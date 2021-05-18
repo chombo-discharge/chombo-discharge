@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_CdrTGA.H
-  @brief  Extensions of CdrSolver which use ebconductivityop and TGA for diffusion parts
+  @brief  Extensions of CdrSolver which use EbConductivityOp and TGA for diffusion parts
   @author Robert Marskar
 */
 
@@ -25,7 +25,7 @@
 #include <EBSimpleSolver.H>
 
 // Our includes
-#include <ebconductivityopfactory.H>
+#include <CD_EbConductivityOpFactory.H>
 #include <CD_CdrSolver.H>
 #include <CD_NamespaceHeader.H>
   
@@ -173,7 +173,7 @@ protected:
   /*!
     @brief Operator factory
   */
-  RefCountedPtr<ebconductivityopfactory> m_operatorFactory;
+  RefCountedPtr<EbConductivityOpFactory> m_operatorFactory;
 
   /*!
     @brief Conjugate gradient solver bottom MG level

@@ -1,46 +1,45 @@
-#ifdef CH_LANG_CC
-/*
- *      _______              __
- *     / ___/ /  ___  __ _  / /  ___
- *    / /__/ _ \/ _ \/  V \/ _ \/ _ \
- *    \___/_//_/\___/_/_/_/_.__/\___/
- *    Please refer to Copyright.txt, in Chombo's root directory.
+/* chombo-discharge
+ * This is a copy of Chombos EBConductivityOp and has Chombo copyright. 
+ * Please refer to Copyright.txt in the Chombo root directory.
  */
-#endif
 
-#ifndef _ebconductivityop_h_
-#define _ebconductivityop_h_
+/*!
+  @file   CD_EbConductivityOp.H
+  @brief  Declares a new version of Chombo's EBConductivityOp with minor changes. 
+  @author Robert Marskar
+*/
 
-#include "REAL.H"
-#include "Box.H"
-#include "FArrayBox.H"
-#include "Vector.H"
+#ifndef CD_EbConductivityOp_H
+#define CD_EbConductivityOp_H
+
+// Chombo includes
+#include <REAL.H>
+#include <Box.H>
+#include <FArrayBox.H>
+#include <Vector.H>
 #include <map>
-#include "RefCountedPtr.H"
-
-#include "AMRMultiGrid.H"
-#include "EBAMRPoissonOp.H"
-
-#include "EBIndexSpace.H"
-#include "EBCellFAB.H"
-#include "EBCellFactory.H"
-#include "EBStencil.H"
-
-#include "EBLevelDataOps.H"
-#include "BaseEBBC.H"
-#include "BaseDomainBC.H"
-#include "CFIVS.H"
-#include "EBFluxRegister.H"
-#include "EBFastFR.H"
-#include "EBMGAverage.H"
-#include "EBMGInterp.H"
-#include "PolyGeom.H"
-#include "EBQuadCFInterp.H"
-#include "EBLevelGrid.H"
-#include "AMRTGA.H"
-#include "AMRPoissonOp.H"
-#include "CFRegion.H"
-#include "ConductivityBaseDomainBC.H"
+#include <RefCountedPtr.H>
+#include <AMRMultiGrid.H>
+#include <EBAMRPoissonOp.H>
+#include <EBIndexSpace.H>
+#include <EBCellFAB.H>
+#include <EBCellFactory.H>
+#include <EBStencil.H>
+#include <EBLevelDataOps.H>
+#include <BaseEBBC.H>
+#include <BaseDomainBC.H>
+#include <CFIVS.H>
+#include <EBFluxRegister.H>
+#include <EBFastFR.H>
+#include <EBMGAverage.H>
+#include <EBMGInterp.H>
+#include <PolyGeom.H>
+#include <EBQuadCFInterp.H>
+#include <EBLevelGrid.H>
+#include <AMRTGA.H>
+#include <AMRPoissonOp.H>
+#include <CFRegion.H>
+#include <ConductivityBaseDomainBC.H>
 
 #if CH_SPACEDIM==2
 #define EBAMRPOVC_NUMSTEN 4
@@ -53,15 +52,15 @@ void THIS_IS_AN_ERROR_MESSAGE(void)
 }
 #endif
 
-#include "CD_NamespaceHeader.H"
+#include <CD_NamespaceHeader.H>
   
 class mfconductivityop;
 
-//! \class ebconductivityop
+//! \class EbConductivityOp
 //! This class implements an operator that solves the equation
 //! (alpha a + beta div (b grad) )phi = rhs
 //! using the AMRLevelOp interface.
-class ebconductivityop: public LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB >
+class EbConductivityOp: public LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB >
 {
 
   friend mfconductivityop;
@@ -84,10 +83,10 @@ public:
   //! Constructs a conductivity operator using the given data. This
   //! constructor is for time-independent a and b coefficients.
   //! If you are approaching this operator from this interface, consider backing away and using
-  //! ebconductivityopFactory to generate these objects. Really.
+  //! EbConductivityOpFactory to generate these objects. Really.
   //! Ghost cell arguments are there for caching reasons. Once you set them,
   //! an error is thrown if you send in data that does not match.
-  ebconductivityop(const EBLevelGrid &                                  a_eblgFine,
+  EbConductivityOp(const EBLevelGrid &                                  a_eblgFine,
 		   const EBLevelGrid &                                  a_eblg,
 		   const EBLevelGrid &                                  a_eblgCoar,
 		   const EBLevelGrid &                                  a_eblgCoarMG,
@@ -114,7 +113,7 @@ public:
 
 
   //! Destructor.
-  ~ebconductivityop();
+  ~EbConductivityOp();
 
   Real getSafety();
 
@@ -699,20 +698,21 @@ private:
 private:
 
   //! Default constructor. Creates an undefined conductivity operator.
-  ebconductivityop();
+  EbConductivityOp();
 
   //copy constructor and operator= disallowed for all the usual reasons
-  ebconductivityop(const ebconductivityop& a_opin)
+  EbConductivityOp(const EbConductivityOp& a_opin)
   {
     MayDay::Error("invalid operator");
   }
 
-  void operator=(const ebconductivityop& a_opin)
+  void operator=(const EbConductivityOp& a_opin)
   {
     MayDay::Error("invalid operator");
   }
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 
 #endif

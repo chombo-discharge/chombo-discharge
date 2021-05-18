@@ -1,54 +1,54 @@
-#ifdef CH_LANG_CC
-/*
- *      _______              __
- *     / ___/ /  ___  __ _  / /  ___
- *    / /__/ _ \/ _ \/  V \/ _ \/ _ \
- *    \___/_//_/\___/_/_/_/_.__/\___/
- *    Please refer to Copyright.txt, in Chombo's root directory.
+/* chombo-discharge
+ * This is a copy of Chombos EBConductivityOpFactory and retains Chombo copyrights. 
+ * Please refer to Copyright.txt in the Chombo root directory.
  */
-#endif
 
-#ifndef _ebconductivityopfactory_h_
-#define _ebconductivityopfactory_h_
+/*!
+  @file   CD_EbConductivityOpFactory.H
+  @brief  Declares a copy of Chombos EBConductivityOpFactory
+  @author Robert Marskar
+*/
 
-#include "REAL.H"
-#include "Box.H"
-#include "FArrayBox.H"
-#include "Vector.H"
+#ifndef CD_EbConductivityOpFactory_H
+#define CD_EbConductivityOpFactory_H
+
+// Chombo includes
+#include <REAL.H>
+#include <Box.H>
+#include <FArrayBox.H>
+#include <Vector.H>
 #include <map>
-#include "RefCountedPtr.H"
+#include <RefCountedPtr.H>
+#include <AMRMultiGrid.H>
+#include <EBIndexSpace.H>
+#include <EBCellFAB.H>
+#include <EBCellFactory.H>
+#include <CD_EbConductivityOp.H>
+#include <EBLevelDataOps.H>
+#include <BaseEBBC.H>
+#include <BaseDomainBC.H>
+#include <CFIVS.H>
+#include <EBFluxRegister.H>
+#include <EBMGAverage.H>
+#include <EBMGInterp.H>
+#include <EBCoarsen.H>
+#include <PolyGeom.H>
+#include <EBAMRPoissonOp.H>
+#include <EBLevelGrid.H>
 
-#include "AMRMultiGrid.H"
-
-#include "EBIndexSpace.H"
-#include "EBCellFAB.H"
-#include "EBCellFactory.H"
-#include "ebconductivityop.H"
-#include "EBLevelDataOps.H"
-#include "BaseEBBC.H"
-#include "BaseDomainBC.H"
-#include "CFIVS.H"
-#include "EBFluxRegister.H"
-#include "EBMGAverage.H"
-#include "EBMGInterp.H"
-#include "EBCoarsen.H"
-#include "PolyGeom.H"
-#include "EBAMRPoissonOp.H"
-#include "EBLevelGrid.H"
-
-
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_NamespaceHeader.H>
   
-//! \class ebconductivityopfactory
-//! Factory class to generate ebconductivityops.  This follows the
+//! \class EbConductivityOpFactory
+//! Factory class to generate EbConductivityOps.  This follows the
 //! AMRLevelOpFactory interface.
-class ebconductivityopfactory: public AMRLevelOpFactory<LevelData<EBCellFAB> >
+class EbConductivityOpFactory: public AMRLevelOpFactory<LevelData<EBCellFAB> >
 {
 public:
 
-  //! Constructs a factory that builds ebconductivityops with time-independent
+  //! Constructs a factory that builds EbConductivityOps with time-independent
   //! A and B coefficients.
-  ebconductivityopfactory(const Vector<EBLevelGrid>&                                  a_eblgs,
+  EbConductivityOpFactory(const Vector<EBLevelGrid>&                                  a_eblgs,
 			  const Vector<RefCountedPtr<EBQuadCFInterp> >&               a_quadCFI,
 			  const Vector<RefCountedPtr<EBFluxRegister> >&               a_fastFR,
 			  const Real&                                                 a_alpha,
@@ -69,7 +69,7 @@ public:
 
 
   //! Destructor.
-  virtual ~ebconductivityopfactory();
+  virtual ~EbConductivityOpFactory();
 
   ///
   virtual void setData( Vector< RefCountedPtr<LevelData<BaseIVFAB<Real> > > >& a_data)
@@ -79,12 +79,12 @@ public:
   }
 
   ///
-  virtual ebconductivityop*
+  virtual EbConductivityOp*
   MGnewOp(const ProblemDomain& a_FineindexSpace,
 	  int                  a_depth,
 	  bool                 a_homoOnly = true);
 
-  ebconductivityop* createOperator(const EBLevelGrid&             a_eblgMGLevel,
+  EbConductivityOp* createOperator(const EBLevelGrid&             a_eblgMGLevel,
 				   const EBLevelGrid&             a_eblgCoarMG,
 				   const bool&                    a_hasMGObjects,
 				   const RealVect&                a_dxMGLevel,
@@ -94,11 +94,11 @@ public:
   virtual void reclaim(MGLevelOp<LevelData<EBCellFAB> >* a_reclaim);
 
   ///
-  virtual ebconductivityop*
+  virtual EbConductivityOp*
   AMRnewOp(const ProblemDomain& a_FineindexSpace);
 
   ///
-  virtual void AMRreclaim(ebconductivityop* a_reclaim);
+  virtual void AMRreclaim(EbConductivityOp* a_reclaim);
 
   ///
   /** Refinement ratio between this level and coarser level.
@@ -181,23 +181,24 @@ protected:
   Vector<Real>                                         m_dx;
 private:
   ///weak construction bad
-  ebconductivityopfactory()
+  EbConductivityOpFactory()
   {
     MayDay::Error("invalid operator");
   }
 
   //copy constructor and operator= disallowed for all the usual reasons
-  ebconductivityopfactory(const ebconductivityopfactory& a_opin)
+  EbConductivityOpFactory(const EbConductivityOpFactory& a_opin)
   {
     MayDay::Error("invalid operator");
   }
 
   //copy constructor and operator= disallowed for all the usual reasons
-  void operator=(const ebconductivityopfactory& a_opin)
+  void operator=(const EbConductivityOpFactory& a_opin)
   {
     MayDay::Error("invalid operator");
   }
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

@@ -707,7 +707,7 @@ void eddington_sp1::setup_operator_factory(){
   }
 
   // Create operator factory.
-  m_opfact = RefCountedPtr<ebconductivityopfactory> (new ebconductivityopfactory(levelgrids,
+  m_opfact = RefCountedPtr<EbConductivityOpFactory> (new EbConductivityOpFactory(levelgrids,
 										 quadcfi,
 										 fastFR,
 										 alpha,

@@ -26,7 +26,7 @@
 #include "electrode.H"
 #include "MFQuadCFInterp.H"
 #include "MFFastFluxReg.H"
-#include "ebconductivityop.H"
+#include <CD_EbConductivityOp.H>
 #include "mfdirichletconductivityebbc.H"
 #include "CD_ElectrostaticEbBc.H"
 
@@ -410,7 +410,7 @@ protected:
   /*!
     @brief EB operators
   */
-  Vector<RefCountedPtr<ebconductivityop> > m_ebops;
+  Vector<RefCountedPtr<EbConductivityOp> > m_ebops;
 
   /*!
     @brief a-coefficients for each phase

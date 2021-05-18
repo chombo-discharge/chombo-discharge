@@ -201,7 +201,7 @@ void mfconductivityop::define(const RefCountedPtr<mfis>&                    a_mf
 #if verb
     pout() << "mfconductivityop::creating oper" << endl;
 #endif
-    m_ebops[iphase] = RefCountedPtr<ebconductivityop> (new ebconductivityop(eblg_fine,
+    m_ebops[iphase] = RefCountedPtr<EbConductivityOp> (new EbConductivityOp(eblg_fine,
 									    eblg,
 									    eblg_coar,
 									    eblg_mg,
@@ -1017,13 +1017,13 @@ void mfconductivityop::AMROperator(LevelData<MFCellFAB>&       a_LofPhi,
 
     mfconductivityop* finerOp = (mfconductivityop*) a_finerOp;
 #if verb
-    pout() << "mfconductivityop::AMROperator - apply ebconductivityops" << endl;
+    pout() << "mfconductivityop::AMROperator - apply EbConductivityOps" << endl;
 #endif
     m_ebops[iphase]->AMROperator(*m_alias[0], *m_alias[1], *m_alias[2], *m_alias[3], a_homogeneousBC, finerOp->m_ebops[iphase]);
     // m_ebops[iphase]->applyOp(*m_alias[0], *m_alias[1], m_alias[2], a_homogeneousBC, false);
     // m_ebops[iphase]->reflux(*m_alias[0], *m_alias[3], *m_alias[1], finerOp->m_ebops[iphase]);
 #if verb
-    pout() << "mfconductivityop::AMROperator - apply ebconductivityops - done" << endl;
+    pout() << "mfconductivityop::AMROperator - apply EbConductivityOps - done" << endl;
 #endif
   }
 

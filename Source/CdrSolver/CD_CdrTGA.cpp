@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_CdrTGA.cpp
-  @brief  Implementation of CdrTGA.H
+  @brief  Implementation of CD_CdrTGA.H
   @author Robert Marskar
 */
 
@@ -312,7 +312,7 @@ void CdrTGA::setupOperatorFactory(){
   // Create operator factory.
   data_ops::set_value(m_aCoefficient, 1.0); // We're usually solving (1 - dt*nabla^2)*phi^(k+1) = phi^k + dt*S^k so aco=1
   data_ops::set_value(m_ebCenteredDiffusionCoefficient, 0.0);
-  m_operatorFactory = RefCountedPtr<ebconductivityopfactory> (new ebconductivityopfactory(levelgrids,
+  m_operatorFactory = RefCountedPtr<EbConductivityOpFactory> (new EbConductivityOpFactory(levelgrids,
 										 quadcfi,
 										 fastFR,
 										 alpha,

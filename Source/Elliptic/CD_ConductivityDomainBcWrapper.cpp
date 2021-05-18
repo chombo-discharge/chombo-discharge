@@ -85,7 +85,7 @@ void ConductivityDomainBcWrapper::getFaceFlux(BaseFab<Real>&        a_faceFlux,
 					       const Real&           a_time,
 					       const bool&           a_useHomogeneous){
   if(!m_defined){
-    this->setCoefficients(); // I really hate that I have to do this, but there's no entry point in ebconductivityop (yet) that
+    this->setCoefficients(); // I really hate that I have to do this, but there's no entry point in EbConductivityOp (yet) that
   }                   // allows me to do this at constructor level
   const int idx = wall_bc::map_bc(a_idir, a_side);
   m_bc[idx]->getFaceFlux(a_faceFlux,
@@ -111,7 +111,7 @@ void ConductivityDomainBcWrapper::getFaceFlux(Real&                 a_faceFlux,
 					       const Real&           a_time, 
 					       const bool&           a_useHomogeneous){
   if(!m_defined){
-    this->setCoefficients(); // I really hate that I have to do this, but there's no entry point in ebconductivityop (yet) that
+    this->setCoefficients(); // I really hate that I have to do this, but there's no entry point in EbConductivityOp (yet) that
   }                   // allows me to do this at constructor level
   const int idx = wall_bc::map_bc(a_idir, a_side);
   m_bc[idx]->getFaceFlux(a_faceFlux,
@@ -141,7 +141,7 @@ void ConductivityDomainBcWrapper::getFaceGradPhi(Real&                 a_faceFlu
 						  const RealVect&       a_centroid,
 						  const bool&           a_useHomogeneous){
   if(!m_defined){
-    this->setCoefficients(); // I really hate that I have to do this, but there's no entry point in ebconductivityop (yet) that
+    this->setCoefficients(); // I really hate that I have to do this, but there's no entry point in EbConductivityOp (yet) that
   }                   // allows me to do this at constructor level
   const int idx = wall_bc::map_bc(a_idir, a_side);
   m_bc[idx]->getFaceGradPhi(a_faceFlux,

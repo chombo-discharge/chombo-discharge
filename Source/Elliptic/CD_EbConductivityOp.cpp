@@ -1,47 +1,48 @@
-#ifdef CH_LANG_CC
-/*
- *      _______              __
- *     / ___/ /  ___  __ _  / /  ___
- *    / /__/ _ \/ _ \/  V \/ _ \/ _ \
- *    \___/_//_/\___/_/_/_/_.__/\___/
- *    Please refer to Copyright.txt, in Chombo's root directory.
+/* chombo-discharge
+ * This is a copy of Chombos EBConductivityOp and has Chombo copyright. 
+ * Please refer to Copyright.txt in the Chombo root directory.
  */
-#endif
 
-#include "LoadBalance.H"
-#include "EBArith.H"
-#include "EBAMRPoissonOp.H"
-#include "CD_EbFastFluxRegister.H"
+/*!
+  @file   CD_EbConductivityOp.cpp
+  @brief  Implementation of CD_EbConductivityOp.H
+  @author Robert Marskar
+*/
 
-#include "ebconductivityop.H"
-#include "EBQuadCFInterp.H"
-
-#include "EBConductivityOpF_F.H"
-#include "InterpF_F.H"
-#include "EBAMRPoissonOpF_F.H"
-#include "BCFunc.H"
-#include "CH_Timer.H"
-#include "BCFunc.H"
-#include "EBLevelGrid.H"
-#include "EBAMRPoissonOp.H"
-#include "EBAMRPoissonOpF_F.H"
-#include "EBAlias.H"
-#include "EBCoarseAverage.H"
-#include "ParmParse.H"
-#include "CH_OpenMP.H"
+// Chombo includes
+#include <LoadBalance.H>
+#include <EBArith.H>
+#include <EBAMRPoissonOp.H>
+#include <EBQuadCFInterp.H>
+#include <EBConductivityOpF_F.H>
+#include <InterpF_F.H>
+#include <EBAMRPoissonOpF_F.H>
+#include <BCFunc.H>
+#include <CH_Timer.H>
+#include <BCFunc.H>
+#include <EBLevelGrid.H>
+#include <EBAMRPoissonOp.H>
+#include <EBAMRPoissonOpF_F.H>
+#include <EBAlias.H>
+#include <EBCoarseAverage.H>
+#include <ParmParse.H>
+#include <CH_OpenMP.H>
 
 #define verb 0
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_EbFastFluxRegister.H>
+#include <CD_EbConductivityOp.H>
+#include <CD_NamespaceHeader.H>
   
-//IntVect ebconductivityop::s_ivDebug = IntVect(D_DECL(111, 124, 3));
-bool ebconductivityop::s_turnOffBCs       = false; //REALLY needs to default to false
-bool ebconductivityop::s_forceNoEBCF      = false; //REALLY needs to default to false
-bool ebconductivityop::s_areaFracWeighted = false; // Precondition the system with area fractions
+//IntVect EbConductivityOp::s_ivDebug = IntVect(D_DECL(111, 124, 3));
+bool EbConductivityOp::s_turnOffBCs       = false; //REALLY needs to default to false
+bool EbConductivityOp::s_forceNoEBCF      = false; //REALLY needs to default to false
+bool EbConductivityOp::s_areaFracWeighted = false; // Precondition the system with area fractions
 
 //-----------------------------------------------------------------------
-ebconductivityop::
-ebconductivityop(const EBLevelGrid &                                  a_eblgFine,
+EbConductivityOp::
+EbConductivityOp(const EBLevelGrid &                                  a_eblgFine,
 		 const EBLevelGrid &                                  a_eblg,
 		 const EBLevelGrid &                                  a_eblgCoar,
 		 const EBLevelGrid &                                  a_eblgCoarMG,
@@ -111,7 +112,7 @@ ebconductivityop(const EBLevelGrid &                                  a_eblgFine
   m_domainCoarMG(),
   m_colors()
 {
-  CH_TIME("ebconductivityop::ConductivityOp");
+  CH_TIME("EbConductivityOp::ConductivityOp");
   int ncomp = 1;
 
   m_ext_fastFR = a_fastFR;
@@ -204,24 +205,24 @@ ebconductivityop(const EBLevelGrid &                                  a_eblgFine
   defineStencils();
 }
 //-----------------------------------------------------------------------
-ebconductivityop::
-~ebconductivityop()
+EbConductivityOp::
+~EbConductivityOp()
 {
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 fillGrad(const LevelData<EBCellFAB>& a_phi)
 {
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 finerOperatorChanged(const MGLevelOp<LevelData<EBCellFAB> >& a_operator,
 		     int a_coarseningFactor)
 {
-  const ebconductivityop& op =
-    dynamic_cast<const ebconductivityop&>(a_operator);
+  const EbConductivityOp& op =
+    dynamic_cast<const EbConductivityOp&>(a_operator);
 
   // Perform multigrid coarsening on the operator data.
   Interval interv(0, 0); // All data is scalar.
@@ -260,7 +261,7 @@ finerOperatorChanged(const MGLevelOp<LevelData<EBCellFAB> >& a_operator,
 }
 //-----------------------------------------------------------------------
 Real
-ebconductivityop::
+EbConductivityOp::
 getSafety()
 {
   Real safety = 1.0;
@@ -268,7 +269,7 @@ getSafety()
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 calculateAlphaWeight()
 {
   DataIterator dit = m_eblg.getDBL().dataIterator(); 
@@ -306,12 +307,12 @@ calculateAlphaWeight()
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 getDivFStencil(VoFStencil&      a_vofStencil,
 	       const VolIndex&  a_vof,
 	       const DataIndex& a_dit)
 {
-  CH_TIME("ebconductivityop::getDivFStencil");
+  CH_TIME("EbConductivityOp::getDivFStencil");
   const EBISBox& ebisBox = m_eblg.getEBISL()[a_dit];
   a_vofStencil.clear();
   for (int idir = 0; idir < SpaceDim; idir++)
@@ -345,7 +346,7 @@ getDivFStencil(VoFStencil&      a_vofStencil,
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 getFluxStencil(VoFStencil&      a_fluxStencil,
 	       const FaceIndex& a_face,
 	       const DataIndex& a_dit)
@@ -353,7 +354,7 @@ getFluxStencil(VoFStencil&      a_fluxStencil,
   /// stencil for flux computation.   the truly ugly part of this computation
   /// beta and eta are multiplied in here
 
-  CH_TIME("ebconductivityop::getFluxStencil");
+  CH_TIME("EbConductivityOp::getFluxStencil");
   //need to do this by interpolating to centroids
   //so get the stencil at each face center and add with
   //interpolation weights
@@ -375,12 +376,12 @@ getFluxStencil(VoFStencil&      a_fluxStencil,
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 getFaceCenteredFluxStencil(VoFStencil&      a_fluxStencil,
 			   const FaceIndex& a_face,
 			   const DataIndex& a_dit)
 {
-  CH_TIME("ebconductivityop::getFaceCenteredFluxStencil");
+  CH_TIME("EbConductivityOp::getFaceCenteredFluxStencil");
   //face centered gradient is just a centered diff
   int faceDir= a_face.direction();
   a_fluxStencil.clear();
@@ -398,11 +399,11 @@ getFaceCenteredFluxStencil(VoFStencil&      a_fluxStencil,
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 setAlphaAndBeta(const Real& a_alpha,
 		const Real& a_beta)
 {
-  CH_TIME("ebconductivityop::setAlphaAndBeta");
+  CH_TIME("EbConductivityOp::setAlphaAndBeta");
   m_alpha = a_alpha;
   m_beta  = a_beta;
   calculateAlphaWeight(); //need to do this because the a coef has probably been changed under us
@@ -410,33 +411,33 @@ setAlphaAndBeta(const Real& a_alpha,
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 setTime(Real a_oldTime, Real a_mu, Real a_dt)
 {
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 kappaScale(LevelData<EBCellFAB> & a_rhs)
 {
-  CH_TIME("ebconductivityop::kappaScale");
+  CH_TIME("EbConductivityOp::kappaScale");
   EBLevelDataOps::kappaWeight(a_rhs);
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 diagonalScale(LevelData<EBCellFAB> & a_rhs,
 	      bool a_kappaWeighted)
 {
 
-  CH_TIME("ebconductivityop::diagonalScale");
-  //  dumpLevelPoint(a_rhs, string("ebconductivityop: diagonalScale: phi coming in = "));
+  CH_TIME("EbConductivityOp::diagonalScale");
+  //  dumpLevelPoint(a_rhs, string("EbConductivityOp: diagonalScale: phi coming in = "));
   if (a_kappaWeighted) {
     EBLevelDataOps::kappaWeight(a_rhs);
 
   }
 
-  //  dumpLevelPoint(a_rhs, string("ebconductivityop: diagonalScale: kappa*phi = "));
+  //  dumpLevelPoint(a_rhs, string("EbConductivityOp: diagonalScale: kappa*phi = "));
 
   //also have to weight by the coefficient
   DataIterator dit = m_eblg.getDBL().dataIterator(); 
@@ -451,19 +452,19 @@ diagonalScale(LevelData<EBCellFAB> & a_rhs,
   }
 
   if(s_areaFracWeighted){
-    MayDay::Abort("ebconductivityop::diagonalScale - wrong scaling");
+    MayDay::Abort("EbConductivityOp::diagonalScale - wrong scaling");
     EBLevelDataOps::areaFracScalingWeight(a_rhs);
   }
-  //  dumpLevelPoint(a_rhs, string("ebconductivityop: diagonalScale: acoef*kappa*phi = "));
+  //  dumpLevelPoint(a_rhs, string("EbConductivityOp: diagonalScale: acoef*kappa*phi = "));
 
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 divideByIdentityCoef(LevelData<EBCellFAB> & a_rhs)
 {
 
-  CH_TIME("ebconductivityop::divideByIdentityCoef");
+  CH_TIME("EbConductivityOp::divideByIdentityCoef");
 
   DataIterator dit = m_eblg.getDBL().dataIterator(); 
   int nbox = dit.size();
@@ -478,7 +479,7 @@ divideByIdentityCoef(LevelData<EBCellFAB> & a_rhs)
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 calculateRelaxationCoefficient()
 {
   CH_TIME("ebco::calculateRelCoef");
@@ -546,10 +547,10 @@ calculateRelaxationCoefficient()
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 defineStencils()
 {
-  CH_TIME("ebconductivityop::defineStencils");
+  CH_TIME("EbConductivityOp::defineStencils");
   // create ebstencil for irregular applyOp
   m_opEBStencil.define(m_eblg.getDBL());
   // create vofstencils for applyOp and
@@ -711,7 +712,7 @@ defineStencils()
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 defineColorStencils(Box a_sideBoxLo[SpaceDim],
 		    Box a_sideBoxHi[SpaceDim])
 {
@@ -811,7 +812,7 @@ defineColorStencils(Box a_sideBoxLo[SpaceDim],
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 defineEBCFStencils()
 {
   ///this routine is ugly and complicated.
@@ -881,13 +882,13 @@ defineEBCFStencils()
 
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 residual(LevelData<EBCellFAB>&       a_residual,
 	 const LevelData<EBCellFAB>& a_phi,
 	 const LevelData<EBCellFAB>& a_rhs,
 	 bool                        a_homogeneousPhysBC)
 {
-  CH_TIME("ebconductivityop::residual");
+  CH_TIME("EbConductivityOp::residual");
   //this is a multigrid operator so only homogeneous CF BC
   //and null coar level
   CH_assert(a_residual.ghostVect() == m_ghostCellsRHS);
@@ -897,11 +898,11 @@ residual(LevelData<EBCellFAB>&       a_residual,
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 preCond(LevelData<EBCellFAB>&       a_lhs,
 	const LevelData<EBCellFAB>& a_rhs)
 {
-  CH_TIME("ebconductivityop::preCond");
+  CH_TIME("EbConductivityOp::preCond");
   EBLevelDataOps::assign(a_lhs, a_rhs);
   EBLevelDataOps::scale(a_lhs, m_relCoef);
 
@@ -909,7 +910,7 @@ preCond(LevelData<EBCellFAB>&       a_lhs,
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 applyOp(LevelData<EBCellFAB>&             a_opPhi,
 	const LevelData<EBCellFAB>&       a_phi,
 	bool                              a_homogeneousPhysBC)
@@ -920,7 +921,7 @@ applyOp(LevelData<EBCellFAB>&             a_opPhi,
 //-----------------------------------------------------------------------
 /***/
 void
-ebconductivityop::
+EbConductivityOp::
 incrOpRegularAllDirs(Box * a_loBox,
 		     Box * a_hiBox,
 		     int * a_hasLo,
@@ -933,7 +934,7 @@ incrOpRegularAllDirs(Box * a_loBox,
 		     bool a_homogeneousPhysBC,
 		     const DataIndex& a_dit)
 {
-  CH_TIME("ebconductivityop::incrOpRegularAllDirs");
+  CH_TIME("EbConductivityOp::incrOpRegularAllDirs");
   CH_assert(m_domainBC != NULL);
 
   //need to monkey with the ghost cells to account for boundary conditions
@@ -977,7 +978,7 @@ incrOpRegularAllDirs(Box * a_loBox,
 
 /***/
 void
-ebconductivityop::
+EbConductivityOp::
 applyDomainFlux(Box * a_loBox,
 		Box * a_hiBox,
 		int * a_hasLo,
@@ -988,7 +989,7 @@ applyDomainFlux(Box * a_loBox,
 		bool a_homogeneousPhysBC,
 		const DataIndex& a_dit)
 {
-  CH_TIME("ebconductivityop::applyDomainFlux");
+  CH_TIME("EbConductivityOp::applyDomainFlux");
   CH_assert(m_domainBC != NULL);
 
   for (int idir=0; idir<SpaceDim; idir++)
@@ -1062,7 +1063,7 @@ applyDomainFlux(Box * a_loBox,
 
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 applyOp(LevelData<EBCellFAB>&                    a_lhs,
 	const LevelData<EBCellFAB>&              a_phi,
 	const LevelData<EBCellFAB>* const        a_phiCoar,
@@ -1075,7 +1076,7 @@ applyOp(LevelData<EBCellFAB>&                    a_lhs,
 }
 
 void
-ebconductivityop::
+EbConductivityOp::
 applyOp(LevelData<EBCellFAB>&                    a_lhs,
 	const LevelData<EBCellFAB>&              a_phi,
 	const LevelData<EBCellFAB>* const        a_phiCoar,
@@ -1144,7 +1145,7 @@ applyOp(LevelData<EBCellFAB>&                    a_lhs,
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 incrOpRegularDir(EBCellFAB&             a_lhs,
 		 const EBCellFAB&       a_phi,
 		 const bool&            a_homogeneous,
@@ -1245,7 +1246,7 @@ incrOpRegularDir(EBCellFAB&             a_lhs,
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 dumpFABPoint(const EBCellFAB&       a_lhs,
 	     const DataIndex&       a_datInd,
 	     const string&          a_blab)
@@ -1270,7 +1271,7 @@ dumpFABPoint(const EBCellFAB&       a_lhs,
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 applyOpIrregular(EBCellFAB&             a_lhs,
 		 const EBCellFAB&       a_phi,
 		 const bool&            a_homogeneous,
@@ -1284,14 +1285,14 @@ applyOpIrregular(EBCellFAB&             a_lhs,
   //      stopHere = true;
   //    }
 
-  //  dumpFABPoint(a_lhs, a_datInd, string("ebconductivityop::applyopirr before apply lhs="));
+  //  dumpFABPoint(a_lhs, a_datInd, string("EbConductivityOp::applyopirr before apply lhs="));
   RealVect vectDx = m_dx*RealVect::Unit;
   //  m_opEBStencil[a_datInd]->apply(a_lhs, a_phi,
   //  m_alphaDiagWeight[a_datInd], m_alpha, m_beta, false, s_ivDebug,
   //  EBCellFAB::s_verbose);
   m_opEBStencil[a_datInd]->apply(a_lhs, a_phi, m_alphaDiagWeight[a_datInd], m_alpha, m_beta, false);
 
-  //  dumpFABPoint(a_lhs, a_datInd, string("ebconductivityop::applyopirr after  apply lhs="));
+  //  dumpFABPoint(a_lhs, a_datInd, string("EbConductivityOp::applyopirr after  apply lhs="));
   const Real factor = m_beta/m_dx; //beta and bcoef handled within applyEBFlux
   m_ebBC->applyEBFlux(a_lhs, a_phi, m_vofIterIrreg[a_datInd], (*m_eblg.getCFIVS()),
 		      a_datInd, RealVect::Zero, vectDx, factor,
@@ -1323,7 +1324,7 @@ applyOpIrregular(EBCellFAB&             a_lhs,
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 applyOpNoBoundary(LevelData<EBCellFAB>&        a_opPhi,
 		  const LevelData<EBCellFAB>&  a_phi)
 {
@@ -1335,7 +1336,7 @@ applyOpNoBoundary(LevelData<EBCellFAB>&        a_opPhi,
 
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 create(LevelData<EBCellFAB>&       a_lhs,
        const LevelData<EBCellFAB>& a_rhs)
 {
@@ -1346,7 +1347,7 @@ create(LevelData<EBCellFAB>&       a_lhs,
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 createCoarsened(LevelData<EBCellFAB>&       a_lhs,
 		const LevelData<EBCellFAB>& a_rhs,
 		const int &                 a_refRat)
@@ -1377,7 +1378,7 @@ createCoarsened(LevelData<EBCellFAB>&       a_lhs,
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 assign(LevelData<EBCellFAB>&       a_lhs,
        const LevelData<EBCellFAB>& a_rhs)
 {
@@ -1386,7 +1387,7 @@ assign(LevelData<EBCellFAB>&       a_lhs,
 }
 //-----------------------------------------------------------------------
 Real
-ebconductivityop::
+EbConductivityOp::
 dotProduct(const LevelData<EBCellFAB>& a_1,
 	   const LevelData<EBCellFAB>& a_2)
 {
@@ -1398,7 +1399,7 @@ dotProduct(const LevelData<EBCellFAB>& a_1,
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 incr(LevelData<EBCellFAB>&       a_lhs,
      const LevelData<EBCellFAB>& a_x,
      Real                        a_scale)
@@ -1408,7 +1409,7 @@ incr(LevelData<EBCellFAB>&       a_lhs,
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 axby(LevelData<EBCellFAB>&       a_lhs,
      const LevelData<EBCellFAB>& a_x,
      const LevelData<EBCellFAB>& a_y,
@@ -1420,7 +1421,7 @@ axby(LevelData<EBCellFAB>&       a_lhs,
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 scale(LevelData<EBCellFAB>& a_lhs,
       const Real&           a_scale)
 {
@@ -1429,11 +1430,11 @@ scale(LevelData<EBCellFAB>& a_lhs,
 }
 //-------------------------------
 Real 
-ebconductivityop::
+EbConductivityOp::
 norm(const LevelData<EBCellFAB>& a_rhs,
      int                         a_ord)
 {
-  CH_TIMERS("ebconductivityop::norm");
+  CH_TIMERS("EbConductivityOp::norm");
   CH_TIMER("mpi_allreduce",t1);
 
   Real maxNorm = 0.0;
@@ -1459,7 +1460,7 @@ norm(const LevelData<EBCellFAB>& a_rhs,
 }
 
 Real 
-ebconductivityop::
+EbConductivityOp::
 localMaxNorm(const LevelData<EBCellFAB>& a_rhs)
 {
   CH_TIME("EBAMRPoissonOp::localMaxNorm");
@@ -1470,7 +1471,7 @@ localMaxNorm(const LevelData<EBCellFAB>& a_rhs)
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 setToZero(LevelData<EBCellFAB>& a_lhs)
 {
   CH_TIME("ebco::setToZero");
@@ -1478,7 +1479,7 @@ setToZero(LevelData<EBCellFAB>& a_lhs)
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 setVal(LevelData<EBCellFAB>& a_lhs, const Real& a_value)
 {
   CH_TIME("ebco::setVal");
@@ -1486,7 +1487,7 @@ setVal(LevelData<EBCellFAB>& a_lhs, const Real& a_value)
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 createCoarser(LevelData<EBCellFAB>&       a_coar,
 	      const LevelData<EBCellFAB>& a_fine,
 	      bool                        a_ghosted)
@@ -1508,7 +1509,7 @@ createCoarser(LevelData<EBCellFAB>&       a_coar,
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 relax(LevelData<EBCellFAB>&       a_phi,
       const LevelData<EBCellFAB>& a_rhs,
       int                         a_iterations)
@@ -1528,12 +1529,12 @@ relax(LevelData<EBCellFAB>&       a_phi,
     }
   else
     {
-      MayDay::Error("ebconductivityop::bogus relaxtype");
+      MayDay::Error("EbConductivityOp::bogus relaxtype");
     }
 }
 
-void ebconductivityop::relax_mf(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_rhs, const int a_iterations){
-  CH_TIME("ebconductivityop::relax_mf");
+void EbConductivityOp::relax_mf(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_rhs, const int a_iterations){
+  CH_TIME("EbConductivityOp::relax_mf");
 
   const bool homogeneous       = true;
   const int ncomps             = a_phi.nComp();
@@ -1565,16 +1566,16 @@ void ebconductivityop::relax_mf(LevelData<EBCellFAB>& a_phi, const LevelData<EBC
       const EBCellFAB& rhs = a_rhs[dit()];
     }
   }
-  MayDay::Abort("ebconductivityop::relax_mf - stop here");
+  MayDay::Abort("EbConductivityOp::relax_mf - stop here");
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 relaxGSRBFast(LevelData<EBCellFAB>&       a_phi,
 	      const LevelData<EBCellFAB>& a_rhs,
 	      int                         a_iterations)
 {
-  CH_TIME("ebconductivityop::relaxGSRBFast");
+  CH_TIME("EbConductivityOp::relaxGSRBFast");
 
   CH_assert(a_phi.ghostVect() == m_ghostCellsPhi);
   CH_assert(a_rhs.ghostVect() == m_ghostCellsRHS);
@@ -1609,7 +1610,7 @@ relaxGSRBFast(LevelData<EBCellFAB>&       a_phi,
 	    int hasLo[SpaceDim],hasHi[SpaceDim];
 
 	    {
-	      //           CH_TIME("ebconductivityop::levelGSRB::applyDomainFlux");
+	      //           CH_TIME("EbConductivityOp::levelGSRB::applyDomainFlux");
 	      applyDomainFlux(loBox, hiBox, hasLo, hasHi,
 			      dblBox, nComps, phiFAB,
 			      true, dit[mybox]);
@@ -1624,13 +1625,13 @@ relaxGSRBFast(LevelData<EBCellFAB>&       a_phi,
       // pout() << "my thread " << id << endl;
       for (int redBlack =0; redBlack <= 1; redBlack++)
 	{
-	  //          CH_TIME("ebconductivityop::levelGSRB::Compute");
+	  //          CH_TIME("EbConductivityOp::levelGSRB::Compute");
             
 	  a_phi.exchange();
             
 	  if (m_hasCoar)
 	    {
-	      //              CH_TIME("ebconductivityop::levelGSRB::homogeneousCFInterp");
+	      //              CH_TIME("EbConductivityOp::levelGSRB::homogeneousCFInterp");
 	      applyCFBCs(a_phi, NULL, true);
 	    }
 	  ibox = 0;
@@ -1710,7 +1711,7 @@ relaxGSRBFast(LevelData<EBCellFAB>&       a_phi,
 }//end loop over iterations
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 GSColorAllIrregular(EBCellFAB&                   a_phi,
 		    const EBCellFAB&             a_rhs,
 		    const int&                   a_icolor,
@@ -1786,12 +1787,12 @@ GSColorAllIrregular(EBCellFAB&                   a_phi,
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 relaxGauSai(LevelData<EBCellFAB>&       a_phi,
 	    const LevelData<EBCellFAB>& a_rhs,
 	    int                         a_iterations)
 {
-  CH_TIME("ebconductivityop::relaxGauSai");
+  CH_TIME("EbConductivityOp::relaxGauSai");
 
   CH_assert(a_phi.ghostVect() == m_ghostCellsPhi);
   CH_assert(a_rhs.ghostVect() == m_ghostCellsRHS);
@@ -1817,9 +1818,9 @@ relaxGauSai(LevelData<EBCellFAB>&       a_phi,
     }
 }
 
-void ebconductivityop::lazyGauSai(LevelData<EBCellFAB>&       a_phi,
+void EbConductivityOp::lazyGauSai(LevelData<EBCellFAB>&       a_phi,
 				  const LevelData<EBCellFAB>& a_rhs){
-  CH_TIME("ebconductivityop::lazyGauSai");
+  CH_TIME("EbConductivityOp::lazyGauSai");
 
   CH_assert(a_phi.ghostVect() == m_ghostCellsPhi);
   CH_assert(a_rhs.ghostVect() == m_ghostCellsRHS);
@@ -1845,12 +1846,12 @@ void ebconductivityop::lazyGauSai(LevelData<EBCellFAB>&       a_phi,
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 relaxPoiJac(LevelData<EBCellFAB>&       a_phi,
 	    const LevelData<EBCellFAB>& a_rhs,
 	    int                         a_iterations)
 {
-  CH_TIME("ebconductivityop::relaxPoiJac");
+  CH_TIME("EbConductivityOp::relaxPoiJac");
 
   CH_assert(a_phi.ghostVect() == m_ghostCellsPhi);
   CH_assert(a_rhs.ghostVect() == m_ghostCellsRHS);
@@ -1885,13 +1886,13 @@ relaxPoiJac(LevelData<EBCellFAB>&       a_phi,
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 gsrbColor(LevelData<EBCellFAB>&       a_phi,
 	  const LevelData<EBCellFAB>& a_lph,
 	  const LevelData<EBCellFAB>& a_rhs,
 	  const IntVect&              a_color)
 {
-  CH_TIME("ebconductivityop::gsrbColor");
+  CH_TIME("EbConductivityOp::gsrbColor");
 
   const DisjointBoxLayout& dbl = a_phi.disjointBoxLayout();
 
@@ -1958,11 +1959,11 @@ gsrbColor(LevelData<EBCellFAB>&       a_phi,
 }
 
 void
-ebconductivityop::nwo_gsrbColor(LevelData<EBCellFAB>&       a_phi,
+EbConductivityOp::nwo_gsrbColor(LevelData<EBCellFAB>&       a_phi,
 				const LevelData<EBCellFAB>& a_lph,
 				const LevelData<EBCellFAB>& a_rhs,
 				const IntVect&              a_color){
-  CH_TIME("ebconductivityop::nwo_gsrbColor");
+  CH_TIME("EbConductivityOp::nwo_gsrbColor");
 
   const DisjointBoxLayout& dbl = a_phi.disjointBoxLayout();
   
@@ -1972,13 +1973,13 @@ ebconductivityop::nwo_gsrbColor(LevelData<EBCellFAB>&       a_phi,
 
 }
 
-void ebconductivityop::gsrbColor(EBCellFAB&       a_phi,
+void EbConductivityOp::gsrbColor(EBCellFAB&       a_phi,
 				 const EBCellFAB& a_lph,
 				 const EBCellFAB& a_rhs,
 				 const Box&       a_box,
 				 const DataIndex& a_dit,
 				 const IntVect&   a_color){
-  CH_TIME("ebconductivityop::gsrbColor (ebcellfabs)");
+  CH_TIME("EbConductivityOp::gsrbColor (ebcellfabs)");
 
   const EBISBox& ebisbox = a_phi.getEBISBox();
   Box dblBox  = a_box;
@@ -2034,12 +2035,12 @@ void ebconductivityop::gsrbColor(EBCellFAB&       a_phi,
 }
 
 //-----------------------------------------------------------------------
-void ebconductivityop::
+void EbConductivityOp::
 restrictResidual(LevelData<EBCellFAB>&       a_resCoar,
 		 LevelData<EBCellFAB>&       a_phiThisLevel,
 		 const LevelData<EBCellFAB>& a_rhsThisLevel)
 {
-  CH_TIME("ebconductivityop::restrictResidual");
+  CH_TIME("EbConductivityOp::restrictResidual");
 
   CH_assert(a_resCoar.nComp() == 1);
   CH_assert(a_phiThisLevel.nComp() == 1);
@@ -2068,11 +2069,11 @@ restrictResidual(LevelData<EBCellFAB>&       a_resCoar,
     }
 }
 //-----------------------------------------------------------------------
-void ebconductivityop::
+void EbConductivityOp::
 prolongIncrement(LevelData<EBCellFAB>&       a_phiThisLevel,
 		 const LevelData<EBCellFAB>& a_correctCoar)
 {
-  CH_TIME("ebconductivityop::prolongIncrement");
+  CH_TIME("EbConductivityOp::prolongIncrement");
   Interval vars(0, 0);
   if (m_layoutChanged)
     {
@@ -2085,12 +2086,12 @@ prolongIncrement(LevelData<EBCellFAB>&       a_phiThisLevel,
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 applyCFBCs(LevelData<EBCellFAB>&             a_phi,
 	   const LevelData<EBCellFAB>* const a_phiCoar,
 	   bool a_homogeneousCFBC)
 {
-  CH_TIMERS("ebconductivityop::applyCFBCs");
+  CH_TIMERS("EbConductivityOp::applyCFBCs");
   CH_TIMER("inhomogeneous_cfbcs_define",t1);
   CH_TIMER("inhomogeneous_cfbcs_execute",t3);
   CH_TIMER("homogeneous_cfbs",t2);
@@ -2127,10 +2128,10 @@ applyCFBCs(LevelData<EBCellFAB>&             a_phi,
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 applyHomogeneousCFBCs(LevelData<EBCellFAB>&   a_phi)
 {
-  CH_TIME("ebconductivityop::applyHomogeneousCFBCs");
+  CH_TIME("EbConductivityOp::applyHomogeneousCFBCs");
   CH_assert(a_phi.nComp() == 1);
   CH_assert( a_phi.ghostVect() >= IntVect::Unit);
   DataIterator dit = m_eblg.getDBL().dataIterator(); 
@@ -2150,7 +2151,7 @@ applyHomogeneousCFBCs(LevelData<EBCellFAB>&   a_phi)
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 applyHomogeneousCFBCs(EBCellFAB&            a_phi,
 		      const DataIndex&      a_datInd,
 		      int                   a_idir,
@@ -2158,7 +2159,7 @@ applyHomogeneousCFBCs(EBCellFAB&            a_phi,
 {
   if (m_hasCoar)
     {
-      CH_TIMERS("ebconductivityop::applyHomogeneousCFBCs2");
+      CH_TIMERS("EbConductivityOp::applyHomogeneousCFBCs2");
       CH_TIMER("packed_applyHomogeneousCFBCs",t1);
       CH_TIMER("unpacked_applyHomogeneousCFBCs",t2);
       CH_assert((a_idir >= 0) && (a_idir  < SpaceDim));
@@ -2277,19 +2278,19 @@ applyHomogeneousCFBCs(EBCellFAB&            a_phi,
     }
 }
 //-----------------------------------------------------------------------
-int ebconductivityop::
+int EbConductivityOp::
 refToCoarser()
 {
   return m_refToCoar;
 }
 //-----------------------------------------------------------------------
-int ebconductivityop::
+int EbConductivityOp::
 refToFiner()
 {
   return m_refToFine;
 }
 //-----------------------------------------------------------------------
-void ebconductivityop::
+void EbConductivityOp::
 AMRResidual(LevelData<EBCellFAB>&       a_residual,
 	    const LevelData<EBCellFAB>& a_phiFine,
 	    const LevelData<EBCellFAB>& a_phi,
@@ -2298,7 +2299,7 @@ AMRResidual(LevelData<EBCellFAB>&       a_residual,
 	    bool a_homogeneousPhysBC,
 	    AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp)
 {
-  CH_TIMERS("ebconductivityop::AMRResidual");
+  CH_TIMERS("EbConductivityOp::AMRResidual");
   CH_TIMER("AMROperator", t1);
   CH_TIMER("axby", t2);
   CH_assert(a_residual.ghostVect() == m_ghostCellsRHS);
@@ -2312,17 +2313,17 @@ AMRResidual(LevelData<EBCellFAB>&       a_residual,
 	      a_homogeneousPhysBC, a_finerOp);
   CH_STOP(t1);
 
-  //  dumpLevelPoint(a_residual, string("ebconductivityop: AMRResidual: lphi = "));
-  //  dumpLevelPoint(a_rhs,      string("ebconductivityop: AMRResidual: rhs = "));
+  //  dumpLevelPoint(a_residual, string("EbConductivityOp: AMRResidual: lphi = "));
+  //  dumpLevelPoint(a_rhs,      string("EbConductivityOp: AMRResidual: rhs = "));
   //multiply by -1 so a_residual now holds -L(phi)
   //add in rhs so a_residual = rhs - L(phi)
   CH_START(t2);
   axby(a_residual,a_residual,a_rhs,-1.0, 1.0);
   CH_STOP(t2);
-  //  dumpLevelPoint(a_residual, string("ebconductivityop: AMRResidual: resid = "));
+  //  dumpLevelPoint(a_residual, string("EbConductivityOp: AMRResidual: resid = "));
 }
 //-----------------------------------------------------------------------
-void ebconductivityop::
+void EbConductivityOp::
 dumpLevelPoint(const LevelData<EBCellFAB>& a_res, const string& a_blab)
 {
   for (DataIterator dit = m_eblg.getDBL().dataIterator(); dit.ok(); ++dit)
@@ -2331,7 +2332,7 @@ dumpLevelPoint(const LevelData<EBCellFAB>& a_res, const string& a_blab)
     }
 }
 //-----------------------------------------------------------------------
-void ebconductivityop::
+void EbConductivityOp::
 AMROperator(LevelData<EBCellFAB>&       a_LofPhi,
 	    const LevelData<EBCellFAB>& a_phiFine,
 	    const LevelData<EBCellFAB>& a_phi,
@@ -2339,7 +2340,7 @@ AMROperator(LevelData<EBCellFAB>&       a_LofPhi,
 	    bool a_homogeneousPhysBC,
 	    AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp)
 {
-  CH_TIMERS("ebconductivityop::AMROperator");
+  CH_TIMERS("EbConductivityOp::AMROperator");
   CH_TIMER("applyOp", t1);
   CH_TIMER("reflux", t2);
   CH_assert(a_LofPhi.ghostVect() == m_ghostCellsRHS);
@@ -2350,41 +2351,41 @@ AMROperator(LevelData<EBCellFAB>&       a_LofPhi,
   CH_START(t1);
 
 #if verb
-  pout() << "ebconductivityop::amroperator - begin applyOp" << endl;
+  pout() << "EbConductivityOp::amroperator - begin applyOp" << endl;
 #endif
   applyOp(a_LofPhi, a_phi, &a_phiCoar,  a_homogeneousPhysBC, false);
 #if verb
-  pout() << "ebconductivityop::amroperator - end applyOp" << endl;
+  pout() << "EbConductivityOp::amroperator - end applyOp" << endl;
 #endif
   CH_STOP(t1);
 
-  //  dumpLevelPoint(a_LofPhi, string("ebconductivityop: AMROperator: pre-reflux lphi = "));
+  //  dumpLevelPoint(a_LofPhi, string("EbConductivityOp: AMROperator: pre-reflux lphi = "));
   //now reflux to enforce flux-matching from finer levels
   if (m_hasFine)
     {
       CH_assert(a_finerOp != NULL);
       CH_START(t2);
 #if verb
-      pout() << "ebconductivityop::amroperator - begin reflux" << endl;
+      pout() << "EbConductivityOp::amroperator - begin reflux" << endl;
 #endif
       reflux(a_LofPhi, a_phiFine, a_phi, a_finerOp);
 #if verb
-      pout() << "ebconductivityop::amroperator - end reflux" << endl;
+      pout() << "EbConductivityOp::amroperator - end reflux" << endl;
 #endif
 
       CH_STOP(t2);
     }
-  //  dumpLevelPoint(a_LofPhi, string("ebconductivityop: AMROperator: post-reflux lphi = "));
+  //  dumpLevelPoint(a_LofPhi, string("EbConductivityOp: AMROperator: post-reflux lphi = "));
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 reflux(LevelData<EBCellFAB>& a_residual,
        const LevelData<EBCellFAB>& a_phiFine,
        const LevelData<EBCellFAB>& a_phi,
        AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp)
 {
-  CH_TIMERS("ebconductivityop::fastReflux");
+  CH_TIMERS("EbConductivityOp::fastReflux");
   CH_TIMER("setToZero",t2);
   CH_TIMER("incrementCoar",t3);
   CH_TIMER("incrementFine",t4);
@@ -2396,45 +2397,45 @@ reflux(LevelData<EBCellFAB>& a_residual,
   CH_STOP(t2);
   CH_START(t3);
 #if verb
-  pout() << "ebconductivityop::reflux - increment coar" << endl;
+  pout() << "EbConductivityOp::reflux - increment coar" << endl;
 #endif
   incrementFRCoar(*m_fastFR, a_phiFine, a_phi);
 #if verb
-  pout() << "ebconductivityop::reflux - done increment coar" << endl;
+  pout() << "EbConductivityOp::reflux - done increment coar" << endl;
 #endif
   CH_STOP(t3);
 
   CH_START(t4);
 #if verb
-  pout() << "ebconductivityop::reflux - increment fine" << endl;
+  pout() << "EbConductivityOp::reflux - increment fine" << endl;
 #endif
   incrementFRFine(*m_fastFR, a_phiFine, a_phi, a_finerOp);
 #if verb
-  pout() << "ebconductivityop::reflux - done increment fine" << endl;
+  pout() << "EbConductivityOp::reflux - done increment fine" << endl;
 #endif
   CH_STOP(t4);
   CH_START(t5);
 
   Real scale = 1.0/m_dx;
 #if verb
-  pout() << "ebconductivityop::refluxing" << endl;
+  pout() << "EbConductivityOp::refluxing" << endl;
 #endif
   m_fastFR->reflux(a_residual, interv, scale);
 
 #if verb
-  pout() << "ebconductivityop::reflux - done reflux" << endl;
+  pout() << "EbConductivityOp::reflux - done reflux" << endl;
 #endif
 
   CH_STOP(t5);
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 incrementFRCoar(EBFluxRegister&             a_fluxReg,
 		const LevelData<EBCellFAB>& a_phiFine,
 		const LevelData<EBCellFAB>& a_phi)
 {
-  CH_TIME("ebconductivityop::incrementFRCoar");
+  CH_TIME("EbConductivityOp::incrementFRCoar");
   CH_assert(a_phiFine.nComp() == 1);
   CH_assert(a_phi.nComp() == 1);
 
@@ -2491,14 +2492,14 @@ incrementFRCoar(EBFluxRegister&             a_fluxReg,
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 getFluxEBCF(EBFaceFAB&                    a_flux,
 	    const EBCellFAB&              a_phi,
 	    const Box&                    a_ghostedBox,
 	    Vector<FaceIndex>&            a_faceitEBCF,
 	    Vector<VoFStencil>&           a_stenEBCF)
 {
-  CH_TIME("ebconductivityop::getFluxEBCF");
+  CH_TIME("EbConductivityOp::getFluxEBCF");
 
   //only do the evil stuff if you have a coarse-fine /  EB crossing situation
 
@@ -2523,7 +2524,7 @@ getFluxEBCF(EBFaceFAB&                    a_flux,
 
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 getFlux(EBFluxFAB&                    a_flux,
 	const LevelData<EBCellFAB>&   a_data,
 	const Box&                    a_grid,
@@ -2548,7 +2549,7 @@ getFlux(EBFluxFAB&                    a_flux,
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 getFlux(EBFaceFAB&                    a_fluxCentroid,
 	const EBCellFAB&              a_phi,
 	const Box&                    a_ghostedBox,
@@ -2610,7 +2611,7 @@ getFlux(EBFaceFAB&                    a_fluxCentroid,
 	  Real fluxFace = bcoebff(face, 0)*(phiHi - phiLo)/a_dx;
 	  //          if (EBCellFAB::s_verbose && ((face==facedeb1) || (face==facedeb2)))
 	  //            {
-	  //              pout() << "ebconductivityop::getFlux at "<< face ;
+	  //              pout() << "EbConductivityOp::getFlux at "<< face ;
 	  //              pout() << ", phiHi, phiLo, flux = " << phiHi << ", " << phiLo << ", "<< fluxFace << endl;
 	  //            }
 	  fluxCenter(face, 0) = fluxFace;
@@ -2629,7 +2630,7 @@ getFlux(EBFaceFAB&                    a_fluxCentroid,
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 getFluxRegOnly(EBFaceFAB&                    a_fluxCentroid,
 	       const EBCellFAB&              a_phi,
 	       const Box&                    a_ghostedBox,
@@ -2669,22 +2670,22 @@ getFluxRegOnly(EBFaceFAB&                    a_fluxCentroid,
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 incrementFRFine(EBFluxRegister&             a_fluxReg,
 		const LevelData<EBCellFAB>& a_phiFine,
 		const LevelData<EBCellFAB>& a_phi,
 		AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp)
 {
-  CH_TIME("ebconductivityop::incrementFRFine");
+  CH_TIME("EbConductivityOp::incrementFRFine");
   CH_assert(a_phiFine.nComp() == 1);
   CH_assert(a_phi.nComp() == 1);
   CH_assert(m_hasFine);
   int ncomp = 1;
   Interval interv(0,0);
-  ebconductivityop& finerEBAMROp = (ebconductivityop& )(*a_finerOp);
+  EbConductivityOp& finerEBAMROp = (EbConductivityOp& )(*a_finerOp);
 
 #if verb
-  pout() << "ebconductivityop::filling ghosts" << endl;
+  pout() << "EbConductivityOp::filling ghosts" << endl;
 #endif
   //ghost cells of phiFine need to be filled
   LevelData<EBCellFAB>& phiFine = (LevelData<EBCellFAB>&) a_phiFine;
@@ -2692,7 +2693,7 @@ incrementFRFine(EBFluxRegister&             a_fluxReg,
   phiFine.exchange(interv);
 
 #if verb
-  pout() << "ebconductivityop::done interpolate" << endl;
+  pout() << "EbConductivityOp::done interpolate" << endl;
 #endif
 
   DataIterator ditf = a_phiFine.dataIterator();
@@ -2729,7 +2730,7 @@ incrementFRFine(EBFluxRegister&             a_fluxReg,
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 getFlux(FArrayBox&                    a_flux,
 	const FArrayBox&              a_phi,
 	const Box&                    a_faceBox,
@@ -2752,7 +2753,7 @@ getFlux(FArrayBox&                    a_flux,
 //-----------------------------------------------------------------------
 
 void
-ebconductivityop::
+EbConductivityOp::
 AMRResidualNC(LevelData<EBCellFAB>&       a_residual,
 	      const LevelData<EBCellFAB>& a_phiFine,
 	      const LevelData<EBCellFAB>& a_phi,
@@ -2769,7 +2770,7 @@ AMRResidualNC(LevelData<EBCellFAB>&       a_residual,
 //-----------------------------------------------------------------------
 
 void
-ebconductivityop::
+EbConductivityOp::
 AMRResidualNF(LevelData<EBCellFAB>&       a_residual,
 	      const LevelData<EBCellFAB>& a_phi,
 	      const LevelData<EBCellFAB>& a_phiCoar,
@@ -2787,7 +2788,7 @@ AMRResidualNF(LevelData<EBCellFAB>&       a_residual,
 //-----------------------------------------------------------------------
 
 void
-ebconductivityop::
+EbConductivityOp::
 AMROperatorNC(LevelData<EBCellFAB>&       a_LofPhi,
 	      const LevelData<EBCellFAB>& a_phiFine,
 	      const LevelData<EBCellFAB>& a_phi,
@@ -2804,7 +2805,7 @@ AMROperatorNC(LevelData<EBCellFAB>&       a_LofPhi,
 //-----------------------------------------------------------------------
 
 void
-ebconductivityop::
+EbConductivityOp::
 AMROperatorNF(LevelData<EBCellFAB>&       a_LofPhi,
 	      const LevelData<EBCellFAB>& a_phi,
 	      const LevelData<EBCellFAB>& a_phiCoar,
@@ -2817,14 +2818,14 @@ AMROperatorNF(LevelData<EBCellFAB>&       a_LofPhi,
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 AMRRestrict(LevelData<EBCellFAB>&       a_resCoar,
 	    const LevelData<EBCellFAB>& a_residual,
 	    const LevelData<EBCellFAB>& a_correction,
 	    const LevelData<EBCellFAB>& a_coarCorrection, 
 	    bool a_skip_res )
 {
-  CH_TIME("ebconductivityop::AMRRestrict");
+  CH_TIME("EbConductivityOp::AMRRestrict");
   CH_assert(a_residual.ghostVect() == m_ghostCellsRHS);
   CH_assert(a_correction.ghostVect() == m_ghostCellsPhi);
   CH_assert(a_coarCorrection.ghostVect() == m_ghostCellsPhi);
@@ -2857,7 +2858,7 @@ AMRRestrict(LevelData<EBCellFAB>&       a_resCoar,
 }
 //-----------------------------------------------------------------------
 Real
-ebconductivityop::
+EbConductivityOp::
 AMRNorm(const LevelData<EBCellFAB>& a_coarResid,
 	const LevelData<EBCellFAB>& a_fineResid,
 	const int& a_refRat,
@@ -2865,18 +2866,18 @@ AMRNorm(const LevelData<EBCellFAB>& a_coarResid,
 
 {
   // compute norm over all cells on coarse not covered by finer
-  CH_TIME("ebconductivityop::AMRNorm");
+  CH_TIME("EbConductivityOp::AMRNorm");
   MayDay::Error("never called");
   //return norm of temp
   return norm(a_coarResid, a_ord);
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 AMRProlong(LevelData<EBCellFAB>&       a_correction,
 	   const LevelData<EBCellFAB>& a_coarCorrection)
 {
-  CH_TIME("ebconductivityop::AMRProlong");
+  CH_TIME("EbConductivityOp::AMRProlong");
   //use cached interpolation object
   Interval variables(0, 0);
   CH_assert(m_hasInterpAve);
@@ -2884,12 +2885,12 @@ AMRProlong(LevelData<EBCellFAB>&       a_correction,
 }
 //-----------------------------------------------------------------------
 void
-ebconductivityop::
+EbConductivityOp::
 AMRUpdateResidual(LevelData<EBCellFAB>&       a_residual,
 		  const LevelData<EBCellFAB>& a_correction,
 		  const LevelData<EBCellFAB>& a_coarCorrection)
 {
-  CH_TIME("ebconductivityop::AMRUpdateResidual");
+  CH_TIME("EbConductivityOp::AMRUpdateResidual");
   CH_assert(a_residual.ghostVect() == m_ghostCellsRHS);
   CH_assert(a_correction.ghostVect() == m_ghostCellsPhi);
   CH_assert(a_coarCorrection.ghostVect() == m_ghostCellsPhi);
@@ -2908,4 +2909,5 @@ AMRUpdateResidual(LevelData<EBCellFAB>&       a_residual,
   incr(a_residual, lcorr, -1);
 }
 //-----------------------------------------------------------------------
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

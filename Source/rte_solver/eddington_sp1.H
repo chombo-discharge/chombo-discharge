@@ -9,7 +9,7 @@
 #define _EDDINGTON_SP1_
 
 #include "rte_solver.H"
-#include "ebconductivityopfactory.H"
+#include <CD_EbConductivityOpFactory.H>
 #include "larsen_coefs.H"
 #include "robinconductivityebbcfactory.H"
 #include "robinconductivitydomainbcfactory.H"
@@ -290,7 +290,7 @@ protected:
   /*!
     @brief Operator factory
   */
-  RefCountedPtr<ebconductivityopfactory> m_opfact;
+  RefCountedPtr<EbConductivityOpFactory> m_opfact;
 
   /*!
     @brief Larsen coefficients for photon outflow bc
