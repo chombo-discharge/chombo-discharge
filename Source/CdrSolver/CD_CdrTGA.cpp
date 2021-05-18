@@ -312,7 +312,7 @@ void CdrTGA::setupOperatorFactory(){
   // Create operator factory.
   data_ops::set_value(m_aCoefficient, 1.0); // We're usually solving (1 - dt*nabla^2)*phi^(k+1) = phi^k + dt*S^k so aco=1
   data_ops::set_value(m_ebCenteredDiffusionCoefficient, 0.0);
-  m_operatorFactory = RefCountedPtr<EbConductivityOpFactory> (new EbConductivityOpFactory(levelgrids,
+  m_operatorFactory = RefCountedPtr<EbHelmholtzOpFactory> (new EbHelmholtzOpFactory(levelgrids,
 										 quadcfi,
 										 fastFR,
 										 alpha,

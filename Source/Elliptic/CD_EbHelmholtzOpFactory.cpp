@@ -4,23 +4,23 @@
  */
 
 /*!
-  @file   CD_EbConductivityOpFactory.H
+  @file   CD_EbHelmholtzOpFactory.H
   @brief  Declares a copy of Chombos EBConductivityOpFactory
   @author Robert Marskar
 */
 
 #include "LoadBalance.H"
-#include <CD_EbConductivityOp.H>
+#include <CD_EbHelmholtzOp.H>
 #include "EBArith.H"
 #include "ParmParse.H"
 #include "CH_Timer.H"
-#include <CD_EbConductivityOpFactory.H>
+#include <CD_EbHelmholtzOpFactory.H>
 #include "EBCoarseAverage.H"
 
 #include "CD_NamespaceHeader.H"
   
-int EbConductivityOpFactory::s_testRef = 2; // Bogus
-int EbConductivityOpFactory::s_maxBoxSize = 32;
+int EbHelmholtzOpFactory::s_testRef = 2; // Bogus
+int EbHelmholtzOpFactory::s_maxBoxSize = 32;
 
 //-----------------------------------------------------------------------
 void coarsen_stuff(LevelData<EBCellFAB>               & a_acoefCoar,
@@ -57,10 +57,10 @@ void coarsen_stuff(LevelData<EBCellFAB>               & a_acoefCoar,
   a_bcoefCoarIrreg.exchange(Interval(0,0));
 }
 
-EbConductivityOpFactory::~EbConductivityOpFactory(){
+EbHelmholtzOpFactory::~EbHelmholtzOpFactory(){
 }
 
-int EbConductivityOpFactory::refToFiner(const ProblemDomain& a_domain) const {
+int EbHelmholtzOpFactory::refToFiner(const ProblemDomain& a_domain) const {
   int retval = -1;
   bool found = false;
   for (int ilev = 0; ilev < m_eblgs.size(); ilev++){
@@ -70,12 +70,12 @@ int EbConductivityOpFactory::refToFiner(const ProblemDomain& a_domain) const {
     }
   }
   if (!found){
-    MayDay::Error("EbConductivityOpFactory::refToFiner - Domain not found in AMR hierarchy");
+    MayDay::Error("EbHelmholtzOpFactory::refToFiner - Domain not found in AMR hierarchy");
   }
   return retval;
 }
 
-EbConductivityOpFactory:: EbConductivityOpFactory(const Vector<EBLevelGrid>&                                  a_eblgs,
+EbHelmholtzOpFactory:: EbHelmholtzOpFactory(const Vector<EBLevelGrid>&                                  a_eblgs,
 						  const Vector<RefCountedPtr<EBQuadCFInterp> >&               a_quadCFI,
 						  const Vector<RefCountedPtr<EBFluxRegister> >&               a_fastFR,
 						  const Real&                                                 a_alpha,
@@ -215,7 +215,7 @@ EbConductivityOpFactory:: EbConductivityOpFactory(const Vector<EBLevelGrid>&    
   }
 }
 
-EbConductivityOp* EbConductivityOpFactory::MGnewOp(const ProblemDomain& a_domainFine,
+EbHelmholtzOp* EbHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_domainFine,
 						   int                  a_depth,
 						   bool                 a_homoOnly){
 
@@ -234,7 +234,7 @@ EbConductivityOp* EbConductivityOpFactory::MGnewOp(const ProblemDomain& a_domain
     }
   }
   if (!found){
-    MayDay::Error("EbConductivityOpFactory::MGnewOp - No corresponding AMRLevel to starting point of MGnewOp");
+    MayDay::Error("EbHelmholtzOpFactory::MGnewOp - No corresponding AMRLevel to starting point of MGnewOp");
   }
 
   //multigrid operator.  coarn by two from depth  no
@@ -322,9 +322,9 @@ EbConductivityOp* EbConductivityOpFactory::MGnewOp(const ProblemDomain& a_domain
   //need to put this in  ala EBAMRPoissonOp to get it.
   bool layoutChanged = true;
   //
-  EbConductivityOp* newOp = NULL;
+  EbHelmholtzOp* newOp = NULL;
   // Time-independent A coefficient.
-  newOp = new EbConductivityOp(EBLevelGrid(), eblgMGLevel, EBLevelGrid(), eblgCoarMG, quadCFI, fastFR,
+  newOp = new EbHelmholtzOp(EBLevelGrid(), eblgMGLevel, EBLevelGrid(), eblgCoarMG, quadCFI, fastFR,
 			       dombc, ebbc, dxMGLevel, dxCoar, bogRef, bogRef, hasFine, hasCoar,
 			       hasCoarMGObjects, layoutChanged, m_alpha, m_beta,
 			       acoef, bcoef, bcoefIrreg, m_ghostCellsPhi, m_ghostCellsRhs, m_relaxType);
@@ -333,7 +333,7 @@ EbConductivityOp* EbConductivityOpFactory::MGnewOp(const ProblemDomain& a_domain
 
 }
 
-EbConductivityOp* EbConductivityOpFactory::AMRnewOp(const ProblemDomain& a_domainFine){
+EbHelmholtzOp* EbHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domainFine){
   //figure out which level we are at.
   int ref=-1;
   bool found = false;
@@ -386,9 +386,9 @@ EbConductivityOp* EbConductivityOpFactory::AMRnewOp(const ProblemDomain& a_domai
   //optimization hook.  need to store the result out of EBArith::getCoarserLayoutss
   bool layoutChanged = true;
 
-  EbConductivityOp* newOp = NULL;
+  EbHelmholtzOp* newOp = NULL;
 
-  newOp = new EbConductivityOp(eblgFine, eblgMGLevel, eblgCoar, eblgCoarMG, m_quadCFI[ref], m_fastFR[ref],
+  newOp = new EbHelmholtzOp(eblgFine, eblgMGLevel, eblgCoar, eblgCoarMG, m_quadCFI[ref], m_fastFR[ref],
 			       dombc, ebbc,  dxMGLevel,dxCoar, refToFiner, refToCoarser,
 			       hasFine, hasCoar, hasCoarMGObjects,  layoutChanged,
 			       m_alpha, m_beta, m_aCoefficientef[ref], m_bcoef[ref], m_bcoefIrreg[ref],
@@ -397,11 +397,11 @@ EbConductivityOp* EbConductivityOpFactory::AMRnewOp(const ProblemDomain& a_domai
   return newOp;
 }
 
-void EbConductivityOpFactory::reclaim(MGLevelOp<LevelData<EBCellFAB> >* a_reclaim){
+void EbHelmholtzOpFactory::reclaim(MGLevelOp<LevelData<EBCellFAB> >* a_reclaim){
   delete a_reclaim;
 }
 
-void EbConductivityOpFactory::AMRreclaim(EbConductivityOp* a_reclaim){
+void EbHelmholtzOpFactory::AMRreclaim(EbHelmholtzOp* a_reclaim){
   delete a_reclaim;
 }
 #include "CD_NamespaceFooter.H"

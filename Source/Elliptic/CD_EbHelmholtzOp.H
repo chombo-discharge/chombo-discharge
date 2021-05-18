@@ -1,23 +1,24 @@
 /* chombo-discharge
- * This is a copy of Chombos EBConductivityOp and has Chombo copyright. 
- * Please refer to Copyright.txt in the Chombo root directory.
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
  */
-
 /*!
-  @file   CD_EbConductivityOp.H
-  @brief  Declares a new version of Chombo's EBConductivityOp with minor changes. 
+  @file   CD_EbHelmholtzOp.H
+  @brief  Declares Helmholtz operator which fits in Chombo3's multigrid templates. 
   @author Robert Marskar
 */
 
-#ifndef CD_EbConductivityOp_H
-#define CD_EbConductivityOp_H
+#ifndef CD_EbHelmholtzOp_H
+#define CD_EbHelmholtzOp_H
+
+// std includes
+#include <map>
 
 // Chombo includes
 #include <REAL.H>
 #include <Box.H>
 #include <FArrayBox.H>
 #include <Vector.H>
-#include <map>
 #include <RefCountedPtr.H>
 #include <AMRMultiGrid.H>
 #include <EBAMRPoissonOp.H>
@@ -41,52 +42,31 @@
 #include <CFRegion.H>
 #include <ConductivityBaseDomainBC.H>
 
+// Our includes
+#include <CD_NamespaceHeader.H>
+
 #if CH_SPACEDIM==2
 #define EBAMRPOVC_NUMSTEN 4
 #elif CH_SPACEDIM==3
 #define EBAMRPOVC_NUMSTEN 8
-#else
-void THIS_IS_AN_ERROR_MESSAGE(void)
-{
-  THIS_WILL_ONLY_COMPILE_WHEN_CH_SPACEDIM_IS_2_OR_3;
-}
 #endif
-
-#include <CD_NamespaceHeader.H>
   
 class MfConductivityOp;
 
-//! \class EbConductivityOp
-//! This class implements an operator that solves the equation
-//! (alpha a + beta div (b grad) )phi = rhs
-//! using the AMRLevelOp interface.
-class EbConductivityOp: public LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB >
-{
+/*!
+  @brief Class which implements an operator that can solve the Helmholtz equation using Chombo's AMRLevelOp interface
+*/
+class EbHelmholtzOp : public LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB > {
 
   friend MfConductivityOp;
   
 public:
 
-#ifdef CH_USE_HDF5
-  ///for debugging
-  virtual void dumpAMR(Vector<LevelData<EBCellFAB>*>& a_data, string name)
-  {
-    writeEBAMRname(&a_data, name.c_str());
-  }
-
-  ///for debugging
-  virtual void dumpLevel(LevelData<EBCellFAB>& a_data, string name)
-  {
-    writeEBLevelname(&a_data, name.c_str());
-  }
-#endif
-  //! Constructs a conductivity operator using the given data. This
-  //! constructor is for time-independent a and b coefficients.
-  //! If you are approaching this operator from this interface, consider backing away and using
-  //! EbConductivityOpFactory to generate these objects. Really.
-  //! Ghost cell arguments are there for caching reasons. Once you set them,
-  //! an error is thrown if you send in data that does not match.
-  EbConductivityOp(const EBLevelGrid &                                  a_eblgFine,
+  /*!
+    @brief Constructor for EbHelmholtzOp's. 
+    @note Ghost cell arguments are there for caching reasons. Once you set them, an error is thrown if you send in data that does not match.
+  */
+  EbHelmholtzOp(const EBLevelGrid &                                  a_eblgFine,
 		   const EBLevelGrid &                                  a_eblg,
 		   const EBLevelGrid &                                  a_eblgCoar,
 		   const EBLevelGrid &                                  a_eblgCoarMG,
@@ -113,7 +93,7 @@ public:
 
 
   //! Destructor.
-  ~EbConductivityOp();
+  ~EbHelmholtzOp();
 
   Real getSafety();
 
@@ -698,21 +678,20 @@ private:
 private:
 
   //! Default constructor. Creates an undefined conductivity operator.
-  EbConductivityOp();
+  EbHelmholtzOp();
 
   //copy constructor and operator= disallowed for all the usual reasons
-  EbConductivityOp(const EbConductivityOp& a_opin)
+  EbHelmholtzOp(const EbHelmholtzOp& a_opin)
   {
     MayDay::Error("invalid operator");
   }
 
-  void operator=(const EbConductivityOp& a_opin)
+  void operator=(const EbHelmholtzOp& a_opin)
   {
     MayDay::Error("invalid operator");
   }
 };
 
 #include <CD_NamespaceFooter.H>
-
 
 #endif

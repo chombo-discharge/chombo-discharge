@@ -4,13 +4,13 @@
  */
 
 /*!
-  @file   CD_EbConductivityOpFactory.H
+  @file   CD_EbHelmholtzOpFactory.H
   @brief  Declares a copy of Chombos EBConductivityOpFactory
   @author Robert Marskar
 */
 
-#ifndef CD_EbConductivityOpFactory_H
-#define CD_EbConductivityOpFactory_H
+#ifndef CD_EbHelmholtzOpFactory_H
+#define CD_EbHelmholtzOpFactory_H
 
 // Chombo includes
 #include <REAL.H>
@@ -23,7 +23,7 @@
 #include <EBIndexSpace.H>
 #include <EBCellFAB.H>
 #include <EBCellFactory.H>
-#include <CD_EbConductivityOp.H>
+#include <CD_EbHelmholtzOp.H>
 #include <EBLevelDataOps.H>
 #include <BaseEBBC.H>
 #include <BaseDomainBC.H>
@@ -39,16 +39,16 @@
 // Our includes
 #include <CD_NamespaceHeader.H>
   
-//! \class EbConductivityOpFactory
-//! Factory class to generate EbConductivityOps.  This follows the
+//! \class EbHelmholtzOpFactory
+//! Factory class to generate EbHelmholtzOps.  This follows the
 //! AMRLevelOpFactory interface.
-class EbConductivityOpFactory: public AMRLevelOpFactory<LevelData<EBCellFAB> >
+class EbHelmholtzOpFactory: public AMRLevelOpFactory<LevelData<EBCellFAB> >
 {
 public:
 
-  //! Constructs a factory that builds EbConductivityOps with time-independent
+  //! Constructs a factory that builds EbHelmholtzOps with time-independent
   //! A and B coefficients.
-  EbConductivityOpFactory(const Vector<EBLevelGrid>&                                  a_eblgs,
+  EbHelmholtzOpFactory(const Vector<EBLevelGrid>&                                  a_eblgs,
 			  const Vector<RefCountedPtr<EBQuadCFInterp> >&               a_quadCFI,
 			  const Vector<RefCountedPtr<EBFluxRegister> >&               a_fastFR,
 			  const Real&                                                 a_alpha,
@@ -69,7 +69,7 @@ public:
 
 
   //! Destructor.
-  virtual ~EbConductivityOpFactory();
+  virtual ~EbHelmholtzOpFactory();
 
   ///
   virtual void setData( Vector< RefCountedPtr<LevelData<BaseIVFAB<Real> > > >& a_data)
@@ -79,12 +79,12 @@ public:
   }
 
   ///
-  virtual EbConductivityOp*
+  virtual EbHelmholtzOp*
   MGnewOp(const ProblemDomain& a_FineindexSpace,
 	  int                  a_depth,
 	  bool                 a_homoOnly = true);
 
-  EbConductivityOp* createOperator(const EBLevelGrid&             a_eblgMGLevel,
+  EbHelmholtzOp* createOperator(const EBLevelGrid&             a_eblgMGLevel,
 				   const EBLevelGrid&             a_eblgCoarMG,
 				   const bool&                    a_hasMGObjects,
 				   const RealVect&                a_dxMGLevel,
@@ -94,11 +94,11 @@ public:
   virtual void reclaim(MGLevelOp<LevelData<EBCellFAB> >* a_reclaim);
 
   ///
-  virtual EbConductivityOp*
+  virtual EbHelmholtzOp*
   AMRnewOp(const ProblemDomain& a_FineindexSpace);
 
   ///
-  virtual void AMRreclaim(EbConductivityOp* a_reclaim);
+  virtual void AMRreclaim(EbHelmholtzOp* a_reclaim);
 
   ///
   /** Refinement ratio between this level and coarser level.
@@ -181,19 +181,19 @@ protected:
   Vector<Real>                                         m_dx;
 private:
   ///weak construction bad
-  EbConductivityOpFactory()
+  EbHelmholtzOpFactory()
   {
     MayDay::Error("invalid operator");
   }
 
   //copy constructor and operator= disallowed for all the usual reasons
-  EbConductivityOpFactory(const EbConductivityOpFactory& a_opin)
+  EbHelmholtzOpFactory(const EbHelmholtzOpFactory& a_opin)
   {
     MayDay::Error("invalid operator");
   }
 
   //copy constructor and operator= disallowed for all the usual reasons
-  void operator=(const EbConductivityOpFactory& a_opin)
+  void operator=(const EbHelmholtzOpFactory& a_opin)
   {
     MayDay::Error("invalid operator");
   }

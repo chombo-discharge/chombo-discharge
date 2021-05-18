@@ -1,6 +1,6 @@
 /*!
   @file robinconductivityebbc.H
-  @brief Declaration of a Robin type EB boundary condition class for EbConductivityOp
+  @brief Declaration of a Robin type EB boundary condition class for EbHelmholtzOp
   @author Robert Marskar
   @date Jan. 2018
 */
