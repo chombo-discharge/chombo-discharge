@@ -38,7 +38,7 @@ LayoutData<BaseIVFAB<VoFStencil> >* mfdirichletconductivityebbc::getFluxStencil(
   return &m_IrregStencils;
 }
 
-void mfdirichletconductivityebbc::setJump_object(const RefCountedPtr<jump_bc> a_jumpbc){
+void mfdirichletconductivityebbc::setJump_object(const RefCountedPtr<JumpBc> a_jumpbc){
   m_jumpbc = a_jumpbc;
 }
 
@@ -86,9 +86,9 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
   m_vofit_diri.define(dbl);
   m_vofit_matching.define(dbl);
 
-  const LayoutData<MFInterfaceFAB<VoFStencil> >& jumpstens = m_jumpbc->get_stencils();
-  const LayoutData<MFInterfaceFAB<Real> >& jumpweights     = m_jumpbc->get_weights();
-  const LayoutData<MFInterfaceFAB<Real> >& jump_coef       = m_jumpbc->get_bco();
+  const LayoutData<MFInterfaceFAB<VoFStencil> >& jumpstens = m_jumpbc->getStencils();
+  const LayoutData<MFInterfaceFAB<Real> >& jumpweights     = m_jumpbc->getWeights();
+  const LayoutData<MFInterfaceFAB<Real> >& jump_coef       = m_jumpbc->getAvgBco();
 
   // Create stencils on irregular cells that are not part of m_ivs
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -128,29 +128,29 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
       bool drop_order = false;
 
       if(m_order == 2){
-	drop_order = this->get_second_order_sten(cur_weight, cur_stencil, vof, ebisbox, cfivs);
+	drop_order = this->getSecondOrderStencil(cur_weight, cur_stencil, vof, ebisbox, cfivs);
 	if(drop_order){
 #if DEBUG
 	  pout() << "dropping order on domain = " << m_domain << " and cell = " << vof.gridIndex() << endl;
 #endif
-	  this->get_first_order_sten(cur_weight, cur_stencil, vof, ebisbox, cfivs);
+	  this->getFirstOrderStencil(cur_weight, cur_stencil, vof, ebisbox, cfivs);
 	}
       }
       else if(m_order == 1){
-	this->get_first_order_sten(cur_weight, cur_stencil, vof, ebisbox, cfivs);
+	this->getFirstOrderStencil(cur_weight, cur_stencil, vof, ebisbox, cfivs);
       }
     }
 
     // Adjust stencils for matching cells
-    const MFInterfaceFAB<VoFStencil>& avgStens = m_jumpbc->get_avgStencils()[dit()];
-    const MFInterfaceFAB<Real>& avgWeights     = m_jumpbc->get_avgWeights()[dit()];
+    const MFInterfaceFAB<VoFStencil>& avgStens = m_jumpbc->getAvgStencils()[dit()];
+    const MFInterfaceFAB<Real>& avgWeights     = m_jumpbc->getAvgWeights()[dit()];
     const MFInterfaceFAB<Real>& avgBco         = m_jumpbc->get_avgBco()[dit()];
 
     for (vofit_matching.reset(); vofit_matching.ok(); ++vofit_matching){
       const VolIndex& vof = vofit_matching();
       const VolIndex vof0(vof.gridIndex(), 0); // Multi-cell averages stored on first component
 
-      // Everything that comes from jump_bc is from vof0, as it should!!!
+      // Everything that comes from JumpBc is from vof0, as it should!!!
       VoFStencil& cur_stencil     = m_IrregStencils[dit()](vof, comp);
       const VoFStencil& jump_sten = avgStens.get_ivfab(m_phase)(vof0, comp);
       const Real cur_weight       = m_irreg_weights[dit()](vof, comp); 
@@ -209,12 +209,12 @@ void mfdirichletconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, 
   }
 }
 
-bool mfdirichletconductivityebbc::get_second_order_sten(Real&             a_weight,
+bool mfdirichletconductivityebbc::getSecondOrderStencil(Real&             a_weight,
 							VoFStencil&       a_stencil,
 							const VolIndex&   a_vof,
 							const EBISBox&    a_ebisbox,
 							const IntVectSet& a_cfivs){
-  CH_TIME("mfdirichletconductivityebbc::get_second_order_sten");
+  CH_TIME("mfdirichletconductivityebbc::getSecondOrderStencil");
 
   a_stencil.clear();
   bool drop_order = false;
@@ -248,12 +248,12 @@ bool mfdirichletconductivityebbc::get_second_order_sten(Real&             a_weig
   return false;
 }
 
-void mfdirichletconductivityebbc::get_first_order_sten(Real&             a_weight,
+void mfdirichletconductivityebbc::getFirstOrderStencil(Real&             a_weight,
 						       VoFStencil&       a_stencil,
 						       const VolIndex&   a_vof,
 						       const EBISBox&    a_ebisbox,
 						       const IntVectSet& a_cfivs){
-  CH_TIME("mfdirichletconductivityebbc::get_first_order_sten");
+  CH_TIME("mfdirichletconductivityebbc::getFirstOrderStencil");
 
   const RealVect normal   = a_ebisbox.normal(a_vof);
   const RealVect centroid = a_ebisbox.bndryCentroid(a_vof);
@@ -294,7 +294,7 @@ void mfdirichletconductivityebbc::get_first_order_sten(Real&             a_weigh
     pout() << "mfdirichletconductivityebbc::get_first_order sten - no sten on domain = "
 	   << m_domain << "\t vof = "
 	   << a_vof.gridIndex() << endl;
-    MayDay::Warning("mfdirichletconductivityebbc::get_first_order_sten - could not find a stencil. ");
+    MayDay::Warning("mfdirichletconductivityebbc::getFirstOrderStencil - could not find a stencil. ");
 #endif
 
     // Do an approximation for the gradient at the boundary by taking the gradient at the cell center and dotting it with the normal vector
@@ -357,8 +357,8 @@ void mfdirichletconductivityebbc::applyEBFlux(EBCellFAB&                    a_lp
   const int otherphase   = m_phase == 0 ? 1 : 0;
   const EBISBox& ebisbox = a_phi.getEBISBox();
 
-  const MFInterfaceFAB<Real>& inhomo = m_jumpbc->get_inhomo()[a_dit];
-  const MFInterfaceFAB<Real>& homog  = m_jumpbc->get_homog()[a_dit];
+  const MFInterfaceFAB<Real>& inhomo = m_jumpbc->getInhomogeneous()[a_dit];
+  const MFInterfaceFAB<Real>& homog  = m_jumpbc->getHomogeneous()[a_dit];
 
   // Multi-fluid cells
   VoFIterator& vofit_matching = m_vofit_matching[a_dit];

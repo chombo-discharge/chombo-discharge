@@ -108,7 +108,7 @@ void MfHelmholtzOp::define(const RefCountedPtr<mfis>&                    a_mfis,
   }
 
   // Object for matching boundary conditions. Native EBBC is data-based Dirichlet
-  m_jumpbc = RefCountedPtr<jump_bc> (new jump_bc(a_mflg, *a_bco_irreg, a_dx, a_order_ebbc, (a_mflg.getEBLevelGrid(0)).getCFIVS()));
+  m_jumpbc = RefCountedPtr<JumpBc> (new JumpBc(a_mflg, *a_bco_irreg, a_dx, a_order_ebbc, (a_mflg.getEBLevelGrid(0)).getCFIVS()));
 
   Vector<EBISLayout> layouts(num_phases);
   Vector<int> comps(num_phases);;
@@ -239,7 +239,7 @@ void MfHelmholtzOp::define(const RefCountedPtr<mfis>&                    a_mfis,
 
   EBArith::getMultiColors(m_colors);
 
-#if 0 // Define aggregate stencils in jump_bc object. Only for the new jump_bc class
+#if 0 // Define aggregate stencils in JumpBc object. Only for the new JumpBc class
   LevelData<MFCellFAB> dummy(a_aco->disjointBoxLayout(), 1, a_ghost_phi*IntVect::Unit, *factory);
   for (int iphase = 0; iphase < num_phases; iphase++){
     m_jumpbc->define_agg_stencils(*m_dirival[iphase], dummy, iphase);
@@ -349,7 +349,7 @@ void MfHelmholtzOp::set_bc_from_matching(const LevelData<MFCellFAB>& a_phi, Data
 
   if(m_multifluid){
     for (int iphase = 0; iphase <= 1; iphase++){
-      m_jumpbc->match_bc(*m_dirival[iphase], *m_jump, a_phi, a_dit, a_homogeneous);
+      m_jumpbc->matchBc(*m_dirival[iphase], *m_jump, a_phi, a_dit, a_homogeneous);
     }
   }
 

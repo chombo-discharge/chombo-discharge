@@ -11,7 +11,7 @@
 
 #include "MFLevelGrid.H"
 #include "mfis.H"
-#include "jump_bc.H"
+#include <CD_JumpBc.H>
 
 #include <DirichletConductivityEBBC.H>
 
@@ -83,7 +83,7 @@ public:
   /*!
     @brief Get a second order stencil 
   */
-  virtual bool get_second_order_sten(Real&             a_weight,
+  virtual bool getSecondOrderStencil(Real&             a_weight,
 				     VoFStencil&       a_stencil,
 				     const VolIndex&   a_vof,
 				     const EBISBox&    a_ebisbox,
@@ -92,7 +92,7 @@ public:
   /*!
     @brief Get a first order stencil 
   */
-  virtual void get_first_order_sten(Real&             a_weight,
+  virtual void getFirstOrderStencil(Real&             a_weight,
 				    VoFStencil&       a_stencil,
 				    const VolIndex&   a_vof,
 				    const EBISBox&    a_ebisbox,
@@ -106,7 +106,7 @@ public:
   /*!
     @brief Set the jump object. This is needed for extracting stencils
   */
-  virtual void setJump_object(const RefCountedPtr<jump_bc> a_jumpbc);
+  virtual void setJump_object(const RefCountedPtr<JumpBc> a_jumpbc);
 
   /*!
     @brief Get stencils for computing the flux
@@ -118,7 +118,7 @@ protected:
   /*!
     @brief Boundary condition jump object
   */
-  RefCountedPtr<jump_bc> m_jumpbc;
+  RefCountedPtr<JumpBc> m_jumpbc;
 
   /*!
     @brief Problem domain

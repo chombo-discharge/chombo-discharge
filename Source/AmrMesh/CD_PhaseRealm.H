@@ -195,7 +195,7 @@ protected:
 
   // Base defines
   void define_eblevelgrid(const int a_lmin);
-  void define_vofiter(const int a_lmin);
+  void defineVofIterator(const int a_lmin);
   void define_neighbors(const int a_lmin);
   
   // Operator defines

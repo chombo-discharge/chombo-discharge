@@ -24,7 +24,7 @@
 
 // Our includes
 #include <mfis.H>
-#include <jump_bc.H>
+#include <CD_JumpBc.H>
 #include <MFLevelGrid.H>
 #include <electrode.H>
 #include <MFQuadCFInterp.H>
@@ -457,7 +457,7 @@ protected:
   /*!
     @brief Class for computing BC matching
   */
-  RefCountedPtr<jump_bc> m_jumpbc;
+  RefCountedPtr<JumpBc> m_jumpbc;
 
   /*!
     @brief Jump condition. Comes in through factory. 

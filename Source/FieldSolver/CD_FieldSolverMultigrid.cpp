@@ -18,7 +18,7 @@
 #include <data_ops.H>
 #include <MFQuadCFInterp.H>
 #include <MFInterfaceFAB.H>
-#include <jump_bc.H>
+#include <CD_JumpBc.H>
 #include <CD_AmrMesh.H>
 #include <CD_ConductivityElectrostaticDomainBcFactory.H>
 #include <units.H>

@@ -92,7 +92,7 @@ void PhaseRealm::regridBase(const int a_lmin){
   if(m_defined){
     this->define_eblevelgrid(a_lmin);
     this->define_neighbors(a_lmin);
-    this->define_vofiter(a_lmin);
+    this->defineVofIterator(a_lmin);
   }
 }
 
@@ -187,10 +187,10 @@ void PhaseRealm::define_eblevelgrid(const int a_lmin){
     m_ebisl[lvl] = m_eblg[lvl]->getEBISL();
   }
 }
-void PhaseRealm::define_vofiter(const int a_lmin){
-  CH_TIME("PhaseRealm::define_vofiter");
+void PhaseRealm::defineVofIterator(const int a_lmin){
+  CH_TIME("PhaseRealm::defineVofIterator");
   if(m_verbosity > 2){
-    pout() << "PhaseRealm::define_vofiter" << endl;
+    pout() << "PhaseRealm::defineVofIterator" << endl;
   }
 
   m_vofiter.resize(1 + m_finestLevel);

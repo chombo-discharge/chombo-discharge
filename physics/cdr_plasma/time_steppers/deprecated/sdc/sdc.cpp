@@ -971,8 +971,8 @@ void sdc::set_semi_implicit_permittivities(){
   poisson->setCoefficientsficients();
 
   // Get bco and increment with mobilities
-  MFAMRFluxData& bco   = poisson->get_bco();
-  MFAMRIVData& bco_irr = poisson->get_bco_irreg();
+  MFAMRFluxData& bco   = poisson->getAvgBco();
+  MFAMRIVData& bco_irr = poisson->getAvgBco_irreg();
   
   EBAMRFluxData bco_gas;
   EBAMRIVData   bco_irr_gas;

@@ -1,21 +1,25 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   jump_bcI.H
-  @brief  Implementation of jump_bc.cpp
+  @file   CD_JumpBcImplem.H
+  @brief  Implementation of CD_JumpBc.H
   @author Robert Marskar
-  @date   Dec. 2017
 */
 
-#ifndef _JUMP_BCI_
-#define _JUMP_BCI_
+#ifndef CD_JumpBcImplem_H
+#define CD_JumpBcImplem_H
 
-#include "jump_bc.H"
-
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_JumpBc.H>
+#include <CD_NamespaceHeader.H>
 
 #define DEBUG_JUMP 0
 
 inline
-void jump_bc::compute_avg_jump(const BaseIVFAB<Real>& a_jump, const MFCellFAB& a_phi, const DataIndex& a_dit){
+void JumpBc::computeAvgJump(const BaseIVFAB<Real>& a_jump, const MFCellFAB& a_phi, const DataIndex& a_dit){
 
   const int comp   = 0;
   const int phase1 = 0;
@@ -59,7 +63,7 @@ void jump_bc::compute_avg_jump(const BaseIVFAB<Real>& a_jump, const MFCellFAB& a
 }
 
 inline
-void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
+void JumpBc::matchBc(BaseIVFAB<Real>&                  a_phibc,
 		       const BaseIVFAB<Real>&            a_jump,
 		       const MFCellFAB&                  a_phi,
 		       const DataIndex&                  a_dit){
@@ -67,7 +71,7 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
   const int phase1 = 0;
   const int phase2 = 1;
 
-  jump_bc::compute_avg_jump(a_jump, a_phi, a_dit);
+  JumpBc::computeAvgJump(a_jump, a_phi, a_dit);
   
   const BaseIVFAB<Real>& avg_bco1    = m_avgBco[a_dit].get_ivfab(phase1);
   const BaseIVFAB<Real>& avg_bco2    = m_avgBco[a_dit].get_ivfab(phase2);
@@ -128,8 +132,8 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
     const Vector<VolIndex> vofs2 = ebisbox2.getVoFs(iv);
 
 #if DEBUG_JUMP
-    if (ebisbox1.isCovered(iv)) MayDay::Abort("jump_bc::match_bc -- cell is covered on phase 1");
-    if (ebisbox2.isCovered(iv)) MayDay::Abort("jump_bc::match_bc -- cell is covered on phase 2");
+    if (ebisbox1.isCovered(iv)) MayDay::Abort("JumpBc::matchBc -- cell is covered on phase 1");
+    if (ebisbox2.isCovered(iv)) MayDay::Abort("JumpBc::matchBc -- cell is covered on phase 2");
 #endif
 
     // Apply the stencils on each side. apply_sten1 is an EB flux contribution to phase 2 and vice versa. 
@@ -185,7 +189,7 @@ void jump_bc::match_bc(BaseIVFAB<Real>&                  a_phibc,
     }
   }
 }
-#include "CD_NamespaceFooter.H"
 
+#include <CD_NamespaceFooter.H>
 
 #endif

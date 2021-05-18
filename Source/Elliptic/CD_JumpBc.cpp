@@ -1,44 +1,48 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file jump_bc.cpp
-  @brief Implementation of jump_bc.H
+  @file   CD_JumpBc.cpp
+  @brief  Implementation of CD_JumpBc.H
   @author Robert Marskar
-  @date Dec. 2017
 */
 
-#include "jump_bc.H"
-#include "CD_LeastSquares.H"
-
+// Chombo includes
 #include <EBArith.H>
-#include <ParmParse.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_JumpBc.H>
+#include <CD_LeastSquares.H>
+#include <CD_NamespaceHeader.H>
   
-bool jump_bc::s_quadrant_based = true;
-int  jump_bc::s_lsq_radius     = 1;
+bool JumpBc::s_quadrant_based = true;
+int  JumpBc::s_lsq_radius     = 1;
 
-jump_bc::jump_bc(){
-  CH_TIME("jump_bc::jump_bc(weak)");
+JumpBc::JumpBc(){
+  CH_TIME("JumpBc::JumpBc(weak)");
 }
 
-jump_bc::jump_bc(const MFLevelGrid&            a_mflg,
-		 const LevelData<MFBaseIVFAB>& a_bco,
-		 const Real&                   a_dx,
-		 const int                     a_order,
-		 const LayoutData<IntVectSet>* a_cfivs){
-  CH_TIME("jump_bc::jump_bc(full)");
+JumpBc::JumpBc(const MFLevelGrid&            a_mflg,
+	       const LevelData<MFBaseIVFAB>& a_bco,
+	       const Real&                   a_dx,
+	       const int                     a_order,
+	       const LayoutData<IntVectSet>* a_cfivs){
+  CH_TIME("JumpBc::JumpBc(full)");
 
   this->define(a_mflg, a_bco, a_dx, a_order, a_cfivs);
 }
 
-jump_bc::~jump_bc(){
-  CH_TIME("jump_bc::~jump_bc");
+JumpBc::~JumpBc(){
+  CH_TIME("JumpBc::~JumpBc");
 }
 
-void jump_bc::get_first_order_sten(Real&             a_weight,
-				   VoFStencil&       a_stencil,
-				   const VolIndex&   a_vof,
-				   const EBISBox&    a_ebisbox,
-				   const IntVectSet& a_cfivs){
+void JumpBc::getFirstOrderStencil(Real&             a_weight,
+				  VoFStencil&       a_stencil,
+				  const VolIndex&   a_vof,
+				  const EBISBox&    a_ebisbox,
+				  const IntVectSet& a_cfivs){
   const RealVect normal   = a_ebisbox.normal(a_vof);
   const RealVect centroid = a_ebisbox.bndryCentroid(a_vof);
 
@@ -75,10 +79,10 @@ void jump_bc::get_first_order_sten(Real&             a_weight,
   // Damn, still haven't found a stencil. Approximate using one side only
   if(a_stencil.size() == 0){
 #if DEBUG_JUMP
-    pout() << "jump_bc::get_first_order sten - no sten on domain = "
+    pout() << "JumpBc::get_first_order sten - no sten on domain = "
 	   << m_domain << "\t vof = "
 	   << a_vof.gridIndex() << endl;
-    MayDay::Warning("jump_bc::get_first_order_sten - could not find a stencil.");
+    MayDay::Warning("JumpBc::getFirstOrderStencil - could not find a stencil.");
 #endif
 
     // Make an approximation to the cell-centered gradient
@@ -94,11 +98,11 @@ void jump_bc::get_first_order_sten(Real&             a_weight,
   }
 }
 
-bool jump_bc::get_second_order_sten(Real&             a_weight,
-				    VoFStencil&       a_stencil,
-				    const VolIndex&   a_vof,
-				    const EBISBox&    a_ebisbox,
-				    const IntVectSet& a_cfivs){
+bool JumpBc::getSecondOrderStencil(Real&             a_weight,
+				   VoFStencil&       a_stencil,
+				   const VolIndex&   a_vof,
+				   const EBISBox&    a_ebisbox,
+				   const IntVectSet& a_cfivs){
   a_stencil.clear();
   bool drop_order = false;
 
@@ -127,12 +131,12 @@ bool jump_bc::get_second_order_sten(Real&             a_weight,
   return false;
 }
 
-void jump_bc::define(const MFLevelGrid&            a_mflg,
-		     const LevelData<MFBaseIVFAB>& a_bco,
-		     const Real&                   a_dx,
-		     const int                     a_order,
-		     const LayoutData<IntVectSet>* a_cfivs){
-  CH_TIME("jump_bc::define");
+void JumpBc::define(const MFLevelGrid&            a_mflg,
+		    const LevelData<MFBaseIVFAB>& a_bco,
+		    const Real&                   a_dx,
+		    const int                     a_order,
+		    const LayoutData<IntVectSet>* a_cfivs){
+  CH_TIME("JumpBc::define");
   m_mflg   = a_mflg;
   m_dx     = a_dx;
   m_domain = m_mflg.get_domain();
@@ -185,16 +189,16 @@ void jump_bc::define(const MFLevelGrid&            a_mflg,
       m_ivs[dit()] = bco.get_ivs();
     }
 
-    this->define_vofiter();
-    this->set_bco(a_bco);
+    this->defineVofIterator();
+    this->setBcoefficient(a_bco);
     this->buildStencils();
   }
 
   m_defined = true;
 }
 
-void jump_bc::define_vofiter(){
-  CH_TIME("jump_bc::define_vofiter");
+void JumpBc::defineVofIterator(){
+  CH_TIME("JumpBc::defineVofIterator");
 
   const int phase1 = 0;
   const int phase2 = 1;
@@ -212,8 +216,8 @@ void jump_bc::define_vofiter(){
   }
 }
 
-void jump_bc::set_bco(const LevelData<MFBaseIVFAB>& a_bco){
-  CH_TIME("jump_bc::set_bco");
+void JumpBc::setBcoefficient(const LevelData<MFBaseIVFAB>& a_bco){
+  CH_TIME("JumpBc::setBcoefficient");
 
   const int comp = 0;
   for (DataIterator dit = m_grids.dataIterator(); dit.ok(); ++dit){
@@ -230,8 +234,8 @@ void jump_bc::set_bco(const LevelData<MFBaseIVFAB>& a_bco){
   }
 }
 
-void jump_bc::buildStencils(){
-  CH_TIME("jump_bc::buildStencils");
+void JumpBc::buildStencils(){
+  CH_TIME("JumpBc::buildStencils");
 
   const int comp = 0;
 
@@ -263,14 +267,14 @@ void jump_bc::buildStencils(){
 	bool drop_order = false;
 	
 	if(m_order == 2){
-	  drop_order = this->get_second_order_sten(cur_weight, cur_stencil, vof, ebisbox, cfivs);
+	  drop_order = this->getSecondOrderStencil(cur_weight, cur_stencil, vof, ebisbox, cfivs);
 	}
 	else if(m_order == 1){
-	  this->get_first_order_sten(cur_weight, cur_stencil, vof, ebisbox, cfivs);
+	  this->getFirstOrderStencil(cur_weight, cur_stencil, vof, ebisbox, cfivs);
 	}
 
 	if(m_order == 2 && drop_order){
-	  this->get_first_order_sten(cur_weight, cur_stencil, vof, ebisbox, cfivs);
+	  this->getFirstOrderStencil(cur_weight, cur_stencil, vof, ebisbox, cfivs);
 	}
       }
 
@@ -344,7 +348,7 @@ void jump_bc::buildStencils(){
       const Real factor = 1.0/(bco1*w1 + bco2*w2);
 
 #if DEBUG_JUMP
-      if(std::isnan(factor)) MayDay::Abort("jump_bc::buildStencils -- factor is NaN");
+      if(std::isnan(factor)) MayDay::Abort("JumpBc::buildStencils -- factor is NaN");
 #endif
 
       factor1(vof0, 0) = factor;
@@ -353,63 +357,63 @@ void jump_bc::buildStencils(){
   }
 }
 
-void jump_bc::match_bc(LevelData<BaseIVFAB<Real> >&       a_phibc,
-		       const LevelData<BaseIVFAB<Real> >& a_jump,
-		       const LevelData<MFCellFAB>&        a_phi,
-		       const bool                         a_homogeneous){
-  CH_TIME("jump_bc::match_bc(1)");
+void JumpBc::matchBc(LevelData<BaseIVFAB<Real> >&       a_phibc,
+		     const LevelData<BaseIVFAB<Real> >& a_jump,
+		     const LevelData<MFCellFAB>&        a_phi,
+		     const bool                         a_homogeneous){
+  CH_TIME("JumpBc::matchBc(1)");
 
   DataIterator dit = a_phibc.dataIterator();
-  this->match_bc(a_phibc, a_jump, a_phi, dit, a_homogeneous);
+  this->matchBc(a_phibc, a_jump, a_phi, dit, a_homogeneous);
 }
 
-void jump_bc::match_bc(LevelData<BaseIVFAB<Real> >&       a_phibc,
-		       const LevelData<BaseIVFAB<Real> >& a_jump,
-		       const LevelData<MFCellFAB>&        a_phi,
-		       DataIterator&                      a_dit,
-		       const bool                         a_homogeneous){
-  CH_TIME("jump_bc::match_bc(1)");
+void JumpBc::matchBc(LevelData<BaseIVFAB<Real> >&       a_phibc,
+		     const LevelData<BaseIVFAB<Real> >& a_jump,
+		     const LevelData<MFCellFAB>&        a_phi,
+		     DataIterator&                      a_dit,
+		     const bool                         a_homogeneous){
+  CH_TIME("JumpBc::matchBc(1)");
 
   for (a_dit.reset(); a_dit.ok(); ++a_dit){
-    this->match_bc(a_phibc[a_dit()], a_jump[a_dit()], a_phi[a_dit()], a_dit());
+    this->matchBc(a_phibc[a_dit()], a_jump[a_dit()], a_phi[a_dit()], a_dit());
   }
 }
 
 
 
-void jump_bc::compute_dphidn(Vector<LevelData<BaseIVFAB<Real> > >&       a_dphidn,
-			     const Vector<LevelData<BaseIVFAB<Real> > >& a_phibc,
-			     const LevelData<MFCellFAB>&                 a_phi){
+void JumpBc::computeDnPhi(Vector<LevelData<BaseIVFAB<Real> > >&       a_dphidn,
+			  const Vector<LevelData<BaseIVFAB<Real> > >& a_phibc,
+			  const LevelData<MFCellFAB>&                 a_phi){
   for (int iphase = 0; iphase < m_multifluidIndexSpace->num_phases(); iphase++){
-    this->compute_dphidn(a_dphidn[iphase], a_phibc[iphase], a_phi, iphase);
+    this->computeDnPhi(a_dphidn[iphase], a_phibc[iphase], a_phi, iphase);
   }
 }
 
-void jump_bc::compute_dphidn(LevelData<BaseIVFAB<Real> >&       a_dphidn,
-			     const LevelData<BaseIVFAB<Real> >& a_phibc,
-			     const LevelData<MFCellFAB>&        a_phi,
-			     const int                          a_phase){
+void JumpBc::computeDnPhi(LevelData<BaseIVFAB<Real> >&       a_dphidn,
+			  const LevelData<BaseIVFAB<Real> >& a_phibc,
+			  const LevelData<MFCellFAB>&        a_phi,
+			  const int                          a_phase){
 
   for (DataIterator dit = a_dphidn.dataIterator(); dit.ok(); ++dit){
-    this->compute_dphidn(a_dphidn[dit()], a_phibc[dit()], a_phi[dit()].getPhase(a_phase), dit(), a_phase);
+    this->computeDnPhi(a_dphidn[dit()], a_phibc[dit()], a_phi[dit()].getPhase(a_phase), dit(), a_phase);
   }
 }
 
-void jump_bc::compute_dphidn(LevelData<BaseIVFAB<Real> >&       a_dphidn,
-			     const LevelData<BaseIVFAB<Real> >& a_phibc,
-			     const LevelData<EBCellFAB>&        a_phi,
-			     const int                          a_phase){
+void JumpBc::computeDnPhi(LevelData<BaseIVFAB<Real> >&       a_dphidn,
+			  const LevelData<BaseIVFAB<Real> >& a_phibc,
+			  const LevelData<EBCellFAB>&        a_phi,
+			  const int                          a_phase){
   
   for (DataIterator dit = a_dphidn.dataIterator(); dit.ok(); ++dit){
-    this->compute_dphidn(a_dphidn[dit()], a_phibc[dit()], a_phi[dit()], dit(), a_phase);
+    this->computeDnPhi(a_dphidn[dit()], a_phibc[dit()], a_phi[dit()], dit(), a_phase);
   }
 }
 
-void jump_bc::compute_dphidn(BaseIVFAB<Real>&       a_dphidn,
-			     const BaseIVFAB<Real>& a_phibc,
-			     const EBCellFAB&       a_phi,
-			     const DataIndex&       a_dit,
-			     const int              a_phase){
+void JumpBc::computeDnPhi(BaseIVFAB<Real>&       a_dphidn,
+			  const BaseIVFAB<Real>& a_phibc,
+			  const EBCellFAB&       a_phi,
+			  const DataIndex&       a_dit,
+			  const int              a_phase){
   const int comp = 0.;
 
   const BaseIVFAB<Real>& wb             = m_weights[a_dit].get_ivfab(a_phase);
@@ -432,35 +436,36 @@ void jump_bc::compute_dphidn(BaseIVFAB<Real>&       a_dphidn,
   }
 }
 
-LayoutData<MFInterfaceFAB<VoFStencil> >& jump_bc::get_stencils(){
+LayoutData<MFInterfaceFAB<VoFStencil> >& JumpBc::getStencils(){
   return m_stencils;
 }
 
-LayoutData<MFInterfaceFAB<Real> >& jump_bc::get_weights(){
+LayoutData<MFInterfaceFAB<Real> >& JumpBc::getWeights(){
   return m_weights;
 }
 
-LayoutData<MFInterfaceFAB<Real> >& jump_bc::get_bco(){
+LayoutData<MFInterfaceFAB<Real> >& JumpBc::getAvgBco(){
   return m_bco;
 }
 
-LayoutData<MFInterfaceFAB<VoFStencil> >& jump_bc::get_avgStencils(){
+LayoutData<MFInterfaceFAB<VoFStencil> >& JumpBc::getAvgStencils(){
   return m_avgStencils;
 }
 
-LayoutData<MFInterfaceFAB<Real> >& jump_bc::get_avgWeights(){
+LayoutData<MFInterfaceFAB<Real> >& JumpBc::getAvgWeights(){
   return m_avgWeights;
 }
 
-LayoutData<MFInterfaceFAB<Real> >& jump_bc::get_avgBco(){
+LayoutData<MFInterfaceFAB<Real> >& JumpBc::get_avgBco(){
   return m_avgBco;
 }
 
-LayoutData<MFInterfaceFAB<Real> >& jump_bc::get_inhomo(){
+LayoutData<MFInterfaceFAB<Real> >& JumpBc::getInhomogeneous(){
   return m_inhomo;
 }
 
-LayoutData<MFInterfaceFAB<Real> >& jump_bc::get_homog(){
+LayoutData<MFInterfaceFAB<Real> >& JumpBc::getHomogeneous(){
   return m_homog;
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

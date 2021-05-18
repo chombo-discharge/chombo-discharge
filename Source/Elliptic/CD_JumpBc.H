@@ -1,48 +1,53 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file jump_bc.H
-  @brief Declaration of a multifluid boundary condition class for the poisson equation
+  @file   JumpBc.H
+  @brief  Declaration of a multifluid boundary condition class for the Poisson equation
   @author Robert Marskar
-  @date Dec. 2017
 */
 
-#ifndef _JUMP_BC_
-#define _JUMP_BC_
+#ifndef CD_JumpBc_H
+#define CD_JumpBc_H
 
-#include "mfis.H"
-#include "MFCellFAB.H"
-#include "MFLevelGrid.H"
-#include "MFInterfaceFAB.H"
-#include "MFBaseIVFAB.H"
-
+// Chombo includes
+#include <MFCellFAB.H>
 #include <Stencils.H>
 #include <EBISBox.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <mfis.H>
+#include <MFLevelGrid.H>
+#include <MFInterfaceFAB.H>
+#include <MFBaseIVFAB.H>
+#include <CD_NamespaceHeader.H>
   
 /*!
   @brief Class matching the surface potential with multifluid poisson
 */
-class jump_bc {
+class JumpBc {
 public:
 
   /*!
     @brief Empty constructor, must call define
   */
-  jump_bc();
+  JumpBc();
 
   /*!
     @brief Full constructor
   */
-  jump_bc(const MFLevelGrid&            a_mflg,
-	  const LevelData<MFBaseIVFAB>& a_bco,
-	  const Real&                   a_dx,
-	  const int                     a_order,
-	  const LayoutData<IntVectSet>* a_cfivs);
+  JumpBc(const MFLevelGrid&            a_mflg,
+	 const LevelData<MFBaseIVFAB>& a_bco,
+	 const Real&                   a_dx,
+	 const int                     a_order,
+	 const LayoutData<IntVectSet>* a_cfivs);
 
   /*!
     @brief Destructor
   */
-  virtual ~jump_bc();
+  virtual ~JumpBc();
 
   /*!
     @brief Switch between quadrant-based and non-quadrant based least squares stencils
@@ -66,75 +71,75 @@ public:
   /*!
     @brief Match the boundary condition
   */
-  virtual void match_bc(LevelData<BaseIVFAB<Real> >&       a_phibc,
-			const LevelData<BaseIVFAB<Real> >& a_jump,
-			const LevelData<MFCellFAB>&        a_phi,
-			const bool                         a_homogeneous);
+  virtual void matchBc(LevelData<BaseIVFAB<Real> >&       a_phibc,
+		       const LevelData<BaseIVFAB<Real> >& a_jump,
+		       const LevelData<MFCellFAB>&        a_phi,
+		       const bool                         a_homogeneous);
 
   /*!
     @brief Match the boundary condition
   */
-  virtual void match_bc(LevelData<BaseIVFAB<Real> >&       a_phibc,
-			const LevelData<BaseIVFAB<Real> >& a_jump,
-			const LevelData<MFCellFAB>&        a_phi,
-			DataIterator&                      a_dit,
-			const bool                         a_homogeneous);
+  virtual void matchBc(LevelData<BaseIVFAB<Real> >&       a_phibc,
+		       const LevelData<BaseIVFAB<Real> >& a_jump,
+		       const LevelData<MFCellFAB>&        a_phi,
+		       DataIterator&                      a_dit,
+		       const bool                         a_homogeneous);
 
   /*!
     @brief Compute dphidn for all phases
   */
-  virtual void compute_dphidn(Vector<LevelData<BaseIVFAB<Real> > >&        a_dphidn,
-			      const Vector<LevelData<BaseIVFAB<Real> > >&  a_phibc,
-			      const LevelData<MFCellFAB>&                  a_phi);
+  virtual void computeDnPhi(Vector<LevelData<BaseIVFAB<Real> > >&        a_dphidn,
+			    const Vector<LevelData<BaseIVFAB<Real> > >&  a_phibc,
+			    const LevelData<MFCellFAB>&                  a_phi);
   /*!
     @brief Compute dphidn for specified phase usign precomputed phibc
   */
-  virtual void compute_dphidn(LevelData<BaseIVFAB<Real> >&       a_dphidn,
-			      const LevelData<BaseIVFAB<Real> >& a_phibc,
-			      const LevelData<MFCellFAB>&        a_phi,
-			      const int                          a_phase);
+  virtual void computeDnPhi(LevelData<BaseIVFAB<Real> >&       a_dphidn,
+			    const LevelData<BaseIVFAB<Real> >& a_phibc,
+			    const LevelData<MFCellFAB>&        a_phi,
+			    const int                          a_phase);
   
   /*!
     @brief Compute dphidn for specified phase usign precomputed phibc
   */
-  virtual void compute_dphidn(LevelData<BaseIVFAB<Real> >&       a_dphidn,
-			      const LevelData<BaseIVFAB<Real> >& a_phibc,
-			      const LevelData<EBCellFAB>&        a_phi,
-			      const int                          a_phase);
+  virtual void computeDnPhi(LevelData<BaseIVFAB<Real> >&       a_dphidn,
+			    const LevelData<BaseIVFAB<Real> >& a_phibc,
+			    const LevelData<EBCellFAB>&        a_phi,
+			    const int                          a_phase);
 
   /*!
     @brief Compute dphidn for specified phase usign precomputed phibc
   */
-  virtual void compute_dphidn(BaseIVFAB<Real>&       a_dphidn,
-			      const BaseIVFAB<Real>& a_phibc,
-			      const EBCellFAB&       a_phi,
-			      const DataIndex&       a_dit,
-			      const int              a_phase);
+  virtual void computeDnPhi(BaseIVFAB<Real>&       a_dphidn,
+			    const BaseIVFAB<Real>& a_phibc,
+			    const EBCellFAB&       a_phi,
+			    const DataIndex&       a_dit,
+			    const int              a_phase);
 
   /*!
     @brief Get stencils
   */
-  virtual LayoutData<MFInterfaceFAB<VoFStencil> >& get_stencils();
+  virtual LayoutData<MFInterfaceFAB<VoFStencil> >& getStencils();
 
   /*!
     @brief Get stencils
   */
-  virtual LayoutData<MFInterfaceFAB<VoFStencil> >& get_avgStencils();
+  virtual LayoutData<MFInterfaceFAB<VoFStencil> >& getAvgStencils();
 
   /*!
     @brief Get weights
   */
-  virtual LayoutData<MFInterfaceFAB<Real> >& get_weights();
+  virtual LayoutData<MFInterfaceFAB<Real> >& getWeights();
 
   /*!
     @brief Get weights
   */
-  virtual LayoutData<MFInterfaceFAB<Real> >& get_avgWeights();
+  virtual LayoutData<MFInterfaceFAB<Real> >& getAvgWeights();
 
   /*!
     @brief Get b-coefficient on each side
   */
-  virtual LayoutData<MFInterfaceFAB<Real> >& get_bco();
+  virtual LayoutData<MFInterfaceFAB<Real> >& getAvgBco();
 
   /*!
     @brief Get b-coefficient on each side
@@ -144,12 +149,12 @@ public:
   /*!
     @brief Get inhomogeneous contribution on each side
   */
-  virtual LayoutData<MFInterfaceFAB<Real> >& get_inhomo();
+  virtual LayoutData<MFInterfaceFAB<Real> >& getInhomogeneous();
 
   /*!
     @brief Homogeneous contribution
   */
-  virtual LayoutData<MFInterfaceFAB<Real> >& get_homog();
+  virtual LayoutData<MFInterfaceFAB<Real> >& getHomogeneous();
 
 
 protected:
@@ -248,12 +253,12 @@ protected:
   /*!
     @brief Define VoFIterators
   */
-  virtual void define_vofiter();
+  virtual void defineVofIterator();
 
   /*!
     @brief Set b-coefficient
   */
-  virtual void set_bco(const LevelData<MFBaseIVFAB>& a_bco);
+  virtual void setBcoefficient(const LevelData<MFBaseIVFAB>& a_bco);
 
   /*!
     @brief Build stencils for matching
@@ -263,7 +268,7 @@ protected:
   /*!
     @brief Get a second order stencil 
   */
-  virtual bool get_second_order_sten(Real&             a_weight,
+  virtual bool getSecondOrderStencil(Real&             a_weight,
 				     VoFStencil&       a_stencil,
 				     const VolIndex&   a_vof,
 				     const EBISBox&    a_ebisbox,
@@ -272,7 +277,7 @@ protected:
   /*!
     @brief Get a first order stencil 
   */
-  virtual void get_first_order_sten(Real&             a_weight,
+  virtual void getFirstOrderStencil(Real&             a_weight,
 				    VoFStencil&       a_stencil,
 				    const VolIndex&   a_vof,
 				    const EBISBox&    a_ebisbox,
@@ -282,19 +287,20 @@ protected:
     @brief Match the boundary condition
   */
   inline
-  void match_bc(BaseIVFAB<Real>&                  a_phibc,
-		const BaseIVFAB<Real>&            a_jump,
-		const MFCellFAB&                  a_phi,
-		const DataIndex&                  a_dit);
+  void matchBc(BaseIVFAB<Real>&                  a_phibc,
+	       const BaseIVFAB<Real>&            a_jump,
+	       const MFCellFAB&                  a_phi,
+	       const DataIndex&                  a_dit);
 
   /*!
     @brief Compute the average jump condition
   */
   inline
-  void compute_avg_jump(const BaseIVFAB<Real>& a_jump, const MFCellFAB& a_phi, const DataIndex& a_dit);
+  void computeAvgJump(const BaseIVFAB<Real>& a_jump, const MFCellFAB& a_phi, const DataIndex& a_dit);
 };
-#include "CD_NamespaceFooter.H"
 
-#include "jump_bcI.H"
+#include <CD_NamespaceFooter.H>
+
+#include <CD_JumpBcImplem.H>
 
 #endif
