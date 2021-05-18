@@ -690,7 +690,7 @@ void eddington_sp1::setup_operator_factory(){
 #endif
 
   // EBBC
-  m_ebfact  = RefCountedPtr<robinconductivityebbcfactory> (new robinconductivityebbcfactory(origin));
+  m_ebfact  = RefCountedPtr<RobinConductivityEbBcFactory> (new RobinConductivityEbBcFactory(origin));
   m_ebfact->setCoefficients(m_robinco);
   m_ebfact->set_type(IrregStencil::StencilType::LeastSquares);
 

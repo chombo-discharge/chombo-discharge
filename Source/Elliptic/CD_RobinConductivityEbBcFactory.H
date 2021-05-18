@@ -1,36 +1,42 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file robinconductivityebbc.H
-  @brief Declaration of a factory class for Robin type EB boundary condition
+  @file   CD_RobinConductivityEbBcFactory.H
+  @brief  Declaration of a factory class for Robin type EB boundary condition
   @author Robert Marskar
-  @date Jan. 2018
 */
 
-#ifndef _ROBINCONDUCTIVITYEBBCFACTORY_
-#define _ROBINCONDUCTIVITYEBBCFACTORY_
+#ifndef CD_RobinConductivityEbBcFactory_H
+#define CD_RobinConductivityEbBcFactory_H
 
-#include "EBAMRData.H"
-#include "CD_IrregStencil.H"
-#include "robinconductivityebbc.H"
-
+// Chombo includes
 #include <BaseEBBC.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <EBAMRData.H>
+#include <CD_RobinCoefficients.H>
+#include <CD_IrregStencil.H>
+#include <CD_RobinConductivityEbBc.H>
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Factory class for generating Robin boundary conditions \f$a\phi + b\partial_n\phi = g\f$, where \f$n\f$ is the EB unit normal. 
 */
-class robinconductivityebbcfactory : public BaseEBBCFactory {
+class RobinConductivityEbBcFactory : public BaseEBBCFactory {
 public:
 
   /*!
     @brief Constructor
   */
-  robinconductivityebbcfactory(const RealVect a_origin);
+  RobinConductivityEbBcFactory(const RealVect a_origin);
 
   /*!
     @brief Destructor
   */
-  ~robinconductivityebbcfactory();
+  ~RobinConductivityEbBcFactory();
 
   /*!
     @brief Set bc order
@@ -51,13 +57,13 @@ public:
     @brief Set data-based coefficients
   */
   virtual void setCoefficients(const EBAMRIVData& a_aco,
-			 const EBAMRIVData& a_bco,
-			 const EBAMRIVData& a_rhs);
+			       const EBAMRIVData& a_bco,
+			       const EBAMRIVData& a_rhs);
 
   /*!
     @brief Create Robin type boundary condition
   */
-  robinconductivityebbc* create(const ProblemDomain& a_domain,
+  RobinConductivityEbBc* create(const ProblemDomain& a_domain,
 				const EBISLayout&    a_ebisl,
 				const RealVect&      a_dx,
 				const IntVect*       a_ghost_phi = 0,
@@ -71,7 +77,7 @@ protected:
 
   RefCountedPtr<RobinCoefficients> m_robinco;
 
-  Real m_aCoefficient;
+  Real m_aco;
 
   Real m_bco;
   
@@ -89,6 +95,7 @@ protected:
 
   bool m_func_coeff;
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

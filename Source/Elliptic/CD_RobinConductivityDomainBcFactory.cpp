@@ -75,7 +75,7 @@ BaseDomainBC* RobinConductivityDomainBcFactory::create(const ProblemDomain& a_do
     }
   }
   else{
-    MayDay::Abort("robinconductivityebbcfactory::create - must set coefficients first");
+    MayDay::Abort("RobinConductivityEbBcFactory::create - must set coefficients first");
   }
 
   return static_cast<BaseDomainBC*> (fresh);

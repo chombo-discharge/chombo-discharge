@@ -1,26 +1,26 @@
 /*!
-  @file robinconductivityebbc.cpp
-  @brief Implementation of robinconductivityebbc.H
+  @file RobinConductivityEbBc.cpp
+  @brief Implementation of RobinConductivityEbBc.H
   @author Robert Marskar
   @date Jan. 2018
 */
 
-#include "robinconductivityebbc.H"
+#include <CD_RobinConductivityEbBc.H>
 
 #include "CD_NamespaceHeader.H"
   
-bool robinconductivityebbc::s_quadrant_based = false;
-int  robinconductivityebbc::s_lsq_radius     = 1;
+bool RobinConductivityEbBc::s_quadrant_based = false;
+int  RobinConductivityEbBc::s_lsq_radius     = 1;
 
-robinconductivityebbc::robinconductivityebbc(const RealVect a_dx, const RealVect a_origin){
+RobinConductivityEbBc::RobinConductivityEbBc(const RealVect a_dx, const RealVect a_origin){
   m_dx     = a_dx;
   m_origin = a_origin;
 }
 
-robinconductivityebbc:: ~robinconductivityebbc(){
+RobinConductivityEbBc:: ~RobinConductivityEbBc(){
 }
 
-void robinconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, const Real& a_factor){
+void RobinConductivityEbBc::define(const LayoutData<IntVectSet>& a_cfivs, const Real& a_factor){
 
   const int ncomp = 1;
   const int comp  = 0;
@@ -73,7 +73,7 @@ void robinconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, const 
       // dphi/dn = g/b - a*phi/b. So we must scale. We only want 
       Real aco, bco;
       if(m_const_coeff){
-	aco = m_aCoefficient;
+	aco = m_aco;
 	bco = m_bco;
       }
       else if(m_func_coeff){
@@ -85,7 +85,7 @@ void robinconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, const 
 	bco = (*m_bcodata)[dit](vof, comp);
       }
       else{
-	MayDay::Abort("robinconductivityebbc::define - must set coefficients before calling define");
+	MayDay::Abort("RobinConductivityEbBc::define - must set coefficients before calling define");
       }
 
       stencil *= aco/bco; // Here, stencil => dphi/dn
@@ -99,7 +99,7 @@ void robinconductivityebbc::define(const LayoutData<IntVectSet>& a_cfivs, const 
   }
 }
 
-bool robinconductivityebbc::get_taylor_sten(VoFStencil&       a_stencil,
+bool RobinConductivityEbBc::get_taylor_sten(VoFStencil&       a_stencil,
 					    const VolIndex&   a_vof,
 					    const EBISBox&    a_ebisbox,
 					    const IntVectSet& a_cfivs){
@@ -113,7 +113,7 @@ bool robinconductivityebbc::get_taylor_sten(VoFStencil&       a_stencil,
   return order > 0;
 }
 
-bool robinconductivityebbc::get_lsq_sten(VoFStencil&          a_stencil,
+bool RobinConductivityEbBc::get_lsq_sten(VoFStencil&          a_stencil,
 					 const VolIndex&      a_vof,
 					 const EBISBox&       a_ebisbox,
 					 const ProblemDomain& a_domain){
@@ -159,17 +159,17 @@ bool robinconductivityebbc::get_lsq_sten(VoFStencil&          a_stencil,
   return found_stencil;
 }
 
-void robinconductivityebbc::set_type(const IrregStencil::StencilType a_type){
+void RobinConductivityEbBc::set_type(const IrregStencil::StencilType a_type){
   if(a_type == IrregStencil::StencilType::TaylorExtrapolation || a_type == IrregStencil::StencilType::LeastSquares){
     m_type = a_type;
   }
   else{
-    MayDay::Abort("robinconductivityebbc::set_type - only taylor and least squares supported for now");
+    MayDay::Abort("RobinConductivityEbBc::set_type - only taylor and least squares supported for now");
   }
 }
 
-void robinconductivityebbc::setCoefficients(const Real a_aco, const Real a_bco, const Real a_rhs){
-  m_aCoefficient = a_aco;
+void RobinConductivityEbBc::setCoefficients(const Real a_aco, const Real a_bco, const Real a_rhs){
+  m_aco = a_aco;
   m_bco = a_bco;
   m_rhs = a_rhs;
 
@@ -178,7 +178,7 @@ void robinconductivityebbc::setCoefficients(const Real a_aco, const Real a_bco, 
   m_data_coeff  = false;
 }
 
-void robinconductivityebbc::setCoefficients(const RefCountedPtr<RobinCoefficients> a_robinco){
+void RobinConductivityEbBc::setCoefficients(const RefCountedPtr<RobinCoefficients> a_robinco){
   m_robinco = a_robinco;
 
   m_const_coeff = false;
@@ -186,7 +186,7 @@ void robinconductivityebbc::setCoefficients(const RefCountedPtr<RobinCoefficient
   m_data_coeff  = false;
 }
 
-void robinconductivityebbc::setCoefficients(const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_aco,
+void RobinConductivityEbBc::setCoefficients(const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_aco,
 				      const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_bco,
 				      const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_rhs){
   m_acodata = a_aco;
@@ -198,7 +198,7 @@ void robinconductivityebbc::setCoefficients(const RefCountedPtr<LevelData<BaseIV
   m_data_coeff  = true;
 }
 
-void robinconductivityebbc::applyEBFlux(EBCellFAB&                    a_lphi, 
+void RobinConductivityEbBc::applyEBFlux(EBCellFAB&                    a_lphi, 
 					const EBCellFAB&              a_phi, 
 					VoFIterator&                  a_vofit, 
 					const LayoutData<IntVectSet>& a_cfivs, 
@@ -220,7 +220,7 @@ void robinconductivityebbc::applyEBFlux(EBCellFAB&                    a_lphi,
 
     Real aco, bco, rhs;
     if(m_const_coeff){
-      aco = m_aCoefficient;
+      aco = m_aco;
       bco = m_bco;
       rhs = m_rhs;
     }
@@ -246,7 +246,7 @@ void robinconductivityebbc::applyEBFlux(EBCellFAB&                    a_lphi,
   }
 }
 
-LayoutData<BaseIVFAB<VoFStencil> >* robinconductivityebbc::getFluxStencil(int ivar){
+LayoutData<BaseIVFAB<VoFStencil> >* RobinConductivityEbBc::getFluxStencil(int ivar){
   return &m_bcstencils;
 }
 #include "CD_NamespaceFooter.H"

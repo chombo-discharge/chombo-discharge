@@ -1,35 +1,40 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file robinconductivityebbc.H
+  @file  CD_RobinConductivityEbBc.H
   @brief Declaration of a Robin type EB boundary condition class for EbHelmholtzOp
   @author Robert Marskar
-  @date Jan. 2018
 */
 
-#ifndef _ROBINCONDUCTIVITYEBBC_
-#define _ROBINCONDUCTIVITYEBBC_
+#ifndef CD_RobinConductivityEbBc_H
+#define CD_RobinConductivityEbBc_H
 
-#include "CD_IrregStencil.H"
-#include <CD_RobinCoefficients.H>
-
+// Chombo includes
 #include <BaseEBBC.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_IrregStencil.H>
+#include <CD_RobinCoefficients.H>
+#include <CD_NamespaceHeader.H>
   
 /*!
   @brief Boundary condition class for Robin type boundary conditions on embedded boundaries
 */
-class robinconductivityebbc : public ConductivityBaseEBBC {
+class RobinConductivityEbBc : public ConductivityBaseEBBC {
 public:
 
   /*!
     @brief Constructor
   */
-  robinconductivityebbc(const RealVect a_dx, const RealVect a_origin);
+  RobinConductivityEbBc(const RealVect a_dx, const RealVect a_origin);
 
   /*!
     @brief Destructor
   */
-  ~robinconductivityebbc();
+  ~RobinConductivityEbBc();
 
   /*!
     @brief Quadrant based stencil or not
@@ -99,11 +104,11 @@ protected:
 
   RefCountedPtr<RobinCoefficients> m_robinco;
   
-  Real m_aCoefficient;
+  Real m_aco;
   Real m_bco;
   Real m_rhs;
 
-  Real (*m_aCoefficientfunc)(const RealVect a_pos);
+  Real (*m_acofunc)(const RealVect a_pos);
   Real (*m_bcofunc)(const RealVect a_pos);
   Real (*m_rhsfunc)(const RealVect a_pos);
 
@@ -119,10 +124,11 @@ protected:
   bool m_data_coeff;
   bool m_func_coeff;
 
-  virtual bool get_taylor_sten(VoFStencil& a_stencil, const VolIndex& a_vof, const EBISBox& a_ebisbox, const IntVectSet& a_cfivs);
+  bool get_taylor_sten(VoFStencil& a_stencil, const VolIndex& a_vof, const EBISBox& a_ebisbox, const IntVectSet& a_cfivs);
 
-  virtual bool get_lsq_sten(VoFStencil& a_stencil, const VolIndex& a_vof, const EBISBox& a_ebisbox, const ProblemDomain& a_domain);
+  bool get_lsq_sten(VoFStencil& a_stencil, const VolIndex& a_vof, const EBISBox& a_ebisbox, const ProblemDomain& a_domain);
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif
