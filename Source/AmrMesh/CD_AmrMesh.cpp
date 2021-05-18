@@ -1599,7 +1599,7 @@ void AmrMesh::parsegridGeneration(){
     MayDay::Abort("AmrMesh::parsegridGeneration - unknown grid generation method requested");
   }
 
-  pp.get("BoxSorting", str);
+  pp.get("box_sorting", str);
   if( str == "none"){
     m_boxSort = BoxSorting::None;
   }
