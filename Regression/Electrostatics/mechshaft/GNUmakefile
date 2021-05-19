@@ -25,7 +25,7 @@ src_dirs = $(DISCHARGE_HOME)/Source \
 	$(DISCHARGE_HOME)/Source/RadiativeTransfer \
 	$(DISCHARGE_HOME)/Source/SigmaSolver \
 	$(DISCHARGE_HOME)/Source/global \
-	$(DISCHARGE_HOME)/Source/FieldSolver \
+	$(DISCHARGE_HOME)//Source/Electrostatics \
 	$(DISCHARGE_HOME)/Source/Particle \
 	$(DISCHARGE_HOME)/Geometries/mechanical_shaft\
 	$(DISCHARGE_HOME)/Physics/Electrostatics \
