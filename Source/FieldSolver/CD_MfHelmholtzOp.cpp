@@ -75,7 +75,7 @@ void MfHelmholtzOp::define(const RefCountedPtr<MultiFluidIndexSpace>&           
 			      const RealVect&                               a_origin){
 
 
-  const int num_phases = a_multiFluidIndexSpace->num_phases();
+  const int numPhases = a_multiFluidIndexSpace->numPhases();
   
   const int num_alias  = 6;
 
@@ -83,20 +83,20 @@ void MfHelmholtzOp::define(const RefCountedPtr<MultiFluidIndexSpace>&           
   m_ncomp = 1;
   m_relax = a_relax_type;
   m_domain = a_domain;
-  m_phases = num_phases;
-  m_ebops.resize(num_phases);
-  m_ebbc.resize(num_phases);
-  m_aCoefeffs.resize(num_phases);
-  m_bcoeffs.resize(num_phases);
-  m_bcoeffs_irr.resize(num_phases);
+  m_phases = numPhases;
+  m_ebops.resize(numPhases);
+  m_ebbc.resize(numPhases);
+  m_aCoefeffs.resize(numPhases);
+  m_bcoeffs.resize(numPhases);
+  m_bcoeffs_irr.resize(numPhases);
   m_alias.resize(num_alias);
   m_ref_to_coarser = a_ref_to_coar;
   m_ghost_phi = a_ghost_phi;
   m_ghost_rhs = a_ghost_rhs;
   m_origin = a_origin;
   m_dx = a_dx;
-  m_dirival.resize(num_phases);
-  m_multifluid = m_multifluidIndexSpace->num_phases() > 1;
+  m_dirival.resize(numPhases);
+  m_multifluid = m_multifluidIndexSpace->numPhases() > 1;
   m_lengthScale = a_lengthScale;
 
   if(a_has_mg){
@@ -110,12 +110,12 @@ void MfHelmholtzOp::define(const RefCountedPtr<MultiFluidIndexSpace>&           
   // Object for matching boundary conditions. Native EBBC is data-based Dirichlet
   m_jumpbc = RefCountedPtr<JumpBc> (new JumpBc(a_mflg, *a_bco_irreg, a_dx, a_order_ebbc, (a_mflg.getEBLevelGrid(0)).getCFIVS()));
 
-  Vector<EBISLayout> layouts(num_phases);
-  Vector<int> comps(num_phases);;
+  Vector<EBISLayout> layouts(numPhases);
+  Vector<int> comps(numPhases);;
 
 
   
-  for (int iphase = 0; iphase < num_phases; iphase++){
+  for (int iphase = 0; iphase < numPhases; iphase++){
 
     const EBLevelGrid& eblg      = a_mflg.getEBLevelGrid(iphase);
     const EBISLayout&  ebisl     = eblg.getEBISL();
@@ -241,7 +241,7 @@ void MfHelmholtzOp::define(const RefCountedPtr<MultiFluidIndexSpace>&           
 
 #if 0 // Define aggregate stencils in JumpBc object. Only for the new JumpBc class
   LevelData<MFCellFAB> dummy(a_aco->disjointBoxLayout(), 1, a_ghost_phi*IntVect::Unit, *factory);
-  for (int iphase = 0; iphase < num_phases; iphase++){
+  for (int iphase = 0; iphase < numPhases; iphase++){
     m_jumpbc->define_agg_stencils(*m_dirival[iphase], dummy, iphase);
   }
 #endif

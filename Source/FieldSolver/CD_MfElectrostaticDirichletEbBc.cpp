@@ -59,7 +59,7 @@ void MfElectrostaticDirichletEbBc::defineIVS(const MFLevelGrid& a_mflg){
   int num = 0;
   m_ivs.define(dbl);
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-    m_ivs[dit()] = a_mflg.interface_region(dbl.get(dit()), dit());
+    m_ivs[dit()] = a_mflg.interfaceRegion(dbl.get(dit()), dit());
     num += m_ivs[dit()].numPts();
   }
  

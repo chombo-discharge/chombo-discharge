@@ -147,7 +147,7 @@ void FieldSolver::computeDisplacementField(MFAMRCellData& a_displacementField, c
     data_ops::scale(D_gas,   units::s_eps0);
 
     // For the solid phase, we multiply by epsilon. 
-    if(m_multifluidIndexSpace->num_phases() > 1){
+    if(m_multifluidIndexSpace->numPhases() > 1){
       mfalias::aliasMF(D_solid, phase::solid, D);
       mfalias::aliasMF(E_solid, phase::solid, E);
       E_solid.localCopyTo(D_solid);
@@ -215,7 +215,7 @@ Real FieldSolver::computeEnergyDensity(const MFAMRCellData& a_electricField){
   m_amr->averageDown(data_g, m_realm, phase::gas);
   data_ops::norm(U_g, *data_g[0], m_amr->getDomains()[0], 1);
 
-  if(m_multifluidIndexSpace->num_phases() > 1){
+  if(m_multifluidIndexSpace->numPhases() > 1){
     EBAMRCellData data_s;
     m_amr->allocatePointer(data_s);
     m_amr->alias(data_s, phase::solid, EdotD);
@@ -289,7 +289,7 @@ void FieldSolver::regrid(const int a_lmin, const int a_old_finest, const int a_n
 
   this->allocateInternals();
 
-  for (int i = 0; i < phase::num_phases; i++){
+  for (int i = 0; i < phase::numPhases; i++){
     phase::which_phase cur_phase;    
     if(i == 0){
       cur_phase = phase::gas;

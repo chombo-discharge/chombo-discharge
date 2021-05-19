@@ -21,7 +21,7 @@ MFLevelGrid::MFLevelGrid(const DisjointBoxLayout&          a_dbl,
 			 const RefCountedPtr<MultiFluidIndexSpace>&        a_multiFluidIndexSpace){
   m_multifluidIndexSpace = a_multiFluidIndexSpace;
   m_eblg.resize(0);
-  for (int i = 0; i < a_multiFluidIndexSpace->num_phases(); i++){
+  for (int i = 0; i < a_multiFluidIndexSpace->numPhases(); i++){
     m_eblg.push_back(EBLevelGrid(a_dbl, a_domain, a_ebghost, a_multiFluidIndexSpace->getEBIndexSpace(i)));
   }
 }
@@ -36,7 +36,7 @@ MFLevelGrid::~MFLevelGrid(){
 
 }
 
-int MFLevelGrid::num_phases() const {
+int MFLevelGrid::numPhases() const {
   return m_eblg.size();
 }
 
@@ -66,14 +66,14 @@ const EBLevelGrid& MFLevelGrid::getEBLevelGrid(int a_phase) const {
   return m_eblg[a_phase];
 }
 
-IntVectSet MFLevelGrid::interface_region(const Box&       a_box,
+IntVectSet MFLevelGrid::interfaceRegion(const Box&       a_box,
 					 const DataIndex& a_dit,
 					 const int        a_phase1,
 					 const int        a_phase2) const {
 
   IntVectSet ret;
     
-  if(m_multifluidIndexSpace->num_phases() == 2){
+  if(m_multifluidIndexSpace->numPhases() == 2){
     const EBLevelGrid& eblg1 = this->getEBLevelGrid(a_phase1);
     const EBLevelGrid& eblg2 = this->getEBLevelGrid(a_phase2);
       
@@ -94,7 +94,7 @@ bool MFLevelGrid::interface_pair(IntVect&             a_iv,
 				 const int            a_phase2) const {
   bool found_iv = false;
 
-  if(m_multifluidIndexSpace->num_phases() == 2){
+  if(m_multifluidIndexSpace->numPhases() == 2){
     const EBLevelGrid& eblg1 = this->getEBLevelGrid(a_phase1);
     const EBLevelGrid& eblg2 = this->getEBLevelGrid(a_phase2);
       

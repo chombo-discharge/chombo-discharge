@@ -42,7 +42,7 @@ MfHelmholtzOpFactory::MfHelmholtzOpFactory(const RefCountedPtr<MultiFluidIndexSp
   pout() << "MfHelmholtzOpFactory::MfHelmholtzOpFactory" << endl;
 #endif
 
-  CH_assert(a_mflg[0].num_phases() <= 2); 
+  CH_assert(a_mflg[0].numPhases() <= 2); 
 
   m_num_levels = (a_num_levels > 0) ? a_num_levels : a_grids.size();
   m_multifluidIndexSpace       = a_multiFluidIndexSpace;
@@ -262,7 +262,7 @@ void MfHelmholtzOpFactory::defineDeeperMultigrid(){
 	  //	    Vector<EBISLayout> ebisl_coar = mflg_coar.getEBISLayout();  // Need this stuff for factories. 
 	  Vector<int> comps;
 	  Vector<EBISLayout> ebisl_coar;
-	  for (int i = 0; i < mflg_coar.num_phases(); i++){
+	  for (int i = 0; i < mflg_coar.numPhases(); i++){
 	    const EBLevelGrid& eblg = mflg_coar.getEBLevelGrid(i);
 	    const EBISLayout& ebisl = eblg.getEBISL();
 	    ebisl_coar.push_back(ebisl);
@@ -287,7 +287,7 @@ void MfHelmholtzOpFactory::defineDeeperMultigrid(){
 	  // Interface cells on MG level img. 
 	  LayoutData<IntVectSet> isect_cells (eblg_coar.getDBL());
 	  for (DataIterator dit = isect_cells.dataIterator(); dit.ok(); ++dit){
-	    isect_cells[dit()] = mflg_coar.interface_region(grid_coar_mg[dit()], dit());
+	    isect_cells[dit()] = mflg_coar.interfaceRegion(grid_coar_mg[dit()], dit());
 	  }
 
 	  MFCellFactory      cellfact(ebisl_coar, comps);
@@ -351,7 +351,7 @@ void MfHelmholtzOpFactory::coarsenCoefficients(LevelData<MFCellFAB>&         a_a
     a_bco_irreg_fine.copyTo(interv, a_bco_irreg_coar, interv);
   }
   else {
-    for (int i = 0; i < a_mflg_coar.num_phases(); i++){
+    for (int i = 0; i < a_mflg_coar.numPhases(); i++){
       const EBLevelGrid& eblg_coar = a_mflg_coar.getEBLevelGrid(i);
       const EBLevelGrid& eblg_fine = a_mflg_fine.getEBLevelGrid(i);
       ebcoarseaverage aveop(eblg_fine.getDBL(),    eblg_coar.getDBL(),
@@ -433,7 +433,7 @@ void MfHelmholtzOpFactory::defineJump(){
       box.grow(ghost);
       box &= m_domains[lvl];
       
-      (*m_jumpcells[lvl])[dit()] = m_mflg[lvl].interface_region(box, dit());
+      (*m_jumpcells[lvl])[dit()] = m_mflg[lvl].interfaceRegion(box, dit());
 
       
     }

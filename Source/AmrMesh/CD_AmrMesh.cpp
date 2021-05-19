@@ -346,7 +346,7 @@ void AmrMesh::allocate(MFAMRCellData& a_data, const std::string a_realm, const i
 
   const int ghost   = (a_ghost == -1) ? m_numGhostCells : a_ghost;
   const int ignored = a_ncomp;
-  const int nphases = m_multifluidIndexSpace->num_phases();
+  const int nphases = m_multifluidIndexSpace->numPhases();
 
   a_data.resize(1 + m_finestLevel);
 
@@ -386,7 +386,7 @@ void AmrMesh::allocate(MFAMRFluxData& a_data, const std::string a_realm, const i
 
   const int ghost   = (a_ghost == -1) ? m_numGhostCells : a_ghost;
   const int ignored = a_ncomp;
-  const int nphases = m_multifluidIndexSpace->num_phases();
+  const int nphases = m_multifluidIndexSpace->numPhases();
 
   a_data.resize(1 + m_finestLevel);
 
@@ -424,7 +424,7 @@ void AmrMesh::allocate(MFAMRIVData& a_data, const std::string a_realm, const int
 
   const int ghost   = (a_ghost == -1) ? m_numGhostCells : a_ghost;
   const int ignored = a_ncomp;
-  const int nphases = m_multifluidIndexSpace->num_phases();
+  const int nphases = m_multifluidIndexSpace->numPhases();
 
   a_data.resize(1 + m_finestLevel);
 
@@ -633,7 +633,7 @@ void AmrMesh::reallocate(MFAMRCellData& a_data, const int a_lmin){
   const IntVect ghost = a_data[0]->ghostVect();
   const int ncomp = a_data[0]->nComp();
   const int ignored = ncomp;
-  const int nphases = m_multifluidIndexSpace->num_phases();
+  const int nphases = m_multifluidIndexSpace->numPhases();
 
   a_data.resize(1 + m_finestLevel);
 
@@ -675,7 +675,7 @@ void AmrMesh::reallocate(MFAMRFluxData& a_data, const int a_lmin){
   const IntVect ghost = a_data[0]->ghostVect();
   const int ncomp     = a_data[0]->nComp();
   const int ignored   = ncomp;
-  const int nphases   = m_multifluidIndexSpace->num_phases();
+  const int nphases   = m_multifluidIndexSpace->numPhases();
 
   a_data.resize(1 + m_finestLevel);
 
@@ -716,7 +716,7 @@ void AmrMesh::reallocate(MFAMRIVData& a_data, const int a_lmin){
   const IntVect ghost = a_data[0]->ghostVect();
   const int ncomp     = a_data[0]->nComp();
   const int ignored   = ncomp;
-  const int nphases   = m_multifluidIndexSpace->num_phases();
+  const int nphases   = m_multifluidIndexSpace->numPhases();
 
   a_data.resize(1 + m_finestLevel);
 
@@ -1081,7 +1081,7 @@ void AmrMesh::computeGradient(MFAMRCellData& a_gradient, const MFAMRCellData& a_
     pout() << "AmrMesh::computeGradient(mf grad, mf phi, Realm)" << endl;
   }
 
-  for (int iphase = 0; iphase < m_multifluidIndexSpace->num_phases(); iphase++){
+  for (int iphase = 0; iphase < m_multifluidIndexSpace->numPhases(); iphase++){
     EBAMRCellData alias_grad(1 + m_finestLevel);
     EBAMRCellData alias_phi(1 + m_finestLevel);
 

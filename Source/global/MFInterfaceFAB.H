@@ -54,12 +54,12 @@ public:
     const DisjointBoxLayout& dbl    = a_mflg.getGrids();
     const ProblemDomain& domain     = a_mflg.get_domain();
     const RefCountedPtr<MultiFluidIndexSpace>& MultiFluidIndexSpace = a_mflg.getMfIndexSpace();
-    const int num_phases            = MultiFluidIndexSpace->num_phases();
+    const int numPhases            = MultiFluidIndexSpace->numPhases();
 
-    m_ivs = a_mflg.interface_region(dbl.get(a_dit), a_dit);
-    m_phase.resize(num_phases, NULL);
+    m_ivs = a_mflg.interfaceRegion(dbl.get(a_dit), a_dit);
+    m_phase.resize(numPhases, NULL);
     
-    for (int i = 0; i < num_phases; i++){
+    for (int i = 0; i < numPhases; i++){
       const EBLevelGrid& eblg = a_mflg.getEBLevelGrid(i);
       const EBISLayout& ebisl = eblg.getEBISL();
       m_phase[i] = new BaseIVFAB<T>(m_ivs, ebisl[a_dit].getEBGraph(), 1);
@@ -94,7 +94,7 @@ public:
   /*!
     @brief Get number of phases
   */
-  virtual int num_phases(){
+  virtual int numPhases(){
     return m_phase.size();
   }
 

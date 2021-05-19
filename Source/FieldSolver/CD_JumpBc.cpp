@@ -162,7 +162,7 @@ void JumpBc::define(const MFLevelGrid&            a_mflg,
   int num = 0;
 
   // If we only have one phase, there are no jump cells and we don't need to do anything. 
-  if(m_multifluidIndexSpace->num_phases() > 1){
+  if(m_multifluidIndexSpace->numPhases() > 1){
     for (DataIterator dit = m_grids.dataIterator(); dit.ok(); ++dit){
       MFInterfaceFAB<Real>& bco            = m_bco[dit()];
       MFInterfaceFAB<Real>& weights        = m_weights[dit()];
@@ -221,7 +221,7 @@ void JumpBc::setBcoefficient(const LevelData<MFBaseIVFAB>& a_bco){
 
   const int comp = 0;
   for (DataIterator dit = m_grids.dataIterator(); dit.ok(); ++dit){
-    for (int iphase = 0; iphase < m_multifluidIndexSpace->num_phases(); iphase ++){
+    for (int iphase = 0; iphase < m_multifluidIndexSpace->numPhases(); iphase ++){
 
       BaseIVFAB<Real>& bco             = m_bco[dit()].get_ivfab(iphase);
       const BaseIVFAB<Real>& bco_irreg = a_bco[dit()].get_ivfab(iphase);
@@ -240,7 +240,7 @@ void JumpBc::buildStencils(){
   const int comp = 0;
 
   for (DataIterator dit = m_grids.dataIterator(); dit.ok(); ++dit){
-    for (int iphase = 0; iphase < m_multifluidIndexSpace->num_phases(); iphase ++){
+    for (int iphase = 0; iphase < m_multifluidIndexSpace->numPhases(); iphase ++){
 
       BaseIVFAB<Real>& bco               = m_bco[dit()].get_ivfab(iphase);
       BaseIVFAB<Real>& avgBco            = m_avgBco[dit()].get_ivfab(iphase);
@@ -384,7 +384,7 @@ void JumpBc::matchBc(LevelData<BaseIVFAB<Real> >&       a_phibc,
 void JumpBc::computeDnPhi(Vector<LevelData<BaseIVFAB<Real> > >&       a_dphidn,
 			  const Vector<LevelData<BaseIVFAB<Real> > >& a_phibc,
 			  const LevelData<MFCellFAB>&                 a_phi){
-  for (int iphase = 0; iphase < m_multifluidIndexSpace->num_phases(); iphase++){
+  for (int iphase = 0; iphase < m_multifluidIndexSpace->numPhases(); iphase++){
     this->computeDnPhi(a_dphidn[iphase], a_phibc[iphase], a_phi, iphase);
   }
 }

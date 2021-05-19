@@ -47,7 +47,7 @@ public:
   /*!
     @brief Number of phases
   */
-  virtual int num_phases() const;
+  virtual int numPhases() const;
 
   /*!
     @brief Define function
@@ -82,7 +82,7 @@ public:
   /*!
     @brief Get interface region between two phases.
   */
-  virtual IntVectSet interface_region(const Box&       a_box,
+  virtual IntVectSet interfaceRegion(const Box&       a_box,
 				      const DataIndex& a_dit,
 				      const int        a_phase1 = 0,
 				      const int        a_phase2 = 1) const;

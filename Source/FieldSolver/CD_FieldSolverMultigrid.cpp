@@ -482,7 +482,7 @@ void FieldSolverMultigrid::defineDeeperMultigridLevels(){
   m_deeperMultigridGrids.resize(0);
   m_mg_mflg.resize(0);
   
-  m_mg_eblg.resize(phase::num_phases);
+  m_mg_eblg.resize(phase::numPhases);
 
   m_mg_eblg[phase::gas].resize(0);
   m_mg_eblg[phase::solid].resize(0);
@@ -577,7 +577,7 @@ void FieldSolverMultigrid::setupOperatorFactory(){
     pout() << "FieldSolverMultigrid::setupOperatorFactory" << endl;
   }
 
-  const int nphases                      = m_multifluidIndexSpace->num_phases();
+  const int nphases                      = m_multifluidIndexSpace->numPhases();
   const int finest_level                 = m_amr->getFinestLevel();
   const Vector<DisjointBoxLayout>& grids = m_amr->getGrids(m_realm);
   const Vector<int>& refinement_ratios   = m_amr->getRefinementRatios();
@@ -687,7 +687,7 @@ void FieldSolverMultigrid::setupMultigridSolver(){
   }
   else if(m_bottomSolver == BottomSolver::BiCGStab){
     botsolver = &m_bicgstab;
-    if(m_multifluidIndexSpace->num_phases() == 2){ // BiCGStab doesn't work with multifluid (yet)
+    if(m_multifluidIndexSpace->numPhases() == 2){ // BiCGStab doesn't work with multifluid (yet)
       botsolver = &m_mfsolver;
       
       if(m_verbosity > 0){

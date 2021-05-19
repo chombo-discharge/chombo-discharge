@@ -19,7 +19,7 @@
 #include <CD_NamespaceHeader.H>
 
 MultiFluidIndexSpace::MultiFluidIndexSpace(){
-  m_ebis.resize(phase::num_phases);
+  m_ebis.resize(phase::numPhases);
   for (int i = 0; i < m_ebis.size(); i++){
     m_ebis[i] = RefCountedPtr<EBIndexSpace> (new EBIndexSpace());
   }
@@ -78,7 +78,7 @@ RefCountedPtr<EBIndexSpace>& MultiFluidIndexSpace::getEBIndexSpace(const int a_p
 }
 
 
-int MultiFluidIndexSpace::num_phases() const{
+int MultiFluidIndexSpace::numPhases() const{
   int phases = 0;
   for (int i = 0; i < m_ebis.size(); i++){
     if(!m_ebis[i].isNull()){
@@ -89,13 +89,13 @@ int MultiFluidIndexSpace::num_phases() const{
   return phases;
 }
 
-IntVectSet MultiFluidIndexSpace::interface_region(const ProblemDomain& a_domain) const {
-  CH_TIME("MultiFluidIndexSpace::interface_region");
+IntVectSet MultiFluidIndexSpace::interfaceRegion(const ProblemDomain& a_domain) const {
+  CH_TIME("MultiFluidIndexSpace::interfaceRegion");
 
   const int which_level = m_ebis[0]->getLevel(a_domain);
 #if 0  
   IntVectSet iface_reg = m_ebis[0]->irregCells(which_level);
-  for (int i = 1; i < this->num_phases(); i++){
+  for (int i = 1; i < this->numPhases(); i++){
     iface_reg &= m_ebis[i]->irregCells(which_level);
   }
 

@@ -1639,7 +1639,7 @@ void cdr_plasma_stepper::compute_cdr_fluxes(Vector<LevelData<BaseIVFAB<Real> >*>
     const Box& box              = dbl.get(dit());
     const EBISBox& ebisbox      = ebisl[dit()];
     const EBGraph& ebgraph      = ebisbox.getEBGraph();
-    const IntVectSet& diel_ivs  = mflg.interface_region(box, dit());
+    const IntVectSet& diel_ivs  = mflg.interfaceRegion(box, dit());
     const IntVectSet& elec_ivs  = ebisbox.getIrregIVS(box) - diel_ivs;
 
     // Loop over conductor cells
@@ -3393,7 +3393,7 @@ void cdr_plasma_stepper::reset_dielectric_cells(EBAMRIVData& a_data){
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box box          = dbl.get(dit());
       BaseIVFAB<Real>& data  = (*a_data[lvl])[dit()];
-      const IntVectSet ivs   = data.getIVS() & mflg.interface_region(box, dit());
+      const IntVectSet ivs   = data.getIVS() & mflg.interfaceRegion(box, dit());
       const EBGraph& ebgraph = data.getEBGraph();
 
       for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){

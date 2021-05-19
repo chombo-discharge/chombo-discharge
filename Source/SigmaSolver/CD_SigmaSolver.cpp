@@ -217,7 +217,7 @@ void SigmaSolver::resetCells(EBAMRIVData& a_data){
       IntVectSet ivs         = data.getIVS();
       const EBGraph& ebgraph = data.getEBGraph();
       
-      ivs -= mflg.interface_region(box, dit());
+      ivs -= mflg.interfaceRegion(box, dit());
 
       for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();

@@ -35,13 +35,13 @@ public:
 	      const Vector<int>&        a_ncomp){
     CH_TIME("MFBaseIVFAB::MFBaseIVFAB");
 
-    const int num_phases = a_regions.size();
+    const int numPhases = a_regions.size();
     
-    CH_assert(a_phase_graphs.size() == num_phases);
-    CH_assert(a_ncomp.size() == num_phases);
+    CH_assert(a_phase_graphs.size() == numPhases);
+    CH_assert(a_ncomp.size() == numPhases);
     
-    m_phase.resize(num_phases, NULL);
-    for (int i = 0; i < num_phases; i++){
+    m_phase.resize(numPhases, NULL);
+    for (int i = 0; i < numPhases; i++){
       m_phase[i] = new BaseIVFAB<Real>(a_regions[i], a_phase_graphs[i], a_ncomp[i]);
     }
   }
@@ -79,7 +79,7 @@ public:
   /*!
     @brief Get number of phases
   */
-  virtual int num_phases(){
+  virtual int numPhases(){
     return m_phase.size();
   }
 
@@ -196,12 +196,12 @@ public:
   virtual MFBaseIVFAB* create(const Box& a_box, int a_ignored_argument, const DataIndex& a_dit) const {
     CH_TIME("MFBaseIVFABFactory::create");
 
-    const int num_phases = m_ebisl.size();
+    const int numPhases = m_ebisl.size();
     
-    Vector<IntVectSet> ivs(num_phases);
-    Vector<EBGraph> ebgraph(num_phases);
+    Vector<IntVectSet> ivs(numPhases);
+    Vector<EBGraph> ebgraph(numPhases);
 
-    for (int i = 0; i < num_phases; ++i){
+    for (int i = 0; i < numPhases; ++i){
       ivs[i]     = m_ebisl[i][a_dit].getIrregIVS(a_box);
       ebgraph[i] = m_ebisl[i][a_dit].getEBGraph();
     }

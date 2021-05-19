@@ -25,7 +25,7 @@
   @brief phase names
 */
 namespace phase {
-  const int num_phases = 2;
+  const int numPhases = 2;
   
   enum which_phase {
     gas   = 0,
@@ -85,12 +85,12 @@ public:
     @brief Get the interface region. This is defined as the intersection between the irregular cells of the 
     gas phase and the other phases. 
   */
-  IntVectSet interface_region(const ProblemDomain& a_domain) const;
+  IntVectSet interfaceRegion(const ProblemDomain& a_domain) const;
 
   /*!
     @brief Get number of phases
   */
-  int num_phases() const;
+  int numPhases() const;
 
 protected:
 

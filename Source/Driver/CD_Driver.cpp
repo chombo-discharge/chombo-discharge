@@ -202,7 +202,7 @@ void Driver::getGeometryTags(){
       cond_tags = ebis_gas->irregCells(which_level);
       if(!ebis_sol.isNull()){
 	cond_tags |= ebis_sol->irregCells(which_level);
-	cond_tags -= m_multifluidIndexSpace->interface_region(cur_dom);
+	cond_tags -= m_multifluidIndexSpace->interfaceRegion(cur_dom);
       }
     }
 
@@ -223,7 +223,7 @@ void Driver::getGeometryTags(){
     // Gas-Dielectric interface cells
     if(m_gasDielectricInterfaceTagDepth > lvl){
       if(!ebis_sol.isNull()){
-	gas_diel_tags = m_multifluidIndexSpace->interface_region(cur_dom);
+	gas_diel_tags = m_multifluidIndexSpace->interfaceRegion(cur_dom);
       }
     }
 
@@ -231,7 +231,7 @@ void Driver::getGeometryTags(){
     if(m_gasConductorInterfaceTagDepth > lvl){ 
       gas_solid_tags = ebis_gas->irregCells(which_level);
       if(!ebis_sol.isNull()){
-	gas_solid_tags -= m_multifluidIndexSpace->interface_region(cur_dom);
+	gas_solid_tags -= m_multifluidIndexSpace->interfaceRegion(cur_dom);
       }
     }
 
@@ -243,7 +243,7 @@ void Driver::getGeometryTags(){
 	// Do the intersection with the conductor cells
 	IntVectSet tmp = ebis_gas->irregCells(which_level);
 	tmp |= ebis_sol->irregCells(which_level);
-	tmp -= m_multifluidIndexSpace->interface_region(cur_dom);
+	tmp -= m_multifluidIndexSpace->interfaceRegion(cur_dom);
 
 	solid_tags &= tmp;
       }
