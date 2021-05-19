@@ -28,7 +28,7 @@
 
 // Our includes
 #include <CD_ComputationalGeometry.H>
-#include <mfis.H>
+#include <CD_MultiFluidIndexSpace.H>
 #include <CD_IrregAmrStencil.H>
 #include <CD_LoadBalancing.H>
 #include <CD_NwoEbQuadCfInterp.H>

@@ -9,7 +9,7 @@
 #ifndef _MFLEVELGRID_
 #define _MFLEVELGRID_
 
-#include "mfis.H"
+#include <CD_MultiFluidIndexSpace.H>
 
 #include "EBLevelGrid.H"
 
@@ -32,12 +32,12 @@ public:
   MFLevelGrid(const DisjointBoxLayout&          a_dbl,
 	      const ProblemDomain&              a_domain,
 	      const int                         a_ebghost,
-	      const RefCountedPtr<mfis>&        a_mfis);
+	      const RefCountedPtr<MultiFluidIndexSpace>&        a_multiFluidIndexSpace);
 
   /*!
     @brief Alternative full constructor - RefCounted storage so no allocation here
   */
-  MFLevelGrid(const RefCountedPtr<mfis>& a_mfis, const Vector<EBLevelGrid>& a_eblg);
+  MFLevelGrid(const RefCountedPtr<MultiFluidIndexSpace>& a_multiFluidIndexSpace, const Vector<EBLevelGrid>& a_eblg);
 
   /*!
     @brief Destructor
@@ -52,12 +52,12 @@ public:
   /*!
     @brief Define function
   */
-  virtual void define(const RefCountedPtr<mfis>& a_mfis, const Vector<EBLevelGrid>& a_eblg);
+  virtual void define(const RefCountedPtr<MultiFluidIndexSpace>& a_multiFluidIndexSpace, const Vector<EBLevelGrid>& a_eblg);
 
   /*!
     @brief Get the index space
   */
-  virtual const RefCountedPtr<mfis>& getMfIndexSpace() const;
+  virtual const RefCountedPtr<MultiFluidIndexSpace>& getMfIndexSpace() const;
 
   /*!
     @brief Get the problem domain
@@ -98,7 +98,7 @@ public:
 			      const int        a_phase2 = 1) const;
 private:
 
-  RefCountedPtr<mfis> m_multifluidIndexSpace;
+  RefCountedPtr<MultiFluidIndexSpace> m_multifluidIndexSpace;
 
   Vector<EBLevelGrid> m_eblg;
 };

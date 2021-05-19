@@ -741,13 +741,13 @@ void AmrMesh::reallocate(MFAMRIVData& a_data, const int a_lmin){
   }
 }
 
-void AmrMesh::setMultifluidIndexSpace(const RefCountedPtr<mfis>& a_mfis){
+void AmrMesh::setMultifluidIndexSpace(const RefCountedPtr<MultiFluidIndexSpace>& a_multiFluidIndexSpace){
   CH_TIME("AmrMesh::setMultifluidIndexSpace");
   if(m_verbosity > 5){
     pout() << "AmrMesh::setMultifluidIndexSpace" << endl;
   }
 
-  m_multifluidIndexSpace = a_mfis;
+  m_multifluidIndexSpace = a_multiFluidIndexSpace;
 }
 
 void AmrMesh::setBaseImplicitFunction(const phase::which_phase a_phase, const RefCountedPtr<BaseIF>& a_baseif){

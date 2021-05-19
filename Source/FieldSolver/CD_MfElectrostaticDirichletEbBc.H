@@ -17,7 +17,7 @@
 
 // Our includes
 #include <MFLevelGrid.H>
-#include <mfis.H>
+#include <CD_MultiFluidIndexSpace.H>
 #include <CD_JumpBc.H>
 #include <CD_NamespaceHeader.H>
 

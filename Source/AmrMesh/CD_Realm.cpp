@@ -51,7 +51,7 @@ void Realm::define(const Vector<DisjointBoxLayout>& a_grids,
 		   const IrregStencil::StencilType a_centroid_stencil,
 		   const IrregStencil::StencilType a_eb_stencil,
 		   const std::map<phase::which_phase, RefCountedPtr<BaseIF> > a_baseif,
-		   const RefCountedPtr<mfis>& a_mfis){
+		   const RefCountedPtr<MultiFluidIndexSpace>& a_multiFluidIndexSpace){
   CH_TIME("Realm::define");
   if(m_verbosity > 5){
     pout() << "Realm::define" << endl;
@@ -66,7 +66,7 @@ void Realm::define(const Vector<DisjointBoxLayout>& a_grids,
   m_baseif = a_baseif;
 
   m_probLo = a_probLo;
-  m_multifluidIndexSpace = a_mfis;
+  m_multifluidIndexSpace = a_multiFluidIndexSpace;
   m_finestLevel = a_finestLevel;
   
   const RefCountedPtr<EBIndexSpace>& ebis_gas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);

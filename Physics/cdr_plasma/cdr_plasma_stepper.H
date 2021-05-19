@@ -15,7 +15,7 @@
 #include <CD_ComputationalGeometry.H>
 #include "cdr_plasma_physics.H"
 #include "CD_AmrMesh.H"
-#include "mfis.H"
+#include <CD_MultiFluidIndexSpace.H>
 #include "cdr_layout.H"
 #include <CD_RtLayout.H>
 #include "CD_FieldSolver.H"
@@ -966,7 +966,7 @@ namespace physics {
       /*!
 	@brief Index space
       */
-      RefCountedPtr<mfis> m_multifluidIndexSpace;
+      RefCountedPtr<MultiFluidIndexSpace> m_multifluidIndexSpace;
 
       /*!
 	@brief Plasma kinetics

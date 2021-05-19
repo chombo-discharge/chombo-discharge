@@ -30,7 +30,7 @@
 // Our includes
 #include <EBAMRData.H>
 #include <CD_ComputationalGeometry.H>
-#include <mfis.H>
+#include <CD_MultiFluidIndexSpace.H>
 #include <CD_IrregAmrStencil.H>
 #include <CD_LoadBalancing.H>
 #include <CD_NwoEbQuadCfInterp.H>
@@ -607,9 +607,9 @@ public:
   
   /*!
     @brief Sets multifluid index space. 
-    @param[in] a_mfis Multifluid index space wrapper. 
+    @param[in] a_multiFluidIndexSpace Multifluid index space wrapper. 
   */
-  void setMultifluidIndexSpace(const RefCountedPtr<mfis>& a_mfis);
+  void setMultifluidIndexSpace(const RefCountedPtr<MultiFluidIndexSpace>& a_multiFluidIndexSpace);
 
   /*!
     @brief Set implicit function for a specific phase. Need e.g. for level-sets. 
@@ -1120,9 +1120,9 @@ protected:
   BoxSorting m_boxSort;
 
   /*!
-    @brief mfis
+    @brief MultiFluidIndexSpace
   */
-  RefCountedPtr<mfis> m_multifluidIndexSpace;
+  RefCountedPtr<MultiFluidIndexSpace> m_multifluidIndexSpace;
 
   /*!
     @brief Stencil type

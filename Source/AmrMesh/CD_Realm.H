@@ -14,7 +14,7 @@
 
 // Our includes
 #include <CD_PhaseRealm.H>
-#include <mfis.H>
+#include <CD_MultiFluidIndexSpace.H>
 #include <MFLevelGrid.H>
 #include <CD_NamespaceHeader.H>
 
@@ -54,7 +54,7 @@ public:
 	      const IrregStencil::StencilType a_centroid_stencil,
 	      const IrregStencil::StencilType a_eb_stencil,
 	      const std::map<phase::which_phase, RefCountedPtr<BaseIF> > a_baseif,
-	      const RefCountedPtr<mfis>& a_mfis);
+	      const RefCountedPtr<MultiFluidIndexSpace>& a_multiFluidIndexSpace);
 
   // Realm copy function
   template <class T>
@@ -126,7 +126,7 @@ protected:
   Vector<DisjointBoxLayout> m_grids;
   Vector<ProblemDomain> m_domains;
   Vector<RefCountedPtr<MFLevelGrid> > m_mflg;
-  RefCountedPtr<mfis> m_multifluidIndexSpace;
+  RefCountedPtr<MultiFluidIndexSpace> m_multifluidIndexSpace;
 
   // Phase Realms and implicit functions
   std::map<phase::which_phase, RefCountedPtr<PhaseRealm> > m_realms;

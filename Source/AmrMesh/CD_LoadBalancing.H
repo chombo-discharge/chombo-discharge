@@ -13,7 +13,7 @@
 #define CD_LoadBalancing_H
 
 // Our includes
-#include <mfis.H>
+#include <CD_MultiFluidIndexSpace.H>
 #include <CD_BoxSorting.H>
 #include <CD_NamespaceHeader.H>
 

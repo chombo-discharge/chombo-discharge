@@ -15,7 +15,7 @@
   
 #define verb 0
 
-MfHelmholtzOpFactory::MfHelmholtzOpFactory(const RefCountedPtr<mfis>&                a_mfis,
+MfHelmholtzOpFactory::MfHelmholtzOpFactory(const RefCountedPtr<MultiFluidIndexSpace>&                a_multiFluidIndexSpace,
 					   const Vector<MFLevelGrid>&                a_mflg,
 					   const Vector<MFQuadCFInterp>&             a_mfquadcfi,
 					   const Vector<MFFastFluxReg>&              a_mffluxreg,
@@ -45,7 +45,7 @@ MfHelmholtzOpFactory::MfHelmholtzOpFactory(const RefCountedPtr<mfis>&           
   CH_assert(a_mflg[0].num_phases() <= 2); 
 
   m_num_levels = (a_num_levels > 0) ? a_num_levels : a_grids.size();
-  m_multifluidIndexSpace       = a_mfis;
+  m_multifluidIndexSpace       = a_multiFluidIndexSpace;
   m_mflg       = a_mflg;
   m_mfquadcfi  = a_mfquadcfi;
   m_mffluxreg  = a_mffluxreg;

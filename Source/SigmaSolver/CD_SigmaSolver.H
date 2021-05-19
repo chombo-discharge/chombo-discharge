@@ -164,7 +164,7 @@ protected:
   /*!
     @brief Index spaces
   */
-  RefCountedPtr<mfis> m_multifluidIndexSpace;
+  RefCountedPtr<MultiFluidIndexSpace> m_multifluidIndexSpace;
 
   /*!
     @brief Computational geometry

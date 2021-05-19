@@ -1,29 +1,34 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   mfis.cpp
-  @brief  Implementation of mfis.H
+  @file   CD_MultiFluidIndexSpace.cpp
+  @brief  Implementation of CD_MultiFluidIndexSpace.H
   @author Robert Marskar
-  @date   Nov. 2017
 */
 
-#include "mfis.H"
-#include <CD_ComputationalGeometry.H>
-#include "memrep.H"
-
+// Chombo includes
 #include <AllRegularService.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_MultiFluidIndexSpace.H>
+#include <CD_ComputationalGeometry.H>
+#include <memrep.H>
+#include <CD_NamespaceHeader.H>
 
-mfis::mfis(){
+MultiFluidIndexSpace::MultiFluidIndexSpace(){
   m_ebis.resize(phase::num_phases);
   for (int i = 0; i < m_ebis.size(); i++){
     m_ebis[i] = RefCountedPtr<EBIndexSpace> (new EBIndexSpace());
   }
 }
 
-mfis::~mfis(){
+MultiFluidIndexSpace::~MultiFluidIndexSpace(){
 }
 
-void mfis::define(const Box                     & a_domain,
+void MultiFluidIndexSpace::define(const Box                     & a_domain,
 		  const RealVect                & a_origin,
 		  const Real                    & a_dx,
 		  const Vector<GeometryService*>& a_geoservers,
@@ -56,24 +61,24 @@ void mfis::define(const Box                     & a_domain,
   }
 }
   
-const RefCountedPtr<EBIndexSpace>& mfis::getEBIndexSpace(const phase::which_phase a_phase) const {
+const RefCountedPtr<EBIndexSpace>& MultiFluidIndexSpace::getEBIndexSpace(const phase::which_phase a_phase) const {
   return m_ebis[a_phase];
 }
 
-const RefCountedPtr<EBIndexSpace>& mfis::getEBIndexSpace(const int a_phase) const {
+const RefCountedPtr<EBIndexSpace>& MultiFluidIndexSpace::getEBIndexSpace(const int a_phase) const {
   return m_ebis[a_phase];
 }
 
-RefCountedPtr<EBIndexSpace>& mfis::getEBIndexSpace(const phase::which_phase a_phase){
+RefCountedPtr<EBIndexSpace>& MultiFluidIndexSpace::getEBIndexSpace(const phase::which_phase a_phase){
   return m_ebis[a_phase];
 }
 
-RefCountedPtr<EBIndexSpace>& mfis::getEBIndexSpace(const int a_phase){
+RefCountedPtr<EBIndexSpace>& MultiFluidIndexSpace::getEBIndexSpace(const int a_phase){
   return m_ebis[a_phase];
 }
 
 
-int mfis::num_phases() const{
+int MultiFluidIndexSpace::num_phases() const{
   int phases = 0;
   for (int i = 0; i < m_ebis.size(); i++){
     if(!m_ebis[i].isNull()){
@@ -84,8 +89,8 @@ int mfis::num_phases() const{
   return phases;
 }
 
-IntVectSet mfis::interface_region(const ProblemDomain& a_domain) const {
-  CH_TIME("mfis::interface_region");
+IntVectSet MultiFluidIndexSpace::interface_region(const ProblemDomain& a_domain) const {
+  CH_TIME("MultiFluidIndexSpace::interface_region");
 
   const int which_level = m_ebis[0]->getLevel(a_domain);
 #if 0  
@@ -127,4 +132,5 @@ IntVectSet mfis::interface_region(const ProblemDomain& a_domain) const {
   return ret;
 #endif
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

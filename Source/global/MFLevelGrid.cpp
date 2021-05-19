@@ -5,7 +5,7 @@
   @date   Dec. 2017
 */
 
-#include "mfis.H"
+#include <CD_MultiFluidIndexSpace.H>
 #include "MFLevelGrid.H"
 
 #include "CD_NamespaceHeader.H"
@@ -18,17 +18,17 @@ MFLevelGrid::MFLevelGrid(){
 MFLevelGrid::MFLevelGrid(const DisjointBoxLayout&          a_dbl,
 			 const ProblemDomain&              a_domain,
 			 const int                         a_ebghost,
-			 const RefCountedPtr<mfis>&        a_mfis){
-  m_multifluidIndexSpace = a_mfis;
+			 const RefCountedPtr<MultiFluidIndexSpace>&        a_multiFluidIndexSpace){
+  m_multifluidIndexSpace = a_multiFluidIndexSpace;
   m_eblg.resize(0);
-  for (int i = 0; i < a_mfis->num_phases(); i++){
-    m_eblg.push_back(EBLevelGrid(a_dbl, a_domain, a_ebghost, a_mfis->getEBIndexSpace(i)));
+  for (int i = 0; i < a_multiFluidIndexSpace->num_phases(); i++){
+    m_eblg.push_back(EBLevelGrid(a_dbl, a_domain, a_ebghost, a_multiFluidIndexSpace->getEBIndexSpace(i)));
   }
 }
 
-MFLevelGrid::MFLevelGrid(const RefCountedPtr<mfis>& a_mfis,
+MFLevelGrid::MFLevelGrid(const RefCountedPtr<MultiFluidIndexSpace>& a_multiFluidIndexSpace,
 			 const Vector<EBLevelGrid>& a_eblg){
-  this->define(a_mfis, a_eblg);
+  this->define(a_multiFluidIndexSpace, a_eblg);
 }
 
 
@@ -40,13 +40,13 @@ int MFLevelGrid::num_phases() const {
   return m_eblg.size();
 }
 
-void MFLevelGrid::define(const RefCountedPtr<mfis>& a_mfis,
+void MFLevelGrid::define(const RefCountedPtr<MultiFluidIndexSpace>& a_multiFluidIndexSpace,
 			 const Vector<EBLevelGrid>& a_eblg){
-  m_multifluidIndexSpace = a_mfis;
+  m_multifluidIndexSpace = a_multiFluidIndexSpace;
   m_eblg = a_eblg;
 }
 
-const RefCountedPtr<mfis>& MFLevelGrid::getMfIndexSpace() const {
+const RefCountedPtr<MultiFluidIndexSpace>& MFLevelGrid::getMfIndexSpace() const {
   return m_multifluidIndexSpace;
 }
 

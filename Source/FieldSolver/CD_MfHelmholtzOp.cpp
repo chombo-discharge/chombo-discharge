@@ -45,7 +45,7 @@ MfHelmholtzOp::~MfHelmholtzOp(){
   }
 }
 
-void MfHelmholtzOp::define(const RefCountedPtr<mfis>&                    a_mfis,
+void MfHelmholtzOp::define(const RefCountedPtr<MultiFluidIndexSpace>&                    a_multiFluidIndexSpace,
 			      const RefCountedPtr<BaseDomainBCFactory>&     a_dombc,
 			      const RefCountedPtr<LevelData<MFCellFAB> >&   a_aco,
 			      const RefCountedPtr<LevelData<MFFluxFAB> >&   a_bco,
@@ -75,11 +75,11 @@ void MfHelmholtzOp::define(const RefCountedPtr<mfis>&                    a_mfis,
 			      const RealVect&                               a_origin){
 
 
-  const int num_phases = a_mfis->num_phases();
+  const int num_phases = a_multiFluidIndexSpace->num_phases();
   
   const int num_alias  = 6;
 
-  m_multifluidIndexSpace = a_mfis;
+  m_multifluidIndexSpace = a_multiFluidIndexSpace;
   m_ncomp = 1;
   m_relax = a_relax_type;
   m_domain = a_domain;

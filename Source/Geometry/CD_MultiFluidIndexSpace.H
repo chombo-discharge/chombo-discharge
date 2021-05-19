@@ -1,19 +1,25 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   mfis.H
+  @file   CD_MultiFluidIndexSpace.H
   @brief  Multi-fluid index space
   @author Robert Marskar
-  @date   Nov. 2017
 */
 
-#ifndef _MFIS_H_
-#define _MFIS_H_
+#ifndef CD_MultiFluidIndexSpace_H
+#define CD_MultiFluidIndexSpace_H
 
+// Chombo includes
 #include <GeometryService.H>
 #include <EBIndexSpace.H>
 #include <RealVect.H>
 #include <MFIndexSpace.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief phase names
@@ -30,19 +36,19 @@ namespace phase {
 /*!
   @brief Two-fluid index space
 */
-class mfis {
+class MultiFluidIndexSpace {
 public:
 
 
   /*!
     @brief Weak constructor. Must call define later
   */
-  mfis();
+  MultiFluidIndexSpace();
 
   /*!
     @brief Destructor
   */
-  ~mfis();
+  ~MultiFluidIndexSpace();
 
   /*!
     @brief Define function
@@ -98,6 +104,7 @@ protected:
   */
   RefCountedPtr<MFIndexSpace> m_multifluidIndexSpace;
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

@@ -27,7 +27,7 @@
 // Our includes
 #include <ebcoarseaverage.H>
 #include <CD_MfHelmholtzOp.H>
-#include <mfis.H>
+#include <CD_MultiFluidIndexSpace.H>
 #include <mfalias.H>
 #include <MFLevelGrid.H>
 #include <MFQuadCFInterp.H>
@@ -51,7 +51,7 @@ public:
     @note This class generates its own EBConductivityOps as well as it's own interpolation utilities. 
     @details This class only supports two-phase solutions with single components
   */
-  MfHelmholtzOpFactory(const RefCountedPtr<mfis>&                a_mfis,
+  MfHelmholtzOpFactory(const RefCountedPtr<MultiFluidIndexSpace>&                a_multiFluidIndexSpace,
 			  const Vector<MFLevelGrid>&                a_mflg,
 			  const Vector<MFQuadCFInterp>&             a_mfquadcfi,
 			  const Vector<MFFastFluxReg>&              a_mffluxreg,
@@ -195,7 +195,7 @@ protected:
   /*!
     @brief Index spaces
   */
-  RefCountedPtr<mfis> m_multifluidIndexSpace;
+  RefCountedPtr<MultiFluidIndexSpace> m_multifluidIndexSpace;
 
   /*!
     @brief Potential function

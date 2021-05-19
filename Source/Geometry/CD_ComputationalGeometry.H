@@ -22,7 +22,7 @@
 // Our includes
 #include <CD_Dielectric.H>
 #include <CD_Electrode.H>
-#include <mfis.H>
+#include <CD_MultiFluidIndexSpace.H>
 #include <real_box.H>
 #include <CD_NamespaceHeader.H>
 
@@ -93,7 +93,7 @@ public:
   /*!
     @brief Get the EBIndexSpaces
   */
-  virtual const RefCountedPtr<mfis>& getMfIndexSpace() const;
+  virtual const RefCountedPtr<MultiFluidIndexSpace>& getMfIndexSpace() const;
 
   /*!
     @brief Get the implicit function used to generate the gas-phase EBIS
@@ -127,7 +127,7 @@ protected:
   /*!
     @brief Multifluid index spaces
   */
-  RefCountedPtr<mfis> m_multifluidIndexSpace;
+  RefCountedPtr<MultiFluidIndexSpace> m_multifluidIndexSpace;
 
   /*!
     @brief Background permittivity

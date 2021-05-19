@@ -321,7 +321,7 @@ protected:
   /*!
     @brief MFindex space
   */
-  RefCountedPtr<mfis> m_multifluidIndexSpace;
+  RefCountedPtr<MultiFluidIndexSpace> m_multifluidIndexSpace;
 
   /*!
     @brief Computational geometry. Needed for passing in BCs on EBs. 

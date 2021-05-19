@@ -23,7 +23,7 @@
 #include <AMRTGA.H>
 
 // Our includes
-#include <mfis.H>
+#include <CD_MultiFluidIndexSpace.H>
 #include <CD_JumpBc.H>
 #include <MFLevelGrid.H>
 #include <CD_Electrode.H>
@@ -54,7 +54,7 @@ public:
   /*!
     @brief Define function
   */
-  virtual void define(const RefCountedPtr<mfis>&                    a_mfis,
+  virtual void define(const RefCountedPtr<MultiFluidIndexSpace>&                    a_multiFluidIndexSpace,
 		      const RefCountedPtr<BaseDomainBCFactory>&     a_dombc,
 		      const RefCountedPtr<LevelData<MFCellFAB> >&   a_aco,
 		      const RefCountedPtr<LevelData<MFFluxFAB> >&   a_bco,
@@ -397,7 +397,7 @@ protected:
   /*!
     @brief Index spaces
   */
-  RefCountedPtr<mfis> m_multifluidIndexSpace;
+  RefCountedPtr<MultiFluidIndexSpace> m_multifluidIndexSpace;
 
   /*!
     @brief Potential function

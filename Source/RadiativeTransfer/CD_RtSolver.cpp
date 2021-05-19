@@ -122,9 +122,9 @@ void RtSolver::setComputationalGeometry(const RefCountedPtr<ComputationalGeometr
   
   m_computationalGeometry = a_computationalGeometry;
 
-  const RefCountedPtr<mfis> mfis = m_computationalGeometry->getMfIndexSpace();
+  const RefCountedPtr<MultiFluidIndexSpace> MultiFluidIndexSpace = m_computationalGeometry->getMfIndexSpace();
   
-  this->setEbIndexSpace(mfis->getEBIndexSpace(m_phase));
+  this->setEbIndexSpace(MultiFluidIndexSpace->getEBIndexSpace(m_phase));
 }
 
 void RtSolver::setEbIndexSpace(const RefCountedPtr<EBIndexSpace>& a_ebis){

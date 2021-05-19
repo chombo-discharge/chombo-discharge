@@ -18,7 +18,7 @@
 #include <EBISBox.H>
 
 // Our includes
-#include <mfis.H>
+#include <CD_MultiFluidIndexSpace.H>
 #include <MFLevelGrid.H>
 #include <MFInterfaceFAB.H>
 #include <MFBaseIVFAB.H>
@@ -159,7 +159,7 @@ public:
 
 protected:
 
-  RefCountedPtr<mfis> m_multifluidIndexSpace;
+  RefCountedPtr<MultiFluidIndexSpace> m_multifluidIndexSpace;
 
   /*!
     @brief Level grid

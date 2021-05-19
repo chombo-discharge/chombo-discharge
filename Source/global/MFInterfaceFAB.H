@@ -9,7 +9,7 @@
 #ifndef _MFINTERFACEBASEIVFAB_
 #define _MFINTERFACEBASEIVFAB_
 
-#include "mfis.H"
+#include <CD_MultiFluidIndexSpace.H>
 #include "MFLevelGrid.H"
 
 #include <BoxLayoutData.H>
@@ -53,8 +53,8 @@ public:
 
     const DisjointBoxLayout& dbl    = a_mflg.getGrids();
     const ProblemDomain& domain     = a_mflg.get_domain();
-    const RefCountedPtr<mfis>& mfis = a_mflg.getMfIndexSpace();
-    const int num_phases            = mfis->num_phases();
+    const RefCountedPtr<MultiFluidIndexSpace>& MultiFluidIndexSpace = a_mflg.getMfIndexSpace();
+    const int num_phases            = MultiFluidIndexSpace->num_phases();
 
     m_ivs = a_mflg.interface_region(dbl.get(a_dit), a_dit);
     m_phase.resize(num_phases, NULL);

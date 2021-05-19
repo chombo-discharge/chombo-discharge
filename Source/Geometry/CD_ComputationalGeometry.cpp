@@ -39,7 +39,7 @@ ComputationalGeometry::ComputationalGeometry(){
   m_electrodes.resize(0);
   m_dielectrics.resize(0);
   
-  m_multifluidIndexSpace = RefCountedPtr<mfis> (new mfis());
+  m_multifluidIndexSpace = RefCountedPtr<MultiFluidIndexSpace> (new MultiFluidIndexSpace());
 }
 
 ComputationalGeometry::~ComputationalGeometry(){}
@@ -64,7 +64,7 @@ const Real& ComputationalGeometry::getGasPermittivity() const {
   return m_eps0;
 }
 
-const RefCountedPtr<mfis>& ComputationalGeometry::getMfIndexSpace() const {
+const RefCountedPtr<MultiFluidIndexSpace>& ComputationalGeometry::getMfIndexSpace() const {
   return m_multifluidIndexSpace;
 }
 

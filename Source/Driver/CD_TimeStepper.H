@@ -14,7 +14,7 @@
 
 // Our includes
 #include <CD_ComputationalGeometry.H>
-#include <mfis.H>
+#include <CD_MultiFluidIndexSpace.H>
 #include <CD_AmrMesh.H>
 #include <CD_TimeCode.H>
 #include <CD_NamespaceHeader.H>

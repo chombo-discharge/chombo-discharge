@@ -1323,9 +1323,9 @@ void CdrSolver::setComputationalGeometry(const RefCountedPtr<ComputationalGeomet
   }
   m_computationalGeometry = a_computationalGeometry;
 
-  const RefCountedPtr<mfis> mfis = m_computationalGeometry->getMfIndexSpace();
+  const RefCountedPtr<MultiFluidIndexSpace> MultiFluidIndexSpace = m_computationalGeometry->getMfIndexSpace();
   
-  this->setEbIndexSpace(mfis->getEBIndexSpace(m_phase));
+  this->setEbIndexSpace(MultiFluidIndexSpace->getEBIndexSpace(m_phase));
 }
 
 void CdrSolver::setDiffusionCoefficient(const EBAMRFluxData& a_diffusionCoefficient, const EBAMRIVData& a_ebDiffusionCoefficient){

@@ -24,7 +24,7 @@
 #include <CD_TimeStepper.H>
 #include <CD_AmrMesh.H>
 #include <CD_CellTagger.H>
-#include <mfis.H>
+#include <CD_MultiFluidIndexSpace.H>
 #include <CD_GeoCoarsener.H>
 #include <CD_NamespaceHeader.H>
 
@@ -96,7 +96,7 @@ protected:
   /*!
     @brief Index space
   */
-  RefCountedPtr<mfis> m_multifluidIndexSpace;
+  RefCountedPtr<MultiFluidIndexSpace> m_multifluidIndexSpace;
 
   /*!
     @brief AMR
