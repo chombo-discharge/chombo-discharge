@@ -358,7 +358,7 @@ void McPhoto::parsePlotVariables(){
   m_plot_bulk_phot = false;
   m_plot_eb_phot   = false;
   m_plot_dom_phot  = false;
-  m_plotSource_phot  = false;
+  m_plot_source_phot  = false;
 
   ParmParse pp(m_className.c_str());
   const int num = pp.countval("plt_vars");
@@ -372,7 +372,7 @@ void McPhoto::parsePlotVariables(){
     else if(str[i] == "bulk_phot") m_plot_bulk_phot = true;
     else if(str[i] == "eb_phot")   m_plot_eb_phot   = true;
     else if(str[i] == "dom_phot")  m_plot_dom_phot  = true;
-    else if(str[i] == "src_phot")  m_plotSource_phot  = true;
+    else if(str[i] == "src_phot")  m_plot_source_phot  = true;
   }
 }
 
@@ -385,19 +385,19 @@ void McPhoto::clear(){
   this->clear(m_photons);
 }
 
-void McPhoto::clear(ParticleContainer<Photon>& a_Photon){
+void McPhoto::clear(ParticleContainer<Photon>& a_photons){
   CH_TIME("McPhoto::clear(ParticleContainer)");
   if(m_verbosity > 5){
     pout() << m_name + "::clear(ParticleContainer)" << endl;
   }
 
-  this->clear(a_Photon.getParticles());
+  this->clear(a_photons.getParticles());
 }
 
 void McPhoto::clear(AMRParticles<Photon>& a_photons){
-  CH_TIME("McPhoto::clear");
+  CH_TIME("McPhoto::clear(AMRParticles)");
   if(m_verbosity > 5){
-    pout() << m_name + "::clear" << endl;
+    pout() << m_name + "::clear(AMRParticles)" << endl;
   }
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
@@ -677,7 +677,7 @@ Vector<std::string> McPhoto::getPlotVariableNames() const {
   if(m_plot_bulk_phot) names.push_back(m_name + " bulkPhotons");
   if(m_plot_eb_phot)   names.push_back(m_name + " ebPhotons");
   if(m_plot_dom_phot)  names.push_back(m_name + " domainPhotons");
-  if(m_plotSource_phot)  names.push_back(m_name + " sourcePhotons");
+  if(m_plot_source_phot)  names.push_back(m_name + " sourcePhotons");
 
   return names;
 }
@@ -696,7 +696,7 @@ int McPhoto::getNumberOfPlotVariables() const{
   if(m_plot_bulk_phot) num_output = num_output + 1;
   if(m_plot_eb_phot)   num_output = num_output + 1;
   if(m_plot_dom_phot)  num_output = num_output + 1;
-  if(m_plotSource_phot)  num_output = num_output + 1;
+  if(m_plot_source_phot)  num_output = num_output + 1;
 
   return num_output;
 }
@@ -1619,7 +1619,7 @@ void McPhoto::writePlotData(EBAMRCellData& a_output, int& a_comp){
     this->depositPhotons(m_scratch, m_domainPhotons.getParticles(), m_plot_deposition);
     this->writeData(a_output, a_comp, m_scratch,  false);
   }
-  if(m_plotSource_phot){
+  if(m_plot_source_phot){
     this->depositPhotons(m_scratch, m_sourcePhotons.getParticles(), m_plot_deposition);
     this->writeData(a_output, a_comp, m_scratch,  false);
   }

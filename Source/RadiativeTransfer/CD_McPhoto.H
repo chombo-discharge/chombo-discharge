@@ -78,7 +78,7 @@ public:
 				       ParticleContainer<Photon>& a_ebPhotons,
 				       ParticleContainer<Photon>& a_domainPhotons,
 				       ParticleContainer<Photon>& a_oPhotons,
-				       const Real                  a_dt);
+				       const Real                 a_dt);
 
   /*!
     @brief Remap Photons
@@ -99,7 +99,7 @@ public:
     @brief Deposit Photons
   */
   virtual void depositPhotons(EBAMRCellData&                    a_phi,
-			      const ParticleContainer<Photon>& a_particles,
+			      const ParticleContainer<Photon>&  a_particles,
 			      const DepositionType::Which&      a_deposition);
 
   /*!
@@ -374,7 +374,7 @@ protected:
   /*!
     @brief Check if source_bulkPhotons should be plotted
   */
-  bool m_plotSource_phot;
+  bool m_plot_source_phot;
 
   /*!
     @brief Check if m_ebPhotons should be plotted
