@@ -1,37 +1,42 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   larsen_coefs.H
+  @file   CD_LarsenCoefficients.H
   @brief  Declaration of a class that holds coefficients for photon outflow boundary conditions
   @author Robert Marskar
-  @date   Jan. 2018
 */
 
-#ifndef _LARSEN_COEFS_
-#define _LARSEN_COEFS_
+#ifndef CD_LarsenCoefficients_H
+#define CD_LarsenCoefficients_H
 
-#include <CD_RobinCoefficients.H>
-#include "rte_species.H"
-
+// Chombo includes
 #include <RefCountedPtr.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_RobinCoefficients.H>
+#include <rte_species.H>
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Class that holds appropriate coefficients for Robin implementation of the Larsen boundary condition
 */
-class larsen_coefs : public RobinCoefficients {
+class LarsenCoefficients : public RobinCoefficients {
 public:
 
   /*!
     @brief Constructor
   */
-  larsen_coefs(const RefCountedPtr<rte_species>& a_rte_species,
-	       const Real                         a_r1,
-	       const Real                         a_r2);
+  LarsenCoefficients(const RefCountedPtr<rte_species>& a_rte_species,
+		     const Real                         a_r1,
+		     const Real                         a_r2);
 
   /*!
     @brief Destructor
   */
-  ~larsen_coefs();
+  ~LarsenCoefficients();
 
   /*!
     @brief aco. Equal to 0.5*3*kappa*kappa*(1 + 3*r2)/(1 - 2*r1)
@@ -56,6 +61,7 @@ protected:
     
   Real m_reflectionCoefficientTwo;
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

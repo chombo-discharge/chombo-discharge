@@ -26,7 +26,7 @@
 // Our includes
 #include <rte_solver.H>
 #include <CD_EbHelmholtzOpFactory.H>
-#include <larsen_coefs.H>
+#include <CD_LarsenCoefficients.H>
 #include <CD_RobinConductivityEbBcFactory.H>
 #include <CD_RobinConductivityDomainBcFactory.H>
 #include <CD_ConductivityDomainBcWrapperFactory.H>
@@ -310,7 +310,7 @@ protected:
   /*!
     @brief Larsen coefficients for photon outflow bc
   */
-  RefCountedPtr<larsen_coefs> m_robinCoefficients;
+  RefCountedPtr<LarsenCoefficients> m_robinCoefficients;
 
   /*!
     @brief Photon outflow boundary conditions

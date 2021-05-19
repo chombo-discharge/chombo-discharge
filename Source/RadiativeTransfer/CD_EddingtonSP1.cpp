@@ -675,7 +675,7 @@ void EddingtonSP1::setupOperatorFactory(){
   const Real beta  = -1.0;
 
   // Appropriate coefficients for this type of Robin BC
-  m_robinCoefficients = RefCountedPtr<larsen_coefs> (new larsen_coefs(m_rte_species, m_reflectionCoefficientOne, m_reflectionCoefficientTwo));
+  m_robinCoefficients = RefCountedPtr<LarsenCoefficients> (new LarsenCoefficients(m_rte_species, m_reflectionCoefficientOne, m_reflectionCoefficientTwo));
 
   // Domain BC
 #if 0
