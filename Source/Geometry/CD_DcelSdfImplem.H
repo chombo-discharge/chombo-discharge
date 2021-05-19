@@ -20,7 +20,7 @@
 using namespace Dcel;
 
 template <class T>
-DcelSdf<T>::DcelSdf(const std::shared_ptr<mesh>& a_mesh, const bool a_flipInside){
+DcelSdf<T>::DcelSdf(const std::shared_ptr<Mesh>& a_mesh, const bool a_flipInside){
   m_mesh       = a_mesh;
   m_flipInside = a_flipInside;
 }

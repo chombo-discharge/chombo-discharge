@@ -23,7 +23,7 @@ namespace Dcel {
   template <class T> class faceT;
 
   template <class T>
-  class meshT {
+  class MeshT {
   public:
 
     using Vec3   = Vec3T<T>;
@@ -36,15 +36,15 @@ namespace Dcel {
     using edgePtr   = std::shared_ptr<edge>;
     using facePtr   = std::shared_ptr<face>;
     
-    using mesh   = meshT<T>;
+    using Mesh   = MeshT<T>;
 
-    meshT();
-    meshT(const mesh& a_otherMesh) = delete;
-    meshT(std::vector<facePtr >&   a_faces,
+    MeshT();
+    MeshT(const Mesh& a_otherMesh) = delete;
+    MeshT(std::vector<facePtr >&   a_faces,
 	  std::vector<edgePtr >&   a_edges,
 	  std::vector<vertexPtr >& a_vertices);
 
-    ~meshT();
+    ~MeshT();
 
     inline
     void define(std::vector<facePtr >&   a_faces,

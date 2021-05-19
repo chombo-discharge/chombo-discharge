@@ -24,7 +24,7 @@ using namespace Dcel;
 using precision = float;
 
 using face   = faceT<precision>;
-using mesh   = meshT<precision>;
+using Mesh   = MeshT<precision>;
 using AABB   = BoundingVolumes::AABBT<precision>;
 using Sphere = BoundingVolumes::BoundingSphereT<precision>;
 
@@ -41,7 +41,7 @@ tesselation::tesselation(){
   pp.get("partitioner", partitioner);
 
   // Build the dcel_mesh and the BVH
-  auto m = std::make_shared<mesh>();
+  auto m = std::make_shared<Mesh>();
   parser::PLY<precision>::readASCII(*m, filename);
   m->reconcile(VertexNormalWeight::Angle);
 

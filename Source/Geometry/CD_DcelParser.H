@@ -32,7 +32,7 @@ namespace Dcel {
       using vertex = vertexT<T>;
       using edge   = edgeT<T>;
       using face   = faceT<T>;
-      using mesh   = meshT<T>;
+      using Mesh   = MeshT<T>;
 
       using edgeIterator = edgeIteratorT<T>;
 
@@ -40,7 +40,7 @@ namespace Dcel {
 	@brief Read an ASCII .ply file and put it in a mesh
       */
       inline
-      static void readASCII(mesh& a_mesh, const std::string a_filename);
+      static void readASCII(Mesh& a_mesh, const std::string a_filename);
 
     protected:
 

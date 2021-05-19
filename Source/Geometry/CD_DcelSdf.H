@@ -30,10 +30,10 @@ class DcelSdf : public BaseIF {
 public:
 
   using Vec3 = Vec3T<T>;
-  using mesh = meshT<T>;
+  using Mesh = MeshT<T>;
 
   DcelSdf() = delete;
-  DcelSdf(const std::shared_ptr<mesh>& a_mesh, const bool a_flipInside);
+  DcelSdf(const std::shared_ptr<Mesh>& a_mesh, const bool a_flipInside);
   DcelSdf(const DcelSdf& a_object);
   ~DcelSdf();
 
@@ -43,7 +43,7 @@ public:
 
 protected:
 
-  std::shared_ptr<mesh> m_mesh;
+  std::shared_ptr<Mesh> m_mesh;
   
   bool m_flipInside;
 };

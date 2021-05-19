@@ -25,7 +25,7 @@ namespace Dcel {
 
   template <class T>
   inline
-  void parser::PLY<T>::readASCII(mesh& a_mesh, const std::string a_filename) {
+  void parser::PLY<T>::readASCII(Mesh& a_mesh, const std::string a_filename) {
     std::ifstream filestream(a_filename);
 
     if(filestream.is_open()){
