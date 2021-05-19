@@ -10,7 +10,7 @@
 #include <ParmParse.H>
 
 #include <CD_BoundingVolumes.H>
-#include "BVH.H"
+#include <CD_BVH.H>
 #include "dcel_mesh.H"
 #include "dcel_parser.H"
 #include "dcel_if.H"

@@ -1,21 +1,26 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   BVH.H
+  @file   CD_BVH.H
   @brief  Declaration of boundary volume hierarchies. 
   @author Robert Marskar
-  @date   March 2021
 */
 
-#ifndef _BVH_H_
-#define _BVH_H_
+#ifndef CD_BVH_H
+#define CD_BVH_H
 
-#include "Vec.H"
-
+// Std includes
 #include <memory>
 #include <vector>
 #include <functional>
 #include <queue>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <Vec.H>
+#include <CD_NamespaceHeader.H>
 
 namespace BVH {
 
@@ -183,8 +188,9 @@ namespace BVH {
     void pruneUnordered2(T& a_minDist2, std::shared_ptr<const P>& a_closest, const Vec3& a_point) const noexcept;
   };
 }
-#include "CD_NamespaceFooter.H"
 
-#include "BVHI.H"
+#include <CD_NamespaceFooter.H>
+
+#include <CD_BVHImplem.H>
 
 #endif

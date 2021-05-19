@@ -8,7 +8,7 @@
 #ifndef _BVH_IF_
 #define _BVH_IF_
 
-#include "BVH.H"
+#include <CD_BVH.H>
 #include "dcel_face.H"
 
 #include <memory>

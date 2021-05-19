@@ -1,16 +1,19 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   BVHI.H
-  @brief  Implementation of BVH.H
+  @file   CD_BVHImplem.H
+  @brief  Implementation of CD_BVH.H
   @author Robert Marskar
-  @date   March 2021
 */
 
-#ifndef _BVHI_H_
-#define _BVHI_H_
+#ifndef CD_BVHImplem_H_
+#define CD_BVHImplem_H_
 
-#include "BVH.H"
-
-#include "CD_NamespaceHeader.H"
+#include <CD_BVH.H>
+#include <CD_NamespaceHeader.H>
 
 namespace BVH {
 
@@ -508,6 +511,7 @@ namespace BVH {
     return closestPrimitive->signedDistance(a_point);
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

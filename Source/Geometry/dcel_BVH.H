@@ -8,7 +8,7 @@
 #ifndef _DCEL_BVH_H_
 #define _DCEL_BVH_H_
 
-#include "BVH.H"
+#include <CD_BVH.H>
 #include "dcel_face.H"
 
 #include "CD_NamespaceHeader.H"
