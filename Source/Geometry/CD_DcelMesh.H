@@ -1,21 +1,27 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   dcel_mesh.H
+  @file   CD_DcelMesh.H
   @brief  Declaration of a mesh class for handling surface tesselations
   @author Robert Marskar
-  @date   March 2021
 */
 
-#ifndef _DCEL_MESH_
-#define _DCEL_MESH_
+#ifndef CD_DcelMesh_H
+#define CD_DcelMesh_H
 
-#include <CD_DcelAlgorithms.H>
-
+// Std includes
 #include <vector>
 #include <memory>
 #include <functional>
 #include <map>
 
+// Our includes
+#include <CD_DcelAlgorithms.H>
 #include "CD_NamespaceHeader.H"
+
 namespace Dcel {
 
   template <class T> class vertexT;
@@ -120,7 +126,8 @@ namespace Dcel {
     void printWarnings(const std::map<std::string, int>& a_warnings) const noexcept;
   };
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #include <CD_DcelMeshImplem.H>
 

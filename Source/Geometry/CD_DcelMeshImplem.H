@@ -1,20 +1,26 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   dcel_meshI.H
-  @brief  Implementation of dcel_mesh.H
+  @file   CD_DcelMeshImplem.H
+  @brief  Implementation of CD_DcelMesh.H
   @author Robert Marskar
   @date   March 2021
 */
 
-#ifndef _DCEL_MESHI_H_
-#define _DCEL_MESHI_H_
+#ifndef CD_DcelMeshImplem_H
+#define CD_DcelMeshImplem_H 
 
+// Our includes
 #include <CD_DcelMesh.H>
 #include <CD_DcelIterator.H>
 #include <CD_DcelVertex.H>
 #include <CD_DcelEdge.H>
 #include <CD_DcelFace.H>
+#include <CD_NamespaceHeader.H>
 
-#include "CD_NamespaceHeader.H"
 namespace Dcel {
 
   template <class T>
@@ -58,7 +64,7 @@ namespace Dcel {
   void MeshT<T>::printWarnings(const std::map<std::string, int>& a_warnings) const noexcept {
     for (const auto& warn : a_warnings){
       if(warn.second > 0){
-	std::cerr << "In file 'dcel_mesh.cpp' function dcel_meshT<T>::sanityCheck() - warnings about error '" << warn.first << "' = " << warn.second << "\n";
+	std::cerr << "In file 'CD_DcelMeshImplem.H' function MeshT<T>::sanityCheck() - warnings about error '" << warn.first << "' = " << warn.second << "\n";
       }
     }
   }
@@ -223,7 +229,7 @@ namespace Dcel {
 	v->computeVertexNormalAngleWeighted();
 	break;
       default:
-	std::cerr << "In file dcel_mesh function Dcel::meshT<T>::reconcileVertices(VertexNormalWeighting) - unsupported algorithm requested\n";
+	std::cerr << "In file 'CD_DcelMeshImplem.H' function Dcel::MeshT<T>::reconcileVertices(VertexNormalWeighting) - unsupported algorithm requested\n";
       }
     }
   }
@@ -294,7 +300,7 @@ namespace Dcel {
       minDist = this->DirectSignedDistance2(a_point);
       break;
     default:
-      std::cerr << "Error in file dcel_mesh meshT<T>::signedDistance unsupported algorithm requested\n";
+      std::cerr << "Error in file 'CD_DcelMeshImplem.H' MeshT<T>::signedDistance unsupported algorithm requested\n";
       break;
     }
 
@@ -339,6 +345,6 @@ namespace Dcel {
   }
 }
 
-#include "CD_NamespaceFooter.H"
+#include <CD_NamespaceFooter.H>
 
 #endif
