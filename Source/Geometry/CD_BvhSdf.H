@@ -9,8 +9,8 @@
   @author Robert Marskar
 */
 
-#ifndef _BVH_IF_
-#define _BVH_IF_
+#ifndef CD_BvhSdf_H
+#define CD_BvhSdf_H
 
 // Std includes
 #include <memory>

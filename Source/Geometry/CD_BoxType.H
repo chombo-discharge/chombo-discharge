@@ -1,16 +1,22 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   BoxType.H
-  @brief  Simple class for describing if a box is cut, regular, or covered
+  @file   CD_BoxType.H
+  @brief  Declaration of a class for identifying boxas as regular, cut, or covered. Used with ScanSHop.
   @author Robert Marskar
 */
 
-#ifndef _BOXTYPE_
-#define _BOXTYPE_
+#ifndef CD_BoxType_H
+#define CD_BoxType_H
 
-#include "Box.H"
-#include "LevelData.H"
+// Chombo includes
+#include <Box.H>
+#include <LevelData.H>
 
-#include "CD_NamespaceHeader.H"
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Class for describing if a box is cut, regular, or covered
@@ -115,6 +121,7 @@ public:
 
   virtual BoxType* create(const Box& a_box, int a_ncomps, const DataIndex& a_dit) const;
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

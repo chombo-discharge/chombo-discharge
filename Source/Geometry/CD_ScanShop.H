@@ -17,7 +17,7 @@
 #include <GeometryService.H>
 
 // Our includes
-#include <BoxType.H>
+#include <CD_BoxType.H>
 #include <CD_NamespaceHeader.H>
 
 /*!

@@ -1,12 +1,17 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   BoxType.cpp
-  @brief  Implementation of BoxType.H
+  @file   CD_BoxType.cpp
+  @brief  Implementation of CD_BoxType.H
   @author Robert Marskar
 */
 
-#include "BoxType.H"
-
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_BoxType.H>
+#include <CD_NamespaceHeader.H>
 
 int BoxType::preAllocatable(){
   return 2;
@@ -99,4 +104,4 @@ BoxType* BoxTypeFactory::create(const Box& a_box, int a_ncomps, const DataIndex&
   return new BoxType();
 }
 
-#include "CD_NamespaceFooter.H"
+#include <CD_NamespaceFooter.H>
