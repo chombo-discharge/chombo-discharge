@@ -8,7 +8,7 @@
 #ifndef _RTE_LAYOUTI_H
 #define _RTE_LAYOUTI_H
 
-#include "rte_iterator.H"
+#include <CD_RtIterator.H>
 #include "rte_layout.H"
 
 #include "CD_NamespaceHeader.H"
@@ -25,8 +25,8 @@ rte_layout<T>::~rte_layout(){
 }
 
 template <class T>
-rte_iterator<T> rte_layout<T>::iterator(){
-  return rte_iterator<T>(*this);
+RtIterator<T> rte_layout<T>::iterator(){
+  return RtIterator<T>(*this);
 }
 
 template <class T>
@@ -55,7 +55,7 @@ void rte_layout<T>::parseOptions(){
     pout() << "rte_layout<T>::parseOptions" << endl;
   }
 
-  for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
     solver->parseOptions();
   }
@@ -68,7 +68,7 @@ void rte_layout<T>::parseRuntimeOptions(){
     pout() << "rte_layout<T>::parseRuntimeOptions" << endl;
   }
 
-  for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
     solver->parseRuntimeOptions();
   }
@@ -81,7 +81,7 @@ void rte_layout<T>::allocateInternals(){
     pout() << "rte_layout<T>::allocateInternals" << endl;
   }
 
-  for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
     solver->allocateInternals();
   }
@@ -94,7 +94,7 @@ void rte_layout<T>::preRegrid(const int a_base, const int a_finestLevel){
     pout() << "rte_layout<T>::preRegrid" << endl;
   }
 
-  for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
     solver->preRegrid(a_base, a_finestLevel);
   }
@@ -107,7 +107,7 @@ void rte_layout<T>::deallocateInternals(){
     pout() << "rte_layout<T>::deallocateInternals" << endl;
   }
 
-  for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
     solver->deallocateInternals();
   }
@@ -120,7 +120,7 @@ void rte_layout<T>::setAmr(const RefCountedPtr<AmrMesh>& a_amr){
     pout() << "rte_layout<T>::setAmr" << endl;
   }
 
-  for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
     solver->setAmr(a_amr);
   }
@@ -133,7 +133,7 @@ void rte_layout<T>::setComputationalGeometry(const RefCountedPtr<computational_g
     pout() << "rte_layout<T>::setComputationalGeometry" << endl;
   }
 
-  for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
     solver->setComputationalGeometry(a_computationalGeometry);
   }
@@ -146,7 +146,7 @@ void rte_layout<T>::setPhase(phase::which_phase a_phase){
     pout() << "rte_layout<T>::setPhase" << endl;
   }
 
-  for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
     solver->setPhase(a_phase);
   }
@@ -161,7 +161,7 @@ void rte_layout<T>::setVerbosity(const int a_verbosity){
     pout() << "rte_layout<T>::setVerbosity" << endl;
   }
 
-  for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
     solver->setVerbosity(a_verbosity);
   }
@@ -174,7 +174,7 @@ void rte_layout<T>::sanityCheck(){
     pout() << "rte_layout<T>::sanityCheck" << endl;
   }
 
-  for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
     solver->sanityCheck();
   }
@@ -187,7 +187,7 @@ void rte_layout<T>::setTime(const int a_step, const Real a_time, const Real a_dt
     pout() << "rte_layout<T>::setTime" << endl;
   }
 
-  for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
     solver->setTime(a_step, a_time, a_dt);
   }
@@ -200,7 +200,7 @@ void rte_layout<T>::regrid(const int a_lmin, const int a_oldFinestLevel, const i
     pout() << "rte_layout<T>::regrid" << endl;
   }
 
-  for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
     solver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   }
@@ -213,7 +213,7 @@ void rte_layout<T>::registerOperators(){
     pout() << "rte_layout<T>::registerOperators" << endl;
   }
 
-  for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
     solver->registerOperators();
   }
@@ -226,7 +226,7 @@ void rte_layout<T>::setSource(const EBAMRCellData& a_source){
     pout() << "rte_layout<T>::setSource(ebamrcell)" << endl;
   }
 
-  for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
     solver->setSource(a_source);
   }
@@ -239,7 +239,7 @@ void rte_layout<T>::setSource(const Real a_source){
     pout() << "rte_layout<T>::setSource(constant)" << endl;
   }
 
-  for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
     solver->setSource(a_source);
   }
@@ -252,7 +252,7 @@ void rte_layout<T>::setStationary(const bool a_stationary){
     pout() << "rte_layout<T>::setStationary" << endl;
   }
 
-  for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
     solver->setStationary(a_stationary);
   }
@@ -265,7 +265,7 @@ void rte_layout<T>::writePlotFile(){
     pout() << "rte_layout<T>::writePlotFile" << endl;
   }
 
-  for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
     solver->writePlotFile();
   }
@@ -278,7 +278,7 @@ void rte_layout<T>::advance(const Real a_dt){
     pout() << "rte_layout<T>::advance" << endl;
   }
 
-  for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
     solver->advance(a_dt, solver->getPhi(), solver->getSource());
   }
@@ -291,7 +291,7 @@ void rte_layout<T>::initialData(){
     pout() << "rte_layout<T>::initialData" << endl;
   }
 
-  for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
     solver->initialData();
   }
@@ -306,7 +306,7 @@ bool rte_layout<T>::isStationary(){
 
   bool stationary = true;
 
-  for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
 
     if(solver->isStationary() == false){
@@ -325,7 +325,7 @@ phase::which_phase rte_layout<T>::get_phase(){
   }
 
   phase::which_phase p;
-  for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
     p = solver->get_phase();
   }
@@ -352,7 +352,7 @@ Vector<EBAMRCellData*> rte_layout<T>::getSources(){
 
   Vector<EBAMRCellData*> sources;
 
-  for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
     sources.push_back(&(solver->getSource()));
   }
@@ -369,7 +369,7 @@ Vector<EBAMRCellData*> rte_layout<T>::getPhis(){
 
   Vector<EBAMRCellData*> states;
 
-  for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
     states.push_back(&(solver->getPhi()));
   }

@@ -11,7 +11,7 @@
 #include "CD_AmrMesh.H"
 #include "cdr_plasma_stepper.H"
 #include <CD_CdrIterator.H>
-#include "rte_iterator.H"
+#include <CD_RtIterator.H>
 
 #include "CD_NamespaceHeader.H"
 
@@ -118,7 +118,7 @@ namespace physics {
 
       // Get functions for storage
       RefCountedPtr<cdr_storage>& get_cdr_storage(const CdrIterator<CdrSolver>& a_solverit);
-      RefCountedPtr<rte_storage>& get_rte_storage(const rte_iterator<RtSolver>& a_solverit);
+      RefCountedPtr<rte_storage>& get_rte_storage(const RtIterator<RtSolver>& a_solverit);
 
       // Allocation functions
       void allocate_cdr_storage();

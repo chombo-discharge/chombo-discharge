@@ -188,7 +188,7 @@ RefCountedPtr<cdr_storage>& sdc::get_cdr_storage(const CdrIterator& a_solverit){
   return m_cdr_scratch[a_solverit.get_solver()];
 }
 
-RefCountedPtr<rte_storage>& sdc::get_rte_storage(const rte_iterator& a_solverit){
+RefCountedPtr<rte_storage>& sdc::get_rte_storage(const RtIterator& a_solverit){
   return m_rte_scratch[a_solverit.get_solver()];
 }
 
@@ -464,7 +464,7 @@ void sdc::copy_phi_p_to_rte(){
     pout() << "sdc::copy_phi_p_to_rte" << endl;
   }
 
-  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>&  solver  = solver_it();
     RefCountedPtr<rte_storage>& storage = get_rte_storage(solver_it);
 
@@ -627,7 +627,7 @@ void sdc::copy_rte_to_phi_m0(){
   }
 
   // RTE solvers
-  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>&  solver  = solver_it();
     RefCountedPtr<rte_storage>& storage = get_rte_storage(solver_it);
     
@@ -1139,7 +1139,7 @@ void sdc::substep_rte(const int a_m, const bool a_corrector){
 
   const Real dtm = m_dtm[a_m];
 
-  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>& solver   = solver_it();
     RefCountedPtr<rte_storage>& storage = get_rte_storage(solver_it);
 
@@ -1512,7 +1512,7 @@ void sdc::allocateInternals(){
   m_cdr_error.resize(m_plaskin->get_num_species());
   m_dummy_rte.resize(m_plaskin->get_num_Photons());
 
-  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     m_dummy_rte[idx] = new EBAMRCellData();
     m_amr->allocate(*m_dummy_rte[idx], phase::gas, 1);
@@ -1599,7 +1599,7 @@ void sdc::allocate_rte_storage(){
   const int num_Photons = m_plaskin->get_num_Photons();
   m_rte_scratch.resize(num_Photons);
   
-  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+  for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     m_rte_scratch[idx] = RefCountedPtr<rte_storage> (new rte_storage(m_amr, m_rte->get_phase(), ncomp));
     m_rte_scratch[idx]->allocate_storage(m_p);
@@ -1621,7 +1621,7 @@ void sdc::deallocateInternals(){
   m_amr->deallocate(m_scratch1);
   m_amr->deallocate(m_scratchD);
 
-  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     m_amr->deallocate(*m_dummy_rte[idx]);
   }
@@ -1632,7 +1632,7 @@ void sdc::deallocateInternals(){
     m_cdr_scratch[idx] = RefCountedPtr<cdr_storage>(0);
   }
 
-  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+  for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     m_rte_scratch[idx]->deallocate_storage();
     m_rte_scratch[idx] = RefCountedPtr<rte_storage>(0);
@@ -1895,7 +1895,7 @@ void sdc::compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_phis, const Real a_
   TimeStepper::compute_extrapolated_velocities(extrap_cdr_velocities, cdr_velocities, m_cdr->get_phase());
 
   // Compute RTE flux on the boundary
-  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+  for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>& solver   = solver_it();
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
@@ -1965,7 +1965,7 @@ void sdc::compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_phis, const 
   this->extrapolate_vector_to_domain_faces(extrap_cdr_gradients,  m_cdr->get_phase(), cdr_gradients);
 
   // Compute RTE flux on domain faces
-  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+  for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>& solver   = solver_it();
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
@@ -2075,7 +2075,7 @@ void sdc::integrate_rte_transient(const Real a_dt){
   if(m_do_rte){
     if((m_timeStep + 1) % m_fast_rte == 0){
       if(!(m_rte->isStationary())){
-	for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+	for (RtIterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
 	  RefCountedPtr<RtSolver>& solver = solver_it();
 	  solver->advance(a_dt);
 	}
@@ -2093,7 +2093,7 @@ void sdc::integrate_rte_stationary(){
   if(m_do_rte){
     if((m_timeStep + 1) % m_fast_rte == 0){
       if((m_rte->isStationary())){
-	for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+	for (RtIterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
 	  RefCountedPtr<RtSolver>& solver = solver_it();
 	  solver->advance(0.0);
 	}
@@ -2147,7 +2147,7 @@ Vector<EBAMRCellData*> sdc::get_rte_phik(const int a_m){
   }
   
   Vector<EBAMRCellData*> ret;
-  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<rte_storage>& storage = sdc::get_rte_storage(solver_it);
     ret.push_back(&(storage->get_phi()[a_m]));
   }
@@ -2228,7 +2228,7 @@ void sdc::store_solvers(){
     data_ops::copy(previous, state);
 
     // RTE
-    for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    for (RtIterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<rte_storage>& storage     = sdc::get_rte_storage(solver_it);
       const RefCountedPtr<RtSolver>& solver = solver_it();
 
@@ -2256,7 +2256,7 @@ void sdc::restore_solvers(){
   data_ops::copy(state, previous);
 
   // RTE
-  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<rte_storage>& storage     = sdc::get_rte_storage(solver_it);
     RefCountedPtr<RtSolver>& solver = solver_it();
 

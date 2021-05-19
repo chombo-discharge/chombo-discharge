@@ -288,7 +288,7 @@ void ito_plasma_stepper::writeCheckpointData(HDF5Handle& a_handle, const int a_l
     solver->writeCheckpointLevel(a_handle, a_lvl);
   }
 
-  for (rte_iterator<McPhoto> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator<McPhoto> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<McPhoto>& solver = solver_it();
     solver->writeCheckpointLevel(a_handle, a_lvl);
   }
@@ -308,7 +308,7 @@ void ito_plasma_stepper::readCheckpointData(HDF5Handle& a_handle, const int a_lv
     solver->readCheckpointLevel(a_handle, a_lvl);
   }
 
-  for (rte_iterator<McPhoto> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator<McPhoto> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<McPhoto>& solver = solver_it();
     solver->readCheckpointLevel(a_handle, a_lvl);
   }
@@ -339,7 +339,7 @@ void ito_plasma_stepper::writePlotData(EBAMRCellData& a_output, Vector<std::stri
   }
 
   // RTE solvers copy their output data
-  for (rte_iterator<McPhoto> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator<McPhoto> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<McPhoto>& solver = solver_it();
     a_plotVariableNames.append(solver->getPlotVariableNames());
     solver->writePlotData(a_output, a_icomp);
@@ -810,7 +810,7 @@ int ito_plasma_stepper::getNumberOfPlotVariables() const {
     ncomp += solver->getNumberOfPlotVariables();
   }
   
-  for (rte_iterator<McPhoto> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator<McPhoto> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<McPhoto>& solver = solver_it();
     ncomp += solver->getNumberOfPlotVariables();
   }

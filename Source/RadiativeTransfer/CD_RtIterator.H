@@ -1,41 +1,41 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   rte_iterator.H
+  @file   CD_RtIterator.H
   @brief  Iterator class for rte_layout
   @author Robert Marskar
-  @date   June 2016
 */
 
-#ifndef _RTE_ITERATOR_
-#define _RTE_ITERATOR_
+#ifndef CD_RtIterator_H
+#define CD_RtIterator_H
 
-#include "rte_layout.H"
-
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <rte_layout.H>
+#include <CD_NamespaceHeader.H>
   
 /*!
   @brief Iterator class for rte_layout
 */
 template <class T>
-class rte_iterator {
+class RtIterator {
 public:  
   /*!
     @brief Empty constructor
   */
-  rte_iterator(){
-    CH_TIME("rte_iterator::rte_iterator");
-    m_defined = false;
-  }
+  RtIterator() = delete;
 
   /*!
     @brief Full constructor
   */
-  rte_iterator(rte_layout<T>& a_layout){
-    CH_TIME("rte_iterator::rte_iterator");
+  RtIterator(rte_layout<T>& a_layout){
+    CH_TIME("RtIterator::RtIterator");
     
     m_solvers  = a_layout.get_solvers();
     m_species  = a_layout.getSpecies();
     m_num      = m_solvers.size();
-    m_defined  = true;
 
     reset();
   }
@@ -43,7 +43,7 @@ public:
   /*!
     @brief Destructor
   */
-  virtual ~rte_iterator(){
+  virtual ~RtIterator(){
 
   }
 
@@ -51,7 +51,6 @@ public:
     @brief Get number of solvers
   */
   virtual int getNumberOfSolvers(){
-    CH_assert(m_defined);
     return m_num;
   }
 
@@ -59,7 +58,6 @@ public:
     @brief Get current solver number
   */
   virtual int index() const {
-    CH_assert(m_defined);
     return m_isolver;
   }
 
@@ -67,7 +65,6 @@ public:
     @brief Reset iterator
   */
   virtual void reset(){
-    CH_assert(m_defined);
     m_isolver = 0;
   }
 
@@ -83,7 +80,6 @@ public:
     @brief Increment
   */
   virtual void operator++(){
-    CH_assert(m_defined);
     m_isolver++;
   }
 
@@ -91,8 +87,7 @@ public:
     @brief Get solver
   */
   virtual RefCountedPtr<T>& operator() () {
-    CH_assert(m_defined == true);
-    CH_assert(m_isolver < m_num);
+   CH_assert(m_isolver < m_num);
     return m_solvers[m_isolver];
   }
 
@@ -100,7 +95,6 @@ public:
     @brief Get current ion
   */
   virtual RefCountedPtr<rte_species>& getSpecies() {
-    CH_assert(m_defined == true);
     CH_assert(m_isolver < m_num);
     return m_species[m_isolver];
   }
@@ -118,11 +112,6 @@ protected:
   int m_num;;
 
   /*!
-    @brief Defined or not
-  */
-  bool m_defined;
-
-  /*!
     @brief Ion solvers
   */
   Vector<RefCountedPtr<T> > m_solvers;
@@ -133,5 +122,7 @@ protected:
   Vector<RefCountedPtr<rte_species> > m_species;
 
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif

@@ -11,7 +11,7 @@
 #include "CD_AmrMesh.H"
 #include "CD_TimeStepper.H"
 #include <CD_CdrIterator.H>
-#include "rte_iterator.H"
+#include <CD_RtIterator.H>
 
 /*!
   @brief Class for evolving plasma equations with a multirate method using strongly stability preserving
@@ -91,7 +91,7 @@ protected:
   TimeCode::which_code m_timeCode;
 
   RefCountedPtr<cdr_storage>& get_cdr_storage(const CdrIterator& a_solverit);
-  RefCountedPtr<rte_storage>& get_rte_storage(const rte_iterator& a_solverit);
+  RefCountedPtr<rte_storage>& get_rte_storage(const RtIterator& a_solverit);
 
   void allocate_cdr_storage();
   void allocate_poisson_storage();

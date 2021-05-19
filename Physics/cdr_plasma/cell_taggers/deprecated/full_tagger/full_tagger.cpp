@@ -7,7 +7,7 @@
 
 #include "full_tagger.H"
 #include <CD_CdrIterator.H>
-#include "rte_iterator.H"
+#include <CD_RtIterator.H>
 #include "data_ops.H"
 
 #include <EBArith.H>
@@ -54,7 +54,7 @@ void full_tagger::allocate_storage(){
     m_amr->allocate(m_cdr_gradients[idx], m_phase, vec_ncomp);
   }
 
-  for(rte_iterator solver_it(*rte); solver_it.ok(); ++solver_it){
+  for(RtIterator solver_it(*rte); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     m_amr->allocate(m_rte_densities[idx], m_phase, sca_ncomp);
   }
@@ -81,7 +81,7 @@ void full_tagger::deallocate_storage(){
     m_amr->deallocate(m_cdr_gradients[idx]);
   }
 
-  for(rte_iterator solver_it(*rte); solver_it.ok(); ++solver_it){
+  for(RtIterator solver_it(*rte); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     m_amr->deallocate(m_rte_densities[idx]);
   }
@@ -209,7 +209,7 @@ void full_tagger::compute_tracers(){
 	}
 
 	// RTE phi
-	for (rte_iterator solver_it(*rte); solver_it.ok(); ++solver_it){
+	for (RtIterator solver_it(*rte); solver_it.ok(); ++solver_it){
 	  const int idx = solver_it.get_solver();
 	  rte_phi[idx] = (*rte_phi_reg[idx])(iv, 0);
 	}
@@ -266,7 +266,7 @@ void full_tagger::compute_tracers(){
 	  cdr_gra[idx] = RealVect(D_DECL(gradient(vof, 0), gradient(vof, 1), gradient(vof, 2)));
 	}
 
-	for (rte_iterator solver_it(*rte); solver_it.ok(); ++solver_it){
+	for (RtIterator solver_it(*rte); solver_it.ok(); ++solver_it){
 	  const int idx = solver_it.get_solver();
 	  const EBCellFAB& density  = *rte_densities[idx];
 	  rte_phi[idx] = density(vof, 0);
@@ -399,7 +399,7 @@ void full_tagger::compute_rte_densities(Vector<EBAMRCellData>& a_rte_densities){
 
   RefCountedPtr<rte_layout>& rte = m_timeStepper->get_rte();
 
-  for (rte_iterator solver_it(*rte); solver_it.ok(); ++solver_it){
+  for (RtIterator solver_it(*rte); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>& solver = solver_it();
 
     // Interpolate density to centroid

@@ -174,7 +174,7 @@ RefCountedPtr<cdr_storage>& euler_maruyama::get_cdr_storage(const CdrIterator& a
   return m_cdr_scratch[a_solverit.index()];
 }
 
-RefCountedPtr<rte_storage>& euler_maruyama::get_rte_storage(const rte_iterator& a_solverit){
+RefCountedPtr<rte_storage>& euler_maruyama::get_rte_storage(const RtIterator& a_solverit){
   return m_rte_scratch[a_solverit.index()];
 }
 
@@ -337,7 +337,7 @@ void euler_maruyama::allocateInternals(){
 
   // Allocate RTE storage
   m_rte_scratch.resize(num_Photons);
-  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+  for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     m_rte_scratch[idx] = RefCountedPtr<rte_storage> (new rte_storage(m_amr, m_rte->get_phase(), ncomp));
     m_rte_scratch[idx]->allocate_storage();
@@ -364,7 +364,7 @@ void euler_maruyama::deallocateInternals(){
     m_cdr_scratch[idx] = RefCountedPtr<cdr_storage>(0);
   }
 
-  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+  for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     m_rte_scratch[idx]->deallocate_storage();
     m_rte_scratch[idx] = RefCountedPtr<rte_storage>(0);
@@ -490,7 +490,7 @@ void euler_maruyama::compute_cdr_eb_fluxes(){
   TimeStepper::compute_extrapolated_velocities(extrap_cdr_velocities, cdr_velocities, m_cdr->get_phase());
 
   // Compute RTE flux on the boundary
-  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+  for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>& solver   = solver_it();
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
@@ -593,7 +593,7 @@ void euler_maruyama::compute_cdr_domain_fluxes(){
   this->extrapolate_vector_to_domain_faces(extrap_cdr_gradients,  m_cdr->get_phase(), cdr_gradients);
 
   // Compute RTE flux on domain faces
-  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+  for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>& solver   = solver_it();
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
@@ -751,7 +751,7 @@ void euler_maruyama::advance_rte(const Real a_dt){
   }
 
   // Source terms should already be in place so we can solve directly.
-  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>& solver = solver_it();
     solver->advance(a_dt);
   }

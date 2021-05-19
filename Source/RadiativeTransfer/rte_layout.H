@@ -13,7 +13,7 @@
 #include "CD_NamespaceHeader.H"
   
 template <class T>
-class rte_iterator;
+class RtIterator;
 
 /*!
   @brief Class for holding a set of RtSolvers. 
@@ -35,7 +35,7 @@ public:
   /*!
     @brief Get iterator
   */
-  virtual rte_iterator<T> iterator();
+  virtual RtIterator<T> iterator();
 
   /*!
     @brief Get Realm

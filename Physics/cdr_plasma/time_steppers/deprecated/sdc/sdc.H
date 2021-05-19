@@ -11,7 +11,7 @@
 #include "CD_AmrMesh.H"
 #include "CD_TimeStepper.H"
 #include <CD_CdrIterator.H>
-#include "rte_iterator.H"
+#include <CD_RtIterator.H>
 
 extern "C" void dgesv_(int*    N,
 		       int*    NRHS,
@@ -123,7 +123,7 @@ protected:
 
   // Get functions for storage
   RefCountedPtr<cdr_storage>& get_cdr_storage(const CdrIterator& a_solverit);
-  RefCountedPtr<rte_storage>& get_rte_storage(const rte_iterator& a_solverit);
+  RefCountedPtr<rte_storage>& get_rte_storage(const RtIterator& a_solverit);
 
   // Allocation functions
   void allocate_cdr_storage();

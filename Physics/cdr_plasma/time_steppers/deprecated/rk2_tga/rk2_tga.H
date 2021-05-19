@@ -11,7 +11,7 @@
 #include "CD_AmrMesh.H"
 #include "CD_TimeStepper.H"
 #include <CD_CdrIterator.H>
-#include "rte_iterator.H"
+#include <CD_RtIterator.H>
 
 /*!
   @brief Class for evolving plasma equations with a split-step RK2/TGA method. 
@@ -123,7 +123,7 @@ protected:
   /*!
     @brief Get storage
   */
-  virtual RefCountedPtr<rte_storage>& get_rte_storage(const rte_iterator& a_solverit);
+  virtual RefCountedPtr<rte_storage>& get_rte_storage(const RtIterator& a_solverit);
 
   /*!
     @brief Allocate storage

@@ -221,7 +221,7 @@ RefCountedPtr<cdr_storage>& godunov::get_cdr_storage(const CdrIterator<CdrSolver
   return m_cdr_scratch[a_solverit.index()];
 }
 
-RefCountedPtr<rte_storage>& godunov::get_rte_storage(const rte_iterator<RtSolver>& a_solverit){
+RefCountedPtr<rte_storage>& godunov::get_rte_storage(const RtIterator<RtSolver>& a_solverit){
   return m_rte_scratch[a_solverit.index()];
 }
 
@@ -389,7 +389,7 @@ void godunov::allocateInternals(){
 
   // Allocate RTE storage
   m_rte_scratch.resize(num_Photons);
-  for (rte_iterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     m_rte_scratch[idx] = RefCountedPtr<rte_storage> (new rte_storage(m_amr, m_realm, m_rte->get_phase(), ncomp));
     m_rte_scratch[idx]->allocate_storage();
@@ -416,7 +416,7 @@ void godunov::deallocateInternals(){
     m_cdr_scratch[idx] = RefCountedPtr<cdr_storage>(0);
   }
 
-  for (rte_iterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     m_rte_scratch[idx]->deallocate_storage();
     m_rte_scratch[idx] = RefCountedPtr<rte_storage>(0);
@@ -543,7 +543,7 @@ void godunov::compute_cdr_eb_fluxes(){
   cdr_plasma_stepper::compute_extrapolated_velocities(extrap_cdr_velocities, cdr_velocities, m_cdr->get_phase());
 
   // Compute RTE flux on the boundary
-  for (rte_iterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>& solver   = solver_it();
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
@@ -647,7 +647,7 @@ void godunov::compute_cdr_domain_fluxes(){
   this->extrapolate_vector_to_domain_faces(extrap_cdr_gradients,  m_cdr->get_phase(), cdr_gradients);
 
   // Compute RTE flux on domain faces
-  for (rte_iterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>& solver   = solver_it();
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
@@ -1021,7 +1021,7 @@ void godunov::advance_rte(const Real a_dt){
   }
 
   // Source terms should already be in place so we can solve directly.
-  for (rte_iterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>& solver = solver_it();
     solver->advance(a_dt);
   }

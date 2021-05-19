@@ -8,7 +8,7 @@
 #include "rk2_tga.H"
 #include "rk2_tga_storage.H"
 #include <CD_CdrIterator.H>
-#include "rte_iterator.H"
+#include <CD_RtIterator.H>
 #include "data_ops.H"
 #include "units.H"
 
@@ -84,7 +84,7 @@ RefCountedPtr<cdr_storage>& rk2_tga::get_cdr_storage(const CdrIterator& a_solver
   return m_cdr_scratch[a_solverit.get_solver()];
 }
 
-RefCountedPtr<rte_storage>& rk2_tga::get_rte_storage(const rte_iterator& a_solverit){
+RefCountedPtr<rte_storage>& rk2_tga::get_rte_storage(const RtIterator& a_solverit){
   return m_rte_scratch[a_solverit.get_solver()];
 }
 
@@ -205,7 +205,7 @@ void rk2_tga::allocate_rte_storage(){
   const int num_Photons = m_plaskin->get_num_Photons();
   m_rte_scratch.resize(num_Photons);
   
-  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+  for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     m_rte_scratch[idx] = RefCountedPtr<rte_storage> (new rte_storage(m_amr, m_rte->get_phase(), ncomp));
     m_rte_scratch[idx]->allocate_storage();
@@ -229,7 +229,7 @@ void rk2_tga::deallocateInternals(){
     m_cdr_scratch[idx]->deallocate_storage();
   }
 
-  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+  for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     m_rte_scratch[idx]->deallocate_storage();
   }
@@ -260,7 +260,7 @@ void rk2_tga::cache_solutions(){
   }
 
   // Cache RTE solutions
-  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<RtSolver>& solver = solver_it();
 
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
@@ -403,7 +403,7 @@ void rk2_tga::compute_cdr_fluxes(const Real a_time){
   this->extrapolate_to_eb(extrap_cdr_velocities, m_cdr->get_phase(), cdr_velocities);
 
   // Compute RTE flux on the boundary
-  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+  for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>& solver   = solver_it();
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 

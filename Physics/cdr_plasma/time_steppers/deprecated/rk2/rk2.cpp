@@ -8,7 +8,7 @@
 #include "rk2.H"
 #include "rk2_storage.H"
 #include <CD_CdrIterator.H>
-#include "rte_iterator.H"
+#include <CD_RtIterator.H>
 #include "data_ops.H"
 #include "units.H"
 
@@ -39,7 +39,7 @@ RefCountedPtr<cdr_storage>& rk2::get_cdr_storage(const CdrIterator& a_solverit){
   return m_cdr_scratch[a_solverit.get_solver()];
 }
 
-RefCountedPtr<rte_storage>& rk2::get_rte_storage(const rte_iterator& a_solverit){
+RefCountedPtr<rte_storage>& rk2::get_rte_storage(const RtIterator& a_solverit){
   return m_rte_scratch[a_solverit.get_solver()];
 }
 
@@ -67,7 +67,7 @@ void rk2::allocate_rte_storage(){
   const int num_Photons = m_plaskin->get_num_Photons();
   m_rte_scratch.resize(num_Photons);
   
-  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+  for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     m_rte_scratch[idx] = RefCountedPtr<rte_storage> (new rte_storage(m_amr, m_rte->get_phase(), ncomp));
     m_rte_scratch[idx]->allocate_storage();
@@ -94,7 +94,7 @@ void rk2::deallocateInternals(){
     m_cdr_scratch[idx]->deallocate_storage();
   }
 
-  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+  for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     m_rte_scratch[idx]->deallocate_storage();
   }
@@ -366,7 +366,7 @@ void rk2::compute_cdr_fluxes_at_start_of_time_step(){
   //  this->extrapolate_to_eb(extrap_cdr_densities,  m_cdr->get_phase(), cdr_densities); // Already been done, no?
 
   // Compute RTE flux on the boundary
-  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+  for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>& solver   = solver_it();
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
@@ -511,7 +511,7 @@ void rk2::advance_rte_k1_stationary(const Real a_dt){
   Vector<EBAMRCellData*> rte_sources;
   Vector<EBAMRCellData*> cdr_states;
 
-  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+  for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>& solver   = solver_it();
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
     
@@ -551,7 +551,7 @@ void rk2::advance_rte_k1_transient(const Real a_dt){
   Vector<EBAMRCellData*> rte_sources;
   Vector<EBAMRCellData*> cdr_states;
 
-  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+  for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>& solver   = solver_it();
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
     
@@ -689,7 +689,7 @@ void rk2::compute_cdr_sources_after_k1(const Real a_dt){
   Vector<EBAMRCellData*> cdr_states;
   Vector<EBAMRCellData*> rte_states;
 
-  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+  for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
     rte_states.push_back(&(storage->get_phi()));
   }
@@ -750,7 +750,7 @@ void rk2::compute_cdr_fluxes_after_k1(const Real a_dt){
   //  this->extrapolate_to_eb(extrap_cdr_densities,  m_cdr->get_phase(), cdr_densities); // This has already been done, no?
 
   // Compute RTE flux on the boundary
-  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+  for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>& solver   = solver_it();
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
@@ -915,7 +915,7 @@ void rk2::advance_rte_k2_stationary(const Real a_dt){
   Vector<EBAMRCellData*> rte_sources;
   Vector<EBAMRCellData*> cdr_states;
 
-  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+  for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>& solver   = solver_it();
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
     
@@ -968,7 +968,7 @@ void rk2::advance_rte_k2_transient(const Real a_dt){
   Vector<EBAMRCellData*> rte_sources;
   Vector<EBAMRCellData*> cdr_states;
 
-  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+  for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>& solver   = solver_it();
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
     

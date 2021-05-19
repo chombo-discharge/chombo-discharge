@@ -239,7 +239,7 @@ RefCountedPtr<cdr_storage>& sisdc::get_cdr_storage(const CdrIterator& a_solverit
   return m_cdr_scratch[a_solverit.get_solver()];
 }
 
-RefCountedPtr<rte_storage>& sisdc::get_rte_storage(const rte_iterator& a_solverit){
+RefCountedPtr<rte_storage>& sisdc::get_rte_storage(const RtIterator& a_solverit){
   return m_rte_scratch[a_solverit.get_solver()];
 }
 
@@ -1781,7 +1781,7 @@ void sisdc::allocate_rte_storage(){
   const int num_Photons = m_plaskin->get_num_Photons();
   m_rte_scratch.resize(num_Photons);
   
-  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+  for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     m_rte_scratch[idx] = RefCountedPtr<rte_storage> (new rte_storage(m_amr, m_rte->get_phase(), ncomp));
     m_rte_scratch[idx]->allocate_storage(m_p);
@@ -1806,7 +1806,7 @@ void sisdc::deallocateInternals(){
     m_cdr_scratch[idx] = RefCountedPtr<cdr_storage>(0);
   }
 
-  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+  for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     m_rte_scratch[idx]->deallocate_storage();
     m_rte_scratch[idx] = RefCountedPtr<rte_storage>(0);
@@ -2068,7 +2068,7 @@ void sisdc::compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_phis, const Real 
   TimeStepper::compute_extrapolated_velocities(extrap_cdr_velocities, cdr_velocities, m_cdr->get_phase());
 
   // Compute RTE flux on the boundary
-  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+  for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>& solver   = solver_it();
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
@@ -2138,7 +2138,7 @@ void sisdc::compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_phis, cons
   this->extrapolate_vector_to_domain_faces(extrap_cdr_gradients,  m_cdr->get_phase(), cdr_gradients);
 
   // Compute RTE flux on domain faces
-  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+  for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>& solver   = solver_it();
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
@@ -2892,7 +2892,7 @@ void sisdc::subcycle_update_transport_bc(const int a_m, const int a_lvl, const R
   }
 
   // Radiative transfer fluxes at boundary
-  for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
+  for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>& solver   = solver_it();
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
@@ -2969,7 +2969,7 @@ void sisdc::subcycle_update_sources(const int a_m, const int a_lvl, const Real a
       cdr_densities[idx] = &((*phim[a_lvl])[dit()]);
       cdr_gradients[idx] = &((*gradm[a_lvl])[dit()]);
     }
-    for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    for (RtIterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.get_solver();
       RefCountedPtr<RtSolver>& solver = solver_it();
       EBAMRCellData& state = solver->getPhi();
@@ -3209,7 +3209,7 @@ void sisdc::store_solvers(){
   data_ops::copy(previous, state);
 
   // RTE
-  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<rte_storage>& storage     = sisdc::get_rte_storage(solver_it);
     const RefCountedPtr<RtSolver>& solver = solver_it();
 
@@ -3236,7 +3236,7 @@ void sisdc::restore_solvers(){
   data_ops::copy(state, previous);
 
   // RTE
-  for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+  for (RtIterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<rte_storage>& storage     = sisdc::get_rte_storage(solver_it);
     RefCountedPtr<RtSolver>& solver = solver_it();
 
