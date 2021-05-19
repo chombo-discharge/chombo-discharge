@@ -1,16 +1,23 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   dcel_iterator.H
+  @file   CD_DcelIterator.H
   @brief  Declaration of an iterators for DCEL surface tesselations
   @author Robert Marskar
-  @date   Apr. 2018
 */
 
-#ifndef _DCEL_ITERATOR_
-#define _DCEL_ITERATOR_
+#ifndef CD_DcelIterator_H
+#define CD_DcelIterator_H
 
+// Std includes
 #include <memory>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_NamespaceHeader.H>
+
 namespace Dcel {
   
   template <class T> class VertexT;
@@ -67,7 +74,8 @@ namespace Dcel {
     std::shared_ptr<Edge> m_curEdge; // Current edge
   };
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #include <CD_DcelIteratorImplem.H>
 
