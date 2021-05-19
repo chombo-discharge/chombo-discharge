@@ -102,11 +102,6 @@ public:
   virtual void setVerbosity(const int a_verbosity);
 
   /*!
-    @brief Set which variables to output
-  */
-  virtual void set_plot_variables();
-
-  /*!
     @brief Get current time
   */
   virtual void setTime(const int a_step, const Real a_time, const Real a_dt);

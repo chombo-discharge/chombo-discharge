@@ -205,26 +205,6 @@ void rte_solver::setSource(const Real a_source){
   m_amr->interpGhost(m_source, m_realm, m_phase);
 }
 
-void rte_solver::set_plot_variables(){
-  CH_TIME("rte_solver::set_plot_variables");
-  if(m_verbosity > 5){
-    pout() << m_name + "::set_plot_variables" << endl;
-  }
-
-  m_plotPhi = false;
-  m_plotSource = false;
-
-  ParmParse pp("rte_solver");
-  const int num = pp.countval("plt_vars");
-  Vector<std::string> str(num);
-  pp.getarr("plt_vars", str, 0, num);
-
-  for (int i = 0; i < num; i++){
-    if(     str[i] == "phi") m_plotPhi = true;
-    else if(str[i] == "src") m_plotSource = true;
-  }
-}
-
 int rte_solver::getNumberOfPlotVariables() const {
   CH_TIME("rte_solver::getNumberOfPlotVariables");
   if(m_verbosity > 5){
