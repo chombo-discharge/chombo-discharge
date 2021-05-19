@@ -13,20 +13,20 @@
 #include "CD_NamespaceHeader.H"
 namespace Dcel {
   
-  template <class T> class vertexT;
-  template <class T> class edgeT;
+  template <class T> class VertexT;
+  template <class T> class EdgeT;
   template <class T> class FaceT;
 
   template <class T>
   class edgeIteratorT {
   public:
 
-    using vertex = vertexT<T>;
-    using edge   = edgeT<T>;
+    using Vertex = VertexT<T>;
+    using Edge   = EdgeT<T>;
     using Face   = FaceT<T>;
 
-    using vertexPtr = std::shared_ptr<vertex>;
-    using edgePtr   = std::shared_ptr<edge>;
+    using VertexPtr = std::shared_ptr<Vertex>;
+    using EdgePtr   = std::shared_ptr<Edge>;
     using FacePtr   = std::shared_ptr<Face>;
 
     edgeIteratorT() = delete;
@@ -34,14 +34,14 @@ namespace Dcel {
     edgeIteratorT(Face& a_face);
     edgeIteratorT(const Face& a_face);
 
-    edgeIteratorT(vertex& a_vert);
-    edgeIteratorT(const vertex& a_vert);
+    edgeIteratorT(Vertex& a_vert);
+    edgeIteratorT(const Vertex& a_vert);
 
     inline
-    edgePtr& operator() () noexcept;
+    EdgePtr& operator() () noexcept;
 
     inline
-    const edgePtr& operator() () const noexcept;
+    const EdgePtr& operator() () const noexcept;
 
     inline
     void reset() noexcept;
@@ -63,8 +63,8 @@ namespace Dcel {
 
     IterationMode m_iterMode;
   
-    std::shared_ptr<edge> m_startEdge;   // Starting edge
-    std::shared_ptr<edge> m_curEdge; // Current edge
+    std::shared_ptr<Edge> m_startEdge;   // Starting edge
+    std::shared_ptr<Edge> m_curEdge; // Current edge
   };
 }
 #include "CD_NamespaceFooter.H"

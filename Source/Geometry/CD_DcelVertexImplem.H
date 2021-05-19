@@ -59,7 +59,7 @@ namespace Dcel {
 
   template <class T>
   inline
-  void VertexT<T>::define(const Vec3& a_pos, const edgePtr& a_edge, const Vec3& a_normal) noexcept {
+  void VertexT<T>::define(const Vec3& a_pos, const EdgePtr& a_edge, const Vec3& a_normal) noexcept {
     m_pos    = a_pos;
     m_outgoingEdge   = a_edge;
     m_normal = a_normal;
@@ -73,7 +73,7 @@ namespace Dcel {
 
   template <class T>
   inline
-  void VertexT<T>::setEdge(const edgePtr& a_edge) noexcept {
+  void VertexT<T>::setEdge(const EdgePtr& a_edge) noexcept {
     m_outgoingEdge = a_edge;
   }
 
@@ -208,13 +208,13 @@ namespace Dcel {
 
   template <class T>
   inline
-  std::shared_ptr<edgeT<T> >& VertexT<T>::getOutgoingEdge() noexcept {
+  std::shared_ptr<EdgeT<T> >& VertexT<T>::getOutgoingEdge() noexcept {
     return (m_outgoingEdge);
   }
 
   template <class T>
   inline
-  const std::shared_ptr<edgeT<T> >& VertexT<T>::getOutgoingEdge() const noexcept {
+  const std::shared_ptr<EdgeT<T> >& VertexT<T>::getOutgoingEdge() const noexcept {
     return (m_outgoingEdge);
   }
 

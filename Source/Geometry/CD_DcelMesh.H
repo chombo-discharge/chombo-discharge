@@ -25,7 +25,7 @@
 namespace Dcel {
 
   template <class T> class VertexT;
-  template <class T> class edgeT;
+  template <class T> class EdgeT;
   template <class T> class FaceT;
 
   template <class T>
@@ -35,11 +35,11 @@ namespace Dcel {
     using Vec3   = Vec3T<T>;
     
     using Vertex = VertexT<T>;
-    using edge   = edgeT<T>;
+    using Edge   = EdgeT<T>;
     using Face   = FaceT<T>;
 
     using VertexPtr = std::shared_ptr<Vertex>;
-    using edgePtr   = std::shared_ptr<edge>;
+    using EdgePtr   = std::shared_ptr<Edge>;
     using FacePtr   = std::shared_ptr<Face>;
     
     using Mesh   = MeshT<T>;
@@ -47,14 +47,14 @@ namespace Dcel {
     MeshT();
     MeshT(const Mesh& a_otherMesh) = delete;
     MeshT(std::vector<FacePtr >&   a_faces,
-	  std::vector<edgePtr >&   a_edges,
+	  std::vector<EdgePtr >&   a_edges,
 	  std::vector<VertexPtr >& a_vertices);
 
     ~MeshT();
 
     inline
     void define(std::vector<FacePtr >&   a_faces,
-		std::vector<edgePtr >&   a_edges,
+		std::vector<EdgePtr >&   a_edges,
 		std::vector<VertexPtr >& a_vertices) noexcept;
     
     inline
@@ -76,10 +76,10 @@ namespace Dcel {
     const std::vector<VertexPtr>& getVertices() const noexcept;
 
     inline
-    std::vector<edgePtr>& getEdges() noexcept;
+    std::vector<EdgePtr>& getEdges() noexcept;
 
     inline
-    const std::vector<edgePtr>& getEdges() const noexcept;
+    const std::vector<EdgePtr>& getEdges() const noexcept;
 
     inline
     std::vector<FacePtr>& getFaces() noexcept;
@@ -98,7 +98,7 @@ namespace Dcel {
     SearchAlgorithm m_algorithm;
 
     std::vector<VertexPtr >  m_vertices;
-    std::vector<edgePtr >    m_edges;
+    std::vector<EdgePtr >    m_edges;
     std::vector<FacePtr >    m_faces;
 
     inline

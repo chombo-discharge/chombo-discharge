@@ -27,7 +27,7 @@
 namespace Dcel {
 
   template <class T> class VertexT;
-  template <class T> class edgeT;
+  template <class T> class EdgeT;
   template <class T> class FaceT;
   template <class T> class edgeIteratorT;
   
@@ -38,40 +38,40 @@ namespace Dcel {
     using Vec3   = Vec3T<T>;
     
     using Vertex = VertexT<T>;
-    using edge   = edgeT<T>;
+    using Edge   = EdgeT<T>;
     using Face   = FaceT<T>;
 
     using VertexPtr = std::shared_ptr<Vertex>;
-    using edgePtr   = std::shared_ptr<edge>;
+    using EdgePtr   = std::shared_ptr<Edge>;
     using FacePtr   = std::shared_ptr<Face>;
 
     using edgeIterator = edgeIteratorT<T>;
     
     FaceT();
     
-    FaceT(const edgePtr& a_edge);
+    FaceT(const EdgePtr& a_edge);
     
     FaceT(const Face& a_otherFace);
     
     ~FaceT();
 
     inline
-    void define(const Vec3& a_normal, const edgePtr& a_edge) noexcept;
+    void define(const Vec3& a_normal, const EdgePtr& a_edge) noexcept;
 
     inline
     void reconcile() noexcept;
 
     inline
-    void setHalfEdge(const edgePtr& a_halfEdge) noexcept;
+    void setHalfEdge(const EdgePtr& a_halfEdge) noexcept;
 
     inline
     void setInsideOutsideAlgorithm(const InsideOutsideAlgorithm& a_algorithm) noexcept;
 
     inline
-    edgePtr& getHalfEdge() noexcept;
+    EdgePtr& getHalfEdge() noexcept;
 
     inline
-    const edgePtr& getHalfEdge() const noexcept;
+    const EdgePtr& getHalfEdge() const noexcept;
 
     inline
     Vec3T<T>& getCentroid() noexcept;
@@ -111,9 +111,9 @@ namespace Dcel {
   
   protected:
     
-    edgePtr m_halfEdge; // One of the edges. This must always be != nullptr for a valid face.
+    EdgePtr m_halfEdge; // One of the Edges. This must always be != nullptr for a valid face.
     
-    std::vector<edgePtr > m_edges; // Exists because of performance reasons. 
+    std::vector<EdgePtr > m_edges; // Exists because of performance reasons. 
 
     T m_area;
     

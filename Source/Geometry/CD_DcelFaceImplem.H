@@ -29,7 +29,7 @@ namespace Dcel {
 
   template <class T>
   inline
-  FaceT<T>::FaceT(const edgePtr& a_edge) : Face() {
+  FaceT<T>::FaceT(const EdgePtr& a_edge) : Face() {
     m_halfEdge = a_edge;
   }
 
@@ -47,7 +47,7 @@ namespace Dcel {
 
   template <class T>
   inline
-  void FaceT<T>::define(const Vec3& a_normal, const edgePtr& a_edge) noexcept {
+  void FaceT<T>::define(const Vec3& a_normal, const EdgePtr& a_edge) noexcept {
     m_normal   = a_normal;
     m_halfEdge = a_edge;
   }
@@ -75,7 +75,7 @@ namespace Dcel {
 
   template <class T>
   inline
-  void FaceT<T>::setHalfEdge(const edgePtr& a_halfEdge) noexcept {
+  void FaceT<T>::setHalfEdge(const EdgePtr& a_halfEdge) noexcept {
     m_halfEdge = a_halfEdge;
   }
 
@@ -197,13 +197,13 @@ namespace Dcel {
 
   template <class T>
   inline
-  std::shared_ptr<edgeT<T> >& FaceT<T>::getHalfEdge() noexcept {
+  std::shared_ptr<EdgeT<T> >& FaceT<T>::getHalfEdge() noexcept {
     return (m_halfEdge);
   }
 
   template <class T>
   inline
-  const std::shared_ptr<edgeT<T> >& FaceT<T>::getHalfEdge() const noexcept {
+  const std::shared_ptr<EdgeT<T> >& FaceT<T>::getHalfEdge() const noexcept {
     return (m_halfEdge);
   }
 
@@ -213,7 +213,7 @@ namespace Dcel {
     std::vector<VertexPtr> vertices;
 
     for (edgeIterator iter(*this); iter.ok(); ++iter){
-      edgePtr& edge = iter();
+      EdgePtr& edge = iter();
       vertices.emplace_back(edge->getVertex());
     }
 
@@ -226,7 +226,7 @@ namespace Dcel {
     std::vector<Vec3> ret;
 
     for (edgeIterator iter(*this); iter.ok(); ++iter){
-      edgePtr& edge = iter();
+      EdgePtr& edge = iter();
       ret.emplace_back(edge->getVertex()->getPosition());
     }
 

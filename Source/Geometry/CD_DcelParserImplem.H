@@ -36,7 +36,7 @@ namespace Dcel {
 
     if(filestream.is_open()){
       std::vector<std::shared_ptr<Vertex> >& vertices  = a_mesh.getVertices();
-      std::vector<std::shared_ptr<edge> >& edges       = a_mesh.getEdges();
+      std::vector<std::shared_ptr<Edge> >& edges       = a_mesh.getEdges();
       std::vector<std::shared_ptr<Face> >& faces       = a_mesh.getFaces();
 
       vertices.resize(0);
@@ -139,7 +139,7 @@ namespace Dcel {
   template <class T>
   inline
   void Dcel::parser::PLY<T>::readFacesASCII(std::vector<std::shared_ptr<Face> >&   a_faces,
-					    std::vector<std::shared_ptr<edge> >&   a_edges,
+					    std::vector<std::shared_ptr<Edge> >&   a_edges,
 					    std::vector<std::shared_ptr<Vertex> >& a_vertices,
 					    const int                              a_numFaces,
 					    std::ifstream&                         a_inputstream) {
@@ -170,9 +170,9 @@ namespace Dcel {
 
       // Build inside half edges and give each vertex an outgoing half edge. This may get overwritten later,
       // but the outgoing edge is not unique so it doesn't matter. 
-      std::vector<std::shared_ptr<edge> > halfEdges;
+      std::vector<std::shared_ptr<Edge> > halfEdges;
       for (const auto& v : curVertices){
-	halfEdges.emplace_back(std::make_shared<edge>(v));
+	halfEdges.emplace_back(std::make_shared<Edge>(v));
 	v->setEdge(halfEdges.back());
       }
 
@@ -209,7 +209,7 @@ namespace Dcel {
 
   template <class T>
   inline
-  void parser::PLY<T>::reconcilePairEdges(std::vector<std::shared_ptr<edge> >& a_edges) {
+  void parser::PLY<T>::reconcilePairEdges(std::vector<std::shared_ptr<Edge> >& a_edges) {
     for (auto& curEdge : a_edges){
       const auto& nextEdge = curEdge->getNextEdge();
     

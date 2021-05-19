@@ -38,7 +38,7 @@ namespace Dcel {
 
   template <class T>
   inline
-  edgeIteratorT<T>::edgeIteratorT(vertex& a_vert){
+  edgeIteratorT<T>::edgeIteratorT(Vertex& a_vert){
     m_startEdge = a_vert.getOutgoingEdge();
     m_curEdge   = m_startEdge;
     m_fullLoop  = false;
@@ -48,7 +48,7 @@ namespace Dcel {
 
   template <class T>
   inline
-  edgeIteratorT<T>::edgeIteratorT(const vertex& a_vert){
+  edgeIteratorT<T>::edgeIteratorT(const Vertex& a_vert){
     m_startEdge = a_vert.getOutgoingEdge();
     m_curEdge   = m_startEdge;
     m_fullLoop  = false;
@@ -58,13 +58,13 @@ namespace Dcel {
 
   template <class T>
   inline
-  std::shared_ptr<edgeT<T> >& edgeIteratorT<T>::operator() () noexcept {
+  std::shared_ptr<EdgeT<T> >& edgeIteratorT<T>::operator() () noexcept {
     return (m_curEdge);
   }
 
   template <class T>
   inline
-  const std::shared_ptr<edgeT<T> >& edgeIteratorT<T>::operator() () const noexcept {
+  const std::shared_ptr<EdgeT<T> >& edgeIteratorT<T>::operator() () const noexcept {
     return (m_curEdge);
   }
 
@@ -97,6 +97,7 @@ namespace Dcel {
     return !m_fullLoop && m_curEdge;
   }
 }
+
 #include "CD_NamespaceFooter.H"
 
 #endif
