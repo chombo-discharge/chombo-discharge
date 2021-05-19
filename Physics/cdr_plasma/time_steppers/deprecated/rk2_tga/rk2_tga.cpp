@@ -340,7 +340,7 @@ void rk2_tga::compute_cdr_velo(const Real a_time){
   }
 
   Vector<EBAMRCellData*> states     = m_cdr->getPhis();
-  Vector<EBAMRCellData*> velocities = m_cdr->get_velocities();
+  Vector<EBAMRCellData*> velocities = m_cdr->getVelocities();
   this->compute_cdr_velocities(velocities, states, m_fieldSolver_scratch->get_E_cell(), a_time);
 }
 
@@ -398,7 +398,7 @@ void rk2_tga::compute_cdr_fluxes(const Real a_time){
 
   // Extrapolate densities, velocities, and fluxes
   Vector<EBAMRCellData*> cdr_densities  = m_cdr->getPhis();
-  Vector<EBAMRCellData*> cdr_velocities = m_cdr->get_velocities();
+  Vector<EBAMRCellData*> cdr_velocities = m_cdr->getVelocities();
   this->compute_extrapolated_fluxes(extrap_cdr_fluxes, cdr_densities, cdr_velocities, m_cdr->getPhase());
   this->extrapolate_to_eb(extrap_cdr_velocities, m_cdr->getPhase(), cdr_velocities);
 

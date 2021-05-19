@@ -19,7 +19,7 @@
 
 // Needs forward declaration.
 template <class T>
-class cdr_iterator;
+class CdrIterator;
 
 /*!
   @brief Class for holding a set of CdrSolvers. 
@@ -48,7 +48,7 @@ public:
   /*!
     @brief Get the iterator
   */
-  virtual cdr_iterator<T> iterator();
+  virtual CdrIterator<T> iterator();
 
   /*!
     @brief Get the Realm

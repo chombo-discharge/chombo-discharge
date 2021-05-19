@@ -259,7 +259,7 @@ void rk2::compute_cdr_velo_at_start_of_time_step(){
   }
 
   Vector<EBAMRCellData*> states     = m_cdr->getPhis();
-  Vector<EBAMRCellData*> velocities = m_cdr->get_velocities();
+  Vector<EBAMRCellData*> velocities = m_cdr->getVelocities();
   this->compute_cdr_velocities(velocities, states, m_fieldSolver_scratch->get_E_cell(), m_time);
 }
 
@@ -360,7 +360,7 @@ void rk2::compute_cdr_fluxes_at_start_of_time_step(){
   
   // Extrapolate densities, velocities, and fluxes
   Vector<EBAMRCellData*> cdr_densities = m_cdr->getPhis();
-  Vector<EBAMRCellData*> cdr_velocities = m_cdr->get_velocities();
+  Vector<EBAMRCellData*> cdr_velocities = m_cdr->getVelocities();
   this->compute_extrapolated_fluxes(extrap_cdr_fluxes, cdr_densities, cdr_velocities, m_cdr->getPhase());
   this->extrapolate_to_eb(extrap_cdr_velocities, m_cdr->getPhase(), cdr_velocities);
   //  this->extrapolate_to_eb(extrap_cdr_densities,  m_cdr->getPhase(), cdr_densities); // Already been done, no?
@@ -637,7 +637,7 @@ void rk2::compute_cdr_velo_after_k1(const Real a_dt){
   const Real time = m_time + m_alpha*a_dt;
   
   Vector<EBAMRCellData*> states(num_species);
-  Vector<EBAMRCellData*> velocities = m_cdr->get_velocities();
+  Vector<EBAMRCellData*> velocities = m_cdr->getVelocities();
 
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
@@ -744,7 +744,7 @@ void rk2::compute_cdr_fluxes_after_k1(const Real a_dt){
   }
 
   // Extrapolate the flux and the velocity
-  Vector<EBAMRCellData*> cdr_velocities = m_cdr->get_velocities();
+  Vector<EBAMRCellData*> cdr_velocities = m_cdr->getVelocities();
   this->compute_extrapolated_fluxes(extrap_cdr_fluxes, cdr_densities, cdr_velocities, m_cdr->getPhase());
   this->extrapolate_to_eb(extrap_cdr_velocities, m_cdr->getPhase(), cdr_velocities);
   //  this->extrapolate_to_eb(extrap_cdr_densities,  m_cdr->getPhase(), cdr_densities); // This has already been done, no?

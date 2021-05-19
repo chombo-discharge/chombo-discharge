@@ -17,7 +17,7 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Iterator class for cdr_layout
+  @brief Iterator class for CdrLayout
 */
 template <class T>
 class CdrIterator {
@@ -42,7 +42,7 @@ public:
   /*!
     @brief Full constructor
   */
-  CdrIterator(cdr_layout<T>& a_layout, const SpeciesIteration a_mode = SpeciesIteration::all);
+  CdrIterator(CdrLayout<T>& a_layout, const SpeciesIteration a_mode = SpeciesIteration::all);
 
   /*!
     @brief Destructor

@@ -2,7 +2,7 @@
 #include <CD_GeoCoarsener.H>
 #include "CD_FieldSolverFactoryImplem.H"
 #include "CD_FieldSolverMultigrid.H"
-#include "cdr_layoutI.H"
+#include <CD_CdrLayoutImplem.H>
 #include <CD_CdrGodunov.H>
 #include <CD_RtLayoutImplem.H>
 #include <CD_EddingtonSP1.H>
@@ -52,7 +52,7 @@ int main(int argc, char* argv[]){
 
   // Create solver factories
   auto poi_fact = new FieldSolverFactory<FieldSolverMultigrid>();
-  auto cdr_fact = new cdr_factory<CdrSolver, CdrGodunov>();
+  auto cdr_fact = new CdrFactory<CdrSolver, CdrGodunov>();
   auto rte_fact = new RtFactory<RtSolver, EddingtonSP1>();
 
   // Instantiate solvers

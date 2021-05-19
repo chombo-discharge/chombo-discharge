@@ -1426,7 +1426,7 @@ void imex_sdc::compute_cdr_velo(const Vector<EBAMRCellData*>& a_phis, const Real
     pout() << "imex_sdc::compute_cdr_velo(Vector<EBAMRCellData*>, Real)" << endl;
   }
 
-  Vector<EBAMRCellData*> velocities = m_cdr->get_velocities();
+  Vector<EBAMRCellData*> velocities = m_cdr->getVelocities();
   imex_sdc::compute_cdr_velocities(velocities, a_phis, m_fieldSolver_scratch->get_E_cell(), a_time);
 }
 
@@ -1607,7 +1607,7 @@ void imex_sdc::compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_phis, const Re
 
 
   // Extrapolate densities, velocities, and fluxes
-  Vector<EBAMRCellData*> cdr_velocities = m_cdr->get_velocities();
+  Vector<EBAMRCellData*> cdr_velocities = m_cdr->getVelocities();
   cdr_plasma_stepper::compute_extrapolated_fluxes(extrap_cdr_fluxes, a_phis, cdr_velocities, m_cdr->getPhase());
   cdr_plasma_stepper::compute_extrapolated_velocities(extrap_cdr_velocities, cdr_velocities, m_cdr->getPhase());
 
@@ -1658,7 +1658,7 @@ void imex_sdc::compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_phis, c
   Vector<EBAMRCellData*> cdr_gradients;
 
   cdr_fluxes = m_cdr->getDomainFlux();
-  cdr_velocities = m_cdr->get_velocities();
+  cdr_velocities = m_cdr->getVelocities();
   for (CdrIterator<CdrSolver> solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 

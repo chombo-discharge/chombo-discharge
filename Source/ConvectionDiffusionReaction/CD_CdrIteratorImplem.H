@@ -23,7 +23,7 @@ CdrIterator<T>::CdrIterator(){
 }
 
 template <class T>
-CdrIterator<T>::CdrIterator(cdr_layout<T>& a_layout, const SpeciesIteration a_mode){
+CdrIterator<T>::CdrIterator(CdrLayout<T>& a_layout, const SpeciesIteration a_mode){
   CH_TIME("CdrIterator<T>::CdrIterator");
     
   m_solvers  = a_layout.getSolvers();

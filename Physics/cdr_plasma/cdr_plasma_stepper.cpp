@@ -2443,7 +2443,7 @@ void cdr_plasma_stepper::compute_cdr_velocities(){
   this->compute_E(E, m_cdr->getPhase(), m_fieldSolver->getPotential());
 
   Vector<EBAMRCellData*> states     = m_cdr->getPhis();
-  Vector<EBAMRCellData*> velocities = m_cdr->get_velocities();
+  Vector<EBAMRCellData*> velocities = m_cdr->getVelocities();
 
   this->compute_cdr_velocities(velocities, states, E, m_time);
 }
@@ -3135,7 +3135,7 @@ void cdr_plasma_stepper::get_cdr_max(Real& a_cdr_max, std::string& a_solver_name
   }
 }
 
-void cdr_plasma_stepper::set_cdr(RefCountedPtr<cdr_layout<CdrSolver>>& a_cdr){
+void cdr_plasma_stepper::set_cdr(RefCountedPtr<CdrLayout<CdrSolver>>& a_cdr){
   CH_TIME("cdr_plasma_stepper::set_cdr");
   if(m_verbosity > 5){
     pout() << "cdr_plasma_stepper::set_cdr" << endl;
@@ -4066,7 +4066,7 @@ Real cdr_plasma_stepper::get_cfl_dt(){
   return m_dt_cfl;
 }
 
-RefCountedPtr<cdr_layout<CdrSolver>>& cdr_plasma_stepper::get_cdr(){
+RefCountedPtr<CdrLayout<CdrSolver>>& cdr_plasma_stepper::get_cdr(){
   return m_cdr;
 }
 

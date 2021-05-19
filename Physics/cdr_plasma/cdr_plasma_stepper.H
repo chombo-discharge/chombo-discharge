@@ -16,7 +16,7 @@
 #include "cdr_plasma_physics.H"
 #include "CD_AmrMesh.H"
 #include <CD_MultiFluidIndexSpace.H>
-#include "cdr_layout.H"
+#include <CD_CdrLayout.H>
 #include <CD_RtLayout.H>
 #include "CD_FieldSolver.H"
 #include "CD_SigmaSolver.H"
@@ -132,7 +132,7 @@ namespace physics {
 
       /*!
 	@brief Solve the poisson equation. This calls compute_rho() 
-	@details This assumes that the data contain in cdr_layout is cell-centered
+	@details This assumes that the data contain in CdrLayout is cell-centered
       */
       virtual bool solve_poisson();
 
@@ -603,13 +603,13 @@ namespace physics {
 
 
       /*!
-	@brief Compute the cell-centered space charge density by using data inside cdr_layout. 
-	@details This assumes that the data contain in cdr_layout is cell-centered
+	@brief Compute the cell-centered space charge density by using data inside CdrLayout. 
+	@details This assumes that the data contain in CdrLayout is cell-centered
       */
       virtual void compute_rho();
 
       /*!
-	@brief Compute cell-centered space charge density on a specific phase using whatever is available in cdr_layout
+	@brief Compute cell-centered space charge density on a specific phase using whatever is available in CdrLayout
       */
       virtual void compute_rho(EBAMRCellData& a_rho, const phase::which_phase a_phase);
 
@@ -832,7 +832,7 @@ namespace physics {
       /*!
 	@brief Set the cdr layout
       */
-      virtual void set_cdr(RefCountedPtr<cdr_layout<CdrSolver> >& a_cdr);
+      virtual void set_cdr(RefCountedPtr<CdrLayout<CdrSolver> >& a_cdr);
 
       /*!
 	@brief Set the Poisson solver
@@ -914,7 +914,7 @@ namespace physics {
       /*!
 	@brief Get cdr solvers
       */
-      virtual RefCountedPtr<cdr_layout<CdrSolver> >& get_cdr();
+      virtual RefCountedPtr<CdrLayout<CdrSolver> >& get_cdr();
 
       /*!
 	@brief Get cdr solvers
@@ -976,7 +976,7 @@ namespace physics {
       /*!
 	@brief CDR solvers
       */
-      RefCountedPtr<cdr_layout<CdrSolver> > m_cdr;
+      RefCountedPtr<CdrLayout<CdrSolver> > m_cdr;
 
       /*!
 	@brief Radiative transfer solvers

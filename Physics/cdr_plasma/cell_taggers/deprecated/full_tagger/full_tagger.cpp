@@ -35,7 +35,7 @@ void full_tagger::allocate_storage(){
   const int vec_ncomp = SpaceDim;
 
 
-  RefCountedPtr<cdr_layout> cdr = m_timeStepper->get_cdr();
+  RefCountedPtr<CdrLayout> cdr = m_timeStepper->get_cdr();
   RefCountedPtr<RtLayout> rte = m_timeStepper->get_rte();
 
   m_amr->allocate(m_scratch,  m_phase, sca_ncomp);
@@ -66,7 +66,7 @@ void full_tagger::deallocate_storage(){
     pout() << m_name + "::deallocate_storage" << endl;
   }
 
-  RefCountedPtr<cdr_layout> cdr = m_timeStepper->get_cdr();
+  RefCountedPtr<CdrLayout> cdr = m_timeStepper->get_cdr();
   RefCountedPtr<RtLayout> rte = m_timeStepper->get_rte();
 
   m_amr->deallocate(m_scratch);
@@ -100,7 +100,7 @@ void full_tagger::compute_tracers(){
   const int num_species = m_physics->get_num_CdrSpecies();
   const int num_Photons = m_physics->get_num_RtSpecies();
 
-  RefCountedPtr<cdr_layout>& cdr = m_timeStepper->get_cdr();
+  RefCountedPtr<CdrLayout>& cdr = m_timeStepper->get_cdr();
   RefCountedPtr<RtLayout>& rte = m_timeStepper->get_rte();
 
 
@@ -325,7 +325,7 @@ void full_tagger::compute_cdr_densities(Vector<EBAMRCellData>& a_cdr_densities){
     pout() << m_name + "::compute_cdr_densities" << endl;
   }
 
-  RefCountedPtr<cdr_layout>& cdr = m_timeStepper->get_cdr();
+  RefCountedPtr<CdrLayout>& cdr = m_timeStepper->get_cdr();
 
   for (CdrIterator solver_it(*cdr); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
@@ -348,7 +348,7 @@ void full_tagger::compute_cdr_gradients(Vector<EBAMRCellData>& a_cdr_gradients){
     pout() << m_name + "::compute_cdr_gradients" << endl;
   }
 
-  RefCountedPtr<cdr_layout>& cdr = m_timeStepper->get_cdr();
+  RefCountedPtr<CdrLayout>& cdr = m_timeStepper->get_cdr();
     
   for (CdrIterator solver_it(*cdr); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
