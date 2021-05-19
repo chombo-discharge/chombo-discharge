@@ -1,10 +1,15 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file polygon_rod_if.cpp
-  @brief Implementation of polygon_rod_if.hpp
+  @file   CD_PolygonRodIF.cpp
+  @brief  Implementation of CD_PolygonRodIF.H
   @author Robert Marskar
-  @date Aug. 2016
 */
 
+// Chombo includes
 #include <IntersectionIF.H>
 #include <SphereIF.H>
 #include <PlaneIF.H>
@@ -13,19 +18,19 @@
 #include <SmoothIntersection.H>
 #include <SmoothUnion.H>
 
-#include "polygon_rod_if.H"
+// Our includes
+#include <CD_PolygonRodIF.H>
 #include <CD_CylinderSdf.H>
+#include <CD_NamespaceHeader.H>
 
-#include "CD_NamespaceHeader.H"
-
-polygon_rod_if::polygon_rod_if(const RealVect a_endPoint1,
-			       const RealVect a_endPoint2,
-			       const Real     a_radius,
-			       const Real     a_cornerCurv,
-			       const int      a_numSides,
-			       const bool     a_fluidInside){
+PolygonRodIF::PolygonRodIF(const RealVect a_endPoint1,
+			   const RealVect a_endPoint2,
+			   const Real     a_radius,
+			   const Real     a_cornerCurv,
+			   const int      a_numSides,
+			   const bool     a_fluidInside){
   if(SpaceDim != 3){
-    MayDay::Abort("polygon_rod_if::polygon_rod_if - this is a 3D object!");
+    MayDay::Abort("PolygonRodIF::PolygonRodIF - this is a 3D object!");
   }
 
   const Real length = (a_endPoint2 - a_endPoint1).vectorLength();
@@ -78,18 +83,19 @@ polygon_rod_if::polygon_rod_if(const RealVect a_endPoint1,
   }
 }
     
-polygon_rod_if::polygon_rod_if(const polygon_rod_if& a_inputIF){
+PolygonRodIF::PolygonRodIF(const PolygonRodIF& a_inputIF){
   m_baseif = a_inputIF.m_baseif;
 }
 
-polygon_rod_if::~polygon_rod_if(){
+PolygonRodIF::~PolygonRodIF(){
 }
 
-Real polygon_rod_if::value(const RealVect& a_pos) const {
+Real PolygonRodIF::value(const RealVect& a_pos) const {
   return m_baseif->value(a_pos);
 }
 
-BaseIF* polygon_rod_if::newImplicitFunction() const {
-  return (BaseIF*) new polygon_rod_if(*this);
+BaseIF* PolygonRodIF::newImplicitFunction() const {
+  return (BaseIF*) new PolygonRodIF(*this);
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

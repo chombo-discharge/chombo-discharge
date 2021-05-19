@@ -19,7 +19,7 @@
 #include <CD_BoxSdf.H>
 #include <CD_CylinderSdf.H>
 #include <CD_ProfileCylinderIF.H>
-#include "polygon_rod_if.H"
+#include <CD_PolygonRodIF.H>
 #include <CD_HollowCylinderIF.H>
 #include <CD_RoundedCylinderIF.H>
 
@@ -133,7 +133,7 @@ RefCountedPtr<BaseIF> mechanical_shaft::get_polygon(){
   pp.getarr("endpoint1", vec, 0, SpaceDim); c1 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
   pp.getarr("endpoint2", vec, 0, SpaceDim); c2 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
 
-  return RefCountedPtr<BaseIF> (new polygon_rod_if(c1, c2, radius, curv, numSides, false));
+  return RefCountedPtr<BaseIF> (new PolygonRodIF(c1, c2, radius, curv, numSides, false));
 }
 
 RefCountedPtr<BaseIF> mechanical_shaft::get_cylinder(){
