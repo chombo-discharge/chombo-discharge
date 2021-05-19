@@ -1,13 +1,18 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file dielectric.cpp
-  @brief Implementation of dielectric.H
+  @file   CD_Dielectric.cpp
+  @brief  Implementation of CD_Dielectric.H
   @author Robert marskar
   @date Nov. 2017
 */
 
+// Our includes
 #include <CD_Dielectric.H>
-
-#include "CD_NamespaceHeader.H"
+#include <CD_NamespaceHeader.H>
   
 Dielectric::Dielectric(){
 }
@@ -49,4 +54,5 @@ Real Dielectric::getPermittivity(const RealVect a_pos) const {
     return m_variablepermittivity(a_pos);
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

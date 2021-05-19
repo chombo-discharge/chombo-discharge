@@ -9,7 +9,6 @@
   @author Robert marskar
 */
 
-
 // Our includes
 #include <CD_Electrode.H>
 #include <CD_NamespaceHeader.H>

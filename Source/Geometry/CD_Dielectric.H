@@ -1,17 +1,24 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file dielectric.H
-  @brief dielectric struct
+  @file   CD_Dielectric.H
+  @brief  Dielectric class
   @author Robert marskar
-  @date Nov. 2017
 */
 
-#ifndef _DIELECTRIC_
-#define _DIELECTRIC_
+#ifndef CD_Dielectric_H
+#define CD_Dielectric_H
 
+// Chombo includes
 #include <BaseIF.H>
 #include <RefCountedPtr.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_NamespaceHeader.H>
+
 /*!
   @brief dielectric class. Simple tuple.
 */
@@ -68,5 +75,7 @@ protected:
   
   bool m_constant;
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif
