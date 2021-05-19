@@ -1,24 +1,30 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   torus_if.H
-  @brief  New TorusIF function, which is now also signed distance
-  @date   Sep. 2017
+  @file   CD_TorusSdf.H
+  @brief  Torus function which is signed distance
   @author Robert Marskar
 */
 
-#ifndef _NEW_TORUS_IF_
-#define _NEW_TORUS_IF_
+#ifndef CD_TorusSdf_H
+#define CD_TorusSdf_H
 
+// Chombo includes
 #include <BaseIF.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Declaration of a torus signed distance function. The orientation is along z
 */
-class torus_if : public BaseIF {
+class TorusSdf : public BaseIF {
 public:
 
-  torus_if() = delete;
+  TorusSdf() = delete;
 
   /*!
     @brief Constructor
@@ -27,19 +33,19 @@ public:
     @param[in] a_minorRadius Minor radius
     @param[in] a_fluidInside Fluid on inside of or not
   */
-  torus_if(const RealVect a_center, const Real a_majorRadius, const Real a_minorRadius, const bool a_fluidInside);
+  TorusSdf(const RealVect a_center, const Real a_majorRadius, const Real a_minorRadius, const bool a_fluidInside);
 
   /*!
     @brief Copy constructor
     @param[in] a_inputIF Input cylinder
   */
   
-  torus_if(const torus_if& a_inputIF);
+  TorusSdf(const TorusSdf& a_inputIF);
 
   /*!
     @brief Destructor
   */
-  virtual ~torus_if();
+  virtual ~TorusSdf();
 
   /*!
     @brief Test whether inside or not
@@ -74,5 +80,7 @@ protected:
   */
   bool m_fluidInside;
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif

@@ -1,15 +1,19 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   torus_if.cpp
-  @brief  Implementation of torus_if.H
-  @date   Feb. 2021
+  @file   CD_TorusSdf.cpp
+  @brief  Implementation of CD_TorusSdf.H
   @author Robert Marskar
 */
 
-#include "torus_if.H"
-
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_TorusSdf.H>
+#include <CD_NamespaceHeader.H>
   
-torus_if::torus_if(const RealVect a_center, const Real a_majorRadius, const Real a_minorRadius, const bool a_fluidInside){
+TorusSdf::TorusSdf(const RealVect a_center, const Real a_majorRadius, const Real a_minorRadius, const bool a_fluidInside){
   m_center      = a_center;
   m_majorRadius = a_majorRadius;
   m_minorRadius = a_minorRadius;
@@ -17,7 +21,7 @@ torus_if::torus_if(const RealVect a_center, const Real a_majorRadius, const Real
 }
 
 
-torus_if::torus_if(const torus_if& a_inputIF){
+TorusSdf::TorusSdf(const TorusSdf& a_inputIF){
   m_center      = a_inputIF.m_center;
   m_majorRadius = a_inputIF.m_majorRadius;
   m_minorRadius = a_inputIF.m_minorRadius;
@@ -25,11 +29,11 @@ torus_if::torus_if(const torus_if& a_inputIF){
 }
 
 
-torus_if::~torus_if(){
+TorusSdf::~TorusSdf(){
 
 }
 
-Real torus_if::value(const RealVect& a_point) const{
+Real TorusSdf::value(const RealVect& a_point) const{
   const RealVect p  = a_point - m_center;
 
   Real radius = 0.0;
@@ -54,8 +58,8 @@ Real torus_if::value(const RealVect& a_point) const{
   return retval;
 }
 
-BaseIF* torus_if::newImplicitFunction() const{
-  return (BaseIF*) new torus_if(m_center, m_majorRadius, m_minorRadius, m_fluidInside);
+BaseIF* TorusSdf::newImplicitFunction() const{
+  return (BaseIF*) new TorusSdf(m_center, m_majorRadius, m_minorRadius, m_fluidInside);
 }
 
-#include "CD_NamespaceFooter.H"
+#include <CD_NamespaceFooter.H>

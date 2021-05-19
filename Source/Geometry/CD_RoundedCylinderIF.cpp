@@ -23,7 +23,7 @@
 #include <CD_CylinderSdf.H>
 #include <CD_RoundedCylinderIF.H>
 #include <CD_RoundedBoxIF.H>
-#include <torus_if.H>
+#include <CD_TorusSdf.H>
 #include <CD_NamespaceHeader.H>
 
 RoundedCylinderIF::RoundedCylinderIF(const RealVect a_center1, const RealVect a_center2, const Real a_radius, const Real a_curv, const bool a_fluidInside){
@@ -109,8 +109,8 @@ BaseIF* RoundedCylinderIF::makeBaseIF3D(){
   BaseIF* mainCylinder   = (BaseIF*) (new CylinderSdf(y0, y1, m_radius,        false));
   BaseIF* insideCylinder = (BaseIF*) (new CylinderSdf(x0, x1, m_radius-m_curv, false));
 
-  BaseIF* torusBottom = (BaseIF*) (new torus_if(y0, majorRadius, minorRadius, false));
-  BaseIF* torusTop    = (BaseIF*) (new torus_if(y1, majorRadius, minorRadius, false));
+  BaseIF* torusBottom = (BaseIF*) (new TorusSdf(y0, majorRadius, minorRadius, false));
+  BaseIF* torusTop    = (BaseIF*) (new TorusSdf(y1, majorRadius, minorRadius, false));
 
   // Make the intersection of these
   Vector<BaseIF*> parts;

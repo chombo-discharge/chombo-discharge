@@ -17,7 +17,7 @@
 #include <CD_ProfileCylinderIF.H>
 #include <CD_RoundedCylinderIF.H>
 #include <CD_CylinderSdf.H>
-#include <torus_if.H>
+#include <CD_TorusSdf.H>
 #include <CD_NamespaceHeader.H>
 
 ProfileCylinderIF::ProfileCylinderIF(const RealVect  a_endPoint1,
@@ -43,7 +43,7 @@ ProfileCylinderIF::ProfileCylinderIF(const RealVect  a_endPoint1,
   Vector<BaseIF*> parts;
 
   BaseIF* cyl   = (BaseIF*) new RoundedCylinderIF(RealVect::Zero, length*zhat, a_cylinderRadius, a_roundingRadius, a_fluidInside);
-  BaseIF* torus = (BaseIF*) new torus_if(center, a_torusMajorRadius, a_torusMinorRadius,  !a_fluidInside);
+  BaseIF* torus = (BaseIF*) new TorusSdf(center, a_torusMajorRadius, a_torusMinorRadius,  !a_fluidInside);
 
   // "Left" profiles
   for (int ileft = 0; ileft < a_numLeft; ileft++){
