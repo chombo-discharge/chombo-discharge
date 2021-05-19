@@ -1,19 +1,25 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   dcel_poly.H
-  @brief  Declaration of a two-dimensional polygon class for embedding 3D dcel_face faces. 
+  @file   CD_DcelPoly.H
+  @brief  Declaration of a two-dimensional polygon class for embedding 3D polygon faces
   @author Robert Marskar
-  @date   Apr. 2018
 */
 
-#ifndef _DCEL_POLY_H_
-#define _DCEL_POLY_H_
+#ifndef CD_DcelPoly_H
+#define CD_DcelPoly_H
 
-#include <CD_Vec.H>
-
+// Std includes
 #include <memory>
 #include <vector>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_Vec.H>
+#include <CD_NamespaceHeader.H>
+
 namespace Dcel {
     
   template <class T>
@@ -65,7 +71,8 @@ namespace Dcel {
     std::vector<Vec2> m_points;
   };
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #include <CD_DcelPolyImplem.H>
 

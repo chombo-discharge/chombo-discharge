@@ -1,18 +1,24 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   dcel_polyI.H
-  @brief  Implementation of dcel_poly.H
+  @file   CD_DcelPolyImplem.H
+  @brief  Implementation of CD_DcelPoly.H
   @author Robert Marskar
-  @date   March 2021
 */
 
-#ifndef _DCEL_POLYI_H_
-#define _DCEL_POLYI_H_
+#ifndef CD_DcelPolyImplem_H
+#define CD_DcelPolyImplem_H
 
-#include <CD_DcelPoly.H>
-
+// Std includes
 #include <iostream>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_DcelPoly.H>
+#include <CD_NamespaceHeader.H>
+
 namespace Dcel {
 
   template <class T>
@@ -37,7 +43,7 @@ namespace Dcel {
       ret = this->isPointInsidePolygonWindingNumber(a_point);
       break;
     default:
-      std::cerr << "In file 'dcel_polyI.H' function Dcel::Polygon2D<T>::isPointInside - unsupported algorithm requested.\n";
+      std::cerr << "In file 'CD_DcelPolyImplem.H' function Dcel::Polygon2D<T>::isPointInside - unsupported algorithm requested.\n";
     }
 
     return ret;
@@ -206,5 +212,7 @@ namespace Dcel {
     return ret;
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif
