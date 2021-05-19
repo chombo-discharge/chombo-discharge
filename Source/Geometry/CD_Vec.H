@@ -1,14 +1,19 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   vec.H
-  @brief  Declaration of 2D and 3D point/vector classes with templated precision (so that we can decouple from Chombo). 
+  @file   CD_Vec.H
+  @brief  Declaration of 2D and 3D point/vector classes with templated precision (so that we can decouple from Chombo). Used with DCEL tools. 
   @author Robert Marskar
-  @date   March 2021
 */
 
-#ifndef _VEC_H_
-#define _VEC_H_
+#ifndef CD_Vec_H
+#define CD_Vec_H
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_NamespaceHeader.H>
 
 template<class T>
 class Vec2T {
@@ -202,8 +207,9 @@ Vec3T<T> min(const Vec3T<T>& u, const Vec3T<T>& v) noexcept;
 template <class T>
 inline
 Vec3T<T> max(const Vec3T<T>& u, const Vec3T<T>& v) noexcept;
-#include "CD_NamespaceFooter.H"
 
-#include "VecI.H"
+#include <CD_NamespaceFooter.H>
+
+#include <CD_VecImplem.H>
 
 #endif

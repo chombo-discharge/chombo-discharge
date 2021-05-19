@@ -8,7 +8,7 @@
 #ifndef _DCEL_IFI_H_
 #define _DCEL_IFI_H_
 
-#include "Vec.H"
+#include <CD_Vec.H>
 
 #include "dcel_if.H"
 

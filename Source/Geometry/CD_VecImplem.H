@@ -1,19 +1,24 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   VecI.H
-  @brief  Implementation of Vec.H
+  @file   CD_VecImplem.H
+  @brief  Implementation of CD_Vec.H
   @author Robert Marskar
-  @date   March 2021
 */
 
-#ifndef _VECI_H_
-#define _VECI_H_
+#ifndef CD_VecImplem_H
+#define CD_VecImplem_H
 
-#include "Vec.H"
-
+// Std includes
 #include <math.h>
 #include <algorithm>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_Vec.H>
+#include <CD_NamespaceHeader.H>
 
 template <class T>
 inline
@@ -446,6 +451,7 @@ Vec3T<T> max(const Vec3T<T>& u, const Vec3T<T>& v) noexcept {
 		  std::max(u[1], v[1]),
 		  std::max(u[2], v[2]));
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

@@ -8,7 +8,7 @@
 #ifndef _DCEL_EDGE_
 #define _DCEL_EDGE_
 
-#include "Vec.H"
+#include <CD_Vec.H>
 
 #include <CD_DcelFace.H>
 

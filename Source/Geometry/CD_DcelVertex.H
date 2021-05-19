@@ -8,7 +8,7 @@
 #ifndef _VERTEX_
 #define _VERTEX_
 
-#include "Vec.H"
+#include <CD_Vec.H>
 
 #include <CD_DcelEdge.H>
 #include <CD_DcelFace.H>

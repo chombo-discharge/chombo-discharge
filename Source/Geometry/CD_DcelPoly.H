@@ -8,7 +8,7 @@
 #ifndef _DCEL_POLY_H_
 #define _DCEL_POLY_H_
 
-#include "Vec.H"
+#include <CD_Vec.H>
 
 #include <memory>
 #include <vector>

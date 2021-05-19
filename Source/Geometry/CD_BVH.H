@@ -19,7 +19,7 @@
 #include <queue>
 
 // Our includes
-#include <Vec.H>
+#include <CD_Vec.H>
 #include <CD_NamespaceHeader.H>
 
 namespace BVH {

@@ -16,7 +16,7 @@
 #include <vector>
 
 // Our includes
-#include <Vec.H>
+#include <CD_Vec.H>
 #include <CD_NamespaceHeader.H>
 
 namespace BoundingVolumes {

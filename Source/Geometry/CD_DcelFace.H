@@ -8,7 +8,7 @@
 #ifndef _DCEL_FACE__
 #define _DCEL_FACE__
 
-#include "Vec.H"
+#include <CD_Vec.H>
 
 #include <CD_DcelAlgorithms.H>
 #include <CD_DcelVertex.H>
