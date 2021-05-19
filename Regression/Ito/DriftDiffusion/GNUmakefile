@@ -23,6 +23,8 @@ src_dirs = $(DISCHARGE_HOME)/Source \
 	$(DISCHARGE_HOME)/Source/Driver \
 	$(DISCHARGE_HOME)/Source/Elliptic \
 	$(DISCHARGE_HOME)/Source/Geometry \
+	$(DISCHARGE_HOME)/Source/ImplicitFunctions \
+	$(DISCHARGE_HOME)/Source/Multifluid \
 	$(DISCHARGE_HOME)/Source/RadiativeTransfer \
 	$(DISCHARGE_HOME)/Source/ito_solver \
 	$(DISCHARGE_HOME)/Source/SigmaSolver \
