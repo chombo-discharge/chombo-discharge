@@ -1,26 +1,32 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   McPhoto.H
+  @file   CD_McPhoto.H
+  @brief  Declaration of a monte carlo class for doing radiative transfer
   @author Robert Marskar
-  @date   Jan. 2018
-  @todo   Particle deposition should use the new EBMeshInterp and not MeshInterp
 */
 
-#ifndef _MC_PHOTO_
-#define _MC_PHOTO_
+#ifndef CD_McPhoto_H
+#define CD_McPhoto_H
 
+// Std includes
+#include <random>
+
+// Chombo includes
+#include <Particle.H>
+#include <ParticleData.H>
+#include <BinItem.H>
+
+// Our includes
 #include <CD_RtSolver.H>
 #include <CD_EbParticleInterp.H>
 #include <CD_ParticleContainer.H>
 #include <CD_WallBc.H>
 #include <CD_Photon.H>
-
-#include <Particle.H>
-#include <ParticleData.H>
-#include <BinItem.H>
-
-#include <random>
-
-#include "CD_NamespaceHeader.H"
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Radiative tranfer equation solver using stationary Monte-Carlo
@@ -58,21 +64,21 @@ public:
     @brief Move Photons and absorb them. 
     @details This is the routine that is used to move Photons when the solver is stationary. 
   */
-  virtual void advancePhotonsStationary(ParticleContainer<Photon>& a_bulk_Photons,
-					  ParticleContainer<Photon>& a_eb_Photons,
-					  ParticleContainer<Photon>& a_domain_Photons,
-					  ParticleContainer<Photon>& a_Photons);
+  virtual void advancePhotonsStationary(ParticleContainer<Photon>& a_bulkPhotons,
+					ParticleContainer<Photon>& a_ebPhotons,
+					ParticleContainer<Photon>& a_domainPhotons,
+					ParticleContainer<Photon>& a_photons);
 
   /*!
     @brief This moves the Photons over a time step dt. If a Photon is absorbed in the gas, it is put in
-    a_bulk_Photons. If it is absorbed on the EB, it is put in a_eb_Photons etc. 
+    a_bulkPhotons. If it is absorbed on the EB, it is put in a_ebPhotons etc. 
     @details This is the routine that is used to move Photons when the solver is transient. 
   */
-  virtual void advancePhotonsTransient(ParticleContainer<Photon>& a_bulk_Photons,
-					 ParticleContainer<Photon>& a_eb_Photons,
-					 ParticleContainer<Photon>& a_domain_Photons,
-					 ParticleContainer<Photon>& a_oPhotons,
-					 const Real                  a_dt);
+  virtual void advancePhotonsTransient(ParticleContainer<Photon>& a_bulkPhotons,
+				       ParticleContainer<Photon>& a_ebPhotons,
+				       ParticleContainer<Photon>& a_domainPhotons,
+				       ParticleContainer<Photon>& a_oPhotons,
+				       const Real                  a_dt);
 
   /*!
     @brief Remap Photons
@@ -82,7 +88,7 @@ public:
   /*!
     @brief Remap Photons
   */
-  virtual void remap(ParticleContainer<Photon>& a_Photons);
+  virtual void remap(ParticleContainer<Photon>& a_photons);
 
   /*!
     @brief Deposit Photons
@@ -93,63 +99,63 @@ public:
     @brief Deposit Photons
   */
   virtual void depositPhotons(EBAMRCellData&                    a_phi,
-			       const ParticleContainer<Photon>& a_particles,
-			       const DepositionType::Which&      a_deposition);
+			      const ParticleContainer<Photon>& a_particles,
+			      const DepositionType::Which&      a_deposition);
 
   /*!
     @brief Deposit Photons
   */
   virtual void depositPhotons(EBAMRCellData&               a_phi,
-			       const AMRParticles<Photon>&  a_Photons,
-			       const DepositionType::Which& a_deposition);
+			      const AMRParticles<Photon>&  a_photons,
+			      const DepositionType::Which& a_deposition);
 
   /*!
-    @brief Sort the m_Photons container by cell
+    @brief Sort the m_photons container by cell
   */
   virtual void sortPhotonsByCell();
 
   /*!
-    @brief Sort the m_Photons container by cell
+    @brief Sort the m_photons container by cell
   */
   virtual void sortPhotonsByPatch();
 
   /*!
-    @brief Sort the m_bulk_Photons container by cell
+    @brief Sort the m_bulkPhotons container by cell
   */
   virtual void sortBulkPhotonsByCell();
 
   /*!
-    @brief Sort the m_bulk_Photons container by cell
+    @brief Sort the m_bulkPhotons container by cell
   */
   virtual void sortBulkPhotonsByPatch();
 
   /*!
-    @brief Sort the m_source_Photons container by cell
+    @brief Sort the m_sourcePhotons container by cell
   */
   virtual void sortSourcePhotonsByCell();
 
   /*!
-    @brief Sort the m_source_Photons container by cell
+    @brief Sort the m_sourcePhotons container by cell
   */
   virtual void sortSourcePhotonsByPatch();
 
   /*!
-    @brief Sort the m_source_Photons container by cell
+    @brief Sort the m_sourcePhotons container by cell
   */
   virtual void sortEbPhotonsByCell();
 
   /*!
-    @brief Sort the m_source_Photons container by cell
+    @brief Sort the m_sourcePhotons container by cell
   */
   virtual void sortEbPhotonsByPatch();
 
   /*!
-    @brief Sort the m_source_Photons container by cell
+    @brief Sort the m_sourcePhotons container by cell
   */
   virtual void sortDomainPhotonsByCell();
 
   /*!
-    @brief Sort the m_source_Photons container by cell
+    @brief Sort the m_sourcePhotons container by cell
   */
   virtual void sortDomainPhotonsByPatch();
 
@@ -223,7 +229,7 @@ public:
   /*!
     @brief Clear data holder
   */
-  virtual void clear(AMRParticles<Photon>& a_Photons);
+  virtual void clear(AMRParticles<Photon>& a_photons);
 
   /*!
     @brief Write plot file
@@ -283,12 +289,12 @@ public:
   /*!
     @brief Count number of Photons in particle list
   */
-  virtual int countPhotons(const AMRParticles<Photon>& a_Photons) const;
+  virtual int countPhotons(const AMRParticles<Photon>& a_photons) const;
 
   /*!
     @brief Count number of outcast Photons in particle list
   */
-  virtual int countOutcast(const AMRParticles<Photon>& a_Photons) const;
+  virtual int countOutcast(const AMRParticles<Photon>& a_photons) const;
 
   /*!
     @brief Get Photons
@@ -351,34 +357,34 @@ protected:
   bool m_plotNumbers;
 
   /*!
-    @brief Check if m_Photons should be plotted
+    @brief Check if m_photons should be plotted
   */
   bool m_plot_phot;
 
   /*!
-    @brief Check if m_bulk_Photons should be plotted
+    @brief Check if m_bulkPhotons should be plotted
   */
   bool m_plot_bulk_phot;
 
   /*!
-    @brief Check if source_bulk_Photons should be plotted
+    @brief Check if source_bulkPhotons should be plotted
   */
   bool m_plotSource_phot;
 
   /*!
-    @brief Check if m_eb_Photons should be plotted
+    @brief Check if m_ebPhotons should be plotted
   */
   bool m_plot_eb_phot;
 
   /*!
-    @brief Check if m_eb_Photons should be plotted
+    @brief Check if m_ebPhotons should be plotted
   */
   bool m_plot_dom_phot;
 
   /*!
     @brief Number of Photons per pseudoPhoton
   */
-  int m_max_Photons;
+  int m_max_photons;
 
   /*!
     @brief RNG seed
@@ -403,7 +409,7 @@ protected:
   /*!
     @brief Number of Photons
   */
-  long long m_num_Photons;
+  long long m_num_photons;
 
   /*!
     @brief Photon generation type
@@ -463,27 +469,27 @@ protected:
   /*!
     @brief All particles
   */
-  ParticleContainer<Photon> m_Photons;
+  ParticleContainer<Photon> m_photons;
 
   /*!
     @brief Photons absorbed in the volume
   */
-  ParticleContainer<Photon> m_bulk_Photons;
+  ParticleContainer<Photon> m_bulkPhotons;
 
   /*!
     @brief This is a particle container for Photons that crossed EBs. It is filled during the advance step. 
   */
-  ParticleContainer<Photon> m_eb_Photons;
+  ParticleContainer<Photon> m_ebPhotons;
 
   /*!
     @brief This is a particle container for Photons that crossed boundaries. It is filled during the advance step. 
   */
-  ParticleContainer<Photon> m_domain_Photons;
+  ParticleContainer<Photon> m_domainPhotons;
 
   /*!
     @brief This is a particle container that can be used to add Photons directly. 
   */
-  ParticleContainer<Photon> m_source_Photons;
+  ParticleContainer<Photon> m_sourcePhotons;
 
   /*!
     @brief Domain boundary conditions
@@ -493,7 +499,7 @@ protected:
   /*!
     @brief Draw Photons
   */
-  int draw_Photons(const Real a_source, const Real a_volume, const Real a_dt);
+  int drawPhotons(const Real a_source, const Real a_volume, const Real a_dt);
 
   /*!
     @brief Mapping function for domain boundary conditions
@@ -531,8 +537,8 @@ protected:
     @brief This computes the "conservative" deposition, multiplied by kappa
   */
   void depositKappaConservative(EBAMRCellData&              a_phi,
-				 const AMRParticles<Photon>& a_particles,
-				 const DepositionType::Which a_deposition);
+				const AMRParticles<Photon>& a_particles,
+				const DepositionType::Which a_deposition);
 
   /*!
     @brief Make the "non-conservative" kappa deposition
@@ -620,6 +626,7 @@ protected:
   void parsePlotVariables();
 
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

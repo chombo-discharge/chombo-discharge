@@ -1,19 +1,19 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   McPhoto.cpp
-  @brief  Implementation of McPhoto.H
+  @file   CD_McPhoto.cpp
+  @brief  Implementation of CD_McPhoto.H
   @author Robert Marskar
-  @date   Apr. 2018
 */
 
-#include <CD_McPhoto.H>
-#include "data_ops.H"
-#include "units.H"
-#include "poly.H"
-#include <CD_ParticleOps.H>
-
+// Std includes
 #include <time.h>
 #include <chrono>
 
+// Chombo includes
 #include <PolyGeom.H>
 #include <EBAlias.H>
 #include <EBLevelDataOps.H>
@@ -22,12 +22,18 @@
 #include <ParmParse.H>
 #include <ParticleIO.H>
 
+// Our includes
+#include <CD_McPhoto.H>
+#include <data_ops.H>
+#include <units.H>
+#include <poly.H>
+#include <CD_ParticleOps.H>
+#include <CD_NamespaceHeader.H>
+
 #define MC_PHOTO_DEBUG 0
 
-#include "CD_NamespaceHeader.H"
-
 McPhoto::McPhoto(){
-  m_name       = "McPhoto";
+  m_name      = "McPhoto";
   m_className = "McPhoto";
 
   m_stationary = false;
@@ -44,30 +50,30 @@ bool McPhoto::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData
   }
 
   // Note: This routine does an on-the-fly generation of Photons based on the contents in a_source. Pure particle methods
-  //       will probably fill m_source_Photons themselves, and this routine will probably not be used with a pure particle
+  //       will probably fill m_sourcePhotons themselves, and this routine will probably not be used with a pure particle
   //       method. If you find yourself calling this routine with a pure particle method, you're probably something wrong. 
 
   // If stationary, do a safety cleanout first. Then generate new Photons
   if(m_instantaneous){
-    this->clear(m_Photons);
+    this->clear(m_photons);
   }
 
-  // Generate new Photons and add them to m_Photons
-  this->clear(m_source_Photons);
-  this->generatePhotons(m_source_Photons, a_source, a_dt);
-  m_Photons.addParticles(m_source_Photons);
+  // Generate new Photons and add them to m_photons
+  this->clear(m_sourcePhotons);
+  this->generatePhotons(m_sourcePhotons, a_source, a_dt);
+  m_photons.addParticles(m_sourcePhotons);
 
   // Advance stationary or transient
   if(m_instantaneous){
-    this->advancePhotonsStationary(m_bulk_Photons, m_eb_Photons, m_domain_Photons, m_Photons);
+    this->advancePhotonsStationary(m_bulkPhotons, m_ebPhotons, m_domainPhotons, m_photons);
   }
   else{
-    this->advancePhotonsTransient(m_bulk_Photons, m_eb_Photons, m_domain_Photons, m_Photons, a_dt);
-    this->remap(m_Photons);                                       
+    this->advancePhotonsTransient(m_bulkPhotons, m_ebPhotons, m_domainPhotons, m_photons, a_dt);
+    this->remap(m_photons);                                       
   }
 
   // Deposit volumetric Photons. 
-  this->depositPhotons(a_phi, m_bulk_Photons, m_deposition);
+  this->depositPhotons(a_phi, m_bulkPhotons, m_deposition);
   
   return true;
 }
@@ -163,9 +169,9 @@ void McPhoto::parsePseudoPhotons(){
   
   ParmParse pp(m_className.c_str());
   
-  pp.get("max_Photons", m_max_Photons);
-  if(m_max_Photons <= 0){ // = -1 => no restriction
-    m_max_Photons = 99999999;
+  pp.get("max_photons", m_max_photons);
+  if(m_max_photons <= 0){ // = -1 => no restriction
+    m_max_photons = 99999999;
   }
 }
 
@@ -376,7 +382,7 @@ void McPhoto::clear(){
     pout() << m_name + "::clear()" << endl;
   }
 
-  this->clear(m_Photons);
+  this->clear(m_photons);
 }
 
 void McPhoto::clear(ParticleContainer<Photon>& a_Photon){
@@ -388,14 +394,14 @@ void McPhoto::clear(ParticleContainer<Photon>& a_Photon){
   this->clear(a_Photon.getParticles());
 }
 
-void McPhoto::clear(AMRParticles<Photon>& a_Photons){
+void McPhoto::clear(AMRParticles<Photon>& a_photons){
   CH_TIME("McPhoto::clear");
   if(m_verbosity > 5){
     pout() << m_name + "::clear" << endl;
   }
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    a_Photons[lvl]->clear();
+    a_photons[lvl]->clear();
   }
 }
   
@@ -415,11 +421,11 @@ void McPhoto::allocateInternals(){
   m_amr->allocate(m_massDiff,     m_realm, m_phase, ncomp);
 
   // Allocate particle data holders
-  m_amr->allocate(m_Photons,        m_pvr_buffer, m_realm);
-  m_amr->allocate(m_bulk_Photons,   m_pvr_buffer, m_realm);
-  m_amr->allocate(m_eb_Photons,     m_pvr_buffer, m_realm);
-  m_amr->allocate(m_domain_Photons, m_pvr_buffer, m_realm);
-  m_amr->allocate(m_source_Photons, m_pvr_buffer, m_realm);
+  m_amr->allocate(m_photons,        m_pvr_buffer, m_realm);
+  m_amr->allocate(m_bulkPhotons,   m_pvr_buffer, m_realm);
+  m_amr->allocate(m_ebPhotons,     m_pvr_buffer, m_realm);
+  m_amr->allocate(m_domainPhotons, m_pvr_buffer, m_realm);
+  m_amr->allocate(m_sourcePhotons, m_pvr_buffer, m_realm);
 }
 
 void McPhoto::preRegrid(const int a_lmin, const int a_oldFinestLevel){
@@ -428,11 +434,11 @@ void McPhoto::preRegrid(const int a_lmin, const int a_oldFinestLevel){
     pout() << m_name + "::pre_grid" << endl;
   }
 
-  m_Photons.preRegrid(a_lmin);         // TLDR: This moves Photons from l >= a_lmin to Max(a_lmin-1,0)
-  m_bulk_Photons.preRegrid(a_lmin);    // TLDR: This moves Photons from l >= a_lmin to Max(a_lmin-1,0)
-  m_eb_Photons.preRegrid(a_lmin);      // TLDR: This moves Photons from l >= a_lmin to Max(a_lmin-1,0)
-  m_domain_Photons.preRegrid(a_lmin);  // TLDR: This moves Photons from l >= a_lmin to Max(a_lmin-1,0)
-  m_source_Photons.preRegrid(a_lmin);  // TLDR: This moves Photons from l >= a_lmin to Max(a_lmin-1,0)
+  m_photons.preRegrid(a_lmin);         // TLDR: This moves Photons from l >= a_lmin to Max(a_lmin-1,0)
+  m_bulkPhotons.preRegrid(a_lmin);    // TLDR: This moves Photons from l >= a_lmin to Max(a_lmin-1,0)
+  m_ebPhotons.preRegrid(a_lmin);      // TLDR: This moves Photons from l >= a_lmin to Max(a_lmin-1,0)
+  m_domainPhotons.preRegrid(a_lmin);  // TLDR: This moves Photons from l >= a_lmin to Max(a_lmin-1,0)
+  m_sourcePhotons.preRegrid(a_lmin);  // TLDR: This moves Photons from l >= a_lmin to Max(a_lmin-1,0)
 }
 
 void McPhoto::deallocateInternals(){
@@ -468,11 +474,11 @@ void McPhoto::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_n
   const Vector<Real>& dx                 = m_amr->getDx();
   const Vector<int>& ref_rat             = m_amr->getRefinementRatios();
 
-  m_Photons.regrid(       grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
-  m_bulk_Photons.regrid(  grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
-  m_eb_Photons.regrid(    grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
-  m_domain_Photons.regrid(grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
-  m_source_Photons.regrid(grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
+  m_photons.regrid(       grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
+  m_bulkPhotons.regrid(  grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
+  m_ebPhotons.regrid(    grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
+  m_domainPhotons.regrid(grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
+  m_sourcePhotons.regrid(grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
 
   // Deposit
   this->depositPhotons();
@@ -484,7 +490,7 @@ void McPhoto::sortPhotonsByCell(){
     pout() << m_name + "::sortPhotonsByCell()" << endl;
   }
 
-  m_Photons.sortParticlesByCell();
+  m_photons.sortParticlesByCell();
 }
 
 void McPhoto::sortPhotonsByPatch(){
@@ -493,7 +499,7 @@ void McPhoto::sortPhotonsByPatch(){
     pout() << m_name + "::sortPhotonsByPatch()" << endl;
   }
 
-  m_Photons.sortParticlesByPatch();
+  m_photons.sortParticlesByPatch();
 }
 
 void McPhoto::sortBulkPhotonsByCell(){
@@ -502,7 +508,7 @@ void McPhoto::sortBulkPhotonsByCell(){
     pout() << m_name + "::sortBulkPhotonsByCell()" << endl;
   }
 
-  m_bulk_Photons.sortParticlesByCell();
+  m_bulkPhotons.sortParticlesByCell();
 }
 
 void McPhoto::sortBulkPhotonsByPatch(){
@@ -511,7 +517,7 @@ void McPhoto::sortBulkPhotonsByPatch(){
     pout() << m_name + "::sortBulkPhotonsByPatch()" << endl;
   }
 
-  m_bulk_Photons.sortParticlesByPatch();
+  m_bulkPhotons.sortParticlesByPatch();
 }
 
 void McPhoto::sortSourcePhotonsByCell(){
@@ -520,7 +526,7 @@ void McPhoto::sortSourcePhotonsByCell(){
     pout() << m_name + "::sortSourcePhotonsByCell()" << endl;
   }
 
-  m_source_Photons.sortParticlesByCell();
+  m_sourcePhotons.sortParticlesByCell();
 }
 
 void McPhoto::sortSourcePhotonsByPatch(){
@@ -529,7 +535,7 @@ void McPhoto::sortSourcePhotonsByPatch(){
     pout() << m_name + "::sortSourcePhotonsByPatch()" << endl;
   }
 
-  m_source_Photons.sortParticlesByPatch();
+  m_sourcePhotons.sortParticlesByPatch();
 }
 
 void McPhoto::sortDomainPhotonsByCell(){
@@ -538,7 +544,7 @@ void McPhoto::sortDomainPhotonsByCell(){
     pout() << m_name + "::sortDomainPhotonsByCell()" << endl;
   }
 
-  m_domain_Photons.sortParticlesByCell();
+  m_domainPhotons.sortParticlesByCell();
 }
 
 void McPhoto::sortDomainPhotonsByPatch(){
@@ -547,7 +553,7 @@ void McPhoto::sortDomainPhotonsByPatch(){
     pout() << m_name + "::sortDomainPhotonsByPatch()" << endl;
   }
 
-  m_domain_Photons.sortParticlesByPatch();
+  m_domainPhotons.sortParticlesByPatch();
 }
 
 void McPhoto::sortEbPhotonsByCell(){
@@ -556,7 +562,7 @@ void McPhoto::sortEbPhotonsByCell(){
     pout() << m_name + "::sortEbPhotonsByCell()" << endl;
   }
 
-  m_eb_Photons.sortParticlesByCell();
+  m_ebPhotons.sortParticlesByCell();
 }
 
 void McPhoto::sortEbPhotonsByPatch(){
@@ -565,7 +571,7 @@ void McPhoto::sortEbPhotonsByPatch(){
     pout() << m_name + "::sortEbPhotonsByPatch()" << endl;
   }
 
-  m_eb_Photons.sortParticlesByPatch();
+  m_ebPhotons.sortParticlesByPatch();
 }
 
 void McPhoto::registerOperators(){
@@ -640,7 +646,7 @@ void McPhoto::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) cons
 
   // Write particles. Must be implemented.
   std::string str = m_name + "_particles";
-  writeParticlesToHDF(a_handle, m_Photons[a_level], str);
+  writeParticlesToHDF(a_handle, m_photons[a_level], str);
 }
 
 void McPhoto::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
@@ -654,7 +660,7 @@ void McPhoto::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
 
   // Read particles. Should be implemented
   std::string str = m_name + "_particles";
-  readParticlesFromHDF(a_handle, m_Photons[a_level], str);
+  readParticlesFromHDF(a_handle, m_photons[a_level], str);
 }
 
 Vector<std::string> McPhoto::getPlotVariableNames() const {
@@ -668,10 +674,10 @@ Vector<std::string> McPhoto::getPlotVariableNames() const {
   if(m_plotPhi)       names.push_back(m_name + " phi");
   if(m_plotSource)       names.push_back(m_name + " source");
   if(m_plot_phot)      names.push_back(m_name + " Photons");
-  if(m_plot_bulk_phot) names.push_back(m_name + " bulk_Photons");
-  if(m_plot_eb_phot)   names.push_back(m_name + " eb_Photons");
-  if(m_plot_dom_phot)  names.push_back(m_name + " domain_Photons");
-  if(m_plotSource_phot)  names.push_back(m_name + " source_Photons");
+  if(m_plot_bulk_phot) names.push_back(m_name + " bulkPhotons");
+  if(m_plot_eb_phot)   names.push_back(m_name + " ebPhotons");
+  if(m_plot_dom_phot)  names.push_back(m_name + " domainPhotons");
+  if(m_plotSource_phot)  names.push_back(m_name + " sourcePhotons");
 
   return names;
 }
@@ -801,7 +807,7 @@ void McPhoto::setHalobuffer(const int a_buffer)  {
   m_halo_buffer = a_buffer;
 }
 
-void McPhoto::generatePhotons(ParticleContainer<Photon>& a_Photons, const EBAMRCellData& a_source, const Real a_dt){
+void McPhoto::generatePhotons(ParticleContainer<Photon>& a_photons, const EBAMRCellData& a_source, const Real a_dt){
   CH_TIME("McPhoto::generatePhotons");
   if(m_verbosity > 5){
     pout() << m_name + "::generatePhotons" << endl;
@@ -811,7 +817,7 @@ void McPhoto::generatePhotons(ParticleContainer<Photon>& a_Photons, const EBAMRC
   const int finest_level = m_amr->getFinestLevel();
 
   // Put here. 
-  AMRParticles<Photon>& Photons = a_Photons.getParticles();
+  AMRParticles<Photon>& Photons = a_photons.getParticles();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
@@ -822,7 +828,7 @@ void McPhoto::generatePhotons(ParticleContainer<Photon>& a_Photons, const EBAMRC
 
     // If there is a coarser level, remove particles from the overlapping region and regenerate on this level.
     if(has_coar) {
-      const AMRPVR& pvr = a_Photons.getPVR();
+      const AMRPVR& pvr = a_photons.getPVR();
       const int ref_ratio = m_amr->getRefinementRatios()[lvl-1];
       collectValidParticles(Photons[lvl]->outcast(),
 			    *Photons[lvl-1],
@@ -858,14 +864,14 @@ void McPhoto::generatePhotons(ParticleContainer<Photon>& a_Photons, const EBAMRC
 	    const RealVect pos = prob_lo + (RealVect(iv) + 0.5*RealVect::Unit)*dx;
 
 	    // Number of physical Photons
-	    const int num_phys_Photons = this->draw_Photons(srcFAB(iv,0), vol, a_dt);
+	    const int num_phys_photons = this->drawPhotons(srcFAB(iv,0), vol, a_dt);
 
 	    // Make superPhotons if we have to
-	    if(num_phys_Photons > 0){
-	      const int num_Photons = (num_phys_Photons <= m_max_Photons) ? num_phys_Photons : m_max_Photons;
-	      const Real weight     = (1.0*num_phys_Photons)/num_Photons; 
+	    if(num_phys_photons > 0){
+	      const int num_photons = (num_phys_photons <= m_max_photons) ? num_phys_photons : m_max_photons;
+	      const Real weight     = (1.0*num_phys_photons)/num_photons; 
 	      
-	      for (int i = 0; i < num_Photons; i++){
+	      for (int i = 0; i < num_photons; i++){
 		const RealVect v = units::s_c0*this->randomDirection();
 		particles.append(Photon(pos, v, m_rte_species->getKappa(pos), weight));
 	      }
@@ -880,14 +886,14 @@ void McPhoto::generatePhotons(ParticleContainer<Photon>& a_Photons, const EBAMRC
 	  const RealVect pos  = EBArith::getVofLocation(vof, dx*RealVect::Unit, prob_lo);
 	  const Real kappa    = ebisbox.volFrac(vof);
 
-	  const int num_phys_Photons = draw_Photons(source(vof,0), vol, a_dt);
+	  const int num_phys_photons = drawPhotons(source(vof,0), vol, a_dt);
 	  
-	  if(num_phys_Photons > 0){
-	    const int num_Photons = (num_phys_Photons <= m_max_Photons) ? num_phys_Photons : m_max_Photons;
-	    const Real weight      = (1.0*num_phys_Photons)/num_Photons;
+	  if(num_phys_photons > 0){
+	    const int num_photons = (num_phys_photons <= m_max_photons) ? num_phys_photons : m_max_photons;
+	    const Real weight      = (1.0*num_phys_photons)/num_photons;
 
 	    // Generate computational Photons 
-	    for (int i = 0; i < num_Photons; i++){
+	    for (int i = 0; i < num_photons; i++){
 	      const RealVect v = units::s_c0*this->randomDirection();
 	      particles.append(Photon(pos, v, m_rte_species->getKappa(pos), weight));
 	    }
@@ -902,13 +908,13 @@ void McPhoto::generatePhotons(ParticleContainer<Photon>& a_Photons, const EBAMRC
   }
 }
 
-int McPhoto::draw_Photons(const Real a_source, const Real a_volume, const Real a_dt){
-  CH_TIME("McPhoto::draw_Photons");
+int McPhoto::drawPhotons(const Real a_source, const Real a_volume, const Real a_dt){
+  CH_TIME("McPhoto::drawPhotons");
   if(m_verbosity > 5){
-    pout() << m_name + "::draw_Photons" << endl;
+    pout() << m_name + "::drawPhotons" << endl;
   }
 
-  int num_Photons = 0;
+  int num_photons = 0;
 
   // Check if we need any type of source term normalization
   Real factor;
@@ -928,16 +934,16 @@ int McPhoto::draw_Photons(const Real a_source, const Real a_volume, const Real a
   // Draw a number of Photons with the desired algorithm
   if(m_photogen == PhotonGeneration::stochastic){
     const Real mean = a_source*factor;
-    num_Photons = randomPoisson(mean);
+    num_photons = randomPoisson(mean);
   }
   else if(m_photogen == PhotonGeneration::deterministic){
-    num_Photons = round(a_source*factor);
+    num_photons = round(a_source*factor);
   }
   else{
-    MayDay::Abort("mc::draw_Photons - unknown generation requested. Aborting...");
+    MayDay::Abort("mc::drawPhotons - unknown generation requested. Aborting...");
   }
 
-  return num_Photons;
+  return num_photons;
 }
 
 void McPhoto::depositPhotons(){
@@ -946,22 +952,22 @@ void McPhoto::depositPhotons(){
     pout() << m_name + "::depositPhotons" << endl;
   }
 
-  this->depositPhotons(m_phi, m_Photons, m_deposition);
+  this->depositPhotons(m_phi, m_photons, m_deposition);
 }
 
 void McPhoto::depositPhotons(EBAMRCellData&                    a_phi,
-			       const ParticleContainer<Photon>& a_Photons,
+			       const ParticleContainer<Photon>& a_photons,
 			       const DepositionType::Which&      a_deposition){
   CH_TIME("McPhoto::depositPhotons(ParticleContainer)");
   if(m_verbosity > 5){
     pout() << m_name + "::depositPhotons(ParticleContainer)" << endl;
   }
 
-  this->depositPhotons(a_phi, a_Photons.getParticles(), a_deposition);
+  this->depositPhotons(a_phi, a_photons.getParticles(), a_deposition);
 }
 
 void McPhoto::depositPhotons(EBAMRCellData&               a_phi,
-			       const AMRParticles<Photon>&  a_Photons,
+			       const AMRParticles<Photon>&  a_photons,
 			       const DepositionType::Which& a_deposition){
   CH_TIME("McPhoto::depositPhotons(AMRParticles)");
   if(m_verbosity > 5){
@@ -969,7 +975,7 @@ void McPhoto::depositPhotons(EBAMRCellData&               a_phi,
   }
 
            
-  this->depositKappaConservative(a_phi, a_Photons, a_deposition); // a_phi contains only weights, i.e. not divided by kappa
+  this->depositKappaConservative(a_phi, a_photons, a_deposition); // a_phi contains only weights, i.e. not divided by kappa
   this->depositNonConservative(m_depositionNC, a_phi);              // Compute m_depositionNC = sum(kappa*Wc)/sum(kappa)
   this->depositHybrid(a_phi, m_massDiff, m_depositionNC);           // Compute hybrid deposition, including mass differnce
   this->incrementRedist(m_massDiff);                                 // Increment level redistribution register
@@ -991,7 +997,7 @@ void McPhoto::depositPhotons(EBAMRCellData&               a_phi,
 }
 
 void McPhoto::depositKappaConservative(EBAMRCellData&              a_phi,
-					 const AMRParticles<Photon>& a_Photons,
+					 const AMRParticles<Photon>& a_photons,
 					 const DepositionType::Which a_deposition){
   CH_TIME("McPhoto::depositKappaConservative");
   if(m_verbosity > 5){
@@ -1029,7 +1035,7 @@ void McPhoto::depositKappaConservative(EBAMRCellData&              a_phi,
       const Box box          = dbl.get(dit());
       const EBISBox& ebisbox = ebisl[dit()];
       EbParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin, true);
-      interp.deposit((*a_Photons[lvl])[dit()].listItems(), (*a_phi[lvl])[dit()].getFArrayBox(), m_deposition);
+      interp.deposit((*a_photons[lvl])[dit()].listItems(), (*a_phi[lvl])[dit()].getFArrayBox(), m_deposition);
     }
 
     // This code adds contributions from ghost cells into the valid region
@@ -1226,10 +1232,10 @@ void McPhoto::coarseFineRedistribution(EBAMRCellData& a_phi){
   }
 }
 
-void McPhoto::advancePhotonsStationary(ParticleContainer<Photon>& a_bulk_Photons,
-					  ParticleContainer<Photon>& a_eb_Photons,
-					  ParticleContainer<Photon>& a_domain_Photons,
-					  ParticleContainer<Photon>& a_Photons){
+void McPhoto::advancePhotonsStationary(ParticleContainer<Photon>& a_bulkPhotons,
+					  ParticleContainer<Photon>& a_ebPhotons,
+					  ParticleContainer<Photon>& a_domainPhotons,
+					  ParticleContainer<Photon>& a_photons){
   CH_TIME("McPhoto::advancePhotonsStationary");
   if(m_verbosity > 5){
     pout() << m_name + "::advancePhotonsStationary" << endl;
@@ -1237,16 +1243,16 @@ void McPhoto::advancePhotonsStationary(ParticleContainer<Photon>& a_bulk_Photons
 
   // TLDR: This routine iterates over the levels and boxes and does the following
   //
-  //       Forall Photons in a_Photons: {
+  //       Forall Photons in a_photons: {
   //          1. Draw random absorption position
   //          2. Check if path intersects boundary, either EB or domain
   //          3. Move the Photon to appropriate data holder:
-  //                 Path crossed EB   => a_eb_Photons
-  //                 Path cross domain => a_domain_Photons
-  //                 Absorbe in bulk   => a_bulk_Photons
+  //                 Path crossed EB   => a_ebPhotons
+  //                 Path cross domain => a_domainPhotons
+  //                 Absorbe in bulk   => a_bulkPhotons
   //       }
   //
-  //       Remap a_bulk_Photons, a_eb_Photons, a_domain_Photons
+  //       Remap a_bulkPhotons, a_ebPhotons, a_domainPhotons
 
   // Low and high corners
   const RealVect prob_lo = m_amr->getProbLo();
@@ -1265,7 +1271,7 @@ void McPhoto::advancePhotonsStationary(ParticleContainer<Photon>& a_bulk_Photons
   }
 
 #if MC_PHOTO_DEBUG // Debug
-  int PhotonsBefore = this->countPhotons(a_Photons.getParticles());
+  int PhotonsBefore = this->countPhotons(a_photons.getParticles());
 #endif
   
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
@@ -1273,10 +1279,10 @@ void McPhoto::advancePhotonsStationary(ParticleContainer<Photon>& a_bulk_Photons
     const Real dx                = m_amr->getDx()[lvl];
     
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      List<Photon>& bulkPhotons = a_bulk_Photons[lvl][dit()].listItems();
-      List<Photon>& ebPhotons   = a_eb_Photons[lvl][dit()].listItems();
-      List<Photon>& domPhotons  = a_domain_Photons[lvl][dit()].listItems();
-      List<Photon>& allPhotons  = a_Photons[lvl][dit()].listItems();
+      List<Photon>& bulkPhotons = a_bulkPhotons[lvl][dit()].listItems();
+      List<Photon>& ebPhotons   = a_ebPhotons[lvl][dit()].listItems();
+      List<Photon>& domPhotons  = a_domainPhotons[lvl][dit()].listItems();
+      List<Photon>& allPhotons  = a_photons[lvl][dit()].listItems();
 
       // These must be cleared
       bulkPhotons.clear();
@@ -1349,14 +1355,14 @@ void McPhoto::advancePhotonsStationary(ParticleContainer<Photon>& a_bulk_Photons
   }
 
   // Remap and clear.
-  a_bulk_Photons.remap();
-  a_eb_Photons.remap();
-  a_domain_Photons.remap();
+  a_bulkPhotons.remap();
+  a_ebPhotons.remap();
+  a_domainPhotons.remap();
 
 #if MC_PHOTO_DEBUG // Debug
-  int bulkPhotons = this->countPhotons(a_bulk_Photons.getParticles());
-  int ebPhotons = this->countPhotons(a_eb_Photons.getParticles());
-  int domPhotons = this->countPhotons(a_domain_Photons.getParticles());
+  int bulkPhotons = this->countPhotons(a_bulkPhotons.getParticles());
+  int ebPhotons = this->countPhotons(a_ebPhotons.getParticles());
+  int domPhotons = this->countPhotons(a_domainPhotons.getParticles());
 
   if(procID() == 0){
     std::cout << "Photons before = " << PhotonsBefore << "\n"
@@ -1370,10 +1376,10 @@ void McPhoto::advancePhotonsStationary(ParticleContainer<Photon>& a_bulk_Photons
 
 }
 
-void McPhoto::advancePhotonsTransient(ParticleContainer<Photon>& a_bulk_Photons,
-					 ParticleContainer<Photon>& a_eb_Photons,
-					 ParticleContainer<Photon>& a_domain_Photons,
-					 ParticleContainer<Photon>& a_Photons,
+void McPhoto::advancePhotonsTransient(ParticleContainer<Photon>& a_bulkPhotons,
+					 ParticleContainer<Photon>& a_ebPhotons,
+					 ParticleContainer<Photon>& a_domainPhotons,
+					 ParticleContainer<Photon>& a_photons,
 					 const Real                  a_dt){
   CH_TIME("McPhoto::advancePhotonsTransient");
   if(m_verbosity > 5){
@@ -1382,17 +1388,17 @@ void McPhoto::advancePhotonsTransient(ParticleContainer<Photon>& a_bulk_Photons,
 
   // TLDR: This routine iterates over the levels and boxes and does the following
   //
-  //       Forall Photons in a_Photons: {
+  //       Forall Photons in a_photons: {
   //          1. Check new Photon position
   //          2. Check if the Photon was absorbed on the interval
   //          3. Check if path intersects boundary, either EB or domain
   //          4. Move the Photon to appropriate data holder:
-  //                 Path crossed EB   => a_eb_Photons
-  //                 Path cross domain => a_domain_Photons
-  //                 Absorbed in bulk  => a_bulk_Photons
+  //                 Path crossed EB   => a_ebPhotons
+  //                 Path cross domain => a_domainPhotons
+  //                 Absorbed in bulk  => a_bulkPhotons
   //       }
   //
-  //       Remap a_bulk_Photons, a_eb_Photons, a_domain_Photons, a_Photons
+  //       Remap a_bulkPhotons, a_ebPhotons, a_domainPhotons, a_photons
 
   // Low and high corners
   const RealVect prob_lo = m_amr->getProbLo();
@@ -1411,7 +1417,7 @@ void McPhoto::advancePhotonsTransient(ParticleContainer<Photon>& a_bulk_Photons,
   }
 
 #if MC_PHOTO_DEBUG // Debug
-  int PhotonsBefore = this->countPhotons(a_Photons.getParticles());
+  int PhotonsBefore = this->countPhotons(a_photons.getParticles());
 #endif
 
   
@@ -1420,10 +1426,10 @@ void McPhoto::advancePhotonsTransient(ParticleContainer<Photon>& a_bulk_Photons,
     const Real dx = m_amr->getDx()[lvl];
     
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      List<Photon>& bulkPhotons = a_bulk_Photons[lvl][dit()].listItems();
-      List<Photon>& ebPhotons   = a_eb_Photons[lvl][dit()].listItems();
-      List<Photon>& domPhotons  = a_domain_Photons[lvl][dit()].listItems();
-      List<Photon>& allPhotons  = a_Photons[lvl][dit()].listItems();
+      List<Photon>& bulkPhotons = a_bulkPhotons[lvl][dit()].listItems();
+      List<Photon>& ebPhotons   = a_ebPhotons[lvl][dit()].listItems();
+      List<Photon>& domPhotons  = a_domainPhotons[lvl][dit()].listItems();
+      List<Photon>& allPhotons  = a_photons[lvl][dit()].listItems();
 
       
       // These must be cleared
@@ -1512,16 +1518,16 @@ void McPhoto::advancePhotonsTransient(ParticleContainer<Photon>& a_bulk_Photons,
   }
 
   // Remap and clear. 
-  a_bulk_Photons.remap();
-  a_eb_Photons.remap();
-  a_domain_Photons.remap();
-  a_Photons.remap();
+  a_bulkPhotons.remap();
+  a_ebPhotons.remap();
+  a_domainPhotons.remap();
+  a_photons.remap();
 
 #if MC_PHOTO_DEBUG // Debug
-  int bulkPhotons = this->countPhotons(a_bulk_Photons.getParticles());
-  int ebPhotons = this->countPhotons(a_eb_Photons.getParticles());
-  int domPhotons = this->countPhotons(a_domain_Photons.getParticles());
-  int afterPhotons = this->countPhotons(a_Photons.getParticles());
+  int bulkPhotons = this->countPhotons(a_bulkPhotons.getParticles());
+  int ebPhotons = this->countPhotons(a_ebPhotons.getParticles());
+  int domPhotons = this->countPhotons(a_domainPhotons.getParticles());
+  int afterPhotons = this->countPhotons(a_photons.getParticles());
 
   if(procID() == 0){
     std::cout << "Photons before = " << PhotonsBefore << "\n"
@@ -1534,7 +1540,7 @@ void McPhoto::advancePhotonsTransient(ParticleContainer<Photon>& a_bulk_Photons,
 
 
 #endif
-  a_bulk_Photons.remap();
+  a_bulkPhotons.remap();
 }
 
 void McPhoto::remap(){
@@ -1543,34 +1549,34 @@ void McPhoto::remap(){
     pout() << m_name + "::remap()" << endl;
   }
 
-  this->remap(m_Photons);
+  this->remap(m_photons);
 }
 
-void McPhoto::remap(ParticleContainer<Photon>& a_Photons){
+void McPhoto::remap(ParticleContainer<Photon>& a_photons){
   CH_TIME("McPhoto::remap(Photons)");
   if(m_verbosity > 5){
     pout() << m_name + "::remap(Photons)" << endl;
   }
 
-  a_Photons.remap();
+  a_photons.remap();
 }
 
-int McPhoto::countPhotons(const AMRParticles<Photon>& a_Photons) const {
+int McPhoto::countPhotons(const AMRParticles<Photon>& a_photons) const {
   CH_TIME("McPhoto::countPhotons");
   if(m_verbosity > 5){
     pout() << m_name + "::countPhotons" << endl;
   }
 
-  int num_Photons = 0;
+  int num_photons = 0;
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    num_Photons += a_Photons[lvl]->numValid();
+    num_photons += a_photons[lvl]->numValid();
   }
 
-  return num_Photons;
+  return num_photons;
 }
 
-int McPhoto::countOutcast(const AMRParticles<Photon>& a_Photons) const {
+int McPhoto::countOutcast(const AMRParticles<Photon>& a_photons) const {
   CH_TIME("McPhoto::countOutcast");
   if(m_verbosity > 5){
     pout() << m_name + "::countOutcast" << endl;
@@ -1579,7 +1585,7 @@ int McPhoto::countOutcast(const AMRParticles<Photon>& a_Photons) const {
   int num_outcast = 0;
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    num_outcast += a_Photons[lvl]->numOutcast();
+    num_outcast += a_photons[lvl]->numOutcast();
   }
 
   return num_outcast;
@@ -1598,23 +1604,23 @@ void McPhoto::writePlotData(EBAMRCellData& a_output, int& a_comp){
     this->writeData(a_output, a_comp, m_source, false);
   }
   if(m_plot_phot){
-    this->depositPhotons(m_scratch, m_Photons.getParticles(), m_plot_deposition);
+    this->depositPhotons(m_scratch, m_photons.getParticles(), m_plot_deposition);
     this->writeData(a_output, a_comp, m_scratch,  false);
   }
   if(m_plot_bulk_phot){
-    this->depositPhotons(m_scratch, m_bulk_Photons.getParticles(), m_plot_deposition);
+    this->depositPhotons(m_scratch, m_bulkPhotons.getParticles(), m_plot_deposition);
     this->writeData(a_output, a_comp, m_scratch,  false);
   }
   if(m_plot_eb_phot){
-    this->depositPhotons(m_scratch, m_eb_Photons.getParticles(), m_plot_deposition);
+    this->depositPhotons(m_scratch, m_ebPhotons.getParticles(), m_plot_deposition);
     this->writeData(a_output, a_comp, m_scratch,  false);
   }
   if(m_plot_dom_phot){
-    this->depositPhotons(m_scratch, m_domain_Photons.getParticles(), m_plot_deposition);
+    this->depositPhotons(m_scratch, m_domainPhotons.getParticles(), m_plot_deposition);
     this->writeData(a_output, a_comp, m_scratch,  false);
   }
   if(m_plotSource_phot){
-    this->depositPhotons(m_scratch, m_source_Photons.getParticles(), m_plot_deposition);
+    this->depositPhotons(m_scratch, m_sourcePhotons.getParticles(), m_plot_deposition);
     this->writeData(a_output, a_comp, m_scratch,  false);
   }
 }
@@ -1625,7 +1631,7 @@ ParticleContainer<Photon>& McPhoto::getPhotons(){
     pout() << m_name + "::getPhotons" << endl;
   }
 
-  return m_Photons;
+  return m_photons;
 }
 
 ParticleContainer<Photon>& McPhoto::getBulkPhotons(){
@@ -1634,7 +1640,7 @@ ParticleContainer<Photon>& McPhoto::getBulkPhotons(){
     pout() << m_name + "::getBulkPhotons" << endl;
   }
 
-  return m_bulk_Photons;
+  return m_bulkPhotons;
 }
 
 ParticleContainer<Photon>& McPhoto::getEbPhotons(){
@@ -1643,7 +1649,7 @@ ParticleContainer<Photon>& McPhoto::getEbPhotons(){
     pout() << m_name + "::getEbPhotons" << endl;
   }
 
-  return m_eb_Photons;
+  return m_ebPhotons;
 }
 
 ParticleContainer<Photon>& McPhoto::getDomainPhotons(){
@@ -1652,7 +1658,7 @@ ParticleContainer<Photon>& McPhoto::getDomainPhotons(){
     pout() << m_name + "::getDomainPhotons" << endl;
   }
 
-  return m_domain_Photons;
+  return m_domainPhotons;
 }
 
 ParticleContainer<Photon>& McPhoto::getSourcePhotons(){
@@ -1661,6 +1667,7 @@ ParticleContainer<Photon>& McPhoto::getSourcePhotons(){
     pout() << m_name + "::getSourcePhotons" << endl;
   }
 
-  return m_source_Photons;
+  return m_sourcePhotons;
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
