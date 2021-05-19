@@ -35,7 +35,7 @@ namespace Dcel {
     class PLY {
     public:
 
-      using vertex = vertexT<T>;
+      using Vertex = VertexT<T>;
       using edge   = edgeT<T>;
       using Face   = FaceT<T>;
       using Mesh   = MeshT<T>;
@@ -66,7 +66,7 @@ namespace Dcel {
 	before entering this routine)
       */
       inline
-      static void readVerticesASCII(std::vector<std::shared_ptr<vertex> >& a_vertices,
+      static void readVerticesASCII(std::vector<std::shared_ptr<Vertex> >& a_vertices,
 				    const int                              a_numVertices,
 				    std::ifstream&                         a_inputstream);
 
@@ -78,7 +78,7 @@ namespace Dcel {
       inline
       static void readFacesASCII(std::vector<std::shared_ptr<Face> >&   a_faces,
 				 std::vector<std::shared_ptr<edge> >&   a_edges,
-				 std::vector<std::shared_ptr<vertex> >& a_vertices,
+				 std::vector<std::shared_ptr<Vertex> >& a_vertices,
 				 const int                              a_numFaces,
 				 std::ifstream&                         a_inputstream);
 
@@ -92,7 +92,7 @@ namespace Dcel {
 	@brief Clean up memory
       */
       inline
-      static void clearFaceCache(std::vector<std::shared_ptr<vertex> >& a_vertices);
+      static void clearFaceCache(std::vector<std::shared_ptr<Vertex> >& a_vertices);
     };
   }
 }

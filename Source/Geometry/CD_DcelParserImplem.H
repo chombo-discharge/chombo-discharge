@@ -35,7 +35,7 @@ namespace Dcel {
     std::ifstream filestream(a_filename);
 
     if(filestream.is_open()){
-      std::vector<std::shared_ptr<vertex> >& vertices  = a_mesh.getVertices();
+      std::vector<std::shared_ptr<Vertex> >& vertices  = a_mesh.getVertices();
       std::vector<std::shared_ptr<edge> >& edges       = a_mesh.getEdges();
       std::vector<std::shared_ptr<Face> >& faces       = a_mesh.getFaces();
 
@@ -107,7 +107,7 @@ namespace Dcel {
 
   template <class T>
   inline
-  void parser::PLY<T>::readVerticesASCII(std::vector<std::shared_ptr<vertex> >& a_vertices,
+  void parser::PLY<T>::readVerticesASCII(std::vector<std::shared_ptr<Vertex> >& a_vertices,
 					 const int                              a_numVertices,
 					 std::ifstream&                         a_inputstream) {
 
@@ -128,7 +128,7 @@ namespace Dcel {
       std::stringstream sstream(line);
       sstream >> x >> y >> z >> nx >> ny >> nz;
 
-      a_vertices.emplace_back(std::make_shared<vertex>(pos, norm));
+      a_vertices.emplace_back(std::make_shared<Vertex>(pos, norm));
 
       // We have read all the vertices we should read. Exit now.
       num++;
@@ -140,7 +140,7 @@ namespace Dcel {
   inline
   void Dcel::parser::PLY<T>::readFacesASCII(std::vector<std::shared_ptr<Face> >&   a_faces,
 					    std::vector<std::shared_ptr<edge> >&   a_edges,
-					    std::vector<std::shared_ptr<vertex> >& a_vertices,
+					    std::vector<std::shared_ptr<Vertex> >& a_vertices,
 					    const int                              a_numFaces,
 					    std::ifstream&                         a_inputstream) {
     int numVertices;
@@ -162,7 +162,7 @@ namespace Dcel {
       if(numVertices < 3) std::cerr << "Dcel::parser::PLY::readFacesASCII - a face must have at least three vertices!\n";
     
       // Get the vertices that make up this face. 
-      std::vector<std::shared_ptr<vertex> > curVertices;
+      std::vector<std::shared_ptr<Vertex> > curVertices;
       for (int i = 0; i < numVertices; i++){
 	const int vertexIndex = vertexIndices[i];
 	curVertices.emplace_back(a_vertices[vertexIndex]);

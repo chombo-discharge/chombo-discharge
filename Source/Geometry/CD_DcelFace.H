@@ -26,7 +26,7 @@
 
 namespace Dcel {
 
-  template <class T> class vertexT;
+  template <class T> class VertexT;
   template <class T> class edgeT;
   template <class T> class FaceT;
   template <class T> class edgeIteratorT;
@@ -37,11 +37,11 @@ namespace Dcel {
 
     using Vec3   = Vec3T<T>;
     
-    using vertex = vertexT<T>;
+    using Vertex = VertexT<T>;
     using edge   = edgeT<T>;
     using Face   = FaceT<T>;
 
-    using vertexPtr = std::shared_ptr<vertex>;
+    using VertexPtr = std::shared_ptr<Vertex>;
     using edgePtr   = std::shared_ptr<edge>;
     using FacePtr   = std::shared_ptr<Face>;
 
@@ -101,7 +101,7 @@ namespace Dcel {
     std::vector<Vec3T<T> > getAllVertexCoordinates() const noexcept;
 
     inline
-    std::vector<vertexPtr> gatherVertices() const noexcept;
+    std::vector<VertexPtr> gatherVertices() const noexcept;
 
     inline
     Vec3T<T> getSmallestCoordinate() const noexcept;

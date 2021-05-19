@@ -209,8 +209,8 @@ namespace Dcel {
 
   template <class T>
   inline
-  std::vector<std::shared_ptr<vertexT<T> > > FaceT<T>::gatherVertices() const noexcept {
-    std::vector<vertexPtr> vertices;
+  std::vector<std::shared_ptr<VertexT<T> > > FaceT<T>::gatherVertices() const noexcept {
+    std::vector<VertexPtr> vertices;
 
     for (edgeIterator iter(*this); iter.ok(); ++iter){
       edgePtr& edge = iter();

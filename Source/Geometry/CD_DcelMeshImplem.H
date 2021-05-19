@@ -33,7 +33,7 @@ namespace Dcel {
   inline
   MeshT<T>::MeshT(std::vector<FacePtr >&   a_faces,
 		  std::vector<edgePtr >&   a_edges,
-		  std::vector<vertexPtr >& a_vertices) : MeshT() {
+		  std::vector<VertexPtr >& a_vertices) : MeshT() {
     this->define(a_faces, a_edges, a_vertices);
   }
 
@@ -47,7 +47,7 @@ namespace Dcel {
   inline
   void MeshT<T>::define(std::vector<FacePtr >&   a_faces,
 			std::vector<edgePtr >&   a_edges,
-			std::vector<vertexPtr >& a_vertices) noexcept{
+			std::vector<VertexPtr >& a_vertices) noexcept{
     m_faces    = a_faces;
     m_edges    = a_edges;
     m_vertices = a_vertices;
@@ -236,13 +236,13 @@ namespace Dcel {
 
   template <class T>
   inline
-  std::vector<std::shared_ptr<vertexT<T> > >& MeshT<T>::getVertices() noexcept {
+  std::vector<std::shared_ptr<VertexT<T> > >& MeshT<T>::getVertices() noexcept {
     return (m_vertices);
   }
 
   template <class T>
   inline
-  const std::vector<std::shared_ptr<vertexT<T> > >& MeshT<T>::getVertices() const noexcept {
+  const std::vector<std::shared_ptr<VertexT<T> > >& MeshT<T>::getVertices() const noexcept {
     return (m_vertices);
   }
 

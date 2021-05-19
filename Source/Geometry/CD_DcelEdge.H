@@ -19,7 +19,7 @@
 
 namespace Dcel {
 
-  template <class T> class vertexT;
+  template <class T> class VertexT;
   template <class T> class edgeT;
   template <class T> class FaceT;
   template <class T> class edgeIteratorT;
@@ -30,11 +30,11 @@ namespace Dcel {
 
     using Vec3   = Vec3T<T>;
     
-    using vertex = vertexT<T>;
+    using Vertex = VertexT<T>;
     using edge   = edgeT<T>;
     using Face   = FaceT<T>;
 
-    using vertexPtr = std::shared_ptr<vertex>;
+    using VertexPtr = std::shared_ptr<Vertex>;
     using edgePtr   = std::shared_ptr<edge>;
     using FacePtr   = std::shared_ptr<Face>;
 
@@ -44,19 +44,19 @@ namespace Dcel {
     
     edgeT(const edge& a_otherEdge);
     
-    edgeT(const vertexPtr& a_vertex);
+    edgeT(const VertexPtr& a_vertex);
     
     ~edgeT();
 
     inline
-    void define(const vertexPtr& a_vertex,
+    void define(const VertexPtr& a_vertex,
 		const edgePtr&   a_pairEdge,
 		const edgePtr&   a_nextEdge,
 		const edgePtr&   a_previousEdge,
 		const Vec3                     a_normal) noexcept;
 
     inline
-    void setVertex(const vertexPtr& a_vertex) noexcept;
+    void setVertex(const VertexPtr& a_vertex) noexcept;
 
     inline
     void setPairEdge(const edgePtr& a_pairEdge) noexcept;
@@ -74,16 +74,16 @@ namespace Dcel {
     void reconcile() noexcept;
 
     inline
-    vertexPtr& getVertex() noexcept;
+    VertexPtr& getVertex() noexcept;
 
     inline
-    const vertexPtr& getVertex() const noexcept;
+    const VertexPtr& getVertex() const noexcept;
 
     inline
-    vertexPtr& getOtherVertex() noexcept;
+    VertexPtr& getOtherVertex() noexcept;
 
     inline
-    const vertexPtr& getOtherVertex() const noexcept;
+    const VertexPtr& getOtherVertex() const noexcept;
 
     inline
     edgePtr& getPairEdge() noexcept;
@@ -129,7 +129,7 @@ namespace Dcel {
     Vec3 m_x2x1;
     T    m_invLen2;
 
-    vertexPtr  m_vertex; 
+    VertexPtr  m_vertex; 
     edgePtr    m_pairEdge;
     edgePtr    m_previousEdge; 
     edgePtr    m_nextEdge;

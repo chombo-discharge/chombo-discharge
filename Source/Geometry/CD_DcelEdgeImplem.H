@@ -31,7 +31,7 @@ namespace Dcel {
 
   template <class T>
   inline
-  edgeT<T>::edgeT(const vertexPtr& a_vertex) : edgeT<T>() {
+  edgeT<T>::edgeT(const VertexPtr& a_vertex) : edgeT<T>() {
     m_vertex = a_vertex;
   }
 
@@ -54,7 +54,7 @@ namespace Dcel {
 
   template <class T>
   inline
-  void edgeT<T>::define(const vertexPtr& a_vertex,
+  void edgeT<T>::define(const VertexPtr& a_vertex,
 			const edgePtr&   a_pairEdge,
 			const edgePtr&   a_nextEdge,
 			const edgePtr&   a_previousEdge,
@@ -68,7 +68,7 @@ namespace Dcel {
 
   template <class T>
   inline
-  void edgeT<T>::setVertex(const vertexPtr& a_vertex) noexcept {
+  void edgeT<T>::setVertex(const VertexPtr& a_vertex) noexcept {
     m_vertex = a_vertex;
   }
 
@@ -137,25 +137,25 @@ namespace Dcel {
 
   template <class T>
   inline
-  std::shared_ptr<vertexT<T> >& edgeT<T>::getVertex() noexcept {
+  std::shared_ptr<VertexT<T> >& edgeT<T>::getVertex() noexcept {
     return (m_vertex);
   }
 
   template <class T>
   inline
-  const std::shared_ptr<vertexT<T> >& edgeT<T>::getVertex() const noexcept {
+  const std::shared_ptr<VertexT<T> >& edgeT<T>::getVertex() const noexcept {
     return (m_vertex);
   }
 
   template <class T>
   inline
-  std::shared_ptr<vertexT<T> >& edgeT<T>::getOtherVertex() noexcept {
+  std::shared_ptr<VertexT<T> >& edgeT<T>::getOtherVertex() noexcept {
     return (m_nextEdge->getVertex());
   }
 
   template <class T>
   inline
-  const std::shared_ptr<vertexT<T> >& edgeT<T>::getOtherVertex() const noexcept {
+  const std::shared_ptr<VertexT<T> >& edgeT<T>::getOtherVertex() const noexcept {
     return (m_nextEdge->getVertex());
   }
 
