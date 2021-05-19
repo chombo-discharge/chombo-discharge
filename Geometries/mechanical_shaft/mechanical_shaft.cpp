@@ -18,7 +18,7 @@
 #include "perlin_sphere_if.H"
 #include <CD_BoxSdf.H>
 #include "cylinder_if.H"
-#include "profile_cylinder_if.H"
+#include <CD_ProfileCylinderIF.H>
 #include "polygon_rod_if.H"
 #include "hollow_cylinder_if.H"
 #include <CD_RoundedCylinderIF.H>
@@ -173,6 +173,6 @@ RefCountedPtr<BaseIF> mechanical_shaft::get_cylinder_profile(){
   pp.get("nleft",           nLeft);
   pp.get("nright",          nRight);
 
-  return RefCountedPtr<BaseIF> (new profile_cylinder_if(c1, c2, cylRad, torusMajor, torusMinor, ccDist, shift, curv, nLeft, nRight, false));
+  return RefCountedPtr<BaseIF> (new ProfileCylinderIF(c1, c2, cylRad, torusMajor, torusMinor, ccDist, shift, curv, nLeft, nRight, false));
 }
 #include "CD_NamespaceFooter.H"

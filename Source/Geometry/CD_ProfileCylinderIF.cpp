@@ -1,32 +1,38 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file    profile_cylinder_if.cpp
-  @brief   Implementation of profile_cylinder_if.H
+  @file    CD_ProfileCylinderIF.cpp
+  @brief   Implementation of CD_ProfileCylinderIF.H
   @author  Robert Marskar
 */
 
-#include "profile_cylinder_if.H"
-#include <CD_RoundedCylinderIF.H>
-#include "cylinder_if.H"
-#include "torus_if.H"
-
-#include "TransformIF.H"
+// Chombo includes
+#include <TransformIF.H>
 #include <SmoothUnion.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_ProfileCylinderIF.H>
+#include <CD_RoundedCylinderIF.H>
+#include <cylinder_if.H>
+#include <torus_if.H>
+#include <CD_NamespaceHeader.H>
 
-profile_cylinder_if::profile_cylinder_if(const RealVect  a_endPoint1,
-					 const RealVect  a_endPoint2,
-					 const Real      a_cylinderRadius,
-					 const Real      a_torusMajorRadius,
-					 const Real      a_torusMinorRadius,
-					 const Real      a_ccDistance,
-					 const Real      a_shift,
-					 const Real      a_roundingRadius,
-					 const int       a_numLeft,
-					 const int       a_numRight,
-					 const bool      a_fluidInside){
+ProfileCylinderIF::ProfileCylinderIF(const RealVect  a_endPoint1,
+				     const RealVect  a_endPoint2,
+				     const Real      a_cylinderRadius,
+				     const Real      a_torusMajorRadius,
+				     const Real      a_torusMinorRadius,
+				     const Real      a_ccDistance,
+				     const Real      a_shift,
+				     const Real      a_roundingRadius,
+				     const int       a_numLeft,
+				     const int       a_numRight,
+				     const bool      a_fluidInside){
   if(SpaceDim != 3){
-    MayDay::Abort("profile_cylinder_if::profile_cylinder_if - this is a 3D object!");
+    MayDay::Abort("ProfileCylinderIF::ProfileCylinderIF - this is a 3D object!");
   }
   
 
@@ -85,19 +91,20 @@ profile_cylinder_if::profile_cylinder_if(const RealVect  a_endPoint1,
   delete base;
 }
 
-profile_cylinder_if::profile_cylinder_if(const profile_cylinder_if& a_inputIF){
+ProfileCylinderIF::ProfileCylinderIF(const ProfileCylinderIF& a_inputIF){
   m_baseif = a_inputIF.m_baseif;
 }
   
-profile_cylinder_if::~profile_cylinder_if(){
+ProfileCylinderIF::~ProfileCylinderIF(){
 
 }
 
-Real profile_cylinder_if::value(const RealVect& a_pos) const{
+Real ProfileCylinderIF::value(const RealVect& a_pos) const{
   return m_baseif->value(a_pos);
 }
 
-BaseIF* profile_cylinder_if::newImplicitFunction() const{
-  return static_cast<BaseIF*> (new profile_cylinder_if(*this));
+BaseIF* ProfileCylinderIF::newImplicitFunction() const{
+  return static_cast<BaseIF*> (new ProfileCylinderIF(*this));
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
