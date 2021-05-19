@@ -20,7 +20,7 @@
 #include <SmoothUnion.H>
 
 // Our includes
-#include <cylinder_if.H>
+#include <CD_CylinderSdf.H>
 #include <CD_RoundedCylinderIF.H>
 #include <CD_RoundedBoxIF.H>
 #include <torus_if.H>
@@ -106,8 +106,8 @@ BaseIF* RoundedCylinderIF::makeBaseIF3D(){
   const Real majorRadius = m_radius - m_curv;
   const Real minorRadius = m_curv;
 
-  BaseIF* mainCylinder   = (BaseIF*) (new cylinder_if(y0, y1, m_radius,        false));
-  BaseIF* insideCylinder = (BaseIF*) (new cylinder_if(x0, x1, m_radius-m_curv, false));
+  BaseIF* mainCylinder   = (BaseIF*) (new CylinderSdf(y0, y1, m_radius,        false));
+  BaseIF* insideCylinder = (BaseIF*) (new CylinderSdf(x0, x1, m_radius-m_curv, false));
 
   BaseIF* torusBottom = (BaseIF*) (new torus_if(y0, majorRadius, minorRadius, false));
   BaseIF* torusTop    = (BaseIF*) (new torus_if(y1, majorRadius, minorRadius, false));

@@ -1,17 +1,22 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file cylinder_if.cpp
-  @brief Implementation of cylinder_if.H
-  @date Nov. 2017
+  @file  CD_CylinderSdf.cpp
+  @brief CD_Implementation of CylinderSdf.H
   @author Robert Marskar
 */
 
+// Chombo includes
 #include <PolyGeom.H>
 
-#include "cylinder_if.H"
-    
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_CylinderSdf.H>
+#include <CD_NamespaceHeader.H>
 
-cylinder_if::cylinder_if(const RealVect& a_center1, const RealVect& a_center2, const Real& a_radius, const bool& a_fluidInside){
+CylinderSdf::CylinderSdf(const RealVect& a_center1, const RealVect& a_center2, const Real& a_radius, const bool& a_fluidInside){
   m_endPoint1    = a_center1;
   m_endPoint2    = a_center2;
   m_center       = 0.5*(m_endPoint1 + m_endPoint2);
@@ -22,7 +27,7 @@ cylinder_if::cylinder_if(const RealVect& a_center1, const RealVect& a_center2, c
   m_fluidInside  = a_fluidInside;
 }
 
-cylinder_if::cylinder_if(const cylinder_if& a_inputIF){
+CylinderSdf::CylinderSdf(const CylinderSdf& a_inputIF){
   m_endPoint1   = a_inputIF.m_endPoint1;
   m_endPoint2   = a_inputIF.m_endPoint2;
   m_center      = a_inputIF.m_center;
@@ -33,7 +38,7 @@ cylinder_if::cylinder_if(const cylinder_if& a_inputIF){
   m_fluidInside = a_inputIF.m_fluidInside;
 }
 
-Real cylinder_if::value(const RealVect& a_point) const{
+Real CylinderSdf::value(const RealVect& a_point) const{
   
   // Translate cylinder center to origin and do all calculations for "positive half" of the cylinder. 
   const RealVect newPoint = a_point - m_center;
@@ -59,7 +64,7 @@ Real cylinder_if::value(const RealVect& a_point) const{
     retval = sqrt(f*f + g*g);
   }
   else{
-    MayDay::Abort("cylinder_if::value - logic bust!");
+    MayDay::Abort("CylinderSdf::value - logic bust!");
   }
 
   // The above value of retval is correct for m_fluidInside. Otherwise, flip it. 
@@ -70,7 +75,8 @@ Real cylinder_if::value(const RealVect& a_point) const{
   return retval;
 }
 
-BaseIF* cylinder_if::newImplicitFunction() const{
-  return (BaseIF*) (new cylinder_if(m_endPoint1, m_endPoint2, m_radius, m_fluidInside));
+BaseIF* CylinderSdf::newImplicitFunction() const{
+  return (BaseIF*) (new CylinderSdf(m_endPoint1, m_endPoint2, m_radius, m_fluidInside));
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

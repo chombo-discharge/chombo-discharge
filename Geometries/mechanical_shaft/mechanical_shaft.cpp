@@ -17,7 +17,7 @@
 
 #include "perlin_sphere_if.H"
 #include <CD_BoxSdf.H>
-#include "cylinder_if.H"
+#include <CD_CylinderSdf.H>
 #include <CD_ProfileCylinderIF.H>
 #include "polygon_rod_if.H"
 #include <CD_HollowCylinderIF.H>

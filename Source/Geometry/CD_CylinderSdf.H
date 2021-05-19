@@ -1,21 +1,27 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   cylinder_if.H
-  @brief  Declaration of a cylindrical implicit function
+  @file   CD_CylinderSdf.H
+  @brief  Declaration of a cylindrical signed distance function
   @date   Nov. 2017
-  @author Robert Marskar
 */
 
-#ifndef _CYLINDER_IF_
-#define _CYLINDER_IF_
+#ifndef CD_CylinderSdf_H
+#define CD_CylinderSdf_H
 
+// Chombo includes
 #include <BaseIF.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Declaration of a cylinder IF class
 */
-class cylinder_if : public BaseIF {
+class CylinderSdf : public BaseIF {
 public:
 
   /*!
@@ -25,13 +31,13 @@ public:
     @param[in] a_radius  Cylinder radius
     @param[in] a_inside  Domain on inside or outside
   */
-  cylinder_if(const RealVect& a_center1, const RealVect& a_center2, const Real& a_radius, const bool& a_fluidInside);
+  CylinderSdf(const RealVect& a_center1, const RealVect& a_center2, const Real& a_radius, const bool& a_fluidInside);
 
   /*!
     @brief Copy constructor
     @param[in] a_inputIF Input cylinder
   */
-  cylinder_if(const cylinder_if& a_inputIF);
+  CylinderSdf(const CylinderSdf& a_inputIF);
 
   /*!
     @brief Test whether inside or not
@@ -86,5 +92,7 @@ protected:
   */
   bool m_fluidInside;
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif

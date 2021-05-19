@@ -10,7 +10,7 @@
 
 #include <BaseIF.H>
 
-#include "cylinder_if.H"
+#include <CD_CylinderSdf.H>
 #include "graded_perlin_sphere_if.H"
 
 #include "CD_NamespaceHeader.H"

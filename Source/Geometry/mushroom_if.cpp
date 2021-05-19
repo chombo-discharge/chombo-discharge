@@ -8,7 +8,7 @@
 #include "mushroom_if.H"
 #include <CD_RoundedBoxIF.H>
 #include <CD_BoxSdf.H>
-#include "cylinder_if.H"
+#include <CD_CylinderSdf.H>
 #include <CD_RoundedCylinderIF.H>
 
 #include <SmoothIntersection.H>
@@ -25,7 +25,7 @@ mushroom_if::mushroom_if(const RealVect a_center,
   const RealVect up = BASISREALV(SpaceDim-1);
 
   BaseIF* head = (BaseIF*) (new RoundedCylinderIF(a_center, a_center - a_d*up, a_R, a_curv, a_fluidInside));   // 3D shape...
-  BaseIF* stem = (BaseIF*) (new cylinder_if(a_center - 0.5*a_d*up, a_center - (a_d+a_L)*up, a_r, a_fluidInside));
+  BaseIF* stem = (BaseIF*) (new CylinderSdf(a_center - 0.5*a_d*up, a_center - (a_d+a_L)*up, a_r, a_fluidInside));
 
   Vector<BaseIF*> parts;
   parts.push_back(stem);

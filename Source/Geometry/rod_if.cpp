@@ -7,7 +7,7 @@
 
 #include "rod_if.H"
 #include "new_sphere_if.H"
-#include "cylinder_if.H"
+#include <CD_CylinderSdf.H>
 
 #include <SphereIF.H>
 #include <IntersectionIF.H>
@@ -30,7 +30,7 @@ rod_if::rod_if(const RealVect& a_center1,
 
   // Build the cylinder
   Vector<BaseIF*> isects;
-  isects.push_back(static_cast<BaseIF*> (new cylinder_if(c1, c2, a_radius, a_fluidInside)));
+  isects.push_back(static_cast<BaseIF*> (new CylinderSdf(c1, c2, a_radius, a_fluidInside)));
   isects.push_back(static_cast<BaseIF*> (new new_sphere_if(c1, a_radius,   a_fluidInside)));
   isects.push_back(static_cast<BaseIF*> (new new_sphere_if(c2, a_radius,   a_fluidInside)));
 

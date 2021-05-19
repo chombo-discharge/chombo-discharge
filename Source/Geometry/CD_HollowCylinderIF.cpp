@@ -15,7 +15,7 @@
 #include <IntersectionIF.H>
 
 // Our includes
-#include <cylinder_if.H>
+#include <CD_CylinderSdf.H>
 #include <CD_HollowCylinderIF.H>
 #include <CD_RoundedCylinderIF.H>
 #include <CD_NamespaceHeader.H>
@@ -37,7 +37,7 @@ HollowCylinderIF::HollowCylinderIF(const RealVect a_center1,
   const RealVect c1 = a_center1 - a_curv*axis;
   
   BaseIF* bigCylinder   = (BaseIF*) (new RoundedCylinderIF(a_center1, a_center2, a_majorRadius, a_curv,  a_fluidInside));
-  BaseIF* smallCylinder = (BaseIF*) (new cylinder_if        (a_center1, a_center2, a_minorRadius,         !a_fluidInside));
+  BaseIF* smallCylinder = (BaseIF*) (new CylinderSdf        (a_center1, a_center2, a_minorRadius,         !a_fluidInside));
 
   parts.push_back(bigCylinder);
   parts.push_back(smallCylinder);

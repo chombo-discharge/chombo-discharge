@@ -14,7 +14,7 @@
 #include <SmoothUnion.H>
 
 #include "polygon_rod_if.H"
-#include "cylinder_if.H"
+#include <CD_CylinderSdf.H>
 
 #include "CD_NamespaceHeader.H"
 

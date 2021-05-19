@@ -5,7 +5,7 @@
   @date Nov. 2017
 */
 
-#include "cylinder_if.H"
+#include <CD_CylinderSdf.H>
 #include "perlin_rod_if.H"
 
 #include <TransformIF.H>
@@ -30,7 +30,7 @@ perlin_rod_if::perlin_rod_if(const Real&     a_rad,
 
 
   // Cylinder and graded noise sphere
-  BaseIF* cyl = static_cast<BaseIF*> (new cylinder_if(a_center1, center2, a_rad, a_inside));
+  BaseIF* cyl = static_cast<BaseIF*> (new CylinderSdf(a_center1, center2, a_rad, a_inside));
   const BaseIF* sph = static_cast<BaseIF*> (new graded_perlin_sphere_if(a_rad,
 									center2,
 									a_inside,

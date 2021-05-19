@@ -8,7 +8,7 @@
 #include "vessel.H"
 #include "mushroom_if.H"
 #include "rod_if.H"
-#include "cylinder_if.H"
+#include <CD_CylinderSdf.H>
 
 #include <ParmParse.H>
 

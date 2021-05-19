@@ -16,7 +16,7 @@
 // Our includes
 #include <CD_ProfileCylinderIF.H>
 #include <CD_RoundedCylinderIF.H>
-#include <cylinder_if.H>
+#include <CD_CylinderSdf.H>
 #include <torus_if.H>
 #include <CD_NamespaceHeader.H>
 

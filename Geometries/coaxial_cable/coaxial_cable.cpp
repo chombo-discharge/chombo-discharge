@@ -13,7 +13,7 @@
 
 #include <ParmParse.H>
 
-#include "cylinder_if.H"
+#include <CD_CylinderSdf.H>
 #include "new_sphere_if.H"
 
 #include "CD_NamespaceHeader.H"
@@ -52,7 +52,7 @@ coaxial_cable::coaxial_cable(){
 #if CH_SPACEDIM==2
     RefCountedPtr<BaseIF> baseif = RefCountedPtr<BaseIF> (new new_sphere_if(e1, rad, true));
 #elif CH_SPACEDIM==3
-    RefCountedPtr<BaseIF> baseif = RefCountedPtr<BaseIF> (new cylinder_if(e1, e2, rad, true));
+    RefCountedPtr<BaseIF> baseif = RefCountedPtr<BaseIF> (new CylinderSdf(e1, e2, rad, true));
 #endif
     m_electrodes.push_back(electrode(baseif, live));
   }
@@ -67,7 +67,7 @@ coaxial_cable::coaxial_cable(){
 #if CH_SPACEDIM==2
     RefCountedPtr<BaseIF> baseif = RefCountedPtr<BaseIF> (new new_sphere_if(e1, rad, false));
 #elif CH_SPACEDIM==3
-    RefCountedPtr<BaseIF> baseif = RefCountedPtr<BaseIF> (new cylinder_if(e1, e2, rad, false));
+    RefCountedPtr<BaseIF> baseif = RefCountedPtr<BaseIF> (new CylinderSdf(e1, e2, rad, false));
 #endif
     m_electrodes.push_back(electrode(baseif, live));
   }
@@ -82,7 +82,7 @@ coaxial_cable::coaxial_cable(){
 #if CH_SPACEDIM==2
     RefCountedPtr<BaseIF> baseif = RefCountedPtr<BaseIF> (new new_sphere_if(e1, rad, false));
 #elif CH_SPACEDIM==3
-    RefCountedPtr<BaseIF> baseif = RefCountedPtr<BaseIF> (new cylinder_if(e1, e2, rad, false));
+    RefCountedPtr<BaseIF> baseif = RefCountedPtr<BaseIF> (new CylinderSdf(e1, e2, rad, false));
 #endif
     m_dielectrics.push_back(dielectric(baseif, eps));
   }
