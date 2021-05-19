@@ -1,29 +1,34 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file perlin_rod_if.H
-  @brief Declaration of a rod with a rounded, noisy tip
+  @file   CD_PerlinRodSdf.H
+  @brief  Declaration of a rod with a rounded, noisy tip
   @author Robert Marskar
-  @date Nov. 2017
 */
 
-#ifndef _PERLIN_ROD_IF_
-#define _PERLIN_ROD_IF_
+#ifndef CD_PerlinRodSdf_H
+#define CD_PerlinRodSdf_H
 
+// Chombo includes
 #include <BaseIF.H>
 
+// Our includes
 #include <CD_CylinderSdf.H>
 #include <CD_GradedPerlinSphereSdf.H>
-
-#include "CD_NamespaceHeader.H"
+#include <CD_NamespaceHeader.H>
 
 /*!
-  @brief perlin_rod_if function
+  @brief PerlinRodSdf function
 */
-class perlin_rod_if : public PerlinSphereSdf {
+class PerlinRodSdf : public PerlinSphereSdf {
 public:  
   /*!
     @brief Constructor
   */
-  perlin_rod_if(const Real&     a_rad,
+  PerlinRodSdf(const Real&     a_rad,
 		const RealVect& a_center1,
 		const RealVect& a_center2,
 		const bool&     a_inside,
@@ -37,12 +42,12 @@ public:
     @brief Copy constructor
   */
 
-  perlin_rod_if(const perlin_rod_if& a_inputIF);
+  PerlinRodSdf(const PerlinRodSdf& a_inputIF);
 
   /*!
     @brief Destructor
   */
-  virtual ~perlin_rod_if();
+  virtual ~PerlinRodSdf();
 
   /*!
     @brief Value function
@@ -61,5 +66,7 @@ protected:
   */
   RefCountedPtr<BaseIF> m_baseif;
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif

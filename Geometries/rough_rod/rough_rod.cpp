@@ -6,7 +6,7 @@
 */
 
 #include "rough_rod.H"
-#include "perlin_rod_if.H"
+#include <CD_PerlinRodSdf.H>
 
 #include <ParmParse.H>
 
@@ -39,7 +39,7 @@ rough_rod::rough_rod(){
     pp.getarr("endpoint1",       v, 0 ,SpaceDim); e1 = RealVect(D_DECL(v[0], v[1], v[2]));
     pp.getarr("endpoint2",       v, 0 ,SpaceDim); e2 = RealVect(D_DECL(v[0], v[1], v[2]));
 
-    RefCountedPtr<BaseIF> rod = RefCountedPtr<BaseIF> (new perlin_rod_if(r, e1, e2, false, amp, f, persist, octaves, reseed));
+    RefCountedPtr<BaseIF> rod = RefCountedPtr<BaseIF> (new PerlinRodSdf(r, e1, e2, false, amp, f, persist, octaves, reseed));
 
     m_electrodes.push_back(Electrode(rod, live));
   }

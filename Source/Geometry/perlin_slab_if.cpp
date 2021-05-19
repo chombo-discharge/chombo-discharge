@@ -6,7 +6,7 @@
 */
 
 #include "perlin_slab_if.H"
-#include "perlin_plane_if.H"
+#include <CD_PerlinPlaneSdf.H>
 
 #include <SmoothUnion.H>
 #include <PlaneIF.H>
@@ -37,7 +37,7 @@ perlin_slab_if::perlin_slab_if(const RealVect a_ccPoint,
       const RealVect p = n*0.5*a_xyz[dir];
 
       if(dir == up && sit() == Side::Hi){
-	BaseIF* baseif = (BaseIF*) new perlin_plane_if(n, p, true, a_noiseAmp, a_noiseFreq, a_persistence, a_octaves, a_reseed);
+	BaseIF* baseif = (BaseIF*) new PerlinPlaneSdf(n, p, true, a_noiseAmp, a_noiseFreq, a_persistence, a_octaves, a_reseed);
 	parts.push_back(baseif);
       }
       else{
