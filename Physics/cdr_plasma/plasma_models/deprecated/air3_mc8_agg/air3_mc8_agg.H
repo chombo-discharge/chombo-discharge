@@ -100,7 +100,7 @@ protected:
   lookup_table m_e_alpha;
   lookup_table m_e_eta;
 
-  Vector<int> m_wallbc; // Wall boundary conditions
+  Vector<int> m_wallBc; // Wall boundary conditions
 
   bool m_use_alpha_corr;      // Use alpha correction due to Soloviev et. al
   bool m_isMobile_electrons;    // Mobile electrons or not

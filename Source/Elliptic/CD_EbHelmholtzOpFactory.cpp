@@ -47,7 +47,7 @@ EbHelmholtzOpFactory:: EbHelmholtzOpFactory(const Vector<EBLevelGrid>&          
   m_fastFR        = a_fastFR;
   m_ghostCellsRhs = a_ghostCellsRhs;
   m_ghostCellsPhi = a_ghostCellsPhi;
-  m_aCoefficient         = a_acoef;
+  m_aCoef         = a_acoef;
   m_bcoef         = a_bcoef;
   m_bcoefIrreg    = a_bcoefIrreg;
   m_alpha         = a_alpha;
@@ -76,7 +76,7 @@ EbHelmholtzOpFactory:: EbHelmholtzOpFactory(const Vector<EBLevelGrid>&          
   m_beta = a_beta;
 
   m_eblgsMG.resize(m_numLevels);
-  m_aCoefficientMG.resize(m_numLevels);
+  m_aCoefMG.resize(m_numLevels);
   m_bcoefMG.resize(m_numLevels);
   m_bcoefIrregMG.resize(m_numLevels);
   m_hasMGObjects.resize(m_numLevels);
@@ -86,11 +86,11 @@ EbHelmholtzOpFactory:: EbHelmholtzOpFactory(const Vector<EBLevelGrid>&          
 
       int mgRef = 2;
       m_eblgsMG[ilev]     .resize(0);
-      m_aCoefficientMG[ilev]     .resize(0);
+      m_aCoefMG[ilev]     .resize(0);
       m_bcoefMG[ilev]     .resize(0);
       m_bcoefIrregMG[ilev].resize(0);
       m_eblgsMG[ilev]     .push_back(m_eblgs[ilev]);
-      m_aCoefficientMG[ilev]     .push_back(m_aCoefficient[ilev]);
+      m_aCoefMG[ilev]     .push_back(m_aCoef[ilev]);
       m_bcoefMG[ilev]     .push_back(m_bcoef[ilev]);
       m_bcoefIrregMG[ilev].push_back(m_bcoefIrreg[ilev]);
 
@@ -152,13 +152,13 @@ EbHelmholtzOpFactory:: EbHelmholtzOpFactory(const Vector<EBLevelGrid>&          
 				    *bcoefIrregCoar,
 				    eblgFine,
 				    eblgCoar,
-				    *m_aCoefficientMG[ilev][img-1],
+				    *m_aCoefMG[ilev][img-1],
 				    *m_bcoefMG[ilev][img-1],
 				    *m_bcoefIrregMG[ilev][img-1],
 				    mgRef);
 
 	  // Move them to appropriate multigrid level
-	  m_aCoefficientMG[ilev].push_back(acoefCoar);
+	  m_aCoefMG[ilev].push_back(acoefCoar);
 	  m_bcoefMG[ilev].push_back(bcoefCoar);
 	  m_bcoefIrregMG[ilev].push_back(bcoefIrregCoar);
 	}
@@ -262,7 +262,7 @@ EbHelmholtzOp* EbHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_domainFine,
   if (a_depth == 0){
     eblgMGLevel    = m_eblgs[ref];
 
-    acoef = m_aCoefficient[ref];
+    acoef = m_aCoef[ref];
 
     bcoef          = m_bcoef[ref];
     bcoefIrreg     = m_bcoefIrreg[ref];
@@ -287,7 +287,7 @@ EbHelmholtzOp* EbHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_domainFine,
     for (int img = 0; img < numMGLevels; img++){
       if (m_eblgsMG[ref][img].getDomain() == domainBoxMGLevel){
 	eblgMGLevel = m_eblgsMG[ref][img];
-	acoef = m_aCoefficientMG[ref][img];
+	acoef = m_aCoefMG[ref][img];
 	bcoef = m_bcoefMG[ref][img];
 	bcoefIrreg  = m_bcoefIrregMG[ref][img];
 	foundMGLevel = true;
@@ -396,7 +396,7 @@ EbHelmholtzOp* EbHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domainFine)
   newOp = new EbHelmholtzOp(eblgFine, eblgMGLevel, eblgCoar, eblgCoarMG, m_quadCFI[ref], m_fastFR[ref],
 			    dombc, ebbc,  dxMGLevel,dxCoar, refToFiner, refToCoarser,
 			    hasFine, hasCoar, hasCoarMGObjects,  layoutChanged,
-			    m_alpha, m_beta, m_aCoefficient[ref], m_bcoef[ref], m_bcoefIrreg[ref],
+			    m_alpha, m_beta, m_aCoef[ref], m_bcoef[ref], m_bcoefIrreg[ref],
 			    m_ghostCellsPhi, m_ghostCellsRhs, m_relaxType);
 
   return newOp;

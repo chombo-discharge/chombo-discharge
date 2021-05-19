@@ -417,7 +417,7 @@ protected:
   /*!
     @brief a-coefficients for each phase
   */
-  Vector<RefCountedPtr<LevelData<EBCellFAB> > > m_aCoefficienteffs;
+  Vector<RefCountedPtr<LevelData<EBCellFAB> > > m_aCoefeffs;
 
   /*!
     @brief b-coefficients for each phase

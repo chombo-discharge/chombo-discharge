@@ -119,7 +119,7 @@ protected:
   lookup_table m_e_losses;
   lookup_table m_lfa; // Local field approximation table
 
-  Vector<int> m_wallbc; // Wall boundary conditions
+  Vector<int> m_wallBc; // Wall boundary conditions
 
   bool m_isMobile_electrons;    // Mobile electrons or not
   bool m_isMobile_ions;         // Mobile ions or not

@@ -40,7 +40,7 @@ def write_template(args):
     makef.write('\t$(DISCHARGE_HOME)/Source/Driver \\\n')
     makef.write('\t$(DISCHARGE_HOME)/Source/Elliptic \\\n')
     makef.write('\t$(DISCHARGE_HOME)/Source/geometry \\\n')
-    makef.write('\t$(DISCHARGE_HOME)/Source/rte_solver \\\n')
+    makef.write('\t$(DISCHARGE_HOME)/Source/RadiativeTransfer \\\n')
     makef.write('\t$(DISCHARGE_HOME)/Source/ito_solver \\\n')
     makef.write('\t$(DISCHARGE_HOME)/Source/SigmaSolver \\\n')
     makef.write('\t$(DISCHARGE_HOME)/Source/Particle \\\n')

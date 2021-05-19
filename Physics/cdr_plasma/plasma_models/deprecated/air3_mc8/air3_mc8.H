@@ -118,7 +118,7 @@ protected:
   lookup_table m_b1_exc;
   lookup_table m_c4_exc;
 
-  Vector<int> m_wallbc; // Wall boundary conditions
+  Vector<int> m_wallBc; // Wall boundary conditions
 
   bool m_alpha_corr;          // Alpha correction
   bool m_isMobile_electrons;    // Mobile electrons or not

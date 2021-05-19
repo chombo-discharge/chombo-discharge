@@ -76,7 +76,7 @@ EbHelmholtzOp::EbHelmholtzOp(const EBLevelGrid &                                
   m_dxFine(),
   m_dx(a_dx),
   m_dxCoar(a_dxCoar),
-  m_aCoefficient(a_acoef),
+  m_aCoef(a_acoef),
   m_bcoef(a_bcoef),
   m_bcoIrreg(a_bcoIrreg),
   m_alpha(a_alpha),
@@ -215,7 +215,7 @@ void EbHelmholtzOp::calculateAlphaWeight(){
       for (vofit.reset(); vofit.ok(); ++vofit){
 	const VolIndex& VoF = vofit();
 	Real volFrac = m_eblg.getEBISL()[dit[mybox]].volFrac(VoF);
-	Real alphaWeight = (*m_aCoefficient)[dit[mybox]](VoF, 0);
+	Real alphaWeight = (*m_aCoef)[dit[mybox]](VoF, 0);
 	alphaWeight *= volFrac;
 
 	m_alphaDiagWeight[dit[mybox]](VoF, 0) = alphaWeight;
@@ -317,13 +317,13 @@ void EbHelmholtzOp::diagonalScale(LevelData<EBCellFAB> & a_rhs, bool a_kappaWeig
   // Scale by a-coefficient and alpha, too.
   DataIterator dit = m_eblg.getDBL().dataIterator();
   for (dit.reset(); dit.ok(); ++dit){
-    a_rhs[dit()] *= (*m_aCoefficient)[dit()];
+    a_rhs[dit()] *= (*m_aCoef)[dit()];
   }
 }
 
 void EbHelmholtzOp::divideByIdentityCoef(LevelData<EBCellFAB> & a_rhs){
   for(DataIterator dit = m_eblg.getDBL().dataIterator(); dit.ok(); ++dit){
-    a_rhs[dit()] /= (*m_aCoefficient)[dit()];
+    a_rhs[dit()] /= (*m_aCoef)[dit()];
   }
 }
 
@@ -340,7 +340,7 @@ void EbHelmholtzOp::calculateRelaxationCoefficient(){
       const Box& grid = m_eblg.getDBL().get(dit[mybox]);
       
       // For time-independent acoef, initialize lambda = alpha * acoef.
-      const EBCellFAB& acofab = (*m_aCoefficient)[dit[mybox]];
+      const EBCellFAB& acofab = (*m_aCoef)[dit[mybox]];
       m_relCoef[dit[mybox]].setVal(0.);
       m_relCoef[dit[mybox]].plus(acofab, 0, 0, 1);
       m_relCoef[dit[mybox]]*= m_alpha;
@@ -501,7 +501,7 @@ void EbHelmholtzOp::defineStencils(){
 
 	//add in identity term
 	Real volFrac = ebisBox.volFrac(VoF);
-	Real alphaWeight = (*m_aCoefficient)[dit[mybox]](VoF, 0);
+	Real alphaWeight = (*m_aCoef)[dit[mybox]](VoF, 0);
 	alphaWeight *= volFrac;
 
 	m_alphaDiagWeight[dit[mybox]](VoF, 0) = alphaWeight;
@@ -863,7 +863,7 @@ void EbHelmholtzOp::applyOp(LevelData<EBCellFAB>&                    a_lhs,
       const EBISBox& ebisbox = phi.getEBISBox();
 
       if(!ebisbox.isAllCovered()){
-	a_lhs[a_dit()].mult((*m_aCoefficient)[a_dit()], 0, 0, 1);
+	a_lhs[a_dit()].mult((*m_aCoef)[a_dit()], 0, 0, 1);
 
 	Box loBox[SpaceDim],hiBox[SpaceDim];
 	int hasLo[SpaceDim],hasHi[SpaceDim];
@@ -1240,7 +1240,7 @@ void EbHelmholtzOp::relaxGSRBFast(LevelData<EBCellFAB>&       a_phi,
 	  BaseFab<Real>      & reguPhi =      (a_phi[dit[mybox]]).getSingleValuedFAB();
 	  const BaseFab<Real>& reguRHS =     (a_rhs[dit[mybox]] ).getSingleValuedFAB();
 	  const BaseFab<Real>& relCoef = (m_relCoef[dit[mybox]] ).getSingleValuedFAB();
-	  const BaseFab<Real>& regACoe =((*m_aCoefficient)[dit[mybox]] ).getSingleValuedFAB();
+	  const BaseFab<Real>& regACoe =((*m_aCoef)[dit[mybox]] ).getSingleValuedFAB();
 	  const BaseFab<Real>* regBCoe[3];
 	  //need three coeffs because this has to work in 3d
 	  //this is my klunky way to make the call dimension-independent

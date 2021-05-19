@@ -19,7 +19,7 @@ def write_template(args):
                      args.discharge_home + "/Source/Driver/Driver.options", \
                      args.discharge_home + "/Source/FieldSolver/CD_" + args.field_solver + ".options",\
                      args.discharge_home + "/Source/ito_solver/" + args.ito_solver + ".options",\
-                     args.discharge_home + "/Source/rte_solver/mc_photo.options",\
+                     args.discharge_home + "/Source/RadiativeTransfer/mc_photo.options",\
                      args.discharge_home + "/Source/geometry/geo_coarsener.options", \
                      args.discharge_home + "/Geometries/" + args.geometry + "/" + args.geometry + ".options", \
                      args.discharge_home + "/Physics/ito_plasma/timesteppers/" + args.TimeStepper + "/" + args.TimeStepper + ".options", \

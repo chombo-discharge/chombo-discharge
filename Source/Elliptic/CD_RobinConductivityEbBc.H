@@ -102,7 +102,7 @@ protected:
 
   RealVect m_origin;
 
-  RefCountedPtr<RobinCoefficients> m_robinco;
+  RefCountedPtr<RobinCoefficients> m_robinCoefficients;
   
   Real m_aco;
   Real m_bco;

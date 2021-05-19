@@ -171,7 +171,7 @@ namespace physics {
       };
 
 
-      Vector<int> m_wallbc;
+      Vector<int> m_wallBc;
 
       int m_nelec_idx; // Electron index
       int m_nplus_idx; // Positive ion index

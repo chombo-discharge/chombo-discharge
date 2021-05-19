@@ -593,19 +593,19 @@ void mc_photo::registerOperators(){
   }
 }
 
-void mc_photo::compute_boundary_flux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi){
-  CH_TIME("mc_photo::compute_boundary_flux");
+void mc_photo::computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi){
+  CH_TIME("mc_photo::computeBoundaryFlux");
   if(m_verbosity > 5){
-    pout() << m_name + "::compute_boundary_flux" << endl;
+    pout() << m_name + "::computeBoundaryFlux" << endl;
   }
 
   data_ops::set_value(a_ebFlux, 0.0);
 }
 
-void mc_photo::compute_domain_flux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_phi){
-  CH_TIME("mc_photo::compute_domain_flux");
+void mc_photo::computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_phi){
+  CH_TIME("mc_photo::computeDomainFlux");
   if(m_verbosity > 5){
-    pout() << m_name + "::compute_domain_flux" << endl;
+    pout() << m_name + "::computeDomainFlux" << endl;
   }
   
   data_ops::set_value(a_domainflux, 0.0);
@@ -616,8 +616,8 @@ void mc_photo::computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi){
   MayDay::Abort(str.c_str());
 }
 
-void mc_photo::compute_density(EBAMRCellData& a_isotropic, const EBAMRCellData& a_phi){
-  MayDay::Abort("mc_photo::compute_density - Calling this is an error");
+void mc_photo::computeDensity(EBAMRCellData& a_isotropic, const EBAMRCellData& a_phi){
+  MayDay::Abort("mc_photo::computeDensity - Calling this is an error");
 }
 
 void mc_photo::writePlotFile(){

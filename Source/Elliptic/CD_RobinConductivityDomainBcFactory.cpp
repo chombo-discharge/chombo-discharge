@@ -32,7 +32,7 @@ void RobinConductivityDomainBcFactory::setCoefficients(const Real a_aco, const R
 }
 
 void RobinConductivityDomainBcFactory::setCoefficients(const RefCountedPtr<RobinCoefficients> a_robinco){
-  m_robinco = a_robinco;
+  m_robinCoefficients = a_robinco;
 
   m_const_coeff = false;
   m_func_coeff  = true;
@@ -65,7 +65,7 @@ BaseDomainBC* RobinConductivityDomainBcFactory::create(const ProblemDomain& a_do
   }
   else if(m_func_coeff){
 
-    fresh->setCoefficients(m_robinco);
+    fresh->setCoefficients(m_robinCoefficients);
   }
   else if(m_data_coeff){
     for (int lvl = 0; lvl < m_acodata.size(); lvl++){

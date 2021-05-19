@@ -968,7 +968,7 @@ void sdc::set_semi_implicit_permittivities(){
   FieldSolverMultigrid* poisson = (FieldSolverMultigrid*) (&(*m_fieldSolver));
 
   // Set coefficients as usual
-  poisson->setCoefficientsficients();
+  poisson->setMultigridCoefficients();
 
   // Get bco and increment with mobilities
   MFAMRFluxData& bco   = poisson->getAvgBco();
@@ -1000,7 +1000,7 @@ void sdc::set_semi_implicit_permittivities(){
   }
 
   // Set up the multigrid solver
-  poisson->setup_operator_factory();
+  poisson->setupOperatorFactory();
   poisson->setup_solver();
   poisson->set_needs_setup(false);
 }
@@ -1900,7 +1900,7 @@ void sdc::compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_phis, const Real a_
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
     EBAMRIVData& flux_eb = storage->get_eb_flux();
-    solver->compute_boundary_flux(flux_eb, solver->getPhi());
+    solver->computeBoundaryFlux(flux_eb, solver->getPhi());
     extrap_rte_fluxes.push_back(&flux_eb);
   }
 
@@ -1970,7 +1970,7 @@ void sdc::compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_phis, const 
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
     EBAMRIFData& domain_flux = storage->get_domain_flux();
-    solver->compute_domain_flux(domain_flux, solver->getPhi());
+    solver->computeDomainFlux(domain_flux, solver->getPhi());
     extrap_rte_fluxes.push_back(&domain_flux);
   }
 

@@ -25,7 +25,7 @@ RobinConductivityDomainBc::~RobinConductivityDomainBc(){
 }
 
 void RobinConductivityDomainBc::setCoefficients(RefCountedPtr<RobinCoefficients> a_robinco){
-  m_robinco = a_robinco;
+  m_robinCoefficients = a_robinco;
 
   m_const_coeff = false;
   m_func_coeff  = true;
@@ -95,9 +95,9 @@ void RobinConductivityDomainBc::getFaceFlux(BaseFab<Real>&        a_faceFlux,
       rhs = m_rhs;
     }
     else if(m_func_coeff){
-      aco = m_robinco->aco(pos);
-      bco = m_robinco->bco(pos);
-      rhs = m_robinco->rhs(pos);
+      aco = m_robinCoefficients->aco(pos);
+      bco = m_robinCoefficients->bco(pos);
+      rhs = m_robinCoefficients->rhs(pos);
     }
     else if(m_data_coeff){
       MayDay::Abort("RobinConductivityDomainBc::getFaceFlux - data-based not supported (yet)");
@@ -253,9 +253,9 @@ void RobinConductivityDomainBc::getFaceGradPhi(Real&                 a_faceFlux,
     rhs = m_rhs;
   }
   else if(m_func_coeff){
-    aco = m_robinco->aco(pos);
-    bco = m_robinco->aco(pos);
-    rhs = m_robinco->rhs(pos);
+    aco = m_robinCoefficients->aco(pos);
+    bco = m_robinCoefficients->aco(pos);
+    rhs = m_robinCoefficients->rhs(pos);
   }
   else if(m_data_coeff){
     MayDay::Abort("RobinConductivityDomainBc::getFaceGradPhi - data-based not supported (yet)");

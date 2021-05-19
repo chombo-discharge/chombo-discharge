@@ -186,7 +186,7 @@ protected:
   Real m_photoionization_efficiency;     // Photoionization efficiency
   Real m_excitation_efficiency;          // Excitation efficiency
 
-  Vector<int> m_wallbc; // Switch for wall bc
+  Vector<int> m_wallBc; // Switch for wall bc
 
 
   // Tables built from BOLSIG+

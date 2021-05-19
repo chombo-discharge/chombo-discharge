@@ -113,7 +113,7 @@ protected:
   lookup_table m_e_alpha;
   lookup_table m_e_eta;
 
-  Vector<int> m_wallbc; // Wall boundary conditions
+  Vector<int> m_wallBc; // Wall boundary conditions
 
   bool m_isMobile_electrons;    // Mobile electrons or not
   bool m_isMobile_ions;         // Mobile ions or not

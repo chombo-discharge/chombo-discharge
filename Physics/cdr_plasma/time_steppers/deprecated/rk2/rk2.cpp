@@ -371,7 +371,7 @@ void rk2::compute_cdr_fluxes_at_start_of_time_step(){
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
     EBAMRIVData& flux_eb = storage->get_eb_flux();
-    solver->compute_boundary_flux(flux_eb, solver->getPhi());
+    solver->computeBoundaryFlux(flux_eb, solver->getPhi());
     extrap_rte_fluxes.push_back(&flux_eb);
   }
 
@@ -755,7 +755,7 @@ void rk2::compute_cdr_fluxes_after_k1(const Real a_dt){
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
     EBAMRIVData& flux_eb = storage->get_eb_flux();
-    solver->compute_boundary_flux(flux_eb, storage->get_phi());
+    solver->computeBoundaryFlux(flux_eb, storage->get_phi());
     extrap_rte_fluxes.push_back(&flux_eb);
   }
 

@@ -49,7 +49,7 @@ MfHelmholtzOpFactory::MfHelmholtzOpFactory(const RefCountedPtr<mfis>&           
   m_mflg       = a_mflg;
   m_mfquadcfi  = a_mfquadcfi;
   m_mffluxreg  = a_mffluxreg;
-  m_aCoefficient        = a_aco;
+  m_aCoef        = a_aco;
   m_bco        = a_bco;
   m_bco_irreg  = a_bco_irreg;
   m_alpha      = a_alpha;
@@ -106,7 +106,7 @@ MfHelmholtzOpFactory::~MfHelmholtzOpFactory(){
 
 void MfHelmholtzOpFactory::defineDeeperMultigrid(){
   CH_TIME("MfHelmholtzOpFactory::defineDeeperMultigrid");
-  m_aCoefficient_mg.resize(m_num_levels);
+  m_aCoef_mg.resize(m_num_levels);
   m_bco_mg.resize(m_num_levels);
   m_bco_irreg_mg.resize(m_num_levels);
   m_mflg_mg.resize(m_num_levels);
@@ -126,7 +126,7 @@ void MfHelmholtzOpFactory::defineDeeperMultigrid(){
 
       const int mg_refi = 2;             // MultiGrid uses VCycling, refinement of 2. 
 
-      m_aCoefficient_mg[lvl].resize(0);            // aco for all MG levels at this level
+      m_aCoef_mg[lvl].resize(0);            // aco for all MG levels at this level
       m_bco_mg[lvl].resize(0);            // bco for all MG levels at this level
       m_bco_irreg_mg[lvl].resize(0);      // bco for all MG levels at this level
       m_mflg_mg[lvl].resize(0);           // MFLevelGrids for all MG levels at this level
@@ -136,7 +136,7 @@ void MfHelmholtzOpFactory::defineDeeperMultigrid(){
       m_aveop_mg[lvl].resize(0);          //
       m_jump_mg[lvl].resize(0);           // sigma for all MG levels at this AMR level
 
-      m_aCoefficient_mg[lvl].push_back(m_aCoefficient[lvl]);                         // MG depth 0 is the AMR level, the stuff 
+      m_aCoef_mg[lvl].push_back(m_aCoef[lvl]);                         // MG depth 0 is the AMR level, the stuff 
       m_bco_mg[lvl].push_back(m_bco[lvl]);                         // below will be coarsened versions
       m_bco_irreg_mg[lvl].push_back(m_bco_irreg[lvl]);             // 
       m_mflg_mg[lvl].push_back(m_mflg[lvl]);                       // 
@@ -310,12 +310,12 @@ void MfHelmholtzOpFactory::defineDeeperMultigrid(){
 				    *bco_irreg_coar,
 				    mflg_coar,
 				    mflg_fine,
-				    *m_aCoefficient_mg[lvl][img-1],
+				    *m_aCoef_mg[lvl][img-1],
 				    *m_bco_mg[lvl][img-1],
 				    *m_bco_irreg_mg[lvl][img-1],
 				    mg_refi);
 
-	  m_aCoefficient_mg[lvl].push_back(aco_coar);
+	  m_aCoef_mg[lvl].push_back(aco_coar);
 	  m_bco_mg[lvl].push_back(bco_coar);
 	  m_bco_irreg_mg[lvl].push_back(bco_irreg_coar);
 	  m_aveop_mg[lvl].push_back(aveop);
@@ -671,7 +671,7 @@ MGLevelOp<LevelData<MFCellFAB> >* MfHelmholtzOpFactory::MGnewOp(const ProblemDom
   
 
   if(a_depth == 0){ // this is an AMR level
-    aco       = m_aCoefficient[ref];
+    aco       = m_aCoef[ref];
     bco       = m_bco[ref];
     bco_irreg = m_bco_irreg[ref];
     jump      = m_jump[ref];
@@ -708,7 +708,7 @@ MGLevelOp<LevelData<MFCellFAB> >* MfHelmholtzOpFactory::MGnewOp(const ProblemDom
 	mflg = m_mflg_mg[ref][img];
 	domain = m_domains_mg[ref][img];
 
-	aco       = m_aCoefficient_mg[ref][img];
+	aco       = m_aCoef_mg[ref][img];
 	bco       = m_bco_mg[ref][img];
 	bco_irreg = m_bco_irreg_mg[ref][img];
 	jump      = m_jump_mg[ref][img];
@@ -743,7 +743,7 @@ MGLevelOp<LevelData<MFCellFAB> >* MfHelmholtzOpFactory::MGnewOp(const ProblemDom
 #endif
   oper->define(m_multifluidIndexSpace,           // Set from factory
 	       m_domainBc,          // Set from factory
-	       aco,              // Set to m_aCoefficient[ref] (for AMR) or m_aCoefficient_mg[ref][img] for MG
+	       aco,              // Set to m_aCoef[ref] (for AMR) or m_aCoef_mg[ref][img] for MG
 	       bco,              // Set to m_bco[ref] (for AMR) or m_bco_mg[ref][img] for MG
 	       bco_irreg,        // Set to m_bco_irreg[ref] (for AMR) or m_bco_irreg_mg[ref][img] for MG
 	       quadcfi,          // Set to m_mfquadcfi[ref] (for AMR). Undefined for MG.
@@ -816,7 +816,7 @@ AMRLevelOp<LevelData<MFCellFAB> >* MfHelmholtzOpFactory::AMRnewOp(const ProblemD
   
 
   // All this shit must be set.
-  RefCountedPtr<LevelData<MFCellFAB> >   aco       = m_aCoefficient[ref];
+  RefCountedPtr<LevelData<MFCellFAB> >   aco       = m_aCoef[ref];
   RefCountedPtr<LevelData<MFFluxFAB> >   bco       = m_bco[ref];
   RefCountedPtr<LevelData<MFBaseIVFAB> > bco_irreg = m_bco_irreg[ref];
   RefCountedPtr<LevelData<BaseIVFAB<Real> > > jump = m_jump[ref];

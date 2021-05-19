@@ -129,12 +129,12 @@ public:
   /*!
     @brief Compute the boundary flux given a state (a_phi will be different for different RTE approximations)
   */
-  virtual void compute_boundary_flux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi) = 0;
+  virtual void computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi) = 0;
 
   /*!
     @brief Compute the domain flux given a state (a_phi will be different for different RTE approximations)
   */
-  virtual void compute_domain_flux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_phi) = 0;
+  virtual void computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_phi) = 0;
 
   /*!
     @brief Compute the flux
@@ -147,7 +147,7 @@ public:
     @brief Get isotropic part. 
     @details This is normally just a copy, but I need the function signature in order to have a clear plasma-coupling interface
   */
-  virtual void compute_density(EBAMRCellData& a_isotropic, const EBAMRCellData& a_phi) = 0;
+  virtual void computeDensity(EBAMRCellData& a_isotropic, const EBAMRCellData& a_phi) = 0;
 
   /*!
     @brief Allocate internal storage

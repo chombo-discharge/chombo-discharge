@@ -130,16 +130,16 @@ void CdrSolver::allocateInternals(){
   // Only allocate memory for diffusion coefficients if we need it. Otherwise, allocate a NULL pointer that we can
   // pass around in TimeStepper in order to handle special cases
   if(m_isDiffusive){
-    m_amr->allocate(m_aCoefficient,                     m_realm, m_phase, sca);
+    m_amr->allocate(m_aCoef,                     m_realm, m_phase, sca);
     m_amr->allocate(m_faceCenteredDiffusionCoefficient, m_realm, m_phase, sca);
     m_amr->allocate(m_ebCenteredDiffusionCoefficient,   m_realm, m_phase, sca);
     
-    data_ops::set_value(m_aCoefficient,                     0.0);
+    data_ops::set_value(m_aCoef,                     0.0);
     data_ops::set_value(m_faceCenteredDiffusionCoefficient, 0.0);
     data_ops::set_value(m_ebCenteredDiffusionCoefficient,   0.0);
   }
   else{
-    m_amr->allocatePointer(m_aCoefficient);
+    m_amr->allocatePointer(m_aCoef);
     m_amr->allocatePointer(m_faceCenteredDiffusionCoefficient);
     m_amr->allocatePointer(m_ebCenteredDiffusionCoefficient);
   }

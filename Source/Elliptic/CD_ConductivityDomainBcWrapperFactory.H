@@ -48,9 +48,9 @@ protected:
 
   bool m_hasbc;
 
-  Vector<RefCountedPtr<WallBc> >        m_wallbc;      // BC identifier
+  Vector<RefCountedPtr<WallBc> >        m_wallBc;      // BC identifier
   Vector<RefCountedPtr<BaseBCFuncEval> > m_potentials;  // Wall potential
-  Vector<RefCountedPtr<RobinCoefficients> >     m_robinco;     // Robin coefficients for Robin
+  Vector<RefCountedPtr<RobinCoefficients> >     m_robinCoefficients;     // Robin coefficients for Robin
 
 };
 #include "CD_NamespaceFooter.H"

@@ -119,7 +119,7 @@ protected:
     @brief Potentials
   */
   Vector<RefCountedPtr<BaseBCFuncEval> > m_potentials;
-  Vector<RefCountedPtr<RobinCoefficients> > m_robinco;         // Robin coefficients for Robin
+  Vector<RefCountedPtr<RobinCoefficients> > m_robinCoefficients;         // Robin coefficients for Robin
 
   /*!
     @brief Is defined or not

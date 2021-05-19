@@ -146,7 +146,7 @@ void imex_sdc::parse_diffusion_coupling(){
   std::string str;
 
   pp.get("use_tga", str);
-  m_use_tga = (str == "true") ? true : false;
+  m_useTGA = (str == "true") ? true : false;
 }
 
 void imex_sdc::parse_adaptive_options(){
@@ -942,7 +942,7 @@ void imex_sdc::integrate_diffusion(const Real a_dt, const int a_m, const bool a_
       data_ops::copy(phi_m1, phi_m);
 
       // Solve
-      if(m_use_tga){
+      if(m_useTGA){
 	solver->advanceTGA(phi_m1, init_soln, source, m_dtm[a_m]); // No source. 
       }
       else{
@@ -1617,7 +1617,7 @@ void imex_sdc::compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_phis, const Re
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
     EBAMRIVData& flux_eb = storage->get_eb_flux();
-    solver->compute_boundary_flux(flux_eb, solver->getPhi());
+    solver->computeBoundaryFlux(flux_eb, solver->getPhi());
     extrap_rte_fluxes.push_back(&flux_eb);
   }
 
@@ -1687,7 +1687,7 @@ void imex_sdc::compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_phis, c
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
     EBAMRIFData& domain_flux = storage->get_domain_flux();
-    solver->compute_domain_flux(domain_flux, solver->getPhi());
+    solver->computeDomainFlux(domain_flux, solver->getPhi());
     extrap_rte_fluxes.push_back(&domain_flux);
   }
 

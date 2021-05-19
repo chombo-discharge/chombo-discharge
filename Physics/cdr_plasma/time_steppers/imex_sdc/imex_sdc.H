@@ -83,7 +83,7 @@ namespace physics {
       bool m_adaptive_dt;
       bool m_print_report;
       bool m_have_err; 
-      bool m_use_tga; // Second order diffusion
+      bool m_useTGA; // Second order diffusion
       bool m_use_AP; // Use the AP scheme
   
 

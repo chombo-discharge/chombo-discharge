@@ -88,7 +88,7 @@ public:
 
 protected:
   
-  Vector<int> m_wallbc; // Wall boundary conditions
+  Vector<int> m_wallBc; // Wall boundary conditions
 
   bool m_ssa; // Using SSA or not
   

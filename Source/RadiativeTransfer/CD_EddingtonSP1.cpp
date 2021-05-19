@@ -1,73 +1,77 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   eddington_sp1.cpp
-  @brief  Implementation of eddington_sp1.H
+  @file   CD_EddingtonSP1.cpp
+  @brief  Implementation of CD_EddingtonSP1.H
   @author Robert Marskar
-  @date   Jan. 2018
-  @todo   Also plot kappa on output
 */
 
-#include "eddington_sp1.H"
-#include "data_ops.H"
-#include "units.H"
-#include <CD_ConductivityDomainBcWrapper.H>
+// Std includes
+#include <chrono>
+#include <time.h>
 
+// Chombo includes
 #include <ParmParse.H>
 #include <EBAMRIO.H>
 #include <BRMeshRefine.H>
 
-#include <chrono>
-#include <time.h>
+// Our includes
+#include <CD_EddingtonSP1.H>
+#include <data_ops.H>
+#include <units.H>
+#include <CD_ConductivityDomainBcWrapper.H>
+#include <CD_NamespaceHeader.H>
 
-#define eddington_sp1_feature 1 // Comment Feb. 14 2018: I think we can keep this - it appears to produce the correct physics.
+#define EddingtonSP1_feature 1 // Comment Feb. 14 2018: I think we can keep this - it appears to produce the correct physics.
 
-#include "CD_NamespaceHeader.H"
-
-eddington_sp1::eddington_sp1() : rte_solver() {
-  m_name = "eddington_sp1";
-  m_className = "eddington_sp1";
+EddingtonSP1::EddingtonSP1() : rte_solver() {
+  m_name = "EddingtonSP1";
+  m_className = "EddingtonSP1";
 
   m_verbosity  = -1;
-  m_needs_setup = true;
-  m_has_mg_stuff = false;
+  m_needsMultigridSetup = true;
+  m_hasDeeperMultigridLevels = false;
 }
 
-eddington_sp1::~eddington_sp1(){
+EddingtonSP1::~EddingtonSP1(){
 }
 
-int eddington_sp1::queryGhost() const{
+int EddingtonSP1::queryGhost() const{
   return 3;
 }
 
-void eddington_sp1::parseOptions(){
-  CH_TIME("eddington_sp1::parseOptions");
+void EddingtonSP1::parseOptions(){
+  CH_TIME("EddingtonSP1::parseOptions");
   if(m_verbosity > 5){
     pout() << m_name + "::parseOptions" << endl;
   }
   
-  parseDomainBc();    // Parses domain BC options
-  parse_stationary();   // Parse stationary solver
-  parsePlotVariables();    // Parses plot variables
-  parse_gmg_settings(); // Parses solver parameters for geometric multigrid
+  parseDomainBc();          // Parses domain BC options
+  parseStationary();        // Parse stationary solver
+  parsePlotVariables();     // Parses plot variables
+  parseMultigridSettings(); // Parses solver parameters for geometric multigrid
 }
 
-void eddington_sp1::parseRuntimeOptions(){
-  CH_TIME("eddington_sp1::parseRuntimeOptions");
+void EddingtonSP1::parseRuntimeOptions(){
+  CH_TIME("EddingtonSP1::parseRuntimeOptions");
   if(m_verbosity > 5){
     pout() << m_name + "::parseRuntimeOptions" << endl;
   }
   
-  parse_stationary();   // Parse stationary solver
-  parsePlotVariables();    // Parses plot variables
-  parse_gmg_settings(); // Parses solver parameters for geometric multigrid
+  parsePlotVariables();     // Parses plot variables
+  parseMultigridSettings(); // Parses solver parameters for geometric multigrid
 }
 
-void eddington_sp1::parseDomainBc(){
-  CH_TIME("eddington_sp1::parseDomainBc");
+void EddingtonSP1::parseDomainBc(){
+  CH_TIME("EddingtonSP1::parseDomainBc");
   if(m_verbosity > 5){
     pout() << m_name + "::parseDomainBc" << endl;
   }
 
-  allocate_WallBc();
+  allocateWallBc();
 
   // Get BC from input script
   ParmParse pp(m_className.c_str());
@@ -93,13 +97,13 @@ void eddington_sp1::parseDomainBc(){
 	if(pp.contains(bc_string.c_str())){
 	  pp.get(bc_string.c_str(), type);
 	  if(type == "neumann"){
-	    this->set_neumann_WallBc(dir, Side::Lo, 0.0);
+	    this->setNeumannWallBc(dir, Side::Lo, 0.0);
 	  }
 	  else if(type == "robin"){
-	    this->set_robin_WallBc(dir, Side::Lo, 0.0);
+	    this->setRobinWallBc(dir, Side::Lo, 0.0);
 	  }
 	  else {
-	    std::string error = "eddington_sp1::eddington_sp1 - unknown bc requested for " + bc_string;
+	    std::string error = "EddingtonSP1::EddingtonSP1 - unknown bc requested for " + bc_string;
 	    MayDay::Abort(error.c_str());
 	  }
 	}
@@ -110,13 +114,13 @@ void eddington_sp1::parseDomainBc(){
 	if(pp.contains(bc_string.c_str())){
 	  pp.get(bc_string.c_str(), type);
 	  if(type == "neumann"){
-	    this->set_neumann_WallBc(dir, Side::Hi, 0.0);
+	    this->setNeumannWallBc(dir, Side::Hi, 0.0);
 	  }
 	  else if(type == "robin"){
-	    this->set_robin_WallBc(dir, Side::Hi, 0.0);
+	    this->setRobinWallBc(dir, Side::Hi, 0.0);
 	  }
 	  else {
-	    std::string error = "eddington_sp1::eddington_sp1 - unknown bc requested for " + bc_string;
+	    std::string error = "EddingtonSP1::EddingtonSP1 - unknown bc requested for " + bc_string;
 	    MayDay::Abort(error.c_str());
 	  }
 	}
@@ -125,29 +129,26 @@ void eddington_sp1::parseDomainBc(){
   }
 }
 
-void eddington_sp1::parse_stationary(){
-  CH_TIME("eddington_sp1::parse_stationary");
+void EddingtonSP1::parseStationary(){
+  CH_TIME("EddingtonSP1::parseStationary");
   if(m_verbosity > 5){
-    pout() << m_name + "::parse_stationary" << endl;
+    pout() << m_name + "::parseStationary" << endl;
   }
 
   ParmParse pp(m_className.c_str());
   std::string str;
   
-  pp.get("stationary", str);
-  m_stationary = (str == "true") ? true : false;
-  
-  pp.get("use_tga", str);
-  m_use_tga = (str == "true") ? true : false;
+  pp.get("stationary", m_stationary);
+  pp.get("use_tga",    m_useTGA);
 }
 
-void eddington_sp1::parsePlotVariables(){
-  CH_TIME("eddington_sp1::parsePlotVariables");
+void EddingtonSP1::parsePlotVariables(){
+  CH_TIME("EddingtonSP1::parsePlotVariables");
   if(m_verbosity > 5){
     pout() << m_name + "::parsePlotVariables" << endl;
   }
 
-  m_plotPhi = false;
+  m_plotPhi    = false;
   m_plotSource = false;
 
   ParmParse pp(m_className.c_str());
@@ -156,71 +157,71 @@ void eddington_sp1::parsePlotVariables(){
   pp.getarr("plt_vars", str, 0, num);
 
   for (int i = 0; i < num; i++){
-    if(     str[i] == "phi") m_plotPhi = true;
+    if(     str[i] == "phi") m_plotPhi    = true;
     else if(str[i] == "src") m_plotSource = true;
   }
 }
 
-void eddington_sp1::parse_gmg_settings(){
+void EddingtonSP1::parseMultigridSettings(){
   ParmParse pp(m_className.c_str());
 
   std::string str;
 
-  pp.get("gmg_verbosity",   m_gmg_verbosity);
-  pp.get("gmg_coarsen",     m_gmg_coarsen);
-  pp.get("gmg_pre_smooth",  m_gmg_pre_smooth);
-  pp.get("gmg_post_smooth", m_gmg_post_smooth);
-  pp.get("gmg_bott_smooth", m_gmg_bot_smooth);
-  pp.get("gmg_max_iter",    m_gmg_max_iter);
-  pp.get("gmg_min_iter",    m_gmg_min_iter);
-  pp.get("gmg_tolerance",   m_gmg_eps);
-  pp.get("gmg_hang",        m_gmg_hang);
-  pp.get("gmg_bottom_drop", m_bottom_drop);
+  pp.get("gmg_verbosity",   m_multigridVerbosity);
+  pp.get("gmg_coarsen",     m_numCoarseningsBeforeAggregation);
+  pp.get("gmg_pre_smooth",  m_multigridPreSmooth);
+  pp.get("gmg_post_smooth", m_multigridPostSmooth);
+  pp.get("gmg_bott_smooth", m_multigridBottomSmooth);
+  pp.get("gmg_max_iter",    m_multigridMaxIterations);
+  pp.get("gmg_min_iter",    m_multigridMinIterations);
+  pp.get("gmg_tolerance",   m_multigridTolerance);
+  pp.get("gmg_hang",        m_multigridHang);
+  pp.get("gmg_bottom_drop", m_numCellsBottomDrop);
 
   // Bottom solver
   pp.get("gmg_bottom_solver", str);
   if(str == "simple"){
-    m_bottomsolver = 0;
+    m_bottomSolver = BottomSolver::Simple;
   }
   else if(str == "bicgstab"){
-    m_bottomsolver = 1;
+    m_bottomSolver = BottomSolver::BiCGStab;
   }
   else{
-    MayDay::Abort("eddington_sp1::parse_gmg_settings - unknown bottom solver requested");
+    MayDay::Abort("EddingtonSP1::parseMultigridSettings - unknown bottom solver requested");
   }
 
   // Relaxation type
   pp.get("gmg_relax_type", str);
   if(str == "gsrb"){
-    m_gmg_relax_type = relax::gsrb_fast;
+    m_multigridRelaxMethod = RelaxationMethod::GSRBFast;
   }
   else if(str == "jacobi"){
-    m_gmg_relax_type = relax::jacobi;
+    m_multigridRelaxMethod = RelaxationMethod::Jacobi;
   }
   else if(str == "gauss_seidel"){
-    m_gmg_relax_type = relax::gauss_seidel;
+    m_multigridRelaxMethod = RelaxationMethod::GaussSeidel;
   }
   else{
-    MayDay::Abort("eddington_sp1::parse_gmg_settings - unknown relaxation method requested");
+    MayDay::Abort("EddingtonSP1::parseMultigridSettings - unknown relaxation method requested");
   }
 
   // Cycle type
   pp.get("gmg_cycle", str);
   if(str == "vcycle"){
-    m_gmg_type = amrmg::vcycle;
+    m_multigridType = MultigridType::VCycle;
   }
   else{
-    MayDay::Abort("eddington_sp1::parse_gmg_settings - unknown cycle type requested");
+    MayDay::Abort("EddingtonSP1::parseMultigridSettings - unknown cycle type requested");
   }
 
   // No lower than 2. 
-  if(m_bottom_drop < 2){
-    m_bottom_drop = 2;
+  if(m_numCellsBottomDrop < 2){
+    m_numCellsBottomDrop = 2;
   }
 }
 
-void eddington_sp1::parse_reflection(){
-  CH_TIME("eddington_sp1::parse_reflectivity");
+void EddingtonSP1::parseReflection(){
+  CH_TIME("EddingtonSP1::parse_reflectivity");
   if(m_verbosity > 5){
     pout() << m_name + "::parse_reflectivity" << endl;
   }
@@ -230,23 +231,23 @@ void eddington_sp1::parse_reflection(){
   Real r;
   pp.get("reflectivity", r);
 
-  m_r1 = r/(2.0);
-  m_r2 = r/(3.0);
+  m_reflectionCoefficientOne = r/(2.0);
+  m_reflectionCoefficientTwo = r/(3.0);
 }
 
-void eddington_sp1::allocate_WallBc(){
-  CH_TIME("eddington_sp1::allocate_WallBc");
+void EddingtonSP1::allocateWallBc(){
+  CH_TIME("EddingtonSP1::allocateWallBc");
   if(m_verbosity > 5){
-    pout() << "eddington_sp1::allocate_WallBc" << endl;
+    pout() << "EddingtonSP1::allocateWallBc" << endl;
   }
-  m_wallbc.resize(2*SpaceDim);
+  m_wallBc.resize(2*SpaceDim);
   for (int i = 0; i < 2*SpaceDim; i++){
-    m_wallbc[i] = RefCountedPtr<WallBc> (NULL);
+    m_wallBc[i] = RefCountedPtr<WallBc> (NULL);
   }
 }
 
-void eddington_sp1::preRegrid(const int a_base, const int a_oldFinestLevel){
-  CH_TIME("eddington_sp1::preRegrid");
+void EddingtonSP1::preRegrid(const int a_base, const int a_oldFinestLevel){
+  CH_TIME("EddingtonSP1::preRegrid");
   if(m_verbosity > 5){
     pout() << m_name + "::preRegrid" << endl;
   }
@@ -261,25 +262,25 @@ void eddington_sp1::preRegrid(const int a_base, const int a_oldFinestLevel){
   }
 }
 
-void eddington_sp1::set_reflection_coefficients(const Real a_r1, const Real a_r2){
-  CH_TIME("eddington_sp1::set_reflection_coefficients");
+void EddingtonSP1::setReflectionCoefficients(const Real a_r1, const Real a_r2){
+  CH_TIME("EddingtonSP1::setReflectionCoefficients");
   if(m_verbosity > 5){
-    pout() << m_name + "::set_reflection_coefficients" << endl;
+    pout() << m_name + "::setReflectionCoefficients" << endl;
   }
   
-  m_r1 = a_r1;
-  m_r2 = a_r2;
+  m_reflectionCoefficientOne = a_r1;
+  m_reflectionCoefficientTwo = a_r2;
 }
 
-void eddington_sp1::allocateInternals(){
-  CH_TIME("eddington_sp1::allocateInternals");
+void EddingtonSP1::allocateInternals(){
+  CH_TIME("EddingtonSP1::allocateInternals");
   if(m_verbosity > 5){
     pout() << m_name + "::allocateInternals" << endl;
   }
   
   const int ncomp = 1;
 
-  m_amr->allocate(m_aCoefficient,       m_realm, m_phase, ncomp);
+  m_amr->allocate(m_aCoef,       m_realm, m_phase, ncomp);
   m_amr->allocate(m_bco,       m_realm, m_phase, ncomp);
   m_amr->allocate(m_bco_irreg, m_realm, m_phase, ncomp);
   m_amr->allocate(m_phi,     m_realm, m_phase, ncomp);
@@ -290,11 +291,11 @@ void eddington_sp1::allocateInternals(){
   data_ops::set_value(m_phi,  0.0);
   data_ops::set_value(m_source, 0.0);
 
-  this->set_aco_and_bco();
+  this->setACoefAndBCoef();
 }
 
-void eddington_sp1::deallocateInternals(){
-  m_amr->deallocate(m_aCoefficient);
+void EddingtonSP1::deallocateInternals(){
+  m_amr->deallocate(m_aCoef);
   m_amr->deallocate(m_bco);
   m_amr->deallocate(m_bco_irreg);
   m_amr->deallocate(m_phi);
@@ -302,8 +303,8 @@ void eddington_sp1::deallocateInternals(){
   m_amr->deallocate(m_resid);
 }
 
-void eddington_sp1::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) {
-  CH_TIME("eddington_sp1::regrid");
+void EddingtonSP1::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) {
+  CH_TIME("EddingtonSP1::regrid");
   if(m_verbosity > 5){
     pout() << m_name + "::regrid" << endl;
   }
@@ -330,17 +331,17 @@ void eddington_sp1::regrid(const int a_lmin, const int a_oldFinestLevel, const i
     }
   }
 
-  m_needs_setup = true;
+  m_needsMultigridSetup = true;
 }
 
-void eddington_sp1::registerOperators(){
-  CH_TIME("eddington_sp1::registerOperators");
+void EddingtonSP1::registerOperators(){
+  CH_TIME("EddingtonSP1::registerOperators");
   if(m_verbosity > 5){
     pout() << m_name + "::registerOperators" << endl;
   }
 
   if(m_amr.isNull()){
-    MayDay::Abort("eddington_sp1::registerOperators - need to set AmrMesh!");
+    MayDay::Abort("EddingtonSP1::registerOperators - need to set AmrMesh!");
   }
   else{
     m_amr->registerOperator(s_eb_coar_ave,     m_realm, m_phase);
@@ -352,8 +353,8 @@ void eddington_sp1::registerOperators(){
   }
 }
 
-bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_source, const bool a_zerophi){
-  CH_TIME("eddington_sp1::advance(ebamrcell, ebamrcell)");
+bool EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_source, const bool a_zerophi){
+  CH_TIME("EddingtonSP1::advance(ebamrcell, ebamrcell)");
   if(m_verbosity > 5){
     pout() << m_name + "::advance(ebamrcell, ebamrcell)" << endl;
   }
@@ -361,8 +362,8 @@ bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCe
   const int ncomp        = 1;
   const int finest_level = m_amr->getFinestLevel();
 
-  if(m_needs_setup){
-    this->setup_gmg();
+  if(m_needsMultigridSetup){
+    this->setupMultigrid();
   }
 
   bool converged;
@@ -377,7 +378,7 @@ bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCe
   // Various source term manipulations. 
   data_ops::set_value(source, 0.0);
   data_ops::incr(source, a_source, 1.0);
-#if eddington_sp1_feature
+#if EddingtonSP1_feature
   data_ops::scale(source, 1./units::s_c0); // Source should be scaled by 1./c0
 #endif
   if(m_stationary){ // Should kappa-scale for transient solvres
@@ -391,14 +392,14 @@ bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCe
   m_amr->alias(zero, dummy);
 
   if(m_stationary){
-    const Real phi_resid  = m_gmg_solver->computeAMRResidual(phi,  rhs, finest_level, 0); // Incoming residual
-    const Real zero_resid = m_gmg_solver->computeAMRResidual(zero, rhs, finest_level, 0); // Zero residual
+    const Real phi_resid  = m_multigridSolver->computeAMRResidual(phi,  rhs, finest_level, 0); // Incoming residual
+    const Real zero_resid = m_multigridSolver->computeAMRResidual(zero, rhs, finest_level, 0); // Zero residual
 
-    if(phi_resid > zero_resid*m_gmg_eps){ // Residual is too large
-      m_gmg_solver->m_convergenceMetric = zero_resid;
-      m_gmg_solver->solveNoInitResid(phi, res, rhs, finest_level, 0, a_zerophi);
+    if(phi_resid > zero_resid*m_multigridTolerance){ // Residual is too large
+      m_multigridSolver->m_convergenceMetric = zero_resid;
+      m_multigridSolver->solveNoInitResid(phi, res, rhs, finest_level, 0, a_zerophi);
       
-      const int status = m_gmg_solver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
+      const int status = m_multigridSolver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
       if(status == 1 || status == 8 || status == 9){  // 8 => Norm sufficiently small
 	converged = true;
       }
@@ -406,27 +407,27 @@ bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCe
     else{ // Solution is already good enough
       converged = true;
     }
-    m_gmg_solver->revert(phi, rhs, finest_level, 0);
+    m_multigridSolver->revert(phi, rhs, finest_level, 0);
 
     data_ops::set_covered_value(a_phi, 0, 0.0);
   }
   else{
-    if(m_use_tga){
-#if eddington_sp1_feature
-      m_tgasolver->oneStep(res, phi, rhs, units::s_c0*a_dt, 0, finest_level, m_time);
+    if(m_useTGA){
+#if EddingtonSP1_feature
+      m_tgaSolver->oneStep(res, phi, rhs, units::s_c0*a_dt, 0, finest_level, m_time);
 #else
-      m_tgasolver->oneStep(res, phi, rhs, a_dt, 0, finest_level, m_time);
+      m_tgaSolver->oneStep(res, phi, rhs, a_dt, 0, finest_level, m_time);
 #endif
     }
     else{
-#if eddington_sp1_feature
-      m_eulersolver->oneStep(res, phi, rhs, units::s_c0*a_dt, 0, finest_level, false);
+#if EddingtonSP1_feature
+      m_eulerSolver->oneStep(res, phi, rhs, units::s_c0*a_dt, 0, finest_level, false);
 #else
-      m_eulersolver->oneStep(res, phi, rhs, a_dt, 0, finest_level, false);
+      m_eulerSolver->oneStep(res, phi, rhs, a_dt, 0, finest_level, false);
 #endif
     }
     
-    const int status = m_gmg_solver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
+    const int status = m_multigridSolver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
     if(status == 1 || status == 8 || status == 9){  // 8 => Norm sufficiently small
       converged = true;
     }
@@ -443,59 +444,59 @@ bool eddington_sp1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCe
   return converged;
 }
 
-void eddington_sp1::setup_gmg(){
-  CH_TIME("eddington_sp1::setup_gmg");
+void EddingtonSP1::setupMultigrid(){
+  CH_TIME("EddingtonSP1::setupMultigrid");
   if(m_verbosity > 5){
-    pout() << m_name + "::setup_gmg" << endl;
+    pout() << m_name + "::setupMultigrid" << endl;
   }
 
-  if(!m_has_mg_stuff){
-    this->define_mg_levels();
-    m_has_mg_stuff = true;
+  if(!m_hasDeeperMultigridLevels){
+    this->defineDeeperMultigridLevels();
+    m_hasDeeperMultigridLevels = true;
   }
   
-  this->setCoefficientsficients();       // Set coefficients, kappa, aco, bco
-  this->setup_operator_factory(); // Set the operator factory
-  this->setup_multigrid();        // Set up the AMR multigrid solver
+  this->setMultigridCoefficients();       // Set coefficients, kappa, aco, bco
+  this->setupOperatorFactory(); // Set the operator factory
+  this->setupMultigridSolver();        // Set up the AMR multigrid solver
 
   if(!m_stationary){
-    if(m_use_tga){
-      this->setup_tga();
+    if(m_useTGA){
+      this->setupTGA();
     }
     else{
-      this->setup_euler();
+      this->setupEuler();
     }
   }
 
-  m_needs_setup = false;
+  m_needsMultigridSetup = false;
 }
 
-void eddington_sp1::setCoefficientsficients(){
-  CH_TIME("eddington_sp1::setCoefficientsficients");
+void EddingtonSP1::setMultigridCoefficients(){
+  CH_TIME("EddingtonSP1::setMultigridCoefficients");
   if(m_verbosity > 5){
-    pout() << m_name + "::setCoefficientsficients" << endl;
+    pout() << m_name + "::setMultigridCoefficients" << endl;
   }
 
   const int ncomp = 1;
   const int ghost = 3;
 
-  m_amr->allocate(m_aCoefficient,        m_realm, m_phase, ncomp, ghost);
+  m_amr->allocate(m_aCoef,        m_realm, m_phase, ncomp, ghost);
   m_amr->allocate(m_bco,        m_realm, m_phase, ncomp, ghost);
   m_amr->allocate(m_bco_irreg,  m_realm, m_phase, ncomp, ghost);
 
-  this->set_aco_and_bco();
+  this->setACoefAndBCoef();
 }
 
-void eddington_sp1::set_aco_and_bco(){
-  CH_TIME("eddington_sp1::set_aco_and_bco");
+void EddingtonSP1::setACoefAndBCoef(){
+  CH_TIME("EddingtonSP1::setACoefAndBCoef");
   if(m_verbosity > 5){
-    pout() << m_name + "::set_aco_and_bco" << endl;
+    pout() << m_name + "::setACoefAndBCoef" << endl;
   }
 
   // This loop fills aco with kappa and bco_irreg with 1./kappa
   if(m_rte_species->constant_kappa()){
     const Real kap = m_rte_species->get_kappa(RealVect::Zero);
-    data_ops::set_value(m_aCoefficient, kap);
+    data_ops::set_value(m_aCoef, kap);
     data_ops::set_value(m_bco, 1./kap);
     data_ops::set_value(m_bco_irreg, 1./kap);
   }
@@ -504,43 +505,43 @@ void eddington_sp1::set_aco_and_bco(){
       const RealVect origin = m_amr->getProbLo();
       const Real dx         = m_amr->getDx()[lvl];
     
-      LevelData<EBCellFAB>& aco            = *m_aCoefficient[lvl];
+      LevelData<EBCellFAB>& aco            = *m_aCoef[lvl];
       LevelData<EBFluxFAB>& bco            = *m_bco[lvl];
       LevelData<BaseIVFAB<Real> >& bco_irr = *m_bco_irreg[lvl];
 
       for (DataIterator dit = aco.dataIterator(); dit.ok(); ++dit){
 	const Box box = (m_amr->getGrids(m_realm)[lvl]).get(dit());
-	this->set_aco_and_bco_box(aco[dit()], bco_irr[dit()], box, origin, dx, lvl, dit());
+	this->setACoefAndBCoef_box(aco[dit()], bco_irr[dit()], box, origin, dx, lvl, dit());
       }
     }
 
-    m_amr->averageDown(m_aCoefficient, m_realm, m_phase);
-    m_amr->interpGhost(m_aCoefficient, m_realm, m_phase);
-    data_ops::average_cell_to_face_allcomps(m_bco, m_aCoefficient, m_amr->getDomains()); // Average aco onto face
+    m_amr->averageDown(m_aCoef, m_realm, m_phase);
+    m_amr->interpGhost(m_aCoef, m_realm, m_phase);
+    data_ops::average_cell_to_face_allcomps(m_bco, m_aCoef, m_amr->getDomains()); // Average aco onto face
     data_ops::invert(m_bco); // Make m_bco = 1./kappa
   }
 
-#if eddington_sp1_feature // Different scaling for the RTE
-  data_ops::scale(m_aCoefficient,       1.0);       // aco = c*kappa
+#if EddingtonSP1_feature // Different scaling for the RTE
+  data_ops::scale(m_aCoef,       1.0);       // aco = c*kappa
   data_ops::scale(m_bco,       1.0/(3.0)); // bco = c/(3*kappa)
   data_ops::scale(m_bco_irreg, 1.0/(3.0)); // bco = c/(3*kappa)
 #else // Original code before different scaling
-  data_ops::scale(m_aCoefficient,       units::s_c0);       // aco = c*kappa
+  data_ops::scale(m_aCoef,       units::s_c0);       // aco = c*kappa
   data_ops::scale(m_bco,       units::s_c0/(3.0)); // bco = c/(3*kappa)
   data_ops::scale(m_bco_irreg, units::s_c0/(3.0)); // bco = c/(3*kappa)
 #endif
 }
 
-void eddington_sp1::set_aco_and_bco_box(EBCellFAB&       a_aco,
+void EddingtonSP1::setACoefAndBCoef_box(EBCellFAB&       a_aco,
 					BaseIVFAB<Real>& a_bco,
 					const Box        a_box,
 					const RealVect   a_origin,
 					const Real       a_dx,
 					const int        a_lvl,
 					const DataIndex& a_dit){
-  CH_TIME("eddington_sp1::set_aco_and_bco_box");
+  CH_TIME("EddingtonSP1::setACoefAndBCoef_box");
   if(m_verbosity > 10){
-    pout() << m_name + "::set_aco_and_bco_box" << endl;
+    pout() << m_name + "::setACoefAndBCoef_box" << endl;
   }
   
   const int comp  = 0;
@@ -571,10 +572,10 @@ void eddington_sp1::set_aco_and_bco_box(EBCellFAB&       a_aco,
   }
 }
 
-void eddington_sp1::define_mg_levels(){
-  CH_TIME("eddington_sp1::define_mg_levels");
+void EddingtonSP1::defineDeeperMultigridLevels(){
+  CH_TIME("EddingtonSP1::defineDeeperMultigridLevels");
   if(m_verbosity > 5){
-    pout() << m_name + "::define_mg_levels" << endl;
+    pout() << m_name + "::defineDeeperMultigridLevels" << endl;
   }
 
   const int coar_ref = 2;
@@ -597,7 +598,7 @@ void eddington_sp1::define_mg_levels(){
   ProblemDomain fine = domains[0];
 
   // Coarsen problem domains and create grids
-  while(num_coar < m_gmg_coarsen || !has_coar){
+  while(num_coar < m_numCoarseningsBeforeAggregation || !has_coar){
 
     // Check if we can coarsen
     const ProblemDomain coar = fine.coarsen(coar_ref);
@@ -637,10 +638,10 @@ void eddington_sp1::define_mg_levels(){
   }
 }
 
-void eddington_sp1::setup_operator_factory(){
-  CH_TIME("eddington_sp1::setup_operator_factory");
+void EddingtonSP1::setupOperatorFactory(){
+  CH_TIME("EddingtonSP1::setupOperatorFactory");
   if(m_verbosity > 5){
-    pout() << m_name + "::setup_operator_factory" << endl;
+    pout() << m_name + "::setupOperatorFactory" << endl;
   }
 
   const int finest_level                 = m_amr->getFinestLevel();
@@ -674,63 +675,63 @@ void eddington_sp1::setup_operator_factory(){
   const Real beta  = -1.0;
 
   // Appropriate coefficients for this type of Robin BC
-  m_robinco = RefCountedPtr<larsen_coefs> (new larsen_coefs(m_rte_species, m_r1, m_r2));
+  m_robinCoefficients = RefCountedPtr<larsen_coefs> (new larsen_coefs(m_rte_species, m_reflectionCoefficientOne, m_reflectionCoefficientTwo));
 
   // Domain BC
 #if 0
-  m_domfact = RefCountedPtr<RobinConductivityDomainBcFactory> (new RobinConductivityDomainBcFactory());
-  m_domfact->setCoefficients(m_robinco);
+  m_robinDomainBcFactory = RefCountedPtr<RobinConductivityDomainBcFactory> (new RobinConductivityDomainBcFactory());
+  m_robinDomainBcFactory->setCoefficients(m_robinCoefficients);
 #else
   RefCountedPtr<BaseDomainBCFactory> domfact = RefCountedPtr<BaseDomainBCFactory>(NULL);
   ConductivityDomainBcWrapperFactory* bcfact = new ConductivityDomainBcWrapperFactory();
-  Vector<RefCountedPtr<RobinCoefficients> > coefs(2*SpaceDim, m_robinco);
-  bcfact->setWallBc(m_wallbc);
+  Vector<RefCountedPtr<RobinCoefficients> > coefs(2*SpaceDim, m_robinCoefficients);
+  bcfact->setWallBc(m_wallBc);
   bcfact->setRobinCoefficients(coefs);
   domfact = RefCountedPtr<BaseDomainBCFactory> (bcfact);
 #endif
 
   // EBBC
-  m_ebfact  = RefCountedPtr<RobinConductivityEbBcFactory> (new RobinConductivityEbBcFactory(origin));
-  m_ebfact->setCoefficients(m_robinco);
-  m_ebfact->setStencilType(IrregStencil::StencilType::LeastSquares);
+  m_robinEbBcFactory  = RefCountedPtr<RobinConductivityEbBcFactory> (new RobinConductivityEbBcFactory(origin));
+  m_robinEbBcFactory->setCoefficients(m_robinCoefficients);
+  m_robinEbBcFactory->setStencilType(IrregStencil::StencilType::LeastSquares);
 
   //  Make relaxation type into int code
   int relax_type = 0;
-  if(m_gmg_relax_type == relax::jacobi){
+  if(m_multigridRelaxMethod == RelaxationMethod::Jacobi){
     relax_type = 0;
   }
-  else if(m_gmg_relax_type == relax::gauss_seidel){
+  else if(m_multigridRelaxMethod == RelaxationMethod::GaussSeidel){
     relax_type = 1;
   }
-  else if(m_gmg_relax_type == relax::gsrb_fast){
+  else if(m_multigridRelaxMethod == RelaxationMethod::GSRBFast){
     relax_type = 2;
   }
 
   // Create operator factory.
-  m_opfact = RefCountedPtr<EbHelmholtzOpFactory> (new EbHelmholtzOpFactory(levelgrids,
-										 quadcfi,
-										 fastFR,
-										 alpha,
-										 beta,
-										 m_aCoefficient.get_data(),
-										 m_bco.get_data(),
-										 m_bco_irreg.get_data(),
-										 dx[0],
-										 refinement_ratios,
-										 domfact,
-										 m_ebfact,
-										 ghost*IntVect::Unit,
-										 ghost*IntVect::Unit,
-										 relax_type,
-										 m_bottom_drop,
-										 -1,
-										 m_mg_levelgrids));
+  m_operatorFactory = RefCountedPtr<EbHelmholtzOpFactory> (new EbHelmholtzOpFactory(levelgrids,
+										    quadcfi,
+										    fastFR,
+										    alpha,
+										    beta,
+										    m_aCoef.get_data(),
+										    m_bco.get_data(),
+										    m_bco_irreg.get_data(),
+										    dx[0],
+										    refinement_ratios,
+										    domfact,
+										    m_robinEbBcFactory,
+										    ghost*IntVect::Unit,
+										    ghost*IntVect::Unit,
+										    relax_type,
+										    m_numCellsBottomDrop,
+										    -1,
+										    m_mg_levelgrids));
 }
 
-void eddington_sp1::setup_multigrid(){
-  CH_TIME("eddington_sp1::setup_multigrid");
+void EddingtonSP1::setupMultigridSolver(){
+  CH_TIME("EddingtonSP1::setupMultigridSolver");
   if(m_verbosity > 5){
-    pout() << m_name + "::setup_multigrid" << endl;
+    pout() << m_name + "::setupMultigridSolver" << endl;
   }
 
   const int finest_level       = m_amr->getFinestLevel();
@@ -738,38 +739,38 @@ void eddington_sp1::setup_multigrid(){
 
   // Select bottom solver
   LinearSolver<LevelData<EBCellFAB> >* botsolver = NULL;
-  if(m_bottomsolver == 0){
-    m_simple_solver.setNumSmooths(m_numsmooth);
-    botsolver = &m_simple_solver;
+  if(m_bottomSolver == BottomSolver::Simple){
+    m_simpleSolver.setNumSmooths(m_numSmoothingsForSimpleSolver);
+    botsolver = &m_simpleSolver;
   }
-  else{
+  else if(m_bottomSolver == BottomSolver::BiCGStab){
     botsolver = &m_bicgstab;
   }
 
-  // Make m_gmg_type into an int for multigrid
+  // Make m_multigridType into an int for multigrid
   int gmg_type;
-  if(m_gmg_type == amrmg::full){
+  if(m_multigridType == MultigridType::FAS){
     gmg_type = 0;
   }
-  else if(m_gmg_type == amrmg::vcycle){
+  else if(m_multigridType == MultigridType::VCycle){
     gmg_type = 1;
   }
-  else if(m_gmg_type == amrmg::fcycle){
+  else if(m_multigridType == MultigridType::FCycle){
     gmg_type = 2;
   }
 
-  m_gmg_solver = RefCountedPtr<AMRMultiGrid<LevelData<EBCellFAB> > > (new AMRMultiGrid<LevelData<EBCellFAB> >());
-  m_gmg_solver->define(coar_dom, *m_opfact, botsolver, 1 + finest_level);
-  m_gmg_solver->setSolverParameters(m_gmg_pre_smooth,
-				    m_gmg_post_smooth,
-				    m_gmg_bot_smooth,
-				    gmg_type,
-				    m_gmg_max_iter,
-				    m_gmg_eps,
-				    m_gmg_hang,
-				    1.E-99); // Residue set through other means
-  m_gmg_solver->m_imin    = m_gmg_min_iter;
-  m_gmg_solver->m_verbosity = m_gmg_verbosity;
+  m_multigridSolver = RefCountedPtr<AMRMultiGrid<LevelData<EBCellFAB> > > (new AMRMultiGrid<LevelData<EBCellFAB> >());
+  m_multigridSolver->define(coar_dom, *m_operatorFactory, botsolver, 1 + finest_level);
+  m_multigridSolver->setSolverParameters(m_multigridPreSmooth,
+					 m_multigridPostSmooth,
+					 m_multigridBottomSmooth,
+					 gmg_type,
+					 m_multigridMaxIterations,
+					 m_multigridTolerance,
+					 m_multigridHang,
+					 1.E-99); // Residue set through other means
+  m_multigridSolver->m_imin    = m_multigridMinIterations;
+  m_multigridSolver->m_verbosity = m_multigridVerbosity;
 
   // Dummies for init
   const int ncomp = 1;
@@ -785,49 +786,49 @@ void eddington_sp1::setup_multigrid(){
   m_amr->alias(rhs, dummy2);
 
   // Init solver
-  m_gmg_solver->init(phi, rhs, finest_level, 0);
+  m_multigridSolver->init(phi, rhs, finest_level, 0);
 }
 
-void eddington_sp1::setup_tga(){
-  CH_TIME("eddington_sp1::setup_tga");
+void EddingtonSP1::setupTGA(){
+  CH_TIME("EddingtonSP1::setupTGA");
   if(m_verbosity > 5){
-    pout() << m_name + "::setup_tga" << endl;
+    pout() << m_name + "::setupTGA" << endl;
   }
   
   const int finest_level       = m_amr->getFinestLevel();
   const ProblemDomain coar_dom = m_amr->getDomains()[0];
   const Vector<int> ref_rat    = m_amr->getRefinementRatios();
 
-  m_tgasolver = RefCountedPtr<AMRTGA<LevelData<EBCellFAB> > >
-    (new AMRTGA<LevelData<EBCellFAB> > (m_gmg_solver, *m_opfact, coar_dom, ref_rat, 1 + finest_level, m_gmg_solver->m_verbosity));
+  m_tgaSolver = RefCountedPtr<AMRTGA<LevelData<EBCellFAB> > >
+    (new AMRTGA<LevelData<EBCellFAB> > (m_multigridSolver, *m_operatorFactory, coar_dom, ref_rat, 1 + finest_level, m_multigridSolver->m_verbosity));
 
   // Must init gmg for TGA
   Vector<LevelData<EBCellFAB>* > phi, rhs;
   m_amr->alias(phi, m_phi);
   m_amr->alias(rhs, m_source);
-  m_gmg_solver->init(phi, rhs, finest_level, 0);
+  m_multigridSolver->init(phi, rhs, finest_level, 0);
 }
 
-void eddington_sp1::setup_euler(){
-  CH_TIME("eddington_sp1::setup_euler");
+void EddingtonSP1::setupEuler(){
+  CH_TIME("EddingtonSP1::setupEuler");
   if(m_verbosity > 5){
-    pout() << m_name + "::setup_euler" << endl;
+    pout() << m_name + "::setupEuler" << endl;
   }
 
   const int finest_level       = m_amr->getFinestLevel();
   const ProblemDomain coar_dom = m_amr->getDomains()[0];
   const Vector<int> ref_rat    = m_amr->getRefinementRatios();
 
-  m_eulersolver = RefCountedPtr<EBBackwardEuler> 
-    (new EBBackwardEuler (m_gmg_solver, *m_opfact, coar_dom, ref_rat, 1 + finest_level, m_gmg_solver->m_verbosity));
+  m_eulerSolver = RefCountedPtr<EBBackwardEuler> 
+    (new EBBackwardEuler (m_multigridSolver, *m_operatorFactory, coar_dom, ref_rat, 1 + finest_level, m_multigridSolver->m_verbosity));
 
   // Note: If this crashes, try to init gmg first
 }
 
-void eddington_sp1::compute_boundary_flux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi){
-  CH_TIME("eddington_sp1::compute_boundary_flux");
+void EddingtonSP1::computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi){
+  CH_TIME("EddingtonSP1::computeBoundaryFlux");
   if(m_verbosity > 5){
-    pout() << m_name + "::compute_boundary_flux" << endl;
+    pout() << m_name + "::computeBoundaryFlux" << endl;
   }
 
   const int finest_level = m_amr->getFinestLevel();
@@ -842,10 +843,10 @@ void eddington_sp1::compute_boundary_flux(EBAMRIVData& a_ebFlux, const EBAMRCell
   data_ops::scale(a_ebFlux, 0.5*units::s_c0);
 }
 
-void eddington_sp1::compute_domain_flux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_data){
-  CH_TIME("eddington_sp1::compute_domain_flux");
+void EddingtonSP1::computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_data){
+  CH_TIME("EddingtonSP1::computeDomainFlux");
   if(m_verbosity > 5){
-    pout() << m_name + "::compute_domain_flux" << endl;
+    pout() << m_name + "::computeDomainFlux" << endl;
   }
 
 
@@ -907,8 +908,8 @@ void eddington_sp1::compute_domain_flux(EBAMRIFData& a_domainflux, const EBAMRCe
   }
 }
 
-void eddington_sp1::computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi){
-  CH_TIME("eddington_sp1::computeFlux");
+void EddingtonSP1::computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi){
+  CH_TIME("EddingtonSP1::computeFlux");
   if(m_verbosity > 5){
     pout() << m_name + "::computeFlux" << endl;
   }
@@ -917,7 +918,7 @@ void eddington_sp1::computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_ph
 
   m_amr->computeGradient(a_flux, a_phi, m_realm, m_phase); // flux = grad(phi)
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    data_ops::divide_scalar(*a_flux[lvl], *m_aCoefficient[lvl]);   // flux = grad(phi)/(c*kappa)
+    data_ops::divide_scalar(*a_flux[lvl], *m_aCoef[lvl]);   // flux = grad(phi)/(c*kappa)
     data_ops::scale(*a_flux[lvl], -units::s_c0*units::s_c0/3.0);  // flux = -c*grad(phi)/3.
   }
 
@@ -926,10 +927,10 @@ void eddington_sp1::computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_ph
 }
 
 
-void eddington_sp1::compute_density(EBAMRCellData& a_isotropic, const EBAMRCellData& a_phi){
-  CH_TIME("eddington_sp1::compute_density");
+void EddingtonSP1::computeDensity(EBAMRCellData& a_isotropic, const EBAMRCellData& a_phi){
+  CH_TIME("EddingtonSP1::computeDensity");
   if(m_verbosity > 5){
-    pout() << m_name + "::compute_density" << endl;
+    pout() << m_name + "::computeDensity" << endl;
   }
 
   const int finest_level = m_amr->getFinestLevel();
@@ -940,8 +941,8 @@ void eddington_sp1::compute_density(EBAMRCellData& a_isotropic, const EBAMRCellD
   }
 }
 
-void eddington_sp1::writePlotFile(){
-  CH_TIME("eddington_sp1::writePlotFile");
+void EddingtonSP1::writePlotFile(){
+  CH_TIME("EddingtonSP1::writePlotFile");
   if(m_verbosity > 5){
     pout() << m_name + "::writePlotFile" << endl;
   }
@@ -1010,8 +1011,8 @@ void eddington_sp1::writePlotFile(){
 	      covered_values);
 }
 
-void eddington_sp1::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const {
-  CH_TIME("eddington_sp1::writeCheckpointLevel");
+void EddingtonSP1::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const {
+  CH_TIME("EddingtonSP1::writeCheckpointLevel");
   if(m_verbosity > 5){
     pout() << m_name + "::writeCheckpointLevel" << endl;
   }
@@ -1020,8 +1021,8 @@ void eddington_sp1::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level
   write(a_handle, *m_phi[a_level], m_name);
 }
 
-void eddington_sp1::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
-  CH_TIME("eddington_sp1::readCheckpointLevel");
+void EddingtonSP1::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
+  CH_TIME("EddingtonSP1::readCheckpointLevel");
   if(m_verbosity > 5){
     pout() << m_name + "::readCheckpointLevel" << endl;
   }
@@ -1029,25 +1030,26 @@ void eddington_sp1::readCheckpointLevel(HDF5Handle& a_handle, const int a_level)
   read<EBCellFAB>(a_handle, *m_phi[a_level], m_name, m_amr->getGrids(m_realm)[a_level], Interval(0,0), false);
 }
 
-void eddington_sp1::set_neumann_WallBc(const int a_dir, Side::LoHiSide a_side, const Real a_value){
-  CH_TIME("eddington_sp1::set_neumann_WallBc");
+void EddingtonSP1::setNeumannWallBc(const int a_dir, Side::LoHiSide a_side, const Real a_value){
+  CH_TIME("EddingtonSP1::setNeumannWallBc");
   if(m_verbosity > 5){
-    pout() << "eddington_sp1::set_neumann_WallBc" << endl;
+    pout() << "EddingtonSP1::setNeumannWallBc" << endl;
   }
 
   const int idx = WallBc::map_bc(a_dir, a_side);
-  m_wallbc[idx] = RefCountedPtr<WallBc> (new WallBc(a_dir, a_side, wallbc::neumann));
-  m_wallbc[idx]->set_value(a_value);
+  m_wallBc[idx] = RefCountedPtr<WallBc> (new WallBc(a_dir, a_side, wallbc::neumann));
+  m_wallBc[idx]->set_value(a_value);
 }
 
-void eddington_sp1::set_robin_WallBc(const int a_dir, Side::LoHiSide a_side, const Real a_value){
-  CH_TIME("eddington_sp1::set_robin_WallBc");
+void EddingtonSP1::setRobinWallBc(const int a_dir, Side::LoHiSide a_side, const Real a_value){
+  CH_TIME("EddingtonSP1::setRobinWallBc");
   if(m_verbosity > 5){
-    pout() << "eddington_sp1::set_robin_WallBc" << endl;
+    pout() << "EddingtonSP1::setRobinWallBc" << endl;
   }
 
   const int idx = WallBc::map_bc(a_dir, a_side);
-  m_wallbc[idx] = RefCountedPtr<WallBc> (new WallBc(a_dir, a_side, wallbc::robin));
-  m_wallbc[idx]->set_value(a_value);
+  m_wallBc[idx] = RefCountedPtr<WallBc> (new WallBc(a_dir, a_side, wallbc::robin));
+  m_wallBc[idx]->set_value(a_value);
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

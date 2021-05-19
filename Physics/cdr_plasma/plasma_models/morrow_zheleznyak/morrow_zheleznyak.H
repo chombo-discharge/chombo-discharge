@@ -90,7 +90,7 @@ namespace physics::cdr_plasma {
     Real initial_sigma(const Real a_time, const RealVect a_pos) const;
 
   
-    Vector<int> m_wallbc; // Wall boundary conditions
+    Vector<int> m_wallBc; // Wall boundary conditions
 
     bool m_ssa; // Using SSA or not
 

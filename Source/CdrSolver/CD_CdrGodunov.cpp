@@ -201,7 +201,7 @@ void CdrGodunov::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_
       Vector<LevelData<EBCellFAB>* > scratchAlias, stateAlias;
       m_amr->alias(scratchAlias, m_scratch);
       m_amr->alias(stateAlias,   a_phi);
-      m_gmg_solver->computeAMROperator(scratchAlias, stateAlias, finest_level, 0, false);
+      m_multigridSolver->computeAMROperator(scratchAlias, stateAlias, finest_level, 0, false);
 
       // computeAMROperator fucks my ghost cells. 
       m_amr->interpGhostPwl(const_cast<EBAMRCellData&> (a_phi), m_realm, m_phase);

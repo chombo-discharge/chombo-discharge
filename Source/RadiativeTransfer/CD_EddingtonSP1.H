@@ -1,21 +1,21 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file eddington_sp1.H
-  @brief Declaration of a first order Eddington solver
+  @file   CD_EddingtonSP1.H
+  @brief  Declaration of a first order Eddington solver for radiative transfer
   @author Robert Marskar
-  @date Jan. 2018
 */
 
-#ifndef _EDDINGTON_SP1_
-#define _EDDINGTON_SP1_
+#ifndef CD_EddingtonSP1_H
+#define CD_EddingtonSP1_H
 
-#include "rte_solver.H"
-#include <CD_EbHelmholtzOpFactory.H>
-#include "larsen_coefs.H"
-#include <CD_RobinConductivityEbBcFactory.H>
-#include <CD_RobinConductivityDomainBcFactory.H>
-#include <CD_ConductivityDomainBcWrapperFactory.H>
-#include <CD_WallBc.H>
+// Std includes
+#include <random>
 
+// Chombo includes
 #include <AMRMultiGrid.H>
 #include <AMRTGA.H>
 #include <BiCGStabSolver.H>
@@ -23,32 +23,47 @@
 #include <EBSimpleSolver.H>
 #include <EBConductivityOpFactory.H>
 
-#include <random>
-
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <rte_solver.H>
+#include <CD_EbHelmholtzOpFactory.H>
+#include <larsen_coefs.H>
+#include <CD_RobinConductivityEbBcFactory.H>
+#include <CD_RobinConductivityDomainBcFactory.H>
+#include <CD_ConductivityDomainBcWrapperFactory.H>
+#include <CD_WallBc.H>
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Radiative tranfer equation solver in the SP1 (diffusion) approximation. Also includes stochastically drawn photons. 
 */
-class eddington_sp1 : public rte_solver {
+class EddingtonSP1 : public rte_solver {
 protected:
 
   /*!
-    @brief Silly enum for switching between relaxation methods.
+    @brief Enum class for supported bottom solvers in multigrid.
   */
-  enum class relax{
-    jacobi,
-    gauss_seidel,
-    gsrb_fast
+  enum class BottomSolver {
+    Simple,
+    BiCGStab,
+    GMRES
   };
 
   /*!
-    @brief Silly enum for switching between multigrid cycling
+    @brief Enum for supported relaxation methods in multigrid. 
   */
-  enum class amrmg{
-    full,
-    vcycle,
-    fcycle,
+  enum class RelaxationMethod {
+    Jacobi,
+    GaussSeidel,
+    GSRBFast
+  };
+
+  /*!
+    @brief Enum for multigrid cycle types. 
+  */
+  enum class MultigridType{
+    FAS,
+    VCycle,
+    FCycle,
   };
   
 public:
@@ -56,12 +71,12 @@ public:
   /*!
     @brief Constructor
   */
-  eddington_sp1();
+  EddingtonSP1();
 
   /*!
     @brief Destructor
   */
-  virtual ~eddington_sp1();
+  virtual ~EddingtonSP1();
 
   /*!
     @brief Advance RTE onto state a_phi
@@ -86,7 +101,7 @@ public:
   /*!
     @brief Allocate wall bc
   */
-  virtual void allocate_WallBc();
+  virtual void allocateWallBc();
   
   /*!
     @brief Cache state
@@ -111,17 +126,17 @@ public:
   /*!
     @brief Set reflection coefficients. These must be obtained by integrals over the reflectivity.
   */
-  virtual void set_reflection_coefficients(const Real r1, const Real r2);
+  virtual void setReflectionCoefficients(const Real r1, const Real r2);
 
   /*!
     @brief Compute the boundary flux. For Eddington, the boundary flux is = c*phi/2
   */
-  virtual void compute_boundary_flux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi);
+  virtual void computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi);
 
   /*!
     @brief Compute the domain flux. For Eddington, the domain flux is = c*phi/2
   */
-  virtual void compute_domain_flux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_phi);
+  virtual void computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_phi);
 
   /*!
     @brief Compute the flux
@@ -133,7 +148,7 @@ public:
   /*!
     @brief Get isotropic part. 
   */
-  virtual void compute_density(EBAMRCellData& a_isotropic, const EBAMRCellData& a_phi);
+  virtual void computeDensity(EBAMRCellData& a_isotropic, const EBAMRCellData& a_phi);
 
   /*!
     @brief Write plot file
@@ -160,27 +175,27 @@ protected:
   /*!
     @brief Relaxation type for gmg
   */
-  relax m_gmg_relax_type;
+  RelaxationMethod m_multigridRelaxMethod;
 
   /*!
     @brief GMG multigrid type
   */
-  amrmg m_gmg_type;
+  MultigridType m_multigridType;
 
   /*!
     @brief Needs setup
   */
-  bool m_needs_setup;
+  bool m_needsMultigridSetup;
 
   /*!
     @brief Has deeper MG levels or not
   */
-  bool m_has_mg_stuff;
+  bool m_hasDeeperMultigridLevels;
 
   /*!
     @brief Use tga for transient solevs
   */
-  bool m_use_tga;
+  bool m_useTGA;
 
   /*!
     @brief Use the source term to draw stochastic photons
@@ -190,52 +205,52 @@ protected:
   /*!
     @brief Verbosity for geometric multigrid
   */
-  int m_gmg_verbosity;
+  int m_multigridVerbosity;
 
   /*!
     @brief Precoarsening for multigrid
   */
-  int m_gmg_coarsen;
+  int m_numCoarseningsBeforeAggregation;
 
   /*!
     @brief Number of smoothings before averaging
   */
-  int m_gmg_pre_smooth;
+  int m_multigridPreSmooth;
 
   /*!
     @brief Number of smoothings before averaging
   */
-  int m_gmg_post_smooth;
+  int m_multigridPostSmooth;
 
   /*!
     @brief Number of smoothing before bottom solver
   */
-  int m_gmg_bot_smooth;
+  int m_multigridBottomSmooth;
 
   /*!
     @brief Maximum number of iterations
   */
-  int m_gmg_max_iter;
+  int m_multigridMaxIterations;
 
   /*!
     @brief Minimum number of iterations
   */
-  int m_gmg_min_iter;
+  int m_multigridMinIterations;
 
   /*!
     @brief Bottom solver type
   */
-  int m_bottomsolver;
+  BottomSolver m_bottomSolver;
 
   /*!
     @brief Number of smoothing for bottom solver
   */
-  int m_numsmooth;
+  int m_numSmoothingsForSimpleSolver;
 
   /*!
     @brief Set bottom drop depth
   */
-  int m_bottom_drop;
+  int m_numCellsBottomDrop;
 
   /*!
     @brief RNG seed
@@ -245,22 +260,22 @@ protected:
   /*!
     @brief 
   */
-  Real m_gmg_eps;
+  Real m_multigridTolerance;
   
   /*!
     @brief 
   */
-  Real m_gmg_hang;
+  Real m_multigridHang;
 
   /*!
     @brief Reflection coefficient
   */
-  Real m_r1;
+  Real m_reflectionCoefficientOne;
 
   /*!
     @brief Reflection coefficient
   */
-  Real m_r2;
+  Real m_reflectionCoefficientTwo;
 
   /*!
     @brief RNG
@@ -270,7 +285,7 @@ protected:
   /*!
     @brief Geometric multigrid solver
   */
-  RefCountedPtr<AMRMultiGrid<LevelData<EBCellFAB> > > m_gmg_solver;
+  RefCountedPtr<AMRMultiGrid<LevelData<EBCellFAB> > > m_multigridSolver;
 
   /*!
     @brief Conjugate gradient solver bottom MG level
@@ -280,37 +295,37 @@ protected:
   /*!
     @brief TGA solver
   */
-  RefCountedPtr<AMRTGA<LevelData<EBCellFAB> > > m_tgasolver;
+  RefCountedPtr<AMRTGA<LevelData<EBCellFAB> > > m_tgaSolver;
 
   /*!
     @brief Euler solver
   */
-  RefCountedPtr<EBBackwardEuler> m_eulersolver;
+  RefCountedPtr<EBBackwardEuler> m_eulerSolver;
 
   /*!
     @brief Operator factory
   */
-  RefCountedPtr<EbHelmholtzOpFactory> m_opfact;
+  RefCountedPtr<EbHelmholtzOpFactory> m_operatorFactory;
 
   /*!
     @brief Larsen coefficients for photon outflow bc
   */
-  RefCountedPtr<larsen_coefs> m_robinco;
+  RefCountedPtr<larsen_coefs> m_robinCoefficients;
 
   /*!
     @brief Photon outflow boundary conditions
   */
-  RefCountedPtr<RobinConductivityEbBcFactory> m_ebfact;
+  RefCountedPtr<RobinConductivityEbBcFactory> m_robinEbBcFactory;
 
   /*!
     @brief Photon outflow boundary conditions
   */
-  RefCountedPtr<RobinConductivityDomainBcFactory> m_domfact;
+  RefCountedPtr<RobinConductivityDomainBcFactory> m_robinDomainBcFactory;
 
   /*!
     @brief Wall boundary conditions
   */
-  Vector<RefCountedPtr<WallBc> > m_wallbc;
+  Vector<RefCountedPtr<WallBc> > m_wallBc;
 
   /*!
     @brief MG levelsgrids
@@ -320,7 +335,7 @@ protected:
   /*!
     @brief multi-fluid simple solver
   */
-  EBSimpleSolver m_simple_solver;
+  EBSimpleSolver m_simpleSolver;
   
   /*!
     @brief Residue for stationary solver
@@ -330,7 +345,7 @@ protected:
   /*!
     @brief a-coefficient
   */
-  EBAMRCellData m_aCoefficient;
+  EBAMRCellData m_aCoef;
 
   /*!
     @brief b-coefficient
@@ -345,22 +360,22 @@ protected:
   /*!
     @brief Set up geometric multigrid
   */
-  virtual void setup_gmg();
+  virtual void setupMultigrid();
 
   /*!
     @brief Set kappa
   */
-  virtual void setCoefficientsficients();
+  virtual void setMultigridCoefficients();
 
   /*!
     @brief Set the a-coefficient and b-coefficient
   */
-  virtual void set_aco_and_bco();
+  virtual void setACoefAndBCoef();
 
   /*!
     @brief Set both aco and bco (irregular version)
   */
-  virtual void set_aco_and_bco_box(EBCellFAB&       a_aco,
+  virtual void setACoefAndBCoef_box(EBCellFAB&       a_aco,
 				   BaseIVFAB<Real>& a_bco_irreg,
 				   const Box        a_cellbox,
 				   const RealVect   a_origin,
@@ -371,44 +386,46 @@ protected:
   /*!
     @brief Define the GMG levels
   */
-  virtual void define_mg_levels();
+  virtual void defineDeeperMultigridLevels();
   
   /*!
     @brief Set the operator factory
   */
-  virtual void setup_operator_factory();
+  virtual void setupOperatorFactory();
 
   /*!
     @brief Set the GMG solver
   */
-  virtual void setup_multigrid();
+  virtual void setupMultigridSolver();
 
   /*!
     @brief Set Neumann wall boundary condition
   */
-  virtual void set_neumann_WallBc(const int a_dir, Side::LoHiSide a_side, const Real a_value);
+  virtual void setNeumannWallBc(const int a_dir, Side::LoHiSide a_side, const Real a_value);
 
   /*!
     @brief Set Robin wall BC
   */
-  virtual void set_robin_WallBc(const int a_dir, Side::LoHiSide a_side, const Real a_value);
+  virtual void setRobinWallBc(const int a_dir, Side::LoHiSide a_side, const Real a_value);
 
   /*!
     @brief Set up the TGA solver
   */
-  virtual void setup_tga();
+  virtual void setupTGA();
   
   /*!
     @brief Set up the Euler solver
   */
-  virtual void setup_euler();
+  virtual void setupEuler();
 
   // Parse options functions
   virtual void parseDomainBc();    // Parses domain BC options
-  virtual void parse_stationary();   // Parse stationary solver
+  virtual void parseStationary();   // Parse stationary solver
   virtual void parsePlotVariables();    // Parses plot variables
-  virtual void parse_gmg_settings(); // Parses solver parameters for geometric multigrid
-  virtual void parse_reflection();   // Parse reflection coefficient
+  virtual void parseMultigridSettings(); // Parses solver parameters for geometric multigrid
+  virtual void parseReflection();   // Parse reflection coefficient
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif

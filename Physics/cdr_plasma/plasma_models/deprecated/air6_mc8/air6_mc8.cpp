@@ -442,7 +442,7 @@ void air6_mc8::parseDomainBc(){
   ParmParse pp("air6_mc8");
   std::string str;
 
-  m_wallbc.resize(2*SpaceDim, 0); 
+  m_wallBc.resize(2*SpaceDim, 0); 
   for (int dir = 0; dir < SpaceDim; dir++){
     for (SideIterator sit; sit.ok(); ++sit){
       const Side::LoHiSide side = sit();
@@ -466,7 +466,7 @@ void air6_mc8::parseDomainBc(){
 	  pp.get(bc_string.c_str(), type);
 	  const int idx = 2*dir;
 	  if(type == "wall"){
-	    m_wallbc[idx] = 1;
+	    m_wallBc[idx] = 1;
 	  }
 	}
       }
@@ -477,7 +477,7 @@ void air6_mc8::parseDomainBc(){
 	  pp.get(bc_string.c_str(), type);
 	  const int idx = 2*dir + 1;
 	  if(type == "wall"){
-	    m_wallbc[idx] = 1;
+	    m_wallBc[idx] = 1;
 	  }
 	}
       }
@@ -565,12 +565,12 @@ Vector<Real> air6_mc8::compute_cdr_domain_fluxes(const Real           a_time,
     idx = 2*a_dir + 1;
   }
 
-  if(m_wallbc[idx] == 0){ // Inflow/outflow
+  if(m_wallBc[idx] == 0){ // Inflow/outflow
     for (int i = 0; i < fluxes.size(); i++){
       fluxes[i] = a_extrap_cdr_fluxes[i];
     }
   }
-  else if(m_wallbc[idx] == 1){ // wall
+  else if(m_wallBc[idx] == 1){ // wall
     for (int i = 0; i < fluxes.size(); i++){
       fluxes[i] = 0.0;
     }

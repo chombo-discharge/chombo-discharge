@@ -174,13 +174,13 @@ bool FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
   // Do the scaled surface charge
   data_ops::copy(m_scaledSigma, a_sigma);
   data_ops::scale(m_scaledSigma, 1./(m_lengthScale*m_lengthScale));
-  m_opfact->setJump(m_scaledSigma, 1.0/units::s_eps0);
+  m_operatorFactory->setJump(m_scaledSigma, 1.0/units::s_eps0);
 
   const Real t2 = MPI_Wtime();
   
 #if 0 // Debug
   MayDay::Warning("FieldSolverMultigrid::solve - debug mode");
-  m_opfact->setJump(0.0, 1.0);
+  m_operatorFactory->setJump(0.0, 1.0);
   data_ops::set_value(source, 0.0);
 #endif
 
@@ -322,11 +322,11 @@ void FieldSolverMultigrid::setMultigridCoefficients(){
   const int ghosts = 1;
   const Real eps0  = m_computationalGeometry->get_eps0();
   
-  m_amr->allocate(m_aCoefficient,      m_realm, ncomps);
+  m_amr->allocate(m_aCoef,      m_realm, ncomps);
   m_amr->allocate(m_bCoefficient,      m_realm, ncomps);
   m_amr->allocate(m_bCoefficientIrreg, m_realm, ncomps);
 
-  data_ops::set_value(m_aCoefficient,      0.0);  // Always zero for poisson equation, but that is done from alpha. 
+  data_ops::set_value(m_aCoef,      0.0);  // Always zero for poisson equation, but that is done from alpha. 
   data_ops::set_value(m_bCoefficient,      eps0); // Will override this later
   data_ops::set_value(m_bCoefficientIrreg, eps0); // Will override this later
 
@@ -641,13 +641,13 @@ void FieldSolverMultigrid::setupOperatorFactory(){
   auto domfact = RefCountedPtr<ConductivityElectrostaticDomainBcFactory> (new ConductivityElectrostaticDomainBcFactory(m_domainBc, m_amr->getProbLo()));
 
   // Create factory and set potential
-  m_opfact = RefCountedPtr<MfHelmholtzOpFactory> (new MfHelmholtzOpFactory(m_multifluidIndexSpace,
+  m_operatorFactory = RefCountedPtr<MfHelmholtzOpFactory> (new MfHelmholtzOpFactory(m_multifluidIndexSpace,
 										 mflg,
 										 mfquadcfi,
 										 mffluxreg,
 										 refinement_ratios,
 										 grids,
-										 m_aCoefficient,
+										 m_aCoef,
 										 m_bCoefficient,
 										 m_bCoefficientIrreg,
 										 alpha,
@@ -666,7 +666,7 @@ void FieldSolverMultigrid::setupOperatorFactory(){
 										 mg_levelgrids));
 
   // Parse Dirichlet boundary conditions on electrodes to the operator factory. 
-  m_opfact->setDirichletEbBc(m_ebBc);
+  m_operatorFactory->setDirichletEbBc(m_ebBc);
 }
 
 void FieldSolverMultigrid::setupMultigridSolver(){
@@ -710,7 +710,7 @@ void FieldSolverMultigrid::setupMultigridSolver(){
     gmg_type = 2;
   }
 
-  m_multigridSolver.define(coar_dom, *m_opfact, botsolver, 1 + finest_level);
+  m_multigridSolver.define(coar_dom, *m_operatorFactory, botsolver, 1 + finest_level);
   m_multigridSolver.setSolverParameters(m_multigridPreSmoothg,
 					m_multigridPostSmooth,
 					m_multigridBottomSmooth,
@@ -742,7 +742,7 @@ void FieldSolverMultigrid::setupMultigridSolver(){
 }
 
 MFAMRCellData& FieldSolverMultigrid::getACoefficient(){
-  return m_aCoefficient;
+  return m_aCoef;
 }
 
 MFAMRFluxData& FieldSolverMultigrid::getBCoefficient(){

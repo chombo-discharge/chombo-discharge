@@ -59,7 +59,7 @@ public:
   
 protected:
 
-  RefCountedPtr<RobinCoefficients> m_robinco;
+  RefCountedPtr<RobinCoefficients> m_robinCoefficients;
 
   Real m_aco;
 

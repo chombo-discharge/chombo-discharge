@@ -191,12 +191,12 @@ public:
   /*!
     @brief Compute the boundary flux. For Eddington, the boundary flux is = c*phi/2
   */
-  virtual void compute_boundary_flux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi);
+  virtual void computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi);
 
   /*!
     @brief Compute the domain flux. For Eddington, the domain flux is = c*phi/2
   */
-  virtual void compute_domain_flux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_phi);
+  virtual void computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_phi);
 
   /*!
     @brief Compute the flux
@@ -208,7 +208,7 @@ public:
   /*!
     @brief Get isotropic part. 
   */
-  virtual void compute_density(EBAMRCellData& a_isotropic, const EBAMRCellData& a_phi);
+  virtual void computeDensity(EBAMRCellData& a_isotropic, const EBAMRCellData& a_phi);
 
   /*!
     @brief Clear data holder

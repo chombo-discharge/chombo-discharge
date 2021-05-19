@@ -77,8 +77,8 @@ void RobinConductivityEbBc::define(const LayoutData<IntVectSet>& a_cfivs, const 
 	bco = m_bco;
       }
       else if(m_func_coeff){
-	aco = m_robinco->aco(pos);
-	bco = m_robinco->bco(pos);
+	aco = m_robinCoefficients->aco(pos);
+	bco = m_robinCoefficients->bco(pos);
       }
       else if(m_data_coeff){
 	aco = (*m_acodata)[dit](vof, comp);
@@ -179,7 +179,7 @@ void RobinConductivityEbBc::setCoefficients(const Real a_aco, const Real a_bco, 
 }
 
 void RobinConductivityEbBc::setCoefficients(const RefCountedPtr<RobinCoefficients> a_robinco){
-  m_robinco = a_robinco;
+  m_robinCoefficients = a_robinco;
 
   m_const_coeff = false;
   m_func_coeff  = true;
@@ -225,9 +225,9 @@ void RobinConductivityEbBc::applyEBFlux(EBCellFAB&                    a_lphi,
       rhs = m_rhs;
     }
     else if(m_func_coeff){
-      aco = m_robinco->aco(pos);
-      bco = m_robinco->bco(pos);
-      rhs = m_robinco->rhs(pos);
+      aco = m_robinCoefficients->aco(pos);
+      bco = m_robinCoefficients->bco(pos);
+      rhs = m_robinCoefficients->rhs(pos);
     }
     else if(m_data_coeff){
       aco = (*m_acodata)[a_dit](vof, comp);

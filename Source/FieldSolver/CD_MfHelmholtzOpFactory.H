@@ -210,7 +210,7 @@ protected:
   /*!
     @brief a-coefficients
   */
-  MFAMRCellData m_aCoefficient;
+  MFAMRCellData m_aCoef;
 
   /*!
     @brief b-coefficients
@@ -305,7 +305,7 @@ protected:
   /*!
     @brief a-coefficient for multigrid
   */
-  Vector<MFAMRCellData> m_aCoefficient_mg;
+  Vector<MFAMRCellData> m_aCoef_mg;
 
   /*!
     @brief b-coefficient for multigrid

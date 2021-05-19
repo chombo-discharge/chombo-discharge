@@ -757,7 +757,7 @@ protected:
 
   //! "Current" (time-interpolated) value of the a coefficient. For a
   //! time-independent a coefficient, this is where the coefficient lives.
-  RefCountedPtr<LevelData<EBCellFAB> >          m_aCoefficient;
+  RefCountedPtr<LevelData<EBCellFAB> >          m_aCoef;
 
   //! "Current" (time-interpolated) value of the b coefficient. For a
   //! time-independent a coefficient, this is where the coefficient lives.

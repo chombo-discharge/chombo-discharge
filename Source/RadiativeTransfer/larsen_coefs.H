@@ -52,9 +52,9 @@ protected:
 
   RefCountedPtr<rte_species> m_rte_species;
 
-  Real m_r1;
+  Real m_reflectionCoefficientOne;
     
-  Real m_r2;
+  Real m_reflectionCoefficientTwo;
 };
 #include "CD_NamespaceFooter.H"
 

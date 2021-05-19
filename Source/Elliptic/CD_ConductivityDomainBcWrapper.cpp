@@ -32,7 +32,7 @@ void ConductivityDomainBcWrapper::setPotentials(const Vector<RefCountedPtr<BaseB
 }
 
 void ConductivityDomainBcWrapper::setRobinCoefficients(const Vector<RefCountedPtr<RobinCoefficients> >& a_robinco){
-  m_robinco = a_robinco;
+  m_robinCoefficients = a_robinco;
 }
 
 void ConductivityDomainBcWrapper::setWallBc(const Vector<RefCountedPtr<WallBc> >& a_wallbc){
@@ -58,11 +58,11 @@ void ConductivityDomainBcWrapper::setWallBc(const Vector<RefCountedPtr<WallBc> >
       // For the Poisson equation, the appropriate coefficients are (1,-1,0.0) for the robin BC class (see robincondu*.H).
       // Otherwise, use externally supplied values
       RobinConductivityDomainBc* robinbc = new RobinConductivityDomainBc();
-      if(m_robinco[i] == NULL){
+      if(m_robinCoefficients[i] == NULL){
 	robinbc->setCoefficients(1.0, -1.0, 0.0);
       }
       else{
-	robinbc->setCoefficients(m_robinco[i]);
+	robinbc->setCoefficients(m_robinCoefficients[i]);
       }
 	    
       m_bc[idx] = RefCountedPtr<RobinConductivityDomainBc> (robinbc);

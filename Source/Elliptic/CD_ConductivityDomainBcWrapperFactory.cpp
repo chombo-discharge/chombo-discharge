@@ -18,7 +18,7 @@ ConductivityDomainBcWrapperFactory::~ConductivityDomainBcWrapperFactory(){
 }
 
 void ConductivityDomainBcWrapperFactory::setWallBc(const Vector<RefCountedPtr<WallBc> >& a_wallbc){
-  m_wallbc = a_wallbc;
+  m_wallBc = a_wallbc;
   m_hasbc = true;
 }
 
@@ -27,7 +27,7 @@ void ConductivityDomainBcWrapperFactory::setPotentials(const Vector<RefCountedPt
 }
 
 void ConductivityDomainBcWrapperFactory::setRobinCoefficients(const Vector<RefCountedPtr<RobinCoefficients> >& a_robinco){
-  m_robinco = a_robinco;
+  m_robinCoefficients = a_robinco;
 }
 
 ConductivityDomainBcWrapper* ConductivityDomainBcWrapperFactory::create(const ProblemDomain& a_domain,
@@ -38,8 +38,8 @@ ConductivityDomainBcWrapper* ConductivityDomainBcWrapperFactory::create(const Pr
   ConductivityDomainBcWrapper* fresh = new ConductivityDomainBcWrapper();
 
   fresh->setPotentials(m_potentials);
-  fresh->setRobinCoefficients(m_robinco);
-  fresh->setWallBc(m_wallbc);
+  fresh->setRobinCoefficients(m_robinCoefficients);
+  fresh->setWallBc(m_wallBc);
 
     
   return fresh;

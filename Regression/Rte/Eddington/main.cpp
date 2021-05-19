@@ -1,5 +1,5 @@
 #include "CD_Driver.H"
-#include "eddington_sp1.H"
+#include <CD_EddingtonSP1.H>
 #include "rod_dielectric.H"
 #include "rte_stepper.H"
 #include "ParmParse.H"
@@ -24,8 +24,8 @@ int main(int argc, char* argv[]){
   RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (NULL);
 
   // Set up basic Poisson, potential = 1 
-  auto timestepper = RefCountedPtr<rte_stepper<eddington_sp1> >
-    (new rte_stepper<eddington_sp1>());
+  auto timestepper = RefCountedPtr<rte_stepper<EddingtonSP1> >
+    (new rte_stepper<EddingtonSP1>());
 
   // Set up the Driver and run it
   RefCountedPtr<Driver> engine = RefCountedPtr<Driver> (new Driver(compgeom, timestepper, amr, tagger, geocoarsen));

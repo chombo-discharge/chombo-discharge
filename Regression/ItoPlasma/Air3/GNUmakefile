@@ -27,7 +27,7 @@ src_dirs = $(DISCHARGE_HOME)/Source \
 	$(DISCHARGE_HOME)/Source/Particle \
 	$(DISCHARGE_HOME)/Source/ito_solver \
 	$(DISCHARGE_HOME)/Source/FieldSolver \
-	$(DISCHARGE_HOME)/Source/rte_solver \
+	$(DISCHARGE_HOME)/Source/RadiativeTransfer \
 	$(DISCHARGE_HOME)/Source/SigmaSolver \
 	$(DISCHARGE_HOME)/Geometries/rod_dielectric\
 	$(DISCHARGE_HOME)/Physics/ito_plasma \

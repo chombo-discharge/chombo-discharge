@@ -66,7 +66,7 @@ public:
     @brief Added because of CD_FieldStepper, which uses the operator factory to generate computational loads.
   */
   RefCountedPtr<MfHelmholtzOpFactory>& getOperatorFactory(){
-    return m_opfact;
+    return m_operatorFactory;
   }
 
   /*!
@@ -271,12 +271,12 @@ protected:
   /*!
     @brief Multigrid operator factory. 
   */
-  RefCountedPtr<MfHelmholtzOpFactory> m_opfact;
+  RefCountedPtr<MfHelmholtzOpFactory> m_operatorFactory;
   
   /*!
     @brief b-coefficient
   */
-  MFAMRCellData m_aCoefficient;
+  MFAMRCellData m_aCoef;
 
   /*!
     @brief b-coefficient

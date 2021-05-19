@@ -408,7 +408,7 @@ void rk2_tga::compute_cdr_fluxes(const Real a_time){
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
     EBAMRIVData& flux_eb = storage->get_eb_flux();
-    solver->compute_boundary_flux(flux_eb, solver->getPhi());
+    solver->computeBoundaryFlux(flux_eb, solver->getPhi());
     extrap_rte_fluxes.push_back(&flux_eb);
   }
 

@@ -648,7 +648,7 @@ protected:
   /*!
     @brief Dummy data
   */
-  EBAMRCellData m_aCoefficient;
+  EBAMRCellData m_aCoef;
 
   /*!
     @brief Diffusion coefficients (can
