@@ -20,7 +20,7 @@ def write_template(args):
                      args.discharge_home + "/Source/FieldSolver/CD_" + args.field_solver + ".options",\
                      args.discharge_home + "/Source/ito_solver/" + args.ito_solver + ".options",\
                      args.discharge_home + "/Source/RadiativeTransfer/McPhoto.options",\
-                     args.discharge_home + "/Source/geometry/geo_coarsener.options", \
+                     args.discharge_home + "/Source/Geometry/geo_coarsener.options", \
                      args.discharge_home + "/Geometries/" + args.geometry + "/" + args.geometry + ".options", \
                      args.discharge_home + "/Physics/ito_plasma/timesteppers/" + args.TimeStepper + "/" + args.TimeStepper + ".options", \
                      args.discharge_home + "/Physics/ito_plasma/plasma_models/" + args.physics + "/" + args.physics + ".options"]

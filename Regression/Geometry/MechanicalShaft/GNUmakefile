@@ -20,7 +20,7 @@ src_dirs = $(DISCHARGE_HOME)/Source \
 	$(DISCHARGE_HOME)/Source/AmrMesh \
 	$(DISCHARGE_HOME)/Source/CellTagger \
 	$(DISCHARGE_HOME)/Source/Driver \
-	$(DISCHARGE_HOME)/Source/geometry \
+	$(DISCHARGE_HOME)/Source/Geometry \
 	$(DISCHARGE_HOME)/Source/global \
 	$(DISCHARGE_HOME)/Source/Particle \
 	$(DISCHARGE_HOME)/Physics/geometry \

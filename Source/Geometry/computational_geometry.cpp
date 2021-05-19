@@ -15,7 +15,7 @@
 #include <ComplementIF.H>
 
 #include "computational_geometry.H"
-#include "ScanShop.H"
+#include <CD_ScanShop.H>
 #include "memrep.H"
 
 #include "CD_NamespaceHeader.H"

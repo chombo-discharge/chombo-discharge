@@ -38,7 +38,7 @@ def write_template(args):
     makef.write('\t$(DISCHARGE_HOME)/Source/CdrSolver \\\n')
     makef.write('\t$(DISCHARGE_HOME)/Source/CellTagger \\\n')
     makef.write('\t$(DISCHARGE_HOME)/Source/Elliptic \\\n')
-    makef.write('\t$(DISCHARGE_HOME)/Source/geometry \\\n')
+    makef.write('\t$(DISCHARGE_HOME)/Source/Geometry \\\n')
     makef.write('\t$(DISCHARGE_HOME)/Source/global \\\n')
     makef.write('\t$(DISCHARGE_HOME)/Source/Driver \\\n')
     makef.write('\t$(DISCHARGE_HOME)/Source/Particle \\\n')

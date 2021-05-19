@@ -1,21 +1,25 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @brief  ScanShop.cpp
-  @brief  Implementation of ScanShop
+  @brief  CD_ScanShop.cpp
+  @brief  Implementation of CD_ScanShop.H
   @author Robert Marskar
-  @date   2019
 */
 
-#include "ScanShop.H"
-
+// Chombo includes
 #include <BRMeshRefine.H>
 #include <LoadBalance.H>
 #include <EBLevelDataOps.H>
-
 #include <ParmParse.H>
 
-#define DEBUG 0
+// Our includes
+#include <CD_ScanShop.H>
+#include <CD_NamespaceHeader.H>
 
-#include "CD_NamespaceHeader.H"
+#define DEBUG 0
 
 bool ScanShop::s_irregularBalance = true;
 bool ScanShop::s_recursive        = true;
@@ -525,4 +529,5 @@ void ScanShop::gatherBoxesParallel(Vector<Box>& a_boxes){
   delete recv_buffer;
   delete send_buffer;
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

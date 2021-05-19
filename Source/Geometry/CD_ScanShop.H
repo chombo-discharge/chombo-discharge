@@ -1,19 +1,24 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @brief  ScanShop.H
-  @brief  Version of GeometryShop that also may use a bounding box for location EB volumes
+  @brief  CD_ScanShop.H
+  @brief  Declare a class geometry generation (GeometryShop) that uses the signed distance functino to prune space. 
   @author Robert Marskar
-  @date   2019
 */
 
-#ifndef _SCANSHOP_
-#define _SCANSHOP_
+#ifndef CD_ScanShop_H
+#define CD_ScanShop_H
 
+// Chombo includes
 #include <GeometryShop.H>
 #include <GeometryService.H>
 
-#include "BoxType.H"
-
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <BoxType.H>
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Derived version of GeometryShop that load balances based on the cut cells themselves. The internals of this class
@@ -151,6 +156,7 @@ protected:
   */
   bool isCovered(const Box a_box, const RealVect m_origin, const Real a_dx);
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

@@ -11,7 +11,7 @@ def write_template(args):
     options_files = [args.discharge_home + "/Source/AmrMesh/AmrMesh.options", \
                      args.discharge_home + "/Source/Driver/Driver.options", \
                      args.discharge_home + "/Source/RadiativeTransfer/" + args.RtSolver + ".options",\
-                     args.discharge_home + "/Source/geometry/geo_coarsener.options", \
+                     args.discharge_home + "/Source/Geometry/geo_coarsener.options", \
                      args.discharge_home + "/Geometries/" + args.geometry + "/" + args.geometry + ".options", \
                      args.discharge_home + "/Physics/RadiativeTransfer/RtPhysicsStepper.options"]
 

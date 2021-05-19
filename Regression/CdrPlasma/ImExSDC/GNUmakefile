@@ -23,7 +23,7 @@ src_dirs = $(DISCHARGE_HOME)/Source \
 	$(DISCHARGE_HOME)/Source/CdrSolver \
 	$(DISCHARGE_HOME)/Source/CellTagger \
 	$(DISCHARGE_HOME)/Source/Elliptic \
-	$(DISCHARGE_HOME)/Source/geometry \
+	$(DISCHARGE_HOME)/Source/Geometry \
 	$(DISCHARGE_HOME)/Source/global \
 	$(DISCHARGE_HOME)/Source/Driver \
 	$(DISCHARGE_HOME)/Source/Particle \
