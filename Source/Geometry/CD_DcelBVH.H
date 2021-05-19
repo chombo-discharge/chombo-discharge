@@ -20,12 +20,12 @@
 namespace Dcel {
 
   template <class T>
-  using PrimitiveList = std::vector<std::shared_ptr<const Dcel::faceT<T> > >;
+  using PrimitiveList = std::vector<std::shared_ptr<const Dcel::FaceT<T> > >;
 
   constexpr int primitivesPerLeafNode = 1;
 
   template <class T, class BV>
-  BVH::StopFunctionT<T, faceT<T>, BV> defaultStopFunction = [=](const BVH::NodeT<T, faceT<T>, BV>& a_node){
+  BVH::StopFunctionT<T, FaceT<T>, BV> defaultStopFunction = [=](const BVH::NodeT<T, FaceT<T>, BV>& a_node){
     const auto& primitives = a_node.getPrimitives();
     const int depth        = a_node.getDepth();
 
@@ -33,7 +33,7 @@ namespace Dcel {
   };
 
   template <class T, class BV>
-  BVH::BVConstructorT<faceT<T>, BV> defaultBVConstructor = [](const PrimitiveList<T>& a_primitives){
+  BVH::BVConstructorT<FaceT<T>, BV> defaultBVConstructor = [](const PrimitiveList<T>& a_primitives){
     std::vector<Vec3T<T> > coordinates;
 
     for (const auto& f : a_primitives){
@@ -45,7 +45,7 @@ namespace Dcel {
   };
   
   template <class T>
-  BVH::PartitionFunctionT<faceT<T> > defaultPartitionFunction = [](const PrimitiveList<T>& a_primitives){
+  BVH::PartitionFunctionT<FaceT<T> > defaultPartitionFunction = [](const PrimitiveList<T>& a_primitives){
 
     auto lo = Vec3T<T>::max();
     auto hi = Vec3T<T>::min();
@@ -59,7 +59,7 @@ namespace Dcel {
     PrimitiveList<T> sortedPrimitives(a_primitives);
   
     std::sort(sortedPrimitives.begin(), sortedPrimitives.end(),
-	      [=](const std::shared_ptr<const faceT<T> >& f1, const std::shared_ptr<const faceT<T> >& f2) -> bool {
+	      [=](const std::shared_ptr<const FaceT<T> >& f1, const std::shared_ptr<const FaceT<T> >& f2) -> bool {
 		return f1->getCentroid(splitDir) < f2->getCentroid(splitDir);
 	      });
 
@@ -72,7 +72,7 @@ namespace Dcel {
   };
 
   template <class T, class BV>
-  BVH::PartitionFunctionT<faceT<T> > partitionMinimumOverlap = [](const PrimitiveList<T>& a_primitives){
+  BVH::PartitionFunctionT<FaceT<T> > partitionMinimumOverlap = [](const PrimitiveList<T>& a_primitives){
     constexpr int DIM = 3;
     
     const int splitIndex    = (a_primitives.size() - 1)/2;
@@ -85,7 +85,7 @@ namespace Dcel {
 
       PrimitiveList<T> sortedPrims(a_primitives);
       std::sort(sortedPrims.begin(), sortedPrims.end(),
-		[=](const std::shared_ptr<const faceT<T> >& f1, const std::shared_ptr<const faceT<T> >& f2){
+		[=](const std::shared_ptr<const FaceT<T> >& f1, const std::shared_ptr<const FaceT<T> >& f2){
 		  return f1->getCentroid(dir) < f2->getCentroid(dir);
 		});
 
@@ -108,7 +108,7 @@ namespace Dcel {
   };
 
   template <class T, class BV>
-  BVH::PartitionFunctionT<faceT<T> > partitionSAH = [](const PrimitiveList<T>& a_primitives){
+  BVH::PartitionFunctionT<FaceT<T> > partitionSAH = [](const PrimitiveList<T>& a_primitives){
     constexpr int DIM   = 3; 
     constexpr int nBins = 16;
     constexpr T invBins = 1./nBins;

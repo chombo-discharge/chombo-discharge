@@ -80,7 +80,7 @@ namespace Dcel {
 
   template <class T>
   inline
-  void vertexT<T>::addFace(const facePtr& a_face) noexcept {
+  void vertexT<T>::addFace(const FacePtr& a_face) noexcept {
     m_faces.emplace_back(a_face);
   }
 
@@ -98,7 +98,7 @@ namespace Dcel {
 
   template <class T>
   inline
-  void vertexT<T>::computeVertexNormalAverage(const std::vector<facePtr>& a_faces) noexcept {
+  void vertexT<T>::computeVertexNormalAverage(const std::vector<FacePtr>& a_faces) noexcept {
     m_normal = Vec3::zero();
     
     for (const auto& f : a_faces){
@@ -116,7 +116,7 @@ namespace Dcel {
 
   template <class T>
   inline
-  void vertexT<T>::computeVertexNormalAngleWeighted(const std::vector<facePtr>& a_faces) noexcept {
+  void vertexT<T>::computeVertexNormalAngleWeighted(const std::vector<FacePtr>& a_faces) noexcept {
     m_normal = Vec3::zero();
 
     // This is more complicated than it looks, and it happens because we want the two half edges that has the current vertex
@@ -215,13 +215,13 @@ namespace Dcel {
 
   template <class T>
   inline
-  std::vector<std::shared_ptr<faceT<T> > >& vertexT<T>::getFaces() noexcept {
+  std::vector<std::shared_ptr<FaceT<T> > >& vertexT<T>::getFaces() noexcept {
     return (m_faces);
   }
 
   template <class T>
   inline
-  const std::vector<std::shared_ptr<faceT<T> > >& vertexT<T>::getFaces() const noexcept {
+  const std::vector<std::shared_ptr<FaceT<T> > >& vertexT<T>::getFaces() const noexcept {
     return (m_faces);
   }
 

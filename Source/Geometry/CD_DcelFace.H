@@ -28,32 +28,32 @@ namespace Dcel {
 
   template <class T> class vertexT;
   template <class T> class edgeT;
-  template <class T> class faceT;
+  template <class T> class FaceT;
   template <class T> class edgeIteratorT;
   
   template <class T>
-  class faceT {
+  class FaceT {
   public:
 
     using Vec3   = Vec3T<T>;
     
     using vertex = vertexT<T>;
     using edge   = edgeT<T>;
-    using face   = faceT<T>;
+    using Face   = FaceT<T>;
 
     using vertexPtr = std::shared_ptr<vertex>;
     using edgePtr   = std::shared_ptr<edge>;
-    using facePtr   = std::shared_ptr<face>;
+    using FacePtr   = std::shared_ptr<Face>;
 
     using edgeIterator = edgeIteratorT<T>;
     
-    faceT();
+    FaceT();
     
-    faceT(const edgePtr& a_edge);
+    FaceT(const edgePtr& a_edge);
     
-    faceT(const face& a_otherFace);
+    FaceT(const Face& a_otherFace);
     
-    ~faceT();
+    ~FaceT();
 
     inline
     void define(const Vec3& a_normal, const edgePtr& a_edge) noexcept;

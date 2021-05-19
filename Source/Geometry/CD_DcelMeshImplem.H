@@ -31,7 +31,7 @@ namespace Dcel {
 
   template <class T>
   inline
-  MeshT<T>::MeshT(std::vector<facePtr >&   a_faces,
+  MeshT<T>::MeshT(std::vector<FacePtr >&   a_faces,
 		  std::vector<edgePtr >&   a_edges,
 		  std::vector<vertexPtr >& a_vertices) : MeshT() {
     this->define(a_faces, a_edges, a_vertices);
@@ -45,7 +45,7 @@ namespace Dcel {
 
   template <class T>
   inline
-  void MeshT<T>::define(std::vector<facePtr >&   a_faces,
+  void MeshT<T>::define(std::vector<FacePtr >&   a_faces,
 			std::vector<edgePtr >&   a_edges,
 			std::vector<vertexPtr >& a_vertices) noexcept{
     m_faces    = a_faces;
@@ -260,13 +260,13 @@ namespace Dcel {
 
   template <class T>
   inline
-  std::vector<std::shared_ptr<faceT<T> > >& MeshT<T>::getFaces() noexcept {
+  std::vector<std::shared_ptr<FaceT<T> > >& MeshT<T>::getFaces() noexcept {
     return (m_faces);
   }
 
   template <class T>  
   inline
-  const std::vector<std::shared_ptr<faceT<T> > >& MeshT<T>::getFaces() const noexcept {
+  const std::vector<std::shared_ptr<FaceT<T> > >& MeshT<T>::getFaces() const noexcept {
     return (m_faces);
   }
 
@@ -329,7 +329,7 @@ namespace Dcel {
   template <class T>  
   inline
   T MeshT<T>::DirectSignedDistance2(const Vec3& a_point) const noexcept {
-    facePtr closest = m_faces.front();
+    FacePtr closest = m_faces.front();
     T minDist2 = closest->unsignedDistance2(a_point);
 
     for (const auto& f : m_faces){

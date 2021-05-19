@@ -21,7 +21,7 @@ namespace Dcel {
 
   template <class T> class vertexT;
   template <class T> class edgeT;
-  template <class T> class faceT;
+  template <class T> class FaceT;
   template <class T> class edgeIteratorT;
 
   template <class T>
@@ -32,11 +32,11 @@ namespace Dcel {
     
     using vertex = vertexT<T>;
     using edge   = edgeT<T>;
-    using face   = faceT<T>;
+    using Face   = FaceT<T>;
 
     using vertexPtr = std::shared_ptr<vertex>;
     using edgePtr   = std::shared_ptr<edge>;
-    using facePtr   = std::shared_ptr<face>;
+    using FacePtr   = std::shared_ptr<Face>;
     
     using edgeIterator = edgeIteratorT<T>;
     
@@ -59,7 +59,7 @@ namespace Dcel {
     void setEdge(const edgePtr& a_edge) noexcept;
 
     inline
-    void addFace(const facePtr& a_face) noexcept;
+    void addFace(const FacePtr& a_face) noexcept;
 
     inline
     void normalizeNormalVector() noexcept;
@@ -68,13 +68,13 @@ namespace Dcel {
     void computeVertexNormalAverage() noexcept;
 
     inline
-    void computeVertexNormalAverage(const std::vector<facePtr>& a_faces) noexcept;
+    void computeVertexNormalAverage(const std::vector<FacePtr>& a_faces) noexcept;
 
     inline
     void computeVertexNormalAngleWeighted() noexcept;
 
     inline
-    void computeVertexNormalAngleWeighted(const std::vector<facePtr>& a_faces) noexcept;
+    void computeVertexNormalAngleWeighted(const std::vector<FacePtr>& a_faces) noexcept;
 
     inline
     Vec3T<T>& getPosition() noexcept;
@@ -95,10 +95,10 @@ namespace Dcel {
     const edgePtr& getOutgoingEdge() const noexcept;
 
     inline
-    std::vector<facePtr>& getFaces() noexcept;
+    std::vector<FacePtr>& getFaces() noexcept;
 
     inline
-    const std::vector<facePtr>& getFaces() const noexcept;
+    const std::vector<FacePtr>& getFaces() const noexcept;
 
     inline
     T signedDistance(const Vec3& a_x0) const noexcept;
@@ -113,9 +113,7 @@ namespace Dcel {
     Vec3 m_pos;
     Vec3 m_normal;
     
-    std::vector<facePtr > m_faces;
-
-
+    std::vector<FacePtr > m_faces;
   };
 }
 #include "CD_NamespaceFooter.H"

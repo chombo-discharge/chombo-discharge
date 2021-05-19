@@ -37,7 +37,7 @@ namespace Dcel {
     if(filestream.is_open()){
       std::vector<std::shared_ptr<vertex> >& vertices  = a_mesh.getVertices();
       std::vector<std::shared_ptr<edge> >& edges       = a_mesh.getEdges();
-      std::vector<std::shared_ptr<face> >& faces       = a_mesh.getFaces();
+      std::vector<std::shared_ptr<Face> >& faces       = a_mesh.getFaces();
 
       vertices.resize(0);
       edges.resize(0);
@@ -138,7 +138,7 @@ namespace Dcel {
 
   template <class T>
   inline
-  void Dcel::parser::PLY<T>::readFacesASCII(std::vector<std::shared_ptr<face> >&   a_faces,
+  void Dcel::parser::PLY<T>::readFacesASCII(std::vector<std::shared_ptr<Face> >&   a_faces,
 					    std::vector<std::shared_ptr<edge> >&   a_edges,
 					    std::vector<std::shared_ptr<vertex> >& a_vertices,
 					    const int                              a_numFaces,
@@ -189,7 +189,7 @@ namespace Dcel {
       }
 
       // Construct a new face
-      a_faces.emplace_back(std::make_shared<face>(halfEdges.front()));
+      a_faces.emplace_back(std::make_shared<Face>(halfEdges.front()));
       auto& curFace = a_faces.back();
 
       // Half edges get a reference to the currently created face

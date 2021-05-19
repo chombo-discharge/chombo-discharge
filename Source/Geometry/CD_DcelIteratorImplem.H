@@ -18,22 +18,22 @@ namespace Dcel {
 
   template <class T>
   inline
-  edgeIteratorT<T>::edgeIteratorT(face& a_face){
+  edgeIteratorT<T>::edgeIteratorT(Face& a_face){
     m_startEdge = a_face.getHalfEdge();
     m_curEdge   = m_startEdge;
     m_fullLoop  = false;
   
-    m_iterMode = IterationMode::Face;
+    m_iterMode = IterationMode::Faces;
   }
 
   template <class T>
   inline
-  edgeIteratorT<T>::edgeIteratorT(const face& a_face){
+  edgeIteratorT<T>::edgeIteratorT(const Face& a_face){
     m_startEdge = a_face.getHalfEdge();
     m_curEdge   = m_startEdge;
     m_fullLoop  = false;
 
-    m_iterMode = IterationMode::Face;
+    m_iterMode = IterationMode::Faces;
   }
 
   template <class T>
@@ -43,7 +43,7 @@ namespace Dcel {
     m_curEdge   = m_startEdge;
     m_fullLoop  = false;
 
-    m_iterMode  = IterationMode::Vertex;
+    m_iterMode  = IterationMode::Vertices;
   }
 
   template <class T>
@@ -53,7 +53,7 @@ namespace Dcel {
     m_curEdge   = m_startEdge;
     m_fullLoop  = false;
 
-    m_iterMode  = IterationMode::Vertex;
+    m_iterMode  = IterationMode::Vertices;
   }
 
   template <class T>
@@ -79,10 +79,10 @@ namespace Dcel {
   inline
   void edgeIteratorT<T>::operator++() noexcept {
     switch(m_iterMode){
-    case IterationMode::Face:
+    case IterationMode::Faces:
       m_curEdge = m_curEdge->getNextEdge();
       break;
-    case IterationMode::Vertex:
+    case IterationMode::Vertices:
       // For vertices, we want to compute the 
       m_curEdge = m_curEdge->getPreviousEdge()->getPairEdge();
       break;

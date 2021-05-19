@@ -92,7 +92,7 @@ namespace Dcel {
 
   template <class T>
   inline
-  void edgeT<T>::setFace(const facePtr& a_face) noexcept {
+  void edgeT<T>::setFace(const FacePtr& a_face) noexcept {
     m_face = a_face;
   }
 
@@ -209,13 +209,13 @@ namespace Dcel {
 
   template <class T>
   inline
-  std::shared_ptr<faceT<T> >& edgeT<T>::getFace() noexcept {
+  std::shared_ptr<FaceT<T> >& edgeT<T>::getFace() noexcept {
     return (m_face);
   }
 
   template <class T>
   inline
-  const std::shared_ptr<faceT<T> >& edgeT<T>::getFace() const noexcept {
+  const std::shared_ptr<FaceT<T> >& edgeT<T>::getFace() const noexcept {
     return (m_face);
   }
 

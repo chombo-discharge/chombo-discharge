@@ -32,8 +32,8 @@ class BvhSdf : public BaseIF {
 public:
 
   using Vec3  = Vec3T<T>;
-  using face  = faceT<T>;
-  using Node  = NodeT<T, face, BV>;
+  using Face  = FaceT<T>;
+  using Node  = NodeT<T, Face, BV>;
   
 
   //  BvhSdf() = delete;

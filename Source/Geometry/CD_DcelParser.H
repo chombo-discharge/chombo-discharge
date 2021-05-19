@@ -37,7 +37,7 @@ namespace Dcel {
 
       using vertex = vertexT<T>;
       using edge   = edgeT<T>;
-      using face   = faceT<T>;
+      using Face   = FaceT<T>;
       using Mesh   = MeshT<T>;
 
       using edgeIterator = edgeIteratorT<T>;
@@ -76,7 +76,7 @@ namespace Dcel {
 	on the correct line
       */
       inline
-      static void readFacesASCII(std::vector<std::shared_ptr<face> >&   a_faces,
+      static void readFacesASCII(std::vector<std::shared_ptr<Face> >&   a_faces,
 				 std::vector<std::shared_ptr<edge> >&   a_edges,
 				 std::vector<std::shared_ptr<vertex> >& a_vertices,
 				 const int                              a_numFaces,

@@ -21,7 +21,7 @@ namespace Dcel {
 
   template <class T> class vertexT;
   template <class T> class edgeT;
-  template <class T> class faceT;
+  template <class T> class FaceT;
   template <class T> class edgeIteratorT;
 
   template<class T>
@@ -32,11 +32,11 @@ namespace Dcel {
     
     using vertex = vertexT<T>;
     using edge   = edgeT<T>;
-    using face   = faceT<T>;
+    using Face   = FaceT<T>;
 
     using vertexPtr = std::shared_ptr<vertex>;
     using edgePtr   = std::shared_ptr<edge>;
-    using facePtr   = std::shared_ptr<face>;
+    using FacePtr   = std::shared_ptr<Face>;
 
     using edgeIterator = edgeIteratorT<T>;
 
@@ -68,7 +68,7 @@ namespace Dcel {
     void setPreviousEdge(const edgePtr& a_previousEdge) noexcept;
 
     inline
-    void setFace(const facePtr& a_face) noexcept;
+    void setFace(const FacePtr& a_face) noexcept;
 
     inline
     void reconcile() noexcept;
@@ -110,10 +110,10 @@ namespace Dcel {
     const Vec3T<T>& getNormal() const noexcept;
 
     inline
-    facePtr& getFace() noexcept;
+    FacePtr& getFace() noexcept;
 
     inline
-    const facePtr& getFace() const noexcept;
+    const FacePtr& getFace() const noexcept;
 
     inline
     T signedDistance(const Vec3& a_x0) const noexcept;
@@ -133,7 +133,7 @@ namespace Dcel {
     edgePtr    m_pairEdge;
     edgePtr    m_previousEdge; 
     edgePtr    m_nextEdge;
-    facePtr    m_face;
+    FacePtr    m_face;
 
     inline
     T projectPointToEdge(const Vec3& a_x0) const noexcept;

@@ -15,7 +15,7 @@ namespace Dcel {
   
   template <class T> class vertexT;
   template <class T> class edgeT;
-  template <class T> class faceT;
+  template <class T> class FaceT;
 
   template <class T>
   class edgeIteratorT {
@@ -23,16 +23,16 @@ namespace Dcel {
 
     using vertex = vertexT<T>;
     using edge   = edgeT<T>;
-    using face   = faceT<T>;
+    using Face   = FaceT<T>;
 
     using vertexPtr = std::shared_ptr<vertex>;
     using edgePtr   = std::shared_ptr<edge>;
-    using facePtr   = std::shared_ptr<face>;
+    using FacePtr   = std::shared_ptr<Face>;
 
     edgeIteratorT() = delete;
   
-    edgeIteratorT(face& a_face);
-    edgeIteratorT(const face& a_face);
+    edgeIteratorT(Face& a_face);
+    edgeIteratorT(const Face& a_face);
 
     edgeIteratorT(vertex& a_vert);
     edgeIteratorT(const vertex& a_vert);
@@ -55,8 +55,8 @@ namespace Dcel {
   protected:
 
     enum class IterationMode {
-      Vertex,
-      Face
+      Vertices,
+      Faces
     };
 
     bool m_fullLoop;

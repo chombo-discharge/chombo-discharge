@@ -26,7 +26,7 @@ namespace Dcel {
 
   template <class T> class vertexT;
   template <class T> class edgeT;
-  template <class T> class faceT;
+  template <class T> class FaceT;
 
   template <class T>
   class MeshT {
@@ -36,24 +36,24 @@ namespace Dcel {
     
     using vertex = vertexT<T>;
     using edge   = edgeT<T>;
-    using face   = faceT<T>;
+    using Face   = FaceT<T>;
 
     using vertexPtr = std::shared_ptr<vertex>;
     using edgePtr   = std::shared_ptr<edge>;
-    using facePtr   = std::shared_ptr<face>;
+    using FacePtr   = std::shared_ptr<Face>;
     
     using Mesh   = MeshT<T>;
 
     MeshT();
     MeshT(const Mesh& a_otherMesh) = delete;
-    MeshT(std::vector<facePtr >&   a_faces,
+    MeshT(std::vector<FacePtr >&   a_faces,
 	  std::vector<edgePtr >&   a_edges,
 	  std::vector<vertexPtr >& a_vertices);
 
     ~MeshT();
 
     inline
-    void define(std::vector<facePtr >&   a_faces,
+    void define(std::vector<FacePtr >&   a_faces,
 		std::vector<edgePtr >&   a_edges,
 		std::vector<vertexPtr >& a_vertices) noexcept;
     
@@ -82,10 +82,10 @@ namespace Dcel {
     const std::vector<edgePtr>& getEdges() const noexcept;
 
     inline
-    std::vector<facePtr>& getFaces() noexcept;
+    std::vector<FacePtr>& getFaces() noexcept;
 
     inline
-    const std::vector<facePtr>& getFaces() const noexcept;
+    const std::vector<FacePtr>& getFaces() const noexcept;
 
     inline
     T signedDistance(const Vec3& a_x0) const noexcept;
@@ -99,7 +99,7 @@ namespace Dcel {
 
     std::vector<vertexPtr >  m_vertices;
     std::vector<edgePtr >    m_edges;
-    std::vector<facePtr >    m_faces;
+    std::vector<FacePtr >    m_faces;
 
     inline
     std::vector<Vec3T<T> > getAllVertexCoordinates() const noexcept;

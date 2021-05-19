@@ -23,7 +23,7 @@ using namespace Dcel;
 
 using precision = float;
 
-using face   = faceT<precision>;
+using Face   = FaceT<precision>;
 using Mesh   = MeshT<precision>;
 using AABB   = BoundingVolumes::AABBT<precision>;
 using Sphere = BoundingVolumes::BoundingSphereT<precision>;
@@ -45,7 +45,7 @@ tesselation::tesselation(){
   parser::PLY<precision>::readASCII(*m, filename);
   m->reconcile(VertexNormalWeight::Angle);
 
-  auto root = std::make_shared<NodeT<precision, face, BV> >(m->getFaces());
+  auto root = std::make_shared<NodeT<precision, Face, BV> >(m->getFaces());
 
   if(partitioner == "default"){
     root->topDownSortAndPartitionPrimitives(defaultStopFunction<precision, BV>,
