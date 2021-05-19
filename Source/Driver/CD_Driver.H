@@ -215,7 +215,7 @@ protected:
   int m_solidSolidInterfaceTagDepth;
 
   /*!
-    @brief Geometric tag depth for gas-dielectric interfaces
+    @brief Geometric tag depth for gas-Dielectric interfaces
   */
   int m_gasDielectricInterfaceTagDepth;
 

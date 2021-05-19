@@ -70,7 +70,7 @@ aerosol::aerosol(){
 									    noise_reseed));
 
     // Add dielectric sphere
-    m_dielectrics.push_back(dielectric(sph, eps));
+    m_dielectrics.push_back(Dielectric(sph, eps));
   }
 }
 

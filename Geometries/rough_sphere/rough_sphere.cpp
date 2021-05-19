@@ -51,7 +51,7 @@ rough_sphere::rough_sphere(){
     RefCountedPtr<BaseIF> sph = RefCountedPtr<BaseIF> (new perlin_sphere_if(r, c, false, amp, f, persist, octaves, reseed));
 
     if      (whichMaterial == "electrode")  m_electrodes.push_back(Electrode(sph, live));
-    else if (whichMaterial == "dielectric") m_dielectrics.push_back(dielectric(sph, eps));
+    else if (whichMaterial == "dielectric") m_dielectrics.push_back(Dielectric(sph, eps));
     else    MayDay::Abort("rough_sphere::rough_sphere - unknown material requested");
   }
 

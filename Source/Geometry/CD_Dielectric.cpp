@@ -5,43 +5,43 @@
   @date Nov. 2017
 */
 
-#include "dielectric.H"
+#include <CD_Dielectric.H>
 
 #include "CD_NamespaceHeader.H"
   
-dielectric::dielectric(){
+Dielectric::Dielectric(){
 }
   
-dielectric::dielectric(RefCountedPtr<BaseIF> a_baseif, Real a_permittivity){
+Dielectric::Dielectric(RefCountedPtr<BaseIF> a_baseif, Real a_permittivity){
   this->define(a_baseif, a_permittivity);
 }
 
-dielectric::dielectric(RefCountedPtr<BaseIF> a_baseif, Real (*a_permittivity)(const RealVect a_pos)){
+Dielectric::Dielectric(RefCountedPtr<BaseIF> a_baseif, Real (*a_permittivity)(const RealVect a_pos)){
   this->define(a_baseif, a_permittivity);
 }
 
-dielectric::~dielectric(){
+Dielectric::~Dielectric(){
 }
 
-void dielectric::define(RefCountedPtr<BaseIF> a_baseif, Real a_permittivity){
+void Dielectric::define(RefCountedPtr<BaseIF> a_baseif, Real a_permittivity){
   m_baseif       = a_baseif;
   m_permittivity = a_permittivity;
 
   m_constant = true;
 }
 
-void dielectric::define(RefCountedPtr<BaseIF> a_baseif, Real (*a_permittivity)(const RealVect a_pos)){
+void Dielectric::define(RefCountedPtr<BaseIF> a_baseif, Real (*a_permittivity)(const RealVect a_pos)){
   m_baseif               = a_baseif;
   m_variablepermittivity = a_permittivity;
   
   m_constant = false;
 }
 
-const RefCountedPtr<BaseIF>& dielectric::getImplicitFunction() const {
+const RefCountedPtr<BaseIF>& Dielectric::getImplicitFunction() const {
   return m_baseif;
 }
   
-Real dielectric::get_permittivity(const RealVect a_pos) const {
+Real Dielectric::getPermittivity(const RealVect a_pos) const {
   if(m_constant){
     return m_permittivity;
   }

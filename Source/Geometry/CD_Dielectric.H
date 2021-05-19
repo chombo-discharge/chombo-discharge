@@ -15,28 +15,28 @@
 /*!
   @brief dielectric class. Simple tuple.
 */
-class dielectric {
+class Dielectric {
 public:
 
   /*!
     @brief Weak constructor
   */
-  dielectric();
+  Dielectric();
   
   /*!
     @brief Constructor. Calls define
   */
-  dielectric(RefCountedPtr<BaseIF> a_baseif, Real a_permittivity);
+  Dielectric(RefCountedPtr<BaseIF> a_baseif, Real a_permittivity);
 
   /*!
     @brief Constructor, allows for spatially dependent permittivity
   */
-  dielectric(RefCountedPtr<BaseIF> a_baseif, Real (*a_permittivity)(const RealVect a_pos));
+  Dielectric(RefCountedPtr<BaseIF> a_baseif, Real (*a_permittivity)(const RealVect a_pos));
 
   /*!
     @brief 
   */
-  virtual ~dielectric();
+  virtual ~Dielectric();
 
   /*!
     @brief Define function
@@ -56,7 +56,7 @@ public:
   /*!
     @brief Get permittivity
   */
-  virtual Real get_permittivity(const RealVect a_pos) const;
+  virtual Real getPermittivity(const RealVect a_pos) const;
 
 protected:
 

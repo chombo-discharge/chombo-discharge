@@ -206,7 +206,7 @@ void Driver::getGeometryTags(){
       }
     }
 
-    // Dielectric cells
+    // dielectric cells
     if(m_dielectricTagsDepth > lvl){ 
       if(!ebis_sol.isNull()){
 	diel_tags = ebis_sol->irregCells(which_level);
@@ -220,7 +220,7 @@ void Driver::getGeometryTags(){
       }
     }
 
-    // Gas-dielectric interface cells
+    // Gas-Dielectric interface cells
     if(m_gasDielectricInterfaceTagDepth > lvl){
       if(!ebis_sol.isNull()){
 	gas_diel_tags = m_multifluidIndexSpace->interface_region(cur_dom);

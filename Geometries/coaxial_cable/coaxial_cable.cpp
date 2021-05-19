@@ -84,7 +84,7 @@ coaxial_cable::coaxial_cable(){
 #elif CH_SPACEDIM==3
     RefCountedPtr<BaseIF> baseif = RefCountedPtr<BaseIF> (new CylinderSdf(e1, e2, rad, false));
 #endif
-    m_dielectrics.push_back(dielectric(baseif, eps));
+    m_dielectrics.push_back(Dielectric(baseif, eps));
   }
 }
 

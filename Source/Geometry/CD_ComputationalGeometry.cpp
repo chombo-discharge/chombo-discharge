@@ -44,7 +44,7 @@ ComputationalGeometry::ComputationalGeometry(){
 
 ComputationalGeometry::~ComputationalGeometry(){}
 
-const Vector<dielectric>& ComputationalGeometry::getDielectrics() const  {
+const Vector<Dielectric>& ComputationalGeometry::getDielectrics() const  {
   return m_dielectrics;
 }
 
@@ -68,7 +68,7 @@ const RefCountedPtr<mfis>& ComputationalGeometry::getMfIndexSpace() const {
   return m_multifluidIndexSpace;
 }
 
-void ComputationalGeometry::setDielectrics(Vector<dielectric>& a_dielectrics){
+void ComputationalGeometry::setDielectrics(Vector<Dielectric>& a_dielectrics){
   m_dielectrics = a_dielectrics;
 }
 

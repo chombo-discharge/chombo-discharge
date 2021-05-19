@@ -333,7 +333,7 @@ void FieldSolverMultigrid::setMultigridCoefficients(){
   this->setPermittivities(m_computationalGeometry->getDielectrics());
 }
 
-void FieldSolverMultigrid::setPermittivities(const Vector<dielectric>& a_dielectrics){
+void FieldSolverMultigrid::setPermittivities(const Vector<Dielectric>& a_dielectrics){
   CH_TIME("FieldSolverMultigrid::setPermittivities");
   if(m_verbosity > 5){
     pout() << "FieldSolverMultigrid::setPermittivities" << endl;
@@ -369,7 +369,7 @@ void FieldSolverMultigrid::setFacePermittivities(EBFluxFAB&                a_per
 						 const Box&                a_box,
 						 const RealVect&           a_origin,
 						 const Real&               a_dx,
-						 const Vector<dielectric>& a_dielectrics){
+						 const Vector<Dielectric>& a_dielectrics){
   CH_TIME("FieldSolverMultigrid::setFacePermittivities");
   if(m_verbosity > 10){
     pout() << "FieldSolverMultigrid::setFacePermittivities" << endl;
@@ -403,7 +403,7 @@ void FieldSolverMultigrid::setFacePermittivities(EBFluxFAB&                a_per
 	  closest = i;
 	}
       }
-      perm_fab(iv, comp) = a_dielectrics[closest].get_permittivity(pos);
+      perm_fab(iv, comp) = a_dielectrics[closest].getPermittivity(pos);
     }
     
 
@@ -426,7 +426,7 @@ void FieldSolverMultigrid::setFacePermittivities(EBFluxFAB&                a_per
 	  closest = i;
 	}
       }
-      a_perm[dir](face, comp) = a_dielectrics[closest].get_permittivity(pos);
+      a_perm[dir](face, comp) = a_dielectrics[closest].getPermittivity(pos);
     }
   }
 }
@@ -436,7 +436,7 @@ void FieldSolverMultigrid::setEbPermittivities(BaseIVFAB<Real>&          a_perm,
 					       const Box&                a_box,
 					       const RealVect&           a_origin,
 					       const Real&               a_dx,
-					       const Vector<dielectric>& a_dielectrics){
+					       const Vector<Dielectric>& a_dielectrics){
   CH_TIME("FieldSolverMultigrid::setEbPermittivities");
   if(m_verbosity > 10){
     pout() << "FieldSolverMultigrid::setEbPermittivities" << endl;
@@ -463,7 +463,7 @@ void FieldSolverMultigrid::setEbPermittivities(BaseIVFAB<Real>&          a_perm,
       }
     }
 
-    a_perm(vof, comp) = a_dielectrics[closest].get_permittivity(pos);
+    a_perm(vof, comp) = a_dielectrics[closest].getPermittivity(pos);
   }
 }
 

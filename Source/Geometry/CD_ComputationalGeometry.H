@@ -20,7 +20,7 @@
 #include <ProblemDomain.H>
 
 // Our includes
-#include <dielectric.H>
+#include <CD_Dielectric.H>
 #include <CD_Electrode.H>
 #include <mfis.H>
 #include <real_box.H>
@@ -63,7 +63,7 @@ public:
   /*!
     @brief Get dielectrics
   */
-  virtual const Vector<dielectric>& getDielectrics() const;
+  virtual const Vector<Dielectric>& getDielectrics() const;
 
   /*!
     @brief Get conductors
@@ -78,7 +78,7 @@ public:
   /*!
     @brief Set electrodes
   */
-  virtual void setDielectrics(Vector<dielectric>& a_dielectrics);
+  virtual void setDielectrics(Vector<Dielectric>& a_dielectrics);
 
   /*!
     @brief Set electrodes
@@ -137,7 +137,7 @@ protected:
   /*!
     @brief dielectrics
   */
-  Vector<dielectric> m_dielectrics;
+  Vector<Dielectric> m_dielectrics;
 
   /*!
     @brief electrodes

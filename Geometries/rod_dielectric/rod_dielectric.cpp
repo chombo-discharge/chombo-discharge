@@ -84,7 +84,7 @@ void rod_dielectric::define_insulator(){
     MayDay::Abort("rod_dielectric.:define_insulator - unsupported shape");
   }
   
-  m_dielectrics.push_back(dielectric(bif, eps));
+  m_dielectrics.push_back(Dielectric(bif, eps));
 }
 
 

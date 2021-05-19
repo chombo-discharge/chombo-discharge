@@ -350,7 +350,7 @@ protected:
 				     const Box&                a_box,
 				     const RealVect&           a_origin,
 				     const Real&               a_dx,
-				     const Vector<dielectric>& a_dielectrics);
+				     const Vector<Dielectric>& a_dielectrics);
 
   /*!
     @brief Set EB-centered permittivities
@@ -359,7 +359,7 @@ protected:
 				   const Box&                a_box,
 				   const RealVect&           a_origin,
 				   const Real&               a_dx,
-				   const Vector<dielectric>& a_dielectrics);
+				   const Vector<Dielectric>& a_dielectrics);
 
   /*!
     @brief Parse multigrid settings
@@ -374,7 +374,7 @@ protected:
     /*!
     @brief Set the permittivities
   */
-  virtual void setPermittivities(const Vector<dielectric>& a_dielectrics);
+  virtual void setPermittivities(const Vector<Dielectric>& a_dielectrics);
   
   /*!
     @brief Define the deeper multigrid levels (the ones that live below the AMR levels)

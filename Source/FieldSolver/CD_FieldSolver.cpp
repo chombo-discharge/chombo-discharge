@@ -131,7 +131,7 @@ void FieldSolver::computeDisplacementField(MFAMRCellData& a_displacementField, c
     pout() << "FieldSolver::computeDisplacementField" << endl;
   }
 
-  const Vector<dielectric>& dielectrics = m_computationalGeometry->getDielectrics();
+  const Vector<Dielectric>& dielectrics = m_computationalGeometry->getDielectrics();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     LevelData<MFCellFAB>& D = *a_displacementField[lvl];
@@ -181,7 +181,7 @@ void FieldSolver::computeDisplacementField(MFAMRCellData& a_displacementField, c
 	      }
 	    }
 	    
-	    const Real eps = dielectrics[closest].get_permittivity(pos);
+	    const Real eps = dielectrics[closest].getPermittivity(pos);
 
 	    for (int comp = 0; comp < dg.nComp(); comp++){
 	      dg(vof, comp) *= eps;
