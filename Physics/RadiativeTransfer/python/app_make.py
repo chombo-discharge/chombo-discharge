@@ -39,6 +39,8 @@ def write_template(args):
     makef.write('\t$(DISCHARGE_HOME)/Source/Driver \\\n')
     makef.write('\t$(DISCHARGE_HOME)/Source/Elliptic \\\n')
     makef.write('\t$(DISCHARGE_HOME)/Source/Geometry \\\n')
+    makef.write('\t$(DISCHARGE_HOME)/Source/ImplicitFunctions \\\n')
+    makef.write('\t$(DISCHARGE_HOME)/Source/Multifluid \\\n')
     makef.write('\t$(DISCHARGE_HOME)/Source/RadiativeTransfer \\\n')
     makef.write('\t$(DISCHARGE_HOME)/Source/SigmaSolver \\\n')
     makef.write('\t$(DISCHARGE_HOME)/Source/Particle \\\n')
