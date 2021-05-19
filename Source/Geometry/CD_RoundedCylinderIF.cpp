@@ -1,10 +1,16 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   rounded_cylinder_if.cpp
-  @brief  Implementation of rounded_cylinder_if.H
+  @file   CD_RoundedCylinderIF.cpp
+  @brief  Implementation of CD_RoundedCylinderIF.H
   @date   Feb. 2021
   @author Robert Marskar
 */
 
+// Chombo includes
 #include <PolyGeom.H>
 #include <TorusIF.H>
 #include <IntersectionIF.H>
@@ -13,14 +19,14 @@
 #include <SmoothIntersection.H>
 #include <SmoothUnion.H>
 
-#include "cylinder_if.H"
-#include "rounded_cylinder_if.H"
+// Our includes
+#include <cylinder_if.H>
+#include <CD_RoundedCylinderIF.H>
 #include <CD_RoundedBoxIF.H>
-#include "torus_if.H"
+#include <torus_if.H>
+#include <CD_NamespaceHeader.H>
 
-#include "CD_NamespaceHeader.H"
-
-rounded_cylinder_if::rounded_cylinder_if(const RealVect a_center1, const RealVect a_center2, const Real a_radius, const Real a_curv, const bool a_fluidInside){
+RoundedCylinderIF::RoundedCylinderIF(const RealVect a_center1, const RealVect a_center2, const Real a_radius, const Real a_curv, const bool a_fluidInside){
   m_center1      = a_center1;
   m_center2      = a_center2;
   m_length       = (m_center2-m_center1).vectorLength();
@@ -31,12 +37,12 @@ rounded_cylinder_if::rounded_cylinder_if(const RealVect a_center1, const RealVec
   this->makeBaseIF();
 }
 
-rounded_cylinder_if::rounded_cylinder_if(const rounded_cylinder_if& a_inputIF){
+RoundedCylinderIF::RoundedCylinderIF(const RoundedCylinderIF& a_inputIF){
   m_fluidInside = a_inputIF.m_fluidInside;
   m_baseif      = a_inputIF.m_baseif;
 }
 
-Real rounded_cylinder_if::value(const RealVect& a_point) const {
+Real RoundedCylinderIF::value(const RealVect& a_point) const {
   Real retval = m_baseif->value(a_point);
 
   if(m_fluidInside){
@@ -46,11 +52,11 @@ Real rounded_cylinder_if::value(const RealVect& a_point) const {
   return retval;
 }
 
-BaseIF* rounded_cylinder_if::newImplicitFunction() const{
-  return (BaseIF*) (new rounded_cylinder_if(*this));
+BaseIF* RoundedCylinderIF::newImplicitFunction() const{
+  return (BaseIF*) (new RoundedCylinderIF(*this));
 }
 
-void rounded_cylinder_if::makeBaseIF(){
+void RoundedCylinderIF::makeBaseIF(){
 #if CH_SPACEDIM==2
   BaseIF* bif = this->makeBaseIF2D();
 #elif CH_SPACEDIM==3
@@ -75,7 +81,7 @@ void rounded_cylinder_if::makeBaseIF(){
 }
 
 #if CH_SPACEDIM==2
-BaseIF* rounded_cylinder_if::makeBaseIF2D(){
+BaseIF* RoundedCylinderIF::makeBaseIF2D(){
   const RealVect x0 = RealVect::Zero - m_radius*BASISREALV(0);
   const RealVect x1 = RealVect::Zero + m_radius*BASISREALV(0) + m_length*BASISREALV(1);
 
@@ -84,7 +90,7 @@ BaseIF* rounded_cylinder_if::makeBaseIF2D(){
 #endif
 
 #if CH_SPACEDIM==3
-BaseIF* rounded_cylinder_if::makeBaseIF3D(){
+BaseIF* RoundedCylinderIF::makeBaseIF3D(){
 
   // TLDR: Construct m_baseif from a main cylinderk.  on each we put a torus and then a smaller cylinder between everything. Default orientation
   //       is along +z.
@@ -116,4 +122,5 @@ BaseIF* rounded_cylinder_if::makeBaseIF3D(){
   return (BaseIF*) (new IntersectionIF(parts));
 }
 #endif
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

@@ -21,7 +21,7 @@
 #include "profile_cylinder_if.H"
 #include "polygon_rod_if.H"
 #include "hollow_cylinder_if.H"
-#include "rounded_cylinder_if.H"
+#include <CD_RoundedCylinderIF.H>
 
 #include "CD_NamespaceHeader.H"
 
@@ -151,7 +151,7 @@ RefCountedPtr<BaseIF> mechanical_shaft::get_cylinder(){
   pp.getarr("endpoint1", vec, 0, SpaceDim); c1 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
   pp.getarr("endpoint2", vec, 0, SpaceDim); c2 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
 
-  return RefCountedPtr<BaseIF> (new rounded_cylinder_if(c1, c2, radius, curv, false));
+  return RefCountedPtr<BaseIF> (new RoundedCylinderIF(c1, c2, radius, curv, false));
 }
 
 RefCountedPtr<BaseIF> mechanical_shaft::get_cylinder_profile(){

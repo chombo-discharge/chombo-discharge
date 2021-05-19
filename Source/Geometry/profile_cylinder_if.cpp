@@ -5,7 +5,7 @@
 */
 
 #include "profile_cylinder_if.H"
-#include "rounded_cylinder_if.H"
+#include <CD_RoundedCylinderIF.H>
 #include "cylinder_if.H"
 #include "torus_if.H"
 
@@ -36,7 +36,7 @@ profile_cylinder_if::profile_cylinder_if(const RealVect  a_endPoint1,
 
   Vector<BaseIF*> parts;
 
-  BaseIF* cyl   = (BaseIF*) new rounded_cylinder_if(RealVect::Zero, length*zhat, a_cylinderRadius, a_roundingRadius, a_fluidInside);
+  BaseIF* cyl   = (BaseIF*) new RoundedCylinderIF(RealVect::Zero, length*zhat, a_cylinderRadius, a_roundingRadius, a_fluidInside);
   BaseIF* torus = (BaseIF*) new torus_if(center, a_torusMajorRadius, a_torusMinorRadius,  !a_fluidInside);
 
   // "Left" profiles

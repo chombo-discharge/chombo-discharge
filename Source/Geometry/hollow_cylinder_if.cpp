@@ -7,7 +7,7 @@
 
 #include "cylinder_if.H"
 #include "hollow_cylinder_if.H"
-#include "rounded_cylinder_if.H"
+#include <CD_RoundedCylinderIF.H>
 
 #include <SmoothUnion.H>
 #include <UnionIF.H>
@@ -31,7 +31,7 @@ hollow_cylinder_if::hollow_cylinder_if(const RealVect a_center1,
   const RealVect c2 = a_center2 + a_curv*axis;
   const RealVect c1 = a_center1 - a_curv*axis;
   
-  BaseIF* bigCylinder   = (BaseIF*) (new rounded_cylinder_if(a_center1, a_center2, a_majorRadius, a_curv,  a_fluidInside));
+  BaseIF* bigCylinder   = (BaseIF*) (new RoundedCylinderIF(a_center1, a_center2, a_majorRadius, a_curv,  a_fluidInside));
   BaseIF* smallCylinder = (BaseIF*) (new cylinder_if        (a_center1, a_center2, a_minorRadius,         !a_fluidInside));
 
   parts.push_back(bigCylinder);

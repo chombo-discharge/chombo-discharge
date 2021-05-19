@@ -1,21 +1,27 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   rounded_cylinder_if.H
+  @file   CD_RoundedCylinderIF.H
   @brief  Declaration of a cylindrical implicit function with rounded edges
-  @date   Feb. 2021
   @author Robert Marskar
 */
 
-#ifndef _ROUNDED_CYLINDER_IF_
-#define _ROUNDED_CYLINDER_IF_
+#ifndef CD_RoundedCylinderIF_H
+#define CD_RoundedCylinderIF_H
 
+// Chombo includes
 #include <BaseIF.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Declaration of a cylinder IF class
 */
-class rounded_cylinder_if : public BaseIF {
+class RoundedCylinderIF : public BaseIF {
 public:
 
   /*!
@@ -26,13 +32,13 @@ public:
     @param[in] a_curv    Radius of curvature
     @param[in] a_inside  Domain on inside or outside
   */
-  rounded_cylinder_if(const RealVect a_center1, const RealVect a_center2, const Real a_radius, const Real a_curv, const bool a_fluidInside);
+  RoundedCylinderIF(const RealVect a_center1, const RealVect a_center2, const Real a_radius, const Real a_curv, const bool a_fluidInside);
 
   /*!
     @brief Copy constructor
     @param[in] a_inputIF Input cylinder
   */
-  rounded_cylinder_if(const rounded_cylinder_if& a_inputIF);
+  RoundedCylinderIF(const RoundedCylinderIF& a_inputIF);
 
   /*!
     @brief Test whether inside or not
@@ -96,5 +102,7 @@ protected:
   BaseIF* makeBaseIF3D();
 #endif
 };
+
+#include <CD_NamespaceFooter.H>
+
 #endif
-#include "CD_NamespaceFooter.H"
