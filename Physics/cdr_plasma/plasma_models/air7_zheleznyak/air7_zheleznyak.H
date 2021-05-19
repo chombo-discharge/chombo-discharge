@@ -28,7 +28,7 @@ namespace physics {
       class O2plusN2;
       class O2minus;
 
-      class uv_photon;
+      class uv_Photon;
 
 
       air7_zheleznyak();
@@ -36,10 +36,10 @@ namespace physics {
   
 
       void advance_reaction_network(Vector<Real>&          a_particle_sources,
-				    Vector<Real>&          a_photon_sources,
+				    Vector<Real>&          a_Photon_sources,
 				    const Vector<Real>     a_particle_densities,
 				    const Vector<RealVect> a_particle_gradients,
-				    const Vector<Real>     a_photon_densities,
+				    const Vector<Real>     a_Photon_densities,
 				    const RealVect         a_E,
 				    const RealVect         a_pos,
 				    const Real             a_dx,
@@ -204,10 +204,10 @@ namespace physics {
 				      const Real         a_quantum_efficiency) const;
 
       void advance_chemistry_euler(Vector<Real>&          a_particle_sources,
-				   Vector<Real>&          a_photon_sources,
+				   Vector<Real>&          a_Photon_sources,
 				   Vector<Real>&          a_particle_densities,
 				   const Vector<RealVect> a_particle_gradients,
-				   const Vector<Real>     a_photon_densities,
+				   const Vector<Real>     a_Photon_densities,
 				   const RealVect         a_E,
 				   const RealVect         a_pos,
 				   const Real             a_dx,

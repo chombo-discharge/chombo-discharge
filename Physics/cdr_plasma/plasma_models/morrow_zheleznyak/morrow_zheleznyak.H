@@ -25,10 +25,10 @@ namespace physics::cdr_plasma {
     ~morrow_zheleznyak();
 
     void advance_reaction_network(Vector<Real>&          a_particle_sources,
-				  Vector<Real>&          a_photon_sources,
+				  Vector<Real>&          a_Photon_sources,
 				  const Vector<Real>     a_particle_densities,
 				  const Vector<RealVect> a_particle_gradients,
-				  const Vector<Real>     a_photon_densities,
+				  const Vector<Real>     a_Photon_densities,
 				  const RealVect         a_E,
 				  const RealVect         a_pos,
 				  const Real             a_dx,
@@ -81,7 +81,7 @@ namespace physics::cdr_plasma {
     Vector<Real> compute_dielectric_fluxes(const Vector<Real> a_extrapolated_fluxes,
 					   const Vector<Real> a_ion_densities,
 					   const Vector<Real> a_ion_velocities,
-					   const Vector<Real> a_photon_fluxes,
+					   const Vector<Real> a_Photon_fluxes,
 					   const RealVect     a_E,
 					   const RealVect     a_pos,
 					   const RealVect     a_normal,
@@ -106,7 +106,7 @@ namespace physics::cdr_plasma {
     int m_nelec_idx;      // Electron index
     int m_nplus_idx;      // Positive ion index
     int m_nminu_idx;      // Negative ion index
-    int m_photon1_idx;    // UV photon index
+    int m_Photon1_idx;    // UV Photon index
 
     bool m_extrap_electrode_ebbc;
     bool m_extrap_dielectric_ebbc;
@@ -144,10 +144,10 @@ namespace physics::cdr_plasma {
 
     // Tau leaping method
     void network_tau(Vector<Real>&          a_particle_sources,
-		     Vector<Real>&          a_photon_sources,
+		     Vector<Real>&          a_Photon_sources,
 		     const Vector<Real>     a_particle_densities,
 		     const Vector<RealVect> a_particle_gradients,
-		     const Vector<Real>     a_photon_densities,
+		     const Vector<Real>     a_Photon_densities,
 		     const RealVect         a_E,
 		     const RealVect         a_pos,
 		     const Real             a_dx,
@@ -157,10 +157,10 @@ namespace physics::cdr_plasma {
 
     // stochastic simulation algorithm
     void network_ssa(Vector<Real>&          a_particle_sources,
-		     Vector<Real>&          a_photon_sources,
+		     Vector<Real>&          a_Photon_sources,
 		     const Vector<Real>     a_particle_densities,
 		     const Vector<RealVect> a_particle_gradients,
-		     const Vector<Real>     a_photon_densities,
+		     const Vector<Real>     a_Photon_densities,
 		     const RealVect         a_E,
 		     const RealVect         a_pos,
 		     const Real             a_dx,
@@ -170,10 +170,10 @@ namespace physics::cdr_plasma {
 
     // stochastic simulation algorithm
     void network_rre(Vector<Real>&          a_particle_sources,
-		     Vector<Real>&          a_photon_sources,
+		     Vector<Real>&          a_Photon_sources,
 		     const Vector<Real>     a_particle_densities,
 		     const Vector<RealVect> a_particle_gradients,
-		     const Vector<Real>     a_photon_densities,
+		     const Vector<Real>     a_Photon_densities,
 		     const RealVect         a_E,
 		     const RealVect         a_pos,
 		     const Real             a_dx,
@@ -268,10 +268,10 @@ namespace physics::cdr_plasma {
       RealVect m_seed_pos;
     };
 
-    class uv_photon : public rte_species {
+    class uv_Photon : public rte_species {
     public:
-      uv_photon();
-      ~uv_photon();
+      uv_Photon();
+      ~uv_Photon();
 
 
       Real getKappa(const RealVect a_pos) const;

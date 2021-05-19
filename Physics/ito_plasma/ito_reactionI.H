@@ -48,13 +48,13 @@ void ito_reaction::jump_state(Vector<long long>& a_particles,
 
 inline
 void ito_reaction::jump_state(Vector<long long>& a_particles,
-			      Vector<long long>& a_photons,
+			      Vector<long long>& a_Photons,
 			      const long long    a_num_reactions) const {
 
   this->jump_state(a_particles, a_num_reactions);
 
-  for (const auto& r : m_photon_products){
-    a_photons[r] += a_num_reactions;;
+  for (const auto& r : m_Photon_products){
+    a_Photons[r] += a_num_reactions;;
   }
 }
 
@@ -126,8 +126,8 @@ const std::list<int>& ito_reaction::get_particle_products() const{
 }
 
 inline
-const std::list<int>& ito_reaction::get_photon_products() const{
-  return m_photon_products;
+const std::list<int>& ito_reaction::get_Photon_products() const{
+  return m_Photon_products;
 }
 
 inline

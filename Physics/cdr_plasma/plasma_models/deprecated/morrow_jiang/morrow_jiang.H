@@ -22,10 +22,10 @@ public:
   ~morrow_jiang();
 
   void advance_reaction_network(Vector<Real>&           a_particle_sources,
-				Vector<Real>&           a_photon_sources,
+				Vector<Real>&           a_Photon_sources,
 				const Vector<Real>     a_particle_densities,
 				const Vector<RealVect> a_particle_gradients,
-				const Vector<Real>     a_photon_densities,
+				const Vector<Real>     a_Photon_densities,
 				const RealVect         a_E,
 				const RealVect         a_pos,
 				const Real             a_dx,
@@ -78,7 +78,7 @@ public:
   Vector<Real> compute_dielectric_fluxes(const Vector<Real> a_extrapolated_fluxes,
 					 const Vector<Real> a_ion_densities,
 					 const Vector<Real> a_ion_velocities,
-					 const Vector<Real> a_photon_fluxes,
+					 const Vector<Real> a_Photon_fluxes,
 					 const RealVect     a_E,
 					 const RealVect     a_pos,
 					 const RealVect     a_normal,
@@ -103,7 +103,7 @@ protected:
   int m_nplus_idx;      // Positive ion index
   int m_nminu_idx;      // Negative ion index
   int m_nexci_idx;      // Excited species index
-  int m_photo_idx;    // UV photon index
+  int m_photo_idx;    // UV Photon index
 
   Real m_background_rate;               // Background ionization
   Real m_townsend2_electrode;           // 2nd Townsend coefficient on electrodes
@@ -140,10 +140,10 @@ protected:
 
   // Tau leaping method
   void network_tau(Vector<Real>&          a_particle_sources,
-		   Vector<Real>&          a_photon_sources,
+		   Vector<Real>&          a_Photon_sources,
 		   const Vector<Real>     a_particle_densities,
 		   const Vector<RealVect> a_particle_gradients,
-		   const Vector<Real>     a_photon_densities,
+		   const Vector<Real>     a_Photon_densities,
 		   const RealVect         a_E,
 		   const RealVect         a_pos,
 		   const Real             a_dx,
@@ -153,10 +153,10 @@ protected:
 
   // stochastic simulation algorithm
   void network_ssa(Vector<Real>&          a_particle_sources,
-		   Vector<Real>&          a_photon_sources,
+		   Vector<Real>&          a_Photon_sources,
 		   const Vector<Real>     a_particle_densities,
 		   const Vector<RealVect> a_particle_gradients,
-		   const Vector<Real>     a_photon_densities,
+		   const Vector<Real>     a_Photon_densities,
 		   const RealVect         a_E,
 		   const RealVect         a_pos,
 		   const Real             a_dx,
@@ -166,10 +166,10 @@ protected:
 
   // stochastic simulation algorithm
   void network_rre(Vector<Real>&          a_particle_sources,
-		   Vector<Real>&          a_photon_sources,
+		   Vector<Real>&          a_Photon_sources,
 		   const Vector<Real>     a_particle_densities,
 		   const Vector<RealVect> a_particle_gradients,
-		   const Vector<Real>     a_photon_densities,
+		   const Vector<Real>     a_Photon_densities,
 		   const RealVect         a_E,
 		   const RealVect         a_pos,
 		   const Real             a_dx,
@@ -271,10 +271,10 @@ protected:
     RealVect m_seed_pos;
   };
 
-  class uv_photon : public photon_group {
+  class uv_Photon : public Photon_group {
   public:
-    uv_photon();
-    ~uv_photon();
+    uv_Photon();
+    ~uv_Photon();
 
     Real getKappa(const RealVect a_pos) const;
     Real get_random_kappa() const;

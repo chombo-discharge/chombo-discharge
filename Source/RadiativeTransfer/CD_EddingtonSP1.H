@@ -34,7 +34,7 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Radiative tranfer equation solver in the SP1 (diffusion) approximation. Also includes stochastically drawn photons. 
+  @brief Radiative tranfer equation solver in the SP1 (diffusion) approximation. Also includes stochastically drawn Photons. 
 */
 class EddingtonSP1 : public RtSolver {
 protected:
@@ -198,9 +198,9 @@ protected:
   bool m_useTGA;
 
   /*!
-    @brief Use the source term to draw stochastic photons
+    @brief Use the source term to draw stochastic Photons
   */
-  bool m_stochastic_photons;
+  bool m_stochastic_Photons;
 
   /*!
     @brief Verbosity for geometric multigrid
@@ -308,7 +308,7 @@ protected:
   RefCountedPtr<EbHelmholtzOpFactory> m_operatorFactory;
 
   /*!
-    @brief Larsen coefficients for photon outflow bc
+    @brief Larsen coefficients for Photon outflow bc
   */
   RefCountedPtr<LarsenCoefficients> m_robinCoefficients;
 

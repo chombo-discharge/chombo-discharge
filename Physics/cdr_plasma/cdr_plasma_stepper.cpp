@@ -141,24 +141,24 @@ void cdr_plasma_stepper::advance_reaction_network(const Real a_time, const Real 
 
 
   Vector<EBAMRCellData*> particle_sources = m_cdr->getSources();
-  Vector<EBAMRCellData*> photon_sources   = m_rte->getSources();
+  Vector<EBAMRCellData*> Photon_sources   = m_rte->getSources();
   Vector<EBAMRCellData*> particle_states  = m_cdr->getPhis();
-  Vector<EBAMRCellData*> photon_states    = m_rte->getPhis();
+  Vector<EBAMRCellData*> Photon_states    = m_rte->getPhis();
 
   // Call the AMR version (without the gradient)
   advance_reaction_network(particle_sources,
-			   photon_sources, 
+			   Photon_sources, 
 			   particle_states,
-			   photon_states,
+			   Photon_states,
 			   E,
 			   a_time,
 			   a_dt);
 }
 
 void cdr_plasma_stepper::advance_reaction_network(Vector<EBAMRCellData*>&       a_particle_sources,
-						  Vector<EBAMRCellData*>&       a_photon_sources,
+						  Vector<EBAMRCellData*>&       a_Photon_sources,
 						  const Vector<EBAMRCellData*>& a_particle_densities,
-						  const Vector<EBAMRCellData*>& a_photon_densities,
+						  const Vector<EBAMRCellData*>& a_Photon_densities,
 						  const EBAMRCellData&          a_E,
 						  const Real&                   a_time,
 						  const Real&                   a_dt){
@@ -181,10 +181,10 @@ void cdr_plasma_stepper::advance_reaction_network(Vector<EBAMRCellData*>&       
   }
 
   this->advance_reaction_network(a_particle_sources,
-				 a_photon_sources,
+				 a_Photon_sources,
 				 a_particle_densities,
 				 grad_cdr,
-				 a_photon_densities,
+				 a_Photon_densities,
 				 a_E,
 				 a_time,
 				 a_dt);
@@ -198,10 +198,10 @@ void cdr_plasma_stepper::advance_reaction_network(Vector<EBAMRCellData*>&       
 }
 
 void cdr_plasma_stepper::advance_reaction_network(Vector<EBAMRCellData*>&       a_particle_sources,
-						  Vector<EBAMRCellData*>&       a_photon_sources,
+						  Vector<EBAMRCellData*>&       a_Photon_sources,
 						  const Vector<EBAMRCellData*>& a_particle_densities,
 						  const Vector<EBAMRCellData*>& a_particle_gradients,
-						  const Vector<EBAMRCellData*>& a_photon_densities,
+						  const Vector<EBAMRCellData*>& a_Photon_densities,
 						  const EBAMRCellData&          a_E,
 						  const Real&                   a_time,
 						  const Real&                   a_dt){
@@ -212,14 +212,14 @@ void cdr_plasma_stepper::advance_reaction_network(Vector<EBAMRCellData*>&       
 
 
   const int num_species = m_physics->get_num_CdrSpecies();
-  const int num_photons = m_physics->get_num_rte_species();
+  const int num_Photons = m_physics->get_num_rte_species();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     Vector<LevelData<EBCellFAB>* > particle_sources(num_species);
     Vector<LevelData<EBCellFAB>* > particle_densities(num_species);
     Vector<LevelData<EBCellFAB>* > particle_gradients(num_species);
-    Vector<LevelData<EBCellFAB>* > photon_sources(num_photons);
-    Vector<LevelData<EBCellFAB>* > photon_densities(num_photons);
+    Vector<LevelData<EBCellFAB>* > Photon_sources(num_Photons);
+    Vector<LevelData<EBCellFAB>* > Photon_densities(num_Photons);
 
     for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.index();
@@ -230,16 +230,16 @@ void cdr_plasma_stepper::advance_reaction_network(Vector<EBAMRCellData*>&       
 
     for (rte_iterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.index();
-      photon_sources[idx]   = (*a_photon_sources[idx])[lvl];
-      photon_densities[idx] = (*a_photon_densities[idx])[lvl];
+      Photon_sources[idx]   = (*a_Photon_sources[idx])[lvl];
+      Photon_densities[idx] = (*a_Photon_densities[idx])[lvl];
     }
 
     // Call the level versions
     advance_reaction_network(particle_sources,
-			     photon_sources,
+			     Photon_sources,
 			     particle_densities,
 			     particle_gradients,
-			     photon_densities,
+			     Photon_densities,
 			     *a_E[lvl],
 			     a_time,
 			     a_dt,
@@ -254,19 +254,19 @@ void cdr_plasma_stepper::advance_reaction_network(Vector<EBAMRCellData*>&       
     m_amr->interpGhost(*a_particle_sources[idx], m_realm, m_cdr->get_phase()); // This MAY be when if we extrapolate advection
   }
 
-  // Average down photon solvers
+  // Average down Photon solvers
   for (rte_iterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
-    m_amr->averageDown(*a_photon_sources[idx], m_realm, m_cdr->get_phase());
+    m_amr->averageDown(*a_Photon_sources[idx], m_realm, m_cdr->get_phase());
   }
 #endif
 }
 
 void cdr_plasma_stepper::advance_reaction_network(Vector<LevelData<EBCellFAB>* >&       a_particle_sources,
-						  Vector<LevelData<EBCellFAB>* >&       a_photon_sources,
+						  Vector<LevelData<EBCellFAB>* >&       a_Photon_sources,
 						  const Vector<LevelData<EBCellFAB>* >& a_particle_densities,
 						  const Vector<LevelData<EBCellFAB>* >& a_particle_gradients,
-						  const Vector<LevelData<EBCellFAB> *>& a_photon_densities,
+						  const Vector<LevelData<EBCellFAB> *>& a_Photon_densities,
 						  const LevelData<EBCellFAB>&           a_E,
 						  const Real&                           a_time,
 						  const Real&                           a_dt,
@@ -278,7 +278,7 @@ void cdr_plasma_stepper::advance_reaction_network(Vector<LevelData<EBCellFAB>* >
 
   const Real zero = 0.0;
 
-  const int num_photons  = m_physics->get_num_rte_species();
+  const int num_Photons  = m_physics->get_num_rte_species();
   const int num_species  = m_physics->get_num_CdrSpecies();
 
 
@@ -295,8 +295,8 @@ void cdr_plasma_stepper::advance_reaction_network(Vector<LevelData<EBCellFAB>* >
     Vector<EBCellFAB*> particle_densities(num_species);
     Vector<EBCellFAB*> particle_gradients(num_species);
     Vector<EBCellFAB*> particle_velocities(num_species, NULL);
-    Vector<EBCellFAB*> photon_sources(num_photons);
-    Vector<EBCellFAB*> photon_densities(num_photons);
+    Vector<EBCellFAB*> Photon_sources(num_Photons);
+    Vector<EBCellFAB*> Photon_densities(num_Photons);
 
     
     for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
@@ -315,17 +315,17 @@ void cdr_plasma_stepper::advance_reaction_network(Vector<LevelData<EBCellFAB>* >
     
     for (rte_iterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.index();
-      photon_sources[idx]   = &(*a_photon_sources[idx])[dit()];
-      photon_densities[idx] = &(*a_photon_densities[idx])[dit()];
+      Photon_sources[idx]   = &(*a_Photon_sources[idx])[dit()];
+      Photon_densities[idx] = &(*a_Photon_densities[idx])[dit()];
     }
     
     // This does all cells
 #if USE_FAST_REACTIONS
     advance_reaction_network_reg_fast(particle_sources,
-				      photon_sources,
+				      Photon_sources,
 				      particle_densities,
 				      particle_gradients,
-				      photon_densities,
+				      Photon_densities,
 				      a_E[dit()],
 				      a_time,
 				      a_dt,
@@ -334,10 +334,10 @@ void cdr_plasma_stepper::advance_reaction_network(Vector<LevelData<EBCellFAB>* >
 
 #else
     advance_reaction_network_reg(particle_sources,
-				 photon_sources,
+				 Photon_sources,
 				 particle_densities,
 				 particle_gradients,
-				 photon_densities,
+				 Photon_densities,
 				 a_E[dit()],
 				 a_time,
 				 a_dt,
@@ -347,11 +347,11 @@ void cdr_plasma_stepper::advance_reaction_network(Vector<LevelData<EBCellFAB>* >
 
     // This overwrites irregular celles
     advance_reaction_network_irreg(particle_sources,
-				   photon_sources,
+				   Photon_sources,
 				   particle_densities,
 				   particle_gradients,
 				   particle_velocities,
-				   photon_densities,
+				   Photon_densities,
 				   interp_stencils[a_lvl][dit()],
 				   a_E[dit()],
 				   a_time,
@@ -364,10 +364,10 @@ void cdr_plasma_stepper::advance_reaction_network(Vector<LevelData<EBCellFAB>* >
 }
 
 void cdr_plasma_stepper::advance_reaction_network_reg(Vector<EBCellFAB*>&       a_particle_sources,
-						      Vector<EBCellFAB*>&       a_photon_sources,
+						      Vector<EBCellFAB*>&       a_Photon_sources,
 						      const Vector<EBCellFAB*>& a_particle_densities,
 						      const Vector<EBCellFAB*>& a_particle_gradients,
-						      const Vector<EBCellFAB*>& a_photon_densities,
+						      const Vector<EBCellFAB*>& a_Photon_densities,
 						      const EBCellFAB&          a_E,
 						      const Real&               a_time,
 						      const Real&               a_dt,
@@ -382,7 +382,7 @@ void cdr_plasma_stepper::advance_reaction_network_reg(Vector<EBCellFAB*>&       
     
 
   const int num_species  = m_physics->get_num_CdrSpecies();
-  const int num_photons  = m_physics->get_num_rte_species();
+  const int num_Photons  = m_physics->get_num_rte_species();
 
   // EBISBox and graph
   const EBISBox& ebisbox = a_E.getEBISBox();
@@ -394,12 +394,12 @@ void cdr_plasma_stepper::advance_reaction_network_reg(Vector<EBCellFAB*>&       
   Vector<Real>     particle_sources(num_species);
   Vector<Real>     particle_densities(num_species);
   Vector<RealVect> particle_gradients(num_species);
-  Vector<Real>     photon_sources(num_photons);
-  Vector<Real>     photon_densities(num_photons);
+  Vector<Real>     Photon_sources(num_Photons);
+  Vector<Real>     Photon_densities(num_Photons);
 
   // Computed source terms onto here
   EBCellFAB part_src(ebisbox, a_E.getRegion(), num_species);
-  EBCellFAB phot_src(ebisbox, a_E.getRegion(), num_photons);
+  EBCellFAB phot_src(ebisbox, a_E.getRegion(), num_Photons);
 
   part_src.setVal(0.0);
   phot_src.setVal(0.0);
@@ -427,17 +427,17 @@ void cdr_plasma_stepper::advance_reaction_network_reg(Vector<EBCellFAB*>&       
       }
       for (rte_iterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
 	const int idx  = solver_it.index();
-	const Real phi = (*a_photon_densities[idx]).getSingleValuedFAB()(iv, 0);
-	photon_densities[idx] = Max(zero, phi);
+	const Real phi = (*a_Photon_densities[idx]).getSingleValuedFAB()(iv, 0);
+	Photon_densities[idx] = Max(zero, phi);
       }
 
       // Compute source terms
       const Real kappa = 1.0; // Kappa for regular cells
       m_physics->advance_reaction_network(particle_sources,
-					  photon_sources,
+					  Photon_sources,
 					  particle_densities,
 					  particle_gradients,
-					  photon_densities,
+					  Photon_densities,
 					  E,
 					  pos,
 					  a_dx,
@@ -454,7 +454,7 @@ void cdr_plasma_stepper::advance_reaction_network_reg(Vector<EBCellFAB*>&       
       // Put vector into temporary holders
       for (rte_iterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
 	const int idx = solver_it.index();
-	phot_src.getSingleValuedFAB()(iv,idx) = photon_sources[idx];
+	phot_src.getSingleValuedFAB()(iv,idx) = Photon_sources[idx];
       }
     }
   }
@@ -472,19 +472,19 @@ void cdr_plasma_stepper::advance_reaction_network_reg(Vector<EBCellFAB*>&       
   // Copy temporary storage back to solvers
   for (rte_iterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
-    (*a_photon_sources[idx]).setVal(0.0);
-    (*a_photon_sources[idx]).plus(phot_src, idx, 0, 1);
+    (*a_Photon_sources[idx]).setVal(0.0);
+    (*a_Photon_sources[idx]).plus(phot_src, idx, 0, 1);
 
     // Covered cells are bogus. 
-    (*a_photon_sources[idx]).setCoveredCellVal(0.0, 0);
+    (*a_Photon_sources[idx]).setCoveredCellVal(0.0, 0);
   }
 }
 
 void cdr_plasma_stepper::advance_reaction_network_reg_fast(Vector<EBCellFAB*>&       a_particle_sources,
-							   Vector<EBCellFAB*>&       a_photon_sources,
+							   Vector<EBCellFAB*>&       a_Photon_sources,
 							   const Vector<EBCellFAB*>& a_particle_densities,
 							   const Vector<EBCellFAB*>& a_particle_gradients,
-							   const Vector<EBCellFAB*>& a_photon_densities,
+							   const Vector<EBCellFAB*>& a_Photon_densities,
 							   const EBCellFAB&          a_E,
 							   const Real&               a_time,
 							   const Real&               a_dt,
@@ -496,20 +496,20 @@ void cdr_plasma_stepper::advance_reaction_network_reg_fast(Vector<EBCellFAB*>&  
   }
 
 #if CH_SPACEDIM==2
-  advance_reaction_network_reg_fast2D(a_particle_sources, a_photon_sources, a_particle_densities, a_particle_gradients,
-				      a_photon_densities, a_E, a_time, a_dt, a_dx, a_box);
+  advance_reaction_network_reg_fast2D(a_particle_sources, a_Photon_sources, a_particle_densities, a_particle_gradients,
+				      a_Photon_densities, a_E, a_time, a_dt, a_dx, a_box);
 #elif CH_SPACEDIM==3
-  advance_reaction_network_reg_fast3D(a_particle_sources, a_photon_sources, a_particle_densities, a_particle_gradients,
-				      a_photon_densities, a_E, a_time, a_dt, a_dx, a_box);
+  advance_reaction_network_reg_fast3D(a_particle_sources, a_Photon_sources, a_particle_densities, a_particle_gradients,
+				      a_Photon_densities, a_E, a_time, a_dt, a_dx, a_box);
 #endif
   
 }
 
 void cdr_plasma_stepper::advance_reaction_network_reg_fast2D(Vector<EBCellFAB*>&       a_particle_sources,
-							     Vector<EBCellFAB*>&       a_photon_sources,
+							     Vector<EBCellFAB*>&       a_Photon_sources,
 							     const Vector<EBCellFAB*>& a_particle_densities,
 							     const Vector<EBCellFAB*>& a_particle_gradients,
-							     const Vector<EBCellFAB*>& a_photon_densities,
+							     const Vector<EBCellFAB*>& a_Photon_densities,
 							     const EBCellFAB&          a_E,
 							     const Real&               a_time,
 							     const Real&               a_dt,
@@ -525,7 +525,7 @@ void cdr_plasma_stepper::advance_reaction_network_reg_fast2D(Vector<EBCellFAB*>&
     
 
   const int num_species  = m_physics->get_num_CdrSpecies();
-  const int num_photons  = m_physics->get_num_rte_species();
+  const int num_Photons  = m_physics->get_num_rte_species();
 
   // EBISBox and graph
   const EBISBox& ebisbox = a_E.getEBISBox();
@@ -538,8 +538,8 @@ void cdr_plasma_stepper::advance_reaction_network_reg_fast2D(Vector<EBCellFAB*>&
   Vector<Real>     particle_sources(num_species);
   Vector<Real>     particle_densities(num_species);
   Vector<RealVect> particle_gradients(num_species);
-  Vector<Real>     photon_sources(num_photons);
-  Vector<Real>     photon_densities(num_photons);
+  Vector<Real>     Photon_sources(num_Photons);
+  Vector<Real>     Photon_densities(num_Photons);
 
   // I need contiguous memory for what is about to happen, so begin by copying stuff onto smaller data holders
   
@@ -556,13 +556,13 @@ void cdr_plasma_stepper::advance_reaction_network_reg_fast2D(Vector<EBCellFAB*>&
     cdr_gy.copy(a_particle_gradients[i]->getFArrayBox(),  a_box, 1, a_box, i, 1);
   }
 
-  // Temps for photon source terms and densities
-  FArrayBox rte_phi(a_box, num_photons);
-  FArrayBox rte_src(a_box, num_photons);
+  // Temps for Photon source terms and densities
+  FArrayBox rte_phi(a_box, num_Photons);
+  FArrayBox rte_src(a_box, num_Photons);
   rte_phi.setVal(0.0);
   rte_src.setVal(0.0);
-  for (int i = 0; i < num_photons; i++){
-    rte_phi.copy(a_photon_densities[i]->getFArrayBox(), a_box, 0, a_box, i, 1);
+  for (int i = 0; i < num_Photons; i++){
+    rte_phi.copy(a_Photon_densities[i]->getFArrayBox(), a_box, 0, a_box, i, 1);
   }
 
   // Temp for electric field
@@ -597,18 +597,18 @@ void cdr_plasma_stepper::advance_reaction_network_reg_fast2D(Vector<EBCellFAB*>&
       }
 
       // Photon densities
-      for (int idx = 0; idx < num_photons; ++idx){
-	photon_densities[idx] = Max(0.0, vla_rte_phi[idx][j][i]);
+      for (int idx = 0; idx < num_Photons; ++idx){
+	Photon_densities[idx] = Max(0.0, vla_rte_phi[idx][j][i]);
       }
 
       E   = RealVect(vla_E[0][j][i], vla_E[1][j][i]);
       pos = origin + RealVect(D_DECL(i,j,k))*a_dx;
 
       m_physics->advance_reaction_network(particle_sources,
-					  photon_sources,
+					  Photon_sources,
 					  particle_densities,
 					  particle_gradients,
-					  photon_densities,
+					  Photon_densities,
 					  E,
 					  pos,
 					  a_dx,
@@ -622,8 +622,8 @@ void cdr_plasma_stepper::advance_reaction_network_reg_fast2D(Vector<EBCellFAB*>&
       }
 
       // Put result in correct palce
-      for (int idx = 0; idx < num_photons; ++idx){
-	vla_rte_src[idx][j][i] = photon_sources[idx];
+      for (int idx = 0; idx < num_Photons; ++idx){
+	vla_rte_src[idx][j][i] = Photon_sources[idx];
       }
     }
   }
@@ -637,8 +637,8 @@ void cdr_plasma_stepper::advance_reaction_network_reg_fast2D(Vector<EBCellFAB*>&
   }
 
   // Copy result back to solvers
-  for (int i = 0; i < num_photons; i++){
-    FArrayBox& src = a_photon_sources[i]->getFArrayBox();
+  for (int i = 0; i < num_Photons; i++){
+    FArrayBox& src = a_Photon_sources[i]->getFArrayBox();
     src.setVal(0.0);
     src.copy(rte_src, a_box, i, a_box, 0, 1);
   }
@@ -647,10 +647,10 @@ void cdr_plasma_stepper::advance_reaction_network_reg_fast2D(Vector<EBCellFAB*>&
 
 
 void cdr_plasma_stepper::advance_reaction_network_reg_fast3D(Vector<EBCellFAB*>&       a_particle_sources,
-							     Vector<EBCellFAB*>&       a_photon_sources,
+							     Vector<EBCellFAB*>&       a_Photon_sources,
 							     const Vector<EBCellFAB*>& a_particle_densities,
 							     const Vector<EBCellFAB*>& a_particle_gradients,
-							     const Vector<EBCellFAB*>& a_photon_densities,
+							     const Vector<EBCellFAB*>& a_Photon_densities,
 							     const EBCellFAB&          a_E,
 							     const Real&               a_time,
 							     const Real&               a_dt,
@@ -665,7 +665,7 @@ void cdr_plasma_stepper::advance_reaction_network_reg_fast3D(Vector<EBCellFAB*>&
   const Real zero = 0.0;
 
   const int num_species  = m_physics->get_num_CdrSpecies();
-  const int num_photons  = m_physics->get_num_rte_species();
+  const int num_Photons  = m_physics->get_num_rte_species();
 
   // EBISBox and graph
   const EBISBox& ebisbox = a_E.getEBISBox();
@@ -678,8 +678,8 @@ void cdr_plasma_stepper::advance_reaction_network_reg_fast3D(Vector<EBCellFAB*>&
   Vector<Real>     particle_sources(num_species);
   Vector<Real>     particle_densities(num_species);
   Vector<RealVect> particle_gradients(num_species);
-  Vector<Real>     photon_sources(num_photons);
-  Vector<Real>     photon_densities(num_photons);
+  Vector<Real>     Photon_sources(num_Photons);
+  Vector<Real>     Photon_densities(num_Photons);
 
   // I need contiguous memory for what is about to happen, so begin by copying stuff onto smaller data holders
   
@@ -698,13 +698,13 @@ void cdr_plasma_stepper::advance_reaction_network_reg_fast3D(Vector<EBCellFAB*>&
     cdr_gz.copy(a_particle_gradients[i]->getFArrayBox(),  a_box, 2, a_box, i, 1);
   }
 
-  // Temps for photon source terms and densities
-  FArrayBox rte_phi(a_box, num_photons);
-  FArrayBox rte_src(a_box, num_photons);
+  // Temps for Photon source terms and densities
+  FArrayBox rte_phi(a_box, num_Photons);
+  FArrayBox rte_src(a_box, num_Photons);
   rte_phi.setVal(0.0);
   rte_src.setVal(0.0);
-  for (int i = 0; i < num_photons; i++){
-    rte_phi.copy(a_photon_densities[i]->getFArrayBox(), a_box, 0, a_box, i, 1);
+  for (int i = 0; i < num_Photons; i++){
+    rte_phi.copy(a_Photon_densities[i]->getFArrayBox(), a_box, 0, a_box, i, 1);
   }
 
   // Temp for electric field
@@ -743,18 +743,18 @@ void cdr_plasma_stepper::advance_reaction_network_reg_fast3D(Vector<EBCellFAB*>&
 	}
 
 	// Photon densities
-	for (int idx = 0; idx < num_photons; ++idx){
-	  photon_densities[idx] = Max(0.0, vla_rte_phi[idx][k][j][i]);
+	for (int idx = 0; idx < num_Photons; ++idx){
+	  Photon_densities[idx] = Max(0.0, vla_rte_phi[idx][k][j][i]);
 	}
 
 	E   = RealVect(vla_E[0][k][j][i], vla_E[1][k][j][i], vla_E[2][k][j][i]);
 	pos = origin + RealVect(D_DECL(i,j,k))*a_dx;
 
 	m_physics->advance_reaction_network(particle_sources,
-					    photon_sources,
+					    Photon_sources,
 					    particle_densities,
 					    particle_gradients,
-					    photon_densities,
+					    Photon_densities,
 					    E,
 					    pos,
 					    a_dx,
@@ -768,8 +768,8 @@ void cdr_plasma_stepper::advance_reaction_network_reg_fast3D(Vector<EBCellFAB*>&
 	}
 
 	// Put result in correct palce
-	for (int idx = 0; idx < num_photons; ++idx){
-	  vla_rte_src[idx][k][j][i] = photon_sources[idx];
+	for (int idx = 0; idx < num_Photons; ++idx){
+	  vla_rte_src[idx][k][j][i] = Photon_sources[idx];
 	}
       }
     }
@@ -784,8 +784,8 @@ void cdr_plasma_stepper::advance_reaction_network_reg_fast3D(Vector<EBCellFAB*>&
   }
 
   // Copy result back to solvers
-  for (int i = 0; i < num_photons; i++){
-    FArrayBox& src = a_photon_sources[i]->getFArrayBox();
+  for (int i = 0; i < num_Photons; i++){
+    FArrayBox& src = a_Photon_sources[i]->getFArrayBox();
     src.setVal(0.0);
     src.copy(rte_src, a_box, i, a_box, 0, 1);
   }
@@ -796,11 +796,11 @@ void cdr_plasma_stepper::advance_reaction_network_reg_fast3D(Vector<EBCellFAB*>&
 
 
 void cdr_plasma_stepper::advance_reaction_network_irreg(Vector<EBCellFAB*>&          a_particle_sources,
-							Vector<EBCellFAB*>&          a_photon_sources,
+							Vector<EBCellFAB*>&          a_Photon_sources,
 							const Vector<EBCellFAB*>&    a_particle_densities,
 							const Vector<EBCellFAB*>&    a_particle_gradients,
 							const Vector<EBCellFAB*>&    a_particle_velocities,
-							const Vector<EBCellFAB*>&    a_photon_densities,
+							const Vector<EBCellFAB*>&    a_Photon_densities,
 							const BaseIVFAB<VoFStencil>& a_interp_stencils,
 							const EBCellFAB&             a_E,
 							const Real&                  a_time,
@@ -811,11 +811,11 @@ void cdr_plasma_stepper::advance_reaction_network_irreg(Vector<EBCellFAB*>&     
 							const DataIndex&             a_dit){
   if(m_interp_sources){
     advance_reaction_network_irreg_interp(a_particle_sources,
-					  a_photon_sources,
+					  a_Photon_sources,
 					  a_particle_densities,
 					  a_particle_gradients,
 					  a_particle_velocities,
-					  a_photon_densities,
+					  a_Photon_densities,
 					  a_interp_stencils,
 					  a_E,
 					  a_time,
@@ -827,10 +827,10 @@ void cdr_plasma_stepper::advance_reaction_network_irreg(Vector<EBCellFAB*>&     
   }
   else{
     advance_reaction_network_irreg_kappa(a_particle_sources,
-					 a_photon_sources,
+					 a_Photon_sources,
 					 a_particle_densities,
 					 a_particle_gradients,
-					 a_photon_densities,
+					 a_Photon_densities,
 					 a_interp_stencils,
 					 a_E,
 					 a_time,
@@ -843,11 +843,11 @@ void cdr_plasma_stepper::advance_reaction_network_irreg(Vector<EBCellFAB*>&     
 }
 
 void cdr_plasma_stepper::advance_reaction_network_irreg_interp(Vector<EBCellFAB*>&          a_particle_sources,
-							       Vector<EBCellFAB*>&          a_photon_sources,
+							       Vector<EBCellFAB*>&          a_Photon_sources,
 							       const Vector<EBCellFAB*>&    a_particle_densities,
 							       const Vector<EBCellFAB*>&    a_particle_gradients,
 							       const Vector<EBCellFAB*>&    a_particle_velocities,
-							       const Vector<EBCellFAB*>&    a_photon_densities,
+							       const Vector<EBCellFAB*>&    a_Photon_densities,
 							       const BaseIVFAB<VoFStencil>& a_interp_stencils,
 							       const EBCellFAB&             a_E,
 							       const Real&                  a_time,
@@ -863,7 +863,7 @@ void cdr_plasma_stepper::advance_reaction_network_irreg_interp(Vector<EBCellFAB*
 
   const Real zero = 0.0;
   
-  const int num_photons  = m_physics->get_num_rte_species();
+  const int num_Photons  = m_physics->get_num_rte_species();
   const int num_species  = m_physics->get_num_CdrSpecies();
 
   // EBISBox and graph
@@ -874,10 +874,10 @@ void cdr_plasma_stepper::advance_reaction_network_irreg_interp(Vector<EBCellFAB*
   // Things that are passed into cdr_plasma_physics
   RealVect         pos, E;
   Vector<Real>     particle_sources(num_species, 0.);
-  Vector<Real>     photon_sources(num_photons, 0.);
+  Vector<Real>     Photon_sources(num_Photons, 0.);
   Vector<Real>     particle_densities(num_species, 0.);
   Vector<RealVect> particle_gradients(num_species, RealVect::Zero);
-  Vector<Real>     photon_densities(num_photons, 0.);
+  Vector<Real>     Photon_densities(num_Photons, 0.);
 
   VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[a_dit];
   for (vofit.reset(); vofit.ok(); ++vofit){
@@ -952,17 +952,17 @@ void cdr_plasma_stepper::advance_reaction_network_irreg_interp(Vector<EBCellFAB*
       for (int i = 0; i < stencil.size(); i++){
 	const VolIndex& ivof = stencil.vof(i);
 	const Real& iweight  = stencil.weight(i);
-	phi += (*a_photon_densities[idx])(ivof, 0)*iweight;
+	phi += (*a_Photon_densities[idx])(ivof, 0)*iweight;
       }
-      photon_densities[idx] = Max(zero, phi);
+      Photon_densities[idx] = Max(zero, phi);
     }
 
     // Compute source terms
     m_physics->advance_reaction_network(particle_sources,
-					photon_sources,
+					Photon_sources,
 					particle_densities,
 					particle_gradients,
-					photon_densities,
+					Photon_densities,
 					E,
 					pos,
 					a_dx,
@@ -977,16 +977,16 @@ void cdr_plasma_stepper::advance_reaction_network_irreg_interp(Vector<EBCellFAB*
     
     for (rte_iterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.index();
-      (*a_photon_sources[idx])(vof, 0) = photon_sources[idx];
+      (*a_Photon_sources[idx])(vof, 0) = Photon_sources[idx];
     }
   }
 }
 
 void cdr_plasma_stepper::advance_reaction_network_irreg_kappa(Vector<EBCellFAB*>&          a_particle_sources,
-							      Vector<EBCellFAB*>&          a_photon_sources,
+							      Vector<EBCellFAB*>&          a_Photon_sources,
 							      const Vector<EBCellFAB*>&    a_particle_densities,
 							      const Vector<EBCellFAB*>&    a_particle_gradients,
-							      const Vector<EBCellFAB*>&    a_photon_densities,
+							      const Vector<EBCellFAB*>&    a_Photon_densities,
 							      const BaseIVFAB<VoFStencil>& a_interp_stencils,
 							      const EBCellFAB&             a_E,
 							      const Real&                  a_time,
@@ -1002,7 +1002,7 @@ void cdr_plasma_stepper::advance_reaction_network_irreg_kappa(Vector<EBCellFAB*>
 
   const Real zero = 0.0;
   
-  const int num_photons  = m_physics->get_num_rte_species();
+  const int num_Photons  = m_physics->get_num_rte_species();
   const int num_species  = m_physics->get_num_CdrSpecies();
 
   // EBISBox and graph
@@ -1013,10 +1013,10 @@ void cdr_plasma_stepper::advance_reaction_network_irreg_kappa(Vector<EBCellFAB*>
   // Things that are passed into cdr_plasma_physics
   RealVect         pos, E;
   Vector<Real>     particle_sources(num_species);
-  Vector<Real>     photon_sources(num_photons);
+  Vector<Real>     Photon_sources(num_Photons);
   Vector<Real>     particle_densities(num_species);
   Vector<RealVect> particle_gradients(num_species);
-  Vector<Real>     photon_densities(num_photons);
+  Vector<Real>     Photon_densities(num_Photons);
 
   VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[a_dit];
   for (vofit.reset(); vofit.ok(); ++vofit){
@@ -1056,15 +1056,15 @@ void cdr_plasma_stepper::advance_reaction_network_irreg_kappa(Vector<EBCellFAB*>
 
     for (rte_iterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.index();
-      photon_densities[idx] = Max(zero, (*a_photon_densities[idx])(vof, 0));
+      Photon_densities[idx] = Max(zero, (*a_Photon_densities[idx])(vof, 0));
     }
 
     // Compute source terms
     m_physics->advance_reaction_network(particle_sources,
-					photon_sources,
+					Photon_sources,
 					particle_densities,
 					particle_gradients,
-					photon_densities,
+					Photon_densities,
 					E,
 					pos,
 					a_dx,
@@ -1079,7 +1079,7 @@ void cdr_plasma_stepper::advance_reaction_network_irreg_kappa(Vector<EBCellFAB*>
     
     for (rte_iterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.index();
-      (*a_photon_sources[idx])(vof, 0) = photon_sources[idx];
+      (*a_Photon_sources[idx])(vof, 0) = Photon_sources[idx];
     }
   }
 }
@@ -1615,7 +1615,7 @@ void cdr_plasma_stepper::compute_cdr_fluxes(Vector<LevelData<BaseIVFAB<Real> >*>
   }
 
   const int num_species  = m_physics->get_num_CdrSpecies();
-  const int num_photons  = m_physics->get_num_rte_species();
+  const int num_Photons  = m_physics->get_num_rte_species();
   const int comp         = 0;
   const int ncomp        = 1;
 
@@ -1624,7 +1624,7 @@ void cdr_plasma_stepper::compute_cdr_fluxes(Vector<LevelData<BaseIVFAB<Real> >*>
   Vector<Real> extrap_cdr_densities(num_species);
   Vector<Real> extrap_cdr_velocities(num_species);
   Vector<Real> extrap_cdr_gradients(num_species);
-  Vector<Real> extrap_rte_fluxes(num_photons);
+  Vector<Real> extrap_rte_fluxes(num_Photons);
 
   // Grid stuff
   const DisjointBoxLayout& dbl  = m_amr->getGrids(m_realm)[a_lvl];
@@ -1663,7 +1663,7 @@ void cdr_plasma_stepper::compute_cdr_fluxes(Vector<LevelData<BaseIVFAB<Real> >*>
 	extrap_cdr_gradients[idx]  = (*a_extrap_cdr_gradients[idx])[dit()](vof,comp);
       }
 
-      // Build photon intensities
+      // Build Photon intensities
       for (rte_iterator<RtSolver> solver_it(*m_rte); solver_it.ok(); ++solver_it){
 	const int idx = solver_it.index();
 	extrap_rte_fluxes[idx] = (*a_extrap_rte_fluxes[idx])[dit()](vof,comp);
@@ -1707,7 +1707,7 @@ void cdr_plasma_stepper::compute_cdr_fluxes(Vector<LevelData<BaseIVFAB<Real> >*>
 	extrap_cdr_gradients[idx]  = (*a_extrap_cdr_gradients[idx])[dit()](vof,comp);
       }
 
-      // Build photon intensities
+      // Build Photon intensities
       for (rte_iterator<RtSolver> solver_it(*m_rte); solver_it.ok(); ++solver_it){
 	const int idx = solver_it.index();
 	extrap_rte_fluxes[idx] = (*a_extrap_rte_fluxes[idx])[dit()](vof,comp);
@@ -1746,7 +1746,7 @@ void cdr_plasma_stepper::compute_cdr_fluxes(Vector<EBAMRIVData*>&       a_fluxes
   }
 
   const int num_species  = m_physics->get_num_CdrSpecies();
-  const int num_photons  = m_physics->get_num_rte_species();
+  const int num_Photons  = m_physics->get_num_rte_species();
   const int finest_level = m_amr->getFinestLevel();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
@@ -1757,7 +1757,7 @@ void cdr_plasma_stepper::compute_cdr_fluxes(Vector<EBAMRIVData*>&       a_fluxes
     Vector<LevelData<BaseIVFAB<Real> >* > extrap_cdr_densities(num_species);
     Vector<LevelData<BaseIVFAB<Real> >* > extrap_cdr_velocities(num_species);
     Vector<LevelData<BaseIVFAB<Real> >* > extrap_cdr_gradients(num_species);
-    Vector<LevelData<BaseIVFAB<Real> >* > extrap_rte_fluxes(num_photons);
+    Vector<LevelData<BaseIVFAB<Real> >* > extrap_rte_fluxes(num_Photons);
     
     for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.index();
@@ -1794,7 +1794,7 @@ void cdr_plasma_stepper::compute_cdr_domain_fluxes(Vector<EBAMRIFData*>&       a
   }
 
   const int num_species  = m_physics->get_num_CdrSpecies();
-  const int num_photons  = m_physics->get_num_rte_species();
+  const int num_Photons  = m_physics->get_num_rte_species();
   const int finest_level = m_amr->getFinestLevel();
 
   // Things that will be passed into physics
@@ -1802,7 +1802,7 @@ void cdr_plasma_stepper::compute_cdr_domain_fluxes(Vector<EBAMRIFData*>&       a
   Vector<Real> extrap_cdr_densities(num_species);
   Vector<Real> extrap_cdr_velocities(num_species);
   Vector<Real> extrap_cdr_gradients(num_species);
-  Vector<Real> extrap_rte_fluxes(num_photons);
+  Vector<Real> extrap_rte_fluxes(num_Photons);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
 
@@ -1811,7 +1811,7 @@ void cdr_plasma_stepper::compute_cdr_domain_fluxes(Vector<EBAMRIFData*>&       a
     Vector<LevelData<DomainFluxIFFAB>* > extrap_cdr_densities(num_species);
     Vector<LevelData<DomainFluxIFFAB>* > extrap_cdr_velocities(num_species);
     Vector<LevelData<DomainFluxIFFAB>* > extrap_cdr_gradients(num_species);
-    Vector<LevelData<DomainFluxIFFAB>* > extrap_rte_fluxes(num_photons);
+    Vector<LevelData<DomainFluxIFFAB>* > extrap_rte_fluxes(num_Photons);
     
     for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.index();
@@ -1849,7 +1849,7 @@ void cdr_plasma_stepper::compute_cdr_domain_fluxes(Vector<LevelData<DomainFluxIF
   }
 
   const int num_species  = m_physics->get_num_CdrSpecies();
-  const int num_photons  = m_physics->get_num_rte_species();
+  const int num_Photons  = m_physics->get_num_rte_species();
   const int comp         = 0;
   const int ncomp        = 1;
   const int finest_level = m_amr->getFinestLevel();
@@ -1859,7 +1859,7 @@ void cdr_plasma_stepper::compute_cdr_domain_fluxes(Vector<LevelData<DomainFluxIF
   Vector<Real> extrap_cdr_densities(num_species);
   Vector<Real> extrap_cdr_velocities(num_species);
   Vector<Real> extrap_cdr_gradients(num_species);
-  Vector<Real> extrap_rte_fluxes(num_photons);
+  Vector<Real> extrap_rte_fluxes(num_Photons);
 
   const DisjointBoxLayout& dbl  = m_amr->getGrids(m_realm)[a_lvl];
   const EBISLayout& ebisl       = m_amr->getEBISLayout(m_realm, m_cdr->get_phase())[a_lvl];

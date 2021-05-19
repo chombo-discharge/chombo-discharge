@@ -81,13 +81,13 @@ int main(int argc, char* argv[]){
   Real avg = 0.0;
   for (int i = 0; i < num; i++){
     Vector<unsigned long long> particles(3);
-    Vector<unsigned long long> photons(1);
+    Vector<unsigned long long> Photons(1);
 
     particles[0] = 1;
     particles[1] = 0;
     particles[2] = 0;
 
-    physics->advance_particles(particles, photons, 1.E-10);
+    physics->advance_particles(particles, Photons, 1.E-10);
 
     avg += 1.0*particles[0];
     //    std::cout << particles << std::endl;

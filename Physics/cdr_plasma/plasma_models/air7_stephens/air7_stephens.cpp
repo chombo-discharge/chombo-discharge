@@ -1,6 +1,6 @@
 /*!
   @file   air7_stephens.H
-  @brief  7-species and 8-photon model for air
+  @brief  7-species and 8-Photon model for air
   @author Robert Marskar
   @date   Feb. 2018
 */
@@ -376,10 +376,10 @@ void air7_stephens::parseDomainBc(){
 }
 
 void air7_stephens::advance_reaction_network(Vector<Real>&          a_particle_sources,
-					     Vector<Real>&          a_photon_sources,
+					     Vector<Real>&          a_Photon_sources,
 					     const Vector<Real>     a_particle_densities,
 					     const Vector<RealVect> a_particle_gradients,
-					     const Vector<Real>     a_photon_densities,
+					     const Vector<Real>     a_Photon_densities,
 					     const RealVect         a_E,
 					     const RealVect         a_pos,
 					     const Real             a_dx,
@@ -400,8 +400,8 @@ void air7_stephens::advance_reaction_network(Vector<Real>&          a_particle_s
   }
 
   for (int i = 0; i < m_num_rte_species; i++){
-    rte_phi[i]          = a_photon_densities[i];
-    a_photon_sources[i] = 0.0;
+    rte_phi[i]          = a_Photon_densities[i];
+    a_Photon_sources[i] = 0.0;
   }
 
 
@@ -418,9 +418,9 @@ void air7_stephens::advance_reaction_network(Vector<Real>&          a_particle_s
 	cdr_phi[i] = cdr_phi[i] + cdr_src[i]*dt;
       }
 
-      // Add photons produced in the substep
+      // Add Photons produced in the substep
       for (int i = 0; i < m_num_rte_species; i++){
-	a_photon_sources[i] += rte_src[i];
+	a_Photon_sources[i] += rte_src[i];
       }
     }
     else if(m_chemistryAlgorithm == chemistryAlgorithm::rk2){
@@ -437,7 +437,7 @@ void air7_stephens::advance_reaction_network(Vector<Real>&          a_particle_s
 
       // Photons only use the Euler update
       for (int i = 0; i < m_num_rte_species; i++){
-	a_photon_sources[i] += rte_src[i];
+	a_Photon_sources[i] += rte_src[i];
       }
 
       // Re-compute slope at k
@@ -455,9 +455,9 @@ void air7_stephens::advance_reaction_network(Vector<Real>&          a_particle_s
       advance_chemistry_euler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
       const Vector<Real> k1 = cdr_src;
 
-      // Only Euler update for photons.
+      // Only Euler update for Photons.
       for (int i = 0; i < m_num_rte_species; i++){
-	a_photon_sources[i] += rte_src[i];
+	a_Photon_sources[i] += rte_src[i];
       }
 
       // Compute k2 slope
@@ -501,10 +501,10 @@ void air7_stephens::advance_reaction_network(Vector<Real>&          a_particle_s
 }
 
 void air7_stephens::advance_chemistry_euler(Vector<Real>&          a_particle_sources,
-					    Vector<Real>&          a_photon_sources,
+					    Vector<Real>&          a_Photon_sources,
 					    Vector<Real>&          a_particle_densities,
 					    const Vector<RealVect> a_particle_gradients,
-					    const Vector<Real>     a_photon_densities,
+					    const Vector<Real>     a_Photon_densities,
 					    const RealVect         a_E,
 					    const RealVect         a_pos,
 					    const Real             a_dx,
@@ -633,8 +633,8 @@ void air7_stephens::advance_chemistry_euler(Vector<Real>&          a_particle_so
 
   // Photoionization
   for (int i = 0; i < m_num_rte_species; i++){
-    S_e   += a_photon_densities[i]/a_dt;
-    S_O2p += a_photon_densities[i]/a_dt;
+    S_e   += a_Photon_densities[i]/a_dt;
+    S_O2p += a_Photon_densities[i]/a_dt;
   }
 
   // Photoionization code below
@@ -698,16 +698,16 @@ void air7_stephens::advance_chemistry_euler(Vector<Real>&          a_particle_so
   const int num_b1v1_X1v1 = poisson_reaction(num_exc_b1v1*m_b1v1_X1v1_kr*m_b1v1_X1v1_photoi_eff/m_b1v1_k, a_dt);
 #endif
 
-  a_photon_sources[m_c4v0_X1v0_idx] = 1.0*num_c4v0_X1v0;
-  a_photon_sources[m_c4v0_X1v1_idx] = 1.0*num_c4v0_X1v1;
+  a_Photon_sources[m_c4v0_X1v0_idx] = 1.0*num_c4v0_X1v0;
+  a_Photon_sources[m_c4v0_X1v1_idx] = 1.0*num_c4v0_X1v1;
   
-  a_photon_sources[m_c4v1_X1v0_idx] = 1.0*num_c4v1_X1v0;
-  a_photon_sources[m_c4v1_X1v1_idx] = 1.0*num_c4v1_X1v1;
-  a_photon_sources[m_c4v1_X1v2_idx] = 1.0*num_c4v1_X1v2;
-  a_photon_sources[m_c4v1_X1v3_idx] = 1.0*num_c4v1_X1v3;
+  a_Photon_sources[m_c4v1_X1v0_idx] = 1.0*num_c4v1_X1v0;
+  a_Photon_sources[m_c4v1_X1v1_idx] = 1.0*num_c4v1_X1v1;
+  a_Photon_sources[m_c4v1_X1v2_idx] = 1.0*num_c4v1_X1v2;
+  a_Photon_sources[m_c4v1_X1v3_idx] = 1.0*num_c4v1_X1v3;
   
-  a_photon_sources[m_b1v1_X1v0_idx] = 1.0*num_b1v1_X1v0;
-  a_photon_sources[m_b1v1_X1v1_idx] = 1.0*num_b1v1_X1v1;
+  a_Photon_sources[m_b1v1_X1v0_idx] = 1.0*num_b1v1_X1v0;
+  a_Photon_sources[m_b1v1_X1v1_idx] = 1.0*num_b1v1_X1v1;
 
   return;
 }

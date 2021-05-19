@@ -21,10 +21,10 @@ public:
   class electron;
   class positive_ion;   
 
-  // Forward declaration of photon excitations
-  class photon_one;
-  class photon_two;
-  class photon_three;
+  // Forward declaration of Photon excitations
+  class Photon_one;
+  class Photon_two;
+  class Photon_three;
 
   /*!
     @brief Get gas temperature, pressure, density, and molecular fractions
@@ -67,10 +67,10 @@ public:
 					     const Vector<Real> a_extrap_cdr_fluxes) const;
 
   void advance_reaction_network(Vector<Real>&          a_particle_sources,
-				Vector<Real>&          a_photon_sources,
+				Vector<Real>&          a_Photon_sources,
 				const Vector<Real>     a_particle_densities,
 				const Vector<RealVect> a_particle_gradients,
-				const Vector<Real>     a_photon_densities,
+				const Vector<Real>     a_Photon_densities,
 				const RealVect         a_E,
 				const RealVect         a_pos,
 				const Real             a_dx,
@@ -90,9 +90,9 @@ protected:
   int m_electron_idx;
   int m_positive_idx;
   
-  int m_photon1_idx;
-  int m_photon2_idx;
-  int m_photon3_idx;
+  int m_Photon1_idx;
+  int m_Photon2_idx;
+  int m_Photon3_idx;
 
   Real m_townsend2_electrode;            // 2nd Townsend on electrodes
   Real m_townsend2_dielectric;           // 2nd Townsend on dielectrics

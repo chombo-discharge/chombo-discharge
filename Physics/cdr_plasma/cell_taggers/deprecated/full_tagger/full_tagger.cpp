@@ -98,7 +98,7 @@ void full_tagger::compute_tracers(){
   const RealVect origin = m_amr->getProbLo();
   const Real time       = m_timeStepper->getTime();
   const int num_species = m_physics->get_num_CdrSpecies();
-  const int num_photons = m_physics->get_num_rte_species();
+  const int num_Photons = m_physics->get_num_rte_species();
 
   RefCountedPtr<cdr_layout>& cdr = m_timeStepper->get_cdr();
   RefCountedPtr<rte_layout>& rte = m_timeStepper->get_rte();
@@ -114,7 +114,7 @@ void full_tagger::compute_tracers(){
 
   // Get maximum and minimum of everything
   Vector<Real> cdr_min(num_species), cdr_max(num_species);
-  Vector<Real> rte_min(num_photons), rte_max(num_photons);
+  Vector<Real> rte_min(num_Photons), rte_max(num_Photons);
   Vector<Real> grad_cdr_max(num_species), grad_cdr_min(num_species);
   Real E_max, E_min;
   Real grad_E_max, grad_E_min;

@@ -1,6 +1,6 @@
 /*!
   @file   air3_mc8.H
-  @brief  3-species and 8-photon model for air
+  @brief  3-species and 8-Photon model for air
   @author Robert Marskar
   @date   Feb. 2018
 */
@@ -34,10 +34,10 @@ public:
   
 
   void advance_reaction_network(Vector<Real>&          a_particle_sources,
-				Vector<Real>&          a_photon_sources,
+				Vector<Real>&          a_Photon_sources,
 				const Vector<Real>     a_particle_densities,
 				const Vector<RealVect> a_particle_gradients,
-				const Vector<Real>     a_photon_densities,
+				const Vector<Real>     a_Photon_densities,
 				const RealVect         a_E,
 				const RealVect         a_pos,
 				const Real             a_dx,
@@ -142,7 +142,7 @@ protected:
   int m_plus_idx; // Positive ions
   int m_minu_idx; // Negative ions
 
-  // Indicates for various photons
+  // Indicates for various Photons
   int m_c4v0_X1v0_idx; // Transition c4(v=0) -> X1(v=0)
   int m_c4v0_X1v1_idx; // Transition c4(v=0) -> X1(v=0)
   int m_c4v1_X1v0_idx; // Transition c4(v=1) -> X1(v=0)
@@ -262,10 +262,10 @@ protected:
 				  const Real         a_quantum_efficiency) const;
 
   void advance_chemistry_euler(Vector<Real>&          a_particle_sources,
-			       Vector<Real>&          a_photon_sources,
+			       Vector<Real>&          a_Photon_sources,
 			       Vector<Real>&          a_particle_densities,
 			       const Vector<RealVect> a_particle_gradients,
-			       const Vector<Real>     a_photon_densities,
+			       const Vector<Real>     a_Photon_densities,
 			       const RealVect         a_E,
 			       const RealVect         a_pos,
 			       const Real             a_dx,

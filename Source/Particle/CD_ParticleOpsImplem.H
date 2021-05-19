@@ -78,7 +78,7 @@ bool ParticleOps::ebIntersectionBisect(const RefCountedPtr<BaseIF>& a_impfunc,
     
     if(fa*fb <= 0.0){ 
       // We happen to know that f(pos+dxStep) > 0.0 and f(pos) < 0.0 so we must now compute the precise location
-      // where the photon crossed the EB. For that we use a Brent root finder on the interval [pos, pos+dxStep].
+      // where the Photon crossed the EB. For that we use a Brent root finder on the interval [pos, pos+dxStep].
       const RealVect xcol = poly::brent_root_finder(a_impfunc, cur_pos, cur_pos + dxStep);
       a_s = (xcol - a_oldPos).vectorLength()/a_pathLen;
       retval = true;

@@ -109,14 +109,14 @@ air_bolsig::air_bolsig(){
   m_species[m_nplus_idx]    = RefCountedPtr<species>      (new air_bolsig::positive_species());
   m_species[m_nminu_idx]    = RefCountedPtr<species>      (new air_bolsig::negative_species());
 
-  m_num_photons = 3;
-  m_photons.resize(m_num_photons);
-  m_photon1_idx = 0;
-  m_photon2_idx = 1;
-  m_photon3_idx = 2;
-  m_photons[m_photon1_idx]  = RefCountedPtr<photon_group> (new air_bolsig::photon_one());
-  m_photons[m_photon2_idx]  = RefCountedPtr<photon_group> (new air_bolsig::photon_two());
-  m_photons[m_photon3_idx]  = RefCountedPtr<photon_group> (new air_bolsig::photon_three());
+  m_num_Photons = 3;
+  m_Photons.resize(m_num_Photons);
+  m_Photon1_idx = 0;
+  m_Photon2_idx = 1;
+  m_Photon3_idx = 2;
+  m_Photons[m_Photon1_idx]  = RefCountedPtr<Photon_group> (new air_bolsig::Photon_one());
+  m_Photons[m_Photon2_idx]  = RefCountedPtr<Photon_group> (new air_bolsig::Photon_two());
+  m_Photons[m_Photon3_idx]  = RefCountedPtr<Photon_group> (new air_bolsig::Photon_three());
 
   // Compute transport data for electrons by calling BOLSIG
   this->compute_transport_coefficients();
@@ -171,10 +171,10 @@ Vector<Real> air_bolsig::compute_cdr_source_terms(const Real              a_time
   const Real eta   = m_eta.get_entry(ET);
   const Real zero  = 0.0;
 
-  // Cast so we can get A-coefficients from photons
-  const air_bolsig::photon_one*   photon1 = static_cast<air_bolsig::photon_one*>   (&(*m_photons[m_photon1_idx]));
-  const air_bolsig::photon_two*   photon2 = static_cast<air_bolsig::photon_two*>   (&(*m_photons[m_photon2_idx]));
-  const air_bolsig::photon_three* photon3 = static_cast<air_bolsig::photon_three*> (&(*m_photons[m_photon3_idx]));
+  // Cast so we can get A-coefficients from Photons
+  const air_bolsig::Photon_one*   Photon1 = static_cast<air_bolsig::Photon_one*>   (&(*m_Photons[m_Photon1_idx]));
+  const air_bolsig::Photon_two*   Photon2 = static_cast<air_bolsig::Photon_two*>   (&(*m_Photons[m_Photon2_idx]));
+  const air_bolsig::Photon_three* Photon3 = static_cast<air_bolsig::Photon_three*> (&(*m_Photons[m_Photon3_idx]));
   
   // Densities and velocities
   const Real Ne  = a_cdr_densities[m_nelec_idx];
@@ -182,9 +182,9 @@ Vector<Real> air_bolsig::compute_cdr_source_terms(const Real              a_time
   const Real Nn  = a_cdr_densities[m_nminu_idx];
   const Real ve  = vel[m_nelec_idx].vectorLength();
   const Real De  = diffCo[m_nelec_idx];
-  const Real Sph = m_photoionization_efficiency*units::s_c0*m_frac_O2*m_p*(photon1->get_A()*a_rte_densities[m_photon1_idx]
-									   + photon2->get_A()*a_rte_densities[m_photon2_idx]
-									   + photon3->get_A()*a_rte_densities[m_photon3_idx]);
+  const Real Sph = m_photoionization_efficiency*units::s_c0*m_frac_O2*m_p*(Photon1->get_A()*a_rte_densities[m_Photon1_idx]
+									   + Photon2->get_A()*a_rte_densities[m_Photon2_idx]
+									   + Photon3->get_A()*a_rte_densities[m_Photon3_idx]);
   
   Vector<Real> source(m_num_species, 0.0); 
   Real& Se = source[m_nelec_idx];
@@ -215,7 +215,7 @@ Vector<Real> air_bolsig::compute_cdr_source_terms(const Real              a_time
 
 
 Vector<Real> air_bolsig::compute_rte_source_terms(const Vector<Real>& a_cdr_densities, const RealVect& a_E) const {
-  Vector<Real> ret(m_num_photons);
+  Vector<Real> ret(m_num_Photons);
 
   const Real zero            = 0.0;
   const Real ET              = a_E.vectorLength()/(units::s_Td*m_N); // Field in Townsend
@@ -226,9 +226,9 @@ Vector<Real> air_bolsig::compute_rte_source_terms(const Vector<Real>& a_cdr_dens
   const Real Se              = Max(zero, alpha*Ne*ve);                 // Excitations = alpha*Ne*ve
 
   // Photosource = electron excitations * efficiency * quenching
-  ret[m_photon1_idx] = Se*m_excitation_efficiency*(m_pq/(m_pq + m_p));
-  ret[m_photon2_idx] = Se*m_excitation_efficiency*(m_pq/(m_pq + m_p));
-  ret[m_photon3_idx] = Se*m_excitation_efficiency*(m_pq/(m_pq + m_p));
+  ret[m_Photon1_idx] = Se*m_excitation_efficiency*(m_pq/(m_pq + m_p));
+  ret[m_Photon2_idx] = Se*m_excitation_efficiency*(m_pq/(m_pq + m_p));
+  ret[m_Photon3_idx] = Se*m_excitation_efficiency*(m_pq/(m_pq + m_p));
 
   return ret;
 }
@@ -306,9 +306,9 @@ Vector<Real> air_bolsig::compute_cathode_flux(const Vector<Real>& a_extrapolated
   fluxes[m_nelec_idx] += -Max(zero, a_extrapolated_fluxes[m_nplus_idx])*m_townsend2_electrode;
 
   // Photoelectric effect
-  fluxes[m_nelec_idx] += -a_rte_fluxes[m_photon1_idx]*m_electrode_quantum_efficiency;
-  fluxes[m_nelec_idx] += -a_rte_fluxes[m_photon2_idx]*m_electrode_quantum_efficiency;
-  fluxes[m_nelec_idx] += -a_rte_fluxes[m_photon3_idx]*m_electrode_quantum_efficiency;
+  fluxes[m_nelec_idx] += -a_rte_fluxes[m_Photon1_idx]*m_electrode_quantum_efficiency;
+  fluxes[m_nelec_idx] += -a_rte_fluxes[m_Photon2_idx]*m_electrode_quantum_efficiency;
+  fluxes[m_nelec_idx] += -a_rte_fluxes[m_Photon3_idx]*m_electrode_quantum_efficiency;
 
   return fluxes;
 }
@@ -355,9 +355,9 @@ Vector<Real> air_bolsig::compute_dielectric_fluxes(const Vector<Real>& a_extrapo
   
   // Add in photoelectric effect and ion bombardment for electrons by positive ions
   if(PolyGeom::dot(a_E, a_normal) < 0.){ // Field points into dielectric
-    fluxes[m_nelec_idx] += -a_rte_fluxes[m_photon1_idx]*m_dielectric_quantum_efficiency;
-    fluxes[m_nelec_idx] += -a_rte_fluxes[m_photon2_idx]*m_dielectric_quantum_efficiency;
-    fluxes[m_nelec_idx] += -a_rte_fluxes[m_photon3_idx]*m_dielectric_quantum_efficiency;
+    fluxes[m_nelec_idx] += -a_rte_fluxes[m_Photon1_idx]*m_dielectric_quantum_efficiency;
+    fluxes[m_nelec_idx] += -a_rte_fluxes[m_Photon2_idx]*m_dielectric_quantum_efficiency;
+    fluxes[m_nelec_idx] += -a_rte_fluxes[m_Photon3_idx]*m_dielectric_quantum_efficiency;
     fluxes[m_nelec_idx] += -Max(zero, a_extrapolated_fluxes[m_nplus_idx])*m_townsend2_dielectric;
   }
 
@@ -452,15 +452,15 @@ Real air_bolsig::negative_species::initialData(const RealVect a_pos, const Real 
   return 0.;
 }
 
-Real air_bolsig::photon_one::getKappa(const RealVect a_pos) const {
+Real air_bolsig::Photon_one::getKappa(const RealVect a_pos) const {
   return m_lambda*m_pO2/sqrt(3.0); // I think this is correct.
 }
 
-Real air_bolsig::photon_two::getKappa(const RealVect a_pos) const {
+Real air_bolsig::Photon_two::getKappa(const RealVect a_pos) const {
   return m_lambda*m_pO2/sqrt(3.0); // I think this is correct.
 }
 
-Real air_bolsig::photon_three::getKappa(const RealVect a_pos) const {
+Real air_bolsig::Photon_three::getKappa(const RealVect a_pos) const {
   return m_lambda*m_pO2/sqrt(3.0); // I think this is correct.
 
 }
@@ -546,16 +546,16 @@ air_bolsig::negative_species::~negative_species(){
   
 }
 
-air_bolsig::photon_one::photon_one(){
-  m_name   = "photon_one";
+air_bolsig::Photon_one::Photon_one(){
+  m_name   = "Photon_one";
 
   m_A      = 1.12E-4;
   m_lambda = 4.15E-2;
 
   { // Parameters
     ParmParse pp("air_bolsig");
-    pp.query("photon1_A_coeff",      m_A);
-    pp.query("photon1_lambda_coeff", m_lambda);
+    pp.query("Photon1_A_coeff",      m_A);
+    pp.query("Photon1_lambda_coeff", m_lambda);
   }
 
   // Find pressure. Need gas state for this. 
@@ -570,20 +570,20 @@ air_bolsig::photon_one::photon_one(){
   m_pO2 = pressure*O2_frac*units::s_atm2pascal;
 }
 
-air_bolsig::photon_one::~photon_one(){
+air_bolsig::Photon_one::~Photon_one(){
   
 }
 
-air_bolsig::photon_two::photon_two(){
-  m_name   = "photon_two";
+air_bolsig::Photon_two::Photon_two(){
+  m_name   = "Photon_two";
 
   m_A      = 2.88E-3;
   m_lambda = 1.09E-1;
 
   { // Parameters
     ParmParse pp("air_bolsig");
-    pp.query("photon2_A_coeff",      m_A);
-    pp.query("photon2_lambda_coeff", m_lambda);
+    pp.query("Photon2_A_coeff",      m_A);
+    pp.query("Photon2_lambda_coeff", m_lambda);
   }
 
   // Find pressure. Need gas state for this. 
@@ -597,20 +597,20 @@ air_bolsig::photon_two::photon_two(){
   m_pO2 = pressure*O2_frac*units::s_atm2pascal;
 }
 
-air_bolsig::photon_two::~photon_two(){
+air_bolsig::Photon_two::~Photon_two(){
   
 }
 
-air_bolsig::photon_three::photon_three(){
-  m_name   = "photon_three";
+air_bolsig::Photon_three::Photon_three(){
+  m_name   = "Photon_three";
 
   m_A      = 2.76E-1;
   m_lambda = 6.69E-1;
 
   { // Parameters
     ParmParse pp("air_bolsig");
-    pp.query("photon3_A_coeff",      m_A);
-    pp.query("photon3_lambda_coeff", m_lambda);
+    pp.query("Photon3_A_coeff",      m_A);
+    pp.query("Photon3_lambda_coeff", m_lambda);
   }
 
   // Find pressure. Need gas state for this. 
@@ -624,7 +624,7 @@ air_bolsig::photon_three::photon_three(){
   m_pO2 = pressure*O2_frac*units::s_atm2pascal;  
 }
 
-air_bolsig::photon_three::~photon_three(){
+air_bolsig::Photon_three::~Photon_three(){
   
 #include "CD_NamespaceFooter.H"
 

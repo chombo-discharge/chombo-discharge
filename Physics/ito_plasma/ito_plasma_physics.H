@@ -22,7 +22,7 @@
 
 #include "ito_species.H"
 #include "rte_species.H"
-#include "photon.H"
+#include <CD_Photon.H>
 #include "ito_particle.H"
 #include "ito_reaction.H"
 #include "photo_reaction.H"
@@ -70,7 +70,7 @@ namespace physics {
       const Vector<RefCountedPtr<ito_species> >& get_ito_species() const;
 
       /*!
-	@brief Get all photons
+	@brief Get all Photons
       */
       const Vector<RefCountedPtr<rte_species> >& get_rte_species() const;
 
@@ -143,8 +143,8 @@ namespace physics {
       */
       inline
       void advance_reaction_network(Vector<List<ito_particle>* >& a_particles,
-				    Vector<List<photon>* >&       a_photons,
-				    Vector<List<photon>* >&       a_newPhotons,
+				    Vector<List<Photon>* >&       a_Photons,
+				    Vector<List<Photon>* >&       a_newPhotons,
 				    const Vector<Real>&           a_sources, 
 				    const RealVect                a_E,           
 				    const RealVect                a_cellPos,
@@ -161,7 +161,7 @@ namespace physics {
 	@brief Reconcile the number of particles
       */
       inline
-      void reconcile_photons(Vector<List<photon>* >&  a_newPhotons,
+      void reconcile_Photons(Vector<List<Photon>* >&  a_newPhotons,
 			     const Vector<long long>& a_numNewPhotons,
 			     const RealVect           a_cellPos,
 			     const RealVect           a_centroidPos,
@@ -189,10 +189,10 @@ namespace physics {
 			       const Real                    a_kappa) const;
 
       /*!
-	@brief Reconcile number of photons
+	@brief Reconcile number of Photons
       */
       inline
-      void reconcile_photons(List<photon>&      a_newPhotons,
+      void reconcile_Photons(List<Photon>&      a_newPhotons,
 			     const rte_species& a_species,
 			     const long long    a_numNewPhotons,
 			     const RealVect     a_cellPos,
@@ -211,7 +211,7 @@ namespace physics {
       void reconcile_photoionization(Vector<List<ito_particle>* >& a_particles,
 				     Vector<Real>&                 a_mean_energies,
 				     const Vector<long long>&      a_numParticles,
-				     const Vector<List<photon>* >& a_photons) const;
+				     const Vector<List<Photon>* >& a_Photons) const;
 
       
       /*!

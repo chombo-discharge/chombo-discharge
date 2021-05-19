@@ -37,7 +37,7 @@ air7::air7(){
   MayDay::Warning("air7::air7 - this class is really not done...");
 
   m_num_species = 7;  // seven species
-  m_num_photons = 3;  // Bourdon model for photons
+  m_num_Photons = 3;  // Bourdon model for Photons
 
   m_seed = 0;
   m_poiss_exp_swap = 500.;
@@ -186,14 +186,14 @@ air7::air7(){
   m_species[m_O2plusN2_idx] = RefCountedPtr<species> (new air7::O2plusN2());
   m_species[m_O2minus_idx]  = RefCountedPtr<species> (new air7::O2minus());
 
-  // Instantiate photon solvers
-  m_photons.resize(m_num_photons);
-  m_photon1_idx = 0;
-  m_photon2_idx = 1;
-  m_photon3_idx = 2;
-  m_photons[m_photon1_idx] = RefCountedPtr<photon_group> (new air7::photon_one());
-  m_photons[m_photon2_idx] = RefCountedPtr<photon_group> (new air7::photon_two());
-  m_photons[m_photon3_idx] = RefCountedPtr<photon_group> (new air7::photon_three());
+  // Instantiate Photon solvers
+  m_Photons.resize(m_num_Photons);
+  m_Photon1_idx = 0;
+  m_Photon2_idx = 1;
+  m_Photon3_idx = 2;
+  m_Photons[m_Photon1_idx] = RefCountedPtr<Photon_group> (new air7::Photon_one());
+  m_Photons[m_Photon2_idx] = RefCountedPtr<Photon_group> (new air7::Photon_two());
+  m_Photons[m_Photon3_idx] = RefCountedPtr<Photon_group> (new air7::Photon_three());
 
   // Compute transport coefficients
   this->compute_transport_coefficients();
@@ -480,12 +480,12 @@ Vector<Real> air7::compute_cdr_source_terms(const Real              a_time,
 
 
   // Photoionization gamma + O2 -> e + O2+
-  const air7::photon_one*   photon1 = static_cast<air7::photon_one*>   (&(*m_photons[m_photon1_idx]));
-  const air7::photon_two*   photon2 = static_cast<air7::photon_two*>   (&(*m_photons[m_photon2_idx]));
-  const air7::photon_three* photon3 = static_cast<air7::photon_three*> (&(*m_photons[m_photon3_idx]));
-  p = m_photoionization_efficiency*units::s_c0*m_O2frac*m_p*(photon1->get_A()*a_rte_densities[m_photon1_idx]
-							     + photon2->get_A()*a_rte_densities[m_photon2_idx]
-							     + photon3->get_A()*a_rte_densities[m_photon3_idx]);
+  const air7::Photon_one*   Photon1 = static_cast<air7::Photon_one*>   (&(*m_Photons[m_Photon1_idx]));
+  const air7::Photon_two*   Photon2 = static_cast<air7::Photon_two*>   (&(*m_Photons[m_Photon2_idx]));
+  const air7::Photon_three* Photon3 = static_cast<air7::Photon_three*> (&(*m_Photons[m_Photon3_idx]));
+  p = m_photoionization_efficiency*units::s_c0*m_O2frac*m_p*(Photon1->get_A()*a_rte_densities[m_Photon1_idx]
+							     + Photon2->get_A()*a_rte_densities[m_Photon2_idx]
+							     + Photon3->get_A()*a_rte_densities[m_Photon3_idx]);
   products = m_fhd ? stochastic_reaction(p, vol, m_dt) : p;
 
   source[m_electron_idx] += products;
@@ -528,9 +528,9 @@ Vector<Real> air7::compute_cdr_fluxes(const Real&         a_time,
 
   // Add secondary emission
   if(cathode){
-    fluxes[m_electron_idx] += -a_rte_fluxes[m_photon1_idx]*a_quantum_efficiency;
-    fluxes[m_electron_idx] += -a_rte_fluxes[m_photon2_idx]*a_quantum_efficiency;
-    fluxes[m_electron_idx] += -a_rte_fluxes[m_photon3_idx]*a_quantum_efficiency;
+    fluxes[m_electron_idx] += -a_rte_fluxes[m_Photon1_idx]*a_quantum_efficiency;
+    fluxes[m_electron_idx] += -a_rte_fluxes[m_Photon2_idx]*a_quantum_efficiency;
+    fluxes[m_electron_idx] += -a_rte_fluxes[m_Photon3_idx]*a_quantum_efficiency;
 
     fluxes[m_electron_idx] += -fluxes[m_O2plus_idx]*a_townsend2;
     fluxes[m_electron_idx] += -fluxes[m_N2plus_idx]*a_townsend2;
@@ -619,7 +619,7 @@ Vector<Real> air7::compute_rte_source_terms(const Real&         a_time,
 					    const Vector<Real>& a_cdr_densities) const {
 
   // We take the source terms as Se = alpha*Ne*ve
-  Vector<Real> ret(m_num_photons, 0.0); 
+  Vector<Real> ret(m_num_Photons, 0.0); 
   
   const Real EbyN  = (a_E/(m_N*units::s_Td)).vectorLength();
   const Real k1    = this->compute_electron_N2_impact_ionization(EbyN);
@@ -627,9 +627,9 @@ Vector<Real> air7::compute_rte_source_terms(const Real&         a_time,
 
   const Real vol = pow(a_dx, SpaceDim);
   const Real Se  = m_fhd ? stochastic_reaction(p, vol, m_dt) : p;
-  ret[m_photon1_idx] = Max(0.0, Se);
-  ret[m_photon2_idx] = Max(0.0, Se);
-  ret[m_photon3_idx] = Max(0.0, Se);
+  ret[m_Photon1_idx] = Max(0.0, Se);
+  ret[m_Photon2_idx] = Max(0.0, Se);
+  ret[m_Photon3_idx] = Max(0.0, Se);
 
 
   return ret;

@@ -307,7 +307,7 @@ Real godunov::advance(const Real a_dt){
   t1 = MPI_Wtime();
   t_reac = t1-t0;
 
-  // Move photons
+  // Move Photons
   t0 = MPI_Wtime();
   if((m_timeStep +1) % m_fast_rte == 0){
     godunov::advance_rte(a_dt);              // Update RTE equations
@@ -377,7 +377,7 @@ void godunov::allocateInternals(){
 
   const int ncomp       = 1;
   const int num_species = m_physics->get_num_CdrSpecies();
-  const int num_photons = m_physics->get_num_rte_species();
+  const int num_Photons = m_physics->get_num_rte_species();
 
   // Allocate cdr storage
   m_cdr_scratch.resize(num_species);
@@ -388,7 +388,7 @@ void godunov::allocateInternals(){
   }
 
   // Allocate RTE storage
-  m_rte_scratch.resize(num_photons);
+  m_rte_scratch.resize(num_Photons);
   for (rte_iterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     m_rte_scratch[idx] = RefCountedPtr<rte_storage> (new rte_storage(m_amr, m_realm, m_rte->get_phase(), ncomp));

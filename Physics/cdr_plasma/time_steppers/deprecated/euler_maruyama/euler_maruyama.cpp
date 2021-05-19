@@ -325,7 +325,7 @@ void euler_maruyama::allocateInternals(){
 
   const int ncomp       = 1;
   const int num_species = m_plaskin->get_num_species();
-  const int num_photons = m_plaskin->get_num_photons();
+  const int num_Photons = m_plaskin->get_num_Photons();
 
   // Allocate cdr storage
   m_cdr_scratch.resize(num_species);
@@ -336,7 +336,7 @@ void euler_maruyama::allocateInternals(){
   }
 
   // Allocate RTE storage
-  m_rte_scratch.resize(num_photons);
+  m_rte_scratch.resize(num_Photons);
   for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     m_rte_scratch[idx] = RefCountedPtr<rte_storage> (new rte_storage(m_amr, m_rte->get_phase(), ncomp));

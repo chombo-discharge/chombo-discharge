@@ -17,19 +17,19 @@ namespace physics {
       class M_plus;
       class M_minus;
 
-      class photon_one;
-      class photon_two;
-      class photon_three;
+      class Photon_one;
+      class Photon_two;
+      class Photon_three;
 
       air3_bourdon();
       ~air3_bourdon();
   
 
       void advance_reaction_network(Vector<Real>&          a_particle_sources,
-				    Vector<Real>&          a_photon_sources,
+				    Vector<Real>&          a_Photon_sources,
 				    const Vector<Real>     a_particle_densities,
 				    const Vector<RealVect> a_particle_gradients,
-				    const Vector<Real>     a_photon_densities,
+				    const Vector<Real>     a_Photon_densities,
 				    const RealVect         a_E,
 				    const RealVect         a_pos,
 				    const Real             a_dx,

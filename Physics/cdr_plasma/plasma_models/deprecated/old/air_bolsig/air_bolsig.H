@@ -50,12 +50,12 @@
   air_bolsig.noise_octaves                 = 1                     # Initial noise octaves
   air_bolsig.noise_persistence             = 0.5                   # Reduction factor between each noise octave
   air_bolsig.noise_frequency               = 1.0 1.0 1.0           # Spatial noise frequency
-  air_bolsig.photon1_A_coeff               = 1.12E-4               # Parameters from Bourdon et. al photoionization model
-  air_bolsig.photon1_lambda_coeff          = 4.15E-2               # Parameters from Bourdon et. al photoionization model
-  air_bolsig.photon2_A_coeff               = 2.88E-2               # Parameters from Bourdon et. al photoionization model
-  air_bolsig.photon2_lambda_coeff          = 1.09E-1               # Parameters from Bourdon et. al photoionization model
-  air_bolsig.photon3_A_coeff               = 2.76E-1               # Parameters from Bourdon et. al photoionization model
-  air_bolsig.photon3_lambda_coeff          = 6.69E-1               # Parameters from Bourdon et. al photoionization model
+  air_bolsig.Photon1_A_coeff               = 1.12E-4               # Parameters from Bourdon et. al photoionization model
+  air_bolsig.Photon1_lambda_coeff          = 4.15E-2               # Parameters from Bourdon et. al photoionization model
+  air_bolsig.Photon2_A_coeff               = 2.88E-2               # Parameters from Bourdon et. al photoionization model
+  air_bolsig.Photon2_lambda_coeff          = 1.09E-1               # Parameters from Bourdon et. al photoionization model
+  air_bolsig.Photon3_A_coeff               = 2.76E-1               # Parameters from Bourdon et. al photoionization model
+  air_bolsig.Photon3_lambda_coeff          = 6.69E-1               # Parameters from Bourdon et. al photoionization model
       
 */
 class air_bolsig : public plasma_kinetics {
@@ -183,7 +183,7 @@ public:
   virtual Vector<Real> compute_conductor_fluxes(const Vector<Real>& a_extrapolated_fluxes,
 						const Vector<Real>& a_ion_densities,
 						const Vector<Real>& a_ion_velocities,
-						const Vector<Real>& a_photon_fluxes,
+						const Vector<Real>& a_Photon_fluxes,
 						const RealVect&     a_E,
 						const RealVect&     a_pos,
 						const RealVect&     a_normal,
@@ -195,7 +195,7 @@ public:
   virtual Vector<Real> compute_dielectric_fluxes(const Vector<Real>& a_extrapolated_fluxes,
 						 const Vector<Real>& a_ion_densities,
 						 const Vector<Real>& a_ion_velocities,
-						 const Vector<Real>& a_photon_fluxes,
+						 const Vector<Real>& a_Photon_fluxes,
 						 const RealVect&     a_E,
 						 const RealVect&     a_pos,
 						 const RealVect&     a_normal,
@@ -279,19 +279,19 @@ protected:
   int m_nminu_idx;
 
   /*!
-    @brief photon_one index
+    @brief Photon_one index
   */
-  int m_photon1_idx;
+  int m_Photon1_idx;
 
   /*!
-    @brief photon_two index
+    @brief Photon_two index
   */
-  int m_photon2_idx;
+  int m_Photon2_idx;
 
   /*!
-    @brief photon_three index
+    @brief Photon_three index
   */
-  int m_photon3_idx;
+  int m_Photon3_idx;
 
   /*!
     @brief Number of octaves to use for noise function
@@ -419,7 +419,7 @@ protected:
   virtual Vector<Real> compute_cathode_flux(const Vector<Real>& a_extrapolated_fluxes,
 					    const Vector<Real>& a_ion_densities,
 					    const Vector<Real>& a_ion_velocities,
-					    const Vector<Real>& a_photon_fluxes,
+					    const Vector<Real>& a_Photon_fluxes,
 					    const RealVect&     a_E,
 					    const RealVect&     a_pos,
 					    const RealVect&     a_normal,
@@ -431,7 +431,7 @@ protected:
   virtual Vector<Real> compute_anode_flux(const Vector<Real>& a_extrapolated_fluxes,
 					  const Vector<Real>& a_ion_densities,
 					  const Vector<Real>& a_ion_velocities,
-					  const Vector<Real>& a_photon_fluxes,
+					  const Vector<Real>& a_Photon_fluxes,
 					  const RealVect&     a_E,
 					  const RealVect&     a_pos,
 					  const RealVect&     a_normal,
@@ -607,19 +607,19 @@ protected:
   };
 
   /*!
-    @brief Implementation of a single photon transition
+    @brief Implementation of a single Photon transition
   */
-  class photon_one : public photon_group {
+  class Photon_one : public Photon_group {
   public:
     /*!
       @brief Constructor
     */
-    photon_one();
+    Photon_one();
 
     /*!
       @brief Destructor
     */
-    ~photon_one();
+    ~Photon_one();
 
     /*!
       @brief Get the absorption coefficient
@@ -665,19 +665,19 @@ protected:
   };
 
   /*!
-    @brief Implementation of a single photon transition
+    @brief Implementation of a single Photon transition
   */
-  class photon_two : public photon_group {
+  class Photon_two : public Photon_group {
   public:
     /*!
       @brief Constructor
     */
-    photon_two();
+    Photon_two();
 
     /*!
       @brief Destructor
     */
-    ~photon_two();
+    ~Photon_two();
 
     /*!
       @brief Get the absorption coefficient
@@ -723,19 +723,19 @@ protected:
   };
 
   /*!
-    @brief Implementation of a single photon transition
+    @brief Implementation of a single Photon transition
   */
-  class photon_three : public photon_group {
+  class Photon_three : public Photon_group {
   public:
     /*!
       @brief Constructor
     */
-    photon_three();
+    Photon_three();
 
     /*!
       @brief Destructor
     */
-    ~photon_three();
+    ~Photon_three();
 
     /*!
       @brief Get the absorption coefficient

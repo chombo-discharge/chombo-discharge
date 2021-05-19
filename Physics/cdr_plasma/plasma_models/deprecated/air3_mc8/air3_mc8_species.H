@@ -35,7 +35,7 @@ public:
   Real initialData(const RealVect a_pos, const Real a_time) const {return 0.0;}
 };
 
-class air3_mc8::phot_c4v0_X1v0 : public photon_group {
+class air3_mc8::phot_c4v0_X1v0 : public Photon_group {
 public:
   phot_c4v0_X1v0();
   ~phot_c4v0_X1v0(){}
@@ -45,7 +45,7 @@ protected:
   Real m_kappa;
 };
 
-class air3_mc8::phot_c4v0_X1v1 : public photon_group {
+class air3_mc8::phot_c4v0_X1v1 : public Photon_group {
 public:
   phot_c4v0_X1v1();
   ~phot_c4v0_X1v1(){}
@@ -55,7 +55,7 @@ protected:
   Real m_kappa;
 };
 
-class air3_mc8::phot_c4v1_X1v0 : public photon_group {
+class air3_mc8::phot_c4v1_X1v0 : public Photon_group {
 public:
   phot_c4v1_X1v0();
   ~phot_c4v1_X1v0(){};
@@ -65,7 +65,7 @@ protected:
   Real m_kappa;
 };
 
-class air3_mc8::phot_c4v1_X1v1 : public photon_group {
+class air3_mc8::phot_c4v1_X1v1 : public Photon_group {
 public:
   phot_c4v1_X1v1();
   ~phot_c4v1_X1v1(){}
@@ -75,7 +75,7 @@ protected:
   Real m_kappa;
 };
 
-class air3_mc8::phot_c4v1_X1v2 : public photon_group {
+class air3_mc8::phot_c4v1_X1v2 : public Photon_group {
 public:
   phot_c4v1_X1v2();
   ~phot_c4v1_X1v2(){}
@@ -85,7 +85,7 @@ protected:
   Real m_kappa;
 };
 
-class air3_mc8::phot_c4v1_X1v3 : public photon_group {
+class air3_mc8::phot_c4v1_X1v3 : public Photon_group {
 public:
   phot_c4v1_X1v3();
   ~phot_c4v1_X1v3(){}
@@ -95,7 +95,7 @@ protected:
   Real m_kappa;
 };
 
-class air3_mc8::phot_b1v1_X1v0 : public photon_group {
+class air3_mc8::phot_b1v1_X1v0 : public Photon_group {
 public:
   phot_b1v1_X1v0();
   ~phot_b1v1_X1v0(){}
@@ -105,7 +105,7 @@ protected:
   Real m_kappa;
 };
 
-class air3_mc8::phot_b1v1_X1v1 : public photon_group {
+class air3_mc8::phot_b1v1_X1v1 : public Photon_group {
 public:
   phot_b1v1_X1v1();
   ~phot_b1v1_X1v1();

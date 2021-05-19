@@ -1,6 +1,6 @@
 /*!
   @file   air7_zheleznyak_species.H
-  @brief  Declaration of charged species and photons for the air zheleznyak model
+  @brief  Declaration of charged species and Photons for the air zheleznyak model
   @author Robert Marskar
 */
 
@@ -84,10 +84,10 @@ namespace physics {
       Real initialData(const RealVect a_pos, const Real a_time) const {return 0.0;}
     };
 
-    class air7_zheleznyak::uv_photon : public rte_species {
+    class air7_zheleznyak::uv_Photon : public rte_species {
     public:
-      uv_photon();
-      ~uv_photon();
+      uv_Photon();
+      ~uv_Photon();
       Real getKappa(const RealVect a_pos) const;
       Real get_random_kappa() const;
       Real get_pO2() const { return m_pO2;}

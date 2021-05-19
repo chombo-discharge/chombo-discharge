@@ -142,9 +142,9 @@ void air3_bourdon::instantiate_species(){
   m_CdrSpecies[m_minu_idx]  = RefCountedPtr<CdrSpecies> (new air3_bourdon::M_minus());
 
   m_rte_species.resize(m_num_rte_species);
-  m_rte_species[m_pho1_idx] = RefCountedPtr<rte_species> (new air3_bourdon::photon_one());
-  m_rte_species[m_pho2_idx] = RefCountedPtr<rte_species> (new air3_bourdon::photon_two());
-  m_rte_species[m_pho3_idx] = RefCountedPtr<rte_species> (new air3_bourdon::photon_three());
+  m_rte_species[m_pho1_idx] = RefCountedPtr<rte_species> (new air3_bourdon::Photon_one());
+  m_rte_species[m_pho2_idx] = RefCountedPtr<rte_species> (new air3_bourdon::Photon_two());
+  m_rte_species[m_pho3_idx] = RefCountedPtr<rte_species> (new air3_bourdon::Photon_three());
 }
 
 void air3_bourdon::parseDomainBc(){
@@ -196,10 +196,10 @@ void air3_bourdon::parseDomainBc(){
 }
 
 void air3_bourdon::advance_reaction_network(Vector<Real>&          a_particle_sources,
-					    Vector<Real>&          a_photon_sources,
+					    Vector<Real>&          a_Photon_sources,
 					    const Vector<Real>     a_particle_densities,
 					    const Vector<RealVect> a_particle_gradients,
-					    const Vector<Real>     a_photon_densities,
+					    const Vector<Real>     a_Photon_densities,
 					    const RealVect         a_E,
 					    const RealVect         a_pos,
 					    const Real             a_dx,
@@ -247,22 +247,22 @@ void air3_bourdon::advance_reaction_network(Vector<Real>&          a_particle_so
   Sm += R2;
 
   // Photoionization, M + y => e + M+
-  const air3_bourdon::photon_one*   photon1 = static_cast<air3_bourdon::photon_one*>   (&(*m_rte_species[m_pho1_idx]));
-  const air3_bourdon::photon_two*   photon2 = static_cast<air3_bourdon::photon_two*>   (&(*m_rte_species[m_pho2_idx]));
-  const air3_bourdon::photon_three* photon3 = static_cast<air3_bourdon::photon_three*> (&(*m_rte_species[m_pho3_idx]));
+  const air3_bourdon::Photon_one*   Photon1 = static_cast<air3_bourdon::Photon_one*>   (&(*m_rte_species[m_pho1_idx]));
+  const air3_bourdon::Photon_two*   Photon2 = static_cast<air3_bourdon::Photon_two*>   (&(*m_rte_species[m_pho2_idx]));
+  const air3_bourdon::Photon_three* Photon3 = static_cast<air3_bourdon::Photon_three*> (&(*m_rte_species[m_pho3_idx]));
 
-  const Real Sph = m_photoi_eff*units::s_c0*m_O2frac*m_p*(photon1->get_A()*a_photon_densities[m_pho1_idx]
-							  + photon2->get_A()*a_photon_densities[m_pho2_idx]
-							  + photon3->get_A()*a_photon_densities[m_pho3_idx]);
+  const Real Sph = m_photoi_eff*units::s_c0*m_O2frac*m_p*(Photon1->get_A()*a_Photon_densities[m_pho1_idx]
+							  + Photon2->get_A()*a_Photon_densities[m_pho2_idx]
+							  + Photon3->get_A()*a_Photon_densities[m_pho3_idx]);
   Se += Sph;
   Sp += Sph;
 
   // Photo-excitation and emission. 
   const Real quench  = m_pq/(m_p + m_pq);
   const Real Rgamma  = R1*m_photoexc_eff*quench;
-  a_photon_sources[m_pho1_idx] = Rgamma;
-  a_photon_sources[m_pho2_idx] = Rgamma;
-  a_photon_sources[m_pho3_idx] = Rgamma;
+  a_Photon_sources[m_pho1_idx] = Rgamma;
+  a_Photon_sources[m_pho2_idx] = Rgamma;
+  a_Photon_sources[m_pho3_idx] = Rgamma;
 
   return;
 }

@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_LarsenCoefficients.H
-  @brief  Declaration of a class that holds coefficients for photon outflow boundary conditions
+  @brief  Declaration of a class that holds coefficients for Photon outflow boundary conditions
   @author Robert Marskar
 */
 

@@ -80,7 +80,7 @@ public:
   virtual void setRealm(const std::string a_realm);
 
   /*!
-    @brief Set the photon group
+    @brief Set the Photon group
   */
   virtual void setRtSpecies(const RefCountedPtr<rte_species> a_rte_species);
 

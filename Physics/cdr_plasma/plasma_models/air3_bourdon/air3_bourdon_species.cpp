@@ -62,45 +62,45 @@ Real air3_bourdon::M_plus::initialData(const RealVect a_pos, const Real a_time) 
   return m_uniform_density + m_seed_density*exp(-factor*factor/(m_seed_rad*m_seed_rad));
 }
 
-air3_bourdon::photon_one::photon_one(){
-  m_name     = "photon_one";
+air3_bourdon::Photon_one::Photon_one(){
+  m_name     = "Photon_one";
   m_constant = true;
 
   Real O2_frac = 0.2;
   Real pressure;
   
   ParmParse pp("air3_bourdon");
-  pp.get("photon1_A_coeff",      m_A);
-  pp.get("photon1_lambda_coeff", m_lambda);
+  pp.get("Photon1_A_coeff",      m_A);
+  pp.get("Photon1_lambda_coeff", m_lambda);
   pp.get("pressure",             pressure);
   
   m_pO2 = pressure*O2_frac*units::s_atm2pascal;
 }
 
-air3_bourdon::photon_two::photon_two(){
-  m_name     = "photon_two";
+air3_bourdon::Photon_two::Photon_two(){
+  m_name     = "Photon_two";
   m_constant = true;
 
   Real O2_frac = 0.2;
   Real pressure;
   
   ParmParse pp("air3_bourdon");
-  pp.get("photon2_A_coeff",      m_A);
-  pp.get("photon2_lambda_coeff", m_lambda);
+  pp.get("Photon2_A_coeff",      m_A);
+  pp.get("Photon2_lambda_coeff", m_lambda);
   pp.get("pressure",             pressure);
   
   m_pO2 = pressure*O2_frac*units::s_atm2pascal;
 }
 
-air3_bourdon::photon_three::photon_three(){
-  m_name     = "photon_three";
+air3_bourdon::Photon_three::Photon_three(){
+  m_name     = "Photon_three";
   m_constant = true;
 
   Real O2_frac = 0.2;
   Real pressure;
   ParmParse pp("air3_bourdon");
-  pp.get("photon3_A_coeff",      m_A);
-  pp.get("photon3_lambda_coeff", m_lambda);
+  pp.get("Photon3_A_coeff",      m_A);
+  pp.get("Photon3_lambda_coeff", m_lambda);
   pp.get("pressure",             pressure);
   
   m_pO2 = pressure*O2_frac*units::s_atm2pascal;

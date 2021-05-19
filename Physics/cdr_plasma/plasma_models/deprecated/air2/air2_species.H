@@ -35,10 +35,10 @@ protected:
   RealVect m_seed_position;
 };
 
-class air2::photon_one : public photon_group {
+class air2::Photon_one : public Photon_group {
 public:
-  photon_one();
-  ~photon_one();
+  Photon_one();
+  ~Photon_one();
   Real getKappa(const RealVect a_pos) const;
   Real get_lambda() const;
   Real get_A() const;
@@ -49,10 +49,10 @@ protected:
   Real m_pO2;
 };
 
-class air2::photon_two : public photon_group {
+class air2::Photon_two : public Photon_group {
 public:
-  photon_two();
-  ~photon_two();
+  Photon_two();
+  ~Photon_two();
   Real getKappa(const RealVect a_pos) const;
   Real get_lambda() const;
   Real get_A() const;
@@ -63,10 +63,10 @@ protected:
   Real m_pO2;
 };
 
-class air2::photon_three : public photon_group {
+class air2::Photon_three : public Photon_group {
 public:
-  photon_three();
-  ~photon_three();
+  Photon_three();
+  ~Photon_three();
   Real getKappa(const RealVect a_pos) const;
   Real get_lambda() const;
   Real get_A() const;

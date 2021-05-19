@@ -1,6 +1,6 @@
 /*!
   @file   air6_mc8.H
-  @brief  6-species (3/3 charged/excited) and 8-photon model for air
+  @brief  6-species (3/3 charged/excited) and 8-Photon model for air
   @author Robert Marskar
   @date   Feb. 2018
 */
@@ -35,10 +35,10 @@ public:
   
 
   void advance_reaction_network(Vector<Real>&          a_particle_sources,
-				Vector<Real>&          a_photon_sources,
+				Vector<Real>&          a_Photon_sources,
 				const Vector<Real>     a_particle_densities,
 				const Vector<RealVect> a_particle_gradients,
-				const Vector<Real>     a_photon_densities,
+				const Vector<Real>     a_Photon_densities,
 				const RealVect         a_E,
 				const RealVect         a_pos,
 				const Real             a_dx,
@@ -139,7 +139,7 @@ protected:
   int m_c4v1_idx; // N2 c4(v=1) excited state
   int m_b1v1_idx; // N2 b1(v=0) excited state
 
-  // Indicates for various photons
+  // Indicates for various Photons
   int m_c4v0_X1v0_idx; // Transition c4(v=0) -> X1(v=0)
   int m_c4v0_X1v1_idx; // Transition c4(v=0) -> X1(v=0)
   int m_c4v1_X1v0_idx; // Transition c4(v=1) -> X1(v=0)
@@ -262,10 +262,10 @@ protected:
 
   // Tau leaping method
   void network_tau(Vector<Real>&          a_particle_sources,
-		   Vector<Real>&          a_photon_sources,
+		   Vector<Real>&          a_Photon_sources,
 		   const Vector<Real>     a_particle_densities,
 		   const Vector<RealVect> a_particle_gradients,
-		   const Vector<Real>     a_photon_densities,
+		   const Vector<Real>     a_Photon_densities,
 		   const RealVect         a_E,
 		   const RealVect         a_pos,
 		   const Real             a_dx,
@@ -275,10 +275,10 @@ protected:
 
   // stochastic simulation algorithm
   void network_ssa(Vector<Real>&          a_particle_sources,
-		   Vector<Real>&          a_photon_sources,
+		   Vector<Real>&          a_Photon_sources,
 		   const Vector<Real>     a_particle_densities,
 		   const Vector<RealVect> a_particle_gradients,
-		   const Vector<Real>     a_photon_densities,
+		   const Vector<Real>     a_Photon_densities,
 		   const RealVect         a_E,
 		   const RealVect         a_pos,
 		   const Real             a_dx,
@@ -288,10 +288,10 @@ protected:
 
   // stochastic simulation algorithm
   void network_rre(Vector<Real>&          a_particle_sources,
-		   Vector<Real>&          a_photon_sources,
+		   Vector<Real>&          a_Photon_sources,
 		   const Vector<Real>     a_particle_densities,
 		   const Vector<RealVect> a_particle_gradients,
-		   const Vector<Real>     a_photon_densities,
+		   const Vector<Real>     a_Photon_densities,
 		   const RealVect         a_E,
 		   const RealVect         a_pos,
 		   const Real             a_dx,

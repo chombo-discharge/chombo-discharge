@@ -18,9 +18,9 @@ public:
   class positive_species;
   class negative_species;
 
-  class photon_one;
-  class photon_two;
-  class photon_three;
+  class Photon_one;
+  class Photon_two;
+  class Photon_three;
 
   /*!
     @brief Get gas temperature, pressure, density, and molecular fractions
@@ -117,9 +117,9 @@ protected:
   int m_O2minus_idx;
   int m_Ominus_idx;
   int m_O_idx;
-  int m_photon1_idx;
-  int m_photon2_idx;
-  int m_photon3_idx;
+  int m_Photon1_idx;
+  int m_Photon2_idx;
+  int m_Photon3_idx;
 
   /*!
     @brief Background gas temperature

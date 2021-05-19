@@ -29,52 +29,52 @@ namespace physics {
       ito_reaction() = default;
 
       /*!
-	@brief Full ctor. Includes photons and energies. LEA fodder. 
+	@brief Full ctor. Includes Photons and energies. LEA fodder. 
       */
       ito_reaction(const std::initializer_list<int>                   a_reactants,
 		   const std::initializer_list<int>                   a_particle_products,
-		   const std::initializer_list<int>                   a_photon_products,
+		   const std::initializer_list<int>                   a_Photon_products,
 		   const std::initializer_list<std::pair<int, Real> > a_energy_jumps) : m_reactants(a_reactants),
 											m_particle_products(a_particle_products),
-											m_photon_products(a_photon_products),
+											m_Photon_products(a_Photon_products),
 											m_energy_jumps(a_energy_jumps){
 	this->compute_state_change();
 	this->compute_energy_change();
       }
 
       /*!
-	@brief Full ctor. Includes energies but not photons. LEA fodder. 
+	@brief Full ctor. Includes energies but not Photons. LEA fodder. 
       */
       ito_reaction(const std::initializer_list<int>                   a_reactants,
 		   const std::initializer_list<int>                   a_particle_products,
 		   const std::initializer_list<std::pair<int, Real> > a_energy_jumps) : m_reactants(a_reactants),
 											m_particle_products(a_particle_products),
-											m_photon_products(0),
+											m_Photon_products(0),
 											m_energy_jumps(a_energy_jumps){
 	this->compute_state_change();
 	this->compute_energy_change();
       }
 
       /*!
-	@brief Full Ctor, includes possible photons but disregards energy. LFA fodder. 
+	@brief Full Ctor, includes possible Photons but disregards energy. LFA fodder. 
       */
       ito_reaction(const std::initializer_list<int> a_reactants,
 		   const std::initializer_list<int> a_particle_products,
-		   const std::initializer_list<int> a_photon_products) : m_reactants(a_reactants),
+		   const std::initializer_list<int> a_Photon_products) : m_reactants(a_reactants),
 									 m_particle_products(a_particle_products),
-									 m_photon_products(a_photon_products),
+									 m_Photon_products(a_Photon_products),
 									 m_energy_jumps(0) {
 	this->compute_state_change();
 	this->compute_energy_change();
       }
 
       /*!
-	@brief Partial ctor. No photons generated and no energy. LFA fodder. 
+	@brief Partial ctor. No Photons generated and no energy. LFA fodder. 
       */
       ito_reaction(const std::initializer_list<int> a_reactants,
 		   const std::initializer_list<int> a_particle_products) : m_reactants(a_reactants),
 									   m_particle_products(a_particle_products),
-									   m_photon_products(0),
+									   m_Photon_products(0),
 									   m_energy_jumps(0){
 	this->compute_state_change();
 	this->compute_energy_change();
@@ -94,11 +94,11 @@ namespace physics {
       void jump_state(Vector<long long>& a_particles, const long long a_num_reactions) const;
 
       /*!
-	@brief Allows a state to jump with N reactions. Includes generation of photons. 
+	@brief Allows a state to jump with N reactions. Includes generation of Photons. 
       */
       inline
       void jump_state(Vector<long long>& a_particles,
-		      Vector<long long>& a_photons,
+		      Vector<long long>& a_Photons,
 		      const long long    a_num_reactions) const;
 
       /*!
@@ -147,7 +147,7 @@ namespace physics {
 	@brief Get reactants
       */
       inline
-      const std::list<int>& get_photon_products() const;
+      const std::list<int>& get_Photon_products() const;
 
       /*!
 	@brief Get the state change. You need to iterate through this map. 
@@ -180,7 +180,7 @@ namespace physics {
 
       std::list<int> m_reactants;                      // Particle reactants
       std::list<int> m_particle_products;              // Particle products
-      std::list<int> m_photon_products;                // Photon products
+      std::list<int> m_Photon_products;                // Photon products
       std::list<std::pair<int, Real> > m_energy_jumps; // Energy changes
 
       std::map<int, int>  m_phiChange;  // Change in species due to firing of one reaction. First index is species, second is change. 

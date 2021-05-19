@@ -1,5 +1,5 @@
 /*!
-  @file   photon_reaction.H
+  @file   Photon_reaction.H
   @brief  Declaration of a class for holding photoionization reaction types in ito_plasma physics
   @author Robert Marskar
   @date   Aug. 2020
@@ -30,7 +30,7 @@ namespace physics {
       photo_reaction() = default;
 
       /*!
-	@brief Full Ctor, includes possible photons. 
+	@brief Full Ctor, includes possible Photons. 
       */
       photo_reaction(const int a_source,
 		     const std::initializer_list<int> a_targets) : m_source(a_source),
@@ -58,13 +58,13 @@ namespace physics {
       }
 
       /*!
-	@brief Get the photon source
+	@brief Get the Photon source
       */
       inline
       const int& source() const;
 
       /*!
-	@brief Get the photon targets
+	@brief Get the Photon targets
       */
       inline
       const std::deque<int>& targets() const;

@@ -18,20 +18,20 @@
 morrow_fhd::morrow_fhd(){
 
   m_num_species = 3;
-  m_num_photons = 1;
+  m_num_Photons = 1;
 
   m_species.resize(m_num_species);
-  m_photons.resize(m_num_photons);
+  m_Photons.resize(m_num_Photons);
 
   m_nelec_idx   = 0;
   m_nplus_idx   = 1;
   m_nminu_idx   = 2;
-  m_photon1_idx = 0;
+  m_Photon1_idx = 0;
   
   m_species[m_nelec_idx]    = RefCountedPtr<species>      (new morrow_fhd::electron());
   m_species[m_nplus_idx]    = RefCountedPtr<species>      (new morrow_fhd::positive_species());
   m_species[m_nminu_idx]    = RefCountedPtr<species>      (new morrow_fhd::negative_species());
-  m_photons[m_photon1_idx]  = RefCountedPtr<photon_group> (new morrow_fhd::uv_photon());
+  m_Photons[m_Photon1_idx]  = RefCountedPtr<Photon_group> (new morrow_fhd::uv_Photon());
 
   ParmParse pp("morrow_fhd");
   std::string str;
@@ -230,7 +230,7 @@ Vector<Real> morrow_fhd::compute_cdr_source_terms(const Real              a_time
   source[m_nminu_idx] -= products;
 
   // Photoionization
-  p = m_photoi_eff*(a_rte_densities[m_photon1_idx])/m_dt;
+  p = m_photoi_eff*(a_rte_densities[m_Photon1_idx])/m_dt;
   products = p;//m_fhd ? stochastic_reaction(p, vol, m_dt) : p;
   source[m_nelec_idx] += products;
   source[m_nplus_idx] += products;
@@ -458,14 +458,14 @@ Vector<Real> morrow_fhd::compute_rte_source_terms(const Real&         a_time,
 						  const RealVect&     a_pos,
 						  const RealVect&     a_E,
 						  const Vector<Real>& a_cdr_densities) const{
-  Vector<Real> ret(m_num_photons);
+  Vector<Real> ret(m_num_Photons);
 
   const Real alpha           = this->compute_alpha(a_E);           // Compute ionization coefficient
   const Real Ne              = a_cdr_densities[m_nelec_idx];       // Electron density
   const Real ve              = compute_ve(a_E).vectorLength();     // Electron velocity
   const Real Se              = Max(0., alpha*Ne*ve);               // Excitations = alpha*Ne*ve
 
-  ret[m_photon1_idx] = Se*m_exc_eff*(m_pq/(m_pq + m_p));
+  ret[m_Photon1_idx] = Se*m_exc_eff*(m_pq/(m_pq + m_p));
 
   return ret;
 }
@@ -576,8 +576,8 @@ Real morrow_fhd::negative_species::initialData(const RealVect a_pos, const Real 
   return 0.;
 }
 
-morrow_fhd::uv_photon::uv_photon(){
-  m_name   = "uv_photon";
+morrow_fhd::uv_Photon::uv_Photon(){
+  m_name   = "uv_Photon";
 
   Real pressure, O2_frac;
   
@@ -602,15 +602,15 @@ morrow_fhd::uv_photon::uv_photon(){
   m_udist01 = new std::uniform_real_distribution<Real>(0.0, 1.0);
 }
 
-morrow_fhd::uv_photon::~uv_photon(){
+morrow_fhd::uv_Photon::~uv_Photon(){
   
 }
 
-Real morrow_fhd::uv_photon::getKappa(const RealVect a_pos) const {
-  MayDay::Abort("morrow_fhd::uv_photon::getKappa - should not be called. morrow_fhd is used with the mc_photo module");
+Real morrow_fhd::uv_Photon::getKappa(const RealVect a_pos) const {
+  MayDay::Abort("morrow_fhd::uv_Photon::getKappa - should not be called. morrow_fhd is used with the mc_photo module");
 }
 
-Real morrow_fhd::uv_photon::get_random_kappa() const {
+Real morrow_fhd::uv_Photon::get_random_kappa() const {
   const Real f = m_f1 + (*m_udist01)(*m_rng)*(m_f2 - m_f1);
   return m_K1*pow(m_K2/m_K1, (f-m_f1)/(m_f2-m_f1));
 #include "CD_NamespaceFooter.H"

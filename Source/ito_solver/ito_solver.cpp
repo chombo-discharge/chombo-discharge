@@ -850,7 +850,7 @@ void ito_solver::intersect_particles_if(ParticleContainer<ito_particle>& a_parti
 	const Real     pathLen = path.vectorLength();
 
 	// Check if we should check of different types of boundary intersections. These are checp initial tests that allow
-	// us to skip intersection tests for some photons.
+	// us to skip intersection tests for some Photons.
 	bool checkEB  = false;
 	bool checkDom = false;
 

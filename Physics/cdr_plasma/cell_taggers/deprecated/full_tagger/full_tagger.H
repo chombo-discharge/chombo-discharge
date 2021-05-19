@@ -137,9 +137,9 @@ protected:
     @param[in] a_ion_gradients Ion gradients
     @param[in] a_min_ion_gradients Smallest ion gradients in domain
     @param[in] a_max_ion_gradients Largest ion gradients in domain
-    @param[in] a_photon_densities Photon densities
-    @param[in] a_min_photon_densities Minium photon densities in domain
-    @param[in] a_max_photon_densities Maximum photon densities in domain
+    @param[in] a_Photon_densities Photon densities
+    @param[in] a_min_Photon_densities Minium Photon densities in domain
+    @param[in] a_max_Photon_densities Maximum Photon densities in domain
   */
   virtual Vector<Real> tracer(const RealVect         a_pos,
 			      const Real             a_time,
@@ -162,9 +162,9 @@ protected:
 			      const Vector<RealVect> a_ion_gradients,
 			      const Vector<Real>     a_min_ion_gradients,
 			      const Vector<Real>     a_max_ion_gradients,
-			      const Vector<Real>     a_photon_densities,
-			      const Vector<Real>     a_min_photon_densities,
-			      const Vector<Real>     a_max_photon_densities) = 0;
+			      const Vector<Real>     a_Photon_densities,
+			      const Vector<Real>     a_min_Photon_densities,
+			      const Vector<Real>     a_max_Photon_densities) = 0;
 
   /*!
     @brief Coarsen a cell based on a tracer field

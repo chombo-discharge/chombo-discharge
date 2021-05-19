@@ -30,7 +30,7 @@ std::string air9eed_bourdon::s_bolsig_townsend = "Energy (eV)	Townsend ioniz. co
 
 air9eed_bourdon::air9eed_bourdon(){
   m_num_CdrSpecies = 9;    // 8 reactive ones plus the eed
-  m_num_rte_species = 3;    // Bourdon model for photons
+  m_num_rte_species = 3;    // Bourdon model for Photons
   m_eed_solve   = true; // Yes, we're doing an EED solve so we must have a Poisson solution first
   m_eed_index   = 0;    // Index for the EED equation
 
@@ -139,15 +139,15 @@ void air9eed_bourdon::instantiate_species(){
   m_CdrSpecies[m_O2minus_idx]  = RefCountedPtr<CdrSpecies> (new air9eed_bourdon::O2minus());
   m_CdrSpecies[m_Ominus_idx]   = RefCountedPtr<CdrSpecies> (new air9eed_bourdon::Ominus());
 
-  // Instantiate photon solvers
+  // Instantiate Photon solvers
   m_rte_species.resize(m_num_rte_species);
-  m_photon1_idx = 0;
-  m_photon2_idx = 1;
-  m_photon3_idx = 2;
+  m_Photon1_idx = 0;
+  m_Photon2_idx = 1;
+  m_Photon3_idx = 2;
   
-  m_rte_species[m_photon1_idx] = RefCountedPtr<rte_species> (new air9eed_bourdon::photon_one());
-  m_rte_species[m_photon2_idx] = RefCountedPtr<rte_species> (new air9eed_bourdon::photon_two());
-  m_rte_species[m_photon3_idx] = RefCountedPtr<rte_species> (new air9eed_bourdon::photon_three());
+  m_rte_species[m_Photon1_idx] = RefCountedPtr<rte_species> (new air9eed_bourdon::Photon_one());
+  m_rte_species[m_Photon2_idx] = RefCountedPtr<rte_species> (new air9eed_bourdon::Photon_two());
+  m_rte_species[m_Photon3_idx] = RefCountedPtr<rte_species> (new air9eed_bourdon::Photon_three());
 }
 
 void air9eed_bourdon::read_file_entries(lookup_table& a_table, const std::string a_string){
@@ -479,12 +479,12 @@ void air9eed_bourdon::advance_reaction_network(Vector<Real>&          a_cdr_sour
 #endif
 
   // Photoionization gamma + O2 -> e + O2+
-  const air9eed_bourdon::photon_one*   photon1 = static_cast<air9eed_bourdon::photon_one*>   (&(*m_rte_species[m_photon1_idx]));
-  const air9eed_bourdon::photon_two*   photon2 = static_cast<air9eed_bourdon::photon_two*>   (&(*m_rte_species[m_photon2_idx]));
-  const air9eed_bourdon::photon_three* photon3 = static_cast<air9eed_bourdon::photon_three*> (&(*m_rte_species[m_photon3_idx]));
-  products = m_photoionization_efficiency*units::s_c0*m_O2frac*m_p*(photon1->get_A()*a_rte_densities[m_photon1_idx]
-								    + photon2->get_A()*a_rte_densities[m_photon2_idx]
-								    + photon3->get_A()*a_rte_densities[m_photon3_idx]);
+  const air9eed_bourdon::Photon_one*   Photon1 = static_cast<air9eed_bourdon::Photon_one*>   (&(*m_rte_species[m_Photon1_idx]));
+  const air9eed_bourdon::Photon_two*   Photon2 = static_cast<air9eed_bourdon::Photon_two*>   (&(*m_rte_species[m_Photon2_idx]));
+  const air9eed_bourdon::Photon_three* Photon3 = static_cast<air9eed_bourdon::Photon_three*> (&(*m_rte_species[m_Photon3_idx]));
+  products = m_photoionization_efficiency*units::s_c0*m_O2frac*m_p*(Photon1->get_A()*a_rte_densities[m_Photon1_idx]
+								    + Photon2->get_A()*a_rte_densities[m_Photon2_idx]
+								    + Photon3->get_A()*a_rte_densities[m_Photon3_idx]);
 
   a_cdr_sources[m_electron_idx] += products;
   a_cdr_sources[m_O2plus_idx]   += products;
@@ -493,9 +493,9 @@ void air9eed_bourdon::advance_reaction_network(Vector<Real>&          a_cdr_sour
   // Photon source terms
   const Real kphot = k1*a_cdr_densities[m_electron_idx]*m_N*m_N2frac;
 
-  a_rte_sources[m_photon1_idx] = kphot*m_excitation_efficiency*(m_pq/(m_pq + m_p));
-  a_rte_sources[m_photon2_idx] = kphot*m_excitation_efficiency*(m_pq/(m_pq + m_p));
-  a_rte_sources[m_photon3_idx] = kphot*m_excitation_efficiency*(m_pq/(m_pq + m_p));
+  a_rte_sources[m_Photon1_idx] = kphot*m_excitation_efficiency*(m_pq/(m_pq + m_p));
+  a_rte_sources[m_Photon2_idx] = kphot*m_excitation_efficiency*(m_pq/(m_pq + m_p));
+  a_rte_sources[m_Photon3_idx] = kphot*m_excitation_efficiency*(m_pq/(m_pq + m_p));
 
 
 #if 0 // Debug
@@ -860,7 +860,7 @@ Vector<Real> air9eed_bourdon::compute_cathode_fluxes(const Real         a_time,
     }
   }
 
-  // Secondary emission from photons
+  // Secondary emission from Photons
   for (int j = 0; j < m_num_rte_species; j++){
 
   }

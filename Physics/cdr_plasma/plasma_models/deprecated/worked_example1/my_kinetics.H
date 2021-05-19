@@ -7,7 +7,7 @@ public:
 
   my_kinetics(){
     m_num_species = 1;
-    m_num_photons = 0;
+    m_num_Photons = 0;
     m_species[0] = RefCountedPtr<species> (new my_species());
   }
 
@@ -69,7 +69,7 @@ public:
 					const RealVect&     a_pos,
 					const RealVect&     a_E,
 					const Vector<Real>& a_cdr_densities) const {
-    return Vector<Real>(m_num_photons, 0.0);
+    return Vector<Real>(m_num_Photons, 0.0);
   }
 
   Real initial_sigma(const Real a_time, const RealVect& a_pos) const {

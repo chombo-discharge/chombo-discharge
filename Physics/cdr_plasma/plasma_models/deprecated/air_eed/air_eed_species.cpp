@@ -60,8 +60,8 @@ air_eed::M_minus::M_minus(){
   pp.get("diffusive_ions", str); m_isDiffusive = (str == "true") ? true : false;
 }
 
-air_eed::agg_photon::agg_photon(){
-  m_name      = "agg_photon";
+air_eed::agg_Photon::agg_Photon(){
+  m_name      = "agg_Photon";
 
   Real p;
   ParmParse pp("air_eed");
@@ -154,7 +154,7 @@ air_eed::agg_photon::agg_photon(){
   m_udist = new std::uniform_real_distribution<Real> (0.0, 1.0);
 }
 
-int air_eed::agg_photon::draw_photon_type() const {
+int air_eed::agg_Photon::draw_Photon_type() const {
   Real r = (*m_udist)(*m_rng);
 
   int ret = -1;
@@ -174,8 +174,8 @@ int air_eed::agg_photon::draw_photon_type() const {
   return ret;
 }
 
-Real air_eed::agg_photon::get_random_kappa() const{
-  const int type = draw_photon_type();
+Real air_eed::agg_Photon::get_random_kappa() const{
+  const int type = draw_Photon_type();
 
   return m_kappas[type];
 }

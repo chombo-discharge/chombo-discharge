@@ -1510,7 +1510,7 @@ void sdc::allocateInternals(){
   }
   
   m_cdr_error.resize(m_plaskin->get_num_species());
-  m_dummy_rte.resize(m_plaskin->get_num_photons());
+  m_dummy_rte.resize(m_plaskin->get_num_Photons());
 
   for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
@@ -1596,8 +1596,8 @@ void sdc::allocate_poisson_storage(){
 
 void sdc::allocate_rte_storage(){
   const int ncomp       = 1;
-  const int num_photons = m_plaskin->get_num_photons();
-  m_rte_scratch.resize(num_photons);
+  const int num_Photons = m_plaskin->get_num_Photons();
+  m_rte_scratch.resize(num_Photons);
   
   for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();

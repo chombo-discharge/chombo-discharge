@@ -10,7 +10,7 @@
 #include "CD_NamespaceHeader.H"
   
 rte_species::rte_species(){
-  this->define("default_photon", 1.0);
+  this->define("default_Photon", 1.0);
 
   m_scatter = 0.0;
   m_kappa = 0.0;

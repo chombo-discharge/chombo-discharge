@@ -1,6 +1,6 @@
 /*!
   @file   air7_stephens_species.H
-  @brief  Declaration of charged species and photons for the air stephens model
+  @brief  Declaration of charged species and Photons for the air stephens model
   @author Robert Marskar
 */
 

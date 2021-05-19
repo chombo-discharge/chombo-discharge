@@ -11,7 +11,7 @@
 
 advection_kinetics::advection_kinetics(){
   m_num_species = 1;
-  m_num_photons = 0;
+  m_num_Photons = 0;
 
   m_species.resize(m_num_species);
   m_species[0] = RefCountedPtr<species> (new advection_kinetics::phi_advect());

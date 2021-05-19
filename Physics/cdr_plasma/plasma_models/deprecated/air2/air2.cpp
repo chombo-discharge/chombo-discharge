@@ -24,14 +24,14 @@
 
 air2::air2(){
   m_num_species  = 2;  
-  m_num_photons  = 3;
+  m_num_Photons  = 3;
   
   m_electron_idx = 0;
   m_positive_idx = 1;
   
-  m_photon1_idx  = 0;
-  m_photon2_idx  = 1;
-  m_photon3_idx  = 2;
+  m_Photon1_idx  = 0;
+  m_Photon2_idx  = 1;
+  m_Photon3_idx  = 2;
 
   ParmParse pp("air2");
   std::string str;
@@ -48,14 +48,14 @@ air2::air2(){
 
   // Instantiate cdr species
   m_species.resize(m_num_species);
-  m_photons.resize(m_num_photons);
+  m_Photons.resize(m_num_Photons);
   
   m_species[m_electron_idx] = RefCountedPtr<species> (new air2::electron());
   m_species[m_positive_idx] = RefCountedPtr<species> (new air2::positive_ion());
   
-  m_photons[m_photon1_idx]  = RefCountedPtr<photon_group> (new air2::photon_one());
-  m_photons[m_photon2_idx]  = RefCountedPtr<photon_group> (new air2::photon_two());
-  m_photons[m_photon3_idx]  = RefCountedPtr<photon_group> (new air2::photon_three());
+  m_Photons[m_Photon1_idx]  = RefCountedPtr<Photon_group> (new air2::Photon_one());
+  m_Photons[m_Photon2_idx]  = RefCountedPtr<Photon_group> (new air2::Photon_two());
+  m_Photons[m_Photon3_idx]  = RefCountedPtr<Photon_group> (new air2::Photon_three());
 }
 
 air2::~air2(){
@@ -91,10 +91,10 @@ Real air2::get_mobility(const Real a_E) const {
 }
 
 void air2::advance_reaction_network(Vector<Real>&          a_particle_sources,
-				    Vector<Real>&          a_photon_sources,
+				    Vector<Real>&          a_Photon_sources,
 				    const Vector<Real>     a_particle_densities,
 				    const Vector<RealVect> a_particle_gradients,
-				    const Vector<Real>     a_photon_densities,
+				    const Vector<Real>     a_Photon_densities,
 				    const RealVect         a_E,
 				    const RealVect         a_pos,
 				    const Real             a_dx,
@@ -109,9 +109,9 @@ void air2::advance_reaction_network(Vector<Real>&          a_particle_sources,
   const Real vol    = pow(a_dx, SpaceDim);
   const Real pO2    = 0.2*m_p;;
 
-  const air2::photon_one*   photon1 = static_cast<air2::photon_one*>   (&(*m_photons[m_photon1_idx]));
-  const air2::photon_two*   photon2 = static_cast<air2::photon_two*>   (&(*m_photons[m_photon2_idx]));
-  const air2::photon_three* photon3 = static_cast<air2::photon_three*> (&(*m_photons[m_photon3_idx]));
+  const air2::Photon_one*   Photon1 = static_cast<air2::Photon_one*>   (&(*m_Photons[m_Photon1_idx]));
+  const air2::Photon_two*   Photon2 = static_cast<air2::Photon_two*>   (&(*m_Photons[m_Photon2_idx]));
+  const air2::Photon_three* Photon3 = static_cast<air2::Photon_three*> (&(*m_Photons[m_Photon3_idx]));
   
   // Impact ionization and recomb
   const Real p1 = mu*alpha*E*a_particle_densities[m_electron_idx];
@@ -125,18 +125,18 @@ void air2::advance_reaction_network(Vector<Real>&          a_particle_sources,
   a_particle_sources[m_positive_idx] -= p2;
 
   // Photoionization
-  const Real Sph = m_photoionization_efficiency*units::s_c0*pO2*(photon1->get_A()*a_photon_densities[m_photon1_idx]
-								 + photon2->get_A()*a_photon_densities[m_photon2_idx]
-								 + photon3->get_A()*a_photon_densities[m_photon3_idx]);
+  const Real Sph = m_photoionization_efficiency*units::s_c0*pO2*(Photon1->get_A()*a_Photon_densities[m_Photon1_idx]
+								 + Photon2->get_A()*a_Photon_densities[m_Photon2_idx]
+								 + Photon3->get_A()*a_Photon_densities[m_Photon3_idx]);
   a_particle_sources[m_electron_idx] += Sph;
   a_particle_sources[m_positive_idx] += Sph;
 
 
-  // Emission of photons
+  // Emission of Photons
   const Real p     = mu*alpha*E*a_particle_densities[m_electron_idx]*m_excitation_efficiency*(m_pq/(m_pq + m_p));;
-  a_photon_sources[m_photon1_idx] = p;
-  a_photon_sources[m_photon2_idx] = p;
-  a_photon_sources[m_photon3_idx] = p;
+  a_Photon_sources[m_Photon1_idx] = p;
+  a_Photon_sources[m_Photon2_idx] = p;
+  a_Photon_sources[m_Photon3_idx] = p;
 }
 
 Vector<Real> air2::compute_cdr_fluxes(const Real         a_time,
@@ -170,7 +170,7 @@ Vector<Real> air2::compute_cdr_fluxes(const Real         a_time,
 
   // Add secondary emission
   if(cathode){
-    fluxes[m_electron_idx] += -a_rte_fluxes[m_photon1_idx]*a_quantum_efficiency;
+    fluxes[m_electron_idx] += -a_rte_fluxes[m_Photon1_idx]*a_quantum_efficiency;
   }
 
   return fluxes;

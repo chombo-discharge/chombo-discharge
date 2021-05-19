@@ -52,10 +52,10 @@ public:
   Real initialData(const RealVect a_pos, const Real a_time) const {return 0.0;}
 };
 
-class air_eed::agg_photon : public photon_group {
+class air_eed::agg_Photon : public Photon_group {
 public:
-  agg_photon();
-  ~agg_photon(){}
+  agg_Photon();
+  ~agg_Photon(){}
   Real getKappa(const RealVect a_pos) const {return m_kappa;}
   Real get_random_kappa() const;
 protected:
@@ -81,20 +81,20 @@ protected:
   Real m_b1v1_X1v0_photoi_eff; // Transition b1(v=1) -> X1(v=0) + electron-ion pair
   Real m_b1v1_X1v1_photoi_eff; // Transition b1(v=1) -> X1(v=1) + electron-ion pair
 
-  Real m_prob_c4v0_X1v0; // Relative probability for the photon being a c4v0->X1v0 photon
-  Real m_prob_c4v0_X1v1; // Relative probability for the photon being a c4v0->X1v1 photon
-  Real m_prob_c4v1_X1v0; // Relative probability for the photon being a c4v1->X1v0 photon
-  Real m_prob_c4v1_X1v1; // Relative probability for the photon being a c4v1->X1v1 photon
-  Real m_prob_c4v1_X1v2; // Relative probability for the photon being a c4v1->X1v2 photon
-  Real m_prob_c4v1_X1v3; // Relative probability for the photon being a c4v1->X1v3 photon
-  Real m_prob_b1v1_X1v0; // Relative probability for the photon being a b1v1->X1v0 photon
-  Real m_prob_b1v1_X1v1; // Relative probability for the photon being a b1v1->X1v1 photon
+  Real m_prob_c4v0_X1v0; // Relative probability for the Photon being a c4v0->X1v0 Photon
+  Real m_prob_c4v0_X1v1; // Relative probability for the Photon being a c4v0->X1v1 Photon
+  Real m_prob_c4v1_X1v0; // Relative probability for the Photon being a c4v1->X1v0 Photon
+  Real m_prob_c4v1_X1v1; // Relative probability for the Photon being a c4v1->X1v1 Photon
+  Real m_prob_c4v1_X1v2; // Relative probability for the Photon being a c4v1->X1v2 Photon
+  Real m_prob_c4v1_X1v3; // Relative probability for the Photon being a c4v1->X1v3 Photon
+  Real m_prob_b1v1_X1v0; // Relative probability for the Photon being a b1v1->X1v0 Photon
+  Real m_prob_b1v1_X1v1; // Relative probability for the Photon being a b1v1->X1v1 Photon
 
   // Probabilities and kappas
   Vector<Real> m_probs;
   Vector<Real> m_kappas;
 
-  int draw_photon_type() const;
+  int draw_Photon_type() const;
 #include "CD_NamespaceFooter.H"
 
 #endif

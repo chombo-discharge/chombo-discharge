@@ -2164,7 +2164,7 @@ void ito_plasma_stepper::advance_reaction_network_nwo(const EBAMRCellData& a_E, 
     pout() << "ito_plasma_stepper::advance_reaction_network(ppc, ypc, E, sources, dt)" << endl;
   }
 
-  // 1. Compute the number of particles per cell. Set the number of photons to be generated per cell to zero. 
+  // 1. Compute the number of particles per cell. Set the number of Photons to be generated per cell to zero. 
   this->compute_reactive_particles_per_cell(m_particle_ppc);
   this->compute_reactive_mean_energies_per_cell(m_particle_eps);
 
@@ -2175,7 +2175,7 @@ void ito_plasma_stepper::advance_reaction_network_nwo(const EBAMRCellData& a_E, 
   data_ops::set_value(m_particle_ypc, 0.0);
   data_ops::copy(m_particle_old, m_particle_ppc);
 
-  // 2. Solve for the new number of particles per cell. This also obtains the number of photons to be generated in each cell. 
+  // 2. Solve for the new number of particles per cell. This also obtains the number of Photons to be generated in each cell. 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     this->advance_reaction_network_nwo(*m_fluid_ppc[lvl], *m_fluid_ypc[lvl], *m_fluid_eps[lvl], *a_E[lvl], *a_EdotJ[lvl], lvl, a_dt);
   }
@@ -2382,8 +2382,8 @@ void ito_plasma_stepper::reconcile_particles(const EBCellFAB& a_newParticlesPerC
   const EBISBox& ebgraph = m_amr->getEBISLayout(m_particleRealm, m_phase)[a_level][a_dit];
 
   Vector<BinFab<ito_particle>* > particlesFAB(num_ito_species);
-  Vector<BinFab<photon>* >       sourcePhotonsFAB(num_rte_species);
-  Vector<BinFab<photon>* >       bulkPhotonsFAB(num_rte_species);
+  Vector<BinFab<Photon>* >       sourcePhotonsFAB(num_rte_species);
+  Vector<BinFab<Photon>* >       bulkPhotonsFAB(num_rte_species);
 
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -2399,8 +2399,8 @@ void ito_plasma_stepper::reconcile_particles(const EBCellFAB& a_newParticlesPerC
     RefCountedPtr<mc_photo>& solver = solver_it();
     const int idx = solver_it.index();
     
-    ParticleContainer<photon>& solverBulkPhotons = solver->get_bulk_photons();
-    ParticleContainer<photon>& solverSourPhotons = solver->getSource_photons();
+    ParticleContainer<Photon>& solverBulkPhotons = solver->get_bulk_Photons();
+    ParticleContainer<Photon>& solverSourPhotons = solver->getSource_Photons();
     
     bulkPhotonsFAB[idx]   = &(solverBulkPhotons.getCellParticles(a_level, a_dit));
     sourcePhotonsFAB[idx] = &(solverSourPhotons.getCellParticles(a_level, a_dit));
@@ -2419,8 +2419,8 @@ void ito_plasma_stepper::reconcile_particles(const EBCellFAB& a_newParticlesPerC
       const Real     kappa         = 1.0;
 
       Vector<List<ito_particle>* > particles(num_ito_species);
-      Vector<List<photon>* >       bulkPhotons(num_rte_species);
-      Vector<List<photon>* >       sourcePhotons(num_rte_species);
+      Vector<List<Photon>* >       bulkPhotons(num_rte_species);
+      Vector<List<Photon>* >       sourcePhotons(num_rte_species);
       Vector<RefCountedPtr<rte_species> > photoSpecies(num_rte_species);
 
       Vector<Real>      particleMeanEnergies(num_ito_species);
@@ -2448,13 +2448,13 @@ void ito_plasma_stepper::reconcile_particles(const EBCellFAB& a_newParticlesPerC
 	sourcePhotons[idx]->clear();
       }
 
-      // Reconcile particles, photons, and photoionization
+      // Reconcile particles, Photons, and photoionization
       m_physics->reconcile_particles(particles, numNewParticles, numOldParticles, cellPos, centroidPos, lo, hi, bndryCentroid, bndryNormal, a_dx, kappa);
-      m_physics->reconcile_photons(sourcePhotons, numNewPhotons, cellPos, centroidPos, lo, hi, bndryCentroid, bndryNormal, a_dx, kappa);
+      m_physics->reconcile_Photons(sourcePhotons, numNewPhotons, cellPos, centroidPos, lo, hi, bndryCentroid, bndryNormal, a_dx, kappa);
       m_physics->reconcile_photoionization(particles, particleMeanEnergies, numNewParticles, bulkPhotons);
       m_physics->set_mean_particle_energy(particles, particleMeanEnergies);
       
-      // Clear the bulk photons - they have now been absorbed on the mesh. 
+      // Clear the bulk Photons - they have now been absorbed on the mesh. 
       for (int i = 0; i < num_rte_species; i++){
 	//	bulkPhotons[i]->clear();
       }
@@ -2479,8 +2479,8 @@ void ito_plasma_stepper::reconcile_particles(const EBCellFAB& a_newParticlesPerC
     }
 
     Vector<List<ito_particle>* > particles(num_ito_species);
-    Vector<List<photon>* >       bulkPhotons(num_rte_species);
-    Vector<List<photon>* >       sourcePhotons(num_rte_species);
+    Vector<List<Photon>* >       bulkPhotons(num_rte_species);
+    Vector<List<Photon>* >       sourcePhotons(num_rte_species);
     Vector<RefCountedPtr<rte_species> > photoSpecies(num_rte_species);
 
     Vector<Real>      particleMeanEnergies(num_ito_species);
@@ -2508,13 +2508,13 @@ void ito_plasma_stepper::reconcile_particles(const EBCellFAB& a_newParticlesPerC
       sourcePhotons[idx]->clear();
     }
 
-    // Reconcile particles, photons, and photoionization
+    // Reconcile particles, Photons, and photoionization
     m_physics->reconcile_particles(particles, numNewParticles, numOldParticles, cellPos, centroidPos, lo, hi, bndryCentroid, bndryNormal, a_dx, kappa);
-    m_physics->reconcile_photons(sourcePhotons, numNewPhotons, cellPos, centroidPos, lo, hi, bndryCentroid, bndryNormal, a_dx, kappa);
+    m_physics->reconcile_Photons(sourcePhotons, numNewPhotons, cellPos, centroidPos, lo, hi, bndryCentroid, bndryNormal, a_dx, kappa);
     m_physics->reconcile_photoionization(particles, particleMeanEnergies, numNewParticles, bulkPhotons);
     m_physics->set_mean_particle_energy(particles, particleMeanEnergies);
       
-    // Clear the bulk photons - they have now been absorbed on the mesh. 
+    // Clear the bulk Photons - they have now been absorbed on the mesh. 
     for (int i = 0; i < num_rte_species; i++){
       //      bulkPhotons[i]->clear();
     }
@@ -2535,25 +2535,25 @@ void ito_plasma_stepper::advance_reaction_network(const Real a_dt){
     const int num_rte_species = m_physics->get_num_rte_species();
   
     Vector<ParticleContainer<ito_particle>* > particles(num_ito_species);  // Current particles. 
-    Vector<ParticleContainer<photon>* > bulk_photons(num_rte_species);     // Photons absorbed on mesh
-    Vector<ParticleContainer<photon>* > new_photons(num_rte_species);      // Produced photons go here.
+    Vector<ParticleContainer<Photon>* > bulk_Photons(num_rte_species);     // Photons absorbed on mesh
+    Vector<ParticleContainer<Photon>* > new_Photons(num_rte_species);      // Produced Photons go here.
 
     for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
       particles[solver_it.index()] = &(solver_it()->getParticles(ito_solver::which_container::bulk));
     }
 
     for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-      bulk_photons[solver_it.index()] = &(solver_it()->get_bulk_photons());
-      new_photons[solver_it.index()] = &(solver_it()->getSource_photons());
+      bulk_Photons[solver_it.index()] = &(solver_it()->get_bulk_Photons());
+      new_Photons[solver_it.index()] = &(solver_it()->getSource_Photons());
     }
 
-    this->advance_reaction_network(particles, bulk_photons, new_photons, m_energy_sources, m_particle_E, a_dt);
+    this->advance_reaction_network(particles, bulk_Photons, new_Photons, m_energy_sources, m_particle_E, a_dt);
   }
 }
 
 void ito_plasma_stepper::advance_reaction_network(Vector<ParticleContainer<ito_particle>* >& a_particles,
-						  Vector<ParticleContainer<photon>* >&       a_photons,
-						  Vector<ParticleContainer<photon>* >&       a_newPhotons,
+						  Vector<ParticleContainer<Photon>* >&       a_Photons,
+						  Vector<ParticleContainer<Photon>* >&       a_newPhotons,
 						  const Vector<EBAMRCellData>&                a_sources,
 						  const EBAMRCellData&                        a_E,
 						  const Real                                  a_dt){
@@ -2566,8 +2566,8 @@ void ito_plasma_stepper::advance_reaction_network(Vector<ParticleContainer<ito_p
   const int num_rte_species = m_physics->get_num_rte_species();
 
   Vector<AMRCellParticles<ito_particle>* > particles(num_ito_species);
-  Vector<AMRCellParticles<photon>* >       photons(num_ito_species);
-  Vector<AMRCellParticles<photon>* >       newPhotons(num_ito_species);
+  Vector<AMRCellParticles<Photon>* >       Photons(num_ito_species);
+  Vector<AMRCellParticles<Photon>* >       newPhotons(num_ito_species);
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
@@ -2576,18 +2576,18 @@ void ito_plasma_stepper::advance_reaction_network(Vector<ParticleContainer<ito_p
 
   for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
-    photons[idx]    = &(a_photons[idx]->getCellParticles());
+    Photons[idx]    = &(a_Photons[idx]->getCellParticles());
     newPhotons[idx] = &(a_newPhotons[idx]->getCellParticles());
   }
 				
   //Advance reaction network
-  this->advance_reaction_network(particles, photons, newPhotons, a_sources, m_particle_E, a_dt);
+  this->advance_reaction_network(particles, Photons, newPhotons, a_sources, m_particle_E, a_dt);
 
 }
 
 void ito_plasma_stepper::advance_reaction_network(Vector<AMRCellParticles<ito_particle>* >& a_particles,
-						  Vector<AMRCellParticles<photon>* >&       a_photons,
-						  Vector<AMRCellParticles<photon>* >&       a_newPhotons,
+						  Vector<AMRCellParticles<Photon>* >&       a_Photons,
+						  Vector<AMRCellParticles<Photon>* >&       a_newPhotons,
 						  const Vector<EBAMRCellData>&              a_sources,
 						  const EBAMRCellData&                      a_E,
 						  const Real                                a_dt){
@@ -2601,8 +2601,8 @@ void ito_plasma_stepper::advance_reaction_network(Vector<AMRCellParticles<ito_pa
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     Vector<LayoutData<BinFab<ito_particle> >* > particles(num_ito_species);
-    Vector<LayoutData<BinFab<photon> >* >       photons(num_rte_species);
-    Vector<LayoutData<BinFab<photon> >* >       newPhotons(num_rte_species);
+    Vector<LayoutData<BinFab<Photon> >* >       Photons(num_rte_species);
+    Vector<LayoutData<BinFab<Photon> >* >       newPhotons(num_rte_species);
     Vector<LevelData<EBCellFAB>* >              sources(num_ito_species);
 
     for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -2613,17 +2613,17 @@ void ito_plasma_stepper::advance_reaction_network(Vector<AMRCellParticles<ito_pa
 
     for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.index();
-      photons[idx]    = &(*(*a_photons[idx])[lvl]);
+      Photons[idx]    = &(*(*a_Photons[idx])[lvl]);
       newPhotons[idx] = &(*(*a_newPhotons[idx])[lvl]);
     }
       
-    this->advance_reaction_network(particles, photons, newPhotons, sources, *a_E[lvl], lvl, a_dt);
+    this->advance_reaction_network(particles, Photons, newPhotons, sources, *a_E[lvl], lvl, a_dt);
   }
 }
 
 void ito_plasma_stepper::advance_reaction_network(Vector<LayoutData<BinFab<ito_particle> >* >& a_particles,
-						  Vector<LayoutData<BinFab<photon> >* >&       a_photons,
-						  Vector<LayoutData<BinFab<photon> >* >&       a_newPhotons,
+						  Vector<LayoutData<BinFab<Photon> >* >&       a_Photons,
+						  Vector<LayoutData<BinFab<Photon> >* >&       a_newPhotons,
 						  const Vector<LevelData<EBCellFAB>* >&        a_sources,
 						  const LevelData<EBCellFAB>&                  a_E,
 						  const int                                    a_lvl,
@@ -2643,8 +2643,8 @@ void ito_plasma_stepper::advance_reaction_network(Vector<LayoutData<BinFab<ito_p
     const Box box = dbl.get(dit());
 
     Vector<BinFab<ito_particle>* > particles(num_ito_species);
-    Vector<BinFab<photon>* >       photons(num_rte_species);;
-    Vector<BinFab<photon>* >       newPhotons(num_rte_species);
+    Vector<BinFab<Photon>* >       Photons(num_rte_species);;
+    Vector<BinFab<Photon>* >       newPhotons(num_rte_species);
     Vector<EBCellFAB*>             sources(num_ito_species);
 
     for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -2655,17 +2655,17 @@ void ito_plasma_stepper::advance_reaction_network(Vector<LayoutData<BinFab<ito_p
 
     for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.index();
-      photons[idx]    = &((*a_photons[idx])[dit()]);
+      Photons[idx]    = &((*a_Photons[idx])[dit()]);
       newPhotons[idx] = &((*a_newPhotons[idx])[dit()]);
     }
 
-    this->advance_reaction_network(particles, photons, newPhotons, sources, a_E[dit()], a_lvl, dit(), box, dx, a_dt);
+    this->advance_reaction_network(particles, Photons, newPhotons, sources, a_E[dit()], a_lvl, dit(), box, dx, a_dt);
   }
 }
 
 void ito_plasma_stepper::advance_reaction_network(Vector<BinFab<ito_particle>* >& a_particles,
-						  Vector<BinFab<photon>* >&       a_photons,
-						  Vector<BinFab<photon>* >&       a_newPhotons,
+						  Vector<BinFab<Photon>* >&       a_Photons,
+						  Vector<BinFab<Photon>* >&       a_newPhotons,
 						  const Vector<EBCellFAB*>&       a_sources,
 						  const EBCellFAB&                a_E,
 						  const int                       a_lvl,
@@ -2701,8 +2701,8 @@ void ito_plasma_stepper::advance_reaction_network(Vector<BinFab<ito_particle>* >
       const RealVect e   = RealVect(D_DECL(Efab(iv, 0), Efab(iv, 1), Efab(iv, 2)));
       
       Vector<List<ito_particle>* > particles(num_ito_species);
-      Vector<List<photon>* >       photons(num_rte_species);
-      Vector<List<photon>* >       newPhotons(num_rte_species);
+      Vector<List<Photon>* >       Photons(num_rte_species);
+      Vector<List<Photon>* >       newPhotons(num_rte_species);
       Vector<Real>                 sources(num_ito_species);
 
       for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -2718,10 +2718,10 @@ void ito_plasma_stepper::advance_reaction_network(Vector<BinFab<ito_particle>* >
       for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
 	const int idx = solver_it.index();
       
-	List<photon>& bp    = (*a_photons[idx])(iv, comp);
-	List<photon>& bpNew = (*a_newPhotons[idx])(iv, comp);
+	List<Photon>& bp    = (*a_Photons[idx])(iv, comp);
+	List<Photon>& bpNew = (*a_newPhotons[idx])(iv, comp);
       
-	photons[idx]    = &bp;
+	Photons[idx]    = &bp;
 	newPhotons[idx] = &bpNew;
       }
 
@@ -2732,7 +2732,7 @@ void ito_plasma_stepper::advance_reaction_network(Vector<BinFab<ito_particle>* >
       const RealVect c  = RealVect::Zero;
 
       // Advance reactions
-      m_physics->advance_reaction_network(particles, photons, newPhotons, sources, e, pos, c, c, n, lo, hi, a_dx, kappa, a_dt);
+      m_physics->advance_reaction_network(particles, Photons, newPhotons, sources, e, pos, c, c, n, lo, hi, a_dx, kappa, a_dt);
     }
   }
 
@@ -2757,8 +2757,8 @@ void ito_plasma_stepper::advance_reaction_network(Vector<BinFab<ito_particle>* >
     }
 
     Vector<List<ito_particle>* > particles(num_ito_species);
-    Vector<List<photon>* >       photons(num_rte_species);
-    Vector<List<photon>* >       newPhotons(num_rte_species);
+    Vector<List<Photon>* >       Photons(num_rte_species);
+    Vector<List<Photon>* >       newPhotons(num_rte_species);
     Vector<Real>                 sources(num_ito_species);
 
     for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -2774,15 +2774,15 @@ void ito_plasma_stepper::advance_reaction_network(Vector<BinFab<ito_particle>* >
     for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.index();
       
-      List<photon>& bp    = (*a_photons[idx])(iv, comp);
-      List<photon>& bpNew = (*a_newPhotons[idx])(iv, comp);
+      List<Photon>& bp    = (*a_Photons[idx])(iv, comp);
+      List<Photon>& bpNew = (*a_newPhotons[idx])(iv, comp);
       
-      photons[idx]    = &bp;
+      Photons[idx]    = &bp;
       newPhotons[idx] = &bpNew;
     }
 
     // Advance reactions
-    m_physics->advance_reaction_network(particles, photons, newPhotons, sources, e, pos, cen, ebc, n, lo, hi, a_dx, kappa, a_dt);
+    m_physics->advance_reaction_network(particles, Photons, newPhotons, sources, e, pos, cen, ebc, n, lo, hi, a_dx, kappa, a_dt);
   }
 }
 
@@ -2928,150 +2928,150 @@ Real ito_plasma_stepper::compute_physics_dt(const EBCellFAB& a_E, const Vector<E
   return minDt;
 }
 
-void ito_plasma_stepper::advance_photons(const Real a_dt){
-  CH_TIME("ito_plasma_stepper::advance_photons(a_dt)");
+void ito_plasma_stepper::advance_Photons(const Real a_dt){
+  CH_TIME("ito_plasma_stepper::advance_Photons(a_dt)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::advance_advance_photons(a_dt)" << endl;
+    pout() << "ito_plasma_stepper::advance_advance_Photons(a_dt)" << endl;
   }
 
   for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<mc_photo>& solver = solver_it();
     
-    // Add source photons and move the photons
-    ParticleContainer<photon>& photons        = solver->get_photons();
-    ParticleContainer<photon>& bulkPhotons    = solver->get_bulk_photons();
-    ParticleContainer<photon>& ebPhotons      = solver->get_eb_photons();
-    ParticleContainer<photon>& domainPhotons  = solver->get_domain_photons();
-    ParticleContainer<photon>& sourcePhotons  = solver->getSource_photons();
+    // Add source Photons and move the Photons
+    ParticleContainer<Photon>& Photons        = solver->get_Photons();
+    ParticleContainer<Photon>& bulkPhotons    = solver->get_bulk_Photons();
+    ParticleContainer<Photon>& ebPhotons      = solver->get_eb_Photons();
+    ParticleContainer<Photon>& domainPhotons  = solver->get_domain_Photons();
+    ParticleContainer<Photon>& sourcePhotons  = solver->getSource_Photons();
 
     if(solver->is_instantaneous()){
-      solver->clear(photons);
+      solver->clear(Photons);
 
-      // Add source photons
-      photons.addParticles(sourcePhotons);
+      // Add source Photons
+      Photons.addParticles(sourcePhotons);
       solver->clear(sourcePhotons);
 
       // Instantaneous advance
-      solver->advance_photons_stationary(bulkPhotons, ebPhotons, domainPhotons, photons);
+      solver->advance_Photons_stationary(bulkPhotons, ebPhotons, domainPhotons, Photons);
     }
     else{
-      // Add source photons
-      photons.addParticles(sourcePhotons);
+      // Add source Photons
+      Photons.addParticles(sourcePhotons);
       solver->clear(sourcePhotons);
 
       // Stationary advance
-      solver->advance_photons_transient(bulkPhotons, ebPhotons, domainPhotons, photons, a_dt);
+      solver->advance_Photons_transient(bulkPhotons, ebPhotons, domainPhotons, Photons, a_dt);
     }
   }
 }
 
-void ito_plasma_stepper::sort_photons_by_cell(){
-  CH_TIME("ito_plasma_stepper::sort_photons_by_cell()");
+void ito_plasma_stepper::sort_Photons_by_cell(){
+  CH_TIME("ito_plasma_stepper::sort_Photons_by_cell()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::sort_photons_by_cell()" << endl;
+    pout() << "ito_plasma_stepper::sort_Photons_by_cell()" << endl;
   }
 
   for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->sort_photons_by_cell();
+    solver_it()->sort_Photons_by_cell();
   }
 }
 
-void ito_plasma_stepper::sort_photons_by_patch(){
-  CH_TIME("ito_plasma_stepper::sort_photons_by_patch()");
+void ito_plasma_stepper::sort_Photons_by_patch(){
+  CH_TIME("ito_plasma_stepper::sort_Photons_by_patch()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::sort_photons_by_patch()" << endl;
+    pout() << "ito_plasma_stepper::sort_Photons_by_patch()" << endl;
   }
 
   for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->sort_photons_by_patch();
+    solver_it()->sort_Photons_by_patch();
   }
 }
 
-void ito_plasma_stepper::sort_source_photons_by_cell(){
-  CH_TIME("ito_plasma_stepper::sort_source_photons_by_cell()");
+void ito_plasma_stepper::sort_source_Photons_by_cell(){
+  CH_TIME("ito_plasma_stepper::sort_source_Photons_by_cell()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::sort_source_photons_by_cell()" << endl;
+    pout() << "ito_plasma_stepper::sort_source_Photons_by_cell()" << endl;
   }
   
   for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->sort_source_photons_by_cell();
+    solver_it()->sort_source_Photons_by_cell();
   }
 }
 
-void ito_plasma_stepper::sort_source_photons_by_patch(){
-  CH_TIME("ito_plasma_stepper::sort_source_photons_by_patch()");
+void ito_plasma_stepper::sort_source_Photons_by_patch(){
+  CH_TIME("ito_plasma_stepper::sort_source_Photons_by_patch()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::sort_source_photons_by_patch()" << endl;
+    pout() << "ito_plasma_stepper::sort_source_Photons_by_patch()" << endl;
   }
 
   for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->sort_source_photons_by_patch();
+    solver_it()->sort_source_Photons_by_patch();
   }
 }
 
-void ito_plasma_stepper::sort_bulk_photons_by_cell(){
-  CH_TIME("ito_plasma_stepper::sort_bulk_photons_by_cell()");
+void ito_plasma_stepper::sort_bulk_Photons_by_cell(){
+  CH_TIME("ito_plasma_stepper::sort_bulk_Photons_by_cell()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::sort_bulk_photons_by_cell()" << endl;
+    pout() << "ito_plasma_stepper::sort_bulk_Photons_by_cell()" << endl;
   }
 
   for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->sort_bulk_photons_by_cell();
+    solver_it()->sort_bulk_Photons_by_cell();
   }
 }
 
-void ito_plasma_stepper::sort_bulk_photons_by_patch(){
-  CH_TIME("ito_plasma_stepper::sort_bulk_photons_by_patch()");
+void ito_plasma_stepper::sort_bulk_Photons_by_patch(){
+  CH_TIME("ito_plasma_stepper::sort_bulk_Photons_by_patch()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::sort_bulk_photons_by_patch()" << endl;
+    pout() << "ito_plasma_stepper::sort_bulk_Photons_by_patch()" << endl;
   }
 
   for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->sort_bulk_photons_by_patch();
+    solver_it()->sort_bulk_Photons_by_patch();
   }
 }
 
-void ito_plasma_stepper::sort_eb_photons_by_cell(){
-  CH_TIME("ito_plasma_stepper::sort_eb_photons_by_cell()");
+void ito_plasma_stepper::sort_eb_Photons_by_cell(){
+  CH_TIME("ito_plasma_stepper::sort_eb_Photons_by_cell()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::sort_eb_photons_by_cell()" << endl;
+    pout() << "ito_plasma_stepper::sort_eb_Photons_by_cell()" << endl;
   }
 
   for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->sort_eb_photons_by_cell();
+    solver_it()->sort_eb_Photons_by_cell();
   }
 }
 
-void ito_plasma_stepper::sort_eb_photons_by_patch(){
-  CH_TIME("ito_plasma_stepper::sort_eb_photons_by_patch()");
+void ito_plasma_stepper::sort_eb_Photons_by_patch(){
+  CH_TIME("ito_plasma_stepper::sort_eb_Photons_by_patch()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::sort_eb_photons_by_patch()" << endl;
+    pout() << "ito_plasma_stepper::sort_eb_Photons_by_patch()" << endl;
   }
 
   for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->sort_eb_photons_by_patch();
+    solver_it()->sort_eb_Photons_by_patch();
   }
 }
 
-void ito_plasma_stepper::sort_domain_photons_by_cell(){
-  CH_TIME("ito_plasma_stepper::sort_domain_photons_by_cell()");
+void ito_plasma_stepper::sort_domain_Photons_by_cell(){
+  CH_TIME("ito_plasma_stepper::sort_domain_Photons_by_cell()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::sort_domain_photons_by_cell()" << endl;
+    pout() << "ito_plasma_stepper::sort_domain_Photons_by_cell()" << endl;
   }
 
   for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->sort_domain_photons_by_cell();
+    solver_it()->sort_domain_Photons_by_cell();
   }
 }
 
-void ito_plasma_stepper::sort_domain_photons_by_patch(){
-  CH_TIME("ito_plasma_stepper::sort_domain_photons_by_patch()");
+void ito_plasma_stepper::sort_domain_Photons_by_patch(){
+  CH_TIME("ito_plasma_stepper::sort_domain_Photons_by_patch()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::sort_domain_photons_by_patch()" << endl;
+    pout() << "ito_plasma_stepper::sort_domain_Photons_by_patch()" << endl;
   }
 
   for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->sort_domain_photons_by_patch();
+    solver_it()->sort_domain_Photons_by_patch();
   }
 
 }

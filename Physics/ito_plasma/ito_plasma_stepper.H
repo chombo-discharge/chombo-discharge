@@ -272,27 +272,27 @@ namespace physics {
       // Old routines for chemistry advances. The physics module will switch between LFA and LEA.
       void advance_reaction_network(const Real a_dt);
       void advance_reaction_network(Vector<ParticleContainer<ito_particle>* >& a_particles,
-				    Vector<ParticleContainer<photon>* >&       a_photons,
-				    Vector<ParticleContainer<photon>* >&       a_newPhotons,
+				    Vector<ParticleContainer<Photon>* >&       a_Photons,
+				    Vector<ParticleContainer<Photon>* >&       a_newPhotons,
 				    const Vector<EBAMRCellData>&                a_sources,
 				    const EBAMRCellData&                        a_E,
 				    const Real                                  a_dt);
       void advance_reaction_network(Vector<AMRCellParticles<ito_particle>* >& a_particles,
-				    Vector<AMRCellParticles<photon>* >&       a_photons,
-				    Vector<AMRCellParticles<photon>* >&       a_newPhotons,
+				    Vector<AMRCellParticles<Photon>* >&       a_Photons,
+				    Vector<AMRCellParticles<Photon>* >&       a_newPhotons,
 				    const Vector<EBAMRCellData>&              a_sources,
 				    const EBAMRCellData&                      a_E,
 				    const Real                                a_dt);
       void advance_reaction_network(Vector<LayoutData<BinFab<ito_particle> >* >& a_particles,
-				    Vector<LayoutData<BinFab<photon> >* >&       a_photons,
-				    Vector<LayoutData<BinFab<photon> >* >&       a_newPhotons,
+				    Vector<LayoutData<BinFab<Photon> >* >&       a_Photons,
+				    Vector<LayoutData<BinFab<Photon> >* >&       a_newPhotons,
 				    const Vector<LevelData<EBCellFAB>* >&        a_sources,
 				    const LevelData<EBCellFAB>&                  a_E,
 				    const int                                    a_lvl,
 				    const Real                                   a_dt);
       void advance_reaction_network(Vector<BinFab<ito_particle>* >& a_particles,
-				    Vector<BinFab<photon>* >&       a_photons,
-				    Vector<BinFab<photon>* >&       a_newPhotons,
+				    Vector<BinFab<Photon>* >&       a_Photons,
+				    Vector<BinFab<Photon>* >&       a_newPhotons,
 				    const Vector<EBCellFAB*>&       a_sources,
 				    const EBCellFAB&                a_E,
 				    const int                       a_lvl,
@@ -307,21 +307,21 @@ namespace physics {
       Real compute_physics_dt(const LevelData<EBCellFAB>& a_E, const Vector<LevelData<EBCellFAB> *> a_densities, const int a_level) const;
       Real compute_physics_dt(const EBCellFAB& a_E, const Vector<EBCellFAB*> a_densities, const int a_level, const DataIndex a_dit, const Box a_box) const;
 
-      // Routines for advancing photons
-      void advance_photons(const Real a_dt);
+      // Routines for advancing Photons
+      void advance_Photons(const Real a_dt);
 
       // Routines for sorting particles. These routines are here because rte_layout is general for RtSolver, and I'm too
       // lazy to write an mc_photo_layout. So here you go. 
-      void sort_photons_by_cell();
-      void sort_photons_by_patch();
-      void sort_source_photons_by_cell();
-      void sort_source_photons_by_patch();
-      void sort_bulk_photons_by_cell();
-      void sort_bulk_photons_by_patch();
-      void sort_eb_photons_by_cell();
-      void sort_eb_photons_by_patch();
-      void sort_domain_photons_by_cell();
-      void sort_domain_photons_by_patch();
+      void sort_Photons_by_cell();
+      void sort_Photons_by_patch();
+      void sort_source_Photons_by_cell();
+      void sort_source_Photons_by_patch();
+      void sort_bulk_Photons_by_cell();
+      void sort_bulk_Photons_by_patch();
+      void sort_eb_Photons_by_cell();
+      void sort_eb_Photons_by_patch();
+      void sort_domain_Photons_by_cell();
+      void sort_domain_Photons_by_patch();
 
       // Routines for computing EdotJ per species, including the diffusive contribution. a_source is defined on the particle Realm.
       void compute_EdotJ_source(const Real a_dt);
@@ -378,12 +378,12 @@ namespace physics {
       mutable Vector<EBAMRCellData> m_fscratch2; // Scratch storage with a single component for all species. On the fluid Realm.
 
       EBAMRCellData m_particle_ppc; // For holding the number of particles per cell for all species. Contains compoents = number of species
-      EBAMRCellData m_particle_ypc; // For holding the number of generated photons per cell on the particle Realm.
+      EBAMRCellData m_particle_ypc; // For holding the number of generated Photons per cell on the particle Realm.
       EBAMRCellData m_particle_eps; // For holding the mean energy on the particle Realm
       EBAMRCellData m_particle_old; // For holding the mean energy on the particle Realm
       
       EBAMRCellData m_fluid_ppc;    // For holding the number of particles per cell for all species. Contains compoents = number of species
-      EBAMRCellData m_fluid_ypc;    // For holding the number of generated photons per cell on the fluid Realm.
+      EBAMRCellData m_fluid_ypc;    // For holding the number of generated Photons per cell on the fluid Realm.
       EBAMRCellData m_fluid_eps;    // For holding the mean energy on the particle Realm
 
       // Storage for the electric field on 

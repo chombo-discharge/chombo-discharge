@@ -12,7 +12,7 @@
 #include <CD_EbParticleInterp.H>
 #include <CD_ParticleContainer.H>
 #include <CD_WallBc.H>
-#include "photon.H"
+#include <CD_Photon.H>
 
 #include <Particle.H>
 #include <ParticleData.H>
@@ -39,7 +39,7 @@ public:
   virtual ~mc_photo();
 
   /*!
-    @brief Advance RTE and deposit photons on a_phi
+    @brief Advance RTE and deposit Photons on a_phi
     @details This routine switches between stationary and transient solvers depending on what you ask for. 
   */
   virtual bool advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_source, const bool a_zerophi = false);
@@ -50,108 +50,108 @@ public:
   virtual bool is_instantaneous();
 
   /*!
-    @brief Generate photons
+    @brief Generate Photons
   */
-  virtual void generate_photons(ParticleContainer<photon>& a_particles, const EBAMRCellData& a_source, const Real a_dt);
+  virtual void generate_Photons(ParticleContainer<Photon>& a_particles, const EBAMRCellData& a_source, const Real a_dt);
 
   /*!
-    @brief Move photons and absorb them. 
-    @details This is the routine that is used to move photons when the solver is stationary. 
+    @brief Move Photons and absorb them. 
+    @details This is the routine that is used to move Photons when the solver is stationary. 
   */
-  virtual void advance_photons_stationary(ParticleContainer<photon>& a_bulk_photons,
-					  ParticleContainer<photon>& a_eb_photons,
-					  ParticleContainer<photon>& a_domain_photons,
-					  ParticleContainer<photon>& a_photons);
+  virtual void advance_Photons_stationary(ParticleContainer<Photon>& a_bulk_Photons,
+					  ParticleContainer<Photon>& a_eb_Photons,
+					  ParticleContainer<Photon>& a_domain_Photons,
+					  ParticleContainer<Photon>& a_Photons);
 
   /*!
-    @brief This moves the photons over a time step dt. If a photon is absorbed in the gas, it is put in
-    a_bulk_photons. If it is absorbed on the EB, it is put in a_eb_photons etc. 
-    @details This is the routine that is used to move photons when the solver is transient. 
+    @brief This moves the Photons over a time step dt. If a Photon is absorbed in the gas, it is put in
+    a_bulk_Photons. If it is absorbed on the EB, it is put in a_eb_Photons etc. 
+    @details This is the routine that is used to move Photons when the solver is transient. 
   */
-  virtual void advance_photons_transient(ParticleContainer<photon>& a_bulk_photons,
-					 ParticleContainer<photon>& a_eb_photons,
-					 ParticleContainer<photon>& a_domain_photons,
-					 ParticleContainer<photon>& a_ophotons,
+  virtual void advance_Photons_transient(ParticleContainer<Photon>& a_bulk_Photons,
+					 ParticleContainer<Photon>& a_eb_Photons,
+					 ParticleContainer<Photon>& a_domain_Photons,
+					 ParticleContainer<Photon>& a_oPhotons,
 					 const Real                  a_dt);
 
   /*!
-    @brief Remap photons
+    @brief Remap Photons
   */
   virtual void remap();
 
   /*!
-    @brief Remap photons
+    @brief Remap Photons
   */
-  virtual void remap(ParticleContainer<photon>& a_photons);
+  virtual void remap(ParticleContainer<Photon>& a_Photons);
 
   /*!
-    @brief Deposit photons
+    @brief Deposit Photons
   */
-  virtual void deposit_photons();
+  virtual void deposit_Photons();
 
   /*!
-    @brief Deposit photons
+    @brief Deposit Photons
   */
-  virtual void deposit_photons(EBAMRCellData&                    a_phi,
-			       const ParticleContainer<photon>& a_particles,
+  virtual void deposit_Photons(EBAMRCellData&                    a_phi,
+			       const ParticleContainer<Photon>& a_particles,
 			       const DepositionType::Which&      a_deposition);
 
   /*!
-    @brief Deposit photons
+    @brief Deposit Photons
   */
-  virtual void deposit_photons(EBAMRCellData&               a_phi,
-			       const AMRParticles<photon>&  a_photons,
+  virtual void deposit_Photons(EBAMRCellData&               a_phi,
+			       const AMRParticles<Photon>&  a_Photons,
 			       const DepositionType::Which& a_deposition);
 
   /*!
-    @brief Sort the m_photons container by cell
+    @brief Sort the m_Photons container by cell
   */
-  virtual void sort_photons_by_cell();
+  virtual void sort_Photons_by_cell();
 
   /*!
-    @brief Sort the m_photons container by cell
+    @brief Sort the m_Photons container by cell
   */
-  virtual void sort_photons_by_patch();
+  virtual void sort_Photons_by_patch();
 
   /*!
-    @brief Sort the m_bulk_photons container by cell
+    @brief Sort the m_bulk_Photons container by cell
   */
-  virtual void sort_bulk_photons_by_cell();
+  virtual void sort_bulk_Photons_by_cell();
 
   /*!
-    @brief Sort the m_bulk_photons container by cell
+    @brief Sort the m_bulk_Photons container by cell
   */
-  virtual void sort_bulk_photons_by_patch();
+  virtual void sort_bulk_Photons_by_patch();
 
   /*!
-    @brief Sort the m_source_photons container by cell
+    @brief Sort the m_source_Photons container by cell
   */
-  virtual void sort_source_photons_by_cell();
+  virtual void sort_source_Photons_by_cell();
 
   /*!
-    @brief Sort the m_source_photons container by cell
+    @brief Sort the m_source_Photons container by cell
   */
-  virtual void sort_source_photons_by_patch();
+  virtual void sort_source_Photons_by_patch();
 
   /*!
-    @brief Sort the m_source_photons container by cell
+    @brief Sort the m_source_Photons container by cell
   */
-  virtual void sort_eb_photons_by_cell();
+  virtual void sort_eb_Photons_by_cell();
 
   /*!
-    @brief Sort the m_source_photons container by cell
+    @brief Sort the m_source_Photons container by cell
   */
-  virtual void sort_eb_photons_by_patch();
+  virtual void sort_eb_Photons_by_patch();
 
   /*!
-    @brief Sort the m_source_photons container by cell
+    @brief Sort the m_source_Photons container by cell
   */
-  virtual void sort_domain_photons_by_cell();
+  virtual void sort_domain_Photons_by_cell();
 
   /*!
-    @brief Sort the m_source_photons container by cell
+    @brief Sort the m_source_Photons container by cell
   */
-  virtual void sort_domain_photons_by_patch();
+  virtual void sort_domain_Photons_by_patch();
 
   /*!
     Parse options
@@ -218,12 +218,12 @@ public:
   /*!
     @brief Clear data holder
   */
-  virtual void clear(ParticleContainer<photon>& a_photon);
+  virtual void clear(ParticleContainer<Photon>& a_Photon);
 
   /*!
     @brief Clear data holder
   */
-  virtual void clear(AMRParticles<photon>& a_photons);
+  virtual void clear(AMRParticles<Photon>& a_Photons);
 
   /*!
     @brief Write plot file
@@ -281,43 +281,43 @@ public:
   virtual int queryGhost() const;
 
   /*!
-    @brief Count number of photons in particle list
+    @brief Count number of Photons in particle list
   */
-  virtual int count_photons(const AMRParticles<photon>& a_photons) const;
+  virtual int count_Photons(const AMRParticles<Photon>& a_Photons) const;
 
   /*!
-    @brief Count number of outcast photons in particle list
+    @brief Count number of outcast Photons in particle list
   */
-  virtual int count_outcast(const AMRParticles<photon>& a_photons) const;
+  virtual int count_outcast(const AMRParticles<Photon>& a_Photons) const;
 
   /*!
-    @brief Get photons
+    @brief Get Photons
   */
-  virtual ParticleContainer<photon>& get_photons();
+  virtual ParticleContainer<Photon>& get_Photons();
 
   /*!
-    @brief Get bulk photons
+    @brief Get bulk Photons
   */
-  virtual ParticleContainer<photon>& get_bulk_photons();
+  virtual ParticleContainer<Photon>& get_bulk_Photons();
 
   /*!
-    @brief Get EB photons
+    @brief Get EB Photons
   */
-  virtual ParticleContainer<photon>& get_eb_photons();
+  virtual ParticleContainer<Photon>& get_eb_Photons();
 
   /*!
-    @brief Get domain photons
+    @brief Get domain Photons
   */
-  virtual ParticleContainer<photon>& get_domain_photons();
+  virtual ParticleContainer<Photon>& get_domain_Photons();
 
   /*!
-    @brief Get source photons
+    @brief Get source Photons
   */
-  virtual ParticleContainer<photon>& getSource_photons();
+  virtual ParticleContainer<Photon>& getSource_Photons();
   
 protected:
 
-  enum photon_generation {
+  enum Photon_generation {
     deterministic = 0,
     stochastic = 1,
   };
@@ -341,7 +341,7 @@ protected:
   bool m_blendConservation;
 
   /*!
-    @brief If true, the NUMBER of of photons will be deposited in each cell
+    @brief If true, the NUMBER of of Photons will be deposited in each cell
   */
   bool m_deposit_numbers;
 
@@ -351,34 +351,34 @@ protected:
   bool m_plotNumbers;
 
   /*!
-    @brief Check if m_photons should be plotted
+    @brief Check if m_Photons should be plotted
   */
   bool m_plot_phot;
 
   /*!
-    @brief Check if m_bulk_photons should be plotted
+    @brief Check if m_bulk_Photons should be plotted
   */
   bool m_plot_bulk_phot;
 
   /*!
-    @brief Check if source_bulk_photons should be plotted
+    @brief Check if source_bulk_Photons should be plotted
   */
   bool m_plotSource_phot;
 
   /*!
-    @brief Check if m_eb_photons should be plotted
+    @brief Check if m_eb_Photons should be plotted
   */
   bool m_plot_eb_phot;
 
   /*!
-    @brief Check if m_eb_photons should be plotted
+    @brief Check if m_eb_Photons should be plotted
   */
   bool m_plot_dom_phot;
 
   /*!
-    @brief Number of photons per pseudophoton
+    @brief Number of Photons per pseudoPhoton
   */
-  int m_max_photons;
+  int m_max_Photons;
 
   /*!
     @brief RNG seed
@@ -401,14 +401,14 @@ protected:
   int m_halo_buffer;
 
   /*!
-    @brief Number of photons
+    @brief Number of Photons
   */
-  long long m_num_photons;
+  long long m_num_Photons;
 
   /*!
     @brief Photon generation type
   */
-  photon_generation m_photogen;
+  Photon_generation m_photogen;
 
   /*!
     @brief Source type
@@ -463,27 +463,27 @@ protected:
   /*!
     @brief All particles
   */
-  ParticleContainer<photon> m_photons;
+  ParticleContainer<Photon> m_Photons;
 
   /*!
     @brief Photons absorbed in the volume
   */
-  ParticleContainer<photon> m_bulk_photons;
+  ParticleContainer<Photon> m_bulk_Photons;
 
   /*!
-    @brief This is a particle container for photons that crossed EBs. It is filled during the advance step. 
+    @brief This is a particle container for Photons that crossed EBs. It is filled during the advance step. 
   */
-  ParticleContainer<photon> m_eb_photons;
+  ParticleContainer<Photon> m_eb_Photons;
 
   /*!
-    @brief This is a particle container for photons that crossed boundaries. It is filled during the advance step. 
+    @brief This is a particle container for Photons that crossed boundaries. It is filled during the advance step. 
   */
-  ParticleContainer<photon> m_domain_photons;
+  ParticleContainer<Photon> m_domain_Photons;
 
   /*!
-    @brief This is a particle container that can be used to add photons directly. 
+    @brief This is a particle container that can be used to add Photons directly. 
   */
-  ParticleContainer<photon> m_source_photons;
+  ParticleContainer<Photon> m_source_Photons;
 
   /*!
     @brief Domain boundary conditions
@@ -491,9 +491,9 @@ protected:
   Vector<wallbc::which_bc> m_domainbc;
 
   /*!
-    @brief Draw photons
+    @brief Draw Photons
   */
-  int draw_photons(const Real a_source, const Real a_volume, const Real a_dt);
+  int draw_Photons(const Real a_source, const Real a_volume, const Real a_dt);
 
   /*!
     @brief Mapping function for domain boundary conditions
@@ -531,7 +531,7 @@ protected:
     @brief This computes the "conservative" deposition, multiplied by kappa
   */
   void deposit_kappaConservative(EBAMRCellData&              a_phi,
-				 const AMRParticles<photon>& a_particles,
+				 const AMRParticles<Photon>& a_particles,
 				 const DepositionType::Which a_deposition);
 
   /*!
@@ -575,9 +575,9 @@ protected:
   void parseDivergenceComputation();
 
   /*!
-    @brief Parse pseudophotons
+    @brief Parse pseudoPhotons
   */
-  void parse_pseudophotons();
+  void parse_pseudoPhotons();
 
   /*!
     @brief Parse photogeneration type

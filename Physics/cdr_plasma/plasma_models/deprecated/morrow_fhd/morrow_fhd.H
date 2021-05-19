@@ -82,7 +82,7 @@ public:
   Vector<Real> compute_conductor_fluxes(const Vector<Real>& a_extrapolated_fluxes,
 					const Vector<Real>& a_ion_densities,
 					const Vector<Real>& a_ion_velocities,
-					const Vector<Real>& a_photon_fluxes,
+					const Vector<Real>& a_Photon_fluxes,
 					const RealVect&     a_E,
 					const RealVect&     a_pos,
 					const RealVect&     a_normal,
@@ -91,7 +91,7 @@ public:
   Vector<Real> compute_dielectric_fluxes(const Vector<Real>& a_extrapolated_fluxes,
 					 const Vector<Real>& a_ion_densities,
 					 const Vector<Real>& a_ion_velocities,
-					 const Vector<Real>& a_photon_fluxes,
+					 const Vector<Real>& a_Photon_fluxes,
 					 const RealVect&     a_E,
 					 const RealVect&     a_pos,
 					 const RealVect&     a_normal,
@@ -112,7 +112,7 @@ public:
   int m_nelec_idx;      // Electron index
   int m_nplus_idx;      // Positive ion index
   int m_nminu_idx;      // Negative ion index
-  int m_photon1_idx;    // UV photon index
+  int m_Photon1_idx;    // UV Photon index
 
   Real m_background_rate;               // Background ionization
   Real m_townsend2_electrode;           // 2nd Townsend coefficient on electrodes
@@ -200,10 +200,10 @@ public:
     RealVect m_seed_pos;
   };
 
-  class uv_photon : public photon_group {
+  class uv_Photon : public Photon_group {
   public:
-    uv_photon();
-    ~uv_photon();
+    uv_Photon();
+    ~uv_Photon();
 
 
     Real getKappa(const RealVect a_pos) const;

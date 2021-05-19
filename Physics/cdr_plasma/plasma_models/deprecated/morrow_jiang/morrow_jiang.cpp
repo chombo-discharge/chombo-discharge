@@ -33,10 +33,10 @@ morrow_jiang::~morrow_jiang(){
 }
 
 void morrow_jiang::advance_reaction_network(Vector<Real>&          a_particle_sources,
-					    Vector<Real>&          a_photon_sources,
+					    Vector<Real>&          a_Photon_sources,
 					    const Vector<Real>     a_particle_densities,
 					    const Vector<RealVect> a_particle_gradients,
-					    const Vector<Real>     a_photon_densities,
+					    const Vector<Real>     a_Photon_densities,
 					    const RealVect         a_E,
 					    const RealVect         a_pos,
 					    const Real             a_dx,
@@ -55,15 +55,15 @@ void morrow_jiang::advance_reaction_network(Vector<Real>&          a_particle_so
   //
   // The various forms of the chemistry step is given in the routines below
   if(m_scomp == source_comp::ssa){ // SSA algorithm
-    network_ssa(a_particle_sources, a_photon_sources, a_particle_densities, a_particle_gradients, a_photon_densities,
+    network_ssa(a_particle_sources, a_Photon_sources, a_particle_densities, a_particle_gradients, a_Photon_densities,
 		a_E, a_pos, a_dx, a_dt, a_time, a_kappa);
   }
   else if(m_scomp == source_comp::tau){ // Tau leaping
-    network_tau(a_particle_sources, a_photon_sources, a_particle_densities, a_particle_gradients, a_photon_densities,
+    network_tau(a_particle_sources, a_Photon_sources, a_particle_densities, a_particle_gradients, a_Photon_densities,
 		a_E, a_pos, a_dx, a_dt, a_time, a_kappa);
   }
   else if(m_scomp == source_comp::rre){ // Reaction rate equation
-    network_rre(a_particle_sources, a_photon_sources, a_particle_densities, a_particle_gradients, a_photon_densities,
+    network_rre(a_particle_sources, a_Photon_sources, a_particle_densities, a_particle_gradients, a_Photon_densities,
 		a_E, a_pos, a_dx, a_dt, a_time, a_kappa);
   }
 
@@ -74,10 +74,10 @@ void morrow_jiang::advance_reaction_network(Vector<Real>&          a_particle_so
 
 // Deterministic reaction-rate equation
 void morrow_jiang::network_rre(Vector<Real>&          a_particle_sources,
-			       Vector<Real>&          a_photon_sources,
+			       Vector<Real>&          a_Photon_sources,
 			       const Vector<Real>     a_particle_densities,
 			       const Vector<RealVect> a_particle_gradients,
-			       const Vector<Real>     a_photon_densities,
+			       const Vector<Real>     a_Photon_densities,
 			       const RealVect         a_E,
 			       const RealVect         a_pos,
 			       const Real             a_dx,
@@ -88,7 +88,7 @@ void morrow_jiang::network_rre(Vector<Real>&          a_particle_sources,
 
   Vector<Real> rest(m_num_species, 0.0);
   Vector<int> particle_numbers(m_num_species, 0);
-  Vector<int> photon_numbers(m_num_photons, 0);
+  Vector<int> Photon_numbers(m_num_Photons, 0);
 
   // Get some aux stuff for propensity functions
   const RealVect Ve = compute_ve(a_E);
@@ -130,7 +130,7 @@ void morrow_jiang::network_rre(Vector<Real>&          a_particle_sources,
   Sm -= a4;
 
   // Reaction 5: Y + M => e + M+
-  const Real a5 = a_photon_densities[0]/a_dt;
+  const Real a5 = a_Photon_densities[0]/a_dt;
   Se += a5;
   Sp += a5;
 
@@ -138,17 +138,17 @@ void morrow_jiang::network_rre(Vector<Real>&          a_particle_sources,
   //  const Real a6 = a1*m_exc_eff*m_pq/(m_p+m_pq);
   const Real a6 = floor(a1*volume*m_exc_eff*m_pq/(m_p+m_pq));
   const int S6  = poisson_reaction(a6, a_dt);
-  a_photon_sources[0] = 1.0*S6;
+  a_Photon_sources[0] = 1.0*S6;
 
 
   return;
 }
 
 void morrow_jiang::network_tau(Vector<Real>&          a_particle_sources,
-			       Vector<Real>&          a_photon_sources,
+			       Vector<Real>&          a_Photon_sources,
 			       const Vector<Real>     a_particle_densities,
 			       const Vector<RealVect> a_particle_gradients,
-			       const Vector<Real>     a_photon_densities,
+			       const Vector<Real>     a_Photon_densities,
 			       const RealVect         a_E,
 			       const RealVect         a_pos,
 			       const Real             a_dx,
@@ -159,7 +159,7 @@ void morrow_jiang::network_tau(Vector<Real>&          a_particle_sources,
 
   Vector<Real> x(m_num_species, 0.0);
   Vector<int> X(m_num_species, 0);
-  Vector<int> Y(m_num_photons, 0);
+  Vector<int> Y(m_num_Photons, 0);
 
   const Real thresh = 1.E-2;
   
@@ -168,8 +168,8 @@ void morrow_jiang::network_tau(Vector<Real>&          a_particle_sources,
     x[i] = a_particle_densities[i] - X[i]*volume;          // "Partial particles"
   }
 
-  for (int i = 0; i < m_num_photons; i++){
-    Y[i] = floor(thresh + a_photon_densities[i]);
+  for (int i = 0; i < m_num_Photons; i++){
+    Y[i] = floor(thresh + a_Photon_densities[i]);
   }
 
   int se = 0; // Number of electrons produced
@@ -241,10 +241,10 @@ void morrow_jiang::network_tau(Vector<Real>&          a_particle_sources,
   const int  S7 = poisson_reaction(A7, a_dt);        // Number of radiative de-excitations
   const int SS7 = binomial_trials(S7, m_photoi_eff); // # of ionizing de-excitations
   si -= S7;
-  a_photon_sources[0] = 1.0*SS7;
+  a_Photon_sources[0] = 1.0*SS7;
 
   // Reaction 7: y + M => e + M+
-  // Since we only track excited species that emit an ionizing photon, this is deterministic
+  // Since we only track excited species that emit an ionizing Photon, this is deterministic
   se += Y[0];
   sp += Y[0];
 
@@ -271,10 +271,10 @@ void morrow_jiang::network_tau(Vector<Real>&          a_particle_sources,
 
 // Tau leaping method
 void morrow_jiang::network_ssa(Vector<Real>&          a_particle_sources,
-			       Vector<Real>&          a_photon_sources,
+			       Vector<Real>&          a_Photon_sources,
 			       const Vector<Real>     a_particle_densities,
 			       const Vector<RealVect> a_particle_gradients,
-			       const Vector<Real>     a_photon_densities,
+			       const Vector<Real>     a_Photon_densities,
 			       const RealVect         a_E,
 			       const RealVect         a_pos,
 			       const Real             a_dx,
@@ -286,7 +286,7 @@ void morrow_jiang::network_ssa(Vector<Real>&          a_particle_sources,
 
   Vector<Real> x(m_num_species, 0.0);
   Vector<int>  X(m_num_species, 0);
-  Vector<int>  Y(m_num_photons, 0);
+  Vector<int>  Y(m_num_Photons, 0);
 
   //
   const RealVect Ve = compute_ve(a_E);
@@ -315,12 +315,12 @@ void morrow_jiang::network_ssa(Vector<Real>&          a_particle_sources,
   const Vector<int> X0 = X;
 
 
-  // Initial photon densities
-  for (int i = 0; i < m_num_photons; i++){
-    Y[i] = floor(thresh + a_photon_densities[i]);
+  // Initial Photon densities
+  for (int i = 0; i < m_num_Photons; i++){
+    Y[i] = floor(thresh + a_Photon_densities[i]);
   }
 
-  // Deposit photons. This is reaction #6 in the list above. We will only do the other 5 reactions.
+  // Deposit Photons. This is reaction #6 in the list above. We will only do the other 5 reactions.
   // X[m_nelec_idx] += Y[0];
   // X[m_nplus_idx] += Y[0];
   Y[0] = 0;
@@ -393,7 +393,7 @@ void morrow_jiang::network_ssa(Vector<Real>&          a_particle_sources,
 	Xp -=1;
 	Xe -=1;
       }
-      else { // Send out a photon
+      else { // Send out a Photon
 	Y[0] += 1;
       }
 
@@ -406,7 +406,7 @@ void morrow_jiang::network_ssa(Vector<Real>&          a_particle_sources,
   }
   
   // Now we need to normalize some stuff
-  a_photon_sources[0] = 1.0*Y[0];
+  a_Photon_sources[0] = 1.0*Y[0];
 
   // Non-integer reactions
   const Real a1 = xe*alpha*ve;
@@ -835,8 +835,8 @@ Real morrow_jiang::excited_species::initialData(const RealVect a_pos, const Real
   return 0.;
 }
 
-morrow_jiang::uv_photon::uv_photon(){
-  m_name   = "uv_photon";
+morrow_jiang::uv_Photon::uv_Photon(){
+  m_name   = "uv_Photon";
 
   Real pressure, O2_frac;
   
@@ -861,15 +861,15 @@ morrow_jiang::uv_photon::uv_photon(){
   m_udist01 = new std::uniform_real_distribution<Real>(0.0, 1.0);
 }
 
-morrow_jiang::uv_photon::~uv_photon(){
+morrow_jiang::uv_Photon::~uv_Photon(){
   
 }
 
-Real morrow_jiang::uv_photon::getKappa(const RealVect a_pos) const {
-  MayDay::Abort("morrow_jiang::uv_photon::getKappa - should not be called. morrow_jiang is used with the mc_photo module");
+Real morrow_jiang::uv_Photon::getKappa(const RealVect a_pos) const {
+  MayDay::Abort("morrow_jiang::uv_Photon::getKappa - should not be called. morrow_jiang is used with the mc_photo module");
 }
 
-Real morrow_jiang::uv_photon::get_random_kappa() const {
+Real morrow_jiang::uv_Photon::get_random_kappa() const {
   const Real f = m_f1 + (*m_udist01)(*m_rng)*(m_f2 - m_f1);
 
   return 1./(100E-6);
@@ -888,10 +888,10 @@ void morrow_jiang::init_rng(){
 
 void morrow_jiang::instantiate_species(){
   m_num_species = 4;
-  m_num_photons = 1;
+  m_num_Photons = 1;
 
   m_species.resize(m_num_species);
-  m_photons.resize(m_num_photons);
+  m_Photons.resize(m_num_Photons);
 
   m_nelec_idx = 0;
   m_nplus_idx = 1;
@@ -904,7 +904,7 @@ void morrow_jiang::instantiate_species(){
   m_species[m_nplus_idx]  = RefCountedPtr<species>      (new morrow_jiang::positive_species());
   m_species[m_nminu_idx]  = RefCountedPtr<species>      (new morrow_jiang::negative_species());
   m_species[m_nexci_idx]  = RefCountedPtr<species>      (new morrow_jiang::excited_species());
-  m_photons[m_photo_idx]  = RefCountedPtr<photon_group> (new morrow_jiang::uv_photon());
+  m_Photons[m_photo_idx]  = RefCountedPtr<Photon_group> (new morrow_jiang::uv_Photon());
 
 }
 

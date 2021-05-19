@@ -1,6 +1,6 @@
 /*!
   @file   air7_zheleznyak.H
-  @brief  3-species and 8-photon model for air
+  @brief  3-species and 8-Photon model for air
   @author Robert Marskar
   @date   Feb. 2018
 */
@@ -243,7 +243,7 @@ void air7_zheleznyak::instantiate_species(){
   m_CdrSpecies[m_O2minus_idx]   = RefCountedPtr<CdrSpecies> (new air7_zheleznyak::O2minus());
 
   m_rte_species.resize(m_num_rte_species);
-  m_rte_species[m_phot_idx] = RefCountedPtr<rte_species> (new air7_zheleznyak::uv_photon());
+  m_rte_species[m_phot_idx] = RefCountedPtr<rte_species> (new air7_zheleznyak::uv_Photon());
 
 }
 
@@ -296,10 +296,10 @@ void air7_zheleznyak::parseDomainBc(){
 }
 
 void air7_zheleznyak::advance_reaction_network(Vector<Real>&          a_particle_sources,
-					       Vector<Real>&          a_photon_sources,
+					       Vector<Real>&          a_Photon_sources,
 					       const Vector<Real>     a_particle_densities,
 					       const Vector<RealVect> a_particle_gradients,
-					       const Vector<Real>     a_photon_densities,
+					       const Vector<Real>     a_Photon_densities,
 					       const RealVect         a_E,
 					       const RealVect         a_pos,
 					       const Real             a_dx,
@@ -320,8 +320,8 @@ void air7_zheleznyak::advance_reaction_network(Vector<Real>&          a_particle
   }
 
   for (int i = 0; i < m_num_rte_species; i++){
-    rte_phi[i]          = a_photon_densities[i];
-    a_photon_sources[i] = 0.0;
+    rte_phi[i]          = a_Photon_densities[i];
+    a_Photon_sources[i] = 0.0;
   }
 
   int nsteps = ceil(a_dt/m_chemistry_dt);
@@ -337,9 +337,9 @@ void air7_zheleznyak::advance_reaction_network(Vector<Real>&          a_particle
 	cdr_phi[i] = cdr_phi[i] + cdr_src[i]*dt;
       }
 
-      // Add photons produced in the substep
+      // Add Photons produced in the substep
       for (int i = 0; i < m_num_rte_species; i++){
-	a_photon_sources[i] += rte_src[i];
+	a_Photon_sources[i] += rte_src[i];
       }
     }
     else if(m_chemistryAlgorithm == chemistryAlgorithm::rk2){
@@ -356,7 +356,7 @@ void air7_zheleznyak::advance_reaction_network(Vector<Real>&          a_particle
 
       // Photons only use the Euler update
       for (int i = 0; i < m_num_rte_species; i++){
-	a_photon_sources[i] += rte_src[i];
+	a_Photon_sources[i] += rte_src[i];
       }
 
       // Re-compute slope at k
@@ -374,9 +374,9 @@ void air7_zheleznyak::advance_reaction_network(Vector<Real>&          a_particle
       advance_chemistry_euler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
       const Vector<Real> k1 = cdr_src;
 
-      // Only Euler update for photons.
+      // Only Euler update for Photons.
       for (int i = 0; i < m_num_rte_species; i++){
-	a_photon_sources[i] += rte_src[i];
+	a_Photon_sources[i] += rte_src[i];
       }
 
       // Compute k2 slope
@@ -420,10 +420,10 @@ void air7_zheleznyak::advance_reaction_network(Vector<Real>&          a_particle
 }
 
 void air7_zheleznyak::advance_chemistry_euler(Vector<Real>&          a_particle_sources,
-					      Vector<Real>&          a_photon_sources,
+					      Vector<Real>&          a_Photon_sources,
 					      Vector<Real>&          a_particle_densities,
 					      const Vector<RealVect> a_particle_gradients,
-					      const Vector<Real>     a_photon_densities,
+					      const Vector<Real>     a_Photon_densities,
 					      const RealVect         a_E,
 					      const RealVect         a_pos,
 					      const Real             a_dx,
@@ -553,16 +553,16 @@ void air7_zheleznyak::advance_chemistry_euler(Vector<Real>&          a_particle_
   S_O2p -= R15;
 
   // Photoionization, M + y => e + M+
-  for (int i = 0; i < a_photon_densities.size(); i++){
-    S_e   += a_photon_densities[i]/a_dt;
-    S_O2p += a_photon_densities[i]/a_dt;
+  for (int i = 0; i < a_Photon_densities.size(); i++){
+    S_e   += a_Photon_densities[i]/a_dt;
+    S_O2p += a_Photon_densities[i]/a_dt;
   }
 
   // Photon generation
   const Real xfactor = excitation_rates(E)*sergey_factor(m_O2frac)*m_photoi_factor;
   const Real Rgamma  = R1*xfactor;
   const int num_phot = poisson_reaction(Rgamma*volume, a_dt);
-  a_photon_sources[m_phot_idx] = 1.0*num_phot;
+  a_Photon_sources[m_phot_idx] = 1.0*num_phot;
 
   return;
 }

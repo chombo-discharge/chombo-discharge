@@ -66,11 +66,11 @@ Driver.refine_solid_solid_interface    = -1            # Refine solid-solid inte
 # MC_PHOTO CLASS OPTIONS
 # ====================================================================================================
 mc_photo.instantaneous      = true          # Instantaneous transport or not
-mc_photo.max_photons        = 1             # Maximum no. generated in a cell (< = 0 yields physical photons)
+mc_photo.max_Photons        = 1             # Maximum no. generated in a cell (< = 0 yields physical Photons)
 mc_photo.blend_conservation = false         # Switch for blending with the nonconservative divergence
 mc_photo.pvr_buffer         = 0             # Buffer for PVR. 
 mc_photo.halo_buffer        = 1             # Halo region for particles. 
-mc_photo.random_kappa       = true          # Randomize absorption length (taken from photon implementation)
+mc_photo.random_kappa       = true          # Randomize absorption length (taken from Photon implementation)
 mc_photo.plt_vars           = phi src phot  # Available are 'phi' and 'src', 'phot', 'eb_phot', 'dom_phot', 'bulk_phot', 'src_phot'
 mc_photo.plot_deposition    = cic           # Cloud-in-cell for plotting particles. 
 mc_photo.bisect_step        = 1.E-4         # Bisection step length for intersection tests
@@ -82,13 +82,13 @@ mc_photo.bc_y_high          = outflow       # Boundary condition
 mc_photo.bc_z_low           = outflow       # Boundary condition
 mc_photo.bc_z_high          = outflow       # Boundary condition
 mc_photo.poiss_exp_swap     = 100           # Swap out Poisson with exponential distribution above this mean
-mc_photo.photon_generation  = deterministic # Volumetric source term. 'deterministic' or 'stochastic'
-mc_photo.source_type        = number        # 'number'       = Source term contains the number of photons produced
-                                            # 'volume'       = Source terms contains the number of photons produced per unit volume
+mc_photo.Photon_generation  = deterministic # Volumetric source term. 'deterministic' or 'stochastic'
+mc_photo.source_type        = number        # 'number'       = Source term contains the number of Photons produced
+                                            # 'volume'       = Source terms contains the number of Photons produced per unit volume
                                             # 'volume_rate'  = Source terms contains the volumetric rate
                                             # 'rate'         = Source terms contains the rate
 mc_photo.deposition         = cic           # 'ngp'  = nearest grid point
-                                            # 'num'  = # of photons per cell
+                                            # 'num'  = # of Photons per cell
                                             # 'cic'  = cloud-in-cell
                                             # 'tsc'  = triangle-shaped-cloud
                                             # 'w4'   = 3rd order interpolation

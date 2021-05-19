@@ -1,6 +1,6 @@
 /*!
   @file   air6_mc8.H
-  @brief  6-species (3/3 charged/excited) and 8-photon model for air
+  @brief  6-species (3/3 charged/excited) and 8-Photon model for air
   @author Robert Marskar
   @date   Feb. 2018
 */
@@ -242,7 +242,7 @@ void air6_mc8::init_rng(){
 
 void air6_mc8::instantiate_species(){
   m_num_species = 6;
-  m_num_photons = 8;
+  m_num_Photons = 8;
 
   m_elec_idx = 0;
   m_plus_idx = 1;
@@ -268,15 +268,15 @@ void air6_mc8::instantiate_species(){
   m_species[m_c4v1_idx]  = RefCountedPtr<species>      (new air6_mc8::N2_c4v1());
   m_species[m_b1v1_idx]  = RefCountedPtr<species>      (new air6_mc8::N2_b1v1());
 
-  m_photons.resize(m_num_photons);
-  m_photons[m_c4v0_X1v0_idx] = RefCountedPtr<photon_group> (new air6_mc8::phot_c4v0_X1v0());
-  m_photons[m_c4v0_X1v1_idx] = RefCountedPtr<photon_group> (new air6_mc8::phot_c4v0_X1v1());
-  m_photons[m_c4v1_X1v0_idx] = RefCountedPtr<photon_group> (new air6_mc8::phot_c4v1_X1v0());
-  m_photons[m_c4v1_X1v1_idx] = RefCountedPtr<photon_group> (new air6_mc8::phot_c4v1_X1v1());
-  m_photons[m_c4v1_X1v2_idx] = RefCountedPtr<photon_group> (new air6_mc8::phot_c4v1_X1v2());
-  m_photons[m_c4v1_X1v3_idx] = RefCountedPtr<photon_group> (new air6_mc8::phot_c4v1_X1v3());
-  m_photons[m_b1v1_X1v0_idx] = RefCountedPtr<photon_group> (new air6_mc8::phot_b1v1_X1v0());
-  m_photons[m_b1v1_X1v1_idx] = RefCountedPtr<photon_group> (new air6_mc8::phot_b1v1_X1v1());
+  m_Photons.resize(m_num_Photons);
+  m_Photons[m_c4v0_X1v0_idx] = RefCountedPtr<Photon_group> (new air6_mc8::phot_c4v0_X1v0());
+  m_Photons[m_c4v0_X1v1_idx] = RefCountedPtr<Photon_group> (new air6_mc8::phot_c4v0_X1v1());
+  m_Photons[m_c4v1_X1v0_idx] = RefCountedPtr<Photon_group> (new air6_mc8::phot_c4v1_X1v0());
+  m_Photons[m_c4v1_X1v1_idx] = RefCountedPtr<Photon_group> (new air6_mc8::phot_c4v1_X1v1());
+  m_Photons[m_c4v1_X1v2_idx] = RefCountedPtr<Photon_group> (new air6_mc8::phot_c4v1_X1v2());
+  m_Photons[m_c4v1_X1v3_idx] = RefCountedPtr<Photon_group> (new air6_mc8::phot_c4v1_X1v3());
+  m_Photons[m_b1v1_X1v0_idx] = RefCountedPtr<Photon_group> (new air6_mc8::phot_b1v1_X1v0());
+  m_Photons[m_b1v1_X1v1_idx] = RefCountedPtr<Photon_group> (new air6_mc8::phot_b1v1_X1v1());
 }
 
 void air6_mc8::parse_initial_particles(){
@@ -486,10 +486,10 @@ void air6_mc8::parseDomainBc(){
 }
 
 void air6_mc8::advance_reaction_network(Vector<Real>&          a_particle_sources,
-					Vector<Real>&          a_photon_sources,
+					Vector<Real>&          a_Photon_sources,
 					const Vector<Real>     a_particle_densities,
 					const Vector<RealVect> a_particle_gradients,
-					const Vector<Real>     a_photon_densities,
+					const Vector<Real>     a_Photon_densities,
 					const RealVect         a_E,
 					const RealVect         a_pos,
 					const Real             a_dx,
@@ -500,15 +500,15 @@ void air6_mc8::advance_reaction_network(Vector<Real>&          a_particle_source
   
   // The various forms of the chemistry step is given in the routines below
   if(m_scomp == source_comp::ssa){ // SSA algorithm
-    network_ssa(a_particle_sources, a_photon_sources, a_particle_densities, a_particle_gradients, a_photon_densities,
+    network_ssa(a_particle_sources, a_Photon_sources, a_particle_densities, a_particle_gradients, a_Photon_densities,
 		a_E, a_pos, a_dx, a_dt, a_time, a_kappa);
   }
   else if(m_scomp == source_comp::tau){ // Tau leaping
-    network_tau(a_particle_sources, a_photon_sources, a_particle_densities, a_particle_gradients, a_photon_densities,
+    network_tau(a_particle_sources, a_Photon_sources, a_particle_densities, a_particle_gradients, a_Photon_densities,
 		a_E, a_pos, a_dx, a_dt, a_time, a_kappa);
   }
   else if(m_scomp == source_comp::rre){ // Reaction rate equation
-    network_rre(a_particle_sources, a_photon_sources, a_particle_densities, a_particle_gradients, a_photon_densities,
+    network_rre(a_particle_sources, a_Photon_sources, a_particle_densities, a_particle_gradients, a_Photon_densities,
 		a_E, a_pos, a_dx, a_dt, a_time, a_kappa);
   }
 
@@ -670,10 +670,10 @@ int air6_mc8::binomial_trials(const int a_trials, const Real a_p) const {
 }
 
 void air6_mc8::network_ssa(Vector<Real>&          a_particle_sources,
-			   Vector<Real>&          a_photon_sources,
+			   Vector<Real>&          a_Photon_sources,
 			   const Vector<Real>     a_particle_densities,
 			   const Vector<RealVect> a_particle_gradients,
-			   const Vector<Real>     a_photon_densities,
+			   const Vector<Real>     a_Photon_densities,
 			   const RealVect         a_E,
 			   const RealVect         a_pos,
 			   const Real             a_dx,
@@ -684,10 +684,10 @@ void air6_mc8::network_ssa(Vector<Real>&          a_particle_sources,
 }
 
 void air6_mc8::network_tau(Vector<Real>&          a_particle_sources,
-			   Vector<Real>&          a_photon_sources,
+			   Vector<Real>&          a_Photon_sources,
 			   const Vector<Real>     a_particle_densities,
 			   const Vector<RealVect> a_particle_gradients,
-			   const Vector<Real>     a_photon_densities,
+			   const Vector<Real>     a_Photon_densities,
 			   const RealVect         a_E,
 			   const RealVect         a_pos,
 			   const Real             a_dx,
@@ -708,7 +708,7 @@ void air6_mc8::network_tau(Vector<Real>&          a_particle_sources,
 
   Vector<Real> x(m_num_species, 0.0);
   Vector<int> X(m_num_species, 0);
-  Vector<int> Y(m_num_photons, 0);
+  Vector<int> Y(m_num_Photons, 0);
 
   const Real thresh = 1.E-2;
   
@@ -717,8 +717,8 @@ void air6_mc8::network_tau(Vector<Real>&          a_particle_sources,
     x[i] = a_particle_densities[i] - X[i]*volume;          // "Partial particles"
   }
 
-  for (int i = 0; i < m_num_photons; i++){
-    Y[i] = floor(thresh + a_photon_densities[i]);
+  for (int i = 0; i < m_num_Photons; i++){
+    Y[i] = floor(thresh + a_Photon_densities[i]);
   }
 
   // Aux functions
@@ -732,8 +732,8 @@ void air6_mc8::network_tau(Vector<Real>&          a_particle_sources,
   const Real x_c4v1 = x[m_c4v1_idx];
   const Real x_b1v1 = x[m_b1v1_idx];
 
-  // Deposit photons first. These are allowed to react
-  for (int i = 0; i < m_num_photons; i++){
+  // Deposit Photons first. These are allowed to react
+  for (int i = 0; i < m_num_Photons; i++){
     X[m_elec_idx] += Y[i];
     X[m_plus_idx] += Y[i];
   }
@@ -811,7 +811,7 @@ void air6_mc8::network_tau(Vector<Real>&          a_particle_sources,
   const int  S9 = poisson_reaction(A9, a_dt);
   const int SS9 = binomial_trials(S9, m_c4v0_X1v0_photoi_eff);
   s_c4v0 -= S9;
-  a_photon_sources[m_c4v0_X1v0_idx] = SS9;
+  a_Photon_sources[m_c4v0_X1v0_idx] = SS9;
 
   // M(c4v0) -> M + through quenching
   const Real A10 = X_c4v0/m_c4v0_X1v0_tau_q;
@@ -825,7 +825,7 @@ void air6_mc8::network_tau(Vector<Real>&          a_particle_sources,
   const int  S11 = poisson_reaction(A11, a_dt);
   const int SS11 = binomial_trials(S11, m_c4v0_X1v1_photoi_eff);
   s_c4v0 -= S11;
-  a_photon_sources[m_c4v0_X1v1_idx] = 1.0*SS11;
+  a_Photon_sources[m_c4v0_X1v1_idx] = 1.0*SS11;
 
   // M(c4v0) -> M through quenching
   const Real A12 = X_c4v0/m_c4v0_X1v1_tau_q;
@@ -839,7 +839,7 @@ void air6_mc8::network_tau(Vector<Real>&          a_particle_sources,
   const int  S13 = poisson_reaction(A13, a_dt);
   const int SS13 = binomial_trials(S13, m_c4v1_X1v0_photoi_eff);
   s_c4v1 -= S13;
-  a_photon_sources[m_c4v1_X1v0_idx] = 1.0*SS13;
+  a_Photon_sources[m_c4v1_X1v0_idx] = 1.0*SS13;
 
   // M(c4v0) -> M + through quenching
   const Real A14 = X_c4v1/m_c4v1_X1v0_tau_q;
@@ -853,7 +853,7 @@ void air6_mc8::network_tau(Vector<Real>&          a_particle_sources,
   const int  S15 = poisson_reaction(A15, a_dt);
   const int SS15 = binomial_trials(S15, m_c4v1_X1v1_photoi_eff);
   s_c4v1 -= S15;
-  a_photon_sources[m_c4v1_X1v1_idx] = 1.0*SS15;
+  a_Photon_sources[m_c4v1_X1v1_idx] = 1.0*SS15;
 
   // M(c4v0) -> M + through quenching
   const Real A16 = X_c4v1/m_c4v1_X1v1_tau_q;
@@ -867,7 +867,7 @@ void air6_mc8::network_tau(Vector<Real>&          a_particle_sources,
   const int  S17 = poisson_reaction(A17, a_dt);
   const int SS17 = binomial_trials(S17, m_c4v1_X1v2_photoi_eff);
   s_c4v1 -= S17;
-  a_photon_sources[m_c4v1_X1v2_idx] = 1.0*SS17;
+  a_Photon_sources[m_c4v1_X1v2_idx] = 1.0*SS17;
 
   // M(c4v1) -> M + through quenching
   const Real A18 = X_c4v1/m_c4v1_X1v2_tau_q;
@@ -881,7 +881,7 @@ void air6_mc8::network_tau(Vector<Real>&          a_particle_sources,
   const int  S19 = poisson_reaction(A19, a_dt);
   const int SS19 = binomial_trials(S19, m_c4v1_X1v3_photoi_eff);
   s_c4v1 -= S19;
-  a_photon_sources[m_c4v1_X1v3_idx] = 1.0*SS19;
+  a_Photon_sources[m_c4v1_X1v3_idx] = 1.0*SS19;
 
   // M(c4v1) -> M + through quenching
   const Real A20 = X_c4v1/m_c4v1_X1v3_tau_q;
@@ -895,7 +895,7 @@ void air6_mc8::network_tau(Vector<Real>&          a_particle_sources,
   const int  S21 = poisson_reaction(A21, a_dt);
   const int SS21 = binomial_trials(S21, m_b1v1_X1v0_photoi_eff);
   s_b1v1 -= S21;
-  a_photon_sources[m_b1v1_X1v0_idx] = 1.0*SS21;
+  a_Photon_sources[m_b1v1_X1v0_idx] = 1.0*SS21;
 
   // M(c4v1) -> M + through quenching
   const Real A22 = X_b1v1/m_b1v1_X1v0_tau_q;
@@ -909,7 +909,7 @@ void air6_mc8::network_tau(Vector<Real>&          a_particle_sources,
   const int  S23 = poisson_reaction(A23, a_dt);
   const int SS23 = binomial_trials(S23, m_b1v1_X1v1_photoi_eff);
   s_b1v1 -= S23;
-  a_photon_sources[m_b1v1_X1v1_idx] = 1.0*SS23;
+  a_Photon_sources[m_b1v1_X1v1_idx] = 1.0*SS23;
 
   // M(c4v1) -> M + through quenching
   const Real A24 = X_b1v1/m_b1v1_X1v1_tau_q;
@@ -943,10 +943,10 @@ void air6_mc8::network_tau(Vector<Real>&          a_particle_sources,
 
 
 void air6_mc8::network_rre(Vector<Real>&          a_particle_sources,
-			   Vector<Real>&          a_photon_sources,
+			   Vector<Real>&          a_Photon_sources,
 			   const Vector<Real>     a_particle_densities,
 			   const Vector<RealVect> a_particle_gradients,
-			   const Vector<Real>     a_photon_densities,
+			   const Vector<Real>     a_Photon_densities,
 			   const RealVect         a_E,
 			   const RealVect         a_pos,
 			   const Real             a_dx,

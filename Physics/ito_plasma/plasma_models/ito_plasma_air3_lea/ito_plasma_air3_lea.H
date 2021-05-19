@@ -24,7 +24,7 @@ namespace physics {
       class electron;
       class positive;
       class negative;
-      class photonZ;
+      class PhotonZ;
       
       ito_plasma_air3_lea();
       ~ito_plasma_air3_lea();
@@ -49,7 +49,7 @@ namespace physics {
       int m_electron_idx;
       int m_positive_idx;
       int m_negative_idx;
-      int m_photonZ_idx;
+      int m_PhotonZ_idx;
 
 
       // Pressure, neutral number density etc
@@ -98,10 +98,10 @@ namespace physics {
       ~negative();
     };
 
-    class ito_plasma_air3_lea::photonZ : public rte_species {
+    class ito_plasma_air3_lea::PhotonZ : public rte_species {
     public:
-      photonZ();
-      ~photonZ();
+      PhotonZ();
+      ~PhotonZ();
 
       Real getKappa(const RealVect a_pos) const override;
       

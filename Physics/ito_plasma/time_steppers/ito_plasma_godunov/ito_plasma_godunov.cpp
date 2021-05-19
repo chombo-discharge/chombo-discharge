@@ -334,7 +334,7 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
 
   Real particle_time = 0.0;
   Real relax_time    = 0.0;
-  Real photon_time   = 0.0;
+  Real Photon_time   = 0.0;
   Real sort_time     = 0.0;
   Real super_time    = 0.0;
   Real reaction_time = 0.0;
@@ -367,11 +367,11 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   m_dt_relax = this->compute_relaxation_time(); // This is for the restricting the next step.
   relax_time += MPI_Wtime();
 
-  // Move photons
+  // Move Photons
   MPI_Barrier(Chombo_MPI::comm);
-  photon_time = -MPI_Wtime();
-  this->advance_photons(a_dt);
-  photon_time += MPI_Wtime();
+  Photon_time = -MPI_Wtime();
+  this->advance_Photons(a_dt);
+  Photon_time += MPI_Wtime();
 
   // If we are using the LEA, we must compute the Ohmic heating term. This must be done
   // BEFORE sorting the particles per cell. 
@@ -379,12 +379,12 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
     this->compute_EdotJ_source(a_dt);
   }
   
-  // Sort the particles and photons per cell so we can call reaction algorithms
+  // Sort the particles and Photons per cell so we can call reaction algorithms
   MPI_Barrier(Chombo_MPI::comm);
   sort_time = -MPI_Wtime();
   m_ito->sortParticlesByCell(ito_solver::which_container::bulk);
-  this->sort_bulk_photons_by_cell();
-  this->sort_source_photons_by_cell();
+  this->sort_bulk_Photons_by_cell();
+  this->sort_source_Photons_by_cell();
   sort_time += MPI_Wtime();
 
   // Chemistry kernel.
@@ -405,8 +405,8 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   MPI_Barrier(Chombo_MPI::comm);
   sort_time -= MPI_Wtime();
   m_ito->sortParticlesByPatch(ito_solver::which_container::bulk);
-  this->sort_bulk_photons_by_patch();
-  this->sort_source_photons_by_patch();
+  this->sort_bulk_Photons_by_patch();
+  this->sort_source_Photons_by_patch();
   sort_time += MPI_Wtime();
 
   // Clear other data holders for now. BC comes later...
@@ -442,7 +442,7 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
     // Convert to %
     particle_time *= 100./total_time;
     relax_time    *= 100./total_time;
-    photon_time   *= 100./total_time;
+    Photon_time   *= 100./total_time;
     sort_time     *= 100./total_time;
     super_time    *= 100./total_time;
     reaction_time *= 100./total_time;
@@ -455,7 +455,7 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
     Real imbalance = 0.0;
     imbalance += particle_time;
     imbalance += relax_time;
-    imbalance += photon_time;
+    imbalance += Photon_time;
     imbalance += sort_time;
     imbalance += super_time;
     imbalance += reaction_time;
@@ -471,7 +471,7 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
     print_timer_head();
     print_timer_diagnostics(particle_time, "Transport & Poisson (%)");
     print_timer_diagnostics(relax_time,    "Relax time (%)");
-    print_timer_diagnostics(photon_time,   "Photons (%)");
+    print_timer_diagnostics(Photon_time,   "Photons (%)");
     print_timer_diagnostics(sort_time,     "Sort (%)");
     print_timer_diagnostics(super_time,    "Superparticles (%)");
     print_timer_diagnostics(reaction_time, "Reaction network (%)");

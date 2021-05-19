@@ -26,10 +26,10 @@ namespace physics {
       ~morrow_bourdon();
 
       void advance_reaction_network(Vector<Real>&          a_particle_sources,
-				    Vector<Real>&          a_photon_sources,
+				    Vector<Real>&          a_Photon_sources,
 				    const Vector<Real>     a_particle_densities,
 				    const Vector<RealVect> a_particle_gradients,
-				    const Vector<Real>     a_photon_densities,
+				    const Vector<Real>     a_Photon_densities,
 				    const RealVect         a_E,
 				    const RealVect         a_pos,
 				    const Real             a_dx,
@@ -125,10 +125,10 @@ namespace physics {
 	RealVect m_seed_pos;
       };
 
-      class photon_one : public rte_species {
+      class Photon_one : public rte_species {
       public:
-	photon_one();
-	~photon_one();
+	Photon_one();
+	~Photon_one();
 	Real getKappa(const RealVect a_pos) const;
 	Real get_lambda() const { return m_lambda;}
 	Real get_A()      const { return m_A;}
@@ -140,10 +140,10 @@ namespace physics {
 	Real m_pO2;
       };
 
-      class photon_two : public rte_species {
+      class Photon_two : public rte_species {
       public:
-	photon_two();
-	~photon_two();
+	Photon_two();
+	~Photon_two();
 	Real getKappa(const RealVect a_pos) const;
 	Real get_lambda() const { return m_lambda;}
 	Real get_A()      const { return m_A;}
@@ -155,10 +155,10 @@ namespace physics {
 	Real m_pO2;
       };
 
-      class photon_three : public rte_species {
+      class Photon_three : public rte_species {
       public:
-	photon_three();
-	~photon_three();
+	Photon_three();
+	~Photon_three();
 	Real getKappa(const RealVect a_pos) const;
 	Real get_lambda() const { return m_lambda;}
 	Real get_A()      const { return m_A;}
@@ -178,9 +178,9 @@ namespace physics {
       int m_nminu_idx; // Negative ion index
 
 
-      int m_photon1_idx;
-      int m_photon2_idx;
-      int m_photon3_idx;
+      int m_Photon1_idx;
+      int m_Photon2_idx;
+      int m_Photon3_idx;
       int m_noise_octaves;
       Real m_background_rate;
       Real m_townsend2_conductor;
@@ -201,7 +201,7 @@ namespace physics {
       Vector<Real> compute_cathode_flux(const Vector<Real> a_extrapolated_fluxes,
 					const Vector<Real> a_ion_densities,
 					const Vector<Real> a_ion_velocities,
-					const Vector<Real> a_photon_fluxes,
+					const Vector<Real> a_Photon_fluxes,
 					const RealVect     a_E,
 					const RealVect     a_pos,
 					const RealVect     a_normal,
@@ -210,7 +210,7 @@ namespace physics {
       Vector<Real> compute_anode_flux(const Vector<Real> a_extrapolated_fluxes,
 				      const Vector<Real> a_ion_densities,
 				      const Vector<Real> a_ion_velocities,
-				      const Vector<Real> a_photon_fluxes,
+				      const Vector<Real> a_Photon_fluxes,
 				      const RealVect     a_E,
 				      const RealVect     a_pos,
 				      const RealVect     a_normal,

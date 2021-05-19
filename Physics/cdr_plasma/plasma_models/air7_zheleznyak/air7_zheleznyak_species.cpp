@@ -116,8 +116,8 @@ Real air7_zheleznyak::O2plus::initialData(const RealVect a_pos, const Real a_tim
   return m_frac*(m_uniform_density + m_seed_density*exp(-factor*factor/(m_seed_rad*m_seed_rad)));
 }
 
-air7_zheleznyak::uv_photon::uv_photon(){
-  m_name   = "uv_photon";
+air7_zheleznyak::uv_Photon::uv_Photon(){
+  m_name   = "uv_Photon";
 
   Real pressure, O2_frac;
   
@@ -142,15 +142,15 @@ air7_zheleznyak::uv_photon::uv_photon(){
   m_udist01 = new std::uniform_real_distribution<Real>(0.0, 1.0);
 }
 
-air7_zheleznyak::uv_photon::~uv_photon(){
+air7_zheleznyak::uv_Photon::~uv_Photon(){
   
 }
 
-Real air7_zheleznyak::uv_photon::getKappa(const RealVect a_pos) const {
+Real air7_zheleznyak::uv_Photon::getKappa(const RealVect a_pos) const {
   return get_random_kappa();
 }
 
-Real air7_zheleznyak::uv_photon::get_random_kappa() const {
+Real air7_zheleznyak::uv_Photon::get_random_kappa() const {
   const Real f = m_f1 + (*m_udist01)(*m_rng)*(m_f2 - m_f1);
   return m_K1*pow(m_K2/m_K1, (f-m_f1)/(m_f2-m_f1));
 }

@@ -1778,8 +1778,8 @@ void sisdc::allocate_poisson_storage(){
 
 void sisdc::allocate_rte_storage(){
   const int ncomp       = 1;
-  const int num_photons = m_plaskin->get_num_photons();
-  m_rte_scratch.resize(num_photons);
+  const int num_Photons = m_plaskin->get_num_Photons();
+  m_rte_scratch.resize(num_Photons);
   
   for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
@@ -2934,7 +2934,7 @@ void sisdc::subcycle_update_sources(const int a_m, const int a_lvl, const Real a
   // This should have been called AFTER update_transport_bc, which computed the cell centered gradients. So
   // at least we don't have to do that again...
   const int num_species        = m_plaskin->get_num_species();
-  const int num_photons        = m_plaskin->get_num_photons();
+  const int num_Photons        = m_plaskin->get_num_Photons();
   
   const DisjointBoxLayout& dbl = m_amr->getGrids()[a_lvl];
   const EBISLayout& ebisl      = m_amr->getEBISLayout(m_cdr->get_phase())[a_lvl];
@@ -2956,7 +2956,7 @@ void sisdc::subcycle_update_sources(const int a_m, const int a_lvl, const Real a
     Vector<EBCellFAB*> sources(num_species);
     Vector<EBCellFAB*> cdr_densities(num_species);
     Vector<EBCellFAB*> cdr_gradients(num_species);
-    Vector<EBCellFAB*> rte_densities(num_photons);
+    Vector<EBCellFAB*> rte_densities(num_Photons);
     for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
       RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);

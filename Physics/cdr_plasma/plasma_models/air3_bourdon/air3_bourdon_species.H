@@ -40,10 +40,10 @@ namespace physics {
       Real initialData(const RealVect a_pos, const Real a_time) const {return 0.0;}
     };
 
-    class air3_bourdon::photon_one : public rte_species {
+    class air3_bourdon::Photon_one : public rte_species {
     public:
-      photon_one();
-      ~photon_one(){}
+      Photon_one();
+      ~Photon_one(){}
       Real getKappa(const RealVect a_pos) const { return m_lambda*m_pO2/sqrt(3.0);}
       Real get_lambda() const { return m_lambda;}
       Real get_A()      const { return m_A;}
@@ -55,10 +55,10 @@ namespace physics {
       Real m_pO2;
     };
 
-    class air3_bourdon::photon_two : public rte_species {
+    class air3_bourdon::Photon_two : public rte_species {
     public:
-      photon_two();
-      ~photon_two(){}
+      Photon_two();
+      ~Photon_two(){}
       Real getKappa(const RealVect a_pos) const { return m_lambda*m_pO2/sqrt(3.0);}
       Real get_lambda() const { return m_lambda;}
       Real get_A()      const { return m_A;}
@@ -70,10 +70,10 @@ namespace physics {
       Real m_pO2;
     };
 
-    class air3_bourdon::photon_three : public rte_species {
+    class air3_bourdon::Photon_three : public rte_species {
     public:
-      photon_three();
-      ~photon_three(){}
+      Photon_three();
+      ~Photon_three(){}
       Real getKappa(const RealVect a_pos) const { return m_lambda*m_pO2/sqrt(3.0);}
       Real get_lambda() const { return m_lambda;}
       Real get_A()      const { return m_A;}

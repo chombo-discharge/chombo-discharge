@@ -24,7 +24,7 @@ namespace physics {
       class electron;
       class positive;
       class negative;
-      class photonZ;
+      class PhotonZ;
       
       ito_plasma_air3();
       ~ito_plasma_air3();
@@ -60,7 +60,7 @@ namespace physics {
       int m_electron_idx;
       int m_positive_idx;
       int m_negative_idx;
-      int m_photonZ_idx;
+      int m_PhotonZ_idx;
 
       // Mobile ions or not
       bool m_isMobile_ions;
@@ -113,10 +113,10 @@ namespace physics {
       ~negative();
     };
 
-    class ito_plasma_air3::photonZ : public rte_species {
+    class ito_plasma_air3::PhotonZ : public rte_species {
     public:
-      photonZ();
-      ~photonZ();
+      PhotonZ();
+      ~PhotonZ();
 
       Real getKappa(const RealVect a_pos) const override;
       

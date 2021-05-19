@@ -1,6 +1,6 @@
 /*!
   @file   air3_mc8_agg.H
-  @brief  3-species and 8-photon model for air
+  @brief  3-species and 8-Photon model for air
   @author Robert Marskar
   @date   Feb. 2018
 */
@@ -21,17 +21,17 @@ public:
   class M_plus;
   class M_minus;
 
-  class agg_photon;
+  class agg_Photon;
 
   air3_mc8_agg();
   ~air3_mc8_agg();
   
 
   void advance_reaction_network(Vector<Real>&          a_particle_sources,
-				Vector<Real>&          a_photon_sources,
+				Vector<Real>&          a_Photon_sources,
 				const Vector<Real>     a_particle_densities,
 				const Vector<RealVect> a_particle_gradients,
-				const Vector<Real>     a_photon_densities,
+				const Vector<Real>     a_Photon_densities,
 				const RealVect         a_E,
 				const RealVect         a_pos,
 				const Real             a_dx,
@@ -119,11 +119,11 @@ protected:
 
   int m_uniform_entries; // # of entries in uniform-made BOLSIG tables
 
-  // Indices for various species and photon
+  // Indices for various species and Photon
   int m_elec_idx;   // Electrons
   int m_plus_idx;   // Positive ions
   int m_minu_idx;   // Negative ions
-  int m_photon_idx; // Photon index
+  int m_Photon_idx; // Photon index
 
   Real m_townsend2_electrode;           // 2nd Townsend coefficient on electrodes
   Real m_townsend2_dielectric;          // 2nd Townsend coefficient on dielectrics

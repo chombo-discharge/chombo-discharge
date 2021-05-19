@@ -1,6 +1,6 @@
 /*!
   @file   air3_mc8_agg.H
-  @brief  6-species (3/3 charged/excited) and 8-photon model for air
+  @brief  6-species (3/3 charged/excited) and 8-Photon model for air
   @author Robert Marskar
   @date   Feb. 2018
 */
@@ -200,21 +200,21 @@ void air3_mc8_agg::init_rng(){
 
 void air3_mc8_agg::instantiate_species(){
   m_num_species = 3;
-  m_num_photons = 1;
+  m_num_Photons = 1;
 
   m_elec_idx = 0;
   m_plus_idx = 1;
   m_minu_idx = 2;
 
-  m_photon_idx = 0;
+  m_Photon_idx = 0;
 
   m_species.resize(m_num_species);
   m_species[m_elec_idx]  = RefCountedPtr<species>      (new air3_mc8_agg::electron());
   m_species[m_plus_idx]  = RefCountedPtr<species>      (new air3_mc8_agg::M_plus());
   m_species[m_minu_idx]  = RefCountedPtr<species>      (new air3_mc8_agg::M_minus());
 
-  m_photons.resize(m_num_photons);
-  m_photons[m_photon_idx] = RefCountedPtr<photon_group> (new air3_mc8_agg::agg_photon());
+  m_Photons.resize(m_num_Photons);
+  m_Photons[m_Photon_idx] = RefCountedPtr<Photon_group> (new air3_mc8_agg::agg_Photon());
 }
 
 void air3_mc8_agg::parse_initial_particles(){
@@ -403,10 +403,10 @@ void air3_mc8_agg::parseDomainBc(){
 }
 
 void air3_mc8_agg::advance_reaction_network(Vector<Real>&          a_particle_sources,
-					    Vector<Real>&          a_photon_sources,
+					    Vector<Real>&          a_Photon_sources,
 					    const Vector<Real>     a_particle_densities,
 					    const Vector<RealVect> a_particle_gradients,
-					    const Vector<Real>     a_photon_densities,
+					    const Vector<Real>     a_Photon_densities,
 					    const RealVect         a_E,
 					    const RealVect         a_pos,
 					    const Real             a_dx,
@@ -458,12 +458,12 @@ void air3_mc8_agg::advance_reaction_network(Vector<Real>&          a_particle_so
   Sm += R2;
 
   // Photoionization, M + y => e + M+
-  for (int i = 0; i < a_photon_densities.size(); i++){
-    Se += a_photon_densities[i]/a_dt;
-    Sp += a_photon_densities[i]/a_dt;
+  for (int i = 0; i < a_Photon_densities.size(); i++){
+    Se += a_Photon_densities[i]/a_dt;
+    Sp += a_Photon_densities[i]/a_dt;
   }
 
-  // Propensity functions for photon emission
+  // Propensity functions for Photon emission
   const Real quench         = m_pq/(m_pq+m_p);
   const Real prop_c4v0_X1v0 = quench*m_c4v0_X1v0_photoi_eff*m_c4v0_exc_eff*R1*volume;
   const Real prop_c4v0_X1v1 = quench*m_c4v0_X1v1_photoi_eff*m_c4v0_exc_eff*R1*volume;
@@ -474,18 +474,18 @@ void air3_mc8_agg::advance_reaction_network(Vector<Real>&          a_particle_so
   const Real prop_b1v1_X1v0 = quench*m_b1v1_X1v0_photoi_eff*m_b1v1_exc_eff*R1*volume;
   const Real prop_b1v1_X1v1 = quench*m_b1v1_X1v1_photoi_eff*m_b1v1_exc_eff*R1*volume;
 
-  // Draw total number of photons. The photon type is late-resolved. 
-  int num_photons = 0;
-  num_photons += poisson_reaction(prop_c4v0_X1v0, a_dt);
-  num_photons += poisson_reaction(prop_c4v0_X1v1, a_dt);
-  num_photons += poisson_reaction(prop_c4v1_X1v0, a_dt);
-  num_photons += poisson_reaction(prop_c4v1_X1v1, a_dt);
-  num_photons += poisson_reaction(prop_c4v1_X1v2, a_dt);
-  num_photons += poisson_reaction(prop_c4v1_X1v3, a_dt);
-  num_photons += poisson_reaction(prop_b1v1_X1v0, a_dt);
-  num_photons += poisson_reaction(prop_b1v1_X1v1, a_dt);
+  // Draw total number of Photons. The Photon type is late-resolved. 
+  int num_Photons = 0;
+  num_Photons += poisson_reaction(prop_c4v0_X1v0, a_dt);
+  num_Photons += poisson_reaction(prop_c4v0_X1v1, a_dt);
+  num_Photons += poisson_reaction(prop_c4v1_X1v0, a_dt);
+  num_Photons += poisson_reaction(prop_c4v1_X1v1, a_dt);
+  num_Photons += poisson_reaction(prop_c4v1_X1v2, a_dt);
+  num_Photons += poisson_reaction(prop_c4v1_X1v3, a_dt);
+  num_Photons += poisson_reaction(prop_b1v1_X1v0, a_dt);
+  num_Photons += poisson_reaction(prop_b1v1_X1v1, a_dt);
 
-  a_photon_sources[m_photon_idx] = 1.0*num_photons;
+  a_Photon_sources[m_Photon_idx] = 1.0*num_Photons;
   
   return;
 }

@@ -250,17 +250,17 @@ namespace physics {
     /*!
       @brief First Contribution to \gamma + O2 -> e + O2minus
     */
-    class air9eed_bourdon::photon_one : public rte_species {
+    class air9eed_bourdon::Photon_one : public rte_species {
     public:
       /*!
 	@brief Constructor
       */
-      photon_one();
+      Photon_one();
 
       /*!
 	@brief Destructor
       */
-      ~photon_one();
+      ~Photon_one();
 
       /*!
 	@brief Get the absorption coefficient
@@ -302,17 +302,17 @@ namespace physics {
     /*!
       @brief First Contribution to \gamma + O2 -> e + O2minus
     */
-    class air9eed_bourdon::photon_two : public rte_species {
+    class air9eed_bourdon::Photon_two : public rte_species {
     public:
       /*!
 	@brief Constructor
       */
-      photon_two();
+      Photon_two();
 
       /*!
 	@brief Destructor
       */
-      ~photon_two();
+      ~Photon_two();
 
       /*!
 	@brief Get the absorption coefficient
@@ -354,17 +354,17 @@ namespace physics {
     /*!
       @brief First Contribution to \gamma + O2 -> e + O2minus
     */
-    class air9eed_bourdon::photon_three : public rte_species {
+    class air9eed_bourdon::Photon_three : public rte_species {
     public:
       /*!
 	@brief Constructor
       */
-      photon_three();
+      Photon_three();
 
       /*!
 	@brief Destructor
       */
-      ~photon_three();
+      ~Photon_three();
 
       /*!
 	@brief Get the absorption coefficient

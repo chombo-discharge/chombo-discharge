@@ -1,6 +1,6 @@
 /*!
   @file   rte_species.H
-  @brief  Declaration of a photon-group class. 
+  @brief  Declaration of a Photon-group class. 
   @author Robert Marskar
   @date   Jan. 2018
 */

@@ -114,24 +114,24 @@ void morrow_bourdon::instantiate_species(){
   m_nplus_idx   = 1;
   m_nminu_idx   = 2;
   
-  m_photon1_idx = 0;
-  m_photon2_idx = 1;
-  m_photon3_idx = 2;
+  m_Photon1_idx = 0;
+  m_Photon2_idx = 1;
+  m_Photon3_idx = 2;
   
   m_CdrSpecies[m_nelec_idx]    = RefCountedPtr<CdrSpecies> (new morrow_bourdon::electron());
   m_CdrSpecies[m_nplus_idx]    = RefCountedPtr<CdrSpecies> (new morrow_bourdon::positive_species());
   m_CdrSpecies[m_nminu_idx]    = RefCountedPtr<CdrSpecies> (new morrow_bourdon::negative_species());
   
-  m_rte_species[m_photon1_idx]  = RefCountedPtr<rte_species> (new morrow_bourdon::photon_one());
-  m_rte_species[m_photon2_idx]  = RefCountedPtr<rte_species> (new morrow_bourdon::photon_two());
-  m_rte_species[m_photon3_idx]  = RefCountedPtr<rte_species> (new morrow_bourdon::photon_three());
+  m_rte_species[m_Photon1_idx]  = RefCountedPtr<rte_species> (new morrow_bourdon::Photon_one());
+  m_rte_species[m_Photon2_idx]  = RefCountedPtr<rte_species> (new morrow_bourdon::Photon_two());
+  m_rte_species[m_Photon3_idx]  = RefCountedPtr<rte_species> (new morrow_bourdon::Photon_three());
 }
 
 void morrow_bourdon::advance_reaction_network(Vector<Real>&          a_particle_sources,
-					      Vector<Real>&          a_photon_sources,
+					      Vector<Real>&          a_Photon_sources,
 					      const Vector<Real>     a_particle_densities,
 					      const Vector<RealVect> a_particle_gradients,
-					      const Vector<Real>     a_photon_densities,
+					      const Vector<Real>     a_Photon_densities,
 					      const RealVect         a_E,
 					      const RealVect         a_pos,
 					      const Real             a_dx,
@@ -144,18 +144,18 @@ void morrow_bourdon::advance_reaction_network(Vector<Real>&          a_particle_
   const Real beta   = compute_beta(a_E);  // Recombination coefficient
 
   // Cast so we can get A-coefficients
-  const morrow_bourdon::photon_one*   photon1 = static_cast<morrow_bourdon::photon_one*>   (&(*m_rte_species[m_photon1_idx]));
-  const morrow_bourdon::photon_two*   photon2 = static_cast<morrow_bourdon::photon_two*>   (&(*m_rte_species[m_photon2_idx]));
-  const morrow_bourdon::photon_three* photon3 = static_cast<morrow_bourdon::photon_three*> (&(*m_rte_species[m_photon3_idx]));
+  const morrow_bourdon::Photon_one*   Photon1 = static_cast<morrow_bourdon::Photon_one*>   (&(*m_rte_species[m_Photon1_idx]));
+  const morrow_bourdon::Photon_two*   Photon2 = static_cast<morrow_bourdon::Photon_two*>   (&(*m_rte_species[m_Photon2_idx]));
+  const morrow_bourdon::Photon_three* Photon3 = static_cast<morrow_bourdon::Photon_three*> (&(*m_rte_species[m_Photon3_idx]));
   
   // Densities and velocities
   const Real Ne  = a_particle_densities[m_nelec_idx]; 
   const Real Np  = a_particle_densities[m_nplus_idx];
   const Real Nn  = a_particle_densities[m_nminu_idx];
   const Real Ve  = compute_ve(a_E).vectorLength();
-  const Real Sph = m_photo_eff*units::s_c0*m_fracO2*m_p*(photon1->get_A()*a_photon_densities[m_photon1_idx]
-							 + photon2->get_A()*a_photon_densities[m_photon2_idx]
-							 + photon3->get_A()*a_photon_densities[m_photon3_idx]);
+  const Real Sph = m_photo_eff*units::s_c0*m_fracO2*m_p*(Photon1->get_A()*a_Photon_densities[m_Photon1_idx]
+							 + Photon2->get_A()*a_Photon_densities[m_Photon2_idx]
+							 + Photon3->get_A()*a_Photon_densities[m_Photon3_idx]);
 
 
   Real& Se = a_particle_sources[m_nelec_idx];
@@ -167,9 +167,9 @@ void morrow_bourdon::advance_reaction_network(Vector<Real>&          a_particle_
   Sn = eta*Ne*Ve   - beta*Np*Nn;
 
   const Real tmp = Max(0.0, alpha*Ne*Ve*m_exc_eff*(m_pq/(m_pq + m_p)));
-  a_photon_sources[m_photon1_idx] = tmp;
-  a_photon_sources[m_photon2_idx] = tmp;
-  a_photon_sources[m_photon3_idx] = tmp;
+  a_Photon_sources[m_Photon1_idx] = tmp;
+  a_Photon_sources[m_Photon2_idx] = tmp;
+  a_Photon_sources[m_Photon3_idx] = tmp;
  
 }
 
@@ -372,9 +372,9 @@ Vector<Real> morrow_bourdon::compute_cdr_dielectric_fluxes(const Real         a_
   
   // Add in photoelectric effect and ion bombardment for electrons by positive ions
   if(PolyGeom::dot(a_E, a_normal) < 0.){
-    fluxes[m_nelec_idx] += -a_rte_fluxes[m_photon1_idx]*m_dielectric_yield;
-    fluxes[m_nelec_idx] += -a_rte_fluxes[m_photon2_idx]*m_dielectric_yield;
-    fluxes[m_nelec_idx] += -a_rte_fluxes[m_photon3_idx]*m_dielectric_yield;
+    fluxes[m_nelec_idx] += -a_rte_fluxes[m_Photon1_idx]*m_dielectric_yield;
+    fluxes[m_nelec_idx] += -a_rte_fluxes[m_Photon2_idx]*m_dielectric_yield;
+    fluxes[m_nelec_idx] += -a_rte_fluxes[m_Photon3_idx]*m_dielectric_yield;
     fluxes[m_nelec_idx] += -Max(0.0, a_extrap_cdr_fluxes[m_nplus_idx])*m_townsend2_dielectric;
   }
 
@@ -425,7 +425,7 @@ Vector<Real> morrow_bourdon::compute_cdr_electrode_fluxes(const Real         a_t
 Vector<Real> morrow_bourdon::compute_cathode_flux(const Vector<Real> a_extrapolated_fluxes,
 						  const Vector<Real> a_ion_densities,
 						  const Vector<Real> a_ion_velocities,
-						  const Vector<Real> a_photon_fluxes,
+						  const Vector<Real> a_Photon_fluxes,
 						  const RealVect     a_E,
 						  const RealVect     a_pos,
 						  const RealVect     a_normal,
@@ -442,9 +442,9 @@ Vector<Real> morrow_bourdon::compute_cathode_flux(const Vector<Real> a_extrapola
   fluxes[m_nelec_idx] += -Max(0., a_extrapolated_fluxes[m_nplus_idx])*m_townsend2_conductor;
 
   // Photoelectric effect
-  fluxes[m_nelec_idx] += -a_photon_fluxes[m_photon1_idx]*m_electrode_yield;
-  fluxes[m_nelec_idx] += -a_photon_fluxes[m_photon2_idx]*m_electrode_yield;
-  fluxes[m_nelec_idx] += -a_photon_fluxes[m_photon3_idx]*m_electrode_yield;
+  fluxes[m_nelec_idx] += -a_Photon_fluxes[m_Photon1_idx]*m_electrode_yield;
+  fluxes[m_nelec_idx] += -a_Photon_fluxes[m_Photon2_idx]*m_electrode_yield;
+  fluxes[m_nelec_idx] += -a_Photon_fluxes[m_Photon3_idx]*m_electrode_yield;
 
   return fluxes;
 }
@@ -452,7 +452,7 @@ Vector<Real> morrow_bourdon::compute_cathode_flux(const Vector<Real> a_extrapola
 Vector<Real> morrow_bourdon::compute_anode_flux(const Vector<Real> a_extrapolated_fluxes,
 						const Vector<Real> a_ion_densities,
 						const Vector<Real> a_ion_velocities,
-						const Vector<Real> a_photon_fluxes,
+						const Vector<Real> a_Photon_fluxes,
 						const RealVect     a_E,
 						const RealVect     a_pos,
 						const RealVect     a_normal,
@@ -599,67 +599,67 @@ Real morrow_bourdon::negative_species::initialData(const RealVect a_pos, const R
 }
 
 
-morrow_bourdon::photon_one::photon_one(){
-  m_name     = "photon_one";
+morrow_bourdon::Photon_one::Photon_one(){
+  m_name     = "Photon_one";
   m_constant = true;
 
   Real O2_frac, pressure;
   ParmParse pp("morrow_bourdon");
-  pp.get("photon1_A_coeff",      m_A);
-  pp.get("photon1_lambda_coeff", m_lambda);
+  pp.get("Photon1_A_coeff",      m_A);
+  pp.get("Photon1_lambda_coeff", m_lambda);
   pp.get("gas_O2_frac",  O2_frac);
   pp.get("gas_pressure", pressure);
   
   m_pO2 = pressure*O2_frac*units::s_atm2pascal;
 }
 
-morrow_bourdon::photon_one::~photon_one(){
+morrow_bourdon::Photon_one::~Photon_one(){
   
 }
 
-Real morrow_bourdon::photon_one::getKappa(const RealVect a_pos) const {
+Real morrow_bourdon::Photon_one::getKappa(const RealVect a_pos) const {
   return m_lambda*m_pO2/sqrt(3.0); // I think this is correct.
 }
 
-morrow_bourdon::photon_two::photon_two(){
-  m_name     = "photon_two";
+morrow_bourdon::Photon_two::Photon_two(){
+  m_name     = "Photon_two";
   m_constant = true;
 
   Real O2_frac, pressure;
   ParmParse pp("morrow_bourdon");
-  pp.get("photon2_A_coeff",      m_A);
-  pp.get("photon2_lambda_coeff", m_lambda);
+  pp.get("Photon2_A_coeff",      m_A);
+  pp.get("Photon2_lambda_coeff", m_lambda);
   pp.get("gas_O2_frac",  O2_frac);
   pp.get("gas_pressure", pressure);
   
   m_pO2 = pressure*O2_frac*units::s_atm2pascal;
 }
 
-morrow_bourdon::photon_two::~photon_two(){
+morrow_bourdon::Photon_two::~Photon_two(){
 }
 
-Real morrow_bourdon::photon_two::getKappa(const RealVect a_pos) const {
+Real morrow_bourdon::Photon_two::getKappa(const RealVect a_pos) const {
   return m_lambda*m_pO2/sqrt(3.0); // I think this is correct.
 }
 
-morrow_bourdon::photon_three::photon_three(){
-  m_name     = "photon_three";
+morrow_bourdon::Photon_three::Photon_three(){
+  m_name     = "Photon_three";
   m_constant = true;
 
   Real O2_frac, pressure;
   ParmParse pp("morrow_bourdon");
-  pp.get("photon3_A_coeff",      m_A);
-  pp.get("photon3_lambda_coeff", m_lambda);
+  pp.get("Photon3_A_coeff",      m_A);
+  pp.get("Photon3_lambda_coeff", m_lambda);
   pp.get("gas_O2_frac",  O2_frac);
   pp.get("gas_pressure", pressure);
 
   m_pO2 = pressure*O2_frac*units::s_atm2pascal;  
 }
 
-morrow_bourdon::photon_three::~photon_three(){
+morrow_bourdon::Photon_three::~Photon_three(){
 }
 
-Real morrow_bourdon::photon_three::getKappa(const RealVect a_pos) const {
+Real morrow_bourdon::Photon_three::getKappa(const RealVect a_pos) const {
   return m_lambda*m_pO2/sqrt(3.0); // I think this is correct.
 
 }

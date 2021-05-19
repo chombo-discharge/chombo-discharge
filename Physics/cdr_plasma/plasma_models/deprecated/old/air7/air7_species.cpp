@@ -262,15 +262,15 @@ air7::O2minus::~O2minus(){
 
 }
 
-air7::photon_one::photon_one(){
-  m_name   = "photon_one";
+air7::Photon_one::Photon_one(){
+  m_name   = "Photon_one";
   m_A      = 1.12E-4; // Default parameters
   m_lambda = 4.15E-2;
 
   { // Override from input script
     ParmParse pp("air7");
-    pp.query("photon1_A_coeff",      m_A);
-    pp.query("photon1_lambda_coeff", m_lambda);
+    pp.query("Photon1_A_coeff",      m_A);
+    pp.query("Photon1_lambda_coeff", m_lambda);
   }
 
   // Get gas stuff from input script
@@ -279,19 +279,19 @@ air7::photon_one::photon_one(){
   m_pO2 = p*O2frac;
 }
 
-air7::photon_one::~photon_one(){
+air7::Photon_one::~Photon_one(){
 
 }
 
-air7::photon_two::photon_two(){
-  m_name   = "photon_two";
+air7::Photon_two::Photon_two(){
+  m_name   = "Photon_two";
   m_A      = 2.88E-3; // Default parameters
   m_lambda = 1.09E-1;
 
   { // Override from input script
     ParmParse pp("air7");
-    pp.query("photon2_A_coeff",      m_A);
-    pp.query("photon2_lambda_coeff", m_lambda);
+    pp.query("Photon2_A_coeff",      m_A);
+    pp.query("Photon2_lambda_coeff", m_lambda);
   }
 
   // Get gas stuff from input script
@@ -300,19 +300,19 @@ air7::photon_two::photon_two(){
   m_pO2 = p*O2frac;
 }
 
-air7::photon_two::~photon_two(){
+air7::Photon_two::~Photon_two(){
 
 }
 
-air7::photon_three::photon_three(){
-  m_name   = "photon_three";
+air7::Photon_three::Photon_three(){
+  m_name   = "Photon_three";
   m_A      = 2.76E-1;
   m_lambda = 6.69E-1;
 
   { // Override from input script
     ParmParse pp("air7");
-    pp.query("photon3_A_coeff",      m_A);
-    pp.query("photon3_lambda_coeff", m_lambda);
+    pp.query("Photon3_A_coeff",      m_A);
+    pp.query("Photon3_lambda_coeff", m_lambda);
   }
 
   // Get gas stuff from input script
@@ -321,7 +321,7 @@ air7::photon_three::photon_three(){
   m_pO2 = p*O2frac;
 }
 
-air7::photon_three::~photon_three(){
+air7::Photon_three::~Photon_three(){
 
 }
 
@@ -356,51 +356,51 @@ Real air7::O2minus::initialData(const RealVect a_pos, const Real a_time) const {
   return 0.0;
 }
 
-Real air7::photon_one::getKappa(const RealVect a_pos) const {
+Real air7::Photon_one::getKappa(const RealVect a_pos) const {
   return m_lambda*m_pO2/(sqrt(3.0));
 }
 
-Real air7::photon_one::get_lambda() const {
+Real air7::Photon_one::get_lambda() const {
   return m_lambda;
 }
 
-Real air7::photon_one::get_A() const {
+Real air7::Photon_one::get_A() const {
   return m_A;
 }
 
-Real air7::photon_one::get_pO2() const {
+Real air7::Photon_one::get_pO2() const {
   return m_pO2;
 }
 
-Real air7::photon_two::getKappa(const RealVect a_pos) const {
+Real air7::Photon_two::getKappa(const RealVect a_pos) const {
   return m_lambda*m_pO2/(sqrt(3.0));
 }
 
-Real air7::photon_two::get_lambda() const {
+Real air7::Photon_two::get_lambda() const {
   return m_lambda;
 }
 
-Real air7::photon_two::get_A() const {
+Real air7::Photon_two::get_A() const {
   return m_A;
 }
 
-Real air7::photon_two::get_pO2() const {
+Real air7::Photon_two::get_pO2() const {
   return m_pO2;
 }
 
-Real air7::photon_three::getKappa(const RealVect a_pos) const{
+Real air7::Photon_three::getKappa(const RealVect a_pos) const{
   return m_lambda*m_pO2/(sqrt(3.0));
 }
 
-Real air7::photon_three::get_lambda() const {
+Real air7::Photon_three::get_lambda() const {
   return m_lambda;
 }
 
-Real air7::photon_three::get_A() const {
+Real air7::Photon_three::get_A() const {
   return m_A;
 }
 
-Real air7::photon_three::get_pO2() const {
+Real air7::Photon_three::get_pO2() const {
   return m_pO2;
 #include "CD_NamespaceFooter.H"
 

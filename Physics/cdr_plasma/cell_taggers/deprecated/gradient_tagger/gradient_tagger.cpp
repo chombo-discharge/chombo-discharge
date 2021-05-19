@@ -59,9 +59,9 @@ Vector<Real> gradient_tagger::tracer(const RealVect         a_pos,
 				     const Vector<RealVect> a_ion_gradients,
 				     const Vector<Real>     a_min_ion_gradients,
 				     const Vector<Real>     a_max_ion_gradients,
-				     const Vector<Real>     a_photon_densities,
-				     const Vector<Real>     a_min_photon_densities,
-				     const Vector<Real>     a_max_photon_densities){
+				     const Vector<Real>     a_Photon_densities,
+				     const Vector<Real>     a_min_Photon_densities,
+				     const Vector<Real>     a_max_Photon_densities){
   Vector<Real> tracers(m_num_tracers);
   for (int i = 0; i < tracers.size(); i++){
     const Real cur_phi = a_ion_densities[i];

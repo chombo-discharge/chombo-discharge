@@ -65,9 +65,9 @@ public:
 			      const Vector<RealVect> a_ion_gradients,
 			      const Vector<Real>     a_min_ion_gradients,
 			      const Vector<Real>     a_max_ion_gradients,
-			      const Vector<Real>     a_photon_densities,
-			      const Vector<Real>     a_min_photon_densities,
-			      const Vector<Real>     a_max_photon_densities);
+			      const Vector<Real>     a_Photon_densities,
+			      const Vector<Real>     a_min_Photon_densities,
+			      const Vector<Real>     a_max_Photon_densities);
 
   /*!
     @brief Coarsen a cell based on a tracer field

@@ -200,17 +200,17 @@ protected:
 /*!
   @brief First Contribution to \gamma + O2 -> e + O2minus
 */
-class air7::photon_one : public photon_group {
+class air7::Photon_one : public Photon_group {
 public:
   /*!
     @brief Constructor
   */
-  photon_one();
+  Photon_one();
 
   /*!
     @brief Destructor
   */
-  ~photon_one();
+  ~Photon_one();
 
   /*!
     @brief Get the absorption coefficient
@@ -252,17 +252,17 @@ protected:
 /*!
   @brief First Contribution to \gamma + O2 -> e + O2minus
 */
-class air7::photon_two : public photon_group {
+class air7::Photon_two : public Photon_group {
 public:
   /*!
     @brief Constructor
   */
-  photon_two();
+  Photon_two();
 
   /*!
     @brief Destructor
   */
-  ~photon_two();
+  ~Photon_two();
 
   /*!
     @brief Get the absorption coefficient
@@ -304,17 +304,17 @@ protected:
 /*!
   @brief First Contribution to \gamma + O2 -> e + O2minus
 */
-class air7::photon_three : public photon_group {
+class air7::Photon_three : public Photon_group {
 public:
   /*!
     @brief Constructor
   */
-  photon_three();
+  Photon_three();
 
   /*!
     @brief Destructor
   */
-  ~photon_three();
+  ~Photon_three();
 
   /*!
     @brief Get the absorption coefficient

@@ -28,12 +28,12 @@
   air3.dielectric_townsend2          = 1.E-1                 # Townsend coefficient on dielectrics
   air3.dielectric_quantum_efficiency = 1.E-1                 # Quantum efficiency on dielectrics
   air3.initial_ionization            = 1.E10                 # Initial background ionization
-  air3.photon1_A_coeff               = 1.12E-4               # Parameters from Bourdon et. al photoionization model
-  air3.photon1_lambda_coeff          = 4.15E-2               # Parameters from Bourdon et. al photoionization model
-  air3.photon2_A_coeff               = 2.88E-2               # Parameters from Bourdon et. al photoionization model
-  air3.photon2_lambda_coeff          = 1.09E-1               # Parameters from Bourdon et. al photoionization model
-  air3.photon3_A_coeff               = 2.76E-1               # Parameters from Bourdon et. al photoionization model
-  air3.photon3_lambda_coeff          = 6.69E-1               # Parameters from Bourdon et. al photoionization model
+  air3.Photon1_A_coeff               = 1.12E-4               # Parameters from Bourdon et. al photoionization model
+  air3.Photon1_lambda_coeff          = 4.15E-2               # Parameters from Bourdon et. al photoionization model
+  air3.Photon2_A_coeff               = 2.88E-2               # Parameters from Bourdon et. al photoionization model
+  air3.Photon2_lambda_coeff          = 1.09E-1               # Parameters from Bourdon et. al photoionization model
+  air3.Photon3_A_coeff               = 2.76E-1               # Parameters from Bourdon et. al photoionization model
+  air3.Photon3_lambda_coeff          = 6.69E-1               # Parameters from Bourdon et. al photoionization model
   air3.electron_recombination        = 5.E-14                # Electron-ion recombination rate
   air3.ion_recombination             = 2.E-12                # Ion-ion recombination rate
   air3.electron_detachment           = 1.E-18                # Electron detachment rate
@@ -46,9 +46,9 @@ public:
   class positive_species;
   class negative_species;
 
-  class photon_one;
-  class photon_two;
-  class photon_three;
+  class Photon_one;
+  class Photon_two;
+  class Photon_three;
 
   /*!
     @brief Get gas temperature, pressure, density, and molecular fractions
@@ -136,9 +136,9 @@ protected:
   int m_electron_idx;
   int m_positive_idx;
   int m_negative_idx;
-  int m_photon1_idx;
-  int m_photon2_idx;
-  int m_photon3_idx;
+  int m_Photon1_idx;
+  int m_Photon2_idx;
+  int m_Photon3_idx;
 
   /*!
     @brief Background gas temperature

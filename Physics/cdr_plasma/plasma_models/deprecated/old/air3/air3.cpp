@@ -15,7 +15,7 @@
 air3::air3(){
   
   m_num_species = 3;
-  m_num_photons = 3;
+  m_num_Photons = 3;
 
   air3::get_gas_parameters(m_Tg, m_p, m_N, m_O2frac, m_N2frac);
 
@@ -74,14 +74,14 @@ air3::air3(){
   m_species[m_negative_idx] = RefCountedPtr<species> (new air3::negative_species());
 
 
-  // Instantiate photon solvers
-  m_photons.resize(m_num_photons);
-  m_photon1_idx = 0;
-  m_photon2_idx = 1;
-  m_photon3_idx = 2;
-  m_photons[m_photon1_idx] = RefCountedPtr<photon_group> (new air3::photon_one());
-  m_photons[m_photon2_idx] = RefCountedPtr<photon_group> (new air3::photon_two());
-  m_photons[m_photon3_idx] = RefCountedPtr<photon_group> (new air3::photon_three());
+  // Instantiate Photon solvers
+  m_Photons.resize(m_num_Photons);
+  m_Photon1_idx = 0;
+  m_Photon2_idx = 1;
+  m_Photon3_idx = 2;
+  m_Photons[m_Photon1_idx] = RefCountedPtr<Photon_group> (new air3::Photon_one());
+  m_Photons[m_Photon2_idx] = RefCountedPtr<Photon_group> (new air3::Photon_two());
+  m_Photons[m_Photon3_idx] = RefCountedPtr<Photon_group> (new air3::Photon_three());
 }
 
 air3::~air3(){
@@ -161,13 +161,13 @@ Vector<Real> air3::compute_cdr_source_terms(const Real              a_time,
   const Real Np = a_cdr_densities[m_positive_idx];
   const Real Nn = a_cdr_densities[m_negative_idx];
 
-  const air3::photon_one*   photon1 = static_cast<air3::photon_one*>   (&(*m_photons[m_photon1_idx]));
-  const air3::photon_two*   photon2 = static_cast<air3::photon_two*>   (&(*m_photons[m_photon2_idx]));
-  const air3::photon_three* photon3 = static_cast<air3::photon_three*> (&(*m_photons[m_photon3_idx]));
+  const air3::Photon_one*   Photon1 = static_cast<air3::Photon_one*>   (&(*m_Photons[m_Photon1_idx]));
+  const air3::Photon_two*   Photon2 = static_cast<air3::Photon_two*>   (&(*m_Photons[m_Photon2_idx]));
+  const air3::Photon_three* Photon3 = static_cast<air3::Photon_three*> (&(*m_Photons[m_Photon3_idx]));
 
-  const Real Sph = m_photoionization_efficiency*units::s_c0*m_O2frac*m_p*(photon1->get_A()*a_rte_densities[m_photon1_idx]
-							         	  + photon2->get_A()*a_rte_densities[m_photon2_idx]
-									  + photon3->get_A()*a_rte_densities[m_photon3_idx]);
+  const Real Sph = m_photoionization_efficiency*units::s_c0*m_O2frac*m_p*(Photon1->get_A()*a_rte_densities[m_Photon1_idx]
+							         	  + Photon2->get_A()*a_rte_densities[m_Photon2_idx]
+									  + Photon3->get_A()*a_rte_densities[m_Photon3_idx]);
 
   const Real alpha_corr = alpha*(1 - PolyGeom::dot(a_E,De*a_grad_cdr[m_electron_idx])/((1.0 + Ne)*PolyGeom::dot(vele, a_E)));
   Real& Se = source[m_electron_idx];
@@ -239,19 +239,19 @@ Vector<Real> air3::compute_cdr_fluxes(const Real&         a_time,
     fluxes[i] = aj[i]*a_extrap_cdr_fluxes[i];
   }
 
-  // Secondary emission for cathode surfaces due to ion and photon bombardment
+  // Secondary emission for cathode surfaces due to ion and Photon bombardment
   if(cathode){
     Real ion_bombardment    = 0.0;
-    Real photon_bombardment = 0.0;
+    Real Photon_bombardment = 0.0;
     
     ion_bombardment += fluxes[m_positive_idx];
 
-    photon_bombardment += a_rte_fluxes[m_photon1_idx];
-    photon_bombardment += a_rte_fluxes[m_photon2_idx];
-    photon_bombardment += a_rte_fluxes[m_photon3_idx];
+    Photon_bombardment += a_rte_fluxes[m_Photon1_idx];
+    Photon_bombardment += a_rte_fluxes[m_Photon2_idx];
+    Photon_bombardment += a_rte_fluxes[m_Photon3_idx];
 
     fluxes[m_electron_idx] -= ion_bombardment*a_townsend;
-    fluxes[m_electron_idx] -= photon_bombardment*a_quantum_efficiency;
+    fluxes[m_electron_idx] -= Photon_bombardment*a_quantum_efficiency;
   }
 
   return fluxes;
@@ -261,7 +261,7 @@ Vector<Real> air3::compute_rte_source_terms(const Real&         a_time,
 					    const RealVect&     a_pos,
 					    const RealVect&     a_E,
 					    const Vector<Real>& a_cdr_densities) const {
-  Vector<Real> ret(m_num_photons);
+  Vector<Real> ret(m_num_Photons);
 
   const Real ET      = a_E.vectorLength()/(units::s_Td*m_N);
   const RealVect vel = -1.0*this->compute_electron_mobility(ET)*a_E;
@@ -271,9 +271,9 @@ Vector<Real> air3::compute_rte_source_terms(const Real&         a_time,
   const Real Se      = Max(0., alpha*Ne*ve);               // Excitations = alpha*Ne*ve
 
   // Photo emissions = electron excitations * efficiency * quenching
-  ret[m_photon1_idx] = Se*m_excitation_efficiency*(m_pq/(m_pq + m_p));
-  ret[m_photon2_idx] = Se*m_excitation_efficiency*(m_pq/(m_pq + m_p));
-  ret[m_photon3_idx] = Se*m_excitation_efficiency*(m_pq/(m_pq + m_p));
+  ret[m_Photon1_idx] = Se*m_excitation_efficiency*(m_pq/(m_pq + m_p));
+  ret[m_Photon2_idx] = Se*m_excitation_efficiency*(m_pq/(m_pq + m_p));
+  ret[m_Photon3_idx] = Se*m_excitation_efficiency*(m_pq/(m_pq + m_p));
 
   return ret;
 }

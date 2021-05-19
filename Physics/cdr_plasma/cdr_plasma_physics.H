@@ -48,23 +48,23 @@ namespace physics {
 	@brief Routine intended for advancing a full reaction network simultaneous. 
 	@details This is the routine that sometimes the reaction network in the FHD description. Things
 	that come in/out of this routine are DENSITIES, but you should translate this to number
-	of particles/photons per cell. The particle densities are probably not integers, i.e. cells may
-	contain "half an electron". If you're doing nearest-grid point deposition of photons, the
-	photon densities x cell volume should be an integer, although stored as a floating point. 
+	of particles/Photons per cell. The particle densities are probably not integers, i.e. cells may
+	contain "half an electron". If you're doing nearest-grid point deposition of Photons, the
+	Photon densities x cell volume should be an integer, although stored as a floating point. 
 	@param[out] a_particle_sources   Number of particles produced per unit volume per unit time
-	@param[out] a_particle_sources   Number of photons produced per unit volume per unit time
+	@param[out] a_particle_sources   Number of Photons produced per unit volume per unit time
 	@param[in]  a_particle_densities Grid-based density for particle species
-	@param[in]  a_photon_densities   Grid-based densities for photons
+	@param[in]  a_Photon_densities   Grid-based densities for Photons
 	@param[in]  a_time               Current time
 	@param[in]  a_dt                 Advanced time
 	@param[in]  a_pos                Position in space
 	@param[in]  a_E                  Electric field
       */
       virtual void advance_reaction_network(Vector<Real>&          a_particle_sources,
-					    Vector<Real>&          a_photon_sources,
+					    Vector<Real>&          a_Photon_sources,
 					    const Vector<Real>     a_particle_densities,
 					    const Vector<RealVect> a_particle_gradients,
-					    const Vector<Real>     a_photon_densities,
+					    const Vector<Real>     a_Photon_densities,
 					    const RealVect         a_E,
 					    const RealVect         a_pos,
 					    const Real             a_dx,
@@ -189,7 +189,7 @@ namespace physics {
       }
 
       /*!
-	@brief Get all photons
+	@brief Get all Photons
       */
       const Vector<RefCountedPtr<rte_species> >& get_rte_species() const {
 	return m_rte_species;

@@ -87,12 +87,12 @@ ito_plasma_air3::ito_plasma_air3(){
   m_electron_idx = 0;
   m_positive_idx = 1;
   m_negative_idx = 2;
-  m_photonZ_idx  = 0;
+  m_PhotonZ_idx  = 0;
 
   m_ito_species[m_electron_idx] = RefCountedPtr<ito_species> (new electron());
   m_ito_species[m_positive_idx] = RefCountedPtr<ito_species> (new positive());
   m_ito_species[m_negative_idx] = RefCountedPtr<ito_species> (new negative());
-  m_rte_species[m_photonZ_idx]  = RefCountedPtr<rte_species> (new photonZ());
+  m_rte_species[m_PhotonZ_idx]  = RefCountedPtr<rte_species> (new PhotonZ());
 
   // To avoid that MPI ranks draw the same particle positions, increment the seed for each rank
   m_seed += procID();
@@ -113,10 +113,10 @@ ito_plasma_air3::ito_plasma_air3(){
   m_reactions.emplace("electron_attachment",    ito_reaction({m_electron_idx}, {m_negative_idx}));
   m_reactions.emplace("electron_recombination", ito_reaction({m_electron_idx, m_positive_idx}, {}));
   m_reactions.emplace("ion_recombination",      ito_reaction({m_positive_idx, m_negative_idx}, {}));
-  m_reactions.emplace("photo_excitation",       ito_reaction({m_electron_idx}, {m_electron_idx}, {m_photonZ_idx}));
+  m_reactions.emplace("photo_excitation",       ito_reaction({m_electron_idx}, {m_electron_idx}, {m_PhotonZ_idx}));
 
   // Photo-reactions
-  m_photo_reactions.emplace("zheleznyak",  photo_reaction({m_photonZ_idx}, {m_electron_idx, m_positive_idx}));
+  m_photo_reactions.emplace("zheleznyak",  photo_reaction({m_PhotonZ_idx}, {m_electron_idx, m_positive_idx}));
 
   // Set the ions diffusion coefficient
   m_ion_D = m_ion_mu*units::s_kb*m_T/units::s_Qe;
@@ -270,8 +270,8 @@ ito_plasma_air3::negative::negative(){
 ito_plasma_air3::negative::~negative(){
 }
 
-ito_plasma_air3::photonZ::photonZ(){
-  m_name   = "photonZ";
+ito_plasma_air3::PhotonZ::PhotonZ(){
+  m_name   = "PhotonZ";
 
   const Real O2_frac  = 0.2;
   const Real pressure = 1.0;
@@ -295,11 +295,11 @@ ito_plasma_air3::photonZ::photonZ(){
   m_udist01 = new std::uniform_real_distribution<Real>(0.0, 1.0);
 }
 
-ito_plasma_air3::photonZ::~photonZ(){
+ito_plasma_air3::PhotonZ::~PhotonZ(){
 
 }
 
-Real ito_plasma_air3::photonZ::getKappa(const RealVect a_pos) const {
+Real ito_plasma_air3::PhotonZ::getKappa(const RealVect a_pos) const {
   const Real f = m_f1 + (*m_udist01)(*m_rng)*(m_f2 - m_f1);
   return m_K1*pow(m_K2/m_K1, (f-m_f1)/(m_f2-m_f1));
 }

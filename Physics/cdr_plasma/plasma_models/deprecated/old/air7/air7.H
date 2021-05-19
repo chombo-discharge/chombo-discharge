@@ -37,10 +37,10 @@ public:
   class O2plusN2;
   class O2minus;
 
-  // Forward declaration of photon excitations
-  class photon_one;
-  class photon_two;
-  class photon_three;
+  // Forward declaration of Photon excitations
+  class Photon_one;
+  class Photon_two;
+  class Photon_three;
 
   /*!
     @brief Get gas temperature, pressure, density, and molecular fractions
@@ -167,9 +167,9 @@ protected:
   int m_O2minus_idx;
   int m_Ominus_idx;
   
-  int m_photon1_idx;
-  int m_photon2_idx;
-  int m_photon3_idx;
+  int m_Photon1_idx;
+  int m_Photon2_idx;
+  int m_Photon3_idx;
 
   Real m_Tg;           // Gas and ion temperature
   Real m_p;            // Gas pressure

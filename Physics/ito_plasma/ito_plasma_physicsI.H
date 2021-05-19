@@ -437,7 +437,7 @@ void ito_plasma_physics::reconcile_weights(List<ito_particle>&      a_particles,
   }
 }
 
-void ito_plasma_physics::reconcile_photons(Vector<List<photon>* >&  a_newPhotons,
+void ito_plasma_physics::reconcile_Photons(Vector<List<Photon>* >&  a_newPhotons,
 					   const Vector<long long>& a_numNewPhotons,
 					   const RealVect           a_cellPos,
 					   const RealVect           a_centroidPos,
@@ -450,16 +450,16 @@ void ito_plasma_physics::reconcile_photons(Vector<List<photon>* >&  a_newPhotons
 
   for (int i = 0; i < a_newPhotons.size(); i++){
     if(a_numNewPhotons[i] > 0){
-      this->reconcile_photons(*a_newPhotons[i], *m_rte_species[i], a_numNewPhotons[i], a_cellPos, a_centroidPos, a_lo, a_hi,
+      this->reconcile_Photons(*a_newPhotons[i], *m_rte_species[i], a_numNewPhotons[i], a_cellPos, a_centroidPos, a_lo, a_hi,
 			      a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
     }
   }
 }
 
 inline
-void ito_plasma_physics::reconcile_photons(List<photon>&      a_photons,
+void ito_plasma_physics::reconcile_Photons(List<Photon>&      a_Photons,
 					   const rte_species& a_species,
-					   const long long    a_num_photons,
+					   const long long    a_num_Photons,
 					   const RealVect     a_cellPos,
 					   const RealVect     a_centroidPos,
 					   const RealVect     a_lo,
@@ -468,23 +468,23 @@ void ito_plasma_physics::reconcile_photons(List<photon>&      a_photons,
 					   const RealVect     a_bndryNormal,
 					   const Real         a_dx,
 					   const Real         a_kappa) const {
-  a_photons.clear();
+  a_Photons.clear();
 
   long long weight, num, remainder;
-  this->compute_particle_weights(weight, num, remainder, a_num_photons);
+  this->compute_particle_weights(weight, num, remainder, a_num_Photons);
   
   for (int i = 0; i < num; i++){
     const RealVect p = this->random_position(a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
     const RealVect v = units::s_c0*random_direction();
       
-    a_photons.add(photon(p, v, a_species.getKappa(p), weight));
+    a_Photons.add(Photon(p, v, a_species.getKappa(p), weight));
   }
 
-  // If we used superphotons the last photon gets some extra oomph. 
+  // If we used superPhotons the last Photon gets some extra oomph. 
   if(remainder > 0){
     const RealVect p = this->random_position(a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
     const RealVect v = units::s_c0*random_direction();
-    a_photons.add(photon(p, v, a_species.getKappa(p), weight + remainder));
+    a_Photons.add(Photon(p, v, a_species.getKappa(p), weight + remainder));
   }
 }
 
@@ -492,7 +492,7 @@ inline
 void ito_plasma_physics::reconcile_photoionization(Vector<List<ito_particle>* >& a_particles,
 						   Vector<Real>&                 a_mean_energies,
 						   const Vector<long long>&      a_numParticles,
-						   const Vector<List<photon>* >& a_photons) const {
+						   const Vector<List<Photon>* >& a_Photons) const {
 
   // TLDR: This routine runs through all the photoreactions. For each reaction we look up the target species (e.g. electrons, ions)
   //       and compute the total energy for those species. We then add the photoreaction products, including the added energy, and then
@@ -513,8 +513,8 @@ void ito_plasma_physics::reconcile_photoionization(Vector<List<ito_particle>* >&
     
     const std::deque<std::pair<int, Real> >& target_energies = r.second.get_target_energies();
 
-    for (ListIterator<photon> lit(*a_photons[src]); lit.ok(); ++lit){
-      const photon& phot  = lit();
+    for (ListIterator<Photon> lit(*a_Photons[src]); lit.ok(); ++lit){
+      const Photon& phot  = lit();
       const RealVect pos  = phot.position();
       const Real mass     = phot.mass();     // Basically the number of reactions, in real format. 
 
@@ -534,7 +534,7 @@ void ito_plasma_physics::reconcile_photoionization(Vector<List<ito_particle>* >&
     }
   }
 
-  // Recompute the mean energies. If dE < a_mean_energies then the addition of photons lead to cooling, pretty cool :)
+  // Recompute the mean energies. If dE < a_mean_energies then the addition of Photons lead to cooling, pretty cool :)
   for (int i = 0; i < a_mean_energies.size(); i++){
     if(a_numParticles[i] > 0){
       a_mean_energies[i] = Max(0.0, energies[i]/newNumParticles[i]);
@@ -727,8 +727,8 @@ Real ito_plasma_physics::get_particle_mean_energy(const Real& a_energy, const lo
 
 inline
 void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& a_particles,
-						  Vector<List<photon>* >&       a_photons,
-						  Vector<List<photon>* >&       a_newPhotons,
+						  Vector<List<Photon>* >&       a_Photons,
+						  Vector<List<Photon>* >&       a_newPhotons,
 						  const Vector<Real>&           a_sources, 
 						  const RealVect                a_E,           
 						  const RealVect                a_cellPos,
@@ -803,11 +803,11 @@ void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& 
 			    a_dx,
 			    a_kappa);
 
-  // Generate new photons
-  this->reconcile_photons(a_newPhotons, newPhotonCount, a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+  // Generate new Photons
+  this->reconcile_Photons(a_newPhotons, newPhotonCount, a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
 
   // Run photo-reactions and increment the number of particles as needed
-  this->reconcile_photoionization(a_particles, mean_energies, newParticleCount, a_photons);
+  this->reconcile_photoionization(a_particles, mean_energies, newParticleCount, a_Photons);
 
   // Set new mean energies for all the particles. 
   this->set_mean_particle_energy(a_particles, mean_energies);
@@ -1139,17 +1139,17 @@ void ito_plasma_physics::advance_tau(Vector<long long>&  a_particles,
     while(!valid){
 
       Vector<long long> particles = a_particles;
-      Vector<long long> photons   = a_newPhotons;
+      Vector<long long> Photons   = a_newPhotons;
       Vector<Real> mean_energies  = a_mean_energies;
 
       // Do the tau-leaping
-      this->tau_step(particles, photons, mean_energies, a_sources, a_dx, a_kappa, nextDt);
+      this->tau_step(particles, Photons, mean_energies, a_sources, a_dx, a_kappa, nextDt);
 
       // Accept step if valid, else, reduce dt.
       valid = this->valid_state(particles);
       if(valid){
 	a_particles     = particles;
-	a_newPhotons    = photons;
+	a_newPhotons    = Photons;
 	a_mean_energies = mean_energies;
 	
 	curTime += nextDt;
@@ -1444,18 +1444,18 @@ void ito_plasma_physics::advance_hybrid(Vector<long long>&  a_particles,
 	  
 	  // Need a copy in case step is rejected
 	  Vector<long long> particles = a_particles;
-	  Vector<long long> photons   = a_newPhotons;
+	  Vector<long long> Photons   = a_newPhotons;
 	  Vector<Real> mean_energies  = a_mean_energies;
 
 	  // Do the tau-leaping
-	  this->tau_step(particles, photons, mean_energies, a_sources, nonCriticalReactions, a_dx, a_kappa, curDt);
+	  this->tau_step(particles, Photons, mean_energies, a_sources, nonCriticalReactions, a_dx, a_kappa, curDt);
 
 	  // Make sure step was valid
 	  valid = this->valid_state(particles);
 	  if(valid){
 	    curTime        += curDt;
 	    a_particles     = particles;
-	    a_newPhotons    = photons;
+	    a_newPhotons    = Photons;
 	    a_mean_energies = mean_energies;
 	  }
 	  else{
@@ -1467,7 +1467,7 @@ void ito_plasma_physics::advance_hybrid(Vector<long long>&  a_particles,
       else{ // One critical reaction fired. Advance that reaction and use tau-leaping for the rest.
 	// Need a copy in case step is rejected
 	Vector<long long> particles = a_particles;
-	Vector<long long> photons   = a_newPhotons;
+	Vector<long long> Photons   = a_newPhotons;
 	Vector<Real> mean_energies  = a_mean_energies;
 
 
@@ -1477,17 +1477,17 @@ void ito_plasma_physics::advance_hybrid(Vector<long long>&  a_particles,
 	const Real Ac = this->propensity(particles, criticalReactions);
 
 	// SSA for critical reactions
-	this->ssa_step(particles, photons, mean_energies, a_sources, propensitiesC, criticalReactions, Ac, a_dx, a_kappa, curDt);
+	this->ssa_step(particles, Photons, mean_energies, a_sources, propensitiesC, criticalReactions, Ac, a_dx, a_kappa, curDt);
 
 	// Tau-leaping for non-critical reactions
-	this->tau_step(particles, photons, mean_energies, a_sources, nonCriticalReactions, propensitiesNC, a_dx, a_kappa, curDt);
+	this->tau_step(particles, Photons, mean_energies, a_sources, nonCriticalReactions, propensitiesNC, a_dx, a_kappa, curDt);
 
 	valid = this->valid_state(particles);
 
 	if(valid){
 	  curTime        += curDt;
 	  a_particles     = particles;
-	  a_newPhotons    = photons;
+	  a_newPhotons    = Photons;
 	  a_mean_energies = mean_energies;
 	}
 	else{

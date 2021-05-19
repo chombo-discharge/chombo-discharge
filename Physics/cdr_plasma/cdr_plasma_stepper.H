@@ -155,9 +155,9 @@ namespace physics {
 	@brief Compute reaction network sources. First computes the CDR gradients and then calls the other version
       */
       virtual void advance_reaction_network(Vector<EBAMRCellData*>&       a_particle_sources,
-					    Vector<EBAMRCellData*>&       a_photon_sources,
+					    Vector<EBAMRCellData*>&       a_Photon_sources,
 					    const Vector<EBAMRCellData*>& a_particle_densities,
-					    const Vector<EBAMRCellData*>& a_photon_densities,
+					    const Vector<EBAMRCellData*>& a_Photon_densities,
 					    const EBAMRCellData&          a_E,
 					    const Real&                   a_time,
 					    const Real&                   a_dt);
@@ -166,20 +166,20 @@ namespace physics {
 	@brief Compute reaction network sources. Used for time-dependent FHD models
       */
       virtual void advance_reaction_network(Vector<EBAMRCellData*>&       a_particle_sources,
-					    Vector<EBAMRCellData*>&       a_photon_sources,
+					    Vector<EBAMRCellData*>&       a_Photon_sources,
 					    const Vector<EBAMRCellData*>& a_particle_densities,
 					    const Vector<EBAMRCellData*>& a_particle_gradients,
-					    const Vector<EBAMRCellData*>& a_photon_densities,
+					    const Vector<EBAMRCellData*>& a_Photon_densities,
 					    const EBAMRCellData&          a_E,
 					    const Real&                   a_time,
 					    const Real&                   a_dt);
 
 
       virtual void advance_reaction_network(Vector<LevelData<EBCellFAB>* >&       a_particle_sources,
-					    Vector<LevelData<EBCellFAB>* >&       a_photon_sources,
+					    Vector<LevelData<EBCellFAB>* >&       a_Photon_sources,
 					    const Vector<LevelData<EBCellFAB>* >& a_particle_densities,
 					    const Vector<LevelData<EBCellFAB>* >& a_particle_gradients,
-					    const Vector<LevelData<EBCellFAB>* >& a_photon_densities,
+					    const Vector<LevelData<EBCellFAB>* >& a_Photon_densities,
 					    const LevelData<EBCellFAB>&           a_E,
 					    const Real&                           a_time,
 					    const Real&                           a_dt,
@@ -188,10 +188,10 @@ namespace physics {
 	@brief Compute reaction network sources. Patch version.
       */
       virtual void advance_reaction_network_reg(Vector<EBCellFAB*>&       a_particle_sources,
-						Vector<EBCellFAB*>&       a_photon_sources,
+						Vector<EBCellFAB*>&       a_Photon_sources,
 						const Vector<EBCellFAB*>& a_particle_densities,
 						const Vector<EBCellFAB*>& a_particle_gradients,
-						const Vector<EBCellFAB*>& a_photon_densities,
+						const Vector<EBCellFAB*>& a_Photon_densities,
 						const EBCellFAB&          a_E,
 						const Real&               a_time,
 						const Real&               a_dt,
@@ -202,10 +202,10 @@ namespace physics {
 	@brief Compute reaction network sources. Fast patch version. 
       */
       virtual void advance_reaction_network_reg_fast(Vector<EBCellFAB*>&       a_particle_sources,
-						     Vector<EBCellFAB*>&       a_photon_sources,
+						     Vector<EBCellFAB*>&       a_Photon_sources,
 						     const Vector<EBCellFAB*>& a_particle_densities,
 						     const Vector<EBCellFAB*>& a_particle_gradients,
-						     const Vector<EBCellFAB*>& a_photon_densities,
+						     const Vector<EBCellFAB*>& a_Photon_densities,
 						     const EBCellFAB&          a_E,
 						     const Real&               a_time,
 						     const Real&               a_dt,
@@ -213,10 +213,10 @@ namespace physics {
 						     const Box&                a_box);
 
       virtual void advance_reaction_network_reg_fast2D(Vector<EBCellFAB*>&       a_particle_sources,
-						       Vector<EBCellFAB*>&       a_photon_sources,
+						       Vector<EBCellFAB*>&       a_Photon_sources,
 						       const Vector<EBCellFAB*>& a_particle_densities,
 						       const Vector<EBCellFAB*>& a_particle_gradients,
-						       const Vector<EBCellFAB*>& a_photon_densities,
+						       const Vector<EBCellFAB*>& a_Photon_densities,
 						       const EBCellFAB&          a_E,
 						       const Real&               a_time,
 						       const Real&               a_dt,
@@ -224,10 +224,10 @@ namespace physics {
 						       const Box&                a_box);
 
       virtual void advance_reaction_network_reg_fast3D(Vector<EBCellFAB*>&       a_particle_sources,
-						       Vector<EBCellFAB*>&       a_photon_sources,
+						       Vector<EBCellFAB*>&       a_Photon_sources,
 						       const Vector<EBCellFAB*>& a_particle_densities,
 						       const Vector<EBCellFAB*>& a_particle_gradients,
-						       const Vector<EBCellFAB*>& a_photon_densities,
+						       const Vector<EBCellFAB*>& a_Photon_densities,
 						       const EBCellFAB&          a_E,
 						       const Real&               a_time,
 						       const Real&               a_dt,
@@ -238,11 +238,11 @@ namespace physics {
 	@brief Compute reaction network sources. Irregular patch version.
       */
       virtual void advance_reaction_network_irreg(Vector<EBCellFAB*>&          a_particle_sources,
-						  Vector<EBCellFAB*>&          a_photon_sources,
+						  Vector<EBCellFAB*>&          a_Photon_sources,
 						  const Vector<EBCellFAB*>&    a_particle_densities,
 						  const Vector<EBCellFAB*>&    a_particle_gradients,
 						  const Vector<EBCellFAB*>&    a_particle_velocities,
-						  const Vector<EBCellFAB*>&    a_photon_densities,
+						  const Vector<EBCellFAB*>&    a_Photon_densities,
 						  const BaseIVFAB<VoFStencil>& a_interp_stencils,
 						  const EBCellFAB&             a_E,
 						  const Real&                  a_time,
@@ -256,11 +256,11 @@ namespace physics {
 	@brief Compute reaction network sources. Irregular patch version.
       */
       virtual void advance_reaction_network_irreg_interp(Vector<EBCellFAB*>&          a_particle_sources,
-							 Vector<EBCellFAB*>&          a_photon_sources,
+							 Vector<EBCellFAB*>&          a_Photon_sources,
 							 const Vector<EBCellFAB*>&    a_particle_densities,
 							 const Vector<EBCellFAB*>&    a_particle_gradients,
 							 const Vector<EBCellFAB*>&    a_particle_velocities,
-							 const Vector<EBCellFAB*>&    a_photon_densities,
+							 const Vector<EBCellFAB*>&    a_Photon_densities,
 							 const BaseIVFAB<VoFStencil>& a_interp_stencils,
 							 const EBCellFAB&             a_E,
 							 const Real&                  a_time,
@@ -271,10 +271,10 @@ namespace physics {
 							 const DataIndex&             a_dit);
 
       virtual void advance_reaction_network_irreg_kappa(Vector<EBCellFAB*>&          a_particle_sources,
-							Vector<EBCellFAB*>&          a_photon_sources,
+							Vector<EBCellFAB*>&          a_Photon_sources,
 							const Vector<EBCellFAB*>&    a_particle_densities,
 							const Vector<EBCellFAB*>&    a_particle_gradients,
-							const Vector<EBCellFAB*>&    a_photon_densities,
+							const Vector<EBCellFAB*>&    a_Photon_densities,
 							const BaseIVFAB<VoFStencil>& a_interp_stencils,
 							const EBCellFAB&             a_E,
 							const Real&                  a_time,
