@@ -13,7 +13,7 @@
 #include <CD_BVH.H>
 #include <CD_DcelMesh.H>
 #include <CD_DcelParser.H>
-#include "dcel_if.H"
+#include <CD_DcelSdf.H>
 #include <CD_DcelBVH.H>
 #include <CD_BvhSdf.H>
 
