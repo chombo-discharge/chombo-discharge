@@ -4,7 +4,7 @@
 #include "ParmParse.H"
 
 using namespace ChomboDischarge;
-using namespace physics::geometry;
+using namespace Physics::Geometry;
 
 int main(int argc, char* argv[]){
 
