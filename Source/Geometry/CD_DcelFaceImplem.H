@@ -1,17 +1,22 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   dcel_faceI.H
-  @brief  Implementation of dcel_face.H
+  @file   CD_DcelFaceImplem.H
+  @brief  Implementation of CD_DcelFace.H
   @author Robert Marskar
-  @date   March 2021
 */
 
-#ifndef _DCEL_FACEI_H_
-#define _DCEL_FACEI_H_
+#ifndef CD_DcelFaceImplem_H
+#define CD_DcelFaceImplem_H
 
+// Our includes
 #include <CD_DcelFace.H>
 #include <CD_DcelIterator.H>
+#include <CD_NamespaceHeader.H>
 
-#include "CD_NamespaceHeader.H"
 namespace Dcel {
 
   template <class T>
@@ -314,7 +319,8 @@ namespace Dcel {
     return retval;
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 
 #endif

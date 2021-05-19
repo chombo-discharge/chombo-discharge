@@ -1,24 +1,28 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   dcel_face.H
-  @brief  Implementation of dcel_face.H
+  @file   CD_DcelFace.H
+  @brief  Declaration of face class for DCEL tools
   @author Robert Marskar
-  @date   March 2021
 */
 
-#ifndef _DCEL_FACE__
-#define _DCEL_FACE__
+#ifndef CD_DcelFace_H
+#define CD_DcelFace_H
 
+// Std includes
+#include <memory>
+#include <vector>
+
+// Our includes
 #include <CD_Vec.H>
-
 #include <CD_DcelAlgorithms.H>
 #include <CD_DcelVertex.H>
 #include <CD_DcelEdge.H>
 #include <CD_DcelPoly.H>
-
-#include <memory>
-#include <vector>
-
-#include "CD_NamespaceHeader.H"
+#include <CD_NamespaceHeader.H>
 
 namespace Dcel {
 
@@ -151,7 +155,8 @@ namespace Dcel {
     bool isPointInsideFace(const Vec3& a_p) const noexcept;
   };
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #include <CD_DcelFaceImplem.H>
 
