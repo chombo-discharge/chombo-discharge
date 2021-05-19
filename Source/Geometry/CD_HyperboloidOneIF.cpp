@@ -1,15 +1,19 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file hyperboloid_one_if.cpp
-  @brief Implementation of a one-sheeted hyperboloid surface
-  @date Nov. 2017
+  @file   CD_HyperboloidOneIF.cpp
+  @brief  Implementation of CD_HyperboloidOneIF.H
   @author Robert Marskar
 */
-  
-#include "hyperboloid_one_if.H"
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_HyperboloidOneIF.H>
+#include <CD_NamespaceHeader.H>
 
-hyperboloid_one_if::hyperboloid_one_if(const RealVect& a_radii,
+HyperboloidOneIF::HyperboloidOneIF(const RealVect& a_radii,
 				       const RealVect& a_center,
 				       const bool&     a_inside){
   m_radii  = a_radii;
@@ -20,7 +24,7 @@ hyperboloid_one_if::hyperboloid_one_if(const RealVect& a_radii,
   m_sign[SpaceDim-1] = -1.;
 }
 
-hyperboloid_one_if::hyperboloid_one_if(const hyperboloid_one_if& a_inputIF){
+HyperboloidOneIF::HyperboloidOneIF(const HyperboloidOneIF& a_inputIF){
   m_radii  = a_inputIF.m_radii;
   m_center = a_inputIF.m_center;
   m_inside = a_inputIF.m_inside;
@@ -28,7 +32,7 @@ hyperboloid_one_if::hyperboloid_one_if(const hyperboloid_one_if& a_inputIF){
   m_sign   = a_inputIF.m_sign;
 }
 
-Real hyperboloid_one_if::value(const RealVect& a_point) const{
+Real HyperboloidOneIF::value(const RealVect& a_point) const{
   Real retval;
   Real sum;
 
@@ -51,7 +55,8 @@ Real hyperboloid_one_if::value(const RealVect& a_point) const{
   return retval;
 }
 
-BaseIF* hyperboloid_one_if::newImplicitFunction() const{
-  return static_cast<BaseIF*> (new hyperboloid_one_if(m_radii,m_center,m_inside));
+BaseIF* HyperboloidOneIF::newImplicitFunction() const{
+  return static_cast<BaseIF*> (new HyperboloidOneIF(m_radii,m_center,m_inside));
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
