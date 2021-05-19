@@ -1,24 +1,28 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file rod_if.H
+  @file  CD_RodIF.H
   @brief Declaration of a cylinder with spheres at both ends
-  @date Nov. 2017
   @author Robert marskar
 */
 
-#ifndef _ROD_IF_
-#define _ROD_IF_
+#ifndef CD_RodIF_H
+#define CD_RodIF_H
 
+// Chombo includes
 #include <BaseIF.H>
 #include <IntersectionIF.H>
 
-#include <ParmParse.H>
-
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Declaration of a cylinder with rounded caps
 */
-class rod_if : public BaseIF{
+class RodIF : public BaseIF{
 public:
 
   /*!
@@ -29,14 +33,14 @@ public:
     @param[in] a_fluidInside Domain on inside or outside
   */
 
-  rod_if(const RealVect& a_center1, const RealVect& a_center2, const Real& a_radius, const bool& a_fluidInside);
+  RodIF(const RealVect& a_center1, const RealVect& a_center2, const Real& a_radius, const bool& a_fluidInside);
 
   /*!
     @brief Copy constructor
     @param[in] a_inputIF Input cylinder
   */
   
-  rod_if(const rod_if& a_inputIF);
+  RodIF(const RodIF& a_inputIF);
 
   /*!
     @brief Test whether inside or not
@@ -53,6 +57,7 @@ protected:
 
   RefCountedPtr<BaseIF> m_baseif;
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

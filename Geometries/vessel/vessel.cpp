@@ -7,7 +7,7 @@
 
 #include "vessel.H"
 #include <CD_MushroomIF.H>
-#include "rod_if.H"
+#include <CD_RodIF.H>
 #include <CD_CylinderSdf.H>
 
 #include <ParmParse.H>
@@ -35,7 +35,7 @@ vessel::vessel(){
   const RealVect v  = RealVect(BASISV(SpaceDim-1));
   
   if(m_rod){
-    auto rod = RefCountedPtr<BaseIF> (new rod_if(m_rod_center + 100*v, m_rod_center, m_rod_R, false));
+    auto rod = RefCountedPtr<BaseIF> (new RodIF(m_rod_center + 100*v, m_rod_center, m_rod_R, false));
     m_electrodes.push_back(Electrode(rod, m_rod_live));
   }
   if(m_shroom){

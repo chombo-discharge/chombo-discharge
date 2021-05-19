@@ -6,7 +6,7 @@
 */
 
 #include "electrode_array.H"
-#include "rod_if.H"
+#include <CD_RodIF.H>
 #include <ParmParse.H>
 
 #include "CD_NamespaceHeader.H"
@@ -42,7 +42,7 @@ electrode_array::electrode_array(){
       const RealVect ic1 = c1 + sx + sy;
       const RealVect ic2 = c2 + sx + sy;
 
-      RefCountedPtr<BaseIF> rod = RefCountedPtr<BaseIF> (new rod_if(ic1, ic2, r, false));
+      RefCountedPtr<BaseIF> rod = RefCountedPtr<BaseIF> (new RodIF(ic1, ic2, r, false));
 
       m_electrodes.push_back(Electrode(rod, live));
     }

@@ -6,7 +6,7 @@
 */
 
 #include "double_rod.H"
-#include "rod_if.H"
+#include <CD_RodIF.H>
 
 #include <ParmParse.H>
 
@@ -35,7 +35,7 @@ double_rod::double_rod(){
     pp1.getarr("endpoint1", v, 0, SpaceDim); e1 = RealVect(D_DECL(v[0], v[1], v[2]));
     pp1.getarr("endpoint2", v, 0, SpaceDim); e2 = RealVect(D_DECL(v[0], v[1], v[2]));
 
-    RefCountedPtr<BaseIF> rod1 = RefCountedPtr<BaseIF> (new rod_if(e1, e2, radius, false));
+    RefCountedPtr<BaseIF> rod1 = RefCountedPtr<BaseIF> (new RodIF(e1, e2, radius, false));
 
     m_electrodes.push_back(Electrode(rod1, live));
   }
@@ -46,7 +46,7 @@ double_rod::double_rod(){
     pp2.getarr("endpoint1", v, 0, SpaceDim); e1 = RealVect(D_DECL(v[0], v[1], v[2]));
     pp2.getarr("endpoint2", v, 0, SpaceDim); e2 = RealVect(D_DECL(v[0], v[1], v[2]));
 
-    RefCountedPtr<BaseIF> rod1 = RefCountedPtr<BaseIF> (new rod_if(e1, e2, radius, false));
+    RefCountedPtr<BaseIF> rod1 = RefCountedPtr<BaseIF> (new RodIF(e1, e2, radius, false));
 
     m_electrodes.push_back(Electrode(rod1, live));
   }

@@ -6,7 +6,7 @@
 */
 
 #include "rod_dielectric.H"
-#include "rod_if.H"
+#include <CD_RodIF.H>
 #include <CD_PerlinSlabSdf.H>
 #include <CD_SphereSdf.H>
 #include "wedge_if.H"
@@ -53,7 +53,7 @@ void rod_dielectric::define_electrode(){
   pp.getarr("endpoint1", v, 0, SpaceDim); e1 = RealVect(D_DECL(v[0], v[1], v[2]));
   pp.getarr("endpoint2", v, 0, SpaceDim); e2 = RealVect(D_DECL(v[0], v[1], v[2]));
 
-  RefCountedPtr<BaseIF> bif = RefCountedPtr<BaseIF> (new rod_if(e1, e2, r, false));
+  RefCountedPtr<BaseIF> bif = RefCountedPtr<BaseIF> (new RodIF(e1, e2, r, false));
 
   m_electrodes.push_back(Electrode(bif, live));
 }

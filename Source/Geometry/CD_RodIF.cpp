@@ -1,24 +1,29 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file rod_if.cpp
-  @brief Implementation of rod_if
-  @date Nov. 2017
+  @file   CD_RodIF.cpp
+  @brief  Implementation of CD_RodIF.H
   @author Robert Marskar
 */
 
-#include "rod_if.H"
-#include <CD_SphereSdf.H>
-#include <CD_CylinderSdf.H>
-
+// Chombo includes
 #include <SphereIF.H>
 #include <IntersectionIF.H>
 #include <PolyGeom.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_RodIF.H>
+#include <CD_SphereSdf.H>
+#include <CD_CylinderSdf.H>
+#include <CD_NamespaceHeader.H>
 
-rod_if::rod_if(const RealVect& a_center1,
-	       const RealVect& a_center2,
-	       const Real&     a_radius,
-	       const bool&     a_fluidInside){
+RodIF::RodIF(const RealVect& a_center1,
+	     const RealVect& a_center2,
+	     const Real&     a_radius,
+	     const bool&     a_fluidInside){
   
 
   const RealVect axis    = (a_center2 - a_center1);
@@ -43,15 +48,16 @@ rod_if::rod_if(const RealVect& a_center1,
   }
 }
 
-rod_if::rod_if(const rod_if& a_inputIF){
+RodIF::RodIF(const RodIF& a_inputIF){
   this->m_baseif = a_inputIF.m_baseif;
 }
 
-Real rod_if::value(const RealVect& a_point) const{
+Real RodIF::value(const RealVect& a_point) const{
   return m_baseif->value(a_point);
 }
 
-BaseIF* rod_if::newImplicitFunction() const{
-  return static_cast<BaseIF*> (new rod_if(*this));
+BaseIF* RodIF::newImplicitFunction() const{
+  return static_cast<BaseIF*> (new RodIF(*this));
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

@@ -16,7 +16,7 @@
 #include <SphereIF.H>
 
 #include <CD_ProfilePlaneIF.H>
-#include "rod_if.H"
+#include <CD_RodIF.H>
 #include <CD_SphereSdf.H>
 #include <CD_BoxSdf.H>
 #include <CD_RoundedBoxIF.H>
@@ -72,7 +72,7 @@ rod_plane_profile::rod_plane_profile(){
 
   if(has_rod){
     m_electrodes.resize(1);
-    RefCountedPtr<BaseIF> rod  = RefCountedPtr<BaseIF> (new rod_if(center1, center2, rod_rad, false));
+    RefCountedPtr<BaseIF> rod  = RefCountedPtr<BaseIF> (new RodIF(center1, center2, rod_rad, false));
     m_electrodes[0].define(rod, rod_live);
   }
   if(has_plane){
