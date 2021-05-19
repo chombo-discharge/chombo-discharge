@@ -65,7 +65,7 @@ perlin_rod_if::perlin_rod_if(const Real&     a_rad,
 }
 
 //
-perlin_rod_if::perlin_rod_if(const perlin_rod_if& a_inputIF) : perlin_sphere_if(a_inputIF){
+perlin_rod_if::perlin_rod_if(const perlin_rod_if& a_inputIF) : PerlinSphereSdf(a_inputIF){
   m_baseif = a_inputIF.m_baseif;
 }
 

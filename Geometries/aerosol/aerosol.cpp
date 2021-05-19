@@ -14,7 +14,7 @@
 #include <ParmParse.H>
 #include <BaseIF.H>
 
-#include "perlin_sphere_if.H"
+#include <CD_PerlinSphereSdf.H>
 
 #include "CD_NamespaceHeader.H"
 
@@ -60,7 +60,7 @@ aerosol::aerosol(){
     pp2.getarr("center", v, 0, SpaceDim); center = RealVect(D_DECL(v[0], v[1], v[2]));
 
     // Get the perlin sphere. 
-    RefCountedPtr<BaseIF> sph = RefCountedPtr<BaseIF> (new perlin_sphere_if(radius,
+    RefCountedPtr<BaseIF> sph = RefCountedPtr<BaseIF> (new PerlinSphereSdf(radius,
 									    center,
 									    false,
 									    noise_amplitude,

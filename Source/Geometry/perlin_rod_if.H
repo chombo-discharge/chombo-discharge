@@ -18,7 +18,7 @@
 /*!
   @brief perlin_rod_if function
 */
-class perlin_rod_if : public perlin_sphere_if {
+class perlin_rod_if : public PerlinSphereSdf {
 public:  
   /*!
     @brief Constructor

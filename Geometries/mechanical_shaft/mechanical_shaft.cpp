@@ -15,7 +15,7 @@
 #include <BaseIF.H>
 #include <SphereIF.H>
 
-#include "perlin_sphere_if.H"
+#include <CD_PerlinSphereSdf.H>
 #include <CD_BoxSdf.H>
 #include <CD_CylinderSdf.H>
 #include <CD_ProfileCylinderIF.H>

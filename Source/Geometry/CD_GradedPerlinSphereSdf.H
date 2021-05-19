@@ -13,13 +13,13 @@
 #define CD_GradedPerlinSphereSdf_H
 
 // Our includes
-#include <perlin_sphere_if.H>
+#include <CD_PerlinSphereSdf.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
   @brief GradedPerlinSphereSdf function
 */
-class GradedPerlinSphereSdf : public perlin_sphere_if {
+class GradedPerlinSphereSdf : public PerlinSphereSdf {
 public:  
   /*!
     @brief Constructor

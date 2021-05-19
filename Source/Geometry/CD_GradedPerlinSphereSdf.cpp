@@ -23,7 +23,7 @@ GradedPerlinSphereSdf::GradedPerlinSphereSdf(const Real&     a_rad,
 					     const RealVect& a_noiseFreq,
 					     const Real&     a_persistence,
 					     const int&      a_octaves,
-					     const bool&     a_reseed) : perlin_sphere_if(a_rad,
+					     const bool&     a_reseed) : PerlinSphereSdf(a_rad,
 											  a_center,
 											  a_inside,
 											  a_noiseAmp,
@@ -33,7 +33,7 @@ GradedPerlinSphereSdf::GradedPerlinSphereSdf(const Real&     a_rad,
 											  a_reseed){
 }
 
-GradedPerlinSphereSdf::GradedPerlinSphereSdf(const GradedPerlinSphereSdf& a_inputIF) : perlin_sphere_if(a_inputIF){
+GradedPerlinSphereSdf::GradedPerlinSphereSdf(const GradedPerlinSphereSdf& a_inputIF) : PerlinSphereSdf(a_inputIF){
 }
 
 GradedPerlinSphereSdf::~GradedPerlinSphereSdf(){
