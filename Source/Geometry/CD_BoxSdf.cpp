@@ -1,20 +1,25 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file box_if.cpp
-  @brief Contains implementation of the box_if class
+  @file   CD_BoxSdf.cpp
+  @brief  Implements CD_BoxSdf.H
   @author Robert Marskar
-  @date Nov. 2017
 */
 
-#include "box_if.H"
-
+// Chombo includes
 #include <PlaneIF.H>
 #include <SmoothUnion.H>
 #include <UnionIF.H>
 #include <IntersectionIF.H>
 
+// our includes
+#include <CD_BoxSdf.H>
 #include "CD_NamespaceHeader.H"
 
-box_if::box_if(const RealVect& a_loCorner, 
+BoxSdf::BoxSdf(const RealVect& a_loCorner, 
 	       const RealVect& a_hiCorner,
 	       const bool&     a_fluidInside){
   m_loCorner    = a_loCorner;
@@ -22,17 +27,17 @@ box_if::box_if(const RealVect& a_loCorner,
   m_fluidInside = a_fluidInside;
 }
 
-box_if::box_if(const box_if& a_inputIF){
+BoxSdf::BoxSdf(const BoxSdf& a_inputIF){
   m_loCorner    = a_inputIF.m_loCorner;
   m_hiCorner    = a_inputIF.m_hiCorner;
   m_fluidInside = a_inputIF.m_fluidInside;
 }
 
-box_if::~box_if(){
+BoxSdf::~BoxSdf(){
   
 }
 
-Real box_if::value(const RealVect& a_pos) const{
+Real BoxSdf::value(const RealVect& a_pos) const{
   // TLDR: Min(0.0, Max(dx, dy)) is the shortest distance from a point inside the rectangle to one of the edges. It becomes zero if dx > 0 or dy > 0. The
   //       second term max(RealVect::Zero, delta).vectorLength() is funky. In principle we should only take the distance to be sqrt(dx^2 + dy^2 + dz^2) if
   //       we are closest to a "corner", but if we are closest to one of the edges we have dx*dy < 0.0. We can just set the other component to zero, which is what
@@ -51,7 +56,8 @@ Real box_if::value(const RealVect& a_pos) const{
   return retval;
 }
 
-BaseIF* box_if::newImplicitFunction() const{
-  return (BaseIF*) (new box_if(m_loCorner, m_hiCorner, m_fluidInside));
+BaseIF* BoxSdf::newImplicitFunction() const{
+  return (BaseIF*) (new BoxSdf(m_loCorner, m_hiCorner, m_fluidInside));
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

@@ -1,21 +1,27 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file box_if.H
-  @brief Declare an interface for defining a two- or three-dimensional box with arbitrary centroid and orientation.
+  @file   CD_BoxSdf.H
+  @brief  Declare an interface for defining an axis-aligned box
   @author Robert Marskar
-  @date Nov. 2017
 */
 
-#ifndef _BOX_IF_
-#define _BOX_IF_
+#ifndef CD_BoxSdf_H
+#define CD_BoxSdf_H
 
+// Chombo includes
 #include <BaseIF.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_NamespaceHeader.H>
   
 /*!
   @brief Class for defining a two- or three-dimensional box with arbitrary centroid and orientation.
 */
-class box_if: public BaseIF {
+class BoxSdf: public BaseIF {
 public:
 
   /*!
@@ -24,20 +30,20 @@ public:
     @param[in] a_hiCorner Upper right corner
     @param[in] a_inside Object on inside or outside
   */
-  box_if(const RealVect& a_loCorner, 
+  BoxSdf(const RealVect& a_loCorner, 
 	 const RealVect& a_hiCorner,
 	 const bool&     a_fluidInside);
     
   /*!
     @brief Copy constructor
-    @param[in] a_inputIF Another box_if
+    @param[in] a_inputIF Another BoxSdf
   */
-  box_if(const box_if& a_inputIF);
+  BoxSdf(const BoxSdf& a_inputIF);
 
   /*!
     @brief Destructor
   */
-  virtual ~box_if();
+  virtual ~BoxSdf();
 
   /*!
     @brief Test if object is on inside or outside
@@ -66,6 +72,7 @@ protected:
   */
   bool m_fluidInside;
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

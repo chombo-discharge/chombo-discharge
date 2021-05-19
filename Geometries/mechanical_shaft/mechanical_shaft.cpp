@@ -16,7 +16,7 @@
 #include <SphereIF.H>
 
 #include "perlin_sphere_if.H"
-#include "box_if.H"
+#include <CD_BoxSdf.H>
 #include "cylinder_if.H"
 #include "profile_cylinder_if.H"
 #include "polygon_rod_if.H"

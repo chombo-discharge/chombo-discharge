@@ -7,7 +7,7 @@
 
 #include "mushroom_if.H"
 #include <CD_RoundedBoxIF.H>
-#include "box_if.H"
+#include <CD_BoxSdf.H>
 #include "cylinder_if.H"
 #include "rounded_cylinder_if.H"
 

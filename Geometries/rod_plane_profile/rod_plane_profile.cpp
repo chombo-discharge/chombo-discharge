@@ -18,7 +18,7 @@
 #include "profile_plane_if.H"
 #include "rod_if.H"
 #include "new_sphere_if.H"
-#include "box_if.H"
+#include <CD_BoxSdf.H>
 #include <CD_RoundedBoxIF.H>
 
 #include "CD_NamespaceHeader.H"
