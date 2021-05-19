@@ -9,7 +9,7 @@
 #include <CD_RodIF.H>
 #include <CD_PerlinSlabSdf.H>
 #include <CD_SphereSdf.H>
-#include "wedge_if.H"
+#include <CD_WedgeIF.H>
 #include <CD_RoundedBoxIF.H>
 
 #include <PlaneIF.H>

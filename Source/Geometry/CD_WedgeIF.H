@@ -1,20 +1,27 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file wedge_if.H
-  @brief Declaration of a n-sided rod
+  @file   CD_WedgeIF.H
+  @brief  Wedge implicit function
   @author Robert Marskar
-  @date Nov. 2017
 */
 
-#ifndef _WEDGE_IF_
-#define _WEDGE_IF_
+#ifndef CD_WedgeIF_H
+#define CD_WedgeIF_H
+
+// Chombo includes
 #include <BaseIF.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Implicit function class describing a hexagonal rod
 */
-class wedge_if: public BaseIF {
+class WedgeIF: public BaseIF {
 public:
 
   /*!
@@ -24,7 +31,7 @@ public:
     @param[in] a_curv Corner curvature
     @param[in] a_point Center of circle used for curvature
   */
-  wedge_if(const int      a_dir,
+  WedgeIF(const int      a_dir,
 	   const Real     a_angle,
 	   const Real     a_curv,
 	   const RealVect a_point,
@@ -34,12 +41,12 @@ public:
     @brief Copy constructor
     @param[in] a_inputIF Another polygon rod
   */
-  wedge_if(const wedge_if& a_inputIF);
+  WedgeIF(const WedgeIF& a_inputIF);
 
   /*!
     @brief Destructor
   */
-  virtual ~wedge_if();
+  virtual ~WedgeIF();
 
   /*!
     @brief Test if object is on inside or outside
@@ -59,5 +66,7 @@ protected:
   RefCountedPtr<BaseIF> m_baseif;
   
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif

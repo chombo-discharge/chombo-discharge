@@ -1,27 +1,32 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file wedge_if.cpp
-  @brief Implementation of wedge_if.hpp
+  @file  CD_WedgeIF.cpp
+  @brief Implementation of CD_WedgeIF.H
   @author Robert Marskar
-  @date Aug. 2016
 */
 
+// Chombo includes
 #include <IntersectionIF.H>
 #include <SphereIF.H>
 #include <PlaneIF.H>
 #include <TransformIF.H>
 #include <UnionIF.H>
 
-#include "wedge_if.H"
+// Our includes
+#include <CD_WedgeIF.H>
 #include <CD_CylinderSdf.H>
 #include <CD_SphereSdf.H>
+#include <CD_NamespaceHeader.H>
 
-#include "CD_NamespaceHeader.H"
-
-wedge_if::wedge_if(const int      a_dir,
-		   const Real     a_angle,
-		   const Real     a_curv,
-		   const RealVect a_point,
-		   const bool     a_inside){
+WedgeIF::WedgeIF(const int      a_dir,
+		 const Real     a_angle,
+		 const Real     a_curv,
+		 const RealVect a_point,
+		 const bool     a_inside){
 
 
   // By default, constructed with infinite extent along the z-axis
@@ -69,20 +74,21 @@ wedge_if::wedge_if(const int      a_dir,
   m_baseif = RefCountedPtr<BaseIF> (static_cast<BaseIF*> (rot_wedge));
 }
     
-wedge_if::wedge_if(const wedge_if& a_inputIF){
+WedgeIF::WedgeIF(const WedgeIF& a_inputIF){
   CH_assert(!a_inputIF.m_baseif.isNull());
   m_baseif = a_inputIF.m_baseif;
 }
 
-wedge_if::~wedge_if(){
+WedgeIF::~WedgeIF(){
   
 }
 
-Real wedge_if::value(const RealVect& a_pos) const {
+Real WedgeIF::value(const RealVect& a_pos) const {
   return m_baseif->value(a_pos);
 }
 
-BaseIF* wedge_if::newImplicitFunction() const {
-  return static_cast<BaseIF*> (new wedge_if(*this));
+BaseIF* WedgeIF::newImplicitFunction() const {
+  return static_cast<BaseIF*> (new WedgeIF(*this));
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
