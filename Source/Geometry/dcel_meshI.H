@@ -15,7 +15,7 @@
 #include "dcel_face.H"
 
 #include "CD_NamespaceHeader.H"
-namespace dcel {
+namespace Dcel {
 
   template <class T>
   inline
@@ -223,7 +223,7 @@ namespace dcel {
 	v->computeVertexNormalAngleWeighted();
 	break;
       default:
-	std::cerr << "In file dcel_mesh function dcel::meshT<T>::reconcileVertices(VertexNormalWeighting) - unsupported algorithm requested\n";
+	std::cerr << "In file dcel_mesh function Dcel::meshT<T>::reconcileVertices(VertexNormalWeighting) - unsupported algorithm requested\n";
       }
     }
   }

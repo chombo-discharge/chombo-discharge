@@ -20,7 +20,7 @@
 #include <CD_BvhSdf.H>
 #include <CD_NamespaceHeader.H>
 
-using namespace dcel;
+using namespace Dcel;
 using namespace BVH;
 using namespace std::chrono;
 

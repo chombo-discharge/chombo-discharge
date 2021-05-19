@@ -20,7 +20,7 @@
 
 #include "CD_NamespaceHeader.H"
 
-namespace dcel {
+namespace Dcel {
 
   template <class T> class vertexT;
   template <class T> class edgeT;

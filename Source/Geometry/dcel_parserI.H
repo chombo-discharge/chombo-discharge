@@ -21,7 +21,7 @@
 #include <sstream>
 
 #include "CD_NamespaceHeader.H"
-namespace dcel {
+namespace Dcel {
 
   template <class T>
   inline
@@ -40,17 +40,17 @@ namespace dcel {
       int numVertices;  // Number of vertices
       int numFaces;     // Number of faces
 
-      dcel::parser::PLY<T>::readHeaderASCII(numVertices, numFaces, filestream);
-      dcel::parser::PLY<T>::readVerticesASCII(vertices, numVertices, filestream);
-      dcel::parser::PLY<T>::readFacesASCII(faces, edges, vertices, numFaces, filestream);
-      dcel::parser::PLY<T>::reconcilePairEdges(edges);
+      Dcel::parser::PLY<T>::readHeaderASCII(numVertices, numFaces, filestream);
+      Dcel::parser::PLY<T>::readVerticesASCII(vertices, numVertices, filestream);
+      Dcel::parser::PLY<T>::readFacesASCII(faces, edges, vertices, numFaces, filestream);
+      Dcel::parser::PLY<T>::reconcilePairEdges(edges);
 
       a_mesh.sanityCheck();
     
       filestream.close();
     }
     else{
-      const std::string error = "dcel::parser::PLY::readASCII - ERROR! Could not open file " + a_filename;
+      const std::string error = "Dcel::parser::PLY::readASCII - ERROR! Could not open file " + a_filename;
       std::cerr << error + "\n";
     }
   }
@@ -132,7 +132,7 @@ namespace dcel {
 
   template <class T>
   inline
-  void dcel::parser::PLY<T>::readFacesASCII(std::vector<std::shared_ptr<face> >&   a_faces,
+  void Dcel::parser::PLY<T>::readFacesASCII(std::vector<std::shared_ptr<face> >&   a_faces,
 					    std::vector<std::shared_ptr<edge> >&   a_edges,
 					    std::vector<std::shared_ptr<vertex> >& a_vertices,
 					    const int                              a_numFaces,
@@ -153,7 +153,7 @@ namespace dcel {
 	sstream >> vertexIndices[i];
       }
 
-      if(numVertices < 3) std::cerr << "dcel::parser::PLY::readFacesASCII - a face must have at least three vertices!\n";
+      if(numVertices < 3) std::cerr << "Dcel::parser::PLY::readFacesASCII - a face must have at least three vertices!\n";
     
       // Get the vertices that make up this face. 
       std::vector<std::shared_ptr<vertex> > curVertices;

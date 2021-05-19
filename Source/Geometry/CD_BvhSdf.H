@@ -24,7 +24,7 @@
 #include <dcel_face.H>
 #include <CD_NamespaceHeader.H>
 
-using namespace dcel;
+using namespace Dcel;
 using namespace BVH;
 
 template <class T, class BV>

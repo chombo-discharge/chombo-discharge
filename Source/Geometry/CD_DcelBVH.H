@@ -1,22 +1,26 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   dcel_BVH.H
+  @file   CD_DcelBVH.H
   @brief  File which contains partitioners and lambdas for enclosing dcel_face in bounding volume heirarchies
   @author Robert Marskar
-  @date   March 2021
 */
 
-#ifndef _DCEL_BVH_H_
-#define _DCEL_BVH_H_
+#ifndef CD_DcelBVH_H
+#define CD_DcelBVH_H
 
+// Our includes
 #include <CD_BVH.H>
-#include "dcel_face.H"
-
-#include "CD_NamespaceHeader.H"
+#include <dcel_face.H>
+#include <CD_NamespaceHeader.H>
   
-namespace dcel {
+namespace Dcel {
 
   template <class T>
-  using PrimitiveList = std::vector<std::shared_ptr<const dcel::faceT<T> > >;
+  using PrimitiveList = std::vector<std::shared_ptr<const Dcel::faceT<T> > >;
 
   constexpr int primitivesPerLeafNode = 1;
 
@@ -166,7 +170,7 @@ namespace dcel {
     return ret;
   };
 }
-#include "CD_NamespaceFooter.H"
-  
+
+#include <CD_NamespaceFooter.H>
 
 #endif

@@ -18,12 +18,12 @@
 #include <map>
 
 #include "CD_NamespaceHeader.H"
-namespace dcel {
+namespace Dcel {
   namespace parser {
   
     /*!
       @class PLY
-      @brief Class for generation a dcel::mesh from the Stanford PLY file format
+      @brief Class for generation a Dcel::mesh from the Stanford PLY file format
     */
     template <class T>
     class PLY {

@@ -13,7 +13,7 @@
 #include <iostream>
 
 #include "CD_NamespaceHeader.H"
-namespace dcel {
+namespace Dcel {
 
   template <class T>
   inline
@@ -37,7 +37,7 @@ namespace dcel {
       ret = this->isPointInsidePolygonWindingNumber(a_point);
       break;
     default:
-      std::cerr << "In file 'dcel_polyI.H' function dcel::Polygon2D<T>::isPointInside - unsupported algorithm requested.\n";
+      std::cerr << "In file 'dcel_polyI.H' function Dcel::Polygon2D<T>::isPointInside - unsupported algorithm requested.\n";
     }
 
     return ret;

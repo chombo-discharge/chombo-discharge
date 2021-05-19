@@ -15,7 +15,7 @@
 // Our includes
 #include <CD_NamespaceHeader.H>
 
-namespace dcel {
+namespace Dcel {
 
   enum class InsideOutsideAlgorithm {
     SubtendedAngle,

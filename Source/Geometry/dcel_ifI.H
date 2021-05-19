@@ -14,7 +14,7 @@
 
 #include "CD_NamespaceHeader.H"
 
-using namespace dcel;
+using namespace Dcel;
 
 template <class T>
 dcel_if<T>::dcel_if(const std::shared_ptr<mesh>& a_mesh, const bool a_flipInside){
@@ -38,7 +38,7 @@ Real dcel_if<T>::value(const RealVect& a_point) const {
   
   Vec3 p(a_point[0], a_point[1], a_point[2]);
 
-  T retval = m_mesh->signedDistance(p); // Note that dcel::mesh can return either positive or negative for outside, depending on the orientation of the input normals. 
+  T retval = m_mesh->signedDistance(p); // Note that Dcel::mesh can return either positive or negative for outside, depending on the orientation of the input normals. 
   
   if(m_flipInside){
     retval = -retval;

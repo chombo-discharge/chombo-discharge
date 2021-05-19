@@ -16,7 +16,7 @@
 
 #include "CD_NamespaceHeader.H"
 
-using namespace dcel;
+using namespace Dcel;
 
 template <class T>
 class dcel_if : public BaseIF {

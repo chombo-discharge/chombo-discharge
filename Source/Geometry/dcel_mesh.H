@@ -16,7 +16,7 @@
 #include <map>
 
 #include "CD_NamespaceHeader.H"
-namespace dcel {
+namespace Dcel {
 
   template <class T> class vertexT;
   template <class T> class edgeT;
@@ -58,7 +58,7 @@ namespace dcel {
     void setSearchAlgorithm(const SearchAlgorithm a_algorithm) noexcept;
 
     inline
-    void setInsideOutsideAlgorithm(const dcel::InsideOutsideAlgorithm a_algorithm) noexcept;
+    void setInsideOutsideAlgorithm(const Dcel::InsideOutsideAlgorithm a_algorithm) noexcept;
 
     inline
     void reconcile(VertexNormalWeight a_weight = VertexNormalWeight::Angle) noexcept;

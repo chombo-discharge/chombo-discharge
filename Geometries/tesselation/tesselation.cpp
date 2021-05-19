@@ -14,12 +14,12 @@
 #include "dcel_mesh.H"
 #include "dcel_parser.H"
 #include "dcel_if.H"
-#include "dcel_BVH.H"
+#include <CD_DcelBVH.H>
 #include <CD_BvhSdf.H>
 
 #include "CD_NamespaceHeader.H"
 
-using namespace dcel;
+using namespace Dcel;
 
 using precision = float;
 

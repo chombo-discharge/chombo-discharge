@@ -12,7 +12,7 @@
 #include "dcel_iterator.H"
 
 #include "CD_NamespaceHeader.H"
-namespace dcel {
+namespace Dcel {
 
   template <class T>
   inline
