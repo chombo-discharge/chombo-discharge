@@ -15,7 +15,7 @@
 #include <BaseIF.H>
 #include <SphereIF.H>
 
-#include "profile_plane_if.H"
+#include <CD_ProfilePlaneIF.H>
 #include "rod_if.H"
 #include <CD_SphereSdf.H>
 #include <CD_BoxSdf.H>
@@ -78,7 +78,7 @@ rod_plane_profile::rod_plane_profile(){
   if(has_plane){
     m_dielectrics.resize(1);
     BaseIF* func = this->getBaseIF();
-    RefCountedPtr<BaseIF> plane = RefCountedPtr<BaseIF> (new profile_plane_if(point, width, func, numl, numr, dist, xshift, yshift, curv, false));
+    RefCountedPtr<BaseIF> plane = RefCountedPtr<BaseIF> (new ProfilePlaneIF(point, width, func, numl, numr, dist, xshift, yshift, curv, false));
     m_dielectrics[0].define(plane, eps);
   }
 

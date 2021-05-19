@@ -1,9 +1,15 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file profile_plane_if.H
+  @file   CD_ProfilePlaneIF.cpp
+  @brief  Implementation of CD_ProfilePlaneIF.H
   @author Robert Marskar
-  @date April 2019
 */
 
+// Chombo includes
 #include <IntersectionIF.H>
 #include <SphereIF.H>
 #include <PlaneIF.H>
@@ -13,25 +19,25 @@
 #include <SmoothUnion.H>
 #include <SmoothIntersection.H>
 
-#include "profile_plane_if.H"
+// Our includes
+#include <CD_ProfilePlaneIF.H>
 #include <CD_SphereSdf.H>
 #include <CD_BoxSdf.H>
 #include <CD_RoundedBoxIF.H>
+#include <CD_NamespaceHeader.H>
 
-#include "CD_NamespaceHeader.H"
-
-profile_plane_if::profile_plane_if(const RealVect  a_point,
-				   const Real      a_width,
-				   const BaseIF*   a_impFunc,
-				   const int       a_num_left,
-				   const int       a_num_right,
-				   const Real      a_ccDist,
-				   const Real      a_xShift,
-				   const Real      a_yShift,
-				   const Real      a_curv,
-				   const bool      a_fluidInside){
+ProfilePlaneIF::ProfilePlaneIF(const RealVect  a_point,
+			       const Real      a_width,
+			       const BaseIF*   a_impFunc,
+			       const int       a_num_left,
+			       const int       a_num_right,
+			       const Real      a_ccDist,
+			       const Real      a_xShift,
+			       const Real      a_yShift,
+			       const Real      a_curv,
+			       const bool      a_fluidInside){
   if(SpaceDim==3){
-    MayDay::Abort("profile_plane_if - only 2D is currently supported");
+    MayDay::Abort("ProfilePlaneIF - only 2D is currently supported");
   }
   
   m_fluidInside = a_fluidInside;
@@ -73,16 +79,16 @@ profile_plane_if::profile_plane_if(const RealVect  a_point,
   m_baseif = RefCountedPtr<BaseIF> (new SmoothUnion(parts, 2*a_curv));
 }
 
-profile_plane_if::profile_plane_if(const profile_plane_if& a_inputIF){
+ProfilePlaneIF::ProfilePlaneIF(const ProfilePlaneIF& a_inputIF){
   m_fluidInside = a_inputIF.m_fluidInside;
   m_baseif      = a_inputIF.m_baseif;
 }
 
-profile_plane_if::~profile_plane_if(){
+ProfilePlaneIF::~ProfilePlaneIF(){
 
 }
 
-Real profile_plane_if::value(const RealVect& a_pos) const{
+Real ProfilePlaneIF::value(const RealVect& a_pos) const{
   Real retval = m_baseif->value(a_pos); 
 
   if(m_fluidInside){ // m_baseif was constructed such that the fluid was outside. Revert if fluid is inside. 
@@ -92,7 +98,8 @@ Real profile_plane_if::value(const RealVect& a_pos) const{
   return retval;
 }
 
-BaseIF* profile_plane_if::newImplicitFunction() const{
-  return static_cast<BaseIF*> (new profile_plane_if(*this));
+BaseIF* ProfilePlaneIF::newImplicitFunction() const{
+  return static_cast<BaseIF*> (new ProfilePlaneIF(*this));
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
