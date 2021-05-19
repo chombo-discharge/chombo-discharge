@@ -1,21 +1,26 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file hollow_cylinder_if.cpp
-  @brief Implementation of hollow_cylinder_if.H
-  @date Jan. 2017
-  @author Sigurd Midttun
+  @file   CD_HollowCylinderIF.cpp
+  @brief  Implementation of CD_HollowCylinderIF.H
+  @author Robert Marskar
 */
 
-#include "cylinder_if.H"
-#include "hollow_cylinder_if.H"
-#include <CD_RoundedCylinderIF.H>
-
+// Chombo includes
 #include <SmoothUnion.H>
 #include <UnionIF.H>
 #include <IntersectionIF.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <cylinder_if.H>
+#include <CD_HollowCylinderIF.H>
+#include <CD_RoundedCylinderIF.H>
+#include <CD_NamespaceHeader.H>
 
-hollow_cylinder_if::hollow_cylinder_if(const RealVect a_center1,
+HollowCylinderIF::HollowCylinderIF(const RealVect a_center1,
 				       const RealVect a_center2,
 				       const Real     a_majorRadius,
 				       const Real     a_minorRadius,
@@ -41,15 +46,16 @@ hollow_cylinder_if::hollow_cylinder_if(const RealVect a_center1,
   m_baseif = RefCountedPtr<BaseIF> (new SmoothUnion(parts, 2*a_curv));
 }
 
-hollow_cylinder_if::hollow_cylinder_if(const hollow_cylinder_if& a_inputIF){
+HollowCylinderIF::HollowCylinderIF(const HollowCylinderIF& a_inputIF){
   m_baseif = a_inputIF.m_baseif;
 }
 
-Real hollow_cylinder_if::value(const RealVect& a_point) const{
+Real HollowCylinderIF::value(const RealVect& a_point) const{
   return m_baseif->value(a_point);
 }
 
-BaseIF* hollow_cylinder_if::newImplicitFunction() const{
-  return (BaseIF*) (new hollow_cylinder_if(*this));
+BaseIF* HollowCylinderIF::newImplicitFunction() const{
+  return (BaseIF*) (new HollowCylinderIF(*this));
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

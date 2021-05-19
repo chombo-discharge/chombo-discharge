@@ -20,7 +20,7 @@
 #include "cylinder_if.H"
 #include <CD_ProfileCylinderIF.H>
 #include "polygon_rod_if.H"
-#include "hollow_cylinder_if.H"
+#include <CD_HollowCylinderIF.H>
 #include <CD_RoundedCylinderIF.H>
 
 #include "CD_NamespaceHeader.H"
@@ -83,7 +83,7 @@ void mechanical_shaft::define_electrode(){
   pp.getarr("endpoint1", vec, 0, SpaceDim); c1 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
   pp.getarr("endpoint2", vec, 0, SpaceDim); c2 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
 
-  RefCountedPtr<BaseIF> elec = RefCountedPtr<BaseIF> (new hollow_cylinder_if(c1, c2, outerRadius, innerRadius, curvature, false));
+  RefCountedPtr<BaseIF> elec = RefCountedPtr<BaseIF> (new HollowCylinderIF(c1, c2, outerRadius, innerRadius, curvature, false));
 
   m_electrodes.resize(1);
   m_electrodes[0].define(elec, live);
