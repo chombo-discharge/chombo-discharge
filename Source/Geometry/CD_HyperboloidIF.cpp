@@ -1,15 +1,19 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file hyperboloid_if.cpp
-  @brief Implementation hyperboloid_if.H
-  @date Nov. 2017
+  @file   CD_HyperboloidIF.cpp
+  @brief  Implementation CD_HyperboloidIF.H
   @author Robert Marskar
 */
-  
-#include "hyperboloid_if.H"
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_HyperboloidIF.H>
+#include <CD_NamespaceHeader.H>
 
-hyperboloid_if::hyperboloid_if(const RealVect& a_radii, const RealVect& a_center, const bool& a_inside){
+HyperboloidIF::HyperboloidIF(const RealVect& a_radii, const RealVect& a_center, const bool& a_inside){
   m_radii  = a_radii;
   m_center = a_center;
   m_inside = a_inside;
@@ -18,7 +22,7 @@ hyperboloid_if::hyperboloid_if(const RealVect& a_radii, const RealVect& a_center
   m_sign[SpaceDim-1] = -1.;
 }
 
-hyperboloid_if::hyperboloid_if(const hyperboloid_if& a_inputIF){
+HyperboloidIF::HyperboloidIF(const HyperboloidIF& a_inputIF){
   m_radii  = a_inputIF.m_radii;
   m_center = a_inputIF.m_center;
   m_inside = a_inputIF.m_inside;
@@ -26,7 +30,7 @@ hyperboloid_if::hyperboloid_if(const hyperboloid_if& a_inputIF){
   m_sign   = a_inputIF.m_sign;
 }
 
-Real hyperboloid_if::value(const RealVect& a_point) const{
+Real HyperboloidIF::value(const RealVect& a_point) const{
 
   Real retval = 1.;
   for (int dir = 0; dir < SpaceDim-1; dir++){
@@ -44,8 +48,9 @@ Real hyperboloid_if::value(const RealVect& a_point) const{
   return retval;
 }
 
-BaseIF* hyperboloid_if::newImplicitFunction() const{
-  hyperboloid_if* hyperboloidPtr = new hyperboloid_if(m_radii,m_center,m_inside);
+BaseIF* HyperboloidIF::newImplicitFunction() const{
+  HyperboloidIF* hyperboloidPtr = new HyperboloidIF(m_radii,m_center,m_inside);
   return static_cast<BaseIF*> (hyperboloidPtr);
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
