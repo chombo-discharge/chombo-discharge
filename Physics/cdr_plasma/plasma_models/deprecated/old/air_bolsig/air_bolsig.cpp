@@ -452,15 +452,15 @@ Real air_bolsig::negative_species::initialData(const RealVect a_pos, const Real 
   return 0.;
 }
 
-Real air_bolsig::photon_one::get_kappa(const RealVect a_pos) const {
+Real air_bolsig::photon_one::getKappa(const RealVect a_pos) const {
   return m_lambda*m_pO2/sqrt(3.0); // I think this is correct.
 }
 
-Real air_bolsig::photon_two::get_kappa(const RealVect a_pos) const {
+Real air_bolsig::photon_two::getKappa(const RealVect a_pos) const {
   return m_lambda*m_pO2/sqrt(3.0); // I think this is correct.
 }
 
-Real air_bolsig::photon_three::get_kappa(const RealVect a_pos) const {
+Real air_bolsig::photon_three::getKappa(const RealVect a_pos) const {
   return m_lambda*m_pO2/sqrt(3.0); // I think this is correct.
 
 }

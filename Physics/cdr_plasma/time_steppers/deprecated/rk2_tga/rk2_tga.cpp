@@ -261,7 +261,7 @@ void rk2_tga::cache_solutions(){
 
   // Cache RTE solutions
   for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<rte_solver>& solver = solver_it();
+    const RefCountedPtr<RtSolver>& solver = solver_it();
 
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
     EBAMRCellData& cache = storage->get_cache();
@@ -404,7 +404,7 @@ void rk2_tga::compute_cdr_fluxes(const Real a_time){
 
   // Compute RTE flux on the boundary
   for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>& solver   = solver_it();
+    RefCountedPtr<RtSolver>& solver   = solver_it();
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
     EBAMRIVData& flux_eb = storage->get_eb_flux();

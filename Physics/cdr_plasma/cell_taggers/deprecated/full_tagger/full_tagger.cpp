@@ -96,7 +96,7 @@ void full_tagger::compute_tracers(){
   this->allocate_storage();
   
   const RealVect origin = m_amr->getProbLo();
-  const Real time       = m_timeStepper->get_time();
+  const Real time       = m_timeStepper->getTime();
   const int num_species = m_physics->get_num_CdrSpecies();
   const int num_photons = m_physics->get_num_rte_species();
 
@@ -400,7 +400,7 @@ void full_tagger::compute_rte_densities(Vector<EBAMRCellData>& a_rte_densities){
   RefCountedPtr<rte_layout>& rte = m_timeStepper->get_rte();
 
   for (rte_iterator solver_it(*rte); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>& solver = solver_it();
+    RefCountedPtr<RtSolver>& solver = solver_it();
 
     // Interpolate density to centroid
     data_ops::set_value(m_scratch, 0.0);

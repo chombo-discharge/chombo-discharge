@@ -617,7 +617,7 @@ morrow_bourdon::photon_one::~photon_one(){
   
 }
 
-Real morrow_bourdon::photon_one::get_kappa(const RealVect a_pos) const {
+Real morrow_bourdon::photon_one::getKappa(const RealVect a_pos) const {
   return m_lambda*m_pO2/sqrt(3.0); // I think this is correct.
 }
 
@@ -638,7 +638,7 @@ morrow_bourdon::photon_two::photon_two(){
 morrow_bourdon::photon_two::~photon_two(){
 }
 
-Real morrow_bourdon::photon_two::get_kappa(const RealVect a_pos) const {
+Real morrow_bourdon::photon_two::getKappa(const RealVect a_pos) const {
   return m_lambda*m_pO2/sqrt(3.0); // I think this is correct.
 }
 
@@ -659,7 +659,7 @@ morrow_bourdon::photon_three::photon_three(){
 morrow_bourdon::photon_three::~photon_three(){
 }
 
-Real morrow_bourdon::photon_three::get_kappa(const RealVect a_pos) const {
+Real morrow_bourdon::photon_three::getKappa(const RealVect a_pos) const {
   return m_lambda*m_pO2/sqrt(3.0); // I think this is correct.
 
 }

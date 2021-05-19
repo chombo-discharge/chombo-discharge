@@ -53,7 +53,7 @@ int main(int argc, char* argv[]){
   // Create solver factories
   auto poi_fact = new FieldSolverFactory<FieldSolverMultigrid>();
   auto cdr_fact = new cdr_factory<CdrSolver, CdrGodunov>();
-  auto rte_fact = new rte_factory<rte_solver, mc_photo>();
+  auto rte_fact = new rte_factory<RtSolver, mc_photo>();
 
   // Instantiate solvers
   auto poi = poi_fact->newSolver();

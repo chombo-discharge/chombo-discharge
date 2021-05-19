@@ -39,7 +39,7 @@ class air2::photon_one : public photon_group {
 public:
   photon_one();
   ~photon_one();
-  Real get_kappa(const RealVect a_pos) const;
+  Real getKappa(const RealVect a_pos) const;
   Real get_lambda() const;
   Real get_A() const;
   Real get_pO2() const;
@@ -53,7 +53,7 @@ class air2::photon_two : public photon_group {
 public:
   photon_two();
   ~photon_two();
-  Real get_kappa(const RealVect a_pos) const;
+  Real getKappa(const RealVect a_pos) const;
   Real get_lambda() const;
   Real get_A() const;
   Real get_pO2() const;
@@ -67,7 +67,7 @@ class air2::photon_three : public photon_group {
 public:
   photon_three();
   ~photon_three();
-  Real get_kappa(const RealVect a_pos) const;
+  Real getKappa(const RealVect a_pos) const;
   Real get_lambda() const;
   Real get_A() const;
   Real get_pO2() const;

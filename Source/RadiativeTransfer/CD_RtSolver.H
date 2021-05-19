@@ -1,34 +1,38 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file rte_solver.H
-  @brief Abstract multi-phase Poisson solver
+  @file   CD_RtSolver.H
+  @brief  Abstract parent class for various radiative transfer solvers
   @author Robert Marskar
-  @date Nov. 2017
 */
 
-#ifndef _RTE_SOLVER_
-#define _RTE_SOLVER_
+#ifndef CD_RtSolver_H
+#define CD_RtSolver_H
 
-#include "computational_geometry.H"
-#include "CD_AmrMesh.H"
-#include "rte_species.H"
-
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <computational_geometry.H>
+#include <CD_AmrMesh.H>
+#include <rte_species.H>
+#include <CD_NamespaceHeader.H>
   
 /*!
   @brief Abstract RTE solver class. This is essentially just an interface. 
 */
-class rte_solver {
+class RtSolver {
 public:
   
   /*!
     @brief Constructor
   */
-  rte_solver();
+  RtSolver();
 
   /*!
     @brief Constructor
   */
-  virtual ~rte_solver();
+  virtual ~RtSolver();
 
   /*!
     @brief Get solver name
@@ -78,7 +82,7 @@ public:
   /*!
     @brief Set the photon group
   */
-  virtual void set_rte_species(const RefCountedPtr<rte_species> a_rte_species);
+  virtual void setRtSpecies(const RefCountedPtr<rte_species> a_rte_species);
 
   /*!
     @brief Set computational geometry
@@ -109,7 +113,7 @@ public:
   /*!
     @brief Set stationary solver or not
   */
-  virtual void set_stationary(const bool a_stationary);
+  virtual void setStationary(const bool a_stationary);
 
   /*!
     @brief Sanity check
@@ -119,7 +123,7 @@ public:
   /*!
     @brief Check if solver is stationary
   */
-  virtual bool is_stationary();
+  virtual bool isStationary();
 
   /*!
     @brief Compute the boundary flux given a state (a_phi will be different for different RTE approximations)
@@ -223,7 +227,7 @@ public:
   /*!
     @brief Get time
   */
-  virtual Real get_time() const;
+  virtual Real getTime() const;
 
   /*!
     @brief Get the RTE phase
@@ -243,12 +247,12 @@ public:
   /*!
     @brief Set the absorption coefficient
   */
-  virtual EBAMRFluxData& get_kappa();
+  virtual EBAMRFluxData& getKappa();
 
   /*!
     @brief Set the absorption coefficient on irregular EB faces
   */
-  virtual EBAMRIVData& get_kappa_eb();
+  virtual EBAMRIVData& getKappaEb();
 
   /*!
     @brief Get species
@@ -366,6 +370,7 @@ protected:
   */
   void setEbIndexSpace(const RefCountedPtr<EBIndexSpace>& a_ebis);
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

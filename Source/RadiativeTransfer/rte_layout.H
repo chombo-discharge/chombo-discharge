@@ -1,6 +1,6 @@
 /*!
   @file   rte_layout.H
-  @brief  Declaration of a class that holds a set of rte_solvers
+  @brief  Declaration of a class that holds a set of RtSolvers
   @author Robert Marskar
   @date   Jan. 2018
 */
@@ -8,7 +8,7 @@
 #ifndef _RTE_LAYOUT_
 #define _RTE_LAYOUT_
 
-#include "rte_solver.H"
+#include <CD_RtSolver.H>
 
 #include "CD_NamespaceHeader.H"
   
@@ -16,7 +16,7 @@ template <class T>
 class rte_iterator;
 
 /*!
-  @brief Class for holding a set of rte_solvers. 
+  @brief Class for holding a set of RtSolvers. 
 */
 template <class T>
 class rte_layout {
@@ -131,7 +131,7 @@ public:
   /*!
     @brief Turn on/off stationary
   */
-  virtual void set_stationary(const bool a_stationary);
+  virtual void setStationary(const bool a_stationary);
 
   /*!
     @brief Convenience function. All solvers write plot files
@@ -152,7 +152,7 @@ public:
   /*!
     @brief Check if solvers are stationary
   */
-  virtual bool is_stationary();
+  virtual bool isStationary();
 
   /*!
     @brief Get phase
@@ -205,7 +205,7 @@ protected:
 /*!
   @brief Factory class for rte_layout. 
   @details Factory class is very simple; since we don't want to template rte_layout2 we use a factory to instantiate solvers of 
-  any rte_solver inherited class, and then return a layout with the casted classes. That's about it. 
+  any RtSolver inherited class, and then return a layout with the casted classes. That's about it. 
 */
 template <class T, class S>
 class rte_factory {

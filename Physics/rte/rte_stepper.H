@@ -9,14 +9,14 @@
 #define _RTE_STEPPER_
 
 #include "CD_TimeStepper.H"
-#include "rte_solver.H"
+#include <CD_RtSolver.H>
 
 #include "CD_NamespaceHeader.H"
 namespace physics {
   namespace rte {
 
     /*!
-      @brief Class that just solves the rte equation using the rte_solver advance method
+      @brief Class that just solves the rte equation using the RtSolver advance method
     */
     template <class T>
     class rte_stepper : public TimeStepper {
@@ -62,7 +62,7 @@ namespace physics {
       std::string m_realm;
 
       // Solver and species
-      RefCountedPtr<rte_solver>  m_solver;
+      RefCountedPtr<RtSolver>  m_solver;
       RefCountedPtr<rte_species> m_species;
 
       // Stuff for source term

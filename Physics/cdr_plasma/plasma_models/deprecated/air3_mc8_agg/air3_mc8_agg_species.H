@@ -42,7 +42,7 @@ class air3_mc8_agg::agg_photon : public photon_group {
 public:
   agg_photon();
   ~agg_photon(){}
-  Real get_kappa(const RealVect a_pos) const {return m_kappa;}
+  Real getKappa(const RealVect a_pos) const {return m_kappa;}
   Real get_random_kappa() const;
 protected:
   Real m_kappa;

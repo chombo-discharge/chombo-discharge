@@ -144,7 +144,7 @@ Real rk2::advance(const Real a_dt){
   const Real t12 = MPI_Wtime();
   this->compute_E_after_k1();
   const Real t13 = MPI_Wtime();
-  if(m_rte->is_stationary()){
+  if(m_rte->isStationary()){
     this->advance_rte_k1_stationary(a_dt);
   }
   else{
@@ -178,7 +178,7 @@ Real rk2::advance(const Real a_dt){
   const Real t33 = MPI_Wtime();
   this->compute_E_after_k2();
   const Real t34 = MPI_Wtime();
-  if(m_rte->is_stationary()){
+  if(m_rte->isStationary()){
     this->advance_rte_k2_stationary(a_dt);
   }
   else{
@@ -367,7 +367,7 @@ void rk2::compute_cdr_fluxes_at_start_of_time_step(){
 
   // Compute RTE flux on the boundary
   for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>& solver   = solver_it();
+    RefCountedPtr<RtSolver>& solver   = solver_it();
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
     EBAMRIVData& flux_eb = storage->get_eb_flux();
@@ -512,7 +512,7 @@ void rk2::advance_rte_k1_stationary(const Real a_dt){
   Vector<EBAMRCellData*> cdr_states;
 
   for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>& solver   = solver_it();
+    RefCountedPtr<RtSolver>& solver   = solver_it();
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
     
     EBAMRCellData& phi    = storage->get_phi();
@@ -552,7 +552,7 @@ void rk2::advance_rte_k1_transient(const Real a_dt){
   Vector<EBAMRCellData*> cdr_states;
 
   for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>& solver   = solver_it();
+    RefCountedPtr<RtSolver>& solver   = solver_it();
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
     
     EBAMRCellData& phi    = storage->get_phi();
@@ -751,7 +751,7 @@ void rk2::compute_cdr_fluxes_after_k1(const Real a_dt){
 
   // Compute RTE flux on the boundary
   for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>& solver   = solver_it();
+    RefCountedPtr<RtSolver>& solver   = solver_it();
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
     EBAMRIVData& flux_eb = storage->get_eb_flux();
@@ -812,7 +812,7 @@ void rk2::advance_cdr_k2(const Real a_dt){
 
     // For transient RTE solvers I need the source term at half time steps. Since the internal state
     // inside the solver will be overwritten, I take a backup into rk2_storage.scratch
-    if(!m_rte->is_stationary()){
+    if(!m_rte->isStationary()){
       data_ops::set_value(scratch,   0.0);
       data_ops::incr(scratch, state, 1.0);
     }
@@ -861,7 +861,7 @@ void rk2::solve_poisson_k2(){
 
   // For transient RTE solvers I need the source term at half time steps. Since the internal state
   // inside the solver will be overwritten, I take a backup into poisson_storage.scratch_phi
-  if(!m_rte->is_stationary()){
+  if(!m_rte->isStationary()){
     data_ops::set_value(scratch, 0.0);
     data_ops::incr(scratch, pot, 1.0); 
   }
@@ -916,7 +916,7 @@ void rk2::advance_rte_k2_stationary(const Real a_dt){
   Vector<EBAMRCellData*> cdr_states;
 
   for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>& solver   = solver_it();
+    RefCountedPtr<RtSolver>& solver   = solver_it();
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
     
     EBAMRCellData& phi    = storage->get_phi();
@@ -969,7 +969,7 @@ void rk2::advance_rte_k2_transient(const Real a_dt){
   Vector<EBAMRCellData*> cdr_states;
 
   for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>& solver   = solver_it();
+    RefCountedPtr<RtSolver>& solver   = solver_it();
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
     
     EBAMRCellData& state  = solver->getPhi();  // This has been unaffected so far because we solved onto rte_storage.phi

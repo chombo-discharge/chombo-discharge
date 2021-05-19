@@ -882,10 +882,10 @@ Real ito_plasma_stepper::compute_Emax(const phase::which_phase a_phase) {
   return max;
 }
 
-Real ito_plasma_stepper::get_time() const{
-  CH_TIME("ito_plasma_stepper::get_time");
+Real ito_plasma_stepper::getTime() const{
+  CH_TIME("ito_plasma_stepper::getTime");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::get_time" << endl;
+    pout() << "ito_plasma_stepper::getTime" << endl;
   }
 
   return m_time;

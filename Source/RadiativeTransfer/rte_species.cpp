@@ -46,7 +46,7 @@ bool rte_species::constant_kappa() const {
   return m_constant;
 }
 
-Real rte_species::get_kappa(const RealVect a_pos) const{
+Real rte_species::getKappa(const RealVect a_pos) const{
   if(m_constant){
     return m_kappa;
   }

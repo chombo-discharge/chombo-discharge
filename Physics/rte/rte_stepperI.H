@@ -36,9 +36,9 @@ void rte_stepper<T>::setup_solvers(){
   m_species = RefCountedPtr<rte_species> (new rte_physics_species());
 
   // Solver setup
-  m_solver = RefCountedPtr<rte_solver> (new T());
+  m_solver = RefCountedPtr<RtSolver> (new T());
   m_solver->setVerbosity(m_verbosity);
-  m_solver->set_rte_species(m_species);
+  m_solver->setRtSpecies(m_species);
   m_solver->parseOptions();
   m_solver->setPhase(phase::gas);
   m_solver->setAmr(m_amr);

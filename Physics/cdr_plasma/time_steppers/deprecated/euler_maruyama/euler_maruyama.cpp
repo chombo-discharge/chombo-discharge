@@ -491,7 +491,7 @@ void euler_maruyama::compute_cdr_eb_fluxes(){
 
   // Compute RTE flux on the boundary
   for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>& solver   = solver_it();
+    RefCountedPtr<RtSolver>& solver   = solver_it();
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
     EBAMRIVData& flux_eb = storage->get_eb_flux();
@@ -594,7 +594,7 @@ void euler_maruyama::compute_cdr_domain_fluxes(){
 
   // Compute RTE flux on domain faces
   for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>& solver   = solver_it();
+    RefCountedPtr<RtSolver>& solver   = solver_it();
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
     EBAMRIFData& domain_flux = storage->get_domain_flux();
@@ -752,7 +752,7 @@ void euler_maruyama::advance_rte(const Real a_dt){
 
   // Source terms should already be in place so we can solve directly.
   for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>& solver = solver_it();
+    RefCountedPtr<RtSolver>& solver = solver_it();
     solver->advance(a_dt);
   }
 }

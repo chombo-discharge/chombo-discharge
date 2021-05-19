@@ -14,7 +14,7 @@ def write_template(args):
     main_filename = app_dir + "/" + args.filename + ".cpp"
     mainf = open(main_filename, "w")
     mainf.write('#include "CD_Driver.H"\n')
-    mainf.write('#include "' + args.rte_solver + '.H"\n')
+    mainf.write('#include "' + args.RtSolver + '.H"\n')
     mainf.write('#include "' + args.geometry + '.H"\n')
     mainf.write('#include "rte_stepper.H"\n')
     mainf.write('#include "ParmParse.H"\n')
@@ -45,8 +45,8 @@ def write_template(args):
 
     mainf.write("\n")
     mainf.write("  // Set up basic Poisson, potential = 1 \n")
-    mainf.write("  auto timestepper = RefCountedPtr<rte_stepper<" + args.rte_solver + "> >\n")
-    mainf.write("     (new rte_stepper<" + args.rte_solver + ">());\n")
+    mainf.write("  auto timestepper = RefCountedPtr<rte_stepper<" + args.RtSolver + "> >\n")
+    mainf.write("     (new rte_stepper<" + args.RtSolver + ">());\n")
     mainf.write("\n")
 
 

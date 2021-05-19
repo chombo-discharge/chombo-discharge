@@ -103,7 +103,7 @@ namespace physics {
       photonZ();
       ~photonZ();
 
-      Real get_kappa(const RealVect a_pos) const override;
+      Real getKappa(const RealVect a_pos) const override;
       
     protected:
       Real m_pO2;

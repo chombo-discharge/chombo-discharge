@@ -643,7 +643,7 @@ Real sisdc::advance(const Real a_dt){
   computeDt(next_dt, dummy);
   m_plaskin->set_dt(next_dt);
   sisdc::compute_cdr_sources(m_time + actual_dt);
-  if(!m_rte->is_stationary()){
+  if(!m_rte->isStationary()){
     
   }
   const Real t5 = MPI_Wtime();
@@ -2069,7 +2069,7 @@ void sisdc::compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_phis, const Real 
 
   // Compute RTE flux on the boundary
   for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>& solver   = solver_it();
+    RefCountedPtr<RtSolver>& solver   = solver_it();
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
     EBAMRIVData& flux_eb = storage->get_eb_flux();
@@ -2139,7 +2139,7 @@ void sisdc::compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_phis, cons
 
   // Compute RTE flux on domain faces
   for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>& solver   = solver_it();
+    RefCountedPtr<RtSolver>& solver   = solver_it();
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
     EBAMRIFData& domain_flux = storage->get_domain_flux();
@@ -2248,7 +2248,7 @@ void sisdc::update_stationary_rte(const Real a_time){
   
   if(m_do_rte){
     if((m_timeStep + 1) % m_fast_rte == 0){
-      if(m_rte->is_stationary()){
+      if(m_rte->isStationary()){
 	Vector<EBAMRCellData*> rte_states  = m_rte->getPhis();
 	Vector<EBAMRCellData*> rte_sources = m_rte->getSources();
 	Vector<EBAMRCellData*> cdr_states  = m_cdr->getPhis();
@@ -2270,7 +2270,7 @@ void sisdc::update_stationary_rte(const Vector<EBAMRCellData*>& a_cdr_states, co
   
   if(m_do_rte){
     if((m_timeStep + 1) % m_fast_rte == 0){
-      if(m_rte->is_stationary()){
+      if(m_rte->isStationary()){
 	Vector<EBAMRCellData*> rte_states  = m_rte->getPhis();
 	Vector<EBAMRCellData*> rte_sources = m_rte->getSources();
 
@@ -2291,7 +2291,7 @@ void sisdc::integrate_rte(const Real a_dt, const int a_m, const bool a_lagged_te
 
   if(m_do_rte){
     if((m_timeStep + 1) % m_fast_rte == 0){
-      if(!(m_rte->is_stationary())){
+      if(!(m_rte->isStationary())){
 	const Real time = m_time + m_dtm[a_m]; // This is the current time
       
 	Vector<EBAMRCellData*>  rte_states  = m_rte->getPhis();
@@ -2893,7 +2893,7 @@ void sisdc::subcycle_update_transport_bc(const int a_m, const int a_lvl, const R
 
   // Radiative transfer fluxes at boundary
   for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>& solver   = solver_it();
+    RefCountedPtr<RtSolver>& solver   = solver_it();
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
     EBAMRIVData& flux_eb = storage->get_eb_flux();
@@ -2971,7 +2971,7 @@ void sisdc::subcycle_update_sources(const int a_m, const int a_lvl, const Real a
     }
     for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.get_solver();
-      RefCountedPtr<rte_solver>& solver = solver_it();
+      RefCountedPtr<RtSolver>& solver = solver_it();
       EBAMRCellData& state = solver->getPhi();
       rte_densities[idx] = &((*state[a_lvl])[dit()]);
     }
@@ -3211,7 +3211,7 @@ void sisdc::store_solvers(){
   // RTE
   for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<rte_storage>& storage     = sisdc::get_rte_storage(solver_it);
-    const RefCountedPtr<rte_solver>& solver = solver_it();
+    const RefCountedPtr<RtSolver>& solver = solver_it();
 
     EBAMRCellData& previous = storage->get_previous();
     const EBAMRCellData& state = solver->getPhi();
@@ -3238,7 +3238,7 @@ void sisdc::restore_solvers(){
   // RTE
   for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<rte_storage>& storage     = sisdc::get_rte_storage(solver_it);
-    RefCountedPtr<rte_solver>& solver = solver_it();
+    RefCountedPtr<RtSolver>& solver = solver_it();
 
     EBAMRCellData& previous = storage->get_previous();
     EBAMRCellData& state = solver->getPhi();

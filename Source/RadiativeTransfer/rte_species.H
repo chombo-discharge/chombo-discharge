@@ -56,7 +56,7 @@ public:
   /*!
     @brief Get kappa at position. You really need to impement this, but it's not pure since this class may be useful for testing. 
   */
-  virtual Real get_kappa(const RealVect a_pos) const;
+  virtual Real getKappa(const RealVect a_pos) const;
 
   /*!
     @brief Get scattering coefficient. 

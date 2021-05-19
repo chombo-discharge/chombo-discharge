@@ -129,7 +129,7 @@ namespace physics {
       public:
 	photon_one();
 	~photon_one();
-	Real get_kappa(const RealVect a_pos) const;
+	Real getKappa(const RealVect a_pos) const;
 	Real get_lambda() const { return m_lambda;}
 	Real get_A()      const { return m_A;}
 	Real get_pO2()    const { return m_pO2; }
@@ -144,7 +144,7 @@ namespace physics {
       public:
 	photon_two();
 	~photon_two();
-	Real get_kappa(const RealVect a_pos) const;
+	Real getKappa(const RealVect a_pos) const;
 	Real get_lambda() const { return m_lambda;}
 	Real get_A()      const { return m_A;}
 	Real get_pO2()    const { return m_pO2; }
@@ -159,7 +159,7 @@ namespace physics {
       public:
 	photon_three();
 	~photon_three();
-	Real get_kappa(const RealVect a_pos) const;
+	Real getKappa(const RealVect a_pos) const;
 	Real get_lambda() const { return m_lambda;}
 	Real get_A()      const { return m_A;}
 	Real get_pO2()    const { return m_pO2; }

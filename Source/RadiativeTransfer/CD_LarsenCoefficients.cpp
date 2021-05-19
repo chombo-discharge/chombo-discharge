@@ -27,7 +27,7 @@ LarsenCoefficients::~LarsenCoefficients(){
 
 Real LarsenCoefficients::aco(const RealVect a_pos) const {
 
-  Real val = m_rte_species->get_kappa(a_pos)*m_rte_species->get_kappa(a_pos);
+  Real val = m_rte_species->getKappa(a_pos)*m_rte_species->getKappa(a_pos);
   val *= 3.0/2.0;
   val *= (1 + 3*m_reflectionCoefficientTwo)/(1 - 2*m_reflectionCoefficientOne);
 
@@ -35,7 +35,7 @@ Real LarsenCoefficients::aco(const RealVect a_pos) const {
 }
 
 Real LarsenCoefficients::bco(const RealVect a_pos) const {
-  return -m_rte_species->get_kappa(a_pos);
+  return -m_rte_species->getKappa(a_pos);
 }
 
 Real LarsenCoefficients::rhs(const RealVect a_pos) const {

@@ -276,7 +276,7 @@ ito_plasma_air3_lea::photonZ::~photonZ(){
 
 }
 
-Real ito_plasma_air3_lea::photonZ::get_kappa(const RealVect a_pos) const {
+Real ito_plasma_air3_lea::photonZ::getKappa(const RealVect a_pos) const {
   const Real f = m_f1 + (*m_udist01)(*m_rng)*(m_f2 - m_f1);
   return m_K1*pow(m_K2/m_K1, (f-m_f1)/(m_f2-m_f1));
 }

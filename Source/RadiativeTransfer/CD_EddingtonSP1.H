@@ -24,7 +24,7 @@
 #include <EBConductivityOpFactory.H>
 
 // Our includes
-#include <rte_solver.H>
+#include <CD_RtSolver.H>
 #include <CD_EbHelmholtzOpFactory.H>
 #include <CD_LarsenCoefficients.H>
 #include <CD_RobinConductivityEbBcFactory.H>
@@ -36,7 +36,7 @@
 /*!
   @brief Radiative tranfer equation solver in the SP1 (diffusion) approximation. Also includes stochastically drawn photons. 
 */
-class EddingtonSP1 : public rte_solver {
+class EddingtonSP1 : public RtSolver {
 protected:
 
   /*!

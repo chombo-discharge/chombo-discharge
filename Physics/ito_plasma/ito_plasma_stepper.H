@@ -127,7 +127,7 @@ namespace physics {
       void set_potential(const std::function<Real(const Real a_time)>& a_potential);
 
       // Get routines
-      Real get_time() const;
+      Real getTime() const;
       Real compute_Emax(const phase::which_phase a_phase);
 
       // E-field computations
@@ -310,7 +310,7 @@ namespace physics {
       // Routines for advancing photons
       void advance_photons(const Real a_dt);
 
-      // Routines for sorting particles. These routines are here because rte_layout is general for rte_solver, and I'm too
+      // Routines for sorting particles. These routines are here because rte_layout is general for RtSolver, and I'm too
       // lazy to write an mc_photo_layout. So here you go. 
       void sort_photons_by_cell();
       void sort_photons_by_patch();

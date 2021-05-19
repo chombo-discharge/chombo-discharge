@@ -899,8 +899,8 @@ morrow_zheleznyak::uv_photon::~uv_photon(){
   
 }
 
-Real morrow_zheleznyak::uv_photon::get_kappa(const RealVect a_pos) const {
-  MayDay::Abort("morrow_zheleznyak::uv_photon::get_kappa - should not be called. morrow_zheleznyak is used with the mc_photo module");
+Real morrow_zheleznyak::uv_photon::getKappa(const RealVect a_pos) const {
+  MayDay::Abort("morrow_zheleznyak::uv_photon::getKappa - should not be called. morrow_zheleznyak is used with the mc_photo module");
 }
 
 Real morrow_zheleznyak::uv_photon::get_random_kappa() const {

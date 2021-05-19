@@ -8,7 +8,7 @@
 #ifndef _MC_PHOTO_
 #define _MC_PHOTO_
 
-#include "rte_solver.H"
+#include <CD_RtSolver.H>
 #include <CD_EbParticleInterp.H>
 #include <CD_ParticleContainer.H>
 #include <CD_WallBc.H>
@@ -25,7 +25,7 @@
 /*!
   @brief Radiative tranfer equation solver using stationary Monte-Carlo
 */
-class mc_photo : public rte_solver {
+class mc_photo : public RtSolver {
 public:
 
   /*!

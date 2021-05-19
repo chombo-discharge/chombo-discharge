@@ -842,7 +842,7 @@ namespace physics {
       /*!
 	@brief Set the RTE layout
       */
-      virtual void set_rte(RefCountedPtr<rte_layout<rte_solver> >& a_rte);
+      virtual void set_rte(RefCountedPtr<rte_layout<RtSolver> >& a_rte);
 
       /*!
 	@brief General RTE advance routine
@@ -899,7 +899,7 @@ namespace physics {
       /*!
 	@brief Return time
       */
-      virtual Real get_time();
+      virtual Real getTime();
 
       /*!
 	@brief Get dt
@@ -924,7 +924,7 @@ namespace physics {
       /*!
 	@brief Get cdr solvers
       */
-      virtual RefCountedPtr<rte_layout<rte_solver>>& get_rte();
+      virtual RefCountedPtr<rte_layout<RtSolver>>& get_rte();
 
       /*!
 	@brief Get sigma solver
@@ -981,7 +981,7 @@ namespace physics {
       /*!
 	@brief Radiative transfer solvers
       */
-      RefCountedPtr<rte_layout<rte_solver>> m_rte;
+      RefCountedPtr<rte_layout<RtSolver>> m_rte;
 
       /*!
 	@brief Poisson solver

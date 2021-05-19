@@ -75,7 +75,7 @@ bool cdr_plasma_stepper::stationary_rte(){
     pout() << "cdr_plasma_stepper::stationary_rte" << endl;
   }
 
-  return m_rte->is_stationary();
+  return m_rte->isStationary();
 }
 
 bool cdr_plasma_stepper::solve_poisson(){
@@ -228,7 +228,7 @@ void cdr_plasma_stepper::advance_reaction_network(Vector<EBAMRCellData*>&       
       particle_gradients[idx] = (*a_particle_gradients[idx])[lvl];
     }
 
-    for (rte_iterator<rte_solver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    for (rte_iterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.index();
       photon_sources[idx]   = (*a_photon_sources[idx])[lvl];
       photon_densities[idx] = (*a_photon_densities[idx])[lvl];
@@ -255,7 +255,7 @@ void cdr_plasma_stepper::advance_reaction_network(Vector<EBAMRCellData*>&       
   }
 
   // Average down photon solvers
-  for (rte_iterator<rte_solver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+  for (rte_iterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     m_amr->averageDown(*a_photon_sources[idx], m_realm, m_cdr->get_phase());
   }
@@ -313,7 +313,7 @@ void cdr_plasma_stepper::advance_reaction_network(Vector<LevelData<EBCellFAB>* >
     }
 
     
-    for (rte_iterator<rte_solver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    for (rte_iterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.index();
       photon_sources[idx]   = &(*a_photon_sources[idx])[dit()];
       photon_densities[idx] = &(*a_photon_densities[idx])[dit()];
@@ -425,7 +425,7 @@ void cdr_plasma_stepper::advance_reaction_network_reg(Vector<EBCellFAB*>&       
 						  (*a_particle_gradients[idx]).getSingleValuedFAB()(iv, 1),
 						  (*a_particle_gradients[idx]).getSingleValuedFAB()(iv, 2)));
       }
-      for (rte_iterator<rte_solver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+      for (rte_iterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
 	const int idx  = solver_it.index();
 	const Real phi = (*a_photon_densities[idx]).getSingleValuedFAB()(iv, 0);
 	photon_densities[idx] = Max(zero, phi);
@@ -452,7 +452,7 @@ void cdr_plasma_stepper::advance_reaction_network_reg(Vector<EBCellFAB*>&       
       }
     
       // Put vector into temporary holders
-      for (rte_iterator<rte_solver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+      for (rte_iterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
 	const int idx = solver_it.index();
 	phot_src.getSingleValuedFAB()(iv,idx) = photon_sources[idx];
       }
@@ -470,7 +470,7 @@ void cdr_plasma_stepper::advance_reaction_network_reg(Vector<EBCellFAB*>&       
   }
 
   // Copy temporary storage back to solvers
-  for (rte_iterator<rte_solver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+  for (rte_iterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     (*a_photon_sources[idx]).setVal(0.0);
     (*a_photon_sources[idx]).plus(phot_src, idx, 0, 1);
@@ -945,7 +945,7 @@ void cdr_plasma_stepper::advance_reaction_network_irreg_interp(Vector<EBCellFAB*
     }
 
     // Compute RTE densities on the centroids
-    for (rte_iterator<rte_solver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    for (rte_iterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.index();
 
       Real phi = 0.0;
@@ -975,7 +975,7 @@ void cdr_plasma_stepper::advance_reaction_network_irreg_interp(Vector<EBCellFAB*
       (*a_particle_sources[idx])(vof, 0) = particle_sources[idx];
     }
     
-    for (rte_iterator<rte_solver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    for (rte_iterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.index();
       (*a_photon_sources[idx])(vof, 0) = photon_sources[idx];
     }
@@ -1054,7 +1054,7 @@ void cdr_plasma_stepper::advance_reaction_network_irreg_kappa(Vector<EBCellFAB*>
       particle_gradients[idx] = grad;
     }
 
-    for (rte_iterator<rte_solver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    for (rte_iterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.index();
       photon_densities[idx] = Max(zero, (*a_photon_densities[idx])(vof, 0));
     }
@@ -1077,7 +1077,7 @@ void cdr_plasma_stepper::advance_reaction_network_irreg_kappa(Vector<EBCellFAB*>
       (*a_particle_sources[idx])(vof, 0) = particle_sources[idx];
     }
     
-    for (rte_iterator<rte_solver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    for (rte_iterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.index();
       (*a_photon_sources[idx])(vof, 0) = photon_sources[idx];
     }
@@ -1664,7 +1664,7 @@ void cdr_plasma_stepper::compute_cdr_fluxes(Vector<LevelData<BaseIVFAB<Real> >*>
       }
 
       // Build photon intensities
-      for (rte_iterator<rte_solver> solver_it(*m_rte); solver_it.ok(); ++solver_it){
+      for (rte_iterator<RtSolver> solver_it(*m_rte); solver_it.ok(); ++solver_it){
 	const int idx = solver_it.index();
 	extrap_rte_fluxes[idx] = (*a_extrap_rte_fluxes[idx])[dit()](vof,comp);
       }
@@ -1708,7 +1708,7 @@ void cdr_plasma_stepper::compute_cdr_fluxes(Vector<LevelData<BaseIVFAB<Real> >*>
       }
 
       // Build photon intensities
-      for (rte_iterator<rte_solver> solver_it(*m_rte); solver_it.ok(); ++solver_it){
+      for (rte_iterator<RtSolver> solver_it(*m_rte); solver_it.ok(); ++solver_it){
 	const int idx = solver_it.index();
 	extrap_rte_fluxes[idx] = (*a_extrap_rte_fluxes[idx])[dit()](vof,comp);
       }
@@ -1769,7 +1769,7 @@ void cdr_plasma_stepper::compute_cdr_fluxes(Vector<EBAMRIVData*>&       a_fluxes
     }
 
 
-    for (rte_iterator<rte_solver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    for (rte_iterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.index();
       extrap_rte_fluxes[idx] = (*a_extrap_rte_fluxes[idx])[lvl];
     }
@@ -1822,7 +1822,7 @@ void cdr_plasma_stepper::compute_cdr_domain_fluxes(Vector<EBAMRIFData*>&       a
       extrap_cdr_gradients[idx]  = (*a_extrap_cdr_gradients[idx])[lvl];
     }
 
-    for (rte_iterator<rte_solver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    for (rte_iterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.index();
       extrap_rte_fluxes[idx] = (*a_extrap_rte_fluxes[idx])[lvl];
     }
@@ -1897,7 +1897,7 @@ void cdr_plasma_stepper::compute_cdr_domain_fluxes(Vector<LevelData<DomainFluxIF
 	  }
 
 	  // Photon fluxes
-	  for (rte_iterator<rte_solver> solver_it(*m_rte); solver_it.ok(); ++solver_it){
+	  for (rte_iterator<RtSolver> solver_it(*m_rte); solver_it.ok(); ++solver_it){
 	    const int idx = solver_it.index();
 	    extrap_rte_fluxes[idx] = (*a_extrap_rte_fluxes[idx])[dit()](dir, sit())(face,comp);
 	  }
@@ -3151,7 +3151,7 @@ void cdr_plasma_stepper::set_poisson(RefCountedPtr<FieldSolver>& a_poisson){
   m_fieldSolver = a_poisson;
 }
 
-void cdr_plasma_stepper::set_rte(RefCountedPtr<rte_layout<rte_solver>>& a_rte){
+void cdr_plasma_stepper::set_rte(RefCountedPtr<rte_layout<RtSolver>>& a_rte){
   CH_TIME("cdr_plasma_stepper::set_rte");
   if(m_verbosity > 5){
     pout() << "cdr_plasma_stepper::set_rte" << endl;
@@ -3187,7 +3187,7 @@ void cdr_plasma_stepper::initialData(){
 
 
   m_cdr->initialData();        // Initial data comes in through CdrSpecies, in this case supplied by physics
-  if(!m_rte->is_stationary()){
+  if(!m_rte->isStationary()){
     m_rte->initialData();
   }
   this->initial_sigma();
@@ -3768,10 +3768,10 @@ void cdr_plasma_stepper::solve_rte(Vector<EBAMRCellData*>&       a_rte_states,
   //  this->compute_rte_sources(a_rte_sources, a_cdr_states, a_E, a_time, a_centering);
   //  advance_reaction_network(a_time, a_dt);
 
-  for (rte_iterator<rte_solver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+  for (rte_iterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     
-    RefCountedPtr<rte_solver>& solver = solver_it();
+    RefCountedPtr<RtSolver>& solver = solver_it();
     EBAMRCellData& state              = *a_rte_states[idx];
     EBAMRCellData& rhs                = *a_rte_sources[idx];
     solver->advance(a_dt, state, rhs);
@@ -4054,7 +4054,7 @@ Real cdr_plasma_stepper::compute_relaxation_time(){
   return min_dt;
 }
 
-Real cdr_plasma_stepper::get_time(){
+Real cdr_plasma_stepper::getTime(){
   return m_time;
 }
 
@@ -4074,7 +4074,7 @@ RefCountedPtr<FieldSolver>& cdr_plasma_stepper::get_poisson(){
   return m_fieldSolver;
 }
 
-RefCountedPtr<rte_layout<rte_solver>>& cdr_plasma_stepper::get_rte(){
+RefCountedPtr<rte_layout<RtSolver>>& cdr_plasma_stepper::get_rte(){
   return m_rte;
 }
 
@@ -4096,8 +4096,8 @@ void cdr_plasma_stepper::writeCheckpointData(HDF5Handle& a_handle, const int a_l
   }
 
   // RTE solvers checkpoint their data
-  for (rte_iterator<rte_solver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<rte_solver>& solver = solver_it();
+  for (rte_iterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<RtSolver>& solver = solver_it();
     solver->writeCheckpointLevel(a_handle, a_lvl);
   }
 
@@ -4116,8 +4116,8 @@ void cdr_plasma_stepper::readCheckpointData(HDF5Handle& a_handle, const int a_lv
     solver->readCheckpointLevel(a_handle, a_lvl);
   }
 
-  for (rte_iterator<rte_solver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>& solver = solver_it();
+  for (rte_iterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<RtSolver>& solver = solver_it();
     solver->readCheckpointLevel(a_handle, a_lvl);
   }
 
@@ -4137,8 +4137,8 @@ int cdr_plasma_stepper::getNumberOfPlotVariables() const{
     ncomp += solver->getNumberOfPlotVariables();
   }
   
-  for (rte_iterator<rte_solver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>& solver = solver_it();
+  for (rte_iterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<RtSolver>& solver = solver_it();
     ncomp += solver->getNumberOfPlotVariables();
   }
 
@@ -4171,8 +4171,8 @@ void cdr_plasma_stepper::writePlotData(EBAMRCellData& a_output, Vector<std::stri
   }
 
   // RTE solvers copy their output data
-  for (rte_iterator<rte_solver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>& solver = solver_it();
+  for (rte_iterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<RtSolver>& solver = solver_it();
     a_plotVariableNames.append(solver->getPlotVariableNames());
     solver->writePlotData(a_output, a_icomp);
   }

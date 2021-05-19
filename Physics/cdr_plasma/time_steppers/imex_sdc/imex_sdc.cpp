@@ -217,7 +217,7 @@ RefCountedPtr<cdr_storage>& imex_sdc::get_cdr_storage(const CdrIterator<CdrSolve
   return m_cdr_scratch[a_solverit.index()];
 }
 
-RefCountedPtr<rte_storage>& imex_sdc::get_rte_storage(const rte_iterator<rte_solver>& a_solverit){
+RefCountedPtr<rte_storage>& imex_sdc::get_rte_storage(const rte_iterator<RtSolver>& a_solverit){
   return m_rte_scratch[a_solverit.index()];
 }
 
@@ -693,7 +693,7 @@ void imex_sdc::integrate(const Real a_dt, const Real a_time, const bool a_lagged
     
     // This does the transient rte advance. Source terms were uåpdated in the compute_reaction_network routine above. 
     t0 = MPI_Wtime();
-    if(!(m_rte->is_stationary())) imex_sdc::integrate_rte_transient(a_dt);
+    if(!(m_rte->isStationary())) imex_sdc::integrate_rte_transient(a_dt);
 
     // This computes phi_(m+1) = phi_m + dtm*FAR_m(phi_m) + lagged quadrature and lagged advection-reaction
     t0 = MPI_Wtime();
@@ -715,7 +715,7 @@ void imex_sdc::integrate(const Real a_dt, const Real a_time, const bool a_lagged
     // Update electric field and stationary RTE equations
     if(m_consistent_E)   imex_sdc::update_poisson(cdr_densities_mp1, sigma_mp1);
     if(m_consistent_rte) {
-      if(m_rte->is_stationary()){
+      if(m_rte->isStationary()){
 	imex_sdc::compute_reaction_network(m+1, time + m_dtm[m], m_dtm[m]);
 	imex_sdc::integrate_rte_stationary();
       }
@@ -1325,7 +1325,7 @@ void imex_sdc::allocate_rte_storage(){
   const int num_photons = m_physics->get_num_rte_species();
   m_rte_scratch.resize(num_photons);
   
-  for (rte_iterator<rte_solver> solver_it(*m_rte); solver_it.ok(); ++solver_it){
+  for (rte_iterator<RtSolver> solver_it(*m_rte); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     m_rte_scratch[idx] = RefCountedPtr<rte_storage> (new rte_storage(m_amr, m_realm, m_rte->get_phase(), ncomp));
     m_rte_scratch[idx]->allocate_storage(m_p);
@@ -1350,7 +1350,7 @@ void imex_sdc::deallocateInternals(){
     m_cdr_scratch[idx] = RefCountedPtr<cdr_storage>(0);
   }
 
-  for (rte_iterator<rte_solver> solver_it(*m_rte); solver_it.ok(); ++solver_it){
+  for (rte_iterator<RtSolver> solver_it(*m_rte); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     m_rte_scratch[idx]->deallocate_storage();
     m_rte_scratch[idx] = RefCountedPtr<rte_storage>(0);
@@ -1612,8 +1612,8 @@ void imex_sdc::compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_phis, const Re
   cdr_plasma_stepper::compute_extrapolated_velocities(extrap_cdr_velocities, cdr_velocities, m_cdr->get_phase());
 
   // Compute RTE flux on the boundary
-  for (rte_iterator<rte_solver> solver_it(*m_rte); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>& solver   = solver_it();
+  for (rte_iterator<RtSolver> solver_it(*m_rte); solver_it.ok(); ++solver_it){
+    RefCountedPtr<RtSolver>& solver   = solver_it();
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
     EBAMRIVData& flux_eb = storage->get_eb_flux();
@@ -1682,8 +1682,8 @@ void imex_sdc::compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_phis, c
   this->extrapolate_vector_to_domain_faces(extrap_cdr_gradients,  m_cdr->get_phase(), cdr_gradients);
 
   // Compute RTE flux on domain faces
-  for (rte_iterator<rte_solver> solver_it(*m_rte); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>& solver   = solver_it();
+  for (rte_iterator<RtSolver> solver_it(*m_rte); solver_it.ok(); ++solver_it){
+    RefCountedPtr<RtSolver>& solver   = solver_it();
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
     EBAMRIFData& domain_flux = storage->get_domain_flux();
@@ -1780,9 +1780,9 @@ void imex_sdc::integrate_rte_transient(const Real a_dt){
 
   if(m_do_rte){
     if((m_timeStep + 1) % m_fast_rte == 0){
-      if(!(m_rte->is_stationary())){
-	for (rte_iterator<rte_solver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-	  RefCountedPtr<rte_solver>& solver = solver_it();
+      if(!(m_rte->isStationary())){
+	for (rte_iterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+	  RefCountedPtr<RtSolver>& solver = solver_it();
 	  solver->advance(a_dt);
 	}
       }
@@ -1798,9 +1798,9 @@ void imex_sdc::integrate_rte_stationary(){
 
   if(m_do_rte){
     if((m_timeStep + 1) % m_fast_rte == 0){
-      if((m_rte->is_stationary())){
-	for (rte_iterator<rte_solver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-	  RefCountedPtr<rte_solver>& solver = solver_it();
+      if((m_rte->isStationary())){
+	for (rte_iterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+	  RefCountedPtr<RtSolver>& solver = solver_it();
 	  solver->advance(0.0);
 	}
       }
@@ -1919,9 +1919,9 @@ void imex_sdc::store_solvers(){
     data_ops::copy(previous, state);
 
     // RTE
-    for (rte_iterator<rte_solver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    for (rte_iterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<rte_storage>& storage     = imex_sdc::get_rte_storage(solver_it);
-      const RefCountedPtr<rte_solver>& solver = solver_it();
+      const RefCountedPtr<RtSolver>& solver = solver_it();
 
       EBAMRCellData& previous = storage->get_previous();
       const EBAMRCellData& state = solver->getPhi();
@@ -1947,9 +1947,9 @@ void imex_sdc::restore_solvers(){
   data_ops::copy(state, previous);
 
   // RTE
-  for (rte_iterator<rte_solver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+  for (rte_iterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<rte_storage>& storage     = imex_sdc::get_rte_storage(solver_it);
-    RefCountedPtr<rte_solver>& solver = solver_it();
+    RefCountedPtr<RtSolver>& solver = solver_it();
 
     EBAMRCellData& previous = storage->get_previous();
     EBAMRCellData& state = solver->getPhi();

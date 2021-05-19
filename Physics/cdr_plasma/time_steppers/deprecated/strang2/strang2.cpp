@@ -1907,7 +1907,7 @@ void strang2::backup_solutions(){
 
   // Backup RTE solutions
   for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<rte_solver>& solver = solver_it();
+    const RefCountedPtr<RtSolver>& solver = solver_it();
 
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
     EBAMRCellData& backup = storage->get_backup();
@@ -1944,7 +1944,7 @@ void strang2::revert_backup(){
 
   // Revert RTE solutions
   for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<rte_solver>& solver = solver_it();
+    const RefCountedPtr<RtSolver>& solver = solver_it();
 
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
     const EBAMRCellData& backup = storage->get_backup();
@@ -2019,7 +2019,7 @@ void strang2::copy_solvers_to_cache(){
   }
 
   for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>& solver   = solver_it();
+    RefCountedPtr<RtSolver>& solver   = solver_it();
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
     const EBAMRCellData& state = solver->getPhi();
@@ -2059,7 +2059,7 @@ void strang2::copy_cache_to_solvers(){
   }
 
   for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>& solver   = solver_it();
+    RefCountedPtr<RtSolver>& solver   = solver_it();
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
     EBAMRCellData& state       = solver->getPhi();
@@ -2304,7 +2304,7 @@ void strang2::compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_phis, const Rea
 
   // Compute RTE flux on the boundary
   for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>& solver   = solver_it();
+    RefCountedPtr<RtSolver>& solver   = solver_it();
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
     EBAMRIVData& flux_eb = storage->get_eb_flux();
@@ -2374,7 +2374,7 @@ void strang2::compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_phis, co
 
   // Compute RTE flux on domain faces
   for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>& solver   = solver_it();
+    RefCountedPtr<RtSolver>& solver   = solver_it();
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
     EBAMRIFData& domain_flux = storage->get_domain_flux();

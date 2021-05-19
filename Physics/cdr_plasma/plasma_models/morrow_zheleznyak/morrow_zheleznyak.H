@@ -274,7 +274,7 @@ namespace physics::cdr_plasma {
       ~uv_photon();
 
 
-      Real get_kappa(const RealVect a_pos) const;
+      Real getKappa(const RealVect a_pos) const;
       Real get_random_kappa() const;
 
       Real get_pO2() const { return m_pO2; }

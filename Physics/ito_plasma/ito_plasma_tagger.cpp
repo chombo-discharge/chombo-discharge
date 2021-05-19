@@ -131,7 +131,7 @@ bool ito_plasma_tagger::tagCells(EBAMRTags& a_tags){
   bool got_new_tags = false;
 
   const RealVect origin      = m_amr->getProbLo();
-  const Real time            = m_timeStepper->get_time();
+  const Real time            = m_timeStepper->getTime();
   const int finest_level     = m_amr->getFinestLevel();
   const int max_depth        = m_amr->getMaxAmrDepth();
   const int finest_tag_level = (finest_level == max_depth) ? max_depth - 1 : finest_level; // Never tag on max_amr_depth

@@ -276,7 +276,7 @@ protected:
     uv_photon();
     ~uv_photon();
 
-    Real get_kappa(const RealVect a_pos) const;
+    Real getKappa(const RealVect a_pos) const;
     Real get_random_kappa() const;
 
     inline Real get_pO2() const { return m_pO2; }

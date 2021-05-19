@@ -95,7 +95,7 @@ air3_zheleznyak::uv_photon::~uv_photon(){
   
 }
 
-Real air3_zheleznyak::uv_photon::get_kappa(const RealVect a_pos) const {
+Real air3_zheleznyak::uv_photon::getKappa(const RealVect a_pos) const {
   return get_random_kappa();
 }
 

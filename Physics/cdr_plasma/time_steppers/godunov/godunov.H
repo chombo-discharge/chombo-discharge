@@ -74,7 +74,7 @@ namespace physics {
 
       // Get functions for storage
       RefCountedPtr<cdr_storage>& get_cdr_storage(const CdrIterator<CdrSolver>& a_solverit);
-      RefCountedPtr<rte_storage>& get_rte_storage(const rte_iterator<rte_solver>& a_solverit);
+      RefCountedPtr<rte_storage>& get_rte_storage(const rte_iterator<RtSolver>& a_solverit);
 
       Real restrict_dt();
 

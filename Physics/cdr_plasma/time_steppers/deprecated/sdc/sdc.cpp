@@ -465,7 +465,7 @@ void sdc::copy_phi_p_to_rte(){
   }
 
   for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>&  solver  = solver_it();
+    RefCountedPtr<RtSolver>&  solver  = solver_it();
     RefCountedPtr<rte_storage>& storage = get_rte_storage(solver_it);
 
     EBAMRCellData& phi = solver->getPhi();
@@ -628,7 +628,7 @@ void sdc::copy_rte_to_phi_m0(){
 
   // RTE solvers
   for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>&  solver  = solver_it();
+    RefCountedPtr<RtSolver>&  solver  = solver_it();
     RefCountedPtr<rte_storage>& storage = get_rte_storage(solver_it);
     
     EBAMRCellData& phi0 = storage->get_phi()[0];
@@ -1140,7 +1140,7 @@ void sdc::substep_rte(const int a_m, const bool a_corrector){
   const Real dtm = m_dtm[a_m];
 
   for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>& solver   = solver_it();
+    RefCountedPtr<RtSolver>& solver   = solver_it();
     RefCountedPtr<rte_storage>& storage = get_rte_storage(solver_it);
 
 
@@ -1896,7 +1896,7 @@ void sdc::compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_phis, const Real a_
 
   // Compute RTE flux on the boundary
   for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>& solver   = solver_it();
+    RefCountedPtr<RtSolver>& solver   = solver_it();
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
     EBAMRIVData& flux_eb = storage->get_eb_flux();
@@ -1966,7 +1966,7 @@ void sdc::compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_phis, const 
 
   // Compute RTE flux on domain faces
   for (rte_iterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_solver>& solver   = solver_it();
+    RefCountedPtr<RtSolver>& solver   = solver_it();
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
     EBAMRIFData& domain_flux = storage->get_domain_flux();
@@ -2074,9 +2074,9 @@ void sdc::integrate_rte_transient(const Real a_dt){
 
   if(m_do_rte){
     if((m_timeStep + 1) % m_fast_rte == 0){
-      if(!(m_rte->is_stationary())){
+      if(!(m_rte->isStationary())){
 	for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-	  RefCountedPtr<rte_solver>& solver = solver_it();
+	  RefCountedPtr<RtSolver>& solver = solver_it();
 	  solver->advance(a_dt);
 	}
       }
@@ -2092,9 +2092,9 @@ void sdc::integrate_rte_stationary(){
 
   if(m_do_rte){
     if((m_timeStep + 1) % m_fast_rte == 0){
-      if((m_rte->is_stationary())){
+      if((m_rte->isStationary())){
 	for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-	  RefCountedPtr<rte_solver>& solver = solver_it();
+	  RefCountedPtr<RtSolver>& solver = solver_it();
 	  solver->advance(0.0);
 	}
       }
@@ -2230,7 +2230,7 @@ void sdc::store_solvers(){
     // RTE
     for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<rte_storage>& storage     = sdc::get_rte_storage(solver_it);
-      const RefCountedPtr<rte_solver>& solver = solver_it();
+      const RefCountedPtr<RtSolver>& solver = solver_it();
 
       EBAMRCellData& previous = storage->get_previous();
       const EBAMRCellData& state = solver->getPhi();
@@ -2258,7 +2258,7 @@ void sdc::restore_solvers(){
   // RTE
   for (rte_iterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<rte_storage>& storage     = sdc::get_rte_storage(solver_it);
-    RefCountedPtr<rte_solver>& solver = solver_it();
+    RefCountedPtr<RtSolver>& solver = solver_it();
 
     EBAMRCellData& previous = storage->get_previous();
     EBAMRCellData& state = solver->getPhi();

@@ -246,15 +246,15 @@ void rte_layout<T>::setSource(const Real a_source){
 }
 
 template <class T>
-void rte_layout<T>::set_stationary(const bool a_stationary){
-  CH_TIME("rte_layout<T>::set_stationary");
+void rte_layout<T>::setStationary(const bool a_stationary){
+  CH_TIME("rte_layout<T>::setStationary");
   if(m_verbosity > 5){ 
-    pout() << "rte_layout<T>::set_stationary" << endl;
+    pout() << "rte_layout<T>::setStationary" << endl;
   }
 
   for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
-    solver->set_stationary(a_stationary);
+    solver->setStationary(a_stationary);
   }
 }
 
@@ -298,10 +298,10 @@ void rte_layout<T>::initialData(){
 }
 
 template <class T>
-bool rte_layout<T>::is_stationary(){
-  CH_TIME("rte_layout<T>::is_stationary");
+bool rte_layout<T>::isStationary(){
+  CH_TIME("rte_layout<T>::isStationary");
   if(m_verbosity > 5){
-    pout() << "rte_layout<T>::is_stationary" << endl;
+    pout() << "rte_layout<T>::isStationary" << endl;
   }
 
   bool stationary = true;
@@ -309,7 +309,7 @@ bool rte_layout<T>::is_stationary(){
   for (rte_iterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
 
-    if(solver->is_stationary() == false){
+    if(solver->isStationary() == false){
       stationary = false;
     }
   }
@@ -395,7 +395,7 @@ RefCountedPtr<rte_layout<T> > rte_factory<T, S>::new_layout(const Vector<RefCoun
   // Cast solvers and instantiate them
   for (int i = 0; i < a_species.size(); i++){
     auto solver = RefCountedPtr<T> (static_cast<T*> (new S()));
-    solver->set_rte_species(spe[i]);
+    solver->setRtSpecies(spe[i]);
     solver->setPhase(phase::gas);
     solver->setVerbosity(-1);
     rte->add_solver(solver);

@@ -215,7 +215,7 @@ public:
   /*!
     @brief Get the absorption coefficient
   */
-  virtual Real get_kappa(const RealVect a_pos) const;
+  virtual Real getKappa(const RealVect a_pos) const;
 
   /*!
     @brief Get the lambda coefficient
@@ -267,7 +267,7 @@ public:
   /*!
     @brief Get the absorption coefficient
   */
-  virtual Real get_kappa(const RealVect a_pos) const;
+  virtual Real getKappa(const RealVect a_pos) const;
 
   /*!
     @brief Get the lambda coefficient
@@ -319,7 +319,7 @@ public:
   /*!
     @brief Get the absorption coefficient
   */
-  virtual Real get_kappa(const RealVect a_pos) const;
+  virtual Real getKappa(const RealVect a_pos) const;
 
   /*!
     @brief Get the lambda coefficient

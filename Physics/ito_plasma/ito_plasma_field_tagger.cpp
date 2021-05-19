@@ -75,7 +75,7 @@ void ito_plasma_field_tagger::compute_tracers(){
   this->allocate_storage();
   
   const RealVect origin = m_amr->getProbLo();
-  const Real time       = m_timeStepper->get_time();
+  const Real time       = m_timeStepper->getTime();
 
   // Compute electric field on volumetric centroids
   this->compute_E(m_E, m_grad_E);

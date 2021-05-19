@@ -27,7 +27,7 @@
 
 #define EddingtonSP1_feature 1 // Comment Feb. 14 2018: I think we can keep this - it appears to produce the correct physics.
 
-EddingtonSP1::EddingtonSP1() : rte_solver() {
+EddingtonSP1::EddingtonSP1() : RtSolver() {
   m_name = "EddingtonSP1";
   m_className = "EddingtonSP1";
 
@@ -495,7 +495,7 @@ void EddingtonSP1::setACoefAndBCoef(){
 
   // This loop fills aco with kappa and bco_irreg with 1./kappa
   if(m_rte_species->constant_kappa()){
-    const Real kap = m_rte_species->get_kappa(RealVect::Zero);
+    const Real kap = m_rte_species->getKappa(RealVect::Zero);
     data_ops::set_value(m_aCoef, kap);
     data_ops::set_value(m_bco, 1./kap);
     data_ops::set_value(m_bco_irreg, 1./kap);
@@ -556,7 +556,7 @@ void EddingtonSP1::setACoefAndBCoef_box(EBCellFAB&       a_aco,
     const IntVect iv = bit();
 
     const RealVect pos = a_origin + iv*a_dx*RealVect::Unit;
-    aco_fab(iv, comp) = m_rte_species->get_kappa(pos);
+    aco_fab(iv, comp) = m_rte_species->getKappa(pos);
   }
 
 
@@ -566,7 +566,7 @@ void EddingtonSP1::setACoefAndBCoef_box(EBCellFAB&       a_aco,
     const VolIndex& vof = vofit();
 
     const RealVect pos  = EBArith::getVofLocation(vof, a_dx*RealVect::Unit, a_origin);
-    const Real tmp = m_rte_species->get_kappa(pos);
+    const Real tmp = m_rte_species->getKappa(pos);
     a_aco(vof, comp) = tmp;
     a_bco(vof, comp) = 1./tmp;
   }

@@ -356,7 +356,7 @@ Real air7::O2minus::initialData(const RealVect a_pos, const Real a_time) const {
   return 0.0;
 }
 
-Real air7::photon_one::get_kappa(const RealVect a_pos) const {
+Real air7::photon_one::getKappa(const RealVect a_pos) const {
   return m_lambda*m_pO2/(sqrt(3.0));
 }
 
@@ -372,7 +372,7 @@ Real air7::photon_one::get_pO2() const {
   return m_pO2;
 }
 
-Real air7::photon_two::get_kappa(const RealVect a_pos) const {
+Real air7::photon_two::getKappa(const RealVect a_pos) const {
   return m_lambda*m_pO2/(sqrt(3.0));
 }
 
@@ -388,7 +388,7 @@ Real air7::photon_two::get_pO2() const {
   return m_pO2;
 }
 
-Real air7::photon_three::get_kappa(const RealVect a_pos) const{
+Real air7::photon_three::getKappa(const RealVect a_pos) const{
   return m_lambda*m_pO2/(sqrt(3.0));
 }
 

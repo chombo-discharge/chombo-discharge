@@ -105,17 +105,17 @@ Real air2::positive_ion::initialData(const RealVect a_pos, const Real a_time) co
   return m_initial_ionization + m_seed_density*exp(-PolyGeom::dot(p, p));
 }
 
-Real air2::photon_one::get_kappa(const RealVect a_pos) const { return m_lambda*m_pO2/(sqrt(3.0));}
+Real air2::photon_one::getKappa(const RealVect a_pos) const { return m_lambda*m_pO2/(sqrt(3.0));}
 Real air2::photon_one::get_lambda() const { return m_lambda;}
 Real air2::photon_one::get_A() const {return m_A;}
 Real air2::photon_one::get_pO2() const {return m_pO2;}
 
-Real air2::photon_two::get_kappa(const RealVect a_pos) const { return m_lambda*m_pO2/(sqrt(3.0));}
+Real air2::photon_two::getKappa(const RealVect a_pos) const { return m_lambda*m_pO2/(sqrt(3.0));}
 Real air2::photon_two::get_lambda() const { return m_lambda;}
 Real air2::photon_two::get_A() const {return m_A;}
 Real air2::photon_two::get_pO2() const {return m_pO2;}
 
-Real air2::photon_three::get_kappa(const RealVect a_pos) const { return m_lambda*m_pO2/(sqrt(3.0));}
+Real air2::photon_three::getKappa(const RealVect a_pos) const { return m_lambda*m_pO2/(sqrt(3.0));}
 Real air2::photon_three::get_lambda() const { return m_lambda;}
 Real air2::photon_three::get_A() const {return m_A;}
 #include "CD_NamespaceFooter.H"

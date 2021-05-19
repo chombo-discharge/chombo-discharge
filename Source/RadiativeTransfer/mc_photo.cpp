@@ -867,7 +867,7 @@ void mc_photo::generate_photons(ParticleContainer<photon>& a_photons, const EBAM
 	      
 	      for (int i = 0; i < num_photons; i++){
 		const RealVect v = units::s_c0*this->random_direction();
-		particles.append(photon(pos, v, m_rte_species->get_kappa(pos), weight));
+		particles.append(photon(pos, v, m_rte_species->getKappa(pos), weight));
 	      }
 	    }
 	  }
@@ -889,7 +889,7 @@ void mc_photo::generate_photons(ParticleContainer<photon>& a_photons, const EBAM
 	    // Generate computational photons 
 	    for (int i = 0; i < num_photons; i++){
 	      const RealVect v = units::s_c0*this->random_direction();
-	      particles.append(photon(pos, v, m_rte_species->get_kappa(pos), weight));
+	      particles.append(photon(pos, v, m_rte_species->getKappa(pos), weight));
 	    }
 	  }
 

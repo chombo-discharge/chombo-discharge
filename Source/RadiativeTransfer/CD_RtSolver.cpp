@@ -1,36 +1,41 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file rte_solver.cpp
-  @brief Implementation of rte_solver.H
+  @file   CD_RtSolver.cpp
+  @brief  Implementation of CD_RtSolver.H
   @author Robert Marskar
-  @date Nov. 2017
 */
 
-#include "rte_solver.H"
-#include "data_ops.H"
-
+// Chombo includes
 #include <ParmParse.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_RtSolver.H>
+#include <data_ops.H>
+#include <CD_NamespaceHeader.H>
 
-rte_solver::rte_solver(){
-  m_name       = "rte_solver";
-  m_className = "rte_solver";
+RtSolver::RtSolver(){
+  m_name      = "RtSolver";
+  m_className = "RtSolver";
 }
 
-rte_solver::~rte_solver(){
+RtSolver::~RtSolver(){
   
 }
 
-std::string rte_solver::getName(){
+std::string RtSolver::getName(){
   return m_name;
 }
 
-const std::string rte_solver::getRealm() const {
+const std::string RtSolver::getRealm() const {
   return m_realm;
 }
 
-Vector<std::string> rte_solver::getPlotVariableNames() const {
-  CH_TIME("rte_solver::getPlotVariableNames");
+Vector<std::string> RtSolver::getPlotVariableNames() const {
+  CH_TIME("RtSolver::getPlotVariableNames");
   if(m_verbosity > 5){
     pout() << m_name + "::getPlotVariableNames" << endl;
   }
@@ -43,12 +48,12 @@ Vector<std::string> rte_solver::getPlotVariableNames() const {
   return names;
 }
 
-bool rte_solver::is_stationary(){
+bool RtSolver::isStationary(){
   return m_stationary;
 }
 
-bool rte_solver::advance(const Real a_dt, const bool a_zerophi){
-  CH_TIME("rte_solver::advance(dt)");
+bool RtSolver::advance(const Real a_dt, const bool a_zerophi){
+  CH_TIME("RtSolver::advance(dt)");
   if(m_verbosity > 5){
     pout() << m_name + "::advance(dt)" << endl;
   }
@@ -58,8 +63,8 @@ bool rte_solver::advance(const Real a_dt, const bool a_zerophi){
   return converged;
 }
 
-bool rte_solver::advance(const Real a_dt, EBAMRCellData& a_phi, const bool a_zerophi){
-  CH_TIME("rte_solver::advance(dt, state)");
+bool RtSolver::advance(const Real a_dt, EBAMRCellData& a_phi, const bool a_zerophi){
+  CH_TIME("RtSolver::advance(dt, state)");
   if(m_verbosity > 5){
     pout() << m_name + "::advance(dt, state)" << endl;
   }
@@ -69,8 +74,8 @@ bool rte_solver::advance(const Real a_dt, EBAMRCellData& a_phi, const bool a_zer
   return converged;
 }
 
-void rte_solver::setRealm(const std::string a_realm){
-  CH_TIME("rte_solver::setRealm");
+void RtSolver::setRealm(const std::string a_realm){
+  CH_TIME("RtSolver::setRealm");
   if(m_verbosity > 5){
     pout() << m_name + "::setRealm" << endl;
   }
@@ -78,18 +83,18 @@ void rte_solver::setRealm(const std::string a_realm){
   m_realm = a_realm;
 }
 
-void rte_solver::set_rte_species(const RefCountedPtr<rte_species> a_rte_species){
-  CH_TIME("rte_solver::set_rte_species");
+void RtSolver::setRtSpecies(const RefCountedPtr<rte_species> a_rte_species){
+  CH_TIME("RtSolver::setRtSpecies");
   if(m_verbosity > 5){
-    pout() << m_name + "::set_rte_species" << endl;
+    pout() << m_name + "::setRtSpecies" << endl;
   }
 
   m_rte_species = a_rte_species;
   m_name = m_rte_species->getName();
 }
 
-void rte_solver::setPhase(const phase::which_phase a_phase){
-  CH_TIME("rte_solver::setPhase");
+void RtSolver::setPhase(const phase::which_phase a_phase){
+  CH_TIME("RtSolver::setPhase");
   if(m_verbosity > 5){
     pout() << m_name + "::setPhase" << endl;
   }
@@ -97,8 +102,8 @@ void rte_solver::setPhase(const phase::which_phase a_phase){
   m_phase = a_phase;
 }
 
-void rte_solver::sanityCheck(){
-  CH_TIME("rte_solver::sanityCheck");
+void RtSolver::sanityCheck(){
+  CH_TIME("RtSolver::sanityCheck");
   if(m_verbosity > 5){
     pout() << m_name + "::sanityCheck" << endl;
   }
@@ -109,8 +114,8 @@ void rte_solver::sanityCheck(){
   CH_assert(!m_ebis.isNull());
 }
 
-void rte_solver::setComputationalGeometry(const RefCountedPtr<computational_geometry> a_computationalGeometry){
-  CH_TIME("rte_solver::setComputationalGeometry");
+void RtSolver::setComputationalGeometry(const RefCountedPtr<computational_geometry> a_computationalGeometry){
+  CH_TIME("RtSolver::setComputationalGeometry");
   if(m_verbosity > 5){
     pout() << m_name + "::setComputationalGeometry" << endl;
   }
@@ -122,8 +127,8 @@ void rte_solver::setComputationalGeometry(const RefCountedPtr<computational_geom
   this->setEbIndexSpace(mfis->getEBIndexSpace(m_phase));
 }
 
-void rte_solver::setEbIndexSpace(const RefCountedPtr<EBIndexSpace>& a_ebis){
-  CH_TIME("rte_solver::setEbIndexSpace");
+void RtSolver::setEbIndexSpace(const RefCountedPtr<EBIndexSpace>& a_ebis){
+  CH_TIME("RtSolver::setEbIndexSpace");
   if(m_verbosity > 5){
     pout() << m_name + "::setEbIndexSpace" << endl;
   }
@@ -131,8 +136,8 @@ void rte_solver::setEbIndexSpace(const RefCountedPtr<EBIndexSpace>& a_ebis){
   m_ebis = a_ebis;
 }
 
-void rte_solver::setAmr(const RefCountedPtr<AmrMesh>& a_amr){
-  CH_TIME("rte_solver::setAmr");
+void RtSolver::setAmr(const RefCountedPtr<AmrMesh>& a_amr){
+  CH_TIME("RtSolver::setAmr");
   if(m_verbosity > 5){
     pout() << m_name + "::setAmr" << endl;
   }
@@ -140,8 +145,8 @@ void rte_solver::setAmr(const RefCountedPtr<AmrMesh>& a_amr){
   m_amr = a_amr;
 }
 
-void rte_solver::setTime(const int a_step, const Real a_time, const Real a_dt) {
-  CH_TIME("rte_solver::setTime");
+void RtSolver::setTime(const int a_step, const Real a_time, const Real a_dt) {
+  CH_TIME("RtSolver::setTime");
   if(m_verbosity > 5){
     pout() << m_name + "::setTime" << endl;
   }
@@ -151,8 +156,8 @@ void rte_solver::setTime(const int a_step, const Real a_time, const Real a_dt) {
   m_dt   = a_dt;
 }
 
-void rte_solver::set_stationary(const bool a_stationary) {
-  CH_TIME("rte_solver::set_stationary");
+void RtSolver::setStationary(const bool a_stationary) {
+  CH_TIME("RtSolver::setStationary");
   if(m_verbosity > 5){
     pout() << m_name + "::set_stationry" << endl;
   }
@@ -160,8 +165,8 @@ void rte_solver::set_stationary(const bool a_stationary) {
   m_stationary = a_stationary;
 }
 
-void rte_solver::setVerbosity(const int a_verbosity){
-  CH_TIME("rte_solver::setVerbosity");
+void RtSolver::setVerbosity(const int a_verbosity){
+  CH_TIME("RtSolver::setVerbosity");
 
   m_verbosity = a_verbosity;
   if(m_verbosity > 5){
@@ -171,8 +176,8 @@ void rte_solver::setVerbosity(const int a_verbosity){
 
 }
 
-void rte_solver::setSource(const EBAMRCellData& a_source){
-  CH_TIME("rte_solver::setSource(ebamrcell)");
+void RtSolver::setSource(const EBAMRCellData& a_source){
+  CH_TIME("RtSolver::setSource(ebamrcell)");
   if(m_verbosity > 5){
     pout() << m_name + "::setSource(ebamrcell)" << endl;
   }
@@ -187,8 +192,8 @@ void rte_solver::setSource(const EBAMRCellData& a_source){
   m_amr->interpGhost(m_source, m_realm, m_phase);
 }
 
-void rte_solver::setSource(const Real a_source){
-  CH_TIME("rte_solver::setSource(constant)");
+void RtSolver::setSource(const Real a_source){
+  CH_TIME("RtSolver::setSource(constant)");
   if(m_verbosity > 5){
     pout() << m_name + "::setSource(constant)" << endl;
   }
@@ -205,8 +210,8 @@ void rte_solver::setSource(const Real a_source){
   m_amr->interpGhost(m_source, m_realm, m_phase);
 }
 
-int rte_solver::getNumberOfPlotVariables() const {
-  CH_TIME("rte_solver::getNumberOfPlotVariables");
+int RtSolver::getNumberOfPlotVariables() const {
+  CH_TIME("RtSolver::getNumberOfPlotVariables");
   if(m_verbosity > 5){
     pout() << m_name + "::getNumberOfPlotVariables" << endl;
   }
@@ -219,8 +224,8 @@ int rte_solver::getNumberOfPlotVariables() const {
   return num_output;
 }
 
-void rte_solver::initialData() {
-  CH_TIME("rte_solver::initialData");
+void RtSolver::initialData() {
+  CH_TIME("RtSolver::initialData");
   if(m_verbosity > 5){
     pout() << m_name + "::initialData" << endl;
   }
@@ -228,8 +233,8 @@ void rte_solver::initialData() {
   data_ops::set_value(m_phi, 0.0);
 }
 
-void rte_solver::writePlotData(EBAMRCellData& a_output, int& a_comp){
-  CH_TIME("rte_solver::writePlotData");
+void RtSolver::writePlotData(EBAMRCellData& a_output, int& a_comp){
+  CH_TIME("RtSolver::writePlotData");
   if(m_verbosity > 5){
     pout() << m_name + "::writePlotData" << endl;
   }
@@ -238,8 +243,8 @@ void rte_solver::writePlotData(EBAMRCellData& a_output, int& a_comp){
   if(m_plotSource) writeData(a_output, a_comp, m_source, false);
 }
 
-void rte_solver::writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp){
-  CH_TIME("rte_solver::writeData");
+void RtSolver::writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp){
+  CH_TIME("RtSolver::writeData");
   if(m_verbosity > 5){
     pout() << m_name + "::writeData" << endl;
   }
@@ -277,17 +282,17 @@ void rte_solver::writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCell
   a_comp += ncomp;
 }
 
-Real rte_solver::get_time() const{
-  CH_TIME("rte_solver::get_time");
+Real RtSolver::getTime() const{
+  CH_TIME("RtSolver::getTime");
   if(m_verbosity > 5){
-    pout() << m_name + "::get_time" << endl;
+    pout() << m_name + "::getTime" << endl;
   }
   
   return m_time;
 }
 
-phase::which_phase rte_solver::get_phase(){
-  CH_TIME("rte_solver::get_phase");
+phase::which_phase RtSolver::get_phase(){
+  CH_TIME("RtSolver::get_phase");
   if(m_verbosity > 5){
     pout() << m_name + "::get_phase" << endl;
   }
@@ -295,23 +300,24 @@ phase::which_phase rte_solver::get_phase(){
   return m_phase;
 }
 
-EBAMRCellData& rte_solver::getPhi(){
+EBAMRCellData& RtSolver::getPhi(){
   return m_phi;
 }
 
-EBAMRCellData& rte_solver::getSource(){
+EBAMRCellData& RtSolver::getSource(){
   return m_source;
 }
 
-EBAMRFluxData& rte_solver::get_kappa(){
+EBAMRFluxData& RtSolver::getKappa(){
   return m_kappa;
 }
 
-EBAMRIVData& rte_solver::get_kappa_eb(){
+EBAMRIVData& RtSolver::getKappaEb(){
   return m_kappa_eb;
 }
 
-RefCountedPtr<rte_species>& rte_solver::getSpecies(){
+RefCountedPtr<rte_species>& RtSolver::getSpecies(){
   return m_rte_species;
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
