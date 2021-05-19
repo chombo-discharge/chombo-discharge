@@ -1256,10 +1256,10 @@ bool ito_plasma_stepper::solve_poisson(MFAMRCellData&                a_potential
   return converged;
 }
 
-void ito_plasma_stepper::intersect_particles(const which_particles a_which_particles, const EB_representation a_representation, const bool a_delete){
-  CH_TIME("ito_plasma_stepper::intersect_particles(which_particles, EB_representation)");
+void ito_plasma_stepper::intersect_particles(const which_particles a_which_particles, const EbRepresentation a_representation, const bool a_delete){
+  CH_TIME("ito_plasma_stepper::intersect_particles(which_particles, EbRepresentation)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::intersect_particles(which_particles, EB_representation)" << endl;
+    pout() << "ito_plasma_stepper::intersect_particles(which_particles, EbRepresentation)" << endl;
   }
 
   this->intersect_particles(a_which_particles,
@@ -1274,11 +1274,11 @@ void ito_plasma_stepper::intersect_particles(const which_particles             a
 					     const ito_solver::which_container a_particles,
 					     const ito_solver::which_container a_eb_particles,
 					     const ito_solver::which_container a_domain_particles,
-					     const EB_representation           a_representation,
+					     const EbRepresentation           a_representation,
 					     const bool                        a_delete) {
-  CH_TIME("ito_plasma_stepper::intersect_particles(which_particles, string, string, string, EB_representation, bool)");
+  CH_TIME("ito_plasma_stepper::intersect_particles(which_particles, string, string, string, EbRepresentation, bool)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::intersect_particles(which_particles, string, string, string, EB_representation, bool)" << endl;
+    pout() << "ito_plasma_stepper::intersect_particles(which_particles, string, string, string, EbRepresentation, bool)" << endl;
   }
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -1317,12 +1317,12 @@ void ito_plasma_stepper::intersect_particles(const which_particles             a
       if(!mobile && !diffusive) solver->intersect_particles(a_particles, a_eb_particles, a_domain_particles, a_representation, a_delete);
       break;
     default:
-      MayDay::Abort("ito_plasma_stepper::intersect_particles_particles(which_particles, string, string, string, EB_representation, bool) - logic bust");
+      MayDay::Abort("ito_plasma_stepper::intersect_particles_particles(which_particles, string, string, string, EbRepresentation, bool) - logic bust");
     }
   }  
 }
 
-void ito_plasma_stepper::remove_covered_particles(const which_particles a_which_particles, const EB_representation a_representation, const Real a_tolerance){
+void ito_plasma_stepper::remove_covered_particles(const which_particles a_which_particles, const EbRepresentation a_representation, const Real a_tolerance){
   CH_TIME("ito_plasma_stepper::remove_covered_particles(which_particles, representation, tolerance)");
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::remove_covered_particles(which_particles, representation, tolerance)" << endl;
@@ -1333,11 +1333,11 @@ void ito_plasma_stepper::remove_covered_particles(const which_particles a_which_
 
 void ito_plasma_stepper::remove_covered_particles(const which_particles             a_which,
 						  const ito_solver::which_container a_container,
-						  const EB_representation           a_representation,
+						  const EbRepresentation           a_representation,
 						  const Real                        a_tolerance){
-  CH_TIME("ito_plasma_stepper::remove_covered_particles(which_particles, container, EB_representation, tolerance)");
+  CH_TIME("ito_plasma_stepper::remove_covered_particles(which_particles, container, EbRepresentation, tolerance)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::remove_covered_particles(which_particles, container, EB_representation, tolerance)" << endl;
+    pout() << "ito_plasma_stepper::remove_covered_particles(which_particles, container, EbRepresentation, tolerance)" << endl;
   }
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -1381,10 +1381,10 @@ void ito_plasma_stepper::remove_covered_particles(const which_particles         
   }  
 }
 
-void ito_plasma_stepper::transfer_covered_particles(const which_particles a_which, const EB_representation a_representation, const Real a_tolerance){
-  CH_TIME("ito_plasma_stepper::transfer_covered_particles_particles(which_particles, EB_representation, tolerance)");
+void ito_plasma_stepper::transfer_covered_particles(const which_particles a_which, const EbRepresentation a_representation, const Real a_tolerance){
+  CH_TIME("ito_plasma_stepper::transfer_covered_particles_particles(which_particles, EbRepresentation, tolerance)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::transfer_covered_particles_particles(which_particles, EB_representation, tolerance)" << endl;
+    pout() << "ito_plasma_stepper::transfer_covered_particles_particles(which_particles, EbRepresentation, tolerance)" << endl;
   }
 
   this->transfer_covered_particles(a_which, ito_solver::which_container::bulk, ito_solver::which_container::covered, a_representation, a_tolerance);
@@ -1393,11 +1393,11 @@ void ito_plasma_stepper::transfer_covered_particles(const which_particles a_whic
 void ito_plasma_stepper::transfer_covered_particles(const which_particles             a_which,
 						    const ito_solver::which_container a_containerFrom,
 						    const ito_solver::which_container a_containerTo,
-						    const EB_representation           a_representation,
+						    const EbRepresentation           a_representation,
 						    const Real                        a_tolerance){
-  CH_TIME("ito_plasma_stepper::transfer_covered_particles_particles(which_particles, container, container, EB_representation, tolerance)");
+  CH_TIME("ito_plasma_stepper::transfer_covered_particles_particles(which_particles, container, container, EbRepresentation, tolerance)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::transfer_covered_particles_particles(which_particles, container, container, EB_representation, tolerance)" << endl;
+    pout() << "ito_plasma_stepper::transfer_covered_particles_particles(which_particles, container, container, EbRepresentation, tolerance)" << endl;
   }
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){

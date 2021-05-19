@@ -17,11 +17,11 @@
 /*!
   @brief Enum for putting some logic into how we thought about EBs
 */
-enum class EB_representation {
-  implicit_function,
-  discrete,
-  voxel,
-  level_set
+enum class EbRepresentation {
+  ImplicitFunction,
+  Discrete,
+  Voxel,
+  Levelset
 };
 
 #include <CD_NamespaceFooter.H>

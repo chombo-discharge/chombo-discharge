@@ -262,30 +262,30 @@ public:
     @brief Remove particles that are inside the EB
     @details Calls the other version with m_particles
   */
-  virtual void remove_covered_particles(const EB_representation a_representation, const Real a_tol);
+  virtual void remove_covered_particles(const EbRepresentation a_representation, const Real a_tol);
 
   /*!
     @brief Which particles to remove
   */
-  virtual void remove_covered_particles(const which_container a_container, const EB_representation a_representation, const Real a_tol);
+  virtual void remove_covered_particles(const which_container a_container, const EbRepresentation a_representation, const Real a_tol);
 
   /*!
     @brief Remove particles that are inside the EB
   */
-  virtual void remove_covered_particles(ParticleContainer<ito_particle>& a_particles, const EB_representation a_representation, const Real a_tol);
+  virtual void remove_covered_particles(ParticleContainer<ito_particle>& a_particles, const EbRepresentation a_representation, const Real a_tol);
 
   /*!
     @brief Transfer particles that are covered (within a_tol distance from EB) to another container. 
     @details This is the default version which moves particles from m_particles to m_covered_particles
   */
-  virtual void transfer_covered_particles(const EB_representation a_representation, const Real a_tol);
+  virtual void transfer_covered_particles(const EbRepresentation a_representation, const Real a_tol);
 
   /*!
     @brief Which particles to remove
   */
   virtual void transfer_covered_particles(const which_container   a_containerFrom,
 					  const which_container   a_containerTo,
-					  const EB_representation a_representation,
+					  const EbRepresentation a_representation,
 					  const Real              a_tol);
 
   /*!
@@ -293,14 +293,14 @@ public:
   */
   virtual void transfer_covered_particles(ParticleContainer<ito_particle>& a_containerFrom,
 					  ParticleContainer<ito_particle>& a_containerTo,
-					  const EB_representation           a_representation,
+					  const EbRepresentation           a_representation,
 					  const Real                        a_tol);
 					    
 
   /*!
     @brief Do boundary intersection tests
   */
-  virtual void intersect_particles(const EB_representation a_representation, const bool a_delete);
+  virtual void intersect_particles(const EbRepresentation a_representation, const bool a_delete);
 
   /*!
     @brief Do boundary intersection tests.
@@ -308,7 +308,7 @@ public:
   virtual void intersect_particles(const which_container       a_particles,
 				   const which_container       a_eb_particles,
 				   const which_container       a_dom_particles,
-				   const EB_representation a_representation,				   
+				   const EbRepresentation a_representation,				   
 				   const bool              a_delete);
 
   /*!
@@ -317,7 +317,7 @@ public:
   virtual void intersect_particles(ParticleContainer<ito_particle>& a_particles,
 				   ParticleContainer<ito_particle>& a_eb_particles,
 				   ParticleContainer<ito_particle>& a_dom_particles,
-				   const EB_representation           a_representation,
+				   const EbRepresentation           a_representation,
 				   const bool                        a_delete);
 
   /*!

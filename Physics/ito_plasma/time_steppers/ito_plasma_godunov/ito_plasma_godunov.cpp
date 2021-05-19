@@ -1245,8 +1245,8 @@ void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
   MPI_Barrier(Chombo_MPI::comm);
   isectTime -= MPI_Wtime();
   const bool delete_eb_particles = true;
-  this->intersect_particles(     which_particles::all_mobile_or_diffusive, EB_representation::implicit_function, delete_eb_particles); 
-  this->remove_covered_particles(which_particles::all_mobile_or_diffusive, EB_representation::implicit_function, m_eb_tolerance);
+  this->intersect_particles(     which_particles::all_mobile_or_diffusive, EbRepresentation::ImplicitFunction, delete_eb_particles); 
+  this->remove_covered_particles(which_particles::all_mobile_or_diffusive, EbRepresentation::ImplicitFunction, m_eb_tolerance);
   isectTime += MPI_Wtime();
 
   // 6. Deposit particles. This shouldn't be necessary unless we want to compute (E,J)
@@ -1454,8 +1454,8 @@ void ito_plasma_godunov::advance_particles_trapezoidal(const Real a_dt){
   // ====== CORRECTOR END =====
 
   // Do particle-boundary intersection. 
-  this->intersect_particles(which_particles::all_mobile_or_diffusive, EB_representation::implicit_function, true);
-  this->remove_covered_particles(which_particles::all_mobile_or_diffusive, EB_representation::implicit_function, m_eb_tolerance);
+  this->intersect_particles(which_particles::all_mobile_or_diffusive, EbRepresentation::ImplicitFunction, true);
+  this->remove_covered_particles(which_particles::all_mobile_or_diffusive, EbRepresentation::ImplicitFunction, m_eb_tolerance);
 
   // Finally, deposit particles. 
   this->deposit_particles(which_particles::all_mobile_or_diffusive);

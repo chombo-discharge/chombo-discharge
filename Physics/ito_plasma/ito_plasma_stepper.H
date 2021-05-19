@@ -96,25 +96,25 @@ namespace physics {
 
 
       // Particle handling routines.
-      void intersect_particles(const which_particles a_which, const EB_representation a_representation, const bool a_delete);
+      void intersect_particles(const which_particles a_which, const EbRepresentation a_representation, const bool a_delete);
       void intersect_particles(const which_particles a_which,
 			       const ito_solver::which_container a_particles,
 			       const ito_solver::which_container a_eb_particles,
 			       const ito_solver::which_container a_domain_particles,
-			       const EB_representation           a_representation,
+			       const EbRepresentation           a_representation,
 			       const bool                        a_delete);
 			       
-      void remove_covered_particles(const which_particles a_which, const EB_representation a_representation, const Real a_tolerance);
+      void remove_covered_particles(const which_particles a_which, const EbRepresentation a_representation, const Real a_tolerance);
       void remove_covered_particles(const which_particles             a_which,
 				    const ito_solver::which_container a_container,
-				    const EB_representation           a_representation,
+				    const EbRepresentation           a_representation,
 				    const Real                        a_tolerance);
 
-      void transfer_covered_particles(const which_particles a_which, const EB_representation a_representation, const Real a_tolerance);
+      void transfer_covered_particles(const which_particles a_which, const EbRepresentation a_representation, const Real a_tolerance);
       void transfer_covered_particles(const which_particles             a_which,
 				      const ito_solver::which_container a_containerFrom,
 				      const ito_solver::which_container a_containerTo,
-				      const EB_representation           a_representation,
+				      const EbRepresentation           a_representation,
 				      const Real                        a_tolerance);
 
       // Internal routines

@@ -502,7 +502,7 @@ void ito_solver::initialData(){
 
   // Add particles, remove the ones that are inside the EB, and then depsit
   particles.addParticles(m_species->getInitialParticles());
-  this->remove_covered_particles(particles, EB_representation::implicit_function, 0.0);
+  this->remove_covered_particles(particles, EbRepresentation::ImplicitFunction, 0.0);
   this->deposit_particles(m_phi, particles, m_deposition);
 }
 
@@ -530,20 +530,20 @@ void ito_solver::compute_loads(Vector<long int>& a_loads, const DisjointBoxLayou
 #endif
 }
 
-void ito_solver::remove_covered_particles(const EB_representation a_representation, const Real a_tol){
-  CH_TIME("ito_solver::remove_covered_particles(EB_representation, tolerance)");
+void ito_solver::remove_covered_particles(const EbRepresentation a_representation, const Real a_tol){
+  CH_TIME("ito_solver::remove_covered_particles(EbRepresentation, tolerance)");
   if(m_verbosity > 5){
-    pout() << m_name + "::remove_covered_particles(EB_representation, tolerance)" << endl;
+    pout() << m_name + "::remove_covered_particles(EbRepresentation, tolerance)" << endl;
   }
 
   this->remove_covered_particles(which_container::bulk, a_representation, a_tol);
 }
 
 
-void ito_solver::remove_covered_particles(const which_container a_container, const EB_representation a_representation, const Real a_tol){
-  CH_TIME("ito_solver::remove_covered_particles(container, EB_representation, tolerance)");
+void ito_solver::remove_covered_particles(const which_container a_container, const EbRepresentation a_representation, const Real a_tol){
+  CH_TIME("ito_solver::remove_covered_particles(container, EbRepresentation, tolerance)");
   if(m_verbosity > 5){
-    pout() << m_name + "::remove_covered_particles(container, EB_representation, tolerance)" << endl;
+    pout() << m_name + "::remove_covered_particles(container, EbRepresentation, tolerance)" << endl;
   }
 
   ParticleContainer<ito_particle>& particles = this->getParticles(a_container);
@@ -551,20 +551,20 @@ void ito_solver::remove_covered_particles(const which_container a_container, con
   this->remove_covered_particles(particles, a_representation, a_tol);
 }
 
-void ito_solver::remove_covered_particles(ParticleContainer<ito_particle>& a_particles, const EB_representation a_representation, const Real a_tol){
-  CH_TIME("ito_solver::remove_covered_particles(particles, EB_representation)");
+void ito_solver::remove_covered_particles(ParticleContainer<ito_particle>& a_particles, const EbRepresentation a_representation, const Real a_tol){
+  CH_TIME("ito_solver::remove_covered_particles(particles, EbRepresentation)");
   if(m_verbosity > 5){
-    pout() << m_name + "::remove_covered_particles(particles, EB_representation)" << endl;
+    pout() << m_name + "::remove_covered_particles(particles, EbRepresentation)" << endl;
   }
 
   switch(a_representation){
-  case EB_representation::implicit_function:
+  case EbRepresentation::ImplicitFunction:
     this->remove_covered_particles_if(a_particles, a_tol);
     break;
-  case EB_representation::discrete:
+  case EbRepresentation::Discrete:
     this->remove_covered_particles_discrete(a_particles);
     break;
-  case EB_representation::voxel:
+  case EbRepresentation::Voxel:
     this->remove_covered_particles_voxels(a_particles);
     break;
   default:
@@ -727,19 +727,19 @@ void ito_solver::remove_covered_particles_voxels(ParticleContainer<ito_particle>
   }
 }
 
-void ito_solver::transfer_covered_particles(const EB_representation a_representation, const Real a_tol){
-  CH_TIME("ito_solver::transfer_covered_particles(EB_representation, tol)");
+void ito_solver::transfer_covered_particles(const EbRepresentation a_representation, const Real a_tol){
+  CH_TIME("ito_solver::transfer_covered_particles(EbRepresentation, tol)");
   if(m_verbosity > 5){
-    pout() << m_name + "::transfer_covered_particles(EB_representation, tol)" << endl;
+    pout() << m_name + "::transfer_covered_particles(EbRepresentation, tol)" << endl;
   }
 
   this->transfer_covered_particles(which_container::bulk, which_container::covered, a_representation, a_tol);
 }
 
-void ito_solver::transfer_covered_particles(const which_container a_containerFrom, const which_container a_containerTo, const EB_representation a_representation, const Real a_tol){
-  CH_TIME("ito_solver::transfer_covered_particles(EB_representation, string, string, tol)");
+void ito_solver::transfer_covered_particles(const which_container a_containerFrom, const which_container a_containerTo, const EbRepresentation a_representation, const Real a_tol){
+  CH_TIME("ito_solver::transfer_covered_particles(EbRepresentation, string, string, tol)");
   if(m_verbosity > 5){
-    pout() << m_name + "::transfer_covered_particles(EB_representation, string, string, tol)" << endl;
+    pout() << m_name + "::transfer_covered_particles(EbRepresentation, string, string, tol)" << endl;
   }
 
   ParticleContainer<ito_particle>& src = this->getParticles(a_containerFrom);
@@ -750,15 +750,15 @@ void ito_solver::transfer_covered_particles(const which_container a_containerFro
 
 void ito_solver::transfer_covered_particles(ParticleContainer<ito_particle>& a_containerFrom,
 					    ParticleContainer<ito_particle>& a_containerTo,
-					    const EB_representation           a_representation,
+					    const EbRepresentation           a_representation,
 					    const Real                        a_tol){
-  CH_TIME("ito_solver::transfer_covered_particles(EB_representation, container, container, tol)");
+  CH_TIME("ito_solver::transfer_covered_particles(EbRepresentation, container, container, tol)");
   if(m_verbosity > 5){
-    pout() << m_name + "::transfer_covered_particles(EB_representation, container, container, tol)" << endl;
+    pout() << m_name + "::transfer_covered_particles(EbRepresentation, container, container, tol)" << endl;
   }
 
   switch(a_representation){
-  case EB_representation::implicit_function:
+  case EbRepresentation::ImplicitFunction:
     this->transfer_covered_particles_if(a_containerFrom, a_containerTo, a_tol);
     break;
   default:
@@ -766,10 +766,10 @@ void ito_solver::transfer_covered_particles(ParticleContainer<ito_particle>& a_c
   }
 }
 
-void ito_solver::intersect_particles(const EB_representation a_representation, const bool a_delete){
-  CH_TIME("ito_solver::intersect_particles(EB_representation, bool)");
+void ito_solver::intersect_particles(const EbRepresentation a_representation, const bool a_delete){
+  CH_TIME("ito_solver::intersect_particles(EbRepresentation, bool)");
   if(m_verbosity > 5){
-    pout() << m_name + "::intersect_particles(EB_representation, bool)" << endl;
+    pout() << m_name + "::intersect_particles(EbRepresentation, bool)" << endl;
   }
 
   this->intersect_particles(which_container::bulk, which_container::eb, which_container::domain, a_representation, a_delete);
@@ -778,11 +778,11 @@ void ito_solver::intersect_particles(const EB_representation a_representation, c
 void ito_solver::intersect_particles(const which_container       a_particles,
 				     const which_container       a_eb_particles,
 				     const which_container       a_dom_particles,
-				     const EB_representation a_representation,				     
+				     const EbRepresentation a_representation,				     
 				     const bool              a_delete){
-  CH_TIME("ito_solver::intersect_particles(string, string, string, bool, EB_representation)");
+  CH_TIME("ito_solver::intersect_particles(string, string, string, bool, EbRepresentation)");
   if(m_verbosity > 5){
-    pout() << m_name + "::intersect_particles(string, string, string, bool, EB_representation)" << endl;
+    pout() << m_name + "::intersect_particles(string, string, string, bool, EbRepresentation)" << endl;
   }
 
   ParticleContainer<ito_particle>& particles     = this->getParticles(a_particles);
@@ -796,15 +796,15 @@ void ito_solver::intersect_particles(const which_container       a_particles,
 void ito_solver::intersect_particles(ParticleContainer<ito_particle>& a_particles,
 				     ParticleContainer<ito_particle>& a_eb_particles,
 				     ParticleContainer<ito_particle>& a_dom_particles,
-				     const EB_representation           a_representation,
+				     const EbRepresentation           a_representation,
 				     const bool                        a_delete){
-  CH_TIME("ito_solver::intersect_particles(container, container, container, EB_representation, bool)");
+  CH_TIME("ito_solver::intersect_particles(container, container, container, EbRepresentation, bool)");
   if(m_verbosity > 5){
-    pout() << m_name + "::intersect_particles(container, container, container, EB_representation, bool)" << endl;
+    pout() << m_name + "::intersect_particles(container, container, container, EbRepresentation, bool)" << endl;
   }
 
   switch(a_representation){
-  case EB_representation::implicit_function:
+  case EbRepresentation::ImplicitFunction:
     this->intersect_particles_if(a_particles, a_eb_particles, a_dom_particles, a_delete);
     break;
   default:
