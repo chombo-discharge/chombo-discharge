@@ -27,16 +27,6 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Switch when representing embedded boundaries
-*/
-enum class EB_representation {
-  implicit_function,
-  discrete,
-  voxel,
-  level_set
-};
-
-/*!
   @brief Abstract base class for geometries
 */
 class ComputationalGeometry {

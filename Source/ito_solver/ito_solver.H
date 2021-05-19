@@ -16,6 +16,7 @@
 #include <CD_ParticleContainer.H>
 #include "bvh.H"
 #include <CD_PointMass.H>
+#include <CD_EbRepresentation.H>
 
 #include <Particle.H>
 #include <ParticleData.H>
