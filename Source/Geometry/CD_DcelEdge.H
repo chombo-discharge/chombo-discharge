@@ -1,21 +1,25 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   dcel_edge.H
-  @brief  Declaration of a dcel_edge class for describing surface tesselations
+  @file   CD_DcelEdge.H
+  @brief  Declaration of an edge class for DCEL tools
   @author Robert Marskar
-  @date   March 2021
 */
 
-#ifndef _DCEL_EDGE_
-#define _DCEL_EDGE_
+#ifndef CD_DcelEdge_H
+#define CD_DcelEdge_H
 
-#include <CD_Vec.H>
-
-#include <CD_DcelFace.H>
-
+// Std includes
 #include <vector>
 #include <memory>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_Vec.H>
+#include <CD_DcelFace.H>
+#include <CD_NamespaceHeader.H>
 
 namespace Dcel {
 
@@ -148,7 +152,8 @@ namespace Dcel {
     void computeNormal() noexcept;
   };
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #include <CD_DcelEdgeImplem.H>
 

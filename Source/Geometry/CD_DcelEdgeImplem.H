@@ -1,19 +1,23 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   dcel_edgeI.cpp
-  @brief  Implementation of dcel_edge.H
+  @file   CD_DcelEdgeImplem.H
+  @brief  Implementation of CD_DcelEdge.H
   @author Robert Marskar
-  @date   March 2021
 */
 
-#ifndef _DCEL_EDGEI_H_
-#define _DCEL_EDGEI_H_
+#ifndef CD_DcelEdgeImplem_H
+#define CD_DcelEdgeImplem_H
 
+// Our includes
 #include <CD_DcelVertex.H>
 #include <CD_DcelEdge.H>
 #include <CD_DcelFace.H>
 #include <CD_DcelIterator.H>
-
-#include "CD_NamespaceHeader.H"
+#include <CD_NamespaceHeader.H>
 
 namespace Dcel {
 
@@ -268,6 +272,7 @@ namespace Dcel {
     return delta.dot(delta);
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif
