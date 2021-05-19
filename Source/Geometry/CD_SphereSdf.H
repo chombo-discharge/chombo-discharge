@@ -1,23 +1,27 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file new_sphere_if.H
-  @brief New SphereIF function, the old one didn't use the correct distance (return distance squared)
-  @date Sep. 2017
+  @file   CD_SphereSdf.H
+  @brief  Signed distance function for sphere
   @author Robert Marskar
 */
 
-#ifndef _NEW_SPHERE_IF
-#define _NEW_SPHERE_IF_
+#ifndef CD_SphereSdf_H
+#define CD_SphereSdf_H
 
+// Chombo includes
 #include <BaseIF.H>
-#include <IntersectionIF.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Declaration of a hemispheric rod IF class
-  @details This class is esseentially a cylinder with a hemisphere at one of its ends. 
+  @brief Signed distance function for sphere
 */
-class new_sphere_if : public BaseIF {
+class SphereSdf : public BaseIF {
 public:
 
   /*!
@@ -26,20 +30,19 @@ public:
     @param[in] a_radius      Sphere radius
     @param[in] a_fluidInside Fluid on inside of sphere
   */
-
-  new_sphere_if(const RealVect& a_center, const Real& a_radius, const bool& a_fluidInside);
+  SphereSdf(const RealVect& a_center, const Real& a_radius, const bool& a_fluidInside);
 
   /*!
     @brief Copy constructor
     @param[in] a_inputIF Input cylinder
   */
   
-  new_sphere_if(const new_sphere_if& a_inputIF);
+  SphereSdf(const SphereSdf& a_inputIF);
 
   /*!
     @brief Destructor
   */
-  virtual ~new_sphere_if();
+  virtual ~SphereSdf();
 
   /*!
     @brief Test whether inside or not
@@ -69,5 +72,7 @@ protected:
   */
   bool m_fluidInside;
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif

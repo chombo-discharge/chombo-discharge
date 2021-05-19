@@ -8,7 +8,7 @@
 #include "rod_dielectric.H"
 #include "rod_if.H"
 #include "perlin_slab_if.H"
-#include "new_sphere_if.H"
+#include <CD_SphereSdf.H>
 #include "wedge_if.H"
 #include <CD_RoundedBoxIF.H>
 
@@ -126,7 +126,7 @@ RefCountedPtr<BaseIF> rod_dielectric::get_sphere(){
   pp.get("radius", r);
   pp.getarr("center", v, 0, SpaceDim); p = RealVect(D_DECL(v[0], v[1], v[2]));
 
-  return RefCountedPtr<BaseIF> (new new_sphere_if(p, r, false));
+  return RefCountedPtr<BaseIF> (new SphereSdf(p, r, false));
 }
 
 RefCountedPtr<BaseIF> rod_dielectric::get_perlin_box(){

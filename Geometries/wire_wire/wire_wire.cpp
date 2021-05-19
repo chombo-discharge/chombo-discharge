@@ -7,7 +7,7 @@
 
 #include "wire_wire.H"
 
-#include "new_sphere_if.H"
+#include <CD_SphereSdf.H>
 #include <CD_CylinderSdf.H>
 
 #include "CD_NamespaceHeader.H"
@@ -46,7 +46,7 @@ void wire_wire::addWire(ParmParse& a_pp){
   Real pot = live ? 0.5 : -0.5;
 
 #if CH_SPACEDIM==2
-  RefCountedPtr<BaseIF> bif = RefCountedPtr<BaseIF> (new new_sphere_if(e1, r, false));
+  RefCountedPtr<BaseIF> bif = RefCountedPtr<BaseIF> (new SphereSdf(e1, r, false));
 #elif CH_SPACEDIM==3
   RefCountedPtr<BaseIF> bif = RefCountedPtr<BaseIF> (new CylinderSdf(e1, e2, r, false));
 #endif

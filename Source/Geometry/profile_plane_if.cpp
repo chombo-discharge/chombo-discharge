@@ -14,7 +14,7 @@
 #include <SmoothIntersection.H>
 
 #include "profile_plane_if.H"
-#include "new_sphere_if.H"
+#include <CD_SphereSdf.H>
 #include <CD_BoxSdf.H>
 #include <CD_RoundedBoxIF.H>
 

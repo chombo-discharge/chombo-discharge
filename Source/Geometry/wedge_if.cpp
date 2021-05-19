@@ -13,7 +13,7 @@
 
 #include "wedge_if.H"
 #include <CD_CylinderSdf.H>
-#include "new_sphere_if.H"
+#include <CD_SphereSdf.H>
 
 #include "CD_NamespaceHeader.H"
 
@@ -53,7 +53,7 @@ wedge_if::wedge_if(const int      a_dir,
   const RealVect c2 = point + 1.E10*RealVect(BASISV(2));
   BaseIF* round_cyl = static_cast<BaseIF*> (new CylinderSdf(c1,c2, a_curv, !a_inside));
 #else
-  BaseIF* round_cyl = static_cast<BaseIF*> (new new_sphere_if(point, a_curv, !a_inside));
+  BaseIF* round_cyl = static_cast<BaseIF*> (new SphereSdf(point, a_curv, !a_inside));
 #endif
 
   // All parts
