@@ -15,7 +15,7 @@
 
 #include "cylinder_if.H"
 #include "rounded_cylinder_if.H"
-#include "rounded_box_if.H"
+#include <CD_RoundedBoxIF.H>
 #include "torus_if.H"
 
 #include "CD_NamespaceHeader.H"
@@ -79,7 +79,7 @@ BaseIF* rounded_cylinder_if::makeBaseIF2D(){
   const RealVect x0 = RealVect::Zero - m_radius*BASISREALV(0);
   const RealVect x1 = RealVect::Zero + m_radius*BASISREALV(0) + m_length*BASISREALV(1);
 
-  return (BaseIF*) (new rounded_box_if(x0, x1, m_curv, false));
+  return (BaseIF*) (new RoundedBoxIF(x0, x1, m_curv, false));
 }
 #endif
 

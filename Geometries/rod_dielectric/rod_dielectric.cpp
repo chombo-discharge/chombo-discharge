@@ -10,7 +10,7 @@
 #include "perlin_slab_if.H"
 #include "new_sphere_if.H"
 #include "wedge_if.H"
-#include "rounded_box_if.H"
+#include <CD_RoundedBoxIF.H>
 
 #include <PlaneIF.H>
 #include <ParmParse.H>
@@ -101,7 +101,7 @@ RefCountedPtr<BaseIF> rod_dielectric::get_box(){
   pp.getarr("hi_corner", v, 0, SpaceDim); hi = RealVect(D_DECL(v[0], v[1], v[2]));
 
 
-  return RefCountedPtr<BaseIF> (new rounded_box_if(lo, hi, curv, false));
+  return RefCountedPtr<BaseIF> (new RoundedBoxIF(lo, hi, curv, false));
 }
 
 RefCountedPtr<BaseIF> rod_dielectric::get_plane(){

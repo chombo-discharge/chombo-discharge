@@ -16,7 +16,7 @@
 #include "profile_plane_if.H"
 #include "new_sphere_if.H"
 #include "box_if.H"
-#include "rounded_box_if.H"
+#include <CD_RoundedBoxIF.H>
 
 #include "CD_NamespaceHeader.H"
 
@@ -45,7 +45,7 @@ profile_plane_if::profile_plane_if(const RealVect  a_point,
   Vector<BaseIF*> parts;
   const RealVect lo = point - 0.5*a_width*xhat - 1.E3*yhat;
   const RealVect hi = point + 0.5*a_width*xhat;
-  BaseIF* box = (BaseIF*) (new rounded_box_if(lo, hi, a_curv, false)); // Construct base box with fluid outside. 
+  BaseIF* box = (BaseIF*) (new RoundedBoxIF(lo, hi, a_curv, false)); // Construct base box with fluid outside. 
   parts.push_back(box);
 
 

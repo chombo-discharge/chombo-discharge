@@ -1,22 +1,27 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   rounded_box_if.cpp
-  @brief  Implementation of rounded_box_if.H
-  @date   March 2021
+  @file   CD_RoundedBoxIF.cpp
+  @brief  Implementation of CD_RoundedBoxIF.H
   @author Robert Marskar
 */
 
-#include "rounded_box_if.H"
-
+// Chombo includes
 #include <PlaneIF.H>
 #include <SmoothUnion.H>
 #include <TransformIF.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_RoundedBoxIF.H>
+#include <CD_NamespaceHeader.H>
 
-rounded_box_if::rounded_box_if(const RealVect a_loCorner,
-			       const RealVect a_hiCorner,
-			       const Real     a_curv,
-			       const bool     a_fluidInside){
+RoundedBoxIF::RoundedBoxIF(const RealVect a_loCorner,
+			   const RealVect a_hiCorner,
+			   const Real     a_curv,
+			   const bool     a_fluidInside){
   m_fluidInside = a_fluidInside;
 
   const RealVect xyz = a_hiCorner - a_loCorner;
@@ -45,15 +50,15 @@ rounded_box_if::rounded_box_if(const RealVect a_loCorner,
   m_baseif = RefCountedPtr<BaseIF> (tif);
 }
 
-rounded_box_if::rounded_box_if(const rounded_box_if& a_inputIF){
+RoundedBoxIF::RoundedBoxIF(const RoundedBoxIF& a_inputIF){
   m_fluidInside = a_inputIF.m_fluidInside;
   m_baseif      = a_inputIF.m_baseif;
 }
 
-rounded_box_if::~rounded_box_if(){
+RoundedBoxIF::~RoundedBoxIF(){
 }
 
-Real rounded_box_if::value(const RealVect& a_point) const{
+Real RoundedBoxIF::value(const RealVect& a_point) const{
 
   // TLDR: m_baseif designed so that f < 0 outside the box. This means that the fluid is outside. Revert if inside. 
   Real retval = m_baseif->value(a_point);
@@ -65,7 +70,8 @@ Real rounded_box_if::value(const RealVect& a_point) const{
   return retval;
 }
 
-BaseIF* rounded_box_if::newImplicitFunction() const{
-  return static_cast<BaseIF*> (new rounded_box_if(*this));
+BaseIF* RoundedBoxIF::newImplicitFunction() const{
+  return static_cast<BaseIF*> (new RoundedBoxIF(*this));
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

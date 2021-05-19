@@ -19,7 +19,7 @@
 #include "rod_if.H"
 #include "new_sphere_if.H"
 #include "box_if.H"
-#include "rounded_box_if.H"
+#include <CD_RoundedBoxIF.H>
 
 #include "CD_NamespaceHeader.H"
 
@@ -145,6 +145,6 @@ BaseIF* rod_plane_profile::getBaseIF_square(){
   const RealVect hi = point + 0.5*width*(BASISREALV(0) + BASISREALV(1));
 #endif
 
-  return new rounded_box_if(lo, hi, curv, true);
+  return new RoundedBoxIF(lo, hi, curv, true);
 }
 #include "CD_NamespaceFooter.H"
