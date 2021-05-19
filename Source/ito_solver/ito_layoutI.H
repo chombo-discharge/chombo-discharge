@@ -89,7 +89,7 @@ void ito_layout<T>::allocateInternals(){
 }
 
 template <class T>
-void ito_layout<T>::add_solver(RefCountedPtr<T> a_solver){
+void ito_layout<T>::addSolver(RefCountedPtr<T> a_solver){
   m_solvers.push_back(a_solver);
 }
 
@@ -291,7 +291,7 @@ Real ito_layout<T>::compute_diffusive_dt() {
 }
 
 template <class T>
-Vector<RefCountedPtr<T> >& ito_layout<T>::get_solvers(){
+Vector<RefCountedPtr<T> >& ito_layout<T>::getSolvers(){
   return m_solvers;
 }
 
@@ -361,7 +361,7 @@ Vector<ParticleContainer<ito_particle>* > ito_layout<T>::getParticles(const ito_
 }
 
 template <class T>
-phase::which_phase ito_layout<T>::get_phase() const {
+phase::which_phase ito_layout<T>::getPhase() const {
   return m_phase;
 }
 
@@ -376,7 +376,7 @@ ito_factory<T, S>::~ito_factory(){
 }
 
 template <class T, class S>
-RefCountedPtr<ito_layout<T> > ito_factory<T, S>::new_layout(const Vector<RefCountedPtr<ito_species> > a_species) const{
+RefCountedPtr<ito_layout<T> > ito_factory<T, S>::newLayout(const Vector<RefCountedPtr<ito_species> > a_species) const{
 
   auto ito = RefCountedPtr<ito_layout<T> > (new ito_layout<T>(a_species));
 
@@ -385,7 +385,7 @@ RefCountedPtr<ito_layout<T> > ito_factory<T, S>::new_layout(const Vector<RefCoun
     RefCountedPtr<T> solver = RefCountedPtr<T> (static_cast<T*> (new S()));
     solver->setSpecies(a_species[i]);
     solver->setVerbosity(-1);
-    ito->add_solver(solver);
+    ito->addSolver(solver);
   }
 
   return ito;

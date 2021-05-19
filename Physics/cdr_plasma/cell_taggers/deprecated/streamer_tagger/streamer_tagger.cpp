@@ -67,9 +67,9 @@ void streamer_tagger::compute_tracers(){
 
 
   // Get electron stuff
-  EBAMRCellData& ne  = (m_timeStepper->get_cdr())->get_solvers()[m_electron_idx]->getPhi();
-  EBAMRCellData& Se  = (m_timeStepper->get_cdr())->get_solvers()[m_electron_idx]->getSource();
-  EBAMRCellData& ve  = (m_timeStepper->get_cdr())->get_solvers()[m_electron_idx]->getCellCenteredVelocity();
+  EBAMRCellData& ne  = (m_timeStepper->get_cdr())->getSolvers()[m_electron_idx]->getPhi();
+  EBAMRCellData& Se  = (m_timeStepper->get_cdr())->getSolvers()[m_electron_idx]->getSource();
+  EBAMRCellData& ve  = (m_timeStepper->get_cdr())->getSolvers()[m_electron_idx]->getCellCenteredVelocity();
 
   // Compute the electric field
   EBAMRCellData rho;

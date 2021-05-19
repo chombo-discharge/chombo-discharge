@@ -189,14 +189,14 @@ void rk2_tga::allocate_cdr_storage(){
   
   for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
-    m_cdr_scratch[idx] = RefCountedPtr<cdr_storage> (new cdr_storage(m_amr, m_cdr->get_phase(), ncomp));
+    m_cdr_scratch[idx] = RefCountedPtr<cdr_storage> (new cdr_storage(m_amr, m_cdr->getPhase(), ncomp));
     m_cdr_scratch[idx]->allocate_storage();
   }
 }
 
 void rk2_tga::allocate_poisson_storage(){
   const int ncomp = 1;
-  m_fieldSolver_scratch = RefCountedPtr<poisson_storage> (new poisson_storage(m_amr, m_cdr->get_phase(), ncomp));
+  m_fieldSolver_scratch = RefCountedPtr<poisson_storage> (new poisson_storage(m_amr, m_cdr->getPhase(), ncomp));
   m_fieldSolver_scratch->allocate_storage();
 }
 
@@ -207,14 +207,14 @@ void rk2_tga::allocate_rte_storage(){
   
   for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
-    m_rte_scratch[idx] = RefCountedPtr<rte_storage> (new rte_storage(m_amr, m_rte->get_phase(), ncomp));
+    m_rte_scratch[idx] = RefCountedPtr<rte_storage> (new rte_storage(m_amr, m_rte->getPhase(), ncomp));
     m_rte_scratch[idx]->allocate_storage();
   }
 }
 
 void rk2_tga::allocate_sigma_storage(){
   const int ncomp = 1;
-  m_sigma_scratch = RefCountedPtr<sigma_storage> (new sigma_storage(m_amr, m_cdr->get_phase(), ncomp));
+  m_sigma_scratch = RefCountedPtr<sigma_storage> (new sigma_storage(m_amr, m_cdr->getPhase(), ncomp));
   m_sigma_scratch->allocate_storage();
 }
 
@@ -328,9 +328,9 @@ void rk2_tga::compute_E_into_scratch(){
 
   const MFAMRCellData& phi = m_fieldSolver->getPotential();
   
-  this->compute_E(E_cell, m_cdr->get_phase(), phi);     // Compute cell-centered field
-  this->compute_E(E_face, m_cdr->get_phase(), E_cell);  // Compute face-centered field
-  this->compute_E(E_eb,   m_cdr->get_phase(), E_cell);  // EB-centered field
+  this->compute_E(E_cell, m_cdr->getPhase(), phi);     // Compute cell-centered field
+  this->compute_E(E_face, m_cdr->getPhase(), E_cell);  // Compute face-centered field
+  this->compute_E(E_eb,   m_cdr->getPhase(), E_cell);  // EB-centered field
 }
 
 void rk2_tga::compute_cdr_velo(const Real a_time){
@@ -363,8 +363,8 @@ void rk2_tga::compute_cdr_eb_states(){
     eb_gradients.push_back(&(storage->get_eb_grad()));
   }
 
-  this->extrapolate_to_eb(eb_states,          m_cdr->get_phase(), cdr_states);
-  this->computeGradients_at_eb(eb_gradients, m_cdr->get_phase(), cdr_states);
+  this->extrapolate_to_eb(eb_states,          m_cdr->getPhase(), cdr_states);
+  this->computeGradients_at_eb(eb_gradients, m_cdr->getPhase(), cdr_states);
 }
 
 void rk2_tga::compute_cdr_fluxes(const Real a_time){
@@ -399,8 +399,8 @@ void rk2_tga::compute_cdr_fluxes(const Real a_time){
   // Extrapolate densities, velocities, and fluxes
   Vector<EBAMRCellData*> cdr_densities  = m_cdr->getPhis();
   Vector<EBAMRCellData*> cdr_velocities = m_cdr->get_velocities();
-  this->compute_extrapolated_fluxes(extrap_cdr_fluxes, cdr_densities, cdr_velocities, m_cdr->get_phase());
-  this->extrapolate_to_eb(extrap_cdr_velocities, m_cdr->get_phase(), cdr_velocities);
+  this->compute_extrapolated_fluxes(extrap_cdr_fluxes, cdr_densities, cdr_velocities, m_cdr->getPhase());
+  this->extrapolate_to_eb(extrap_cdr_velocities, m_cdr->getPhase(), cdr_velocities);
 
   // Compute RTE flux on the boundary
   for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
@@ -467,8 +467,8 @@ void rk2_tga::advance_advection_source_cdr_k1(const Real a_dt){
     // Make phi = phi + k1*alpha*dt
     data_ops::incr(phi, k1, m_alpha*a_dt);
 
-    m_amr->averageDown(phi, m_cdr->get_phase());
-    m_amr->interpGhost(phi, m_cdr->get_phase());
+    m_amr->averageDown(phi, m_cdr->getPhase());
+    m_amr->interpGhost(phi, m_cdr->getPhase());
 
     data_ops::floor(phi, 0.0);
   }
@@ -488,7 +488,7 @@ void rk2_tga::advance_advection_sigma_k1(const Real a_dt){
   // Make phi = phi + k1*alpha*dt
   data_ops::incr(phi, k1,    m_alpha*a_dt);
 
-  m_amr->averageDown(phi, m_cdr->get_phase());
+  m_amr->averageDown(phi, m_cdr->getPhase());
   
   m_sigma->resetCells(k1);
   m_sigma->resetCells(phi);
@@ -524,8 +524,8 @@ void rk2_tga::advance_advection_source_cdr_k2(const Real a_dt){
     data_ops::incr(state, k1, k1_factor);
     data_ops::incr(state, k2, k2_factor);
 
-    m_amr->averageDown(state, m_cdr->get_phase());
-    m_amr->interpGhost(state, m_cdr->get_phase());
+    m_amr->averageDown(state, m_cdr->getPhase());
+    m_amr->interpGhost(state, m_cdr->getPhase());
 
     data_ops::floor(state, 0.0);
   }
@@ -552,7 +552,7 @@ void rk2_tga::advance_advection_sigma_k2(const Real a_dt){
   data_ops::incr(state, k1, k1_factor);
   data_ops::incr(state, k2, k2_factor);
 
-  m_amr->averageDown(state, m_cdr->get_phase());
+  m_amr->averageDown(state, m_cdr->getPhase());
   m_sigma->resetCells(state);
 }
 

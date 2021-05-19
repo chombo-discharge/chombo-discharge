@@ -693,7 +693,7 @@ public:
   /*!
     @brief Return phase
   */
-  phase::which_phase get_phase() const;
+  phase::which_phase getPhase() const;
   
 protected:
 

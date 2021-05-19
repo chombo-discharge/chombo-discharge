@@ -22,7 +22,7 @@ template <class T>
 ito_iterator<T>::ito_iterator(ito_layout<T>& a_layout, const SpeciesIteration a_mode){
   CH_TIME("ito_iterator<T>::ito_iterator<T>");
     
-  m_solvers  = a_layout.get_solvers();
+  m_solvers  = a_layout.getSolvers();
   m_species  = a_layout.getSpecies();
   m_num      = m_solvers.size();
   m_mode     = a_mode;

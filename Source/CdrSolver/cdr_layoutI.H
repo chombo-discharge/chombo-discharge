@@ -31,7 +31,7 @@ cdr_layout<T>::~cdr_layout(){
 }
 
 template <class T>
-phase::which_phase cdr_layout<T>::get_phase() const{
+phase::which_phase cdr_layout<T>::getPhase() const{
   return m_phase;
 }
 
@@ -55,7 +55,7 @@ void cdr_layout<T>::setRealm(const std::string a_realm){
 }
 
 template <class T>
-void cdr_layout<T>::add_solver(RefCountedPtr<T> a_solver){
+void cdr_layout<T>::addSolver(RefCountedPtr<T> a_solver){
   m_solvers.push_back(a_solver);
 }
 
@@ -537,7 +537,7 @@ Vector<std::string> cdr_layout<T>::getNames() {
 }
 
 template <class T>
-Vector<RefCountedPtr<T> >& cdr_layout<T>::get_solvers(){
+Vector<RefCountedPtr<T> >& cdr_layout<T>::getSolvers(){
   return m_solvers;
 }
 
@@ -681,7 +681,7 @@ cdr_factory<T, S>::~cdr_factory(){
 
 
 template <class T, class S>
-RefCountedPtr<cdr_layout<T> > cdr_factory<T, S>::new_layout(const Vector<RefCountedPtr<CdrSpecies> > a_species) const{
+RefCountedPtr<cdr_layout<T> > cdr_factory<T, S>::newLayout(const Vector<RefCountedPtr<CdrSpecies> > a_species) const{
 
   // Build cdr layout
   auto cdr = RefCountedPtr<cdr_layout<T> > (new cdr_layout<T>(a_species));
@@ -692,7 +692,7 @@ RefCountedPtr<cdr_layout<T> > cdr_factory<T, S>::new_layout(const Vector<RefCoun
     solver->setSpecies(a_species[i]);
     solver->setPhase(phase::gas);
     solver->setVerbosity(-1);
-    cdr->add_solver(solver);
+    cdr->addSolver(solver);
   }
 
   return cdr;

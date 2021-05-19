@@ -17,7 +17,7 @@
 #include "CD_AmrMesh.H"
 #include "mfis.H"
 #include "cdr_layout.H"
-#include "rte_layout.H"
+#include <CD_RtLayout.H>
 #include "CD_FieldSolver.H"
 #include "CD_SigmaSolver.H"
 #include "CD_TimeStepper.H"
@@ -842,7 +842,7 @@ namespace physics {
       /*!
 	@brief Set the RTE layout
       */
-      virtual void set_rte(RefCountedPtr<rte_layout<RtSolver> >& a_rte);
+      virtual void set_rte(RefCountedPtr<RtLayout<RtSolver> >& a_rte);
 
       /*!
 	@brief General RTE advance routine
@@ -924,7 +924,7 @@ namespace physics {
       /*!
 	@brief Get cdr solvers
       */
-      virtual RefCountedPtr<rte_layout<RtSolver>>& get_rte();
+      virtual RefCountedPtr<RtLayout<RtSolver>>& get_rte();
 
       /*!
 	@brief Get sigma solver
@@ -981,7 +981,7 @@ namespace physics {
       /*!
 	@brief Radiative transfer solvers
       */
-      RefCountedPtr<rte_layout<RtSolver>> m_rte;
+      RefCountedPtr<RtLayout<RtSolver>> m_rte;
 
       /*!
 	@brief Poisson solver

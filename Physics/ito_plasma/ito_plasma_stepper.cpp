@@ -841,7 +841,7 @@ void ito_plasma_stepper::set_poisson(RefCountedPtr<FieldSolver>& a_poisson){
   m_fieldSolver = a_poisson;
 }
 
-void ito_plasma_stepper::set_rte(RefCountedPtr<rte_layout<McPhoto> >& a_rte){
+void ito_plasma_stepper::set_rte(RefCountedPtr<RtLayout<McPhoto> >& a_rte){
   CH_TIME("ito_plasma_stepper::set_rte");
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::set_rte" << endl;
@@ -3220,7 +3220,7 @@ Vector<RefCountedPtr<ito_solver> > ito_plasma_stepper::get_lb_solvers() const {
     }
   }
   else {
-    RefCountedPtr<ito_solver>& solver = m_ito->get_solvers()[m_LoadBalancing_idx];
+    RefCountedPtr<ito_solver>& solver = m_ito->getSolvers()[m_LoadBalancing_idx];
     lb_solvers.push_back(solver);
   }
 

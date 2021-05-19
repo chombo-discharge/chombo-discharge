@@ -36,7 +36,7 @@ void full_tagger::allocate_storage(){
 
 
   RefCountedPtr<cdr_layout> cdr = m_timeStepper->get_cdr();
-  RefCountedPtr<rte_layout> rte = m_timeStepper->get_rte();
+  RefCountedPtr<RtLayout> rte = m_timeStepper->get_rte();
 
   m_amr->allocate(m_scratch,  m_phase, sca_ncomp);
   m_amr->allocate(m_E,        m_phase, vec_ncomp);
@@ -67,7 +67,7 @@ void full_tagger::deallocate_storage(){
   }
 
   RefCountedPtr<cdr_layout> cdr = m_timeStepper->get_cdr();
-  RefCountedPtr<rte_layout> rte = m_timeStepper->get_rte();
+  RefCountedPtr<RtLayout> rte = m_timeStepper->get_rte();
 
   m_amr->deallocate(m_scratch);
   m_amr->deallocate(m_E);
@@ -101,7 +101,7 @@ void full_tagger::compute_tracers(){
   const int num_Photons = m_physics->get_num_rte_species();
 
   RefCountedPtr<cdr_layout>& cdr = m_timeStepper->get_cdr();
-  RefCountedPtr<rte_layout>& rte = m_timeStepper->get_rte();
+  RefCountedPtr<RtLayout>& rte = m_timeStepper->get_rte();
 
 
   // This is all computes on volumetric centroids
@@ -397,7 +397,7 @@ void full_tagger::compute_rte_densities(Vector<EBAMRCellData>& a_rte_densities){
     pout() << m_name + "::compute_rte_densities" << endl;
   }
 
-  RefCountedPtr<rte_layout>& rte = m_timeStepper->get_rte();
+  RefCountedPtr<RtLayout>& rte = m_timeStepper->get_rte();
 
   for (RtIterator solver_it(*rte); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>& solver = solver_it();

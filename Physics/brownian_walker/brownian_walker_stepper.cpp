@@ -383,7 +383,7 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
     const DisjointBoxLayout& dbl          = m_amr->getGrids(m_realm)[lvl];
     ParticleData<ito_particle>& particles = m_solver->getParticles(ito_solver::which_container::bulk)[lvl];
 
-    const EBISLayout& ebisl = m_amr->getEBISLayout(m_realm, m_solver->get_phase())[lvl];
+    const EBISLayout& ebisl = m_amr->getEBISLayout(m_realm, m_solver->getPhase())[lvl];
 
     if(m_solver->isMobile() || m_solver->isDiffusive()){
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -430,7 +430,7 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 	  
 	  // This is the implicit function
 	  RefCountedPtr<BaseIF> func;
-	  if(m_solver->get_phase() == phase::gas){
+	  if(m_solver->getPhase() == phase::gas){
 	    func = m_computationalGeometry->get_gas_if();
 	  }
 	  else {

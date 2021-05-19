@@ -87,7 +87,7 @@ public:
   /*!
     @brief Get BaseIVFAB for phase
   */
-  virtual BaseIVFAB<T>* get_phase_ptr(int a_phase){
+  virtual BaseIVFAB<T>* getPhase_ptr(int a_phase){
     return m_phase[a_phase];
   }
 

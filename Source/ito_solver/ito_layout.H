@@ -40,7 +40,7 @@ public:
   /*!
     @brief Return phase
   */
-  virtual phase::which_phase get_phase() const;
+  virtual phase::which_phase getPhase() const;
 
   /*!
     @brief Return iterator. The iterator is a simple random access object
@@ -90,7 +90,7 @@ public:
   /*!
     @brief Add solver
   */
-  virtual void add_solver(RefCountedPtr<T> a_solver);
+  virtual void addSolver(RefCountedPtr<T> a_solver);
 
   /*!
     @brief Cache states before regrid step
@@ -216,7 +216,7 @@ public:
   /*!
     @brief Get solvers
   */
-  virtual Vector<RefCountedPtr<T> >& get_solvers();
+  virtual Vector<RefCountedPtr<T> >& getSolvers();
 
   /*!
     @brief Get species
@@ -295,7 +295,7 @@ class ito_factory {
 public:
   ito_factory();
   ~ito_factory();
-  RefCountedPtr<ito_layout<T> > new_layout(const Vector<RefCountedPtr<ito_species> > a_species) const;
+  RefCountedPtr<ito_layout<T> > newLayout(const Vector<RefCountedPtr<ito_species> > a_species) const;
 };
 #include "CD_NamespaceFooter.H"
 

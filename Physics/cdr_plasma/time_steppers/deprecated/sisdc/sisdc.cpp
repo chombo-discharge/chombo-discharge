@@ -718,8 +718,8 @@ void sisdc::compute_FD_0(){
       solver->computeDivD(FD_0, phi_0);
 
       // Shouldn't be necesary
-      // m_amr->averageDown(FD_0, m_cdr->get_phase());
-      // m_amr->interpGhost(FD_0, m_cdr->get_phase());
+      // m_amr->averageDown(FD_0, m_cdr->getPhase());
+      // m_amr->interpGhost(FD_0, m_cdr->getPhase());
     }
     else{
       data_ops::set_value(FD_0, 0.0);
@@ -992,8 +992,8 @@ void sisdc::integrate_advection_reaction(const Real a_dt, const int a_m, const b
       }
 
       // This shouldn't be necessary
-      m_amr->averageDown(phi_m1, m_cdr->get_phase());
-      m_amr->interpGhost(phi_m1, m_cdr->get_phase());
+      m_amr->averageDown(phi_m1, m_cdr->getPhase());
+      m_amr->interpGhost(phi_m1, m_cdr->getPhase());
 
       if(a_lagged_terms){ // Back up the old slope first, we will need it for the lagged term
 	data_ops::copy(scratch, FAR_m);
@@ -1005,8 +1005,8 @@ void sisdc::integrate_advection_reaction(const Real a_dt, const int a_m, const b
       data_ops::scale(FAR_m, 1./m_dtm[a_m]);    // :
 
       // Shouldn't be necessary
-      m_amr->averageDown(FAR_m, m_cdr->get_phase());
-      m_amr->interpGhost(FAR_m, m_cdr->get_phase());
+      m_amr->averageDown(FAR_m, m_cdr->getPhase());
+      m_amr->interpGhost(FAR_m, m_cdr->getPhase());
     }
 
     // Now add in the lagged advection-reaction and quadrature terms. This is a bit weird, but we did overwrite
@@ -1080,8 +1080,8 @@ void sisdc::integrate_advection_nosubcycle(const Real a_dt, const int a_m, const
       data_ops::copy(phi_m1, phi_m);
       data_ops::incr(phi_m1, scratch, -m_dtm[a_m]);
       //      data_ops::floor(phi_m1, 0.0);
-      m_amr->averageDown(phi_m1, m_cdr->get_phase());
-      m_amr->interpGhost(phi_m1, m_cdr->get_phase());
+      m_amr->averageDown(phi_m1, m_cdr->getPhase());
+      m_amr->interpGhost(phi_m1, m_cdr->getPhase());
 
     }
     else{
@@ -1162,8 +1162,8 @@ void sisdc::integrate_advection_multistep(const Real a_dt, const int a_m, const 
       if(m_cycle_sources){
 	data_ops::incr(phi_m1, src, dt);
       }
-      m_amr->averageDown(phi_m1, m_cdr->get_phase());
-      m_amr->interpGhost(phi_m1, m_cdr->get_phase());
+      m_amr->averageDown(phi_m1, m_cdr->getPhase());
+      m_amr->interpGhost(phi_m1, m_cdr->getPhase());
       data_ops::floor(phi_m1, 0.0);
     }
 
@@ -1212,8 +1212,8 @@ void sisdc::integrate_advection_multistep(const Real a_dt, const int a_m, const 
       }
       data_ops::incr(phi_m1, scratch2, 1.0);
       data_ops::scale(phi_m1, 0.5);
-      m_amr->averageDown(phi_m1, m_cdr->get_phase());
-      m_amr->interpGhost(phi_m1, m_cdr->get_phase());
+      m_amr->averageDown(phi_m1, m_cdr->getPhase());
+      m_amr->interpGhost(phi_m1, m_cdr->getPhase());
       data_ops::floor(phi_m1, 0.0);
     }
   }
@@ -1250,8 +1250,8 @@ void sisdc::integrate_diffusion(const Real a_dt, const int a_m, const bool a_lag
 	const EBAMRCellData& FD_m1k = storage->get_FD()[a_m+1];      // FD_(m+1)^k. Lagged term.
 	data_ops::incr(init_soln, FD_m1k, -m_dtm[a_m]);
       }
-      m_amr->averageDown(init_soln, m_cdr->get_phase());
-      m_amr->interpGhost(init_soln, m_cdr->get_phase());
+      m_amr->averageDown(init_soln, m_cdr->getPhase());
+      m_amr->interpGhost(init_soln, m_cdr->getPhase());
 #if 1 // Original code
       data_ops::copy(phi_m1, phi_m);
 #else // Debug code
@@ -1265,8 +1265,8 @@ void sisdc::integrate_diffusion(const Real a_dt, const int a_m, const bool a_lag
       else{
 	solver->advanceEuler(phi_m1, init_soln, source, m_dtm[a_m]); // No source. 
       }
-      m_amr->averageDown(phi_m1, m_cdr->get_phase());
-      m_amr->interpGhost(phi_m1, m_cdr->get_phase());
+      m_amr->averageDown(phi_m1, m_cdr->getPhase());
+      m_amr->interpGhost(phi_m1, m_cdr->getPhase());
       data_ops::floor(phi_m1, 0.0);
 
       // Update the operator slope
@@ -1276,8 +1276,8 @@ void sisdc::integrate_diffusion(const Real a_dt, const int a_m, const bool a_lag
       data_ops::incr(FD_m1k, init_soln, -1.0);
       data_ops::scale(FD_m1k, 1./m_dtm[a_m]);
 
-      m_amr->averageDown(FD_m1k, m_cdr->get_phase());
-      m_amr->interpGhost(FD_m1k, m_cdr->get_phase());
+      m_amr->averageDown(FD_m1k, m_cdr->getPhase());
+      m_amr->interpGhost(FD_m1k, m_cdr->getPhase());
     }
     else{
       EBAMRCellData& FD_m1k = storage->get_FD()[a_m+1];
@@ -1460,8 +1460,8 @@ void sisdc::reconcile_integrands(){
       }
 
       // Shouldn't be necessary
-      m_amr->averageDown(F_m, m_cdr->get_phase());
-      m_amr->interpGhost(F_m, m_cdr->get_phase());
+      m_amr->averageDown(F_m, m_cdr->getPhase());
+      m_amr->interpGhost(F_m, m_cdr->getPhase());
     }
   }
 
@@ -1765,14 +1765,14 @@ void sisdc::allocate_cdr_storage(){
   
   for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
-    m_cdr_scratch[idx] = RefCountedPtr<cdr_storage> (new cdr_storage(m_amr, m_cdr->get_phase(), ncomp));
+    m_cdr_scratch[idx] = RefCountedPtr<cdr_storage> (new cdr_storage(m_amr, m_cdr->getPhase(), ncomp));
     m_cdr_scratch[idx]->allocate_storage(m_p);
   }
 }
 
 void sisdc::allocate_poisson_storage(){
   const int ncomp = 1;
-  m_fieldSolver_scratch = RefCountedPtr<poisson_storage> (new poisson_storage(m_amr, m_cdr->get_phase(), ncomp));
+  m_fieldSolver_scratch = RefCountedPtr<poisson_storage> (new poisson_storage(m_amr, m_cdr->getPhase(), ncomp));
   m_fieldSolver_scratch->allocate_storage(m_p);
 }
 
@@ -1783,14 +1783,14 @@ void sisdc::allocate_rte_storage(){
   
   for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
-    m_rte_scratch[idx] = RefCountedPtr<rte_storage> (new rte_storage(m_amr, m_rte->get_phase(), ncomp));
+    m_rte_scratch[idx] = RefCountedPtr<rte_storage> (new rte_storage(m_amr, m_rte->getPhase(), ncomp));
     m_rte_scratch[idx]->allocate_storage(m_p);
   }
 }
 
 void sisdc::allocate_sigma_storage(){
   const int ncomp = 1;
-  m_sigma_scratch = RefCountedPtr<sigma_storage> (new sigma_storage(m_amr, m_cdr->get_phase(), ncomp));
+  m_sigma_scratch = RefCountedPtr<sigma_storage> (new sigma_storage(m_amr, m_cdr->getPhase(), ncomp));
   m_sigma_scratch->allocate_storage(m_p);
 }
 
@@ -1835,11 +1835,11 @@ void sisdc::compute_E_into_scratch(){
 
   const MFAMRCellData& phi = m_fieldSolver->getPotential();
   
-  sisdc::compute_E(E_cell, m_cdr->get_phase(), phi);     // Compute cell-centered field
-  sisdc::compute_E(E_face, m_cdr->get_phase(), E_cell);  // Compute face-centered field
-  sisdc::compute_E(E_eb,   m_cdr->get_phase(), E_cell);  // EB-centered field
+  sisdc::compute_E(E_cell, m_cdr->getPhase(), phi);     // Compute cell-centered field
+  sisdc::compute_E(E_face, m_cdr->getPhase(), E_cell);  // Compute face-centered field
+  sisdc::compute_E(E_eb,   m_cdr->getPhase(), E_cell);  // EB-centered field
 
-  TimeStepper::extrapolate_to_domain_faces(E_dom, m_cdr->get_phase(), E_cell);
+  TimeStepper::extrapolate_to_domain_faces(E_dom, m_cdr->getPhase(), E_cell);
 }
 
 void sisdc::compute_cdr_gradients(){
@@ -1862,8 +1862,8 @@ void sisdc::compute_cdr_gradients(const Vector<EBAMRCellData*>& a_phis){
     RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
     EBAMRCellData& grad = storage->get_gradient();
     m_amr->computeGradient(grad, *a_phis[idx]);
-    //    m_amr->averageDown(grad, m_cdr->get_phase());
-    m_amr->interpGhost(grad, m_cdr->get_phase());
+    //    m_amr->averageDown(grad, m_cdr->getPhase());
+    m_amr->interpGhost(grad, m_cdr->getPhase());
   }
 }
 
@@ -1909,7 +1909,7 @@ void sisdc::compute_cdr_eb_states(){
 
   // Extrapolate states to the EB and floor them so we cannot get negative values on the boundary. This
   // won't hurt mass conservation because the mass hasn't been injected yet
-  sisdc::extrapolate_to_eb(eb_states, m_cdr->get_phase(), cdr_states);
+  sisdc::extrapolate_to_eb(eb_states, m_cdr->getPhase(), cdr_states);
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     data_ops::floor(*eb_states[idx], 0.0);
@@ -1917,9 +1917,9 @@ void sisdc::compute_cdr_eb_states(){
 
   // We should already have the cell-centered gradients, extrapolate them to the EB and project the flux. 
   EBAMRIVData eb_gradient;
-  m_amr->allocate(eb_gradient, m_cdr->get_phase(), SpaceDim);
+  m_amr->allocate(eb_gradient, m_cdr->getPhase(), SpaceDim);
   for (int i = 0; i < cdr_states.size(); i++){
-    sisdc::extrapolate_to_eb(eb_gradient, m_cdr->get_phase(), *cdr_gradients[i]);
+    sisdc::extrapolate_to_eb(eb_gradient, m_cdr->getPhase(), *cdr_gradients[i]);
     sisdc::project_flux(*eb_gradients[i], eb_gradient);
   }
 }
@@ -1944,7 +1944,7 @@ void sisdc::compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_phis){
 
   // Extrapolate states to the EB and floor them so we cannot get negative values on the boundary. This
   // won't hurt mass conservation because the mass hasn't been injected yet
-  sisdc::extrapolate_to_eb(eb_states, m_cdr->get_phase(), a_phis);
+  sisdc::extrapolate_to_eb(eb_states, m_cdr->getPhase(), a_phis);
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     data_ops::floor(*eb_states[idx], 0.0);
@@ -1952,9 +1952,9 @@ void sisdc::compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_phis){
 
   // We should already have the cell-centered gradients, extrapolate them to the EB and project the flux. 
   EBAMRIVData eb_gradient;
-  m_amr->allocate(eb_gradient, m_cdr->get_phase(), SpaceDim);
+  m_amr->allocate(eb_gradient, m_cdr->getPhase(), SpaceDim);
   for (int i = 0; i < a_phis.size(); i++){
-    sisdc::extrapolate_to_eb(eb_gradient, m_cdr->get_phase(), *cdr_gradients[i]);
+    sisdc::extrapolate_to_eb(eb_gradient, m_cdr->getPhase(), *cdr_gradients[i]);
     sisdc::project_flux(*eb_gradients[i], eb_gradient);
   }
 }
@@ -1981,13 +1981,13 @@ void sisdc::compute_cdr_domain_states(){
   }
 
   // Extrapolate states to the domain faces
-  sisdc::extrapolate_to_domain_faces(domain_states, m_cdr->get_phase(), cdr_states);
+  sisdc::extrapolate_to_domain_faces(domain_states, m_cdr->getPhase(), cdr_states);
 
   // We already have the cell-centered gradients, extrapolate them to the EB and project the flux. 
   EBAMRIFData grad;
-  m_amr->allocate(grad, m_cdr->get_phase(), SpaceDim);
+  m_amr->allocate(grad, m_cdr->getPhase(), SpaceDim);
   for (int i = 0; i < cdr_states.size(); i++){
-    sisdc::extrapolate_to_domain_faces(grad, m_cdr->get_phase(), *cdr_gradients[i]);
+    sisdc::extrapolate_to_domain_faces(grad, m_cdr->getPhase(), *cdr_gradients[i]);
     sisdc::project_domain(*domain_gradients[i], grad);
   }
 }
@@ -2012,13 +2012,13 @@ void sisdc::compute_cdr_domain_states(const Vector<EBAMRCellData*>& a_phis){
   }
 
   // Extrapolate states to the domain faces
-  this->extrapolate_to_domain_faces(domain_states, m_cdr->get_phase(), a_phis);
+  this->extrapolate_to_domain_faces(domain_states, m_cdr->getPhase(), a_phis);
 
   // We already have the cell-centered gradients, extrapolate them to the EB and project the flux. 
   EBAMRIFData grad;
-  m_amr->allocate(grad, m_cdr->get_phase(), SpaceDim);
+  m_amr->allocate(grad, m_cdr->getPhase(), SpaceDim);
   for (int i = 0; i < a_phis.size(); i++){
-    this->extrapolate_to_domain_faces(grad, m_cdr->get_phase(), *cdr_gradients[i]);
+    this->extrapolate_to_domain_faces(grad, m_cdr->getPhase(), *cdr_gradients[i]);
     this->project_domain(*domain_gradients[i], grad);
   }
 }
@@ -2064,8 +2064,8 @@ void sisdc::compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_phis, const Real 
 
   // Extrapolate densities, velocities, and fluxes
   Vector<EBAMRCellData*> cdr_velocities = m_cdr->get_velocities();
-  TimeStepper::compute_extrapolated_fluxes(extrap_cdr_fluxes, a_phis, cdr_velocities, m_cdr->get_phase());
-  TimeStepper::compute_extrapolated_velocities(extrap_cdr_velocities, cdr_velocities, m_cdr->get_phase());
+  TimeStepper::compute_extrapolated_fluxes(extrap_cdr_fluxes, a_phis, cdr_velocities, m_cdr->getPhase());
+  TimeStepper::compute_extrapolated_velocities(extrap_cdr_velocities, cdr_velocities, m_cdr->getPhase());
 
   // Compute RTE flux on the boundary
   for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
@@ -2132,10 +2132,10 @@ void sisdc::compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_phis, cons
   }
 
   // Compute extrapolated velocities and fluxes at the domain faces
-  this->extrapolate_to_domain_faces(extrap_cdr_densities,         m_cdr->get_phase(), a_phis);
-  this->extrapolate_vector_to_domain_faces(extrap_cdr_velocities, m_cdr->get_phase(), cdr_velocities);
-  this->compute_extrapolated_domain_fluxes(extrap_cdr_fluxes,     a_phis,           cdr_velocities, m_cdr->get_phase());
-  this->extrapolate_vector_to_domain_faces(extrap_cdr_gradients,  m_cdr->get_phase(), cdr_gradients);
+  this->extrapolate_to_domain_faces(extrap_cdr_densities,         m_cdr->getPhase(), a_phis);
+  this->extrapolate_vector_to_domain_faces(extrap_cdr_velocities, m_cdr->getPhase(), cdr_velocities);
+  this->compute_extrapolated_domain_fluxes(extrap_cdr_fluxes,     a_phis,           cdr_velocities, m_cdr->getPhase());
+  this->extrapolate_vector_to_domain_faces(extrap_cdr_gradients,  m_cdr->getPhase(), cdr_gradients);
 
   // Compute RTE flux on domain faces
   for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
@@ -2410,7 +2410,7 @@ void sisdc::reset_finer_flux_registers_level(const int a_lvl,
     pout() << "sisdc::resetFluxRegisters_level" << endl;
   }
 
-  const phase::which_phase phase = m_cdr->get_phase();
+  const phase::which_phase phase = m_cdr->getPhase();
   const bool has_fine = a_lvl < a_finestLevel;
   if(has_fine){
     EBFluxRegister* fluxreg_fine = m_amr->getFluxRegister(phase)[a_lvl];
@@ -2424,7 +2424,7 @@ void sisdc::reset_redist_registers_level(const int a_lvl, const int a_coarsest_l
     pout() << "sisdc::reset_redist_registers_level" << endl;
   }
 
-  const phase::which_phase phase = m_cdr->get_phase();
+  const phase::which_phase phase = m_cdr->getPhase();
   EBLevelRedist& level_redist = *(m_amr->getLevelRedist(phase)[a_lvl]);
   level_redist.setToZero();
 
@@ -2432,9 +2432,9 @@ void sisdc::reset_redist_registers_level(const int a_lvl, const int a_coarsest_l
     const bool has_fine = a_lvl < a_finestLevel;
     const bool has_coar = a_lvl > a_coarsest_level;
 
-    RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->getFineToCoarRedist(m_cdr->get_phase())[a_lvl];
-    RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->getCoarToFineRedist(m_cdr->get_phase())[a_lvl];
-    RefCountedPtr<EBCoarToCoarRedist>& coar2coar_redist = m_amr->getCoarToCoarRedist(m_cdr->get_phase())[a_lvl];
+    RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->getFineToCoarRedist(m_cdr->getPhase())[a_lvl];
+    RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->getCoarToFineRedist(m_cdr->getPhase())[a_lvl];
+    RefCountedPtr<EBCoarToCoarRedist>& coar2coar_redist = m_amr->getCoarToCoarRedist(m_cdr->getPhase())[a_lvl];
 
     if(has_coar){
       fine2coar_redist->setToZero();
@@ -2458,7 +2458,7 @@ void sisdc::update_flux_registers(LevelData<EBFluxFAB>& a_flux,
   const bool has_fine = a_lvl < a_finestLevel;
   const bool has_coar = a_lvl > a_coarsest_level;
 
-  const phase::which_phase phase = m_cdr->get_phase();
+  const phase::which_phase phase = m_cdr->getPhase();
   const Interval interv(a_solver, a_solver);
   EBFluxRegister* fluxreg_fine = NULL;
   EBFluxRegister* fluxreg_coar = NULL;
@@ -2512,12 +2512,12 @@ void sisdc::update_redist_register(const LevelData<BaseIVFAB<Real> >& a_massDiff
   const Interval interv(a_solver, a_solver);
   const DisjointBoxLayout& dbl = m_amr->getGrids()[a_lvl];
 
-  const phase::which_phase phase = m_cdr->get_phase();
+  const phase::which_phase phase = m_cdr->getPhase();
   EBLevelRedist& level_redist = *(m_amr->getLevelRedist(phase)[a_lvl]);
 
   // Again, this is a bit stupid but to get the correct data from the correct interval, we have to do this
   EBAMRIVData diff;
-  m_amr->allocate(diff, m_cdr->get_phase(), m_plaskin->get_num_species());
+  m_amr->allocate(diff, m_cdr->getPhase(), m_plaskin->get_num_species());
   a_massDifference.localCopyTo(Interval(0,0), *diff[a_lvl], interv);
   diff[a_lvl]->exchange(interv);
 
@@ -2548,14 +2548,14 @@ void sisdc::update_coarse_fine_register(const LevelData<BaseIVFAB<Real> >& a_mas
     
     // Again, this is a bit stupid but to get the correct data from the correct interval, we have to do this
     EBAMRIVData diff;
-    m_amr->allocate(diff, m_cdr->get_phase(), m_plaskin->get_num_species());
+    m_amr->allocate(diff, m_cdr->getPhase(), m_plaskin->get_num_species());
     data_ops::set_value(*diff[a_lvl], 0.0);
     a_massDifference.localCopyTo(Interval(0,0), *diff[a_lvl], interv);
     diff[a_lvl]->exchange();
 
-    RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->getFineToCoarRedist(m_cdr->get_phase())[a_lvl];
-    RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->getCoarToFineRedist(m_cdr->get_phase())[a_lvl];
-    RefCountedPtr<EBCoarToCoarRedist>& coar2coar_redist = m_amr->getCoarToCoarRedist(m_cdr->get_phase())[a_lvl];
+    RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->getFineToCoarRedist(m_cdr->getPhase())[a_lvl];
+    RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->getCoarToFineRedist(m_cdr->getPhase())[a_lvl];
+    RefCountedPtr<EBCoarToCoarRedist>& coar2coar_redist = m_amr->getCoarToCoarRedist(m_cdr->getPhase())[a_lvl];
 
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -2571,7 +2571,7 @@ void sisdc::update_coarse_fine_register(const LevelData<BaseIVFAB<Real> >& a_mas
 
     // Tell the flux register about what is going on with EBCF. 
     if(has_fine){
-      RefCountedPtr<EBFluxRegister>& fluxreg = m_amr->getFluxRegister(m_cdr->get_phase())[a_lvl];
+      RefCountedPtr<EBFluxRegister>& fluxreg = m_amr->getFluxRegister(m_cdr->getPhase())[a_lvl];
       fluxreg->incrementRedistRegister(*coar2fine_redist, interv, -dx);
       fluxreg->incrementRedistRegister(*coar2coar_redist, interv, -dx);
     }
@@ -2590,7 +2590,7 @@ void sisdc::reflux_level(EBAMRCellData& a_phi,
     pout() << "sisdc::::reflux_level" << endl;
   }
   
-  const phase::which_phase phase = m_cdr->get_phase();
+  const phase::which_phase phase = m_cdr->getPhase();
   const Interval soln_interv(0, 0);
   const Interval flux_interv(a_solver, a_solver);
   const Real dx = m_amr->getDx()[a_lvl];
@@ -2606,7 +2606,7 @@ void sisdc::redist_level(LevelData<EBCellFAB>&       a_phi,
   if(m_verbosity > 5){
     pout() << "sisdc::redist_level" << endl;
   }
-  const phase::which_phase phase = m_cdr->get_phase();
+  const phase::which_phase phase = m_cdr->getPhase();
   const Interval solver_interv(0, 0);
   const Interval redist_interv(a_solver, a_solver);
   EBLevelRedist& level_redist = *(m_amr->getLevelRedist(phase)[a_lvl]);
@@ -2627,7 +2627,7 @@ void sisdc::integrate_advection_subcycle(const Real a_dt, const int a_m, const b
   const int ncomp      = 1;
   const int redist_rad = m_amr->getRedistributionRadius();
 
-  const phase::which_phase phase = m_cdr->get_phase();
+  const phase::which_phase phase = m_cdr->getPhase();
 
   // These are all temporaries that are required for evaluating the advective derivative. 
   EBAMRFluxData flux;
@@ -2870,16 +2870,16 @@ void sisdc::subcycle_update_transport_bc(const int a_m, const int a_lvl, const R
     m_amr->computeGradient(*cell_gradients[idx], *cell_states[idx], a_lvl);
     
     // 2. Extrapolate cell-centered gradient to the EB
-    TimeStepper::extrapolate_to_eb(scratchIV_D, m_cdr->get_phase(), *cell_gradients[idx], a_lvl);
+    TimeStepper::extrapolate_to_eb(scratchIV_D, m_cdr->getPhase(), *cell_gradients[idx], a_lvl);
 
     // 3. Dot EB-centered gradient with normal vector
     TimeStepper::project_flux(*eb_gradients[idx], scratchIV_D, a_lvl);
     
     // 4. Extrapolate the cell-centered states to the EB
-    TimeStepper::extrapolate_to_eb(*eb_states[idx], m_cdr->get_phase(), *cell_states[idx], a_lvl);
+    TimeStepper::extrapolate_to_eb(*eb_states[idx], m_cdr->getPhase(), *cell_states[idx], a_lvl);
 
     // 5. Extrapolate cell-centered velocities to the EB
-    TimeStepper::extrapolate_to_eb(scratchIV_D, m_cdr->get_phase(), *cell_velocities[idx], a_lvl);
+    TimeStepper::extrapolate_to_eb(scratchIV_D, m_cdr->getPhase(), *cell_velocities[idx], a_lvl);
 
     // 6. Project normal velocity
     TimeStepper::project_flux(*eb_velocities[idx], scratchIV_D, a_lvl);
@@ -2887,7 +2887,7 @@ void sisdc::subcycle_update_transport_bc(const int a_m, const int a_lvl, const R
     // 7. Compute the extrapolated flux at the boundary
     cell_velocities[idx]->localCopyTo(scratchD);
     data_ops::multiply_scalar(scratchD, *cell_states[idx]);
-    TimeStepper::extrapolate_to_eb(scratchIV_D, m_cdr->get_phase(), scratchD, a_lvl);
+    TimeStepper::extrapolate_to_eb(scratchIV_D, m_cdr->getPhase(), scratchD, a_lvl);
     TimeStepper::project_flux(*eb_fluxes[idx], scratchIV_D, a_lvl);
   }
 
@@ -2937,17 +2937,17 @@ void sisdc::subcycle_update_sources(const int a_m, const int a_lvl, const Real a
   const int num_Photons        = m_plaskin->get_num_Photons();
   
   const DisjointBoxLayout& dbl = m_amr->getGrids()[a_lvl];
-  const EBISLayout& ebisl      = m_amr->getEBISLayout(m_cdr->get_phase())[a_lvl];
+  const EBISLayout& ebisl      = m_amr->getEBISLayout(m_cdr->getPhase())[a_lvl];
   const RealVect origin        = m_physdom->getProbLo();
   const Real dx                = m_amr->getDx()[a_lvl];
 
   // Stencils for extrapolating things to cell centroids
-  const IrregAmrStencil<CentroidInterpolationStencil>& interp_stencils = m_amr->getCentroidInterpolationStencils(m_cdr->get_phase());
+  const IrregAmrStencil<CentroidInterpolationStencil>& interp_stencils = m_amr->getCentroidInterpolationStencils(m_cdr->getPhase());
 
   // We must have the gradient of E. This block of code does that. 
   EBAMRCellData grad_E, E_norm;
-  m_amr->allocate(grad_E, m_cdr->get_phase(), SpaceDim);  // Allocate storage for grad(|E|)
-  m_amr->allocate(E_norm, m_cdr->get_phase(), 1);         // Allocate storage for |E|
+  m_amr->allocate(grad_E, m_cdr->getPhase(), SpaceDim);  // Allocate storage for grad(|E|)
+  m_amr->allocate(E_norm, m_cdr->getPhase(), 1);         // Allocate storage for |E|
   const EBAMRCellData& E = m_fieldSolver_scratch->get_E_cell();
   data_ops::vector_length(*E_norm[a_lvl], *E[a_lvl]);            // Compute |E| on this level
   m_amr->computeGradient(*grad_E[a_lvl], *E_norm[a_lvl], a_lvl);// Compute grad(|E|) on this level
@@ -3022,7 +3022,7 @@ void sisdc::subcycle_sync_levels(const int a_m, const int a_lvl, const int a_coa
     
     // Reflux state
     if(solver->isMobile()){
-      m_amr->averageDown(state, m_cdr->get_phase(), a_lvl);
+      m_amr->averageDown(state, m_cdr->getPhase(), a_lvl);
       sisdc::reflux_level(state, solver_idx, a_lvl, a_coarsest_level, a_finestLevel, 1.0);
       // EBCF related code. 
       if(m_amr->getEbCf()){
@@ -3034,12 +3034,12 @@ void sisdc::subcycle_sync_levels(const int a_m, const int a_lvl, const int a_coa
 
 	// Bah, extra storage becase redistribution registers don't let me use different for mass diffs and target FAB
 	EBAMRCellData dummy;
-	m_amr->allocate(dummy, m_cdr->get_phase(), m_plaskin->get_num_species());
+	m_amr->allocate(dummy, m_cdr->getPhase(), m_plaskin->get_num_species());
 	data_ops::set_value(dummy, 0.0);
 
-	RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->getCoarToFineRedist(m_cdr->get_phase())[a_lvl];
-	RefCountedPtr<EBCoarToCoarRedist>& coar2coar_redist = m_amr->getCoarToCoarRedist(m_cdr->get_phase())[a_lvl];
-	RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->getFineToCoarRedist(m_cdr->get_phase())[a_lvl];
+	RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->getCoarToFineRedist(m_cdr->getPhase())[a_lvl];
+	RefCountedPtr<EBCoarToCoarRedist>& coar2coar_redist = m_amr->getCoarToCoarRedist(m_cdr->getPhase())[a_lvl];
+	RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->getFineToCoarRedist(m_cdr->getPhase())[a_lvl];
 
 
 	LevelData<EBCellFAB>* dummy_lev  = dummy[a_lvl];
@@ -3070,7 +3070,7 @@ void sisdc::subcycle_sync_levels(const int a_m, const int a_lvl, const int a_coa
 	}
       }
     }
-    m_amr->averageDown(state, m_cdr->get_phase(), a_lvl);
+    m_amr->averageDown(state, m_cdr->getPhase(), a_lvl);
     state[a_lvl]->exchange();
   }
 }

@@ -149,7 +149,7 @@ private:
       @brief Factory method
     */
     virtual BaseIVFAB<Real>* create(const Box& box, int ncomps, const DataIndex& a_datInd) const{
-      return (*m_mf)[a_datInd].get_phase_ptr(m_phase);
+      return (*m_mf)[a_datInd].getPhase_ptr(m_phase);
     }
 
     /*!

@@ -232,7 +232,7 @@ public:
   /*!
     @brief Get the RTE phase
   */
-  virtual phase::which_phase get_phase();
+  virtual phase::which_phase getPhase();
 
   /*!
     @brief Get multifluid state

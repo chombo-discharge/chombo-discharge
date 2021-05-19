@@ -4,7 +4,7 @@
 #include "CD_FieldSolverMultigrid.H"
 #include "cdr_layoutI.H"
 #include <CD_CdrGodunov.H>
-#include "rte_layoutI.H"
+#include <CD_RtLayoutImplem.H>
 #include <CD_EddingtonSP1.H>
 #include "air9eed_bourdon.H"
 #include "rod_dielectric.H"
@@ -53,12 +53,12 @@ int main(int argc, char* argv[]){
   // Create solver factories
   auto poi_fact = new FieldSolverFactory<FieldSolverMultigrid>();
   auto cdr_fact = new cdr_factory<CdrSolver, CdrGodunov>();
-  auto rte_fact = new rte_factory<RtSolver, EddingtonSP1>();
+  auto rte_fact = new RtFactory<RtSolver, EddingtonSP1>();
 
   // Instantiate solvers
   auto poi = poi_fact->newSolver();
-  auto cdr = cdr_fact->new_layout(physics->get_CdrSpecies());
-  auto rte = rte_fact->new_layout(physics->get_rte_species());
+  auto cdr = cdr_fact->newLayout(physics->get_CdrSpecies());
+  auto rte = rte_fact->newLayout(physics->get_rte_species());
 
   // Send solvers to TimeStepper 
   timestepper->set_poisson(poi);

@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_RtIterator.H
-  @brief  Iterator class for rte_layout
+  @brief  Iterator class for RtLayout
   @author Robert Marskar
 */
 
@@ -13,11 +13,11 @@
 #define CD_RtIterator_H
 
 // Our includes
-#include <rte_layout.H>
+#include <CD_RtLayout.H>
 #include <CD_NamespaceHeader.H>
   
 /*!
-  @brief Iterator class for rte_layout
+  @brief Iterator class for RtLayout
 */
 template <class T>
 class RtIterator {
@@ -30,10 +30,10 @@ public:
   /*!
     @brief Full constructor
   */
-  RtIterator(rte_layout<T>& a_layout){
+  RtIterator(RtLayout<T>& a_layout){
     CH_TIME("RtIterator::RtIterator");
     
-    m_solvers  = a_layout.get_solvers();
+    m_solvers  = a_layout.getSolvers();
     m_species  = a_layout.getSpecies();
     m_num      = m_solvers.size();
 

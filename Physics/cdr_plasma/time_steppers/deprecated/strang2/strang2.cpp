@@ -712,8 +712,8 @@ void strang2::advance_rkN2(const Real a_time, const Real a_dt, const int a_stage
       data_ops::incr(rhs,  src, 1.0);            // RHS = S^i - Div(u^i*v^i)
       data_ops::incr(phi, rhs, beta*a_dt);       // u^(i+1) = u^i + [1/(s-1)]*dt*L(u^i)
 
-      m_amr->averageDown(phi, m_cdr->get_phase());
-      m_amr->interpGhost(phi, m_cdr->get_phase());
+      m_amr->averageDown(phi, m_cdr->getPhase());
+      m_amr->interpGhost(phi, m_cdr->getPhase());
 
       data_ops::floor(phi, 0.0);
     }
@@ -753,8 +753,8 @@ void strang2::advance_rkN2(const Real a_time, const Real a_dt, const int a_stage
       data_ops::incr(phi, pre, sinv);            // u^(n+1) = (1/s)*u^n + (s-1/s)*u^i
       data_ops::incr(phi, rhs, sinv*a_dt);       // u^(n+1) = (1/s)*u^n + (1/s)*dt*L(u^i)
 
-      m_amr->averageDown(phi, m_cdr->get_phase());
-      m_amr->interpGhost(phi, m_cdr->get_phase());
+      m_amr->averageDown(phi, m_cdr->getPhase());
+      m_amr->interpGhost(phi, m_cdr->getPhase());
 
       data_ops::floor(phi, 0.0);
     }
@@ -808,8 +808,8 @@ void strang2::advance_rk33(const Real a_time, const Real a_dt){
       data_ops::incr(rhs,  src, 1.0);            // RHS = S^n - Div(u^n*v^n)
       data_ops::incr(phi, rhs, a_dt);            // u^1 = u^n + dt*L(u^n)
     
-      m_amr->averageDown(phi, m_cdr->get_phase());
-      m_amr->interpGhost(phi, m_cdr->get_phase());
+      m_amr->averageDown(phi, m_cdr->getPhase());
+      m_amr->interpGhost(phi, m_cdr->getPhase());
     
       data_ops::floor(phi, 0.0);
 
@@ -850,8 +850,8 @@ void strang2::advance_rk33(const Real a_time, const Real a_dt){
       data_ops::incr(phi,  pre, 3.0);            // u^2 = 3*u^n + u^1 + dt*L(u^1)
       data_ops::scale(phi, 0.25);                // u^2 = 0.25*[3*u^n + u^1 + dt*L(u^1)]
     
-      m_amr->averageDown(phi, m_cdr->get_phase());
-      m_amr->interpGhost(phi, m_cdr->get_phase());
+      m_amr->averageDown(phi, m_cdr->getPhase());
+      m_amr->interpGhost(phi, m_cdr->getPhase());
     
       data_ops::floor(phi, 0.0);
     }
@@ -896,8 +896,8 @@ void strang2::advance_rk33(const Real a_time, const Real a_dt){
       data_ops::incr(phi, pre, 1.0);             // u^(n+1) = u^n + 2*u^2 + dt*L(u^2)
       data_ops::scale(phi, 1./3.);               // u^(n+1) = (1/3)*[u^n + 2*u^2 + 2*dt*L(u^2)]
     
-      m_amr->averageDown(phi, m_cdr->get_phase());
-      m_amr->interpGhost(phi, m_cdr->get_phase());
+      m_amr->averageDown(phi, m_cdr->getPhase());
+      m_amr->interpGhost(phi, m_cdr->getPhase());
     
       data_ops::floor(phi, 0.0);
 
@@ -960,8 +960,8 @@ void strang2::advance_rk43(const Real a_time, const Real a_dt){
       data_ops::incr(rhs,  src, 1.0);            // RHS = S^i - Div(u^i*v^i)
       data_ops::incr(phi, rhs, 0.5*a_dt);      // u^(i+1) = u^i + 0.5*dt*L(u^i)
 
-      m_amr->averageDown(phi, m_cdr->get_phase());
-      m_amr->interpGhost(phi, m_cdr->get_phase());
+      m_amr->averageDown(phi, m_cdr->getPhase());
+      m_amr->interpGhost(phi, m_cdr->getPhase());
 
       data_ops::floor(phi, 0.0);
     }
@@ -1003,8 +1003,8 @@ void strang2::advance_rk43(const Real a_time, const Real a_dt){
       data_ops::incr(phi, rhs, a_dt);            // u^(n+1) = 4*u^n + 2*u^2 + dt*L(u^2)
       data_ops::scale(phi, sixth);               // u^(n+1) = (2/3)u^n + (1/3)*u^3 + (1/6)*dt*L(u^3)]
 
-      m_amr->averageDown(phi, m_cdr->get_phase());
-      m_amr->interpGhost(phi, m_cdr->get_phase());
+      m_amr->averageDown(phi, m_cdr->getPhase());
+      m_amr->interpGhost(phi, m_cdr->getPhase());
 
       data_ops::floor(phi, 0.0);
     }
@@ -1045,8 +1045,8 @@ void strang2::advance_rk43(const Real a_time, const Real a_dt){
       data_ops::incr(rhs,  src, 1.0);            // RHS = S^i - Div(u^i*v^i)
       data_ops::incr(phi, rhs, 0.5*a_dt);      // u^(i+1) = u^i + 0.5*dt*L(u^i)
 
-      m_amr->averageDown(phi, m_cdr->get_phase());
-      m_amr->interpGhost(phi, m_cdr->get_phase());
+      m_amr->averageDown(phi, m_cdr->getPhase());
+      m_amr->interpGhost(phi, m_cdr->getPhase());
 
       data_ops::floor(phi, 0.0);
     }
@@ -1140,8 +1140,8 @@ void strang2::advance_rk53(const Real a_time, const Real a_dt){
       data_ops::incr(rhs,  src, 1.0);            // RHS = S^n - Div(u^n*v^n) = L(u^n)
       data_ops::incr(phi, rhs, a_dt*b00);        // u^1 = u^n + dt*b00*L(u^n)
 
-      m_amr->averageDown(phi, m_cdr->get_phase());
-      m_amr->interpGhost(phi, m_cdr->get_phase());
+      m_amr->averageDown(phi, m_cdr->getPhase());
+      m_amr->interpGhost(phi, m_cdr->getPhase());
 
       data_ops::floor(phi, 0.0);
       data_ops::copy(u1, phi); // Backup of u^1
@@ -1183,8 +1183,8 @@ void strang2::advance_rk53(const Real a_time, const Real a_dt){
       data_ops::incr(rhs,  src, 1.0);            // RHS = S^1 - Div(u^1*v^1) = L(u^1)
       data_ops::incr(phi, rhs, a_dt*b11);        // u^2 = u^1 + dt*b11*L(u^1)
 
-      m_amr->averageDown(phi, m_cdr->get_phase());
-      m_amr->interpGhost(phi, m_cdr->get_phase());
+      m_amr->averageDown(phi, m_cdr->getPhase());
+      m_amr->interpGhost(phi, m_cdr->getPhase());
 
       data_ops::floor(phi, 0.0);
       data_ops::copy(u2, phi);   // Backup of u^2
@@ -1228,8 +1228,8 @@ void strang2::advance_rk53(const Real a_time, const Real a_dt){
       data_ops::incr(phi, pre, a20);             // u^3 = a20*u^n + a22*u^2
       data_ops::incr(phi, rhs, a_dt*b22);        // u^3 = a20*u^n + a22*u^2 + dt*b22*L(u^2)
 
-      m_amr->averageDown(phi, m_cdr->get_phase());
-      m_amr->interpGhost(phi, m_cdr->get_phase());
+      m_amr->averageDown(phi, m_cdr->getPhase());
+      m_amr->interpGhost(phi, m_cdr->getPhase());
 
       data_ops::floor(phi, 0.0);
     }
@@ -1276,8 +1276,8 @@ void strang2::advance_rk53(const Real a_time, const Real a_dt){
       data_ops::incr(phi, Lun, a_dt*b30);        // u^4 = a30*u^n + a31*u^1 + a33*u^3 + dt*b30*L(u^n)
       data_ops::incr(phi, rhs, a_dt*b33);        // u^4 = a30*u^n + a31*u^1 + a33*u^3 + dt*b30*L(u^n) + dt*b33*L(u^3)
 
-      m_amr->averageDown(phi, m_cdr->get_phase());
-      m_amr->interpGhost(phi, m_cdr->get_phase());
+      m_amr->averageDown(phi, m_cdr->getPhase());
+      m_amr->interpGhost(phi, m_cdr->getPhase());
 
       data_ops::floor(phi, 0.0);
     }
@@ -1332,8 +1332,8 @@ void strang2::advance_rk53(const Real a_time, const Real a_dt){
       data_ops::incr(phi, Lu1, a_dt*b41);        // u^(n+1) += b41*dt*L(u^1)
       data_ops::incr(phi, rhs, a_dt*b44);        // u^(n+1) += b44*dt*L(u^4)
 
-      m_amr->averageDown(phi, m_cdr->get_phase());
-      m_amr->interpGhost(phi, m_cdr->get_phase());
+      m_amr->averageDown(phi, m_cdr->getPhase());
+      m_amr->interpGhost(phi, m_cdr->getPhase());
 
       data_ops::floor(phi, 0.0);
     }
@@ -1448,8 +1448,8 @@ void strang2::advance_rk54(const Real a_time, const Real a_dt){
       data_ops::incr(rhs,  src, 1.0);            // RHS = S^n - Div(u^n*v^n) = L(u^n)
       data_ops::incr(phi, rhs, a_dt*b00);        // u^1 = u^n + dt*b00*L(u^n)
 
-      m_amr->averageDown(phi, m_cdr->get_phase());
-      m_amr->interpGhost(phi, m_cdr->get_phase());
+      m_amr->averageDown(phi, m_cdr->getPhase());
+      m_amr->interpGhost(phi, m_cdr->getPhase());
 
       data_ops::floor(phi, 0.0);
     }
@@ -1490,8 +1490,8 @@ void strang2::advance_rk54(const Real a_time, const Real a_dt){
       data_ops::incr(phi, pre, a10);             // u^2 = a10*u^n + a11*u^1
       data_ops::incr(phi, rhs, a_dt*b11);        // u^2 = a10*u^n + a11*u^1 + dt*b11*L(u^1)
 
-      m_amr->averageDown(phi, m_cdr->get_phase());
-      m_amr->interpGhost(phi, m_cdr->get_phase());
+      m_amr->averageDown(phi, m_cdr->getPhase());
+      m_amr->interpGhost(phi, m_cdr->getPhase());
 
       data_ops::floor(phi, 0.0);
       data_ops::copy(u2, phi);   // Backup of u^2
@@ -1539,8 +1539,8 @@ void strang2::advance_rk54(const Real a_time, const Real a_dt){
       data_ops::incr(phi, pre, a20);             // u^3 = a20*u^n + a22*u^2
       data_ops::incr(phi, rhs, a_dt*b22);        // u^3 = a20*u^n + a22*u^2 + dt*b22*L(u^2)
 
-      m_amr->averageDown(phi, m_cdr->get_phase());
-      m_amr->interpGhost(phi, m_cdr->get_phase());
+      m_amr->averageDown(phi, m_cdr->getPhase());
+      m_amr->interpGhost(phi, m_cdr->getPhase());
 
       data_ops::floor(phi, 0.0);
       data_ops::copy(u3, phi);   // Backup of u^3
@@ -1587,8 +1587,8 @@ void strang2::advance_rk54(const Real a_time, const Real a_dt){
       data_ops::incr(phi, pre, a30);             // u^4 = a30*u^n + a33*u^3
       data_ops::incr(phi, rhs, a_dt*b33);        // u^4 = a30*u^n + a33*u^3 + dt*b33*L(u^3)
 
-      m_amr->averageDown(phi, m_cdr->get_phase());
-      m_amr->interpGhost(phi, m_cdr->get_phase());
+      m_amr->averageDown(phi, m_cdr->getPhase());
+      m_amr->interpGhost(phi, m_cdr->getPhase());
 
       data_ops::floor(phi, 0.0);
     }
@@ -1638,8 +1638,8 @@ void strang2::advance_rk54(const Real a_time, const Real a_dt){
       data_ops::incr(phi, Lu3, a_dt*b43);        // u^(n+1) = a40*u^n + a42*u^2 + a43*u^3 a44*u^4 + b43*dt*L(u^3)
       data_ops::incr(phi, rhs, a_dt*b44);        // u^(n+1) = a40*u^n + a42*u^2 + a43*u^3 a44*u^4 + b43*dt*L(u^3) + b44*dt*L(u^4)
 
-      m_amr->averageDown(phi, m_cdr->get_phase());
-      m_amr->interpGhost(phi, m_cdr->get_phase());
+      m_amr->averageDown(phi, m_cdr->getPhase());
+      m_amr->interpGhost(phi, m_cdr->getPhase());
 
       data_ops::floor(phi, 0.0);
     }
@@ -1696,8 +1696,8 @@ void strang2::compute_cdr_gradients(const Vector<EBAMRCellData*>& a_phis){
     EBAMRCellData& grad = storage->get_gradient();
 
     m_amr->computeGradient(grad, *a_phis[idx]);
-    m_amr->averageDown(grad, m_cdr->get_phase());
-    m_amr->interpGhost(grad, m_cdr->get_phase());
+    m_amr->averageDown(grad, m_cdr->getPhase());
+    m_amr->interpGhost(grad, m_cdr->getPhase());
   }
 }
 
@@ -1723,7 +1723,7 @@ void strang2::compute_errors(){
     // So far 'err' contains the embedded formula and 'phi' is the numerical solution
     data_ops::incr(err, phi, -1.0); // err -> (err-phi), this is opposite, but the norm takes the magnitude anyways
 
-    m_amr->averageDown(err, m_cdr->get_phase());
+    m_amr->averageDown(err, m_cdr->getPhase());
     
     Real Lerr, Lphi;
     data_ops::norm(Lerr, *err[0], m_amr->getDomains()[0], m_error_norm);
@@ -1827,14 +1827,14 @@ void strang2::allocate_cdr_storage(){
   
   for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
-    m_cdr_scratch[idx] = RefCountedPtr<cdr_storage> (new cdr_storage(m_rk_order, m_amr, m_cdr->get_phase(), ncomp));
+    m_cdr_scratch[idx] = RefCountedPtr<cdr_storage> (new cdr_storage(m_rk_order, m_amr, m_cdr->getPhase(), ncomp));
     m_cdr_scratch[idx]->allocate_storage();
   }
 }
 
 void strang2::allocate_poisson_storage(){
   const int ncomp = 1;
-  m_fieldSolver_scratch = RefCountedPtr<poisson_storage> (new poisson_storage(m_rk_order, m_amr, m_cdr->get_phase(), ncomp));
+  m_fieldSolver_scratch = RefCountedPtr<poisson_storage> (new poisson_storage(m_rk_order, m_amr, m_cdr->getPhase(), ncomp));
   m_fieldSolver_scratch->allocate_storage();
 }
 
@@ -1845,14 +1845,14 @@ void strang2::allocate_rte_storage(){
   
   for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
-    m_rte_scratch[idx] = RefCountedPtr<rte_storage> (new rte_storage(m_rk_order, m_amr, m_rte->get_phase(), ncomp));
+    m_rte_scratch[idx] = RefCountedPtr<rte_storage> (new rte_storage(m_rk_order, m_amr, m_rte->getPhase(), ncomp));
     m_rte_scratch[idx]->allocate_storage();
   }
 }
 
 void strang2::allocate_sigma_storage(){
   const int ncomp = 1;
-  m_sigma_scratch = RefCountedPtr<sigma_storage> (new sigma_storage(m_rk_order, m_amr, m_cdr->get_phase(), ncomp));
+  m_sigma_scratch = RefCountedPtr<sigma_storage> (new sigma_storage(m_rk_order, m_amr, m_cdr->getPhase(), ncomp));
   m_sigma_scratch->allocate_storage();
 }
 
@@ -2095,11 +2095,11 @@ void strang2::compute_E_into_scratch(){
 
   const MFAMRCellData& phi = m_fieldSolver->getPotential();
   
-  this->compute_E(E_cell, m_cdr->get_phase(), phi);     // Compute cell-centered field
-  this->compute_E(E_face, m_cdr->get_phase(), E_cell);  // Compute face-centered field
-  this->compute_E(E_eb,   m_cdr->get_phase(), E_cell);  // EB-centered field
+  this->compute_E(E_cell, m_cdr->getPhase(), phi);     // Compute cell-centered field
+  this->compute_E(E_face, m_cdr->getPhase(), E_cell);  // Compute face-centered field
+  this->compute_E(E_eb,   m_cdr->getPhase(), E_cell);  // EB-centered field
 
-  TimeStepper::extrapolate_to_domain_faces(E_dom, m_cdr->get_phase(), E_cell);
+  TimeStepper::extrapolate_to_domain_faces(E_dom, m_cdr->getPhase(), E_cell);
 }
 
 void strang2::compute_cdr_velo(const Real a_time){
@@ -2144,7 +2144,7 @@ void strang2::compute_cdr_eb_states(){
 
   // Extrapolate states to the EB and floor them so we cannot get negative values on the boundary. This
   // won't hurt mass conservation because the mass hasn't been injected yet
-  this->extrapolate_to_eb(eb_states, m_cdr->get_phase(), cdr_states);
+  this->extrapolate_to_eb(eb_states, m_cdr->getPhase(), cdr_states);
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     data_ops::floor(*eb_states[idx], 0.0);
@@ -2152,9 +2152,9 @@ void strang2::compute_cdr_eb_states(){
 
   // We should already have the cell-centered gradients, extrapolate them to the EB and project the flux. 
   EBAMRIVData eb_gradient;
-  m_amr->allocate(eb_gradient, m_cdr->get_phase(), SpaceDim);
+  m_amr->allocate(eb_gradient, m_cdr->getPhase(), SpaceDim);
   for (int i = 0; i < cdr_states.size(); i++){
-    this->extrapolate_to_eb(eb_gradient, m_cdr->get_phase(), *cdr_gradients[i]);
+    this->extrapolate_to_eb(eb_gradient, m_cdr->getPhase(), *cdr_gradients[i]);
     this->project_flux(*eb_gradients[i], eb_gradient);
   }
 }
@@ -2179,7 +2179,7 @@ void strang2::compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_phis){
 
   // Extrapolate states to the EB and floor them so we cannot get negative values on the boundary. This
   // won't hurt mass conservation because the mass hasn't been injected yet
-  this->extrapolate_to_eb(eb_states, m_cdr->get_phase(), a_phis);
+  this->extrapolate_to_eb(eb_states, m_cdr->getPhase(), a_phis);
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     data_ops::floor(*eb_states[idx], 0.0);
@@ -2187,9 +2187,9 @@ void strang2::compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_phis){
 
   // We should already have the cell-centered gradients, extrapolate them to the EB and project the flux. 
   EBAMRIVData eb_gradient;
-  m_amr->allocate(eb_gradient, m_cdr->get_phase(), SpaceDim);
+  m_amr->allocate(eb_gradient, m_cdr->getPhase(), SpaceDim);
   for (int i = 0; i < a_phis.size(); i++){
-    this->extrapolate_to_eb(eb_gradient, m_cdr->get_phase(), *cdr_gradients[i]);
+    this->extrapolate_to_eb(eb_gradient, m_cdr->getPhase(), *cdr_gradients[i]);
     this->project_flux(*eb_gradients[i], eb_gradient);
   }
 }
@@ -2216,13 +2216,13 @@ void strang2::compute_cdr_domain_states(){
   }
 
   // Extrapolate states to the domain faces
-  this->extrapolate_to_domain_faces(domain_states, m_cdr->get_phase(), cdr_states);
+  this->extrapolate_to_domain_faces(domain_states, m_cdr->getPhase(), cdr_states);
 
   // We already have the cell-centered gradients, extrapolate them to the EB and project the flux. 
   EBAMRIFData grad;
-  m_amr->allocate(grad, m_cdr->get_phase(), SpaceDim);
+  m_amr->allocate(grad, m_cdr->getPhase(), SpaceDim);
   for (int i = 0; i < cdr_states.size(); i++){
-    this->extrapolate_to_domain_faces(grad, m_cdr->get_phase(), *cdr_gradients[i]);
+    this->extrapolate_to_domain_faces(grad, m_cdr->getPhase(), *cdr_gradients[i]);
     this->project_domain(*domain_gradients[i], grad);
   }
 }
@@ -2247,13 +2247,13 @@ void strang2::compute_cdr_domain_states(const Vector<EBAMRCellData*>& a_phis){
   }
 
   // Extrapolate states to the domain faces
-  this->extrapolate_to_domain_faces(domain_states, m_cdr->get_phase(), a_phis);
+  this->extrapolate_to_domain_faces(domain_states, m_cdr->getPhase(), a_phis);
 
   // We already have the cell-centered gradients, extrapolate them to the EB and project the flux. 
   EBAMRIFData grad;
-  m_amr->allocate(grad, m_cdr->get_phase(), SpaceDim);
+  m_amr->allocate(grad, m_cdr->getPhase(), SpaceDim);
   for (int i = 0; i < a_phis.size(); i++){
-    this->extrapolate_to_domain_faces(grad, m_cdr->get_phase(), *cdr_gradients[i]);
+    this->extrapolate_to_domain_faces(grad, m_cdr->getPhase(), *cdr_gradients[i]);
     this->project_domain(*domain_gradients[i], grad);
   }
 }
@@ -2299,8 +2299,8 @@ void strang2::compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_phis, const Rea
 
   // Extrapolate densities, velocities, and fluxes
   Vector<EBAMRCellData*> cdr_velocities = m_cdr->get_velocities();
-  this->compute_extrapolated_fluxes(extrap_cdr_fluxes, a_phis, cdr_velocities, m_cdr->get_phase());
-  this->extrapolate_to_eb(extrap_cdr_velocities, m_cdr->get_phase(), cdr_velocities);
+  this->compute_extrapolated_fluxes(extrap_cdr_fluxes, a_phis, cdr_velocities, m_cdr->getPhase());
+  this->extrapolate_to_eb(extrap_cdr_velocities, m_cdr->getPhase(), cdr_velocities);
 
   // Compute RTE flux on the boundary
   for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
@@ -2367,10 +2367,10 @@ void strang2::compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_phis, co
   }
 
   // Compute extrapolated velocities and fluxes at the domain faces
-  this->extrapolate_to_domain_faces(extrap_cdr_densities,         m_cdr->get_phase(), a_phis);
-  this->extrapolate_vector_to_domain_faces(extrap_cdr_velocities, m_cdr->get_phase(), cdr_velocities);
-  this->compute_extrapolated_domain_fluxes(extrap_cdr_fluxes,     a_phis,           cdr_velocities, m_cdr->get_phase());
-  this->extrapolate_vector_to_domain_faces(extrap_cdr_gradients,  m_cdr->get_phase(), cdr_gradients);
+  this->extrapolate_to_domain_faces(extrap_cdr_densities,         m_cdr->getPhase(), a_phis);
+  this->extrapolate_vector_to_domain_faces(extrap_cdr_velocities, m_cdr->getPhase(), cdr_velocities);
+  this->compute_extrapolated_domain_fluxes(extrap_cdr_fluxes,     a_phis,           cdr_velocities, m_cdr->getPhase());
+  this->extrapolate_vector_to_domain_faces(extrap_cdr_gradients,  m_cdr->getPhase(), cdr_gradients);
 
   // Compute RTE flux on domain faces
   for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){

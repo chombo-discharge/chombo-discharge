@@ -1221,8 +1221,8 @@ void sdc::reconcile_integrands(){
       }
 
       // Shouldn't be necessary
-      m_amr->averageDown(F_m, m_cdr->get_phase());
-      m_amr->interpGhost(F_m, m_cdr->get_phase());
+      m_amr->averageDown(F_m, m_cdr->getPhase());
+      m_amr->interpGhost(F_m, m_cdr->getPhase());
     }
   }
 
@@ -1583,14 +1583,14 @@ void sdc::allocate_cdr_storage(){
   
   for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
-    m_cdr_scratch[idx] = RefCountedPtr<cdr_storage> (new cdr_storage(m_amr, m_cdr->get_phase(), ncomp));
+    m_cdr_scratch[idx] = RefCountedPtr<cdr_storage> (new cdr_storage(m_amr, m_cdr->getPhase(), ncomp));
     m_cdr_scratch[idx]->allocate_storage(m_p);
   }
 }
 
 void sdc::allocate_poisson_storage(){
   const int ncomp = 1;
-  m_fieldSolver_scratch = RefCountedPtr<poisson_storage> (new poisson_storage(m_amr, m_cdr->get_phase(), ncomp));
+  m_fieldSolver_scratch = RefCountedPtr<poisson_storage> (new poisson_storage(m_amr, m_cdr->getPhase(), ncomp));
   m_fieldSolver_scratch->allocate_storage(m_p);
 }
 
@@ -1601,14 +1601,14 @@ void sdc::allocate_rte_storage(){
   
   for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
-    m_rte_scratch[idx] = RefCountedPtr<rte_storage> (new rte_storage(m_amr, m_rte->get_phase(), ncomp));
+    m_rte_scratch[idx] = RefCountedPtr<rte_storage> (new rte_storage(m_amr, m_rte->getPhase(), ncomp));
     m_rte_scratch[idx]->allocate_storage(m_p);
   }
 }
 
 void sdc::allocate_sigma_storage(){
   const int ncomp = 1;
-  m_sigma_scratch = RefCountedPtr<sigma_storage> (new sigma_storage(m_amr, m_cdr->get_phase(), ncomp));
+  m_sigma_scratch = RefCountedPtr<sigma_storage> (new sigma_storage(m_amr, m_cdr->getPhase(), ncomp));
   m_sigma_scratch->allocate_storage(m_p);
 }
 
@@ -1662,11 +1662,11 @@ void sdc::compute_E_into_scratch(){
 
   const MFAMRCellData& phi = m_fieldSolver->getPotential();
   
-  sdc::compute_E(E_cell, m_cdr->get_phase(), phi);     // Compute cell-centered field
-  sdc::compute_E(E_face, m_cdr->get_phase(), E_cell);  // Compute face-centered field
-  sdc::compute_E(E_eb,   m_cdr->get_phase(), E_cell);  // EB-centered field
+  sdc::compute_E(E_cell, m_cdr->getPhase(), phi);     // Compute cell-centered field
+  sdc::compute_E(E_face, m_cdr->getPhase(), E_cell);  // Compute face-centered field
+  sdc::compute_E(E_eb,   m_cdr->getPhase(), E_cell);  // EB-centered field
 
-  TimeStepper::extrapolate_to_domain_faces(E_dom, m_cdr->get_phase(), E_cell);
+  TimeStepper::extrapolate_to_domain_faces(E_dom, m_cdr->getPhase(), E_cell);
 }
 
 void sdc::compute_cdr_gradients(){
@@ -1688,9 +1688,9 @@ void sdc::compute_cdr_gradients(const Vector<EBAMRCellData*>& a_phis){
     const int idx = solver_it.get_solver();
     RefCountedPtr<cdr_storage>& storage = sdc::get_cdr_storage(solver_it);
     EBAMRCellData& grad = storage->get_gradient();
-    m_amr->computeGradient(grad, *a_phis[idx], m_cdr->get_phase());
-    //    m_amr->averageDown(grad, m_cdr->get_phase());
-    m_amr->interpGhost(grad, m_cdr->get_phase());
+    m_amr->computeGradient(grad, *a_phis[idx], m_cdr->getPhase());
+    //    m_amr->averageDown(grad, m_cdr->getPhase());
+    m_amr->interpGhost(grad, m_cdr->getPhase());
   }
 }
 
@@ -1736,7 +1736,7 @@ void sdc::compute_cdr_eb_states(){
 
   // Extrapolate states to the EB and floor them so we cannot get negative values on the boundary. This
   // won't hurt mass conservation because the mass hasn't been injected yet
-  sdc::extrapolate_to_eb(eb_states, m_cdr->get_phase(), cdr_states);
+  sdc::extrapolate_to_eb(eb_states, m_cdr->getPhase(), cdr_states);
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     data_ops::floor(*eb_states[idx], 0.0);
@@ -1744,9 +1744,9 @@ void sdc::compute_cdr_eb_states(){
 
   // We should already have the cell-centered gradients, extrapolate them to the EB and project the flux. 
   EBAMRIVData eb_gradient;
-  m_amr->allocate(eb_gradient, m_cdr->get_phase(), SpaceDim);
+  m_amr->allocate(eb_gradient, m_cdr->getPhase(), SpaceDim);
   for (int i = 0; i < cdr_states.size(); i++){
-    sdc::extrapolate_to_eb(eb_gradient, m_cdr->get_phase(), *cdr_gradients[i]);
+    sdc::extrapolate_to_eb(eb_gradient, m_cdr->getPhase(), *cdr_gradients[i]);
     sdc::project_flux(*eb_gradients[i], eb_gradient);
   }
 }
@@ -1771,7 +1771,7 @@ void sdc::compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_phis){
 
   // Extrapolate states to the EB and floor them so we cannot get negative values on the boundary. This
   // won't hurt mass conservation because the mass hasn't been injected yet
-  sdc::extrapolate_to_eb(eb_states, m_cdr->get_phase(), a_phis);
+  sdc::extrapolate_to_eb(eb_states, m_cdr->getPhase(), a_phis);
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     data_ops::floor(*eb_states[idx], 0.0);
@@ -1779,9 +1779,9 @@ void sdc::compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_phis){
 
   // We should already have the cell-centered gradients, extrapolate them to the EB and project the flux. 
   EBAMRIVData eb_gradient;
-  m_amr->allocate(eb_gradient, m_cdr->get_phase(), SpaceDim);
+  m_amr->allocate(eb_gradient, m_cdr->getPhase(), SpaceDim);
   for (int i = 0; i < a_phis.size(); i++){
-    sdc::extrapolate_to_eb(eb_gradient, m_cdr->get_phase(), *cdr_gradients[i]);
+    sdc::extrapolate_to_eb(eb_gradient, m_cdr->getPhase(), *cdr_gradients[i]);
     sdc::project_flux(*eb_gradients[i], eb_gradient);
   }
 }
@@ -1808,13 +1808,13 @@ void sdc::compute_cdr_domain_states(){
   }
 
   // Extrapolate states to the domain faces
-  sdc::extrapolate_to_domain_faces(domain_states, m_cdr->get_phase(), cdr_states);
+  sdc::extrapolate_to_domain_faces(domain_states, m_cdr->getPhase(), cdr_states);
 
   // We already have the cell-centered gradients, extrapolate them to the EB and project the flux. 
   EBAMRIFData grad;
-  m_amr->allocate(grad, m_cdr->get_phase(), SpaceDim);
+  m_amr->allocate(grad, m_cdr->getPhase(), SpaceDim);
   for (int i = 0; i < cdr_states.size(); i++){
-    sdc::extrapolate_to_domain_faces(grad, m_cdr->get_phase(), *cdr_gradients[i]);
+    sdc::extrapolate_to_domain_faces(grad, m_cdr->getPhase(), *cdr_gradients[i]);
     sdc::project_domain(*domain_gradients[i], grad);
   }
 }
@@ -1839,13 +1839,13 @@ void sdc::compute_cdr_domain_states(const Vector<EBAMRCellData*>& a_phis){
   }
 
   // Extrapolate states to the domain faces
-  this->extrapolate_to_domain_faces(domain_states, m_cdr->get_phase(), a_phis);
+  this->extrapolate_to_domain_faces(domain_states, m_cdr->getPhase(), a_phis);
 
   // We already have the cell-centered gradients, extrapolate them to the EB and project the flux. 
   EBAMRIFData grad;
-  m_amr->allocate(grad, m_cdr->get_phase(), SpaceDim);
+  m_amr->allocate(grad, m_cdr->getPhase(), SpaceDim);
   for (int i = 0; i < a_phis.size(); i++){
-    this->extrapolate_to_domain_faces(grad, m_cdr->get_phase(), *cdr_gradients[i]);
+    this->extrapolate_to_domain_faces(grad, m_cdr->getPhase(), *cdr_gradients[i]);
     this->project_domain(*domain_gradients[i], grad);
   }
 }
@@ -1891,8 +1891,8 @@ void sdc::compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_phis, const Real a_
 
   // Extrapolate densities, velocities, and fluxes
   Vector<EBAMRCellData*> cdr_velocities = m_cdr->get_velocities();
-  TimeStepper::compute_extrapolated_fluxes(extrap_cdr_fluxes, a_phis, cdr_velocities, m_cdr->get_phase());
-  TimeStepper::compute_extrapolated_velocities(extrap_cdr_velocities, cdr_velocities, m_cdr->get_phase());
+  TimeStepper::compute_extrapolated_fluxes(extrap_cdr_fluxes, a_phis, cdr_velocities, m_cdr->getPhase());
+  TimeStepper::compute_extrapolated_velocities(extrap_cdr_velocities, cdr_velocities, m_cdr->getPhase());
 
   // Compute RTE flux on the boundary
   for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
@@ -1959,10 +1959,10 @@ void sdc::compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_phis, const 
   }
 
   // Compute extrapolated velocities and fluxes at the domain faces
-  this->extrapolate_to_domain_faces(extrap_cdr_densities,         m_cdr->get_phase(), a_phis);
-  this->extrapolate_velo_to_domain_faces(extrap_cdr_velocities, m_cdr->get_phase(), cdr_velocities);
-  this->compute_extrapolated_domain_fluxes(extrap_cdr_fluxes,     a_phis,           cdr_velocities, m_cdr->get_phase());
-  this->extrapolate_vector_to_domain_faces(extrap_cdr_gradients,  m_cdr->get_phase(), cdr_gradients);
+  this->extrapolate_to_domain_faces(extrap_cdr_densities,         m_cdr->getPhase(), a_phis);
+  this->extrapolate_velo_to_domain_faces(extrap_cdr_velocities, m_cdr->getPhase(), cdr_velocities);
+  this->compute_extrapolated_domain_fluxes(extrap_cdr_fluxes,     a_phis,           cdr_velocities, m_cdr->getPhase());
+  this->extrapolate_vector_to_domain_faces(extrap_cdr_gradients,  m_cdr->getPhase(), cdr_gradients);
 
   // Compute RTE flux on domain faces
   for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){

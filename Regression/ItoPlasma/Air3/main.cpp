@@ -4,7 +4,7 @@
 #include "CD_FieldSolverMultigrid.H"
 #include "ito_layout.H"
 #include "ito_solver.H"
-#include "rte_layout.H"
+#include <CD_RtLayout.H>
 #include <CD_McPhoto.H>
 #include "ito_plasma_air3.H"
 #include "rod_dielectric.H"
@@ -54,12 +54,12 @@ int main(int argc, char* argv[]){
   // Create solver factories
   auto poi_fact = new FieldSolverFactory<FieldSolverMultigrid>();
   auto ito_fact = new ito_factory<ito_solver, ito_solver>();
-  auto rte_fact = new rte_factory<McPhoto, McPhoto>();
+  auto rte_fact = new RtFactory<McPhoto, McPhoto>();
 
   // Instantiate solvers
   auto poi = poi_fact->newSolver();
-  auto cdr = ito_fact->new_layout(physics->get_ito_species());
-  auto rte = rte_fact->new_layout(physics->get_rte_species());
+  auto cdr = ito_fact->newLayout(physics->get_ito_species());
+  auto rte = rte_fact->newLayout(physics->get_rte_species());
 
   // Send solvers to TimeStepper 
   timestepper->set_poisson(poi);

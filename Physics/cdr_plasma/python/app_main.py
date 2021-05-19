@@ -30,7 +30,7 @@ def write_template(args):
     mainf.write('#include "CD_' + args.field_solver + '.H"\n')
     mainf.write('#include "cdr_layoutI.H"\n')
     mainf.write('#include "' + args.CdrSolver + '.H"\n')
-    mainf.write('#include "rte_layoutI.H"\n')
+    mainf.write('#include <CD_RtLayoutImplem.H>\n')
     mainf.write('#include "' + args.RtSolver + '.H"\n')
     mainf.write('#include "' + args.physics + '.H"\n')
     mainf.write('#include "' + args.geometry + '.H"\n')
@@ -93,13 +93,13 @@ def write_template(args):
     mainf.write("  // Create solver factories\n")
     mainf.write("  auto poi_fact = new FieldSolverFactory<" + args.field_solver + ">();\n")
     mainf.write("  auto cdr_fact = new cdr_factory<CdrSolver, " + args.CdrSolver + ">();\n")
-    mainf.write("  auto rte_fact = new rte_factory<RtSolver, " + args.RtSolver + ">();\n")
+    mainf.write("  auto rte_fact = new RtFactory<RtSolver, " + args.RtSolver + ">();\n")
     mainf.write("\n")
     
     mainf.write("  // Instantiate solvers\n")
     mainf.write("  auto poi = poi_fact->newSolver();\n");
-    mainf.write("  auto cdr = cdr_fact->new_layout(physics->get_CdrSpecies());\n");
-    mainf.write("  auto rte = rte_fact->new_layout(physics->get_rte_species());\n");
+    mainf.write("  auto cdr = cdr_fact->newLayout(physics->get_CdrSpecies());\n");
+    mainf.write("  auto rte = rte_fact->newLayout(physics->get_rte_species());\n");
     mainf.write("\n")
 
     mainf.write("  // Send solvers to TimeStepper \n")

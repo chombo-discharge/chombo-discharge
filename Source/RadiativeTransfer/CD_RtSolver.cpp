@@ -291,10 +291,10 @@ Real RtSolver::getTime() const{
   return m_time;
 }
 
-phase::which_phase RtSolver::get_phase(){
-  CH_TIME("RtSolver::get_phase");
+phase::which_phase RtSolver::getPhase(){
+  CH_TIME("RtSolver::getPhase");
   if(m_verbosity > 5){
-    pout() << m_name + "::get_phase" << endl;
+    pout() << m_name + "::getPhase" << endl;
   }
 
   return m_phase;

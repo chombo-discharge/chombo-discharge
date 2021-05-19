@@ -37,7 +37,7 @@ public:
   /*!
     @brief Get phase
   */
-  virtual phase::which_phase get_phase() const;
+  virtual phase::which_phase getPhase() const;
 
   /*!
     @brief Get the iterator
@@ -67,7 +67,7 @@ public:
   /*!
     @brief Add solver
   */
-  virtual void add_solver(RefCountedPtr<T> a_solver);
+  virtual void addSolver(RefCountedPtr<T> a_solver);
 
   /*!
     @brief Allocate internal storage for solvers
@@ -223,7 +223,7 @@ public:
   /*!
     @brief Get solvers
   */
-  virtual Vector<RefCountedPtr<T> >& get_solvers();
+  virtual Vector<RefCountedPtr<T> >& getSolvers();
 
   /*!
     @brief Get species
@@ -318,7 +318,7 @@ class cdr_factory {
 public:
   cdr_factory();
   ~cdr_factory();
-  RefCountedPtr<cdr_layout<T> > new_layout(const Vector<RefCountedPtr<CdrSpecies> > a_species) const;
+  RefCountedPtr<cdr_layout<T> > newLayout(const Vector<RefCountedPtr<CdrSpecies> > a_species) const;
 };
 #include "CD_NamespaceFooter.H"
 

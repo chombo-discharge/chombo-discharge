@@ -1,16 +1,20 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   rte_layout.H
+  @file   CD_RtLayout.H
   @brief  Declaration of a class that holds a set of RtSolvers
   @author Robert Marskar
-  @date   Jan. 2018
 */
 
-#ifndef _RTE_LAYOUT_
-#define _RTE_LAYOUT_
+#ifndef CD_RtLayout_H
+#define CD_RtLayout_H
 
+// Our includes
 #include <CD_RtSolver.H>
-
-#include "CD_NamespaceHeader.H"
+#include <CD_NamespaceHeader.H>
   
 template <class T>
 class RtIterator;
@@ -19,18 +23,18 @@ class RtIterator;
   @brief Class for holding a set of RtSolvers. 
 */
 template <class T>
-class rte_layout {
+class RtLayout {
 public:
 
   /*!
     @brief Full constructor
   */
-  rte_layout(const Vector<RefCountedPtr<rte_species> >& a_rte_species);
+  RtLayout(const Vector<RefCountedPtr<rte_species> >& a_rte_species);
 
   /*!
     @brief Destructor
   */
-  virtual ~rte_layout();
+  virtual ~RtLayout();
 
   /*!
     @brief Get iterator
@@ -50,7 +54,7 @@ public:
   /*!
     @brief Add solver
   */
-  virtual void add_solver(RefCountedPtr<T> a_solver);
+  virtual void addSolver(RefCountedPtr<T> a_solver);
 
   /*!
     @brief Parse options
@@ -157,12 +161,12 @@ public:
   /*!
     @brief Get phase
   */
-  virtual phase::which_phase get_phase();
+  virtual phase::which_phase getPhase();
 
   /*!
     @brief Get solvers
   */
-  virtual Vector<RefCountedPtr<T> >& get_solvers();
+  virtual Vector<RefCountedPtr<T> >& getSolvers();
 
   /*!
     @brief Get species
@@ -203,19 +207,20 @@ protected:
 };
 
 /*!
-  @brief Factory class for rte_layout. 
-  @details Factory class is very simple; since we don't want to template rte_layout2 we use a factory to instantiate solvers of 
+  @brief Factory class for RtLayout. 
+  @details Factory class is very simple; since we don't want to template RtLayout2 we use a factory to instantiate solvers of 
   any RtSolver inherited class, and then return a layout with the casted classes. That's about it. 
 */
 template <class T, class S>
-class rte_factory {
+class RtFactory {
 public:
-  rte_factory();
-  ~rte_factory();
-  RefCountedPtr<rte_layout<T> > new_layout(const Vector<RefCountedPtr<rte_species> >& a_species) const;
+  RtFactory();
+  ~RtFactory();
+  RefCountedPtr<RtLayout<T> > newLayout(const Vector<RefCountedPtr<rte_species> >& a_species) const;
 };
-#include "CD_NamespaceFooter.H"
 
-#include "rte_layoutI.H"
+#include <CD_NamespaceFooter.H>
+
+#include <CD_RtLayoutImplem.H>
 
 #endif

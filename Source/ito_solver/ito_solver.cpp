@@ -2783,7 +2783,7 @@ DepositionType::Which ito_solver::getDeposition() const {
   return m_deposition;
 }
 
-phase::which_phase ito_solver::get_phase() const{
+phase::which_phase ito_solver::getPhase() const{
   return m_phase;
 }
 

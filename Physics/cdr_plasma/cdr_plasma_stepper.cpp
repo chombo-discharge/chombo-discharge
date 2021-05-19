@@ -136,8 +136,8 @@ void cdr_plasma_stepper::advance_reaction_network(const Real a_time, const Real 
 
   // Compute the electric field
   EBAMRCellData E;
-  m_amr->allocate(E, m_realm, m_cdr->get_phase(), SpaceDim);
-  this->compute_E(E, m_cdr->get_phase(), m_fieldSolver->getPotential());
+  m_amr->allocate(E, m_realm, m_cdr->getPhase(), SpaceDim);
+  this->compute_E(E, m_cdr->getPhase(), m_fieldSolver->getPotential());
 
 
   Vector<EBAMRCellData*> particle_sources = m_cdr->getSources();
@@ -173,11 +173,11 @@ void cdr_plasma_stepper::advance_reaction_network(Vector<EBAMRCellData*>&       
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     grad_cdr[idx] = new EBAMRCellData();                            // This storage must be deleted
-    m_amr->allocate(*grad_cdr[idx], m_realm, m_cdr->get_phase(), SpaceDim);  // Allocate
+    m_amr->allocate(*grad_cdr[idx], m_realm, m_cdr->getPhase(), SpaceDim);  // Allocate
 
     m_amr->computeGradient(*grad_cdr[idx], *a_particle_densities[idx], m_realm, phase::gas); // Compute grad()
-    m_amr->averageDown(*grad_cdr[idx], m_realm, m_cdr->get_phase());        // Average down
-    m_amr->interpGhost(*grad_cdr[idx], m_realm, m_cdr->get_phase());        // Interpolate ghost cells
+    m_amr->averageDown(*grad_cdr[idx], m_realm, m_cdr->getPhase());        // Average down
+    m_amr->interpGhost(*grad_cdr[idx], m_realm, m_cdr->getPhase());        // Interpolate ghost cells
   }
 
   this->advance_reaction_network(a_particle_sources,
@@ -250,14 +250,14 @@ void cdr_plasma_stepper::advance_reaction_network(Vector<EBAMRCellData*>&       
   // Average down species
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
-    m_amr->averageDown(*a_particle_sources[idx], m_realm, m_cdr->get_phase());
-    m_amr->interpGhost(*a_particle_sources[idx], m_realm, m_cdr->get_phase()); // This MAY be when if we extrapolate advection
+    m_amr->averageDown(*a_particle_sources[idx], m_realm, m_cdr->getPhase());
+    m_amr->interpGhost(*a_particle_sources[idx], m_realm, m_cdr->getPhase()); // This MAY be when if we extrapolate advection
   }
 
   // Average down Photon solvers
   for (RtIterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
-    m_amr->averageDown(*a_Photon_sources[idx], m_realm, m_cdr->get_phase());
+    m_amr->averageDown(*a_Photon_sources[idx], m_realm, m_cdr->getPhase());
   }
 #endif
 }
@@ -283,10 +283,10 @@ void cdr_plasma_stepper::advance_reaction_network(Vector<LevelData<EBCellFAB>* >
 
 
   // Stencils for extrapolating things to cell centroids
-  const IrregAmrStencil<CentroidInterpolationStencil>& interp_stencils = m_amr->getCentroidInterpolationStencils(m_realm, m_cdr->get_phase());
+  const IrregAmrStencil<CentroidInterpolationStencil>& interp_stencils = m_amr->getCentroidInterpolationStencils(m_realm, m_cdr->getPhase());
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
-  const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_cdr->get_phase())[a_lvl];
+  const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_cdr->getPhase())[a_lvl];
   const Real dx                = m_amr->getDx()[a_lvl];
   const RealVect origin        = m_amr->getProbLo();
   
@@ -1104,7 +1104,7 @@ void cdr_plasma_stepper::compute_cdr_diffco_face(Vector<EBAMRFluxData*>&       a
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
 
-    m_amr->allocate(diffco[idx], m_realm, m_cdr->get_phase(), ncomp);
+    m_amr->allocate(diffco[idx], m_realm, m_cdr->getPhase(), ncomp);
   }
 
   // Call the cell version
@@ -1117,8 +1117,8 @@ void cdr_plasma_stepper::compute_cdr_diffco_face(Vector<EBAMRFluxData*>&       a
 
     if(solver->isDiffusive()){ // Only need to do this for diffusive things
       data_ops::set_value(*a_diffusionCoefficient_face[idx], 1.0);
-      m_amr->averageDown(diffco[idx], m_realm, m_cdr->get_phase());
-      m_amr->interpGhost(diffco[idx], m_realm, m_cdr->get_phase()); 
+      m_amr->averageDown(diffco[idx], m_realm, m_cdr->getPhase());
+      m_amr->interpGhost(diffco[idx], m_realm, m_cdr->getPhase()); 
 
       data_ops::average_cell_to_face_allcomps(*a_diffusionCoefficient_face[idx], diffco[idx], m_amr->getDomains());
     }
@@ -1167,11 +1167,11 @@ void cdr_plasma_stepper::compute_cdr_diffco_cell(Vector<LevelData<EBCellFAB>* >&
   const int ncomp        = 1;
   const int num_species  = m_physics->get_num_CdrSpecies();
 
-  const IrregAmrStencil<CentroidInterpolationStencil>& interp_stencils = m_amr->getCentroidInterpolationStencils(m_realm, m_cdr->get_phase());
+  const IrregAmrStencil<CentroidInterpolationStencil>& interp_stencils = m_amr->getCentroidInterpolationStencils(m_realm, m_cdr->getPhase());
 
   // Call the level version
   const DisjointBoxLayout& dbl  = m_amr->getGrids(m_realm)[a_lvl];
-  const EBISLayout& ebisl       = m_amr->getEBISLayout(m_realm, m_cdr->get_phase())[a_lvl];
+  const EBISLayout& ebisl       = m_amr->getEBISLayout(m_realm, m_cdr->getPhase())[a_lvl];
   const Real dx                 = m_amr->getDx()[a_lvl];
   const RealVect origin         = m_amr->getProbLo();
   
@@ -1555,7 +1555,7 @@ void cdr_plasma_stepper::compute_cdr_diffco_eb(Vector<LevelData<BaseIVFAB<Real> 
 
   
   const DisjointBoxLayout& dbl  = m_amr->getGrids(m_realm)[a_lvl];
-  const EBISLayout& ebisl       = m_amr->getEBISLayout(m_realm, m_cdr->get_phase())[a_lvl];
+  const EBISLayout& ebisl       = m_amr->getEBISLayout(m_realm, m_cdr->getPhase())[a_lvl];
   const Real dx                 = m_amr->getDx()[a_lvl];
   const RealVect origin         = m_amr->getProbLo();
 
@@ -1628,7 +1628,7 @@ void cdr_plasma_stepper::compute_cdr_fluxes(Vector<LevelData<BaseIVFAB<Real> >*>
 
   // Grid stuff
   const DisjointBoxLayout& dbl  = m_amr->getGrids(m_realm)[a_lvl];
-  const EBISLayout& ebisl       = m_amr->getEBISLayout(m_realm, m_cdr->get_phase())[a_lvl];
+  const EBISLayout& ebisl       = m_amr->getEBISLayout(m_realm, m_cdr->getPhase())[a_lvl];
   const ProblemDomain& domain   = m_amr->getDomains()[a_lvl];
   const Real dx                 = m_amr->getDx()[a_lvl];
   const MFLevelGrid& mflg       = *(m_amr->getMFLevelGrid(m_realm)[a_lvl]);
@@ -1862,7 +1862,7 @@ void cdr_plasma_stepper::compute_cdr_domain_fluxes(Vector<LevelData<DomainFluxIF
   Vector<Real> extrap_rte_fluxes(num_Photons);
 
   const DisjointBoxLayout& dbl  = m_amr->getGrids(m_realm)[a_lvl];
-  const EBISLayout& ebisl       = m_amr->getEBISLayout(m_realm, m_cdr->get_phase())[a_lvl];
+  const EBISLayout& ebisl       = m_amr->getEBISLayout(m_realm, m_cdr->getPhase())[a_lvl];
   const ProblemDomain& domain   = m_amr->getDomains()[a_lvl];
   const Real dx                 = m_amr->getDx()[a_lvl];
   const RealVect origin         = m_amr->getProbLo();
@@ -2075,8 +2075,8 @@ void cdr_plasma_stepper::compute_cdr_velocities(Vector<EBAMRCellData*>&       a_
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     if(solver_it()->isMobile()){
-      m_amr->averageDown(*a_velocities[idx], m_realm, m_cdr->get_phase()); 
-      m_amr->interpGhost(*a_velocities[idx], m_realm, m_cdr->get_phase()); 
+      m_amr->averageDown(*a_velocities[idx], m_realm, m_cdr->getPhase()); 
+      m_amr->interpGhost(*a_velocities[idx], m_realm, m_cdr->getPhase()); 
     }
   }
 }
@@ -2091,7 +2091,7 @@ void cdr_plasma_stepper::compute_cdr_velocities(Vector<LevelData<EBCellFAB> *>& 
     pout() << "cdr_plasma_stepper::compute_cdr_velocities(level)" << endl;
   }
 
-  const phase::which_phase cdr_phase = m_cdr->get_phase();
+  const phase::which_phase cdr_phase = m_cdr->getPhase();
   const int finest_level             = m_amr->getFinestLevel();
 
   const DisjointBoxLayout& dbl  = m_amr->getGrids(m_realm)[a_lvl];
@@ -2439,8 +2439,8 @@ void cdr_plasma_stepper::compute_cdr_velocities(){
 
   // Compute the electric field (again)
   EBAMRCellData E;
-  m_amr->allocate(E, m_realm, m_cdr->get_phase(), SpaceDim);
-  this->compute_E(E, m_cdr->get_phase(), m_fieldSolver->getPotential());
+  m_amr->allocate(E, m_realm, m_cdr->getPhase(), SpaceDim);
+  this->compute_E(E, m_cdr->getPhase(), m_fieldSolver->getPotential());
 
   Vector<EBAMRCellData*> states     = m_cdr->getPhis();
   Vector<EBAMRCellData*> velocities = m_cdr->get_velocities();
@@ -2459,11 +2459,11 @@ void cdr_plasma_stepper::compute_cdr_diffusion(){
 
   EBAMRCellData E_cell;
   EBAMRIVData   E_eb;
-  m_amr->allocate(E_cell, m_realm, m_cdr->get_phase(), SpaceDim);
-  m_amr->allocate(E_eb,   m_realm, m_cdr->get_phase(), SpaceDim);
+  m_amr->allocate(E_cell, m_realm, m_cdr->getPhase(), SpaceDim);
+  m_amr->allocate(E_eb,   m_realm, m_cdr->getPhase(), SpaceDim);
   
-  this->compute_E(E_cell, m_cdr->get_phase(), m_fieldSolver->getPotential());
-  this->compute_E(E_eb,   m_cdr->get_phase(), E_cell);
+  this->compute_E(E_cell, m_cdr->getPhase(), m_fieldSolver->getPotential());
+  this->compute_E(E_eb,   m_cdr->getPhase(), E_cell);
 
   Vector<EBAMRCellData*> cdr_states  = m_cdr->getPhis();
 
@@ -2475,9 +2475,9 @@ void cdr_plasma_stepper::compute_cdr_diffusion(){
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     cdr_extrap[idx] = new EBAMRIVData();  // This must be deleted
-    m_amr->allocate(*cdr_extrap[idx], m_realm, m_cdr->get_phase(), ncomp);
+    m_amr->allocate(*cdr_extrap[idx], m_realm, m_cdr->getPhase(), ncomp);
 
-    const IrregAmrStencil<EbCentroidInterpolationStencil>& stencil = m_amr->getEbCentroidInterpolationStencilStencils(m_realm, m_cdr->get_phase());
+    const IrregAmrStencil<EbCentroidInterpolationStencil>& stencil = m_amr->getEbCentroidInterpolationStencilStencils(m_realm, m_cdr->getPhase());
     stencil.apply(*cdr_extrap[idx], *cdr_states[idx]);
   }
   
@@ -2510,9 +2510,9 @@ void cdr_plasma_stepper::compute_cdr_diffusion(const EBAMRCellData& a_E_cell, co
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     cdr_extrap[idx] = new EBAMRIVData();  // This must be deleted
-    m_amr->allocate(*cdr_extrap[idx], m_realm, m_cdr->get_phase(), ncomp);
+    m_amr->allocate(*cdr_extrap[idx], m_realm, m_cdr->getPhase(), ncomp);
 
-    const IrregAmrStencil<EbCentroidInterpolationStencil>& stencil = m_amr->getEbCentroidInterpolationStencilStencils(m_realm, m_cdr->get_phase());
+    const IrregAmrStencil<EbCentroidInterpolationStencil>& stencil = m_amr->getEbCentroidInterpolationStencilStencils(m_realm, m_cdr->getPhase());
     stencil.apply(*cdr_extrap[idx], *cdr_states[idx]);
   }
   
@@ -2829,8 +2829,8 @@ void cdr_plasma_stepper::compute_J(EBAMRCellData& a_J) const{
     compute_J(*a_J[lvl], lvl);
   }
 
-  m_amr->averageDown(a_J, m_realm, m_cdr->get_phase());
-  m_amr->interpGhost(a_J, m_realm, m_cdr->get_phase());
+  m_amr->averageDown(a_J, m_realm, m_cdr->getPhase());
+  m_amr->interpGhost(a_J, m_realm, m_cdr->getPhase());
 }
 
 void cdr_plasma_stepper::compute_J(LevelData<EBCellFAB>& a_J, const int a_lvl) const{
@@ -2844,7 +2844,7 @@ void cdr_plasma_stepper::compute_J(LevelData<EBCellFAB>& a_J, const int a_lvl) c
   const int density_comp = 0;
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
-  const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_cdr->get_phase())[a_lvl];
+  const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_cdr->getPhase())[a_lvl];
   
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
@@ -2906,7 +2906,7 @@ void cdr_plasma_stepper::compute_rho(EBAMRCellData& a_rho, const phase::which_ph
     pout() << "cdr_plasma_stepper::compute_rho(ebamrcelldata, phase)" << endl;
   }
 
-  CH_assert(a_phase == m_cdr->get_phase());
+  CH_assert(a_phase == m_cdr->getPhase());
 
   data_ops::set_value(a_rho, 0.0);
 
@@ -3151,7 +3151,7 @@ void cdr_plasma_stepper::set_poisson(RefCountedPtr<FieldSolver>& a_poisson){
   m_fieldSolver = a_poisson;
 }
 
-void cdr_plasma_stepper::set_rte(RefCountedPtr<rte_layout<RtSolver>>& a_rte){
+void cdr_plasma_stepper::set_rte(RefCountedPtr<RtLayout<RtSolver>>& a_rte){
   CH_TIME("cdr_plasma_stepper::set_rte");
   if(m_verbosity > 5){
     pout() << "cdr_plasma_stepper::set_rte" << endl;
@@ -3257,7 +3257,7 @@ void cdr_plasma_stepper::project_flux(LevelData<BaseIVFAB<Real> >&       a_proje
   CH_assert(a_flux.nComp()           == SpaceDim);
 
   const DisjointBoxLayout& dbl  = m_amr->getGrids(m_realm)[a_lvl];
-  const EBISLayout& ebisl       = m_amr->getEBISLayout(m_realm, m_cdr->get_phase())[a_lvl];
+  const EBISLayout& ebisl       = m_amr->getEBISLayout(m_realm, m_cdr->getPhase())[a_lvl];
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     const Box& box         = dbl.get(dit());
@@ -3307,7 +3307,7 @@ void cdr_plasma_stepper::project_domain(EBAMRIFData& a_projected_flux, const EBA
     CH_assert(a_flux[lvl]->nComp()           == SpaceDim);
 
     const DisjointBoxLayout& dbl  = m_amr->getGrids(m_realm)[lvl];
-    const EBISLayout& ebisl       = m_amr->getEBISLayout(m_realm, m_cdr->get_phase())[lvl];
+    const EBISLayout& ebisl       = m_amr->getEBISLayout(m_realm, m_cdr->getPhase())[lvl];
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
@@ -3740,7 +3740,7 @@ void cdr_plasma_stepper::solve_rte(const Real a_dt){
     pout() << "cdr_plasma_stepper::solve_rte()" << endl;
   }
 
-  const phase::which_phase rte_phase = m_rte->get_phase();
+  const phase::which_phase rte_phase = m_rte->getPhase();
 
   EBAMRCellData E;
   m_amr->allocate(E, m_realm, rte_phase, SpaceDim);
@@ -3802,7 +3802,7 @@ Real cdr_plasma_stepper::compute_electrode_current(){
 
   // Need to copy onto temporary storage because 
   EBAMRIVData charge_flux;
-  m_amr->allocate(charge_flux, m_realm, m_cdr->get_phase(), 1);
+  m_amr->allocate(charge_flux, m_realm, m_cdr->getPhase(), 1);
   data_ops::set_value(charge_flux, 0.0);
   
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
@@ -3814,7 +3814,7 @@ Real cdr_plasma_stepper::compute_electrode_current(){
   }
 
   this->reset_dielectric_cells(charge_flux);
-  m_amr->conservativeAverage(charge_flux, m_realm, m_cdr->get_phase());
+  m_amr->conservativeAverage(charge_flux, m_realm, m_cdr->getPhase());
 
   const int compute_lvl = 0;
   Real sum = 0.0;
@@ -3825,7 +3825,7 @@ Real cdr_plasma_stepper::compute_electrode_current(){
     const IntVectSet ivs = flx.getIVS() & m_amr->getGrids(m_realm)[compute_lvl].get(dit());
     for (VoFIterator vofit(ivs, flx.getEBGraph()); vofit.ok(); ++vofit){
       const VolIndex& vof   = vofit();
-      const Real& bndryFrac = m_amr->getEBISLayout(m_realm, m_cdr->get_phase())[compute_lvl][dit()].bndryArea(vof);
+      const Real& bndryFrac = m_amr->getEBISLayout(m_realm, m_cdr->getPhase())[compute_lvl][dit()].bndryArea(vof);
       const Real& flux = flx(vof, 0);
       sum += flux*bndryFrac;
     }
@@ -3850,7 +3850,7 @@ Real cdr_plasma_stepper::compute_dielectric_current(){
 
   // Need to copy onto temporary storage because 
   EBAMRIVData charge_flux;
-  m_amr->allocate(charge_flux, m_realm, m_cdr->get_phase(), 1);
+  m_amr->allocate(charge_flux, m_realm, m_cdr->getPhase(), 1);
   data_ops::set_value(charge_flux, 0.0);
   
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
@@ -3862,7 +3862,7 @@ Real cdr_plasma_stepper::compute_dielectric_current(){
   }
 
   m_sigma->resetCells(charge_flux);
-  m_amr->conservativeAverage(charge_flux, m_realm, m_cdr->get_phase());
+  m_amr->conservativeAverage(charge_flux, m_realm, m_cdr->getPhase());
 
   const int compute_lvl = 0;
   Real sum = 0.0;
@@ -3873,7 +3873,7 @@ Real cdr_plasma_stepper::compute_dielectric_current(){
     const IntVectSet ivs = flx.getIVS() & m_amr->getGrids(m_realm)[compute_lvl].get(dit());
     for (VoFIterator vofit(ivs, flx.getEBGraph()); vofit.ok(); ++vofit){
       const VolIndex& vof   = vofit();
-      const Real& bndryFrac = m_amr->getEBISLayout(m_realm, m_cdr->get_phase())[compute_lvl][dit()].bndryArea(vof);
+      const Real& bndryFrac = m_amr->getEBISLayout(m_realm, m_cdr->getPhase())[compute_lvl][dit()].bndryArea(vof);
       const Real& flux = flx(vof, 0);
       sum += flux*bndryFrac;
     }
@@ -3900,7 +3900,7 @@ Real cdr_plasma_stepper::compute_domain_current(){
 
   // Need to copy onto temporary storage because 
   EBAMRIFData charge_flux;
-  m_amr->allocate(charge_flux, m_realm, m_cdr->get_phase(), 1);
+  m_amr->allocate(charge_flux, m_realm, m_cdr->getPhase(), 1);
   data_ops::set_value(charge_flux, 0.0);
   
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
@@ -3952,16 +3952,16 @@ Real cdr_plasma_stepper::compute_ohmic_induction_current(){
   Real current = 0.0;
 
   EBAMRCellData J, E, JdotE;
-  m_amr->allocate(J,     m_realm, m_cdr->get_phase(), SpaceDim);
-  m_amr->allocate(E,     m_realm, m_cdr->get_phase(), SpaceDim);
-  m_amr->allocate(JdotE, m_realm, m_cdr->get_phase(), SpaceDim);
+  m_amr->allocate(J,     m_realm, m_cdr->getPhase(), SpaceDim);
+  m_amr->allocate(E,     m_realm, m_cdr->getPhase(), SpaceDim);
+  m_amr->allocate(JdotE, m_realm, m_cdr->getPhase(), SpaceDim);
 
-  this->compute_E(E, m_cdr->get_phase(), m_fieldSolver->getPotential());
+  this->compute_E(E, m_cdr->getPhase(), m_fieldSolver->getPotential());
   this->compute_J(J);
 
   // Compute J.dot.E 
   data_ops::dot_prod(JdotE, J,E);
-  m_amr->averageDown(JdotE, m_realm, m_cdr->get_phase());
+  m_amr->averageDown(JdotE, m_realm, m_cdr->getPhase());
 
   // Only compue on coarsest level
   const int coar = 0;
@@ -3984,13 +3984,13 @@ Real cdr_plasma_stepper::compute_relaxation_time(){
 
   Real t1 = MPI_Wtime();
   EBAMRCellData E, J, dt;
-  m_amr->allocate(E,  m_realm, m_cdr->get_phase(), SpaceDim);
-  m_amr->allocate(J,  m_realm, m_cdr->get_phase(), SpaceDim);
-  m_amr->allocate(dt, m_realm, m_cdr->get_phase(), 1);
+  m_amr->allocate(E,  m_realm, m_cdr->getPhase(), SpaceDim);
+  m_amr->allocate(J,  m_realm, m_cdr->getPhase(), SpaceDim);
+  m_amr->allocate(dt, m_realm, m_cdr->getPhase(), 1);
 
   data_ops::set_value(dt, 1.234567E89);
 
-  this->compute_E(E, m_cdr->get_phase(), m_fieldSolver->getPotential());
+  this->compute_E(E, m_cdr->getPhase(), m_fieldSolver->getPotential());
   this->compute_J(J);
 
   // Find the largest electric field in each direction
@@ -4006,7 +4006,7 @@ Real cdr_plasma_stepper::compute_relaxation_time(){
   
   for (int lvl = 0; lvl <= finest_relax_level; lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_cdr->get_phase())[lvl];
+    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_cdr->getPhase())[lvl];
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box& box         = dbl.get(dit());
@@ -4074,7 +4074,7 @@ RefCountedPtr<FieldSolver>& cdr_plasma_stepper::get_poisson(){
   return m_fieldSolver;
 }
 
-RefCountedPtr<rte_layout<RtSolver>>& cdr_plasma_stepper::get_rte(){
+RefCountedPtr<RtLayout<RtSolver>>& cdr_plasma_stepper::get_rte(){
   return m_rte;
 }
 
