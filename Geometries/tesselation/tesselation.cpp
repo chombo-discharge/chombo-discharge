@@ -15,7 +15,7 @@
 #include "dcel_parser.H"
 #include "dcel_if.H"
 #include "dcel_BVH.H"
-#include "bvh_if.H"
+#include <CD_BvhSdf.H>
 
 #include "CD_NamespaceHeader.H"
 
@@ -67,7 +67,7 @@ tesselation::tesselation(){
   }
 
 
-  auto bif = RefCountedPtr<bvh_if<precision, BV> > (new bvh_if<precision, BV>(root,false));
+  auto bif = RefCountedPtr<BvhSdf<precision, BV> > (new BvhSdf<precision, BV>(root,false));
 
   m_electrodes.push_back(electrode(bif, true));
   
