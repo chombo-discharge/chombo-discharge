@@ -1,23 +1,29 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   dcel_parser.H
-  @brief  Various classes for reading mesh files and putting them in a mesh
+  @file   CD_DcelParser.H
+  @brief  Utilities for passing data into dcel structures. 
   @author Robert Marskar
-  @date   Apr. 2018
 */
 
-#ifndef _DCEL_PARSER_
-#define _DCEL_PARSER_
+#ifndef CD_DcelParser_H
+#define CD_DcelParser_H
 
-#include <CD_DcelVertex.H>
-#include <CD_DcelEdge.H>
-#include <CD_DcelFace.H>
-#include <CD_DcelMesh.H>
-
+// Std includes
 #include <vector>
 #include <memory>
 #include <map>
 
+// Our includes
+#include <CD_DcelVertex.H>
+#include <CD_DcelEdge.H>
+#include <CD_DcelFace.H>
+#include <CD_DcelMesh.H>
 #include "CD_NamespaceHeader.H"
+
 namespace Dcel {
   namespace parser {
   
@@ -90,7 +96,8 @@ namespace Dcel {
     };
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #include <CD_DcelParserImplem.H>
 

@@ -1,26 +1,32 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   dcel_parserI.H
-  @brief  Implementation of dcel_parser.H
+  @file   CD_DcelParserImplem.H
+  @brief  Implementation of CD_DcelParser.H
   @author Robert Marskar
-  @date   March 2021
 */
 
-#ifndef _DCEL_PARSERI_H_
-#define _DCEL_PARSERI_H_
+#ifndef CD_DcelParserImplem_H
+#define CD_DcelParserImplem_H
 
+// Std includes
+#include <iostream>
+#include <fstream>
+#include <iterator>
+#include <sstream>
+
+// Our includes
 #include <CD_DcelParser.H>
 #include <CD_DcelVertex.H>
 #include <CD_DcelEdge.H>
 #include <CD_DcelFace.H>
 #include <CD_DcelMesh.H>
 #include <CD_DcelIterator.H>
+#include <CD_NamespaceHeader.H>
 
-#include <iostream>
-#include <fstream>
-#include <iterator>
-#include <sstream>
-
-#include "CD_NamespaceHeader.H"
 namespace Dcel {
 
   template <class T>
@@ -227,5 +233,7 @@ namespace Dcel {
     }
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif
