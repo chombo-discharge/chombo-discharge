@@ -8,10 +8,10 @@
 #ifndef _DCEL_PARSER_
 #define _DCEL_PARSER_
 
-#include "dcel_vertex.H"
-#include "dcel_edge.H"
-#include "dcel_face.H"
-#include "dcel_mesh.H"
+#include <CD_DcelVertex.H>
+#include <CD_DcelEdge.H>
+#include <CD_DcelFace.H>
+#include <CD_DcelMesh.H>
 
 #include <vector>
 #include <memory>
@@ -92,6 +92,6 @@ namespace Dcel {
 }
 #include "CD_NamespaceFooter.H"
 
-#include "dcel_parserI.H"
+#include <CD_DcelParserImplem.H>
 
 #endif

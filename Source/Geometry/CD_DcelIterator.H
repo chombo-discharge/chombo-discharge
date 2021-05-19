@@ -69,6 +69,6 @@ namespace Dcel {
 }
 #include "CD_NamespaceFooter.H"
 
-#include "dcel_iteratorI.H"
+#include <CD_DcelIteratorImplem.H>
 
 #endif

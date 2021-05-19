@@ -21,7 +21,7 @@
 
 // Our includes
 #include <CD_BVH.H>
-#include <dcel_face.H>
+#include <CD_DcelFace.H>
 #include <CD_NamespaceHeader.H>
 
 using namespace Dcel;

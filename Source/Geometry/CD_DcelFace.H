@@ -11,9 +11,9 @@
 #include "Vec.H"
 
 #include <CD_DcelAlgorithms.H>
-#include "dcel_vertex.H"
-#include "dcel_edge.H"
-#include "dcel_poly.H"
+#include <CD_DcelVertex.H>
+#include <CD_DcelEdge.H>
+#include <CD_DcelPoly.H>
 
 #include <memory>
 #include <vector>
@@ -153,6 +153,6 @@ namespace Dcel {
 }
 #include "CD_NamespaceFooter.H"
 
-#include "dcel_faceI.H"
+#include <CD_DcelFaceImplem.H>
 
 #endif

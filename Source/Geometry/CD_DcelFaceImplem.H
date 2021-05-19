@@ -8,8 +8,8 @@
 #ifndef _DCEL_FACEI_H_
 #define _DCEL_FACEI_H_
 
-#include "dcel_face.H"
-#include "dcel_iterator.H"
+#include <CD_DcelFace.H>
+#include <CD_DcelIterator.H>
 
 #include "CD_NamespaceHeader.H"
 namespace Dcel {

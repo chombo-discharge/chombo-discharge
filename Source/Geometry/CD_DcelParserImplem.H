@@ -8,12 +8,12 @@
 #ifndef _DCEL_PARSERI_H_
 #define _DCEL_PARSERI_H_
 
-#include "dcel_parser.H"
-#include "dcel_vertex.H"
-#include "dcel_edge.H"
-#include "dcel_face.H"
-#include "dcel_mesh.H"
-#include "dcel_iterator.H"
+#include <CD_DcelParser.H>
+#include <CD_DcelVertex.H>
+#include <CD_DcelEdge.H>
+#include <CD_DcelFace.H>
+#include <CD_DcelMesh.H>
+#include <CD_DcelIterator.H>
 
 #include <iostream>
 #include <fstream>

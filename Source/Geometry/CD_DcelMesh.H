@@ -122,6 +122,6 @@ namespace Dcel {
 }
 #include "CD_NamespaceFooter.H"
 
-#include "dcel_meshI.H"
+#include <CD_DcelMeshImplem.H>
 
 #endif

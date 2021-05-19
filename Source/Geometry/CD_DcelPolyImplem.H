@@ -8,7 +8,7 @@
 #ifndef _DCEL_POLYI_H_
 #define _DCEL_POLYI_H_
 
-#include "dcel_poly.H"
+#include <CD_DcelPoly.H>
 
 #include <iostream>
 

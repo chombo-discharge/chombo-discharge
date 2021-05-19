@@ -67,6 +67,6 @@ namespace Dcel {
 }
 #include "CD_NamespaceFooter.H"
 
-#include "dcel_polyI.H"
+#include <CD_DcelPolyImplem.H>
 
 #endif

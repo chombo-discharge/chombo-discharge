@@ -11,8 +11,8 @@
 
 #include <CD_BoundingVolumes.H>
 #include <CD_BVH.H>
-#include "dcel_mesh.H"
-#include "dcel_parser.H"
+#include <CD_DcelMesh.H>
+#include <CD_DcelParser.H>
 #include "dcel_if.H"
 #include <CD_DcelBVH.H>
 #include <CD_BvhSdf.H>
