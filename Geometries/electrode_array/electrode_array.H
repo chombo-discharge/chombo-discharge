@@ -1,6 +1,6 @@
 /*!
   @file   electrode_array.H
-  @brief  Electrode array geometry.
+  @brief  electrode array geometry.
   @author Robert Marskar
   @date   Dec. 2018
 */
@@ -15,7 +15,7 @@
 /*!
   @brief This is a class that defines an array of electrodes.
 */
-class electrode_array : public ComputationalGeometry {
+class Electrode_array : public ComputationalGeometry {
 public:
 
   electrode_array();

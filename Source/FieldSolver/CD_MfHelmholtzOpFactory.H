@@ -131,7 +131,7 @@ public:
   virtual void setJump(const Real& a_sigma, const Real& a_scale);
 
   /*!
-    @brief Electrodes, this stuff is used for setting appropriate Dirichlet boundary conditions
+    @brief electrodes, this stuff is used for setting appropriate Dirichlet boundary conditions
   */
   virtual void setDirichletEbBc(const ElectrostaticEbBc& a_ebbc);
 
@@ -228,9 +228,9 @@ protected:
   EBAMRIVData m_jump;
 
   /*!
-    @brief Electrodes
+    @brief electrodes
   */
-  Vector<electrode> m_electrodes;
+  Vector<Electrode> m_electrodes;
 
   /*!
     @brief EBLevelGrids (in MFLevelGrid form)

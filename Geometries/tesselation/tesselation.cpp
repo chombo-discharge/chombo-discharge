@@ -69,7 +69,7 @@ tesselation::tesselation(){
 
   auto bif = RefCountedPtr<BvhSdf<precision, BV> > (new BvhSdf<precision, BV>(root,false));
 
-  m_electrodes.push_back(electrode(bif, true));
+  m_electrodes.push_back(Electrode(bif, true));
   
 }
 

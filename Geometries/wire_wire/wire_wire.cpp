@@ -51,6 +51,6 @@ void wire_wire::addWire(ParmParse& a_pp){
   RefCountedPtr<BaseIF> bif = RefCountedPtr<BaseIF> (new CylinderSdf(e1, e2, r, false));
 #endif
 
-  m_electrodes.push_back(electrode(bif, true, pot));
+  m_electrodes.push_back(Electrode(bif, true, pot));
 }
 #include "CD_NamespaceFooter.H"

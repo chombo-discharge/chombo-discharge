@@ -312,14 +312,14 @@ void MfHelmholtzOp::set_bc_from_levelset(){
 	const VolIndex& vof = vofit();
 	const RealVect pos  = EBArith::getVofLocation(vof, physDx, m_origin);
 
-	const std::vector<std::pair<electrode, ElectrostaticEbBc::BcFunction> >& electrodeBcs = m_electrostaticEbBc.getBcs();
+	const std::vector<std::pair<Electrode, ElectrostaticEbBc::BcFunction> >& electrodeBcs = m_electrostaticEbBc.getBcs();
 	
 	if(electrodeBcs.size() > 0){
 	  int  func = -1;
 	  Real dist = std::numeric_limits<Real>::infinity();
 
 	  for (int i = 0; i < electrodeBcs.size(); i++){
-	    Real cur_val = (electrodeBcs[i].first.get_function())->value(pos);
+	    Real cur_val = (electrodeBcs[i].first.getImplicitFunction())->value(pos);
 	    if(std::abs(cur_val) < std::abs(dist)){
 	      func  = i;
 	      dist  = cur_val;

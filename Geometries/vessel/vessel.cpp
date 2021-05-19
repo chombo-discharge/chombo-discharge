@@ -36,7 +36,7 @@ vessel::vessel(){
   
   if(m_rod){
     auto rod = RefCountedPtr<BaseIF> (new rod_if(m_rod_center + 100*v, m_rod_center, m_rod_R, false));
-    m_electrodes.push_back(electrode(rod, m_rod_live));
+    m_electrodes.push_back(Electrode(rod, m_rod_live));
   }
   if(m_shroom){
     auto shroom = RefCountedPtr<BaseIF> (new mushroom_if(m_shroom_center,
@@ -46,7 +46,7 @@ vessel::vessel(){
 							 m_shroom_d,
 							 m_shroom_c,
 							 false));
-    m_electrodes.push_back(electrode(shroom, m_shroom_live));
+    m_electrodes.push_back(Electrode(shroom, m_shroom_live));
   }
 }
 

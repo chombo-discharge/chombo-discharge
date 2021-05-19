@@ -20,7 +20,7 @@
 #include <RealVect.H>
 
 // Our includes
-#include <electrode.H>
+#include <CD_Electrode.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -58,7 +58,7 @@ public:
     @details This appends an EbBc to the end of m_bcFunctions. 
     @note If the boundary condition already exists for a_electrode, it will be overwritten. 
   */
-  void addEbBc(const electrode& a_electrode, const BcFunction& a_bcFunction);
+  void addEbBc(const Electrode& a_electrode, const BcFunction& a_bcFunction);
 
   /*!
     @brief Set the potential for a_electrode to be given by a_bcFunction
@@ -69,14 +69,14 @@ public:
 
   /*!
     @brief Return boundary condition associated with a particular electrode.
-    @param[in] a_electrode Electrode
+    @param[in] a_electrode electrode
     @return Boundary condition associated with a_electrode. 
   */
   BcFunction& getBc(const int a_electrode);
 
   /*!
     @brief Return boundary condition associated with a particular electrode.
-    @param[in] a_electrode Electrode
+    @param[in] a_electrode electrode
     @return Boundary condition associated with a_electrode.
   */
   const BcFunction& getBc(const int a_electrode) const;
@@ -85,20 +85,20 @@ public:
     @brief Get all boundary conditions
     @return Returns modifiable version of m_bcFunctions
   */
-  std::vector<std::pair<electrode, BcFunction> >& getBcs();
+  std::vector<std::pair<Electrode, BcFunction> >& getBcs();
 
     /*!
     @brief Get all boundary conditions
     @return Returns non-modifiable version of m_bcFunctions
   */
-  const std::vector<std::pair<electrode, BcFunction> >& getBcs() const;
+  const std::vector<std::pair<Electrode, BcFunction> >& getBcs() const;
 
 protected:
 
   /*!
     @brief Data structure which holds electrode and associated potential functions. 
   */
-  std::vector<std::pair<electrode, BcFunction> > m_bcFunctions;
+  std::vector<std::pair<Electrode, BcFunction> > m_bcFunctions;
 };
 
 #include <CD_NamespaceFooter.H>

@@ -41,7 +41,7 @@ rough_rod::rough_rod(){
 
     RefCountedPtr<BaseIF> rod = RefCountedPtr<BaseIF> (new perlin_rod_if(r, e1, e2, false, amp, f, persist, octaves, reseed));
 
-    m_electrodes.push_back(electrode(rod, live));
+    m_electrodes.push_back(Electrode(rod, live));
   }
 }
 

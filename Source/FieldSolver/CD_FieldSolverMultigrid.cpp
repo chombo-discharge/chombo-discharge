@@ -394,7 +394,7 @@ void FieldSolverMultigrid::setFacePermittivities(EBFluxFAB&                a_per
       Real dist   = 1.E99;
       int closest = 0;
       for (int i = 0; i < a_dielectrics.size(); i++){
-	const RefCountedPtr<BaseIF> func = a_dielectrics[i].get_function();
+	const RefCountedPtr<BaseIF> func = a_dielectrics[i].getImplicitFunction();
 
 	const Real cur_dist = func->value(pos);
 	
@@ -417,7 +417,7 @@ void FieldSolverMultigrid::setFacePermittivities(EBFluxFAB&                a_per
       Real dist   = 1.E99;
       int closest = 0;
       for (int i = 0; i < a_dielectrics.size(); i++){
-	const RefCountedPtr<BaseIF> func = a_dielectrics[i].get_function();
+	const RefCountedPtr<BaseIF> func = a_dielectrics[i].getImplicitFunction();
 
 	const Real cur_dist = func->value(pos);
 	
@@ -453,7 +453,7 @@ void FieldSolverMultigrid::setEbPermittivities(BaseIVFAB<Real>&          a_perm,
     Real dist   = 1.E99;
     int closest = 0;
     for (int i = 0; i < a_dielectrics.size(); i++){
-      const RefCountedPtr<BaseIF> func = a_dielectrics[i].get_function();
+      const RefCountedPtr<BaseIF> func = a_dielectrics[i].getImplicitFunction();
 
       const Real cur_dist = func->value(pos);
 	

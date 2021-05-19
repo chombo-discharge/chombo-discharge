@@ -171,7 +171,7 @@ void FieldSolver::computeDisplacementField(MFAMRCellData& a_displacementField, c
 	    int closest;
 	    
 	    for (int i = 0; i < dielectrics.size(); i++){
-	      const RefCountedPtr<BaseIF> func = dielectrics[i].get_function();
+	      const RefCountedPtr<BaseIF> func = dielectrics[i].getImplicitFunction();
 
 	      const Real cur_dist = func->value(pos);
 	
@@ -509,13 +509,13 @@ void FieldSolver::setDefaultEbBcFunctions() {
     pout() << "FieldSolver::setDefaultEbBcFunctions" << endl;
   }
 
-  const Vector<electrode> electrodes = m_computationalGeometry->getElectrodes();
+  const Vector<Electrode> electrodes = m_computationalGeometry->getElectrodes();
 
   for (int i = 0; i < electrodes.size(); i++){
-    const electrode& elec = electrodes[i];
+    const Electrode& elec = electrodes[i];
 
-    Real val  = (elec.is_live()) ? 1.0 : 0.0;
-    Real frac = elec.get_fraction();
+    Real val  = (elec.isLive()) ? 1.0 : 0.0;
+    Real frac = elec.getFraction();
     
     ElectrostaticEbBc::BcFunction curFunc = [&, val, frac](const RealVect a_position, const Real a_time){
       return m_voltage(m_time)*val*frac;

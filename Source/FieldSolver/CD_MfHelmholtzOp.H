@@ -26,7 +26,7 @@
 #include <mfis.H>
 #include <CD_JumpBc.H>
 #include <MFLevelGrid.H>
-#include <electrode.H>
+#include <CD_Electrode.H>
 #include <MFQuadCFInterp.H>
 #include <MFFastFluxReg.H>
 #include <CD_EbHelmholtzOp.H>
@@ -96,7 +96,7 @@ public:
   virtual void setTime(Real* a_time);
 
     /*!
-    @brief Electrodes, this stuff is used for setting appropriate Dirichlet boundary conditions
+    @brief electrodes, this stuff is used for setting appropriate Dirichlet boundary conditions
   */
   virtual void setDirichletEbBc(const ElectrostaticEbBc& a_ebbc);
 
@@ -476,9 +476,9 @@ protected:
   Vector<RefCountedPtr<MfElectrostaticDirichletEbBc> > m_ebbc;
 
   /*!
-    @brief Electrodes
+    @brief electrodes
   */
-  Vector<electrode> m_electrodes;
+  Vector<Electrode> m_electrodes;
 
   /*!
     @brief Problem domain

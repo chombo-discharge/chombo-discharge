@@ -241,7 +241,7 @@ public:
 
   /*!
     @brief Set embedded boundary Dirichlet function on a specific electrode.
-    @param[in] a_electrode Electrode index. Follows the same order as ComputationalGeometry. 
+    @param[in] a_electrode electrode index. Follows the same order as ComputationalGeometry. 
     @param[in] a_function  Voltage on the electrode. 
   */
   virtual void setElectrodeDirichletFunction(const int a_electrode, const ElectrostaticEbBc::BcFunction& a_function);
@@ -431,7 +431,7 @@ protected:
   /*!
     @brief BC functions (Dirichlet) on the electrodes
   */
-  std::vector<std::pair<electrode, ElectrostaticEbBc::BcFunction> > m_electrodeBcFunctions;
+  std::vector<std::pair<Electrode, ElectrostaticEbBc::BcFunction> > m_electrodeBcFunctions;
 
   /*!
     @brief Potential function. 
@@ -455,7 +455,7 @@ protected:
 
   /*!
     @brief Set default Dirichlet boundary conditions on the embedded boundaries. 
-    @details For each electrode the default boundary condition is set to m_voltage*electroc.get_fraction(). 
+    @details For each electrode the default boundary condition is set to m_voltage*electroc.getFraction(). 
   */
   virtual void setDefaultEbBcFunctions();
 

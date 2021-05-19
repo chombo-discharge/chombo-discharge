@@ -43,7 +43,7 @@ void ConductivityDomainBcWrapper::setWallBc(const Vector<RefCountedPtr<WallBc> >
       
     if(a_wallbc[i]->which_bc() == wallbc::dirichlet){
       m_bc[idx] = RefCountedPtr<DirichletConductivityDomainBC> (new DirichletConductivityDomainBC());
-      if(a_wallbc[i]->is_live()){
+      if(a_wallbc[i]->isLive()){
 	m_bc[idx]->setFunction(m_potentials[i]);
       }
       else{

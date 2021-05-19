@@ -54,7 +54,7 @@ coaxial_cable::coaxial_cable(){
 #elif CH_SPACEDIM==3
     RefCountedPtr<BaseIF> baseif = RefCountedPtr<BaseIF> (new CylinderSdf(e1, e2, rad, true));
 #endif
-    m_electrodes.push_back(electrode(baseif, live));
+    m_electrodes.push_back(Electrode(baseif, live));
   }
 
   if(inner){ // Add inner electrode
@@ -69,7 +69,7 @@ coaxial_cable::coaxial_cable(){
 #elif CH_SPACEDIM==3
     RefCountedPtr<BaseIF> baseif = RefCountedPtr<BaseIF> (new CylinderSdf(e1, e2, rad, false));
 #endif
-    m_electrodes.push_back(electrode(baseif, live));
+    m_electrodes.push_back(Electrode(baseif, live));
   }
 
   if(middle){ // Add dielectric

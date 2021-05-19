@@ -25,7 +25,7 @@ void ElectrostaticEbBc::clear(){
   m_bcFunctions.resize(0);
 }
 
-void ElectrostaticEbBc::addEbBc(const electrode& a_electrode, const BcFunction& a_bcFunction){
+void ElectrostaticEbBc::addEbBc(const Electrode& a_electrode, const BcFunction& a_bcFunction){
   m_bcFunctions.emplace_back(std::make_pair(a_electrode, a_bcFunction));
 }
 
@@ -54,11 +54,11 @@ const ElectrostaticEbBc::BcFunction& ElectrostaticEbBc::getBc(const int a_electr
   return m_bcFunctions[a_electrode].second;
 }
 
-std::vector<std::pair<electrode, ElectrostaticEbBc::BcFunction> >& ElectrostaticEbBc::getBcs(){
+std::vector<std::pair<Electrode, ElectrostaticEbBc::BcFunction> >& ElectrostaticEbBc::getBcs(){
   return m_bcFunctions;
 }
 
-const std::vector<std::pair<electrode, ElectrostaticEbBc::BcFunction> >&  ElectrostaticEbBc::getBcs() const {
+const std::vector<std::pair<Electrode, ElectrostaticEbBc::BcFunction> >&  ElectrostaticEbBc::getBcs() const {
   return m_bcFunctions;
 }
 

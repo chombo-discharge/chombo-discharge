@@ -48,7 +48,7 @@ const Vector<dielectric>& ComputationalGeometry::getDielectrics() const  {
   return m_dielectrics;
 }
 
-const Vector<electrode>& ComputationalGeometry::getElectrodes() const  {
+const Vector<Electrode>& ComputationalGeometry::getElectrodes() const  {
   return m_electrodes;
 }
 
@@ -72,7 +72,7 @@ void ComputationalGeometry::setDielectrics(Vector<dielectric>& a_dielectrics){
   m_dielectrics = a_dielectrics;
 }
 
-void ComputationalGeometry::setElectrodes(Vector<electrode>& a_electrodes){
+void ComputationalGeometry::setElectrodes(Vector<Electrode>& a_electrodes){
   m_electrodes = a_electrodes;
 }
 
@@ -134,10 +134,10 @@ void ComputationalGeometry::buildGasGeoServ(GeometryService*&   a_geoserver,
   // The gas ebis is the intersection of electrodes and dielectrics
   Vector<BaseIF*> parts;
   for (int i = 0; i < m_dielectrics.size(); i++){
-    parts.push_back(&(*(m_dielectrics[i].get_function())));
+    parts.push_back(&(*(m_dielectrics[i].getImplicitFunction())));
   }
   for (int i = 0; i < m_electrodes.size(); i++){
-    parts.push_back(&(*(m_electrodes[i].get_function())));
+    parts.push_back(&(*(m_electrodes[i].getImplicitFunction())));
   }
 
   // Create geoshop; either all regular or an intersection
@@ -169,10 +169,10 @@ void ComputationalGeometry::buildSolidGeoServ(GeometryService*&   a_geoserver,
   // The gas ebis is the intersection of dielectrics
   Vector<BaseIF*> parts_dielectrics, parts_electrodes;
   for (int i = 0; i < m_dielectrics.size(); i++){
-    parts_dielectrics.push_back(&(*m_dielectrics[i].get_function()));
+    parts_dielectrics.push_back(&(*m_dielectrics[i].getImplicitFunction()));
   }
   for (int i = 0; i < m_electrodes.size(); i++){
-    parts_electrodes.push_back(&(*m_electrodes[i].get_function()));
+    parts_electrodes.push_back(&(*m_electrodes[i].getImplicitFunction()));
   }
 
   // Create EBIndexSpace. If there are no solid phases, return null

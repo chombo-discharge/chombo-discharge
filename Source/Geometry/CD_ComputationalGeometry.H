@@ -21,7 +21,7 @@
 
 // Our includes
 #include <dielectric.H>
-#include <electrode.H>
+#include <CD_Electrode.H>
 #include <mfis.H>
 #include <real_box.H>
 #include <CD_NamespaceHeader.H>
@@ -68,7 +68,7 @@ public:
   /*!
     @brief Get conductors
   */
-  virtual const Vector<electrode>& getElectrodes() const;
+  virtual const Vector<Electrode>& getElectrodes() const;
 
   /*!
     @brief Get the background permittivity
@@ -83,7 +83,7 @@ public:
   /*!
     @brief Set electrodes
   */
-  virtual void setElectrodes(Vector<electrode>& a_electrodes);
+  virtual void setElectrodes(Vector<Electrode>& a_electrodes);
 
   /*!
     @brief Get the background permittivity
@@ -142,7 +142,7 @@ protected:
   /*!
     @brief electrodes
   */
-  Vector<electrode> m_electrodes;
+  Vector<Electrode> m_electrodes;
 
   /*!
     @brief The gas-phase implicit function

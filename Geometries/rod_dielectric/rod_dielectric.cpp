@@ -55,7 +55,7 @@ void rod_dielectric::define_electrode(){
 
   RefCountedPtr<BaseIF> bif = RefCountedPtr<BaseIF> (new rod_if(e1, e2, r, false));
 
-  m_electrodes.push_back(electrode(bif, live));
+  m_electrodes.push_back(Electrode(bif, live));
 }
 
 void rod_dielectric::define_insulator(){

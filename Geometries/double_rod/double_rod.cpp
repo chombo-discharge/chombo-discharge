@@ -37,7 +37,7 @@ double_rod::double_rod(){
 
     RefCountedPtr<BaseIF> rod1 = RefCountedPtr<BaseIF> (new rod_if(e1, e2, radius, false));
 
-    m_electrodes.push_back(electrode(rod1, live));
+    m_electrodes.push_back(Electrode(rod1, live));
   }
 
   if(use_rod2){
@@ -48,7 +48,7 @@ double_rod::double_rod(){
 
     RefCountedPtr<BaseIF> rod1 = RefCountedPtr<BaseIF> (new rod_if(e1, e2, radius, false));
 
-    m_electrodes.push_back(electrode(rod1, live));
+    m_electrodes.push_back(Electrode(rod1, live));
   }
 }
 

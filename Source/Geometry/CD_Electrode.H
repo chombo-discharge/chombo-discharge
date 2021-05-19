@@ -1,35 +1,42 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file electrode.H
-  @brief electrode struct
+  @file   CD_Electrode.H
+  @brief  Declaring electrod
   @author Robert marskar
-  @date Nov. 2017
 */
 
-#ifndef _ELECTRODE_
-#define _ELECTRODE_
+#ifndef CD_Electrode_H
+#define CD_Electrode_H
 
+// Chombo includes
 #include <BaseIF.H>
 #include <RefCountedPtr.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_NamespaceHeader.H>
+
 /*!
   @brief electrode class. Simple tuple.
 */
-class electrode {
+class Electrode {
 public:
 
   //
-  electrode();
+  Electrode();
   
   /*!
     @brief Constructor. Calls define
   */
-  electrode(RefCountedPtr<BaseIF> a_baseif, bool a_live, Real a_fraction = 1.0);
+  Electrode(RefCountedPtr<BaseIF> a_baseif, bool a_live, Real a_fraction = 1.0);
 
   /*!
     @brief 
   */
-  virtual ~electrode();
+  virtual ~Electrode();
 
   /*!
     @brief Define function
@@ -39,17 +46,17 @@ public:
   /*!
     @brief Get implicit function
   */
-  virtual const RefCountedPtr<BaseIF>& get_function() const;
+  virtual const RefCountedPtr<BaseIF>& getImplicitFunction() const;
 
   /*!
     @brief Get implicit function
   */
-  virtual const bool& is_live() const;
+  virtual const bool& isLive() const;
 
   /*!
     @brief Get fraction
   */
-  virtual const Real& get_fraction() const;
+  virtual const Real& getFraction() const;
 
 protected:
   std::pair<RefCountedPtr<BaseIF>, bool> m_tuple;
@@ -59,6 +66,7 @@ protected:
   */
   Real m_fraction;
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

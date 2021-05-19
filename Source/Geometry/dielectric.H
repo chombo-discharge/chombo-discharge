@@ -51,7 +51,7 @@ public:
   /*!
     @brief Get level-set function
   */
-  virtual const RefCountedPtr<BaseIF>& get_function() const;
+  virtual const RefCountedPtr<BaseIF>& getImplicitFunction() const;
 
   /*!
     @brief Get permittivity

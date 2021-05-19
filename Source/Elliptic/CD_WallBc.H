@@ -84,7 +84,7 @@ public:
   /*!
     @brief Check if domain wall is live or not
   */
-  virtual bool is_live();
+  virtual bool isLive();
 
   /*!
     @brief Get value. 

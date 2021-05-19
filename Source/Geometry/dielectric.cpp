@@ -37,7 +37,7 @@ void dielectric::define(RefCountedPtr<BaseIF> a_baseif, Real (*a_permittivity)(c
   m_constant = false;
 }
 
-const RefCountedPtr<BaseIF>& dielectric::get_function() const {
+const RefCountedPtr<BaseIF>& dielectric::getImplicitFunction() const {
   return m_baseif;
 }
   

@@ -46,7 +46,7 @@ Real WallBc::get_value(){
   return value;
 }
 
-bool WallBc::is_live(){
+bool WallBc::isLive(){
   return m_live;
 }
 

@@ -44,7 +44,7 @@ electrode_array::electrode_array(){
 
       RefCountedPtr<BaseIF> rod = RefCountedPtr<BaseIF> (new rod_if(ic1, ic2, r, false));
 
-      m_electrodes.push_back(electrode(rod, live));
+      m_electrodes.push_back(Electrode(rod, live));
     }
   }
 }
