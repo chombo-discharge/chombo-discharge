@@ -154,7 +154,7 @@ bool cdr_plasma_tagger::tagCells(EBAMRTags& a_tags){
 	const IntVectSet irreg_ivs = ebisbox.getIrregIVS(box);
 	const IntVectSet prev_tags = IntVectSet((*a_tags[lvl])[dit()]);
 
-	DenseIntVectSet coarsen_tags(box, false); // Cells that will be coarsened
+	DenseIntVectSet coarsenTags(box, false); // Cells that will be coarsened
 	DenseIntVectSet refine_tags(box, false);  // Cells that will be refined
 
 	Vector<EBCellFAB*> tracers;
@@ -169,12 +169,12 @@ bool cdr_plasma_tagger::tagCells(EBAMRTags& a_tags){
 	
 	// Refinement and coarsening
 	refine_cells_box(refine_tags, tracers, gtracers, lvl, box, ebisbox, time, dx, origin);
-	coarsen_cells_box(coarsen_tags, tracers, gtracers, lvl, box, ebisbox, time, dx, origin);
+	coarsen_cells_box(coarsenTags, tracers, gtracers, lvl, box, ebisbox, time, dx, origin);
 
 	// Check if we got any new tags, or we are just recycling old tags.
-	// Basically we will check if (current_tags + refined_tags - coarsen_tags) == current_tags
+	// Basically we will check if (current_tags + refined_tags - coarsenTags) == current_tags
 	DenseIntVectSet cpy1 = tags;
-	tags -= coarsen_tags;
+	tags -= coarsenTags;
 	tags |= refine_tags;
 	DenseIntVectSet cpy2 = tags;
 

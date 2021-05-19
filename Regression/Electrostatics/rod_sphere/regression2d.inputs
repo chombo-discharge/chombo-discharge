@@ -93,11 +93,11 @@ FieldSolverMultigrid.gmg_relax_type    = gsrb      # Relaxation type. 'jacobi', 
 # ====================================================================================================
 # GEO_COARSENER CLASS OPTIONS
 # ====================================================================================================
-geo_coarsener.num_boxes   = 1            # Number of coarsening boxes (0 = don't coarsen)
-geo_coarsener.box1_lo     = -2 0.2       # Coarsening box, lo
-geo_coarsener.box1_hi     =  2 2.0       # Coarsening box, hi
-geo_coarsener.box1_lvl    = 0            # up to this level
-geo_coarsener.box1_inv    = false        # Remove except inside box (true)
+GeoCoarsener.num_boxes   = 1            # Number of coarsening boxes (0 = don't coarsen)
+GeoCoarsener.box1_lo     = -2 0.2       # Coarsening box, lo
+GeoCoarsener.box1_hi     =  2 2.0       # Coarsening box, hi
+GeoCoarsener.box1_lvl    = 0            # up to this level
+GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 
 # ====================================================================================================
 # ROD_DIELECTRIC CLASS OPTIONS

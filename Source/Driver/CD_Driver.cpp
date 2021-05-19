@@ -33,7 +33,7 @@ Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeomet
 	       const RefCountedPtr<TimeStepper>&           a_timeStepper,
 	       const RefCountedPtr<AmrMesh>&               a_amr,
 	       const RefCountedPtr<CellTagger>&            a_cellTagger,
-	       const RefCountedPtr<geo_coarsener>&          a_geoCoarsen){
+	       const RefCountedPtr<GeoCoarsener>&          a_geoCoarsen){
   CH_TIME("Driver::Driver(full)");
 
   setComputationalGeometry(a_computationalGeometry); // Set computational geometry
@@ -260,7 +260,7 @@ void Driver::getGeometryTags(){
 
   // Remove tags using the geocoarsener if we have it
   if(!m_geoCoarsen.isNull()){
-    m_geoCoarsen->coarsen_tags(m_geomTags, m_amr->getDx(), m_amr->getProbLo());
+    m_geoCoarsen->coarsenTags(m_geomTags, m_amr->getDx(), m_amr->getProbLo());
   }
 
   // Grow tags. This is an ad-hoc fix that prevents ugly grid near EBs (i.e. cases where only ghost cells are used
@@ -946,7 +946,7 @@ void Driver::setCellTagger(const RefCountedPtr<CellTagger>& a_cellTagger){
   }
 }
 
-void Driver::setGeoCoarsen(const RefCountedPtr<geo_coarsener>& a_geoCoarsen){
+void Driver::setGeoCoarsen(const RefCountedPtr<GeoCoarsener>& a_geoCoarsen){
   CH_TIME("Driver::setGeoCoarsen");
   if(m_verbosity > 5){
     pout() << "Driver::setGeoCoarsen" << endl;

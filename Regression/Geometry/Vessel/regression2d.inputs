@@ -64,11 +64,11 @@ Driver.refine_solid_solid_interface    = -1            # Refine solid-solid inte
 # ====================================================================================================
 # GEO_COARSENER CLASS OPTIONS
 # ====================================================================================================
-geo_coarsener.num_boxes   = 0            # Number of coarsening boxes (0 = don't coarsen)
-geo_coarsener.box1_lo     = 0.0 0.0 0.0  # Remove irregular cell tags 
-geo_coarsener.box1_hi     = 0.0 0.0 0.0  # between these two corners
-geo_coarsener.box1_lvl    = 0            # up to this level
-geo_coarsener.box1_inv    = false        # Remove except inside box (true)
+GeoCoarsener.num_boxes   = 0            # Number of coarsening boxes (0 = don't coarsen)
+GeoCoarsener.box1_lo     = 0.0 0.0 0.0  # Remove irregular cell tags 
+GeoCoarsener.box1_hi     = 0.0 0.0 0.0  # between these two corners
+GeoCoarsener.box1_lvl    = 0            # up to this level
+GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 
 # ====================================================================================================
 # VESSEL CLASS OPTIONS

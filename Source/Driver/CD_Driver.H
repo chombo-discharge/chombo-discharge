@@ -25,7 +25,7 @@
 #include <CD_AmrMesh.H>
 #include <CD_CellTagger.H>
 #include <mfis.H>
-#include <geo_coarsener.H>
+#include <CD_GeoCoarsener.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -52,7 +52,7 @@ public:
 	 const RefCountedPtr<TimeStepper>&           a_timeStepper,
 	 const RefCountedPtr<AmrMesh>&                a_amr,
 	 const RefCountedPtr<CellTagger>&            a_cellTagger = RefCountedPtr<CellTagger>(NULL),
-	 const RefCountedPtr<geo_coarsener>&          a_geoCoarsen = RefCountedPtr<geo_coarsener>(NULL));
+	 const RefCountedPtr<GeoCoarsener>&          a_geoCoarsen = RefCountedPtr<GeoCoarsener>(NULL));
 
   /*!
     @brief Constructor
@@ -121,7 +121,7 @@ protected:
   /*!
     @brief Geometric coarsener
   */
-  RefCountedPtr<geo_coarsener> m_geoCoarsen;
+  RefCountedPtr<GeoCoarsener> m_geoCoarsen;
 
   /*!
     @brief Time code
@@ -517,7 +517,7 @@ protected:
   /*!
     @brief Set the geo coarsener
   */
-  void setGeoCoarsen(const RefCountedPtr<geo_coarsener>& a_geoCoarsen);
+  void setGeoCoarsen(const RefCountedPtr<GeoCoarsener>& a_geoCoarsen);
 
   /*!
     @brief Setup function

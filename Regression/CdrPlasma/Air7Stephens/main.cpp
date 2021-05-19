@@ -1,5 +1,5 @@
 #include "CD_Driver.H"
-#include "geo_coarsener.H"
+#include <CD_GeoCoarsener.H>
 #include "CD_FieldSolverFactoryImplem.H"
 #include "CD_FieldSolverMultigrid.H"
 #include "cdr_layoutI.H"
@@ -43,7 +43,7 @@ int main(int argc, char* argv[]){
   // Set geometry and AMR 
   RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry> (new rod_dielectric());
   RefCountedPtr<AmrMesh> amr                    = RefCountedPtr<AmrMesh> (new AmrMesh());
-  RefCountedPtr<geo_coarsener> geocoarsen        = RefCountedPtr<geo_coarsener> (new geo_coarsener());
+  RefCountedPtr<GeoCoarsener> geocoarsen        = RefCountedPtr<GeoCoarsener> (new GeoCoarsener());
 
   // Set up physics 
   RefCountedPtr<cdr_plasma_physics> physics      = RefCountedPtr<cdr_plasma_physics> (new air7_stephens());

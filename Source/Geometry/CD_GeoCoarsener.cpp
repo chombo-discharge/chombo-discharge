@@ -1,24 +1,31 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   geo_coarsener.cpp
-  @brief  Implementation of geo_coarsener.H
+  @file   CD_GeoCoarsener.cpp
+  @brief  Implementation of CD_GeoCoarsener.H
   @author Robert Marskar
-  @date   June 2018
 */
 
-#include "geo_coarsener.H"
-
-#include <ParmParse.H>
+// Std includes
 #include <sstream>
 
-#include "CD_NamespaceHeader.H"
+// Chombo includes
+#include <ParmParse.H>
 
-geo_coarsener::geo_coarsener(){
+// Our includes
+#include <CD_GeoCoarsener.H>
+#include <CD_NamespaceHeader.H>
+
+GeoCoarsener::GeoCoarsener(){
   m_coarsen_boxes.resize(0);
   m_coarsen_levels.resize(0);
 
   
   { // Info from input script
-    ParmParse pp("geo_coarsener");
+    ParmParse pp("GeoCoarsener");
 
     int num_boxes = 0;
     pp.query("num_boxes", num_boxes);
@@ -62,13 +69,13 @@ geo_coarsener::geo_coarsener(){
   }
 }
 
-geo_coarsener::~geo_coarsener(){
+GeoCoarsener::~GeoCoarsener(){
 }
 
-void geo_coarsener::coarsen_tags(Vector<IntVectSet>& a_tags, const Vector<Real>& a_dx, const RealVect& a_origin) const {
-  CH_TIME("geo_coarsener::coarsen_tags");
+void GeoCoarsener::coarsenTags(Vector<IntVectSet>& a_tags, const Vector<Real>& a_dx, const RealVect& a_origin) const {
+  CH_TIME("GeoCoarsener::coarsenTags");
   if(!(m_coarsen_boxes.size() == m_coarsen_levels.size())){
-    pout() << "geo_coarsener::coarsen_tags - m_geoCoarsen is not well defined. Skipping the coarsening step" << endl;
+    pout() << "GeoCoarsener::coarsenTags - m_geoCoarsen is not well defined. Skipping the coarsening step" << endl;
   }
   else{
     if(m_coarsen_boxes.size() > 0){
@@ -128,12 +135,13 @@ void geo_coarsener::coarsen_tags(Vector<IntVectSet>& a_tags, const Vector<Real>&
   }
 }
 
-Vector<real_box> geo_coarsener::get_coarsen_boxes(){
+Vector<real_box> GeoCoarsener::getCoarsenBoxes(){
   return m_coarsen_boxes;
 }
 
 
-Vector<int> geo_coarsener::get_coarsen_levels(){
+Vector<int> GeoCoarsener::getCoarsenLevels(){
   return m_coarsen_levels;
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

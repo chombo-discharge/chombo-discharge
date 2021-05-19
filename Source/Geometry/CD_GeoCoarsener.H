@@ -1,51 +1,56 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   geo_coarsener.H
+  @file   CD_GeoCoarsener.H
   @brief  Declaration of a utility class for removing geometrically tagged cells
   @author Robert Marskar
-  @date   June 2018
 */
 
-#ifndef _GEO_COARSENER_
-#define _GEO_COARSENER_
+#ifndef CD_GeoCoarsener_H
+#define CD_GeoCoarsener_H
 
-#include "real_box.H"
-
+// Chombo includes
 #include <Vector.H>
 #include <IntVectSet.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <real_box.H>
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Utility class for removing geometrically tagged cells
   @details This class is an optimization class for coarsening of EBs. The usage of this class is simple; the user defines m_coarsen_boxes and a level for each coarsening box. These are passed to plasma_engine which will remove geometric tags in those regions (above the level specified)
 */
-class geo_coarsener {
+class GeoCoarsener {
 public:
 
   /*!
     @brief Constructor
   */
-  geo_coarsener();
+  GeoCoarsener();
 
   /*!
     @brief Destructor
   */
-  virtual ~geo_coarsener();
+  virtual ~GeoCoarsener();
 
   /*!
     @brief Coarsen tags
   */
-  virtual void coarsen_tags(Vector<IntVectSet>& a_tags, const Vector<Real>& a_dx, const RealVect& a_origin) const;
+  virtual void coarsenTags(Vector<IntVectSet>& a_tags, const Vector<Real>& a_dx, const RealVect& a_origin) const;
 
   /*!
     @brief Get coarsening boxes
   */
-  virtual Vector<real_box> get_coarsen_boxes();
+  virtual Vector<real_box> getCoarsenBoxes();
 
   /*!
     @brief Get coarsening levels
   */
-  virtual Vector<int> get_coarsen_levels();
+  virtual Vector<int> getCoarsenLevels();
   
 protected:
 
@@ -64,5 +69,7 @@ protected:
   */
   Vector<int> m_inverse;
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif

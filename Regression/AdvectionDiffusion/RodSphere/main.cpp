@@ -22,7 +22,7 @@ int main(int argc, char* argv[]){
   // Set geometry and AMR 
   RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry> (new rod_dielectric());
   RefCountedPtr<AmrMesh> amr                    = RefCountedPtr<AmrMesh> (new AmrMesh());
-  RefCountedPtr<geo_coarsener> geocoarsen        = RefCountedPtr<geo_coarsener> (new geo_coarsener());
+  RefCountedPtr<GeoCoarsener> geocoarsen        = RefCountedPtr<GeoCoarsener> (new GeoCoarsener());
 
   // Set up basic AdvectionDiffusion 
   RefCountedPtr<CdrSolver> solver        = RefCountedPtr<CdrSolver>   (new CdrGodunov());
