@@ -5,7 +5,7 @@
 #include "ParmParse.H"
 
 using namespace ChomboDischarge;
-using namespace physics::rte;
+using namespace Physics::RadiativeTransfer;
 
 int main(int argc, char* argv[]){
 

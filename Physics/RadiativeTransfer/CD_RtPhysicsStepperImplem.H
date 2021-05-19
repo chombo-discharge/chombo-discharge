@@ -1,18 +1,24 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   RtPhysicsStepperI.H
-  @brief  Implementation of RtPhysicsStepper.H
+  @file   CD_RtPhysicsStepperImplem.H
+  @brief  Implementation of CD_RtPhysicsStepper.H
   @author Robert Marskar
-  @data   May 2020
 */
 
-#include <CD_RtPhysicsStepper.H>
-#include <CD_RtPhysicsSpecies.H>
-
+// Chombo includes
 #include <ParmParse.H>
 #include <PolyGeom.H>
 
-#include "CD_NamespaceHeader.H"
-using namespace physics::rte;
+// Our includes
+#include <CD_RtPhysicsStepper.H>
+#include <CD_RtPhysicsSpecies.H>
+#include <CD_NamespaceHeader.H>
+
+using namespace Physics::RadiativeTransfer;
 
 template <typename T>
 RtPhysicsStepper<T>::RtPhysicsStepper(){
@@ -184,4 +190,5 @@ void RtPhysicsStepper<T>::set_gaussian_source(){
     }
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

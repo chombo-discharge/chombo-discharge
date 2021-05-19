@@ -1,19 +1,24 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   RtPhysicsStepper.H
-  @brief  TimeStepper class for only solving the Rte equation (with surface charge)
+  @file   CD_RtPhysicsStepper.H
+  @brief  TimeStepper class for only evolving radiative transfer modules
   @author Robert Marskar
-  @date   May 2020
 */
 
-#ifndef _RTE_STEPPER_
-#define _RTE_STEPPER_
+#ifndef CD_RtPhysicsStepper_H
+#define CD_RtPhysicsStepper_H
 
-#include "CD_TimeStepper.H"
+// Our includes
+#include <CD_TimeStepper.H>
 #include <CD_RtSolver.H>
+#include <CD_NamespaceHeader.H>
 
-#include "CD_NamespaceHeader.H"
-namespace physics {
-  namespace rte {
+namespace Physics {
+  namespace RadiativeTransfer {
 
     /*!
       @brief Class that just solves the rte equation using the RtSolver advance method
@@ -74,7 +79,8 @@ namespace physics {
     };
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #include <CD_RtPhysicsStepperImplem.H>
 

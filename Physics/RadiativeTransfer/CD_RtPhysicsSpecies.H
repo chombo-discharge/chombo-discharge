@@ -1,18 +1,24 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   RtPhysicsSpecies.H
-  @brief  Simple species for RTE physics
+  @file   CD_RtPhysicsSpecies.H
+  @brief  Simple species for Physics/RadiativeTransfer
   @author Robert Marskar
   @date   March 2020
 */
 
-#ifndef _RTE_PHYSICS_SPECIES_
-#define _RTE_PHYSICS_SPECIES_
+#ifndef CD_RtPhysicsSpecies_H
+#define CD_RtPhysicsSpecies_H
 
+// Our includes
 #include <CD_RtSpecies.H>
+#include <CD_NamespaceHeader.H>
 
-#include "CD_NamespaceHeader.H"
-namespace physics {
-  namespace rte {
+namespace Physics {
+  namespace RadiativeTransfer {
 
     class RtPhysicsSpecies : public RtSpecies {
     public:
@@ -21,6 +27,7 @@ namespace physics {
     };
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

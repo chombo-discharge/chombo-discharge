@@ -1,16 +1,22 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   RtPhysicsSpecies.cpp
-  @brief  Implementation of RtPhysicsSpecies.H
+  @file   CD_RtPhysicsSpecies.cpp
+  @brief  Implementation of CD_RtPhysicsSpecies.H
   @author Robert Marskar
-  @date   May 2020
 */
 
-#include <CD_RtPhysicsSpecies.H>
-
+// Chombo includes
 #include <ParmParse.H>
 
-#include "CD_NamespaceHeader.H"
-using namespace physics::rte;
+// Our includes
+#include <CD_RtPhysicsSpecies.H>
+#include <CD_NamespaceHeader.H>
+
+using namespace Physics::RadiativeTransfer;
 
 RtPhysicsSpecies::RtPhysicsSpecies(){
 
@@ -25,4 +31,5 @@ RtPhysicsSpecies::RtPhysicsSpecies(){
 RtPhysicsSpecies::~RtPhysicsSpecies(){
 
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
