@@ -1,7 +1,7 @@
 /*!
   @file perlin_plane_if.H
   @brief Declaration of a noise plane level-set function
-  @details This class is essentially a PlaneIF with perlin_if noise
+  @details This class is essentially a PlaneIF with PerlinSdf noise
   @author Robert Marskar
   @date Nov. 2017
 */

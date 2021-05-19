@@ -17,7 +17,7 @@
 #include <SphereIF.H>
 
 // Our includes
-#include <perlin_if.H>
+#include <CD_PerlinSdf.H>
 #include <CD_NamespaceHeader.H>
 
 /*!

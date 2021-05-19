@@ -9,7 +9,7 @@
 #define _MORROW_BOURDON_
 
 #include "cdr_plasma_physics.H"
-#include "perlin_if.H"
+#include <CD_PerlinSdf.H>
 
 #include "CD_NamespaceHeader.H"
 namespace physics {

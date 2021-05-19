@@ -1,16 +1,19 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file perlin_if.cpp
-  @brief Implementation of perlin_if.H
+  @file   CD_PerlinSdf.cpp
+  @brief  Implementation of CD_PerlinSdf.H
   @author Robert Marskar
-  @date Sep. 2017
 */
 
-#include "perlin_if.H"
+// Our includes
+#include <CD_PerlinSdf.H>
+#include <CD_NamespaceHeader.H>
 
-#include "CD_NamespaceHeader.H"
-
-//
-int perlin_if::s_perlin[256] = { 151,160,137,91,90,15,
+int PerlinSdf::s_perlin[256] = { 151,160,137,91,90,15,
 				 131,13,201,95,96,53,194,233,7,225,140,36,103,30,69,142,8,99,37,240,21,10,23,
 				 190, 6,148,247,120,234,75,0,26,197,62,94,252,219,203,117,35,11,32,57,177,33,
 				 88,237,149,56,87,174,20,125,136,171,168, 68,175,74,165,71,134,139,48,27,166,
@@ -24,19 +27,18 @@ int perlin_if::s_perlin[256] = { 151,160,137,91,90,15,
 				 49,192,214, 31,181,199,106,157,184, 84,204,176,115,121,50,45,127, 4,150,254,
 				 138,236,205,93,222,114,67,29,24,72,243,141,128,195,78,66,215,61,156,180};
 
-//
-perlin_if::perlin_if(const Real     a_noiseAmp,
+
+PerlinSdf::PerlinSdf(const Real     a_noiseAmp,
 		     const RealVect a_noiseFreq,
 		     const Real     a_persistence,
 		     const int      a_octaves,
 		     const bool     a_reseed){
 #if CH_SPACEDIM < 2 || CH_SPACEDIM > 3
-  MayDay::Abort("perlin_if::perlin_if - This will only compile in 2D or 3D");
+  MayDay::Abort("PerlinSdf::PerlinSdf - This will only compile in 2D or 3D");
 #endif
 
   CH_assert(a_octaves >= 1);
 
-  //
   m_noiseAmp    = a_noiseAmp;
   m_noiseFreq   = a_noiseFreq;
   m_persistence = a_persistence;
@@ -48,66 +50,54 @@ perlin_if::perlin_if(const Real     a_noiseAmp,
     p[i + 256] = s_perlin[i];
   }
 
-
   // Reseed the permutation table
   if(a_reseed){
     reseed(); 
   }
 }
 
+PerlinSdf::PerlinSdf(const PerlinSdf& a_inputIF){
 
-
-
-//
-perlin_if::perlin_if(const perlin_if& a_inputIF){
-
-  //
   m_noiseAmp    = a_inputIF.m_noiseAmp;
   m_noiseFreq   = a_inputIF.m_noiseFreq;
   m_persistence = a_inputIF.m_persistence;
   m_octaves     = a_inputIF.m_octaves;
+  
   for (int i = 0; i < 256; i++){
     p[i]           = a_inputIF.p[i];
     p[i + 256]     = a_inputIF.p[i + 256];
   }
 }
 
-//
-perlin_if::~perlin_if(){
+PerlinSdf::~PerlinSdf(){
 }
 
-//
-Real perlin_if::value(const RealVect& a_pos) const{
+Real PerlinSdf::value(const RealVect& a_pos) const{
   return octaveNoise(a_pos);
 }
 
-//
-BaseIF* perlin_if::newImplicitFunction() const{
-  return static_cast<BaseIF*> (new perlin_if(*this));
+BaseIF* PerlinSdf::newImplicitFunction() const{
+  return static_cast<BaseIF*> (new PerlinSdf(*this));
 }
 
-//
-int perlin_if::random (const int i) {
+int PerlinSdf::random (const int i) {
   return std::rand()%i;
 }
 
-//
-void perlin_if::reseed(){
+void PerlinSdf::reseed(){
 
-  //
   for (int i = 0; i < 256; i++){
     p[i] = i;
   }
 
   // Reseed the RNG
-  //
   int seed = time(NULL);
 
   // Haven't had trouble with this, but I'm putting this here for safety. 
 #ifdef CH_MPI
   int result = MPI_Bcast(&seed, 1, MPI_INT, 0, Chombo_MPI::comm);
   if(result != MPI_SUCCESS){
-    MayDay::Error("perlin_if::reseed() - broadcast failed");
+    MayDay::Error("PerlinSdf::reseed() - broadcast failed");
   }
 #endif
   std::srand(seed);
@@ -116,13 +106,12 @@ void perlin_if::reseed(){
   
   random_shuffle(&p[0], &p[256], random);
 
-  //
   for (int i = 0; i < 256; i++){
     p[i + 256] = p[i];
   }
 }
 
-double perlin_if::noise(const double a_x, const double a_y, const double a_z) const {
+double PerlinSdf::noise(const double a_x, const double a_y, const double a_z) const {
 
   // Lower cube corner
   const int X = (int) std::floor(a_x) & 255;
@@ -158,7 +147,7 @@ double perlin_if::noise(const double a_x, const double a_y, const double a_z) co
 			grad(p[BB+1], x-1, y-1, z-1 ))));
 }
 
-Real perlin_if::noise(const RealVect& a_pos) const {
+Real PerlinSdf::noise(const RealVect& a_pos) const {
 
   Real x, y, z;
   x = a_pos[0];
@@ -173,7 +162,7 @@ Real perlin_if::noise(const RealVect& a_pos) const {
   return 0.5*noise(x, y, z) + 0.5;
 }
 
-Real perlin_if::octaveNoise(const RealVect& a_pos) const {
+Real PerlinSdf::octaveNoise(const RealVect& a_pos) const {
   Real result = 0.0;
 
   //
@@ -196,18 +185,19 @@ Real perlin_if::octaveNoise(const RealVect& a_pos) const {
   return result;
 }
 
-Real perlin_if::lerp(const Real t, const Real a, const Real b) const {
+Real PerlinSdf::lerp(const Real t, const Real a, const Real b) const {
   return a + t * (b - a);
 }
 
-Real perlin_if::fade(const Real t) const {
+Real PerlinSdf::fade(const Real t) const {
   return t * t * t * (t * (t * 6 - 15) + 10); 
 }
 
-Real perlin_if::grad(const int hash, const double x, const double y, const double z) const {
+Real PerlinSdf::grad(const int hash, const double x, const double y, const double z) const {
   const int h    = hash & 15;
   const double u = h < 8 ? x : y;
   const double v = h < 4 ? y : h == 12 || h == 14 ? x : y;
   return ((h&1) == 0 ? u : -u) + ((h&2) == 0 ? v : -v);
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

@@ -1,24 +1,31 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file perlin_if.H
-  @brief Declaration of a perlin_if function
+  @file   CD_PerlinSdf.H
+  @brief  Declaration of signed distance Perlin noise
   @author Robert Marskar
-  @date Nov. 2017
 */
 
-#ifndef _PERLIN_IF_
-#define _PERLIN_IF_
+#ifndef CD_PerlinSdf_H
+#define CD_PerlinSdf_H
 
-#include <BaseIF.H>
+// Std includes
 #include <algorithm>
 
-#include "CD_NamespaceHeader.H"
+// Chombo includes
+#include <BaseIF.H>
+
+// Our includes
+#include <CD_NamespaceHeader.H>
 
 /*!
-  @class perlin_if
-  @brief Class that implements an improved Perlin noise function
+  @brief Class that implements the improved Perlin noise function
   @details Typically, you will use this function to displace a level-set function by using SumIF. 
 */
-class perlin_if : public BaseIF {
+class PerlinSdf : public BaseIF {
 public:
   /*!
     @brief Full constructor
@@ -28,7 +35,7 @@ public:
     @param[in] a_persistence Reduction factor for each octave
     @param[in] a_reseed Reseed permutation vector (true) or use Ken Perlin's original one (false)
   */
-  perlin_if(const Real     a_noiseAmp,
+  PerlinSdf(const Real     a_noiseAmp,
 	    const RealVect a_noiseFreq,
 	    const Real     a_persistence,
 	    const int      a_octaves,
@@ -36,9 +43,9 @@ public:
 
   /*!
     @brief Copy constructor
-    @param[in] a_inputIF Input perlin_if
+    @param[in] a_inputIF Input PerlinSdf
   */
-  perlin_if(const perlin_if& a_inputIF);
+  PerlinSdf(const PerlinSdf& a_inputIF);
 
   /*!
     @brief Random number generator
@@ -48,7 +55,7 @@ public:
   /*!
     @brief Destructor
   */
-  virtual ~perlin_if();
+  virtual ~PerlinSdf();
 
   /*!
     @brief Level-set function
@@ -132,7 +139,8 @@ protected:
   */
   Real grad(const int hash, const double x, const double y, const double z) const;
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 
 #endif

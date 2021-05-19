@@ -26,7 +26,7 @@ PerlinSphereSdf::PerlinSphereSdf(const Real&     a_rad,
   m_rad    = a_rad;
   m_center = a_center;
   m_inside = a_inside;
-  m_perlinIF = RefCountedPtr<BaseIF> (new perlin_if(a_noiseAmp, a_noiseFreq, a_persistence, a_octaves, a_reseed));
+  m_perlinIF = RefCountedPtr<BaseIF> (new PerlinSdf(a_noiseAmp, a_noiseFreq, a_persistence, a_octaves, a_reseed));
 }
 
 PerlinSphereSdf::PerlinSphereSdf(const PerlinSphereSdf& a_inputIF){
