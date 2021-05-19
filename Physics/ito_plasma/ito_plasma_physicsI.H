@@ -79,7 +79,7 @@ RealVect ito_plasma_physics::random_position(const RealVect a_lo, const RealVect
 }
 
 inline
-RealVect ito_plasma_physics::random_direction() const {
+RealVect ito_plasma_physics::randomDirection() const {
   const Real EPS = 1.E-8;
 #if CH_SPACEDIM==2
   Real x1 = 2.0;
@@ -475,7 +475,7 @@ void ito_plasma_physics::reconcile_Photons(List<Photon>&      a_Photons,
   
   for (int i = 0; i < num; i++){
     const RealVect p = this->random_position(a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
-    const RealVect v = units::s_c0*random_direction();
+    const RealVect v = units::s_c0*randomDirection();
       
     a_Photons.add(Photon(p, v, a_species.getKappa(p), weight));
   }
@@ -483,7 +483,7 @@ void ito_plasma_physics::reconcile_Photons(List<Photon>&      a_Photons,
   // If we used superPhotons the last Photon gets some extra oomph. 
   if(remainder > 0){
     const RealVect p = this->random_position(a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
-    const RealVect v = units::s_c0*random_direction();
+    const RealVect v = units::s_c0*randomDirection();
     a_Photons.add(Photon(p, v, a_species.getKappa(p), weight + remainder));
   }
 }
@@ -595,7 +595,7 @@ void ito_plasma_physics::draw_gaussian_particles(List<ito_particle>& a_particles
 
   // Now make the particles
   for (int i = 0; i < myNumParticles; i++){
-    const RealVect pos = a_blobCenter + gauss(m_rng)*random_direction();
+    const RealVect pos = a_blobCenter + gauss(m_rng)*randomDirection();
     
     
     a_particles1.add(ito_particle(a_weight, pos, RealVect::Zero, 0.0, 0.0, a_energy1));

@@ -163,11 +163,11 @@ namespace physics {
 
       // Functions for creating random Gaussian distributions
       RealVect random_gaussian();
-      RealVect random_direction();
+      RealVect randomDirection();
 #if CH_SPACEDIM==2
-      RealVect random_direction2D();
+      RealVect randomDirection2D();
 #elif CH_SPACEDIM==3
-      RealVect random_direction3D();
+      RealVect randomDirection3D();
 #endif
 
       int poisson_reaction(const Real a_propensity, const Real a_dt) const;

@@ -607,7 +607,7 @@ morrow_fhd::uv_Photon::~uv_Photon(){
 }
 
 Real morrow_fhd::uv_Photon::getKappa(const RealVect a_pos) const {
-  MayDay::Abort("morrow_fhd::uv_Photon::getKappa - should not be called. morrow_fhd is used with the mc_photo module");
+  MayDay::Abort("morrow_fhd::uv_Photon::getKappa - should not be called. morrow_fhd is used with the McPhoto module");
 }
 
 Real morrow_fhd::uv_Photon::get_random_kappa() const {

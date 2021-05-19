@@ -332,22 +332,22 @@ public:
   /*!
     @brief Get PVR buffer
   */
-  virtual int getPVR_buffer() const;
+  virtual int getPVRBuffer() const;
 
   /*!
     @brief Get the halo buffer
   */
-  virtual int get_halo_buffer() const;
+  virtual int getHaloBuffer() const;
 
   /*!
     @brief Set the PVR buffer
   */
-  virtual void set_pvr_buffer(const int a_buffer);
+  virtual void setPVRBuffer(const int a_buffer);
 
   /*!
     @brief Set the halo buffer
   */
-  virtual void set_halo_buffer(const int a_buffer);
+  virtual void setHalobuffer(const int a_buffer);
 
   /*!
     @brief Get number of particles in a container
@@ -593,7 +593,7 @@ public:
     @brief Random direction
   */
   inline
-  RealVect random_direction();
+  RealVect randomDirection();
 
   /*!
     @brief Compute min dt
@@ -1008,22 +1008,22 @@ protected:
   /*!
     @brief Parse RNG options
   */
-  void parse_rng();
+  void parseRng();
 
   /*!
     @brief Parse deposition options
   */
-  void parse_deposition();
+  void parseDeposition();
 
   /*!
     @brief Parse bisection step
   */
-  void parse_bisect_step();
+  void parseBisectStep();
 
   /*!
     @brief Parse PVR buffer
   */
-  void parse_pvr_buffer();
+  void parsePvrBuffer();
 
   /*!
     @brief Parse plot variables
@@ -1054,46 +1054,46 @@ protected:
     @brief This computes the "conservative" deposition, multiplied by kappa
   */
   template <class T>
-  void deposit_kappaConservative(EBAMRCellData&               a_phi,
+  void depositKappaConservative(EBAMRCellData&               a_phi,
 				 const ParticleContainer<T>& a_particles,
 				 const DepositionType::Which  a_deposition);
 
   /*!
-    @brief Just as deposit_kappaConservative, but using a PVR buffer where particle clouds on coarse levels are
+    @brief Just as depositKappaConservative, but using a PVR buffer where particle clouds on coarse levels are
     interpolated to fine levels. 
   */
   template <class T>
-  void deposit_kappaConservativeWithPVR(EBAMRCellData&               a_phi,
+  void depositKappaConservativeWithPVR(EBAMRCellData&               a_phi,
 					const ParticleContainer<T>& a_particles,
 					const DepositionType::Which  a_deposition);
 
   /*!
-    @brief Just as deposit_kappaConservative, but using halo particles when depositing particles from coarse levels to fine
+    @brief Just as depositKappaConservative, but using halo particles when depositing particles from coarse levels to fine
     levels
   */
   template <class T>
-  void deposit_kappaConservativeNoPVR_native(EBAMRCellData&               a_phi,
+  void depositKappaConservativeNoPVR_native(EBAMRCellData&               a_phi,
 					     const ParticleContainer<T>& a_particles,
 					     const DepositionType::Which  a_deposition);
 
   /*!
-    @brief Just as deposit_kappaConservative, but using halo particles when depositing particles from coarse levels to fine
+    @brief Just as depositKappaConservative, but using halo particles when depositing particles from coarse levels to fine
     levels
   */
   template <class T>
-  void deposit_kappaConservativeNoPVR_NGP(EBAMRCellData&               a_phi,
+  void depositKappaConservativeNoPVR_NGP(EBAMRCellData&               a_phi,
 					  const ParticleContainer<T>& a_particles,
 					  const DepositionType::Which  a_deposition);
 
   /*!
     @brief Make the "non-conservative" kappa deposition
   */
-  void deposit_nonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellData& a_depositionKappaC);
+  void depositNonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellData& a_depositionKappaC);
 
   /*!
     @brief Make the hybrid deposition. Also compute the mass difference
   */
-  void deposit_hybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massDifference, const EBAMRIVData& a_depositionNC);
+  void depositHybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massDifference, const EBAMRIVData& a_depositionNC);
 
   /*!
     @brief Increment redistribution objects with mass to be redistributed
@@ -1103,7 +1103,7 @@ protected:
   /*!
     @brief Do redistribution on all levels, no coarse-fine stuff
   */
-  void level_redistribution(EBAMRCellData& a_phi);
+  void levelRedist(EBAMRCellData& a_phi);
 
   /*!
     @brief Increment the coarse-fine redist with mass difference (only for EB x CF)

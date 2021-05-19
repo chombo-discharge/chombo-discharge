@@ -47,7 +47,7 @@ RealVect ito_solver::random_gaussian() {
 }
 
 inline
-RealVect ito_solver::random_direction(){
+RealVect ito_solver::randomDirection(){
   const Real EPS = 1.E-8;
 #if CH_SPACEDIM==2
   Real x1 = 2.0;
@@ -97,21 +97,21 @@ void ito_solver::deposit_particles(EBAMRCellData&               a_phi,
     pout() << m_name + "::deposit_particles" << endl;
   }
            
-  this->deposit_kappaConservative(a_phi, a_particles, a_deposition); // a_phi contains only weights, i.e. not divided by kappa
+  this->depositKappaConservative(a_phi, a_particles, a_deposition); // a_phi contains only weights, i.e. not divided by kappa
   if(m_redistribute){
-    this->deposit_nonConservative(m_depositionNC, a_phi);              // Compute m_depositionNC = sum(kappa*Wc)/sum(kappa)
-    this->deposit_hybrid(a_phi, m_massDiff, m_depositionNC);           // Compute hybrid deposition, including mass differnce
+    this->depositNonConservative(m_depositionNC, a_phi);              // Compute m_depositionNC = sum(kappa*Wc)/sum(kappa)
+    this->depositHybrid(a_phi, m_massDiff, m_depositionNC);           // Compute hybrid deposition, including mass differnce
     this->incrementRedist(m_massDiff);                                  // Increment level redistribution register
 
     // Do the redistribution magic
     const bool ebcf = m_amr->getEbCf();
     if(ebcf){ // Mucho stuff to do here...
       this->coarseFineIncrement(m_massDiff);       // Compute C2F, F2C, and C2C mass transfers
-      this->level_redistribution(a_phi);           // Level redistribution. Weights is a dummy parameter
+      this->levelRedist(a_phi);           // Level redistribution. Weights is a dummy parameter
       this->coarseFineRedistribution(a_phi);     // Do the coarse-fine redistribution
     }
     else{ // Very simple, redistribute this level.
-      this->level_redistribution(a_phi);
+      this->levelRedist(a_phi);
     }
   }
 
@@ -121,39 +121,39 @@ void ito_solver::deposit_particles(EBAMRCellData&               a_phi,
 }
 
 template <class T>
-void ito_solver::deposit_kappaConservative(EBAMRCellData&               a_phi,
+void ito_solver::depositKappaConservative(EBAMRCellData&               a_phi,
 					   const ParticleContainer<T>& a_particles,
 					   const DepositionType::Which  a_deposition){
-  CH_TIME("ito_solver::deposit_kappaConservative");
+  CH_TIME("ito_solver::depositKappaConservative");
   if(m_verbosity > 5){
-    pout() << m_name + "::deposit_kappaConservative" << endl;
+    pout() << m_name + "::depositKappaConservative" << endl;
   }
 
   if(m_halo_buffer > 0 && m_pvr_buffer > 0){
-    MayDay::Abort("ito_solver::deposit_kappaConservative - conflicting inputs, halo/pvr buffers both > 0");
+    MayDay::Abort("ito_solver::depositKappaConservative - conflicting inputs, halo/pvr buffers both > 0");
   }
 
   if(m_pvr_buffer > 0){
-    this->deposit_kappaConservativeWithPVR(a_phi, a_particles, a_deposition);
+    this->depositKappaConservativeWithPVR(a_phi, a_particles, a_deposition);
   }
   else{
     if(m_ngp_halo || a_deposition == DepositionType::NGP){
-      this->deposit_kappaConservativeNoPVR_NGP(a_phi, a_particles, a_deposition);
+      this->depositKappaConservativeNoPVR_NGP(a_phi, a_particles, a_deposition);
     }
     else{
-      this->deposit_kappaConservativeNoPVR_native(a_phi, a_particles, a_deposition);
+      this->depositKappaConservativeNoPVR_native(a_phi, a_particles, a_deposition);
     }
 
   }
 }
 
 template <class T>
-void ito_solver::deposit_kappaConservativeWithPVR(EBAMRCellData&               a_phi,
+void ito_solver::depositKappaConservativeWithPVR(EBAMRCellData&               a_phi,
 						  const ParticleContainer<T>& a_particles,
 						  const DepositionType::Which  a_deposition){
-  CH_TIME("ito_solver::deposit_kappaConservativeWithPVR");
+  CH_TIME("ito_solver::depositKappaConservativeWithPVR");
   if(m_verbosity > 5){
-    pout() << m_name + "::deposit_kappaConservativeWithPVR" << endl;
+    pout() << m_name + "::depositKappaConservativeWithPVR" << endl;
   }
   
   const int comp = 0;
@@ -209,12 +209,12 @@ void ito_solver::deposit_kappaConservativeWithPVR(EBAMRCellData&               a
 }
 
 template <class T>
-void ito_solver::deposit_kappaConservativeNoPVR_native(EBAMRCellData&               a_phi,
+void ito_solver::depositKappaConservativeNoPVR_native(EBAMRCellData&               a_phi,
 						       const ParticleContainer<T>& a_particles,
 						       const DepositionType::Which  a_deposition){
-  CH_TIME("ito_solver::deposit_kappaConservativeNoPVR_native");
+  CH_TIME("ito_solver::depositKappaConservativeNoPVR_native");
   if(m_verbosity > 5){
-    pout() << m_name + "::deposit_kappaConservativeNoPVR_native" << endl;
+    pout() << m_name + "::depositKappaConservativeNoPVR_native" << endl;
   }
 
   const int comp = 0;
@@ -287,7 +287,7 @@ void ito_solver::deposit_kappaConservativeNoPVR_native(EBAMRCellData&           
 	  interp.deposit4((*halo_particles[lvl-1])[dit()].listItems(), buffer[dit()], m_deposition);
 	}
 	else{
-	  MayDay::Abort("ito_solverI::deposit_kappaConservativeNoPVR - logic bust");
+	  MayDay::Abort("ito_solverI::depositKappaConservativeNoPVR - logic bust");
 	}
       }
 
@@ -301,12 +301,12 @@ void ito_solver::deposit_kappaConservativeNoPVR_native(EBAMRCellData&           
 }
 
 template <class T>
-void ito_solver::deposit_kappaConservativeNoPVR_NGP(EBAMRCellData&               a_phi,
+void ito_solver::depositKappaConservativeNoPVR_NGP(EBAMRCellData&               a_phi,
 						    const ParticleContainer<T>& a_particles,
 						    const DepositionType::Which  a_deposition){
-  CH_TIME("ito_solver::deposit_kappaConservativeNoPVR_NGP");
+  CH_TIME("ito_solver::depositKappaConservativeNoPVR_NGP");
   if(m_verbosity > 5){
-    pout() << m_name + "::deposit_kappaConservativeNoPVR_NGP" << endl;
+    pout() << m_name + "::depositKappaConservativeNoPVR_NGP" << endl;
   }
 
   const int comp = 0;

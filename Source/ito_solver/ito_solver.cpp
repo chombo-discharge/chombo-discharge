@@ -65,11 +65,11 @@ void ito_solver::parseOptions(){
   }
 
   this->parse_superparticles();
-  this->parse_rng();
+  this->parseRng();
   this->parsePlotVariables();
-  this->parse_deposition();
-  this->parse_bisect_step();
-  this->parse_pvr_buffer();
+  this->parseDeposition();
+  this->parseBisectStep();
+  this->parsePvrBuffer();
   this->parse_diffusion_hop();
   this->parse_redistribution();
   this->parseDivergenceComputation();
@@ -83,10 +83,10 @@ void ito_solver::parseRuntimeOptions(){
   }
 
   this->parse_superparticles();
-  this->parse_rng();
+  this->parseRng();
   this->parsePlotVariables();
-  this->parse_deposition();
-  this->parse_bisect_step();
+  this->parseDeposition();
+  this->parseBisectStep();
   this->parse_diffusion_hop();
   this->parse_redistribution();
   this->parseDivergenceComputation();
@@ -106,10 +106,10 @@ void ito_solver::parse_superparticles(){
   m_kd_direction = min(m_kd_direction, SpaceDim-1);
 }
 
-void ito_solver::parse_rng(){
-  CH_TIME("ito_solver::parse_rng");
+void ito_solver::parseRng(){
+  CH_TIME("ito_solver::parseRng");
   if(m_verbosity > 5){
-    pout() << m_name + "::parse_rng" << endl;
+    pout() << m_name + "::parseRng" << endl;
   }
 
   // Seed the RNG
@@ -128,7 +128,7 @@ void ito_solver::parse_rng(){
 }
 
 void ito_solver::parsePlotVariables(){
-  CH_TIME("mc_photo::parsePlotVariables");
+  CH_TIME("McPhoto::parsePlotVariables");
   if(m_verbosity > 5){
     pout() << m_name + "::parsePlotVariables" << endl;
   }
@@ -161,10 +161,10 @@ void ito_solver::parsePlotVariables(){
   }
 }
 
-void ito_solver::parse_deposition(){
-  CH_TIME("ito_solver::parse_rng");
+void ito_solver::parseDeposition(){
+  CH_TIME("ito_solver::parseRng");
   if(m_verbosity > 5){
-    pout() << m_name + "::parse_rng" << endl;
+    pout() << m_name + "::parseRng" << endl;
   }
 
   ParmParse pp(m_className.c_str());
@@ -185,7 +185,7 @@ void ito_solver::parse_deposition(){
     m_deposition = DepositionType::W4;
   }
   else{
-    MayDay::Abort("ito_solver::parse_deposition - unknown interpolant requested");
+    MayDay::Abort("ito_solver::parseDeposition - unknown interpolant requested");
   }
 
   // Deposition for plotting only
@@ -204,7 +204,7 @@ void ito_solver::parse_deposition(){
     m_plot_deposition = DepositionType::W4;
   }
   else{
-    MayDay::Abort("ito_solver::parse_deposition - unknown interpolant requested");
+    MayDay::Abort("ito_solver::parseDeposition - unknown interpolant requested");
   }
 
   // Mobility interpolation.
@@ -217,27 +217,27 @@ void ito_solver::parse_deposition(){
     m_mobility_interp = mobility_interp::velocity;
   }
   else{
-    MayDay::Abort("ito_solver::parse_deposition - unknown interpolation method for mobility");
+    MayDay::Abort("ito_solver::parseDeposition - unknown interpolation method for mobility");
   }
 
   pp.get("irr_ngp_deposition", m_irreg_ngp_deposition);
   pp.get("irr_ngp_interp",     m_irreg_ngp_interpolation);
 }
 
-void ito_solver::parse_bisect_step(){
-  CH_TIME("ito_solver::parse_bisect_step");
+void ito_solver::parseBisectStep(){
+  CH_TIME("ito_solver::parseBisectStep");
   if(m_verbosity > 5){
-    pout() << m_name + "::parse_bisect_step" << endl;
+    pout() << m_name + "::parseBisectStep" << endl;
   }
 
   ParmParse pp(m_className.c_str());
   pp.get("bisect_step", m_bisect_step);
 }
 
-void ito_solver::parse_pvr_buffer(){
-  CH_TIME("ito_solver::parse_pvr_buffer");
+void ito_solver::parsePvrBuffer(){
+  CH_TIME("ito_solver::parsePvrBuffer");
   if(m_verbosity > 5){
-    pout() << m_name + "::parse_pvr_buffer" << endl;
+    pout() << m_name + "::parsePvrBuffer" << endl;
   }
 
   ParmParse pp(m_className.c_str());
@@ -253,7 +253,7 @@ void ito_solver::parse_pvr_buffer(){
     m_ngp_halo = false;
   }
   else{
-    MayDay::Abort("ito_solver::parse_pvr_buffer - unknown argument to 'halo_deposition'");
+    MayDay::Abort("ito_solver::parsePvrBuffer - unknown argument to 'halo_deposition'");
   }
 }
 
@@ -365,37 +365,37 @@ int ito_solver::getNumberOfPlotVariables() const {
   return num_plotvars;
 }
 
-int ito_solver::getPVR_buffer() const {
-  CH_TIME("ito_solver::getPVR_buffer");
+int ito_solver::getPVRBuffer() const {
+  CH_TIME("ito_solver::getPVRBuffer");
   if(m_verbosity > 5){
-    pout() << m_name + "::getPVR_buffer" << endl;
+    pout() << m_name + "::getPVRBuffer" << endl;
   }
 
   return m_pvr_buffer;
 }
 
-int ito_solver::get_halo_buffer() const {
-  CH_TIME("ito_solver::get_halo_buffer");
+int ito_solver::getHaloBuffer() const {
+  CH_TIME("ito_solver::getHaloBuffer");
   if(m_verbosity > 5){
-    pout() << m_name + "::get_halo_buffer" << endl;
+    pout() << m_name + "::getHaloBuffer" << endl;
   }
 
   return m_halo_buffer;
 }
 
-void ito_solver::set_pvr_buffer(const int a_buffer) {
-  CH_TIME("ito_solver::set_pvr_buffer");
+void ito_solver::setPVRBuffer(const int a_buffer) {
+  CH_TIME("ito_solver::setPVRBuffer");
   if(m_verbosity > 5){
-    pout() << m_name + "::set_pvr_buffer" << endl;
+    pout() << m_name + "::setPVRBuffer" << endl;
   }
 
   m_pvr_buffer = a_buffer;
 }
 
-void ito_solver::set_halo_buffer(const int a_buffer)  {
-  CH_TIME("ito_solver::set_halo_buffer");
+void ito_solver::setHalobuffer(const int a_buffer)  {
+  CH_TIME("ito_solver::setHalobuffer");
   if(m_verbosity > 5){
-    pout() << m_name + "::set_halo_buffer" << endl;
+    pout() << m_name + "::setHalobuffer" << endl;
   }
 
   m_halo_buffer = a_buffer;
@@ -1706,10 +1706,10 @@ void ito_solver::deposit_particles(const which_container a_container){
   this->deposit_particles(m_phi, m_ParticleContainers.at(a_container), m_deposition);
 }
 
-void ito_solver::deposit_nonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellData& a_depositionKappaC){
-  CH_TIME("ito_solver::deposit_nonConservative");
+void ito_solver::depositNonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellData& a_depositionKappaC){
+  CH_TIME("ito_solver::depositNonConservative");
   if(m_verbosity > 5){
-    pout() << m_name + "::deposit_nonConservative" << endl;
+    pout() << m_name + "::depositNonConservative" << endl;
   }
 
   const std::string cur_Realm = a_depositionNC.getRealm();
@@ -1723,10 +1723,10 @@ void ito_solver::deposit_nonConservative(EBAMRIVData& a_depositionNC, const EBAM
   }
 }
 
-void ito_solver::deposit_hybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massDifference, const EBAMRIVData& a_depositionNC){
-  CH_TIME("ito_solver::deposit_hybrid");
+void ito_solver::depositHybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massDifference, const EBAMRIVData& a_depositionNC){
+  CH_TIME("ito_solver::depositHybrid");
   if(m_verbosity > 5){
-    pout() << m_name + "::deposit_hybrid" << endl;
+    pout() << m_name + "::depositHybrid" << endl;
   }
 
   const std::string cur_Realm = a_depositionH.getRealm();
@@ -1789,10 +1789,10 @@ void ito_solver::incrementRedist(const EBAMRIVData& a_massDifference){
   }
 }
 
-void ito_solver::level_redistribution(EBAMRCellData& a_phi){
-  CH_TIME("ito_solver::level_redistribution");
+void ito_solver::levelRedist(EBAMRCellData& a_phi){
+  CH_TIME("ito_solver::levelRedist");
   if(m_verbosity > 5){
-    pout() << m_name + "::level_redistribution" << endl;
+    pout() << m_name + "::levelRedist" << endl;
   }
 
   const std::string cur_Realm = a_phi.getRealm();

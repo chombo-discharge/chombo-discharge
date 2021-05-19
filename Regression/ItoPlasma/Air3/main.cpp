@@ -5,7 +5,7 @@
 #include "ito_layout.H"
 #include "ito_solver.H"
 #include "rte_layout.H"
-#include "mc_photo.H"
+#include <CD_McPhoto.H>
 #include "ito_plasma_air3.H"
 #include "rod_dielectric.H"
 #include "ito_plasma_godunov.H"
@@ -54,7 +54,7 @@ int main(int argc, char* argv[]){
   // Create solver factories
   auto poi_fact = new FieldSolverFactory<FieldSolverMultigrid>();
   auto ito_fact = new ito_factory<ito_solver, ito_solver>();
-  auto rte_fact = new rte_factory<mc_photo, mc_photo>();
+  auto rte_fact = new rte_factory<McPhoto, McPhoto>();
 
   // Instantiate solvers
   auto poi = poi_fact->newSolver();

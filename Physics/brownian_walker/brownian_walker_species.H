@@ -33,7 +33,7 @@ namespace physics {
 
       void draw_initial_particles();
       RealVect random_gaussian();
-      RealVect random_direction();
+      RealVect randomDirection();
     };
   }
 }

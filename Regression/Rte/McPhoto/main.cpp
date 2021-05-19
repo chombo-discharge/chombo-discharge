@@ -1,5 +1,5 @@
 #include "CD_Driver.H"
-#include "mc_photo.H"
+#include <CD_McPhoto.H>
 #include "rod_dielectric.H"
 #include "rte_stepper.H"
 #include "ParmParse.H"
@@ -24,8 +24,8 @@ int main(int argc, char* argv[]){
   RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (NULL);
 
   // Set up basic Poisson, potential = 1 
-  auto timestepper = RefCountedPtr<rte_stepper<mc_photo> >
-    (new rte_stepper<mc_photo>());
+  auto timestepper = RefCountedPtr<rte_stepper<McPhoto> >
+    (new rte_stepper<McPhoto>());
 
   // Set up the Driver and run it
   RefCountedPtr<Driver> engine = RefCountedPtr<Driver> (new Driver(compgeom, timestepper, amr, tagger, geocoarsen));

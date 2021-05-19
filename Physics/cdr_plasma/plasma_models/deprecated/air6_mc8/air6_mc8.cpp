@@ -390,19 +390,19 @@ Real air6_mc8::ran11() const{
 RealVect air6_mc8::random_gaussian(){
 
   const Real rad = m_gauss(*m_rng);
-  return rad*random_direction();
+  return rad*randomDirection();
 }
 
-RealVect air6_mc8::random_direction(){
+RealVect air6_mc8::randomDirection(){
 #if CH_SPACEDIM == 2
-  return random_direction2D();
+  return randomDirection2D();
 #else
-  return random_direction3D();
+  return randomDirection3D();
 #endif
 }
 
 #if CH_SPACEDIM == 2
-RealVect air6_mc8::random_direction2D(){
+RealVect air6_mc8::randomDirection2D(){
   const Real EPS = 1.E-8;
   Real x1 = 2.0;
   Real x2 = 2.0;
@@ -418,7 +418,7 @@ RealVect air6_mc8::random_direction2D(){
 #endif
 
 #if CH_SPACEDIM==3
-RealVect air6_mc8::random_direction3D(){
+RealVect air6_mc8::randomDirection3D(){
   const Real EPS = 1.E-8;
   Real x1 = 2.0;
   Real x2 = 2.0;

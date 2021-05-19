@@ -127,15 +127,15 @@ ito_solver.deposition          = cic           # 'ngp' = nearest grid point
 # ====================================================================================================
 # MC_PHOTO CLASS OPTIONS
 #
-# The mc_photo class is intended as a flexible RTE solver that may interface into several descriptions.
+# The McPhoto class is intended as a flexible RTE solver that may interface into several descriptions.
 # Because of that we allow several deposition types, e.g. cloud-in-cell if one wants to compute photoionization
 # profiles with less noise. If one wants the photoionization profile (which is what gets passed around
 # in the TimeStepper framework) to contain just the number of Photons in a cell, one would use
 # deposition_type = num. This is useful for SSA type algorithms. 
 #
 # Since the photoproduction source term is filled externally, and the filling of this depends on the
-# CFD/FHD description, mc_photo.source_type species what the solver will expect when drawing Photons.
-# For example, if one species 'volume_rate', mc_photo will interpret the internal data so as to contain
+# CFD/FHD description, McPhoto.source_type species what the solver will expect when drawing Photons.
+# For example, if one species 'volume_rate', McPhoto will interpret the internal data so as to contain
 # a rate per unit volume. The number of Photons produced in a volume will then be S*dx^3*dt. If you
 # filled the source term with just the number of Photons that will be produced in a cell, you should
 # use source_type = number.
@@ -144,32 +144,32 @@ ito_solver.deposition          = cic           # 'ngp' = nearest grid point
 # depends on how you implemented your source terms through the plasma_kinetics interface (or equivalent).
 # This design makes sense for FHD models because the number of Photons produced in a cell can be
 # computed directly, e.g. with SSA algorithms. In this way the stochasticity is provided by the SSA
-# algorithm and one would use mc_photo.source_type = deterministic. For CFD models one would probably
+# algorithm and one would use McPhoto.source_type = deterministic. For CFD models one would probably
 # work with a volumetric rate, in which one could draw the number of Photons from a Poisson distribution. 
 # ====================================================================================================
-mc_photo.instantaneous      = true          # Instantaneous transport or not
-mc_photo.max_Photons        = -1            # Maximum no. generated in a cell (< = 0 yields physical Photons)
-mc_photo.blend_conservation = false         # Switch for blending with the nonconservative divergence
-mc_photo.pvr_buffer         = 2             # Buffer for PVR. Prevents clouds from leaking onto coarse levels.
-mc_photo.halo_buffer        = 0             # Halo region for particles.      
-mc_photo.random_kappa       = true          # Randomize absorption length (taken from Photon implementation)
-mc_photo.plt_vars           = bulk_phot src_phot dom_phot eb_phot  # Available are 'phi' and 'src', 'phot', 'eb_phot', 'dom_phot', 'bulk_phot'
-mc_photo.plot_deposition    = cic           # Cloud-in-cell for plotting particles. 
-mc_photo.bisect_step        = 1.E-4         # Bisection step length for intersection tests
-mc_photo.seed               = 0             # Seed for RNG
-mc_photo.bc_x_low           = outflow       # Boundary condition. 'outflow', 'symmetry', or 'wall'
-mc_photo.bc_x_high          = outflow       # Boundary condition
-mc_photo.bc_y_low           = outflow       # Boundary condition
-mc_photo.bc_y_high          = outflow       # Boundary condition
-mc_photo.bc_z_low           = outflow       # Boundary condition
-mc_photo.bc_z_high          = outflow       # Boundary condition
-mc_photo.poiss_exp_swap     = 100           # Swap out Poisson with exponential distribution above this mean
-mc_photo.Photon_generation  = deterministic # Volumetric source term. 'deterministic' or 'stochastic'
-mc_photo.source_type        = number        # 'number'       = Source term contains the number of Photons produced
+McPhoto.instantaneous      = true          # Instantaneous transport or not
+McPhoto.max_Photons        = -1            # Maximum no. generated in a cell (< = 0 yields physical Photons)
+McPhoto.blend_conservation = false         # Switch for blending with the nonconservative divergence
+McPhoto.pvr_buffer         = 2             # Buffer for PVR. Prevents clouds from leaking onto coarse levels.
+McPhoto.halo_buffer        = 0             # Halo region for particles.      
+McPhoto.random_kappa       = true          # Randomize absorption length (taken from Photon implementation)
+McPhoto.plt_vars           = bulk_phot src_phot dom_phot eb_phot  # Available are 'phi' and 'src', 'phot', 'eb_phot', 'dom_phot', 'bulk_phot'
+McPhoto.plot_deposition    = cic           # Cloud-in-cell for plotting particles. 
+McPhoto.bisect_step        = 1.E-4         # Bisection step length for intersection tests
+McPhoto.seed               = 0             # Seed for RNG
+McPhoto.bc_x_low           = outflow       # Boundary condition. 'outflow', 'symmetry', or 'wall'
+McPhoto.bc_x_high          = outflow       # Boundary condition
+McPhoto.bc_y_low           = outflow       # Boundary condition
+McPhoto.bc_y_high          = outflow       # Boundary condition
+McPhoto.bc_z_low           = outflow       # Boundary condition
+McPhoto.bc_z_high          = outflow       # Boundary condition
+McPhoto.poiss_exp_swap     = 100           # Swap out Poisson with exponential distribution above this mean
+McPhoto.PhotonGeneration  = deterministic # Volumetric source term. 'deterministic' or 'stochastic'
+McPhoto.source_type        = number        # 'number'       = Source term contains the number of Photons produced
                                             # 'volume'       = Source terms contains the number of Photons produced per unit volume
                                             # 'volume_rate'  = Source terms contains the volumetric rate
                                             # 'rate'         = Source terms contains the rate
-mc_photo.deposition         = cic           # 'ngp'  = nearest grid point
+McPhoto.deposition         = cic           # 'ngp'  = nearest grid point
                                             # 'num'  = # of Photons per cell
                                             # 'cic'  = cloud-in-cell
                                             # 'tsc'  = triangle-shaped-cloud
@@ -224,8 +224,8 @@ ito_plasma_godunov.relax_factor   = 9999.5         # Factor in front of relaxati
 ito_plasma_godunov.regrid_super   = true           # Make superparticles after regrid or not
 ito_plasma_godunov.algorithm      = euler_maruyama # 'euler', 'euler_maruyama', 'midpoint'
 ito_plasma_godunov.profile        = true           # Profile advance or not
-ito_plasma_godunov.pvr_buffer     = 0              # PVR buffer for particles (overrides ito and mc_photo)
-ito_plasma_godunov.halo_buffer    = 2              # Halo buffer for particles (overrides ito and mc_photo)
+ito_plasma_godunov.pvr_buffer     = 0              # PVR buffer for particles (overrides ito and McPhoto)
+ito_plasma_godunov.halo_buffer    = 2              # Halo buffer for particles (overrides ito and McPhoto)
 ito_plasma_godunov.filter_rho     = false          # Filter space charge or not
 ito_plasma_godunov.filter_cond    = false          # Filter conductivity or not. 
 ito_plasma_godunov.filter_1       = 0.5 1 4 true   # alpha = 0.5, stride = 1, N = 1, Compensation step = true.

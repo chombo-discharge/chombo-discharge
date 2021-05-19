@@ -134,14 +134,14 @@ void ito_plasma_stepper::set_particle_buffers(){
     pout() << "ito_plasma_stepper::set_particle_buffers" << endl;
   }
   
-  m_ito->set_halo_buffer(m_halo_buffer);
-  m_ito->set_pvr_buffer(m_pvr_buffer);
+  m_ito->setHalobuffer(m_halo_buffer);
+  m_ito->setPVRBuffer(m_pvr_buffer);
 
   for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<mc_photo>& solver = solver_it();
+    RefCountedPtr<McPhoto>& solver = solver_it();
 
-    solver->set_halo_buffer(m_halo_buffer);
-    solver->set_pvr_buffer(m_pvr_buffer);
+    solver->setHalobuffer(m_halo_buffer);
+    solver->setPVRBuffer(m_pvr_buffer);
   }
 }
 
@@ -288,8 +288,8 @@ void ito_plasma_stepper::writeCheckpointData(HDF5Handle& a_handle, const int a_l
     solver->writeCheckpointLevel(a_handle, a_lvl);
   }
 
-  for (rte_iterator<mc_photo> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<mc_photo>& solver = solver_it();
+  for (rte_iterator<McPhoto> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    const RefCountedPtr<McPhoto>& solver = solver_it();
     solver->writeCheckpointLevel(a_handle, a_lvl);
   }
 
@@ -308,8 +308,8 @@ void ito_plasma_stepper::readCheckpointData(HDF5Handle& a_handle, const int a_lv
     solver->readCheckpointLevel(a_handle, a_lvl);
   }
 
-  for (rte_iterator<mc_photo> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<mc_photo>& solver = solver_it();
+  for (rte_iterator<McPhoto> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<McPhoto>& solver = solver_it();
     solver->readCheckpointLevel(a_handle, a_lvl);
   }
 
@@ -339,8 +339,8 @@ void ito_plasma_stepper::writePlotData(EBAMRCellData& a_output, Vector<std::stri
   }
 
   // RTE solvers copy their output data
-  for (rte_iterator<mc_photo> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<mc_photo>& solver = solver_it();
+  for (rte_iterator<McPhoto> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<McPhoto>& solver = solver_it();
     a_plotVariableNames.append(solver->getPlotVariableNames());
     solver->writePlotData(a_output, a_icomp);
   }
@@ -810,8 +810,8 @@ int ito_plasma_stepper::getNumberOfPlotVariables() const {
     ncomp += solver->getNumberOfPlotVariables();
   }
   
-  for (rte_iterator<mc_photo> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<mc_photo>& solver = solver_it();
+  for (rte_iterator<McPhoto> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
+    RefCountedPtr<McPhoto>& solver = solver_it();
     ncomp += solver->getNumberOfPlotVariables();
   }
 
@@ -841,7 +841,7 @@ void ito_plasma_stepper::set_poisson(RefCountedPtr<FieldSolver>& a_poisson){
   m_fieldSolver = a_poisson;
 }
 
-void ito_plasma_stepper::set_rte(RefCountedPtr<rte_layout<mc_photo> >& a_rte){
+void ito_plasma_stepper::set_rte(RefCountedPtr<rte_layout<McPhoto> >& a_rte){
   CH_TIME("ito_plasma_stepper::set_rte");
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::set_rte" << endl;
@@ -2396,11 +2396,11 @@ void ito_plasma_stepper::reconcile_particles(const EBCellFAB& a_newParticlesPerC
   }
   
   for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<mc_photo>& solver = solver_it();
+    RefCountedPtr<McPhoto>& solver = solver_it();
     const int idx = solver_it.index();
     
-    ParticleContainer<Photon>& solverBulkPhotons = solver->get_bulk_Photons();
-    ParticleContainer<Photon>& solverSourPhotons = solver->getSource_Photons();
+    ParticleContainer<Photon>& solverBulkPhotons = solver->getBulkPhotons();
+    ParticleContainer<Photon>& solverSourPhotons = solver->getSourcePhotons();
     
     bulkPhotonsFAB[idx]   = &(solverBulkPhotons.getCellParticles(a_level, a_dit));
     sourcePhotonsFAB[idx] = &(solverSourPhotons.getCellParticles(a_level, a_dit));
@@ -2543,8 +2543,8 @@ void ito_plasma_stepper::advance_reaction_network(const Real a_dt){
     }
 
     for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-      bulk_Photons[solver_it.index()] = &(solver_it()->get_bulk_Photons());
-      new_Photons[solver_it.index()] = &(solver_it()->getSource_Photons());
+      bulk_Photons[solver_it.index()] = &(solver_it()->getBulkPhotons());
+      new_Photons[solver_it.index()] = &(solver_it()->getSourcePhotons());
     }
 
     this->advance_reaction_network(particles, bulk_Photons, new_Photons, m_energy_sources, m_particle_E, a_dt);
@@ -2935,16 +2935,16 @@ void ito_plasma_stepper::advance_Photons(const Real a_dt){
   }
 
   for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<mc_photo>& solver = solver_it();
+    RefCountedPtr<McPhoto>& solver = solver_it();
     
     // Add source Photons and move the Photons
-    ParticleContainer<Photon>& Photons        = solver->get_Photons();
-    ParticleContainer<Photon>& bulkPhotons    = solver->get_bulk_Photons();
-    ParticleContainer<Photon>& ebPhotons      = solver->get_eb_Photons();
-    ParticleContainer<Photon>& domainPhotons  = solver->get_domain_Photons();
-    ParticleContainer<Photon>& sourcePhotons  = solver->getSource_Photons();
+    ParticleContainer<Photon>& Photons        = solver->getPhotons();
+    ParticleContainer<Photon>& bulkPhotons    = solver->getBulkPhotons();
+    ParticleContainer<Photon>& ebPhotons      = solver->getEbPhotons();
+    ParticleContainer<Photon>& domainPhotons  = solver->getDomainPhotons();
+    ParticleContainer<Photon>& sourcePhotons  = solver->getSourcePhotons();
 
-    if(solver->is_instantaneous()){
+    if(solver->isInstantaneous()){
       solver->clear(Photons);
 
       // Add source Photons
@@ -2952,7 +2952,7 @@ void ito_plasma_stepper::advance_Photons(const Real a_dt){
       solver->clear(sourcePhotons);
 
       // Instantaneous advance
-      solver->advance_Photons_stationary(bulkPhotons, ebPhotons, domainPhotons, Photons);
+      solver->advancePhotonsStationary(bulkPhotons, ebPhotons, domainPhotons, Photons);
     }
     else{
       // Add source Photons
@@ -2960,118 +2960,118 @@ void ito_plasma_stepper::advance_Photons(const Real a_dt){
       solver->clear(sourcePhotons);
 
       // Stationary advance
-      solver->advance_Photons_transient(bulkPhotons, ebPhotons, domainPhotons, Photons, a_dt);
+      solver->advancePhotonsTransient(bulkPhotons, ebPhotons, domainPhotons, Photons, a_dt);
     }
   }
 }
 
-void ito_plasma_stepper::sort_Photons_by_cell(){
-  CH_TIME("ito_plasma_stepper::sort_Photons_by_cell()");
+void ito_plasma_stepper::sortPhotonsByCell(){
+  CH_TIME("ito_plasma_stepper::sortPhotonsByCell()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::sort_Photons_by_cell()" << endl;
+    pout() << "ito_plasma_stepper::sortPhotonsByCell()" << endl;
   }
 
   for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->sort_Photons_by_cell();
+    solver_it()->sortPhotonsByCell();
   }
 }
 
-void ito_plasma_stepper::sort_Photons_by_patch(){
-  CH_TIME("ito_plasma_stepper::sort_Photons_by_patch()");
+void ito_plasma_stepper::sortPhotonsByPatch(){
+  CH_TIME("ito_plasma_stepper::sortPhotonsByPatch()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::sort_Photons_by_patch()" << endl;
+    pout() << "ito_plasma_stepper::sortPhotonsByPatch()" << endl;
   }
 
   for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->sort_Photons_by_patch();
+    solver_it()->sortPhotonsByPatch();
   }
 }
 
-void ito_plasma_stepper::sort_source_Photons_by_cell(){
-  CH_TIME("ito_plasma_stepper::sort_source_Photons_by_cell()");
+void ito_plasma_stepper::sortSourcePhotonsByCell(){
+  CH_TIME("ito_plasma_stepper::sortSourcePhotonsByCell()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::sort_source_Photons_by_cell()" << endl;
+    pout() << "ito_plasma_stepper::sortSourcePhotonsByCell()" << endl;
   }
   
   for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->sort_source_Photons_by_cell();
+    solver_it()->sortSourcePhotonsByCell();
   }
 }
 
-void ito_plasma_stepper::sort_source_Photons_by_patch(){
-  CH_TIME("ito_plasma_stepper::sort_source_Photons_by_patch()");
+void ito_plasma_stepper::sortSourcePhotonsByPatch(){
+  CH_TIME("ito_plasma_stepper::sortSourcePhotonsByPatch()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::sort_source_Photons_by_patch()" << endl;
+    pout() << "ito_plasma_stepper::sortSourcePhotonsByPatch()" << endl;
   }
 
   for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->sort_source_Photons_by_patch();
+    solver_it()->sortSourcePhotonsByPatch();
   }
 }
 
-void ito_plasma_stepper::sort_bulk_Photons_by_cell(){
-  CH_TIME("ito_plasma_stepper::sort_bulk_Photons_by_cell()");
+void ito_plasma_stepper::sortBulkPhotonsByCell(){
+  CH_TIME("ito_plasma_stepper::sortBulkPhotonsByCell()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::sort_bulk_Photons_by_cell()" << endl;
+    pout() << "ito_plasma_stepper::sortBulkPhotonsByCell()" << endl;
   }
 
   for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->sort_bulk_Photons_by_cell();
+    solver_it()->sortBulkPhotonsByCell();
   }
 }
 
-void ito_plasma_stepper::sort_bulk_Photons_by_patch(){
-  CH_TIME("ito_plasma_stepper::sort_bulk_Photons_by_patch()");
+void ito_plasma_stepper::sortBulkPhotonsByPatch(){
+  CH_TIME("ito_plasma_stepper::sortBulkPhotonsByPatch()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::sort_bulk_Photons_by_patch()" << endl;
+    pout() << "ito_plasma_stepper::sortBulkPhotonsByPatch()" << endl;
   }
 
   for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->sort_bulk_Photons_by_patch();
+    solver_it()->sortBulkPhotonsByPatch();
   }
 }
 
-void ito_plasma_stepper::sort_eb_Photons_by_cell(){
-  CH_TIME("ito_plasma_stepper::sort_eb_Photons_by_cell()");
+void ito_plasma_stepper::sortEbPhotonsByCell(){
+  CH_TIME("ito_plasma_stepper::sortEbPhotonsByCell()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::sort_eb_Photons_by_cell()" << endl;
+    pout() << "ito_plasma_stepper::sortEbPhotonsByCell()" << endl;
   }
 
   for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->sort_eb_Photons_by_cell();
+    solver_it()->sortEbPhotonsByCell();
   }
 }
 
-void ito_plasma_stepper::sort_eb_Photons_by_patch(){
-  CH_TIME("ito_plasma_stepper::sort_eb_Photons_by_patch()");
+void ito_plasma_stepper::sortEbPhotonsByPatch(){
+  CH_TIME("ito_plasma_stepper::sortEbPhotonsByPatch()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::sort_eb_Photons_by_patch()" << endl;
+    pout() << "ito_plasma_stepper::sortEbPhotonsByPatch()" << endl;
   }
 
   for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->sort_eb_Photons_by_patch();
+    solver_it()->sortEbPhotonsByPatch();
   }
 }
 
-void ito_plasma_stepper::sort_domain_Photons_by_cell(){
-  CH_TIME("ito_plasma_stepper::sort_domain_Photons_by_cell()");
+void ito_plasma_stepper::sortDomainPhotonsByCell(){
+  CH_TIME("ito_plasma_stepper::sortDomainPhotonsByCell()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::sort_domain_Photons_by_cell()" << endl;
+    pout() << "ito_plasma_stepper::sortDomainPhotonsByCell()" << endl;
   }
 
   for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->sort_domain_Photons_by_cell();
+    solver_it()->sortDomainPhotonsByCell();
   }
 }
 
-void ito_plasma_stepper::sort_domain_Photons_by_patch(){
-  CH_TIME("ito_plasma_stepper::sort_domain_Photons_by_patch()");
+void ito_plasma_stepper::sortDomainPhotonsByPatch(){
+  CH_TIME("ito_plasma_stepper::sortDomainPhotonsByPatch()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::sort_domain_Photons_by_patch()" << endl;
+    pout() << "ito_plasma_stepper::sortDomainPhotonsByPatch()" << endl;
   }
 
   for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->sort_domain_Photons_by_patch();
+    solver_it()->sortDomainPhotonsByPatch();
   }
 
 }

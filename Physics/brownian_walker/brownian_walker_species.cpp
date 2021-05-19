@@ -67,10 +67,10 @@ void brownian_walker_species::draw_initial_particles(){
 RealVect brownian_walker_species::random_gaussian(){
 
   const Real rad = m_gauss(m_rng);
-  return rad*random_direction();
+  return rad*randomDirection();
 }
 
-RealVect brownian_walker_species::random_direction(){
+RealVect brownian_walker_species::randomDirection(){
   const Real EPS = 1.E-8;
 #if CH_SPACEDIM==2
   Real x1 = 2.0;

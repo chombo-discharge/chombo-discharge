@@ -1,11 +1,11 @@
 /*!
-  @file   mc_photo.cpp
-  @brief  Implementation of mc_photo.H
+  @file   McPhoto.cpp
+  @brief  Implementation of McPhoto.H
   @author Robert Marskar
   @date   Apr. 2018
 */
 
-#include "mc_photo.H"
+#include <CD_McPhoto.H>
 #include "data_ops.H"
 #include "units.H"
 #include "poly.H"
@@ -26,19 +26,19 @@
 
 #include "CD_NamespaceHeader.H"
 
-mc_photo::mc_photo(){
-  m_name       = "mc_photo";
-  m_className = "mc_photo";
+McPhoto::McPhoto(){
+  m_name       = "McPhoto";
+  m_className = "McPhoto";
 
   m_stationary = false;
 }
 
-mc_photo::~mc_photo(){
+McPhoto::~McPhoto(){
 
 }
 
-bool mc_photo::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_source, const bool a_zerophi){
-  CH_TIME("mc_photo::advance");
+bool McPhoto::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_source, const bool a_zerophi){
+  CH_TIME("McPhoto::advance");
   if(m_verbosity > 5){
     pout() << m_name + "::advance" << endl;
   }
@@ -54,67 +54,67 @@ bool mc_photo::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellDat
 
   // Generate new Photons and add them to m_Photons
   this->clear(m_source_Photons);
-  this->generate_Photons(m_source_Photons, a_source, a_dt);
+  this->generatePhotons(m_source_Photons, a_source, a_dt);
   m_Photons.addParticles(m_source_Photons);
 
   // Advance stationary or transient
   if(m_instantaneous){
-    this->advance_Photons_stationary(m_bulk_Photons, m_eb_Photons, m_domain_Photons, m_Photons);
+    this->advancePhotonsStationary(m_bulk_Photons, m_eb_Photons, m_domain_Photons, m_Photons);
   }
   else{
-    this->advance_Photons_transient(m_bulk_Photons, m_eb_Photons, m_domain_Photons, m_Photons, a_dt);
+    this->advancePhotonsTransient(m_bulk_Photons, m_eb_Photons, m_domain_Photons, m_Photons, a_dt);
     this->remap(m_Photons);                                       
   }
 
   // Deposit volumetric Photons. 
-  this->deposit_Photons(a_phi, m_bulk_Photons, m_deposition);
+  this->depositPhotons(a_phi, m_bulk_Photons, m_deposition);
   
   return true;
 }
 
-bool mc_photo::is_instantaneous(){
+bool McPhoto::isInstantaneous(){
   return m_instantaneous;
 }
 
-void mc_photo::parseOptions(){
-  CH_TIME("mc_photo::parseOptions");
+void McPhoto::parseOptions(){
+  CH_TIME("McPhoto::parseOptions");
   if(m_verbosity > 5){
     pout() << m_name + "::parseOptions" << endl;
   }
   
-  this->parse_rng();
-  this->parse_pseudoPhotons();
-  this->parse_photogen();
-  this->parse_source_type();
-  this->parse_deposition();
-  this->parse_bisect_step();
+  this->parseRng();
+  this->parsePseudoPhotons();
+  this->parsePhotoGeneration();
+  this->parseSourceType();
+  this->parseDeposition();
+  this->parseBisectStep();
   this->parseDomainBc();
-  this->parse_pvr_buffer();
+  this->parsePvrBuffer();
   this->parsePlotVariables();
-  this->parse_instantaneous();
+  this->parseInstantaneous();
   this->parseDivergenceComputation();
 }
 
-void mc_photo::parseRuntimeOptions(){
-  CH_TIME("mc_photo::parseRuntimeOptions");
+void McPhoto::parseRuntimeOptions(){
+  CH_TIME("McPhoto::parseRuntimeOptions");
   if(m_verbosity > 5){
     pout() << m_name + "::parseRuntimeOptions" << endl;
   }
   
-  this->parse_pseudoPhotons();
-  this->parse_photogen();
-  this->parse_source_type();
-  this->parse_deposition();
-  this->parse_bisect_step();
+  this->parsePseudoPhotons();
+  this->parsePhotoGeneration();
+  this->parseSourceType();
+  this->parseDeposition();
+  this->parseBisectStep();
   this->parseDomainBc();
-  this->parse_pvr_buffer();
+  this->parsePvrBuffer();
   this->parsePlotVariables();
-  this->parse_instantaneous();
+  this->parseInstantaneous();
   this->parseDivergenceComputation();
 }
 
-void mc_photo::parseDivergenceComputation(){
-  CH_TIME("mc_photo::parseDivergenceComputation");
+void McPhoto::parseDivergenceComputation(){
+  CH_TIME("McPhoto::parseDivergenceComputation");
   if(m_verbosity > 5){
     pout() << m_name + "::parseDivergenceComputation" << endl;
   }
@@ -124,10 +124,10 @@ void mc_photo::parseDivergenceComputation(){
   pp.get("blend_conservation", m_blendConservation);
 }
 
-void mc_photo::parse_rng(){
-  CH_TIME("mc_photo::parse_rng");
+void McPhoto::parseRng(){
+  CH_TIME("McPhoto::parseRng");
   if(m_verbosity > 5){
-    pout() << m_name + "::parse_rng" << endl;
+    pout() << m_name + "::parseRng" << endl;
   }
 
   // Seed the RNG
@@ -144,10 +144,10 @@ void mc_photo::parse_rng(){
   m_udist11 = new uniform_real_distribution<Real>(-1.0, 1.0);
 }
 
-void mc_photo::parse_instantaneous(){
-  CH_TIME("mc_photo::parse_instantaneous");
+void McPhoto::parseInstantaneous(){
+  CH_TIME("McPhoto::parseInstantaneous");
   if(m_verbosity > 5){
-    pout() << m_name + "::parse_instantaneous" << endl;
+    pout() << m_name + "::parseInstantaneous" << endl;
   }
   
   ParmParse pp(m_className.c_str());
@@ -155,10 +155,10 @@ void mc_photo::parse_instantaneous(){
   pp.get("instantaneous", m_instantaneous);
 }
 
-void mc_photo::parse_pseudoPhotons(){
-  CH_TIME("mc_photo::parse_pseudoPhotons");
+void McPhoto::parsePseudoPhotons(){
+  CH_TIME("McPhoto::parsePseudoPhotons");
   if(m_verbosity > 5){
-    pout() << m_name + "::parse_pseudoPhotons" << endl;
+    pout() << m_name + "::parsePseudoPhotons" << endl;
   }
   
   ParmParse pp(m_className.c_str());
@@ -169,32 +169,32 @@ void mc_photo::parse_pseudoPhotons(){
   }
 }
 
-void mc_photo::parse_photogen(){
-  CH_TIME("mc_photo::parse_photogen");
+void McPhoto::parsePhotoGeneration(){
+  CH_TIME("McPhoto::parsePhotoGeneration");
   if(m_verbosity > 5){
-    pout() << m_name + "::parse_photogen" << endl;
+    pout() << m_name + "::parsePhotoGeneration" << endl;
   }
   
   ParmParse pp(m_className.c_str());
 
   std::string str;
-  pp.get("Photon_generation", str);
+  pp.get("PhotonGeneration", str);
 
   if(str == "deterministic"){
-    m_photogen = Photon_generation::deterministic;
+    m_photogen = PhotonGeneration::deterministic;
   }
   else if(str == "stochastic"){
-    m_photogen = Photon_generation::stochastic;
+    m_photogen = PhotonGeneration::stochastic;
   }
   else{
-    MayDay::Abort("mc_photo::set_Photon_generation - unknown Photon generation type requested");
+    MayDay::Abort("McPhoto::set_PhotonGeneration - unknown Photon generation type requested");
   }
 }
 
-void mc_photo::parse_source_type(){
-  CH_TIME("mc_photo::parse_source_type");
+void McPhoto::parseSourceType(){
+  CH_TIME("McPhoto::parseSourceType");
   if(m_verbosity > 5){
-    pout() << m_name + "::parse_source_type" << endl;
+    pout() << m_name + "::parseSourceType" << endl;
   }
   
   ParmParse pp(m_className.c_str());
@@ -215,14 +215,14 @@ void mc_photo::parse_source_type(){
     m_src_type = source_type::per_s;
   }
   else{
-    MayDay::Abort("mc_photo::setSource_type - unknown source type requested");
+    MayDay::Abort("McPhoto::setSourceType - unknown source type requested");
   }
 }
 
-void mc_photo::parse_deposition(){
-  CH_TIME("mc_photo::parse_deposition");
+void McPhoto::parseDeposition(){
+  CH_TIME("McPhoto::parseDeposition");
   if(m_verbosity > 5){
-    pout() << m_name + "::parse_deposition" << endl;
+    pout() << m_name + "::parseDeposition" << endl;
   }
   
   ParmParse pp(m_className.c_str());
@@ -248,7 +248,7 @@ void mc_photo::parse_deposition(){
     m_deposition = DepositionType::W4;
   }
   else{
-    MayDay::Abort("mc_photo::set_deposition_type - unknown interpolant requested");
+    MayDay::Abort("McPhoto::set_deposition_type - unknown interpolant requested");
   }
 
   pp.get("plot_deposition", str);
@@ -270,22 +270,22 @@ void mc_photo::parse_deposition(){
     m_plot_deposition = DepositionType::W4;
   }
   else{
-    MayDay::Abort("mc_photo::set_deposition_type - unknown interpolant requested");
+    MayDay::Abort("McPhoto::set_deposition_type - unknown interpolant requested");
   }
 }
 
-void mc_photo::parse_bisect_step(){
-  CH_TIME("mc_photo::parse_bisect_step");
+void McPhoto::parseBisectStep(){
+  CH_TIME("McPhoto::parseBisectStep");
   if(m_verbosity > 5){
-    pout() << m_name + "::parse_bisect_step" << endl;
+    pout() << m_name + "::parseBisectStep" << endl;
   }
   
   ParmParse pp(m_className.c_str());
   pp.get("bisect_step", m_bisect_step);
 }
 
-void mc_photo::parseDomainBc(){
-  CH_TIME("mc_photo::parseDomainBc");
+void McPhoto::parseDomainBc(){
+  CH_TIME("McPhoto::parseDomainBc");
   if(m_verbosity > 5){
     pout() << m_name + "::parseDomainBc" << endl;
   }
@@ -294,7 +294,7 @@ void mc_photo::parseDomainBc(){
   for (int dir = 0; dir < SpaceDim; dir++){
     for (SideIterator sit; sit.ok(); ++sit){
       const Side::LoHiSide side = sit();
-      const int idx = domainbc_map(dir, side);
+      const int idx = domainBcMap(dir, side);
 
       ParmParse pp(m_className.c_str());
       std::string str_dir;
@@ -322,17 +322,17 @@ void mc_photo::parseDomainBc(){
 	m_domainbc[idx] = wallbc::wall;
       }
       else {
-	std::string error = "mc_photo::setDomainBc - unsupported boundary condition requested: " + bc_string;
+	std::string error = "McPhoto::setDomainBc - unsupported boundary condition requested: " + bc_string;
 	MayDay::Abort(error.c_str());
       }
     }
   }
 }
 
-void mc_photo::parse_pvr_buffer(){
-  CH_TIME("mc_photo::parse_pvr_buffer");
+void McPhoto::parsePvrBuffer(){
+  CH_TIME("McPhoto::parsePvrBuffer");
   if(m_verbosity > 5){
-    pout() << m_name + "::parse_pvr_buffer" << endl;
+    pout() << m_name + "::parsePvrBuffer" << endl;
   }
   
   ParmParse pp(m_className.c_str());
@@ -340,8 +340,8 @@ void mc_photo::parse_pvr_buffer(){
   pp.get("halo_buffer",  m_halo_buffer);
 }
 
-void mc_photo::parsePlotVariables(){
-  CH_TIME("mc_photo::parsePlotVariables");
+void McPhoto::parsePlotVariables(){
+  CH_TIME("McPhoto::parsePlotVariables");
   if(m_verbosity > 5){
     pout() << m_name + "::parsePlotVariables" << endl;
   }
@@ -370,8 +370,8 @@ void mc_photo::parsePlotVariables(){
   }
 }
 
-void mc_photo::clear(){
-  CH_TIME("mc_photo::clear()");
+void McPhoto::clear(){
+  CH_TIME("McPhoto::clear()");
   if(m_verbosity > 5){
     pout() << m_name + "::clear()" << endl;
   }
@@ -379,8 +379,8 @@ void mc_photo::clear(){
   this->clear(m_Photons);
 }
 
-void mc_photo::clear(ParticleContainer<Photon>& a_Photon){
-  CH_TIME("mc_photo::clear(ParticleContainer)");
+void McPhoto::clear(ParticleContainer<Photon>& a_Photon){
+  CH_TIME("McPhoto::clear(ParticleContainer)");
   if(m_verbosity > 5){
     pout() << m_name + "::clear(ParticleContainer)" << endl;
   }
@@ -388,8 +388,8 @@ void mc_photo::clear(ParticleContainer<Photon>& a_Photon){
   this->clear(a_Photon.getParticles());
 }
 
-void mc_photo::clear(AMRParticles<Photon>& a_Photons){
-  CH_TIME("mc_photo::clear");
+void McPhoto::clear(AMRParticles<Photon>& a_Photons){
+  CH_TIME("McPhoto::clear");
   if(m_verbosity > 5){
     pout() << m_name + "::clear" << endl;
   }
@@ -399,8 +399,8 @@ void mc_photo::clear(AMRParticles<Photon>& a_Photons){
   }
 }
   
-void mc_photo::allocateInternals(){
-  CH_TIME("mc_photo::allocateInternals");
+void McPhoto::allocateInternals(){
+  CH_TIME("McPhoto::allocateInternals");
   if(m_verbosity > 5){
     pout() << m_name + "::allocateInternals" << endl;
   }
@@ -422,8 +422,8 @@ void mc_photo::allocateInternals(){
   m_amr->allocate(m_source_Photons, m_pvr_buffer, m_realm);
 }
 
-void mc_photo::preRegrid(const int a_lmin, const int a_oldFinestLevel){
-  CH_TIME("mc_photo::preRegrid");
+void McPhoto::preRegrid(const int a_lmin, const int a_oldFinestLevel){
+  CH_TIME("McPhoto::preRegrid");
   if(m_verbosity > 5){
     pout() << m_name + "::pre_grid" << endl;
   }
@@ -435,8 +435,8 @@ void mc_photo::preRegrid(const int a_lmin, const int a_oldFinestLevel){
   m_source_Photons.preRegrid(a_lmin);  // TLDR: This moves Photons from l >= a_lmin to Max(a_lmin-1,0)
 }
 
-void mc_photo::deallocateInternals(){
-  CH_TIME("mc_photo::deallocateInternals");
+void McPhoto::deallocateInternals(){
+  CH_TIME("McPhoto::deallocateInternals");
   if(m_verbosity > 5){ 
     pout() << m_name + "::deallocateInternals" << endl;
   }
@@ -449,8 +449,8 @@ void mc_photo::deallocateInternals(){
   // m_amr->deallocate(m_massDiff);
 }
 
-void mc_photo::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel){
-  CH_TIME("mc_photo::regrid");
+void McPhoto::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel){
+  CH_TIME("McPhoto::regrid");
   if(m_verbosity > 5){ 
     pout() << m_name + "::regrid" << endl;
   }
@@ -475,107 +475,107 @@ void mc_photo::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_
   m_source_Photons.regrid(grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
 
   // Deposit
-  this->deposit_Photons();
+  this->depositPhotons();
 }
 
-void mc_photo::sort_Photons_by_cell(){
-  CH_TIME("mc_photo::sort_Photons_by_cell()");
+void McPhoto::sortPhotonsByCell(){
+  CH_TIME("McPhoto::sortPhotonsByCell()");
   if(m_verbosity > 5){
-    pout() << m_name + "::sort_Photons_by_cell()" << endl;
+    pout() << m_name + "::sortPhotonsByCell()" << endl;
   }
 
   m_Photons.sortParticlesByCell();
 }
 
-void mc_photo::sort_Photons_by_patch(){
-  CH_TIME("mc_photo::sort_Photons_by_patch()");
+void McPhoto::sortPhotonsByPatch(){
+  CH_TIME("McPhoto::sortPhotonsByPatch()");
   if(m_verbosity > 5){
-    pout() << m_name + "::sort_Photons_by_patch()" << endl;
+    pout() << m_name + "::sortPhotonsByPatch()" << endl;
   }
 
   m_Photons.sortParticlesByPatch();
 }
 
-void mc_photo::sort_bulk_Photons_by_cell(){
-  CH_TIME("mc_photo::sort_bulk_Photons_by_cell()");
+void McPhoto::sortBulkPhotonsByCell(){
+  CH_TIME("McPhoto::sortBulkPhotonsByCell()");
   if(m_verbosity > 5){
-    pout() << m_name + "::sort_bulk_Photons_by_cell()" << endl;
+    pout() << m_name + "::sortBulkPhotonsByCell()" << endl;
   }
 
   m_bulk_Photons.sortParticlesByCell();
 }
 
-void mc_photo::sort_bulk_Photons_by_patch(){
-  CH_TIME("mc_photo::sort_bulk_Photons_by_patch()");
+void McPhoto::sortBulkPhotonsByPatch(){
+  CH_TIME("McPhoto::sortBulkPhotonsByPatch()");
   if(m_verbosity > 5){
-    pout() << m_name + "::sort_bulk_Photons_by_patch()" << endl;
+    pout() << m_name + "::sortBulkPhotonsByPatch()" << endl;
   }
 
   m_bulk_Photons.sortParticlesByPatch();
 }
 
-void mc_photo::sort_source_Photons_by_cell(){
-  CH_TIME("mc_photo::sort_source_Photons_by_cell()");
+void McPhoto::sortSourcePhotonsByCell(){
+  CH_TIME("McPhoto::sortSourcePhotonsByCell()");
   if(m_verbosity > 5){
-    pout() << m_name + "::sort_source_Photons_by_cell()" << endl;
+    pout() << m_name + "::sortSourcePhotonsByCell()" << endl;
   }
 
   m_source_Photons.sortParticlesByCell();
 }
 
-void mc_photo::sort_source_Photons_by_patch(){
-  CH_TIME("mc_photo::sort_source_Photons_by_patch()");
+void McPhoto::sortSourcePhotonsByPatch(){
+  CH_TIME("McPhoto::sortSourcePhotonsByPatch()");
   if(m_verbosity > 5){
-    pout() << m_name + "::sort_source_Photons_by_patch()" << endl;
+    pout() << m_name + "::sortSourcePhotonsByPatch()" << endl;
   }
 
   m_source_Photons.sortParticlesByPatch();
 }
 
-void mc_photo::sort_domain_Photons_by_cell(){
-  CH_TIME("mc_photo::sort_domain_Photons_by_cell()");
+void McPhoto::sortDomainPhotonsByCell(){
+  CH_TIME("McPhoto::sortDomainPhotonsByCell()");
   if(m_verbosity > 5){
-    pout() << m_name + "::sort_domain_Photons_by_cell()" << endl;
+    pout() << m_name + "::sortDomainPhotonsByCell()" << endl;
   }
 
   m_domain_Photons.sortParticlesByCell();
 }
 
-void mc_photo::sort_domain_Photons_by_patch(){
-  CH_TIME("mc_photo::sort_domain_Photons_by_patch()");
+void McPhoto::sortDomainPhotonsByPatch(){
+  CH_TIME("McPhoto::sortDomainPhotonsByPatch()");
   if(m_verbosity > 5){
-    pout() << m_name + "::sort_domain_Photons_by_patch()" << endl;
+    pout() << m_name + "::sortDomainPhotonsByPatch()" << endl;
   }
 
   m_domain_Photons.sortParticlesByPatch();
 }
 
-void mc_photo::sort_eb_Photons_by_cell(){
-  CH_TIME("mc_photo::sort_eb_Photons_by_cell()");
+void McPhoto::sortEbPhotonsByCell(){
+  CH_TIME("McPhoto::sortEbPhotonsByCell()");
   if(m_verbosity > 5){
-    pout() << m_name + "::sort_eb_Photons_by_cell()" << endl;
+    pout() << m_name + "::sortEbPhotonsByCell()" << endl;
   }
 
   m_eb_Photons.sortParticlesByCell();
 }
 
-void mc_photo::sort_eb_Photons_by_patch(){
-  CH_TIME("mc_photo::sort_eb_Photons_by_patch()");
+void McPhoto::sortEbPhotonsByPatch(){
+  CH_TIME("McPhoto::sortEbPhotonsByPatch()");
   if(m_verbosity > 5){
-    pout() << m_name + "::sort_eb_Photons_by_patch()" << endl;
+    pout() << m_name + "::sortEbPhotonsByPatch()" << endl;
   }
 
   m_eb_Photons.sortParticlesByPatch();
 }
 
-void mc_photo::registerOperators(){
-  CH_TIME("mc_photo::registerOperators");
+void McPhoto::registerOperators(){
+  CH_TIME("McPhoto::registerOperators");
   if(m_verbosity > 5){
     pout() << m_name + "::registerOperators" << endl;
   }
 
   if(m_amr.isNull()){
-    MayDay::Abort("mc_photo::registerOperators - need to set AmrMesh!");
+    MayDay::Abort("McPhoto::registerOperators - need to set AmrMesh!");
   }
   else{
     m_amr->registerOperator(s_eb_coar_ave,     m_realm, m_phase);
@@ -593,8 +593,8 @@ void mc_photo::registerOperators(){
   }
 }
 
-void mc_photo::computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi){
-  CH_TIME("mc_photo::computeBoundaryFlux");
+void McPhoto::computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi){
+  CH_TIME("McPhoto::computeBoundaryFlux");
   if(m_verbosity > 5){
     pout() << m_name + "::computeBoundaryFlux" << endl;
   }
@@ -602,8 +602,8 @@ void mc_photo::computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a
   data_ops::set_value(a_ebFlux, 0.0);
 }
 
-void mc_photo::computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_phi){
-  CH_TIME("mc_photo::computeDomainFlux");
+void McPhoto::computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_phi){
+  CH_TIME("McPhoto::computeDomainFlux");
   if(m_verbosity > 5){
     pout() << m_name + "::computeDomainFlux" << endl;
   }
@@ -611,26 +611,26 @@ void mc_photo::computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellData&
   data_ops::set_value(a_domainflux, 0.0);
 }
 
-void mc_photo::computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi){
-  const std::string str = "mc_photo::computeFlux - Fluid flux can't be computed with discrete Photons. Calling this is an error";
+void McPhoto::computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi){
+  const std::string str = "McPhoto::computeFlux - Fluid flux can't be computed with discrete Photons. Calling this is an error";
   MayDay::Abort(str.c_str());
 }
 
-void mc_photo::computeDensity(EBAMRCellData& a_isotropic, const EBAMRCellData& a_phi){
-  MayDay::Abort("mc_photo::computeDensity - Calling this is an error");
+void McPhoto::computeDensity(EBAMRCellData& a_isotropic, const EBAMRCellData& a_phi){
+  MayDay::Abort("McPhoto::computeDensity - Calling this is an error");
 }
 
-void mc_photo::writePlotFile(){
-  CH_TIME("mc_photo::writePlotFile");
+void McPhoto::writePlotFile(){
+  CH_TIME("McPhoto::writePlotFile");
   if(m_verbosity > 5){
     pout() << m_name + "::writePlotFile" << endl;
   }
 
-  MayDay::Abort("mc_photo::writePlotFile - not implemented");
+  MayDay::Abort("McPhoto::writePlotFile - not implemented");
 }
 
-void mc_photo::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const {
-  CH_TIME("mc_photo::writeCheckpointLevel");
+void McPhoto::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const {
+  CH_TIME("McPhoto::writeCheckpointLevel");
   if(m_verbosity > 5){
     pout() << m_name + "::writeCheckpointLevel" << endl;
   }
@@ -643,8 +643,8 @@ void mc_photo::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) con
   writeParticlesToHDF(a_handle, m_Photons[a_level], str);
 }
 
-void mc_photo::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
-  CH_TIME("mc_photo::readCheckpointLevel");
+void McPhoto::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
+  CH_TIME("McPhoto::readCheckpointLevel");
   if(m_verbosity > 5){
     pout() << m_name + "::readCheckpointLevel" << endl;
   }
@@ -657,8 +657,8 @@ void mc_photo::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
   readParticlesFromHDF(a_handle, m_Photons[a_level], str);
 }
 
-Vector<std::string> mc_photo::getPlotVariableNames() const {
-  CH_TIME("mc_photo::getPlotVariableNames");
+Vector<std::string> McPhoto::getPlotVariableNames() const {
+  CH_TIME("McPhoto::getPlotVariableNames");
   if(m_verbosity > 5){
     pout() << m_name + "::getPlotVariableNames" << endl;
   }
@@ -676,8 +676,8 @@ Vector<std::string> mc_photo::getPlotVariableNames() const {
   return names;
 }
 
-int mc_photo::getNumberOfPlotVariables() const{
-  CH_TIME("mc_photo::getNumberOfPlotVariables");
+int McPhoto::getNumberOfPlotVariables() const{
+  CH_TIME("McPhoto::getNumberOfPlotVariables");
   if(m_verbosity > 5){
     pout() << m_name + "::getNumberOfPlotVariables" << endl;
   }
@@ -695,11 +695,11 @@ int mc_photo::getNumberOfPlotVariables() const{
   return num_output;
 }
 
-int mc_photo::queryGhost() const {
+int McPhoto::queryGhost() const {
   return 3;
 }
 
-int mc_photo::random_fieldSolver(const Real a_mean){
+int McPhoto::randomPoisson(const Real a_mean){
   if(a_mean < m_poiss_exp_swap){
     std::poisson_distribution<int> pdist(a_mean);
     return pdist(*m_rng);
@@ -710,27 +710,27 @@ int mc_photo::random_fieldSolver(const Real a_mean){
   }
 }
 
-int mc_photo::domainbc_map(const int a_dir, const Side::LoHiSide a_side) {
+int McPhoto::domainBcMap(const int a_dir, const Side::LoHiSide a_side) {
   const int iside = (a_side == Side::Lo) ? 0 : 1;
 
   return 2*a_dir + iside;
 }
 
-Real mc_photo::random_exponential(const Real a_mean){
+Real McPhoto::randomExponential(const Real a_mean){
   std::exponential_distribution<Real> dist(a_mean);
   return dist(*m_rng);
 }
 
-RealVect mc_photo::random_direction(){
+RealVect McPhoto::randomDirection(){
 #if CH_SPACEDIM == 2
-  return random_direction2D();
+  return randomDirection2D();
 #else
-  return random_direction3D();
+  return randomDirection3D();
 #endif
 }
 
 #if CH_SPACEDIM == 2
-RealVect mc_photo::random_direction2D(){
+RealVect McPhoto::randomDirection2D(){
   const Real EPS = 1.E-8;
   Real x1 = 2.0;
   Real x2 = 2.0;
@@ -746,7 +746,7 @@ RealVect mc_photo::random_direction2D(){
 #endif
 
 #if CH_SPACEDIM==3
-RealVect mc_photo::random_direction3D(){
+RealVect McPhoto::randomDirection3D(){
   const Real EPS = 1.E-8;
   Real x1 = 2.0;
   Real x2 = 2.0;
@@ -765,46 +765,46 @@ RealVect mc_photo::random_direction3D(){
 }
 #endif
 
-int mc_photo::getPVR_buffer() const {
-  CH_TIME("mc_photo::getPVR_buffer");
+int McPhoto::getPVRBuffer() const {
+  CH_TIME("McPhoto::getPVRBuffer");
   if(m_verbosity > 5){
-    pout() << m_name + "::getPVR_buffer" << endl;
+    pout() << m_name + "::getPVRBuffer" << endl;
   }
 
   return m_pvr_buffer;
 }
 
-int mc_photo::get_halo_buffer() const {
-  CH_TIME("mc_photo::get_halo_buffer");
+int McPhoto::getHaloBuffer() const {
+  CH_TIME("McPhoto::getHaloBuffer");
   if(m_verbosity > 5){
-    pout() << m_name + "::get_halo_buffer" << endl;
+    pout() << m_name + "::getHaloBuffer" << endl;
   }
 
   return m_halo_buffer;
 }
 
-void mc_photo::set_pvr_buffer(const int a_buffer) {
-  CH_TIME("mc_photo::set_pvr_buffer");
+void McPhoto::setPVRBuffer(const int a_buffer) {
+  CH_TIME("McPhoto::setPVRBuffer");
   if(m_verbosity > 5){
-    pout() << m_name + "::set_pvr_buffer" << endl;
+    pout() << m_name + "::setPVRBuffer" << endl;
   }
 
   m_pvr_buffer = a_buffer;
 }
 
-void mc_photo::set_halo_buffer(const int a_buffer)  {
-  CH_TIME("mc_photo::set_halo_buffer");
+void McPhoto::setHalobuffer(const int a_buffer)  {
+  CH_TIME("McPhoto::setHalobuffer");
   if(m_verbosity > 5){
-    pout() << m_name + "::set_halo_buffer" << endl;
+    pout() << m_name + "::setHalobuffer" << endl;
   }
 
   m_halo_buffer = a_buffer;
 }
 
-void mc_photo::generate_Photons(ParticleContainer<Photon>& a_Photons, const EBAMRCellData& a_source, const Real a_dt){
-  CH_TIME("mc_photo::generate_Photons");
+void McPhoto::generatePhotons(ParticleContainer<Photon>& a_Photons, const EBAMRCellData& a_source, const Real a_dt){
+  CH_TIME("McPhoto::generatePhotons");
   if(m_verbosity > 5){
-    pout() << m_name + "::generate_Photons" << endl;
+    pout() << m_name + "::generatePhotons" << endl;
   }
 
   const RealVect prob_lo = m_amr->getProbLo();
@@ -866,7 +866,7 @@ void mc_photo::generate_Photons(ParticleContainer<Photon>& a_Photons, const EBAM
 	      const Real weight     = (1.0*num_phys_Photons)/num_Photons; 
 	      
 	      for (int i = 0; i < num_Photons; i++){
-		const RealVect v = units::s_c0*this->random_direction();
+		const RealVect v = units::s_c0*this->randomDirection();
 		particles.append(Photon(pos, v, m_rte_species->getKappa(pos), weight));
 	      }
 	    }
@@ -888,7 +888,7 @@ void mc_photo::generate_Photons(ParticleContainer<Photon>& a_Photons, const EBAM
 
 	    // Generate computational Photons 
 	    for (int i = 0; i < num_Photons; i++){
-	      const RealVect v = units::s_c0*this->random_direction();
+	      const RealVect v = units::s_c0*this->randomDirection();
 	      particles.append(Photon(pos, v, m_rte_species->getKappa(pos), weight));
 	    }
 	  }
@@ -902,8 +902,8 @@ void mc_photo::generate_Photons(ParticleContainer<Photon>& a_Photons, const EBAM
   }
 }
 
-int mc_photo::draw_Photons(const Real a_source, const Real a_volume, const Real a_dt){
-  CH_TIME("mc_photo::draw_Photons");
+int McPhoto::draw_Photons(const Real a_source, const Real a_volume, const Real a_dt){
+  CH_TIME("McPhoto::draw_Photons");
   if(m_verbosity > 5){
     pout() << m_name + "::draw_Photons" << endl;
   }
@@ -926,11 +926,11 @@ int mc_photo::draw_Photons(const Real a_source, const Real a_volume, const Real 
   }
 
   // Draw a number of Photons with the desired algorithm
-  if(m_photogen == Photon_generation::stochastic){
+  if(m_photogen == PhotonGeneration::stochastic){
     const Real mean = a_source*factor;
-    num_Photons = random_fieldSolver(mean);
+    num_Photons = randomPoisson(mean);
   }
-  else if(m_photogen == Photon_generation::deterministic){
+  else if(m_photogen == PhotonGeneration::deterministic){
     num_Photons = round(a_source*factor);
   }
   else{
@@ -940,49 +940,49 @@ int mc_photo::draw_Photons(const Real a_source, const Real a_volume, const Real 
   return num_Photons;
 }
 
-void mc_photo::deposit_Photons(){
-  CH_TIME("mc_photo::deposit_Photons");
+void McPhoto::depositPhotons(){
+  CH_TIME("McPhoto::depositPhotons");
   if(m_verbosity > 5){
-    pout() << m_name + "::deposit_Photons" << endl;
+    pout() << m_name + "::depositPhotons" << endl;
   }
 
-  this->deposit_Photons(m_phi, m_Photons, m_deposition);
+  this->depositPhotons(m_phi, m_Photons, m_deposition);
 }
 
-void mc_photo::deposit_Photons(EBAMRCellData&                    a_phi,
+void McPhoto::depositPhotons(EBAMRCellData&                    a_phi,
 			       const ParticleContainer<Photon>& a_Photons,
 			       const DepositionType::Which&      a_deposition){
-  CH_TIME("mc_photo::deposit_Photons(ParticleContainer)");
+  CH_TIME("McPhoto::depositPhotons(ParticleContainer)");
   if(m_verbosity > 5){
-    pout() << m_name + "::deposit_Photons(ParticleContainer)" << endl;
+    pout() << m_name + "::depositPhotons(ParticleContainer)" << endl;
   }
 
-  this->deposit_Photons(a_phi, a_Photons.getParticles(), a_deposition);
+  this->depositPhotons(a_phi, a_Photons.getParticles(), a_deposition);
 }
 
-void mc_photo::deposit_Photons(EBAMRCellData&               a_phi,
+void McPhoto::depositPhotons(EBAMRCellData&               a_phi,
 			       const AMRParticles<Photon>&  a_Photons,
 			       const DepositionType::Which& a_deposition){
-  CH_TIME("mc_photo::deposit_Photons(AMRParticles)");
+  CH_TIME("McPhoto::depositPhotons(AMRParticles)");
   if(m_verbosity > 5){
-    pout() << m_name + "::deposit_Photons(AMRParticles)" << endl;
+    pout() << m_name + "::depositPhotons(AMRParticles)" << endl;
   }
 
            
-  this->deposit_kappaConservative(a_phi, a_Photons, a_deposition); // a_phi contains only weights, i.e. not divided by kappa
-  this->deposit_nonConservative(m_depositionNC, a_phi);              // Compute m_depositionNC = sum(kappa*Wc)/sum(kappa)
-  this->deposit_hybrid(a_phi, m_massDiff, m_depositionNC);           // Compute hybrid deposition, including mass differnce
+  this->depositKappaConservative(a_phi, a_Photons, a_deposition); // a_phi contains only weights, i.e. not divided by kappa
+  this->depositNonConservative(m_depositionNC, a_phi);              // Compute m_depositionNC = sum(kappa*Wc)/sum(kappa)
+  this->depositHybrid(a_phi, m_massDiff, m_depositionNC);           // Compute hybrid deposition, including mass differnce
   this->incrementRedist(m_massDiff);                                 // Increment level redistribution register
 
   // Do the redistribution magic
   const bool ebcf = m_amr->getEbCf();
   if(ebcf){ // Mucho stuff to do here...
     this->coarseFineIncrement(m_massDiff);       // Compute C2F, F2C, and C2C mass transfers
-    this->level_redistribution(a_phi);           // Level redistribution. Weights is a dummy parameter
+    this->levelRedist(a_phi);           // Level redistribution. Weights is a dummy parameter
     this->coarseFineRedistribution(a_phi);     // Do the coarse-fine redistribution
   }
   else{ // Very simple, redistribute this level.
-    this->level_redistribution(a_phi);
+    this->levelRedist(a_phi);
   }
 
   // Average down and interpolate
@@ -990,12 +990,12 @@ void mc_photo::deposit_Photons(EBAMRCellData&               a_phi,
   m_amr->interpGhost(a_phi, m_realm, m_phase);
 }
 
-void mc_photo::deposit_kappaConservative(EBAMRCellData&              a_phi,
+void McPhoto::depositKappaConservative(EBAMRCellData&              a_phi,
 					 const AMRParticles<Photon>& a_Photons,
 					 const DepositionType::Which a_deposition){
-  CH_TIME("mc_photo::deposit_kappaConservative");
+  CH_TIME("McPhoto::depositKappaConservative");
   if(m_verbosity > 5){
-    pout() << m_name + "::deposit_kappaConservative" << endl;
+    pout() << m_name + "::depositKappaConservative" << endl;
   }
 
   const int comp = 0;
@@ -1051,10 +1051,10 @@ void mc_photo::deposit_kappaConservative(EBAMRCellData&              a_phi,
   }
 }
 
-void mc_photo::deposit_nonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellData& a_depositionKappaC){
-  CH_TIME("mc_photo::deposit_nonConservative");
+void McPhoto::depositNonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellData& a_depositionKappaC){
+  CH_TIME("McPhoto::depositNonConservative");
   if(m_verbosity > 5){
-    pout() << m_name + "::deposit_nonConservative" << endl;
+    pout() << m_name + "::depositNonConservative" << endl;
   }
 
   if(m_blendConservation){
@@ -1066,10 +1066,10 @@ void mc_photo::deposit_nonConservative(EBAMRIVData& a_depositionNC, const EBAMRC
   }
 }
 
-void mc_photo::deposit_hybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massDifference, const EBAMRIVData& a_depositionNC){
-  CH_TIME("mc_photo::deposit_hybrid");
+void McPhoto::depositHybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massDifference, const EBAMRIVData& a_depositionNC){
+  CH_TIME("McPhoto::depositHybrid");
   if(m_verbosity > 5){
-    pout() << m_name + "::deposit_hybrid" << endl;
+    pout() << m_name + "::depositHybrid" << endl;
   }
 
   const int comp  = 0;
@@ -1107,8 +1107,8 @@ void mc_photo::deposit_hybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massD
   }
 }
 
-void mc_photo::incrementRedist(const EBAMRIVData& a_massDifference){
-  CH_TIME("mc_photo::incrementRedist");
+void McPhoto::incrementRedist(const EBAMRIVData& a_massDifference){
+  CH_TIME("McPhoto::incrementRedist");
   if(m_verbosity > 5){
     pout() << m_name + "::incrementRedist" << endl;
   }
@@ -1130,10 +1130,10 @@ void mc_photo::incrementRedist(const EBAMRIVData& a_massDifference){
   }
 }
 
-void mc_photo::level_redistribution(EBAMRCellData& a_phi){
-  CH_TIME("mc_photo::level_redistribution");
+void McPhoto::levelRedist(EBAMRCellData& a_phi){
+  CH_TIME("McPhoto::levelRedist");
   if(m_verbosity > 5){
-    pout() << m_name + "::level_redistribution" << endl;
+    pout() << m_name + "::levelRedist" << endl;
   }
 
   const int comp  = 0;
@@ -1148,8 +1148,8 @@ void mc_photo::level_redistribution(EBAMRCellData& a_phi){
   }
 }
 
-void mc_photo::coarseFineIncrement(const EBAMRIVData& a_massDifference){
-  CH_TIME("mc_photo::coarseFineIncrement");
+void McPhoto::coarseFineIncrement(const EBAMRIVData& a_massDifference){
+  CH_TIME("McPhoto::coarseFineIncrement");
   if(m_verbosity > 5){
     pout() << m_name + "::coarseFineIncrement" << endl;
   }
@@ -1191,8 +1191,8 @@ void mc_photo::coarseFineIncrement(const EBAMRIVData& a_massDifference){
   }
 }
 
-void mc_photo::coarseFineRedistribution(EBAMRCellData& a_phi){
-  CH_TIME("mc_photo::coarseFineRedistribution");
+void McPhoto::coarseFineRedistribution(EBAMRCellData& a_phi){
+  CH_TIME("McPhoto::coarseFineRedistribution");
   if(m_verbosity > 5){
     pout() << m_name + "::coarseFineRedistribution" << endl;
   }
@@ -1226,13 +1226,13 @@ void mc_photo::coarseFineRedistribution(EBAMRCellData& a_phi){
   }
 }
 
-void mc_photo::advance_Photons_stationary(ParticleContainer<Photon>& a_bulk_Photons,
+void McPhoto::advancePhotonsStationary(ParticleContainer<Photon>& a_bulk_Photons,
 					  ParticleContainer<Photon>& a_eb_Photons,
 					  ParticleContainer<Photon>& a_domain_Photons,
 					  ParticleContainer<Photon>& a_Photons){
-  CH_TIME("mc_photo::advance_Photons_stationary");
+  CH_TIME("McPhoto::advancePhotonsStationary");
   if(m_verbosity > 5){
-    pout() << m_name + "::advance_Photons_stationary" << endl;
+    pout() << m_name + "::advancePhotonsStationary" << endl;
   }
 
   // TLDR: This routine iterates over the levels and boxes and does the following
@@ -1265,7 +1265,7 @@ void mc_photo::advance_Photons_stationary(ParticleContainer<Photon>& a_bulk_Phot
   }
 
 #if MC_PHOTO_DEBUG // Debug
-  int PhotonsBefore = this->count_Photons(a_Photons.getParticles());
+  int PhotonsBefore = this->countPhotons(a_Photons.getParticles());
 #endif
   
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
@@ -1290,7 +1290,7 @@ void mc_photo::advance_Photons_stationary(ParticleContainer<Photon>& a_bulk_Phot
 	// Draw a new random absorption position
 	const RealVect oldPos  = p.position();
 	const RealVect unitV   = p.velocity()/(p.velocity().vectorLength());
-	const RealVect newPos  = oldPos + unitV*this->random_exponential(p.kappa());
+	const RealVect newPos  = oldPos + unitV*this->randomExponential(p.kappa());
 	const RealVect path    = newPos - oldPos;
 	const Real     pathLen = path.vectorLength();
 
@@ -1354,9 +1354,9 @@ void mc_photo::advance_Photons_stationary(ParticleContainer<Photon>& a_bulk_Phot
   a_domain_Photons.remap();
 
 #if MC_PHOTO_DEBUG // Debug
-  int bulkPhotons = this->count_Photons(a_bulk_Photons.getParticles());
-  int ebPhotons = this->count_Photons(a_eb_Photons.getParticles());
-  int domPhotons = this->count_Photons(a_domain_Photons.getParticles());
+  int bulkPhotons = this->countPhotons(a_bulk_Photons.getParticles());
+  int ebPhotons = this->countPhotons(a_eb_Photons.getParticles());
+  int domPhotons = this->countPhotons(a_domain_Photons.getParticles());
 
   if(procID() == 0){
     std::cout << "Photons before = " << PhotonsBefore << "\n"
@@ -1370,14 +1370,14 @@ void mc_photo::advance_Photons_stationary(ParticleContainer<Photon>& a_bulk_Phot
 
 }
 
-void mc_photo::advance_Photons_transient(ParticleContainer<Photon>& a_bulk_Photons,
+void McPhoto::advancePhotonsTransient(ParticleContainer<Photon>& a_bulk_Photons,
 					 ParticleContainer<Photon>& a_eb_Photons,
 					 ParticleContainer<Photon>& a_domain_Photons,
 					 ParticleContainer<Photon>& a_Photons,
 					 const Real                  a_dt){
-  CH_TIME("mc_photo::advance_Photons_transient");
+  CH_TIME("McPhoto::advancePhotonsTransient");
   if(m_verbosity > 5){
-    pout() << m_name + "::advance_Photons_transient" << endl;
+    pout() << m_name + "::advancePhotonsTransient" << endl;
   }
 
   // TLDR: This routine iterates over the levels and boxes and does the following
@@ -1411,7 +1411,7 @@ void mc_photo::advance_Photons_transient(ParticleContainer<Photon>& a_bulk_Photo
   }
 
 #if MC_PHOTO_DEBUG // Debug
-  int PhotonsBefore = this->count_Photons(a_Photons.getParticles());
+  int PhotonsBefore = this->countPhotons(a_Photons.getParticles());
 #endif
 
   
@@ -1469,7 +1469,7 @@ void mc_photo::advance_Photons_transient(ParticleContainer<Photon>& a_bulk_Photo
 
 
 	// Check absorption in the bulk
-	const Real travelLen  = this->random_exponential(p.kappa());
+	const Real travelLen  = this->randomExponential(p.kappa());
 	if(travelLen < pathLen){
 	  absorbed_bulk = true;
 	  bulk_s        = travelLen/pathLen;
@@ -1504,7 +1504,7 @@ void mc_photo::advance_Photons_transient(ParticleContainer<Photon>& a_bulk_Photo
 	    domPhotons.transfer(lit);
 	  }
 	  else{
-	    MayDay::Abort("mc_photo::advance_Photons_transient - logic bust");
+	    MayDay::Abort("McPhoto::advancePhotonsTransient - logic bust");
 	  }
 	}
       }
@@ -1518,10 +1518,10 @@ void mc_photo::advance_Photons_transient(ParticleContainer<Photon>& a_bulk_Photo
   a_Photons.remap();
 
 #if MC_PHOTO_DEBUG // Debug
-  int bulkPhotons = this->count_Photons(a_bulk_Photons.getParticles());
-  int ebPhotons = this->count_Photons(a_eb_Photons.getParticles());
-  int domPhotons = this->count_Photons(a_domain_Photons.getParticles());
-  int afterPhotons = this->count_Photons(a_Photons.getParticles());
+  int bulkPhotons = this->countPhotons(a_bulk_Photons.getParticles());
+  int ebPhotons = this->countPhotons(a_eb_Photons.getParticles());
+  int domPhotons = this->countPhotons(a_domain_Photons.getParticles());
+  int afterPhotons = this->countPhotons(a_Photons.getParticles());
 
   if(procID() == 0){
     std::cout << "Photons before = " << PhotonsBefore << "\n"
@@ -1537,8 +1537,8 @@ void mc_photo::advance_Photons_transient(ParticleContainer<Photon>& a_bulk_Photo
   a_bulk_Photons.remap();
 }
 
-void mc_photo::remap(){
-  CH_TIME("mc_photo::remap()");
+void McPhoto::remap(){
+  CH_TIME("McPhoto::remap()");
   if(m_verbosity > 5){
     pout() << m_name + "::remap()" << endl;
   }
@@ -1546,8 +1546,8 @@ void mc_photo::remap(){
   this->remap(m_Photons);
 }
 
-void mc_photo::remap(ParticleContainer<Photon>& a_Photons){
-  CH_TIME("mc_photo::remap(Photons)");
+void McPhoto::remap(ParticleContainer<Photon>& a_Photons){
+  CH_TIME("McPhoto::remap(Photons)");
   if(m_verbosity > 5){
     pout() << m_name + "::remap(Photons)" << endl;
   }
@@ -1555,10 +1555,10 @@ void mc_photo::remap(ParticleContainer<Photon>& a_Photons){
   a_Photons.remap();
 }
 
-int mc_photo::count_Photons(const AMRParticles<Photon>& a_Photons) const {
-  CH_TIME("mc_photo::count_Photons");
+int McPhoto::countPhotons(const AMRParticles<Photon>& a_Photons) const {
+  CH_TIME("McPhoto::countPhotons");
   if(m_verbosity > 5){
-    pout() << m_name + "::count_Photons" << endl;
+    pout() << m_name + "::countPhotons" << endl;
   }
 
   int num_Photons = 0;
@@ -1570,10 +1570,10 @@ int mc_photo::count_Photons(const AMRParticles<Photon>& a_Photons) const {
   return num_Photons;
 }
 
-int mc_photo::count_outcast(const AMRParticles<Photon>& a_Photons) const {
-  CH_TIME("mc_photo::count_outcast");
+int McPhoto::countOutcast(const AMRParticles<Photon>& a_Photons) const {
+  CH_TIME("McPhoto::countOutcast");
   if(m_verbosity > 5){
-    pout() << m_name + "::count_outcast" << endl;
+    pout() << m_name + "::countOutcast" << endl;
   }
 
   int num_outcast = 0;
@@ -1585,8 +1585,8 @@ int mc_photo::count_outcast(const AMRParticles<Photon>& a_Photons) const {
   return num_outcast;
 }
 
-void mc_photo::writePlotData(EBAMRCellData& a_output, int& a_comp){
-  CH_TIME("mc_photo::writePlotData");
+void McPhoto::writePlotData(EBAMRCellData& a_output, int& a_comp){
+  CH_TIME("McPhoto::writePlotData");
   if(m_verbosity > 5){
     pout() << m_name + "::writePlotData" << endl;
   }
@@ -1598,67 +1598,67 @@ void mc_photo::writePlotData(EBAMRCellData& a_output, int& a_comp){
     this->writeData(a_output, a_comp, m_source, false);
   }
   if(m_plot_phot){
-    this->deposit_Photons(m_scratch, m_Photons.getParticles(), m_plot_deposition);
+    this->depositPhotons(m_scratch, m_Photons.getParticles(), m_plot_deposition);
     this->writeData(a_output, a_comp, m_scratch,  false);
   }
   if(m_plot_bulk_phot){
-    this->deposit_Photons(m_scratch, m_bulk_Photons.getParticles(), m_plot_deposition);
+    this->depositPhotons(m_scratch, m_bulk_Photons.getParticles(), m_plot_deposition);
     this->writeData(a_output, a_comp, m_scratch,  false);
   }
   if(m_plot_eb_phot){
-    this->deposit_Photons(m_scratch, m_eb_Photons.getParticles(), m_plot_deposition);
+    this->depositPhotons(m_scratch, m_eb_Photons.getParticles(), m_plot_deposition);
     this->writeData(a_output, a_comp, m_scratch,  false);
   }
   if(m_plot_dom_phot){
-    this->deposit_Photons(m_scratch, m_domain_Photons.getParticles(), m_plot_deposition);
+    this->depositPhotons(m_scratch, m_domain_Photons.getParticles(), m_plot_deposition);
     this->writeData(a_output, a_comp, m_scratch,  false);
   }
   if(m_plotSource_phot){
-    this->deposit_Photons(m_scratch, m_source_Photons.getParticles(), m_plot_deposition);
+    this->depositPhotons(m_scratch, m_source_Photons.getParticles(), m_plot_deposition);
     this->writeData(a_output, a_comp, m_scratch,  false);
   }
 }
 
-ParticleContainer<Photon>& mc_photo::get_Photons(){
-  CH_TIME("mc_photo::get_Photons");
+ParticleContainer<Photon>& McPhoto::getPhotons(){
+  CH_TIME("McPhoto::getPhotons");
   if(m_verbosity > 5){
-    pout() << m_name + "::get_Photons" << endl;
+    pout() << m_name + "::getPhotons" << endl;
   }
 
   return m_Photons;
 }
 
-ParticleContainer<Photon>& mc_photo::get_bulk_Photons(){
-  CH_TIME("mc_photo::get_bulk_Photons");
+ParticleContainer<Photon>& McPhoto::getBulkPhotons(){
+  CH_TIME("McPhoto::getBulkPhotons");
   if(m_verbosity > 5){
-    pout() << m_name + "::get_bulk_Photons" << endl;
+    pout() << m_name + "::getBulkPhotons" << endl;
   }
 
   return m_bulk_Photons;
 }
 
-ParticleContainer<Photon>& mc_photo::get_eb_Photons(){
-  CH_TIME("mc_photo::get_eb_Photons");
+ParticleContainer<Photon>& McPhoto::getEbPhotons(){
+  CH_TIME("McPhoto::getEbPhotons");
   if(m_verbosity > 5){
-    pout() << m_name + "::get_eb_Photons" << endl;
+    pout() << m_name + "::getEbPhotons" << endl;
   }
 
   return m_eb_Photons;
 }
 
-ParticleContainer<Photon>& mc_photo::get_domain_Photons(){
-  CH_TIME("mc_photo::get_domain_Photons");
+ParticleContainer<Photon>& McPhoto::getDomainPhotons(){
+  CH_TIME("McPhoto::getDomainPhotons");
   if(m_verbosity > 5){
-    pout() << m_name + "::get_domain_Photons" << endl;
+    pout() << m_name + "::getDomainPhotons" << endl;
   }
 
   return m_domain_Photons;
 }
 
-ParticleContainer<Photon>& mc_photo::getSource_Photons(){
-  CH_TIME("mc_photo::getSource_Photons");
+ParticleContainer<Photon>& McPhoto::getSourcePhotons(){
+  CH_TIME("McPhoto::getSourcePhotons");
   if(m_verbosity > 5){
-    pout() << m_name + "::getSource_Photons" << endl;
+    pout() << m_name + "::getSourcePhotons" << endl;
   }
 
   return m_source_Photons;

@@ -383,19 +383,19 @@ void air_eed::add_gaussian_particles(List<Particle>& a_particles,
 RealVect air_eed::random_gaussian(){
 
   const Real rad = m_gauss(*m_rng);
-  return rad*random_direction();
+  return rad*randomDirection();
 }
 
-RealVect air_eed::random_direction(){
+RealVect air_eed::randomDirection(){
 #if CH_SPACEDIM == 2
-  return random_direction2D();
+  return randomDirection2D();
 #else
-  return random_direction3D();
+  return randomDirection3D();
 #endif
 }
 
 #if CH_SPACEDIM == 2
-RealVect air_eed::random_direction2D(){
+RealVect air_eed::randomDirection2D(){
   const Real EPS = 1.E-8;
   Real x1 = 2.0;
   Real x2 = 2.0;
@@ -411,7 +411,7 @@ RealVect air_eed::random_direction2D(){
 #endif
 
 #if CH_SPACEDIM==3
-RealVect air_eed::random_direction3D(){
+RealVect air_eed::randomDirection3D(){
   const Real EPS = 1.E-8;
   Real x1 = 2.0;
   Real x2 = 2.0;

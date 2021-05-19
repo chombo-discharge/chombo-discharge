@@ -309,19 +309,19 @@ void air3_zheleznyak::add_gaussian_particles(List<Particle>& a_particles,
 RealVect air3_zheleznyak::random_gaussian(){
 
   const Real rad = m_gauss(*m_rng);
-  return rad*random_direction();
+  return rad*randomDirection();
 }
 
-RealVect air3_zheleznyak::random_direction(){
+RealVect air3_zheleznyak::randomDirection(){
 #if CH_SPACEDIM == 2
-  return random_direction2D();
+  return randomDirection2D();
 #else
-  return random_direction3D();
+  return randomDirection3D();
 #endif
 }
 
 #if CH_SPACEDIM == 2
-RealVect air3_zheleznyak::random_direction2D(){
+RealVect air3_zheleznyak::randomDirection2D(){
   const Real EPS = 1.E-8;
   Real x1 = 2.0;
   Real x2 = 2.0;
@@ -337,7 +337,7 @@ RealVect air3_zheleznyak::random_direction2D(){
 #endif
 
 #if CH_SPACEDIM==3
-RealVect air3_zheleznyak::random_direction3D(){
+RealVect air3_zheleznyak::randomDirection3D(){
   const Real EPS = 1.E-8;
   Real x1 = 2.0;
   Real x2 = 2.0;

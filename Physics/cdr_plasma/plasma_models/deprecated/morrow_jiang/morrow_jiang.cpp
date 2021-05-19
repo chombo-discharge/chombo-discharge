@@ -866,7 +866,7 @@ morrow_jiang::uv_Photon::~uv_Photon(){
 }
 
 Real morrow_jiang::uv_Photon::getKappa(const RealVect a_pos) const {
-  MayDay::Abort("morrow_jiang::uv_Photon::getKappa - should not be called. morrow_jiang is used with the mc_photo module");
+  MayDay::Abort("morrow_jiang::uv_Photon::getKappa - should not be called. morrow_jiang is used with the McPhoto module");
 }
 
 Real morrow_jiang::uv_Photon::get_random_kappa() const {
@@ -1201,19 +1201,19 @@ void morrow_jiang::add_gaussian_excited(List<Particle>& a_particles){
 RealVect morrow_jiang::random_gaussian(const Real a_rad){
 
   const Real rad = m_gauss(*m_rng);
-  return rad*random_direction();
+  return rad*randomDirection();
 }
 
-RealVect morrow_jiang::random_direction(){
+RealVect morrow_jiang::randomDirection(){
 #if CH_SPACEDIM == 2
-  return random_direction2D();
+  return randomDirection2D();
 #else
-  return random_direction3D();
+  return randomDirection3D();
 #endif
 }
 
 #if CH_SPACEDIM == 2
-RealVect morrow_jiang::random_direction2D(){
+RealVect morrow_jiang::randomDirection2D(){
   const Real EPS = 1.E-8;
   Real x1 = 2.0;
   Real x2 = 2.0;
@@ -1229,7 +1229,7 @@ RealVect morrow_jiang::random_direction2D(){
 #endif
 
 #if CH_SPACEDIM==3
-RealVect morrow_jiang::random_direction3D(){
+RealVect morrow_jiang::randomDirection3D(){
   const Real EPS = 1.E-8;
   Real x1 = 2.0;
   Real x2 = 2.0;

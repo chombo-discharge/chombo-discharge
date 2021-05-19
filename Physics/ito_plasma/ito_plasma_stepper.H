@@ -15,7 +15,7 @@
 #include "ito_layout.H"
 #include <CD_PointParticle.H>
 #include "rte_layout.H"
-#include "mc_photo.H"
+#include <CD_McPhoto.H>
 #include "CD_FieldSolver.H"
 #include "CD_SigmaSolver.H"
 
@@ -123,7 +123,7 @@ namespace physics {
       // Set routines
       void set_ito(RefCountedPtr<ito_layout<ito_solver> >& a_cdr);
       void set_poisson(RefCountedPtr<FieldSolver>& a_poisson);
-      void set_rte(RefCountedPtr<rte_layout<mc_photo> >& a_rte);
+      void set_rte(RefCountedPtr<rte_layout<McPhoto> >& a_rte);
       void set_potential(const std::function<Real(const Real a_time)>& a_potential);
 
       // Get routines
@@ -311,17 +311,17 @@ namespace physics {
       void advance_Photons(const Real a_dt);
 
       // Routines for sorting particles. These routines are here because rte_layout is general for RtSolver, and I'm too
-      // lazy to write an mc_photo_layout. So here you go. 
-      void sort_Photons_by_cell();
-      void sort_Photons_by_patch();
-      void sort_source_Photons_by_cell();
-      void sort_source_Photons_by_patch();
-      void sort_bulk_Photons_by_cell();
-      void sort_bulk_Photons_by_patch();
-      void sort_eb_Photons_by_cell();
-      void sort_eb_Photons_by_patch();
-      void sort_domain_Photons_by_cell();
-      void sort_domain_Photons_by_patch();
+      // lazy to write an McPhoto_layout. So here you go. 
+      void sortPhotonsByCell();
+      void sortPhotonsByPatch();
+      void sortSourcePhotonsByCell();
+      void sortSourcePhotonsByPatch();
+      void sortBulkPhotonsByCell();
+      void sortBulkPhotonsByPatch();
+      void sortEbPhotonsByCell();
+      void sortEbPhotonsByPatch();
+      void sortDomainPhotonsByCell();
+      void sortDomainPhotonsByPatch();
 
       // Routines for computing EdotJ per species, including the diffusive contribution. a_source is defined on the particle Realm.
       void compute_EdotJ_source(const Real a_dt);
@@ -341,7 +341,7 @@ namespace physics {
       
       RefCountedPtr<ito_plasma_physics> m_physics;
       RefCountedPtr<ito_layout<ito_solver> > m_ito;
-      RefCountedPtr<rte_layout<mc_photo> > m_rte;
+      RefCountedPtr<rte_layout<McPhoto> > m_rte;
       RefCountedPtr<FieldSolver> m_fieldSolver;
       RefCountedPtr<SigmaSolver> m_sigma;
 

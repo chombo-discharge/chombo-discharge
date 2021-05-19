@@ -68,16 +68,16 @@ void ito_layout<T>::parseRuntimeOptions(){
 }
 
 template <class T>
-void ito_layout<T>::set_pvr_buffer(const int a_buffer){
+void ito_layout<T>::setPVRBuffer(const int a_buffer){
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    iter()->set_pvr_buffer(a_buffer);
+    iter()->setPVRBuffer(a_buffer);
   }
 }
 
 template <class T>
-void ito_layout<T>::set_halo_buffer(const int a_buffer){
+void ito_layout<T>::setHalobuffer(const int a_buffer){
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    iter()->set_halo_buffer(a_buffer);
+    iter()->setHalobuffer(a_buffer);
   }
 }
 

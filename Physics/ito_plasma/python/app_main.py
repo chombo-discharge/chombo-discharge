@@ -32,7 +32,7 @@ def write_template(args):
     mainf.write('#include "ito_layout.H"\n')
     mainf.write('#include "' + args.ito_solver + '.H"\n')
     mainf.write('#include "rte_layout.H"\n')
-    mainf.write('#include "mc_photo.H"\n')
+    mainf.write('#include <CD_McPhoto.H>\n')
     mainf.write('#include "' + args.physics + '.H"\n')
     mainf.write('#include "' + args.geometry + '.H"\n')
     mainf.write('#include "' + args.TimeStepper + '.H"\n')
@@ -94,7 +94,7 @@ def write_template(args):
     mainf.write("  // Create solver factories\n")
     mainf.write("  auto poi_fact = new FieldSolverFactory<" + args.field_solver + ">();\n")
     mainf.write("  auto ito_fact = new ito_factory<ito_solver, " + args.ito_solver + ">();\n")
-    mainf.write("  auto rte_fact = new rte_factory<mc_photo, mc_photo>();\n")
+    mainf.write("  auto rte_fact = new rte_factory<McPhoto, McPhoto>();\n")
     mainf.write("\n")
     
     mainf.write("  // Instantiate solvers\n")

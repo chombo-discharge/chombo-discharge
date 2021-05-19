@@ -1,5 +1,5 @@
 /*!
-  @file   mc_photo.H
+  @file   McPhoto.H
   @author Robert Marskar
   @date   Jan. 2018
   @todo   Particle deposition should use the new EBMeshInterp and not MeshInterp
@@ -25,18 +25,18 @@
 /*!
   @brief Radiative tranfer equation solver using stationary Monte-Carlo
 */
-class mc_photo : public RtSolver {
+class McPhoto : public RtSolver {
 public:
 
   /*!
     @brief Constructor
   */
-  mc_photo();
+  McPhoto();
 
   /*!
     @brief Destructor
   */
-  virtual ~mc_photo();
+  virtual ~McPhoto();
 
   /*!
     @brief Advance RTE and deposit Photons on a_phi
@@ -47,18 +47,18 @@ public:
   /*!
     @brief Instantaneous solver or not
   */
-  virtual bool is_instantaneous();
+  virtual bool isInstantaneous();
 
   /*!
     @brief Generate Photons
   */
-  virtual void generate_Photons(ParticleContainer<Photon>& a_particles, const EBAMRCellData& a_source, const Real a_dt);
+  virtual void generatePhotons(ParticleContainer<Photon>& a_particles, const EBAMRCellData& a_source, const Real a_dt);
 
   /*!
     @brief Move Photons and absorb them. 
     @details This is the routine that is used to move Photons when the solver is stationary. 
   */
-  virtual void advance_Photons_stationary(ParticleContainer<Photon>& a_bulk_Photons,
+  virtual void advancePhotonsStationary(ParticleContainer<Photon>& a_bulk_Photons,
 					  ParticleContainer<Photon>& a_eb_Photons,
 					  ParticleContainer<Photon>& a_domain_Photons,
 					  ParticleContainer<Photon>& a_Photons);
@@ -68,7 +68,7 @@ public:
     a_bulk_Photons. If it is absorbed on the EB, it is put in a_eb_Photons etc. 
     @details This is the routine that is used to move Photons when the solver is transient. 
   */
-  virtual void advance_Photons_transient(ParticleContainer<Photon>& a_bulk_Photons,
+  virtual void advancePhotonsTransient(ParticleContainer<Photon>& a_bulk_Photons,
 					 ParticleContainer<Photon>& a_eb_Photons,
 					 ParticleContainer<Photon>& a_domain_Photons,
 					 ParticleContainer<Photon>& a_oPhotons,
@@ -87,71 +87,71 @@ public:
   /*!
     @brief Deposit Photons
   */
-  virtual void deposit_Photons();
+  virtual void depositPhotons();
 
   /*!
     @brief Deposit Photons
   */
-  virtual void deposit_Photons(EBAMRCellData&                    a_phi,
+  virtual void depositPhotons(EBAMRCellData&                    a_phi,
 			       const ParticleContainer<Photon>& a_particles,
 			       const DepositionType::Which&      a_deposition);
 
   /*!
     @brief Deposit Photons
   */
-  virtual void deposit_Photons(EBAMRCellData&               a_phi,
+  virtual void depositPhotons(EBAMRCellData&               a_phi,
 			       const AMRParticles<Photon>&  a_Photons,
 			       const DepositionType::Which& a_deposition);
 
   /*!
     @brief Sort the m_Photons container by cell
   */
-  virtual void sort_Photons_by_cell();
+  virtual void sortPhotonsByCell();
 
   /*!
     @brief Sort the m_Photons container by cell
   */
-  virtual void sort_Photons_by_patch();
+  virtual void sortPhotonsByPatch();
 
   /*!
     @brief Sort the m_bulk_Photons container by cell
   */
-  virtual void sort_bulk_Photons_by_cell();
+  virtual void sortBulkPhotonsByCell();
 
   /*!
     @brief Sort the m_bulk_Photons container by cell
   */
-  virtual void sort_bulk_Photons_by_patch();
+  virtual void sortBulkPhotonsByPatch();
 
   /*!
     @brief Sort the m_source_Photons container by cell
   */
-  virtual void sort_source_Photons_by_cell();
+  virtual void sortSourcePhotonsByCell();
 
   /*!
     @brief Sort the m_source_Photons container by cell
   */
-  virtual void sort_source_Photons_by_patch();
+  virtual void sortSourcePhotonsByPatch();
 
   /*!
     @brief Sort the m_source_Photons container by cell
   */
-  virtual void sort_eb_Photons_by_cell();
+  virtual void sortEbPhotonsByCell();
 
   /*!
     @brief Sort the m_source_Photons container by cell
   */
-  virtual void sort_eb_Photons_by_patch();
+  virtual void sortEbPhotonsByPatch();
 
   /*!
     @brief Sort the m_source_Photons container by cell
   */
-  virtual void sort_domain_Photons_by_cell();
+  virtual void sortDomainPhotonsByCell();
 
   /*!
     @brief Sort the m_source_Photons container by cell
   */
-  virtual void sort_domain_Photons_by_patch();
+  virtual void sortDomainPhotonsByPatch();
 
   /*!
     Parse options
@@ -253,22 +253,22 @@ public:
   /*!
     @brief Get PVR buffer
   */
-  virtual int getPVR_buffer() const;
+  virtual int getPVRBuffer() const;
 
   /*!
     @brief Get the halo buffer
   */
-  virtual int get_halo_buffer() const;
+  virtual int getHaloBuffer() const;
 
   /*!
     @brief Set the PVR buffer
   */
-  virtual void set_pvr_buffer(const int a_buffer);
+  virtual void setPVRBuffer(const int a_buffer);
 
   /*!
     @brief Set the halo buffer
   */
-  virtual void set_halo_buffer(const int a_buffer);
+  virtual void setHalobuffer(const int a_buffer);
 
   /*!
     @brief Get number of output fields
@@ -283,41 +283,41 @@ public:
   /*!
     @brief Count number of Photons in particle list
   */
-  virtual int count_Photons(const AMRParticles<Photon>& a_Photons) const;
+  virtual int countPhotons(const AMRParticles<Photon>& a_Photons) const;
 
   /*!
     @brief Count number of outcast Photons in particle list
   */
-  virtual int count_outcast(const AMRParticles<Photon>& a_Photons) const;
+  virtual int countOutcast(const AMRParticles<Photon>& a_Photons) const;
 
   /*!
     @brief Get Photons
   */
-  virtual ParticleContainer<Photon>& get_Photons();
+  virtual ParticleContainer<Photon>& getPhotons();
 
   /*!
     @brief Get bulk Photons
   */
-  virtual ParticleContainer<Photon>& get_bulk_Photons();
+  virtual ParticleContainer<Photon>& getBulkPhotons();
 
   /*!
     @brief Get EB Photons
   */
-  virtual ParticleContainer<Photon>& get_eb_Photons();
+  virtual ParticleContainer<Photon>& getEbPhotons();
 
   /*!
     @brief Get domain Photons
   */
-  virtual ParticleContainer<Photon>& get_domain_Photons();
+  virtual ParticleContainer<Photon>& getDomainPhotons();
 
   /*!
     @brief Get source Photons
   */
-  virtual ParticleContainer<Photon>& getSource_Photons();
+  virtual ParticleContainer<Photon>& getSourcePhotons();
   
 protected:
 
-  enum Photon_generation {
+  enum PhotonGeneration {
     deterministic = 0,
     stochastic = 1,
   };
@@ -408,7 +408,7 @@ protected:
   /*!
     @brief Photon generation type
   */
-  Photon_generation m_photogen;
+  PhotonGeneration m_photogen;
 
   /*!
     @brief Source type
@@ -498,51 +498,51 @@ protected:
   /*!
     @brief Mapping function for domain boundary conditions
   */
-  int domainbc_map(const int a_dir, const Side::LoHiSide a_side);
+  int domainBcMap(const int a_dir, const Side::LoHiSide a_side);
 
   /*!
     @brief Random Poisson trial
   */
-  int random_fieldSolver(const Real a_mean);
+  int randomPoisson(const Real a_mean);
 
   /*!
     @brief Random exponential trial
   */
-  Real random_exponential(const Real a_mean);
+  Real randomExponential(const Real a_mean);
 
   /*!
     @brief Random direction
   */
-  RealVect random_direction();
+  RealVect randomDirection();
 
 #if CH_SPACEDIM==2
   /*!
     @brief Random direction in 2D
   */
-  RealVect random_direction2D();
+  RealVect randomDirection2D();
 #elif CH_SPACEDIM==3
   /*!
     @brief Random direction in 2D
   */
-  RealVect random_direction3D();
+  RealVect randomDirection3D();
 #endif
 
   /*!
     @brief This computes the "conservative" deposition, multiplied by kappa
   */
-  void deposit_kappaConservative(EBAMRCellData&              a_phi,
+  void depositKappaConservative(EBAMRCellData&              a_phi,
 				 const AMRParticles<Photon>& a_particles,
 				 const DepositionType::Which a_deposition);
 
   /*!
     @brief Make the "non-conservative" kappa deposition
   */
-  void deposit_nonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellData& a_depositionKappaC);
+  void depositNonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellData& a_depositionKappaC);
 
   /*!
     @brief Make the hybrid deposition. Also compute the mass difference
   */
-  void deposit_hybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massDifference, const EBAMRIVData& a_depositionNC);
+  void depositHybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massDifference, const EBAMRIVData& a_depositionNC);
 
   /*!
     @brief Increment redistribution objects with mass to be redistributed
@@ -552,7 +552,7 @@ protected:
   /*!
     @brief Do redistribution on all levels, no coarse-fine stuff
   */
-  void level_redistribution(EBAMRCellData& a_phi);
+  void levelRedist(EBAMRCellData& a_phi);
 
   /*!
     @brief Increment the coarse-fine redist with mass difference (only for EB x CF)
@@ -567,7 +567,7 @@ protected:
   /*!
     @brief Parse RNG options
   */
-  void parse_rng();
+  void parseRng();
 
   /*!
     @brief Parse the conservation
@@ -577,32 +577,32 @@ protected:
   /*!
     @brief Parse pseudoPhotons
   */
-  void parse_pseudoPhotons();
+  void parsePseudoPhotons();
 
   /*!
     @brief Parse photogeneration type
   */
-  void parse_photogen();
+  void parsePhotoGeneration();
 
   /*!
     @brief Parse whether stationary or not
   */
-  void parse_instantaneous();
+  void parseInstantaneous();
 
   /*!
     @brief Parse source type
   */
-  void parse_source_type();
+  void parseSourceType();
 
   /*!
     @brief Parse deposition
   */
-  void parse_deposition();
+  void parseDeposition();
 
   /*!
     @brief Parse bisection step
   */
-  void parse_bisect_step();
+  void parseBisectStep();
 
   /*!
     @brief Parse domain BCs
@@ -612,7 +612,7 @@ protected:
   /*!
     @brief Parse PVR buffer
   */
-  void parse_pvr_buffer();
+  void parsePvrBuffer();
 
   /*!
     @brief Parse plot variables

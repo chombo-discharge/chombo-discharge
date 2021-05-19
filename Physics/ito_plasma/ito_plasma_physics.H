@@ -299,7 +299,7 @@ namespace physics {
 	@brief Draw a random direction in space
       */
       inline
-      RealVect random_direction() const;
+      RealVect randomDirection() const;
 
       /*!
 	@brief Returns true if all particle numbers are >= 0

@@ -5,7 +5,7 @@
 #include "cdr_layoutI.H"
 #include <CD_CdrGodunov.H>
 #include "rte_layoutI.H"
-#include "mc_photo.H"
+#include <CD_McPhoto.H>
 #include "air7_stephens.H"
 #include "rod_dielectric.H"
 #include "godunov.H"
@@ -53,7 +53,7 @@ int main(int argc, char* argv[]){
   // Create solver factories
   auto poi_fact = new FieldSolverFactory<FieldSolverMultigrid>();
   auto cdr_fact = new cdr_factory<CdrSolver, CdrGodunov>();
-  auto rte_fact = new rte_factory<RtSolver, mc_photo>();
+  auto rte_fact = new rte_factory<RtSolver, McPhoto>();
 
   // Instantiate solvers
   auto poi = poi_fact->newSolver();

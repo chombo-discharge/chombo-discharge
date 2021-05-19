@@ -214,11 +214,11 @@ protected:
   Real ran01() const;
   Real ran11() const;
   RealVect random_gaussian();
-  RealVect random_direction();
+  RealVect randomDirection();
 #if CH_SPACEDIM==2
-  RealVect random_direction2D();
+  RealVect randomDirection2D();
 #elif CH_SPACEDIM==3
-  RealVect random_direction3D();
+  RealVect randomDirection3D();
 #endif
 
   void read_file_entries(lookup_table& a_table, const std::string a_string);

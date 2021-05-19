@@ -21,7 +21,7 @@ parser.add_argument('-app_name',        type=str,  help="Mini app name. An error
 parser.add_argument('-filename',        type=str,  help="File name of main file", default="main")
 parser.add_argument('-field_solver',    type=str,  help="Poisson solver implementation", default="FieldSolverMultigrid")
 parser.add_argument('-CdrSolver',      type=str,  help="CDR solver implementation", default="CdrGodunov")
-parser.add_argument('-RtSolver',      type=str,  help="RTE solver implementation", default="mc_photo")
+parser.add_argument('-RtSolver',      type=str,  help="RTE solver implementation", default="McPhoto")
 parser.add_argument('-physics',         type=str,  help="Plasma kinetics class", default="")
 parser.add_argument('-geometry',        type=str,  help="Geometry class", default="regular_geometry")
 parser.add_argument('-TimeStepper',    type=str,  help="Time stepping method", default="imex_sdc")

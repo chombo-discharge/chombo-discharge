@@ -103,8 +103,8 @@ void ito_plasma_godunov::allocate(){
     const RefCountedPtr<ito_solver>& solver = solver_it();
 
     const int idx         = solver_it.index();
-    const int pvr_buffer  = solver->getPVR_buffer();
-    const int halo_buffer = solver->get_halo_buffer();
+    const int pvr_buffer  = solver->getPVRBuffer();
+    const int halo_buffer = solver->getHaloBuffer();
 
     m_conductivity_particles[idx] = new ParticleContainer<godunov_particle>();
     m_rho_dagger_particles[idx]   = new ParticleContainer<godunov_particle>();
@@ -383,8 +383,8 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   MPI_Barrier(Chombo_MPI::comm);
   sort_time = -MPI_Wtime();
   m_ito->sortParticlesByCell(ito_solver::which_container::bulk);
-  this->sort_bulk_Photons_by_cell();
-  this->sort_source_Photons_by_cell();
+  this->sortBulkPhotonsByCell();
+  this->sortSourcePhotonsByCell();
   sort_time += MPI_Wtime();
 
   // Chemistry kernel.
@@ -405,8 +405,8 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   MPI_Barrier(Chombo_MPI::comm);
   sort_time -= MPI_Wtime();
   m_ito->sortParticlesByPatch(ito_solver::which_container::bulk);
-  this->sort_bulk_Photons_by_patch();
-  this->sort_source_Photons_by_patch();
+  this->sortBulkPhotonsByPatch();
+  this->sortSourcePhotonsByPatch();
   sort_time += MPI_Wtime();
 
   // Clear other data holders for now. BC comes later...
