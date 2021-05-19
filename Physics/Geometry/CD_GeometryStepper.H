@@ -1,18 +1,23 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   GeometryStepper.H
+  @file   CD_GeometryStepper.H
   @brief  Declaration of a TimeStepper class without any solver functionality, i.e. for geometries only. 
   @author Robert Marskar
-  @date   March 2020
 */
 
 #ifndef _GEOMETRY_STEPPER_
 #define _GEOMETRY_STEPPER_
 
-#include "CD_TimeStepper.H"
+// Our includes
+#include <CD_TimeStepper.H>
+#include <CD_NamespaceHeader.H>
 
-#include "CD_NamespaceHeader.H"
-namespace physics {
-  namespace geometry {
+namespace Physics {
+  namespace Geometry {
     
     /*!
       @brief Abstract class for performing time stepping
@@ -54,6 +59,7 @@ namespace physics {
     };
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

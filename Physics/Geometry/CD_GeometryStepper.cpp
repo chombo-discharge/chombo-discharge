@@ -1,14 +1,19 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   GeometryStepper.cpp
-  @brief  Implementation of GeometryStepper.H
+  @file   CD_GeometryStepper.cpp
+  @brief  Implementation of CD_GeometryStepper.H
   @author Robert Marskar
-  @date   March 2020
 */
 
+// Our includes
 #include <CD_GeometryStepper.H>
+#include <CD_NamespaceHeader.H>
 
-#include "CD_NamespaceHeader.H"
-using namespace physics::geometry;
+using namespace Physics::Geometry;
 
 // ctor/dtor
 GeometryStepper::GeometryStepper(){}
@@ -43,4 +48,5 @@ void GeometryStepper::printStepReport() {}
 void GeometryStepper::preRegrid(const int a_lmin, const int a_oldFinestLevel) {}
 void GeometryStepper::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) {}
 void GeometryStepper::postRegrid() {}
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
