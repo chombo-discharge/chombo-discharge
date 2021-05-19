@@ -1,16 +1,22 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file hyperboloid_two_if.H
-  @brief Declaration of a two-sheet hyperboloidal implicit function object
-  @date Nov. 2017
+  @file   CD_HyperboloidTwoIF.H
+  @brief  Declaration of a two-sheet hyperboloidal implicit function object
   @author Robert Marskar
 */
 
-#ifndef _HYPERBOLOID_TWO_IF_
-#define _HYPERBOLOID_TWO_IF_
+#ifndef CD_HyperboloidTwoIF_H
+#define CD_HyperboloidTwoIF_H
 
+// Chombo includes
 #include <BaseIF.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Declaration of a two-sheet hyperboloid. 
@@ -19,7 +25,7 @@
   \frac{x^2}{a^2} + \frac{y^2}{b^2} - \frac{z^2}{c^2} = -1
   \f]
 */
-class hyperboloid_two_if : public BaseIF{
+class HyperboloidTwoIF : public BaseIF{
 public:
 
   /*!
@@ -28,13 +34,13 @@ public:
     @param[in] a_center Hyperboloid center
     @param[in] a_inside Domain on inside or outside
   */
-  hyperboloid_two_if(const RealVect& a_radii, const RealVect& a_center, const bool& a_inside);
+  HyperboloidTwoIF(const RealVect& a_radii, const RealVect& a_center, const bool& a_inside);
 
   /*!
     @brief Copy constructor
     @param[in] a_inputIF Input one-sheeted hyperboloid
   */
-  hyperboloid_two_if(const hyperboloid_two_if& a_inputIF);
+  HyperboloidTwoIF(const HyperboloidTwoIF& a_inputIF);
 
   /*!
     @brief Test whether inside or not
@@ -73,5 +79,7 @@ protected:
   */
   bool m_inside;
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif
