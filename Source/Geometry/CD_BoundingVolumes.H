@@ -1,17 +1,23 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   BoundingVolumes.H
-  @brief  Declaration of a various bounding volumes. 
+  @file   CD_BoundingVolumes.H
+  @brief  Declaration of a various bounding volumes
   @author Robert Marskar
-  @date   March 2021
 */
 
-#ifndef _BOUNDINGVOLUMES_H_
-#define _BOUNDINGVOLUMES_H_
+#ifndef CD_BoundingVolumes_H
+#define CD_BoundingVolumes_H
 
-#include "Vec.H"
+// Std includes
 #include <vector>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <Vec.H>
+#include <CD_NamespaceHeader.H>
 
 namespace BoundingVolumes {
   
@@ -144,8 +150,9 @@ namespace BoundingVolumes {
   template <class T>
   T getOverlappingVolume(const AABBT<T>& a_u, const AABBT<T>& a_v) noexcept;
 }
-#include "CD_NamespaceFooter.H"
 
-#include "BoundingVolumesI.H"
+#include <CD_NamespaceFooter.H>
+
+#include <CD_BoundingVolumesImplem.H>
 
 #endif

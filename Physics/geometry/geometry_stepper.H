@@ -47,7 +47,6 @@ namespace physics {
       virtual void printStepReport() override;
 
       // Regrid routines
-      virtual void deallocate() override;
       virtual void preRegrid(const int a_lmin, const int a_oldFinestLevel) override;
       virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
       virtual void postRegrid() override;

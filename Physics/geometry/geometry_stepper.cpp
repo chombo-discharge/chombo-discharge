@@ -40,7 +40,6 @@ void geometry_stepper::synchronizeSolverTimes(const int a_step, const Real a_tim
 void geometry_stepper::printStepReport() {}
 
 // Regrid routines
-void geometry_stepper::deallocate() {}
 void geometry_stepper::preRegrid(const int a_lmin, const int a_oldFinestLevel) {}
 void geometry_stepper::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) {}
 void geometry_stepper::postRegrid() {}
