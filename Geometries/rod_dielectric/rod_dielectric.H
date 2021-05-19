@@ -8,14 +8,14 @@
 #ifndef _ROD_DIELECTRIC_
 #define _ROD_DIELECTRIC_
 
-#include "computational_geometry.H"
+#include <CD_ComputationalGeometry.H>
 
 #include "CD_NamespaceHeader.H"
 
 /*!
   @brief Class that defines an electrode rod and a dielectric (some shapes supported)
 */
-class rod_dielectric : public computational_geometry {
+class rod_dielectric : public ComputationalGeometry {
 public:
 
   rod_dielectric();

@@ -431,10 +431,10 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 	  // This is the implicit function
 	  RefCountedPtr<BaseIF> func;
 	  if(m_solver->getPhase() == phase::gas){
-	    func = m_computationalGeometry->get_gas_if();
+	    func = m_computationalGeometry->getGasImplicitFunction();
 	  }
 	  else {
-	    func = m_computationalGeometry->get_sol_if();
+	    func = m_computationalGeometry->getSolidImplicitFunction();
 	  }
 
 	  for (lit.rewind(), litC.rewind(); lit, litC; ++lit, ++litC){

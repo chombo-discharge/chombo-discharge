@@ -182,7 +182,7 @@ void CdrLayout<T>::setAmr(const RefCountedPtr<AmrMesh>& a_amr){
 }
 
 template <class T>
-void CdrLayout<T>::setComputationalGeometry(const RefCountedPtr<computational_geometry>& a_computationalGeometry){
+void CdrLayout<T>::setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry){
   CH_TIME("CdrLayout<T>::setComputationalGeometry");
   if(m_verbosity > 5){
     pout() << "CdrLayout<T>::setComputationalGeometry" << endl;

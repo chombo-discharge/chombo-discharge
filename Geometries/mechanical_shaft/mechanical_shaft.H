@@ -8,14 +8,14 @@
 #ifndef _MECHANICAL_SHAFT_
 #define _MECHANICAL_SHAFT_
 
-#include "computational_geometry.H"
+#include <CD_ComputationalGeometry.H>
 
 #include "CD_NamespaceHeader.H"
 
 /*!
   @brief Mechanical shaft class
 */
-class mechanical_shaft : public computational_geometry {
+class mechanical_shaft : public ComputationalGeometry {
 public:
 
   mechanical_shaft();

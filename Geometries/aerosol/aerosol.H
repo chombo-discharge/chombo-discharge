@@ -8,11 +8,11 @@
 #ifndef _AEROSOL_GEOM_
 #define _AEROSOL_GEOM_
 
-#include "computational_geometry.H"
+#include <CD_ComputationalGeometry.H>
 
 #include "CD_NamespaceHeader.H"
 
-class aerosol : public computational_geometry {
+class aerosol : public ComputationalGeometry {
 public:
 
   aerosol();

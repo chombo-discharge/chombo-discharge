@@ -1,25 +1,30 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file computational_geometry.H
-  @brief Declaration of an abstract base class for defining geometries
+  @file   CD_ComputationalGeometry.H
+  @brief  Declaration of base class for defining geometries.
   @author Robert Marskar
-  @date Nov. 2017
 */
 
-#ifndef _COMPUTATIONAL_GEOMETRY_
-#define _COMPUTATIONAL_GEOMETRY_
+#ifndef CD_ComputationalGeometry_H
+#define CD_ComputationalGeometry_H
 
+// Chombo includes
 #include <BaseIF.H>
 #include <MFIndexSpace.H>
 #include <Box.H>
 #include <RealVect.H>
 #include <ProblemDomain.H>
 
-#include "dielectric.H"
-#include "electrode.H"
-#include "mfis.H"
-#include "real_box.H"
-
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <dielectric.H>
+#include <electrode.H>
+#include <mfis.H>
+#include <real_box.H>
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Switch when representing embedded boundaries
@@ -34,7 +39,7 @@ enum class EB_representation {
 /*!
   @brief Abstract base class for geometries
 */
-class computational_geometry {
+class ComputationalGeometry {
 public:
 
   static bool s_use_new_gshop;
@@ -43,12 +48,12 @@ public:
   /*!
     @brief Constructor
   */
-  computational_geometry();
+  ComputationalGeometry();
 
   /*!
     @brief Destructor
   */
-  virtual ~computational_geometry();
+  virtual ~ComputationalGeometry();
 
   /*!
     @brief Minimum refines
@@ -68,64 +73,64 @@ public:
   /*!
     @brief Get dielectrics
   */
-  virtual const Vector<dielectric>& get_dielectrics() const;
+  virtual const Vector<dielectric>& getDielectrics() const;
 
   /*!
     @brief Get conductors
   */
-  virtual const Vector<electrode>& get_electrodes() const;
+  virtual const Vector<electrode>& getElectrodes() const;
 
   /*!
     @brief Get the background permittivity
   */
-  virtual const Real& get_eps0() const;
+  virtual const Real& getGasPermittivity() const;
   
   /*!
     @brief Set electrodes
   */
-  virtual void set_dielectrics(Vector<dielectric>& a_dielectrics);
+  virtual void setDielectrics(Vector<dielectric>& a_dielectrics);
 
   /*!
     @brief Set electrodes
   */
-  virtual void set_electrodes(Vector<electrode>& a_electrodes);
+  virtual void setElectrodes(Vector<electrode>& a_electrodes);
 
   /*!
     @brief Get the background permittivity
   */
-  virtual void set_eps0(const Real a_eps0);
+  virtual void setGasPermittivity(const Real a_eps0);
 
   /*!
     @brief Get the EBIndexSpaces
   */
-  virtual const RefCountedPtr<mfis>& get_mfis() const;
+  virtual const RefCountedPtr<mfis>& getMfIndexSpace() const;
 
   /*!
     @brief Get the implicit function used to generate the gas-phase EBIS
   */
-  virtual const RefCountedPtr<BaseIF>& get_gas_if() const;
+  virtual const RefCountedPtr<BaseIF>& getGasImplicitFunction() const;
 
   /*!
     @brief Get the implicit function used to generate the solid-phase EBIS
   */
-  virtual const RefCountedPtr<BaseIF>& get_sol_if() const;
+  virtual const RefCountedPtr<BaseIF>& getSolidImplicitFunction() const;
 
   /*!
     @brief Build MFIndexSpace
     @details This will build the gas and solid phase domain. The input is the finest-level stuff and you can control the division
     into boxes as well as the maximum number of coarsenings. The computed domain is (a_origin, a_origin + a_box*a_dx)
   */
-  virtual void build_geometries(const ProblemDomain   a_finestDomain,
-				const RealVect        a_origin,
-				const Real            a_finestDx,
-				const int             a_nCellMax = -1,
-				const int             a_maxCoarsen = -1);
+  virtual void buildGeometries(const ProblemDomain   a_finestDomain,
+			       const RealVect        a_origin,
+			       const Real            a_finestDx,
+			       const int             a_nCellMax = -1,
+			       const int             a_maxCoarsen = -1);
 
   /*!
     @brief Build geometries from files
   */
-  virtual void build_geo_from_files(const std::string&   a_gas_file,
-				    const std::string&   a_sol_file);
+  virtual void buildGeometriesFromFiles(const std::string&   a_gas_file,
+					const std::string&   a_sol_file);
 
 protected:
 
@@ -159,32 +164,24 @@ protected:
   */
   RefCountedPtr<BaseIF> m_sol_if;
 
-  // Voxels for gas phase
-  Vector<real_box> m_regular_voxels_gas;
-  Vector<real_box> m_covered_voxels_gas;
-  Vector<real_box> m_bounded_voxels_gas;
-
-  // Voxels for solid phase
-  Vector<real_box> m_regular_voxels_sol;
-  Vector<real_box> m_covered_voxels_sol;
-  Vector<real_box> m_bounded_voxels_sol;
-
   /*!
     @brief Geometry server for gas phase
   */
-  virtual void build_gas_geoserv(GeometryService*&   a_geoserver,
-				 const ProblemDomain a_finestDomain,
-				 const RealVect      a_origin,
-				 const Real          a_dx);
+  virtual void buildGasGeoServ(GeometryService*&   a_geoserver,
+			       const ProblemDomain a_finestDomain,
+			       const RealVect      a_origin,
+			       const Real          a_dx);
 
   /*!
     @brief Geometry server for solid phas
   */
-  virtual void build_solid_geoserv(GeometryService*&   a_geoserver,
-				   const ProblemDomain a_finestDomain,
-				   const RealVect      a_origin,
-				   const Real          a_dx);
+  virtual void buildSolidGeoServ(GeometryService*&   a_geoserver,
+				 const ProblemDomain a_finestDomain,
+				 const RealVect      a_origin,
+				 const Real          a_dx);
 
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif

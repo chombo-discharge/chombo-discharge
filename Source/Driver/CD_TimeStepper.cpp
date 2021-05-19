@@ -31,7 +31,7 @@ void TimeStepper::setAmr(const RefCountedPtr<AmrMesh>& a_amr){
   m_amr = a_amr;
 }
 
-void TimeStepper::setComputationalGeometry(const RefCountedPtr<computational_geometry>& a_computationalGeometry){
+void TimeStepper::setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry){
   CH_TIME("TimeStepper::setComputationalGeometry");
   if(m_verbosity > 5){
     pout() << "TimeStepper::setComputationalGeometry" << endl;

@@ -9,7 +9,7 @@
 #define _ITO_SOLVER_
 
 #include "CD_AmrMesh.H"
-#include "computational_geometry.H"
+#include <CD_ComputationalGeometry.H>
 #include "ito_species.H"
 #include "ito_particle.H"
 #include <CD_EbParticleInterp.H>
@@ -362,7 +362,7 @@ public:
   /*!
     @brief Set computational geometry
   */
-  virtual void setComputationalGeometry(const RefCountedPtr<computational_geometry> a_computationalGeometry);
+  virtual void setComputationalGeometry(const RefCountedPtr<ComputationalGeometry> a_computationalGeometry);
 
   /*!
     @brief Set the amr object
@@ -752,7 +752,7 @@ protected:
   /*!
     @brief Computational geometry. 
   */
-  RefCountedPtr<computational_geometry> m_computationalGeometry;
+  RefCountedPtr<ComputationalGeometry> m_computationalGeometry;
 
   /*!
     @brief AMR; needed for grid stuff

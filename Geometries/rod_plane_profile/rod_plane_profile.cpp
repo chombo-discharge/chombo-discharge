@@ -82,7 +82,7 @@ rod_plane_profile::rod_plane_profile(){
     m_dielectrics[0].define(plane, eps);
   }
 
-  this->set_eps0(1.0);
+  this->setGasPermittivity(1.0);
 }
 
 rod_plane_profile::~rod_plane_profile(){

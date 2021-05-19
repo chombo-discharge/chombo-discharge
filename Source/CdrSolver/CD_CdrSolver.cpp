@@ -1316,14 +1316,14 @@ void CdrSolver::setDomainBc(const CdrBc a_bctype){
   m_domainBc = a_bctype;
 }
 
-void CdrSolver::setComputationalGeometry(const RefCountedPtr<computational_geometry> a_computationalGeometry){
+void CdrSolver::setComputationalGeometry(const RefCountedPtr<ComputationalGeometry> a_computationalGeometry){
   CH_TIME("CdrSolver::setComputationalGeometry");
   if(m_verbosity > 5){
     pout() << m_name + "::setComputationalGeometry" << endl;
   }
   m_computationalGeometry = a_computationalGeometry;
 
-  const RefCountedPtr<mfis> mfis = m_computationalGeometry->get_mfis();
+  const RefCountedPtr<mfis> mfis = m_computationalGeometry->getMfIndexSpace();
   
   this->setEbIndexSpace(mfis->getEBIndexSpace(m_phase));
 }

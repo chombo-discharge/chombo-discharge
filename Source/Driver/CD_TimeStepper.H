@@ -13,7 +13,7 @@
 #define CD_TimeStepper_H
 
 // Our includes
-#include <computational_geometry.H>
+#include <CD_ComputationalGeometry.H>
 #include <mfis.H>
 #include <CD_AmrMesh.H>
 #include <CD_TimeCode.H>
@@ -45,7 +45,7 @@ public:
     @brief Set the computational geometry
     @param[in] a_computationalGeometry The computational geometry....
   */
-  void setComputationalGeometry(const RefCountedPtr<computational_geometry>& a_computationalGeometry);
+  void setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
 
   // SETUP ROUTINES BELOW HERE
   // -------------------------
@@ -257,7 +257,7 @@ protected:
   /*!
     @brief Physical domain
   */
-  RefCountedPtr<computational_geometry> m_computationalGeometry;
+  RefCountedPtr<ComputationalGeometry> m_computationalGeometry;
 };
 
 #include <CD_NamespaceFooter.H>

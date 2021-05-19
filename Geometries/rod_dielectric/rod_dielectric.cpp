@@ -21,7 +21,7 @@ rod_dielectric::rod_dielectric(){
   m_dielectrics.resize(0);
   m_electrodes.resize(0);
 
-  this->set_eps0(1.0);
+  this->setGasPermittivity(1.0);
 
   ParmParse ppRod("rod_dielectric.electrode");
   ParmParse ppIns("rod_dielectric.dielectric");

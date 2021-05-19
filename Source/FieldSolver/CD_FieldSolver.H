@@ -13,7 +13,7 @@
 #define CD_FieldSolver_H
 
 // Our includes
-#include <computational_geometry.H>
+#include <CD_ComputationalGeometry.H>
 #include <CD_AmrMesh.H>
 #include <CD_ElectrostaticDomainBc.H>
 #include <CD_ElectrostaticEbBc.H>
@@ -149,7 +149,7 @@ public:
     @brief Set the computational geometry
     @param[in] a_computationalGeometry Computational geometry. 
   */
-  virtual void setComputationalGeometry(const RefCountedPtr<computational_geometry>& a_computationalGeometry);
+  virtual void setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
   
   /*!
     @brief Set the amr object. 
@@ -326,7 +326,7 @@ protected:
   /*!
     @brief Computational geometry. Needed for passing in BCs on EBs. 
   */
-  RefCountedPtr<computational_geometry> m_computationalGeometry;
+  RefCountedPtr<ComputationalGeometry> m_computationalGeometry;
 
   /*!
     @brief AMR; needed for grid stuff

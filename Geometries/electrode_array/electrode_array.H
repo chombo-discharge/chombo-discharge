@@ -8,14 +8,14 @@
 #ifndef _ELECTRODE_ARRAY_GEOM_
 #define _ELECTRODE_ARRAY_GEOM_
 
-#include "computational_geometry.H"
+#include <CD_ComputationalGeometry.H>
 
 #include "CD_NamespaceHeader.H"
   
 /*!
   @brief This is a class that defines an array of electrodes.
 */
-class electrode_array : public computational_geometry {
+class electrode_array : public ComputationalGeometry {
 public:
 
   electrode_array();

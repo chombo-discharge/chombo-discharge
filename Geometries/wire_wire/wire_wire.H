@@ -8,7 +8,7 @@
 #ifndef _WIRE_WIRE_
 #define _WIRE_WIRE_
 
-#include "computational_geometry.H"
+#include <CD_ComputationalGeometry.H>
 
 #include <ParmParse.H>
 
@@ -17,7 +17,7 @@
 /*!
   @brief This is a class that defines a wire-wire geometry
 */
-class wire_wire : public computational_geometry {
+class wire_wire : public ComputationalGeometry {
 public:
   
   wire_wire();

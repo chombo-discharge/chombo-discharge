@@ -25,7 +25,7 @@ streamer_tagger::~streamer_tagger(){
 streamer_tagger::streamer_tagger(const RefCountedPtr<cdr_plasma_physics>&     a_physics,
 				 const RefCountedPtr<cdr_plasma_stepper>&     a_timeStepper,
 				 const RefCountedPtr<AmrMesh>&               a_amr,
-				 const RefCountedPtr<computational_geometry>& a_computationalGeometry) : streamer_tagger() {
+				 const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry) : streamer_tagger() {
   this->define(a_physics, a_timeStepper, a_amr, a_computationalGeometry);
 }
 

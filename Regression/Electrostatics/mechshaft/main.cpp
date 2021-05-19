@@ -18,7 +18,7 @@ int main(int argc, char* argv[]){
   ParmParse pp(argc-2, argv+2, NULL, input_file.c_str());
 
   // Set geometry and AMR 
-  RefCountedPtr<computational_geometry> compgeom = RefCountedPtr<computational_geometry> (new mechanical_shaft());
+  RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry> (new mechanical_shaft());
   RefCountedPtr<AmrMesh> amr                    = RefCountedPtr<AmrMesh> (new AmrMesh());
   RefCountedPtr<geo_coarsener> geocoarsen        = RefCountedPtr<geo_coarsener> (new geo_coarsener());
   RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (NULL);

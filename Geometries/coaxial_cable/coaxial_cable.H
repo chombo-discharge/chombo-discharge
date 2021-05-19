@@ -8,14 +8,14 @@
 #ifndef _COAXIAL_CABLE_
 #define _COAXIAL_CABLE_
 
-#include "computational_geometry.H"
+#include <CD_ComputationalGeometry.H>
 
 #include "CD_NamespaceHeader.H"
 
 /*!
   @brief This is a class that defines a coaxial cable geometry 
 */
-class coaxial_cable : public computational_geometry {
+class coaxial_cable : public ComputationalGeometry {
 public:
   coaxial_cable();
   ~coaxial_cable();

@@ -20,7 +20,7 @@
 #include <RefCountedPtr.H>
 
 // Our includes
-#include <computational_geometry.H>
+#include <CD_ComputationalGeometry.H>
 #include <CD_TimeStepper.H>
 #include <CD_AmrMesh.H>
 #include <CD_CellTagger.H>
@@ -48,7 +48,7 @@ public:
     @param[in] a_cellTagger            Cell tagger which flags cell for refinement. 
     @param[in] a_geoCoarsen            geo_coarsen class which can remove tags along the geometry. 
   */
-  Driver(const RefCountedPtr<computational_geometry>& a_computationalGeometry,
+  Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry,
 	 const RefCountedPtr<TimeStepper>&           a_timeStepper,
 	 const RefCountedPtr<AmrMesh>&                a_amr,
 	 const RefCountedPtr<CellTagger>&            a_cellTagger = RefCountedPtr<CellTagger>(NULL),
@@ -106,7 +106,7 @@ protected:
   /*!
     @brief Geometry
   */
-  RefCountedPtr<computational_geometry> m_computationalGeometry;
+  RefCountedPtr<ComputationalGeometry> m_computationalGeometry;
 
   /*!
     @brief Time stepper
@@ -502,7 +502,7 @@ protected:
   /*!
     @brief Set the computational geometry
   */
-  void setComputationalGeometry(const RefCountedPtr<computational_geometry>& a_computationalGeometry);
+  void setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
 
   /*!
     @brief Set the time stepper

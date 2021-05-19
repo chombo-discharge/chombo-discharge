@@ -29,7 +29,7 @@
 #include <memrep.H>
 #include <CD_NamespaceHeader.H>
 
-Driver::Driver(const RefCountedPtr<computational_geometry>& a_computationalGeometry,
+Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry,
 	       const RefCountedPtr<TimeStepper>&           a_timeStepper,
 	       const RefCountedPtr<AmrMesh>&               a_amr,
 	       const RefCountedPtr<CellTagger>&            a_cellTagger,
@@ -917,13 +917,13 @@ void Driver::rebuildParmParse() const {
   pp.redefine(m_inputFile.c_str());
 }
 
-void Driver::setComputationalGeometry(const RefCountedPtr<computational_geometry>& a_computationalGeometry){
+void Driver::setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry){
   CH_TIME("Driver::setComputationalGeometry");
   if(m_verbosity > 5){
     pout() << "Driver::setComputationalGeometry" << endl;
   }
   m_computationalGeometry = a_computationalGeometry;
-  m_multifluidIndexSpace     = a_computationalGeometry->get_mfis();
+  m_multifluidIndexSpace     = a_computationalGeometry->getMfIndexSpace();
 }
 
 void Driver::setTimeStepper(const RefCountedPtr<TimeStepper>& a_timeStepper){
@@ -1047,9 +1047,9 @@ void Driver::parseGeometryGeneration(){
   
 
   if(m_geometryGeneration == "chombo-discharge"){ // Need to activate some flags that trigger the correct code. 
-    computational_geometry::s_use_new_gshop = true;
+    ComputationalGeometry::s_use_new_gshop = true;
     EBISLevel::s_distributedData            = true;
-    computational_geometry::s_ScanDomain = m_amr->getDomains()[m_geoScanLevel];
+    ComputationalGeometry::s_ScanDomain = m_amr->getDomains()[m_geoScanLevel];
   }
   else if(m_geometryGeneration == "chombo"){
   }
@@ -1181,7 +1181,7 @@ void Driver::setAmr(const RefCountedPtr<AmrMesh>& a_amr){
   }
 
   m_amr = a_amr;
-  m_amr->setMultifluidIndexSpace(m_computationalGeometry->get_mfis());
+  m_amr->setMultifluidIndexSpace(m_computationalGeometry->getMfIndexSpace());
 
 }
 
@@ -1233,7 +1233,7 @@ void Driver::setupGeometryOnly(){
   }
 
   const Real t0 = MPI_Wtime();
-  m_computationalGeometry->build_geometries(m_amr->getFinestDomain(),
+  m_computationalGeometry->buildGeometries(m_amr->getFinestDomain(),
 					    m_amr->getProbLo(),
 					    m_amr->getFinestDx(),
 					    m_amr->getMaxEbisBoxSize());
@@ -1241,8 +1241,8 @@ void Driver::setupGeometryOnly(){
   if(procID() == 0) std::cout << "geotime = " << t1 - t0 << std::endl;
 
   // Set implicit functions now. 
-  m_amr->setBaseImplicitFunction(phase::gas,   m_computationalGeometry->get_gas_if());
-  m_amr->setBaseImplicitFunction(phase::solid, m_computationalGeometry->get_sol_if());
+  m_amr->setBaseImplicitFunction(phase::gas,   m_computationalGeometry->getGasImplicitFunction());
+  m_amr->setBaseImplicitFunction(phase::solid, m_computationalGeometry->getSolidImplicitFunction());
 
   if(m_writeMemory){
     this->writeMemoryUsage();
@@ -1288,7 +1288,7 @@ void Driver::setupFresh(const int a_initialRegrids){
     EBIndexSpace::s_useMemoryLoadBalance = false;
   }
 
-  m_computationalGeometry->build_geometries(m_amr->getFinestDomain(),
+  m_computationalGeometry->buildGeometries(m_amr->getFinestDomain(),
 					    m_amr->getProbLo(),
 					    m_amr->getFinestDx(),
 					    m_amr->getMaxEbisBoxSize());
@@ -1299,8 +1299,8 @@ void Driver::setupFresh(const int a_initialRegrids){
   m_timeStepper->registerRealms();
 
   // Set implicit functions now. 
-  m_amr->setBaseImplicitFunction(phase::gas,   m_computationalGeometry->get_gas_if());
-  m_amr->setBaseImplicitFunction(phase::solid, m_computationalGeometry->get_sol_if());
+  m_amr->setBaseImplicitFunction(phase::gas,   m_computationalGeometry->getGasImplicitFunction());
+  m_amr->setBaseImplicitFunction(phase::solid, m_computationalGeometry->getSolidImplicitFunction());
 
   // Get geometry tags
   this->getGeometryTags();
@@ -1392,7 +1392,7 @@ void Driver::setupForRestart(const int a_initialRegrids, const std::string a_res
 
   this->sanityCheck();                                    // Sanity check before doing anything expensive
 
-  m_computationalGeometry->build_geometries(m_amr->getFinestDomain(),
+  m_computationalGeometry->buildGeometries(m_amr->getFinestDomain(),
 					    m_amr->getProbLo(),
 					    m_amr->getFinestDx(),
 					    m_amr->getMaxEbisBoxSize());
@@ -1404,8 +1404,8 @@ void Driver::setupForRestart(const int a_initialRegrids, const std::string a_res
   m_timeStepper->setComputationalGeometry(m_computationalGeometry); // Set computational geometry
 
   // Set implicit functions now. 
-  m_amr->setBaseImplicitFunction(phase::gas,   m_computationalGeometry->get_gas_if());
-  m_amr->setBaseImplicitFunction(phase::solid, m_computationalGeometry->get_sol_if());
+  m_amr->setBaseImplicitFunction(phase::gas,   m_computationalGeometry->getGasImplicitFunction());
+  m_amr->setBaseImplicitFunction(phase::solid, m_computationalGeometry->getSolidImplicitFunction());
 
   // Read checkpoint file
   this->readCheckpointFile(a_restartFile); // Read checkpoint file - this sets up amr, instantiates solvers and fills them
@@ -2108,8 +2108,8 @@ void Driver::writeLevelset(EBAMRCellData& a_output, int& a_comp){
     pout() << "Driver::writeLevelset" << endl;
   }
 
-  const RefCountedPtr<BaseIF>& lsf1 = m_computationalGeometry->get_gas_if();
-  const RefCountedPtr<BaseIF>& lsf2 = m_computationalGeometry->get_sol_if();
+  const RefCountedPtr<BaseIF>& lsf1 = m_computationalGeometry->getGasImplicitFunction();
+  const RefCountedPtr<BaseIF>& lsf2 = m_computationalGeometry->getSolidImplicitFunction();
 
   const RealVect prob_lo = m_amr->getProbLo();
 

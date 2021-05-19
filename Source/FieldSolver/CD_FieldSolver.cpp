@@ -131,7 +131,7 @@ void FieldSolver::computeDisplacementField(MFAMRCellData& a_displacementField, c
     pout() << "FieldSolver::computeDisplacementField" << endl;
   }
 
-  const Vector<dielectric>& dielectrics = m_computationalGeometry->get_dielectrics();
+  const Vector<dielectric>& dielectrics = m_computationalGeometry->getDielectrics();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     LevelData<MFCellFAB>& D = *a_displacementField[lvl];
@@ -328,14 +328,14 @@ void FieldSolver::regrid(const int a_lmin, const int a_old_finest, const int a_n
   this->computeElectricField();
 }
 
-void FieldSolver::setComputationalGeometry(const RefCountedPtr<computational_geometry>& a_computationalGeometry){
+void FieldSolver::setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry){
   CH_TIME("FieldSolver::setComputationalGeometry");
   if(m_verbosity > 5){
     pout() << "FieldSolver::setComputationalGeometry" << endl;
   }
 
   m_computationalGeometry = a_computationalGeometry;
-  m_multifluidIndexSpace     = m_computationalGeometry->get_mfis();
+  m_multifluidIndexSpace     = m_computationalGeometry->getMfIndexSpace();
 
   this->setDefaultEbBcFunctions();
 }
@@ -509,7 +509,7 @@ void FieldSolver::setDefaultEbBcFunctions() {
     pout() << "FieldSolver::setDefaultEbBcFunctions" << endl;
   }
 
-  const Vector<electrode> electrodes = m_computationalGeometry->get_electrodes();
+  const Vector<electrode> electrodes = m_computationalGeometry->getElectrodes();
 
   for (int i = 0; i < electrodes.size(); i++){
     const electrode& elec = electrodes[i];

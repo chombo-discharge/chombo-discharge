@@ -8,11 +8,11 @@
 #ifndef _TESSELATION__
 #define _TESSELATION_
 
-#include "computational_geometry.H"
+#include <CD_ComputationalGeometry.H>
 
 #include "CD_NamespaceHeader.H"
 
-class tesselation : public computational_geometry {
+class tesselation : public ComputationalGeometry {
 public:
 
   tesselation();

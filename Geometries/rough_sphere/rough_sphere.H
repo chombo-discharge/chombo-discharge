@@ -8,14 +8,14 @@
 #ifndef _ROUGH_SPHERE_GEOM_
 #define _ROUGH_SPHERE_GEOM_
 
-#include "computational_geometry.H"
+#include <CD_ComputationalGeometry.H>
 
 #include "CD_NamespaceHeader.H"
 
 /*!
   @brief This is a class that a rough sphere (either electrode or dielectric)
 */
-class rough_sphere : public computational_geometry {
+class rough_sphere : public ComputationalGeometry {
 public:
 
   rough_sphere();

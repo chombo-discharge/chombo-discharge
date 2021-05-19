@@ -8,14 +8,14 @@
 #ifndef _ROD_PLANE_PROFILE_GEOM_
 #define _ROD_PLANE_PROFILE_GEOM_
 
-#include "computational_geometry.H"
+#include <CD_ComputationalGeometry.H>
 
 #include "CD_NamespaceHeader.H"
 
 /*!
   @brief Geometry class which defines an electrode blade and a dielectric slab with various surface profiles. 
 */
-class rod_plane_profile : public computational_geometry {
+class rod_plane_profile : public ComputationalGeometry {
 public:
 
   enum class profile {

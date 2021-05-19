@@ -99,7 +99,7 @@ public:
   /*!
     @brief Set the computational geometry
   */
-  virtual void setComputationalGeometry(const RefCountedPtr<computational_geometry>& a_computationalGeometry);
+  virtual void setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
 
   /*!
     @brief Do a sanity check

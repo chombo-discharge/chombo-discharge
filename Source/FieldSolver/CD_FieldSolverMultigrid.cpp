@@ -320,7 +320,7 @@ void FieldSolverMultigrid::setMultigridCoefficients(){
 
   const int ncomps = 1;
   const int ghosts = 1;
-  const Real eps0  = m_computationalGeometry->get_eps0();
+  const Real eps0  = m_computationalGeometry->getGasPermittivity();
   
   m_amr->allocate(m_aCoef,      m_realm, ncomps);
   m_amr->allocate(m_bCoefficient,      m_realm, ncomps);
@@ -330,7 +330,7 @@ void FieldSolverMultigrid::setMultigridCoefficients(){
   data_ops::set_value(m_bCoefficient,      eps0); // Will override this later
   data_ops::set_value(m_bCoefficientIrreg, eps0); // Will override this later
 
-  this->setPermittivities(m_computationalGeometry->get_dielectrics());
+  this->setPermittivities(m_computationalGeometry->getDielectrics());
 }
 
 void FieldSolverMultigrid::setPermittivities(const Vector<dielectric>& a_dielectrics){

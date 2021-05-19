@@ -8,11 +8,11 @@
 #ifndef _VESSEL_H_
 #define _VESSEL_H_
 
-#include "computational_geometry.H"
+#include <CD_ComputationalGeometry.H>
 
 #include "CD_NamespaceHeader.H"
 
-class vessel : public computational_geometry {
+class vessel : public ComputationalGeometry {
 public:
   vessel();
   ~vessel();

@@ -60,7 +60,7 @@ mechanical_shaft::mechanical_shaft(){
   if(has_electrode)  this->define_electrode();
   if(has_dielectric) this->define_dielectric();
 
-  set_eps0(eps0);
+  setGasPermittivity(eps0);
 }
 
 mechanical_shaft::~mechanical_shaft(){

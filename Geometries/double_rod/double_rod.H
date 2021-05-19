@@ -8,14 +8,14 @@
 #ifndef _DOUBLE_ROD_GEOM_
 #define _DOUBLE_ROD_GEOM_
 
-#include "computational_geometry.H"
+#include <CD_ComputationalGeometry.H>
 
 #include "CD_NamespaceHeader.H"
   
 /*!
   @brief This is a class that defines two dielectric rods.
 */
-class double_rod : public computational_geometry {
+class double_rod : public ComputationalGeometry {
 public:
 
   /*!

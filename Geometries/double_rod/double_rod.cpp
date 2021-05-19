@@ -13,7 +13,7 @@
 #include "CD_NamespaceHeader.H"
 
 double_rod::double_rod(){
-  this->set_eps0(1.0);
+  this->setGasPermittivity(1.0);
 
   ParmParse pp1("double_rod.rod1");
   ParmParse pp2("double_rod.rod2");

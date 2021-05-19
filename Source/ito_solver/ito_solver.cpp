@@ -422,7 +422,7 @@ size_t ito_solver::get_num_particles(const which_container a_container, const bo
   return N;
 }
 
-void ito_solver::setComputationalGeometry(const RefCountedPtr<computational_geometry> a_computationalGeometry){
+void ito_solver::setComputationalGeometry(const RefCountedPtr<ComputationalGeometry> a_computationalGeometry){
   CH_TIME("ito_solver::setComputationalGeometry");
   if(m_verbosity > 5){
     pout() << m_name + "::setComputationalGeometry" << endl;
@@ -578,7 +578,7 @@ void ito_solver::remove_covered_particles_if(ParticleContainer<ito_particle>& a_
     pout() << m_name + "::remove_covered_particles_if(particles)" << endl;
   }
 
-  const RefCountedPtr<BaseIF>& func = (m_phase == phase::gas) ? m_computationalGeometry->get_gas_if() : m_computationalGeometry->get_sol_if();
+  const RefCountedPtr<BaseIF>& func = (m_phase == phase::gas) ? m_computationalGeometry->getGasImplicitFunction() : m_computationalGeometry->getSolidImplicitFunction();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
@@ -609,7 +609,7 @@ void ito_solver::transfer_covered_particles_if(ParticleContainer<ito_particle>& 
     pout() << m_name + "::transfer_covered_particles_if(container, container, tolerance)" << endl;
   }
 
-  const RefCountedPtr<BaseIF>& func = (m_phase == phase::gas) ? m_computationalGeometry->get_gas_if() : m_computationalGeometry->get_sol_if();
+  const RefCountedPtr<BaseIF>& func = (m_phase == phase::gas) ? m_computationalGeometry->getGasImplicitFunction() : m_computationalGeometry->getSolidImplicitFunction();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];

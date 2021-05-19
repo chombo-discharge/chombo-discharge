@@ -6,7 +6,7 @@
 */
 
 #include "mfis.H"
-#include "computational_geometry.H"
+#include <CD_ComputationalGeometry.H>
 #include "memrep.H"
 
 #include <AllRegularService.H>
@@ -32,7 +32,7 @@ void mfis::define(const Box                     & a_domain,
 		  bool                            a_fix_phase){
 
   // Define the gas geoserver
-  if(computational_geometry::s_use_new_gshop){
+  if(ComputationalGeometry::s_use_new_gshop){
     m_ebis[phase::gas]->setDistributedData();
   }
   m_ebis[phase::gas]->define(a_domain,   a_origin, a_dx, *a_geoservers[phase::gas],   a_nCellMax, a_max_coar);
@@ -46,7 +46,7 @@ void mfis::define(const Box                     & a_domain,
     m_ebis[phase::solid] = RefCountedPtr<EBIndexSpace> (NULL);
   }
   else{
-    if(computational_geometry::s_use_new_gshop){
+    if(ComputationalGeometry::s_use_new_gshop){
       m_ebis[phase::solid]->setDistributedData();
     }
     m_ebis[phase::solid]->define(a_domain, a_origin, a_dx, *a_geoservers[phase::solid], a_nCellMax, a_max_coar);

@@ -31,7 +31,7 @@ namespace physics {
       ito_plasma_streamer_tagger(const RefCountedPtr<ito_plasma_physics>&     a_physics,
 				 const RefCountedPtr<ito_plasma_stepper>&     a_timeStepper,
 				 const RefCountedPtr<AmrMesh>&               a_amr,
-				 const RefCountedPtr<computational_geometry>& a_computationalGeometry);
+				 const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
 
       /*!
 	@brief Destructor

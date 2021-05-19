@@ -238,14 +238,14 @@ void SigmaSolver::setAmr(const RefCountedPtr<AmrMesh>& a_amr){
   m_amr = a_amr;
 }
 
-void SigmaSolver::setComputationalGeometry(const RefCountedPtr<computational_geometry>& a_computationalGeometry){
+void SigmaSolver::setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry){
   CH_TIME("SigmaSolver::setComputationalGeometry");
   if(m_verbosity > 5){
     pout() << "SigmaSolver::setComputationalGeometry" << endl;
   }
 
   m_computationalGeometry = a_computationalGeometry;
-  m_multifluidIndexSpace     = m_computationalGeometry->get_mfis();
+  m_multifluidIndexSpace     = m_computationalGeometry->getMfIndexSpace();
 }
 
 void SigmaSolver::setPhase(phase::which_phase a_phase){

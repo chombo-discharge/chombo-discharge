@@ -34,7 +34,7 @@ namespace physics {
       ito_plasma_tagger(const RefCountedPtr<ito_plasma_physics>&     a_physics,
 			const RefCountedPtr<ito_plasma_stepper>&     a_timeStepper,
 			const RefCountedPtr<AmrMesh>&               a_amr,
-			const RefCountedPtr<computational_geometry>& a_computationalGeometry);
+			const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
 
       /*!
 	@brief Destructor
@@ -51,7 +51,7 @@ namespace physics {
       virtual void define(const RefCountedPtr<ito_plasma_physics>&     a_physics,
 			  const RefCountedPtr<ito_plasma_stepper>&     a_timeStepper,
 			  const RefCountedPtr<AmrMesh>&               a_amr,
-			  const RefCountedPtr<computational_geometry>& a_computationalGeometry);
+			  const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
 
 
       /*!
@@ -129,7 +129,7 @@ namespace physics {
       /*!
 	@brief Computational geometry. Needed for what exactly?
       */
-      RefCountedPtr<computational_geometry> m_computationalGeometry;
+      RefCountedPtr<ComputationalGeometry> m_computationalGeometry;
 
       /*!
 	@brief Number of tracer fields

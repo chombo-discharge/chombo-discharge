@@ -40,7 +40,7 @@ coaxial_cable::coaxial_cable(){
   // Reset
   m_electrodes.resize(0);
   m_dielectrics.resize(0);
-  this->set_eps0(1.0);
+  this->setGasPermittivity(1.0);
 
   if(outer){ // Add outer electrode
     Real rad;

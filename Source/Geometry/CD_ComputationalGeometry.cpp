@@ -1,10 +1,15 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file computational_geometry.cpp
-  @brief Implementation of computational_geometry.H
+  @file   CD_ComputationalGeometry.cpp
+  @brief  Implementation of CD_ComputationalGeometry.H
   @author Robert Marskar
-  @date Nov. 2017
 */
 
+// Chombo includes
 #include <MFIndexSpace.H>
 #include <IntersectionIF.H>
 #include <UnionIF.H>
@@ -14,22 +19,22 @@
 #include <GeometryShop.H>
 #include <ComplementIF.H>
 
-#include "computational_geometry.H"
+// Our includes
+#include <CD_ComputationalGeometry.H>
 #include <CD_ScanShop.H>
-#include "memrep.H"
-
-#include "CD_NamespaceHeader.H"
+#include <memrep.H>
+#include <CD_NamespaceHeader.H>
 
 #if CH_USE_DOUBLE
-Real computational_geometry::s_thresh = 1.E-15;
+Real ComputationalGeometry::s_thresh = 1.E-15;
 #elif CH_USE_FLOAT
-Real computational_geometry::s_thresh = 1.E-6;
+Real ComputationalGeometry::s_thresh = 1.E-6;
 #endif
 
-bool          computational_geometry::s_use_new_gshop = false;
-ProblemDomain computational_geometry::s_ScanDomain = ProblemDomain(); // Needs to be set
+bool          ComputationalGeometry::s_use_new_gshop = false;
+ProblemDomain ComputationalGeometry::s_ScanDomain = ProblemDomain(); // Needs to be set
 
-computational_geometry::computational_geometry(){
+ComputationalGeometry::ComputationalGeometry(){
   m_eps0 = 1.0;
   m_electrodes.resize(0);
   m_dielectrics.resize(0);
@@ -37,61 +42,61 @@ computational_geometry::computational_geometry(){
   m_multifluidIndexSpace = RefCountedPtr<mfis> (new mfis());
 }
 
-computational_geometry::~computational_geometry(){}
+ComputationalGeometry::~ComputationalGeometry(){}
 
-const Vector<dielectric>& computational_geometry::get_dielectrics() const  {
+const Vector<dielectric>& ComputationalGeometry::getDielectrics() const  {
   return m_dielectrics;
 }
 
-const Vector<electrode>& computational_geometry::get_electrodes() const  {
+const Vector<electrode>& ComputationalGeometry::getElectrodes() const  {
   return m_electrodes;
 }
 
-const RefCountedPtr<BaseIF>& computational_geometry::get_gas_if() const{
+const RefCountedPtr<BaseIF>& ComputationalGeometry::getGasImplicitFunction() const{
   return m_gas_if;
 }
 
-const RefCountedPtr<BaseIF>& computational_geometry::get_sol_if() const{
+const RefCountedPtr<BaseIF>& ComputationalGeometry::getSolidImplicitFunction() const{
   return m_sol_if;
 }
 
-const Real& computational_geometry::get_eps0() const {
+const Real& ComputationalGeometry::getGasPermittivity() const {
   return m_eps0;
 }
 
-const RefCountedPtr<mfis>& computational_geometry::get_mfis() const {
+const RefCountedPtr<mfis>& ComputationalGeometry::getMfIndexSpace() const {
   return m_multifluidIndexSpace;
 }
 
-void computational_geometry::set_dielectrics(Vector<dielectric>& a_dielectrics){
+void ComputationalGeometry::setDielectrics(Vector<dielectric>& a_dielectrics){
   m_dielectrics = a_dielectrics;
 }
 
-void computational_geometry::set_electrodes(Vector<electrode>& a_electrodes){
+void ComputationalGeometry::setElectrodes(Vector<electrode>& a_electrodes){
   m_electrodes = a_electrodes;
 }
 
-void computational_geometry::set_eps0(const Real a_eps0){
+void ComputationalGeometry::setGasPermittivity(const Real a_eps0){
   m_eps0 = a_eps0;
 }
 
-void computational_geometry::build_geometries(const ProblemDomain   a_finestDomain,
-					      const RealVect        a_origin,
-					      const Real            a_finestDx,
-					      const int             a_nCellMax,
-					      const int             a_maxCoarsen){
+void ComputationalGeometry::buildGeometries(const ProblemDomain   a_finestDomain,
+					    const RealVect        a_origin,
+					    const Real            a_finestDx,
+					    const int             a_nCellMax,
+					    const int             a_maxCoarsen){
 
   // Build geoservers
   Vector<GeometryService*> geoservers(2, NULL);
-  this->build_gas_geoserv(geoservers[phase::gas],     a_finestDomain, a_origin, a_finestDx);
-  this->build_solid_geoserv(geoservers[phase::solid], a_finestDomain, a_origin, a_finestDx);
+  this->buildGasGeoServ(geoservers[phase::gas],     a_finestDomain, a_origin, a_finestDx);
+  this->buildSolidGeoServ(geoservers[phase::solid], a_finestDomain, a_origin, a_finestDx);
 
   m_multifluidIndexSpace->define(a_finestDomain.domainBox(), // Define MF
-		 a_origin,
-		 a_finestDx,
-		 geoservers,
-		 a_nCellMax,
-		 a_maxCoarsen);
+				 a_origin,
+				 a_finestDx,
+				 geoservers,
+				 a_nCellMax,
+				 a_maxCoarsen);
 
   for (int i = 0; i < 2; i++){
     if(geoservers[i] != NULL){
@@ -100,8 +105,8 @@ void computational_geometry::build_geometries(const ProblemDomain   a_finestDoma
   }
 }
 
-void computational_geometry::build_geo_from_files(const std::string&   a_gas_file,
-						  const std::string&   a_sol_file){
+void ComputationalGeometry::buildGeometriesFromFiles(const std::string&   a_gas_file,
+						     const std::string&   a_sol_file){
 
   RefCountedPtr<EBIndexSpace>& ebis_gas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
   RefCountedPtr<EBIndexSpace>& ebis_sol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
@@ -121,10 +126,10 @@ void computational_geometry::build_geo_from_files(const std::string&   a_gas_fil
   }
 }
 
-void computational_geometry::build_gas_geoserv(GeometryService*&   a_geoserver,
-					       const ProblemDomain a_finestDomain,
-					       const RealVect      a_origin,
-					       const Real          a_dx){
+void ComputationalGeometry::buildGasGeoServ(GeometryService*&   a_geoserver,
+					    const ProblemDomain a_finestDomain,
+					    const RealVect      a_origin,
+					    const Real          a_dx){
   
   // The gas ebis is the intersection of electrodes and dielectrics
   Vector<BaseIF*> parts;
@@ -156,10 +161,10 @@ void computational_geometry::build_gas_geoserv(GeometryService*&   a_geoserver,
   //  }
 }
 
-void computational_geometry::build_solid_geoserv(GeometryService*&   a_geoserver,
-						 const ProblemDomain a_finestDomain,
-						 const RealVect      a_origin,
-						 const Real          a_dx){
+void ComputationalGeometry::buildSolidGeoServ(GeometryService*&   a_geoserver,
+					      const ProblemDomain a_finestDomain,
+					      const RealVect      a_origin,
+					      const Real          a_dx){
 
   // The gas ebis is the intersection of dielectrics
   Vector<BaseIF*> parts_dielectrics, parts_electrodes;
@@ -200,4 +205,5 @@ void computational_geometry::build_solid_geoserv(GeometryService*&   a_geoserver
     }
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

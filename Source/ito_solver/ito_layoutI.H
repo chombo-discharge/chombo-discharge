@@ -136,7 +136,7 @@ void ito_layout<T>::setAmr(const RefCountedPtr<AmrMesh>& a_amr){
 }
 
 template <class T>
-void ito_layout<T>::setComputationalGeometry(const RefCountedPtr<computational_geometry>& a_computationalGeometry){
+void ito_layout<T>::setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry){
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
     iter()->setComputationalGeometry(a_computationalGeometry);
   }

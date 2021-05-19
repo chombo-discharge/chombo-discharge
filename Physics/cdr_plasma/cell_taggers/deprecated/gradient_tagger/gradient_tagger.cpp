@@ -20,7 +20,7 @@ gradient_tagger::~gradient_tagger(){
 void gradient_tagger::define(const RefCountedPtr<plasma_kinetics>&        a_plaskin,
 			     const RefCountedPtr<TimeStepper>&           a_timeStepper,
 			     const RefCountedPtr<AmrMesh>&               a_amr,
-			     const RefCountedPtr<computational_geometry>& a_computationalGeometry,
+			     const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry,
 			     const RefCountedPtr<physical_domain>&        a_physdom){
   CellTagger::define(a_plaskin, a_timeStepper, a_amr, a_computationalGeometry, a_physdom);
 

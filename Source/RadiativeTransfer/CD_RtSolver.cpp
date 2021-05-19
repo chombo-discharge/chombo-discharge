@@ -114,7 +114,7 @@ void RtSolver::sanityCheck(){
   CH_assert(!m_ebis.isNull());
 }
 
-void RtSolver::setComputationalGeometry(const RefCountedPtr<computational_geometry> a_computationalGeometry){
+void RtSolver::setComputationalGeometry(const RefCountedPtr<ComputationalGeometry> a_computationalGeometry){
   CH_TIME("RtSolver::setComputationalGeometry");
   if(m_verbosity > 5){
     pout() << m_name + "::setComputationalGeometry" << endl;
@@ -122,7 +122,7 @@ void RtSolver::setComputationalGeometry(const RefCountedPtr<computational_geomet
   
   m_computationalGeometry = a_computationalGeometry;
 
-  const RefCountedPtr<mfis> mfis = m_computationalGeometry->get_mfis();
+  const RefCountedPtr<mfis> mfis = m_computationalGeometry->getMfIndexSpace();
   
   this->setEbIndexSpace(mfis->getEBIndexSpace(m_phase));
 }

@@ -1264,10 +1264,10 @@ void McPhoto::advancePhotonsStationary(ParticleContainer<Photon>& a_bulkPhotons,
   // This is the implicit function used for intersection tests
   RefCountedPtr<BaseIF> impfunc;
   if(m_phase == phase::gas){
-    impfunc = m_computationalGeometry->get_gas_if();
+    impfunc = m_computationalGeometry->getGasImplicitFunction();
   }
   else{
-    impfunc = m_computationalGeometry->get_sol_if();
+    impfunc = m_computationalGeometry->getSolidImplicitFunction();
   }
 
 #if MC_PHOTO_DEBUG // Debug
@@ -1410,10 +1410,10 @@ void McPhoto::advancePhotonsTransient(ParticleContainer<Photon>& a_bulkPhotons,
   // This is the implicit function used for intersection tests
   RefCountedPtr<BaseIF> impfunc;
   if(m_phase == phase::gas){
-    impfunc = m_computationalGeometry->get_gas_if();
+    impfunc = m_computationalGeometry->getGasImplicitFunction();
   }
   else{
-    impfunc = m_computationalGeometry->get_sol_if();
+    impfunc = m_computationalGeometry->getSolidImplicitFunction();
   }
 
 #if MC_PHOTO_DEBUG // Debug

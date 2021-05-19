@@ -46,7 +46,7 @@ void MFLevelGrid::define(const RefCountedPtr<mfis>& a_mfis,
   m_eblg = a_eblg;
 }
 
-const RefCountedPtr<mfis>& MFLevelGrid::get_mfis() const {
+const RefCountedPtr<mfis>& MFLevelGrid::getMfIndexSpace() const {
   return m_multifluidIndexSpace;
 }
 

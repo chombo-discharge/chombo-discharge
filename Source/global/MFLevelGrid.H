@@ -57,7 +57,7 @@ public:
   /*!
     @brief Get the index space
   */
-  virtual const RefCountedPtr<mfis>& get_mfis() const;
+  virtual const RefCountedPtr<mfis>& getMfIndexSpace() const;
 
   /*!
     @brief Get the problem domain

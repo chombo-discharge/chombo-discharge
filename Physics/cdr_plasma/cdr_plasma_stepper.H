@@ -12,7 +12,7 @@
 
 #include <RealVect.H>
 
-#include "computational_geometry.H"
+#include <CD_ComputationalGeometry.H>
 #include "cdr_plasma_physics.H"
 #include "CD_AmrMesh.H"
 #include "mfis.H"

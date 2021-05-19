@@ -8,14 +8,14 @@
 #ifndef _REGULAR_GEOMETRY_GEOM_
 #define _REGULAR_GEOMETRY_GEOM_
 
-#include "computational_geometry.H"
+#include <CD_ComputationalGeometry.H>
 
 #include "CD_NamespaceHeader.H"
   
 /*!
   @brief This class implements an empty geometry
 */
-class regular_geometry : public computational_geometry {
+class regular_geometry : public ComputationalGeometry {
 public:
 
   regular_geometry();

@@ -19,7 +19,7 @@
 #include "CD_NamespaceHeader.H"
 
 rough_sphere::rough_sphere(){
-  this->set_eps0(1.0);
+  this->setGasPermittivity(1.0);
 
   ParmParse pp("rough_sphere");
 

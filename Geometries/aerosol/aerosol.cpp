@@ -40,7 +40,7 @@ aerosol::aerosol(){
   pp.getarr("noise_frequency",   v, 0, SpaceDim);  noise_frequency = RealVect(D_DECL(v[0], v[1], v[2]));
 
 
-  set_eps0(eps0);
+  setGasPermittivity(eps0);
   m_dielectrics.resize(0);
   m_electrodes.resize(0);
 

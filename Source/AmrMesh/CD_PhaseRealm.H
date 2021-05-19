@@ -27,7 +27,7 @@
 #include <ProblemDomain.H>
 
 // Our includes
-#include <computational_geometry.H>
+#include <CD_ComputationalGeometry.H>
 #include <mfis.H>
 #include <CD_IrregAmrStencil.H>
 #include <CD_LoadBalancing.H>
