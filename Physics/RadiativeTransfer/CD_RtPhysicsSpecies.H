@@ -1,5 +1,5 @@
 /*!
-  @file   rte_physics_species.H
+  @file   RtPhysicsSpecies.H
   @brief  Simple species for RTE physics
   @author Robert Marskar
   @date   March 2020
@@ -14,10 +14,10 @@
 namespace physics {
   namespace rte {
 
-    class rte_physics_species : public RtSpecies {
+    class RtPhysicsSpecies : public RtSpecies {
     public:
-      rte_physics_species();
-      ~rte_physics_species();
+      RtPhysicsSpecies();
+      ~RtPhysicsSpecies();
     };
   }
 }

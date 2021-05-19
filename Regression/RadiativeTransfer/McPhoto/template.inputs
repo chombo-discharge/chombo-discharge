@@ -138,7 +138,7 @@ rod_sphere.dielectric_radius         = 1.0              # Dielectric radius
 # ====================================================================================================
 # RTE_STEPPER CLASS OPTIONS
 # ====================================================================================================
-rte_stepper.verbosity  = -1              # Verbosity
-rte_stepper.kappa      = 1.0             # Inverse absorption coefficient
+RtPhysicsStepper.verbosity  = -1              # Verbosity
+RtPhysicsStepper.kappa      = 1.0             # Inverse absorption coefficient
 
 

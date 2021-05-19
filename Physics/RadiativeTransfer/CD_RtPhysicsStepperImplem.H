@@ -1,12 +1,12 @@
 /*!
-  @file   rte_stepperI.H
-  @brief  Implementation of rte_stepper.H
+  @file   RtPhysicsStepperI.H
+  @brief  Implementation of RtPhysicsStepper.H
   @author Robert Marskar
   @data   May 2020
 */
 
-#include "rte_stepper.H"
-#include "rte_physics_species.H"
+#include <CD_RtPhysicsStepper.H>
+#include <CD_RtPhysicsSpecies.H>
 
 #include <ParmParse.H>
 #include <PolyGeom.H>
@@ -15,10 +15,10 @@
 using namespace physics::rte;
 
 template <typename T>
-rte_stepper<T>::rte_stepper(){
+RtPhysicsStepper<T>::RtPhysicsStepper(){
 
   // Get shit for setting the source term
-  ParmParse pp("rte_stepper");
+  ParmParse pp("RtPhysicsStepper");
   Vector<Real> v;
 
   pp.get   ("verbosity",      m_verbosity);
@@ -29,11 +29,11 @@ rte_stepper<T>::rte_stepper(){
 }
     
 template <typename T>
-rte_stepper<T>::~rte_stepper(){}
+RtPhysicsStepper<T>::~RtPhysicsStepper(){}
 
 template <typename T>
-void rte_stepper<T>::setup_solvers(){
-  m_species = RefCountedPtr<RtSpecies> (new rte_physics_species());
+void RtPhysicsStepper<T>::setup_solvers(){
+  m_species = RefCountedPtr<RtSpecies> (new RtPhysicsSpecies());
 
   // Solver setup
   m_solver = RefCountedPtr<RtSolver> (new T());
@@ -47,8 +47,8 @@ void rte_stepper<T>::setup_solvers(){
 }
 
 template <typename T>
-void rte_stepper<T>::parseRuntimeOptions() {
-  ParmParse pp("rte_stepper");
+void RtPhysicsStepper<T>::parseRuntimeOptions() {
+  ParmParse pp("RtPhysicsStepper");
 
   pp.get   ("verbosity", m_verbosity);
       
@@ -56,93 +56,93 @@ void rte_stepper<T>::parseRuntimeOptions() {
 }
 
 template <typename T>
-void rte_stepper<T>::allocate() {
+void RtPhysicsStepper<T>::allocate() {
   m_solver->allocateInternals();
 }
 
 template <typename T>
-void rte_stepper<T>::initialData(){
+void RtPhysicsStepper<T>::initialData(){
   m_solver->initialData();
 
   this->set_gaussian_source();
 }
 
 template <typename T>
-void rte_stepper<T>::postInitialize(){
+void RtPhysicsStepper<T>::postInitialize(){
 }
 
 template <typename T>
-void rte_stepper<T>::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const {
+void RtPhysicsStepper<T>::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const {
   m_solver->writeCheckpointLevel(a_handle, a_lvl);
 }
 
 template <typename T>
-void rte_stepper<T>::readCheckpointData(HDF5Handle& a_handle, const int a_lvl){
+void RtPhysicsStepper<T>::readCheckpointData(HDF5Handle& a_handle, const int a_lvl){
   m_solver->readCheckpointLevel(a_handle, a_lvl);
 }
 
 template <typename T>
-void rte_stepper<T>::postCheckpointSetup() {
+void RtPhysicsStepper<T>::postCheckpointSetup() {
   this->set_gaussian_source();
 }
 
 template <typename T>
-int rte_stepper<T>::getNumberOfPlotVariables() const {
+int RtPhysicsStepper<T>::getNumberOfPlotVariables() const {
   return m_solver->getNumberOfPlotVariables();
 }
 
 template <typename T>
-void rte_stepper<T>::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const {
+void RtPhysicsStepper<T>::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const {
   a_plotVariableNames.append(m_solver->getPlotVariableNames());
   m_solver->writePlotData(a_output, a_icomp);
 }
 
 template <typename T>
-void rte_stepper<T>::computeDt(Real& a_dt, TimeCode& a_timeCode) {
+void RtPhysicsStepper<T>::computeDt(Real& a_dt, TimeCode& a_timeCode) {
   a_dt = 1.E-10;
 }
 
 template <typename T>
-Real rte_stepper<T>::advance(const Real a_dt) {
+Real RtPhysicsStepper<T>::advance(const Real a_dt) {
   m_solver->advance(a_dt);
 
   return a_dt;
 }
 
 template <typename T>
-void rte_stepper<T>::synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) {
+void RtPhysicsStepper<T>::synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) {
   m_timeStep = a_step;
   m_time = a_time;
   m_dt   = a_dt;
 }
 
 template <typename T>
-void rte_stepper<T>::printStepReport() {
+void RtPhysicsStepper<T>::printStepReport() {
 }
 
 // Regrid routines
 template <typename T>
-bool rte_stepper<T>::needToRegrid() {
+bool RtPhysicsStepper<T>::needToRegrid() {
   return false;
 }
 
 template <typename T>
-void rte_stepper<T>::registerRealms() {
+void RtPhysicsStepper<T>::registerRealms() {
   m_amr->registerRealm(m_realm);
 }
 
 template <typename T>
-void rte_stepper<T>::registerOperators() {
+void RtPhysicsStepper<T>::registerOperators() {
   m_solver->registerOperators();
 }
 
 template <typename T>
-void rte_stepper<T>::preRegrid(const int a_base, const int a_oldFinestLevel) {
+void RtPhysicsStepper<T>::preRegrid(const int a_base, const int a_oldFinestLevel) {
   m_solver->preRegrid(a_base, a_oldFinestLevel);
 }
 
 template <typename T>
-void rte_stepper<T>::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) {
+void RtPhysicsStepper<T>::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) {
   m_solver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
 
   // Do the rest of the setup
@@ -150,11 +150,11 @@ void rte_stepper<T>::regrid(const int a_lmin, const int a_oldFinestLevel, const 
 }
 
 template <typename T>
-void rte_stepper<T>::postRegrid(){
+void RtPhysicsStepper<T>::postRegrid(){
 }
 
 template <typename T>
-void rte_stepper<T>::set_gaussian_source(){
+void RtPhysicsStepper<T>::set_gaussian_source(){
 
   EBAMRCellData& source = m_solver->getSource();
   const RealVect prob_lo = m_amr->getProbLo();

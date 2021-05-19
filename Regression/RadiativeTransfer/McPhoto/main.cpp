@@ -1,7 +1,7 @@
 #include "CD_Driver.H"
 #include <CD_McPhoto.H>
 #include "rod_dielectric.H"
-#include "rte_stepper.H"
+#include <CD_RtPhysicsStepper.H>
 #include "ParmParse.H"
 
 using namespace ChomboDischarge;
@@ -24,8 +24,8 @@ int main(int argc, char* argv[]){
   RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (NULL);
 
   // Set up basic Poisson, potential = 1 
-  auto timestepper = RefCountedPtr<rte_stepper<McPhoto> >
-    (new rte_stepper<McPhoto>());
+  auto timestepper = RefCountedPtr<RtPhysicsStepper<McPhoto> >
+    (new RtPhysicsStepper<McPhoto>());
 
   // Set up the Driver and run it
   RefCountedPtr<Driver> engine = RefCountedPtr<Driver> (new Driver(compgeom, timestepper, amr, tagger, geocoarsen));

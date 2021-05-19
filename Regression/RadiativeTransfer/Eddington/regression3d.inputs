@@ -119,9 +119,9 @@ rod_dielectric.sphere.radius             = 0.15          # Radius
 # ====================================================================================================
 # RTE_STEPPER CLASS OPTIONS
 # ====================================================================================================
-rte_stepper.verbosity      = -1      # Verbosity
-rte_stepper.realm          = primal  # Realm 
-rte_stepper.kappa          = 0.1     # Inverse absorption coefficient
-rte_stepper.blob_amplitude = 1E2     # Blob amplitude
-rte_stepper.blob_radius    = 0.05    # Blob radius
-rte_stepper.blob_center    = 0.5 0.5 0.5 # Blob center
+RtPhysicsStepper.verbosity      = -1      # Verbosity
+RtPhysicsStepper.realm          = primal  # Realm 
+RtPhysicsStepper.kappa          = 0.1     # Inverse absorption coefficient
+RtPhysicsStepper.blob_amplitude = 1E2     # Blob amplitude
+RtPhysicsStepper.blob_radius    = 0.05    # Blob radius
+RtPhysicsStepper.blob_center    = 0.5 0.5 0.5 # Blob center

@@ -28,7 +28,7 @@ src_dirs = $(DISCHARGE_HOME)/Source \
 	$(DISCHARGE_HOME)/Source/global \
 	$(DISCHARGE_HOME)/Source/FieldSolver \
 	$(DISCHARGE_HOME)/Geometries/rod_dielectric\
-	$(DISCHARGE_HOME)/Physics/rte \
+	$(DISCHARGE_HOME)/Physics/RadiativeTransfer \
 
 
 include $(CHOMBO_HOME)/mk/Make.example

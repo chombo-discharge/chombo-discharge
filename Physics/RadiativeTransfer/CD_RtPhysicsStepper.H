@@ -1,5 +1,5 @@
 /*!
-  @file   rte_stepper.H
+  @file   RtPhysicsStepper.H
   @brief  TimeStepper class for only solving the Rte equation (with surface charge)
   @author Robert Marskar
   @date   May 2020
@@ -19,10 +19,10 @@ namespace physics {
       @brief Class that just solves the rte equation using the RtSolver advance method
     */
     template <class T>
-    class rte_stepper : public TimeStepper {
+    class RtPhysicsStepper : public TimeStepper {
     public:
-      rte_stepper();
-      ~rte_stepper();
+      RtPhysicsStepper();
+      ~RtPhysicsStepper();
 
       // Stuff below here is derived from TimeStepper.
       // ----------------------------------------------
@@ -76,6 +76,6 @@ namespace physics {
 }
 #include "CD_NamespaceFooter.H"
 
-#include "rte_stepperI.H"
+#include <CD_RtPhysicsStepperImplem.H>
 
 #endif

@@ -16,7 +16,7 @@ def write_template(args):
     mainf.write('#include "CD_Driver.H"\n')
     mainf.write('#include "' + args.RtSolver + '.H"\n')
     mainf.write('#include "' + args.geometry + '.H"\n')
-    mainf.write('#include "rte_stepper.H"\n')
+    mainf.write('#include <CD_RtPhysicsStepper.H>\n')
     mainf.write('#include "ParmParse.H"\n')
     mainf.write("\n")
 
@@ -45,8 +45,8 @@ def write_template(args):
 
     mainf.write("\n")
     mainf.write("  // Set up basic Poisson, potential = 1 \n")
-    mainf.write("  auto timestepper = RefCountedPtr<rte_stepper<" + args.RtSolver + "> >\n")
-    mainf.write("     (new rte_stepper<" + args.RtSolver + ">());\n")
+    mainf.write("  auto timestepper = RefCountedPtr<RtPhysicsStepper<" + args.RtSolver + "> >\n")
+    mainf.write("     (new RtPhysicsStepper<" + args.RtSolver + ">());\n")
     mainf.write("\n")
 
 

@@ -13,7 +13,7 @@ def write_template(args):
                      args.discharge_home + "/Source/RadiativeTransfer/" + args.RtSolver + ".options",\
                      args.discharge_home + "/Source/geometry/geo_coarsener.options", \
                      args.discharge_home + "/Geometries/" + args.geometry + "/" + args.geometry + ".options", \
-                     args.discharge_home + "/Physics/rte/rte_stepper.options"]
+                     args.discharge_home + "/Physics/RadiativeTransfer/RtPhysicsStepper.options"]
 
     for opt in options_files:
         if os.path.exists(opt):

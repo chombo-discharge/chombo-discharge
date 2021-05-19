@@ -1,28 +1,28 @@
 /*!
-  @file   rte_physics_species.cpp
-  @brief  Implementation of rte_physics_species.H
+  @file   RtPhysicsSpecies.cpp
+  @brief  Implementation of RtPhysicsSpecies.H
   @author Robert Marskar
   @date   May 2020
 */
 
-#include "rte_physics_species.H"
+#include <CD_RtPhysicsSpecies.H>
 
 #include <ParmParse.H>
 
 #include "CD_NamespaceHeader.H"
 using namespace physics::rte;
 
-rte_physics_species::rte_physics_species(){
+RtPhysicsSpecies::RtPhysicsSpecies(){
 
   // This stuff sets the name and a constnat kappa taken from the input script
-  m_name = "rte_physics_species";
+  m_name = "RtPhysicsSpecies";
   m_constant = true;
 
-  ParmParse pp("rte_stepper");
+  ParmParse pp("RtPhysicsStepper");
   pp.get("kappa", m_kappa);
 }
 
-rte_physics_species::~rte_physics_species(){
+RtPhysicsSpecies::~RtPhysicsSpecies(){
 
 }
 #include "CD_NamespaceFooter.H"
