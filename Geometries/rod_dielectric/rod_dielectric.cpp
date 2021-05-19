@@ -7,7 +7,7 @@
 
 #include "rod_dielectric.H"
 #include "rod_if.H"
-#include "perlin_slab_if.H"
+#include <CD_PerlinSlabSdf.H>
 #include <CD_SphereSdf.H>
 #include "wedge_if.H"
 #include <CD_RoundedBoxIF.H>
@@ -149,6 +149,6 @@ RefCountedPtr<BaseIF> rod_dielectric::get_perlin_box(){
   pp.getarr("dimensions", v, 0, SpaceDim); xyz  = RealVect(D_DECL(v[0], v[1], v[2]));
   pp.getarr("noise_freq", v, 0, SpaceDim); freq = RealVect(D_DECL(v[0], v[1], v[2]));
 
-  return RefCountedPtr<BaseIF> (new perlin_slab_if(p,n, xyz, freq, octaves, amp, persist, curv, reseed, false));
+  return RefCountedPtr<BaseIF> (new PerlinSlabSdf(p,n, xyz, freq, octaves, amp, persist, curv, reseed, false));
 }
 #include "CD_NamespaceFooter.H"

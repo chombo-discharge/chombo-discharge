@@ -1,21 +1,27 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   perlin_slab.H
+  @file   CD_PerlinSlabSdf.H
   @brief  Declaration of a noisy slab, i.e. a box with surface roughness
   @author Robert Marskar
-  @date   March 2021
 */
 
-#ifndef _PERLIN_SLAB_IF_
-#define _PERLIN_SLAB_IF_
+#ifndef CD_PerlinSlabSdf_H
+#define CD_PerlinSlabSdf_H
 
+// Chombo includes
 #include <BaseIF.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Implicit function class describing a hexagonal rod
 */
-class perlin_slab_if: public BaseIF {
+class PerlinSlabSdf: public BaseIF {
 public:
 
   /*!
@@ -26,7 +32,7 @@ public:
     @param[in] a_curv        Corner curvatures
     @param[in] a_fluidInside Fluid on inside or not
   */
-  perlin_slab_if(const RealVect a_ccPoint,
+  PerlinSlabSdf(const RealVect a_ccPoint,
 		 const RealVect a_normal,
 		 const RealVect a_xyz,
 		 const RealVect a_noiseFreq,
@@ -37,10 +43,10 @@ public:
 		 const bool     a_reseed,
 		 const bool     a_fluidInside);
 
-  perlin_slab_if(const perlin_slab_if& a_inputIF);
-  perlin_slab_if() = delete;
+  PerlinSlabSdf(const PerlinSlabSdf& a_inputIF);
+  PerlinSlabSdf() = delete;
 
-  virtual ~perlin_slab_if();
+  virtual ~PerlinSlabSdf();
   virtual Real value(const RealVect& a_pos) const override;
   virtual BaseIF* newImplicitFunction() const override;
 
@@ -50,5 +56,7 @@ protected:
   bool m_fluidInside;
 
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif

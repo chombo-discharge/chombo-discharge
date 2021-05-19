@@ -1,29 +1,34 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   perlin_slab.cpp
-  @brief  Implementation of perlin_slab_if.H
+  @file   CD_PerlinSlabSdf.cpp
+  @brief  Implementation of CD_PerlinSlabSdf.H
   @author Robert Marskar
-  @date   March 2021
 */
 
-#include "perlin_slab_if.H"
-#include <CD_PerlinPlaneSdf.H>
-
+// Chombo includes
 #include <SmoothUnion.H>
 #include <PlaneIF.H>
 #include <TransformIF.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_PerlinSlabSdf.H>
+#include <CD_PerlinPlaneSdf.H>
+#include <CD_NamespaceHeader.H>
   
-perlin_slab_if::perlin_slab_if(const RealVect a_ccPoint,
-			       const RealVect a_normal,
-			       const RealVect a_xyz,
-			       const RealVect a_noiseFreq,
-			       const int      a_octaves,
-			       const Real     a_noiseAmp,
-			       const Real     a_persistence,
-			       const Real     a_cornerCurv,
-			       const bool     a_reseed,
-			       const bool     a_fluidInside){
+PerlinSlabSdf::PerlinSlabSdf(const RealVect a_ccPoint,
+			     const RealVect a_normal,
+			     const RealVect a_xyz,
+			     const RealVect a_noiseFreq,
+			     const int      a_octaves,
+			     const Real     a_noiseAmp,
+			     const Real     a_persistence,
+			     const Real     a_cornerCurv,
+			     const bool     a_reseed,
+			     const bool     a_fluidInside){
   m_fluidInside = a_fluidInside;
 
   constexpr int up = CH_SPACEDIM-1;
@@ -65,16 +70,16 @@ perlin_slab_if::perlin_slab_if(const RealVect a_ccPoint,
   delete bif;
 }
 
-perlin_slab_if::perlin_slab_if(const perlin_slab_if& a_inputIF){
+PerlinSlabSdf::PerlinSlabSdf(const PerlinSlabSdf& a_inputIF){
   m_baseif      = a_inputIF.m_baseif;
   m_fluidInside = a_inputIF.m_fluidInside;
 }
 
-perlin_slab_if::~perlin_slab_if(){
+PerlinSlabSdf::~PerlinSlabSdf(){
 
 }
 
-Real perlin_slab_if::value(const RealVect& a_pos) const {
+Real PerlinSlabSdf::value(const RealVect& a_pos) const {
   Real retval = m_baseif->value(a_pos);
 
   if(m_fluidInside){
@@ -84,7 +89,8 @@ Real perlin_slab_if::value(const RealVect& a_pos) const {
   return retval;
 }
 
-BaseIF* perlin_slab_if::newImplicitFunction() const {
-  return (BaseIF*) new perlin_slab_if(*this);
+BaseIF* PerlinSlabSdf::newImplicitFunction() const {
+  return (BaseIF*) new PerlinSlabSdf(*this);
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
