@@ -1,5 +1,5 @@
 /*!
-  @file   geometry_stepper.H
+  @file   GeometryStepper.H
   @brief  Declaration of a TimeStepper class without any solver functionality, i.e. for geometries only. 
   @author Robert Marskar
   @date   March 2020
@@ -17,11 +17,11 @@ namespace physics {
     /*!
       @brief Abstract class for performing time stepping
     */
-    class geometry_stepper: public TimeStepper {
+    class GeometryStepper: public TimeStepper {
     public:
 
-      geometry_stepper();
-      ~geometry_stepper();
+      GeometryStepper();
+      ~GeometryStepper();
 
       // Setup routines
       virtual void setup_solvers() override;

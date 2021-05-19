@@ -1,6 +1,6 @@
 #include "CD_Driver.H"
 #include "aerosol.H"
-#include "geometry_stepper.H"
+#include <CD_GeometryStepper.H>
 #include "ParmParse.H"
 
 using namespace ChomboDischarge;
@@ -23,7 +23,7 @@ int main(int argc, char* argv[]){
   RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (NULL);
 
   // Set up basic geometry stepper = 1 
-  auto timestepper = RefCountedPtr<geometry_stepper> (new geometry_stepper());
+  auto timestepper = RefCountedPtr<GeometryStepper> (new GeometryStepper());
 
   // Set up the Driver and run it
   RefCountedPtr<Driver> engine = RefCountedPtr<Driver> (new Driver(compgeom, timestepper, amr, tagger, geocoarsen));

@@ -25,7 +25,7 @@ src_dirs = $(DISCHARGE_HOME)/Source \
 	$(DISCHARGE_HOME)/Source/Multifluid \
 	$(DISCHARGE_HOME)/Source/global \
 	$(DISCHARGE_HOME)/Source/Particle \
-	$(DISCHARGE_HOME)/Physics/geometry \
+	$(DISCHARGE_HOME)/Physics/Geometry \
 	$(DISCHARGE_HOME)/Geometries/rough_rod\
 
 

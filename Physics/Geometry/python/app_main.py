@@ -15,7 +15,7 @@ def write_template(args):
     mainf = open(main_filename, "w")
     mainf.write('#include "CD_Driver.H"\n')
     mainf.write('#include "' + args.geometry + '.H"\n')
-    mainf.write('#include "geometry_stepper.H"\n')
+    mainf.write('#include <CD_GeometryStepper.H>\n')
     mainf.write('#include "ParmParse.H"\n')
     mainf.write("\n")
 
@@ -44,7 +44,7 @@ def write_template(args):
 
     mainf.write("\n")
     mainf.write("  // Set up basic geometry stepper = 1 \n")
-    mainf.write("  auto timestepper = RefCountedPtr<geometry_stepper> (new geometry_stepper());\n")
+    mainf.write("  auto timestepper = RefCountedPtr<GeometryStepper> (new GeometryStepper());\n")
     mainf.write("\n")
     
     mainf.write("  // Set up the Driver and run it\n")
