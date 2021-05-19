@@ -1,14 +1,19 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   dcel_algorithms.H
+  @file   CD_DcelAlgorithms.H
   @brief  Summary of some enum classes for navigating dcel functionality
   @author Robert Marskar
-  @date   Apr. 2018
 */
 
-#ifndef _DCEL_ALGORITHMS_H_
-#define _DCEL_ALGORITHMS_H_
+#ifndef CD_DcelAlgorithms_H
+#define CD_DcelAlgorithms_H
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_NamespaceHeader.H>
 
 namespace dcel {
 
@@ -29,6 +34,7 @@ namespace dcel {
     KdTree
   };
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

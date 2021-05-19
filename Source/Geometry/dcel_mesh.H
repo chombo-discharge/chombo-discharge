@@ -8,7 +8,7 @@
 #ifndef _DCEL_MESH_
 #define _DCEL_MESH_
 
-#include "dcel_algorithms.H"
+#include <CD_DcelAlgorithms.H>
 
 #include <vector>
 #include <memory>

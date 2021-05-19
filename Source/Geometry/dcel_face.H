@@ -10,7 +10,7 @@
 
 #include "Vec.H"
 
-#include "dcel_algorithms.H"
+#include <CD_DcelAlgorithms.H>
 #include "dcel_vertex.H"
 #include "dcel_edge.H"
 #include "dcel_poly.H"
