@@ -8,13 +8,13 @@
 #ifndef _RTE_PHYSICS_SPECIES_
 #define _RTE_PHYSICS_SPECIES_
 
-#include "rte_species.H"
+#include <CD_RtSpecies.H>
 
 #include "CD_NamespaceHeader.H"
 namespace physics {
   namespace rte {
 
-    class rte_physics_species : public rte_species {
+    class rte_physics_species : public RtSpecies {
     public:
       rte_physics_species();
       ~rte_physics_species();

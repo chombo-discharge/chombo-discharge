@@ -33,7 +33,7 @@ rte_stepper<T>::~rte_stepper(){}
 
 template <typename T>
 void rte_stepper<T>::setup_solvers(){
-  m_species = RefCountedPtr<rte_species> (new rte_physics_species());
+  m_species = RefCountedPtr<RtSpecies> (new rte_physics_species());
 
   // Solver setup
   m_solver = RefCountedPtr<RtSolver> (new T());

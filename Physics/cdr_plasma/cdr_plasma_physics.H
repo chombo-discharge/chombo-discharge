@@ -13,7 +13,7 @@
 #include <LoHiSide.H>
 
 #include <CD_CdrSpecies.H>
-#include "rte_species.H"
+#include <CD_RtSpecies.H>
 
 #include "CD_NamespaceHeader.H"
 namespace physics {
@@ -191,8 +191,8 @@ namespace physics {
       /*!
 	@brief Get all Photons
       */
-      const Vector<RefCountedPtr<rte_species> >& get_rte_species() const {
-	return m_rte_species;
+      const Vector<RefCountedPtr<RtSpecies> >& get_RtSpecies() const {
+	return m_RtSpecies;
       }
 
       /*!
@@ -205,8 +205,8 @@ namespace physics {
       /*!
 	@brief Return number of RTE equations
       */
-      int get_num_rte_species() const {
-	return m_rte_species.size();
+      int get_num_RtSpecies() const {
+	return m_RtSpecies.size();
       }
 
       /*!
@@ -248,7 +248,7 @@ namespace physics {
       /*!
 	@brief List of optical transitions between species
       */
-      Vector<RefCountedPtr<rte_species> > m_rte_species;
+      Vector<RefCountedPtr<RtSpecies> > m_RtSpecies;
 
       /*!
 	@brief Number of species
@@ -258,7 +258,7 @@ namespace physics {
       /*!
 	@brief Number of RTE species
       */
-      int m_num_rte_species;
+      int m_num_RtSpecies;
     };
   }
 }

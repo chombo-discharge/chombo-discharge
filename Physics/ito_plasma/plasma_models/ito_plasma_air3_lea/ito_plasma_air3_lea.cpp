@@ -15,7 +15,7 @@ using namespace physics::ito_plasma;
 
 ito_plasma_air3_lea::ito_plasma_air3_lea(){
   m_num_ito_species = 3;
-  m_num_rte_species = 1;
+  m_num_RtSpecies = 1;
 
   m_coupling = ito_plasma_physics::coupling::LEA;
 
@@ -75,7 +75,7 @@ ito_plasma_air3_lea::ito_plasma_air3_lea(){
 
   // Set up species
   m_ito_species.resize(m_num_ito_species);
-  m_rte_species.resize(m_num_rte_species);
+  m_RtSpecies.resize(m_num_RtSpecies);
 
   m_electron_idx = 0;
   m_positive_idx = 1;
@@ -89,7 +89,7 @@ ito_plasma_air3_lea::ito_plasma_air3_lea(){
   m_ito_species[m_electron_idx] = RefCountedPtr<ito_species> (new electron(m_tables.at("mobility"), m_tables.at("diffco")));
   m_ito_species[m_positive_idx] = RefCountedPtr<ito_species> (new positive());
   m_ito_species[m_negative_idx] = RefCountedPtr<ito_species> (new negative());
-  m_rte_species[m_PhotonZ_idx]  = RefCountedPtr<rte_species> (new PhotonZ());
+  m_RtSpecies[m_PhotonZ_idx]  = RefCountedPtr<RtSpecies> (new PhotonZ());
 
   // To avoid that MPI ranks draw the same particle positions, increment the seed for each rank
   m_seed += procID();

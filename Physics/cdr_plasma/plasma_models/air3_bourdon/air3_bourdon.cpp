@@ -127,7 +127,7 @@ void air3_bourdon::read_file_entries(lookup_table& a_table, const std::string a_
 
 void air3_bourdon::instantiate_species(){
   m_num_CdrSpecies = 3;
-  m_num_rte_species = 3;
+  m_num_RtSpecies = 3;
 
   m_elec_idx = 0;
   m_plus_idx = 1;
@@ -141,10 +141,10 @@ void air3_bourdon::instantiate_species(){
   m_CdrSpecies[m_plus_idx]  = RefCountedPtr<CdrSpecies> (new air3_bourdon::M_plus());
   m_CdrSpecies[m_minu_idx]  = RefCountedPtr<CdrSpecies> (new air3_bourdon::M_minus());
 
-  m_rte_species.resize(m_num_rte_species);
-  m_rte_species[m_pho1_idx] = RefCountedPtr<rte_species> (new air3_bourdon::Photon_one());
-  m_rte_species[m_pho2_idx] = RefCountedPtr<rte_species> (new air3_bourdon::Photon_two());
-  m_rte_species[m_pho3_idx] = RefCountedPtr<rte_species> (new air3_bourdon::Photon_three());
+  m_RtSpecies.resize(m_num_RtSpecies);
+  m_RtSpecies[m_pho1_idx] = RefCountedPtr<RtSpecies> (new air3_bourdon::Photon_one());
+  m_RtSpecies[m_pho2_idx] = RefCountedPtr<RtSpecies> (new air3_bourdon::Photon_two());
+  m_RtSpecies[m_pho3_idx] = RefCountedPtr<RtSpecies> (new air3_bourdon::Photon_three());
 }
 
 void air3_bourdon::parseDomainBc(){
@@ -247,9 +247,9 @@ void air3_bourdon::advance_reaction_network(Vector<Real>&          a_particle_so
   Sm += R2;
 
   // Photoionization, M + y => e + M+
-  const air3_bourdon::Photon_one*   Photon1 = static_cast<air3_bourdon::Photon_one*>   (&(*m_rte_species[m_pho1_idx]));
-  const air3_bourdon::Photon_two*   Photon2 = static_cast<air3_bourdon::Photon_two*>   (&(*m_rte_species[m_pho2_idx]));
-  const air3_bourdon::Photon_three* Photon3 = static_cast<air3_bourdon::Photon_three*> (&(*m_rte_species[m_pho3_idx]));
+  const air3_bourdon::Photon_one*   Photon1 = static_cast<air3_bourdon::Photon_one*>   (&(*m_RtSpecies[m_pho1_idx]));
+  const air3_bourdon::Photon_two*   Photon2 = static_cast<air3_bourdon::Photon_two*>   (&(*m_RtSpecies[m_pho2_idx]));
+  const air3_bourdon::Photon_three* Photon3 = static_cast<air3_bourdon::Photon_three*> (&(*m_RtSpecies[m_pho3_idx]));
 
   const Real Sph = m_photoi_eff*units::s_c0*m_O2frac*m_p*(Photon1->get_A()*a_Photon_densities[m_pho1_idx]
 							  + Photon2->get_A()*a_Photon_densities[m_pho2_idx]

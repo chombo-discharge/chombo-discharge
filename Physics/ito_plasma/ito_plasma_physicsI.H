@@ -450,7 +450,7 @@ void ito_plasma_physics::reconcile_Photons(Vector<List<Photon>* >&  a_newPhotons
 
   for (int i = 0; i < a_newPhotons.size(); i++){
     if(a_numNewPhotons[i] > 0){
-      this->reconcile_Photons(*a_newPhotons[i], *m_rte_species[i], a_numNewPhotons[i], a_cellPos, a_centroidPos, a_lo, a_hi,
+      this->reconcile_Photons(*a_newPhotons[i], *m_RtSpecies[i], a_numNewPhotons[i], a_cellPos, a_centroidPos, a_lo, a_hi,
 			      a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
     }
   }
@@ -458,7 +458,7 @@ void ito_plasma_physics::reconcile_Photons(Vector<List<Photon>* >&  a_newPhotons
 
 inline
 void ito_plasma_physics::reconcile_Photons(List<Photon>&      a_Photons,
-					   const rte_species& a_species,
+					   const RtSpecies& a_species,
 					   const long long    a_num_Photons,
 					   const RealVect     a_cellPos,
 					   const RealVect     a_centroidPos,
@@ -747,7 +747,7 @@ void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& 
 
 
   // Get particle counts. 
-  Vector<long long> newPhotonCount   = Vector<long long>(m_num_rte_species, 0);
+  Vector<long long> newPhotonCount   = Vector<long long>(m_num_RtSpecies, 0);
   Vector<long long> oldParticleCount = this->get_particle_count(a_particles);
   Vector<long long> newParticleCount = oldParticleCount;
 

@@ -46,7 +46,7 @@ namespace physics {
       Real initialData(const RealVect a_pos, const Real a_time) const {return 0.0;}
     };
 
-    class air3_zheleznyak::uv_Photon : public rte_species {
+    class air3_zheleznyak::uv_Photon : public RtSpecies {
     public:
       uv_Photon();
       ~uv_Photon();

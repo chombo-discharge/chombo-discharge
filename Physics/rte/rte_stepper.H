@@ -63,7 +63,7 @@ namespace physics {
 
       // Solver and species
       RefCountedPtr<RtSolver>  m_solver;
-      RefCountedPtr<rte_species> m_species;
+      RefCountedPtr<RtSpecies> m_species;
 
       // Stuff for source term
       Real     m_blob_radius;    // Gaussian radius

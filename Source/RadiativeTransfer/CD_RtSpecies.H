@@ -1,37 +1,43 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   rte_species.H
-  @brief  Declaration of a Photon-group class. 
+  @file   CD_RtSpecies.H
+  @brief  Declaration of a class which supplies a user interface to radiative transfer code. 
   @author Robert Marskar
-  @date   Jan. 2018
 */
 
-#ifndef _RTE_SPECIES_
-#define _RTE_SPECIES_
+#ifndef CD_RtSpecies_H
+#define CD_RtSpecies_H
 
-#include "RealVect.H"
+// Chombo includes
+#include <RealVect.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Declaration of a class that defines a group within the multigroup approximation
   @details This is a lightweight class - it just holds a name for the group and the kappa for the group
 */
-class rte_species {
+class RtSpecies {
 public:
   /*!
     @brief Weak constructor, must subsequently call define
   */
-  rte_species();
+  RtSpecies();
 
   /*!
     @brief Constructor, constant kappa
   */
-  rte_species(const std::string a_name, const Real a_kappa);
+  RtSpecies(const std::string a_name, const Real a_kappa);
 
   /*!
     @brief Constructor, spatially dependent kappa
   */
-  rte_species(const std::string a_name, Real (*a_kappa)(const RealVect a_pos));
+  RtSpecies(const std::string a_name, Real (*a_kappa)(const RealVect a_pos));
 
   /*!
     @brief Define function
@@ -51,7 +57,7 @@ public:
   /*!
     @brief Constant kappa or not
   */
-  virtual bool constant_kappa() const;
+  virtual bool isKappaConstant() const;
 
   /*!
     @brief Get kappa at position. You really need to impement this, but it's not pure since this class may be useful for testing. 
@@ -61,7 +67,7 @@ public:
   /*!
     @brief Get scattering coefficient. 
   */
-  virtual Real get_scatter(const RealVect a_pos) const;
+  virtual Real getScatteringCoefficient(const RealVect a_pos) const;
 	      
 protected:
 
@@ -95,6 +101,8 @@ protected:
   */
   Real (*m_varscatter)(const RealVect a_pos);
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif
   

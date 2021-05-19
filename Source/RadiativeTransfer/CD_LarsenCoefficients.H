@@ -17,7 +17,7 @@
 
 // Our includes
 #include <CD_RobinCoefficients.H>
-#include <rte_species.H>
+#include <CD_RtSpecies.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -29,7 +29,7 @@ public:
   /*!
     @brief Constructor
   */
-  LarsenCoefficients(const RefCountedPtr<rte_species>& a_rte_species,
+  LarsenCoefficients(const RefCountedPtr<RtSpecies>& a_RtSpecies,
 		     const Real                         a_r1,
 		     const Real                         a_r2);
 
@@ -55,7 +55,7 @@ public:
     
 protected:
 
-  RefCountedPtr<rte_species> m_rte_species;
+  RefCountedPtr<RtSpecies> m_RtSpecies;
 
   Real m_reflectionCoefficientOne;
     

@@ -94,7 +94,7 @@ public:
   /*!
     @brief Get current ion
   */
-  virtual RefCountedPtr<rte_species>& getSpecies() {
+  virtual RefCountedPtr<RtSpecies>& getSpecies() {
     CH_assert(m_isolver < m_num);
     return m_species[m_isolver];
   }
@@ -119,7 +119,7 @@ protected:
   /*!
     @brief Ions
   */
-  Vector<RefCountedPtr<rte_species> > m_species;
+  Vector<RefCountedPtr<RtSpecies> > m_species;
 
 };
 

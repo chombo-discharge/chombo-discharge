@@ -50,16 +50,16 @@ const Vector<RefCountedPtr<ito_species> >& ito_plasma_physics::get_ito_species()
   return m_ito_species; 
 }
 
-const Vector<RefCountedPtr<rte_species> >& ito_plasma_physics::get_rte_species() const {
-  return m_rte_species;
+const Vector<RefCountedPtr<RtSpecies> >& ito_plasma_physics::get_RtSpecies() const {
+  return m_RtSpecies;
 }
 
 int ito_plasma_physics::get_num_ito_species() const{
   return m_ito_species.size();
 }
 
-int ito_plasma_physics::get_num_rte_species() const {
-  return m_rte_species.size();
+int ito_plasma_physics::get_num_RtSpecies() const {
+  return m_RtSpecies.size();
 }
 
 ito_plasma_physics::coupling ito_plasma_physics::get_coupling() const {

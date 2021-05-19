@@ -105,10 +105,10 @@ void morrow_bourdon::parse_bc(){
 
 void morrow_bourdon::instantiate_species(){
   m_num_CdrSpecies = 3;
-  m_num_rte_species = 3;
+  m_num_RtSpecies = 3;
 
   m_CdrSpecies.resize(m_num_CdrSpecies);
-  m_rte_species.resize(m_num_rte_species);
+  m_RtSpecies.resize(m_num_RtSpecies);
 
   m_nelec_idx   = 0;
   m_nplus_idx   = 1;
@@ -122,9 +122,9 @@ void morrow_bourdon::instantiate_species(){
   m_CdrSpecies[m_nplus_idx]    = RefCountedPtr<CdrSpecies> (new morrow_bourdon::positive_species());
   m_CdrSpecies[m_nminu_idx]    = RefCountedPtr<CdrSpecies> (new morrow_bourdon::negative_species());
   
-  m_rte_species[m_Photon1_idx]  = RefCountedPtr<rte_species> (new morrow_bourdon::Photon_one());
-  m_rte_species[m_Photon2_idx]  = RefCountedPtr<rte_species> (new morrow_bourdon::Photon_two());
-  m_rte_species[m_Photon3_idx]  = RefCountedPtr<rte_species> (new morrow_bourdon::Photon_three());
+  m_RtSpecies[m_Photon1_idx]  = RefCountedPtr<RtSpecies> (new morrow_bourdon::Photon_one());
+  m_RtSpecies[m_Photon2_idx]  = RefCountedPtr<RtSpecies> (new morrow_bourdon::Photon_two());
+  m_RtSpecies[m_Photon3_idx]  = RefCountedPtr<RtSpecies> (new morrow_bourdon::Photon_three());
 }
 
 void morrow_bourdon::advance_reaction_network(Vector<Real>&          a_particle_sources,
@@ -144,9 +144,9 @@ void morrow_bourdon::advance_reaction_network(Vector<Real>&          a_particle_
   const Real beta   = compute_beta(a_E);  // Recombination coefficient
 
   // Cast so we can get A-coefficients
-  const morrow_bourdon::Photon_one*   Photon1 = static_cast<morrow_bourdon::Photon_one*>   (&(*m_rte_species[m_Photon1_idx]));
-  const morrow_bourdon::Photon_two*   Photon2 = static_cast<morrow_bourdon::Photon_two*>   (&(*m_rte_species[m_Photon2_idx]));
-  const morrow_bourdon::Photon_three* Photon3 = static_cast<morrow_bourdon::Photon_three*> (&(*m_rte_species[m_Photon3_idx]));
+  const morrow_bourdon::Photon_one*   Photon1 = static_cast<morrow_bourdon::Photon_one*>   (&(*m_RtSpecies[m_Photon1_idx]));
+  const morrow_bourdon::Photon_two*   Photon2 = static_cast<morrow_bourdon::Photon_two*>   (&(*m_RtSpecies[m_Photon2_idx]));
+  const morrow_bourdon::Photon_three* Photon3 = static_cast<morrow_bourdon::Photon_three*> (&(*m_RtSpecies[m_Photon3_idx]));
   
   // Densities and velocities
   const Real Ne  = a_particle_densities[m_nelec_idx]; 

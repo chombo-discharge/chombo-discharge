@@ -19,8 +19,8 @@
 #include <CD_NamespaceHeader.H>
 
 template <class T>
-RtLayout<T>::RtLayout(const Vector<RefCountedPtr<rte_species> >& a_rte_species){
-  m_species = a_rte_species;
+RtLayout<T>::RtLayout(const Vector<RefCountedPtr<RtSpecies> >& a_RtSpecies){
+  m_species = a_RtSpecies;
   m_solvers.resize(0); // Solvers added through the addSolver function
 }
 
@@ -344,7 +344,7 @@ Vector<RefCountedPtr<T> >& RtLayout<T>::getSolvers(){
 }
 
 template <class T>
-Vector<RefCountedPtr<rte_species> >& RtLayout<T>::getSpecies(){
+Vector<RefCountedPtr<RtSpecies> >& RtLayout<T>::getSpecies(){
   return m_species;
 }
 
@@ -392,7 +392,7 @@ RtFactory<T, S>::~RtFactory(){
 
 
 template <class T, class S>
-RefCountedPtr<RtLayout<T> > RtFactory<T, S>::newLayout(const Vector<RefCountedPtr<rte_species> >& a_species) const{
+RefCountedPtr<RtLayout<T> > RtFactory<T, S>::newLayout(const Vector<RefCountedPtr<RtSpecies> >& a_species) const{
   // Build rte layout
   auto rte = RefCountedPtr<RtLayout<T> > (new RtLayout<T> (a_species));
   auto spe = a_species;

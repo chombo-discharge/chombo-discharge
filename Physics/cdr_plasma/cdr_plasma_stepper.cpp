@@ -212,7 +212,7 @@ void cdr_plasma_stepper::advance_reaction_network(Vector<EBAMRCellData*>&       
 
 
   const int num_species = m_physics->get_num_CdrSpecies();
-  const int num_Photons = m_physics->get_num_rte_species();
+  const int num_Photons = m_physics->get_num_RtSpecies();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     Vector<LevelData<EBCellFAB>* > particle_sources(num_species);
@@ -278,7 +278,7 @@ void cdr_plasma_stepper::advance_reaction_network(Vector<LevelData<EBCellFAB>* >
 
   const Real zero = 0.0;
 
-  const int num_Photons  = m_physics->get_num_rte_species();
+  const int num_Photons  = m_physics->get_num_RtSpecies();
   const int num_species  = m_physics->get_num_CdrSpecies();
 
 
@@ -382,7 +382,7 @@ void cdr_plasma_stepper::advance_reaction_network_reg(Vector<EBCellFAB*>&       
     
 
   const int num_species  = m_physics->get_num_CdrSpecies();
-  const int num_Photons  = m_physics->get_num_rte_species();
+  const int num_Photons  = m_physics->get_num_RtSpecies();
 
   // EBISBox and graph
   const EBISBox& ebisbox = a_E.getEBISBox();
@@ -525,7 +525,7 @@ void cdr_plasma_stepper::advance_reaction_network_reg_fast2D(Vector<EBCellFAB*>&
     
 
   const int num_species  = m_physics->get_num_CdrSpecies();
-  const int num_Photons  = m_physics->get_num_rte_species();
+  const int num_Photons  = m_physics->get_num_RtSpecies();
 
   // EBISBox and graph
   const EBISBox& ebisbox = a_E.getEBISBox();
@@ -665,7 +665,7 @@ void cdr_plasma_stepper::advance_reaction_network_reg_fast3D(Vector<EBCellFAB*>&
   const Real zero = 0.0;
 
   const int num_species  = m_physics->get_num_CdrSpecies();
-  const int num_Photons  = m_physics->get_num_rte_species();
+  const int num_Photons  = m_physics->get_num_RtSpecies();
 
   // EBISBox and graph
   const EBISBox& ebisbox = a_E.getEBISBox();
@@ -863,7 +863,7 @@ void cdr_plasma_stepper::advance_reaction_network_irreg_interp(Vector<EBCellFAB*
 
   const Real zero = 0.0;
   
-  const int num_Photons  = m_physics->get_num_rte_species();
+  const int num_Photons  = m_physics->get_num_RtSpecies();
   const int num_species  = m_physics->get_num_CdrSpecies();
 
   // EBISBox and graph
@@ -1002,7 +1002,7 @@ void cdr_plasma_stepper::advance_reaction_network_irreg_kappa(Vector<EBCellFAB*>
 
   const Real zero = 0.0;
   
-  const int num_Photons  = m_physics->get_num_rte_species();
+  const int num_Photons  = m_physics->get_num_RtSpecies();
   const int num_species  = m_physics->get_num_CdrSpecies();
 
   // EBISBox and graph
@@ -1615,7 +1615,7 @@ void cdr_plasma_stepper::compute_cdr_fluxes(Vector<LevelData<BaseIVFAB<Real> >*>
   }
 
   const int num_species  = m_physics->get_num_CdrSpecies();
-  const int num_Photons  = m_physics->get_num_rte_species();
+  const int num_Photons  = m_physics->get_num_RtSpecies();
   const int comp         = 0;
   const int ncomp        = 1;
 
@@ -1746,7 +1746,7 @@ void cdr_plasma_stepper::compute_cdr_fluxes(Vector<EBAMRIVData*>&       a_fluxes
   }
 
   const int num_species  = m_physics->get_num_CdrSpecies();
-  const int num_Photons  = m_physics->get_num_rte_species();
+  const int num_Photons  = m_physics->get_num_RtSpecies();
   const int finest_level = m_amr->getFinestLevel();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
@@ -1794,7 +1794,7 @@ void cdr_plasma_stepper::compute_cdr_domain_fluxes(Vector<EBAMRIFData*>&       a
   }
 
   const int num_species  = m_physics->get_num_CdrSpecies();
-  const int num_Photons  = m_physics->get_num_rte_species();
+  const int num_Photons  = m_physics->get_num_RtSpecies();
   const int finest_level = m_amr->getFinestLevel();
 
   // Things that will be passed into physics
@@ -1849,7 +1849,7 @@ void cdr_plasma_stepper::compute_cdr_domain_fluxes(Vector<LevelData<DomainFluxIF
   }
 
   const int num_species  = m_physics->get_num_CdrSpecies();
-  const int num_Photons  = m_physics->get_num_rte_species();
+  const int num_Photons  = m_physics->get_num_RtSpecies();
   const int comp         = 0;
   const int ncomp        = 1;
   const int finest_level = m_amr->getFinestLevel();

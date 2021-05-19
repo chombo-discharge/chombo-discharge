@@ -113,7 +113,7 @@ namespace physics {
       ~negative();
     };
 
-    class ito_plasma_air3::PhotonZ : public rte_species {
+    class ito_plasma_air3::PhotonZ : public RtSpecies {
     public:
       PhotonZ();
       ~PhotonZ();

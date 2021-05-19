@@ -221,7 +221,7 @@ void air7_zheleznyak::init_rng(){
 
 void air7_zheleznyak::instantiate_species(){
   m_num_CdrSpecies = 7;
-  m_num_rte_species = 1;
+  m_num_RtSpecies = 1;
 
   m_elec_idx     = 0;
   m_N2plus_idx   = 1;
@@ -242,8 +242,8 @@ void air7_zheleznyak::instantiate_species(){
   m_CdrSpecies[m_O2plusN2_idx]  = RefCountedPtr<CdrSpecies> (new air7_zheleznyak::O2plusN2());
   m_CdrSpecies[m_O2minus_idx]   = RefCountedPtr<CdrSpecies> (new air7_zheleznyak::O2minus());
 
-  m_rte_species.resize(m_num_rte_species);
-  m_rte_species[m_phot_idx] = RefCountedPtr<rte_species> (new air7_zheleznyak::uv_Photon());
+  m_RtSpecies.resize(m_num_RtSpecies);
+  m_RtSpecies[m_phot_idx] = RefCountedPtr<RtSpecies> (new air7_zheleznyak::uv_Photon());
 
 }
 
@@ -307,9 +307,9 @@ void air7_zheleznyak::advance_reaction_network(Vector<Real>&          a_particle
 					       const Real             a_time,
 					       const Real             a_kappa) const{
   Vector<Real>     cdr_src(m_num_CdrSpecies, 0.0);
-  Vector<Real>     rte_src(m_num_rte_species, 0.0);
+  Vector<Real>     rte_src(m_num_RtSpecies, 0.0);
   Vector<Real>     cdr_phi(m_num_CdrSpecies, 0.0);
-  Vector<Real>     rte_phi(m_num_rte_species, 0.0);
+  Vector<Real>     rte_phi(m_num_RtSpecies, 0.0);
   Vector<RealVect> cdr_grad(m_num_CdrSpecies, RealVect::Zero);
 
 
@@ -319,7 +319,7 @@ void air7_zheleznyak::advance_reaction_network(Vector<Real>&          a_particle
     cdr_grad[i] = a_particle_gradients[i];
   }
 
-  for (int i = 0; i < m_num_rte_species; i++){
+  for (int i = 0; i < m_num_RtSpecies; i++){
     rte_phi[i]          = a_Photon_densities[i];
     a_Photon_sources[i] = 0.0;
   }
@@ -338,7 +338,7 @@ void air7_zheleznyak::advance_reaction_network(Vector<Real>&          a_particle
       }
 
       // Add Photons produced in the substep
-      for (int i = 0; i < m_num_rte_species; i++){
+      for (int i = 0; i < m_num_RtSpecies; i++){
 	a_Photon_sources[i] += rte_src[i];
       }
     }
@@ -355,7 +355,7 @@ void air7_zheleznyak::advance_reaction_network(Vector<Real>&          a_particle
       }
 
       // Photons only use the Euler update
-      for (int i = 0; i < m_num_rte_species; i++){
+      for (int i = 0; i < m_num_RtSpecies; i++){
 	a_Photon_sources[i] += rte_src[i];
       }
 
@@ -375,7 +375,7 @@ void air7_zheleznyak::advance_reaction_network(Vector<Real>&          a_particle
       const Vector<Real> k1 = cdr_src;
 
       // Only Euler update for Photons.
-      for (int i = 0; i < m_num_rte_species; i++){
+      for (int i = 0; i < m_num_RtSpecies; i++){
 	a_Photon_sources[i] += rte_src[i];
       }
 

@@ -20,10 +20,10 @@ using namespace physics::cdr_plasma;
 
 morrow_zheleznyak::morrow_zheleznyak(){
   m_num_CdrSpecies = 3;
-  m_num_rte_species = 1;
+  m_num_RtSpecies = 1;
 
   m_CdrSpecies.resize(m_num_CdrSpecies);
-  m_rte_species.resize(m_num_rte_species);
+  m_RtSpecies.resize(m_num_RtSpecies);
 
   m_nelec_idx   = 0;
   m_nplus_idx   = 1;
@@ -34,7 +34,7 @@ morrow_zheleznyak::morrow_zheleznyak(){
   m_CdrSpecies[m_nelec_idx]    = RefCountedPtr<CdrSpecies> (new morrow_zheleznyak::electron());
   m_CdrSpecies[m_nplus_idx]    = RefCountedPtr<CdrSpecies> (new morrow_zheleznyak::positive_species());
   m_CdrSpecies[m_nminu_idx]    = RefCountedPtr<CdrSpecies> (new morrow_zheleznyak::negative_species());
-  m_rte_species[m_Photon1_idx]  = RefCountedPtr<rte_species> (new morrow_zheleznyak::uv_Photon());
+  m_RtSpecies[m_Photon1_idx]  = RefCountedPtr<RtSpecies> (new morrow_zheleznyak::uv_Photon());
 
   // Parse some basic settings
   parse_gas_params();
@@ -139,7 +139,7 @@ void morrow_zheleznyak::network_rre(Vector<Real>&          a_particle_sources,
 
   Vector<Real> rest(m_num_CdrSpecies, 0.0);
   Vector<int> particle_numbers(m_num_CdrSpecies, 0);
-  Vector<int> Photon_numbers(m_num_rte_species, 0);
+  Vector<int> Photon_numbers(m_num_RtSpecies, 0);
 
   // Get some aux stuff for propensity functions
   const RealVect Ve = compute_ve(a_E);
@@ -222,11 +222,11 @@ void morrow_zheleznyak::network_tau(Vector<Real>&          a_particle_sources,
   const Real volume = pow(a_dx, SpaceDim);
 
   Vector<int> particle_numbers(m_num_CdrSpecies, 0);
-  Vector<int> Photon_numbers(m_num_rte_species, 0);
+  Vector<int> Photon_numbers(m_num_RtSpecies, 0);
 
   Vector<Real> x(m_num_CdrSpecies, 0.0);
   Vector<int> X(m_num_CdrSpecies, 0);
-  Vector<int> Y(m_num_rte_species, 0);
+  Vector<int> Y(m_num_RtSpecies, 0);
 
   const Real thresh = 1.E-2;
   
@@ -235,7 +235,7 @@ void morrow_zheleznyak::network_tau(Vector<Real>&          a_particle_sources,
     x[i] = a_particle_densities[i] - X[i]*volume;          // "Partial particles"
   }
 
-  for (int i = 0; i < m_num_rte_species; i++){
+  for (int i = 0; i < m_num_RtSpecies; i++){
     Y[i] = floor(thresh + a_Photon_densities[i]);
   }
 
@@ -333,7 +333,7 @@ void morrow_zheleznyak::network_ssa(Vector<Real>&          a_particle_sources,
 
   Vector<Real> x(m_num_CdrSpecies, 0.0);
   Vector<int>  X(m_num_CdrSpecies, 0);
-  Vector<int>  Y(m_num_rte_species, 0);
+  Vector<int>  Y(m_num_RtSpecies, 0);
 
   //
   const RealVect Ve = compute_ve(a_E);
@@ -364,7 +364,7 @@ void morrow_zheleznyak::network_ssa(Vector<Real>&          a_particle_sources,
 
 
   // Initial Photon densities
-  for (int i = 0; i < m_num_rte_species; i++){
+  for (int i = 0; i < m_num_RtSpecies; i++){
     Y[i] = floor(thresh + a_Photon_densities[i]);
   }
 

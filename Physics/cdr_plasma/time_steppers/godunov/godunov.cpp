@@ -377,7 +377,7 @@ void godunov::allocateInternals(){
 
   const int ncomp       = 1;
   const int num_species = m_physics->get_num_CdrSpecies();
-  const int num_Photons = m_physics->get_num_rte_species();
+  const int num_Photons = m_physics->get_num_RtSpecies();
 
   // Allocate cdr storage
   m_cdr_scratch.resize(num_species);

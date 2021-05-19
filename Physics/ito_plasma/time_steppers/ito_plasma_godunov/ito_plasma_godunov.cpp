@@ -281,7 +281,7 @@ void ito_plasma_godunov::allocateInternals(){
   }
 
   const int num_ito_species = m_physics->get_num_ito_species();
-  const int num_rte_species = m_physics->get_num_rte_species();
+  const int num_RtSpecies = m_physics->get_num_RtSpecies();
 
   m_amr->allocate(m_fluid_scratch1,    m_fluid_Realm,    m_phase, 1);
   m_amr->allocate(m_fluid_scratchD,    m_fluid_Realm,    m_phase, SpaceDim);
@@ -316,11 +316,11 @@ void ito_plasma_godunov::allocateInternals(){
   m_amr->allocate(m_particle_ppc,   m_particleRealm, m_phase, num_ito_species);
   m_amr->allocate(m_particle_old,   m_particleRealm, m_phase, num_ito_species);
   m_amr->allocate(m_particle_eps,   m_particleRealm, m_phase, num_ito_species);
-  m_amr->allocate(m_particle_ypc,   m_particleRealm, m_phase, num_rte_species);
+  m_amr->allocate(m_particle_ypc,   m_particleRealm, m_phase, num_RtSpecies);
 
   m_amr->allocate(m_fluid_ppc,      m_fluid_Realm,    m_phase, num_ito_species);
   m_amr->allocate(m_fluid_eps,      m_fluid_Realm,    m_phase, num_ito_species);
-  m_amr->allocate(m_fluid_ypc,      m_fluid_Realm,    m_phase, num_rte_species);
+  m_amr->allocate(m_fluid_ypc,      m_fluid_Realm,    m_phase, num_RtSpecies);
 
   m_amr->allocate(m_EdotJ,          m_fluid_Realm,    m_phase, num_ito_species);
 }

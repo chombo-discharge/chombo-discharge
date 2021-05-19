@@ -125,7 +125,7 @@ namespace physics {
 	RealVect m_seed_pos;
       };
 
-      class Photon_one : public rte_species {
+      class Photon_one : public RtSpecies {
       public:
 	Photon_one();
 	~Photon_one();
@@ -140,7 +140,7 @@ namespace physics {
 	Real m_pO2;
       };
 
-      class Photon_two : public rte_species {
+      class Photon_two : public RtSpecies {
       public:
 	Photon_two();
 	~Photon_two();
@@ -155,7 +155,7 @@ namespace physics {
 	Real m_pO2;
       };
 
-      class Photon_three : public rte_species {
+      class Photon_three : public RtSpecies {
       public:
 	Photon_three();
 	~Photon_three();

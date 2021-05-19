@@ -13,10 +13,10 @@
 #include <CD_LarsenCoefficients.H>
 #include <CD_NamespaceHeader.H>
 
-LarsenCoefficients::LarsenCoefficients(const RefCountedPtr<rte_species>& a_rte_species,
+LarsenCoefficients::LarsenCoefficients(const RefCountedPtr<RtSpecies>& a_RtSpecies,
 				       const Real                         a_r1,
 				       const Real                         a_r2){
-  m_rte_species = a_rte_species;
+  m_RtSpecies = a_RtSpecies;
   m_reflectionCoefficientOne = a_r1;
   m_reflectionCoefficientTwo = a_r2;
 }
@@ -27,7 +27,7 @@ LarsenCoefficients::~LarsenCoefficients(){
 
 Real LarsenCoefficients::aco(const RealVect a_pos) const {
 
-  Real val = m_rte_species->getKappa(a_pos)*m_rte_species->getKappa(a_pos);
+  Real val = m_RtSpecies->getKappa(a_pos)*m_RtSpecies->getKappa(a_pos);
   val *= 3.0/2.0;
   val *= (1 + 3*m_reflectionCoefficientTwo)/(1 - 2*m_reflectionCoefficientOne);
 
@@ -35,7 +35,7 @@ Real LarsenCoefficients::aco(const RealVect a_pos) const {
 }
 
 Real LarsenCoefficients::bco(const RealVect a_pos) const {
-  return -m_rte_species->getKappa(a_pos);
+  return -m_RtSpecies->getKappa(a_pos);
 }
 
 Real LarsenCoefficients::rhs(const RealVect a_pos) const {

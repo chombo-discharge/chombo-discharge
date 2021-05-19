@@ -46,7 +46,7 @@ void full_tagger::allocate_storage(){
 
   m_cdr_densities.resize(m_physics->get_num_CdrSpecies());
   m_cdr_gradients.resize(m_physics->get_num_CdrSpecies());
-  m_rte_densities.resize(m_physics->get_num_rte_species());
+  m_rte_densities.resize(m_physics->get_num_RtSpecies());
 
   for(CdrIterator solver_it(*cdr); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
@@ -98,7 +98,7 @@ void full_tagger::compute_tracers(){
   const RealVect origin = m_amr->getProbLo();
   const Real time       = m_timeStepper->getTime();
   const int num_species = m_physics->get_num_CdrSpecies();
-  const int num_Photons = m_physics->get_num_rte_species();
+  const int num_Photons = m_physics->get_num_RtSpecies();
 
   RefCountedPtr<cdr_layout>& cdr = m_timeStepper->get_cdr();
   RefCountedPtr<RtLayout>& rte = m_timeStepper->get_rte();
@@ -137,7 +137,7 @@ void full_tagger::compute_tracers(){
   Vector<Real>     rte_phi;
   cdr_phi.resize(m_physics->get_num_CdrSpecies());
   cdr_gra.resize(m_physics->get_num_CdrSpecies());
-  rte_phi.resize(m_physics->get_num_rte_species());
+  rte_phi.resize(m_physics->get_num_RtSpecies());
 
   const int finest_level = m_amr->getFinestLevel();
   for (int lvl = 0; lvl <= finest_level; lvl++){

@@ -21,7 +21,7 @@
 #include <sstream>
 
 #include "ito_species.H"
-#include "rte_species.H"
+#include <CD_RtSpecies.H>
 #include <CD_Photon.H>
 #include "ito_particle.H"
 #include "ito_reaction.H"
@@ -72,7 +72,7 @@ namespace physics {
       /*!
 	@brief Get all Photons
       */
-      const Vector<RefCountedPtr<rte_species> >& get_rte_species() const;
+      const Vector<RefCountedPtr<RtSpecies> >& get_RtSpecies() const;
 
       /*!
 	@brief Return number of ion equations
@@ -82,7 +82,7 @@ namespace physics {
       /*!
 	@brief Return number of RTE equations
       */
-      int get_num_rte_species() const;
+      int get_num_RtSpecies() const;
 
       /*!
 	@brief Get the coupling, LFA/LEA
@@ -193,7 +193,7 @@ namespace physics {
       */
       inline
       void reconcile_Photons(List<Photon>&      a_newPhotons,
-			     const rte_species& a_species,
+			     const RtSpecies& a_species,
 			     const long long    a_numNewPhotons,
 			     const RealVect     a_cellPos,
 			     const RealVect     a_centroidPos,
@@ -236,10 +236,10 @@ namespace physics {
       mutable std::uniform_real_distribution<Real> m_udist11;
 
       Vector<RefCountedPtr<ito_species> > m_ito_species;
-      Vector<RefCountedPtr<rte_species> > m_rte_species;
+      Vector<RefCountedPtr<RtSpecies> > m_RtSpecies;
 
       int m_num_ito_species;
-      int m_num_rte_species;
+      int m_num_RtSpecies;
       int m_ppc;
       int m_fieldSolver_switch;
       int m_init_weights;

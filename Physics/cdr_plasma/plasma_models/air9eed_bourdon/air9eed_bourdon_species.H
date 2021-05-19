@@ -250,7 +250,7 @@ namespace physics {
     /*!
       @brief First Contribution to \gamma + O2 -> e + O2minus
     */
-    class air9eed_bourdon::Photon_one : public rte_species {
+    class air9eed_bourdon::Photon_one : public RtSpecies {
     public:
       /*!
 	@brief Constructor
@@ -302,7 +302,7 @@ namespace physics {
     /*!
       @brief First Contribution to \gamma + O2 -> e + O2minus
     */
-    class air9eed_bourdon::Photon_two : public rte_species {
+    class air9eed_bourdon::Photon_two : public RtSpecies {
     public:
       /*!
 	@brief Constructor
@@ -354,7 +354,7 @@ namespace physics {
     /*!
       @brief First Contribution to \gamma + O2 -> e + O2minus
     */
-    class air9eed_bourdon::Photon_three : public rte_species {
+    class air9eed_bourdon::Photon_three : public RtSpecies {
     public:
       /*!
 	@brief Constructor

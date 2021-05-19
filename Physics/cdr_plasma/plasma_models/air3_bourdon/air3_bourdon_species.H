@@ -40,7 +40,7 @@ namespace physics {
       Real initialData(const RealVect a_pos, const Real a_time) const {return 0.0;}
     };
 
-    class air3_bourdon::Photon_one : public rte_species {
+    class air3_bourdon::Photon_one : public RtSpecies {
     public:
       Photon_one();
       ~Photon_one(){}
@@ -55,7 +55,7 @@ namespace physics {
       Real m_pO2;
     };
 
-    class air3_bourdon::Photon_two : public rte_species {
+    class air3_bourdon::Photon_two : public RtSpecies {
     public:
       Photon_two();
       ~Photon_two(){}
@@ -70,7 +70,7 @@ namespace physics {
       Real m_pO2;
     };
 
-    class air3_bourdon::Photon_three : public rte_species {
+    class air3_bourdon::Photon_three : public RtSpecies {
     public:
       Photon_three();
       ~Photon_three(){}

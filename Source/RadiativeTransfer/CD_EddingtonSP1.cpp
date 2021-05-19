@@ -494,8 +494,8 @@ void EddingtonSP1::setACoefAndBCoef(){
   }
 
   // This loop fills aco with kappa and bco_irreg with 1./kappa
-  if(m_rte_species->constant_kappa()){
-    const Real kap = m_rte_species->getKappa(RealVect::Zero);
+  if(m_RtSpecies->isKappaConstant()){
+    const Real kap = m_RtSpecies->getKappa(RealVect::Zero);
     data_ops::set_value(m_aCoef, kap);
     data_ops::set_value(m_bco, 1./kap);
     data_ops::set_value(m_bco_irreg, 1./kap);
@@ -556,7 +556,7 @@ void EddingtonSP1::setACoefAndBCoef_box(EBCellFAB&       a_aco,
     const IntVect iv = bit();
 
     const RealVect pos = a_origin + iv*a_dx*RealVect::Unit;
-    aco_fab(iv, comp) = m_rte_species->getKappa(pos);
+    aco_fab(iv, comp) = m_RtSpecies->getKappa(pos);
   }
 
 
@@ -566,7 +566,7 @@ void EddingtonSP1::setACoefAndBCoef_box(EBCellFAB&       a_aco,
     const VolIndex& vof = vofit();
 
     const RealVect pos  = EBArith::getVofLocation(vof, a_dx*RealVect::Unit, a_origin);
-    const Real tmp = m_rte_species->getKappa(pos);
+    const Real tmp = m_RtSpecies->getKappa(pos);
     a_aco(vof, comp) = tmp;
     a_bco(vof, comp) = 1./tmp;
   }
@@ -675,7 +675,7 @@ void EddingtonSP1::setupOperatorFactory(){
   const Real beta  = -1.0;
 
   // Appropriate coefficients for this type of Robin BC
-  m_robinCoefficients = RefCountedPtr<LarsenCoefficients> (new LarsenCoefficients(m_rte_species, m_reflectionCoefficientOne, m_reflectionCoefficientTwo));
+  m_robinCoefficients = RefCountedPtr<LarsenCoefficients> (new LarsenCoefficients(m_RtSpecies, m_reflectionCoefficientOne, m_reflectionCoefficientTwo));
 
   // Domain BC
 #if 0

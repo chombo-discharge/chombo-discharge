@@ -15,7 +15,7 @@
 // Our includes
 #include <computational_geometry.H>
 #include <CD_AmrMesh.H>
-#include <rte_species.H>
+#include <CD_RtSpecies.H>
 #include <CD_NamespaceHeader.H>
   
 /*!
@@ -82,7 +82,7 @@ public:
   /*!
     @brief Set the Photon group
   */
-  virtual void setRtSpecies(const RefCountedPtr<rte_species> a_rte_species);
+  virtual void setRtSpecies(const RefCountedPtr<RtSpecies> a_RtSpecies);
 
   /*!
     @brief Set computational geometry
@@ -257,7 +257,7 @@ public:
   /*!
     @brief Get species
   */
-  virtual RefCountedPtr<rte_species>& getSpecies();
+  virtual RefCountedPtr<RtSpecies>& getSpecies();
   
 protected:
 
@@ -274,7 +274,7 @@ protected:
   /*!
     @brief Photon group
   */
-  RefCountedPtr<rte_species> m_rte_species;
+  RefCountedPtr<RtSpecies> m_RtSpecies;
 
   /*!
     @brief Computational geometry. 

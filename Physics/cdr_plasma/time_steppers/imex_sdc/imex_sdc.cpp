@@ -1322,7 +1322,7 @@ void imex_sdc::allocate_poisson_storage(){
 
 void imex_sdc::allocate_rte_storage(){
   const int ncomp       = 1;
-  const int num_Photons = m_physics->get_num_rte_species();
+  const int num_Photons = m_physics->get_num_RtSpecies();
   m_rte_scratch.resize(num_Photons);
   
   for (RtIterator<RtSolver> solver_it(*m_rte); solver_it.ok(); ++solver_it){

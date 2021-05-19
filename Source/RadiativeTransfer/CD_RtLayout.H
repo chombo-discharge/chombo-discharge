@@ -29,7 +29,7 @@ public:
   /*!
     @brief Full constructor
   */
-  RtLayout(const Vector<RefCountedPtr<rte_species> >& a_rte_species);
+  RtLayout(const Vector<RefCountedPtr<RtSpecies> >& a_RtSpecies);
 
   /*!
     @brief Destructor
@@ -171,7 +171,7 @@ public:
   /*!
     @brief Get species
   */
-  virtual Vector<RefCountedPtr<rte_species> >& getSpecies();
+  virtual Vector<RefCountedPtr<RtSpecies> >& getSpecies();
 
   /*!
     @brief Get all source terms
@@ -198,7 +198,7 @@ protected:
   /*!
     @brief Species
   */
-  Vector<RefCountedPtr<rte_species> > m_species;
+  Vector<RefCountedPtr<RtSpecies> > m_species;
 
   /*!
     @brief Verbosity
@@ -216,7 +216,7 @@ class RtFactory {
 public:
   RtFactory();
   ~RtFactory();
-  RefCountedPtr<RtLayout<T> > newLayout(const Vector<RefCountedPtr<rte_species> >& a_species) const;
+  RefCountedPtr<RtLayout<T> > newLayout(const Vector<RefCountedPtr<RtSpecies> >& a_species) const;
 };
 
 #include <CD_NamespaceFooter.H>

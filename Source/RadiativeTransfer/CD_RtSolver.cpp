@@ -83,14 +83,14 @@ void RtSolver::setRealm(const std::string a_realm){
   m_realm = a_realm;
 }
 
-void RtSolver::setRtSpecies(const RefCountedPtr<rte_species> a_rte_species){
+void RtSolver::setRtSpecies(const RefCountedPtr<RtSpecies> a_RtSpecies){
   CH_TIME("RtSolver::setRtSpecies");
   if(m_verbosity > 5){
     pout() << m_name + "::setRtSpecies" << endl;
   }
 
-  m_rte_species = a_rte_species;
-  m_name = m_rte_species->getName();
+  m_RtSpecies = a_RtSpecies;
+  m_name = m_RtSpecies->getName();
 }
 
 void RtSolver::setPhase(const phase::which_phase a_phase){
@@ -110,7 +110,7 @@ void RtSolver::sanityCheck(){
 
   CH_assert(!m_computationalGeometry.isNull());
   CH_assert(!m_amr.isNull());
-  CH_assert(!m_rte_species.isNull());
+  CH_assert(!m_RtSpecies.isNull());
   CH_assert(!m_ebis.isNull());
 }
 
@@ -316,8 +316,8 @@ EBAMRIVData& RtSolver::getKappaEb(){
   return m_kappa_eb;
 }
 
-RefCountedPtr<rte_species>& RtSolver::getSpecies(){
-  return m_rte_species;
+RefCountedPtr<RtSpecies>& RtSolver::getSpecies(){
+  return m_RtSpecies;
 }
 
 #include <CD_NamespaceFooter.H>

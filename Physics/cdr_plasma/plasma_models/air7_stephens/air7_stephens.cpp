@@ -287,7 +287,7 @@ void air7_stephens::init_rng(){
 
 void air7_stephens::instantiate_species(){
   m_num_CdrSpecies = 7;
-  m_num_rte_species = 8;
+  m_num_RtSpecies = 8;
 
   m_elec_idx     = 0;
   m_N2plus_idx   = 1;
@@ -315,15 +315,15 @@ void air7_stephens::instantiate_species(){
   m_CdrSpecies[m_O2plusN2_idx]  = RefCountedPtr<CdrSpecies>      (new air7_stephens::O2plusN2());
   m_CdrSpecies[m_O2minus_idx]   = RefCountedPtr<CdrSpecies>      (new air7_stephens::O2minus());
 
-  m_rte_species.resize(m_num_rte_species);
-  m_rte_species[m_c4v0_X1v0_idx] = RefCountedPtr<rte_species> (new air7_stephens::phot_c4v0_X1v0());
-  m_rte_species[m_c4v0_X1v1_idx] = RefCountedPtr<rte_species> (new air7_stephens::phot_c4v0_X1v1());
-  m_rte_species[m_c4v1_X1v0_idx] = RefCountedPtr<rte_species> (new air7_stephens::phot_c4v1_X1v0());
-  m_rte_species[m_c4v1_X1v1_idx] = RefCountedPtr<rte_species> (new air7_stephens::phot_c4v1_X1v1());
-  m_rte_species[m_c4v1_X1v2_idx] = RefCountedPtr<rte_species> (new air7_stephens::phot_c4v1_X1v2());
-  m_rte_species[m_c4v1_X1v3_idx] = RefCountedPtr<rte_species> (new air7_stephens::phot_c4v1_X1v3());
-  m_rte_species[m_b1v1_X1v0_idx] = RefCountedPtr<rte_species> (new air7_stephens::phot_b1v1_X1v0());
-  m_rte_species[m_b1v1_X1v1_idx] = RefCountedPtr<rte_species> (new air7_stephens::phot_b1v1_X1v1());
+  m_RtSpecies.resize(m_num_RtSpecies);
+  m_RtSpecies[m_c4v0_X1v0_idx] = RefCountedPtr<RtSpecies> (new air7_stephens::phot_c4v0_X1v0());
+  m_RtSpecies[m_c4v0_X1v1_idx] = RefCountedPtr<RtSpecies> (new air7_stephens::phot_c4v0_X1v1());
+  m_RtSpecies[m_c4v1_X1v0_idx] = RefCountedPtr<RtSpecies> (new air7_stephens::phot_c4v1_X1v0());
+  m_RtSpecies[m_c4v1_X1v1_idx] = RefCountedPtr<RtSpecies> (new air7_stephens::phot_c4v1_X1v1());
+  m_RtSpecies[m_c4v1_X1v2_idx] = RefCountedPtr<RtSpecies> (new air7_stephens::phot_c4v1_X1v2());
+  m_RtSpecies[m_c4v1_X1v3_idx] = RefCountedPtr<RtSpecies> (new air7_stephens::phot_c4v1_X1v3());
+  m_RtSpecies[m_b1v1_X1v0_idx] = RefCountedPtr<RtSpecies> (new air7_stephens::phot_b1v1_X1v0());
+  m_RtSpecies[m_b1v1_X1v1_idx] = RefCountedPtr<RtSpecies> (new air7_stephens::phot_b1v1_X1v1());
 
 }
 
@@ -387,9 +387,9 @@ void air7_stephens::advance_reaction_network(Vector<Real>&          a_particle_s
 					     const Real             a_time,
 					     const Real             a_kappa) const{
   Vector<Real>     cdr_src(m_num_CdrSpecies, 0.0);
-  Vector<Real>     rte_src(m_num_rte_species, 0.0);
+  Vector<Real>     rte_src(m_num_RtSpecies, 0.0);
   Vector<Real>     cdr_phi(m_num_CdrSpecies, 0.0);
-  Vector<Real>     rte_phi(m_num_rte_species, 0.0);
+  Vector<Real>     rte_phi(m_num_RtSpecies, 0.0);
   Vector<RealVect> cdr_grad(m_num_CdrSpecies, RealVect::Zero);
 
 
@@ -399,7 +399,7 @@ void air7_stephens::advance_reaction_network(Vector<Real>&          a_particle_s
     cdr_grad[i] = a_particle_gradients[i];
   }
 
-  for (int i = 0; i < m_num_rte_species; i++){
+  for (int i = 0; i < m_num_RtSpecies; i++){
     rte_phi[i]          = a_Photon_densities[i];
     a_Photon_sources[i] = 0.0;
   }
@@ -419,7 +419,7 @@ void air7_stephens::advance_reaction_network(Vector<Real>&          a_particle_s
       }
 
       // Add Photons produced in the substep
-      for (int i = 0; i < m_num_rte_species; i++){
+      for (int i = 0; i < m_num_RtSpecies; i++){
 	a_Photon_sources[i] += rte_src[i];
       }
     }
@@ -436,7 +436,7 @@ void air7_stephens::advance_reaction_network(Vector<Real>&          a_particle_s
       }
 
       // Photons only use the Euler update
-      for (int i = 0; i < m_num_rte_species; i++){
+      for (int i = 0; i < m_num_RtSpecies; i++){
 	a_Photon_sources[i] += rte_src[i];
       }
 
@@ -456,7 +456,7 @@ void air7_stephens::advance_reaction_network(Vector<Real>&          a_particle_s
       const Vector<Real> k1 = cdr_src;
 
       // Only Euler update for Photons.
-      for (int i = 0; i < m_num_rte_species; i++){
+      for (int i = 0; i < m_num_RtSpecies; i++){
 	a_Photon_sources[i] += rte_src[i];
       }
 
@@ -632,7 +632,7 @@ void air7_stephens::advance_chemistry_euler(Vector<Real>&          a_particle_so
   S_O2p -= R15;
 
   // Photoionization
-  for (int i = 0; i < m_num_rte_species; i++){
+  for (int i = 0; i < m_num_RtSpecies; i++){
     S_e   += a_Photon_densities[i]/a_dt;
     S_O2p += a_Photon_densities[i]/a_dt;
   }

@@ -268,7 +268,7 @@ namespace physics::cdr_plasma {
       RealVect m_seed_pos;
     };
 
-    class uv_Photon : public rte_species {
+    class uv_Photon : public RtSpecies {
     public:
       uv_Photon();
       ~uv_Photon();

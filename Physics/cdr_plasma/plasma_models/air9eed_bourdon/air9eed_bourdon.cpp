@@ -30,7 +30,7 @@ std::string air9eed_bourdon::s_bolsig_townsend = "Energy (eV)	Townsend ioniz. co
 
 air9eed_bourdon::air9eed_bourdon(){
   m_num_CdrSpecies = 9;    // 8 reactive ones plus the eed
-  m_num_rte_species = 3;    // Bourdon model for Photons
+  m_num_RtSpecies = 3;    // Bourdon model for Photons
   m_eed_solve   = true; // Yes, we're doing an EED solve so we must have a Poisson solution first
   m_eed_index   = 0;    // Index for the EED equation
 
@@ -140,14 +140,14 @@ void air9eed_bourdon::instantiate_species(){
   m_CdrSpecies[m_Ominus_idx]   = RefCountedPtr<CdrSpecies> (new air9eed_bourdon::Ominus());
 
   // Instantiate Photon solvers
-  m_rte_species.resize(m_num_rte_species);
+  m_RtSpecies.resize(m_num_RtSpecies);
   m_Photon1_idx = 0;
   m_Photon2_idx = 1;
   m_Photon3_idx = 2;
   
-  m_rte_species[m_Photon1_idx] = RefCountedPtr<rte_species> (new air9eed_bourdon::Photon_one());
-  m_rte_species[m_Photon2_idx] = RefCountedPtr<rte_species> (new air9eed_bourdon::Photon_two());
-  m_rte_species[m_Photon3_idx] = RefCountedPtr<rte_species> (new air9eed_bourdon::Photon_three());
+  m_RtSpecies[m_Photon1_idx] = RefCountedPtr<RtSpecies> (new air9eed_bourdon::Photon_one());
+  m_RtSpecies[m_Photon2_idx] = RefCountedPtr<RtSpecies> (new air9eed_bourdon::Photon_two());
+  m_RtSpecies[m_Photon3_idx] = RefCountedPtr<RtSpecies> (new air9eed_bourdon::Photon_three());
 }
 
 void air9eed_bourdon::read_file_entries(lookup_table& a_table, const std::string a_string){
@@ -479,9 +479,9 @@ void air9eed_bourdon::advance_reaction_network(Vector<Real>&          a_cdr_sour
 #endif
 
   // Photoionization gamma + O2 -> e + O2+
-  const air9eed_bourdon::Photon_one*   Photon1 = static_cast<air9eed_bourdon::Photon_one*>   (&(*m_rte_species[m_Photon1_idx]));
-  const air9eed_bourdon::Photon_two*   Photon2 = static_cast<air9eed_bourdon::Photon_two*>   (&(*m_rte_species[m_Photon2_idx]));
-  const air9eed_bourdon::Photon_three* Photon3 = static_cast<air9eed_bourdon::Photon_three*> (&(*m_rte_species[m_Photon3_idx]));
+  const air9eed_bourdon::Photon_one*   Photon1 = static_cast<air9eed_bourdon::Photon_one*>   (&(*m_RtSpecies[m_Photon1_idx]));
+  const air9eed_bourdon::Photon_two*   Photon2 = static_cast<air9eed_bourdon::Photon_two*>   (&(*m_RtSpecies[m_Photon2_idx]));
+  const air9eed_bourdon::Photon_three* Photon3 = static_cast<air9eed_bourdon::Photon_three*> (&(*m_RtSpecies[m_Photon3_idx]));
   products = m_photoionization_efficiency*units::s_c0*m_O2frac*m_p*(Photon1->get_A()*a_rte_densities[m_Photon1_idx]
 								    + Photon2->get_A()*a_rte_densities[m_Photon2_idx]
 								    + Photon3->get_A()*a_rte_densities[m_Photon3_idx]);
@@ -861,7 +861,7 @@ Vector<Real> air9eed_bourdon::compute_cathode_fluxes(const Real         a_time,
   }
 
   // Secondary emission from Photons
-  for (int j = 0; j < m_num_rte_species; j++){
+  for (int j = 0; j < m_num_RtSpecies; j++){
 
   }
 

@@ -84,7 +84,7 @@ namespace physics {
       Real initialData(const RealVect a_pos, const Real a_time) const {return 0.0;}
     };
 
-    class air7_stephens::phot_c4v0_X1v0 : public rte_species {
+    class air7_stephens::phot_c4v0_X1v0 : public RtSpecies {
     public:
       phot_c4v0_X1v0();
       ~phot_c4v0_X1v0(){}
@@ -94,7 +94,7 @@ namespace physics {
       Real m_kappa;
     };
 
-    class air7_stephens::phot_c4v0_X1v1 : public rte_species {
+    class air7_stephens::phot_c4v0_X1v1 : public RtSpecies {
     public:
       phot_c4v0_X1v1();
       ~phot_c4v0_X1v1(){}
@@ -104,7 +104,7 @@ namespace physics {
       Real m_kappa;
     };
 
-    class air7_stephens::phot_c4v1_X1v0 : public rte_species {
+    class air7_stephens::phot_c4v1_X1v0 : public RtSpecies {
     public:
       phot_c4v1_X1v0();
       ~phot_c4v1_X1v0(){};
@@ -114,7 +114,7 @@ namespace physics {
       Real m_kappa;
     };
 
-    class air7_stephens::phot_c4v1_X1v1 : public rte_species {
+    class air7_stephens::phot_c4v1_X1v1 : public RtSpecies {
     public:
       phot_c4v1_X1v1();
       ~phot_c4v1_X1v1(){}
@@ -124,7 +124,7 @@ namespace physics {
       Real m_kappa;
     };
 
-    class air7_stephens::phot_c4v1_X1v2 : public rte_species {
+    class air7_stephens::phot_c4v1_X1v2 : public RtSpecies {
     public:
       phot_c4v1_X1v2();
       ~phot_c4v1_X1v2(){}
@@ -134,7 +134,7 @@ namespace physics {
       Real m_kappa;
     };
 
-    class air7_stephens::phot_c4v1_X1v3 : public rte_species {
+    class air7_stephens::phot_c4v1_X1v3 : public RtSpecies {
     public:
       phot_c4v1_X1v3();
       ~phot_c4v1_X1v3(){}
@@ -144,7 +144,7 @@ namespace physics {
       Real m_kappa;
     };
 
-    class air7_stephens::phot_b1v1_X1v0 : public rte_species {
+    class air7_stephens::phot_b1v1_X1v0 : public RtSpecies {
     public:
       phot_b1v1_X1v0();
       ~phot_b1v1_X1v0(){}
@@ -154,7 +154,7 @@ namespace physics {
       Real m_kappa;
     };
 
-    class air7_stephens::phot_b1v1_X1v1 : public rte_species {
+    class air7_stephens::phot_b1v1_X1v1 : public RtSpecies {
     public:
       phot_b1v1_X1v1();
       ~phot_b1v1_X1v1();
