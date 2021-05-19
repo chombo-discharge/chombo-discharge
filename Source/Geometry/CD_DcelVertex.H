@@ -1,22 +1,27 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   vertex.H
+  @file   CD_DcelVertex.H
   @brief  Declaration of a vertex class for describing surface tesselations
   @author Robert Marskar
-  @date   March 2021
 */
 
-#ifndef _VERTEX_
-#define _VERTEX_
+#ifndef CD_DcelVertex_H
+#define CD_DcelVertex_H
 
-#include <CD_Vec.H>
-
-#include <CD_DcelEdge.H>
-#include <CD_DcelFace.H>
-
+// Std includes
 #include <vector>
 #include <memory>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_Vec.H>
+#include <CD_DcelEdge.H>
+#include <CD_DcelFace.H>
+#include <CD_NamespaceHeader.H>
+
 namespace Dcel {
 
   template <class T> class vertexT;
@@ -116,7 +121,8 @@ namespace Dcel {
     std::vector<FacePtr > m_faces;
   };
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #include <CD_DcelVertexImplem.H>
 

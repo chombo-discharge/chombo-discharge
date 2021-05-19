@@ -1,19 +1,24 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   dcel_vertexI.H
-  @brief  Implementaion of dcel_vertex.H
+  @file   CD_DcelVertexImplem.H
+  @brief  Implementaion of CD_DcelVertex.H
   @author Robert Marskar
-  @date   Apr. 2018
 */
 
-#ifndef _DCEL_VERTEXI_
-#define _DCEL_VERTEXI_
+#ifndef CD_DcelVertexImplem_H
+#define CD_DcelVertexImplem_H
 
+// Our includes
 #include <CD_DcelVertex.H>
 #include <CD_DcelEdge.H>
 #include <CD_DcelFace.H>
 #include <CD_DcelIterator.H>
+#include <CD_NamespaceHeader.H>
 
-#include "CD_NamespaceHeader.H"
 namespace Dcel {
 
   template <class T>
@@ -244,6 +249,7 @@ namespace Dcel {
     return d.dot(d);
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif
