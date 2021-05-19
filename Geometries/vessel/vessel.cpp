@@ -6,7 +6,7 @@
 */
 
 #include "vessel.H"
-#include "mushroom_if.H"
+#include <CD_MushroomIF.H>
 #include "rod_if.H"
 #include <CD_CylinderSdf.H>
 
@@ -39,7 +39,7 @@ vessel::vessel(){
     m_electrodes.push_back(Electrode(rod, m_rod_live));
   }
   if(m_shroom){
-    auto shroom = RefCountedPtr<BaseIF> (new mushroom_if(m_shroom_center,
+    auto shroom = RefCountedPtr<BaseIF> (new MushroomIF(m_shroom_center,
 							 m_shroom_R,
 							 m_shroom_r,
 							 1.E4,

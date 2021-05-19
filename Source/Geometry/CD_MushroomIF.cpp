@@ -1,21 +1,26 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file    mushroom_if.H
-  @brief   Implementation of mushroom_if.H
+  @file    CD_MushroomIF.cpp
+  @brief   Implementation of CD_MushroomIF.H
   @author  Robert Marskar
-  @date    Nov. 2017
 */
 
-#include "mushroom_if.H"
+// Chombo includes
+#include <SmoothIntersection.H>
+
+// Our includes
+#include <CD_MushroomIF.H>
 #include <CD_RoundedBoxIF.H>
 #include <CD_BoxSdf.H>
 #include <CD_CylinderSdf.H>
 #include <CD_RoundedCylinderIF.H>
+#include <CD_NamespaceHeader.H>
 
-#include <SmoothIntersection.H>
-
-#include "CD_NamespaceHeader.H"
-
-mushroom_if::mushroom_if(const RealVect a_center,
+MushroomIF::MushroomIF(const RealVect a_center,
 			 const Real     a_R,
 			 const Real     a_r,
 			 const Real     a_L,
@@ -35,16 +40,16 @@ mushroom_if::mushroom_if(const RealVect a_center,
   m_fluidInside = a_fluidInside;
 }
 
-mushroom_if::mushroom_if(const mushroom_if& a_inputIF){
+MushroomIF::MushroomIF(const MushroomIF& a_inputIF){
   m_baseif      = a_inputIF.m_baseif;
   m_fluidInside = a_inputIF.m_fluidInside;
 }
 
-mushroom_if::~mushroom_if(){
+MushroomIF::~MushroomIF(){
 
 }
 
-Real mushroom_if::value(const RealVect& a_pos) const{
+Real MushroomIF::value(const RealVect& a_pos) const{
   Real retval = m_baseif->value(a_pos);
 
   if(m_fluidInside){
@@ -54,7 +59,8 @@ Real mushroom_if::value(const RealVect& a_pos) const{
   return retval;
 }
 
-BaseIF* mushroom_if::newImplicitFunction() const{
-  return static_cast<BaseIF*> (new mushroom_if(*this));
+BaseIF* MushroomIF::newImplicitFunction() const{
+  return static_cast<BaseIF*> (new MushroomIF(*this));
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

@@ -1,22 +1,28 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file    mushroom_if.H
+  @file    CD_MushroomIF.H
   @brief   Declaration of a "mushroom", used in HV vessel
   @author  Robert Marskar
-  @date    Nov. 2017
 */
 
-#ifndef _MUSHROOM_IF_
-#define _MUSHROOM_IF_
+#ifndef CD_MushroomIF_H
+#define CD_MushroomIF_H
 
+// Chombo includes
 #include <BaseIF.H>
 #include <RealVect.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_NamespaceHeader.H>
 
-class mushroom_if : public BaseIF {
+class MushroomIF : public BaseIF {
 public:  
 
-  mushroom_if(const RealVect a_center,
+  MushroomIF(const RealVect a_center,
 	      const Real     a_R,
 	      const Real     a_r,
 	      const Real     a_L,
@@ -24,8 +30,8 @@ public:
 	      const Real     a_curv,
 	      const bool     a_fluidInside);
 
-  mushroom_if(const mushroom_if& a_inputIF);
-  virtual ~mushroom_if();
+  MushroomIF(const MushroomIF& a_inputIF);
+  virtual ~MushroomIF();
   virtual Real value(const RealVect& a_pos) const override;
   virtual BaseIF* newImplicitFunction() const override;
   
@@ -36,5 +42,7 @@ protected:
 
     
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif
