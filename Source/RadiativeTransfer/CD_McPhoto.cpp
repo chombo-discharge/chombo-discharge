@@ -184,13 +184,13 @@ void McPhoto::parsePhotoGeneration(){
   ParmParse pp(m_className.c_str());
 
   std::string str;
-  pp.get("PhotonGeneration", str);
+  pp.get("photon_generation", str);
 
   if(str == "deterministic"){
-    m_photogen = PhotonGeneration::deterministic;
+    m_photogen = PhotonGeneration::Deterministic;
   }
   else if(str == "stochastic"){
-    m_photogen = PhotonGeneration::stochastic;
+    m_photogen = PhotonGeneration::Stochastic;
   }
   else{
     MayDay::Abort("McPhoto::set_PhotonGeneration - unknown Photon generation type requested");
@@ -209,16 +209,16 @@ void McPhoto::parseSourceType(){
   pp.get("source_type", str);
 
   if(str == "number"){
-    m_src_type = source_type::number;
+    m_src_type = SourceType::Number;
   }
   else if(str == "volume"){
-    m_src_type = source_type::per_vol;
+    m_src_type = SourceType::PerVol;
   }
   else if(str == "volume_rate"){
-    m_src_type = source_type::per_vols;
+    m_src_type = SourceType::PerVolSecond;
   }
   else if(str == "rate"){
-    m_src_type = source_type::per_s;
+    m_src_type = SourceType::PerSecond;
   }
   else{
     MayDay::Abort("McPhoto::setSourceType - unknown source type requested");
@@ -918,25 +918,25 @@ int McPhoto::drawPhotons(const Real a_source, const Real a_volume, const Real a_
 
   // Check if we need any type of source term normalization
   Real factor;
-  if(m_src_type == source_type::number){
+  if(m_src_type == SourceType::Number){
     factor = 1.0;
   }
-  else if(m_src_type == source_type::per_vol){
+  else if(m_src_type == SourceType::PerVol){
     factor = a_volume;
   }
-  else if(m_src_type == source_type::per_vols){
+  else if(m_src_type == SourceType::PerVolSecond){
     factor = a_volume*a_dt;
   }
-  else if(m_src_type == source_type::per_s){
+  else if(m_src_type == SourceType::PerSecond){
     factor = a_dt;
   }
 
   // Draw a number of Photons with the desired algorithm
-  if(m_photogen == PhotonGeneration::stochastic){
+  if(m_photogen == PhotonGeneration::Stochastic){
     const Real mean = a_source*factor;
     num_photons = randomPoisson(mean);
   }
-  else if(m_photogen == PhotonGeneration::deterministic){
+  else if(m_photogen == PhotonGeneration::Deterministic){
     num_photons = round(a_source*factor);
   }
   else{

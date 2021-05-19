@@ -323,17 +323,22 @@ public:
   
 protected:
 
-  enum PhotonGeneration {
-    deterministic = 0,
-    stochastic = 1,
+  /*!
+    @brief Enum for interpreting how photons are generated when using fluid codes
+  */
+  enum class PhotonGeneration {
+    Deterministic,
+    Stochastic
   };
 
-  
-  enum source_type {
-    number   = 0,
-    per_vols = 1, 
-    per_vol  = 2,
-    per_s    = 3,
+  /*!
+    @brief Enum for adding flexibility in what the fluid source term contains. 
+  */
+  enum class SourceType {
+    Number,
+    PerVol,
+    PerVolSecond,
+    PerSecond
   };
 
   /*!
@@ -419,7 +424,7 @@ protected:
   /*!
     @brief Source type
   */
-  source_type m_src_type;
+  SourceType m_src_type;
 
   /*!
     @brief Bisection step length for boundary intersections

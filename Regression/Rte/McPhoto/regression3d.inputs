@@ -66,7 +66,7 @@ Driver.refine_solid_solid_interface    = -1            # Refine solid-solid inte
 # MC_PHOTO CLASS OPTIONS
 # ====================================================================================================
 McPhoto.instantaneous      = true          # Instantaneous transport or not
-McPhoto.max_Photons        = 1             # Maximum no. generated in a cell (< = 0 yields physical Photons)
+McPhoto.max_photons        = 1             # Maximum no. generated in a cell (< = 0 yields physical Photons)
 McPhoto.blend_conservation = false         # Switch for blending with the nonconservative divergence
 McPhoto.pvr_buffer         = 0             # Buffer for PVR. 
 McPhoto.halo_buffer        = 1             # Halo region for particles. 
@@ -82,7 +82,7 @@ McPhoto.bc_y_high          = outflow       # Boundary condition
 McPhoto.bc_z_low           = outflow       # Boundary condition
 McPhoto.bc_z_high          = outflow       # Boundary condition
 McPhoto.poiss_exp_swap     = 100           # Swap out Poisson with exponential distribution above this mean
-McPhoto.PhotonGeneration  = deterministic # Volumetric source term. 'deterministic' or 'stochastic'
+McPhoto.photon_generation  = deterministic # Volumetric source term. 'deterministic' or 'stochastic'
 McPhoto.source_type        = number        # 'number'       = Source term contains the number of Photons produced
                                             # 'volume'       = Source terms contains the number of Photons produced per unit volume
                                             # 'volume_rate'  = Source terms contains the volumetric rate
