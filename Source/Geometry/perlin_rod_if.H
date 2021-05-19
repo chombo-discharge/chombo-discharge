@@ -11,7 +11,7 @@
 #include <BaseIF.H>
 
 #include <CD_CylinderSdf.H>
-#include "graded_perlin_sphere_if.H"
+#include <CD_GradedPerlinSphereSdf.H>
 
 #include "CD_NamespaceHeader.H"
 
