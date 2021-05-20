@@ -1,50 +1,57 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file DataOps.H
-  @brief Agglomeration of useful data operations
+  @file   CD_DataOps.H
+  @brief  Agglomeration of useful data operations
   @author Robert Marskar
-  @date Nov 2017
 */
 
-#ifndef _DataOps_
-#define _DataOps_
+#ifndef CD_DataOps_H
+#define CD_DataOps_H
 
-#include "EBAMRData.H"
-#include "MFInterfaceFAB.H"
-
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <EBAMRData.H>
+#include <MFInterfaceFAB.H>
+#include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Agglomeration of useful data operations. Doing this because I use smart pointer all around
+  @brief Agglomeration of useful data operations. 
 */
 class DataOps {
 public:
-  template <typename T> static void setValue(LevelData<MFInterfaceFAB<T> >& a_lhs, const T& a_value);
+  
+  template <typename T>
+  static void setValue(LevelData<MFInterfaceFAB<T> >& a_lhs, const T& a_value);
 
-  template <typename T> static int sgn(const T a_value);
+  template <typename T>
+  static int sgn(const T a_value);
 
   static void averageCellToFace(EBAMRFluxData&               a_facedata,
-				   const EBAMRCellData&         a_celldata,
-				   const Vector<ProblemDomain>& a_domains);
+				const EBAMRCellData&         a_celldata,
+				const Vector<ProblemDomain>& a_domains);
 
   static void averageCellToFace(LevelData<EBFluxFAB>&       a_facedata,
-				   const LevelData<EBCellFAB>& a_celldata,
-				   const ProblemDomain&        a_domain);
+				const LevelData<EBCellFAB>& a_celldata,
+				const ProblemDomain&        a_domain);
 
   static void averageCellToFaceAllComps(EBAMRFluxData& a_face_data,
-					    const EBAMRCellData& a_cell_data,
-					    const Vector<ProblemDomain>& a_domains);
+					const EBAMRCellData& a_cell_data,
+					const Vector<ProblemDomain>& a_domains);
 
   static void averageCellToFaceAllComps(LevelData<EBFluxFAB>&       a_facedata,
-					    const LevelData<EBCellFAB>& a_celldata,
-					    const ProblemDomain&        a_domain);
+					const LevelData<EBCellFAB>& a_celldata,
+					const ProblemDomain&        a_domain);
 
   static void averageFaceToCell(EBAMRCellData&               a_celldata,
-				   const EBAMRFluxData&         a_fluxdata,
-				   const Vector<ProblemDomain>& a_domains);
+				const EBAMRFluxData&         a_fluxdata,
+				const Vector<ProblemDomain>& a_domains);
 
   static void averageFaceToCell(LevelData<EBCellFAB>&       a_celldata,
-				   const LevelData<EBFluxFAB>& a_fluxdata,
-				   const ProblemDomain&        a_domain);
+				const LevelData<EBFluxFAB>& a_fluxdata,
+				const ProblemDomain&        a_domain);
 
   static void dotProduct(MFAMRCellData& a_result, const MFAMRCellData& a_data1, const MFAMRCellData& a_data2);
 
@@ -263,13 +270,14 @@ public:
   static void filterSmooth(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const int a_stride, const Real a_alpha);
 
   static void computeParticleWeights(unsigned long long&      a_weight,
-				       unsigned long long&      a_num,
-				       unsigned long long&      a_remainder,
-				       const unsigned long long a_numPhysicalParticles,
-				       const int                a_ppc);
+				     unsigned long long&      a_num,
+				     unsigned long long&      a_remainder,
+				     const unsigned long long a_numPhysicalParticles,
+				     const int                a_ppc);
 
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #include <CD_DataOpsImplem.H>
 

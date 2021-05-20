@@ -1,9 +1,24 @@
-#ifndef _DATA_OPSF_F_H_
-#define _DATA_OPSF_F_H_
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
 
-#include "FORT_PROTO.H"
-#include "CH_Timer.H"
-#include "REAL.H"
+/*!
+  @file   CD_DataOpsF_F.H
+  @brief  Fortran headers forCD_DataOps.H
+  @author Robert Marskar
+*/
+
+#ifndef CD_DataOpsF_F_H
+#define CD_DataOpsF_F_H
+
+// Chombo includes
+#include <FORT_PROTO.H>
+#include <CH_Timer.H>
+#include <REAL.H>
+
+// Our includes
+#include <CD_NamespaceHeader.H>
 
 extern "C"
 {
@@ -347,6 +362,7 @@ extern "C"
   }
 #endif  // GUARDFILTER_SMOOTH 
 
-#include "CD_NamespaceFooter.H"
+}
+#include <CD_NamespaceFooter.H>
 
 #endif

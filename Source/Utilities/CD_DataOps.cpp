@@ -1,32 +1,37 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file DataOps.cpp
-  @brief Implementation of DataOps.H
+  @file   CD_DataOps.cpp
+  @brief  Implementation of CD_DataOps.H
   @author Robert Marskar
-  @date Nov. 2017
 */
 
+#include <EBArith.H>
+#include <EBLevelDataOps.H>
+#include <MFLevelDataOps.H>
+#include <CCProjectorF_F.H>
+#include <EBLevelDataOpsF_F.H>
+#include <PolyGeom.H>
+
+// Our includes
 #include <CD_DataOps.H>
 #include <CD_DataOpsF_F.H>
-#include "EBArith.H"
-#include "EBLevelDataOps.H"
-#include "MFLevelDataOps.H"
-#include "CCProjectorF_F.H"
-#include "EBLevelDataOpsF_F.H"
-#include "PolyGeom.H"
-
-#include "CD_NamespaceHeader.H"
+#include <CD_NamespaceHeader.H>
 
 void DataOps::averageCellToFace(EBAMRFluxData&               a_facedata,
-				    const EBAMRCellData&         a_celldata,
-				    const Vector<ProblemDomain>& a_domains){
+				const EBAMRCellData&         a_celldata,
+				const Vector<ProblemDomain>& a_domains){
   for (int lvl = 0; lvl < a_facedata.size(); lvl++){
     DataOps::averageCellToFace(*a_facedata[lvl], *a_celldata[lvl], a_domains[lvl]);
   }
 }
 
 void DataOps::averageCellToFace(LevelData<EBFluxFAB>&       a_facedata,
-				    const LevelData<EBCellFAB>& a_celldata,
-				    const ProblemDomain&        a_domain){
+				const LevelData<EBCellFAB>& a_celldata,
+				const ProblemDomain&        a_domain){
 
   CH_assert(a_facedata.nComp() == 1);
   CH_assert(a_celldata.nComp() == SpaceDim);
@@ -45,16 +50,16 @@ void DataOps::averageCellToFace(LevelData<EBFluxFAB>&       a_facedata,
 }
 
 void DataOps::averageCellToFaceAllComps(EBAMRFluxData& a_face_data,
-					     const EBAMRCellData& a_cell_data,
-					     const Vector<ProblemDomain>& a_domains){
+					const EBAMRCellData& a_cell_data,
+					const Vector<ProblemDomain>& a_domains){
   for (int lvl = 0; lvl < a_face_data.size(); lvl++){
     DataOps::averageCellToFaceAllComps(*a_face_data[lvl], *a_cell_data[lvl], a_domains[lvl]);
   }
 }
 
 void DataOps::averageCellToFaceAllComps(LevelData<EBFluxFAB>&       a_facedata,
-					     const LevelData<EBCellFAB>& a_celldata,
-					     const ProblemDomain&        a_domain){
+					const LevelData<EBCellFAB>& a_celldata,
+					const ProblemDomain&        a_domain){
 
   CH_assert(a_facedata.nComp() == a_celldata.nComp());
 
@@ -129,16 +134,16 @@ void DataOps::averageCellToFaceAllComps(LevelData<EBFluxFAB>&       a_facedata,
 }
 
 void DataOps::averageFaceToCell(EBAMRCellData&               a_celldata,
-				    const EBAMRFluxData&         a_facedata,
-				    const Vector<ProblemDomain>& a_domains){
+				const EBAMRFluxData&         a_facedata,
+				const Vector<ProblemDomain>& a_domains){
   for (int lvl = 0; lvl < a_facedata.size(); lvl++){
     DataOps::averageFaceToCell(*a_celldata[lvl], *a_facedata[lvl], a_domains[lvl]);
   }
 }
 
 void DataOps::averageFaceToCell(LevelData<EBCellFAB>&       a_celldata,
-				    const LevelData<EBFluxFAB>& a_fluxdata,
-				    const ProblemDomain&        a_domain){
+				const LevelData<EBFluxFAB>& a_fluxdata,
+				const ProblemDomain&        a_domain){
 
   const int nc = a_celldata.nComp();
   CH_assert(a_fluxdata.nComp() == nc);
@@ -231,8 +236,8 @@ void DataOps::dotProduct(EBAMRCellData& a_result, const EBAMRCellData& a_data1, 
 }
 
 void DataOps::dotProduct(LevelData<EBCellFAB>& a_result,
-			const LevelData<EBCellFAB>& a_data1,
-			const LevelData<EBCellFAB>& a_data2){
+			 const LevelData<EBCellFAB>& a_data1,
+			 const LevelData<EBCellFAB>& a_data2){
   const int nc = a_data1.nComp();
 
   CH_assert(a_data2.nComp() == nc);
@@ -1657,10 +1662,10 @@ void DataOps::filterSmooth(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFA
 }
 
 void DataOps::computeParticleWeights(unsigned long long&      a_weight,
-					unsigned long long&      a_num,
-					unsigned long long&      a_remainder,
-					const unsigned long long a_numPhysicalParticles,
-					const int                a_ppc) {
+				     unsigned long long&      a_num,
+				     unsigned long long&      a_remainder,
+				     const unsigned long long a_numPhysicalParticles,
+				     const int                a_ppc) {
 
   if(a_numPhysicalParticles <= a_ppc){  
     a_weight    = 1;
@@ -1673,4 +1678,5 @@ void DataOps::computeParticleWeights(unsigned long long&      a_weight,
     a_num       = (a_remainder == 0) ? a_ppc : a_ppc - 1;
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
