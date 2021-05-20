@@ -1,22 +1,29 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   CDR_VofUtils.H
+  @file   CD_VofUtils.H
   @brief  Various functions for getting Vofs near cut-cells
   @author Robert Marskar
-  @date   May 2021
 */
 
-#ifndef _VofUtils_H_
-#define _VofUtils_H_
+#ifndef CD_VofUtils_H
+#define CD_VofUtils_H
 
-#include "Stencils.H"
-#include "EBISBox.H"
-#include "IntVectSet.H"
-#include "RealVect.H"
-#include "ProblemDomain.H"
-#include "VolIndex.H"
-#include "LoHiSide.H"
+// Chombo includes
+#include <Stencils.H>
+#include <EBISBox.H>
+#include <IntVectSet.H>
+#include <RealVect.H>
+#include <ProblemDomain.H>
+#include <VolIndex.H>
+#include <LoHiSide.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_NamespaceHeader.H>
+
 namespace VofUtils {
 
   /*!
@@ -172,7 +179,8 @@ namespace VofUtils {
   */
   Vector<VolIndex> getAllVofsInRadius(const VolIndex& a_startVof, const EBISBox& a_ebisbox, const int a_radius, const bool a_addStartVof);
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif
   

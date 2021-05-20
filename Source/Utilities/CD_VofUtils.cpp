@@ -1,13 +1,16 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
   @file   CD_VofUtils.cpp
   @brief  Implementation of CD_VofUtils.H
   @author Robert Marskar
-  @date   May 2021
 */
 
-#include "CD_VofUtils.H"
-
-#include "CD_NamespaceHeader.H"
+#include <CD_VofUtils.H>
+#include <CD_NamespaceHeader.H>
 
 bool VofUtils::isQuadrantWellDefined(const RealVect a_normal){
   bool ret = true;
@@ -307,4 +310,5 @@ Vector<VolIndex> VofUtils::getAllVofsSymmetric(const VolIndex&      a_startVof,
 
   return ret;
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
