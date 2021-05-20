@@ -1,19 +1,26 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
   @file   MultiIndex.H
   @brief  Declaration of a SpaceDim multi-index type for use with higher order Taylor series
   @author Robert Marskar
-  @date   Aug. 2017
 */
 
-#ifndef _CD_MultiIndex_H_
-#define _CD_MultiIndex_H_
+#ifndef CD_MultiIndex_H
+#define CD_MultiIndex_H
 
+// Std includes
 #include <map>
 
-#include "IntVect.H"
-#include "RealVect.H"
+// Chombo includes
+#include <IntVect.H>
+#include <RealVect.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief SpaceDim multi-index type for use with higher order Taylor series
@@ -167,6 +174,7 @@ private:
   */
   int norm(const IntVect a_index) const;
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

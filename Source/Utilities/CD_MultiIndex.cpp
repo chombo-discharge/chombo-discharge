@@ -1,12 +1,17 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
   @file   CD_MultiIndex.cpp
   @brief  Implementation of CD_MultiIndex.H
   @author Robert Marskar
-  @date   Aug. 2017
 */
 
-#include "CD_MultiIndex.H"
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_MultiIndex.H>
+#include <CD_NamespaceHeader.H>
 
 MultiIndex::MultiIndex(const int a_order){
   this->define(a_order);
@@ -164,4 +169,4 @@ void MultiIndex::makeMaps(){
   }
 }
 
-#include "CD_NamespaceFooter.H"
+#include <CD_NamespaceFooter.H>
