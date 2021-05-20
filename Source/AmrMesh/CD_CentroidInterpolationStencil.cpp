@@ -14,7 +14,7 @@
 
 // Our includes
 #include <CD_CentroidInterpolationStencil.H>
-#include <LinearStencil.H>
+#include <CD_LinearStencil.H>
 #include <CD_LeastSquares.H>
 #include <CD_NamespaceHeader.H>
 

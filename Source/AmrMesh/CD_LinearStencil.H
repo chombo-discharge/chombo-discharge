@@ -1,18 +1,24 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   LinearStencil.H
+  @file   CD_LinearStencil.H
   @brief  Routines for computing a bi/tri-linear stencil in cut-cells, with modifications for a bunch of corner cases involving multi-cells. 
   @author Robert Marskar
-  @date   Jan. 2018
 */
 
-#ifndef _LINEARSTENCIL_
-#define _LINEARSTENCIL_
+#ifndef CD_LinearStencil_H
+#define CD_LinearStencil_H
 
+// Chombo includes
 #include <Stencil.H>
 #include <ProblemDomain.H>
 #include <EBISBox.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_NamespaceHeader.H>
   
 /*!
   @brief Static class with routines for getting various kinds of stencils
@@ -62,6 +68,7 @@ protected:
 				     const ProblemDomain& a_domain,
 				     const EBISBox&       a_ebisbox);
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

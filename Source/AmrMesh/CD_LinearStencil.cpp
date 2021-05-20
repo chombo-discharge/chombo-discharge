@@ -1,15 +1,21 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   LinearStencil.cpp
-  @brief  Implementation of LinearStencil.H
+  @file   CD_LinearStencil.cpp
+  @brief  Implementation of cd_LinearStencil.H
   @author Robert Marskar
-  @date   Jan. 2018
 */
 
-#include "LinearStencil.H"
+// Our includes
+#include <CD_LinearStencil.H>
+#include <CD_NamespaceHeader.H>
 
 #define DEBUG_LINEARSTENCIL 1
 
-#include "CD_NamespaceHeader.H"
+
   
 Real LinearStencil::tolerance = 1.E-6;
 
@@ -533,4 +539,5 @@ bool LinearStencil::computeInterpStencil3D(VoFStencil&          a_stencil,
   
   return found_stencil;
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
