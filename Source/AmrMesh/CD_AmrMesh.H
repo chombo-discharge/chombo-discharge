@@ -361,7 +361,7 @@ public:
 		const std::string        a_realm,
 		const phase::which_phase a_phase,
 		const int                a_nComp,
-		const int                a_nGhost = -1);
+		const int                a_nGhost = 0);
 
   /*!
     @brief Allocate a data holder over a specific Realm
@@ -375,7 +375,7 @@ public:
 		const std::string        a_realm,
 		const phase::which_phase a_phase,
 		const int                a_nComp,
-		const int                a_nGhost = -1);
+		const int                a_nGhost = 0);
 
   /*!
     @brief Allocate Boolean data over a specific Realm
@@ -415,7 +415,7 @@ public:
     @param[in]  a_nGhost Number of ghost cells for a_data
     @note If a_nGhost < 0, this routine will use the default number of ghost cells. 
   */
-  void allocate(MFAMRIVData& a_data, const std::string a_realm, const int a_ncomp, const int a_ghost = -1);
+  void allocate(MFAMRIVData& a_data, const std::string a_realm, const int a_ncomp, const int a_ghost = 0);
 
   /*!
     @brief Reallocate data. 
