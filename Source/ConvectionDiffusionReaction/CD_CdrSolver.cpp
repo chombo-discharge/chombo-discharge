@@ -19,7 +19,7 @@
 #include <CD_CdrSolver.H>
 #include <CD_CdrSolverF_F.H>
 #include <CD_CdrFhdF_F.H>
-#include <data_ops.H>
+#include <CD_DataOps.H>
 #include <CD_NamespaceHeader.H>
 
 CdrSolver::CdrSolver(){
@@ -108,9 +108,9 @@ void CdrSolver::allocateInternals(){
   m_amr->allocate(m_source,  m_realm, m_phase, sca);
   m_amr->allocate(m_scratch, m_realm, m_phase, sca);
   
-  data_ops::set_value(m_phi,      0.0);
-  data_ops::set_value(m_source,   0.0);
-  data_ops::set_value(m_scratch,  0.0);
+  DataOps::setValue(m_phi,      0.0);
+  DataOps::setValue(m_source,   0.0);
+  DataOps::setValue(m_scratch,  0.0);
 
   // Only allocate memory for cell-centered and face-centered velocities if the solver is mobile. Otherwise, allocate
   // a NULL pointer that we can pass around in TimeStepper in order to handle special cases
@@ -119,8 +119,8 @@ void CdrSolver::allocateInternals(){
     m_amr->allocate(m_cellVelocity, m_realm, m_phase, vec);
     m_amr->allocate(m_faceStates,   m_realm, m_phase, sca);
     
-    data_ops::set_value(m_faceVelocity,  0.0);
-    data_ops::set_value(m_cellVelocity,  0.0);
+    DataOps::setValue(m_faceVelocity,  0.0);
+    DataOps::setValue(m_cellVelocity,  0.0);
   }
   else{
     m_amr->allocatePointer(m_faceVelocity);
@@ -134,9 +134,9 @@ void CdrSolver::allocateInternals(){
     m_amr->allocate(m_faceCenteredDiffusionCoefficient, m_realm, m_phase, sca);
     m_amr->allocate(m_ebCenteredDiffusionCoefficient,   m_realm, m_phase, sca);
     
-    data_ops::set_value(m_aCoef,                     0.0);
-    data_ops::set_value(m_faceCenteredDiffusionCoefficient, 0.0);
-    data_ops::set_value(m_ebCenteredDiffusionCoefficient,   0.0);
+    DataOps::setValue(m_aCoef,                     0.0);
+    DataOps::setValue(m_faceCenteredDiffusionCoefficient, 0.0);
+    DataOps::setValue(m_ebCenteredDiffusionCoefficient,   0.0);
   }
   else{
     m_amr->allocatePointer(m_aCoef);
@@ -157,9 +157,9 @@ void CdrSolver::allocateInternals(){
   m_amr->allocate(m_massDifference,      m_realm, m_phase, sca);
   m_amr->allocate(m_nonConservativeDivG, m_realm, m_phase, sca);
   
-  data_ops::set_value(m_ebFlux,     0.0);
-  data_ops::set_value(m_ebZero,     0.0);
-  data_ops::set_value(m_domainFlux, 0.0);
+  DataOps::setValue(m_ebFlux,     0.0);
+  DataOps::setValue(m_ebZero,     0.0);
+  DataOps::setValue(m_domainFlux, 0.0);
 
   // This defines interpolation stencils and space for interpolants
   this->defineInterpolationStencils();
@@ -202,7 +202,7 @@ void CdrSolver::averageVelocityToFaces(EBAMRFluxData& a_faceVelocity, const EBAM
 
   const int finest_level = m_amr->getFinestLevel();
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    data_ops::average_cell_to_face(*a_faceVelocity[lvl], *a_cellVelocity[lvl], m_amr->getDomains()[lvl]);
+    DataOps::averageCellToFace(*a_faceVelocity[lvl], *a_cellVelocity[lvl], m_amr->getDomains()[lvl]);
     a_faceVelocity[lvl]->exchange();
   }
 }
@@ -309,7 +309,7 @@ void CdrSolver::computeDivG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const EBA
     pout() << m_name + "::computeDivG" << endl;
   }
 
-  data_ops::set_value(a_divG, 0.0);
+  DataOps::setValue(a_divG, 0.0);
   
   this->conservativeDivergenceNoKappaDivision(a_divG, a_G, a_ebFlux);      // Make the conservative divergence.
   this->nonConservativeDivergence(m_nonConservativeDivG, a_divG);          // Non-conservative divergence
@@ -361,7 +361,7 @@ void CdrSolver::injectEbFlux(EBAMRCellData& a_phi, const EBAMRIVData& a_ebFlux, 
   }
 
   // Now do the increment. 
-  data_ops::incr(a_phi, m_scratch, -a_dt);
+  DataOps::incr(a_phi, m_scratch, -a_dt);
 }
 
 void CdrSolver::conservativeDivergenceNoKappaDivisionOnlyEbFlux(EBAMRCellData& a_conservativeDivergence, const EBAMRIVData& a_ebFlux){
@@ -822,7 +822,7 @@ void CdrSolver::initialData(){
   const bool deposit_function  = m_species->initializeWithFunction();
   const bool deposit_particles = m_species->initializeWithParticles();
 
-  data_ops::set_value(m_phi, 0.0);
+  DataOps::setValue(m_phi, 0.0);
   
   if(deposit_particles){
     initialDataParticles();
@@ -847,7 +847,7 @@ void CdrSolver::initialDataDistribution(){
   const int finest_level = m_amr->getFinestLevel();
 
   // Copy this
-  data_ops::copy(m_scratch, m_phi);
+  DataOps::copy(m_scratch, m_phi);
   
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const Real dx = m_amr->getDx()[lvl];
@@ -888,7 +888,7 @@ void CdrSolver::initialDataDistribution(){
   m_amr->averageDown(m_phi, m_realm, m_phase);
   m_amr->interpGhost(m_phi, m_realm, m_phase);
 
-  data_ops::set_covered_value(m_phi, 0, 0.0);
+  DataOps::set_covered_value(m_phi, 0, 0.0);
 }
 
 void CdrSolver::initialDataParticles(){
@@ -909,7 +909,7 @@ void CdrSolver::initialDataParticles(){
     particles.addParticles(m_species->getInitialParticles());
 
     // We will deposit onto m_phi, using m_scratch as a scratch holder for interpolation stuff
-    data_ops::set_value(m_phi, 0.0);
+    DataOps::setValue(m_phi, 0.0);
   
     // Deposit onto mseh
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
@@ -931,7 +931,7 @@ void CdrSolver::initialDataParticles(){
 #if CH_SPACEDIM==2 // Only do this scaling for planar cartesian
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
       const Real dx = m_amr->getDx()[lvl];
-      data_ops::scale(*m_phi[lvl], 1./dx);
+      DataOps::scale(*m_phi[lvl], 1./dx);
     }
 #endif
   }
@@ -1195,7 +1195,7 @@ void CdrSolver::nonConservativeDivergence(EBAMRIVData& a_nonConservativeDivergen
     stencils.apply(a_nonConservativeDivergence, a_divG);
   }
   else{
-    data_ops::set_value(a_nonConservativeDivergence, 0.0);
+    DataOps::setValue(a_nonConservativeDivergence, 0.0);
   }
 }
 
@@ -1229,7 +1229,7 @@ void CdrSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a
     }
   }
 
-  //  data_ops::floor(m_phi, 0.0);
+  //  DataOps::floor(m_phi, 0.0);
   m_amr->averageDown(m_phi, m_realm, m_phase);
   m_amr->interpGhost(m_phi, m_realm, m_phase);
 
@@ -1354,8 +1354,8 @@ void CdrSolver::setDiffusionCoefficient(const Real a_diffusionCoefficient){
   const int finest_level = m_amr->getFinestLevel();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    data_ops::set_value(*m_faceCenteredDiffusionCoefficient[lvl],    a_diffusionCoefficient);
-    data_ops::set_value(*m_ebCenteredDiffusionCoefficient[lvl], a_diffusionCoefficient);
+    DataOps::setValue(*m_faceCenteredDiffusionCoefficient[lvl],    a_diffusionCoefficient);
+    DataOps::setValue(*m_ebCenteredDiffusionCoefficient[lvl], a_diffusionCoefficient);
 
     m_faceCenteredDiffusionCoefficient[lvl]->exchange();
   }
@@ -1387,7 +1387,7 @@ void CdrSolver::setEbFlux(const Real a_ebFlux){
 
   const int finest_level = m_amr->getFinestLevel();
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    data_ops::set_value(*m_ebFlux[lvl], a_ebFlux);
+    DataOps::setValue(*m_ebFlux[lvl], a_ebFlux);
   }
 }
 
@@ -1397,7 +1397,7 @@ void CdrSolver::setDomainFlux(const Real a_domainFlux){
     pout() << m_name + "::setDomainFlux(constant)" << endl;
   }
 
-  data_ops::set_value(m_domainFlux, 0.0);
+  DataOps::setValue(m_domainFlux, 0.0);
 }
 
 void CdrSolver::setEbIndexSpace(const RefCountedPtr<EBIndexSpace>& a_ebis){
@@ -1447,7 +1447,7 @@ void CdrSolver::setSource(const Real a_source){
   const int finest_level = m_amr->getFinestLevel();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    data_ops::set_value(*m_source[lvl], a_source, comp);
+    DataOps::setValue(*m_source[lvl], a_source, comp);
   }
 
   m_amr->averageDown(m_source, m_realm, m_phase);
@@ -1491,7 +1491,7 @@ void CdrSolver::setVelocity(const RealVect a_velo){
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     for (int dir = 0; dir < SpaceDim; dir++){
-      data_ops::set_value(*m_cellVelocity[lvl], a_velo[dir], dir);
+      DataOps::setValue(*m_cellVelocity[lvl], a_velo[dir], dir);
     }
 
     m_cellVelocity[lvl]->exchange();
@@ -1568,7 +1568,7 @@ void CdrSolver::writePlotFile(){
   // Allocate storage
   EBAMRCellData output;
   m_amr->allocate(output, m_realm, m_phase, ncomps);
-  data_ops::set_value(output, 0.0);
+  DataOps::setValue(output, 0.0);
 
   // Copy internal data to be plotted over to 'output'
   int icomp = 0;
@@ -1612,8 +1612,8 @@ void CdrSolver::writePlotData(EBAMRCellData& a_output, int& a_comp){
 
   // Plot diffusion coefficients
   if(m_plotDiffusionCoefficient && m_isDiffusive) { // Need to compute the cell-centerd stuff first
-    data_ops::set_value(m_scratch, 0.0);
-    data_ops::average_face_to_cell(m_scratch, m_faceCenteredDiffusionCoefficient, m_amr->getDomains());
+    DataOps::setValue(m_scratch, 0.0);
+    DataOps::averageFaceToCell(m_scratch, m_faceCenteredDiffusionCoefficient, m_amr->getDomains());
     this->writeData(a_output, a_comp, m_scratch,   false);
   }
 
@@ -1629,8 +1629,8 @@ void CdrSolver::writePlotData(EBAMRCellData& a_output, int& a_comp){
 
   // Plot EB fluxes
   if(m_plotEbFlux && m_isMobile){
-    data_ops::set_value(m_scratch, 0.0);
-    data_ops::incr(m_scratch, m_ebFlux, 1.0);
+    DataOps::setValue(m_scratch, 0.0);
+    DataOps::incr(m_scratch, m_ebFlux, 1.0);
     this->writeData(a_output, a_comp, m_scratch, false);
   }
 }
@@ -1649,7 +1649,7 @@ void CdrSolver::writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellD
 
   EBAMRCellData scratch;
   m_amr->allocate(scratch, m_realm, m_phase, ncomp);
-  data_ops::copy(scratch, a_data);
+  DataOps::copy(scratch, a_data);
 
   if(a_interp){
     m_amr->interpToCentroids(scratch, m_realm, phase::gas);
@@ -1668,7 +1668,7 @@ void CdrSolver::writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellD
     }
   }
 
-  data_ops::set_covered_value(a_output, a_comp, 0.0);
+  DataOps::set_covered_value(a_output, a_comp, 0.0);
 
   a_comp += ncomp;
 }
@@ -1705,7 +1705,7 @@ Real CdrSolver::computeAdvectionDt(){
   if(m_isMobile){
     const int comp = 0;
 
-    data_ops::set_value(m_scratch, min_dt);
+    DataOps::setValue(m_scratch, min_dt);
     
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
       const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
@@ -1741,8 +1741,8 @@ Real CdrSolver::computeAdvectionDt(){
 
     Real maxVal = std::numeric_limits<Real>::max();
     
-    data_ops::set_covered_value(m_scratch, comp, maxVal);
-    data_ops::get_max_min(maxVal, min_dt, m_scratch, comp);
+    DataOps::set_covered_value(m_scratch, comp, maxVal);
+    DataOps::getMaxMin(maxVal, min_dt, m_scratch, comp);
   }
 
 
@@ -1760,7 +1760,7 @@ Real CdrSolver::computeDiffusionDt(){
   if(m_isDiffusive){
     const int comp  = 0;
 
-    data_ops::set_value(m_scratch, min_dt);
+    DataOps::setValue(m_scratch, min_dt);
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
       const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
@@ -1812,8 +1812,8 @@ Real CdrSolver::computeDiffusionDt(){
 
       Real maxVal = std::numeric_limits<Real>::max();
     
-      data_ops::set_covered_value(m_scratch, comp, maxVal);
-      data_ops::get_max_min(maxVal, min_dt, m_scratch, comp);
+      DataOps::set_covered_value(m_scratch, comp, maxVal);
+      DataOps::getMaxMin(maxVal, min_dt, m_scratch, comp);
     }
   }
 
@@ -1837,7 +1837,7 @@ Real CdrSolver::computeAdvectionDiffusionDt(){
   else if(m_isMobile && m_isDiffusive){
     const int comp  = 0;
 
-    data_ops::set_value(m_scratch, 0.0);
+    DataOps::setValue(m_scratch, 0.0);
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
       const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
@@ -1915,8 +1915,8 @@ Real CdrSolver::computeAdvectionDiffusionDt(){
 
     Real maxVal = std::numeric_limits<Real>::max();
     
-    data_ops::set_covered_value(m_scratch, comp, maxVal);  // Covered cells are bogus. 
-    data_ops::get_max_min(maxVal, min_dt, m_scratch, comp);
+    DataOps::set_covered_value(m_scratch, comp, maxVal);  // Covered cells are bogus. 
+    DataOps::getMaxMin(maxVal, min_dt, m_scratch, comp);
   }
 
 
@@ -1997,7 +1997,7 @@ Real CdrSolver::computeMass(){
   const Real dx = m_amr->getDx()[base];
   m_amr->averageDown(m_phi, m_realm, m_phase);
   
-  data_ops::kappa_sum(mass, *m_phi[base]);
+  DataOps::kappaSum(mass, *m_phi[base]);
   mass *= pow(dx, SpaceDim);
   
   return mass;
@@ -2177,9 +2177,9 @@ void CdrSolver::gwnDiffusionSource(EBAMRCellData& a_noiseSource, const EBAMRCell
 
     this->fillGwn(m_scratchFluxTwo, 1.0);                         // Gaussian White Noise = W/sqrt(dV)
     this->smoothHeavisideFaces(m_scratchFluxOne, a_cellPhi); // m_scratchFluxOne = phis
-    data_ops::multiply(m_scratchFluxOne, m_faceCenteredDiffusionCoefficient);                // m_scratchFluxOne = D*phis
-    data_ops::scale(m_scratchFluxOne, 2.0);                        // m_scratchFluxOne = 2*D*phis
-    data_ops::square_root(m_scratchFluxOne);                       // m_scratchFluxOne = sqrt(2*D*phis)
+    DataOps::multiply(m_scratchFluxOne, m_faceCenteredDiffusionCoefficient);                // m_scratchFluxOne = D*phis
+    DataOps::scale(m_scratchFluxOne, 2.0);                        // m_scratchFluxOne = 2*D*phis
+    DataOps::squareRoot(m_scratchFluxOne);                       // m_scratchFluxOne = sqrt(2*D*phis)
 
 #if 0 // Debug
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
@@ -2193,7 +2193,7 @@ void CdrSolver::gwnDiffusionSource(EBAMRCellData& a_noiseSource, const EBAMRCell
     }
 #endif
   
-    data_ops::multiply(m_scratchFluxOne, m_scratchFluxTwo);                     // Holds random, cell-centered flux
+    DataOps::multiply(m_scratchFluxOne, m_scratchFluxTwo);                     // Holds random, cell-centered flux
     this->conservativeDivergenceNoKappaDivision(a_noiseSource, m_scratchFluxOne, m_ebZero); 
   
 #if 0 // Debug
@@ -2206,7 +2206,7 @@ void CdrSolver::gwnDiffusionSource(EBAMRCellData& a_noiseSource, const EBAMRCell
 #endif
   }
   else{
-    data_ops::set_value(a_noiseSource, 0.0);
+    DataOps::setValue(a_noiseSource, 0.0);
   }
 }
 

@@ -21,7 +21,7 @@
 // Our includes
 #include <CD_FieldSolver.H>
 #include <mfalias.H>
-#include <data_ops.H>
+#include <CD_DataOps.H>
 #include <units.H>
 #include <CD_NamespaceHeader.H>
 
@@ -82,7 +82,7 @@ void FieldSolver::computeElectricField(MFAMRCellData& a_electricField, const MFA
   }
 
   m_amr->computeGradient(a_electricField, a_potential, m_realm);
-  data_ops::scale(a_electricField, -1.0);
+  DataOps::scale(a_electricField, -1.0);
 
   m_amr->averageDown(a_electricField, m_realm);
   m_amr->interpGhost(a_electricField, m_realm);
@@ -102,11 +102,11 @@ void FieldSolver::allocateInternals(){
   m_amr->allocate(m_sigma,         m_realm, phase::gas, ncomp);
   m_amr->allocate(m_electricField, m_realm, SpaceDim);
 
-  data_ops::set_value(m_potential,     0.0);
-  data_ops::set_value(m_rho,           0.0);
-  data_ops::set_value(m_sigma,         0.0);
-  data_ops::set_value(m_residue,       0.0);
-  data_ops::set_value(m_electricField, 0.0);
+  DataOps::setValue(m_potential,     0.0);
+  DataOps::setValue(m_rho,           0.0);
+  DataOps::setValue(m_sigma,         0.0);
+  DataOps::setValue(m_residue,       0.0);
+  DataOps::setValue(m_electricField, 0.0);
 }
 
 void FieldSolver::preRegrid(const int a_lbase, const int a_oldFinestLevel){
@@ -144,14 +144,14 @@ void FieldSolver::computeDisplacementField(MFAMRCellData& a_displacementField, c
     mfalias::aliasMF(D_gas,   phase::gas, D);
     mfalias::aliasMF(E_gas,   phase::gas, E);
     E_gas.localCopyTo(D_gas);
-    data_ops::scale(D_gas,   units::s_eps0);
+    DataOps::scale(D_gas,   units::s_eps0);
 
     // For the solid phase, we multiply by epsilon. 
     if(m_multifluidIndexSpace->numPhases() > 1){
       mfalias::aliasMF(D_solid, phase::solid, D);
       mfalias::aliasMF(E_solid, phase::solid, E);
       E_solid.localCopyTo(D_solid);
-      data_ops::scale(D_solid, units::s_eps0);
+      DataOps::scale(D_solid, units::s_eps0);
 
       // Now scale by relative epsilon
       if(dielectrics.size() > 0){
@@ -203,7 +203,7 @@ Real FieldSolver::computeEnergyDensity(const MFAMRCellData& a_electricField){
   m_amr->allocate(D, m_realm, SpaceDim);
   m_amr->allocate(EdotD, m_realm, 1);
   this->computeDisplacementField(D, a_electricField);
-  data_ops::dot_prod(EdotD, D, a_electricField);
+  DataOps::dotProduct(EdotD, D, a_electricField);
 
   Real U_g = 0.0;
   Real U_s = 0.0;
@@ -213,14 +213,14 @@ Real FieldSolver::computeEnergyDensity(const MFAMRCellData& a_electricField){
   m_amr->allocatePointer(data_g);
   m_amr->alias(data_g, phase::gas, EdotD);
   m_amr->averageDown(data_g, m_realm, phase::gas);
-  data_ops::norm(U_g, *data_g[0], m_amr->getDomains()[0], 1);
+  DataOps::norm(U_g, *data_g[0], m_amr->getDomains()[0], 1);
 
   if(m_multifluidIndexSpace->numPhases() > 1){
     EBAMRCellData data_s;
     m_amr->allocatePointer(data_s);
     m_amr->alias(data_s, phase::solid, EdotD);
     m_amr->averageDown(data_s, m_realm, phase::solid);
-    data_ops::norm(U_s, *data_s[0], m_amr->getDomains()[0], 1);
+    DataOps::norm(U_s, *data_s[0], m_amr->getDomains()[0], 1);
   }
 
   return 0.5*(U_g + U_s);
@@ -243,9 +243,9 @@ Real FieldSolver::computeCapacitance(){
   m_amr->allocate(source, m_realm, 1);
   m_amr->allocate(sigma,  m_realm, phase::gas, 1);
 
-  data_ops::set_value(phi,    0.0);
-  data_ops::set_value(source, 0.0);
-  data_ops::set_value(sigma,  0.0);
+  DataOps::setValue(phi,    0.0);
+  DataOps::setValue(source, 0.0);
+  DataOps::setValue(sigma,  0.0);
 
   this->solve(phi, source, sigma);
 
@@ -704,7 +704,7 @@ void FieldSolver::writePlotData(EBAMRCellData& a_output, int& a_comp){
   }
   if(m_plotRho) {
     this->writeMultifluidData(a_output, a_comp, m_rho, false);
-    //    data_ops::set_covered_value(a_output, a_comp-1, 0.0); // Why was this here? If the dielectric side contains charge, it should not be here. 
+    //    DataOps::set_covered_value(a_output, a_comp-1, 0.0); // Why was this here? If the dielectric side contains charge, it should not be here. 
   }
   if(m_plotResidue) {
     this->writeMultifluidData(a_output, a_comp, m_residue,  false);

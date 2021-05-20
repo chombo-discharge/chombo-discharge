@@ -8,7 +8,7 @@
 #include "cdr_plasma_tagger.H"
 #include <CD_CdrIterator.H>
 #include <CD_RtIterator.H>
-#include "data_ops.H"
+#include <CD_DataOps.H>
 
 #include <EBArith.H>
 #include <ParmParse.H>
@@ -113,7 +113,7 @@ void cdr_plasma_tagger::writePlotData(EBAMRCellData& a_output, Vector<std::strin
     
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
       tracer[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
-      data_ops::set_covered_value(*a_output[lvl], a_icomp, 0.0);
+      DataOps::set_covered_value(*a_output[lvl], a_icomp, 0.0);
     }
 
     // Add component and name

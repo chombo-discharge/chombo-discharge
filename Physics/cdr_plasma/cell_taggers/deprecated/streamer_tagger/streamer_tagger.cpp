@@ -6,7 +6,7 @@
 */
 
 #include "streamer_tagger.H"
-#include "data_ops.H"
+#include <CD_DataOps.H>
 
 #include <ParmParse.H>
   
@@ -82,7 +82,7 @@ void streamer_tagger::compute_tracers(){
   // Compute the electric field magnitude
   EBAMRCellData Emag;
   m_amr->allocate(Emag, m_phase, 1);
-  data_ops::vector_length(Emag, Efield);
+  DataOps::vectorLength(Emag, Efield);
   m_amr->averageDown(Emag, m_phase);
   m_amr->interpGhost(Emag, m_phase);
 
@@ -93,25 +93,25 @@ void streamer_tagger::compute_tracers(){
   Real Se_max,  Se_min;
   Real E_max,   E_min;
   Real rho_max, rho_min;
-  data_ops::get_max_min(ne_max,  ne_min,  ne,   comp);
-  data_ops::get_max_min(Se_max,  Se_min,  Se,   comp);
-  data_ops::get_max_min(E_max,   E_min,   Emag, comp);
-  data_ops::get_max_min(rho_max, rho_min, rho,  comp);
+  DataOps::getMaxMin(ne_max,  ne_min,  ne,   comp);
+  DataOps::getMaxMin(Se_max,  Se_min,  Se,   comp);
+  DataOps::getMaxMin(E_max,   E_min,   Emag, comp);
+  DataOps::getMaxMin(rho_max, rho_min, rho,  comp);
 
   // Compute the FLASH code error
   const Real FLASH_eps = 1.E-2;
   if(ne_max > 1.E-2*ne_min && Abs(ne_max) > 0.0){
-    data_ops::flash_error(m_tracer[0], ne, FLASH_eps);
+    DataOps::flashError(m_tracer[0], ne, FLASH_eps);
   }
   else{
-    data_ops::set_value(m_tracer[0], 0.0);
+    DataOps::setValue(m_tracer[0], 0.0);
   }
 
   //  if(Abs(rho_max) > 1.E-2*Abs(rho_min)){
-  //    data_ops::flash_error(m_tracer[1], Emag, FLASH_eps);
+  //    DataOps::flashError(m_tracer[1], Emag, FLASH_eps);
   // }
   // else{
-  //   data_ops::set_value(m_tracer[1], 0.0);
+  //   DataOps::setValue(m_tracer[1], 0.0);
   // }
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){

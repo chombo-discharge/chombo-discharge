@@ -15,7 +15,7 @@
 // Our includes
 #include <CD_CdrMuscl.H>
 #include <CD_CdrMusclF_F.H>
-#include <data_ops.H>
+#include <CD_DataOps.H>
 #include <CD_NamespaceHeader.H>
 
 CdrMuscl::CdrMuscl(){
@@ -90,13 +90,13 @@ void CdrMuscl::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_ph
   // Need to overwrite ghost cells, so I do that here.
   EBAMRCellData copy_state; 
   m_amr->allocate(copy_state, m_realm, m_phase, ncomp);
-  data_ops::set_value(copy_state, 0.0);
-  data_ops::incr(copy_state, a_phi, 1.0);
+  DataOps::setValue(copy_state, 0.0);
+  DataOps::incr(copy_state, a_phi, 1.0);
 
   m_amr->averageDown(copy_state,     m_realm, m_phase);
   m_amr->interpGhostPwl(copy_state, m_realm, m_phase);
 
-  data_ops::set_value(a_facePhi, 0.0);
+  DataOps::setValue(a_facePhi, 0.0);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];

@@ -14,7 +14,7 @@
 
 // Our includes
 #include <CD_RtSolver.H>
-#include <data_ops.H>
+#include <CD_DataOps.H>
 #include <CD_NamespaceHeader.H>
 
 RtSolver::RtSolver(){
@@ -202,7 +202,7 @@ void RtSolver::setSource(const Real a_source){
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     for (int comp = 0; comp < m_source[lvl]->nComp(); comp++){
-      data_ops::set_value(*m_source[lvl], a_source, comp);
+      DataOps::setValue(*m_source[lvl], a_source, comp);
     }
   }
 
@@ -230,7 +230,7 @@ void RtSolver::initialData() {
     pout() << m_name + "::initialData" << endl;
   }
   
-  data_ops::set_value(m_phi, 0.0);
+  DataOps::setValue(m_phi, 0.0);
 }
 
 void RtSolver::writePlotData(EBAMRCellData& a_output, int& a_comp){
@@ -258,7 +258,7 @@ void RtSolver::writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellDa
   // Copy data onto scratch
   EBAMRCellData scratch;
   m_amr->allocate(scratch, m_realm, m_phase, ncomp);
-  data_ops::copy(scratch, a_data);
+  DataOps::copy(scratch, a_data);
 
   // Interp if we should
   if(a_interp){
@@ -277,7 +277,7 @@ void RtSolver::writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellDa
     }
   }
 
-  data_ops::set_covered_value(a_output, a_comp, 0.0);
+  DataOps::set_covered_value(a_output, a_comp, 0.0);
 
   a_comp += ncomp;
 }

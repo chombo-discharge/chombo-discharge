@@ -1,12 +1,12 @@
 /*!
-  @file data_ops.H
+  @file DataOps.H
   @brief Agglomeration of useful data operations
   @author Robert Marskar
   @date Nov 2017
 */
 
-#ifndef _data_ops_
-#define _data_ops_
+#ifndef _DataOps_
+#define _DataOps_
 
 #include "EBAMRData.H"
 #include "MFInterfaceFAB.H"
@@ -16,45 +16,45 @@
 /*!
   @brief Agglomeration of useful data operations. Doing this because I use smart pointer all around
 */
-class data_ops {
+class DataOps {
 public:
-  template <typename T> static void set_value(LevelData<MFInterfaceFAB<T> >& a_lhs, const T& a_value);
+  template <typename T> static void setValue(LevelData<MFInterfaceFAB<T> >& a_lhs, const T& a_value);
 
   template <typename T> static int sgn(const T a_value);
 
-  static void average_cell_to_face(EBAMRFluxData&               a_facedata,
+  static void averageCellToFace(EBAMRFluxData&               a_facedata,
 				   const EBAMRCellData&         a_celldata,
 				   const Vector<ProblemDomain>& a_domains);
 
-  static void average_cell_to_face(LevelData<EBFluxFAB>&       a_facedata,
+  static void averageCellToFace(LevelData<EBFluxFAB>&       a_facedata,
 				   const LevelData<EBCellFAB>& a_celldata,
 				   const ProblemDomain&        a_domain);
 
-  static void average_cell_to_face_allcomps(EBAMRFluxData& a_face_data,
+  static void averageCellToFaceAllComps(EBAMRFluxData& a_face_data,
 					    const EBAMRCellData& a_cell_data,
 					    const Vector<ProblemDomain>& a_domains);
 
-  static void average_cell_to_face_allcomps(LevelData<EBFluxFAB>&       a_facedata,
+  static void averageCellToFaceAllComps(LevelData<EBFluxFAB>&       a_facedata,
 					    const LevelData<EBCellFAB>& a_celldata,
 					    const ProblemDomain&        a_domain);
 
-  static void average_face_to_cell(EBAMRCellData&               a_celldata,
+  static void averageFaceToCell(EBAMRCellData&               a_celldata,
 				   const EBAMRFluxData&         a_fluxdata,
 				   const Vector<ProblemDomain>& a_domains);
 
-  static void average_face_to_cell(LevelData<EBCellFAB>&       a_celldata,
+  static void averageFaceToCell(LevelData<EBCellFAB>&       a_celldata,
 				   const LevelData<EBFluxFAB>& a_fluxdata,
 				   const ProblemDomain&        a_domain);
 
-  static void dot_prod(MFAMRCellData& a_result, const MFAMRCellData& a_data1, const MFAMRCellData& a_data2);
+  static void dotProduct(MFAMRCellData& a_result, const MFAMRCellData& a_data1, const MFAMRCellData& a_data2);
 
-  static void dot_prod(LevelData<MFCellFAB>& a_result, const LevelData<MFCellFAB>& a_data1, const LevelData<MFCellFAB>& a_data2);
+  static void dotProduct(LevelData<MFCellFAB>& a_result, const LevelData<MFCellFAB>& a_data1, const LevelData<MFCellFAB>& a_data2);
   
-  static void dot_prod(EBAMRCellData& a_result, const EBAMRCellData& a_data1, const EBAMRCellData& a_data2);
+  static void dotProduct(EBAMRCellData& a_result, const EBAMRCellData& a_data1, const EBAMRCellData& a_data2);
 
-  static void dot_prod(LevelData<EBCellFAB>& a_result, const LevelData<EBCellFAB>& a_data1, const LevelData<EBCellFAB>& a_data2);
+  static void dotProduct(LevelData<EBCellFAB>& a_result, const LevelData<EBCellFAB>& a_data1, const LevelData<EBCellFAB>& a_data2);
 
-  static void dot_prod(EBCellFAB& a_result, const EBCellFAB& a_data1, const EBCellFAB& a_data2, const Box& a_box);
+  static void dotProduct(EBCellFAB& a_result, const EBCellFAB& a_data1, const EBCellFAB& a_data2, const Box& a_box);
 
   static void incr(MFAMRCellData& a_lhs, const MFAMRCellData& a_rhs, const Real a_scale);
   
@@ -100,9 +100,9 @@ public:
 
   static void divide(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const int a_lcomp, const int a_rcomp);
 
-  static void divide_scalar(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs);
+  static void divideByScalar(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs);
   
-  static void divide_scalar(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs);
+  static void divideByScalar(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs);
 
   static void exponentiate(EBAMRCellData& a_lhs, const Real a_factor);
 
@@ -116,19 +116,19 @@ public:
 
   static void floor(LevelData<BaseIVFAB<Real> >& a_lhs, const Real a_value); 
 
-  static void get_max_min(Real& max, Real& min, EBAMRCellData& a_E, const int a_comp);
+  static void getMaxMin(Real& max, Real& min, EBAMRCellData& a_E, const int a_comp);
 
-  static void get_max_min(Real& max, Real& min, LevelData<EBCellFAB>& a_E, const int a_comp);
+  static void getMaxMin(Real& max, Real& min, LevelData<EBCellFAB>& a_E, const int a_comp);
 
-  static void get_max_min(Vector<Real>& a_max, Vector<Real>& a_min, Vector<EBAMRCellData>& a_data);
+  static void getMaxMin(Vector<Real>& a_max, Vector<Real>& a_min, Vector<EBAMRCellData>& a_data);
 
-  static void get_max_min_norm(Real& a_max, Real& a_min, EBAMRCellData& data);
+  static void getMaxMinNorm(Real& a_max, Real& a_min, EBAMRCellData& data);
 
-  static void get_max_min_norm(Real& a_max, Real& a_min, LevelData<EBCellFAB>& data);
+  static void getMaxMinNorm(Real& a_max, Real& a_min, LevelData<EBCellFAB>& data);
 
-  static void get_max_min_norm(Real& a_max, Real& a_min, EBAMRIVData& data);
+  static void getMaxMinNorm(Real& a_max, Real& a_min, EBAMRIVData& data);
 
-  static void get_max_min_norm(Real& a_max, Real& a_min, LevelData<BaseIVFAB<Real> >& data);
+  static void getMaxMinNorm(Real& a_max, Real& a_min, LevelData<BaseIVFAB<Real> >& data);
 
   static void invert(EBAMRFluxData& a_data);
 
@@ -136,27 +136,27 @@ public:
 
   static void invert(EBFluxFAB& a_data);
 
-  static void kappa_sum(Real& a_mass, const LevelData<EBCellFAB>& a_lhs);
+  static void kappaSum(Real& a_mass, const LevelData<EBCellFAB>& a_lhs);
 
-  static void kappa_scale(EBAMRCellData& a_data);
+  static void kappaScale(EBAMRCellData& a_data);
 
-  static void kappa_scale(LevelData<EBCellFAB>& a_data);
+  static void kappaScale(LevelData<EBCellFAB>& a_data);
 
-  static void kappa_scale(MFAMRCellData& a_data);
+  static void kappaScale(MFAMRCellData& a_data);
 
-  static void kappa_scale(LevelData<MFCellFAB>& a_data);
+  static void kappaScale(LevelData<MFCellFAB>& a_data);
 
   static void laplacian(EBAMRCellData& a_lapl, const EBAMRCellData& a_data);
   
   static void laplacian(LevelData<EBCellFAB>& a_lapl, const LevelData<EBCellFAB>& a_data);
 
-  static void gen_laplacian(EBAMRCellData& a_lapl, const EBAMRCellData& a_data);
+  static void genLaplacian(EBAMRCellData& a_lapl, const EBAMRCellData& a_data);
   
-  static void gen_laplacian(LevelData<EBCellFAB>& a_lapl, const LevelData<EBCellFAB>& a_data);
+  static void genLaplacian(LevelData<EBCellFAB>& a_lapl, const LevelData<EBCellFAB>& a_data);
 
-  static void flash_error(EBAMRCellData& a_lapl, const EBAMRCellData& a_data, const Real a_eps);
+  static void flashError(EBAMRCellData& a_lapl, const EBAMRCellData& a_data, const Real a_eps);
   
-  static void flash_error(LevelData<EBCellFAB>& a_lapl, const LevelData<EBCellFAB>& a_data, const Real a_eps);
+  static void flashError(LevelData<EBCellFAB>& a_lapl, const LevelData<EBCellFAB>& a_data, const Real a_eps);
 
   static void ln(EBAMRCellData& a_lhs);
 
@@ -174,13 +174,13 @@ public:
 
   static void multiply(LevelData<BaseIVFAB<Real> >& a_lhs, const LevelData<BaseIVFAB<Real> >& a_rhs);
   
-  static void multiply_scalar(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs);
+  static void multiplyScalar(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs);
 
-  static void multiply_scalar(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs);
+  static void multiplyScalar(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs);
 
-  static void multiply_scalar(EBAMRIVData& a_lhs, const EBAMRIVData& a_rhs);
+  static void multiplyScalar(EBAMRIVData& a_lhs, const EBAMRIVData& a_rhs);
   
-  static void multiply_scalar(LevelData<BaseIVFAB<Real> >& a_lhs, const LevelData<BaseIVFAB<Real> >& a_rhs);
+  static void multiplyScalar(LevelData<BaseIVFAB<Real> >& a_lhs, const LevelData<BaseIVFAB<Real> >& a_rhs);
   
   static void norm(Real& a_norm, const LevelData<EBCellFAB>& a_data, const ProblemDomain& a_domain, const int a_p);
 
@@ -202,67 +202,67 @@ public:
 
   static void set_covered_value(LevelData<EBCellFAB>& a_lhs, const int a_comp, const Real a_value);
 
-  static void set_value(EBAMRCellData& a_lhs, const Real& a_value);
+  static void setValue(EBAMRCellData& a_lhs, const Real& a_value);
   
-  static void set_value(EBAMRCellData& a_lhs, const Real a_value, const int a_comp);
+  static void setValue(EBAMRCellData& a_lhs, const Real a_value, const int a_comp);
 
-  static void set_value(LevelData<EBCellFAB>& a_lhs, const Real a_value, const int a_comp);
+  static void setValue(LevelData<EBCellFAB>& a_lhs, const Real a_value, const int a_comp);
 
-  static void set_value(LevelData<EBCellFAB>& a_lhs, const Real a_value);
+  static void setValue(LevelData<EBCellFAB>& a_lhs, const Real a_value);
 
-  static void set_value(LevelData<EBFluxFAB>& a_lhs, const Real a_value);
+  static void setValue(LevelData<EBFluxFAB>& a_lhs, const Real a_value);
   
-  static void set_value(LevelData<BaseIVFAB<Real> >& a_lhs, const Real a_value);
+  static void setValue(LevelData<BaseIVFAB<Real> >& a_lhs, const Real a_value);
 
-  static void set_value(EBAMRFluxData& a_lhs, const Real& a_value);
+  static void setValue(EBAMRFluxData& a_lhs, const Real& a_value);
 
-  static void set_value(EBAMRIVData& a_lhs, const Real& a_value);
+  static void setValue(EBAMRIVData& a_lhs, const Real& a_value);
 
-  static void set_value(MFAMRCellData& a_lhs, const Real& a_value);
+  static void setValue(MFAMRCellData& a_lhs, const Real& a_value);
 
-  static void set_value(LevelData<MFCellFAB>& a_lhs, const Real& a_value);
+  static void setValue(LevelData<MFCellFAB>& a_lhs, const Real& a_value);
 
-  static void set_value(MFAMRFluxData& a_lhs, const Real& a_value);
+  static void setValue(MFAMRFluxData& a_lhs, const Real& a_value);
 
-  static void set_value(LevelData<MFFluxFAB>& a_lhs, const Real& a_value);
+  static void setValue(LevelData<MFFluxFAB>& a_lhs, const Real& a_value);
 
-  static void set_value(MFAMRIVData& a_lhs, const Real& a_value);
+  static void setValue(MFAMRIVData& a_lhs, const Real& a_value);
 
-  static void set_value(LevelData<MFBaseIVFAB>& a_lhs, const Real& a_value);
+  static void setValue(LevelData<MFBaseIVFAB>& a_lhs, const Real& a_value);
 
-  static void set_value(EBAMRIFData& a_lhs, const Real a_value);
+  static void setValue(EBAMRIFData& a_lhs, const Real a_value);
 
-  static void set_value(LevelData<DomainFluxIFFAB>& a_lhs, const Real a_value);
+  static void setValue(LevelData<DomainFluxIFFAB>& a_lhs, const Real a_value);
 
   static void sum(Real& a_value);
 
-  static void square_root(EBAMRFluxData& a_lhs);
+  static void squareRoot(EBAMRFluxData& a_lhs);
 
-  static void square_root(LevelData<EBFluxFAB>& a_lhs);
+  static void squareRoot(LevelData<EBFluxFAB>& a_lhs);
 
-  static void vector_length(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs);
+  static void vectorLength(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs);
 
-  static void vector_length(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs);
+  static void vectorLength(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs);
 
-  static void vector_length(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& box);
+  static void vectorLength(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& box);
 
-  static void vector_length2(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs);
+  static void vectorLength2(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs);
 
-  static void vector_length2(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs);
+  static void vectorLength2(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs);
 
-  static void vector_length2(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& box);
+  static void vectorLength2(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& box);
 
-  static void compute_min_valid_box(RealVect& a_lo, RealVect& a_hi, const RealVect a_normal, const RealVect a_centroid);
+  static void computeMinValidBox(RealVect& a_lo, RealVect& a_hi, const RealVect a_normal, const RealVect a_centroid);
   
-  static bool all_corners_inside_eb(const Vector<RealVect>& a_corners, const RealVect a_normal, const RealVect a_centroid);
+  static bool allCornersInsideEb(const Vector<RealVect>& a_corners, const RealVect a_normal, const RealVect a_centroid);
 
-  static void shift_corners(Vector<RealVect>& a_corners, const RealVect& a_distance);
+  static void shiftCorners(Vector<RealVect>& a_corners, const RealVect& a_distance);
 
-  static void filter_smooth(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const int a_stride, const Real a_alpha);
+  static void filterSmooth(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const int a_stride, const Real a_alpha);
   
-  static void filter_smooth(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const int a_stride, const Real a_alpha);
+  static void filterSmooth(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const int a_stride, const Real a_alpha);
 
-  static void compute_particle_weights(unsigned long long&      a_weight,
+  static void computeParticleWeights(unsigned long long&      a_weight,
 				       unsigned long long&      a_num,
 				       unsigned long long&      a_remainder,
 				       const unsigned long long a_numPhysicalParticles,
@@ -271,6 +271,6 @@ public:
 };
 #include "CD_NamespaceFooter.H"
 
-#include "data_opsI.H"
+#include <CD_DataOpsImplem.H>
 
 #endif

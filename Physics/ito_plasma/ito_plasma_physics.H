@@ -409,7 +409,7 @@ namespace physics {
 	@brief Compute particle weights for superparticles
       */
       inline
-      void compute_particle_weights(long long&      a_weight,
+      void computeParticleWeights(long long&      a_weight,
 				    long long&      a_num,
 				    long long&      a_remainder,
 				    const long long a_numNewParticles) const;

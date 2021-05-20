@@ -517,9 +517,9 @@ void MfHelmholtzOpFactory::averageDownMG(){
 void MfHelmholtzOpFactory::resetJump(){
   CH_TIME("MfHelmholtzOpFactory::resetJump()");
 
-  data_ops::set_value(m_jump, 0.0);
+  DataOps::setValue(m_jump, 0.0);
   for (int i = 0; i < m_jump_mg.size(); i++){
-    data_ops::set_value(m_jump_mg[i], 0.0);
+    DataOps::setValue(m_jump_mg[i], 0.0);
   }
 }
 
@@ -531,14 +531,14 @@ void MfHelmholtzOpFactory::setJump(const Real& a_sigma, const Real& a_scale){
 #endif
   // for (int lvl = 0; lvl < m_num_levels; lvl++){
   //   EBLevelDataOps::setVal(*m_jump[lvl], a_sigma);
-  //   data_ops::scale(*m_jump[lvl], a_scale);
+  //   DataOps::scale(*m_jump[lvl], a_scale);
   // }
   // this->averageDownAmr();
   // this->averageDownMG();
 
-  data_ops::set_value(m_jump, a_sigma*a_scale);
+  DataOps::setValue(m_jump, a_sigma*a_scale);
   for (int i = 0; i < m_jump_mg.size(); i++){
-    data_ops::set_value(m_jump_mg[i], a_sigma*a_scale);
+    DataOps::setValue(m_jump_mg[i], a_sigma*a_scale);
   }
 #if verb
   pout() << "MfHelmholtzOpFactory::setJump - done" << endl;
@@ -561,7 +561,7 @@ void MfHelmholtzOpFactory::setJump(const EBAMRIVData& a_sigma, const Real& a_sca
       (*m_jump[lvl])[dit()].copy(box, interv, box, (*a_sigma[lvl])[dit()], interv);
     }
 
-    data_ops::scale(*m_jump[lvl], a_scale);
+    DataOps::scale(*m_jump[lvl], a_scale);
 
     m_jump[lvl]->exchange();
   }

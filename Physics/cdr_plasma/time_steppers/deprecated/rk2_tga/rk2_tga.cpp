@@ -9,7 +9,7 @@
 #include "rk2_tga_storage.H"
 #include <CD_CdrIterator.H>
 #include <CD_RtIterator.H>
-#include "data_ops.H"
+#include <CD_DataOps.H>
 #include "units.H"
 
 #include <ParmParse.H>
@@ -251,12 +251,12 @@ void rk2_tga::cache_solutions(){
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
     EBAMRCellData& cache = storage->get_cache();
 
-    data_ops::copy(cache, solver->getPhi());
+    DataOps::copy(cache, solver->getPhi());
   }
 
   {// Cache Poisson solution
     MFAMRCellData& cache = m_fieldSolver_scratch->get_cache();
-    data_ops::copy(cache, m_fieldSolver->getPotential());
+    DataOps::copy(cache, m_fieldSolver->getPotential());
   }
 
   // Cache RTE solutions
@@ -266,12 +266,12 @@ void rk2_tga::cache_solutions(){
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
     EBAMRCellData& cache = storage->get_cache();
 
-    data_ops::copy(cache, solver->getPhi());
+    DataOps::copy(cache, solver->getPhi());
   }
 
   { // Cache sigma
     EBAMRIVData& cache = m_sigma_scratch->get_cache();
-    data_ops::copy(cache, m_sigma->getPhi());
+    DataOps::copy(cache, m_sigma->getPhi());
   }
 }
 
@@ -431,14 +431,14 @@ void rk2_tga::compute_sigma_flux_into_scratch(){
   }
 
   EBAMRIVData& flux = m_sigma->getFlux();
-  data_ops::set_value(flux, 0.0);
+  DataOps::setValue(flux, 0.0);
 
   for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
     const RefCountedPtr<species>& spec      = solver_it.getSpecies();
     const EBAMRIVData& solver_flux          = solver->getEbFlux();
 
-    data_ops::incr(flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
+    DataOps::incr(flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
   }
 
   m_sigma->resetCells(flux);
@@ -459,18 +459,18 @@ void rk2_tga::advance_advection_source_cdr_k1(const Real a_dt){
     EBAMRCellData& src = solver->getSource();
 
     // Compute rhs
-    data_ops::set_value(k1, 0.0);
+    DataOps::setValue(k1, 0.0);
     solver->computeDivF(k1, phi, 0.0, true);
-    data_ops::scale(k1, -1.0); 
-    data_ops::incr(k1, src, 1.0);
+    DataOps::scale(k1, -1.0); 
+    DataOps::incr(k1, src, 1.0);
 
     // Make phi = phi + k1*alpha*dt
-    data_ops::incr(phi, k1, m_alpha*a_dt);
+    DataOps::incr(phi, k1, m_alpha*a_dt);
 
     m_amr->averageDown(phi, m_cdr->getPhase());
     m_amr->interpGhost(phi, m_cdr->getPhase());
 
-    data_ops::floor(phi, 0.0);
+    DataOps::floor(phi, 0.0);
   }
 }
 
@@ -486,7 +486,7 @@ void rk2_tga::advance_advection_sigma_k1(const Real a_dt){
   m_sigma->computeRHS(k1);
 
   // Make phi = phi + k1*alpha*dt
-  data_ops::incr(phi, k1,    m_alpha*a_dt);
+  DataOps::incr(phi, k1,    m_alpha*a_dt);
 
   m_amr->averageDown(phi, m_cdr->getPhase());
   
@@ -510,10 +510,10 @@ void rk2_tga::advance_advection_source_cdr_k2(const Real a_dt){
     EBAMRCellData& src         = solver->getSource();
 
     // Compute RHS
-    data_ops::set_value(k2, 0.0);
+    DataOps::setValue(k2, 0.0);
     solver->computeDivF(k2, state, 0.0, true);
-    data_ops::scale(k2, -1.0);
-    data_ops::incr(k2, src, 1.0);
+    DataOps::scale(k2, -1.0);
+    DataOps::incr(k2, src, 1.0);
 
     // RK2 advance. The extract m_alpha subtraction is because when we came here, the solver state (which we update in place)
     // contained the intermediate state phi + k1*alpha_dt. But we want phi = phi + k1*a_dt*(1-1/(2*alpha)) + k2*dt/(2*alpha),
@@ -521,13 +521,13 @@ void rk2_tga::advance_advection_source_cdr_k2(const Real a_dt){
     const Real k1_factor = a_dt*(1.0 - 1.0/(2.0*m_alpha) - m_alpha);
     const Real k2_factor = a_dt/(2.0*m_alpha);
     
-    data_ops::incr(state, k1, k1_factor);
-    data_ops::incr(state, k2, k2_factor);
+    DataOps::incr(state, k1, k1_factor);
+    DataOps::incr(state, k2, k2_factor);
 
     m_amr->averageDown(state, m_cdr->getPhase());
     m_amr->interpGhost(state, m_cdr->getPhase());
 
-    data_ops::floor(state, 0.0);
+    DataOps::floor(state, 0.0);
   }
 }
 
@@ -549,8 +549,8 @@ void rk2_tga::advance_advection_sigma_k2(const Real a_dt){
   const Real k1_factor = a_dt*(1.0 - 1.0/(2.0*m_alpha) - m_alpha);
   const Real k2_factor = a_dt/(2.0*m_alpha);
     
-  data_ops::incr(state, k1, k1_factor);
-  data_ops::incr(state, k2, k2_factor);
+  DataOps::incr(state, k1, k1_factor);
+  DataOps::incr(state, k2, k2_factor);
 
   m_amr->averageDown(state, m_cdr->getPhase());
   m_sigma->resetCells(state);

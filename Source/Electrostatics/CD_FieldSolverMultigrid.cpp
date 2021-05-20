@@ -15,7 +15,7 @@
 
 // Our includes
 #include <CD_FieldSolverMultigrid.H>
-#include <data_ops.H>
+#include <CD_DataOps.H>
 #include <MFQuadCFInterp.H>
 #include <MFInterfaceFAB.H>
 #include <CD_JumpBc.H>
@@ -136,7 +136,7 @@ void FieldSolverMultigrid::allocateInternals(){
   m_amr->allocate(m_scaledSource, m_realm, ncomp);
   m_amr->allocate(m_scaledSigma,  m_realm, phase::gas, ncomp);
 
-  data_ops::set_value(m_zero, 0.0);
+  DataOps::setValue(m_zero, 0.0);
 }
 
 bool FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
@@ -163,17 +163,17 @@ bool FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
   const Real t1 = MPI_Wtime();
 
   // Do the scaled space charge density
-  data_ops::copy(m_scaledSource, a_source);
-  data_ops::scale(m_scaledSource, 1./(units::s_eps0));
-  data_ops::scale(m_scaledSource, 1./(m_lengthScale*m_lengthScale));
+  DataOps::copy(m_scaledSource, a_source);
+  DataOps::scale(m_scaledSource, 1./(units::s_eps0));
+  DataOps::scale(m_scaledSource, 1./(m_lengthScale*m_lengthScale));
 
   if(m_kappaSource){ // Scale source by kappa
-    data_ops::kappa_scale(m_scaledSource);
+    DataOps::kappaScale(m_scaledSource);
   }
 
   // Do the scaled surface charge
-  data_ops::copy(m_scaledSigma, a_sigma);
-  data_ops::scale(m_scaledSigma, 1./(m_lengthScale*m_lengthScale));
+  DataOps::copy(m_scaledSigma, a_sigma);
+  DataOps::scale(m_scaledSigma, 1./(m_lengthScale*m_lengthScale));
   m_operatorFactory->setJump(m_scaledSigma, 1.0/units::s_eps0);
 
   const Real t2 = MPI_Wtime();
@@ -181,7 +181,7 @@ bool FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
 #if 0 // Debug
   MayDay::Warning("FieldSolverMultigrid::solve - debug mode");
   m_operatorFactory->setJump(0.0, 1.0);
-  data_ops::set_value(source, 0.0);
+  DataOps::setValue(source, 0.0);
 #endif
 
 #if 0 // Check NaN/Inf input
@@ -232,7 +232,7 @@ bool FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
   // Solver hang. Try again. 
   if(!converged){
     this->setupMultigrid();
-    data_ops::set_value(a_phi, 0.0);
+    DataOps::setValue(a_phi, 0.0);
     m_multigridSolver.solveNoInitResid(phi, res, rhs, finest_level, 0, a_zerophi);
 
     const int status = m_multigridSolver.m_exitStatus;   // 1 => Initial norm sufficiently reduced
@@ -326,9 +326,9 @@ void FieldSolverMultigrid::setMultigridCoefficients(){
   m_amr->allocate(m_bCoefficient,      m_realm, ncomps);
   m_amr->allocate(m_bCoefficientIrreg, m_realm, ncomps);
 
-  data_ops::set_value(m_aCoef,      0.0);  // Always zero for poisson equation, but that is done from alpha. 
-  data_ops::set_value(m_bCoefficient,      eps0); // Will override this later
-  data_ops::set_value(m_bCoefficientIrreg, eps0); // Will override this later
+  DataOps::setValue(m_aCoef,      0.0);  // Always zero for poisson equation, but that is done from alpha. 
+  DataOps::setValue(m_bCoefficient,      eps0); // Will override this later
+  DataOps::setValue(m_bCoefficientIrreg, eps0); // Will override this later
 
   this->setPermittivities(m_computationalGeometry->getDielectrics());
 }
@@ -729,8 +729,8 @@ void FieldSolverMultigrid::setupMultigridSolver(){
   MFAMRCellData dummy1, dummy2;
   m_amr->allocate(dummy1, m_realm, ncomp);
   m_amr->allocate(dummy2, m_realm, ncomp);
-  data_ops::set_value(dummy1, 0.0);
-  data_ops::set_value(dummy2, 0.0);
+  DataOps::setValue(dummy1, 0.0);
+  DataOps::setValue(dummy2, 0.0);
 
   // Aliasing
   Vector<LevelData<MFCellFAB>* > phi, rhs;

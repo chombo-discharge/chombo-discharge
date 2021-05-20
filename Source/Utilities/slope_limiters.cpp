@@ -6,7 +6,7 @@
 */
 
 #include "slope_limiters.H"
-#include "data_ops.H"
+#include <CD_DataOps.H>
 
 #include "CD_NamespaceHeader.H"
 
@@ -81,7 +81,7 @@ Real slope_limiters::van_leer(const Real a_slopeL, const Real a_slopeR){
   if(a_slopeL*a_slopeR > 0.0){
     const Real slopeC = 0.5*(a_slopeL + a_slopeR);
 
-    slope = data_ops::sgn(slopeC)*Min(2*a_slopeL, Min(2*a_slopeR, slopeC));
+    slope = DataOps::sgn(slopeC)*Min(2*a_slopeL, Min(2*a_slopeR, slopeC));
   }
   return slope;
 }

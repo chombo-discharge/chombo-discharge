@@ -8,7 +8,7 @@
 #include "air9eed_bourdon.H"
 #include "air9eed_bourdon_species.H"
 #include "units.H"
-#include "data_ops.H"
+#include <CD_DataOps.H>
 
 #include <iostream>
 #include <fstream>
@@ -772,7 +772,7 @@ Vector<Real> air9eed_bourdon::compute_cdr_fluxes(const Real         a_time,
   // Switch for setting drift flux to zero for charge species
   Vector<Real> aj(m_num_CdrSpecies, 0.0);
   for (int i = 0; i < m_num_CdrSpecies; i++){
-    if(data_ops::sgn(m_CdrSpecies[i]->getChargeNumber())*PolyGeom::dot(a_E, a_normal) < 0){
+    if(DataOps::sgn(m_CdrSpecies[i]->getChargeNumber())*PolyGeom::dot(a_E, a_normal) < 0){
       aj[i] = 1.0;
     }
     else {

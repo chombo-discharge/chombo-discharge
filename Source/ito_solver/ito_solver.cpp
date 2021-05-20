@@ -7,7 +7,7 @@
 
 #include "simple_ito_particle.H"
 #include "ito_solver.H"
-#include "data_ops.H"
+#include <CD_DataOps.H>
 #include <CD_EbParticleInterp.H>
 #include "units.H"
 #include <CD_EbGhostCloud.H>
@@ -1160,7 +1160,7 @@ void ito_solver::restart_particles(LevelData<EBCellFAB>& a_num_particles, const 
 	// Compute weights and remainder
 	const unsigned long long numParticles = (unsigned long long) llround(ppc(bit()));
 	unsigned long long w, N, r;
-	data_ops::compute_particle_weights(w, N, r, numParticles, m_ppc_restart);
+	DataOps::computeParticleWeights(w, N, r, numParticles, m_ppc_restart);
 
 	const RealVect minLo = -0.5*RealVect::Unit;
 	const RealVect minHi =  0.5*RealVect::Unit;
@@ -1202,13 +1202,13 @@ void ito_solver::restart_particles(LevelData<EBCellFAB>& a_num_particles, const 
       RealVect minLo = -0.5*RealVect::Unit;
       RealVect minHi =  0.5*RealVect::Unit;
       if(kappa < 1.0){
-	data_ops::compute_min_valid_box(minLo, minHi, norm, cent);
+	DataOps::computeMinValidBox(minLo, minHi, norm, cent);
       }
 
       // Compute weights and remainder
       const unsigned long long numParticles = (unsigned long long) llround(ppc(iv));
       unsigned long long w, N, r;
-      data_ops::compute_particle_weights(w, N, r, numParticles, m_ppc_restart);
+      DataOps::computeParticleWeights(w, N, r, numParticles, m_ppc_restart);
 
       // Now add N partices. If r > 0 we add another one with weight w + r
       for (unsigned long long i = 0; i < N; i++){
@@ -1247,7 +1247,7 @@ void ito_solver::writePlotData(EBAMRCellData& a_output, int& a_comp){
 	m_phi[lvl]->copyTo(src, *a_output[lvl], dst);
       }
     }
-    //data_ops::set_covered_value(a_output, a_comp, 0.0);
+    //DataOps::set_covered_value(a_output, a_comp, 0.0);
     a_comp++;
   }
 
@@ -1264,7 +1264,7 @@ void ito_solver::writePlotData(EBAMRCellData& a_output, int& a_comp){
 	m_faceCenteredDiffusionCoefficient_cell[lvl]->copyTo(src, *a_output[lvl], dst);
       }
     }
-    data_ops::set_covered_value(a_output, a_comp, 0.0);
+    DataOps::set_covered_value(a_output, a_comp, 0.0);
     a_comp++;
   }
 
@@ -1284,7 +1284,7 @@ void ito_solver::writePlotData(EBAMRCellData& a_output, int& a_comp){
     }
 
     for (int c = 0; c < SpaceDim; c++){
-      data_ops::set_covered_value(a_output, a_comp + c, 0.0);
+      DataOps::set_covered_value(a_output, a_comp + c, 0.0);
     }
 
     a_comp += ncomp;
@@ -1333,7 +1333,7 @@ void ito_solver::writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCell
   // Copy data onto scratch
   EBAMRCellData scratch;
   m_amr->allocate(scratch, m_realm, m_phase, ncomp);
-  data_ops::copy(scratch, a_data);
+  DataOps::copy(scratch, a_data);
 
   // Interp if we should
   if(a_interp){
@@ -1352,7 +1352,7 @@ void ito_solver::writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCell
     }
   }
 
-  data_ops::set_covered_value(a_output, a_comp, 0.0);
+  DataOps::set_covered_value(a_output, a_comp, 0.0);
 
   a_comp += ncomp;
 }
@@ -1570,7 +1570,7 @@ void ito_solver::compute_average_mobility(EBAMRCellData& a_phi, ParticleContaine
 
   constexpr int comp = 0;
 
-  data_ops::set_value(a_phi, 0.0);
+  DataOps::setValue(a_phi, 0.0);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
@@ -1612,7 +1612,7 @@ void ito_solver::compute_average_diffusion(EBAMRCellData& a_phi, ParticleContain
 
   constexpr int comp = 0;
 
-  data_ops::set_value(a_phi, 0.0);
+  DataOps::setValue(a_phi, 0.0);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
@@ -1654,7 +1654,7 @@ void ito_solver::compute_average_energy(EBAMRCellData& a_phi, ParticleContainer<
 
   constexpr int comp = 0;
 
-  data_ops::set_value(a_phi, 0.0);
+  DataOps::setValue(a_phi, 0.0);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
@@ -1719,7 +1719,7 @@ void ito_solver::depositNonConservative(EBAMRIVData& a_depositionNC, const EBAMR
     stencils.apply(a_depositionNC, a_depositionKappaC);
   }
   else{
-    data_ops::set_value(a_depositionNC, 0.0);
+    DataOps::setValue(a_depositionNC, 0.0);
   }
 }
 
@@ -1901,7 +1901,7 @@ void ito_solver::deposit_weights(EBAMRCellData& a_phi, const ParticleContainer<i
   this->deposit_particles(a_phi, m_ParticleContainers.at(which_container::bulk), DepositionType::NGP);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    data_ops::scale(*a_phi[lvl], pow(m_amr->getDx()[lvl], SpaceDim));
+    DataOps::scale(*a_phi[lvl], pow(m_amr->getDx()[lvl], SpaceDim));
   }
 }
 
@@ -2008,7 +2008,7 @@ void ito_solver::setDiffusionCoefficient_func(const Real a_diffusionCoefficient)
     pout() << m_name + "::setDiffusionCoefficient_func" << endl;
   }
 
-  data_ops::set_value(m_faceCenteredDiffusionCoefficient_cell, a_diffusionCoefficient);
+  DataOps::setValue(m_faceCenteredDiffusionCoefficient_cell, a_diffusionCoefficient);
 }
 
 void ito_solver::setVelocity_func(const RealVect a_vel){
@@ -2018,7 +2018,7 @@ void ito_solver::setVelocity_func(const RealVect a_vel){
   }
 
   for (int comp = 0; comp < SpaceDim; comp++){
-    data_ops::set_value(m_velo_func, a_vel[comp], comp);
+    DataOps::setValue(m_velo_func, a_vel[comp], comp);
   }
 }
 
@@ -2099,7 +2099,7 @@ void ito_solver::interpolate_mobilities(){
   if(m_isMobile){
 
     if(m_mobility_interp == mobility_interp::velocity){
-      data_ops::vector_length(m_scratch, m_velo_func); // Compute |E| (or whatever other function you've decided to provide).
+      DataOps::vectorLength(m_scratch, m_velo_func); // Compute |E| (or whatever other function you've decided to provide).
       m_amr->averageDown(m_scratch, m_realm, m_phase);
       m_amr->interpGhost(m_scratch, m_realm, m_phase);
     }

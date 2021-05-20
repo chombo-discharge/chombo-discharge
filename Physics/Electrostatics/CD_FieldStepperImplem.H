@@ -116,9 +116,9 @@ namespace Physics {
       MFAMRCellData& rho   = m_fieldSolver->getRho();
       EBAMRIVData& sigma   = m_sigma->getPhi();
 
-      data_ops::set_value(state, 0.0);
-      data_ops::set_value(rho,   m_init_rho);
-      data_ops::set_value(sigma, m_init_sigma);
+      DataOps::setValue(state, 0.0);
+      DataOps::setValue(rho,   m_init_rho);
+      DataOps::setValue(sigma, m_init_sigma);
     }
 
     template <class T>

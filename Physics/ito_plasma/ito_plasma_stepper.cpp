@@ -6,7 +6,7 @@
 */
 
 #include "ito_plasma_stepper.H"
-#include "data_ops.H"
+#include <CD_DataOps.H>
 #include "units.H"
 #include "CD_FieldSolverMultigrid.H"
 
@@ -387,7 +387,7 @@ void ito_plasma_stepper::write_num_particles_per_patch(EBAMRCellData& a_output, 
   const Interval src_interv(0, 0);
   const Interval dst_interv(a_icomp, a_icomp);
 
-  data_ops::set_value(m_particle_scratch1, 0.0);
+  DataOps::setValue(m_particle_scratch1, 0.0);
   
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     const ParticleContainer<ito_particle>& particles = solver_it()->getParticles(ito_solver::which_container::bulk);
@@ -873,11 +873,11 @@ Real ito_plasma_stepper::compute_Emax(const phase::which_phase a_phase) {
   // Interpolate to centroids
   EBAMRCellData E;
   m_amr->allocate(E, m_fluid_Realm, m_phase, SpaceDim);
-  data_ops::copy(E, Ephase);
+  DataOps::copy(E, Ephase);
   m_amr->interpToCentroids(E, m_fluid_Realm, m_phase);
 
   Real max, min;
-  data_ops::get_max_min_norm(max, min, E);
+  DataOps::getMaxMinNorm(max, min, E);
 
   return max;
 }
@@ -898,7 +898,7 @@ void ito_plasma_stepper::compute_E(MFAMRCellData& a_E, const MFAMRCellData& a_po
   }
 
   m_amr->computeGradient(a_E, a_potential, m_fluid_Realm);
-  data_ops::scale(a_E, -1.0);
+  DataOps::scale(a_E, -1.0);
 
   m_amr->averageDown(a_E, m_fluid_Realm);
   m_amr->interpGhost(a_E, m_fluid_Realm);
@@ -925,7 +925,7 @@ void ito_plasma_stepper::compute_E(EBAMRCellData& a_E, const phase::which_phase 
   m_amr->alias(pot_gas, a_phase, a_potential);
 
   m_amr->computeGradient(a_E, pot_gas, m_fluid_Realm, a_phase);
-  data_ops::scale(a_E, -1.0);
+  DataOps::scale(a_E, -1.0);
 
   m_amr->averageDown(a_E, m_fluid_Realm, a_phase);
   m_amr->interpGhost(a_E, m_fluid_Realm, a_phase);
@@ -1005,7 +1005,7 @@ void ito_plasma_stepper::compute_rho(MFAMRCellData& a_rho, const Vector<EBAMRCel
   //       the fluid Realm so we need scratch storage we can copy into. We use m_fluid_scratch1 for that. 
 
   // Reset
-  data_ops::set_value(a_rho, 0.0);
+  DataOps::setValue(a_rho, 0.0);
 
   // Make alias
   EBAMRCellData rhoPhase;
@@ -1021,11 +1021,11 @@ void ito_plasma_stepper::compute_rho(MFAMRCellData& a_rho, const Vector<EBAMRCel
 
     if(species->getChargeNumber() != 0){
       m_fluid_scratch1.copy(*a_densities[idx]);
-      data_ops::incr(rhoPhase, m_fluid_scratch1, q);
+      DataOps::incr(rhoPhase, m_fluid_scratch1, q);
     }
   }
 
-  data_ops::scale(a_rho, units::s_Qe);
+  DataOps::scale(a_rho, units::s_Qe);
 
   m_amr->averageDown(a_rho, m_fluid_Realm);
   m_amr->interpGhost(a_rho, m_fluid_Realm);
@@ -1039,10 +1039,10 @@ void ito_plasma_stepper::compute_rho(MFAMRCellData& a_rho, const Vector<EBAMRCel
       const int num_app = std::get<2>(f);
 
       for (int iapp = 0; iapp < num_app; iapp++){
-	data_ops::set_value(m_fluid_scratch1, 0.0);
+	DataOps::setValue(m_fluid_scratch1, 0.0);
 	m_fluid_scratch1.copy(rhoPhase);
-	data_ops::set_covered_value(m_fluid_scratch1, 0.0, 0);
-	data_ops::filter_smooth(rhoPhase, m_fluid_scratch1, stride, alpha);
+	DataOps::set_covered_value(m_fluid_scratch1, 0.0, 0);
+	DataOps::filterSmooth(rhoPhase, m_fluid_scratch1, stride, alpha);
 
 	m_amr->averageDown(rhoPhase, m_fluid_Realm, m_phase);
 	m_amr->interpGhost(rhoPhase, m_fluid_Realm, m_phase);
@@ -1070,7 +1070,7 @@ void ito_plasma_stepper::compute_conductivity(EBAMRCellData& a_conductivity, con
     pout() << "ito_plasma_stepper::compute_conductivity(conductivity)" << endl;
   }
   
-  data_ops::set_value(a_conductivity, 0.0);
+  DataOps::setValue(a_conductivity, 0.0);
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>&   solver = solver_it();
@@ -1080,17 +1080,17 @@ void ito_plasma_stepper::compute_conductivity(EBAMRCellData& a_conductivity, con
     const int q   = species->getChargeNumber();
 
     if(Abs(q) > 0 && solver->isMobile()){
-      data_ops::set_value(m_particle_scratch1, 0.0);
+      DataOps::setValue(m_particle_scratch1, 0.0);
 
       solver->deposit_conductivity(m_particle_scratch1, *a_particles[idx]);
 
       // Copy to fluid Realm and add to fluid stuff
       m_fluid_scratch1.copy(m_particle_scratch1);
-      data_ops::incr(a_conductivity, m_fluid_scratch1, Abs(q));
+      DataOps::incr(a_conductivity, m_fluid_scratch1, Abs(q));
     }
   }
 
-  data_ops::scale(a_conductivity, units::s_Qe);
+  DataOps::scale(a_conductivity, units::s_Qe);
 
   m_amr->averageDown(a_conductivity, m_fluid_Realm, m_phase);
   m_amr->interpGhostPwl(a_conductivity, m_fluid_Realm, m_phase);
@@ -1110,9 +1110,9 @@ void ito_plasma_stepper::compute_J(EBAMRCellData& a_J, const Real a_dt){
 
 
   this->compute_conductivity(m_fluid_scratch1);
-  data_ops::copy(a_J, m_fluid_E);
+  DataOps::copy(a_J, m_fluid_E);
 
-  data_ops::multiply_scalar(a_J, m_fluid_scratch1);
+  DataOps::multiplyScalar(a_J, m_fluid_scratch1);
 }
 
 Real ito_plasma_stepper::compute_relaxation_time(){
@@ -1187,8 +1187,8 @@ Real ito_plasma_stepper::compute_relaxation_time(const int a_level, const DataIn
   e_magnitude.setVal(0.0);
   j_magnitude.setVal(0.0);
 
-  data_ops::vector_length(e_magnitude, E, box);
-  data_ops::vector_length(j_magnitude, J, box);
+  DataOps::vectorLength(e_magnitude, E, box);
+  DataOps::vectorLength(j_magnitude, J, box);
   j_magnitude += SAFETY;
 
   dt.setVal(units::s_eps0);
@@ -1571,7 +1571,7 @@ void ito_plasma_stepper::set_ito_velocity_funcs(){
       const int q = species->getChargeNumber();
       const int s = (q > 0) - (q < 0);
       
-      data_ops::scale(velo_func, s);
+      DataOps::scale(velo_func, s);
     }
   }
 }
@@ -1969,7 +1969,7 @@ void ito_plasma_stepper::compute_reactive_particles_per_cell(EBAMRCellData& a_pp
     pout() << "ito_plasma_stepper::compute_reactive_particles_per_cell(ppc)" << endl;
   }
 
-  data_ops::set_value(a_ppc, 0.0);
+  DataOps::setValue(a_ppc, 0.0);
   
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     this->compute_reactive_particles_per_cell(*a_ppc[lvl], lvl);
@@ -2059,7 +2059,7 @@ void ito_plasma_stepper::compute_reactive_mean_energies_per_cell(EBAMRCellData& 
     pout() << "ito_plasma_stepper::compute_reactive_particles_per_cell(EBAMRCellData)" << endl;
   }
 
-  data_ops::set_value(a_mean_energies, 0.0);
+  DataOps::setValue(a_mean_energies, 0.0);
   
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     this->compute_reactive_mean_energies_per_cell(*a_mean_energies[lvl], lvl);
@@ -2171,9 +2171,9 @@ void ito_plasma_stepper::advance_reaction_network_nwo(const EBAMRCellData& a_E, 
   m_fluid_ppc.copy(m_particle_ppc);
   m_fluid_eps.copy(m_particle_eps);
   
-  data_ops::set_value(m_fluid_ypc,    0.0);
-  data_ops::set_value(m_particle_ypc, 0.0);
-  data_ops::copy(m_particle_old, m_particle_ppc);
+  DataOps::setValue(m_fluid_ypc,    0.0);
+  DataOps::setValue(m_particle_ypc, 0.0);
+  DataOps::copy(m_particle_old, m_particle_ppc);
 
   // 2. Solve for the new number of particles per cell. This also obtains the number of Photons to be generated in each cell. 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
@@ -2475,7 +2475,7 @@ void ito_plasma_stepper::reconcile_particles(const EBCellFAB& a_newParticlesPerC
     RealVect lo            = -0.5*RealVect::Unit;
     RealVect hi            = 0.5*RealVect::Unit;
     if(kappa < 1.0){
-      data_ops::compute_min_valid_box(lo, hi, bndryNormal, bndryCentroid);
+      DataOps::computeMinValidBox(lo, hi, bndryNormal, bndryCentroid);
     }
 
     Vector<List<ito_particle>* > particles(num_ito_species);
@@ -2753,7 +2753,7 @@ void ito_plasma_stepper::advance_reaction_network(Vector<BinFab<ito_particle>* >
     RealVect lo = -0.5*RealVect::Unit;
     RealVect hi =  0.5*RealVect::Unit;
     if(kappa < 1.0){
-      data_ops::compute_min_valid_box(lo, hi, n, ebc);
+      DataOps::computeMinValidBox(lo, hi, n, ebc);
     }
 
     Vector<List<ito_particle>* > particles(num_ito_species);
@@ -3256,18 +3256,18 @@ void ito_plasma_stepper::compute_EdotJ_source(){
     const int idx = solver_it.index();
     const int q   = species->getChargeNumber();
 
-    data_ops::set_value(m_energy_sources[idx], 0.0);
+    DataOps::setValue(m_energy_sources[idx], 0.0);
 
     // Do mobile contribution. 
     if(q != 0 && solver->isMobile()){
 
       // Drift contribution
       solver->deposit_conductivity(m_particle_scratch1, solver->getParticles(ito_solver::which_container::bulk)); // Deposit mu*n
-      data_ops::copy(m_particle_scratchD, m_particle_E); // Could use m_particle_E or solver's m_velo_func here, but m_velo_func = +/- E (depends on q)
+      DataOps::copy(m_particle_scratchD, m_particle_E); // Could use m_particle_E or solver's m_velo_func here, but m_velo_func = +/- E (depends on q)
       
-      data_ops::multiply_scalar(m_particle_scratchD, m_particle_scratch1);        // m_particle_scratchD = mu*n*E
-      data_ops::dot_prod(m_particle_scratch1, m_particle_E, m_particle_scratchD); // m_particle_scratch1 = mu*n*E*E
-      data_ops::incr(m_energy_sources[idx], m_particle_scratch1, 1.0);            // a_source[idx] += mu*n*E*E
+      DataOps::multiplyScalar(m_particle_scratchD, m_particle_scratch1);        // m_particle_scratchD = mu*n*E
+      DataOps::dotProduct(m_particle_scratch1, m_particle_E, m_particle_scratchD); // m_particle_scratch1 = mu*n*E*E
+      DataOps::incr(m_energy_sources[idx], m_particle_scratch1, 1.0);            // a_source[idx] += mu*n*E*E
     }
 
     // Diffusive contribution
@@ -3276,14 +3276,14 @@ void ito_plasma_stepper::compute_EdotJ_source(){
       // Compute the negative gradient of the diffusion term
       solver->deposit_diffusivity(m_particle_scratch1, solver->getParticles(ito_solver::which_container::bulk));
       m_amr->computeGradient(m_particle_scratchD, m_particle_scratch1, m_particleRealm, m_phase);
-      data_ops::scale(m_particle_scratchD, -1.0); // scratchD = -grad(D*n)
+      DataOps::scale(m_particle_scratchD, -1.0); // scratchD = -grad(D*n)
       
-      data_ops::dot_prod(m_particle_scratch1, m_particle_scratchD, m_particle_E); // m_particle_scratch1 = -E*grad(D*n)
-      data_ops::incr(m_energy_sources[idx], m_particle_scratch1, 1.0);            // a_source[idx]
+      DataOps::dotProduct(m_particle_scratch1, m_particle_scratchD, m_particle_E); // m_particle_scratch1 = -E*grad(D*n)
+      DataOps::incr(m_energy_sources[idx], m_particle_scratch1, 1.0);            // a_source[idx]
     }
     
     if (q != 0 && (solver->isMobile() || solver->isDiffusive())){
-      data_ops::scale(m_energy_sources[idx], Abs(q)*units::s_Qe);
+      DataOps::scale(m_energy_sources[idx], Abs(q)*units::s_Qe);
     }
   }
 }
@@ -3294,7 +3294,7 @@ void ito_plasma_stepper::compute_EdotJ_source_nwo(){
     pout() << "ito_plasma_stepper::compute_EdotJ_source_nwo()" << endl;
   }
 
-  data_ops::set_value(m_EdotJ, 0.0);
+  DataOps::setValue(m_EdotJ, 0.0);
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>& solver   = solver_it();
@@ -3307,14 +3307,14 @@ void ito_plasma_stepper::compute_EdotJ_source_nwo(){
     if(q != 0 && solver->isMobile()){
       solver->deposit_conductivity(m_particle_scratch1, solver->getParticles(ito_solver::which_container::bulk)); // Deposit mu*n
       m_fluid_scratch1.copy(m_particle_scratch1);                                 // Copy mu*n to fluid Realm
-      data_ops::copy(m_fluid_scratchD, m_fluid_E);                                // m_fluid_scratchD = E
-      data_ops::multiply_scalar(m_fluid_scratchD, m_fluid_scratch1);              // m_fluid_scratchD = E*mu*n
-      data_ops::dot_prod(m_fluid_scratch1, m_fluid_E, m_fluid_scratchD);          // m_particle_scratch1 = E.dot.(E*mu*n)
-      data_ops::scale(m_fluid_scratch1, Abs(q)*units::s_Qe);                      // m_particle_scratch1 = Z*e*mu*n*E*E
+      DataOps::copy(m_fluid_scratchD, m_fluid_E);                                // m_fluid_scratchD = E
+      DataOps::multiplyScalar(m_fluid_scratchD, m_fluid_scratch1);              // m_fluid_scratchD = E*mu*n
+      DataOps::dotProduct(m_fluid_scratch1, m_fluid_E, m_fluid_scratchD);          // m_particle_scratch1 = E.dot.(E*mu*n)
+      DataOps::scale(m_fluid_scratch1, Abs(q)*units::s_Qe);                      // m_particle_scratch1 = Z*e*mu*n*E*E
 
       m_amr->averageDown(m_fluid_scratch1, m_fluid_Realm, m_phase);
       m_amr->interpGhost(m_fluid_scratch1, m_fluid_Realm, m_phase);
-      data_ops::plus(m_EdotJ, m_fluid_scratch1, 0, idx, 1);                       // a_source[idx] += Z*e*mu*n*E*E
+      DataOps::plus(m_EdotJ, m_fluid_scratch1, 0, idx, 1);                       // a_source[idx] += Z*e*mu*n*E*E
     }
 
     // Diffusive contribution. Computes -Z*e*E*grad(D*n)
@@ -3322,14 +3322,14 @@ void ito_plasma_stepper::compute_EdotJ_source_nwo(){
       solver->deposit_diffusivity(m_particle_scratch1, solver->getParticles(ito_solver::which_container::bulk));            // Deposit D*n
       m_fluid_scratch1.copy(m_particle_scratch1);                                           // Copy D*n to fluid Realm
       m_amr->computeGradient(m_fluid_scratchD, m_fluid_scratch1, m_fluid_Realm, m_phase);  // scratchD = grad(D*n)
-      data_ops::scale(m_fluid_scratchD, -1.0);                                              // scratchD = -grad(D*n)
-      data_ops::dot_prod(m_fluid_scratch1,  m_fluid_scratchD, m_fluid_E);                   // scratch1 = -E.dot.grad(D*n)
-      data_ops::scale(m_fluid_scratch1, Abs(q)*units::s_Qe);                                // scratch1 = -Z*e*E*grad(D*n)
+      DataOps::scale(m_fluid_scratchD, -1.0);                                              // scratchD = -grad(D*n)
+      DataOps::dotProduct(m_fluid_scratch1,  m_fluid_scratchD, m_fluid_E);                   // scratch1 = -E.dot.grad(D*n)
+      DataOps::scale(m_fluid_scratch1, Abs(q)*units::s_Qe);                                // scratch1 = -Z*e*E*grad(D*n)
 
       m_amr->averageDown(m_fluid_scratch1, m_fluid_Realm, m_phase);
       m_amr->interpGhost(m_fluid_scratch1, m_fluid_Realm, m_phase);
       
-      data_ops::plus(m_EdotJ, m_fluid_scratch1, 0, idx, 1);                                 // source  += -Z*e*E*grad(D*n)
+      DataOps::plus(m_EdotJ, m_fluid_scratch1, 0, idx, 1);                                 // source  += -Z*e*E*grad(D*n)
     }
   }
 }
@@ -3340,7 +3340,7 @@ void ito_plasma_stepper::compute_EdotJ_source_nwo2(const Real a_dt){
     pout() << "ito_plasma_stepper::compute_EdotJ_source_nwo2(a_dt)" << endl;
   }
 
-  data_ops::set_value(m_EdotJ, 0.0);
+  DataOps::setValue(m_EdotJ, 0.0);
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>& solver   = solver_it();
@@ -3396,8 +3396,8 @@ void ito_plasma_stepper::compute_EdotJ_source_nwo2(const Real a_dt){
       m_fluid_scratch1.copy(m_particle_scratch1);
 
       // Scale by Qe/dt to make it Joule/dt. Then add to correct index
-      data_ops::scale(m_fluid_scratch1, q*units::s_Qe/a_dt);
-      data_ops::plus(m_EdotJ, m_fluid_scratch1, 0, idx, 1);
+      DataOps::scale(m_fluid_scratch1, q*units::s_Qe/a_dt);
+      DataOps::plus(m_EdotJ, m_fluid_scratch1, 0, idx, 1);
 
       // Set p.mass() back to the original value
       for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){

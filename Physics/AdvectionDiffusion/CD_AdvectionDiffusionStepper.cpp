@@ -16,7 +16,7 @@
 // Our includes
 #include <CD_AdvectionDiffusionStepper.H>
 #include <CD_AdvectionDiffusionSpecies.H>
-#include <data_ops.H>
+#include <CD_DataOps.H>
 #include <CD_NamespaceHeader.H>
   
 using namespace Physics::AdvectionDiffusion;
@@ -210,19 +210,19 @@ Real AdvectionDiffusionStepper::advance(const Real a_dt){
   
   if(m_integrator == 0){ //   Use Heun's method
     m_solver->computeDivJ(m_k1, state, 0.0);
-    data_ops::copy(m_tmp, state);
-    data_ops::incr(m_tmp, m_k1, -a_dt); // m_tmp = phi - dt*div(J)
+    DataOps::copy(m_tmp, state);
+    DataOps::incr(m_tmp, m_k1, -a_dt); // m_tmp = phi - dt*div(J)
 
     m_solver->computeDivJ(m_k2, m_tmp, 0.0);
-    data_ops::incr(state, m_k1, -0.5*a_dt);
-    data_ops::incr(state, m_k2, -0.5*a_dt); // Done with deterministic update.
+    DataOps::incr(state, m_k1, -0.5*a_dt);
+    DataOps::incr(state, m_k2, -0.5*a_dt); // Done with deterministic update.
 
     //m_solver->make_non_negative(state);
 
     // Add random diffusion flux. This is equivalent to a 1st order. Godunov splitting
     if(m_fhd){
       m_solver->gwnDiffusionSource(m_k1, state); // k1 holds random diffusion
-      data_ops::incr(state, m_k1, a_dt);
+      DataOps::incr(state, m_k1, a_dt);
     }
   
     m_amr->averageDown(state, m_realm, m_phase);
@@ -230,16 +230,16 @@ Real AdvectionDiffusionStepper::advance(const Real a_dt){
   }
   else if(m_integrator == 1){
     m_solver->computeDivF(m_k1, state, a_dt);
-    data_ops::incr(state, m_k1, -a_dt);
+    DataOps::incr(state, m_k1, -a_dt);
     m_amr->averageDown(state, m_realm, m_phase);
 
     if(m_solver->isDiffusive()){
-      data_ops::copy(m_k2, state); // Now holds phiOld - dt*div(F)
+      DataOps::copy(m_k2, state); // Now holds phiOld - dt*div(F)
       if(m_fhd){
 	m_solver->gwnDiffusionSource(m_k1, state); // k1 holds random diffusion
-	data_ops::incr(m_k2, m_k1, a_dt);
+	DataOps::incr(m_k2, m_k1, a_dt);
       }
-      data_ops::set_value(m_k1, 0.0);
+      DataOps::setValue(m_k1, 0.0);
       m_solver->advanceEuler(state, m_k2, m_k1, a_dt);
     }
 

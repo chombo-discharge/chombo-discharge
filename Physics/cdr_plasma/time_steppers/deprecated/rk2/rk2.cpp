@@ -9,7 +9,7 @@
 #include "rk2_storage.H"
 #include <CD_CdrIterator.H>
 #include <CD_RtIterator.H>
-#include "data_ops.H"
+#include <CD_DataOps.H>
 #include "units.H"
 
 #include <ParmParse.H>
@@ -394,14 +394,14 @@ void rk2::compute_sigma_flux_at_start_of_time_step(){
   }
 
   EBAMRIVData& flux = m_sigma->getFlux();
-  data_ops::set_value(flux, 0.0);
+  DataOps::setValue(flux, 0.0);
 
   for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
     const RefCountedPtr<species>& spec      = solver_it.getSpecies();
     const EBAMRIVData& solver_flux          = solver->getEbFlux();
 
-    data_ops::incr(flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
+    DataOps::incr(flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
   }
 
   m_sigma->resetCells(flux);
@@ -422,17 +422,17 @@ void rk2::advance_cdr_k1(const Real a_dt){
 
     const EBAMRCellData& state = solver->getPhi();
 
-    data_ops::set_value(k1, 0.0);
+    DataOps::setValue(k1, 0.0);
     solver->computeRHS(k1, state, a_dt);
 
-    data_ops::set_value(phi, 0.0);
-    data_ops::incr(phi, state, 1.0);
-    data_ops::incr(phi, k1,    m_alpha*a_dt);
+    DataOps::setValue(phi, 0.0);
+    DataOps::incr(phi, state, 1.0);
+    DataOps::incr(phi, k1,    m_alpha*a_dt);
 
     m_amr->averageDown(phi, m_cdr->getPhase());
     m_amr->interpGhost(phi, m_cdr->getPhase());
 
-    data_ops::floor(phi, 0.0);
+    DataOps::floor(phi, 0.0);
   }
 }
 
@@ -447,9 +447,9 @@ void rk2::advance_sigma_k1(const Real a_dt){
   EBAMRIVData& k1  = m_sigma_scratch->get_k1();
   EBAMRIVData& phi = m_sigma_scratch->get_phi();
   m_sigma->computeRHS(k1);
-  data_ops::set_value(phi,   0.0);
-  data_ops::incr(phi, state, 1.0);
-  data_ops::incr(phi, k1,    m_alpha*a_dt);
+  DataOps::setValue(phi,   0.0);
+  DataOps::incr(phi, state, 1.0);
+  DataOps::incr(phi, k1,    m_alpha*a_dt);
 
   m_amr->averageDown(phi, m_cdr->getPhase());
   
@@ -471,8 +471,8 @@ void rk2::solve_poisson_k1(){
     cdr_densities.push_back(&(storage->get_phi()));
   }
 
-  data_ops::set_value(scratch_pot, 0.0);
-  data_ops::incr(scratch_pot, m_fieldSolver->getPotential(), 1.0);
+  DataOps::setValue(scratch_pot, 0.0);
+  DataOps::incr(scratch_pot, m_fieldSolver->getPotential(), 1.0);
 
   if((m_timeStep + 1) % m_fast_poisson == 0){
     const bool converged = this->solve_poisson(scratch_pot, m_fieldSolver->getRho(), cdr_densities, sigma, centering::cell_center);
@@ -519,8 +519,8 @@ void rk2::advance_rte_k1_stationary(const Real a_dt){
     EBAMRCellData& state  = solver->getPhi();
     EBAMRCellData& source = solver->getSource();
 
-    data_ops::set_value(phi, 0.0);
-    data_ops::incr(phi, state, 1.0);
+    DataOps::setValue(phi, 0.0);
+    DataOps::incr(phi, state, 1.0);
 
     rte_states.push_back(&(phi));
     rte_sources.push_back(&(source));
@@ -559,8 +559,8 @@ void rk2::advance_rte_k1_transient(const Real a_dt){
     EBAMRCellData& state  = solver->getPhi();
     EBAMRCellData& source = solver->getSource();
 
-    data_ops::set_value(phi, 0.0);
-    data_ops::incr(phi, state, 1.0);
+    DataOps::setValue(phi, 0.0);
+    DataOps::incr(phi, state, 1.0);
     
     rte_states.push_back(&(phi));
     rte_sources.push_back(&(source));
@@ -576,9 +576,9 @@ void rk2::advance_rte_k1_transient(const Real a_dt){
 
     EBAMRCellData& scratch = storage->get_scratch();
 
-    data_ops::set_value(scratch, 0.0);
-    data_ops::incr(scratch, state, 0.5);
-    data_ops::incr(scratch, phi,   0.5);
+    DataOps::setValue(scratch, 0.0);
+    DataOps::incr(scratch, state, 0.5);
+    DataOps::incr(scratch, phi,   0.5);
 
     cdr_states.push_back(&(scratch));
   }
@@ -591,9 +591,9 @@ void rk2::advance_rte_k1_transient(const Real a_dt){
     MFAMRCellData& scratch_phi = m_fieldSolver_scratch->get_scratch_phi();
     EBAMRCellData& scratch_E   = m_fieldSolver_scratch->get_scratch_E();
 
-    data_ops::set_value(scratch_phi, 0.0);
-    data_ops::incr(scratch_phi, state, 0.5);
-    data_ops::incr(scratch_phi, phi, 0.5);
+    DataOps::setValue(scratch_phi, 0.0);
+    DataOps::incr(scratch_phi, state, 0.5);
+    DataOps::incr(scratch_phi, phi, 0.5);
 
     m_amr->averageDown(scratch_phi);
     m_amr->interpGhost(scratch_phi);
@@ -779,14 +779,14 @@ void rk2::compute_sigma_flux_after_k1(){
   }
 
   EBAMRIVData& flux = m_sigma->getFlux();
-  data_ops::set_value(flux, 0.0);
+  DataOps::setValue(flux, 0.0);
 
   for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
     const RefCountedPtr<species>& spec      = solver_it.getSpecies();
     const EBAMRIVData& solver_flux          = solver->getEbFlux();
 
-    data_ops::incr(flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
+    DataOps::incr(flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
   }
 
   m_sigma->resetCells(flux);
@@ -813,18 +813,18 @@ void rk2::advance_cdr_k2(const Real a_dt){
     // For transient RTE solvers I need the source term at half time steps. Since the internal state
     // inside the solver will be overwritten, I take a backup into rk2_storage.scratch
     if(!m_rte->isStationary()){
-      data_ops::set_value(scratch,   0.0);
-      data_ops::incr(scratch, state, 1.0);
+      DataOps::setValue(scratch,   0.0);
+      DataOps::incr(scratch, state, 1.0);
     }
 
     
-    data_ops::incr(state, k1, a_dt*(1 - 1./(2.*m_alpha)));
-    data_ops::incr(state, k2, a_dt*1./(2.*m_alpha));
+    DataOps::incr(state, k1, a_dt*(1 - 1./(2.*m_alpha)));
+    DataOps::incr(state, k2, a_dt*1./(2.*m_alpha));
 
     m_amr->averageDown(state, m_cdr->getPhase());
     m_amr->interpGhost(state, m_cdr->getPhase());
 
-    data_ops::floor(state, 0.0);
+    DataOps::floor(state, 0.0);
   }
 }
 
@@ -839,8 +839,8 @@ void rk2::advance_sigma_k2(const Real a_dt){
   m_sigma->computeRHS(k2);
 
   EBAMRIVData& state = m_sigma->getPhi();
-  data_ops::incr(state, k1, a_dt*(1 - 1./(2.*m_alpha)));
-  data_ops::incr(state, k2, a_dt*1./(2.*m_alpha));
+  DataOps::incr(state, k1, a_dt*(1 - 1./(2.*m_alpha)));
+  DataOps::incr(state, k2, a_dt*1./(2.*m_alpha));
 
   m_amr->averageDown(state, m_cdr->getPhase());
   m_sigma->resetCells(state);
@@ -862,13 +862,13 @@ void rk2::solve_poisson_k2(){
   // For transient RTE solvers I need the source term at half time steps. Since the internal state
   // inside the solver will be overwritten, I take a backup into poisson_storage.scratch_phi
   if(!m_rte->isStationary()){
-    data_ops::set_value(scratch, 0.0);
-    data_ops::incr(scratch, pot, 1.0); 
+    DataOps::setValue(scratch, 0.0);
+    DataOps::incr(scratch, pot, 1.0); 
   }
 
   if((m_timeStep + 1) % m_fast_poisson == 0){
-    data_ops::scale(pot, -(1.0 - m_alpha)/m_alpha);
-    data_ops::incr(pot, phi, 1./m_alpha);
+    DataOps::scale(pot, -(1.0 - m_alpha)/m_alpha);
+    DataOps::incr(pot, phi, 1./m_alpha);
 
     const bool converged = this->solve_poisson(pot,
 					       m_fieldSolver->getRho(),
@@ -881,8 +881,8 @@ void rk2::solve_poisson_k2(){
     }
   }
   else{
-    data_ops::set_value(pot, 0.0);
-    data_ops::incr(pot, phi, 1.0);
+    DataOps::setValue(pot, 0.0);
+    DataOps::incr(pot, phi, 1.0);
   }
 }
 
@@ -928,12 +928,12 @@ void rk2::advance_rte_k2_stationary(const Real a_dt){
     // the time step. The result for this is y_extrap = y_alpha/alpha - y_0*(1-alpha)/alpha. This (usually) brings the
     // initial guess closer to the true solution.
     if((m_timeStep + 1) % m_fast_rte == 0){
-      data_ops::scale(state, -(1.0 - m_alpha)/(m_alpha));
-      data_ops::incr(state, phi, 1.0/m_alpha);
+      DataOps::scale(state, -(1.0 - m_alpha)/(m_alpha));
+      DataOps::incr(state, phi, 1.0/m_alpha);
     }
     else {
-      data_ops::set_value(state, 0.0);
-      data_ops::incr(state, phi, 1.0);
+      DataOps::setValue(state, 0.0);
+      DataOps::incr(state, phi, 1.0);
     }
     
     rte_states.push_back(&(state));
@@ -990,9 +990,9 @@ void rk2::advance_rte_k2_transient(const Real a_dt){
 
     EBAMRCellData& phi = storage->get_phi();
 
-    data_ops::set_value(phi, 0.0);
-    data_ops::incr(phi, scratch, 0.5);
-    data_ops::incr(phi, phi,     0.5);
+    DataOps::setValue(phi, 0.0);
+    DataOps::incr(phi, scratch, 0.5);
+    DataOps::incr(phi, phi,     0.5);
 
     cdr_states.push_back(&(phi));
   }
@@ -1004,9 +1004,9 @@ void rk2::advance_rte_k2_transient(const Real a_dt){
     MFAMRCellData& phi   = m_fieldSolver_scratch->get_phi();
     EBAMRCellData& scratch_E   = m_fieldSolver_scratch->get_scratch_E();
     
-    data_ops::set_value(phi, 0.0);
-    data_ops::incr(phi, state, 0.5);
-    data_ops::incr(phi, scratch_phi, 0.5);
+    DataOps::setValue(phi, 0.0);
+    DataOps::incr(phi, state, 0.5);
+    DataOps::incr(phi, scratch_phi, 0.5);
     
     m_amr->averageDown(phi);
     m_amr->interpGhost(phi);

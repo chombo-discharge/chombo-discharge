@@ -1116,11 +1116,11 @@ void cdr_plasma_stepper::compute_cdr_diffco_face(Vector<EBAMRFluxData*>&       a
     const int idx = solver_it.index();
 
     if(solver->isDiffusive()){ // Only need to do this for diffusive things
-      data_ops::set_value(*a_diffusionCoefficient_face[idx], 1.0);
+      DataOps::setValue(*a_diffusionCoefficient_face[idx], 1.0);
       m_amr->averageDown(diffco[idx], m_realm, m_cdr->getPhase());
       m_amr->interpGhost(diffco[idx], m_realm, m_cdr->getPhase()); 
 
-      data_ops::average_cell_to_face_allcomps(*a_diffusionCoefficient_face[idx], diffco[idx], m_amr->getDomains());
+      DataOps::averageCellToFaceAllComps(*a_diffusionCoefficient_face[idx], diffco[idx], m_amr->getDomains());
     }
   }
 }
@@ -2034,7 +2034,7 @@ void cdr_plasma_stepper::extrapolate_velo_to_domain_faces(Vector<EBAMRIFData*>& 
       extrapolate_vector_to_domain_faces(*a_extrap[idx], a_phase, *a_velocities[idx]);
     }
     else{
-      data_ops::set_value(*a_extrap[idx], 0.0);
+      DataOps::setValue(*a_extrap[idx], 0.0);
     }
   }
 }
@@ -2054,7 +2054,7 @@ void cdr_plasma_stepper::compute_cdr_velocities(Vector<EBAMRCellData*>&       a_
   // Interpolate E to centroids
   EBAMRCellData E;
   m_amr->allocate(E, m_realm, phase::gas, SpaceDim);
-  data_ops::copy(E, a_E);
+  DataOps::copy(E, a_E);
   m_amr->interpToCentroids(E, m_realm, phase::gas);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
@@ -2536,7 +2536,7 @@ void cdr_plasma_stepper::compute_E(MFAMRCellData& a_E, const MFAMRCellData& a_po
   }
 
   m_amr->computeGradient(a_E, a_potential, m_realm);
-  data_ops::scale(a_E, -1.0);
+  DataOps::scale(a_E, -1.0);
 
   m_amr->averageDown(a_E, m_realm);
   m_amr->interpGhost(a_E, m_realm);
@@ -2562,7 +2562,7 @@ void cdr_plasma_stepper::compute_E(EBAMRCellData& a_E, const phase::which_phase 
   m_amr->alias(pot_gas, a_phase, a_potential);
 
   m_amr->computeGradient(a_E, pot_gas, m_realm, a_phase);
-  data_ops::scale(a_E, -1.0);
+  DataOps::scale(a_E, -1.0);
 
   m_amr->averageDown(a_E, m_realm, a_phase);
   m_amr->interpGhost(a_E, m_realm, a_phase);
@@ -2606,7 +2606,7 @@ void cdr_plasma_stepper::compute_E(EBAMRFluxData& a_E_face, const phase::which_p
       }
 
     }
-    //    data_ops::average_cell_to_face_allcomps(*a_E_face[lvl], *a_E_cell[lvl], m_amr->getDomains()[lvl]);
+    //    DataOps::averageCellToFaceAllComps(*a_E_face[lvl], *a_E_cell[lvl], m_amr->getDomains()[lvl]);
     a_E_face[lvl]->exchange();
   }
 }
@@ -2637,7 +2637,7 @@ void cdr_plasma_stepper::compute_Emax(Real& a_Emax, const phase::which_phase a_p
   m_amr->interpToCentroids(E, m_realm, a_phase);
 
   Real max, min;
-  data_ops::get_max_min_norm(max, min, E);
+  DataOps::getMaxMinNorm(max, min, E);
 
   a_Emax = max;
 }
@@ -2650,14 +2650,14 @@ void cdr_plasma_stepper::computeCharge_flux(EBAMRIVData& a_flux, Vector<EBAMRIVD
 
   MayDay::Abort("cdr_plasma_stepper::computeCharge_flux - I'm suspecting that this is deprecated code which is no longer used");
 
-  data_ops::set_value(a_flux, 0.0);
+  DataOps::setValue(a_flux, 0.0);
 
   for (CdrIterator<CdrSolver> solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
     const RefCountedPtr<CdrSpecies>& spec      = solver_it.getSpecies();
     const EBAMRIVData& solver_flux          = *a_cdr_fluxes[solver_it.index()];
 
-    data_ops::incr(a_flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
+    DataOps::incr(a_flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
   }
 
   m_sigma->resetCells(a_flux);
@@ -2710,18 +2710,18 @@ void cdr_plasma_stepper::compute_extrapolated_fluxes(Vector<EBAMRIVData*>&      
       interp_stencils.apply(eb_vel, *a_velocities[idx]);
       interp_stencils.apply(eb_phi, *a_densities[idx]);
 
-      data_ops::floor(eb_phi, 0.0);
+      DataOps::floor(eb_phi, 0.0);
 
-      data_ops::set_value(eb_flx, 0.0);
-      data_ops::incr(eb_flx, eb_vel, 1.0);
-      data_ops::multiply_scalar(eb_flx, eb_phi);
+      DataOps::setValue(eb_flx, 0.0);
+      DataOps::incr(eb_flx, eb_vel, 1.0);
+      DataOps::multiplyScalar(eb_flx, eb_phi);
 
       this->project_flux(*a_fluxes[idx], eb_flx);
 
       m_amr->averageDown(*a_fluxes[idx], m_realm, a_phase);
     }
     else{
-      data_ops::set_value(*a_fluxes[idx], 0.0);
+      DataOps::setValue(*a_fluxes[idx], 0.0);
     }
   }
 #endif
@@ -2769,8 +2769,8 @@ void cdr_plasma_stepper::compute_extrapolated_domain_fluxes(Vector<EBAMRIFData*>
     const RefCountedPtr<CdrSolver>& solver = solver_it();
     const int idx = solver_it.index();
     if(solver->isMobile()){
-      data_ops::copy(cell_flux, *a_velocities[idx]);
-      data_ops::multiply_scalar(cell_flux, *a_densities[idx]); // cell_flux = n*v
+      DataOps::copy(cell_flux, *a_velocities[idx]);
+      DataOps::multiplyScalar(cell_flux, *a_densities[idx]); // cell_flux = n*v
 
       // Extrapolate cell-centered to domain faces
       this->extrapolate_to_domain_faces(domain_flux, a_phase, cell_flux);
@@ -2779,7 +2779,7 @@ void cdr_plasma_stepper::compute_extrapolated_domain_fluxes(Vector<EBAMRIFData*>
       this->project_domain(*a_fluxes[idx], domain_flux);
     }
     else{
-      data_ops::set_value(*a_fluxes[idx], 0.0);
+      DataOps::setValue(*a_fluxes[idx], 0.0);
     }
   }
 }
@@ -2811,9 +2811,9 @@ void cdr_plasma_stepper::computeFlux(LevelData<EBCellFAB>&       a_flux,
     pout() << "cdr_plasma_stepper::computeFlux(amr)" << endl;
   }
 
-  data_ops::set_value(a_flux, 0.0);
-  data_ops::incr(a_flux, a_velocity, 1.0);
-  data_ops::multiply_scalar(a_flux, a_density);
+  DataOps::setValue(a_flux, 0.0);
+  DataOps::incr(a_flux, a_velocity, 1.0);
+  DataOps::multiplyScalar(a_flux, a_density);
 }
 
 void cdr_plasma_stepper::compute_J(EBAMRCellData& a_J) const{
@@ -2839,7 +2839,7 @@ void cdr_plasma_stepper::compute_J(LevelData<EBCellFAB>& a_J, const int a_lvl) c
     pout() << "cdr_plasma_stepper::compute_J(level)" << endl;
   }
 
-  data_ops::set_value(a_J, 0.0);
+  DataOps::setValue(a_J, 0.0);
   
   const int density_comp = 0;
 
@@ -2882,7 +2882,7 @@ void cdr_plasma_stepper::compute_J(LevelData<EBCellFAB>& a_J, const int a_lvl) c
     }
   }
   
-  data_ops::scale(a_J, units::s_Qe);
+  DataOps::scale(a_J, units::s_Qe);
 }
 
 void cdr_plasma_stepper::compute_rho(){
@@ -2908,7 +2908,7 @@ void cdr_plasma_stepper::compute_rho(EBAMRCellData& a_rho, const phase::which_ph
 
   CH_assert(a_phase == m_cdr->getPhase());
 
-  data_ops::set_value(a_rho, 0.0);
+  DataOps::setValue(a_rho, 0.0);
 
   Vector<EBAMRCellData*> densities = m_cdr->getPhis(); // Get densities from solver
   
@@ -2921,12 +2921,12 @@ void cdr_plasma_stepper::compute_rho(EBAMRCellData& a_rho, const phase::which_ph
       const RefCountedPtr<CdrSpecies>& spec = solver_it.getSpecies();
 
       if(spec->getChargeNumber() != 0){
-	data_ops::incr(*a_rho[lvl], *density[lvl], spec->getChargeNumber());
+	DataOps::incr(*a_rho[lvl], *density[lvl], spec->getChargeNumber());
       }
     }
 
     // Scale by s_Qe/s_eps0
-    data_ops::scale(*a_rho[lvl], units::s_Qe);
+    DataOps::scale(*a_rho[lvl], units::s_Qe);
   }
 
   m_amr->averageDown(a_rho, m_realm, a_phase);
@@ -2941,7 +2941,7 @@ void cdr_plasma_stepper::compute_rho(MFAMRCellData&                 a_rho,
     pout() << "cdr_plasma_stepper::compute_rho(mfamrcell, vec(ebamrcell))" << endl;
   }
 
-  data_ops::set_value(a_rho, 0.0);
+  DataOps::setValue(a_rho, 0.0);
 
   EBAMRCellData rho_gas;
   m_amr->allocatePointer(rho_gas); 
@@ -2955,12 +2955,12 @@ void cdr_plasma_stepper::compute_rho(MFAMRCellData&                 a_rho,
       const RefCountedPtr<CdrSpecies>& spec = solver_it.getSpecies();
 
       if(spec->getChargeNumber() != 0){
-	data_ops::incr(*rho_gas[lvl], *density[lvl], spec->getChargeNumber());
+	DataOps::incr(*rho_gas[lvl], *density[lvl], spec->getChargeNumber());
       }
     }
 
     // Scale by s_Qe
-    data_ops::scale(*a_rho[lvl], units::s_Qe);
+    DataOps::scale(*a_rho[lvl], units::s_Qe);
   }
 
   m_amr->averageDown(a_rho, m_realm);
@@ -3126,7 +3126,7 @@ void cdr_plasma_stepper::get_cdr_max(Real& a_cdr_max, std::string& a_solver_name
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     Real max, min;
-    data_ops::get_max_min(max, min, solver->getPhi(), comp);
+    DataOps::getMaxMin(max, min, solver->getPhi(), comp);
 
     if(max > a_cdr_max){
       a_cdr_max     = max;
@@ -3803,14 +3803,14 @@ Real cdr_plasma_stepper::compute_electrode_current(){
   // Need to copy onto temporary storage because 
   EBAMRIVData charge_flux;
   m_amr->allocate(charge_flux, m_realm, m_cdr->getPhase(), 1);
-  data_ops::set_value(charge_flux, 0.0);
+  DataOps::setValue(charge_flux, 0.0);
   
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
     const RefCountedPtr<CdrSpecies>& spec      = solver_it.getSpecies();
     const EBAMRIVData& solver_flux          = solver->getEbFlux();
 
-    data_ops::incr(charge_flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
+    DataOps::incr(charge_flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
   }
 
   this->reset_dielectric_cells(charge_flux);
@@ -3851,14 +3851,14 @@ Real cdr_plasma_stepper::compute_dielectric_current(){
   // Need to copy onto temporary storage because 
   EBAMRIVData charge_flux;
   m_amr->allocate(charge_flux, m_realm, m_cdr->getPhase(), 1);
-  data_ops::set_value(charge_flux, 0.0);
+  DataOps::setValue(charge_flux, 0.0);
   
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
     const RefCountedPtr<CdrSpecies>& spec      = solver_it.getSpecies();
     const EBAMRIVData& solver_flux          = solver->getEbFlux();
 
-    data_ops::incr(charge_flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
+    DataOps::incr(charge_flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
   }
 
   m_sigma->resetCells(charge_flux);
@@ -3901,14 +3901,14 @@ Real cdr_plasma_stepper::compute_domain_current(){
   // Need to copy onto temporary storage because 
   EBAMRIFData charge_flux;
   m_amr->allocate(charge_flux, m_realm, m_cdr->getPhase(), 1);
-  data_ops::set_value(charge_flux, 0.0);
+  DataOps::setValue(charge_flux, 0.0);
   
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
     const RefCountedPtr<CdrSpecies>& spec      = solver_it.getSpecies();
     const EBAMRIFData& solver_flux          = solver->getDomainFlux();
 
-    data_ops::incr(charge_flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
+    DataOps::incr(charge_flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
   }
 
   const int compute_lvl = 0;
@@ -3960,13 +3960,13 @@ Real cdr_plasma_stepper::compute_ohmic_induction_current(){
   this->compute_J(J);
 
   // Compute J.dot.E 
-  data_ops::dot_prod(JdotE, J,E);
+  DataOps::dotProduct(JdotE, J,E);
   m_amr->averageDown(JdotE, m_realm, m_cdr->getPhase());
 
   // Only compue on coarsest level
   const int coar = 0;
   const Real dx  = m_amr->getDx()[coar];
-  data_ops::kappa_sum(current, *JdotE[coar]);
+  DataOps::kappaSum(current, *JdotE[coar]);
   current *= pow(dx, SpaceDim);
 
   return current;
@@ -3988,7 +3988,7 @@ Real cdr_plasma_stepper::compute_relaxation_time(){
   m_amr->allocate(J,  m_realm, m_cdr->getPhase(), SpaceDim);
   m_amr->allocate(dt, m_realm, m_cdr->getPhase(), 1);
 
-  data_ops::set_value(dt, 1.234567E89);
+  DataOps::setValue(dt, 1.234567E89);
 
   this->compute_E(E, m_cdr->getPhase(), m_fieldSolver->getPotential());
   this->compute_J(J);
@@ -3998,7 +3998,7 @@ Real cdr_plasma_stepper::compute_relaxation_time(){
   for (int dir = 0; dir < SpaceDim; dir++){
 
     Real max, min;
-    data_ops::get_max_min(max, min, E, dir);
+    DataOps::getMaxMin(max, min, E, dir);
     max_E[dir] = Max(Abs(max), Abs(min));
   }
 
@@ -4025,8 +4025,8 @@ Real cdr_plasma_stepper::compute_relaxation_time(){
       e_magnitude.setVal(0.0);
       j_magnitude.setVal(0.0);
       
-      data_ops::vector_length(e_magnitude, e, box);
-      data_ops::vector_length(j_magnitude, j, box);
+      DataOps::vectorLength(e_magnitude, e, box);
+      DataOps::vectorLength(j_magnitude, j, box);
       j_magnitude += SAFETY;      
 
       dt_fab.setVal(units::s_eps0);
@@ -4048,7 +4048,7 @@ Real cdr_plasma_stepper::compute_relaxation_time(){
   // Find the smallest dt
   Real min_dt = 1.E99;
   Real max, min;
-  data_ops::get_max_min(max, min, dt, comp);
+  DataOps::getMaxMin(max, min, dt, comp);
   min_dt = Min(min_dt, min);
 
   return min_dt;

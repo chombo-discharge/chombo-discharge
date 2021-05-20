@@ -1,5 +1,5 @@
 /*!
-  @file data_ops.H
+  @file DataOps.H
   @brief Agglomeration of useful data operations
   @author Robert Marskar
   @date Nov 2017
@@ -13,19 +13,19 @@
 
 #include "CD_NamespaceHeader.H"
 
-void memrep::get_max_min_memory(){
+void memrep::getMaxMin_memory(){
   Real max_peak, min_peak, min_unfreed, max_unfreed;
 
-  memrep::get_max_min_memory(max_peak, min_peak, min_unfreed, max_unfreed);
+  memrep::getMaxMin_memory(max_peak, min_peak, min_unfreed, max_unfreed);
 
-  pout() << "memrep::get_max_min_memory:" 
+  pout() << "memrep::getMaxMin_memory:" 
 	 << "\t max peak = "       << 1.0*max_peak
 	 << "\t min peak = "    << 1.0*min_peak
 	 << "\t max unfreed = " << 1.0*max_unfreed
 	 << "\t min unfreed = " << 1.0*min_unfreed << endl;
 }
 
-void memrep::get_max_min_memory(Real& a_max_peak, Real& a_min_peak, Real& a_min_unfreed, Real& a_max_unfreed){
+void memrep::getMaxMin_memory(Real& a_max_peak, Real& a_min_peak, Real& a_min_unfreed, Real& a_max_unfreed){
   int BytesPerMB = 1024*1024;
   long long curMem;
   long long peakMem;

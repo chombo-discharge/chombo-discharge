@@ -8,7 +8,7 @@
 #include "full_tagger.H"
 #include <CD_CdrIterator.H>
 #include <CD_RtIterator.H>
-#include "data_ops.H"
+#include <CD_DataOps.H>
 
 #include <EBArith.H>
 
@@ -121,15 +121,15 @@ void full_tagger::compute_tracers(){
   Real rho_max, rho_min;
   Real grad_rho_max, grad_rho_min;
 
-  data_ops::get_max_min(cdr_max,           cdr_min,      m_cdr_densities);
-  data_ops::get_max_min(rte_max,           rte_min,      m_rte_densities);
+  DataOps::getMaxMin(cdr_max,           cdr_min,      m_cdr_densities);
+  DataOps::getMaxMin(rte_max,           rte_min,      m_rte_densities);
   for (int i = 0; i < m_cdr_gradients.size(); i++){
-    data_ops::get_max_min_norm(grad_cdr_max[i], grad_cdr_min[i], m_cdr_gradients[i]);
+    DataOps::getMaxMinNorm(grad_cdr_max[i], grad_cdr_min[i], m_cdr_gradients[i]);
   }
-  data_ops::get_max_min_norm(E_max,        E_min,        m_E);
-  data_ops::get_max_min_norm(grad_E_max,   grad_E_min,   m_grad_E);
-  data_ops::get_max_min(rho_max,           rho_min,      m_rho, 0);
-  data_ops::get_max_min_norm(grad_rho_max, grad_rho_min, m_grad_rho);
+  DataOps::getMaxMinNorm(E_max,        E_min,        m_E);
+  DataOps::getMaxMinNorm(grad_E_max,   grad_E_min,   m_grad_E);
+  DataOps::getMaxMin(rho_max,           rho_min,      m_rho, 0);
+  DataOps::getMaxMinNorm(grad_rho_max, grad_rho_min, m_grad_rho);
 
   // Shit that will be passed on
   Vector<Real>     cdr_phi;
@@ -331,14 +331,14 @@ void full_tagger::compute_cdr_densities(Vector<EBAMRCellData>& a_cdr_densities){
     RefCountedPtr<CdrSolver>& solver = solver_it();
 
     // Interpolate density to centroid
-    data_ops::set_value(m_scratch, 0.0);
-    data_ops::incr(m_scratch, solver->getPhi(), 1.0);
+    DataOps::setValue(m_scratch, 0.0);
+    DataOps::incr(m_scratch, solver->getPhi(), 1.0);
     m_amr->interpToCentroids(m_scratch, m_phase);
 
     // Copy to member data holder
     const int idx = solver_it.get_solver();
-    data_ops::set_value(a_cdr_densities[idx], 0.0);
-    data_ops::incr(a_cdr_densities[idx], m_scratch, 1.0);
+    DataOps::setValue(a_cdr_densities[idx], 0.0);
+    DataOps::incr(a_cdr_densities[idx], m_scratch, 1.0);
   }
 }
 
@@ -365,7 +365,7 @@ void full_tagger::compute_E(EBAMRCellData& a_E, EBAMRCellData& a_grad_E){
   }
 
   m_timeStepper->compute_E(a_E, m_phase);
-  data_ops::vector_length(m_scratch, a_E);
+  DataOps::vectorLength(m_scratch, a_E);
   m_amr->computeGradient(a_grad_E, m_scratch, phase::gas);
 
   m_amr->averageDown(a_grad_E, m_phase);
@@ -403,13 +403,13 @@ void full_tagger::compute_rte_densities(Vector<EBAMRCellData>& a_rte_densities){
     RefCountedPtr<RtSolver>& solver = solver_it();
 
     // Interpolate density to centroid
-    data_ops::set_value(m_scratch, 0.0);
-    data_ops::incr(m_scratch, solver->getPhi(), 1.0);
+    DataOps::setValue(m_scratch, 0.0);
+    DataOps::incr(m_scratch, solver->getPhi(), 1.0);
     m_amr->interpToCentroids(m_scratch, m_phase);
 
     // Copy to member data holder
     const int idx = solver_it.get_solver();
-    data_ops::set_value(a_rte_densities[idx], 0.0);
-    data_ops::incr(a_rte_densities[idx], m_scratch, 1.0);
+    DataOps::setValue(a_rte_densities[idx], 0.0);
+    DataOps::incr(a_rte_densities[idx], m_scratch, 1.0);
   }
 #include "CD_NamespaceFooter.H"

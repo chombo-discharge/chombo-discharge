@@ -7,7 +7,7 @@
 
 #include "imex_sdc.H"
 #include "imex_sdc_storage.H"
-#include "data_ops.H"
+#include <CD_DataOps.H>
 #include "units.H"
 #include <CD_CdrGodunov.H>
 #include "CD_LaPackUtils.H"
@@ -450,9 +450,9 @@ void imex_sdc::quad(EBAMRCellData& a_quad, const Vector<EBAMRCellData>& a_integr
   if(a_m < 0)     MayDay::Abort("imex_sdc::quad - bad index a_m < 0");
   if(a_m >= m_p)  MayDay::Abort("imex_sdc::quad - bad index a_m >= m_p");
 
-  data_ops::set_value(a_quad, 0.0);
+  DataOps::setValue(a_quad, 0.0);
   for (int j = 0; j <= m_p; j++){
-    data_ops::incr(a_quad, a_integrand[j], m_qmj[a_m][j]);
+    DataOps::incr(a_quad, a_integrand[j], m_qmj[a_m][j]);
   }
 }
 
@@ -465,9 +465,9 @@ void imex_sdc::quad(EBAMRIVData& a_quad, const Vector<EBAMRIVData>& a_integrand,
   if(a_m < 0)     MayDay::Abort("imex_sdc::quad - bad index a_m < 0");
   if(a_m >= m_p)  MayDay::Abort("imex_sdc::quad - bad index a_m >= m_p");
 
-  data_ops::set_value(a_quad, 0.0);
+  DataOps::setValue(a_quad, 0.0);
   for (int j = 0; j <= m_p; j++){
-    data_ops::incr(a_quad, a_integrand[j], m_qmj[a_m][j]);
+    DataOps::incr(a_quad, a_integrand[j], m_qmj[a_m][j]);
   }
 }
   
@@ -483,7 +483,7 @@ void imex_sdc::copy_phi_p_to_cdr(){
 
     EBAMRCellData& phi = solver->getPhi();
     const EBAMRCellData& phip = storage->get_phi()[m_p];
-    data_ops::copy(phi, phip);
+    DataOps::copy(phi, phip);
   }
 }
 
@@ -495,7 +495,7 @@ void imex_sdc::copy_sigma_p_to_sigma(){
 
   EBAMRIVData& sigma        = m_sigma->getPhi();
   const EBAMRIVData& sigmap = m_sigma_scratch->get_sigma()[m_p];
-  data_ops::copy(sigma, sigmap);
+  DataOps::copy(sigma, sigmap);
 }
 
 Real imex_sdc::advance(const Real a_dt){
@@ -607,7 +607,7 @@ void imex_sdc::copy_cdr_to_phi_m0(){
     
     EBAMRCellData& phi0 = storage->get_phi()[0];
     const EBAMRCellData& phi = solver->getPhi();
-    data_ops::copy(phi0, phi);
+    DataOps::copy(phi0, phi);
   }
 }
 
@@ -620,7 +620,7 @@ void imex_sdc::copy_sigma_to_sigma_m0(){
   // Copy sigma to starting state
   EBAMRIVData& sigma0      = m_sigma_scratch->get_sigma()[0];
   const EBAMRIVData& sigma = m_sigma->getPhi();
-  data_ops::copy(sigma0, sigma);
+  DataOps::copy(sigma0, sigma);
 }
 
 void imex_sdc::compute_FD_0(){
@@ -645,7 +645,7 @@ void imex_sdc::compute_FD_0(){
 	m_amr->interpGhost(FD_0, m_realm, m_cdr->getPhase());
       }
       else{
-	data_ops::set_value(FD_0, 0.0);
+	DataOps::setValue(FD_0, 0.0);
       }
     }
   }
@@ -788,10 +788,10 @@ void imex_sdc::integrate_advection_reaction(const Real a_dt, const int a_m, cons
     // choosing instead to use the old slopes (which did not change)
     if(skip){ // Can use the old slopes
       const EBAMRCellData& FAR_m = storage->get_FAR()[a_m]; // Slope, doesn't require recomputation. 
-      data_ops::copy(phi_m1, phi_m);
-      data_ops::incr(phi_m1, FAR_m, m_dtm[a_m]);
+      DataOps::copy(phi_m1, phi_m);
+      DataOps::incr(phi_m1, FAR_m, m_dtm[a_m]);
       if(a_lagged_terms) {
-	data_ops::copy(scratch, FAR_m);
+	DataOps::copy(scratch, FAR_m);
       }
     }
     else{ // If we made it here, phi_(m+1) = phi_m + dtm*FA(phi_m) through the integrate_advection routine
@@ -799,20 +799,20 @@ void imex_sdc::integrate_advection_reaction(const Real a_dt, const int a_m, cons
       EBAMRCellData& src = solver->getSource();    // Updated source
 
       // Increment swith source and then compute slope. This has already been done 
-      data_ops::incr(phi_m1, src, m_dtm[a_m]);  // phi_(m+1) = phi_m + dtm*(FA_m + FR_m)
+      DataOps::incr(phi_m1, src, m_dtm[a_m]);  // phi_(m+1) = phi_m + dtm*(FA_m + FR_m)
 
       // This shouldn't be necessary
       m_amr->averageDown(phi_m1, m_realm, m_cdr->getPhase());
       m_amr->interpGhost(phi_m1, m_realm, m_cdr->getPhase());
 
       if(a_lagged_terms){ // Back up the old slope first, we will need it for the lagged term
-	data_ops::copy(scratch, FAR_m);
+	DataOps::copy(scratch, FAR_m);
       }
 
       // Re-compute the advection-reaction slope for node t_m
-      data_ops::copy(FAR_m, phi_m1);            // FAR_m = (phi_(m+1) - phi_m)/dtm
-      data_ops::incr(FAR_m, phi_m, -1.0);       // :
-      data_ops::scale(FAR_m, 1./m_dtm[a_m]);    // :
+      DataOps::copy(FAR_m, phi_m1);            // FAR_m = (phi_(m+1) - phi_m)/dtm
+      DataOps::incr(FAR_m, phi_m, -1.0);       // :
+      DataOps::scale(FAR_m, 1./m_dtm[a_m]);    // :
 
       // Shouldn't be necessary
       m_amr->averageDown(FAR_m, m_realm, m_cdr->getPhase());
@@ -822,9 +822,9 @@ void imex_sdc::integrate_advection_reaction(const Real a_dt, const int a_m, cons
     // Now add in the lagged advection-reaction and quadrature terms. This is a bit weird, but we did overwrite
     // FAR_m above after the advection-reaction advance, but we also backed up the old term into scratch. 
     if(a_lagged_terms){
-      data_ops::incr(phi_m1, scratch, -m_dtm[a_m]); // phi_(m+1)^(k+1) = phi_m^(k+1) + dtm*(FAR_m^(k+1) - FAR_m^k)
+      DataOps::incr(phi_m1, scratch, -m_dtm[a_m]); // phi_(m+1)^(k+1) = phi_m^(k+1) + dtm*(FAR_m^(k+1) - FAR_m^k)
       imex_sdc::quad(scratch, storage->get_F(), a_m);  // Does the quadrature of the lagged operator slopes. 
-      data_ops::incr(phi_m1, scratch, 0.5*a_dt);    // phi_(m+1)^(k+1) = phi_m^(k+1) + dtm*(FAR_m^(k+1) - FAR_m^k) + I_m^(m+1)
+      DataOps::incr(phi_m1, scratch, 0.5*a_dt);    // phi_(m+1)^(k+1) = phi_m^(k+1) + dtm*(FAR_m^(k+1) - FAR_m^k) + I_m^(m+1)
     }
   }
   const Real t2 = MPI_Wtime();
@@ -834,19 +834,19 @@ void imex_sdc::integrate_advection_reaction(const Real a_dt, const int a_m, cons
   const EBAMRIVData& sigma_m = m_sigma_scratch->get_sigma()[a_m];
   if(skip){
     const EBAMRIVData& Fsig_m = m_sigma_scratch->get_Fold()[a_m]; // Here, we should be able to use either Fold or Fnew
-    data_ops::copy(sigma_m1, sigma_m);                            // since Fsig_0 is only computed once. 
-    data_ops::incr(sigma_m1, Fsig_m, m_dtm[a_m]);
+    DataOps::copy(sigma_m1, sigma_m);                            // since Fsig_0 is only computed once. 
+    DataOps::incr(sigma_m1, Fsig_m, m_dtm[a_m]);
   }
 
   const Real t3 = MPI_Wtime();
   if(a_lagged_terms){ // Add in the lagged terms. When we make it here, sigma_(m+1) = sigma_m + dtm*Fsig_m. 
     EBAMRIVData& Fsig_lag = m_sigma_scratch->get_Fold()[a_m];
-    data_ops::incr(sigma_m1, Fsig_lag, -m_dtm[a_m]);
+    DataOps::incr(sigma_m1, Fsig_lag, -m_dtm[a_m]);
 
     // Add in the quadrature term
     EBAMRIVData& scratch = m_sigma_scratch->get_scratch();
     imex_sdc::quad(scratch, m_sigma_scratch->get_Fold(), a_m);
-    data_ops::incr(sigma_m1, scratch, 0.5*a_dt); // Mult by 0.5*a_dt due to scaling on [-1,1] for quadrature
+    DataOps::incr(sigma_m1, scratch, 0.5*a_dt); // Mult by 0.5*a_dt due to scaling on [-1,1] for quadrature
   }
   const Real t4 = MPI_Wtime();
 
@@ -887,15 +887,15 @@ void imex_sdc::integrate_advection(const Real a_dt, const int a_m, const bool a_
       const Real extrap_dt = m_extrap_advect ? 2.0*m_extrap_dt*m_dtm[a_m] : 0.0; // Factor of 2 due to EBPatchAdvect
       solver->computeDivF(scratch, phi_m, extrap_dt);                           // scratch =  Div(v_m*phi_m^(k+1))
     
-      data_ops::copy(phi_m1, phi_m);
-      data_ops::incr(phi_m1, scratch, -m_dtm[a_m]);
-      data_ops::floor(phi_m1, 0.0);
+      DataOps::copy(phi_m1, phi_m);
+      DataOps::incr(phi_m1, scratch, -m_dtm[a_m]);
+      DataOps::floor(phi_m1, 0.0);
       m_amr->averageDown(phi_m1, m_realm, m_cdr->getPhase());
       m_amr->interpGhost(phi_m1, m_realm, m_cdr->getPhase());
 
     }
     else{
-      data_ops::copy(phi_m1, phi_m);
+      DataOps::copy(phi_m1, phi_m);
     }
   }
 
@@ -904,8 +904,8 @@ void imex_sdc::integrate_advection(const Real a_dt, const int a_m, const bool a_
   EBAMRIVData& Fsig_new      = m_sigma_scratch->get_Fnew()[a_m];
   const EBAMRIVData& sigma_m = m_sigma_scratch->get_sigma()[a_m];
   m_sigma->computeRHS(Fsig_new); // Fills Fsig_new with BCs from CDR solvers
-  data_ops::copy(sigma_m1, sigma_m);
-  data_ops::incr(sigma_m1, Fsig_new, m_dtm[a_m]);
+  DataOps::copy(sigma_m1, sigma_m);
+  DataOps::incr(sigma_m1, Fsig_new, m_dtm[a_m]);
 }
 
 void imex_sdc::integrate_diffusion(const Real a_dt, const int a_m, const bool a_lagged_terms){
@@ -930,16 +930,16 @@ void imex_sdc::integrate_diffusion(const Real a_dt, const int a_m, const bool a_
       // Build the diffusion source term
       EBAMRCellData& source   = storage->get_scratch();
       EBAMRCellData& init_soln = storage->get_scratch2();
-      data_ops::set_value(source, 0.0); // No source term
+      DataOps::setValue(source, 0.0); // No source term
       
-      data_ops::copy(init_soln, phi_m1);      // Copy initial solutions
+      DataOps::copy(init_soln, phi_m1);      // Copy initial solutions
       if(a_lagged_terms){
 	const EBAMRCellData& FD_m1k = storage->get_FD()[a_m+1];      // FD_(m+1)^k. Lagged term.
-	data_ops::incr(init_soln, FD_m1k, -m_dtm[a_m]);
+	DataOps::incr(init_soln, FD_m1k, -m_dtm[a_m]);
       }
       m_amr->averageDown(init_soln, m_realm, m_cdr->getPhase());
       m_amr->interpGhost(init_soln, m_realm, m_cdr->getPhase());
-      data_ops::copy(phi_m1, phi_m);
+      DataOps::copy(phi_m1, phi_m);
 
       // Solve
       if(m_useTGA){
@@ -950,21 +950,21 @@ void imex_sdc::integrate_diffusion(const Real a_dt, const int a_m, const bool a_
       }
       m_amr->averageDown(phi_m1, m_realm, m_cdr->getPhase());
       m_amr->interpGhost(phi_m1, m_realm, m_cdr->getPhase());
-      data_ops::floor(phi_m1, 0.0);
+      DataOps::floor(phi_m1, 0.0);
 
       // Update the operator slope
       EBAMRCellData& FD_m1k = storage->get_FD()[a_m+1];
-      data_ops::set_value(FD_m1k, 0.0);
-      data_ops::incr(FD_m1k, phi_m1, 1.0);
-      data_ops::incr(FD_m1k, init_soln, -1.0);
-      data_ops::scale(FD_m1k, 1./m_dtm[a_m]);
+      DataOps::setValue(FD_m1k, 0.0);
+      DataOps::incr(FD_m1k, phi_m1, 1.0);
+      DataOps::incr(FD_m1k, init_soln, -1.0);
+      DataOps::scale(FD_m1k, 1./m_dtm[a_m]);
 
       m_amr->averageDown(FD_m1k, m_realm, m_cdr->getPhase());
       m_amr->interpGhost(FD_m1k, m_realm, m_cdr->getPhase());
     }
     else{
       EBAMRCellData& FD_m1k = storage->get_FD()[a_m+1];
-      data_ops::set_value(FD_m1k, 0.0);
+      DataOps::setValue(FD_m1k, 0.0);
     }
   }
 }
@@ -1003,12 +1003,12 @@ void imex_sdc::reconcile_integrands(){
     if(solver->isMobile()){
       const Real extrap_dt = m_extrap_advect ? 2.0*m_extrap_dt*m_dtm[m_p-1] : 0.0; // Factor of 2 because of EBPatchAdvect
       solver->computeDivF(FAR_p, phi_p, extrap_dt);       // FAR_p =  Div(v_p*phi_p)
-      data_ops::scale(FAR_p, -1.0);                        // FAR_p = -Div(v_p*phi_p)
+      DataOps::scale(FAR_p, -1.0);                        // FAR_p = -Div(v_p*phi_p)
     }
     else{
-      data_ops::set_value(FAR_p, 0.0);
+      DataOps::setValue(FAR_p, 0.0);
     }
-    data_ops::incr(FAR_p, src, 1.0);                     // RHS = -Div(v_m*phi_m) + S_m = FAR(phi_m)
+    DataOps::incr(FAR_p, src, 1.0);                     // RHS = -Div(v_m*phi_m) + S_m = FAR(phi_m)
 
     // Build the integrand
     for (int m = 0; m <= m_p; m++){
@@ -1016,9 +1016,9 @@ void imex_sdc::reconcile_integrands(){
       EBAMRCellData& FD_m  = storage->get_FD()[m];
       EBAMRCellData& FAR_m = storage->get_FAR()[m];
 
-      data_ops::copy(F_m, FAR_m);
+      DataOps::copy(F_m, FAR_m);
       if(solver->isDiffusive()){
-	data_ops::incr(F_m, FD_m, 1.0);
+	DataOps::incr(F_m, FD_m, 1.0);
       }
 
       // Shouldn't be necessary
@@ -1033,7 +1033,7 @@ void imex_sdc::reconcile_integrands(){
   for (int m = 0; m <= m_p; m++){
     EBAMRIVData& Fold_m = m_sigma_scratch->get_Fold()[m];
     EBAMRIVData& Fnew_m = m_sigma_scratch->get_Fnew()[m];
-    data_ops::copy(Fold_m, Fnew_m);
+    DataOps::copy(Fold_m, Fnew_m);
   }
 }
 
@@ -1053,15 +1053,15 @@ void imex_sdc::initialize_errors(){
       EBAMRCellData& error = storage->get_error();
       const EBAMRCellData& phi_final = storage->get_phi()[m_p];
 
-      data_ops::set_value(error, 0.0);
-      data_ops::incr(error, phi_final, -1.0);
+      DataOps::setValue(error, 0.0);
+      DataOps::incr(error, phi_final, -1.0);
     }
   }
 
   EBAMRIVData& error = m_sigma_scratch->get_error();
   const EBAMRIVData& sigma_final = m_sigma_scratch->get_sigma()[m_p];
-  data_ops::set_value(error, 0.0);
-  data_ops::incr(error, sigma_final, -1.0);
+  DataOps::setValue(error, 0.0);
+  DataOps::incr(error, sigma_final, -1.0);
 }
 
 void imex_sdc::finalize_errors(){
@@ -1082,13 +1082,13 @@ void imex_sdc::finalize_errors(){
     if(idx == m_error_idx || m_error_idx < 0){
       EBAMRCellData& error       = storage->get_error();
       const EBAMRCellData& phi_p = storage->get_phi()[m_p];
-      data_ops::incr(error, phi_p, 1.0);
+      DataOps::incr(error, phi_p, 1.0);
 
       // Compute norms. Only coarsest level
       Real Lerr, Lphi;
       const int lvl = 0;
-      data_ops::norm(Lerr, *error[lvl], m_amr->getDomains()[lvl], m_error_norm);
-      data_ops::norm(Lphi, *phi_p[lvl], m_amr->getDomains()[lvl], m_error_norm);
+      DataOps::norm(Lerr, *error[lvl], m_amr->getDomains()[lvl], m_error_norm);
+      DataOps::norm(Lphi, *phi_p[lvl], m_amr->getDomains()[lvl], m_error_norm);
 
       if(Lphi > 0.0){
 	m_cdr_error[idx] = Lerr/Lphi;
@@ -1111,7 +1111,7 @@ void imex_sdc::finalize_errors(){
   // Compute the surface charge conservation error
   EBAMRIVData& error = m_sigma_scratch->get_error();
   const EBAMRIVData& sigma_final = m_sigma_scratch->get_sigma()[m_p];
-  data_ops::incr(error, sigma_final, 1.0);
+  DataOps::incr(error, sigma_final, 1.0);
   m_sigma_error = 0.0; // I don't think this is ever used...
 
 
@@ -1456,7 +1456,7 @@ void imex_sdc::compute_cdr_eb_states(){
   imex_sdc::extrapolate_to_eb(eb_states, m_cdr->getPhase(), cdr_states);
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
-    data_ops::floor(*eb_states[idx], 0.0);
+    DataOps::floor(*eb_states[idx], 0.0);
   }
 
   // We should already have the cell-centered gradients, extrapolate them to the EB and project the flux. 
@@ -1491,7 +1491,7 @@ void imex_sdc::compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_phis){
   imex_sdc::extrapolate_to_eb(eb_states, m_cdr->getPhase(), a_phis);
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
-    data_ops::floor(*eb_states[idx], 0.0);
+    DataOps::floor(*eb_states[idx], 0.0);
   }
 
   // We should already have the cell-centered gradients, extrapolate them to the EB and project the flux. 
@@ -1711,14 +1711,14 @@ void imex_sdc::compute_sigma_flux(){
   }
 
   EBAMRIVData& flux = m_sigma->getFlux();
-  data_ops::set_value(flux, 0.0);
+  DataOps::setValue(flux, 0.0);
 
   for (CdrIterator<CdrSolver> solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
     const RefCountedPtr<CdrSpecies>& spec  = solver_it.getSpecies();
     const EBAMRIVData& solver_flux          = solver->getEbFlux();
 
-    data_ops::incr(flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
+    DataOps::incr(flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
   }
 
   m_sigma->resetCells(flux);
@@ -1916,7 +1916,7 @@ void imex_sdc::store_solvers(){
     // Poisson
     MFAMRCellData& previous    = m_fieldSolver_scratch->get_previous();
     const MFAMRCellData& state = m_fieldSolver->getPotential();
-    data_ops::copy(previous, state);
+    DataOps::copy(previous, state);
 
     // RTE
     for (RtIterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
@@ -1926,7 +1926,7 @@ void imex_sdc::store_solvers(){
       EBAMRCellData& previous = storage->get_previous();
       const EBAMRCellData& state = solver->getPhi();
 
-      data_ops::copy(previous, state);
+      DataOps::copy(previous, state);
     }
   }
 }
@@ -1944,7 +1944,7 @@ void imex_sdc::restore_solvers(){
   MFAMRCellData& state = m_fieldSolver->getPotential();
   const MFAMRCellData& previous    = m_fieldSolver_scratch->get_previous();
 
-  data_ops::copy(state, previous);
+  DataOps::copy(state, previous);
 
   // RTE
   for (RtIterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
@@ -1954,7 +1954,7 @@ void imex_sdc::restore_solvers(){
     EBAMRCellData& previous = storage->get_previous();
     EBAMRCellData& state = solver->getPhi();
 
-    data_ops::copy(state, previous);
+    DataOps::copy(state, previous);
   }
 }
 #include "CD_NamespaceFooter.H"

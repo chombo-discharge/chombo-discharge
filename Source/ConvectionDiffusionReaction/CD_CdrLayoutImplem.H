@@ -16,7 +16,7 @@
 #include <CD_CdrLayout.H>
 #include <CD_CdrIterator.H>
 #include <units.H>
-#include <data_ops.H>
+#include <CD_DataOps.H>
 #include <CD_NamespaceHeader.H>
 
 template <class T>
@@ -449,7 +449,7 @@ Real CdrLayout<T>::computeSourceDt(const Real a_tolerance, const bool a_elec_onl
   for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     Real cur_max, cur_min;
     RefCountedPtr<CdrSolver>& solver = solver_it();
-    data_ops::get_max_min(cur_max, cur_min, solver->getPhi(), comp);
+    DataOps::getMaxMin(cur_max, cur_min, solver->getPhi(), comp);
     max = Max(max, cur_max);
     if(a_elec_only){
       break;

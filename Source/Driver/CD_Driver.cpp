@@ -23,7 +23,7 @@
 
 // Our includes
 #include <CD_Driver.H>
-#include <data_ops.H>
+#include <CD_DataOps.H>
 #include <mfalias.H>
 #include <units.H>
 #include <memrep.H>
@@ -1812,7 +1812,7 @@ void Driver::writeGeometry(){
 
   EBAMRCellData output;
   m_amr->allocate(output, m_realm, phase::gas, ncomp);
-  data_ops::set_value(output, 0.0);
+  DataOps::setValue(output, 0.0);
 
   // Names
   Vector<std::string> names(2);
@@ -1941,8 +1941,8 @@ void Driver::writePlotFile(const std::string a_filename){
   // Allocate storage
   m_amr->allocate(output,  m_realm, phase::gas, ncomp);
   m_amr->allocate(scratch, m_realm, phase::gas, 1);
-  data_ops::set_value(output, 0.0);
-  data_ops::set_value(scratch, 0.0);
+  DataOps::setValue(output, 0.0);
+  DataOps::setValue(scratch, 0.0);
 
   // Assemble data
   int icomp = 0;             // Used as reference for output components
@@ -2047,7 +2047,7 @@ void Driver::writeTags(EBAMRCellData& a_output, int& a_comp){
   // Alloc some temporary storage
   EBAMRCellData tags;
   m_amr->allocate(tags, m_realm, phase::gas, 1);
-  data_ops::set_value(tags, 0.0);
+  DataOps::setValue(tags, 0.0);
     
   // Set tagged cells = 1
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
@@ -2069,7 +2069,7 @@ void Driver::writeTags(EBAMRCellData& a_output, int& a_comp){
     }
   }
 
-  data_ops::set_covered_value(tags, 0, 0.0);
+  DataOps::set_covered_value(tags, 0, 0.0);
 
   const Interval src_interv(0, 0);
   const Interval dst_interv(a_comp, a_comp);
@@ -2090,7 +2090,7 @@ void Driver::writeRanks(EBAMRCellData& a_output, int& a_comp){
     EBAMRCellData scratch;
     m_amr->allocate(scratch, r, phase::gas, 1);
 
-    data_ops::set_value(scratch, 1.0*procID());
+    DataOps::setValue(scratch, 1.0*procID());
 
     const Interval src(0,0);
     const Interval dst(a_comp, a_comp);
@@ -2221,7 +2221,7 @@ void Driver::writeCheckpointTags(HDF5Handle& a_handle, const int a_level){
   // Create some scratch data = 0 which can grok
   EBCellFactory fact(m_amr->getEBISLayout(m_realm, phase::gas)[a_level]);
   LevelData<EBCellFAB> scratch(m_amr->getGrids(m_realm)[a_level], 1, 3*IntVect::Unit, fact);
-  data_ops::set_value(scratch, 0.0);
+  DataOps::setValue(scratch, 0.0);
 
   // Set tags = 1
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
@@ -2239,7 +2239,7 @@ void Driver::writeCheckpointTags(HDF5Handle& a_handle, const int a_level){
       }
     }
 
-    data_ops::set_covered_value(scratch, 0, 0.0);
+    DataOps::set_covered_value(scratch, 0, 0.0);
   }
 
   // Write tags
@@ -2421,7 +2421,7 @@ void Driver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
   // Some scratch data we can use
   EBCellFactory fact(ebisl);
   LevelData<EBCellFAB> scratch(dbl, 1, 3*IntVect::Unit, fact);
-  data_ops::set_value(scratch, 0.0);
+  DataOps::setValue(scratch, 0.0);
 
   // Read in tags
   read<EBCellFAB>(a_handle, scratch, "tagged_cells", dbl, Interval(0,0), false);

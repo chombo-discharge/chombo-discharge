@@ -20,7 +20,7 @@
 
 // Our includes
 #include <CD_EddingtonSP1.H>
-#include <data_ops.H>
+#include <CD_DataOps.H>
 #include <units.H>
 #include <CD_ConductivityDomainBcWrapper.H>
 #include <CD_NamespaceHeader.H>
@@ -287,9 +287,9 @@ void EddingtonSP1::allocateInternals(){
   m_amr->allocate(m_source,    m_realm, m_phase, ncomp);
   m_amr->allocate(m_resid,     m_realm, m_phase, ncomp);
 
-  data_ops::set_value(m_resid,  0.0);
-  data_ops::set_value(m_phi,  0.0);
-  data_ops::set_value(m_source, 0.0);
+  DataOps::setValue(m_resid,  0.0);
+  DataOps::setValue(m_phi,  0.0);
+  DataOps::setValue(m_source, 0.0);
 
   this->setACoefAndBCoef();
 }
@@ -373,16 +373,16 @@ bool EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCel
   EBAMRCellData source;
   m_amr->allocate(dummy,  m_realm, m_phase, ncomp);
   m_amr->allocate(source, m_realm, m_phase, ncomp);
-  data_ops::set_value(dummy, 0.0);
+  DataOps::setValue(dummy, 0.0);
 
   // Various source term manipulations. 
-  data_ops::set_value(source, 0.0);
-  data_ops::incr(source, a_source, 1.0);
+  DataOps::setValue(source, 0.0);
+  DataOps::incr(source, a_source, 1.0);
 #if EddingtonSP1_feature
-  data_ops::scale(source, 1./units::s_c0); // Source should be scaled by 1./c0
+  DataOps::scale(source, 1./units::s_c0); // Source should be scaled by 1./c0
 #endif
   if(m_stationary){ // Should kappa-scale for transient solvres
-    data_ops::kappa_scale(source);
+    DataOps::kappaScale(source);
   }
 
   Vector<LevelData<EBCellFAB>* > phi, rhs, res, zero;
@@ -409,7 +409,7 @@ bool EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCel
     }
     m_multigridSolver->revert(phi, rhs, finest_level, 0);
 
-    data_ops::set_covered_value(a_phi, 0, 0.0);
+    DataOps::set_covered_value(a_phi, 0, 0.0);
   }
   else{
     if(m_useTGA){
@@ -433,13 +433,13 @@ bool EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCel
     }
 
     // We solve onto res, copy back to state
-    data_ops::copy(a_phi, m_resid);
+    DataOps::copy(a_phi, m_resid);
   }
 
   m_amr->averageDown(a_phi, m_realm, m_phase);
   m_amr->interpGhost(a_phi, m_realm, m_phase);
 
-  data_ops::floor(a_phi, 0.0);
+  DataOps::floor(a_phi, 0.0);
 
   return converged;
 }
@@ -496,9 +496,9 @@ void EddingtonSP1::setACoefAndBCoef(){
   // This loop fills aco with kappa and bco_irreg with 1./kappa
   if(m_RtSpecies->isKappaConstant()){
     const Real kap = m_RtSpecies->getKappa(RealVect::Zero);
-    data_ops::set_value(m_aCoef, kap);
-    data_ops::set_value(m_bco, 1./kap);
-    data_ops::set_value(m_bco_irreg, 1./kap);
+    DataOps::setValue(m_aCoef, kap);
+    DataOps::setValue(m_bco, 1./kap);
+    DataOps::setValue(m_bco_irreg, 1./kap);
   }
   else{ // If kappa is not constant, we need to go through each cell to determine it
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
@@ -517,18 +517,18 @@ void EddingtonSP1::setACoefAndBCoef(){
 
     m_amr->averageDown(m_aCoef, m_realm, m_phase);
     m_amr->interpGhost(m_aCoef, m_realm, m_phase);
-    data_ops::average_cell_to_face_allcomps(m_bco, m_aCoef, m_amr->getDomains()); // Average aco onto face
-    data_ops::invert(m_bco); // Make m_bco = 1./kappa
+    DataOps::averageCellToFaceAllComps(m_bco, m_aCoef, m_amr->getDomains()); // Average aco onto face
+    DataOps::invert(m_bco); // Make m_bco = 1./kappa
   }
 
 #if EddingtonSP1_feature // Different scaling for the RTE
-  data_ops::scale(m_aCoef,       1.0);       // aco = c*kappa
-  data_ops::scale(m_bco,       1.0/(3.0)); // bco = c/(3*kappa)
-  data_ops::scale(m_bco_irreg, 1.0/(3.0)); // bco = c/(3*kappa)
+  DataOps::scale(m_aCoef,       1.0);       // aco = c*kappa
+  DataOps::scale(m_bco,       1.0/(3.0)); // bco = c/(3*kappa)
+  DataOps::scale(m_bco_irreg, 1.0/(3.0)); // bco = c/(3*kappa)
 #else // Original code before different scaling
-  data_ops::scale(m_aCoef,       units::s_c0);       // aco = c*kappa
-  data_ops::scale(m_bco,       units::s_c0/(3.0)); // bco = c/(3*kappa)
-  data_ops::scale(m_bco_irreg, units::s_c0/(3.0)); // bco = c/(3*kappa)
+  DataOps::scale(m_aCoef,       units::s_c0);       // aco = c*kappa
+  DataOps::scale(m_bco,       units::s_c0/(3.0)); // bco = c/(3*kappa)
+  DataOps::scale(m_bco_irreg, units::s_c0/(3.0)); // bco = c/(3*kappa)
 #endif
 }
 
@@ -777,8 +777,8 @@ void EddingtonSP1::setupMultigridSolver(){
   EBAMRCellData dummy1, dummy2;
   m_amr->allocate(dummy1, m_realm, m_phase, ncomp);
   m_amr->allocate(dummy2, m_realm, m_phase, ncomp);
-  data_ops::set_value(dummy1, 0.0);
-  data_ops::set_value(dummy2, 0.0);
+  DataOps::setValue(dummy1, 0.0);
+  DataOps::setValue(dummy2, 0.0);
 
   // Aliasing
   Vector<LevelData<EBCellFAB>* > phi, rhs;
@@ -840,7 +840,7 @@ void EddingtonSP1::computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellDat
 
   m_amr->averageDown(a_ebFlux, m_realm, m_phase);
 
-  data_ops::scale(a_ebFlux, 0.5*units::s_c0);
+  DataOps::scale(a_ebFlux, 0.5*units::s_c0);
 }
 
 void EddingtonSP1::computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_data){
@@ -918,8 +918,8 @@ void EddingtonSP1::computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi
 
   m_amr->computeGradient(a_flux, a_phi, m_realm, m_phase); // flux = grad(phi)
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    data_ops::divide_scalar(*a_flux[lvl], *m_aCoef[lvl]);   // flux = grad(phi)/(c*kappa)
-    data_ops::scale(*a_flux[lvl], -units::s_c0*units::s_c0/3.0);  // flux = -c*grad(phi)/3.
+    DataOps::divideByScalar(*a_flux[lvl], *m_aCoef[lvl]);   // flux = grad(phi)/(c*kappa)
+    DataOps::scale(*a_flux[lvl], -units::s_c0*units::s_c0/3.0);  // flux = -c*grad(phi)/3.
   }
 
   m_amr->averageDown(a_flux, m_realm, m_phase);
@@ -1038,7 +1038,7 @@ void EddingtonSP1::setNeumannWallBc(const int a_dir, Side::LoHiSide a_side, cons
 
   const int idx = WallBc::map_bc(a_dir, a_side);
   m_wallBc[idx] = RefCountedPtr<WallBc> (new WallBc(a_dir, a_side, wallbc::neumann));
-  m_wallBc[idx]->set_value(a_value);
+  m_wallBc[idx]->setValue(a_value);
 }
 
 void EddingtonSP1::setRobinWallBc(const int a_dir, Side::LoHiSide a_side, const Real a_value){
@@ -1049,7 +1049,7 @@ void EddingtonSP1::setRobinWallBc(const int a_dir, Side::LoHiSide a_side, const 
 
   const int idx = WallBc::map_bc(a_dir, a_side);
   m_wallBc[idx] = RefCountedPtr<WallBc> (new WallBc(a_dir, a_side, wallbc::robin));
-  m_wallBc[idx]->set_value(a_value);
+  m_wallBc[idx]->setValue(a_value);
 }
 
 #include <CD_NamespaceFooter.H>

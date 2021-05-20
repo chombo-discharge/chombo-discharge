@@ -24,7 +24,7 @@
 
 // Our includes
 #include <CD_McPhoto.H>
-#include <data_ops.H>
+#include <CD_DataOps.H>
 #include <units.H>
 #include <poly.H>
 #include <CD_ParticleOps.H>
@@ -605,7 +605,7 @@ void McPhoto::computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_
     pout() << m_name + "::computeBoundaryFlux" << endl;
   }
 
-  data_ops::set_value(a_ebFlux, 0.0);
+  DataOps::setValue(a_ebFlux, 0.0);
 }
 
 void McPhoto::computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_phi){
@@ -614,7 +614,7 @@ void McPhoto::computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellData& 
     pout() << m_name + "::computeDomainFlux" << endl;
   }
   
-  data_ops::set_value(a_domainflux, 0.0);
+  DataOps::setValue(a_domainflux, 0.0);
 }
 
 void McPhoto::computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi){
@@ -1010,8 +1010,8 @@ void McPhoto::depositKappaConservative(EBAMRCellData&              a_phi,
   const RealVect origin  = m_amr->getProbLo();
   const int finest_level = m_amr->getFinestLevel();
 
-  data_ops::set_value(a_phi,    0.0);
-  data_ops::set_value(m_scratch,  0.0);
+  DataOps::setValue(a_phi,    0.0);
+  DataOps::setValue(m_scratch,  0.0);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const Real dx                = m_amr->getDx()[lvl];
@@ -1068,7 +1068,7 @@ void McPhoto::depositNonConservative(EBAMRIVData& a_depositionNC, const EBAMRCel
     stencils.apply(a_depositionNC, a_depositionKappaC);
   }
   else{
-    data_ops::set_value(a_depositionNC, 0.0);
+    DataOps::setValue(a_depositionNC, 0.0);
   }
 }
 

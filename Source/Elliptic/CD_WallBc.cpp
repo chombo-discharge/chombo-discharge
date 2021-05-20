@@ -18,7 +18,7 @@ WallBc::WallBc(const int a_dir, const Side::LoHiSide a_side, wallbc::which_bc a_
 WallBc::~WallBc(){
 }
 
-void WallBc::set_value(Real a_value){
+void WallBc::setValue(Real a_value){
   m_value = a_value;
 }
 

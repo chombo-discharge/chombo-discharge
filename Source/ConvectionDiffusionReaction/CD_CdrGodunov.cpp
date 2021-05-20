@@ -16,7 +16,7 @@
 
 // Our includes
 #include <CD_CdrGodunov.H>
-#include <data_ops.H>
+#include <CD_DataOps.H>
 
 ExtrapAdvectBCFactory s_physibc;
 
@@ -90,7 +90,7 @@ void CdrGodunov::averageVelocityToFaces(EBAMRFluxData& a_faceVelocity, const EBA
 
   const int finest_level = m_amr->getFinestLevel();
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    data_ops::average_cell_to_face(*a_faceVelocity[lvl], *a_cellVelocity[lvl], m_amr->getDomains()[lvl]);
+    DataOps::averageCellToFace(*a_faceVelocity[lvl], *a_cellVelocity[lvl], m_amr->getDomains()[lvl]);
     a_faceVelocity[lvl]->exchange();
   }
 
@@ -208,12 +208,12 @@ void CdrGodunov::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_
     }
 #endif
 
-    data_ops::copy(m_scratch, m_source);
+    DataOps::copy(m_scratch, m_source);
     m_amr->averageDown(m_scratch,     m_realm, m_phase);
     m_amr->interpGhostPwl(m_scratch, m_realm, m_phase);
   }
   else{
-    data_ops::set_value(m_scratch, 0.0);
+    DataOps::setValue(m_scratch, 0.0);
   }
 
   // Extrapolate face-centered state on every level

@@ -6,7 +6,7 @@
 */
 
 #include "ito_plasma_godunov.H"
-#include "data_ops.H"
+#include <CD_DataOps.H>
 #include "units.H"
 #include "CD_FieldSolverMultigrid.H"
 
@@ -918,7 +918,7 @@ void ito_plasma_godunov::compute_cell_conductivity(EBAMRCellData& a_conductivity
     pout() << m_name + "::compute_cell_conductivity(conductivity, godunov_particle)" << endl;
   }
 
-  data_ops::set_value(a_conductivity, 0.0);
+  DataOps::setValue(a_conductivity, 0.0);
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>&   solver = solver_it();
@@ -928,19 +928,19 @@ void ito_plasma_godunov::compute_cell_conductivity(EBAMRCellData& a_conductivity
     const int q   = species->getChargeNumber();
 
     if(q != 0 && solver->isMobile()){
-      data_ops::set_value(m_particle_scratch1, 0.0);
+      DataOps::setValue(m_particle_scratch1, 0.0);
 #if 1 // Original code
       solver->deposit_particles(m_particle_scratch1, *a_particles[idx]); // The particles should have "masses" = m*mu
 #else
       const EBAMRCellData& mu  = solver->get_mobility_func();
       const EBAMRCellData& phi = solver->getPhi();
-      data_ops::copy(m_particle_scratch1, mu);
-      data_ops::multiply(m_particle_scratch1, phi);
+      DataOps::copy(m_particle_scratch1, mu);
+      DataOps::multiply(m_particle_scratch1, phi);
 #endif
 
       // Copy to fluid Realm and add to fluid stuff
       m_fluid_scratch1.copy(m_particle_scratch1);
-      data_ops::incr(a_conductivity, m_fluid_scratch1, Abs(q));
+      DataOps::incr(a_conductivity, m_fluid_scratch1, Abs(q));
     }
   }
 
@@ -952,10 +952,10 @@ void ito_plasma_godunov::compute_cell_conductivity(EBAMRCellData& a_conductivity
       const int num_app = std::get<2>(f);
 
       for (int iapp = 0; iapp < num_app; iapp++){
-	data_ops::set_value(m_fluid_scratch1, 0.0);
+	DataOps::setValue(m_fluid_scratch1, 0.0);
 	m_fluid_scratch1.copy(a_conductivity);
-	data_ops::set_covered_value(m_fluid_scratch1, 0.0, 0);
-	data_ops::filter_smooth(a_conductivity, m_fluid_scratch1, stride, alpha);
+	DataOps::set_covered_value(m_fluid_scratch1, 0.0, 0);
+	DataOps::filterSmooth(a_conductivity, m_fluid_scratch1, stride, alpha);
 
 	m_amr->averageDown(a_conductivity, m_fluid_Realm, m_phase);
 	m_amr->interpGhost(a_conductivity, m_fluid_Realm, m_phase);
@@ -963,7 +963,7 @@ void ito_plasma_godunov::compute_cell_conductivity(EBAMRCellData& a_conductivity
     }
   }
 
-  data_ops::scale(a_conductivity, units::s_Qe);
+  DataOps::scale(a_conductivity, units::s_Qe);
 
   m_amr->averageDown(a_conductivity,     m_fluid_Realm, m_phase);
   m_amr->interpGhostPwl(a_conductivity, m_fluid_Realm, m_phase);
@@ -979,11 +979,11 @@ void ito_plasma_godunov::compute_face_conductivity(){
     pout() << m_name + "::compute_face_conductivity" << endl;
   }
 
-  data_ops::set_value(m_conduct_face, 0.0);
-  data_ops::set_value(m_conduct_eb,   0.0);
+  DataOps::setValue(m_conduct_face, 0.0);
+  DataOps::setValue(m_conduct_eb,   0.0);
 
   // This code does averaging from cell to face. 
-  data_ops::average_cell_to_face_allcomps(m_conduct_face, m_conduct_cell, m_amr->getDomains());
+  DataOps::averageCellToFaceAllComps(m_conduct_face, m_conduct_cell, m_amr->getDomains());
 
   // This code extrapolates the conductivity to the EB. This should actually be the EB centroid but since the stencils
   // for EB extrapolation can be a bit nasty (e.g. negative weights), we do the centroid instead and take that as an approximation.
@@ -993,7 +993,7 @@ void ito_plasma_godunov::compute_face_conductivity(){
     ebsten.apply(m_conduct_eb, m_conduct_cell, lvl);
   }
 #else
-  data_ops::incr(m_conduct_eb, m_conduct_cell, 1.0);
+  DataOps::incr(m_conduct_eb, m_conduct_cell, 1.0);
 #endif
 
 }
@@ -1022,14 +1022,14 @@ void ito_plasma_godunov::setup_semi_implicit_poisson(const Real a_dt){
   m_amr->alias(bco_gas,     phase::gas, bco);
   m_amr->alias(bco_irr_gas, phase::gas, bco_irr);
 
-  data_ops::scale(m_conduct_face, a_dt/units::s_eps0);
-  data_ops::scale(m_conduct_eb,   a_dt/units::s_eps0);
+  DataOps::scale(m_conduct_face, a_dt/units::s_eps0);
+  DataOps::scale(m_conduct_eb,   a_dt/units::s_eps0);
 
-  data_ops::multiply(m_conduct_face, bco_gas);
-  data_ops::multiply(m_conduct_eb,   bco_irr_gas);
+  DataOps::multiply(m_conduct_face, bco_gas);
+  DataOps::multiply(m_conduct_eb,   bco_irr_gas);
 
-  data_ops::incr(bco_gas,     m_conduct_face, 1.0);
-  data_ops::incr(bco_irr_gas, m_conduct_eb,   1.0);
+  DataOps::incr(bco_gas,     m_conduct_face, 1.0);
+  DataOps::incr(bco_irr_gas, m_conduct_eb,   1.0);
 
   m_amr->averageDown(bco_gas,     m_fluid_Realm, phase::gas);
   m_amr->averageDown(bco_irr_gas, m_fluid_Realm, phase::gas);

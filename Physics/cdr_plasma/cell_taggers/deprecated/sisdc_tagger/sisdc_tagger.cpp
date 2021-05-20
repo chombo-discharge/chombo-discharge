@@ -6,7 +6,7 @@
 */
 
 #include "sisdc_tagger.H"
-#include "data_ops.H"
+#include <CD_DataOps.H>
 #include "sisdc.H"
 
 #include <ParmParse.H>
@@ -51,8 +51,8 @@ void sisdc_tagger::compute_tracers(){
   // Get maximum and minimum stuff
   Real err_max,  err_min, Emax, Emin;
   Real ne_min, ne_max;
-  data_ops::get_max_min(err_max,  err_min,  ne_err,   comp);
-  data_ops::get_max_min(ne_max,  ne_min,  ne,   comp);
+  DataOps::getMaxMin(err_max,  err_min,  ne_err,   comp);
+  DataOps::getMaxMin(ne_max,  ne_min,  ne,   comp);
   err_max = Max(Abs(err_max), Abs(err_min));
 
   // Compute the electric field and take the magnitude onto tracer1. Also scale it. 
@@ -60,10 +60,10 @@ void sisdc_tagger::compute_tracers(){
   m_amr->allocate(E, phase::gas, SpaceDim);
   m_timeStepper->compute_E(E, phase::gas);
 
-  data_ops::vector_length(m_tracer[1], E);
+  DataOps::vectorLength(m_tracer[1], E);
   m_amr->interpToCentroids(m_tracer[1], m_phase);
-  data_ops::get_max_min(Emax, Emin, m_tracer[1], 0);
-  data_ops::scale(m_tracer[1], 1./Emax);
+  DataOps::getMaxMin(Emax, Emin, m_tracer[1], 0);
+  DataOps::scale(m_tracer[1], 1./Emax);
 
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
@@ -90,9 +90,9 @@ void sisdc_tagger::compute_tracers(){
     }
   }
 
-  data_ops::get_max_min(err_max, err_min, m_tracer[0], 0);
+  DataOps::getMaxMin(err_max, err_min, m_tracer[0], 0);
   err_max = Max(Abs(err_max), Abs(err_min));
-  data_ops::scale(m_tracer[0], 1./err_max);
+  DataOps::scale(m_tracer[0], 1./err_max);
 }
 
 bool sisdc_tagger::coarsen_cell(const RealVect&         a_pos,

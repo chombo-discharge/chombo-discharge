@@ -14,7 +14,7 @@
 
 // Our includes
 #include <CD_AdvectionDiffusionTagger.H>
-#include <data_ops.H>
+#include <CD_DataOps.H>
 #include <CD_NamespaceHeader.H>
 
 using namespace Physics::AdvectionDiffusion;
@@ -56,8 +56,8 @@ bool AdvectionDiffusionTagger::tagCells(EBAMRTags& a_tags){
 
   // Compute the gradient, vec = grad(phi)
   m_amr->computeGradient(vec, state, m_realm, phase::gas); // vec = grad(phi)
-  data_ops::vector_length(sca, vec);                        // sca = |grad(phi)|
-  data_ops::set_covered_value(sca, 0, 0.0);                 // covered cell values are set to 0.0
+  DataOps::vectorLength(sca, vec);                        // sca = |grad(phi)|
+  DataOps::set_covered_value(sca, 0, 0.0);                 // covered cell values are set to 0.0
 
   bool found_tags = false;
 
@@ -67,7 +67,7 @@ bool AdvectionDiffusionTagger::tagCells(EBAMRTags& a_tags){
   const int finest_tag_level = (finest_level == max_depth) ? max_depth - 1 : finest_level; // Never tag on max_amr_depth
 
   for (int lvl = 0; lvl <= finest_tag_level; lvl++){
-    data_ops::scale(*sca[lvl], m_amr->getDx()[lvl]); // sca = |grad(phi)|*dx
+    DataOps::scale(*sca[lvl], m_amr->getDx()[lvl]); // sca = |grad(phi)|*dx
 
     const Real SAFETY = 1.E-6;
     

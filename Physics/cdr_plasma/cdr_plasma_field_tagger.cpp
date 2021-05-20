@@ -6,7 +6,7 @@
 */
 
 #include "cdr_plasma_field_tagger.H"
-#include "data_ops.H"
+#include <CD_DataOps.H>
 
 #include <EBArith.H>
 
@@ -55,7 +55,7 @@ void cdr_plasma_field_tagger::compute_E(EBAMRCellData& a_E, EBAMRCellData& a_gra
   }
 
   m_timeStepper->compute_E(a_E, m_phase);
-  data_ops::vector_length(m_scratch, a_E);
+  DataOps::vectorLength(m_scratch, a_E);
   m_amr->computeGradient(a_grad_E, m_scratch, m_realm, phase::gas);
 
   m_amr->averageDown(a_grad_E, m_realm, m_phase);
@@ -84,8 +84,8 @@ void cdr_plasma_field_tagger::compute_tracers(){
   Real E_max, E_min;
   Real grad_E_max, grad_E_min;
 
-  data_ops::get_max_min_norm(E_max,        E_min,        m_E);
-  data_ops::get_max_min_norm(grad_E_max,   grad_E_min,   m_grad_E);
+  DataOps::getMaxMinNorm(E_max,        E_min,        m_E);
+  DataOps::getMaxMinNorm(grad_E_max,   grad_E_min,   m_grad_E);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];

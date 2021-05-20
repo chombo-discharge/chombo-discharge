@@ -69,7 +69,7 @@ public:
   /*!
     @brief Set value
   */
-  virtual void set_value(Real a_value);
+  virtual void setValue(Real a_value);
 
   /*!
     @brief Set live or not

@@ -215,7 +215,7 @@ void ito_plasma_physics::reconcile_particles(List<ito_particle>& a_particles,
 }
 
 inline
-void ito_plasma_physics::compute_particle_weights(long long&      a_weight,
+void ito_plasma_physics::computeParticleWeights(long long&      a_weight,
 						  long long&      a_num,
 						  long long&      a_remainder,
 						  const long long a_numNewParticles) const {
@@ -248,7 +248,7 @@ void ito_plasma_physics::addParticles(List<ito_particle>& a_particles,
 
   constexpr long long zero = 0;
   
-  this->compute_particle_weights(weight, num, remainder, a_numNewParticles);
+  this->computeParticleWeights(weight, num, remainder, a_numNewParticles);
 
   for (int i = 0; i < num; i++){
     const RealVect p = this->random_position(a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
@@ -471,7 +471,7 @@ void ito_plasma_physics::reconcile_Photons(List<Photon>&      a_Photons,
   a_Photons.clear();
 
   long long weight, num, remainder;
-  this->compute_particle_weights(weight, num, remainder, a_num_Photons);
+  this->computeParticleWeights(weight, num, remainder, a_num_Photons);
   
   for (int i = 0; i < num; i++){
     const RealVect p = this->random_position(a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);

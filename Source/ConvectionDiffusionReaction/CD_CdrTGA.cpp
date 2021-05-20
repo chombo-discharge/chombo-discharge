@@ -19,7 +19,7 @@
 
 // Our includes
 #include <CD_CdrTGA.H>
-#include <data_ops.H>
+#include <CD_DataOps.H>
 #include <CD_NamespaceHeader.H>
 
 CdrTGA::CdrTGA() : CdrSolver() {
@@ -43,13 +43,13 @@ void CdrTGA::advanceEuler(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi
     const int ncomp = 1;
     EBAMRCellData src;
     m_amr->allocate(src, m_realm, m_phase, ncomp);
-    data_ops::set_value(src, 0.0);
+    DataOps::setValue(src, 0.0);
 
     // Call version with source term
     advanceEuler(a_newPhi, a_oldPhi, src, a_dt);
   }
   else{
-    data_ops::copy(a_newPhi, a_oldPhi);
+    DataOps::copy(a_newPhi, a_oldPhi);
   }
 }
 
@@ -75,9 +75,9 @@ void CdrTGA::advanceEuler(EBAMRCellData&       a_newPhi,
     // compute the residue L(zero) - m_scratch which sets the convergence metric. 
     EBAMRCellData zero;
     m_amr->allocate(zero, m_realm, m_phase, ncomp);
-    data_ops::set_value(zero, 0.0);
-    data_ops::copy(m_scratch, a_oldPhi);
-    data_ops::incr(m_scratch, a_source, a_dt);
+    DataOps::setValue(zero, 0.0);
+    DataOps::copy(m_scratch, a_oldPhi);
+    DataOps::incr(m_scratch, a_source, a_dt);
 
     Vector<LevelData<EBCellFAB>* > orez;
     Vector<LevelData<EBCellFAB>* > shr;
@@ -99,7 +99,7 @@ void CdrTGA::advanceEuler(EBAMRCellData&       a_newPhi,
 
 
     // Euler solve
-    data_ops::set_value(m_ebCenteredDiffusionCoefficient, 0.0);
+    DataOps::setValue(m_ebCenteredDiffusionCoefficient, 0.0);
     m_eulerSolver->oneStep(new_state, old_state, source, a_dt, 0, finest_level, false);
     const int status = m_multigridSolver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
     if(status == 1 || status == 8 || status == 9){  // 8 => Norm sufficiently small
@@ -107,7 +107,7 @@ void CdrTGA::advanceEuler(EBAMRCellData&       a_newPhi,
     }
   }
   else{
-    data_ops::copy(a_newPhi, a_oldPhi);
+    DataOps::copy(a_newPhi, a_oldPhi);
   }
 }
 
@@ -123,13 +123,13 @@ void CdrTGA::advanceTGA(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, 
     const int ncomp = 1;
     EBAMRCellData src;
     m_amr->allocate(src, m_realm, m_phase, ncomp);
-    data_ops::set_value(src, 0.0);
+    DataOps::setValue(src, 0.0);
 
     // Call other version
     advanceTGA(a_newPhi, a_oldPhi, src, a_dt);
   }
   else{
-    data_ops::copy(a_newPhi, a_oldPhi);
+    DataOps::copy(a_newPhi, a_oldPhi);
   }
 }
 
@@ -160,7 +160,7 @@ void CdrTGA::advanceTGA(EBAMRCellData&       a_newPhi,
     const Real alpha = 0.0;
     const Real beta  = 1.0;
 
-    data_ops::set_value(m_ebCenteredDiffusionCoefficient, 0.0);
+    DataOps::setValue(m_ebCenteredDiffusionCoefficient, 0.0);
 
     // TGA solve
     m_tgaSolver->resetAlphaAndBeta(alpha, beta);
@@ -172,7 +172,7 @@ void CdrTGA::advanceTGA(EBAMRCellData&       a_newPhi,
     }
   }
   else{
-    data_ops::copy(a_newPhi, a_oldPhi);
+    DataOps::copy(a_newPhi, a_oldPhi);
   }
 }
 
@@ -310,8 +310,8 @@ void CdrTGA::setupOperatorFactory(){
       
   
   // Create operator factory.
-  data_ops::set_value(m_aCoef, 1.0); // We're usually solving (1 - dt*nabla^2)*phi^(k+1) = phi^k + dt*S^k so aco=1
-  data_ops::set_value(m_ebCenteredDiffusionCoefficient, 0.0);
+  DataOps::setValue(m_aCoef, 1.0); // We're usually solving (1 - dt*nabla^2)*phi^(k+1) = phi^k + dt*S^k so aco=1
+  DataOps::setValue(m_ebCenteredDiffusionCoefficient, 0.0);
   m_operatorFactory = RefCountedPtr<EbHelmholtzOpFactory> (new EbHelmholtzOpFactory(levelgrids,
 										 quadcfi,
 										 fastFR,
@@ -433,7 +433,7 @@ void CdrTGA::computeDivJ(EBAMRCellData& a_divJ, EBAMRCellData& a_phi, const Real
     }
 
     // We will let m_scratchFluxOne hold the total flux = advection + diffusion fluxes
-    data_ops::set_value(m_scratchFluxOne, 0.0);
+    DataOps::setValue(m_scratchFluxOne, 0.0);
 
     // Compute advection flux. This is mostly the same as computeDivF
     if(m_isMobile){
@@ -443,13 +443,13 @@ void CdrTGA::computeDivJ(EBAMRCellData& a_divJ, EBAMRCellData& a_phi, const Real
       this->advectToFaces(m_faceStates, a_phi, a_extrapDt); // Advect to faces
       this->computeFlux(m_scratchFluxTwo, m_faceVelocity, m_faceStates, m_domainFlux);
 
-      data_ops::incr(m_scratchFluxOne, m_scratchFluxTwo, 1.0);
+      DataOps::incr(m_scratchFluxOne, m_scratchFluxTwo, 1.0);
     }
 
     // Compute diffusion flux. 
     if(m_isDiffusive){
       this->computeDiffusionFlux(m_scratchFluxTwo, a_phi);
-      data_ops::incr(m_scratchFluxOne, m_scratchFluxTwo, -1.0);
+      DataOps::incr(m_scratchFluxOne, m_scratchFluxTwo, -1.0);
     }
 
     // General divergence computation. Also inject charge. Domain fluxes came in through the compute
@@ -464,7 +464,7 @@ void CdrTGA::computeDivJ(EBAMRCellData& a_divJ, EBAMRCellData& a_phi, const Real
     this->computeDivG(a_divJ, m_scratchFluxOne, *ebflux);
   }
   else{ 
-    data_ops::set_value(a_divJ, 0.0);
+    DataOps::setValue(a_divJ, 0.0);
   }
 
   return;
@@ -499,7 +499,7 @@ void CdrTGA::computeDivF(EBAMRCellData& a_divF, EBAMRCellData& a_phi, const Real
     this->computeDivG(a_divF, m_scratchFluxOne, *ebflux); 
   }
   else{
-    data_ops::set_value(a_divF, 0.0);
+    DataOps::setValue(a_divF, 0.0);
   }
 
 #if 0 // Debug
@@ -542,7 +542,7 @@ void CdrTGA::computeDivD(EBAMRCellData& a_divD, EBAMRCellData& a_phi, const bool
     m_amr->interpGhost(a_divD, m_realm, m_phase);
   }
   else{
-    data_ops::set_value(a_divD, 0.0);
+    DataOps::setValue(a_divD, 0.0);
   }
 }
 
@@ -617,18 +617,18 @@ void CdrTGA::writePlotData(EBAMRCellData& a_output, int& a_comp){
     else{ // Scale, write, and scale back
      
       for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-	data_ops::scale(*m_phi[lvl], (pow(m_amr->getDx()[lvl], 3)));
+	DataOps::scale(*m_phi[lvl], (pow(m_amr->getDx()[lvl], 3)));
       }
       writeData(a_output, a_comp, m_phi,    false);
       for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-	data_ops::scale(*m_phi[lvl], 1./(pow(m_amr->getDx()[lvl], 3)));
+	DataOps::scale(*m_phi[lvl], 1./(pow(m_amr->getDx()[lvl], 3)));
       }
     }
   }
 
   if(m_plotDiffusionCoefficient && m_isDiffusive) { // Need to compute the cell-centerd stuff first
-    data_ops::set_value(m_scratch, 0.0);
-    data_ops::average_face_to_cell(m_scratch, m_faceCenteredDiffusionCoefficient, m_amr->getDomains());
+    DataOps::setValue(m_scratch, 0.0);
+    DataOps::averageFaceToCell(m_scratch, m_faceCenteredDiffusionCoefficient, m_amr->getDomains());
     writeData(a_output, a_comp, m_scratch,   false);
   }
 
@@ -638,11 +638,11 @@ void CdrTGA::writePlotData(EBAMRCellData& a_output, int& a_comp){
     }
     else { // Scale, write, and scale back
       for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-	data_ops::scale(*m_source[lvl], (pow(m_amr->getDx()[lvl], 3)));
+	DataOps::scale(*m_source[lvl], (pow(m_amr->getDx()[lvl], 3)));
       }
       writeData(a_output, a_comp, m_source,    false);
       for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-	data_ops::scale(*m_source[lvl], 1./(pow(m_amr->getDx()[lvl], 3)));
+	DataOps::scale(*m_source[lvl], 1./(pow(m_amr->getDx()[lvl], 3)));
       }
     }
   }
@@ -653,8 +653,8 @@ void CdrTGA::writePlotData(EBAMRCellData& a_output, int& a_comp){
 
   // Plot EB fluxes
   if(m_plotEbFlux && m_isMobile){
-    data_ops::set_value(m_scratch, 0.0);
-    data_ops::incr(m_scratch, m_ebFlux, 1.0);
+    DataOps::setValue(m_scratch, 0.0);
+    DataOps::incr(m_scratch, m_ebFlux, 1.0);
     writeData(a_output, a_comp, m_scratch, false);
   }
 }

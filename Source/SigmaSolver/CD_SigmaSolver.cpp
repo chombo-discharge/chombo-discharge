@@ -14,7 +14,7 @@
 
 // Our includes
 #include <CD_SigmaSolver.H>
-#include <data_ops.H>
+#include <CD_DataOps.H>
 #include <CD_NamespaceHeader.H>
 
 SigmaSolver::SigmaSolver(){
@@ -58,7 +58,7 @@ void SigmaSolver::preRegrid(const int a_lbase, const int a_oldFinestLevel){
   const int finest_level = m_amr->getFinestLevel();
   
   m_amr->allocate(m_cache, m_realm, m_phase, ncomp);
-  data_ops::set_value(m_cache, 0.0);
+  DataOps::setValue(m_cache, 0.0);
   
   for (int lvl = 0; lvl <= a_oldFinestLevel; lvl++){
     m_phi[lvl]->localCopyTo(*m_cache[lvl]);
@@ -100,7 +100,7 @@ void SigmaSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int
 
   this->allocateInternals();
 
-  data_ops::set_value(m_phi, 0.0);
+  DataOps::setValue(m_phi, 0.0);
 
   // These levels have never changed
   for (int lvl = 0; lvl <= Max(0, a_lmin-1); lvl++){
@@ -281,7 +281,7 @@ void SigmaSolver::setSigma(const Real a_sigma){
   const int finest_level = m_amr->getFinestLevel();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    data_ops::set_value(*m_phi[lvl], a_sigma);
+    DataOps::setValue(*m_phi[lvl], a_sigma);
   }
 
   this->resetCells(m_phi);
@@ -317,8 +317,8 @@ void SigmaSolver::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) 
 
   EBCellFactory fact(m_amr->getEBISLayout(m_realm, phase::gas)[a_level]);
   LevelData<EBCellFAB> scratch(m_amr->getGrids(m_realm)[a_level], 1, 3*IntVect::Unit, fact);
-  data_ops::set_value(scratch, 0.0);
-  data_ops::incr(scratch, *m_phi[a_level], 1.0);
+  DataOps::setValue(scratch, 0.0);
+  DataOps::incr(scratch, *m_phi[a_level], 1.0);
 
   // Write state vector
   write(a_handle, scratch, "sigma");
@@ -335,12 +335,12 @@ void SigmaSolver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
   
   EBCellFactory fact(ebisl);
   LevelData<EBCellFAB> scratch(dbl, 1, 3*IntVect::Unit, fact);
-  data_ops::set_value(scratch, 0.0);
+  DataOps::setValue(scratch, 0.0);
   read<EBCellFAB>(a_handle, scratch, "sigma", dbl, Interval(0,0), false);
 
 		     
-  data_ops::set_value(*m_phi[a_level], 0.0);
-  data_ops::incr(*m_phi[a_level], scratch, 1.0);
+  DataOps::setValue(*m_phi[a_level], 0.0);
+  DataOps::incr(*m_phi[a_level], scratch, 1.0);
 }
 
 void SigmaSolver::writePlotData(EBAMRCellData& a_output, int& a_comp){
@@ -355,16 +355,16 @@ void SigmaSolver::writePlotData(EBAMRCellData& a_output, int& a_comp){
 
 
   // Write sigma
-  data_ops::set_value(scratch, 0.0);
-  data_ops::incr(scratch, m_phi, 1.0);
+  DataOps::setValue(scratch, 0.0);
+  DataOps::incr(scratch, m_phi, 1.0);
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     scratch[lvl]->localCopyTo(Interval(0,0), *a_output[lvl], Interval(a_comp, a_comp));
   }
   a_comp++;
 
   // Write flux
-  data_ops::set_value(scratch, 0.0);
-  data_ops::incr(scratch, m_flux, 1.0);
+  DataOps::setValue(scratch, 0.0);
+  DataOps::incr(scratch, m_flux, 1.0);
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     scratch[lvl]->localCopyTo(Interval(0,0), *a_output[lvl], Interval(a_comp, a_comp));
   }
@@ -424,7 +424,7 @@ Real SigmaSolver::computeCharge(){
     }
   }
 
-  data_ops::sum(charge); // Parallell sum
+  DataOps::sum(charge); // Parallell sum
   
   return charge*dx;
 }

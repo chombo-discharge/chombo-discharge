@@ -11,7 +11,7 @@
 #include "ito_solver.H"
 #include "simple_ito_particle.H"
 #include "ito_solver.H"
-#include "data_ops.H"
+#include <CD_DataOps.H>
 #include <CD_EbParticleInterp.H>
 #include "units.H"
 #include <CD_EbGhostCloud.H>
@@ -162,8 +162,8 @@ void ito_solver::depositKappaConservativeWithPVR(EBAMRCellData&               a_
   const RealVect origin  = m_amr->getProbLo();
   const int finest_level = m_amr->getFinestLevel();
 
-  data_ops::set_value(a_phi,    0.0);
-  data_ops::set_value(m_scratch,  0.0);
+  DataOps::setValue(a_phi,    0.0);
+  DataOps::setValue(m_scratch,  0.0);
 
   const AMRParticles<T>& particles      = a_particles.getParticles();
   const AMRParticles<T>& halo_particles = a_particles.getMaskParticles();
@@ -223,7 +223,7 @@ void ito_solver::depositKappaConservativeNoPVR_native(EBAMRCellData&            
   const RealVect origin  = m_amr->getProbLo();
   const int finest_level = m_amr->getFinestLevel();
 
-  data_ops::set_value(a_phi,    0.0);
+  DataOps::setValue(a_phi,    0.0);
 
   //  const EBAMRBool& mask = m_amr->getMask(s_particle_halo, m_halo_buffer, m_realm);
   const AMRMask& mask = m_amr->getMask(s_particle_halo, m_halo_buffer, m_realm);
@@ -315,7 +315,7 @@ void ito_solver::depositKappaConservativeNoPVR_NGP(EBAMRCellData&               
   const RealVect origin  = m_amr->getProbLo();
   const int finest_level = m_amr->getFinestLevel();
 
-  data_ops::set_value(a_phi,    0.0);
+  DataOps::setValue(a_phi,    0.0);
 
   const AMRMask& mask = m_amr->getMask(s_particle_halo, m_halo_buffer, m_realm);
 

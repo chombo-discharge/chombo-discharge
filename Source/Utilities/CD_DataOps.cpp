@@ -1,12 +1,12 @@
 /*!
-  @file data_ops.cpp
-  @brief Implementation of data_ops.H
+  @file DataOps.cpp
+  @brief Implementation of DataOps.H
   @author Robert Marskar
   @date Nov. 2017
 */
 
-#include "data_ops.H"
-#include "data_opsF_F.H"
+#include <CD_DataOps.H>
+#include <CD_DataOpsF_F.H>
 #include "EBArith.H"
 #include "EBLevelDataOps.H"
 #include "MFLevelDataOps.H"
@@ -16,15 +16,15 @@
 
 #include "CD_NamespaceHeader.H"
 
-void data_ops::average_cell_to_face(EBAMRFluxData&               a_facedata,
+void DataOps::averageCellToFace(EBAMRFluxData&               a_facedata,
 				    const EBAMRCellData&         a_celldata,
 				    const Vector<ProblemDomain>& a_domains){
   for (int lvl = 0; lvl < a_facedata.size(); lvl++){
-    data_ops::average_cell_to_face(*a_facedata[lvl], *a_celldata[lvl], a_domains[lvl]);
+    DataOps::averageCellToFace(*a_facedata[lvl], *a_celldata[lvl], a_domains[lvl]);
   }
 }
 
-void data_ops::average_cell_to_face(LevelData<EBFluxFAB>&       a_facedata,
+void DataOps::averageCellToFace(LevelData<EBFluxFAB>&       a_facedata,
 				    const LevelData<EBCellFAB>& a_celldata,
 				    const ProblemDomain&        a_domain){
 
@@ -44,15 +44,15 @@ void data_ops::average_cell_to_face(LevelData<EBFluxFAB>&       a_facedata,
   }
 }
 
-void data_ops::average_cell_to_face_allcomps(EBAMRFluxData& a_face_data,
+void DataOps::averageCellToFaceAllComps(EBAMRFluxData& a_face_data,
 					     const EBAMRCellData& a_cell_data,
 					     const Vector<ProblemDomain>& a_domains){
   for (int lvl = 0; lvl < a_face_data.size(); lvl++){
-    data_ops::average_cell_to_face_allcomps(*a_face_data[lvl], *a_cell_data[lvl], a_domains[lvl]);
+    DataOps::averageCellToFaceAllComps(*a_face_data[lvl], *a_cell_data[lvl], a_domains[lvl]);
   }
 }
 
-void data_ops::average_cell_to_face_allcomps(LevelData<EBFluxFAB>&       a_facedata,
+void DataOps::averageCellToFaceAllComps(LevelData<EBFluxFAB>&       a_facedata,
 					     const LevelData<EBCellFAB>& a_celldata,
 					     const ProblemDomain&        a_domain){
 
@@ -116,7 +116,7 @@ void data_ops::average_cell_to_face_allcomps(LevelData<EBFluxFAB>&       a_faced
 	    vof = face.getVoF(Side::Hi);
 	  }
 	  else{
-	    MayDay::Error("data_ops::average_cell_to_face - logic bust in average cells to faces");
+	    MayDay::Error("DataOps::averageCellToFace - logic bust in average cells to faces");
 	  }
 	  for (int comp = 0; comp < ncomp; comp++){
 	    facedata[dir](face, comp) = celldata(vof, comp);
@@ -128,15 +128,15 @@ void data_ops::average_cell_to_face_allcomps(LevelData<EBFluxFAB>&       a_faced
 #endif
 }
 
-void data_ops::average_face_to_cell(EBAMRCellData&               a_celldata,
+void DataOps::averageFaceToCell(EBAMRCellData&               a_celldata,
 				    const EBAMRFluxData&         a_facedata,
 				    const Vector<ProblemDomain>& a_domains){
   for (int lvl = 0; lvl < a_facedata.size(); lvl++){
-    data_ops::average_face_to_cell(*a_celldata[lvl], *a_facedata[lvl], a_domains[lvl]);
+    DataOps::averageFaceToCell(*a_celldata[lvl], *a_facedata[lvl], a_domains[lvl]);
   }
 }
 
-void data_ops::average_face_to_cell(LevelData<EBCellFAB>&       a_celldata,
+void DataOps::averageFaceToCell(LevelData<EBCellFAB>&       a_celldata,
 				    const LevelData<EBFluxFAB>& a_fluxdata,
 				    const ProblemDomain&        a_domain){
 
@@ -196,13 +196,13 @@ void data_ops::average_face_to_cell(LevelData<EBCellFAB>&       a_celldata,
   }
 }
 
-void data_ops::dot_prod(MFAMRCellData& a_result, const MFAMRCellData& a_data1, const MFAMRCellData& a_data2){
+void DataOps::dotProduct(MFAMRCellData& a_result, const MFAMRCellData& a_data1, const MFAMRCellData& a_data2){
   for (int lvl = 0; lvl < a_result.size(); lvl++){
-    data_ops::dot_prod(*a_result[lvl], *a_data1[lvl], *a_data2[lvl]);
+    DataOps::dotProduct(*a_result[lvl], *a_data1[lvl], *a_data2[lvl]);
   }
 }
 
-void data_ops::dot_prod(LevelData<MFCellFAB>& a_result, const LevelData<MFCellFAB>& a_data1, const LevelData<MFCellFAB>& a_data2){
+void DataOps::dotProduct(LevelData<MFCellFAB>& a_result, const LevelData<MFCellFAB>& a_data1, const LevelData<MFCellFAB>& a_data2){
   const int nc = a_data1.nComp();
 
   CH_assert(a_data2.nComp() == nc);
@@ -219,18 +219,18 @@ void data_ops::dot_prod(LevelData<MFCellFAB>& a_result, const LevelData<MFCellFA
       const EBCellFAB& data1_phase = data1.getPhase(i);
       const EBCellFAB& data2_phase = data2.getPhase(i);
 
-      data_ops::dot_prod(result_phase, data1_phase, data2_phase, box);
+      DataOps::dotProduct(result_phase, data1_phase, data2_phase, box);
     }
   }
 }
 
-void data_ops::dot_prod(EBAMRCellData& a_result, const EBAMRCellData& a_data1, const EBAMRCellData& a_data2){
+void DataOps::dotProduct(EBAMRCellData& a_result, const EBAMRCellData& a_data1, const EBAMRCellData& a_data2){
   for (int lvl = 0; lvl < a_result.size(); lvl++){
-    data_ops::dot_prod(*a_result[lvl], *a_data1[lvl], *a_data2[lvl]);
+    DataOps::dotProduct(*a_result[lvl], *a_data1[lvl], *a_data2[lvl]);
   }
 }
 
-void data_ops::dot_prod(LevelData<EBCellFAB>& a_result,
+void DataOps::dotProduct(LevelData<EBCellFAB>& a_result,
 			const LevelData<EBCellFAB>& a_data1,
 			const LevelData<EBCellFAB>& a_data2){
   const int nc = a_data1.nComp();
@@ -243,7 +243,7 @@ void data_ops::dot_prod(LevelData<EBCellFAB>& a_result,
     const EBCellFAB& data1 = a_data1[dit()];
     const EBCellFAB& data2 = a_data2[dit()];
     const Box& box         = a_result.disjointBoxLayout().get(dit());
-    data_ops::dot_prod(result, data1, data2, box);
+    DataOps::dotProduct(result, data1, data2, box);
 
 #if 0
     // Regular cells
@@ -272,7 +272,7 @@ void data_ops::dot_prod(LevelData<EBCellFAB>& a_result,
   }
 }
 
-void data_ops::dot_prod(EBCellFAB& a_result, const EBCellFAB& a_data1, const EBCellFAB& a_data2, const Box& a_box){
+void DataOps::dotProduct(EBCellFAB& a_result, const EBCellFAB& a_data1, const EBCellFAB& a_data2, const Box& a_box){
   const int nc = a_data1.nComp();
   BaseFab<Real>& result_reg      = a_result.getSingleValuedFAB();
   const BaseFab<Real>& data1_reg = a_data1.getSingleValuedFAB();
@@ -297,33 +297,33 @@ void data_ops::dot_prod(EBCellFAB& a_result, const EBCellFAB& a_data1, const EBC
   }
 }
 
-void data_ops::incr(MFAMRCellData& a_lhs, const MFAMRCellData& a_rhs, const Real a_scale){
+void DataOps::incr(MFAMRCellData& a_lhs, const MFAMRCellData& a_rhs, const Real a_scale){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    data_ops::incr(*a_lhs[lvl], *a_rhs[lvl], a_scale);
+    DataOps::incr(*a_lhs[lvl], *a_rhs[lvl], a_scale);
   }
 }
   
-void data_ops::incr(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs, const Real a_scale){
+void DataOps::incr(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs, const Real a_scale){
   MFLevelDataOps::incr(a_lhs, a_rhs, a_scale);
 }
 
-void data_ops::incr(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const Real& a_scale){
+void DataOps::incr(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const Real& a_scale){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    data_ops::incr(*a_lhs[lvl], *a_rhs[lvl], a_scale);
+    DataOps::incr(*a_lhs[lvl], *a_rhs[lvl], a_scale);
   }
 }
 
-void data_ops::incr(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const Real& a_scale){
+void DataOps::incr(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const Real& a_scale){
   EBLevelDataOps::incr(a_lhs, a_rhs, a_scale);
 }
 
-void data_ops::plus(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const int a_srcComp, const int a_dstComp, const int a_numComp){
+void DataOps::plus(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const int a_srcComp, const int a_dstComp, const int a_numComp){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    data_ops::plus(*a_lhs[lvl], *a_rhs[lvl], a_srcComp, a_dstComp, a_numComp);
+    DataOps::plus(*a_lhs[lvl], *a_rhs[lvl], a_srcComp, a_dstComp, a_numComp);
   }
 }
 
-void data_ops::plus(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const int a_srcComp, const int a_dstComp, const int a_numComp){
+void DataOps::plus(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const int a_srcComp, const int a_dstComp, const int a_numComp){
   for (DataIterator dit = a_lhs.disjointBoxLayout().dataIterator(); dit.ok(); ++dit){
     EBCellFAB& lhs       = a_lhs[dit()];
     const EBCellFAB& rhs = a_rhs[dit()];
@@ -332,19 +332,19 @@ void data_ops::plus(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_r
   }
 }
 
-void data_ops::incr(EBAMRFluxData& a_lhs, const EBAMRFluxData& a_rhs, const Real& a_scale){
+void DataOps::incr(EBAMRFluxData& a_lhs, const EBAMRFluxData& a_rhs, const Real& a_scale){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    data_ops::incr(*a_lhs[lvl], *a_rhs[lvl], a_scale);
+    DataOps::incr(*a_lhs[lvl], *a_rhs[lvl], a_scale);
   }
 }
 
-void data_ops::incr(LevelData<EBFluxFAB>& a_lhs, const LevelData<EBFluxFAB>& a_rhs, const Real& a_scale){
+void DataOps::incr(LevelData<EBFluxFAB>& a_lhs, const LevelData<EBFluxFAB>& a_rhs, const Real& a_scale){
   for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
-    data_ops::incr(a_lhs[dit()], a_rhs[dit()], a_scale);
+    DataOps::incr(a_lhs[dit()], a_rhs[dit()], a_scale);
   }
 }
 
-void data_ops::incr(EBFluxFAB& a_lhs, const EBFluxFAB& a_rhs, const Real& a_scale){
+void DataOps::incr(EBFluxFAB& a_lhs, const EBFluxFAB& a_rhs, const Real& a_scale){
 
   EBFluxFAB rhsClone;
   rhsClone.clone(a_rhs);
@@ -357,14 +357,14 @@ void data_ops::incr(EBFluxFAB& a_lhs, const EBFluxFAB& a_rhs, const Real& a_scal
   }
 }
 
-void data_ops::incr(EBAMRIVData& a_lhs, const EBAMRIVData& a_rhs, const Real& a_scale){
+void DataOps::incr(EBAMRIVData& a_lhs, const EBAMRIVData& a_rhs, const Real& a_scale){
 
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    data_ops::incr(*a_lhs[lvl], *a_rhs[lvl], a_scale);
+    DataOps::incr(*a_lhs[lvl], *a_rhs[lvl], a_scale);
   }
 }
 
-void data_ops::incr(LevelData<BaseIVFAB<Real> >& a_lhs, const LevelData<BaseIVFAB<Real> >& a_rhs, const Real& a_scale){
+void DataOps::incr(LevelData<BaseIVFAB<Real> >& a_lhs, const LevelData<BaseIVFAB<Real> >& a_rhs, const Real& a_scale){
   CH_assert(a_lhs.nComp() == a_rhs.nComp());
 
   const int ncomp = a_lhs.nComp();
@@ -383,13 +383,13 @@ void data_ops::incr(LevelData<BaseIVFAB<Real> >& a_lhs, const LevelData<BaseIVFA
   }
 }
 
-void data_ops::incr(EBAMRIFData& a_lhs, const EBAMRIFData& a_rhs, const Real& a_scale){
+void DataOps::incr(EBAMRIFData& a_lhs, const EBAMRIFData& a_rhs, const Real& a_scale){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    data_ops::incr(*a_lhs[lvl], *a_rhs[lvl], a_scale);
+    DataOps::incr(*a_lhs[lvl], *a_rhs[lvl], a_scale);
   }
 }
 
-void data_ops::incr(LevelData<DomainFluxIFFAB>& a_lhs, const LevelData<DomainFluxIFFAB>& a_rhs, const Real& a_scale){
+void DataOps::incr(LevelData<DomainFluxIFFAB>& a_lhs, const LevelData<DomainFluxIFFAB>& a_rhs, const Real& a_scale){
   CH_assert(a_lhs.nComp() == a_rhs.nComp());
 
   const int ncomp = a_lhs.nComp();
@@ -420,13 +420,13 @@ void data_ops::incr(LevelData<DomainFluxIFFAB>& a_lhs, const LevelData<DomainFlu
   }
 }
 
-void data_ops::incr(EBAMRCellData& a_lhs, const EBAMRIVData& a_rhs, const Real a_scale){
+void DataOps::incr(EBAMRCellData& a_lhs, const EBAMRIVData& a_rhs, const Real a_scale){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    data_ops::incr(*a_lhs[lvl], *a_rhs[lvl], a_scale);
+    DataOps::incr(*a_lhs[lvl], *a_rhs[lvl], a_scale);
   }
 }
 
-void data_ops::incr(LevelData<EBCellFAB>& a_lhs, const LevelData<BaseIVFAB<Real> >& a_rhs, const Real a_scale){
+void DataOps::incr(LevelData<EBCellFAB>& a_lhs, const LevelData<BaseIVFAB<Real> >& a_rhs, const Real a_scale){
   CH_assert(a_lhs.nComp() == a_rhs.nComp());
 
   const int ncomp = a_lhs.nComp();
@@ -447,13 +447,13 @@ void data_ops::incr(LevelData<EBCellFAB>& a_lhs, const LevelData<BaseIVFAB<Real>
   }
 }
 
-void data_ops::incr(EBAMRIVData& a_lhs, const EBAMRCellData& a_rhs, const Real a_scale){
+void DataOps::incr(EBAMRIVData& a_lhs, const EBAMRCellData& a_rhs, const Real a_scale){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    data_ops::incr(*a_lhs[lvl], *a_rhs[lvl], a_scale);
+    DataOps::incr(*a_lhs[lvl], *a_rhs[lvl], a_scale);
   }
 }
 
-void data_ops::incr(LevelData<BaseIVFAB<Real> >& a_lhs, const LevelData<EBCellFAB>& a_rhs, const Real a_scale){
+void DataOps::incr(LevelData<BaseIVFAB<Real> >& a_lhs, const LevelData<EBCellFAB>& a_rhs, const Real a_scale){
   const int ncomp = a_lhs.nComp();
   
   for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
@@ -470,7 +470,7 @@ void data_ops::incr(LevelData<BaseIVFAB<Real> >& a_lhs, const LevelData<EBCellFA
   }
 }
 
-void data_ops::copy(MFAMRCellData& a_dst, const MFAMRCellData& a_src){
+void DataOps::copy(MFAMRCellData& a_dst, const MFAMRCellData& a_src){
   for (int lvl = 0; lvl < a_dst.size(); lvl++){
     if(a_src[lvl] != NULL && a_dst[lvl] != NULL){
       a_src[lvl]->localCopyTo(*a_dst[lvl]);
@@ -478,7 +478,7 @@ void data_ops::copy(MFAMRCellData& a_dst, const MFAMRCellData& a_src){
   }
 }
 
-void data_ops::copy(EBAMRCellData& a_dst, const EBAMRCellData& a_src){
+void DataOps::copy(EBAMRCellData& a_dst, const EBAMRCellData& a_src){
   for (int lvl = 0; lvl < a_dst.size(); lvl++){
     if(a_src[lvl] != NULL && a_dst[lvl] != NULL){
       a_src[lvl]->localCopyTo(*a_dst[lvl]);
@@ -486,7 +486,7 @@ void data_ops::copy(EBAMRCellData& a_dst, const EBAMRCellData& a_src){
   }
 }
 
-void data_ops::copy(EBAMRIVData& a_dst, const EBAMRIVData& a_src){
+void DataOps::copy(EBAMRIVData& a_dst, const EBAMRIVData& a_src){
   for (int lvl = 0; lvl < a_dst.size(); lvl++){
     if(a_src[lvl] != NULL && a_dst[lvl] != NULL){
       a_src[lvl]->localCopyTo(*a_dst[lvl]);
@@ -494,13 +494,13 @@ void data_ops::copy(EBAMRIVData& a_dst, const EBAMRIVData& a_src){
   }
 }
 
-void data_ops::exponentiate(EBAMRCellData& a_lhs, const Real a_factor){
+void DataOps::exponentiate(EBAMRCellData& a_lhs, const Real a_factor){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    data_ops::exponentiate(*a_lhs[lvl], a_factor);
+    DataOps::exponentiate(*a_lhs[lvl], a_factor);
   }
 }
 
-void data_ops::exponentiate(LevelData<EBCellFAB>& a_lhs, const Real a_factor){
+void DataOps::exponentiate(LevelData<EBCellFAB>& a_lhs, const Real a_factor){
   for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
     EBCellFAB& lhs         = a_lhs[dit()];
     const Box box          = a_lhs.disjointBoxLayout().get(dit());
@@ -519,24 +519,24 @@ void data_ops::exponentiate(LevelData<EBCellFAB>& a_lhs, const Real a_factor){
   }
 }
 
-void data_ops::get_max_min(Real& a_max, Real& a_min, EBAMRCellData& a_E, const int a_comp){
+void DataOps::getMaxMin(Real& a_max, Real& a_min, EBAMRCellData& a_E, const int a_comp){
   a_max = -1.E99;
   a_min =  1.E99;
   for (int lvl = 0; lvl < a_E.size(); lvl++){
     Real lvl_max = -1.E99;
     Real lvl_min =  1.E99;
-    data_ops::get_max_min(lvl_max, lvl_min, *a_E[lvl], a_comp);
+    DataOps::getMaxMin(lvl_max, lvl_min, *a_E[lvl], a_comp);
 
     a_max = Max(a_max, lvl_max);
     a_min = Min(a_min, lvl_min);
   }
 }
 
-void data_ops::get_max_min(Real& a_max, Real& a_min, LevelData<EBCellFAB>& a_E, const int a_comp){
+void DataOps::getMaxMin(Real& a_max, Real& a_min, LevelData<EBCellFAB>& a_E, const int a_comp){
   EBLevelDataOps::getMaxMin(a_max, a_min, a_E, a_comp);
 }
 
-void data_ops::get_max_min(Vector<Real>& a_max, Vector<Real>& a_min, Vector<EBAMRCellData>& a_data){
+void DataOps::getMaxMin(Vector<Real>& a_max, Vector<Real>& a_min, Vector<EBAMRCellData>& a_data){
   a_max.resize(a_data.size(), -1.234567E89);
   a_min.resize(a_data.size(),  1.234567E89);
 
@@ -545,23 +545,23 @@ void data_ops::get_max_min(Vector<Real>& a_max, Vector<Real>& a_min, Vector<EBAM
   
   for (int i = 0; i < a_data.size(); i++){
     CH_assert(a_data[i][0]->nComp() == ncomp);
-    data_ops::get_max_min(a_max[i], a_min[i], a_data[i], comp);
+    DataOps::getMaxMin(a_max[i], a_min[i], a_data[i], comp);
   }
 }
 
-void data_ops::get_max_min_norm(Real& a_max, Real& a_min, EBAMRCellData& a_data){
+void DataOps::getMaxMinNorm(Real& a_max, Real& a_min, EBAMRCellData& a_data){
   a_max = -1.234567E89;
   a_min =  1.234567E89;
   for (int lvl = 0; lvl < a_data.size(); lvl++){
     Real max, min;
-    data_ops::get_max_min_norm(max, min, *a_data[lvl]);
+    DataOps::getMaxMinNorm(max, min, *a_data[lvl]);
 
     a_max = Max(a_max, max);
     a_min = Min(a_min, min);
   }
 }
 
-void data_ops::get_max_min_norm(Real& a_max, Real& a_min, LevelData<EBCellFAB>& a_data){
+void DataOps::getMaxMinNorm(Real& a_max, Real& a_min, LevelData<EBCellFAB>& a_data){
   a_max = -1.234567E89;
   a_min =  1.234567E89;
 
@@ -627,31 +627,31 @@ void data_ops::get_max_min_norm(Real& a_max, Real& a_min, LevelData<EBCellFAB>& 
   
   result = MPI_Allreduce(&a_max, &tmp, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
   if(result != MPI_SUCCESS){
-    MayDay::Error("data_ops::get_max_min_norm - communication error on norm");
+    MayDay::Error("DataOps::getMaxMinNorm - communication error on norm");
   }
   a_max = tmp;
   
   result = MPI_Allreduce(&a_min, &tmp, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
   if(result != MPI_SUCCESS){
-    MayDay::Error("data_ops::get_max_min_norm - communication error on norm");
+    MayDay::Error("DataOps::getMaxMinNorm - communication error on norm");
   }
   a_min = tmp;
 #endif
 }
 
-void data_ops::get_max_min_norm(Real& a_max, Real& a_min, EBAMRIVData& a_data){
+void DataOps::getMaxMinNorm(Real& a_max, Real& a_min, EBAMRIVData& a_data){
   a_max = -1.234567E89;
   a_min =  1.234567E89;
   for (int lvl = 0; lvl < a_data.size(); lvl++){
     Real max, min;
-    data_ops::get_max_min_norm(max, min, *a_data[lvl]);
+    DataOps::getMaxMinNorm(max, min, *a_data[lvl]);
 
     a_max = Max(a_max, max);
     a_min = Min(a_min, min);
   }
 }
 
-void data_ops::get_max_min_norm(Real& a_max, Real& a_min, LevelData<BaseIVFAB<Real> >& a_data){
+void DataOps::getMaxMinNorm(Real& a_max, Real& a_min, LevelData<BaseIVFAB<Real> >& a_data){
   a_max = -1.234567E89;
   a_min =  1.234567E89;
 
@@ -684,25 +684,25 @@ void data_ops::get_max_min_norm(Real& a_max, Real& a_min, LevelData<BaseIVFAB<Re
   
   result = MPI_Allreduce(&a_max, &tmp, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
   if(result != MPI_SUCCESS){
-    MayDay::Error("data_ops::get_max_min_norm - communication error on norm");
+    MayDay::Error("DataOps::getMaxMinNorm - communication error on norm");
   }
   a_max = tmp;
   
   result = MPI_Allreduce(&a_min, &tmp, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
   if(result != MPI_SUCCESS){
-    MayDay::Error("data_ops::get_max_min_norm - communication error on norm");
+    MayDay::Error("DataOps::getMaxMinNorm - communication error on norm");
   }
   a_min = tmp;
 #endif
 }
 
-void data_ops::invert(EBAMRFluxData& a_data){
+void DataOps::invert(EBAMRFluxData& a_data){
   for (int lvl = 0; lvl < a_data.size(); lvl++){
-    data_ops::invert(*a_data[lvl]);
+    DataOps::invert(*a_data[lvl]);
   }
 }
 
-void data_ops::invert(LevelData<EBFluxFAB>& a_data){
+void DataOps::invert(LevelData<EBFluxFAB>& a_data){
   
   const int ncomp = a_data.nComp();
 
@@ -743,39 +743,39 @@ void data_ops::invert(LevelData<EBFluxFAB>& a_data){
   }
 }
 
-void data_ops::scale(MFAMRCellData& a_lhs, const Real& a_scale){
+void DataOps::scale(MFAMRCellData& a_lhs, const Real& a_scale){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    data_ops::scale(*a_lhs[lvl], a_scale);
+    DataOps::scale(*a_lhs[lvl], a_scale);
   }
 }
 
-void data_ops::scale(LevelData<MFCellFAB>& a_lhs, const Real& a_scale){
+void DataOps::scale(LevelData<MFCellFAB>& a_lhs, const Real& a_scale){
   MFLevelDataOps::scale(a_lhs, a_scale);
 }
 
-void data_ops::scale(EBAMRIVData& a_lhs, const Real& a_scale){
+void DataOps::scale(EBAMRIVData& a_lhs, const Real& a_scale){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    data_ops::scale(*a_lhs[lvl], a_scale);
+    DataOps::scale(*a_lhs[lvl], a_scale);
   }
 }
 
-void data_ops::scale(EBAMRCellData& a_lhs, const Real a_scale){
+void DataOps::scale(EBAMRCellData& a_lhs, const Real a_scale){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    data_ops::scale(*a_lhs[lvl], a_scale);
+    DataOps::scale(*a_lhs[lvl], a_scale);
   }
 }
 
-void data_ops::scale(LevelData<EBCellFAB>& a_lhs, const Real a_scale){
+void DataOps::scale(LevelData<EBCellFAB>& a_lhs, const Real a_scale){
   EBLevelDataOps::scale(a_lhs, a_scale);
 }
 
-void data_ops::scale(EBAMRFluxData& a_lhs, const Real a_scale){
+void DataOps::scale(EBAMRFluxData& a_lhs, const Real a_scale){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
     EBLevelDataOps::scale(*a_lhs[lvl], a_scale);
   }
 }
 
-void data_ops::scale(LevelData<BaseIVFAB<Real> >& a_lhs, const Real& a_scale){
+void DataOps::scale(LevelData<BaseIVFAB<Real> >& a_lhs, const Real& a_scale){
   for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
     BaseIVFAB<Real>& lhs = a_lhs[dit()];
 
@@ -787,13 +787,13 @@ void data_ops::scale(LevelData<BaseIVFAB<Real> >& a_lhs, const Real& a_scale){
   }
 }
 
-void data_ops::divide(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const int a_lcomp, const int a_rcomp){
+void DataOps::divide(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const int a_lcomp, const int a_rcomp){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    data_ops::divide(*a_lhs[lvl], *a_rhs[lvl], a_lcomp, a_rcomp);
+    DataOps::divide(*a_lhs[lvl], *a_rhs[lvl], a_lcomp, a_rcomp);
   }
 }
 
-void data_ops::divide(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const int a_lcomp, const int a_rcomp){
+void DataOps::divide(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const int a_lcomp, const int a_rcomp){
   for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
     EBCellFAB& lhs       = a_lhs[dit()];
     const EBCellFAB& rhs = a_rhs[dit()];
@@ -802,13 +802,13 @@ void data_ops::divide(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a
   }
 }
 
-void data_ops::divide_scalar(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs){
+void DataOps::divideByScalar(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    data_ops::divide_scalar(*a_lhs[lvl], *a_rhs[lvl]);
+    DataOps::divideByScalar(*a_lhs[lvl], *a_rhs[lvl]);
   }
 }
 
-void data_ops::divide_scalar(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs){
+void DataOps::divideByScalar(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs){
   const int lcomps = a_lhs.nComp();
   const int rcomps = a_rhs.nComp();
   
@@ -816,17 +816,17 @@ void data_ops::divide_scalar(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCell
   CH_assert(a_lhs.nComp() >= 1);
 
   for (int comp = 0; comp < lcomps; comp++){
-    data_ops::divide(a_lhs, a_rhs, comp, 0);
+    DataOps::divide(a_lhs, a_rhs, comp, 0);
   }
 }
 
-void data_ops::floor(EBAMRCellData& a_lhs, const Real a_value){
+void DataOps::floor(EBAMRCellData& a_lhs, const Real a_value){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    data_ops::floor(*a_lhs[lvl], a_value);
+    DataOps::floor(*a_lhs[lvl], a_value);
   }
 }
 
-void data_ops::floor(LevelData<EBCellFAB>& a_lhs, const Real a_value){
+void DataOps::floor(LevelData<EBCellFAB>& a_lhs, const Real a_value){
   for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
     EBCellFAB& lhs = a_lhs[dit()];
     const Box box = lhs.getRegion();
@@ -865,13 +865,13 @@ void data_ops::floor(LevelData<EBCellFAB>& a_lhs, const Real a_value){
   }
 }
 
-void data_ops::floor(EBAMRIVData& a_lhs, const Real a_value){
+void DataOps::floor(EBAMRIVData& a_lhs, const Real a_value){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    data_ops::floor(*a_lhs[lvl], a_value);
+    DataOps::floor(*a_lhs[lvl], a_value);
   }
 }
 
-void data_ops::floor(LevelData<BaseIVFAB<Real> >& a_lhs, const Real a_value){
+void DataOps::floor(LevelData<BaseIVFAB<Real> >& a_lhs, const Real a_value){
   const int ncomp = a_lhs.nComp();
   
   for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
@@ -886,7 +886,7 @@ void data_ops::floor(LevelData<BaseIVFAB<Real> >& a_lhs, const Real a_value){
   }
 }
 
-void data_ops::kappa_sum(Real& a_mass, const LevelData<EBCellFAB>& a_lhs){
+void DataOps::kappaSum(Real& a_mass, const LevelData<EBCellFAB>& a_lhs){
 
 
   Real mass = 0.;
@@ -913,33 +913,33 @@ void data_ops::kappa_sum(Real& a_mass, const LevelData<EBCellFAB>& a_lhs){
   a_mass = EBLevelDataOps::parallelSum(mass);
 }
 
-void data_ops::kappa_scale(EBAMRCellData& a_data){
+void DataOps::kappaScale(EBAMRCellData& a_data){
   for (int lvl = 0; lvl < a_data.size(); lvl++){
-    data_ops::kappa_scale(*a_data[lvl]);
+    DataOps::kappaScale(*a_data[lvl]);
   }
 }
 
-void data_ops::kappa_scale(LevelData<EBCellFAB>& a_data){
+void DataOps::kappaScale(LevelData<EBCellFAB>& a_data){
   EBLevelDataOps::kappaWeight(a_data);
 }
 
-void data_ops::kappa_scale(MFAMRCellData& a_data){
+void DataOps::kappaScale(MFAMRCellData& a_data){
   for (int lvl = 0; lvl < a_data.size(); lvl++){
-    data_ops::kappa_scale(*a_data[lvl]);
+    DataOps::kappaScale(*a_data[lvl]);
   }
 }
 
-void data_ops::kappa_scale(LevelData<MFCellFAB>& a_data){
+void DataOps::kappaScale(LevelData<MFCellFAB>& a_data){
   MFLevelDataOps::kappaWeight(a_data);
 }
 
-void data_ops::laplacian(EBAMRCellData& a_lapl, const EBAMRCellData& a_data){
+void DataOps::laplacian(EBAMRCellData& a_lapl, const EBAMRCellData& a_data){
   for (int lvl = 0; lvl < a_data.size(); lvl++){
-    data_ops::laplacian(*a_lapl[lvl], *a_data[lvl]);
+    DataOps::laplacian(*a_lapl[lvl], *a_data[lvl]);
   }
 }
 
-void data_ops::laplacian(LevelData<EBCellFAB>& a_lapl, const LevelData<EBCellFAB>& a_data){
+void DataOps::laplacian(LevelData<EBCellFAB>& a_lapl, const LevelData<EBCellFAB>& a_data){
   const int ncomp = a_data.nComp();
   
   for (DataIterator dit = a_lapl.dataIterator(); dit.ok(); ++dit){
@@ -987,13 +987,13 @@ void data_ops::laplacian(LevelData<EBCellFAB>& a_lapl, const LevelData<EBCellFAB
   }
 }
 
-void data_ops::gen_laplacian(EBAMRCellData& a_lapl, const EBAMRCellData& a_data){
+void DataOps::genLaplacian(EBAMRCellData& a_lapl, const EBAMRCellData& a_data){
   for (int lvl = 0; lvl < a_data.size(); lvl++){
-    data_ops::gen_laplacian(*a_lapl[lvl], *a_data[lvl]);
+    DataOps::genLaplacian(*a_lapl[lvl], *a_data[lvl]);
   }
 }
 
-void data_ops::gen_laplacian(LevelData<EBCellFAB>& a_lapl, const LevelData<EBCellFAB>& a_data){
+void DataOps::genLaplacian(LevelData<EBCellFAB>& a_lapl, const LevelData<EBCellFAB>& a_data){
   const int ncomp = a_data.nComp();
   
   for (DataIterator dit = a_lapl.dataIterator(); dit.ok(); ++dit){
@@ -1045,13 +1045,13 @@ void data_ops::gen_laplacian(LevelData<EBCellFAB>& a_lapl, const LevelData<EBCel
   }
 }
 
-void data_ops::flash_error(EBAMRCellData& a_lapl, const EBAMRCellData& a_data, const Real a_eps){
+void DataOps::flashError(EBAMRCellData& a_lapl, const EBAMRCellData& a_data, const Real a_eps){
   for (int lvl = 0; lvl < a_data.size(); lvl++){
-    data_ops::flash_error(*a_lapl[lvl], *a_data[lvl], a_eps);
+    DataOps::flashError(*a_lapl[lvl], *a_data[lvl], a_eps);
   }
 }
 
-void data_ops::flash_error(LevelData<EBCellFAB>& a_lapl, const LevelData<EBCellFAB>& a_data, const Real a_eps){
+void DataOps::flashError(LevelData<EBCellFAB>& a_lapl, const LevelData<EBCellFAB>& a_data, const Real a_eps){
   const int ncomp = a_data.nComp();
   const DisjointBoxLayout& dbl = a_lapl.disjointBoxLayout();
   const ProblemDomain domain   = dbl.physDomain();
@@ -1116,13 +1116,13 @@ void data_ops::flash_error(LevelData<EBCellFAB>& a_lapl, const LevelData<EBCellF
   }
 }
 
-void data_ops::ln(EBAMRCellData& a_lhs){
+void DataOps::ln(EBAMRCellData& a_lhs){
   for (int lvl = 0; lvl <= a_lhs.size(); lvl++){
-    data_ops::ln(*a_lhs[lvl]);
+    DataOps::ln(*a_lhs[lvl]);
   }
 }
 
-void data_ops::ln(LevelData<EBCellFAB>& a_lhs){
+void DataOps::ln(LevelData<EBCellFAB>& a_lhs){
   for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
     EBCellFAB& lhs         = a_lhs[dit()];
     const Box box          = a_lhs.disjointBoxLayout().get(dit());
@@ -1141,37 +1141,37 @@ void data_ops::ln(LevelData<EBCellFAB>& a_lhs){
   }
 }
 
-void data_ops::multiply(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs){
+void DataOps::multiply(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    data_ops::multiply(*a_lhs[lvl], *a_rhs[lvl]);
+    DataOps::multiply(*a_lhs[lvl], *a_rhs[lvl]);
   }
 }
 
-void data_ops::multiply(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs){
+void DataOps::multiply(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs){
   for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
     a_lhs[dit()] *= a_rhs[dit()];
   }
 }
 
-void data_ops::multiply(EBAMRFluxData& a_lhs, const EBAMRFluxData& a_rhs){
+void DataOps::multiply(EBAMRFluxData& a_lhs, const EBAMRFluxData& a_rhs){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    data_ops::multiply(*a_lhs[lvl], *a_rhs[lvl]);
+    DataOps::multiply(*a_lhs[lvl], *a_rhs[lvl]);
   }
 }
 
-void data_ops::multiply(LevelData<EBFluxFAB>& a_lhs, const LevelData<EBFluxFAB>& a_rhs){
+void DataOps::multiply(LevelData<EBFluxFAB>& a_lhs, const LevelData<EBFluxFAB>& a_rhs){
   for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
     a_lhs[dit()] *= a_rhs[dit()];
   }
 }
 
-void data_ops::multiply(EBAMRIVData& a_lhs, const EBAMRIVData& a_rhs){
+void DataOps::multiply(EBAMRIVData& a_lhs, const EBAMRIVData& a_rhs){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    data_ops::multiply(*a_lhs[lvl], *a_rhs[lvl]);
+    DataOps::multiply(*a_lhs[lvl], *a_rhs[lvl]);
   }
 }
 
-void data_ops::multiply(LevelData<BaseIVFAB<Real> >& a_lhs, const LevelData<BaseIVFAB<Real> >& a_rhs){
+void DataOps::multiply(LevelData<BaseIVFAB<Real> >& a_lhs, const LevelData<BaseIVFAB<Real> >& a_rhs){
   const int ncomp = a_lhs.nComp();
 
   for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
@@ -1190,13 +1190,13 @@ void data_ops::multiply(LevelData<BaseIVFAB<Real> >& a_lhs, const LevelData<Base
   }
 }
 
-void data_ops::multiply_scalar(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs){
+void DataOps::multiplyScalar(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    data_ops::multiply_scalar(*a_lhs[lvl], *a_rhs[lvl]);
+    DataOps::multiplyScalar(*a_lhs[lvl], *a_rhs[lvl]);
   }
 }
 
-void data_ops::multiply_scalar(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs){
+void DataOps::multiplyScalar(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs){
   CH_assert(a_rhs.nComp() == 1);
 
   for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
@@ -1209,13 +1209,13 @@ void data_ops::multiply_scalar(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCe
   }
 }
 
-void data_ops::multiply_scalar(EBAMRIVData& a_lhs, const EBAMRIVData& a_rhs){
+void DataOps::multiplyScalar(EBAMRIVData& a_lhs, const EBAMRIVData& a_rhs){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    data_ops::multiply_scalar(*a_lhs[lvl], *a_rhs[lvl]);
+    DataOps::multiplyScalar(*a_lhs[lvl], *a_rhs[lvl]);
   }
 }
   
-void data_ops::multiply_scalar(LevelData<BaseIVFAB<Real> >& a_lhs, const LevelData<BaseIVFAB<Real> >& a_rhs){
+void DataOps::multiplyScalar(LevelData<BaseIVFAB<Real> >& a_lhs, const LevelData<BaseIVFAB<Real> >& a_rhs){
   CH_assert(a_rhs.nComp() == 1);
 
   const int ncomp = a_lhs.nComp();
@@ -1236,107 +1236,107 @@ void data_ops::multiply_scalar(LevelData<BaseIVFAB<Real> >& a_lhs, const LevelDa
   }
 }
 
-void data_ops::norm(Real& a_norm, const LevelData<EBCellFAB>& a_data, const ProblemDomain& a_domain, const int a_p){
+void DataOps::norm(Real& a_norm, const LevelData<EBCellFAB>& a_data, const ProblemDomain& a_domain, const int a_p){
   Real volume;
 
   a_norm = EBLevelDataOps::kappaNorm(volume, a_data, EBLEVELDATAOPS_ALLVOFS, a_domain, a_p);
 }
 
-void data_ops::set_covered_value(EBAMRCellData& a_lhs, const int a_comp, const Real a_value){
+void DataOps::set_covered_value(EBAMRCellData& a_lhs, const int a_comp, const Real a_value){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    data_ops::set_covered_value(*a_lhs[lvl], a_comp, a_value);
+    DataOps::set_covered_value(*a_lhs[lvl], a_comp, a_value);
   }
 }
 
-void data_ops::set_covered_value(LevelData<EBCellFAB>& a_lhs, const int a_comp, const Real a_value){
+void DataOps::set_covered_value(LevelData<EBCellFAB>& a_lhs, const int a_comp, const Real a_value){
   EBLevelDataOps::setCoveredVal(a_lhs, a_comp, a_value);
 }
 
-void data_ops::set_value(EBAMRCellData& a_data, const Real& a_value){
+void DataOps::setValue(EBAMRCellData& a_data, const Real& a_value){
   for (int lvl = 0; lvl < a_data.size(); lvl++){
     EBLevelDataOps::setVal(*a_data[lvl], a_value);
   }
 }
 
-void data_ops::set_value(EBAMRCellData& a_lhs, const Real a_value, const int a_comp){
+void DataOps::setValue(EBAMRCellData& a_lhs, const Real a_value, const int a_comp){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    data_ops::set_value(*a_lhs[lvl], a_value, a_comp);
+    DataOps::setValue(*a_lhs[lvl], a_value, a_comp);
   }
 }
 
-void data_ops::set_value(LevelData<EBCellFAB>& a_lhs, const Real a_value, const int a_comp){
+void DataOps::setValue(LevelData<EBCellFAB>& a_lhs, const Real a_value, const int a_comp){
   EBLevelDataOps::setVal(a_lhs, a_value, a_comp);
 }
 
-void data_ops::set_value(LevelData<EBCellFAB>& a_lhs, const Real a_value){
+void DataOps::setValue(LevelData<EBCellFAB>& a_lhs, const Real a_value){
   EBLevelDataOps::setVal(a_lhs, a_value);
 }
 
-void data_ops::set_value(LevelData<EBFluxFAB>& a_lhs, const Real a_value){
+void DataOps::setValue(LevelData<EBFluxFAB>& a_lhs, const Real a_value){
   EBLevelDataOps::setVal(a_lhs, a_value);
 }
   
-void data_ops::set_value(LevelData<BaseIVFAB<Real> >& a_lhs, const Real a_value){
+void DataOps::setValue(LevelData<BaseIVFAB<Real> >& a_lhs, const Real a_value){
   EBLevelDataOps::setVal(a_lhs, a_value);
 }
 
-void data_ops::set_value(EBAMRFluxData& a_data, const Real& a_value){
+void DataOps::setValue(EBAMRFluxData& a_data, const Real& a_value){
   for (int lvl = 0; lvl < a_data.size(); lvl++){
     EBLevelDataOps::setVal(*a_data[lvl], a_value);
   }
 }
 
-void data_ops::set_value(EBAMRIVData& a_data, const Real& a_value){
+void DataOps::setValue(EBAMRIVData& a_data, const Real& a_value){
   for (int lvl = 0; lvl < a_data.size(); lvl++){
     EBLevelDataOps::setVal(*a_data[lvl], a_value);
   }
 }
 
-void data_ops::set_value(MFAMRCellData& a_lhs, const Real& a_value){
+void DataOps::setValue(MFAMRCellData& a_lhs, const Real& a_value){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    data_ops::set_value(*a_lhs[lvl], a_value);
+    DataOps::setValue(*a_lhs[lvl], a_value);
   }
 }
 
-void data_ops::set_value(LevelData<MFCellFAB>& a_lhs, const Real& a_value){
+void DataOps::setValue(LevelData<MFCellFAB>& a_lhs, const Real& a_value){
   for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
     MFCellFAB& lhs = a_lhs[dit()];
     lhs.setVal(a_value);
   }
 }
 
-void data_ops::set_value(MFAMRFluxData& a_lhs, const Real& a_value){
+void DataOps::setValue(MFAMRFluxData& a_lhs, const Real& a_value){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    data_ops::set_value(*a_lhs[lvl] , a_value);
+    DataOps::setValue(*a_lhs[lvl] , a_value);
   }
 }
 
-void data_ops::set_value(LevelData<MFFluxFAB>& a_lhs, const Real& a_value){
+void DataOps::setValue(LevelData<MFFluxFAB>& a_lhs, const Real& a_value){
   for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
     MFFluxFAB& lhs = a_lhs[dit()];
     lhs.setVal(a_value);
   }
 }
 
-void data_ops::set_value(MFAMRIVData& a_lhs, const Real& a_value){
+void DataOps::setValue(MFAMRIVData& a_lhs, const Real& a_value){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    data_ops::set_value(*a_lhs[lvl] , a_value);
+    DataOps::setValue(*a_lhs[lvl] , a_value);
   }
 }
 
-void data_ops::set_value(LevelData<MFBaseIVFAB>& a_lhs, const Real& a_value){
+void DataOps::setValue(LevelData<MFBaseIVFAB>& a_lhs, const Real& a_value){
   for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
     a_lhs[dit()].setVal(a_value);
   }
 }
 
-void data_ops::set_value(EBAMRIFData& a_lhs, const Real a_value){
+void DataOps::setValue(EBAMRIFData& a_lhs, const Real a_value){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    data_ops::set_value(*a_lhs[lvl], a_value);
+    DataOps::setValue(*a_lhs[lvl], a_value);
   }
 }
 
-void data_ops::set_value(LevelData<DomainFluxIFFAB>& a_lhs, const Real a_value){
+void DataOps::setValue(LevelData<DomainFluxIFFAB>& a_lhs, const Real a_value){
   for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
     DomainFluxIFFAB& lhs = a_lhs[dit()];
     for (SideIterator sit; sit.ok(); ++sit){
@@ -1348,27 +1348,27 @@ void data_ops::set_value(LevelData<DomainFluxIFFAB>& a_lhs, const Real a_value){
   }
 }
 
-void data_ops::sum(Real& a_value){
+void DataOps::sum(Real& a_value){
 
 #ifdef CH_MPI
   Real cur = a_value;
   Real tmp = a_value;
   int result = MPI_Allreduce(&cur, &tmp, 1, MPI_CH_REAL, MPI_SUM, Chombo_MPI::comm);
   if(result != MPI_SUCCESS){
-    MayDay::Abort("data_ops::sum - communication error on Allreduce");
+    MayDay::Abort("DataOps::sum - communication error on Allreduce");
   }
 
   a_value = tmp;
 #endif
 }
 
-void data_ops::square_root(EBAMRFluxData& a_lhs){
+void DataOps::squareRoot(EBAMRFluxData& a_lhs){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    data_ops::square_root(*a_lhs[lvl]);
+    DataOps::squareRoot(*a_lhs[lvl]);
   }
 }
 
-void data_ops::square_root(LevelData<EBFluxFAB>& a_lhs){
+void DataOps::squareRoot(LevelData<EBFluxFAB>& a_lhs){
   for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
 
     const Box& box         = a_lhs.disjointBoxLayout().get(dit());
@@ -1402,13 +1402,13 @@ void data_ops::square_root(LevelData<EBFluxFAB>& a_lhs){
   }
 }
 
-void data_ops::vector_length(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs){
+void DataOps::vectorLength(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    data_ops::vector_length(*a_lhs[lvl], *a_rhs[lvl]);
+    DataOps::vectorLength(*a_lhs[lvl], *a_rhs[lvl]);
   }
 }
 
-void data_ops::vector_length(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs){
+void DataOps::vectorLength(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs){
   CH_assert(a_lhs.nComp() == 1);
   CH_assert(a_rhs.nComp() == SpaceDim);
   
@@ -1417,11 +1417,11 @@ void data_ops::vector_length(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCell
     const Box& box             = a_lhs.disjointBoxLayout().get(dit());
     const EBCellFAB& rhs       = a_rhs[dit()];
 
-    data_ops::vector_length(lhs, rhs, box);
+    DataOps::vectorLength(lhs, rhs, box);
   }
 }
 
-void data_ops::vector_length(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& a_box){
+void DataOps::vectorLength(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& a_box){
   CH_assert(a_lhs.nComp() == 1);
   CH_assert(a_rhs.nComp() == SpaceDim);
 
@@ -1475,13 +1475,13 @@ void data_ops::vector_length(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box
 #endif
 }
 
-void data_ops::vector_length2(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs){
+void DataOps::vectorLength2(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    data_ops::vector_length2(*a_lhs[lvl], *a_rhs[lvl]);
+    DataOps::vectorLength2(*a_lhs[lvl], *a_rhs[lvl]);
   }
 }
 
-void data_ops::vector_length2(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs){
+void DataOps::vectorLength2(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs){
   CH_assert(a_lhs.nComp() == 1);
   CH_assert(a_rhs.nComp() == SpaceDim);
   
@@ -1490,11 +1490,11 @@ void data_ops::vector_length2(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCel
     const Box& box             = a_lhs.disjointBoxLayout().get(dit());
     const EBCellFAB& rhs       = a_rhs[dit()];
 
-    data_ops::vector_length2(lhs, rhs, box);
+    DataOps::vectorLength2(lhs, rhs, box);
   }
 }
 
-void data_ops::vector_length2(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& a_box){
+void DataOps::vectorLength2(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& a_box){
   CH_assert(a_lhs.nComp() == 1);
   CH_assert(a_rhs.nComp() == SpaceDim);
 
@@ -1531,7 +1531,7 @@ void data_ops::vector_length2(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Bo
   }
 }
 
-void data_ops::compute_min_valid_box(RealVect& a_lo, RealVect& a_hi, const RealVect a_normal, const RealVect a_centroid){
+void DataOps::computeMinValidBox(RealVect& a_lo, RealVect& a_hi, const RealVect a_normal, const RealVect a_centroid){
   const int num_segments = 10;
 
   // Default values
@@ -1562,16 +1562,16 @@ void data_ops::compute_min_valid_box(RealVect& a_lo, RealVect& a_hi, const RealV
       // Shift corners in direction plane_normal with length base_shift. Keep track of the total
       // displacement of the plane. 
       RealVect shift_vector = RealVect::Zero;
-      bool allInside = data_ops::all_corners_inside_eb(corners, a_normal, a_centroid);
+      bool allInside = DataOps::allCornersInsideEb(corners, a_normal, a_centroid);
 
       while(allInside){
 
 	// Shift the corners
-	data_ops::shift_corners(corners, base_shift);
+	DataOps::shiftCorners(corners, base_shift);
 	shift_vector += base_shift;
 
 	// Check if shifted corners are inside EB
-	allInside = data_ops::all_corners_inside_eb(corners, a_normal, a_centroid);
+	allInside = DataOps::allCornersInsideEb(corners, a_normal, a_centroid);
 
 	// If they are, we can change some components of a_lo
 	if(allInside) {
@@ -1587,7 +1587,7 @@ void data_ops::compute_min_valid_box(RealVect& a_lo, RealVect& a_hi, const RealV
   }
 }
 
-bool data_ops::all_corners_inside_eb(const Vector<RealVect>& a_corners, const RealVect a_normal, const RealVect a_centroid){
+bool DataOps::allCornersInsideEb(const Vector<RealVect>& a_corners, const RealVect a_normal, const RealVect a_centroid){
   bool ret = true;
 
   // If any point it outside the EB, i.e. inside the domain boundary, return false. 
@@ -1600,19 +1600,19 @@ bool data_ops::all_corners_inside_eb(const Vector<RealVect>& a_corners, const Re
   return ret;
 }
 
-void data_ops::shift_corners(Vector<RealVect>& a_corners, const RealVect& a_distance){
+void DataOps::shiftCorners(Vector<RealVect>& a_corners, const RealVect& a_distance){
   for(int i = 0; i < a_corners.size(); i++){
     a_corners[i] += a_distance;
   }
 }
 
-void data_ops::filter_smooth(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const int a_stride, const Real a_alpha){
+void DataOps::filterSmooth(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const int a_stride, const Real a_alpha){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    data_ops::filter_smooth(*a_lhs[lvl], *a_rhs[lvl], a_stride, a_alpha);
+    DataOps::filterSmooth(*a_lhs[lvl], *a_rhs[lvl], a_stride, a_alpha);
   }
 }
 
-void data_ops::filter_smooth(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const int a_stride, const Real a_alpha){
+void DataOps::filterSmooth(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const int a_stride, const Real a_alpha){
 
   const DisjointBoxLayout& dbl = a_lhs.disjointBoxLayout();
   const IntVect ghostVec       = a_lhs.ghostVect();
@@ -1620,7 +1620,7 @@ void data_ops::filter_smooth(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCell
 
   // Dummy check. 
   for (int dir = 0; dir < SpaceDim; dir++){
-    if(ghostVec[dir] < a_stride) MayDay::Abort("data_ops::filter_smooth - stride is too large!");
+    if(ghostVec[dir] < a_stride) MayDay::Abort("DataOps::filterSmooth - stride is too large!");
   }
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -1656,7 +1656,7 @@ void data_ops::filter_smooth(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCell
   }
 }
 
-void data_ops::compute_particle_weights(unsigned long long&      a_weight,
+void DataOps::computeParticleWeights(unsigned long long&      a_weight,
 					unsigned long long&      a_num,
 					unsigned long long&      a_remainder,
 					const unsigned long long a_numPhysicalParticles,

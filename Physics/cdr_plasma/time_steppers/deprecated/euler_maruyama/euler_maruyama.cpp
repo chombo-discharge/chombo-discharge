@@ -7,7 +7,7 @@
 
 #include "euler_maruyama.H"
 #include "euler_maruyama_storage.H"
-#include "data_ops.H"
+#include <CD_DataOps.H>
 #include "units.H"
 #include <CD_CdrGodunov.H>
 
@@ -441,7 +441,7 @@ void euler_maruyama::compute_cdr_eb_states(){
   TimeStepper::extrapolate_to_eb(eb_states, m_cdr->getPhase(), cdr_states);
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
-    data_ops::floor(*eb_states[idx], 0.0);
+    DataOps::floor(*eb_states[idx], 0.0);
   }
 
   // We should already have the cell-centered gradients, extrapolate them to the EB and project the flux. 
@@ -545,7 +545,7 @@ void euler_maruyama::compute_cdr_domain_states(){
       TimeStepper::project_domain(*domain_gradients[idx], grad);
     }
     else{
-      data_ops::set_value(*domain_gradients[idx], 0.0);
+      DataOps::setValue(*domain_gradients[idx], 0.0);
     }
   }
 }
@@ -622,14 +622,14 @@ void euler_maruyama::compute_sigma_flux(){
   }
 
   EBAMRIVData& flux = m_sigma->getFlux();
-  data_ops::set_value(flux, 0.0);
+  DataOps::setValue(flux, 0.0);
 
   for (auto solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
     const RefCountedPtr<species>& spec      = solver_it.getSpecies();
     const EBAMRIVData& solver_flux          = solver->getEbFlux();
 
-    data_ops::incr(flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
+    DataOps::incr(flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
   }
 
   m_sigma->resetCells(flux);
@@ -686,25 +686,25 @@ void euler_maruyama::advance_cdr(const Real a_dt){
     else{
       solver->computeDivF(scratch, phi, extrap_dt);
     }
-    data_ops::scale(scratch, -1.0);
+    DataOps::scale(scratch, -1.0);
 
     // Increment with source term
-    data_ops::incr(scratch, src, 1.0);  // scratch = [-div(F/J) + R]
-    data_ops::scale(scratch, a_dt);     // scratch = [-div(F/J) + R]*dt
-    data_ops::incr(phi, scratch, 1.0);  // Make phi = phi^k - dt*div(F/J) + dt*R
+    DataOps::incr(scratch, src, 1.0);  // scratch = [-div(F/J) + R]
+    DataOps::scale(scratch, a_dt);     // scratch = [-div(F/J) + R]*dt
+    DataOps::incr(phi, scratch, 1.0);  // Make phi = phi^k - dt*div(F/J) + dt*R
 
     solver->make_non_negative(phi);
 
     if(m_floor){ // Should we floor or not? Usually a good idea, and you can monitor the (hopefully negligible) injected mass
       if(m_debug){
 	const Real mass_before = solver->computeMass();
-	data_ops::floor(phi, 0.0);
+	DataOps::floor(phi, 0.0);
 	const Real mass_after = solver->computeMass();
 	const Real rel_mass = (mass_after-mass_before)/mass_before;
 	pout() << "euler_maruayma::injecting relative " << solver->getName() << " mass = " << rel_mass << endl;
       }
       else{
-	data_ops::floor(phi, 0.0);
+	DataOps::floor(phi, 0.0);
       }
     }
     
@@ -718,8 +718,8 @@ void euler_maruyama::advance_cdr(const Real a_dt){
       // This discretization is equivalent to a diffusion-only discretization with phi^k -dt*div(F) + dt*R as initial solution
       // so we just use that for simplicity
       if(solver->isDiffusive()){
-	data_ops::copy(scratch, phi); // Weird-ass initial solution, as explained above
-	data_ops::set_value(scratch2, 0.0); // No source, those are a part of the initial solution
+	DataOps::copy(scratch, phi); // Weird-ass initial solution, as explained above
+	DataOps::setValue(scratch2, 0.0); // No source, those are a part of the initial solution
 	solver->advanceEuler(phi, scratch, scratch2, a_dt);
 
 	solver->make_non_negative(phi);
@@ -727,13 +727,13 @@ void euler_maruyama::advance_cdr(const Real a_dt){
 	if(m_floor){ // Should we floor or not? Usually a good idea, and you can monitor the (hopefully negligible) injected mass
 	  if(m_debug){
 	    const Real mass_before = solver->computeMass();
-	    data_ops::floor(phi, 0.0);
+	    DataOps::floor(phi, 0.0);
 	    const Real mass_after = solver->computeMass();
 	    const Real rel_mass = (mass_after-mass_before)/mass_before;
 	    pout() << "euler_maruayma::injecting relative " << solver->getName() << " mass = " << rel_mass << endl;
 	  }
 	  else{
-	    data_ops::floor(phi, 0.0);
+	    DataOps::floor(phi, 0.0);
 	  }
 	}
       }
@@ -766,7 +766,7 @@ void euler_maruyama::advance_sigma(const Real a_dt){
   // Advance the sigma equation
   EBAMRIVData& sigma = m_sigma->getPhi();
   const EBAMRIVData& rhs = m_sigma->getFlux();
-  data_ops::incr(sigma, rhs, a_dt);
+  DataOps::incr(sigma, rhs, a_dt);
 }
 
 void euler_maruyama::compute_cdr_velo(const Real a_time){
