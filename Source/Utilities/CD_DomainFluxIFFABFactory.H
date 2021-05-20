@@ -1,20 +1,26 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   DomainFluxIFFABFactory.H
-  @author Robert Marskar
+  @file   CD_DomainFluxIFFABFactory.H
   @brief  Declaration of factory class for DomainFluxIFFAB
+  @author Robert Marskar
 */
 
-#ifndef _DOMAINFLUXIFFABFACTORY_
-#define _DOMAINFLUXIFFABFACTORY_
+#ifndef CD_DomainFluxIFFABFactory_ 
+#define  CD_DomainFluxIFFABFactory_ 
 
-#include "DomainFluxIFFAB.H"
-
+// Chombo includes
 #include <Vector.H>
 #include <ProblemDomain.H>
 #include <EBISLayout.H>
 #include <DataIndex.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_DomainFluxIFFAB.H>
+#include <CD_NamespaceHeader.H>
   
 /*!
   @brief Factory class for DomainFluxIFFAB
@@ -32,6 +38,6 @@ private:
   ProblemDomain m_domain;
 };
   
-#include "CD_NamespaceFooter.H"
+#include <CD_NamespaceFooter.H>
 
 #endif

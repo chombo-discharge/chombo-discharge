@@ -34,8 +34,8 @@
 #include <CD_NwoEbQuadCfInterp.H>
 #include <MFLevelGrid.H>
 #include <ebcoarseaverage.H>
-#include <DomainFluxIFFAB.H>
-#include <DomainFluxIFFABFactory.H>
+#include <CD_DomainFluxIFFAB.H>
+#include <CD_DomainFluxIFFABFactory.H>
 #include <CD_ParticleContainer.H>
 #include <CD_EbGhostCloud.H>
 #include <CD_NonConservativeDivergenceStencil.H>

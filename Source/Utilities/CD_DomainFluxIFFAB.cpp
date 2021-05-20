@@ -1,13 +1,17 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   DomainFluxIFFAB.H
-  @brief  Declaration of a BaseIFFAB wrapper that holds domain fluxes 
+  @file   CD_DomainFluxIFFAB.cpp
+  @brief  Implementation of CD_DomainFluxIFFAB.H
   @author Robert Marskar
-  @date   Oct. 2018
 */
 
-#include "DomainFluxIFFAB.H"
-
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_DomainFluxIFFAB.H>
+#include <CD_NamespaceHeader.H>
   
 DomainFluxIFFAB::DomainFluxIFFAB(){
   setDefaultValues();
@@ -201,4 +205,5 @@ const BaseIFFAB<Real>& DomainFluxIFFAB::operator()(const int a_dir, const Side::
 
   return *ptr;
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

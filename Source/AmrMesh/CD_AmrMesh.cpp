@@ -26,7 +26,7 @@
 #include <CD_EbFastFineToCoarRedist.H>
 #include <CD_EbFastCoarToFineRedist.H>
 #include <CD_EbFastCoarToCoarRedist.H>
-#include <DomainFluxIFFABFactory.H>
+#include <CD_DomainFluxIFFABFactory.H>
 #include <CD_TiledMeshRefine.H>
 
 #include <CD_NamespaceHeader.H>

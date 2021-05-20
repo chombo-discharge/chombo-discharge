@@ -1,17 +1,23 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   DomainFluxIFFAB.H
+  @file   CD_DomainFluxIFFAB.H
   @brief  Declaration of a BaseIFFAB wrapper that holds domain fluxes 
   @author Robert Marskar
-  @date   Oct. 2018
 */
 
-#ifndef _DOMAINFLUXIFFAB_
-#define _DOMAINFLUXIFFAB_
+#ifndef CD_DomainFluxIFFAB_H
+#define CD_DomainFluxIFFAB_H
 
+// Chombo includes
 #include <BaseIFFAB.H>
 #include <ProblemDomain.H>
 #include <EBISLayout.H>
 
+// Our includes
 #include "CD_NamespaceHeader.H"
 
 /*!
@@ -73,6 +79,7 @@ protected:
   void setDefaultValues();
   void clear();
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

@@ -19,7 +19,7 @@
 #include <MFFluxFAB.H>
 #include <BinItem.H>
 
-#include "DomainFluxIFFAB.H"
+#include <CD_DomainFluxIFFAB.H>
 #include "MFBaseIVFAB.H"
 
 #include "CD_NamespaceHeader.H"
