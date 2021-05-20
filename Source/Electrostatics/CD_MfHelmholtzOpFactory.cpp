@@ -275,7 +275,7 @@ void MfHelmholtzOpFactory::defineDeeperMultigrid(){
 	  const int main_phase = 0;
 	  const EBLevelGrid& eblg_fine = mflg_fine.getEBLevelGrid(main_phase);
 	  const EBLevelGrid& eblg_coar = mflg_coar.getEBLevelGrid(main_phase);
-	  RefCountedPtr<ebcoarseaverage> aveop(new ebcoarseaverage(eblg_fine.getDBL(),    eblg_coar.getDBL(),
+	  RefCountedPtr<EbCoarAve> aveop(new EbCoarAve(eblg_fine.getDBL(),    eblg_coar.getDBL(),
 								   eblg_fine.getEBISL(),  eblg_coar.getEBISL(),
 								   eblg_coar.getDomain(), mg_refi, ncomp,
 								   eblg_coar.getEBIS()));
@@ -354,7 +354,7 @@ void MfHelmholtzOpFactory::coarsenCoefficients(LevelData<MFCellFAB>&         a_a
     for (int i = 0; i < a_mflg_coar.numPhases(); i++){
       const EBLevelGrid& eblg_coar = a_mflg_coar.getEBLevelGrid(i);
       const EBLevelGrid& eblg_fine = a_mflg_fine.getEBLevelGrid(i);
-      ebcoarseaverage aveop(eblg_fine.getDBL(),    eblg_coar.getDBL(),
+      EbCoarAve aveop(eblg_fine.getDBL(),    eblg_coar.getDBL(),
 			    eblg_fine.getEBISL(),  eblg_coar.getEBISL(),
 			    eblg_coar.getDomain(), a_ref_to_depth, ncomp,
 			    eblg_coar.getEBIS());
@@ -451,7 +451,7 @@ void MfHelmholtzOpFactory::defineJump(){
       const EBLevelGrid& eblg_coar = m_mflg[lvl-1].getEBLevelGrid(main_phase);
       const int ref_ratio          = m_ref_rat[lvl-1];
 	
-      m_aveop[lvl] = RefCountedPtr<ebcoarseaverage> (new ebcoarseaverage(eblg_fine.getDBL(),    eblg_coar.getDBL(),
+      m_aveop[lvl] = RefCountedPtr<EbCoarAve> (new EbCoarAve(eblg_fine.getDBL(),    eblg_coar.getDBL(),
 									 eblg_fine.getEBISL(),  eblg_coar.getEBISL(),
 									 eblg_coar.getDomain(), ref_ratio, ncomp,
 									 eblg_coar.getEBIS()));

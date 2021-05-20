@@ -103,7 +103,7 @@ void PhaseRealm::regridOperators(const int a_lmin, const int a_lmax, const int a
   }
 
   if(m_defined){
-    this->define_eb_coar_ave(a_lmin);             // Define ebcoarseaverage on both phases
+    this->define_eb_coar_ave(a_lmin);             // Define EbCoarAve on both phases
     this->define_eb_quad_cfi(a_lmin);             // Define NwoEbQuadCfInterp on both phases.
     this->define_fillpatch(a_lmin);               // Define operator for piecewise linear interpolation of ghost cells
     this->define_ebpwl_interp(a_lmin);            // Define interpolator for piecewise interpolation of interior points
@@ -304,7 +304,7 @@ void PhaseRealm::define_eb_coar_ave(const int a_lmin){
       const bool has_coar = lvl > 0;
 
       if(has_coar){
-	m_coarave[lvl] = RefCountedPtr<ebcoarseaverage> (new ebcoarseaverage(m_grids[lvl],
+	m_coarave[lvl] = RefCountedPtr<EbCoarAve> (new EbCoarAve(m_grids[lvl],
 									     m_grids[lvl-1],
 									     m_ebisl[lvl],
 									     m_ebisl[lvl-1],
@@ -861,7 +861,7 @@ EBAMRFAB& PhaseRealm::getLevelset() {
   return m_levelset;
 }
 
-Vector<RefCountedPtr<ebcoarseaverage> >& PhaseRealm::getCoarseAverage() {
+Vector<RefCountedPtr<EbCoarAve> >& PhaseRealm::getCoarseAverage() {
   if(!this->queryOperator(s_eb_coar_ave)) MayDay::Abort("PhaseRealm::getCoarseAverage - operator not registered!");
   
   return m_coarave;

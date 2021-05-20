@@ -16,7 +16,7 @@
 
 // Chombo includes
 #include <DisjointBoxLayout.H>
-#include <ebcoarseaverage.H>
+#include <CD_EbCoarAve.H>
 #include <EBFluxRegister.H>
 #include <EBFluxRegister.H>
 #include <EBLevelRedist.H>
@@ -35,7 +35,7 @@
 #include <CD_LoadBalancing.H>
 #include <CD_NwoEbQuadCfInterp.H>
 #include <MFLevelGrid.H>
-#include <ebcoarseaverage.H>
+#include <CD_EbCoarAve.H>
 #include <CD_DomainFluxIFFAB.H>
 #include <CD_DomainFluxIFFABFactory.H>
 #include <CD_ParticleContainer.H>
@@ -974,7 +974,7 @@ public:
   /*!
     @brief Get the coarsening utility
   */
-  Vector<RefCountedPtr<ebcoarseaverage> >& getCoarseAverage(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EbCoarAve> >& getCoarseAverage(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Get the ghost cloud particle magic

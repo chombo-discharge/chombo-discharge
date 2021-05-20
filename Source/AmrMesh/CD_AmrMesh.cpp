@@ -1114,7 +1114,7 @@ void AmrMesh::averageDown(EBAMRCellData& a_data, const std::string a_realm, cons
   }
   
   for (int lvl = m_finestLevel; lvl > 0; lvl--){
-    ebcoarseaverage& aveOp = *m_realms[a_realm]->getCoarseAverage(a_phase)[lvl];
+    EbCoarAve& aveOp = *m_realms[a_realm]->getCoarseAverage(a_phase)[lvl];
       
     const int ncomps = a_data[lvl]->nComp();
     const Interval interv (0, ncomps-1);
@@ -1141,7 +1141,7 @@ void AmrMesh::averageDown(EBAMRCellData& a_data, const std::string a_realm, cons
   const int ncomps = a_data[a_lvl]->nComp();
   const Interval interv (0, ncomps-1);
 
-  ebcoarseaverage& aveOp = *m_realms[a_realm]->getCoarseAverage(a_phase)[a_lvl+1];
+  EbCoarAve& aveOp = *m_realms[a_realm]->getCoarseAverage(a_phase)[a_lvl+1];
 
   aveOp.average(*a_data[a_lvl], *a_data[a_lvl+1], interv);
 
@@ -1222,7 +1222,7 @@ void AmrMesh::averageDown(EBAMRFluxData& a_data, const std::string a_realm, cons
     const int ncomps = a_data[lvl]->nComp();
     const Interval interv (0, ncomps-1);
 
-    ebcoarseaverage& aveOp = *m_realms[a_realm]->getCoarseAverage(a_phase)[lvl];
+    EbCoarAve& aveOp = *m_realms[a_realm]->getCoarseAverage(a_phase)[lvl];
     aveOp.average(*a_data[lvl-1], *a_data[lvl], interv);
   }
 
@@ -1246,7 +1246,7 @@ void AmrMesh::averageDown(EBAMRIVData& a_data, const std::string a_realm, const 
     const int ncomps = a_data[lvl]->nComp();
     const Interval interv (0, ncomps-1);
 
-    ebcoarseaverage& aveOp = *m_realms[a_realm]->getCoarseAverage(a_phase)[lvl];
+    EbCoarAve& aveOp = *m_realms[a_realm]->getCoarseAverage(a_phase)[lvl];
     aveOp.average(*a_data[lvl-1], *a_data[lvl], interv);
   }
 
@@ -1270,7 +1270,7 @@ void AmrMesh::conservativeAverage(EBAMRIVData& a_data, const std::string a_realm
     const int ncomps = a_data[lvl]->nComp();
     const Interval interv (0, ncomps-1);
 
-    ebcoarseaverage& aveOp = *m_realms[a_realm]->getCoarseAverage(a_phase)[lvl];
+    EbCoarAve& aveOp = *m_realms[a_realm]->getCoarseAverage(a_phase)[lvl];
     
     aveOp.conservativeAverage(*a_data[lvl-1], *a_data[lvl], interv);
   }
@@ -1887,7 +1887,7 @@ const EBAMRFAB& AmrMesh::getLevelset(const std::string a_realm, const phase::whi
   return m_realms[a_realm]->getLevelset(a_phase);
 }
 
-Vector<RefCountedPtr<ebcoarseaverage> >& AmrMesh::getCoarseAverage(const std::string a_realm, const phase::which_phase a_phase){
+Vector<RefCountedPtr<EbCoarAve> >& AmrMesh::getCoarseAverage(const std::string a_realm, const phase::which_phase a_phase){
   return m_realms[a_realm]->getCoarseAverage(a_phase);
 }
 

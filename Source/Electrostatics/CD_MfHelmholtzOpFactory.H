@@ -25,7 +25,7 @@
 #include <MFCellFAB.H>
 
 // Our includes
-#include <ebcoarseaverage.H>
+#include <CD_EbCoarAve.H>
 #include <CD_MfHelmholtzOp.H>
 #include <CD_MultiFluidIndexSpace.H>
 #include <mfalias.H>
@@ -280,12 +280,12 @@ protected:
   /*!
     @brief Averaging operator. 
   */
-  Vector<RefCountedPtr<ebcoarseaverage> > m_aveop;
+  Vector<RefCountedPtr<EbCoarAve> > m_aveop;
 
   /*!
     @brief Averaging operator for lower levels of multigrid. This is needed for coarsening data-based boundary conditions
   */
-  Vector<Vector<RefCountedPtr<ebcoarseaverage> > > m_aveop_mg;
+  Vector<Vector<RefCountedPtr<EbCoarAve> > > m_aveop_mg;
 
   /*!
     @brief Grids for multigrid

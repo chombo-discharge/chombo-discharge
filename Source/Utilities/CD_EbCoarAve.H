@@ -23,23 +23,23 @@
    at fine level of refinement. Just like Chombo's EBCoarseAverage, with an extra
    function. 
 */
-class ebcoarseaverage : public EBCoarseAverage {
+class EbCoarAve : public EBCoarseAverage {
 public:
 
   /*!
      @brief Default constructor but must call defined afterwards. 
   */
-  ebcoarseaverage();
+  EbCoarAve();
 
   /*!
     @brief Copy constructor not allowed
   */
-  ebcoarseaverage(const ebcoarseaverage& ebcin) = delete;
+  EbCoarAve(const EbCoarAve& ebcin) = delete;
 
   /*!
      @brief Defining constructor. 
   */
-  ebcoarseaverage(const DisjointBoxLayout& dblFine,
+  EbCoarAve(const DisjointBoxLayout& dblFine,
 		  const DisjointBoxLayout& dblCoar,
 		  const EBISLayout& ebislFine,
 		  const EBISLayout& ebislCoar,
@@ -51,7 +51,7 @@ public:
   /*!
     @brief Defining constructor
   */
-  ebcoarseaverage(const EBLevelGrid& a_eblgFine,
+  EbCoarAve(const EBLevelGrid& a_eblgFine,
 		  const EBLevelGrid& a_eblgCoar,
 		  const EBLevelGrid& a_eblgCoFi,
 		  const int& nref,
@@ -60,14 +60,14 @@ public:
   /*!
     @brief Destructor
   */
-  ~ebcoarseaverage();
+  ~EbCoarAve();
 
 
 
   /*!
     @brief Assignement not allowed.
   */
-  void operator=(const ebcoarseaverage& fabin) = delete;
+  void operator=(const EbCoarAve& fabin) = delete;
 
 
   /*!

@@ -425,7 +425,7 @@ Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& Realm::getGradientS
   return m_realms[a_phase]->getGradientStencils();
 }
 
-Vector<RefCountedPtr<ebcoarseaverage> >& Realm::getCoarseAverage(const phase::which_phase a_phase){
+Vector<RefCountedPtr<EbCoarAve> >& Realm::getCoarseAverage(const phase::which_phase a_phase){
   return m_realms[a_phase]->getCoarseAverage();
 }
 

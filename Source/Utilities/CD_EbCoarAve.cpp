@@ -10,17 +10,17 @@
 */
 
 // Our includes
-#include <ebcoarseaverage.H>
+#include <CD_EbCoarAve.H>
 #include <CD_NamespaceHeader.H>
 
-ebcoarseaverage::ebcoarseaverage(){
+EbCoarAve::EbCoarAve(){
   EBCoarseAverage::setDefaultValues();
 }
 
-ebcoarseaverage::~ebcoarseaverage(){
+EbCoarAve::~EbCoarAve(){
 }
 
-ebcoarseaverage::ebcoarseaverage(const DisjointBoxLayout& a_dblFine,
+EbCoarAve::EbCoarAve(const DisjointBoxLayout& a_dblFine,
 				 const DisjointBoxLayout& a_dblCoar,
 				 const EBISLayout& a_ebislFine,
 				 const EBISLayout& a_ebislCoar,
@@ -33,7 +33,7 @@ ebcoarseaverage::ebcoarseaverage(const DisjointBoxLayout& a_dblFine,
 			  a_domainCoar, a_nref, a_nvar, ebisPtr);
 }
 
-ebcoarseaverage::ebcoarseaverage(const EBLevelGrid& a_eblgFine,
+EbCoarAve::EbCoarAve(const EBLevelGrid& a_eblgFine,
 				 const EBLevelGrid& a_eblgCoar,
 				 const EBLevelGrid& a_eblgCoFi,
 				 const int& a_nref,
@@ -42,10 +42,10 @@ ebcoarseaverage::ebcoarseaverage(const EBLevelGrid& a_eblgFine,
   EBCoarseAverage::define(a_eblgFine, a_eblgCoar, a_eblgCoFi, a_nref, a_nvar);
 }
 
-void ebcoarseaverage::conservativeAverage(LevelData<BaseIVFAB<Real> >&        a_coarData,
+void EbCoarAve::conservativeAverage(LevelData<BaseIVFAB<Real> >&        a_coarData,
 					  const LevelData<BaseIVFAB<Real> >&  a_fineData,
 					  const Interval&                     a_variables){
-  CH_TIME("ebcoarseaverage::conservativeAverage(LD<BaseIVFAB>)");
+  CH_TIME("EbCoarAve::conservativeAverage(LD<BaseIVFAB>)");
   LevelData<BaseIVFAB<Real> > coarFiData;
   LevelData<BaseIVFAB<Real> > fineBuffer;
   CH_assert(isDefined());
@@ -88,7 +88,7 @@ void ebcoarseaverage::conservativeAverage(LevelData<BaseIVFAB<Real> >&        a_
   }
 }
 
-void ebcoarseaverage::conservativeAverageFAB(BaseIVFAB<Real>&       a_coar,
+void EbCoarAve::conservativeAverageFAB(BaseIVFAB<Real>&       a_coar,
 					     const BaseIVFAB<Real>& a_fine,
 					     const DataIndex&       a_datInd,
 					     const Interval&        a_variables) const{

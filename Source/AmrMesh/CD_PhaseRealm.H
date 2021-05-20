@@ -15,7 +15,7 @@
 // Chombo includes
 #include <DisjointBoxLayout.H>
 #include <AggEBPWLFillPatch.H>
-#include <ebcoarseaverage.H>
+#include <CD_EbCoarAve.H>
 #include <EBFluxRegister.H>
 #include <EBFluxRegister.H>
 #include <EBLevelRedist.H>
@@ -33,7 +33,7 @@
 #include <CD_LoadBalancing.H>
 #include <CD_NwoEbQuadCfInterp.H>
 #include <MFLevelGrid.H>
-#include <ebcoarseaverage.H>
+#include <CD_EbCoarAve.H>
 #include <CD_DomainFluxIFFAB.H>
 #include <CD_DomainFluxIFFABFactory.H>
 #include <CD_ParticleContainer.H>
@@ -111,7 +111,7 @@ public:
   IrregAmrStencil<NonConservativeDivergenceStencil>& getNonConservativeDivergenceStencils();
   Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& getGradientStencils();
 
-  Vector<RefCountedPtr<ebcoarseaverage> >& getCoarseAverage();
+  Vector<RefCountedPtr<EbCoarAve> >& getCoarseAverage();
   Vector<RefCountedPtr<EbGhostCloud> >& getGhostCloud();
   Vector<RefCountedPtr<NwoEbQuadCfInterp> >& getNWOEBQuadCFInterp();
   Vector<RefCountedPtr<EBQuadCFInterp> >& getEBQuadCFInterp();
@@ -174,7 +174,7 @@ protected:
   EBAMRFAB m_levelset;
 
   // Various operators
-  Vector<RefCountedPtr<ebcoarseaverage> > m_coarave;
+  Vector<RefCountedPtr<EbCoarAve> > m_coarave;
   Vector<RefCountedPtr<NwoEbQuadCfInterp> > m_quadcfi;
   Vector<RefCountedPtr<EbGhostCloud> > m_ghostclouds;
   Vector<RefCountedPtr<EBQuadCFInterp> > m_old_quadcfi;
