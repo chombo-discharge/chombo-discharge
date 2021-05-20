@@ -1,3 +1,14 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
+/*!
+  @file   CD_EbCoarAve.H
+  @brief  Declaration of conservative coarsening utility 
+  @author Robert Marskar
+*/
+
 #ifndef CD_EbCoarAve_H
 #define CD_EbCoarAve_H
 
