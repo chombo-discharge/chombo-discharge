@@ -1,23 +1,29 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
   @file   CD_LeastSquares.H
   @brief  Agglomeration of various routines that use least squares computations
   @author Robert Marskar
-  @date   May 2016
 */
 
-#ifndef _CD_LeastSquares_H_
-#define _CD_LeastSquares_H_
+#ifndef CD_LeastSquares_H
+#define CD_LeastSquares_H
 
-#include "Stencils.H"
-#include "EBISBox.H"
-#include "IntVectSet.H"
-#include "RealVect.H"
-#include "ProblemDomain.H"
-#include "VolIndex.H"
-#include "PolyGeom.H"
-#include "EBISLayout.H"
+// Chombo includes
+#include <Stencils.H>
+#include <EBISBox.H>
+#include <IntVectSet.H>
+#include <RealVect.H>
+#include <ProblemDomain.H>
+#include <VolIndex.H>
+#include <PolyGeom.H>
+#include <EBISLayout.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_NamespaceHeader.H>
 
 namespace LeastSquares {
 
@@ -284,6 +290,7 @@ namespace LeastSquares {
 
 
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

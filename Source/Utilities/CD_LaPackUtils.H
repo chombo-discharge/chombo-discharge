@@ -10,8 +10,8 @@
   @author Robert Marskar
 */
 
-#ifndef _CD_LaPackUtils_H_
-#define _CD_LaPackUtils_H_
+#ifndef CD_LaPackUtils_H
+#define CD_LaPackUtils_H
 
 // Std includes
 #include <vector>

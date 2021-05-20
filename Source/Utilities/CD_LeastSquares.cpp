@@ -1,18 +1,23 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
   @file   CD_LeastSquares.cpp
   @brief  Implementation of CD_LeastSquares.H
   @author Robert Marskar
-  @date   May 2016
 */
 
-#include "CD_LaPackUtils.H"
-#include "CD_LeastSquares.H"
-#include "CD_VofUtils.H"
-#include "CD_MultiIndex.H"
+// Chombo includes
+#include <EBArith.H>
 
-#include "EBArith.H"
-
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_LaPackUtils.H>
+#include <CD_LeastSquares.H>
+#include <CD_VofUtils.H>
+#include <CD_MultiIndex.H>
+#include <CD_NamespaceHeader.H>
 
 RealVect LeastSquares::position(const CellPosition a_position,
 				const VolIndex&    a_vof,
@@ -387,4 +392,5 @@ VoFStencil LeastSquares::getInterpolationStencilUsingAllVofsInRadius(const CellP
 
   return ret;
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
