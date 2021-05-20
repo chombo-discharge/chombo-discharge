@@ -1,109 +1,115 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file lookup_table.H
-  @brief Declaration of a table for looking up coefficients etc. 
+  @file   CD_LookupTable.H
+  @brief  Declaration of a table for looking up coefficients etc. 
   @author Robert Marskar
-  @date Sept. 2016
 */
 
-#ifndef _LOOKUPTABLE_H_
-#define _LOOKUPTABLE_H_
+#ifndef CD_LookupTable_H
+#define CD_LookupTable_H
 
+// Chombo includes
 #include <RealVect.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Class for looking up and interpolation (x,y) data. 
 */
-class lookup_table {
+class LookupTable {
 public:
 
   /*!
     @brief Constructor
   */
-  lookup_table();
+  LookupTable();
 
   /*!
     @brief Copy constructor with scalability
   */
-  lookup_table(const lookup_table& a_table);
+  LookupTable(const LookupTable& a_table);
 
   /*!
     @brief Destructor
   */
-  ~lookup_table();
+  ~LookupTable();
 
   /*!
     @brief Make the table into a uniform table with the number of entries
   */
   inline
-  void make_uniform(const int a_entries);
+  void makeUniform(const int a_entries);
 
   /*!
     @brief Scale x values
   */
   inline
-  void scale_x(const Real& a_scale);
+  void scaleX(const Real& a_scale);
 
   /*!
     @brief Scale y values
   */
   inline
-  void scale_y(const Real& a_scale);
+  void scaleY(const Real& a_scale);
   
   /*!
     @brief Add entry
   */
   inline
-  void add_entry(const Real& a_x, const Real& a_y);
+  void addEntry(const Real& a_x, const Real& a_y);
 
   /*!
     @brief Add other table. 
   */
   inline
-  void add_table(const lookup_table& a_otherTable, const Real a_scale);
+  void addTable(const LookupTable& a_otherTable, const Real a_scale);
 
   /*!
     @brief Dump table to pout()
   */
   inline
-  void dump_table() const ;
+  void dumpTable() const ;
 
   /*!
     @brief Get entry
   */
   inline
-  Real get_entry(const Real a_x) const;
+  Real getEntry(const Real a_x) const;
 
   /*!
     @brief Direct lookup, assumes non-uniform ordering. Performance killer. 
   */
   inline
-  Real direct_lookup(const Real a_x) const;
+  Real directLookup(const Real a_x) const;
 
   /*!
     @brief Swap x and y vectors
   */
   inline
-  void swap_xy();
+  void swapXY();
 
   /*!
     @brief Add a table to this one
   */
   inline
-  void operator+=(const lookup_table& a_table);
+  void operator+=(const LookupTable& a_table);
 
   /*!
     @brief Subtract a table from this one
   */
   inline
-  void operator-=(const lookup_table& a_table);
+  void operator-=(const LookupTable& a_table);
 
   /*!
     @brief Assignment operator
   */
   inline
-  void operator=(const lookup_table& a_table);
+  void operator=(const LookupTable& a_table);
 
 protected:
 
@@ -115,7 +121,7 @@ protected:
   /*!
     @brief Number of entries in reaction table
   */
-  int m_num_entries;
+  int m_numEntries;
   
   /*!
     @brief Towsend field
@@ -127,8 +133,9 @@ protected:
   */
   std::vector<Real> m_y;
 };
-#include "CD_NamespaceFooter.H"
 
-#include "lookup_tableI.H"
+#include <CD_NamespaceFooter.H>
+
+#include <CD_LookupTableImplem.H>
 
 #endif

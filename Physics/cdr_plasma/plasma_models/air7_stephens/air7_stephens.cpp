@@ -54,7 +54,7 @@ air7_stephens::~air7_stephens() {
 
 }
 
-void air7_stephens::read_file_entries(lookup_table& a_table, const std::string a_string){
+void air7_stephens::read_file_entries(LookupTable& a_table, const std::string a_string){
   Real x, y;
   bool read_line = false;
   std::ifstream infile(m_transport_file);
@@ -77,7 +77,7 @@ void air7_stephens::read_file_entries(lookup_table& a_table, const std::string a
       if (!(iss >> x >> y)) {
 	continue;
       }
-      a_table.add_entry(x, y);
+      a_table.addEntry(x, y);
     }
   }
   infile.close();
@@ -151,18 +151,18 @@ void air7_stephens::parse_electron_mobility(){
   ParmParse pp("air7_stephens");
 
   read_file_entries(m_e_mobility, air7_stephens::s_bolsig_mobility);
-  m_e_mobility.scale_x(m_N*units::s_Td);
-  m_e_mobility.scale_y(1./m_N); 
-  m_e_mobility.make_uniform(m_uniform_entries);
+  m_e_mobility.scaleX(m_N*units::s_Td);
+  m_e_mobility.scaleY(1./m_N); 
+  m_e_mobility.makeUniform(m_uniform_entries);
 }
 
 void air7_stephens::parse_electron_diffco(){
   ParmParse pp("air7_stephens");
   
   read_file_entries(m_e_diffco, air7_stephens::s_bolsig_diffco);
-  m_e_diffco.scale_x(m_N*units::s_Td);
-  m_e_diffco.scale_y(1./m_N); 
-  m_e_diffco.make_uniform(m_uniform_entries);
+  m_e_diffco.scaleX(m_N*units::s_Td);
+  m_e_diffco.scaleY(1./m_N); 
+  m_e_diffco.makeUniform(m_uniform_entries);
 }
 
 void air7_stephens::parse_alpha(){
@@ -171,51 +171,51 @@ void air7_stephens::parse_alpha(){
   read_file_entries(m_e_alphaN2, air7_stephens::s_bolsig_alphaN2);
   read_file_entries(m_e_alphaO2, air7_stephens::s_bolsig_alphaO2);
   
-  m_e_alpha.scale_x(m_N*units::s_Td);
-  m_e_alphaN2.scale_x(m_N*units::s_Td);
-  m_e_alphaO2.scale_x(m_N*units::s_Td);
+  m_e_alpha.scaleX(m_N*units::s_Td);
+  m_e_alphaN2.scaleX(m_N*units::s_Td);
+  m_e_alphaO2.scaleX(m_N*units::s_Td);
   
-  m_e_alpha.scale_y(m_N);
-  m_e_alphaN2.scale_y(m_N*m_N2frac);
-  m_e_alphaO2.scale_y(m_N*m_O2frac);
+  m_e_alpha.scaleY(m_N);
+  m_e_alphaN2.scaleY(m_N*m_N2frac);
+  m_e_alphaO2.scaleY(m_N*m_O2frac);
   
-  m_e_alpha.make_uniform(m_uniform_entries);
-  m_e_alphaN2.make_uniform(m_uniform_entries);
-  m_e_alphaO2.make_uniform(m_uniform_entries);
+  m_e_alpha.makeUniform(m_uniform_entries);
+  m_e_alphaN2.makeUniform(m_uniform_entries);
+  m_e_alphaO2.makeUniform(m_uniform_entries);
 }
 
 void air7_stephens::parse_eta(){
   ParmParse pp("air7_stephens");
   read_file_entries(m_e_eta, air7_stephens::s_bolsig_eta);
-  m_e_eta.scale_x(m_N*units::s_Td);
-  m_e_eta.scale_y(m_N);
-  m_e_eta.make_uniform(m_uniform_entries);
+  m_e_eta.scaleX(m_N*units::s_Td);
+  m_e_eta.scaleY(m_N);
+  m_e_eta.makeUniform(m_uniform_entries);
 }
 
 void air7_stephens::parse_temperature(){
   ParmParse pp("air7_stephens");
   read_file_entries(m_e_temperature, air7_stephens::s_bolsig_energy);
 
-  //  m_e_temperature.dump_table();
-  m_e_temperature.scale_x(m_N*units::s_Td);
-  m_e_temperature.scale_y(2.0*units::s_Qe/(3.0*units::s_kb));
-  m_e_temperature.make_uniform(m_uniform_entries);
+  //  m_e_temperature.dumpTable();
+  m_e_temperature.scaleX(m_N*units::s_Td);
+  m_e_temperature.scaleY(2.0*units::s_Qe/(3.0*units::s_kb));
+  m_e_temperature.makeUniform(m_uniform_entries);
 }
 
 void air7_stephens::parse_excitations(){
   ParmParse pp("air7_mc8");
   
   read_file_entries(m_b1_exc, air7_stephens::s_bolsig_b1_exc);
-  m_b1_exc.scale_x(m_N*units::s_Td);
-  m_b1_exc.scale_y(m_N); 
-  m_b1_exc.make_uniform(m_uniform_entries);
+  m_b1_exc.scaleX(m_N*units::s_Td);
+  m_b1_exc.scaleY(m_N); 
+  m_b1_exc.makeUniform(m_uniform_entries);
 
   read_file_entries(m_c4_exc, air7_stephens::s_bolsig_c4_exc);
 
-  m_c4_exc.scale_x(m_N*units::s_Td);
-  m_c4_exc.scale_y(m_N);
+  m_c4_exc.scaleX(m_N*units::s_Td);
+  m_c4_exc.scaleY(m_N);
 
-  m_c4_exc.make_uniform(m_uniform_entries);
+  m_c4_exc.makeUniform(m_uniform_entries);
 }
 
 void air7_stephens::parse_see(){
@@ -513,8 +513,8 @@ void air7_stephens::advance_chemistry_euler(Vector<Real>&          a_particle_so
 					    const Real             a_kappa) const{
   const Real volume = pow(a_dx, SpaceDim);
   const Real E      = a_E.vectorLength();
-  const Real ve     = E*m_e_mobility.get_entry(E);
-  const Real Te     = Max(m_e_temperature.get_entry(E), 300.);
+  const Real ve     = E*m_e_mobility.getEntry(E);
+  const Real Te     = Max(m_e_temperature.getEntry(E), 300.);
 
   const Real Ne    = a_particle_densities[m_elec_idx];
   const Real N2p   = a_particle_densities[m_N2plus_idx];
@@ -547,7 +547,7 @@ void air7_stephens::advance_chemistry_euler(Vector<Real>&          a_particle_so
   Real fcorr = 1.0;
   if(m_alpha_corr){
     const RealVect Eunit = a_E/a_E.vectorLength();
-    const Real De        = m_e_diffco.get_entry(E);
+    const Real De        = m_e_diffco.getEntry(E);
     const RealVect gNe   = a_particle_gradients[m_elec_idx];
 
     fcorr = 1.0 + PolyGeom::dot(Eunit, De*gNe)/(1.0+a_particle_densities[m_elec_idx]*ve);
@@ -555,8 +555,8 @@ void air7_stephens::advance_chemistry_euler(Vector<Real>&          a_particle_so
     fcorr = Max(0.0, fcorr);
   }
 
-  const Real R1  = fcorr*m_e_alphaN2.get_entry(E)*Ne;
-  const Real R2  = fcorr*m_e_alphaO2.get_entry(E)*Ne;
+  const Real R1  = fcorr*m_e_alphaN2.getEntry(E)*Ne;
+  const Real R2  = fcorr*m_e_alphaO2.getEntry(E)*Ne;
   const Real R3  = (5.E-41)*N2p*N2*M;
   const Real R4  = 2.5E-16*N4p*O2;
   const Real R5  = 6E-17*N2p*O2;
@@ -638,8 +638,8 @@ void air7_stephens::advance_chemistry_euler(Vector<Real>&          a_particle_so
   }
 
   // Photoionization code below
-  const Real Rb1    = m_b1_exc.get_entry(E)*a_particle_densities[m_elec_idx];  // Excitation rate for b1
-  const Real Rc4    = m_c4_exc.get_entry(E)*a_particle_densities[m_elec_idx];  // Excitation rate for c4
+  const Real Rb1    = m_b1_exc.getEntry(E)*a_particle_densities[m_elec_idx];  // Excitation rate for b1
+  const Real Rc4    = m_c4_exc.getEntry(E)*a_particle_densities[m_elec_idx];  // Excitation rate for c4
 
 #if 0 // Original code, not performant. 
   const int num_exc_c4v0 = poisson_reaction(m_photoi_factor*Rc4*volume*m_c4v0_exc_rep, a_dt);
@@ -740,7 +740,7 @@ Vector<Real> air7_stephens::compute_cdr_diffusion_coefficients(const Real       
 							       const Vector<Real> a_cdr_densities) const {
 
   Vector<Real> dco(m_num_CdrSpecies, 0.0);
-  dco[m_elec_idx] = m_e_diffco.get_entry(a_E.vectorLength());
+  dco[m_elec_idx] = m_e_diffco.getEntry(a_E.vectorLength());
   if(m_isDiffusive_ions){
     dco[m_N2plus_idx]   = m_ion_diffusion;
     dco[m_O2plus_idx]   = m_ion_diffusion;
@@ -760,7 +760,7 @@ Vector<RealVect> air7_stephens::compute_cdr_velocities(const Real         a_time
 						       const Vector<Real> a_cdr_densities) const{
   Vector<RealVect> vel(m_num_CdrSpecies, RealVect::Zero);
 
-  vel[m_elec_idx] = -a_E*m_e_mobility.get_entry(a_E.vectorLength());
+  vel[m_elec_idx] = -a_E*m_e_mobility.getEntry(a_E.vectorLength());
   if(m_isMobile_ions){
     vel[m_N2plus_idx]   =  a_E*m_ion_mobility;
     vel[m_O2plus_idx]   =  a_E*m_ion_mobility;
@@ -880,8 +880,8 @@ Real air7_stephens::initial_sigma(const Real a_time, const RealVect a_pos) const
 
 Real air7_stephens::compute_alpha(const RealVect a_E) const{
   const Real E     = a_E.vectorLength();
-  const Real alpha = m_e_alpha.get_entry(E);
-  const Real eta   = m_e_eta.get_entry(E);
+  const Real alpha = m_e_alpha.getEntry(E);
+  const Real eta   = m_e_eta.getEntry(E);
 
   return alpha;
 }

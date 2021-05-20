@@ -130,28 +130,28 @@ ito_plasma_air3::~ito_plasma_air3(){
 
 void ito_plasma_air3::read_tables(){
 
-  this->add_table("mobility", "mobility.dat");
-  this->add_table("diffco",   "diffusion.dat");
-  this->add_table("alpha",    "alpha.dat");
-  this->add_table("eta",      "eta.dat");
-  this->add_table("Te",       "energy.dat");
+  this->addTable("mobility", "mobility.dat");
+  this->addTable("diffco",   "diffusion.dat");
+  this->addTable("alpha",    "alpha.dat");
+  this->addTable("eta",      "eta.dat");
+  this->addTable("Te",       "energy.dat");
 
   // Need to scale tables. First column is in Td and second in /N
-  m_tables["mobility"].scale_x(m_N*units::s_Td);
-  m_tables["mobility"].scale_y(1./m_N);
+  m_tables["mobility"].scaleX(m_N*units::s_Td);
+  m_tables["mobility"].scaleY(1./m_N);
 
-  m_tables["diffco"].scale_x(m_N*units::s_Td);
-  m_tables["diffco"].scale_y(1./m_N);
+  m_tables["diffco"].scaleX(m_N*units::s_Td);
+  m_tables["diffco"].scaleY(1./m_N);
 
-  m_tables["alpha"].scale_x(m_N*units::s_Td);
-  m_tables["alpha"].scale_y(m_N);
+  m_tables["alpha"].scaleX(m_N*units::s_Td);
+  m_tables["alpha"].scaleY(m_N);
 
-  m_tables["eta"].scale_x(m_N*units::s_Td);
-  m_tables["eta"].scale_y(m_N);
+  m_tables["eta"].scaleX(m_N*units::s_Td);
+  m_tables["eta"].scaleY(m_N);
 
-  m_tables["Te"].swap_xy();
-  m_tables["Te"].scale_x(m_N*units::s_Td);
-  m_tables["Te"].scale_y(2.0*units::s_Qe/(3.0*units::s_kb));
+  m_tables["Te"].swapXY();
+  m_tables["Te"].scaleX(m_N*units::s_Td);
+  m_tables["Te"].scaleY(2.0*units::s_Qe/(3.0*units::s_kb));
 }
 
 Real ito_plasma_air3::computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_cdr_densities) const {
@@ -166,18 +166,18 @@ Real ito_plasma_air3::computeDt(const RealVect a_E, const RealVect a_pos, const 
 Real ito_plasma_air3::compute_alpha(const RealVect a_E) const {
   const Real E = a_E.vectorLength();
 
-  return m_tables.at("alpha").get_entry(E);
+  return m_tables.at("alpha").getEntry(E);
 }
 
 Vector<Real> ito_plasma_air3::compute_ito_mobilities_lfa(const Real a_time, const RealVect a_pos, const RealVect a_E) const {
   Vector<Real> mobilities(m_num_ito_species, m_ion_mu);
-  mobilities[m_electron_idx] = m_tables.at("mobility").get_entry(a_E.vectorLength());
+  mobilities[m_electron_idx] = m_tables.at("mobility").getEntry(a_E.vectorLength());
 
   return mobilities;
 }
 
 RealVect ito_plasma_air3::compute_electron_velocity(const RealVect a_E) const {
-  return -m_tables.at("mobility").get_entry(a_E.vectorLength())*a_E;
+  return -m_tables.at("mobility").getEntry(a_E.vectorLength())*a_E;
 }
 
 Vector<Real> ito_plasma_air3::compute_ito_diffusion_lfa(const Real         a_time,
@@ -185,7 +185,7 @@ Vector<Real> ito_plasma_air3::compute_ito_diffusion_lfa(const Real         a_tim
 							const RealVect     a_E,
 							const Vector<Real> a_cdr_densities) const {
   Vector<Real> D(m_num_ito_species, m_ion_D);
-  D[m_electron_idx] = m_tables.at("diffco").get_entry(a_E.vectorLength());
+  D[m_electron_idx] = m_tables.at("diffco").getEntry(a_E.vectorLength());
   
   return D;
 }
@@ -195,9 +195,9 @@ void ito_plasma_air3::update_reaction_rates_lfa(const RealVect a_E, const Real a
   // Compute the reaction rates.
   const Real dV      = pow(a_dx, SpaceDim);//*a_kappa;
   const Real E       = a_E.vectorLength();
-  const Real alpha   = m_tables.at("alpha").get_entry(E);
-  const Real eta     = m_tables.at("eta").get_entry(E);
-  const Real Te      = m_tables.at("Te").get_entry(E);
+  const Real alpha   = m_tables.at("alpha").getEntry(E);
+  const Real eta     = m_tables.at("eta").getEntry(E);
+  const Real Te      = m_tables.at("Te").getEntry(E);
   const Real velo    = this->compute_electron_velocity(a_E).vectorLength();
   const Real xfactor = (m_pq/(m_p + m_pq))*excitation_rates(E)*sergey_factor(m_O2frac)*m_photoi_factor;
   const Real bpn     = 2E-13*sqrt(300/m_T)/dV;

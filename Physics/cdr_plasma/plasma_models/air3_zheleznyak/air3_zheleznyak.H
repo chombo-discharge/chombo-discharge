@@ -9,7 +9,7 @@
 #define _AIR3_ZHELEZNYAK_
 
 #include "cdr_plasma_physics.H"
-#include "lookup_table.H"
+#include "CD_LookupTable.H"
 
 #include <random>
 
@@ -109,12 +109,12 @@ namespace physics {
       chemistryAlgorithm m_chemistryAlgorithm;
 
       // Tables built from BOLSIG+
-      lookup_table m_e_mobility;
-      lookup_table m_e_diffco;
-      lookup_table m_e_alpha;
-      lookup_table m_e_eta;
-      lookup_table m_b1_exc;
-      lookup_table m_c4_exc;
+      LookupTable m_e_mobility;
+      LookupTable m_e_diffco;
+      LookupTable m_e_alpha;
+      LookupTable m_e_eta;
+      LookupTable m_b1_exc;
+      LookupTable m_c4_exc;
 
       Vector<int> m_wallBc; // Wall boundary conditions
 
@@ -172,7 +172,7 @@ namespace physics {
 
       int poisson_reaction(const Real a_propensity, const Real a_dt) const;
 
-      void read_file_entries(lookup_table& a_table, const std::string a_string);
+      void read_file_entries(LookupTable& a_table, const std::string a_string);
       void parse_transport_file();
       void parse_transport();
       void parse_gas_params();

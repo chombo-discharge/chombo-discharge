@@ -64,20 +64,20 @@ air3_bourdon::air3_bourdon() {
     read_file_entries(m_e_alpha,    air3_bourdon::s_bolsig_alpha);
     read_file_entries(m_e_eta,      air3_bourdon::s_bolsig_eta);
     
-    m_e_mobility.scale_x(m_N*units::s_Td);
-    m_e_diffco.scale_x(m_N*units::s_Td);
-    m_e_alpha.scale_x(m_N*units::s_Td);
-    m_e_eta.scale_x(m_N*units::s_Td);
+    m_e_mobility.scaleX(m_N*units::s_Td);
+    m_e_diffco.scaleX(m_N*units::s_Td);
+    m_e_alpha.scaleX(m_N*units::s_Td);
+    m_e_eta.scaleX(m_N*units::s_Td);
     
-    m_e_mobility.scale_y(1./m_N); 
-    m_e_diffco.scale_y(1./m_N); 
-    m_e_alpha.scale_y(m_N); 
-    m_e_eta.scale_y(m_N);
+    m_e_mobility.scaleY(1./m_N); 
+    m_e_diffco.scaleY(1./m_N); 
+    m_e_alpha.scaleY(m_N); 
+    m_e_eta.scaleY(m_N);
 
-    m_e_diffco.make_uniform(m_uniform_entries);
-    m_e_mobility.make_uniform(m_uniform_entries);
-    m_e_alpha.make_uniform(m_uniform_entries);
-    m_e_eta.make_uniform(m_uniform_entries);
+    m_e_diffco.makeUniform(m_uniform_entries);
+    m_e_mobility.makeUniform(m_uniform_entries);
+    m_e_alpha.makeUniform(m_uniform_entries);
+    m_e_eta.makeUniform(m_uniform_entries);
 
   }
   else{
@@ -96,7 +96,7 @@ air3_bourdon::~air3_bourdon() {
 
 }
 
-void air3_bourdon::read_file_entries(lookup_table& a_table, const std::string a_string){
+void air3_bourdon::read_file_entries(LookupTable& a_table, const std::string a_string){
   Real x, y;
   bool read_line = false;
   std::ifstream infile(m_transport_file);
@@ -119,7 +119,7 @@ void air3_bourdon::read_file_entries(lookup_table& a_table, const std::string a_
       if (!(iss >> x >> y)) {
 	continue;
       }
-      a_table.add_entry(x, y);
+      a_table.addEntry(x, y);
     }
   }
   infile.close();
@@ -207,16 +207,16 @@ void air3_bourdon::advance_reaction_network(Vector<Real>&          a_particle_so
 					    const Real             a_time,
 					    const Real             a_kappa) const {
   const Real E      = a_E.vectorLength();
-  const Real ve     = E*m_e_mobility.get_entry(E);
+  const Real ve     = E*m_e_mobility.getEntry(E);
   
   // Ionization and attachment coefficients
-  Real alpha  = m_e_alpha.get_entry(E);
-  Real eta    = m_e_eta.get_entry(E);
+  Real alpha  = m_e_alpha.getEntry(E);
+  Real eta    = m_e_eta.getEntry(E);
 
   // Modify alpha
   if(m_alpha_corr){
     const RealVect Eunit = a_E/a_E.vectorLength();
-    const Real De        = m_e_diffco.get_entry(E);
+    const Real De        = m_e_diffco.getEntry(E);
     const RealVect gNe   = a_particle_gradients[m_elec_idx];
 
     Real fcorr = 1.0;
@@ -273,7 +273,7 @@ Vector<Real> air3_bourdon::compute_cdr_diffusion_coefficients(const Real        
 							      const Vector<Real> a_cdr_densities) const {
 
   Vector<Real> dco(m_num_CdrSpecies, 0.0);
-  dco[m_elec_idx] = m_e_diffco.get_entry(a_E.vectorLength());
+  dco[m_elec_idx] = m_e_diffco.getEntry(a_E.vectorLength());
   dco[m_plus_idx] = m_ion_diffusion;
   dco[m_minu_idx] = m_ion_diffusion;
   
@@ -286,7 +286,7 @@ Vector<RealVect> air3_bourdon::compute_cdr_velocities(const Real         a_time,
 						      const Vector<Real> a_cdr_densities) const{
   Vector<RealVect> vel(m_num_CdrSpecies, RealVect::Zero);
 
-  vel[m_elec_idx] = -a_E*m_e_mobility.get_entry(a_E.vectorLength());
+  vel[m_elec_idx] = -a_E*m_e_mobility.getEntry(a_E.vectorLength());
   vel[m_plus_idx] =  a_E*m_ion_mobility;
   vel[m_minu_idx] = -a_E*m_ion_mobility;
   
@@ -400,7 +400,7 @@ Real air3_bourdon::initial_sigma(const Real a_time, const RealVect a_pos) const 
 
 Real air3_bourdon::compute_alpha(const RealVect a_E) const{
   const Real E     = a_E.vectorLength();
-  const Real alpha = m_e_alpha.get_entry(E);
+  const Real alpha = m_e_alpha.getEntry(E);
 
   return alpha;
 }

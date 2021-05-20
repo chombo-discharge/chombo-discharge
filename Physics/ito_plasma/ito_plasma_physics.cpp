@@ -70,16 +70,16 @@ Real ito_plasma_physics::initial_sigma(const Real a_time, const RealVect a_pos) 
   return 0.0;
 }
 
-void ito_plasma_physics::add_table(const std::string a_table_name, const std::string a_file){
+void ito_plasma_physics::addTable(const std::string a_table_name, const std::string a_file){
 
-  lookup_table table;
+  LookupTable table;
 
   this->read_file(table, a_file);        // Read file
-  table.make_uniform(m_table_entries);   // Make table into a unifom table
+  table.makeUniform(m_table_entries);   // Make table into a unifom table
   m_tables.emplace(a_table_name, table); // Add table
 }
 
-void ito_plasma_physics::read_file(lookup_table& a_table, const std::string a_file){
+void ito_plasma_physics::read_file(LookupTable& a_table, const std::string a_file){
 
   Real x, y;
   
@@ -98,7 +98,7 @@ void ito_plasma_physics::read_file(lookup_table& a_table, const std::string a_fi
       if (!(iss >> x >> y)) {
 	continue;
       }
-      a_table.add_entry(x, y);
+      a_table.addEntry(x, y);
     }
   }
   infile.close();

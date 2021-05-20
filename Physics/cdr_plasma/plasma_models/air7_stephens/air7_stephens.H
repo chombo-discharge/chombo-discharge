@@ -9,7 +9,7 @@
 #define _AIR7_STEPHENS_
 
 #include "cdr_plasma_physics.H"
-#include "lookup_table.H"
+#include "CD_LookupTable.H"
 
 #include <random>
 
@@ -125,15 +125,15 @@ namespace physics {
       chemistryAlgorithm m_chemistryAlgorithm;
 
       // Tables built from BOLSIG+
-      lookup_table m_e_mobility;    // Mobility
-      lookup_table m_e_diffco;      // Diffusion coefficient
-      lookup_table m_e_alphaN2;     // Ionization rate
-      lookup_table m_e_alphaO2;     // Ionization rate
-      lookup_table m_e_alpha;       // Townsend alpha
-      lookup_table m_e_eta;         // Townsend eta
-      lookup_table m_e_temperature; // Electron temperature (K)
-      lookup_table m_b1_exc;        // Lookup table for excitation rates
-      lookup_table m_c4_exc;        // Lookup table for excitation rates
+      LookupTable m_e_mobility;    // Mobility
+      LookupTable m_e_diffco;      // Diffusion coefficient
+      LookupTable m_e_alphaN2;     // Ionization rate
+      LookupTable m_e_alphaO2;     // Ionization rate
+      LookupTable m_e_alpha;       // Townsend alpha
+      LookupTable m_e_eta;         // Townsend eta
+      LookupTable m_e_temperature; // Electron temperature (K)
+      LookupTable m_b1_exc;        // Lookup table for excitation rates
+      LookupTable m_c4_exc;        // Lookup table for excitation rates
 
 
       Vector<int> m_wallBc; // Wall boundary conditions
@@ -238,7 +238,7 @@ namespace physics {
       int poisson_reaction(const Real a_propensity, const Real a_dt) const;
       int binomial_trials(const int a_trials, const Real a_p) const; // a_p is chance of success
 
-      void read_file_entries(lookup_table& a_table, const std::string a_string);
+      void read_file_entries(LookupTable& a_table, const std::string a_string);
       void parse_transport_file();
       void parse_transport();
       void parse_gas_params();

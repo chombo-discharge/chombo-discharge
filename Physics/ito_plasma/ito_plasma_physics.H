@@ -26,7 +26,7 @@
 #include "ito_particle.H"
 #include "ito_reaction.H"
 #include "photo_reaction.H"
-#include "lookup_table.H"
+#include "CD_LookupTable.H"
 
 #include "CD_NamespaceHeader.H"
 namespace physics {
@@ -254,17 +254,17 @@ namespace physics {
       mutable std::map<std::string, photo_reaction> m_photo_reactions;
 
       // Lookup tables if you need them. 
-      std::map<std::string, lookup_table> m_tables;
+      std::map<std::string, LookupTable> m_tables;
 
       /*!
 	@brief Add a table
       */
-      void add_table(const std::string a_table_name, const std::string a_file);
+      void addTable(const std::string a_table_name, const std::string a_file);
 
       /*!
 	@brief Read a file and put it in a lookup table
       */
-      void read_file(lookup_table& a_table, const std::string a_file);
+      void read_file(LookupTable& a_table, const std::string a_file);
 
       /*!
 	@brief Draw a valid random position somewhere in a cell

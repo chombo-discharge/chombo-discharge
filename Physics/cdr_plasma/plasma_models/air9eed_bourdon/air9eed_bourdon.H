@@ -9,7 +9,7 @@
 #define _AIR9EED_BOURDON_
 
 #include "cdr_plasma_physics.H"
-#include "lookup_table.H"
+#include "CD_LookupTable.H"
 
 #include "CD_NamespaceHeader.H"
 namespace physics {
@@ -180,16 +180,16 @@ namespace physics {
       Real m_excitation_efficiency;          // Excitation efficiency
 
       // Tables built from BOLSIG+
-      lookup_table m_init_eed;
-      lookup_table m_e_mobility;
-      lookup_table m_e_N2_alpha;
-      lookup_table m_e_O2_alpha;
-      lookup_table m_e_O2_to_e_2O_c1;
-      lookup_table m_e_O2_to_e_2O_c2;
-      lookup_table m_e_O2_to_Ominus_O;
-      lookup_table m_e_N2_to_e_N2;
-      lookup_table m_e_O2_to_e_O2;
-      lookup_table m_alpha_townsend;
+      LookupTable m_init_eed;
+      LookupTable m_e_mobility;
+      LookupTable m_e_N2_alpha;
+      LookupTable m_e_O2_alpha;
+      LookupTable m_e_O2_to_e_2O_c1;
+      LookupTable m_e_O2_to_e_2O_c2;
+      LookupTable m_e_O2_to_Ominus_O;
+      LookupTable m_e_N2_to_e_N2;
+      LookupTable m_e_O2_to_e_O2;
+      LookupTable m_alpha_townsend;
 
       void parse_transport_file();
       void parse_photoi();
@@ -259,7 +259,7 @@ namespace physics {
 
       Real init_eed(const RealVect a_pos, const Real a_time, const RealVect a_E);
 
-      void read_file_entries(lookup_table& a_table, const std::string a_string);
+      void read_file_entries(LookupTable& a_table, const std::string a_string);
       void read_electron_mobility();
       void read_init_eed();
       void read_e_N2_alpha();

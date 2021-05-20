@@ -150,7 +150,7 @@ void air9eed_bourdon::instantiate_species(){
   m_RtSpecies[m_Photon3_idx] = RefCountedPtr<RtSpecies> (new air9eed_bourdon::Photon_three());
 }
 
-void air9eed_bourdon::read_file_entries(lookup_table& a_table, const std::string a_string){
+void air9eed_bourdon::read_file_entries(LookupTable& a_table, const std::string a_string){
   Real x, y;
   bool read_line = false;
   std::ifstream infile(m_transport_file);
@@ -172,7 +172,7 @@ void air9eed_bourdon::read_file_entries(lookup_table& a_table, const std::string
       if (!(iss >> x >> y)) {
 	continue;
       }
-      a_table.add_entry(x, y);
+      a_table.addEntry(x, y);
     }
   }
   infile.close();
@@ -183,7 +183,7 @@ void air9eed_bourdon::read_e_N2_alpha(){
   // Read file entries
   read_file_entries(m_e_N2_alpha, air9eed_bourdon::s_bolsig_N2_alpha);
 
-  m_e_N2_alpha.make_uniform(m_uniform_tables);
+  m_e_N2_alpha.makeUniform(m_uniform_tables);
 }
 
 void air9eed_bourdon::read_e_O2_alpha(){
@@ -191,7 +191,7 @@ void air9eed_bourdon::read_e_O2_alpha(){
   // Read file entries
   read_file_entries(m_e_O2_alpha, air9eed_bourdon::s_bolsig_O2_alpha);
 
-  m_e_O2_alpha.make_uniform(m_uniform_tables);
+  m_e_O2_alpha.makeUniform(m_uniform_tables);
 }
 
 void air9eed_bourdon::read_electron_mobility(){
@@ -200,8 +200,8 @@ void air9eed_bourdon::read_electron_mobility(){
   read_file_entries(m_e_mobility, air9eed_bourdon::s_bolsig_mobility);
 
   // Scale with density and make a uniform table (there's no guarantee that BOLSIG output is uniform!)
-  m_e_mobility.scale_y(1./m_N); 
-  m_e_mobility.make_uniform(m_uniform_tables);
+  m_e_mobility.scaleY(1./m_N); 
+  m_e_mobility.makeUniform(m_uniform_tables);
 }
 
 void air9eed_bourdon::read_townsend(){
@@ -210,24 +210,24 @@ void air9eed_bourdon::read_townsend(){
   read_file_entries(m_alpha_townsend, air9eed_bourdon::s_bolsig_townsend);
 
   // Scale with density and make a uniform table (there's no guarantee that BOLSIG output is uniform!)
-  m_alpha_townsend.make_uniform(m_uniform_tables);
-  m_alpha_townsend.scale_y(m_N);
+  m_alpha_townsend.makeUniform(m_uniform_tables);
+  m_alpha_townsend.scaleY(m_N);
 
-  //  m_alpha_townsend.dump_table();
+  //  m_alpha_townsend.dumpTable();
 }
 
 void air9eed_bourdon::read_init_eed(){
   read_file_entries(m_init_eed, air9eed_bourdon::s_bolsig_energy_E);
 
   // Input table is in reverse order. Then make it uniform. 
-  m_init_eed.swap_xy();
-  m_init_eed.make_uniform(m_uniform_tables);
+  m_init_eed.swapXY();
+  m_init_eed.makeUniform(m_uniform_tables);
 }
 
 Real air9eed_bourdon::compute_alpha(const RealVect a_E) const{
   const Real EbyN    = a_E.vectorLength()/(m_N*units::s_Td);
-  const Real energy  = m_init_eed.get_entry(EbyN);
-  const Real alpha = m_alpha_townsend.get_entry(energy);
+  const Real energy  = m_init_eed.getEntry(EbyN);
+  const Real alpha = m_alpha_townsend.getEntry(energy);
   
   return alpha;
 }
@@ -552,7 +552,7 @@ Real air9eed_bourdon::electron_energy(const Real a_energy, const Real a_density)
 }
 
 Real air9eed_bourdon::compute_eed_mobility(const Real a_energy)    const {return (5.0/3.0)*compute_e_mobility(a_energy);}
-Real air9eed_bourdon::compute_e_mobility(const Real a_energy)      const {return m_e_mobility.get_entry(a_energy);}
+Real air9eed_bourdon::compute_e_mobility(const Real a_energy)      const {return m_e_mobility.getEntry(a_energy);}
 Real air9eed_bourdon::compute_N2plus_mobility(const Real a_EbyN)   const {return m_ion_mobility;}
 Real air9eed_bourdon::compute_N4plus_mobility(const Real a_EbyN)   const {return m_ion_mobility;}
 Real air9eed_bourdon::compute_O2plus_mobility(const Real a_EbyN)   const {return m_ion_mobility;}
@@ -571,8 +571,8 @@ Real air9eed_bourdon::compute_O2plusN2_diffco()               const {return m_io
 Real air9eed_bourdon::compute_O2minus_diffco()                const {return m_ion_diffusion;}
 Real air9eed_bourdon::compute_Ominus_diffco()                 const {return m_ion_diffusion;}
 
-Real air9eed_bourdon::compute_electron_N2_alpha(const Real a_energy)     const {return m_e_N2_alpha.get_entry(a_energy);}
-Real air9eed_bourdon::compute_electron_O2_alpha(const Real a_energy)     const {return m_e_O2_alpha.get_entry(a_energy);}
+Real air9eed_bourdon::compute_electron_N2_alpha(const Real a_energy)     const {return m_e_N2_alpha.getEntry(a_energy);}
+Real air9eed_bourdon::compute_electron_O2_alpha(const Real a_energy)     const {return m_e_O2_alpha.getEntry(a_energy);}
 Real air9eed_bourdon::compute_N2plus_N2_M_to_N4plus_M()                  const {return 5.E-41;}
 Real air9eed_bourdon::compute_N4plus_O2_to_O2_2N2()                      const {return 2.5E-16;}
 Real air9eed_bourdon::compute_N2plus_O2_to_O2plus_N2(const Real a_Tg)    const {return 1.05E-15/sqrt(a_Tg);}
@@ -736,7 +736,7 @@ Real air9eed_bourdon::compute_e_N2_scattering_loss()              const {return 
 
 Real air9eed_bourdon::init_eed(const RealVect a_pos, const Real a_time, const RealVect a_E){
   const Real EbyN = (a_E/(m_N*units::s_Td)).vectorLength();
-  return m_init_eed.get_entry(EbyN)*m_CdrSpecies[m_electron_idx]->initialData(a_pos, a_time);
+  return m_init_eed.getEntry(EbyN)*m_CdrSpecies[m_electron_idx]->initialData(a_pos, a_time);
 }
 
 Vector<Real> air9eed_bourdon::compute_cdr_fluxes(const Real         a_time,

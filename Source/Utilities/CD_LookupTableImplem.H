@@ -1,42 +1,47 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   lookup_tableI.H
-  @brief  Implementation of lookup_table.H
+  @file   CD_LookupTableImplem.H
+  @brief  Implementation of CD_LookupTable.H
   @author Robert Marskar
-  @date   Feb. 2018
 */
 
-#ifndef _LOOKUP_TABLEI_H_
-#define _LOOKUP_TABLEI_H_
+#ifndef CD_LookupTableImplem_H
+#define CD_LookupTableImplem_H
 
-#include "lookup_table.H"
-
+// Std includes
 #include <iostream>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_LookupTable.H>
+#include <CD_NamespaceHeader.H>
 
 inline
-void lookup_table::add_entry(const Real& a_x, const Real& a_y){
+void LookupTable::addEntry(const Real& a_x, const Real& a_y){
   m_x.push_back(a_x);
   m_y.push_back(a_y);
-  m_num_entries++;
+  m_numEntries++;
 
-  if(m_num_entries == 1){
+  if(m_numEntries == 1){
     m_dx    = 0.;
   }
-  else if(m_num_entries >= 2){
+  else if(m_numEntries >= 2){
     m_dx    = m_x[1] - m_x[0];
   }
 }
 
 inline
-void lookup_table::add_table(const lookup_table& a_otherTable, const Real a_scale){
+void LookupTable::addTable(const LookupTable& a_otherTable, const Real a_scale){
   for (int i = 0; i < m_x.size(); i++){
-    m_y[i] += a_scale*a_otherTable.get_entry(m_x[i]);
+    m_y[i] += a_scale*a_otherTable.getEntry(m_x[i]);
   }
 }
 
 inline
-void lookup_table::scale_x(const Real& a_scale){
+void LookupTable::scaleX(const Real& a_scale){
   for (int i = 0; i < m_x.size(); i++){
     m_x[i] *= a_scale;
   }
@@ -45,59 +50,59 @@ void lookup_table::scale_x(const Real& a_scale){
 }
 
 inline
-void lookup_table::scale_y(const Real& a_scale){
+void LookupTable::scaleY(const Real& a_scale){
   for (int i = 0; i < m_y.size(); i++){
     m_y[i] *= a_scale;
   }
 }
 
 inline
-void lookup_table::dump_table() const{
+void LookupTable::dumpTable() const{
   for (int i = 0; i < m_y.size(); i++){
     std::cout << m_x[i] << "\t" << m_y[i] << std::endl;
   }
 }
 
 inline
-void lookup_table::swap_xy(){
+void LookupTable::swapXY(){
   std::vector<Real> tmp = m_x;
   m_x = m_y;
   m_y = tmp;
 
-  if(m_num_entries == 1){
+  if(m_numEntries == 1){
     m_dx    = 0.;
   }
-  else if(m_num_entries >= 2){
+  else if(m_numEntries >= 2){
     m_dx    = m_x[1] - m_x[0];
   }
 }
 
 inline
-void lookup_table::operator+=(const lookup_table& a_table){
+void LookupTable::operator+=(const LookupTable& a_table){
   for (int i = 0; i < m_y.size(); i++){
     m_y[i] += a_table.m_y[i];
   }
 }
 
 inline
-void lookup_table::operator-=(const lookup_table& a_table){
+void LookupTable::operator-=(const LookupTable& a_table){
   for (int i = 0; i < m_y.size(); i++){
     m_y[i] -= a_table.m_y[i];
   }
 }
 
 inline
-void lookup_table::operator=(const lookup_table& a_table){
-  m_num_entries = a_table.m_num_entries;
+void LookupTable::operator=(const LookupTable& a_table){
+  m_numEntries = a_table.m_numEntries;
   m_dx = a_table.m_dx;
   m_x = a_table.m_x;
   m_y = a_table.m_y;
 }
 
 inline
-Real lookup_table::get_entry(const Real a_x) const {
+Real LookupTable::getEntry(const Real a_x) const {
   Real value;
-  if(m_num_entries == 1){
+  if(m_numEntries == 1){
     value = m_y[0];
   }
   else {
@@ -109,8 +114,8 @@ Real lookup_table::get_entry(const Real a_x) const {
     if(i < 0){
       value = m_y[0];
     }
-    else if(i >= m_num_entries - 1){
-      value = m_y[m_num_entries - 1];
+    else if(i >= m_numEntries - 1){
+      value = m_y[m_numEntries - 1];
     }
     else {
 
@@ -128,13 +133,13 @@ Real lookup_table::get_entry(const Real a_x) const {
 }
 
 inline
-Real lookup_table::direct_lookup(const Real a_x) const {
+Real LookupTable::directLookup(const Real a_x) const {
   Real value;
   if(a_x <= m_x[0]){
     value = m_y[0];
   }
-  else if(a_x >= m_x[m_num_entries - 1]){
-    value = m_y[m_num_entries - 1];
+  else if(a_x >= m_x[m_numEntries - 1]){
+    value = m_y[m_numEntries - 1];
   }
   else{
     for (int i = 0; i <= m_x.size()-2; i++){
@@ -156,13 +161,13 @@ Real lookup_table::direct_lookup(const Real a_x) const {
 }
 
 inline
-void lookup_table::make_uniform(const int a_num_entries){
+void LookupTable::makeUniform(const int a_num_entries){
 
   std::vector<Real> new_x(a_num_entries, 0.0);
   std::vector<Real> new_y(a_num_entries, 0.0);
 
   const Real xmin = m_x[0];
-  const Real xmax = m_x[m_num_entries-1];
+  const Real xmax = m_x[m_numEntries-1];
   const Real dx   = (xmax - xmin)/(a_num_entries - 1);
 
   // Build x
@@ -172,7 +177,7 @@ void lookup_table::make_uniform(const int a_num_entries){
 
   // Build y
   for (int i = 0; i < new_y.size(); i++){
-    new_y[i] = direct_lookup(new_x[i]);
+    new_y[i] = directLookup(new_x[i]);
   }
 
 
@@ -180,8 +185,9 @@ void lookup_table::make_uniform(const int a_num_entries){
   m_dx = dx;
   m_x  = new_x;
   m_y  = new_y;
-  m_num_entries = a_num_entries;
+  m_numEntries = a_num_entries;
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

@@ -9,7 +9,7 @@
 #define _ITO_PLASMA_AIR3_LEA_
 
 #include "ito_plasma_physics_lea.H"
-#include "lookup_table.H"
+#include "CD_LookupTable.H"
 
 #include "CD_NamespaceHeader.H"
 namespace physics {
@@ -75,15 +75,15 @@ namespace physics {
     class ito_plasma_air3_lea::electron : public ito_species {
     public:
       electron() = default;
-      electron(const lookup_table& a_mobility, const lookup_table& a_diffusion);
+      electron(const LookupTable& a_mobility, const LookupTable& a_diffusion);
       ~electron();
 
       Real mobility(const Real a_energy) const override;
       Real diffusion(const Real a_energy) const override;
 
     protected:
-      lookup_table m_mobility;
-      lookup_table m_diffusion;
+      LookupTable m_mobility;
+      LookupTable m_diffusion;
     };
 
     class ito_plasma_air3_lea::positive : public ito_species {

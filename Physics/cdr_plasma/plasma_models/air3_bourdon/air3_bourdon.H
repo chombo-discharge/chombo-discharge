@@ -2,7 +2,7 @@
 #define _AIR3_BOURDON_
 
 #include "cdr_plasma_physics.H"
-#include "lookup_table.H"
+#include "CD_LookupTable.H"
 
 #include <random>
 
@@ -93,10 +93,10 @@ namespace physics {
       std::string m_transport_file;
 
       // Tables built from BOLSIG+
-      lookup_table m_e_mobility;
-      lookup_table m_e_diffco;
-      lookup_table m_e_alpha;
-      lookup_table m_e_eta;
+      LookupTable m_e_mobility;
+      LookupTable m_e_diffco;
+      LookupTable m_e_alpha;
+      LookupTable m_e_eta;
 
       Vector<int> m_wallBc; // Wall boundary conditions
 
@@ -136,7 +136,7 @@ namespace physics {
       Real m_photoi_eff;    // Photoionizationn efficiency
 
 
-      void read_file_entries(lookup_table& a_table, const std::string a_string);
+      void read_file_entries(LookupTable& a_table, const std::string a_string);
       void parseDomainBc();
       void instantiate_species();
 

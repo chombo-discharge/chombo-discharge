@@ -129,23 +129,23 @@ ito_plasma_air3_lea::~ito_plasma_air3_lea(){
 
 void ito_plasma_air3_lea::read_tables(){
 
-  this->add_table("mobility",  "mobility.dat");
-  this->add_table("diffco",    "diffusion.dat");
-  this->add_table("alpha",     "alpha.dat");
-  this->add_table("eta",       "eta.dat");
-  this->add_table("alpha_lfa", "alpha_lfa.dat");
-  this->add_table("collision", "collision_rate.dat");
+  this->addTable("mobility",  "mobility.dat");
+  this->addTable("diffco",    "diffusion.dat");
+  this->addTable("alpha",     "alpha.dat");
+  this->addTable("eta",       "eta.dat");
+  this->addTable("alpha_lfa", "alpha_lfa.dat");
+  this->addTable("collision", "collision_rate.dat");
 
   // Need to scale energy tables. First column is in eV
-  m_tables["mobility"].scale_y(1./m_N);
-  m_tables["diffco"].scale_y(1./m_N);
-  m_tables["alpha"].scale_y(m_N);
-  m_tables["eta"].scale_y(m_N);
-  m_tables["collision"].scale_y(m_N);
+  m_tables["mobility"].scaleY(1./m_N);
+  m_tables["diffco"].scaleY(1./m_N);
+  m_tables["alpha"].scaleY(m_N);
+  m_tables["eta"].scaleY(m_N);
+  m_tables["collision"].scaleY(m_N);
 
   // LFA table for Townsed coefficient
-  m_tables["alpha_lfa"].scale_x(m_N*units::s_Td);
-  m_tables["alpha_lfa"].scale_y(m_N);
+  m_tables["alpha_lfa"].scaleX(m_N*units::s_Td);
+  m_tables["alpha_lfa"].scaleY(m_N);
 }
 
 Real ito_plasma_air3_lea::computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_cdr_densities) const {
@@ -155,7 +155,7 @@ Real ito_plasma_air3_lea::computeDt(const RealVect a_E, const RealVect a_pos, co
 Real ito_plasma_air3_lea::compute_alpha(const RealVect a_E) const {
   const Real E = a_E.vectorLength();
 
-  return m_tables.at("alpha_lfa").get_entry(E);
+  return m_tables.at("alpha_lfa").getEntry(E);
 }
 
 void ito_plasma_air3_lea::update_reaction_rates_lea(const RealVect a_E, const Vector<Real> a_mean_energies, const Real a_dx, const Real a_kappa) const {
@@ -167,10 +167,10 @@ void ito_plasma_air3_lea::update_reaction_rates_lea(const RealVect a_E, const Ve
   // Compute the reaction rates.
   const Real dV      = pow(a_dx, SpaceDim);//*a_kappa;
   const Real E       = a_E.vectorLength();
-  const Real alpha   = m_tables.at("alpha").get_entry(electron_energy);
-  const Real eta     = m_tables.at("eta").get_entry(electron_energy);
-  const Real mu      = m_tables.at("mobility").get_entry(electron_energy);
-  const Real scat    = m_tables.at("collision").get_entry(electron_energy);
+  const Real alpha   = m_tables.at("alpha").getEntry(electron_energy);
+  const Real eta     = m_tables.at("eta").getEntry(electron_energy);
+  const Real mu      = m_tables.at("mobility").getEntry(electron_energy);
+  const Real scat    = m_tables.at("collision").getEntry(electron_energy);
   const Real velo    = mu*a_E.vectorLength();
   const Real Te      = 2.0*a_mean_energies[m_electron_idx]/(3.0*units::s_kb);
   const Real xfactor = (m_pq/(m_p + m_pq))*excitation_rates(E)*sergey_factor(m_O2frac)*m_photoi_factor;
@@ -204,7 +204,7 @@ Real ito_plasma_air3_lea::photo_rate(const Real a_E) const {
   return excitation_rates(a_E)*sergey_factor(m_O2frac)*m_photoi_factor;
 }
 
-ito_plasma_air3_lea::electron::electron(const lookup_table& a_mobility, const lookup_table& a_diffusion) : m_mobility(a_mobility),
+ito_plasma_air3_lea::electron::electron(const LookupTable& a_mobility, const LookupTable& a_diffusion) : m_mobility(a_mobility),
 													   m_diffusion(a_diffusion) {
   m_isMobile    = true;
   m_isDiffusive = true;
@@ -218,12 +218,12 @@ ito_plasma_air3_lea::electron::~electron(){
 
 Real ito_plasma_air3_lea::electron::mobility(const Real a_energy) const {
   const Real energy = Max(a_energy, 30.0);
-  return m_mobility.get_entry(energy);
+  return m_mobility.getEntry(energy);
 }
 
 Real ito_plasma_air3_lea::electron::diffusion(const Real a_energy) const {
   const Real energy = Max(a_energy, 30.0);
-  return m_diffusion.get_entry(energy);
+  return m_diffusion.getEntry(energy);
 }
 
 ito_plasma_air3_lea::positive::positive(){
