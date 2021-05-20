@@ -419,7 +419,7 @@ void MfHelmholtzOpFactory::defineJump(){
   m_jump.resize(m_num_levels);
   m_jumpcells.resize(m_num_levels);
 
-  const int ghost      = 1; // Using one ghost cell for this
+  const int ghost      = 0; // Using one ghost cell for this
   const int ncomp      = 1; // Only single-component stuff
   const int main_phase = 0; // Interface region is the intersection between gas-side irregular cells and solid phase cells
     
@@ -433,9 +433,8 @@ void MfHelmholtzOpFactory::defineJump(){
       box.grow(ghost);
       box &= m_domains[lvl];
       
-      (*m_jumpcells[lvl])[dit()] = m_mflg[lvl].interfaceRegion(box, dit());
-
-      
+      //      (*m_jumpcells[lvl])[dit()] = m_mflg[lvl].interfaceRegion(box, dit());
+      (*m_jumpcells[lvl])[dit()] = ebisl[dit()].getIrregIVS(box);
     }
 
     BaseIVFactory<Real> fact(ebisl, *m_jumpcells[lvl]);
@@ -463,7 +462,7 @@ void MfHelmholtzOpFactory::defineJump(){
 void MfHelmholtzOpFactory::averageDownAmr(){
   CH_TIME("MfHelmholtzOpFactory::averageDownAmr");
     
-  const int ncomp        = 0;
+  const int ncomp        = 1;
   const Interval interv  = Interval(0, ncomp -1);
   const int finest_level = m_num_levels - 1;
 
