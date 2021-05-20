@@ -28,7 +28,7 @@ src_dirs = $(DISCHARGE_HOME)/Source \
 	$(DISCHARGE_HOME)/Source/RadiativeTransfer \
 	$(DISCHARGE_HOME)/Source/ito_solver \
 	$(DISCHARGE_HOME)/Source/SigmaSolver \
-	$(DISCHARGE_HOME)/Source/global \
+	$(DISCHARGE_HOME)/Source/Utilities \
 	$(DISCHARGE_HOME)/Source/Particle \
 	$(DISCHARGE_HOME)/Geometries/rod_sphere\
 	$(DISCHARGE_HOME)/Physics/brownian_walker \

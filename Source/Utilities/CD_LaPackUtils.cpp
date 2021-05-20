@@ -1,17 +1,22 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
   @file   CD_LaPackUtils.cpp
   @brief  Implementation of CD_LaPackUtils.H
   @author Robert Marskar
-  @date   Feb. 2017
 */
 
-#include "CD_LaPackUtils.H"
+// Std includes
 #include <limits>
 #include <algorithm>
+#include <iostream>
 
-#include "CH_Timer.H"
-
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_LaPackUtils.H>
+#include <CD_NamespaceHeader.H>
 
 int LaPackUtils::linearIndex(const int irow, const int jcol, const int M, const int N){
   return irow + jcol*M;
@@ -309,4 +314,4 @@ void LaPackUtils::deLinearizeMatrix(std::vector<std::vector<double> >& a_A,
   }
 }
 
-#include "CD_NamespaceFooter.H"
+#include <CD_NamespaceFooter.H>

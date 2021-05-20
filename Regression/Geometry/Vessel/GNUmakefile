@@ -23,7 +23,7 @@ src_dirs = $(DISCHARGE_HOME)/Source \
 	$(DISCHARGE_HOME)/Source/Geometry \
 	$(DISCHARGE_HOME)/Source/ImplicitFunctions \
 	$(DISCHARGE_HOME)/Source/Multifluid \
-	$(DISCHARGE_HOME)/Source/global \
+	$(DISCHARGE_HOME)/Source/Utilities \
 	$(DISCHARGE_HOME)/Source/Particle \
 	$(DISCHARGE_HOME)/Physics/Geometry \
 	$(DISCHARGE_HOME)/Geometries/vessel\

@@ -1,15 +1,23 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
   @file   CD_LaPackUtils.H
-  @brief  Interface to some LaPack routines that permit us to compute the Moore-Penrose pseudoinverse. 
+  @brief  Interface to some LaPack routines. 
   @note   The routines in this file are double precision only. 
   @author Robert Marskar
-  @date   Feb. 2017
 */
 
 #ifndef _CD_LaPackUtils_H_
 #define _CD_LaPackUtils_H_
 
+// Std includes
 #include <vector>
+
+// Our includes
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief This is an interface to LAPACK for solving least squares problems using singular-value decomposition
@@ -76,7 +84,7 @@ extern "C" void dgesv_(int*    N,
 		       int*    INFO);
 
 
-#include "CD_NamespaceHeader.H"
+
 namespace LaPackUtils {
 
   /*!
@@ -188,5 +196,7 @@ namespace LaPackUtils {
 				 const int&                         a_N,
 				 const std::vector<double>&         a_linA);
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif

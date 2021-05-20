@@ -41,7 +41,7 @@ def write_template(args):
     makef.write('\t$(DISCHARGE_HOME)/Source/Geometry \\\n')
     makef.write('\t$(DISCHARGE_HOME)/Source/ImplicitFunctions \\\n')
     makef.write('\t$(DISCHARGE_HOME)/Source/Multifluid \\\n')
-    makef.write('\t$(DISCHARGE_HOME)/Source/global \\\n')
+    makef.write('\t$(DISCHARGE_HOME)/Source/Utilities \\\n')
     makef.write('\t$(DISCHARGE_HOME)/Source/Driver \\\n')
     makef.write('\t$(DISCHARGE_HOME)/Source/Particle \\\n')
     makef.write('\t$(DISCHARGE_HOME)/Source/ito_solver \\\n')
