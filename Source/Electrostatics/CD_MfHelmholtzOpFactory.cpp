@@ -293,10 +293,10 @@ void MfHelmholtzOpFactory::defineDeeperMultigrid(){
 	  MFCellFactory      cellfact(ebisl_coar, comps);
 	  MFFluxFactory      fluxfact(ebisl_coar, comps);
 	  MFBaseIVFABFactory ivfact  (ebisl_coar, comps);
-	  BaseIVFactory<Real> fact   (eblg_coar.getEBISL(), isect_cells);
+	  BaseIVFactory<Real> fact   (eblg_coar.getEBISL());//, isect_cells);
 
 	  RefCountedPtr<LevelData<BaseIVFAB<Real> > > jump_coar = RefCountedPtr<LevelData<BaseIVFAB<Real> > >
-	    (new LevelData<BaseIVFAB<Real> > (grid_coar_mg, ncomps, ghost*IntVect::Unit, fact)); 
+	    (new LevelData<BaseIVFAB<Real> > (grid_coar_mg, ncomps, 0*IntVect::Unit, fact)); 
 	  RefCountedPtr<LevelData<MFCellFAB> > aco_coar = RefCountedPtr<LevelData<MFCellFAB> >
 	    (new LevelData<MFCellFAB>(grid_coar_mg, ncomps, ghost*IntVect::Unit, cellfact));
 	  RefCountedPtr<LevelData<MFFluxFAB> > bco_coar = RefCountedPtr<LevelData<MFFluxFAB> >
@@ -477,7 +477,7 @@ void MfHelmholtzOpFactory::averageDownAmr(){
 void MfHelmholtzOpFactory::averageDownMG(){
   CH_TIME("MfHelmholtzOpFactory::averageDownMG");
 
-  const int ncomp        = 0;
+  const int ncomp        = 1;
   const Interval interv  = Interval(0, ncomp -1);
 
   for (int lvl = 0; lvl < m_num_levels; lvl++){ // Average down the MG stuff
@@ -500,6 +500,8 @@ void MfHelmholtzOpFactory::averageDownMG(){
 	if(m_aveop_mg[lvl][img].isNull()){
 	  MayDay::Abort("MfHelmholtzOpFactory::averageDownMG - aveop is NULL");
 	}
+	if(jump_mg[img].isNull()) MayDay::Abort("MfHelmholtzOpFactory::averageDownMG -- jump1 is NULL");
+	if(jump_mg[img-1].isNull()) MayDay::Abort("MfHelmholtzOpFactory::averageDownMG -- jump2 is NULL");
 #endif
 	m_aveop_mg[lvl][img]->average(*jump_mg[img], *jump_mg[img-1], interv); // Average down onto level img
 #if verb
