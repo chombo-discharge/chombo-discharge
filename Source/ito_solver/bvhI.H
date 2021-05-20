@@ -88,12 +88,12 @@ inline std::shared_ptr<bvh_node<T> >& bvh_node<T>::get_parent(){
 
 
 template <class T>
-inline std::vector<T>& bvh_node<T>::get_data(){
+inline std::vector<T>& bvh_node<T>::getData(){
   return m_data;
 }
 
 template <class T>
-inline const std::vector<T>& bvh_node<T>::get_data() const{
+inline const std::vector<T>& bvh_node<T>::getData() const{
   return m_data;
 }
 
@@ -164,8 +164,8 @@ inline void bvh_node<T>::split(const int a_dir){
   if(!m_left)  m_left  = std::make_shared<bvh_node<T> >();
   if(!m_right) m_right = std::make_shared<bvh_node<T> >();
 
-  std::vector<T>& leftData  = m_left->get_data();
-  std::vector<T>& rightData = m_right->get_data();
+  std::vector<T>& leftData  = m_left->getData();
+  std::vector<T>& rightData = m_right->getData();
 
   leftData.assign(m_data.begin(), m_data.begin() + splitIndex);
   rightData.assign(m_data.begin() + splitIndex + 1, m_data.end());
@@ -314,7 +314,7 @@ template <class T>
 inline void bvh_tree<T>::build_tree(const int a_firstDir, const int a_numLeaves){
   
 #if BVH_DEBUG
-  for (const auto& d : m_root->get_data()){
+  for (const auto& d : m_root->getData()){
     if(d.mass() < 1.0) MayDay::Abort("bvh_node<T>::build_tree - how did mass become <= 0??");
   }
 #endif

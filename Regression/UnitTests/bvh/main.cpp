@@ -76,7 +76,7 @@ int main(int argc, char* argv[]){
   std::vector<PointMass> outputParticles(0);
   const std::vector<std::shared_ptr<bvh_node<PointMass> > >& leaves = tree.get_leaves();
   for (int i = 0; i < leaves.size(); i++){
-    const PointMass newParticle(leaves[i]->get_data());
+    const PointMass newParticle(leaves[i]->getData());
 
     outputParticles.push_back(newParticle);
   }

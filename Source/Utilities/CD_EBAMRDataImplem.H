@@ -1,16 +1,20 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   EBAMRDataI.H
+  @file   CD_EBAMRDataImplem.H
   @brief  Implementation of EBAMRData.H
   @author Robert Marskar
-  @data   Aug. 2020
 */
 
-#ifndef _EBAMRDATAI_H_
-#define _EBAMRDATAI_H_
+#ifndef CD_EBAMRDataImplem_H
+#define CD_EBAMRDataImplem_H
 
-#include "EBAMRData.H"
-
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_EBAMRData.H>
+#include <CD_NamespaceHeader.H>
 
 template <typename T>
 EBAMRData<T>::EBAMRData(){
@@ -51,12 +55,12 @@ const int EBAMRData<T>::size() const {
 }
 
 template <typename T>
-Vector<RefCountedPtr<LevelData<T> > >& EBAMRData<T>::get_data(){
+Vector<RefCountedPtr<LevelData<T> > >& EBAMRData<T>::getData(){
   return m_data;
 }
 
 template <typename T>
-const Vector<RefCountedPtr<LevelData<T> > >& EBAMRData<T>::get_data() const {
+const Vector<RefCountedPtr<LevelData<T> > >& EBAMRData<T>::getData() const {
   return m_data;
 }
 
@@ -133,7 +137,8 @@ typedef EBAMRData<BaseIVFAB<Real> > EBAMRIVData;    // Data on irregular data ce
 typedef EBAMRData<DomainFluxIFFAB>  EBAMRIFData;    // Data on domain phases
 typedef EBAMRData<BaseFab<bool> >   EBAMRBool;      // For holding bool at every cell
 typedef EBAMRData<FArrayBox>        EBAMRFAB;       // Just regular grid data.
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif
 

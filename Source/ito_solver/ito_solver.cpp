@@ -2910,7 +2910,7 @@ void ito_solver::bvh_merge(List<ito_particle>& a_particles, const int a_particle
   // 3. Clear particles in this cell and add new ones.
   a_particles.clear();
   for (int i = 0; i < leaves.size(); i++){
-    PointMass pointMass(leaves[i]->get_data());
+    PointMass pointMass(leaves[i]->getData());
     ito_particle p(pointMass.mass(), pointMass.pos(), RealVect::Zero, 0.0, 0.0, pointMass.energy());
     a_particles.add(p);
 

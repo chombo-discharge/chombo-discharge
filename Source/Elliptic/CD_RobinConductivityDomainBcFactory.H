@@ -16,7 +16,7 @@
 #include <BaseDomainBC.H>
 
 // Our includes
-#include <EBAMRData.H>
+#include <CD_EBAMRData.H>
 #include <CD_RobinCoefficients.H>
 #include <CD_RobinConductivityDomainBc.H>
 #include <CD_NamespaceHeader.H>

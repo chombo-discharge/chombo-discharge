@@ -13,7 +13,7 @@
 #define CD_DataOps_H
 
 // Our includes
-#include <EBAMRData.H>
+#include <CD_EBAMRData.H>
 #include <MFInterfaceFAB.H>
 #include <CD_NamespaceHeader.H>
 

@@ -1,13 +1,18 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   EBAMRData.H
+  @file   CD_EBAMRData.H
   @brief  Class for holding data across EBAMR hierarchies
   @author Robert Marskar
-  @data   Aug. 2020
 */
 
-#ifndef _EBAMRDATA_H_
-#define _EBAMRDATA_H_
+#ifndef CD_EBAMRData_H
+#define CD_EBAMRData_H
 
+// Chombo includes
 #include <LevelData.H>
 #include <RefCountedPtr.H>
 #include <EBCellFAB.H>
@@ -19,16 +24,16 @@
 #include <MFFluxFAB.H>
 #include <BinItem.H>
 
+// Our includes
 #include <CD_DomainFluxIFFAB.H>
-#include "MFBaseIVFAB.H"
-
-#include "CD_NamespaceHeader.H"
+#include <MFBaseIVFAB.H>
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Default class for holding LevelData<T> data across an EBAMR Realm
   @details This class is a base class for holding LevelData<T> over a Realm. The class does not have arithmetic operators or 
   assignment operators because LevelData<T> does not have them. Manipulating the data is done directly by fetching the data 
-  on a level through the indexing operator [], or by fetching all the data through get_data. 
+  on a level through the indexing operator [], or by fetching all the data through getData. 
 */ 
 template <typename T>
 class EBAMRData {
@@ -82,12 +87,12 @@ public:
   /*!
     @brief Get underlying data. Returns m_data. 
   */
-  Vector<RefCountedPtr<LevelData<T> > >& get_data();
+  Vector<RefCountedPtr<LevelData<T> > >& getData();
 
   /*!
     @brief Get underlying data. Returns const m_data.
   */
-  const Vector<RefCountedPtr<LevelData<T> > >& get_data() const;
+  const Vector<RefCountedPtr<LevelData<T> > >& getData() const;
 
   /*!
     @brief General copying of another object. This does a local copy if the two Realms are the same. Otherwise it does
@@ -123,8 +128,9 @@ protected:
   */
   Vector<RefCountedPtr<LevelData<T> > > m_data;
 };
-#include "CD_NamespaceFooter.H"
 
-#include <EBAMRDataI.H>
+#include <CD_NamespaceFooter.H>
+
+#include <CD_EBAMRDataImplem.H>
 
 #endif

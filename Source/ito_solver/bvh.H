@@ -36,8 +36,8 @@ public:
   inline void sort(const int a_dir);
   inline void split(const int a_dir);
 
-  inline std::vector<T>& get_data();
-  inline const std::vector<T>& get_data() const;
+  inline std::vector<T>& getData();
+  inline const std::vector<T>& getData() const;
 
   inline Real mass() const;
 

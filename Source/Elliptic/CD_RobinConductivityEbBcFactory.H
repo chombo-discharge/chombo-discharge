@@ -16,7 +16,7 @@
 #include <BaseEBBC.H>
 
 // Our includes
-#include <EBAMRData.H>
+#include <CD_EBAMRData.H>
 #include <CD_RobinCoefficients.H>
 #include <CD_IrregStencil.H>
 #include <CD_RobinConductivityEbBc.H>

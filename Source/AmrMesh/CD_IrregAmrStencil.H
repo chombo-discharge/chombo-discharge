@@ -13,7 +13,7 @@
 #define CD_IrregAmrStencil_H
 
 // Our includes
-#include <EBAMRData.H>
+#include <CD_EBAMRData.H>
 #include <CD_IrregStencil.H>
 #include <CD_NamespaceHeader.H>
 

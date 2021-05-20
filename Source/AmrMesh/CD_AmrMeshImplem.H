@@ -43,7 +43,7 @@ void AmrMesh::deallocate(Vector<RefCountedPtr<T> >& a_data){
 
 template<typename T>
 void AmrMesh::deallocate(EBAMRData<T>& a_data){
-  return this->deallocate(a_data.get_data());
+  return this->deallocate(a_data.getData());
 }
 
 template<typename T>
@@ -62,7 +62,7 @@ void AmrMesh::alias(Vector<T*>& a_alias, const Vector<RefCountedPtr<T> >& a_data
 
 template<typename T, typename S>
 void AmrMesh::alias(Vector<T*>& a_alias, const EBAMRData<S>& a_data){
-  return this->alias(a_alias, a_data.get_data());
+  return this->alias(a_alias, a_data.getData());
 }
 
 template <typename T>
@@ -152,12 +152,12 @@ void AmrMesh::allocatePointer(Vector<RefCountedPtr<T> >& a_data, const int a_fin
 
 template <typename T>
 void AmrMesh::allocatePointer(EBAMRData<T>& a_data){
-  return this->allocatePointer(a_data.get_data());
+  return this->allocatePointer(a_data.getData());
 }
 
 template <typename T>
 void AmrMesh::allocatePointer(EBAMRData<T>& a_data, const int a_finestLevel){
-  return this->allocatePointer(a_data.get_data(), a_finestLevel);
+  return this->allocatePointer(a_data.getData(), a_finestLevel);
 }
 
 #include <CD_NamespaceFooter.H>

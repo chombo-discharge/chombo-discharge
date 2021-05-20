@@ -28,7 +28,7 @@
 #include <ProblemDomain.H>
 
 // Our includes
-#include <EBAMRData.H>
+#include <CD_EBAMRData.H>
 #include <CD_ComputationalGeometry.H>
 #include <CD_MultiFluidIndexSpace.H>
 #include <CD_IrregAmrStencil.H>
