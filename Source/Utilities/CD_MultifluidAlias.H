@@ -17,7 +17,7 @@
 #include <MFCellFAB.H>
 
 // Our includes
-#include "MFBaseIVFAB.H"
+#include <MFBaseIVFAB.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -29,26 +29,17 @@ public:
   /*!
     @brief Alias MFCellFABs
   */
-  static void aliasMF(LevelData<EBCellFAB>& a_alias, int a_phase, const LevelData<MFCellFAB>& a_input){
-    MfCellAliasFactory factory((LevelData<MFCellFAB>*)& a_input, a_phase);
-    a_alias.define(a_input.disjointBoxLayout(), a_input.nComp(), a_input.ghostVect(), factory);
-  }
+  static void aliasMF(LevelData<EBCellFAB>& a_alias, const int a_phase, const LevelData<MFCellFAB>& a_input);
 
   /*!
     @brief Alias MFFluxFABs
   */
-  static void aliasMF(LevelData<EBFluxFAB>& a_alias, int a_phase, const LevelData<MFFluxFAB>& a_input){
-    MfFluxAliasFactory factory((LevelData<MFFluxFAB>*)& a_input, a_phase);
-    a_alias.define(a_input.disjointBoxLayout(), a_input.nComp(), a_input.ghostVect(), factory);
-  }
+  static void aliasMF(LevelData<EBFluxFAB>& a_alias, const int a_phase, const LevelData<MFFluxFAB>& a_input);
 
   /*!
     @brief Alias MFBaseIVFABs
   */
-  static void aliasMF(LevelData<BaseIVFAB<Real> >& a_alias, int a_phase, const LevelData<MFBaseIVFAB>& a_input){
-    MfIVAliasFactory factory((LevelData<MFBaseIVFAB>*)& a_input, a_phase);
-    a_alias.define(a_input.disjointBoxLayout(), a_input.nComp(), a_input.ghostVect(), factory);
-  }
+  static void aliasMF(LevelData<BaseIVFAB<Real> >& a_alias, const int a_phase, const LevelData<MFBaseIVFAB>& a_input);
 
 private:
   
@@ -59,26 +50,24 @@ private:
   public:
 
     /*!
+      @brief Don't see what a weak constructor would do here.
+    */
+    MfCellAliasFactory() = delete;
+
+    /*!
       @brief Constructor
     */
-    MfCellAliasFactory(LevelData<MFCellFAB>* a_mf, int a_phase){
-      m_mf    = a_mf;
-      m_phase = a_phase;
-    }
+    MfCellAliasFactory(LevelData<MFCellFAB>* a_mf, const int a_phase);
 
     /*!
       @brief Factory method
     */
-    virtual EBCellFAB* create(const Box& box, int ncomps, const DataIndex& a_datInd) const{
-      return (*m_mf)[a_datInd].getPhasePtr(m_phase);
-    }
+    virtual EBCellFAB* create(const Box& box, int ncomps, const DataIndex& a_datInd) const override;
 
     /*!
       @brief Return false (data is not our responsibility)
     */
-    virtual bool callDelete() const {
-      return false;
-    }
+    virtual bool callDelete() const override;
 
   private:
 
@@ -100,26 +89,24 @@ private:
   public:
 
     /*!
+      @brief Don't see what a weak constructor would do here.
+    */
+    MfFluxAliasFactory() = delete;
+
+    /*!
       @brief Constructor
     */
-    MfFluxAliasFactory(LevelData<MFFluxFAB>* a_mf, int a_phase){
-      m_mf    = a_mf;
-      m_phase = a_phase;
-    }
+    MfFluxAliasFactory(LevelData<MFFluxFAB>* a_mf, const int a_phase);
 
     /*!
       @brief Factory method
     */
-    virtual EBFluxFAB* create(const Box& box, int ncomps, const DataIndex& a_datInd) const{
-      return (*m_mf)[a_datInd].getPhasePtr(m_phase);
-    }
+    virtual EBFluxFAB* create(const Box& box, int ncomps, const DataIndex& a_datInd) const override;
 
     /*!
       @brief Return false (data is not our responsibility)
     */
-    virtual bool callDelete() const {
-      return false;
-    }
+    virtual bool callDelete() const override;
 
   private:
 
@@ -141,26 +128,24 @@ private:
   public:
 
     /*!
+      @brief Don't see what a weak constructor would do here.
+    */
+    MfIVAliasFactory() = delete;
+
+    /*!
       @brief Constructor
     */
-    MfIVAliasFactory(LevelData<MFBaseIVFAB>* a_mf, int a_phase){
-      m_mf    = a_mf;
-      m_phase = a_phase;
-    }
+    MfIVAliasFactory(LevelData<MFBaseIVFAB>* a_mf, const int a_phase);
 
     /*!
       @brief Factory method
     */
-    virtual BaseIVFAB<Real>* create(const Box& box, int ncomps, const DataIndex& a_datInd) const{
-      return (*m_mf)[a_datInd].getPhase_ptr(m_phase);
-    }
+    virtual BaseIVFAB<Real>* create(const Box& box, int ncomps, const DataIndex& a_datInd) const override;
 
     /*!
       @brief Return false (data is not our responsibility)
     */
-    virtual bool callDelete() const {
-      return false;
-    }
+    virtual bool callDelete() const override;
 
   private:
 
@@ -178,4 +163,4 @@ private:
 
 #include <CD_NamespaceFooter.H>
 
-#endif
+#endif 
