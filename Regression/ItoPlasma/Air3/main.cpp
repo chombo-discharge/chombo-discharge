@@ -59,7 +59,7 @@ int main(int argc, char* argv[]){
   // Instantiate solvers
   auto poi = poi_fact->newSolver();
   auto cdr = ito_fact->newLayout(physics->get_ItoSpecies());
-  auto rte = rte_fact->newLayout(physics->get_RtSpecies());
+  auto rte = rte_fact->newLayout(physics->getRtSpecies());
 
   // Send solvers to TimeStepper 
   timestepper->set_poisson(poi);

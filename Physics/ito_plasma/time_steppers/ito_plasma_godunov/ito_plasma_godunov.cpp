@@ -281,7 +281,7 @@ void ito_plasma_godunov::allocateInternals(){
   }
 
   const int num_ItoSpecies = m_physics->get_num_ItoSpecies();
-  const int num_RtSpecies = m_physics->get_num_RtSpecies();
+  const int num_RtSpecies = m_physics->getNumRtSpecies();
 
   m_amr->allocate(m_fluid_scratch1,    m_fluid_Realm,    m_phase, 1);
   m_amr->allocate(m_fluid_scratchD,    m_fluid_Realm,    m_phase, SpaceDim);
@@ -390,7 +390,7 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   // Chemistry kernel.
   MPI_Barrier(Chombo_MPI::comm);
   reaction_time = -MPI_Wtime();
-  this->advance_reaction_network(a_dt);
+  this->advanceReactionNetwork(a_dt);
   reaction_time += MPI_Wtime();
 
   // Make superparticles. 

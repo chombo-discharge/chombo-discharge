@@ -50,7 +50,7 @@ const Vector<RefCountedPtr<ItoSpecies> >& ito_plasma_physics::get_ItoSpecies() c
   return m_ItoSpecies; 
 }
 
-const Vector<RefCountedPtr<RtSpecies> >& ito_plasma_physics::get_RtSpecies() const {
+const Vector<RefCountedPtr<RtSpecies> >& ito_plasma_physics::getRtSpecies() const {
   return m_RtSpecies;
 }
 
@@ -58,7 +58,7 @@ int ito_plasma_physics::get_num_ItoSpecies() const{
   return m_ItoSpecies.size();
 }
 
-int ito_plasma_physics::get_num_RtSpecies() const {
+int ito_plasma_physics::getNumRtSpecies() const {
   return m_RtSpecies.size();
 }
 
@@ -66,7 +66,7 @@ ito_plasma_physics::coupling ito_plasma_physics::get_coupling() const {
   return m_coupling;
 }
 
-Real ito_plasma_physics::initial_sigma(const Real a_time, const RealVect a_pos) const {
+Real ito_plasma_physics::initialSigma(const Real a_time, const RealVect a_pos) const {
   return 0.0;
 }
 

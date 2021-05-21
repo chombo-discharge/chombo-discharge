@@ -37,12 +37,12 @@ namespace physics {
       /*!
 	@brief Compute Townsend ionization length
       */
-      virtual Real compute_alpha(const RealVect a_E) const = 0;
+      virtual Real computeAlpha(const RealVect a_E) const = 0;
 
       /*!
 	@brief Set initial surface charge. Default is 0, override if you want.
       */
-      virtual Real initial_sigma(const Real a_time, const RealVect a_pos) const {return 0.0;}
+      virtual Real initialSigma(const Real a_time, const RealVect a_pos) const {return 0.0;}
 
       /*!
 	@brief This must be overridden.

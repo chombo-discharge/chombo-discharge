@@ -726,7 +726,7 @@ Real ito_plasma_physics::get_particle_mean_energy(const Real& a_energy, const lo
 }
 
 inline
-void ito_plasma_physics::advance_reaction_network(Vector<List<ItoParticle>* >& a_particles,
+void ito_plasma_physics::advanceReactionNetwork(Vector<List<ItoParticle>* >& a_particles,
 						  Vector<List<Photon>* >&       a_Photons,
 						  Vector<List<Photon>* >&       a_newPhotons,
 						  const Vector<Real>&           a_sources, 
@@ -747,7 +747,7 @@ void ito_plasma_physics::advance_reaction_network(Vector<List<ItoParticle>* >& a
 
 
   // Get particle counts. 
-  Vector<long long> newPhotonCount   = Vector<long long>(m_num_RtSpecies, 0);
+  Vector<long long> newPhotonCount   = Vector<long long>(m_numRtSpecies, 0);
   Vector<long long> oldParticleCount = this->get_particle_count(a_particles);
   Vector<long long> newParticleCount = oldParticleCount;
 
@@ -773,10 +773,10 @@ void ito_plasma_physics::advance_reaction_network(Vector<List<ItoParticle>* >& a
 #if ITO_PLASMA_PHYSICS_DEBUG
   for (int i = 0; i < a_sources.size(); i++){
     if(a_sources[i] != a_sources[i]){
-      MayDay::Abort("ito_plasma_physics::advance_reaction_network - got nan source!"); 
+      MayDay::Abort("ito_plasma_physics::advanceReactionNetwork - got nan source!"); 
     }
     if(mean_energies[i] != mean_energies[i]){
-      MayDay::Abort("ito_plasma_physics::advance_reaction_network - got nan energy!"); 
+      MayDay::Abort("ito_plasma_physics::advanceReactionNetwork - got nan energy!"); 
     }
   }
 #endif
@@ -821,7 +821,7 @@ void ito_plasma_physics::advance_reaction_network(Vector<List<ItoParticle>* >& a
   if(Qbefore - Qafter != zero){
     std::cout << "Qbefore = " << Qbefore << std::endl;
     std::cout << "Qafter  = " << Qafter << std::endl;
-    MayDay::Abort("ito_plasma_physics::advance_reaction_network_lfa(...) - charge is not conserved!!!");
+    MayDay::Abort("ito_plasma_physics::advanceReactionNetwork_lfa(...) - charge is not conserved!!!");
   }
 #endif
 }

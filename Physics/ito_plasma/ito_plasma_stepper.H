@@ -53,7 +53,7 @@ namespace physics {
       virtual void setupSolvers() override;
       virtual void allocate() override;
       virtual void initialData() override;
-      virtual void initial_sigma();
+      virtual void initialSigma();
       virtual void postCheckpointSetup() override;
       virtual void post_checkpoint_poisson();
       virtual void postInitialize() override;
@@ -229,16 +229,16 @@ namespace physics {
       void compute_reactive_mean_energies_per_cell(EBCellFAB& a_mean_energies, const int a_level, const DataIndex a_dit, const Box a_box, const EBISBox& a_ebisbox);
 
       // New routines for chemistry advances. 
-      void advance_reaction_network_nwo(const Real a_dt);
-      void advance_reaction_network_nwo(const EBAMRCellData& a_E, const EBAMRCellData& a_EdotJ, const Real a_dt);
-      void advance_reaction_network_nwo(LevelData<EBCellFAB>&       a_ppc,
+      void advanceReactionNetwork_nwo(const Real a_dt);
+      void advanceReactionNetwork_nwo(const EBAMRCellData& a_E, const EBAMRCellData& a_EdotJ, const Real a_dt);
+      void advanceReactionNetwork_nwo(LevelData<EBCellFAB>&       a_ppc,
 					LevelData<EBCellFAB>&       a_ypc,
 					LevelData<EBCellFAB>&       a_mean_energies,
 					const LevelData<EBCellFAB>& a_E,
 					const LevelData<EBCellFAB>& a_EdotJ,
 					const int                   a_level,
 					const Real                  a_dt);
-      void advance_reaction_network_nwo(EBCellFAB&       a_particlesPerCell,
+      void advanceReactionNetwork_nwo(EBCellFAB&       a_particlesPerCell,
 					EBCellFAB&       a_newPhotonsPerCell,
 					EBCellFAB&       a_meanParticleEnergies,
 					const EBCellFAB& a_E,
@@ -270,27 +270,27 @@ namespace physics {
 
 
       // Old routines for chemistry advances. The physics module will switch between LFA and LEA.
-      void advance_reaction_network(const Real a_dt);
-      void advance_reaction_network(Vector<ParticleContainer<ItoParticle>* >& a_particles,
+      void advanceReactionNetwork(const Real a_dt);
+      void advanceReactionNetwork(Vector<ParticleContainer<ItoParticle>* >& a_particles,
 				    Vector<ParticleContainer<Photon>* >&       a_Photons,
 				    Vector<ParticleContainer<Photon>* >&       a_newPhotons,
 				    const Vector<EBAMRCellData>&                a_sources,
 				    const EBAMRCellData&                        a_E,
 				    const Real                                  a_dt);
-      void advance_reaction_network(Vector<AMRCellParticles<ItoParticle>* >& a_particles,
+      void advanceReactionNetwork(Vector<AMRCellParticles<ItoParticle>* >& a_particles,
 				    Vector<AMRCellParticles<Photon>* >&       a_Photons,
 				    Vector<AMRCellParticles<Photon>* >&       a_newPhotons,
 				    const Vector<EBAMRCellData>&              a_sources,
 				    const EBAMRCellData&                      a_E,
 				    const Real                                a_dt);
-      void advance_reaction_network(Vector<LayoutData<BinFab<ItoParticle> >* >& a_particles,
+      void advanceReactionNetwork(Vector<LayoutData<BinFab<ItoParticle> >* >& a_particles,
 				    Vector<LayoutData<BinFab<Photon> >* >&       a_Photons,
 				    Vector<LayoutData<BinFab<Photon> >* >&       a_newPhotons,
 				    const Vector<LevelData<EBCellFAB>* >&        a_sources,
 				    const LevelData<EBCellFAB>&                  a_E,
 				    const int                                    a_lvl,
 				    const Real                                   a_dt);
-      void advance_reaction_network(Vector<BinFab<ItoParticle>* >& a_particles,
+      void advanceReactionNetwork(Vector<BinFab<ItoParticle>* >& a_particles,
 				    Vector<BinFab<Photon>* >&       a_Photons,
 				    Vector<BinFab<Photon>* >&       a_newPhotons,
 				    const Vector<EBCellFAB*>&       a_sources,

@@ -72,7 +72,7 @@ Vector<Real> ito_plasma_streamer_tagger::tracer(const RealVect         a_pos,
   
   Vector<Real> tracers(m_num_tracers);
   tracers[0] = a_E.vectorLength()/a_max_E;
-  tracers[1] = m_physics->compute_alpha(a_E);
+  tracers[1] = m_physics->computeAlpha(a_E);
 
 
   return tracers;

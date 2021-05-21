@@ -46,7 +46,7 @@ int main(int argc, char* argv[]){
   RefCountedPtr<GeoCoarsener> geocoarsen        = RefCountedPtr<GeoCoarsener> (new GeoCoarsener());
 
   // Set up physics 
-  RefCountedPtr<cdr_plasma_physics> physics      = RefCountedPtr<cdr_plasma_physics> (new air3_bourdon());
+  RefCountedPtr<CdrPlasmaPhysics> physics      = RefCountedPtr<CdrPlasmaPhysics> (new air3_bourdon());
   RefCountedPtr<cdr_plasma_stepper> timestepper  = RefCountedPtr<cdr_plasma_stepper> (new imex_sdc(physics));
   RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (new streamer_tagger(physics, timestepper, amr, compgeom));
 
@@ -57,8 +57,8 @@ int main(int argc, char* argv[]){
 
   // Instantiate solvers
   auto poi = poi_fact->newSolver();
-  auto cdr = cdr_fact->newLayout(physics->get_CdrSpecies());
-  auto rte = rte_fact->newLayout(physics->get_RtSpecies());
+  auto cdr = cdr_fact->newLayout(physics->getCdrSpecies());
+  auto rte = rte_fact->newLayout(physics->getRtSpecies());
 
   // Send solvers to TimeStepper 
   timestepper->set_poisson(poi);

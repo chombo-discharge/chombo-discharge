@@ -62,7 +62,7 @@ namespace physics {
       /*!
 	@brief Compute Townsend ionization length
       */
-      virtual Real compute_alpha(const RealVect a_E) const = 0;
+      virtual Real computeAlpha(const RealVect a_E) const = 0;
 
       /*!
 	@brief Get all species
@@ -72,7 +72,7 @@ namespace physics {
       /*!
 	@brief Get all Photons
       */
-      const Vector<RefCountedPtr<RtSpecies> >& get_RtSpecies() const;
+      const Vector<RefCountedPtr<RtSpecies> >& getRtSpecies() const;
 
       /*!
 	@brief Return number of ion equations
@@ -82,7 +82,7 @@ namespace physics {
       /*!
 	@brief Return number of RTE equations
       */
-      int get_num_RtSpecies() const;
+      int getNumRtSpecies() const;
 
       /*!
 	@brief Get the coupling, LFA/LEA
@@ -92,7 +92,7 @@ namespace physics {
       /*!
 	@brief Set initial surface charge. Default is 0, override if you want.
       */
-      virtual Real initial_sigma(const Real a_time, const RealVect a_pos) const;
+      virtual Real initialSigma(const Real a_time, const RealVect a_pos) const;
 
       /*!
 	@brief Compute the ito mobilities in the lfa approximation
@@ -142,7 +142,7 @@ namespace physics {
 	@brief Reaction network advance in the LEA.
       */
       inline
-      void advance_reaction_network(Vector<List<ItoParticle>* >& a_particles,
+      void advanceReactionNetwork(Vector<List<ItoParticle>* >& a_particles,
 				    Vector<List<Photon>* >&       a_Photons,
 				    Vector<List<Photon>* >&       a_newPhotons,
 				    const Vector<Real>&           a_sources, 
@@ -239,7 +239,7 @@ namespace physics {
       Vector<RefCountedPtr<RtSpecies> > m_RtSpecies;
 
       int m_num_ItoSpecies;
-      int m_num_RtSpecies;
+      int m_numRtSpecies;
       int m_ppc;
       int m_fieldSolver_switch;
       int m_init_weights;

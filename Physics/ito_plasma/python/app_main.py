@@ -100,7 +100,7 @@ def write_template(args):
     mainf.write("  // Instantiate solvers\n")
     mainf.write("  auto poi = poi_fact->newSolver();\n");
     mainf.write("  auto cdr = ito_fact->newLayout(physics->get_ItoSpecies());\n");
-    mainf.write("  auto rte = rte_fact->newLayout(physics->get_RtSpecies());\n");
+    mainf.write("  auto rte = rte_fact->newLayout(physics->getRtSpecies());\n");
     mainf.write("\n")
 
     mainf.write("  // Send solvers to TimeStepper \n")

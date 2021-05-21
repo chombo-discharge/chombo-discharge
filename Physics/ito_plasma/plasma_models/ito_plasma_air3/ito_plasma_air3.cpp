@@ -15,7 +15,7 @@ using namespace physics::ito_plasma;
 
 ito_plasma_air3::ito_plasma_air3(){
   m_num_ItoSpecies = 3;
-  m_num_RtSpecies = 1;
+  m_numRtSpecies = 1;
 
   m_coupling == ito_plasma_physics::coupling::LFA;
 
@@ -82,7 +82,7 @@ ito_plasma_air3::ito_plasma_air3(){
 
   // Set up species
   m_ItoSpecies.resize(m_num_ItoSpecies);
-  m_RtSpecies.resize(m_num_RtSpecies);
+  m_RtSpecies.resize(m_numRtSpecies);
 
   m_electron_idx = 0;
   m_positive_idx = 1;
@@ -155,7 +155,7 @@ void ito_plasma_air3::read_tables(){
 }
 
 Real ito_plasma_air3::computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_cdr_densities) const {
-  const Real alpha = this->compute_alpha(a_E);
+  const Real alpha = this->computeAlpha(a_E);
   const Real velo  = this->compute_electron_velocity(a_E).vectorLength();
 
   const Real k_alpha = alpha*velo;
@@ -163,7 +163,7 @@ Real ito_plasma_air3::computeDt(const RealVect a_E, const RealVect a_pos, const 
   return log(m_deltaX)/k_alpha;
 }
 
-Real ito_plasma_air3::compute_alpha(const RealVect a_E) const {
+Real ito_plasma_air3::computeAlpha(const RealVect a_E) const {
   const Real E = a_E.vectorLength();
 
   return m_tables.at("alpha").getEntry(E);

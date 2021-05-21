@@ -15,7 +15,7 @@ using namespace physics::ito_plasma;
 
 ito_plasma_air3_lea::ito_plasma_air3_lea(){
   m_num_ItoSpecies = 3;
-  m_num_RtSpecies = 1;
+  m_numRtSpecies = 1;
 
   m_coupling = ito_plasma_physics::coupling::LEA;
 
@@ -75,7 +75,7 @@ ito_plasma_air3_lea::ito_plasma_air3_lea(){
 
   // Set up species
   m_ItoSpecies.resize(m_num_ItoSpecies);
-  m_RtSpecies.resize(m_num_RtSpecies);
+  m_RtSpecies.resize(m_numRtSpecies);
 
   m_electron_idx = 0;
   m_positive_idx = 1;
@@ -152,7 +152,7 @@ Real ito_plasma_air3_lea::computeDt(const RealVect a_E, const RealVect a_pos, co
   return 1.E99;
 }
 
-Real ito_plasma_air3_lea::compute_alpha(const RealVect a_E) const {
+Real ito_plasma_air3_lea::computeAlpha(const RealVect a_E) const {
   const Real E = a_E.vectorLength();
 
   return m_tables.at("alpha_lfa").getEntry(E);

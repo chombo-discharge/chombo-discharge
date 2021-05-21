@@ -31,7 +31,7 @@ namespace physics {
 
       Real computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_cdr_densities) const override;
 
-      Real compute_alpha(const RealVect a_E) const override;
+      Real computeAlpha(const RealVect a_E) const override;
 
       Real compute_eta(const RealVect a_E) const;
 
