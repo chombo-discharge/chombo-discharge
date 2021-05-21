@@ -1,21 +1,26 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   rough_rod.cpp
-  @brief  Implementation of rough_rod.H
+  @file   CD_RoughRod.cpp
+  @brief  Implementation of CD_RoughRod.H
   @author Robert Marskar
-  @date   Nov. 2017
 */
 
-#include "rough_rod.H"
-#include <CD_PerlinRodSdf.H>
-
+// Chombo includes
 #include <ParmParse.H>
 
+// Our includes
+#include <CD_RoughRod.H>
+#include <CD_PerlinRodSdf.H>
 #include "CD_NamespaceHeader.H"
 
-rough_rod::rough_rod(){
+RoughRod::RoughRod(){
   this->setGasPermittivity(1.0);
 
-  ParmParse pp("rough_rod");
+  ParmParse pp("RoughRod");
 
   bool useRod;
   
@@ -45,7 +50,8 @@ rough_rod::rough_rod(){
   }
 }
 
-rough_rod::~rough_rod(){
+RoughRod::~RoughRod(){
   
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

@@ -75,13 +75,13 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 #
 # NOTE: Only the endcap at endpoint2 has a spherical cap. 
 # ====================================================================================================
-rough_rod.on                = true             # Turn on/off rod
-rough_rod.radius            = 0.25             # Radius
-rough_rod.endpoint1         = 0 0 2            # One endpoint
-rough_rod.endpoint2         = 0 0 0            # Other endpoint
-rough_rod.live              = true             # At live voltage
-rough_rod.noise_amplitude   = 0.05             # Noise amplitude
-rough_rod.noise_frequency   = 10 10 10            # Noise frequency
-rough_rod.noise_persistence = 0.5              # Noise persistence
-rough_rod.noise_octaves     = 3                # Noise octaves
-rough_rod.noise_reseed      = false            # Reseed noise
+RoughRod.on                = true             # Turn on/off rod
+RoughRod.radius            = 0.25             # Radius
+RoughRod.endpoint1         = 0 0 2            # One endpoint
+RoughRod.endpoint2         = 0 0 0            # Other endpoint
+RoughRod.live              = true             # At live voltage
+RoughRod.noise_amplitude   = 0.05             # Noise amplitude
+RoughRod.noise_frequency   = 10 10 10            # Noise frequency
+RoughRod.noise_persistence = 0.5              # Noise persistence
+RoughRod.noise_octaves     = 3                # Noise octaves
+RoughRod.noise_reseed      = false            # Reseed noise
