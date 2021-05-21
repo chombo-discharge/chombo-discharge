@@ -1,29 +1,34 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file coaxial_cable.cpp
-  @brief Implementation of coaxial_cable.H
+  @file   CD_CoaxialCable.cpp
+  @brief  Implementation of CD_CoaxialCable.H
   @author Robert Marskar
-  @date Nov. 2017
 */
 
-#include "coaxial_cable.H"
-
+// Std includes
 #include <string>
 #include <iostream>
 #include <fstream>
 
+// Chombo includes
 #include <ParmParse.H>
 
+// Our includes
+#include <CD_CoaxialCable.H>
 #include <CD_CylinderSdf.H>
 #include <CD_SphereSdf.H>
+#include <CD_NamespaceHeader.H>
 
-#include "CD_NamespaceHeader.H"
+CoaxialCable::CoaxialCable(){
 
-coaxial_cable::coaxial_cable(){
-
-  ParmParse pp      ("coaxial_cable");
-  ParmParse ppOuter ("coaxial_cable.outer");
-  ParmParse ppInner ("coaxial_cable.inner");
-  ParmParse ppMiddle("coaxial_cable.dielectric");
+  ParmParse pp      ("CoaxialCable");
+  ParmParse ppOuter ("CoaxialCable.outer");
+  ParmParse ppInner ("CoaxialCable.inner");
+  ParmParse ppMiddle("CoaxialCable.dielectric");
 
   // Get centers
   Vector<Real> v(SpaceDim);
@@ -88,7 +93,8 @@ coaxial_cable::coaxial_cable(){
   }
 }
 
-coaxial_cable::~coaxial_cable(){
+CoaxialCable::~CoaxialCable(){
   
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
