@@ -1,35 +1,32 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   ItoSolver.cpp
-  @brief  Declaration of an abstract class for Ito diffusion
+  @file   CD_ItoSolver.cpp
+  @brief  Implementation of CD_ItoSolver.H
   @author Robert Marskar
-  @date   April 2020
 */
 
+// Std includes
+#include <chrono>
+
+// Chombo includes
+#include <ParmParse.H>
+#include <ParticleIO.H>
+
+// Our includes
 #include <CD_SimpleItoParticle.H>
 #include <CD_ItoSolver.H>
 #include <CD_DataOps.H>
-#include <CD_EbParticleInterp.H>
-#include <CD_Units.H>
-#include <CD_EbGhostCloud.H>
-#include "ito_layout.H"
-
-
 #include <CD_ParticleOps.H>
-
-#include <EBArith.H>
-#include <ParmParse.H>
-#include <EBAlias.H>
-#include <BaseEBCellFactory.H>
-#include <ParticleIO.H>
-
-#include <chrono>
+#include <CD_NamespaceHeader.H>
 
 #define ITO_DEBUG 0
 
-#include "CD_NamespaceHeader.H"
-
 ItoSolver::ItoSolver(){
-  m_name       = "ItoSolver";
+  m_name      = "ItoSolver";
   m_className = "ItoSolver";
 
   m_WhichMobilityInterpolation = WhichMobilityInterpolation::mobility;
@@ -749,9 +746,9 @@ void ItoSolver::transferCoveredParticles(const WhichContainer a_containerFrom, c
 }
 
 void ItoSolver::transferCoveredParticles(ParticleContainer<ItoParticle>& a_containerFrom,
-					    ParticleContainer<ItoParticle>& a_containerTo,
-					    const EbRepresentation           a_representation,
-					    const Real                        a_tol){
+					 ParticleContainer<ItoParticle>& a_containerTo,
+					 const EbRepresentation           a_representation,
+					 const Real                        a_tol){
   CH_TIME("ItoSolver::transferCoveredParticles(EbRepresentation, container, container, tol)");
   if(m_verbosity > 5){
     pout() << m_name + "::transferCoveredParticles(EbRepresentation, container, container, tol)" << endl;
@@ -776,10 +773,10 @@ void ItoSolver::intersectParticles(const EbRepresentation a_representation, cons
 }
 
 void ItoSolver::intersectParticles(const WhichContainer       a_particles,
-				     const WhichContainer       a_eb_particles,
-				     const WhichContainer       a_dom_particles,
-				     const EbRepresentation a_representation,				     
-				     const bool              a_delete){
+				   const WhichContainer       a_eb_particles,
+				   const WhichContainer       a_dom_particles,
+				   const EbRepresentation a_representation,				     
+				   const bool              a_delete){
   CH_TIME("ItoSolver::intersectParticles(string, string, string, bool, EbRepresentation)");
   if(m_verbosity > 5){
     pout() << m_name + "::intersectParticles(string, string, string, bool, EbRepresentation)" << endl;
@@ -794,10 +791,10 @@ void ItoSolver::intersectParticles(const WhichContainer       a_particles,
 
 
 void ItoSolver::intersectParticles(ParticleContainer<ItoParticle>& a_particles,
-				     ParticleContainer<ItoParticle>& a_eb_particles,
-				     ParticleContainer<ItoParticle>& a_dom_particles,
-				     const EbRepresentation           a_representation,
-				     const bool                        a_delete){
+				   ParticleContainer<ItoParticle>& a_eb_particles,
+				   ParticleContainer<ItoParticle>& a_dom_particles,
+				   const EbRepresentation           a_representation,
+				   const bool                        a_delete){
   CH_TIME("ItoSolver::intersectParticles(container, container, container, EbRepresentation, bool)");
   if(m_verbosity > 5){
     pout() << m_name + "::intersectParticles(container, container, container, EbRepresentation, bool)" << endl;
@@ -813,9 +810,9 @@ void ItoSolver::intersectParticles(ParticleContainer<ItoParticle>& a_particles,
 }
 
 void ItoSolver::intersectParticlesIF(ParticleContainer<ItoParticle>& a_particles,
-					ParticleContainer<ItoParticle>& a_eb_particles,
-					ParticleContainer<ItoParticle>& a_domain_particles,
-					const bool                        a_delete){
+				     ParticleContainer<ItoParticle>& a_eb_particles,
+				     ParticleContainer<ItoParticle>& a_domain_particles,
+				     const bool                        a_delete){
   CH_TIME("ItoSolver::intersectParticlesIF(container, container, container, bool)");
   if(m_verbosity > 5){
     pout() << m_name + "::intersectParticlesIF(container, container, container, bool)" << endl;
@@ -2966,12 +2963,12 @@ void ItoSolver::clear(AMRParticles<ItoParticle>& a_particles){
 }
 
 RealVect ItoSolver::randomPosition(const RealVect a_pos,
-				     const RealVect a_lo,
-				     const RealVect a_hi,
-				     const RealVect a_bndryCentroid,
-				     const RealVect a_bndryNormal,
-				     const Real     a_dx,
-				     const Real     a_kappa) {
+				   const RealVect a_lo,
+				   const RealVect a_hi,
+				   const RealVect a_bndryCentroid,
+				   const RealVect a_bndryNormal,
+				   const Real     a_dx,
+				   const Real     a_kappa) {
 
   RealVect pos;
   if(a_kappa < 1.0){ // Rejection sampling. 
@@ -2987,9 +2984,9 @@ RealVect ItoSolver::randomPosition(const RealVect a_pos,
 }
 
 RealVect ItoSolver::randomPosition(const RealVect a_lo,
-				     const RealVect a_hi,
-				     const RealVect a_bndryCentroid,
-				     const RealVect a_bndryNormal) {
+				   const RealVect a_hi,
+				   const RealVect a_bndryCentroid,
+				   const RealVect a_bndryNormal) {
   RealVect pos = this->randomPosition(a_lo, a_hi);
   bool valid   = PolyGeom::dot(pos-a_bndryCentroid, a_bndryNormal) >= 0.0;
 
@@ -3011,4 +3008,5 @@ RealVect ItoSolver::randomPosition(const RealVect a_lo, const RealVect a_hi) {
 
   return pos;
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

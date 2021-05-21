@@ -1,33 +1,30 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   ItoSolverI.H
-  @brief  Templated functions for ItoSolver
+  @file   CD_ItoSolverImplem.H
+  @brief  Implementation of CD_ItoSolver.H
   @author Robert Marskar
   @date   April 2020
 */
 
-#ifndef _ITO_SOLVERI_H_
-#define _ITO_SOLVERI_H_
+#ifndef CD_ItoSolverImplem_H
+#define CD_ItoSolverImplem_H
 
-#include <CD_ItoSolver.H>
-#include <CD_SimpleItoParticle.H>
+// Std includes
+#include <chrono>
+
+// Chombo includes
+#include <EBAlias.H>
+
+// Our includes
 #include <CD_ItoSolver.H>
 #include <CD_DataOps.H>
 #include <CD_EbParticleInterp.H>
-#include <CD_Units.H>
 #include <CD_EbGhostCloud.H>
-#include "ito_layout.H"
-
-#include <CD_ParticleOps.H>
-
-#include <EBArith.H>
-#include <ParmParse.H>
-#include <EBAlias.H>
-#include <BaseEBCellFactory.H>
-#include <ParticleIO.H>
-
-#include <chrono>
-
-#include "CD_NamespaceHeader.H"
+#include <CD_NamespaceHeader.H>
 
 inline
 Real ItoSolver::sign(const Real& a) const{
@@ -369,7 +366,7 @@ void ItoSolver::depositKappaConservativeNoPVR_NGP(EBAMRCellData&               a
   a_particles.clearMaskParticles();
   a_particles.clearNonMaskParticles();
 }
-#include "CD_NamespaceFooter.H"
 
+#include <CD_NamespaceFooter.H>
 
 #endif

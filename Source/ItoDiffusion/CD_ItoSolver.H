@@ -1,28 +1,36 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   ItoSolver.H
-  @brief  Declaration of an abstract class for Ito diffusion
+  @file   CD_ItoSolver.H
+  @brief  Declaration of solver class for Ito diffusion
   @author Robert Marskar
-  @date   April 2020
 */
 
-#ifndef _ITO_SOLVER_
-#define _ITO_SOLVER_
+#ifndef CD_ItoSolver_H
+#define CD_ItoSolver_H
 
-#include "CD_AmrMesh.H"
+// Std includes
+#include <random>
+
+// Chombo includes
+#include <Particle.H>
+#include <ParticleData.H>
+#include <BinItem.H>
+
+// Our includes
+#include <CD_AmrMesh.H>
 #include <CD_ComputationalGeometry.H>
 #include <CD_ItoSpecies.H>
 #include <CD_ItoParticle.H>
 #include <CD_EbParticleInterp.H>
 #include <CD_ParticleContainer.H>
-#include "bvh.H"
+#include <bvh.H>
 #include <CD_PointMass.H>
 #include <CD_EbRepresentation.H>
-
-#include <Particle.H>
-#include <ParticleData.H>
-#include <BinItem.H>
-
-#include <random>
+#include <CD_NamespaceHeader.H>
 
 #define BOOST_RANDOM 0
 
@@ -32,8 +40,6 @@ namespace RAN = boost::random;
 #else
 namespace RAN = std;
 #endif
-
-#include "CD_NamespaceHeader.H"
   
 /*!
   @brief Base class for Ito diffusion particle models
@@ -284,17 +290,17 @@ public:
     @brief Which particles to remove
   */
   virtual void transferCoveredParticles(const WhichContainer   a_containerFrom,
-					  const WhichContainer   a_containerTo,
-					  const EbRepresentation a_representation,
-					  const Real              a_tol);
+					const WhichContainer   a_containerTo,
+					const EbRepresentation a_representation,
+					const Real              a_tol);
 
   /*!
     @brief Transfer particles that are inside the EB to another container. 
   */
   virtual void transferCoveredParticles(ParticleContainer<ItoParticle>& a_containerFrom,
-					  ParticleContainer<ItoParticle>& a_containerTo,
-					  const EbRepresentation           a_representation,
-					  const Real                        a_tol);
+					ParticleContainer<ItoParticle>& a_containerTo,
+					const EbRepresentation           a_representation,
+					const Real                        a_tol);
 					    
 
   /*!
@@ -306,19 +312,19 @@ public:
     @brief Do boundary intersection tests.
   */
   virtual void intersectParticles(const WhichContainer       a_particles,
-				   const WhichContainer       a_eb_particles,
-				   const WhichContainer       a_dom_particles,
-				   const EbRepresentation a_representation,				   
-				   const bool              a_delete);
+				  const WhichContainer       a_eb_particles,
+				  const WhichContainer       a_dom_particles,
+				  const EbRepresentation a_representation,				   
+				  const bool              a_delete);
 
   /*!
     @brief Do boundary intersection tests.
   */
   virtual void intersectParticles(ParticleContainer<ItoParticle>& a_particles,
-				   ParticleContainer<ItoParticle>& a_eb_particles,
-				   ParticleContainer<ItoParticle>& a_dom_particles,
-				   const EbRepresentation           a_representation,
-				   const bool                        a_delete);
+				  ParticleContainer<ItoParticle>& a_eb_particles,
+				  ParticleContainer<ItoParticle>& a_dom_particles,
+				  const EbRepresentation           a_representation,
+				  const bool                        a_delete);
 
   /*!
     @brief Compute particle load on specific levle
@@ -1056,8 +1062,8 @@ protected:
   */
   template <class T>
   void depositKappaConservative(EBAMRCellData&               a_phi,
-				 const ParticleContainer<T>& a_particles,
-				 const DepositionType::Which  a_deposition);
+				const ParticleContainer<T>& a_particles,
+				const DepositionType::Which  a_deposition);
 
   /*!
     @brief Just as depositKappaConservative, but using a PVR buffer where particle clouds on coarse levels are
@@ -1065,8 +1071,8 @@ protected:
   */
   template <class T>
   void depositKappaConservativeWithPVR(EBAMRCellData&               a_phi,
-					const ParticleContainer<T>& a_particles,
-					const DepositionType::Which  a_deposition);
+				       const ParticleContainer<T>& a_particles,
+				       const DepositionType::Which  a_deposition);
 
   /*!
     @brief Just as depositKappaConservative, but using halo particles when depositing particles from coarse levels to fine
@@ -1074,8 +1080,8 @@ protected:
   */
   template <class T>
   void depositKappaConservativeNoPVR_native(EBAMRCellData&               a_phi,
-					     const ParticleContainer<T>& a_particles,
-					     const DepositionType::Which  a_deposition);
+					    const ParticleContainer<T>& a_particles,
+					    const DepositionType::Which  a_deposition);
 
   /*!
     @brief Just as depositKappaConservative, but using halo particles when depositing particles from coarse levels to fine
@@ -1083,8 +1089,8 @@ protected:
   */
   template <class T>
   void depositKappaConservativeNoPVR_NGP(EBAMRCellData&               a_phi,
-					  const ParticleContainer<T>& a_particles,
-					  const DepositionType::Which  a_deposition);
+					 const ParticleContainer<T>& a_particles,
+					 const DepositionType::Which  a_deposition);
 
   /*!
     @brief Make the "non-conservative" kappa deposition
@@ -1150,9 +1156,9 @@ protected:
     @brief Do boundary intersection tests with an implicit function
   */
   void intersectParticlesIF(ParticleContainer<ItoParticle>& a_particles,
-			      ParticleContainer<ItoParticle>& a_eb_particles,
-			      ParticleContainer<ItoParticle>& a_domain_particles,
-			      const bool                        a_delete);
+			    ParticleContainer<ItoParticle>& a_eb_particles,
+			    ParticleContainer<ItoParticle>& a_domain_particles,
+			    const bool                        a_delete);
 
   /*!
     @brief Interpolate mobilities
@@ -1175,27 +1181,28 @@ protected:
   */
   inline
   RealVect randomPosition(const RealVect a_pos,
-			   const RealVect a_lo,
-			   const RealVect a_hi,
-			   const RealVect a_bndryCentroid,
-			   const RealVect a_normal,
-			   const Real     a_dx,
-			   const Real     a_kappa);
+			  const RealVect a_lo,
+			  const RealVect a_hi,
+			  const RealVect a_bndryCentroid,
+			  const RealVect a_normal,
+			  const Real     a_dx,
+			  const Real     a_kappa);
 
   /*!
     @brief Draw a random position somewhere in a cell
   */
   RealVect randomPosition(const RealVect a_lo,
-			   const RealVect a_hi,
-			   const RealVect a_bndryCentroid,
-			   const RealVect a_normal);
+			  const RealVect a_hi,
+			  const RealVect a_bndryCentroid,
+			  const RealVect a_normal);
 
   /*!
     @brief Return a random position in the cube (a_lo, a_hi);
   */
   RealVect randomPosition(const RealVect a_lo, const RealVect a_hi);
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #include <CD_ItoSolverImplem.H>
 
