@@ -77,20 +77,20 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 # you need to set 'num_spheres' to the number of spheres that you want. Each sphere needs a separate
 # radius and center. 
 # ====================================================================================================
-aerosol.num_spheres       = 3              # Number of spheres
-aerosol.permittivity      = 5.0            # Dielectric permittivity, if the geometry is a dielectric		
-aerosol.eps0              = 1              # Permittivity
-aerosol.noise_amplitude   = 0.1            # Noise amplitude
-aerosol.noise_frequency   = 5. 5. 5.       # Noise frequency
-aerosol.noise_persistence = 0.5            # Noise persistence
-aerosol.noise_octaves     = 1              # Noise octaves
-aerosol.noise_reseed      = false          # Reseed noise
+Aerosol.num_spheres       = 3              # Number of spheres
+Aerosol.permittivity      = 5.0            # Dielectric permittivity, if the geometry is a dielectric		
+Aerosol.eps0              = 1              # Permittivity
+Aerosol.noise_amplitude   = 0.1            # Noise amplitude
+Aerosol.noise_frequency   = 5. 5. 5.       # Noise frequency
+Aerosol.noise_persistence = 0.5            # Noise persistence
+Aerosol.noise_octaves     = 1              # Noise octaves
+Aerosol.noise_reseed      = false          # Reseed noise
 
-aerosol.sphere1.radius    = 0.2            # Sphere radius
-aerosol.sphere1.center    = -0.5 -0.5 -0.5 # Sphere position
+Aerosol.sphere1.radius    = 0.2            # Sphere radius
+Aerosol.sphere1.center    = -0.5 -0.5 -0.5 # Sphere position
 
-aerosol.sphere2.radius    = 0.2            # Sphere radius
-aerosol.sphere2.center    = 0. 0. 0.       # Sphere center
+Aerosol.sphere2.radius    = 0.2            # Sphere radius
+Aerosol.sphere2.center    = 0. 0. 0.       # Sphere center
 
-aerosol.sphere3.radius    = 0.2            # Sphere radius
-aerosol.sphere3.center    = 0.5 0.5 0.5    # Sphere center
+Aerosol.sphere3.radius    = 0.2            # Sphere radius
+Aerosol.sphere3.center    = 0.5 0.5 0.5    # Sphere center

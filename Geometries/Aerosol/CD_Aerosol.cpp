@@ -1,24 +1,29 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file aerosol.cpp
-  @brief Implementation of aerosol.H
+  @file   CD_Aerosol.cpp
+  @brief  Implementation of CD_Aerosol.H
   @author Robert Marskar
-  @date Nov. 2017
 */
 
-#include "aerosol.H"
-
+// Std includes
 #include <string>
 #include <iostream>
 #include <fstream>
 
+// Chombo includes
 #include <ParmParse.H>
 #include <BaseIF.H>
 
+// Our includes
+#include <CD_Aerosol.H>
 #include <CD_PerlinSphereSdf.H>
+#include <CD_NamespaceHeader.H>
 
-#include "CD_NamespaceHeader.H"
-
-aerosol::aerosol(){
+Aerosol::Aerosol(){
 
   Real eps, eps0, noise_persistence, noise_amplitude;
   RealVect noise_frequency;
@@ -28,7 +33,7 @@ aerosol::aerosol(){
   Vector<Real> v(SpaceDim);
 
   // Get a bunch of parameters from the input script
-  ParmParse pp("aerosol");
+  ParmParse pp("Aerosol");
   
   pp.get   ("eps0",              eps0);
   pp.get   ("permittivity",      eps);
@@ -53,7 +58,7 @@ aerosol::aerosol(){
 
     char* cstr = new char[ndigits];
     sprintf(cstr, "%d", 1+i);
-    const std::string str = "aerosol.sphere" + std::string(cstr);
+    const std::string str = "Aerosol.sphere" + std::string(cstr);
 
     ParmParse pp2(str);
     pp2.get   ("radius", radius);
@@ -61,20 +66,21 @@ aerosol::aerosol(){
 
     // Get the perlin sphere. 
     RefCountedPtr<BaseIF> sph = RefCountedPtr<BaseIF> (new PerlinSphereSdf(radius,
-									    center,
-									    false,
-									    noise_amplitude,
-									    noise_frequency,
-									    noise_persistence,
-									    noise_octaves,
-									    noise_reseed));
+									   center,
+									   false,
+									   noise_amplitude,
+									   noise_frequency,
+									   noise_persistence,
+									   noise_octaves,
+									   noise_reseed));
 
     // Add dielectric sphere
     m_dielectrics.push_back(Dielectric(sph, eps));
   }
 }
 
-aerosol::~aerosol(){
+Aerosol::~Aerosol(){
   
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

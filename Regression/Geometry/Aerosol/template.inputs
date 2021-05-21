@@ -85,15 +85,15 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 #
 #
 # ====================================================================================================
-aerosol.num_spheres       = 1             # Number of spheres
-aerosol.permittivity      = 5.0           # Dielectric permittivity, if the geometry is a dielectric		
-aerosol.eps0              = 1             # Permittivity
-aerosol.sphere1_radius    = 1             # Sphere radius
-aerosol.sphere1_center    = 0. 0. 0.      # Sphere center
-aerosol.noise_amplitude   = 0.0           # Noise amplitude
-aerosol.noise_frequency   = 1. 1. 1.      # Noise frequency
-aerosol.noise_persistence = 0.5           # Noise persistence
-aerosol.noise_octaves     = 1             # Noise octaves
-aerosol.noise_reseed      = false         # Reseed noise
+Aerosol.num_spheres       = 1             # Number of spheres
+Aerosol.permittivity      = 5.0           # Dielectric permittivity, if the geometry is a dielectric		
+Aerosol.eps0              = 1             # Permittivity
+Aerosol.sphere1_radius    = 1             # Sphere radius
+Aerosol.sphere1_center    = 0. 0. 0.      # Sphere center
+Aerosol.noise_amplitude   = 0.0           # Noise amplitude
+Aerosol.noise_frequency   = 1. 1. 1.      # Noise frequency
+Aerosol.noise_persistence = 0.5           # Noise persistence
+Aerosol.noise_octaves     = 1             # Noise octaves
+Aerosol.noise_reseed      = false         # Reseed noise
 
 

@@ -1,5 +1,5 @@
 #include "CD_Driver.H"
-#include "aerosol.H"
+#include <CD_Aerosol.H>
 #include <CD_GeometryStepper.H>
 #include "ParmParse.H"
 
@@ -17,7 +17,7 @@ int main(int argc, char* argv[]){
   ParmParse pp(argc-2, argv+2, NULL, input_file.c_str());
 
   // Set geometry and AMR 
-  RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry> (new aerosol());
+  RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry> (new Aerosol());
   RefCountedPtr<AmrMesh> amr                    = RefCountedPtr<AmrMesh> (new AmrMesh());
   RefCountedPtr<GeoCoarsener> geocoarsen        = RefCountedPtr<GeoCoarsener> (new GeoCoarsener());
   RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (NULL);
