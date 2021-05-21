@@ -14,15 +14,15 @@ def write_template(args):
     main_filename = app_dir + "/" + args.filename + ".cpp"
     mainf = open(main_filename, "w")
     mainf.write('#include "CD_Driver.H"\n')
-    mainf.write('#include "' + args.ItoSolver + '.H"\n')
-    mainf.write('#include "' + args.geometry + '.H"\n')
-    mainf.write('#include "' + args.stepper + '.H"\n')
+    mainf.write('#include "CD_' + args.ItoSolver + '.H"\n')
+    mainf.write('#include "CD_' + args.geometry + '.H"\n')
+    mainf.write('#include "CD_' + args.stepper + '.H"\n')
     mainf.write('#include <CD_BrownianWalkerTagger.H>\n')
     mainf.write('#include "ParmParse.H"\n')
     mainf.write("\n")
 
     mainf.write("using namespace ChomboDischarge;\n")
-    mainf.write("using namespace physics::BrownianWalker;\n\n")
+    mainf.write("using namespace Physics::BrownianWalker;\n\n")
     mainf.write("int main(int argc, char* argv[]){\n")
 
     mainf.write("\n")
