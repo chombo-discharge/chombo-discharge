@@ -186,7 +186,7 @@ void JumpBc::define(const MFLevelGrid&            a_mflg,
       avgStens.define(m_mflg,   dit());
       avgWeights.define(m_mflg, dit());
 
-      m_ivs[dit()] = bco.get_ivs();
+      m_ivs[dit()] = bco.getIVS();
     }
 
     this->defineVofIterator();
@@ -207,7 +207,7 @@ void JumpBc::defineVofIterator(){
     VoFIterator& vofit_g = m_vofit_gas[dit()];
     VoFIterator& vofit_s = m_vofit_sol[dit()];
 
-    const IntVectSet& ivs = m_bco[dit()].get_ivs();
+    const IntVectSet& ivs = m_bco[dit()].getIVS();
     const EBGraph& graph1 = m_bco[dit()].getIVFAB(phase1).getEBGraph();
     const EBGraph& graph2 = m_bco[dit()].getIVFAB(phase2).getEBGraph();
 

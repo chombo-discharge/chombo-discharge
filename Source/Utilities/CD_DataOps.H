@@ -14,7 +14,7 @@
 
 // Our includes
 #include <CD_EBAMRData.H>
-#include <MFInterfaceFAB.H>
+#include <CD_MFInterfaceFAB.H>
 #include <CD_NamespaceHeader.H>
 
 /*!

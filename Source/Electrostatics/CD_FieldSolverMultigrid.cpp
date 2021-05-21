@@ -17,7 +17,7 @@
 #include <CD_FieldSolverMultigrid.H>
 #include <CD_DataOps.H>
 #include <MFQuadCFInterp.H>
-#include <MFInterfaceFAB.H>
+#include <CD_MFInterfaceFAB.H>
 #include <CD_JumpBc.H>
 #include <CD_AmrMesh.H>
 #include <CD_ConductivityElectrostaticDomainBcFactory.H>
