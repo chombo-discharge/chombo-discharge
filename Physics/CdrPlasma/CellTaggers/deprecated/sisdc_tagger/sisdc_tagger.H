@@ -1,0 +1,47 @@
+/*!
+  @file   sisdc_tagger.H
+  @brief  Declaration of a  class for tagging streamer heads
+  @author Robert Marskar
+  @date   Oct. 2018
+*/
+
+#ifndef _SISDC_TAGGER_H
+#define _SISDC_TAGGER_H
+
+#include "CD_CellTagger.H"
+
+/*!
+  @brief Class that tags streamer heads based on the electron source term. 
+  @note  The electrons must be the first class that is defined in the cdr solver layout
+*/
+class sisdc_tagger : public CellTagger {
+public:
+  
+  sisdc_tagger();
+  ~sisdc_tagger();
+
+  void computeTracers();
+  
+protected:
+
+  int m_cdr_idx;
+  Real m_err_thresh;
+  Real m_curv_thresh;
+  Real m_mag_thresh;
+
+  bool coarsenCell(const RealVect&         a_pos,
+		    const Real&             a_time,
+		    const Real&             a_dx,
+		    const int&              a_lvl,
+		    const Vector<Real>&     a_tracer,
+		    const Vector<RealVect>& a_grad_tracer);
+
+  bool refineCell(const RealVect&         a_pos,
+		   const Real&             a_time,
+		   const Real&             a_dx,
+		   const int&              a_lvl,
+		   const Vector<Real>&     a_tracer,
+		   const Vector<RealVect>& a_grad_tracer);
+#include "CD_NamespaceFooter.H"
+
+#endif

@@ -8,7 +8,7 @@
 #ifndef _ITO_PLASMA_STREAMER_TAGGER_
 #define _ITO_PLASMA_STREAMER_TAGGER_
 
-#include "ito_plasma_field_tagger.H"
+#include "ito_plasma_CdrPlasmaCurvatureTagger.H"
 
 #include "CD_NamespaceHeader.H"
 namespace Physics {
@@ -17,7 +17,7 @@ namespace Physics {
     /*!
       @brief Refinement class for morrow_stephens plasma model only
     */
-    class ito_plasma_streamer_tagger : public ito_plasma_field_tagger {
+    class ito_plasma_streamer_tagger : public ito_plasma_CdrPlasmaCurvatureTagger {
     public:
   
       /*!

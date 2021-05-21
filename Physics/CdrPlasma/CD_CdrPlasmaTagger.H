@@ -68,7 +68,7 @@ namespace Physics {
       virtual void parseOptions() = 0;
 
       /*!
-	@brief
+	@brief Get number of plot variables. 
       */
       virtual int getNumberOfPlotVariables();
 

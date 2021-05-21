@@ -1,0 +1,13 @@
+# ====================================================================================================
+# ML_TAGGER CLASS OPTIONS
+# ====================================================================================================
+ml_tagger.verbosity         = -1           # Verbosity
+ml_tagger.num_boxes         = 0            # Number of allowed tag boxes (0 = tags allowe everywhere)
+ml_tagger.box1_lo           = 0.0 0.0 0.0  # Only allow tags that fall between
+ml_tagger.box1_hi           = 0.0 0.0 0.0  # these two corners
+ml_tagger.buffer            = 0            # Grow tagged cells
+
+ml_tagger.coarsen_curvature = 2.0          # Curvature coarsening
+ml_tagger.refine_curvature  = 2.0          # Curvature refinement
+ml_tagger.refine_alpha      = 0.75         # Set alpha coarsening
+ml_tagger.coarsen_alpha     = 1.5          # Set alpha fudge refinement

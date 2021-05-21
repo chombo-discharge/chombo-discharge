@@ -1,0 +1,12 @@
+# ====================================================================================================
+# GRADIENT_TAGGER CLASS OPTIONS
+# ====================================================================================================
+gradient_tagger.verbosity   = -1           # Verbosity
+gradient_tagger.num_boxes   = 0            # Number of allowed tag boxes (0 = tags allowe everywhere)
+gradient_tagger.box1_lo     = 0.0 0.0 0.0  # Only allow tags that fall between
+gradient_tagger.box1_hi     = 0.0 0.0 0.0  # these two corners
+gradient_tagger.buffer      = 0            # Grow tagged cells
+
+gradient_tagger.coarsen_curvature = 0.1
+gradient_tagger.refine_curvature  = 0.2
+gradient_tagger.relative_cutoff   = 1.E-6
