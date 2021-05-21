@@ -12,7 +12,7 @@
 
 #include "CD_TimeStepper.H"
 #include "ito_plasma_physics.H"
-#include "ito_layout.H"
+#include <CD_ItoLayout.H>
 #include <CD_PointParticle.H>
 #include <CD_RtLayout.H>
 #include <CD_McPhoto.H>
@@ -121,7 +121,7 @@ namespace physics {
       void setVerbosity(const int a_verbosity);
 
       // Set routines
-      void set_ito(RefCountedPtr<ito_layout<ItoSolver> >& a_cdr);
+      void set_ito(RefCountedPtr<ItoLayout<ItoSolver> >& a_cdr);
       void set_poisson(RefCountedPtr<FieldSolver>& a_poisson);
       void set_rte(RefCountedPtr<RtLayout<McPhoto> >& a_rte);
       void set_potential(const std::function<Real(const Real a_time)>& a_potential);
@@ -340,7 +340,7 @@ namespace physics {
       BoxSorting m_boxSort;
       
       RefCountedPtr<ito_plasma_physics> m_physics;
-      RefCountedPtr<ito_layout<ItoSolver> > m_ito;
+      RefCountedPtr<ItoLayout<ItoSolver> > m_ito;
       RefCountedPtr<RtLayout<McPhoto> > m_rte;
       RefCountedPtr<FieldSolver> m_fieldSolver;
       RefCountedPtr<SigmaSolver> m_sigma;

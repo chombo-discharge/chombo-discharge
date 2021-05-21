@@ -1,6 +1,6 @@
 /*!
   @file   ito_iterator.H
-  @brief  Iterator class for ito_layout
+  @brief  Iterator class for ItoLayout
   @author Robert Marskar
   @date   June Dec. 2017
 */
@@ -8,12 +8,12 @@
 #ifndef _ITO_ITERATOR_
 #define _ITO_ITERATOR_
 
-#include "ito_layout.H"
+#include <CD_ItoLayout.H>
 
 #include "CD_NamespaceHeader.H"
 
 /*!
-  @brief Iterator class for ito_layout
+  @brief Iterator class for ItoLayout
 */
 template <class T>
 class ito_iterator {
@@ -38,7 +38,7 @@ public:
   /*!
     @brief Full constructor
   */
-  ito_iterator(ito_layout<T>& a_layout, const SpeciesIteration a_mode = SpeciesIteration::all);
+  ito_iterator(ItoLayout<T>& a_layout, const SpeciesIteration a_mode = SpeciesIteration::all);
 
   /*!
     @brief Destructor

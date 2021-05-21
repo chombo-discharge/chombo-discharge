@@ -1,16 +1,20 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   ito_layout.H
+  @file   CD_ItoLayout.H
   @brief  Declaration of a class that holds a set of ItoSolvers
   @author Robert Marskar
-  @date   May 2020
 */
 
-#ifndef _ITO_LAYOUT_
-#define _ITO_LAYOUT_
+#ifndef CD_ItoLayout_H
+#define CD_ItoLayout_H
 
+// Our includes
 #include <CD_ItoSolver.H>
-
-#include "CD_NamespaceHeader.H"
+#include <CD_NamespaceHeader.H>
   
 template <class T>
 class ito_iterator;
@@ -19,23 +23,23 @@ class ito_iterator;
   @brief Class for holding a set of ItoSolvers
 */
 template <class T>
-class ito_layout{
+class ItoLayout{
 public:
 
   /*!
     @brief Default constructor. Must subsequently call define. 
   */
-  ito_layout();
+  ItoLayout();
 
   /*!
     @brief Full constructor. Calls define. 
   */
-  ito_layout(const Vector<RefCountedPtr<ItoSpecies> >& a_species);
+  ItoLayout(const Vector<RefCountedPtr<ItoSpecies> >& a_species);
 
   /*!
     @brief Destructor. 
   */
-  ~ito_layout();
+  ~ItoLayout();
 
   /*!
     @brief Return phase
@@ -231,7 +235,7 @@ public:
   /*!
     @brief Get all densities
   */
-  virtual Vector<EBAMRCellData*> get_densities();
+  virtual Vector<EBAMRCellData*> getDensities();
 
   /*!
     @brief Get all scratch storage
@@ -288,17 +292,18 @@ protected:
 };
 
 /*!
-  @brief Factory class for ito_layout
+  @brief Factory class for ItoLayout
 */
 template <class T, class S>
-class ito_factory {
+class itoFactory {
 public:
-  ito_factory();
-  ~ito_factory();
-  RefCountedPtr<ito_layout<T> > newLayout(const Vector<RefCountedPtr<ItoSpecies> > a_species) const;
+  itoFactory();
+  ~itoFactory();
+  RefCountedPtr<ItoLayout<T> > newLayout(const Vector<RefCountedPtr<ItoSpecies> > a_species) const;
 };
-#include "CD_NamespaceFooter.H"
 
-#include "ito_layoutI.H"
+#include <CD_NamespaceFooter.H>
+
+#include <CD_ItoLayoutImplem.H>
 
 #endif

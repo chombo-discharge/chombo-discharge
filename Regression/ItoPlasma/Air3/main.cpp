@@ -2,7 +2,7 @@
 #include <CD_GeoCoarsener.H>
 #include "CD_FieldSolverFactoryImplem.H"
 #include "CD_FieldSolverMultigrid.H"
-#include "ito_layout.H"
+#include <CD_ItoLayout.H>
 #include <CD_ItoSolver.H>
 #include <CD_RtLayout.H>
 #include <CD_McPhoto.H>
@@ -53,7 +53,7 @@ int main(int argc, char* argv[]){
 
   // Create solver factories
   auto poi_fact = new FieldSolverFactory<FieldSolverMultigrid>();
-  auto ito_fact = new ito_factory<ItoSolver, ItoSolver>();
+  auto ito_fact = new itoFactory<ItoSolver, ItoSolver>();
   auto rte_fact = new RtFactory<McPhoto, McPhoto>();
 
   // Instantiate solvers

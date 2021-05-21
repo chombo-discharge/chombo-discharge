@@ -12,6 +12,7 @@
 
 #include <EBArith.H>
 #include <PolyGeom.H>
+#include <ParmParse.H>
 
 #include "CD_NamespaceHeader.H"
 using namespace physics::ito_plasma;
@@ -823,7 +824,7 @@ int ito_plasma_stepper::getNumberOfPlotVariables() const {
   return ncomp;
 }
 
-void ito_plasma_stepper::set_ito(RefCountedPtr<ito_layout<ItoSolver> >& a_ito){
+void ito_plasma_stepper::set_ito(RefCountedPtr<ItoLayout<ItoSolver> >& a_ito){
   CH_TIME("ito_plasma_stepper::set_ito");
   if(m_verbosity > 5){
     pout() << "ito_plasma_stepper::set_ito" << endl;
@@ -992,7 +993,7 @@ void ito_plasma_stepper::compute_rho(){
     pout() << "ito_plasma_stepper::compute_rho()" << endl;
   }
   
-  this->compute_rho(m_fieldSolver->getRho(), m_ito->get_densities());
+  this->compute_rho(m_fieldSolver->getRho(), m_ito->getDensities());
 }
 
 void ito_plasma_stepper::compute_rho(MFAMRCellData& a_rho, const Vector<EBAMRCellData*>&  a_densities){
@@ -1777,7 +1778,7 @@ void ito_plasma_stepper::compute_ito_diffusion_lfa(){
   }
 
   Vector<EBAMRCellData*> diffco_funcs = m_ito->getDiffusionFunctions();
-  Vector<EBAMRCellData*> densities    = m_ito->get_densities();
+  Vector<EBAMRCellData*> densities    = m_ito->getDensities();
 
   this->compute_ito_diffusion_lfa(diffco_funcs, densities, m_particle_E, m_time);
 }
@@ -2794,7 +2795,7 @@ Real ito_plasma_stepper::compute_physics_dt() const{
 
   // TLDR: This is done on the particle Realm because of the densities (which are defined on the particle Realm). 
 
-  const Real dt = this->compute_physics_dt(m_particle_E, m_ito->get_densities());
+  const Real dt = this->compute_physics_dt(m_particle_E, m_ito->getDensities());
 
   return dt;
 }
