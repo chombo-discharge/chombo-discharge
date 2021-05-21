@@ -293,32 +293,32 @@ namespace Physics {
       /*!
 	@brief Compute the cell-centered electric field on both phases
       */
-      virtual void compute_E(MFAMRCellData& a_E, const MFAMRCellData& a_potential);
+      virtual void computeElectricField(MFAMRCellData& a_E, const MFAMRCellData& a_potential);
 
       /*!
 	@brief Compute the cell-centered electric field on a specific phase using whatever is available in m_fieldSolver
       */
-      virtual void compute_E(EBAMRCellData& a_E, const phase::which_phase a_phase);
+      virtual void computeElectricField(EBAMRCellData& a_E, const phase::which_phase a_phase);
 
       /*!
 	@brief Compute the cell-centered electric field on a specific phase
       */
-      virtual void compute_E(EBAMRCellData& a_E, const phase::which_phase a_phase, const MFAMRCellData& a_potential);
+      virtual void computeElectricField(EBAMRCellData& a_E, const phase::which_phase a_phase, const MFAMRCellData& a_potential);
 
       /*!
 	@brief Compute the face-centered electric field (only normal components)
       */
-      virtual void compute_E(EBAMRFluxData& a_E_face, const phase::which_phase a_phase, const EBAMRCellData& a_E_cell);
+      virtual void computeElectricField(EBAMRFluxData& a_E_face, const phase::which_phase a_phase, const EBAMRCellData& a_E_cell);
   
       /*!
 	@brief Compute the face-centered electric field (only normal components)
       */
-      virtual void compute_E(EBAMRIVData& a_E_eb, const phase::which_phase a_phase, const EBAMRCellData& a_E_cell);
+      virtual void computeElectricField(EBAMRIVData& a_E_eb, const phase::which_phase a_phase, const EBAMRCellData& a_E_cell);
 
       /*!
 	@brief Compute the maximum of the electric field
       */
-      virtual void compute_Emax(Real& a_Emax, const phase::which_phase a_phase);
+      virtual void computeElectricFieldmax(Real& a_Emax, const phase::which_phase a_phase);
 
       /*!
 	@brief Compute the current density

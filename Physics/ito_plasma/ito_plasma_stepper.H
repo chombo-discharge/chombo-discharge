@@ -128,14 +128,14 @@ namespace Physics {
 
       // Get routines
       Real getTime() const;
-      Real compute_Emax(const phase::which_phase a_phase);
+      Real computeElectricFieldmax(const phase::which_phase a_phase);
 
       // E-field computations
-      void compute_E(MFAMRCellData& a_E,      const MFAMRCellData& a_potential);
-      void compute_E(EBAMRCellData& a_E,      const phase::which_phase a_phase);
-      void compute_E(EBAMRCellData& a_E,      const phase::which_phase a_phase, const MFAMRCellData& a_potential);
-      void compute_E(EBAMRFluxData& a_E_face, const phase::which_phase a_phase, const EBAMRCellData& a_E_cell);
-      void compute_E(EBAMRIVData& a_E_eb,     const phase::which_phase a_phase, const EBAMRCellData& a_E_cell);
+      void computeElectricField(MFAMRCellData& a_E,      const MFAMRCellData& a_potential);
+      void computeElectricField(EBAMRCellData& a_E,      const phase::which_phase a_phase);
+      void computeElectricField(EBAMRCellData& a_E,      const phase::which_phase a_phase, const MFAMRCellData& a_potential);
+      void computeElectricField(EBAMRFluxData& a_E_face, const phase::which_phase a_phase, const EBAMRCellData& a_E_cell);
+      void computeElectricField(EBAMRIVData& a_E_eb,     const phase::which_phase a_phase, const EBAMRCellData& a_E_cell);
       
       // Compute rho routines
       void compute_rho();
@@ -324,10 +324,10 @@ namespace Physics {
       void sortDomainPhotonsByPatch();
 
       // Routines for computing EdotJ per species, including the diffusive contribution. a_source is defined on the particle Realm.
-      void compute_EdotJ_source(const Real a_dt);
-      void compute_EdotJ_source();
-      void compute_EdotJ_source_nwo();
-      void compute_EdotJ_source_nwo2(const Real a_dt);
+      void computeElectricFielddotJ_source(const Real a_dt);
+      void computeElectricFielddotJ_source();
+      void computeElectricFielddotJ_source_nwo();
+      void computeElectricFielddotJ_source_nwo2(const Real a_dt);
 
 
     protected:

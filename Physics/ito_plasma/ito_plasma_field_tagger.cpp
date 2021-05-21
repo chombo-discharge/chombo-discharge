@@ -48,13 +48,13 @@ void ito_plasma_field_tagger::deallocate_storage(){
   m_amr->deallocate(m_grad_E);
 }
 
-void ito_plasma_field_tagger::compute_E(EBAMRCellData& a_E, EBAMRCellData& a_grad_E){
-  CH_TIME("ito_plasma_field_tagger::compute_E");
+void ito_plasma_field_tagger::computeElectricField(EBAMRCellData& a_E, EBAMRCellData& a_grad_E){
+  CH_TIME("ito_plasma_field_tagger::computeElectricField");
   if(m_verbosity > 5){
-    pout() << m_name + "::compute_E" << endl;
+    pout() << m_name + "::computeElectricField" << endl;
   }
 
-  m_timeStepper->compute_E(a_E, m_phase);
+  m_timeStepper->computeElectricField(a_E, m_phase);
   DataOps::vectorLength(m_scratch, a_E);
   m_amr->computeGradient(a_grad_E, m_scratch, m_realm, phase::gas);
 
@@ -78,7 +78,7 @@ void ito_plasma_field_tagger::computeTracers(){
   const Real time       = m_timeStepper->getTime();
 
   // Compute electric field on volumetric centroids
-  this->compute_E(m_E, m_grad_E);
+  this->computeElectricField(m_E, m_grad_E);
 
   // Get maximum and minimum of everything
   Real E_max, E_min;

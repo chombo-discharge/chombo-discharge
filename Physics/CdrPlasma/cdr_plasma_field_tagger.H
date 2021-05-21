@@ -72,7 +72,7 @@ namespace Physics {
       /*!
 	@brief Compute electric field
       */
-      void compute_E(EBAMRCellData& a_E, EBAMRCellData& a_grad_E);
+      void computeElectricField(EBAMRCellData& a_E, EBAMRCellData& a_grad_E);
     
       /*!
 	@brief Compute tracer field

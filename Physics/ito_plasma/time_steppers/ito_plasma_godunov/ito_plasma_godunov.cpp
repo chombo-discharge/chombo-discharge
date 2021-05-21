@@ -376,7 +376,7 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   // If we are using the LEA, we must compute the Ohmic heating term. This must be done
   // BEFORE sorting the particles per cell. 
   if(m_physics->get_coupling() == ito_plasma_physics::coupling::LEA){
-    this->compute_EdotJ_source(a_dt);
+    this->computeElectricFielddotJ_source(a_dt);
   }
   
   // Sort the particles and Photons per cell so we can call reaction algorithms

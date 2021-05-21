@@ -560,7 +560,7 @@ Real imex_sdc::advance(const Real a_dt){
 	
 	if(retry_step){
 	  imex_sdc::restore_solvers();
-	  imex_sdc::compute_E_into_scratch();
+	  imex_sdc::computeElectricField_into_scratch();
 	  imex_sdc::compute_cdr_gradients();
 	  imex_sdc::compute_cdr_velo(m_time);
 	  cdr_plasma_stepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
@@ -672,7 +672,7 @@ void imex_sdc::integrate(const Real a_dt, const Real a_time, const bool a_lagged
   for(int m = 0; m < m_p; m++){
 
     // Update source terms every time we go through this
-    imex_sdc::compute_E_into_scratch();
+    imex_sdc::computeElectricField_into_scratch();
     imex_sdc::compute_reaction_network(m, a_time, m_dtm[m]); // Ppdate the CDR and RTE source terms using the correct step size
 
     // Always update boundary conditions on the way in. All of these calls use the stuff that reside in the solvers,
@@ -1366,10 +1366,10 @@ void imex_sdc::deallocateInternals(){
   m_sigma_scratch = RefCountedPtr<sigma_storage>(0);
 }
 
-void imex_sdc::compute_E_into_scratch(){
-  CH_TIME("imex_sdc::compute_E_into_scratch");
+void imex_sdc::computeElectricField_into_scratch(){
+  CH_TIME("imex_sdc::computeElectricField_into_scratch");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::compute_E_into_scratch" << endl;
+    pout() << "imex_sdc::computeElectricField_into_scratch" << endl;
   }
   
   EBAMRCellData& E_cell = m_fieldSolver_scratch->get_E_cell();
@@ -1379,9 +1379,9 @@ void imex_sdc::compute_E_into_scratch(){
 
   const MFAMRCellData& phi = m_fieldSolver->getPotential();
   
-  imex_sdc::compute_E(E_cell, m_cdr->getPhase(), phi);     // Compute cell-centered field
-  imex_sdc::compute_E(E_face, m_cdr->getPhase(), E_cell);  // Compute face-centered field
-  imex_sdc::compute_E(E_eb,   m_cdr->getPhase(), E_cell);  // EB-centered field
+  imex_sdc::computeElectricField(E_cell, m_cdr->getPhase(), phi);     // Compute cell-centered field
+  imex_sdc::computeElectricField(E_face, m_cdr->getPhase(), E_cell);  // Compute face-centered field
+  imex_sdc::computeElectricField(E_eb,   m_cdr->getPhase(), E_cell);  // EB-centered field
 
   cdr_plasma_stepper::extrapolate_to_domain_faces(E_dom, m_cdr->getPhase(), E_cell);
 }
@@ -1749,7 +1749,7 @@ void imex_sdc::update_poisson(){
   if(m_do_poisson){ // Solve Poisson equation
     if((m_timeStep +1) % m_fast_poisson == 0){
       cdr_plasma_stepper::solve_poisson();
-      this->compute_E_into_scratch();
+      this->computeElectricField_into_scratch();
     }
   }
 }
@@ -1767,7 +1767,7 @@ void imex_sdc::update_poisson(const Vector<EBAMRCellData*>& a_densities, const E
 					a_densities,
 					a_sigma,
 					centering::cell_center);
-      this->compute_E_into_scratch();
+      this->computeElectricField_into_scratch();
     }
   }
 }

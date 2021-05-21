@@ -137,7 +137,7 @@ void cdr_plasma_stepper::advanceReactionNetwork(const Real a_time, const Real a_
   // Compute the electric field
   EBAMRCellData E;
   m_amr->allocate(E, m_realm, m_cdr->getPhase(), SpaceDim);
-  this->compute_E(E, m_cdr->getPhase(), m_fieldSolver->getPotential());
+  this->computeElectricField(E, m_cdr->getPhase(), m_fieldSolver->getPotential());
 
 
   Vector<EBAMRCellData*> particle_sources = m_cdr->getSources();
@@ -2440,7 +2440,7 @@ void cdr_plasma_stepper::computeCdrDriftVelocities(){
   // Compute the electric field (again)
   EBAMRCellData E;
   m_amr->allocate(E, m_realm, m_cdr->getPhase(), SpaceDim);
-  this->compute_E(E, m_cdr->getPhase(), m_fieldSolver->getPotential());
+  this->computeElectricField(E, m_cdr->getPhase(), m_fieldSolver->getPotential());
 
   Vector<EBAMRCellData*> states     = m_cdr->getPhis();
   Vector<EBAMRCellData*> velocities = m_cdr->getVelocities();
@@ -2462,8 +2462,8 @@ void cdr_plasma_stepper::compute_cdr_diffusion(){
   m_amr->allocate(E_cell, m_realm, m_cdr->getPhase(), SpaceDim);
   m_amr->allocate(E_eb,   m_realm, m_cdr->getPhase(), SpaceDim);
   
-  this->compute_E(E_cell, m_cdr->getPhase(), m_fieldSolver->getPotential());
-  this->compute_E(E_eb,   m_cdr->getPhase(), E_cell);
+  this->computeElectricField(E_cell, m_cdr->getPhase(), m_fieldSolver->getPotential());
+  this->computeElectricField(E_eb,   m_cdr->getPhase(), E_cell);
 
   Vector<EBAMRCellData*> cdr_states  = m_cdr->getPhis();
 
@@ -2529,10 +2529,10 @@ void cdr_plasma_stepper::compute_cdr_diffusion(const EBAMRCellData& a_E_cell, co
   }
 }
 
-void cdr_plasma_stepper::compute_E(MFAMRCellData& a_E, const MFAMRCellData& a_potential){
-  CH_TIME("cdr_plasma_stepper::compute_E(mfamrcell, mfamrcell)");
+void cdr_plasma_stepper::computeElectricField(MFAMRCellData& a_E, const MFAMRCellData& a_potential){
+  CH_TIME("cdr_plasma_stepper::computeElectricField(mfamrcell, mfamrcell)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_E(mfamrcell, mfamrcell)" << endl;
+    pout() << "cdr_plasma_stepper::computeElectricField(mfamrcell, mfamrcell)" << endl;
   }
 
   m_amr->computeGradient(a_E, a_potential, m_realm);
@@ -2542,19 +2542,19 @@ void cdr_plasma_stepper::compute_E(MFAMRCellData& a_E, const MFAMRCellData& a_po
   m_amr->interpGhost(a_E, m_realm);
 }
 
-void cdr_plasma_stepper::compute_E(EBAMRCellData& a_E, const phase::which_phase a_phase){
-  CH_TIME("cdr_plasma_stepper::compute_E(ebamrcell, phase)");
+void cdr_plasma_stepper::computeElectricField(EBAMRCellData& a_E, const phase::which_phase a_phase){
+  CH_TIME("cdr_plasma_stepper::computeElectricField(ebamrcell, phase)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_E(ebamrcell, phase)" << endl;
+    pout() << "cdr_plasma_stepper::computeElectricField(ebamrcell, phase)" << endl;
   }
 
-  this->compute_E(a_E, a_phase, m_fieldSolver->getPotential());
+  this->computeElectricField(a_E, a_phase, m_fieldSolver->getPotential());
 }
 
-void cdr_plasma_stepper::compute_E(EBAMRCellData& a_E, const phase::which_phase a_phase, const MFAMRCellData& a_potential){
-  CH_TIME("cdr_plasma_stepper::compute_E(ebamrcell, phase, mfamrcell)");
+void cdr_plasma_stepper::computeElectricField(EBAMRCellData& a_E, const phase::which_phase a_phase, const MFAMRCellData& a_potential){
+  CH_TIME("cdr_plasma_stepper::computeElectricField(ebamrcell, phase, mfamrcell)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_E(ebamrcell, phase, mfamrcell)" << endl;
+    pout() << "cdr_plasma_stepper::computeElectricField(ebamrcell, phase, mfamrcell)" << endl;
   }
 
   EBAMRCellData pot_gas;
@@ -2568,10 +2568,10 @@ void cdr_plasma_stepper::compute_E(EBAMRCellData& a_E, const phase::which_phase 
   m_amr->interpGhost(a_E, m_realm, a_phase);
 }
 
-void cdr_plasma_stepper::compute_E(EBAMRFluxData& a_E_face, const phase::which_phase a_phase, const EBAMRCellData& a_E_cell){
-  CH_TIME("cdr_plasma_stepper::compute_E(ebamrflux, phase, ebamrcell)");
+void cdr_plasma_stepper::computeElectricField(EBAMRFluxData& a_E_face, const phase::which_phase a_phase, const EBAMRCellData& a_E_cell){
+  CH_TIME("cdr_plasma_stepper::computeElectricField(ebamrflux, phase, ebamrcell)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_E(ebamrflux, phase, ebamrcell)" << endl;
+    pout() << "cdr_plasma_stepper::computeElectricField(ebamrflux, phase, ebamrcell)" << endl;
   }
 
   CH_assert(a_E_face[0]->nComp() == SpaceDim);
@@ -2611,10 +2611,10 @@ void cdr_plasma_stepper::compute_E(EBAMRFluxData& a_E_face, const phase::which_p
   }
 }
 
-void cdr_plasma_stepper::compute_E(EBAMRIVData& a_E_eb, const phase::which_phase a_phase, const EBAMRCellData& a_E_cell){
-  CH_TIME("cdr_plasma_stepper::compute_E(ebamriv, phase, ebamrcell)");
+void cdr_plasma_stepper::computeElectricField(EBAMRIVData& a_E_eb, const phase::which_phase a_phase, const EBAMRCellData& a_E_cell){
+  CH_TIME("cdr_plasma_stepper::computeElectricField(ebamriv, phase, ebamrcell)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_E(ebamriv, phase, ebamrcell)" << endl;
+    pout() << "cdr_plasma_stepper::computeElectricField(ebamriv, phase, ebamrcell)" << endl;
   }
 
   CH_assert(a_E_eb[0]->nComp()   == SpaceDim);
@@ -2624,16 +2624,16 @@ void cdr_plasma_stepper::compute_E(EBAMRIVData& a_E_eb, const phase::which_phase
   interp_stencil.apply(a_E_eb, a_E_cell);
 }
 
-void cdr_plasma_stepper::compute_Emax(Real& a_Emax, const phase::which_phase a_phase){
-  CH_TIME("cdr_plasma_stepper::compute_Emax(Real, phase)");
+void cdr_plasma_stepper::computeElectricFieldmax(Real& a_Emax, const phase::which_phase a_phase){
+  CH_TIME("cdr_plasma_stepper::computeElectricFieldmax(Real, phase)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_Emax(Real, phase)" << endl;
+    pout() << "cdr_plasma_stepper::computeElectricFieldmax(Real, phase)" << endl;
   }
 
   EBAMRCellData E;
   m_amr->allocate(E, m_realm, a_phase, SpaceDim);
 
-  this->compute_E(E, a_phase, m_fieldSolver->getPotential());
+  this->computeElectricField(E, a_phase, m_fieldSolver->getPotential());
   m_amr->interpToCentroids(E, m_realm, a_phase);
 
   Real max, min;
@@ -3744,7 +3744,7 @@ void cdr_plasma_stepper::solve_rte(const Real a_dt){
 
   EBAMRCellData E;
   m_amr->allocate(E, m_realm, rte_phase, SpaceDim);
-  this->compute_E(E, rte_phase, m_fieldSolver->getPotential());
+  this->computeElectricField(E, rte_phase, m_fieldSolver->getPotential());
 
   Vector<EBAMRCellData*> states     = m_rte->getPhis();
   Vector<EBAMRCellData*> rhs        = m_rte->getSources();
@@ -3956,7 +3956,7 @@ Real cdr_plasma_stepper::compute_ohmic_induction_current(){
   m_amr->allocate(E,     m_realm, m_cdr->getPhase(), SpaceDim);
   m_amr->allocate(JdotE, m_realm, m_cdr->getPhase(), SpaceDim);
 
-  this->compute_E(E, m_cdr->getPhase(), m_fieldSolver->getPotential());
+  this->computeElectricField(E, m_cdr->getPhase(), m_fieldSolver->getPotential());
   this->compute_J(J);
 
   // Compute J.dot.E 
@@ -3990,7 +3990,7 @@ Real cdr_plasma_stepper::compute_relaxation_time(){
 
   DataOps::setValue(dt, 1.234567E89);
 
-  this->compute_E(E, m_cdr->getPhase(), m_fieldSolver->getPotential());
+  this->computeElectricField(E, m_cdr->getPhase(), m_fieldSolver->getPotential());
   this->compute_J(J);
 
   // Find the largest electric field in each direction
@@ -4232,7 +4232,7 @@ void cdr_plasma_stepper::printStepReport(){
 
   // Compute the maximum electric field
   Real Emax;
-  this->compute_Emax(Emax, phase::gas);
+  this->computeElectricFieldmax(Emax, phase::gas);
 
   //
   Real nmax;

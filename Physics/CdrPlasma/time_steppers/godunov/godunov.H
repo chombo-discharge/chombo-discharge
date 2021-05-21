@@ -79,7 +79,7 @@ namespace Physics {
       Real restrict_dt();
 
       // Aux functions
-      void compute_E_into_scratch();
+      void computeElectricField_into_scratch();
       void compute_cdr_gradients();
       void compute_cdr_eb_states();
       void compute_cdr_eb_fluxes();

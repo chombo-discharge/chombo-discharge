@@ -273,7 +273,7 @@ Real godunov::advance(const Real a_dt){
   // These calls are responsible for filling CDR and sigma solver boundary conditions
   // on the EB and on the domain walls
   t0 = MPI_Wtime();
-  godunov::compute_E_into_scratch();       // Compute the electric field
+  godunov::computeElectricField_into_scratch();       // Compute the electric field
   godunov::compute_cdr_gradients();        // Compute cdr gradients
   godunov::extrapolateSourceTerm(a_dt);            // If we used advective extrapolation, BCs are more work. 
   godunov::compute_cdr_eb_states();        // Extrapolate cell-centered stuff to EB centroids
@@ -297,7 +297,7 @@ Real godunov::advance(const Real a_dt){
   t_pois = t1 - t0;
 
   t0 = MPI_Wtime();
-  godunov::compute_E_into_scratch();       // Update electric fields too
+  godunov::computeElectricField_into_scratch();       // Update electric fields too
   t1 = MPI_Wtime();
   t_filE = t1-t0;
 
@@ -432,10 +432,10 @@ void godunov::deallocateInternals(){
   m_sigma_scratch = RefCountedPtr<sigma_storage>(0);
 }
 
-void godunov::compute_E_into_scratch(){
-  CH_TIME("godunov::compute_E_into_scratch");
+void godunov::computeElectricField_into_scratch(){
+  CH_TIME("godunov::computeElectricField_into_scratch");
   if(m_verbosity > 5){
-    pout() << "godunov::compute_E_into_scratch" << endl;
+    pout() << "godunov::computeElectricField_into_scratch" << endl;
   }
   
   EBAMRCellData& E_cell = m_fieldSolver_scratch->get_E_cell();
@@ -444,8 +444,8 @@ void godunov::compute_E_into_scratch(){
 
   const MFAMRCellData& phi = m_fieldSolver->getPotential();
 
-  cdr_plasma_stepper::compute_E(E_cell, m_cdr->getPhase(), phi);     // Compute cell-centered field
-  cdr_plasma_stepper::compute_E(E_eb,   m_cdr->getPhase(), E_cell);  // EB-centered field
+  cdr_plasma_stepper::computeElectricField(E_cell, m_cdr->getPhase(), phi);     // Compute cell-centered field
+  cdr_plasma_stepper::computeElectricField(E_eb,   m_cdr->getPhase(), E_cell);  // EB-centered field
   cdr_plasma_stepper::extrapolate_to_domain_faces(E_dom, m_cdr->getPhase(), E_cell); // Domain centered field
 }
 
@@ -929,7 +929,7 @@ void godunov::advance_transport_rk2(const Real a_dt){
   // 2. Compute the electric field and update boundary conditions and kinetic coefficients
   if((m_timeStep +1) % m_fast_poisson == 0){
     cdr_plasma_stepper::solve_poisson();         // Update the Poisson equation
-    godunov::compute_E_into_scratch();       // Update electric fields too
+    godunov::computeElectricField_into_scratch();       // Update electric fields too
   }
   godunov::compute_cdr_velo(m_time + a_dt);
   godunov::compute_cdr_diffco(m_time + a_dt);

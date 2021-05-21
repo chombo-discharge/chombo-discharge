@@ -181,7 +181,7 @@ namespace Physics {
 
       // Aux functions
       void compute_reaction_network(const int a_m, const Real a_time, const Real a_dt);
-      void compute_E_into_scratch();
+      void computeElectricField_into_scratch();
       void compute_cdr_eb_states();
       void compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_phis);
       void compute_cdr_domain_states();

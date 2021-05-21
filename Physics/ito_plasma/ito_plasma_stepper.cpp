@@ -274,7 +274,7 @@ void ito_plasma_stepper::post_checkpoint_poisson(){
   m_amr->interpToCentroids(m_particle_E, m_particleRealm, m_phase);
 
   // Compute maximum E
-  // const Real Emax = this->compute_Emax(m_phase);
+  // const Real Emax = this->computeElectricFieldmax(m_phase);
   // std::cout << Emax << std::endl;
 }
 
@@ -436,7 +436,7 @@ void ito_plasma_stepper::printStepReport(){
     pout() << "ito_plasma_stepper::printStepReport" << endl;
   }
 
-  const Real Emax = this->compute_Emax(m_phase);
+  const Real Emax = this->computeElectricFieldmax(m_phase);
   
   const size_t l_particles        = m_ito->getNumParticles(ItoSolver::WhichContainer::bulk, true);
   const size_t g_particles        = m_ito->getNumParticles(ItoSolver::WhichContainer::bulk, false);
@@ -860,10 +860,10 @@ void ito_plasma_stepper::set_potential(const std::function<Real(const Real a_tim
   m_potential = a_potential;
 }
 
-Real ito_plasma_stepper::compute_Emax(const phase::which_phase a_phase) {
-  CH_TIME("ito_plasma_stepper::compute_Emax");
+Real ito_plasma_stepper::computeElectricFieldmax(const phase::which_phase a_phase) {
+  CH_TIME("ito_plasma_stepper::computeElectricFieldmax");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_Emax" << endl;
+    pout() << "ito_plasma_stepper::computeElectricFieldmax" << endl;
   }
 
   // Get a handle to the E-field
@@ -892,10 +892,10 @@ Real ito_plasma_stepper::getTime() const{
   return m_time;
 }
 
-void ito_plasma_stepper::compute_E(MFAMRCellData& a_E, const MFAMRCellData& a_potential){
-  CH_TIME("ito_plasma_stepper::compute_E(mfamrcell,mfamrcell)");
+void ito_plasma_stepper::computeElectricField(MFAMRCellData& a_E, const MFAMRCellData& a_potential){
+  CH_TIME("ito_plasma_stepper::computeElectricField(mfamrcell,mfamrcell)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_E(mfamrcell, mfamrcell" << endl;
+    pout() << "ito_plasma_stepper::computeElectricField(mfamrcell, mfamrcell" << endl;
   }
 
   m_amr->computeGradient(a_E, a_potential, m_fluid_Realm);
@@ -906,19 +906,19 @@ void ito_plasma_stepper::compute_E(MFAMRCellData& a_E, const MFAMRCellData& a_po
 
 }
 
-void ito_plasma_stepper::compute_E(EBAMRCellData& a_E, const phase::which_phase a_phase){
-  CH_TIME("ito_plasma_stepper::compute_E(ebamrcell, phase)");
+void ito_plasma_stepper::computeElectricField(EBAMRCellData& a_E, const phase::which_phase a_phase){
+  CH_TIME("ito_plasma_stepper::computeElectricField(ebamrcell, phase)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_E(ebamrcell, phase" << endl;
+    pout() << "ito_plasma_stepper::computeElectricField(ebamrcell, phase" << endl;
   }
 
-  this->compute_E(a_E, a_phase, m_fieldSolver->getPotential());
+  this->computeElectricField(a_E, a_phase, m_fieldSolver->getPotential());
 }
 
-void ito_plasma_stepper::compute_E(EBAMRCellData& a_E, const phase::which_phase a_phase, const MFAMRCellData& a_potential){
-  CH_TIME("ito_plasma_stepper::compute_E(ebamrcell, phase, mfamrcell)");
+void ito_plasma_stepper::computeElectricField(EBAMRCellData& a_E, const phase::which_phase a_phase, const MFAMRCellData& a_potential){
+  CH_TIME("ito_plasma_stepper::computeElectricField(ebamrcell, phase, mfamrcell)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_E(ebamrcell, phase mfamrcell" << endl;
+    pout() << "ito_plasma_stepper::computeElectricField(ebamrcell, phase mfamrcell" << endl;
   }
   
   EBAMRCellData pot_gas;
@@ -932,10 +932,10 @@ void ito_plasma_stepper::compute_E(EBAMRCellData& a_E, const phase::which_phase 
   m_amr->interpGhost(a_E, m_fluid_Realm, a_phase);
 }
 
-void ito_plasma_stepper::compute_E(EBAMRFluxData& a_E_face, const phase::which_phase a_phase, const EBAMRCellData& a_E_cell){
-  CH_TIME("ito_plasma_stepper::compute_E(ebamrflux, phase, mfamrcell)");
+void ito_plasma_stepper::computeElectricField(EBAMRFluxData& a_E_face, const phase::which_phase a_phase, const EBAMRCellData& a_E_cell){
+  CH_TIME("ito_plasma_stepper::computeElectricField(ebamrflux, phase, mfamrcell)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_E(ebamrflux, phase mfamrcell" << endl;
+    pout() << "ito_plasma_stepper::computeElectricField(ebamrflux, phase mfamrcell" << endl;
   }
 
   CH_assert(a_E_face[0]->nComp() == SpaceDim);
@@ -974,10 +974,10 @@ void ito_plasma_stepper::compute_E(EBAMRFluxData& a_E_face, const phase::which_p
   }
 }
 
-void ito_plasma_stepper::compute_E(EBAMRIVData& a_E_eb,  const phase::which_phase a_phase, const EBAMRCellData& a_E_cell){
-  CH_TIME("ito_plasma_stepper::compute_E(ebamriv, phase, ebamrcell)");
+void ito_plasma_stepper::computeElectricField(EBAMRIVData& a_E_eb,  const phase::which_phase a_phase, const EBAMRCellData& a_E_cell){
+  CH_TIME("ito_plasma_stepper::computeElectricField(ebamriv, phase, ebamrcell)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_E(ebamriv, phase ebamrcell)" << endl;
+    pout() << "ito_plasma_stepper::computeElectricField(ebamriv, phase ebamrcell)" << endl;
   }
 
   CH_assert(a_E_eb[0]->nComp()   == SpaceDim);
@@ -3228,26 +3228,26 @@ Vector<RefCountedPtr<ItoSolver> > ito_plasma_stepper::get_lb_solvers() const {
   return lb_solvers;
 }
 
-void ito_plasma_stepper::compute_EdotJ_source(const Real a_dt){
-  CH_TIME("ito_plasma_stepper::compute_EdotJ_source(a_dt)");
+void ito_plasma_stepper::computeElectricFielddotJ_source(const Real a_dt){
+  CH_TIME("ito_plasma_stepper::computeElectricFielddotJ_source(a_dt)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_EdotJ_source(a_dt)" << endl;
+    pout() << "ito_plasma_stepper::computeElectricFielddotJ_source(a_dt)" << endl;
   }
 
   // Swap between these two. 
   if(m_nwo_reactions){
-    //    this->compute_EdotJ_source_nwo();
-    this->compute_EdotJ_source_nwo2(a_dt);
+    //    this->computeElectricFielddotJ_source_nwo();
+    this->computeElectricFielddotJ_source_nwo2(a_dt);
   }
   else{
-    this->compute_EdotJ_source();
+    this->computeElectricFielddotJ_source();
   }
 }
 
-void ito_plasma_stepper::compute_EdotJ_source(){
-  CH_TIME("ito_plasma_stepper::compute_EdotJ_source()");
+void ito_plasma_stepper::computeElectricFielddotJ_source(){
+  CH_TIME("ito_plasma_stepper::computeElectricFielddotJ_source()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_EdotJ_source()" << endl;
+    pout() << "ito_plasma_stepper::computeElectricFielddotJ_source()" << endl;
   }
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -3289,10 +3289,10 @@ void ito_plasma_stepper::compute_EdotJ_source(){
   }
 }
 
-void ito_plasma_stepper::compute_EdotJ_source_nwo(){
-  CH_TIME("ito_plasma_stepper::compute_EdotJ_source_nwo()");
+void ito_plasma_stepper::computeElectricFielddotJ_source_nwo(){
+  CH_TIME("ito_plasma_stepper::computeElectricFielddotJ_source_nwo()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_EdotJ_source_nwo()" << endl;
+    pout() << "ito_plasma_stepper::computeElectricFielddotJ_source_nwo()" << endl;
   }
 
   DataOps::setValue(m_EdotJ, 0.0);
@@ -3335,10 +3335,10 @@ void ito_plasma_stepper::compute_EdotJ_source_nwo(){
   }
 }
 
-void ito_plasma_stepper::compute_EdotJ_source_nwo2(const Real a_dt){
-  CH_TIME("ito_plasma_stepper::compute_EdotJ_source_nwo2(a_dt)");
+void ito_plasma_stepper::computeElectricFielddotJ_source_nwo2(const Real a_dt){
+  CH_TIME("ito_plasma_stepper::computeElectricFielddotJ_source_nwo2(a_dt)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_EdotJ_source_nwo2(a_dt)" << endl;
+    pout() << "ito_plasma_stepper::computeElectricFielddotJ_source_nwo2(a_dt)" << endl;
   }
 
   DataOps::setValue(m_EdotJ, 0.0);
