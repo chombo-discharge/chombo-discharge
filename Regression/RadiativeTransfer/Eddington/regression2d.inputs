@@ -102,19 +102,19 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 # ====================================================================================================
 # ROD_DIELECTRIC CLASS OPTIONS
 # ====================================================================================================
-rod_dielectric.electrode.on              = false         # Use electrode or not
-rod_dielectric.electrode.endpoint1       = 0 0 0         # One endpoint
-rod_dielectric.electrode.endpoint2       = 0 0 2         # Other endpoint
-rod_dielectric.electrode.radius          = 0.1           # Electrode radius
-rod_dielectric.electrode.live            = true          # Live or not
+RodDielectric.electrode.on              = false         # Use electrode or not
+RodDielectric.electrode.endpoint1       = 0 0 0         # One endpoint
+RodDielectric.electrode.endpoint2       = 0 0 2         # Other endpoint
+RodDielectric.electrode.radius          = 0.1           # Electrode radius
+RodDielectric.electrode.live            = true          # Live or not
 
-rod_dielectric.dielectric.on             = true          # Use dielectric or not
-rod_dielectric.dielectric.shape          = sphere        # 'plane', 'box', 'perlin_box', 'sphere'.
-rod_dielectric.dielectric.permittivity   = 4             # Dielectric permittivity
+RodDielectric.dielectric.on             = true          # Use dielectric or not
+RodDielectric.dielectric.shape          = sphere        # 'plane', 'box', 'perlin_box', 'sphere'.
+RodDielectric.dielectric.permittivity   = 4             # Dielectric permittivity
 
 # Subsettings for sphere
-rod_dielectric.sphere.center             = 0 0 0         # Sphere center
-rod_dielectric.sphere.radius             = 0.15          # Radius
+RodDielectric.sphere.center             = 0 0 0         # Sphere center
+RodDielectric.sphere.radius             = 0.15          # Radius
 
 # ====================================================================================================
 # RTE_STEPPER CLASS OPTIONS

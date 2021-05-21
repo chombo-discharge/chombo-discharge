@@ -7,7 +7,7 @@
 #include <CD_RtLayoutImplem.H>
 #include <CD_McPhoto.H>
 #include "air7_stephens.H"
-#include "rod_dielectric.H"
+#include <CD_RodDielectric.H>
 #include "godunov.H"
 #include "streamer_tagger.H"
 #include "ParmParse.H"
@@ -41,7 +41,7 @@ int main(int argc, char* argv[]){
   }
 
   // Set geometry and AMR 
-  RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry> (new rod_dielectric());
+  RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry> (new RodDielectric());
   RefCountedPtr<AmrMesh> amr                    = RefCountedPtr<AmrMesh> (new AmrMesh());
   RefCountedPtr<GeoCoarsener> geocoarsen        = RefCountedPtr<GeoCoarsener> (new GeoCoarsener());
 

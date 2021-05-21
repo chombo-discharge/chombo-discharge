@@ -1,30 +1,35 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   rod_dielectric.cpp
-  @brief  Implementation of rod_dielectric.H
+  @file   CD_RodDielectric.cpp
+  @brief  Implementation of CD_RodDielectric.H
   @author Robert Marskar
-  @date   Nov. 2017
 */
 
-#include "rod_dielectric.H"
+// Chombo includes
+#include <PlaneIF.H>
+#include <ParmParse.H>
+
+// Our includes
+#include <CD_RodDielectric.H>
 #include <CD_RodIF.H>
 #include <CD_PerlinSlabSdf.H>
 #include <CD_SphereSdf.H>
 #include <CD_WedgeIF.H>
 #include <CD_RoundedBoxIF.H>
+#include <CD_NamespaceHeader.H>
 
-#include <PlaneIF.H>
-#include <ParmParse.H>
-
-#include "CD_NamespaceHeader.H"
-
-rod_dielectric::rod_dielectric(){
+RodDielectric::RodDielectric(){
   m_dielectrics.resize(0);
   m_electrodes.resize(0);
 
   this->setGasPermittivity(1.0);
 
-  ParmParse ppRod("rod_dielectric.electrode");
-  ParmParse ppIns("rod_dielectric.dielectric");
+  ParmParse ppRod("RodDielectric.electrode");
+  ParmParse ppIns("RodDielectric.dielectric");
 
   bool useRod;
   bool useIns;
@@ -32,21 +37,21 @@ rod_dielectric::rod_dielectric(){
   ppRod.get("on", useRod);
   ppIns.get("on", useIns);
 
-  if(useRod) this->define_electrode();
-  if(useIns) this->define_insulator();
+  if(useRod) this->defineElectrode();
+  if(useIns) this->defineInsulator();
 }
 
-rod_dielectric::~rod_dielectric(){
+RodDielectric::~RodDielectric(){
   
 }
 
-void rod_dielectric::define_electrode(){
+void RodDielectric::defineElectrode(){
   Vector<Real> v(SpaceDim);
   RealVect e1, e2;
   Real r;
   bool live;
 
-  ParmParse pp("rod_dielectric.electrode");
+  ParmParse pp("RodDielectric.electrode");
 
   pp.get("radius", r);
   pp.get("live",   live);
@@ -58,8 +63,8 @@ void rod_dielectric::define_electrode(){
   m_electrodes.push_back(Electrode(bif, live));
 }
 
-void rod_dielectric::define_insulator(){
-  ParmParse pp("rod_dielectric.dielectric");
+void RodDielectric::defineInsulator(){
+  ParmParse pp("RodDielectric.dielectric");
 
   std::string str;
   Real eps;
@@ -69,19 +74,19 @@ void rod_dielectric::define_insulator(){
 
   RefCountedPtr<BaseIF> bif;
   if(str == "plane"){
-    bif = this->get_plane();
+    bif = this->getPlane();
   }
   else if(str == "box"){
-    bif = this->get_box();
+    bif = this->getBox();
   }
   else if(str == "perlin_box"){
-    bif = this->get_perlin_box();
+    bif = this->getPerlinBox();
   }
   else if(str == "sphere"){
-    bif = this->get_sphere();
+    bif = this->getSphere();
   }
   else{
-    MayDay::Abort("rod_dielectric.:define_insulator - unsupported shape");
+    MayDay::Abort("RodDielectric.:defineInsulator - unsupported shape");
   }
   
   m_dielectrics.push_back(Dielectric(bif, eps));
@@ -89,8 +94,8 @@ void rod_dielectric::define_insulator(){
 
 
 
-RefCountedPtr<BaseIF> rod_dielectric::get_box(){
-  ParmParse pp("rod_dielectric.box");
+RefCountedPtr<BaseIF> RodDielectric::getBox(){
+  ParmParse pp("RodDielectric.box");
 
   Vector<Real> v(SpaceDim);
   RealVect lo, hi;
@@ -104,8 +109,8 @@ RefCountedPtr<BaseIF> rod_dielectric::get_box(){
   return RefCountedPtr<BaseIF> (new RoundedBoxIF(lo, hi, curv, false));
 }
 
-RefCountedPtr<BaseIF> rod_dielectric::get_plane(){
-  ParmParse pp("rod_dielectric.plane");
+RefCountedPtr<BaseIF> RodDielectric::getPlane(){
+  ParmParse pp("RodDielectric.plane");
 
   Vector<Real> v(SpaceDim);
   RealVect p, n;
@@ -116,8 +121,8 @@ RefCountedPtr<BaseIF> rod_dielectric::get_plane(){
   return RefCountedPtr<BaseIF> (new PlaneIF(n, p, true));
 }
 
-RefCountedPtr<BaseIF> rod_dielectric::get_sphere(){
-  ParmParse pp("rod_dielectric.sphere");
+RefCountedPtr<BaseIF> RodDielectric::getSphere(){
+  ParmParse pp("RodDielectric.sphere");
 
   Vector<Real> v(SpaceDim);
   RealVect p;
@@ -129,8 +134,8 @@ RefCountedPtr<BaseIF> rod_dielectric::get_sphere(){
   return RefCountedPtr<BaseIF> (new SphereSdf(p, r, false));
 }
 
-RefCountedPtr<BaseIF> rod_dielectric::get_perlin_box(){
-  ParmParse pp("rod_dielectric.perlin_box");
+RefCountedPtr<BaseIF> RodDielectric::getPerlinBox(){
+  ParmParse pp("RodDielectric.perlin_box");
   
   Vector<Real> v(SpaceDim);
   RealVect p, n, xyz, freq;
@@ -151,4 +156,5 @@ RefCountedPtr<BaseIF> rod_dielectric::get_perlin_box(){
 
   return RefCountedPtr<BaseIF> (new PerlinSlabSdf(p,n, xyz, freq, octaves, amp, persist, curv, reseed, false));
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

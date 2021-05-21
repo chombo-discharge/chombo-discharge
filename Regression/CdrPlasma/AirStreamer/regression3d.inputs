@@ -164,39 +164,39 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 # ====================================================================================================
 # ROD_DIELECTRIC CLASS OPTIONS
 # ====================================================================================================
-rod_dielectric.electrode.on              = true          # Use electrode or not
-rod_dielectric.electrode.endpoint1       = 0 0 0         # One endpoint
-rod_dielectric.electrode.endpoint2       = 0 0 1         # Other endpoint
-rod_dielectric.electrode.radius          = 250E-6        # Electrode radius
-rod_dielectric.electrode.live            = true          # Live or not
+RodDielectric.electrode.on              = true          # Use electrode or not
+RodDielectric.electrode.endpoint1       = 0 0 0         # One endpoint
+RodDielectric.electrode.endpoint2       = 0 0 1         # Other endpoint
+RodDielectric.electrode.radius          = 250E-6        # Electrode radius
+RodDielectric.electrode.live            = true          # Live or not
 
-rod_dielectric.dielectric.on             = false         # Use dielectric or not
-rod_dielectric.dielectric.shape          = perlin_box    # 'plane', 'box', 'perlin_box', 'sphere'
-rod_dielectric.dielectric.permittivity   = 4             # Dielectric permittivity
+RodDielectric.dielectric.on             = false         # Use dielectric or not
+RodDielectric.dielectric.shape          = perlin_box    # 'plane', 'box', 'perlin_box', 'sphere'
+RodDielectric.dielectric.permittivity   = 4             # Dielectric permittivity
 
 # Subsettings for 'plane'
-rod_dielectric.plane.point               = 0 0 0         # Plane point
-rod_dielectric.plane.normal              = 0 0 1         # Plane normal vector (outward)
+RodDielectric.plane.point               = 0 0 0         # Plane point
+RodDielectric.plane.normal              = 0 0 1         # Plane normal vector (outward)
 
 # Subsettings for 'box'
-rod_dielectric.box.lo_corner             = 0 0 0         # Low corner
-rod_dielectric.box.hi_corner             = 1 1 1         # Hi corner
-rod_dielectric.box.curvature             = 0.1
+RodDielectric.box.lo_corner             = 0 0 0         # Low corner
+RodDielectric.box.hi_corner             = 1 1 1         # Hi corner
+RodDielectric.box.curvature             = 0.1
 
 # Subsettings for 'perlin_box'
-rod_dielectric.perlin_box.point          = 0  0 -0.5     # Slab center-point (side with roughness)
-rod_dielectric.perlin_box.normal         = 0  0  1       # Slab normal
-rod_dielectric.perlin_box.curvature      = 0.1           # Slab rounding radius
-rod_dielectric.perlin_box.dimensions     = 1  1  1       # Slab dimensions
-rod_dielectric.perlin_box.noise_amp      = 0.1           # Noise amplitude
-rod_dielectric.perlin_box.noise_octaves  = 1             # Noise octaves
-rod_dielectric.perlin_box.noise_persist  = 0.5           # Octave persistence
-rod_dielectric.perlin_box.noise_freq     = 1 1 1         # Noise frequency
-rod_dielectric.perlin_box.noise_reseed   = false         # Reseed noise or not
+RodDielectric.perlin_box.point          = 0  0 -0.5     # Slab center-point (side with roughness)
+RodDielectric.perlin_box.normal         = 0  0  1       # Slab normal
+RodDielectric.perlin_box.curvature      = 0.1           # Slab rounding radius
+RodDielectric.perlin_box.dimensions     = 1  1  1       # Slab dimensions
+RodDielectric.perlin_box.noise_amp      = 0.1           # Noise amplitude
+RodDielectric.perlin_box.noise_octaves  = 1             # Noise octaves
+RodDielectric.perlin_box.noise_persist  = 0.5           # Octave persistence
+RodDielectric.perlin_box.noise_freq     = 1 1 1         # Noise frequency
+RodDielectric.perlin_box.noise_reseed   = false         # Reseed noise or not
 
 # Subsettings for sphere
-rod_dielectric.sphere.center             = 0 0 0         # Low corner
-rod_dielectric.sphere.radius             = 0.5           # Radius
+RodDielectric.sphere.center             = 0 0 0         # Low corner
+RodDielectric.sphere.radius             = 0.5           # Radius
 
 
 # ====================================================================================================

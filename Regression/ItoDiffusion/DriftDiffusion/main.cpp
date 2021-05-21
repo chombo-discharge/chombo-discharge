@@ -1,6 +1,6 @@
 #include "CD_Driver.H"
 #include <CD_ItoSolver.H>
-#include "rod_dielectric.H"
+#include <CD_RodDielectric.H>
 #include "brownian_walker_stepper.H"
 #include "brownian_walker_tagger.H"
 #include "ParmParse.H"
@@ -19,7 +19,7 @@ int main(int argc, char* argv[]){
   ParmParse pp(argc-2, argv+2, NULL, input_file.c_str());
 
   // Set geometry and AMR 
-  RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry> (new rod_dielectric());
+  RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry> (new RodDielectric());
   RefCountedPtr<AmrMesh> amr                    = RefCountedPtr<AmrMesh> (new AmrMesh());
   RefCountedPtr<GeoCoarsener> geocoarsen        = RefCountedPtr<GeoCoarsener> (new GeoCoarsener());
 

@@ -29,7 +29,7 @@ src_dirs = $(DISCHARGE_HOME)/Source \
 	$(DISCHARGE_HOME)/Source/Particle \
 	$(DISCHARGE_HOME)/Source/Utilities \
 	$(DISCHARGE_HOME)//Source/Electrostatics \
-	$(DISCHARGE_HOME)/Geometries/rod_dielectric\
+	$(DISCHARGE_HOME)/Geometries/RodDielectric\
 	$(DISCHARGE_HOME)/Physics/RadiativeTransfer \
 
 

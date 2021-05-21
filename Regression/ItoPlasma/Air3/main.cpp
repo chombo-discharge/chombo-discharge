@@ -7,7 +7,7 @@
 #include <CD_RtLayout.H>
 #include <CD_McPhoto.H>
 #include "ito_plasma_air3.H"
-#include "rod_dielectric.H"
+#include <CD_RodDielectric.H>
 #include "ito_plasma_godunov.H"
 #include "ito_plasma_streamer_tagger.H"
 #include "ParmParse.H"
@@ -42,7 +42,7 @@ int main(int argc, char* argv[]){
 
 
   // Set geometry and AMR 
-  RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry> (new rod_dielectric());
+  RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry> (new RodDielectric());
   RefCountedPtr<AmrMesh> amr                    = RefCountedPtr<AmrMesh> (new AmrMesh());
   RefCountedPtr<GeoCoarsener> geocoarsen        = RefCountedPtr<GeoCoarsener> (new GeoCoarsener());
 

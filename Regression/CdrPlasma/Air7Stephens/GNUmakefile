@@ -30,7 +30,7 @@ src_dirs = $(DISCHARGE_HOME)/Source \
 	$(DISCHARGE_HOME)//Source/Electrostatics \
 	$(DISCHARGE_HOME)/Source/RadiativeTransfer \
 	$(DISCHARGE_HOME)/Source/SigmaSolver \
-	$(DISCHARGE_HOME)/Geometries/rod_dielectric\
+	$(DISCHARGE_HOME)/Geometries/RodDielectric\
 	$(DISCHARGE_HOME)/Physics/cdr_plasma \
 	$(DISCHARGE_HOME)/Physics/cdr_plasma/cell_taggers/streamer_tagger\
 	$(DISCHARGE_HOME)/Physics/cdr_plasma/time_steppers/godunov\

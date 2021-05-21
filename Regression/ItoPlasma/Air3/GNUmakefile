@@ -31,7 +31,7 @@ src_dirs = $(DISCHARGE_HOME)/Source \
 	$(DISCHARGE_HOME)//Source/Electrostatics \
 	$(DISCHARGE_HOME)/Source/RadiativeTransfer \
 	$(DISCHARGE_HOME)/Source/SigmaSolver \
-	$(DISCHARGE_HOME)/Geometries/rod_dielectric\
+	$(DISCHARGE_HOME)/Geometries/RodDielectric\
 	$(DISCHARGE_HOME)/Physics/ito_plasma \
 	$(DISCHARGE_HOME)/Physics/ito_plasma/cell_taggers/ito_plasma_streamer_tagger\
 	$(DISCHARGE_HOME)/Physics/ito_plasma/time_steppers/ito_plasma_godunov\
