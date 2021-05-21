@@ -20,7 +20,7 @@
 #include <SphereIF.H>
 
 // Our includes
-n#include <CD_MechanicalShaft.H>
+#include <CD_MechanicalShaft.H>
 #include <CD_PerlinSphereSdf.H>
 #include <CD_BoxSdf.H>
 #include <CD_CylinderSdf.H>
