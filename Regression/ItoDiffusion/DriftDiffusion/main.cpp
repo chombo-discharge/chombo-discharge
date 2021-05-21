@@ -6,7 +6,7 @@
 #include "ParmParse.H"
 
 using namespace ChomboDischarge;
-using namespace physics::brownian_walker;
+using namespace Physics::BrownianWalker;
 
 int main(int argc, char* argv[]){
 
