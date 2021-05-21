@@ -33,10 +33,10 @@ sisdc_tagger::~sisdc_tagger(){
   
 }
 
-void sisdc_tagger::compute_tracers(){
-  CH_TIME("sisdc_tagger::compute_tracers");
+void sisdc_tagger::computeTracers(){
+  CH_TIME("sisdc_tagger::computeTracers");
   if(m_verbosity > 5){
-    pout() << m_name + "::compute_tracers" << endl;
+    pout() << m_name + "::computeTracers" << endl;
   }
 
   const int comp = 0;
@@ -95,7 +95,7 @@ void sisdc_tagger::compute_tracers(){
   DataOps::scale(m_tracer[0], 1./err_max);
 }
 
-bool sisdc_tagger::coarsen_cell(const RealVect&         a_pos,
+bool sisdc_tagger::coarsenCell(const RealVect&         a_pos,
 				const Real&             a_time,
 				const Real&             a_dx,
 				const int&              a_lvl,
@@ -104,7 +104,7 @@ bool sisdc_tagger::coarsen_cell(const RealVect&         a_pos,
   return true;
 }
 
-bool sisdc_tagger::refine_cell(const RealVect&         a_pos,
+bool sisdc_tagger::refineCell(const RealVect&         a_pos,
 			       const Real&             a_time,
 			       const Real&             a_dx,
 			       const int&              a_lvl,

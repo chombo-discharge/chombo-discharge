@@ -77,7 +77,7 @@ Vector<Real> ito_plasma_streamer_tagger::tracer(const RealVect         a_pos,
 
   return tracers;
 }
-bool ito_plasma_streamer_tagger::coarsen_cell(const RealVect         a_pos,
+bool ito_plasma_streamer_tagger::coarsenCell(const RealVect         a_pos,
 					      const Real             a_time,
 					      const Real             a_dx,
 					      const int              a_lvl,
@@ -98,7 +98,7 @@ bool ito_plasma_streamer_tagger::coarsen_cell(const RealVect         a_pos,
 }
 
 
-bool ito_plasma_streamer_tagger::refine_cell(const RealVect         a_pos,
+bool ito_plasma_streamer_tagger::refineCell(const RealVect         a_pos,
 					     const Real             a_time,
 					     const Real             a_dx,
 					     const int              a_lvl,

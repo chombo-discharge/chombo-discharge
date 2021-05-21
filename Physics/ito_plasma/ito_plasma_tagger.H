@@ -1,6 +1,6 @@
 /*!
   @file   ito_plasma_tagger.H
-  @brief  Shameless ripoff of cdr_plasma_tagger.H
+  @brief  Shameless ripoff of CdrPlasmaTagger.H
   @author Robert Marskar
   @date   June 2020. 
   @todo   Rename to ito_plasma_tagger. 
@@ -57,7 +57,7 @@ namespace Physics {
       /*!
 	@brief Compute tracer fields
       */
-      virtual void compute_tracers() = 0;
+      virtual void computeTracers() = 0;
 
       /*!
 	@brief Parse class options
@@ -92,7 +92,7 @@ namespace Physics {
       /*!
 	@brief Tracer fields
       */
-      virtual Vector<EBAMRCellData>& get_tracer_fields();
+      virtual Vector<EBAMRCellData>& getTracerFields();
 
       /*!
 	@brief Write plot data
@@ -149,7 +149,7 @@ namespace Physics {
       /*!
 	@brief Per-box refinement tags
       */
-      virtual void refine_cells_box(DenseIntVectSet&          a_refined_tags,
+      virtual void refineCellsBox(DenseIntVectSet&          a_refined_tags,
 				    const Vector<EBCellFAB*>& a_tracers,
 				    const Vector<EBCellFAB*>& a_grad_tracers,
 				    const int                 a_lvl,
@@ -162,7 +162,7 @@ namespace Physics {
       /*!
 	@brief Per-box coarsen
       */
-      virtual void coarsen_cells_box(DenseIntVectSet&          a_refined_tags,
+      virtual void coarsenCellsBox(DenseIntVectSet&          a_refined_tags,
 				     const Vector<EBCellFAB*>& a_tracers,
 				     const Vector<EBCellFAB*>& a_grad_tracers,
 				     const int                 a_lvl,
@@ -177,7 +177,7 @@ namespace Physics {
       /*!
 	@brief Coarsen a cell based on a tracer field
       */
-      virtual bool coarsen_cell(const RealVect         a_pos,
+      virtual bool coarsenCell(const RealVect         a_pos,
 				const Real             a_time,
 				const Real             a_dx,
 				const int              a_lvl,
@@ -187,7 +187,7 @@ namespace Physics {
       /*!
 	@brief Refine a cell based on a tracer field
       */
-      virtual bool refine_cell(const RealVect         a_pos,
+      virtual bool refineCell(const RealVect         a_pos,
 			       const Real             a_time,
 			       const Real             a_dx,
 			       const int              a_lvl,

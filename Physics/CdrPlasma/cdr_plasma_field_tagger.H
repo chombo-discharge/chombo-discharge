@@ -8,7 +8,7 @@
 #ifndef _CDR_PLASMA_FIELD_TAGGER_
 #define _CDR_PLASMA_FIELD_TAGGER_
 
-#include "cdr_plasma_tagger.H"
+#include <CD_CdrPlasmaTagger.H>
 
 #include "CD_NamespaceHeader.H"
 namespace Physics {
@@ -19,7 +19,7 @@ namespace Physics {
       @details This class fetches the point-wise electric field. The class is pure, so users must implement 
       the actual tagging criterion themselves. 
     */
-    class cdr_plasma_field_tagger : public cdr_plasma_tagger {
+    class cdr_plasma_field_tagger : public CdrPlasmaTagger {
     public:
 
       /*!
@@ -35,7 +35,7 @@ namespace Physics {
       /*!
 	@brief Compute tracer fields
       */
-      void compute_tracers();
+      void computeTracers();
 
       /*!
 	@brief Parse options
@@ -91,7 +91,7 @@ namespace Physics {
       /*!
 	@brief Coarsen a cell based on a tracer field
       */
-      virtual bool coarsen_cell(const RealVect         a_pos,
+      virtual bool coarsenCell(const RealVect         a_pos,
 				const Real             a_time,
 				const Real             a_dx,
 				const int              a_lvl,
@@ -101,7 +101,7 @@ namespace Physics {
       /*!
 	@brief Refine a cell based on a tracer field
       */
-      virtual bool refine_cell(const RealVect         a_pos,
+      virtual bool refineCell(const RealVect         a_pos,
 			       const Real             a_time,
 			       const Real             a_dx,
 			       const int              a_lvl,

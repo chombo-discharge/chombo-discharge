@@ -52,7 +52,7 @@ Vector<Real> air3_mc8_tagger::tracer(const RealVect         a_pos,
 
   return tracers;
 }
-bool air3_mc8_tagger::coarsen_cell(const RealVect         a_pos,
+bool air3_mc8_tagger::coarsenCell(const RealVect         a_pos,
 				   const Real             a_time,
 				   const Real             a_dx,
 				   const int              a_lvl,
@@ -73,7 +73,7 @@ bool air3_mc8_tagger::coarsen_cell(const RealVect         a_pos,
 }
 
 
-bool air3_mc8_tagger::refine_cell(const RealVect         a_pos,
+bool air3_mc8_tagger::refineCell(const RealVect         a_pos,
 				  const Real             a_time,
 				  const Real             a_dx,
 				  const int              a_lvl,

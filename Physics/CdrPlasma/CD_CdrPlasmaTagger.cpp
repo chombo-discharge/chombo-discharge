@@ -1,48 +1,51 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   cdr_plasma_tagger.cpp
-  @brief  Implementation of cdr_plasma_tagger.H
+  @file   CD_CdrPlasmaTagger.cpp
+  @brief  Implementation of CD_CdrPlasmaTagger.H
   @author Robert marskar
-  @date   May. 2018
 */
 
-#include "cdr_plasma_tagger.H"
-#include <CD_CdrIterator.H>
-#include <CD_RtIterator.H>
-#include <CD_DataOps.H>
-
+// Chombo includes
 #include <EBArith.H>
-#include <ParmParse.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_CdrPlasmaTagger.H>
+#include <CD_DataOps.H>
+#include <CD_NamespaceHeader.H>
+
 using namespace Physics::CdrPlasma;
 
-cdr_plasma_tagger::cdr_plasma_tagger(){
-  CH_TIME("cdr_plasma_tagger::cdr_plasma_tagger");
+CdrPlasmaTagger::CdrPlasmaTagger(){
+  CH_TIME("CdrPlasmaTagger::CdrPlasmaTagger");
   m_verbosity = 10;
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_tagger::cdr_plasma_tagger" << endl;
+    pout() << "CdrPlasmaTagger::CdrPlasmaTagger" << endl;
   }
 
-  m_name  = "cdr_plasma_tagger";
+  m_name  = "CdrPlasmaTagger";
   m_phase = phase::gas;
 }
 
-cdr_plasma_tagger::cdr_plasma_tagger(const RefCountedPtr<CdrPlasmaPhysics>&     a_physics,
-				     const RefCountedPtr<cdr_plasma_stepper>&     a_timeStepper,
-				     const RefCountedPtr<AmrMesh>&               a_amr,
-				     const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry) : cdr_plasma_tagger() {
+CdrPlasmaTagger::CdrPlasmaTagger(const RefCountedPtr<CdrPlasmaPhysics>&     a_physics,
+				 const RefCountedPtr<cdr_plasma_stepper>&     a_timeStepper,
+				 const RefCountedPtr<AmrMesh>&               a_amr,
+				 const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry) : CdrPlasmaTagger() {
   this->define(a_physics, a_timeStepper, a_amr, a_computationalGeometry);
 }
 
-cdr_plasma_tagger::~cdr_plasma_tagger(){
+CdrPlasmaTagger::~CdrPlasmaTagger(){
 
 }
 
-void cdr_plasma_tagger::define(const RefCountedPtr<CdrPlasmaPhysics>&     a_physics,
-			       const RefCountedPtr<cdr_plasma_stepper>&     a_timeStepper,
-			       const RefCountedPtr<AmrMesh>&               a_amr,
-			       const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry){
-  CH_TIME("cdr_plasma_tagger::define");
+void CdrPlasmaTagger::define(const RefCountedPtr<CdrPlasmaPhysics>&     a_physics,
+			     const RefCountedPtr<cdr_plasma_stepper>&     a_timeStepper,
+			     const RefCountedPtr<AmrMesh>&               a_amr,
+			     const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry){
+  CH_TIME("CdrPlasmaTagger::define");
   if(m_verbosity > 5){
     pout() << m_name + "::define" << endl;
   }
@@ -54,8 +57,8 @@ void cdr_plasma_tagger::define(const RefCountedPtr<CdrPlasmaPhysics>&     a_phys
   m_realm       = Realm::Primal;
 }
 
-void cdr_plasma_tagger::regrid(){
-  CH_TIME("cdr_plasma_tagger::regrid");
+void CdrPlasmaTagger::regrid(){
+  CH_TIME("CdrPlasmaTagger::regrid");
   if(m_verbosity > 5){
     pout() << m_name + "::regrid" << endl;
   }
@@ -70,8 +73,8 @@ void cdr_plasma_tagger::regrid(){
   }
 }
 
-void cdr_plasma_tagger::setPhase(const phase::which_phase a_phase){
-  CH_TIME("cdr_plasma_tagger::setPhase");
+void CdrPlasmaTagger::setPhase(const phase::which_phase a_phase){
+  CH_TIME("CdrPlasmaTagger::setPhase");
   if(m_verbosity > 5){
     pout() << m_name + "::setPhase" << endl;
   }
@@ -79,8 +82,8 @@ void cdr_plasma_tagger::setPhase(const phase::which_phase a_phase){
   m_phase = a_phase;
 }
 
-int cdr_plasma_tagger::getNumberOfPlotVariables(){
-  CH_TIME("cdr_plasma_tagger::getNumberOfPlotVariables_cells");
+int CdrPlasmaTagger::getNumberOfPlotVariables(){
+  CH_TIME("CdrPlasmaTagger::getNumberOfPlotVariables_cells");
   if(m_verbosity > 5){
     pout() << m_name + "::getNumberOfPlotVariables" << endl;
   }
@@ -88,17 +91,17 @@ int cdr_plasma_tagger::getNumberOfPlotVariables(){
   return m_num_tracers;
 }
 
-Vector<EBAMRCellData>& cdr_plasma_tagger::get_tracer_fields() {
+Vector<EBAMRCellData>& CdrPlasmaTagger::getTracerFields() {
   return m_tracer;
 }
 
-void cdr_plasma_tagger::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) {
-  CH_TIME("cdr_plasma_tagger::writePlotData");
+void CdrPlasmaTagger::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) {
+  CH_TIME("CdrPlasmaTagger::writePlotData");
   if(m_verbosity > 5){
     pout() << m_name + "::writePlotData" << endl;
   }
 
-  this->compute_tracers();
+  this->computeTracers();
   for (int i = 0; i < m_num_tracers; i++){
     std::string one = "Tracer field-";
     long int j = i;
@@ -122,8 +125,8 @@ void cdr_plasma_tagger::writePlotData(EBAMRCellData& a_output, Vector<std::strin
   }
 }
 
-bool cdr_plasma_tagger::tagCells(EBAMRTags& a_tags){
-  CH_TIME("cdr_plasma_tagger::tagCells");
+bool CdrPlasmaTagger::tagCells(EBAMRTags& a_tags){
+  CH_TIME("CdrPlasmaTagger::tagCells");
   if(m_verbosity > 5){
     pout() << m_name + "::tagCells" << endl;
   }
@@ -139,7 +142,7 @@ bool cdr_plasma_tagger::tagCells(EBAMRTags& a_tags){
   if(m_num_tracers > 0){
 
     // Compute tracer fields. This is an overriden pure function
-    compute_tracers();
+    computeTracers();
     
     for (int lvl = 0; lvl <= finest_tag_level; lvl++){
       const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
@@ -168,8 +171,8 @@ bool cdr_plasma_tagger::tagCells(EBAMRTags& a_tags){
 	DenseIntVectSet& tags = (*a_tags[lvl])[dit()];
 	
 	// Refinement and coarsening
-	refine_cells_box(refine_tags, tracers, gtracers, lvl, box, ebisbox, time, dx, origin);
-	coarsen_cells_box(coarsenTags, tracers, gtracers, lvl, box, ebisbox, time, dx, origin);
+	refineCellsBox(refine_tags, tracers, gtracers, lvl, box, ebisbox, time, dx, origin);
+	coarsenCellsBox(coarsenTags, tracers, gtracers, lvl, box, ebisbox, time, dx, origin);
 
 	// Check if we got any new tags, or we are just recycling old tags.
 	// Basically we will check if (current_tags + refined_tags - coarsenTags) == current_tags
@@ -203,15 +206,15 @@ bool cdr_plasma_tagger::tagCells(EBAMRTags& a_tags){
   return got_new_tags;
 }
 
-void cdr_plasma_tagger::refine_cells_box(DenseIntVectSet&          a_refined_tags,
-					 const Vector<EBCellFAB*>& a_tracers,
-					 const Vector<EBCellFAB*>& a_grad_tracers,
-					 const int                 a_lvl,
-					 const Box                 a_box,
-					 const EBISBox&            a_ebisbox,
-					 const Real                a_time,
-					 const Real                a_dx,
-					 const RealVect            a_origin){
+void CdrPlasmaTagger::refineCellsBox(DenseIntVectSet&          a_refined_tags,
+				     const Vector<EBCellFAB*>& a_tracers,
+				     const Vector<EBCellFAB*>& a_grad_tracers,
+				     const int                 a_lvl,
+				     const Box                 a_box,
+				     const EBISBox&            a_ebisbox,
+				     const Real                a_time,
+				     const Real                a_dx,
+				     const RealVect            a_origin){
 
 
   
@@ -240,7 +243,7 @@ void cdr_plasma_tagger::refine_cells_box(DenseIntVectSet&          a_refined_tag
       }
 
       // Check if this cell should be refined
-      const bool refine = refine_cell(pos, a_time, a_dx, a_lvl, tr, gt);
+      const bool refine = refineCell(pos, a_time, a_dx, a_lvl, tr, gt);
 
       // If we refine, grow with buffer and increment to a_refined_tags
       if(refine){
@@ -268,7 +271,7 @@ void cdr_plasma_tagger::refine_cells_box(DenseIntVectSet&          a_refined_tag
       }
 
       // Check if this cell should be refined
-      const bool refine = refine_cell(pos, a_time, a_dx, a_lvl, tr, gt);
+      const bool refine = refineCell(pos, a_time, a_dx, a_lvl, tr, gt);
 
       if(refine){
 	a_refined_tags |= vof.gridIndex();
@@ -277,15 +280,15 @@ void cdr_plasma_tagger::refine_cells_box(DenseIntVectSet&          a_refined_tag
   }
 }
 
-void cdr_plasma_tagger::coarsen_cells_box(DenseIntVectSet&         a_coarsened_tags,
-					  const Vector<EBCellFAB*>& a_tracers,
-					  const Vector<EBCellFAB*>& a_grad_tracers,
-					  const int                 a_lvl,
-					  const Box                 a_box,
-					  const EBISBox&            a_ebisbox,
-					  const Real                a_time,
-					  const Real                a_dx,
-					  const RealVect            a_origin){
+void CdrPlasmaTagger::coarsenCellsBox(DenseIntVectSet&         a_coarsened_tags,
+				      const Vector<EBCellFAB*>& a_tracers,
+				      const Vector<EBCellFAB*>& a_grad_tracers,
+				      const int                 a_lvl,
+				      const Box                 a_box,
+				      const EBISBox&            a_ebisbox,
+				      const Real                a_time,
+				      const Real                a_dx,
+				      const RealVect            a_origin){
 
 
   
@@ -318,7 +321,7 @@ void cdr_plasma_tagger::coarsen_cells_box(DenseIntVectSet&         a_coarsened_t
       }
 
       // Check if this cell should be refined
-      const bool coarsen = coarsen_cell(pos, a_time, a_dx, a_lvl, tr, gt);
+      const bool coarsen = coarsenCell(pos, a_time, a_dx, a_lvl, tr, gt);
 
       // If we refine, grow with buffer and increment to a_refined_tags
       if(coarsen){
@@ -350,7 +353,7 @@ void cdr_plasma_tagger::coarsen_cells_box(DenseIntVectSet&         a_coarsened_t
       }
 
       // Check if this cell should be refined
-      const bool coarsen = coarsen_cell(pos, a_time, a_dx, a_lvl, tr, gt);
+      const bool coarsen = coarsenCell(pos, a_time, a_dx, a_lvl, tr, gt);
 
       if(coarsen){
 	a_coarsened_tags |= vof.gridIndex();
@@ -358,4 +361,5 @@ void cdr_plasma_tagger::coarsen_cells_box(DenseIntVectSet&         a_coarsened_t
     }
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

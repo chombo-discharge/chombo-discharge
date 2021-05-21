@@ -60,7 +60,7 @@ Vector<Real> air2_tagger::tracer(const RealVect         a_pos,
 
   return tracers;
 }
-bool air2_tagger::coarsen_cell(const RealVect         a_pos,
+bool air2_tagger::coarsenCell(const RealVect         a_pos,
 			       const Real             a_time,
 			       const Real             a_dx,
 			       const int              a_lvl,
@@ -73,7 +73,7 @@ bool air2_tagger::coarsen_cell(const RealVect         a_pos,
 }
 
 
-bool air2_tagger::refine_cell(const RealVect         a_pos,
+bool air2_tagger::refineCell(const RealVect         a_pos,
 			      const Real             a_time,
 			      const Real             a_dx,
 			      const int              a_lvl,

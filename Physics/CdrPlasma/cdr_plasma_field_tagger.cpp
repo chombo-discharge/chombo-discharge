@@ -66,10 +66,10 @@ void cdr_plasma_field_tagger::compute_E(EBAMRCellData& a_E, EBAMRCellData& a_gra
   m_amr->interpToCentroids(a_grad_E, m_realm, m_phase);
 }
 
-void cdr_plasma_field_tagger::compute_tracers(){
-  CH_TIME("cdr_plasma_field_tagger::compute_tracers");
+void cdr_plasma_field_tagger::computeTracers(){
+  CH_TIME("cdr_plasma_field_tagger::computeTracers");
   if(m_verbosity > 5){
-    pout() << m_name + "::compute_tracers" << endl;
+    pout() << m_name + "::computeTracers" << endl;
   }
 
   this->allocate_storage();

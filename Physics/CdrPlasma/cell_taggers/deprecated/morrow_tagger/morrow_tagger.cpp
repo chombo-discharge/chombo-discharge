@@ -58,7 +58,7 @@ Vector<Real> morrow_tagger::tracer(const RealVect         a_pos,
 
   return tracers;
 }
-bool morrow_tagger::coarsen_cell(const RealVect         a_pos,
+bool morrow_tagger::coarsenCell(const RealVect         a_pos,
 				 const Real             a_time,
 				 const Real             a_dx,
 				 const int              a_lvl,
@@ -78,7 +78,7 @@ bool morrow_tagger::coarsen_cell(const RealVect         a_pos,
 }
 
 
-bool morrow_tagger::refine_cell(const RealVect         a_pos,
+bool morrow_tagger::refineCell(const RealVect         a_pos,
 				const Real             a_time,
 				const Real             a_dx,
 				const int              a_lvl,

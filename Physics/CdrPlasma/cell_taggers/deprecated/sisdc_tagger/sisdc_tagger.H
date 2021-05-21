@@ -20,7 +20,7 @@ public:
   sisdc_tagger();
   ~sisdc_tagger();
 
-  void compute_tracers();
+  void computeTracers();
   
 protected:
 
@@ -29,14 +29,14 @@ protected:
   Real m_curv_thresh;
   Real m_mag_thresh;
 
-  bool coarsen_cell(const RealVect&         a_pos,
+  bool coarsenCell(const RealVect&         a_pos,
 		    const Real&             a_time,
 		    const Real&             a_dx,
 		    const int&              a_lvl,
 		    const Vector<Real>&     a_tracer,
 		    const Vector<RealVect>& a_grad_tracer);
 
-  bool refine_cell(const RealVect&         a_pos,
+  bool refineCell(const RealVect&         a_pos,
 		   const Real&             a_time,
 		   const Real&             a_dx,
 		   const int&              a_lvl,

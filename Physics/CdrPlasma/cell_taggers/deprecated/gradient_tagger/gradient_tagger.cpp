@@ -72,7 +72,7 @@ Vector<Real> gradient_tagger::tracer(const RealVect         a_pos,
 }
 
 
-bool gradient_tagger::coarsen_cell(const RealVect         a_pos,
+bool gradient_tagger::coarsenCell(const RealVect         a_pos,
 				   const Real             a_time,
 				   const Real             a_dx,
 				   const int              a_lvl,
@@ -91,7 +91,7 @@ bool gradient_tagger::coarsen_cell(const RealVect         a_pos,
   return coarsen;  
 }
 
-bool gradient_tagger::refine_cell(const RealVect         a_pos,
+bool gradient_tagger::refineCell(const RealVect         a_pos,
 				  const Real             a_time,
 				  const Real             a_dx,
 				  const int              a_lvl,

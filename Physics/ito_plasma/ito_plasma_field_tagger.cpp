@@ -66,10 +66,10 @@ void ito_plasma_field_tagger::compute_E(EBAMRCellData& a_E, EBAMRCellData& a_gra
   m_amr->interpToCentroids(a_grad_E, m_realm, m_phase);
 }
 
-void ito_plasma_field_tagger::compute_tracers(){
-  CH_TIME("ito_plasma_field_tagger::compute_tracers");
+void ito_plasma_field_tagger::computeTracers(){
+  CH_TIME("ito_plasma_field_tagger::computeTracers");
   if(m_verbosity > 5){
-    pout() << m_name + "::compute_tracers" << endl;
+    pout() << m_name + "::computeTracers" << endl;
   }
 
   this->allocate_storage();

@@ -59,7 +59,7 @@ namespace Physics {
       /*!
 	@brief Return coarsening criterion. 
       */
-      virtual bool coarsen_cell(const RealVect         a_pos,
+      virtual bool coarsenCell(const RealVect         a_pos,
 				const Real             a_time,
 				const Real             a_dx,
 				const int              a_lvl,
@@ -69,7 +69,7 @@ namespace Physics {
       /*!
 	@brief Return refinement criterion. 
       */
-      virtual bool refine_cell(const RealVect         a_pos,
+      virtual bool refineCell(const RealVect         a_pos,
 			       const Real             a_time,
 			       const Real             a_dx,
 			       const int              a_lvl,

@@ -23,11 +23,11 @@ public:
     m_num_tracers = 1;
   }
   
-  void compute_tracers(){
+  void computeTracers(){
     return;
   }
 
-  bool coarsen_cell(const RealVect&         a_pos,
+  bool coarsenCell(const RealVect&         a_pos,
 		    const Real&             a_time,
 		    const Real&             a_dx,
 		    const int&              a_lvl,
@@ -36,7 +36,7 @@ public:
     return false;
   }
 
-  bool refine_cell(const RealVect&         a_pos,
+  bool refineCell(const RealVect&         a_pos,
 		   const Real&             a_time,
 		   const Real&             a_dx,
 		   const int&              a_lvl,

@@ -88,7 +88,7 @@ int ito_plasma_tagger::getNumberOfPlotVariables(){
   return m_num_tracers;
 }
 
-Vector<EBAMRCellData>& ito_plasma_tagger::get_tracer_fields() {
+Vector<EBAMRCellData>& ito_plasma_tagger::getTracerFields() {
   return m_tracer;
 }
 
@@ -98,7 +98,7 @@ void ito_plasma_tagger::writePlotData(EBAMRCellData& a_output, Vector<std::strin
     pout() << m_name + "::writePlotData" << endl;
   }
 
-  this->compute_tracers();
+  this->computeTracers();
   for (int i = 0; i < m_num_tracers; i++){
     std::string one = "Tracer field-";
     long int j = i;
@@ -139,7 +139,7 @@ bool ito_plasma_tagger::tagCells(EBAMRTags& a_tags){
   if(m_num_tracers > 0){
 
     // Compute tracer fields. This is an overriden pure function
-    compute_tracers();
+    computeTracers();
     
     for (int lvl = 0; lvl <= finest_tag_level; lvl++){
       const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
@@ -168,8 +168,8 @@ bool ito_plasma_tagger::tagCells(EBAMRTags& a_tags){
 	DenseIntVectSet& tags = (*a_tags[lvl])[dit()];
 	
 	// Refinement and coarsening
-	refine_cells_box(refine_tags, tracers, gtracers, lvl, box, ebisbox, time, dx, origin);
-	coarsen_cells_box(coarsenTags, tracers, gtracers, lvl, box, ebisbox, time, dx, origin);
+	refineCellsBox(refine_tags, tracers, gtracers, lvl, box, ebisbox, time, dx, origin);
+	coarsenCellsBox(coarsenTags, tracers, gtracers, lvl, box, ebisbox, time, dx, origin);
 
 	// Check if we got any new tags, or we are just recycling old tags.
 	// Basically we will check if (current_tags + refined_tags - coarsenTags) == current_tags
@@ -203,7 +203,7 @@ bool ito_plasma_tagger::tagCells(EBAMRTags& a_tags){
   return got_new_tags;
 }
 
-void ito_plasma_tagger::refine_cells_box(DenseIntVectSet&          a_refined_tags,
+void ito_plasma_tagger::refineCellsBox(DenseIntVectSet&          a_refined_tags,
 					 const Vector<EBCellFAB*>& a_tracers,
 					 const Vector<EBCellFAB*>& a_grad_tracers,
 					 const int                 a_lvl,
@@ -240,7 +240,7 @@ void ito_plasma_tagger::refine_cells_box(DenseIntVectSet&          a_refined_tag
       }
 
       // Check if this cell should be refined
-      const bool refine = refine_cell(pos, a_time, a_dx, a_lvl, tr, gt);
+      const bool refine = refineCell(pos, a_time, a_dx, a_lvl, tr, gt);
 
       // If we refine, grow with buffer and increment to a_refined_tags
       if(refine){
@@ -268,7 +268,7 @@ void ito_plasma_tagger::refine_cells_box(DenseIntVectSet&          a_refined_tag
       }
 
       // Check if this cell should be refined
-      const bool refine = refine_cell(pos, a_time, a_dx, a_lvl, tr, gt);
+      const bool refine = refineCell(pos, a_time, a_dx, a_lvl, tr, gt);
 
       if(refine){
 	a_refined_tags |= vof.gridIndex();
@@ -277,7 +277,7 @@ void ito_plasma_tagger::refine_cells_box(DenseIntVectSet&          a_refined_tag
   }
 }
 
-void ito_plasma_tagger::coarsen_cells_box(DenseIntVectSet&         a_coarsened_tags,
+void ito_plasma_tagger::coarsenCellsBox(DenseIntVectSet&         a_coarsened_tags,
 					  const Vector<EBCellFAB*>& a_tracers,
 					  const Vector<EBCellFAB*>& a_grad_tracers,
 					  const int                 a_lvl,
@@ -318,7 +318,7 @@ void ito_plasma_tagger::coarsen_cells_box(DenseIntVectSet&         a_coarsened_t
       }
 
       // Check if this cell should be refined
-      const bool coarsen = coarsen_cell(pos, a_time, a_dx, a_lvl, tr, gt);
+      const bool coarsen = coarsenCell(pos, a_time, a_dx, a_lvl, tr, gt);
 
       // If we refine, grow with buffer and increment to a_refined_tags
       if(coarsen){
@@ -350,7 +350,7 @@ void ito_plasma_tagger::coarsen_cells_box(DenseIntVectSet&         a_coarsened_t
       }
 
       // Check if this cell should be refined
-      const bool coarsen = coarsen_cell(pos, a_time, a_dx, a_lvl, tr, gt);
+      const bool coarsen = coarsenCell(pos, a_time, a_dx, a_lvl, tr, gt);
 
       if(coarsen){
 	a_coarsened_tags |= vof.gridIndex();

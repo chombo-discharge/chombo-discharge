@@ -47,10 +47,10 @@ streamer_tagger::~streamer_tagger(){
   
 }
 
-void streamer_tagger::compute_tracers(){
-  CH_TIME("streamer_tagger::compute_tracers");
+void streamer_tagger::computeTracers(){
+  CH_TIME("streamer_tagger::computeTracers");
   if(m_verbosity > 5){
-    pout() << m_name + "::compute_tracers" << endl;
+    pout() << m_name + "::computeTracers" << endl;
   }
 
   const int comp = 0;
@@ -172,7 +172,7 @@ void streamer_tagger::compute_tracers(){
 }
 
 
-bool streamer_tagger::coarsen_cell(const RealVect&         a_pos,
+bool streamer_tagger::coarsenCell(const RealVect&         a_pos,
 				   const Real&             a_time,
 				   const Real&             a_dx,
 				   const int&              a_lvl,
@@ -185,7 +185,7 @@ bool streamer_tagger::coarsen_cell(const RealVect&         a_pos,
   return coarsen1;// && coarsen2; 
 }
 
-bool streamer_tagger::refine_cell(const RealVect&         a_pos,
+bool streamer_tagger::refineCell(const RealVect&         a_pos,
 				  const Real&             a_time,
 				  const Real&             a_dx,
 				  const int&              a_lvl,

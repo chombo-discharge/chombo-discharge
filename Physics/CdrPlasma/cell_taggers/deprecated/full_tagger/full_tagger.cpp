@@ -87,10 +87,10 @@ void full_tagger::deallocate_storage(){
   }
 }
 
-void full_tagger::compute_tracers(){
-  CH_TIME("full_tagger::compute_tracers");
+void full_tagger::computeTracers(){
+  CH_TIME("full_tagger::computeTracers");
   if(m_verbosity > 5){
-    pout() << m_name + "::compute_tracers" << endl;
+    pout() << m_name + "::computeTracers" << endl;
   }
 
   this->allocate_storage();

@@ -9,12 +9,12 @@
 #ifndef _FULL_TAGGER_
 #define _FULL_TAGGER_
 
-#include "cdr_plasma_tagger.H"
+#include <CD_CdrPlasmaTagger.H>
 
 /*!
   @brief Abstract class for tagging cells across an AMR hierarchy
 */
-class full_tagger : public cdr_plasma_tagger {
+class full_tagger : public CdrPlasmaTagger {
 public:
 
   /*!
@@ -30,7 +30,7 @@ public:
   /*!
     @brief Compute tracer fields
   */
-  virtual void compute_tracers();
+  virtual void computeTracers();
 
   /*!
     @brief Parse options
@@ -169,7 +169,7 @@ protected:
   /*!
     @brief Coarsen a cell based on a tracer field
   */
-  virtual bool coarsen_cell(const RealVect         a_pos,
+  virtual bool coarsenCell(const RealVect         a_pos,
 			    const Real             a_time,
 			    const Real             a_dx,
 			    const int              a_lvl,
@@ -179,7 +179,7 @@ protected:
   /*!
     @brief Refine a cell based on a tracer field
   */
-  virtual bool refine_cell(const RealVect         a_pos,
+  virtual bool refineCell(const RealVect         a_pos,
 			   const Real             a_time,
 			   const Real             a_dx,
 			   const int              a_lvl,
