@@ -14,7 +14,7 @@
 
 // Our includes
 #include <CD_ComputationalGeometry.H>
-#include <real_box.H>
+#include <CD_RealBox.H>
 #include <CD_AmrMesh.H>
 #include <CD_EBAMRTags.H>
 #include <CD_NamespaceHeader.H>
@@ -95,7 +95,7 @@ protected:
   /*!
     @brief Boxes used for tagging
   */
-  Vector<real_box> m_tagBoxes;
+  Vector<RealBox> m_tagBoxes;
 
   /*!
     @brief Check if a point is inside a tagging box

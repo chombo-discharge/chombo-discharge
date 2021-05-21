@@ -1,26 +1,30 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   real_box.cpp
-  @brief  Implementation of real_box.H
+  @file   CD_RealBox.cpp
+  @brief  Implementation of CD_RealBox.H
   @author Robert Marskar
-  @date   June 2018
 */
 
-#include "real_box.H"
-
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_RealBox.H>
+#include <CD_NamespaceHeader.H>
   
-real_box::real_box(){
+RealBox::RealBox(){
   m_lo = RealVect::Zero;
   m_hi = RealVect::Zero;
 }
 
 
-real_box::real_box(const RealVect a_lo, const RealVect a_hi){
+RealBox::RealBox(const RealVect a_lo, const RealVect a_hi){
   m_lo = a_lo;
   m_hi = a_hi;
 }
 
-real_box::real_box(const Box a_box, const RealVect a_origin, const Real a_dx){
+RealBox::RealBox(const Box a_box, const RealVect a_origin, const Real a_dx){
 
   const IntVect lo = a_box.smallEnd();
   const IntVect hi = a_box.bigEnd();
@@ -29,19 +33,19 @@ real_box::real_box(const Box a_box, const RealVect a_origin, const Real a_dx){
   m_hi = a_origin + a_dx*RealVect(hi);
 }
 
-real_box::~real_box(){
+RealBox::~RealBox(){
 
 }
 
-RealVect real_box::get_lo() const {
+RealVect RealBox::getLo() const {
   return m_lo;
 }
 
-RealVect real_box::get_hi() const {
+RealVect RealBox::getHi() const {
   return m_hi;
 }
 
-Vector<RealVect> real_box::get_corners() const {
+Vector<RealVect> RealBox::getCorners() const {
 
   Vector<RealVect> corners(pow(2, SpaceDim));
 
@@ -66,12 +70,12 @@ Vector<RealVect> real_box::get_corners() const {
   return corners;
 }
 
-bool real_box::intersect(const real_box& a_box) const {
+bool RealBox::intersect(const RealBox& a_box) const {
 
   //  bool ret = false;
 
-  const RealVect LO = a_box.get_lo();
-  const RealVect HI = a_box.get_hi();
+  const RealVect LO = a_box.getLo();
+  const RealVect HI = a_box.getHi();
 
   if (   LO[0] < m_hi[0] && HI[0] > m_lo[0]  //  Input x-edges either to left or righ
 	 && LO[1] < m_hi[1] && HI[1] > m_lo[1]
@@ -86,10 +90,10 @@ bool real_box::intersect(const real_box& a_box) const {
   }
       
     
-  // const Vector<RealVect> corners = a_box.get_corners();
+  // const Vector<RealVect> corners = a_box.getCorners();
   
   // for (int i = 0; i < corners.size(); i++){
-  //   if(is_point_inside(corners[i])){
+  //   if(isPointInside(corners[i])){
   //     ret = true;
   //   }
   // }
@@ -98,7 +102,7 @@ bool real_box::intersect(const real_box& a_box) const {
 }
 
 
-bool real_box::is_point_inside(const RealVect a_point) const {
+bool RealBox::isPointInside(const RealVect a_point) const {
 
   bool ret = false;
 
@@ -114,9 +118,9 @@ bool real_box::is_point_inside(const RealVect a_point) const {
   return ret;
 }
 
-bool real_box::is_box_inside(const real_box& a_box) const {
+bool RealBox::isBoxInside(const RealBox& a_box) const {
 
-  Vector<RealVect> corners = a_box.get_corners();
+  Vector<RealVect> corners = a_box.getCorners();
 
   bool inside = true;
   return true;
@@ -124,7 +128,7 @@ bool real_box::is_box_inside(const real_box& a_box) const {
 
     // Check if any of the corners of the input box lies inside this box. If one of the
     // corners of the input box is outside, a_box is NOT completely contained by this box.
-    const bool is_corner_inside = this->is_point_inside(corners[i]);
+    const bool is_corner_inside = this->isPointInside(corners[i]);
 
     if(!is_corner_inside){
       inside = false;
@@ -134,4 +138,5 @@ bool real_box::is_box_inside(const real_box& a_box) const {
 
   return inside;
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

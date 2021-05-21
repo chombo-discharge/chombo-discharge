@@ -23,7 +23,7 @@
 #include <CD_Dielectric.H>
 #include <CD_Electrode.H>
 #include <CD_MultiFluidIndexSpace.H>
-#include <real_box.H>
+#include <CD_RealBox.H>
 #include <CD_NamespaceHeader.H>
 
 /*!

@@ -59,7 +59,7 @@ GeoCoarsener::GeoCoarsener(){
 	const RealVect c1 = RealVect(D_DECL(corner_lo[0], corner_lo[1], corner_lo[2]));
 	const RealVect c2 = RealVect(D_DECL(corner_hi[0], corner_hi[1], corner_hi[2]));
 
-	m_coarsen_boxes[ibox]  = real_box(c1,c2);
+	m_coarsen_boxes[ibox]  = RealBox(c1,c2);
 	m_coarsen_levels[ibox] = finest_box_lvl;
 	m_inverse[ibox]        = (str == "true") ? 1 : 0;
 	
@@ -94,8 +94,8 @@ void GeoCoarsener::coarsenTags(Vector<IntVectSet>& a_tags, const Vector<Real>& a
 
 	  // Check the regular box
 	  for (int ibox = 0; ibox < num_coarsen; ibox++){
-	    const RealVect lo = m_coarsen_boxes[ibox].get_lo();
-	    const RealVect hi = m_coarsen_boxes[ibox].get_hi();
+	    const RealVect lo = m_coarsen_boxes[ibox].getLo();
+	    const RealVect hi = m_coarsen_boxes[ibox].getHi();
 
 	    const bool inverse     = (m_inverse[ibox] != 0) ? true : false;
 	    const bool inside_box  = pos > lo && pos < hi;
@@ -108,8 +108,8 @@ void GeoCoarsener::coarsenTags(Vector<IntVectSet>& a_tags, const Vector<Real>& a
 
 	  // Check the inverse boxes
 	  for (int ibox = 0; ibox < num_coarsen; ibox++){
-	    const RealVect lo = m_coarsen_boxes[ibox].get_lo();
-	    const RealVect hi = m_coarsen_boxes[ibox].get_hi();
+	    const RealVect lo = m_coarsen_boxes[ibox].getLo();
+	    const RealVect hi = m_coarsen_boxes[ibox].getHi();
 
 	    const bool inverse     = (m_inverse[ibox] != 0) ? true : false;
 	    const bool inside_box  = pos > lo && pos < hi;
@@ -135,7 +135,7 @@ void GeoCoarsener::coarsenTags(Vector<IntVectSet>& a_tags, const Vector<Real>& a
   }
 }
 
-Vector<real_box> GeoCoarsener::getCoarsenBoxes(){
+Vector<RealBox> GeoCoarsener::getCoarsenBoxes(){
   return m_coarsen_boxes;
 }
 

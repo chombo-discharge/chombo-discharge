@@ -73,7 +73,7 @@ void CellTagger::parseBoxes(){
       const RealVect c1 = RealVect(D_DECL(corner_lo[0], corner_lo[1], corner_lo[2]));
       const RealVect c2 = RealVect(D_DECL(corner_hi[0], corner_hi[1], corner_hi[2]));
 
-      m_tagBoxes[ibox] = real_box(c1,c2);
+      m_tagBoxes[ibox] = RealBox(c1,c2);
 	
       delete cstr;
     }
@@ -104,8 +104,8 @@ void CellTagger::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_p
 bool CellTagger::insideTagBox(const RealVect a_pos){
   bool do_this_refine = (m_tagBoxes.size() > 0) ? false : true;
   for (int ibox = 0; ibox < m_tagBoxes.size(); ibox++){
-    const RealVect lo = m_tagBoxes[ibox].get_lo();
-    const RealVect hi = m_tagBoxes[ibox].get_hi();
+    const RealVect lo = m_tagBoxes[ibox].getLo();
+    const RealVect hi = m_tagBoxes[ibox].getHi();
 
     if(a_pos >= lo && a_pos <= hi){
       do_this_refine = true;

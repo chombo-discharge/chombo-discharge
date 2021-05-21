@@ -17,7 +17,7 @@
 #include <IntVectSet.H>
 
 // Our includes
-#include <real_box.H>
+#include <CD_RealBox.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -45,7 +45,7 @@ public:
   /*!
     @brief Get coarsening boxes
   */
-  virtual Vector<real_box> getCoarsenBoxes();
+  virtual Vector<RealBox> getCoarsenBoxes();
 
   /*!
     @brief Get coarsening levels
@@ -57,7 +57,7 @@ protected:
   /*!
     @brief Coarsening boxes
   */
-  Vector<real_box> m_coarsen_boxes;
+  Vector<RealBox> m_coarsen_boxes;
 
   /*!
     @brief Coarsening levels. Tags are removed above this level
