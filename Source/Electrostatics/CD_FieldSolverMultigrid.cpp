@@ -21,7 +21,7 @@
 #include <CD_JumpBc.H>
 #include <CD_AmrMesh.H>
 #include <CD_ConductivityElectrostaticDomainBcFactory.H>
-#include <units.H>
+#include <CD_Units.H>
 #include <CD_NamespaceHeader.H>
 
 #define POISSON_MF_GMG_TIMER 0
@@ -164,7 +164,7 @@ bool FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
 
   // Do the scaled space charge density
   DataOps::copy(m_scaledSource, a_source);
-  DataOps::scale(m_scaledSource, 1./(units::s_eps0));
+  DataOps::scale(m_scaledSource, 1./(Units::eps0));
   DataOps::scale(m_scaledSource, 1./(m_lengthScale*m_lengthScale));
 
   if(m_kappaSource){ // Scale source by kappa
@@ -174,7 +174,7 @@ bool FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
   // Do the scaled surface charge
   DataOps::copy(m_scaledSigma, a_sigma);
   DataOps::scale(m_scaledSigma, 1./(m_lengthScale*m_lengthScale));
-  m_operatorFactory->setJump(m_scaledSigma, 1.0/units::s_eps0);
+  m_operatorFactory->setJump(m_scaledSigma, 1.0/Units::eps0);
 
   const Real t2 = MPI_Wtime();
   

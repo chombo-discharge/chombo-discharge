@@ -10,7 +10,7 @@
 #include <CD_CdrIterator.H>
 #include <CD_RtIterator.H>
 #include <CD_DataOps.H>
-#include "units.H"
+#include <CD_Units.H>
 
 #include <ParmParse.H>
 
@@ -401,7 +401,7 @@ void rk2::compute_sigma_flux_at_start_of_time_step(){
     const RefCountedPtr<species>& spec      = solver_it.getSpecies();
     const EBAMRIVData& solver_flux          = solver->getEbFlux();
 
-    DataOps::incr(flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
+    DataOps::incr(flux, solver_flux, spec->getChargeNumber()*Units::Qe);
   }
 
   m_sigma->resetCells(flux);
@@ -786,7 +786,7 @@ void rk2::compute_sigma_flux_after_k1(){
     const RefCountedPtr<species>& spec      = solver_it.getSpecies();
     const EBAMRIVData& solver_flux          = solver->getEbFlux();
 
-    DataOps::incr(flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
+    DataOps::incr(flux, solver_flux, spec->getChargeNumber()*Units::Qe);
   }
 
   m_sigma->resetCells(flux);

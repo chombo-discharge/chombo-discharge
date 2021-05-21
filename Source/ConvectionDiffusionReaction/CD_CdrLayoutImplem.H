@@ -15,7 +15,7 @@
 // Our includes
 #include <CD_CdrLayout.H>
 #include <CD_CdrIterator.H>
-#include <units.H>
+#include <CD_Units.H>
 #include <CD_DataOps.H>
 #include <CD_NamespaceHeader.H>
 
@@ -484,7 +484,7 @@ Real CdrLayout<T>::computeTotalCharge(){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     const Real N = solver->computeMass();
 
-    Q += N*units::s_Qe;
+    Q += N*Units::Qe;
   }
 
   return Q;
@@ -518,7 +518,7 @@ Vector<Real> CdrLayout<T>::computeCharge(){
 
   for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver = solver_it();
-    charge.push_back(solver->computeCharge()*units::s_Qe);
+    charge.push_back(solver->computeCharge()*Units::Qe);
   }
 
   return charge;

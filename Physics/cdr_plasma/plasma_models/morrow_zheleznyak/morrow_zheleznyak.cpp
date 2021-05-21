@@ -7,7 +7,7 @@
 */
 
 #include "morrow_zheleznyak.H"
-#include "units.H"
+#include <CD_Units.H>
 #include <CD_DataOps.H>
 
 #include <ParmParse.H>
@@ -56,9 +56,9 @@ morrow_zheleznyak::morrow_zheleznyak(){
   parse_initial_particles();
 
   // Convert to correct units and compute necessary things
-  m_p  *= units::s_atm2pascal;
-  m_pq *= units::s_atm2pascal;
-  m_N   = m_p*units::s_Na/(m_T*units::s_R);
+  m_p  *= Units::atm2pascal;
+  m_pq *= Units::atm2pascal;
+  m_N   = m_p*Units::Na/(m_T*Units::R);
 }
 
 morrow_zheleznyak::~morrow_zheleznyak(){
@@ -107,7 +107,7 @@ void morrow_zheleznyak::advance_reaction_network(Vector<Real>&          a_partic
 }
 
 Real morrow_zheleznyak::excitation_rates(const Real a_E) const{
-  const Real Etd = a_E/(m_N*units::s_Td);
+  const Real Etd = a_E/(m_N*Units::Td);
 
   Real y = 1.0;
   if(Etd > 100){
@@ -523,7 +523,7 @@ RealVect morrow_zheleznyak::compute_ve(const RealVect a_E) const{
 
 RealVect morrow_zheleznyak::compute_vp(const RealVect a_E) const{
   const RealVect E = a_E*1.E-2;           // E in V/cm
-  RealVect vp = 2.34*E*m_p/units::s_atm2pascal;  // Morrow-Lowke wants V/cm
+  RealVect vp = 2.34*E*m_p/Units::atm2pascal;  // Morrow-Lowke wants V/cm
   vp *= 0.01;                             // Morrow-Lowke expression is in cm/s
   return vp;  
 }
@@ -538,10 +538,10 @@ RealVect morrow_zheleznyak::compute_vn(const RealVect a_E) const{
 
   const Real lim0 = 5.0E-16;
   if(EbyN <= lim0){
-    vn = -2.7*E*m_p/units::s_atm2pascal;
+    vn = -2.7*E*m_p/Units::atm2pascal;
   }
   else{
-    vn = -1.86*E*m_p/units::s_atm2pascal;
+    vn = -1.86*E*m_p/Units::atm2pascal;
   }
 
   vn *= 0.01; // Morrow-Lowke expression is in cm/s
@@ -885,7 +885,7 @@ morrow_zheleznyak::uv_Photon::uv_Photon(){
   pp.get("seed",         m_seed);
 
   // Convert units
-  m_pO2 = pressure*O2_frac*units::s_atm2pascal;
+  m_pO2 = pressure*O2_frac*Units::atm2pascal;
   m_K1  = m_K1*m_pO2;
   m_K2  = m_K2*m_pO2;
 

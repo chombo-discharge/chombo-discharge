@@ -6,7 +6,7 @@
 */
 
 #include "ito_plasma_air3.H"
-#include "units.H"
+#include <CD_Units.H>
 
 #include <ParmParse.H>
 
@@ -76,9 +76,9 @@ ito_plasma_air3::ito_plasma_air3(){
   m_O2frac = 0.2;
 
   // Convert to SI units
-  m_p  = m_p*units::s_atm2pascal;
-  m_pq = m_pq*units::s_atm2pascal;
-  m_N  = m_p*units::s_Na/(m_T*units::s_R);
+  m_p  = m_p*Units::atm2pascal;
+  m_pq = m_pq*Units::atm2pascal;
+  m_N  = m_p*Units::Na/(m_T*Units::R);
 
   // Set up species
   m_ito_species.resize(m_num_ito_species);
@@ -119,7 +119,7 @@ ito_plasma_air3::ito_plasma_air3(){
   m_photo_reactions.emplace("zheleznyak",  photo_reaction({m_PhotonZ_idx}, {m_electron_idx, m_positive_idx}));
 
   // Set the ions diffusion coefficient
-  m_ion_D = m_ion_mu*units::s_kb*m_T/units::s_Qe;
+  m_ion_D = m_ion_mu*Units::kb*m_T/Units::Qe;
 
   this->read_tables();
 }
@@ -137,21 +137,21 @@ void ito_plasma_air3::read_tables(){
   this->addTable("Te",       "energy.dat");
 
   // Need to scale tables. First column is in Td and second in /N
-  m_tables["mobility"].scaleX(m_N*units::s_Td);
+  m_tables["mobility"].scaleX(m_N*Units::Td);
   m_tables["mobility"].scaleY(1./m_N);
 
-  m_tables["diffco"].scaleX(m_N*units::s_Td);
+  m_tables["diffco"].scaleX(m_N*Units::Td);
   m_tables["diffco"].scaleY(1./m_N);
 
-  m_tables["alpha"].scaleX(m_N*units::s_Td);
+  m_tables["alpha"].scaleX(m_N*Units::Td);
   m_tables["alpha"].scaleY(m_N);
 
-  m_tables["eta"].scaleX(m_N*units::s_Td);
+  m_tables["eta"].scaleX(m_N*Units::Td);
   m_tables["eta"].scaleY(m_N);
 
   m_tables["Te"].swapXY();
-  m_tables["Te"].scaleX(m_N*units::s_Td);
-  m_tables["Te"].scaleY(2.0*units::s_Qe/(3.0*units::s_kb));
+  m_tables["Te"].scaleX(m_N*Units::Td);
+  m_tables["Te"].scaleY(2.0*Units::Qe/(3.0*Units::kb));
 }
 
 Real ito_plasma_air3::computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_cdr_densities) const {
@@ -211,7 +211,7 @@ void ito_plasma_air3::update_reaction_rates_lfa(const RealVect a_E, const Real a
 }
 
 Real ito_plasma_air3::excitation_rates(const Real a_E) const{
-  const Real Etd = a_E/(m_N*units::s_Td);
+  const Real Etd = a_E/(m_N*Units::Td);
 
   Real y = 1.0;
   if(Etd > 100){
@@ -285,7 +285,7 @@ ito_plasma_air3::PhotonZ::PhotonZ(){
   pp.get("photoi_seed", m_seed);
 
   // Convert units
-  m_pO2 = pressure*O2_frac*units::s_atm2pascal;
+  m_pO2 = pressure*O2_frac*Units::atm2pascal;
   m_K1  = m_K1*m_pO2;
   m_K2  = m_K2*m_pO2;
 

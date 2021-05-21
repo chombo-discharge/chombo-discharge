@@ -1,7 +1,7 @@
 #include "air3_bourdon.H"
 #include "air3_bourdon_species.H"
 #include <CD_DataOps.H>
-#include "units.H" 
+#include <CD_Units.H> 
 
 #include <iostream>
 #include <fstream>
@@ -47,11 +47,11 @@ air3_bourdon::air3_bourdon() {
   // Normalize units.
   m_N2frac = 0.8;
   m_O2frac = 0.2;
-  m_p     *= units::s_atm2pascal;
-  m_pq    *= units::s_atm2pascal;
-  m_N      = m_p*units::s_Na/(m_T*units::s_R);
+  m_p     *= Units::atm2pascal;
+  m_pq    *= Units::atm2pascal;
+  m_N      = m_p*Units::Na/(m_T*Units::R);
   
-  m_ion_diffusion = m_ion_mobility*(units::s_kb*m_T)/units::s_Qe; // Einstein relation. 
+  m_ion_diffusion = m_ion_mobility*(Units::kb*m_T)/Units::Qe; // Einstein relation. 
 
 
   // Read from input file and put in lookup tables. 
@@ -64,10 +64,10 @@ air3_bourdon::air3_bourdon() {
     read_file_entries(m_e_alpha,    air3_bourdon::s_bolsig_alpha);
     read_file_entries(m_e_eta,      air3_bourdon::s_bolsig_eta);
     
-    m_e_mobility.scaleX(m_N*units::s_Td);
-    m_e_diffco.scaleX(m_N*units::s_Td);
-    m_e_alpha.scaleX(m_N*units::s_Td);
-    m_e_eta.scaleX(m_N*units::s_Td);
+    m_e_mobility.scaleX(m_N*Units::Td);
+    m_e_diffco.scaleX(m_N*Units::Td);
+    m_e_alpha.scaleX(m_N*Units::Td);
+    m_e_eta.scaleX(m_N*Units::Td);
     
     m_e_mobility.scaleY(1./m_N); 
     m_e_diffco.scaleY(1./m_N); 
@@ -251,7 +251,7 @@ void air3_bourdon::advance_reaction_network(Vector<Real>&          a_particle_so
   const air3_bourdon::Photon_two*   Photon2 = static_cast<air3_bourdon::Photon_two*>   (&(*m_RtSpecies[m_pho2_idx]));
   const air3_bourdon::Photon_three* Photon3 = static_cast<air3_bourdon::Photon_three*> (&(*m_RtSpecies[m_pho3_idx]));
 
-  const Real Sph = m_photoi_eff*units::s_c0*m_O2frac*m_p*(Photon1->get_A()*a_Photon_densities[m_pho1_idx]
+  const Real Sph = m_photoi_eff*Units::c*m_O2frac*m_p*(Photon1->get_A()*a_Photon_densities[m_pho1_idx]
 							  + Photon2->get_A()*a_Photon_densities[m_pho2_idx]
 							  + Photon3->get_A()*a_Photon_densities[m_pho3_idx]);
   Se += Sph;

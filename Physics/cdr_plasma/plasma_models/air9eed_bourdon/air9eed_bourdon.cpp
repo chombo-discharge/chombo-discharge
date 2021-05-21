@@ -7,7 +7,7 @@
 
 #include "air9eed_bourdon.H"
 #include "air9eed_bourdon_species.H"
-#include "units.H"
+#include <CD_Units.H>
 #include <CD_DataOps.H>
 
 #include <iostream>
@@ -78,10 +78,10 @@ void air9eed_bourdon::parse_gas_parameters(Real& a_Tg, Real& a_p, Real& a_N, Rea
   a_N2frac = 0.80; 
 
   const Real tot_frac = a_O2frac + a_N2frac; 
-  a_p      = a_p*units::s_atm2pascal;
+  a_p      = a_p*Units::atm2pascal;
   a_O2frac = a_O2frac/tot_frac; // Normalize to one
   a_N2frac = a_N2frac/tot_frac;
-  a_N      = a_p*units::s_Na/(a_Tg*units::s_R);
+  a_N      = a_p*Units::Na/(a_Tg*Units::R);
 }
 
 void air9eed_bourdon::parse_photoi(){
@@ -90,7 +90,7 @@ void air9eed_bourdon::parse_photoi(){
   pp.get("excitation_efficiency",      m_excitation_efficiency);
   pp.get("quenching_pressure",         m_pq);
 
-  m_pq *= units::s_atm2pascal;
+  m_pq *= Units::atm2pascal;
 }
 
 void air9eed_bourdon::parse_see(){
@@ -114,7 +114,7 @@ void air9eed_bourdon::parse_transport(){
 
   pp.get("ion_mobility", m_ion_mobility);
 
-  m_ion_diffusion = m_ion_mobility*(units::s_kb*m_Tg)/units::s_Qe;
+  m_ion_diffusion = m_ion_mobility*(Units::kb*m_Tg)/Units::Qe;
 }
 
 void air9eed_bourdon::instantiate_species(){
@@ -225,7 +225,7 @@ void air9eed_bourdon::read_init_eed(){
 }
 
 Real air9eed_bourdon::compute_alpha(const RealVect a_E) const{
-  const Real EbyN    = a_E.vectorLength()/(m_N*units::s_Td);
+  const Real EbyN    = a_E.vectorLength()/(m_N*Units::Td);
   const Real energy  = m_init_eed.getEntry(EbyN);
   const Real alpha = m_alpha_townsend.getEntry(energy);
   
@@ -245,7 +245,7 @@ Vector<Real> air9eed_bourdon::compute_cdr_diffusion_coefficients(const Real     
   Vector<Real> diffco(m_num_CdrSpecies, 0.0);
 
   const Real electron_energy = compute_electron_energy(a_cdr_densities[m_eed_idx], a_cdr_densities[m_electron_idx]);
-  const Real EbyN            = (a_E/(m_N*units::s_Td)).vectorLength();
+  const Real EbyN            = (a_E/(m_N*Units::Td)).vectorLength();
   
   diffco[m_eed_idx]      = this->compute_eed_diffco(electron_energy);
   diffco[m_electron_idx] = this->compute_e_diffco(electron_energy);
@@ -266,7 +266,7 @@ Vector<RealVect> air9eed_bourdon::compute_cdr_velocities(const Real         a_ti
   Vector<RealVect> velocities(m_num_CdrSpecies, RealVect::Zero);
 
   const Real electron_energy = compute_electron_energy(a_cdr_densities[m_eed_idx], a_cdr_densities[m_electron_idx]);
-  const Real EbyN            = (a_E/(m_N*units::s_Td)).vectorLength();
+  const Real EbyN            = (a_E/(m_N*Units::Td)).vectorLength();
 
   velocities[m_eed_idx]      = this->compute_eed_mobility(electron_energy)*(-a_E);
   velocities[m_electron_idx] = this->compute_e_mobility(electron_energy)*(-a_E);
@@ -300,8 +300,8 @@ void air9eed_bourdon::advance_reaction_network(Vector<Real>&          a_cdr_sour
   }
 
   const Real electron_energy = compute_electron_energy(a_cdr_densities[m_eed_idx], a_cdr_densities[m_electron_idx]);
-  const Real Te              = Max(300., 2.0*(electron_energy*units::s_Qe)/(3.0*units::s_kb));  // Kelvin
-  const Real EbyN            = (a_E/(m_N*units::s_Td)).vectorLength();
+  const Real Te              = Max(300., 2.0*(electron_energy*Units::Qe)/(3.0*Units::kb));  // Kelvin
+  const Real EbyN            = (a_E/(m_N*Units::Td)).vectorLength();
 
 #if 1 // Debug
   if(electron_energy > 1.E6) std::cout << electron_energy << std::endl;
@@ -482,7 +482,7 @@ void air9eed_bourdon::advance_reaction_network(Vector<Real>&          a_cdr_sour
   const air9eed_bourdon::Photon_one*   Photon1 = static_cast<air9eed_bourdon::Photon_one*>   (&(*m_RtSpecies[m_Photon1_idx]));
   const air9eed_bourdon::Photon_two*   Photon2 = static_cast<air9eed_bourdon::Photon_two*>   (&(*m_RtSpecies[m_Photon2_idx]));
   const air9eed_bourdon::Photon_three* Photon3 = static_cast<air9eed_bourdon::Photon_three*> (&(*m_RtSpecies[m_Photon3_idx]));
-  products = m_photoionization_efficiency*units::s_c0*m_O2frac*m_p*(Photon1->get_A()*a_rte_densities[m_Photon1_idx]
+  products = m_photoionization_efficiency*Units::c*m_O2frac*m_p*(Photon1->get_A()*a_rte_densities[m_Photon1_idx]
 								    + Photon2->get_A()*a_rte_densities[m_Photon2_idx]
 								    + Photon3->get_A()*a_rte_densities[m_Photon3_idx]);
 
@@ -735,7 +735,7 @@ Real air9eed_bourdon::compute_e_O2_scattering_loss()              const {return 
 Real air9eed_bourdon::compute_e_N2_scattering_loss()              const {return 1;}
 
 Real air9eed_bourdon::init_eed(const RealVect a_pos, const Real a_time, const RealVect a_E){
-  const Real EbyN = (a_E/(m_N*units::s_Td)).vectorLength();
+  const Real EbyN = (a_E/(m_N*Units::Td)).vectorLength();
   return m_init_eed.getEntry(EbyN)*m_CdrSpecies[m_electron_idx]->initialData(a_pos, a_time);
 }
 
@@ -762,11 +762,11 @@ Vector<Real> air9eed_bourdon::compute_cdr_fluxes(const Real         a_time,
   const bool anode   = PolyGeom::dot(a_E, a_normal) > 0.0;
   
   const Real electron_energy = a_cdr_densities[m_eed_idx]/(1.0 + a_cdr_densities[m_electron_idx]);
-  const Real Te              = 2.0*electron_energy*units::s_Qe/(3.0*units::s_kb);
-  const Real EbyN            = (a_E/(m_N*units::s_Td)).vectorLength();
+  const Real Te              = 2.0*electron_energy*Units::Qe/(3.0*Units::kb);
+  const Real EbyN            = (a_E/(m_N*Units::Td)).vectorLength();
   const Real ion_mass        = 2.65E-26; // kg
-  const Real vth_g           = sqrt(units::s_kb*m_Tg/(units::s_pi*ion_mass));  // Ion thermal velocity
-  const Real vth_e           = sqrt(units::s_kb*Te/(units::s_pi*units::s_me)); // Electron thermal velocity
+  const Real vth_g           = sqrt(Units::kb*m_Tg/(Units::pi*ion_mass));  // Ion thermal velocity
+  const Real vth_e           = sqrt(Units::kb*Te/(Units::pi*Units::me)); // Electron thermal velocity
 
 
   // Switch for setting drift flux to zero for charge species

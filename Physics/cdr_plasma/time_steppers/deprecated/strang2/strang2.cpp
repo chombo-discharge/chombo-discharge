@@ -8,7 +8,7 @@
 #include "strang2.H"
 #include "strang2_storage.H"
 #include <CD_DataOps.H>
-#include "units.H"
+#include <CD_Units.H>
 #include <CD_CdrTGA.H>
 
 #include <fstream>
@@ -2409,7 +2409,7 @@ void strang2::compute_sigma_flux(){
     const RefCountedPtr<species>& spec      = solver_it.getSpecies();
     const EBAMRIVData& solver_flux          = solver->getEbFlux();
 
-    DataOps::incr(flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
+    DataOps::incr(flux, solver_flux, spec->getChargeNumber()*Units::Qe);
   }
 
   m_sigma->resetCells(flux);

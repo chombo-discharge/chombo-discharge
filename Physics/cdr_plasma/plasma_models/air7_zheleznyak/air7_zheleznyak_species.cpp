@@ -4,7 +4,7 @@
 
 #include "air7_zheleznyak.H"
 #include "air7_zheleznyak_species.H"
-#include "units.H"
+#include <CD_Units.H>
 
 #include <chrono>
 
@@ -132,7 +132,7 @@ air7_zheleznyak::uv_Photon::uv_Photon(){
   pp.get("photoi_seed",     m_seed);
 
   // Convert units
-  m_pO2 = pressure*O2_frac*units::s_atm2pascal;
+  m_pO2 = pressure*O2_frac*Units::atm2pascal;
   m_K1  = m_K1*m_pO2;
   m_K2  = m_K2*m_pO2;
 

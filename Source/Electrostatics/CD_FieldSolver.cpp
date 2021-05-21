@@ -22,7 +22,7 @@
 #include <CD_FieldSolver.H>
 #include <CD_MultifluidAlias.H>
 #include <CD_DataOps.H>
-#include <units.H>
+#include <CD_Units.H>
 #include <CD_NamespaceHeader.H>
 
 Real FieldSolver::s_defaultDomainBcFunction(const RealVect a_position, const Real a_time){
@@ -144,14 +144,14 @@ void FieldSolver::computeDisplacementField(MFAMRCellData& a_displacementField, c
     MultifluidAlias::aliasMF(D_gas,   phase::gas, D);
     MultifluidAlias::aliasMF(E_gas,   phase::gas, E);
     E_gas.localCopyTo(D_gas);
-    DataOps::scale(D_gas,   units::s_eps0);
+    DataOps::scale(D_gas,   Units::eps0);
 
     // For the solid phase, we multiply by epsilon. 
     if(m_multifluidIndexSpace->numPhases() > 1){
       MultifluidAlias::aliasMF(D_solid, phase::solid, D);
       MultifluidAlias::aliasMF(E_solid, phase::solid, E);
       E_solid.localCopyTo(D_solid);
-      DataOps::scale(D_solid, units::s_eps0);
+      DataOps::scale(D_solid, Units::eps0);
 
       // Now scale by relative epsilon
       if(dielectrics.size() > 0){

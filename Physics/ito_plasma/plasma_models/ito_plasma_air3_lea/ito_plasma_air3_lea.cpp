@@ -6,7 +6,7 @@
 */
 
 #include "ito_plasma_air3_lea.H"
-#include "units.H"
+#include <CD_Units.H>
 
 #include <ParmParse.H>
 
@@ -69,9 +69,9 @@ ito_plasma_air3_lea::ito_plasma_air3_lea(){
   m_O2frac = 0.2;
 
   // Convert to SI units
-  m_p  = m_p*units::s_atm2pascal;
-  m_pq = m_pq*units::s_atm2pascal;
-  m_N  = m_p*units::s_Na/(m_T*units::s_R);
+  m_p  = m_p*Units::atm2pascal;
+  m_pq = m_pq*Units::atm2pascal;
+  m_N  = m_p*Units::Na/(m_T*Units::R);
 
   // Set up species
   m_ito_species.resize(m_num_ito_species);
@@ -144,7 +144,7 @@ void ito_plasma_air3_lea::read_tables(){
   m_tables["collision"].scaleY(m_N);
 
   // LFA table for Townsed coefficient
-  m_tables["alpha_lfa"].scaleX(m_N*units::s_Td);
+  m_tables["alpha_lfa"].scaleX(m_N*Units::Td);
   m_tables["alpha_lfa"].scaleY(m_N);
 }
 
@@ -172,7 +172,7 @@ void ito_plasma_air3_lea::update_reaction_rates_lea(const RealVect a_E, const Ve
   const Real mu      = m_tables.at("mobility").getEntry(electron_energy);
   const Real scat    = m_tables.at("collision").getEntry(electron_energy);
   const Real velo    = mu*a_E.vectorLength();
-  const Real Te      = 2.0*a_mean_energies[m_electron_idx]/(3.0*units::s_kb);
+  const Real Te      = 2.0*a_mean_energies[m_electron_idx]/(3.0*Units::kb);
   const Real xfactor = (m_pq/(m_p + m_pq))*excitation_rates(E)*sergey_factor(m_O2frac)*m_photoi_factor;
   const Real bpn     = 2E-13*sqrt(300/m_T)/dV;
   const Real bpe     = 1.138E-11*pow(Te, -0.7)/dV;
@@ -186,7 +186,7 @@ void ito_plasma_air3_lea::update_reaction_rates_lea(const RealVect a_E, const Ve
 }
 
 Real ito_plasma_air3_lea::excitation_rates(const Real a_E) const{
-  const Real Etd = a_E/(m_N*units::s_Td);
+  const Real Etd = a_E/(m_N*Units::Td);
 
   Real y = 1.0;
   if(Etd > 100){
@@ -262,7 +262,7 @@ ito_plasma_air3_lea::PhotonZ::PhotonZ(){
   pp.get("photoi_seed", m_seed);
 
   // Convert units
-  m_pO2 = pressure*O2_frac*units::s_atm2pascal;
+  m_pO2 = pressure*O2_frac*Units::atm2pascal;
   m_K1  = m_K1*m_pO2;
   m_K2  = m_K2*m_pO2;
 

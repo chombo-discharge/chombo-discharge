@@ -6,7 +6,7 @@
 */
 
 #include "ito_plasma_physics.H"
-#include "units.H"
+#include <CD_Units.H>
 
 #include <PolyGeom.H>
 

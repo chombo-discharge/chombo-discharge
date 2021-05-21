@@ -7,7 +7,7 @@
 
 #include "ito_plasma_godunov.H"
 #include <CD_DataOps.H>
-#include "units.H"
+#include <CD_Units.H>
 #include "CD_FieldSolverMultigrid.H"
 
 #include <ParmParse.H>
@@ -963,7 +963,7 @@ void ito_plasma_godunov::compute_cell_conductivity(EBAMRCellData& a_conductivity
     }
   }
 
-  DataOps::scale(a_conductivity, units::s_Qe);
+  DataOps::scale(a_conductivity, Units::Qe);
 
   m_amr->averageDown(a_conductivity,     m_fluid_Realm, m_phase);
   m_amr->interpGhostPwl(a_conductivity, m_fluid_Realm, m_phase);
@@ -1022,8 +1022,8 @@ void ito_plasma_godunov::setup_semi_implicit_poisson(const Real a_dt){
   m_amr->alias(bco_gas,     phase::gas, bco);
   m_amr->alias(bco_irr_gas, phase::gas, bco_irr);
 
-  DataOps::scale(m_conduct_face, a_dt/units::s_eps0);
-  DataOps::scale(m_conduct_eb,   a_dt/units::s_eps0);
+  DataOps::scale(m_conduct_face, a_dt/Units::eps0);
+  DataOps::scale(m_conduct_eb,   a_dt/Units::eps0);
 
   DataOps::multiply(m_conduct_face, bco_gas);
   DataOps::multiply(m_conduct_eb,   bco_irr_gas);

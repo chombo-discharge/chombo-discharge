@@ -8,7 +8,7 @@
 #include "air3_zheleznyak.H"
 #include "air3_zheleznyak_species.H"
 #include <CD_DataOps.H>
-#include "units.H" 
+#include <CD_Units.H> 
 
 #include <iostream>
 #include <fstream>
@@ -126,7 +126,7 @@ void air3_zheleznyak::parse_transport(){
   
   pp.get("ion_mobility", m_ion_mobility);
 
-  m_ion_diffusion = m_ion_mobility*(units::s_kb*m_T)/units::s_Qe;
+  m_ion_diffusion = m_ion_mobility*(Units::kb*m_T)/Units::Qe;
 }
 
 void air3_zheleznyak::parse_gas_params(){
@@ -140,16 +140,16 @@ void air3_zheleznyak::parse_gas_params(){
   pp.get("frac_O2",            m_O2frac);
   pp.get("photoi_factor",      m_factor);
 
-  m_p  *= units::s_atm2pascal;
-  m_pq *= units::s_atm2pascal;
-  m_N = m_p*units::s_Na/(m_T*units::s_R);
+  m_p  *= Units::atm2pascal;
+  m_pq *= Units::atm2pascal;
+  m_N = m_p*Units::Na/(m_T*Units::R);
 }
 
 void air3_zheleznyak::parse_electron_mobility(){
   ParmParse pp("air3_zheleznyak");
 
   read_file_entries(m_e_mobility, air3_zheleznyak::s_bolsig_mobility);
-  m_e_mobility.scaleX(m_N*units::s_Td);
+  m_e_mobility.scaleX(m_N*Units::Td);
   m_e_mobility.scaleY(1./m_N); 
   m_e_mobility.makeUniform(m_uniform_entries);
 }
@@ -158,7 +158,7 @@ void air3_zheleznyak::parse_electron_diffco(){
   ParmParse pp("air3_zheleznyak");
   
   read_file_entries(m_e_diffco, air3_zheleznyak::s_bolsig_diffco);
-  m_e_diffco.scaleX(m_N*units::s_Td);
+  m_e_diffco.scaleX(m_N*Units::Td);
   m_e_diffco.scaleY(1./m_N); 
   m_e_diffco.makeUniform(m_uniform_entries);
 }
@@ -166,7 +166,7 @@ void air3_zheleznyak::parse_electron_diffco(){
 void air3_zheleznyak::parse_alpha(){
   ParmParse pp("air3_zheleznyak");
   read_file_entries(m_e_alpha, air3_zheleznyak::s_bolsig_alpha);
-  m_e_alpha.scaleX(m_N*units::s_Td);
+  m_e_alpha.scaleX(m_N*Units::Td);
   m_e_alpha.scaleY(m_N); 
   m_e_alpha.makeUniform(m_uniform_entries);
 }
@@ -174,7 +174,7 @@ void air3_zheleznyak::parse_alpha(){
 void air3_zheleznyak::parse_eta(){
   ParmParse pp("air3_zheleznyak");
   read_file_entries(m_e_eta, air3_zheleznyak::s_bolsig_eta);
-  m_e_eta.scaleX(m_N*units::s_Td);
+  m_e_eta.scaleX(m_N*Units::Td);
   m_e_eta.scaleY(m_N);
   m_e_eta.makeUniform(m_uniform_entries);
 }
@@ -760,7 +760,7 @@ Real air3_zheleznyak::compute_alpha(const RealVect a_E) const{
 }
 
 Real air3_zheleznyak::excitation_rates(const Real a_E) const{
-  const Real Etd = a_E/(m_N*units::s_Td);
+  const Real Etd = a_E/(m_N*Units::Td);
 
   Real y = 1.0;
   if(Etd > 100){

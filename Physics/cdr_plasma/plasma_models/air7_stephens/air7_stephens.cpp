@@ -8,7 +8,7 @@
 #include "air7_stephens.H"
 #include "air7_stephens_species.H"
 #include <CD_DataOps.H>
-#include "units.H" 
+#include <CD_Units.H> 
 
 #include <iostream>
 #include <fstream>
@@ -130,7 +130,7 @@ void air7_stephens::parse_transport(){
   
   pp.get("ion_mobility", m_ion_mobility);
 
-  m_ion_diffusion = m_ion_mobility*(units::s_kb*m_T)/units::s_Qe;
+  m_ion_diffusion = m_ion_mobility*(Units::kb*m_T)/Units::Qe;
 }
 
 void air7_stephens::parse_gas_params(){
@@ -143,15 +143,15 @@ void air7_stephens::parse_gas_params(){
   pp.get("frac_O2",            m_O2frac);
   pp.get("photoi_factor",      m_photoi_factor);
 
-  m_p  *= units::s_atm2pascal;
-  m_N = m_p*units::s_Na/(m_T*units::s_R);
+  m_p  *= Units::atm2pascal;
+  m_N = m_p*Units::Na/(m_T*Units::R);
 }
 
 void air7_stephens::parse_electron_mobility(){
   ParmParse pp("air7_stephens");
 
   read_file_entries(m_e_mobility, air7_stephens::s_bolsig_mobility);
-  m_e_mobility.scaleX(m_N*units::s_Td);
+  m_e_mobility.scaleX(m_N*Units::Td);
   m_e_mobility.scaleY(1./m_N); 
   m_e_mobility.makeUniform(m_uniform_entries);
 }
@@ -160,7 +160,7 @@ void air7_stephens::parse_electron_diffco(){
   ParmParse pp("air7_stephens");
   
   read_file_entries(m_e_diffco, air7_stephens::s_bolsig_diffco);
-  m_e_diffco.scaleX(m_N*units::s_Td);
+  m_e_diffco.scaleX(m_N*Units::Td);
   m_e_diffco.scaleY(1./m_N); 
   m_e_diffco.makeUniform(m_uniform_entries);
 }
@@ -171,9 +171,9 @@ void air7_stephens::parse_alpha(){
   read_file_entries(m_e_alphaN2, air7_stephens::s_bolsig_alphaN2);
   read_file_entries(m_e_alphaO2, air7_stephens::s_bolsig_alphaO2);
   
-  m_e_alpha.scaleX(m_N*units::s_Td);
-  m_e_alphaN2.scaleX(m_N*units::s_Td);
-  m_e_alphaO2.scaleX(m_N*units::s_Td);
+  m_e_alpha.scaleX(m_N*Units::Td);
+  m_e_alphaN2.scaleX(m_N*Units::Td);
+  m_e_alphaO2.scaleX(m_N*Units::Td);
   
   m_e_alpha.scaleY(m_N);
   m_e_alphaN2.scaleY(m_N*m_N2frac);
@@ -187,7 +187,7 @@ void air7_stephens::parse_alpha(){
 void air7_stephens::parse_eta(){
   ParmParse pp("air7_stephens");
   read_file_entries(m_e_eta, air7_stephens::s_bolsig_eta);
-  m_e_eta.scaleX(m_N*units::s_Td);
+  m_e_eta.scaleX(m_N*Units::Td);
   m_e_eta.scaleY(m_N);
   m_e_eta.makeUniform(m_uniform_entries);
 }
@@ -197,8 +197,8 @@ void air7_stephens::parse_temperature(){
   read_file_entries(m_e_temperature, air7_stephens::s_bolsig_energy);
 
   //  m_e_temperature.dumpTable();
-  m_e_temperature.scaleX(m_N*units::s_Td);
-  m_e_temperature.scaleY(2.0*units::s_Qe/(3.0*units::s_kb));
+  m_e_temperature.scaleX(m_N*Units::Td);
+  m_e_temperature.scaleY(2.0*Units::Qe/(3.0*Units::kb));
   m_e_temperature.makeUniform(m_uniform_entries);
 }
 
@@ -206,13 +206,13 @@ void air7_stephens::parse_excitations(){
   ParmParse pp("air7_mc8");
   
   read_file_entries(m_b1_exc, air7_stephens::s_bolsig_b1_exc);
-  m_b1_exc.scaleX(m_N*units::s_Td);
+  m_b1_exc.scaleX(m_N*Units::Td);
   m_b1_exc.scaleY(m_N); 
   m_b1_exc.makeUniform(m_uniform_entries);
 
   read_file_entries(m_c4_exc, air7_stephens::s_bolsig_c4_exc);
 
-  m_c4_exc.scaleX(m_N*units::s_Td);
+  m_c4_exc.scaleX(m_N*Units::Td);
   m_c4_exc.scaleY(m_N);
 
   m_c4_exc.makeUniform(m_uniform_entries);

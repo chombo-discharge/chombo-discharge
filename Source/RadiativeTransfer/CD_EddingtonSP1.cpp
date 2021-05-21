@@ -21,7 +21,7 @@
 // Our includes
 #include <CD_EddingtonSP1.H>
 #include <CD_DataOps.H>
-#include <units.H>
+#include <CD_Units.H>
 #include <CD_ConductivityDomainBcWrapper.H>
 #include <CD_NamespaceHeader.H>
 
@@ -379,7 +379,7 @@ bool EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCel
   DataOps::setValue(source, 0.0);
   DataOps::incr(source, a_source, 1.0);
 #if EddingtonSP1_feature
-  DataOps::scale(source, 1./units::s_c0); // Source should be scaled by 1./c0
+  DataOps::scale(source, 1./Units::c); // Source should be scaled by 1./c0
 #endif
   if(m_stationary){ // Should kappa-scale for transient solvres
     DataOps::kappaScale(source);
@@ -414,14 +414,14 @@ bool EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCel
   else{
     if(m_useTGA){
 #if EddingtonSP1_feature
-      m_tgaSolver->oneStep(res, phi, rhs, units::s_c0*a_dt, 0, finest_level, m_time);
+      m_tgaSolver->oneStep(res, phi, rhs, Units::c*a_dt, 0, finest_level, m_time);
 #else
       m_tgaSolver->oneStep(res, phi, rhs, a_dt, 0, finest_level, m_time);
 #endif
     }
     else{
 #if EddingtonSP1_feature
-      m_eulerSolver->oneStep(res, phi, rhs, units::s_c0*a_dt, 0, finest_level, false);
+      m_eulerSolver->oneStep(res, phi, rhs, Units::c*a_dt, 0, finest_level, false);
 #else
       m_eulerSolver->oneStep(res, phi, rhs, a_dt, 0, finest_level, false);
 #endif
@@ -526,9 +526,9 @@ void EddingtonSP1::setACoefAndBCoef(){
   DataOps::scale(m_bco,       1.0/(3.0)); // bco = c/(3*kappa)
   DataOps::scale(m_bco_irreg, 1.0/(3.0)); // bco = c/(3*kappa)
 #else // Original code before different scaling
-  DataOps::scale(m_aCoef,       units::s_c0);       // aco = c*kappa
-  DataOps::scale(m_bco,       units::s_c0/(3.0)); // bco = c/(3*kappa)
-  DataOps::scale(m_bco_irreg, units::s_c0/(3.0)); // bco = c/(3*kappa)
+  DataOps::scale(m_aCoef,       Units::c);       // aco = c*kappa
+  DataOps::scale(m_bco,       Units::c/(3.0)); // bco = c/(3*kappa)
+  DataOps::scale(m_bco_irreg, Units::c/(3.0)); // bco = c/(3*kappa)
 #endif
 }
 
@@ -840,7 +840,7 @@ void EddingtonSP1::computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellDat
 
   m_amr->averageDown(a_ebFlux, m_realm, m_phase);
 
-  DataOps::scale(a_ebFlux, 0.5*units::s_c0);
+  DataOps::scale(a_ebFlux, 0.5*Units::c);
 }
 
 void EddingtonSP1::computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_data){
@@ -899,7 +899,7 @@ void EddingtonSP1::computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellD
 
 	    // Necessary scaling
 	    for (int comp = 0; comp < ncomp; comp++){
-	      extrap(face, comp) = 0.5*units::s_c0*extrap(face, comp);
+	      extrap(face, comp) = 0.5*Units::c*extrap(face, comp);
 	    }
 	  }
 	}
@@ -919,7 +919,7 @@ void EddingtonSP1::computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi
   m_amr->computeGradient(a_flux, a_phi, m_realm, m_phase); // flux = grad(phi)
   for (int lvl = 0; lvl <= finest_level; lvl++){
     DataOps::divideByScalar(*a_flux[lvl], *m_aCoef[lvl]);   // flux = grad(phi)/(c*kappa)
-    DataOps::scale(*a_flux[lvl], -units::s_c0*units::s_c0/3.0);  // flux = -c*grad(phi)/3.
+    DataOps::scale(*a_flux[lvl], -Units::c*Units::c/3.0);  // flux = -c*grad(phi)/3.
   }
 
   m_amr->averageDown(a_flux, m_realm, m_phase);

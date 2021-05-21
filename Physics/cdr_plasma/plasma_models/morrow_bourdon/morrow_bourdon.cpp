@@ -7,7 +7,7 @@
 */
 
 #include "morrow_bourdon.H"
-#include "units.H"
+#include <CD_Units.H>
 
 #include <ParmParse.H>
 #include <PolyGeom.H>
@@ -39,8 +39,8 @@ void morrow_bourdon::parse_gas(){
   pp.get("gas_pressure",    m_p);
 
   // Convert to correct units and compute necessary things
-  m_p  *= units::s_atm2pascal;
-  m_N   = m_p*units::s_Na/(m_temp*units::s_R);
+  m_p  *= Units::atm2pascal;
+  m_N   = m_p*Units::Na/(m_temp*Units::R);
 }
 
 void morrow_bourdon::parse_photoi(){
@@ -49,7 +49,7 @@ void morrow_bourdon::parse_photoi(){
   pp.get("excitation_efficiency",      m_exc_eff);
   pp.get("photoionization_efficiency", m_photo_eff);
 
-  m_pq *= units::s_atm2pascal;
+  m_pq *= Units::atm2pascal;
 }
 
 void morrow_bourdon::parse_see(){
@@ -153,7 +153,7 @@ void morrow_bourdon::advance_reaction_network(Vector<Real>&          a_particle_
   const Real Np  = a_particle_densities[m_nplus_idx];
   const Real Nn  = a_particle_densities[m_nminu_idx];
   const Real Ve  = compute_ve(a_E).vectorLength();
-  const Real Sph = m_photo_eff*units::s_c0*m_fracO2*m_p*(Photon1->get_A()*a_Photon_densities[m_Photon1_idx]
+  const Real Sph = m_photo_eff*Units::c*m_fracO2*m_p*(Photon1->get_A()*a_Photon_densities[m_Photon1_idx]
 							 + Photon2->get_A()*a_Photon_densities[m_Photon2_idx]
 							 + Photon3->get_A()*a_Photon_densities[m_Photon3_idx]);
 
@@ -218,7 +218,7 @@ RealVect morrow_bourdon::compute_ve(const RealVect a_E) const{
 
 RealVect morrow_bourdon::compute_vp(const RealVect a_E) const{
   const RealVect E = a_E*1.E-2;           // E in V/cm
-  RealVect vp = 2.34*E*m_p/units::s_atm2pascal;  // Morrow-Lowke wants V/cm
+  RealVect vp = 2.34*E*m_p/Units::atm2pascal;  // Morrow-Lowke wants V/cm
   vp *= 0.01;                             // Morrow-Lowke expression is in cm/s
 
   return vp;  
@@ -234,10 +234,10 @@ RealVect morrow_bourdon::compute_vn(const RealVect a_E) const{
 
   const Real lim0 = 5.0E-16;
   if(EbyN <= lim0){
-    vn = -2.7*E*m_p/units::s_atm2pascal;
+    vn = -2.7*E*m_p/Units::atm2pascal;
   }
   else{
-    vn = -1.86*E*m_p/units::s_atm2pascal;
+    vn = -1.86*E*m_p/Units::atm2pascal;
   }
 
   vn *= 0.01; // Morrow-Lowke expression is in cm/s
@@ -610,7 +610,7 @@ morrow_bourdon::Photon_one::Photon_one(){
   pp.get("gas_O2_frac",  O2_frac);
   pp.get("gas_pressure", pressure);
   
-  m_pO2 = pressure*O2_frac*units::s_atm2pascal;
+  m_pO2 = pressure*O2_frac*Units::atm2pascal;
 }
 
 morrow_bourdon::Photon_one::~Photon_one(){
@@ -632,7 +632,7 @@ morrow_bourdon::Photon_two::Photon_two(){
   pp.get("gas_O2_frac",  O2_frac);
   pp.get("gas_pressure", pressure);
   
-  m_pO2 = pressure*O2_frac*units::s_atm2pascal;
+  m_pO2 = pressure*O2_frac*Units::atm2pascal;
 }
 
 morrow_bourdon::Photon_two::~Photon_two(){
@@ -653,7 +653,7 @@ morrow_bourdon::Photon_three::Photon_three(){
   pp.get("gas_O2_frac",  O2_frac);
   pp.get("gas_pressure", pressure);
 
-  m_pO2 = pressure*O2_frac*units::s_atm2pascal;  
+  m_pO2 = pressure*O2_frac*Units::atm2pascal;  
 }
 
 morrow_bourdon::Photon_three::~Photon_three(){

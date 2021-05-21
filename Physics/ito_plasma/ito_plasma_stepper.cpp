@@ -7,7 +7,7 @@
 
 #include "ito_plasma_stepper.H"
 #include <CD_DataOps.H>
-#include "units.H"
+#include <CD_Units.H>
 #include "CD_FieldSolverMultigrid.H"
 
 #include <EBArith.H>
@@ -1025,7 +1025,7 @@ void ito_plasma_stepper::compute_rho(MFAMRCellData& a_rho, const Vector<EBAMRCel
     }
   }
 
-  DataOps::scale(a_rho, units::s_Qe);
+  DataOps::scale(a_rho, Units::Qe);
 
   m_amr->averageDown(a_rho, m_fluid_Realm);
   m_amr->interpGhost(a_rho, m_fluid_Realm);
@@ -1090,7 +1090,7 @@ void ito_plasma_stepper::compute_conductivity(EBAMRCellData& a_conductivity, con
     }
   }
 
-  DataOps::scale(a_conductivity, units::s_Qe);
+  DataOps::scale(a_conductivity, Units::Qe);
 
   m_amr->averageDown(a_conductivity, m_fluid_Realm, m_phase);
   m_amr->interpGhostPwl(a_conductivity, m_fluid_Realm, m_phase);
@@ -1191,7 +1191,7 @@ Real ito_plasma_stepper::compute_relaxation_time(const int a_level, const DataIn
   DataOps::vectorLength(j_magnitude, J, box);
   j_magnitude += SAFETY;
 
-  dt.setVal(units::s_eps0);
+  dt.setVal(Units::eps0);
   dt *= e_magnitude;
   dt /= j_magnitude;
   
@@ -2263,7 +2263,7 @@ void ito_plasma_stepper::advance_reaction_network_nwo(EBCellFAB&       a_particl
       for (int i = 0; i < num_ito_species; i++){
 	particles[i]     = llround(a_particlesPerCell.getSingleValuedFAB()(iv, i));
 	meanEnergies[i]  = a_meanParticleEnergies.getSingleValuedFAB()(iv,i);
-	energySources[i] = a_EdotJ.getSingleValuedFAB()(iv, i)*dV/units::s_Qe;
+	energySources[i] = a_EdotJ.getSingleValuedFAB()(iv, i)*dV/Units::Qe;
       }
 
       for (int i = 0; i < num_RtSpecies; i++){
@@ -2299,7 +2299,7 @@ void ito_plasma_stepper::advance_reaction_network_nwo(EBCellFAB&       a_particl
     for (int i = 0; i < num_ito_species; i++){
       particles[i]     = a_particlesPerCell(vof, i);
       meanEnergies[i]  = a_meanParticleEnergies(vof, i);
-      energySources[i] = a_EdotJ(vof, i)*dV/units::s_Qe;
+      energySources[i] = a_EdotJ(vof, i)*dV/Units::Qe;
     }
 
     for (int i = 0; i < num_RtSpecies; i++){
@@ -3283,7 +3283,7 @@ void ito_plasma_stepper::compute_EdotJ_source(){
     }
     
     if (q != 0 && (solver->isMobile() || solver->isDiffusive())){
-      DataOps::scale(m_energy_sources[idx], Abs(q)*units::s_Qe);
+      DataOps::scale(m_energy_sources[idx], Abs(q)*Units::Qe);
     }
   }
 }
@@ -3310,7 +3310,7 @@ void ito_plasma_stepper::compute_EdotJ_source_nwo(){
       DataOps::copy(m_fluid_scratchD, m_fluid_E);                                // m_fluid_scratchD = E
       DataOps::multiplyScalar(m_fluid_scratchD, m_fluid_scratch1);              // m_fluid_scratchD = E*mu*n
       DataOps::dotProduct(m_fluid_scratch1, m_fluid_E, m_fluid_scratchD);          // m_particle_scratch1 = E.dot.(E*mu*n)
-      DataOps::scale(m_fluid_scratch1, Abs(q)*units::s_Qe);                      // m_particle_scratch1 = Z*e*mu*n*E*E
+      DataOps::scale(m_fluid_scratch1, Abs(q)*Units::Qe);                      // m_particle_scratch1 = Z*e*mu*n*E*E
 
       m_amr->averageDown(m_fluid_scratch1, m_fluid_Realm, m_phase);
       m_amr->interpGhost(m_fluid_scratch1, m_fluid_Realm, m_phase);
@@ -3324,7 +3324,7 @@ void ito_plasma_stepper::compute_EdotJ_source_nwo(){
       m_amr->computeGradient(m_fluid_scratchD, m_fluid_scratch1, m_fluid_Realm, m_phase);  // scratchD = grad(D*n)
       DataOps::scale(m_fluid_scratchD, -1.0);                                              // scratchD = -grad(D*n)
       DataOps::dotProduct(m_fluid_scratch1,  m_fluid_scratchD, m_fluid_E);                   // scratch1 = -E.dot.grad(D*n)
-      DataOps::scale(m_fluid_scratch1, Abs(q)*units::s_Qe);                                // scratch1 = -Z*e*E*grad(D*n)
+      DataOps::scale(m_fluid_scratch1, Abs(q)*Units::Qe);                                // scratch1 = -Z*e*E*grad(D*n)
 
       m_amr->averageDown(m_fluid_scratch1, m_fluid_Realm, m_phase);
       m_amr->interpGhost(m_fluid_scratch1, m_fluid_Realm, m_phase);
@@ -3396,7 +3396,7 @@ void ito_plasma_stepper::compute_EdotJ_source_nwo2(const Real a_dt){
       m_fluid_scratch1.copy(m_particle_scratch1);
 
       // Scale by Qe/dt to make it Joule/dt. Then add to correct index
-      DataOps::scale(m_fluid_scratch1, q*units::s_Qe/a_dt);
+      DataOps::scale(m_fluid_scratch1, q*Units::Qe/a_dt);
       DataOps::plus(m_EdotJ, m_fluid_scratch1, 0, idx, 1);
 
       // Set p.mass() back to the original value

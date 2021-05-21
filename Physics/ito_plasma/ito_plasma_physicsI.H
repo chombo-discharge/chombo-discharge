@@ -9,7 +9,7 @@
 #define _ITO_PLASMA_PHYSICSI_H_
 
 #include "ito_plasma_physics.H"
-#include "units.H"
+#include <CD_Units.H>
 
 #include <algorithm>
 #include <unordered_set> 
@@ -475,7 +475,7 @@ void ito_plasma_physics::reconcile_Photons(List<Photon>&      a_Photons,
   
   for (int i = 0; i < num; i++){
     const RealVect p = this->random_position(a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
-    const RealVect v = units::s_c0*randomDirection();
+    const RealVect v = Units::c*randomDirection();
       
     a_Photons.add(Photon(p, v, a_species.getKappa(p), weight));
   }
@@ -483,7 +483,7 @@ void ito_plasma_physics::reconcile_Photons(List<Photon>&      a_Photons,
   // If we used superPhotons the last Photon gets some extra oomph. 
   if(remainder > 0){
     const RealVect p = this->random_position(a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
-    const RealVect v = units::s_c0*randomDirection();
+    const RealVect v = Units::c*randomDirection();
     a_Photons.add(Photon(p, v, a_species.getKappa(p), weight + remainder));
   }
 }
@@ -766,7 +766,7 @@ void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& 
     // // The one that comes in through ito_plasma_stepper is in Joule/(dV*dt), make it eV/(cell*dt)
     const Real dV = a_kappa*pow(a_dx, SpaceDim);
     for (int i = 0; i < sources.size(); i++){ 
-      sources[i] *= dV/units::s_Qe;
+      sources[i] *= dV/Units::Qe;
     }
   }
 

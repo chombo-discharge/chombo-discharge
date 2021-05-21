@@ -9,7 +9,7 @@
 #include "CD_FieldSolverMultigrid.H"
 #include <CD_CdrIterator.H>
 #include <CD_RtIterator.H>
-#include "units.H"
+#include <CD_Units.H>
 
 #include <ParmParse.H>
 #include <EBLevelDataOps.H>
@@ -2657,7 +2657,7 @@ void cdr_plasma_stepper::computeCharge_flux(EBAMRIVData& a_flux, Vector<EBAMRIVD
     const RefCountedPtr<CdrSpecies>& spec      = solver_it.getSpecies();
     const EBAMRIVData& solver_flux          = *a_cdr_fluxes[solver_it.index()];
 
-    DataOps::incr(a_flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
+    DataOps::incr(a_flux, solver_flux, spec->getChargeNumber()*Units::Qe);
   }
 
   m_sigma->resetCells(a_flux);
@@ -2882,7 +2882,7 @@ void cdr_plasma_stepper::compute_J(LevelData<EBCellFAB>& a_J, const int a_lvl) c
     }
   }
   
-  DataOps::scale(a_J, units::s_Qe);
+  DataOps::scale(a_J, Units::Qe);
 }
 
 void cdr_plasma_stepper::compute_rho(){
@@ -2926,7 +2926,7 @@ void cdr_plasma_stepper::compute_rho(EBAMRCellData& a_rho, const phase::which_ph
     }
 
     // Scale by s_Qe/s_eps0
-    DataOps::scale(*a_rho[lvl], units::s_Qe);
+    DataOps::scale(*a_rho[lvl], Units::Qe);
   }
 
   m_amr->averageDown(a_rho, m_realm, a_phase);
@@ -2960,7 +2960,7 @@ void cdr_plasma_stepper::compute_rho(MFAMRCellData&                 a_rho,
     }
 
     // Scale by s_Qe
-    DataOps::scale(*a_rho[lvl], units::s_Qe);
+    DataOps::scale(*a_rho[lvl], Units::Qe);
   }
 
   m_amr->averageDown(a_rho, m_realm);
@@ -3810,7 +3810,7 @@ Real cdr_plasma_stepper::compute_electrode_current(){
     const RefCountedPtr<CdrSpecies>& spec      = solver_it.getSpecies();
     const EBAMRIVData& solver_flux          = solver->getEbFlux();
 
-    DataOps::incr(charge_flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
+    DataOps::incr(charge_flux, solver_flux, spec->getChargeNumber()*Units::Qe);
   }
 
   this->reset_dielectric_cells(charge_flux);
@@ -3858,7 +3858,7 @@ Real cdr_plasma_stepper::compute_dielectric_current(){
     const RefCountedPtr<CdrSpecies>& spec      = solver_it.getSpecies();
     const EBAMRIVData& solver_flux          = solver->getEbFlux();
 
-    DataOps::incr(charge_flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
+    DataOps::incr(charge_flux, solver_flux, spec->getChargeNumber()*Units::Qe);
   }
 
   m_sigma->resetCells(charge_flux);
@@ -3908,7 +3908,7 @@ Real cdr_plasma_stepper::compute_domain_current(){
     const RefCountedPtr<CdrSpecies>& spec      = solver_it.getSpecies();
     const EBAMRIFData& solver_flux          = solver->getDomainFlux();
 
-    DataOps::incr(charge_flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
+    DataOps::incr(charge_flux, solver_flux, spec->getChargeNumber()*Units::Qe);
   }
 
   const int compute_lvl = 0;
@@ -4029,7 +4029,7 @@ Real cdr_plasma_stepper::compute_relaxation_time(){
       DataOps::vectorLength(j_magnitude, j, box);
       j_magnitude += SAFETY;      
 
-      dt_fab.setVal(units::s_eps0);
+      dt_fab.setVal(Units::eps0);
       dt_fab *= e_magnitude;
       dt_fab /= j_magnitude;
 
@@ -4040,7 +4040,7 @@ Real cdr_plasma_stepper::compute_relaxation_time(){
 	const RealVect ee = RealVect(D_DECL(e(vof, 0), e(vof, 1), e(vof, 2)));
 	const RealVect jj = RealVect(D_DECL(j(vof, 0), j(vof, 1), j(vof, 2)));
 
-	dt_fab(vof, comp) = Abs(units::s_eps0*ee.vectorLength()/(1.E-20 + jj.vectorLength()));
+	dt_fab(vof, comp) = Abs(Units::eps0*ee.vectorLength()/(1.E-20 + jj.vectorLength()));
       }
     }
   }

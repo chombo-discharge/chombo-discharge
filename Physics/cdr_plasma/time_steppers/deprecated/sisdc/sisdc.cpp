@@ -9,7 +9,7 @@
 #include "sisdcF_F.H"
 #include "sisdc_storage.H"
 #include <CD_DataOps.H>
-#include "units.H"
+#include <CD_Units.H>
 #include <CD_CdrGodunov.H>
 
 #include <fstream>
@@ -382,7 +382,7 @@ void sisdc::setup_chebyshev_nodes(const int a_p){
   m_nodes.resize(1+a_p);
   m_nodes[0] = -1.0;
   for (int m = 1; m < a_p; m++){
-    m_nodes[m] = -cos((2*m-1)*units::s_pi/(2*(a_p-1)));
+    m_nodes[m] = -cos((2*m-1)*Units::pi/(2*(a_p-1)));
   }
   m_nodes[a_p] = 1.0;
 }
@@ -2174,7 +2174,7 @@ void sisdc::compute_sigma_flux(){
     const RefCountedPtr<species>& spec      = solver_it.getSpecies();
     const EBAMRIVData& solver_flux          = solver->getEbFlux();
 
-    DataOps::incr(flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
+    DataOps::incr(flux, solver_flux, spec->getChargeNumber()*Units::Qe);
   }
 
   m_sigma->resetCells(flux);

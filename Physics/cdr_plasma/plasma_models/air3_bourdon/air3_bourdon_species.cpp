@@ -1,6 +1,6 @@
 #include "air3_bourdon.H"
 #include "air3_bourdon_species.H"
-#include "units.H"
+#include <CD_Units.H>
 #include "ParmParse.H"
 
 #include <chrono>
@@ -74,7 +74,7 @@ air3_bourdon::Photon_one::Photon_one(){
   pp.get("Photon1_lambda_coeff", m_lambda);
   pp.get("pressure",             pressure);
   
-  m_pO2 = pressure*O2_frac*units::s_atm2pascal;
+  m_pO2 = pressure*O2_frac*Units::atm2pascal;
 }
 
 air3_bourdon::Photon_two::Photon_two(){
@@ -89,7 +89,7 @@ air3_bourdon::Photon_two::Photon_two(){
   pp.get("Photon2_lambda_coeff", m_lambda);
   pp.get("pressure",             pressure);
   
-  m_pO2 = pressure*O2_frac*units::s_atm2pascal;
+  m_pO2 = pressure*O2_frac*Units::atm2pascal;
 }
 
 air3_bourdon::Photon_three::Photon_three(){
@@ -103,6 +103,6 @@ air3_bourdon::Photon_three::Photon_three(){
   pp.get("Photon3_lambda_coeff", m_lambda);
   pp.get("pressure",             pressure);
   
-  m_pO2 = pressure*O2_frac*units::s_atm2pascal;
+  m_pO2 = pressure*O2_frac*Units::atm2pascal;
 }
 #include "CD_NamespaceFooter.H"

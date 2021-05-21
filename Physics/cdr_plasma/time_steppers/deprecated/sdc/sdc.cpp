@@ -8,7 +8,7 @@
 #include "sdc.H"
 #include "sdc_storage.H"
 #include <CD_DataOps.H>
-#include "units.H"
+#include <CD_Units.H>
 #include <CD_CdrGodunov.H>
 #include "CD_FieldSolverMultigrid.H"
 
@@ -329,7 +329,7 @@ void sdc::setup_chebyshev_nodes(const int a_p){
   m_nodes.resize(1+a_p);
   m_nodes[0] = -1.0;
   for (int m = 1; m < a_p; m++){
-    m_nodes[m] = -cos((2*m-1)*units::s_pi/(2*(a_p-1)));
+    m_nodes[m] = -cos((2*m-1)*Units::pi/(2*(a_p-1)));
   }
   m_nodes[a_p] = 1.0;
 }
@@ -875,7 +875,7 @@ void sdc::compute_semi_implicit_mobilities(const int a_m, const bool a_corrector
 
       // Now make the cell-centered mobility equal to
       DataOps::multiply(cell_mob, phi);
-      DataOps::scale(cell_mob, q*dtm*units::s_Qe/units::s_eps0);
+      DataOps::scale(cell_mob, q*dtm*Units::Qe/Units::eps0);
 
       // Get valid ghost cells before averaging
       m_amr->averageDown(cell_mob, phase::gas);
@@ -955,7 +955,7 @@ void sdc::compute_semi_implicit_rho(const int a_m,  const bool a_corrector){
   }
 
   // Now do the scaling
-  DataOps::scale(rho_gas, units::s_Qe);
+  DataOps::scale(rho_gas, Units::Qe);
   m_amr->interpToCentroids(rho_gas, phase::gas);
 }
 
@@ -2001,7 +2001,7 @@ void sdc::compute_sigma_flux(){
     const RefCountedPtr<species>& spec      = solver_it.getSpecies();
     const EBAMRIVData& solver_flux          = solver->getEbFlux();
 
-    DataOps::incr(flux, solver_flux, spec->getChargeNumber()*units::s_Qe);
+    DataOps::incr(flux, solver_flux, spec->getChargeNumber()*Units::Qe);
   }
 
   m_sigma->resetCells(flux);
