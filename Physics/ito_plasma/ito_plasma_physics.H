@@ -23,7 +23,7 @@
 #include <CD_ItoSpecies.H>
 #include <CD_RtSpecies.H>
 #include <CD_Photon.H>
-#include "ito_particle.H"
+#include <CD_ItoParticle.H>
 #include "ito_reaction.H"
 #include "photo_reaction.H"
 #include "CD_LookupTable.H"
@@ -142,7 +142,7 @@ namespace physics {
 	@brief Reaction network advance in the LEA.
       */
       inline
-      void advance_reaction_network(Vector<List<ito_particle>* >& a_particles,
+      void advance_reaction_network(Vector<List<ItoParticle>* >& a_particles,
 				    Vector<List<Photon>* >&       a_Photons,
 				    Vector<List<Photon>* >&       a_newPhotons,
 				    const Vector<Real>&           a_sources, 
@@ -176,7 +176,7 @@ namespace physics {
 	@brief Reconcile the number of particles
       */
       inline
-      void reconcile_particles(Vector<List<ito_particle>* >& a_particles,
+      void reconcile_particles(Vector<List<ItoParticle>* >& a_particles,
 			       const Vector<long long>&      a_newNumParticles,
 			       const Vector<long long>&      a_oldNumParticles,
 			       const RealVect                a_cellPos,
@@ -208,7 +208,7 @@ namespace physics {
 	@brief Reconcile photoionization mechanism
       */
       inline
-      void reconcile_photoionization(Vector<List<ito_particle>* >& a_particles,
+      void reconcile_photoionization(Vector<List<ItoParticle>* >& a_particles,
 				     Vector<Real>&                 a_mean_energies,
 				     const Vector<long long>&      a_numParticles,
 				     const Vector<List<Photon>* >& a_Photons) const;
@@ -218,7 +218,7 @@ namespace physics {
 	@brief Set mean particle energy
       */
       inline
-      void set_mean_particle_energy(Vector<List<ito_particle>* >& a_particles, const Vector<Real> a_mean_energy) const;
+      void set_mean_particle_energy(Vector<List<ItoParticle>* >& a_particles, const Vector<Real> a_mean_energy) const;
       
     protected:
 
@@ -318,14 +318,14 @@ namespace physics {
 	@brief Compute total charge in a cell
       */
       inline
-      long long computeCharge(const Vector<List<ito_particle>* >& a_particles) const;
+      long long computeCharge(const Vector<List<ItoParticle>* >& a_particles) const;
 
 
       /*!
 	@brief Reconcile number of particles
       */
       inline
-      void reconcile_particles(List<ito_particle>& a_particles,
+      void reconcile_particles(List<ItoParticle>& a_particles,
 			       const long long     a_numNewParticles,
 			       const long long     a_oldNewParticles,
 			       const RealVect      a_cellPos,
@@ -341,7 +341,7 @@ namespace physics {
 	@brief Add particles
       */
       inline
-      void addParticles(List<ito_particle>& a_particles,
+      void addParticles(List<ItoParticle>& a_particles,
 			 const long long     a_numParticlesToAdd,
 			 const RealVect      a_cellPos,
 			 const RealVect      a_centroidPos,
@@ -356,31 +356,31 @@ namespace physics {
 	@brief Remove particles
       */
       inline
-      void remove_particles(List<ito_particle>& a_particles, const long long a_numParticlesToRemove) const;
+      void remove_particles(List<ItoParticle>& a_particles, const long long a_numParticlesToRemove) const;
 
       /*!
 	@brief Set mean particle energy
       */
       inline
-      void set_mean_particle_energy(List<ito_particle>& a_particles, const Real a_mean_energy) const;
+      void set_mean_particle_energy(List<ItoParticle>& a_particles, const Real a_mean_energy) const;
 
       /*!
 	@brief Check that all weights are > 0
       */
       inline
-      void sanityCheck(const List<ito_particle>& a_lit) const;
+      void sanityCheck(const List<ItoParticle>& a_lit) const;
 
       /*!
 	@brief Check that all weights are > 0
       */
       inline
-      long long get_total_weight(const List<ito_particle>& a_lit) const;
+      long long get_total_weight(const List<ItoParticle>& a_lit) const;
       
       /*!
 	@brief Compute particle weights
       */
       inline
-      void compute_weights(ListIterator<ito_particle>& a_lit,
+      void compute_weights(ListIterator<ItoParticle>& a_lit,
 			   Vector<long long>&          a_particleWeights,
 			   long long&                  a_minWeight) const;
 
@@ -403,7 +403,7 @@ namespace physics {
 	@brief Remove particle weight down to a_numParticlesToRemove
       */
       inline
-      void reconcile_weights(List<ito_particle>& a_particles, const Vector<long long>& a_particleWeights) const;
+      void reconcile_weights(List<ItoParticle>& a_particles, const Vector<long long>& a_particleWeights) const;
 
       /*!
 	@brief Compute particle weights for superparticles
@@ -430,8 +430,8 @@ namespace physics {
 	@brief Draw Gaussian distributed particles
       */
       inline
-      void draw_gaussian_particles(List<ito_particle>& a_particles1,
-				   List<ito_particle>& a_particles2,
+      void draw_gaussian_particles(List<ItoParticle>& a_particles1,
+				   List<ItoParticle>& a_particles2,
 				   const int           a_numParticles,
 				   const RealVect      a_blobCenter,
 				   const Real          a_blobRadius,
@@ -443,8 +443,8 @@ namespace physics {
 	@brief Draw sphere particles
       */
       inline
-      void draw_sphere_particles(List<ito_particle>& a_particles1,
-				 List<ito_particle>& a_particles2,
+      void draw_sphere_particles(List<ItoParticle>& a_particles1,
+				 List<ItoParticle>& a_particles2,
 				 const int           a_numParticles,
 				 const RealVect      a_blobCenter,
 				 const Real          a_blobRadius,
@@ -456,8 +456,8 @@ namespace physics {
 	@brief Draw particles in a box
       */
       inline
-      void draw_box_particles(List<ito_particle>& a_particles1,
-			      List<ito_particle>& a_particles2,
+      void draw_box_particles(List<ItoParticle>& a_particles1,
+			      List<ItoParticle>& a_particles2,
 			      const int           a_numParticles,
 			      const RealVect      a_boxLo,
 			      const RealVect      a_boxHi,
@@ -469,25 +469,25 @@ namespace physics {
 	@brief Get the particle count
       */
       inline
-      Vector<long long> get_particle_count(const Vector<List<ito_particle>* >& a_particles) const;
+      Vector<long long> get_particle_count(const Vector<List<ItoParticle>* >& a_particles) const;
       
       /*!
 	@brief Get the particle count
       */
       inline
-      long long get_particle_count(const List<ito_particle>& a_particles) const;
+      long long get_particle_count(const List<ItoParticle>& a_particles) const;
 
       /*!
 	@brief Get the particle energies
       */
       inline
-      Vector<Real> get_particle_energy(const Vector<List<ito_particle>* >& a_particles) const;
+      Vector<Real> get_particle_energy(const Vector<List<ItoParticle>* >& a_particles) const;
 
       /*!
 	@brief Get the particle energies
       */
       inline
-      Real get_particle_energy(const List<ito_particle>& a_particles) const;
+      Real get_particle_energy(const List<ItoParticle>& a_particles) const;
 
       /*!
 	@brief Get the mean particle energies

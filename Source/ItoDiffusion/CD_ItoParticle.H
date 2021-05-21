@@ -1,57 +1,64 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   ito_particle.H
+  @file   CD_ItoParticle.H
   @brief  Declaration of a particle class for Ito diffusion
   @author Robert Marskar
-  @date   April 2020
 */
 
-#ifndef _ITO_PARTICLE_
-#define _ITO_PARTICLE_
+#ifndef CD_ItoParticle_H
+#define CD_ItoParticle_H
 
+// Std includes
 #include <string>
 #include <typeinfo>
 #include <cstdio>
 #include <cmath>
 
-#include "BinItem.H"
+// Chombo includes
+#include <BinItem.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief A particle class for use with Ito diffusion, i.e. drift-diffusion brownian walkers
 */
-class ito_particle : public BinItem {
+class ItoParticle : public BinItem {
 public:
 
   /*!
     @brief Static for defining the number of runtime Real components
   */
-  static int s_num_runtime_scalars;
+  static int s_num_runtimeScalars;
 
   /*!
     @brief Static for defining the number of runtime RealVect components
   */
-  static int s_num_runtime_vectors;
+  static int s_num_runtimeVectors;
 
   /*!
     @brief Set the number of run-time defined real variables
   */
-  static void set_num_runtime_scalars(const int a_num);
+  static void setNumRunTimeScalars(const int a_num);
 
   /*!
     @brief Set the number of run-time defined RealVect variables
   */
-  static void set_num_runtime_vectors(const int a_num);
+  static void setNumRunTimeVectors(const int a_num);
   
   /*!
     @brief Default constructor
   */
-  ito_particle();
+  ItoParticle();
 
   /*!
     @brief Constructor. Subsequently calls define
   */
-  ito_particle(const Real      a_mass,
+  ItoParticle(const Real      a_mass,
 	       const RealVect& a_position,
 	       const RealVect& a_velocity  = RealVect::Zero,
 	       const Real      a_diffusion = 0.0,
@@ -61,12 +68,12 @@ public:
   /*!
     @brief Copy constructor
   */
-  ito_particle(const ito_particle& a_other);
+  ItoParticle(const ItoParticle& a_other);
 
   /*!
     @brief Default dtor
   */
-  virtual ~ito_particle();
+  virtual ~ItoParticle();
 
   /*!
     @brief For non-default ctor
@@ -193,37 +200,37 @@ public:
   /*!
     @brief Get a runtime-defined variable
   */
-  Real& runtime_scalar(const int a_num);
+  Real& runtimeScalar(const int a_num);
 
   /*!
     @brief Get a runtime-defined variable
   */
-  const Real& runtime_scalar(const int a_num) const;
+  const Real& runtimeScalar(const int a_num) const;
 
   /*!
     @brief Get a runtime-defined vector
   */
-  RealVect& runtime_vector(const int a_num);
+  RealVect& runtimeVector(const int a_num);
 
   /*!
     @brief Get a runtime-defined vector
   */
-  const RealVect& runtime_vector(const int a_num) const;
+  const RealVect& runtimeVector(const int a_num) const;
 
   /*!
     @brief Comparison operator
   */
-  bool operator==(const ito_particle& a_p) const;
+  bool operator==(const ItoParticle& a_p) const;
 
   /*!
     @brief Comparison operator
   */
-  bool operator==(const ito_particle* a_p) const;
+  bool operator==(const ItoParticle* a_p) const;
 
   /*!
     @brief Comparison operator
   */
-  bool operator!=(const ito_particle& a_p) const;
+  bool operator!=(const ItoParticle& a_p) const;
 
   /*!
     @brief Returns the size, in number of bytes, of a flat representation of the data in this object.
@@ -246,7 +253,7 @@ public:
   /*!
     @brief For outputting particle
   */
-  friend std::ostream & operator<<(std::ostream& ostr,const ito_particle& p);
+  friend std::ostream & operator<<(std::ostream& ostr,const ItoParticle& p);
 
 protected:
   
@@ -267,7 +274,9 @@ protected:
   void allocateRuntimeBuffers();
 };
 
-std::ostream & operator<<(std::ostream& ostr, const ito_particle& p);
-#include "CD_NamespaceFooter.H"
+std::ostream & operator<<(std::ostream& ostr, const ItoParticle& p);
+
+#include <CD_NamespaceFooter.H>
+
 #endif
 

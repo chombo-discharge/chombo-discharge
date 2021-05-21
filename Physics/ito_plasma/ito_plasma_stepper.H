@@ -144,7 +144,7 @@ namespace physics {
 
       // Compute conductivity routines
       void compute_conductivity(EBAMRCellData& a_conductivity);
-      void compute_conductivity(EBAMRCellData& a_conductivity, const Vector<ParticleContainer<ito_particle>* >& a_particles);
+      void compute_conductivity(EBAMRCellData& a_conductivity, const Vector<ParticleContainer<ItoParticle>* >& a_particles);
 
       // Compute J routines
       void compute_J(EBAMRCellData& a_J, const Real a_dt);
@@ -191,8 +191,8 @@ namespace physics {
       // Routines for computing mobilities in the LEA. This runs through all the particles and calls a mobility computation function,
       // which you must implement in ItoSpecies
       void compute_ito_mobilities_lea();
-      void compute_ito_mobilities_lea(Vector<ParticleContainer<ito_particle>* >& a_particles);
-      void compute_ito_mobilities_lea(Vector<ParticleData<ito_particle>* >& a_particles);
+      void compute_ito_mobilities_lea(Vector<ParticleContainer<ItoParticle>* >& a_particles);
+      void compute_ito_mobilities_lea(Vector<ParticleData<ItoParticle>* >& a_particles);
 
       // Routines for computing diffusion coefficients.
       // These routines compute the diffusion coefficients by computing D(E)
@@ -271,26 +271,26 @@ namespace physics {
 
       // Old routines for chemistry advances. The physics module will switch between LFA and LEA.
       void advance_reaction_network(const Real a_dt);
-      void advance_reaction_network(Vector<ParticleContainer<ito_particle>* >& a_particles,
+      void advance_reaction_network(Vector<ParticleContainer<ItoParticle>* >& a_particles,
 				    Vector<ParticleContainer<Photon>* >&       a_Photons,
 				    Vector<ParticleContainer<Photon>* >&       a_newPhotons,
 				    const Vector<EBAMRCellData>&                a_sources,
 				    const EBAMRCellData&                        a_E,
 				    const Real                                  a_dt);
-      void advance_reaction_network(Vector<AMRCellParticles<ito_particle>* >& a_particles,
+      void advance_reaction_network(Vector<AMRCellParticles<ItoParticle>* >& a_particles,
 				    Vector<AMRCellParticles<Photon>* >&       a_Photons,
 				    Vector<AMRCellParticles<Photon>* >&       a_newPhotons,
 				    const Vector<EBAMRCellData>&              a_sources,
 				    const EBAMRCellData&                      a_E,
 				    const Real                                a_dt);
-      void advance_reaction_network(Vector<LayoutData<BinFab<ito_particle> >* >& a_particles,
+      void advance_reaction_network(Vector<LayoutData<BinFab<ItoParticle> >* >& a_particles,
 				    Vector<LayoutData<BinFab<Photon> >* >&       a_Photons,
 				    Vector<LayoutData<BinFab<Photon> >* >&       a_newPhotons,
 				    const Vector<LevelData<EBCellFAB>* >&        a_sources,
 				    const LevelData<EBCellFAB>&                  a_E,
 				    const int                                    a_lvl,
 				    const Real                                   a_dt);
-      void advance_reaction_network(Vector<BinFab<ito_particle>* >& a_particles,
+      void advance_reaction_network(Vector<BinFab<ItoParticle>* >& a_particles,
 				    Vector<BinFab<Photon>* >&       a_Photons,
 				    Vector<BinFab<Photon>* >&       a_newPhotons,
 				    const Vector<EBCellFAB*>&       a_sources,

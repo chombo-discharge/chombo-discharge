@@ -122,7 +122,7 @@ void brownian_walker_stepper::loadBalanceBoxes(Vector<Vector<int> >&            
   }
   
   if(m_LoadBalancing && a_realm == m_realm){
-    ParticleContainer<ito_particle>& particles = m_solver->getParticles(ito_solver::which_container::bulk);
+    ParticleContainer<ItoParticle>& particles = m_solver->getParticles(ito_solver::which_container::bulk);
   
     particles.regrid(a_grids, m_amr->getDomains(), m_amr->getDx(), m_amr->getRefinementRatios(), a_lmin, a_finestLevel);
 
@@ -206,8 +206,8 @@ void brownian_walker_stepper::setVelocity(const int a_level){
     }
 
     // Now set the mobility for all the particles
-    List<ito_particle>& particles = m_solver->getParticles(ito_solver::which_container::bulk)[a_level][dit()].listItems();
-    for (ListIterator<ito_particle> lit(particles); lit.ok(); ++lit){
+    List<ItoParticle>& particles = m_solver->getParticles(ito_solver::which_container::bulk)[a_level][dit()].listItems();
+    for (ListIterator<ItoParticle> lit(particles); lit.ok(); ++lit){
       lit().mobility() = 1.0;
     }
   }
@@ -381,7 +381,7 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const RealVect dx                     = m_amr->getDx()[lvl]*RealVect::Unit;
     const DisjointBoxLayout& dbl          = m_amr->getGrids(m_realm)[lvl];
-    ParticleData<ito_particle>& particles = m_solver->getParticles(ito_solver::which_container::bulk)[lvl];
+    ParticleData<ItoParticle>& particles = m_solver->getParticles(ito_solver::which_container::bulk)[lvl];
 
     const EBISLayout& ebisl = m_amr->getEBISLayout(m_realm, m_solver->getPhase())[lvl];
 
@@ -389,18 +389,18 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
 	// Create a copy. 
-	List<ito_particle>& particleList = particles[dit()].listItems();
-	List<ito_particle>  particleCopy = List<ito_particle>(particleList);
+	List<ItoParticle>& particleList = particles[dit()].listItems();
+	List<ItoParticle>  particleCopy = List<ItoParticle>(particleList);
 
 	// The list iterator is NOT an indexing iterator but iterates over the list given
 	// in the constructor. So, we need one for velocities and one for the copy
-	ListIterator<ito_particle> lit(particleList);
-	ListIterator<ito_particle> litC(particleCopy);
+	ListIterator<ItoParticle> lit(particleList);
+	ListIterator<ItoParticle> litC(particleCopy);
 
 	// Half Euler step and evaluate velocity at half step
 	if(m_solver->isMobile()){
 	  for (lit.rewind(); lit; ++lit){ 
-	    ito_particle& p = particleList[lit];
+	    ItoParticle& p = particleList[lit];
 	    p.position() += 0.5*p.velocity()*a_dt;
 	  }
 
@@ -408,8 +408,8 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 
 	  // Final stage
 	  for (lit.rewind(), litC.rewind(); lit, litC; ++lit, ++litC){
-	    ito_particle& p    = particleList[lit];
-	    ito_particle& oldP = particleCopy[litC];
+	    ItoParticle& p    = particleList[lit];
+	    ItoParticle& oldP = particleCopy[litC];
 	    p.position() = oldP.position() + p.velocity()*a_dt;
 	  }
 	}
@@ -417,7 +417,7 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 	// Add a diffusion hop
 	if(m_solver->isDiffusive()){
 	  for (lit.rewind(); lit; ++lit){ 
-	    ito_particle& p = particleList[lit];
+	    ItoParticle& p = particleList[lit];
 	    const RealVect ran = m_solver->random_gaussian();
 	    const RealVect hop = ran*sqrt(2.0*p.diffusion()*a_dt);
 	    p.position() += hop;
@@ -438,8 +438,8 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 	  }
 
 	  for (lit.rewind(), litC.rewind(); lit, litC; ++lit, ++litC){
-	    ito_particle& p    = particleList[lit];
-	    ito_particle& oldP = particleCopy[litC];
+	    ItoParticle& p    = particleList[lit];
+	    ItoParticle& oldP = particleCopy[litC];
 
 	    const RealVect& oldPos = oldP.position();
 	    const RealVect& newPos = p.position();

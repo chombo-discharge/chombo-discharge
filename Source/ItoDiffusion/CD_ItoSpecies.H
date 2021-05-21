@@ -19,7 +19,7 @@
 #include <MeshInterp.H>
 
 // Our includes
-#include <ito_particle.H>
+#include <CD_ItoParticle.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -77,7 +77,7 @@ public:
   /*!
     @brief Get initial particles
   */
-  List<ito_particle>& getInitialParticles();
+  List<ItoParticle>& getInitialParticles();
 
 protected:
 
@@ -104,7 +104,7 @@ protected:
   /*!
     @brief Initial particles
   */
-  List<ito_particle> m_initialParticles;
+  List<ItoParticle> m_initialParticles;
 };
 
 #include <CD_NamespaceFooter.H>

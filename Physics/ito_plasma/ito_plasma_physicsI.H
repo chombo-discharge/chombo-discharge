@@ -147,13 +147,13 @@ void ito_plasma_physics::check_charge_conservation(const Vector<long long>& a_ol
 }
 
 inline
-long long ito_plasma_physics::computeCharge(const Vector<List<ito_particle>* >& a_particles) const {
+long long ito_plasma_physics::computeCharge(const Vector<List<ItoParticle>* >& a_particles) const {
 
   long long ret = 0;
   for (int i = 0; i < a_particles.size(); i++){
     const long long q = (long long) m_ItoSpecies[i]->getChargeNumber();
     
-    for (ListIterator<ito_particle> lit(*a_particles[i]); lit.ok(); ++lit){
+    for (ListIterator<ItoParticle> lit(*a_particles[i]); lit.ok(); ++lit){
       const long long w = llround(lit().mass());
 
       ret += w*q;
@@ -164,7 +164,7 @@ long long ito_plasma_physics::computeCharge(const Vector<List<ito_particle>* >& 
 }
 
 inline
-void ito_plasma_physics::reconcile_particles(Vector<List<ito_particle>* >& a_particles,
+void ito_plasma_physics::reconcile_particles(Vector<List<ItoParticle>* >& a_particles,
 					     const Vector<long long>&      a_newNumParticles,
 					     const Vector<long long>&      a_oldNumParticles,
 					     const RealVect                a_cellPos,
@@ -190,7 +190,7 @@ void ito_plasma_physics::reconcile_particles(Vector<List<ito_particle>* >& a_par
 }
 
 inline
-void ito_plasma_physics::reconcile_particles(List<ito_particle>& a_particles,
+void ito_plasma_physics::reconcile_particles(List<ItoParticle>& a_particles,
 					     const long long     a_newNumParticles,
 					     const long long     a_oldNumParticles,
 					     const RealVect      a_cellPos,
@@ -234,7 +234,7 @@ void ito_plasma_physics::computeParticleWeights(long long&      a_weight,
 }
 
 inline
-void ito_plasma_physics::addParticles(List<ito_particle>& a_particles,
+void ito_plasma_physics::addParticles(List<ItoParticle>& a_particles,
 				       const long long     a_numNewParticles,
 				       const RealVect      a_cellPos,
 				       const RealVect      a_centroidPos,
@@ -253,18 +253,18 @@ void ito_plasma_physics::addParticles(List<ito_particle>& a_particles,
   for (int i = 0; i < num; i++){
     const RealVect p = this->random_position(a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
     const Real w     = (Real) weight;
-    a_particles.add(ito_particle(w, p));
+    a_particles.add(ItoParticle(w, p));
   }
 
   if(remainder > zero){ // Rest of weight in case we got superparticles
     const RealVect p = this->random_position(a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
     const Real w     = (Real) (weight + remainder);
-    a_particles.add(ito_particle(w, p));
+    a_particles.add(ItoParticle(w, p));
   }
 }
 
 inline
-void ito_plasma_physics::remove_particles(List<ito_particle>& a_particles,
+void ito_plasma_physics::remove_particles(List<ItoParticle>& a_particles,
 					  const long long     a_numParticlesToRemove) const {
 
   constexpr long long zero = 0;
@@ -276,7 +276,7 @@ void ito_plasma_physics::remove_particles(List<ito_particle>& a_particles,
     const long long weightBefore = this->get_total_weight(a_particles);
 #endif
 
-    ListIterator<ito_particle> lit(a_particles);
+    ListIterator<ItoParticle> lit(a_particles);
     Vector<long long> particleWeights(a_particles.length());
   
     long long minWeight  = std::numeric_limits<long long>::max();
@@ -306,14 +306,14 @@ void ito_plasma_physics::remove_particles(List<ito_particle>& a_particles,
 }
 
 inline
-void ito_plasma_physics::set_mean_particle_energy(Vector<List<ito_particle>* >& a_particles, const Vector<Real> a_mean_energy) const{
+void ito_plasma_physics::set_mean_particle_energy(Vector<List<ItoParticle>* >& a_particles, const Vector<Real> a_mean_energy) const{
   for (int i = 0; i < a_particles.size(); i++){
     this->set_mean_particle_energy(*a_particles[i], a_mean_energy[i]);
   }
 }
 
 inline
-void ito_plasma_physics::set_mean_particle_energy(List<ito_particle>& a_particles, const Real a_mean_energy) const{
+void ito_plasma_physics::set_mean_particle_energy(List<ItoParticle>& a_particles, const Real a_mean_energy) const{
 #if ITO_PLASMA_PHYSICS_DEBUG
   if(a_mean_energy < 0.0){
     pout() << "ito_plasma_physics::set_mean_particle_energy - energy = " << a_mean_energy << endl;
@@ -323,15 +323,15 @@ void ito_plasma_physics::set_mean_particle_energy(List<ito_particle>& a_particle
   }
 #endif
   
-  for (ListIterator<ito_particle> lit(a_particles); lit.ok(); ++lit){
+  for (ListIterator<ItoParticle> lit(a_particles); lit.ok(); ++lit){
     lit().energy() = a_mean_energy;
   }
 }
 
 inline
-void ito_plasma_physics::sanityCheck(const List<ito_particle>& a_particles) const{
+void ito_plasma_physics::sanityCheck(const List<ItoParticle>& a_particles) const{
 
-  ListIterator<ito_particle> lit(a_particles);
+  ListIterator<ItoParticle> lit(a_particles);
   
   for (lit.begin(); lit.ok(); ++lit){
     const Real w = lit().mass();
@@ -341,10 +341,10 @@ void ito_plasma_physics::sanityCheck(const List<ito_particle>& a_particles) cons
 }
 
 inline
-long long ito_plasma_physics::get_total_weight(const List<ito_particle>& a_particles) const {
+long long ito_plasma_physics::get_total_weight(const List<ItoParticle>& a_particles) const {
 
   long long ret = 0;
-  for (ListIterator<ito_particle> lit(a_particles); lit.ok(); ++lit){
+  for (ListIterator<ItoParticle> lit(a_particles); lit.ok(); ++lit){
     const long long w = (long long) llround(lit().mass());
 
     ret += w;
@@ -354,7 +354,7 @@ long long ito_plasma_physics::get_total_weight(const List<ito_particle>& a_parti
 }
 
 inline
-void ito_plasma_physics::compute_weights(ListIterator<ito_particle>& a_lit,
+void ito_plasma_physics::compute_weights(ListIterator<ItoParticle>& a_lit,
 					 Vector<long long>&          a_particleWeights,
 					 long long&                  a_minWeight) const {
   int i = 0;
@@ -418,17 +418,17 @@ void ito_plasma_physics::remove_weights(Vector<long long>& a_particleWeights,
 }
 
 inline
-void ito_plasma_physics::reconcile_weights(List<ito_particle>&      a_particles,
+void ito_plasma_physics::reconcile_weights(List<ItoParticle>&      a_particles,
 					   const Vector<long long>& a_particleWeights) const {
 
   constexpr long long zero = 0;  
 
-  List<ito_particle> copyParticles(a_particles);
+  List<ItoParticle> copyParticles(a_particles);
   a_particles.clear();
 
   int i = 0;
-  for (ListIterator<ito_particle> lit(copyParticles); lit.ok(); ++lit, ++i){
-    ito_particle& p = lit();
+  for (ListIterator<ItoParticle> lit(copyParticles); lit.ok(); ++lit, ++i){
+    ItoParticle& p = lit();
 
     if(a_particleWeights[i] > zero){
       p.mass() = (Real) a_particleWeights[i];
@@ -489,7 +489,7 @@ void ito_plasma_physics::reconcile_Photons(List<Photon>&      a_Photons,
 }
 
 inline
-void ito_plasma_physics::reconcile_photoionization(Vector<List<ito_particle>* >& a_particles,
+void ito_plasma_physics::reconcile_photoionization(Vector<List<ItoParticle>* >& a_particles,
 						   Vector<Real>&                 a_mean_energies,
 						   const Vector<long long>&      a_numParticles,
 						   const Vector<List<Photon>* >& a_Photons) const {
@@ -520,7 +520,7 @@ void ito_plasma_physics::reconcile_photoionization(Vector<List<ito_particle>* >&
 
       // Increment energies and update total particles. 
       for (const auto& t : targets){
-	a_particles[t]->add(ito_particle(mass, pos));
+	a_particles[t]->add(ItoParticle(mass, pos));
 
 	newNumParticles[t] += llround(mass); // Now have this many particles in the cell. 
       }
@@ -579,8 +579,8 @@ int ito_plasma_physics::compute_particles_per_rank(const int a_numParticles) con
 }
 
 inline
-void ito_plasma_physics::draw_gaussian_particles(List<ito_particle>& a_particles1,
-						 List<ito_particle>& a_particles2,
+void ito_plasma_physics::draw_gaussian_particles(List<ItoParticle>& a_particles1,
+						 List<ItoParticle>& a_particles2,
 						 const int           a_numParticles,
 						 const RealVect      a_blobCenter,
 						 const Real          a_blobRadius,
@@ -598,14 +598,14 @@ void ito_plasma_physics::draw_gaussian_particles(List<ito_particle>& a_particles
     const RealVect pos = a_blobCenter + gauss(m_rng)*randomDirection();
     
     
-    a_particles1.add(ito_particle(a_weight, pos, RealVect::Zero, 0.0, 0.0, a_energy1));
-    a_particles2.add(ito_particle(a_weight, pos, RealVect::Zero, 0.0, 0.0, a_energy2));
+    a_particles1.add(ItoParticle(a_weight, pos, RealVect::Zero, 0.0, 0.0, a_energy1));
+    a_particles2.add(ItoParticle(a_weight, pos, RealVect::Zero, 0.0, 0.0, a_energy2));
   }
 }
 
 inline
-void ito_plasma_physics::draw_sphere_particles(List<ito_particle>& a_particles1,
-					       List<ito_particle>& a_particles2,
+void ito_plasma_physics::draw_sphere_particles(List<ItoParticle>& a_particles1,
+					       List<ItoParticle>& a_particles2,
 					       const int           a_numParticles,
 					       const RealVect      a_blobCenter,
 					       const Real          a_blobRadius,
@@ -632,16 +632,16 @@ void ito_plasma_physics::draw_sphere_particles(List<ito_particle>& a_particles1,
     }
     
     // Add the particle
-    a_particles1.add(ito_particle(a_weight, pos, RealVect::Zero, 0.0, 0.0, a_energy1));
-    a_particles2.add(ito_particle(a_weight, pos, RealVect::Zero, 0.0, 0.0, a_energy2));
+    a_particles1.add(ItoParticle(a_weight, pos, RealVect::Zero, 0.0, 0.0, a_energy1));
+    a_particles2.add(ItoParticle(a_weight, pos, RealVect::Zero, 0.0, 0.0, a_energy2));
   }
 
 
 }
 
 inline
-void ito_plasma_physics::draw_box_particles(List<ito_particle>& a_particles1,
-					    List<ito_particle>& a_particles2,
+void ito_plasma_physics::draw_box_particles(List<ItoParticle>& a_particles1,
+					    List<ItoParticle>& a_particles2,
 					    const int           a_numParticles,
 					    const RealVect      a_boxLo,
 					    const RealVect      a_boxHi,
@@ -656,13 +656,13 @@ void ito_plasma_physics::draw_box_particles(List<ito_particle>& a_particles1,
     const RealVect pos = a_boxLo + m_udist01(m_rng)*diff;
 
 
-    a_particles1.add(ito_particle(a_weight, pos, RealVect::Zero, 0.0, 0.0, a_energy1));
-    a_particles2.add(ito_particle(a_weight, pos, RealVect::Zero, 0.0, 0.0, a_energy2));
+    a_particles1.add(ItoParticle(a_weight, pos, RealVect::Zero, 0.0, 0.0, a_energy1));
+    a_particles2.add(ItoParticle(a_weight, pos, RealVect::Zero, 0.0, 0.0, a_energy2));
   }
 }
 
 inline
-Vector<long long> ito_plasma_physics::get_particle_count(const Vector<List<ito_particle>* >& a_particles) const {
+Vector<long long> ito_plasma_physics::get_particle_count(const Vector<List<ItoParticle>* >& a_particles) const {
   Vector<long long> ret(a_particles.size(), 0);
 
   for (int i = 0; i < a_particles.size(); i++){
@@ -673,10 +673,10 @@ Vector<long long> ito_plasma_physics::get_particle_count(const Vector<List<ito_p
 }
 
 inline
-long long ito_plasma_physics::get_particle_count(const List<ito_particle>& a_particles) const {
+long long ito_plasma_physics::get_particle_count(const List<ItoParticle>& a_particles) const {
   long long ret = 0;
 
-  for (ListIterator<ito_particle> lit(a_particles); lit.ok(); ++lit){
+  for (ListIterator<ItoParticle> lit(a_particles); lit.ok(); ++lit){
     ret += (long long) llround(lit().mass());
   }
 
@@ -684,7 +684,7 @@ long long ito_plasma_physics::get_particle_count(const List<ito_particle>& a_par
 }
 
 inline
-Vector<Real> ito_plasma_physics::get_particle_energy(const Vector<List<ito_particle>* >& a_particles) const {
+Vector<Real> ito_plasma_physics::get_particle_energy(const Vector<List<ItoParticle>* >& a_particles) const {
   Vector<Real> ret(a_particles.size(), 0.0);
 
   for (int i = 0; i < a_particles.size(); i++){
@@ -695,10 +695,10 @@ Vector<Real> ito_plasma_physics::get_particle_energy(const Vector<List<ito_parti
 }
 
 inline
-Real ito_plasma_physics::get_particle_energy(const List<ito_particle>& a_particles) const {
+Real ito_plasma_physics::get_particle_energy(const List<ItoParticle>& a_particles) const {
   Real ret = 0;
 
-  for (ListIterator<ito_particle> lit(a_particles); lit.ok(); ++lit){
+  for (ListIterator<ItoParticle> lit(a_particles); lit.ok(); ++lit){
     const Real& m = lit().mass();
     const Real& e = lit().energy();
     
@@ -726,7 +726,7 @@ Real ito_plasma_physics::get_particle_mean_energy(const Real& a_energy, const lo
 }
 
 inline
-void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& a_particles,
+void ito_plasma_physics::advance_reaction_network(Vector<List<ItoParticle>* >& a_particles,
 						  Vector<List<Photon>* >&       a_Photons,
 						  Vector<List<Photon>* >&       a_newPhotons,
 						  const Vector<Real>&           a_sources, 

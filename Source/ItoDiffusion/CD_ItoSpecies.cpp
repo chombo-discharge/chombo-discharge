@@ -49,7 +49,7 @@ bool ItoSpecies::isMobile() const {
   return m_isMobile;
 }
 
-List<ito_particle>& ItoSpecies::getInitialParticles() {
+List<ItoParticle>& ItoSpecies::getInitialParticles() {
   return m_initialParticles;
 }
 

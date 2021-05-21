@@ -95,9 +95,9 @@ ito_plasma_air3_lea::ito_plasma_air3_lea(){
   m_seed += procID();
   m_rng   = std::mt19937_64(m_seed);
 
-  List<ito_particle>& electrons = m_ItoSpecies[m_electron_idx]->getInitialParticles();
-  List<ito_particle>& positives = m_ItoSpecies[m_positive_idx]->getInitialParticles();
-  List<ito_particle>& negatives = m_ItoSpecies[m_negative_idx]->getInitialParticles();
+  List<ItoParticle>& electrons = m_ItoSpecies[m_electron_idx]->getInitialParticles();
+  List<ItoParticle>& positives = m_ItoSpecies[m_positive_idx]->getInitialParticles();
+  List<ItoParticle>& negatives = m_ItoSpecies[m_negative_idx]->getInitialParticles();
 
   electrons.clear();
   positives.clear();

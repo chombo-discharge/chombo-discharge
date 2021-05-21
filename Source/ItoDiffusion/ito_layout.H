@@ -251,7 +251,7 @@ public:
   /*!
     @brief Get particle containers
   */
-  virtual Vector<ParticleContainer<ito_particle>* > getParticles(const ito_solver::which_container a_ptype);
+  virtual Vector<ParticleContainer<ItoParticle>* > getParticles(const ito_solver::which_container a_ptype);
 
 protected:
 

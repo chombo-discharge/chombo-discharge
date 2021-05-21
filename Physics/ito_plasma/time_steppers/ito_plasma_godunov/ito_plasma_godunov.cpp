@@ -720,10 +720,10 @@ void ito_plasma_godunov::setup_runtime_storage(){
 
   switch (m_algorithm){
   case which_algorithm::euler_maruyama:
-    ito_particle::set_num_runtime_vectors(1);
+    ItoParticle::setNumRunTimeVectors(1);
     break;
   case which_algorithm::trapezoidal:
-    ito_particle::set_num_runtime_vectors(2); // For V^k and the diffusion hop. 
+    ItoParticle::setNumRunTimeVectors(2); // For V^k and the diffusion hop. 
     break;
   default:
     MayDay::Abort("ito_plasma_godunov::setup_runtime_storage - logic bust");
@@ -743,15 +743,15 @@ void ito_plasma_godunov::set_old_positions(){
     
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
       const DisjointBoxLayout& dbl          = m_amr->getGrids(m_particleRealm)[lvl];
-      ParticleData<ito_particle>& particles = solver->getParticles(ito_solver::which_container::bulk)[lvl];
+      ParticleData<ItoParticle>& particles = solver->getParticles(ito_solver::which_container::bulk)[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
-	List<ito_particle>& particleList = particles[dit()].listItems();
+	List<ItoParticle>& particleList = particles[dit()].listItems();
 
 
-	for (ListIterator<ito_particle> lit(particleList); lit.ok(); ++lit){
-	  ito_particle& p = particleList[lit];
+	for (ListIterator<ItoParticle> lit(particleList); lit.ok(); ++lit){
+	  ItoParticle& p = particleList[lit];
 	  p.oldPosition() = p.position();
 	}
       }
@@ -1076,12 +1076,12 @@ void ito_plasma_godunov::copy_conductivity_particles(Vector<ParticleContainer<go
       const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	const List<ito_particle>& ito_parts = solver->getParticles(ito_solver::which_container::bulk)[lvl][dit()].listItems();
+	const List<ItoParticle>& ito_parts = solver->getParticles(ito_solver::which_container::bulk)[lvl][dit()].listItems();
 	List<godunov_particle>& gdnv_parts  = (*a_conductivity_particles[idx])[lvl][dit()].listItems();
 
 	if(q != 0 && solver->isMobile()){
-	  for (ListIterator<ito_particle> lit(ito_parts); lit.ok(); ++lit){
-	    const ito_particle& p = lit();
+	  for (ListIterator<ItoParticle> lit(ito_parts); lit.ok(); ++lit){
+	    const ItoParticle& p = lit();
 	    const RealVect& pos   = p.position();
 	    const Real& mass      = p.mass();
 	    const Real& mobility  = p.mobility();
@@ -1111,14 +1111,14 @@ void ito_plasma_godunov::copy_rho_dagger_particles(Vector<ParticleContainer<godu
       const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	const List<ito_particle>& ito_parts = solver->getParticles(ito_solver::which_container::bulk)[lvl][dit()].listItems();
+	const List<ItoParticle>& ito_parts = solver->getParticles(ito_solver::which_container::bulk)[lvl][dit()].listItems();
 	List<godunov_particle>& gdnv_parts  = (*a_rho_dagger_particles[idx])[lvl][dit()].listItems();
 
 	gdnv_parts.clear();
 
 	if(q != 0){
-	  for (ListIterator<ito_particle> lit(ito_parts); lit.ok(); ++lit){
-	    const ito_particle& p = lit();
+	  for (ListIterator<ItoParticle> lit(ito_parts); lit.ok(); ++lit){
+	    const ItoParticle& p = lit();
 	    const RealVect& pos   = p.position();
 	    const Real& mass      = p.mass();
 
@@ -1336,20 +1336,20 @@ void ito_plasma_godunov::diffuse_particles_euler_maruyama(Vector<ParticleContain
     
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
       const DisjointBoxLayout& dbl          = m_amr->getGrids(m_particleRealm)[lvl];
-      ParticleData<ito_particle>& particles = solver->getParticles(ito_solver::which_container::bulk)[lvl];
+      ParticleData<ItoParticle>& particles = solver->getParticles(ito_solver::which_container::bulk)[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
-	List<ito_particle>& ito_particles  = particles[dit()].listItems();
+	List<ItoParticle>& ItoParticles  = particles[dit()].listItems();
 	List<godunov_particle>& gdnv_parts = (*a_rho_dagger[idx])[lvl][dit()].listItems();
 
 	if(diffusive){
-	  for (ListIterator<ito_particle> lit(ito_particles); lit.ok(); ++lit){
-	    ito_particle& p     = lit();
+	  for (ListIterator<ItoParticle> lit(ItoParticles); lit.ok(); ++lit){
+	    ItoParticle& p     = lit();
 	    const Real factor   = g*sqrt(2.0*p.diffusion()*a_dt);
 	    const Real& mass    = p.mass();
 	    const RealVect& pos = p.position();
-	    RealVect& hop       = p.runtime_vector(0);
+	    RealVect& hop       = p.runtimeVector(0);
 	    hop                 = factor*solver->random_gaussian();
 
 	    // Add simpler particle
@@ -1357,11 +1357,11 @@ void ito_plasma_godunov::diffuse_particles_euler_maruyama(Vector<ParticleContain
 	  }
 	}
 	else{ // Splitting up diffusion and non-diffusion because I dont want to generate random numbers where they're not required...
-	  for (ListIterator<ito_particle> lit(ito_particles); lit.ok(); ++lit){
-	    ito_particle& p     = lit();
+	  for (ListIterator<ItoParticle> lit(ItoParticles); lit.ok(); ++lit){
+	    ItoParticle& p     = lit();
 	    const Real& mass    = p.mass();
 	    const RealVect& pos = p.position();
-	    RealVect& hop       = p.runtime_vector(0);
+	    RealVect& hop       = p.runtimeVector(0);
 	    hop                 = RealVect::Zero;
 
 	    // Add simpler particle
@@ -1392,17 +1392,17 @@ void ito_plasma_godunov::step_euler_maruyama(const Real a_dt){
       
       for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
 	const DisjointBoxLayout& dbl          = m_amr->getGrids(m_particleRealm)[lvl];
-	ParticleData<ito_particle>& particles = solver->getParticles(ito_solver::which_container::bulk)[lvl];
+	ParticleData<ItoParticle>& particles = solver->getParticles(ito_solver::which_container::bulk)[lvl];
 
 	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
-	  List<ito_particle>& particleList = particles[dit()].listItems();
+	  List<ItoParticle>& particleList = particles[dit()].listItems();
 
-	  for (ListIterator<ito_particle> lit(particleList); lit.ok(); ++lit){
-	    ito_particle& p = lit();
+	  for (ListIterator<ItoParticle> lit(particleList); lit.ok(); ++lit){
+	    ItoParticle& p = lit();
 
 	    // Add diffusion hop again. The position after the diffusion hop is oldPosition() and X^k is in position()
-	    const RealVect& hop = p.runtime_vector(0);
+	    const RealVect& hop = p.runtimeVector(0);
 	    p.position()        = p.oldPosition() + f*p.velocity()*a_dt + g*hop;
 	  }
 	}
@@ -1481,26 +1481,26 @@ void ito_plasma_godunov::pre_trapezoidal_predictor(Vector<ParticleContainer<godu
     
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
       const DisjointBoxLayout& dbl          = m_amr->getGrids(m_particleRealm)[lvl];
-      ParticleData<ito_particle>& particles = solver->getParticles(ito_solver::which_container::bulk)[lvl];
+      ParticleData<ItoParticle>& particles = solver->getParticles(ito_solver::which_container::bulk)[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
-	List<ito_particle>& ito_particles  = particles[dit()].listItems();
+	List<ItoParticle>& ItoParticles  = particles[dit()].listItems();
 	List<godunov_particle>& gdnv_parts = (*a_rho_dagger[idx])[lvl][dit()].listItems();
 
 	gdnv_parts.clear();
 
 	// Store the diffusion hop, and add the godunov particles
-	for (ListIterator<ito_particle> lit(ito_particles); lit.ok(); ++lit){
-	  ito_particle& p     = lit();
+	for (ListIterator<ItoParticle> lit(ItoParticles); lit.ok(); ++lit){
+	  ItoParticle& p     = lit();
 	  const Real factor   = sqrt(2.0*p.diffusion()*a_dt);
 	  const RealVect hop  = factor*solver->random_gaussian();
 	  const RealVect& Xk  = p.oldPosition();
 	  const Real& mass    = p.mass();
 
 	  // Store the diffusion hop and the current velocity. 
-	  p.runtime_vector(0) = g*hop;
-	  p.runtime_vector(1) = f*p.velocity();
+	  p.runtimeVector(0) = g*hop;
+	  p.runtimeVector(1) = f*p.velocity();
 
 	  // Add simpler particle
 	  gdnv_parts.add(godunov_particle(Xk + g*hop, mass));
@@ -1529,18 +1529,18 @@ void ito_plasma_godunov::trapezoidal_predictor(const Real a_dt){
       
       for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
 	const DisjointBoxLayout& dbl          = m_amr->getGrids(m_particleRealm)[lvl];
-	ParticleData<ito_particle>& particles = solver->getParticles(ito_solver::which_container::bulk)[lvl];
+	ParticleData<ItoParticle>& particles = solver->getParticles(ito_solver::which_container::bulk)[lvl];
 
 	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
-	  List<ito_particle>& particleList = particles[dit()].listItems();
+	  List<ItoParticle>& particleList = particles[dit()].listItems();
 
-	  for (ListIterator<ito_particle> lit(particleList); lit.ok(); ++lit){
-	    ito_particle& p = lit();
+	  for (ListIterator<ItoParticle> lit(particleList); lit.ok(); ++lit){
+	    ItoParticle& p = lit();
 
 	    // Add diffusion hop again. The position after the diffusion hop is oldPosition() and X^k is in position()
-	    const RealVect& hop = p.runtime_vector(0);
-	    const RealVect& Vk  = p.runtime_vector(1);
+	    const RealVect& hop = p.runtimeVector(0);
+	    const RealVect& Vk  = p.runtimeVector(1);
 	    
 	    p.position()        = p.oldPosition() + f*p.velocity()*a_dt + g*hop;
 	  }
@@ -1570,23 +1570,23 @@ void ito_plasma_godunov::pre_trapezoidal_corrector(Vector<ParticleContainer<godu
     
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
       const DisjointBoxLayout& dbl          = m_amr->getGrids(m_particleRealm)[lvl];
-      ParticleData<ito_particle>& particles = solver->getParticles(ito_solver::which_container::bulk)[lvl];
+      ParticleData<ItoParticle>& particles = solver->getParticles(ito_solver::which_container::bulk)[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
-	List<ito_particle>& ito_particles  = particles[dit()].listItems();
+	List<ItoParticle>& ItoParticles  = particles[dit()].listItems();
 	List<godunov_particle>& gdnv_parts = (*a_rho_dagger[idx])[lvl][dit()].listItems();
 
 	gdnv_parts.clear();
 
 	// Store the diffusion hop, and add the godunov particles
-	for (ListIterator<ito_particle> lit(ito_particles); lit.ok(); ++lit){
-	  ito_particle& p     = lit();
+	for (ListIterator<ItoParticle> lit(ItoParticles); lit.ok(); ++lit){
+	  ItoParticle& p     = lit();
 	  
 	  const Real& mass    = p.mass();
 	  const RealVect& Xk  = p.oldPosition();
-	  const RealVect& hop = p.runtime_vector(0);
-	  const RealVect& Vk  = p.runtime_vector(1);
+	  const RealVect& hop = p.runtimeVector(0);
+	  const RealVect& Vk  = p.runtimeVector(1);
 
 	  // Move particle. 
 	  const RealVect pos  = Xk + 0.5*a_dt*f*Vk + g*hop;
@@ -1616,18 +1616,18 @@ void ito_plasma_godunov::trapezoidal_corrector(const Real a_dt){
       
       for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
 	const DisjointBoxLayout& dbl          = m_amr->getGrids(m_particleRealm)[lvl];
-	ParticleData<ito_particle>& particles = solver->getParticles(ito_solver::which_container::bulk)[lvl];
+	ParticleData<ItoParticle>& particles = solver->getParticles(ito_solver::which_container::bulk)[lvl];
 
 	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
-	  List<ito_particle>& particleList = particles[dit()].listItems();
+	  List<ItoParticle>& particleList = particles[dit()].listItems();
 
-	  for (ListIterator<ito_particle> lit(particleList); lit.ok(); ++lit){
-	    ito_particle& p = lit();
+	  for (ListIterator<ItoParticle> lit(particleList); lit.ok(); ++lit){
+	    ItoParticle& p = lit();
 
 	    const RealVect& Xk  = p.oldPosition();
-	    const RealVect& hop = p.runtime_vector(0);
-	    const RealVect& Vk  = p.runtime_vector(1);
+	    const RealVect& hop = p.runtimeVector(0);
+	    const RealVect& Vk  = p.runtimeVector(1);
 	    const RealVect& Vk1 = p.velocity();
 	    
 	    p.position() = Xk + 0.5*f*a_dt*(Vk + Vk1) + g*hop;

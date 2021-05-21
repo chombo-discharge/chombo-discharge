@@ -1,31 +1,35 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   ito_particle.cpp
-  @brief  Implementation of ito_particle.H
+  @file   CD_ItoParticle.cpp
+  @brief  Implementation of CD_ItoParticle.H
   @author Robert Marskar
-  @date   April 2020
 */
 
-#include "ito_particle.H"
-
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_ItoParticle.H>
+#include <CD_NamespaceHeader.H>
   
-int ito_particle::s_num_runtime_scalars = 0;
-int ito_particle::s_num_runtime_vectors = 0;
+int ItoParticle::s_num_runtimeScalars = 0;
+int ItoParticle::s_num_runtimeVectors = 0;
 
-void ito_particle::set_num_runtime_scalars(const int a_num){
-  s_num_runtime_scalars = a_num;
+void ItoParticle::setNumRunTimeScalars(const int a_num){
+  s_num_runtimeScalars = a_num;
 }
 
-void ito_particle::set_num_runtime_vectors(const int a_num){
-  s_num_runtime_vectors = a_num;
+void ItoParticle::setNumRunTimeVectors(const int a_num){
+  s_num_runtimeVectors = a_num;
 }
 
-ito_particle::ito_particle() : BinItem(){
+ItoParticle::ItoParticle() : BinItem(){
 
   allocateRuntimeBuffers();
 }
 
-ito_particle::ito_particle(const ito_particle& a_other) {
+ItoParticle::ItoParticle(const ItoParticle& a_other) {
   m_position    = a_other.m_position;
   m_mass        = a_other.m_mass;
   m_velocity    = a_other.m_velocity;
@@ -37,12 +41,12 @@ ito_particle::ito_particle(const ito_particle& a_other) {
   allocateRuntimeBuffers();
 }
 
-ito_particle::ito_particle(const Real      a_mass,
-			   const RealVect& a_position,
-			   const RealVect& a_velocity,
-			   const Real      a_diffusion,
-			   const Real      a_mobility,
-			   const Real      a_energy) : BinItem(a_position){
+ItoParticle::ItoParticle(const Real      a_mass,
+			 const RealVect& a_position,
+			 const RealVect& a_velocity,
+			 const Real      a_diffusion,
+			 const Real      a_mobility,
+			 const Real      a_energy) : BinItem(a_position){
   m_mass        = a_mass;
   m_velocity    = a_velocity;
   m_diffusion   = a_diffusion;
@@ -53,7 +57,7 @@ ito_particle::ito_particle(const Real      a_mass,
   allocateRuntimeBuffers();
 }
 
-ito_particle::~ito_particle(){
+ItoParticle::~ItoParticle(){
 
   if(m_runtimeScalars != nullptr){
     delete [] m_runtimeScalars;
@@ -66,25 +70,25 @@ ito_particle::~ito_particle(){
   }
 }
 
-void ito_particle::allocateRuntimeBuffers(){
+void ItoParticle::allocateRuntimeBuffers(){
   m_runtimeScalars = nullptr;
   m_runtimeVectors = nullptr;
   
-  if(s_num_runtime_scalars >= 0){
-    m_runtimeScalars = new Real [s_num_runtime_scalars];
+  if(s_num_runtimeScalars >= 0){
+    m_runtimeScalars = new Real [s_num_runtimeScalars];
   }
 
-  if(s_num_runtime_vectors >= 0){
-    m_runtimeVectors = new RealVect [s_num_runtime_vectors];
+  if(s_num_runtimeVectors >= 0){
+    m_runtimeVectors = new RealVect [s_num_runtimeVectors];
   }
 }
 
-void ito_particle::define(const Real      a_mass,
-			  const RealVect& a_position,
-			  const RealVect& a_velocity,
-			  const Real      a_diffusion,
-			  const Real      a_mobility,
-			  const Real      a_energy){
+void ItoParticle::define(const Real      a_mass,
+			 const RealVect& a_position,
+			 const RealVect& a_velocity,
+			 const Real      a_diffusion,
+			 const Real      a_mobility,
+			 const Real      a_energy){
   setMass(a_mass);
   setPosition(a_position);
   setVelocity(a_velocity);
@@ -93,137 +97,137 @@ void ito_particle::define(const Real      a_mass,
   setEnergy(a_energy);
 }
 
-void ito_particle::setOldPosition(const RealVect a_oldPosition){
+void ItoParticle::setOldPosition(const RealVect a_oldPosition){
   m_oldPosition = a_oldPosition;
 }
 
-RealVect& ito_particle::oldPosition(){
+RealVect& ItoParticle::oldPosition(){
   return m_oldPosition;
 }
 
-const RealVect& ito_particle::oldPosition() const{
+const RealVect& ItoParticle::oldPosition() const{
   return m_oldPosition;
 }
 
-void ito_particle::setMass(const Real a_mass){
+void ItoParticle::setMass(const Real a_mass){
   m_mass = a_mass;
 }
 
-Real& ito_particle::mass(){
+Real& ItoParticle::mass(){
   return m_mass;
 }
 
-const Real& ito_particle::mass() const{
+const Real& ItoParticle::mass() const{
   return m_mass;
 }
 
-void ito_particle::setDiffusion(const Real a_diffusion){
+void ItoParticle::setDiffusion(const Real a_diffusion){
   m_diffusion = a_diffusion;
 }
 
-Real& ito_particle::diffusion(){
+Real& ItoParticle::diffusion(){
   return m_diffusion;
 }
 
-const Real& ito_particle::diffusion() const{
+const Real& ItoParticle::diffusion() const{
   return m_diffusion;
 }
 
-void ito_particle::setMobility(const Real a_mobility){
+void ItoParticle::setMobility(const Real a_mobility){
   m_mobility = a_mobility;
 }
 
 
-Real& ito_particle::mobility(){
+Real& ItoParticle::mobility(){
   return m_mobility;
 }
 
-const Real& ito_particle::mobility() const{
+const Real& ItoParticle::mobility() const{
   return m_mobility;
 }
 
-void ito_particle::setEnergy(const Real a_energy){
+void ItoParticle::setEnergy(const Real a_energy){
   m_energy = a_energy;
 }
 
-Real& ito_particle::energy(){
+Real& ItoParticle::energy(){
   return m_energy;
 }
 
-const Real& ito_particle::energy() const{
+const Real& ItoParticle::energy() const{
   return m_energy;
 }
 
-void ito_particle::setVelocity(const RealVect& a_velocity){
+void ItoParticle::setVelocity(const RealVect& a_velocity){
   m_velocity = a_velocity;
 }
 
-void ito_particle::setVelocity(const Real& a_velocity, const int a_dir){
+void ItoParticle::setVelocity(const Real& a_velocity, const int a_dir){
   m_velocity[a_dir] = a_velocity;
 }
 
-RealVect& ito_particle::velocity(){
+RealVect& ItoParticle::velocity(){
   return m_velocity;
 }
 
-const RealVect& ito_particle::velocity() const{
+const RealVect& ItoParticle::velocity() const{
   return m_velocity;
 }
 
-Real ito_particle::velocity(const int a_dir) const{
+Real ItoParticle::velocity(const int a_dir) const{
   return m_velocity[a_dir];
 }
 
-Real& ito_particle::tmp(){
+Real& ItoParticle::tmp(){
   return m_tmp;
 }
 
-const Real& ito_particle::tmp() const{
+const Real& ItoParticle::tmp() const{
   return m_tmp;
 }
 
-Real& ito_particle::runtime_scalar(const int a_num){
+Real& ItoParticle::runtimeScalar(const int a_num){
   return m_runtimeScalars[a_num];
 }
 
-const Real& ito_particle::runtime_scalar(const int a_num) const{
+const Real& ItoParticle::runtimeScalar(const int a_num) const{
   return m_runtimeScalars[a_num];
 }
 
-RealVect& ito_particle::runtime_vector(const int a_num){
+RealVect& ItoParticle::runtimeVector(const int a_num){
   return m_runtimeVectors[a_num];
 }
 
-const RealVect& ito_particle::runtime_vector(const int a_num) const {
+const RealVect& ItoParticle::runtimeVector(const int a_num) const {
   return m_runtimeVectors[a_num];
 }
 
-bool ito_particle::operator==(const ito_particle& a_p) const{
+bool ItoParticle::operator==(const ItoParticle& a_p) const{
   return ( m_mass      == a_p.m_mass     &&
 	   m_position  == a_p.m_position &&
 	   m_velocity  == a_p.m_velocity &&
 	   m_diffusion == a_p.m_diffusion);
 }
 
-bool ito_particle::operator==(const ito_particle* a_p) const{
+bool ItoParticle::operator==(const ItoParticle* a_p) const{
   return (*this == *a_p);
 }
 
-bool ito_particle::operator!=(const ito_particle& a_p) const{
+bool ItoParticle::operator!=(const ItoParticle& a_p) const{
   return !(*this == a_p);
 }
 
-int ito_particle::size() const{
+int ItoParticle::size() const{
   const int compileSize = BinItem::size() + sizeof(m_mass) + sizeof(m_velocity) + sizeof(m_diffusion) + sizeof(m_oldPosition) + sizeof(m_mobility) + sizeof(m_energy);
   //  const int runtimeSize = sizeof(*m_runtimeScalars) + sizeof(*m_runtimeVectors);
-  const int runtimeSize = s_num_runtime_scalars*sizeof(Real) + s_num_runtime_vectors*sizeof(RealVect);
+  const int runtimeSize = s_num_runtimeScalars*sizeof(Real) + s_num_runtimeVectors*sizeof(RealVect);
 
-  //  std::cout << s_num_runtime_vectors*sizeof(RealVect) << std::endl;
+  //  std::cout << s_num_runtimeVectors*sizeof(RealVect) << std::endl;
 
   return compileSize + runtimeSize;
 }
 
-void ito_particle::linearOut(void* buf) const{
+void ItoParticle::linearOut(void* buf) const{
   Real* buffer = (Real*)buf;
   D_TERM6( *buffer++ = m_position[0];,
 	   *buffer++ = m_position[1];,
@@ -252,11 +256,11 @@ void ito_particle::linearOut(void* buf) const{
 
 
   // Go through run-time memory
-  for (int i = 0; i < s_num_runtime_scalars; i++){
+  for (int i = 0; i < s_num_runtimeScalars; i++){
     *buffer++ = m_runtimeScalars[i];
   }
 
-  for (int i = 0; i < s_num_runtime_vectors; i++){
+  for (int i = 0; i < s_num_runtimeVectors; i++){
     D_TERM6( *buffer++ = m_runtimeVectors[i][0];,
 	     *buffer++ = m_runtimeVectors[i][1];,
 	     *buffer++ = m_runtimeVectors[i][2];,
@@ -268,7 +272,7 @@ void ito_particle::linearOut(void* buf) const{
   *buffer = m_energy;
 }
 
-void ito_particle::linearIn(void* buf){
+void ItoParticle::linearIn(void* buf){
   Real* buffer = (Real*)buf;
   D_TERM6( m_position[0] = *buffer++;,
 	   m_position[1] = *buffer++;,
@@ -296,10 +300,10 @@ void ito_particle::linearIn(void* buf){
   m_mobility  = *buffer++;
 
   // Go through run-time memory
-  for (int i = 0; i < s_num_runtime_scalars; i++){
+  for (int i = 0; i < s_num_runtimeScalars; i++){
     m_runtimeScalars[i] = *buffer++;
   }
-  for (int i = 0; i < s_num_runtime_vectors; i++){
+  for (int i = 0; i < s_num_runtimeVectors; i++){
     D_TERM6( m_runtimeVectors[i][0] = *buffer++;,
 	     m_runtimeVectors[i][1] = *buffer++;,
 	     m_runtimeVectors[i][2] = *buffer++;,
@@ -311,8 +315,8 @@ void ito_particle::linearIn(void* buf){
   m_energy    = *buffer;
 }
 
-std::ostream & operator<<(std::ostream& ostr, const ito_particle& p){
-  ostr << " ito_particle : " << std::endl;
+std::ostream & operator<<(std::ostream& ostr, const ItoParticle& p){
+  ostr << " ItoParticle : " << std::endl;
   ostr << " mass " << p.mass() << std::endl;
   ostr << " position ( ";
   for ( int i=0; i<SpaceDim; ++i ){ ostr << " " << p.position(i); }
@@ -325,4 +329,5 @@ std::ostream & operator<<(std::ostream& ostr, const ito_particle& p){
   ostr << std::endl << " energy " << p.energy() << std::endl;
   return ostr;
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

@@ -351,8 +351,8 @@ Vector<EBAMRCellData*> ito_layout<T>::get_mobility_funcs(){
 }
 
 template <class T>
-Vector<ParticleContainer<ito_particle>* > ito_layout<T>::getParticles(const ito_solver::which_container a_container){
-  Vector<ParticleContainer<ito_particle>* > ret(m_solvers.size(), nullptr);
+Vector<ParticleContainer<ItoParticle>* > ito_layout<T>::getParticles(const ito_solver::which_container a_container){
+  Vector<ParticleContainer<ItoParticle>* > ret(m_solvers.size(), nullptr);
   for (ito_iterator<T> iter = this->iterator(); iter.ok(); ++iter){
     ret[iter.index()] = &(iter()->getParticles(a_container));
   }
