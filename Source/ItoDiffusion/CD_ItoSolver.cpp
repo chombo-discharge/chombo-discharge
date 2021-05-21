@@ -2901,8 +2901,8 @@ void ItoSolver::mergeBVH(List<ItoParticle>& a_particles, const int a_particlesPe
   // 2. Build the BVH tree and get the leaves of the tree
   const int dir = (m_kd_direction < 0) ? m_udist0d(m_rng) : m_kd_direction;
   m_tree.define(pointMasses, mass);
-  m_tree.build_tree(dir, a_particlesPerCell);
-  const std::vector<std::shared_ptr<bvh_node<PointMass> > >& leaves = m_tree.get_leaves();
+  m_tree.buildTree(dir, a_particlesPerCell);
+  const std::vector<std::shared_ptr<ItoMerge::Node<PointMass> > >& leaves = m_tree.getLeaves();
 
   // 3. Clear particles in this cell and add new ones.
   a_particles.clear();

@@ -76,7 +76,7 @@ public:
   }
   
   inline
-  bool can_split() const {
+  bool canSplit() const {
     return m_mass*(1.0 + 1.E-6) >= 2.0;
   }
   

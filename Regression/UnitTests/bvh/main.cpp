@@ -1,5 +1,5 @@
 #include "CD_Driver.H"
-#include "bvh.H"
+#include <CD_ItoMerge.H>
 #include <CD_PointMass.H>
 
 #include <iostream>
@@ -67,14 +67,14 @@ int main(int argc, char* argv[]){
 
   // Do particle merging/splitting
 
-  bvh_tree<PointMass> tree(inputParticles, Mass);
+  Tree<PointMass> tree(inputParticles, Mass);
   const Real t0 = MPI_Wtime();
-  tree.build_tree(ppc);
+  tree.buildTree(ppc);
   const Real t1 = MPI_Wtime();
 
   // Create output particles
   std::vector<PointMass> outputParticles(0);
-  const std::vector<std::shared_ptr<bvh_node<PointMass> > >& leaves = tree.get_leaves();
+  const std::vector<std::shared_ptr<Node<PointMass> > >& leaves = tree.getLeaves();
   for (int i = 0; i < leaves.size(); i++){
     const PointMass newParticle(leaves[i]->getData());
 

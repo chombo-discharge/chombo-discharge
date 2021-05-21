@@ -27,7 +27,7 @@
 #include <CD_ItoParticle.H>
 #include <CD_EbParticleInterp.H>
 #include <CD_ParticleContainer.H>
-#include <bvh.H>
+#include <CD_ItoMerge.H>
 #include <CD_PointMass.H>
 #include <CD_EbRepresentation.H>
 #include <CD_NamespaceHeader.H>
@@ -754,7 +754,7 @@ protected:
   /*!
     @brief Boundary volume hierarchy merging tree
   */
-  bvh_tree<PointMass> m_tree;
+  ItoMerge::Tree<PointMass> m_tree;
 
   /*!
     @brief Computational geometry. 
