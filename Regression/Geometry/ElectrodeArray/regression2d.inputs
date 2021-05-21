@@ -81,11 +81,11 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 #
 # In 2D, the electrodes are moved in the x-direction only and 'num_y' and 'delta_y' are not used. 
 # ----------------------------------------------------------------------------------------------------
-electrode_array.live      = 1             # Live voltage (1) or not (0)
-electrode_array.radius    = 0.1           # Radius 
-electrode_array.endpoint1 = -0.75 0       # One endpoint for first electrode
-electrode_array.endpoint2 = -0.75 2       # One endpoint for second electrode
-electrode_array.num_x     = 4             # Number of electrodes in the x-direction
-electrode_array.num_y     = 4             # Number of electrodes in the y-direction
-electrode_array.delta_x   = 0.5           # Electrode spacing in the x-direction
-electrode_array.delta_y   = 0.5           # Electrode spacing in the y-direction
+ElectrodeArray.live      = 1             # Live voltage (1) or not (0)
+ElectrodeArray.radius    = 0.1           # Radius 
+ElectrodeArray.endpoint1 = -0.75 0       # One endpoint for first electrode
+ElectrodeArray.endpoint2 = -0.75 2       # One endpoint for second electrode
+ElectrodeArray.num_x     = 4             # Number of electrodes in the x-direction
+ElectrodeArray.num_y     = 4             # Number of electrodes in the y-direction
+ElectrodeArray.delta_x   = 0.5           # Electrode spacing in the x-direction
+ElectrodeArray.delta_y   = 0.5           # Electrode spacing in the y-direction

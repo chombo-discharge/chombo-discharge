@@ -1,18 +1,24 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   electrode_array.cpp
-  @brief  Implementation of electrode_array.H
+  @file   CD_ElectrodeArray.cpp
+  @brief  Implementation of CD_ElectrodeArray.H
   @author Robert Marskar
-  @date   Dec. 2018
 */
 
-#include "electrode_array.H"
-#include <CD_RodIF.H>
+// Chombo includes
 #include <ParmParse.H>
 
-#include "CD_NamespaceHeader.H"
+//
+#include <CD_ElectrodeArray.H>
+#include <CD_RodIF.H>
+#include <CD_NamespaceHeader.H>
   
-electrode_array::electrode_array(){
-  ParmParse pp("electrode_array");
+ElectrodeArray::ElectrodeArray(){
+  ParmParse pp("ElectrodeArray");
 
   bool live;
   Vector<Real> v(SpaceDim);
@@ -49,7 +55,8 @@ electrode_array::electrode_array(){
   }
 }
 
-electrode_array::~electrode_array(){
+ElectrodeArray::~ElectrodeArray(){
 
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
