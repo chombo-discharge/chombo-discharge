@@ -1,31 +1,36 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file DataOps.H
-  @brief Agglomeration of useful data operations
+  @file   CD_MemoryReport.cpp
+  @brief  Implementation of CD_MemoryReport.H
   @author Robert Marskar
-  @date Nov 2017
 */
 
-#include "memrep.H"
-
+// Chombo includes
 #include <EBLevelDataOps.H>
 #include <memtrack.H>
 #include <memusage.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_MemoryReport.H>
+#include <CD_NamespaceHeader.H>
 
-void memrep::getMaxMin_memory(){
+void MemoryReport::getMaxMinMemoryUsage(){
   Real max_peak, min_peak, min_unfreed, max_unfreed;
 
-  memrep::getMaxMin_memory(max_peak, min_peak, min_unfreed, max_unfreed);
+  MemoryReport::getMaxMinMemoryUsage(max_peak, min_peak, min_unfreed, max_unfreed);
 
-  pout() << "memrep::getMaxMin_memory:" 
+  pout() << "MemoryReport::getMaxMinMemoryUsage:" 
 	 << "\t max peak = "       << 1.0*max_peak
 	 << "\t min peak = "    << 1.0*min_peak
 	 << "\t max unfreed = " << 1.0*max_unfreed
 	 << "\t min unfreed = " << 1.0*min_unfreed << endl;
 }
 
-void memrep::getMaxMin_memory(Real& a_max_peak, Real& a_min_peak, Real& a_min_unfreed, Real& a_max_unfreed){
+void MemoryReport::getMaxMinMemoryUsage(Real& a_max_peak, Real& a_min_peak, Real& a_min_unfreed, Real& a_max_unfreed){
   int BytesPerMB = 1024*1024;
   long long curMem;
   long long peakMem;
@@ -50,7 +55,7 @@ void memrep::getMaxMin_memory(Real& a_max_peak, Real& a_min_peak, Real& a_min_un
   a_min_unfreed = 1.0*min_unfreed_mem/BytesPerMB;
 }
 
-void memrep::get_memory(Vector<Real>& a_peak, Vector<Real>& a_unfreed){
+void MemoryReport::getMemoryUsage(Vector<Real>& a_peak, Vector<Real>& a_unfreed){
   const int BytesPerMB = 1024*1024;
 
   long long curMem, peakMem;
@@ -76,4 +81,5 @@ void memrep::get_memory(Vector<Real>& a_peak, Vector<Real>& a_unfreed){
   delete unfreed;
   delete peak;
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

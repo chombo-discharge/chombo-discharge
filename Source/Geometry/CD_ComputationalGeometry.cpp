@@ -22,7 +22,7 @@
 // Our includes
 #include <CD_ComputationalGeometry.H>
 #include <CD_ScanShop.H>
-#include <memrep.H>
+#include <CD_MemoryReport.H>
 #include <CD_NamespaceHeader.H>
 
 #if CH_USE_DOUBLE

@@ -15,7 +15,7 @@
 // Our includes
 #include <CD_MultiFluidIndexSpace.H>
 #include <CD_ComputationalGeometry.H>
-#include <memrep.H>
+#include <CD_MemoryReport.H>
 #include <CD_NamespaceHeader.H>
 
 MultiFluidIndexSpace::MultiFluidIndexSpace(){
@@ -42,7 +42,7 @@ void MultiFluidIndexSpace::define(const Box                     & a_domain,
   }
   m_ebis[phase::gas]->define(a_domain,   a_origin, a_dx, *a_geoservers[phase::gas],   a_nCellMax, a_max_coar);
 #if 1 // Debug
-  memrep::getMaxMin_memory();
+  MemoryReport::getMaxMinMemoryUsage();
 #endif
 
 
@@ -56,7 +56,7 @@ void MultiFluidIndexSpace::define(const Box                     & a_domain,
     }
     m_ebis[phase::solid]->define(a_domain, a_origin, a_dx, *a_geoservers[phase::solid], a_nCellMax, a_max_coar);
 #if 1 // Debug
-    memrep::getMaxMin_memory();
+    MemoryReport::getMaxMinMemoryUsage();
 #endif
   }
 }

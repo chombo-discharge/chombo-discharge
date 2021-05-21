@@ -26,7 +26,7 @@
 #include <CD_DataOps.H>
 #include <mfalias.H>
 #include <units.H>
-#include <memrep.H>
+#include <CD_MemoryReport.H>
 #include <CD_NamespaceHeader.H>
 
 Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry,
@@ -1708,7 +1708,7 @@ void Driver::writeMemoryUsage(){
 
   // Get memory stuff
   Vector<Real> peak, unfreed;
-  memrep::get_memory(peak, unfreed);
+  MemoryReport::getMemoryUsage(peak, unfreed);
   
   // Begin writing output
   if(procID() == 0){
