@@ -31,16 +31,6 @@ class ItoParticle : public BinItem {
 public:
 
   /*!
-    @brief Static for defining the number of runtime Real components
-  */
-  static int s_num_runtimeScalars;
-
-  /*!
-    @brief Static for defining the number of runtime RealVect components
-  */
-  static int s_num_runtimeVectors;
-
-  /*!
     @brief Set the number of run-time defined real variables
   */
   static void setNumRunTimeScalars(const int a_num);
@@ -256,6 +246,16 @@ public:
   friend std::ostream & operator<<(std::ostream& ostr,const ItoParticle& p);
 
 protected:
+
+  /*!
+    @brief Static for defining the number of runtime Real components
+  */
+  static int s_num_runtimeScalars;
+
+  /*!
+    @brief Static for defining the number of runtime RealVect components
+  */
+  static int s_num_runtimeVectors;
   
   Real     m_tmp; // Not communicated!
   Real     m_mass;
