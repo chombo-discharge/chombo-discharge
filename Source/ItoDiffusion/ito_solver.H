@@ -10,7 +10,7 @@
 
 #include "CD_AmrMesh.H"
 #include <CD_ComputationalGeometry.H>
-#include "ito_species.H"
+#include <CD_ItoSpecies.H>
 #include "ito_particle.H"
 #include <CD_EbParticleInterp.H>
 #include <CD_ParticleContainer.H>
@@ -418,7 +418,7 @@ public:
   /*!
     @brief Set the species
   */
-  virtual void setSpecies(RefCountedPtr<ito_species> a_species);
+  virtual void setSpecies(RefCountedPtr<ItoSpecies> a_species);
 
   /*!
     @brief Cache the particles
@@ -453,7 +453,7 @@ public:
   /*!
     @brief Get the species
   */
-  virtual RefCountedPtr<ito_species>& getSpecies();
+  virtual RefCountedPtr<ItoSpecies>& getSpecies();
 
   /*!
     @brief Get state
@@ -517,13 +517,13 @@ public:
 
   /*!
     @brief Update mobilities
-    @details This calls the mobility function implemented by ito_species
+    @details This calls the mobility function implemented by ItoSpecies
   */
   virtual void update_mobilities();
 
   /*!
     @brief Update mobilities
-    @details This calls the mobility function implemented by ito_species
+    @details This calls the mobility function implemented by ItoSpecies
   */
   virtual void update_mobilities(const int a_level, const DataIndex a_dit);
 
@@ -539,13 +539,13 @@ public:
 
   /*!
     @brief Update diffusion coefficients
-    @details This calls the diffusion function implemented by ito_species
+    @details This calls the diffusion function implemented by ItoSpecies
   */
   virtual void update_diffusion();
 
   /*!
     @brief Update diffusion coefficients
-    @details This calls the diffusion function implemented by ito_species
+    @details This calls the diffusion function implemented by ItoSpecies
   */
   virtual void update_diffusion(const int a_level, const DataIndex a_dit);
 
@@ -763,7 +763,7 @@ protected:
   /*!
     @brief Species
   */
-  RefCountedPtr<ito_species> m_species;
+  RefCountedPtr<ItoSpecies> m_species;
 
   /*!
     @brief Phase

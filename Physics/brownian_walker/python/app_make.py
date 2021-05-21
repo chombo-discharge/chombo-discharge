@@ -43,7 +43,7 @@ def write_template(args):
     makef.write('\t$(DISCHARGE_HOME)/Source/ImplicitFunctions \\\n')
     makef.write('\t$(DISCHARGE_HOME)/Source/Multifluid \\\n')    
     makef.write('\t$(DISCHARGE_HOME)/Source/RadiativeTransfer \\\n')
-    makef.write('\t$(DISCHARGE_HOME)/Source/ito_solver \\\n')
+    makef.write('\t$(DISCHARGE_HOME)/Source/ItoDiffusion \\\n')
     makef.write('\t$(DISCHARGE_HOME)/Source/SigmaSolver \\\n')
     makef.write('\t$(DISCHARGE_HOME)/Source/Particle \\\n')
     makef.write('\t$(DISCHARGE_HOME)/Source/Utilities \\\n')

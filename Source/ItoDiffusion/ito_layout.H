@@ -30,7 +30,7 @@ public:
   /*!
     @brief Full constructor. Calls define. 
   */
-  ito_layout(const Vector<RefCountedPtr<ito_species> >& a_species);
+  ito_layout(const Vector<RefCountedPtr<ItoSpecies> >& a_species);
 
   /*!
     @brief Destructor. 
@@ -60,7 +60,7 @@ public:
   /*!
     @brief Define function
   */
-  virtual void define(const Vector<RefCountedPtr<ito_species> >& a_species);
+  virtual void define(const Vector<RefCountedPtr<ItoSpecies> >& a_species);
 
   /*!
     @brief Parse options for all solvers
@@ -221,7 +221,7 @@ public:
   /*!
     @brief Get species
   */
-  virtual Vector<RefCountedPtr<ito_species> >& getSpecies();
+  virtual Vector<RefCountedPtr<ItoSpecies> >& getSpecies();
 
   /*!
     @brief Get all velocity functions
@@ -268,7 +268,7 @@ protected:
   /*!
     @brief Species
   */
-  Vector<RefCountedPtr<ito_species> > m_species;
+  Vector<RefCountedPtr<ItoSpecies> > m_species;
 
   /*!
     @brief Verbosity
@@ -295,7 +295,7 @@ class ito_factory {
 public:
   ito_factory();
   ~ito_factory();
-  RefCountedPtr<ito_layout<T> > newLayout(const Vector<RefCountedPtr<ito_species> > a_species) const;
+  RefCountedPtr<ito_layout<T> > newLayout(const Vector<RefCountedPtr<ItoSpecies> > a_species) const;
 };
 #include "CD_NamespaceFooter.H"
 

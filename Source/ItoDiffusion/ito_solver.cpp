@@ -54,7 +54,7 @@ void ito_solver::setRealm(const std::string a_realm){
   m_fluid_Realm = m_realm;
 }
 
-RefCountedPtr<ito_species>& ito_solver::getSpecies(){
+RefCountedPtr<ItoSpecies>& ito_solver::getSpecies(){
   return m_species;
 }
 
@@ -945,7 +945,7 @@ void ito_solver::regrid(const int a_lmin, const int a_oldFinestLevel, const int 
   }
 }
 
-void ito_solver::setSpecies(RefCountedPtr<ito_species> a_species){
+void ito_solver::setSpecies(RefCountedPtr<ItoSpecies> a_species){
   CH_TIME("ito_solver::setSpecies");
   if(m_verbosity > 5){
     pout() << m_name + "::setSpecies" << endl;

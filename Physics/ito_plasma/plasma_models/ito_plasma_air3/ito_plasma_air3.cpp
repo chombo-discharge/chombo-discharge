@@ -14,7 +14,7 @@
 using namespace physics::ito_plasma;
 
 ito_plasma_air3::ito_plasma_air3(){
-  m_num_ito_species = 3;
+  m_num_ItoSpecies = 3;
   m_num_RtSpecies = 1;
 
   m_coupling == ito_plasma_physics::coupling::LFA;
@@ -81,7 +81,7 @@ ito_plasma_air3::ito_plasma_air3(){
   m_N  = m_p*Units::Na/(m_T*Units::R);
 
   // Set up species
-  m_ito_species.resize(m_num_ito_species);
+  m_ItoSpecies.resize(m_num_ItoSpecies);
   m_RtSpecies.resize(m_num_RtSpecies);
 
   m_electron_idx = 0;
@@ -89,18 +89,18 @@ ito_plasma_air3::ito_plasma_air3(){
   m_negative_idx = 2;
   m_PhotonZ_idx  = 0;
 
-  m_ito_species[m_electron_idx] = RefCountedPtr<ito_species> (new electron());
-  m_ito_species[m_positive_idx] = RefCountedPtr<ito_species> (new positive());
-  m_ito_species[m_negative_idx] = RefCountedPtr<ito_species> (new negative());
+  m_ItoSpecies[m_electron_idx] = RefCountedPtr<ItoSpecies> (new electron());
+  m_ItoSpecies[m_positive_idx] = RefCountedPtr<ItoSpecies> (new positive());
+  m_ItoSpecies[m_negative_idx] = RefCountedPtr<ItoSpecies> (new negative());
   m_RtSpecies[m_PhotonZ_idx]  = RefCountedPtr<RtSpecies> (new PhotonZ());
 
   // To avoid that MPI ranks draw the same particle positions, increment the seed for each rank
   m_seed += procID();
   m_rng   = std::mt19937_64(m_seed);
 
-  List<ito_particle>& electrons = m_ito_species[m_electron_idx]->getInitialParticles();
-  List<ito_particle>& positives = m_ito_species[m_positive_idx]->getInitialParticles();
-  List<ito_particle>& negatives = m_ito_species[m_negative_idx]->getInitialParticles();
+  List<ito_particle>& electrons = m_ItoSpecies[m_electron_idx]->getInitialParticles();
+  List<ito_particle>& positives = m_ItoSpecies[m_positive_idx]->getInitialParticles();
+  List<ito_particle>& negatives = m_ItoSpecies[m_negative_idx]->getInitialParticles();
 
   electrons.clear();
   positives.clear();
@@ -170,7 +170,7 @@ Real ito_plasma_air3::compute_alpha(const RealVect a_E) const {
 }
 
 Vector<Real> ito_plasma_air3::compute_ito_mobilities_lfa(const Real a_time, const RealVect a_pos, const RealVect a_E) const {
-  Vector<Real> mobilities(m_num_ito_species, m_ion_mu);
+  Vector<Real> mobilities(m_num_ItoSpecies, m_ion_mu);
   mobilities[m_electron_idx] = m_tables.at("mobility").getEntry(a_E.vectorLength());
 
   return mobilities;
@@ -184,7 +184,7 @@ Vector<Real> ito_plasma_air3::compute_ito_diffusion_lfa(const Real         a_tim
 							const RealVect     a_pos,
 							const RealVect     a_E,
 							const Vector<Real> a_cdr_densities) const {
-  Vector<Real> D(m_num_ito_species, m_ion_D);
+  Vector<Real> D(m_num_ItoSpecies, m_ion_D);
   D[m_electron_idx] = m_tables.at("diffco").getEntry(a_E.vectorLength());
   
   return D;

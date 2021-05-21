@@ -95,19 +95,19 @@ namespace physics {
     };
 
     
-    class ito_plasma_air3::electron : public ito_species {
+    class ito_plasma_air3::electron : public ItoSpecies {
     public:
       electron();
       ~electron();
     };
 
-    class ito_plasma_air3::positive : public ito_species {
+    class ito_plasma_air3::positive : public ItoSpecies {
     public:
       positive();
       ~positive();
     };
 
-    class ito_plasma_air3::negative : public ito_species {
+    class ito_plasma_air3::negative : public ItoSpecies {
     public:
       negative();
       ~negative();

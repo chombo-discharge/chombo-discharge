@@ -133,7 +133,7 @@ void ito_plasma_physics::check_charge_conservation(const Vector<long long>& a_ol
   long long charge_after = 0;
 
   for (int i = 0; i < a_oldNumParticles.size(); i++){
-    const int q = m_ito_species[i]->getChargeNumber();
+    const int q = m_ItoSpecies[i]->getChargeNumber();
 
     charge_before += a_oldNumParticles[i]*q;
     charge_after  += a_newNumParticles[i]*q;
@@ -151,7 +151,7 @@ long long ito_plasma_physics::computeCharge(const Vector<List<ito_particle>* >& 
 
   long long ret = 0;
   for (int i = 0; i < a_particles.size(); i++){
-    const long long q = (long long) m_ito_species[i]->getChargeNumber();
+    const long long q = (long long) m_ItoSpecies[i]->getChargeNumber();
     
     for (ListIterator<ito_particle> lit(*a_particles[i]); lit.ok(); ++lit){
       const long long w = llround(lit().mass());
@@ -754,9 +754,9 @@ void ito_plasma_physics::advance_reaction_network(Vector<List<ito_particle>* >& 
   // Energies, mean_energies, and sources. Make sure LFA gives dummy arguments. 
   Vector<Real> sources, energies, mean_energies;
   if(m_coupling == coupling::LFA){ 
-    energies.resize(m_num_ito_species, 0.0);
-    mean_energies.resize(m_num_ito_species, 0.0);
-    sources.resize(m_num_ito_species, 0.0);
+    energies.resize(m_num_ItoSpecies, 0.0);
+    mean_energies.resize(m_num_ItoSpecies, 0.0);
+    sources.resize(m_num_ItoSpecies, 0.0);
   }
   else{
     energies      = this->get_particle_energy(a_particles);
@@ -1069,7 +1069,7 @@ void ito_plasma_physics::tau_step(Vector<long long>&      a_particles,
 				  const Real              a_kappa,
 				  const Real              a_dt) const {
   // mean_energies -> total energies
-  Vector<Real> energies(m_num_ito_species);
+  Vector<Real> energies(m_num_ItoSpecies);
   for (int i = 0; i < a_particles.size(); i++){
     energies[i] = Max(0.0, a_mean_energies[i]*a_particles[i]);
   }

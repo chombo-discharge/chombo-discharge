@@ -14,7 +14,7 @@
 using namespace physics::ito_plasma;
 
 ito_plasma_air3_lea::ito_plasma_air3_lea(){
-  m_num_ito_species = 3;
+  m_num_ItoSpecies = 3;
   m_num_RtSpecies = 1;
 
   m_coupling = ito_plasma_physics::coupling::LEA;
@@ -74,7 +74,7 @@ ito_plasma_air3_lea::ito_plasma_air3_lea(){
   m_N  = m_p*Units::Na/(m_T*Units::R);
 
   // Set up species
-  m_ito_species.resize(m_num_ito_species);
+  m_ItoSpecies.resize(m_num_ItoSpecies);
   m_RtSpecies.resize(m_num_RtSpecies);
 
   m_electron_idx = 0;
@@ -86,18 +86,18 @@ ito_plasma_air3_lea::ito_plasma_air3_lea(){
   this->read_tables();
 
   // Initiate species
-  m_ito_species[m_electron_idx] = RefCountedPtr<ito_species> (new electron(m_tables.at("mobility"), m_tables.at("diffco")));
-  m_ito_species[m_positive_idx] = RefCountedPtr<ito_species> (new positive());
-  m_ito_species[m_negative_idx] = RefCountedPtr<ito_species> (new negative());
+  m_ItoSpecies[m_electron_idx] = RefCountedPtr<ItoSpecies> (new electron(m_tables.at("mobility"), m_tables.at("diffco")));
+  m_ItoSpecies[m_positive_idx] = RefCountedPtr<ItoSpecies> (new positive());
+  m_ItoSpecies[m_negative_idx] = RefCountedPtr<ItoSpecies> (new negative());
   m_RtSpecies[m_PhotonZ_idx]  = RefCountedPtr<RtSpecies> (new PhotonZ());
 
   // To avoid that MPI ranks draw the same particle positions, increment the seed for each rank
   m_seed += procID();
   m_rng   = std::mt19937_64(m_seed);
 
-  List<ito_particle>& electrons = m_ito_species[m_electron_idx]->getInitialParticles();
-  List<ito_particle>& positives = m_ito_species[m_positive_idx]->getInitialParticles();
-  List<ito_particle>& negatives = m_ito_species[m_negative_idx]->getInitialParticles();
+  List<ito_particle>& electrons = m_ItoSpecies[m_electron_idx]->getInitialParticles();
+  List<ito_particle>& positives = m_ItoSpecies[m_positive_idx]->getInitialParticles();
+  List<ito_particle>& negatives = m_ItoSpecies[m_negative_idx]->getInitialParticles();
 
   electrons.clear();
   positives.clear();

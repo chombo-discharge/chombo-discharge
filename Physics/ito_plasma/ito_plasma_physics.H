@@ -20,7 +20,7 @@
 #include <fstream>
 #include <sstream>
 
-#include "ito_species.H"
+#include <CD_ItoSpecies.H>
 #include <CD_RtSpecies.H>
 #include <CD_Photon.H>
 #include "ito_particle.H"
@@ -67,7 +67,7 @@ namespace physics {
       /*!
 	@brief Get all species
       */
-      const Vector<RefCountedPtr<ito_species> >& get_ito_species() const;
+      const Vector<RefCountedPtr<ItoSpecies> >& get_ItoSpecies() const;
 
       /*!
 	@brief Get all Photons
@@ -77,7 +77,7 @@ namespace physics {
       /*!
 	@brief Return number of ion equations
       */
-      int get_num_ito_species() const;
+      int get_num_ItoSpecies() const;
 
       /*!
 	@brief Return number of RTE equations
@@ -235,10 +235,10 @@ namespace physics {
       mutable std::uniform_real_distribution<Real> m_udist01;
       mutable std::uniform_real_distribution<Real> m_udist11;
 
-      Vector<RefCountedPtr<ito_species> > m_ito_species;
+      Vector<RefCountedPtr<ItoSpecies> > m_ItoSpecies;
       Vector<RefCountedPtr<RtSpecies> > m_RtSpecies;
 
-      int m_num_ito_species;
+      int m_num_ItoSpecies;
       int m_num_RtSpecies;
       int m_ppc;
       int m_fieldSolver_switch;

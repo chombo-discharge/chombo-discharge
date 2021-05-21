@@ -189,7 +189,7 @@ namespace physics {
 				      const Real          a_time);
 
       // Routines for computing mobilities in the LEA. This runs through all the particles and calls a mobility computation function,
-      // which you must implement in ito_species
+      // which you must implement in ItoSpecies
       void compute_ito_mobilities_lea();
       void compute_ito_mobilities_lea(Vector<ParticleContainer<ito_particle>* >& a_particles);
       void compute_ito_mobilities_lea(Vector<ParticleData<ito_particle>* >& a_particles);

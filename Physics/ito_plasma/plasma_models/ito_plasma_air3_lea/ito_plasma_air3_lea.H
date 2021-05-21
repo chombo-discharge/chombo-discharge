@@ -72,7 +72,7 @@ namespace physics {
     };
 
     
-    class ito_plasma_air3_lea::electron : public ito_species {
+    class ito_plasma_air3_lea::electron : public ItoSpecies {
     public:
       electron() = default;
       electron(const LookupTable& a_mobility, const LookupTable& a_diffusion);
@@ -86,13 +86,13 @@ namespace physics {
       LookupTable m_diffusion;
     };
 
-    class ito_plasma_air3_lea::positive : public ito_species {
+    class ito_plasma_air3_lea::positive : public ItoSpecies {
     public:
       positive();
       ~positive();
     };
 
-    class ito_plasma_air3_lea::negative : public ito_species {
+    class ito_plasma_air3_lea::negative : public ItoSpecies {
     public:
       negative();
       ~negative();

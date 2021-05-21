@@ -1015,7 +1015,7 @@ void ito_plasma_stepper::compute_rho(MFAMRCellData& a_rho, const Vector<EBAMRCel
   // Increment each solver
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<ito_solver>& solver   = solver_it();
-    const RefCountedPtr<ito_species>& species = solver->getSpecies();
+    const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
     const int idx = solver_it.index();
     const int q   = species->getChargeNumber();
 
@@ -1074,7 +1074,7 @@ void ito_plasma_stepper::compute_conductivity(EBAMRCellData& a_conductivity, con
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>&   solver = solver_it();
-    RefCountedPtr<ito_species>& species = solver->getSpecies();
+    RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
     
     const int idx = solver_it.index();
     const int q   = species->getChargeNumber();
@@ -1283,7 +1283,7 @@ void ito_plasma_stepper::intersect_particles(const which_particles             a
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>&   solver = solver_it();
-    RefCountedPtr<ito_species>& species = solver->getSpecies();
+    RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
     const int idx = solver_it.index();
 
@@ -1342,7 +1342,7 @@ void ito_plasma_stepper::remove_covered_particles(const which_particles         
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>&   solver = solver_it();
-    RefCountedPtr<ito_species>& species = solver->getSpecies();
+    RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
     const int idx = solver_it.index();
 
@@ -1402,7 +1402,7 @@ void ito_plasma_stepper::transfer_covered_particles(const which_particles       
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>&   solver = solver_it();
-    RefCountedPtr<ito_species>& species = solver->getSpecies();
+    RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
     const int idx = solver_it.index();
 
@@ -1458,7 +1458,7 @@ void ito_plasma_stepper::remap_particles(const which_particles a_which_particles
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>&   solver = solver_it();
-    RefCountedPtr<ito_species>& species = solver->getSpecies();
+    RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
     const int idx = solver_it.index();
 
@@ -1515,7 +1515,7 @@ void ito_plasma_stepper::deposit_particles(const which_particles a_which_particl
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>&   solver = solver_it();
-    RefCountedPtr<ito_species>& species = solver->getSpecies();
+    RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
     const int idx = solver_it.index();
 
@@ -1562,7 +1562,7 @@ void ito_plasma_stepper::set_ito_velocity_funcs(){
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>& solver   = solver_it();
-    RefCountedPtr<ito_species>& species = solver->getSpecies();
+    RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
     if(solver->isMobile()){
       EBAMRCellData& velo_func = solver->get_velo_func();
@@ -1804,10 +1804,10 @@ void ito_plasma_stepper::compute_ito_diffusion_lfa(Vector<EBAMRCellData*>&      
   // 2. Compute on each level. On the fluid Realm. 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
 
-    const int num_ito_species = m_physics->get_num_ito_species();
+    const int num_ItoSpecies = m_physics->get_num_ItoSpecies();
 
-    Vector<LevelData<EBCellFAB>* > diffco_funcs(num_ito_species);
-    Vector<LevelData<EBCellFAB>* > densities(num_ito_species);
+    Vector<LevelData<EBCellFAB>* > diffco_funcs(num_ItoSpecies);
+    Vector<LevelData<EBCellFAB>* > densities(num_ItoSpecies);
     
     for (int idx = 0; idx < a_diffusionCoefficient_funcs.size(); idx++){
       diffco_funcs[idx] = &(*(m_fscratch1[idx])[lvl]);
@@ -1850,15 +1850,15 @@ void ito_plasma_stepper::compute_ito_diffusion_lfa(Vector<LevelData<EBCellFAB>* 
     pout() << "ito_plasma_stepper::compute_ito_diffusion_lfa(velo, E, level, time)" << endl;
   }
 
-  const int num_ito_species = m_physics->get_num_ito_species();
+  const int num_ItoSpecies = m_physics->get_num_ItoSpecies();
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_fluid_Realm)[a_level];
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     const Box box = dbl.get(dit());
 
-    Vector<EBCellFAB*> diffusion(num_ito_species);
-    Vector<EBCellFAB*> densities(num_ito_species);;
+    Vector<EBCellFAB*> diffusion(num_ItoSpecies);
+    Vector<EBCellFAB*> densities(num_ItoSpecies);;
     
     for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.index();
@@ -2233,7 +2233,7 @@ void ito_plasma_stepper::advance_reaction_network_nwo(EBCellFAB&       a_particl
     pout() << "ito_plasma_stepper::advance_reaction_network_nwo(ppc, ypc, E, sources, level, dit, box, dx, dt)" << endl;
   }
   
-  const int num_ito_species = m_physics->get_num_ito_species();
+  const int num_ItoSpecies = m_physics->get_num_ItoSpecies();
   const int num_RtSpecies = m_physics->get_num_RtSpecies();
 
   const RealVect prob_lo = m_amr->getProbLo();
@@ -2243,10 +2243,10 @@ void ito_plasma_stepper::advance_reaction_network_nwo(EBCellFAB&       a_particl
 
   const BaseFab<Real>& Efab = a_E.getSingleValuedFAB();
 
-  Vector<long long> particles(num_ito_species);
+  Vector<long long> particles(num_ItoSpecies);
   Vector<long long> newPhotons(num_RtSpecies);
-  Vector<Real>      meanEnergies(num_ito_species);
-  Vector<Real>      energySources(num_ito_species);
+  Vector<Real>      meanEnergies(num_ItoSpecies);
+  Vector<Real>      energySources(num_ItoSpecies);
 
   // Regular cells
   for (BoxIterator bit(a_box); bit.ok(); ++bit){
@@ -2260,7 +2260,7 @@ void ito_plasma_stepper::advance_reaction_network_nwo(EBCellFAB&       a_particl
       const RealVect E   = RealVect(D_DECL(Efab(iv, 0), Efab(iv, 1), Efab(iv, 2)));
 
       // Initialize for this cell. 
-      for (int i = 0; i < num_ito_species; i++){
+      for (int i = 0; i < num_ItoSpecies; i++){
 	particles[i]     = llround(a_particlesPerCell.getSingleValuedFAB()(iv, i));
 	meanEnergies[i]  = a_meanParticleEnergies.getSingleValuedFAB()(iv,i);
 	energySources[i] = a_EdotJ.getSingleValuedFAB()(iv, i)*dV/Units::Qe;
@@ -2274,7 +2274,7 @@ void ito_plasma_stepper::advance_reaction_network_nwo(EBCellFAB&       a_particl
       m_physics->advance_particles(particles, newPhotons, meanEnergies, energySources, a_dt, E, a_dx, kappa);
 
       // Set result
-      for (int i = 0; i < num_ito_species; i++){
+      for (int i = 0; i < num_ItoSpecies; i++){
 	a_particlesPerCell.getSingleValuedFAB()(iv, i)     = 1.0*particles[i];
 	a_meanParticleEnergies.getSingleValuedFAB()(iv, i) = 1.0*meanEnergies[i];
       }
@@ -2296,7 +2296,7 @@ void ito_plasma_stepper::advance_reaction_network_nwo(EBCellFAB&       a_particl
 
 
     // Initialize for this cell. 
-    for (int i = 0; i < num_ito_species; i++){
+    for (int i = 0; i < num_ItoSpecies; i++){
       particles[i]     = a_particlesPerCell(vof, i);
       meanEnergies[i]  = a_meanParticleEnergies(vof, i);
       energySources[i] = a_EdotJ(vof, i)*dV/Units::Qe;
@@ -2310,7 +2310,7 @@ void ito_plasma_stepper::advance_reaction_network_nwo(EBCellFAB&       a_particl
 
 
     // Set result
-    for (int i = 0; i < num_ito_species; i++){
+    for (int i = 0; i < num_ItoSpecies; i++){
       a_particlesPerCell(vof, i)     = 1.0*particles[i];
       a_meanParticleEnergies(vof, i) = 1.0*meanEnergies[i];
     }
@@ -2373,7 +2373,7 @@ void ito_plasma_stepper::reconcile_particles(const EBCellFAB& a_newParticlesPerC
     pout() << "ito_plasma_stepper::reconcile_particles(EBCellFABx3, int, DataIndex, Box, Real)" << endl;
   }
 
-  const int num_ito_species = m_physics->get_num_ito_species();
+  const int num_ItoSpecies = m_physics->get_num_ItoSpecies();
   const int num_RtSpecies = m_physics->get_num_RtSpecies();
 
   const RealVect prob_lo = m_amr->getProbLo();
@@ -2381,7 +2381,7 @@ void ito_plasma_stepper::reconcile_particles(const EBCellFAB& a_newParticlesPerC
   const EBISBox& ebisbox = m_amr->getEBISLayout(m_particleRealm, m_phase)[a_level][a_dit];
   const EBISBox& ebgraph = m_amr->getEBISLayout(m_particleRealm, m_phase)[a_level][a_dit];
 
-  Vector<BinFab<ito_particle>* > particlesFAB(num_ito_species);
+  Vector<BinFab<ito_particle>* > particlesFAB(num_ItoSpecies);
   Vector<BinFab<Photon>* >       sourcePhotonsFAB(num_RtSpecies);
   Vector<BinFab<Photon>* >       bulkPhotonsFAB(num_RtSpecies);
 
@@ -2418,14 +2418,14 @@ void ito_plasma_stepper::reconcile_particles(const EBCellFAB& a_newParticlesPerC
       const RealVect bndryNormal   = RealVect::Zero;
       const Real     kappa         = 1.0;
 
-      Vector<List<ito_particle>* > particles(num_ito_species);
+      Vector<List<ito_particle>* > particles(num_ItoSpecies);
       Vector<List<Photon>* >       bulkPhotons(num_RtSpecies);
       Vector<List<Photon>* >       sourcePhotons(num_RtSpecies);
       Vector<RefCountedPtr<RtSpecies> > photoSpecies(num_RtSpecies);
 
-      Vector<Real>      particleMeanEnergies(num_ito_species);
-      Vector<long long> numNewParticles(num_ito_species);
-      Vector<long long> numOldParticles(num_ito_species);
+      Vector<Real>      particleMeanEnergies(num_ItoSpecies);
+      Vector<long long> numNewParticles(num_ItoSpecies);
+      Vector<long long> numOldParticles(num_ItoSpecies);
       Vector<long long> numNewPhotons(num_RtSpecies);
 
       for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -2478,14 +2478,14 @@ void ito_plasma_stepper::reconcile_particles(const EBCellFAB& a_newParticlesPerC
       DataOps::computeMinValidBox(lo, hi, bndryNormal, bndryCentroid);
     }
 
-    Vector<List<ito_particle>* > particles(num_ito_species);
+    Vector<List<ito_particle>* > particles(num_ItoSpecies);
     Vector<List<Photon>* >       bulkPhotons(num_RtSpecies);
     Vector<List<Photon>* >       sourcePhotons(num_RtSpecies);
     Vector<RefCountedPtr<RtSpecies> > photoSpecies(num_RtSpecies);
 
-    Vector<Real>      particleMeanEnergies(num_ito_species);
-    Vector<long long> numNewParticles(num_ito_species);
-    Vector<long long> numOldParticles(num_ito_species);
+    Vector<Real>      particleMeanEnergies(num_ItoSpecies);
+    Vector<long long> numNewParticles(num_ItoSpecies);
+    Vector<long long> numOldParticles(num_ItoSpecies);
     Vector<long long> numNewPhotons(num_RtSpecies);
 
     for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -2531,10 +2531,10 @@ void ito_plasma_stepper::advance_reaction_network(const Real a_dt){
     this->advance_reaction_network_nwo(a_dt);
   }
   else{
-    const int num_ito_species = m_physics->get_num_ito_species();
+    const int num_ItoSpecies = m_physics->get_num_ItoSpecies();
     const int num_RtSpecies = m_physics->get_num_RtSpecies();
   
-    Vector<ParticleContainer<ito_particle>* > particles(num_ito_species);  // Current particles. 
+    Vector<ParticleContainer<ito_particle>* > particles(num_ItoSpecies);  // Current particles. 
     Vector<ParticleContainer<Photon>* > bulk_Photons(num_RtSpecies);     // Photons absorbed on mesh
     Vector<ParticleContainer<Photon>* > new_Photons(num_RtSpecies);      // Produced Photons go here.
 
@@ -2562,12 +2562,12 @@ void ito_plasma_stepper::advance_reaction_network(Vector<ParticleContainer<ito_p
     pout() << "ito_plasma_stepper::advance_reaction_network(Vector<ParticleContainer*> x3, Vector<EBAMRCellData*>, EBAMRCellData, Real)" << endl;
   }
 
-  const int num_ito_species = m_physics->get_num_ito_species();
+  const int num_ItoSpecies = m_physics->get_num_ItoSpecies();
   const int num_RtSpecies = m_physics->get_num_RtSpecies();
 
-  Vector<AMRCellParticles<ito_particle>* > particles(num_ito_species);
-  Vector<AMRCellParticles<Photon>* >       Photons(num_ito_species);
-  Vector<AMRCellParticles<Photon>* >       newPhotons(num_ito_species);
+  Vector<AMRCellParticles<ito_particle>* > particles(num_ItoSpecies);
+  Vector<AMRCellParticles<Photon>* >       Photons(num_ItoSpecies);
+  Vector<AMRCellParticles<Photon>* >       newPhotons(num_ItoSpecies);
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
@@ -2596,14 +2596,14 @@ void ito_plasma_stepper::advance_reaction_network(Vector<AMRCellParticles<ito_pa
     pout() << "ito_plasma_stepper::advance_reaction_network(Vector<AMRCellParticles*> x 3, Vector<EBAMRCellData*>, EBAMRCellData, Real)" << endl;
   }
 
-  const int num_ito_species = m_physics->get_num_ito_species();
+  const int num_ItoSpecies = m_physics->get_num_ItoSpecies();
   const int num_RtSpecies = m_physics->get_num_RtSpecies();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    Vector<LayoutData<BinFab<ito_particle> >* > particles(num_ito_species);
+    Vector<LayoutData<BinFab<ito_particle> >* > particles(num_ItoSpecies);
     Vector<LayoutData<BinFab<Photon> >* >       Photons(num_RtSpecies);
     Vector<LayoutData<BinFab<Photon> >* >       newPhotons(num_RtSpecies);
-    Vector<LevelData<EBCellFAB>* >              sources(num_ito_species);
+    Vector<LevelData<EBCellFAB>* >              sources(num_ItoSpecies);
 
     for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.index();
@@ -2633,7 +2633,7 @@ void ito_plasma_stepper::advance_reaction_network(Vector<LayoutData<BinFab<ito_p
     pout() << "ito_plasma_stepper::advance_reaction_network(Vector<LD<BinFab>* > x 3, Vector<LD<EBCellFAB>*>, EBAMRCellData, level, dt)" << endl;
   }
 
-  const int num_ito_species = m_physics->get_num_ito_species();
+  const int num_ItoSpecies = m_physics->get_num_ItoSpecies();
   const int num_RtSpecies = m_physics->get_num_RtSpecies();
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[a_lvl];
@@ -2642,10 +2642,10 @@ void ito_plasma_stepper::advance_reaction_network(Vector<LayoutData<BinFab<ito_p
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     const Box box = dbl.get(dit());
 
-    Vector<BinFab<ito_particle>* > particles(num_ito_species);
+    Vector<BinFab<ito_particle>* > particles(num_ItoSpecies);
     Vector<BinFab<Photon>* >       Photons(num_RtSpecies);;
     Vector<BinFab<Photon>* >       newPhotons(num_RtSpecies);
-    Vector<EBCellFAB*>             sources(num_ito_species);
+    Vector<EBCellFAB*>             sources(num_ItoSpecies);
 
     for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.index();
@@ -2680,7 +2680,7 @@ void ito_plasma_stepper::advance_reaction_network(Vector<BinFab<ito_particle>* >
 
   const int comp = 0;
 
-  const int num_ito_species = m_physics->get_num_ito_species();
+  const int num_ItoSpecies = m_physics->get_num_ItoSpecies();
   const int num_RtSpecies = m_physics->get_num_RtSpecies();
 
   const RealVect prob_lo = m_amr->getProbLo();
@@ -2700,10 +2700,10 @@ void ito_plasma_stepper::advance_reaction_network(Vector<BinFab<ito_particle>* >
       const RealVect pos = prob_lo + a_dx*(RealVect(iv) + 0.5*RealVect::Unit);
       const RealVect e   = RealVect(D_DECL(Efab(iv, 0), Efab(iv, 1), Efab(iv, 2)));
       
-      Vector<List<ito_particle>* > particles(num_ito_species);
+      Vector<List<ito_particle>* > particles(num_ItoSpecies);
       Vector<List<Photon>* >       Photons(num_RtSpecies);
       Vector<List<Photon>* >       newPhotons(num_RtSpecies);
-      Vector<Real>                 sources(num_ito_species);
+      Vector<Real>                 sources(num_ItoSpecies);
 
       for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
 	const int idx = solver_it.index();
@@ -2756,10 +2756,10 @@ void ito_plasma_stepper::advance_reaction_network(Vector<BinFab<ito_particle>* >
       DataOps::computeMinValidBox(lo, hi, n, ebc);
     }
 
-    Vector<List<ito_particle>* > particles(num_ito_species);
+    Vector<List<ito_particle>* > particles(num_ItoSpecies);
     Vector<List<Photon>* >       Photons(num_RtSpecies);
     Vector<List<Photon>* >       newPhotons(num_RtSpecies);
-    Vector<Real>                 sources(num_ito_species);
+    Vector<Real>                 sources(num_ItoSpecies);
 
     for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.index();
@@ -2807,13 +2807,13 @@ Real ito_plasma_stepper::compute_physics_dt(const EBAMRCellData& a_E, const Vect
 
 
 
-  const int num_ito_species = m_physics->get_num_ito_species();
+  const int num_ItoSpecies = m_physics->get_num_ItoSpecies();
 
   Real minDt = 1.E99;
   
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     
-    Vector<LevelData<EBCellFAB>*> densities(num_ito_species);
+    Vector<LevelData<EBCellFAB>*> densities(num_ItoSpecies);
     
     for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.index();
@@ -2835,7 +2835,7 @@ Real ito_plasma_stepper::compute_physics_dt(const LevelData<EBCellFAB>& a_E, con
     pout() << "ito_plasma_stepper::compute_physics_dt(LevelData<EBCellFAB>, Vector<LevelData<EBCellFAB> *>, int)" << endl;
   }
 
-  const int num_ito_species = m_physics->get_num_ito_species();
+  const int num_ItoSpecies = m_physics->get_num_ItoSpecies();
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[a_level];
 
@@ -2843,7 +2843,7 @@ Real ito_plasma_stepper::compute_physics_dt(const LevelData<EBCellFAB>& a_E, con
   
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
-    Vector<EBCellFAB*> densities(num_ito_species);
+    Vector<EBCellFAB*> densities(num_ItoSpecies);
 
     for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.index();
@@ -2877,7 +2877,7 @@ Real ito_plasma_stepper::compute_physics_dt(const EBCellFAB& a_E, const Vector<E
 
   Real minDt = 1.E99;
 
-  const int num_ito_species = m_physics->get_num_ito_species();
+  const int num_ItoSpecies = m_physics->get_num_ItoSpecies();
   
   const int comp         = 0;
   const Real dx          = m_amr->getDx()[a_level];
@@ -2892,7 +2892,7 @@ Real ito_plasma_stepper::compute_physics_dt(const EBCellFAB& a_E, const Vector<E
     const RealVect e   = RealVect(D_DECL(E(iv,0), E(iv, 1), E(iv, 2)));
 
     if(ebisbox.isRegular(iv)){
-      Vector<Real> densities(num_ito_species);
+      Vector<Real> densities(num_ItoSpecies);
       for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
 	const int idx = solver_it.index();
 	
@@ -2913,7 +2913,7 @@ Real ito_plasma_stepper::compute_physics_dt(const EBCellFAB& a_E, const Vector<E
     const RealVect e    = RealVect(D_DECL(a_E(vof, 0), a_E(vof, 1), a_E(vof, 2)));
     const RealVect pos  = EBArith::getVofLocation(vof, dx*RealVect::Unit, prob_lo);
 
-    Vector<Real> densities(num_ito_species);
+    Vector<Real> densities(num_ItoSpecies);
     
     for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
       const int idx = solver_it.index();
@@ -3251,7 +3251,7 @@ void ito_plasma_stepper::compute_EdotJ_source(){
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>& solver   = solver_it();
-    RefCountedPtr<ito_species>& species = solver->getSpecies();
+    RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
     const int idx = solver_it.index();
     const int q   = species->getChargeNumber();
@@ -3298,7 +3298,7 @@ void ito_plasma_stepper::compute_EdotJ_source_nwo(){
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>& solver   = solver_it();
-    RefCountedPtr<ito_species>& species = solver->getSpecies();
+    RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
     const int idx = solver_it.index();
     const int q   = species->getChargeNumber();
@@ -3344,7 +3344,7 @@ void ito_plasma_stepper::compute_EdotJ_source_nwo2(const Real a_dt){
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>& solver   = solver_it();
-    RefCountedPtr<ito_species>& species = solver->getSpecies();
+    RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
     const int idx = solver_it.index();
     const int q   = species->getChargeNumber();

@@ -78,7 +78,7 @@ public:
   /*!
     @brief Get current ion
   */
-  virtual RefCountedPtr<ito_species>& getSpecies();
+  virtual RefCountedPtr<ItoSpecies>& getSpecies();
   
 protected:
 
@@ -110,7 +110,7 @@ protected:
   /*!
     @brief Ions
   */
-  Vector<RefCountedPtr<ito_species> > m_species;
+  Vector<RefCountedPtr<ItoSpecies> > m_species;
 
 };
 #include "CD_NamespaceFooter.H"

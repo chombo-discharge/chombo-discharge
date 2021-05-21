@@ -19,7 +19,7 @@ ito_layout<T>::ito_layout(){
 }
 
 template <class T>
-ito_layout<T>::ito_layout(const Vector<RefCountedPtr<ito_species> >& a_species){
+ito_layout<T>::ito_layout(const Vector<RefCountedPtr<ItoSpecies> >& a_species){
   this->define(a_species);
   m_solvers.resize(0);
 }
@@ -49,7 +49,7 @@ void ito_layout<T>::setRealm(const std::string a_realm){
 }
 
 template <class T>
-void ito_layout<T>::define(const Vector<RefCountedPtr<ito_species> >& a_species){
+void ito_layout<T>::define(const Vector<RefCountedPtr<ItoSpecies> >& a_species){
   m_isDefined = true;
 }
 
@@ -296,7 +296,7 @@ Vector<RefCountedPtr<T> >& ito_layout<T>::getSolvers(){
 }
 
 template <class T>
-Vector<RefCountedPtr<ito_species> >& ito_layout<T>::getSpecies(){
+Vector<RefCountedPtr<ItoSpecies> >& ito_layout<T>::getSpecies(){
   return m_species;
 }
 
@@ -376,7 +376,7 @@ ito_factory<T, S>::~ito_factory(){
 }
 
 template <class T, class S>
-RefCountedPtr<ito_layout<T> > ito_factory<T, S>::newLayout(const Vector<RefCountedPtr<ito_species> > a_species) const{
+RefCountedPtr<ito_layout<T> > ito_factory<T, S>::newLayout(const Vector<RefCountedPtr<ItoSpecies> > a_species) const{
 
   auto ito = RefCountedPtr<ito_layout<T> > (new ito_layout<T>(a_species));
 

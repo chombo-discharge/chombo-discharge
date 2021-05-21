@@ -8,7 +8,7 @@
 #ifndef _BROWNIAN_WALKER_SPECIES_
 #define _BROWNIAN_WALKER_SPECIES_
 
-#include "ito_species.H"
+#include <CD_ItoSpecies.H>
 
 #include <random>
 
@@ -16,7 +16,7 @@
 namespace physics {
   namespace brownian_walker {
 
-    class brownian_walker_species : public ito_species {
+    class brownian_walker_species : public ItoSpecies {
     public:
       brownian_walker_species();
       ~brownian_walker_species();

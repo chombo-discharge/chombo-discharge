@@ -71,7 +71,7 @@ void ito_iterator<T>::operator++(){
 
     for (int isolver = m_isolver; this->ok(); ++isolver){
       const RefCountedPtr<ito_solver>& solver = m_solvers[isolver];
-      const RefCountedPtr<ito_species>& species   = m_species[isolver];
+      const RefCountedPtr<ItoSpecies>& species   = m_species[isolver];
       
       if(m_mode == SpeciesIteration::charged){
 	if(species->getChargeNumber() != 0){
@@ -109,7 +109,7 @@ RefCountedPtr<T>& ito_iterator<T>::operator() () {
 }
 
 template <class T>
-RefCountedPtr<ito_species>& ito_iterator<T>::getSpecies() {
+RefCountedPtr<ItoSpecies>& ito_iterator<T>::getSpecies() {
   CH_assert(m_defined == true);
   CH_assert(m_isolver < m_num);
   return m_species[m_isolver];

@@ -1,38 +1,48 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   ito_species.H
-  @brief  Declaration of an ito_species class that passes in names and initial data to ito_solvers
+  @file   CD_ItoSpecies.H
+  @brief  Declaration of an ItoSpecies class that passes in names and initial data to ito_solvers
   @author Robert Marskar
-  @date   March 2020
 */
 
-#ifndef _ITO_SPECIES_
-#define _ITO_SPECIES_
+#ifndef CD_ItoSpecies_H
+#define CD_ItoSpecies_H
 
+// Chombo includes
 #include <RealVect.H>
 #include <Particle.H>
 #include <BinItem.H>
 #include <MeshInterp.H>
 
-#include "ito_particle.H"
-
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <ito_particle.H>
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Metadata class that parses for ito_solver
   @details The ito_solver takes it's information from this class, e.g. mobile/diffusive, charge, name, initial particles etc. 
 */
-class ito_species {
+class ItoSpecies {
 public:
+
+  /*!
+    @brief Weak constructor. 
+  */
+  ItoSpecies();
 
   /*!
     @brief Full constructor
   */
-  ito_species(const std::string a_name, const int a_charge, const bool a_mobile, const bool a_diffusive);
+  ItoSpecies(const std::string a_name, const int a_charge, const bool a_mobile, const bool a_diffusive);
 
   /*!
     @brief Destructor
   */
-  ~ito_species();
+  ~ItoSpecies();
 
   /*!
     @brief Return name
@@ -50,7 +60,7 @@ public:
   bool isDiffusive() const;
 
   /*!
-    @brief Mobile ito_species or not
+    @brief Mobile ItoSpecies or not
   */
   bool isMobile() const;
 
@@ -82,12 +92,12 @@ protected:
   int m_chargeNumber;
 
   /*!
-    @brief Diffusive ito_species or not
+    @brief Diffusive ItoSpecies or not
   */
   bool m_isDiffusive;
 
   /*!
-    @brief Mobile ito_species or not
+    @brief Mobile ItoSpecies or not
   */
   bool m_isMobile;
 
@@ -95,13 +105,8 @@ protected:
     @brief Initial particles
   */
   List<ito_particle> m_initialParticles;
-
-  /*!
-    @brief Weak constructor. 
-  */
-  ito_species();
-
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

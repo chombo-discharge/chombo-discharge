@@ -94,10 +94,10 @@ void ito_plasma_godunov::allocate(){
   m_sigma->allocateInternals();
 
   // Now allocate for the conductivity particles and rho^dagger particles
-  const int num_ito_species = m_physics->get_num_ito_species();
+  const int num_ItoSpecies = m_physics->get_num_ItoSpecies();
   
-  m_conductivity_particles.resize(num_ito_species);
-  m_rho_dagger_particles.resize(num_ito_species);
+  m_conductivity_particles.resize(num_ItoSpecies);
+  m_rho_dagger_particles.resize(num_ItoSpecies);
   
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<ito_solver>& solver = solver_it();
@@ -280,7 +280,7 @@ void ito_plasma_godunov::allocateInternals(){
     pout() << m_name + "::allocateInternals" << endl;
   }
 
-  const int num_ito_species = m_physics->get_num_ito_species();
+  const int num_ItoSpecies = m_physics->get_num_ItoSpecies();
   const int num_RtSpecies = m_physics->get_num_RtSpecies();
 
   m_amr->allocate(m_fluid_scratch1,    m_fluid_Realm,    m_phase, 1);
@@ -299,30 +299,30 @@ void ito_plasma_godunov::allocateInternals(){
   m_amr->allocate(m_fluid_E,      m_fluid_Realm, m_phase, SpaceDim);
 
   // Allocate for energy sources
-  m_energy_sources.resize(num_ito_species);
+  m_energy_sources.resize(num_ItoSpecies);
   for (int i = 0; i < m_energy_sources.size(); i++){
     m_amr->allocate(m_energy_sources[i],  m_particleRealm, m_phase, 1);
   }
 
   // Allocate fluid scratch storage
-  m_fscratch1.resize(num_ito_species);
-  m_fscratch2.resize(num_ito_species);
-  for (int i = 0; i < num_ito_species; i++){
+  m_fscratch1.resize(num_ItoSpecies);
+  m_fscratch2.resize(num_ItoSpecies);
+  for (int i = 0; i < num_ItoSpecies; i++){
     m_amr->allocate(m_fscratch1[i], m_fluid_Realm, m_phase, 1);
     m_amr->allocate(m_fscratch2[i], m_fluid_Realm, m_phase, 1);
   }
 
   // Allocate for PPC and YPC on both Realm. Also do EdotJ. 
-  m_amr->allocate(m_particle_ppc,   m_particleRealm, m_phase, num_ito_species);
-  m_amr->allocate(m_particle_old,   m_particleRealm, m_phase, num_ito_species);
-  m_amr->allocate(m_particle_eps,   m_particleRealm, m_phase, num_ito_species);
+  m_amr->allocate(m_particle_ppc,   m_particleRealm, m_phase, num_ItoSpecies);
+  m_amr->allocate(m_particle_old,   m_particleRealm, m_phase, num_ItoSpecies);
+  m_amr->allocate(m_particle_eps,   m_particleRealm, m_phase, num_ItoSpecies);
   m_amr->allocate(m_particle_ypc,   m_particleRealm, m_phase, num_RtSpecies);
 
-  m_amr->allocate(m_fluid_ppc,      m_fluid_Realm,    m_phase, num_ito_species);
-  m_amr->allocate(m_fluid_eps,      m_fluid_Realm,    m_phase, num_ito_species);
+  m_amr->allocate(m_fluid_ppc,      m_fluid_Realm,    m_phase, num_ItoSpecies);
+  m_amr->allocate(m_fluid_eps,      m_fluid_Realm,    m_phase, num_ItoSpecies);
   m_amr->allocate(m_fluid_ypc,      m_fluid_Realm,    m_phase, num_RtSpecies);
 
-  m_amr->allocate(m_EdotJ,          m_fluid_Realm,    m_phase, num_ito_species);
+  m_amr->allocate(m_EdotJ,          m_fluid_Realm,    m_phase, num_ItoSpecies);
 }
 
 Real ito_plasma_godunov::advance(const Real a_dt) {
@@ -767,7 +767,7 @@ void ito_plasma_godunov::remap_godunov_particles(Vector<ParticleContainer<goduno
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>&   solver = solver_it();
-    RefCountedPtr<ito_species>& species = solver->getSpecies();
+    RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
     const int idx = solver_it.index();
 
@@ -814,7 +814,7 @@ void ito_plasma_godunov::deposit_godunov_particles(const Vector<ParticleContaine
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>&   solver = solver_it();
-    RefCountedPtr<ito_species>& species = solver->getSpecies();
+    RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
     const int idx = solver_it.index();
 
@@ -861,7 +861,7 @@ void ito_plasma_godunov::clear_godunov_particles(const Vector<ParticleContainer<
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>&   solver = solver_it();
-    RefCountedPtr<ito_species>& species = solver->getSpecies();
+    RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
     const int idx = solver_it.index();
 
@@ -922,7 +922,7 @@ void ito_plasma_godunov::compute_cell_conductivity(EBAMRCellData& a_conductivity
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>&   solver = solver_it();
-    RefCountedPtr<ito_species>& species = solver->getSpecies();
+    RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
     
     const int idx = solver_it.index();
     const int q   = species->getChargeNumber();
@@ -1067,7 +1067,7 @@ void ito_plasma_godunov::copy_conductivity_particles(Vector<ParticleContainer<go
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<ito_solver>& solver   = solver_it();
-    const RefCountedPtr<ito_species>& species = solver->getSpecies();
+    const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
     const int idx = solver_it.index();
     const int q   = species->getChargeNumber();
@@ -1102,7 +1102,7 @@ void ito_plasma_godunov::copy_rho_dagger_particles(Vector<ParticleContainer<godu
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<ito_solver>& solver   = solver_it();
-    const RefCountedPtr<ito_species>& species = solver->getSpecies();
+    const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
     const int idx = solver_it.index();
     const int q   = species->getChargeNumber();
@@ -1324,7 +1324,7 @@ void ito_plasma_godunov::diffuse_particles_euler_maruyama(Vector<ParticleContain
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>& solver   = solver_it();
-    RefCountedPtr<ito_species>& species = solver->getSpecies();
+    RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
     const int idx = solver_it.index();
 
@@ -1469,7 +1469,7 @@ void ito_plasma_godunov::pre_trapezoidal_predictor(Vector<ParticleContainer<godu
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>& solver   = solver_it();
-    RefCountedPtr<ito_species>& species = solver->getSpecies();
+    RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
     const int idx = solver_it.index();
 
@@ -1558,7 +1558,7 @@ void ito_plasma_godunov::pre_trapezoidal_corrector(Vector<ParticleContainer<godu
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ito_solver>& solver   = solver_it();
-    RefCountedPtr<ito_species>& species = solver->getSpecies();
+    RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
     const int idx = solver_it.index();
 

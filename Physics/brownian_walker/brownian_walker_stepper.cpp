@@ -334,7 +334,7 @@ void brownian_walker_stepper::setup_solvers() {
     pout() << "brownian_walker_stepper::setup_solvers" << endl;
   }
 
-  m_species = RefCountedPtr<ito_species> (new brownian_walker_species());
+  m_species = RefCountedPtr<ItoSpecies> (new brownian_walker_species());
 
   m_solver->setVerbosity(m_verbosity);
   m_solver->parseOptions();
