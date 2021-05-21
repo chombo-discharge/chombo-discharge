@@ -1,22 +1,27 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   double_rod.cpp
-  @brief  Implementation of double_rod.H
+  @file   CD_DoubleRod.cpp
+  @brief  Implementation of CD_DoubleRod.H
   @author Robert Marskar
-  @date   Nov. 2017
 */
 
-#include "double_rod.H"
-#include <CD_RodIF.H>
-
+// Chombo includes
 #include <ParmParse.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_DoubleRod.H>
+#include <CD_RodIF.H>
+#include <CD_NamespaceHeader.H>
 
-double_rod::double_rod(){
+DoubleRod::DoubleRod(){
   this->setGasPermittivity(1.0);
 
-  ParmParse pp1("double_rod.rod1");
-  ParmParse pp2("double_rod.rod2");
+  ParmParse pp1("DoubleRod.rod1");
+  ParmParse pp2("DoubleRod.rod2");
 
   bool use_rod1;
   bool use_rod2;
@@ -52,7 +57,8 @@ double_rod::double_rod(){
   }
 }
 
-double_rod::~double_rod(){
+DoubleRod::~DoubleRod(){
   
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
