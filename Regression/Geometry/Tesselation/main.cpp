@@ -33,4 +33,4 @@ int main(int argc, char* argv[]){
   CH_TIMER_REPORT();
   MPI_Finalize();
 #endif
-#include "CD_NamespaceFooter.H"
+}
