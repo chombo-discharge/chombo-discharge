@@ -20,7 +20,7 @@ parser.add_argument('-base_dir',        type=str,  help="Base directory of mini-
 parser.add_argument('-app_name',        type=str,  help="Mini app name. An error message is issued if the name already exists")
 parser.add_argument('-filename',        type=str,  help="File name of main file", default="main")
 parser.add_argument('-cdrsolver',       type=str,  help="CDR solver", default="CdrGodunov")
-parser.add_argument('-geometry',        type=str,  help="Geometry class", default="regular_geometry")
+parser.add_argument('-geometry',        type=str,  help="Geometry class", default="RegularGeometry")
 parser.add_argument('-stepper',         type=str,  help="Time stepper class", default="AdvectionDiffusionStepper")
 
 args = parser.parse_args()

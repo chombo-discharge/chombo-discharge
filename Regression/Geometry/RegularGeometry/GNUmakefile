@@ -26,7 +26,7 @@ src_dirs = $(DISCHARGE_HOME)/Source \
 	$(DISCHARGE_HOME)/Source/Utilities \
 	$(DISCHARGE_HOME)/Source/Particle \
 	$(DISCHARGE_HOME)/Physics/Geometry \
-	$(DISCHARGE_HOME)/Geometries/regular_geometry\
+	$(DISCHARGE_HOME)/Geometries/RegularGeometry\
 
 
 include $(CHOMBO_HOME)/mk/Make.example

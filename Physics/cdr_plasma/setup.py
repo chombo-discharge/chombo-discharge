@@ -23,7 +23,7 @@ parser.add_argument('-field_solver',    type=str,  help="Poisson solver implemen
 parser.add_argument('-CdrSolver',      type=str,  help="CDR solver implementation", default="CdrGodunov")
 parser.add_argument('-RtSolver',      type=str,  help="RTE solver implementation", default="McPhoto")
 parser.add_argument('-physics',         type=str,  help="Plasma kinetics class", default="")
-parser.add_argument('-geometry',        type=str,  help="Geometry class", default="regular_geometry")
+parser.add_argument('-geometry',        type=str,  help="Geometry class", default="RegularGeometry")
 parser.add_argument('-TimeStepper',    type=str,  help="Time stepping method", default="imex_sdc")
 parser.add_argument('-CellTagger',     type=str,  help="Cell tagging method", default="none")
 

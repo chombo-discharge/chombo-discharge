@@ -22,7 +22,7 @@ parser.add_argument('-filename',        type=str,  help="File name of main file"
 parser.add_argument('-field_solver',    type=str,  help="Poisson solver implementation", default="FieldSolverMultigrid")
 parser.add_argument('-ItoSolver',      type=str,  help="CDR solver implementation", default="ItoSolver")
 parser.add_argument('-physics',         type=str,  help="Plasma kinetics class", default="")
-parser.add_argument('-geometry',        type=str,  help="Geometry class", default="regular_geometry")
+parser.add_argument('-geometry',        type=str,  help="Geometry class", default="RegularGeometry")
 parser.add_argument('-TimeStepper',    type=str,  help="Time stepping method", default="ito_plasma_godunov")
 parser.add_argument('-CellTagger',     type=str,  help="Cell tagging method", default="none")
 

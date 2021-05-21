@@ -20,7 +20,7 @@ parser.add_argument('-base_dir',        type=str,  help="Base directory of mini-
 parser.add_argument('-app_name',        type=str,  help="Mini app name. An error message is issued if the name already exists")
 parser.add_argument('-filename',        type=str,  help="File name of main file", default="main")
 parser.add_argument('-RtSolver',      type=str,  help="Poisson solver implementation", default="field_solver_multigrid")
-parser.add_argument('-geometry',        type=str,  help="Geometry class", default="regular_geometry")
+parser.add_argument('-geometry',        type=str,  help="Geometry class", default="RegularGeometry")
 
 args = parser.parse_args()
 
