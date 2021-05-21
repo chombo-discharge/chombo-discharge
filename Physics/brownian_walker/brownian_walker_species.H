@@ -1,6 +1,6 @@
 /*!
   @file   brownian_walker_species.H
-  @brief  Declaration of a brownian walker species for the ito_solver
+  @brief  Declaration of a brownian walker species for the ItoSolver
   @author Robert Marskar
   @date   March 2020
 */
@@ -32,7 +32,7 @@ namespace physics {
       std::normal_distribution<Real> m_gauss;
 
       void draw_initial_particles();
-      RealVect random_gaussian();
+      RealVect randomGaussian();
       RealVect randomDirection();
     };
   }

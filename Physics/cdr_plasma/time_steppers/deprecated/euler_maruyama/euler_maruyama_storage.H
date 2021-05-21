@@ -23,8 +23,8 @@ public:
   void allocate_storage();
   void deallocate_storage();
 
-  EBAMRCellData& get_scratch()  { return m_scratch;    }
-  EBAMRCellData& get_scratch2() { return m_scratch2;   }
+  EBAMRCellData& getScratch()  { return m_scratch;    }
+  EBAMRCellData& getScratch2() { return m_scratch2;   }
   EBAMRCellData& get_gradient() { return m_gradient;   }
 
   EBAMRIVData& get_eb_scratch1(){ return m_scratchIVs; }

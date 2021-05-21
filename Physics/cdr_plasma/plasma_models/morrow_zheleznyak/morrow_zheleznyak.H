@@ -200,7 +200,7 @@ namespace physics::cdr_plasma {
     void add_uniform_particles(List<Particle>& a_particles);
     void add_gaussian_particles(List<Particle>& a_particles);
 
-    RealVect random_gaussian(const Real a_rad);
+    RealVect randomGaussian(const Real a_rad);
 
     RealVect randomDirection();
 #if CH_SPACEDIM==2

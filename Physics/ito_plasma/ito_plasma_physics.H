@@ -270,7 +270,7 @@ namespace physics {
 	@brief Draw a valid random position somewhere in a cell
       */
       inline
-      RealVect random_position(const RealVect a_cellPos,
+      RealVect randomPosition(const RealVect a_cellPos,
 			       const RealVect a_centroidPos,
 			       const RealVect a_lo,
 			       const RealVect a_hi,
@@ -284,7 +284,7 @@ namespace physics {
 	(pos-bndryCentroid).dotProduct.a_normal > 0, i.e. inside the valid region. 
       */
       inline
-      RealVect random_position(const RealVect a_lo,
+      RealVect randomPosition(const RealVect a_lo,
 			       const RealVect a_hi,
 			       const RealVect a_bndryCentroid,
 			       const RealVect a_normal) const;
@@ -293,7 +293,7 @@ namespace physics {
 	@brief Return a random position in the cube (a_lo, a_hi);
       */
       inline
-      RealVect random_position(const RealVect a_lo, const RealVect a_hi) const;
+      RealVect randomPosition(const RealVect a_lo, const RealVect a_hi) const;
 
       /*!
 	@brief Draw a random direction in space

@@ -1,5 +1,5 @@
 /*!
-  @file   ito_solver.H
+  @file   ItoSolver.H
   @brief  Declaration of an abstract class for Ito diffusion
   @author Robert Marskar
   @date   April 2020
@@ -40,13 +40,13 @@ namespace RAN = std;
   @details This is a particle class for solving Ito diffusion problems dX = vdt + Z*D*t over an AMR hierarchy. The diffusion
   coefficient is related to the hydrodynamic diffusion coefficient by D(fluid = sqrt(2*D(Ito))
 */
-class ito_solver {
+class ItoSolver {
 public:
 
   /*!
     @brief Enum class for interfacing into individual containers. 
   */
-  enum class which_container {
+  enum class WhichContainer {
     bulk,
     eb,
     domain,
@@ -58,12 +58,12 @@ public:
   /*!
     @brief Default ctor
   */
-  ito_solver();
+  ItoSolver();
 
   /*!
     @Default dtor
   */
-  virtual ~ito_solver();
+  virtual ~ItoSolver();
 
   /*!
     @brief Get solver name
@@ -113,7 +113,7 @@ public:
   /*!
     @brief Clear a particle container
   */
-  virtual void clear(const which_container a_container);
+  virtual void clear(const WhichContainer a_container);
 
   /*!
     @brief Empty particle container
@@ -129,169 +129,169 @@ public:
     @brief Set mass to conductivity
     @details This sets mass = mass*mobility
   */
-  virtual void set_mass_to_conductivity(ParticleContainer<ItoParticle>& a_particles);
+  virtual void setMassToConductivity(ParticleContainer<ItoParticle>& a_particles);
 
   /*!
     @brief Unset mass to conductivity
     @details This sets mass = mass/mobility
   */
-  virtual void unset_mass_to_conductivity(ParticleContainer<ItoParticle>& a_particles);
+  virtual void unsetMassToConductivity(ParticleContainer<ItoParticle>& a_particles);
 
   /*!
     @brief Set mass to diffusivity
     @details This sets mass = mass*diffusion_coefficient
   */
-  virtual void set_mass_to_diffusivity(ParticleContainer<ItoParticle>& a_particles);
+  virtual void setMassToDiffusivity(ParticleContainer<ItoParticle>& a_particles);
 
   /*!
     @brief Unset mass to diffusivity
     @details This sets mass = mass/diffusion_coefficient
   */
-  virtual void unset_mass_to_diffusivity(ParticleContainer<ItoParticle>& a_particles);
+  virtual void unsetMassToDiffusivity(ParticleContainer<ItoParticle>& a_particles);
 
   /*!
     @brief Set mass to energy
     @details This sets mass = mass*particle_energy
   */
-  virtual void set_mass_to_energy(ParticleContainer<ItoParticle>& a_particles);
+  virtual void setMassToEnergy(ParticleContainer<ItoParticle>& a_particles);
 
   /*!
     @brief Unset mass to energy
     @details This sets mass = mass/particle_energy
   */
-  virtual void unset_mass_to_energy(ParticleContainer<ItoParticle>& a_particles);
+  virtual void unsetMassToEnergy(ParticleContainer<ItoParticle>& a_particles);
 
   /*!
     @brief Deposit conductivities
     @details This deposits weight*mobility (not multiplied by charge)
   */
-  virtual void deposit_conductivity();
+  virtual void depositConductivity();
 
   /*!
     @brief Deposit conductivities
     @details This deposits weight*mobility (not multiplied by charge)
   */
-  virtual void deposit_conductivity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles);
+  virtual void depositConductivity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles);
 
   /*!
     @brief Deposit conductivities
     @details This deposits weight*mobility (not multiplied by charge)
   */
-  virtual void deposit_conductivity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles, const DepositionType::Which a_deposition);
+  virtual void depositConductivity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles, const DepositionType::Which a_deposition);
 
   /*!
     @brief Deposit diffusivity
     @details This deposits weight*D (not multiplied by charge)
   */
-  virtual void deposit_diffusivity();
+  virtual void depositDiffusivity();
 
   /*!
     @brief Deposit diffusivities
     @details This deposits weight*D (not multiplied by charge)
   */
-  virtual void deposit_diffusivity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles);
+  virtual void depositDiffusivity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles);
 
   /*!
     @brief Deposit diffusivity
     @details This deposits weight*D (not multiplied by charge)
   */
-  virtual void deposit_diffusivity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles, const DepositionType::Which a_deposition);
+  virtual void depositDiffusivity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles, const DepositionType::Which a_deposition);
 
   /*!
     @brief Deposit diffusivity
     @details This deposits weight*energy
   */
-  virtual void deposit_energy_density();
+  virtual void depositEnergyDensity();
 
   /*!
     @brief Deposit energy
     @details This deposits weight*energy
   */
-  virtual void deposit_energy_density(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles);
+  virtual void depositEnergyDensity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles);
 
   /*!
     @brief Deposit energy
     @details This deposits weight*energy
   */
-  virtual void deposit_energy_density(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles, const DepositionType::Which a_deposition);
+  virtual void depositEnergyDensity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles, const DepositionType::Which a_deposition);
 
   /*!
     @brief Compute average mobility. Must sort the particles by cell first. 
     
   */
-  virtual void compute_average_mobility(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles);
+  virtual void computeAverageMobility(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles);
 
   /*!
     @brief Compute average diffusion. Must sort the particles by cell first. 
   */
-  virtual void compute_average_diffusion(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles);
+  virtual void computeAverageDiffusion(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles);
 
   /*!
     @brief Compute average energy. Must sort the particles by cell first. 
   */
-  virtual void compute_average_energy(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles);
+  virtual void computeAverageEnergy(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles);
 
   /*!
     @brief Deposit particles
   */
-  virtual void deposit_particles();
+  virtual void depositParticles();
 
   /*!
     @brief Deposit particles
   */
-  virtual void deposit_particles(const which_container a_container);
+  virtual void depositParticles(const WhichContainer a_container);
 
   /*!
     @brief Deposit the particles onto a_phi. The result is put on the a_comp compoennt
   */
   template <class T>
-  void deposit_particles(EBAMRCellData& a_phi, const ParticleContainer<T>& a_particles);
+  void depositParticles(EBAMRCellData& a_phi, const ParticleContainer<T>& a_particles);
 
   /*!
     @brief Deposit the particles onto a_phi. The result is put on the a_comp compoennt
   */
   template <class T>
-  void deposit_particles(EBAMRCellData& a_phi, const ParticleContainer<T>& a_particles, const DepositionType::Which  a_deposition);
+  void depositParticles(EBAMRCellData& a_phi, const ParticleContainer<T>& a_particles, const DepositionType::Which  a_deposition);
 
   /*!
     @brief Deposit the total weight of the particles in the grid cells
   */
-  virtual void deposit_weights(EBAMRCellData& a_weights, const ParticleContainer<ItoParticle>& a_particles);
+  virtual void depositWeights(EBAMRCellData& a_weights, const ParticleContainer<ItoParticle>& a_particles);
 
   /*!
     @brief Remove particles that are inside the EB
     @details Calls the other version with m_particles
   */
-  virtual void remove_covered_particles(const EbRepresentation a_representation, const Real a_tol);
+  virtual void removeCoveredParticles(const EbRepresentation a_representation, const Real a_tol);
 
   /*!
     @brief Which particles to remove
   */
-  virtual void remove_covered_particles(const which_container a_container, const EbRepresentation a_representation, const Real a_tol);
+  virtual void removeCoveredParticles(const WhichContainer a_container, const EbRepresentation a_representation, const Real a_tol);
 
   /*!
     @brief Remove particles that are inside the EB
   */
-  virtual void remove_covered_particles(ParticleContainer<ItoParticle>& a_particles, const EbRepresentation a_representation, const Real a_tol);
+  virtual void removeCoveredParticles(ParticleContainer<ItoParticle>& a_particles, const EbRepresentation a_representation, const Real a_tol);
 
   /*!
     @brief Transfer particles that are covered (within a_tol distance from EB) to another container. 
     @details This is the default version which moves particles from m_particles to m_covered_particles
   */
-  virtual void transfer_covered_particles(const EbRepresentation a_representation, const Real a_tol);
+  virtual void transferCoveredParticles(const EbRepresentation a_representation, const Real a_tol);
 
   /*!
     @brief Which particles to remove
   */
-  virtual void transfer_covered_particles(const which_container   a_containerFrom,
-					  const which_container   a_containerTo,
+  virtual void transferCoveredParticles(const WhichContainer   a_containerFrom,
+					  const WhichContainer   a_containerTo,
 					  const EbRepresentation a_representation,
 					  const Real              a_tol);
 
   /*!
     @brief Transfer particles that are inside the EB to another container. 
   */
-  virtual void transfer_covered_particles(ParticleContainer<ItoParticle>& a_containerFrom,
+  virtual void transferCoveredParticles(ParticleContainer<ItoParticle>& a_containerFrom,
 					  ParticleContainer<ItoParticle>& a_containerTo,
 					  const EbRepresentation           a_representation,
 					  const Real                        a_tol);
@@ -300,21 +300,21 @@ public:
   /*!
     @brief Do boundary intersection tests
   */
-  virtual void intersect_particles(const EbRepresentation a_representation, const bool a_delete);
+  virtual void intersectParticles(const EbRepresentation a_representation, const bool a_delete);
 
   /*!
     @brief Do boundary intersection tests.
   */
-  virtual void intersect_particles(const which_container       a_particles,
-				   const which_container       a_eb_particles,
-				   const which_container       a_dom_particles,
+  virtual void intersectParticles(const WhichContainer       a_particles,
+				   const WhichContainer       a_eb_particles,
+				   const WhichContainer       a_dom_particles,
 				   const EbRepresentation a_representation,				   
 				   const bool              a_delete);
 
   /*!
     @brief Do boundary intersection tests.
   */
-  virtual void intersect_particles(ParticleContainer<ItoParticle>& a_particles,
+  virtual void intersectParticles(ParticleContainer<ItoParticle>& a_particles,
 				   ParticleContainer<ItoParticle>& a_eb_particles,
 				   ParticleContainer<ItoParticle>& a_dom_particles,
 				   const EbRepresentation           a_representation,
@@ -323,7 +323,7 @@ public:
   /*!
     @brief Compute particle load on specific levle
   */
-  virtual void compute_loads(Vector<long int>& a_loads, const DisjointBoxLayout& a_dbl, const int a_level);
+  virtual void computeLoads(Vector<long int>& a_loads, const DisjointBoxLayout& a_dbl, const int a_level);
 
   /*!
     @brief Get number of plot variables
@@ -353,7 +353,7 @@ public:
   /*!
     @brief Get number of particles in a container
   */
-  virtual size_t get_num_particles(const which_container a_container, const bool a_local) const;
+  virtual size_t getNumParticles(const WhichContainer a_container, const bool a_local) const;
 
   /*!
     @brief Register operators
@@ -403,12 +403,12 @@ public:
   /*!
     @brief Checkpoint particles
   */
-  virtual void writeCheckpointLevel_particles(HDF5Handle& a_handle, const int a_level) const;
+  virtual void writeCheckPointLevelParticles(HDF5Handle& a_handle, const int a_level) const;
 
   /*!
     @brief Checkpoint particles
   */
-  virtual void writeCheckpointLevel_fluid(HDF5Handle& a_handle, const int a_level) const;
+  virtual void writeCheckPointLevelFluid(HDF5Handle& a_handle, const int a_level) const;
 
   /*!
     @brief Read checkpoint data from handle
@@ -443,12 +443,12 @@ public:
   /*!
     @brief Get a general particle container
   */
-  virtual ParticleContainer<ItoParticle>& getParticles(const which_container a_container);
+  virtual ParticleContainer<ItoParticle>& getParticles(const WhichContainer a_container);
 
   /*!
     @brief Get a general particle container
   */
-  virtual const ParticleContainer<ItoParticle>& getParticles(const which_container a_container) const;
+  virtual const ParticleContainer<ItoParticle>& getParticles(const WhichContainer a_container) const;
 
   /*!
     @brief Get the species
@@ -463,32 +463,32 @@ public:
   /*!
     @brief Get cell-centered velocity
   */
-  virtual EBAMRCellData& get_velo_func();
+  virtual EBAMRCellData& getVelocityFunction();
 
   /*!
     @brief Get cell-centered velocity
   */
-  virtual EBAMRCellData& get_diffco_func();
+  virtual EBAMRCellData& getDiffusionFunction();
 
   /*!
     @brief Get scratch storage
   */
-  virtual EBAMRCellData& get_scratch();
+  virtual EBAMRCellData& getScratch();
 
   /*!
     @brief Get mobility function
   */
-  virtual EBAMRCellData& get_mobility_func();
+  virtual EBAMRCellData& getMobilityFunction();
 
   /*!
     @brief Set diffusion coefficient
   */
-  virtual void setDiffusionCoefficient_func(const Real a_diffusionCoefficient);
+  virtual void setDiffusionFunction(const Real a_diffusionCoefficient);
 
   /*!
     @brief Set velocity
   */
-  virtual void setVelocity_func(const RealVect a_vel);
+  virtual void setVelocityFunction(const RealVect a_vel);
 
   /*!
     @brief Sets constant mobility for all particles
@@ -498,81 +498,81 @@ public:
   /*!
     @brief Interpolate velocities
   */
-  virtual void interpolate_velocities();
+  virtual void interpolateVelocities();
 
   /*!
     @brief Interpolate velocities
   */
-  virtual void interpolate_velocities(const int a_level, const DataIndex& a_dit);
+  virtual void interpolateVelocities(const int a_level, const DataIndex& a_dit);
 
   /*!
     @brief Interpolate mobilities
   */
-  virtual void interpolate_mobilities();
+  virtual void interpolateMobilities();
 
   /*!
     @brief Interpolate mobilities
   */
-  virtual void interpolate_mobilities(const int a_level, const DataIndex& a_dit);
+  virtual void interpolateMobilities(const int a_level, const DataIndex& a_dit);
 
   /*!
     @brief Update mobilities
     @details This calls the mobility function implemented by ItoSpecies
   */
-  virtual void update_mobilities();
+  virtual void updateMobilities();
 
   /*!
     @brief Update mobilities
     @details This calls the mobility function implemented by ItoSpecies
   */
-  virtual void update_mobilities(const int a_level, const DataIndex a_dit);
+  virtual void updateMobilities(const int a_level, const DataIndex a_dit);
 
   /*!
     @brief Interpolate diffusion
   */
-  virtual void interpolate_diffusion();
+  virtual void interpolateDiffusion();
 
   /*!
     @brief Interpolate velocities
   */
-  virtual void interpolate_diffusion(const int a_level, const DataIndex& a_dit);
+  virtual void interpolateDiffusion(const int a_level, const DataIndex& a_dit);
 
   /*!
     @brief Update diffusion coefficients
     @details This calls the diffusion function implemented by ItoSpecies
   */
-  virtual void update_diffusion();
+  virtual void updateDiffusion();
 
   /*!
     @brief Update diffusion coefficients
     @details This calls the diffusion function implemented by ItoSpecies
   */
-  virtual void update_diffusion(const int a_level, const DataIndex a_dit);
+  virtual void updateDiffusion(const int a_level, const DataIndex a_dit);
 
   /*!
     @brief Sort the m_particles container by cell
   */
-  virtual void sortParticlesByCell(const which_container a_container);
+  virtual void sortParticlesByCell(const WhichContainer a_container);
 
   /*!
     @brief Sort the m_particles container by cell
   */
-  virtual void sortParticlesByPatch(const which_container a_container);
+  virtual void sortParticlesByPatch(const WhichContainer a_container);
   
   /*!
     @brief Make superparticles
   */
-  virtual void make_superparticles(const which_container a_container, const int a_particlesPerPatch);
+  virtual void makeSuperparticles(const WhichContainer a_container, const int a_particlesPerPatch);
 
   /*!
     @brief Make superparticles on specified level
   */
-  virtual void make_superparticles(const which_container a_container, const int a_particlesPerPatch, const int a_level);
+  virtual void makeSuperparticles(const WhichContainer a_container, const int a_particlesPerPatch, const int a_level);
 
   /*!
     @brief Make superparticles on specified level and patch
   */
-  virtual void make_superparticles(const which_container a_container, const int a_particlesPerPatch, const int a_level, const DataIndex a_dit);
+  virtual void makeSuperparticles(const WhichContainer a_container, const int a_particlesPerPatch, const int a_level, const DataIndex a_dit);
 
   /*!
     @brief Remap all particles
@@ -582,13 +582,13 @@ public:
   /*!
     @brief Remap all particles
   */
-  void remap(const which_container a_container);
+  void remap(const WhichContainer a_container);
 
   /*!
     @brief Random Gaussian
   */
   inline
-  RealVect random_gaussian();
+  RealVect randomGaussian();
 
   /*!
     @brief Random direction
@@ -614,52 +614,52 @@ public:
   /*!
     @brief Compute drift dt. This returns the minimum of (dx/dt)*a_maxCellsToMove over all levels. 
   */
-  Real compute_min_dt(const Real a_maxCellsToMove) const;
+  Real computeMinDt(const Real a_maxCellsToMove) const;
 
   /*!
     @brief Compute drift dt. This returns the minimum of (dx/dt)*a_maxCellsToMove over all levels. 
   */
-  Real compute_min_dt(const Real a_maxCellsToMove, const int a_lvl) const;
+  Real computeMinDt(const Real a_maxCellsToMove, const int a_lvl) const;
 
   /*!
     @brief Compute drift dt. This returns the minimum of (dx/dt)*a_maxCellsToMove over all levels. 
   */
-  Real compute_min_dt(const Real a_maxCellsToMove, const int a_lvl, const DataIndex a_dit, const Real a_dx) const;
+  Real computeMinDt(const Real a_maxCellsToMove, const int a_lvl, const DataIndex a_dit, const Real a_dx) const;
 
   /*!
     @brief Compute drift dt. This returns the minimum of (dx/dt)*a_maxCellsToMove over all levels. 
   */
-  Real compute_min_drift_dt(const Real a_maxCellsToMove) const;
+  Real computeMinDriftDt(const Real a_maxCellsToMove) const;
 
   /*!
     @brief Compute advection time step
   */
-  Real compute_advective_dt() const;
+  Real computeAdvectiveDt() const;
 
   /*!
     @brief Compute the drift dt. This returns (dx/dt)*a_maxCellsToMove
   */
-  Vector<Real> compute_drift_dt(const Real a_maxCellsToMove) const;
+  Vector<Real> computeDriftDt(const Real a_maxCellsToMove) const;
 
   /*!
     @brief Compute the drift dt. This computes the minimum dt = dx/v on every level
   */
-  Vector<Real> compute_drift_dt() const;
+  Vector<Real> computeDriftDt() const;
 
   /*!
     @brief Compute the drift dt. This computes the minimum dt = dx/v on one level
   */
-  Real compute_drift_dt(const int a_lvl) const;
+  Real computeDriftDt(const int a_lvl) const;
 
   /*!
     @brief Compute the drift dt. This computes the minimum dt = dx/v on one level and one box. 
   */
-  Real compute_drift_dt(const int a_lvl, const DataIndex& a_dit, const RealVect a_dx) const;
+  Real computeDriftDt(const int a_lvl, const DataIndex& a_dit, const RealVect a_dx) const;
 
   /*!
     @brief Compute diffusion dt
   */
-  Real compute_min_diffusion_dt(const Real a_maxCellsToMove) const;
+  Real computeMinDiffusionDt(const Real a_maxCellsToMove) const;
 
   /*!
     @brief Compute diffusion dt as dx*maxCellsToMove/(sqrt(2D)*eps) on all levels
@@ -669,7 +669,7 @@ public:
   /*!
     @brief Compute the diffusive dt
   */
-  Real compute_diffusive_dt() const;
+  Real computeDiffusiveDt() const;
   
   /*!
     @brief Compute diffusion dt as dx/(sqrt(2D)*eps) on all levels
@@ -701,7 +701,7 @@ protected:
   /*! 
     @brief How to checkpoint files
   */
-  enum class which_checkpoint {
+  enum class WhichCheckpoint {
     particles,
     numbers
   };
@@ -709,7 +709,7 @@ protected:
   /*!
     @brief Enum for deciding how to interpolate mobilities. 
   */
-  enum class mobility_interp {
+  enum class WhichMobilityInterpolation {
     mobility,
     velocity
   };
@@ -717,12 +717,12 @@ protected:
   /*!
     @brief How to checkpoint files. particles => write particles to HDF5. numbers => write numbers to HDF5
   */
-  which_checkpoint m_checkpointing;
+  WhichCheckpoint m_checkpointing;
 
   /*!
     @brief Switch for deciding how to interpolate mobilities, i.e. interpolating either mu*E or just mu (to the particle position)
   */
-  mobility_interp m_mobility_interp;
+  WhichMobilityInterpolation m_WhichMobilityInterpolation;
 
   /*!
     @brief Get number of particles used for restarting
@@ -999,12 +999,12 @@ protected:
   /*!
     @brief Various particle containers with identifiers. 
   */
-  std::map<which_container, ParticleContainer<ItoParticle> > m_ParticleContainers;
+  std::map<WhichContainer, ParticleContainer<ItoParticle> > m_ParticleContainers;
 
   /*!
     @brief Parse superparticles
   */
-  void parse_superparticles();
+  void parseSuperParticles();
   
   /*!
     @brief Parse RNG options
@@ -1034,12 +1034,12 @@ protected:
   /*!
     @brief Parse diffusion hop
   */
-  void parse_diffusion_hop();
+  void parseDiffusionHop();
 
   /*!
     @brief Parse the conservation
   */
-  void parse_redistribution();
+  void parseRedistribution();
 
   /*!
     @brief Parse the conservation
@@ -1049,7 +1049,7 @@ protected:
   /*!
     @brief Parse checkpointing method
   */
-  void parse_checkpointing();
+  void parseCheckpointing();
 
   /*!
     @brief This computes the "conservative" deposition, multiplied by kappa
@@ -1119,37 +1119,37 @@ protected:
   /*!
     @brief Superparticle merging with BVH trees
   */
-  void bvh_merge(List<ItoParticle>& a_particles, const int a_particlesPerCell);
+  void mergeBVH(List<ItoParticle>& a_particles, const int a_particlesPerCell);
 
   /*!
     @brief Restart particles
   */
-  void restart_particles(LevelData<EBCellFAB>& a_num_particles, const int a_level);
+  void restartParticles(LevelData<EBCellFAB>& a_num_particles, const int a_level);
 
   /*!
     @brief Remove particles that are inside the EB using the implicit function
   */
-  void remove_covered_particles_if(ParticleContainer<ItoParticle>& a_particles, const Real a_tol);
+  void removeCoveredParticles_if(ParticleContainer<ItoParticle>& a_particles, const Real a_tol);
 
   /*!
     @brief Remove particles that are inside the EB using the discrete information
   */
-  void remove_covered_particles_discrete(ParticleContainer<ItoParticle>& a_particles);
+  void removeCoveredParticles_discrete(ParticleContainer<ItoParticle>& a_particles);
   
   /*!
     @brief Remove particles only in covered cells. 
   */
-  void remove_covered_particles_voxels(ParticleContainer<ItoParticle>& a_particles);
+  void removeCoveredParticles_voxels(ParticleContainer<ItoParticle>& a_particles);
 
   /*!
     @brief Transfer particles that are inside the EB
   */
-  void transfer_covered_particles_if(ParticleContainer<ItoParticle>& a_src, ParticleContainer<ItoParticle>& a_dst, const Real a_tol);
+  void transferCoveredParticles_if(ParticleContainer<ItoParticle>& a_src, ParticleContainer<ItoParticle>& a_dst, const Real a_tol);
 
   /*!
     @brief Do boundary intersection tests with an implicit function
   */
-  void intersect_particles_if(ParticleContainer<ItoParticle>& a_particles,
+  void intersectParticlesIF(ParticleContainer<ItoParticle>& a_particles,
 			      ParticleContainer<ItoParticle>& a_eb_particles,
 			      ParticleContainer<ItoParticle>& a_domain_particles,
 			      const bool                        a_delete);
@@ -1157,12 +1157,12 @@ protected:
   /*!
     @brief Interpolate mobilities
   */
-  virtual void interpolate_mobilities_mu(const int a_level, const DataIndex& a_dit);
+  virtual void interpolateMobilitiesMu(const int a_level, const DataIndex& a_dit);
 
   /*!
     @brief Interpolate mobilities
   */
-  virtual void interpolate_mobilities_vel(const int a_level, const DataIndex& a_dit);
+  virtual void interpolateMobilitiesVel(const int a_level, const DataIndex& a_dit);
 
   /*!
     @brief Sign function
@@ -1174,7 +1174,7 @@ protected:
     @brief Draw a valid random position somewhere in a cell
   */
   inline
-  RealVect random_position(const RealVect a_pos,
+  RealVect randomPosition(const RealVect a_pos,
 			   const RealVect a_lo,
 			   const RealVect a_hi,
 			   const RealVect a_bndryCentroid,
@@ -1185,7 +1185,7 @@ protected:
   /*!
     @brief Draw a random position somewhere in a cell
   */
-  RealVect random_position(const RealVect a_lo,
+  RealVect randomPosition(const RealVect a_lo,
 			   const RealVect a_hi,
 			   const RealVect a_bndryCentroid,
 			   const RealVect a_normal);
@@ -1193,10 +1193,10 @@ protected:
   /*!
     @brief Return a random position in the cube (a_lo, a_hi);
   */
-  RealVect random_position(const RealVect a_lo, const RealVect a_hi);
+  RealVect randomPosition(const RealVect a_lo, const RealVect a_hi);
 };
 #include "CD_NamespaceFooter.H"
 
-#include "ito_solverI.H"
+#include <CD_ItoSolverImplem.H>
 
 #endif

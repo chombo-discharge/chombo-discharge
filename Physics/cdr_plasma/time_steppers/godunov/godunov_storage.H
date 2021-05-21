@@ -31,9 +31,9 @@ namespace physics {
       void allocate_storage();
       void deallocate_storage();
 
-      EBAMRCellData& get_scratch()  { return m_scratch;    }
-      EBAMRCellData& get_scratch2() { return m_scratch2;   }
-      EBAMRCellData& get_scratch3() { return m_scratch3;   }
+      EBAMRCellData& getScratch()  { return m_scratch;    }
+      EBAMRCellData& getScratch2() { return m_scratch2;   }
+      EBAMRCellData& getScratch3() { return m_scratch3;   }
       EBAMRCellData& get_extrap()   { return m_cellExtr;  }
       EBAMRCellData& get_gradient() { return m_gradient;   }
 
@@ -142,7 +142,7 @@ namespace physics {
       void allocate_storage();
       void deallocate_storage();
 
-      EBAMRIVData& get_scratch() {return m_scratch;}
+      EBAMRIVData& getScratch() {return m_scratch;}
   
     protected:
 

@@ -301,12 +301,12 @@ void air3_zheleznyak::add_gaussian_particles(List<Particle>& a_particles,
   m_gauss = std::normal_distribution<Real>(0., a_rad);
 
   for (int i = 0; i < a_num; i++){
-    RealVect pos = a_center + random_gaussian();
+    RealVect pos = a_center + randomGaussian();
     a_particles.add(Particle(a_weight, pos));
   }
 }
 
-RealVect air3_zheleznyak::random_gaussian(){
+RealVect air3_zheleznyak::randomGaussian(){
 
   const Real rad = m_gauss(*m_rng);
   return rad*randomDirection();

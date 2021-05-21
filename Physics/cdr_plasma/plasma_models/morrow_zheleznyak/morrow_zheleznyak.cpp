@@ -1123,13 +1123,13 @@ void morrow_zheleznyak::add_gaussian_particles(List<Particle>& a_particles){
 
   m_gauss = std::normal_distribution<Real>(0., gaussian_radius);
   for (int i = 0; i < num_gaussian_particles; i++){
-    RealVect pos = gaussian_center + random_gaussian(gaussian_radius);
+    RealVect pos = gaussian_center + randomGaussian(gaussian_radius);
     a_particles.add(Particle(weight, pos));
   }
 
 }
  
-RealVect morrow_zheleznyak::random_gaussian(const Real a_rad){
+RealVect morrow_zheleznyak::randomGaussian(const Real a_rad){
 
   const Real rad = m_gauss(*m_rng);
   return rad*randomDirection();

@@ -23,12 +23,12 @@ public:
   void allocate_storage(const int a_p);
   void deallocate_storage();
 
-  EBAMRCellData& get_scratch()  { return m_scratch;    }
-  EBAMRCellData& get_scratch2() { return m_scratch2;   }
+  EBAMRCellData& getScratch()  { return m_scratch;    }
+  EBAMRCellData& getScratch2() { return m_scratch2;   }
   EBAMRCellData& get_error()    { return m_error;      }
   EBAMRCellData& get_gradient() { return m_gradient;   }
   EBAMRCellData& get_old()      { return m_old;        }
-  EBAMRCellData& get_scratchD() { return m_scratchD;   }
+  EBAMRCellData& getScratchD() { return m_scratchD;   }
   EBAMRCellData& get_divF()     { return m_divF;       }
   
 
@@ -149,7 +149,7 @@ public:
   void allocate_storage(const int a_p);
   void deallocate_storage();
 
-  EBAMRIVData& get_scratch(){ return m_scratch; }
+  EBAMRIVData& getScratch(){ return m_scratch; }
   EBAMRIVData& get_error(){   return m_error; }
 
   Vector<EBAMRIVData>& get_sigma(){ return m_sigma;}

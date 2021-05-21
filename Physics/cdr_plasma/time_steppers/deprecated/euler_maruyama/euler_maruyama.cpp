@@ -675,8 +675,8 @@ void euler_maruyama::advance_cdr(const Real a_dt){
     EBAMRCellData& phi = solver->getPhi();
     EBAMRCellData& src = solver->getSource();
     
-    EBAMRCellData& scratch  = storage->get_scratch();
-    EBAMRCellData& scratch2 = storage->get_scratch2();
+    EBAMRCellData& scratch  = storage->getScratch();
+    EBAMRCellData& scratch2 = storage->getScratch2();
 
     // Compute hyperbolic term into scratch. Also include diffusion term if and only if we're using explicit diffusion
     const Real extrap_dt = m_extrap_advect ? a_dt : 0.0;
@@ -821,14 +821,14 @@ void euler_maruyama::computeDt(Real& a_dt, TimeCode::which_code& a_timeCode){
 
   // Diffusion step step constraint. If diffusion dt is the shortest scale, 
   if(m_whichDiffusion == whichDiffusion::Explicit){ // Have to accept time step constraint
-    const Real dt_diffusion = m_cdr->compute_diffusive_dt();
+    const Real dt_diffusion = m_cdr->computeDiffusiveDt();
     if(dt_diffusion < dt){
       dt = dt_diffusion;
       a_timeCode = TimeCode::Diffusion;
     }
   }
   else if(m_whichDiffusion == whichDiffusion::Automatic){ // If explicit diffusion dt is the shortest, go implicit
-    const Real dt_diffusion = m_cdr->compute_diffusive_dt();
+    const Real dt_diffusion = m_cdr->computeDiffusiveDt();
     if(dt_diffusion < dt){ // Use implicit diffusion
       m_implicit_diffusion = true;
     }

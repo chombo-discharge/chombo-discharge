@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_ItoSpecies.H
-  @brief  Declaration of an ItoSpecies class that passes in names and initial data to ito_solvers
+  @brief  Declaration of an ItoSpecies class that passes in names and initial data to ItoSolvers
   @author Robert Marskar
 */
 
@@ -23,8 +23,8 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Metadata class that parses for ito_solver
-  @details The ito_solver takes it's information from this class, e.g. mobile/diffusive, charge, name, initial particles etc. 
+  @brief Metadata class that parses for ItoSolver
+  @details The ItoSolver takes it's information from this class, e.g. mobile/diffusive, charge, name, initial particles etc. 
 */
 class ItoSpecies {
 public:

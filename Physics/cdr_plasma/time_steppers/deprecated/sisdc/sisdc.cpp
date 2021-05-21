@@ -803,7 +803,7 @@ void sisdc::integrate(const Real a_dt, const Real a_time, const bool a_lagged_te
       if(m_compute_S)      sisdc::compute_cdr_gradients(cdr_densities_mp1);
       if(m_compute_v)      sisdc::compute_cdr_velo(cdr_densities_mp1, t_mp1);
       if(m_compute_S)      sisdc::compute_cdr_sources(cdr_densities_mp1, t_mp1);
-      if(m_compute_D)      sisdc::update_diffusion_coefficients();
+      if(m_compute_D)      sisdc::updateDiffusion_coefficients();
 
       // Update boundary conditions for cdr and sigma equations. 
       sisdc::compute_cdr_eb_states(cdr_densities_mp1);
@@ -908,7 +908,7 @@ void sisdc::integrate_AP(const Real a_dt, const Real a_time, const bool a_lagged
       if(m_compute_S)      sisdc::compute_cdr_gradients(cdr_densities_mp1);
       if(m_compute_v)      sisdc::compute_cdr_velo(cdr_densities_mp1, t_mp1);
       if(m_compute_S)      sisdc::compute_cdr_sources(cdr_densities_mp1, t_mp1);
-      if(m_compute_D)      sisdc::update_diffusion_coefficients();
+      if(m_compute_D)      sisdc::updateDiffusion_coefficients();
 
       // Update boundary conditions for cdr and sigma equations. 
       sisdc::compute_cdr_eb_states(cdr_densities_mp1);
@@ -969,7 +969,7 @@ void sisdc::integrate_advection_reaction(const Real a_dt, const int a_m, const b
 
     // phi_(m+1) = phi_M
     EBAMRCellData& phi_m1      = storage->get_phi()[a_m+1];
-    EBAMRCellData& scratch     = storage->get_scratch();
+    EBAMRCellData& scratch     = storage->getScratch();
     const EBAMRCellData& phi_m = storage->get_phi()[a_m];
     
     // Increment with operator slopes. m=0 and corrector is a special case where we skipped the advective advance,
@@ -1034,7 +1034,7 @@ void sisdc::integrate_advection_reaction(const Real a_dt, const int a_m, const b
     DataOps::incr(sigma_m1, Fsig_lag, -m_dtm[a_m]);
 
     // Add in the quadrature term
-    EBAMRIVData& scratch = m_sigma_scratch->get_scratch();
+    EBAMRIVData& scratch = m_sigma_scratch->getScratch();
     sisdc::quad(scratch, m_sigma_scratch->get_Fold(), a_m);
     DataOps::incr(sigma_m1, scratch, 0.5*a_dt); // Mult by 0.5*a_dt due to scaling on [-1,1] for quadrature
   }
@@ -1070,7 +1070,7 @@ void sisdc::integrate_advection_nosubcycle(const Real a_dt, const int a_m, const
     RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
 
     EBAMRCellData& phi_m1      = storage->get_phi()[a_m+1];
-    EBAMRCellData& scratch     = storage->get_scratch();
+    EBAMRCellData& scratch     = storage->getScratch();
     const EBAMRCellData& phi_m = storage->get_phi()[a_m];
 
     if(solver->isMobile()){
@@ -1150,8 +1150,8 @@ void sisdc::integrate_advection_multistep(const Real a_dt, const int a_m, const 
       RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
 
       EBAMRCellData& phi_m1      = storage->get_phi()[a_m+1];
-      EBAMRCellData& scratch     = storage->get_scratch();
-      EBAMRCellData& scratch2    = storage->get_scratch2();
+      EBAMRCellData& scratch     = storage->getScratch();
+      EBAMRCellData& scratch2    = storage->getScratch2();
       const EBAMRCellData& src   = solver->getSource();
 
       const Real extrap_dt = m_extrap_advect ? 2.0*m_extrap_dt*dt : 0.0; // Factor of 2 due to EBPatchAdvect
@@ -1199,8 +1199,8 @@ void sisdc::integrate_advection_multistep(const Real a_dt, const int a_m, const 
       RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
 
       EBAMRCellData& phi_m1      = storage->get_phi()[a_m+1];
-      EBAMRCellData& scratch     = storage->get_scratch();
-      EBAMRCellData& scratch2    = storage->get_scratch2();
+      EBAMRCellData& scratch     = storage->getScratch();
+      EBAMRCellData& scratch2    = storage->getScratch2();
       const EBAMRCellData& src   = solver->getSource();
 
       const Real extrap_dt = m_extrap_advect ? 2.0*m_extrap_dt*dt : 0.0; // Factor of 2 due to EBPatchAdvect
@@ -1241,8 +1241,8 @@ void sisdc::integrate_diffusion(const Real a_dt, const int a_m, const bool a_lag
       const EBAMRCellData& phi_m = storage->get_phi()[a_m];
 
       // Build the diffusion source term
-      EBAMRCellData& source   = storage->get_scratch();
-      EBAMRCellData& init_soln = storage->get_scratch2();
+      EBAMRCellData& source   = storage->getScratch();
+      EBAMRCellData& init_soln = storage->getScratch2();
       DataOps::setValue(source, 0.0); // No source term
       
       DataOps::copy(init_soln, phi_m1);      // Copy initial solutions
@@ -1356,7 +1356,7 @@ void sisdc::integrate_AP_advection_reaction(const Real a_dt, const int a_m, cons
     EBAMRCellData& phi_m1  = storage->get_phi()[a_m+1]; // This contains phi_m - dt*div(F) + dt*R
     EBAMRCellData& phi_m   = storage->get_phi()[a_m];   // This contains phi_m - dt*div(F) + dt*R
     EBAMRCellData& FAR_m   = storage->get_FAR()[a_m];   // Old operator slope
-    EBAMRCellData& scratch = storage->get_scratch();    // Scratch storage
+    EBAMRCellData& scratch = storage->getScratch();    // Scratch storage
 
 
     // Back up the old slope first
@@ -1396,7 +1396,7 @@ void sisdc::integrate_AP_advection_reaction(const Real a_dt, const int a_m, cons
       DataOps::incr(sigma_m1, Fsig_lag, -m_dtm[a_m]);
 
       // Add in the quadrature term
-      EBAMRIVData& scratch = m_sigma_scratch->get_scratch();
+      EBAMRIVData& scratch = m_sigma_scratch->getScratch();
       sisdc::quad(scratch, m_sigma_scratch->get_Fold(), a_m);
       DataOps::incr(sigma_m1, scratch, 0.5*a_dt); // Mult by 0.5*a_dt due to scaling on [-1,1] for quadrature
     }
@@ -2307,10 +2307,10 @@ void sisdc::integrate_rte(const Real a_dt, const int a_m, const bool a_lagged_te
   }
 }
 
-void sisdc::update_diffusion_coefficients(){
-  CH_TIME("sisdc::update_diffusion_coefficients");
+void sisdc::updateDiffusion_coefficients(){
+  CH_TIME("sisdc::updateDiffusion_coefficients");
   if(m_verbosity > 5){
-    pout() << "sisdc::update_diffusion_coefficients" << endl;
+    pout() << "sisdc::updateDiffusion_coefficients" << endl;
   }
   TimeStepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
 }
@@ -2861,7 +2861,7 @@ void sisdc::subcycle_update_transport_bc(const int a_m, const int a_lvl, const R
     RefCountedPtr<cdr_storage>& storage = sisdc::get_cdr_storage(solver_it);
 
     // Storage we can use for computations
-    LevelData<EBCellFAB>&        scratchD    = *storage->get_scratchD()[a_lvl];
+    LevelData<EBCellFAB>&        scratchD    = *storage->getScratchD()[a_lvl];
     LevelData<BaseIVFAB<Real> >& scratchIV_1 = *storage->get_eb_scratch1()[a_lvl]; // Scalar
     LevelData<BaseIVFAB<Real> >& scratchIV_D = *storage->get_eb_scratchD()[a_lvl]; // SpaceDim comps
 

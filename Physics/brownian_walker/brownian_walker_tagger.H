@@ -9,7 +9,7 @@
 #define _BROWNIAN_WALKER_TAGGER_
 
 #include "CD_CellTagger.H"
-#include "ito_solver.H"
+#include <CD_ItoSolver.H>
 #include "CD_AmrMesh.H"
 
 #include "CD_NamespaceHeader.H"
@@ -22,7 +22,7 @@ namespace physics {
     class brownian_walker_tagger : public CellTagger {
     public:
 
-      brownian_walker_tagger(RefCountedPtr<ito_solver>& a_solver, RefCountedPtr<AmrMesh>& a_amr);
+      brownian_walker_tagger(RefCountedPtr<ItoSolver>& a_solver, RefCountedPtr<AmrMesh>& a_amr);
       ~brownian_walker_tagger();
 
       void regrid() override;
@@ -30,7 +30,7 @@ namespace physics {
       bool tagCells(EBAMRTags& a_tags) override;
 
     protected:
-      RefCountedPtr<ito_solver> m_solver;
+      RefCountedPtr<ItoSolver> m_solver;
       RefCountedPtr<AmrMesh>   m_amr;
 
     private:

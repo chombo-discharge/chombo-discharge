@@ -777,8 +777,8 @@ void godunov::advance_transport_euler(const Real a_dt){
       EBAMRCellData& phi = solver->getPhi();
       EBAMRCellData& src = solver->getSource();
     
-      EBAMRCellData& scratch  = storage->get_scratch();
-      EBAMRCellData& scratch2 = storage->get_scratch2();
+      EBAMRCellData& scratch  = storage->getScratch();
+      EBAMRCellData& scratch2 = storage->getScratch2();
 
       // Compute hyperbolic term into scratch. Also include diffusion term if and only if we're using explicit diffusion
       const Real extrap_dt = (m_extrap_advect && solver->extrapolateSourceTerm()) ? a_dt : 0.0;
@@ -865,8 +865,8 @@ void godunov::advance_transport_rk2(const Real a_dt){
     RefCountedPtr<cdr_storage>& storage = godunov::get_cdr_storage(solver_it);
 
     EBAMRCellData& phi     = solver->getPhi();
-    EBAMRCellData& scratch = storage->get_scratch();
-    EBAMRCellData& k1      = storage->get_scratch3();
+    EBAMRCellData& scratch = storage->getScratch();
+    EBAMRCellData& k1      = storage->getScratch3();
 
     DataOps::copy(k1, phi);
 
@@ -893,7 +893,7 @@ void godunov::advance_transport_rk2(const Real a_dt){
       // This discretization is equivalent to a diffusion-only discretization with phi^k -dt*div(F) + dt*R as initial solution
       // so we just use that for simplicity
       if(solver->isDiffusive()){
-	EBAMRCellData& scratch2 = storage->get_scratch2();
+	EBAMRCellData& scratch2 = storage->getScratch2();
 	
 	DataOps::copy(scratch, phi);       // Make scratch = phiOld - dt*div(F/J)
 	DataOps::setValue(scratch2, 0.0); // No source, those are a part of the initial solution
@@ -914,7 +914,7 @@ void godunov::advance_transport_rk2(const Real a_dt){
   // Update the sigma equation
   {
     EBAMRIVData& sigma = m_sigma->getPhi();
-    EBAMRIVData& k1    = m_sigma_scratch->get_scratch();
+    EBAMRIVData& k1    = m_sigma_scratch->getScratch();
     DataOps::copy(k1, sigma);
 
     // Advance
@@ -949,8 +949,8 @@ void godunov::advance_transport_rk2(const Real a_dt){
     RefCountedPtr<cdr_storage>& storage = godunov::get_cdr_storage(solver_it);
 
     EBAMRCellData& phi      = solver->getPhi();
-    EBAMRCellData& scratch  = storage->get_scratch();
-    const EBAMRCellData& k1 = storage->get_scratch3();
+    EBAMRCellData& scratch  = storage->getScratch();
+    const EBAMRCellData& k1 = storage->getScratch3();
 
     // Compute hyperbolic term into scratch. Also include diffusion term if and only if we're using explicit diffusion
     const Real extrap_dt = m_extrap_advect ? a_dt : 0.0;
@@ -977,7 +977,7 @@ void godunov::advance_transport_rk2(const Real a_dt){
       DataOps::incr(phi, scratch, 0.5); // phi = phiOld + 0.5*(k1 - div(F))
       
       if(solver->isDiffusive()){
-	EBAMRCellData& scratch2 = storage->get_scratch2();
+	EBAMRCellData& scratch2 = storage->getScratch2();
 	
 	DataOps::copy(scratch, phi);       // Weird-ass initial solution, as explained above
 	DataOps::setValue(scratch2, 0.0); // No source, those are a part of the initial solution
@@ -1008,7 +1008,7 @@ void godunov::advance_transport_rk2(const Real a_dt){
   { // Do the final sigma advance
     EBAMRIVData& sigma     = m_sigma->getPhi();
     const EBAMRIVData& rhs = m_sigma->getFlux();
-    const EBAMRIVData& k1  = m_sigma_scratch->get_scratch();
+    const EBAMRIVData& k1  = m_sigma_scratch->getScratch();
     DataOps::incr(sigma, k1, -0.5);
     DataOps::incr(sigma, rhs, 0.5*a_dt);
   }

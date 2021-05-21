@@ -3,7 +3,7 @@
 #include "CD_FieldSolverFactoryImplem.H"
 #include "CD_FieldSolverMultigrid.H"
 #include "ito_layout.H"
-#include "ito_solver.H"
+#include <CD_ItoSolver.H>
 #include <CD_RtLayout.H>
 #include <CD_McPhoto.H>
 #include "ito_plasma_air3.H"
@@ -53,7 +53,7 @@ int main(int argc, char* argv[]){
 
   // Create solver factories
   auto poi_fact = new FieldSolverFactory<FieldSolverMultigrid>();
-  auto ito_fact = new ito_factory<ito_solver, ito_solver>();
+  auto ito_fact = new ito_factory<ItoSolver, ItoSolver>();
   auto rte_fact = new RtFactory<McPhoto, McPhoto>();
 
   // Instantiate solvers

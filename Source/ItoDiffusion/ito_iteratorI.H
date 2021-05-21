@@ -70,7 +70,7 @@ void ito_iterator<T>::operator++(){
     m_isolver++;
 
     for (int isolver = m_isolver; this->ok(); ++isolver){
-      const RefCountedPtr<ito_solver>& solver = m_solvers[isolver];
+      const RefCountedPtr<ItoSolver>& solver = m_solvers[isolver];
       const RefCountedPtr<ItoSpecies>& species   = m_species[isolver];
       
       if(m_mode == SpeciesIteration::charged){

@@ -22,7 +22,7 @@
 using namespace physics::ito_plasma;
 
 inline
-RealVect ito_plasma_physics::random_position(const RealVect a_cellPos,
+RealVect ito_plasma_physics::randomPosition(const RealVect a_cellPos,
 					     const RealVect a_centroidPos,
 					     const RealVect a_lo,
 					     const RealVect a_hi,
@@ -38,10 +38,10 @@ RealVect ito_plasma_physics::random_position(const RealVect a_cellPos,
     pos = a_centroidPos;
   }
   else if(a_kappa < 1.0){ // Rejection sampling. 
-    pos = this->random_position(a_lo, a_hi, a_bndryCentroid, a_bndryNormal);
+    pos = this->randomPosition(a_lo, a_hi, a_bndryCentroid, a_bndryNormal);
   }
   else{ // Regular cell. Get a position. 
-    pos = this->random_position(a_lo, a_hi);
+    pos = this->randomPosition(a_lo, a_hi);
   }
 
   pos = a_cellPos + pos*a_dx;
@@ -50,16 +50,16 @@ RealVect ito_plasma_physics::random_position(const RealVect a_cellPos,
 }
 
 inline
-RealVect ito_plasma_physics::random_position(const RealVect a_lo,
+RealVect ito_plasma_physics::randomPosition(const RealVect a_lo,
 					     const RealVect a_hi,
 					     const RealVect a_bndryCentroid,
 					     const RealVect a_bndryNormal) const {
 
-  RealVect pos = this->random_position(a_lo, a_hi);
+  RealVect pos = this->randomPosition(a_lo, a_hi);
   bool valid   = PolyGeom::dot(pos-a_bndryCentroid, a_bndryNormal) >= 0.0;
 
   while(!valid){
-    pos    = this->random_position(a_lo, a_hi);
+    pos    = this->randomPosition(a_lo, a_hi);
     valid = PolyGeom::dot(pos-a_bndryCentroid, a_bndryNormal) >= 0.0;
   }
 
@@ -67,7 +67,7 @@ RealVect ito_plasma_physics::random_position(const RealVect a_lo,
 }
 
 inline
-RealVect ito_plasma_physics::random_position(const RealVect a_lo, const RealVect a_hi) const {
+RealVect ito_plasma_physics::randomPosition(const RealVect a_lo, const RealVect a_hi) const {
 
   RealVect pos = RealVect::Unit;
 
@@ -251,13 +251,13 @@ void ito_plasma_physics::addParticles(List<ItoParticle>& a_particles,
   this->computeParticleWeights(weight, num, remainder, a_numNewParticles);
 
   for (int i = 0; i < num; i++){
-    const RealVect p = this->random_position(a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+    const RealVect p = this->randomPosition(a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
     const Real w     = (Real) weight;
     a_particles.add(ItoParticle(w, p));
   }
 
   if(remainder > zero){ // Rest of weight in case we got superparticles
-    const RealVect p = this->random_position(a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+    const RealVect p = this->randomPosition(a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
     const Real w     = (Real) (weight + remainder);
     a_particles.add(ItoParticle(w, p));
   }
@@ -474,7 +474,7 @@ void ito_plasma_physics::reconcile_Photons(List<Photon>&      a_Photons,
   this->computeParticleWeights(weight, num, remainder, a_num_Photons);
   
   for (int i = 0; i < num; i++){
-    const RealVect p = this->random_position(a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+    const RealVect p = this->randomPosition(a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
     const RealVect v = Units::c*randomDirection();
       
     a_Photons.add(Photon(p, v, a_species.getKappa(p), weight));
@@ -482,7 +482,7 @@ void ito_plasma_physics::reconcile_Photons(List<Photon>&      a_Photons,
 
   // If we used superPhotons the last Photon gets some extra oomph. 
   if(remainder > 0){
-    const RealVect p = this->random_position(a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+    const RealVect p = this->randomPosition(a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
     const RealVect v = Units::c*randomDirection();
     a_Photons.add(Photon(p, v, a_species.getKappa(p), weight + remainder));
   }

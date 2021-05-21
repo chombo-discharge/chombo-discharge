@@ -939,7 +939,7 @@ void sdc::compute_semi_implicit_rho(const int a_m,  const bool a_corrector){
 	const EBAMRCellData& FD   = storage->get_FD()[a_m];
 
 	// Compute the quadrature
-	EBAMRCellData& scratch = storage->get_scratch();
+	EBAMRCellData& scratch = storage->getScratch();
 	sdc::quad(scratch, storage->get_F(), a_m);
 
 	// Increment
@@ -1028,7 +1028,7 @@ void sdc::advance_sigma(const int a_m, const bool a_corrector){
     DataOps::incr(sigma_m1, Fsig_lag, -dtm);
 
     // Add in the quadrature term
-    EBAMRIVData& scratch = m_sigma_scratch->get_scratch();
+    EBAMRIVData& scratch = m_sigma_scratch->getScratch();
     sdc::quad(scratch, m_sigma_scratch->get_Fold(), a_m);
     DataOps::incr(sigma_m1, scratch, 0.5*dtm); // Mult by 0.5*a_dt due to scaling on [-1,1] for quadrature
   }
@@ -1072,7 +1072,7 @@ void sdc::substep_cdr(const int a_m, const bool a_corrector){
     RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
 
     EBAMRCellData& phi_m1      = storage->get_phi()[a_m+1];
-    EBAMRCellData& I_m         = storage->get_scratch();  
+    EBAMRCellData& I_m         = storage->getScratch();  
     const EBAMRCellData& phi_m = storage->get_phi()[a_m];
     const EBAMRCellData& divF  = storage->get_divF();     // Beware the sign, FA = -DivF
     const EBAMRCellData& divD  = storage->get_divD();  
@@ -2102,10 +2102,10 @@ void sdc::integrate_rte_stationary(){
   }
 }
 
-void sdc::update_diffusion_coefficients(){
-  CH_TIME("sdc::update_diffusion_coefficients");
+void sdc::updateDiffusion_coefficients(){
+  CH_TIME("sdc::updateDiffusion_coefficients");
   if(m_verbosity > 5){
-    pout() << "sdc::update_diffusion_coefficients" << endl;
+    pout() << "sdc::updateDiffusion_coefficients" << endl;
   }
   TimeStepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
 }

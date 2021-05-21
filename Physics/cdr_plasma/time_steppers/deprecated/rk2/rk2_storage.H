@@ -56,7 +56,7 @@ public:
   /*!
     @brief Scratch state
   */
-  virtual EBAMRCellData& get_scratch(){
+  virtual EBAMRCellData& getScratch(){
     return m_scratch;
   }
 
@@ -202,14 +202,14 @@ public:
   /*!
     @brief Get scratch storage
   */
-  virtual MFAMRCellData& get_scratch_phi(){
+  virtual MFAMRCellData& getScratch_phi(){
     return m_scratch_phi;
   }
 
   /*!
     @brief Get scratch storage
   */
-  virtual EBAMRCellData& get_scratch_E(){
+  virtual EBAMRCellData& getScratch_E(){
     return m_scratch_E;
   }
 

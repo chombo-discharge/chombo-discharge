@@ -162,7 +162,7 @@ namespace physics {
       Real m_ion_diffusion; // Ion diffusion coefficient
 
       // Functions for creating random Gaussian distributions
-      RealVect random_gaussian();
+      RealVect randomGaussian();
       RealVect randomDirection();
 #if CH_SPACEDIM==2
       RealVect randomDirection2D();

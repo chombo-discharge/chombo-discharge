@@ -9,7 +9,7 @@
 #define _BROWNIAN_WALKER_STEPPER_
 
 #include "CD_TimeStepper.H"
-#include "ito_solver.H"
+#include <CD_ItoSolver.H>
 #include "ito_layout.H"
 
 #include "CD_NamespaceHeader.H"
@@ -23,7 +23,7 @@ namespace physics {
     public:
 
       brownian_walker_stepper();
-      brownian_walker_stepper(RefCountedPtr<ito_solver>& a_solver);
+      brownian_walker_stepper(RefCountedPtr<ItoSolver>& a_solver);
       ~brownian_walker_stepper();
 
       // Setup routines
@@ -83,7 +83,7 @@ namespace physics {
       bool m_LoadBalancing;
 
       // Ito solver & species
-      RefCountedPtr<ito_solver>  m_solver;
+      RefCountedPtr<ItoSolver>  m_solver;
       RefCountedPtr<ItoSpecies> m_species;
 
       // Diffusion coefficient and velocity

@@ -59,12 +59,12 @@ void brownian_walker_species::draw_initial_particles(){
   m_initialParticles.clear();
   for (int i = 0; i < particlesPerRank[procID()]; i++){
     const Real weight  = 1.0;
-    const RealVect pos = m_blob_center + random_gaussian();
+    const RealVect pos = m_blob_center + randomGaussian();
     m_initialParticles.add(ItoParticle(weight, pos));
   }
 }
 
-RealVect brownian_walker_species::random_gaussian(){
+RealVect brownian_walker_species::randomGaussian(){
 
   const Real rad = m_gauss(m_rng);
   return rad*randomDirection();

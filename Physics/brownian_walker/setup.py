@@ -18,7 +18,7 @@ parser.add_argument('-discharge_home',    type=str,  help="Source code base dire
 parser.add_argument('-base_dir',        type=str,  help="Base directory of mini-app", default="./mini_apps")
 parser.add_argument('-app_name',        type=str,  help="Mini app name. An error message is issued if the name already exists")
 parser.add_argument('-filename',        type=str,  help="File name of main file", default="main")
-parser.add_argument('-ito_solver',      type=str,  help="Ito solver", default="ito_solver")
+parser.add_argument('-ItoSolver',      type=str,  help="Ito solver", default="ItoSolver")
 parser.add_argument('-geometry',        type=str,  help="Geometry class", default="regular_geometry")
 parser.add_argument('-stepper',         type=str,  help="Time stepper class", default="brownian_walker_stepper")
 

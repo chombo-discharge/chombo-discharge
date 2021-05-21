@@ -96,24 +96,24 @@ namespace physics {
 
 
       // Particle handling routines.
-      void intersect_particles(const which_particles a_which, const EbRepresentation a_representation, const bool a_delete);
-      void intersect_particles(const which_particles a_which,
-			       const ito_solver::which_container a_particles,
-			       const ito_solver::which_container a_eb_particles,
-			       const ito_solver::which_container a_domain_particles,
+      void intersectParticles(const which_particles a_which, const EbRepresentation a_representation, const bool a_delete);
+      void intersectParticles(const which_particles a_which,
+			       const ItoSolver::WhichContainer a_particles,
+			       const ItoSolver::WhichContainer a_eb_particles,
+			       const ItoSolver::WhichContainer a_domain_particles,
 			       const EbRepresentation           a_representation,
 			       const bool                        a_delete);
 			       
-      void remove_covered_particles(const which_particles a_which, const EbRepresentation a_representation, const Real a_tolerance);
-      void remove_covered_particles(const which_particles             a_which,
-				    const ito_solver::which_container a_container,
+      void removeCoveredParticles(const which_particles a_which, const EbRepresentation a_representation, const Real a_tolerance);
+      void removeCoveredParticles(const which_particles             a_which,
+				    const ItoSolver::WhichContainer a_container,
 				    const EbRepresentation           a_representation,
 				    const Real                        a_tolerance);
 
-      void transfer_covered_particles(const which_particles a_which, const EbRepresentation a_representation, const Real a_tolerance);
-      void transfer_covered_particles(const which_particles             a_which,
-				      const ito_solver::which_container a_containerFrom,
-				      const ito_solver::which_container a_containerTo,
+      void transferCoveredParticles(const which_particles a_which, const EbRepresentation a_representation, const Real a_tolerance);
+      void transferCoveredParticles(const which_particles             a_which,
+				      const ItoSolver::WhichContainer a_containerFrom,
+				      const ItoSolver::WhichContainer a_containerTo,
 				      const EbRepresentation           a_representation,
 				      const Real                        a_tolerance);
 
@@ -121,7 +121,7 @@ namespace physics {
       void setVerbosity(const int a_verbosity);
 
       // Set routines
-      void set_ito(RefCountedPtr<ito_layout<ito_solver> >& a_cdr);
+      void set_ito(RefCountedPtr<ito_layout<ItoSolver> >& a_cdr);
       void set_poisson(RefCountedPtr<FieldSolver>& a_poisson);
       void set_rte(RefCountedPtr<RtLayout<McPhoto> >& a_rte);
       void set_potential(const std::function<Real(const Real a_time)>& a_potential);
@@ -162,10 +162,10 @@ namespace physics {
 			 const EBAMRIVData&             a_sigma);
 
       // Remap and deposition routines for solver subsets.
-      void deposit_particles(const which_particles a_which_particles);
-      void deposit_particles(const which_particles a_which_particles, const ito_solver::which_container a_container);
+      void depositParticles(const which_particles a_which_particles);
+      void depositParticles(const which_particles a_which_particles, const ItoSolver::WhichContainer a_container);
       void remap_particles(const which_particles a_which_particles);
-      void remap_particles(const which_particles a_which_particles, const ito_solver::which_container a_container);
+      void remap_particles(const which_particles a_which_particles, const ItoSolver::WhichContainer a_container);
 
       // This sets the velocity function for each species. This is sgn(charge)*E
       void set_ito_velocity_funcs();
@@ -340,7 +340,7 @@ namespace physics {
       BoxSorting m_boxSort;
       
       RefCountedPtr<ito_plasma_physics> m_physics;
-      RefCountedPtr<ito_layout<ito_solver> > m_ito;
+      RefCountedPtr<ito_layout<ItoSolver> > m_ito;
       RefCountedPtr<RtLayout<McPhoto> > m_rte;
       RefCountedPtr<FieldSolver> m_fieldSolver;
       RefCountedPtr<SigmaSolver> m_sigma;
@@ -415,7 +415,7 @@ namespace physics {
 				       const int                        a_lmin,
 				       const int                        a_finestLevel);
       
-      Vector<RefCountedPtr<ito_solver> > get_lb_solvers() const;
+      Vector<RefCountedPtr<ItoSolver> > get_lb_solvers() const;
     };
   }
 };

@@ -101,25 +101,25 @@ FieldSolverMultigrid.gmg_relax_type    = gsrb      # Relaxation type. 'jacobi', 
 # ====================================================================================================
 # ITO_SOLVER CLASS OPTIONS
 # ====================================================================================================
-ito_solver.pvr_buffer          = 0             # Buffer for PVR.
-ito_solver.halo_buffer         = 1             # Halo buffer. 
-ito_solver.plt_vars            = phi vel dco mobility eb_part dom_part src_part   # Currently available are 'phi', 'vel', and 'dco'
-ito_solver.bisect_step         = 1.E-5         # Bisection step length for intersection tests
-ito_solver.seed                = 0             # Seed for RNG
-ito_solver.kd_direction        = -1            # Kd-tree direction, -1 => random, 0,1,2 => first plane split in this dir
-ito_solver.max_diffusion_hop   = 99.0          # Maximum diffusion hop length (in units of dx)
-ito_solver.normal_max          = 100.0         # Maximum value (absolute) that can be drawn from the exponential distribution.
-ito_solver.irr_ngp_deposition  = false         # Force irregular deposition in cut cells or not
-ito_solver.irr_ngp_interp      = true          # Force irregular interpolation in cut cells or not
-ito_solver.mobility_interp     = mobility      # How to interpolate mobility, 'mobility' or 'velocity', i.e. either mu_p = mu(X_p) or mu_p = (mu*E)(X_p)/E(X_p)
-ito_solver.redistribute        = false         # Turn on/off redistribution. 
-ito_solver.blend_conservation  = false         # Turn on/off blending with nonconservative divergenceo
-ito_solver.checkpointing       = particles     # Use particle numbers for writing/reading checkpoint files
-ito_solver.ppc_restart         = 32            # Maximum number of computational particles to generate for restarts.
-ito_solver.mobility_interp     = velocity      # 'mobility' or 'velocity', depending on how you wish to compute. 
-ito_solver.plot_deposition     = ngp           # Cloud-in-cell for plotting particles.
-ito_solver.halo_deposition     = native        # 'native' or 'ngp' (see documentation)
-ito_solver.deposition          = cic           # 'ngp' = nearest grid point
+ItoSolver.pvr_buffer          = 0             # Buffer for PVR.
+ItoSolver.halo_buffer         = 1             # Halo buffer. 
+ItoSolver.plt_vars            = phi vel dco mobility eb_part dom_part src_part   # Currently available are 'phi', 'vel', and 'dco'
+ItoSolver.bisect_step         = 1.E-5         # Bisection step length for intersection tests
+ItoSolver.seed                = 0             # Seed for RNG
+ItoSolver.kd_direction        = -1            # Kd-tree direction, -1 => random, 0,1,2 => first plane split in this dir
+ItoSolver.max_diffusion_hop   = 99.0          # Maximum diffusion hop length (in units of dx)
+ItoSolver.normal_max          = 100.0         # Maximum value (absolute) that can be drawn from the exponential distribution.
+ItoSolver.irr_ngp_deposition  = false         # Force irregular deposition in cut cells or not
+ItoSolver.irr_ngp_interp      = true          # Force irregular interpolation in cut cells or not
+ItoSolver.WhichMobilityInterpolation     = mobility      # How to interpolate mobility, 'mobility' or 'velocity', i.e. either mu_p = mu(X_p) or mu_p = (mu*E)(X_p)/E(X_p)
+ItoSolver.redistribute        = false         # Turn on/off redistribution. 
+ItoSolver.blend_conservation  = false         # Turn on/off blending with nonconservative divergenceo
+ItoSolver.checkpointing       = particles     # Use particle numbers for writing/reading checkpoint files
+ItoSolver.ppc_restart         = 32            # Maximum number of computational particles to generate for restarts.
+ItoSolver.WhichMobilityInterpolation     = velocity      # 'mobility' or 'velocity', depending on how you wish to compute. 
+ItoSolver.plot_deposition     = ngp           # Cloud-in-cell for plotting particles.
+ItoSolver.halo_deposition     = native        # 'native' or 'ngp' (see documentation)
+ItoSolver.deposition          = cic           # 'ngp' = nearest grid point
                                                # 'cic' = cloud-in-cell
                                                # 'tsc' = triangle-shaped-cloud
                                                # 'w4'  = 3rd order interpolation

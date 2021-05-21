@@ -30,7 +30,7 @@ brownian_walker_stepper::brownian_walker_stepper(){
   pp.get("load_balance",   m_LoadBalancing);
 }
 
-brownian_walker_stepper::brownian_walker_stepper(RefCountedPtr<ito_solver>& a_solver) : brownian_walker_stepper() {
+brownian_walker_stepper::brownian_walker_stepper(RefCountedPtr<ItoSolver>& a_solver) : brownian_walker_stepper() {
   m_solver = a_solver;
 }
 
@@ -58,13 +58,13 @@ void brownian_walker_stepper::initialData(){
   
   m_solver->initialData();
   if(m_ppc > 0){
-    m_solver->sortParticlesByCell(ito_solver::which_container::bulk);
-    m_solver->make_superparticles(ito_solver::which_container::bulk,m_ppc);
-    m_solver->sortParticlesByPatch(ito_solver::which_container::bulk);
+    m_solver->sortParticlesByCell(ItoSolver::WhichContainer::bulk);
+    m_solver->makeSuperparticles(ItoSolver::WhichContainer::bulk,m_ppc);
+    m_solver->sortParticlesByPatch(ItoSolver::WhichContainer::bulk);
   }
 
   if(m_solver->isDiffusive()){
-    m_solver->setDiffusionCoefficient_func(m_faceCenteredDiffusionCoefficient);
+    m_solver->setDiffusionFunction(m_faceCenteredDiffusionCoefficient);
   }
   if(m_solver->isMobile()){
     this->setVelocity();
@@ -90,7 +90,7 @@ void brownian_walker_stepper::setVelocity(){
     this->setVelocity(lvl);
   }
 
-  EBAMRCellData& vel = m_solver->get_velo_func();
+  EBAMRCellData& vel = m_solver->getVelocityFunction();
   m_amr->averageDown(vel, m_realm, m_phase);
   m_amr->interpGhost(vel, m_realm, m_phase);
 }
@@ -122,7 +122,7 @@ void brownian_walker_stepper::loadBalanceBoxes(Vector<Vector<int> >&            
   }
   
   if(m_LoadBalancing && a_realm == m_realm){
-    ParticleContainer<ItoParticle>& particles = m_solver->getParticles(ito_solver::which_container::bulk);
+    ParticleContainer<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::bulk);
   
     particles.regrid(a_grids, m_amr->getDomains(), m_amr->getDx(), m_amr->getRefinementRatios(), a_lmin, a_finestLevel);
 
@@ -139,7 +139,7 @@ void brownian_walker_stepper::loadBalanceBoxes(Vector<Vector<int> >&            
       Vector<long int> loads;
       a_boxes[lvl] = a_grids[lvl].boxArray();
     
-      m_solver->compute_loads(loads, a_grids[lvl], lvl);
+      m_solver->computeLoads(loads, a_grids[lvl], lvl);
 
 #ifdef CH_MPI
       int count = loads.size();
@@ -170,7 +170,7 @@ void brownian_walker_stepper::setVelocity(const int a_level){
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     const Box& box = dbl.get(dit());
 
-    EBCellFAB& vel = (*(m_solver->get_velo_func())[a_level])[dit()];
+    EBCellFAB& vel = (*(m_solver->getVelocityFunction())[a_level])[dit()];
     BaseFab<Real>& vel_reg = vel.getSingleValuedFAB();
 
     vel.setVal(0.0);
@@ -206,7 +206,7 @@ void brownian_walker_stepper::setVelocity(const int a_level){
     }
 
     // Now set the mobility for all the particles
-    List<ItoParticle>& particles = m_solver->getParticles(ito_solver::which_container::bulk)[a_level][dit()].listItems();
+    List<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::bulk)[a_level][dit()].listItems();
     for (ListIterator<ItoParticle> lit(particles); lit.ok(); ++lit){
       lit().mobility() = 1.0;
     }
@@ -239,14 +239,14 @@ void brownian_walker_stepper::postCheckpointSetup() {
 
   m_solver->remap();
   if(m_ppc > 0){
-    m_solver->sortParticlesByCell(ito_solver::which_container::bulk);
-    m_solver->make_superparticles(ito_solver::which_container::bulk, m_ppc);
-    m_solver->sortParticlesByPatch(ito_solver::which_container::bulk);
+    m_solver->sortParticlesByCell(ItoSolver::WhichContainer::bulk);
+    m_solver->makeSuperparticles(ItoSolver::WhichContainer::bulk, m_ppc);
+    m_solver->sortParticlesByPatch(ItoSolver::WhichContainer::bulk);
   }
-  m_solver->deposit_particles();
+  m_solver->depositParticles();
 
   if(m_solver->isDiffusive()){
-    m_solver->setDiffusionCoefficient_func(m_faceCenteredDiffusionCoefficient);
+    m_solver->setDiffusionFunction(m_faceCenteredDiffusionCoefficient);
   }
   if(m_solver->isMobile()){
     this->setVelocity();
@@ -278,8 +278,8 @@ void brownian_walker_stepper::computeDt(Real& a_dt, TimeCode& a_timeCode) {
   }
 
   m_solver->set_mobility(1.0); 
-  m_solver->interpolate_velocities();
-  m_solver->interpolate_diffusion();
+  m_solver->interpolateVelocities();
+  m_solver->interpolateDiffusion();
 
   a_dt = m_max_cells_hop*m_solver->computeDt();
 }
@@ -304,8 +304,8 @@ void brownian_walker_stepper::printStepReport() {
   }
 
   // Do nothing
-  const size_t local_particles  = m_solver->get_num_particles(ito_solver::which_container::bulk, true);
-  const size_t global_particles = m_solver->get_num_particles(ito_solver::which_container::bulk, false);
+  const size_t local_particles  = m_solver->getNumParticles(ItoSolver::WhichContainer::bulk, true);
+  const size_t global_particles = m_solver->getNumParticles(ItoSolver::WhichContainer::bulk, false);
 
   pout() << "                                   #part = " << local_particles << " (" << global_particles << ")" << endl;
   
@@ -381,7 +381,7 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const RealVect dx                     = m_amr->getDx()[lvl]*RealVect::Unit;
     const DisjointBoxLayout& dbl          = m_amr->getGrids(m_realm)[lvl];
-    ParticleData<ItoParticle>& particles = m_solver->getParticles(ito_solver::which_container::bulk)[lvl];
+    ParticleData<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::bulk)[lvl];
 
     const EBISLayout& ebisl = m_amr->getEBISLayout(m_realm, m_solver->getPhase())[lvl];
 
@@ -404,7 +404,7 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 	    p.position() += 0.5*p.velocity()*a_dt;
 	  }
 
-	  m_solver->interpolate_velocities(lvl, dit());
+	  m_solver->interpolateVelocities(lvl, dit());
 
 	  // Final stage
 	  for (lit.rewind(), litC.rewind(); lit, litC; ++lit, ++litC){
@@ -418,7 +418,7 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 	if(m_solver->isDiffusive()){
 	  for (lit.rewind(); lit; ++lit){ 
 	    ItoParticle& p = particleList[lit];
-	    const RealVect ran = m_solver->random_gaussian();
+	    const RealVect ran = m_solver->randomGaussian();
 	    const RealVect hop = ran*sqrt(2.0*p.diffusion()*a_dt);
 	    p.position() += hop;
 	  }
@@ -472,7 +472,7 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 
   // Remap and deposit particles
   m_solver->remap();
-  m_solver->deposit_particles();
+  m_solver->depositParticles();
 
   return a_dt;
 }
@@ -485,16 +485,16 @@ void brownian_walker_stepper::regrid(const int a_lmin, const int a_oldFinestLeve
 
   m_solver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   if(m_solver->isDiffusive()){
-    m_solver->setDiffusionCoefficient_func(m_faceCenteredDiffusionCoefficient);
+    m_solver->setDiffusionFunction(m_faceCenteredDiffusionCoefficient);
   }
   if(m_solver->isMobile()){
     this->setVelocity();
   }
 
   if(m_ppc > 0){
-    m_solver->sortParticlesByCell(ito_solver::which_container::bulk);
-    m_solver->make_superparticles(ito_solver::which_container::bulk, m_ppc);
-    m_solver->sortParticlesByPatch(ito_solver::which_container::bulk);
+    m_solver->sortParticlesByCell(ItoSolver::WhichContainer::bulk);
+    m_solver->makeSuperparticles(ItoSolver::WhichContainer::bulk, m_ppc);
+    m_solver->sortParticlesByPatch(ItoSolver::WhichContainer::bulk);
     
     m_solver->set_mobility(1.0); // Superparticle algorithm only conserves mass, energy. Diffusion and mobility needs to be reset.
   }

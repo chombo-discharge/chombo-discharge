@@ -820,11 +820,11 @@ void CdrSolver::initialData(){
   }
 
   const bool deposit_function  = m_species->initializeWithFunction();
-  const bool deposit_particles = m_species->initializeWithParticles();
+  const bool depositParticles = m_species->initializeWithParticles();
 
   DataOps::setValue(m_phi, 0.0);
   
-  if(deposit_particles){
+  if(depositParticles){
     initialDataParticles();
   }
 

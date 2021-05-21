@@ -196,7 +196,7 @@ protected:
   // Poisson, RTE, and diffusion coefficient updates
   void update_poisson(); // This uses the solver states
   void update_poisson(const Vector<EBAMRCellData*>& a_densities, const EBAMRIVData& a_sigma);
-  void update_diffusion_coefficients();
+  void updateDiffusion_coefficients();
 
   // Store & restore functions
   void store_solvers();

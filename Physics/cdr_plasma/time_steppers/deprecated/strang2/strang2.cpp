@@ -703,7 +703,7 @@ void strang2::advance_rkN2(const Real a_time, const Real a_dt, const int a_stage
       RefCountedPtr<CdrSolver>& solver   = solver_it();
       RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
-      EBAMRCellData& rhs       = storage->get_scratch();
+      EBAMRCellData& rhs       = storage->getScratch();
       EBAMRCellData& phi       = solver->getPhi();  // u^i
       const EBAMRCellData& src = solver->getSource(); // S^i
 
@@ -719,7 +719,7 @@ void strang2::advance_rkN2(const Real a_time, const Real a_dt, const int a_stage
     }
 
     EBAMRIVData& sigma = m_sigma->getPhi(); // sigma^i
-    EBAMRIVData& rhs   = m_sigma_scratch->get_scratch();
+    EBAMRIVData& rhs   = m_sigma_scratch->getScratch();
     m_sigma->computeRHS(rhs);
     DataOps::incr(sigma, rhs, beta*a_dt); // sigma^(i+1) = sigma^i + [1/(s-1)]*dt*F^i
 
@@ -741,7 +741,7 @@ void strang2::advance_rkN2(const Real a_time, const Real a_dt, const int a_stage
       RefCountedPtr<CdrSolver>& solver   = solver_it();
       RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
-      EBAMRCellData& rhs       = storage->get_scratch();
+      EBAMRCellData& rhs       = storage->getScratch();
       EBAMRCellData& phi       = solver->getPhi();     // u^i
       const EBAMRCellData& src = solver->getSource();
       const EBAMRCellData& pre = storage->get_previous(); // u^n
@@ -760,7 +760,7 @@ void strang2::advance_rkN2(const Real a_time, const Real a_dt, const int a_stage
     }
 
     EBAMRIVData& sigma     = m_sigma->getPhi();            // sigma^3
-    EBAMRIVData& rhs       = m_sigma_scratch->get_scratch();
+    EBAMRIVData& rhs       = m_sigma_scratch->getScratch();
     const EBAMRIVData& pre = m_sigma_scratch->get_previous(); // sigma^n
     m_sigma->computeRHS(rhs);
     DataOps::scale(sigma, alpha);           // sigma^(n+1) = (s-1/s)*sigma^i
@@ -800,7 +800,7 @@ void strang2::advance_rk33(const Real a_time, const Real a_dt){
       RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
     
       EBAMRCellData& phi       = solver->getPhi();    // u^n
-      EBAMRCellData& rhs       = storage->get_scratch();
+      EBAMRCellData& rhs       = storage->getScratch();
       const EBAMRCellData& src = solver->getSource();
     
       solver->computeDivF(rhs, phi, 0.0, true); // RHS =  Div(u^n*v^n)
@@ -816,7 +816,7 @@ void strang2::advance_rk33(const Real a_time, const Real a_dt){
     }
 
     EBAMRIVData& sigma = m_sigma->getPhi();
-    EBAMRIVData& rhs   = m_sigma_scratch->get_scratch();
+    EBAMRIVData& rhs   = m_sigma_scratch->getScratch();
     m_sigma->computeRHS(rhs);
     DataOps::incr(sigma, rhs, a_dt); // sigma^1 = sigma^n + dt*F^n
   }
@@ -838,7 +838,7 @@ void strang2::advance_rk33(const Real a_time, const Real a_dt){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
       RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
     
-      EBAMRCellData& rhs       = storage->get_scratch();
+      EBAMRCellData& rhs       = storage->getScratch();
       EBAMRCellData& phi       = solver->getPhi();     // phi = u^1 = u^n + dt*L(u^n)
       const EBAMRCellData& src = solver->getSource();
       const EBAMRCellData& pre = storage->get_previous(); // pre = u^n
@@ -857,7 +857,7 @@ void strang2::advance_rk33(const Real a_time, const Real a_dt){
     }
 
     EBAMRIVData& sigma = m_sigma->getPhi();           // u^1
-    EBAMRIVData& rhs = m_sigma_scratch->get_scratch();   // Storage for right hand side
+    EBAMRIVData& rhs = m_sigma_scratch->getScratch();   // Storage for right hand side
     EBAMRIVData& pre = m_sigma_scratch->get_previous();  // u^n
     m_sigma->computeRHS(rhs);
     DataOps::incr(sigma, rhs, a_dt);  // sigma = u^1 + dt*L(u^1)
@@ -883,7 +883,7 @@ void strang2::advance_rk33(const Real a_time, const Real a_dt){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
       RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
     
-      EBAMRCellData& rhs       = storage->get_scratch();
+      EBAMRCellData& rhs       = storage->getScratch();
       EBAMRCellData& phi       = solver->getPhi();     // phi = u^2
       const EBAMRCellData& src = solver->getSource();
       const EBAMRCellData& pre = storage->get_previous(); // pre = u^n
@@ -904,7 +904,7 @@ void strang2::advance_rk33(const Real a_time, const Real a_dt){
     }
 
     EBAMRIVData& sigma = m_sigma->getPhi();           // u^2
-    EBAMRIVData& rhs = m_sigma_scratch->get_scratch();   // Storage for right hand side
+    EBAMRIVData& rhs = m_sigma_scratch->getScratch();   // Storage for right hand side
     EBAMRIVData& pre = m_sigma_scratch->get_previous();  // u^n
     m_sigma->computeRHS(rhs);
     DataOps::incr(sigma, rhs, a_dt);  // sigma = u^2 + dt*L(u^2)
@@ -951,7 +951,7 @@ void strang2::advance_rk43(const Real a_time, const Real a_dt){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
       RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
-      EBAMRCellData& rhs       = storage->get_scratch();
+      EBAMRCellData& rhs       = storage->getScratch();
       EBAMRCellData& phi       = solver->getPhi();  // u^i
       const EBAMRCellData& src = solver->getSource(); // S^i
 
@@ -967,7 +967,7 @@ void strang2::advance_rk43(const Real a_time, const Real a_dt){
     }
 
     EBAMRIVData& sigma = m_sigma->getPhi(); // sigma^i
-    EBAMRIVData& rhs   = m_sigma_scratch->get_scratch();
+    EBAMRIVData& rhs   = m_sigma_scratch->getScratch();
     m_sigma->computeRHS(rhs);
     DataOps::incr(sigma, rhs, 0.5*a_dt); // sigma^(i+1) = sigma^i + 0.5*dt*F^i
 
@@ -990,7 +990,7 @@ void strang2::advance_rk43(const Real a_time, const Real a_dt){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
       RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
-      EBAMRCellData& rhs       = storage->get_scratch();
+      EBAMRCellData& rhs       = storage->getScratch();
       EBAMRCellData& phi       = solver->getPhi();     // u^2
       const EBAMRCellData& src = solver->getSource();
       const EBAMRCellData& pre = storage->get_previous(); // u^n
@@ -1010,7 +1010,7 @@ void strang2::advance_rk43(const Real a_time, const Real a_dt){
     }
 
     EBAMRIVData& sigma     = m_sigma->getPhi();            // sigma^2
-    EBAMRIVData& rhs       = m_sigma_scratch->get_scratch();
+    EBAMRIVData& rhs       = m_sigma_scratch->getScratch();
     const EBAMRIVData& pre = m_sigma_scratch->get_previous(); // sigma^n
     m_sigma->computeRHS(rhs);
     DataOps::scale(sigma, 2.0);            // sigma^(n+1) = 2*sigma^2
@@ -1036,7 +1036,7 @@ void strang2::advance_rk43(const Real a_time, const Real a_dt){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
       RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
-      EBAMRCellData& rhs       = storage->get_scratch();
+      EBAMRCellData& rhs       = storage->getScratch();
       EBAMRCellData& phi       = solver->getPhi();  // u^i
       const EBAMRCellData& src = solver->getSource(); // S^i
 
@@ -1052,7 +1052,7 @@ void strang2::advance_rk43(const Real a_time, const Real a_dt){
     }
 
     EBAMRIVData& sigma = m_sigma->getPhi(); // sigma^i
-    EBAMRIVData& rhs   = m_sigma_scratch->get_scratch();
+    EBAMRIVData& rhs   = m_sigma_scratch->getScratch();
     m_sigma->computeRHS(rhs);
     DataOps::incr(sigma, rhs, 0.5*a_dt); // sigma^(i+1) = sigma^i + 0.5*dt*F^i
   }
@@ -1217,7 +1217,7 @@ void strang2::advance_rk53(const Real a_time, const Real a_dt){
       RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
       EBAMRCellData& phi       = solver->getPhi();     // u^2
-      EBAMRCellData& rhs       = storage->get_scratch();  // RHS     
+      EBAMRCellData& rhs       = storage->getScratch();  // RHS     
       EBAMRCellData& pre       = storage->get_previous(); // u^n
       const EBAMRCellData& src = solver->getSource();    // S^3
 
@@ -1235,7 +1235,7 @@ void strang2::advance_rk53(const Real a_time, const Real a_dt){
     }
 
     EBAMRIVData& sigma  = m_sigma->getPhi();            // sigma^2
-    EBAMRIVData& rhs    = m_sigma_scratch->get_scratch();  // RHS
+    EBAMRIVData& rhs    = m_sigma_scratch->getScratch();  // RHS
     EBAMRIVData& pre    = m_sigma_scratch->get_previous(); // sigma^n
     m_sigma->computeRHS(rhs);
     DataOps::scale(sigma, a22);                           // sigma^3 = a2*sigma^2
@@ -1261,7 +1261,7 @@ void strang2::advance_rk53(const Real a_time, const Real a_dt){
       RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
       EBAMRCellData& phi       = solver->getPhi();                // u^3
-      EBAMRCellData& rhs       = storage->get_scratch();             // RHS     
+      EBAMRCellData& rhs       = storage->getScratch();             // RHS     
       const EBAMRCellData& pre = storage->get_previous();            // u^n
       const EBAMRCellData& u1  = *(storage->get_extra_storage()[0]); // u^1
       const EBAMRCellData& Lun = *(storage->get_extra_storage()[2]); // L(u^n)
@@ -1283,7 +1283,7 @@ void strang2::advance_rk53(const Real a_time, const Real a_dt){
     }
 
     EBAMRIVData& sigma         = m_sigma->getPhi();               // sigma^3
-    EBAMRIVData& rhs           = m_sigma_scratch->get_scratch();     // RHS
+    EBAMRIVData& rhs           = m_sigma_scratch->getScratch();     // RHS
     const EBAMRIVData& pre     = m_sigma_scratch->get_previous();    // sigma^n
     const EBAMRIVData& sigma1  = *(m_sigma_scratch->get_extra_storage()[0]); // sigma^1
     const EBAMRIVData& Lsigman = *(m_sigma_scratch->get_extra_storage()[2]); // L(sigma^n)
@@ -1313,7 +1313,7 @@ void strang2::advance_rk53(const Real a_time, const Real a_dt){
       RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
       EBAMRCellData& phi       = solver->getPhi();                // u^4
-      EBAMRCellData& rhs       = storage->get_scratch();             // RHS     
+      EBAMRCellData& rhs       = storage->getScratch();             // RHS     
       const EBAMRCellData& pre = storage->get_previous();            // u^n
       const EBAMRCellData& u1  = *(storage->get_extra_storage()[0]); // u^1
       const EBAMRCellData& u2  = *(storage->get_extra_storage()[1]); // u^2
@@ -1339,7 +1339,7 @@ void strang2::advance_rk53(const Real a_time, const Real a_dt){
     }
 
     EBAMRIVData& sigma         = m_sigma->getPhi();               // sigma^4
-    EBAMRIVData& rhs           = m_sigma_scratch->get_scratch();     // RHS
+    EBAMRIVData& rhs           = m_sigma_scratch->getScratch();     // RHS
     const EBAMRIVData& pre     = m_sigma_scratch->get_previous();    // sigma^n
     const EBAMRIVData& sigma1  = *(m_sigma_scratch->get_extra_storage()[0]); // sigma^1
     const EBAMRIVData& sigma2  = *(m_sigma_scratch->get_extra_storage()[1]); // sigma^2
@@ -1439,7 +1439,7 @@ void strang2::advance_rk54(const Real a_time, const Real a_dt){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
       RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
-      EBAMRCellData& rhs       = storage->get_scratch(); // rhs
+      EBAMRCellData& rhs       = storage->getScratch(); // rhs
       EBAMRCellData& phi       = solver->getPhi();    // u^n
       const EBAMRCellData& src = solver->getSource();   // S^n
 
@@ -1455,7 +1455,7 @@ void strang2::advance_rk54(const Real a_time, const Real a_dt){
     }
 
     EBAMRIVData& sigma  = m_sigma->getPhi();           // sigma^n
-    EBAMRIVData& rhs    = m_sigma_scratch->get_scratch(); // rhs
+    EBAMRIVData& rhs    = m_sigma_scratch->getScratch(); // rhs
     m_sigma->computeRHS(rhs);
     DataOps::incr(sigma, rhs, a_dt*b00);   // sigma^1 = sigma^n + dt*b00*L(sigma^n)
 
@@ -1477,7 +1477,7 @@ void strang2::advance_rk54(const Real a_time, const Real a_dt){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
       RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
-      EBAMRCellData& rhs       = storage->get_scratch();  // rhs
+      EBAMRCellData& rhs       = storage->getScratch();  // rhs
       EBAMRCellData& phi       = solver->getPhi();     // u^1
       EBAMRCellData& u2        = *(storage->get_extra_storage()[0]); // Becomes u^2
       const EBAMRCellData& pre = storage->get_previous(); // u^n
@@ -1498,7 +1498,7 @@ void strang2::advance_rk54(const Real a_time, const Real a_dt){
     }
 
     EBAMRIVData& sigma     = m_sigma->getPhi();           // sigma^1
-    EBAMRIVData& rhs       = m_sigma_scratch->get_scratch(); // RHS
+    EBAMRIVData& rhs       = m_sigma_scratch->getScratch(); // RHS
     EBAMRIVData& sigma2    = *(m_sigma_scratch->get_extra_storage()[0]); // Will become sigma^2
     const EBAMRIVData& pre = m_sigma_scratch->get_previous();
     m_sigma->computeRHS(rhs);
@@ -1527,7 +1527,7 @@ void strang2::advance_rk54(const Real a_time, const Real a_dt){
       RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
       EBAMRCellData& phi       = solver->getPhi();     // u^2
-      EBAMRCellData& rhs       = storage->get_scratch();  // RHS
+      EBAMRCellData& rhs       = storage->getScratch();  // RHS
       EBAMRCellData& u3        = *(storage->get_extra_storage()[1]); // Becomes u^3
       const EBAMRCellData& pre = storage->get_previous(); // u^n
       const EBAMRCellData& src = solver->getSource();    // S^3
@@ -1547,7 +1547,7 @@ void strang2::advance_rk54(const Real a_time, const Real a_dt){
     }
 
     EBAMRIVData& sigma     = m_sigma->getPhi();            // sigma^2
-    EBAMRIVData& rhs       = m_sigma_scratch->get_scratch();  // RHS
+    EBAMRIVData& rhs       = m_sigma_scratch->getScratch();  // RHS
     EBAMRIVData& sigma3    = *(m_sigma_scratch->get_extra_storage()[1]); // Becomes sigma^3
     const EBAMRIVData& pre = m_sigma_scratch->get_previous(); // sigma^n
     m_sigma->computeRHS(rhs);
@@ -1620,7 +1620,7 @@ void strang2::advance_rk54(const Real a_time, const Real a_dt){
       RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
       EBAMRCellData& phi       = solver->getPhi();                // u^4
-      EBAMRCellData& rhs       = storage->get_scratch();             // RHS     
+      EBAMRCellData& rhs       = storage->getScratch();             // RHS     
       const EBAMRCellData& pre = storage->get_previous();            // u^n
       const EBAMRCellData& u2  = *(storage->get_extra_storage()[0]); // u^2
       const EBAMRCellData& u3  = *(storage->get_extra_storage()[1]); // u^3
@@ -1645,7 +1645,7 @@ void strang2::advance_rk54(const Real a_time, const Real a_dt){
     }
 
     EBAMRIVData& sigma         = m_sigma->getPhi();               // sigma^4
-    EBAMRIVData& rhs           = m_sigma_scratch->get_scratch();     // RHS
+    EBAMRIVData& rhs           = m_sigma_scratch->getScratch();     // RHS
     const EBAMRIVData& pre     = m_sigma_scratch->get_previous();    // sigma^n
     const EBAMRIVData& sigma2  = *(m_sigma_scratch->get_extra_storage()[0]); // sigma^1
     const EBAMRIVData& sigma3  = *(m_sigma_scratch->get_extra_storage()[1]); // sigma^2

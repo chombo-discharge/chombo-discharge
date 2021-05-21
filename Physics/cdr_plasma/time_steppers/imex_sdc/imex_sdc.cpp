@@ -728,7 +728,7 @@ void imex_sdc::integrate(const Real a_dt, const Real a_time, const bool a_lagged
     if(!last){
       if(m_compute_S)      imex_sdc::compute_cdr_gradients(cdr_densities_mp1);
       if(m_compute_v)      imex_sdc::compute_cdr_velo(cdr_densities_mp1, t_mp1);
-      if(m_compute_D)      imex_sdc::update_diffusion_coefficients();
+      if(m_compute_D)      imex_sdc::updateDiffusion_coefficients();
 
       // Update boundary conditions for cdr and sigma equations. We need them for the next step
       imex_sdc::compute_cdr_eb_states(cdr_densities_mp1);
@@ -781,7 +781,7 @@ void imex_sdc::integrate_advection_reaction(const Real a_dt, const int a_m, cons
 
     // phi_(m+1) = phi_M
     EBAMRCellData& phi_m1      = storage->get_phi()[a_m+1];
-    EBAMRCellData& scratch     = storage->get_scratch();
+    EBAMRCellData& scratch     = storage->getScratch();
     const EBAMRCellData& phi_m = storage->get_phi()[a_m];
     
     // Increment with operator slopes. m=0 and corrector is a special case where we skipped the advective advance,
@@ -844,7 +844,7 @@ void imex_sdc::integrate_advection_reaction(const Real a_dt, const int a_m, cons
     DataOps::incr(sigma_m1, Fsig_lag, -m_dtm[a_m]);
 
     // Add in the quadrature term
-    EBAMRIVData& scratch = m_sigma_scratch->get_scratch();
+    EBAMRIVData& scratch = m_sigma_scratch->getScratch();
     imex_sdc::quad(scratch, m_sigma_scratch->get_Fold(), a_m);
     DataOps::incr(sigma_m1, scratch, 0.5*a_dt); // Mult by 0.5*a_dt due to scaling on [-1,1] for quadrature
   }
@@ -880,7 +880,7 @@ void imex_sdc::integrate_advection(const Real a_dt, const int a_m, const bool a_
     RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
 
     EBAMRCellData& phi_m1  = storage->get_phi()[a_m+1];
-    EBAMRCellData& scratch = storage->get_scratch();
+    EBAMRCellData& scratch = storage->getScratch();
     EBAMRCellData& phi_m   = storage->get_phi()[a_m];
 
     if(solver->isMobile()){
@@ -928,8 +928,8 @@ void imex_sdc::integrate_diffusion(const Real a_dt, const int a_m, const bool a_
       const EBAMRCellData& phi_m = storage->get_phi()[a_m];
 
       // Build the diffusion source term
-      EBAMRCellData& source   = storage->get_scratch();
-      EBAMRCellData& init_soln = storage->get_scratch2();
+      EBAMRCellData& source   = storage->getScratch();
+      EBAMRCellData& init_soln = storage->getScratch2();
       DataOps::setValue(source, 0.0); // No source term
       
       DataOps::copy(init_soln, phi_m1);      // Copy initial solutions
@@ -1808,10 +1808,10 @@ void imex_sdc::integrate_rte_stationary(){
   }
 }
 
-void imex_sdc::update_diffusion_coefficients(){
-  CH_TIME("imex_sdc::update_diffusion_coefficients");
+void imex_sdc::updateDiffusion_coefficients(){
+  CH_TIME("imex_sdc::updateDiffusion_coefficients");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::update_diffusion_coefficients" << endl;
+    pout() << "imex_sdc::updateDiffusion_coefficients" << endl;
   }
   cdr_plasma_stepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
 }

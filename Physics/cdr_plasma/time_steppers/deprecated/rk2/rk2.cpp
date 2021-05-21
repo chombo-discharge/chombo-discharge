@@ -574,7 +574,7 @@ void rk2::advance_rte_k1_transient(const Real a_dt){
     const EBAMRCellData& state = solver->getPhi();
     const EBAMRCellData& phi   = storage->get_phi();
 
-    EBAMRCellData& scratch = storage->get_scratch();
+    EBAMRCellData& scratch = storage->getScratch();
 
     DataOps::setValue(scratch, 0.0);
     DataOps::incr(scratch, state, 0.5);
@@ -588,8 +588,8 @@ void rk2::advance_rte_k1_transient(const Real a_dt){
     const MFAMRCellData& state = m_fieldSolver->getPotential();
     const MFAMRCellData& phi   = m_fieldSolver_scratch->get_phi();
   
-    MFAMRCellData& scratch_phi = m_fieldSolver_scratch->get_scratch_phi();
-    EBAMRCellData& scratch_E   = m_fieldSolver_scratch->get_scratch_E();
+    MFAMRCellData& scratch_phi = m_fieldSolver_scratch->getScratch_phi();
+    EBAMRCellData& scratch_E   = m_fieldSolver_scratch->getScratch_E();
 
     DataOps::setValue(scratch_phi, 0.0);
     DataOps::incr(scratch_phi, state, 0.5);
@@ -806,7 +806,7 @@ void rk2::advance_cdr_k2(const Real a_dt){
     EBAMRCellData& k1      = storage->get_k1();
     EBAMRCellData& k2      = storage->get_k2();
     EBAMRCellData& phi     = storage->get_phi();
-    EBAMRCellData& scratch = storage->get_scratch();
+    EBAMRCellData& scratch = storage->getScratch();
 
     solver->computeRHS(k2, phi, a_dt);
 
@@ -857,7 +857,7 @@ void rk2::solve_poisson_k2(){
   // initial guess closer to the true solution.
   MFAMRCellData& pot     = m_fieldSolver->getPotential();
   MFAMRCellData& phi     = m_fieldSolver_scratch->get_phi();
-  MFAMRCellData& scratch = m_fieldSolver_scratch->get_scratch_phi();
+  MFAMRCellData& scratch = m_fieldSolver_scratch->getScratch_phi();
 
   // For transient RTE solvers I need the source term at half time steps. Since the internal state
   // inside the solver will be overwritten, I take a backup into poisson_storage.scratch_phi
@@ -986,7 +986,7 @@ void rk2::advance_rte_k2_transient(const Real a_dt){
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
     
     const EBAMRCellData& state   = solver->getPhi();
-    const EBAMRCellData& scratch = storage->get_scratch();
+    const EBAMRCellData& scratch = storage->getScratch();
 
     EBAMRCellData& phi = storage->get_phi();
 
@@ -999,10 +999,10 @@ void rk2::advance_rte_k2_transient(const Real a_dt){
   
   if((m_timeStep + 1) % m_fast_rte == 0){ // Actual solve
     const MFAMRCellData& state       = m_fieldSolver->getPotential();
-    const MFAMRCellData& scratch_phi = m_fieldSolver_scratch->get_scratch_phi();
+    const MFAMRCellData& scratch_phi = m_fieldSolver_scratch->getScratch_phi();
     
     MFAMRCellData& phi   = m_fieldSolver_scratch->get_phi();
-    EBAMRCellData& scratch_E   = m_fieldSolver_scratch->get_scratch_E();
+    EBAMRCellData& scratch_E   = m_fieldSolver_scratch->getScratch_E();
     
     DataOps::setValue(phi, 0.0);
     DataOps::incr(phi, state, 0.5);

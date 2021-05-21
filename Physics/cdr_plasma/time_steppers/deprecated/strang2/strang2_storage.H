@@ -27,7 +27,7 @@ public:
 
   EBAMRCellData& get_cache(){   return m_cache;      }
   EBAMRCellData& get_backup(){  return m_backup;     }
-  EBAMRCellData& get_scratch(){ return m_scratch;    }
+  EBAMRCellData& getScratch(){ return m_scratch;    }
   EBAMRCellData& get_previous(){return m_previous;   }
   EBAMRCellData& get_error(){   return m_error;      }
   EBAMRCellData& get_gradient(){return m_gradient;   }
@@ -145,7 +145,7 @@ public:
   void deallocate_extra_storage();
   
   EBAMRIVData& get_cache(){   return m_cache; }
-  EBAMRIVData& get_scratch(){ return m_scratch; }
+  EBAMRIVData& getScratch(){ return m_scratch; }
   EBAMRIVData& get_backup(){  return m_backup; }
   EBAMRIVData& get_previous(){return m_previous; }
   EBAMRIVData& get_error(){   return m_error; }

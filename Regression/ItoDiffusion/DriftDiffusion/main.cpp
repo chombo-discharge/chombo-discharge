@@ -1,5 +1,5 @@
 #include "CD_Driver.H"
-#include "ito_solver.H"
+#include <CD_ItoSolver.H>
 #include "rod_dielectric.H"
 #include "brownian_walker_stepper.H"
 #include "brownian_walker_tagger.H"
@@ -24,7 +24,7 @@ int main(int argc, char* argv[]){
   RefCountedPtr<GeoCoarsener> geocoarsen        = RefCountedPtr<GeoCoarsener> (new GeoCoarsener());
 
   // Set up basic brownian_walker 
-  RefCountedPtr<ito_solver> solver        = RefCountedPtr<ito_solver>   (new ito_solver());
+  RefCountedPtr<ItoSolver> solver        = RefCountedPtr<ItoSolver>   (new ItoSolver());
   RefCountedPtr<TimeStepper> timestepper = RefCountedPtr<TimeStepper> (new brownian_walker_stepper(solver));
   RefCountedPtr<CellTagger> tagger       = RefCountedPtr<CellTagger>  (new brownian_walker_tagger(solver, amr));
 

@@ -201,7 +201,7 @@ protected:
   void update_poisson(const Vector<EBAMRCellData*>& a_densities, const EBAMRIVData& a_sigma);
   void update_stationary_rte(const Real a_time); // This uses the solver states, make sure that is what you want
   void update_stationary_rte(const Vector<EBAMRCellData*>& a_densities, const Real a_time);
-  void update_diffusion_coefficients();
+  void updateDiffusion_coefficients();
 
   // Store & restore functions
   void store_solvers();

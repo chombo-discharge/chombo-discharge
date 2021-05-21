@@ -1,6 +1,6 @@
 /*!
   @file   ito_layout.H
-  @brief  Declaration of a class that holds a set of ito_solvers
+  @brief  Declaration of a class that holds a set of ItoSolvers
   @author Robert Marskar
   @date   May 2020
 */
@@ -8,7 +8,7 @@
 #ifndef _ITO_LAYOUT_
 #define _ITO_LAYOUT_
 
-#include "ito_solver.H"
+#include <CD_ItoSolver.H>
 
 #include "CD_NamespaceHeader.H"
   
@@ -16,7 +16,7 @@ template <class T>
 class ito_iterator;
 
 /*!
-  @brief Class for holding a set of ito_solvers
+  @brief Class for holding a set of ItoSolvers
 */
 template <class T>
 class ito_layout{
@@ -105,12 +105,12 @@ public:
   /*!
     @brief All solvers deposit their particles
   */
-  virtual void deposit_particles();
+  virtual void depositParticles();
 
   /*!
     @brief Deposit particles
   */
-  virtual void deposit_particles(const ito_solver::which_container a_ptype);
+  virtual void depositParticles(const ItoSolver::WhichContainer a_ptype);
 
   /*!
     @brief All solvers remap. 
@@ -120,12 +120,12 @@ public:
   /*!
     @brief All solvers remap. 
   */
-  virtual void remap(const ito_solver::which_container a_ptype);
+  virtual void remap(const ItoSolver::WhichContainer a_ptype);
 
   /*!
     @brief Interpolate velocities
   */
-  virtual void interpolate_velocities();
+  virtual void interpolateVelocities();
 
   /*!
     @brief Regrid method. 
@@ -166,17 +166,17 @@ public:
   /*!
     @brief Sort the m_particles container by cell
   */
-  virtual void sortParticlesByCell(const ito_solver::which_container a_ptype);
+  virtual void sortParticlesByCell(const ItoSolver::WhichContainer a_ptype);
 
   /*!
     @brief Sort the m_particles container by cell
   */
-  virtual void sortParticlesByPatch(const ito_solver::which_container a_ptype);
+  virtual void sortParticlesByPatch(const ItoSolver::WhichContainer a_ptype);
 
   /*!
     @brief Make superparticles
   */
-  virtual void make_superparticles(const ito_solver::which_container a_ptype, const int a_ppc);
+  virtual void makeSuperparticles(const ItoSolver::WhichContainer a_ptype, const int a_ppc);
 
   /*!
     @brief Compute dt
@@ -186,32 +186,32 @@ public:
   /*!
     @brief Compute the classical advection time step
   */
-  virtual Real compute_advective_dt();
+  virtual Real computeAdvectiveDt();
 
   /*!
     @brief Compute dt
   */
-  virtual Real compute_min_dt(const Real a_maxCellsToMove);
+  virtual Real computeMinDt(const Real a_maxCellsToMove);
 
   /*!
     @brief Get largest possible time step for advection part
   */
-  virtual Real compute_min_drift_dt(const Real a_maxCellsToMove);
+  virtual Real computeMinDriftDt(const Real a_maxCellsToMove);
 
   /*!
     @brief Get largest possible time step for diffusion part
   */
-  virtual Real compute_min_diffusion_dt(const Real a_maxCellsToMove);
+  virtual Real computeMinDiffusionDt(const Real a_maxCellsToMove);
 
   /*!
     @brief Compute the classical diffusive time step
   */
-  virtual Real compute_diffusive_dt();
+  virtual Real computeDiffusiveDt();
 
   /*!
     @brief Get number of particles
   */
-  virtual size_t get_num_particles(const ito_solver::which_container a_ptype, const bool a_local);
+  virtual size_t getNumParticles(const ItoSolver::WhichContainer a_ptype, const bool a_local);
 
   /*!
     @brief Get solvers
@@ -226,7 +226,7 @@ public:
   /*!
     @brief Get all velocity functions
   */
-  virtual Vector<EBAMRCellData*> get_velo_funcs();
+  virtual Vector<EBAMRCellData*> getVelocityFunctions();
 
   /*!
     @brief Get all densities
@@ -236,22 +236,22 @@ public:
   /*!
     @brief Get all scratch storage
   */
-  virtual Vector<EBAMRCellData*> get_scratch();
+  virtual Vector<EBAMRCellData*> getScratch();
 
   /*!
     @brief Get all diffusion coefficients
   */
-  virtual Vector<EBAMRCellData*> get_diffco_funcs();
+  virtual Vector<EBAMRCellData*> getDiffusionFunctions();
 
   /*!
     @brief Get all mobility mesh functions
   */
-  virtual Vector<EBAMRCellData*> get_mobility_funcs();
+  virtual Vector<EBAMRCellData*> getMobilityFunctions();
 
   /*!
     @brief Get particle containers
   */
-  virtual Vector<ParticleContainer<ItoParticle>* > getParticles(const ito_solver::which_container a_ptype);
+  virtual Vector<ParticleContainer<ItoParticle>* > getParticles(const ItoSolver::WhichContainer a_ptype);
 
 protected:
 
