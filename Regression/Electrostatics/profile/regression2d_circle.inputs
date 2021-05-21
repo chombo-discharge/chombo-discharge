@@ -112,32 +112,32 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 # or right along the x-axis. The 'profile_curv' arguments sets the radius of curvature. Use the sub-
 # settings to select which profile you want. 
 # ====================================================================================================
-rod_plane_profile.turn_on_rod       = true          # Turn on/off electrode
-rod_plane_profile.turn_on_plane     = true          # Turn on/off dielectric
-rod_plane_profile.rod_live          = true          # Live electrode or not
-rod_plane_profile.rod_radius        = 500E-6        # Electrode inner radius
-rod_plane_profile.rod_center1       = 0.0 1E-2      # Center 1
-rod_plane_profile.rod_center2       = 0.0 1.0       # Center 2
-rod_plane_profile.plane_width       = 7.2E-2        # Plane width. 
-rod_plane_profile.plane_normal      = 0.0 1.0       # Plane normal. Not used, oriented along +y only 
-rod_plane_profile.plane_point       = 0.0 5E-3      # Center point on plane
-rod_plane_profile.plane_eps         = 4.0           # Plane permittivity
-rod_plane_profile.profile_num_left  = 19            # Number of holes to the left
-rod_plane_profile.profile_num_right = 19            # Number of holes to the left
-rod_plane_profile.profile_dist      = 2.06E-3       # Distance between each hole
-rod_plane_profile.profile_xshift    = 0.0           # Horizontal offset
-rod_plane_profile.profile_yshift    = 0.5E-3        # Vertical offset
-rod_plane_profile.profile_curv      = 50E-6         # Rounding radius
+RodPlaneProfile.turn_on_rod       = true          # Turn on/off electrode
+RodPlaneProfile.turn_on_plane     = true          # Turn on/off dielectric
+RodPlaneProfile.rod_live          = true          # Live electrode or not
+RodPlaneProfile.rod_radius        = 500E-6        # Electrode inner radius
+RodPlaneProfile.rod_center1       = 0.0 1E-2      # Center 1
+RodPlaneProfile.rod_center2       = 0.0 1.0       # Center 2
+RodPlaneProfile.plane_width       = 7.2E-2        # Plane width. 
+RodPlaneProfile.plane_normal      = 0.0 1.0       # Plane normal. Not used, oriented along +y only 
+RodPlaneProfile.plane_point       = 0.0 5E-3      # Center point on plane
+RodPlaneProfile.plane_eps         = 4.0           # Plane permittivity
+RodPlaneProfile.profile_num_left  = 19            # Number of holes to the left
+RodPlaneProfile.profile_num_right = 19            # Number of holes to the left
+RodPlaneProfile.profile_dist      = 2.06E-3       # Distance between each hole
+RodPlaneProfile.profile_xshift    = 0.0           # Horizontal offset
+RodPlaneProfile.profile_yshift    = 0.5E-3        # Vertical offset
+RodPlaneProfile.profile_curv      = 50E-6         # Rounding radius
 
 # Shape set. Can use 'circle' or 'square' for now. 
-rod_plane_profile.profile       = circle
+RodPlaneProfile.profile       = circle
 
 # Circle specific settings
-rod_plane_profile.circle_radius = 1.031E-3
+RodPlaneProfile.circle_radius = 1.031E-3
 
 # Square specific settings
-rod_plane_profile.square_width = 2.00012356E-3
-rod_plane_profile.square_depth = 3.0001235E-3
+RodPlaneProfile.square_width = 2.00012356E-3
+RodPlaneProfile.square_depth = 3.0001235E-3
 
 # ====================================================================================================
 # FIELD_STEPPER CLASS OPTIONS

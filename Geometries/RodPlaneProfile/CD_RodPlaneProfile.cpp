@@ -1,30 +1,35 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   rod_plane_profile.cpp
-  @brief  Implementation of rod_plane_profile.H
+  @file   CD_RodPlaneProfile.cpp
+  @brief  Implementation of CD_RodPlaneProfile.H
   @author Robert Marskar
-  @date   Nov. 2017
 */
 
-#include "rod_plane_profile.H"
-
+// Std includes
 #include <string>
 #include <iostream>
 #include <fstream>
 
+// Chombo includes
 #include <ParmParse.H>
 #include <BaseIF.H>
 #include <SphereIF.H>
 
+// Our includes
+#include <CD_RodPlaneProfile.H>
 #include <CD_ProfilePlaneIF.H>
 #include <CD_RodIF.H>
 #include <CD_SphereSdf.H>
 #include <CD_BoxSdf.H>
 #include <CD_RoundedBoxIF.H>
+#include <CD_NamespaceHeader.H>
 
-#include "CD_NamespaceHeader.H"
-
-rod_plane_profile::rod_plane_profile(){
-  if(SpaceDim == 3) MayDay::Abort("rod_plane_profile::rod_plane_profile - this is currently for 2D only");
+RodPlaneProfile::RodPlaneProfile(){
+  if(SpaceDim == 3) MayDay::Abort("RodPlaneProfile::RodPlaneProfile - this is currently for 2D only");
   std::string str;
   Vector<Real> vec(SpaceDim);
 
@@ -34,7 +39,7 @@ rod_plane_profile::rod_plane_profile(){
   RealVect center1, center2, point, normal;
   std::string profile;
 
-  ParmParse pp("rod_plane_profile");
+  ParmParse pp("RodPlaneProfile");
 
   pp.get   ("turn_on_rod",       has_rod);
   pp.get   ("turn_on_plane",     has_plane);
@@ -63,7 +68,7 @@ rod_plane_profile::rod_plane_profile(){
     m_profile = profile::square;
   }
   else{
-    MayDay::Abort("rod_plane_profile::rod_plane_profile - unknown profile requested");
+    MayDay::Abort("RodPlaneProfile::RodPlaneProfile - unknown profile requested");
   }
 
   // Build geometries
@@ -85,30 +90,30 @@ rod_plane_profile::rod_plane_profile(){
   this->setGasPermittivity(1.0);
 }
 
-rod_plane_profile::~rod_plane_profile(){
+RodPlaneProfile::~RodPlaneProfile(){
   
 }
 
-BaseIF* rod_plane_profile::getBaseIF(){
+BaseIF* RodPlaneProfile::getBaseIF(){
   BaseIF* ret = nullptr;
   
   switch(m_profile){
   case profile::circle:
-    ret = this->getBaseIF_circle();
+    ret = this->getBaseIFCircle();
     break;
   case profile::square:
-    ret = this->getBaseIF_square();
+    ret = this->getBaseIFSquare();
     break;
   default:
-    MayDay::Abort("rod_plane_profile::getBaseIF - logic bust, unknown profile requested");
+    MayDay::Abort("RodPlaneProfile::getBaseIF - logic bust, unknown profile requested");
     break;
   }
 
   return ret;
 }
 
-BaseIF* rod_plane_profile::getBaseIF_circle(){
-  ParmParse pp("rod_plane_profile");
+BaseIF* RodPlaneProfile::getBaseIFCircle(){
+  ParmParse pp("RodPlaneProfile");
 
   Vector<Real> vec(SpaceDim);
   RealVect point;
@@ -122,8 +127,8 @@ BaseIF* rod_plane_profile::getBaseIF_circle(){
   return new SphereSdf(point, rad, true);
 }
 
-BaseIF* rod_plane_profile::getBaseIF_square(){
-  ParmParse pp("rod_plane_profile");
+BaseIF* RodPlaneProfile::getBaseIFSquare(){
+  ParmParse pp("RodPlaneProfile");
   
   Real width;
   Real depth;
