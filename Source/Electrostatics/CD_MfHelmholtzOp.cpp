@@ -51,7 +51,7 @@ void MfHelmholtzOp::define(const RefCountedPtr<MultiFluidIndexSpace>&           
 			      const RefCountedPtr<LevelData<MFFluxFAB> >&   a_bco,
 			      const RefCountedPtr<LevelData<MFBaseIVFAB> >& a_bco_irreg,
 			      const MFQuadCFInterp&                         a_quadcfi,
-			      const MFFastFluxReg&                          a_fluxreg,
+			      const MFFluxReg&                          a_fluxreg,
 			      const MFLevelGrid&                            a_mflg_fine,
 			      const MFLevelGrid&                            a_mflg,
 			      const MFLevelGrid&                            a_mflg_coar,
@@ -146,7 +146,7 @@ void MfHelmholtzOp::define(const RefCountedPtr<MultiFluidIndexSpace>&           
       CH_assert(!quadcfi.isNull());
     }
     if(a_has_fine){
-      fastFR = a_fluxreg.get_fastfr_ptr(iphase);
+      fastFR = a_fluxreg.getFluxRegPointer(iphase);
     }
 
 

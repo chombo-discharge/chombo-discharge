@@ -591,7 +591,7 @@ void FieldSolverMultigrid::setupOperatorFactory(){
   // This stuff is needed for the operator factory
   Vector<MFLevelGrid>    mflg(1 + finest_level);
   Vector<MFQuadCFInterp> mfquadcfi(1 + finest_level);
-  Vector<MFFastFluxReg>  mffluxreg(1 + finest_level);
+  Vector<MFFluxReg>  mffluxreg(1 + finest_level);
   for (int lvl = 0; lvl <= finest_level; lvl++){
     Vector<EBLevelGrid>                    eblg_phases   (nphases);
     Vector<RefCountedPtr<EBQuadCFInterp> > quadcfi_phases(nphases);

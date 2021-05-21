@@ -18,7 +18,7 @@
 MfHelmholtzOpFactory::MfHelmholtzOpFactory(const RefCountedPtr<MultiFluidIndexSpace>&                a_multiFluidIndexSpace,
 					   const Vector<MFLevelGrid>&                a_mflg,
 					   const Vector<MFQuadCFInterp>&             a_mfquadcfi,
-					   const Vector<MFFastFluxReg>&              a_mffluxreg,
+					   const Vector<MFFluxReg>&              a_mffluxreg,
 					   const Vector<int>&                        a_ref_rat,
 					   const Vector<DisjointBoxLayout>&          a_grids,
 					   const MFAMRCellData&                      a_aco,
@@ -627,7 +627,7 @@ MGLevelOp<LevelData<MFCellFAB> >* MfHelmholtzOpFactory::MGnewOp(const ProblemDom
   RefCountedPtr<LevelData<BaseIVFAB<Real> > > jump;
 
   MFQuadCFInterp quadcfi;
-  MFFastFluxReg fluxreg;
+  MFFluxReg fluxreg;
   
   MFLevelGrid mflg_fine;
   MFLevelGrid mflg;
@@ -823,7 +823,7 @@ AMRLevelOp<LevelData<MFCellFAB> >* MfHelmholtzOpFactory::AMRnewOp(const ProblemD
   RefCountedPtr<LevelData<BaseIVFAB<Real> > > jump = m_jump[ref];
 
   MFQuadCFInterp quadcfi = m_mfquadcfi[ref];
-  MFFastFluxReg fluxreg  = m_mffluxreg[ref];
+  MFFluxReg fluxreg  = m_mffluxreg[ref];
   
   MFLevelGrid mflg_fine;
   MFLevelGrid mflg = m_mflg[ref];

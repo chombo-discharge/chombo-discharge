@@ -54,7 +54,7 @@ public:
   MfHelmholtzOpFactory(const RefCountedPtr<MultiFluidIndexSpace>&                a_multiFluidIndexSpace,
 			  const Vector<MFLevelGrid>&                a_mflg,
 			  const Vector<MFQuadCFInterp>&             a_mfquadcfi,
-			  const Vector<MFFastFluxReg>&              a_mffluxreg,
+			  const Vector<MFFluxReg>&              a_mffluxreg,
 			  const Vector<int>&                        a_ref_rat,
 			  const Vector<DisjointBoxLayout>&          a_grids,
 			  const MFAMRCellData&                      a_aco,
@@ -250,7 +250,7 @@ protected:
   /*!
     @brief Interpolation utilities
   */
-  Vector<MFFastFluxReg> m_mffluxreg;
+  Vector<MFFluxReg> m_mffluxreg;
 
   /*!
     @brief Refinement ratios

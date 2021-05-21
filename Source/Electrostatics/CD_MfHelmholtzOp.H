@@ -28,7 +28,7 @@
 #include <MFLevelGrid.H>
 #include <CD_Electrode.H>
 #include <MFQuadCFInterp.H>
-#include <MFFastFluxReg.H>
+#include <CD_MFFluxReg.H>
 #include <CD_EbHelmholtzOp.H>
 #include <CD_MfElectrostaticDirichletEbBc.H>
 #include <CD_ElectrostaticEbBc.H>
@@ -60,7 +60,7 @@ public:
 		      const RefCountedPtr<LevelData<MFFluxFAB> >&   a_bco,
 		      const RefCountedPtr<LevelData<MFBaseIVFAB> >& a_bco_irreg,
 		      const MFQuadCFInterp&                         a_quadcfi,
-		      const MFFastFluxReg&                          a_fluxreg,
+		      const MFFluxReg&                          a_fluxreg,
 		      const MFLevelGrid&                            a_mflg_fine,
 		      const MFLevelGrid&                            a_mflg,
 		      const MFLevelGrid&                            a_mflg_coar,
