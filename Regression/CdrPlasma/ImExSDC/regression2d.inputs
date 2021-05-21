@@ -307,14 +307,14 @@ air9eed_bourdon.excitation_efficiency      = 0.6                  # Excitation e
 # ====================================================================================================
 # STREAMER_TAGGER CLASS OPTIONS
 # ====================================================================================================
-streamer_tagger.verbosity         = -1           # Verbosity
-streamer_tagger.num_boxes         = 0            # Number of allowed tag boxes (0 = tags allowe everywhere)
-streamer_tagger.box1_lo           = 0.0 0.0 0.0  # Only allow tags that fall between
-streamer_tagger.box1_hi           = 0.0 0.0 0.0  # these two corners
-streamer_tagger.buffer            = 8            # Grow tagged cells
+CdrPlasmaStreamerTagger.verbosity         = -1           # Verbosity
+CdrPlasmaStreamerTagger.num_boxes         = 0            # Number of allowed tag boxes (0 = tags allowe everywhere)
+CdrPlasmaStreamerTagger.box1_lo           = 0.0 0.0 0.0  # Only allow tags that fall between
+CdrPlasmaStreamerTagger.box1_hi           = 0.0 0.0 0.0  # these two corners
+CdrPlasmaStreamerTagger.buffer            = 8            # Grow tagged cells
 
-streamer_tagger.refine_curvature  = 10.0         # Curvature refinement
-streamer_tagger.coarsen_curvature = 10.0         # Curvature coarsening	
-streamer_tagger.refine_alpha      = 0.5          # Set alpha refinement. Lower  => More mesh
-streamer_tagger.coarsen_alpha     = 4.0          # Set alpha coarsening. Higher => Less mesh
-streamer_tagger.max_coarsen_lvl   = 0            # Set max coarsening depth
+CdrPlasmaStreamerTagger.refine_curvature  = 10.0         # Curvature refinement
+CdrPlasmaStreamerTagger.coarsen_curvature = 10.0         # Curvature coarsening	
+CdrPlasmaStreamerTagger.refine_alpha      = 0.5          # Set alpha refinement. Lower  => More mesh
+CdrPlasmaStreamerTagger.coarsen_alpha     = 4.0          # Set alpha coarsening. Higher => Less mesh
+CdrPlasmaStreamerTagger.max_coarsen_lvl   = 0            # Set max coarsening depth

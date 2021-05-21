@@ -1,18 +1,18 @@
 /*!
-  @file   streamer_tagger.cpp
-  @brief  Implementation of streamer_tagger.H
+  @file   CdrPlasmaStreamerTagger.cpp
+  @brief  Implementation of CdrPlasmaStreamerTagger.H
   @author Robert Marskar
   @date   Oct. 2018
 */
 
-#include "streamer_tagger.H"
+#include <CD_CdrPlasmaStreamerTagger.H>
 #include <CD_DataOps.H>
 
 #include <ParmParse.H>
   
-streamer_tagger::streamer_tagger(){
+CdrPlasmaStreamerTagger::CdrPlasmaStreamerTagger(){
   m_num_tracers = 2;
-  m_name        = "streamer_tagger";
+  m_name        = "CdrPlasmaStreamerTagger";
 
   m_electron_idx   = 0;
   m_fudge          = 1.E-4;
@@ -23,7 +23,7 @@ streamer_tagger::streamer_tagger(){
 
 
   {
-    ParmParse pp("streamer_tagger");
+    ParmParse pp("CdrPlasmaStreamerTagger");
     
     const int num_src = pp.countval("refine_source");
     const int num_crv = pp.countval("refine_E_curv");
@@ -43,12 +43,12 @@ streamer_tagger::streamer_tagger(){
   this->setPhase(phase::gas);
 }
 
-streamer_tagger::~streamer_tagger(){
+CdrPlasmaStreamerTagger::~CdrPlasmaStreamerTagger(){
   
 }
 
-void streamer_tagger::computeTracers(){
-  CH_TIME("streamer_tagger::computeTracers");
+void CdrPlasmaStreamerTagger::computeTracers(){
+  CH_TIME("CdrPlasmaStreamerTagger::computeTracers");
   if(m_verbosity > 5){
     pout() << m_name + "::computeTracers" << endl;
   }
@@ -172,7 +172,7 @@ void streamer_tagger::computeTracers(){
 }
 
 
-bool streamer_tagger::coarsenCell(const RealVect&         a_pos,
+bool CdrPlasmaStreamerTagger::coarsenCell(const RealVect&         a_pos,
 				   const Real&             a_time,
 				   const Real&             a_dx,
 				   const int&              a_lvl,
@@ -185,7 +185,7 @@ bool streamer_tagger::coarsenCell(const RealVect&         a_pos,
   return coarsen1;// && coarsen2; 
 }
 
-bool streamer_tagger::refineCell(const RealVect&         a_pos,
+bool CdrPlasmaStreamerTagger::refineCell(const RealVect&         a_pos,
 				  const Real&             a_time,
 				  const Real&             a_dx,
 				  const int&              a_lvl,

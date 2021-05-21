@@ -1,42 +1,47 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   streamer_tagger.H
-  @brief  Implementation of CellTagger that tags cells based on the gradient of the electric field
+  @file   CD_CdrPlasmaStreamerTagger.H
+  @brief  Implementation of CellTagger that tags cells based on field evaluations or the Townsend coefficient
   @author Robert Marskar
-  @date   Feb. 2018
 */
 
-#ifndef _STREAMER_TAGGER_
-#define _STREAMER_TAGGER_
+#ifndef CD_CdrPlasmaStreamerTagger_H
+#define CD_CdrPlasmaStreamerTagger_H
 
+// Our includes
 #include <CD_CdrPlasmaFieldTagger.H>
+#include <CD_NamespaceHeader.H>
 
-#include "CD_NamespaceHeader.H"
 namespace Physics {
   namespace CdrPlasma {
   
     /*!
       @brief Refinement class for morrow_stephens plasma model only
     */
-    class streamer_tagger : public CdrPlasmaFieldTagger {
+    class CdrPlasmaStreamerTagger : public CdrPlasmaFieldTagger {
     public:
   
       /*!
 	@brief Constructor
       */
-      streamer_tagger();
+      CdrPlasmaStreamerTagger();
 
       /*!
 	@brief Constructor
       */
-      streamer_tagger(const RefCountedPtr<CdrPlasmaPhysics>&     a_physics,
-		      const RefCountedPtr<cdr_plasma_stepper>&     a_timeStepper,
-		      const RefCountedPtr<AmrMesh>&               a_amr,
-		      const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
+      CdrPlasmaStreamerTagger(const RefCountedPtr<CdrPlasmaPhysics>&     a_physics,
+			      const RefCountedPtr<cdr_plasma_stepper>&     a_timeStepper,
+			      const RefCountedPtr<AmrMesh>&               a_amr,
+			      const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
 
       /*!
 	@brief Destructor
       */
-      virtual ~streamer_tagger();
+      virtual ~CdrPlasmaStreamerTagger();
 
       /*!
 	@brief Parse class options
@@ -60,21 +65,21 @@ namespace Physics {
 	@brief Return coarsening criterion. 
       */
       virtual bool coarsenCell(const RealVect         a_pos,
-				const Real             a_time,
-				const Real             a_dx,
-				const int              a_lvl,
-				const Vector<Real>     a_tracer,
-				const Vector<RealVect> a_grad_tracer);
-
-      /*!
-	@brief Return refinement criterion. 
-      */
-      virtual bool refineCell(const RealVect         a_pos,
 			       const Real             a_time,
 			       const Real             a_dx,
 			       const int              a_lvl,
 			       const Vector<Real>     a_tracer,
 			       const Vector<RealVect> a_grad_tracer);
+
+      /*!
+	@brief Return refinement criterion. 
+      */
+      virtual bool refineCell(const RealVect         a_pos,
+			      const Real             a_time,
+			      const Real             a_dx,
+			      const int              a_lvl,
+			      const Vector<Real>     a_tracer,
+			      const Vector<RealVect> a_grad_tracer);
     protected:
 
       /*!
@@ -104,5 +109,7 @@ namespace Physics {
     };
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif

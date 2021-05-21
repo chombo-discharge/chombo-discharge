@@ -9,7 +9,7 @@
 #include "air9eed_bourdon.H"
 #include <CD_RodDielectric.H>
 #include "godunov.H"
-#include "streamer_tagger.H"
+#include <CD_CdrPlasmaStreamerTagger.H>
 #include "ParmParse.H"
 
 // This is the potential curve (constant in this case). Modify it if you want to.
@@ -48,7 +48,7 @@ int main(int argc, char* argv[]){
   // Set up physics 
   RefCountedPtr<CdrPlasmaPhysics> physics      = RefCountedPtr<CdrPlasmaPhysics> (new air9eed_bourdon());
   RefCountedPtr<cdr_plasma_stepper> timestepper  = RefCountedPtr<cdr_plasma_stepper> (new godunov(physics));
-  RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (new streamer_tagger(physics, timestepper, amr, compgeom));
+  RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (new CdrPlasmaStreamerTagger(physics, timestepper, amr, compgeom));
 
   // Create solver factories
   auto poi_fact = new FieldSolverFactory<FieldSolverMultigrid>();

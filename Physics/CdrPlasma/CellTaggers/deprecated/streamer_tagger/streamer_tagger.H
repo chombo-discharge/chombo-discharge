@@ -1,5 +1,5 @@
 /*!
-  @file   streamer_tagger.H
+  @file   CdrPlasmaStreamerTagger.H
   @brief  Declaration of a  class for tagging streamer heads
   @author Robert Marskar
   @date   Oct. 2018
@@ -14,11 +14,11 @@
   @brief Class that tags streamer heads based on the electron source term. 
   @note  The electrons must be the first class that is defined in the cdr solver layout
 */
-class streamer_tagger : public CellTagger {
+class CdrPlasmaStreamerTagger : public CellTagger {
 public:
   
-  streamer_tagger();
-  ~streamer_tagger();
+  CdrPlasmaStreamerTagger();
+  ~CdrPlasmaStreamerTagger();
 
   void computeTracers();
   

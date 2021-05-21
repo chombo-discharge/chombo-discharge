@@ -1,5 +1,5 @@
 /*!
-  @file   streamer_tagger.H
+  @file   CdrPlasmaStreamerTagger.H
   @brief  Implementation of CellTagger that tags cells based on the gradient of the electric field
   @author Robert Marskar
   @date   Feb. 2018
@@ -13,18 +13,18 @@
 /*!
   @brief Refinement class for morrow_stephens plasma model only
 */
-class streamer_tagger : public CdrPlasmaFieldTagger {
+class CdrPlasmaStreamerTagger : public CdrPlasmaFieldTagger {
 public:
   
   /*!
     @brief Constructor
   */
-  streamer_tagger();
+  CdrPlasmaStreamerTagger();
 
   /*!
     @brief Destructor
   */
-  virtual ~streamer_tagger();
+  virtual ~CdrPlasmaStreamerTagger();
 
   /*!
     @brief Parse class options

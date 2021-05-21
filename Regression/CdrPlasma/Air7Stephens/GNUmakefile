@@ -32,7 +32,7 @@ src_dirs = $(DISCHARGE_HOME)/Source \
 	$(DISCHARGE_HOME)/Source/SigmaSolver \
 	$(DISCHARGE_HOME)/Geometries/RodDielectric\
 	$(DISCHARGE_HOME)/Physics/CdrPlasma \
-	$(DISCHARGE_HOME)/Physics/CdrPlasma/CellTaggers/streamer_tagger\
+	$(DISCHARGE_HOME)/Physics/CdrPlasma/CellTaggers/CdrPlasmaStreamerTagger\
 	$(DISCHARGE_HOME)/Physics/CdrPlasma/time_steppers/godunov\
 	$(DISCHARGE_HOME)/Physics/CdrPlasma/plasma_models/air7_stephens
 
