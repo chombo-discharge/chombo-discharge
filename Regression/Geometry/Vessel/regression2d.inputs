@@ -74,21 +74,21 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 # VESSEL CLASS OPTIONS
 #
 # This class is a pin-mushroom type geometry commonly used in high-voltage pressure/vaccum
-# vessel. It (currently) consists of a rod electrode and a "mushroom" flat plate electrode, set up
+# Vessel. It (currently) consists of a rod electrode and a "mushroom" flat plate electrode, set up
 # along +y/+z in 2D/3D
 # ====================================================================================================
-vessel.use_rod       = true           # Turn on/off rod
-vessel.use_shroom    = true           # Turn on/off plate
+Vessel.use_rod       = true           # Turn on/off rod
+Vessel.use_shroom    = true           # Turn on/off plate
 
-vessel.rod_point     = 0. 0.5         # Rod center point
-vessel.rod_radius    = 0.2            # Rod radius
+Vessel.rod_point     = 0. 0.5         # Rod center point
+Vessel.rod_radius    = 0.2            # Rod radius
 
-vessel.shroom_point  = 0. -0.5        # Mushroom center point
-vessel.shroom_R      = 0.5            # Mushroom head radius
-vessel.shroom_r      = 0.2            # Mushroom stem radius
-vessel.shroom_d      = 0.2            # Mushroom head thickness
-vessel.shroom_curv   = 0.05           # Mushroom corner curvatures
+Vessel.shroom_point  = 0. -0.5        # Mushroom center point
+Vessel.shroom_R      = 0.5            # Mushroom head radius
+Vessel.shroom_r      = 0.2            # Mushroom stem radius
+Vessel.shroom_d      = 0.2            # Mushroom head thickness
+Vessel.shroom_curv   = 0.05           # Mushroom corner curvatures
 
-vessel.live_rod      = true           # Rod is live or not
-vessel.live_shroom   = false          # Mushroom is live or not
+Vessel.live_rod      = true           # Rod is live or not
+Vessel.live_shroom   = false          # Mushroom is live or not
 

@@ -5,7 +5,7 @@
 
 /*!
   @file    CD_MushroomIF.H
-  @brief   Declaration of a "mushroom", used in HV vessel
+  @brief   Declaration of a "mushroom", used in HV Vessel
   @author  Robert Marskar
 */
 

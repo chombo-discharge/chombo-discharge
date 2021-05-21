@@ -1,21 +1,26 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   vessel.cpp
-  @brief  High-voltage vessel geometry
+  @file   CD_Vessel.cpp
+  @brief  High-voltage Vessel geometry
   @author Robert Marskar
-  @date   2019
 */
 
-#include "vessel.H"
+// Chombo includes
+#include <ParmParse.H>
+
+// Our includes
+#include <CD_Vessel.H>
 #include <CD_MushroomIF.H>
 #include <CD_RodIF.H>
 #include <CD_CylinderSdf.H>
+#include <CD_NamespaceHeader.H>
 
-#include <ParmParse.H>
-
-#include "CD_NamespaceHeader.H"
-
-vessel::vessel(){
-  ParmParse pp("vessel");
+Vessel::Vessel(){
+  ParmParse pp("Vessel");
 
   std::string str;
   Vector<Real> vec(SpaceDim);
@@ -40,17 +45,18 @@ vessel::vessel(){
   }
   if(m_shroom){
     auto shroom = RefCountedPtr<BaseIF> (new MushroomIF(m_shroom_center,
-							 m_shroom_R,
-							 m_shroom_r,
-							 1.E4,
-							 m_shroom_d,
-							 m_shroom_c,
-							 false));
+							m_shroom_R,
+							m_shroom_r,
+							1.E4,
+							m_shroom_d,
+							m_shroom_c,
+							false));
     m_electrodes.push_back(Electrode(shroom, m_shroom_live));
   }
 }
 
-vessel::~vessel(){
+Vessel::~Vessel(){
 
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
