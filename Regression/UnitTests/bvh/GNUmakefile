@@ -31,7 +31,7 @@ src_dirs = $(DISCHARGE_HOME)/Source \
 	$(DISCHARGE_HOME)/Source/Utilities \
 	$(DISCHARGE_HOME)/Source/Particle \
 	$(DISCHARGE_HOME)/Geometries/rod_sphere\
-	$(DISCHARGE_HOME)/Physics/brownian_walker \
+	$(DISCHARGE_HOME)/Physics/BrownianWalker \
 
 
 include $(CHOMBO_HOME)/mk/Make.example

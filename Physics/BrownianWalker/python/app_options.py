@@ -13,7 +13,7 @@ def write_template(args):
                      args.discharge_home + "/Source/ItoDiffusion/" + args.ItoSolver + ".options",\
                      args.discharge_home + "/Source/Geometry/GeoCoarsener.options", \
                      args.discharge_home + "/Geometries/" + args.geometry + "/" + args.geometry + ".options", \
-                     args.discharge_home + "/Physics/brownian_walker/brownian_walker_stepper.options"]
+                     args.discharge_home + "/Physics/BrownianWalker/BrownianWalkerStepper.options"]
 
     for opt in options_files:
         if os.path.exists(opt):

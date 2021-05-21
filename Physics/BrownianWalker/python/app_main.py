@@ -17,7 +17,7 @@ def write_template(args):
     mainf.write('#include "' + args.ItoSolver + '.H"\n')
     mainf.write('#include "' + args.geometry + '.H"\n')
     mainf.write('#include "' + args.stepper + '.H"\n')
-    mainf.write('#include "brownian_walker_tagger.H"\n')
+    mainf.write('#include <CD_BrownianWalkerTagger.H>\n')
     mainf.write('#include "ParmParse.H"\n')
     mainf.write("\n")
 
@@ -48,7 +48,7 @@ def write_template(args):
     mainf.write("  // Set up basic brownian_walker \n")
     mainf.write("  RefCountedPtr<ItoSolver> solver        = RefCountedPtr<ItoSolver>   (new " + args.ItoSolver + "());\n")
     mainf.write("  RefCountedPtr<TimeStepper> timestepper = RefCountedPtr<TimeStepper> (new " + args.stepper + "(solver));\n")
-    mainf.write("  RefCountedPtr<CellTagger> tagger       = RefCountedPtr<CellTagger>  (new brownian_walker_tagger(solver, amr));\n")
+    mainf.write("  RefCountedPtr<CellTagger> tagger       = RefCountedPtr<CellTagger>  (new BrownianWalkerTagger(solver, amr));\n")
     mainf.write("\n")
     
     mainf.write("  // Set up the Driver and run it\n")

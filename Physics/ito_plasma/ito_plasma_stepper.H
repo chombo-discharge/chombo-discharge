@@ -50,7 +50,7 @@ namespace physics {
       virtual void parseOptions() = 0;
       virtual void parseRuntimeOptions() = 0;
       virtual void allocateInternals() = 0;
-      virtual void setup_solvers() override;
+      virtual void setupSolvers() override;
       virtual void allocate() override;
       virtual void initialData() override;
       virtual void initial_sigma();

@@ -52,7 +52,7 @@ public:
   /*!
     @brief Set up solvers
   */
-  virtual void setup_solvers() = 0;
+  virtual void setupSolvers() = 0;
 
   /*!
     @brief Allocate memory for time stepper

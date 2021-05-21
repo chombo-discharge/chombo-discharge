@@ -1,18 +1,24 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   brownian_walker_species.cpp
-  @brief  Implementation of brownian_walker_species.H
+  @file   CD_BrownianWalkerSpecies.cpp
+  @brief  Implementation of CD_BrownianWalkerSpecies.H
   @author Robert Marskar
-  @date   March 2020
 */
 
-#include "brownian_walker_species.H"
-
+// Chombo includes
 #include <ParmParse.H>
 
-#include "CD_NamespaceHeader.H"
-using namespace physics::brownian_walker;
+// Our includes
+#include <CD_BrownianWalkerSpecies.H>
+#include <CD_NamespaceHeader.H>
 
-brownian_walker_species::brownian_walker_species() : m_rng(), m_gauss(0., 1.) {
+using namespace Physics::BrownianWalker;
+
+BrownianWalkerSpecies::BrownianWalkerSpecies() : m_rng(), m_gauss(0., 1.) {
   m_name   = "scalar species";
   m_chargeNumber = 0;
 
@@ -31,11 +37,11 @@ brownian_walker_species::brownian_walker_species() : m_rng(), m_gauss(0., 1.) {
   draw_initial_particles();
 }
 
-brownian_walker_species::~brownian_walker_species(){
+BrownianWalkerSpecies::~BrownianWalkerSpecies(){
 
 }
 
-void brownian_walker_species::draw_initial_particles(){
+void BrownianWalkerSpecies::draw_initial_particles(){
 
   // To avoid that MPI ranks draw the same particle positions, increment the seed for each rank
   //  m_seed += procID();
@@ -64,13 +70,13 @@ void brownian_walker_species::draw_initial_particles(){
   }
 }
 
-RealVect brownian_walker_species::randomGaussian(){
+RealVect BrownianWalkerSpecies::randomGaussian(){
 
   const Real rad = m_gauss(m_rng);
   return rad*randomDirection();
 }
 
-RealVect brownian_walker_species::randomDirection(){
+RealVect BrownianWalkerSpecies::randomDirection(){
   const Real EPS = 1.E-8;
 #if CH_SPACEDIM==2
   Real x1 = 2.0;
@@ -100,4 +106,5 @@ RealVect brownian_walker_species::randomDirection(){
   return RealVect(x,y,z);
 #endif
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

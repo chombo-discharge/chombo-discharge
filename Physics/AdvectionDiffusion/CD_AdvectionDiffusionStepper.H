@@ -61,7 +61,7 @@ namespace Physics {
       void preRegrid(const int a_lbase, const int a_finestLevel) override;
 
       // Pure routines for derived classes
-      void setup_solvers() override;
+      void setupSolvers() override;
       Real advance(const Real a_dt) override;
       void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
       void postRegrid() override;

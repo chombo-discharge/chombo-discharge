@@ -1,25 +1,31 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   brownian_walker_species.H
+  @file   CD_BrownianWalkerSpecies.H
   @brief  Declaration of a brownian walker species for the ItoSolver
   @author Robert Marskar
-  @date   March 2020
 */
 
-#ifndef _BROWNIAN_WALKER_SPECIES_
-#define _BROWNIAN_WALKER_SPECIES_
+#ifndef CD_BrownianWalkerSpecies_H
+#define CD_BrownianWalkerSpecies_H
 
-#include <CD_ItoSpecies.H>
-
+// Std includes
 #include <random>
 
-#include "CD_NamespaceHeader.H"
-namespace physics {
-  namespace brownian_walker {
+// Our includes
+#include <CD_ItoSpecies.H>
+#include <CD_NamespaceHeader.H>
 
-    class brownian_walker_species : public ItoSpecies {
+namespace Physics {
+  namespace BrownianWalker {
+
+    class BrownianWalkerSpecies : public ItoSpecies {
     public:
-      brownian_walker_species();
-      ~brownian_walker_species();
+      BrownianWalkerSpecies();
+      ~BrownianWalkerSpecies();
     protected:
       Real     m_blob_radius;
       Real     m_blob_amplitude;
@@ -37,5 +43,7 @@ namespace physics {
     };
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif

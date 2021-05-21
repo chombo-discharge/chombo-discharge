@@ -31,7 +31,7 @@ namespace Physics {
 
       // Stuff below here is derived from TimeStepper.
       // ----------------------------------------------
-      void setup_solvers() override;
+      void setupSolvers() override;
       void initialData() override;
       void allocate() override;
       void postInitialize() override;

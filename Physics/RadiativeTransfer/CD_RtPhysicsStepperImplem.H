@@ -38,7 +38,7 @@ template <typename T>
 RtPhysicsStepper<T>::~RtPhysicsStepper(){}
 
 template <typename T>
-void RtPhysicsStepper<T>::setup_solvers(){
+void RtPhysicsStepper<T>::setupSolvers(){
   m_species = RefCountedPtr<RtSpecies> (new RtPhysicsSpecies());
 
   // Solver setup

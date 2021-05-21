@@ -51,10 +51,10 @@ void ito_plasma_stepper::setVerbosity(const int a_verbosity){
   m_verbosity = a_verbosity;
 }
 
-void ito_plasma_stepper::setup_solvers(){
+void ito_plasma_stepper::setupSolvers(){
   CH_TIME("ito_plasma_stepper::setup_solver");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::setup_solvers" << endl;
+    pout() << "ito_plasma_stepper::setupSolvers" << endl;
   }
 
   // Parse class options

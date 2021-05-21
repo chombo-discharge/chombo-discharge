@@ -69,7 +69,7 @@ namespace Physics {
     }
 
     template <class T>
-    void FieldStepper<T>::setup_solvers(){
+    void FieldStepper<T>::setupSolvers(){
       
       // Poisson setup
       m_fieldSolver = RefCountedPtr<FieldSolver> (new T());

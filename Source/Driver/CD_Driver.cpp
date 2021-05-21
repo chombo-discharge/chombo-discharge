@@ -1321,7 +1321,7 @@ void Driver::setupFresh(const int a_initialRegrids){
   m_timeStepper->setComputationalGeometry(m_computationalGeometry);       // Set computational geometry
 
   // TimeStepper setup
-  m_timeStepper->setup_solvers();                                 // Instantiate solvers
+  m_timeStepper->setupSolvers();                                 // Instantiate solvers
   m_timeStepper->synchronizeSolverTimes(m_timeStep, m_time, m_dt);  // Sync solver times
   m_timeStepper->registerOperators();
   m_amr->regridOperators(lmin, lmax, regsize);
@@ -2384,7 +2384,7 @@ void Driver::readCheckpointFile(const std::string& a_restartFile){
   
   // Instantiate solvers and register operators
   const int regsize = m_timeStepper->getRedistributionRegSize();
-  m_timeStepper->setup_solvers();
+  m_timeStepper->setupSolvers();
   m_timeStepper->registerOperators();
   m_amr->regridOperators(base_level, finest_level, regsize);
   m_timeStepper->allocate();

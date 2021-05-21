@@ -3159,10 +3159,10 @@ void cdr_plasma_stepper::set_rte(RefCountedPtr<RtLayout<RtSolver>>& a_rte){
   m_rte = a_rte;
 }
 
-void cdr_plasma_stepper::setup_solvers(){
-  CH_TIME("cdr_plasma_stepper::setup_solvers");
+void cdr_plasma_stepper::setupSolvers(){
+  CH_TIME("cdr_plasma_stepper::setupSolvers");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::setup_solvers" << endl;
+    pout() << "cdr_plasma_stepper::setupSolvers" << endl;
   }
   parseOptions();
   this->sanityCheck();

@@ -1,8 +1,8 @@
 #include "CD_Driver.H"
 #include <CD_ItoSolver.H>
 #include <CD_RodDielectric.H>
-#include "brownian_walker_stepper.H"
-#include "brownian_walker_tagger.H"
+#include <CD_BrownianWalkerStepper.H>
+#include <CD_BrownianWalkerTagger.H>
 #include "ParmParse.H"
 
 using namespace ChomboDischarge;
@@ -25,8 +25,8 @@ int main(int argc, char* argv[]){
 
   // Set up basic brownian_walker 
   RefCountedPtr<ItoSolver> solver        = RefCountedPtr<ItoSolver>   (new ItoSolver());
-  RefCountedPtr<TimeStepper> timestepper = RefCountedPtr<TimeStepper> (new brownian_walker_stepper(solver));
-  RefCountedPtr<CellTagger> tagger       = RefCountedPtr<CellTagger>  (new brownian_walker_tagger(solver, amr));
+  RefCountedPtr<TimeStepper> timestepper = RefCountedPtr<TimeStepper> (new BrownianWalkerStepper(solver));
+  RefCountedPtr<CellTagger> tagger       = RefCountedPtr<CellTagger>  (new BrownianWalkerTagger(solver, amr));
 
   // Set up the Driver and run it
   RefCountedPtr<Driver> engine = RefCountedPtr<Driver> (new Driver(compgeom, timestepper, amr, tagger, geocoarsen));

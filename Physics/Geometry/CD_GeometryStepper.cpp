@@ -20,7 +20,7 @@ GeometryStepper::GeometryStepper(){}
 GeometryStepper::~GeometryStepper(){};
 
 // Setup routines
-void GeometryStepper::setup_solvers() {};
+void GeometryStepper::setupSolvers() {};
 void GeometryStepper::allocate() {};
 void GeometryStepper::initialData() {};
 void GeometryStepper::postInitialize() {};

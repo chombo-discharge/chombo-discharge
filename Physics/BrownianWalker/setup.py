@@ -20,7 +20,7 @@ parser.add_argument('-app_name',        type=str,  help="Mini app name. An error
 parser.add_argument('-filename',        type=str,  help="File name of main file", default="main")
 parser.add_argument('-ItoSolver',      type=str,  help="Ito solver", default="ItoSolver")
 parser.add_argument('-geometry',        type=str,  help="Geometry class", default="RegularGeometry")
-parser.add_argument('-stepper',         type=str,  help="Time stepper class", default="brownian_walker_stepper")
+parser.add_argument('-stepper',         type=str,  help="Time stepper class", default="BrownianWalkerStepper")
 
 args = parser.parse_args()
 

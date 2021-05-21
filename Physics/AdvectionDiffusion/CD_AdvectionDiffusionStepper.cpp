@@ -52,7 +52,7 @@ void AdvectionDiffusionStepper::parseRuntimeOptions() {
   m_solver->parseRuntimeOptions();
 }
 
-void AdvectionDiffusionStepper::setup_solvers(){
+void AdvectionDiffusionStepper::setupSolvers(){
   m_species = RefCountedPtr<CdrSpecies> (new AdvectionDiffusionSpecies());
 
   // Solver setup
@@ -66,7 +66,7 @@ void AdvectionDiffusionStepper::setup_solvers(){
   m_solver->setRealm(m_realm);
   
   if(!m_solver->isMobile() && !m_solver->isDiffusive()){
-    MayDay::Abort("AdvectionDiffusionStepper::setup_solvers - can't turn off both advection AND diffusion");
+    MayDay::Abort("AdvectionDiffusionStepper::setupSolvers - can't turn off both advection AND diffusion");
   }
 }
 

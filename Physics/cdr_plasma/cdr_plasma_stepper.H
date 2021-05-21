@@ -687,7 +687,7 @@ namespace physics {
       /*!
 	@brief Instantiate solvers
       */
-      virtual void setup_solvers();
+      virtual void setupSolvers();
 
       /*!
 	@brief Fill all solvers with initial data

@@ -48,7 +48,7 @@ def write_template(args):
     makef.write('\t$(DISCHARGE_HOME)/Source/Particle \\\n')
     makef.write('\t$(DISCHARGE_HOME)/Source/Utilities \\\n')
     makef.write('\t$(DISCHARGE_HOME)/Geometries/' + args.geometry + '\\\n')
-    makef.write('\t$(DISCHARGE_HOME)/Physics/brownian_walker \\\n')
+    makef.write('\t$(DISCHARGE_HOME)/Physics/BrownianWalker \\\n')
     makef.write('\n')
 
     makef.write('\n')

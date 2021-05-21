@@ -1,30 +1,35 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   brownian_walker_stepper.H
+  @file   CD_BrownianWalkerStepper.H
   @brief  TimeStepper class for only solving the Brownian_Walker equation (with surface charge)
   @author Robert Marskar
-  @data   March 2020
 */
 
-#ifndef _BROWNIAN_WALKER_STEPPER_
-#define _BROWNIAN_WALKER_STEPPER_
+#ifndef CD_BrownianWalkerStepper_H
+#define CD_BrownianWalkerStepper_H
 
+// Our includes
 #include "CD_TimeStepper.H"
 #include <CD_ItoSolver.H>
 #include <CD_ItoLayout.H>
+#include <CD_NamespaceHeader.H>
 
-#include "CD_NamespaceHeader.H"
-namespace physics {
-  namespace brownian_walker {
+namespace Physics {
+  namespace BrownianWalker {
 
     /*!
       @brief Class that just solves the brownian_walker equation
     */
-    class brownian_walker_stepper : public TimeStepper {
+    class BrownianWalkerStepper : public TimeStepper {
     public:
 
-      brownian_walker_stepper();
-      brownian_walker_stepper(RefCountedPtr<ItoSolver>& a_solver);
-      ~brownian_walker_stepper();
+      BrownianWalkerStepper();
+      BrownianWalkerStepper(RefCountedPtr<ItoSolver>& a_solver);
+      ~BrownianWalkerStepper();
 
       // Setup routines
       void initialData() override;
@@ -34,11 +39,11 @@ namespace physics {
       // Load balancing
       bool loadBalanceThisRealm(const std::string a_realm) const override;
       void loadBalanceBoxes(Vector<Vector<int> >&            a_procs,
-			      Vector<Vector<Box> >&            a_boxes,
-			      const std::string                a_realm,
-			      const Vector<DisjointBoxLayout>& a_grids,
-			      const int                        a_lmin,
-			      const int                        a_finestLevel) override;
+			    Vector<Vector<Box> >&            a_boxes,
+			    const std::string                a_realm,
+			    const Vector<DisjointBoxLayout>& a_grids,
+			    const int                        a_lmin,
+			    const int                        a_finestLevel) override;
 
       // IO routines
       void writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const override;
@@ -66,7 +71,7 @@ namespace physics {
       void preRegrid(const int a_lbase, const int a_oldFinestLevel) override;
 
       // Pure routines for derived classes
-      void setup_solvers() override;
+      void setupSolvers() override;
       Real advance(const Real a_dt) override;
       void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
       void postRegrid() override;
@@ -101,5 +106,7 @@ namespace physics {
     };
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif

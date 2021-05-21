@@ -29,7 +29,7 @@ namespace Physics {
       ~GeometryStepper();
 
       // Setup routines
-      virtual void setup_solvers() override;
+      virtual void setupSolvers() override;
       virtual void allocate() override;
       virtual void initialData() override;
       virtual void postInitialize() override;
