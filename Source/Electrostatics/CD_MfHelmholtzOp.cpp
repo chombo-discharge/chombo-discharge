@@ -142,7 +142,7 @@ void MfHelmholtzOp::define(const RefCountedPtr<MultiFluidIndexSpace>&           
     RefCountedPtr<EBFluxRegister> fastFR;
     RefCountedPtr<EBQuadCFInterp> quadcfi;
     if(a_has_coar){
-      quadcfi = a_quadcfi.getNWOEBQuadCFInterp_ptr(iphase);
+      quadcfi = a_quadcfi.getEBQuadCFInterpPointer(iphase);
       CH_assert(!quadcfi.isNull());
     }
     if(a_has_fine){

@@ -27,7 +27,7 @@
 #include <CD_JumpBc.H>
 #include <CD_MFLevelGrid.H>
 #include <CD_Electrode.H>
-#include <MFQuadCFInterp.H>
+#include <CD_MFQuadCFInterp.H>
 #include <CD_MFFluxReg.H>
 #include <CD_EbHelmholtzOp.H>
 #include <CD_MfElectrostaticDirichletEbBc.H>

@@ -30,7 +30,7 @@
 #include <CD_MultiFluidIndexSpace.H>
 #include <CD_MultifluidAlias.H>
 #include <CD_MFLevelGrid.H>
-#include <MFQuadCFInterp.H>
+#include <CD_MFQuadCFInterp.H>
 #include <CD_DataOps.H>
 #include <CD_ElectrostaticEbBc.H>
 #include <CD_NamespaceHeader.H>

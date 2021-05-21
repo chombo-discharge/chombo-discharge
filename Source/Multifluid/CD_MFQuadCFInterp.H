@@ -1,17 +1,23 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   MFQuadCFInterp.H
+  @file   CD_MFQuadCFInterp.H
   @brief  Wrapper class for holding multifluid EBQuadCFInterps
   @author Robert Marskar
-  @date   Dec. 2017
 */
 
-#ifndef _MFQUADCFINTERP_
-#define _MFQUADCFINTERP_
+#ifndef CD_MFQuadCFInterp_H
+#define CD_MFQuadCFInterp_H
 
+// Chombo includes
 #include <RefCountedPtr.H>
 #include <EBQuadCFInterp.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_NamespaceHeader.H>
   
 /*!
   @brief Class for filling ghost cells alà EBQuadCFInterp for multiphase
@@ -42,17 +48,17 @@ public:
   /*!
     @brief Get interpolation utility
   */
-  const RefCountedPtr<EBQuadCFInterp>& getNWOEBQuadCFInterp_ptr(const int a_phase) const;
+  const RefCountedPtr<EBQuadCFInterp>& getEBQuadCFInterpPointer(const int a_phase) const;
 
   /*!
     @brief get interpolation utility for phase
   */
-  EBQuadCFInterp& getNWOEBQuadCFInterp(const int a_phase);
+  EBQuadCFInterp& getEBQuadCFInterp(const int a_phase);
 
   /*!
     @brief get interpolation utility for phase
   */
-  const EBQuadCFInterp& getNWOEBQuadCFInterp(const int a_phase) const;
+  const EBQuadCFInterp& getEBQuadCFInterp(const int a_phase) const;
   
 protected:
 
@@ -63,6 +69,7 @@ protected:
   Vector<RefCountedPtr<EBQuadCFInterp> > m_quadcfi;
   
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif
