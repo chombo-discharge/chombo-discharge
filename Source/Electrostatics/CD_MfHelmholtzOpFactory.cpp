@@ -366,12 +366,12 @@ void MfHelmholtzOpFactory::coarsenCoefficients(LevelData<MFCellFAB>&         a_a
       LevelData<BaseIVFAB<Real> > bco_irreg_coar;
       LevelData<BaseIVFAB<Real> > bco_irreg_fine;
 
-      mfalias::aliasMF(aco_coar,       i, a_aco_coar);
-      mfalias::aliasMF(aco_fine,       i, a_aco_fine);
-      mfalias::aliasMF(bco_coar,       i, a_bco_coar); 
-      mfalias::aliasMF(bco_fine,       i, a_bco_fine);       
-      mfalias::aliasMF(bco_irreg_coar, i, a_bco_irreg_coar); 
-      mfalias::aliasMF(bco_irreg_fine, i, a_bco_irreg_fine);
+      MultifluidAlias::aliasMF(aco_coar,       i, a_aco_coar);
+      MultifluidAlias::aliasMF(aco_fine,       i, a_aco_fine);
+      MultifluidAlias::aliasMF(bco_coar,       i, a_bco_coar); 
+      MultifluidAlias::aliasMF(bco_fine,       i, a_bco_fine);       
+      MultifluidAlias::aliasMF(bco_irreg_coar, i, a_bco_irreg_coar); 
+      MultifluidAlias::aliasMF(bco_irreg_fine, i, a_bco_irreg_fine);
 	
       aveop.average(aco_coar,       aco_fine,       interv);
       aveop.average(bco_coar,       bco_fine,       interv);

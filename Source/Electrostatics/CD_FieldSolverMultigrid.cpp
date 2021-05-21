@@ -350,8 +350,8 @@ void FieldSolverMultigrid::setPermittivities(const Vector<Dielectric>& a_dielect
       LevelData<EBFluxFAB> bco;
       LevelData<BaseIVFAB<Real> > bcoIrreg;
 
-      mfalias::aliasMF(bco,       phase::solid, *m_bCoefficient[lvl]);
-      mfalias::aliasMF(bcoIrreg, phase::solid, *m_bCoefficientIrreg[lvl]);
+      MultifluidAlias::aliasMF(bco,       phase::solid, *m_bCoefficient[lvl]);
+      MultifluidAlias::aliasMF(bcoIrreg, phase::solid, *m_bCoefficientIrreg[lvl]);
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 	EBFluxFAB& perm          = bco[dit()];

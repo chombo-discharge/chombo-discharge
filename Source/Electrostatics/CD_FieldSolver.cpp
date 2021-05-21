@@ -20,7 +20,7 @@
 
 // Our includes
 #include <CD_FieldSolver.H>
-#include <mfalias.H>
+#include <CD_MultifluidAlias.H>
 #include <CD_DataOps.H>
 #include <units.H>
 #include <CD_NamespaceHeader.H>
@@ -141,15 +141,15 @@ void FieldSolver::computeDisplacementField(MFAMRCellData& a_displacementField, c
     LevelData<EBCellFAB> E_gas, E_solid;
 
     // This is all we need for the gas phase
-    mfalias::aliasMF(D_gas,   phase::gas, D);
-    mfalias::aliasMF(E_gas,   phase::gas, E);
+    MultifluidAlias::aliasMF(D_gas,   phase::gas, D);
+    MultifluidAlias::aliasMF(E_gas,   phase::gas, E);
     E_gas.localCopyTo(D_gas);
     DataOps::scale(D_gas,   units::s_eps0);
 
     // For the solid phase, we multiply by epsilon. 
     if(m_multifluidIndexSpace->numPhases() > 1){
-      mfalias::aliasMF(D_solid, phase::solid, D);
-      mfalias::aliasMF(E_solid, phase::solid, E);
+      MultifluidAlias::aliasMF(D_solid, phase::solid, D);
+      MultifluidAlias::aliasMF(E_solid, phase::solid, E);
       E_solid.localCopyTo(D_solid);
       DataOps::scale(D_solid, units::s_eps0);
 
@@ -656,8 +656,8 @@ void FieldSolver::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) 
   LevelData<EBCellFAB> potential_gas;
   LevelData<EBCellFAB> potential_sol;
 
-  if(!ebis_gas.isNull()) mfalias::aliasMF(potential_gas,  phase::gas,   *m_potential[a_level]);
-  if(!ebis_sol.isNull()) mfalias::aliasMF(potential_sol,  phase::solid, *m_potential[a_level]);
+  if(!ebis_gas.isNull()) MultifluidAlias::aliasMF(potential_gas,  phase::gas,   *m_potential[a_level]);
+  if(!ebis_sol.isNull()) MultifluidAlias::aliasMF(potential_sol,  phase::solid, *m_potential[a_level]);
   
   // Write data
   if(!ebis_gas.isNull()) write(a_handle, potential_gas, "poisson_g");
@@ -677,8 +677,8 @@ void FieldSolver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
   LevelData<EBCellFAB> potential_gas;
   LevelData<EBCellFAB> potential_sol;
 
-  if(!ebis_gas.isNull()) mfalias::aliasMF(potential_gas,  phase::gas,   *m_potential[a_level]);
-  if(!ebis_sol.isNull()) mfalias::aliasMF(potential_sol,  phase::solid, *m_potential[a_level]);
+  if(!ebis_gas.isNull()) MultifluidAlias::aliasMF(potential_gas,  phase::gas,   *m_potential[a_level]);
+  if(!ebis_sol.isNull()) MultifluidAlias::aliasMF(potential_sol,  phase::solid, *m_potential[a_level]);
   
   // Read data
   if(!ebis_gas.isNull()) read<EBCellFAB>(a_handle, potential_gas, "poisson_g", m_amr->getGrids(m_realm)[a_level], Interval(0,0), false);
@@ -735,8 +735,8 @@ void FieldSolver::writeMultifluidData(EBAMRCellData& a_output, int& a_comp, cons
     LevelData<EBCellFAB> data_gas;
     LevelData<EBCellFAB> data_sol;
 
-    if(!ebis_gas.isNull()) mfalias::aliasMF(data_gas,  phase::gas,   *a_data[lvl]);
-    if(!ebis_sol.isNull()) mfalias::aliasMF(data_sol,  phase::solid, *a_data[lvl]);
+    if(!ebis_gas.isNull()) MultifluidAlias::aliasMF(data_gas,  phase::gas,   *a_data[lvl]);
+    if(!ebis_sol.isNull()) MultifluidAlias::aliasMF(data_sol,  phase::solid, *a_data[lvl]);
 
     data_gas.localCopyTo(*scratch[lvl]);
 

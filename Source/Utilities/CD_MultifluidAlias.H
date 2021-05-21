@@ -1,33 +1,36 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file mfalias.H
-  @brief Declaration of factories that allow aliasing of LevelData<MFFluxFAB> and LevelData<MFBaseIVFAB>
+  @file   CD_MultifluidAlias.H
+  @brief  Declaration of factories that allow aliasing of LevelData<MFFluxFAB> and LevelData<MFBaseIVFAB>
   @author Robert Marskar
-  @date Dec. 2017
-  @todo Segregate header and implementation.
-  @todo Do an aliasing for MFBaseIVFAB. 
 */
 
-#ifndef _MFALIAS_
-#define _MFALIAS_
+#ifndef CD_MultifluidAlias_H
+#define CD_MultifluidAlias_H
 
+// Chombo includes
 #include <MFFluxFAB.H>
 #include <MFCellFAB.H>
 
+// Our includes
 #include "MFBaseIVFAB.H"
-
-#include "CD_NamespaceHeader.H"
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Class for aliasing multifluid things
 */
-class mfalias {
+class MultifluidAlias {
 public:
 
   /*!
     @brief Alias MFCellFABs
   */
   static void aliasMF(LevelData<EBCellFAB>& a_alias, int a_phase, const LevelData<MFCellFAB>& a_input){
-    mf_cell_alias_factory factory((LevelData<MFCellFAB>*)& a_input, a_phase);
+    MfCellAliasFactory factory((LevelData<MFCellFAB>*)& a_input, a_phase);
     a_alias.define(a_input.disjointBoxLayout(), a_input.nComp(), a_input.ghostVect(), factory);
   }
 
@@ -35,7 +38,7 @@ public:
     @brief Alias MFFluxFABs
   */
   static void aliasMF(LevelData<EBFluxFAB>& a_alias, int a_phase, const LevelData<MFFluxFAB>& a_input){
-    mf_flux_alias_factory factory((LevelData<MFFluxFAB>*)& a_input, a_phase);
+    MfFluxAliasFactory factory((LevelData<MFFluxFAB>*)& a_input, a_phase);
     a_alias.define(a_input.disjointBoxLayout(), a_input.nComp(), a_input.ghostVect(), factory);
   }
 
@@ -43,7 +46,7 @@ public:
     @brief Alias MFBaseIVFABs
   */
   static void aliasMF(LevelData<BaseIVFAB<Real> >& a_alias, int a_phase, const LevelData<MFBaseIVFAB>& a_input){
-    mf_baseivfab_alias_factory factory((LevelData<MFBaseIVFAB>*)& a_input, a_phase);
+    MfIVAliasFactory factory((LevelData<MFBaseIVFAB>*)& a_input, a_phase);
     a_alias.define(a_input.disjointBoxLayout(), a_input.nComp(), a_input.ghostVect(), factory);
   }
 
@@ -52,13 +55,13 @@ private:
   /*!
     @brief Class for aliasing 
   */
-  class mf_cell_alias_factory : public DataFactory<EBCellFAB> {
+  class MfCellAliasFactory : public DataFactory<EBCellFAB> {
   public:
 
     /*!
       @brief Constructor
     */
-    mf_cell_alias_factory(LevelData<MFCellFAB>* a_mf, int a_phase){
+    MfCellAliasFactory(LevelData<MFCellFAB>* a_mf, int a_phase){
       m_mf    = a_mf;
       m_phase = a_phase;
     }
@@ -93,13 +96,13 @@ private:
   /*!
     @brief Class for aliasing 
   */
-  class mf_flux_alias_factory : public DataFactory<EBFluxFAB> {
+  class MfFluxAliasFactory : public DataFactory<EBFluxFAB> {
   public:
 
     /*!
       @brief Constructor
     */
-    mf_flux_alias_factory(LevelData<MFFluxFAB>* a_mf, int a_phase){
+    MfFluxAliasFactory(LevelData<MFFluxFAB>* a_mf, int a_phase){
       m_mf    = a_mf;
       m_phase = a_phase;
     }
@@ -134,13 +137,13 @@ private:
   /*!
     @brief Class for aliasing 
   */
-  class mf_baseivfab_alias_factory : public DataFactory<BaseIVFAB<Real> > {
+  class MfIVAliasFactory : public DataFactory<BaseIVFAB<Real> > {
   public:
 
     /*!
       @brief Constructor
     */
-    mf_baseivfab_alias_factory(LevelData<MFBaseIVFAB>* a_mf, int a_phase){
+    MfIVAliasFactory(LevelData<MFBaseIVFAB>* a_mf, int a_phase){
       m_mf    = a_mf;
       m_phase = a_phase;
     }
@@ -172,6 +175,7 @@ private:
     int m_phase;
   };
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

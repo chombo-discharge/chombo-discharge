@@ -19,7 +19,7 @@
 // Our includes
 #include <CD_MfElectrostaticDirichletEbBc.H>
 #include <CD_MfHelmholtzOp.H>
-#include <mfalias.H>
+#include <CD_MultifluidAlias.H>
 #include <CD_DataOps.H>
 #include <CD_NamespaceHeader.H>
   
@@ -189,9 +189,9 @@ void MfHelmholtzOp::define(const RefCountedPtr<MultiFluidIndexSpace>&           
     EBLevelDataOps::setVal(*m_dirival[iphase], 0.0);
     m_ebbc[iphase]->setData(m_dirival[iphase]);
 
-    mfalias::aliasMF(*m_aCoefeffs[iphase],     iphase, *a_aco);
-    mfalias::aliasMF(*m_bcoeffs[iphase],     iphase, *a_bco);
-    mfalias::aliasMF(*m_bcoeffs_irr[iphase], iphase, *a_bco_irreg);
+    MultifluidAlias::aliasMF(*m_aCoefeffs[iphase],     iphase, *a_aco);
+    MultifluidAlias::aliasMF(*m_bcoeffs[iphase],     iphase, *a_bco);
+    MultifluidAlias::aliasMF(*m_bcoeffs_irr[iphase], iphase, *a_bco_irreg);
 
     const RefCountedPtr<LevelData<EBCellFAB> >&        aco     = m_aCoefeffs[iphase];
     const RefCountedPtr<LevelData<EBFluxFAB> >&        bco     = m_bcoeffs[iphase];
@@ -377,7 +377,7 @@ void MfHelmholtzOp::diagonalScale(LevelData<MFCellFAB>& a_rhs){
 
   // // Operator diagonal scale
   for (int iphase = 0; iphase < m_phases; iphase++){
-    mfalias::aliasMF(*m_alias[0], iphase, a_rhs);
+    MultifluidAlias::aliasMF(*m_alias[0], iphase, a_rhs);
 
     m_ebops[iphase]->diagonalScale(*m_alias[0], true);
   }
@@ -392,7 +392,7 @@ void MfHelmholtzOp::divideByIdentityCoef(LevelData<MFCellFAB>& a_rhs){
 #endif
 
   for (int iphase = 0; iphase < m_phases; iphase++){
-    mfalias::aliasMF(*m_alias[0], iphase, a_rhs);
+    MultifluidAlias::aliasMF(*m_alias[0], iphase, a_rhs);
 
     m_ebops[iphase]->divideByIdentityCoef(*m_alias[0]);
   }
@@ -407,8 +407,8 @@ void MfHelmholtzOp::applyOpNoBoundary(LevelData<MFCellFAB>&       a_opPhi,
 
   this->update_bc(a_phi, true);
   for (int iphase=0; iphase < m_phases; iphase++){
-    mfalias::aliasMF(*m_alias[0], iphase, a_opPhi);
-    mfalias::aliasMF(*m_alias[1], iphase, a_phi);
+    MultifluidAlias::aliasMF(*m_alias[0], iphase, a_opPhi);
+    MultifluidAlias::aliasMF(*m_alias[1], iphase, a_phi);
     m_ebops[iphase]->applyOpNoBoundary(*m_alias[0], *m_alias[1]);
   }
 }
@@ -475,8 +475,8 @@ void MfHelmholtzOp::applyOp(LevelData<MFCellFAB>&        a_lhs,
   this->update_bc(a_phi, a_dit, a_homogeneous);
 
   for (int i=0; i < m_phases; i++){
-    mfalias::aliasMF(*m_alias[0], i, a_lhs);
-    mfalias::aliasMF(*m_alias[1], i, a_phi);
+    MultifluidAlias::aliasMF(*m_alias[0], i, a_lhs);
+    MultifluidAlias::aliasMF(*m_alias[1], i, a_phi);
     
     m_ebops[i]->applyOp(*m_alias[0], *m_alias[1], NULL, a_homogeneous, true, a_dit);
   }
@@ -646,7 +646,7 @@ Real MfHelmholtzOp::norm(const LevelData<MFCellFAB>& a_x, int a_ord){
   Real rtn = 0.0;
   for (int iphase=0; iphase<m_phases;iphase++){
     LevelData<EBCellFAB> alias;
-    mfalias::aliasMF(alias, iphase, a_x);
+    MultifluidAlias::aliasMF(alias, iphase, a_x);
 
     Real phaseNorm = m_ebops[iphase]->norm(alias, 0);
     rtn = Max(rtn, phaseNorm);
@@ -781,8 +781,8 @@ void MfHelmholtzOp::relax(LevelData<MFCellFAB>&       a_e,
   //     this->update_bc(a_e, homogeneous);
 
   //     for (int iphase = 0; iphase < m_phases; iphase++){
-  //       mfalias::aliasMF(*m_alias[0], iphase, a_e);
-  //       mfalias::aliasMF(*m_alias[1], iphase, a_residual);
+  //       MultifluidAlias::aliasMF(*m_alias[0], iphase, a_e);
+  //       MultifluidAlias::aliasMF(*m_alias[1], iphase, a_residual);
 
   //       m_ebops[iphase]->lazyGauSai(*m_alias[0], *m_alias[1]);
   //     }
@@ -793,8 +793,8 @@ void MfHelmholtzOp::relax(LevelData<MFCellFAB>&       a_e,
   
   if(!m_multifluid){ // Single-fluid code
     for (int iphase = 0; iphase < m_phases; iphase++){
-      mfalias::aliasMF(*m_alias[0], iphase, a_e);
-      mfalias::aliasMF(*m_alias[1], iphase, a_residual);
+      MultifluidAlias::aliasMF(*m_alias[0], iphase, a_e);
+      MultifluidAlias::aliasMF(*m_alias[1], iphase, a_residual);
 
       for (int i = 0; i < a_iterations; i++){
 	this->update_bc(a_e, homogeneous);
@@ -820,8 +820,8 @@ void MfHelmholtzOp::relax(LevelData<MFCellFAB>&       a_e,
       this->update_bc(a_e, homogeneous);
 
       for (int iphase = 0; iphase <= 1; iphase++){
-	mfalias::aliasMF(*m_alias[0], iphase, a_e);
-	mfalias::aliasMF(*m_alias[1], iphase, a_residual);
+	MultifluidAlias::aliasMF(*m_alias[0], iphase, a_e);
+	MultifluidAlias::aliasMF(*m_alias[1], iphase, a_residual);
 
 #if 0 // Original code
 	//	m_ebops[iphase]->lazyGauSai(*m_alias[0], *m_alias[1]);
@@ -839,12 +839,12 @@ void MfHelmholtzOp::relax(LevelData<MFCellFAB>&       a_e,
     
     const bool homogeneous = true;
 
-    mfalias::aliasMF(*m_alias[0], 0, a_e);        
-    mfalias::aliasMF(*m_alias[1], 0, a_residual);
-    mfalias::aliasMF(*m_alias[2], 0, lphi);
-    mfalias::aliasMF(*m_alias[3], 1, a_e);
-    mfalias::aliasMF(*m_alias[4], 1, a_residual);
-    mfalias::aliasMF(*m_alias[5], 1, lphi);
+    MultifluidAlias::aliasMF(*m_alias[0], 0, a_e);        
+    MultifluidAlias::aliasMF(*m_alias[1], 0, a_residual);
+    MultifluidAlias::aliasMF(*m_alias[2], 0, lphi);
+    MultifluidAlias::aliasMF(*m_alias[3], 1, a_e);
+    MultifluidAlias::aliasMF(*m_alias[4], 1, a_residual);
+    MultifluidAlias::aliasMF(*m_alias[5], 1, lphi);
 
     
     for (int i = 0; i < a_iterations; i++){
@@ -916,8 +916,8 @@ void MfHelmholtzOp::levelJacobi(LevelData<MFCellFAB>&       a_phi,
   bool homogeneous = true;
 
   for (int iphase = 0; iphase < m_phases; iphase++){
-    mfalias::aliasMF(*m_alias[0], iphase, a_phi);
-    mfalias::aliasMF(*m_alias[1], iphase, a_rhs);
+    MultifluidAlias::aliasMF(*m_alias[0], iphase, a_phi);
+    MultifluidAlias::aliasMF(*m_alias[1], iphase, a_rhs);
 
 #if 1 // This is the only way we can make it converge for now
       // m_ebops[iphase]->relaxPoiJac(*m_alias[0], *m_alias[1], 1);
@@ -958,9 +958,9 @@ void MfHelmholtzOp::restrictResidual(LevelData<MFCellFAB>&       a_resCoarse,
   pout() << "MfHelmholtzOp::restrictResidual"<< endl;
 #endif
   for (int i=0; i < m_phases; i++) {
-    mfalias::aliasMF(*m_alias[0], i, a_resCoarse);
-    mfalias::aliasMF(*m_alias[1], i, a_phiFine);
-    mfalias::aliasMF(*m_alias[2], i, a_rhsFine);
+    MultifluidAlias::aliasMF(*m_alias[0], i, a_resCoarse);
+    MultifluidAlias::aliasMF(*m_alias[1], i, a_phiFine);
+    MultifluidAlias::aliasMF(*m_alias[2], i, a_rhsFine);
     
     m_ebops[i]->restrictResidual(*m_alias[0], *m_alias[1], *m_alias[2]);
   }
@@ -973,8 +973,8 @@ void MfHelmholtzOp::prolongIncrement(LevelData<MFCellFAB>&       a_phiThisLevel,
   pout() << "MfHelmholtzOp::prolongIncrement"<< endl;
 #endif
   for (int i=0; i < m_phases; i++){
-    mfalias::aliasMF(*m_alias[0], i, a_phiThisLevel);
-    mfalias::aliasMF(*m_alias[1], i, a_correctCoarse);
+    MultifluidAlias::aliasMF(*m_alias[0], i, a_phiThisLevel);
+    MultifluidAlias::aliasMF(*m_alias[1], i, a_correctCoarse);
     
     m_ebops[i]->prolongIncrement(*m_alias[0], *m_alias[1]);
   }
@@ -1013,10 +1013,10 @@ void MfHelmholtzOp::AMROperator(LevelData<MFCellFAB>&       a_LofPhi,
   this->update_bc(a_phi, a_homogeneousBC);
 
   for (int iphase = 0; iphase < m_phases; iphase++){
-    mfalias::aliasMF(*m_alias[0], iphase, a_LofPhi);
-    mfalias::aliasMF(*m_alias[1], iphase, a_phiFine);
-    mfalias::aliasMF(*m_alias[2], iphase, a_phi);
-    mfalias::aliasMF(*m_alias[3], iphase, a_phiCoarse);
+    MultifluidAlias::aliasMF(*m_alias[0], iphase, a_LofPhi);
+    MultifluidAlias::aliasMF(*m_alias[1], iphase, a_phiFine);
+    MultifluidAlias::aliasMF(*m_alias[2], iphase, a_phi);
+    MultifluidAlias::aliasMF(*m_alias[3], iphase, a_phiCoarse);
 
     MfHelmholtzOp* finerOp = (MfHelmholtzOp*) a_finerOp;
 #if verb
@@ -1071,9 +1071,9 @@ void MfHelmholtzOp::AMROperatorNC(LevelData<MFCellFAB>&       a_LofPhi,
   this->update_bc(a_phi, a_homogeneousBC);
   
   for (int i=0; i < m_phases; i++){
-    mfalias::aliasMF(*m_alias[0], i, a_LofPhi);
-    mfalias::aliasMF(*m_alias[1], i, a_phiFine);
-    mfalias::aliasMF(*m_alias[2], i, a_phi);
+    MultifluidAlias::aliasMF(*m_alias[0], i, a_LofPhi);
+    MultifluidAlias::aliasMF(*m_alias[1], i, a_phiFine);
+    MultifluidAlias::aliasMF(*m_alias[2], i, a_phi);
 
     MfHelmholtzOp* finerOp = (MfHelmholtzOp*) a_finerOp;
     m_ebops[i]->AMROperatorNC(*m_alias[0], *m_alias[1], *m_alias[2], a_homogeneousBC, finerOp->m_ebops[i]);
@@ -1118,9 +1118,9 @@ void MfHelmholtzOp::AMROperatorNF(LevelData<MFCellFAB>&       a_LofPhi,
   this->update_bc(a_phi, a_homogeneousBC);
   
   for (int i=0; i<m_phases; i++){
-    mfalias::aliasMF(*m_alias[0], i, a_LofPhi);
-    mfalias::aliasMF(*m_alias[1], i, a_phi);
-    mfalias::aliasMF(*m_alias[2], i, a_phiCoarse);
+    MultifluidAlias::aliasMF(*m_alias[0], i, a_LofPhi);
+    MultifluidAlias::aliasMF(*m_alias[1], i, a_phi);
+    MultifluidAlias::aliasMF(*m_alias[2], i, a_phiCoarse);
 
     m_ebops[i]->AMROperatorNF(*m_alias[0], *m_alias[1], *m_alias[2], a_homogeneousBC);
     //    m_ebops[i]->applyOp(*m_alias[0], *m_alias[1], m_alias[2], a_homogeneousBC, false);
@@ -1140,9 +1140,9 @@ void MfHelmholtzOp::AMRUpdateResidual(LevelData<MFCellFAB>&       a_residual,
   this->update_bc(a_correction, true);
 
   for (int i=0; i < m_phases; i++){
-    mfalias::aliasMF(*m_alias[0], i, a_residual);
-    mfalias::aliasMF(*m_alias[1], i, a_correction);
-    mfalias::aliasMF(*m_alias[2], i, a_coarseCorrection);
+    MultifluidAlias::aliasMF(*m_alias[0], i, a_residual);
+    MultifluidAlias::aliasMF(*m_alias[1], i, a_correction);
+    MultifluidAlias::aliasMF(*m_alias[2], i, a_coarseCorrection);
     
     m_ebops[i]->AMRUpdateResidual(*m_alias[0], *m_alias[1], *m_alias[2]);
   }
@@ -1159,10 +1159,10 @@ void MfHelmholtzOp::AMRRestrict(LevelData<MFCellFAB>&       a_resCoarse,
 #endif
   
   for (int i=0; i < m_phases; i++){
-    mfalias::aliasMF(*m_alias[0], i, a_resCoarse);
-    mfalias::aliasMF(*m_alias[1], i, a_residual);
-    mfalias::aliasMF(*m_alias[2], i, a_correction);
-    mfalias::aliasMF(*m_alias[3], i, a_coarseCorrection);
+    MultifluidAlias::aliasMF(*m_alias[0], i, a_resCoarse);
+    MultifluidAlias::aliasMF(*m_alias[1], i, a_residual);
+    MultifluidAlias::aliasMF(*m_alias[2], i, a_correction);
+    MultifluidAlias::aliasMF(*m_alias[3], i, a_coarseCorrection);
     
     m_ebops[i]->AMRRestrict(*m_alias[0], *m_alias[1], *m_alias[2], *m_alias[3], a_skip_res);
   }
@@ -1176,8 +1176,8 @@ void MfHelmholtzOp::AMRProlong(LevelData<MFCellFAB>&       a_correction,
 #endif
   
   for (int i=0; i < m_phases; i++){
-    mfalias::aliasMF(*m_alias[0], i, a_correction);
-    mfalias::aliasMF(*m_alias[1], i, a_coarseCorrection);
+    MultifluidAlias::aliasMF(*m_alias[0], i, a_correction);
+    MultifluidAlias::aliasMF(*m_alias[1], i, a_coarseCorrection);
     
     m_ebops[i]->AMRProlong(*m_alias[0], *m_alias[1]);
   }
@@ -1196,8 +1196,8 @@ Real MfHelmholtzOp::AMRNorm(const LevelData<MFCellFAB>& a_coar_resid,
   Real m = 0;
 
   for (int i = 0; i < m_phases; i++){
-    mfalias::aliasMF(*m_alias[0], i, a_coar_resid);
-    mfalias::aliasMF(*m_alias[1], i, a_fine_resid);
+    MultifluidAlias::aliasMF(*m_alias[0], i, a_coar_resid);
+    MultifluidAlias::aliasMF(*m_alias[1], i, a_fine_resid);
 
     Real norm = m_ebops[i]->AMRNorm(*m_alias[0], *m_alias[1], a_ref_rat, a_ord);
 

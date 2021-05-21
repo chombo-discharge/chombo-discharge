@@ -20,7 +20,7 @@
 
 // Our includes
 #include <CD_AmrMesh.H>
-#include <mfalias.H>
+#include <CD_MultifluidAlias.H>
 #include <CD_LoadBalancing.H>
 #include <CD_gradientF_F.H>
 #include <CD_EbFastFineToCoarRedist.H>
@@ -114,7 +114,7 @@ void AmrMesh::alias(EBAMRCellData&           a_data,
   }
 
   for (int lvl = 0; lvl <= a_finestLevel; lvl++){
-    mfalias::aliasMF(*a_data[lvl], a_phase, *a_mfdata[lvl]);
+    MultifluidAlias::aliasMF(*a_data[lvl], a_phase, *a_mfdata[lvl]);
   }
 }
 
@@ -128,7 +128,7 @@ void AmrMesh::alias(EBAMRFluxData&           a_data,
   }
 
   for (int lvl = 0; lvl <= a_finestLevel; lvl++){
-    mfalias::aliasMF(*a_data[lvl], a_phase, *a_mfdata[lvl]);
+    MultifluidAlias::aliasMF(*a_data[lvl], a_phase, *a_mfdata[lvl]);
   }
 }
 
@@ -139,7 +139,7 @@ void AmrMesh::alias(EBAMRCellData& a_data, const phase::which_phase a_phase, con
   }
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
-    mfalias::aliasMF(*a_data[lvl], a_phase, *a_mfdata[lvl]);
+    MultifluidAlias::aliasMF(*a_data[lvl], a_phase, *a_mfdata[lvl]);
   }
 }
 
@@ -150,7 +150,7 @@ void AmrMesh::alias(EBAMRFluxData& a_data, const phase::which_phase a_phase, con
   }
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
-    mfalias::aliasMF(*a_data[lvl], a_phase, *a_mfdata[lvl]);
+    MultifluidAlias::aliasMF(*a_data[lvl], a_phase, *a_mfdata[lvl]);
   }
 }
 
@@ -161,7 +161,7 @@ void AmrMesh::alias(EBAMRIVData& a_data, const phase::which_phase a_phase, const
   }
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
-    mfalias::aliasMF(*a_data[lvl], a_phase, *a_mfdata[lvl]);
+    MultifluidAlias::aliasMF(*a_data[lvl], a_phase, *a_mfdata[lvl]);
   }
 }
 
@@ -1089,8 +1089,8 @@ void AmrMesh::computeGradient(MFAMRCellData& a_gradient, const MFAMRCellData& a_
       alias_grad[lvl] = RefCountedPtr<LevelData<EBCellFAB> > (new LevelData<EBCellFAB>());
       alias_phi[lvl]  = RefCountedPtr<LevelData<EBCellFAB> > (new LevelData<EBCellFAB>());
       
-      mfalias::aliasMF(*alias_grad[lvl], iphase, *a_gradient[lvl]);
-      mfalias::aliasMF(*alias_phi[lvl],  iphase, *a_phi[lvl]);
+      MultifluidAlias::aliasMF(*alias_grad[lvl], iphase, *a_gradient[lvl]);
+      MultifluidAlias::aliasMF(*alias_phi[lvl],  iphase, *a_phi[lvl]);
     }
 
     if(iphase == 0){
@@ -1170,8 +1170,8 @@ void AmrMesh::averageDown(MFAMRFluxData& a_data, const std::string a_realm){
     alias_g[lvl] = RefCountedPtr<LevelData<EBFluxFAB> > (new LevelData<EBFluxFAB>());
     alias_s[lvl] = RefCountedPtr<LevelData<EBFluxFAB> > (new LevelData<EBFluxFAB>());
       
-    if(!ebis_gas.isNull()) mfalias::aliasMF(*alias_g[lvl], phase::gas,   *a_data[lvl]);
-    if(!ebis_sol.isNull()) mfalias::aliasMF(*alias_s[lvl], phase::solid, *a_data[lvl]);
+    if(!ebis_gas.isNull()) MultifluidAlias::aliasMF(*alias_g[lvl], phase::gas,   *a_data[lvl]);
+    if(!ebis_sol.isNull()) MultifluidAlias::aliasMF(*alias_s[lvl], phase::solid, *a_data[lvl]);
   }
 
   if(!ebis_gas.isNull()) this->averageDown(alias_g, a_realm, phase::gas);
@@ -1199,8 +1199,8 @@ void AmrMesh::averageDown(MFAMRCellData& a_data, const std::string a_realm){
     alias_g[lvl] = RefCountedPtr<LevelData<EBCellFAB> > (new LevelData<EBCellFAB>());
     alias_s[lvl] = RefCountedPtr<LevelData<EBCellFAB> > (new LevelData<EBCellFAB>());
       
-    if(!ebis_gas.isNull()) mfalias::aliasMF(*alias_g[lvl], phase::gas,   *a_data[lvl]);
-    if(!ebis_sol.isNull()) mfalias::aliasMF(*alias_s[lvl], phase::solid, *a_data[lvl]);
+    if(!ebis_gas.isNull()) MultifluidAlias::aliasMF(*alias_g[lvl], phase::gas,   *a_data[lvl]);
+    if(!ebis_sol.isNull()) MultifluidAlias::aliasMF(*alias_s[lvl], phase::solid, *a_data[lvl]);
   }
 
   if(!ebis_gas.isNull()) this->averageDown(alias_g, a_realm, phase::gas);
@@ -1359,8 +1359,8 @@ void AmrMesh::interpGhost(MFAMRCellData& a_data, const std::string a_realm){
     alias_g[lvl] = RefCountedPtr<LevelData<EBCellFAB> > (new LevelData<EBCellFAB>());
     alias_s[lvl] = RefCountedPtr<LevelData<EBCellFAB> > (new LevelData<EBCellFAB>());
       
-    if(!ebis_gas.isNull()) mfalias::aliasMF(*alias_g[lvl], phase::gas,   *a_data[lvl]);
-    if(!ebis_sol.isNull()) mfalias::aliasMF(*alias_s[lvl], phase::solid, *a_data[lvl]);
+    if(!ebis_gas.isNull()) MultifluidAlias::aliasMF(*alias_g[lvl], phase::gas,   *a_data[lvl]);
+    if(!ebis_sol.isNull()) MultifluidAlias::aliasMF(*alias_s[lvl], phase::solid, *a_data[lvl]);
   }
 
   if(!ebis_gas.isNull()) this->interpGhost(alias_g, a_realm, phase::gas);

@@ -24,7 +24,7 @@
 // Our includes
 #include <CD_Driver.H>
 #include <CD_DataOps.H>
-#include <mfalias.H>
+#include <CD_MultifluidAlias.H>
 #include <units.H>
 #include <CD_MemoryReport.H>
 #include <CD_NamespaceHeader.H>
