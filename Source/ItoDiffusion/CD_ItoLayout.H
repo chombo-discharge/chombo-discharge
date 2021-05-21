@@ -17,7 +17,7 @@
 #include <CD_NamespaceHeader.H>
   
 template <class T>
-class ito_iterator;
+class ItoIterator;
 
 /*!
   @brief Class for holding a set of ItoSolvers
@@ -49,7 +49,7 @@ public:
   /*!
     @brief Return iterator. The iterator is a simple random access object
   */
-  virtual ito_iterator<T> iterator();
+  virtual ItoIterator<T> iterator();
 
   /*!
     @brief Get Realm

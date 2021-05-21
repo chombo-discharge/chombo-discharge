@@ -1,49 +1,52 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   ito_iterator.H
+  @file   CD_ItoIterator.H
   @brief  Iterator class for ItoLayout
   @author Robert Marskar
-  @date   June Dec. 2017
 */
 
-#ifndef _ITO_ITERATOR_
-#define _ITO_ITERATOR_
+#ifndef CD_ItoIterator_H
+#define CD_ItoIterator_H
 
 #include <CD_ItoLayout.H>
-
-#include "CD_NamespaceHeader.H"
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Iterator class for ItoLayout
 */
 template <class T>
-class ito_iterator {
+class ItoIterator {
 public:
 
   /*!
     @brief Silly enum for iterating through selected species
   */
   enum class SpeciesIteration{
-    all,
-    charged,
-    negative,
-    positive,
-    neutral
+    All,
+    Charged,
+    Negative,
+    Positive,
+    Neutral
   };
   
   /*!
     @brief Empty constructor
   */
-  ito_iterator();
+  ItoIterator();
 
   /*!
     @brief Full constructor
   */
-  ito_iterator(ItoLayout<T>& a_layout, const SpeciesIteration a_mode = SpeciesIteration::all);
+  ItoIterator(ItoLayout<T>& a_layout, const SpeciesIteration a_mode = SpeciesIteration::All);
 
   /*!
     @brief Destructor
   */
-  virtual ~ito_iterator();
+  virtual ~ItoIterator();
 
   /*!
     @brief Get number of solvers. 
@@ -113,8 +116,9 @@ protected:
   Vector<RefCountedPtr<ItoSpecies> > m_species;
 
 };
-#include "CD_NamespaceFooter.H"
 
-#include "ito_iteratorI.H"
+#include <CD_NamespaceFooter.H>
+
+#include <CD_ItoIteratorImplem.H>
 
 #endif

@@ -284,7 +284,7 @@ void ito_plasma_stepper::writeCheckpointData(HDF5Handle& a_handle, const int a_l
     pout() << "ito_plasma_stepper::writeCheckpointData" << endl;
   }
 
-  for (ito_iterator<ItoSolver> solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+  for (ItoIterator<ItoSolver> solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<ItoSolver>& solver = solver_it();
     solver->writeCheckpointLevel(a_handle, a_lvl);
   }
@@ -304,7 +304,7 @@ void ito_plasma_stepper::readCheckpointData(HDF5Handle& a_handle, const int a_lv
     pout() << "ito_plasma_stepper::readCheckpointData" << endl;
   }
 
-  for (ito_iterator<ItoSolver> solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+  for (ItoIterator<ItoSolver> solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ItoSolver>& solver = solver_it();
     solver->readCheckpointLevel(a_handle, a_lvl);
   }
@@ -333,7 +333,7 @@ void ito_plasma_stepper::writePlotData(EBAMRCellData& a_output, Vector<std::stri
   m_sigma->writePlotData(a_output, a_icomp);
 
   // Ito solvers copy their output data
-  for (ito_iterator<ItoSolver> solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+  for (ItoIterator<ItoSolver> solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ItoSolver>& solver = solver_it();
     a_plotVariableNames.append(solver->getPlotVariableNames());
     solver->writePlotData(a_output, a_icomp);
@@ -806,7 +806,7 @@ int ito_plasma_stepper::getNumberOfPlotVariables() const {
 
   int ncomp = 0;
   
-  for (ito_iterator<ItoSolver> solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
+  for (ItoIterator<ItoSolver> solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ItoSolver>& solver = solver_it();
     ncomp += solver->getNumberOfPlotVariables();
   }

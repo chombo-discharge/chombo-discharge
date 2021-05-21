@@ -1,26 +1,30 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   ito_iterator.H
-  @brief  Implementation of ito_iterator.H
+  @file   CD_ItoIteratorImplem.H
+  @brief  Implementation of CD_ItoIterator.H
   @author Robert Marskar
-  @date   May 2020
 */
 
-#ifndef _ITO_ITERATORI_H_
-#define _ITO_ITERATORI_H_
+#ifndef CD_ItoIteratorImplem_H
+#define CD_ItoIteratorImplem_H
 
-#include "ito_iterator.H"
-
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_ItoIterator.H>
+#include <CD_NamespaceHeader.H>
 
 template <class T>
-ito_iterator<T>::ito_iterator(){
-  CH_TIME("ito_iterator<T>::ito_iterator<T>");
+ItoIterator<T>::ItoIterator(){
+  CH_TIME("ItoIterator<T>::ItoIterator<T>");
   m_defined = false;
 }
 
 template <class T>
-ito_iterator<T>::ito_iterator(ItoLayout<T>& a_layout, const SpeciesIteration a_mode){
-  CH_TIME("ito_iterator<T>::ito_iterator<T>");
+ItoIterator<T>::ItoIterator(ItoLayout<T>& a_layout, const SpeciesIteration a_mode){
+  CH_TIME("ItoIterator<T>::ItoIterator<T>");
     
   m_solvers  = a_layout.getSolvers();
   m_species  = a_layout.getSpecies();
@@ -32,38 +36,38 @@ ito_iterator<T>::ito_iterator(ItoLayout<T>& a_layout, const SpeciesIteration a_m
 }
 
 template <class T>
-ito_iterator<T>::~ito_iterator<T>(){
+ItoIterator<T>::~ItoIterator<T>(){
 
 }
 
 template <class T>
-int ito_iterator<T>::getNumberOfSolvers(){
+int ItoIterator<T>::getNumberOfSolvers(){
   CH_assert(m_defined);
   return m_num;
 }
 
 template <class T>
-int ito_iterator<T>::index() const {
+int ItoIterator<T>::index() const {
   CH_assert(m_defined);
   return m_isolver;
 }
 
 template <class T>
-void ito_iterator<T>::reset(){
+void ItoIterator<T>::reset(){
   CH_assert(m_defined);
   m_isolver = 0;
 }
 
 template <class T>
-bool ito_iterator<T>::ok(){
+bool ItoIterator<T>::ok(){
   return (m_isolver < m_num);
 }
 
 template <class T>
-void ito_iterator<T>::operator++(){
+void ItoIterator<T>::operator++(){
   CH_assert(m_defined);
 
-  if(m_mode == SpeciesIteration::all){
+  if(m_mode == SpeciesIteration::All){
     m_isolver++;
   }
   else{
@@ -73,25 +77,25 @@ void ito_iterator<T>::operator++(){
       const RefCountedPtr<ItoSolver>& solver = m_solvers[isolver];
       const RefCountedPtr<ItoSpecies>& species   = m_species[isolver];
       
-      if(m_mode == SpeciesIteration::charged){
+      if(m_mode == SpeciesIteration::Charged){
 	if(species->getChargeNumber() != 0){
 	  m_isolver = isolver;
 	  break;
 	}
       }
-      else if(m_mode == SpeciesIteration::negative){
+      else if(m_mode == SpeciesIteration::Negative){
 	if(species->getChargeNumber() < 0){
 	  m_isolver = isolver;
 	  break;
 	}
       }
-      else if(m_mode == SpeciesIteration::positive){
+      else if(m_mode == SpeciesIteration::Positive){
 	if(species->getChargeNumber() > 0){
 	  m_isolver = isolver;
 	  break;
 	}
       }
-      else if(m_mode == SpeciesIteration::neutral){
+      else if(m_mode == SpeciesIteration::Neutral){
 	if(species->getChargeNumber() == 0){
 	  m_isolver = isolver;
 	  break;
@@ -102,18 +106,19 @@ void ito_iterator<T>::operator++(){
 }
 
 template <class T>
-RefCountedPtr<T>& ito_iterator<T>::operator() () {
+RefCountedPtr<T>& ItoIterator<T>::operator() () {
   CH_assert(m_defined == true);
   CH_assert(m_isolver < m_num);
   return m_solvers[m_isolver];
 }
 
 template <class T>
-RefCountedPtr<ItoSpecies>& ito_iterator<T>::getSpecies() {
+RefCountedPtr<ItoSpecies>& ItoIterator<T>::getSpecies() {
   CH_assert(m_defined == true);
   CH_assert(m_isolver < m_num);
   return m_species[m_isolver];
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif
