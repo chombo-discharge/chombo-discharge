@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_DcelVertex.H
-  @brief  Declaration of a vertex class for describing surface tesselations
+  @brief  Declaration of a vertex class for describing surface Tesselations
   @author Robert Marskar
 */
 

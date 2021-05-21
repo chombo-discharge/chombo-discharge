@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_DcelIterator.H
-  @brief  Declaration of an iterators for DCEL surface tesselations
+  @brief  Declaration of an iterators for DCEL surface Tesselations
   @author Robert Marskar
 */
 

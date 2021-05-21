@@ -1,14 +1,19 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   tesselation.cpp
-  @brief  Implementation of tesselation.H
+  @file   CD_Tesselation.cpp
+  @brief  Implementation of CD_Tesselation.H
   @author Robert Marskar
-  @date   March 2021
 */
 
-#include "tesselation.H"
-
+// Chombo includes
 #include <ParmParse.H>
 
+// Our includes
+#include <CD_Tesselation.H>
 #include <CD_BoundingVolumes.H>
 #include <CD_BVH.H>
 #include <CD_DcelMesh.H>
@@ -16,8 +21,7 @@
 #include <CD_DcelSdf.H>
 #include <CD_DcelBVH.H>
 #include <CD_BvhSdf.H>
-
-#include "CD_NamespaceHeader.H"
+#include <CD_NamespaceHeader.H>
 
 using namespace Dcel;
 
@@ -30,12 +34,12 @@ using Sphere = BoundingVolumes::BoundingSphereT<precision>;
 
 using BV = AABB;
 
-tesselation::tesselation(){
+Tesselation::Tesselation(){
 
   std::string filename;
   std::string partitioner;
 
-  ParmParse pp("tesselation");
+  ParmParse pp("Tesselation");
 
   pp.get("mesh_file",   filename);
   pp.get("partitioner", partitioner);
@@ -63,7 +67,7 @@ tesselation::tesselation(){
 					    defaultBVConstructor<precision, BV>);
   }
   else{
-    MayDay::Abort("tesselation::tesselation() -- unknown partitioner requested");
+    MayDay::Abort("Tesselation::Tesselation() -- unknown partitioner requested");
   }
 
 
@@ -73,7 +77,8 @@ tesselation::tesselation(){
   
 }
 
-tesselation::~tesselation(){
+Tesselation::~Tesselation(){
   
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

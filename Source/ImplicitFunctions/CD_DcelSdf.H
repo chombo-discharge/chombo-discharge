@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_DcelSdf.H
-  @brief  Declaration of an implicit-function class that gets its value function from a DCEL surface tesselation
+  @brief  Declaration of an implicit-function class that gets its value function from a DCEL surface Tesselation
   @author Robert Marskar
   @date   March 2021
 */

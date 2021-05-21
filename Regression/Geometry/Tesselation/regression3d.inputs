@@ -73,5 +73,5 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 # ====================================================================================================
 # TESSELATION GEOMETRY CLASS
 # ====================================================================================================
-tesselation.mesh_file    = sphere.ply
-tesselation.partitioner  = overlap
+Tesselation.mesh_file    = sphere.ply
+Tesselation.partitioner  = overlap

@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_DcelMesh.H
-  @brief  Declaration of a mesh class for handling surface tesselations
+  @brief  Declaration of a mesh class for handling surface Tesselations
   @author Robert Marskar
 */
 
