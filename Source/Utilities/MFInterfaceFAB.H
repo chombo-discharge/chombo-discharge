@@ -73,21 +73,21 @@ public:
   /*!
     @brief Get BaseIVFAB for phase
   */
-  virtual BaseIVFAB<T>& get_ivfab(const int a_phase){
+  virtual BaseIVFAB<T>& getIVFAB(const int a_phase){
     return *m_phase[a_phase];
   }
 
   /*!
     @brief Get BaseIVFAB for phase
   */
-  virtual const BaseIVFAB<T>& get_ivfab(const int a_phase) const {
+  virtual const BaseIVFAB<T>& getIVFAB(const int a_phase) const {
     return *m_phase[a_phase];
   }
 
   /*!
     @brief Get BaseIVFAB for phase
   */
-  virtual BaseIVFAB<T>* getPhase_ptr(int a_phase){
+  virtual BaseIVFAB<T>* getPhasePtr(int a_phase){
     return m_phase[a_phase];
   }
 

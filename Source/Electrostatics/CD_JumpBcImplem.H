@@ -25,14 +25,14 @@ void JumpBc::computeAvgJump(const BaseIVFAB<Real>& a_jump, const MFCellFAB& a_ph
   const int phase1 = 0;
   const int phase2 = 1;
   
-  const BaseIVFAB<Real>& bco1 = m_bco[a_dit].get_ivfab(phase1);
-  const BaseIVFAB<Real>& bco2 = m_bco[a_dit].get_ivfab(phase2);
+  const BaseIVFAB<Real>& bco1 = m_bco[a_dit].getIVFAB(phase1);
+  const BaseIVFAB<Real>& bco2 = m_bco[a_dit].getIVFAB(phase2);
 
   const EBISBox& ebisbox1 = a_phi.getPhase(phase1).getEBISBox();
   const EBISBox& ebisbox2 = a_phi.getPhase(phase2).getEBISBox();
 
-  BaseIVFAB<Real>& avg1 = m_avgJump[a_dit].get_ivfab(phase1);
-  BaseIVFAB<Real>& avg2 = m_avgJump[a_dit].get_ivfab(phase2);
+  BaseIVFAB<Real>& avg1 = m_avgJump[a_dit].getIVFAB(phase1);
+  BaseIVFAB<Real>& avg2 = m_avgJump[a_dit].getIVFAB(phase2);
 
   avg1.setVal(0.0);
   avg2.setVal(0.0);
@@ -73,20 +73,20 @@ void JumpBc::matchBc(BaseIVFAB<Real>&                  a_phibc,
 
   JumpBc::computeAvgJump(a_jump, a_phi, a_dit);
   
-  const BaseIVFAB<Real>& avg_bco1    = m_avgBco[a_dit].get_ivfab(phase1);
-  const BaseIVFAB<Real>& avg_bco2    = m_avgBco[a_dit].get_ivfab(phase2);
+  const BaseIVFAB<Real>& avg_bco1    = m_avgBco[a_dit].getIVFAB(phase1);
+  const BaseIVFAB<Real>& avg_bco2    = m_avgBco[a_dit].getIVFAB(phase2);
   
-  const BaseIVFAB<Real>& avg_w1      = m_avgWeights[a_dit].get_ivfab(phase1);
-  const BaseIVFAB<Real>& avg_w2      = m_avgWeights[a_dit].get_ivfab(phase2);
+  const BaseIVFAB<Real>& avg_w1      = m_avgWeights[a_dit].getIVFAB(phase1);
+  const BaseIVFAB<Real>& avg_w2      = m_avgWeights[a_dit].getIVFAB(phase2);
   
-  const BaseIVFAB<VoFStencil>& avg_sten1 = m_avgStencils[a_dit].get_ivfab(phase1);
-  const BaseIVFAB<VoFStencil>& avg_sten2 = m_avgStencils[a_dit].get_ivfab(phase2);
+  const BaseIVFAB<VoFStencil>& avg_sten1 = m_avgStencils[a_dit].getIVFAB(phase1);
+  const BaseIVFAB<VoFStencil>& avg_sten2 = m_avgStencils[a_dit].getIVFAB(phase2);
 
-  const BaseIVFAB<Real>& avg_jump1   = m_avgJump[a_dit].get_ivfab(phase1);
-  const BaseIVFAB<Real>& avg_jump2   = m_avgJump[a_dit].get_ivfab(phase2);
+  const BaseIVFAB<Real>& avg_jump1   = m_avgJump[a_dit].getIVFAB(phase1);
+  const BaseIVFAB<Real>& avg_jump2   = m_avgJump[a_dit].getIVFAB(phase2);
 
-  const BaseIVFAB<Real>& avg_factor1   = m_avgFactor[a_dit].get_ivfab(phase1);
-  const BaseIVFAB<Real>& avg_factor2   = m_avgFactor[a_dit].get_ivfab(phase2);
+  const BaseIVFAB<Real>& avg_factor1   = m_avgFactor[a_dit].getIVFAB(phase1);
+  const BaseIVFAB<Real>& avg_factor2   = m_avgFactor[a_dit].getIVFAB(phase2);
   
   const EBCellFAB& phi1              = a_phi.getPhase(phase1);
   const EBCellFAB& phi2              = a_phi.getPhase(phase2);
@@ -94,11 +94,11 @@ void JumpBc::matchBc(BaseIVFAB<Real>&                  a_phibc,
   const EBISBox& ebisbox1            = phi1.getEBISBox();
   const EBISBox& ebisbox2            = phi2.getEBISBox();
   
-  BaseIVFAB<Real>& inhomo1 = m_inhomo[a_dit].get_ivfab(phase1);
-  BaseIVFAB<Real>& inhomo2 = m_inhomo[a_dit].get_ivfab(phase2);
+  BaseIVFAB<Real>& inhomo1 = m_inhomo[a_dit].getIVFAB(phase1);
+  BaseIVFAB<Real>& inhomo2 = m_inhomo[a_dit].getIVFAB(phase2);
 
-  BaseIVFAB<Real>& homog1  = m_homog[a_dit].get_ivfab(phase1);
-  BaseIVFAB<Real>& homog2  = m_homog[a_dit].get_ivfab(phase2);
+  BaseIVFAB<Real>& homog1  = m_homog[a_dit].getIVFAB(phase1);
+  BaseIVFAB<Real>& homog2  = m_homog[a_dit].getIVFAB(phase2);
 
   homog1.setVal(0.0); // This is the contribution of the surface charge for phase1
   homog2.setVal(0.0); // This is the contribution of the surface charge for phase2

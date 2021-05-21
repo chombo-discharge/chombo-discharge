@@ -156,12 +156,12 @@ void MfElectrostaticDirichletEbBc::define(const LayoutData<IntVectSet>& a_cfivs,
 
       // Everything that comes from JumpBc is from vof0, as it should!!!
       VoFStencil& cur_stencil     = m_IrregStencils[dit()](vof, comp);
-      const VoFStencil& jump_sten = avgStens.get_ivfab(m_phase)(vof0, comp);
+      const VoFStencil& jump_sten = avgStens.getIVFAB(m_phase)(vof0, comp);
       const Real cur_weight       = m_irreg_weights[dit()](vof, comp); 
-      const Real wp               = avgWeights.get_ivfab(m_phase)(vof0, comp);
-      const Real wq               = avgWeights.get_ivfab(otherphase)(vof0, comp);
-      const Real bp               = avgBco.get_ivfab(m_phase)(vof0, comp);
-      const Real bq               = avgBco.get_ivfab(otherphase)(vof0, comp);
+      const Real wp               = avgWeights.getIVFAB(m_phase)(vof0, comp);
+      const Real wq               = avgWeights.getIVFAB(otherphase)(vof0, comp);
+      const Real bp               = avgBco.getIVFAB(m_phase)(vof0, comp);
+      const Real bq               = avgBco.getIVFAB(otherphase)(vof0, comp);
       const Real factor           = cur_weight*bp/(bp*wp + bq*wq);
 
       
@@ -374,9 +374,9 @@ void MfElectrostaticDirichletEbBc::applyEBFlux(EBCellFAB&                    a_l
     const Real area_frac  = ebisbox.bndryArea(vof);
 
 
-    Real value = inhomo.get_ivfab(m_phase)(vof, comp); // This is the flux from the other side. Always use it. 
+    Real value = inhomo.getIVFAB(m_phase)(vof, comp); // This is the flux from the other side. Always use it. 
     if(!a_useHomogeneous){
-      value += homog.get_ivfab(m_phase)(vof,comp);
+      value += homog.getIVFAB(m_phase)(vof,comp);
     }
 
     // Flux - this contains the contribution from the surface charge (inhomogeneous bc) and the

@@ -208,8 +208,8 @@ void JumpBc::defineVofIterator(){
     VoFIterator& vofit_s = m_vofit_sol[dit()];
 
     const IntVectSet& ivs = m_bco[dit()].get_ivs();
-    const EBGraph& graph1 = m_bco[dit()].get_ivfab(phase1).getEBGraph();
-    const EBGraph& graph2 = m_bco[dit()].get_ivfab(phase2).getEBGraph();
+    const EBGraph& graph1 = m_bco[dit()].getIVFAB(phase1).getEBGraph();
+    const EBGraph& graph2 = m_bco[dit()].getIVFAB(phase2).getEBGraph();
 
     vofit_g.define(ivs, graph1);
     vofit_s.define(ivs, graph2);
@@ -223,8 +223,8 @@ void JumpBc::setBcoefficient(const LevelData<MFBaseIVFAB>& a_bco){
   for (DataIterator dit = m_grids.dataIterator(); dit.ok(); ++dit){
     for (int iphase = 0; iphase < m_multifluidIndexSpace->numPhases(); iphase ++){
 
-      BaseIVFAB<Real>& bco             = m_bco[dit()].get_ivfab(iphase);
-      const BaseIVFAB<Real>& bco_irreg = a_bco[dit()].get_ivfab(iphase);
+      BaseIVFAB<Real>& bco             = m_bco[dit()].getIVFAB(iphase);
+      const BaseIVFAB<Real>& bco_irreg = a_bco[dit()].getIVFAB(iphase);
 
       for (VoFIterator vofit(bco.getIVS(), bco.getEBGraph()); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();
@@ -242,12 +242,12 @@ void JumpBc::buildStencils(){
   for (DataIterator dit = m_grids.dataIterator(); dit.ok(); ++dit){
     for (int iphase = 0; iphase < m_multifluidIndexSpace->numPhases(); iphase ++){
 
-      BaseIVFAB<Real>& bco               = m_bco[dit()].get_ivfab(iphase);
-      BaseIVFAB<Real>& avgBco            = m_avgBco[dit()].get_ivfab(iphase);
-      BaseIVFAB<Real>& weights           = m_weights[dit()].get_ivfab(iphase);
-      BaseIVFAB<Real>& avgWeights        = m_avgWeights[dit()].get_ivfab(iphase);
-      BaseIVFAB<VoFStencil>& stencils    = m_stencils[dit()].get_ivfab(iphase);
-      BaseIVFAB<VoFStencil>& avgStencils = m_avgStencils[dit()].get_ivfab(iphase);
+      BaseIVFAB<Real>& bco               = m_bco[dit()].getIVFAB(iphase);
+      BaseIVFAB<Real>& avgBco            = m_avgBco[dit()].getIVFAB(iphase);
+      BaseIVFAB<Real>& weights           = m_weights[dit()].getIVFAB(iphase);
+      BaseIVFAB<Real>& avgWeights        = m_avgWeights[dit()].getIVFAB(iphase);
+      BaseIVFAB<VoFStencil>& stencils    = m_stencils[dit()].getIVFAB(iphase);
+      BaseIVFAB<VoFStencil>& avgStencils = m_avgStencils[dit()].getIVFAB(iphase);
 
       avgBco.setVal(0.0);
       avgWeights.setVal(0.0);
@@ -322,14 +322,14 @@ void JumpBc::buildStencils(){
     const int phase1 = 0;
     const int phase2 = 1;
 
-    BaseIVFAB<Real>& factor1 = m_avgFactor[dit()].get_ivfab(phase1);
-    BaseIVFAB<Real>& factor2 = m_avgFactor[dit()].get_ivfab(phase2);
+    BaseIVFAB<Real>& factor1 = m_avgFactor[dit()].getIVFAB(phase1);
+    BaseIVFAB<Real>& factor2 = m_avgFactor[dit()].getIVFAB(phase2);
 
-    const BaseIVFAB<Real>& avgBco1 = m_avgBco[dit()].get_ivfab(phase1);
-    const BaseIVFAB<Real>& avgBco2 = m_avgBco[dit()].get_ivfab(phase2);
+    const BaseIVFAB<Real>& avgBco1 = m_avgBco[dit()].getIVFAB(phase1);
+    const BaseIVFAB<Real>& avgBco2 = m_avgBco[dit()].getIVFAB(phase2);
 
-    const BaseIVFAB<Real>& avgWeights1 = m_avgWeights[dit()].get_ivfab(phase1);
-    const BaseIVFAB<Real>& avgWeights2 = m_avgWeights[dit()].get_ivfab(phase2);
+    const BaseIVFAB<Real>& avgWeights1 = m_avgWeights[dit()].getIVFAB(phase1);
+    const BaseIVFAB<Real>& avgWeights2 = m_avgWeights[dit()].getIVFAB(phase2);
 
     factor1.setVal(0.0);
     factor2.setVal(0.0);
@@ -416,8 +416,8 @@ void JumpBc::computeDnPhi(BaseIVFAB<Real>&       a_dphidn,
 			  const int              a_phase){
   const int comp = 0.;
 
-  const BaseIVFAB<Real>& wb             = m_weights[a_dit].get_ivfab(a_phase);
-  const BaseIVFAB<VoFStencil>& stencils = m_stencils[a_dit].get_ivfab(a_phase);
+  const BaseIVFAB<Real>& wb             = m_weights[a_dit].getIVFAB(a_phase);
+  const BaseIVFAB<VoFStencil>& stencils = m_stencils[a_dit].getIVFAB(a_phase);
 
   for (VoFIterator vofit(m_ivs[a_dit], a_dphidn.getEBGraph()); vofit.ok(); ++vofit){
     const VolIndex& vof = vofit();

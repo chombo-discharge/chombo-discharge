@@ -64,7 +64,7 @@ MultifluidAlias::MfIVAliasFactory::MfIVAliasFactory(LevelData<MFBaseIVFAB>* a_mf
 }
 
 BaseIVFAB<Real>* MultifluidAlias::MfIVAliasFactory::create(const Box& box, int ncomps, const DataIndex& a_datInd) const{
-  return (*m_mf)[a_datInd].getPhase_ptr(m_phase);
+  return (*m_mf)[a_datInd].getPhasePtr(m_phase);
 }
 
 bool MultifluidAlias::MfIVAliasFactory::callDelete() const {
