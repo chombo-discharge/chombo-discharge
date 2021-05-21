@@ -15,7 +15,7 @@ def write_template(args):
     mainf = open(main_filename, "w")
     mainf.write('#include <CD_Driver.H>\n')
     mainf.write('#include <CD_' + args.cdrsolver + '.H>\n')
-    mainf.write('#include <' + args.geometry + '.H>\n')
+    mainf.write('#include <CD_' + args.geometry + '.H>\n')
     mainf.write('#include <CD_' + args.stepper + '.H>\n')
     mainf.write('#include <CD_AdvectionDiffusionTagger.H>\n')
     mainf.write('#include <ParmParse.H>\n')

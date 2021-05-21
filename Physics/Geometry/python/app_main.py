@@ -14,7 +14,7 @@ def write_template(args):
     main_filename = app_dir + "/" + args.filename + ".cpp"
     mainf = open(main_filename, "w")
     mainf.write('#include "CD_Driver.H"\n')
-    mainf.write('#include "' + args.geometry + '.H"\n')
+    mainf.write('#include "CD_' + args.geometry + '.H"\n')
     mainf.write('#include <CD_GeometryStepper.H>\n')
     mainf.write('#include "ParmParse.H"\n')
     mainf.write("\n")
