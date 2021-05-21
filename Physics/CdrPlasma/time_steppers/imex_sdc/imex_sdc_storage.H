@@ -14,8 +14,8 @@
 #include <RefCountedPtr.H>
 
 #include "CD_NamespaceHeader.H"
-namespace physics {
-  namespace cdr_plasma {
+namespace Physics {
+  namespace CdrPlasma {
   
     class imex_sdc::cdr_storage {
     public:

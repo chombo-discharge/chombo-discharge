@@ -26,8 +26,8 @@
   @brief Namespace for cdr plasma physics
 */
 #include "CD_NamespaceHeader.H"
-namespace physics {
-  namespace cdr_plasma {
+namespace Physics {
+  namespace CdrPlasma {
   
     /*!
       @brief Abstract class for evolving plasma equations in time

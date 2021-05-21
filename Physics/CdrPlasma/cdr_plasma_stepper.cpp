@@ -20,7 +20,7 @@
 #define USE_FAST_DIFFUSION  1
 
 #include "CD_NamespaceHeader.H"
-using namespace physics::cdr_plasma;
+using namespace Physics::CdrPlasma;
 
 Real cdr_plasma_stepper::s_constant_one(const RealVect a_pos){
   return 1.0;

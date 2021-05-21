@@ -11,7 +11,7 @@
 #include <ParmParse.H>
 
 #include "CD_NamespaceHeader.H"
-using namespace physics::ito_plasma;
+using namespace Physics::ito_plasma;
 
 ito_plasma_air3_lea::ito_plasma_air3_lea(){
   m_num_ItoSpecies = 3;

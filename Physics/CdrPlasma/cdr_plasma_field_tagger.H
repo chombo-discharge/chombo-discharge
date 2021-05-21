@@ -11,8 +11,8 @@
 #include "cdr_plasma_tagger.H"
 
 #include "CD_NamespaceHeader.H"
-namespace physics {
-  namespace cdr_plasma {
+namespace Physics {
+  namespace CdrPlasma {
   
     /*!
       @brief Lightweight tagging class. Only tags cells based on electric field. 

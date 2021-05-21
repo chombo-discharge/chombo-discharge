@@ -12,7 +12,7 @@
 #include <ParmParse.H>
 
 #include "CD_NamespaceHeader.H"
-using namespace physics::cdr_plasma;
+using namespace Physics::CdrPlasma;
 
 air9eed_bourdon::eed::eed(){
   m_name      = "eed";

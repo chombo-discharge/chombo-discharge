@@ -20,7 +20,7 @@
 
 #include "CD_NamespaceHeader.H"
 
-using namespace physics::cdr_plasma;
+using namespace Physics::CdrPlasma;
 
 typedef imex_sdc::cdr_storage     cdr_storage;
 typedef imex_sdc::poisson_storage poisson_storage;

@@ -10,7 +10,7 @@
 #include <ParmParse.H>
 
 #include "CD_NamespaceHeader.H"
-using namespace physics::cdr_plasma;
+using namespace Physics::CdrPlasma;
 
 field_tagger::field_tagger(){
   m_name = "field_tagger";

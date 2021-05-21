@@ -19,7 +19,7 @@
 #include <ParmParse.H>
 
 #include "CD_NamespaceHeader.H"
-using namespace physics::cdr_plasma;
+using namespace Physics::CdrPlasma;
 
 std::string air9eed_bourdon::s_bolsig_energy_E = "Energy (eV) 	Electric field / N (Td)";
 std::string air9eed_bourdon::s_bolsig_mobility = "Energy (eV)	Mobility *N (1/m/V/s)";

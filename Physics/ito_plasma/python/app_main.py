@@ -49,7 +49,7 @@ def write_template(args):
 
     mainf.write("\n")
     mainf.write("using namespace ChomboDischarge;\n")
-    mainf.write("using namespace physics::ito_plasma;\n\n")
+    mainf.write("using namespace Physics::ito_plasma;\n\n")
     mainf.write("int main(int argc, char* argv[]){\n")
 
     mainf.write("\n")

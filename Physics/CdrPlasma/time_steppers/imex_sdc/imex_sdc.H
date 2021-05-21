@@ -15,8 +15,8 @@
 
 #include "CD_NamespaceHeader.H"
 
-namespace physics {
-  namespace cdr_plasma {
+namespace Physics {
+  namespace CdrPlasma {
 
     /*!
       @brief Class for evolving plasma equations with a multirate method using semi-implicit spectral deferred corrections

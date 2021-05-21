@@ -15,7 +15,7 @@
 
 #include "CD_NamespaceHeader.H"
   
-using namespace physics::ito_plasma;
+using namespace Physics::ito_plasma;
 
 ito_plasma_physics::ito_plasma_physics(){
 

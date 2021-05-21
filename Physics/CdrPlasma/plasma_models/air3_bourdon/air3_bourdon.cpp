@@ -12,7 +12,7 @@
 #include <PolyGeom.H>
 
 #include "CD_NamespaceHeader.H"
-using namespace physics::cdr_plasma;
+using namespace Physics::CdrPlasma;
 
 std::string air3_bourdon::s_bolsig_mobility = "# Electron mobility (E/N, mu*N)";
 std::string air3_bourdon::s_bolsig_diffco   = "# Electron diffusion coefficient (E/N, D*N)";

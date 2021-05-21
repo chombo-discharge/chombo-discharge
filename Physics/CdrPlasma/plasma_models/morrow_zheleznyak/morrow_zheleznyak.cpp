@@ -16,7 +16,7 @@
 #include <chrono>
 
 #include "CD_NamespaceHeader.H"
-using namespace physics::cdr_plasma;
+using namespace Physics::CdrPlasma;
 
 morrow_zheleznyak::morrow_zheleznyak(){
   m_numCdrSpecies = 3;

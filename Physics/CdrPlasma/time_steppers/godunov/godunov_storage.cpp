@@ -9,7 +9,7 @@
 #include "godunov_storage.H"
 
 #include "CD_NamespaceHeader.H"
-using namespace physics::cdr_plasma;
+using namespace Physics::CdrPlasma;
 
 godunov::cdr_storage::cdr_storage(){
 

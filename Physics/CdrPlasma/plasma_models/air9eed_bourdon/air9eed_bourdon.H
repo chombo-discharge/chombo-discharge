@@ -12,8 +12,8 @@
 #include "CD_LookupTable.H"
 
 #include "CD_NamespaceHeader.H"
-namespace physics {
-  namespace cdr_plasma {
+namespace Physics {
+  namespace CdrPlasma {
     
     /*!
       @brief 9-species plasma model for air (79/21 N2/O2 ratio) at 300K

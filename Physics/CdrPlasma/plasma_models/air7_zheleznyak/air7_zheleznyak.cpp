@@ -19,7 +19,7 @@
 #include <PolyGeom.H>
 
 #include "CD_NamespaceHeader.H"
-using namespace physics::cdr_plasma;
+using namespace Physics::CdrPlasma;
 
 std::string air7_zheleznyak::s_bolsig_energy   = "# Electron mean energy (E/N, eV)";
 std::string air7_zheleznyak::s_bolsig_mobility = "# Electron mobility (E/N, mu*N)";

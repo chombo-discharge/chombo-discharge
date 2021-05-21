@@ -13,7 +13,7 @@
 #include <ParmParse.H>
 
 #include "CD_NamespaceHeader.H"
-using namespace physics::ito_plasma;
+using namespace Physics::ito_plasma;
 
 ito_plasma_godunov::ito_plasma_godunov(RefCountedPtr<ito_plasma_physics>& a_physics){
   m_name    = "ito_plasma_godunov";

@@ -22,8 +22,8 @@
 #include <CD_RtSpecies.H>
 #include <CD_NamespaceHeader.H>
 
-namespace physics {
-  namespace cdr_plasma {
+namespace Physics {
+  namespace CdrPlasma {
   
     /*!
       @brief Abstract base class for specifying plasma kinetics

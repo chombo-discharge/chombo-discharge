@@ -13,7 +13,7 @@
 #include <random>
 
 #include "CD_NamespaceHeader.H"
-namespace physics::cdr_plasma {
+namespace Physics::cdr_plasma {
   
   /*!
     @brief Class that implements the fluctuating Morrow-Lowke discharge model for air.

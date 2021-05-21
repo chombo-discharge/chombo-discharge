@@ -11,8 +11,8 @@
 #include <random>
 
 #include "CD_NamespaceHeader.H"
-namespace physics {
-  namespace cdr_plasma {
+namespace Physics {
+  namespace CdrPlasma {
 
     class air3_zheleznyak::electron : public CdrSpecies {
     public:

@@ -19,7 +19,7 @@ Real potential_curve(const Real a_time){
 }
 
 using namespace ChomboDischarge;
-using namespace physics::cdr_plasma;
+using namespace Physics::CdrPlasma;
 
 int main(int argc, char* argv[]){
 

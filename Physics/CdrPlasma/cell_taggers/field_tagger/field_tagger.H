@@ -11,8 +11,8 @@
 #include "cdr_plasma_field_tagger.H"
 
 #include "CD_NamespaceHeader.H"
-namespace physics {
-  namespace cdr_plasma {
+namespace Physics {
+  namespace CdrPlasma {
 
     /*!
       @brief Class that tags cells based on the relative curvature of the electric field

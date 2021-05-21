@@ -19,7 +19,7 @@
 #define ITO_PLASMA_PHYSICS_DEBUG 0
 
 #include "CD_NamespaceHeader.H"
-using namespace physics::ito_plasma;
+using namespace Physics::ito_plasma;
 
 inline
 RealVect ito_plasma_physics::randomPosition(const RealVect a_cellPos,

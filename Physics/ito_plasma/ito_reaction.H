@@ -12,7 +12,7 @@
 #include <RealVect.H>
 
 #include "CD_NamespaceHeader.H"
-namespace physics {
+namespace Physics {
   namespace ito_plasma {
     
     /*!

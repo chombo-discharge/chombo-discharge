@@ -12,7 +12,7 @@
 #include "godunov_particle.H"
 
 #include "CD_NamespaceHeader.H"
-namespace physics {
+namespace Physics {
   namespace ito_plasma {
 
     class ito_plasma_godunov : public ito_plasma_stepper {

@@ -11,7 +11,7 @@
 #include "photo_reaction.H"
 
 #include "CD_NamespaceHeader.H"
-using namespace physics::ito_plasma;
+using namespace Physics::ito_plasma;
 
 inline
 const int& photo_reaction::source() const {

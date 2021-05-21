@@ -11,7 +11,7 @@
 #include <chrono>
 
 #include "CD_NamespaceHeader.H"
-using namespace physics::cdr_plasma;
+using namespace Physics::CdrPlasma;
 
 air7_stephens::electron::electron(){
   m_name = "electron";

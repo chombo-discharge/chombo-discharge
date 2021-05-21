@@ -13,8 +13,8 @@
 #include "cdr_plasma_stepper.H"
 
 #include "CD_NamespaceHeader.H"
-namespace physics {
-  namespace cdr_plasma {
+namespace Physics {
+  namespace CdrPlasma {
   
     /*!
       @brief Abstract class for tagging cells across an AMR hierarchy

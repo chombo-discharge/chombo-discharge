@@ -11,8 +11,8 @@
 #define _AIR9EED_BOURDON_SPECIES_
 
 #include "CD_NamespaceHeader.H"
-namespace physics {
-  namespace cdr_plasma {
+namespace Physics {
+  namespace CdrPlasma {
 
 
     /*!

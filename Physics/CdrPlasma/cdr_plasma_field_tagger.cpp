@@ -11,7 +11,7 @@
 #include <EBArith.H>
 
 #include "CD_NamespaceHeader.H"
-using namespace physics::cdr_plasma;
+using namespace Physics::CdrPlasma;
 
 cdr_plasma_field_tagger::cdr_plasma_field_tagger(){
   CH_TIME("cdr_plasma_field_tagger::cdr_plasma_field_tagger");

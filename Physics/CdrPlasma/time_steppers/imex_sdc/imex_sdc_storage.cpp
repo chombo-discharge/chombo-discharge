@@ -9,7 +9,7 @@
 #include "imex_sdc_storage.H"
 
 #include "CD_NamespaceHeader.H"
-using namespace physics::cdr_plasma;
+using namespace Physics::CdrPlasma;
 
 imex_sdc::cdr_storage::cdr_storage(){
 

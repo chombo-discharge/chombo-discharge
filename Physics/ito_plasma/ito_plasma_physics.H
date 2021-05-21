@@ -29,7 +29,7 @@
 #include "CD_LookupTable.H"
 
 #include "CD_NamespaceHeader.H"
-namespace physics {
+namespace Physics {
   namespace ito_plasma {
 
     // Ease up on the typing.

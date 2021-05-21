@@ -12,8 +12,8 @@
 #include <CD_PerlinSdf.H>
 
 #include "CD_NamespaceHeader.H"
-namespace physics {
-  namespace cdr_plasma {
+namespace Physics {
+  namespace CdrPlasma {
   
     /*!
       @brief Class that implements the Morrow-Lowke discharge model for air.

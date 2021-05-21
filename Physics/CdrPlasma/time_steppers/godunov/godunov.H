@@ -14,8 +14,8 @@
 #include <CD_RtIterator.H>
 
 #include "CD_NamespaceHeader.H"
-namespace physics {
-  namespace cdr_plasma {
+namespace Physics {
+  namespace CdrPlasma {
   
     /*!
       @brief Class for evolving plasma equations using the Euler-Maruyama scheme

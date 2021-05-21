@@ -13,7 +13,7 @@
 #define ITO_REACTION_DEBUG 0
 
 #include "CD_NamespaceHeader.H"
-using namespace physics::ito_plasma;
+using namespace Physics::ito_plasma;
 
 inline
 void ito_reaction::jump_state(Vector<long long>& a_particles,

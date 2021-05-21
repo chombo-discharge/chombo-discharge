@@ -13,7 +13,7 @@
 #include <PolyGeom.H>
 
 #include "CD_NamespaceHeader.H"
-using namespace physics::cdr_plasma;
+using namespace Physics::CdrPlasma;
 
 morrow_bourdon::morrow_bourdon(){
   CH_TIME("morrow_bourdon::morrow_bourdon");

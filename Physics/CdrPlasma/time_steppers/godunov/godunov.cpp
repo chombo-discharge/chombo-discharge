@@ -14,7 +14,7 @@
 #include <ParmParse.H>
 
 #include "CD_NamespaceHeader.H"
-using namespace physics::cdr_plasma;
+using namespace Physics::CdrPlasma;
 
 typedef godunov::cdr_storage     cdr_storage;
 typedef godunov::poisson_storage poisson_storage;
