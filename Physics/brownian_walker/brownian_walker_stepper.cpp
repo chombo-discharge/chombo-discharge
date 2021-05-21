@@ -7,7 +7,7 @@
 
 #include "brownian_walker_stepper.H"
 #include "brownian_walker_species.H"
-#include "poly.H"
+#include <CD_PolyUtils.H>
 
 #include <ParmParse.H>
 #include <PolyGeom.H>
@@ -449,7 +449,7 @@ Real brownian_walker_stepper::advance(const Real a_dt) {
 
 	    // If the particle crossed the boundary, 
 	    if(fOld*fNew <= 0.0){
-	      const RealVect xb = poly::brent_root_finder(func, oldPos, newPos);
+	      const RealVect xb = PolyUtils::brentRootFinder(func, oldPos, newPos);
 	      const IntVect iv = locateBin(xb, dx, origin);
 	      const VolIndex vof(iv, 0);
 

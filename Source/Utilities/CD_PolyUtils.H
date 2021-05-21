@@ -22,10 +22,10 @@
 /*!
   @brief Agglomeration class for various useful polynomial routines
 */
-namespace poly {
-  RealVect brent_root_finder(const RefCountedPtr<BaseIF>& a_impFunc, const RealVect& a_point1, const RealVect& a_point2);
+namespace PolyUtils {
+  RealVect brentRootFinder(const RefCountedPtr<BaseIF>& a_impFunc, const RealVect& a_point1, const RealVect& a_point2);
 };
 
-#include "CD_NamespaceFooter.H"
+#include <CD_NamespaceFooter.H>
 
 #endif

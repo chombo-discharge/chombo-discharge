@@ -1,16 +1,22 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   poly.cpp
-  @brief  Implementation of poly.H
+  @file   CD_PolyUtils.cpp
+  @brief  Implementation of CD_PolyUtils.cpp
   @author Robert Marskar
 */
 
-#include "poly.H"
-
+// Chombo includes
 #include <PolyGeom.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_PolyUtils.H>
+#include <CD_NamespaceHeader.H>
 
-RealVect poly::brent_root_finder(const RefCountedPtr<BaseIF>& a_impFunc, const RealVect& a_point1, const RealVect& a_point2){
+RealVect PolyUtils::brentRootFinder(const RefCountedPtr<BaseIF>& a_impFunc, const RealVect& a_point1, const RealVect& a_point2){
   const Real tol = PolyGeom::getTolerance();
 
   const unsigned int maxIter = 100;
@@ -42,7 +48,7 @@ RealVect poly::brent_root_finder(const RefCountedPtr<BaseIF>& a_impFunc, const R
   // Check for stupid input
   if (fa*fb > 0){
     pout() << "fa " << fa << " fb " << fb << endl;
-    MayDay::Abort("brent_root_finder. Root must be bracketed, but instead the supplied end points have the same sign.");
+    MayDay::Abort("brentRootFinder. Root must be bracketed, but instead the supplied end points have the same sign.");
   }
 
   // Init to be safe
@@ -150,4 +156,5 @@ RealVect poly::brent_root_finder(const RefCountedPtr<BaseIF>& a_impFunc, const R
     
   return bPt + a_point1;
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

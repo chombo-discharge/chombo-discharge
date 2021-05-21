@@ -26,7 +26,7 @@
 #include <CD_McPhoto.H>
 #include <CD_DataOps.H>
 #include <units.H>
-#include <poly.H>
+#include <CD_PolyUtils.H>
 #include <CD_ParticleOps.H>
 #include <CD_NamespaceHeader.H>
 
