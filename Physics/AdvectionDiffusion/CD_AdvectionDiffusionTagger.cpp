@@ -57,7 +57,7 @@ bool AdvectionDiffusionTagger::tagCells(EBAMRTags& a_tags){
   // Compute the gradient, vec = grad(phi)
   m_amr->computeGradient(vec, state, m_realm, phase::gas); // vec = grad(phi)
   DataOps::vectorLength(sca, vec);                        // sca = |grad(phi)|
-  DataOps::set_covered_value(sca, 0, 0.0);                 // covered cell values are set to 0.0
+  DataOps::setCoveredValue(sca, 0, 0.0);                 // covered cell values are set to 0.0
 
   bool found_tags = false;
 

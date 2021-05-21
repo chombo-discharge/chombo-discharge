@@ -205,9 +205,9 @@ public:
 
   static void scale(LevelData<BaseIVFAB<Real> >& a_lhs, const Real& a_scale);
 
-  static void set_covered_value(EBAMRCellData& a_lhs, const int a_comp, const Real a_value);
+  static void setCoveredValue(EBAMRCellData& a_lhs, const int a_comp, const Real a_value);
 
-  static void set_covered_value(LevelData<EBCellFAB>& a_lhs, const int a_comp, const Real a_value);
+  static void setCoveredValue(LevelData<EBCellFAB>& a_lhs, const int a_comp, const Real a_value);
 
   static void setValue(EBAMRCellData& a_lhs, const Real& a_value);
   

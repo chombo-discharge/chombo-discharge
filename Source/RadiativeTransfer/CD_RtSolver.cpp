@@ -277,7 +277,7 @@ void RtSolver::writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellDa
     }
   }
 
-  DataOps::set_covered_value(a_output, a_comp, 0.0);
+  DataOps::setCoveredValue(a_output, a_comp, 0.0);
 
   a_comp += ncomp;
 }

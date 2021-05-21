@@ -1244,7 +1244,7 @@ void ItoSolver::writePlotData(EBAMRCellData& a_output, int& a_comp){
 	m_phi[lvl]->copyTo(src, *a_output[lvl], dst);
       }
     }
-    //DataOps::set_covered_value(a_output, a_comp, 0.0);
+    //DataOps::setCoveredValue(a_output, a_comp, 0.0);
     a_comp++;
   }
 
@@ -1261,7 +1261,7 @@ void ItoSolver::writePlotData(EBAMRCellData& a_output, int& a_comp){
 	m_faceCenteredDiffusionCoefficient_cell[lvl]->copyTo(src, *a_output[lvl], dst);
       }
     }
-    DataOps::set_covered_value(a_output, a_comp, 0.0);
+    DataOps::setCoveredValue(a_output, a_comp, 0.0);
     a_comp++;
   }
 
@@ -1281,7 +1281,7 @@ void ItoSolver::writePlotData(EBAMRCellData& a_output, int& a_comp){
     }
 
     for (int c = 0; c < SpaceDim; c++){
-      DataOps::set_covered_value(a_output, a_comp + c, 0.0);
+      DataOps::setCoveredValue(a_output, a_comp + c, 0.0);
     }
 
     a_comp += ncomp;
@@ -1349,7 +1349,7 @@ void ItoSolver::writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellD
     }
   }
 
-  DataOps::set_covered_value(a_output, a_comp, 0.0);
+  DataOps::setCoveredValue(a_output, a_comp, 0.0);
 
   a_comp += ncomp;
 }

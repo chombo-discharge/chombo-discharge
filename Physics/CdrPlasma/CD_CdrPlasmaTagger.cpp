@@ -116,7 +116,7 @@ void CdrPlasmaTagger::writePlotData(EBAMRCellData& a_output, Vector<std::string>
     
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
       tracer[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
-      DataOps::set_covered_value(*a_output[lvl], a_icomp, 0.0);
+      DataOps::setCoveredValue(*a_output[lvl], a_icomp, 0.0);
     }
 
     // Add component and name

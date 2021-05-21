@@ -704,7 +704,7 @@ void FieldSolver::writePlotData(EBAMRCellData& a_output, int& a_comp){
   }
   if(m_plotRho) {
     this->writeMultifluidData(a_output, a_comp, m_rho, false);
-    //    DataOps::set_covered_value(a_output, a_comp-1, 0.0); // Why was this here? If the dielectric side contains charge, it should not be here. 
+    //    DataOps::setCoveredValue(a_output, a_comp-1, 0.0); // Why was this here? If the dielectric side contains charge, it should not be here. 
   }
   if(m_plotResidue) {
     this->writeMultifluidData(a_output, a_comp, m_residue,  false);

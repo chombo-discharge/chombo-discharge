@@ -888,7 +888,7 @@ void CdrSolver::initialDataDistribution(){
   m_amr->averageDown(m_phi, m_realm, m_phase);
   m_amr->interpGhost(m_phi, m_realm, m_phase);
 
-  DataOps::set_covered_value(m_phi, 0, 0.0);
+  DataOps::setCoveredValue(m_phi, 0, 0.0);
 }
 
 void CdrSolver::initialDataParticles(){
@@ -1668,7 +1668,7 @@ void CdrSolver::writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellD
     }
   }
 
-  DataOps::set_covered_value(a_output, a_comp, 0.0);
+  DataOps::setCoveredValue(a_output, a_comp, 0.0);
 
   a_comp += ncomp;
 }
@@ -1741,7 +1741,7 @@ Real CdrSolver::computeAdvectionDt(){
 
     Real maxVal = std::numeric_limits<Real>::max();
     
-    DataOps::set_covered_value(m_scratch, comp, maxVal);
+    DataOps::setCoveredValue(m_scratch, comp, maxVal);
     DataOps::getMaxMin(maxVal, min_dt, m_scratch, comp);
   }
 
@@ -1812,7 +1812,7 @@ Real CdrSolver::computeDiffusionDt(){
 
       Real maxVal = std::numeric_limits<Real>::max();
     
-      DataOps::set_covered_value(m_scratch, comp, maxVal);
+      DataOps::setCoveredValue(m_scratch, comp, maxVal);
       DataOps::getMaxMin(maxVal, min_dt, m_scratch, comp);
     }
   }
@@ -1915,7 +1915,7 @@ Real CdrSolver::computeAdvectionDiffusionDt(){
 
     Real maxVal = std::numeric_limits<Real>::max();
     
-    DataOps::set_covered_value(m_scratch, comp, maxVal);  // Covered cells are bogus. 
+    DataOps::setCoveredValue(m_scratch, comp, maxVal);  // Covered cells are bogus. 
     DataOps::getMaxMin(maxVal, min_dt, m_scratch, comp);
   }
 

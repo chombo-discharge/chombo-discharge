@@ -2069,7 +2069,7 @@ void Driver::writeTags(EBAMRCellData& a_output, int& a_comp){
     }
   }
 
-  DataOps::set_covered_value(tags, 0, 0.0);
+  DataOps::setCoveredValue(tags, 0, 0.0);
 
   const Interval src_interv(0, 0);
   const Interval dst_interv(a_comp, a_comp);
@@ -2239,7 +2239,7 @@ void Driver::writeCheckpointTags(HDF5Handle& a_handle, const int a_level){
       }
     }
 
-    DataOps::set_covered_value(scratch, 0, 0.0);
+    DataOps::setCoveredValue(scratch, 0, 0.0);
   }
 
   // Write tags

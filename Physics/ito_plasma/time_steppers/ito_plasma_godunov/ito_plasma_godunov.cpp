@@ -954,7 +954,7 @@ void ito_plasma_godunov::compute_cell_conductivity(EBAMRCellData& a_conductivity
       for (int iapp = 0; iapp < num_app; iapp++){
 	DataOps::setValue(m_fluid_scratch1, 0.0);
 	m_fluid_scratch1.copy(a_conductivity);
-	DataOps::set_covered_value(m_fluid_scratch1, 0.0, 0);
+	DataOps::setCoveredValue(m_fluid_scratch1, 0.0, 0);
 	DataOps::filterSmooth(a_conductivity, m_fluid_scratch1, stride, alpha);
 
 	m_amr->averageDown(a_conductivity, m_fluid_Realm, m_phase);

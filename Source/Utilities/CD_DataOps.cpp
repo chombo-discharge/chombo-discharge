@@ -1247,13 +1247,13 @@ void DataOps::norm(Real& a_norm, const LevelData<EBCellFAB>& a_data, const Probl
   a_norm = EBLevelDataOps::kappaNorm(volume, a_data, EBLEVELDATAOPS_ALLVOFS, a_domain, a_p);
 }
 
-void DataOps::set_covered_value(EBAMRCellData& a_lhs, const int a_comp, const Real a_value){
+void DataOps::setCoveredValue(EBAMRCellData& a_lhs, const int a_comp, const Real a_value){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    DataOps::set_covered_value(*a_lhs[lvl], a_comp, a_value);
+    DataOps::setCoveredValue(*a_lhs[lvl], a_comp, a_value);
   }
 }
 
-void DataOps::set_covered_value(LevelData<EBCellFAB>& a_lhs, const int a_comp, const Real a_value){
+void DataOps::setCoveredValue(LevelData<EBCellFAB>& a_lhs, const int a_comp, const Real a_value){
   EBLevelDataOps::setCoveredVal(a_lhs, a_comp, a_value);
 }
 

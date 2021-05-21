@@ -1042,7 +1042,7 @@ void ito_plasma_stepper::compute_rho(MFAMRCellData& a_rho, const Vector<EBAMRCel
       for (int iapp = 0; iapp < num_app; iapp++){
 	DataOps::setValue(m_fluid_scratch1, 0.0);
 	m_fluid_scratch1.copy(rhoPhase);
-	DataOps::set_covered_value(m_fluid_scratch1, 0.0, 0);
+	DataOps::setCoveredValue(m_fluid_scratch1, 0.0, 0);
 	DataOps::filterSmooth(rhoPhase, m_fluid_scratch1, stride, alpha);
 
 	m_amr->averageDown(rhoPhase, m_fluid_Realm, m_phase);

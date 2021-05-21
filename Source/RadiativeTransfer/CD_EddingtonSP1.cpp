@@ -409,7 +409,7 @@ bool EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCel
     }
     m_multigridSolver->revert(phi, rhs, finest_level, 0);
 
-    DataOps::set_covered_value(a_phi, 0, 0.0);
+    DataOps::setCoveredValue(a_phi, 0, 0.0);
   }
   else{
     if(m_useTGA){
