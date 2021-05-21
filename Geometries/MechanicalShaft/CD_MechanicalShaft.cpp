@@ -1,20 +1,26 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file mechanical_shaft.cpp
-  @brief Implementation of mechanical_shaft.H
+  @file   CD_MechanicalShaft.cpp
+  @brief  Implementation of CD_MechanicalShaft.H
   @author Robert Marskar
-  @date Nov. 2017
 */
 
-#include "mechanical_shaft.H"
-
+// Std includes
 #include <string>
 #include <iostream>
 #include <fstream>
 
+// Chombo includes
 #include <ParmParse.H>
 #include <BaseIF.H>
 #include <SphereIF.H>
 
+// Our includes
+n#include <CD_MechanicalShaft.H>
 #include <CD_PerlinSphereSdf.H>
 #include <CD_BoxSdf.H>
 #include <CD_CylinderSdf.H>
@@ -22,12 +28,11 @@
 #include <CD_PolygonRodIF.H>
 #include <CD_HollowCylinderIF.H>
 #include <CD_RoundedCylinderIF.H>
+#include <CD_NamespaceHeader.H>
 
-#include "CD_NamespaceHeader.H"
-
-mechanical_shaft::mechanical_shaft(){
+MechanicalShaft::MechanicalShaft(){
 #if CH_SPACEDIM == 2
-  MayDay::Abort("mechanical_shaft::mechanical_shaft - this class is for 3D only");
+  MayDay::Abort("MechanicalShaft::MechanicalShaft - this class is for 3D only");
 #endif
 
   m_electrodes.resize(0);
@@ -39,7 +44,7 @@ mechanical_shaft::mechanical_shaft(){
   Real eps0;
   Real corner_curv;
 
-  ParmParse pp("mechanical_shaft");
+  ParmParse pp("MechanicalShaft");
 
 
   std::string shape;
@@ -57,18 +62,18 @@ mechanical_shaft::mechanical_shaft(){
 
   
   // Define shit. 
-  if(has_electrode)  this->define_electrode();
-  if(has_dielectric) this->define_dielectric();
+  if(has_electrode)  this->defineElectrode();
+  if(has_dielectric) this->defineDielectric();
 
   setGasPermittivity(eps0);
 }
 
-mechanical_shaft::~mechanical_shaft(){
+MechanicalShaft::~MechanicalShaft(){
   
 }
 
-void mechanical_shaft::define_electrode(){
-  ParmParse pp("mechanical_shaft.electrode");
+void MechanicalShaft::defineElectrode(){
+  ParmParse pp("MechanicalShaft.electrode");
 
   Vector<Real> vec(SpaceDim);
   bool live;
@@ -89,8 +94,8 @@ void mechanical_shaft::define_electrode(){
   m_electrodes[0].define(elec, live);
 }
 
-void mechanical_shaft::define_dielectric(){
-  ParmParse pp("mechanical_shaft.dielectric");
+void MechanicalShaft::defineDielectric(){
+  ParmParse pp("MechanicalShaft.dielectric");
 
   std::string str;
   Real eps;
@@ -101,24 +106,24 @@ void mechanical_shaft::define_dielectric(){
   // Get the shape
   RefCountedPtr<BaseIF> shaft = RefCountedPtr<BaseIF>(nullptr);
   if(str == "polygon"){
-    shaft = this->get_polygon();
+    shaft = this->getPolygon();
   }
   else if(str == "cylinder"){
-    shaft = this->get_cylinder();
+    shaft = this->getCylinder();
   }
   else if(str == "cyl_profile"){
-    shaft = this->get_cylinder_profile();
+    shaft = this->getCylinderProfile();
   }
   else{
-    MayDay::Abort("mechanical_shaft::define_dielectric - unknown argument 'shaft_shape' passed");
+    MayDay::Abort("MechanicalShaft::defineDielectric - unknown argument 'shaft_shape' passed");
   }
 
   m_dielectrics.resize(1);
   m_dielectrics[0].define(shaft, eps);
 }
 
-RefCountedPtr<BaseIF> mechanical_shaft::get_polygon(){
-  ParmParse pp("mechanical_shaft.dielectric.polygon");
+RefCountedPtr<BaseIF> MechanicalShaft::getPolygon(){
+  ParmParse pp("MechanicalShaft.dielectric.polygon");
 
   int numSides;
   RealVect c1, c2;
@@ -136,8 +141,8 @@ RefCountedPtr<BaseIF> mechanical_shaft::get_polygon(){
   return RefCountedPtr<BaseIF> (new PolygonRodIF(c1, c2, radius, curv, numSides, false));
 }
 
-RefCountedPtr<BaseIF> mechanical_shaft::get_cylinder(){
-  ParmParse pp("mechanical_shaft.dielectric.polygon");
+RefCountedPtr<BaseIF> MechanicalShaft::getCylinder(){
+  ParmParse pp("MechanicalShaft.dielectric.polygon");
     
   int numSides;
   RealVect c1, c2;
@@ -154,8 +159,8 @@ RefCountedPtr<BaseIF> mechanical_shaft::get_cylinder(){
   return RefCountedPtr<BaseIF> (new RoundedCylinderIF(c1, c2, radius, curv, false));
 }
 
-RefCountedPtr<BaseIF> mechanical_shaft::get_cylinder_profile(){
-  ParmParse pp("mechanical_shaft.dielectric.cyl_profile");
+RefCountedPtr<BaseIF> MechanicalShaft::getCylinderProfile(){
+  ParmParse pp("MechanicalShaft.dielectric.cylProfile");
     
   RealVect c1, c2;
   Real cylRad, torusMajor, torusMinor, ccDist, shift, curv, nLeft, nRight;
@@ -175,4 +180,5 @@ RefCountedPtr<BaseIF> mechanical_shaft::get_cylinder_profile(){
 
   return RefCountedPtr<BaseIF> (new ProfileCylinderIF(c1, c2, cylRad, torusMajor, torusMinor, ccDist, shift, curv, nLeft, nRight, false));
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

@@ -19,7 +19,7 @@
 /*!
   @brief This is a class that defines an array of electrodes.
 */
-class Electrode_array : public ComputationalGeometry {
+class ElectrodeArray : public ComputationalGeometry {
 public:
 
   ElectrodeArray();
