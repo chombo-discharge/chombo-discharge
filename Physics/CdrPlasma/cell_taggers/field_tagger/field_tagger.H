@@ -8,7 +8,7 @@
 #ifndef _FIELD_TAGGER_
 #define _FIELD_TAGGER_
 
-#include "cdr_plasma_field_tagger.H"
+#include <CD_CdrPlasmaFieldTagger.H>
 
 #include "CD_NamespaceHeader.H"
 namespace Physics {
@@ -17,7 +17,7 @@ namespace Physics {
     /*!
       @brief Class that tags cells based on the relative curvature of the electric field
     */
-    class field_tagger : public cdr_plasma_field_tagger {
+    class field_tagger : public CdrPlasmaFieldTagger {
     public:
   
       /*!

@@ -26,10 +26,10 @@ imex_sdc::cdr_storage::cdr_storage(const RefCountedPtr<AmrMesh>& a_amr,
 }
 
 imex_sdc::cdr_storage::~cdr_storage(){
-  deallocate_storage();
+  deallocateStorage();
 }
 
-void imex_sdc::cdr_storage::allocate_storage(const int a_p){
+void imex_sdc::cdr_storage::allocateStorage(const int a_p){
   m_p = a_p;
 
   m_amr->allocate(m_scratch,  m_realm, m_phase, m_ncomp);
@@ -66,7 +66,7 @@ void imex_sdc::cdr_storage::allocate_storage(const int a_p){
   }
 }
 
-void imex_sdc::cdr_storage::deallocate_storage(){
+void imex_sdc::cdr_storage::deallocateStorage(){
 
   m_amr->deallocate(m_scratch);
   m_amr->deallocate(m_scratch2);
@@ -113,10 +113,10 @@ imex_sdc::poisson_storage::poisson_storage(const RefCountedPtr<AmrMesh>& a_amr,
 }
 
 imex_sdc::poisson_storage::~poisson_storage(){
-  deallocate_storage();
+  deallocateStorage();
 }
 
-void imex_sdc::poisson_storage::allocate_storage(const int a_p){
+void imex_sdc::poisson_storage::allocateStorage(const int a_p){
   m_p = a_p;
   
   m_amr->allocate(m_previous, m_realm, m_ncomp);
@@ -126,7 +126,7 @@ void imex_sdc::poisson_storage::allocate_storage(const int a_p){
   m_amr->allocate(m_E_dom,    m_realm, m_phase, SpaceDim);
 }
 
-void imex_sdc::poisson_storage::deallocate_storage(){
+void imex_sdc::poisson_storage::deallocateStorage(){
   m_amr->deallocate(m_previous);
   m_amr->deallocate(m_E_cell);
   m_amr->deallocate(m_E_face);
@@ -149,10 +149,10 @@ imex_sdc::rte_storage::rte_storage(const RefCountedPtr<AmrMesh>& a_amr,
 }
 
 imex_sdc::rte_storage::~rte_storage(){
-  deallocate_storage();
+  deallocateStorage();
 }
 
-void imex_sdc::rte_storage::allocate_storage(const int a_p){
+void imex_sdc::rte_storage::allocateStorage(const int a_p){
   m_p = a_p;
   
   m_amr->allocate(m_previous,   m_realm, m_phase, m_ncomp);
@@ -160,7 +160,7 @@ void imex_sdc::rte_storage::allocate_storage(const int a_p){
   m_amr->allocate(m_scratchIF,  m_realm, m_phase, m_ncomp);
 }
 
-void imex_sdc::rte_storage::deallocate_storage(){
+void imex_sdc::rte_storage::deallocateStorage(){
   m_amr->deallocate(m_previous);
   m_amr->deallocate(m_scratchIV);
   m_amr->deallocate(m_scratchIF);
@@ -181,10 +181,10 @@ imex_sdc::sigma_storage::sigma_storage(const RefCountedPtr<AmrMesh>& a_amr,
 }
 
 imex_sdc::sigma_storage::~sigma_storage(){
-  deallocate_storage();
+  deallocateStorage();
 }
 
-void imex_sdc::sigma_storage::allocate_storage(const int a_p){
+void imex_sdc::sigma_storage::allocateStorage(const int a_p){
   m_p = a_p;
   
   m_amr->allocate(m_scratch, m_realm, m_phase, m_ncomp);
@@ -201,7 +201,7 @@ void imex_sdc::sigma_storage::allocate_storage(const int a_p){
   }
 }
 
-void imex_sdc::sigma_storage::deallocate_storage(){
+void imex_sdc::sigma_storage::deallocateStorage(){
   m_amr->deallocate(m_scratch);
   m_amr->deallocate(m_error);
 

@@ -26,10 +26,10 @@ godunov::cdr_storage::cdr_storage(const RefCountedPtr<AmrMesh>& a_amr,
 }
 
 godunov::cdr_storage::~cdr_storage(){
-  deallocate_storage();
+  deallocateStorage();
 }
 
-void godunov::cdr_storage::allocate_storage(){
+void godunov::cdr_storage::allocateStorage(){
   m_amr->allocate(m_scratch,  m_realm, m_phase, m_ncomp);
   m_amr->allocate(m_scratch2, m_realm, m_phase, m_ncomp);
   m_amr->allocate(m_scratch3, m_realm, m_phase, m_ncomp);
@@ -50,7 +50,7 @@ void godunov::cdr_storage::allocate_storage(){
   m_amr->allocate(m_scratchIF4, m_realm, m_phase, m_ncomp);
 }
 
-void godunov::cdr_storage::deallocate_storage(){
+void godunov::cdr_storage::deallocateStorage(){
   m_amr->deallocate(m_scratch);
   m_amr->deallocate(m_scratch2);
   m_amr->deallocate(m_scratch3);
@@ -86,16 +86,16 @@ godunov::poisson_storage::poisson_storage(const RefCountedPtr<AmrMesh>& a_amr,
 }
 
 godunov::poisson_storage::~poisson_storage(){
-  deallocate_storage();
+  deallocateStorage();
 }
 
-void godunov::poisson_storage::allocate_storage(){
+void godunov::poisson_storage::allocateStorage(){
   m_amr->allocate(m_E_cell, m_realm, m_phase, SpaceDim);
   m_amr->allocate(m_E_eb,   m_realm, m_phase, SpaceDim);
   m_amr->allocate(m_E_dom,  m_realm, m_phase, SpaceDim);
 }
 
-void godunov::poisson_storage::deallocate_storage(){
+void godunov::poisson_storage::deallocateStorage(){
   m_amr->deallocate(m_E_cell);
   m_amr->deallocate(m_E_eb);
   m_amr->deallocate(m_E_dom);
@@ -119,12 +119,12 @@ godunov::rte_storage::~rte_storage(){
 
 }
 
-void godunov::rte_storage::allocate_storage(){
+void godunov::rte_storage::allocateStorage(){
   m_amr->allocate(m_scratchIV, m_realm, m_phase, m_ncomp);
   m_amr->allocate(m_scratchIF, m_realm, m_phase, m_ncomp);
 }
 
-void godunov::rte_storage::deallocate_storage(){
+void godunov::rte_storage::deallocateStorage(){
   m_amr->deallocate(m_scratchIV);
   m_amr->deallocate(m_scratchIF);
 }
@@ -147,11 +147,11 @@ godunov::sigma_storage::~sigma_storage(){
 
 }
 
-void godunov::sigma_storage::allocate_storage(){
+void godunov::sigma_storage::allocateStorage(){
   m_amr->allocate(m_scratch, m_realm, m_phase, m_ncomp);
 }
 
-void godunov::sigma_storage::deallocate_storage(){
+void godunov::sigma_storage::deallocateStorage(){
   m_amr->deallocate(m_scratch);
 }
 #include "CD_NamespaceFooter.H"

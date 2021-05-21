@@ -26,10 +26,10 @@ ito_plasma_field_tagger::~ito_plasma_field_tagger(){
 
 }
 
-void ito_plasma_field_tagger::allocate_storage(){
-  CH_TIME("ito_plasma_field_tagger::allocate_storage");
+void ito_plasma_field_tagger::allocateStorage(){
+  CH_TIME("ito_plasma_field_tagger::allocateStorage");
   if(m_verbosity > 5){
-    pout() << m_name + "::allocate_storage" << endl;
+    pout() << m_name + "::allocateStorage" << endl;
   }
 
   m_amr->allocate(m_scratch, m_realm, m_phase, 1);
@@ -37,10 +37,10 @@ void ito_plasma_field_tagger::allocate_storage(){
   m_amr->allocate(m_grad_E,  m_realm, m_phase, SpaceDim);
 }
 
-void ito_plasma_field_tagger::deallocate_storage(){
-  CH_TIME("ito_plasma_field_tagger::deallocate_storage");
+void ito_plasma_field_tagger::deallocateStorage(){
+  CH_TIME("ito_plasma_field_tagger::deallocateStorage");
   if(m_verbosity > 5){
-    pout() << m_name + "::deallocate_storage" << endl;
+    pout() << m_name + "::deallocateStorage" << endl;
   }
 
   m_amr->deallocate(m_scratch);
@@ -72,7 +72,7 @@ void ito_plasma_field_tagger::computeTracers(){
     pout() << m_name + "::computeTracers" << endl;
   }
 
-  this->allocate_storage();
+  this->allocateStorage();
   
   const RealVect origin = m_amr->getProbLo();
   const Real time       = m_timeStepper->getTime();
@@ -174,6 +174,6 @@ void ito_plasma_field_tagger::computeTracers(){
     m_amr->averageDown(m_grad_tracer[i], m_realm, m_phase);
   }
 
-  this->deallocate_storage(); // No reason to keep the extra storage lying around...
+  this->deallocateStorage(); // No reason to keep the extra storage lying around...
 }
 #include "CD_NamespaceFooter.H"

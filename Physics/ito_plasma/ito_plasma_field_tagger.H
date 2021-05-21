@@ -67,12 +67,12 @@ namespace Physics {
       /*!
 	@brief Allocate memory
       */
-      void allocate_storage();
+      void allocateStorage();
 
       /*!
 	@brief Deallocate memory
       */
-      void deallocate_storage();
+      void deallocateStorage();
 
       /*!
 	@brief Compute electric field

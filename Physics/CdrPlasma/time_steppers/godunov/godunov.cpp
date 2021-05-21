@@ -384,7 +384,7 @@ void godunov::allocateInternals(){
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     m_cdr_scratch[idx] = RefCountedPtr<cdr_storage> (new cdr_storage(m_amr, m_realm, m_cdr->getPhase(), ncomp));
-    m_cdr_scratch[idx]->allocate_storage();
+    m_cdr_scratch[idx]->allocateStorage();
   }
 
   // Allocate RTE storage
@@ -392,16 +392,16 @@ void godunov::allocateInternals(){
   for (RtIterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     m_rte_scratch[idx] = RefCountedPtr<rte_storage> (new rte_storage(m_amr, m_realm, m_rte->getPhase(), ncomp));
-    m_rte_scratch[idx]->allocate_storage();
+    m_rte_scratch[idx]->allocateStorage();
   }
 
   // Allocate Poisson storage
   m_fieldSolver_scratch = RefCountedPtr<poisson_storage> (new poisson_storage(m_amr, m_realm, m_cdr->getPhase(), ncomp));
-  m_fieldSolver_scratch->allocate_storage();
+  m_fieldSolver_scratch->allocateStorage();
   
   // Allocate sigma storage
   m_sigma_scratch = RefCountedPtr<sigma_storage> (new sigma_storage(m_amr, m_realm, m_cdr->getPhase(), ncomp));
-  m_sigma_scratch->allocate_storage();
+  m_sigma_scratch->allocateStorage();
 }
 
 void godunov::deallocateInternals(){
@@ -412,23 +412,23 @@ void godunov::deallocateInternals(){
 
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
-    m_cdr_scratch[idx]->deallocate_storage();
+    m_cdr_scratch[idx]->deallocateStorage();
     m_cdr_scratch[idx] = RefCountedPtr<cdr_storage>(0);
   }
 
   for (RtIterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
-    m_rte_scratch[idx]->deallocate_storage();
+    m_rte_scratch[idx]->deallocateStorage();
     m_rte_scratch[idx] = RefCountedPtr<rte_storage>(0);
   }
 
   m_cdr_scratch.resize(0);
   m_rte_scratch.resize(0);
 
-  m_fieldSolver_scratch->deallocate_storage();
+  m_fieldSolver_scratch->deallocateStorage();
   m_fieldSolver_scratch = RefCountedPtr<poisson_storage>(0);
   
-  m_sigma_scratch->deallocate_storage();
+  m_sigma_scratch->deallocateStorage();
   m_sigma_scratch = RefCountedPtr<sigma_storage>(0);
 }
 

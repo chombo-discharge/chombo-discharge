@@ -28,8 +28,8 @@ namespace Physics {
     
       ~cdr_storage();
 
-      void allocate_storage();
-      void deallocate_storage();
+      void allocateStorage();
+      void deallocateStorage();
 
       EBAMRCellData& getScratch()  { return m_scratch;    }
       EBAMRCellData& getScratch2() { return m_scratch2;   }
@@ -84,8 +84,8 @@ namespace Physics {
 		      const int m_ncomp);
       ~poisson_storage();
 
-      void allocate_storage();
-      void deallocate_storage();
+      void allocateStorage();
+      void deallocateStorage();
 
       EBAMRCellData& get_E_cell()      {return m_E_cell;   }
       EBAMRIVData& get_E_eb()          {return m_E_eb;     }
@@ -112,8 +112,8 @@ namespace Physics {
 		  const int                      a_ncomp);
       ~rte_storage();
 
-      void allocate_storage();
-      void deallocate_storage();
+      void allocateStorage();
+      void deallocateStorage();
 
       EBAMRIVData& get_eb_flux(){     return m_scratchIV; }
       EBAMRIFData& getDomain_flux(){ return m_scratchIF; }
@@ -139,8 +139,8 @@ namespace Physics {
 		    const int                      a_ncomp);
       ~sigma_storage();
   
-      void allocate_storage();
-      void deallocate_storage();
+      void allocateStorage();
+      void deallocateStorage();
 
       EBAMRIVData& getScratch() {return m_scratch;}
   

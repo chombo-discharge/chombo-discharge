@@ -1,35 +1,41 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   cdr_plasma_field_tagger.cpp
-  @brief  Implementation of cdr_plasma_field_tagger.H
+  @file   CD_CdrPlasmaFieldTagger.cpp
+  @brief  Implementation of CD_CdrPlasmaFieldTagger.H
   @author Robert Marskar
-  @date   May. 2018
 */
 
-#include "cdr_plasma_field_tagger.H"
-#include <CD_DataOps.H>
-
+// Chombo includes
 #include <EBArith.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_CdrPlasmaFieldTagger.H>
+#include <CD_DataOps.H>
+#include <CD_NamespaceHeader.H>
+
 using namespace Physics::CdrPlasma;
 
-cdr_plasma_field_tagger::cdr_plasma_field_tagger(){
-  CH_TIME("cdr_plasma_field_tagger::cdr_plasma_field_tagger");
+CdrPlasmaFieldTagger::CdrPlasmaFieldTagger(){
+  CH_TIME("CdrPlasmaFieldTagger::CdrPlasmaFieldTagger");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_field_tagger::cdr_plasma_field_tagger" << endl;
+    pout() << "CdrPlasmaFieldTagger::CdrPlasmaFieldTagger" << endl;
   }
 
-  m_name = "cdr_plasma_field_tagger";
+  m_name = "CdrPlasmaFieldTagger";
 }
 
-cdr_plasma_field_tagger::~cdr_plasma_field_tagger(){
+CdrPlasmaFieldTagger::~CdrPlasmaFieldTagger(){
 
 }
 
-void cdr_plasma_field_tagger::allocate_storage(){
-  CH_TIME("cdr_plasma_field_tagger::allocate_storage");
+void CdrPlasmaFieldTagger::allocateStorage(){
+  CH_TIME("CdrPlasmaFieldTagger::allocateStorage");
   if(m_verbosity > 5){
-    pout() << m_name + "::allocate_storage" << endl;
+    pout() << m_name + "::allocateStorage" << endl;
   }
 
   m_amr->allocate(m_scratch,  m_realm, m_phase, 1);
@@ -37,10 +43,10 @@ void cdr_plasma_field_tagger::allocate_storage(){
   m_amr->allocate(m_grad_E,   m_realm, m_phase, SpaceDim);
 }
 
-void cdr_plasma_field_tagger::deallocate_storage(){
-  CH_TIME("cdr_plasma_field_tagger::deallocate_storage");
+void CdrPlasmaFieldTagger::deallocateStorage(){
+  CH_TIME("CdrPlasmaFieldTagger::deallocateStorage");
   if(m_verbosity > 5){
-    pout() << m_name + "::deallocate_storage" << endl;
+    pout() << m_name + "::deallocateStorage" << endl;
   }
 
   m_amr->deallocate(m_scratch);
@@ -48,8 +54,8 @@ void cdr_plasma_field_tagger::deallocate_storage(){
   m_amr->deallocate(m_grad_E);
 }
 
-void cdr_plasma_field_tagger::computeElectricField(EBAMRCellData& a_E, EBAMRCellData& a_grad_E){
-  CH_TIME("cdr_plasma_field_tagger::computeElectricField");
+void CdrPlasmaFieldTagger::computeElectricField(EBAMRCellData& a_E, EBAMRCellData& a_grad_E){
+  CH_TIME("CdrPlasmaFieldTagger::computeElectricField");
   if(m_verbosity > 5){
     pout() << m_name + "::computeElectricField" << endl;
   }
@@ -66,13 +72,13 @@ void cdr_plasma_field_tagger::computeElectricField(EBAMRCellData& a_E, EBAMRCell
   m_amr->interpToCentroids(a_grad_E, m_realm, m_phase);
 }
 
-void cdr_plasma_field_tagger::computeTracers(){
-  CH_TIME("cdr_plasma_field_tagger::computeTracers");
+void CdrPlasmaFieldTagger::computeTracers(){
+  CH_TIME("CdrPlasmaFieldTagger::computeTracers");
   if(m_verbosity > 5){
     pout() << m_name + "::computeTracers" << endl;
   }
 
-  this->allocate_storage();
+  this->allocateStorage();
   
   const RealVect origin = m_amr->getProbLo();
   const Real time       = m_timeStepper->getTime();
@@ -174,6 +180,7 @@ void cdr_plasma_field_tagger::computeTracers(){
     m_amr->averageDown(m_grad_tracer[i], m_realm, m_phase);
   }
 
-  this->deallocate_storage(); // No reason to keep the extra storage lying around...
+  this->deallocateStorage(); // No reason to keep the extra storage lying around...
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

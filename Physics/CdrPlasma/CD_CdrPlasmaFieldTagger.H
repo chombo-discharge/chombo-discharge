@@ -1,16 +1,21 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   cdr_plasma_field_tagger.H
-  @brief  Declaration of an abstract field-only tagging class for cdr plasmas
+  @file   CD_CdrPlasmaFieldTagger.H
+  @brief  Cell tagger class for Physics/CdrPlasma. 
   @author Robert Marskar
-  @date   May. 2018
 */
 
-#ifndef _CDR_PLASMA_FIELD_TAGGER_
-#define _CDR_PLASMA_FIELD_TAGGER_
+#ifndef CD_CdrPlasmaFieldTagger_H
+#define CD_CdrPlasmaFieldTagger_H
 
+// Our includes
 #include <CD_CdrPlasmaTagger.H>
+#include <CD_NamespaceHeader.H>
 
-#include "CD_NamespaceHeader.H"
 namespace Physics {
   namespace CdrPlasma {
   
@@ -19,18 +24,18 @@ namespace Physics {
       @details This class fetches the point-wise electric field. The class is pure, so users must implement 
       the actual tagging criterion themselves. 
     */
-    class cdr_plasma_field_tagger : public CdrPlasmaTagger {
+    class CdrPlasmaFieldTagger : public CdrPlasmaTagger {
     public:
 
       /*!
 	@brief Weak constructor, must subsequently call define
       */
-      cdr_plasma_field_tagger();
+      CdrPlasmaFieldTagger();
 
       /*!
 	@brief Destructor
       */
-      ~cdr_plasma_field_tagger();
+      ~CdrPlasmaFieldTagger();
 
       /*!
 	@brief Compute tracer fields
@@ -62,12 +67,12 @@ namespace Physics {
       /*!
 	@brief Allocate memory
       */
-      void allocate_storage();
+      void allocateStorage();
 
       /*!
 	@brief Deallocate memory
       */
-      void deallocate_storage();
+      void deallocateStorage();
 
       /*!
 	@brief Compute electric field
@@ -92,23 +97,25 @@ namespace Physics {
 	@brief Coarsen a cell based on a tracer field
       */
       virtual bool coarsenCell(const RealVect         a_pos,
-				const Real             a_time,
-				const Real             a_dx,
-				const int              a_lvl,
-				const Vector<Real>     a_tracer,
-				const Vector<RealVect> a_grad_tracer) = 0;
-
-      /*!
-	@brief Refine a cell based on a tracer field
-      */
-      virtual bool refineCell(const RealVect         a_pos,
 			       const Real             a_time,
 			       const Real             a_dx,
 			       const int              a_lvl,
 			       const Vector<Real>     a_tracer,
 			       const Vector<RealVect> a_grad_tracer) = 0;
+
+      /*!
+	@brief Refine a cell based on a tracer field
+      */
+      virtual bool refineCell(const RealVect         a_pos,
+			      const Real             a_time,
+			      const Real             a_dx,
+			      const int              a_lvl,
+			      const Vector<Real>     a_tracer,
+			      const Vector<RealVect> a_grad_tracer) = 0;
     };
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif

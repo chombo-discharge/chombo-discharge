@@ -8,12 +8,12 @@
 #ifndef _STREAMER_TAGGER_
 #define _STREAMER_TAGGER_
 
-#include "cdr_plasma_field_tagger.H"
+#include <CD_CdrPlasmaFieldTagger.H>
 
 /*!
   @brief Refinement class for morrow_stephens plasma model only
 */
-class streamer_tagger : public cdr_plasma_field_tagger {
+class streamer_tagger : public CdrPlasmaFieldTagger {
 public:
   
   /*!
