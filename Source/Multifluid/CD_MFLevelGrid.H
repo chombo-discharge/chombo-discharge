@@ -1,19 +1,23 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   MFLevelGrid.H
+  @file   CD_MFLevelGrid.H
   @brief  Declaration of a wrapper for wrapping multifluid EBLevelGrids
   @author Robert Marskar
-  @date   Dec. 2017
-  @todo   Segregate header and implementation files
 */
 
-#ifndef _MFLEVELGRID_
-#define _MFLEVELGRID_
+#ifndef CD_MFLevelGrid_H
+#define CD_MFLevelGrid_H
 
+// Chombo includes
+#include <EBLevelGrid.H>
+
+// Our includes
 #include <CD_MultiFluidIndexSpace.H>
-
-#include "EBLevelGrid.H"
-
-#include "CD_NamespaceHeader.H"
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Wrapper class for holding multifluid EBLevelGrids
@@ -62,7 +66,7 @@ public:
   /*!
     @brief Get the problem domain
   */
-  virtual ProblemDomain get_domain() const;
+  virtual ProblemDomain getDomain() const;
 
   /*!
     @brief Get the grids
@@ -83,25 +87,26 @@ public:
     @brief Get interface region between two phases.
   */
   virtual IntVectSet interfaceRegion(const Box&       a_box,
-				      const DataIndex& a_dit,
-				      const int        a_phase1 = 0,
-				      const int        a_phase2 = 1) const;
+				     const DataIndex& a_dit,
+				     const int        a_phase1 = 0,
+				     const int        a_phase2 = 1) const;
 
   /*!
     @brief Get the interface IntVect on the other side of the EB. Useful for when EB aligns with cell face
   */
-  virtual bool interface_pair(IntVect& a_iv,
-			      const IntVect&   a_iv_in,
-			      const Box&       a_box,
-			      const DataIndex& a_dit,
-			      const int        a_phase1 = 0,
-			      const int        a_phase2 = 1) const;
+  virtual bool interfacePair(IntVect& a_iv,
+			     const IntVect&   a_iv_in,
+			     const Box&       a_box,
+			     const DataIndex& a_dit,
+			     const int        a_phase1 = 0,
+			     const int        a_phase2 = 1) const;
 private:
 
   RefCountedPtr<MultiFluidIndexSpace> m_multifluidIndexSpace;
 
   Vector<EBLevelGrid> m_eblg;
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

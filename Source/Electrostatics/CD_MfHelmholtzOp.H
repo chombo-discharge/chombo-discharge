@@ -25,7 +25,7 @@
 // Our includes
 #include <CD_MultiFluidIndexSpace.H>
 #include <CD_JumpBc.H>
-#include <MFLevelGrid.H>
+#include <CD_MFLevelGrid.H>
 #include <CD_Electrode.H>
 #include <MFQuadCFInterp.H>
 #include <CD_MFFluxReg.H>

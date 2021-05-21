@@ -139,7 +139,7 @@ void JumpBc::define(const MFLevelGrid&            a_mflg,
   CH_TIME("JumpBc::define");
   m_mflg   = a_mflg;
   m_dx     = a_dx;
-  m_domain = m_mflg.get_domain();
+  m_domain = m_mflg.getDomain();
   m_multifluidIndexSpace   = m_mflg.getMfIndexSpace();
   m_grids  = m_mflg.getGrids();
   m_order  = a_order;

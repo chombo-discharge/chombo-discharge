@@ -36,7 +36,7 @@ template <class T>
 void MFInterfaceFAB<T>::define(const MFLevelGrid& a_mflg, const DataIndex& a_dit){
 
   const DisjointBoxLayout& dbl    = a_mflg.getGrids();
-  const ProblemDomain& domain     = a_mflg.get_domain();
+  const ProblemDomain& domain     = a_mflg.getDomain();
   const RefCountedPtr<MultiFluidIndexSpace>& MultiFluidIndexSpace = a_mflg.getMfIndexSpace();
   const int numPhases            = MultiFluidIndexSpace->numPhases();
 

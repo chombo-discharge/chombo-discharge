@@ -15,7 +15,7 @@
 // Our includes
 #include <CD_PhaseRealm.H>
 #include <CD_MultiFluidIndexSpace.H>
-#include <MFLevelGrid.H>
+#include <CD_MFLevelGrid.H>
 #include <CD_NamespaceHeader.H>
 
 static const std::string s_particle_halo         = "particle_halo";

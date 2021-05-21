@@ -1,14 +1,18 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   MFLevelGrid.cpp
-  @brief  Implementation of MFLevelGrid.H
+  @file   CD_MFLevelGrid.cpp
+  @brief  Implementation of CD_MFLevelGrid.H
   @author Robert Marskar
-  @date   Dec. 2017
 */
 
+// Our includes
 #include <CD_MultiFluidIndexSpace.H>
-#include "MFLevelGrid.H"
-
-#include "CD_NamespaceHeader.H"
+#include <CD_MFLevelGrid.H>
+#include <CD_NamespaceHeader.H>
 
 MFLevelGrid::MFLevelGrid(){
 
@@ -50,7 +54,7 @@ const RefCountedPtr<MultiFluidIndexSpace>& MFLevelGrid::getMfIndexSpace() const 
   return m_multifluidIndexSpace;
 }
 
-ProblemDomain MFLevelGrid::get_domain() const {
+ProblemDomain MFLevelGrid::getDomain() const {
   return m_eblg[0].getDomain();
 }
 
@@ -86,7 +90,7 @@ IntVectSet MFLevelGrid::interfaceRegion(const Box&       a_box,
   return ret;
 }
 
-bool MFLevelGrid::interface_pair(IntVect&             a_iv,
+bool MFLevelGrid::interfacePair(IntVect&             a_iv,
 				 const IntVect&       a_iv_in,
 				 const Box&           a_box,
 				 const DataIndex&     a_dit,
@@ -114,7 +118,7 @@ bool MFLevelGrid::interface_pair(IntVect&             a_iv,
 	  const IntVect iv = a_iv_in + BASISV(dir)*sign(sit());
 	  if(irreg2.contains(iv)){
 	    if(found_iv){
-	      MayDay::Abort("MFLevelGrid::interface_pair - iv has multiple neighboring irregular cells. Aborting.");
+	      MayDay::Abort("MFLevelGrid::interfacePair - iv has multiple neighboring irregular cells. Aborting.");
 	    }
 	    else{
 	      a_iv     = iv;
@@ -128,4 +132,5 @@ bool MFLevelGrid::interface_pair(IntVect&             a_iv,
 
   return found_iv;
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

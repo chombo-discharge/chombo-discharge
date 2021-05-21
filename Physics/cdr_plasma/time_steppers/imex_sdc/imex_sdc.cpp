@@ -1519,8 +1519,8 @@ void imex_sdc::compute_cdr_domain_states(){
     RefCountedPtr<cdr_storage>& storage = imex_sdc::get_cdr_storage(solver_it);
 
     cdr_states.push_back(&(solver->getPhi()));
-    domain_states.push_back(&(storage->get_domain_state()));
-    domain_gradients.push_back(&(storage->get_domain_grad()));
+    domain_states.push_back(&(storage->getDomain_state()));
+    domain_gradients.push_back(&(storage->getDomain_grad()));
     cdr_gradients.push_back(&(storage->get_gradient())); // Should already be computed
   }
 
@@ -1550,8 +1550,8 @@ void imex_sdc::compute_cdr_domain_states(const Vector<EBAMRCellData*>& a_phis){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
-    domain_states.push_back(&(storage->get_domain_state()));
-    domain_gradients.push_back(&(storage->get_domain_grad()));
+    domain_states.push_back(&(storage->getDomain_state()));
+    domain_gradients.push_back(&(storage->getDomain_grad()));
     cdr_gradients.push_back(&(storage->get_gradient()));
   }
 
@@ -1662,10 +1662,10 @@ void imex_sdc::compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_phis, c
   for (CdrIterator<CdrSolver> solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
 
-    EBAMRIFData& dens_domain = storage->get_domain_state();
-    EBAMRIFData& velo_domain = storage->get_domain_velo();
-    EBAMRIFData& flux_domain = storage->get_domain_flux();
-    EBAMRIFData& grad_domain = storage->get_domain_grad();
+    EBAMRIFData& dens_domain = storage->getDomain_state();
+    EBAMRIFData& velo_domain = storage->getDomain_velo();
+    EBAMRIFData& flux_domain = storage->getDomain_flux();
+    EBAMRIFData& grad_domain = storage->getDomain_grad();
     EBAMRCellData& gradient  = storage->get_gradient();
 
     extrap_cdr_densities.push_back(&dens_domain);  // Has not been computed
@@ -1686,7 +1686,7 @@ void imex_sdc::compute_cdr_domain_fluxes(const Vector<EBAMRCellData*>& a_phis, c
     RefCountedPtr<RtSolver>& solver   = solver_it();
     RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
 
-    EBAMRIFData& domain_flux = storage->get_domain_flux();
+    EBAMRIFData& domain_flux = storage->getDomain_flux();
     solver->computeDomainFlux(domain_flux, solver->getPhi());
     extrap_rte_fluxes.push_back(&domain_flux);
   }

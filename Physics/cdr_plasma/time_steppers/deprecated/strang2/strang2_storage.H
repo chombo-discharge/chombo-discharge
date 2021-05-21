@@ -39,10 +39,10 @@ public:
   EBAMRIVData& get_eb_flux(){   return m_scratchIV3; }
   EBAMRIVData& get_eb_grad(){   return m_scratchIV4; }
 
-  EBAMRIFData& get_domain_state(){  return m_scratchIF1; }
-  EBAMRIFData& get_domain_velo(){   return m_scratchIF2; }
-  EBAMRIFData& get_domain_flux(){   return m_scratchIF3; }
-  EBAMRIFData& get_domain_grad(){   return m_scratchIF4; }
+  EBAMRIFData& getDomain_state(){  return m_scratchIF1; }
+  EBAMRIFData& getDomain_velo(){   return m_scratchIF2; }
+  EBAMRIFData& getDomain_flux(){   return m_scratchIF3; }
+  EBAMRIFData& getDomain_grad(){   return m_scratchIF4; }
   
 protected:
 
@@ -116,7 +116,7 @@ public:
   EBAMRCellData& get_cache(){     return m_cache; }
   EBAMRCellData& get_backup(){    return m_backup; }
   EBAMRIVData& get_eb_flux(){     return m_scratchIV; }
-  EBAMRIFData& get_domain_flux(){ return m_scratchIF; }
+  EBAMRIFData& getDomain_flux(){ return m_scratchIF; }
 
 protected:
 
