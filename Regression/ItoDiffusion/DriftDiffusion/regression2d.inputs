@@ -134,26 +134,26 @@ RodDielectric.sphere.radius             = 0.15          # Radius
 # This class does an expclit AMR advection-diffusion simulation of Brownian walker particles drawn
 # from a Gaussian distribution. 
 # ====================================================================================================
-brownian_walker.verbosity      = -1      # Verbosity
-brownian_walker.realm          = primal  # Realm
-brownian_walker.diffusion      = true    # Turn on/off diffusion
-brownian_walker.advection      = true    # Turn on/off advection
-brownian_walker.blob_amplitude = 1.0     # Blob amplitude
-brownian_walker.blob_radius    = 0.15    # Blob radius
-brownian_walker.blob_center    = 0 0.25  # Blob center
-brownian_walker.seed           = 0       # RNG seed
-brownian_walker.num_particles  = 100000  # Number of initial particles
-brownian_walker.max_cells_hop  = 2.0     # Maximum cells to move in one time step
-brownian_walker.ppc            = 32      # Target particles per cell
-brownian_walker.load_balance   = false   # Turn on/off particle load balancing	
+BrownianWalker.verbosity      = -1      # Verbosity
+BrownianWalker.realm          = primal  # Realm
+BrownianWalker.diffusion      = true    # Turn on/off diffusion
+BrownianWalker.advection      = true    # Turn on/off advection
+BrownianWalker.blob_amplitude = 1.0     # Blob amplitude
+BrownianWalker.blob_radius    = 0.15    # Blob radius
+BrownianWalker.blob_center    = 0 0.25  # Blob center
+BrownianWalker.seed           = 0       # RNG seed
+BrownianWalker.num_particles  = 100000  # Number of initial particles
+BrownianWalker.max_cells_hop  = 2.0     # Maximum cells to move in one time step
+BrownianWalker.ppc            = 32      # Target particles per cell
+BrownianWalker.load_balance   = false   # Turn on/off particle load balancing	
 
 # Velocity, diffusion, and CFL
 # ----------------------------
-brownian_walker.diffco         = 0.01    # Diffusion coefficient
-brownian_walker.omega          = 1.0     # Rotation velocity
+BrownianWalker.diffco         = 0.01    # Diffusion coefficient
+BrownianWalker.omega          = 1.0     # Rotation velocity
 
 # Cell tagging stuff
 # ------------------
-brownian_walker.refine_curv = 0.1          # Refine if curvature exceeds this
-brownian_walker.refine_magn = 1E-2         # Only tag if magnitude eceeds this
-brownian_walker.buffer      = 0            # Grow tagged cells     
+BrownianWalker.refine_curv = 0.1          # Refine if curvature exceeds this
+BrownianWalker.refine_magn = 1E-2         # Only tag if magnitude eceeds this
+BrownianWalker.buffer      = 0            # Grow tagged cells     

@@ -22,7 +22,7 @@ def write_template(args):
     mainf.write("\n")
 
     mainf.write("using namespace ChomboDischarge;\n")
-    mainf.write("using namespace physics::brownian_walker;\n\n")
+    mainf.write("using namespace physics::BrownianWalker;\n\n")
     mainf.write("int main(int argc, char* argv[]){\n")
 
     mainf.write("\n")
@@ -45,7 +45,7 @@ def write_template(args):
 
 
     mainf.write("\n")
-    mainf.write("  // Set up basic brownian_walker \n")
+    mainf.write("  // Set up basic BrownianWalker \n")
     mainf.write("  RefCountedPtr<ItoSolver> solver        = RefCountedPtr<ItoSolver>   (new " + args.ItoSolver + "());\n")
     mainf.write("  RefCountedPtr<TimeStepper> timestepper = RefCountedPtr<TimeStepper> (new " + args.stepper + "(solver));\n")
     mainf.write("  RefCountedPtr<CellTagger> tagger       = RefCountedPtr<CellTagger>  (new BrownianWalkerTagger(solver, amr));\n")

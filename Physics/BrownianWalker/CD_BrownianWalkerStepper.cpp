@@ -23,7 +23,7 @@
 using namespace Physics::BrownianWalker;
 
 BrownianWalkerStepper::BrownianWalkerStepper(){
-  ParmParse pp("brownian_walker");
+  ParmParse pp("BrownianWalker");
 
   m_phase = phase::gas;
 
@@ -46,7 +46,7 @@ BrownianWalkerStepper::~BrownianWalkerStepper(){
 
 void BrownianWalkerStepper::parseRuntimeOptions() {
 
-  ParmParse pp("brownian_walker");
+  ParmParse pp("BrownianWalker");
   
   pp.get("verbosity",      m_verbosity);
   pp.get("ppc",            m_ppc);

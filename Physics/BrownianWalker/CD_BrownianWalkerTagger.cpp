@@ -24,7 +24,7 @@ BrownianWalkerTagger::BrownianWalkerTagger(RefCountedPtr<ItoSolver>& a_solver,
 					       RefCountedPtr<AmrMesh>&   a_amr){
   m_solver    = a_solver;
   m_amr       = a_amr;
-  m_name      = "brownian_walker";
+  m_name      = "BrownianWalker";
   m_verbosity = -1;
 }
 

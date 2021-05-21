@@ -22,7 +22,7 @@ BrownianWalkerSpecies::BrownianWalkerSpecies() : m_rng(), m_gauss(0., 1.) {
   m_name   = "scalar species";
   m_chargeNumber = 0;
 
-  ParmParse pp("brownian_walker");
+  ParmParse pp("BrownianWalker");
   Vector<Real> v;
 
   pp.get   ("seed",           m_seed);

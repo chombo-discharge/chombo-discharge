@@ -23,7 +23,7 @@ int main(int argc, char* argv[]){
   RefCountedPtr<AmrMesh> amr                    = RefCountedPtr<AmrMesh> (new AmrMesh());
   RefCountedPtr<GeoCoarsener> geocoarsen        = RefCountedPtr<GeoCoarsener> (new GeoCoarsener());
 
-  // Set up basic brownian_walker 
+  // Set up basic BrownianWalker 
   RefCountedPtr<ItoSolver> solver        = RefCountedPtr<ItoSolver>   (new ItoSolver());
   RefCountedPtr<TimeStepper> timestepper = RefCountedPtr<TimeStepper> (new BrownianWalkerStepper(solver));
   RefCountedPtr<CellTagger> tagger       = RefCountedPtr<CellTagger>  (new BrownianWalkerTagger(solver, amr));

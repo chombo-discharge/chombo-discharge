@@ -22,7 +22,7 @@ namespace Physics {
   namespace BrownianWalker {
 
     /*!
-      @brief Class that just solves the brownian_walker equation
+      @brief Class that just solves the BrownianWalker equation
     */
     class BrownianWalkerStepper : public TimeStepper {
     public:
