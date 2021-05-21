@@ -76,14 +76,14 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 # Note: For this geometry a live wire gets V = 0.5V0 and a dead wire gets V=-0.5V0
 # In 2D the wires are spheres and only endpoint1 is used. 
 # ====================================================================================================
-wire_wire.first.on        = true          # Wire on or not
-wire_wire.first.live      = true          # Wire live or not
-wire_wire.first.radius    = 0.1           # Wire radius
-wire_wire.first.endpoint1 = 0.5 -2 0      # Wire endpoint
-wire_wire.first.endpoint2 = 0.5  2 0      # Other endpoint
+WireWire.first.on        = true          # Wire on or not
+WireWire.first.live      = true          # Wire live or not
+WireWire.first.radius    = 0.1           # Wire radius
+WireWire.first.endpoint1 = 0.5 -2 0      # Wire endpoint
+WireWire.first.endpoint2 = 0.5  2 0      # Other endpoint
 
-wire_wire.second.on        = true         # Wire on or not
-wire_wire.second.live      = true         # Wire live or not
-wire_wire.second.radius    = 0.1          # Wire radius
-wire_wire.second.endpoint1 = -0.5 -2 0    # Wire endpoint
-wire_wire.second.endpoint2 = -0.5  2 0    # Other endpoint
+WireWire.second.on        = true         # Wire on or not
+WireWire.second.live      = true         # Wire live or not
+WireWire.second.radius    = 0.1          # Wire radius
+WireWire.second.endpoint1 = -0.5 -2 0    # Wire endpoint
+WireWire.second.endpoint2 = -0.5  2 0    # Other endpoint

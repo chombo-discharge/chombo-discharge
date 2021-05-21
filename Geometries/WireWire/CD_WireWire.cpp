@@ -1,20 +1,23 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   wire_wire.cpp
-  @brief  Implementation of wire_wire.H
+  @file   CD_WireWire.cpp
+  @brief  Implementation of CD_WireWire.H
   @author Robert Marskar
-  @date   Nov. 2017
 */
 
-#include "wire_wire.H"
-
+// Our includes
+#include <CD_WireWire.H>
 #include <CD_SphereSdf.H>
 #include <CD_CylinderSdf.H>
+#include <CD_NamespaceHeader.H>
 
-#include "CD_NamespaceHeader.H"
-
-wire_wire::wire_wire(){
-  ParmParse pp1("wire_wire.first");
-  ParmParse pp2("wire_wire.second");
+WireWire::WireWire(){
+  ParmParse pp1("WireWire.first");
+  ParmParse pp2("WireWire.second");
 
   bool useFirst;
   bool useSecond;
@@ -27,10 +30,10 @@ wire_wire::wire_wire(){
 }
 
 
-wire_wire::~wire_wire(){
+WireWire::~WireWire(){
 }
 
-void wire_wire::addWire(ParmParse& a_pp){
+void WireWire::addWire(ParmParse& a_pp){
   Real r;
   RealVect e1, e2;
   bool live;
@@ -53,4 +56,5 @@ void wire_wire::addWire(ParmParse& a_pp){
 
   m_electrodes.push_back(Electrode(bif, true, pot));
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
