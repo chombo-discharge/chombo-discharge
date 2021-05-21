@@ -73,15 +73,15 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 # ====================================================================================================
 # ROUGH_SPHERE CLASS OPTIONS
 # ====================================================================================================
-rough_sphere.on                = true         # Turn on/off geometry
-rough_sphere.material          = electrode    # 'electrode' or 'dielectric'
-rough_sphere.live              = true         # Live potential or not (for electrode)
-rough_sphere.eps               = 4            # Set permittivity for dielectric
-rough_sphere.radius            = 0.25         # Sphere radius
-rough_sphere.center            = 0 0 0        # Sphere center
-rough_sphere.noise_amplitude   = 0.1          # Noise amplitude
-rough_sphere.noise_frequency   = 10 10 10     # Noise frequency
-rough_sphere.noise_persistence = 0.5          # Noise persistence
-rough_sphere.noise_octaves     = 3            # Noise octaves
-rough_sphere.noise_reseed      = false        # Reseed noise
+RoughSphere.on                = true         # Turn on/off geometry
+RoughSphere.material          = electrode    # 'electrode' or 'dielectric'
+RoughSphere.live              = true         # Live potential or not (for electrode)
+RoughSphere.eps               = 4            # Set permittivity for dielectric
+RoughSphere.radius            = 0.25         # Sphere radius
+RoughSphere.center            = 0 0 0        # Sphere center
+RoughSphere.noise_amplitude   = 0.1          # Noise amplitude
+RoughSphere.noise_frequency   = 10 10 10     # Noise frequency
+RoughSphere.noise_persistence = 0.5          # Noise persistence
+RoughSphere.noise_octaves     = 3            # Noise octaves
+RoughSphere.noise_reseed      = false        # Reseed noise
 

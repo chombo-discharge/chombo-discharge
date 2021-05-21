@@ -1,27 +1,32 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file rough_sphere.cpp
-  @brief Implementation of rough_sphere.H
+  @file   CD_RoughSphere.cpp
+  @brief  Implementation of CD_RoughSphere.H
   @author Robert Marskar
-  @date Nov. 2017
 */
 
-#include "rough_sphere.H"
-
+// Std includes
 #include <string>
 #include <iostream>
 #include <fstream>
 
+// Chombo includes
 #include <ParmParse.H>
 #include <BaseIF.H>
 
+// Our includes
 #include <CD_PerlinSphereSdf.H>
+#include <CD_RoughSphere.H>
+#include <CD_NamespaceHeader.H>
 
-#include "CD_NamespaceHeader.H"
-
-rough_sphere::rough_sphere(){
+RoughSphere::RoughSphere(){
   this->setGasPermittivity(1.0);
 
-  ParmParse pp("rough_sphere");
+  ParmParse pp("RoughSphere");
 
   bool useSphere;
   std::string whichMaterial;
@@ -52,13 +57,14 @@ rough_sphere::rough_sphere(){
 
     if      (whichMaterial == "electrode")  m_electrodes.push_back(Electrode(sph, live));
     else if (whichMaterial == "dielectric") m_dielectrics.push_back(Dielectric(sph, eps));
-    else    MayDay::Abort("rough_sphere::rough_sphere - unknown material requested");
+    else    MayDay::Abort("RoughSphere::RoughSphere - unknown material requested");
   }
 
 
 }
 
-rough_sphere::~rough_sphere(){
+RoughSphere::~RoughSphere(){
   
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
