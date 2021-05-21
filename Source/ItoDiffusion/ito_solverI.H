@@ -9,7 +9,7 @@
 #define _ITO_SOLVERI_H_
 
 #include "ito_solver.H"
-#include "simple_ito_particle.H"
+#include <CD_SimpleItoParticle.H>
 #include "ito_solver.H"
 #include <CD_DataOps.H>
 #include <CD_EbParticleInterp.H>

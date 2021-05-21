@@ -5,7 +5,7 @@
   @date   April 2020
 */
 
-#include "simple_ito_particle.H"
+#include <CD_SimpleItoParticle.H>
 #include "ito_solver.H"
 #include <CD_DataOps.H>
 #include <CD_EbParticleInterp.H>
@@ -1026,19 +1026,19 @@ void ito_solver::writeCheckpointLevel_particles(HDF5Handle& a_handle, const int 
   const int halo        = 0;
   const std::string str = m_name + "_particles";
 
-  ParticleContainer<simple_ito_particle> RealmParticles;
+  ParticleContainer<SimpleItoParticle> RealmParticles;
   m_amr->allocate(RealmParticles,  m_pvr_buffer, m_realm);
 
   const ParticleContainer<ItoParticle>& myParticles = this->getParticles(which_container::bulk);
 
-  // Make ItoParticle into simple_ito_particle. This saves a shitload of disk space. 
+  // Make ItoParticle into SimpleItoParticle. This saves a shitload of disk space. 
   for (DataIterator dit(m_amr->getGrids(m_realm)[a_level]); dit.ok(); ++dit){
-    List<simple_ito_particle>& other_particles = (RealmParticles[a_level])[dit()].listItems();
+    List<SimpleItoParticle>& other_particles = (RealmParticles[a_level])[dit()].listItems();
 
     other_particles.clear();
       
     for (ListIterator<ItoParticle> lit(myParticles[a_level][dit()].listItems()); lit.ok(); ++lit){
-      other_particles.append(simple_ito_particle(lit().mass(), lit().position(), lit().energy()));
+      other_particles.append(SimpleItoParticle(lit().mass(), lit().position(), lit().energy()));
     }
   }
 
@@ -1102,18 +1102,18 @@ void ito_solver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
   const std::string str = m_name + "_particles";
   if(m_checkpointing == which_checkpoint::particles){
 
-    // Get simple_ito_particles from data file
-    Vector<RefCountedPtr<ParticleData<simple_ito_particle> > > simpleParticles;
+    // Get SimpleItoParticles from data file
+    Vector<RefCountedPtr<ParticleData<SimpleItoParticle> > > simpleParticles;
     m_amr->allocate(simpleParticles, m_realm);
     readParticlesFromHDF(a_handle, *simpleParticles[a_level], str);
 
     ParticleContainer<ItoParticle>& particles = m_ParticleContainers.at(which_container::bulk);
 
-    // Make simple_ito_particles into ito_ particles
+    // Make SimpleItoParticles into ito_ particles
     for (DataIterator dit(m_amr->getGrids(m_realm)[a_level]); dit.ok(); ++dit){
       List<ItoParticle>& particlesDit = particles[a_level][dit()].listItems();
       
-      for (ListIterator<simple_ito_particle> lit((*simpleParticles[a_level])[dit()].listItems()); lit.ok(); ++lit){
+      for (ListIterator<SimpleItoParticle> lit((*simpleParticles[a_level])[dit()].listItems()); lit.ok(); ++lit){
 	particlesDit.append(ItoParticle(lit().mass(), lit().position(), RealVect::Zero, 0.0, 0.0, lit().energy()));
       }
     }

@@ -1,42 +1,49 @@
+/* chombo-discharge
+ * Copyright 2021 SINTEF Energy Research
+ * Please refer to LICENSE in the chombo-discharge root directory
+ */
+
 /*!
-  @file   simple_ito_particle.H
+  @file   CD_SimpleItoParticleParticle.H
   @brief  Declaration of a particle which only holds position and mass. 
   @author Robert Marskar
-  @date   Sept. 2020
 */
 
-#ifndef _SIMPLE_ITO_PARTICLE_H_
-#define _SIMPLE_ITO_PARTICLE_H_
+#ifndef CD_SimpleItoParticleParticle_H
+#define  CD_SimpleItoParticleParticle_H
 
+// Std includes
 #include <string>
 #include <typeinfo>
 #include <cstdio>
 #include <cmath>
 
-#include "BinItem.H"
+// Chombo includes
+#include <BinItem.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief A particle class for use with Ito diffusion, i.e. drift-diffusion brownian walkers
 */
-class simple_ito_particle : public BinItem {
+class SimpleItoParticle : public BinItem {
 public:
 
   /*!
     @brief Default constructor
   */
-  simple_ito_particle();
+  SimpleItoParticle();
 
   /*!
     @brief Constructor. Subsequently calls define
   */
-  simple_ito_particle(const Real a_mass, const RealVect a_position, const Real a_energy);
+  SimpleItoParticle(const Real a_mass, const RealVect a_position, const Real a_energy);
 
   /*!
     @brief Default dtor
   */
-  ~simple_ito_particle();
+  ~SimpleItoParticle();
 
   /*!
     @brief For non-default ctor
@@ -76,17 +83,17 @@ public:
   /*!
     @brief Comparison operator
   */
-  bool operator==(const simple_ito_particle& a_p) const;
+  bool operator==(const SimpleItoParticle& a_p) const;
 
   /*!
     @brief Comparison operator
   */
-  bool operator==(const simple_ito_particle* a_p) const;
+  bool operator==(const SimpleItoParticle* a_p) const;
 
   /*!
     @brief Comparison operator
   */
-  bool operator!=(const simple_ito_particle& a_p) const;
+  bool operator!=(const SimpleItoParticle& a_p) const;
 
   /*!
     @brief Returns the size, in number of bytes, of a flat representation of the data in this object.
@@ -109,7 +116,7 @@ public:
   /*!
     @brief For outputting particle
   */
-  friend std::ostream & operator<<(std::ostream& ostr,const simple_ito_particle& p);
+  friend std::ostream & operator<<(std::ostream& ostr,const SimpleItoParticle& p);
 
 protected:
 
@@ -117,7 +124,8 @@ protected:
   Real m_energy;
 };
 
-std::ostream & operator<<(std::ostream& ostr, const simple_ito_particle& p);
-#include "CD_NamespaceFooter.H"
+std::ostream & operator<<(std::ostream& ostr, const SimpleItoParticle& p);
+
+#include <CD_NamespaceFooter.H>
 
 #endif
