@@ -1,11 +1,11 @@
 /*!
-  @file cdr_plasma_stepper.cpp
-  @brief Implementation of cdr_plasma_stepper.H
+  @file CdrPlasmaStepper.cpp
+  @brief Implementation of CdrPlasmaStepper.H
   @author Robert Marskar
   @date Nov. 2017
 */
 
-#include "cdr_plasma_stepper.H"
+#include <CD_CdrPlasmaStepper.H>
 #include "CD_FieldSolverMultigrid.H"
 #include <CD_CdrIterator.H>
 #include <CD_RtIterator.H>
@@ -22,12 +22,12 @@
 #include "CD_NamespaceHeader.H"
 using namespace Physics::CdrPlasma;
 
-Real cdr_plasma_stepper::s_constant_one(const RealVect a_pos){
+Real CdrPlasmaStepper::s_constant_one(const RealVect a_pos){
   return 1.0;
 }
 
-cdr_plasma_stepper::cdr_plasma_stepper(){
-  m_className = "cdr_plasma_stepper";
+CdrPlasmaStepper::CdrPlasmaStepper(){
+  m_className = "CdrPlasmaStepper";
   m_verbosity  = -1;
   m_solver_verbosity = -1;
   m_phase = phase::gas;
@@ -35,25 +35,25 @@ cdr_plasma_stepper::cdr_plasma_stepper(){
   m_subcycle = false;
 }
 
-cdr_plasma_stepper::cdr_plasma_stepper(RefCountedPtr<CdrPlasmaPhysics>& a_physics) : cdr_plasma_stepper() {
+CdrPlasmaStepper::CdrPlasmaStepper(RefCountedPtr<CdrPlasmaPhysics>& a_physics) : CdrPlasmaStepper() {
   m_physics = a_physics;
 }
 
-void cdr_plasma_stepper::postInitialize() {
+void CdrPlasmaStepper::postInitialize() {
 }
 
-void cdr_plasma_stepper::registerRealms(){
+void CdrPlasmaStepper::registerRealms(){
   m_amr->registerRealm(m_realm);
 }
 
-void cdr_plasma_stepper::postRegrid(){
+void CdrPlasmaStepper::postRegrid(){
 
 }
 
-void cdr_plasma_stepper::registerOperators(){
-  CH_TIME("cdr_plasma_stepper::registerOperators");
+void CdrPlasmaStepper::registerOperators(){
+  CH_TIME("CdrPlasmaStepper::registerOperators");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::registerOperators" << endl;
+    pout() << "CdrPlasmaStepper::registerOperators" << endl;
   }
   
   m_cdr->registerOperators();
@@ -62,29 +62,29 @@ void cdr_plasma_stepper::registerOperators(){
   m_sigma->registerOperators();
 }
 
-cdr_plasma_stepper::~cdr_plasma_stepper(){
+CdrPlasmaStepper::~CdrPlasmaStepper(){
 }
 
-int cdr_plasma_stepper::queryGhost(){
+int CdrPlasmaStepper::queryGhost(){
   return 3;
 }
 
-bool cdr_plasma_stepper::stationary_rte(){
-  CH_TIME("cdr_plasma_stepper::stationary_rte");
+bool CdrPlasmaStepper::stationary_rte(){
+  CH_TIME("CdrPlasmaStepper::stationary_rte");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::stationary_rte" << endl;
+    pout() << "CdrPlasmaStepper::stationary_rte" << endl;
   }
 
   return m_rte->isStationary();
 }
 
-bool cdr_plasma_stepper::solve_poisson(){
-  CH_TIME("cdr_plasma_stepper::solve_poisson");
+bool CdrPlasmaStepper::solvePoisson(){
+  CH_TIME("CdrPlasmaStepper::solvePoisson");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::solve_poisson" << endl;
+    pout() << "CdrPlasmaStepper::solvePoisson" << endl;
   }
 
-  this->compute_rho();
+  this->computeSpaceChargeDensity();
   const bool converged = m_fieldSolver->solve(m_fieldSolver->getPotential(),
 					  m_fieldSolver->getRho(),
 					  m_sigma->getPhi(),
@@ -93,45 +93,45 @@ bool cdr_plasma_stepper::solve_poisson(){
   return converged;
 }
 
-bool cdr_plasma_stepper::solve_poisson(MFAMRCellData&                a_potential,
+bool CdrPlasmaStepper::solvePoisson(MFAMRCellData&                a_potential,
 				       MFAMRCellData&                a_rhs,
 				       const Vector<EBAMRCellData*>  a_densities,
 				       const EBAMRIVData&            a_sigma,
 				       const centering               a_centering){
-  CH_TIME("cdr_plasma_stepper::solve_poisson(full)");
+  CH_TIME("CdrPlasmaStepper::solvePoisson(full)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::solve_poisson(full)" << endl;
+    pout() << "CdrPlasmaStepper::solvePoisson(full)" << endl;
   }
 
-  this->compute_rho(a_rhs, a_densities, a_centering);
+  this->computeSpaceChargeDensity(a_rhs, a_densities, a_centering);
 
   const bool converged = m_fieldSolver->solve(a_potential, a_rhs, a_sigma, false);
 
   return converged;
 }
 
-void cdr_plasma_stepper::allocateInternals(){
-  CH_TIME("cdr_plasma_stepper::allocateInternals"); 
+void CdrPlasmaStepper::allocateInternals(){
+  CH_TIME("CdrPlasmaStepper::allocateInternals"); 
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::allocateInternals" << endl;
+    pout() << "CdrPlasmaStepper::allocateInternals" << endl;
   }
 
   /// Do nothing
 }
 
-void cdr_plasma_stepper::deallocateInternals(){
-  CH_TIME("cdr_plasma_stepper::deallocateInternals"); 
+void CdrPlasmaStepper::deallocateInternals(){
+  CH_TIME("CdrPlasmaStepper::deallocateInternals"); 
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::deallocateInternals" << endl;
+    pout() << "CdrPlasmaStepper::deallocateInternals" << endl;
   }
 
   /// Do nothing
 }
 
-void cdr_plasma_stepper::advanceReactionNetwork(const Real a_time, const Real a_dt){
-  CH_TIME("cdr_plasma_stepper::advanceReactionNetwork(solvers)");
+void CdrPlasmaStepper::advanceReactionNetwork(const Real a_time, const Real a_dt){
+  CH_TIME("CdrPlasmaStepper::advanceReactionNetwork(solvers)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::advanceReactionNetwork(solvers)" << endl;
+    pout() << "CdrPlasmaStepper::advanceReactionNetwork(solvers)" << endl;
   }
 
   // Compute the electric field
@@ -155,16 +155,16 @@ void cdr_plasma_stepper::advanceReactionNetwork(const Real a_time, const Real a_
 			   a_dt);
 }
 
-void cdr_plasma_stepper::advanceReactionNetwork(Vector<EBAMRCellData*>&       a_particle_sources,
+void CdrPlasmaStepper::advanceReactionNetwork(Vector<EBAMRCellData*>&       a_particle_sources,
 						  Vector<EBAMRCellData*>&       a_Photon_sources,
 						  const Vector<EBAMRCellData*>& a_particle_densities,
 						  const Vector<EBAMRCellData*>& a_Photon_densities,
 						  const EBAMRCellData&          a_E,
 						  const Real&                   a_time,
 						  const Real&                   a_dt){
-  CH_TIME("cdr_plasma_stepper::advanceReactionNetwork(nograd)");
+  CH_TIME("CdrPlasmaStepper::advanceReactionNetwork(nograd)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::advanceReactionNetwork(nograd)" << endl;
+    pout() << "CdrPlasmaStepper::advanceReactionNetwork(nograd)" << endl;
   }
 
   const int num_species = m_physics->getNumCdrSpecies();
@@ -197,7 +197,7 @@ void cdr_plasma_stepper::advanceReactionNetwork(Vector<EBAMRCellData*>&       a_
   }
 }
 
-void cdr_plasma_stepper::advanceReactionNetwork(Vector<EBAMRCellData*>&       a_particle_sources,
+void CdrPlasmaStepper::advanceReactionNetwork(Vector<EBAMRCellData*>&       a_particle_sources,
 						  Vector<EBAMRCellData*>&       a_Photon_sources,
 						  const Vector<EBAMRCellData*>& a_particle_densities,
 						  const Vector<EBAMRCellData*>& a_particle_gradients,
@@ -205,9 +205,9 @@ void cdr_plasma_stepper::advanceReactionNetwork(Vector<EBAMRCellData*>&       a_
 						  const EBAMRCellData&          a_E,
 						  const Real&                   a_time,
 						  const Real&                   a_dt){
-  CH_TIME("cdr_plasma_stepper::advanceReactionNetwork(amr)");
+  CH_TIME("CdrPlasmaStepper::advanceReactionNetwork(amr)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::advanceReactionNetwork(amr)" << endl;
+    pout() << "CdrPlasmaStepper::advanceReactionNetwork(amr)" << endl;
   }
 
 
@@ -262,7 +262,7 @@ void cdr_plasma_stepper::advanceReactionNetwork(Vector<EBAMRCellData*>&       a_
 #endif
 }
 
-void cdr_plasma_stepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>* >&       a_particle_sources,
+void CdrPlasmaStepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>* >&       a_particle_sources,
 						  Vector<LevelData<EBCellFAB>* >&       a_Photon_sources,
 						  const Vector<LevelData<EBCellFAB>* >& a_particle_densities,
 						  const Vector<LevelData<EBCellFAB>* >& a_particle_gradients,
@@ -271,9 +271,9 @@ void cdr_plasma_stepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>* >& 
 						  const Real&                           a_time,
 						  const Real&                           a_dt,
 						  const int                             a_lvl){
-  CH_TIME("cdr_plasma_stepper::advanceReactionNetwork(level)");
+  CH_TIME("CdrPlasmaStepper::advanceReactionNetwork(level)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::advanceReactionNetwork(level)" << endl;
+    pout() << "CdrPlasmaStepper::advanceReactionNetwork(level)" << endl;
   }
 
   const Real zero = 0.0;
@@ -321,7 +321,7 @@ void cdr_plasma_stepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>* >& 
     
     // This does all cells
 #if USE_FAST_REACTIONS
-    advanceReactionNetwork_reg_fast(particle_sources,
+    advanceReactionNetworkRegularCellsFast(particle_sources,
 				      Photon_sources,
 				      particle_densities,
 				      particle_gradients,
@@ -333,7 +333,7 @@ void cdr_plasma_stepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>* >& 
 				      dbl.get(dit()));
 
 #else
-    advanceReactionNetwork_reg(particle_sources,
+    advanceReactionNetworkRegularCells(particle_sources,
 				 Photon_sources,
 				 particle_densities,
 				 particle_gradients,
@@ -346,7 +346,7 @@ void cdr_plasma_stepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>* >& 
 #endif
 
     // This overwrites irregular celles
-    advanceReactionNetwork_irreg(particle_sources,
+    advanceReactionNetworkRegularCellsFastIrreg(particle_sources,
 				   Photon_sources,
 				   particle_densities,
 				   particle_gradients,
@@ -363,7 +363,7 @@ void cdr_plasma_stepper::advanceReactionNetwork(Vector<LevelData<EBCellFAB>* >& 
   }
 }
 
-void cdr_plasma_stepper::advanceReactionNetwork_reg(Vector<EBCellFAB*>&       a_particle_sources,
+void CdrPlasmaStepper::advanceReactionNetworkRegularCells(Vector<EBCellFAB*>&       a_particle_sources,
 						      Vector<EBCellFAB*>&       a_Photon_sources,
 						      const Vector<EBCellFAB*>& a_particle_densities,
 						      const Vector<EBCellFAB*>& a_particle_gradients,
@@ -373,9 +373,9 @@ void cdr_plasma_stepper::advanceReactionNetwork_reg(Vector<EBCellFAB*>&       a_
 						      const Real&               a_dt,
 						      const Real&               a_dx,
 						      const Box&                a_box){
-  CH_TIME("cdr_plasma_stepper::advanceReactionNetwork_reg(patch)");
+  CH_TIME("CdrPlasmaStepper::advanceReactionNetworkRegularCells(patch)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::advanceReactionNetwork_reg(patch)" << endl;
+    pout() << "CdrPlasmaStepper::advanceReactionNetworkRegularCells(patch)" << endl;
   }
 
   const Real zero = 0.0;
@@ -480,7 +480,7 @@ void cdr_plasma_stepper::advanceReactionNetwork_reg(Vector<EBCellFAB*>&       a_
   }
 }
 
-void cdr_plasma_stepper::advanceReactionNetwork_reg_fast(Vector<EBCellFAB*>&       a_particle_sources,
+void CdrPlasmaStepper::advanceReactionNetworkRegularCellsFast(Vector<EBCellFAB*>&       a_particle_sources,
 							   Vector<EBCellFAB*>&       a_Photon_sources,
 							   const Vector<EBCellFAB*>& a_particle_densities,
 							   const Vector<EBCellFAB*>& a_particle_gradients,
@@ -490,22 +490,22 @@ void cdr_plasma_stepper::advanceReactionNetwork_reg_fast(Vector<EBCellFAB*>&    
 							   const Real&               a_dt,
 							   const Real&               a_dx,
 							   const Box&                a_box){
-  CH_TIME("cdr_plasma_stepper::advanceReactionNetwork_reg_fast(patch)");
+  CH_TIME("CdrPlasmaStepper::advanceReactionNetworkRegularCellsFast(patch)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::advanceReactionNetwork_reg_fast(patch)" << endl;
+    pout() << "CdrPlasmaStepper::advanceReactionNetworkRegularCellsFast(patch)" << endl;
   }
 
 #if CH_SPACEDIM==2
-  advanceReactionNetwork_reg_fast2D(a_particle_sources, a_Photon_sources, a_particle_densities, a_particle_gradients,
+  advanceReactionNetworkRegularCellsFast2D(a_particle_sources, a_Photon_sources, a_particle_densities, a_particle_gradients,
 				      a_Photon_densities, a_E, a_time, a_dt, a_dx, a_box);
 #elif CH_SPACEDIM==3
-  advanceReactionNetwork_reg_fast3D(a_particle_sources, a_Photon_sources, a_particle_densities, a_particle_gradients,
+  advanceReactionNetworkRegularCellsFast3D(a_particle_sources, a_Photon_sources, a_particle_densities, a_particle_gradients,
 				      a_Photon_densities, a_E, a_time, a_dt, a_dx, a_box);
 #endif
   
 }
 
-void cdr_plasma_stepper::advanceReactionNetwork_reg_fast2D(Vector<EBCellFAB*>&       a_particle_sources,
+void CdrPlasmaStepper::advanceReactionNetworkRegularCellsFast2D(Vector<EBCellFAB*>&       a_particle_sources,
 							     Vector<EBCellFAB*>&       a_Photon_sources,
 							     const Vector<EBCellFAB*>& a_particle_densities,
 							     const Vector<EBCellFAB*>& a_particle_gradients,
@@ -516,9 +516,9 @@ void cdr_plasma_stepper::advanceReactionNetwork_reg_fast2D(Vector<EBCellFAB*>&  
 							     const Real&               a_dx,
 							     const Box&                a_box){
 #if CH_SPACEDIM==2
-  CH_TIME("cdr_plasma_stepper::advanceReactionNetwork_reg_fast2D(patch)");
+  CH_TIME("CdrPlasmaStepper::advanceReactionNetworkRegularCellsFast2D(patch)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::advanceReactionNetwork_reg_fast2D(patch)" << endl;
+    pout() << "CdrPlasmaStepper::advanceReactionNetworkRegularCellsFast2D(patch)" << endl;
   }
 
   const Real zero = 0.0;
@@ -646,7 +646,7 @@ void cdr_plasma_stepper::advanceReactionNetwork_reg_fast2D(Vector<EBCellFAB*>&  
 }
 
 
-void cdr_plasma_stepper::advanceReactionNetwork_reg_fast3D(Vector<EBCellFAB*>&       a_particle_sources,
+void CdrPlasmaStepper::advanceReactionNetworkRegularCellsFast3D(Vector<EBCellFAB*>&       a_particle_sources,
 							     Vector<EBCellFAB*>&       a_Photon_sources,
 							     const Vector<EBCellFAB*>& a_particle_densities,
 							     const Vector<EBCellFAB*>& a_particle_gradients,
@@ -657,9 +657,9 @@ void cdr_plasma_stepper::advanceReactionNetwork_reg_fast3D(Vector<EBCellFAB*>&  
 							     const Real&               a_dx,
 							     const Box&                a_box){
 #if CH_SPACEDIM==3
-  CH_TIME("cdr_plasma_stepper::advanceReactionNetwork_reg_fast3D(patch)");
+  CH_TIME("CdrPlasmaStepper::advanceReactionNetworkRegularCellsFast3D(patch)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::advanceReactionNetwork_reg_fast3D(patch)" << endl;
+    pout() << "CdrPlasmaStepper::advanceReactionNetworkRegularCellsFast3D(patch)" << endl;
   }
 
   const Real zero = 0.0;
@@ -795,7 +795,7 @@ void cdr_plasma_stepper::advanceReactionNetwork_reg_fast3D(Vector<EBCellFAB*>&  
 
 
 
-void cdr_plasma_stepper::advanceReactionNetwork_irreg(Vector<EBCellFAB*>&          a_particle_sources,
+void CdrPlasmaStepper::advanceReactionNetworkRegularCellsFastIrreg(Vector<EBCellFAB*>&          a_particle_sources,
 							Vector<EBCellFAB*>&          a_Photon_sources,
 							const Vector<EBCellFAB*>&    a_particle_densities,
 							const Vector<EBCellFAB*>&    a_particle_gradients,
@@ -810,7 +810,7 @@ void cdr_plasma_stepper::advanceReactionNetwork_irreg(Vector<EBCellFAB*>&       
 							const int                    a_lvl,
 							const DataIndex&             a_dit){
   if(m_interp_sources){
-    advanceReactionNetwork_irreg_interp(a_particle_sources,
+    advanceReactionNetworkRegularCellsIrregInterp(a_particle_sources,
 					  a_Photon_sources,
 					  a_particle_densities,
 					  a_particle_gradients,
@@ -826,7 +826,7 @@ void cdr_plasma_stepper::advanceReactionNetwork_irreg(Vector<EBCellFAB*>&       
 					  a_dit);
   }
   else{
-    advanceReactionNetwork_irreg_kappa(a_particle_sources,
+    advanceReactionNetworkRegularCellsIrregKappa(a_particle_sources,
 					 a_Photon_sources,
 					 a_particle_densities,
 					 a_particle_gradients,
@@ -842,7 +842,7 @@ void cdr_plasma_stepper::advanceReactionNetwork_irreg(Vector<EBCellFAB*>&       
   }
 }
 
-void cdr_plasma_stepper::advanceReactionNetwork_irreg_interp(Vector<EBCellFAB*>&          a_particle_sources,
+void CdrPlasmaStepper::advanceReactionNetworkRegularCellsIrregInterp(Vector<EBCellFAB*>&          a_particle_sources,
 							       Vector<EBCellFAB*>&          a_Photon_sources,
 							       const Vector<EBCellFAB*>&    a_particle_densities,
 							       const Vector<EBCellFAB*>&    a_particle_gradients,
@@ -856,9 +856,9 @@ void cdr_plasma_stepper::advanceReactionNetwork_irreg_interp(Vector<EBCellFAB*>&
 							       const Box&                   a_box,
 							       const int                    a_lvl,
 							       const DataIndex&             a_dit){
-  CH_TIME("cdr_plasma_stepper::advanceReactionNetwork_irreg_interp(patch)");
+  CH_TIME("CdrPlasmaStepper::advanceReactionNetworkRegularCellsIrregInterp(patch)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::advanceReactionNetwork_irreg_interp(patch)" << endl;
+    pout() << "CdrPlasmaStepper::advanceReactionNetworkRegularCellsIrregInterp(patch)" << endl;
   }
 
   const Real zero = 0.0;
@@ -982,7 +982,7 @@ void cdr_plasma_stepper::advanceReactionNetwork_irreg_interp(Vector<EBCellFAB*>&
   }
 }
 
-void cdr_plasma_stepper::advanceReactionNetwork_irreg_kappa(Vector<EBCellFAB*>&          a_particle_sources,
+void CdrPlasmaStepper::advanceReactionNetworkRegularCellsIrregKappa(Vector<EBCellFAB*>&          a_particle_sources,
 							      Vector<EBCellFAB*>&          a_Photon_sources,
 							      const Vector<EBCellFAB*>&    a_particle_densities,
 							      const Vector<EBCellFAB*>&    a_particle_gradients,
@@ -995,9 +995,9 @@ void cdr_plasma_stepper::advanceReactionNetwork_irreg_kappa(Vector<EBCellFAB*>& 
 							      const Box&                   a_box,
 							      const int                    a_lvl,
 							      const DataIndex&             a_dit){
-  CH_TIME("cdr_plasma_stepper::advanceReactionNetwork_irreg_kappa(patch)");
+  CH_TIME("CdrPlasmaStepper::advanceReactionNetworkRegularCellsIrregKappa(patch)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::advanceReactionNetwork_irreg_kappa(patch)" << endl;
+    pout() << "CdrPlasmaStepper::advanceReactionNetworkRegularCellsIrregKappa(patch)" << endl;
   }
 
   const Real zero = 0.0;
@@ -1084,13 +1084,13 @@ void cdr_plasma_stepper::advanceReactionNetwork_irreg_kappa(Vector<EBCellFAB*>& 
   }
 }
 
-void cdr_plasma_stepper::compute_cdr_diffco_face(Vector<EBAMRFluxData*>&       a_diffusionCoefficient_face,
+void CdrPlasmaStepper::computeCdrDiffusionFace(Vector<EBAMRFluxData*>&       a_diffusionCoefficient_face,
 						 const Vector<EBAMRCellData*>& a_cdr_densities,
 						 const EBAMRCellData&          a_E,
 						 const Real&                   a_time){
-  CH_TIME("cdr_plasma_stepper::compute_cdr_diffco_face(full)");
+  CH_TIME("CdrPlasmaStepper::computeCdrDiffusionFace(full)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_cdr_diffco_face(full)" << endl;
+    pout() << "CdrPlasmaStepper::computeCdrDiffusionFace(full)" << endl;
   }
 
   const int comp         = 0;
@@ -1108,7 +1108,7 @@ void cdr_plasma_stepper::compute_cdr_diffco_face(Vector<EBAMRFluxData*>&       a
   }
 
   // Call the cell version
-  compute_cdr_diffco_cell(diffco, a_cdr_densities, a_E, a_time);
+  computeCdrDiffusionCell(diffco, a_cdr_densities, a_E, a_time);
 
   // Now compute face-centered things by taking the average of cell-centered things
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
@@ -1125,13 +1125,13 @@ void cdr_plasma_stepper::compute_cdr_diffco_face(Vector<EBAMRFluxData*>&       a
   }
 }
 
-void cdr_plasma_stepper::compute_cdr_diffco_cell(Vector<EBAMRCellData>&       a_diffusionCoefficient_cell,
+void CdrPlasmaStepper::computeCdrDiffusionCell(Vector<EBAMRCellData>&       a_diffusionCoefficient_cell,
 						 const Vector<EBAMRCellData*>& a_cdr_densities,
 						 const EBAMRCellData&          a_E,
 						 const Real&                   a_time){
-  CH_TIME("cdr_plasma_stepper::compute_cdr_diffco_cell(amr)");
+  CH_TIME("CdrPlasmaStepper::computeCdrDiffusionCell(amr)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_cdr_diffco_cell(amr)" << endl;
+    pout() << "CdrPlasmaStepper::computeCdrDiffusionCell(amr)" << endl;
   }
   
   const int comp         = 0;
@@ -1149,18 +1149,18 @@ void cdr_plasma_stepper::compute_cdr_diffco_cell(Vector<EBAMRCellData>&       a_
     }
 
     // Cell the level version
-    compute_cdr_diffco_cell(diffco, cdr_densities, *a_E[lvl], lvl, a_time);
+    computeCdrDiffusionCell(diffco, cdr_densities, *a_E[lvl], lvl, a_time);
   }
 }
 
-void cdr_plasma_stepper::compute_cdr_diffco_cell(Vector<LevelData<EBCellFAB>* >&       a_diffusionCoefficient_cell,
+void CdrPlasmaStepper::computeCdrDiffusionCell(Vector<LevelData<EBCellFAB>* >&       a_diffusionCoefficient_cell,
 						 const Vector<LevelData<EBCellFAB>* >& a_cdr_densities,
 						 const LevelData<EBCellFAB>&           a_E,
 						 const int                             a_lvl,
 						 const Real&                           a_time){
-  CH_TIME("cdr_plasma_stepper::compute_cdr_diffco_cell(level)");
+  CH_TIME("CdrPlasmaStepper::computeCdrDiffusionCell(level)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_cdr_diffco_cell(level)" << endl;
+    pout() << "CdrPlasmaStepper::computeCdrDiffusionCell(level)" << endl;
   }
 
   const int comp         = 0;
@@ -1193,28 +1193,28 @@ void cdr_plasma_stepper::compute_cdr_diffco_cell(Vector<LevelData<EBCellFAB>* >&
 
     // Regular cells
 #if USE_FAST_DIFFUSION
-    compute_cdr_diffco_cell_reg_fast(diffco, cdr_densities, E, dbl.get(dit()), m_amr->getDx()[a_lvl], a_time);
+    computeCdrDiffusionCellRegularFast(diffco, cdr_densities, E, dbl.get(dit()), m_amr->getDx()[a_lvl], a_time);
 #else
-    compute_cdr_diffco_cell_reg(diffco, cdr_densities, E, dbl.get(dit()), m_amr->getDx()[a_lvl], a_time);
+    computeCdrDiffusionCellRegular(diffco, cdr_densities, E, dbl.get(dit()), m_amr->getDx()[a_lvl], a_time);
 #endif
 
     // Irregular cells
-    compute_cdr_diffco_cell_irreg(diffco, cdr_densities, E, dbl.get(dit()), m_amr->getDx()[a_lvl],
+    computeCdrDiffusionCellIrregular(diffco, cdr_densities, E, dbl.get(dit()), m_amr->getDx()[a_lvl],
 				  interp_stencils[a_lvl][dit()], a_time, a_lvl, dit());
 
 
   }
 }
 
-void cdr_plasma_stepper::compute_cdr_diffco_cell_reg(Vector<EBCellFAB*>&       a_diffusionCoefficient_cell,
+void CdrPlasmaStepper::computeCdrDiffusionCellRegular(Vector<EBCellFAB*>&       a_diffusionCoefficient_cell,
 						     const Vector<EBCellFAB*>& a_cdr_densities,
 						     const EBCellFAB&          a_E,
 						     const Box                 a_box,
 						     const Real                a_dx,
 						     const Real                a_time){
-  CH_TIME("cdr_plasma_stepper::compute_cdr_diffco_cell_reg");
+  CH_TIME("CdrPlasmaStepper::computeCdrDiffusionCellRegular");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_cdr_diffco_cell_reg" << endl;
+    pout() << "CdrPlasmaStepper::computeCdrDiffusionCellRegular" << endl;
   }
 
   const int comp        = 0;
@@ -1271,34 +1271,34 @@ void cdr_plasma_stepper::compute_cdr_diffco_cell_reg(Vector<EBCellFAB*>&       a
   }
 }
 
-void cdr_plasma_stepper::compute_cdr_diffco_cell_reg_fast(Vector<EBCellFAB*>&       a_diffusionCoefficient_cell,
+void CdrPlasmaStepper::computeCdrDiffusionCellRegularFast(Vector<EBCellFAB*>&       a_diffusionCoefficient_cell,
 							  const Vector<EBCellFAB*>& a_cdr_densities,
 							  const EBCellFAB&          a_E,
 							  const Box                 a_box,
 							  const Real                a_dx,
 							  const Real                a_time){
-  CH_TIME("cdr_plasma_stepper::compute_cdr_diffco_cell_reg_fast");
+  CH_TIME("CdrPlasmaStepper::computeCdrDiffusionCellRegularFast");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_cdr_diffco_cell_reg_fast" << endl;
+    pout() << "CdrPlasmaStepper::computeCdrDiffusionCellRegularFast" << endl;
   }
 
 #if CH_SPACEDIM==2
-  compute_cdr_diffco_cell_reg_fast2D(a_diffusionCoefficient_cell, a_cdr_densities, a_E, a_box, a_dx, a_time);
+  computeCdrDiffusionCellRegularFast2D(a_diffusionCoefficient_cell, a_cdr_densities, a_E, a_box, a_dx, a_time);
 #elif CH_SPACEDIM==3
-  compute_cdr_diffco_cell_reg_fast3D(a_diffusionCoefficient_cell, a_cdr_densities, a_E, a_box, a_dx, a_time);
+  computeCdrDiffusionCellRegularFast3D(a_diffusionCoefficient_cell, a_cdr_densities, a_E, a_box, a_dx, a_time);
 #endif
 }
 
-void cdr_plasma_stepper::compute_cdr_diffco_cell_reg_fast2D(Vector<EBCellFAB*>&       a_diffusionCoefficient_cell,
+void CdrPlasmaStepper::computeCdrDiffusionCellRegularFast2D(Vector<EBCellFAB*>&       a_diffusionCoefficient_cell,
 							    const Vector<EBCellFAB*>& a_cdr_densities,
 							    const EBCellFAB&          a_E,
 							    const Box                 a_box,
 							    const Real                a_dx,
 							    const Real                a_time){
 #if CH_SPACEDIM==2
-  CH_TIME("cdr_plasma_stepper::compute_cdr_diffco_cell_reg_fast2D");
+  CH_TIME("CdrPlasmaStepper::computeCdrDiffusionCellRegularFast2D");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_cdr_diffco_cell_reg_fast2D" << endl;
+    pout() << "CdrPlasmaStepper::computeCdrDiffusionCellRegularFast2D" << endl;
   }
 
   const int comp        = 0;
@@ -1368,16 +1368,16 @@ void cdr_plasma_stepper::compute_cdr_diffco_cell_reg_fast2D(Vector<EBCellFAB*>& 
 #endif
 }
 
-void cdr_plasma_stepper::compute_cdr_diffco_cell_reg_fast3D(Vector<EBCellFAB*>&       a_diffusionCoefficient_cell,
+void CdrPlasmaStepper::computeCdrDiffusionCellRegularFast3D(Vector<EBCellFAB*>&       a_diffusionCoefficient_cell,
 							    const Vector<EBCellFAB*>& a_cdr_densities,
 							    const EBCellFAB&          a_E,
 							    const Box                 a_box,
 							    const Real                a_dx,
 							    const Real                a_time){
 #if CH_SPACEDIM==3
-  CH_TIME("cdr_plasma_stepper::compute_cdr_diffco_cell_reg_fast3D");
+  CH_TIME("CdrPlasmaStepper::computeCdrDiffusionCellRegularFast3D");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_cdr_diffco_cell_reg_fast3D" << endl;
+    pout() << "CdrPlasmaStepper::computeCdrDiffusionCellRegularFast3D" << endl;
   }
 
   const int comp        = 0;
@@ -1452,7 +1452,7 @@ void cdr_plasma_stepper::compute_cdr_diffco_cell_reg_fast3D(Vector<EBCellFAB*>& 
 #endif
 }
 
-void cdr_plasma_stepper::compute_cdr_diffco_cell_irreg(Vector<EBCellFAB*>&          a_diffusionCoefficient_cell,
+void CdrPlasmaStepper::computeCdrDiffusionCellIrregular(Vector<EBCellFAB*>&          a_diffusionCoefficient_cell,
 						       const Vector<EBCellFAB*>&    a_cdr_densities,
 						       const EBCellFAB&             a_E,
 						       const Box                    a_box,
@@ -1461,9 +1461,9 @@ void cdr_plasma_stepper::compute_cdr_diffco_cell_irreg(Vector<EBCellFAB*>&      
 						       const Real&                  a_time,
 						       const int                    a_lvl,
 						       const DataIndex&             a_dit){
-  CH_TIME("cdr_plasma_stepper::compute_cdr_diffco_cell_irreg");
+  CH_TIME("CdrPlasmaStepper::computeCdrDiffusionCellIrregular");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_cdr_diffco_cell_irreg" << endl;
+    pout() << "CdrPlasmaStepper::computeCdrDiffusionCellIrregular" << endl;
   }
 
   const int comp = 0;
@@ -1505,13 +1505,13 @@ void cdr_plasma_stepper::compute_cdr_diffco_cell_irreg(Vector<EBCellFAB*>&      
   }
 }
 
-void cdr_plasma_stepper::compute_cdr_diffco_eb(Vector<EBAMRIVData*>&       a_ebDiffusionCoefficient,
+void CdrPlasmaStepper::computeCdrDiffusionEb(Vector<EBAMRIVData*>&       a_ebDiffusionCoefficient,
 					       const Vector<EBAMRIVData*>& a_cdr_densities,
 					       const EBAMRIVData&          a_E,
 					       const Real&                 a_time){
-  CH_TIME("cdr_plasma_stepper::compute_cdr_diffco_eb(full)");
+  CH_TIME("CdrPlasmaStepper::computeCdrDiffusionEb(full)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_cdr_diffco_eb(full)" << endl;
+    pout() << "CdrPlasmaStepper::computeCdrDiffusionEb(full)" << endl;
   }
 
   const int comp         = 0;
@@ -1535,19 +1535,19 @@ void cdr_plasma_stepper::compute_cdr_diffco_eb(Vector<EBAMRIVData*>&       a_ebD
     }
 
     // Call level versions
-    compute_cdr_diffco_eb(diffco, cdr_densities, *a_E[lvl], a_time, lvl);
+    computeCdrDiffusionEb(diffco, cdr_densities, *a_E[lvl], a_time, lvl);
   }
 }
 
 
-void cdr_plasma_stepper::compute_cdr_diffco_eb(Vector<LevelData<BaseIVFAB<Real> >* >&       a_ebDiffusionCoefficient,
+void CdrPlasmaStepper::computeCdrDiffusionEb(Vector<LevelData<BaseIVFAB<Real> >* >&       a_ebDiffusionCoefficient,
 					       const Vector<LevelData<BaseIVFAB<Real> >* >& a_cdr_densities,
 					       const LevelData<BaseIVFAB<Real> >&           a_E,
 					       const Real&                                  a_time,
 					       const int                                    a_lvl){
-  CH_TIME("cdr_plasma_stepper::compute_cdr_diffco_eb(level)");
+  CH_TIME("CdrPlasmaStepper::computeCdrDiffusionEb(level)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_cdr_diffco_eb(level)" << endl;
+    pout() << "CdrPlasmaStepper::computeCdrDiffusionEb(level)" << endl;
   }
 
   const int comp = 0;
@@ -1600,7 +1600,7 @@ void cdr_plasma_stepper::compute_cdr_diffco_eb(Vector<LevelData<BaseIVFAB<Real> 
   }
 }
 
-void cdr_plasma_stepper::compute_cdr_fluxes(Vector<LevelData<BaseIVFAB<Real> >*>&       a_fluxes,
+void CdrPlasmaStepper::computeCdrFluxes(Vector<LevelData<BaseIVFAB<Real> >*>&       a_fluxes,
 					    const Vector<LevelData<BaseIVFAB<Real> >*>& a_extrap_cdr_fluxes,
 					    const Vector<LevelData<BaseIVFAB<Real> >*>& a_extrap_cdr_densities,
 					    const Vector<LevelData<BaseIVFAB<Real> >*>& a_extrap_cdr_velocities,
@@ -1609,9 +1609,9 @@ void cdr_plasma_stepper::compute_cdr_fluxes(Vector<LevelData<BaseIVFAB<Real> >*>
 					    const LevelData<BaseIVFAB<Real> >&          a_E,
 					    const Real&                                 a_time,
 					    const int                                   a_lvl){
-  CH_TIME("cdr_plasma_stepper::compute_cdr_fluxes(full, level)");
+  CH_TIME("CdrPlasmaStepper::computeCdrFluxes(full, level)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_cdr_fluxes(full, level)" << endl;
+    pout() << "CdrPlasmaStepper::computeCdrFluxes(full, level)" << endl;
   }
 
   const int num_species  = m_physics->getNumCdrSpecies();
@@ -1732,7 +1732,7 @@ void cdr_plasma_stepper::compute_cdr_fluxes(Vector<LevelData<BaseIVFAB<Real> >*>
   }
 }
 
-void cdr_plasma_stepper::compute_cdr_fluxes(Vector<EBAMRIVData*>&       a_fluxes,
+void CdrPlasmaStepper::computeCdrFluxes(Vector<EBAMRIVData*>&       a_fluxes,
 					    const Vector<EBAMRIVData*>& a_extrap_cdr_fluxes,
 					    const Vector<EBAMRIVData*>& a_extrap_cdr_densities,
 					    const Vector<EBAMRIVData*>& a_extrap_cdr_velocities,
@@ -1740,9 +1740,9 @@ void cdr_plasma_stepper::compute_cdr_fluxes(Vector<EBAMRIVData*>&       a_fluxes
 					    const Vector<EBAMRIVData*>& a_extrap_rte_fluxes,
 					    const EBAMRIVData&          a_E,
 					    const Real&                 a_time){
-  CH_TIME("cdr_plasma_stepper::compute_cdr_fluxes(full)");
+  CH_TIME("CdrPlasmaStepper::computeCdrFluxes(full)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_cdr_fluxes(full)" << endl;
+    pout() << "CdrPlasmaStepper::computeCdrFluxes(full)" << endl;
   }
 
   const int num_species  = m_physics->getNumCdrSpecies();
@@ -1775,12 +1775,12 @@ void cdr_plasma_stepper::compute_cdr_fluxes(Vector<EBAMRIVData*>&       a_fluxes
     }
 
     // Call the level version
-    compute_cdr_fluxes(fluxes, extrap_cdr_fluxes, extrap_cdr_densities, extrap_cdr_velocities,
+    computeCdrFluxes(fluxes, extrap_cdr_fluxes, extrap_cdr_densities, extrap_cdr_velocities,
 		       extrap_cdr_gradients, extrap_rte_fluxes, *a_E[lvl], a_time, lvl);
   }
 }
 
-void cdr_plasma_stepper::computeCdrDomainFluxes(Vector<EBAMRIFData*>&       a_fluxes,
+void CdrPlasmaStepper::computeCdrDomainFluxes(Vector<EBAMRIFData*>&       a_fluxes,
 						   const Vector<EBAMRIFData*>& a_extrap_cdr_fluxes,
 						   const Vector<EBAMRIFData*>& a_extrap_cdr_densities,
 						   const Vector<EBAMRIFData*>& a_extrap_cdr_velocities,
@@ -1788,9 +1788,9 @@ void cdr_plasma_stepper::computeCdrDomainFluxes(Vector<EBAMRIFData*>&       a_fl
 						   const Vector<EBAMRIFData*>& a_extrap_rte_fluxes,
 						   const EBAMRIFData&          a_E,
 						   const Real&                 a_time){
-  CH_TIME("cdr_plasma_stepper::computeCdrDomainFluxes(level)");
+  CH_TIME("CdrPlasmaStepper::computeCdrDomainFluxes(level)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::computeCdrDomainFluxes(level)" << endl;
+    pout() << "CdrPlasmaStepper::computeCdrDomainFluxes(level)" << endl;
   }
 
   const int num_species  = m_physics->getNumCdrSpecies();
@@ -1834,7 +1834,7 @@ void cdr_plasma_stepper::computeCdrDomainFluxes(Vector<EBAMRIFData*>&       a_fl
   }
 }
 
-void cdr_plasma_stepper::computeCdrDomainFluxes(Vector<LevelData<DomainFluxIFFAB>*>        a_fluxes,
+void CdrPlasmaStepper::computeCdrDomainFluxes(Vector<LevelData<DomainFluxIFFAB>*>        a_fluxes,
 						   const Vector<LevelData<DomainFluxIFFAB>*>& a_extrap_cdr_fluxes,
 						   const Vector<LevelData<DomainFluxIFFAB>*>& a_extrap_cdr_densities,
 						   const Vector<LevelData<DomainFluxIFFAB>*>& a_extrap_cdr_velocities,
@@ -1843,9 +1843,9 @@ void cdr_plasma_stepper::computeCdrDomainFluxes(Vector<LevelData<DomainFluxIFFAB
 						   const LevelData<DomainFluxIFFAB>&          a_E,
 						   const Real&                                a_time,
 						   const int                                  a_lvl){
-  CH_TIME("cdr_plasma_stepper::computeCdrDomainFluxes(level)");
+  CH_TIME("CdrPlasmaStepper::computeCdrDomainFluxes(level)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::computeCdrDomainFluxes(level)" << endl;
+    pout() << "CdrPlasmaStepper::computeCdrDomainFluxes(level)" << endl;
   }
 
   const int num_species  = m_physics->getNumCdrSpecies();
@@ -1925,12 +1925,12 @@ void cdr_plasma_stepper::computeCdrDomainFluxes(Vector<LevelData<DomainFluxIFFAB
   }
 }
 
-void cdr_plasma_stepper::computeGradients_at_eb(Vector<EBAMRIVData*>&         a_grad,
+void CdrPlasmaStepper::computeGradientsAtEb(Vector<EBAMRIVData*>&         a_grad,
 						 const phase::which_phase&     a_phase,
 						 const Vector<EBAMRCellData*>& a_phi){
-  CH_TIME("cdr_plasma_stepper::computeGradients_at_eb");
+  CH_TIME("CdrPlasmaStepper::computeGradientsAtEb");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::computeGradients_at_eb" << endl;
+    pout() << "CdrPlasmaStepper::computeGradientsAtEb" << endl;
   }
 
   CH_assert(a_grad.size() == a_phi.size());
@@ -1950,17 +1950,17 @@ void cdr_plasma_stepper::computeGradients_at_eb(Vector<EBAMRIVData*>&         a_
     m_amr->computeGradient(gradient, density, m_realm, a_phase);       // Compute cell-centered gradient
     m_amr->averageDown(gradient, m_realm, a_phase);                    // Average down - shouldn't be necesasry
     m_amr->interpGhost(gradient, m_realm, a_phase);                    // Interpolate ghost cells (have to do this before interp)
-    this->extrapolate_to_eb(eb_gradient, a_phase, gradient);            // Extrapolate to EB
-    this->project_flux(grad_density, eb_gradient);                      // Project onto EB
+    this->extrapolateToEb(eb_gradient, a_phase, gradient);            // Extrapolate to EB
+    this->projectFlux(grad_density, eb_gradient);                      // Project onto EB
   }
 }
 
-void cdr_plasma_stepper::computeGradients_at_domain_faces(Vector<EBAMRIFData*>&         a_grad,
+void CdrPlasmaStepper::computeGradientsAtDomainFaces(Vector<EBAMRIFData*>&         a_grad,
 							   const phase::which_phase&     a_phase,
 							   const Vector<EBAMRCellData*>& a_phi){
-  CH_TIME("cdr_plasma_stepper::computeGradients_at_eb");
+  CH_TIME("CdrPlasmaStepper::computeGradientsAtEb");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::computeGradients_at_eb" << endl;
+    pout() << "CdrPlasmaStepper::computeGradientsAtEb" << endl;
   }
 
   CH_assert(a_grad.size() == a_phi.size());
@@ -1981,17 +1981,17 @@ void cdr_plasma_stepper::computeGradients_at_domain_faces(Vector<EBAMRIFData*>& 
     m_amr->averageDown(gradient, m_realm, a_phase);                             
     m_amr->interpGhost(gradient, m_realm, a_phase);                             
     
-    this->extrapolate_to_domain_faces(domain_gradient, a_phase, gradient);  // Extrapolate to EB
-    this->project_domain(grad_density, domain_gradient);                    // Project normal compoent
+    this->extrapolateToDomainFaces(domain_gradient, a_phase, gradient);  // Extrapolate to EB
+    this->projectDomain(grad_density, domain_gradient);                    // Project normal compoent
   }
 }
 
-void cdr_plasma_stepper::extrapolate_vector_to_domain_faces(EBAMRIFData&             a_extrap,
+void CdrPlasmaStepper::extrapolateToVectorDomainFaces(EBAMRIFData&             a_extrap,
 							    const phase::which_phase a_phase,
 							    const EBAMRCellData&     a_data){
-  CH_TIME("cdr_plasma_stepper::extrapolate_to_domain_faces");
+  CH_TIME("CdrPlasmaStepper::extrapolateToDomainFaces");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::extrapolate_to_domain_faces" << endl;
+    pout() << "CdrPlasmaStepper::extrapolateToDomainFaces" << endl;
   }
 
   CH_assert(a_extrap[0]->nComp() == 1);
@@ -1999,31 +1999,31 @@ void cdr_plasma_stepper::extrapolate_vector_to_domain_faces(EBAMRIFData&        
 
   EBAMRIFData domain_vector;
   m_amr->allocate(domain_vector, m_realm, a_phase, SpaceDim);
-  this->extrapolate_to_domain_faces(domain_vector, a_phase, a_data);
-  this->project_domain(a_extrap, domain_vector);
+  this->extrapolateToDomainFaces(domain_vector, a_phase, a_data);
+  this->projectDomain(a_extrap, domain_vector);
 }
 
-void cdr_plasma_stepper::extrapolate_vector_to_domain_faces(Vector<EBAMRIFData*>&         a_extrap,
+void CdrPlasmaStepper::extrapolateToVectorDomainFaces(Vector<EBAMRIFData*>&         a_extrap,
 							    const phase::which_phase      a_phase,
 							    const Vector<EBAMRCellData*>& a_data){
-  CH_TIME("cdr_plasma_stepper::extrapolate_vector_to_domain_faces");
+  CH_TIME("CdrPlasmaStepper::extrapolateToVectorDomainFaces");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::extrapolate_vector_to_domain_faces" << endl;
+    pout() << "CdrPlasmaStepper::extrapolateToVectorDomainFaces" << endl;
   }
 
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
     const int idx = solver_it.index();
-    extrapolate_vector_to_domain_faces(*a_extrap[idx], a_phase, *a_data[idx]);
+    extrapolateToVectorDomainFaces(*a_extrap[idx], a_phase, *a_data[idx]);
   }
 }
 
-void cdr_plasma_stepper::extrapolate_velo_to_domain_faces(Vector<EBAMRIFData*>&         a_extrap,
+void CdrPlasmaStepper::extrapolateVelocitiesVectorDomainFaces(Vector<EBAMRIFData*>&         a_extrap,
 							  const phase::which_phase      a_phase,
 							  const Vector<EBAMRCellData*>& a_velocities){
-  CH_TIME("cdr_plasma_stepper::extrapolate_velo_to_domain_faces");
+  CH_TIME("CdrPlasmaStepper::extrapolateVelocitiesVectorDomainFaces");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::extrapolate_velo_to_domain_faces)" << endl;
+    pout() << "CdrPlasmaStepper::extrapolateVelocitiesVectorDomainFaces)" << endl;
   }
 
   //  for(int i = 0; i < a_extrap.size(); i++){
@@ -2031,7 +2031,7 @@ void cdr_plasma_stepper::extrapolate_velo_to_domain_faces(Vector<EBAMRIFData*>& 
     const RefCountedPtr<CdrSolver>& solver = solver_it();
     const int idx = solver_it.index();
     if(solver->isMobile()){
-      extrapolate_vector_to_domain_faces(*a_extrap[idx], a_phase, *a_velocities[idx]);
+      extrapolateToVectorDomainFaces(*a_extrap[idx], a_phase, *a_velocities[idx]);
     }
     else{
       DataOps::setValue(*a_extrap[idx], 0.0);
@@ -2039,13 +2039,13 @@ void cdr_plasma_stepper::extrapolate_velo_to_domain_faces(Vector<EBAMRIFData*>& 
   }
 }
 
-void cdr_plasma_stepper::computeCdrDriftVelocities(Vector<EBAMRCellData*>&       a_velocities,
+void CdrPlasmaStepper::computeCdrDriftVelocities(Vector<EBAMRCellData*>&       a_velocities,
 						const Vector<EBAMRCellData*>& a_cdr_densities,
 						const EBAMRCellData&          a_E,
 						const Real&                   a_time){
-  CH_TIME("cdr_plasma_stepper::computeCdrDriftVelocities(full)");
+  CH_TIME("CdrPlasmaStepper::computeCdrDriftVelocities(full)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::computeCdrDriftVelocities(full)" << endl;
+    pout() << "CdrPlasmaStepper::computeCdrDriftVelocities(full)" << endl;
   }
   
   const int num_species  = m_physics->getNumCdrSpecies();
@@ -2081,14 +2081,14 @@ void cdr_plasma_stepper::computeCdrDriftVelocities(Vector<EBAMRCellData*>&      
   }
 }
 
-void cdr_plasma_stepper::computeCdrDriftVelocities(Vector<LevelData<EBCellFAB> *>&       a_velocities,
+void CdrPlasmaStepper::computeCdrDriftVelocities(Vector<LevelData<EBCellFAB> *>&       a_velocities,
 						const Vector<LevelData<EBCellFAB> *>& a_cdr_densities,
 						const LevelData<EBCellFAB> &          a_E,
 						const int                             a_lvl,
 						const Real&                           a_time){
-  CH_TIME("cdr_plasma_stepper::computeCdrDriftVelocities(level)");
+  CH_TIME("CdrPlasmaStepper::computeCdrDriftVelocities(level)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::computeCdrDriftVelocities(level)" << endl;
+    pout() << "CdrPlasmaStepper::computeCdrDriftVelocities(level)" << endl;
   }
 
   const phase::which_phase cdr_phase = m_cdr->getPhase();
@@ -2113,23 +2113,23 @@ void cdr_plasma_stepper::computeCdrDriftVelocities(Vector<LevelData<EBCellFAB> *
 
     // Separate calls for regular and irregular
 #if USE_FAST_VELOCITIES
-    computeCdrDriftVelocities_reg_fast(vel,   phi, a_E[dit()], dbl.get(dit()), a_time, dx);
+    computeCdrDriftVelocitiesRegularFast(vel,   phi, a_E[dit()], dbl.get(dit()), a_time, dx);
 #else
-    computeCdrDriftVelocities_reg(vel,   phi, a_E[dit()], dbl.get(dit()), a_time, dx);
+    computeCdrDriftVelocitiesRegular(vel,   phi, a_E[dit()], dbl.get(dit()), a_time, dx);
 #endif
-    computeCdrDriftVelocities_irreg(vel, phi, a_E[dit()], dbl.get(dit()), a_time, dx, a_lvl, dit());
+    computeCdrDriftVelocitiesIrregular(vel, phi, a_E[dit()], dbl.get(dit()), a_time, dx, a_lvl, dit());
   }
 }
 
-void cdr_plasma_stepper::computeCdrDriftVelocities_reg(Vector<EBCellFAB*>&       a_velocities,
+void CdrPlasmaStepper::computeCdrDriftVelocitiesRegular(Vector<EBCellFAB*>&       a_velocities,
 						    const Vector<EBCellFAB*>& a_cdr_densities,
 						    const EBCellFAB&          a_E,
 						    const Box&                a_box,
 						    const Real&               a_time,
 						    const Real&               a_dx){
-  CH_TIME("cdr_plasma_stepper::computeCdrDriftVelocities_reg");
+  CH_TIME("CdrPlasmaStepper::computeCdrDriftVelocitiesRegular");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::computeCdrDriftVelocities_reg" << endl;
+    pout() << "CdrPlasmaStepper::computeCdrDriftVelocitiesRegular" << endl;
   }
 
   const int comp         = 0;
@@ -2177,28 +2177,28 @@ void cdr_plasma_stepper::computeCdrDriftVelocities_reg(Vector<EBCellFAB*>&      
   }
 }
 
-void cdr_plasma_stepper::computeCdrDriftVelocities_reg_fast(Vector<EBCellFAB*>&       a_velocities,
+void CdrPlasmaStepper::computeCdrDriftVelocitiesRegularFast(Vector<EBCellFAB*>&       a_velocities,
 							 const Vector<EBCellFAB*>& a_cdr_densities,
 							 const EBCellFAB&          a_E,
 							 const Box&                a_box,
 							 const Real&               a_time,
 							 const Real&               a_dx){
 #if CH_SPACEDIM==2
-  computeCdrDriftVelocities_reg_fast2D(a_velocities, a_cdr_densities, a_E, a_box, a_time, a_dx);
+  computeCdrDriftVelocitiesRegularFast2D(a_velocities, a_cdr_densities, a_E, a_box, a_time, a_dx);
 #elif CH_SPACEDIM==3
-  computeCdrDriftVelocities_reg_fast3D(a_velocities, a_cdr_densities, a_E, a_box, a_time, a_dx);
+  computeCdrDriftVelocitiesRegularFast3D(a_velocities, a_cdr_densities, a_E, a_box, a_time, a_dx);
 #endif
 }
 
-void cdr_plasma_stepper::computeCdrDriftVelocities_reg_fast2D(Vector<EBCellFAB*>&       a_velocities,
+void CdrPlasmaStepper::computeCdrDriftVelocitiesRegularFast2D(Vector<EBCellFAB*>&       a_velocities,
 							   const Vector<EBCellFAB*>& a_cdr_densities,
 							   const EBCellFAB&          a_E,
 							   const Box&                a_box,
 							   const Real&               a_time,
 							   const Real&               a_dx){
-  CH_TIME("cdr_plasma_stepper::computeCdrDriftVelocities_reg_fast2D");
+  CH_TIME("CdrPlasmaStepper::computeCdrDriftVelocitiesRegularFast2D");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::computeCdrDriftVelocities_reg_fast2D" << endl;
+    pout() << "CdrPlasmaStepper::computeCdrDriftVelocitiesRegularFast2D" << endl;
   }
   
 #if CH_SPACEDIM==2
@@ -2275,15 +2275,15 @@ void cdr_plasma_stepper::computeCdrDriftVelocities_reg_fast2D(Vector<EBCellFAB*>
 
 
 
-void cdr_plasma_stepper::computeCdrDriftVelocities_reg_fast3D(Vector<EBCellFAB*>&       a_velocities,
+void CdrPlasmaStepper::computeCdrDriftVelocitiesRegularFast3D(Vector<EBCellFAB*>&       a_velocities,
 							   const Vector<EBCellFAB*>& a_cdr_densities,
 							   const EBCellFAB&          a_E,
 							   const Box&                a_box,
 							   const Real&               a_time,
 							   const Real&               a_dx){
-  CH_TIME("cdr_plasma_stepper::computeCdrDriftVelocities_reg_fast3D");
+  CH_TIME("CdrPlasmaStepper::computeCdrDriftVelocitiesRegularFast3D");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::computeCdrDriftVelocities_reg_fast3D" << endl;
+    pout() << "CdrPlasmaStepper::computeCdrDriftVelocitiesRegularFast3D" << endl;
   }
 
 #if CH_SPACEDIM==3
@@ -2365,7 +2365,7 @@ void cdr_plasma_stepper::computeCdrDriftVelocities_reg_fast3D(Vector<EBCellFAB*>
 }
 
 
-void cdr_plasma_stepper::computeCdrDriftVelocities_irreg(Vector<EBCellFAB*>&       a_velocities,
+void CdrPlasmaStepper::computeCdrDriftVelocitiesIrregular(Vector<EBCellFAB*>&       a_velocities,
 						      const Vector<EBCellFAB*>& a_cdr_densities,
 						      const EBCellFAB&          a_E,
 						      const Box&                a_box,
@@ -2373,9 +2373,9 @@ void cdr_plasma_stepper::computeCdrDriftVelocities_irreg(Vector<EBCellFAB*>&    
 						      const Real&               a_dx,
 						      const int                 a_lvl,
 						      const DataIndex&          a_dit){
-  CH_TIME("cdr_plasma_stepper::computeCdrDriftVelocities_irreg");
+  CH_TIME("CdrPlasmaStepper::computeCdrDriftVelocitiesIrregular");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::computeCdrDriftVelocities_irreg" << endl;
+    pout() << "CdrPlasmaStepper::computeCdrDriftVelocitiesIrregular" << endl;
   }
 
   const int comp         = 0;
@@ -2411,10 +2411,10 @@ void cdr_plasma_stepper::computeCdrDriftVelocities_irreg(Vector<EBCellFAB*>&    
   }
 }
 
-void cdr_plasma_stepper::preRegrid(const int a_lmin, const int a_finestLevel){
-  CH_TIME("cdr_plasma_stepper::preRegrid");
+void CdrPlasmaStepper::preRegrid(const int a_lmin, const int a_finestLevel){
+  CH_TIME("CdrPlasmaStepper::preRegrid");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::preRegrid" << endl;
+    pout() << "CdrPlasmaStepper::preRegrid" << endl;
   }
 
   // Solvers do pre-regridding shit. 
@@ -2424,17 +2424,17 @@ void cdr_plasma_stepper::preRegrid(const int a_lmin, const int a_finestLevel){
   m_sigma->preRegrid(a_lmin, a_finestLevel);
 }
 
-void cdr_plasma_stepper::preRegridInternals(const int a_lbase, const int a_finestLevel){
-  CH_TIME("cdr_plasma_stepper::preRegridInternals");
+void CdrPlasmaStepper::preRegridInternals(const int a_lbase, const int a_finestLevel){
+  CH_TIME("CdrPlasmaStepper::preRegridInternals");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::preRegridInternals" << endl;
+    pout() << "CdrPlasmaStepper::preRegridInternals" << endl;
   }
 }
 
-void cdr_plasma_stepper::computeCdrDriftVelocities(){
-  CH_TIME("cdr_plasma_stepper::computeCdrDriftVelocities()");
+void CdrPlasmaStepper::computeCdrDriftVelocities(){
+  CH_TIME("CdrPlasmaStepper::computeCdrDriftVelocities()");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::computeCdrDriftVelocities()" << endl;
+    pout() << "CdrPlasmaStepper::computeCdrDriftVelocities()" << endl;
   }
 
   // Compute the electric field (again)
@@ -2448,10 +2448,10 @@ void cdr_plasma_stepper::computeCdrDriftVelocities(){
   this->computeCdrDriftVelocities(velocities, states, E, m_time);
 }
 
-void cdr_plasma_stepper::compute_cdr_diffusion(){
-  CH_TIME("cdr_plasma_stepper::compute_cdr_diffusion");
+void CdrPlasmaStepper::computeCdrDiffusion(){
+  CH_TIME("CdrPlasmaStepper::computeCdrDiffusion");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_cdr_diffusion" << endl;
+    pout() << "CdrPlasmaStepper::computeCdrDiffusion" << endl;
   }
 
   const int ncomp       = 1;
@@ -2467,7 +2467,7 @@ void cdr_plasma_stepper::compute_cdr_diffusion(){
 
   Vector<EBAMRCellData*> cdr_states  = m_cdr->getPhis();
 
-  cdr_plasma_stepper::compute_cdr_diffusion(E_cell, E_eb);
+  CdrPlasmaStepper::computeCdrDiffusion(E_cell, E_eb);
 #if 0
 
   // Extrapolate states to the EB
@@ -2484,8 +2484,8 @@ void cdr_plasma_stepper::compute_cdr_diffusion(){
   Vector<EBAMRFluxData*> diffco_face = m_cdr->getFaceCenteredDiffusionCoefficient();
   Vector<EBAMRIVData*> diffco_eb     = m_cdr->getEbCenteredDiffusionCoefficient();
 
-  this->compute_cdr_diffco_face(diffco_face, cdr_states, E_cell, m_time);
-  this->compute_cdr_diffco_eb(diffco_eb,     cdr_extrap, E_eb,   m_time);
+  this->computeCdrDiffusionFace(diffco_face, cdr_states, E_cell, m_time);
+  this->computeCdrDiffusionEb(diffco_eb,     cdr_extrap, E_eb,   m_time);
 
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
@@ -2494,10 +2494,10 @@ void cdr_plasma_stepper::compute_cdr_diffusion(){
 #endif
 }
 
-void cdr_plasma_stepper::compute_cdr_diffusion(const EBAMRCellData& a_E_cell, const EBAMRIVData& a_E_eb){
-  CH_TIME("cdr_plasma_stepper::compute_cdr_diffusion");
+void CdrPlasmaStepper::computeCdrDiffusion(const EBAMRCellData& a_E_cell, const EBAMRIVData& a_E_eb){
+  CH_TIME("CdrPlasmaStepper::computeCdrDiffusion");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_cdr_diffusion" << endl;
+    pout() << "CdrPlasmaStepper::computeCdrDiffusion" << endl;
   }
 
   const int ncomp       = 1;
@@ -2519,8 +2519,8 @@ void cdr_plasma_stepper::compute_cdr_diffusion(const EBAMRCellData& a_E_cell, co
   Vector<EBAMRFluxData*> diffco_face = m_cdr->getFaceCenteredDiffusionCoefficient();
   Vector<EBAMRIVData*> diffco_eb     = m_cdr->getEbCenteredDiffusionCoefficient();
 
-  this->compute_cdr_diffco_face(diffco_face, cdr_states, a_E_cell, m_time);
-  this->compute_cdr_diffco_eb(diffco_eb,     cdr_extrap, a_E_eb,   m_time);
+  this->computeCdrDiffusionFace(diffco_face, cdr_states, a_E_cell, m_time);
+  this->computeCdrDiffusionEb(diffco_eb,     cdr_extrap, a_E_eb,   m_time);
 
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
@@ -2529,10 +2529,10 @@ void cdr_plasma_stepper::compute_cdr_diffusion(const EBAMRCellData& a_E_cell, co
   }
 }
 
-void cdr_plasma_stepper::computeElectricField(MFAMRCellData& a_E, const MFAMRCellData& a_potential){
-  CH_TIME("cdr_plasma_stepper::computeElectricField(mfamrcell, mfamrcell)");
+void CdrPlasmaStepper::computeElectricField(MFAMRCellData& a_E, const MFAMRCellData& a_potential){
+  CH_TIME("CdrPlasmaStepper::computeElectricField(mfamrcell, mfamrcell)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::computeElectricField(mfamrcell, mfamrcell)" << endl;
+    pout() << "CdrPlasmaStepper::computeElectricField(mfamrcell, mfamrcell)" << endl;
   }
 
   m_amr->computeGradient(a_E, a_potential, m_realm);
@@ -2542,19 +2542,19 @@ void cdr_plasma_stepper::computeElectricField(MFAMRCellData& a_E, const MFAMRCel
   m_amr->interpGhost(a_E, m_realm);
 }
 
-void cdr_plasma_stepper::computeElectricField(EBAMRCellData& a_E, const phase::which_phase a_phase){
-  CH_TIME("cdr_plasma_stepper::computeElectricField(ebamrcell, phase)");
+void CdrPlasmaStepper::computeElectricField(EBAMRCellData& a_E, const phase::which_phase a_phase){
+  CH_TIME("CdrPlasmaStepper::computeElectricField(ebamrcell, phase)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::computeElectricField(ebamrcell, phase)" << endl;
+    pout() << "CdrPlasmaStepper::computeElectricField(ebamrcell, phase)" << endl;
   }
 
   this->computeElectricField(a_E, a_phase, m_fieldSolver->getPotential());
 }
 
-void cdr_plasma_stepper::computeElectricField(EBAMRCellData& a_E, const phase::which_phase a_phase, const MFAMRCellData& a_potential){
-  CH_TIME("cdr_plasma_stepper::computeElectricField(ebamrcell, phase, mfamrcell)");
+void CdrPlasmaStepper::computeElectricField(EBAMRCellData& a_E, const phase::which_phase a_phase, const MFAMRCellData& a_potential){
+  CH_TIME("CdrPlasmaStepper::computeElectricField(ebamrcell, phase, mfamrcell)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::computeElectricField(ebamrcell, phase, mfamrcell)" << endl;
+    pout() << "CdrPlasmaStepper::computeElectricField(ebamrcell, phase, mfamrcell)" << endl;
   }
 
   EBAMRCellData pot_gas;
@@ -2568,10 +2568,10 @@ void cdr_plasma_stepper::computeElectricField(EBAMRCellData& a_E, const phase::w
   m_amr->interpGhost(a_E, m_realm, a_phase);
 }
 
-void cdr_plasma_stepper::computeElectricField(EBAMRFluxData& a_E_face, const phase::which_phase a_phase, const EBAMRCellData& a_E_cell){
-  CH_TIME("cdr_plasma_stepper::computeElectricField(ebamrflux, phase, ebamrcell)");
+void CdrPlasmaStepper::computeElectricField(EBAMRFluxData& a_E_face, const phase::which_phase a_phase, const EBAMRCellData& a_E_cell){
+  CH_TIME("CdrPlasmaStepper::computeElectricField(ebamrflux, phase, ebamrcell)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::computeElectricField(ebamrflux, phase, ebamrcell)" << endl;
+    pout() << "CdrPlasmaStepper::computeElectricField(ebamrflux, phase, ebamrcell)" << endl;
   }
 
   CH_assert(a_E_face[0]->nComp() == SpaceDim);
@@ -2611,10 +2611,10 @@ void cdr_plasma_stepper::computeElectricField(EBAMRFluxData& a_E_face, const pha
   }
 }
 
-void cdr_plasma_stepper::computeElectricField(EBAMRIVData& a_E_eb, const phase::which_phase a_phase, const EBAMRCellData& a_E_cell){
-  CH_TIME("cdr_plasma_stepper::computeElectricField(ebamriv, phase, ebamrcell)");
+void CdrPlasmaStepper::computeElectricField(EBAMRIVData& a_E_eb, const phase::which_phase a_phase, const EBAMRCellData& a_E_cell){
+  CH_TIME("CdrPlasmaStepper::computeElectricField(ebamriv, phase, ebamrcell)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::computeElectricField(ebamriv, phase, ebamrcell)" << endl;
+    pout() << "CdrPlasmaStepper::computeElectricField(ebamriv, phase, ebamrcell)" << endl;
   }
 
   CH_assert(a_E_eb[0]->nComp()   == SpaceDim);
@@ -2624,10 +2624,10 @@ void cdr_plasma_stepper::computeElectricField(EBAMRIVData& a_E_eb, const phase::
   interp_stencil.apply(a_E_eb, a_E_cell);
 }
 
-void cdr_plasma_stepper::computeElectricFieldmax(Real& a_Emax, const phase::which_phase a_phase){
-  CH_TIME("cdr_plasma_stepper::computeElectricFieldmax(Real, phase)");
+void CdrPlasmaStepper::computeMaxElectricField(Real& a_Emax, const phase::which_phase a_phase){
+  CH_TIME("CdrPlasmaStepper::computeMaxElectricField(Real, phase)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::computeElectricFieldmax(Real, phase)" << endl;
+    pout() << "CdrPlasmaStepper::computeMaxElectricField(Real, phase)" << endl;
   }
 
   EBAMRCellData E;
@@ -2642,13 +2642,13 @@ void cdr_plasma_stepper::computeElectricFieldmax(Real& a_Emax, const phase::whic
   a_Emax = max;
 }
 
-void cdr_plasma_stepper::computeCharge_flux(EBAMRIVData& a_flux, Vector<EBAMRIVData*>& a_cdr_fluxes){
-  CH_TIME("cdr_plasma_stepper::computeCharge_flux");
+void CdrPlasmaStepper::computeChargeFlux(EBAMRIVData& a_flux, Vector<EBAMRIVData*>& a_cdr_fluxes){
+  CH_TIME("CdrPlasmaStepper::computeChargeFlux");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::computeCharge_flux" << endl;
+    pout() << "CdrPlasmaStepper::computeChargeFlux" << endl;
   }
 
-  MayDay::Abort("cdr_plasma_stepper::computeCharge_flux - I'm suspecting that this is deprecated code which is no longer used");
+  MayDay::Abort("CdrPlasmaStepper::computeChargeFlux - I'm suspecting that this is deprecated code which is no longer used");
 
   DataOps::setValue(a_flux, 0.0);
 
@@ -2663,13 +2663,13 @@ void cdr_plasma_stepper::computeCharge_flux(EBAMRIVData& a_flux, Vector<EBAMRIVD
   m_sigma->resetCells(a_flux);
 }
 
-void cdr_plasma_stepper::compute_extrapolated_fluxes(Vector<EBAMRIVData*>&        a_fluxes,
+void CdrPlasmaStepper::computeExtrapolatedFluxes(Vector<EBAMRIVData*>&        a_fluxes,
 						     const Vector<EBAMRCellData*> a_densities,
 						     const Vector<EBAMRCellData*> a_velocities,
 						     const phase::which_phase     a_phase){
-  CH_TIME("cdr_plasma_stepper::compute_extrapolated_fluxes");
+  CH_TIME("CdrPlasmaStepper::computeExtrapolatedFluxes");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_extrapolated_fluxes" << endl;
+    pout() << "CdrPlasmaStepper::computeExtrapolatedFluxes" << endl;
   }
 
 #if 0 // This code computes the cell-centered flux which is then extrapolated to the EB. Please don't remove this code. 
@@ -2685,9 +2685,9 @@ void cdr_plasma_stepper::compute_extrapolated_fluxes(Vector<EBAMRIVData*>&      
     m_amr->averageDown(cell_flux, m_realm, a_phase);
     m_amr->interpGhost(cell_flux, m_realm, a_phase);
 
-    this->extrapolate_to_eb(eb_flux, a_phase, cell_flux);
+    this->extrapolateToEb(eb_flux, a_phase, cell_flux);
     
-    this->project_flux(*a_fluxes[i], eb_flux);
+    this->projectFlux(*a_fluxes[i], eb_flux);
   }
 #else // New way of doing this. Extrapolate everything to the BC first. Then compute the flux and project it. We do this because
       // extrapolation stencils may have negative weights, and v*n may therefore nonphysically change sign. Better to compute
@@ -2716,7 +2716,7 @@ void cdr_plasma_stepper::compute_extrapolated_fluxes(Vector<EBAMRIVData*>&      
       DataOps::incr(eb_flx, eb_vel, 1.0);
       DataOps::multiplyScalar(eb_flx, eb_phi);
 
-      this->project_flux(*a_fluxes[idx], eb_flx);
+      this->projectFlux(*a_fluxes[idx], eb_flx);
 
       m_amr->averageDown(*a_fluxes[idx], m_realm, a_phase);
     }
@@ -2727,12 +2727,12 @@ void cdr_plasma_stepper::compute_extrapolated_fluxes(Vector<EBAMRIVData*>&      
 #endif
 }
 
-void cdr_plasma_stepper::compute_extrapolated_velocities(Vector<EBAMRIVData*>&        a_ebvelo,
+void CdrPlasmaStepper::computeExtrapolatedVelocities(Vector<EBAMRIVData*>&        a_ebvelo,
 							 const Vector<EBAMRCellData*> a_cell_vel,
 							 const phase::which_phase     a_phase){
-  CH_TIME("cdr_plasma_stepper::compute_extrapolated_velocities");
+  CH_TIME("CdrPlasmaStepper::computeExtrapolatedVelocities");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_extrapolated_velocities" << endl;
+    pout() << "CdrPlasmaStepper::computeExtrapolatedVelocities" << endl;
   }
 
   EBAMRIVData scratch;
@@ -2743,19 +2743,19 @@ void cdr_plasma_stepper::compute_extrapolated_velocities(Vector<EBAMRIVData*>&  
     const RefCountedPtr<CdrSolver>& solver = solver_it();
     const int idx = solver_it.index();
     if(solver->isMobile()){
-      this->extrapolate_to_eb(scratch, a_phase, *a_cell_vel[idx]);
-      this->project_flux(*a_ebvelo[idx], scratch);
+      this->extrapolateToEb(scratch, a_phase, *a_cell_vel[idx]);
+      this->projectFlux(*a_ebvelo[idx], scratch);
     }
   }
 }
 
-void cdr_plasma_stepper::compute_extrapolated_domain_fluxes(Vector<EBAMRIFData*>&        a_fluxes,
+void CdrPlasmaStepper::computeExtrapolatedDomainFluxes(Vector<EBAMRIFData*>&        a_fluxes,
 							    const Vector<EBAMRCellData*> a_densities,
 							    const Vector<EBAMRCellData*> a_velocities,
 							    const phase::which_phase     a_phase){
-  CH_TIME("cdr_plasma_stepper::compute_extrapolated_domain_fluxes");
+  CH_TIME("CdrPlasmaStepper::computeExtrapolatedDomainFluxes");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_extrapolated_domain_fluxes" << endl;
+    pout() << "CdrPlasmaStepper::computeExtrapolatedDomainFluxes" << endl;
   }
 
   EBAMRCellData cell_flux;
@@ -2773,10 +2773,10 @@ void cdr_plasma_stepper::compute_extrapolated_domain_fluxes(Vector<EBAMRIFData*>
       DataOps::multiplyScalar(cell_flux, *a_densities[idx]); // cell_flux = n*v
 
       // Extrapolate cell-centered to domain faces
-      this->extrapolate_to_domain_faces(domain_flux, a_phase, cell_flux);
+      this->extrapolateToDomainFaces(domain_flux, a_phase, cell_flux);
 
       // Project normal component onto domain face
-      this->project_domain(*a_fluxes[idx], domain_flux);
+      this->projectDomain(*a_fluxes[idx], domain_flux);
     }
     else{
       DataOps::setValue(*a_fluxes[idx], 0.0);
@@ -2784,10 +2784,10 @@ void cdr_plasma_stepper::compute_extrapolated_domain_fluxes(Vector<EBAMRIFData*>
   }
 }
 
-void cdr_plasma_stepper::computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_density, const EBAMRCellData& a_velocity){
-  CH_TIME("cdr_plasma_stepper::computeFlux(amr)");
+void CdrPlasmaStepper::computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_density, const EBAMRCellData& a_velocity){
+  CH_TIME("CdrPlasmaStepper::computeFlux(amr)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::computeFlux(amr)" << endl;
+    pout() << "CdrPlasmaStepper::computeFlux(amr)" << endl;
   }
   
   const int finest_level = m_amr->getFinestLevel();
@@ -2802,13 +2802,13 @@ void cdr_plasma_stepper::computeFlux(EBAMRCellData& a_flux, const EBAMRCellData&
   }
 }
 
-void cdr_plasma_stepper::computeFlux(LevelData<EBCellFAB>&       a_flux,
+void CdrPlasmaStepper::computeFlux(LevelData<EBCellFAB>&       a_flux,
 				      const LevelData<EBCellFAB>& a_density,
 				      const LevelData<EBCellFAB>& a_velocity,
 				      const int                   a_lvl){
-  CH_TIME("cdr_plasma_stepper::computeFlux(amr)");
+  CH_TIME("CdrPlasmaStepper::computeFlux(amr)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::computeFlux(amr)" << endl;
+    pout() << "CdrPlasmaStepper::computeFlux(amr)" << endl;
   }
 
   DataOps::setValue(a_flux, 0.0);
@@ -2816,27 +2816,27 @@ void cdr_plasma_stepper::computeFlux(LevelData<EBCellFAB>&       a_flux,
   DataOps::multiplyScalar(a_flux, a_density);
 }
 
-void cdr_plasma_stepper::compute_J(EBAMRCellData& a_J) const{
-  CH_TIME("cdr_plasma_stepper::compute_J(amr)");
+void CdrPlasmaStepper::computeJ(EBAMRCellData& a_J) const{
+  CH_TIME("CdrPlasmaStepper::computeJ(amr)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_J(amr)" << endl;
+    pout() << "CdrPlasmaStepper::computeJ(amr)" << endl;
   }
   
   const int finest_level = m_amr->getFinestLevel();
 
   // Call level versions
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    compute_J(*a_J[lvl], lvl);
+    computeJ(*a_J[lvl], lvl);
   }
 
   m_amr->averageDown(a_J, m_realm, m_cdr->getPhase());
   m_amr->interpGhost(a_J, m_realm, m_cdr->getPhase());
 }
 
-void cdr_plasma_stepper::compute_J(LevelData<EBCellFAB>& a_J, const int a_lvl) const{
-  CH_TIME("cdr_plasma_stepper::compute_J(level)");
+void CdrPlasmaStepper::computeJ(LevelData<EBCellFAB>& a_J, const int a_lvl) const{
+  CH_TIME("CdrPlasmaStepper::computeJ(level)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_J(level)" << endl;
+    pout() << "CdrPlasmaStepper::computeJ(level)" << endl;
   }
 
   DataOps::setValue(a_J, 0.0);
@@ -2885,10 +2885,10 @@ void cdr_plasma_stepper::compute_J(LevelData<EBCellFAB>& a_J, const int a_lvl) c
   DataOps::scale(a_J, Units::Qe);
 }
 
-void cdr_plasma_stepper::compute_rho(){
-  CH_TIME("cdr_plasma_stepper::compute_rho()");
+void CdrPlasmaStepper::computeSpaceChargeDensity(){
+  CH_TIME("CdrPlasmaStepper::computeSpaceChargeDensity()");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_rho()" << endl;
+    pout() << "CdrPlasmaStepper::computeSpaceChargeDensity()" << endl;
   }
 
   Vector<EBAMRCellData*> densities;
@@ -2897,13 +2897,13 @@ void cdr_plasma_stepper::compute_rho(){
     densities.push_back(&(solver->getPhi()));
   }
 
-  this->compute_rho(m_fieldSolver->getRho(), densities, centering::cell_center);
+  this->computeSpaceChargeDensity(m_fieldSolver->getRho(), densities, centering::CellCenter);
 }
 
-void cdr_plasma_stepper::compute_rho(EBAMRCellData& a_rho, const phase::which_phase a_phase){
-  CH_TIME("cdr_plasma_stepper::compute_rho(ebamrcelldata, phase)");
+void CdrPlasmaStepper::computeSpaceChargeDensity(EBAMRCellData& a_rho, const phase::which_phase a_phase){
+  CH_TIME("CdrPlasmaStepper::computeSpaceChargeDensity(ebamrcelldata, phase)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_rho(ebamrcelldata, phase)" << endl;
+    pout() << "CdrPlasmaStepper::computeSpaceChargeDensity(ebamrcelldata, phase)" << endl;
   }
 
   CH_assert(a_phase == m_cdr->getPhase());
@@ -2933,12 +2933,12 @@ void cdr_plasma_stepper::compute_rho(EBAMRCellData& a_rho, const phase::which_ph
   m_amr->interpGhost(a_rho, m_realm, a_phase);
 }
 
-void cdr_plasma_stepper::compute_rho(MFAMRCellData&                 a_rho,
+void CdrPlasmaStepper::computeSpaceChargeDensity(MFAMRCellData&                 a_rho,
 				     const Vector<EBAMRCellData*>&  a_densities,
 				     const centering                a_centering){
-  CH_TIME("cdr_plasma_stepper::compute_rho(mfamrcell, vec(ebamrcell))");
+  CH_TIME("CdrPlasmaStepper::computeSpaceChargeDensity(mfamrcell, vec(ebamrcell))");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_rho(mfamrcell, vec(ebamrcell))" << endl;
+    pout() << "CdrPlasmaStepper::computeSpaceChargeDensity(mfamrcell, vec(ebamrcell))" << endl;
   }
 
   DataOps::setValue(a_rho, 0.0);
@@ -2967,15 +2967,15 @@ void cdr_plasma_stepper::compute_rho(MFAMRCellData&                 a_rho,
   m_amr->interpGhost(a_rho, m_realm);
 
   // Transform to centroids
-  if(a_centering == centering::cell_center){
+  if(a_centering == centering::CellCenter){
     m_amr->interpToCentroids(rho_gas, m_realm, phase::gas);
   }
 }
 
-void cdr_plasma_stepper::deallocate_solver_internals(){
-  CH_TIME("cdr_plasma_stepper::deallocate_solver_internals");
+void CdrPlasmaStepper::deallocateSolverInternals(){
+  CH_TIME("CdrPlasmaStepper::deallocateSolverInternals");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::deallocate_solver_internals" << endl;
+    pout() << "CdrPlasmaStepper::deallocateSolverInternals" << endl;
   }
 
   m_cdr->deallocateInternals();
@@ -2984,67 +2984,67 @@ void cdr_plasma_stepper::deallocate_solver_internals(){
   m_sigma->deallocateInternals();
 }
 
-void cdr_plasma_stepper::extrapolate_to_eb(Vector<EBAMRIVData*>&         a_extrap,
+void CdrPlasmaStepper::extrapolateToEb(Vector<EBAMRIVData*>&         a_extrap,
 					   const phase::which_phase      a_phase,
 					   const Vector<EBAMRCellData*>& a_data){
-  CH_TIME("cdr_plasma_stepper::extrapolate_to_eb(vec)");
+  CH_TIME("CdrPlasmaStepper::extrapolateToEb(vec)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::extrapolate_to_eb(vec)" << endl;
+    pout() << "CdrPlasmaStepper::extrapolateToEb(vec)" << endl;
   }
 
   CH_assert(a_extrap.size() == a_data.size());
 
   for (int i = 0; i < a_extrap.size(); i++){
-    this->extrapolate_to_eb(*a_extrap[i], a_phase, *a_data[i]);
+    this->extrapolateToEb(*a_extrap[i], a_phase, *a_data[i]);
   }
 }
 
-void cdr_plasma_stepper::extrapolate_to_eb(EBAMRIVData& a_extrap, const phase::which_phase a_phase, const EBAMRCellData& a_data){
-  CH_TIME("cdr_plasma_stepper::extrapolate_to_eb");
+void CdrPlasmaStepper::extrapolateToEb(EBAMRIVData& a_extrap, const phase::which_phase a_phase, const EBAMRCellData& a_data){
+  CH_TIME("CdrPlasmaStepper::extrapolateToEb");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::extrapolate_to_eb" << endl;
+    pout() << "CdrPlasmaStepper::extrapolateToEb" << endl;
   }
 
   const IrregAmrStencil<EbCentroidInterpolationStencil>& stencils = m_amr->getEbCentroidInterpolationStencilStencils(m_realm, a_phase);
   
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    extrapolate_to_eb(*a_extrap[lvl], a_phase, *a_data[lvl], lvl);
+    extrapolateToEb(*a_extrap[lvl], a_phase, *a_data[lvl], lvl);
   }
 }
 
-void cdr_plasma_stepper::extrapolate_to_eb(LevelData<BaseIVFAB<Real> >& a_extrap,
+void CdrPlasmaStepper::extrapolateToEb(LevelData<BaseIVFAB<Real> >& a_extrap,
 					   const phase::which_phase     a_phase,
 					   const LevelData<EBCellFAB>&  a_data,
 					   const int                    a_lvl){
-  CH_TIME("cdr_plasma_stepper::extrapolate_to_eb(level)");
+  CH_TIME("CdrPlasmaStepper::extrapolateToEb(level)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::extrapolate_to_eb(level)" << endl;
+    pout() << "CdrPlasmaStepper::extrapolateToEb(level)" << endl;
   }
 
   const IrregAmrStencil<EbCentroidInterpolationStencil>& stencils = m_amr->getEbCentroidInterpolationStencilStencils(m_realm, a_phase);
   stencils.apply(a_extrap, a_data, a_lvl);
 }
 
-void cdr_plasma_stepper::extrapolate_to_domain_faces(EBAMRIFData&             a_extrap,
+void CdrPlasmaStepper::extrapolateToDomainFaces(EBAMRIFData&             a_extrap,
 						     const phase::which_phase a_phase,
 						     const EBAMRCellData&     a_data){
-  CH_TIME("cdr_plasma_stepper::extrapolate_to_domain_faces(amr)");
+  CH_TIME("CdrPlasmaStepper::extrapolateToDomainFaces(amr)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::extrapolate_to_domain_faces(amr)" << endl;
+    pout() << "CdrPlasmaStepper::extrapolateToDomainFaces(amr)" << endl;
   }
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    extrapolate_to_domain_faces(*a_extrap[lvl], a_phase, *a_data[lvl], lvl);
+    extrapolateToDomainFaces(*a_extrap[lvl], a_phase, *a_data[lvl], lvl);
   }
 }
 
-void cdr_plasma_stepper::extrapolate_to_domain_faces(LevelData<DomainFluxIFFAB>& a_extrap,
+void CdrPlasmaStepper::extrapolateToDomainFaces(LevelData<DomainFluxIFFAB>& a_extrap,
 						     const phase::which_phase    a_phase,
 						     const LevelData<EBCellFAB>& a_data,
 						     const int                   a_lvl){
-  CH_TIME("cdr_plasma_stepper::extrapolate_to_domain_faces(level)");
+  CH_TIME("CdrPlasmaStepper::extrapolateToDomainFaces(level)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::extrapolate_to_domain_faces(level)" << endl;
+    pout() << "CdrPlasmaStepper::extrapolateToDomainFaces(level)" << endl;
   }
 
   const int ncomp = a_data.nComp();
@@ -3098,25 +3098,25 @@ void cdr_plasma_stepper::extrapolate_to_domain_faces(LevelData<DomainFluxIFFAB>&
   }
 }
 
-void cdr_plasma_stepper::extrapolate_to_domain_faces(Vector<EBAMRIFData*>&         a_extrap,
+void CdrPlasmaStepper::extrapolateToDomainFaces(Vector<EBAMRIFData*>&         a_extrap,
 						     const phase::which_phase      a_phase,
 						     const Vector<EBAMRCellData*>& a_data){
-  CH_TIME("cdr_plasma_stepper::extrapolate_to_domain_faces(vec)");
+  CH_TIME("CdrPlasmaStepper::extrapolateToDomainFaces(vec)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::extrapolate_to_domain_faces(vec)" << endl;
+    pout() << "CdrPlasmaStepper::extrapolateToDomainFaces(vec)" << endl;
   }
 
   CH_assert(a_extrap.size() == a_data.size());
 
   for (int i = 0; i < a_extrap.size(); i++){
-    this->extrapolate_to_domain_faces(*a_extrap[i], a_phase, *a_data[i]);
+    this->extrapolateToDomainFaces(*a_extrap[i], a_phase, *a_data[i]);
   }
 }
 
-void cdr_plasma_stepper::get_cdr_max(Real& a_cdr_max, std::string& a_solver_name){
-  CH_TIME("cdr_plasma_stepper::get_cdr_max");
+void CdrPlasmaStepper::getCdrMax(Real& a_cdr_max, std::string& a_solver_name){
+  CH_TIME("CdrPlasmaStepper::getCdrMax");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::get_cdr_max" << endl;
+    pout() << "CdrPlasmaStepper::getCdrMax" << endl;
   }
 
   const int comp = 0;
@@ -3135,54 +3135,54 @@ void cdr_plasma_stepper::get_cdr_max(Real& a_cdr_max, std::string& a_solver_name
   }
 }
 
-void cdr_plasma_stepper::set_cdr(RefCountedPtr<CdrLayout<CdrSolver>>& a_cdr){
-  CH_TIME("cdr_plasma_stepper::set_cdr");
+void CdrPlasmaStepper::setCdrSolvers(RefCountedPtr<CdrLayout<CdrSolver>>& a_cdr){
+  CH_TIME("CdrPlasmaStepper::setCdrSolvers");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::set_cdr" << endl;
+    pout() << "CdrPlasmaStepper::setCdrSolvers" << endl;
   }
   m_cdr = a_cdr;
 }
 
-void cdr_plasma_stepper::set_poisson(RefCountedPtr<FieldSolver>& a_poisson){
-  CH_TIME("cdr_plasma_stepper::set_poisson");
+void CdrPlasmaStepper::setFieldSolver(RefCountedPtr<FieldSolver>& a_poisson){
+  CH_TIME("CdrPlasmaStepper::setFieldSolver");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::set_poisson" << endl;
+    pout() << "CdrPlasmaStepper::setFieldSolver" << endl;
   }
   m_fieldSolver = a_poisson;
 }
 
-void cdr_plasma_stepper::set_rte(RefCountedPtr<RtLayout<RtSolver>>& a_rte){
-  CH_TIME("cdr_plasma_stepper::set_rte");
+void CdrPlasmaStepper::setRadiativeTransferSolvers(RefCountedPtr<RtLayout<RtSolver>>& a_rte){
+  CH_TIME("CdrPlasmaStepper::setRadiativeTransferSolvers");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::set_rte" << endl;
+    pout() << "CdrPlasmaStepper::setRadiativeTransferSolvers" << endl;
   }
   m_rte = a_rte;
 }
 
-void cdr_plasma_stepper::setupSolvers(){
-  CH_TIME("cdr_plasma_stepper::setupSolvers");
+void CdrPlasmaStepper::setupSolvers(){
+  CH_TIME("CdrPlasmaStepper::setupSolvers");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::setupSolvers" << endl;
+    pout() << "CdrPlasmaStepper::setupSolvers" << endl;
   }
   parseOptions();
   this->sanityCheck();
 
   // Make solvers
-  this->setup_cdr();
-  this->setup_rte(); 
-  this->setup_poisson();
-  this->setup_sigma();
+  this->setupCdr();
+  this->setupRadiativeTransfer(); 
+  this->setupPoisson();
+  this->setupSigma();
 
-  this->set_solver_verbosity();
+  this->setSolverVerbosity();
 
   // Allocate internal memory
   this->allocateInternals();
 }
 
-void cdr_plasma_stepper::initialData(){
-  CH_TIME("cdr_plasma_stepper::initialData");
+void CdrPlasmaStepper::initialData(){
+  CH_TIME("CdrPlasmaStepper::initialData");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::initialData" << endl;
+    pout() << "CdrPlasmaStepper::initialData" << endl;
   }
 
 
@@ -3193,24 +3193,24 @@ void cdr_plasma_stepper::initialData(){
   this->initialSigma();
 
   // Solve Poisson equation
-  this->solve_poisson();
+  this->solvePoisson();
 
   // Fill solvers with velocity and diffusion
   this->computeCdrDriftVelocities();
-  this->compute_cdr_diffusion();
+  this->computeCdrDiffusion();
 
   // Do stationary RTE solve if we must
   if(this->stationary_rte()){                  // Solve RTE equations by using initial data and electric field
     const Real dummy_dt = 1.0;
 
-    this->solve_rte(dummy_dt);                 // Argument does not matter, it's a stationary solver.
+    this->solveRadiativeTransfer(dummy_dt);                 // Argument does not matter, it's a stationary solver.
   }
 }
 
-void cdr_plasma_stepper::initialSigma(){
-  CH_TIME("cdr_plasma_stepper::initialSigma");
+void CdrPlasmaStepper::initialSigma(){
+  CH_TIME("CdrPlasmaStepper::initialSigma");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::initialSigma" << endl;
+    pout() << "CdrPlasmaStepper::initialSigma" << endl;
   }
 
   const RealVect origin  = m_amr->getProbLo();
@@ -3245,12 +3245,12 @@ void cdr_plasma_stepper::initialSigma(){
   m_sigma->resetCells(sigma);
 }
 
-void cdr_plasma_stepper::project_flux(LevelData<BaseIVFAB<Real> >&       a_projected_flux,
+void CdrPlasmaStepper::projectFlux(LevelData<BaseIVFAB<Real> >&       a_projected_flux,
 				      const LevelData<BaseIVFAB<Real> >& a_flux,
 				      const int                          a_lvl){
-  CH_TIME("cdr_plasma_stepper::project_flux(level)");
+  CH_TIME("CdrPlasmaStepper::projectFlux(level)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::project_flux(level)" << endl;
+    pout() << "CdrPlasmaStepper::projectFlux(level)" << endl;
   }
 
   CH_assert(a_projected_flux.nComp() == 1);
@@ -3279,24 +3279,24 @@ void cdr_plasma_stepper::project_flux(LevelData<BaseIVFAB<Real> >&       a_proje
   }
 }
 
-void cdr_plasma_stepper::project_flux(EBAMRIVData& a_projected_flux, const EBAMRIVData& a_flux){
-  CH_TIME("cdr_plasma_stepper::project_flux");
+void CdrPlasmaStepper::projectFlux(EBAMRIVData& a_projected_flux, const EBAMRIVData& a_flux){
+  CH_TIME("CdrPlasmaStepper::projectFlux");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::project_flux" << endl;
+    pout() << "CdrPlasmaStepper::projectFlux" << endl;
   }
 
   const int comp         = 0;
   const int finest_level = m_amr->getFinestLevel();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    cdr_plasma_stepper::project_flux(*a_projected_flux[lvl], *a_flux[lvl], lvl);
+    CdrPlasmaStepper::projectFlux(*a_projected_flux[lvl], *a_flux[lvl], lvl);
   }
 }
 
-void cdr_plasma_stepper::project_domain(EBAMRIFData& a_projected_flux, const EBAMRIFData& a_flux){
-  CH_TIME("cdr_plasma_stepper::project_domain");
+void CdrPlasmaStepper::projectDomain(EBAMRIFData& a_projected_flux, const EBAMRIFData& a_flux){
+  CH_TIME("CdrPlasmaStepper::projectDomain");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::project_domain" << endl;
+    pout() << "CdrPlasmaStepper::projectDomain" << endl;
   }
 
   const int comp         = 0;
@@ -3331,18 +3331,18 @@ void cdr_plasma_stepper::project_domain(EBAMRIFData& a_projected_flux, const EBA
   }
 }
 
-void cdr_plasma_stepper::regrid(const int a_lmin, const int a_old_finest, const int a_new_finest){
-  CH_TIME("cdr_plasma_stepper::regrid");
+void CdrPlasmaStepper::regrid(const int a_lmin, const int a_old_finest, const int a_new_finest){
+  CH_TIME("CdrPlasmaStepper::regrid");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::regrid" << endl;
+    pout() << "CdrPlasmaStepper::regrid" << endl;
   }
 
   this->allocateInternals(); // Allocate memory for time stepper
-  this->regrid_solvers(a_lmin, a_old_finest, a_new_finest);
+  this->regridSolvers(a_lmin, a_old_finest, a_new_finest);
   this->regridInternals(a_lmin, a_old_finest, a_new_finest);
 
   // Solvers have been regridded. Now resolve the Poisson equation with the new data
-  bool converged = this->solve_poisson();
+  bool converged = this->solvePoisson();
 
   // If we don't converge, try new Poisson solver settings
   if(!converged){ 
@@ -3353,7 +3353,7 @@ void cdr_plasma_stepper::regrid(const int a_lmin, const int a_old_finest, const 
 
   // Compute stuff that is important for the CDR solvers. 
   this->computeCdrDriftVelocities();
-  this->compute_cdr_diffusion();
+  this->computeCdrDiffusion();
 
   // If we're doing a stationary RTE solve, recompute source terms
   if(this->stationary_rte()){     // Solve RTE equations by using data that exists inside solvers
@@ -3361,14 +3361,14 @@ void cdr_plasma_stepper::regrid(const int a_lmin, const int a_old_finest, const 
 
     // Need new source terms for RTE equations
     this->advanceReactionNetwork(m_time, dummy_dt);
-    this->solve_rte(dummy_dt);    // Argument does not matter, it's a stationary solver.
+    this->solveRadiativeTransfer(dummy_dt);    // Argument does not matter, it's a stationary solver.
   }
 }
 
-void cdr_plasma_stepper::regrid_solvers(const int a_lmin, const int a_old_finest, const int a_new_finest){
-  CH_TIME("cdr_plasma_stepper::regrid_solvers");
+void CdrPlasmaStepper::regridSolvers(const int a_lmin, const int a_old_finest, const int a_new_finest){
+  CH_TIME("CdrPlasmaStepper::regridSolvers");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::regrid_solvers" << endl;
+    pout() << "CdrPlasmaStepper::regridSolvers" << endl;
   }
 
   m_cdr->regrid(a_lmin,     a_old_finest, a_new_finest);
@@ -3377,10 +3377,10 @@ void cdr_plasma_stepper::regrid_solvers(const int a_lmin, const int a_old_finest
   m_sigma->regrid(a_lmin,   a_old_finest, a_new_finest);
 }
 
-void cdr_plasma_stepper::reset_dielectric_cells(EBAMRIVData& a_data){
-  CH_TIME("cdr_plasma_stepper::reset_dielectric_cells");
+void CdrPlasmaStepper::resetDielectricCells(EBAMRIVData& a_data){
+  CH_TIME("CdrPlasmaStepper::resetDielectricCells");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::reset_dielectric_cells" << endl;
+    pout() << "CdrPlasmaStepper::resetDielectricCells" << endl;
   }
 
   const int finest_level = m_amr->getFinestLevel();
@@ -3406,10 +3406,10 @@ void cdr_plasma_stepper::reset_dielectric_cells(EBAMRIVData& a_data){
   }
 }
 
-void cdr_plasma_stepper::sanityCheck(){
-  CH_TIME("cdr_plasma_stepper::sanityCheck");
+void CdrPlasmaStepper::sanityCheck(){
+  CH_TIME("CdrPlasmaStepper::sanityCheck");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::sanityCheck" << endl;
+    pout() << "CdrPlasmaStepper::sanityCheck" << endl;
   }
 
   CH_assert(!m_computationalGeometry.isNull());
@@ -3417,110 +3417,110 @@ void cdr_plasma_stepper::sanityCheck(){
   CH_assert(!m_physics.isNull());
 }
 
-void cdr_plasma_stepper::set_CdrPlasmaPhysics(const RefCountedPtr<CdrPlasmaPhysics>& a_physics){
-  CH_TIME("cdr_plasma_stepper::set_CdrPlasmaPhysics");
+void CdrPlasmaStepper::setCdrPlasmaPhysics(const RefCountedPtr<CdrPlasmaPhysics>& a_physics){
+  CH_TIME("CdrPlasmaStepper::setCdrPlasmaPhysics");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::set_CdrPlasmaPhysics" << endl;
+    pout() << "CdrPlasmaStepper::setCdrPlasmaPhysics" << endl;
   }
 
   m_physics = a_physics;
 }
 
-void cdr_plasma_stepper::set_potential(std::function<Real(const Real a_time)> a_potential){
-  CH_TIME("cdr_plasma_stepper::set_potential");
+void CdrPlasmaStepper::setVoltage(std::function<Real(const Real a_time)> a_potential){
+  CH_TIME("CdrPlasmaStepper::setVoltage");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::set_potential" << endl;
+    pout() << "CdrPlasmaStepper::setVoltage" << endl;
   }
 
   m_potential = a_potential;
 }
 
-void cdr_plasma_stepper::parseVerbosity(){
-  CH_TIME("cdr_plasma_stepper::parseVerbosity");
+void CdrPlasmaStepper::parseVerbosity(){
+  CH_TIME("CdrPlasmaStepper::parseVerbosity");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::parseVerbosity" << endl;
+    pout() << "CdrPlasmaStepper::parseVerbosity" << endl;
   }
   
   ParmParse pp(m_className.c_str());
   pp.get("verbosity", m_verbosity);
 }
 
-void cdr_plasma_stepper::parse_solver_verbosity(){
-  CH_TIME("cdr_plasma_stepper::parse_solver_verbosity");
+void CdrPlasmaStepper::parseSolverVerbosity(){
+  CH_TIME("CdrPlasmaStepper::parseSolverVerbosity");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::parse_solver_verbosity" << endl;
+    pout() << "CdrPlasmaStepper::parseSolverVerbosity" << endl;
   }
   
   ParmParse pp(m_className.c_str());
   pp.get("solver_verbosity", m_solver_verbosity);
 }
 
-void cdr_plasma_stepper::parse_cfl(){
+void CdrPlasmaStepper::parseCFL(){
 
   ParmParse pp(m_className.c_str());
   pp.get("cfl", m_cfl);
   if(m_cfl < 0.0){
-    MayDay::Abort("cdr_plasma_stepper::parse_cfl - CFL cannot be negative!");
+    MayDay::Abort("CdrPlasmaStepper::parseCFL - CFL cannot be negative!");
   }
 }
 
-void cdr_plasma_stepper::parse_relax_time(){
+void CdrPlasmaStepper::parseRelaxationTime(){
   ParmParse pp(m_className.c_str());
   pp.get("relax_time", m_relax_time);
   if(m_relax_time < 0.0){
-    MayDay::Abort("cdr_plasma_stepper::parse_relax_time - relaxation time cannot be negative");
+    MayDay::Abort("CdrPlasmaStepper::parseRelaxationTime - relaxation time cannot be negative");
   }
 }
 
-void cdr_plasma_stepper::parse_source_growth(){
+void CdrPlasmaStepper::parseSourceGrowth(){
   ParmParse pp(m_className.c_str());
   pp.query("source_growth", m_src_growth);
   if(m_src_growth < 0.0){
-    MayDay::Abort("cdr_plasma_stepper::parse_source_growth - value cannot be negative");
+    MayDay::Abort("CdrPlasmaStepper::parseSourceGrowth - value cannot be negative");
   }
 }
 
-void cdr_plasma_stepper::parse_source_tolerance(){
+void CdrPlasmaStepper::parseSourceTolerance(){
   ParmParse pp(m_className.c_str());
   pp.query("source_tolerance", m_src_tolerance);
   if(m_src_tolerance < 0.0){
-    MayDay::Abort("cdr_plasma_stepper::parse_source_tolerance - value cannot be negative");
+    MayDay::Abort("CdrPlasmaStepper::parseSourceTolerance - value cannot be negative");
   }
 }
 
-void cdr_plasma_stepper::parse_min_dt(){
+void CdrPlasmaStepper::parseMinDt(){
   ParmParse pp(m_className.c_str());
   pp.get("min_dt", m_min_dt);
   if(m_min_dt < 0.0){
-    MayDay::Abort("cdr_plasma_stepper::parse_min_dt - value cannot be negative");
+    MayDay::Abort("CdrPlasmaStepper::parseMinDt - value cannot be negative");
   }
 }
 
-void cdr_plasma_stepper::parse_max_dt(){
+void CdrPlasmaStepper::parseMaxDt(){
   ParmParse pp(m_className.c_str());
   pp.get("max_dt", m_max_dt);
   if(m_max_dt < 0.0){
-    MayDay::Abort("cdr_plasma_stepper::parse_max_dt - value cannot be negative");
+    MayDay::Abort("CdrPlasmaStepper::parseMaxDt - value cannot be negative");
   }
 }
 
-void cdr_plasma_stepper::parse_fast_rte(){
+void CdrPlasmaStepper::parseFastRadiativeTransfer(){
   ParmParse pp(m_className.c_str());
   pp.get("fast_rte", m_fast_rte);
   if(m_fast_rte <= 0){
-    MayDay::Abort("cdr_plasma_stepper::parse_fast_rte - value cannot be negative");
+    MayDay::Abort("CdrPlasmaStepper::parseFastRadiativeTransfer - value cannot be negative");
   }
 }
 
-void cdr_plasma_stepper::parse_fast_poisson(){
+void CdrPlasmaStepper::parseFastPoisson(){
   ParmParse pp(m_className.c_str());
   pp.get("fast_poisson", m_fast_poisson);
   if(m_fast_poisson <= 0){
-    MayDay::Abort("cdr_plasma_stepper::parse_fast_poisson - value cannot be negative");
+    MayDay::Abort("CdrPlasmaStepper::parseFastPoisson - value cannot be negative");
   }
 }
 
-void cdr_plasma_stepper::parse_source_comp(){
+void CdrPlasmaStepper::parseSourceComputation(){
 
   std::string str;
   ParmParse pp(m_className.c_str());
@@ -3532,14 +3532,14 @@ void cdr_plasma_stepper::parse_source_comp(){
     m_interp_sources = false;
   }
   else{
-    MayDay::Abort("cdr_plasma_stepper::parse_source_comp - unknown type requested");
+    MayDay::Abort("CdrPlasmaStepper::parseSourceComputation - unknown type requested");
   }
 }
 
-void cdr_plasma_stepper::set_solver_verbosity(){
-  CH_TIME("cdr_plasma_stepper::set_solver_verbosity");
+void CdrPlasmaStepper::setSolverVerbosity(){
+  CH_TIME("CdrPlasmaStepper::setSolverVerbosity");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::set_solver_verbosity" << endl;
+    pout() << "CdrPlasmaStepper::setSolverVerbosity" << endl;
   }
 
   if(!m_cdr.isNull()){
@@ -3556,31 +3556,31 @@ void cdr_plasma_stepper::set_solver_verbosity(){
   }
 }
 
-void cdr_plasma_stepper::set_fast_rte(const int a_fast_rte){
+void CdrPlasmaStepper::setFastRadiativeTransfer(const int a_fast_rte){
   m_fast_rte = a_fast_rte;
 
-  ParmParse pp("cdr_plasma_stepper");
+  ParmParse pp("CdrPlasmaStepper");
   pp.query("fast_rte", m_fast_rte);
   if(m_fast_rte <= 0){
     m_fast_rte = a_fast_rte;
   }
 }
 
-void cdr_plasma_stepper::set_fast_poisson(const int a_fast_poisson){
+void CdrPlasmaStepper::setFastPoisson(const int a_fast_poisson){
   m_fast_poisson = a_fast_poisson;
 
-  ParmParse pp("cdr_plasma_stepper");
+  ParmParse pp("CdrPlasmaStepper");
   pp.query("fast_poisson", m_fast_poisson);
   if(m_fast_poisson <= 0){
     m_fast_poisson = a_fast_poisson;
   }
 }
 
-void cdr_plasma_stepper::setSource_computation(){
+void CdrPlasmaStepper::setSourceComputation(){
   m_interp_sources = true;
 
   std::string str;
-  ParmParse pp("cdr_plasma_stepper");
+  ParmParse pp("CdrPlasmaStepper");
   if(pp.contains("source_comp")){
     pp.get("source_comp", str);
     if(str == "interp"){
@@ -3590,77 +3590,77 @@ void cdr_plasma_stepper::setSource_computation(){
       m_interp_sources = false;
     }
     else{
-      MayDay::Abort("cdr_plasma_stepper::setSource_computation - unknown type requested");
+      MayDay::Abort("CdrPlasmaStepper::setSourceComputation - unknown type requested");
     }
   }
 }
 
-void cdr_plasma_stepper::set_min_dt(const Real a_min_dt){
+void CdrPlasmaStepper::setMinDt(const Real a_min_dt){
   const Real zero = 0.0;
   m_min_dt = Max(a_min_dt, zero);
 
-  ParmParse pp("cdr_plasma_stepper");
+  ParmParse pp("CdrPlasmaStepper");
   pp.query("min_dt", m_min_dt);
   if(m_min_dt < 0.0){
     m_min_dt = a_min_dt;
   }
 }
 
-void cdr_plasma_stepper::set_max_dt(const Real a_max_dt){
+void CdrPlasmaStepper::setMaxDt(const Real a_max_dt){
   const Real zero = 0.0;
   m_max_dt = Max(a_max_dt, zero);
 
-  ParmParse pp("cdr_plasma_stepper");
+  ParmParse pp("CdrPlasmaStepper");
   pp.query("max_dt", m_max_dt);
   if(m_max_dt < 0.0){
     m_max_dt = a_max_dt;
   }
 }
 
-void cdr_plasma_stepper::set_cfl(const Real a_cfl){
+void CdrPlasmaStepper::setCFL(const Real a_cfl){
   m_cfl = a_cfl;
 
-  ParmParse pp("cdr_plasma_stepper");
+  ParmParse pp("CdrPlasmaStepper");
   pp.query("cfl", m_cfl);
   if(m_cfl < 0.0){
     m_cfl = a_cfl;
   }
 }
 
-void cdr_plasma_stepper::set_relax_time(const Real a_relax_time){
+void CdrPlasmaStepper::setRelaxTime(const Real a_relax_time){
   m_relax_time = a_relax_time;
 
-  ParmParse pp("cdr_plasma_stepper");
+  ParmParse pp("CdrPlasmaStepper");
   pp.query("relax_time", m_relax_time);
   if(m_relax_time < 0.0){
     m_relax_time = a_relax_time;
   }
 }
 
-void cdr_plasma_stepper::setSource_growth(const Real a_src_growth){
+void CdrPlasmaStepper::setSourceGrowth(const Real a_src_growth){
   m_src_growth = a_src_growth;
 
-  ParmParse pp("cdr_plasma_stepper");
+  ParmParse pp("CdrPlasmaStepper");
   pp.query("source_growth", m_src_growth);
   if(m_src_growth < 0.0){
     m_src_growth = a_src_growth;
   }
 }
 
-void cdr_plasma_stepper::setSource_growth_tolerance(const Real a_src_tolerance){
+void CdrPlasmaStepper::setSourceGrowthTolerance(const Real a_src_tolerance){
   m_src_tolerance = a_src_tolerance;
 
-  ParmParse pp("cdr_plasma_stepper");
+  ParmParse pp("CdrPlasmaStepper");
   pp.query("source_tolerance", m_src_tolerance);
   if(m_src_tolerance < 0.0){
     m_src_tolerance = a_src_tolerance;
   }
 }
 
-void cdr_plasma_stepper::setup_cdr(){
-  CH_TIME("cdr_plasma_stepper::setup_cdr");
+void CdrPlasmaStepper::setupCdr(){
+  CH_TIME("CdrPlasmaStepper::setupCdr");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::setup_cdr" << endl;
+    pout() << "CdrPlasmaStepper::setupCdr" << endl;
   }
 
   m_cdr->setVerbosity(m_solver_verbosity);
@@ -3672,17 +3672,17 @@ void cdr_plasma_stepper::setup_cdr(){
   m_cdr->setRealm(m_realm);
 }
 
-void cdr_plasma_stepper::allocate() {
+void CdrPlasmaStepper::allocate() {
   m_cdr->allocateInternals();
   m_fieldSolver->allocateInternals();
   m_rte->allocateInternals();
   m_sigma->allocateInternals();
 }
 
-void cdr_plasma_stepper::setup_poisson(){
-  CH_TIME("cdr_plasma_stepper::setup_poisson");
+void CdrPlasmaStepper::setupPoisson(){
+  CH_TIME("CdrPlasmaStepper::setupPoisson");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::setup_poisson" << endl;
+    pout() << "CdrPlasmaStepper::setupPoisson" << endl;
   }
 
   m_fieldSolver->setVerbosity(m_solver_verbosity);
@@ -3690,13 +3690,13 @@ void cdr_plasma_stepper::setup_poisson(){
   m_fieldSolver->setAmr(m_amr);
   m_fieldSolver->setComputationalGeometry(m_computationalGeometry);
   m_fieldSolver->setRealm(m_realm);
-  m_fieldSolver->setVoltage(m_potential); // Needs to happen AFTER set_poisson_wall_func
+  m_fieldSolver->setVoltage(m_potential); // Needs to happen AFTER setFieldSolver_wall_func
 }
 
-void cdr_plasma_stepper::setup_rte(){
-  CH_TIME("cdr_plasma_stepper::setup_rte");
+void CdrPlasmaStepper::setupRadiativeTransfer(){
+  CH_TIME("CdrPlasmaStepper::setupRadiativeTransfer");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::setup_rte" << endl;
+    pout() << "CdrPlasmaStepper::setupRadiativeTransfer" << endl;
   }
 
   m_rte->setVerbosity(m_solver_verbosity);
@@ -3709,10 +3709,10 @@ void cdr_plasma_stepper::setup_rte(){
   //  m_rte->allocateInternals();
 }
 
-void cdr_plasma_stepper::setup_sigma(){
-  CH_TIME("cdr_plasma_stepper::setup_sigma");
+void CdrPlasmaStepper::setupSigma(){
+  CH_TIME("CdrPlasmaStepper::setupSigma");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::setup_sigma" << endl;
+    pout() << "CdrPlasmaStepper::setupSigma" << endl;
   }
 
   m_sigma = RefCountedPtr<SigmaSolver> (new SigmaSolver());
@@ -3723,10 +3723,10 @@ void cdr_plasma_stepper::setup_sigma(){
   //  m_sigma->allocateInternals();
 }
 
-void cdr_plasma_stepper::solver_dump(){
-  CH_TIME("cdr_plasma_stepper::solver_dump");
+void CdrPlasmaStepper::solverDump(){
+  CH_TIME("CdrPlasmaStepper::solverDump");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::solver_dump" << endl;
+    pout() << "CdrPlasmaStepper::solverDump" << endl;
   }
 
   m_cdr->writePlotFile();
@@ -3734,10 +3734,10 @@ void cdr_plasma_stepper::solver_dump(){
   m_rte->writePlotFile();
 }
 
-void cdr_plasma_stepper::solve_rte(const Real a_dt){
-  CH_TIME("cdr_plasma_stepper::solve_rte()");
+void CdrPlasmaStepper::solveRadiativeTransfer(const Real a_dt){
+  CH_TIME("CdrPlasmaStepper::solveRadiativeTransfer()");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::solve_rte()" << endl;
+    pout() << "CdrPlasmaStepper::solveRadiativeTransfer()" << endl;
   }
 
   const phase::which_phase rte_phase = m_rte->getPhase();
@@ -3750,19 +3750,19 @@ void cdr_plasma_stepper::solve_rte(const Real a_dt){
   Vector<EBAMRCellData*> rhs        = m_rte->getSources();
   Vector<EBAMRCellData*> cdr_states = m_cdr->getPhis();
 
-  this->solve_rte(states, rhs, cdr_states, E, m_time, a_dt, centering::cell_center);
+  this->solveRadiativeTransfer(states, rhs, cdr_states, E, m_time, a_dt, centering::CellCenter);
 }
 
-void cdr_plasma_stepper::solve_rte(Vector<EBAMRCellData*>&       a_rte_states,
+void CdrPlasmaStepper::solveRadiativeTransfer(Vector<EBAMRCellData*>&       a_rte_states,
 				   Vector<EBAMRCellData*>&       a_rte_sources,
 				   const Vector<EBAMRCellData*>& a_cdr_states,
 				   const EBAMRCellData&          a_E,
 				   const Real                    a_time,
 				   const Real                    a_dt,
 				   const centering               a_centering){
-  CH_TIME("cdr_plasma_stepper::solve_rte(full)");
+  CH_TIME("CdrPlasmaStepper::solveRadiativeTransfer(full)");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::solve_rte(full)" << endl;
+    pout() << "CdrPlasmaStepper::solveRadiativeTransfer(full)" << endl;
   }
 
   //  this->compute_rte_sources(a_rte_sources, a_cdr_states, a_E, a_time, a_centering);
@@ -3778,10 +3778,10 @@ void cdr_plasma_stepper::solve_rte(Vector<EBAMRCellData*>&       a_rte_states,
   }
 }
 
-void cdr_plasma_stepper::synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt){
-  CH_TIME("cdr_plasma_stepper::synchronizeSolverTimes");
+void CdrPlasmaStepper::synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt){
+  CH_TIME("CdrPlasmaStepper::synchronizeSolverTimes");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::synchronizeSolverTimes" << endl;
+    pout() << "CdrPlasmaStepper::synchronizeSolverTimes" << endl;
   }
 
   m_timeStep = a_step;
@@ -3794,10 +3794,10 @@ void cdr_plasma_stepper::synchronizeSolverTimes(const int a_step, const Real a_t
   m_sigma->setTime(a_step,   a_time, a_dt);
 }
 
-Real cdr_plasma_stepper::compute_electrode_current(){
-  CH_TIME("cdr_plasma_stepper::compute_electrode_current");
+Real CdrPlasmaStepper::computeElectrodeCurrent(){
+  CH_TIME("CdrPlasmaStepper::computeElectrodeCurrent");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_electrode_current" << endl;
+    pout() << "CdrPlasmaStepper::computeElectrodeCurrent" << endl;
   }
 
   // Need to copy onto temporary storage because 
@@ -3813,7 +3813,7 @@ Real cdr_plasma_stepper::compute_electrode_current(){
     DataOps::incr(charge_flux, solver_flux, spec->getChargeNumber()*Units::Qe);
   }
 
-  this->reset_dielectric_cells(charge_flux);
+  this->resetDielectricCells(charge_flux);
   m_amr->conservativeAverage(charge_flux, m_realm, m_cdr->getPhase());
 
   const int compute_lvl = 0;
@@ -3842,10 +3842,10 @@ Real cdr_plasma_stepper::compute_electrode_current(){
   return sum;
 }
 
-Real cdr_plasma_stepper::compute_dielectric_current(){
-  CH_TIME("cdr_plasma_stepper::compute_dielectric_current");
+Real CdrPlasmaStepper::computeDielectricCurrent(){
+  CH_TIME("CdrPlasmaStepper::computeDielectricCurrent");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_dielectric_current" << endl;
+    pout() << "CdrPlasmaStepper::computeDielectricCurrent" << endl;
   }
 
   // Need to copy onto temporary storage because 
@@ -3890,10 +3890,10 @@ Real cdr_plasma_stepper::compute_dielectric_current(){
   return sum;
 }
 
-Real cdr_plasma_stepper::compute_domain_current(){
-  CH_TIME("cdr_plasma_stepper::compute_domain_current");
+Real CdrPlasmaStepper::computeDomainCurrent(){
+  CH_TIME("CdrPlasmaStepper::computeDomainCurrent");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_domain_current" << endl;
+    pout() << "CdrPlasmaStepper::computeDomainCurrent" << endl;
   }
 
   const int comp = 0;
@@ -3943,10 +3943,10 @@ Real cdr_plasma_stepper::compute_domain_current(){
   return sum;
 }
 
-Real cdr_plasma_stepper::compute_ohmic_induction_current(){
-  CH_TIME("cdr_plasma_stepper::compute_relaxation_time");
+Real CdrPlasmaStepper::computeOhmicInductionCurrent(){
+  CH_TIME("CdrPlasmaStepper::computeRelaxationTime");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_relaxation_time" << endl;
+    pout() << "CdrPlasmaStepper::computeRelaxationTime" << endl;
   }
 
   Real current = 0.0;
@@ -3957,7 +3957,7 @@ Real cdr_plasma_stepper::compute_ohmic_induction_current(){
   m_amr->allocate(JdotE, m_realm, m_cdr->getPhase(), SpaceDim);
 
   this->computeElectricField(E, m_cdr->getPhase(), m_fieldSolver->getPotential());
-  this->compute_J(J);
+  this->computeJ(J);
 
   // Compute J.dot.E 
   DataOps::dotProduct(JdotE, J,E);
@@ -3972,10 +3972,10 @@ Real cdr_plasma_stepper::compute_ohmic_induction_current(){
   return current;
 }
 
-Real cdr_plasma_stepper::compute_relaxation_time(){
-  CH_TIME("cdr_plasma_stepper::compute_relaxation_time");
+Real CdrPlasmaStepper::computeRelaxationTime(){
+  CH_TIME("CdrPlasmaStepper::computeRelaxationTime");
   if(m_verbosity > 5){
-    pout() << "cdr_plasma_stepper::compute_relaxation_time" << endl;
+    pout() << "CdrPlasmaStepper::computeRelaxationTime" << endl;
   }
 
   const int comp         = 0;
@@ -3991,7 +3991,7 @@ Real cdr_plasma_stepper::compute_relaxation_time(){
   DataOps::setValue(dt, 1.234567E89);
 
   this->computeElectricField(E, m_cdr->getPhase(), m_fieldSolver->getPotential());
-  this->compute_J(J);
+  this->computeJ(J);
 
   // Find the largest electric field in each direction
   Vector<Real> max_E(SpaceDim);
@@ -4054,36 +4054,36 @@ Real cdr_plasma_stepper::compute_relaxation_time(){
   return min_dt;
 }
 
-Real cdr_plasma_stepper::getTime(){
+Real CdrPlasmaStepper::getTime(){
   return m_time;
 }
 
-Real cdr_plasma_stepper::get_dt(){
+Real CdrPlasmaStepper::getDt(){
   return m_dt;
 }
 
-Real cdr_plasma_stepper::get_cfl_dt(){
+Real CdrPlasmaStepper::getCflDt(){
   return m_dt_cfl;
 }
 
-RefCountedPtr<CdrLayout<CdrSolver>>& cdr_plasma_stepper::get_cdr(){
+RefCountedPtr<CdrLayout<CdrSolver>>& CdrPlasmaStepper::getCdrSolvers(){
   return m_cdr;
 }
 
-RefCountedPtr<FieldSolver>& cdr_plasma_stepper::get_poisson(){
+RefCountedPtr<FieldSolver>& CdrPlasmaStepper::getFieldSolver(){
   return m_fieldSolver;
 }
 
-RefCountedPtr<RtLayout<RtSolver>>& cdr_plasma_stepper::get_rte(){
+RefCountedPtr<RtLayout<RtSolver>>& CdrPlasmaStepper::getRadiativeTransferSolvers(){
   return m_rte;
 }
 
-RefCountedPtr<SigmaSolver>& cdr_plasma_stepper::get_sigma(){
+RefCountedPtr<SigmaSolver>& CdrPlasmaStepper::getSigmaSolver(){
   return m_sigma;
 }
 
 // New functions for Driver
-void cdr_plasma_stepper::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const{
+void CdrPlasmaStepper::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const{
   CH_TIME("Driver::writeCheckpointData");
   if(m_verbosity > 3){
     pout() << "Driver::writeCheckpointData" << endl;
@@ -4105,7 +4105,7 @@ void cdr_plasma_stepper::writeCheckpointData(HDF5Handle& a_handle, const int a_l
   m_sigma->writeCheckpointLevel(a_handle, a_lvl);
 }
 
-void cdr_plasma_stepper::readCheckpointData(HDF5Handle& a_handle, const int a_lvl){
+void CdrPlasmaStepper::readCheckpointData(HDF5Handle& a_handle, const int a_lvl){
   CH_TIME("Driver::readCheckpointData");
   if(m_verbosity > 3){
     pout() << "Driver::readCheckpointData" << endl;
@@ -4125,10 +4125,10 @@ void cdr_plasma_stepper::readCheckpointData(HDF5Handle& a_handle, const int a_lv
   m_sigma->readCheckpointLevel(a_handle, a_lvl);
 }
 
-int cdr_plasma_stepper::getNumberOfPlotVariables() const{
-  CH_TIME("cdr_plasma_stepper::getNumberOfPlotVariables");
+int CdrPlasmaStepper::getNumberOfPlotVariables() const{
+  CH_TIME("CdrPlasmaStepper::getNumberOfPlotVariables");
   if(m_verbosity > 3){
-    pout() << "cdr_plasma_stepper::getNumberOfPlotVariables" << endl;
+    pout() << "CdrPlasmaStepper::getNumberOfPlotVariables" << endl;
   }
   int ncomp = 0;
   
@@ -4149,10 +4149,10 @@ int cdr_plasma_stepper::getNumberOfPlotVariables() const{
   return ncomp;
 }
 
-void cdr_plasma_stepper::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const {
-  CH_TIME("cdr_plasma_stepper::writePlotData");
+void CdrPlasmaStepper::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const {
+  CH_TIME("CdrPlasmaStepper::writePlotData");
   if(m_verbosity > 3){
-    pout() << "cdr_plasma_stepper::writePlotData" << endl;
+    pout() << "CdrPlasmaStepper::writePlotData" << endl;
   }
 
   // Poisson solver copies over its output data
@@ -4178,7 +4178,7 @@ void cdr_plasma_stepper::writePlotData(EBAMRCellData& a_output, Vector<std::stri
   }
 
   // Write the current to the output
-  this->write_J(a_output, a_icomp);
+  this->writeJ(a_output, a_icomp);
   a_plotVariableNames.push_back("x-J");
   a_plotVariableNames.push_back("y-J");
   if(SpaceDim == 3){
@@ -4187,16 +4187,16 @@ void cdr_plasma_stepper::writePlotData(EBAMRCellData& a_output, Vector<std::stri
   
 }
 
-void cdr_plasma_stepper::write_J(EBAMRCellData& a_output, int& a_icomp) const{
-  CH_TIME("cdr_plasma_stepper::write_J");
+void CdrPlasmaStepper::writeJ(EBAMRCellData& a_output, int& a_icomp) const{
+  CH_TIME("CdrPlasmaStepper::writeJ");
   if(m_verbosity > 3){
-    pout() << "cdr_plasma_stepper::write_J" << endl;
+    pout() << "CdrPlasmaStepper::writeJ" << endl;
   }
 
   // Allocates storage and computes J
   EBAMRCellData scratch;
   m_amr->allocate(scratch, m_realm, phase::gas, SpaceDim);
-  this->compute_J(scratch);
+  this->computeJ(scratch);
 
   const Interval src_interv(0, SpaceDim-1);
   const Interval dst_interv(a_icomp, a_icomp + SpaceDim -1);
@@ -4206,40 +4206,40 @@ void cdr_plasma_stepper::write_J(EBAMRCellData& a_output, int& a_icomp) const{
   a_icomp += SpaceDim;
 }
 
-void cdr_plasma_stepper::postCheckpointSetup(){
-  CH_TIME("cdr_plasma_stepper::postCheckpointSetup");
+void CdrPlasmaStepper::postCheckpointSetup(){
+  CH_TIME("CdrPlasmaStepper::postCheckpointSetup");
   if(m_verbosity > 3){
-    pout() << "cdr_plasma_stepper::postCheckpointSetup" << endl;
+    pout() << "CdrPlasmaStepper::postCheckpointSetup" << endl;
   }
 
-  this->solve_poisson();       // Solve Poisson equation by 
+  this->solvePoisson();       // Solve Poisson equation by 
   if(this->stationary_rte()){  // Solve RTE equations if stationary solvers
     const Real dummy_dt = 0.0;
-    this->solve_rte(dummy_dt); // Argument does not matter, it's a stationary solver.
+    this->solveRadiativeTransfer(dummy_dt); // Argument does not matter, it's a stationary solver.
   }
   this->allocateInternals();  // Prepare internal storage for time stepper
 
   // Fill solvers with important stuff
   this->computeCdrDriftVelocities();
-  this->compute_cdr_diffusion();
+  this->computeCdrDiffusion();
 }
 
-void cdr_plasma_stepper::printStepReport(){
-  CH_TIME("cdr_plasma_stepper::printStepReport");
+void CdrPlasmaStepper::printStepReport(){
+  CH_TIME("CdrPlasmaStepper::printStepReport");
   if(m_verbosity > 4){
-    pout() << "cdr_plasma_stepper::printStepReport" << endl;
+    pout() << "CdrPlasmaStepper::printStepReport" << endl;
   }
 
   // Compute the maximum electric field
   Real Emax;
-  this->computeElectricFieldmax(Emax, phase::gas);
+  this->computeMaxElectricField(Emax, phase::gas);
 
   //
   Real nmax;
   std::string solver_max;
-  this->get_cdr_max(nmax, solver_max);
+  this->getCdrMax(nmax, solver_max);
 
-  const Real cfl_dt = this->get_cfl_dt();
+  const Real cfl_dt = this->getCflDt();
 
   std::string str;
   if(m_timeCode == TimeCode::Advection){

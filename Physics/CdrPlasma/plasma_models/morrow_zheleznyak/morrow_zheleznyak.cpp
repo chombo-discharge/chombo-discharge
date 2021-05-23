@@ -656,7 +656,7 @@ Vector<Real> morrow_zheleznyak::computeCdrDiffusionCoefficients(const Real      
   return diffCo;
 }
 
-Vector<Real> morrow_zheleznyak::compute_cdr_fluxes(const Real         a_time,
+Vector<Real> morrow_zheleznyak::computeCdrFluxes(const Real         a_time,
 						   const RealVect     a_pos,
 						   const RealVect     a_normal,
 						   const RealVect     a_E,
@@ -745,7 +745,7 @@ Vector<Real> morrow_zheleznyak::computeCdrElectrodeFluxes(const Real         a_t
     return a_extrap_cdr_fluxes;
   }
   else{
-    return this->compute_cdr_fluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients,
+    return this->computeCdrFluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients,
 				    a_rte_fluxes, a_extrap_cdr_fluxes, m_townsend2_electrode, m_electrode_quantum_efficiency);
   }
 }
@@ -763,7 +763,7 @@ Vector<Real> morrow_zheleznyak::computeCdrDielectricFluxes(const Real         a_
     return a_extrap_cdr_fluxes;
   }
   else{
-    return this->compute_cdr_fluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients,
+    return this->computeCdrFluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients,
 				    a_rte_fluxes, a_extrap_cdr_fluxes, m_townsend2_dielectric, m_dielectric_quantum_efficiency);
   }
 }

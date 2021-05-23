@@ -67,9 +67,9 @@ void CdrPlasmaStreamerTagger::computeTracers(){
 
 
   // Get electron stuff
-  EBAMRCellData& ne  = (m_timeStepper->get_cdr())->getSolvers()[m_electron_idx]->getPhi();
-  EBAMRCellData& Se  = (m_timeStepper->get_cdr())->getSolvers()[m_electron_idx]->getSource();
-  EBAMRCellData& ve  = (m_timeStepper->get_cdr())->getSolvers()[m_electron_idx]->getCellCenteredVelocity();
+  EBAMRCellData& ne  = (m_timeStepper->getCdrSolvers())->getSolvers()[m_electron_idx]->getPhi();
+  EBAMRCellData& Se  = (m_timeStepper->getCdrSolvers())->getSolvers()[m_electron_idx]->getSource();
+  EBAMRCellData& ve  = (m_timeStepper->getCdrSolvers())->getSolvers()[m_electron_idx]->getCellCenteredVelocity();
 
   // Compute the electric field
   EBAMRCellData rho;
@@ -77,7 +77,7 @@ void CdrPlasmaStreamerTagger::computeTracers(){
   m_amr->allocate(Efield,  m_phase, SpaceDim);
   m_timeStepper->compute_E(Efield, m_phase);
   m_amr->allocatePointer(rho);
-  m_amr->alias(rho, phase::gas, m_timeStepper->get_poisson()->getSource());
+  m_amr->alias(rho, phase::gas, m_timeStepper->getFieldSolver()->getSource());
 
   // Compute the electric field magnitude
   EBAMRCellData Emag;

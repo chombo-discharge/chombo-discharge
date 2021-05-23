@@ -1,6 +1,6 @@
 /*!
-  @file cdr_plasma_stepper.H
-  @brief Declaration of a cdr_plasma_stepper, an abstract class for evolving in time across an amr mesh
+  @file CdrPlasmaStepper.H
+  @brief Declaration of a CdrPlasmaStepper, an abstract class for evolving in time across an amr mesh
   @author Robert Marskar
   @date Nov. 2017
 */
@@ -32,16 +32,16 @@ namespace Physics {
     /*!
       @brief Abstract class for evolving plasma equations in time
     */
-    class cdr_plasma_stepper : public TimeStepper {
+    class CdrPlasmaStepper : public TimeStepper {
     protected:
 
       /*!
 	@brief Just a silly namespace for centering stuff...
       */
       enum class centering {
-	cell_center,
-	cell_centroid,
-	eb_centroid,
+	CellCenter,
+	CellCentroid,
+	EbCentroid,
       };
       
     public:
@@ -56,7 +56,7 @@ namespace Physics {
       virtual void readCheckpointData(HDF5Handle& a_handle, const int a_lvl);
       virtual int getNumberOfPlotVariables() const;
       virtual void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const;
-      virtual void write_J(EBAMRCellData& a_output, int& a_comp) const;
+      virtual void writeJ(EBAMRCellData& a_output, int& a_comp) const;
       virtual void postCheckpointSetup();
       virtual void printStepReport() override;
       virtual void registerOperators() override;
@@ -68,17 +68,17 @@ namespace Physics {
       /*!
 	@brief Constructor
       */
-      cdr_plasma_stepper();
+      CdrPlasmaStepper();
 
       /*!
 	@brief Constructor
       */
-      cdr_plasma_stepper(RefCountedPtr<CdrPlasmaPhysics>& a_physics);
+      CdrPlasmaStepper(RefCountedPtr<CdrPlasmaPhysics>& a_physics);
 
       /*!
 	@brief Destructor
       */
-      ~cdr_plasma_stepper();
+      ~CdrPlasmaStepper();
 
       /*!
 	@brief Advance method, advances equations.
@@ -127,20 +127,20 @@ namespace Physics {
       */
       virtual void deallocate(){
 	this->deallocateInternals();
-	this->deallocate_solver_internals();
+	this->deallocateSolverInternals();
       }
 
       /*!
-	@brief Solve the poisson equation. This calls compute_rho() 
+	@brief Solve the poisson equation. This calls computeSpaceChargeDensity() 
 	@details This assumes that the data contain in CdrLayout is cell-centered
       */
-      virtual bool solve_poisson();
+      virtual bool solvePoisson();
 
       /*!
 	@brief General poisson solver routine. 
 	@details You have the option of supplying storage for a right-hand side if you want to. The densities can be either cell-centered or centroid-centered, If they are cell-centered, we will extrapolate the right-hand side to the centroids first. 
       */
-      virtual bool solve_poisson(MFAMRCellData&                a_potential,
+      virtual bool solvePoisson(MFAMRCellData&                a_potential,
 				 MFAMRCellData&                a_rhs,
 				 const Vector<EBAMRCellData*>  a_densities,
 				 const EBAMRIVData&            a_sigma,
@@ -187,7 +187,7 @@ namespace Physics {
       /*!
 	@brief Compute reaction network sources. Patch version.
       */
-      virtual void advanceReactionNetwork_reg(Vector<EBCellFAB*>&       a_particle_sources,
+      virtual void advanceReactionNetworkRegularCells(Vector<EBCellFAB*>&       a_particle_sources,
 						Vector<EBCellFAB*>&       a_Photon_sources,
 						const Vector<EBCellFAB*>& a_particle_densities,
 						const Vector<EBCellFAB*>& a_particle_gradients,
@@ -201,7 +201,7 @@ namespace Physics {
       /*!
 	@brief Compute reaction network sources. Fast patch version. 
       */
-      virtual void advanceReactionNetwork_reg_fast(Vector<EBCellFAB*>&       a_particle_sources,
+      virtual void advanceReactionNetworkRegularCellsFast(Vector<EBCellFAB*>&       a_particle_sources,
 						     Vector<EBCellFAB*>&       a_Photon_sources,
 						     const Vector<EBCellFAB*>& a_particle_densities,
 						     const Vector<EBCellFAB*>& a_particle_gradients,
@@ -212,7 +212,7 @@ namespace Physics {
 						     const Real&               a_dx,
 						     const Box&                a_box);
 
-      virtual void advanceReactionNetwork_reg_fast2D(Vector<EBCellFAB*>&       a_particle_sources,
+      virtual void advanceReactionNetworkRegularCellsFast2D(Vector<EBCellFAB*>&       a_particle_sources,
 						       Vector<EBCellFAB*>&       a_Photon_sources,
 						       const Vector<EBCellFAB*>& a_particle_densities,
 						       const Vector<EBCellFAB*>& a_particle_gradients,
@@ -223,7 +223,7 @@ namespace Physics {
 						       const Real&               a_dx,
 						       const Box&                a_box);
 
-      virtual void advanceReactionNetwork_reg_fast3D(Vector<EBCellFAB*>&       a_particle_sources,
+      virtual void advanceReactionNetworkRegularCellsFast3D(Vector<EBCellFAB*>&       a_particle_sources,
 						       Vector<EBCellFAB*>&       a_Photon_sources,
 						       const Vector<EBCellFAB*>& a_particle_densities,
 						       const Vector<EBCellFAB*>& a_particle_gradients,
@@ -237,7 +237,7 @@ namespace Physics {
       /*!
 	@brief Compute reaction network sources. Irregular patch version.
       */
-      virtual void advanceReactionNetwork_irreg(Vector<EBCellFAB*>&          a_particle_sources,
+      virtual void advanceReactionNetworkRegularCellsFastIrreg(Vector<EBCellFAB*>&          a_particle_sources,
 						  Vector<EBCellFAB*>&          a_Photon_sources,
 						  const Vector<EBCellFAB*>&    a_particle_densities,
 						  const Vector<EBCellFAB*>&    a_particle_gradients,
@@ -255,7 +255,7 @@ namespace Physics {
       /*!
 	@brief Compute reaction network sources. Irregular patch version.
       */
-      virtual void advanceReactionNetwork_irreg_interp(Vector<EBCellFAB*>&          a_particle_sources,
+      virtual void advanceReactionNetworkRegularCellsIrregInterp(Vector<EBCellFAB*>&          a_particle_sources,
 							 Vector<EBCellFAB*>&          a_Photon_sources,
 							 const Vector<EBCellFAB*>&    a_particle_densities,
 							 const Vector<EBCellFAB*>&    a_particle_gradients,
@@ -270,7 +270,7 @@ namespace Physics {
 							 const int                    a_lvl,
 							 const DataIndex&             a_dit);
 
-      virtual void advanceReactionNetwork_irreg_kappa(Vector<EBCellFAB*>&          a_particle_sources,
+      virtual void advanceReactionNetworkRegularCellsIrregKappa(Vector<EBCellFAB*>&          a_particle_sources,
 							Vector<EBCellFAB*>&          a_Photon_sources,
 							const Vector<EBCellFAB*>&    a_particle_densities,
 							const Vector<EBCellFAB*>&    a_particle_gradients,
@@ -318,35 +318,35 @@ namespace Physics {
       /*!
 	@brief Compute the maximum of the electric field
       */
-      virtual void computeElectricFieldmax(Real& a_Emax, const phase::which_phase a_phase);
+      virtual void computeMaxElectricField(Real& a_Emax, const phase::which_phase a_phase);
 
       /*!
 	@brief Compute the current density
       */
-      virtual void compute_J(EBAMRCellData& a_J) const;
+      virtual void computeJ(EBAMRCellData& a_J) const;
 
       /*!
 	@brief Compute the current density. Level version. 
       */
-      virtual void compute_J(LevelData<EBCellFAB>& a_J, const int a_lvl) const;
+      virtual void computeJ(LevelData<EBCellFAB>& a_J, const int a_lvl) const;
 
   
       /*!
 	@brief Compute diffusion things using whatever is available in the solvers
       */
-      virtual void compute_cdr_diffusion();
+      virtual void computeCdrDiffusion();
 
       /*!
 	@brief Compute diffusion things using whatever is available in the solvers, except for the fields
       */
-      virtual void compute_cdr_diffusion(const EBAMRCellData& a_E_cell, const EBAMRIVData& a_E_eb);
+      virtual void computeCdrDiffusion(const EBAMRCellData& a_E_cell, const EBAMRIVData& a_E_eb);
 
       /*!
 	@brief Compute diffusion coefficients
 	@details The way we do this is that we compute the diffusion coefficients on cell centers, and then we average that
 	onto cell faces. 
       */
-      virtual void compute_cdr_diffco_face(Vector<EBAMRFluxData*>&       a_diffusionCoefficient_face,
+      virtual void computeCdrDiffusionFace(Vector<EBAMRFluxData*>&       a_diffusionCoefficient_face,
 					   const Vector<EBAMRCellData*>& a_cdr_densities,
 					   const EBAMRCellData&          a_E,
 					   const Real&                   a_time);
@@ -354,7 +354,7 @@ namespace Physics {
       /*!
 	@brief Compute diffusion coefficients on cell centers. Calls the level version. 
       */
-      virtual void compute_cdr_diffco_cell(Vector<EBAMRCellData>&        a_diffusionCoefficient_cell,
+      virtual void computeCdrDiffusionCell(Vector<EBAMRCellData>&        a_diffusionCoefficient_cell,
 					   const Vector<EBAMRCellData*>& a_cdr_densities,
 					   const EBAMRCellData&          a_E,
 					   const Real&                   a_time);
@@ -362,7 +362,7 @@ namespace Physics {
       /*!
 	@brief Compute diffusion coefficients on cell centers. Regular cells. 
       */
-      virtual void compute_cdr_diffco_cell_reg(Vector<EBCellFAB*>&       a_diffusionCoefficient_cell,
+      virtual void computeCdrDiffusionCellRegular(Vector<EBCellFAB*>&       a_diffusionCoefficient_cell,
 					       const Vector<EBCellFAB*>& a_cdr_densities,
 					       const EBCellFAB&          a_E,
 					       const Box                 a_box,
@@ -372,7 +372,7 @@ namespace Physics {
       /*!
 	@brief Compute diffusion coefficients on cell centers. Fast version that calls dimension versions
       */
-      virtual void compute_cdr_diffco_cell_reg_fast(Vector<EBCellFAB*>&       a_diffusionCoefficient_cell,
+      virtual void computeCdrDiffusionCellRegularFast(Vector<EBCellFAB*>&       a_diffusionCoefficient_cell,
 						    const Vector<EBCellFAB*>& a_cdr_densities,
 						    const EBCellFAB&          a_E,
 						    const Box                 a_box,
@@ -382,7 +382,7 @@ namespace Physics {
       /*!
 	@brief Compute diffusion coefficients on cell centers. Fast version that calls dimension versions
       */
-      virtual void compute_cdr_diffco_cell_reg_fast2D(Vector<EBCellFAB*>&       a_diffusionCoefficient_cell,
+      virtual void computeCdrDiffusionCellRegularFast2D(Vector<EBCellFAB*>&       a_diffusionCoefficient_cell,
 						      const Vector<EBCellFAB*>& a_cdr_densities,
 						      const EBCellFAB&          a_E,
 						      const Box                 a_box,
@@ -392,7 +392,7 @@ namespace Physics {
       /*!
 	@brief Compute diffusion coefficients on cell centers. Fast version that calls dimension versions
       */
-      virtual void compute_cdr_diffco_cell_reg_fast3D(Vector<EBCellFAB*>&       a_diffusionCoefficient_cell,
+      virtual void computeCdrDiffusionCellRegularFast3D(Vector<EBCellFAB*>&       a_diffusionCoefficient_cell,
 						      const Vector<EBCellFAB*>& a_cdr_densities,
 						      const EBCellFAB&          a_E,
 						      const Box                 a_box,
@@ -402,7 +402,7 @@ namespace Physics {
       /*!
 	@brief Compute diffusion coefficients on cell centers. Regular cells. 
       */
-      virtual void compute_cdr_diffco_cell_irreg(Vector<EBCellFAB*>&           a_diffusionCoefficient_cell,
+      virtual void computeCdrDiffusionCellIrregular(Vector<EBCellFAB*>&           a_diffusionCoefficient_cell,
 						 const Vector<EBCellFAB*>&    a_cdr_densities,
 						 const EBCellFAB&             a_E,
 						 const Box                    a_box,
@@ -415,7 +415,7 @@ namespace Physics {
       /*!
 	@brief Compute diffusion coefficients. Level version. 
       */
-      virtual void compute_cdr_diffco_cell(Vector<LevelData<EBCellFAB>* >&       a_diffusionCoefficient_cell,
+      virtual void computeCdrDiffusionCell(Vector<LevelData<EBCellFAB>* >&       a_diffusionCoefficient_cell,
 					   const Vector<LevelData<EBCellFAB>* >& a_cdr_densities,
 					   const LevelData<EBCellFAB>&           a_E,
 					   const int                             a_lvl,
@@ -424,7 +424,7 @@ namespace Physics {
       /*!
 	@brief Compute diffusion coefficients on the EB. 
       */
-      virtual void compute_cdr_diffco_eb(Vector<EBAMRIVData*>&       a_diffusionCoefficient_face,
+      virtual void computeCdrDiffusionEb(Vector<EBAMRIVData*>&       a_diffusionCoefficient_face,
 					 const Vector<EBAMRIVData*>& a_cdr_densities,
 					 const EBAMRIVData&          a_E,
 					 const Real&                 a_time);
@@ -432,7 +432,7 @@ namespace Physics {
       /*!
 	@brief Compute diffusion coefficients on the EB. Level version. 
       */
-      virtual void compute_cdr_diffco_eb(Vector<LevelData<BaseIVFAB<Real> >* >&       a_ebDiffusionCoefficient,
+      virtual void computeCdrDiffusionEb(Vector<LevelData<BaseIVFAB<Real> >* >&       a_ebDiffusionCoefficient,
 					 const Vector<LevelData<BaseIVFAB<Real> >* >& a_cdr_densities,
 					 const LevelData<BaseIVFAB<Real> >&           a_E,
 					 const Real&                                  a_time,
@@ -441,7 +441,7 @@ namespace Physics {
       /*!
 	@brief Compute cdr_fluxes
       */
-      virtual void compute_cdr_fluxes(Vector<LevelData<BaseIVFAB<Real> >*>&       a_fluxes,
+      virtual void computeCdrFluxes(Vector<LevelData<BaseIVFAB<Real> >*>&       a_fluxes,
 				      const Vector<LevelData<BaseIVFAB<Real> >*>& a_extrap_cdr_fluxes,
 				      const Vector<LevelData<BaseIVFAB<Real> >*>& a_extrap_cdr_densities,
 				      const Vector<LevelData<BaseIVFAB<Real> >*>& a_extrap_cdr_velocities,
@@ -451,7 +451,7 @@ namespace Physics {
 				      const Real&                                 a_time,
 				      const int                                   a_lvl);
 
-      virtual void compute_cdr_fluxes(Vector<EBAMRIVData*>&       a_fluxes,
+      virtual void computeCdrFluxes(Vector<EBAMRIVData*>&       a_fluxes,
 				      const Vector<EBAMRIVData*>& a_extrap_cdr_fluxes,
 				      const Vector<EBAMRIVData*>& a_extrap_cdr_densities,
 				      const Vector<EBAMRIVData*>& a_extrap_cdr_velocities,
@@ -490,14 +490,14 @@ namespace Physics {
 	@brief Compute the gradient at the boundary (we also take the dot product w.r.t. to the normal vector)
 	@note This version computes the gradients from phi
       */
-      virtual void computeGradients_at_eb(Vector<EBAMRIVData*>&         a_grad,
+      virtual void computeGradientsAtEb(Vector<EBAMRIVData*>&         a_grad,
 					   const phase::which_phase&     a_phase,
 					   const Vector<EBAMRCellData*>& a_phi);
 
       /*!
 	@brief Compute gradients at domain faces
       */
-      virtual void computeGradients_at_domain_faces(Vector<EBAMRIFData*>&         a_grad,
+      virtual void computeGradientsAtDomainFaces(Vector<EBAMRIFData*>&         a_grad,
 						     const phase::which_phase&     a_phase,
 						     const Vector<EBAMRCellData*>& a_phi);
 
@@ -523,35 +523,35 @@ namespace Physics {
 					  const int                             a_lvl,
 					  const Real&                           a_time);
 
-      virtual void computeCdrDriftVelocities_reg(Vector<EBCellFAB*>&       a_velocities,
+      virtual void computeCdrDriftVelocitiesRegular(Vector<EBCellFAB*>&       a_velocities,
 					      const Vector<EBCellFAB*>& a_cdr_densities,
 					      const EBCellFAB&          a_E,
 					      const Box&                a_box,
 					      const Real&               a_time,
 					      const Real&               a_dx);
 
-      virtual void computeCdrDriftVelocities_reg_fast(Vector<EBCellFAB*>&       a_velocities,
+      virtual void computeCdrDriftVelocitiesRegularFast(Vector<EBCellFAB*>&       a_velocities,
 						   const Vector<EBCellFAB*>& a_cdr_densities,
 						   const EBCellFAB&          a_E,
 						   const Box&                a_box,
 						   const Real&               a_time,
 						   const Real&               a_dx);
 
-      virtual void computeCdrDriftVelocities_reg_fast2D(Vector<EBCellFAB*>&       a_velocities,
+      virtual void computeCdrDriftVelocitiesRegularFast2D(Vector<EBCellFAB*>&       a_velocities,
 						     const Vector<EBCellFAB*>& a_cdr_densities,
 						     const EBCellFAB&          a_E,
 						     const Box&                a_box,
 						     const Real&               a_time,
 						     const Real&               a_dx);
   
-      virtual void computeCdrDriftVelocities_reg_fast3D(Vector<EBCellFAB*>&       a_velocities,
+      virtual void computeCdrDriftVelocitiesRegularFast3D(Vector<EBCellFAB*>&       a_velocities,
 						     const Vector<EBCellFAB*>& a_cdr_densities,
 						     const EBCellFAB&          a_E,
 						     const Box&                a_box,
 						     const Real&               a_time,
 						     const Real&               a_dx);
 
-      virtual void computeCdrDriftVelocities_irreg(Vector<EBCellFAB*>&       a_velocities,
+      virtual void computeCdrDriftVelocitiesIrregular(Vector<EBCellFAB*>&       a_velocities,
 						const Vector<EBCellFAB*>& a_cdr_densities,
 						const EBCellFAB&          a_E,
 						const Box&                a_box,
@@ -563,7 +563,7 @@ namespace Physics {
       /*!
 	@brief Compute the cell-centered fluxes and extrapolate these to the EB centroid
       */
-      virtual void compute_extrapolated_fluxes(Vector<EBAMRIVData*>&        a_fluxes,
+      virtual void computeExtrapolatedFluxes(Vector<EBAMRIVData*>&        a_fluxes,
 					       const Vector<EBAMRCellData*> a_densities,
 					       const Vector<EBAMRCellData*> a_velocities,
 					       const phase::which_phase     a_phase);
@@ -571,14 +571,14 @@ namespace Physics {
       /*!
 	@brief Compute the cell-centered fluxes and extrapolate these to the EB centroid
       */
-      virtual void compute_extrapolated_velocities(Vector<EBAMRIVData*>&        a_ebvel,
+      virtual void computeExtrapolatedVelocities(Vector<EBAMRIVData*>&        a_ebvel,
 						   const Vector<EBAMRCellData*> a_velocities,
 						   const phase::which_phase     a_phase);
 
       /*!
 	@brief Compute the cell-centered fluxes and extrapolate these to the domain faces
       */
-      virtual void compute_extrapolated_domain_fluxes(Vector<EBAMRIFData*>&        a_fluxes,
+      virtual void computeExtrapolatedDomainFluxes(Vector<EBAMRIFData*>&        a_fluxes,
 						      const Vector<EBAMRCellData*> a_densities,
 						      const Vector<EBAMRCellData*> a_velocities,
 						      const phase::which_phase     a_phase);
@@ -599,26 +599,26 @@ namespace Physics {
       /*!
 	@brief Compute charge flux. 
       */
-      virtual void computeCharge_flux(EBAMRIVData& a_flux, Vector<EBAMRIVData*>& a_cdr_flxues);
+      virtual void computeChargeFlux(EBAMRIVData& a_flux, Vector<EBAMRIVData*>& a_cdr_flxues);
 
 
       /*!
 	@brief Compute the cell-centered space charge density by using data inside CdrLayout. 
 	@details This assumes that the data contain in CdrLayout is cell-centered
       */
-      virtual void compute_rho();
+      virtual void computeSpaceChargeDensity();
 
       /*!
 	@brief Compute cell-centered space charge density on a specific phase using whatever is available in CdrLayout
       */
-      virtual void compute_rho(EBAMRCellData& a_rho, const phase::which_phase a_phase);
+      virtual void computeSpaceChargeDensity(EBAMRCellData& a_rho, const phase::which_phase a_phase);
 
       /*!
 	@brief Compute the centroid-centered space charge density
 	@details You have the option of specifying the centering for this computation. If the densities are cell-centered, we first 
 	compute the cell-centered space charge density and the interpolate to the cell centroid. 
       */
-      virtual void compute_rho(MFAMRCellData&                 a_rho,
+      virtual void computeSpaceChargeDensity(MFAMRCellData&                 a_rho,
 			       const Vector<EBAMRCellData*>&  a_densities,
 			       const centering                a_centering);
 
@@ -627,9 +627,9 @@ namespace Physics {
       /*!
 	@brief Deallocate internal solver storages
       */
-      virtual void deallocate_solver_internals();
+      virtual void deallocateSolverInternals();
 
-      virtual void extrapolate_to_eb(LevelData<BaseIVFAB<Real> >& a_extrap,
+      virtual void extrapolateToEb(LevelData<BaseIVFAB<Real> >& a_extrap,
 				     const phase::which_phase     a_phase,
 				     const LevelData<EBCellFAB>&  a_data,
 				     const int                    a_lvl);
@@ -637,24 +637,24 @@ namespace Physics {
       /*!
 	@brief Extrapolate data to EB centroid
       */
-      virtual void extrapolate_to_eb(EBAMRIVData& a_extrap, const phase::which_phase a_phase, const EBAMRCellData& a_data);
+      virtual void extrapolateToEb(EBAMRIVData& a_extrap, const phase::which_phase a_phase, const EBAMRCellData& a_data);
 
       /*!
 	@brief Extrapolate data to EB centroid
       */
-      virtual void extrapolate_to_eb(Vector<EBAMRIVData*>&         a_extrap,
+      virtual void extrapolateToEb(Vector<EBAMRIVData*>&         a_extrap,
 				     const phase::which_phase      a_phase,
 				     const Vector<EBAMRCellData*>& a_data);
 
       /*!
 	@brief Extrapolate to domain faces. Calls level version. 
       */
-      virtual void extrapolate_to_domain_faces(EBAMRIFData& a_extrap, const phase::which_phase a_phase, const EBAMRCellData& a_data);
+      virtual void extrapolateToDomainFaces(EBAMRIFData& a_extrap, const phase::which_phase a_phase, const EBAMRCellData& a_data);
 
       /*!
 	@brief Extrapolate to domain faces
       */
-      virtual void extrapolate_to_domain_faces(LevelData<DomainFluxIFFAB>& a_extrap,
+      virtual void extrapolateToDomainFaces(LevelData<DomainFluxIFFAB>& a_extrap,
 					       const phase::which_phase    a_phase,
 					       const LevelData<EBCellFAB>& a_data,
 					       const int                   a_lvl);
@@ -662,27 +662,27 @@ namespace Physics {
       /*!
 	@brief Extrapolate to domain faces
       */
-      virtual void extrapolate_to_domain_faces(Vector<EBAMRIFData*>&         a_extrap,
+      virtual void extrapolateToDomainFaces(Vector<EBAMRIFData*>&         a_extrap,
 					       const phase::which_phase      a_phase,
 					       const Vector<EBAMRCellData*>& a_data);
   
 
-      virtual void extrapolate_vector_to_domain_faces(EBAMRIFData&             a_extrap,
+      virtual void extrapolateToVectorDomainFaces(EBAMRIFData&             a_extrap,
 						      const phase::which_phase a_phase,
 						      const EBAMRCellData&     a_data);
 
-      virtual void extrapolate_vector_to_domain_faces(Vector<EBAMRIFData*>&         a_extrap,
+      virtual void extrapolateToVectorDomainFaces(Vector<EBAMRIFData*>&         a_extrap,
 						      const phase::which_phase      a_phase,
 						      const Vector<EBAMRCellData*>& a_data);
 
-      virtual void extrapolate_velo_to_domain_faces(Vector<EBAMRIFData*>&         a_extrap,
+      virtual void extrapolateVelocitiesVectorDomainFaces(Vector<EBAMRIFData*>&         a_extrap,
 						    const phase::which_phase      a_phase,
 						    const Vector<EBAMRCellData*>& a_data);
 
       /*!
 	@brief Get maximum value of the cdr solver stuff
       */
-      virtual void get_cdr_max(Real& a_cdr_max, std::string& a_solver_name);
+      virtual void getCdrMax(Real& a_cdr_max, std::string& a_solver_name);
 
       /*!
 	@brief Instantiate solvers
@@ -702,17 +702,17 @@ namespace Physics {
       /*!
 	@brief Project flux
       */
-      virtual void project_flux(LevelData<BaseIVFAB<Real> >& a_proj_flux, const LevelData<BaseIVFAB<Real> >& a_flux, const int a_lvl);
+      virtual void projectFlux(LevelData<BaseIVFAB<Real> >& a_proj_flux, const LevelData<BaseIVFAB<Real> >& a_flux, const int a_lvl);
 
       /*!
 	@brief Extrapolated flux to EB and project it onto the normal
       */
-      virtual void project_flux(EBAMRIVData& a_projected_flux, const EBAMRIVData& a_flux);
+      virtual void projectFlux(EBAMRIVData& a_projected_flux, const EBAMRIVData& a_flux);
 
       /*!
 	@brief Project flux on the boundary normal
       */
-      virtual void project_domain(EBAMRIFData& a_projected_flux, const EBAMRIFData& a_flux);
+      virtual void projectDomain(EBAMRIFData& a_projected_flux, const EBAMRIFData& a_flux);
 
       /*!
 	@brief Regrid
@@ -727,12 +727,12 @@ namespace Physics {
       /*!
 	@brief Regrid individual solvers
       */
-      virtual void regrid_solvers(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel);
+      virtual void regridSolvers(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel);
 
       /*!
 	@brief Set data defined over dielectric cells to zero
       */
-      virtual void reset_dielectric_cells(EBAMRIVData& a_data);
+      virtual void resetDielectricCells(EBAMRIVData& a_data);
 
       /*!
 	@brief Do a sanity check
@@ -742,113 +742,113 @@ namespace Physics {
       /*!
 	@brief Set fast rte
       */
-      virtual void set_fast_rte(const int a_fast_rte);
+      virtual void setFastRadiativeTransfer(const int a_fast_rte);
 
       /*!
 	@brief Set fast rte
       */
-      virtual void set_fast_poisson(const int a_fast_poisson);
+      virtual void setFastPoisson(const int a_fast_poisson);
 
       /*!
 	@brief Set type of source term computation
       */
-      virtual void setSource_computation();
+      virtual void setSourceComputation();
 
       /*!
 	@brief Set hardcap on the time step
       */
-      virtual void set_min_dt(const Real a_min_dt);
+      virtual void setMinDt(const Real a_min_dt);
 
       /*!
 	@brief Set hardcap on the time step
       */
-      virtual void set_max_dt(const Real a_min_dt);
+      virtual void setMaxDt(const Real a_min_dt);
 
       /*!
 	@brief Set CFL condition
       */
-      virtual void set_cfl(const Real a_cfl);
+      virtual void setCFL(const Real a_cfl);
 
       /*!
 	@brief Set fudge factor for relaxation time
       */
-      virtual void set_relax_time(const Real a_relax_time);
+      virtual void setRelaxTime(const Real a_relax_time);
 
       /*!
 	@brief Set source growth
       */
-      virtual void setSource_growth(const Real a_src_growth);
+      virtual void setSourceGrowth(const Real a_src_growth);
 
       /*!
 	@brief Set source growth
       */
-      virtual void setSource_growth_tolerance(const Real a_src_tolerance);
+      virtual void setSourceGrowthTolerance(const Real a_src_tolerance);
 
       /*!
 	@brief Set plasma kinetics
       */
-      virtual void set_CdrPlasmaPhysics(const RefCountedPtr<CdrPlasmaPhysics>& a_physics);
+      virtual void setCdrPlasmaPhysics(const RefCountedPtr<CdrPlasmaPhysics>& a_physics);
 
       /*!
 	@brief Set solver verbosity
       */
-      virtual void set_solver_verbosity();
+      virtual void setSolverVerbosity();
 
       /*!
 	@brief Setup the cdr solvers
       */
-      virtual void setup_cdr();
+      virtual void setupCdr();
 
       /*!
 	@brief Setup the poisson solver
       */
-      virtual void setup_poisson();
+      virtual void setupPoisson();
 
       /*!
 	@brief Setup the rte solvers
       */
-      virtual void setup_rte();
+      virtual void setupRadiativeTransfer();
 
       /*!
 	@brief Instantiate the sigma solver
       */
-      virtual void setup_sigma();
+      virtual void setupSigma();
 
       /*!
 	@brief Solver dumps data files
       */
-      virtual void solver_dump();
+      virtual void solverDump();
 
       /*!
 	@brief Set potential
       */
-      virtual void set_potential(std::function<Real(const Real a_time)> a_potential);
+      virtual void setVoltage(std::function<Real(const Real a_time)> a_potential);
 
       /*!
 	@brief RTE advance using data existing in other solvers
       */
-      virtual void solve_rte(const Real a_dt);
+      virtual void solveRadiativeTransfer(const Real a_dt);
 
       /*!
 	@brief Set the cdr layout
       */
-      virtual void set_cdr(RefCountedPtr<CdrLayout<CdrSolver> >& a_cdr);
+      virtual void setCdrSolvers(RefCountedPtr<CdrLayout<CdrSolver> >& a_cdr);
 
       /*!
 	@brief Set the Poisson solver
       */
-      virtual void set_poisson(RefCountedPtr<FieldSolver>& a_poisson);
+      virtual void setFieldSolver(RefCountedPtr<FieldSolver>& a_poisson);
 
       /*!
 	@brief Set the RTE layout
       */
-      virtual void set_rte(RefCountedPtr<RtLayout<RtSolver> >& a_rte);
+      virtual void setRadiativeTransferSolvers(RefCountedPtr<RtLayout<RtSolver> >& a_rte);
 
       /*!
 	@brief General RTE advance routine
 	@details This computes the source terms at the specified time and then advances the solution
       */
-      virtual void solve_rte(Vector<EBAMRCellData*>&       a_phis,
+      virtual void solveRadiativeTransfer(Vector<EBAMRCellData*>&       a_phis,
 			     Vector<EBAMRCellData*>&       a_rhs,
 			     const Vector<EBAMRCellData*>& a_cdr_states,
 			     const EBAMRCellData&          a_E,
@@ -869,32 +869,32 @@ namespace Physics {
       /*!
 	@brief Compute the ohmic current on electrodes
       */
-      virtual Real compute_electrode_current();
+      virtual Real computeElectrodeCurrent();
 
       /*!
 	@brief Compute the ohmic current on dielectrics
       */
-      virtual Real compute_dielectric_current();
+      virtual Real computeDielectricCurrent();
 
       /*!
 	@brief Compute the ohmic current through the domain faces
       */
-      virtual Real compute_domain_current();
+      virtual Real computeDomainCurrent();
 
       /*!
 	@brief Compute induced current in external circuit due to ohmic conduction
       */
-      virtual Real compute_ohmic_induction_current();
+      virtual Real computeOhmicInductionCurrent();
 			     
       /*!
 	@brief Compute the relaxation time
       */
-      virtual Real compute_relaxation_time();
+      virtual Real computeRelaxationTime();
 
       /*!
 	@brief Restrict dt
       */
-      virtual Real restrict_dt() = 0;
+      virtual Real restrictDt() = 0;
 
       /*!
 	@brief Return time
@@ -904,32 +904,32 @@ namespace Physics {
       /*!
 	@brief Get dt
       */
-      virtual Real get_dt();
+      virtual Real getDt();
 
       /*!
 	@brief Get the CFL time step
       */
-      virtual Real get_cfl_dt();
+      virtual Real getCflDt();
 
       /*!
 	@brief Get cdr solvers
       */
-      virtual RefCountedPtr<CdrLayout<CdrSolver> >& get_cdr();
+      virtual RefCountedPtr<CdrLayout<CdrSolver> >& getCdrSolvers();
 
       /*!
 	@brief Get cdr solvers
       */
-      virtual RefCountedPtr<FieldSolver>& get_poisson();
+      virtual RefCountedPtr<FieldSolver>& getFieldSolver();
   
       /*!
 	@brief Get cdr solvers
       */
-      virtual RefCountedPtr<RtLayout<RtSolver>>& get_rte();
+      virtual RefCountedPtr<RtLayout<RtSolver>>& getRadiativeTransferSolvers();
 
       /*!
 	@brief Get sigma solver
       */
-      virtual RefCountedPtr<SigmaSolver>& get_sigma();
+      virtual RefCountedPtr<SigmaSolver>& getSigmaSolver();
   
     protected:
 
@@ -942,16 +942,16 @@ namespace Physics {
 
       // Various parsing functions that are common to many derived classes
       virtual void parseVerbosity();
-      virtual void parse_solver_verbosity();
-      virtual void parse_cfl();
-      virtual void parse_relax_time();
-      virtual void parse_source_growth();
-      virtual void parse_source_tolerance();
-      virtual void parse_min_dt();
-      virtual void parse_max_dt();
-      virtual void parse_fast_poisson();
-      virtual void parse_fast_rte();
-      virtual void parse_source_comp();
+      virtual void parseSolverVerbosity();
+      virtual void parseCFL();
+      virtual void parseRelaxationTime();
+      virtual void parseSourceGrowth();
+      virtual void parseSourceTolerance();
+      virtual void parseMinDt();
+      virtual void parseMaxDt();
+      virtual void parseFastPoisson();
+      virtual void parseFastRadiativeTransfer();
+      virtual void parseSourceComputation();
 
       /*!
 	@brief Plasma phase

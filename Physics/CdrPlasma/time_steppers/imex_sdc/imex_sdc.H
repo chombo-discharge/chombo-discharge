@@ -9,7 +9,7 @@
 #define _IMEX_SDC_
 
 #include "CD_AmrMesh.H"
-#include "cdr_plasma_stepper.H"
+#include <CD_CdrPlasmaStepper.H>
 #include <CD_CdrIterator.H>
 #include <CD_RtIterator.H>
 
@@ -21,7 +21,7 @@ namespace Physics {
     /*!
       @brief Class for evolving plasma equations with a multirate method using semi-implicit spectral deferred corrections
     */
-    class imex_sdc : public cdr_plasma_stepper {
+    class imex_sdc : public CdrPlasmaStepper {
     public:
   
       // Forward declare nested classes. I don't want to clutter this file.
@@ -47,7 +47,7 @@ namespace Physics {
       void parseRuntimeOptions() override;
       bool needToRegrid() override;
 
-      Vector<EBAMRCellData*> get_cdr_errors();
+      Vector<EBAMRCellData*> getCdrSolvers_errors();
   
     protected:
 
@@ -117,8 +117,8 @@ namespace Physics {
       std::string m_which_nodes;
 
       // Get functions for storage
-      RefCountedPtr<cdr_storage>& get_cdr_storage(const CdrIterator<CdrSolver>& a_solverit);
-      RefCountedPtr<rte_storage>& get_rte_storage(const RtIterator<RtSolver>& a_solverit);
+      RefCountedPtr<cdr_storage>& getCdrSolvers_storage(const CdrIterator<CdrSolver>& a_solverit);
+      RefCountedPtr<rte_storage>& getRadiativeTransferSolvers_storage(const RtIterator<RtSolver>& a_solverit);
 
       // Allocation functions
       void allocate_cdr_storage();
@@ -127,8 +127,8 @@ namespace Physics {
       void allocate_sigma_storage();
 
       // Get functions for substep data. 
-      Vector<EBAMRCellData*> get_cdr_phik(const int a_m);
-      EBAMRIVData& get_sigmak(const int a_m);
+      Vector<EBAMRCellData*> getCdrSolvers_phik(const int a_m);
+      EBAMRIVData& getSigmaSolverk(const int a_m);
 
       // Routines for intervals and quadrature
       void setup_quadrature_nodes(const int a_p);
@@ -188,8 +188,8 @@ namespace Physics {
       void compute_cdr_domain_states(const Vector<EBAMRCellData*>& a_phis);
       void compute_cdr_gradients();
       void compute_cdr_gradients(const Vector<EBAMRCellData*>& a_phis);
-      void compute_cdr_fluxes(const Real a_time);
-      void compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_phis, const Real a_time);
+      void computeCdrFluxes(const Real a_time);
+      void computeCdrFluxes(const Vector<EBAMRCellData*>& a_phis, const Real a_time);
       void computeCdrDomainFluxes(const Real a_time);
       void computeCdrDomainFluxes(const Vector<EBAMRCellData*>& a_phis, const Real a_time);
       void compute_cdr_velo(const Real a_time);
@@ -199,7 +199,7 @@ namespace Physics {
 
       //
       Real get_max_error();
-      Real restrict_dt() ;
+      Real restrictDt() ;
       Real get_max_node_distance();
 
       // Profiling

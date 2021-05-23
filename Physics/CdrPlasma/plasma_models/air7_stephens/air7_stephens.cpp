@@ -822,7 +822,7 @@ Vector<Real> air7_stephens::computeCdrElectrodeFluxes(const Real         a_time,
 							 const Vector<Real> a_cdr_gradients,
 							 const Vector<Real> a_rte_fluxes,
 							 const Vector<Real> a_extrap_cdr_fluxes) const{
-  return compute_cdr_fluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients, a_rte_fluxes,
+  return computeCdrFluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients, a_rte_fluxes,
 			    a_extrap_cdr_fluxes, m_townsend2_electrode, m_electrode_quantum_efficiency);
 }
 
@@ -835,11 +835,11 @@ Vector<Real> air7_stephens::computeCdrDielectricFluxes(const Real         a_time
 							  const Vector<Real> a_cdr_gradients,
 							  const Vector<Real> a_rte_fluxes,
 							  const Vector<Real> a_extrap_cdr_fluxes) const{
-  return compute_cdr_fluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients, a_rte_fluxes,
+  return computeCdrFluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients, a_rte_fluxes,
 			    a_extrap_cdr_fluxes, m_townsend2_dielectric, m_dielectric_quantum_efficiency);
 }
 
-Vector<Real> air7_stephens::compute_cdr_fluxes(const Real         a_time,
+Vector<Real> air7_stephens::computeCdrFluxes(const Real         a_time,
 					       const RealVect     a_pos,
 					       const RealVect     a_normal,
 					       const RealVect     a_E,

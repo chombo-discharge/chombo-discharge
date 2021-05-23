@@ -104,13 +104,13 @@ def write_template(args):
     mainf.write("\n")
 
     mainf.write("  // Send solvers to TimeStepper \n")
-    mainf.write("  timestepper->set_poisson(poi);\n");
+    mainf.write("  timestepper->setFieldSolver(poi);\n");
     mainf.write("  timestepper->set_ito(cdr);\n");
-    mainf.write("  timestepper->set_rte(rte);\n");
+    mainf.write("  timestepper->setRadiativeTransferSolvers(rte);\n");
     mainf.write("\n")
 
     mainf.write("  // Set potential \n")
-    mainf.write("timestepper->set_potential(potential_curve);\n")
+    mainf.write("timestepper->setVoltage(potential_curve);\n")
     mainf.write("\n")
     
     mainf.write("  // Set up the Driver and run it\n")

@@ -72,7 +72,7 @@ namespace Physics {
       void postRegrid() override;
 
       // Solve routine
-      void solve_poisson();
+      void solvePoisson();
 
     protected:
 

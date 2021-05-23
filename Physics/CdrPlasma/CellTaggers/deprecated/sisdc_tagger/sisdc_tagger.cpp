@@ -45,8 +45,8 @@ void sisdc_tagger::computeTracers(){
 
   // Get electron density and error
   sisdc* stepper = (sisdc*) (&(*m_timeStepper));
-  EBAMRCellData& ne_err  = *(stepper->get_cdr_errors()[m_cdr_idx]);
-  EBAMRCellData& ne      = *stepper->get_cdr()->getPhis()[m_cdr_idx];
+  EBAMRCellData& ne_err  = *(stepper->getCdrSolvers_errors()[m_cdr_idx]);
+  EBAMRCellData& ne      = *stepper->getCdrSolvers()->getPhis()[m_cdr_idx];
 
   // Get maximum and minimum stuff
   Real err_max,  err_min, Emax, Emin;

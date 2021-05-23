@@ -130,7 +130,7 @@ namespace Physics::cdr_plasma {
     Real m_particle_w; // Particle weights
 
     // Common function for computing CDR fluxes
-    Vector<Real> compute_cdr_fluxes(const Real         a_time,
+    Vector<Real> computeCdrFluxes(const Real         a_time,
 				    const RealVect     a_pos,
 				    const RealVect     a_normal,
 				    const RealVect     a_E,

@@ -82,7 +82,7 @@ def write_template(args):
     mainf.write("\n")
     mainf.write("  // Set up physics \n")
     mainf.write("  RefCountedPtr<CdrPlasmaPhysics> physics      = RefCountedPtr<CdrPlasmaPhysics> (new " + args.physics + "());\n")
-    mainf.write("  RefCountedPtr<cdr_plasma_stepper> timestepper  = RefCountedPtr<cdr_plasma_stepper> (new " + args.TimeStepper + "(physics));\n")
+    mainf.write("  RefCountedPtr<CdrPlasmaStepper> timestepper  = RefCountedPtr<CdrPlasmaStepper> (new " + args.TimeStepper + "(physics));\n")
     if args.CellTagger != "none":
         mainf.write("  RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (new " + args.CellTagger + "(physics, timestepper, amr, compgeom));\n")
     else:
@@ -103,13 +103,13 @@ def write_template(args):
     mainf.write("\n")
 
     mainf.write("  // Send solvers to TimeStepper \n")
-    mainf.write("  timestepper->set_poisson(poi);\n");
-    mainf.write("  timestepper->set_cdr(cdr);\n");
-    mainf.write("  timestepper->set_rte(rte);\n");
+    mainf.write("  timestepper->setFieldSolver(poi);\n");
+    mainf.write("  timestepper->setCdrSolvers(cdr);\n");
+    mainf.write("  timestepper->setRadiativeTransferSolvers(rte);\n");
     mainf.write("\n")
 
     mainf.write("  // Set potential \n")
-    mainf.write("timestepper->set_potential(potential_curve);\n")
+    mainf.write("timestepper->setVoltage(potential_curve);\n")
     mainf.write("\n")
     
     mainf.write("  // Set up the Driver and run it\n")

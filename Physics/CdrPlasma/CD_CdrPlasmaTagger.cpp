@@ -31,7 +31,7 @@ CdrPlasmaTagger::CdrPlasmaTagger(){
 }
 
 CdrPlasmaTagger::CdrPlasmaTagger(const RefCountedPtr<CdrPlasmaPhysics>&     a_physics,
-				 const RefCountedPtr<cdr_plasma_stepper>&     a_timeStepper,
+				 const RefCountedPtr<CdrPlasmaStepper>&     a_timeStepper,
 				 const RefCountedPtr<AmrMesh>&               a_amr,
 				 const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry) : CdrPlasmaTagger() {
   this->define(a_physics, a_timeStepper, a_amr, a_computationalGeometry);
@@ -42,7 +42,7 @@ CdrPlasmaTagger::~CdrPlasmaTagger(){
 }
 
 void CdrPlasmaTagger::define(const RefCountedPtr<CdrPlasmaPhysics>&     a_physics,
-			     const RefCountedPtr<cdr_plasma_stepper>&     a_timeStepper,
+			     const RefCountedPtr<CdrPlasmaStepper>&     a_timeStepper,
 			     const RefCountedPtr<AmrMesh>&               a_amr,
 			     const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry){
   CH_TIME("CdrPlasmaTagger::define");

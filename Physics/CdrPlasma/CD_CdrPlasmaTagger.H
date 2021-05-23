@@ -14,7 +14,7 @@
 
 // Our includes
 #include <CD_CellTagger.H>
-#include <cdr_plasma_stepper.H>
+#include <CD_CdrPlasmaStepper.H>
 #include <CD_NamespaceHeader.H>
 
 namespace Physics {
@@ -35,7 +35,7 @@ namespace Physics {
 	@brief Full constructor
       */
       CdrPlasmaTagger(const RefCountedPtr<CdrPlasmaPhysics>&     a_physics,
-		      const RefCountedPtr<cdr_plasma_stepper>&     a_timeStepper,
+		      const RefCountedPtr<CdrPlasmaStepper>&     a_timeStepper,
 		      const RefCountedPtr<AmrMesh>&               a_amr,
 		      const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
 
@@ -52,7 +52,7 @@ namespace Physics {
 	@param[in] a_computationalGeometry    Computational geometry
       */
       virtual void define(const RefCountedPtr<CdrPlasmaPhysics>&     a_physics,
-			  const RefCountedPtr<cdr_plasma_stepper>&     a_timeStepper,
+			  const RefCountedPtr<CdrPlasmaStepper>&     a_timeStepper,
 			  const RefCountedPtr<AmrMesh>&               a_amr,
 			  const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
 
@@ -117,7 +117,7 @@ namespace Physics {
       /*!
 	@brief Time stepper
       */
-      RefCountedPtr<cdr_plasma_stepper> m_timeStepper;
+      RefCountedPtr<CdrPlasmaStepper> m_timeStepper;
 
       /*!
 	@brief AmrMesh. Needed for computing tracer stuff

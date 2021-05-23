@@ -171,7 +171,7 @@ namespace Physics {
       EBAMRIVData& getScratch(){ return m_scratch; }
       EBAMRIVData& get_error(){   return m_error; }
 
-      Vector<EBAMRIVData>& get_sigma(){ return m_sigma;}
+      Vector<EBAMRIVData>& getSigmaSolver(){ return m_sigma;}
       Vector<EBAMRIVData>& get_Fnew(){  return m_Fnew; }
       Vector<EBAMRIVData>& get_Fold(){  return m_Fold; }
 

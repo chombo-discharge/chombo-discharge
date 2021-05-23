@@ -34,7 +34,7 @@ namespace Physics {
 	@brief Full constructor
       */
       CdrPlasmaCurvatureTagger(const RefCountedPtr<CdrPlasmaPhysics>&     a_physics,
-			       const RefCountedPtr<cdr_plasma_stepper>&     a_timeStepper,
+			       const RefCountedPtr<CdrPlasmaStepper>&     a_timeStepper,
 			       const RefCountedPtr<AmrMesh>&               a_amr,
 			       const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
 

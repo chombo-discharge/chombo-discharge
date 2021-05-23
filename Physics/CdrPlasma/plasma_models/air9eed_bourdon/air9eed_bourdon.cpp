@@ -541,7 +541,7 @@ Vector<Real> air9eed_bourdon::computeCdrDielectricFluxes(const Real         a_ti
 							    const Vector<Real> a_rte_fluxes,
 							    const Vector<Real> a_extrap_cdr_fluxes) const {
   
-  return this->compute_cdr_fluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients, a_rte_fluxes,
+  return this->computeCdrFluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients, a_rte_fluxes,
 				  a_extrap_cdr_fluxes, m_townsend2_dielectric, m_dielectric_quantum_efficiency);
 }
 
@@ -739,7 +739,7 @@ Real air9eed_bourdon::initEed(const RealVect a_pos, const Real a_time, const Rea
   return m_initEed.getEntry(EbyN)*m_CdrSpecies[m_electron_idx]->initialData(a_pos, a_time);
 }
 
-Vector<Real> air9eed_bourdon::compute_cdr_fluxes(const Real         a_time,
+Vector<Real> air9eed_bourdon::computeCdrFluxes(const Real         a_time,
 						 const RealVect     a_pos,
 						 const RealVect     a_normal,
 						 const RealVect     a_E,

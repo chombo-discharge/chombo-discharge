@@ -122,7 +122,7 @@ namespace Physics {
     }
 
     template <class T>
-    void FieldStepper<T>::solve_poisson(){
+    void FieldStepper<T>::solvePoisson(){
       
       MFAMRCellData& state = m_fieldSolver->getPotential();  
       MFAMRCellData& rho   = m_fieldSolver->getRho();
@@ -139,12 +139,12 @@ namespace Physics {
     
     template <class T>
     void FieldStepper<T>::postInitialize() {
-      this->solve_poisson();
+      this->solvePoisson();
     }
 
     template <class T>
     void FieldStepper<T>::postRegrid(){
-      this->solve_poisson();
+      this->solvePoisson();
     }
 
     template<class T>

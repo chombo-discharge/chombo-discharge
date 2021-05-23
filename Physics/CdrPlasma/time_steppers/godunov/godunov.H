@@ -9,7 +9,7 @@
 #define _GODUNOV_
 
 #include "CD_AmrMesh.H"
-#include "cdr_plasma_stepper.H"
+#include <CD_CdrPlasmaStepper.H>
 #include <CD_CdrIterator.H>
 #include <CD_RtIterator.H>
 
@@ -20,7 +20,7 @@ namespace Physics {
     /*!
       @brief Class for evolving plasma equations using the Euler-Maruyama scheme
     */
-    class godunov : public cdr_plasma_stepper {
+    class godunov : public CdrPlasmaStepper {
     public:
   
       // Forward declare nested classes. I don't want to clutter this file.
@@ -73,10 +73,10 @@ namespace Physics {
       whichTransport m_whichTransport;
 
       // Get functions for storage
-      RefCountedPtr<cdr_storage>& get_cdr_storage(const CdrIterator<CdrSolver>& a_solverit);
-      RefCountedPtr<rte_storage>& get_rte_storage(const RtIterator<RtSolver>& a_solverit);
+      RefCountedPtr<cdr_storage>& getCdrSolvers_storage(const CdrIterator<CdrSolver>& a_solverit);
+      RefCountedPtr<rte_storage>& getRadiativeTransferSolvers_storage(const RtIterator<RtSolver>& a_solverit);
 
-      Real restrict_dt();
+      Real restrictDt();
 
       // Aux functions
       void computeElectricField_into_scratch();

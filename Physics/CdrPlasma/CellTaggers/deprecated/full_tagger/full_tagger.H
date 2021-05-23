@@ -107,7 +107,7 @@ protected:
   /*!
     @brief Compute space charge and its gardient
   */
-  virtual void compute_rho(EBAMRCellData& a_rho, EBAMRCellData& a_grad_rho);
+  virtual void computeSpaceChargeDensity(EBAMRCellData& a_rho, EBAMRCellData& a_grad_rho);
 
   /*!
     @brief Compute the rte densities

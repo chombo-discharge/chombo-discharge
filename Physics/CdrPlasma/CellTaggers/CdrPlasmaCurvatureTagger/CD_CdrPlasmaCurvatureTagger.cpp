@@ -24,7 +24,7 @@ CdrPlasmaCurvatureTagger::CdrPlasmaCurvatureTagger(){
 }
 
 CdrPlasmaCurvatureTagger::CdrPlasmaCurvatureTagger(const RefCountedPtr<CdrPlasmaPhysics>&     a_plaskin,
-						   const RefCountedPtr<cdr_plasma_stepper>&     a_timeStepper,
+						   const RefCountedPtr<CdrPlasmaStepper>&     a_timeStepper,
 						   const RefCountedPtr<AmrMesh>&               a_amr,
 						   const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry) : CdrPlasmaCurvatureTagger() {
   this->define(a_plaskin, a_timeStepper, a_amr, a_computationalGeometry);

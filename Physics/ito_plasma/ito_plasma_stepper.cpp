@@ -62,9 +62,9 @@ void ito_plasma_stepper::setupSolvers(){
 
   // Set up solvers
   this->setup_ito();
-  this->setup_poisson();
-  this->setup_rte();
-  this->setup_sigma();
+  this->setupPoisson();
+  this->setupRadiativeTransfer();
+  this->setupSigma();
 
   // Allocate internal stuff
   this->allocateInternals();
@@ -87,10 +87,10 @@ void ito_plasma_stepper::setup_ito(){
   m_ito->setRealm(m_particleRealm);
 }
 
-void ito_plasma_stepper::setup_poisson(){
-  CH_TIME("ito_plasma_stepper::setup_poisson");
+void ito_plasma_stepper::setupPoisson(){
+  CH_TIME("ito_plasma_stepper::setupPoisson");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::setup_poisson" << endl;
+    pout() << "ito_plasma_stepper::setupPoisson" << endl;
   }
 
   m_fieldSolver->setVerbosity(m_verbosity);
@@ -101,10 +101,10 @@ void ito_plasma_stepper::setup_poisson(){
   m_fieldSolver->setRealm(m_fluid_Realm);
 }
 
-void ito_plasma_stepper::setup_rte(){
-  CH_TIME("ito_plasma_stepper::setup_rte");
+void ito_plasma_stepper::setupRadiativeTransfer(){
+  CH_TIME("ito_plasma_stepper::setupRadiativeTransfer");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::setup_rte" << endl;
+    pout() << "ito_plasma_stepper::setupRadiativeTransfer" << endl;
   }
 
   m_rte->setVerbosity(m_verbosity);
@@ -116,10 +116,10 @@ void ito_plasma_stepper::setup_rte(){
   m_rte->sanityCheck();
 }
 
-void ito_plasma_stepper::setup_sigma(){
-  CH_TIME("ito_plasma_stepper::setup_sigma");
+void ito_plasma_stepper::setupSigma(){
+  CH_TIME("ito_plasma_stepper::setupSigma");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::setup_sigma" << endl;
+    pout() << "ito_plasma_stepper::setupSigma" << endl;
   }
 
   m_sigma = RefCountedPtr<SigmaSolver> (new SigmaSolver());
@@ -177,7 +177,7 @@ void ito_plasma_stepper::initialData(){
   m_ito->sortParticlesByPatch(ItoSolver::WhichContainer::bulk);
   
   // Solve Poisson equation and compute the E-field
-  this->solve_poisson();
+  this->solvePoisson();
 
   // Fill solvers with velocities and diffusion coefficients
   this->compute_ito_velocities();
@@ -228,7 +228,7 @@ void ito_plasma_stepper::postCheckpointSetup(){
     pout() << "ito_plasma_stepper::postCheckpointSetup" << endl;
   }
 
-  //this->solve_poisson();
+  //this->solvePoisson();
   this->allocateInternals();
 
   m_ito->remap();
@@ -274,7 +274,7 @@ void ito_plasma_stepper::post_checkpoint_poisson(){
   m_amr->interpToCentroids(m_particle_E, m_particleRealm, m_phase);
 
   // Compute maximum E
-  // const Real Emax = this->computeElectricFieldmax(m_phase);
+  // const Real Emax = this->computeMaxElectricField(m_phase);
   // std::cout << Emax << std::endl;
 }
 
@@ -347,7 +347,7 @@ void ito_plasma_stepper::writePlotData(EBAMRCellData& a_output, Vector<std::stri
   }
 
   // Write the current to the output
-  this->write_J(a_output, a_icomp);
+  this->writeJ(a_output, a_icomp);
   a_plotVariableNames.push_back("x-J");
   a_plotVariableNames.push_back("y-J");
   if(SpaceDim == 3){
@@ -359,10 +359,10 @@ void ito_plasma_stepper::writePlotData(EBAMRCellData& a_output, Vector<std::stri
   a_plotVariableNames.push_back("particles_per_patch");
 }
 
-void ito_plasma_stepper::write_J(EBAMRCellData& a_output, int& a_icomp) const{
-  CH_TIME("ito_plasma_stepper::write_J");
+void ito_plasma_stepper::writeJ(EBAMRCellData& a_output, int& a_icomp) const{
+  CH_TIME("ito_plasma_stepper::writeJ");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::write_J" << endl;
+    pout() << "ito_plasma_stepper::writeJ" << endl;
   }
 
   const Interval src_interv(0, SpaceDim-1);
@@ -436,7 +436,7 @@ void ito_plasma_stepper::printStepReport(){
     pout() << "ito_plasma_stepper::printStepReport" << endl;
   }
 
-  const Real Emax = this->computeElectricFieldmax(m_phase);
+  const Real Emax = this->computeMaxElectricField(m_phase);
   
   const size_t l_particles        = m_ito->getNumParticles(ItoSolver::WhichContainer::bulk, true);
   const size_t g_particles        = m_ito->getNumParticles(ItoSolver::WhichContainer::bulk, false);
@@ -784,7 +784,7 @@ void ito_plasma_stepper::regrid(const int a_lmin, const int a_oldFinestLevel, co
   m_ito->depositParticles();
 
   // Recompute the electric field
-  const bool converged = this->solve_poisson();
+  const bool converged = this->solvePoisson();
   if(!converged){
     MayDay::Abort("ito_plasma_stepper::regrid - Poisson solve did not converge after regrid!!!");
   }
@@ -833,37 +833,37 @@ void ito_plasma_stepper::set_ito(RefCountedPtr<ItoLayout<ItoSolver> >& a_ito){
   m_ito = a_ito;
 }
 
-void ito_plasma_stepper::set_poisson(RefCountedPtr<FieldSolver>& a_poisson){
-  CH_TIME("ito_plasma_stepper::set_poisson");
+void ito_plasma_stepper::setFieldSolver(RefCountedPtr<FieldSolver>& a_poisson){
+  CH_TIME("ito_plasma_stepper::setFieldSolver");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::set_poisson" << endl;
+    pout() << "ito_plasma_stepper::setFieldSolver" << endl;
   }
 
   m_fieldSolver = a_poisson;
 }
 
-void ito_plasma_stepper::set_rte(RefCountedPtr<RtLayout<McPhoto> >& a_rte){
-  CH_TIME("ito_plasma_stepper::set_rte");
+void ito_plasma_stepper::setRadiativeTransferSolvers(RefCountedPtr<RtLayout<McPhoto> >& a_rte){
+  CH_TIME("ito_plasma_stepper::setRadiativeTransferSolvers");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::set_rte" << endl;
+    pout() << "ito_plasma_stepper::setRadiativeTransferSolvers" << endl;
   }
   
   m_rte = a_rte;
 }
 
-void ito_plasma_stepper::set_potential(const std::function<Real(const Real a_time)>& a_potential){
-  CH_TIME("ito_plasma_stepper::set_potential");
+void ito_plasma_stepper::setVoltage(const std::function<Real(const Real a_time)>& a_potential){
+  CH_TIME("ito_plasma_stepper::setVoltage");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::set_potential" << endl;
+    pout() << "ito_plasma_stepper::setVoltage" << endl;
   }
 
   m_potential = a_potential;
 }
 
-Real ito_plasma_stepper::computeElectricFieldmax(const phase::which_phase a_phase) {
-  CH_TIME("ito_plasma_stepper::computeElectricFieldmax");
+Real ito_plasma_stepper::computeMaxElectricField(const phase::which_phase a_phase) {
+  CH_TIME("ito_plasma_stepper::computeMaxElectricField");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::computeElectricFieldmax" << endl;
+    pout() << "ito_plasma_stepper::computeMaxElectricField" << endl;
   }
 
   // Get a handle to the E-field
@@ -987,19 +987,19 @@ void ito_plasma_stepper::computeElectricField(EBAMRIVData& a_E_eb,  const phase:
   interp_stencil.apply(a_E_eb, a_E_cell);
 }
 
-void ito_plasma_stepper::compute_rho(){
-  CH_TIME("ito_plasma_stepper::compute_rho()");
+void ito_plasma_stepper::computeSpaceChargeDensity(){
+  CH_TIME("ito_plasma_stepper::computeSpaceChargeDensity()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_rho()" << endl;
+    pout() << "ito_plasma_stepper::computeSpaceChargeDensity()" << endl;
   }
   
-  this->compute_rho(m_fieldSolver->getRho(), m_ito->getDensities());
+  this->computeSpaceChargeDensity(m_fieldSolver->getRho(), m_ito->getDensities());
 }
 
-void ito_plasma_stepper::compute_rho(MFAMRCellData& a_rho, const Vector<EBAMRCellData*>&  a_densities){
-  CH_TIME("ito_plasma_stepper::compute_rho(rho, densities)");
+void ito_plasma_stepper::computeSpaceChargeDensity(MFAMRCellData& a_rho, const Vector<EBAMRCellData*>&  a_densities){
+  CH_TIME("ito_plasma_stepper::computeSpaceChargeDensity(rho, densities)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_rho(rho, densities)" << endl;
+    pout() << "ito_plasma_stepper::computeSpaceChargeDensity(rho, densities)" << endl;
   }
 
   // TLDR: a_densities is from the ito solvers so it is defined over the particle Realm. But a_rho is defined over
@@ -1100,10 +1100,10 @@ void ito_plasma_stepper::compute_conductivity(EBAMRCellData& a_conductivity, con
   m_amr->interpToCentroids(a_conductivity, m_fluid_Realm, m_phase);
 }
 
-void ito_plasma_stepper::compute_J(EBAMRCellData& a_J, const Real a_dt){
-  CH_TIME("ito_plasma_stepper::compute_J(J)");
+void ito_plasma_stepper::computeJ(EBAMRCellData& a_J, const Real a_dt){
+  CH_TIME("ito_plasma_stepper::computeJ(J)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_J(J)" << endl;
+    pout() << "ito_plasma_stepper::computeJ(J)" << endl;
   }
 
   // TLDR: a_J is defined over the fluid Realm but the computation takes place on the particle Realm.
@@ -1116,16 +1116,16 @@ void ito_plasma_stepper::compute_J(EBAMRCellData& a_J, const Real a_dt){
   DataOps::multiplyScalar(a_J, m_fluid_scratch1);
 }
 
-Real ito_plasma_stepper::compute_relaxation_time(){
-  CH_TIME("ito_plasma_stepper::compute_relaxation_time()");
+Real ito_plasma_stepper::computeRelaxationTime(){
+  CH_TIME("ito_plasma_stepper::computeRelaxationTime()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_relaxation_time()" << endl;
+    pout() << "ito_plasma_stepper::computeRelaxationTime()" << endl;
   }
 
   Real dt = 1.E99;
   
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const Real thisDt = this->compute_relaxation_time(lvl);
+    const Real thisDt = this->computeRelaxationTime(lvl);
 
     dt = Min(dt, thisDt);
   }
@@ -1133,10 +1133,10 @@ Real ito_plasma_stepper::compute_relaxation_time(){
   return dt;
 }
 
-Real ito_plasma_stepper::compute_relaxation_time(const int a_level){
-  CH_TIME("ito_plasma_stepper::compute_relaxation_time(level)");
+Real ito_plasma_stepper::computeRelaxationTime(const int a_level){
+  CH_TIME("ito_plasma_stepper::computeRelaxationTime(level)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_relaxation_time(level)" << endl;
+    pout() << "ito_plasma_stepper::computeRelaxationTime(level)" << endl;
   }
 
   Real dt = 1.E99;
@@ -1144,7 +1144,7 @@ Real ito_plasma_stepper::compute_relaxation_time(const int a_level){
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_fluid_Realm)[a_level];
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-    const Real thisDt = this->compute_relaxation_time(a_level, dit());
+    const Real thisDt = this->computeRelaxationTime(a_level, dit());
 
     dt = Min(dt, thisDt);
   }
@@ -1161,10 +1161,10 @@ Real ito_plasma_stepper::compute_relaxation_time(const int a_level){
   return dt;
 }
 
-Real ito_plasma_stepper::compute_relaxation_time(const int a_level, const DataIndex a_dit){
-  CH_TIME("ito_plasma_stepper::compute_relaxation_time(level, dit)");
+Real ito_plasma_stepper::computeRelaxationTime(const int a_level, const DataIndex a_dit){
+  CH_TIME("ito_plasma_stepper::computeRelaxationTime(level, dit)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_relaxation_time(level, dit)" << endl;
+    pout() << "ito_plasma_stepper::computeRelaxationTime(level, dit)" << endl;
   }
 
   const int comp    = 0;
@@ -1199,14 +1199,14 @@ Real ito_plasma_stepper::compute_relaxation_time(const int a_level, const DataIn
   return dt.min(comp);
 }
 
-bool ito_plasma_stepper::solve_poisson(){
-  CH_TIME("ito_plasma_stepper::solve_poisson()");
+bool ito_plasma_stepper::solvePoisson(){
+  CH_TIME("ito_plasma_stepper::solvePoisson()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::solve_poisson()" << endl;
+    pout() << "ito_plasma_stepper::solvePoisson()" << endl;
   }
 
   // Computes rho
-  this->compute_rho();
+  this->computeSpaceChargeDensity();
 
   // Solves the Poisson equation
   const bool converged = m_fieldSolver->solve(m_fieldSolver->getPotential(),
@@ -1237,16 +1237,16 @@ bool ito_plasma_stepper::solve_poisson(){
   return converged;
 }
 
-bool ito_plasma_stepper::solve_poisson(MFAMRCellData&                a_potential,
+bool ito_plasma_stepper::solvePoisson(MFAMRCellData&                a_potential,
 				       MFAMRCellData&                a_rho,
 				       const Vector<EBAMRCellData*>& a_densities,
 				       const EBAMRIVData&            a_sigma){
-  CH_TIME("ito_plasma_stepper::solve_poisson(phi, rho, densities, sigma)");
+  CH_TIME("ito_plasma_stepper::solvePoisson(phi, rho, densities, sigma)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::solve_poisson(phi, rho, densities, sigma)" << endl;
+    pout() << "ito_plasma_stepper::solvePoisson(phi, rho, densities, sigma)" << endl;
   }
 
-  this->compute_rho(a_rho, a_densities);
+  this->computeSpaceChargeDensity(a_rho, a_densities);
 
   const bool converged = m_fieldSolver->solve(a_potential,
 					  a_rho,

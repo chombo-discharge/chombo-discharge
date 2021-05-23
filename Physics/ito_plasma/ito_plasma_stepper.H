@@ -59,15 +59,15 @@ namespace Physics {
       virtual void postInitialize() override;
       
       void setup_ito();
-      void setup_poisson();
-      void setup_rte();
-      void setup_sigma();
+      void setupPoisson();
+      void setupRadiativeTransfer();
+      void setupSigma();
   
       // IO routines
       void writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const override;
       void readCheckpointData(HDF5Handle& a_handle, const int a_lvl) override;
       virtual void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const override;
-      void write_J(EBAMRCellData& a_output, int& a_icomp) const;
+      void writeJ(EBAMRCellData& a_output, int& a_icomp) const;
       void write_num_particles_per_patch(EBAMRCellData& a_output, int& a_icomp) const;
       int  getNumberOfPlotVariables() const override;
       Vector<long int> getCheckpointLoads(const std::string a_realm, const int a_level) const override;
@@ -122,13 +122,13 @@ namespace Physics {
 
       // Set routines
       void set_ito(RefCountedPtr<ItoLayout<ItoSolver> >& a_cdr);
-      void set_poisson(RefCountedPtr<FieldSolver>& a_poisson);
-      void set_rte(RefCountedPtr<RtLayout<McPhoto> >& a_rte);
-      void set_potential(const std::function<Real(const Real a_time)>& a_potential);
+      void setFieldSolver(RefCountedPtr<FieldSolver>& a_poisson);
+      void setRadiativeTransferSolvers(RefCountedPtr<RtLayout<McPhoto> >& a_rte);
+      void setVoltage(const std::function<Real(const Real a_time)>& a_potential);
 
       // Get routines
       Real getTime() const;
-      Real computeElectricFieldmax(const phase::which_phase a_phase);
+      Real computeMaxElectricField(const phase::which_phase a_phase);
 
       // E-field computations
       void computeElectricField(MFAMRCellData& a_E,      const MFAMRCellData& a_potential);
@@ -138,25 +138,25 @@ namespace Physics {
       void computeElectricField(EBAMRIVData& a_E_eb,     const phase::which_phase a_phase, const EBAMRCellData& a_E_cell);
       
       // Compute rho routines
-      void compute_rho();
-      void compute_rho(EBAMRCellData& a_rho, const phase::which_phase a_phase);
-      void compute_rho(MFAMRCellData& a_rho, const Vector<EBAMRCellData*>&  a_densities);
+      void computeSpaceChargeDensity();
+      void computeSpaceChargeDensity(EBAMRCellData& a_rho, const phase::which_phase a_phase);
+      void computeSpaceChargeDensity(MFAMRCellData& a_rho, const Vector<EBAMRCellData*>&  a_densities);
 
       // Compute conductivity routines
       void compute_conductivity(EBAMRCellData& a_conductivity);
       void compute_conductivity(EBAMRCellData& a_conductivity, const Vector<ParticleContainer<ItoParticle>* >& a_particles);
 
       // Compute J routines
-      void compute_J(EBAMRCellData& a_J, const Real a_dt);
+      void computeJ(EBAMRCellData& a_J, const Real a_dt);
 
       // Relaxation time
-      Real compute_relaxation_time();
-      Real compute_relaxation_time(const int a_level);
-      Real compute_relaxation_time(const int a_level, const DataIndex a_dit);
+      Real computeRelaxationTime();
+      Real computeRelaxationTime(const int a_level);
+      Real computeRelaxationTime(const int a_level, const DataIndex a_dit);
 
       // Poisson-solving routines
-      bool solve_poisson();
-      bool solve_poisson(MFAMRCellData&                 a_potential,
+      bool solvePoisson();
+      bool solvePoisson(MFAMRCellData&                 a_potential,
 			 MFAMRCellData&                 a_rhs,
 			 const Vector<EBAMRCellData* >& a_densities,
 			 const EBAMRIVData&             a_sigma);

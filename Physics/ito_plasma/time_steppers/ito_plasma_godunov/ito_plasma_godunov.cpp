@@ -363,8 +363,8 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   // Compute current and relaxation time.
   MPI_Barrier(Chombo_MPI::comm);
   relax_time = -MPI_Wtime();
-  this->compute_J(m_J, a_dt);
-  m_dt_relax = this->compute_relaxation_time(); // This is for the restricting the next step.
+  this->computeJ(m_J, a_dt);
+  m_dt_relax = this->computeRelaxationTime(); // This is for the restricting the next step.
   relax_time += MPI_Wtime();
 
   // Move Photons
@@ -637,7 +637,7 @@ void ito_plasma_godunov::regrid(const int a_lmin, const int a_oldFinestLevel, co
 
   MPI_Barrier(Chombo_MPI::comm);
   solve_time -= MPI_Wtime();
-  const bool converged = this->solve_poisson();
+  const bool converged = this->solvePoisson();
   if(!converged){
     MayDay::Abort("ito_plasma_godunov::regrid - Poisson solve did not converge after regrid!!!");
   }
@@ -1217,7 +1217,7 @@ void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
 
   MPI_Barrier(Chombo_MPI::comm);
   poissonTime -= MPI_Wtime();
-  this->solve_poisson();                                       // Solve the stinking equation.
+  this->solvePoisson();                                       // Solve the stinking equation.
   poissonTime += MPI_Wtime();
 
   // 4. Recompute velocities with the new electric field, then do the actual semi-implicit Euler-Maruyama update.
@@ -1429,7 +1429,7 @@ void ito_plasma_godunov::advance_particles_trapezoidal(const Real a_dt){
   this->copy_conductivity_particles(m_conductivity_particles); 
   this->compute_all_conductivities(m_conductivity_particles);        
   this->setup_semi_implicit_poisson(a_dt);                     
-  this->solve_poisson();                                       
+  this->solvePoisson();                                       
 
   this->set_ito_velocity_funcs();
   m_ito->interpolateVelocities();
@@ -1445,7 +1445,7 @@ void ito_plasma_godunov::advance_particles_trapezoidal(const Real a_dt){
   this->copy_conductivity_particles(m_conductivity_particles); 
   this->compute_all_conductivities(m_conductivity_particles);        
   this->setup_semi_implicit_poisson(0.5*a_dt);                 
-  this->solve_poisson();                                       
+  this->solvePoisson();                                       
 
   this->set_ito_velocity_funcs();
   m_ito->interpolateVelocities();

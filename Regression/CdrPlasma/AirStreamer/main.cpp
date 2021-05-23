@@ -47,7 +47,7 @@ int main(int argc, char* argv[]){
 
   // Set up physics 
   RefCountedPtr<CdrPlasmaPhysics> physics      = RefCountedPtr<CdrPlasmaPhysics> (new air3_bourdon());
-  RefCountedPtr<cdr_plasma_stepper> timestepper  = RefCountedPtr<cdr_plasma_stepper> (new imex_sdc(physics));
+  RefCountedPtr<CdrPlasmaStepper> timestepper  = RefCountedPtr<CdrPlasmaStepper> (new imex_sdc(physics));
   RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (new CdrPlasmaStreamerTagger(physics, timestepper, amr, compgeom));
 
   // Create solver factories
@@ -61,12 +61,12 @@ int main(int argc, char* argv[]){
   auto rte = rte_fact->newLayout(physics->getRtSpecies());
 
   // Send solvers to TimeStepper 
-  timestepper->set_poisson(poi);
-  timestepper->set_cdr(cdr);
-  timestepper->set_rte(rte);
+  timestepper->setFieldSolver(poi);
+  timestepper->setCdrSolvers(cdr);
+  timestepper->setRadiativeTransferSolvers(rte);
 
   // Set potential 
-  timestepper->set_potential(potential_curve);
+  timestepper->setVoltage(potential_curve);
 
   // Set up the Driver and run it
   RefCountedPtr<Driver> engine = RefCountedPtr<Driver> (new Driver(compgeom, timestepper, amr, tagger, geocoarsen));

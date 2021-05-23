@@ -269,7 +269,7 @@ namespace Physics {
       /*!
 	@brief Common function for dielectric and electrode fluxes, only difference is the secondary emission coefficients
       */
-      Vector<Real> compute_cdr_fluxes(const Real         a_time,
+      Vector<Real> computeCdrFluxes(const Real         a_time,
 				      const RealVect     a_pos,
 				      const RealVect     a_normal,
 				      const RealVect     a_E,

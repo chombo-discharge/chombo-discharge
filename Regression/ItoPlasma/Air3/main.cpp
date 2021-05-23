@@ -62,12 +62,12 @@ int main(int argc, char* argv[]){
   auto rte = rte_fact->newLayout(physics->getRtSpecies());
 
   // Send solvers to TimeStepper 
-  timestepper->set_poisson(poi);
+  timestepper->setFieldSolver(poi);
   timestepper->set_ito(cdr);
-  timestepper->set_rte(rte);
+  timestepper->setRadiativeTransferSolvers(rte);
 
   // Set potential 
-  timestepper->set_potential(potential_curve);
+  timestepper->setVoltage(potential_curve);
 
   // Set up the Driver and run it
   RefCountedPtr<Driver> engine = RefCountedPtr<Driver> (new Driver(compgeom, timestepper, amr, tagger, geocoarsen));
