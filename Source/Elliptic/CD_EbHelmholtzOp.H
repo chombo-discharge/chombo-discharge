@@ -1,6 +1,6 @@
 /* chombo-discharge
- * Copyright 2021 SINTEF Energy Research
- * Please refer to LICENSE in the chombo-discharge root directory
+ * Copyright © 2021 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
  */
 /*!
   @file   CD_EbHelmholtzOp.H
