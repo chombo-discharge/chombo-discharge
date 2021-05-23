@@ -39,7 +39,7 @@ namespace Physics {
       /*!
 	@brief Just a silly namespace for centering stuff...
       */
-      enum class centering {
+      enum class Centering {
 	CellCenter,
 	CellCentroid,
 	EbCentroid,
@@ -145,7 +145,7 @@ namespace Physics {
 				MFAMRCellData&                a_rhs,
 				const Vector<EBAMRCellData*>  a_densities,
 				const EBAMRIVData&            a_sigma,
-				const centering               a_centering);
+				const Centering               a_centering = Centering::CellCenter);
 
       /*!
 	@brief Advance the reaction network. 
@@ -621,7 +621,7 @@ namespace Physics {
       */
       virtual void computeSpaceChargeDensity(MFAMRCellData&                 a_rho,
 					     const Vector<EBAMRCellData*>&  a_densities,
-					     const centering                a_centering);
+					     const Centering                a_centering = Centering::CellCenter);
 
 
   
@@ -855,7 +855,7 @@ namespace Physics {
 					  const EBAMRCellData&          a_E,
 					  const Real                    a_time,
 					  const Real                    a_dt,
-					  const centering               a_centering);
+					  const Centering               a_centering = Centering::CellCenter);
 
       /*!
 	@brief Synchronize solver times

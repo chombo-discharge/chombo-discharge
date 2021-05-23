@@ -104,7 +104,7 @@ bool CdrPlasmaStepper::solvePoisson(MFAMRCellData&                a_potential,
 				    MFAMRCellData&                a_rhs,
 				    const Vector<EBAMRCellData*>  a_densities,
 				    const EBAMRIVData&            a_sigma,
-				    const centering               a_centering){
+				    const Centering               a_centering){
   CH_TIME("CdrPlasmaStepper::solvePoisson(full)");
   if(m_verbosity > 5){
     pout() << "CdrPlasmaStepper::solvePoisson(full)" << endl;
@@ -2904,7 +2904,7 @@ void CdrPlasmaStepper::computeSpaceChargeDensity(){
     densities.push_back(&(solver->getPhi()));
   }
 
-  this->computeSpaceChargeDensity(m_fieldSolver->getRho(), densities, centering::CellCenter);
+  this->computeSpaceChargeDensity(m_fieldSolver->getRho(), densities, Centering::CellCenter);
 }
 
 void CdrPlasmaStepper::computeSpaceChargeDensity(EBAMRCellData& a_rho, const phase::which_phase a_phase){
@@ -2942,7 +2942,7 @@ void CdrPlasmaStepper::computeSpaceChargeDensity(EBAMRCellData& a_rho, const pha
 
 void CdrPlasmaStepper::computeSpaceChargeDensity(MFAMRCellData&                 a_rho,
 						 const Vector<EBAMRCellData*>&  a_densities,
-						 const centering                a_centering){
+						 const Centering                a_centering){
   CH_TIME("CdrPlasmaStepper::computeSpaceChargeDensity(mfamrcell, vec(ebamrcell))");
   if(m_verbosity > 5){
     pout() << "CdrPlasmaStepper::computeSpaceChargeDensity(mfamrcell, vec(ebamrcell))" << endl;
@@ -2974,7 +2974,7 @@ void CdrPlasmaStepper::computeSpaceChargeDensity(MFAMRCellData&                 
   m_amr->interpGhost(a_rho, m_realm);
 
   // Transform to centroids
-  if(a_centering == centering::CellCenter){
+  if(a_centering == Centering::CellCenter){
     m_amr->interpToCentroids(rho_gas, m_realm, phase::gas);
   }
 }
@@ -3757,7 +3757,7 @@ void CdrPlasmaStepper::solveRadiativeTransfer(const Real a_dt){
   Vector<EBAMRCellData*> rhs        = m_rte->getSources();
   Vector<EBAMRCellData*> cdr_states = m_cdr->getPhis();
 
-  this->solveRadiativeTransfer(states, rhs, cdr_states, E, m_time, a_dt, centering::CellCenter);
+  this->solveRadiativeTransfer(states, rhs, cdr_states, E, m_time, a_dt, Centering::CellCenter);
 }
 
 void CdrPlasmaStepper::solveRadiativeTransfer(Vector<EBAMRCellData*>&       a_rte_states,
@@ -3766,7 +3766,7 @@ void CdrPlasmaStepper::solveRadiativeTransfer(Vector<EBAMRCellData*>&       a_rt
 					      const EBAMRCellData&          a_E,
 					      const Real                    a_time,
 					      const Real                    a_dt,
-					      const centering               a_centering){
+					      const Centering               a_centering){
   CH_TIME("CdrPlasmaStepper::solveRadiativeTransfer(full)");
   if(m_verbosity > 5){
     pout() << "CdrPlasmaStepper::solveRadiativeTransfer(full)" << endl;

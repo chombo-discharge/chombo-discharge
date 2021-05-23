@@ -1623,13 +1623,13 @@ void imex_sdc::computeCdrFluxes(const Vector<EBAMRCellData*>& a_phis, const Real
 
   const EBAMRIVData& E = m_fieldSolver_scratch->get_E_eb();
   CdrPlasmaStepper::computeCdrFluxes(cdr_fluxes,
-					 extrap_cdr_fluxes,
-					 extrap_cdr_densities,
-					 extrap_cdr_velocities,
-					 extrap_cdr_gradients,
-					 extrap_rte_fluxes,
-					 E,
-					 a_time);
+				     extrap_cdr_fluxes,
+				     extrap_cdr_densities,
+				     extrap_cdr_velocities,
+				     extrap_cdr_gradients,
+				     extrap_rte_fluxes,
+				     E,
+				     a_time);
 }
 
 void imex_sdc::computeCdrDomainFluxes(const Real a_time){
@@ -1695,13 +1695,13 @@ void imex_sdc::computeCdrDomainFluxes(const Vector<EBAMRCellData*>& a_phis, cons
 
   // This fills the solvers' domain fluxes
   CdrPlasmaStepper::computeCdrDomainFluxes(cdr_fluxes,
-						extrap_cdr_fluxes,
-						extrap_cdr_densities,
-						extrap_cdr_velocities,
-						extrap_cdr_gradients,
-						extrap_rte_fluxes,
-						E,
-						a_time);
+					   extrap_cdr_fluxes,
+					   extrap_cdr_densities,
+					   extrap_cdr_velocities,
+					   extrap_cdr_gradients,
+					   extrap_rte_fluxes,
+					   E,
+					   a_time);
 }
 
 void imex_sdc::compute_sigma_flux(){
@@ -1763,11 +1763,10 @@ void imex_sdc::update_poisson(const Vector<EBAMRCellData*>& a_densities, const E
   if(m_do_poisson){ // Solve Poisson equation
     if((m_timeStep +1) % m_fast_poisson == 0){
       CdrPlasmaStepper::solvePoisson(m_fieldSolver->getPotential(),
-					m_fieldSolver->getRho(),
-					a_densities,
-					a_sigma,
-					centering::CellCenter);
-      this->computeElectricField_into_scratch();
+				     m_fieldSolver->getRho(),
+				     a_densities,
+				     a_sigma);
+	this->computeElectricField_into_scratch();
     }
   }
 }
