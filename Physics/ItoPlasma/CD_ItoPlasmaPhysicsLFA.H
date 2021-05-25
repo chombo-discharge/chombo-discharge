@@ -1,36 +1,41 @@
+/* chombo-discharge
+ * Copyright © 2021 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+ */
+
 /*!
-  @file   ito_plasma_physics_lea.H
-  @brief  Interface file for LEA-based ito plasma physics
+  @file   CD_ItoPlasmaPhysicsLFA.H
+  @brief  Interface file for LFA-based ito plasma physics.
   @author Robert Marskar
-  @date   June 2020
 */
 
-#ifndef _ITO_PLASMA_PHYSICS_LFA_
-#define _ITO_PLASMA_PHYSICS_LFA_
+#ifndef CD_ItoPlasmaPhysicsLFA_H
+#define CD_ItoPlasmaPhysicsLFA_H
 
+// Our includes
 #include <CD_ItoPlasmaPhysics.H>
+#include <CD_NamespaceHeader.H>
 
-#include "CD_NamespaceHeader.H"
 namespace Physics {
   namespace ItoPlasma {
 
     /*!
       @brief Middle layer for describing ItoPlasmaPhysics in the LFA
     */
-    class ito_plasma_physics_lfa : public ItoPlasmaPhysics {
+    class ItoPlasmaPhysicsLFA : public ItoPlasmaPhysics {
     public:
       
       /*!
 	@brief Ctor. Does nothing.
       */
-      ito_plasma_physics_lfa(){
+      ItoPlasmaPhysicsLFA(){
 
       }
 
       /*!
 	@brief Dtor. Does nothing. 
       */
-      ~ito_plasma_physics_lfa(){
+      ~ItoPlasmaPhysicsLFA(){
 
       }
 
@@ -60,9 +65,9 @@ namespace Physics {
 	@brief Compute diffusion coefficients
       */
       virtual Vector<Real> computeItoDiffusionLFA(const Real         a_time,
-						     const RealVect     a_pos,
-						     const RealVect     a_E,
-						     const Vector<Real> a_cdr_densities) const override = 0;
+						  const RealVect     a_pos,
+						  const RealVect     a_E,
+						  const Vector<Real> a_cdr_densities) const override = 0;
 
       /*!
 	@brief Update reaction rates for LFA updates. Since the rates don't change during the advance, they can
@@ -75,7 +80,8 @@ namespace Physics {
     };
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #include <CD_ItoPlasmaPhysicsImplem.H>
 
