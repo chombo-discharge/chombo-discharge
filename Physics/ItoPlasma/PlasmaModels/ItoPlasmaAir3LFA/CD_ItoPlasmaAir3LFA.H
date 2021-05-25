@@ -1,48 +1,53 @@
+/* chombo-discharge
+ * Copyright © 2021 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+ */
+
 /*!
-  @file   ito_plasma_air3.H
-  @brief  Simple class for 3-species air plasma
+  @file   CD_ItoPlasmaAir3LFA.H
+  @brief  Ito plasma three-species model for air
   @author Robert Marskar
-  @date   June 2020
 */
 
-#ifndef _ITO_PLASMA_AIR3_
-#define _ITO_PLASMA_AIR3_
+#ifndef CD_ItoPlasmaAir3LFA_H
+#define CD_ItoPlasmaAir3LFA_H
 
+// Our includes
 #include <CD_ItoPlasmaPhysicsLFA.H>
-#include "CD_LookupTable.H"
+#include <CD_LookupTable.H>
+#include <CD_NamespaceHeader.H>
 
-#include "CD_NamespaceHeader.H"
 namespace Physics {
   namespace ItoPlasma{
 
     /*!
       @brief Abstract clas for specifying plasma kinetics
     */
-    class ito_plasma_air3 : public ItoPlasmaPhysicsLFA {
+    class ItoPlasmaAir3LFA : public ItoPlasmaPhysicsLFA {
     public:
 
-      class electron;
-      class positive;
-      class negative;
+      class Electron;
+      class Positive;
+      class Negative;
       class PhotonZ;
       
-      ito_plasma_air3();
-      ~ito_plasma_air3();
+      ItoPlasmaAir3LFA();
+      ~ItoPlasmaAir3LFA();
 
       Real computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_cdr_densities) const override;
 
       Real computeAlpha(const RealVect a_E) const override;
 
-      Real compute_eta(const RealVect a_E) const;
+      Real computeEta(const RealVect a_E) const;
 
       void updateReactionRatesLFA(const RealVect a_E, const Real a_dx, const Real a_kappa) const override;
 
       Vector<Real> computeItoMobilitiesLFA(const Real a_time, const RealVect a_pos, const RealVect a_E) const override;
 
       Vector<Real> computeItoDiffusionLFA(const Real         a_time,
-					     const RealVect     a_pos,
-					     const RealVect     a_E,
-					     const Vector<Real> a_cdr_densities) const override;
+					  const RealVect     a_pos,
+					  const RealVect     a_E,
+					  const Vector<Real> a_cdr_densities) const override;
 
 
     protected:
@@ -57,9 +62,9 @@ namespace Physics {
       RealVect m_blob_center;
 
       // Indices for species
-      int m_electron_idx;
-      int m_positive_idx;
-      int m_negative_idx;
+      int m_electronIdx;
+      int m_positiveIdx;
+      int m_negativeIdx;
       int m_PhotonZ_idx;
 
       // Mobile ions or not
@@ -80,40 +85,40 @@ namespace Physics {
       Real m_photoi_factor;
 
       // Functions for drawing initial particles
-      void draw_initial_particles();
+      void drawInitialParticles();
 
       // Zheleznyak photoionization rates
-      Real excitation_rates(const Real a_E) const;
-      Real sergey_factor(const Real a_O2frac) const;
-      Real photo_rate(const Real a_E) const;
+      Real excitationRates(const Real a_E) const;
+      Real sergeyFactor(const Real a_O2frac) const;
+      Real photoionizationRate(const Real a_E) const;
 
       // Electron velocity
-      RealVect compute_electron_velocity(const RealVect a_E) const;
+      RealVect computeElectronDriftVelocity(const RealVect a_E) const;
 
       // Read file into table
-      void read_tables();
+      void readTables();
     };
 
     
-    class ito_plasma_air3::electron : public ItoSpecies {
+    class ItoPlasmaAir3LFA::Electron : public ItoSpecies {
     public:
-      electron();
-      ~electron();
+      Electron();
+      ~Electron();
     };
 
-    class ito_plasma_air3::positive : public ItoSpecies {
+    class ItoPlasmaAir3LFA::Positive : public ItoSpecies {
     public:
-      positive();
-      ~positive();
+      Positive();
+      ~Positive();
     };
 
-    class ito_plasma_air3::negative : public ItoSpecies {
+    class ItoPlasmaAir3LFA::Negative : public ItoSpecies {
     public:
-      negative();
-      ~negative();
+      Negative();
+      ~Negative();
     };
 
-    class ito_plasma_air3::PhotonZ : public RtSpecies {
+    class ItoPlasmaAir3LFA::PhotonZ : public RtSpecies {
     public:
       PhotonZ();
       ~PhotonZ();
@@ -133,6 +138,7 @@ namespace Physics {
     };
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

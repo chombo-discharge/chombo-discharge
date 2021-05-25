@@ -992,7 +992,7 @@ void ItoPlasmaGodunovStepper::compute_face_conductivity(){
   DataOps::averageCellToFaceAllComps(m_conduct_face, m_conduct_cell, m_amr->getDomains());
 
   // This code extrapolates the conductivity to the EB. This should actually be the EB centroid but since the stencils
-  // for EB extrapolation can be a bit nasty (e.g. negative weights), we do the centroid instead and take that as an approximation.
+  // for EB extrapolation can be a bit nasty (e.g. Negative weights), we do the centroid instead and take that as an approximation.
 #if 0
   const IrregAmrStencil<CentroidInterpolationStencil>& ebsten = m_amr->getCentroidInterpolationStencils(m_fluid_Realm, m_phase);
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){

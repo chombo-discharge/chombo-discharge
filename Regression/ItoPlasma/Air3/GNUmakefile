@@ -35,7 +35,7 @@ src_dirs = $(DISCHARGE_HOME)/Source \
 	$(DISCHARGE_HOME)/Physics/ItoPlasma \
 	$(DISCHARGE_HOME)/Physics/ItoPlasma/CellTaggers/ItoPlasmaStreamerTagger\
 	$(DISCHARGE_HOME)/Physics/ItoPlasma/TimeSteppers/ItoPlasmaGodunovStepper\
-	$(DISCHARGE_HOME)/Physics/ItoPlasma/PlasmaModels/ito_plasma_air3
+	$(DISCHARGE_HOME)/Physics/ItoPlasma/PlasmaModels/ItoPlasmaAir3LFA
 
 
 include $(CHOMBO_HOME)/mk/Make.example

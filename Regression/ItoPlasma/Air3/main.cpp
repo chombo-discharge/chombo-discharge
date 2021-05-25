@@ -6,7 +6,7 @@
 #include <CD_ItoSolver.H>
 #include <CD_RtLayout.H>
 #include <CD_McPhoto.H>
-#include "ito_plasma_air3.H"
+#include <CD_ItoPlasmaAir3LFA.H>
 #include <CD_RodDielectric.H>
 #include <CD_ItoPlasmaGodunovStepper.H>
 #include <CD_ItoPlasmaStreamerTagger.H>
@@ -47,7 +47,7 @@ int main(int argc, char* argv[]){
   RefCountedPtr<GeoCoarsener> geocoarsen        = RefCountedPtr<GeoCoarsener> (new GeoCoarsener());
 
   // Set up physics 
-  RefCountedPtr<ItoPlasmaPhysics> physics      = RefCountedPtr<ItoPlasmaPhysics> (new ito_plasma_air3());
+  RefCountedPtr<ItoPlasmaPhysics> physics      = RefCountedPtr<ItoPlasmaPhysics> (new ItoPlasmaAir3LFA());
   RefCountedPtr<ItoPlasmaStepper> timestepper  = RefCountedPtr<ItoPlasmaStepper> (new ItoPlasmaGodunovStepper(physics));
   RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (new ItoPlasmaStreamerTagger(physics, timestepper, amr, compgeom));
 
