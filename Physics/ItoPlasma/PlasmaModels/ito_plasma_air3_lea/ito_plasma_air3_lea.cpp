@@ -17,7 +17,7 @@ ito_plasma_air3_lea::ito_plasma_air3_lea(){
   m_num_ItoSpecies = 3;
   m_numRtSpecies = 1;
 
-  m_coupling = ito_plasma_physics::coupling::LEA;
+  m_coupling = ItoPlasmaPhysics::coupling::LEA;
 
   ParmParse pp("ito_plasma_air3_lea");
   Vector<Real> v;
@@ -103,7 +103,7 @@ ito_plasma_air3_lea::ito_plasma_air3_lea(){
   positives.clear();
   negatives.clear();
   
-  this->draw_sphere_particles(electrons, positives, m_num_particles, m_blob_center, m_blob_radius, m_particle_weight, 2.0, 0.0);
+  this->drawSphereParticles(electrons, positives, m_num_particles, m_blob_center, m_blob_radius, m_particle_weight, 2.0, 0.0);
 
   // Electron loss function
   std::pair<int, Real> impact_loss     = std::make_pair(m_electron_idx, -13.0);  //  14eV per reaction of this type.
@@ -158,7 +158,7 @@ Real ito_plasma_air3_lea::computeAlpha(const RealVect a_E) const {
   return m_tables.at("alpha_lfa").getEntry(E);
 }
 
-void ito_plasma_air3_lea::update_reaction_rates_lea(const RealVect a_E, const Vector<Real> a_mean_energies, const Real a_dx, const Real a_kappa) const {
+void ito_plasma_air3_lea::updateReactionRatesLEA(const RealVect a_E, const Vector<Real> a_mean_energies, const Real a_dx, const Real a_kappa) const {
 
   //  const Real electron_energy = a_mean_energies[m_electron_idx];
   //  const Real electron_energy = 12; // Use 12eV for everything for now.

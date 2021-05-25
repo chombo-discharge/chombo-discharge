@@ -23,7 +23,7 @@ namespace Physics {
   namespace ItoPlasma {
     
     /*!
-      @brief Reaction class for ito_plasma_physics. 
+      @brief Reaction class for ItoPlasmaPhysics. 
       @details To use this class you should initialize a photoreaction e.g. ItoPlasmaPhotoReaction({0}, {0,1,3})
       to the reaction Y0 => X_0 + X_1 + X_3.
       @note Technically, this class can also do Y0 + Y1 => X_0 + X1 + X3, but I don't see where that would be used...

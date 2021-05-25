@@ -82,7 +82,7 @@ def write_template(args):
 
     mainf.write("\n")
     mainf.write("  // Set up physics \n")
-    mainf.write("  RefCountedPtr<ito_plasma_physics> physics      = RefCountedPtr<ito_plasma_physics> (new " + args.physics + "());\n")
+    mainf.write("  RefCountedPtr<ItoPlasmaPhysics> physics      = RefCountedPtr<ItoPlasmaPhysics> (new " + args.physics + "());\n")
     mainf.write("  RefCountedPtr<ito_plasma_stepper> timestepper  = RefCountedPtr<ito_plasma_stepper> (new " + args.TimeStepper + "(physics));\n")
     if args.CellTagger != "none":
         mainf.write("  RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (new " + args.CellTagger + "(physics, timestepper, amr, compgeom));\n")

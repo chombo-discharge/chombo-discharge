@@ -8,7 +8,7 @@
 #ifndef _ITO_PLASMA_PHYSICS_LEA_
 #define _ITO_PLASMA_PHYSICS_LEA_
 
-#include "ito_plasma_physics.H"
+#include <CD_ItoPlasmaPhysics.H>
 
 #include "CD_NamespaceHeader.H"
 namespace Physics {
@@ -17,7 +17,7 @@ namespace Physics {
     /*!
       @brief Abstract clas for specifying plasma kinetics
     */
-    class ito_plasma_physics_lea : public ito_plasma_physics {
+    class ito_plasma_physics_lea : public ItoPlasmaPhysics {
     public:
 
       /*!
@@ -47,15 +47,15 @@ namespace Physics {
       /*!
 	@brief This must be overridden.
       */
-      virtual void update_reaction_rates_lea(const RealVect a_E, const Vector<Real> a_mean_energies, const Real a_dx, const Real a_kappa) const override = 0;
+      virtual void updateReactionRatesLEA(const RealVect a_E, const Vector<Real> a_mean_energies, const Real a_dx, const Real a_kappa) const override = 0;
 
       // Disabled in LEA
-      Vector<Real> compute_ito_mobilities_lfa(const Real a_time, const RealVect a_pos, const RealVect a_E) const override final {
-	MayDay::Abort("ito_plasma_physics_lea::compute_ito_mobilities_lfa - should not end up here with an LEA model");
+      Vector<Real> computeItoMobilitiesLFA(const Real a_time, const RealVect a_pos, const RealVect a_E) const override final {
+	MayDay::Abort("ito_plasma_physics_lea::computeItoMobilitiesLFA - should not end up here with an LEA model");
       }
 
       // Disabled in LEA
-      Vector<Real> compute_ito_diffusion_lfa(const Real         a_time,
+      Vector<Real> computeItoDiffusionLFA(const Real         a_time,
 					     const RealVect     a_pos,
 					     const RealVect     a_E,
 					     const Vector<Real> a_cdr_densities) const override final {
@@ -63,8 +63,8 @@ namespace Physics {
       }
 
       // Disables in LEA
-      void update_reaction_rates_lfa(const RealVect a_E, const Real a_dx, const Real a_kappa) const override final {
-	MayDay::Abort("ito_plasma_physics_lea::update_reaction_rates_lfa - should not end up here with an LEA model");
+      void updateReactionRatesLFA(const RealVect a_E, const Real a_dx, const Real a_kappa) const override final {
+	MayDay::Abort("ito_plasma_physics_lea::updateReactionRatesLFA - should not end up here with an LEA model");
       }
 
 

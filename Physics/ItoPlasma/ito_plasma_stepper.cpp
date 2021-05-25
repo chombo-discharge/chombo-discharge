@@ -36,7 +36,7 @@ ito_plasma_stepper::ito_plasma_stepper(){
   m_particleRealm = Realm::Primal;
 }
 
-ito_plasma_stepper::ito_plasma_stepper(RefCountedPtr<ito_plasma_physics>& a_physics) : ito_plasma_stepper(){
+ito_plasma_stepper::ito_plasma_stepper(RefCountedPtr<ItoPlasmaPhysics>& a_physics) : ito_plasma_stepper(){
   m_physics   = a_physics;
 }
 
@@ -1583,17 +1583,17 @@ void ito_plasma_stepper::compute_ito_velocities(){
     pout() << "ito_plasma_stepper::compute_ito_velocities()" << endl;
   }
 
-  const ito_plasma_physics::coupling which_coupling = m_physics->get_coupling();
+  const ItoPlasmaPhysics::coupling which_coupling = m_physics->getCoupling();
 
   // Set velocity functions
   this->set_ito_velocity_funcs();
 
   // Compute mobilities based on appropriate coupling
   switch(which_coupling){
-  case ito_plasma_physics::coupling::LFA:
-    this->compute_ito_mobilities_lfa();
+  case ItoPlasmaPhysics::coupling::LFA:
+    this->computeItoMobilitiesLFA();
     break;
-  case ito_plasma_physics::coupling::LEA:
+  case ItoPlasmaPhysics::coupling::LEA:
     this->compute_ito_mobilities_lea();
     break;
   }
@@ -1610,33 +1610,33 @@ void ito_plasma_stepper::compute_ito_diffusion(){
     pout() << "ito_plasma_stepper::compute_ito_diffusion()" << endl;
   }
 
-  const ito_plasma_physics::coupling which_coupling = m_physics->get_coupling();
+  const ItoPlasmaPhysics::coupling which_coupling = m_physics->getCoupling();
 
   // Compute mobilities based on appropriate coupling
   switch(which_coupling){
-  case ito_plasma_physics::coupling::LFA:
-    this->compute_ito_diffusion_lfa();
+  case ItoPlasmaPhysics::coupling::LFA:
+    this->computeItoDiffusionLFA();
     break;
-  case ito_plasma_physics::coupling::LEA:
+  case ItoPlasmaPhysics::coupling::LEA:
     this->compute_ito_diffusion_lea();
     break;
   }
 }
 
-void ito_plasma_stepper::compute_ito_mobilities_lfa(){
-  CH_TIME("ito_plasma_stepper::compute_ito_mobilities_lfa()");
+void ito_plasma_stepper::computeItoMobilitiesLFA(){
+  CH_TIME("ito_plasma_stepper::computeItoMobilitiesLFA()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_ito_mobilities_lfa()" << endl;
+    pout() << "ito_plasma_stepper::computeItoMobilitiesLFA()" << endl;
   }
 
   Vector<EBAMRCellData*> meshMobilities = m_ito->getMobilityFunctions();
-  this->compute_ito_mobilities_lfa(meshMobilities, m_fluid_E, m_time);
+  this->computeItoMobilitiesLFA(meshMobilities, m_fluid_E, m_time);
 }
 
-void ito_plasma_stepper::compute_ito_mobilities_lfa(Vector<EBAMRCellData*>& a_meshMobilities, const EBAMRCellData& a_E, const Real a_time){
-  CH_TIME("ito_plasma_stepper::compute_ito_mobilities_lfa(mobilities, E, time)");
+void ito_plasma_stepper::computeItoMobilitiesLFA(Vector<EBAMRCellData*>& a_meshMobilities, const EBAMRCellData& a_E, const Real a_time){
+  CH_TIME("ito_plasma_stepper::computeItoMobilitiesLFA(mobilities, E, time)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_ito_mobilities_lfa(mobilities, E, time)" << endl;
+    pout() << "ito_plasma_stepper::computeItoMobilitiesLFA(mobilities, E, time)" << endl;
   }
 
 
@@ -1648,7 +1648,7 @@ void ito_plasma_stepper::compute_ito_mobilities_lfa(Vector<EBAMRCellData*>& a_me
       meshMobilities.push_back(&(*(m_fscratch1[i])[lvl]));
     }
     
-    this->compute_ito_mobilities_lfa(meshMobilities, *a_E[lvl], lvl, a_time);
+    this->computeItoMobilitiesLFA(meshMobilities, *a_E[lvl], lvl, a_time);
   }
 
   // Average down and interpolate ghost cells. Then interpolate mobilities to particle positions. 
@@ -1678,13 +1678,13 @@ void ito_plasma_stepper::compute_ito_mobilities_lfa(Vector<EBAMRCellData*>& a_me
   }
 }
 
-void ito_plasma_stepper::compute_ito_mobilities_lfa(Vector<LevelData<EBCellFAB>* >& a_meshMobilities,
+void ito_plasma_stepper::computeItoMobilitiesLFA(Vector<LevelData<EBCellFAB>* >& a_meshMobilities,
 						    const LevelData<EBCellFAB>&     a_E,
 						    const int                       a_level,
 						    const Real                      a_time){
-  CH_TIME("ito_plasma_stepper::compute_ito_mobilities_lfa(mobilities, E, level, time)");
+  CH_TIME("ito_plasma_stepper::computeItoMobilitiesLFA(mobilities, E, level, time)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_ito_mobilities_lfa(mobilities, E, level, time)" << endl;
+    pout() << "ito_plasma_stepper::computeItoMobilitiesLFA(mobilities, E, level, time)" << endl;
   }
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_fluid_Realm)[a_level];
@@ -1698,19 +1698,19 @@ void ito_plasma_stepper::compute_ito_mobilities_lfa(Vector<LevelData<EBCellFAB>*
       meshMobilities.push_back(&((*a_meshMobilities[i])[dit()]));
     }
 
-    this->compute_ito_mobilities_lfa(meshMobilities, E, a_level, dit(), bx, a_time);
+    this->computeItoMobilitiesLFA(meshMobilities, E, a_level, dit(), bx, a_time);
   }
 }
 
-void ito_plasma_stepper::compute_ito_mobilities_lfa(Vector<EBCellFAB*>& a_meshMobilities,
+void ito_plasma_stepper::computeItoMobilitiesLFA(Vector<EBCellFAB*>& a_meshMobilities,
 						    const EBCellFAB&    a_E,
 						    const int           a_level,
 						    const DataIndex     a_dit,
 						    const Box           a_box,
 						    const Real          a_time) {
-  CH_TIME("ito_plasma_stepper::compute_ito_mobilities_lfa(meshMobilities, E, level, dit, box, time)");
+  CH_TIME("ito_plasma_stepper::computeItoMobilitiesLFA(meshMobilities, E, level, dit, box, time)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_ito_mobilities_lfa(meshMobilities, E, level, dit, box, time)" << endl;
+    pout() << "ito_plasma_stepper::computeItoMobilitiesLFA(meshMobilities, E, level, dit, box, time)" << endl;
   }
 
   const int comp         = 0;
@@ -1725,7 +1725,7 @@ void ito_plasma_stepper::compute_ito_mobilities_lfa(Vector<EBCellFAB*>& a_meshMo
     const RealVect e   = RealVect(D_DECL(E(iv,0), E(iv, 1), E(iv, 2)));
 
     // Call ito_physics and compute diffusion for each particle species
-    const Vector<Real> mobilities = m_physics->compute_ito_mobilities_lfa(a_time, pos, e);
+    const Vector<Real> mobilities = m_physics->computeItoMobilitiesLFA(a_time, pos, e);
     
     // Put mobilities in data holder
     for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -1742,7 +1742,7 @@ void ito_plasma_stepper::compute_ito_mobilities_lfa(Vector<EBCellFAB*>& a_meshMo
     const RealVect pos  = EBArith::getVofLocation(vof, dx*RealVect::Unit, prob_lo);
     
     // Compute diffusion
-    const Vector<Real> mobilities = m_physics->compute_ito_mobilities_lfa(a_time, pos, e);
+    const Vector<Real> mobilities = m_physics->computeItoMobilitiesLFA(a_time, pos, e);
 
     // Put diffusion in the appropriate place.
     for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -1771,25 +1771,25 @@ void ito_plasma_stepper::compute_ito_mobilities_lea(){
   }
 }
 
-void ito_plasma_stepper::compute_ito_diffusion_lfa(){
-  CH_TIME("ito_plasma_stepper::compute_ito_diffusion_lfa()");
+void ito_plasma_stepper::computeItoDiffusionLFA(){
+  CH_TIME("ito_plasma_stepper::computeItoDiffusionLFA()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_ito_diffusion_lfa()" << endl;
+    pout() << "ito_plasma_stepper::computeItoDiffusionLFA()" << endl;
   }
 
   Vector<EBAMRCellData*> diffco_funcs = m_ito->getDiffusionFunctions();
   Vector<EBAMRCellData*> densities    = m_ito->getDensities();
 
-  this->compute_ito_diffusion_lfa(diffco_funcs, densities, m_particle_E, m_time);
+  this->computeItoDiffusionLFA(diffco_funcs, densities, m_particle_E, m_time);
 }
 
-void ito_plasma_stepper::compute_ito_diffusion_lfa(Vector<EBAMRCellData*>&       a_diffusionCoefficient_funcs,
+void ito_plasma_stepper::computeItoDiffusionLFA(Vector<EBAMRCellData*>&       a_diffusionCoefficient_funcs,
 						   const Vector<EBAMRCellData*>& a_densities,
 						   const EBAMRCellData&          a_E,
 						   const Real                    a_time){
-  CH_TIME("ito_plasma_stepper::compute_ito_diffusion_lfa(velo, E, time)");
+  CH_TIME("ito_plasma_stepper::computeItoDiffusionLFA(velo, E, time)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_ito_diffusion_lfa(velo, E, time)" << endl;
+    pout() << "ito_plasma_stepper::computeItoDiffusionLFA(velo, E, time)" << endl;
   }
 
   // TLDR: In this routine we make m_fscratch1 hold the diffusion coefficients on the fluid Realm and m_fscratch2 hold the particle densities on the fluid Realm.
@@ -1805,7 +1805,7 @@ void ito_plasma_stepper::compute_ito_diffusion_lfa(Vector<EBAMRCellData*>&      
   // 2. Compute on each level. On the fluid Realm. 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
 
-    const int num_ItoSpecies = m_physics->get_num_ItoSpecies();
+    const int num_ItoSpecies = m_physics->getNumItoSpecies();
 
     Vector<LevelData<EBCellFAB>* > diffco_funcs(num_ItoSpecies);
     Vector<LevelData<EBCellFAB>* > densities(num_ItoSpecies);
@@ -1815,7 +1815,7 @@ void ito_plasma_stepper::compute_ito_diffusion_lfa(Vector<EBAMRCellData*>&      
       densities[idx]    = &(*(m_fscratch2[idx])[lvl]);
     }
 
-    this->compute_ito_diffusion_lfa(diffco_funcs, densities, *m_fluid_E[lvl], lvl, a_time);
+    this->computeItoDiffusionLFA(diffco_funcs, densities, *m_fluid_E[lvl], lvl, a_time);
   }
 
   // Average down, interpolate ghost cells, and then interpolate to particle positions
@@ -1841,17 +1841,17 @@ void ito_plasma_stepper::compute_ito_diffusion_lfa(Vector<EBAMRCellData*>&      
   }
 }
 
-void ito_plasma_stepper::compute_ito_diffusion_lfa(Vector<LevelData<EBCellFAB>* >&       a_diffusionCoefficient,
+void ito_plasma_stepper::computeItoDiffusionLFA(Vector<LevelData<EBCellFAB>* >&       a_diffusionCoefficient,
 						   const Vector<LevelData<EBCellFAB>* >& a_densities,
 						   const LevelData<EBCellFAB>&           a_E,
 						   const int                             a_level,
 						   const Real                            a_time){
-  CH_TIME("ito_plasma_stepper::compute_ito_diffusion_lfa(velo, E, level, time)");
+  CH_TIME("ito_plasma_stepper::computeItoDiffusionLFA(velo, E, level, time)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_ito_diffusion_lfa(velo, E, level, time)" << endl;
+    pout() << "ito_plasma_stepper::computeItoDiffusionLFA(velo, E, level, time)" << endl;
   }
 
-  const int num_ItoSpecies = m_physics->get_num_ItoSpecies();
+  const int num_ItoSpecies = m_physics->getNumItoSpecies();
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_fluid_Realm)[a_level];
 
@@ -1870,20 +1870,20 @@ void ito_plasma_stepper::compute_ito_diffusion_lfa(Vector<LevelData<EBCellFAB>* 
       densities[idx] = &(*a_densities[idx])[dit()];
     }
 
-    this->compute_ito_diffusion_lfa(diffusion, densities, a_E[dit()], a_level, dit(), box, a_time);
+    this->computeItoDiffusionLFA(diffusion, densities, a_E[dit()], a_level, dit(), box, a_time);
   }
 }
 
-void ito_plasma_stepper::compute_ito_diffusion_lfa(Vector<EBCellFAB*>&       a_diffusionCoefficient,
+void ito_plasma_stepper::computeItoDiffusionLFA(Vector<EBCellFAB*>&       a_diffusionCoefficient,
 						   const Vector<EBCellFAB*>& a_densities,
 						   const EBCellFAB&          a_E,
 						   const int                 a_level,
 						   const DataIndex           a_dit,
 						   const Box                 a_box,
 						   const Real                a_time){
-  CH_TIME("ito_plasma_stepper::compute_ito_diffusion_lfa(velo, E, level, dit, time)");
+  CH_TIME("ito_plasma_stepper::computeItoDiffusionLFA(velo, E, level, dit, time)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_ito_diffusion_lfa(velo, E, level, dit, time)" << endl;
+    pout() << "ito_plasma_stepper::computeItoDiffusionLFA(velo, E, level, dit, time)" << endl;
   }
 
   const int comp         = 0;
@@ -1905,7 +1905,7 @@ void ito_plasma_stepper::compute_ito_diffusion_lfa(Vector<EBCellFAB*>&       a_d
     }
 
     // Call ito_physics and compute diffusion for each particle species
-    const Vector<Real> diffusion = m_physics->compute_ito_diffusion_lfa(a_time, pos, e, densities);
+    const Vector<Real> diffusion = m_physics->computeItoDiffusionLFA(a_time, pos, e, densities);
     
     // Put diffusion where they belong
     for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -1932,7 +1932,7 @@ void ito_plasma_stepper::compute_ito_diffusion_lfa(Vector<EBCellFAB*>&       a_d
     }
     
     // Compute diffusion
-    const Vector<Real> diffusion = m_physics->compute_ito_diffusion_lfa(a_time, pos, e, densities);
+    const Vector<Real> diffusion = m_physics->computeItoDiffusionLFA(a_time, pos, e, densities);
 
     // Put diffusion in the appropriate place.
     for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -2187,7 +2187,7 @@ void ito_plasma_stepper::advanceReactionNetwork_nwo(const EBAMRCellData& a_E, co
   m_particle_eps.copy(m_fluid_eps);
 
   // 4. Reconcile particles on the particle Realm. Not implemented (yet).
-  this->reconcile_particles(m_particle_ppc, m_particle_old, m_particle_eps, m_particle_ypc);
+  this->reconcileParticles(m_particle_ppc, m_particle_old, m_particle_eps, m_particle_ypc);
 }
 
 
@@ -2234,7 +2234,7 @@ void ito_plasma_stepper::advanceReactionNetwork_nwo(EBCellFAB&       a_particles
     pout() << "ito_plasma_stepper::advanceReactionNetwork_nwo(ppc, ypc, E, sources, level, dit, box, dx, dt)" << endl;
   }
   
-  const int num_ItoSpecies = m_physics->get_num_ItoSpecies();
+  const int num_ItoSpecies = m_physics->getNumItoSpecies();
   const int num_RtSpecies = m_physics->getNumRtSpecies();
 
   const RealVect prob_lo = m_amr->getProbLo();
@@ -2272,7 +2272,7 @@ void ito_plasma_stepper::advanceReactionNetwork_nwo(EBCellFAB&       a_particles
       }
 	   
       // Do the physics advance
-      m_physics->advance_particles(particles, newPhotons, meanEnergies, energySources, a_dt, E, a_dx, kappa);
+      m_physics->advanceParticles(particles, newPhotons, meanEnergies, energySources, a_dt, E, a_dx, kappa);
 
       // Set result
       for (int i = 0; i < num_ItoSpecies; i++){
@@ -2307,7 +2307,7 @@ void ito_plasma_stepper::advanceReactionNetwork_nwo(EBCellFAB&       a_particles
       newPhotons[i]= 0LL;
     }
 
-    m_physics->advance_particles(particles, newPhotons, meanEnergies, energySources, a_dt, E, a_dx, kappa);
+    m_physics->advanceParticles(particles, newPhotons, meanEnergies, energySources, a_dt, E, a_dx, kappa);
 
 
     // Set result
@@ -2322,35 +2322,35 @@ void ito_plasma_stepper::advanceReactionNetwork_nwo(EBCellFAB&       a_particles
   }
 }
 
-void ito_plasma_stepper::reconcile_particles(const EBAMRCellData& a_newParticlesPerCell,
+void ito_plasma_stepper::reconcileParticles(const EBAMRCellData& a_newParticlesPerCell,
 					     const EBAMRCellData& a_oldParticlesPerCell,
 					     const EBAMRCellData& a_meanParticleEnergies,
 					     const EBAMRCellData& a_newPhotonsPerCell){
-  CH_TIME("ito_plasma_stepper::reconcile_particles(EBAMRCellData, EBAMRCellData, EBAMRCellData)");
+  CH_TIME("ito_plasma_stepper::reconcileParticles(EBAMRCellData, EBAMRCellData, EBAMRCellData)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::reconcile_particles(EBAMRCellData, EBAMRCellData, EBAMRCellData)";
+    pout() << "ito_plasma_stepper::reconcileParticles(EBAMRCellData, EBAMRCellData, EBAMRCellData)";
   }
 
   for(int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
 
-    this->reconcile_particles(*a_newParticlesPerCell[lvl], *a_oldParticlesPerCell[lvl], *a_meanParticleEnergies[lvl], *a_newPhotonsPerCell[lvl], lvl);
+    this->reconcileParticles(*a_newParticlesPerCell[lvl], *a_oldParticlesPerCell[lvl], *a_meanParticleEnergies[lvl], *a_newPhotonsPerCell[lvl], lvl);
   }
 }
 
-void ito_plasma_stepper::reconcile_particles(const LevelData<EBCellFAB>& a_newParticlesPerCell,
+void ito_plasma_stepper::reconcileParticles(const LevelData<EBCellFAB>& a_newParticlesPerCell,
 					     const LevelData<EBCellFAB>& a_oldParticlesPerCell,
 					     const LevelData<EBCellFAB>& a_meanParticleEnergies,
 					     const LevelData<EBCellFAB>& a_newPhotonsPerCell,
 					     const int                   a_level){
-  CH_TIME("ito_plasma_stepper::reconcile_particles(LevelData<EBCellFAB>x3, int)");
+  CH_TIME("ito_plasma_stepper::reconcileParticles(LevelData<EBCellFAB>x3, int)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::reconcile_particles(LevelData<EBCellFAB>x3, int)" << endl;
+    pout() << "ito_plasma_stepper::reconcileParticles(LevelData<EBCellFAB>x3, int)" << endl;
   }
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[a_level];
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-    this->reconcile_particles(a_newParticlesPerCell[dit()],
+    this->reconcileParticles(a_newParticlesPerCell[dit()],
 			      a_oldParticlesPerCell[dit()],
 			      a_meanParticleEnergies[dit()],
 			      a_newPhotonsPerCell[dit()],
@@ -2361,7 +2361,7 @@ void ito_plasma_stepper::reconcile_particles(const LevelData<EBCellFAB>& a_newPa
   }
 }
 
-void ito_plasma_stepper::reconcile_particles(const EBCellFAB& a_newParticlesPerCell,
+void ito_plasma_stepper::reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
 					     const EBCellFAB& a_oldParticlesPerCell,
 					     const EBCellFAB& a_meanParticleEnergies,
 					     const EBCellFAB& a_newPhotonsPerCell,
@@ -2369,12 +2369,12 @@ void ito_plasma_stepper::reconcile_particles(const EBCellFAB& a_newParticlesPerC
 					     const DataIndex  a_dit,
 					     const Box        a_box,
 					     const Real       a_dx){
-  CH_TIME("ito_plasma_stepper::reconcile_particles(EBCellFABx3, int, DataIndex, Box, Real)");
+  CH_TIME("ito_plasma_stepper::reconcileParticles(EBCellFABx3, int, DataIndex, Box, Real)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::reconcile_particles(EBCellFABx3, int, DataIndex, Box, Real)" << endl;
+    pout() << "ito_plasma_stepper::reconcileParticles(EBCellFABx3, int, DataIndex, Box, Real)" << endl;
   }
 
-  const int num_ItoSpecies = m_physics->get_num_ItoSpecies();
+  const int num_ItoSpecies = m_physics->getNumItoSpecies();
   const int num_RtSpecies = m_physics->getNumRtSpecies();
 
   const RealVect prob_lo = m_amr->getProbLo();
@@ -2450,10 +2450,10 @@ void ito_plasma_stepper::reconcile_particles(const EBCellFAB& a_newParticlesPerC
       }
 
       // Reconcile particles, Photons, and photoionization
-      m_physics->reconcile_particles(particles, numNewParticles, numOldParticles, cellPos, centroidPos, lo, hi, bndryCentroid, bndryNormal, a_dx, kappa);
-      m_physics->reconcile_Photons(sourcePhotons, numNewPhotons, cellPos, centroidPos, lo, hi, bndryCentroid, bndryNormal, a_dx, kappa);
-      m_physics->reconcile_photoionization(particles, particleMeanEnergies, numNewParticles, bulkPhotons);
-      m_physics->set_mean_particle_energy(particles, particleMeanEnergies);
+      m_physics->reconcileParticles(particles, numNewParticles, numOldParticles, cellPos, centroidPos, lo, hi, bndryCentroid, bndryNormal, a_dx, kappa);
+      m_physics->reconcilePhotons(sourcePhotons, numNewPhotons, cellPos, centroidPos, lo, hi, bndryCentroid, bndryNormal, a_dx, kappa);
+      m_physics->reconcilePhotoionization(particles, particleMeanEnergies, numNewParticles, bulkPhotons);
+      m_physics->setMeanParticleEnergy(particles, particleMeanEnergies);
       
       // Clear the bulk Photons - they have now been absorbed on the mesh. 
       for (int i = 0; i < num_RtSpecies; i++){
@@ -2510,10 +2510,10 @@ void ito_plasma_stepper::reconcile_particles(const EBCellFAB& a_newParticlesPerC
     }
 
     // Reconcile particles, Photons, and photoionization
-    m_physics->reconcile_particles(particles, numNewParticles, numOldParticles, cellPos, centroidPos, lo, hi, bndryCentroid, bndryNormal, a_dx, kappa);
-    m_physics->reconcile_Photons(sourcePhotons, numNewPhotons, cellPos, centroidPos, lo, hi, bndryCentroid, bndryNormal, a_dx, kappa);
-    m_physics->reconcile_photoionization(particles, particleMeanEnergies, numNewParticles, bulkPhotons);
-    m_physics->set_mean_particle_energy(particles, particleMeanEnergies);
+    m_physics->reconcileParticles(particles, numNewParticles, numOldParticles, cellPos, centroidPos, lo, hi, bndryCentroid, bndryNormal, a_dx, kappa);
+    m_physics->reconcilePhotons(sourcePhotons, numNewPhotons, cellPos, centroidPos, lo, hi, bndryCentroid, bndryNormal, a_dx, kappa);
+    m_physics->reconcilePhotoionization(particles, particleMeanEnergies, numNewParticles, bulkPhotons);
+    m_physics->setMeanParticleEnergy(particles, particleMeanEnergies);
       
     // Clear the bulk Photons - they have now been absorbed on the mesh. 
     for (int i = 0; i < num_RtSpecies; i++){
@@ -2532,7 +2532,7 @@ void ito_plasma_stepper::advanceReactionNetwork(const Real a_dt){
     this->advanceReactionNetwork_nwo(a_dt);
   }
   else{
-    const int num_ItoSpecies = m_physics->get_num_ItoSpecies();
+    const int num_ItoSpecies = m_physics->getNumItoSpecies();
     const int num_RtSpecies = m_physics->getNumRtSpecies();
   
     Vector<ParticleContainer<ItoParticle>* > particles(num_ItoSpecies);  // Current particles. 
@@ -2563,7 +2563,7 @@ void ito_plasma_stepper::advanceReactionNetwork(Vector<ParticleContainer<ItoPart
     pout() << "ito_plasma_stepper::advanceReactionNetwork(Vector<ParticleContainer*> x3, Vector<EBAMRCellData*>, EBAMRCellData, Real)" << endl;
   }
 
-  const int num_ItoSpecies = m_physics->get_num_ItoSpecies();
+  const int num_ItoSpecies = m_physics->getNumItoSpecies();
   const int num_RtSpecies = m_physics->getNumRtSpecies();
 
   Vector<AMRCellParticles<ItoParticle>* > particles(num_ItoSpecies);
@@ -2597,7 +2597,7 @@ void ito_plasma_stepper::advanceReactionNetwork(Vector<AMRCellParticles<ItoParti
     pout() << "ito_plasma_stepper::advanceReactionNetwork(Vector<AMRCellParticles*> x 3, Vector<EBAMRCellData*>, EBAMRCellData, Real)" << endl;
   }
 
-  const int num_ItoSpecies = m_physics->get_num_ItoSpecies();
+  const int num_ItoSpecies = m_physics->getNumItoSpecies();
   const int num_RtSpecies = m_physics->getNumRtSpecies();
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
@@ -2634,7 +2634,7 @@ void ito_plasma_stepper::advanceReactionNetwork(Vector<LayoutData<BinFab<ItoPart
     pout() << "ito_plasma_stepper::advanceReactionNetwork(Vector<LD<BinFab>* > x 3, Vector<LD<EBCellFAB>*>, EBAMRCellData, level, dt)" << endl;
   }
 
-  const int num_ItoSpecies = m_physics->get_num_ItoSpecies();
+  const int num_ItoSpecies = m_physics->getNumItoSpecies();
   const int num_RtSpecies = m_physics->getNumRtSpecies();
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[a_lvl];
@@ -2681,7 +2681,7 @@ void ito_plasma_stepper::advanceReactionNetwork(Vector<BinFab<ItoParticle>* >& a
 
   const int comp = 0;
 
-  const int num_ItoSpecies = m_physics->get_num_ItoSpecies();
+  const int num_ItoSpecies = m_physics->getNumItoSpecies();
   const int num_RtSpecies = m_physics->getNumRtSpecies();
 
   const RealVect prob_lo = m_amr->getProbLo();
@@ -2808,7 +2808,7 @@ Real ito_plasma_stepper::compute_physics_dt(const EBAMRCellData& a_E, const Vect
 
 
 
-  const int num_ItoSpecies = m_physics->get_num_ItoSpecies();
+  const int num_ItoSpecies = m_physics->getNumItoSpecies();
 
   Real minDt = 1.E99;
   
@@ -2836,7 +2836,7 @@ Real ito_plasma_stepper::compute_physics_dt(const LevelData<EBCellFAB>& a_E, con
     pout() << "ito_plasma_stepper::compute_physics_dt(LevelData<EBCellFAB>, Vector<LevelData<EBCellFAB> *>, int)" << endl;
   }
 
-  const int num_ItoSpecies = m_physics->get_num_ItoSpecies();
+  const int num_ItoSpecies = m_physics->getNumItoSpecies();
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[a_level];
 
@@ -2878,7 +2878,7 @@ Real ito_plasma_stepper::compute_physics_dt(const EBCellFAB& a_E, const Vector<E
 
   Real minDt = 1.E99;
 
-  const int num_ItoSpecies = m_physics->get_num_ItoSpecies();
+  const int num_ItoSpecies = m_physics->getNumItoSpecies();
   
   const int comp         = 0;
   const Real dx          = m_amr->getDx()[a_level];

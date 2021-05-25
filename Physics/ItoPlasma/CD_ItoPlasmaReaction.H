@@ -23,7 +23,7 @@ namespace Physics {
   namespace ItoPlasma {
     
     /*!
-      @brief Reaction class for ito_plasma_physics. 
+      @brief Reaction class for ItoPlasmaPhysics. 
       @details To use this class you should initialize a reaction e.g. ItoPlasmaReaction({0,1,2}, {0,4}, {0}) which is equivalent
       to the reaction X_0 + X_1 + X_2 => X_1 + X_4 + Y_0. 
     */

@@ -1,35 +1,42 @@
+/* chombo-discharge
+ * Copyright © 2021 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+ */
+
 /*!
-  @file   ito_plasma_physicsI.H 
-  @brief  Implementation of ito_plasma_physics.H
+  @file   CD_ItoPlasmaPhysicsImplem.H 
+  @brief  Implementation of CD_ItoPlasmaPhysics.H
   @author Robert Marskar
-  @date   June 2020
 */
 
-#ifndef _ITO_PLASMA_PHYSICSI_H_
-#define _ITO_PLASMA_PHYSICSI_H_
+#ifndef CD_ItoPlasmaPhysicsImplem_H
+#define CD_ItoPlasmaPhysicsImplem_H
 
-#include "ito_plasma_physics.H"
-#include <CD_Units.H>
-
+// Std includes
 #include <algorithm>
 #include <unordered_set> 
 
+// Chombo includes
 #include <PolyGeom.H>
+
+// Our includes
+#include <CD_ItoPlasmaPhysics.H>
+#include <CD_Units.H>
+#include <CD_NamespaceHeader.H>
 
 #define ITO_PLASMA_PHYSICS_DEBUG 0
 
-#include "CD_NamespaceHeader.H"
 using namespace Physics::ItoPlasma;
 
 inline
-RealVect ito_plasma_physics::randomPosition(const RealVect a_cellPos,
-					     const RealVect a_centroidPos,
-					     const RealVect a_lo,
-					     const RealVect a_hi,
-					     const RealVect a_bndryCentroid,
-					     const RealVect a_bndryNormal,
-					     const Real     a_dx,
-					     const Real     a_kappa) const {
+RealVect ItoPlasmaPhysics::randomPosition(const RealVect a_cellPos,
+					  const RealVect a_centroidPos,
+					  const RealVect a_lo,
+					  const RealVect a_hi,
+					  const RealVect a_bndryCentroid,
+					  const RealVect a_bndryNormal,
+					  const Real     a_dx,
+					  const Real     a_kappa) const {
 
   RealVect pos;
 
@@ -50,10 +57,10 @@ RealVect ito_plasma_physics::randomPosition(const RealVect a_cellPos,
 }
 
 inline
-RealVect ito_plasma_physics::randomPosition(const RealVect a_lo,
-					     const RealVect a_hi,
-					     const RealVect a_bndryCentroid,
-					     const RealVect a_bndryNormal) const {
+RealVect ItoPlasmaPhysics::randomPosition(const RealVect a_lo,
+					  const RealVect a_hi,
+					  const RealVect a_bndryCentroid,
+					  const RealVect a_bndryNormal) const {
 
   RealVect pos = this->randomPosition(a_lo, a_hi);
   bool valid   = PolyGeom::dot(pos-a_bndryCentroid, a_bndryNormal) >= 0.0;
@@ -67,7 +74,7 @@ RealVect ito_plasma_physics::randomPosition(const RealVect a_lo,
 }
 
 inline
-RealVect ito_plasma_physics::randomPosition(const RealVect a_lo, const RealVect a_hi) const {
+RealVect ItoPlasmaPhysics::randomPosition(const RealVect a_lo, const RealVect a_hi) const {
 
   RealVect pos = RealVect::Unit;
 
@@ -79,7 +86,7 @@ RealVect ito_plasma_physics::randomPosition(const RealVect a_lo, const RealVect 
 }
 
 inline
-RealVect ito_plasma_physics::randomDirection() const {
+RealVect ItoPlasmaPhysics::randomDirection() const {
   const Real EPS = 1.E-8;
 #if CH_SPACEDIM==2
   Real x1 = 2.0;
@@ -111,7 +118,7 @@ RealVect ito_plasma_physics::randomDirection() const {
 }
 
 inline
-bool ito_plasma_physics::valid_state(const Vector<long long>& a_particles) const {
+bool ItoPlasmaPhysics::isStateValid(const Vector<long long>& a_particles) const {
   bool ret = true;
   
   for (int i = 0; i < a_particles.size(); i++){
@@ -125,8 +132,8 @@ bool ito_plasma_physics::valid_state(const Vector<long long>& a_particles) const
 }
 
 inline
-void ito_plasma_physics::check_charge_conservation(const Vector<long long>& a_oldNumParticles,
-						   const Vector<long long>& a_newNumParticles) const {
+void ItoPlasmaPhysics::checkChargeConservation(const Vector<long long>& a_oldNumParticles,
+					       const Vector<long long>& a_newNumParticles) const {
   constexpr long long zero = 0;
   
   long long charge_before = 0;
@@ -142,12 +149,12 @@ void ito_plasma_physics::check_charge_conservation(const Vector<long long>& a_ol
   const long long diff = charge_before - charge_after;
 
   if(diff != zero){
-    MayDay::Abort("ito_plasma_physics::check_charge_conservation() - charge is not conserved!");
+    MayDay::Abort("ItoPlasmaPhysics::checkChargeConservation() - charge is not conserved!");
   }
 }
 
 inline
-long long ito_plasma_physics::computeCharge(const Vector<List<ItoParticle>* >& a_particles) const {
+long long ItoPlasmaPhysics::computeCharge(const Vector<List<ItoParticle>* >& a_particles) const {
 
   long long ret = 0;
   for (int i = 0; i < a_particles.size(); i++){
@@ -164,43 +171,43 @@ long long ito_plasma_physics::computeCharge(const Vector<List<ItoParticle>* >& a
 }
 
 inline
-void ito_plasma_physics::reconcile_particles(Vector<List<ItoParticle>* >& a_particles,
-					     const Vector<long long>&      a_newNumParticles,
-					     const Vector<long long>&      a_oldNumParticles,
-					     const RealVect                a_cellPos,
-					     const RealVect                a_centroidPos,
-					     const RealVect                a_lo,
-					     const RealVect                a_hi,
-					     const RealVect                a_bndryCentroid,
-					     const RealVect                a_bndryNormal,
-					     const Real                    a_dx,
-					     const Real                    a_kappa) const{
+void ItoPlasmaPhysics::reconcileParticles(Vector<List<ItoParticle>* >& a_particles,
+					  const Vector<long long>&      a_newNumParticles,
+					  const Vector<long long>&      a_oldNumParticles,
+					  const RealVect                a_cellPos,
+					  const RealVect                a_centroidPos,
+					  const RealVect                a_lo,
+					  const RealVect                a_hi,
+					  const RealVect                a_bndryCentroid,
+					  const RealVect                a_bndryNormal,
+					  const Real                    a_dx,
+					  const Real                    a_kappa) const{
 
 #if ITO_PLASMA_PHYSICS_DEBUG
-  const bool valid_state = this->valid_state(a_newNumParticles);
-  if(!valid_state){
-    MayDay::Abort("ito_plmasma_physics::reconcile_particles - not a valid state!!!");
+  const bool isStateValid = this->isStateValid(a_newNumParticles);
+  if(!isStateValid){
+    MayDay::Abort("ito_plmasma_physics::reconcileParticles - not a valid state!!!");
   }
 #endif
 
   for (int i = 0; i < a_particles.size(); i++){
-    this->reconcile_particles(*a_particles[i], a_newNumParticles[i], a_oldNumParticles[i], a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid,
-			      a_bndryNormal, a_dx, a_kappa);
+    this->reconcileParticles(*a_particles[i], a_newNumParticles[i], a_oldNumParticles[i], a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid,
+			     a_bndryNormal, a_dx, a_kappa);
   }
 }
 
 inline
-void ito_plasma_physics::reconcile_particles(List<ItoParticle>& a_particles,
-					     const long long     a_newNumParticles,
-					     const long long     a_oldNumParticles,
-					     const RealVect      a_cellPos,
-					     const RealVect      a_centroidPos,
-					     const RealVect      a_lo,
-					     const RealVect      a_hi,
-					     const RealVect      a_bndryCentroid,
-					     const RealVect      a_bndryNormal,
-					     const Real          a_dx,
-					     const Real          a_kappa) const {
+void ItoPlasmaPhysics::reconcileParticles(List<ItoParticle>& a_particles,
+					  const long long     a_newNumParticles,
+					  const long long     a_oldNumParticles,
+					  const RealVect      a_cellPos,
+					  const RealVect      a_centroidPos,
+					  const RealVect      a_lo,
+					  const RealVect      a_hi,
+					  const RealVect      a_bndryCentroid,
+					  const RealVect      a_bndryNormal,
+					  const Real          a_dx,
+					  const Real          a_kappa) const {
   
   const long long diff     = a_newNumParticles - a_oldNumParticles;
   constexpr long long zero = 0;
@@ -215,10 +222,10 @@ void ito_plasma_physics::reconcile_particles(List<ItoParticle>& a_particles,
 }
 
 inline
-void ito_plasma_physics::computeParticleWeights(long long&      a_weight,
-						  long long&      a_num,
-						  long long&      a_remainder,
-						  const long long a_numNewParticles) const {
+void ItoPlasmaPhysics::computeParticleWeights(long long&      a_weight,
+					      long long&      a_num,
+					      long long&      a_remainder,
+					      const long long a_numNewParticles) const {
 
   if(a_numNewParticles <= m_ppc){  
     a_weight    = 1;
@@ -234,16 +241,16 @@ void ito_plasma_physics::computeParticleWeights(long long&      a_weight,
 }
 
 inline
-void ito_plasma_physics::addParticles(List<ItoParticle>& a_particles,
-				       const long long     a_numNewParticles,
-				       const RealVect      a_cellPos,
-				       const RealVect      a_centroidPos,
-				       const RealVect      a_lo,
-				       const RealVect      a_hi,
-				       const RealVect      a_bndryCentroid,
-				       const RealVect      a_bndryNormal,
-				       const Real          a_dx,
-				       const Real          a_kappa) const {
+void ItoPlasmaPhysics::addParticles(List<ItoParticle>& a_particles,
+				    const long long     a_numNewParticles,
+				    const RealVect      a_cellPos,
+				    const RealVect      a_centroidPos,
+				    const RealVect      a_lo,
+				    const RealVect      a_hi,
+				    const RealVect      a_bndryCentroid,
+				    const RealVect      a_bndryNormal,
+				    const Real          a_dx,
+				    const Real          a_kappa) const {
   long long weight, num, remainder;
 
   constexpr long long zero = 0;
@@ -264,8 +271,8 @@ void ito_plasma_physics::addParticles(List<ItoParticle>& a_particles,
 }
 
 inline
-void ito_plasma_physics::remove_particles(List<ItoParticle>& a_particles,
-					  const long long     a_numParticlesToRemove) const {
+void ItoPlasmaPhysics::remove_particles(List<ItoParticle>& a_particles,
+					const long long     a_numParticlesToRemove) const {
 
   constexpr long long zero = 0;
   
@@ -273,7 +280,7 @@ void ito_plasma_physics::remove_particles(List<ItoParticle>& a_particles,
 #if ITO_PLASMA_PHYSICS_DEBUG // Debug
     this->sanityCheck(a_particles);
 
-    const long long weightBefore = this->get_total_weight(a_particles);
+    const long long weightBefore = this->getTotalWeight(a_particles);
 #endif
 
     ListIterator<ItoParticle> lit(a_particles);
@@ -284,14 +291,14 @@ void ito_plasma_physics::remove_particles(List<ItoParticle>& a_particles,
 
     // Compute weights and trim all particle weights down to the minimum weight. We shouldn't have weight = 0 when we
     // get here...
-    this->compute_weights(lit, particleWeights, minWeight);                             // Computes weights
-    this->trim_weights(numRemoved, particleWeights, a_numParticlesToRemove, minWeight); // Remove weight down to minWeight
-    this->remove_weights(particleWeights, a_numParticlesToRemove - numRemoved);         // Uniformly removes rest of mass
-    this->reconcile_weights(a_particles, particleWeights);                              // Reconcile particle weights
+    this->computeWeights(lit, particleWeights, minWeight);                             // Computes weights
+    this->trimWeights(numRemoved, particleWeights, a_numParticlesToRemove, minWeight); // Remove weight down to minWeight
+    this->removeWeights(particleWeights, a_numParticlesToRemove - numRemoved);         // Uniformly removes rest of mass
+    this->reconcileWeights(a_particles, particleWeights);                              // Reconcile particle weights
 
 #if ITO_PLASMA_PHYSICS_DEBUG // Debug
     this->sanityCheck(a_particles);
-    const long long weightAfter = this->get_total_weight(a_particles);
+    const long long weightAfter = this->getTotalWeight(a_particles);
 
     if(weightBefore - weightAfter != a_numParticlesToRemove){
       std::cout << "weight before = " << weightBefore << std::endl;
@@ -299,27 +306,27 @@ void ito_plasma_physics::remove_particles(List<ItoParticle>& a_particles,
       std::cout << "Should remove = " << a_numParticlesToRemove << std::endl;
       std::cout << "numRemoved    = " << numRemoved << std::endl;
     
-      MayDay::Abort("ito_plasma_physics::remove_particles - incorrect mass removed");
+      MayDay::Abort("ItoPlasmaPhysics::remove_particles - incorrect mass removed");
     }
 #endif
   }
 }
 
 inline
-void ito_plasma_physics::set_mean_particle_energy(Vector<List<ItoParticle>* >& a_particles, const Vector<Real> a_mean_energy) const{
+void ItoPlasmaPhysics::setMeanParticleEnergy(Vector<List<ItoParticle>* >& a_particles, const Vector<Real> a_mean_energy) const{
   for (int i = 0; i < a_particles.size(); i++){
-    this->set_mean_particle_energy(*a_particles[i], a_mean_energy[i]);
+    this->setMeanParticleEnergy(*a_particles[i], a_mean_energy[i]);
   }
 }
 
 inline
-void ito_plasma_physics::set_mean_particle_energy(List<ItoParticle>& a_particles, const Real a_mean_energy) const{
+void ItoPlasmaPhysics::setMeanParticleEnergy(List<ItoParticle>& a_particles, const Real a_mean_energy) const{
 #if ITO_PLASMA_PHYSICS_DEBUG
   if(a_mean_energy < 0.0){
-    pout() << "ito_plasma_physics::set_mean_particle_energy - energy = " << a_mean_energy << endl;
+    pout() << "ItoPlasmaPhysics::setMeanParticleEnergy - energy = " << a_mean_energy << endl;
   }
   else if(a_mean_energy != a_mean_energy){
-    MayDay::Abort("ito_plasma_physics::set_mean_particle_energy - a_mean_energy is NaN!");
+    MayDay::Abort("ItoPlasmaPhysics::setMeanParticleEnergy - a_mean_energy is NaN!");
   }
 #endif
   
@@ -329,19 +336,19 @@ void ito_plasma_physics::set_mean_particle_energy(List<ItoParticle>& a_particles
 }
 
 inline
-void ito_plasma_physics::sanityCheck(const List<ItoParticle>& a_particles) const{
+void ItoPlasmaPhysics::sanityCheck(const List<ItoParticle>& a_particles) const{
 
   ListIterator<ItoParticle> lit(a_particles);
   
   for (lit.begin(); lit.ok(); ++lit){
     const Real w = lit().mass();
 
-    if(w < 1.0) MayDay::Abort("ito_plasma_physics::sanityCheck - can't have w < 1!!!!");
+    if(w < 1.0) MayDay::Abort("ItoPlasmaPhysics::sanityCheck - can't have w < 1!!!!");
   }
 }
 
 inline
-long long ito_plasma_physics::get_total_weight(const List<ItoParticle>& a_particles) const {
+long long ItoPlasmaPhysics::getTotalWeight(const List<ItoParticle>& a_particles) const {
 
   long long ret = 0;
   for (ListIterator<ItoParticle> lit(a_particles); lit.ok(); ++lit){
@@ -354,9 +361,9 @@ long long ito_plasma_physics::get_total_weight(const List<ItoParticle>& a_partic
 }
 
 inline
-void ito_plasma_physics::compute_weights(ListIterator<ItoParticle>& a_lit,
-					 Vector<long long>&          a_particleWeights,
-					 long long&                  a_minWeight) const {
+void ItoPlasmaPhysics::computeWeights(ListIterator<ItoParticle>& a_lit,
+				      Vector<long long>&          a_particleWeights,
+				      long long&                  a_minWeight) const {
   int i = 0;
   for (a_lit.begin(); a_lit.ok(); ++a_lit, ++i){
     a_particleWeights[i] = (long long) llround(a_lit().mass());
@@ -365,10 +372,10 @@ void ito_plasma_physics::compute_weights(ListIterator<ItoParticle>& a_lit,
 }
 
 inline
-void ito_plasma_physics::trim_weights(long long&         a_numRemoved,
-				      Vector<long long>& a_particleWeights,
-				      const long long    a_numParticlesToRemove,
-				      const long long    a_minWeight) const{
+void ItoPlasmaPhysics::trimWeights(long long&         a_numRemoved,
+				   Vector<long long>& a_particleWeights,
+				   const long long    a_numParticlesToRemove,
+				   const long long    a_minWeight) const{
   constexpr long long zero = 0;
   
   for (int i = 0; i < a_particleWeights.size(); i++){
@@ -383,8 +390,8 @@ void ito_plasma_physics::trim_weights(long long&         a_numRemoved,
 }
 
 inline
-void ito_plasma_physics::remove_weights(Vector<long long>& a_particleWeights,
-					const long long    a_numParticlesToRemove) const {
+void ItoPlasmaPhysics::removeWeights(Vector<long long>& a_particleWeights,
+				     const long long    a_numParticlesToRemove) const {
 
   constexpr long long zero = 0;
 
@@ -418,8 +425,8 @@ void ito_plasma_physics::remove_weights(Vector<long long>& a_particleWeights,
 }
 
 inline
-void ito_plasma_physics::reconcile_weights(List<ItoParticle>&      a_particles,
-					   const Vector<long long>& a_particleWeights) const {
+void ItoPlasmaPhysics::reconcileWeights(List<ItoParticle>&      a_particles,
+					const Vector<long long>& a_particleWeights) const {
 
   constexpr long long zero = 0;  
 
@@ -437,37 +444,37 @@ void ito_plasma_physics::reconcile_weights(List<ItoParticle>&      a_particles,
   }
 }
 
-void ito_plasma_physics::reconcile_Photons(Vector<List<Photon>* >&  a_newPhotons,
-					   const Vector<long long>& a_numNewPhotons,
-					   const RealVect           a_cellPos,
-					   const RealVect           a_centroidPos,
-					   const RealVect           a_lo,
-					   const RealVect           a_hi,
-					   const RealVect           a_bndryCentroid,
-					   const RealVect           a_bndryNormal,
-					   const Real               a_dx,
-					   const Real               a_kappa) const {
+void ItoPlasmaPhysics::reconcilePhotons(Vector<List<Photon>* >&  a_newPhotons,
+					const Vector<long long>& a_numNewPhotons,
+					const RealVect           a_cellPos,
+					const RealVect           a_centroidPos,
+					const RealVect           a_lo,
+					const RealVect           a_hi,
+					const RealVect           a_bndryCentroid,
+					const RealVect           a_bndryNormal,
+					const Real               a_dx,
+					const Real               a_kappa) const {
 
   for (int i = 0; i < a_newPhotons.size(); i++){
     if(a_numNewPhotons[i] > 0){
-      this->reconcile_Photons(*a_newPhotons[i], *m_RtSpecies[i], a_numNewPhotons[i], a_cellPos, a_centroidPos, a_lo, a_hi,
-			      a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+      this->reconcilePhotons(*a_newPhotons[i], *m_RtSpecies[i], a_numNewPhotons[i], a_cellPos, a_centroidPos, a_lo, a_hi,
+			     a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
     }
   }
 }
 
 inline
-void ito_plasma_physics::reconcile_Photons(List<Photon>&      a_Photons,
-					   const RtSpecies& a_species,
-					   const long long    a_num_Photons,
-					   const RealVect     a_cellPos,
-					   const RealVect     a_centroidPos,
-					   const RealVect     a_lo,
-					   const RealVect     a_hi,
-					   const RealVect     a_bndryCentroid,
-					   const RealVect     a_bndryNormal,
-					   const Real         a_dx,
-					   const Real         a_kappa) const {
+void ItoPlasmaPhysics::reconcilePhotons(List<Photon>&      a_Photons,
+					const RtSpecies& a_species,
+					const long long    a_num_Photons,
+					const RealVect     a_cellPos,
+					const RealVect     a_centroidPos,
+					const RealVect     a_lo,
+					const RealVect     a_hi,
+					const RealVect     a_bndryCentroid,
+					const RealVect     a_bndryNormal,
+					const Real         a_dx,
+					const Real         a_kappa) const {
   a_Photons.clear();
 
   long long weight, num, remainder;
@@ -489,10 +496,10 @@ void ito_plasma_physics::reconcile_Photons(List<Photon>&      a_Photons,
 }
 
 inline
-void ito_plasma_physics::reconcile_photoionization(Vector<List<ItoParticle>* >& a_particles,
-						   Vector<Real>&                 a_mean_energies,
-						   const Vector<long long>&      a_numParticles,
-						   const Vector<List<Photon>* >& a_Photons) const {
+void ItoPlasmaPhysics::reconcilePhotoionization(Vector<List<ItoParticle>* >& a_particles,
+						Vector<Real>&                 a_mean_energies,
+						const Vector<long long>&      a_numParticles,
+						const Vector<List<Photon>* >& a_Photons) const {
 
   // TLDR: This routine runs through all the photoreactions. For each reaction we look up the target species (e.g. electrons, ions)
   //       and compute the total energy for those species. We then add the photoreaction products, including the added energy, and then
@@ -546,7 +553,7 @@ void ito_plasma_physics::reconcile_photoionization(Vector<List<ItoParticle>* >& 
 }
 
 inline
-long long ito_plasma_physics::poisson_reaction(const Real a_propensity, const Real a_dt) const{
+long long ItoPlasmaPhysics::poissonReaction(const Real a_propensity, const Real a_dt) const{
 
   constexpr long long zero  = 0;
   long long value = 0;
@@ -565,7 +572,7 @@ long long ito_plasma_physics::poisson_reaction(const Real a_propensity, const Re
 }
 
 inline
-int ito_plasma_physics::compute_particles_per_rank(const int a_numParticles) const {
+int ItoPlasmaPhysics::computeParticlesPerRank(const int a_numParticles) const {
   const int quotient  = a_numParticles/numProc();
   const int remainder = a_numParticles % numProc();
   
@@ -579,19 +586,19 @@ int ito_plasma_physics::compute_particles_per_rank(const int a_numParticles) con
 }
 
 inline
-void ito_plasma_physics::draw_gaussian_particles(List<ItoParticle>& a_particles1,
-						 List<ItoParticle>& a_particles2,
-						 const int           a_numParticles,
-						 const RealVect      a_blobCenter,
-						 const Real          a_blobRadius,
-						 const Real          a_weight,
-						 const Real          a_energy1,
-						 const Real          a_energy2){
+void ItoPlasmaPhysics::drawGaussianParticles(List<ItoParticle>& a_particles1,
+					     List<ItoParticle>& a_particles2,
+					     const int           a_numParticles,
+					     const RealVect      a_blobCenter,
+					     const Real          a_blobRadius,
+					     const Real          a_weight,
+					     const Real          a_energy1,
+					     const Real          a_energy2){
 
   // Set up the Gaussian RNG
   std::normal_distribution<Real> gauss(0.0, a_blobRadius);
 
-  const int myNumParticles = this->compute_particles_per_rank(a_numParticles);
+  const int myNumParticles = this->computeParticlesPerRank(a_numParticles);
 
   // Now make the particles
   for (int i = 0; i < myNumParticles; i++){
@@ -604,16 +611,16 @@ void ito_plasma_physics::draw_gaussian_particles(List<ItoParticle>& a_particles1
 }
 
 inline
-void ito_plasma_physics::draw_sphere_particles(List<ItoParticle>& a_particles1,
-					       List<ItoParticle>& a_particles2,
-					       const int           a_numParticles,
-					       const RealVect      a_blobCenter,
-					       const Real          a_blobRadius,
-					       const Real          a_weight,
-					       const Real          a_energy1,
-					       const Real          a_energy2){
+void ItoPlasmaPhysics::drawSphereParticles(List<ItoParticle>& a_particles1,
+					   List<ItoParticle>& a_particles2,
+					   const int           a_numParticles,
+					   const RealVect      a_blobCenter,
+					   const Real          a_blobRadius,
+					   const Real          a_weight,
+					   const Real          a_energy1,
+					   const Real          a_energy2){
 
-  const int myNumParticles = this->compute_particles_per_rank(a_numParticles);
+  const int myNumParticles = this->computeParticlesPerRank(a_numParticles);
   
   // Now make the particles
   for (int i = 0; i < myNumParticles; i++){
@@ -640,16 +647,16 @@ void ito_plasma_physics::draw_sphere_particles(List<ItoParticle>& a_particles1,
 }
 
 inline
-void ito_plasma_physics::draw_box_particles(List<ItoParticle>& a_particles1,
-					    List<ItoParticle>& a_particles2,
-					    const int           a_numParticles,
-					    const RealVect      a_boxLo,
-					    const RealVect      a_boxHi,
-					    const Real          a_weight,
-					    const Real          a_energy1,
-					    const Real          a_energy2) {
+void ItoPlasmaPhysics::drawBoxParticles(List<ItoParticle>& a_particles1,
+					List<ItoParticle>& a_particles2,
+					const int           a_numParticles,
+					const RealVect      a_boxLo,
+					const RealVect      a_boxHi,
+					const Real          a_weight,
+					const Real          a_energy1,
+					const Real          a_energy2) {
 
-  const int myNumParticles = this->compute_particles_per_rank(a_numParticles);
+  const int myNumParticles = this->computeParticlesPerRank(a_numParticles);
 
   const RealVect diff = a_boxHi - a_boxLo;
   for (int i = 0; i < myNumParticles; i++){
@@ -662,18 +669,18 @@ void ito_plasma_physics::draw_box_particles(List<ItoParticle>& a_particles1,
 }
 
 inline
-Vector<long long> ito_plasma_physics::get_particle_count(const Vector<List<ItoParticle>* >& a_particles) const {
+Vector<long long> ItoPlasmaPhysics::getParticleCount(const Vector<List<ItoParticle>* >& a_particles) const {
   Vector<long long> ret(a_particles.size(), 0);
 
   for (int i = 0; i < a_particles.size(); i++){
-    ret[i] = this->get_particle_count(*a_particles[i]);
+    ret[i] = this->getParticleCount(*a_particles[i]);
   }
 
   return ret;
 }
 
 inline
-long long ito_plasma_physics::get_particle_count(const List<ItoParticle>& a_particles) const {
+long long ItoPlasmaPhysics::getParticleCount(const List<ItoParticle>& a_particles) const {
   long long ret = 0;
 
   for (ListIterator<ItoParticle> lit(a_particles); lit.ok(); ++lit){
@@ -684,18 +691,18 @@ long long ito_plasma_physics::get_particle_count(const List<ItoParticle>& a_part
 }
 
 inline
-Vector<Real> ito_plasma_physics::get_particle_energy(const Vector<List<ItoParticle>* >& a_particles) const {
+Vector<Real> ItoPlasmaPhysics::getParticleEnergy(const Vector<List<ItoParticle>* >& a_particles) const {
   Vector<Real> ret(a_particles.size(), 0.0);
 
   for (int i = 0; i < a_particles.size(); i++){
-    ret[i] = this->get_particle_energy(*a_particles[i]);
+    ret[i] = this->getParticleEnergy(*a_particles[i]);
   }
 
   return ret;
 }
 
 inline
-Real ito_plasma_physics::get_particle_energy(const List<ItoParticle>& a_particles) const {
+Real ItoPlasmaPhysics::getParticleEnergy(const List<ItoParticle>& a_particles) const {
   Real ret = 0;
 
   for (ListIterator<ItoParticle> lit(a_particles); lit.ok(); ++lit){
@@ -709,37 +716,37 @@ Real ito_plasma_physics::get_particle_energy(const List<ItoParticle>& a_particle
 }
 
 inline
-Vector<Real> ito_plasma_physics::get_particle_mean_energy(const Vector<Real>& a_energies, const Vector<long long>& a_particle_count) const {
+Vector<Real> ItoPlasmaPhysics::getParticleMeanEnergy(const Vector<Real>& a_energies, const Vector<long long>& a_particle_count) const {
   Vector<Real> ret(a_energies.size(), 0.0);
 
   for (int i = 0; i < a_energies.size(); i++){
-    ret[i] = this->get_particle_mean_energy(a_energies[i], a_particle_count[i]);
+    ret[i] = this->getParticleMeanEnergy(a_energies[i], a_particle_count[i]);
   }
 
   return ret;
 }
 
 inline
-Real ito_plasma_physics::get_particle_mean_energy(const Real& a_energy, const long long& a_particle_count) const{
+Real ItoPlasmaPhysics::getParticleMeanEnergy(const Real& a_energy, const long long& a_particle_count) const{
   const Real ret = (a_particle_count > 0) ? a_energy/a_particle_count : 0.0;
   return ret;
 }
 
 inline
-void ito_plasma_physics::advanceReactionNetwork(Vector<List<ItoParticle>* >& a_particles,
-						  Vector<List<Photon>* >&       a_Photons,
-						  Vector<List<Photon>* >&       a_newPhotons,
-						  const Vector<Real>&           a_sources, 
-						  const RealVect                a_E,           
-						  const RealVect                a_cellPos,
-						  const RealVect                a_centroidPos,
-						  const RealVect                a_bndryCentroid,
-						  const RealVect                a_bndryNormal,
-						  const RealVect                a_lo,
-						  const RealVect                a_hi,
-						  const Real                    a_dx,
-						  const Real                    a_kappa, 
-						  const Real                    a_dt) {
+void ItoPlasmaPhysics::advanceReactionNetwork(Vector<List<ItoParticle>* >& a_particles,
+					      Vector<List<Photon>* >&       a_Photons,
+					      Vector<List<Photon>* >&       a_newPhotons,
+					      const Vector<Real>&           a_sources, 
+					      const RealVect                a_E,           
+					      const RealVect                a_cellPos,
+					      const RealVect                a_centroidPos,
+					      const RealVect                a_bndryCentroid,
+					      const RealVect                a_bndryNormal,
+					      const RealVect                a_lo,
+					      const RealVect                a_hi,
+					      const Real                    a_dx,
+					      const Real                    a_kappa, 
+					      const Real                    a_dt) {
 #if ITO_PLASMA_PHYSICS_DEBUG
   const long long Qbefore = this->computeCharge(a_particles);
 #endif
@@ -748,7 +755,7 @@ void ito_plasma_physics::advanceReactionNetwork(Vector<List<ItoParticle>* >& a_p
 
   // Get particle counts. 
   Vector<long long> newPhotonCount   = Vector<long long>(m_numRtSpecies, 0);
-  Vector<long long> oldParticleCount = this->get_particle_count(a_particles);
+  Vector<long long> oldParticleCount = this->getParticleCount(a_particles);
   Vector<long long> newParticleCount = oldParticleCount;
 
   // Energies, mean_energies, and sources. Make sure LFA gives dummy arguments. 
@@ -759,8 +766,8 @@ void ito_plasma_physics::advanceReactionNetwork(Vector<List<ItoParticle>* >& a_p
     sources.resize(m_num_ItoSpecies, 0.0);
   }
   else{
-    energies      = this->get_particle_energy(a_particles);
-    mean_energies = this->get_particle_mean_energy(energies, oldParticleCount);
+    energies      = this->getParticleEnergy(a_particles);
+    mean_energies = this->getParticleMeanEnergy(energies, oldParticleCount);
     sources       = a_sources;
 
     // // The one that comes in through ito_plasma_stepper is in Joule/(dV*dt), make it eV/(cell*dt)
@@ -773,10 +780,10 @@ void ito_plasma_physics::advanceReactionNetwork(Vector<List<ItoParticle>* >& a_p
 #if ITO_PLASMA_PHYSICS_DEBUG
   for (int i = 0; i < a_sources.size(); i++){
     if(a_sources[i] != a_sources[i]){
-      MayDay::Abort("ito_plasma_physics::advanceReactionNetwork - got nan source!"); 
+      MayDay::Abort("ItoPlasmaPhysics::advanceReactionNetwork - got nan source!"); 
     }
     if(mean_energies[i] != mean_energies[i]){
-      MayDay::Abort("ito_plasma_physics::advanceReactionNetwork - got nan energy!"); 
+      MayDay::Abort("ItoPlasmaPhysics::advanceReactionNetwork - got nan energy!"); 
     }
   }
 #endif
@@ -788,32 +795,32 @@ void ito_plasma_physics::advanceReactionNetwork(Vector<List<ItoParticle>* >& a_p
 #endif
 
   // Do particle advancement
-  this->advance_particles(newParticleCount, newPhotonCount, mean_energies, sources, a_dt, a_E, a_dx, a_kappa);
+  this->advanceParticles(newParticleCount, newPhotonCount, mean_energies, sources, a_dt, a_E, a_dx, a_kappa);
   
   // Reconcile particles
-  this->reconcile_particles(a_particles,
-			    newParticleCount,
-			    oldParticleCount,
-			    a_cellPos,
-			    a_centroidPos,
-			    a_lo,
-			    a_hi,
-			    a_bndryCentroid,
-			    a_bndryNormal,
-			    a_dx,
-			    a_kappa);
+  this->reconcileParticles(a_particles,
+			   newParticleCount,
+			   oldParticleCount,
+			   a_cellPos,
+			   a_centroidPos,
+			   a_lo,
+			   a_hi,
+			   a_bndryCentroid,
+			   a_bndryNormal,
+			   a_dx,
+			   a_kappa);
 
   // Generate new Photons
-  this->reconcile_Photons(a_newPhotons, newPhotonCount, a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
+  this->reconcilePhotons(a_newPhotons, newPhotonCount, a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
 
   // Run photo-reactions and increment the number of particles as needed
-  this->reconcile_photoionization(a_particles, mean_energies, newParticleCount, a_Photons);
+  this->reconcilePhotoionization(a_particles, mean_energies, newParticleCount, a_Photons);
 
   // Set new mean energies for all the particles. 
-  this->set_mean_particle_energy(a_particles, mean_energies);
+  this->setMeanParticleEnergy(a_particles, mean_energies);
 
 #if ITO_PLASMA_PHYSICS_DEBUG // Debug code
-  this->check_charge_conservation(oldParticleCount, newParticleCount);
+  this->checkChargeConservation(oldParticleCount, newParticleCount);
 
   const long long Qafter = this->computeCharge(a_particles);
 
@@ -821,13 +828,13 @@ void ito_plasma_physics::advanceReactionNetwork(Vector<List<ItoParticle>* >& a_p
   if(Qbefore - Qafter != zero){
     std::cout << "Qbefore = " << Qbefore << std::endl;
     std::cout << "Qafter  = " << Qafter << std::endl;
-    MayDay::Abort("ito_plasma_physics::advanceReactionNetwork_lfa(...) - charge is not conserved!!!");
+    MayDay::Abort("ItoPlasmaPhysics::advanceReactionNetwork_lfa(...) - charge is not conserved!!!");
   }
 #endif
 }
 
 inline
-ReactionTypes ito_plasma_physics::get_critical_reactions(const Vector<long long>& a_particles) const{
+ReactionTypes ItoPlasmaPhysics::getCriticalReactions(const Vector<long long>& a_particles) const{
 
   ReactionPtrs criticalReactions;    // std::deque<shared_ptr<ItoPlasmaReaction> > under the hood
   ReactionPtrs nonCriticalReactions; // std::deque<shared_ptr<ItoPlasmaReaction> > under the hood
@@ -881,7 +888,7 @@ ReactionTypes ito_plasma_physics::get_critical_reactions(const Vector<long long>
 }
 
 inline
-Real ito_plasma_physics::get_critical_step(const Vector<long long>& a_particles,
+Real ItoPlasmaPhysics::getCriticalTimeStep(const Vector<long long>& a_particles,
 					   const ReactionPtrs&      a_critical_reactions) const {
 						 
   // TLDR: a_critical_reaction is a vector under the hood.
@@ -901,8 +908,8 @@ Real ito_plasma_physics::get_critical_step(const Vector<long long>& a_particles,
 }
 
 inline
-Real ito_plasma_physics::get_non_critical_step(const Vector<long long>& a_particles,
-					       const ReactionPtrs&      a_non_critical_reactions) const {
+Real ItoPlasmaPhysics::getNonCriticalTimeStep(const Vector<long long>& a_particles,
+					      const ReactionPtrs&      a_non_critical_reactions) const {
 						 
   // TLDR: a_non_critical_reaction is a vector under the hood.
   
@@ -979,7 +986,7 @@ Real ito_plasma_physics::get_non_critical_step(const Vector<long long>& a_partic
 }
 
 inline
-Real ito_plasma_physics::propensity(const Vector<long long>& a_particles) const{
+Real ItoPlasmaPhysics::propensity(const Vector<long long>& a_particles) const{
 
   Real A = 0.0;
   for (const auto& r : m_reactions){
@@ -991,7 +998,7 @@ Real ito_plasma_physics::propensity(const Vector<long long>& a_particles) const{
 
 
 inline
-Real ito_plasma_physics::propensity(const Vector<long long>& a_particles, const ReactionPtrs& a_critical_reactions) const{
+Real ItoPlasmaPhysics::propensity(const Vector<long long>& a_particles, const ReactionPtrs& a_critical_reactions) const{
 
   Real A = 0.0;
   std::deque<Real> propensities = this->propensities(a_particles, a_critical_reactions);
@@ -1004,7 +1011,7 @@ Real ito_plasma_physics::propensity(const Vector<long long>& a_particles, const 
 }
 
 inline
-std::deque<Real> ito_plasma_physics::propensities(const Vector<long long>& a_particles) const {
+std::deque<Real> ItoPlasmaPhysics::propensities(const Vector<long long>& a_particles) const {
   std::deque<Real> propensities;
   
   for (const auto& r : m_reactions){
@@ -1016,8 +1023,8 @@ std::deque<Real> ito_plasma_physics::propensities(const Vector<long long>& a_par
 }
 
 inline
-std::deque<Real> ito_plasma_physics::propensities(const Vector<long long>& a_particles,
-						  const ReactionPtrs&      a_critical_reactions) const{
+std::deque<Real> ItoPlasmaPhysics::propensities(const Vector<long long>& a_particles,
+						const ReactionPtrs&      a_critical_reactions) const{
   std::deque<Real> propensities;
 
   for (const auto& r : a_critical_reactions){
@@ -1029,45 +1036,45 @@ std::deque<Real> ito_plasma_physics::propensities(const Vector<long long>& a_par
 }
 
 inline
-void ito_plasma_physics::update_reaction_rates(const RealVect a_E, const Vector<Real> a_mean_energies, const Real a_dx, const Real a_kappa) const {
+void ItoPlasmaPhysics::updateReactionRates(const RealVect a_E, const Vector<Real> a_mean_energies, const Real a_dx, const Real a_kappa) const {
   
   // Update the rate based on the mean energies or the electric field, depending on how we use the LFA/LEA. 
   if(m_coupling == coupling::LFA){
-    this->update_reaction_rates_lfa(a_E, a_dx, a_kappa);
+    this->updateReactionRatesLFA(a_E, a_dx, a_kappa);
   }
   else if(m_coupling == coupling::LEA){
-    this->update_reaction_rates_lea(a_E, a_mean_energies, a_dx, a_kappa);
+    this->updateReactionRatesLEA(a_E, a_mean_energies, a_dx, a_kappa);
   }
   
 }
 
 inline
-void ito_plasma_physics::tau_step(Vector<long long>&  a_particles,
-				  Vector<long long>&  a_newPhotons,
-				  Vector<Real>&       a_mean_energies,
-				  const Vector<Real>& a_sources,
-				  const ReactionPtrs& a_reactions,
-				  const Real          a_dx,
-				  const Real          a_kappa,
-				  const Real          a_dt) const {
+void ItoPlasmaPhysics::stepTau(Vector<long long>&  a_particles,
+			       Vector<long long>&  a_newPhotons,
+			       Vector<Real>&       a_mean_energies,
+			       const Vector<Real>& a_sources,
+			       const ReactionPtrs& a_reactions,
+			       const Real          a_dx,
+			       const Real          a_kappa,
+			       const Real          a_dt) const {
 
   // These are the propensities. 
   const std::deque<Real> propensities = this->propensities(a_particles, a_reactions);
 
   // Call the other version. 
-  this->tau_step(a_particles, a_newPhotons, a_mean_energies, a_sources, a_reactions, propensities, a_dx, a_kappa, a_dt);
+  this->stepTau(a_particles, a_newPhotons, a_mean_energies, a_sources, a_reactions, propensities, a_dx, a_kappa, a_dt);
 }
 
 inline
-void ito_plasma_physics::tau_step(Vector<long long>&      a_particles,
-				  Vector<long long>&      a_newPhotons,
-				  Vector<Real>&           a_mean_energies,
-				  const Vector<Real>&     a_sources,
-				  const ReactionPtrs&     a_reactions,
-				  const std::deque<Real>& a_propensities,
-				  const Real              a_dx,
-				  const Real              a_kappa,
-				  const Real              a_dt) const {
+void ItoPlasmaPhysics::stepTau(Vector<long long>&      a_particles,
+			       Vector<long long>&      a_newPhotons,
+			       Vector<Real>&           a_mean_energies,
+			       const Vector<Real>&     a_sources,
+			       const ReactionPtrs&     a_reactions,
+			       const std::deque<Real>& a_propensities,
+			       const Real              a_dx,
+			       const Real              a_kappa,
+			       const Real              a_dt) const {
   // mean_energies -> total energies
   Vector<Real> energies(m_num_ItoSpecies);
   for (int i = 0; i < a_particles.size(); i++){
@@ -1077,7 +1084,7 @@ void ito_plasma_physics::tau_step(Vector<long long>&      a_particles,
 
   // Go through list of reactions. 
   for (int i = 0; i < a_reactions.size(); i++){
-    const long long num_reactions = this->poisson_reaction(a_propensities[i], a_dt);
+    const long long num_reactions = this->poissonReaction(a_propensities[i], a_dt);
 
     // Jump state and energy
     a_reactions[i]->jumpState(a_particles, a_newPhotons, num_reactions);    // 
@@ -1098,33 +1105,33 @@ void ito_plasma_physics::tau_step(Vector<long long>&      a_particles,
 }
 
 inline
-void ito_plasma_physics::tau_step(Vector<long long>&  a_particles,
-				  Vector<long long>&  a_newPhotons,
-				  Vector<Real>&       a_mean_energies,
-				  const Vector<Real>& a_sources,
-				  const Real          a_dx,
-				  const Real          a_kappa,
-				  const Real          a_dt) const {
+void ItoPlasmaPhysics::stepTau(Vector<long long>&  a_particles,
+			       Vector<long long>&  a_newPhotons,
+			       Vector<Real>&       a_mean_energies,
+			       const Vector<Real>& a_sources,
+			       const Real          a_dx,
+			       const Real          a_kappa,
+			       const Real          a_dt) const {
 
   std::deque<std::shared_ptr<ItoPlasmaReaction> > reactions;
   for (const auto& r : m_reactions){
     reactions.emplace_back(std::make_shared<ItoPlasmaReaction>(r.second));
   }
 
-  this->tau_step(a_particles, a_newPhotons, a_mean_energies, a_sources, reactions, a_dx, a_kappa, a_dt);
+  this->stepTau(a_particles, a_newPhotons, a_mean_energies, a_sources, reactions, a_dx, a_kappa, a_dt);
 }
 
 inline
-void ito_plasma_physics::advance_tau(Vector<long long>&  a_particles,
-				     Vector<long long>&  a_newPhotons,
-				     Vector<Real>&       a_mean_energies,
-				     const Vector<Real>& a_sources,
-				     const Real          a_dt,
-				     const RealVect      a_E,
-				     const Real          a_dx,
-				     const Real          a_kappa) const {
+void ItoPlasmaPhysics::advanceTau(Vector<long long>&  a_particles,
+				  Vector<long long>&  a_newPhotons,
+				  Vector<Real>&       a_mean_energies,
+				  const Vector<Real>& a_sources,
+				  const Real          a_dt,
+				  const RealVect      a_E,
+				  const Real          a_dx,
+				  const Real          a_kappa) const {
   // Update reaction rates in case we use LEA. 
-  this->update_reaction_rates(a_E, a_mean_energies, a_dx, a_kappa);
+  this->updateReactionRates(a_E, a_mean_energies, a_dx, a_kappa);
 
   // Do a tau step. Use rejection sampling so we only get valid states. But don't update reaction rates. 
   Real curTime  = 0.0;
@@ -1143,10 +1150,10 @@ void ito_plasma_physics::advance_tau(Vector<long long>&  a_particles,
       Vector<Real> mean_energies  = a_mean_energies;
 
       // Do the tau-leaping
-      this->tau_step(particles, Photons, mean_energies, a_sources, a_dx, a_kappa, nextDt);
+      this->stepTau(particles, Photons, mean_energies, a_sources, a_dx, a_kappa, nextDt);
 
       // Accept step if valid, else, reduce dt.
-      valid = this->valid_state(particles);
+      valid = this->isStateValid(particles);
       if(valid){
 	a_particles     = particles;
 	a_newPhotons    = Photons;
@@ -1155,7 +1162,7 @@ void ito_plasma_physics::advance_tau(Vector<long long>&  a_particles,
 	curTime += nextDt;
 
 	// Update reaction rates in case we use LEA. 
-	this->update_reaction_rates(a_E, a_mean_energies, a_dx, a_kappa);
+	this->updateReactionRates(a_E, a_mean_energies, a_dx, a_kappa);
       }
       else{
 	nextDt = nextDt*0.5;
@@ -1165,13 +1172,13 @@ void ito_plasma_physics::advance_tau(Vector<long long>&  a_particles,
 }
 
 inline
-void ito_plasma_physics::ssa_step(Vector<long long>&  a_particles,
-				  Vector<long long>&  a_newPhotons,
-				  Vector<Real>&       a_mean_energies,
-				  const Vector<Real>& a_sources,
-				  const Real          a_dx,
-				  const Real          a_kappa,
-				  const Real          a_dt) const {
+void ItoPlasmaPhysics::stepSSA(Vector<long long>&  a_particles,
+			       Vector<long long>&  a_newPhotons,
+			       Vector<Real>&       a_mean_energies,
+			       const Vector<Real>& a_sources,
+			       const Real          a_dx,
+			       const Real          a_kappa,
+			       const Real          a_dt) const {
 
   
   std::deque<std::shared_ptr<ItoPlasmaReaction> > reactions;
@@ -1188,39 +1195,39 @@ void ito_plasma_physics::ssa_step(Vector<long long>&  a_particles,
     A += a;
   }
 
-  this->ssa_step(a_particles, a_newPhotons, a_mean_energies, a_sources, propensities, reactions, A, a_dx, a_kappa, a_dt);
+  this->stepSSA(a_particles, a_newPhotons, a_mean_energies, a_sources, propensities, reactions, A, a_dx, a_kappa, a_dt);
 }
 
 inline
-void ito_plasma_physics::ssa_step(Vector<long long>&       a_particles,
-				  Vector<long long>&       a_newPhotons,
-				  Vector<Real>&            a_mean_energies,
-				  const Vector<Real>&      a_sources,
-				  const std::deque<Real>&  a_propensities,
-				  const Real               a_A,
-				  const Real               a_dx,
-				  const Real               a_kappa,
-				  const Real               a_dt) const {
+void ItoPlasmaPhysics::stepSSA(Vector<long long>&       a_particles,
+			       Vector<long long>&       a_newPhotons,
+			       Vector<Real>&            a_mean_energies,
+			       const Vector<Real>&      a_sources,
+			       const std::deque<Real>&  a_propensities,
+			       const Real               a_A,
+			       const Real               a_dx,
+			       const Real               a_kappa,
+			       const Real               a_dt) const {
 
   std::deque<std::shared_ptr<ItoPlasmaReaction> > reactions;
   for (const auto& r : m_reactions){
     reactions.emplace_back(std::make_shared<ItoPlasmaReaction>(r.second));
   }
 
-  this->ssa_step(a_particles, a_newPhotons, a_mean_energies, a_sources, a_propensities, reactions, a_A, a_dx, a_kappa, a_dt);
+  this->stepSSA(a_particles, a_newPhotons, a_mean_energies, a_sources, a_propensities, reactions, a_A, a_dx, a_kappa, a_dt);
 }
 
 inline
-void ito_plasma_physics::ssa_step(Vector<long long>&      a_particles,
-				  Vector<long long>&      a_newPhotons,
-				  Vector<Real>&           a_mean_energies,
-				  const Vector<Real>&     a_sources,
-				  const std::deque<Real>& a_propensities,
-				  const ReactionPtrs&     a_reactions,
-				  const Real              a_A,
-				  const Real              a_dx,
-				  const Real              a_kappa,
-				  const Real              a_dt) const {
+void ItoPlasmaPhysics::stepSSA(Vector<long long>&      a_particles,
+			       Vector<long long>&      a_newPhotons,
+			       Vector<Real>&           a_mean_energies,
+			       const Vector<Real>&     a_sources,
+			       const std::deque<Real>& a_propensities,
+			       const ReactionPtrs&     a_reactions,
+			       const Real              a_A,
+			       const Real              a_dx,
+			       const Real              a_kappa,
+			       const Real              a_dt) const {
 
   const int M = a_reactions.size();
   
@@ -1266,14 +1273,14 @@ void ito_plasma_physics::ssa_step(Vector<long long>&      a_particles,
 
 
 inline
-void ito_plasma_physics::advance_ssa(Vector<long long>& a_particles,
-				     Vector<long long>& a_newPhotons,
-				     Vector<Real>&               a_mean_energies,
-				     const Vector<Real>&         a_sources,
-				     const Real                  a_dt,
-				     const RealVect              a_E,
-				     const Real                  a_dx,
-				     const Real                  a_kappa) const {
+void ItoPlasmaPhysics::advanceSSA(Vector<long long>& a_particles,
+				  Vector<long long>& a_newPhotons,
+				  Vector<Real>&               a_mean_energies,
+				  const Vector<Real>&         a_sources,
+				  const Real                  a_dt,
+				  const RealVect              a_E,
+				  const Real                  a_dx,
+				  const Real                  a_kappa) const {
 
   constexpr long long one = 1;
 
@@ -1295,7 +1302,7 @@ void ito_plasma_physics::advance_ssa(Vector<long long>& a_particles,
     while(curDt <= a_dt){
 
       // Update reaction rates.
-      this->update_reaction_rates(a_E, a_mean_energies, a_dx, a_kappa);
+      this->updateReactionRates(a_E, a_mean_energies, a_dx, a_kappa);
 
       // Get all propensities and compute the total propensity. 
       const std::deque<Real> propensities = this->propensities(a_particles);
@@ -1313,23 +1320,23 @@ void ito_plasma_physics::advance_ssa(Vector<long long>& a_particles,
 
       if(curDt + nextDt <= a_dt){ // Collision within a_dt, do an SSA step.
 	curDt += nextDt;
-	this->ssa_step(a_particles, a_newPhotons, a_mean_energies, a_sources, propensities, reactions, A, a_dx, a_kappa, nextDt);
+	this->stepSSA(a_particles, a_newPhotons, a_mean_energies, a_sources, propensities, reactions, A, a_dx, a_kappa, nextDt);
       }
       else{ // No reaction in this time interval, but we should still increment/decrement the energy with the source.
 	curDt += nextDt;
-	this->energy_step(a_mean_energies, a_particles, a_sources, a_dx, a_kappa, a_dt-curDt);
+	this->stepEnergy(a_mean_energies, a_particles, a_sources, a_dx, a_kappa, a_dt-curDt);
       }
     }
   }
 }
 
 inline
-void ito_plasma_physics::energy_step(Vector<Real>&            a_mean_energies,
-				     const Vector<long long>& a_particles,
-				     const Vector<Real>&      a_sources,
-				     const Real               a_dx,
-				     const Real               a_kappa,
-				     const Real               a_dt) const {
+void ItoPlasmaPhysics::stepEnergy(Vector<Real>&            a_mean_energies,
+				  const Vector<long long>& a_particles,
+				  const Vector<Real>&      a_sources,
+				  const Real               a_dx,
+				  const Real               a_kappa,
+				  const Real               a_dt) const {
   constexpr long long zero = 0;
   
   for (int i = 0; i < a_particles.size(); i++){
@@ -1342,7 +1349,7 @@ void ito_plasma_physics::energy_step(Vector<Real>&            a_mean_energies,
 
 #if ITO_PLASMA_PHYSICS_DEBUG
     if(a_mean_energies[i] != a_mean_energies[i]){
-      MayDay::Abort("ito_plasma_physics::energy_step - got NaN energy...");
+      MayDay::Abort("ItoPlasmaPhysics::stepEnergy - got NaN energy...");
     }
 #endif
   }
@@ -1350,51 +1357,51 @@ void ito_plasma_physics::energy_step(Vector<Real>&            a_mean_energies,
 
 
 inline
-void ito_plasma_physics::advance_particles(Vector<long long>&   a_particles,
-					   Vector<long long>&   a_newPhotons,
-					   Vector<Real>&        a_mean_energies,
-					   const Vector<Real>&  a_sources,
-					   const Real           a_dt,
-					   const RealVect       a_E,
-					   const Real           a_dx,
-					   const Real           a_kappa) const{
+void ItoPlasmaPhysics::advanceParticles(Vector<long long>&   a_particles,
+					Vector<long long>&   a_newPhotons,
+					Vector<Real>&        a_mean_energies,
+					const Vector<Real>&  a_sources,
+					const Real           a_dt,
+					const RealVect       a_E,
+					const Real           a_dx,
+					const Real           a_kappa) const{
   // // Which algorithm?
   if(m_algorithm == algorithm::ssa){
-    this->advance_ssa(a_particles, a_newPhotons, a_mean_energies, a_sources, a_dt, a_E, a_dx, a_kappa); 
+    this->advanceSSA(a_particles, a_newPhotons, a_mean_energies, a_sources, a_dt, a_E, a_dx, a_kappa); 
   }
   else if(m_algorithm == algorithm::tau){
-    this->advance_tau(a_particles, a_newPhotons, a_mean_energies, a_sources, a_dt, a_E, a_dx, a_kappa); 
+    this->advanceTau(a_particles, a_newPhotons, a_mean_energies, a_sources, a_dt, a_E, a_dx, a_kappa); 
   }
   else if(m_algorithm == algorithm::hybrid){
-    this->advance_hybrid(a_particles, a_newPhotons, a_mean_energies, a_sources, a_dt, a_E, a_dx, a_kappa); 
+    this->advanceHybrid(a_particles, a_newPhotons, a_mean_energies, a_sources, a_dt, a_E, a_dx, a_kappa); 
   }
 }
 
 inline
-void ito_plasma_physics::advance_hybrid(Vector<long long>&  a_particles,
-					Vector<long long>&  a_newPhotons,
-					Vector<Real>&       a_mean_energies,
-					const Vector<Real>& a_sources,
-					const Real          a_dt,
-					const RealVect      a_E,
-					const Real          a_dx,
-					const Real          a_kappa) const {
+void ItoPlasmaPhysics::advanceHybrid(Vector<long long>&  a_particles,
+				     Vector<long long>&  a_newPhotons,
+				     Vector<Real>&       a_mean_energies,
+				     const Vector<Real>& a_sources,
+				     const Real          a_dt,
+				     const RealVect      a_E,
+				     const Real          a_dx,
+				     const Real          a_kappa) const {
   Real curTime = 0.0;
 
   while(curTime < a_dt){
 
     // Update reaction rates
-    this->update_reaction_rates(a_E, a_mean_energies, a_dx, a_kappa);
+    this->updateReactionRates(a_E, a_mean_energies, a_dx, a_kappa);
 
     // Get critical and non-critical reactions. 
-    ReactionTypes rTypes = this->get_critical_reactions(a_particles);
+    ReactionTypes rTypes = this->getCriticalReactions(a_particles);
 
     ReactionPtrs criticalReactions    = rTypes.first;
     ReactionPtrs nonCriticalReactions = rTypes.second;
 
     // Compute time steps for critical and non-critical reactions
-    Real dtCrit    = this->get_critical_step(a_particles,     criticalReactions);
-    Real dtNonCrit = this->get_non_critical_step(a_particles, nonCriticalReactions);
+    Real dtCrit    = this->getCriticalTimeStep(a_particles,     criticalReactions);
+    Real dtNonCrit = this->getNonCriticalTimeStep(a_particles, nonCriticalReactions);
 
     bool valid = false;
     while(!valid){ 
@@ -1424,14 +1431,14 @@ void ito_plasma_physics::advance_hybrid(Vector<long long>&  a_particles,
 	    const Real dtNext = Min(dtColl, curDt - dtSSA); // Don't exceed curDt with the next time step. 
 
 	    if(dtSSA + dtColl < curDt){ // Collision happened inside curDt
-	      this->ssa_step(a_particles, a_newPhotons, a_mean_energies, a_sources, propensities, A, a_dx, a_kappa, dtColl);
+	      this->stepSSA(a_particles, a_newPhotons, a_mean_energies, a_sources, propensities, A, a_dx, a_kappa, dtColl);
 	    }
 	    else{ // Next reaction is outside curDt, but we should still increment with the energy.
-	      this->energy_step(a_mean_energies, a_particles, a_sources, a_dx, a_kappa, dtNext);
+	      this->stepEnergy(a_mean_energies, a_particles, a_sources, a_dx, a_kappa, dtNext);
 	    }
 
 	    // Update reaction rates and propensity for the next SSA step. 
-	    this->update_reaction_rates(a_E, a_mean_energies, a_dx, a_kappa);
+	    this->updateReactionRates(a_E, a_mean_energies, a_dx, a_kappa);
 	    
 	    dtSSA += dtNext;
 	    nSSA  += 1;
@@ -1448,10 +1455,10 @@ void ito_plasma_physics::advance_hybrid(Vector<long long>&  a_particles,
 	  Vector<Real> mean_energies  = a_mean_energies;
 
 	  // Do the tau-leaping
-	  this->tau_step(particles, Photons, mean_energies, a_sources, nonCriticalReactions, a_dx, a_kappa, curDt);
+	  this->stepTau(particles, Photons, mean_energies, a_sources, nonCriticalReactions, a_dx, a_kappa, curDt);
 
 	  // Make sure step was valid
-	  valid = this->valid_state(particles);
+	  valid = this->isStateValid(particles);
 	  if(valid){
 	    curTime        += curDt;
 	    a_particles     = particles;
@@ -1477,12 +1484,12 @@ void ito_plasma_physics::advance_hybrid(Vector<long long>&  a_particles,
 	const Real Ac = this->propensity(particles, criticalReactions);
 
 	// SSA for critical reactions
-	this->ssa_step(particles, Photons, mean_energies, a_sources, propensitiesC, criticalReactions, Ac, a_dx, a_kappa, curDt);
+	this->stepSSA(particles, Photons, mean_energies, a_sources, propensitiesC, criticalReactions, Ac, a_dx, a_kappa, curDt);
 
 	// Tau-leaping for non-critical reactions
-	this->tau_step(particles, Photons, mean_energies, a_sources, nonCriticalReactions, propensitiesNC, a_dx, a_kappa, curDt);
+	this->stepTau(particles, Photons, mean_energies, a_sources, nonCriticalReactions, propensitiesNC, a_dx, a_kappa, curDt);
 
-	valid = this->valid_state(particles);
+	valid = this->isStateValid(particles);
 
 	if(valid){
 	  curTime        += curDt;
@@ -1498,9 +1505,10 @@ void ito_plasma_physics::advance_hybrid(Vector<long long>&  a_particles,
     }
 
     // Update reaction rates for next step
-    this->update_reaction_rates(a_E, a_mean_energies, a_dx, a_kappa);
+    this->updateReactionRates(a_E, a_mean_energies, a_dx, a_kappa);
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

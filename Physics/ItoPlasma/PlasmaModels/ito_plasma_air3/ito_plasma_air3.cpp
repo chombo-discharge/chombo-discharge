@@ -17,7 +17,7 @@ ito_plasma_air3::ito_plasma_air3(){
   m_num_ItoSpecies = 3;
   m_numRtSpecies = 1;
 
-  m_coupling == ito_plasma_physics::coupling::LFA;
+  m_coupling == ItoPlasmaPhysics::coupling::LFA;
 
   ParmParse pp("ito_plasma_air3");
   Vector<Real> v;
@@ -106,7 +106,7 @@ ito_plasma_air3::ito_plasma_air3(){
   positives.clear();
   negatives.clear();
   
-  this->draw_sphere_particles(electrons, positives, m_num_particles, m_blob_center, m_blob_radius, m_particle_weight, 0.0, 0.0);
+  this->drawSphereParticles(electrons, positives, m_num_particles, m_blob_center, m_blob_radius, m_particle_weight, 0.0, 0.0);
 
   // Particle-particle reactions
   m_reactions.emplace("impact_ionization",      ItoPlasmaReaction({m_electron_idx}, {m_electron_idx, m_electron_idx, m_positive_idx}));
@@ -169,7 +169,7 @@ Real ito_plasma_air3::computeAlpha(const RealVect a_E) const {
   return m_tables.at("alpha").getEntry(E);
 }
 
-Vector<Real> ito_plasma_air3::compute_ito_mobilities_lfa(const Real a_time, const RealVect a_pos, const RealVect a_E) const {
+Vector<Real> ito_plasma_air3::computeItoMobilitiesLFA(const Real a_time, const RealVect a_pos, const RealVect a_E) const {
   Vector<Real> mobilities(m_num_ItoSpecies, m_ion_mu);
   mobilities[m_electron_idx] = m_tables.at("mobility").getEntry(a_E.vectorLength());
 
@@ -180,7 +180,7 @@ RealVect ito_plasma_air3::compute_electron_velocity(const RealVect a_E) const {
   return -m_tables.at("mobility").getEntry(a_E.vectorLength())*a_E;
 }
 
-Vector<Real> ito_plasma_air3::compute_ito_diffusion_lfa(const Real         a_time,
+Vector<Real> ito_plasma_air3::computeItoDiffusionLFA(const Real         a_time,
 							const RealVect     a_pos,
 							const RealVect     a_E,
 							const Vector<Real> a_cdr_densities) const {
@@ -190,7 +190,7 @@ Vector<Real> ito_plasma_air3::compute_ito_diffusion_lfa(const Real         a_tim
   return D;
 }
 
-void ito_plasma_air3::update_reaction_rates_lfa(const RealVect a_E, const Real a_dx, const Real a_kappa) const{
+void ito_plasma_air3::updateReactionRatesLFA(const RealVect a_E, const Real a_dx, const Real a_kappa) const{
 
   // Compute the reaction rates.
   const Real dV      = pow(a_dx, SpaceDim);//*a_kappa;

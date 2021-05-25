@@ -11,7 +11,7 @@
 #include <functional>
 
 #include "CD_TimeStepper.H"
-#include "ito_plasma_physics.H"
+#include <CD_ItoPlasmaPhysics.H>
 #include <CD_ItoLayout.H>
 #include <CD_PointParticle.H>
 #include <CD_RtLayout.H>
@@ -43,7 +43,7 @@ namespace Physics {
 
       // Ctor and dtor
       ito_plasma_stepper();
-      ito_plasma_stepper(RefCountedPtr<ito_plasma_physics>& a_physics);
+      ito_plasma_stepper(RefCountedPtr<ItoPlasmaPhysics>& a_physics);
       ~ito_plasma_stepper();
 
       // Setup routines
@@ -175,13 +175,13 @@ namespace Physics {
       void compute_ito_diffusion();
 
       // Routines for computing mobilities in the LFA. This computes mesh-defined mobilities and interpolates them to the particle positions
-      void compute_ito_mobilities_lfa();
-      void compute_ito_mobilities_lfa(Vector<EBAMRCellData*>& a_meshMobilities, const EBAMRCellData& a_E, const Real a_time);
-      void compute_ito_mobilities_lfa(Vector<LevelData<EBCellFAB>* >& a_meshMobilities,
+      void computeItoMobilitiesLFA();
+      void computeItoMobilitiesLFA(Vector<EBAMRCellData*>& a_meshMobilities, const EBAMRCellData& a_E, const Real a_time);
+      void computeItoMobilitiesLFA(Vector<LevelData<EBCellFAB>* >& a_meshMobilities,
 				      const LevelData<EBCellFAB>&     a_E,
 				      const int                       a_level,
 				      const Real                      a_time);
-      void compute_ito_mobilities_lfa(Vector<EBCellFAB*>& a_meshMobilities,
+      void computeItoMobilitiesLFA(Vector<EBCellFAB*>& a_meshMobilities,
 				      const EBCellFAB&    a_E,
 				      const int           a_level,
 				      const DataIndex     a_dit,
@@ -197,17 +197,17 @@ namespace Physics {
       // Routines for computing diffusion coefficients.
       // These routines compute the diffusion coefficients by computing D(E)
       // as a mesh variable, and then interpolating that to the particle position. 
-      void compute_ito_diffusion_lfa();
-      void compute_ito_diffusion_lfa(Vector<EBAMRCellData*>&       a_diffusionCoefficient,
+      void computeItoDiffusionLFA();
+      void computeItoDiffusionLFA(Vector<EBAMRCellData*>&       a_diffusionCoefficient,
 				     const Vector<EBAMRCellData*>& a_densities,
 				     const EBAMRCellData&          a_E,
 				     const Real                    a_time);
-      void compute_ito_diffusion_lfa(Vector<LevelData<EBCellFAB>* >&       a_diffusionCoefficient,
+      void computeItoDiffusionLFA(Vector<LevelData<EBCellFAB>* >&       a_diffusionCoefficient,
 				     const Vector<LevelData<EBCellFAB>* >& a_densities,
 				     const LevelData<EBCellFAB>&           a_E,
 				     const int                             a_level,
 				     const Real                            a_time);
-      void compute_ito_diffusion_lfa(Vector<EBCellFAB*>&       a_diffusionCoefficient,
+      void computeItoDiffusionLFA(Vector<EBCellFAB*>&       a_diffusionCoefficient,
 				     const Vector<EBCellFAB*>& a_densities,
 				     const EBCellFAB&          a_E,
 				     const int                 a_level,
@@ -250,16 +250,16 @@ namespace Physics {
 					const Real       a_dt);
 
       // Routines for reconciling particles. 
-      void reconcile_particles(const EBAMRCellData& a_newParticlesPerCell,
+      void reconcileParticles(const EBAMRCellData& a_newParticlesPerCell,
 			       const EBAMRCellData& a_oldParticlesPerCell,
 			       const EBAMRCellData& a_meanParticleEnergies,
 			       const EBAMRCellData& a_newPhotonsPerCell);
-      void reconcile_particles(const LevelData<EBCellFAB>& a_newParticlesPerCell,
+      void reconcileParticles(const LevelData<EBCellFAB>& a_newParticlesPerCell,
 			       const LevelData<EBCellFAB>& a_oldParticlesPerCell,
 			       const LevelData<EBCellFAB>& a_meanParticleEnergies,
 			       const LevelData<EBCellFAB>& a_newPhotonsPerCell,
 			       const int                   a_level);
-      void reconcile_particles(const EBCellFAB& a_newParticlesPerCell,
+      void reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
 			       const EBCellFAB& a_oldParticlesPerCell,
 			       const EBCellFAB& a_meanParticleEnergies,
 			       const EBCellFAB& a_newPhotonsPerCell,
@@ -339,7 +339,7 @@ namespace Physics {
 
       BoxSorting m_boxSort;
       
-      RefCountedPtr<ito_plasma_physics> m_physics;
+      RefCountedPtr<ItoPlasmaPhysics> m_physics;
       RefCountedPtr<ItoLayout<ItoSolver> > m_ito;
       RefCountedPtr<RtLayout<McPhoto> > m_rte;
       RefCountedPtr<FieldSolver> m_fieldSolver;

@@ -15,7 +15,7 @@
 #include "CD_NamespaceHeader.H"
 using namespace Physics::ItoPlasma;
 
-ito_plasma_godunov::ito_plasma_godunov(RefCountedPtr<ito_plasma_physics>& a_physics){
+ito_plasma_godunov::ito_plasma_godunov(RefCountedPtr<ItoPlasmaPhysics>& a_physics){
   m_name    = "ito_plasma_godunov";
   m_physics = a_physics;
 
@@ -94,7 +94,7 @@ void ito_plasma_godunov::allocate(){
   m_sigma->allocateInternals();
 
   // Now allocate for the conductivity particles and rho^dagger particles
-  const int num_ItoSpecies = m_physics->get_num_ItoSpecies();
+  const int num_ItoSpecies = m_physics->getNumItoSpecies();
   
   m_conductivity_particles.resize(num_ItoSpecies);
   m_rho_dagger_particles.resize(num_ItoSpecies);
@@ -280,7 +280,7 @@ void ito_plasma_godunov::allocateInternals(){
     pout() << m_name + "::allocateInternals" << endl;
   }
 
-  const int num_ItoSpecies = m_physics->get_num_ItoSpecies();
+  const int num_ItoSpecies = m_physics->getNumItoSpecies();
   const int num_RtSpecies = m_physics->getNumRtSpecies();
 
   m_amr->allocate(m_fluid_scratch1,    m_fluid_Realm,    m_phase, 1);
@@ -350,10 +350,10 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   particle_time -= MPI_Wtime();
   switch(m_algorithm){
   case which_algorithm::euler_maruyama:
-    this->advance_particles_euler_maruyama(a_dt);
+    this->advanceParticles_euler_maruyama(a_dt);
     break;
   case which_algorithm::trapezoidal:
-    this->advance_particles_trapezoidal(a_dt);
+    this->advanceParticles_trapezoidal(a_dt);
     break;
   default:
     MayDay::Abort("ito_plasma_godunov::advance - logic bust");
@@ -375,7 +375,7 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
 
   // If we are using the LEA, we must compute the Ohmic heating term. This must be done
   // BEFORE sorting the particles per cell. 
-  if(m_physics->get_coupling() == ito_plasma_physics::coupling::LEA){
+  if(m_physics->getCoupling() == ItoPlasmaPhysics::coupling::LEA){
     this->computeElectricFielddotJ_source(a_dt);
   }
   
@@ -1148,10 +1148,10 @@ void ito_plasma_godunov::compute_regrid_rho(){
   this->deposit_godunov_particles(m_rho_dagger_particles, which_particles::all);
 }
 
-void ito_plasma_godunov::advance_particles_euler_maruyama(const Real a_dt){
-  CH_TIME("ito_plasma_godunov::advance_particles_euler_maruyama");
+void ito_plasma_godunov::advanceParticles_euler_maruyama(const Real a_dt){
+  CH_TIME("ito_plasma_godunov::advanceParticles_euler_maruyama");
   if(m_verbosity > 5){
-    pout() << m_name + "::advance_particles_euler_maruyama" << endl;
+    pout() << m_name + "::advanceParticles_euler_maruyama" << endl;
   }
 
   Real posTime = 0.0;
@@ -1411,10 +1411,10 @@ void ito_plasma_godunov::step_euler_maruyama(const Real a_dt){
   }
 }
 
-void ito_plasma_godunov::advance_particles_trapezoidal(const Real a_dt){
-  CH_TIME("ito_plasma_godunov::advance_particles_trapezoidal");
+void ito_plasma_godunov::advanceParticles_trapezoidal(const Real a_dt){
+  CH_TIME("ito_plasma_godunov::advanceParticles_trapezoidal");
   if(m_verbosity > 5){
-    pout() << m_name + "::advance_particles_trapezoidal" << endl;
+    pout() << m_name + "::advanceParticles_trapezoidal" << endl;
   }
 
   m_prevDt = 0.5*a_dt;  // Needed for regrids. 

@@ -28,7 +28,7 @@ ito_plasma_tagger::ito_plasma_tagger(){
   m_realm = Realm::Primal;
 }
 
-ito_plasma_tagger::ito_plasma_tagger(const RefCountedPtr<ito_plasma_physics>&     a_physics,
+ito_plasma_tagger::ito_plasma_tagger(const RefCountedPtr<ItoPlasmaPhysics>&     a_physics,
 				     const RefCountedPtr<ito_plasma_stepper>&     a_timeStepper,
 				     const RefCountedPtr<AmrMesh>&               a_amr,
 				     const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry) : ito_plasma_tagger() {
@@ -39,7 +39,7 @@ ito_plasma_tagger::~ito_plasma_tagger(){
 
 }
 
-void ito_plasma_tagger::define(const RefCountedPtr<ito_plasma_physics>&     a_physics,
+void ito_plasma_tagger::define(const RefCountedPtr<ItoPlasmaPhysics>&     a_physics,
 			       const RefCountedPtr<ito_plasma_stepper>&     a_timeStepper,
 			       const RefCountedPtr<AmrMesh>&               a_amr,
 			       const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry){

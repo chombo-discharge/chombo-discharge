@@ -20,7 +20,7 @@ namespace Physics {
 
       // Ctor and dtor
       ito_plasma_godunov() = delete;
-      ito_plasma_godunov(RefCountedPtr<ito_plasma_physics>& a_physics);
+      ito_plasma_godunov(RefCountedPtr<ItoPlasmaPhysics>& a_physics);
       ~ito_plasma_godunov();
 
       // IO routines
@@ -107,12 +107,12 @@ namespace Physics {
       void compute_regrid_rho();
 
       // Specific routines for Euler-Maruyama
-      void advance_particles_euler_maruyama(const Real a_dt);
+      void advanceParticles_euler_maruyama(const Real a_dt);
       void diffuse_particles_euler_maruyama(Vector<ParticleContainer<godunov_particle>* >& a_rho_dagger, const Real a_dt);
       void step_euler_maruyama(const Real a_dt);
       
       // Specific routines for trapezoidal integration
-      void advance_particles_trapezoidal(const Real a_dt);
+      void advanceParticles_trapezoidal(const Real a_dt);
       void pre_trapezoidal_predictor(Vector<ParticleContainer<godunov_particle>* >& a_rho_dagger, const Real a_dt);
       void pre_trapezoidal_corrector(Vector<ParticleContainer<godunov_particle>* >& a_rho_dagger, const Real a_dt);
       void trapezoidal_predictor(const Real a_dt);

@@ -11,7 +11,7 @@
 
 #include "CD_CellTagger.H"
 #include "ito_plasma_stepper.H"
-#include "ito_plasma_physics.H"
+#include <CD_ItoPlasmaPhysics.H>
 
 #include "CD_NamespaceHeader.H"
 namespace Physics {
@@ -31,7 +31,7 @@ namespace Physics {
       /*!
 	@brief Full constructor
       */
-      ito_plasma_tagger(const RefCountedPtr<ito_plasma_physics>&     a_physics,
+      ito_plasma_tagger(const RefCountedPtr<ItoPlasmaPhysics>&     a_physics,
 			const RefCountedPtr<ito_plasma_stepper>&     a_timeStepper,
 			const RefCountedPtr<AmrMesh>&               a_amr,
 			const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
@@ -48,7 +48,7 @@ namespace Physics {
 	@param[in] a_amr         AmrMesh instance
 	@param[in] a_computationalGeometry    Computational geometry
       */
-      virtual void define(const RefCountedPtr<ito_plasma_physics>&     a_physics,
+      virtual void define(const RefCountedPtr<ItoPlasmaPhysics>&     a_physics,
 			  const RefCountedPtr<ito_plasma_stepper>&     a_timeStepper,
 			  const RefCountedPtr<AmrMesh>&               a_amr,
 			  const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
@@ -114,7 +114,7 @@ namespace Physics {
       /*!
 	@brief Plasma kinetics. 
       */
-      RefCountedPtr<ito_plasma_physics> m_physics;
+      RefCountedPtr<ItoPlasmaPhysics> m_physics;
 
       /*!
 	@brief Time stepper

@@ -35,7 +35,7 @@ namespace Physics {
 
       Real compute_eta(const RealVect a_E) const;
 
-      void update_reaction_rates_lea(const RealVect a_E, const Vector<Real> a_mean_energies, const Real a_dx, const Real a_kappa) const override;
+      void updateReactionRatesLEA(const RealVect a_E, const Vector<Real> a_mean_energies, const Real a_dx, const Real a_kappa) const override;
 
     protected:
 

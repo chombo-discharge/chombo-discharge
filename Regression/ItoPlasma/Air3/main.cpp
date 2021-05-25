@@ -47,7 +47,7 @@ int main(int argc, char* argv[]){
   RefCountedPtr<GeoCoarsener> geocoarsen        = RefCountedPtr<GeoCoarsener> (new GeoCoarsener());
 
   // Set up physics 
-  RefCountedPtr<ito_plasma_physics> physics      = RefCountedPtr<ito_plasma_physics> (new ito_plasma_air3());
+  RefCountedPtr<ItoPlasmaPhysics> physics      = RefCountedPtr<ItoPlasmaPhysics> (new ito_plasma_air3());
   RefCountedPtr<ito_plasma_stepper> timestepper  = RefCountedPtr<ito_plasma_stepper> (new ito_plasma_godunov(physics));
   RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (new ito_plasma_streamer_tagger(physics, timestepper, amr, compgeom));
 

@@ -1,11 +1,11 @@
 /*!
-  @file   ito_plasma_physics.cpp
-  @brief  Implementation of ito_plasma_physics.H
+  @file   ItoPlasmaPhysics.cpp
+  @brief  Implementation of ItoPlasmaPhysics.H
   @author Robert Marskar
   @date   June 2020
 */
 
-#include "ito_plasma_physics.H"
+#include <CD_ItoPlasmaPhysics.H>
 #include <CD_Units.H>
 
 #include <PolyGeom.H>
@@ -17,7 +17,7 @@
   
 using namespace Physics::ItoPlasma;
 
-ito_plasma_physics::ito_plasma_physics(){
+ItoPlasmaPhysics::ItoPlasmaPhysics(){
 
   // Default coupling
   m_coupling = coupling::LFA;
@@ -43,43 +43,43 @@ ito_plasma_physics::ito_plasma_physics(){
   m_table_entries = 1000;
 }
 
-ito_plasma_physics::~ito_plasma_physics(){
+ItoPlasmaPhysics::~ItoPlasmaPhysics(){
 }
 
-const Vector<RefCountedPtr<ItoSpecies> >& ito_plasma_physics::get_ItoSpecies() const { 
+const Vector<RefCountedPtr<ItoSpecies> >& ItoPlasmaPhysics::get_ItoSpecies() const { 
   return m_ItoSpecies; 
 }
 
-const Vector<RefCountedPtr<RtSpecies> >& ito_plasma_physics::getRtSpecies() const {
+const Vector<RefCountedPtr<RtSpecies> >& ItoPlasmaPhysics::getRtSpecies() const {
   return m_RtSpecies;
 }
 
-int ito_plasma_physics::get_num_ItoSpecies() const{
+int ItoPlasmaPhysics::getNumItoSpecies() const{
   return m_ItoSpecies.size();
 }
 
-int ito_plasma_physics::getNumRtSpecies() const {
+int ItoPlasmaPhysics::getNumRtSpecies() const {
   return m_RtSpecies.size();
 }
 
-ito_plasma_physics::coupling ito_plasma_physics::get_coupling() const {
+ItoPlasmaPhysics::coupling ItoPlasmaPhysics::getCoupling() const {
   return m_coupling;
 }
 
-Real ito_plasma_physics::initialSigma(const Real a_time, const RealVect a_pos) const {
+Real ItoPlasmaPhysics::initialSigma(const Real a_time, const RealVect a_pos) const {
   return 0.0;
 }
 
-void ito_plasma_physics::addTable(const std::string a_table_name, const std::string a_file){
+void ItoPlasmaPhysics::addTable(const std::string a_table_name, const std::string a_file){
 
   LookupTable table;
 
-  this->read_file(table, a_file);        // Read file
+  this->readFile(table, a_file);        // Read file
   table.makeUniform(m_table_entries);   // Make table into a unifom table
   m_tables.emplace(a_table_name, table); // Add table
 }
 
-void ito_plasma_physics::read_file(LookupTable& a_table, const std::string a_file){
+void ItoPlasmaPhysics::readFile(LookupTable& a_table, const std::string a_file){
 
   Real x, y;
   
