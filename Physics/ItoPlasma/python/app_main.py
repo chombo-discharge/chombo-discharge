@@ -83,7 +83,7 @@ def write_template(args):
     mainf.write("\n")
     mainf.write("  // Set up physics \n")
     mainf.write("  RefCountedPtr<ItoPlasmaPhysics> physics      = RefCountedPtr<ItoPlasmaPhysics> (new " + args.physics + "());\n")
-    mainf.write("  RefCountedPtr<ito_plasma_stepper> timestepper  = RefCountedPtr<ito_plasma_stepper> (new " + args.TimeStepper + "(physics));\n")
+    mainf.write("  RefCountedPtr<ItoPlasmaStepper> timestepper  = RefCountedPtr<ItoPlasmaStepper> (new " + args.TimeStepper + "(physics));\n")
     if args.CellTagger != "none":
         mainf.write("  RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (new " + args.CellTagger + "(physics, timestepper, amr, compgeom));\n")
     else:
@@ -105,7 +105,7 @@ def write_template(args):
 
     mainf.write("  // Send solvers to TimeStepper \n")
     mainf.write("  timestepper->setFieldSolver(poi);\n");
-    mainf.write("  timestepper->set_ito(cdr);\n");
+    mainf.write("  timestepper->setIto(cdr);\n");
     mainf.write("  timestepper->setRadiativeTransferSolvers(rte);\n");
     mainf.write("\n")
 

@@ -770,7 +770,7 @@ void ItoPlasmaPhysics::advanceReactionNetwork(Vector<List<ItoParticle>* >& a_par
     mean_energies = this->getParticleMeanEnergy(energies, oldParticleCount);
     sources       = a_sources;
 
-    // // The one that comes in through ito_plasma_stepper is in Joule/(dV*dt), make it eV/(cell*dt)
+    // // The one that comes in through ItoPlasmaStepper is in Joule/(dV*dt), make it eV/(cell*dt)
     const Real dV = a_kappa*pow(a_dx, SpaceDim);
     for (int i = 0; i < sources.size(); i++){ 
       sources[i] *= dV/Units::Qe;

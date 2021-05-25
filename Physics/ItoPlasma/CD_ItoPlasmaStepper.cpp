@@ -1,25 +1,31 @@
+/* chombo-discharge
+ * Copyright © 2021 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+ */
+
 /*!
-  @file   ito_plasmpa_stepper.cpp
-  @brief  Implementation of ito_plasma_stepper.H
+  @file   CD_ItoPlasmaStepper.cpp
+  @brief  Implementation of CD_ItoPlasmaStepper.H
   @author Robert Marskar
-  @date   May 2020
 */
 
-#include "ito_plasma_stepper.H"
-#include <CD_DataOps.H>
-#include <CD_Units.H>
-#include "CD_FieldSolverMultigrid.H"
-
+// Chombo includes
 #include <EBArith.H>
 #include <PolyGeom.H>
 #include <ParmParse.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_ItoPlasmaStepper.H>
+#include <CD_DataOps.H>
+#include <CD_Units.H>
+#include <CD_FieldSolverMultigrid.H>
+#include <CD_NamespaceHeader.H>
+
 using namespace Physics::ItoPlasma;
 
-ito_plasma_stepper::ito_plasma_stepper(){
+ItoPlasmaStepper::ItoPlasmaStepper(){
   m_verbosity = -1;
-  m_name      = "ito_plasma_stepper";
+  m_name      = "ItoPlasmaStepper";
   m_phase     = phase::gas;
 
   m_dt   = 0.0;
@@ -36,32 +42,32 @@ ito_plasma_stepper::ito_plasma_stepper(){
   m_particleRealm = Realm::Primal;
 }
 
-ito_plasma_stepper::ito_plasma_stepper(RefCountedPtr<ItoPlasmaPhysics>& a_physics) : ito_plasma_stepper(){
+ItoPlasmaStepper::ItoPlasmaStepper(RefCountedPtr<ItoPlasmaPhysics>& a_physics) : ItoPlasmaStepper(){
   m_physics   = a_physics;
 }
 
-ito_plasma_stepper::~ito_plasma_stepper(){
+ItoPlasmaStepper::~ItoPlasmaStepper(){
 }
 
-void ito_plasma_stepper::setVerbosity(const int a_verbosity){
-  CH_TIME("ito_plasma_stepper::setVerbosity");
+void ItoPlasmaStepper::setVerbosity(const int a_verbosity){
+  CH_TIME("ItoPlasmaStepper::setVerbosity");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::setVerbosity" << endl;
+    pout() << "ItoPlasmaStepper::setVerbosity" << endl;
   }
   m_verbosity = a_verbosity;
 }
 
-void ito_plasma_stepper::setupSolvers(){
-  CH_TIME("ito_plasma_stepper::setup_solver");
+void ItoPlasmaStepper::setupSolvers(){
+  CH_TIME("ItoPlasmaStepper::setup_solver");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::setupSolvers" << endl;
+    pout() << "ItoPlasmaStepper::setupSolvers" << endl;
   }
 
   // Parse class options
   this->parseOptions();
 
   // Set up solvers
-  this->setup_ito();
+  this->setupIto();
   this->setupPoisson();
   this->setupRadiativeTransfer();
   this->setupSigma();
@@ -70,13 +76,13 @@ void ito_plasma_stepper::setupSolvers(){
   this->allocateInternals();
 
   // Set the particle buffers for the Ito solver
-  this->set_particle_buffers();
+  this->setParticleBuffers();
 }
 
-void ito_plasma_stepper::setup_ito(){
-  CH_TIME("ito_plasma_stepper::setup_ito");
+void ItoPlasmaStepper::setupIto(){
+  CH_TIME("ItoPlasmaStepper::setupIto");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::setup_ito" << endl;
+    pout() << "ItoPlasmaStepper::setupIto" << endl;
   }
 
   m_ito->setVerbosity(m_verbosity);
@@ -87,10 +93,10 @@ void ito_plasma_stepper::setup_ito(){
   m_ito->setRealm(m_particleRealm);
 }
 
-void ito_plasma_stepper::setupPoisson(){
-  CH_TIME("ito_plasma_stepper::setupPoisson");
+void ItoPlasmaStepper::setupPoisson(){
+  CH_TIME("ItoPlasmaStepper::setupPoisson");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::setupPoisson" << endl;
+    pout() << "ItoPlasmaStepper::setupPoisson" << endl;
   }
 
   m_fieldSolver->setVerbosity(m_verbosity);
@@ -101,10 +107,10 @@ void ito_plasma_stepper::setupPoisson(){
   m_fieldSolver->setRealm(m_fluid_Realm);
 }
 
-void ito_plasma_stepper::setupRadiativeTransfer(){
-  CH_TIME("ito_plasma_stepper::setupRadiativeTransfer");
+void ItoPlasmaStepper::setupRadiativeTransfer(){
+  CH_TIME("ItoPlasmaStepper::setupRadiativeTransfer");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::setupRadiativeTransfer" << endl;
+    pout() << "ItoPlasmaStepper::setupRadiativeTransfer" << endl;
   }
 
   m_rte->setVerbosity(m_verbosity);
@@ -116,10 +122,10 @@ void ito_plasma_stepper::setupRadiativeTransfer(){
   m_rte->sanityCheck();
 }
 
-void ito_plasma_stepper::setupSigma(){
-  CH_TIME("ito_plasma_stepper::setupSigma");
+void ItoPlasmaStepper::setupSigma(){
+  CH_TIME("ItoPlasmaStepper::setupSigma");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::setupSigma" << endl;
+    pout() << "ItoPlasmaStepper::setupSigma" << endl;
   }
 
   m_sigma = RefCountedPtr<SigmaSolver> (new SigmaSolver());
@@ -129,10 +135,10 @@ void ito_plasma_stepper::setupSigma(){
   m_sigma->setRealm(m_fluid_Realm);
 }
 
-void ito_plasma_stepper::set_particle_buffers(){
-  CH_TIME("ito_plasma_stepper::set_particle_buffers");
+void ItoPlasmaStepper::setParticleBuffers(){
+  CH_TIME("ItoPlasmaStepper::setParticleBuffers");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::set_particle_buffers" << endl;
+    pout() << "ItoPlasmaStepper::setParticleBuffers" << endl;
   }
   
   m_ito->setHalobuffer(m_halo_buffer);
@@ -146,10 +152,10 @@ void ito_plasma_stepper::set_particle_buffers(){
   }
 }
 
-void ito_plasma_stepper::allocate() {
-  CH_TIME("ito_plasma_stepper::allocate");
+void ItoPlasmaStepper::allocate() {
+  CH_TIME("ItoPlasmaStepper::allocate");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::allocate" << endl;
+    pout() << "ItoPlasmaStepper::allocate" << endl;
   }
 
   m_ito->allocateInternals();
@@ -158,14 +164,14 @@ void ito_plasma_stepper::allocate() {
   m_sigma->allocateInternals();
 }
 
-void ito_plasma_stepper::postInitialize(){
+void ItoPlasmaStepper::postInitialize(){
 
 }
 
-void ito_plasma_stepper::initialData(){
-  CH_TIME("ito_plasma_stepper::initialData");
+void ItoPlasmaStepper::initialData(){
+  CH_TIME("ItoPlasmaStepper::initialData");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::initialData" << endl;
+    pout() << "ItoPlasmaStepper::initialData" << endl;
   }
 
   m_ito->initialData(); // This deposits, of course. 
@@ -180,14 +186,14 @@ void ito_plasma_stepper::initialData(){
   this->solvePoisson();
 
   // Fill solvers with velocities and diffusion coefficients
-  this->compute_ito_velocities();
-  this->compute_ito_diffusion();
+  this->computeItoVelocities();
+  this->computeItoDiffusion();
 }
 
-void ito_plasma_stepper::initialSigma(){
-  CH_TIME("ito_plasma_stepper::initialSigma");
+void ItoPlasmaStepper::initialSigma(){
+  CH_TIME("ItoPlasmaStepper::initialSigma");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::initialSigma" << endl;
+    pout() << "ItoPlasmaStepper::initialSigma" << endl;
   }
 
   const RealVect origin  = m_amr->getProbLo();
@@ -222,10 +228,10 @@ void ito_plasma_stepper::initialSigma(){
   m_sigma->resetCells(sigma);
 }
 
-void ito_plasma_stepper::postCheckpointSetup(){
-  CH_TIME("ito_plasma_stepper::postCheckpointSetup");
+void ItoPlasmaStepper::postCheckpointSetup(){
+  CH_TIME("ItoPlasmaStepper::postCheckpointSetup");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::postCheckpointSetup" << endl;
+    pout() << "ItoPlasmaStepper::postCheckpointSetup" << endl;
   }
 
   //this->solvePoisson();
@@ -233,16 +239,16 @@ void ito_plasma_stepper::postCheckpointSetup(){
 
   m_ito->remap();
   
-  this->post_checkpoint_poisson();
+  this->postCheckpointPoisson();
   
-  this->compute_ito_velocities();
-  this->compute_ito_diffusion();
+  this->computeItoVelocities();
+  this->computeItoDiffusion();
 }
 
-void ito_plasma_stepper::post_checkpoint_poisson(){
-  CH_TIME("ito_plasma_stepper::post_checkpoint_poisson");
+void ItoPlasmaStepper::postCheckpointPoisson(){
+  CH_TIME("ItoPlasmaStepper::postCheckpointPoisson");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::post_checkpoint_poisson" << endl;
+    pout() << "ItoPlasmaStepper::postCheckpointPoisson" << endl;
   }
 
   // Do some post checkpointing stuff. 
@@ -278,10 +284,10 @@ void ito_plasma_stepper::post_checkpoint_poisson(){
   // std::cout << Emax << std::endl;
 }
 
-void ito_plasma_stepper::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const {
-  CH_TIME("ito_plasma_stepper::writeCheckpointData");
+void ItoPlasmaStepper::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const {
+  CH_TIME("ItoPlasmaStepper::writeCheckpointData");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::writeCheckpointData" << endl;
+    pout() << "ItoPlasmaStepper::writeCheckpointData" << endl;
   }
 
   for (ItoIterator<ItoSolver> solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -298,10 +304,10 @@ void ito_plasma_stepper::writeCheckpointData(HDF5Handle& a_handle, const int a_l
   m_sigma->writeCheckpointLevel(a_handle, a_lvl);
 }
 
-void ito_plasma_stepper::readCheckpointData(HDF5Handle& a_handle, const int a_lvl){
-  CH_TIME("ito_plasma_stepper::readCheckpointData");
+void ItoPlasmaStepper::readCheckpointData(HDF5Handle& a_handle, const int a_lvl){
+  CH_TIME("ItoPlasmaStepper::readCheckpointData");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::readCheckpointData" << endl;
+    pout() << "ItoPlasmaStepper::readCheckpointData" << endl;
   }
 
   for (ItoIterator<ItoSolver> solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -318,10 +324,10 @@ void ito_plasma_stepper::readCheckpointData(HDF5Handle& a_handle, const int a_lv
   m_sigma->readCheckpointLevel(a_handle, a_lvl);
 }
 
-void ito_plasma_stepper::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const {
-  CH_TIME("ito_plasma_stepper::writePlotData");
+void ItoPlasmaStepper::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const {
+  CH_TIME("ItoPlasmaStepper::writePlotData");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::writePlotData" << endl;
+    pout() << "ItoPlasmaStepper::writePlotData" << endl;
   }
 
   // Poisson solver copies over its output data
@@ -355,14 +361,14 @@ void ito_plasma_stepper::writePlotData(EBAMRCellData& a_output, Vector<std::stri
   }
 
   // Write the number of particles per patch
-  this->write_num_particles_per_patch(a_output, a_icomp);
+  this->writeNumParticlesPerPatch(a_output, a_icomp);
   a_plotVariableNames.push_back("particles_per_patch");
 }
 
-void ito_plasma_stepper::writeJ(EBAMRCellData& a_output, int& a_icomp) const{
-  CH_TIME("ito_plasma_stepper::writeJ");
+void ItoPlasmaStepper::writeJ(EBAMRCellData& a_output, int& a_icomp) const{
+  CH_TIME("ItoPlasmaStepper::writeJ");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::writeJ" << endl;
+    pout() << "ItoPlasmaStepper::writeJ" << endl;
   }
 
   const Interval src_interv(0, SpaceDim-1);
@@ -379,10 +385,10 @@ void ito_plasma_stepper::writeJ(EBAMRCellData& a_output, int& a_icomp) const{
   a_icomp += SpaceDim;
 }
 
-void ito_plasma_stepper::write_num_particles_per_patch(EBAMRCellData& a_output, int& a_icomp) const {
-  CH_TIME("ito_plasma_stepper::write_num_particles_per_patch");
+void ItoPlasmaStepper::writeNumParticlesPerPatch(EBAMRCellData& a_output, int& a_icomp) const {
+  CH_TIME("ItoPlasmaStepper::writeNumParticlesPerPatch");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::write_num_particles_per_patch" << endl;
+    pout() << "ItoPlasmaStepper::writeNumParticlesPerPatch" << endl;
   }
 
   const Interval src_interv(0, 0);
@@ -414,10 +420,10 @@ void ito_plasma_stepper::write_num_particles_per_patch(EBAMRCellData& a_output, 
   a_icomp += 1;
 }
 
-void ito_plasma_stepper::synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt){
-  CH_TIME("ito_plasma_stepper::synchronizeSolverTimes");
+void ItoPlasmaStepper::synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt){
+  CH_TIME("ItoPlasmaStepper::synchronizeSolverTimes");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::synchronizeSolverTimes" << endl;
+    pout() << "ItoPlasmaStepper::synchronizeSolverTimes" << endl;
   }
 
   m_timeStep = a_step;
@@ -430,10 +436,10 @@ void ito_plasma_stepper::synchronizeSolverTimes(const int a_step, const Real a_t
   m_sigma->setTime(a_step,   a_time, a_dt);
 }
 
-void ito_plasma_stepper::printStepReport(){
-  CH_TIME("ito_plasma_stepper::printStepReport");
+void ItoPlasmaStepper::printStepReport(){
+  CH_TIME("ItoPlasmaStepper::printStepReport");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::printStepReport" << endl;
+    pout() << "ItoPlasmaStepper::printStepReport" << endl;
   }
 
   const Real Emax = this->computeMaxElectricField(m_phase);
@@ -460,7 +466,7 @@ void ito_plasma_stepper::printStepReport(){
   size_t maxParticles;
   
   // Compute some particle statistics
-  this->get_particle_statistics(avg, sigma, minParticles, maxParticles, minRank, maxRank);
+  this->getParticleStatistics(avg, sigma, minParticles, maxParticles, minRank, maxRank);
 
   // How was the time step restricted
   std::string str;
@@ -493,10 +499,10 @@ void ito_plasma_stepper::printStepReport(){
 	 << "                                   #part dev = " << sigma << " (" << 100.*sigma/avg << "%)" << endl;
 }
 
-void ito_plasma_stepper::get_particle_statistics(Real& a_avg, Real& a_sigma, size_t& a_minPart, size_t& a_maxPart, int& a_minRank, int& a_maxRank){
-  CH_TIME("ito_plasma_stepper::get_particle_statistics");
+void ItoPlasmaStepper::getParticleStatistics(Real& a_avg, Real& a_sigma, size_t& a_minPart, size_t& a_maxPart, int& a_minRank, int& a_maxRank){
+  CH_TIME("ItoPlasmaStepper::getParticleStatistics");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::get_particle_statistics" << endl;
+    pout() << "ItoPlasmaStepper::getParticleStatistics" << endl;
   }
 
   const int srcProc = 0; 
@@ -557,10 +563,10 @@ void ito_plasma_stepper::get_particle_statistics(Real& a_avg, Real& a_sigma, siz
   broadcast(a_maxPart, srcProc);
 }
 
-void ito_plasma_stepper::print_timer_diagnostics(Real& a_timer, const std::string a_prefix){
-  CH_TIME("ito_plasma_stepper::print_timer_diagnostics");
+void ItoPlasmaStepper::printTimerDiagnostics(Real& a_timer, const std::string a_prefix){
+  CH_TIME("ItoPlasmaStepper::printTimerDiagnostics");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::print_timer_diagnostics" << endl;
+    pout() << "ItoPlasmaStepper::printTimerDiagnostics" << endl;
   }
 
   const int srcProc = 0; 
@@ -652,7 +658,7 @@ void ito_plasma_stepper::print_timer_diagnostics(Real& a_timer, const std::strin
 	 << " | " << endl;
 }
 
-void ito_plasma_stepper::print_timer_head(){
+void ItoPlasmaStepper::printTimerHead(){
   pout() << "--------------------------------------------------------------------------------------------------------"
 	 << endl
 	 << std::left << std::setw(25) << "Kernel"
@@ -668,14 +674,14 @@ void ito_plasma_stepper::print_timer_head(){
 	 << endl;
 }
 
-void ito_plasma_stepper::print_timer_tail(){
+void ItoPlasmaStepper::printTimerTail(){
   pout() << "--------------------------------------------------------------------------------------------------------\n";
 }
 
-void ito_plasma_stepper::parse_filters(){
-  CH_TIME("ito_plasma_stepper::computeDt");
+void ItoPlasmaStepper::parseFilters(){
+  CH_TIME("ItoPlasmaStepper::computeDt");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::parse_filters" << endl;
+    pout() << "ItoPlasmaStepper::parseFilters" << endl;
   }
 
   ParmParse pp(m_name.c_str());
@@ -711,10 +717,10 @@ void ito_plasma_stepper::parse_filters(){
   }
 }
 
-void ito_plasma_stepper::computeDt(Real& a_dt, TimeCode& a_timeCode){
-  CH_TIME("ito_plasma_stepper::computeDt");
+void ItoPlasmaStepper::computeDt(Real& a_dt, TimeCode& a_timeCode){
+  CH_TIME("ItoPlasmaStepper::computeDt");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::computeDt" << endl;
+    pout() << "ItoPlasmaStepper::computeDt" << endl;
   }
   
   a_dt = m_ito->computeDt();
@@ -723,20 +729,20 @@ void ito_plasma_stepper::computeDt(Real& a_dt, TimeCode& a_timeCode){
   
 }
 
-void ito_plasma_stepper::registerRealms(){
-  CH_TIME("ito_plasma_stepper::registerRealms");
+void ItoPlasmaStepper::registerRealms(){
+  CH_TIME("ItoPlasmaStepper::registerRealms");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::registerRealms" << endl;
+    pout() << "ItoPlasmaStepper::registerRealms" << endl;
   }
 
   m_amr->registerRealm(m_fluid_Realm);
   m_amr->registerRealm(m_particleRealm);
 }
 
-void ito_plasma_stepper::registerOperators(){
-  CH_TIME("ito_plasma_stepper::registerOperators");
+void ItoPlasmaStepper::registerOperators(){
+  CH_TIME("ItoPlasmaStepper::registerOperators");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::registerOperators" << endl;
+    pout() << "ItoPlasmaStepper::registerOperators" << endl;
   }
 
   m_ito->registerOperators();
@@ -747,10 +753,10 @@ void ito_plasma_stepper::registerOperators(){
   m_amr->registerMask("particle_halo", m_halo_buffer, m_particleRealm);
 }
   
-void ito_plasma_stepper::preRegrid(const int a_lmin, const int a_oldFinestLevel){
-  CH_TIME("ito_plasma_stepper::preRegrid");
+void ItoPlasmaStepper::preRegrid(const int a_lmin, const int a_oldFinestLevel){
+  CH_TIME("ItoPlasmaStepper::preRegrid");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::preRegrid" << endl;
+    pout() << "ItoPlasmaStepper::preRegrid" << endl;
   }
 
   m_ito->preRegrid(a_lmin,     a_oldFinestLevel);
@@ -759,10 +765,10 @@ void ito_plasma_stepper::preRegrid(const int a_lmin, const int a_oldFinestLevel)
   m_sigma->preRegrid(a_lmin,   a_oldFinestLevel);
 }
 
-void ito_plasma_stepper::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel){
-  CH_TIME("ito_plasma_stepper::regrid");
+void ItoPlasmaStepper::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel){
+  CH_TIME("ItoPlasmaStepper::regrid");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::regrid" << endl;
+    pout() << "ItoPlasmaStepper::regrid" << endl;
   }
 
   // Allocate new memory
@@ -786,22 +792,22 @@ void ito_plasma_stepper::regrid(const int a_lmin, const int a_oldFinestLevel, co
   // Recompute the electric field
   const bool converged = this->solvePoisson();
   if(!converged){
-    MayDay::Abort("ito_plasma_stepper::regrid - Poisson solve did not converge after regrid!!!");
+    MayDay::Abort("ItoPlasmaStepper::regrid - Poisson solve did not converge after regrid!!!");
   }
 
   // Recompute new velocities and diffusion coefficients
-  this->compute_ito_velocities();
-  this->compute_ito_diffusion();
+  this->computeItoVelocities();
+  this->computeItoDiffusion();
 }
 
-void ito_plasma_stepper::postRegrid(){
+void ItoPlasmaStepper::postRegrid(){
 
 }
 
-int ito_plasma_stepper::getNumberOfPlotVariables() const {
-  CH_TIME("ito_plasma_stepper::getNumberOfPlotVariables");
+int ItoPlasmaStepper::getNumberOfPlotVariables() const {
+  CH_TIME("ItoPlasmaStepper::getNumberOfPlotVariables");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::getNumberOfPlotVariables" << endl;
+    pout() << "ItoPlasmaStepper::getNumberOfPlotVariables" << endl;
   }
 
   int ncomp = 0;
@@ -824,46 +830,46 @@ int ito_plasma_stepper::getNumberOfPlotVariables() const {
   return ncomp;
 }
 
-void ito_plasma_stepper::set_ito(RefCountedPtr<ItoLayout<ItoSolver> >& a_ito){
-  CH_TIME("ito_plasma_stepper::set_ito");
+void ItoPlasmaStepper::setIto(RefCountedPtr<ItoLayout<ItoSolver> >& a_ito){
+  CH_TIME("ItoPlasmaStepper::setIto");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::set_ito" << endl;
+    pout() << "ItoPlasmaStepper::setIto" << endl;
   }
 
   m_ito = a_ito;
 }
 
-void ito_plasma_stepper::setFieldSolver(RefCountedPtr<FieldSolver>& a_poisson){
-  CH_TIME("ito_plasma_stepper::setFieldSolver");
+void ItoPlasmaStepper::setFieldSolver(RefCountedPtr<FieldSolver>& a_poisson){
+  CH_TIME("ItoPlasmaStepper::setFieldSolver");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::setFieldSolver" << endl;
+    pout() << "ItoPlasmaStepper::setFieldSolver" << endl;
   }
 
   m_fieldSolver = a_poisson;
 }
 
-void ito_plasma_stepper::setRadiativeTransferSolvers(RefCountedPtr<RtLayout<McPhoto> >& a_rte){
-  CH_TIME("ito_plasma_stepper::setRadiativeTransferSolvers");
+void ItoPlasmaStepper::setRadiativeTransferSolvers(RefCountedPtr<RtLayout<McPhoto> >& a_rte){
+  CH_TIME("ItoPlasmaStepper::setRadiativeTransferSolvers");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::setRadiativeTransferSolvers" << endl;
+    pout() << "ItoPlasmaStepper::setRadiativeTransferSolvers" << endl;
   }
   
   m_rte = a_rte;
 }
 
-void ito_plasma_stepper::setVoltage(const std::function<Real(const Real a_time)>& a_potential){
-  CH_TIME("ito_plasma_stepper::setVoltage");
+void ItoPlasmaStepper::setVoltage(const std::function<Real(const Real a_time)>& a_potential){
+  CH_TIME("ItoPlasmaStepper::setVoltage");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::setVoltage" << endl;
+    pout() << "ItoPlasmaStepper::setVoltage" << endl;
   }
 
   m_potential = a_potential;
 }
 
-Real ito_plasma_stepper::computeMaxElectricField(const phase::which_phase a_phase) {
-  CH_TIME("ito_plasma_stepper::computeMaxElectricField");
+Real ItoPlasmaStepper::computeMaxElectricField(const phase::which_phase a_phase) {
+  CH_TIME("ItoPlasmaStepper::computeMaxElectricField");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::computeMaxElectricField" << endl;
+    pout() << "ItoPlasmaStepper::computeMaxElectricField" << endl;
   }
 
   // Get a handle to the E-field
@@ -883,19 +889,19 @@ Real ito_plasma_stepper::computeMaxElectricField(const phase::which_phase a_phas
   return max;
 }
 
-Real ito_plasma_stepper::getTime() const{
-  CH_TIME("ito_plasma_stepper::getTime");
+Real ItoPlasmaStepper::getTime() const{
+  CH_TIME("ItoPlasmaStepper::getTime");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::getTime" << endl;
+    pout() << "ItoPlasmaStepper::getTime" << endl;
   }
 
   return m_time;
 }
 
-void ito_plasma_stepper::computeElectricField(MFAMRCellData& a_E, const MFAMRCellData& a_potential){
-  CH_TIME("ito_plasma_stepper::computeElectricField(mfamrcell,mfamrcell)");
+void ItoPlasmaStepper::computeElectricField(MFAMRCellData& a_E, const MFAMRCellData& a_potential){
+  CH_TIME("ItoPlasmaStepper::computeElectricField(mfamrcell,mfamrcell)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::computeElectricField(mfamrcell, mfamrcell" << endl;
+    pout() << "ItoPlasmaStepper::computeElectricField(mfamrcell, mfamrcell" << endl;
   }
 
   m_amr->computeGradient(a_E, a_potential, m_fluid_Realm);
@@ -906,19 +912,19 @@ void ito_plasma_stepper::computeElectricField(MFAMRCellData& a_E, const MFAMRCel
 
 }
 
-void ito_plasma_stepper::computeElectricField(EBAMRCellData& a_E, const phase::which_phase a_phase){
-  CH_TIME("ito_plasma_stepper::computeElectricField(ebamrcell, phase)");
+void ItoPlasmaStepper::computeElectricField(EBAMRCellData& a_E, const phase::which_phase a_phase){
+  CH_TIME("ItoPlasmaStepper::computeElectricField(ebamrcell, phase)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::computeElectricField(ebamrcell, phase" << endl;
+    pout() << "ItoPlasmaStepper::computeElectricField(ebamrcell, phase" << endl;
   }
 
   this->computeElectricField(a_E, a_phase, m_fieldSolver->getPotential());
 }
 
-void ito_plasma_stepper::computeElectricField(EBAMRCellData& a_E, const phase::which_phase a_phase, const MFAMRCellData& a_potential){
-  CH_TIME("ito_plasma_stepper::computeElectricField(ebamrcell, phase, mfamrcell)");
+void ItoPlasmaStepper::computeElectricField(EBAMRCellData& a_E, const phase::which_phase a_phase, const MFAMRCellData& a_potential){
+  CH_TIME("ItoPlasmaStepper::computeElectricField(ebamrcell, phase, mfamrcell)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::computeElectricField(ebamrcell, phase mfamrcell" << endl;
+    pout() << "ItoPlasmaStepper::computeElectricField(ebamrcell, phase mfamrcell" << endl;
   }
   
   EBAMRCellData pot_gas;
@@ -932,10 +938,10 @@ void ito_plasma_stepper::computeElectricField(EBAMRCellData& a_E, const phase::w
   m_amr->interpGhost(a_E, m_fluid_Realm, a_phase);
 }
 
-void ito_plasma_stepper::computeElectricField(EBAMRFluxData& a_E_face, const phase::which_phase a_phase, const EBAMRCellData& a_E_cell){
-  CH_TIME("ito_plasma_stepper::computeElectricField(ebamrflux, phase, mfamrcell)");
+void ItoPlasmaStepper::computeElectricField(EBAMRFluxData& a_E_face, const phase::which_phase a_phase, const EBAMRCellData& a_E_cell){
+  CH_TIME("ItoPlasmaStepper::computeElectricField(ebamrflux, phase, mfamrcell)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::computeElectricField(ebamrflux, phase mfamrcell" << endl;
+    pout() << "ItoPlasmaStepper::computeElectricField(ebamrflux, phase mfamrcell" << endl;
   }
 
   CH_assert(a_E_face[0]->nComp() == SpaceDim);
@@ -974,10 +980,10 @@ void ito_plasma_stepper::computeElectricField(EBAMRFluxData& a_E_face, const pha
   }
 }
 
-void ito_plasma_stepper::computeElectricField(EBAMRIVData& a_E_eb,  const phase::which_phase a_phase, const EBAMRCellData& a_E_cell){
-  CH_TIME("ito_plasma_stepper::computeElectricField(ebamriv, phase, ebamrcell)");
+void ItoPlasmaStepper::computeElectricField(EBAMRIVData& a_E_eb,  const phase::which_phase a_phase, const EBAMRCellData& a_E_cell){
+  CH_TIME("ItoPlasmaStepper::computeElectricField(ebamriv, phase, ebamrcell)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::computeElectricField(ebamriv, phase ebamrcell)" << endl;
+    pout() << "ItoPlasmaStepper::computeElectricField(ebamriv, phase ebamrcell)" << endl;
   }
 
   CH_assert(a_E_eb[0]->nComp()   == SpaceDim);
@@ -987,19 +993,19 @@ void ito_plasma_stepper::computeElectricField(EBAMRIVData& a_E_eb,  const phase:
   interp_stencil.apply(a_E_eb, a_E_cell);
 }
 
-void ito_plasma_stepper::computeSpaceChargeDensity(){
-  CH_TIME("ito_plasma_stepper::computeSpaceChargeDensity()");
+void ItoPlasmaStepper::computeSpaceChargeDensity(){
+  CH_TIME("ItoPlasmaStepper::computeSpaceChargeDensity()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::computeSpaceChargeDensity()" << endl;
+    pout() << "ItoPlasmaStepper::computeSpaceChargeDensity()" << endl;
   }
   
   this->computeSpaceChargeDensity(m_fieldSolver->getRho(), m_ito->getDensities());
 }
 
-void ito_plasma_stepper::computeSpaceChargeDensity(MFAMRCellData& a_rho, const Vector<EBAMRCellData*>&  a_densities){
-  CH_TIME("ito_plasma_stepper::computeSpaceChargeDensity(rho, densities)");
+void ItoPlasmaStepper::computeSpaceChargeDensity(MFAMRCellData& a_rho, const Vector<EBAMRCellData*>&  a_densities){
+  CH_TIME("ItoPlasmaStepper::computeSpaceChargeDensity(rho, densities)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::computeSpaceChargeDensity(rho, densities)" << endl;
+    pout() << "ItoPlasmaStepper::computeSpaceChargeDensity(rho, densities)" << endl;
   }
 
   // TLDR: a_densities is from the ito solvers so it is defined over the particle Realm. But a_rho is defined over
@@ -1055,20 +1061,20 @@ void ito_plasma_stepper::computeSpaceChargeDensity(MFAMRCellData& a_rho, const V
   m_amr->interpToCentroids(rhoPhase, m_fluid_Realm, m_phase);
 }
 
-void ito_plasma_stepper::compute_conductivity(EBAMRCellData& a_conductivity){
-  CH_TIME("ito_plasma_stepper::compute_conductivity(conductivity)");
+void ItoPlasmaStepper::computeConductivity(EBAMRCellData& a_conductivity){
+  CH_TIME("ItoPlasmaStepper::computeConductivity(conductivity)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_conductivity(conductivity)" << endl;
+    pout() << "ItoPlasmaStepper::computeConductivity(conductivity)" << endl;
   }
 
-  this->compute_conductivity(a_conductivity, m_ito->getParticles(ItoSolver::WhichContainer::bulk));
+  this->computeConductivity(a_conductivity, m_ito->getParticles(ItoSolver::WhichContainer::bulk));
   
 }
 
-void ito_plasma_stepper::compute_conductivity(EBAMRCellData& a_conductivity, const Vector<ParticleContainer<ItoParticle>* >& a_particles){
-  CH_TIME("ito_plasma_stepper::compute_conductivity(conductivity)");
+void ItoPlasmaStepper::computeConductivity(EBAMRCellData& a_conductivity, const Vector<ParticleContainer<ItoParticle>* >& a_particles){
+  CH_TIME("ItoPlasmaStepper::computeConductivity(conductivity)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_conductivity(conductivity)" << endl;
+    pout() << "ItoPlasmaStepper::computeConductivity(conductivity)" << endl;
   }
   
   DataOps::setValue(a_conductivity, 0.0);
@@ -1100,26 +1106,26 @@ void ito_plasma_stepper::compute_conductivity(EBAMRCellData& a_conductivity, con
   m_amr->interpToCentroids(a_conductivity, m_fluid_Realm, m_phase);
 }
 
-void ito_plasma_stepper::computeJ(EBAMRCellData& a_J, const Real a_dt){
-  CH_TIME("ito_plasma_stepper::computeJ(J)");
+void ItoPlasmaStepper::computeJ(EBAMRCellData& a_J, const Real a_dt){
+  CH_TIME("ItoPlasmaStepper::computeJ(J)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::computeJ(J)" << endl;
+    pout() << "ItoPlasmaStepper::computeJ(J)" << endl;
   }
 
   // TLDR: a_J is defined over the fluid Realm but the computation takes place on the particle Realm.
   //       If the Realms are different we compute on a scratch storage instead
 
 
-  this->compute_conductivity(m_fluid_scratch1);
+  this->computeConductivity(m_fluid_scratch1);
   DataOps::copy(a_J, m_fluid_E);
 
   DataOps::multiplyScalar(a_J, m_fluid_scratch1);
 }
 
-Real ito_plasma_stepper::computeRelaxationTime(){
-  CH_TIME("ito_plasma_stepper::computeRelaxationTime()");
+Real ItoPlasmaStepper::computeRelaxationTime(){
+  CH_TIME("ItoPlasmaStepper::computeRelaxationTime()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::computeRelaxationTime()" << endl;
+    pout() << "ItoPlasmaStepper::computeRelaxationTime()" << endl;
   }
 
   Real dt = 1.E99;
@@ -1133,10 +1139,10 @@ Real ito_plasma_stepper::computeRelaxationTime(){
   return dt;
 }
 
-Real ito_plasma_stepper::computeRelaxationTime(const int a_level){
-  CH_TIME("ito_plasma_stepper::computeRelaxationTime(level)");
+Real ItoPlasmaStepper::computeRelaxationTime(const int a_level){
+  CH_TIME("ItoPlasmaStepper::computeRelaxationTime(level)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::computeRelaxationTime(level)" << endl;
+    pout() << "ItoPlasmaStepper::computeRelaxationTime(level)" << endl;
   }
 
   Real dt = 1.E99;
@@ -1161,10 +1167,10 @@ Real ito_plasma_stepper::computeRelaxationTime(const int a_level){
   return dt;
 }
 
-Real ito_plasma_stepper::computeRelaxationTime(const int a_level, const DataIndex a_dit){
-  CH_TIME("ito_plasma_stepper::computeRelaxationTime(level, dit)");
+Real ItoPlasmaStepper::computeRelaxationTime(const int a_level, const DataIndex a_dit){
+  CH_TIME("ItoPlasmaStepper::computeRelaxationTime(level, dit)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::computeRelaxationTime(level, dit)" << endl;
+    pout() << "ItoPlasmaStepper::computeRelaxationTime(level, dit)" << endl;
   }
 
   const int comp    = 0;
@@ -1199,10 +1205,10 @@ Real ito_plasma_stepper::computeRelaxationTime(const int a_level, const DataInde
   return dt.min(comp);
 }
 
-bool ito_plasma_stepper::solvePoisson(){
-  CH_TIME("ito_plasma_stepper::solvePoisson()");
+bool ItoPlasmaStepper::solvePoisson(){
+  CH_TIME("ItoPlasmaStepper::solvePoisson()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::solvePoisson()" << endl;
+    pout() << "ItoPlasmaStepper::solvePoisson()" << endl;
   }
 
   // Computes rho
@@ -1210,9 +1216,9 @@ bool ito_plasma_stepper::solvePoisson(){
 
   // Solves the Poisson equation
   const bool converged = m_fieldSolver->solve(m_fieldSolver->getPotential(),
-					  m_fieldSolver->getRho(),
-					  m_sigma->getPhi(),
-					  false);
+					      m_fieldSolver->getRho(),
+					      m_sigma->getPhi(),
+					      false);
 
   // Computes cell-centered E onto storage in the field solver
   m_fieldSolver->computeElectricField();
@@ -1237,49 +1243,49 @@ bool ito_plasma_stepper::solvePoisson(){
   return converged;
 }
 
-bool ito_plasma_stepper::solvePoisson(MFAMRCellData&                a_potential,
-				       MFAMRCellData&                a_rho,
-				       const Vector<EBAMRCellData*>& a_densities,
-				       const EBAMRIVData&            a_sigma){
-  CH_TIME("ito_plasma_stepper::solvePoisson(phi, rho, densities, sigma)");
+bool ItoPlasmaStepper::solvePoisson(MFAMRCellData&                a_potential,
+				    MFAMRCellData&                a_rho,
+				    const Vector<EBAMRCellData*>& a_densities,
+				    const EBAMRIVData&            a_sigma){
+  CH_TIME("ItoPlasmaStepper::solvePoisson(phi, rho, densities, sigma)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::solvePoisson(phi, rho, densities, sigma)" << endl;
+    pout() << "ItoPlasmaStepper::solvePoisson(phi, rho, densities, sigma)" << endl;
   }
 
   this->computeSpaceChargeDensity(a_rho, a_densities);
 
   const bool converged = m_fieldSolver->solve(a_potential,
-					  a_rho,
-					  a_sigma,
-					  false);
+					      a_rho,
+					      a_sigma,
+					      false);
   m_fieldSolver->computeElectricField();
   
   return converged;
 }
 
-void ito_plasma_stepper::intersectParticles(const which_particles a_which_particles, const EbRepresentation a_representation, const bool a_delete){
-  CH_TIME("ito_plasma_stepper::intersectParticles(which_particles, EbRepresentation)");
+void ItoPlasmaStepper::intersectParticles(const WhichParticles a_WhichParticles, const EbRepresentation a_representation, const bool a_delete){
+  CH_TIME("ItoPlasmaStepper::intersectParticles(WhichParticles, EbRepresentation)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::intersectParticles(which_particles, EbRepresentation)" << endl;
+    pout() << "ItoPlasmaStepper::intersectParticles(WhichParticles, EbRepresentation)" << endl;
   }
 
-  this->intersectParticles(a_which_particles,
-			    ItoSolver::WhichContainer::bulk,
-			    ItoSolver::WhichContainer::eb,
-			    ItoSolver::WhichContainer::domain,
-			    a_representation,
-			    a_delete);
+  this->intersectParticles(a_WhichParticles,
+			   ItoSolver::WhichContainer::bulk,
+			   ItoSolver::WhichContainer::eb,
+			   ItoSolver::WhichContainer::domain,
+			   a_representation,
+			   a_delete);
 }
 
-void ito_plasma_stepper::intersectParticles(const which_particles             a_which_particles,
-					     const ItoSolver::WhichContainer a_particles,
-					     const ItoSolver::WhichContainer a_eb_particles,
-					     const ItoSolver::WhichContainer a_domain_particles,
-					     const EbRepresentation           a_representation,
-					     const bool                        a_delete) {
-  CH_TIME("ito_plasma_stepper::intersectParticles(which_particles, string, string, string, EbRepresentation, bool)");
+void ItoPlasmaStepper::intersectParticles(const WhichParticles             a_WhichParticles,
+					  const ItoSolver::WhichContainer a_particles,
+					  const ItoSolver::WhichContainer a_eb_particles,
+					  const ItoSolver::WhichContainer a_domain_particles,
+					  const EbRepresentation           a_representation,
+					  const bool                        a_delete) {
+  CH_TIME("ItoPlasmaStepper::intersectParticles(WhichParticles, string, string, string, EbRepresentation, bool)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::intersectParticles(which_particles, string, string, string, EbRepresentation, bool)" << endl;
+    pout() << "ItoPlasmaStepper::intersectParticles(WhichParticles, string, string, string, EbRepresentation, bool)" << endl;
   }
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -1292,53 +1298,53 @@ void ito_plasma_stepper::intersectParticles(const which_particles             a_
     const bool diffusive = solver->isDiffusive();
     const bool charged   = species->getChargeNumber() != 0;
 
-    switch(a_which_particles) {
-    case which_particles::all:
+    switch(a_WhichParticles) {
+    case WhichParticles::all:
       solver->intersectParticles(a_particles, a_eb_particles, a_domain_particles, a_representation, a_delete);
       break;
-    case which_particles::all_mobile:
+    case WhichParticles::all_mobile:
       if(mobile) solver->intersectParticles(a_particles, a_eb_particles, a_domain_particles, a_representation, a_delete);
       break;
-    case which_particles::all_diffusive:
+    case WhichParticles::all_diffusive:
       if(diffusive) solver->intersectParticles(a_particles, a_eb_particles, a_domain_particles, a_representation, a_delete);
       break;
-    case which_particles::charged_mobile:
+    case WhichParticles::charged_mobile:
       if(charged && mobile) solver->intersectParticles(a_particles, a_eb_particles, a_domain_particles, a_representation, a_delete);
       break;
-    case which_particles::charged_diffusive:
+    case WhichParticles::charged_diffusive:
       if(charged && diffusive) solver->intersectParticles(a_particles, a_eb_particles, a_domain_particles, a_representation, a_delete);
       break;
-    case which_particles::all_mobile_or_diffusive:
+    case WhichParticles::all_mobile_or_diffusive:
       if(mobile || diffusive) solver->intersectParticles(a_particles, a_eb_particles, a_domain_particles, a_representation, a_delete);
       break;
-    case which_particles::charged_and_mobile_or_diffusive:
+    case WhichParticles::charged_and_mobile_or_diffusive:
       if(charged && (mobile || diffusive)) solver->intersectParticles(a_particles, a_eb_particles, a_domain_particles, a_representation, a_delete);
       break;
-    case which_particles::stationary:
+    case WhichParticles::stationary:
       if(!mobile && !diffusive) solver->intersectParticles(a_particles, a_eb_particles, a_domain_particles, a_representation, a_delete);
       break;
     default:
-      MayDay::Abort("ito_plasma_stepper::intersectParticles_particles(which_particles, string, string, string, EbRepresentation, bool) - logic bust");
+      MayDay::Abort("ItoPlasmaStepper::intersectParticles_particles(WhichParticles, string, string, string, EbRepresentation, bool) - logic bust");
     }
   }  
 }
 
-void ito_plasma_stepper::removeCoveredParticles(const which_particles a_which_particles, const EbRepresentation a_representation, const Real a_tolerance){
-  CH_TIME("ito_plasma_stepper::removeCoveredParticles(which_particles, representation, tolerance)");
+void ItoPlasmaStepper::removeCoveredParticles(const WhichParticles a_WhichParticles, const EbRepresentation a_representation, const Real a_tolerance){
+  CH_TIME("ItoPlasmaStepper::removeCoveredParticles(WhichParticles, representation, tolerance)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::removeCoveredParticles(which_particles, representation, tolerance)" << endl;
+    pout() << "ItoPlasmaStepper::removeCoveredParticles(WhichParticles, representation, tolerance)" << endl;
   }
 
-  this->removeCoveredParticles(a_which_particles, ItoSolver::WhichContainer::bulk, a_representation, a_tolerance);
+  this->removeCoveredParticles(a_WhichParticles, ItoSolver::WhichContainer::bulk, a_representation, a_tolerance);
 }
 
-void ito_plasma_stepper::removeCoveredParticles(const which_particles             a_which,
-						  const ItoSolver::WhichContainer a_container,
-						  const EbRepresentation           a_representation,
-						  const Real                        a_tolerance){
-  CH_TIME("ito_plasma_stepper::removeCoveredParticles(which_particles, container, EbRepresentation, tolerance)");
+void ItoPlasmaStepper::removeCoveredParticles(const WhichParticles             a_which,
+					      const ItoSolver::WhichContainer a_container,
+					      const EbRepresentation           a_representation,
+					      const Real                        a_tolerance){
+  CH_TIME("ItoPlasmaStepper::removeCoveredParticles(WhichParticles, container, EbRepresentation, tolerance)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::removeCoveredParticles(which_particles, container, EbRepresentation, tolerance)" << endl;
+    pout() << "ItoPlasmaStepper::removeCoveredParticles(WhichParticles, container, EbRepresentation, tolerance)" << endl;
   }
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -1352,53 +1358,53 @@ void ito_plasma_stepper::removeCoveredParticles(const which_particles           
     const bool charged   = species->getChargeNumber() != 0;
 
     switch(a_which) {
-    case which_particles::all:
+    case WhichParticles::all:
       solver->removeCoveredParticles(a_container, a_representation, a_tolerance);
       break;
-    case which_particles::all_mobile:
+    case WhichParticles::all_mobile:
       if(mobile) solver->removeCoveredParticles(a_container, a_representation, a_tolerance);
       break;
-    case which_particles::all_diffusive:
+    case WhichParticles::all_diffusive:
       if(diffusive) solver->removeCoveredParticles(a_container, a_representation, a_tolerance);
       break;
-    case which_particles::charged_mobile:
+    case WhichParticles::charged_mobile:
       if(charged && mobile) solver->removeCoveredParticles(a_container, a_representation, a_tolerance);
       break;
-    case which_particles::charged_diffusive:
+    case WhichParticles::charged_diffusive:
       if(charged && diffusive) solver->removeCoveredParticles(a_container, a_representation, a_tolerance);
       break;
-    case which_particles::all_mobile_or_diffusive:
+    case WhichParticles::all_mobile_or_diffusive:
       if(mobile || diffusive) solver->removeCoveredParticles(a_container, a_representation, a_tolerance);
       break;
-    case which_particles::charged_and_mobile_or_diffusive:
+    case WhichParticles::charged_and_mobile_or_diffusive:
       if(charged && (mobile || diffusive)) solver->removeCoveredParticles(a_container, a_representation, a_tolerance);
       break;
-    case which_particles::stationary:
+    case WhichParticles::stationary:
       if(!mobile && !diffusive) solver->removeCoveredParticles(a_container, a_representation, a_tolerance);
       break;
     default:
-      MayDay::Abort("ito_plasma_stepper::removeCoveredParticles_particles(which particles) - logic bust");
+      MayDay::Abort("ItoPlasmaStepper::removeCoveredParticles_particles(which particles) - logic bust");
     }
   }  
 }
 
-void ito_plasma_stepper::transferCoveredParticles(const which_particles a_which, const EbRepresentation a_representation, const Real a_tolerance){
-  CH_TIME("ito_plasma_stepper::transferCoveredParticles_particles(which_particles, EbRepresentation, tolerance)");
+void ItoPlasmaStepper::transferCoveredParticles(const WhichParticles a_which, const EbRepresentation a_representation, const Real a_tolerance){
+  CH_TIME("ItoPlasmaStepper::transferCoveredParticles_particles(WhichParticles, EbRepresentation, tolerance)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::transferCoveredParticles_particles(which_particles, EbRepresentation, tolerance)" << endl;
+    pout() << "ItoPlasmaStepper::transferCoveredParticles_particles(WhichParticles, EbRepresentation, tolerance)" << endl;
   }
 
   this->transferCoveredParticles(a_which, ItoSolver::WhichContainer::bulk, ItoSolver::WhichContainer::covered, a_representation, a_tolerance);
 }
 
-void ito_plasma_stepper::transferCoveredParticles(const which_particles             a_which,
-						    const ItoSolver::WhichContainer a_containerFrom,
-						    const ItoSolver::WhichContainer a_containerTo,
-						    const EbRepresentation           a_representation,
-						    const Real                        a_tolerance){
-  CH_TIME("ito_plasma_stepper::transferCoveredParticles_particles(which_particles, container, container, EbRepresentation, tolerance)");
+void ItoPlasmaStepper::transferCoveredParticles(const WhichParticles             a_which,
+						const ItoSolver::WhichContainer a_containerFrom,
+						const ItoSolver::WhichContainer a_containerTo,
+						const EbRepresentation           a_representation,
+						const Real                        a_tolerance){
+  CH_TIME("ItoPlasmaStepper::transferCoveredParticles_particles(WhichParticles, container, container, EbRepresentation, tolerance)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::transferCoveredParticles_particles(which_particles, container, container, EbRepresentation, tolerance)" << endl;
+    pout() << "ItoPlasmaStepper::transferCoveredParticles_particles(WhichParticles, container, container, EbRepresentation, tolerance)" << endl;
   }
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -1412,49 +1418,49 @@ void ito_plasma_stepper::transferCoveredParticles(const which_particles         
     const bool charged   = species->getChargeNumber() != 0;
 
     switch(a_which) {
-    case which_particles::all:
+    case WhichParticles::all:
       solver->transferCoveredParticles(a_containerFrom, a_containerTo,a_representation, a_tolerance);
       break;
-    case which_particles::all_mobile:
+    case WhichParticles::all_mobile:
       if(mobile) solver->transferCoveredParticles(a_containerFrom, a_containerTo,a_representation, a_tolerance);
       break;
-    case which_particles::all_diffusive:
+    case WhichParticles::all_diffusive:
       if(diffusive) solver->transferCoveredParticles(a_containerFrom, a_containerTo,a_representation, a_tolerance);
       break;
-    case which_particles::charged_mobile:
+    case WhichParticles::charged_mobile:
       if(charged && mobile) solver->transferCoveredParticles(a_containerFrom, a_containerTo,a_representation, a_tolerance);
       break;
-    case which_particles::charged_diffusive:
+    case WhichParticles::charged_diffusive:
       if(charged && diffusive) solver->transferCoveredParticles(a_containerFrom, a_containerTo,a_representation, a_tolerance);
       break;
-    case which_particles::all_mobile_or_diffusive:
+    case WhichParticles::all_mobile_or_diffusive:
       if(mobile || diffusive) solver->transferCoveredParticles(a_containerFrom, a_containerTo,a_representation, a_tolerance);
       break;
-    case which_particles::charged_and_mobile_or_diffusive:
+    case WhichParticles::charged_and_mobile_or_diffusive:
       if(charged && (mobile || diffusive)) solver->transferCoveredParticles(a_containerFrom, a_containerTo,a_representation, a_tolerance);
       break;
-    case which_particles::stationary:
+    case WhichParticles::stationary:
       if(!mobile && !diffusive) solver->transferCoveredParticles(a_containerFrom, a_containerTo,a_representation, a_tolerance);
       break;
     default:
-      MayDay::Abort("ito_plasma_stepper::transferCoveredParticles_particles(...) - logic bust");
+      MayDay::Abort("ItoPlasmaStepper::transferCoveredParticles_particles(...) - logic bust");
     }    
   }
 }
 
-void ito_plasma_stepper::remap_particles(const which_particles a_which_particles){
-  CH_TIME("ito_plasma_stepper::remap_particles(which_particles)");
+void ItoPlasmaStepper::remapParticles(const WhichParticles a_WhichParticles){
+  CH_TIME("ItoPlasmaStepper::remapParticles(WhichParticles)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::remap_particles(which_particles)" << endl;
+    pout() << "ItoPlasmaStepper::remapParticles(WhichParticles)" << endl;
   }
 
-  this->remap_particles(a_which_particles, ItoSolver::WhichContainer::bulk);
+  this->remapParticles(a_WhichParticles, ItoSolver::WhichContainer::bulk);
 }
 
-void ito_plasma_stepper::remap_particles(const which_particles a_which_particles, const ItoSolver::WhichContainer a_container){
-  CH_TIME("ito_plasma_stepper::remap_particles(which_particles)");
+void ItoPlasmaStepper::remapParticles(const WhichParticles a_WhichParticles, const ItoSolver::WhichContainer a_container){
+  CH_TIME("ItoPlasmaStepper::remapParticles(WhichParticles)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::remap_particles(which_particles)" << endl;
+    pout() << "ItoPlasmaStepper::remapParticles(WhichParticles)" << endl;
   }
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -1467,51 +1473,51 @@ void ito_plasma_stepper::remap_particles(const which_particles a_which_particles
     const bool diffusive = solver->isDiffusive();
     const bool charged   = species->getChargeNumber() != 0;
 
-    switch(a_which_particles) {
-    case which_particles::all:
+    switch(a_WhichParticles) {
+    case WhichParticles::all:
       solver->remap(a_container);
       break;
-    case which_particles::all_mobile:
+    case WhichParticles::all_mobile:
       if(mobile) solver->remap(a_container);
       break;
-    case which_particles::all_diffusive:
+    case WhichParticles::all_diffusive:
       if(diffusive) solver->remap(a_container);
       break;
-    case which_particles::charged_mobile:
+    case WhichParticles::charged_mobile:
       if(charged && mobile) solver->remap(a_container);
       break;
-    case which_particles::charged_diffusive:
+    case WhichParticles::charged_diffusive:
       if(charged && diffusive) solver->remap(a_container);
       break;
-    case which_particles::all_mobile_or_diffusive:
+    case WhichParticles::all_mobile_or_diffusive:
       if(mobile || diffusive) solver->remap(a_container);
       break;
-    case which_particles::charged_and_mobile_or_diffusive:
+    case WhichParticles::charged_and_mobile_or_diffusive:
       if(charged && (mobile || diffusive)) solver->remap(a_container);
       break;
-    case which_particles::stationary:
+    case WhichParticles::stationary:
       if(!mobile && !diffusive) solver->remap(a_container);
       break;
     default:
-      MayDay::Abort("ito_plasma_stepper::remap_particles(which particles) - logic bust");
+      MayDay::Abort("ItoPlasmaStepper::remapParticles(which particles) - logic bust");
     }
   }
 }
 
-void ito_plasma_stepper::depositParticles(const which_particles a_which_particles){
-  CH_TIME("ito_plasma_stepper::depositParticles(which_particles)");
+void ItoPlasmaStepper::depositParticles(const WhichParticles a_WhichParticles){
+  CH_TIME("ItoPlasmaStepper::depositParticles(WhichParticles)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::depositParticles(which_particles)" << endl;
+    pout() << "ItoPlasmaStepper::depositParticles(WhichParticles)" << endl;
   }
 
-  this->depositParticles(a_which_particles, ItoSolver::WhichContainer::bulk);
+  this->depositParticles(a_WhichParticles, ItoSolver::WhichContainer::bulk);
 
 }
 
-void ito_plasma_stepper::depositParticles(const which_particles a_which_particles, const ItoSolver::WhichContainer a_container){
-  CH_TIME("ito_plasma_stepper::depositParticles(which_particles)");
+void ItoPlasmaStepper::depositParticles(const WhichParticles a_WhichParticles, const ItoSolver::WhichContainer a_container){
+  CH_TIME("ItoPlasmaStepper::depositParticles(WhichParticles)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::depositParticles(which_particles)" << endl;
+    pout() << "ItoPlasmaStepper::depositParticles(WhichParticles)" << endl;
   }
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -1524,41 +1530,41 @@ void ito_plasma_stepper::depositParticles(const which_particles a_which_particle
     const bool diffusive = solver->isDiffusive();
     const bool charged   = species->getChargeNumber() != 0;
 
-    switch(a_which_particles) {
-    case which_particles::all:
+    switch(a_WhichParticles) {
+    case WhichParticles::all:
       solver->depositParticles(a_container);
       break;
-    case which_particles::all_mobile:
+    case WhichParticles::all_mobile:
       if(mobile) solver->depositParticles(a_container);
       break;
-    case which_particles::all_diffusive:
+    case WhichParticles::all_diffusive:
       if(diffusive) solver->depositParticles(a_container);
       break;
-    case which_particles::charged_mobile:
+    case WhichParticles::charged_mobile:
       if(charged && mobile) solver->depositParticles(a_container);
       break;
-    case which_particles::charged_diffusive:
+    case WhichParticles::charged_diffusive:
       if(charged && diffusive) solver->depositParticles(a_container);
       break;
-    case which_particles::all_mobile_or_diffusive:
+    case WhichParticles::all_mobile_or_diffusive:
       if(mobile || diffusive) solver->depositParticles(a_container);
       break;
-    case which_particles::charged_and_mobile_or_diffusive:
+    case WhichParticles::charged_and_mobile_or_diffusive:
       if(charged && (mobile || diffusive)) solver->depositParticles(a_container);
       break;
-    case which_particles::stationary:
+    case WhichParticles::stationary:
       if(!mobile && !diffusive) solver->depositParticles(a_container);
       break;
     default:
-      MayDay::Abort("ito_plasma_stepper::depositParticles(which_particles) - logic bust");
+      MayDay::Abort("ItoPlasmaStepper::depositParticles(WhichParticles) - logic bust");
     }
   }
 }
 
-void ito_plasma_stepper::set_ito_velocity_funcs(){
-  CH_TIME("ito_plasma_stepper::set_ito_velocity_funcs");
+void ItoPlasmaStepper::setItoVelocityFunctions(){
+  CH_TIME("ItoPlasmaStepper::setItoVelocityFunctions");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::set_ito_velocity_funcs" << endl;
+    pout() << "ItoPlasmaStepper::setItoVelocityFunctions" << endl;
   }
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -1577,16 +1583,16 @@ void ito_plasma_stepper::set_ito_velocity_funcs(){
   }
 }
 
-void ito_plasma_stepper::compute_ito_velocities(){
-  CH_TIME("ito_plasma_stepper::compute_ito_velocities()");
+void ItoPlasmaStepper::computeItoVelocities(){
+  CH_TIME("ItoPlasmaStepper::computeItoVelocities()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_ito_velocities()" << endl;
+    pout() << "ItoPlasmaStepper::computeItoVelocities()" << endl;
   }
 
   const ItoPlasmaPhysics::coupling which_coupling = m_physics->getCoupling();
 
   // Set velocity functions
-  this->set_ito_velocity_funcs();
+  this->setItoVelocityFunctions();
 
   // Compute mobilities based on appropriate coupling
   switch(which_coupling){
@@ -1594,7 +1600,7 @@ void ito_plasma_stepper::compute_ito_velocities(){
     this->computeItoMobilitiesLFA();
     break;
   case ItoPlasmaPhysics::coupling::LEA:
-    this->compute_ito_mobilities_lea();
+    this->computeItoMobilitiesLEA();
     break;
   }
 
@@ -1604,10 +1610,10 @@ void ito_plasma_stepper::compute_ito_velocities(){
   }
 }
 
-void ito_plasma_stepper::compute_ito_diffusion(){
-  CH_TIME("ito_plasma_stepper::compute_ito_diffusion()");
+void ItoPlasmaStepper::computeItoDiffusion(){
+  CH_TIME("ItoPlasmaStepper::computeItoDiffusion()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_ito_diffusion()" << endl;
+    pout() << "ItoPlasmaStepper::computeItoDiffusion()" << endl;
   }
 
   const ItoPlasmaPhysics::coupling which_coupling = m_physics->getCoupling();
@@ -1618,25 +1624,25 @@ void ito_plasma_stepper::compute_ito_diffusion(){
     this->computeItoDiffusionLFA();
     break;
   case ItoPlasmaPhysics::coupling::LEA:
-    this->compute_ito_diffusion_lea();
+    this->computeItoDiffusion_lea();
     break;
   }
 }
 
-void ito_plasma_stepper::computeItoMobilitiesLFA(){
-  CH_TIME("ito_plasma_stepper::computeItoMobilitiesLFA()");
+void ItoPlasmaStepper::computeItoMobilitiesLFA(){
+  CH_TIME("ItoPlasmaStepper::computeItoMobilitiesLFA()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::computeItoMobilitiesLFA()" << endl;
+    pout() << "ItoPlasmaStepper::computeItoMobilitiesLFA()" << endl;
   }
 
   Vector<EBAMRCellData*> meshMobilities = m_ito->getMobilityFunctions();
   this->computeItoMobilitiesLFA(meshMobilities, m_fluid_E, m_time);
 }
 
-void ito_plasma_stepper::computeItoMobilitiesLFA(Vector<EBAMRCellData*>& a_meshMobilities, const EBAMRCellData& a_E, const Real a_time){
-  CH_TIME("ito_plasma_stepper::computeItoMobilitiesLFA(mobilities, E, time)");
+void ItoPlasmaStepper::computeItoMobilitiesLFA(Vector<EBAMRCellData*>& a_meshMobilities, const EBAMRCellData& a_E, const Real a_time){
+  CH_TIME("ItoPlasmaStepper::computeItoMobilitiesLFA(mobilities, E, time)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::computeItoMobilitiesLFA(mobilities, E, time)" << endl;
+    pout() << "ItoPlasmaStepper::computeItoMobilitiesLFA(mobilities, E, time)" << endl;
   }
 
 
@@ -1678,13 +1684,13 @@ void ito_plasma_stepper::computeItoMobilitiesLFA(Vector<EBAMRCellData*>& a_meshM
   }
 }
 
-void ito_plasma_stepper::computeItoMobilitiesLFA(Vector<LevelData<EBCellFAB>* >& a_meshMobilities,
-						    const LevelData<EBCellFAB>&     a_E,
-						    const int                       a_level,
-						    const Real                      a_time){
-  CH_TIME("ito_plasma_stepper::computeItoMobilitiesLFA(mobilities, E, level, time)");
+void ItoPlasmaStepper::computeItoMobilitiesLFA(Vector<LevelData<EBCellFAB>* >& a_meshMobilities,
+					       const LevelData<EBCellFAB>&     a_E,
+					       const int                       a_level,
+					       const Real                      a_time){
+  CH_TIME("ItoPlasmaStepper::computeItoMobilitiesLFA(mobilities, E, level, time)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::computeItoMobilitiesLFA(mobilities, E, level, time)" << endl;
+    pout() << "ItoPlasmaStepper::computeItoMobilitiesLFA(mobilities, E, level, time)" << endl;
   }
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_fluid_Realm)[a_level];
@@ -1702,15 +1708,15 @@ void ito_plasma_stepper::computeItoMobilitiesLFA(Vector<LevelData<EBCellFAB>* >&
   }
 }
 
-void ito_plasma_stepper::computeItoMobilitiesLFA(Vector<EBCellFAB*>& a_meshMobilities,
-						    const EBCellFAB&    a_E,
-						    const int           a_level,
-						    const DataIndex     a_dit,
-						    const Box           a_box,
-						    const Real          a_time) {
-  CH_TIME("ito_plasma_stepper::computeItoMobilitiesLFA(meshMobilities, E, level, dit, box, time)");
+void ItoPlasmaStepper::computeItoMobilitiesLFA(Vector<EBCellFAB*>& a_meshMobilities,
+					       const EBCellFAB&    a_E,
+					       const int           a_level,
+					       const DataIndex     a_dit,
+					       const Box           a_box,
+					       const Real          a_time) {
+  CH_TIME("ItoPlasmaStepper::computeItoMobilitiesLFA(meshMobilities, E, level, dit, box, time)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::computeItoMobilitiesLFA(meshMobilities, E, level, dit, box, time)" << endl;
+    pout() << "ItoPlasmaStepper::computeItoMobilitiesLFA(meshMobilities, E, level, dit, box, time)" << endl;
   }
 
   const int comp         = 0;
@@ -1759,10 +1765,10 @@ void ito_plasma_stepper::computeItoMobilitiesLFA(Vector<EBCellFAB*>& a_meshMobil
   }
 }
 
-void ito_plasma_stepper::compute_ito_mobilities_lea(){
-  CH_TIME("ito_plasma_stepper");
+void ItoPlasmaStepper::computeItoMobilitiesLEA(){
+  CH_TIME("ItoPlasmaStepper");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_ito_mobilities_lea()" << endl;
+    pout() << "ItoPlasmaStepper::computeItoMobilitiesLEA()" << endl;
   }
 
   // This is really simple because the solvers do this directly...
@@ -1771,10 +1777,10 @@ void ito_plasma_stepper::compute_ito_mobilities_lea(){
   }
 }
 
-void ito_plasma_stepper::computeItoDiffusionLFA(){
-  CH_TIME("ito_plasma_stepper::computeItoDiffusionLFA()");
+void ItoPlasmaStepper::computeItoDiffusionLFA(){
+  CH_TIME("ItoPlasmaStepper::computeItoDiffusionLFA()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::computeItoDiffusionLFA()" << endl;
+    pout() << "ItoPlasmaStepper::computeItoDiffusionLFA()" << endl;
   }
 
   Vector<EBAMRCellData*> diffco_funcs = m_ito->getDiffusionFunctions();
@@ -1783,13 +1789,13 @@ void ito_plasma_stepper::computeItoDiffusionLFA(){
   this->computeItoDiffusionLFA(diffco_funcs, densities, m_particle_E, m_time);
 }
 
-void ito_plasma_stepper::computeItoDiffusionLFA(Vector<EBAMRCellData*>&       a_diffusionCoefficient_funcs,
-						   const Vector<EBAMRCellData*>& a_densities,
-						   const EBAMRCellData&          a_E,
-						   const Real                    a_time){
-  CH_TIME("ito_plasma_stepper::computeItoDiffusionLFA(velo, E, time)");
+void ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBAMRCellData*>&       a_diffusionCoefficient_funcs,
+					      const Vector<EBAMRCellData*>& a_densities,
+					      const EBAMRCellData&          a_E,
+					      const Real                    a_time){
+  CH_TIME("ItoPlasmaStepper::computeItoDiffusionLFA(velo, E, time)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::computeItoDiffusionLFA(velo, E, time)" << endl;
+    pout() << "ItoPlasmaStepper::computeItoDiffusionLFA(velo, E, time)" << endl;
   }
 
   // TLDR: In this routine we make m_fscratch1 hold the diffusion coefficients on the fluid Realm and m_fscratch2 hold the particle densities on the fluid Realm.
@@ -1841,14 +1847,14 @@ void ito_plasma_stepper::computeItoDiffusionLFA(Vector<EBAMRCellData*>&       a_
   }
 }
 
-void ito_plasma_stepper::computeItoDiffusionLFA(Vector<LevelData<EBCellFAB>* >&       a_diffusionCoefficient,
-						   const Vector<LevelData<EBCellFAB>* >& a_densities,
-						   const LevelData<EBCellFAB>&           a_E,
-						   const int                             a_level,
-						   const Real                            a_time){
-  CH_TIME("ito_plasma_stepper::computeItoDiffusionLFA(velo, E, level, time)");
+void ItoPlasmaStepper::computeItoDiffusionLFA(Vector<LevelData<EBCellFAB>* >&       a_diffusionCoefficient,
+					      const Vector<LevelData<EBCellFAB>* >& a_densities,
+					      const LevelData<EBCellFAB>&           a_E,
+					      const int                             a_level,
+					      const Real                            a_time){
+  CH_TIME("ItoPlasmaStepper::computeItoDiffusionLFA(velo, E, level, time)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::computeItoDiffusionLFA(velo, E, level, time)" << endl;
+    pout() << "ItoPlasmaStepper::computeItoDiffusionLFA(velo, E, level, time)" << endl;
   }
 
   const int num_ItoSpecies = m_physics->getNumItoSpecies();
@@ -1874,16 +1880,16 @@ void ito_plasma_stepper::computeItoDiffusionLFA(Vector<LevelData<EBCellFAB>* >& 
   }
 }
 
-void ito_plasma_stepper::computeItoDiffusionLFA(Vector<EBCellFAB*>&       a_diffusionCoefficient,
-						   const Vector<EBCellFAB*>& a_densities,
-						   const EBCellFAB&          a_E,
-						   const int                 a_level,
-						   const DataIndex           a_dit,
-						   const Box                 a_box,
-						   const Real                a_time){
-  CH_TIME("ito_plasma_stepper::computeItoDiffusionLFA(velo, E, level, dit, time)");
+void ItoPlasmaStepper::computeItoDiffusionLFA(Vector<EBCellFAB*>&       a_diffusionCoefficient,
+					      const Vector<EBCellFAB*>& a_densities,
+					      const EBCellFAB&          a_E,
+					      const int                 a_level,
+					      const DataIndex           a_dit,
+					      const Box                 a_box,
+					      const Real                a_time){
+  CH_TIME("ItoPlasmaStepper::computeItoDiffusionLFA(velo, E, level, dit, time)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::computeItoDiffusionLFA(velo, E, level, dit, time)" << endl;
+    pout() << "ItoPlasmaStepper::computeItoDiffusionLFA(velo, E, level, dit, time)" << endl;
   }
 
   const int comp         = 0;
@@ -1952,10 +1958,10 @@ void ito_plasma_stepper::computeItoDiffusionLFA(Vector<EBCellFAB*>&       a_diff
   }
 }
 
-void ito_plasma_stepper::compute_ito_diffusion_lea(){
-  CH_TIME("ito_plasma_stepper::compute_ito_diffusion_lea()");
+void ItoPlasmaStepper::computeItoDiffusion_lea(){
+  CH_TIME("ItoPlasmaStepper::computeItoDiffusion_lea()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_ito_diffusion_lea()" << endl;
+    pout() << "ItoPlasmaStepper::computeItoDiffusion_lea()" << endl;
   }
   
   // This is really simple because the solvers do this directly... No monkeying with interpolations or anything. 
@@ -1964,23 +1970,23 @@ void ito_plasma_stepper::compute_ito_diffusion_lea(){
   }
 }
 
-void ito_plasma_stepper::compute_reactive_particles_per_cell(EBAMRCellData& a_ppc){
-  CH_TIME("ito_plasma_stepper::compute_reactive_particles_per_cell(ppc)");
+void ItoPlasmaStepper::computeReactiveParticlesPerCell(EBAMRCellData& a_ppc){
+  CH_TIME("ItoPlasmaStepper::computeReactiveParticlesPerCell(ppc)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_reactive_particles_per_cell(ppc)" << endl;
+    pout() << "ItoPlasmaStepper::computeReactiveParticlesPerCell(ppc)" << endl;
   }
 
   DataOps::setValue(a_ppc, 0.0);
   
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    this->compute_reactive_particles_per_cell(*a_ppc[lvl], lvl);
+    this->computeReactiveParticlesPerCell(*a_ppc[lvl], lvl);
   }
 }
 
-void ito_plasma_stepper::compute_reactive_particles_per_cell(LevelData<EBCellFAB>& a_ppc, const int a_level){
-  CH_TIME("ito_plasma_stepper::compute_reactive_particles_per_cell(ppc, lvl)");
+void ItoPlasmaStepper::computeReactiveParticlesPerCell(LevelData<EBCellFAB>& a_ppc, const int a_level){
+  CH_TIME("ItoPlasmaStepper::computeReactiveParticlesPerCell(ppc, lvl)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_reactive_particles_per_cell(ppc, lvl)" << endl;
+    pout() << "ItoPlasmaStepper::computeReactiveParticlesPerCell(ppc, lvl)" << endl;
   }
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[a_level];
@@ -1991,14 +1997,14 @@ void ito_plasma_stepper::compute_reactive_particles_per_cell(LevelData<EBCellFAB
     const Box box = dbl[dit()];
     const EBISBox& ebisbox = ebisl[dit()];
     
-    this->compute_reactive_particles_per_cell(a_ppc[dit()], a_level, dit(), box, ebisbox);
+    this->computeReactiveParticlesPerCell(a_ppc[dit()], a_level, dit(), box, ebisbox);
   }
 }
 
-void ito_plasma_stepper::compute_reactive_particles_per_cell(EBCellFAB& a_ppc, const int a_level, const DataIndex a_dit, const Box a_box, const EBISBox& a_ebisbox){
-  CH_TIME("ito_plasma_stepper::compute_reactive_particles_per_cell(ppc, lvl, dit, box)");
+void ItoPlasmaStepper::computeReactiveParticlesPerCell(EBCellFAB& a_ppc, const int a_level, const DataIndex a_dit, const Box a_box, const EBISBox& a_ebisbox){
+  CH_TIME("ItoPlasmaStepper::computeReactiveParticlesPerCell(ppc, lvl, dit, box)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_reactive_particles_per_cell(ppc, lvl, dit, box)" << endl;
+    pout() << "ItoPlasmaStepper::computeReactiveParticlesPerCell(ppc, lvl, dit, box)" << endl;
   }
 
   BaseFab<Real>& numFab = a_ppc.getSingleValuedFAB();
@@ -2054,23 +2060,23 @@ void ito_plasma_stepper::compute_reactive_particles_per_cell(EBCellFAB& a_ppc, c
   }
 }
 
-void ito_plasma_stepper::compute_reactive_mean_energies_per_cell(EBAMRCellData& a_mean_energies){
-  CH_TIME("ito_plasma_stepper::compute_mean-energies_per_cell(EBAMRCellData)");
+void ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(EBAMRCellData& a_mean_energies){
+  CH_TIME("ItoPlasmaStepper::compute_mean-energies_per_cell(EBAMRCellData)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_reactive_particles_per_cell(EBAMRCellData)" << endl;
+    pout() << "ItoPlasmaStepper::computeReactiveParticlesPerCell(EBAMRCellData)" << endl;
   }
 
   DataOps::setValue(a_mean_energies, 0.0);
   
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    this->compute_reactive_mean_energies_per_cell(*a_mean_energies[lvl], lvl);
+    this->computeReactiveMeanEnergiesPerCell(*a_mean_energies[lvl], lvl);
   }
 }
 
-void ito_plasma_stepper::compute_reactive_mean_energies_per_cell(LevelData<EBCellFAB>& a_mean_energies, const int a_level){
-  CH_TIME("ito_plasma_stepper::compute_reactive_mean_energies_per_cell(ppc, lvl)");
+void ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(LevelData<EBCellFAB>& a_mean_energies, const int a_level){
+  CH_TIME("ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(ppc, lvl)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_reactive_mean_energies_per_cell(ppc, lvl)" << endl;
+    pout() << "ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(ppc, lvl)" << endl;
   }
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[a_level];
@@ -2081,18 +2087,18 @@ void ito_plasma_stepper::compute_reactive_mean_energies_per_cell(LevelData<EBCel
     const Box box = dbl[dit()];
     const EBISBox& ebisbox = ebisl[dit()];
       
-    this->compute_reactive_mean_energies_per_cell(a_mean_energies[dit()], a_level, dit(), box, ebisbox);
+    this->computeReactiveMeanEnergiesPerCell(a_mean_energies[dit()], a_level, dit(), box, ebisbox);
   }
 }
 
-void ito_plasma_stepper::compute_reactive_mean_energies_per_cell(EBCellFAB&      a_mean_energies,
-								 const int       a_level,
-								 const DataIndex a_dit,
-								 const Box       a_box,
-								 const EBISBox&  a_ebisbox){
-  CH_TIME("ito_plasma_stepper::compute_reactive_mean_energies_per_cell(ppc, lvl, dit, box)");
+void ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(EBCellFAB&      a_mean_energies,
+							  const int       a_level,
+							  const DataIndex a_dit,
+							  const Box       a_box,
+							  const EBISBox&  a_ebisbox){
+  CH_TIME("ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(ppc, lvl, dit, box)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_reactive_mean_energies_per_cell(ppc, lvl, dit, box)" << endl;
+    pout() << "ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(ppc, lvl, dit, box)" << endl;
   }
 
   BaseFab<Real>& numFab = a_mean_energies.getSingleValuedFAB();
@@ -2150,24 +2156,24 @@ void ito_plasma_stepper::compute_reactive_mean_energies_per_cell(EBCellFAB&     
   }
 }
 
-void ito_plasma_stepper::advanceReactionNetwork_nwo(const Real a_dt){
-  CH_TIME("ito_plasma_stepper::advanceReactionNetwork_nwo(dt)");
+void ItoPlasmaStepper::advanceReactionNetworkNWO(const Real a_dt){
+  CH_TIME("ItoPlasmaStepper::advanceReactionNetworkNWO(dt)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::advanceReactionNetwork_nwo(dt)" << endl;
+    pout() << "ItoPlasmaStepper::advanceReactionNetworkNWO(dt)" << endl;
   }
 
-  this->advanceReactionNetwork_nwo(m_fluid_E, m_EdotJ, a_dt);
+  this->advanceReactionNetworkNWO(m_fluid_E, m_EdotJ, a_dt);
 }
 
-void ito_plasma_stepper::advanceReactionNetwork_nwo(const EBAMRCellData& a_E, const EBAMRCellData& a_EdotJ, const Real a_dt){
-  CH_TIME("ito_plasma_stepper::advanceReactionNetwork(ppc, ypc, E, sources, dt)");
+void ItoPlasmaStepper::advanceReactionNetworkNWO(const EBAMRCellData& a_E, const EBAMRCellData& a_EdotJ, const Real a_dt){
+  CH_TIME("ItoPlasmaStepper::advanceReactionNetwork(ppc, ypc, E, sources, dt)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::advanceReactionNetwork(ppc, ypc, E, sources, dt)" << endl;
+    pout() << "ItoPlasmaStepper::advanceReactionNetwork(ppc, ypc, E, sources, dt)" << endl;
   }
 
   // 1. Compute the number of particles per cell. Set the number of Photons to be generated per cell to zero. 
-  this->compute_reactive_particles_per_cell(m_particle_ppc);
-  this->compute_reactive_mean_energies_per_cell(m_particle_eps);
+  this->computeReactiveParticlesPerCell(m_particle_ppc);
+  this->computeReactiveMeanEnergiesPerCell(m_particle_eps);
 
   m_fluid_ppc.copy(m_particle_ppc);
   m_fluid_eps.copy(m_particle_eps);
@@ -2178,7 +2184,7 @@ void ito_plasma_stepper::advanceReactionNetwork_nwo(const EBAMRCellData& a_E, co
 
   // 2. Solve for the new number of particles per cell. This also obtains the number of Photons to be generated in each cell. 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    this->advanceReactionNetwork_nwo(*m_fluid_ppc[lvl], *m_fluid_ypc[lvl], *m_fluid_eps[lvl], *a_E[lvl], *a_EdotJ[lvl], lvl, a_dt);
+    this->advanceReactionNetworkNWO(*m_fluid_ppc[lvl], *m_fluid_ypc[lvl], *m_fluid_eps[lvl], *a_E[lvl], *a_EdotJ[lvl], lvl, a_dt);
   }
 
   // 3. Copy the results to the particle Realm.
@@ -2191,47 +2197,47 @@ void ito_plasma_stepper::advanceReactionNetwork_nwo(const EBAMRCellData& a_E, co
 }
 
 
-void ito_plasma_stepper::advanceReactionNetwork_nwo(LevelData<EBCellFAB>&       a_particlesPerCell,
-						      LevelData<EBCellFAB>&       a_newPhotonsPerCell,
-						      LevelData<EBCellFAB>&       a_meanParticleEnergies,
-						      const LevelData<EBCellFAB>& a_E,
-						      const LevelData<EBCellFAB>& a_EdotJ,
-						      const int                   a_level,
-						      const Real                  a_dt){
-  CH_TIME("ito_plasma_stepper::advanceReactionNetwork(ppc, ypc, energies, E, sources, level, dt)");
+void ItoPlasmaStepper::advanceReactionNetworkNWO(LevelData<EBCellFAB>&       a_particlesPerCell,
+						 LevelData<EBCellFAB>&       a_newPhotonsPerCell,
+						 LevelData<EBCellFAB>&       a_meanParticleEnergies,
+						 const LevelData<EBCellFAB>& a_E,
+						 const LevelData<EBCellFAB>& a_EdotJ,
+						 const int                   a_level,
+						 const Real                  a_dt){
+  CH_TIME("ItoPlasmaStepper::advanceReactionNetwork(ppc, ypc, energies, E, sources, level, dt)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::advanceReactionNetwork(ppc, ypc, energies, E, sources, level, dt)" << endl;
+    pout() << "ItoPlasmaStepper::advanceReactionNetwork(ppc, ypc, energies, E, sources, level, dt)" << endl;
   }
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_fluid_Realm)[a_level];
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-    this->advanceReactionNetwork_nwo(a_particlesPerCell[dit()],
-				       a_newPhotonsPerCell[dit()],
-				       a_meanParticleEnergies[dit()],
-				       a_E[dit()],
-				       a_EdotJ[dit()],
-				       a_level,
-				       dit(),
-				       dbl[dit()],
-				       m_amr->getDx()[a_level],
-				       a_dt);
+    this->advanceReactionNetworkNWO(a_particlesPerCell[dit()],
+				    a_newPhotonsPerCell[dit()],
+				    a_meanParticleEnergies[dit()],
+				    a_E[dit()],
+				    a_EdotJ[dit()],
+				    a_level,
+				    dit(),
+				    dbl[dit()],
+				    m_amr->getDx()[a_level],
+				    a_dt);
   }
 }
 
-void ito_plasma_stepper::advanceReactionNetwork_nwo(EBCellFAB&       a_particlesPerCell,
-						      EBCellFAB&       a_newPhotonsPerCell,
-						      EBCellFAB&       a_meanParticleEnergies,
-						      const EBCellFAB& a_E,
-						      const EBCellFAB& a_EdotJ,
-						      const int        a_level,
-						      const DataIndex  a_dit,
-						      const Box        a_box,
-						      const Real       a_dx,
-						      const Real       a_dt){
-  CH_TIME("ito_plasma_stepper::advanceReactionNetwork_nwo(ppc, ypc, E, sources, level, dit, box, dx, dt)");
+void ItoPlasmaStepper::advanceReactionNetworkNWO(EBCellFAB&       a_particlesPerCell,
+						 EBCellFAB&       a_newPhotonsPerCell,
+						 EBCellFAB&       a_meanParticleEnergies,
+						 const EBCellFAB& a_E,
+						 const EBCellFAB& a_EdotJ,
+						 const int        a_level,
+						 const DataIndex  a_dit,
+						 const Box        a_box,
+						 const Real       a_dx,
+						 const Real       a_dt){
+  CH_TIME("ItoPlasmaStepper::advanceReactionNetworkNWO(ppc, ypc, E, sources, level, dit, box, dx, dt)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::advanceReactionNetwork_nwo(ppc, ypc, E, sources, level, dit, box, dx, dt)" << endl;
+    pout() << "ItoPlasmaStepper::advanceReactionNetworkNWO(ppc, ypc, E, sources, level, dit, box, dx, dt)" << endl;
   }
   
   const int num_ItoSpecies = m_physics->getNumItoSpecies();
@@ -2322,13 +2328,13 @@ void ito_plasma_stepper::advanceReactionNetwork_nwo(EBCellFAB&       a_particles
   }
 }
 
-void ito_plasma_stepper::reconcileParticles(const EBAMRCellData& a_newParticlesPerCell,
-					     const EBAMRCellData& a_oldParticlesPerCell,
-					     const EBAMRCellData& a_meanParticleEnergies,
-					     const EBAMRCellData& a_newPhotonsPerCell){
-  CH_TIME("ito_plasma_stepper::reconcileParticles(EBAMRCellData, EBAMRCellData, EBAMRCellData)");
+void ItoPlasmaStepper::reconcileParticles(const EBAMRCellData& a_newParticlesPerCell,
+					  const EBAMRCellData& a_oldParticlesPerCell,
+					  const EBAMRCellData& a_meanParticleEnergies,
+					  const EBAMRCellData& a_newPhotonsPerCell){
+  CH_TIME("ItoPlasmaStepper::reconcileParticles(EBAMRCellData, EBAMRCellData, EBAMRCellData)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::reconcileParticles(EBAMRCellData, EBAMRCellData, EBAMRCellData)";
+    pout() << "ItoPlasmaStepper::reconcileParticles(EBAMRCellData, EBAMRCellData, EBAMRCellData)";
   }
 
   for(int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
@@ -2337,41 +2343,41 @@ void ito_plasma_stepper::reconcileParticles(const EBAMRCellData& a_newParticlesP
   }
 }
 
-void ito_plasma_stepper::reconcileParticles(const LevelData<EBCellFAB>& a_newParticlesPerCell,
-					     const LevelData<EBCellFAB>& a_oldParticlesPerCell,
-					     const LevelData<EBCellFAB>& a_meanParticleEnergies,
-					     const LevelData<EBCellFAB>& a_newPhotonsPerCell,
-					     const int                   a_level){
-  CH_TIME("ito_plasma_stepper::reconcileParticles(LevelData<EBCellFAB>x3, int)");
+void ItoPlasmaStepper::reconcileParticles(const LevelData<EBCellFAB>& a_newParticlesPerCell,
+					  const LevelData<EBCellFAB>& a_oldParticlesPerCell,
+					  const LevelData<EBCellFAB>& a_meanParticleEnergies,
+					  const LevelData<EBCellFAB>& a_newPhotonsPerCell,
+					  const int                   a_level){
+  CH_TIME("ItoPlasmaStepper::reconcileParticles(LevelData<EBCellFAB>x3, int)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::reconcileParticles(LevelData<EBCellFAB>x3, int)" << endl;
+    pout() << "ItoPlasmaStepper::reconcileParticles(LevelData<EBCellFAB>x3, int)" << endl;
   }
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[a_level];
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     this->reconcileParticles(a_newParticlesPerCell[dit()],
-			      a_oldParticlesPerCell[dit()],
-			      a_meanParticleEnergies[dit()],
-			      a_newPhotonsPerCell[dit()],
-			      a_level,
-			      dit(),
-			      dbl[dit()],
-			      m_amr->getDx()[a_level]);
+			     a_oldParticlesPerCell[dit()],
+			     a_meanParticleEnergies[dit()],
+			     a_newPhotonsPerCell[dit()],
+			     a_level,
+			     dit(),
+			     dbl[dit()],
+			     m_amr->getDx()[a_level]);
   }
 }
 
-void ito_plasma_stepper::reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
-					     const EBCellFAB& a_oldParticlesPerCell,
-					     const EBCellFAB& a_meanParticleEnergies,
-					     const EBCellFAB& a_newPhotonsPerCell,
-					     const int        a_level,
-					     const DataIndex  a_dit,
-					     const Box        a_box,
-					     const Real       a_dx){
-  CH_TIME("ito_plasma_stepper::reconcileParticles(EBCellFABx3, int, DataIndex, Box, Real)");
+void ItoPlasmaStepper::reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
+					  const EBCellFAB& a_oldParticlesPerCell,
+					  const EBCellFAB& a_meanParticleEnergies,
+					  const EBCellFAB& a_newPhotonsPerCell,
+					  const int        a_level,
+					  const DataIndex  a_dit,
+					  const Box        a_box,
+					  const Real       a_dx){
+  CH_TIME("ItoPlasmaStepper::reconcileParticles(EBCellFABx3, int, DataIndex, Box, Real)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::reconcileParticles(EBCellFABx3, int, DataIndex, Box, Real)" << endl;
+    pout() << "ItoPlasmaStepper::reconcileParticles(EBCellFABx3, int, DataIndex, Box, Real)" << endl;
   }
 
   const int num_ItoSpecies = m_physics->getNumItoSpecies();
@@ -2522,14 +2528,14 @@ void ito_plasma_stepper::reconcileParticles(const EBCellFAB& a_newParticlesPerCe
   }
 }
 
-void ito_plasma_stepper::advanceReactionNetwork(const Real a_dt){
-  CH_TIME("ito_plasma_stepper::advanceReactionNetwork(a_dt)");
+void ItoPlasmaStepper::advanceReactionNetwork(const Real a_dt){
+  CH_TIME("ItoPlasmaStepper::advanceReactionNetwork(a_dt)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::advanceReactionNetwork(a_dt)" << endl;
+    pout() << "ItoPlasmaStepper::advanceReactionNetwork(a_dt)" << endl;
   }
 
   if(m_nwo_reactions){
-    this->advanceReactionNetwork_nwo(a_dt);
+    this->advanceReactionNetworkNWO(a_dt);
   }
   else{
     const int num_ItoSpecies = m_physics->getNumItoSpecies();
@@ -2552,15 +2558,15 @@ void ito_plasma_stepper::advanceReactionNetwork(const Real a_dt){
   }
 }
 
-void ito_plasma_stepper::advanceReactionNetwork(Vector<ParticleContainer<ItoParticle>* >& a_particles,
-						  Vector<ParticleContainer<Photon>* >&       a_Photons,
-						  Vector<ParticleContainer<Photon>* >&       a_newPhotons,
-						  const Vector<EBAMRCellData>&                a_sources,
-						  const EBAMRCellData&                        a_E,
-						  const Real                                  a_dt){
-  CH_TIME("ito_plasma_stepper::advanceReactionNetwork(Vector<ParticleContainer*> x3, Vector<EBAMRCellData*>, EBAMRCellData, Real)");
+void ItoPlasmaStepper::advanceReactionNetwork(Vector<ParticleContainer<ItoParticle>* >& a_particles,
+					      Vector<ParticleContainer<Photon>* >&       a_Photons,
+					      Vector<ParticleContainer<Photon>* >&       a_newPhotons,
+					      const Vector<EBAMRCellData>&                a_sources,
+					      const EBAMRCellData&                        a_E,
+					      const Real                                  a_dt){
+  CH_TIME("ItoPlasmaStepper::advanceReactionNetwork(Vector<ParticleContainer*> x3, Vector<EBAMRCellData*>, EBAMRCellData, Real)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::advanceReactionNetwork(Vector<ParticleContainer*> x3, Vector<EBAMRCellData*>, EBAMRCellData, Real)" << endl;
+    pout() << "ItoPlasmaStepper::advanceReactionNetwork(Vector<ParticleContainer*> x3, Vector<EBAMRCellData*>, EBAMRCellData, Real)" << endl;
   }
 
   const int num_ItoSpecies = m_physics->getNumItoSpecies();
@@ -2586,15 +2592,15 @@ void ito_plasma_stepper::advanceReactionNetwork(Vector<ParticleContainer<ItoPart
 
 }
 
-void ito_plasma_stepper::advanceReactionNetwork(Vector<AMRCellParticles<ItoParticle>* >& a_particles,
-						  Vector<AMRCellParticles<Photon>* >&       a_Photons,
-						  Vector<AMRCellParticles<Photon>* >&       a_newPhotons,
-						  const Vector<EBAMRCellData>&              a_sources,
-						  const EBAMRCellData&                      a_E,
-						  const Real                                a_dt){
-  CH_TIME("ito_plasma_stepper::advanceReactionNetwork(Vector<AMRCellParticles*> x 3, Vector<EBAMRCellData*>, EBAMRCellData, Real)");
+void ItoPlasmaStepper::advanceReactionNetwork(Vector<AMRCellParticles<ItoParticle>* >& a_particles,
+					      Vector<AMRCellParticles<Photon>* >&       a_Photons,
+					      Vector<AMRCellParticles<Photon>* >&       a_newPhotons,
+					      const Vector<EBAMRCellData>&              a_sources,
+					      const EBAMRCellData&                      a_E,
+					      const Real                                a_dt){
+  CH_TIME("ItoPlasmaStepper::advanceReactionNetwork(Vector<AMRCellParticles*> x 3, Vector<EBAMRCellData*>, EBAMRCellData, Real)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::advanceReactionNetwork(Vector<AMRCellParticles*> x 3, Vector<EBAMRCellData*>, EBAMRCellData, Real)" << endl;
+    pout() << "ItoPlasmaStepper::advanceReactionNetwork(Vector<AMRCellParticles*> x 3, Vector<EBAMRCellData*>, EBAMRCellData, Real)" << endl;
   }
 
   const int num_ItoSpecies = m_physics->getNumItoSpecies();
@@ -2622,16 +2628,16 @@ void ito_plasma_stepper::advanceReactionNetwork(Vector<AMRCellParticles<ItoParti
   }
 }
 
-void ito_plasma_stepper::advanceReactionNetwork(Vector<LayoutData<BinFab<ItoParticle> >* >& a_particles,
-						  Vector<LayoutData<BinFab<Photon> >* >&       a_Photons,
-						  Vector<LayoutData<BinFab<Photon> >* >&       a_newPhotons,
-						  const Vector<LevelData<EBCellFAB>* >&        a_sources,
-						  const LevelData<EBCellFAB>&                  a_E,
-						  const int                                    a_lvl,
-						  const Real                                   a_dt){
-  CH_TIME("ito_plasma_stepper::advanceReactionNetwork(Vector<LD<BinFab>* > x 3, Vector<LD<EBCellFAB>*>, EBAMRCellData, level, dt)");
+void ItoPlasmaStepper::advanceReactionNetwork(Vector<LayoutData<BinFab<ItoParticle> >* >& a_particles,
+					      Vector<LayoutData<BinFab<Photon> >* >&       a_Photons,
+					      Vector<LayoutData<BinFab<Photon> >* >&       a_newPhotons,
+					      const Vector<LevelData<EBCellFAB>* >&        a_sources,
+					      const LevelData<EBCellFAB>&                  a_E,
+					      const int                                    a_lvl,
+					      const Real                                   a_dt){
+  CH_TIME("ItoPlasmaStepper::advanceReactionNetwork(Vector<LD<BinFab>* > x 3, Vector<LD<EBCellFAB>*>, EBAMRCellData, level, dt)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::advanceReactionNetwork(Vector<LD<BinFab>* > x 3, Vector<LD<EBCellFAB>*>, EBAMRCellData, level, dt)" << endl;
+    pout() << "ItoPlasmaStepper::advanceReactionNetwork(Vector<LD<BinFab>* > x 3, Vector<LD<EBCellFAB>*>, EBAMRCellData, level, dt)" << endl;
   }
 
   const int num_ItoSpecies = m_physics->getNumItoSpecies();
@@ -2664,19 +2670,19 @@ void ito_plasma_stepper::advanceReactionNetwork(Vector<LayoutData<BinFab<ItoPart
   }
 }
 
-void ito_plasma_stepper::advanceReactionNetwork(Vector<BinFab<ItoParticle>* >& a_particles,
-						  Vector<BinFab<Photon>* >&       a_Photons,
-						  Vector<BinFab<Photon>* >&       a_newPhotons,
-						  const Vector<EBCellFAB*>&       a_sources,
-						  const EBCellFAB&                a_E,
-						  const int                       a_lvl,
-						  const DataIndex                 a_dit,
-						  const Box                       a_box,
-						  const Real                      a_dx,
-						  const Real                      a_dt){
-  CH_TIME("ito_plasma_stepper::advanceReactionNetwork(Vector<BinFab*> x 3, Vector<EBCellFAB*>, EBCellFAB, level, dit, box, dx, dt)");
+void ItoPlasmaStepper::advanceReactionNetwork(Vector<BinFab<ItoParticle>* >& a_particles,
+					      Vector<BinFab<Photon>* >&       a_Photons,
+					      Vector<BinFab<Photon>* >&       a_newPhotons,
+					      const Vector<EBCellFAB*>&       a_sources,
+					      const EBCellFAB&                a_E,
+					      const int                       a_lvl,
+					      const DataIndex                 a_dit,
+					      const Box                       a_box,
+					      const Real                      a_dx,
+					      const Real                      a_dt){
+  CH_TIME("ItoPlasmaStepper::advanceReactionNetwork(Vector<BinFab*> x 3, Vector<EBCellFAB*>, EBCellFAB, level, dit, box, dx, dt)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::advanceReactionNetwork(Vector<BinFab*> x 3, Vector<EBCellFAB*>, EBCellFAB, level, dit, box, dx, dt)" << endl;
+    pout() << "ItoPlasmaStepper::advanceReactionNetwork(Vector<BinFab*> x 3, Vector<EBCellFAB*>, EBCellFAB, level, dit, box, dx, dt)" << endl;
   }
 
   const int comp = 0;
@@ -2787,23 +2793,23 @@ void ito_plasma_stepper::advanceReactionNetwork(Vector<BinFab<ItoParticle>* >& a
   }
 }
 
-Real ito_plasma_stepper::compute_physics_dt() const{
-  CH_TIME("ito_plasma_stepper::compute_physics_dt()");
+Real ItoPlasmaStepper::computePhysicsDt() const{
+  CH_TIME("ItoPlasmaStepper::computePhysicsDt()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_physics_dt()" << endl;
+    pout() << "ItoPlasmaStepper::computePhysicsDt()" << endl;
   }
 
   // TLDR: This is done on the particle Realm because of the densities (which are defined on the particle Realm). 
 
-  const Real dt = this->compute_physics_dt(m_particle_E, m_ito->getDensities());
+  const Real dt = this->computePhysicsDt(m_particle_E, m_ito->getDensities());
 
   return dt;
 }
 
-Real ito_plasma_stepper::compute_physics_dt(const EBAMRCellData& a_E, const Vector<EBAMRCellData*> a_densities) const {
-  CH_TIME("ito_plasma_stepper::compute_physics_dt(EBAMRCellFAB, Vector<EBAMRCellFAB*>)");
+Real ItoPlasmaStepper::computePhysicsDt(const EBAMRCellData& a_E, const Vector<EBAMRCellData*> a_densities) const {
+  CH_TIME("ItoPlasmaStepper::computePhysicsDt(EBAMRCellFAB, Vector<EBAMRCellFAB*>)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_physics_dt(EBAMRCellFAB, Vector<EBAMRCellFAB*>)" << endl;
+    pout() << "ItoPlasmaStepper::computePhysicsDt(EBAMRCellFAB, Vector<EBAMRCellFAB*>)" << endl;
   }
 
 
@@ -2822,7 +2828,7 @@ Real ito_plasma_stepper::compute_physics_dt(const EBAMRCellData& a_E, const Vect
       densities[idx] = &(*(*a_densities[idx])[lvl]);
     }
 
-    const Real levelDt = this->compute_physics_dt(*a_E[lvl], densities, lvl);
+    const Real levelDt = this->computePhysicsDt(*a_E[lvl], densities, lvl);
 
     minDt = Min(minDt, levelDt);
   }
@@ -2830,10 +2836,10 @@ Real ito_plasma_stepper::compute_physics_dt(const EBAMRCellData& a_E, const Vect
   return minDt;
 }
 
-Real ito_plasma_stepper::compute_physics_dt(const LevelData<EBCellFAB>& a_E, const Vector<LevelData<EBCellFAB> *> a_densities, const int a_level) const {
-  CH_TIME("ito_plasma_stepper::compute_physics_dt(LevelData<EBCellFAB>, Vector<LevelData<EBCellFAB> *>, int)");
+Real ItoPlasmaStepper::computePhysicsDt(const LevelData<EBCellFAB>& a_E, const Vector<LevelData<EBCellFAB> *> a_densities, const int a_level) const {
+  CH_TIME("ItoPlasmaStepper::computePhysicsDt(LevelData<EBCellFAB>, Vector<LevelData<EBCellFAB> *>, int)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_physics_dt(LevelData<EBCellFAB>, Vector<LevelData<EBCellFAB> *>, int)" << endl;
+    pout() << "ItoPlasmaStepper::computePhysicsDt(LevelData<EBCellFAB>, Vector<LevelData<EBCellFAB> *>, int)" << endl;
   }
 
   const int num_ItoSpecies = m_physics->getNumItoSpecies();
@@ -2852,7 +2858,7 @@ Real ito_plasma_stepper::compute_physics_dt(const LevelData<EBCellFAB>& a_E, con
       densities[idx] = &((*a_densities[idx])[dit()]);
     }
 
-    const Real boxDt = this->compute_physics_dt(a_E[dit()], densities, a_level, dit(), dbl.get(dit()));
+    const Real boxDt = this->computePhysicsDt(a_E[dit()], densities, a_level, dit(), dbl.get(dit()));
 
     minDt = Min(minDt, boxDt);
   }
@@ -2862,7 +2868,7 @@ Real ito_plasma_stepper::compute_physics_dt(const LevelData<EBCellFAB>& a_E, con
   Real tmp = 1.;
   int result = MPI_Allreduce(&minDt, &tmp, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
   if(result != MPI_SUCCESS){
-    MayDay::Error("ito_plasma_stepper::compute_physics_dt(lvl) - communication error on norm");
+    MayDay::Error("ItoPlasmaStepper::computePhysicsDt(lvl) - communication error on norm");
   }
   minDt = tmp;
 #endif  
@@ -2870,10 +2876,10 @@ Real ito_plasma_stepper::compute_physics_dt(const LevelData<EBCellFAB>& a_E, con
   return minDt;
 }
 
-Real ito_plasma_stepper::compute_physics_dt(const EBCellFAB& a_E, const Vector<EBCellFAB*> a_densities, const int a_level, const DataIndex a_dit, const Box a_box) const {
-  CH_TIME("ito_plasma_stepper::compute_physics_dt(EBCellFAB, Vector<EBCellFAB*>, lvl, dit, box)");
+Real ItoPlasmaStepper::computePhysicsDt(const EBCellFAB& a_E, const Vector<EBCellFAB*> a_densities, const int a_level, const DataIndex a_dit, const Box a_box) const {
+  CH_TIME("ItoPlasmaStepper::computePhysicsDt(EBCellFAB, Vector<EBCellFAB*>, lvl, dit, box)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::compute_physics_dt(EBCellFAB, Vector<EBCellFAB*>, lvl, dit, box)" << endl;
+    pout() << "ItoPlasmaStepper::computePhysicsDt(EBCellFAB, Vector<EBCellFAB*>, lvl, dit, box)" << endl;
   }
 
   Real minDt = 1.E99;
@@ -2929,10 +2935,10 @@ Real ito_plasma_stepper::compute_physics_dt(const EBCellFAB& a_E, const Vector<E
   return minDt;
 }
 
-void ito_plasma_stepper::advance_Photons(const Real a_dt){
-  CH_TIME("ito_plasma_stepper::advance_Photons(a_dt)");
+void ItoPlasmaStepper::advancePhotons(const Real a_dt){
+  CH_TIME("ItoPlasmaStepper::advancePhotons(a_dt)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::advance_advance_Photons(a_dt)" << endl;
+    pout() << "ItoPlasmaStepper::advance_advancePhotons(a_dt)" << endl;
   }
 
   for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
@@ -2966,10 +2972,10 @@ void ito_plasma_stepper::advance_Photons(const Real a_dt){
   }
 }
 
-void ito_plasma_stepper::sortPhotonsByCell(){
-  CH_TIME("ito_plasma_stepper::sortPhotonsByCell()");
+void ItoPlasmaStepper::sortPhotonsByCell(){
+  CH_TIME("ItoPlasmaStepper::sortPhotonsByCell()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::sortPhotonsByCell()" << endl;
+    pout() << "ItoPlasmaStepper::sortPhotonsByCell()" << endl;
   }
 
   for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
@@ -2977,10 +2983,10 @@ void ito_plasma_stepper::sortPhotonsByCell(){
   }
 }
 
-void ito_plasma_stepper::sortPhotonsByPatch(){
-  CH_TIME("ito_plasma_stepper::sortPhotonsByPatch()");
+void ItoPlasmaStepper::sortPhotonsByPatch(){
+  CH_TIME("ItoPlasmaStepper::sortPhotonsByPatch()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::sortPhotonsByPatch()" << endl;
+    pout() << "ItoPlasmaStepper::sortPhotonsByPatch()" << endl;
   }
 
   for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
@@ -2988,10 +2994,10 @@ void ito_plasma_stepper::sortPhotonsByPatch(){
   }
 }
 
-void ito_plasma_stepper::sortSourcePhotonsByCell(){
-  CH_TIME("ito_plasma_stepper::sortSourcePhotonsByCell()");
+void ItoPlasmaStepper::sortSourcePhotonsByCell(){
+  CH_TIME("ItoPlasmaStepper::sortSourcePhotonsByCell()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::sortSourcePhotonsByCell()" << endl;
+    pout() << "ItoPlasmaStepper::sortSourcePhotonsByCell()" << endl;
   }
   
   for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
@@ -2999,10 +3005,10 @@ void ito_plasma_stepper::sortSourcePhotonsByCell(){
   }
 }
 
-void ito_plasma_stepper::sortSourcePhotonsByPatch(){
-  CH_TIME("ito_plasma_stepper::sortSourcePhotonsByPatch()");
+void ItoPlasmaStepper::sortSourcePhotonsByPatch(){
+  CH_TIME("ItoPlasmaStepper::sortSourcePhotonsByPatch()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::sortSourcePhotonsByPatch()" << endl;
+    pout() << "ItoPlasmaStepper::sortSourcePhotonsByPatch()" << endl;
   }
 
   for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
@@ -3010,10 +3016,10 @@ void ito_plasma_stepper::sortSourcePhotonsByPatch(){
   }
 }
 
-void ito_plasma_stepper::sortBulkPhotonsByCell(){
-  CH_TIME("ito_plasma_stepper::sortBulkPhotonsByCell()");
+void ItoPlasmaStepper::sortBulkPhotonsByCell(){
+  CH_TIME("ItoPlasmaStepper::sortBulkPhotonsByCell()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::sortBulkPhotonsByCell()" << endl;
+    pout() << "ItoPlasmaStepper::sortBulkPhotonsByCell()" << endl;
   }
 
   for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
@@ -3021,10 +3027,10 @@ void ito_plasma_stepper::sortBulkPhotonsByCell(){
   }
 }
 
-void ito_plasma_stepper::sortBulkPhotonsByPatch(){
-  CH_TIME("ito_plasma_stepper::sortBulkPhotonsByPatch()");
+void ItoPlasmaStepper::sortBulkPhotonsByPatch(){
+  CH_TIME("ItoPlasmaStepper::sortBulkPhotonsByPatch()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::sortBulkPhotonsByPatch()" << endl;
+    pout() << "ItoPlasmaStepper::sortBulkPhotonsByPatch()" << endl;
   }
 
   for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
@@ -3032,10 +3038,10 @@ void ito_plasma_stepper::sortBulkPhotonsByPatch(){
   }
 }
 
-void ito_plasma_stepper::sortEbPhotonsByCell(){
-  CH_TIME("ito_plasma_stepper::sortEbPhotonsByCell()");
+void ItoPlasmaStepper::sortEbPhotonsByCell(){
+  CH_TIME("ItoPlasmaStepper::sortEbPhotonsByCell()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::sortEbPhotonsByCell()" << endl;
+    pout() << "ItoPlasmaStepper::sortEbPhotonsByCell()" << endl;
   }
 
   for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
@@ -3043,10 +3049,10 @@ void ito_plasma_stepper::sortEbPhotonsByCell(){
   }
 }
 
-void ito_plasma_stepper::sortEbPhotonsByPatch(){
-  CH_TIME("ito_plasma_stepper::sortEbPhotonsByPatch()");
+void ItoPlasmaStepper::sortEbPhotonsByPatch(){
+  CH_TIME("ItoPlasmaStepper::sortEbPhotonsByPatch()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::sortEbPhotonsByPatch()" << endl;
+    pout() << "ItoPlasmaStepper::sortEbPhotonsByPatch()" << endl;
   }
 
   for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
@@ -3054,10 +3060,10 @@ void ito_plasma_stepper::sortEbPhotonsByPatch(){
   }
 }
 
-void ito_plasma_stepper::sortDomainPhotonsByCell(){
-  CH_TIME("ito_plasma_stepper::sortDomainPhotonsByCell()");
+void ItoPlasmaStepper::sortDomainPhotonsByCell(){
+  CH_TIME("ItoPlasmaStepper::sortDomainPhotonsByCell()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::sortDomainPhotonsByCell()" << endl;
+    pout() << "ItoPlasmaStepper::sortDomainPhotonsByCell()" << endl;
   }
 
   for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
@@ -3065,10 +3071,10 @@ void ito_plasma_stepper::sortDomainPhotonsByCell(){
   }
 }
 
-void ito_plasma_stepper::sortDomainPhotonsByPatch(){
-  CH_TIME("ito_plasma_stepper::sortDomainPhotonsByPatch()");
+void ItoPlasmaStepper::sortDomainPhotonsByPatch(){
+  CH_TIME("ItoPlasmaStepper::sortDomainPhotonsByPatch()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::sortDomainPhotonsByPatch()" << endl;
+    pout() << "ItoPlasmaStepper::sortDomainPhotonsByPatch()" << endl;
   }
 
   for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
@@ -3077,7 +3083,7 @@ void ito_plasma_stepper::sortDomainPhotonsByPatch(){
 
 }
 
-bool ito_plasma_stepper::loadBalanceThisRealm(const std::string a_realm) const{
+bool ItoPlasmaStepper::loadBalanceThisRealm(const std::string a_realm) const{
   CH_TIME("TimeStepper::loadBalanceThisRealm");
   if(m_verbosity > 5){
     pout() << "TimeStepper::loadBalanceThisRealm" << endl;
@@ -3092,29 +3098,29 @@ bool ito_plasma_stepper::loadBalanceThisRealm(const std::string a_realm) const{
   return ret;
 }
 
-void ito_plasma_stepper::loadBalanceBoxes(Vector<Vector<int> >&            a_procs,
-					    Vector<Vector<Box> >&            a_boxes,
-					    const std::string                a_realm,
-					    const Vector<DisjointBoxLayout>& a_grids,
-					    const int                        a_lmin,
-					    const int                        a_finestLevel){
-  CH_TIME("ito_plasma_stepper::loadBalanceBoxes");
+void ItoPlasmaStepper::loadBalanceBoxes(Vector<Vector<int> >&            a_procs,
+					Vector<Vector<Box> >&            a_boxes,
+					const std::string                a_realm,
+					const Vector<DisjointBoxLayout>& a_grids,
+					const int                        a_lmin,
+					const int                        a_finestLevel){
+  CH_TIME("ItoPlasmaStepper::loadBalanceBoxes");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper_stepper::loadBalanceBoxes" << endl;
+    pout() << "ItoPlasmaStepper_stepper::loadBalanceBoxes" << endl;
   }
 
   if(m_LoadBalancing && a_realm == m_particleRealm){
-    this->LoadBalancing_particle_Realm(a_procs, a_boxes, a_realm, a_grids, a_lmin, a_finestLevel);
+    this->loadBalanceParticleRealm(a_procs, a_boxes, a_realm, a_grids, a_lmin, a_finestLevel);
   }
   else{
-    MayDay::Abort("ito_plasma_stepper::loadBalanceBoxes - shouldn't happen, how did you get here..?");
+    MayDay::Abort("ItoPlasmaStepper::loadBalanceBoxes - shouldn't happen, how did you get here..?");
   }
 }
 
-Vector<long int> ito_plasma_stepper::getCheckpointLoads(const std::string a_realm, const int a_level) const {
-  CH_TIME("ito_plasma_stepper::getCheckpointLoads(...)");
+Vector<long int> ItoPlasmaStepper::getCheckpointLoads(const std::string a_realm, const int a_level) const {
+  CH_TIME("ItoPlasmaStepper::getCheckpointLoads(...)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper_stepper::getCheckpointLoads(...)" << endl;
+    pout() << "ItoPlasmaStepper_stepper::getCheckpointLoads(...)" << endl;
   }
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(a_realm)[a_level];
@@ -3122,7 +3128,7 @@ Vector<long int> ito_plasma_stepper::getCheckpointLoads(const std::string a_real
 
   Vector<long int> loads(nbox, 0L);
   if(m_LoadBalancing && a_realm == m_particleRealm){
-    Vector<RefCountedPtr<ItoSolver> > lb_solvers = this->get_lb_solvers();
+    Vector<RefCountedPtr<ItoSolver> > lb_solvers = this->getLoadBalanceSolvers();
     
     for (int isolver = 0; isolver < lb_solvers.size(); isolver++){
       Vector<long int> solver_loads(nbox, 0L);
@@ -3148,15 +3154,15 @@ Vector<long int> ito_plasma_stepper::getCheckpointLoads(const std::string a_real
   return loads;
 }
 
-void ito_plasma_stepper::LoadBalancing_particle_Realm(Vector<Vector<int> >&            a_procs,
-						     Vector<Vector<Box> >&            a_boxes,
-						     const std::string                a_realm,
-						     const Vector<DisjointBoxLayout>& a_grids,
-						     const int                        a_lmin,
-						     const int                        a_finestLevel){
-  CH_TIME("ito_plasma_stepper::LoadBalancing_particle_Realm(...)");
+void ItoPlasmaStepper::loadBalanceParticleRealm(Vector<Vector<int> >&            a_procs,
+						Vector<Vector<Box> >&            a_boxes,
+						const std::string                a_realm,
+						const Vector<DisjointBoxLayout>& a_grids,
+						const int                        a_lmin,
+						const int                        a_finestLevel){
+  CH_TIME("ItoPlasmaStepper::loadBalanceParticleRealm(...)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper_stepper::LoadBalancing_particle_Realm(...)" << endl;
+    pout() << "ItoPlasmaStepper_stepper::loadBalanceParticleRealm(...)" << endl;
   }
   
   // Decompose the DisjointBoxLayout
@@ -3169,7 +3175,7 @@ void ito_plasma_stepper::LoadBalancing_particle_Realm(Vector<Vector<int> >&     
   }
 
   // Get the particles that we will use for load balancing. 
-  Vector<RefCountedPtr<ItoSolver> > lb_solvers = this->get_lb_solvers();
+  Vector<RefCountedPtr<ItoSolver> > lb_solvers = this->getLoadBalanceSolvers();
 
   // Regrid particles onto the "dummy grids" a_grids
   for (int i = 0; i < lb_solvers.size(); i++){
@@ -3205,10 +3211,10 @@ void ito_plasma_stepper::LoadBalancing_particle_Realm(Vector<Vector<int> >&     
   }
 }
 
-Vector<RefCountedPtr<ItoSolver> > ito_plasma_stepper::get_lb_solvers() const {
-  CH_TIME("ito_plasma_stepper::get_lb_solvers()");
+Vector<RefCountedPtr<ItoSolver> > ItoPlasmaStepper::getLoadBalanceSolvers() const {
+  CH_TIME("ItoPlasmaStepper::getLoadBalanceSolvers()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::get_lb_solvers()" << endl;
+    pout() << "ItoPlasmaStepper::getLoadBalanceSolvers()" << endl;
   }
 
   Vector<RefCountedPtr<ItoSolver> > lb_solvers;
@@ -3228,26 +3234,26 @@ Vector<RefCountedPtr<ItoSolver> > ito_plasma_stepper::get_lb_solvers() const {
   return lb_solvers;
 }
 
-void ito_plasma_stepper::computeElectricFielddotJ_source(const Real a_dt){
-  CH_TIME("ito_plasma_stepper::computeElectricFielddotJ_source(a_dt)");
+void ItoPlasmaStepper::computeEdotJSource(const Real a_dt){
+  CH_TIME("ItoPlasmaStepper::computeEdotJSource(a_dt)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::computeElectricFielddotJ_source(a_dt)" << endl;
+    pout() << "ItoPlasmaStepper::computeEdotJSource(a_dt)" << endl;
   }
 
   // Swap between these two. 
   if(m_nwo_reactions){
-    //    this->computeElectricFielddotJ_source_nwo();
-    this->computeElectricFielddotJ_source_nwo2(a_dt);
+    //    this->computeEdotJSourceNWO();
+    this->computeEdotJSourceNWO2(a_dt);
   }
   else{
-    this->computeElectricFielddotJ_source();
+    this->computeEdotJSource();
   }
 }
 
-void ito_plasma_stepper::computeElectricFielddotJ_source(){
-  CH_TIME("ito_plasma_stepper::computeElectricFielddotJ_source()");
+void ItoPlasmaStepper::computeEdotJSource(){
+  CH_TIME("ItoPlasmaStepper::computeEdotJSource()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::computeElectricFielddotJ_source()" << endl;
+    pout() << "ItoPlasmaStepper::computeEdotJSource()" << endl;
   }
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -3289,10 +3295,10 @@ void ito_plasma_stepper::computeElectricFielddotJ_source(){
   }
 }
 
-void ito_plasma_stepper::computeElectricFielddotJ_source_nwo(){
-  CH_TIME("ito_plasma_stepper::computeElectricFielddotJ_source_nwo()");
+void ItoPlasmaStepper::computeEdotJSourceNWO(){
+  CH_TIME("ItoPlasmaStepper::computeEdotJSourceNWO()");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::computeElectricFielddotJ_source_nwo()" << endl;
+    pout() << "ItoPlasmaStepper::computeEdotJSourceNWO()" << endl;
   }
 
   DataOps::setValue(m_EdotJ, 0.0);
@@ -3335,10 +3341,10 @@ void ito_plasma_stepper::computeElectricFielddotJ_source_nwo(){
   }
 }
 
-void ito_plasma_stepper::computeElectricFielddotJ_source_nwo2(const Real a_dt){
-  CH_TIME("ito_plasma_stepper::computeElectricFielddotJ_source_nwo2(a_dt)");
+void ItoPlasmaStepper::computeEdotJSourceNWO2(const Real a_dt){
+  CH_TIME("ItoPlasmaStepper::computeEdotJSourceNWO2(a_dt)");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_stepper::computeElectricFielddotJ_source_nwo2(a_dt)" << endl;
+    pout() << "ItoPlasmaStepper::computeEdotJSourceNWO2(a_dt)" << endl;
   }
 
   DataOps::setValue(m_EdotJ, 0.0);
@@ -3415,4 +3421,5 @@ void ito_plasma_stepper::computeElectricFielddotJ_source_nwo2(const Real a_dt){
     }
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

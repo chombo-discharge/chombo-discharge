@@ -48,7 +48,7 @@ int main(int argc, char* argv[]){
 
   // Set up physics 
   RefCountedPtr<ItoPlasmaPhysics> physics      = RefCountedPtr<ItoPlasmaPhysics> (new ito_plasma_air3());
-  RefCountedPtr<ito_plasma_stepper> timestepper  = RefCountedPtr<ito_plasma_stepper> (new ito_plasma_godunov(physics));
+  RefCountedPtr<ItoPlasmaStepper> timestepper  = RefCountedPtr<ItoPlasmaStepper> (new ito_plasma_godunov(physics));
   RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (new ito_plasma_streamer_tagger(physics, timestepper, amr, compgeom));
 
   // Create solver factories
@@ -63,7 +63,7 @@ int main(int argc, char* argv[]){
 
   // Send solvers to TimeStepper 
   timestepper->setFieldSolver(poi);
-  timestepper->set_ito(cdr);
+  timestepper->setIto(cdr);
   timestepper->setRadiativeTransferSolvers(rte);
 
   // Set potential 

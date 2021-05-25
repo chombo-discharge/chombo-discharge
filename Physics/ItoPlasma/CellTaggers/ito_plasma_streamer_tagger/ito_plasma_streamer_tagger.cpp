@@ -25,7 +25,7 @@ ito_plasma_streamer_tagger::~ito_plasma_streamer_tagger(){
 }
 
 ito_plasma_streamer_tagger::ito_plasma_streamer_tagger(const RefCountedPtr<ItoPlasmaPhysics>&     a_physics,
-						       const RefCountedPtr<ito_plasma_stepper>&     a_timeStepper,
+						       const RefCountedPtr<ItoPlasmaStepper>&     a_timeStepper,
 						       const RefCountedPtr<AmrMesh>&               a_amr,
 						       const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry) : ito_plasma_streamer_tagger() {
   this->define(a_physics, a_timeStepper, a_amr, a_computationalGeometry);

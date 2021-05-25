@@ -1,5 +1,5 @@
 /*!
-  @file   ito_plasma_stepper.H
+  @file   ItoPlasmaStepper.H
   @author Robert Marskar
   @date   May 2020
   @brief  Abstract class for integrating the Ito plasma equations
@@ -8,14 +8,14 @@
 #ifndef _ITO_PLASMA_GODUNOV_
 #define _ITO_PLASMA_GODUNOV_
 
-#include "ito_plasma_stepper.H"
+#include <CD_ItoPlasmaStepper.H>
 #include "godunov_particle.H"
 
 #include "CD_NamespaceHeader.H"
 namespace Physics {
   namespace ItoPlasma {
 
-    class ito_plasma_godunov : public ito_plasma_stepper {
+    class ito_plasma_godunov : public ItoPlasmaStepper {
     public:
 
       // Ctor and dtor
@@ -87,9 +87,9 @@ namespace Physics {
 
       // Global routines
       void set_old_positions();
-      void remap_godunov_particles(Vector<ParticleContainer<godunov_particle>* >& a_particles, const which_particles a_which);
-      void deposit_godunov_particles(const Vector<ParticleContainer<godunov_particle>* >& a_particles, const which_particles a_which);
-      void clear_godunov_particles(const Vector<ParticleContainer<godunov_particle>* >& a_particles, const which_particles a_which);
+      void remap_godunov_particles(Vector<ParticleContainer<godunov_particle>* >& a_particles, const WhichParticles a_which);
+      void deposit_godunov_particles(const Vector<ParticleContainer<godunov_particle>* >& a_particles, const WhichParticles a_which);
+      void clear_godunov_particles(const Vector<ParticleContainer<godunov_particle>* >& a_particles, const WhichParticles a_which);
 
       // Routines for semi-implicit Poisson solution
       void compute_all_conductivities(const Vector<ParticleContainer<godunov_particle>* >& a_particles);

@@ -10,7 +10,7 @@
 #define _ITO_PLASMA_TAGGER_
 
 #include "CD_CellTagger.H"
-#include "ito_plasma_stepper.H"
+#include <CD_ItoPlasmaStepper.H>
 #include <CD_ItoPlasmaPhysics.H>
 
 #include "CD_NamespaceHeader.H"
@@ -32,7 +32,7 @@ namespace Physics {
 	@brief Full constructor
       */
       ito_plasma_tagger(const RefCountedPtr<ItoPlasmaPhysics>&     a_physics,
-			const RefCountedPtr<ito_plasma_stepper>&     a_timeStepper,
+			const RefCountedPtr<ItoPlasmaStepper>&     a_timeStepper,
 			const RefCountedPtr<AmrMesh>&               a_amr,
 			const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
 
@@ -49,7 +49,7 @@ namespace Physics {
 	@param[in] a_computationalGeometry    Computational geometry
       */
       virtual void define(const RefCountedPtr<ItoPlasmaPhysics>&     a_physics,
-			  const RefCountedPtr<ito_plasma_stepper>&     a_timeStepper,
+			  const RefCountedPtr<ItoPlasmaStepper>&     a_timeStepper,
 			  const RefCountedPtr<AmrMesh>&               a_amr,
 			  const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
 
@@ -119,7 +119,7 @@ namespace Physics {
       /*!
 	@brief Time stepper
       */
-      RefCountedPtr<ito_plasma_stepper> m_timeStepper;
+      RefCountedPtr<ItoPlasmaStepper> m_timeStepper;
 
       /*!
 	@brief AmrMesh. Needed for computing tracer stuff

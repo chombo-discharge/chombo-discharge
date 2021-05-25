@@ -1,16 +1,22 @@
+/* chombo-discharge
+ * Copyright © 2021 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+ */
+
 /*!
-  @file   ito_plasma_stepper.H
+  @file   CD_ItoPlasmaStepper.H
   @author Robert Marskar
-  @date   May 2020
   @brief  Abstract class for integrating the Ito plasma equations
 */
 
-#ifndef _ITO_PLASMA_STEPPER_
-#define _ITO_PLASMA_STEPPER_
+#ifndef CD_ItoPlasmaStepper_H
+#define  CD_ItoPlasmaStepper_H
 
+// Std includes
 #include <functional>
 
-#include "CD_TimeStepper.H"
+// Our includes
+#include <CD_TimeStepper.H>
 #include <CD_ItoPlasmaPhysics.H>
 #include <CD_ItoLayout.H>
 #include <CD_PointParticle.H>
@@ -18,14 +24,13 @@
 #include <CD_McPhoto.H>
 #include "CD_FieldSolver.H"
 #include "CD_SigmaSolver.H"
-
-#include "CD_NamespaceHeader.H"
+#include <CD_NamespaceHeader.H>
 
 namespace Physics {
   namespace ItoPlasma {
 
     // Differentiation between particles. 
-    enum class which_particles {
+    enum class WhichParticles {
       all,
       all_mobile,
       all_diffusive,
@@ -36,15 +41,15 @@ namespace Physics {
       stationary,
     };
 
-    class ito_plasma_stepper : public TimeStepper {
+    class ItoPlasmaStepper : public TimeStepper {
     public:
 
       static Real s_constant_one(const RealVect a_pos);
 
       // Ctor and dtor
-      ito_plasma_stepper();
-      ito_plasma_stepper(RefCountedPtr<ItoPlasmaPhysics>& a_physics);
-      ~ito_plasma_stepper();
+      ItoPlasmaStepper();
+      ItoPlasmaStepper(RefCountedPtr<ItoPlasmaPhysics>& a_physics);
+      ~ItoPlasmaStepper();
 
       // Setup routines
       virtual void parseOptions() = 0;
@@ -55,10 +60,10 @@ namespace Physics {
       virtual void initialData() override;
       virtual void initialSigma();
       virtual void postCheckpointSetup() override;
-      virtual void post_checkpoint_poisson();
+      virtual void postCheckpointPoisson();
       virtual void postInitialize() override;
       
-      void setup_ito();
+      void setupIto();
       void setupPoisson();
       void setupRadiativeTransfer();
       void setupSigma();
@@ -68,7 +73,7 @@ namespace Physics {
       void readCheckpointData(HDF5Handle& a_handle, const int a_lvl) override;
       virtual void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const override;
       void writeJ(EBAMRCellData& a_output, int& a_icomp) const;
-      void write_num_particles_per_patch(EBAMRCellData& a_output, int& a_icomp) const;
+      void writeNumParticlesPerPatch(EBAMRCellData& a_output, int& a_icomp) const;
       int  getNumberOfPlotVariables() const override;
       Vector<long int> getCheckpointLoads(const std::string a_realm, const int a_level) const override;
   
@@ -88,40 +93,40 @@ namespace Physics {
       void postRegrid() override;
       bool loadBalanceThisRealm(const std::string a_realm) const override;
       void loadBalanceBoxes(Vector<Vector<int> >&            a_procs,
-			      Vector<Vector<Box> >&            a_boxes,
-			      const std::string                a_realm,
-			      const Vector<DisjointBoxLayout>& a_grids,
-			      const int                        a_lmin,
-			      const int                        a_finestLevel) override;
+			    Vector<Vector<Box> >&            a_boxes,
+			    const std::string                a_realm,
+			    const Vector<DisjointBoxLayout>& a_grids,
+			    const int                        a_lmin,
+			    const int                        a_finestLevel) override;
 
 
       // Particle handling routines.
-      void intersectParticles(const which_particles a_which, const EbRepresentation a_representation, const bool a_delete);
-      void intersectParticles(const which_particles a_which,
-			       const ItoSolver::WhichContainer a_particles,
-			       const ItoSolver::WhichContainer a_eb_particles,
-			       const ItoSolver::WhichContainer a_domain_particles,
-			       const EbRepresentation           a_representation,
-			       const bool                        a_delete);
+      void intersectParticles(const WhichParticles a_which, const EbRepresentation a_representation, const bool a_delete);
+      void intersectParticles(const WhichParticles a_which,
+			      const ItoSolver::WhichContainer a_particles,
+			      const ItoSolver::WhichContainer a_eb_particles,
+			      const ItoSolver::WhichContainer a_domain_particles,
+			      const EbRepresentation           a_representation,
+			      const bool                        a_delete);
 			       
-      void removeCoveredParticles(const which_particles a_which, const EbRepresentation a_representation, const Real a_tolerance);
-      void removeCoveredParticles(const which_particles             a_which,
-				    const ItoSolver::WhichContainer a_container,
+      void removeCoveredParticles(const WhichParticles a_which, const EbRepresentation a_representation, const Real a_tolerance);
+      void removeCoveredParticles(const WhichParticles             a_which,
+				  const ItoSolver::WhichContainer a_container,
+				  const EbRepresentation           a_representation,
+				  const Real                        a_tolerance);
+
+      void transferCoveredParticles(const WhichParticles a_which, const EbRepresentation a_representation, const Real a_tolerance);
+      void transferCoveredParticles(const WhichParticles             a_which,
+				    const ItoSolver::WhichContainer a_containerFrom,
+				    const ItoSolver::WhichContainer a_containerTo,
 				    const EbRepresentation           a_representation,
 				    const Real                        a_tolerance);
-
-      void transferCoveredParticles(const which_particles a_which, const EbRepresentation a_representation, const Real a_tolerance);
-      void transferCoveredParticles(const which_particles             a_which,
-				      const ItoSolver::WhichContainer a_containerFrom,
-				      const ItoSolver::WhichContainer a_containerTo,
-				      const EbRepresentation           a_representation,
-				      const Real                        a_tolerance);
 
       // Internal routines
       void setVerbosity(const int a_verbosity);
 
       // Set routines
-      void set_ito(RefCountedPtr<ItoLayout<ItoSolver> >& a_cdr);
+      void setIto(RefCountedPtr<ItoLayout<ItoSolver> >& a_cdr);
       void setFieldSolver(RefCountedPtr<FieldSolver>& a_poisson);
       void setRadiativeTransferSolvers(RefCountedPtr<RtLayout<McPhoto> >& a_rte);
       void setVoltage(const std::function<Real(const Real a_time)>& a_potential);
@@ -143,8 +148,8 @@ namespace Physics {
       void computeSpaceChargeDensity(MFAMRCellData& a_rho, const Vector<EBAMRCellData*>&  a_densities);
 
       // Compute conductivity routines
-      void compute_conductivity(EBAMRCellData& a_conductivity);
-      void compute_conductivity(EBAMRCellData& a_conductivity, const Vector<ParticleContainer<ItoParticle>* >& a_particles);
+      void computeConductivity(EBAMRCellData& a_conductivity);
+      void computeConductivity(EBAMRCellData& a_conductivity, const Vector<ParticleContainer<ItoParticle>* >& a_particles);
 
       // Compute J routines
       void computeJ(EBAMRCellData& a_J, const Real a_dt);
@@ -157,158 +162,158 @@ namespace Physics {
       // Poisson-solving routines
       bool solvePoisson();
       bool solvePoisson(MFAMRCellData&                 a_potential,
-			 MFAMRCellData&                 a_rhs,
-			 const Vector<EBAMRCellData* >& a_densities,
-			 const EBAMRIVData&             a_sigma);
+			MFAMRCellData&                 a_rhs,
+			const Vector<EBAMRCellData* >& a_densities,
+			const EBAMRIVData&             a_sigma);
 
       // Remap and deposition routines for solver subsets.
-      void depositParticles(const which_particles a_which_particles);
-      void depositParticles(const which_particles a_which_particles, const ItoSolver::WhichContainer a_container);
-      void remap_particles(const which_particles a_which_particles);
-      void remap_particles(const which_particles a_which_particles, const ItoSolver::WhichContainer a_container);
+      void depositParticles(const WhichParticles a_WhichParticles);
+      void depositParticles(const WhichParticles a_WhichParticles, const ItoSolver::WhichContainer a_container);
+      void remapParticles(const WhichParticles a_WhichParticles);
+      void remapParticles(const WhichParticles a_WhichParticles, const ItoSolver::WhichContainer a_container);
 
       // This sets the velocity function for each species. This is sgn(charge)*E
-      void set_ito_velocity_funcs();
+      void setItoVelocityFunctions();
 
       // Routines for computing velocities and diffusion coefficients
-      void compute_ito_velocities();
-      void compute_ito_diffusion();
+      void computeItoVelocities();
+      void computeItoDiffusion();
 
       // Routines for computing mobilities in the LFA. This computes mesh-defined mobilities and interpolates them to the particle positions
       void computeItoMobilitiesLFA();
       void computeItoMobilitiesLFA(Vector<EBAMRCellData*>& a_meshMobilities, const EBAMRCellData& a_E, const Real a_time);
       void computeItoMobilitiesLFA(Vector<LevelData<EBCellFAB>* >& a_meshMobilities,
-				      const LevelData<EBCellFAB>&     a_E,
-				      const int                       a_level,
-				      const Real                      a_time);
+				   const LevelData<EBCellFAB>&     a_E,
+				   const int                       a_level,
+				   const Real                      a_time);
       void computeItoMobilitiesLFA(Vector<EBCellFAB*>& a_meshMobilities,
-				      const EBCellFAB&    a_E,
-				      const int           a_level,
-				      const DataIndex     a_dit,
-				      const Box           a_box,
-				      const Real          a_time);
+				   const EBCellFAB&    a_E,
+				   const int           a_level,
+				   const DataIndex     a_dit,
+				   const Box           a_box,
+				   const Real          a_time);
 
       // Routines for computing mobilities in the LEA. This runs through all the particles and calls a mobility computation function,
       // which you must implement in ItoSpecies
-      void compute_ito_mobilities_lea();
-      void compute_ito_mobilities_lea(Vector<ParticleContainer<ItoParticle>* >& a_particles);
-      void compute_ito_mobilities_lea(Vector<ParticleData<ItoParticle>* >& a_particles);
+      void computeItoMobilitiesLEA();
+      void computeItoMobilitiesLEA(Vector<ParticleContainer<ItoParticle>* >& a_particles);
+      void computeItoMobilitiesLEA(Vector<ParticleData<ItoParticle>* >& a_particles);
 
       // Routines for computing diffusion coefficients.
       // These routines compute the diffusion coefficients by computing D(E)
       // as a mesh variable, and then interpolating that to the particle position. 
       void computeItoDiffusionLFA();
       void computeItoDiffusionLFA(Vector<EBAMRCellData*>&       a_diffusionCoefficient,
-				     const Vector<EBAMRCellData*>& a_densities,
-				     const EBAMRCellData&          a_E,
-				     const Real                    a_time);
+				  const Vector<EBAMRCellData*>& a_densities,
+				  const EBAMRCellData&          a_E,
+				  const Real                    a_time);
       void computeItoDiffusionLFA(Vector<LevelData<EBCellFAB>* >&       a_diffusionCoefficient,
-				     const Vector<LevelData<EBCellFAB>* >& a_densities,
-				     const LevelData<EBCellFAB>&           a_E,
-				     const int                             a_level,
-				     const Real                            a_time);
+				  const Vector<LevelData<EBCellFAB>* >& a_densities,
+				  const LevelData<EBCellFAB>&           a_E,
+				  const int                             a_level,
+				  const Real                            a_time);
       void computeItoDiffusionLFA(Vector<EBCellFAB*>&       a_diffusionCoefficient,
-				     const Vector<EBCellFAB*>& a_densities,
-				     const EBCellFAB&          a_E,
-				     const int                 a_level,
-				     const DataIndex           a_dit,
-				     const Box                 a_box,
-				     const Real                a_time);
+				  const Vector<EBCellFAB*>& a_densities,
+				  const EBCellFAB&          a_E,
+				  const int                 a_level,
+				  const DataIndex           a_dit,
+				  const Box                 a_box,
+				  const Real                a_time);
 
       // Routines for computing diffusion coefficients in the LEA
-      void compute_ito_diffusion_lea();
+      void computeItoDiffusion_lea();
 
       // Routines for computing the number of particles per cell. This is done on the particle Realm. 
-      void compute_reactive_particles_per_cell(EBAMRCellData& a_ppc);
-      void compute_reactive_particles_per_cell(LevelData<EBCellFAB>& a_ppc, const int a_level);
-      void compute_reactive_particles_per_cell(EBCellFAB& a_ppc, const int a_level, const DataIndex a_dit, const Box a_box, const EBISBox& a_ebisbox);
+      void computeReactiveParticlesPerCell(EBAMRCellData& a_ppc);
+      void computeReactiveParticlesPerCell(LevelData<EBCellFAB>& a_ppc, const int a_level);
+      void computeReactiveParticlesPerCell(EBCellFAB& a_ppc, const int a_level, const DataIndex a_dit, const Box a_box, const EBISBox& a_ebisbox);
 
       // Routines for computing the mean energy of the particles in grid cells
-      void compute_reactive_mean_energies_per_cell(EBAMRCellData& a_mean_energies);
-      void compute_reactive_mean_energies_per_cell(LevelData<EBCellFAB>& a_mean_energies, const int a_level);
-      void compute_reactive_mean_energies_per_cell(EBCellFAB& a_mean_energies, const int a_level, const DataIndex a_dit, const Box a_box, const EBISBox& a_ebisbox);
+      void computeReactiveMeanEnergiesPerCell(EBAMRCellData& a_mean_energies);
+      void computeReactiveMeanEnergiesPerCell(LevelData<EBCellFAB>& a_mean_energies, const int a_level);
+      void computeReactiveMeanEnergiesPerCell(EBCellFAB& a_mean_energies, const int a_level, const DataIndex a_dit, const Box a_box, const EBISBox& a_ebisbox);
 
       // New routines for chemistry advances. 
-      void advanceReactionNetwork_nwo(const Real a_dt);
-      void advanceReactionNetwork_nwo(const EBAMRCellData& a_E, const EBAMRCellData& a_EdotJ, const Real a_dt);
-      void advanceReactionNetwork_nwo(LevelData<EBCellFAB>&       a_ppc,
-					LevelData<EBCellFAB>&       a_ypc,
-					LevelData<EBCellFAB>&       a_mean_energies,
-					const LevelData<EBCellFAB>& a_E,
-					const LevelData<EBCellFAB>& a_EdotJ,
-					const int                   a_level,
-					const Real                  a_dt);
-      void advanceReactionNetwork_nwo(EBCellFAB&       a_particlesPerCell,
-					EBCellFAB&       a_newPhotonsPerCell,
-					EBCellFAB&       a_meanParticleEnergies,
-					const EBCellFAB& a_E,
-					const EBCellFAB& a_EdotJ,
-					const int        a_level,
-					const DataIndex  a_dit,
-					const Box        a_box,
-					const Real       a_dx,
-					const Real       a_dt);
+      void advanceReactionNetworkNWO(const Real a_dt);
+      void advanceReactionNetworkNWO(const EBAMRCellData& a_E, const EBAMRCellData& a_EdotJ, const Real a_dt);
+      void advanceReactionNetworkNWO(LevelData<EBCellFAB>&       a_ppc,
+				     LevelData<EBCellFAB>&       a_ypc,
+				     LevelData<EBCellFAB>&       a_mean_energies,
+				     const LevelData<EBCellFAB>& a_E,
+				     const LevelData<EBCellFAB>& a_EdotJ,
+				     const int                   a_level,
+				     const Real                  a_dt);
+      void advanceReactionNetworkNWO(EBCellFAB&       a_particlesPerCell,
+				     EBCellFAB&       a_newPhotonsPerCell,
+				     EBCellFAB&       a_meanParticleEnergies,
+				     const EBCellFAB& a_E,
+				     const EBCellFAB& a_EdotJ,
+				     const int        a_level,
+				     const DataIndex  a_dit,
+				     const Box        a_box,
+				     const Real       a_dx,
+				     const Real       a_dt);
 
       // Routines for reconciling particles. 
       void reconcileParticles(const EBAMRCellData& a_newParticlesPerCell,
-			       const EBAMRCellData& a_oldParticlesPerCell,
-			       const EBAMRCellData& a_meanParticleEnergies,
-			       const EBAMRCellData& a_newPhotonsPerCell);
+			      const EBAMRCellData& a_oldParticlesPerCell,
+			      const EBAMRCellData& a_meanParticleEnergies,
+			      const EBAMRCellData& a_newPhotonsPerCell);
       void reconcileParticles(const LevelData<EBCellFAB>& a_newParticlesPerCell,
-			       const LevelData<EBCellFAB>& a_oldParticlesPerCell,
-			       const LevelData<EBCellFAB>& a_meanParticleEnergies,
-			       const LevelData<EBCellFAB>& a_newPhotonsPerCell,
-			       const int                   a_level);
+			      const LevelData<EBCellFAB>& a_oldParticlesPerCell,
+			      const LevelData<EBCellFAB>& a_meanParticleEnergies,
+			      const LevelData<EBCellFAB>& a_newPhotonsPerCell,
+			      const int                   a_level);
       void reconcileParticles(const EBCellFAB& a_newParticlesPerCell,
-			       const EBCellFAB& a_oldParticlesPerCell,
-			       const EBCellFAB& a_meanParticleEnergies,
-			       const EBCellFAB& a_newPhotonsPerCell,
-			       const int        a_level,
-			       const DataIndex  a_dit,
-			       const Box        a_box,
-			       const Real       a_dx);
+			      const EBCellFAB& a_oldParticlesPerCell,
+			      const EBCellFAB& a_meanParticleEnergies,
+			      const EBCellFAB& a_newPhotonsPerCell,
+			      const int        a_level,
+			      const DataIndex  a_dit,
+			      const Box        a_box,
+			      const Real       a_dx);
 
 
       // Old routines for chemistry advances. The physics module will switch between LFA and LEA.
       void advanceReactionNetwork(const Real a_dt);
       void advanceReactionNetwork(Vector<ParticleContainer<ItoParticle>* >& a_particles,
-				    Vector<ParticleContainer<Photon>* >&       a_Photons,
-				    Vector<ParticleContainer<Photon>* >&       a_newPhotons,
-				    const Vector<EBAMRCellData>&                a_sources,
-				    const EBAMRCellData&                        a_E,
-				    const Real                                  a_dt);
+				  Vector<ParticleContainer<Photon>* >&       a_Photons,
+				  Vector<ParticleContainer<Photon>* >&       a_newPhotons,
+				  const Vector<EBAMRCellData>&                a_sources,
+				  const EBAMRCellData&                        a_E,
+				  const Real                                  a_dt);
       void advanceReactionNetwork(Vector<AMRCellParticles<ItoParticle>* >& a_particles,
-				    Vector<AMRCellParticles<Photon>* >&       a_Photons,
-				    Vector<AMRCellParticles<Photon>* >&       a_newPhotons,
-				    const Vector<EBAMRCellData>&              a_sources,
-				    const EBAMRCellData&                      a_E,
-				    const Real                                a_dt);
+				  Vector<AMRCellParticles<Photon>* >&       a_Photons,
+				  Vector<AMRCellParticles<Photon>* >&       a_newPhotons,
+				  const Vector<EBAMRCellData>&              a_sources,
+				  const EBAMRCellData&                      a_E,
+				  const Real                                a_dt);
       void advanceReactionNetwork(Vector<LayoutData<BinFab<ItoParticle> >* >& a_particles,
-				    Vector<LayoutData<BinFab<Photon> >* >&       a_Photons,
-				    Vector<LayoutData<BinFab<Photon> >* >&       a_newPhotons,
-				    const Vector<LevelData<EBCellFAB>* >&        a_sources,
-				    const LevelData<EBCellFAB>&                  a_E,
-				    const int                                    a_lvl,
-				    const Real                                   a_dt);
+				  Vector<LayoutData<BinFab<Photon> >* >&       a_Photons,
+				  Vector<LayoutData<BinFab<Photon> >* >&       a_newPhotons,
+				  const Vector<LevelData<EBCellFAB>* >&        a_sources,
+				  const LevelData<EBCellFAB>&                  a_E,
+				  const int                                    a_lvl,
+				  const Real                                   a_dt);
       void advanceReactionNetwork(Vector<BinFab<ItoParticle>* >& a_particles,
-				    Vector<BinFab<Photon>* >&       a_Photons,
-				    Vector<BinFab<Photon>* >&       a_newPhotons,
-				    const Vector<EBCellFAB*>&       a_sources,
-				    const EBCellFAB&                a_E,
-				    const int                       a_lvl,
-				    const DataIndex                 a_dit,
-				    const Box                       a_box,
-				    const Real                      a_dx,
-				    const Real                      a_dt);
+				  Vector<BinFab<Photon>* >&       a_Photons,
+				  Vector<BinFab<Photon>* >&       a_newPhotons,
+				  const Vector<EBCellFAB*>&       a_sources,
+				  const EBCellFAB&                a_E,
+				  const int                       a_lvl,
+				  const DataIndex                 a_dit,
+				  const Box                       a_box,
+				  const Real                      a_dx,
+				  const Real                      a_dt);
 
       // Compute dt routines
-      Real compute_physics_dt() const;
-      Real compute_physics_dt(const EBAMRCellData& a_E, const Vector<EBAMRCellData*> a_densities) const;
-      Real compute_physics_dt(const LevelData<EBCellFAB>& a_E, const Vector<LevelData<EBCellFAB> *> a_densities, const int a_level) const;
-      Real compute_physics_dt(const EBCellFAB& a_E, const Vector<EBCellFAB*> a_densities, const int a_level, const DataIndex a_dit, const Box a_box) const;
+      Real computePhysicsDt() const;
+      Real computePhysicsDt(const EBAMRCellData& a_E, const Vector<EBAMRCellData*> a_densities) const;
+      Real computePhysicsDt(const LevelData<EBCellFAB>& a_E, const Vector<LevelData<EBCellFAB> *> a_densities, const int a_level) const;
+      Real computePhysicsDt(const EBCellFAB& a_E, const Vector<EBCellFAB*> a_densities, const int a_level, const DataIndex a_dit, const Box a_box) const;
 
       // Routines for advancing Photons
-      void advance_Photons(const Real a_dt);
+      void advancePhotons(const Real a_dt);
 
       // Routines for sorting particles. These routines are here because RtLayout is general for RtSolver, and I'm too
       // lazy to write an McPhoto_layout. So here you go. 
@@ -324,10 +329,10 @@ namespace Physics {
       void sortDomainPhotonsByPatch();
 
       // Routines for computing EdotJ per species, including the diffusive contribution. a_source is defined on the particle Realm.
-      void computeElectricFielddotJ_source(const Real a_dt);
-      void computeElectricFielddotJ_source();
-      void computeElectricFielddotJ_source_nwo();
-      void computeElectricFielddotJ_source_nwo2(const Real a_dt);
+      void computeEdotJSource(const Real a_dt);
+      void computeEdotJSource();
+      void computeEdotJSourceNWO();
+      void computeEdotJSourceNWO2(const Real a_dt);
 
 
     protected:
@@ -395,29 +400,31 @@ namespace Physics {
       EBAMRCellData m_EdotJ;
 
       // For parsing filters
-      void parse_filters();
+      void parseFilters();
 
       // Set the particle buffers
-      void set_particle_buffers();
+      void setParticleBuffers();
 
       // Diagnostics tool
-      void get_particle_statistics(Real& a_avg, Real& a_sigma, size_t& a_minParticles, size_t& a_maxParticles, int& a_minRank, int& a_maxRank);
-      void print_timer_head();
-      void print_timer_diagnostics(Real& a_timer, const std::string a_prefix); // Timer should be in percentage 
-      void print_timer_tail();
+      void getParticleStatistics(Real& a_avg, Real& a_sigma, size_t& a_minParticles, size_t& a_maxParticles, int& a_minRank, int& a_maxRank);
+      void printTimerHead();
+      void printTimerDiagnostics(Real& a_timer, const std::string a_prefix); // Timer should be in percentage 
+      void printTimerTail();
 
 
       // Do load balancing of the particle Realm. 
-      void LoadBalancing_particle_Realm(Vector<Vector<int> >&            a_procs,
-				       Vector<Vector<Box> >&            a_boxes,
-				       const std::string                a_realm,
-				       const Vector<DisjointBoxLayout>& a_grids,
-				       const int                        a_lmin,
-				       const int                        a_finestLevel);
+      void loadBalanceParticleRealm(Vector<Vector<int> >&            a_procs,
+				    Vector<Vector<Box> >&            a_boxes,
+				    const std::string                a_realm,
+				    const Vector<DisjointBoxLayout>& a_grids,
+				    const int                        a_lmin,
+				    const int                        a_finestLevel);
       
-      Vector<RefCountedPtr<ItoSolver> > get_lb_solvers() const;
+      Vector<RefCountedPtr<ItoSolver> > getLoadBalanceSolvers() const;
     };
   }
 };
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif
