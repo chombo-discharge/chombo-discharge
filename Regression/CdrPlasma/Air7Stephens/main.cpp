@@ -6,7 +6,7 @@
 #include <CD_CdrGodunov.H>
 #include <CD_RtLayoutImplem.H>
 #include <CD_McPhoto.H>
-#include "air7_stephens.H"
+#include <CD_CdrPlasmaAir7Stephens.H>
 #include <CD_RodDielectric.H>
 #include <CD_CdrPlasmaGodunovStepper.H>
 #include <CD_CdrPlasmaStreamerTagger.H>
@@ -46,7 +46,7 @@ int main(int argc, char* argv[]){
   RefCountedPtr<GeoCoarsener> geocoarsen        = RefCountedPtr<GeoCoarsener> (new GeoCoarsener());
 
   // Set up physics 
-  RefCountedPtr<CdrPlasmaPhysics> physics      = RefCountedPtr<CdrPlasmaPhysics> (new air7_stephens());
+  RefCountedPtr<CdrPlasmaPhysics> physics      = RefCountedPtr<CdrPlasmaPhysics> (new CdrPlasmaAir7Stephens());
   RefCountedPtr<CdrPlasmaStepper> timestepper  = RefCountedPtr<CdrPlasmaStepper> (new CdrPlasmaGodunovStepper(physics));
   RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (new CdrPlasmaStreamerTagger(physics, timestepper, amr, compgeom));
 

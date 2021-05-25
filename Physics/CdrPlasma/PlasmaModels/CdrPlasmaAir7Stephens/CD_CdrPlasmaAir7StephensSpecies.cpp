@@ -1,22 +1,31 @@
+/* chombo-discharge
+ * Copyright © 2021 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+ */
+
 /*!
-  @file air_stephens_species.H
+  @file   CD_CdrPlasmaAir7StephensSpecies.H
+  @brief  Implementation of CD_CdrPlasmaAir7StephensSpecies.cpp 
+  @author Robert Marskar
 */
 
-#include "air7_stephens.H"
-#include "air7_stephens_species.H"
-#include <CD_Units.H>
-
-#include "ParmParse.H"
-
+// Std includes
 #include <chrono>
 
-#include "CD_NamespaceHeader.H"
+// Chombo includes
+#include <ParmParse.H>
+
+#include <CD_CdrPlasmaAir7Stephens.H>
+#include <CD_CdrPlasmaAir7StephensSpecies.H>
+#include <CD_Units.H>
+#include <CD_NamespaceHeader.H>
+
 using namespace Physics::CdrPlasma;
 
-air7_stephens::electron::electron(){
-  m_name = "electron";
+CdrPlasmaAir7Stephens::Electron::Electron(){
+  m_name = "Electron";
   m_chargeNumber = -1;
-  ParmParse pp("air7_stephens");
+  ParmParse pp("CdrPlasmaAir7Stephens");
   std::string str;
   Vector<Real> vec(SpaceDim);
   
@@ -29,10 +38,10 @@ air7_stephens::electron::electron(){
   pp.getarr("seed_position", vec, 0, SpaceDim); m_seed_pos=RealVect(D_DECL(vec[0], vec[1], vec[2]));
 }
 
-air7_stephens::N2plus::N2plus(){
+CdrPlasmaAir7Stephens::N2plus::N2plus(){
   m_name = "N2plus";
   m_chargeNumber = 1;
-  ParmParse pp("air7_stephens");
+  ParmParse pp("CdrPlasmaAir7Stephens");
   std::string str;
   Vector<Real> vec(SpaceDim);
   
@@ -46,10 +55,10 @@ air7_stephens::N2plus::N2plus(){
   pp.getarr("seed_position", vec, 0, SpaceDim); m_seed_pos=RealVect(D_DECL(vec[0], vec[1], vec[2]));
 }
 
-air7_stephens::O2plus::O2plus(){
+CdrPlasmaAir7Stephens::O2plus::O2plus(){
   m_name = "O2plus";
   m_chargeNumber = 1;
-  ParmParse pp("air7_stephens");
+  ParmParse pp("CdrPlasmaAir7Stephens");
   std::string str;
   Vector<Real> vec(SpaceDim);
   
@@ -63,66 +72,66 @@ air7_stephens::O2plus::O2plus(){
   pp.getarr("seed_position", vec, 0, SpaceDim); m_seed_pos=RealVect(D_DECL(vec[0], vec[1], vec[2]));
 }
 
-air7_stephens::N4plus::N4plus(){
+CdrPlasmaAir7Stephens::N4plus::N4plus(){
   m_name = "N4plus";
   m_chargeNumber = 1;
-  ParmParse pp("air7_stephens");
+  ParmParse pp("CdrPlasmaAir7Stephens");
   std::string str;
   
   pp.get("mobile_ions", str);    m_isMobile    = (str == "true") ? true : false;
   pp.get("diffusive_ions", str); m_isDiffusive = (str == "true") ? true : false;
 }
 
-air7_stephens::O4plus::O4plus(){
+CdrPlasmaAir7Stephens::O4plus::O4plus(){
   m_name = "O4plus";
   m_chargeNumber = 1;
-  ParmParse pp("air7_stephens");
+  ParmParse pp("CdrPlasmaAir7Stephens");
   std::string str;
   
   pp.get("mobile_ions", str);    m_isMobile    = (str == "true") ? true : false;
   pp.get("diffusive_ions", str); m_isDiffusive = (str == "true") ? true : false;
 }
 
-air7_stephens::O2plusN2::O2plusN2(){
+CdrPlasmaAir7Stephens::O2plusN2::O2plusN2(){
   m_name = "O2plusN2";
   m_chargeNumber = 1;
-  ParmParse pp("air7_stephens");
+  ParmParse pp("CdrPlasmaAir7Stephens");
   std::string str;
   
   pp.get("mobile_ions", str);    m_isMobile    = (str == "true") ? true : false;
   pp.get("diffusive_ions", str); m_isDiffusive = (str == "true") ? true : false;
 }
 
-air7_stephens::O2minus::O2minus(){
+CdrPlasmaAir7Stephens::O2minus::O2minus(){
   m_name = "O2minus";
   m_chargeNumber = -1;
-  ParmParse pp("air7_stephens");
+  ParmParse pp("CdrPlasmaAir7Stephens");
   std::string str;
   
   pp.get("mobile_ions", str);    m_isMobile    = (str == "true") ? true : false;
   pp.get("diffusive_ions", str); m_isDiffusive = (str == "true") ? true : false;
 }
 
-Real air7_stephens::electron::initialData(const RealVect a_pos, const Real a_time) const{
+Real CdrPlasmaAir7Stephens::Electron::initialData(const RealVect a_pos, const Real a_time) const{
   const Real factor = (a_pos - m_seed_pos).vectorLength();
   return m_uniform_density + m_seed_density*exp(-factor*factor/(m_seed_rad*m_seed_rad));
 }
 
-Real air7_stephens::N2plus::initialData(const RealVect a_pos, const Real a_time) const{
+Real CdrPlasmaAir7Stephens::N2plus::initialData(const RealVect a_pos, const Real a_time) const{
   const Real factor = (a_pos - m_seed_pos).vectorLength();
   return m_frac*(m_uniform_density + m_seed_density*exp(-factor*factor/(m_seed_rad*m_seed_rad)));
 }
 
-Real air7_stephens::O2plus::initialData(const RealVect a_pos, const Real a_time) const{
+Real CdrPlasmaAir7Stephens::O2plus::initialData(const RealVect a_pos, const Real a_time) const{
   const Real factor = (a_pos - m_seed_pos).vectorLength();
   return m_frac*(m_uniform_density + m_seed_density*exp(-factor*factor/(m_seed_rad*m_seed_rad)));
 }
 
-air7_stephens::phot_c4v0_X1v0::phot_c4v0_X1v0(){
+CdrPlasmaAir7Stephens::phot_c4v0_X1v0::phot_c4v0_X1v0(){
   m_name      = "phot_c4v0_X1v0";
 
   Real p;
-  ParmParse pp("air7_stephens");
+  ParmParse pp("CdrPlasmaAir7Stephens");
 
 
   pp.get("pressure", p);
@@ -130,22 +139,22 @@ air7_stephens::phot_c4v0_X1v0::phot_c4v0_X1v0(){
   m_kappa = 1./(m_kappa*p);
 }
 
-air7_stephens::phot_c4v0_X1v1::phot_c4v0_X1v1(){
+CdrPlasmaAir7Stephens::phot_c4v0_X1v1::phot_c4v0_X1v1(){
   m_name      = "phot_c4v0_X1v1";
 
   Real p;
-  ParmParse pp("air7_stephens");
+  ParmParse pp("CdrPlasmaAir7Stephens");
   
   pp.get("pressure", p);
   pp.get("c4v0_X1v1_beer", m_kappa);
   m_kappa = 1./(m_kappa*p);
 }
 
-air7_stephens::phot_c4v1_X1v0::phot_c4v1_X1v0(){
+CdrPlasmaAir7Stephens::phot_c4v1_X1v0::phot_c4v1_X1v0(){
   m_name      = "phot_c4v1_X1v0";
 
   Real p;
-  ParmParse pp("air7_stephens");
+  ParmParse pp("CdrPlasmaAir7Stephens");
   
   pp.get("pressure", p);
   pp.get("c4v1_X1v0_beer", m_kappa);
@@ -153,11 +162,11 @@ air7_stephens::phot_c4v1_X1v0::phot_c4v1_X1v0(){
   m_kappa = 1./(m_kappa*p);
 }
 
-air7_stephens::phot_c4v1_X1v1::phot_c4v1_X1v1(){
+CdrPlasmaAir7Stephens::phot_c4v1_X1v1::phot_c4v1_X1v1(){
   m_name      = "phot_c4v1_X1v1";
 
   Real p;
-  ParmParse pp("air7_stephens");
+  ParmParse pp("CdrPlasmaAir7Stephens");
   
   pp.get("pressure", p);
   pp.get("c4v1_X1v1_beer", m_kappa);
@@ -165,11 +174,11 @@ air7_stephens::phot_c4v1_X1v1::phot_c4v1_X1v1(){
   m_kappa = 1./(m_kappa*p);
 }
 
-air7_stephens::phot_c4v1_X1v2::phot_c4v1_X1v2(){
+CdrPlasmaAir7Stephens::phot_c4v1_X1v2::phot_c4v1_X1v2(){
   m_name      = "phot_c4v1_X1v2";
 
   Real p;
-  ParmParse pp("air7_stephens");
+  ParmParse pp("CdrPlasmaAir7Stephens");
   
   pp.get("pressure", p);
   pp.get("c4v1_X1v2_beer", m_kappa);
@@ -177,11 +186,11 @@ air7_stephens::phot_c4v1_X1v2::phot_c4v1_X1v2(){
   m_kappa = 1./(m_kappa*p);
 }
 
-air7_stephens::phot_c4v1_X1v3::phot_c4v1_X1v3(){
+CdrPlasmaAir7Stephens::phot_c4v1_X1v3::phot_c4v1_X1v3(){
   m_name      = "phot_c4v1_X1v3";
 
   Real p;
-  ParmParse pp("air7_stephens");
+  ParmParse pp("CdrPlasmaAir7Stephens");
   
   pp.get("pressure", p);
   pp.get("c4v1_X1v3_beer", m_kappa);
@@ -189,11 +198,11 @@ air7_stephens::phot_c4v1_X1v3::phot_c4v1_X1v3(){
   m_kappa = 1./(m_kappa*p);
 }
 
-air7_stephens::phot_b1v1_X1v0::phot_b1v1_X1v0(){
+CdrPlasmaAir7Stephens::phot_b1v1_X1v0::phot_b1v1_X1v0(){
   m_name      = "phot_b1v1_X1v0";
 
   Real p;
-  ParmParse pp("air7_stephens");
+  ParmParse pp("CdrPlasmaAir7Stephens");
   
   pp.get("pressure", p);
   pp.get("b1v1_X1v0_beer", m_kappa);
@@ -201,15 +210,16 @@ air7_stephens::phot_b1v1_X1v0::phot_b1v1_X1v0(){
   m_kappa = 1./(m_kappa*p);
 }
 
-air7_stephens::phot_b1v1_X1v1::phot_b1v1_X1v1(){
+CdrPlasmaAir7Stephens::phot_b1v1_X1v1::phot_b1v1_X1v1(){
   m_name      = "phot_b1v1_X1v1";
 
   Real p;
-  ParmParse pp("air7_stephens");
+  ParmParse pp("CdrPlasmaAir7Stephens");
   
   pp.get("pressure", p);
   pp.get("b1v1_X1v1_beer", m_kappa);
   
   m_kappa = 1./(m_kappa*p);
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

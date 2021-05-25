@@ -1,60 +1,67 @@
+/* chombo-discharge
+ * Copyright © 2021 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+ */
+
 /*!
-  @file   air7_stephens.H
-  @brief  7-species and 8-Photon model for air
+  @file   CD_CdrPlasmaAir7Stephens.cpp
+  @brief  Implementation of CD_CdrPlasmaAir7Stephens.H
   @author Robert Marskar
-  @date   Feb. 2018
 */
 
-#include "air7_stephens.H"
-#include "air7_stephens_species.H"
-#include <CD_DataOps.H>
-#include <CD_Units.H> 
-
+// Std includes
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <chrono>
 
+// Chombo includes
 #include <ParmParse.H>
 #include <PolyGeom.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_CdrPlasmaAir7Stephens.H>
+#include <CD_CdrPlasmaAir7StephensSpecies.H>
+#include <CD_DataOps.H>
+#include <CD_Units.H> 
+#include <CD_NamespaceHeader.H>
+
 using namespace Physics::CdrPlasma;
 
-std::string air7_stephens::s_bolsig_energy   = "# Mean energy (E/N, eV)";
-std::string air7_stephens::s_bolsig_mobility = "# Electron mobility (E/N, mu*N)";
-std::string air7_stephens::s_bolsig_diffco   = "# Electron diffusion coefficient (E/N, D*N)";
-std::string air7_stephens::s_bolsig_alpha    = "# Townsend alpha (E/N, alpha/N)";
-std::string air7_stephens::s_bolsig_eta      = "# Townsend eta (E/N, eta/N)";
-std::string air7_stephens::s_bolsig_b1_exc   = "# b1 excitation (E/N, rate/N)";
-std::string air7_stephens::s_bolsig_c4_exc   = "# c4 excitation (E/N, rate/N)";
-std::string air7_stephens::s_bolsig_alphaN2  = "# N2 Ionization (E/N, rate/N)";
-std::string air7_stephens::s_bolsig_alphaO2  = "# O2 Ionization (E/N, rate/N)";
+std::string CdrPlasmaAir7Stephens::s_bolsig_energy   = "# Mean energy (E/N, eV)";
+std::string CdrPlasmaAir7Stephens::s_bolsig_mobility = "# Electron mobility (E/N, mu*N)";
+std::string CdrPlasmaAir7Stephens::s_bolsig_diffco   = "# Electron diffusion coefficient (E/N, D*N)";
+std::string CdrPlasmaAir7Stephens::s_bolsig_alpha    = "# Townsend alpha (E/N, alpha/N)";
+std::string CdrPlasmaAir7Stephens::s_bolsig_eta      = "# Townsend eta (E/N, eta/N)";
+std::string CdrPlasmaAir7Stephens::s_bolsig_b1_exc   = "# b1 excitation (E/N, rate/N)";
+std::string CdrPlasmaAir7Stephens::s_bolsig_c4_exc   = "# c4 excitation (E/N, rate/N)";
+std::string CdrPlasmaAir7Stephens::s_bolsig_alphaN2  = "# N2 Ionization (E/N, rate/N)";
+std::string CdrPlasmaAir7Stephens::s_bolsig_alphaO2  = "# O2 Ionization (E/N, rate/N)";
 
-air7_stephens::air7_stephens() {
+CdrPlasmaAir7Stephens::CdrPlasmaAir7Stephens() {
 
-  instantiate_species();
+  initSpecies();
   parseTransportFile();
   parseTransport();
-  parse_chemistry();
-  parse_gas_params();
-  parse_electron_mobility();
-  parse_electron_diffco();
-  parse_alpha();
-  parse_eta();
-  parse_excitations();
-  parse_photoi();
-  parse_temperature();
-  parse_see();
+  parseChemistry();
+  parseGasParameters();
+  parseElectronMobility();
+  parseElectronDiffusionCoefficient();
+  parseAlpha();
+  parseEta();
+  parseExcitations();
+  parsePhotoi();
+  parseTemperature();
+  parseSEE();
   parseDomainBc();
-  init_rng();                 // Initialize random number generators
+  initRNG();                 // Initialize random number generators
 }
 
-air7_stephens::~air7_stephens() {
+CdrPlasmaAir7Stephens::~CdrPlasmaAir7Stephens() {
 
 }
 
-void air7_stephens::read_file_entries(LookupTable& a_table, const std::string a_string){
+void CdrPlasmaAir7Stephens::readFileEntries(LookupTable& a_table, const std::string a_string){
   Real x, y;
   bool read_line = false;
   std::ifstream infile(m_transport_file);
@@ -83,48 +90,48 @@ void air7_stephens::read_file_entries(LookupTable& a_table, const std::string a_
   infile.close();
 }
 
-void air7_stephens::parse_chemistry(){
-  ParmParse pp("air7_stephens");
+void CdrPlasmaAir7Stephens::parseChemistry(){
+  ParmParse pp("CdrPlasmaAir7Stephens");
 
   std::string str;
   pp.get("chemistry_dt", m_chemistry_dt);
   pp.get("chemistry_algorithm", str);
 
   if(str == "euler"){
-    m_chemistryAlgorithm = chemistryAlgorithm::euler;
+    m_ChemistryAlgorithm = ChemistryAlgorithm::euler;
   }
   else if(str == "rk2"){
-    m_chemistryAlgorithm = chemistryAlgorithm::rk2;
+    m_ChemistryAlgorithm = ChemistryAlgorithm::rk2;
   }
   else if(str == "rk4"){
-    m_chemistryAlgorithm = chemistryAlgorithm::rk4;
+    m_ChemistryAlgorithm = ChemistryAlgorithm::rk4;
   }
   else{
-    MayDay::Abort("air_eed::parse_chemistry - unknown chemistry algorithm requested");
+    MayDay::Abort("air_eed::parseChemistry - unknown chemistry algorithm requested");
   }
 }
 
-void air7_stephens::parseTransportFile(){
-  ParmParse pp("air7_stephens");
+void CdrPlasmaAir7Stephens::parseTransportFile(){
+  ParmParse pp("CdrPlasmaAir7Stephens");
   pp.get("transport_file",  m_transport_file);
   pp.get("uniform_tables",  m_uniform_entries);
   std::ifstream infile(m_transport_file);
   if(!infile.good()){
-    MayDay::Abort("air7_stephens::parseTransportFile - could not find transport data");
+    MayDay::Abort("CdrPlasmaAir7Stephens::parseTransportFile - could not find transport data");
   }
   else{
     infile.close();
   }
 }
 
-void air7_stephens::parseTransport(){
-  ParmParse pp("air7_stephens");
+void CdrPlasmaAir7Stephens::parseTransport(){
+  ParmParse pp("CdrPlasmaAir7Stephens");
 
   std::string str;
 
   pp.get("use_alpha_corr", str);      m_alpha_corr          = (str == "true") ? true : false;
-  pp.get("mobile_electrons", str);    m_isMobile_electrons    = (str == "true") ? true : false;
-  pp.get("diffusive_electrons", str); m_isDiffusive_electrons = (str == "true") ? true : false;
+  pp.get("mobile_electrons", str);    m_isMobile_Electrons    = (str == "true") ? true : false;
+  pp.get("diffusive_electrons", str); m_isDiffusive_Electrons = (str == "true") ? true : false;
   pp.get("diffusive_ions", str);      m_isDiffusive_ions      = (str == "true") ? true : false;
   pp.get("mobile_ions", str);         m_isMobile_ions         = (str == "true") ? true : false;
   
@@ -133,8 +140,8 @@ void air7_stephens::parseTransport(){
   m_ion_diffusion = m_ion_mobility*(Units::kb*m_T)/Units::Qe;
 }
 
-void air7_stephens::parse_gas_params(){
-  ParmParse pp("air7_stephens");
+void CdrPlasmaAir7Stephens::parseGasParameters(){
+  ParmParse pp("CdrPlasmaAir7Stephens");
 
   // Pressure form input script
   pp.get("pressure",           m_p);
@@ -147,29 +154,29 @@ void air7_stephens::parse_gas_params(){
   m_N = m_p*Units::Na/(m_T*Units::R);
 }
 
-void air7_stephens::parse_electron_mobility(){
-  ParmParse pp("air7_stephens");
+void CdrPlasmaAir7Stephens::parseElectronMobility(){
+  ParmParse pp("CdrPlasmaAir7Stephens");
 
-  read_file_entries(m_e_mobility, air7_stephens::s_bolsig_mobility);
+  readFileEntries(m_e_mobility, CdrPlasmaAir7Stephens::s_bolsig_mobility);
   m_e_mobility.scaleX(m_N*Units::Td);
   m_e_mobility.scaleY(1./m_N); 
   m_e_mobility.makeUniform(m_uniform_entries);
 }
 
-void air7_stephens::parse_electron_diffco(){
-  ParmParse pp("air7_stephens");
+void CdrPlasmaAir7Stephens::parseElectronDiffusionCoefficient(){
+  ParmParse pp("CdrPlasmaAir7Stephens");
   
-  read_file_entries(m_e_diffco, air7_stephens::s_bolsig_diffco);
+  readFileEntries(m_e_diffco, CdrPlasmaAir7Stephens::s_bolsig_diffco);
   m_e_diffco.scaleX(m_N*Units::Td);
   m_e_diffco.scaleY(1./m_N); 
   m_e_diffco.makeUniform(m_uniform_entries);
 }
 
-void air7_stephens::parse_alpha(){
-  ParmParse pp("air7_stephens");
-  read_file_entries(m_e_alpha,   air7_stephens::s_bolsig_alpha);
-  read_file_entries(m_e_alphaN2, air7_stephens::s_bolsig_alphaN2);
-  read_file_entries(m_e_alphaO2, air7_stephens::s_bolsig_alphaO2);
+void CdrPlasmaAir7Stephens::parseAlpha(){
+  ParmParse pp("CdrPlasmaAir7Stephens");
+  readFileEntries(m_e_alpha,   CdrPlasmaAir7Stephens::s_bolsig_alpha);
+  readFileEntries(m_e_alphaN2, CdrPlasmaAir7Stephens::s_bolsig_alphaN2);
+  readFileEntries(m_e_alphaO2, CdrPlasmaAir7Stephens::s_bolsig_alphaO2);
   
   m_e_alpha.scaleX(m_N*Units::Td);
   m_e_alphaN2.scaleX(m_N*Units::Td);
@@ -184,17 +191,17 @@ void air7_stephens::parse_alpha(){
   m_e_alphaO2.makeUniform(m_uniform_entries);
 }
 
-void air7_stephens::parse_eta(){
-  ParmParse pp("air7_stephens");
-  read_file_entries(m_e_eta, air7_stephens::s_bolsig_eta);
+void CdrPlasmaAir7Stephens::parseEta(){
+  ParmParse pp("CdrPlasmaAir7Stephens");
+  readFileEntries(m_e_eta, CdrPlasmaAir7Stephens::s_bolsig_eta);
   m_e_eta.scaleX(m_N*Units::Td);
   m_e_eta.scaleY(m_N);
   m_e_eta.makeUniform(m_uniform_entries);
 }
 
-void air7_stephens::parse_temperature(){
-  ParmParse pp("air7_stephens");
-  read_file_entries(m_e_temperature, air7_stephens::s_bolsig_energy);
+void CdrPlasmaAir7Stephens::parseTemperature(){
+  ParmParse pp("CdrPlasmaAir7Stephens");
+  readFileEntries(m_e_temperature, CdrPlasmaAir7Stephens::s_bolsig_energy);
 
   //  m_e_temperature.dumpTable();
   m_e_temperature.scaleX(m_N*Units::Td);
@@ -202,15 +209,15 @@ void air7_stephens::parse_temperature(){
   m_e_temperature.makeUniform(m_uniform_entries);
 }
 
-void air7_stephens::parse_excitations(){
+void CdrPlasmaAir7Stephens::parseExcitations(){
   ParmParse pp("air7_mc8");
   
-  read_file_entries(m_b1_exc, air7_stephens::s_bolsig_b1_exc);
+  readFileEntries(m_b1_exc, CdrPlasmaAir7Stephens::s_bolsig_b1_exc);
   m_b1_exc.scaleX(m_N*Units::Td);
   m_b1_exc.scaleY(m_N); 
   m_b1_exc.makeUniform(m_uniform_entries);
 
-  read_file_entries(m_c4_exc, air7_stephens::s_bolsig_c4_exc);
+  readFileEntries(m_c4_exc, CdrPlasmaAir7Stephens::s_bolsig_c4_exc);
 
   m_c4_exc.scaleX(m_N*Units::Td);
   m_c4_exc.scaleY(m_N);
@@ -218,16 +225,16 @@ void air7_stephens::parse_excitations(){
   m_c4_exc.makeUniform(m_uniform_entries);
 }
 
-void air7_stephens::parse_see(){
-  ParmParse pp("air7_stephens");
+void CdrPlasmaAir7Stephens::parseSEE(){
+  ParmParse pp("CdrPlasmaAir7Stephens");
   pp.get("electrode_townsend2",           m_townsend2_electrode);
   pp.get("dielectric_townsend2",          m_townsend2_dielectric);
   pp.get("electrode_quantum_efficiency",  m_electrode_quantum_efficiency);
   pp.get("dielectric_quantum_efficiency", m_dielectric_quantum_efficiency);
 }
 
-void air7_stephens::parse_photoi(){
-  ParmParse pp("air7_stephens");
+void CdrPlasmaAir7Stephens::parsePhotoi(){
+  ParmParse pp("CdrPlasmaAir7Stephens");
 
   pp.get("c4v0_exc_rep", m_c4v0_exc_rep);
   pp.get("c4v1_exc_rep", m_c4v1_exc_rep);
@@ -272,8 +279,8 @@ void air7_stephens::parse_photoi(){
 
 
 
-void air7_stephens::init_rng(){
-  ParmParse pp("air7_stephens");
+void CdrPlasmaAir7Stephens::initRNG(){
+  ParmParse pp("CdrPlasmaAir7Stephens");
   pp.get("rng_seed", m_rng_seed);
 
   pp.get("poiss_exp_swap", m_poiss_exp_swap);
@@ -285,7 +292,7 @@ void air7_stephens::init_rng(){
   m_rng     = new std::mt19937_64(m_rng_seed);
 }
 
-void air7_stephens::instantiate_species(){
+void CdrPlasmaAir7Stephens::initSpecies(){
   m_numCdrSpecies = 7;
   m_numRtSpecies = 8;
 
@@ -307,29 +314,29 @@ void air7_stephens::instantiate_species(){
   m_b1v1_X1v1_idx = 7;
 
   m_CdrSpecies.resize(m_numCdrSpecies);
-  m_CdrSpecies[m_elec_idx]      = RefCountedPtr<CdrSpecies>      (new air7_stephens::electron());
-  m_CdrSpecies[m_N2plus_idx]    = RefCountedPtr<CdrSpecies>      (new air7_stephens::N2plus());
-  m_CdrSpecies[m_O2plus_idx]    = RefCountedPtr<CdrSpecies>      (new air7_stephens::O2plus());
-  m_CdrSpecies[m_N4plus_idx]    = RefCountedPtr<CdrSpecies>      (new air7_stephens::N4plus());
-  m_CdrSpecies[m_O4plus_idx]    = RefCountedPtr<CdrSpecies>      (new air7_stephens::O4plus());
-  m_CdrSpecies[m_O2plusN2_idx]  = RefCountedPtr<CdrSpecies>      (new air7_stephens::O2plusN2());
-  m_CdrSpecies[m_O2minus_idx]   = RefCountedPtr<CdrSpecies>      (new air7_stephens::O2minus());
+  m_CdrSpecies[m_elec_idx]      = RefCountedPtr<CdrSpecies>      (new CdrPlasmaAir7Stephens::Electron());
+  m_CdrSpecies[m_N2plus_idx]    = RefCountedPtr<CdrSpecies>      (new CdrPlasmaAir7Stephens::N2plus());
+  m_CdrSpecies[m_O2plus_idx]    = RefCountedPtr<CdrSpecies>      (new CdrPlasmaAir7Stephens::O2plus());
+  m_CdrSpecies[m_N4plus_idx]    = RefCountedPtr<CdrSpecies>      (new CdrPlasmaAir7Stephens::N4plus());
+  m_CdrSpecies[m_O4plus_idx]    = RefCountedPtr<CdrSpecies>      (new CdrPlasmaAir7Stephens::O4plus());
+  m_CdrSpecies[m_O2plusN2_idx]  = RefCountedPtr<CdrSpecies>      (new CdrPlasmaAir7Stephens::O2plusN2());
+  m_CdrSpecies[m_O2minus_idx]   = RefCountedPtr<CdrSpecies>      (new CdrPlasmaAir7Stephens::O2minus());
 
   m_RtSpecies.resize(m_numRtSpecies);
-  m_RtSpecies[m_c4v0_X1v0_idx] = RefCountedPtr<RtSpecies> (new air7_stephens::phot_c4v0_X1v0());
-  m_RtSpecies[m_c4v0_X1v1_idx] = RefCountedPtr<RtSpecies> (new air7_stephens::phot_c4v0_X1v1());
-  m_RtSpecies[m_c4v1_X1v0_idx] = RefCountedPtr<RtSpecies> (new air7_stephens::phot_c4v1_X1v0());
-  m_RtSpecies[m_c4v1_X1v1_idx] = RefCountedPtr<RtSpecies> (new air7_stephens::phot_c4v1_X1v1());
-  m_RtSpecies[m_c4v1_X1v2_idx] = RefCountedPtr<RtSpecies> (new air7_stephens::phot_c4v1_X1v2());
-  m_RtSpecies[m_c4v1_X1v3_idx] = RefCountedPtr<RtSpecies> (new air7_stephens::phot_c4v1_X1v3());
-  m_RtSpecies[m_b1v1_X1v0_idx] = RefCountedPtr<RtSpecies> (new air7_stephens::phot_b1v1_X1v0());
-  m_RtSpecies[m_b1v1_X1v1_idx] = RefCountedPtr<RtSpecies> (new air7_stephens::phot_b1v1_X1v1());
+  m_RtSpecies[m_c4v0_X1v0_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir7Stephens::phot_c4v0_X1v0());
+  m_RtSpecies[m_c4v0_X1v1_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir7Stephens::phot_c4v0_X1v1());
+  m_RtSpecies[m_c4v1_X1v0_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir7Stephens::phot_c4v1_X1v0());
+  m_RtSpecies[m_c4v1_X1v1_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir7Stephens::phot_c4v1_X1v1());
+  m_RtSpecies[m_c4v1_X1v2_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir7Stephens::phot_c4v1_X1v2());
+  m_RtSpecies[m_c4v1_X1v3_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir7Stephens::phot_c4v1_X1v3());
+  m_RtSpecies[m_b1v1_X1v0_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir7Stephens::phot_b1v1_X1v0());
+  m_RtSpecies[m_b1v1_X1v1_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir7Stephens::phot_b1v1_X1v1());
 
 }
 
-void air7_stephens::parseDomainBc(){
+void CdrPlasmaAir7Stephens::parseDomainBc(){
 
-  ParmParse pp("air7_stephens");
+  ParmParse pp("CdrPlasmaAir7Stephens");
   std::string str;
 
   m_wallBc.resize(2*SpaceDim, 0); 
@@ -375,17 +382,17 @@ void air7_stephens::parseDomainBc(){
   }
 }
 
-void air7_stephens::advanceReactionNetwork(Vector<Real>&          a_particle_sources,
-					     Vector<Real>&          a_Photon_sources,
-					     const Vector<Real>     a_particle_densities,
-					     const Vector<RealVect> a_particle_gradients,
-					     const Vector<Real>     a_Photon_densities,
-					     const RealVect         a_E,
-					     const RealVect         a_pos,
-					     const Real             a_dx,
-					     const Real             a_dt,
-					     const Real             a_time,
-					     const Real             a_kappa) const{
+void CdrPlasmaAir7Stephens::advanceReactionNetwork(Vector<Real>&          a_particle_sources,
+						   Vector<Real>&          a_Photon_sources,
+						   const Vector<Real>     a_particle_densities,
+						   const Vector<RealVect> a_particle_gradients,
+						   const Vector<Real>     a_Photon_densities,
+						   const RealVect         a_E,
+						   const RealVect         a_pos,
+						   const Real             a_dx,
+						   const Real             a_dt,
+						   const Real             a_time,
+						   const Real             a_kappa) const{
   Vector<Real>     cdr_src(m_numCdrSpecies, 0.0);
   Vector<Real>     rte_src(m_numRtSpecies, 0.0);
   Vector<Real>     cdr_phi(m_numCdrSpecies, 0.0);
@@ -410,8 +417,8 @@ void air7_stephens::advanceReactionNetwork(Vector<Real>&          a_particle_sou
   Real time  = a_time;
   
   for (int istep = 0; istep < nsteps; istep++){
-    if(m_chemistryAlgorithm == chemistryAlgorithm::euler){
-      advance_chemistry_euler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
+    if(m_ChemistryAlgorithm == ChemistryAlgorithm::euler){
+      advanceChemistryEuler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
 
       // Increment
       for (int i = 0; i < m_numCdrSpecies; i++){
@@ -423,10 +430,10 @@ void air7_stephens::advanceReactionNetwork(Vector<Real>&          a_particle_sou
 	a_Photon_sources[i] += rte_src[i];
       }
     }
-    else if(m_chemistryAlgorithm == chemistryAlgorithm::rk2){
+    else if(m_ChemistryAlgorithm == ChemistryAlgorithm::rk2){
 
       // Compute slope at k
-      advance_chemistry_euler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
+      advanceChemistryEuler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
       Vector<Real> k1 = cdr_src;
 
       // Euler update to k+1
@@ -441,18 +448,18 @@ void air7_stephens::advanceReactionNetwork(Vector<Real>&          a_particle_sou
       }
 
       // Re-compute slope at k
-      advance_chemistry_euler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
+      advanceChemistryEuler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
 
       // Funky notation, but checks out
       for (int i = 0; i < m_numCdrSpecies; i++){
 	cdr_phi[i] = cdr_phi[i] + dt*(0.5*cdr_src[i] - 0.5*k1[i]);
       }
     }
-    else if(m_chemistryAlgorithm == chemistryAlgorithm::rk4){
+    else if(m_ChemistryAlgorithm == ChemistryAlgorithm::rk4){
       const Vector<Real> cdr_phi0 = cdr_phi;
       
       // Compute k1 slope
-      advance_chemistry_euler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
+      advanceChemistryEuler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
       const Vector<Real> k1 = cdr_src;
 
       // Only Euler update for Photons.
@@ -464,21 +471,21 @@ void air7_stephens::advanceReactionNetwork(Vector<Real>&          a_particle_sou
       for (int i = 0; i < m_numCdrSpecies; i++){
 	cdr_phi[i] = cdr_phi0[i] + 0.5*dt*k1[i];
       }
-      advance_chemistry_euler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
+      advanceChemistryEuler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
       const Vector<Real> k2 = cdr_src;
 
       // Compute k3 slope
       for (int i = 0; i < m_numCdrSpecies; i++){
 	cdr_phi[i] = cdr_phi0[i] + 0.5*dt*k2[i];
       }
-      advance_chemistry_euler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
+      advanceChemistryEuler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
       const Vector<Real> k3 = cdr_src;
 
       // Compute k4 slope
       for (int i = 0; i < m_numCdrSpecies; i++){
 	cdr_phi[i] = cdr_phi0[i] + dt*k3[i];
       }
-      advance_chemistry_euler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
+      advanceChemistryEuler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
       const Vector<Real> k4 = cdr_src;
 
       for (int i = 0; i < m_numCdrSpecies; i++){
@@ -500,17 +507,17 @@ void air7_stephens::advanceReactionNetwork(Vector<Real>&          a_particle_sou
 
 }
 
-void air7_stephens::advance_chemistry_euler(Vector<Real>&          a_particle_sources,
-					    Vector<Real>&          a_Photon_sources,
-					    Vector<Real>&          a_particle_densities,
-					    const Vector<RealVect> a_particle_gradients,
-					    const Vector<Real>     a_Photon_densities,
-					    const RealVect         a_E,
-					    const RealVect         a_pos,
-					    const Real             a_dx,
-					    const Real             a_dt,
-					    const Real             a_time,
-					    const Real             a_kappa) const{
+void CdrPlasmaAir7Stephens::advanceChemistryEuler(Vector<Real>&          a_particle_sources,
+						  Vector<Real>&          a_Photon_sources,
+						  Vector<Real>&          a_particle_densities,
+						  const Vector<RealVect> a_particle_gradients,
+						  const Vector<Real>     a_Photon_densities,
+						  const RealVect         a_E,
+						  const RealVect         a_pos,
+						  const Real             a_dx,
+						  const Real             a_dt,
+						  const Real             a_time,
+						  const Real             a_kappa) const{
   const Real volume = pow(a_dx, SpaceDim);
   const Real E      = a_E.vectorLength();
   const Real ve     = E*m_e_mobility.getEntry(E);
@@ -712,7 +719,7 @@ void air7_stephens::advance_chemistry_euler(Vector<Real>&          a_particle_so
   return;
 }
 
-int air7_stephens::poisson_reaction(const Real a_propensity, const Real a_dt) const{
+int CdrPlasmaAir7Stephens::poisson_reaction(const Real a_propensity, const Real a_dt) const{
   int value = 0;
   const Real mean = a_propensity*a_dt;
 
@@ -728,16 +735,16 @@ int air7_stephens::poisson_reaction(const Real a_propensity, const Real a_dt) co
   return value;
 }
 
-int air7_stephens::binomial_trials(const int a_trials, const Real a_p) const{
+int CdrPlasmaAir7Stephens::binomial_trials(const int a_trials, const Real a_p) const{
   std::binomial_distribution<int> dist(a_trials, a_p);
   return dist(*m_rng);
 }
 
 
-Vector<Real> air7_stephens::computeCdrDiffusionCoefficients(const Real         a_time,
-							       const RealVect     a_pos,
-							       const RealVect     a_E,
-							       const Vector<Real> a_cdr_densities) const {
+Vector<Real> CdrPlasmaAir7Stephens::computeCdrDiffusionCoefficients(const Real         a_time,
+								    const RealVect     a_pos,
+								    const RealVect     a_E,
+								    const Vector<Real> a_cdr_densities) const {
 
   Vector<Real> dco(m_numCdrSpecies, 0.0);
   dco[m_elec_idx] = m_e_diffco.getEntry(a_E.vectorLength());
@@ -754,10 +761,10 @@ Vector<Real> air7_stephens::computeCdrDiffusionCoefficients(const Real         a
 
 }
   
-Vector<RealVect> air7_stephens::computeCdrDriftVelocities(const Real         a_time,
-						       const RealVect     a_pos,
-						       const RealVect     a_E,
-						       const Vector<Real> a_cdr_densities) const{
+Vector<RealVect> CdrPlasmaAir7Stephens::computeCdrDriftVelocities(const Real         a_time,
+								  const RealVect     a_pos,
+								  const RealVect     a_E,
+								  const Vector<Real> a_cdr_densities) const{
   Vector<RealVect> vel(m_numCdrSpecies, RealVect::Zero);
 
   vel[m_elec_idx] = -a_E*m_e_mobility.getEntry(a_E.vectorLength());
@@ -773,16 +780,16 @@ Vector<RealVect> air7_stephens::computeCdrDriftVelocities(const Real         a_t
   return vel;
 }
   
-Vector<Real> air7_stephens::computeCdrDomainFluxes(const Real           a_time,
-						      const RealVect       a_pos,
-						      const int            a_dir,
-						      const Side::LoHiSide a_side,
-						      const RealVect       a_E,
-						      const Vector<Real>   a_cdr_densities,
-						      const Vector<Real>   a_cdr_velocities,
-						      const Vector<Real>   a_cdr_gradients,
-						      const Vector<Real>   a_rte_fluxes,
-						      const Vector<Real>   a_extrap_cdr_fluxes) const{
+Vector<Real> CdrPlasmaAir7Stephens::computeCdrDomainFluxes(const Real           a_time,
+							   const RealVect       a_pos,
+							   const int            a_dir,
+							   const Side::LoHiSide a_side,
+							   const RealVect       a_E,
+							   const Vector<Real>   a_cdr_densities,
+							   const Vector<Real>   a_cdr_velocities,
+							   const Vector<Real>   a_cdr_gradients,
+							   const Vector<Real>   a_rte_fluxes,
+							   const Vector<Real>   a_extrap_cdr_fluxes) const{
   Vector<Real> fluxes(m_numCdrSpecies, 0.0);
 
   int idx, sgn;
@@ -813,43 +820,43 @@ Vector<Real> air7_stephens::computeCdrDomainFluxes(const Real           a_time,
   return fluxes;
 }
   
-Vector<Real> air7_stephens::computeCdrElectrodeFluxes(const Real         a_time,
-							 const RealVect     a_pos,
-							 const RealVect     a_normal,
-							 const RealVect     a_E,
-							 const Vector<Real> a_cdr_densities,
-							 const Vector<Real> a_cdr_velocities,
-							 const Vector<Real> a_cdr_gradients,
-							 const Vector<Real> a_rte_fluxes,
-							 const Vector<Real> a_extrap_cdr_fluxes) const{
+Vector<Real> CdrPlasmaAir7Stephens::computeCdrElectrodeFluxes(const Real         a_time,
+							      const RealVect     a_pos,
+							      const RealVect     a_normal,
+							      const RealVect     a_E,
+							      const Vector<Real> a_cdr_densities,
+							      const Vector<Real> a_cdr_velocities,
+							      const Vector<Real> a_cdr_gradients,
+							      const Vector<Real> a_rte_fluxes,
+							      const Vector<Real> a_extrap_cdr_fluxes) const{
   return computeCdrFluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients, a_rte_fluxes,
-			    a_extrap_cdr_fluxes, m_townsend2_electrode, m_electrode_quantum_efficiency);
+			  a_extrap_cdr_fluxes, m_townsend2_electrode, m_electrode_quantum_efficiency);
 }
 
-Vector<Real> air7_stephens::computeCdrDielectricFluxes(const Real         a_time,
-							  const RealVect     a_pos,
-							  const RealVect     a_normal,
-							  const RealVect     a_E,
-							  const Vector<Real> a_cdr_densities,
-							  const Vector<Real> a_cdr_velocities,
-							  const Vector<Real> a_cdr_gradients,
-							  const Vector<Real> a_rte_fluxes,
-							  const Vector<Real> a_extrap_cdr_fluxes) const{
+Vector<Real> CdrPlasmaAir7Stephens::computeCdrDielectricFluxes(const Real         a_time,
+							       const RealVect     a_pos,
+							       const RealVect     a_normal,
+							       const RealVect     a_E,
+							       const Vector<Real> a_cdr_densities,
+							       const Vector<Real> a_cdr_velocities,
+							       const Vector<Real> a_cdr_gradients,
+							       const Vector<Real> a_rte_fluxes,
+							       const Vector<Real> a_extrap_cdr_fluxes) const{
   return computeCdrFluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients, a_rte_fluxes,
-			    a_extrap_cdr_fluxes, m_townsend2_dielectric, m_dielectric_quantum_efficiency);
+			  a_extrap_cdr_fluxes, m_townsend2_dielectric, m_dielectric_quantum_efficiency);
 }
 
-Vector<Real> air7_stephens::computeCdrFluxes(const Real         a_time,
-					       const RealVect     a_pos,
-					       const RealVect     a_normal,
-					       const RealVect     a_E,
-					       const Vector<Real> a_cdr_densities,
-					       const Vector<Real> a_cdr_velocities,
-					       const Vector<Real> a_cdr_gradients,
-					       const Vector<Real> a_rte_fluxes,
-					       const Vector<Real> a_extrap_cdr_fluxes,
-					       const Real         a_townsend2,
-					       const Real         a_quantum_efficiency) const{
+Vector<Real> CdrPlasmaAir7Stephens::computeCdrFluxes(const Real         a_time,
+						     const RealVect     a_pos,
+						     const RealVect     a_normal,
+						     const RealVect     a_E,
+						     const Vector<Real> a_cdr_densities,
+						     const Vector<Real> a_cdr_velocities,
+						     const Vector<Real> a_cdr_gradients,
+						     const Vector<Real> a_rte_fluxes,
+						     const Vector<Real> a_extrap_cdr_fluxes,
+						     const Real         a_townsend2,
+						     const Real         a_quantum_efficiency) const{
   Vector<Real> fluxes(m_numCdrSpecies, 0.0);
 
   const bool cathode = PolyGeom::dot(a_E, a_normal) < 0.0;
@@ -874,15 +881,16 @@ Vector<Real> air7_stephens::computeCdrFluxes(const Real         a_time,
   return fluxes;
 }
 
-Real air7_stephens::initialSigma(const Real a_time, const RealVect a_pos) const {
+Real CdrPlasmaAir7Stephens::initialSigma(const Real a_time, const RealVect a_pos) const {
   return 0.0;
 }
 
-Real air7_stephens::computeAlpha(const RealVect a_E) const{
+Real CdrPlasmaAir7Stephens::computeAlpha(const RealVect a_E) const{
   const Real E     = a_E.vectorLength();
   const Real alpha = m_e_alpha.getEntry(E);
   const Real eta   = m_e_eta.getEntry(E);
 
   return alpha;
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

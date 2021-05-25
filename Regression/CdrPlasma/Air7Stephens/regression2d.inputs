@@ -242,97 +242,97 @@ CdrPlasmaGodunovStepper.fhd              = false     # Turn on if you want a sto
 # ----------------------------------------------------------------------------------------------------	
 # Transport file and # of points to use when converting files to uniform spacings
 # ----------------------------------------------------------------------------------------------------
-air7_stephens.transport_file      = transport_data.txt          # Transport file
-air7_stephens.uniform_tables      = 100	                   #  Converted # of points in transport file
+CdrPlasmaAir7Stephens.transport_file      = transport_data.txt          # Transport file
+CdrPlasmaAir7Stephens.uniform_tables      = 100	                   #  Converted # of points in transport file
 
 # ----------------------------------------------------------------------------------------------------	
 # Gas composition. This should match your BOLSIG stuff!
 # ----------------------------------------------------------------------------------------------------
-air7_stephens.pressure            = 1.0                         # Gas pressure
-air7_stephens.temperature         = 300                         # Gas temperature
-air7_stephens.frac_N2             = 0.8                         # N2 fraction
-air7_stephens.frac_O2             = 0.2                         # O2 fraction
+CdrPlasmaAir7Stephens.pressure            = 1.0                         # Gas pressure
+CdrPlasmaAir7Stephens.temperature         = 300                         # Gas temperature
+CdrPlasmaAir7Stephens.frac_N2             = 0.8                         # N2 fraction
+CdrPlasmaAir7Stephens.frac_O2             = 0.2                         # O2 fraction
 
 # ----------------------------------------------------------------------------------------------------	
 # Transport properties
 # ----------------------------------------------------------------------------------------------------
-air7_stephens.use_alpha_corr      = false                       # Soloviev alpha correction	
-air7_stephens.mobile_electrons    = true                        # Mobile electrons or not
-air7_stephens.diffusive_electrons = true                        # Diffusive electrons or not
-air7_stephens.mobile_ions         = false                       # Mobile ions or not
-air7_stephens.diffusive_ions      = false                       # Diffusive ions or not
-air7_stephens.ion_mobility        = 2.E-4                       # Ion mobility
+CdrPlasmaAir7Stephens.use_alpha_corr      = false                       # Soloviev alpha correction	
+CdrPlasmaAir7Stephens.mobile_electrons    = true                        # Mobile electrons or not
+CdrPlasmaAir7Stephens.diffusive_electrons = true                        # Diffusive electrons or not
+CdrPlasmaAir7Stephens.mobile_ions         = false                       # Mobile ions or not
+CdrPlasmaAir7Stephens.diffusive_ions      = false                       # Diffusive ions or not
+CdrPlasmaAir7Stephens.ion_mobility        = 2.E-4                       # Ion mobility
 
 # ----------------------------------------------------------------------------------------------------	
 # Chemistry algorithm
 # ----------------------------------------------------------------------------------------------------
-air7_stephens.chemistry_algorithm = euler # 'euler', 'rk2', or 'rk4'
-air7_stephens.chemistry_dt        = 1.0   # Minimum dt used for chemistry
+CdrPlasmaAir7Stephens.chemistry_algorithm = euler # 'euler', 'rk2', or 'rk4'
+CdrPlasmaAir7Stephens.chemistry_dt        = 1.0   # Minimum dt used for chemistry
 
 # ----------------------------------------------------------------------------------------------------
 # RNG stuff
 # ----------------------------------------------------------------------------------------------------
-air7_stephens.rng_seed            = 0    # RNG seed. < 0 gives a random seed
-air7_stephens.poiss_exp_swap      = 100  # Swap from Poisson to exponential distribution
+CdrPlasmaAir7Stephens.rng_seed            = 0    # RNG seed. < 0 gives a random seed
+CdrPlasmaAir7Stephens.poiss_exp_swap      = 100  # Swap from Poisson to exponential distribution
 
 # ----------------------------------------------------------------------------------------------------
 # Initial data
 # ----------------------------------------------------------------------------------------------------
-air7_stephens.uniform_density       = 1.E4         # Uniform density
-air7_stephens.seed_density          = 1.E18        # Gaussian seed density
-air7_stephens.seed_radius           = 250E-6       # Gaussian seed radius
-air7_stephens.seed_position         = 0 0          # Gaussian seed position
+CdrPlasmaAir7Stephens.uniform_density       = 1.E4         # Uniform density
+CdrPlasmaAir7Stephens.seed_density          = 1.E18        # Gaussian seed density
+CdrPlasmaAir7Stephens.seed_radius           = 250E-6       # Gaussian seed radius
+CdrPlasmaAir7Stephens.seed_position         = 0 0          # Gaussian seed position
 
 # ----------------------------------------------------------------------------------------------------	
 # SEE coefficients
 # ----------------------------------------------------------------------------------------------------
-air7_stephens.electrode_townsend2           = 1.E-6             # SEE on electrodes
-air7_stephens.dielectric_townsend2          = 1.E-6             # SEE on dielectrics
-air7_stephens.electrode_quantum_efficiency  = 1.E-6             # SEE on electrodes
-air7_stephens.dielectric_quantum_efficiency = 1.E-6             # SEE on dielectrics
+CdrPlasmaAir7Stephens.electrode_townsend2           = 1.E-6             # SEE on electrodes
+CdrPlasmaAir7Stephens.dielectric_townsend2          = 1.E-6             # SEE on dielectrics
+CdrPlasmaAir7Stephens.electrode_quantum_efficiency  = 1.E-6             # SEE on electrodes
+CdrPlasmaAir7Stephens.dielectric_quantum_efficiency = 1.E-6             # SEE on dielectrics
 
 # ----------------------------------------------------------------------------------------------------	
 # Exitation efficiencies, photoionization efficiences, quenching pressure, radiative lifetimes,
 # and predissociation lifetime, and absorption lengths. These are pressure independent.
 # ----------------------------------------------------------------------------------------------------
-air7_stephens.photoi_factor        = 1.0       # Correction factor photoionization
+CdrPlasmaAir7Stephens.photoi_factor        = 1.0       # Correction factor photoionization
 
-air7_stephens.c4v0_exc_rep         = 0.8       # Relative excitation probability
-air7_stephens.c4v1_exc_rep         = 0.034     # Relative excitation probability
-air7_stephens.b1v1_exc_rep         = 0.014     # Relative excitation probability
+CdrPlasmaAir7Stephens.c4v0_exc_rep         = 0.8       # Relative excitation probability
+CdrPlasmaAir7Stephens.c4v1_exc_rep         = 0.034     # Relative excitation probability
+CdrPlasmaAir7Stephens.b1v1_exc_rep         = 0.014     # Relative excitation probability
 
-air7_stephens.c4v0_kp              = 2.39E8    # Predissociation rate
-air7_stephens.c4v1_kp              = 17.7E8    # Predissociation rate
-air7_stephens.b1v1_kp              = 4.68E8    # Predissociation rate
+CdrPlasmaAir7Stephens.c4v0_kp              = 2.39E8    # Predissociation rate
+CdrPlasmaAir7Stephens.c4v1_kp              = 17.7E8    # Predissociation rate
+CdrPlasmaAir7Stephens.b1v1_kp              = 4.68E8    # Predissociation rate
 
-air7_stephens.c4v0_X1v0_kr         = 11.2E8    # Radiative rate
-air7_stephens.c4v0_X1v1_kr         = 1.89E8    # Radiative rate
-air7_stephens.c4v1_X1v0_kr         = 0.41E8    # Radiative rate
-air7_stephens.c4v1_X1v1_kr         = 6.97E8    # Radiative rate
-air7_stephens.c4v1_X1v2_kr         = 4.06E8    # Radiative rate
-air7_stephens.c4v1_X1v3_kr         = 1.45E8    # Radiative rate
-air7_stephens.b1v1_X1v0_kr         = 0.42E8    # Radiative rate
-air7_stephens.b1v1_X1v1_kr         = 0.80E8    # Radiative rate
+CdrPlasmaAir7Stephens.c4v0_X1v0_kr         = 11.2E8    # Radiative rate
+CdrPlasmaAir7Stephens.c4v0_X1v1_kr         = 1.89E8    # Radiative rate
+CdrPlasmaAir7Stephens.c4v1_X1v0_kr         = 0.41E8    # Radiative rate
+CdrPlasmaAir7Stephens.c4v1_X1v1_kr         = 6.97E8    # Radiative rate
+CdrPlasmaAir7Stephens.c4v1_X1v2_kr         = 4.06E8    # Radiative rate
+CdrPlasmaAir7Stephens.c4v1_X1v3_kr         = 1.45E8    # Radiative rate
+CdrPlasmaAir7Stephens.b1v1_X1v0_kr         = 0.42E8    # Radiative rate
+CdrPlasmaAir7Stephens.b1v1_X1v1_kr         = 0.80E8    # Radiative rate
 
-air7_stephens.k_quench             = 1.E-17    # Collisional quenching rate/N
+CdrPlasmaAir7Stephens.k_quench             = 1.E-17    # Collisional quenching rate/N
 
-air7_stephens.c4v0_X1v0_photoi_eff = 0.23      # Photoionization efficiency
-air7_stephens.c4v0_X1v1_photoi_eff = 0.77      # Photoionization efficiency
-air7_stephens.c4v1_X1v0_photoi_eff = 0.045     # Photoionization efficiency
-air7_stephens.c4v1_X1v1_photoi_eff = 0.10      # Photoionization efficiency
-air7_stephens.c4v1_X1v2_photoi_eff = 0.75      # Photoionization efficiency
-air7_stephens.c4v1_X1v3_photoi_eff = 0.69      # Photoionization efficiency
-air7_stephens.b1v1_X1v0_photoi_eff = 0.72      # Photoionization efficiency
-air7_stephens.b1v1_X1v1_photoi_eff = 0.69      # Photoionization efficiency
+CdrPlasmaAir7Stephens.c4v0_X1v0_photoi_eff = 0.23      # Photoionization efficiency
+CdrPlasmaAir7Stephens.c4v0_X1v1_photoi_eff = 0.77      # Photoionization efficiency
+CdrPlasmaAir7Stephens.c4v1_X1v0_photoi_eff = 0.045     # Photoionization efficiency
+CdrPlasmaAir7Stephens.c4v1_X1v1_photoi_eff = 0.10      # Photoionization efficiency
+CdrPlasmaAir7Stephens.c4v1_X1v2_photoi_eff = 0.75      # Photoionization efficiency
+CdrPlasmaAir7Stephens.c4v1_X1v3_photoi_eff = 0.69      # Photoionization efficiency
+CdrPlasmaAir7Stephens.b1v1_X1v0_photoi_eff = 0.72      # Photoionization efficiency
+CdrPlasmaAir7Stephens.b1v1_X1v1_photoi_eff = 0.69      # Photoionization efficiency
 
-air7_stephens.c4v0_X1v0_beer       = 19E-6     # Beer's length per bar
-air7_stephens.c4v0_X1v1_beer       = 146E-6    # Beer's length per bar
-air7_stephens.c4v1_X1v0_beer       = 30E-6     # Beer's length per bar
-air7_stephens.c4v1_X1v1_beer       = 21E-6     # Beer's length per bar
-air7_stephens.c4v1_X1v2_beer       = 58E-6     # Beer's length per bar
-air7_stephens.c4v1_X1v3_beer       = 158E-6    # Beer's length per bar
-air7_stephens.b1v1_X1v0_beer       = 236E-6    # Beer's length per bar
-air7_stephens.b1v1_X1v1_beer       = 298E-6    # Beer's length per bar
+CdrPlasmaAir7Stephens.c4v0_X1v0_beer       = 19E-6     # Beer's length per bar
+CdrPlasmaAir7Stephens.c4v0_X1v1_beer       = 146E-6    # Beer's length per bar
+CdrPlasmaAir7Stephens.c4v1_X1v0_beer       = 30E-6     # Beer's length per bar
+CdrPlasmaAir7Stephens.c4v1_X1v1_beer       = 21E-6     # Beer's length per bar
+CdrPlasmaAir7Stephens.c4v1_X1v2_beer       = 58E-6     # Beer's length per bar
+CdrPlasmaAir7Stephens.c4v1_X1v3_beer       = 158E-6    # Beer's length per bar
+CdrPlasmaAir7Stephens.b1v1_X1v0_beer       = 236E-6    # Beer's length per bar
+CdrPlasmaAir7Stephens.b1v1_X1v1_beer       = 298E-6    # Beer's length per bar
 
 # ====================================================================================================
 # STREAMER_TAGGER CLASS OPTIONS

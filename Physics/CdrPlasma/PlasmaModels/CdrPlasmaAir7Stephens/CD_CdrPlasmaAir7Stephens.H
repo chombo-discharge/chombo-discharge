@@ -1,26 +1,32 @@
+/* chombo-discharge
+ * Copyright © 2021 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+ */
+
 /*!
-  @file   air7_stephens.H
-  @brief  7-species model for air
+  @file   CD_CdrPlasmaAir7Stephens.H
+  @brief  Declaration of a 7-species model for air, using Stephens et. al photoionization model 
   @author Robert Marskar
-  @date   Feb. 2018
 */
 
-#ifndef _AIR7_STEPHENS_
-#define _AIR7_STEPHENS_
+#ifndef CD_CdrPlasmaAir7Stephens_H
+#define CD_CdrPlasmaAir7Stephens_H
 
-#include <CD_CdrPlasmaPhysics.H>
-#include "CD_LookupTable.H"
-
+// Std includes
 #include <random>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_CdrPlasmaPhysics.H>
+#include <CD_LookupTable.H>
+#include <CD_NamespaceHeader.H>
+
 namespace Physics {
   namespace CdrPlasma {
 
-    class air7_stephens : public CdrPlasmaPhysics {
+    class CdrPlasmaAir7Stephens : public CdrPlasmaPhysics {
     public:
 
-      class electron;
+      class Electron;
       class N2plus;
       class O2plus;
       class N4plus;
@@ -38,63 +44,63 @@ namespace Physics {
       class phot_b1v1_X1v1;
 
 
-      air7_stephens();
-      ~air7_stephens();
+      CdrPlasmaAir7Stephens();
+      ~CdrPlasmaAir7Stephens();
   
 
       void advanceReactionNetwork(Vector<Real>&          a_particle_sources,
-				    Vector<Real>&          a_Photon_sources,
-				    const Vector<Real>     a_particle_densities,
-				    const Vector<RealVect> a_particle_gradients,
-				    const Vector<Real>     a_Photon_densities,
-				    const RealVect         a_E,
-				    const RealVect         a_pos,
-				    const Real             a_dx,
-				    const Real             a_dt,
-				    const Real             a_time,
-				    const Real             a_kappa) const;
+				  Vector<Real>&          a_Photon_sources,
+				  const Vector<Real>     a_particle_densities,
+				  const Vector<RealVect> a_particle_gradients,
+				  const Vector<Real>     a_Photon_densities,
+				  const RealVect         a_E,
+				  const RealVect         a_pos,
+				  const Real             a_dx,
+				  const Real             a_dt,
+				  const Real             a_time,
+				  const Real             a_kappa) const;
 
 
       Vector<Real> computeCdrDiffusionCoefficients(const Real         a_time,
-						      const RealVect     a_pos,
-						      const RealVect     a_E,
-						      const Vector<Real> a_cdr_densities) const;
+						   const RealVect     a_pos,
+						   const RealVect     a_E,
+						   const Vector<Real> a_cdr_densities) const;
   
       Vector<RealVect> computeCdrDriftVelocities(const Real         a_time,
-					      const RealVect     a_pos,
-					      const RealVect     a_E,
-					      const Vector<Real> a_cdr_densities) const;
+						 const RealVect     a_pos,
+						 const RealVect     a_E,
+						 const Vector<Real> a_cdr_densities) const;
   
       Vector<Real> computeCdrDomainFluxes(const Real           a_time,
-					     const RealVect       a_pos,
-					     const int            a_dir,
-					     const Side::LoHiSide a_side,
-					     const RealVect       a_E,
-					     const Vector<Real>   a_cdr_densities,
-					     const Vector<Real>   a_cdr_velocities,
-					     const Vector<Real>   a_cdr_gradients,
-					     const Vector<Real>   a_rte_fluxes,
-					     const Vector<Real>   a_extrap_cdr_fluxes) const;
+					  const RealVect       a_pos,
+					  const int            a_dir,
+					  const Side::LoHiSide a_side,
+					  const RealVect       a_E,
+					  const Vector<Real>   a_cdr_densities,
+					  const Vector<Real>   a_cdr_velocities,
+					  const Vector<Real>   a_cdr_gradients,
+					  const Vector<Real>   a_rte_fluxes,
+					  const Vector<Real>   a_extrap_cdr_fluxes) const;
   
       Vector<Real> computeCdrElectrodeFluxes(const Real         a_time,
-						const RealVect     a_pos,
-						const RealVect     a_normal,
-						const RealVect     a_E,
-						const Vector<Real> a_cdr_densities,
-						const Vector<Real> a_cdr_velocities,
-						const Vector<Real> a_cdr_gradients,
-						const Vector<Real> a_rte_fluxes,
-						const Vector<Real> a_extrap_cdr_fluxes) const;
+					     const RealVect     a_pos,
+					     const RealVect     a_normal,
+					     const RealVect     a_E,
+					     const Vector<Real> a_cdr_densities,
+					     const Vector<Real> a_cdr_velocities,
+					     const Vector<Real> a_cdr_gradients,
+					     const Vector<Real> a_rte_fluxes,
+					     const Vector<Real> a_extrap_cdr_fluxes) const;
 
       Vector<Real> computeCdrDielectricFluxes(const Real         a_time,
-						 const RealVect     a_pos,
-						 const RealVect     a_normal,
-						 const RealVect     a_E,
-						 const Vector<Real> a_cdr_densities,
-						 const Vector<Real> a_cdr_velocities,
-						 const Vector<Real> a_cdr_gradients,
-						 const Vector<Real> a_rte_fluxes,
-						 const Vector<Real> a_extrap_cdr_fluxes) const;
+					      const RealVect     a_pos,
+					      const RealVect     a_normal,
+					      const RealVect     a_E,
+					      const Vector<Real> a_cdr_densities,
+					      const Vector<Real> a_cdr_velocities,
+					      const Vector<Real> a_cdr_gradients,
+					      const Vector<Real> a_rte_fluxes,
+					      const Vector<Real> a_extrap_cdr_fluxes) const;
 
       Real initialSigma(const Real a_time, const RealVect a_pos) const;
 
@@ -116,13 +122,13 @@ namespace Physics {
   
       std::string m_transport_file;
 
-      enum chemistryAlgorithm {
+      enum ChemistryAlgorithm {
 	euler = 0,
 	rk2   = 1,
 	rk4   = 2
       };
 
-      chemistryAlgorithm m_chemistryAlgorithm;
+      ChemistryAlgorithm m_ChemistryAlgorithm;
 
       // Tables built from BOLSIG+
       LookupTable m_e_mobility;    // Mobility
@@ -139,10 +145,10 @@ namespace Physics {
       Vector<int> m_wallBc; // Wall boundary conditions
 
       bool m_alpha_corr;          // Alpha correction
-      bool m_isMobile_electrons;    // Mobile electrons or not
+      bool m_isMobile_Electrons;    // Mobile Electrons or not
       bool m_isMobile_ions;         // Mobile ions or not
       bool m_isDiffusive_ions;      // Diffusive ions or not
-      bool m_isDiffusive_electrons; // Diffusive electrons or not
+      bool m_isDiffusive_Electrons; // Diffusive Electrons or not
   
       Real m_rng_seed;
       Real m_poiss_exp_swap;
@@ -219,14 +225,14 @@ namespace Physics {
       Real m_b1v1_kr;
 
       // Photoionization efficiency for various transitions
-      Real m_c4v0_X1v0_photoi_eff; // Transition c4(v=0) -> X1(v=0) + electron-ion pair
-      Real m_c4v0_X1v1_photoi_eff; // Transition c4(v=0) -> X1(v=0) + electron-ion pair
-      Real m_c4v1_X1v0_photoi_eff; // Transition c4(v=1) -> X1(v=0) + electron-ion pair
-      Real m_c4v1_X1v1_photoi_eff; // Transition c4(v=1) -> X1(v=1) + electron-ion pair
-      Real m_c4v1_X1v2_photoi_eff; // Transition c4(v=1) -> X1(v=2) + electron-ion pair
-      Real m_c4v1_X1v3_photoi_eff; // Transition c4(v=1) -> X1(v=3) + electron-ion pair
-      Real m_b1v1_X1v0_photoi_eff; // Transition b1(v=1) -> X1(v=0) + electron-ion pair
-      Real m_b1v1_X1v1_photoi_eff; // Transition b1(v=1) -> X1(v=1) + electron-ion pair
+      Real m_c4v0_X1v0_photoi_eff; // Transition c4(v=0) -> X1(v=0) + Electron-ion pair
+      Real m_c4v0_X1v1_photoi_eff; // Transition c4(v=0) -> X1(v=0) + Electron-ion pair
+      Real m_c4v1_X1v0_photoi_eff; // Transition c4(v=1) -> X1(v=0) + Electron-ion pair
+      Real m_c4v1_X1v1_photoi_eff; // Transition c4(v=1) -> X1(v=1) + Electron-ion pair
+      Real m_c4v1_X1v2_photoi_eff; // Transition c4(v=1) -> X1(v=2) + Electron-ion pair
+      Real m_c4v1_X1v3_photoi_eff; // Transition c4(v=1) -> X1(v=3) + Electron-ion pair
+      Real m_b1v1_X1v0_photoi_eff; // Transition b1(v=1) -> X1(v=0) + Electron-ion pair
+      Real m_b1v1_X1v1_photoi_eff; // Transition b1(v=1) -> X1(v=1) + Electron-ion pair
 
       Real m_kq; // Quenching rate constant
   
@@ -238,50 +244,52 @@ namespace Physics {
       int poisson_reaction(const Real a_propensity, const Real a_dt) const;
       int binomial_trials(const int a_trials, const Real a_p) const; // a_p is chance of success
 
-      void read_file_entries(LookupTable& a_table, const std::string a_string);
+      void readFileEntries(LookupTable& a_table, const std::string a_string);
       void parseTransportFile();
       void parseTransport();
-      void parse_gas_params();
-      void parse_electron_mobility();
-      void parse_electron_diffco();
-      void parse_alpha();
-      void parse_eta();
-      void parse_photoi();
-      void parse_excitations();
-      void parse_temperature();
-      void parse_see();
+      void parseGasParameters();
+      void parseElectronMobility();
+      void parseElectronDiffusionCoefficient();
+      void parseAlpha();
+      void parseEta();
+      void parsePhotoi();
+      void parseExcitations();
+      void parseTemperature();
+      void parseSEE();
       void parseDomainBc();
-      void parse_chemistry();
-      void instantiate_species();
-      void init_rng();
+      void parseChemistry();
+      void initSpecies();
+      void initRNG();
 
 
       Vector<Real> computeCdrFluxes(const Real         a_time,
-				      const RealVect     a_pos,
-				      const RealVect     a_normal,
-				      const RealVect     a_E,
-				      const Vector<Real> a_cdr_densities,
-				      const Vector<Real> a_cdr_velocities,
-				      const Vector<Real> a_cdr_gradients,
-				      const Vector<Real> a_rte_fluxes,
-				      const Vector<Real> a_extrap_cdr_fluxes,
-				      const Real         a_townsend2,
-				      const Real         a_quantum_efficiency) const;
+				    const RealVect     a_pos,
+				    const RealVect     a_normal,
+				    const RealVect     a_E,
+				    const Vector<Real> a_cdr_densities,
+				    const Vector<Real> a_cdr_velocities,
+				    const Vector<Real> a_cdr_gradients,
+				    const Vector<Real> a_rte_fluxes,
+				    const Vector<Real> a_extrap_cdr_fluxes,
+				    const Real         a_townsend2,
+				    const Real         a_quantum_efficiency) const;
 
-      void advance_chemistry_euler(Vector<Real>&          a_particle_sources,
-				   Vector<Real>&          a_Photon_sources,
-				   Vector<Real>&          a_particle_densities,
-				   const Vector<RealVect> a_particle_gradients,
-				   const Vector<Real>     a_Photon_densities,
-				   const RealVect         a_E,
-				   const RealVect         a_pos,
-				   const Real             a_dx,
-				   const Real             a_dt,
-				   const Real             a_time,
-				   const Real             a_kappa) const;
+      void advanceChemistryEuler(Vector<Real>&          a_particle_sources,
+				 Vector<Real>&          a_Photon_sources,
+				 Vector<Real>&          a_particle_densities,
+				 const Vector<RealVect> a_particle_gradients,
+				 const Vector<Real>     a_Photon_densities,
+				 const RealVect         a_E,
+				 const RealVect         a_pos,
+				 const Real             a_dx,
+				 const Real             a_dt,
+				 const Real             a_time,
+				 const Real             a_kappa) const;
 
     };
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif
