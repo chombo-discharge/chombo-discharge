@@ -8,11 +8,11 @@
 #include "sisdc.H"
 #include "sisdc_storage.H"
 
-sisdc::cdr_storage::cdr_storage(){
+sisdc::CdrStorage::CdrStorage(){
 
 }
 
-sisdc::cdr_storage::cdr_storage(const RefCountedPtr<AmrMesh>& a_amr,
+sisdc::CdrStorage::CdrStorage(const RefCountedPtr<AmrMesh>& a_amr,
 				const phase::which_phase       a_phase,
 				const int                      a_ncomp){
   m_amr       = a_amr;
@@ -20,11 +20,11 @@ sisdc::cdr_storage::cdr_storage(const RefCountedPtr<AmrMesh>& a_amr,
   m_ncomp     = a_ncomp;
 }
 
-sisdc::cdr_storage::~cdr_storage(){
+sisdc::CdrStorage::~CdrStorage(){
   deallocate_storage();
 }
 
-void sisdc::cdr_storage::allocate_storage(const int a_p){
+void sisdc::CdrStorage::allocate_storage(const int a_p){
   m_p = a_p;
 
   m_amr->allocate(m_scratch,  m_phase, m_ncomp);
@@ -61,7 +61,7 @@ void sisdc::cdr_storage::allocate_storage(const int a_p){
   }
 }
 
-void sisdc::cdr_storage::deallocate_storage(){
+void sisdc::CdrStorage::deallocate_storage(){
 
   m_amr->deallocate(m_scratch);
   m_amr->deallocate(m_scratch2);
@@ -93,11 +93,11 @@ void sisdc::cdr_storage::deallocate_storage(){
   }
 }
 
-sisdc::poisson_storage::poisson_storage(){
+sisdc::FieldStorage::FieldStorage(){
 
 }
 
-sisdc::poisson_storage::poisson_storage(const RefCountedPtr<AmrMesh>& a_amr,
+sisdc::FieldStorage::FieldStorage(const RefCountedPtr<AmrMesh>& a_amr,
 					const phase::which_phase       a_phase,
 					const int                      a_ncomp){
   m_amr    = a_amr;
@@ -105,11 +105,11 @@ sisdc::poisson_storage::poisson_storage(const RefCountedPtr<AmrMesh>& a_amr,
   m_phase  = a_phase;
 }
 
-sisdc::poisson_storage::~poisson_storage(){
+sisdc::FieldStorage::~FieldStorage(){
   deallocate_storage();
 }
 
-void sisdc::poisson_storage::allocate_storage(const int a_p){
+void sisdc::FieldStorage::allocate_storage(const int a_p){
   m_p = a_p;
   
   m_amr->allocate(m_previous, m_ncomp);
@@ -119,7 +119,7 @@ void sisdc::poisson_storage::allocate_storage(const int a_p){
   m_amr->allocate(m_E_dom,    m_phase, SpaceDim);
 }
 
-void sisdc::poisson_storage::deallocate_storage(){
+void sisdc::FieldStorage::deallocate_storage(){
   m_amr->deallocate(m_previous);
   m_amr->deallocate(m_E_cell);
   m_amr->deallocate(m_E_face);
@@ -127,11 +127,11 @@ void sisdc::poisson_storage::deallocate_storage(){
   m_amr->deallocate(m_E_dom);
 }
 
-sisdc::rte_storage::rte_storage(){
+sisdc::RtStorage::RtStorage(){
 
 }
 
-sisdc::rte_storage::rte_storage(const RefCountedPtr<AmrMesh>& a_amr,
+sisdc::RtStorage::RtStorage(const RefCountedPtr<AmrMesh>& a_amr,
 				const phase::which_phase       a_phase,
 				const int                      a_ncomp){
   m_amr    = a_amr;
@@ -141,11 +141,11 @@ sisdc::rte_storage::rte_storage(const RefCountedPtr<AmrMesh>& a_amr,
 
 }
 
-sisdc::rte_storage::~rte_storage(){
+sisdc::RtStorage::~RtStorage(){
   deallocate_storage();
 }
 
-void sisdc::rte_storage::allocate_storage(const int a_p){
+void sisdc::RtStorage::allocate_storage(const int a_p){
   m_p = a_p;
   
   m_amr->allocate(m_previous,   m_phase, m_ncomp);
@@ -153,17 +153,17 @@ void sisdc::rte_storage::allocate_storage(const int a_p){
   m_amr->allocate(m_scratchIF,  m_phase, m_ncomp);
 }
 
-void sisdc::rte_storage::deallocate_storage(){
+void sisdc::RtStorage::deallocate_storage(){
   m_amr->deallocate(m_previous);
   m_amr->deallocate(m_scratchIV);
   m_amr->deallocate(m_scratchIF);
 }
 
-sisdc::sigma_storage::sigma_storage(){
+sisdc::SigmaStorage::SigmaStorage(){
 
 }
 
-sisdc::sigma_storage::sigma_storage(const RefCountedPtr<AmrMesh>& a_amr,
+sisdc::SigmaStorage::SigmaStorage(const RefCountedPtr<AmrMesh>& a_amr,
 				    const phase::which_phase       a_phase,
 				    const int                      a_ncomp){
   m_amr    = a_amr;
@@ -171,11 +171,11 @@ sisdc::sigma_storage::sigma_storage(const RefCountedPtr<AmrMesh>& a_amr,
   m_ncomp  = a_ncomp;
 }
 
-sisdc::sigma_storage::~sigma_storage(){
+sisdc::SigmaStorage::~SigmaStorage(){
   deallocate_storage();
 }
 
-void sisdc::sigma_storage::allocate_storage(const int a_p){
+void sisdc::SigmaStorage::allocate_storage(const int a_p){
   m_p = a_p;
   
   m_amr->allocate(m_scratch,  m_phase, m_ncomp);
@@ -192,7 +192,7 @@ void sisdc::sigma_storage::allocate_storage(const int a_p){
   }
 }
 
-void sisdc::sigma_storage::deallocate_storage(){
+void sisdc::SigmaStorage::deallocate_storage(){
   m_amr->deallocate(m_scratch);
   m_amr->deallocate(m_error);
 

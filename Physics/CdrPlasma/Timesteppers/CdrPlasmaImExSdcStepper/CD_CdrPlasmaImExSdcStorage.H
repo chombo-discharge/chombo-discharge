@@ -1,60 +1,63 @@
+/* chombo-discharge
+ * Copyright © 2021 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+ */
+
 /*!
-  @file   imex_sdc_storage.H
-  @brief  Declaration of scratch storage for imex_sdc
+  @file   CD_CdrPlasmaImExSdcStorage.H
+  @brief  Declaration of scratch storage for CdrPlasmaImExSdcStepper
   @author Robert Marskar
-  @date   Feb. 2018
 */
 
-#ifndef _IMEX_SDC_STORAGE_
-#define _IMEX_SDC_STORAGE_
+#ifndef CD_CdrPlasmaImExSdcStorage_H
+#define CD_CdrPlasmaImExSdcStorage_H
 
-#include "imex_sdc.H"
-#include "CD_AmrMesh.H"
+// Our includes
+#include <CD_CdrPlasmaImExSdcStepper.H>
+#include <CD_AmrMesh.H>
+#include <CD_NamespaceHeader.H>
 
-#include <RefCountedPtr.H>
-
-#include "CD_NamespaceHeader.H"
 namespace Physics {
   namespace CdrPlasma {
   
-    class imex_sdc::cdr_storage {
+    class CdrPlasmaImExSdcStepper::CdrStorage {
     public:
 
-      cdr_storage();
-      cdr_storage(const RefCountedPtr<AmrMesh>& a_amr,
-		  const std::string              a_realm,
-		  const phase::which_phase       a_phase,
-		  const int m_ncomp);
-      ~cdr_storage();
+      CdrStorage();
+      CdrStorage(const RefCountedPtr<AmrMesh>& a_amr,
+		 const std::string              a_realm,
+		 const phase::which_phase       a_phase,
+		 const int m_ncomp);
+      ~CdrStorage();
 
       void allocateStorage(const int a_p);
       void deallocateStorage();
 
       EBAMRCellData& getScratch()  { return m_scratch;    }
       EBAMRCellData& getScratch2() { return m_scratch2;   }
-      EBAMRCellData& get_error()    { return m_error;      }
-      EBAMRCellData& get_gradient() { return m_gradient;   }
-      EBAMRCellData& get_old()      { return m_old;        }
+      EBAMRCellData& getError()    { return m_error;      }
+      EBAMRCellData& getGradient() { return m_gradient;   }
+      EBAMRCellData& getOld()      { return m_old;        }
       EBAMRCellData& getScratchD() { return m_scratchD;   }
-      EBAMRCellData& get_divF()     { return m_divF;       }
+      EBAMRCellData& getDivF()     { return m_divF;       }
   
 
-      Vector<EBAMRCellData>& get_phi()     { return m_phi;     }
-      Vector<EBAMRCellData>& get_FAR()     { return m_FAR;     }
-      Vector<EBAMRCellData>& get_FD()      { return m_FD;      }
-      Vector<EBAMRCellData>& get_F()       { return m_F;       }
+      Vector<EBAMRCellData>& getPhi()     { return m_phi;     }
+      Vector<EBAMRCellData>& getFAR()     { return m_FAR;     }
+      Vector<EBAMRCellData>& getFD()      { return m_FD;      }
+      Vector<EBAMRCellData>& getF()       { return m_F;       }
 
-      EBAMRIVData& get_eb_scratch1(){ return m_scratchIVs; }
-      EBAMRIVData& get_eb_scratchD(){ return m_scratchIVD; }
-      EBAMRIVData& get_eb_state(){    return m_scratchIV1; }
-      EBAMRIVData& get_eb_velo(){     return m_scratchIV2; }
-      EBAMRIVData& get_eb_flux(){     return m_scratchIV3; }
-      EBAMRIVData& get_eb_grad(){     return m_scratchIV4; }
+      EBAMRIVData& getEbScratch1(){ return m_scratchIVs; }
+      EBAMRIVData& getEbScratchD(){ return m_scratchIVD; }
+      EBAMRIVData& getEbState(){    return m_scratchIV1; }
+      EBAMRIVData& getEbVelo(){     return m_scratchIV2; }
+      EBAMRIVData& getEbFlux(){     return m_scratchIV3; }
+      EBAMRIVData& getEbGrad(){     return m_scratchIV4; }
 
-      EBAMRIFData& getDomain_state(){  return m_scratchIF1; }
-      EBAMRIFData& getDomain_velo(){   return m_scratchIF2; }
-      EBAMRIFData& getDomain_flux(){   return m_scratchIF3; }
-      EBAMRIFData& getDomain_grad(){   return m_scratchIF4; }
+      EBAMRIFData& getDomainState(){  return m_scratchIF1; }
+      EBAMRIFData& getDomainVelo(){   return m_scratchIF2; }
+      EBAMRIFData& getDomainFlux(){   return m_scratchIF3; }
+      EBAMRIFData& getDomainGrad(){   return m_scratchIF4; }
   
     protected:
 
@@ -91,24 +94,24 @@ namespace Physics {
       EBAMRIFData m_scratchIF4; // Scratch data
     };
 
-    class imex_sdc::poisson_storage {
+    class CdrPlasmaImExSdcStepper::FieldStorage {
     public:
 
-      poisson_storage();
-      poisson_storage(const RefCountedPtr<AmrMesh>& a_amr,
-		      const std::string              a_realm,
-		      const phase::which_phase       a_phase,
-		      const int                      a_ncomp);
-      ~poisson_storage();
+      FieldStorage();
+      FieldStorage(const RefCountedPtr<AmrMesh>& a_amr,
+		   const std::string              a_realm,
+		   const phase::which_phase       a_phase,
+		   const int                      a_ncomp);
+      ~FieldStorage();
 
       void allocateStorage(const int a_p);
       void deallocateStorage();
 
-      MFAMRCellData& get_previous()    {return m_previous; }
-      EBAMRCellData& get_E_cell()      {return m_E_cell;   }
-      EBAMRFluxData& get_E_face()      {return m_E_face;   }
-      EBAMRIVData& get_E_eb()          {return m_E_eb;     }
-      EBAMRIFData& get_E_domain()      {return m_E_dom;    }
+      MFAMRCellData& getPrevious()    {return m_previous; }
+      EBAMRCellData& getElectricFieldCell()      {return m_E_cell;   }
+      EBAMRFluxData& getElectricFieldFace()      {return m_E_face;   }
+      EBAMRIVData& getElectricFieldEb()          {return m_E_eb;     }
+      EBAMRIFData& getElectricFieldDomain()      {return m_E_dom;    }
 
     protected:
 
@@ -125,22 +128,22 @@ namespace Physics {
       EBAMRIFData m_E_dom;           // E-field on domain faces
     };
 
-    class imex_sdc::rte_storage {
+    class CdrPlasmaImExSdcStepper::RtStorage {
     public:
 
-      rte_storage();
-      rte_storage(const RefCountedPtr<AmrMesh>& a_amr,
-		  const std::string              a_realm,
-		  const phase::which_phase       a_phase,
-		  const int                      a_ncomp);
-      ~rte_storage();
+      RtStorage();
+      RtStorage(const RefCountedPtr<AmrMesh>& a_amr,
+		const std::string              a_realm,
+		const phase::which_phase       a_phase,
+		const int                      a_ncomp);
+      ~RtStorage();
 
       void allocateStorage(const int a_p);
       void deallocateStorage();
   
-      EBAMRCellData& get_previous(){  return m_previous;  }
-      EBAMRIVData& get_eb_flux(){     return m_scratchIV; }
-      EBAMRIFData& getDomain_flux(){ return m_scratchIF; }
+      EBAMRCellData& getPrevious(){  return m_previous;  }
+      EBAMRIVData& getEbFlux(){     return m_scratchIV; }
+      EBAMRIFData& getDomainFlux(){ return m_scratchIF; }
 
     protected:
 
@@ -155,25 +158,25 @@ namespace Physics {
       EBAMRIFData m_scratchIF;   // Used for domain-centered isotropic density
     };
 
-    class imex_sdc::sigma_storage {
+    class CdrPlasmaImExSdcStepper::SigmaStorage {
     public:
 
-      sigma_storage();
-      sigma_storage(const RefCountedPtr<AmrMesh>& a_amr,
-		    const std::string              a_realm,
-		    const phase::which_phase       a_phase,
-		    const int                      a_ncomp);
-      ~sigma_storage();
+      SigmaStorage();
+      SigmaStorage(const RefCountedPtr<AmrMesh>& a_amr,
+		   const std::string              a_realm,
+		   const phase::which_phase       a_phase,
+		   const int                      a_ncomp);
+      ~SigmaStorage();
   
       void allocateStorage(const int a_p);
       void deallocateStorage();
 
       EBAMRIVData& getScratch(){ return m_scratch; }
-      EBAMRIVData& get_error(){   return m_error; }
+      EBAMRIVData& getError(){   return m_error; }
 
       Vector<EBAMRIVData>& getSigmaSolver(){ return m_sigma;}
-      Vector<EBAMRIVData>& get_Fnew(){  return m_Fnew; }
-      Vector<EBAMRIVData>& get_Fold(){  return m_Fold; }
+      Vector<EBAMRIVData>& getFnew(){  return m_Fnew; }
+      Vector<EBAMRIVData>& getFold(){  return m_Fold; }
 
     protected:
     
@@ -192,5 +195,7 @@ namespace Physics {
     };
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif

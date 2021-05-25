@@ -17,10 +17,10 @@
 #include <iomanip>
 #include <ParmParse.H>
 
-typedef sdc::cdr_storage     cdr_storage;
-typedef sdc::poisson_storage poisson_storage;
-typedef sdc::rte_storage     rte_storage;
-typedef sdc::sigma_storage   sigma_storage;
+typedef sdc::CdrStorage     CdrStorage;
+typedef sdc::FieldStorage FieldStorage;
+typedef sdc::RtStorage     RtStorage;
+typedef sdc::SigmaStorage   SigmaStorage;
 
 sdc::sdc(){
   m_className = "sdc";
@@ -49,21 +49,21 @@ void sdc::parseOptions(){
   parse_semi_implicit();
 
   // Specific to this class
-  parse_nodes();
-  parse_adaptive_options();
-  parse_debug_options();
-  parse_advection_options();
+  parseNodes();
+  parseAdaptiveOptions();
+  parseDebugOptions();
+  parseAdvectionOptions();
   parse_photoi_options();
 
   // Setup nodes
-  sdc::setup_quadrature_nodes(m_p);
-  sdc::setup_qmj(m_p);
+  sdc::setupQuadratureNodes(m_p);
+  sdc::setupQmj(m_p);
 }
 
-void sdc::parse_nodes(){
-  CH_TIME("sdc::parse_nodes");
+void sdc::parseNodes(){
+  CH_TIME("sdc::parseNodes");
   if(m_verbosity > 5){
-    pout() << "sdc::parse_nodes" << endl;
+    pout() << "sdc::parseNodes" << endl;
   }
 
   ParmParse pp(m_className.c_str());
@@ -80,24 +80,24 @@ void sdc::parse_nodes(){
     m_which_nodes = "chebyshev";
   }
   else {
-    MayDay::Abort("sdc::parse_nodes - unknown node type requested");
+    MayDay::Abort("sdc::parseNodes - unknown node type requested");
   }
 
   pp.get("subintervals",     m_p);
   pp.get("corr_iter",        m_k);
 
   if(m_p < 1){
-    MayDay::Abort("sdc::parse_nodes - sdc.subintervals cannot be < 1");
+    MayDay::Abort("sdc::parseNodes - sdc.subintervals cannot be < 1");
   }
   if(m_k < 0){
-    MayDay::Abort("sdc::parse_nodes - sdc.corr_iter cannot be < 0");
+    MayDay::Abort("sdc::parseNodes - sdc.corr_iter cannot be < 0");
   }
 }
 
-void sdc::parse_adaptive_options(){
-  CH_TIME("sdc::parse_adaptive_options");
+void sdc::parseAdaptiveOptions(){
+  CH_TIME("sdc::parseAdaptiveOptions");
   if(m_verbosity > 5){
-    pout() << "sdc::parse_adaptive_options" << endl;
+    pout() << "sdc::parseAdaptiveOptions" << endl;
   }
 
   ParmParse pp(m_className.c_str());
@@ -121,10 +121,10 @@ void sdc::parse_adaptive_options(){
   m_adaptive_dt = (str == "true") ? true : false;
 }
 
-void sdc::parse_debug_options(){
-  CH_TIME("sdc::parse_debug_options");
+void sdc::parseDebugOptions(){
+  CH_TIME("sdc::parseDebugOptions");
   if(m_verbosity > 5){
-    pout() << "sdc::parse_debug_options" << endl;
+    pout() << "sdc::parseDebugOptions" << endl;
   }
 
   ParmParse pp(m_className.c_str());
@@ -145,10 +145,10 @@ void sdc::parse_debug_options(){
   pp.get("profile_steps", str); m_profile_steps = (str == "true") ? true : false;
 }
 
-void sdc::parse_advection_options(){
-  CH_TIME("sdc::parse_advection_options");
+void sdc::parseAdvectionOptions(){
+  CH_TIME("sdc::parseAdvectionOptions");
   if(m_verbosity > 5){
-    pout() << "sdc::parse_advection_options" << endl;
+    pout() << "sdc::parseAdvectionOptions" << endl;
   }
 
   ParmParse pp(m_className.c_str());
@@ -184,11 +184,11 @@ void sdc::parse_photoi_options(){
   pp.get("freeze_photoi", str); m_freeze_photoi = (str == "true") ? true : false;
 }
 
-RefCountedPtr<cdr_storage>& sdc::get_cdr_storage(const CdrIterator& a_solverit){
+RefCountedPtr<CdrStorage>& sdc::get_CdrStorage(const CdrIterator& a_solverit){
   return m_cdr_scratch[a_solverit.get_solver()];
 }
 
-RefCountedPtr<rte_storage>& sdc::get_rte_storage(const RtIterator& a_solverit){
+RefCountedPtr<RtStorage>& sdc::get_RtStorage(const RtIterator& a_solverit){
   return m_rte_scratch[a_solverit.get_solver()];
 }
 
@@ -205,10 +205,10 @@ Real sdc::restrict_dt(){
   return 1.E99;
 }
 
-Real sdc::get_max_node_distance(){
-  CH_TIME("sdc::get_max_node_distance");
+Real sdc::getMaxNodeDistance(){
+  CH_TIME("sdc::getMaxNodeDistance");
   if(m_verbosity > 5){
-    pout() << "sdc::get_max_node_distance" << endl;
+    pout() << "sdc::getMaxNodeDistance" << endl;
   }
 
   Real max_dist = 0.0;
@@ -228,30 +228,30 @@ void sdc::init(){
   advanceReactionNetwork(m_time, m_dt);
 }
 
-void sdc::setup_quadrature_nodes(const int a_p){
-  CH_TIME("sdc::setup_quadrature_nodes");
+void sdc::setupQuadratureNodes(const int a_p){
+  CH_TIME("sdc::setupQuadratureNodes");
   if(m_verbosity > 5){
-    pout() << "sdc::setup_quadrature_nodes" << endl;
+    pout() << "sdc::setupQuadratureNodes" << endl;
   }
 
   if(m_which_nodes == "uniform"){
-    sdc::setup_uniform_nodes(a_p);
+    sdc::setupUniformNodes(a_p);
   }
   else if(m_which_nodes == "lobatto"){
-    sdc::setup_lobatto_nodes(a_p);
+    sdc::setupLobattoNodes(a_p);
   }
   else if(m_which_nodes == "chebyshev"){
-    sdc::setup_chebyshev_nodes(a_p);
+    sdc::setupChebyshevNodes(a_p);
   }
   else {
-    MayDay::Abort("sdc::setup_quadrature_nodes - unknown nodes requested");
+    MayDay::Abort("sdc::setupQuadratureNodes - unknown nodes requested");
   }
 }
 
-void sdc::setup_uniform_nodes(const int a_p){
-  CH_TIME("sdc::setup_uniform_nodes");
+void sdc::setupUniformNodes(const int a_p){
+  CH_TIME("sdc::setupUniformNodes");
   if(m_verbosity > 5){
-    pout() << "sdc::setup_uniform_nodes" << endl;
+    pout() << "sdc::setupUniformNodes" << endl;
   }
 
   // TLDR: The nodes and weights are hardcoded. A better programmer would compute these
@@ -264,10 +264,10 @@ void sdc::setup_uniform_nodes(const int a_p){
   }
 }
 
-void sdc::setup_lobatto_nodes(const int a_p){
-  CH_TIME("sdc::setup_lobatto_nodes");
+void sdc::setupLobattoNodes(const int a_p){
+  CH_TIME("sdc::setupLobattoNodes");
   if(m_verbosity > 5){
-    pout() << "sdc::setup_lobatto_nodes" << endl;
+    pout() << "sdc::setupLobattoNodes" << endl;
   }
 
   // TLDR: The nodes and weights are hardcoded. A better programmer would compute these
@@ -314,14 +314,14 @@ void sdc::setup_lobatto_nodes(const int a_p){
     m_nodes[6] =  1.0;
   }
   else{
-    MayDay::Abort("sdc::setup_lobatto_nodes - requested order exceeds 7. Compute your own damn nodes!");
+    MayDay::Abort("sdc::setupLobattoNodes - requested order exceeds 7. Compute your own damn nodes!");
   }
 }
 
-void sdc::setup_chebyshev_nodes(const int a_p){
-  CH_TIME("sdc::setup_chebyshev_nodes");
+void sdc::setupChebyshevNodes(const int a_p){
+  CH_TIME("sdc::setupChebyshevNodes");
   if(m_verbosity > 5){
-    pout() << "sdc::setup_chebyshev_nodes" << endl;
+    pout() << "sdc::setupChebyshevNodes" << endl;
   }
 
   // TLDR: The nodes and weights are hardcoded. A better programmer would compute these
@@ -334,10 +334,10 @@ void sdc::setup_chebyshev_nodes(const int a_p){
   m_nodes[a_p] = 1.0;
 }
 
-void sdc::setup_qmj(const int a_p){
-  CH_TIME("sdc::setup_qmj");
+void sdc::setupQmj(const int a_p){
+  CH_TIME("sdc::setupQmj");
   if(m_verbosity > 5){
-    pout() << "sdc::setup_qmj" << endl;
+    pout() << "sdc::setupQmj" << endl;
   }
 
   const int nnodes = 1 + a_p;
@@ -374,7 +374,7 @@ void sdc::setup_qmj(const int a_p){
     int LDB  = nnodes;
     int INFO = 10;
     dgesv_(&N, &NRHS, V, &LDA, IPIV, cj, &LDB, &INFO);
-    if(INFO != 0) MayDay::Abort("sdc::setup_qmj - could not compute weights");
+    if(INFO != 0) MayDay::Abort("sdc::setupQmj - could not compute weights");
     
     // Now construct qmj
     for (int m = 0; m < a_p; m++){
@@ -386,10 +386,10 @@ void sdc::setup_qmj(const int a_p){
   }
 }
 
-void sdc::setup_subintervals(const Real a_time, const Real a_dt){
-  CH_TIME("sdc::setup_subintervals");
+void sdc::setupSubintervals(const Real a_time, const Real a_dt){
+  CH_TIME("sdc::setupSubintervals");
   if(m_verbosity > 5){
-    pout() << "sdc::setup_subintervals" << endl;
+    pout() << "sdc::setupSubintervals" << endl;
   }
 
   // m_nodes are Gauss-Lobatto nodes on [-1,1]. These must
@@ -442,18 +442,18 @@ void sdc::quad(EBAMRIVData& a_quad, const Vector<EBAMRIVData>& a_integrand, cons
   }
 }
   
-void sdc::copy_phi_p_to_cdr(){
-  CH_TIME("sdc::copy_phi_p_to_cdr");
+void sdc::copyPhiPToCdr(){
+  CH_TIME("sdc::copyPhiPToCdr");
   if(m_verbosity > 5){
-    pout() << "sdc::copy_phi_p_to_cdr" << endl;
+    pout() << "sdc::copyPhiPToCdr" << endl;
   }
 
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>&  solver  = solver_it();
-    RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = get_CdrStorage(solver_it);
 
     EBAMRCellData& phi = solver->getPhi();
-    const EBAMRCellData& phip = storage->get_phi()[m_p];
+    const EBAMRCellData& phip = storage->getPhi()[m_p];
     DataOps::copy(phi, phip);
   }
 }
@@ -466,18 +466,18 @@ void sdc::copy_phi_p_to_rte(){
 
   for (RtIterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>&  solver  = solver_it();
-    RefCountedPtr<rte_storage>& storage = get_rte_storage(solver_it);
+    RefCountedPtr<RtStorage>& storage = get_RtStorage(solver_it);
 
     EBAMRCellData& phi = solver->getPhi();
-    const EBAMRCellData& phip = storage->get_phi()[m_p];
+    const EBAMRCellData& phip = storage->getPhi()[m_p];
     DataOps::copy(phi, phip);
   }
 }
 
-void sdc::copy_sigma_p_to_sigma(){
-  CH_TIME("sdc::copy_sigma_p_to_sigma");
+void sdc::copySigmaPToSigma(){
+  CH_TIME("sdc::copySigmaPToSigma");
   if(m_verbosity > 5){
-    pout() << "sdc::copy_sigma_p_to_sigma" << endl;
+    pout() << "sdc::copySigmaPToSigma" << endl;
   }
 
   EBAMRIVData& sigma        = m_sigma->getPhi();
@@ -492,10 +492,10 @@ void sdc::copy_FRp_to_FR0(){
   }
 
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = get_CdrStorage(solver_it);
 
-    EBAMRCellData& FR0       = storage->get_FR()[0];
-    const EBAMRCellData& FRp = storage->get_FR()[m_p];
+    EBAMRCellData& FR0       = storage->getFR()[0];
+    const EBAMRCellData& FRp = storage->getFR()[m_p];
     DataOps::copy(FR0, FRp);
   }
 }
@@ -512,11 +512,11 @@ Real sdc::advance(const Real a_dt){
   // ---------------------------------------------------------------------------------------------------
 
   // Backup solvers
-  sdc::store_solvers();
+  sdc::storeSolvers();
   
   // Initialize integrations. If we do corrections
-  sdc::copy_cdr_to_phi_m0();
-  sdc::copy_sigma_to_sigma_m0();
+  sdc::copyCdrToPhiM0();
+  sdc::copySigmaToM0();
   sdc::copy_rte_to_phi_m0();
 
   // SDC advance
@@ -531,7 +531,7 @@ Real sdc::advance(const Real a_dt){
   Real t = 0.0;
   while(!accept_step && retry_step){
     num_corrections = 0;
-    sdc::setup_subintervals(m_time, actual_dt);
+    sdc::setupSubintervals(m_time, actual_dt);
 
     // First SDC sweep. No lagged slopes here.
     sdc::sweep(a_dt, m_time, false);
@@ -541,20 +541,20 @@ Real sdc::advance(const Real a_dt){
       num_corrections++;
 
       // Initialize error and reconcile integrands (i.e. make them quadrature-ready)
-      sdc::initialize_errors();
-      sdc::reconcile_integrands();
+      sdc::initializeErrors();
+      sdc::reconcileIntegrands();
 
       // SDC correction along whole interval
       sdc::sweep(a_dt, m_time, true);
 
       // Compute error and check if we need to keep iterating
-      sdc::finalize_errors();
+      sdc::finalizeErrors();
       if(m_max_error < m_err_thresh && m_adaptive_dt && icorr >= m_min_corr) break; // No need in going beyond
     }
 
     // Compute a new time step. If it is smaller than the minimum allowed CFL step, accept the step anyways
     if(m_adaptive_dt){
-      sdc::compute_new_dt(accept_step, actual_dt, num_corrections);
+      sdc::computeNewDt(accept_step, actual_dt, num_corrections);
       
       if(!accept_step){  // Step rejection, use the new dt for next step.
 	actual_dt = m_new_dt;
@@ -563,11 +563,11 @@ Real sdc::advance(const Real a_dt){
 	retry_step  = num_reject <= m_max_retries;
 	
 	if(retry_step){
-	  sdc::restore_solvers();
+	  sdc::restoreSolvers();
 	  sdc::compute_E_into_scratch();
-	  sdc::compute_cdr_gradients();
-	  sdc::compute_cdr_velo(m_time);
-	  TimeStepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
+	  sdc::computeCdrGradients();
+	  sdc::computeCdrVelo(m_time);
+	  TimeStepper::compute_cdr_diffusion(m_fieldSolver_scratch->getElectricFieldCell(), m_fieldSolver_scratch->getElectricFieldEb());
 	}
       }
     }
@@ -582,19 +582,19 @@ Real sdc::advance(const Real a_dt){
   // on m=0 for the next step. If this step is the last step before a regrid, this class will regrid the FR_0 slope and
   // put it back where it belongs. 
   sdc::copy_phi_p_to_rte();
-  sdc::copy_phi_p_to_cdr();
-  sdc::copy_sigma_p_to_sigma();
+  sdc::copyPhiPToCdr();
+  sdc::copySigmaPToSigma();
   sdc::copy_FRp_to_FR0();       
 
   // Always recompute velocities and diffusion coefficients before the next time step. The Poisson and RTE equations
   // have been updated when we come in here. 
-  sdc::compute_cdr_velo(m_time + actual_dt);
-  TimeStepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
+  sdc::computeCdrVelo(m_time + actual_dt);
+  TimeStepper::compute_cdr_diffusion(m_fieldSolver_scratch->getElectricFieldCell(), m_fieldSolver_scratch->getElectricFieldEb());
 
 
   // Profile step
-  if(m_print_report)  sdc::adaptive_report(first_dt, actual_dt, m_new_dt, num_corrections, num_reject, m_max_error);
-  if(m_profile_steps) sdc::write_step_profile(actual_dt, m_max_error, m_p, num_corrections, num_reject);
+  if(m_print_report)  sdc::adaptiveReport(first_dt, actual_dt, m_new_dt, num_corrections, num_reject, m_max_error);
+  if(m_profile_steps) sdc::writeStepProfile(actual_dt, m_max_error, m_p, num_corrections, num_reject);
 
   // Store current error. 
   m_have_err  = true;
@@ -603,18 +603,18 @@ Real sdc::advance(const Real a_dt){
   return actual_dt;
 }
 
-void sdc::copy_cdr_to_phi_m0(){
-  CH_TIME("sdc::copy_cdr_to_phi_m0");
+void sdc::copyCdrToPhiM0(){
+  CH_TIME("sdc::copyCdrToPhiM0");
   if(m_verbosity > 5){
-    pout() << "sdc::copy_cdr_to_phi_m0" << endl;
+    pout() << "sdc::copyCdrToPhiM0" << endl;
   }
 
   // CDR solvers
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>&  solver  = solver_it();
-    RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = get_CdrStorage(solver_it);
     
-    EBAMRCellData& phi0 = storage->get_phi()[0];
+    EBAMRCellData& phi0 = storage->getPhi()[0];
     const EBAMRCellData& phi = solver->getPhi();
     DataOps::copy(phi0, phi);
   }
@@ -629,18 +629,18 @@ void sdc::copy_rte_to_phi_m0(){
   // RTE solvers
   for (RtIterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>&  solver  = solver_it();
-    RefCountedPtr<rte_storage>& storage = get_rte_storage(solver_it);
+    RefCountedPtr<RtStorage>& storage = get_RtStorage(solver_it);
     
-    EBAMRCellData& phi0 = storage->get_phi()[0];
+    EBAMRCellData& phi0 = storage->getPhi()[0];
     const EBAMRCellData& phi = solver->getPhi();
     DataOps::copy(phi0, phi);
   }
 }
 
-void sdc::copy_sigma_to_sigma_m0(){
+void sdc::copySigmaToM0(){
   CH_TIME("sdc::copy_sigma_sigma_m0");
   if(m_verbosity > 5){
-    pout() << "sdc::copy_sigma_to_sigma_m0" << endl;
+    pout() << "sdc::copySigmaToM0" << endl;
   }
 
   // Copy sigma to starting state
@@ -716,12 +716,12 @@ void sdc::sweep_semi_implicit(const Real a_dt, const Real a_time, const bool a_c
     sdc::compute_E_into_scratch();
       
     // 1. Update boundary conditions and charge fluxes
-    sdc::compute_cdr_gradients();
-    sdc::compute_cdr_eb_states(); 
+    sdc::computeCdrGradients();
+    sdc::computeCdrEbStates(); 
     sdc::compute_cdr_fluxes(a_time);
-    sdc::compute_cdr_domain_states();
+    sdc::computeCdrDomainStates();
     sdc::computeCdrDomainFluxes(a_time);
-    sdc::compute_sigma_flux();
+    sdc::computeSigmaFlux();
 
     // 2. Compute the explicit divergence. The operator div(D*grad(phi_m^(k+1))) goes onto m_divD storage
     sdc::computeDivD(m, a_corrector);
@@ -742,19 +742,19 @@ void sdc::sweep_semi_implicit(const Real a_dt, const Real a_time, const bool a_c
     sdc::solve_semi_implicit_poisson(m);
 
     // 8. Advance the reaction network to get source terms
-    sdc::compute_reaction_network(m, time, m_dtm[m], a_corrector);
+    sdc::computeReactionNetwork(m, time, m_dtm[m], a_corrector);
 
     // 9. Compute the new cdr velocities
     sdc::compute_semi_implicit_cdr_velocities(m, time);
 
     // 9b. Compute new boundary conditions using the new field and velocities. Really need to rework this one. 
 #if 1
-    sdc::compute_cdr_gradients();
-    sdc::compute_cdr_eb_states();
+    sdc::computeCdrGradients();
+    sdc::computeCdrEbStates();
     sdc::compute_cdr_fluxes(a_time);
-    sdc::compute_cdr_domain_states();
+    sdc::computeCdrDomainStates();
     sdc::computeCdrDomainFluxes(a_time);
-    sdc::compute_sigma_flux();
+    sdc::computeSigmaFlux();
 #endif
 
     // 10. Compute div(v*phi)
@@ -779,11 +779,11 @@ void sdc::computeDivD(const int a_m, const bool a_corrector){
 
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
-    RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = get_CdrStorage(solver_it);
 
     EBAMRCellData& divD = storage->get_divD();
-    const EBAMRCellData& phi = storage->get_phi()[a_m];
-    const EBAMRCellData& FD0 = storage->get_FD()[0];
+    const EBAMRCellData& phi = storage->getPhi()[a_m];
+    const EBAMRCellData& FD0 = storage->getFD()[0];
     
     // If a_m==0 we should only have to compute divD once, and this happens during the initial SDC sweep. For the corrector
     // we should always be able to use the m_FD[0] slope so we simply copy that over
@@ -809,11 +809,11 @@ void sdc::computeDivF(const int a_m, const bool a_corrector){
 
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
-    RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = get_CdrStorage(solver_it);
 
-    EBAMRCellData& divF      = storage->get_divF();
-    const EBAMRCellData& phi = storage->get_phi()[a_m];
-    const EBAMRCellData& FA0 = storage->get_FA()[0];
+    EBAMRCellData& divF      = storage->getDivF();
+    const EBAMRCellData& phi = storage->getPhi()[a_m];
+    const EBAMRCellData& FA0 = storage->getFA()[0];
 
     const Real extrap_dt = (m_extrap_advect) ? m_dtm[a_m] : 0.0;
     
@@ -847,7 +847,7 @@ void sdc::compute_semi_implicit_mobilities(const int a_m, const bool a_corrector
   //    mobility = |v|/|E|*q*dt/eps0*phi
 
   // Compute |E| first
-  const EBAMRCellData& E = m_fieldSolver_scratch->get_E_cell();
+  const EBAMRCellData& E = m_fieldSolver_scratch->getElectricFieldCell();
   DataOps::vectorLength(m_scratch1, E);
 
   // This is the dt for m->m+1
@@ -857,7 +857,7 @@ void sdc::compute_semi_implicit_mobilities(const int a_m, const bool a_corrector
   // by computing mobility = |v|/|E|
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver   = solver_it();
-    const RefCountedPtr<cdr_storage>& storage = sdc::get_cdr_storage(solver_it);
+    const RefCountedPtr<CdrStorage>& storage = sdc::get_CdrStorage(solver_it);
 
     const int q      = (solver_it.getSpecies())->getChargeNumber();
     const int q_sign = q > 0 ? 1 : -1;
@@ -867,7 +867,7 @@ void sdc::compute_semi_implicit_mobilities(const int a_m, const bool a_corrector
       EBAMRFluxData& face_mob   = storage->get_face_mob();
       EBAMRIVData&   eb_mob     = storage->get_eb_mob();
       const EBAMRCellData& velo = solver->getCellCenteredVelocity();
-      const EBAMRCellData& phi  = storage->get_phi()[a_m];
+      const EBAMRCellData& phi  = storage->getPhi()[a_m];
 
       DataOps::vectorLength(cell_mob, velo);
       DataOps::divideByScalar(cell_mob, m_scratch1); // This gives the magnitude of the cell-centered mobility
@@ -917,14 +917,14 @@ void sdc::compute_semi_implicit_rho(const int a_m,  const bool a_corrector){
   // This iterates over solvers and add the terms if q > 0
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver   = solver_it();
-    const RefCountedPtr<cdr_storage>& storage = sdc::get_cdr_storage(solver_it);
+    const RefCountedPtr<CdrStorage>& storage = sdc::get_CdrStorage(solver_it);
 
     const int q = (solver_it.getSpecies())->getChargeNumber();
     
     if(q != 0){
 
       // This adds the term q*phi_m^k
-      const EBAMRCellData& phi = storage->get_phi()[a_m];
+      const EBAMRCellData& phi = storage->getPhi()[a_m];
       DataOps::incr(rho_gas, phi, 1.0*q);
 
       // Add diffusive term. This is not a lagged term
@@ -935,12 +935,12 @@ void sdc::compute_semi_implicit_rho(const int a_m,  const bool a_corrector){
 
       // This adds the other terms. The quadrature required for I_m(phi^k) is performed in place. 
       if(a_corrector){
-	const EBAMRCellData& FA   = storage->get_FA()[a_m];
-	const EBAMRCellData& FD   = storage->get_FD()[a_m];
+	const EBAMRCellData& FA   = storage->getFA()[a_m];
+	const EBAMRCellData& FD   = storage->getFD()[a_m];
 
 	// Compute the quadrature
 	EBAMRCellData& scratch = storage->getScratch();
-	sdc::quad(scratch, storage->get_F(), a_m);
+	sdc::quad(scratch, storage->getF(), a_m);
 
 	// Increment
 	if(solver->isMobile()){
@@ -986,7 +986,7 @@ void sdc::set_semi_implicit_permittivities(){
   // Increment that shit. 
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver   = solver_it();
-    const RefCountedPtr<cdr_storage>& storage = sdc::get_cdr_storage(solver_it);
+    const RefCountedPtr<CdrStorage>& storage = sdc::get_CdrStorage(solver_it);
 
     const int q = (solver_it.getSpecies())->getChargeNumber();
     
@@ -1014,7 +1014,7 @@ void sdc::advance_sigma(const int a_m, const bool a_corrector){
   // Add in the lagged terms for sigma. As above, m=0 and corrector is a special case where we just use the old slopes.
   EBAMRIVData& sigma_m1      = m_sigma_scratch->get_sigma()[a_m+1];
   const EBAMRIVData& sigma_m = m_sigma_scratch->get_sigma()[a_m];
-  const EBAMRIVData& Fsig_m = m_sigma_scratch->get_Fold()[a_m]; // Here, we should be able to use either Fold or Fnew
+  const EBAMRIVData& Fsig_m = m_sigma_scratch->getFold()[a_m]; // Here, we should be able to use either Fold or Fnew
 
   const Real dtm = m_dtm[a_m];
   
@@ -1024,12 +1024,12 @@ void sdc::advance_sigma(const int a_m, const bool a_corrector){
 
   // Corrector needs lagged terms
   if(a_corrector){
-    EBAMRIVData& Fsig_lag = m_sigma_scratch->get_Fold()[a_m];
+    EBAMRIVData& Fsig_lag = m_sigma_scratch->getFold()[a_m];
     DataOps::incr(sigma_m1, Fsig_lag, -dtm);
 
     // Add in the quadrature term
     EBAMRIVData& scratch = m_sigma_scratch->getScratch();
-    sdc::quad(scratch, m_sigma_scratch->get_Fold(), a_m);
+    sdc::quad(scratch, m_sigma_scratch->getFold(), a_m);
     DataOps::incr(sigma_m1, scratch, 0.5*dtm); // Mult by 0.5*a_dt due to scaling on [-1,1] for quadrature
   }
 }
@@ -1056,7 +1056,7 @@ void sdc::compute_semi_implicit_cdr_velocities(const int a_m, const Real a_time)
   }
 
   Vector<EBAMRCellData*> states = get_cdr_phik(a_m);
-  sdc::compute_cdr_velo(states, a_time);
+  sdc::computeCdrVelo(states, a_time);
 }
 
 void sdc::substep_cdr(const int a_m, const bool a_corrector){
@@ -1069,19 +1069,19 @@ void sdc::substep_cdr(const int a_m, const bool a_corrector){
 
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
-    RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = get_CdrStorage(solver_it);
 
-    EBAMRCellData& phi_m1      = storage->get_phi()[a_m+1];
+    EBAMRCellData& phi_m1      = storage->getPhi()[a_m+1];
     EBAMRCellData& I_m         = storage->getScratch();  
-    const EBAMRCellData& phi_m = storage->get_phi()[a_m];
-    const EBAMRCellData& divF  = storage->get_divF();     // Beware the sign, FA = -DivF
+    const EBAMRCellData& phi_m = storage->getPhi()[a_m];
+    const EBAMRCellData& divF  = storage->getDivF();     // Beware the sign, FA = -DivF
     const EBAMRCellData& divD  = storage->get_divD();  
     const EBAMRCellData& R     = solver->getSource();
 
-    EBAMRCellData& FA_lag    = storage->get_FA()[a_m];
-    EBAMRCellData& FD_lag    = storage->get_FD()[a_m];
-    EBAMRCellData& FR_lag    = storage->get_FR()[a_m+1]; // Beware the centering monster for implicit reactions
-    const Vector<EBAMRCellData>& F = storage->get_F();
+    EBAMRCellData& FA_lag    = storage->getFA()[a_m];
+    EBAMRCellData& FD_lag    = storage->getFD()[a_m];
+    EBAMRCellData& FR_lag    = storage->getFR()[a_m+1]; // Beware the centering monster for implicit reactions
+    const Vector<EBAMRCellData>& F = storage->getF();
 
     // Do the lagged term high-order quadrature
     if(a_corrector){
@@ -1141,11 +1141,11 @@ void sdc::substep_rte(const int a_m, const bool a_corrector){
 
   for (RtIterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>& solver   = solver_it();
-    RefCountedPtr<rte_storage>& storage = get_rte_storage(solver_it);
+    RefCountedPtr<RtStorage>& storage = get_RtStorage(solver_it);
 
 
-    EBAMRCellData& phi_m1      = storage->get_phi()[a_m+1];
-    const EBAMRCellData& phi_m = storage->get_phi()[a_m];
+    EBAMRCellData& phi_m1      = storage->getPhi()[a_m+1];
+    const EBAMRCellData& phi_m = storage->getPhi()[a_m];
     
     if(!m_freeze_photoi){
       DataOps::copy(phi_m1, phi_m); // Faster MG solve (if MG is used)
@@ -1158,10 +1158,10 @@ void sdc::substep_rte(const int a_m, const bool a_corrector){
   }
 }
 
-void sdc::reconcile_integrands(){
-  CH_TIME("sdc::reconcile_integrands");
+void sdc::reconcileIntegrands(){
+  CH_TIME("sdc::reconcileIntegrands");
   if(m_verbosity > 5){
-    pout() << "sdc::reconcile_integrands" << endl;
+    pout() << "sdc::reconcileIntegrands" << endl;
   }
 
   // TLDR: When we come in here, all solutions (Poisson, CDR, RTE, Sigma) are known at node m_p. But we
@@ -1172,21 +1172,21 @@ void sdc::reconcile_integrands(){
   const Real t_p = m_tm[m_p];
 
   // Update boundary conditions for cdr and sigma equations before getting the slope at the final node
-  sdc::compute_cdr_eb_states(cdr_densities_p);
+  sdc::computeCdrEbStates(cdr_densities_p);
   sdc::compute_cdr_fluxes(cdr_densities_p, t_p);
-  sdc::compute_cdr_domain_states(cdr_densities_p);
+  sdc::computeCdrDomainStates(cdr_densities_p);
   sdc::computeCdrDomainFluxes(cdr_densities_p, t_p);
-  sdc::compute_sigma_flux();
+  sdc::computeSigmaFlux();
 
   // Now compute FAR_p - that wasn't done when we integrated
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
-    RefCountedPtr<cdr_storage>& storage = sdc::get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = sdc::get_CdrStorage(solver_it);
     const int idx = solver_it.get_solver();
 
     // This has not been computed yet. Do it.
-    EBAMRCellData& FA_p       = storage->get_FA()[m_p];
-    EBAMRCellData& FD_p       = storage->get_FD()[m_p];
+    EBAMRCellData& FA_p       = storage->getFA()[m_p];
+    EBAMRCellData& FD_p       = storage->getFD()[m_p];
     const EBAMRCellData& phi_p = *cdr_densities_p[idx] ;
 
     if(solver->isMobile()){
@@ -1207,10 +1207,10 @@ void sdc::reconcile_integrands(){
 
     // Build the integrand required for the lagged high-order quadrature
     for (int m = 0; m <= m_p; m++){
-      EBAMRCellData& F_m        = storage->get_F()[m];
-      const EBAMRCellData& FA_m = storage->get_FA()[m];
-      const EBAMRCellData& FD_m = storage->get_FD()[m];
-      const EBAMRCellData& FR_m = storage->get_FR()[m];
+      EBAMRCellData& F_m        = storage->getF()[m];
+      const EBAMRCellData& FA_m = storage->getFA()[m];
+      const EBAMRCellData& FD_m = storage->getFD()[m];
+      const EBAMRCellData& FR_m = storage->getFR()[m];
 
       DataOps::copy(F_m, FR_m);
       if(solver->isDiffusive()){
@@ -1227,11 +1227,11 @@ void sdc::reconcile_integrands(){
   }
 
   // Compute Fsig_p - that wasn't done either
-  EBAMRIVData& Fnew_p = m_sigma_scratch->get_Fnew()[m_p];
+  EBAMRIVData& Fnew_p = m_sigma_scratch->getFnew()[m_p];
   m_sigma->computeRHS(Fnew_p);
   for (int m = 0; m <= m_p; m++){
-    EBAMRIVData& Fold_m = m_sigma_scratch->get_Fold()[m];
-    EBAMRIVData& Fnew_m = m_sigma_scratch->get_Fnew()[m];
+    EBAMRIVData& Fold_m = m_sigma_scratch->getFold()[m];
+    EBAMRIVData& Fnew_m = m_sigma_scratch->getFnew()[m];
     DataOps::copy(Fold_m, Fnew_m);
   }
 }
@@ -1245,37 +1245,37 @@ void sdc::sweep_explicit(const Real a_dt, const Real a_time, const bool a_lagged
   MayDay::Abort("sdc::sweep_explicit - not implemented yet");
 }
 
-void sdc::initialize_errors(){
-  CH_TIME("sdc::corrector_initialize_errors");
+void sdc::initializeErrors(){
+  CH_TIME("sdc::corrector_initializeErrors");
   if(m_verbosity > 5){
-    pout() << "sdc::corrector_initialize_errors" << endl;
+    pout() << "sdc::corrector_initializeErrors" << endl;
   }
 
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
-    RefCountedPtr<cdr_storage>& storage = sdc::get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = sdc::get_CdrStorage(solver_it);
     const int idx = solver_it.get_solver();
     
     // These should be zero
     if(idx == m_error_idx || m_error_idx < 0){
-      EBAMRCellData& error = storage->get_error();
-      const EBAMRCellData& phi_final = storage->get_phi()[m_p];
+      EBAMRCellData& error = storage->getError();
+      const EBAMRCellData& phi_final = storage->getPhi()[m_p];
 
       DataOps::setValue(error, 0.0);
       DataOps::incr(error, phi_final, -1.0);
     }
   }
 
-  EBAMRIVData& error = m_sigma_scratch->get_error();
+  EBAMRIVData& error = m_sigma_scratch->getError();
   const EBAMRIVData& sigma_final = m_sigma_scratch->get_sigma()[m_p];
   DataOps::setValue(error, 0.0);
   DataOps::incr(error, sigma_final, -1.0);
 }
 
-void sdc::finalize_errors(){
-  CH_TIME("sdc::corrector_finalize_errors");
+void sdc::finalizeErrors(){
+  CH_TIME("sdc::corrector_finalizeErrors");
   if(m_verbosity > 5){
-    pout() << "sdc::corrector_finalize_errors" << endl;
+    pout() << "sdc::corrector_finalizeErrors" << endl;
   }
 
   const Real safety = 1.E-20;
@@ -1283,13 +1283,13 @@ void sdc::finalize_errors(){
   m_max_error = 0.0;
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
-    RefCountedPtr<cdr_storage>& storage = sdc::get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = sdc::get_CdrStorage(solver_it);
     const int idx = solver_it.get_solver();
 
     // Compute error
     if(idx == m_error_idx || m_error_idx < 0){
-      EBAMRCellData& error       = storage->get_error();
-      const EBAMRCellData& phi_p = storage->get_phi()[m_p];
+      EBAMRCellData& error       = storage->getError();
+      const EBAMRCellData& phi_p = storage->getPhi()[m_p];
       DataOps::incr(error, phi_p, 1.0);
 
       // Compute norms. Only coarsest level
@@ -1317,7 +1317,7 @@ void sdc::finalize_errors(){
   }
 
   // Compute the surface charge conservation error
-  EBAMRIVData& error = m_sigma_scratch->get_error();
+  EBAMRIVData& error = m_sigma_scratch->getError();
   const EBAMRIVData& sigma_final = m_sigma_scratch->get_sigma()[m_p];
   DataOps::incr(error, sigma_final, 1.0);
   m_sigma_error = 0.0; // I don't think this is ever used...
@@ -1325,14 +1325,14 @@ void sdc::finalize_errors(){
 
 }
 
-void sdc::compute_new_dt(bool& a_accept_step, const Real a_dt, const int a_num_corrections){
-  CH_TIME("sdc::compute_new_dt");
+void sdc::computeNewDt(bool& a_accept_step, const Real a_dt, const int a_num_corrections){
+  CH_TIME("sdc::computeNewDt");
   if(m_verbosity > 5){
-    pout() << "sdc::compute_new_dt" << endl;
+    pout() << "sdc::computeNewDt" << endl;
   }
 
   // If a_dt was the smallest possible CFL or hardcap time step, we just have to accept it
-  const Real max_gl_dist = sdc::get_max_node_distance();
+  const Real max_gl_dist = sdc::getMaxNodeDistance();
   Real dt_cfl = 2.0*m_dt_cfl/max_gl_dist; // This is the smallest time step ON THE FINEST LEVEL
 
   // Try time step
@@ -1384,14 +1384,14 @@ void sdc::compute_new_dt(bool& a_accept_step, const Real a_dt, const int a_num_c
   m_have_dt_err = true;
 }
 
-void sdc::adaptive_report(const Real a_first_dt, const Real a_dt, const Real a_new_dt, const int a_corr, const int a_rej, const Real a_max_err){
-  CH_TIME("sdc::adaptive_report");
+void sdc::adaptiveReport(const Real a_first_dt, const Real a_dt, const Real a_new_dt, const int a_corr, const int a_rej, const Real a_max_err){
+  CH_TIME("sdc::adaptiveReport");
   if(m_verbosity > 5){
-    pout() << "sdc::adaptive_report" << endl;
+    pout() << "sdc::adaptiveReport" << endl;
   }
 
   pout() << "\n";
-  pout() << "sdc::adaptive_report breakdown" << endl;
+  pout() << "sdc::adaptiveReport breakdown" << endl;
   pout() << "--------------------------------\n";
   pout() << "\t Try dt       = " << a_first_dt << endl;
   pout() << "\t Advanced dt  = " << a_dt << endl;
@@ -1415,7 +1415,7 @@ void sdc::computeDt(Real& a_dt, TimeCode::which_code& a_timeCode){
   for (int lvl = 0; lvl < m_amr->getFinestLevel(); lvl++){
     Nref = Nref*m_amr->getRefinementRatios()[lvl];
   }
-  const Real max_gl_dist = sdc::get_max_node_distance();
+  const Real max_gl_dist = sdc::getMaxNodeDistance();
   m_dt_cfl = m_cdr->compute_cfl_dt();
 
   Real dt_cfl = 2.0*m_dt_cfl/max_gl_dist;
@@ -1493,12 +1493,12 @@ void sdc::cache_internals(){
 
   //
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<cdr_storage>& storage = sdc::get_cdr_storage(solver_it);
+    const RefCountedPtr<CdrStorage>& storage = sdc::get_CdrStorage(solver_it);
     const int idx = solver_it.get_solver();
     m_amr->allocate(m_cache_FR0[idx], phase::gas, 1);
 
     // Storage the reactive slope
-    const EBAMRCellData& FR0 = storage->get_FR()[0];
+    const EBAMRCellData& FR0 = storage->getFR()[0];
     DataOps::copy(m_cache_FR0[idx], FR0);
   }
 }
@@ -1521,13 +1521,13 @@ void sdc::allocateInternals(){
   m_amr->allocate(m_scratch1,  phase::gas, 1);
   m_amr->allocate(m_scratchD,  phase::gas, SpaceDim);
   
-  sdc::allocate_cdr_storage();
-  sdc::allocate_poisson_storage();
-  sdc::allocate_rte_storage();
-  sdc::allocate_sigma_storage();
+  sdc::allocateCdrStorage();
+  sdc::allocateFieldStorage();
+  sdc::allocateRtStorage();
+  sdc::allocateSigmaStorage();
 
-  sdc::setup_quadrature_nodes(m_p);
-  sdc::setup_qmj(m_p);
+  sdc::setupQuadratureNodes(m_p);
+  sdc::setupQmj(m_p);
 }
 
 void sdc::regridInternals(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel){
@@ -1541,11 +1541,11 @@ void sdc::regridInternals(const int a_lmin, const int a_oldFinestLevel, const in
   const Interval interv(comp, comp);
 
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    const RefCountedPtr<cdr_storage>& storage = sdc::get_cdr_storage(solver_it);
+    const RefCountedPtr<CdrStorage>& storage = sdc::get_CdrStorage(solver_it);
     const int idx = solver_it.get_solver();
 
     // This is data on the new grids which needs to be filled
-    EBAMRCellData& FR0 = storage->get_FR()[0];
+    EBAMRCellData& FR0 = storage->getFR()[0];
 
 
     // Get the interpolator from amr
@@ -1575,7 +1575,7 @@ void sdc::regridInternals(const int a_lmin, const int a_oldFinestLevel, const in
 
 }
 
-void sdc::allocate_cdr_storage(){
+void sdc::allocateCdrStorage(){
   const int ncomp       = 1;
   const int num_species = m_plaskin->get_num_species();
 
@@ -1583,32 +1583,32 @@ void sdc::allocate_cdr_storage(){
   
   for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
-    m_cdr_scratch[idx] = RefCountedPtr<cdr_storage> (new cdr_storage(m_amr, m_cdr->getPhase(), ncomp));
+    m_cdr_scratch[idx] = RefCountedPtr<CdrStorage> (new CdrStorage(m_amr, m_cdr->getPhase(), ncomp));
     m_cdr_scratch[idx]->allocate_storage(m_p);
   }
 }
 
-void sdc::allocate_poisson_storage(){
+void sdc::allocateFieldStorage(){
   const int ncomp = 1;
-  m_fieldSolver_scratch = RefCountedPtr<poisson_storage> (new poisson_storage(m_amr, m_cdr->getPhase(), ncomp));
+  m_fieldSolver_scratch = RefCountedPtr<FieldStorage> (new FieldStorage(m_amr, m_cdr->getPhase(), ncomp));
   m_fieldSolver_scratch->allocate_storage(m_p);
 }
 
-void sdc::allocate_rte_storage(){
+void sdc::allocateRtStorage(){
   const int ncomp       = 1;
   const int num_Photons = m_plaskin->get_num_Photons();
   m_rte_scratch.resize(num_Photons);
   
   for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
-    m_rte_scratch[idx] = RefCountedPtr<rte_storage> (new rte_storage(m_amr, m_rte->getPhase(), ncomp));
+    m_rte_scratch[idx] = RefCountedPtr<RtStorage> (new RtStorage(m_amr, m_rte->getPhase(), ncomp));
     m_rte_scratch[idx]->allocate_storage(m_p);
   }
 }
 
-void sdc::allocate_sigma_storage(){
+void sdc::allocateSigmaStorage(){
   const int ncomp = 1;
-  m_sigma_scratch = RefCountedPtr<sigma_storage> (new sigma_storage(m_amr, m_cdr->getPhase(), ncomp));
+  m_sigma_scratch = RefCountedPtr<SigmaStorage> (new SigmaStorage(m_amr, m_cdr->getPhase(), ncomp));
   m_sigma_scratch->allocate_storage(m_p);
 }
 
@@ -1629,13 +1629,13 @@ void sdc::deallocateInternals(){
   for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     m_cdr_scratch[idx]->deallocate_storage();
-    m_cdr_scratch[idx] = RefCountedPtr<cdr_storage>(0);
+    m_cdr_scratch[idx] = RefCountedPtr<CdrStorage>(0);
   }
 
   for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     m_rte_scratch[idx]->deallocate_storage();
-    m_rte_scratch[idx] = RefCountedPtr<rte_storage>(0);
+    m_rte_scratch[idx] = RefCountedPtr<RtStorage>(0);
   }
 
   m_dummy_rte.resize(0);
@@ -1643,10 +1643,10 @@ void sdc::deallocateInternals(){
   m_rte_scratch.resize(0);
 
   m_fieldSolver_scratch->deallocate_storage();
-  m_fieldSolver_scratch = RefCountedPtr<poisson_storage>(0);
+  m_fieldSolver_scratch = RefCountedPtr<FieldStorage>(0);
   
   m_sigma_scratch->deallocate_storage();
-  m_sigma_scratch = RefCountedPtr<sigma_storage>(0);
+  m_sigma_scratch = RefCountedPtr<SigmaStorage>(0);
 }
 
 void sdc::compute_E_into_scratch(){
@@ -1655,10 +1655,10 @@ void sdc::compute_E_into_scratch(){
     pout() << "sdc::compute_E_into_scratch" << endl;
   }
   
-  EBAMRCellData& E_cell = m_fieldSolver_scratch->get_E_cell();
-  EBAMRFluxData& E_face = m_fieldSolver_scratch->get_E_face();
-  EBAMRIVData&   E_eb   = m_fieldSolver_scratch->get_E_eb();
-  EBAMRIFData&   E_dom  = m_fieldSolver_scratch->get_E_domain();
+  EBAMRCellData& E_cell = m_fieldSolver_scratch->getElectricFieldCell();
+  EBAMRFluxData& E_face = m_fieldSolver_scratch->getElectricFieldFace();
+  EBAMRIVData&   E_eb   = m_fieldSolver_scratch->getElectricFieldEb();
+  EBAMRIFData&   E_dom  = m_fieldSolver_scratch->getElectricFieldDomain();
 
   const MFAMRCellData& phi = m_fieldSolver->getPotential();
   
@@ -1669,54 +1669,54 @@ void sdc::compute_E_into_scratch(){
   TimeStepper::extrapolate_to_domain_faces(E_dom, m_cdr->getPhase(), E_cell);
 }
 
-void sdc::compute_cdr_gradients(){
-  CH_TIME("sdc::compute_cdr_gradients");
+void sdc::computeCdrGradients(){
+  CH_TIME("sdc::computeCdrGradients");
   if(m_verbosity > 5){
-    pout() << "sdc::compute_cdr_gradients" << endl;
+    pout() << "sdc::computeCdrGradients" << endl;
   }
 
-  sdc::compute_cdr_gradients(m_cdr->getPhis());
+  sdc::computeCdrGradients(m_cdr->getPhis());
 }
 
-void sdc::compute_cdr_gradients(const Vector<EBAMRCellData*>& a_phis){
-  CH_TIME("sdc::compute_cdr_gradients");
+void sdc::computeCdrGradients(const Vector<EBAMRCellData*>& a_phis){
+  CH_TIME("sdc::computeCdrGradients");
   if(m_verbosity > 5){
-    pout() << "sdc::compute_cdr_gradients" << endl;
+    pout() << "sdc::computeCdrGradients" << endl;
   }
 
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
-    RefCountedPtr<cdr_storage>& storage = sdc::get_cdr_storage(solver_it);
-    EBAMRCellData& grad = storage->get_gradient();
+    RefCountedPtr<CdrStorage>& storage = sdc::get_CdrStorage(solver_it);
+    EBAMRCellData& grad = storage->getGradient();
     m_amr->computeGradient(grad, *a_phis[idx], m_cdr->getPhase());
     //    m_amr->averageDown(grad, m_cdr->getPhase());
     m_amr->interpGhost(grad, m_cdr->getPhase());
   }
 }
 
-void sdc::compute_cdr_velo(const Real a_time){
-  CH_TIME("sdc::compute_cdr_velo");
+void sdc::computeCdrVelo(const Real a_time){
+  CH_TIME("sdc::computeCdrVelo");
   if(m_verbosity > 5){
-    pout() << "sdc::compute_cdr_velo" << endl;
+    pout() << "sdc::computeCdrVelo" << endl;
   }
 
-  sdc::compute_cdr_velo(m_cdr->getPhis(), a_time);
+  sdc::computeCdrVelo(m_cdr->getPhis(), a_time);
 }
 
-void sdc::compute_cdr_velo(const Vector<EBAMRCellData*>& a_phis, const Real a_time){
-  CH_TIME("sdc::compute_cdr_velo(Vector<EBAMRCellData*>, Real)");
+void sdc::computeCdrVelo(const Vector<EBAMRCellData*>& a_phis, const Real a_time){
+  CH_TIME("sdc::computeCdrVelo(Vector<EBAMRCellData*>, Real)");
   if(m_verbosity > 5){
-    pout() << "sdc::compute_cdr_velo(Vector<EBAMRCellData*>, Real)" << endl;
+    pout() << "sdc::computeCdrVelo(Vector<EBAMRCellData*>, Real)" << endl;
   }
 
   Vector<EBAMRCellData*> velocities = m_cdr->getVelocities();
-  sdc::computeCdrDriftVelocities(velocities, a_phis, m_fieldSolver_scratch->get_E_cell(), a_time);
+  sdc::computeCdrDriftVelocities(velocities, a_phis, m_fieldSolver_scratch->getElectricFieldCell(), a_time);
 }
 
-void sdc::compute_cdr_eb_states(){
-  CH_TIME("sdc::compute_cdr_eb_states");
+void sdc::computeCdrEbStates(){
+  CH_TIME("sdc::computeCdrEbStates");
   if(m_verbosity > 5){
-    pout() << "sdc::compute_cdr_eb_states" << endl;
+    pout() << "sdc::computeCdrEbStates" << endl;
   }
 
   Vector<EBAMRIVData*>   eb_gradients;
@@ -1726,12 +1726,12 @@ void sdc::compute_cdr_eb_states(){
   
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
-    RefCountedPtr<cdr_storage>& storage = sdc::get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = sdc::get_CdrStorage(solver_it);
 
     cdr_states.push_back(&(solver->getPhi()));
-    eb_states.push_back(&(storage->get_eb_state()));
-    eb_gradients.push_back(&(storage->get_eb_grad()));
-    cdr_gradients.push_back(&(storage->get_gradient())); // Should already have been computed
+    eb_states.push_back(&(storage->getEbState()));
+    eb_gradients.push_back(&(storage->getEbGrad()));
+    cdr_gradients.push_back(&(storage->getGradient())); // Should already have been computed
   }
 
   // Extrapolate states to the EB and floor them so we cannot get negative values on the boundary. This
@@ -1751,10 +1751,10 @@ void sdc::compute_cdr_eb_states(){
   }
 }
 
-void sdc::compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_phis){
-  CH_TIME("sdc::compute_cdr_eb_states(vec)");
+void sdc::computeCdrEbStates(const Vector<EBAMRCellData*>& a_phis){
+  CH_TIME("sdc::computeCdrEbStates(vec)");
   if(m_verbosity > 5){
-    pout() << "sdc::compute_cdr_eb_states(vec)" << endl;
+    pout() << "sdc::computeCdrEbStates(vec)" << endl;
   }
 
   Vector<EBAMRIVData*>   eb_gradients;
@@ -1762,11 +1762,11 @@ void sdc::compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_phis){
   Vector<EBAMRCellData*> cdr_gradients;
   
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_storage>& storage = sdc::get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = sdc::get_CdrStorage(solver_it);
 
-    eb_states.push_back(&(storage->get_eb_state()));
-    eb_gradients.push_back(&(storage->get_eb_grad()));
-    cdr_gradients.push_back(&(storage->get_gradient())); // Should already have been computed
+    eb_states.push_back(&(storage->getEbState()));
+    eb_gradients.push_back(&(storage->getEbGrad()));
+    cdr_gradients.push_back(&(storage->getGradient())); // Should already have been computed
   }
 
   // Extrapolate states to the EB and floor them so we cannot get negative values on the boundary. This
@@ -1786,10 +1786,10 @@ void sdc::compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_phis){
   }
 }
 
-void sdc::compute_cdr_domain_states(){
-  CH_TIME("sdc::compute_cdr_domain_states");
+void sdc::computeCdrDomainStates(){
+  CH_TIME("sdc::computeCdrDomainStates");
   if(m_verbosity > 5){
-    pout() << "sdc::compute_cdr_domain_states" << endl;
+    pout() << "sdc::computeCdrDomainStates" << endl;
   }
 
   Vector<EBAMRIFData*>   domain_gradients;
@@ -1799,12 +1799,12 @@ void sdc::compute_cdr_domain_states(){
   
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
-    RefCountedPtr<cdr_storage>& storage = sdc::get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = sdc::get_CdrStorage(solver_it);
 
     cdr_states.push_back(&(solver->getPhi()));
-    domain_states.push_back(&(storage->getDomain_state()));
-    domain_gradients.push_back(&(storage->getDomain_grad()));
-    cdr_gradients.push_back(&(storage->get_gradient())); // Should already be computed
+    domain_states.push_back(&(storage->getDomainState()));
+    domain_gradients.push_back(&(storage->getDomainGrad()));
+    cdr_gradients.push_back(&(storage->getGradient())); // Should already be computed
   }
 
   // Extrapolate states to the domain faces
@@ -1819,10 +1819,10 @@ void sdc::compute_cdr_domain_states(){
   }
 }
 
-void sdc::compute_cdr_domain_states(const Vector<EBAMRCellData*>& a_phis){
-  CH_TIME("sdc::compute_cdr_domain_states");
+void sdc::computeCdrDomainStates(const Vector<EBAMRCellData*>& a_phis){
+  CH_TIME("sdc::computeCdrDomainStates");
   if(m_verbosity > 5){
-    pout() << "sdc::compute_cdr_domain_states" << endl;
+    pout() << "sdc::computeCdrDomainStates" << endl;
   }
 
   Vector<EBAMRIFData*>   domain_gradients;
@@ -1831,11 +1831,11 @@ void sdc::compute_cdr_domain_states(const Vector<EBAMRCellData*>& a_phis){
   
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
 
-    domain_states.push_back(&(storage->getDomain_state()));
-    domain_gradients.push_back(&(storage->getDomain_grad()));
-    cdr_gradients.push_back(&(storage->get_gradient()));
+    domain_states.push_back(&(storage->getDomainState()));
+    domain_gradients.push_back(&(storage->getDomainGrad()));
+    cdr_gradients.push_back(&(storage->getGradient()));
   }
 
   // Extrapolate states to the domain faces
@@ -1875,17 +1875,17 @@ void sdc::compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_phis, const Real a_
   cdr_fluxes = m_cdr->getEbFlux();
 
   for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
 
-    EBAMRIVData& dens_eb = storage->get_eb_state();
-    EBAMRIVData& velo_eb = storage->get_eb_velo();
-    EBAMRIVData& flux_eb = storage->get_eb_flux();
-    EBAMRIVData& grad_eb = storage->get_eb_grad();
+    EBAMRIVData& dens_eb = storage->getEbState();
+    EBAMRIVData& velo_eb = storage->getEbVelo();
+    EBAMRIVData& flux_eb = storage->getEbFlux();
+    EBAMRIVData& grad_eb = storage->getEbGrad();
 
-    extrap_cdr_densities.push_back(&dens_eb);  // Computed in compute_cdr_eb_states
+    extrap_cdr_densities.push_back(&dens_eb);  // Computed in computeCdrEbStates
     extrap_cdr_velocities.push_back(&velo_eb); // Not yet computed
     extrap_cdr_fluxes.push_back(&flux_eb);     // Not yet computed
-    extrap_cdr_gradients.push_back(&grad_eb);  // Computed in compute_cdr_eb_states
+    extrap_cdr_gradients.push_back(&grad_eb);  // Computed in computeCdrEbStates
   }
 
 
@@ -1897,14 +1897,14 @@ void sdc::compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_phis, const Real a_
   // Compute RTE flux on the boundary
   for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>& solver   = solver_it();
-    RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
+    RefCountedPtr<RtStorage>& storage = this->get_RtStorage(solver_it);
 
-    EBAMRIVData& flux_eb = storage->get_eb_flux();
+    EBAMRIVData& flux_eb = storage->getEbFlux();
     solver->computeBoundaryFlux(flux_eb, solver->getPhi());
     extrap_rte_fluxes.push_back(&flux_eb);
   }
 
-  const EBAMRIVData& E = m_fieldSolver_scratch->get_E_eb();
+  const EBAMRIVData& E = m_fieldSolver_scratch->getElectricFieldEb();
   TimeStepper::compute_cdr_fluxes(cdr_fluxes,
 				   extrap_cdr_fluxes,
 				   extrap_cdr_densities,
@@ -1943,13 +1943,13 @@ void sdc::computeCdrDomainFluxes(const Vector<EBAMRCellData*>& a_phis, const Rea
   cdr_fluxes = m_cdr->getDomainFlux();
   cdr_velocities = m_cdr->getVelocities();
   for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
 
-    EBAMRIFData& dens_domain = storage->getDomain_state();
-    EBAMRIFData& velo_domain = storage->getDomain_velo();
-    EBAMRIFData& flux_domain = storage->getDomain_flux();
-    EBAMRIFData& grad_domain = storage->getDomain_grad();
-    EBAMRCellData& gradient  = storage->get_gradient();
+    EBAMRIFData& dens_domain = storage->getDomainState();
+    EBAMRIFData& velo_domain = storage->getDomainVelo();
+    EBAMRIFData& flux_domain = storage->getDomainFlux();
+    EBAMRIFData& grad_domain = storage->getDomainGrad();
+    EBAMRCellData& gradient  = storage->getGradient();
 
     extrap_cdr_densities.push_back(&dens_domain);  // Has not been computed
     extrap_cdr_velocities.push_back(&velo_domain); // Has not been computed
@@ -1967,14 +1967,14 @@ void sdc::computeCdrDomainFluxes(const Vector<EBAMRCellData*>& a_phis, const Rea
   // Compute RTE flux on domain faces
   for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>& solver   = solver_it();
-    RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
+    RefCountedPtr<RtStorage>& storage = this->get_RtStorage(solver_it);
 
-    EBAMRIFData& domain_flux = storage->getDomain_flux();
+    EBAMRIFData& domain_flux = storage->getDomainFlux();
     solver->computeDomainFlux(domain_flux, solver->getPhi());
     extrap_rte_fluxes.push_back(&domain_flux);
   }
 
-  const EBAMRIFData& E = m_fieldSolver_scratch->get_E_domain();
+  const EBAMRIFData& E = m_fieldSolver_scratch->getElectricFieldDomain();
 
   // This fills the solvers' domain fluxes
   TimeStepper::computeCdrDomainFluxes(cdr_fluxes,
@@ -1987,10 +1987,10 @@ void sdc::computeCdrDomainFluxes(const Vector<EBAMRCellData*>& a_phis, const Rea
 					  a_time);
 }
 
-void sdc::compute_sigma_flux(){
-  CH_TIME("sdc::compute_sigma_flux");
+void sdc::computeSigmaFlux(){
+  CH_TIME("sdc::computeSigmaFlux");
   if(m_verbosity > 5){
-    pout() << "sdc::compute_sigma_flux" << endl;
+    pout() << "sdc::computeSigmaFlux" << endl;
   }
 
   EBAMRIVData& flux = m_sigma->getFlux();
@@ -2007,10 +2007,10 @@ void sdc::compute_sigma_flux(){
   m_sigma->resetCells(flux);
 }
 
-void sdc::compute_reaction_network(const int a_m, const Real a_time, const Real a_dt, const bool a_corrector){
-  CH_TIME("sdc::compute_reaction_network");
+void sdc::computeReactionNetwork(const int a_m, const Real a_time, const Real a_dt, const bool a_corrector){
+  CH_TIME("sdc::computeReactionNetwork");
   if(m_verbosity > 5){
-    pout() << "sdc::compute_reaction_network";
+    pout() << "sdc::computeReactionNetwork";
   }
 
   Vector<EBAMRCellData*> cdr_sources = m_cdr->getSources();
@@ -2028,16 +2028,16 @@ void sdc::compute_reaction_network(const int a_m, const Real a_time, const Real 
 
   const Vector<EBAMRCellData*> cdr_densities = get_cdr_phik(a_m);
   const Vector<EBAMRCellData*> rte_densities = get_rte_phik(a_m);
-  const EBAMRCellData& E = m_fieldSolver_scratch->get_E_cell();
+  const EBAMRCellData& E = m_fieldSolver_scratch->getElectricFieldCell();
 
 
   TimeStepper::advanceReactionNetwork(cdr_sources, rte_sources, cdr_densities, rte_densities, E, a_time, a_dt);
 }
 
-void sdc::update_poisson(){
-  CH_TIME("sdc::update_poisson(solver)");
+void sdc::updateField(){
+  CH_TIME("sdc::updateField(solver)");
   if(m_verbosity > 5){
-    pout() << "sdc::update_poisson(solver)" << endl;
+    pout() << "sdc::updateField(solver)" << endl;
   }
   
   if(m_do_poisson){ // Solve Poisson equation
@@ -2048,10 +2048,10 @@ void sdc::update_poisson(){
   }
 }
 
-void sdc::update_poisson(const Vector<EBAMRCellData*>& a_densities, const EBAMRIVData& a_sigma){
-  CH_TIME("sdc::update_poisson(full)");
+void sdc::updateField(const Vector<EBAMRCellData*>& a_densities, const EBAMRIVData& a_sigma){
+  CH_TIME("sdc::updateField(full)");
   if(m_verbosity > 5){
-    pout() << "sdc::update_poisson(full)" << endl;
+    pout() << "sdc::updateField(full)" << endl;
   }
   
   if(m_do_poisson){ // Solve Poisson equation
@@ -2066,10 +2066,10 @@ void sdc::update_poisson(const Vector<EBAMRCellData*>& a_densities, const EBAMRI
   }
 }
 
-void sdc::integrate_rte_transient(const Real a_dt){
-  CH_TIME("sdc::integrate_rte_transient");
+void sdc::integrateRtTransient(const Real a_dt){
+  CH_TIME("sdc::integrateRtTransient");
   if(m_verbosity > 5){
-    pout() << "sdc::integrate_rte_transient" << endl;
+    pout() << "sdc::integrateRtTransient" << endl;
   }
 
   if(m_do_rte){
@@ -2084,10 +2084,10 @@ void sdc::integrate_rte_transient(const Real a_dt){
   }
 }
 
-void sdc::integrate_rte_stationary(){
-  CH_TIME("sdc::integrate_rte_transient");
+void sdc::integrateRtStationary(){
+  CH_TIME("sdc::integrateRtTransient");
   if(m_verbosity > 5){
-    pout() << "sdc::integrate_rte_transient" << endl;
+    pout() << "sdc::integrateRtTransient" << endl;
   }
 
   if(m_do_rte){
@@ -2102,12 +2102,12 @@ void sdc::integrate_rte_stationary(){
   }
 }
 
-void sdc::updateDiffusion_coefficients(){
-  CH_TIME("sdc::updateDiffusion_coefficients");
+void sdc::updateDiffusionCoefficients(){
+  CH_TIME("sdc::updateDiffusionCoefficients");
   if(m_verbosity > 5){
-    pout() << "sdc::updateDiffusion_coefficients" << endl;
+    pout() << "sdc::updateDiffusionCoefficients" << endl;
   }
-  TimeStepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
+  TimeStepper::compute_cdr_diffusion(m_fieldSolver_scratch->getElectricFieldCell(), m_fieldSolver_scratch->getElectricFieldEb());
 }
 
 Vector<EBAMRCellData*> sdc::get_cdr_errors(){
@@ -2118,8 +2118,8 @@ Vector<EBAMRCellData*> sdc::get_cdr_errors(){
   
   Vector<EBAMRCellData*> ret;
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_storage>& storage = sdc::get_cdr_storage(solver_it);
-    ret.push_back(&(storage->get_error()));
+    RefCountedPtr<CdrStorage>& storage = sdc::get_CdrStorage(solver_it);
+    ret.push_back(&(storage->getError()));
   }
 
   return ret;
@@ -2133,8 +2133,8 @@ Vector<EBAMRCellData*> sdc::get_cdr_phik(const int a_m){
   
   Vector<EBAMRCellData*> ret;
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_storage>& storage = sdc::get_cdr_storage(solver_it);
-    ret.push_back(&(storage->get_phi()[a_m]));
+    RefCountedPtr<CdrStorage>& storage = sdc::get_CdrStorage(solver_it);
+    ret.push_back(&(storage->getPhi()[a_m]));
   }
 
   return ret;
@@ -2148,8 +2148,8 @@ Vector<EBAMRCellData*> sdc::get_rte_phik(const int a_m){
   
   Vector<EBAMRCellData*> ret;
   for (RtIterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_storage>& storage = sdc::get_rte_storage(solver_it);
-    ret.push_back(&(storage->get_phi()[a_m]));
+    RefCountedPtr<RtStorage>& storage = sdc::get_RtStorage(solver_it);
+    ret.push_back(&(storage->getPhi()[a_m]));
   }
 
   return ret;
@@ -2163,14 +2163,14 @@ EBAMRIVData& sdc::get_sigmak(const int a_m){
   return m_sigma_scratch->get_sigma()[a_m];
 }
 
-void sdc::write_step_profile(const Real a_dt,
+void sdc::writeStepProfile(const Real a_dt,
 			     const Real a_error,
 			     const int  a_substeps,
 			     const int  a_corrections,
 			     const int  a_rejections){
-  CH_TIME("sissdc::write_step_profile");
+  CH_TIME("sissdc::writeStepProfile");
   if(m_verbosity > 5){
-    pout() << "sdc::write_step_profile" << endl;
+    pout() << "sdc::writeStepProfile" << endl;
   }
 
   if(procID() == 0 ){
@@ -2212,10 +2212,10 @@ void sdc::write_step_profile(const Real a_dt,
   }
 }
 
-void sdc::store_solvers(){
-  CH_TIME("sdc::store_solvers");
+void sdc::storeSolvers(){
+  CH_TIME("sdc::storeSolvers");
   if(m_verbosity > 5){
-    pout() << "sdc::store_solvers" << endl;
+    pout() << "sdc::storeSolvers" << endl;
   }
 
   if(m_k > 0 && m_adaptive_dt){
@@ -2223,16 +2223,16 @@ void sdc::store_solvers(){
     // Poisson and RTE here.
 
     // Poisson
-    MFAMRCellData& previous    = m_fieldSolver_scratch->get_previous();
+    MFAMRCellData& previous    = m_fieldSolver_scratch->getPrevious();
     const MFAMRCellData& state = m_fieldSolver->getPotential();
     DataOps::copy(previous, state);
 
     // RTE
     for (RtIterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-      RefCountedPtr<rte_storage>& storage     = sdc::get_rte_storage(solver_it);
+      RefCountedPtr<RtStorage>& storage     = sdc::get_RtStorage(solver_it);
       const RefCountedPtr<RtSolver>& solver = solver_it();
 
-      EBAMRCellData& previous = storage->get_previous();
+      EBAMRCellData& previous = storage->getPrevious();
       const EBAMRCellData& state = solver->getPhi();
 
       DataOps::copy(previous, state);
@@ -2240,10 +2240,10 @@ void sdc::store_solvers(){
   }
 }
 
-void sdc::restore_solvers(){
-  CH_TIME("sdc::restore_solvers");
+void sdc::restoreSolvers(){
+  CH_TIME("sdc::restoreSolvers");
   if(m_verbosity > 5){
-    pout() << "sdc::restore_solvers" << endl;
+    pout() << "sdc::restoreSolvers" << endl;
   }
 
   // SDC does not manipulate cdr and sigma solvers until the end of the time step. Only need to do
@@ -2251,16 +2251,16 @@ void sdc::restore_solvers(){
 
   // Poisson
   MFAMRCellData& state = m_fieldSolver->getPotential();
-  const MFAMRCellData& previous    = m_fieldSolver_scratch->get_previous();
+  const MFAMRCellData& previous    = m_fieldSolver_scratch->getPrevious();
 
   DataOps::copy(state, previous);
 
   // RTE
   for (RtIterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_storage>& storage     = sdc::get_rte_storage(solver_it);
+    RefCountedPtr<RtStorage>& storage     = sdc::get_RtStorage(solver_it);
     RefCountedPtr<RtSolver>& solver = solver_it();
 
-    EBAMRCellData& previous = storage->get_previous();
+    EBAMRCellData& previous = storage->getPrevious();
     EBAMRCellData& state = solver->getPhi();
 
     DataOps::copy(state, previous);

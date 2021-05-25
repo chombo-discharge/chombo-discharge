@@ -8,11 +8,11 @@
 #include "strang2.H"
 #include "strang2_storage.H"
 
-strang2::cdr_storage::cdr_storage(){
+strang2::CdrStorage::CdrStorage(){
 
 }
 
-strang2::cdr_storage::cdr_storage(const int a_stages,
+strang2::CdrStorage::CdrStorage(const int a_stages,
 				  const RefCountedPtr<AmrMesh>& a_amr,
 				  const phase::which_phase       a_phase,
 				  const int                      a_ncomp){
@@ -23,11 +23,11 @@ strang2::cdr_storage::cdr_storage(const int a_stages,
   m_has_extra = false;
 }
 
-strang2::cdr_storage::~cdr_storage(){
+strang2::CdrStorage::~CdrStorage(){
   deallocate_storage();
 }
 
-void strang2::cdr_storage::allocate_storage(){
+void strang2::CdrStorage::allocate_storage(){
   m_amr->allocate(m_cache,    m_phase, m_ncomp);
   m_amr->allocate(m_scratch,  m_phase, m_ncomp);
   m_amr->allocate(m_backup,   m_phase, m_ncomp);
@@ -47,7 +47,7 @@ void strang2::cdr_storage::allocate_storage(){
 }
 
 
-void strang2::cdr_storage::deallocate_storage(){
+void strang2::CdrStorage::deallocate_storage(){
   m_amr->deallocate(m_cache);
   m_amr->deallocate(m_scratch);
   m_amr->deallocate(m_backup);
@@ -66,9 +66,9 @@ void strang2::cdr_storage::deallocate_storage(){
   m_amr->deallocate(m_scratchIF4);
 }
 
-void strang2::cdr_storage::allocate_extra_storage(const int a_num_extra){
+void strang2::CdrStorage::allocate_extra_storage(const int a_num_extra){
   if(m_has_extra == true){
-    MayDay::Abort("strang2::cdr_storage::allocate_extra_storage - already allocated. Did you remember to deallocate first?");
+    MayDay::Abort("strang2::CdrStorage::allocate_extra_storage - already allocated. Did you remember to deallocate first?");
   }
 
   if(a_num_extra > 0){
@@ -85,7 +85,7 @@ void strang2::cdr_storage::allocate_extra_storage(const int a_num_extra){
   m_has_extra = true;
 }
 
-void strang2::cdr_storage::deallocate_extra_storage(){
+void strang2::CdrStorage::deallocate_extra_storage(){
 
   for (int i = 0; i < m_extra_storage.size(); i++){
     m_amr->deallocate(*m_extra_storage[i]);
@@ -94,11 +94,11 @@ void strang2::cdr_storage::deallocate_extra_storage(){
   m_has_extra = false;
 }
 
-strang2::poisson_storage::poisson_storage(){
+strang2::FieldStorage::FieldStorage(){
 
 }
 
-strang2::poisson_storage::poisson_storage(const int a_stages,
+strang2::FieldStorage::FieldStorage(const int a_stages,
 					  const RefCountedPtr<AmrMesh>& a_amr,
 					  const phase::which_phase       a_phase,
 					  const int                      a_ncomp){
@@ -108,11 +108,11 @@ strang2::poisson_storage::poisson_storage(const int a_stages,
   m_phase  = a_phase;
 }
 
-strang2::poisson_storage::~poisson_storage(){
+strang2::FieldStorage::~FieldStorage(){
   deallocate_storage();
 }
 
-void strang2::poisson_storage::allocate_storage(){
+void strang2::FieldStorage::allocate_storage(){
   m_amr->allocate(m_cache,   m_ncomp);
   m_amr->allocate(m_backup,  m_ncomp);
   m_amr->allocate(m_E_cell,  m_phase, SpaceDim);
@@ -121,7 +121,7 @@ void strang2::poisson_storage::allocate_storage(){
   m_amr->allocate(m_E_dom,   m_phase, SpaceDim);
 }
 
-void strang2::poisson_storage::deallocate_storage(){
+void strang2::FieldStorage::deallocate_storage(){
   m_amr->deallocate(m_cache);
   m_amr->deallocate(m_backup);
   m_amr->deallocate(m_E_cell);
@@ -130,11 +130,11 @@ void strang2::poisson_storage::deallocate_storage(){
   m_amr->deallocate(m_E_dom);
 }
 
-strang2::rte_storage::rte_storage(){
+strang2::RtStorage::RtStorage(){
 
 }
 
-strang2::rte_storage::rte_storage(const int a_stages,
+strang2::RtStorage::RtStorage(const int a_stages,
 				  const RefCountedPtr<AmrMesh>& a_amr,
 				  const phase::which_phase       a_phase,
 				  const int                      a_ncomp){
@@ -144,29 +144,29 @@ strang2::rte_storage::rte_storage(const int a_stages,
   m_ncomp  = a_ncomp;
 }
 
-strang2::rte_storage::~rte_storage(){
+strang2::RtStorage::~RtStorage(){
   deallocate_storage();
 }
 
-void strang2::rte_storage::allocate_storage(){
+void strang2::RtStorage::allocate_storage(){
   m_amr->allocate(m_cache,      m_phase, m_ncomp);
   m_amr->allocate(m_backup,     m_phase, m_ncomp);
   m_amr->allocate(m_scratchIV,  m_phase, m_ncomp);
   m_amr->allocate(m_scratchIF,  m_phase, m_ncomp);
 }
 
-void strang2::rte_storage::deallocate_storage(){
+void strang2::RtStorage::deallocate_storage(){
   m_amr->deallocate(m_cache);
   m_amr->deallocate(m_backup);
   m_amr->deallocate(m_scratchIV);
   m_amr->deallocate(m_scratchIF);
 }
 
-strang2::sigma_storage::sigma_storage(){
+strang2::SigmaStorage::SigmaStorage(){
 
 }
 
-strang2::sigma_storage::sigma_storage(const int a_stages,
+strang2::SigmaStorage::SigmaStorage(const int a_stages,
 				      const RefCountedPtr<AmrMesh>& a_amr,
 				      const phase::which_phase       a_phase,
 				      const int                      a_ncomp){
@@ -177,11 +177,11 @@ strang2::sigma_storage::sigma_storage(const int a_stages,
   m_has_extra = false;
 }
 
-strang2::sigma_storage::~sigma_storage(){
+strang2::SigmaStorage::~SigmaStorage(){
   deallocate_storage();
 }
 
-void strang2::sigma_storage::allocate_storage(){
+void strang2::SigmaStorage::allocate_storage(){
   m_amr->allocate(m_cache,    m_phase, m_ncomp);
   m_amr->allocate(m_backup,   m_phase, m_ncomp);
   m_amr->allocate(m_scratch,  m_phase, m_ncomp);
@@ -189,7 +189,7 @@ void strang2::sigma_storage::allocate_storage(){
   m_amr->allocate(m_error,    m_phase, m_ncomp);
 }
 
-void strang2::sigma_storage::deallocate_storage(){
+void strang2::SigmaStorage::deallocate_storage(){
   m_amr->deallocate(m_cache);
   m_amr->deallocate(m_backup);
   m_amr->deallocate(m_scratch);
@@ -197,9 +197,9 @@ void strang2::sigma_storage::deallocate_storage(){
   m_amr->deallocate(m_error);
 }
 
-void strang2::sigma_storage::allocate_extra_storage(const int a_num_extra){
+void strang2::SigmaStorage::allocate_extra_storage(const int a_num_extra){
   if(m_has_extra == true){
-    MayDay::Abort("strang2::sigma_storage::allocate_extra_storage - already allocated. Did you remember to deallocate first?");
+    MayDay::Abort("strang2::SigmaStorage::allocate_extra_storage - already allocated. Did you remember to deallocate first?");
   }
 
   if(a_num_extra > 0){
@@ -216,7 +216,7 @@ void strang2::sigma_storage::allocate_extra_storage(const int a_num_extra){
   m_has_extra = true;
 }
 
-void strang2::sigma_storage::deallocate_extra_storage(){
+void strang2::SigmaStorage::deallocate_extra_storage(){
 
   for (int i = 0; i < m_extra_storage.size(); i++){
     m_amr->deallocate(*m_extra_storage[i]);

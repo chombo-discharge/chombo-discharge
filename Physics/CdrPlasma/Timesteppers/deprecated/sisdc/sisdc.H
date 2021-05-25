@@ -29,10 +29,10 @@ class sisdc : public TimeStepper {
 public:
   
   // Forward declare nested classes. I don't want to clutter this file.
-  class cdr_storage;
-  class poisson_storage;
-  class rte_storage;
-  class sigma_storage;
+  class CdrStorage;
+  class FieldStorage;
+  class RtStorage;
+  class SigmaStorage;
 
   
 public:
@@ -52,10 +52,10 @@ public:
   
 protected:
 
-  Vector<RefCountedPtr<cdr_storage> > m_cdr_scratch;
-  Vector<RefCountedPtr<rte_storage> > m_rte_scratch;
-  RefCountedPtr<poisson_storage>      m_fieldSolver_scratch;
-  RefCountedPtr<sigma_storage>        m_sigma_scratch;
+  Vector<RefCountedPtr<CdrStorage> > m_cdr_scratch;
+  Vector<RefCountedPtr<RtStorage> > m_rte_scratch;
+  RefCountedPtr<FieldStorage>      m_fieldSolver_scratch;
+  RefCountedPtr<SigmaStorage>        m_sigma_scratch;
 
   // Extra storage outside of solver storage
   EBAMRCellData scratch1;
@@ -127,59 +127,59 @@ protected:
   std::string m_which_nodes;
 
   // Get functions for storage
-  RefCountedPtr<cdr_storage>& get_cdr_storage(const CdrIterator& a_solverit);
-  RefCountedPtr<rte_storage>& get_rte_storage(const RtIterator& a_solverit);
+  RefCountedPtr<CdrStorage>& get_CdrStorage(const CdrIterator& a_solverit);
+  RefCountedPtr<RtStorage>& get_RtStorage(const RtIterator& a_solverit);
 
   // Allocation functions
-  void allocate_cdr_storage();
-  void allocate_poisson_storage();
-  void allocate_rte_storage();
-  void allocate_sigma_storage();
+  void allocateCdrStorage();
+  void allocateFieldStorage();
+  void allocateRtStorage();
+  void allocateSigmaStorage();
 
   // Get functions for substep data. 
   Vector<EBAMRCellData*> get_cdr_phik(const int a_m);
   EBAMRIVData& get_sigmak(const int a_m);
 
   // Routines for intervals and quadrature
-  void setup_quadrature_nodes(const int a_p);
-  void setup_uniform_nodes(const int a_p);
-  void setup_lobatto_nodes(const int a_p);
-  void setup_chebyshev_nodes(const int a_p);
-  void setup_qmj(const int a_p);
-  void setup_subintervals(const Real a_time, const Real a_dt);
+  void setupQuadratureNodes(const int a_p);
+  void setupUniformNodes(const int a_p);
+  void setupLobattoNodes(const int a_p);
+  void setupChebyshevNodes(const int a_p);
+  void setupQmj(const int a_p);
+  void setupSubintervals(const Real a_time, const Real a_dt);
   void quad(EBAMRCellData& a_quad, const Vector<EBAMRCellData>& a_integrand, const int a_m);
   void quad(EBAMRIVData& a_quad, const Vector<EBAMRIVData>& a_integrand, const int a_m);
 
   // Routines for copying data at tm[0] and tm[p]
-  void copy_cdr_to_phi_m0();
-  void copy_sigma_to_sigma_m0();
+  void copyCdrToPhiM0();
+  void copySigmaToM0();
 
-  void copy_phi_p_to_cdr();
-  void copy_sigma_p_to_sigma();
+  void copyPhiPToCdr();
+  void copySigmaPToSigma();
 
   // Integrate RTE (only time dependent)
   void integrate_rte(const Real a_dt, const int a_m, const bool a_lagged_terms);
 
   // These are the standard SISDC integration routines
   void integrate(const Real a_dt, const Real a_time, const bool a_lagged_terms);
-  void integrate_advection_reaction(const Real a_dt, const int a_m, const bool a_lagged_terms);
-  void integrate_advection_nosubcycle(const Real a_dt, const int a_m, const bool a_lagged_terms);
-  void integrate_advection_multistep(const Real a_dt, const int a_m, const bool a_lagged_terms);
-  void integrate_advection_subcycle(const Real a_dt, const int a_m, const bool a_lagged_terms);
-  void integrate_diffusion(const Real a_dt, const int a_m, const bool a_lagged_terms);
+  void integrateAdvectionReaction(const Real a_dt, const int a_m, const bool a_lagged_terms);
+  void integrateAdvection_nosubcycle(const Real a_dt, const int a_m, const bool a_lagged_terms);
+  void integrateAdvection_multistep(const Real a_dt, const int a_m, const bool a_lagged_terms);
+  void integrateAdvection_subcycle(const Real a_dt, const int a_m, const bool a_lagged_terms);
+  void integrateDiffusion(const Real a_dt, const int a_m, const bool a_lagged_terms);
 
   // Here are the ''asymptotic-preserving'' AP methods
   void integrate_AP(const Real a_dt, const Real a_time, const bool a_lagged_terms);
   void integrate_AP_advection_reaction(const Real a_dt, const int a_m, const bool a_lagged_terms, const bool a_predictor);
 
   // Make integrands quadrature-ready
-  void reconcile_integrands();
+  void reconcileIntegrands();
 
   // SISDC predictor routines
-  void compute_FD_0();
+  void computeFD0();
 
   // SISDC corrector routines
-  void initialize_errors();
+  void initializeErrors();
 #if 0 // Deprecated?
   void corrector_reconcile_gl_integrands();
   void corrector(const Real a_time, const Real a_dt);
@@ -190,49 +190,49 @@ protected:
   void corrector_diffusion_onestep(const int a_m);
   void corrector_diffusion_build_FD(const int a_m);
 #endif
-  void finalize_errors();
+  void finalizeErrors();
 
   // Step size control routines
-  void compute_new_dt(bool& a_accept_step, const Real a_dt, const int a_num_corrections);
-  void adaptive_report(const Real a_first_dt, const Real a_dt, const Real a_new_dt, const int a_corr, const int a_rej, const Real a_max_err);
+  void computeNewDt(bool& a_accept_step, const Real a_dt, const int a_num_corrections);
+  void adaptiveReport(const Real a_first_dt, const Real a_dt, const Real a_new_dt, const int a_corr, const int a_rej, const Real a_max_err);
 
   // Poisson, RTE, and diffusion coefficient updates
-  void update_poisson(); // This uses the solver states
-  void update_poisson(const Vector<EBAMRCellData*>& a_densities, const EBAMRIVData& a_sigma);
+  void updateField(); // This uses the solver states
+  void updateField(const Vector<EBAMRCellData*>& a_densities, const EBAMRIVData& a_sigma);
   void update_stationary_rte(const Real a_time); // This uses the solver states, make sure that is what you want
   void update_stationary_rte(const Vector<EBAMRCellData*>& a_densities, const Real a_time);
-  void updateDiffusion_coefficients();
+  void updateDiffusionCoefficients();
 
   // Store & restore functions
-  void store_solvers();
-  void restore_solvers();
+  void storeSolvers();
+  void restoreSolvers();
 
   // Aux functions
   void compute_E_into_scratch();
-  void compute_cdr_eb_states();
-  void compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_phis);
-  void compute_cdr_domain_states();
-  void compute_cdr_domain_states(const Vector<EBAMRCellData*>& a_phis);
-  void compute_cdr_gradients();
-  void compute_cdr_gradients(const Vector<EBAMRCellData*>& a_phis);
+  void computeCdrEbStates();
+  void computeCdrEbStates(const Vector<EBAMRCellData*>& a_phis);
+  void computeCdrDomainStates();
+  void computeCdrDomainStates(const Vector<EBAMRCellData*>& a_phis);
+  void computeCdrGradients();
+  void computeCdrGradients(const Vector<EBAMRCellData*>& a_phis);
   void compute_cdr_fluxes(const Real a_time);
   void compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_phis, const Real a_time);
   void computeCdrDomainFluxes(const Real a_time);
   void computeCdrDomainFluxes(const Vector<EBAMRCellData*>& a_phis, const Real a_time);
-  void compute_cdr_velo(const Real a_time);
-  void compute_cdr_velo(const Vector<EBAMRCellData*>& a_phis, const Real a_time);
+  void computeCdrVelo(const Real a_time);
+  void computeCdrVelo(const Vector<EBAMRCellData*>& a_phis, const Real a_time);
   void compute_cdr_sources(const Real a_time);
   void compute_cdr_sources(const Vector<EBAMRCellData*>& a_phis, const Real a_time);
   void computeDt(Real& a_dt, TimeCode::which_code& a_timeCode);
-  void compute_sigma_flux();
+  void computeSigmaFlux();
 
   //
-  Real get_max_error();
+  Real getMaxError();
   Real restrict_dt() ;
-  Real get_max_node_distance();
+  Real getMaxNodeDistance();
 
   // Profiling
-  void write_step_profile(const Real a_dt,
+  void writeStepProfile(const Real a_dt,
 			  const Real a_error,
 			  const int  a_substeps,
 			  const int  a_corrections,
@@ -303,13 +303,13 @@ protected:
 				const Real                   a_dt);
 
   // Parse optiosn that are not really used
-  void parse_nodes();
-  void parse_AP();
-  void parse_diffusion_coupling();
-  void parse_adaptive_options();
-  void parse_subcycle_options();
-  void parse_debug_options();
-  void parse_advection_options();
+  void parseNodes();
+  void parseAP();
+  void parseDiffusionCoupling();
+  void parseAdaptiveOptions();
+  void parseSubcycleOptions();
+  void parseDebugOptions();
+  void parseAdvectionOptions();
 #include "CD_NamespaceFooter.H"
 
 #endif

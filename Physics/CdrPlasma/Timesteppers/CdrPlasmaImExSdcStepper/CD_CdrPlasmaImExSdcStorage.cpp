@@ -1,35 +1,40 @@
+/* chombo-discharge
+ * Copyright © 2021 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+ */
+
 /*!
-  @file   imex_sdc_storage.cpp
-  @brief  Implementation of imex_sdc_storage.H
+  @file   CD_CdrPlasmaImExSdcStorage.cpp
+  @brief  Implementation of CD_CdrPlasmaImExSdcStorage.H
   @author Robert Marskar
-  @date   Feb. 2018
 */
 
-#include "imex_sdc.H"
-#include "imex_sdc_storage.H"
+// Our includes
+#include <CD_CdrPlasmaImExSdcStepper.H>
+#include <CD_CdrPlasmaImExSdcStorage.H>
+#include <CD_NamespaceHeader.H>
 
-#include "CD_NamespaceHeader.H"
 using namespace Physics::CdrPlasma;
 
-imex_sdc::cdr_storage::cdr_storage(){
+CdrPlasmaImExSdcStepper::CdrStorage::CdrStorage(){
 
 }
 
-imex_sdc::cdr_storage::cdr_storage(const RefCountedPtr<AmrMesh>& a_amr,
-				   const std::string              a_realm,
-				   const phase::which_phase       a_phase,
-				   const int                      a_ncomp){
+CdrPlasmaImExSdcStepper::CdrStorage::CdrStorage(const RefCountedPtr<AmrMesh>& a_amr,
+						const std::string              a_realm,
+						const phase::which_phase       a_phase,
+						const int                      a_ncomp){
   m_amr   = a_amr;
   m_realm = a_realm;
   m_phase = a_phase;
   m_ncomp = a_ncomp;
 }
 
-imex_sdc::cdr_storage::~cdr_storage(){
+CdrPlasmaImExSdcStepper::CdrStorage::~CdrStorage(){
   deallocateStorage();
 }
 
-void imex_sdc::cdr_storage::allocateStorage(const int a_p){
+void CdrPlasmaImExSdcStepper::CdrStorage::allocateStorage(const int a_p){
   m_p = a_p;
 
   m_amr->allocate(m_scratch,  m_realm, m_phase, m_ncomp);
@@ -66,7 +71,7 @@ void imex_sdc::cdr_storage::allocateStorage(const int a_p){
   }
 }
 
-void imex_sdc::cdr_storage::deallocateStorage(){
+void CdrPlasmaImExSdcStepper::CdrStorage::deallocateStorage(){
 
   m_amr->deallocate(m_scratch);
   m_amr->deallocate(m_scratch2);
@@ -98,25 +103,25 @@ void imex_sdc::cdr_storage::deallocateStorage(){
   }
 }
 
-imex_sdc::poisson_storage::poisson_storage(){
+CdrPlasmaImExSdcStepper::FieldStorage::FieldStorage(){
 
 }
 
-imex_sdc::poisson_storage::poisson_storage(const RefCountedPtr<AmrMesh>& a_amr,
-					   const std::string              a_realm,
-					   const phase::which_phase       a_phase,
-					   const int                      a_ncomp){
+CdrPlasmaImExSdcStepper::FieldStorage::FieldStorage(const RefCountedPtr<AmrMesh>& a_amr,
+						    const std::string              a_realm,
+						    const phase::which_phase       a_phase,
+						    const int                      a_ncomp){
   m_amr   = a_amr;
   m_realm = a_realm;
   m_ncomp = a_ncomp;
   m_phase = a_phase;
 }
 
-imex_sdc::poisson_storage::~poisson_storage(){
+CdrPlasmaImExSdcStepper::FieldStorage::~FieldStorage(){
   deallocateStorage();
 }
 
-void imex_sdc::poisson_storage::allocateStorage(const int a_p){
+void CdrPlasmaImExSdcStepper::FieldStorage::allocateStorage(const int a_p){
   m_p = a_p;
   
   m_amr->allocate(m_previous, m_realm, m_ncomp);
@@ -126,7 +131,7 @@ void imex_sdc::poisson_storage::allocateStorage(const int a_p){
   m_amr->allocate(m_E_dom,    m_realm, m_phase, SpaceDim);
 }
 
-void imex_sdc::poisson_storage::deallocateStorage(){
+void CdrPlasmaImExSdcStepper::FieldStorage::deallocateStorage(){
   m_amr->deallocate(m_previous);
   m_amr->deallocate(m_E_cell);
   m_amr->deallocate(m_E_face);
@@ -134,25 +139,25 @@ void imex_sdc::poisson_storage::deallocateStorage(){
   m_amr->deallocate(m_E_dom);
 }
 
-imex_sdc::rte_storage::rte_storage(){
+CdrPlasmaImExSdcStepper::RtStorage::RtStorage(){
 
 }
 
-imex_sdc::rte_storage::rte_storage(const RefCountedPtr<AmrMesh>& a_amr,
-				   const std::string              a_realm,
-				   const phase::which_phase       a_phase,
-				   const int                      a_ncomp){
+CdrPlasmaImExSdcStepper::RtStorage::RtStorage(const RefCountedPtr<AmrMesh>& a_amr,
+					      const std::string              a_realm,
+					      const phase::which_phase       a_phase,
+					      const int                      a_ncomp){
   m_amr   = a_amr;
   m_realm = a_realm;
   m_phase = a_phase;
   m_ncomp = a_ncomp;
 }
 
-imex_sdc::rte_storage::~rte_storage(){
+CdrPlasmaImExSdcStepper::RtStorage::~RtStorage(){
   deallocateStorage();
 }
 
-void imex_sdc::rte_storage::allocateStorage(const int a_p){
+void CdrPlasmaImExSdcStepper::RtStorage::allocateStorage(const int a_p){
   m_p = a_p;
   
   m_amr->allocate(m_previous,   m_realm, m_phase, m_ncomp);
@@ -160,31 +165,31 @@ void imex_sdc::rte_storage::allocateStorage(const int a_p){
   m_amr->allocate(m_scratchIF,  m_realm, m_phase, m_ncomp);
 }
 
-void imex_sdc::rte_storage::deallocateStorage(){
+void CdrPlasmaImExSdcStepper::RtStorage::deallocateStorage(){
   m_amr->deallocate(m_previous);
   m_amr->deallocate(m_scratchIV);
   m_amr->deallocate(m_scratchIF);
 }
 
-imex_sdc::sigma_storage::sigma_storage(){
+CdrPlasmaImExSdcStepper::SigmaStorage::SigmaStorage(){
 
 }
 
-imex_sdc::sigma_storage::sigma_storage(const RefCountedPtr<AmrMesh>& a_amr,
-				       const std::string              a_realm,
-				       const phase::which_phase       a_phase,
-				       const int                      a_ncomp){
+CdrPlasmaImExSdcStepper::SigmaStorage::SigmaStorage(const RefCountedPtr<AmrMesh>& a_amr,
+						    const std::string              a_realm,
+						    const phase::which_phase       a_phase,
+						    const int                      a_ncomp){
   m_amr   = a_amr;
   m_realm = a_realm;
   m_phase = a_phase;
   m_ncomp = a_ncomp;
 }
 
-imex_sdc::sigma_storage::~sigma_storage(){
+CdrPlasmaImExSdcStepper::SigmaStorage::~SigmaStorage(){
   deallocateStorage();
 }
 
-void imex_sdc::sigma_storage::allocateStorage(const int a_p){
+void CdrPlasmaImExSdcStepper::SigmaStorage::allocateStorage(const int a_p){
   m_p = a_p;
   
   m_amr->allocate(m_scratch, m_realm, m_phase, m_ncomp);
@@ -201,7 +206,7 @@ void imex_sdc::sigma_storage::allocateStorage(const int a_p){
   }
 }
 
-void imex_sdc::sigma_storage::deallocateStorage(){
+void CdrPlasmaImExSdcStepper::SigmaStorage::deallocateStorage(){
   m_amr->deallocate(m_scratch);
   m_amr->deallocate(m_error);
 
@@ -211,4 +216,5 @@ void imex_sdc::sigma_storage::deallocateStorage(){
     m_amr->deallocate(m_Fold[m]);
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

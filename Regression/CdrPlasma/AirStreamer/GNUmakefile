@@ -33,7 +33,7 @@ src_dirs = $(DISCHARGE_HOME)/Source \
 	$(DISCHARGE_HOME)/Geometries/RodDielectric\
 	$(DISCHARGE_HOME)/Physics/CdrPlasma \
 	$(DISCHARGE_HOME)/Physics/CdrPlasma/CellTaggers/CdrPlasmaStreamerTagger\
-	$(DISCHARGE_HOME)/Physics/CdrPlasma/Timesteppers/imex_sdc\
+	$(DISCHARGE_HOME)/Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper\
 	$(DISCHARGE_HOME)/Physics/CdrPlasma/plasma_models/air3_bourdon
 
 

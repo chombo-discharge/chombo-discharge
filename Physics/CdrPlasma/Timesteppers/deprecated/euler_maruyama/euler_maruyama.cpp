@@ -13,10 +13,10 @@
 
 #include <ParmParse.H>
 
-typedef euler_maruyama::cdr_storage     cdr_storage;
-typedef euler_maruyama::poisson_storage poisson_storage;
-typedef euler_maruyama::rte_storage     rte_storage;
-typedef euler_maruyama::sigma_storage   sigma_storage;
+typedef euler_maruyama::CdrStorage     CdrStorage;
+typedef euler_maruyama::FieldStorage FieldStorage;
+typedef euler_maruyama::RtStorage     RtStorage;
+typedef euler_maruyama::SigmaStorage   SigmaStorage;
 
 euler_maruyama::euler_maruyama(){
   m_className = "euler_maruyama";
@@ -170,11 +170,11 @@ bool euler_maruyama::needToRegrid(){
   return false;
 }
 
-RefCountedPtr<cdr_storage>& euler_maruyama::get_cdr_storage(const CdrIterator& a_solverit){
+RefCountedPtr<CdrStorage>& euler_maruyama::get_CdrStorage(const CdrIterator& a_solverit){
   return m_cdr_scratch[a_solverit.index()];
 }
 
-RefCountedPtr<rte_storage>& euler_maruyama::get_rte_storage(const RtIterator& a_solverit){
+RefCountedPtr<RtStorage>& euler_maruyama::get_RtStorage(const RtIterator& a_solverit){
   return m_rte_scratch[a_solverit.index()];
 }
 
@@ -224,21 +224,21 @@ Real euler_maruyama::advance(const Real a_dt){
   // on the EB and on the domain walls
   t0 = MPI_Wtime();
   euler_maruyama::compute_E_into_scratch();       // Compute the electric field
-  euler_maruyama::compute_cdr_gradients();        // Extrapolate cell-centered stuff to EB centroids
+  euler_maruyama::computeCdrGradients();        // Extrapolate cell-centered stuff to EB centroids
   t1 = MPI_Wtime();
   t_grad = t1 - t0;
 
   t0 = MPI_Wtime();
-  euler_maruyama::compute_cdr_eb_states();        // Extrapolate cell-centered stuff to EB centroids
-  euler_maruyama::compute_cdr_eb_fluxes();        // Extrapolate cell-centered fluxes to EB centroids
-  euler_maruyama::compute_cdr_domain_states();    // Extrapolate cell-centered states to domain edges
+  euler_maruyama::computeCdrEbStates();        // Extrapolate cell-centered stuff to EB centroids
+  euler_maruyama::computeCdrEbFluxes();        // Extrapolate cell-centered fluxes to EB centroids
+  euler_maruyama::computeCdrDomainStates();    // Extrapolate cell-centered states to domain edges
   euler_maruyama::computeCdrDomainFluxes();    // Extrapolate cell-centered fluxes to domain edges
-  euler_maruyama::compute_sigma_flux();           // Update charge flux for sigma solver
+  euler_maruyama::computeSigmaFlux();           // Update charge flux for sigma solver
   t1 = MPI_Wtime();
   t_filBC = t1 - t0;
 
   t0 = MPI_Wtime();
-  euler_maruyama::compute_reaction_network(a_dt); // Advance the reaction network
+  euler_maruyama::computeReactionNetwork(a_dt); // Advance the reaction network
   t1 = MPI_Wtime();
   t_reac = t1-t0;
 
@@ -271,7 +271,7 @@ Real euler_maruyama::advance(const Real a_dt){
 
   // Update velocities and diffusion coefficients. We don't do sources here.
   t0 = MPI_Wtime();
-  euler_maruyama::compute_cdr_velo(m_time + a_dt);
+  euler_maruyama::computeCdrVelo(m_time + a_dt);
   t1 = MPI_Wtime();
   t_filV = t1 - t0;
   t0 = MPI_Wtime();
@@ -331,7 +331,7 @@ void euler_maruyama::allocateInternals(){
   m_cdr_scratch.resize(num_species);
   for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
-    m_cdr_scratch[idx] = RefCountedPtr<cdr_storage> (new cdr_storage(m_amr, m_cdr->getPhase(), ncomp));
+    m_cdr_scratch[idx] = RefCountedPtr<CdrStorage> (new CdrStorage(m_amr, m_cdr->getPhase(), ncomp));
     m_cdr_scratch[idx]->allocate_storage();
   }
 
@@ -339,16 +339,16 @@ void euler_maruyama::allocateInternals(){
   m_rte_scratch.resize(num_Photons);
   for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
-    m_rte_scratch[idx] = RefCountedPtr<rte_storage> (new rte_storage(m_amr, m_rte->getPhase(), ncomp));
+    m_rte_scratch[idx] = RefCountedPtr<RtStorage> (new RtStorage(m_amr, m_rte->getPhase(), ncomp));
     m_rte_scratch[idx]->allocate_storage();
   }
 
   // Allocate Poisson storage
-  m_fieldSolver_scratch = RefCountedPtr<poisson_storage> (new poisson_storage(m_amr, m_cdr->getPhase(), ncomp));
+  m_fieldSolver_scratch = RefCountedPtr<FieldStorage> (new FieldStorage(m_amr, m_cdr->getPhase(), ncomp));
   m_fieldSolver_scratch->allocate_storage();
   
   // Allocate sigma storage
-  m_sigma_scratch = RefCountedPtr<sigma_storage> (new sigma_storage(m_amr, m_cdr->getPhase(), ncomp));
+  m_sigma_scratch = RefCountedPtr<SigmaStorage> (new SigmaStorage(m_amr, m_cdr->getPhase(), ncomp));
   m_sigma_scratch->allocate_storage();
 }
 
@@ -361,23 +361,23 @@ void euler_maruyama::deallocateInternals(){
   for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     m_cdr_scratch[idx]->deallocate_storage();
-    m_cdr_scratch[idx] = RefCountedPtr<cdr_storage>(0);
+    m_cdr_scratch[idx] = RefCountedPtr<CdrStorage>(0);
   }
 
   for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     m_rte_scratch[idx]->deallocate_storage();
-    m_rte_scratch[idx] = RefCountedPtr<rte_storage>(0);
+    m_rte_scratch[idx] = RefCountedPtr<RtStorage>(0);
   }
 
   m_cdr_scratch.resize(0);
   m_rte_scratch.resize(0);
 
   m_fieldSolver_scratch->deallocate_storage();
-  m_fieldSolver_scratch = RefCountedPtr<poisson_storage>(0);
+  m_fieldSolver_scratch = RefCountedPtr<FieldStorage>(0);
   
   m_sigma_scratch->deallocate_storage();
-  m_sigma_scratch = RefCountedPtr<sigma_storage>(0);
+  m_sigma_scratch = RefCountedPtr<SigmaStorage>(0);
 }
 
 void euler_maruyama::compute_E_into_scratch(){
@@ -386,9 +386,9 @@ void euler_maruyama::compute_E_into_scratch(){
     pout() << "euler_maruyama::compute_E_into_scratch" << endl;
   }
   
-  EBAMRCellData& E_cell = m_fieldSolver_scratch->get_E_cell();
-  EBAMRIVData&   E_eb   = m_fieldSolver_scratch->get_E_eb();
-  EBAMRIFData&   E_dom  = m_fieldSolver_scratch->get_E_domain();
+  EBAMRCellData& E_cell = m_fieldSolver_scratch->getElectricFieldCell();
+  EBAMRIVData&   E_eb   = m_fieldSolver_scratch->getElectricFieldEb();
+  EBAMRIFData&   E_dom  = m_fieldSolver_scratch->getElectricFieldDomain();
 
   const MFAMRCellData& phi = m_fieldSolver->getPotential();
 
@@ -397,28 +397,28 @@ void euler_maruyama::compute_E_into_scratch(){
   TimeStepper::extrapolate_to_domain_faces(E_dom, m_cdr->getPhase(), E_cell); // Domain centered field
 }
 
-void euler_maruyama::compute_cdr_gradients(){
-  CH_TIME("euler_maruyama::compute_cdr_gradients");
+void euler_maruyama::computeCdrGradients(){
+  CH_TIME("euler_maruyama::computeCdrGradients");
   if(m_verbosity > 5){
-    pout() << "euler_maruyama::compute_cdr_gradients" << endl;
+    pout() << "euler_maruyama::computeCdrGradients" << endl;
   }
 
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     RefCountedPtr<CdrSolver>& solver = solver_it();
-    RefCountedPtr<cdr_storage>& storage = euler_maruyama::get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = euler_maruyama::get_CdrStorage(solver_it);
 
-    EBAMRCellData& grad = storage->get_gradient();
+    EBAMRCellData& grad = storage->getGradient();
     m_amr->computeGradient(grad, solver->getPhi(), phase::gas);
     m_amr->averageDown(grad, m_cdr->getPhase());
     m_amr->interpGhost(grad, m_cdr->getPhase());
   }
 }
 
-void euler_maruyama::compute_cdr_eb_states(){
-  CH_TIME("euler_maruyama::compute_cdr_eb_states");
+void euler_maruyama::computeCdrEbStates(){
+  CH_TIME("euler_maruyama::computeCdrEbStates");
   if(m_verbosity > 5){
-    pout() << "euler_maruyama::compute_cdr_eb_states" << endl;
+    pout() << "euler_maruyama::computeCdrEbStates" << endl;
   }
 
   Vector<EBAMRCellData*> cdr_states = m_cdr->getPhis();
@@ -429,11 +429,11 @@ void euler_maruyama::compute_cdr_eb_states(){
   
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
-    RefCountedPtr<cdr_storage>& storage = euler_maruyama::get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = euler_maruyama::get_CdrStorage(solver_it);
 
-    eb_states.push_back(&(storage->get_eb_state()));
-    eb_gradients.push_back(&(storage->get_eb_grad()));
-    cdr_gradients.push_back(&(storage->get_gradient())); // Should already have been computed
+    eb_states.push_back(&(storage->getEbState()));
+    eb_gradients.push_back(&(storage->getEbGrad()));
+    cdr_gradients.push_back(&(storage->getGradient())); // Should already have been computed
   }
 
   // Extrapolate states to the EB and floor them so we cannot get negative values on the boundary. This
@@ -453,10 +453,10 @@ void euler_maruyama::compute_cdr_eb_states(){
   }
 }
 
-void euler_maruyama::compute_cdr_eb_fluxes(){
-  CH_TIME("euler_maruyama::compute_cdr_eb_fluxes()");
+void euler_maruyama::computeCdrEbFluxes(){
+  CH_TIME("euler_maruyama::computeCdrEbFluxes()");
   if(m_verbosity > 5){
-    pout() << "euler_maruyama::compute_cdr_eb_fluxes()";
+    pout() << "euler_maruyama::computeCdrEbFluxes()";
   }
 
   Vector<EBAMRCellData*> states = m_cdr->getPhis();
@@ -471,17 +471,17 @@ void euler_maruyama::compute_cdr_eb_fluxes(){
   cdr_fluxes = m_cdr->getEbFlux();
 
   for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
 
-    EBAMRIVData& dens_eb = storage->get_eb_state();
-    EBAMRIVData& velo_eb = storage->get_eb_velo();
-    EBAMRIVData& flux_eb = storage->get_eb_flux();
-    EBAMRIVData& grad_eb = storage->get_eb_grad();
+    EBAMRIVData& dens_eb = storage->getEbState();
+    EBAMRIVData& velo_eb = storage->getEbVelo();
+    EBAMRIVData& flux_eb = storage->getEbFlux();
+    EBAMRIVData& grad_eb = storage->getEbGrad();
 
-    extrap_cdr_densities.push_back(&dens_eb);  // Computed in compute_cdr_eb_states
+    extrap_cdr_densities.push_back(&dens_eb);  // Computed in computeCdrEbStates
     extrap_cdr_velocities.push_back(&velo_eb); // Not yet computed
     extrap_cdr_fluxes.push_back(&flux_eb);     // Not yet computed
-    extrap_cdr_gradients.push_back(&grad_eb);  // Computed in compute_cdr_eb_states
+    extrap_cdr_gradients.push_back(&grad_eb);  // Computed in computeCdrEbStates
   }
 
   // Compute extrapolated fluxes and velocities at the EB
@@ -492,14 +492,14 @@ void euler_maruyama::compute_cdr_eb_fluxes(){
   // Compute RTE flux on the boundary
   for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>& solver   = solver_it();
-    RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
+    RefCountedPtr<RtStorage>& storage = this->get_RtStorage(solver_it);
 
-    EBAMRIVData& flux_eb = storage->get_eb_flux();
+    EBAMRIVData& flux_eb = storage->getEbFlux();
     solver->computeBoundaryFlux(flux_eb, solver->getPhi());
     extrap_rte_fluxes.push_back(&flux_eb);
   }
 
-  const EBAMRIVData& E = m_fieldSolver_scratch->get_E_eb();
+  const EBAMRIVData& E = m_fieldSolver_scratch->getElectricFieldEb();
   TimeStepper::compute_cdr_fluxes(cdr_fluxes,
 				   extrap_cdr_fluxes,
 				   extrap_cdr_densities,
@@ -510,10 +510,10 @@ void euler_maruyama::compute_cdr_eb_fluxes(){
 				   m_time);
 }
 
-void euler_maruyama::compute_cdr_domain_states(){
-  CH_TIME("euler_maruyama::compute_cdr_domain_states");
+void euler_maruyama::computeCdrDomainStates(){
+  CH_TIME("euler_maruyama::computeCdrDomainStates");
   if(m_verbosity > 5){
-    pout() << "euler_maruyama::compute_cdr_domain_states" << endl;
+    pout() << "euler_maruyama::computeCdrDomainStates" << endl;
   }
 
   Vector<EBAMRIFData*>   domain_gradients;
@@ -523,12 +523,12 @@ void euler_maruyama::compute_cdr_domain_states(){
   
   for (auto solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
-    RefCountedPtr<cdr_storage>& storage = euler_maruyama::get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = euler_maruyama::get_CdrStorage(solver_it);
 
     cdr_states.push_back(&(solver->getPhi()));
-    domain_states.push_back(&(storage->getDomain_state()));
-    domain_gradients.push_back(&(storage->getDomain_grad()));
-    cdr_gradients.push_back(&(storage->get_gradient())); // Should already be computed
+    domain_states.push_back(&(storage->getDomainState()));
+    domain_gradients.push_back(&(storage->getDomainGrad()));
+    cdr_gradients.push_back(&(storage->getGradient())); // Should already be computed
   }
 
   // Extrapolate states to the domain faces
@@ -571,13 +571,13 @@ void euler_maruyama::computeCdrDomainFluxes(){
   cdr_fluxes = m_cdr->getDomainFlux();
   cdr_velocities = m_cdr->getVelocities();
   for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
 
-    EBAMRIFData& dens_domain = storage->getDomain_state();
-    EBAMRIFData& velo_domain = storage->getDomain_velo();
-    EBAMRIFData& flux_domain = storage->getDomain_flux();
-    EBAMRIFData& grad_domain = storage->getDomain_grad();
-    EBAMRCellData& gradient  = storage->get_gradient();
+    EBAMRIFData& dens_domain = storage->getDomainState();
+    EBAMRIFData& velo_domain = storage->getDomainVelo();
+    EBAMRIFData& flux_domain = storage->getDomainFlux();
+    EBAMRIFData& grad_domain = storage->getDomainGrad();
+    EBAMRCellData& gradient  = storage->getGradient();
 
     extrap_cdr_densities.push_back(&dens_domain);  // Has not been computed
     extrap_cdr_velocities.push_back(&velo_domain); // Has not been computed
@@ -595,14 +595,14 @@ void euler_maruyama::computeCdrDomainFluxes(){
   // Compute RTE flux on domain faces
   for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>& solver   = solver_it();
-    RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
+    RefCountedPtr<RtStorage>& storage = this->get_RtStorage(solver_it);
 
-    EBAMRIFData& domain_flux = storage->getDomain_flux();
+    EBAMRIFData& domain_flux = storage->getDomainFlux();
     solver->computeDomainFlux(domain_flux, solver->getPhi());
     extrap_rte_fluxes.push_back(&domain_flux);
   }
 
-  const EBAMRIFData& E = m_fieldSolver_scratch->get_E_domain();
+  const EBAMRIFData& E = m_fieldSolver_scratch->getElectricFieldDomain();
 
   // This fills the solvers' domain fluxes
   TimeStepper::computeCdrDomainFluxes(cdr_fluxes,
@@ -615,10 +615,10 @@ void euler_maruyama::computeCdrDomainFluxes(){
 					  m_time);
 }
 
-void euler_maruyama::compute_sigma_flux(){
-  CH_TIME("euler_maruyama::compute_sigma_flux");
+void euler_maruyama::computeSigmaFlux(){
+  CH_TIME("euler_maruyama::computeSigmaFlux");
   if(m_verbosity > 5){
-    pout() << "euler_maruyama::compute_sigma_flux" << endl;
+    pout() << "euler_maruyama::computeSigmaFlux" << endl;
   }
 
   EBAMRIVData& flux = m_sigma->getFlux();
@@ -635,10 +635,10 @@ void euler_maruyama::compute_sigma_flux(){
   m_sigma->resetCells(flux);
 }
 
-void euler_maruyama::compute_reaction_network(const Real a_dt){
-  CH_TIME("euler_maruyama::compute_reaction_network");
+void euler_maruyama::computeReactionNetwork(const Real a_dt){
+  CH_TIME("euler_maruyama::computeReactionNetwork");
   if(m_verbosity > 5){
-    pout() << "euler_maruaya::compute_reaction_network" << endl;
+    pout() << "euler_maruaya::computeReactionNetwork" << endl;
   }
 
   // We have already computed E and the gradients of the CDR equations, so we will call the
@@ -648,13 +648,13 @@ void euler_maruyama::compute_reaction_network(const Real a_dt){
   Vector<EBAMRCellData*> cdr_phi = m_cdr->getPhis();
   Vector<EBAMRCellData*> rte_src = m_rte->getSources();
   Vector<EBAMRCellData*> rte_phi = m_rte->getPhis();
-  const EBAMRCellData& E = m_fieldSolver_scratch->get_E_cell();
+  const EBAMRCellData& E = m_fieldSolver_scratch->getElectricFieldCell();
 
   Vector<EBAMRCellData*> cdr_grad;
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = get_CdrStorage(solver_it);
 
-    EBAMRCellData& gradient = storage->get_gradient();
+    EBAMRCellData& gradient = storage->getGradient();
     cdr_grad.push_back(&gradient);
   }
 
@@ -670,7 +670,7 @@ void euler_maruyama::advance_cdr(const Real a_dt){
 
   for (auto solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
-    RefCountedPtr<cdr_storage>& storage = euler_maruyama::get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = euler_maruyama::get_CdrStorage(solver_it);
 
     EBAMRCellData& phi = solver->getPhi();
     EBAMRCellData& src = solver->getSource();
@@ -769,14 +769,14 @@ void euler_maruyama::advance_sigma(const Real a_dt){
   DataOps::incr(sigma, rhs, a_dt);
 }
 
-void euler_maruyama::compute_cdr_velo(const Real a_time){
-  CH_TIME("euler_maruyama::compute_cdr_velo");
+void euler_maruyama::computeCdrVelo(const Real a_time){
+  CH_TIME("euler_maruyama::computeCdrVelo");
   if(m_verbosity > 5){
-    pout() << "euler_maruaya::compute_cdr_velo" << endl;
+    pout() << "euler_maruaya::computeCdrVelo" << endl;
   }
 
   Vector<EBAMRCellData*> velocities = m_cdr->getVelocities();
-  TimeStepper::computeCdrDriftVelocities(velocities, m_cdr->getPhis(), m_fieldSolver_scratch->get_E_cell(), a_time);
+  TimeStepper::computeCdrDriftVelocities(velocities, m_cdr->getPhis(), m_fieldSolver_scratch->getElectricFieldCell(), a_time);
 }
 
 void euler_maruyama::compute_cdr_diffco(const Real a_time){
@@ -785,7 +785,7 @@ void euler_maruyama::compute_cdr_diffco(const Real a_time){
     pout() << "euler_maruaya::compute_cdr_diffco" << endl;
   }
 
-  TimeStepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
+  TimeStepper::compute_cdr_diffusion(m_fieldSolver_scratch->getElectricFieldCell(), m_fieldSolver_scratch->getElectricFieldEb());
 }
 
 void euler_maruyama::computeDt(Real& a_dt, TimeCode::which_code& a_timeCode){

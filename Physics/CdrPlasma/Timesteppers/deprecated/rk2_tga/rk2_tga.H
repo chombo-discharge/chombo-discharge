@@ -33,10 +33,10 @@ class rk2_tga : public TimeStepper {
 public:
 
   // Forward declare nested classes. I don't want to clutter this file. 
-  class cdr_storage;
-  class poisson_storage;
-  class rte_storage;
-  class sigma_storage;
+  class CdrStorage;
+  class FieldStorage;
+  class RtStorage;
+  class SigmaStorage;
 
   /*!
     @brief Constructor
@@ -73,22 +73,22 @@ protected:
   /*!
     @brief Scratch storage
   */
-  Vector<RefCountedPtr<cdr_storage> > m_cdr_scratch;
+  Vector<RefCountedPtr<CdrStorage> > m_cdr_scratch;
 
   /*!
     @brief Scratch storage
   */
-  RefCountedPtr<poisson_storage> m_fieldSolver_scratch;
+  RefCountedPtr<FieldStorage> m_fieldSolver_scratch;
 
   /*!
     @brief Scratch storage
   */
-  Vector<RefCountedPtr<rte_storage> > m_rte_scratch;
+  Vector<RefCountedPtr<RtStorage> > m_rte_scratch;
 
   /*!
     @brief Scratch storage
   */
-  RefCountedPtr<sigma_storage> m_sigma_scratch;
+  RefCountedPtr<SigmaStorage> m_sigma_scratch;
 
   /*!
     @brief RK2 method. 
@@ -118,32 +118,32 @@ protected:
   /*!
     @brief Get storage
   */
-  virtual RefCountedPtr<cdr_storage>& get_cdr_storage(const CdrIterator& a_solverit);
+  virtual RefCountedPtr<CdrStorage>& get_CdrStorage(const CdrIterator& a_solverit);
 
   /*!
     @brief Get storage
   */
-  virtual RefCountedPtr<rte_storage>& get_rte_storage(const RtIterator& a_solverit);
+  virtual RefCountedPtr<RtStorage>& get_RtStorage(const RtIterator& a_solverit);
 
   /*!
     @brief Allocate storage
   */
-  virtual void allocate_cdr_storage();
+  virtual void allocateCdrStorage();
 
   /*!
     @brief Allocate storage
   */
-  virtual void allocate_poisson_storage();
+  virtual void allocateFieldStorage();
 
   /*!
     @brief Allocate storage
   */
-  virtual void allocate_rte_storage();
+  virtual void allocateRtStorage();
 
   /*!
     @brief Allocate storage
   */
-  virtual void allocate_sigma_storage();
+  virtual void allocateSigmaStorage();
 
   /*!
     @brief Restrict dt
@@ -173,12 +173,12 @@ protected:
   /*!
     @brief Compute the velocities
   */
-  virtual void compute_cdr_velo(const Real a_time);
+  virtual void computeCdrVelo(const Real a_time);
 
   /*!
     @brief Compute the cdr states at the EB at the start of the time step
   */
-  virtual void compute_cdr_eb_states();
+  virtual void computeCdrEbStates();
 
   /*!
     @brief Compute the cdr fluxes the start of the time step
@@ -188,7 +188,7 @@ protected:
   /*!
     @brief Compute the sigma flux the start of the time step
   */
-  virtual void compute_sigma_flux_into_scratch();
+  virtual void computeSigmaFlux_into_scratch();
 
   /*!
     @brief Compute k1 and intermediate state for cdr equations

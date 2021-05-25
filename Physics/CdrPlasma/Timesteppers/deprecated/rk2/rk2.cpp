@@ -17,10 +17,10 @@
 #define RK2_DEBUG_TIMER 0
 #define RK2_DEBUG_TIMER_STOP 0
 
-typedef rk2::cdr_storage     cdr_storage;
-typedef rk2::poisson_storage poisson_storage;
-typedef rk2::rte_storage     rte_storage;
-typedef rk2::sigma_storage   sigma_storage;
+typedef rk2::CdrStorage     CdrStorage;
+typedef rk2::FieldStorage FieldStorage;
+typedef rk2::RtStorage     RtStorage;
+typedef rk2::SigmaStorage   SigmaStorage;
 
 rk2::rk2() : TimeStepper() {
   m_alpha = 1.0;
@@ -35,15 +35,15 @@ rk2::~rk2(){
   
 }
 
-RefCountedPtr<cdr_storage>& rk2::get_cdr_storage(const CdrIterator& a_solverit){
+RefCountedPtr<CdrStorage>& rk2::get_CdrStorage(const CdrIterator& a_solverit){
   return m_cdr_scratch[a_solverit.get_solver()];
 }
 
-RefCountedPtr<rte_storage>& rk2::get_rte_storage(const RtIterator& a_solverit){
+RefCountedPtr<RtStorage>& rk2::get_RtStorage(const RtIterator& a_solverit){
   return m_rte_scratch[a_solverit.get_solver()];
 }
 
-void rk2::allocate_cdr_storage(){
+void rk2::allocateCdrStorage(){
 
   const int ncomp       = 1;
   const int num_species = m_plaskin->get_num_species();
@@ -51,32 +51,32 @@ void rk2::allocate_cdr_storage(){
   
   for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
-    m_cdr_scratch[idx] = RefCountedPtr<cdr_storage> (new cdr_storage(m_amr, m_cdr->getPhase(), ncomp));
+    m_cdr_scratch[idx] = RefCountedPtr<CdrStorage> (new CdrStorage(m_amr, m_cdr->getPhase(), ncomp));
     m_cdr_scratch[idx]->allocate_storage();
   }
 }
 
-void rk2::allocate_poisson_storage(){
+void rk2::allocateFieldStorage(){
   const int ncomp = 1;
-  m_fieldSolver_scratch = RefCountedPtr<poisson_storage> (new poisson_storage(m_amr, m_cdr->getPhase(), ncomp));
+  m_fieldSolver_scratch = RefCountedPtr<FieldStorage> (new FieldStorage(m_amr, m_cdr->getPhase(), ncomp));
   m_fieldSolver_scratch->allocate_storage();
 }
 
-void rk2::allocate_rte_storage(){
+void rk2::allocateRtStorage(){
   const int ncomp       = 1;
   const int num_Photons = m_plaskin->get_num_Photons();
   m_rte_scratch.resize(num_Photons);
   
   for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
-    m_rte_scratch[idx] = RefCountedPtr<rte_storage> (new rte_storage(m_amr, m_rte->getPhase(), ncomp));
+    m_rte_scratch[idx] = RefCountedPtr<RtStorage> (new RtStorage(m_amr, m_rte->getPhase(), ncomp));
     m_rte_scratch[idx]->allocate_storage();
   }
 }
 
-void rk2::allocate_sigma_storage(){
+void rk2::allocateSigmaStorage(){
   const int ncomp = 1;
-  m_sigma_scratch = RefCountedPtr<sigma_storage> (new sigma_storage(m_amr, m_cdr->getPhase(), ncomp));
+  m_sigma_scratch = RefCountedPtr<SigmaStorage> (new SigmaStorage(m_amr, m_cdr->getPhase(), ncomp));
   m_sigma_scratch->allocate_storage();
 }
 
@@ -106,10 +106,10 @@ void rk2::regridInternals(){
     pout() << "rk2::regridInternals" << endl;
   }
   
-  this->allocate_cdr_storage();
-  this->allocate_poisson_storage();
-  this->allocate_rte_storage();
-  this->allocate_sigma_storage();
+  this->allocateCdrStorage();
+  this->allocateFieldStorage();
+  this->allocateRtStorage();
+  this->allocateSigmaStorage();
 }
 
 Real rk2::advance(const Real a_dt){
@@ -122,9 +122,9 @@ Real rk2::advance(const Real a_dt){
   const Real t0 = MPI_Wtime();
   this->compute_E_at_start_of_time_step();
   const Real t00 = MPI_Wtime();
-  this->compute_cdr_velo_at_start_of_time_step();
+  this->computeCdrVelo_at_start_of_time_step();
   const Real t01 = MPI_Wtime();
-  this->compute_cdr_eb_states_at_start_of_time_step();
+  this->computeCdrEbStates_at_start_of_time_step();
   const Real t02 = MPI_Wtime();
   this->compute_cdr_diffco_at_start_of_time_step();
   const Real t03 = MPI_Wtime();
@@ -132,7 +132,7 @@ Real rk2::advance(const Real a_dt){
   const Real t04 = MPI_Wtime();
   this->compute_cdr_fluxes_at_start_of_time_step();
   const Real t05 = MPI_Wtime();
-  this->compute_sigma_flux_at_start_of_time_step();
+  this->computeSigmaFlux_at_start_of_time_step();
 
   // Do k1 advance
   const Real t1 = MPI_Wtime();
@@ -154,9 +154,9 @@ Real rk2::advance(const Real a_dt){
 
   // Recompute things in order to do k2 advance
   const Real t2 = MPI_Wtime();
-  this->compute_cdr_eb_states_after_k1();
+  this->computeCdrEbStates_after_k1();
   const Real t20 = MPI_Wtime();
-  this->compute_cdr_velo_after_k1(a_dt);
+  this->computeCdrVelo_after_k1(a_dt);
   const Real t21 = MPI_Wtime();
   this->compute_cdr_diffco_after_k1(a_dt);
   const Real t22 = MPI_Wtime();
@@ -164,7 +164,7 @@ Real rk2::advance(const Real a_dt){
   const Real t23 = MPI_Wtime();
   this->compute_cdr_fluxes_after_k1(a_dt);
   const Real t24 = MPI_Wtime();
-  this->compute_sigma_flux_after_k1();
+  this->computeSigmaFlux_after_k1();
   const Real t25 = MPI_Wtime();
   
   // Do k2 advance
@@ -241,9 +241,9 @@ void rk2::compute_E_at_start_of_time_step(){
     pout() << "rk2::compute_E_at_start_of_time_step" << endl;
   }
 
-  EBAMRCellData& E_cell = m_fieldSolver_scratch->get_E_cell();
-  EBAMRFluxData& E_face = m_fieldSolver_scratch->get_E_face();
-  EBAMRIVData&   E_eb   = m_fieldSolver_scratch->get_E_eb();
+  EBAMRCellData& E_cell = m_fieldSolver_scratch->getElectricFieldCell();
+  EBAMRFluxData& E_face = m_fieldSolver_scratch->getElectricFieldFace();
+  EBAMRIVData&   E_eb   = m_fieldSolver_scratch->getElectricFieldEb();
 
   const MFAMRCellData& phi = m_fieldSolver->getPotential();
   
@@ -252,21 +252,21 @@ void rk2::compute_E_at_start_of_time_step(){
   this->compute_E(E_eb,   m_cdr->getPhase(), E_cell);  // EB-centered field
 }
 
-void rk2::compute_cdr_velo_at_start_of_time_step(){
-  CH_TIME("rk2::compute_cdr_velo_at_start_of_time_step");
+void rk2::computeCdrVelo_at_start_of_time_step(){
+  CH_TIME("rk2::computeCdrVelo_at_start_of_time_step");
   if(m_verbosity > 5){
-    pout() << "rk2::compute_cdr_velo_at_start_of_time_step" << endl;
+    pout() << "rk2::computeCdrVelo_at_start_of_time_step" << endl;
   }
 
   Vector<EBAMRCellData*> states     = m_cdr->getPhis();
   Vector<EBAMRCellData*> velocities = m_cdr->getVelocities();
-  this->computeCdrDriftVelocities(velocities, states, m_fieldSolver_scratch->get_E_cell(), m_time);
+  this->computeCdrDriftVelocities(velocities, states, m_fieldSolver_scratch->getElectricFieldCell(), m_time);
 }
 
-void rk2::compute_cdr_eb_states_at_start_of_time_step(){
-  CH_TIME("rk2::compute_cdr_eb_states_at_start_of_time_step");
+void rk2::computeCdrEbStates_at_start_of_time_step(){
+  CH_TIME("rk2::computeCdrEbStates_at_start_of_time_step");
   if(m_verbosity > 5){
-    pout() << "rk2::compute_cdr_eb_states_at_start_of_time_step" << endl;
+    pout() << "rk2::computeCdrEbStates_at_start_of_time_step" << endl;
   }
 
   Vector<EBAMRIVData*>   eb_gradients;
@@ -275,12 +275,12 @@ void rk2::compute_cdr_eb_states_at_start_of_time_step(){
   
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
 
 
     cdr_states.push_back(&(solver->getPhi()));
-    eb_states.push_back(&(storage->get_eb_state()));
-    eb_gradients.push_back(&(storage->get_eb_grad()));
+    eb_states.push_back(&(storage->getEbState()));
+    eb_gradients.push_back(&(storage->getEbGrad()));
   }
 
   this->extrapolate_to_eb(eb_states,          m_cdr->getPhase(), cdr_states);
@@ -300,15 +300,15 @@ void rk2::compute_cdr_diffco_at_start_of_time_step(){
   Vector<EBAMRFluxData*> diffco_face = m_cdr->getFaceCenteredDiffusionCoefficient();
   Vector<EBAMRIVData*> diffco_eb     = m_cdr->getEbCenteredDiffusionCoefficient();
 
-  const EBAMRCellData& E_cell = m_fieldSolver_scratch->get_E_cell();
-  const EBAMRIVData& E_eb     = m_fieldSolver_scratch->get_E_eb();
+  const EBAMRCellData& E_cell = m_fieldSolver_scratch->getElectricFieldCell();
+  const EBAMRIVData& E_eb     = m_fieldSolver_scratch->getElectricFieldEb();
 
   // Get extrapolated states
   Vector<EBAMRIVData*> eb_states(num_species);
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
-    eb_states[idx] = &(storage->get_eb_state());
+    RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
+    eb_states[idx] = &(storage->getEbState());
   }
   
   this->compute_cdr_diffco_face(diffco_face, cdr_states, E_cell, m_time);
@@ -324,7 +324,7 @@ void rk2::compute_cdr_sources_at_start_of_time_step(){
   Vector<EBAMRCellData*> cdr_sources = m_cdr->getSources();
   Vector<EBAMRCellData*> cdr_states  = m_cdr->getPhis();
   Vector<EBAMRCellData*> rte_states  = m_rte->getPhis();
-  EBAMRCellData& E                   = m_fieldSolver_scratch->get_E_cell();
+  EBAMRCellData& E                   = m_fieldSolver_scratch->getElectricFieldCell();
 
   this->compute_cdr_sources(cdr_sources, cdr_states, rte_states, E, m_time, centering::cell_center);
 }
@@ -345,12 +345,12 @@ void rk2::compute_cdr_fluxes_at_start_of_time_step(){
   cdr_fluxes = m_cdr->getEbFlux();
 
   for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
 
-    EBAMRIVData& dens_eb = storage->get_eb_state();
-    EBAMRIVData& velo_eb = storage->get_eb_velo();
-    EBAMRIVData& flux_eb = storage->get_eb_flux();
-    EBAMRIVData& grad_eb = storage->get_eb_grad();
+    EBAMRIVData& dens_eb = storage->getEbState();
+    EBAMRIVData& velo_eb = storage->getEbVelo();
+    EBAMRIVData& flux_eb = storage->getEbFlux();
+    EBAMRIVData& grad_eb = storage->getEbGrad();
 
     extrap_cdr_densities.push_back(&dens_eb);  // Already been computed
     extrap_cdr_velocities.push_back(&velo_eb);
@@ -368,14 +368,14 @@ void rk2::compute_cdr_fluxes_at_start_of_time_step(){
   // Compute RTE flux on the boundary
   for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>& solver   = solver_it();
-    RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
+    RefCountedPtr<RtStorage>& storage = this->get_RtStorage(solver_it);
 
-    EBAMRIVData& flux_eb = storage->get_eb_flux();
+    EBAMRIVData& flux_eb = storage->getEbFlux();
     solver->computeBoundaryFlux(flux_eb, solver->getPhi());
     extrap_rte_fluxes.push_back(&flux_eb);
   }
 
-  const EBAMRIVData& E = m_fieldSolver_scratch->get_E_eb();
+  const EBAMRIVData& E = m_fieldSolver_scratch->getElectricFieldEb();
 
   this->compute_cdr_fluxes(cdr_fluxes,
 			   extrap_cdr_fluxes,
@@ -387,10 +387,10 @@ void rk2::compute_cdr_fluxes_at_start_of_time_step(){
 			   m_time);
 }
 
-void rk2::compute_sigma_flux_at_start_of_time_step(){
-  CH_TIME("rk2::compute_sigma_flux_at_start_of_time_step");
+void rk2::computeSigmaFlux_at_start_of_time_step(){
+  CH_TIME("rk2::computeSigmaFlux_at_start_of_time_step");
   if(m_verbosity > 5){
-    pout() << "rk2::compute_sigma_flux_at_start_of_time_step" << endl;
+    pout() << "rk2::computeSigmaFlux_at_start_of_time_step" << endl;
   }
 
   EBAMRIVData& flux = m_sigma->getFlux();
@@ -415,10 +415,10 @@ void rk2::advance_cdr_k1(const Real a_dt){
 
   for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
 
     EBAMRCellData& k1  = storage->get_k1();
-    EBAMRCellData& phi = storage->get_phi();
+    EBAMRCellData& phi = storage->getPhi();
 
     const EBAMRCellData& state = solver->getPhi();
 
@@ -445,7 +445,7 @@ void rk2::advance_sigma_k1(const Real a_dt){
   const EBAMRIVData& state = m_sigma->getPhi();
   
   EBAMRIVData& k1  = m_sigma_scratch->get_k1();
-  EBAMRIVData& phi = m_sigma_scratch->get_phi();
+  EBAMRIVData& phi = m_sigma_scratch->getPhi();
   m_sigma->computeRHS(k1);
   DataOps::setValue(phi,   0.0);
   DataOps::incr(phi, state, 1.0);
@@ -463,12 +463,12 @@ void rk2::solve_poisson_k1(){
     pout() << "rk2::solve_poisson_k1" << endl;
   }
 
-  MFAMRCellData& scratch_pot = m_fieldSolver_scratch->get_phi();
-  EBAMRIVData& sigma         = m_sigma_scratch->get_phi();
+  MFAMRCellData& scratch_pot = m_fieldSolver_scratch->getPhi();
+  EBAMRIVData& sigma         = m_sigma_scratch->getPhi();
   Vector<EBAMRCellData*> cdr_densities;
   for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
-    cdr_densities.push_back(&(storage->get_phi()));
+    RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
+    cdr_densities.push_back(&(storage->getPhi()));
   }
 
   DataOps::setValue(scratch_pot, 0.0);
@@ -488,11 +488,11 @@ void rk2::compute_E_after_k1(){
     pout() << "rk2::compute_E_after_k1" << endl;
   }
   
-  EBAMRCellData& E_cell = m_fieldSolver_scratch->get_E_cell();
-  EBAMRFluxData& E_face = m_fieldSolver_scratch->get_E_face();
-  EBAMRIVData&   E_eb   = m_fieldSolver_scratch->get_E_eb();
+  EBAMRCellData& E_cell = m_fieldSolver_scratch->getElectricFieldCell();
+  EBAMRFluxData& E_face = m_fieldSolver_scratch->getElectricFieldFace();
+  EBAMRIVData&   E_eb   = m_fieldSolver_scratch->getElectricFieldEb();
 
-  const MFAMRCellData& phi = m_fieldSolver_scratch->get_phi();
+  const MFAMRCellData& phi = m_fieldSolver_scratch->getPhi();
   
   this->compute_E(E_cell, m_cdr->getPhase(), phi);     // Compute cell-centered field
   this->compute_E(E_face, m_cdr->getPhase(), E_cell);  // Compute face-centered field
@@ -513,9 +513,9 @@ void rk2::advance_rte_k1_stationary(const Real a_dt){
 
   for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>& solver   = solver_it();
-    RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
+    RefCountedPtr<RtStorage>& storage = this->get_RtStorage(solver_it);
     
-    EBAMRCellData& phi    = storage->get_phi();
+    EBAMRCellData& phi    = storage->getPhi();
     EBAMRCellData& state  = solver->getPhi();
     EBAMRCellData& source = solver->getSource();
 
@@ -527,11 +527,11 @@ void rk2::advance_rte_k1_stationary(const Real a_dt){
   }
 
   for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
-    cdr_states.push_back(&(storage->get_phi()));
+    RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
+    cdr_states.push_back(&(storage->getPhi()));
   }
 
-  EBAMRCellData& E = m_fieldSolver_scratch->get_E_cell();
+  EBAMRCellData& E = m_fieldSolver_scratch->getElectricFieldCell();
 
   if((m_timeStep + 1) % m_fast_rte == 0){
     const Real dummy_dt = 0.0;
@@ -553,9 +553,9 @@ void rk2::advance_rte_k1_transient(const Real a_dt){
 
   for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>& solver   = solver_it();
-    RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
+    RefCountedPtr<RtStorage>& storage = this->get_RtStorage(solver_it);
     
-    EBAMRCellData& phi    = storage->get_phi();
+    EBAMRCellData& phi    = storage->getPhi();
     EBAMRCellData& state  = solver->getPhi();
     EBAMRCellData& source = solver->getSource();
 
@@ -569,10 +569,10 @@ void rk2::advance_rte_k1_transient(const Real a_dt){
   // Source term must be centered between time tn and the intermediate time
   for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
     
     const EBAMRCellData& state = solver->getPhi();
-    const EBAMRCellData& phi   = storage->get_phi();
+    const EBAMRCellData& phi   = storage->getPhi();
 
     EBAMRCellData& scratch = storage->getScratch();
 
@@ -586,7 +586,7 @@ void rk2::advance_rte_k1_transient(const Real a_dt){
 
   if((m_timeStep + 1) % m_fast_rte == 0){ // Actual solve
     const MFAMRCellData& state = m_fieldSolver->getPotential();
-    const MFAMRCellData& phi   = m_fieldSolver_scratch->get_phi();
+    const MFAMRCellData& phi   = m_fieldSolver_scratch->getPhi();
   
     MFAMRCellData& scratch_phi = m_fieldSolver_scratch->getScratch_phi();
     EBAMRCellData& scratch_E   = m_fieldSolver_scratch->getScratch_E();
@@ -605,10 +605,10 @@ void rk2::advance_rte_k1_transient(const Real a_dt){
   }
 }
 
-void rk2::compute_cdr_eb_states_after_k1(){
-  CH_TIME("rk2::compute_cdr_eb_states_after_k1");
+void rk2::computeCdrEbStates_after_k1(){
+  CH_TIME("rk2::computeCdrEbStates_after_k1");
   if(m_verbosity > 5){
-    pout() << "rk2::compute_cdr_eb_states_after_k1" << endl;
+    pout() << "rk2::computeCdrEbStates_after_k1" << endl;
   }
 
   Vector<EBAMRIVData*>   eb_gradients;
@@ -616,20 +616,20 @@ void rk2::compute_cdr_eb_states_after_k1(){
   Vector<EBAMRCellData*> cdr_states;
   
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
-    cdr_states.push_back(&(storage->get_phi()));
-    eb_states.push_back(&(storage->get_eb_state()));
-    eb_gradients.push_back(&(storage->get_eb_grad()));
+    RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
+    cdr_states.push_back(&(storage->getPhi()));
+    eb_states.push_back(&(storage->getEbState()));
+    eb_gradients.push_back(&(storage->getEbGrad()));
   }
 
   this->extrapolate_to_eb(eb_states,          m_cdr->getPhase(), cdr_states);
   this->computeGradients_at_eb(eb_gradients, m_cdr->getPhase(), cdr_states);
 }
 
-void rk2::compute_cdr_velo_after_k1(const Real a_dt){
-  CH_TIME("rk2::compute_cdr_velo_after_k1");
+void rk2::computeCdrVelo_after_k1(const Real a_dt){
+  CH_TIME("rk2::computeCdrVelo_after_k1");
   if(m_verbosity > 5){
-    pout() << "rk2::compute_cdr_velo_after_k1" << endl;
+    pout() << "rk2::computeCdrVelo_after_k1" << endl;
   }
   
   const int num_species = m_plaskin->get_num_species();
@@ -640,12 +640,12 @@ void rk2::compute_cdr_velo_after_k1(const Real a_dt){
   Vector<EBAMRCellData*> velocities = m_cdr->getVelocities();
 
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
     const int idx = solver_it.get_solver();
-    states[idx] = &(storage->get_phi());
+    states[idx] = &(storage->getPhi());
   }
   
-  this->computeCdrDriftVelocities(velocities, states, m_fieldSolver_scratch->get_E_cell(), time);
+  this->computeCdrDriftVelocities(velocities, states, m_fieldSolver_scratch->getElectricFieldCell(), time);
 }
 
 void rk2::compute_cdr_diffco_after_k1(const Real a_dt){
@@ -661,16 +661,16 @@ void rk2::compute_cdr_diffco_after_k1(const Real a_dt){
   Vector<EBAMRFluxData*> diffco_face = m_cdr->getFaceCenteredDiffusionCoefficient();
   Vector<EBAMRIVData*> diffco_eb     = m_cdr->getEbCenteredDiffusionCoefficient();
 
-  const EBAMRCellData& E_cell = m_fieldSolver_scratch->get_E_cell();
-  const EBAMRIVData& E_eb     = m_fieldSolver_scratch->get_E_eb();
+  const EBAMRCellData& E_cell = m_fieldSolver_scratch->getElectricFieldCell();
+  const EBAMRIVData& E_eb     = m_fieldSolver_scratch->getElectricFieldEb();
 
   Vector<EBAMRCellData*> states(num_species);
   Vector<EBAMRIVData*> eb_states(num_species);
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
     const int idx  = solver_it.get_solver();
-    states[idx]    = &(storage->get_phi());
-    eb_states[idx] = &(storage->get_eb_state());
+    states[idx]    = &(storage->getPhi());
+    eb_states[idx] = &(storage->getEbState());
   }
   
   this->compute_cdr_diffco_face(diffco_face, states,    E_cell, time);
@@ -690,19 +690,19 @@ void rk2::compute_cdr_sources_after_k1(const Real a_dt){
   Vector<EBAMRCellData*> rte_states;
 
   for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
-    rte_states.push_back(&(storage->get_phi()));
+    RefCountedPtr<RtStorage>& storage = this->get_RtStorage(solver_it);
+    rte_states.push_back(&(storage->getPhi()));
   }
 
   for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
     
-    cdr_states.push_back(&(storage->get_phi()));
+    cdr_states.push_back(&(storage->getPhi()));
     cdr_sources.push_back(&(solver->getSource()));
   }
 
-  EBAMRCellData& E = m_fieldSolver_scratch->get_E_cell();
+  EBAMRCellData& E = m_fieldSolver_scratch->getElectricFieldCell();
 
   this->compute_cdr_sources(cdr_sources, cdr_states, rte_states, E, time, centering::cell_center);
 }
@@ -728,13 +728,13 @@ void rk2::compute_cdr_fluxes_after_k1(const Real a_dt){
   cdr_fluxes = m_cdr->getEbFlux();
 
   for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
 
-    EBAMRCellData& dens  = storage->get_phi();
-    EBAMRIVData& dens_eb = storage->get_eb_state();
-    EBAMRIVData& velo_eb = storage->get_eb_velo();
-    EBAMRIVData& flux_eb = storage->get_eb_flux();
-    EBAMRIVData& grad_eb = storage->get_eb_grad();
+    EBAMRCellData& dens  = storage->getPhi();
+    EBAMRIVData& dens_eb = storage->getEbState();
+    EBAMRIVData& velo_eb = storage->getEbVelo();
+    EBAMRIVData& flux_eb = storage->getEbFlux();
+    EBAMRIVData& grad_eb = storage->getEbGrad();
 
     cdr_densities.push_back(&dens);
     extrap_cdr_densities.push_back(&dens_eb);  // This has already been extrapolated to the EB
@@ -752,15 +752,15 @@ void rk2::compute_cdr_fluxes_after_k1(const Real a_dt){
   // Compute RTE flux on the boundary
   for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>& solver   = solver_it();
-    RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
+    RefCountedPtr<RtStorage>& storage = this->get_RtStorage(solver_it);
 
-    EBAMRIVData& flux_eb = storage->get_eb_flux();
-    solver->computeBoundaryFlux(flux_eb, storage->get_phi());
+    EBAMRIVData& flux_eb = storage->getEbFlux();
+    solver->computeBoundaryFlux(flux_eb, storage->getPhi());
     extrap_rte_fluxes.push_back(&flux_eb);
   }
 
 
-  const EBAMRIVData& E = m_fieldSolver_scratch->get_E_eb();
+  const EBAMRIVData& E = m_fieldSolver_scratch->getElectricFieldEb();
 
   this->compute_cdr_fluxes(cdr_fluxes,
 			   extrap_cdr_fluxes,
@@ -772,10 +772,10 @@ void rk2::compute_cdr_fluxes_after_k1(const Real a_dt){
 			   time);
 }
 
-void rk2::compute_sigma_flux_after_k1(){
-  CH_TIME("rk2::compute_sigma_flux_after_k1");
+void rk2::computeSigmaFlux_after_k1(){
+  CH_TIME("rk2::computeSigmaFlux_after_k1");
   if(m_verbosity > 5){
-    pout() << "rk2::compute_sigma_flux_after_k1" << endl;
+    pout() << "rk2::computeSigmaFlux_after_k1" << endl;
   }
 
   EBAMRIVData& flux = m_sigma->getFlux();
@@ -800,12 +800,12 @@ void rk2::advance_cdr_k2(const Real a_dt){
 
   for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
 
     EBAMRCellData& state   = solver->getPhi();
     EBAMRCellData& k1      = storage->get_k1();
     EBAMRCellData& k2      = storage->get_k2();
-    EBAMRCellData& phi     = storage->get_phi();
+    EBAMRCellData& phi     = storage->getPhi();
     EBAMRCellData& scratch = storage->getScratch();
 
     solver->computeRHS(k2, phi, a_dt);
@@ -856,11 +856,11 @@ void rk2::solve_poisson_k2(){
   // the time step. The result for this is y_extrap = y_alpha/alpha - y_0*(1-alpha)/alpha. This (usually) brings the
   // initial guess closer to the true solution.
   MFAMRCellData& pot     = m_fieldSolver->getPotential();
-  MFAMRCellData& phi     = m_fieldSolver_scratch->get_phi();
+  MFAMRCellData& phi     = m_fieldSolver_scratch->getPhi();
   MFAMRCellData& scratch = m_fieldSolver_scratch->getScratch_phi();
 
   // For transient RTE solvers I need the source term at half time steps. Since the internal state
-  // inside the solver will be overwritten, I take a backup into poisson_storage.scratch_phi
+  // inside the solver will be overwritten, I take a backup into FieldStorage.scratch_phi
   if(!m_rte->isStationary()){
     DataOps::setValue(scratch, 0.0);
     DataOps::incr(scratch, pot, 1.0); 
@@ -892,9 +892,9 @@ void rk2::compute_E_after_k2(){
     pout() << "rk2::compute_E_after_k2" << endl;
   }
   
-  EBAMRCellData& E_cell = m_fieldSolver_scratch->get_E_cell();
-  EBAMRFluxData& E_face = m_fieldSolver_scratch->get_E_face();
-  EBAMRIVData&   E_eb   = m_fieldSolver_scratch->get_E_eb();
+  EBAMRCellData& E_cell = m_fieldSolver_scratch->getElectricFieldCell();
+  EBAMRFluxData& E_face = m_fieldSolver_scratch->getElectricFieldFace();
+  EBAMRIVData&   E_eb   = m_fieldSolver_scratch->getElectricFieldEb();
 
   const MFAMRCellData& phi = m_fieldSolver->getPotential();
   
@@ -917,9 +917,9 @@ void rk2::advance_rte_k2_stationary(const Real a_dt){
 
   for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>& solver   = solver_it();
-    RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
+    RefCountedPtr<RtStorage>& storage = this->get_RtStorage(solver_it);
     
-    EBAMRCellData& phi    = storage->get_phi();
+    EBAMRCellData& phi    = storage->getPhi();
     EBAMRCellData& state  = solver->getPhi();
     EBAMRCellData& source = solver->getSource();
 
@@ -945,7 +945,7 @@ void rk2::advance_rte_k2_stationary(const Real a_dt){
     cdr_states.push_back(&(solver->getPhi()));
   }
 
-  EBAMRCellData& E = m_fieldSolver_scratch->get_E_cell();
+  EBAMRCellData& E = m_fieldSolver_scratch->getElectricFieldCell();
 
   if((m_timeStep + 1) % m_fast_rte == 0){
     const Real dummy_dt = 0.0;
@@ -962,7 +962,7 @@ void rk2::advance_rte_k2_transient(const Real a_dt){
   const Real time = m_time + 0.5*a_dt; // Source terms centered on the half time step
 
   // If we made it here, the old potential lies in m_fieldSolver_scratch->scratch and the old cdr solutions
-  // lie in cdr_storage->m_scratch. The internal state inside the solver is unaffected by anything done previously
+  // lie in CdrStorage->m_scratch. The internal state inside the solver is unaffected by anything done previously
 
   Vector<EBAMRCellData*> rte_states;
   Vector<EBAMRCellData*> rte_sources;
@@ -970,9 +970,9 @@ void rk2::advance_rte_k2_transient(const Real a_dt){
 
   for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>& solver   = solver_it();
-    RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
+    RefCountedPtr<RtStorage>& storage = this->get_RtStorage(solver_it);
     
-    EBAMRCellData& state  = solver->getPhi();  // This has been unaffected so far because we solved onto rte_storage.phi
+    EBAMRCellData& state  = solver->getPhi();  // This has been unaffected so far because we solved onto RtStorage.phi
     EBAMRCellData& source = solver->getSource(); // in the k1-stage. 
 
     rte_states.push_back(&(state));
@@ -983,12 +983,12 @@ void rk2::advance_rte_k2_transient(const Real a_dt){
   // Source term must be centered between time tn and the intermediate time
   for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
     
     const EBAMRCellData& state   = solver->getPhi();
     const EBAMRCellData& scratch = storage->getScratch();
 
-    EBAMRCellData& phi = storage->get_phi();
+    EBAMRCellData& phi = storage->getPhi();
 
     DataOps::setValue(phi, 0.0);
     DataOps::incr(phi, scratch, 0.5);
@@ -1001,7 +1001,7 @@ void rk2::advance_rte_k2_transient(const Real a_dt){
     const MFAMRCellData& state       = m_fieldSolver->getPotential();
     const MFAMRCellData& scratch_phi = m_fieldSolver_scratch->getScratch_phi();
     
-    MFAMRCellData& phi   = m_fieldSolver_scratch->get_phi();
+    MFAMRCellData& phi   = m_fieldSolver_scratch->getPhi();
     EBAMRCellData& scratch_E   = m_fieldSolver_scratch->getScratch_E();
     
     DataOps::setValue(phi, 0.0);

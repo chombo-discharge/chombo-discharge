@@ -8,21 +8,21 @@
 #include "rk2.H"
 #include "rk2_storage.H"
 
-rk2::cdr_storage::cdr_storage(){
+rk2::CdrStorage::CdrStorage(){
 
 }
 
-rk2::cdr_storage::cdr_storage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int a_ncomp){
+rk2::CdrStorage::CdrStorage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int a_ncomp){
   m_amr   = a_amr;
   m_phase = a_phase;
   m_ncomp = a_ncomp;
 }
 
-rk2::cdr_storage::~cdr_storage(){
+rk2::CdrStorage::~CdrStorage(){
   
 }
 
-void rk2::cdr_storage::allocate_storage(){
+void rk2::CdrStorage::allocate_storage(){
   m_amr->allocate(m_phi, m_phase, m_ncomp);
   m_amr->allocate(m_k1,  m_phase, m_ncomp);
   m_amr->allocate(m_k2,  m_phase, m_ncomp);
@@ -35,7 +35,7 @@ void rk2::cdr_storage::allocate_storage(){
   m_amr->allocate(m_scratch, m_phase, m_ncomp); 
 }
 
-void rk2::cdr_storage::deallocate_storage(){
+void rk2::CdrStorage::deallocate_storage(){
   m_amr->deallocate(m_phi);
   m_amr->deallocate(m_k1);
   m_amr->deallocate(m_k2);
@@ -48,21 +48,21 @@ void rk2::cdr_storage::deallocate_storage(){
   m_amr->deallocate(m_scratch);
 }
 
-rk2::poisson_storage::poisson_storage(){
+rk2::FieldStorage::FieldStorage(){
 
 }
 
-rk2::poisson_storage::poisson_storage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int a_ncomp){
+rk2::FieldStorage::FieldStorage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int a_ncomp){
   m_amr   = a_amr;
   m_ncomp = a_ncomp;
   m_phase = a_phase;
 }
 
-rk2::poisson_storage::~poisson_storage(){
+rk2::FieldStorage::~FieldStorage(){
   
 }
 
-void rk2::poisson_storage::allocate_storage(){
+void rk2::FieldStorage::allocate_storage(){
   m_amr->allocate(m_phi,    m_ncomp);
   
   m_amr->allocate(m_E_cell, m_phase, SpaceDim);
@@ -73,7 +73,7 @@ void rk2::poisson_storage::allocate_storage(){
   m_amr->allocate(m_scratch_E,   m_phase, SpaceDim);
 }
 
-void rk2::poisson_storage::deallocate_storage(){
+void rk2::FieldStorage::deallocate_storage(){
   m_amr->deallocate(m_phi);
   
   m_amr->deallocate(m_E_cell);
@@ -84,50 +84,50 @@ void rk2::poisson_storage::deallocate_storage(){
   m_amr->deallocate(m_scratch_E);
 }
 
-rk2::rte_storage::rte_storage(){
+rk2::RtStorage::RtStorage(){
 
 }
 
-rk2::rte_storage::rte_storage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int a_ncomp){
+rk2::RtStorage::RtStorage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int a_ncomp){
   m_amr   = a_amr;
   m_phase = a_phase;
   m_ncomp = a_ncomp;
 }
 
-rk2::rte_storage::~rte_storage(){
+rk2::RtStorage::~RtStorage(){
   
 }
 
-void rk2::rte_storage::allocate_storage(){
+void rk2::RtStorage::allocate_storage(){
   m_amr->allocate(m_phi,        m_phase, m_ncomp);
   m_amr->allocate(m_scratchIV,  m_phase, m_ncomp);
 }
 
-void rk2::rte_storage::deallocate_storage(){
+void rk2::RtStorage::deallocate_storage(){
   m_amr->deallocate(m_phi);
   m_amr->deallocate(m_scratchIV);
 }
 
-rk2::sigma_storage::sigma_storage(){
+rk2::SigmaStorage::SigmaStorage(){
 
 }
 
-rk2::sigma_storage::sigma_storage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int a_ncomp){
+rk2::SigmaStorage::SigmaStorage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int a_ncomp){
   m_amr   = a_amr;
   m_phase = a_phase;
   m_ncomp = a_ncomp;
 }
 
-rk2::sigma_storage::~sigma_storage(){
+rk2::SigmaStorage::~SigmaStorage(){
 }
 
-void rk2::sigma_storage::allocate_storage(){
+void rk2::SigmaStorage::allocate_storage(){
   m_amr->allocate(m_phi, m_phase, m_ncomp);
   m_amr->allocate(m_k1,  m_phase, m_ncomp);
   m_amr->allocate(m_k2,  m_phase, m_ncomp);
 }
 
-void rk2::sigma_storage::deallocate_storage(){
+void rk2::SigmaStorage::deallocate_storage(){
   m_amr->deallocate(m_phi);
   m_amr->deallocate(m_k1);
   m_amr->deallocate(m_k2);

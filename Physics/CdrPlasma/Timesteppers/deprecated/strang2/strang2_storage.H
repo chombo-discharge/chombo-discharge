@@ -13,12 +13,12 @@
 
 #include <RefCountedPtr.H>
 
-class strang2::cdr_storage {
+class strang2::CdrStorage {
 public:
 
-  cdr_storage();
-  cdr_storage(const int m_stages, const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
-  ~cdr_storage();
+  CdrStorage();
+  CdrStorage(const int m_stages, const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
+  ~CdrStorage();
 
   void allocate_storage();
   void deallocate_storage();
@@ -28,21 +28,21 @@ public:
   EBAMRCellData& get_cache(){   return m_cache;      }
   EBAMRCellData& get_backup(){  return m_backup;     }
   EBAMRCellData& getScratch(){ return m_scratch;    }
-  EBAMRCellData& get_previous(){return m_previous;   }
-  EBAMRCellData& get_error(){   return m_error;      }
-  EBAMRCellData& get_gradient(){return m_gradient;   }
+  EBAMRCellData& getPrevious(){return m_previous;   }
+  EBAMRCellData& getError(){   return m_error;      }
+  EBAMRCellData& getGradient(){return m_gradient;   }
   
   Vector<EBAMRCellData*> get_extra_storage(){return m_extra_storage;}
 
-  EBAMRIVData& get_eb_state(){  return m_scratchIV1; }
-  EBAMRIVData& get_eb_velo(){   return m_scratchIV2; }
-  EBAMRIVData& get_eb_flux(){   return m_scratchIV3; }
-  EBAMRIVData& get_eb_grad(){   return m_scratchIV4; }
+  EBAMRIVData& getEbState(){  return m_scratchIV1; }
+  EBAMRIVData& getEbVelo(){   return m_scratchIV2; }
+  EBAMRIVData& getEbFlux(){   return m_scratchIV3; }
+  EBAMRIVData& getEbGrad(){   return m_scratchIV4; }
 
-  EBAMRIFData& getDomain_state(){  return m_scratchIF1; }
-  EBAMRIFData& getDomain_velo(){   return m_scratchIF2; }
-  EBAMRIFData& getDomain_flux(){   return m_scratchIF3; }
-  EBAMRIFData& getDomain_grad(){   return m_scratchIF4; }
+  EBAMRIFData& getDomainState(){  return m_scratchIF1; }
+  EBAMRIFData& getDomainVelo(){   return m_scratchIF2; }
+  EBAMRIFData& getDomainFlux(){   return m_scratchIF3; }
+  EBAMRIFData& getDomainGrad(){   return m_scratchIF4; }
   
 protected:
 
@@ -71,22 +71,22 @@ protected:
   EBAMRIFData m_scratchIF4;
 };
 
-class strang2::poisson_storage {
+class strang2::FieldStorage {
 public:
 
-  poisson_storage();
-  poisson_storage(const int m_stages, const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
-  ~poisson_storage();
+  FieldStorage();
+  FieldStorage(const int m_stages, const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
+  ~FieldStorage();
 
   void allocate_storage();
   void deallocate_storage();
   
   MFAMRCellData& get_cache(){   return m_cache;   }
   MFAMRCellData& get_backup(){  return m_backup; }
-  EBAMRCellData& get_E_cell(){  return m_E_cell;  }
-  EBAMRFluxData& get_E_face(){  return m_E_face;  }
-  EBAMRIVData& get_E_eb(){      return m_E_eb;    }
-  EBAMRIFData& get_E_domain(){  return m_E_dom;   }
+  EBAMRCellData& getElectricFieldCell(){  return m_E_cell;  }
+  EBAMRFluxData& getElectricFieldFace(){  return m_E_face;  }
+  EBAMRIVData& getElectricFieldEb(){      return m_E_eb;    }
+  EBAMRIFData& getElectricFieldDomain(){  return m_E_dom;   }
 
 protected:
 
@@ -103,20 +103,20 @@ protected:
   EBAMRIFData m_E_dom;           // E-field on domain faces
 };
 
-class strang2::rte_storage {
+class strang2::RtStorage {
 public:
 
-  rte_storage();
-  rte_storage(const int a_stages, const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
-  ~rte_storage();
+  RtStorage();
+  RtStorage(const int a_stages, const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
+  ~RtStorage();
 
   void allocate_storage();
   void deallocate_storage();
   
   EBAMRCellData& get_cache(){     return m_cache; }
   EBAMRCellData& get_backup(){    return m_backup; }
-  EBAMRIVData& get_eb_flux(){     return m_scratchIV; }
-  EBAMRIFData& getDomain_flux(){ return m_scratchIF; }
+  EBAMRIVData& getEbFlux(){     return m_scratchIV; }
+  EBAMRIFData& getDomainFlux(){ return m_scratchIF; }
 
 protected:
 
@@ -132,12 +132,12 @@ protected:
   EBAMRIFData m_scratchIF; // Used for domain-centered isotropic density
 };
 
-class strang2::sigma_storage {
+class strang2::SigmaStorage {
 public:
 
-  sigma_storage();
-  sigma_storage(const int a_stages, const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
-  ~sigma_storage();
+  SigmaStorage();
+  SigmaStorage(const int a_stages, const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
+  ~SigmaStorage();
   
   void allocate_storage();
   void deallocate_storage();
@@ -147,8 +147,8 @@ public:
   EBAMRIVData& get_cache(){   return m_cache; }
   EBAMRIVData& getScratch(){ return m_scratch; }
   EBAMRIVData& get_backup(){  return m_backup; }
-  EBAMRIVData& get_previous(){return m_previous; }
-  EBAMRIVData& get_error(){   return m_error; }
+  EBAMRIVData& getPrevious(){return m_previous; }
+  EBAMRIVData& getError(){   return m_error; }
 
   Vector<EBAMRIVData*> get_extra_storage(){return m_extra_storage;}
 

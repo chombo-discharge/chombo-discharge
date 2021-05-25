@@ -1,49 +1,55 @@
+/* chombo-discharge
+ * Copyright © 2021 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+ */
+
 /*!
-  @file   imex_sdc.cpp
-  @brief  Implementation of imex_sdc.H
+  @file   CD_CdrPlasmaImExSdcStepper.cpp
+  @brief  Implementation of CD_CdrPlasmaImExSdcStepper.H
   @author Robert Marskar
-  @date   Feb. 2019
 */
 
-#include "imex_sdc.H"
-#include "imex_sdc_storage.H"
-#include <CD_DataOps.H>
-#include <CD_Units.H>
-#include <CD_CdrGodunov.H>
-#include "CD_LaPackUtils.H"
-
+// Std includes
 #include <fstream>
 #include <iostream>
 #include <iomanip>
 
-#include "ParmParse.H"
+// Chombo includes
+#include <ParmParse.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_CdrPlasmaImExSdcStepper.H>
+#include <CD_CdrPlasmaImExSdcStorage.H>
+#include <CD_DataOps.H>
+#include <CD_Units.H>
+#include <CD_CdrGodunov.H>
+#include "CD_LaPackUtils.H"
+#include <CD_NamespaceHeader.H>
 
 using namespace Physics::CdrPlasma;
 
-typedef imex_sdc::cdr_storage     cdr_storage;
-typedef imex_sdc::poisson_storage poisson_storage;
-typedef imex_sdc::rte_storage     rte_storage;
-typedef imex_sdc::sigma_storage   sigma_storage;
+typedef CdrPlasmaImExSdcStepper::CdrStorage     CdrStorage;
+typedef CdrPlasmaImExSdcStepper::FieldStorage FieldStorage;
+typedef CdrPlasmaImExSdcStepper::RtStorage     RtStorage;
+typedef CdrPlasmaImExSdcStepper::SigmaStorage   SigmaStorage;
 
-imex_sdc::imex_sdc(){
-  m_className = "imex_sdc";
+CdrPlasmaImExSdcStepper::CdrPlasmaImExSdcStepper(){
+  m_className = "CdrPlasmaImExSdcStepper";
   m_subcycle   = false;
 }
 
-imex_sdc::imex_sdc(RefCountedPtr<CdrPlasmaPhysics>& a_physics) : imex_sdc() {
+CdrPlasmaImExSdcStepper::CdrPlasmaImExSdcStepper(RefCountedPtr<CdrPlasmaPhysics>& a_physics) : CdrPlasmaImExSdcStepper() {
   m_physics = a_physics;
 }
 
-imex_sdc::~imex_sdc(){
+CdrPlasmaImExSdcStepper::~CdrPlasmaImExSdcStepper(){
 
 }
 
-void imex_sdc::parseOptions(){
-  CH_TIME("imex_sdc::parseOptions");
+void CdrPlasmaImExSdcStepper::parseOptions(){
+  CH_TIME("CdrPlasmaImExSdcStepper::parseOptions");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::parseOptions" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::parseOptions" << endl;
   }
 
   // Regular stuff from CdrPlasmaStepper that we almost always need
@@ -58,21 +64,21 @@ void imex_sdc::parseOptions(){
   parseSourceComputation();
 
   // Specific to this class
-  parse_nodes();
-  parse_diffusion_coupling();
-  parse_adaptive_options();
-  parse_debug_options();
-  parse_advection_options();
+  parseNodes();
+  parseDiffusionCoupling();
+  parseAdaptiveOptions();
+  parseDebugOptions();
+  parseAdvectionOptions();
 
   // Setup nodes
-  imex_sdc::setup_quadrature_nodes(m_p);
-  imex_sdc::setup_qmj(m_p);
+  CdrPlasmaImExSdcStepper::setupQuadratureNodes(m_p);
+  CdrPlasmaImExSdcStepper::setupQmj(m_p);
 }
 
-void imex_sdc::parseRuntimeOptions(){
-  CH_TIME("imex_sdc::parseRuntimeOptions");
+void CdrPlasmaImExSdcStepper::parseRuntimeOptions(){
+  CH_TIME("CdrPlasmaImExSdcStepper::parseRuntimeOptions");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::parseRuntimeOptions" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::parseRuntimeOptions" << endl;
   }
 
   // Regular stuff from CdrPlasmaStepper that we almost always need
@@ -87,24 +93,24 @@ void imex_sdc::parseRuntimeOptions(){
   parseSourceComputation();
 
   // Specific to this class
-  parse_diffusion_coupling();
-  parse_adaptive_options();
-  parse_debug_options();
-  parse_advection_options();
+  parseDiffusionCoupling();
+  parseAdaptiveOptions();
+  parseDebugOptions();
+  parseAdvectionOptions();
 
   // Setup nodes
-  imex_sdc::setup_quadrature_nodes(m_p);
-  imex_sdc::setup_qmj(m_p);
+  CdrPlasmaImExSdcStepper::setupQuadratureNodes(m_p);
+  CdrPlasmaImExSdcStepper::setupQmj(m_p);
 
   m_cdr->parseRuntimeOptions();
   m_rte->parseRuntimeOptions();
   m_fieldSolver->parseRuntimeOptions();
 }
 
-void imex_sdc::parse_nodes(){
-  CH_TIME("imex_sdc::parse_nodes");
+void CdrPlasmaImExSdcStepper::parseNodes(){
+  CH_TIME("CdrPlasmaImExSdcStepper::parseNodes");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::parse_nodes" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::parseNodes" << endl;
   }
 
   ParmParse pp(m_className.c_str());
@@ -121,24 +127,24 @@ void imex_sdc::parse_nodes(){
     m_which_nodes = "chebyshev";
   }
   else {
-    MayDay::Abort("imex_sdc::parse_nodes - unknown node type requested");
+    MayDay::Abort("CdrPlasmaImExSdcStepper::parseNodes - unknown node type requested");
   }
 
   pp.get("subintervals",     m_p);
   pp.get("corr_iter",        m_k);
 
   if(m_p < 1){
-    MayDay::Abort("imex_sdc::parse_nodes - imex_sdc.subintervals cannot be < 1");
+    MayDay::Abort("CdrPlasmaImExSdcStepper::parseNodes - CdrPlasmaImExSdcStepper.subintervals cannot be < 1");
   }
   if(m_k < 0){
-    MayDay::Abort("imex_sdc::parse_nodes - imex_sdc.corr_iter cannot be < 0");
+    MayDay::Abort("CdrPlasmaImExSdcStepper::parseNodes - CdrPlasmaImExSdcStepper.corr_iter cannot be < 0");
   }
 }
 
-void imex_sdc::parse_diffusion_coupling(){
-  CH_TIME("imex_sdc::parse_diffusion_coupling");
+void CdrPlasmaImExSdcStepper::parseDiffusionCoupling(){
+  CH_TIME("CdrPlasmaImExSdcStepper::parseDiffusionCoupling");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::parse_diffusion_coupling" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::parseDiffusionCoupling" << endl;
   }
 
   ParmParse pp(m_className.c_str());
@@ -149,10 +155,10 @@ void imex_sdc::parse_diffusion_coupling(){
   m_useTGA = (str == "true") ? true : false;
 }
 
-void imex_sdc::parse_adaptive_options(){
-  CH_TIME("imex_sdc::parse_adaptive_options");
+void CdrPlasmaImExSdcStepper::parseAdaptiveOptions(){
+  CH_TIME("CdrPlasmaImExSdcStepper::parseAdaptiveOptions");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::parse_adaptive_options" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::parseAdaptiveOptions" << endl;
   }
 
   ParmParse pp(m_className.c_str());
@@ -174,10 +180,10 @@ void imex_sdc::parse_adaptive_options(){
   m_min_corr = (!m_adaptive_dt) ? 0 : m_min_corr;
 }
 
-void imex_sdc::parse_debug_options(){
-  CH_TIME("imex_sdc::parse_debug_options");
+void CdrPlasmaImExSdcStepper::parseDebugOptions(){
+  CH_TIME("CdrPlasmaImExSdcStepper::parseDebugOptions");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::parse_debug_options" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::parseDebugOptions" << endl;
   }
 
   ParmParse pp(m_className.c_str());
@@ -198,10 +204,10 @@ void imex_sdc::parse_debug_options(){
   pp.get("profile_steps", str); m_profile_steps = (str == "true") ? true : false;
 }
 
-void imex_sdc::parse_advection_options(){
-  CH_TIME("imex_sdc::parse_advection_options");
+void CdrPlasmaImExSdcStepper::parseAdvectionOptions(){
+  CH_TIME("CdrPlasmaImExSdcStepper::parseAdvectionOptions");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::parse_advection_options" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::parseAdvectionOptions" << endl;
   }
 
   ParmParse pp(m_className.c_str());
@@ -213,31 +219,31 @@ void imex_sdc::parse_advection_options(){
   pp.get("extrap_advect", str); m_extrap_advect = (str == "true") ? true : false;
 }
 
-RefCountedPtr<cdr_storage>& imex_sdc::getCdrSolvers_storage(const CdrIterator<CdrSolver>& a_solverit){
+RefCountedPtr<CdrStorage>& CdrPlasmaImExSdcStepper::getCdrStorage(const CdrIterator<CdrSolver>& a_solverit){
   return m_cdr_scratch[a_solverit.index()];
 }
 
-RefCountedPtr<rte_storage>& imex_sdc::getRadiativeTransferSolvers_storage(const RtIterator<RtSolver>& a_solverit){
+RefCountedPtr<RtStorage>& CdrPlasmaImExSdcStepper::getRtStorage(const RtIterator<RtSolver>& a_solverit){
   return m_rte_scratch[a_solverit.index()];
 }
 
-bool imex_sdc::needToRegrid(){
-  CH_TIME("imex_sdc::needToRegrid");
+bool CdrPlasmaImExSdcStepper::needToRegrid(){
+  CH_TIME("CdrPlasmaImExSdcStepper::needToRegrid");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::needToRegrid" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::needToRegrid" << endl;
   }
 
   return false;
 }
 
-Real imex_sdc::restrictDt(){
+Real CdrPlasmaImExSdcStepper::restrictDt(){
   return 1.E99;
 }
 
-Real imex_sdc::get_max_node_distance(){
-  CH_TIME("imex_sdc::get_max_node_distance");
+Real CdrPlasmaImExSdcStepper::getMaxNodeDistance(){
+  CH_TIME("CdrPlasmaImExSdcStepper::getMaxNodeDistance");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::get_max_node_distance" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::getMaxNodeDistance" << endl;
   }
 
   Real max_dist = 0.0;
@@ -248,39 +254,39 @@ Real imex_sdc::get_max_node_distance(){
   return max_dist;
 }
 
-void imex_sdc::init(){
-  CH_TIME("imex_sdc::init");
+void CdrPlasmaImExSdcStepper::init(){
+  CH_TIME("CdrPlasmaImExSdcStepper::init");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::init" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::init" << endl;
   }
 
   advanceReactionNetwork(m_time, m_dt);
 }
 
-void imex_sdc::setup_quadrature_nodes(const int a_p){
-  CH_TIME("imex_sdc::setup_quadrature_nodes");
+void CdrPlasmaImExSdcStepper::setupQuadratureNodes(const int a_p){
+  CH_TIME("CdrPlasmaImExSdcStepper::setupQuadratureNodes");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::setup_quadrature_nodes" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::setupQuadratureNodes" << endl;
   }
 
   if(m_which_nodes == "uniform"){
-    imex_sdc::setup_uniform_nodes(a_p);
+    CdrPlasmaImExSdcStepper::setupUniformNodes(a_p);
   }
   else if(m_which_nodes == "lobatto"){
-    imex_sdc::setup_lobatto_nodes(a_p);
+    CdrPlasmaImExSdcStepper::setupLobattoNodes(a_p);
   }
   else if(m_which_nodes == "chebyshev"){
-    imex_sdc::setup_chebyshev_nodes(a_p);
+    CdrPlasmaImExSdcStepper::setupChebyshevNodes(a_p);
   }
   else {
-    MayDay::Abort("imex_sdc::setup_quadrature_nodes - unknown nodes requested");
+    MayDay::Abort("CdrPlasmaImExSdcStepper::setupQuadratureNodes - unknown nodes requested");
   }
 }
 
-void imex_sdc::setup_uniform_nodes(const int a_p){
-  CH_TIME("imex_sdc::setup_uniform_nodes");
+void CdrPlasmaImExSdcStepper::setupUniformNodes(const int a_p){
+  CH_TIME("CdrPlasmaImExSdcStepper::setupUniformNodes");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::setup_uniform_nodes" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::setupUniformNodes" << endl;
   }
 
   // TLDR: The nodes and weights are hardcoded. A better programmer would compute these
@@ -293,10 +299,10 @@ void imex_sdc::setup_uniform_nodes(const int a_p){
   }
 }
 
-void imex_sdc::setup_lobatto_nodes(const int a_p){
-  CH_TIME("imex_sdc::setup_lobatto_nodes");
+void CdrPlasmaImExSdcStepper::setupLobattoNodes(const int a_p){
+  CH_TIME("CdrPlasmaImExSdcStepper::setupLobattoNodes");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::setup_lobatto_nodes" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::setupLobattoNodes" << endl;
   }
 
   // TLDR: The nodes and weights are hardcoded. A better programmer would compute these
@@ -343,14 +349,14 @@ void imex_sdc::setup_lobatto_nodes(const int a_p){
     m_nodes[6] =  1.0;
   }
   else{
-    MayDay::Abort("imex_sdc::setup_lobatto_nodes - requested order exceeds 7. Compute your own damn nodes!");
+    MayDay::Abort("CdrPlasmaImExSdcStepper::setupLobattoNodes - requested order exceeds 7. Compute your own damn nodes!");
   }
 }
 
-void imex_sdc::setup_chebyshev_nodes(const int a_p){
-  CH_TIME("imex_sdc::setup_chebyshev_nodes");
+void CdrPlasmaImExSdcStepper::setupChebyshevNodes(const int a_p){
+  CH_TIME("CdrPlasmaImExSdcStepper::setupChebyshevNodes");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::setup_chebyshev_nodes" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::setupChebyshevNodes" << endl;
   }
 
   // TLDR: The nodes and weights are hardcoded. A better programmer would compute these
@@ -363,10 +369,10 @@ void imex_sdc::setup_chebyshev_nodes(const int a_p){
   m_nodes[a_p] = 1.0;
 }
 
-void imex_sdc::setup_qmj(const int a_p){
-  CH_TIME("imex_sdc::setup_qmj");
+void CdrPlasmaImExSdcStepper::setupQmj(const int a_p){
+  CH_TIME("CdrPlasmaImExSdcStepper::setupQmj");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::setup_qmj" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::setupQmj" << endl;
   }
 
   const int nnodes = 1 + a_p;
@@ -403,7 +409,7 @@ void imex_sdc::setup_qmj(const int a_p){
     int LDB  = nnodes;
     int INFO = 10;
     dgesv_(&N, &NRHS, V, &LDA, IPIV, cj, &LDB, &INFO);
-    if(INFO != 0) MayDay::Abort("imex_sdc::setup_qmj - could not compute weights");
+    if(INFO != 0) MayDay::Abort("CdrPlasmaImExSdcStepper::setupQmj - could not compute weights");
     
     // Now construct qmj
     for (int m = 0; m < a_p; m++){
@@ -415,10 +421,10 @@ void imex_sdc::setup_qmj(const int a_p){
   }
 }
 
-void imex_sdc::setup_subintervals(const Real a_time, const Real a_dt){
-  CH_TIME("imex_sdc::setup_subintervals");
+void CdrPlasmaImExSdcStepper::setupSubintervals(const Real a_time, const Real a_dt){
+  CH_TIME("CdrPlasmaImExSdcStepper::setupSubintervals");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::setup_subintervals" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::setupSubintervals" << endl;
   }
 
   // m_nodes are Gauss-Lobatto nodes on [-1,1]. These must
@@ -441,14 +447,14 @@ void imex_sdc::setup_subintervals(const Real a_time, const Real a_dt){
   }
 }
 
-void imex_sdc::quad(EBAMRCellData& a_quad, const Vector<EBAMRCellData>& a_integrand, const int a_m){
-  CH_TIME("imex_sdc::quad");
+void CdrPlasmaImExSdcStepper::quad(EBAMRCellData& a_quad, const Vector<EBAMRCellData>& a_integrand, const int a_m){
+  CH_TIME("CdrPlasmaImExSdcStepper::quad");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::quad" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::quad" << endl;
   }
 
-  if(a_m < 0)     MayDay::Abort("imex_sdc::quad - bad index a_m < 0");
-  if(a_m >= m_p)  MayDay::Abort("imex_sdc::quad - bad index a_m >= m_p");
+  if(a_m < 0)     MayDay::Abort("CdrPlasmaImExSdcStepper::quad - bad index a_m < 0");
+  if(a_m >= m_p)  MayDay::Abort("CdrPlasmaImExSdcStepper::quad - bad index a_m >= m_p");
 
   DataOps::setValue(a_quad, 0.0);
   for (int j = 0; j <= m_p; j++){
@@ -456,14 +462,14 @@ void imex_sdc::quad(EBAMRCellData& a_quad, const Vector<EBAMRCellData>& a_integr
   }
 }
 
-void imex_sdc::quad(EBAMRIVData& a_quad, const Vector<EBAMRIVData>& a_integrand, const int a_m){
-  CH_TIME("imex_sdc::quad");
+void CdrPlasmaImExSdcStepper::quad(EBAMRIVData& a_quad, const Vector<EBAMRIVData>& a_integrand, const int a_m){
+  CH_TIME("CdrPlasmaImExSdcStepper::quad");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::quad" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::quad" << endl;
   }
 
-  if(a_m < 0)     MayDay::Abort("imex_sdc::quad - bad index a_m < 0");
-  if(a_m >= m_p)  MayDay::Abort("imex_sdc::quad - bad index a_m >= m_p");
+  if(a_m < 0)     MayDay::Abort("CdrPlasmaImExSdcStepper::quad - bad index a_m < 0");
+  if(a_m >= m_p)  MayDay::Abort("CdrPlasmaImExSdcStepper::quad - bad index a_m >= m_p");
 
   DataOps::setValue(a_quad, 0.0);
   for (int j = 0; j <= m_p; j++){
@@ -471,26 +477,26 @@ void imex_sdc::quad(EBAMRIVData& a_quad, const Vector<EBAMRIVData>& a_integrand,
   }
 }
   
-void imex_sdc::copy_phi_p_to_cdr(){
-  CH_TIME("imex_sdc::copy_phi_p_to_cdr");
+void CdrPlasmaImExSdcStepper::copyPhiPToCdr(){
+  CH_TIME("CdrPlasmaImExSdcStepper::copyPhiPToCdr");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::copy_phi_p_to_cdr" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::copyPhiPToCdr" << endl;
   }
 
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>&  solver  = solver_it();
-    RefCountedPtr<cdr_storage>& storage = getCdrSolvers_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = getCdrStorage(solver_it);
 
     EBAMRCellData& phi = solver->getPhi();
-    const EBAMRCellData& phip = storage->get_phi()[m_p];
+    const EBAMRCellData& phip = storage->getPhi()[m_p];
     DataOps::copy(phi, phip);
   }
 }
 
-void imex_sdc::copy_sigma_p_to_sigma(){
-  CH_TIME("imex_sdc::copy_sigma_p_to_sigma");
+void CdrPlasmaImExSdcStepper::copySigmaPToSigma(){
+  CH_TIME("CdrPlasmaImExSdcStepper::copySigmaPToSigma");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::copy_sigma_p_to_sigma" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::copySigmaPToSigma" << endl;
   }
 
   EBAMRIVData& sigma        = m_sigma->getPhi();
@@ -498,10 +504,10 @@ void imex_sdc::copy_sigma_p_to_sigma(){
   DataOps::copy(sigma, sigmap);
 }
 
-Real imex_sdc::advance(const Real a_dt){
-  CH_TIME("imex_sdc::advance");
+Real CdrPlasmaImExSdcStepper::advance(const Real a_dt){
+  CH_TIME("CdrPlasmaImExSdcStepper::advance");
   if(m_verbosity > 2){
-    pout() << "imex_sdc::advance" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::advance" << endl;
   }
 
   // ---------------------------------------------------------------------------------------------------
@@ -510,10 +516,10 @@ Real imex_sdc::advance(const Real a_dt){
   // ---------------------------------------------------------------------------------------------------
   // Initialize integrations. If we do corrections, we need FD(phi_0) since this is implicit. If we do adaptive_dt, we should
   // also a
-  imex_sdc::copy_cdr_to_phi_m0();
-  imex_sdc::copy_sigma_to_sigma_m0();
-  imex_sdc::compute_FD_0();
-  imex_sdc::store_solvers();
+  CdrPlasmaImExSdcStepper::copyCdrToPhiM0();
+  CdrPlasmaImExSdcStepper::copySigmaToM0();
+  CdrPlasmaImExSdcStepper::computeFD0();
+  CdrPlasmaImExSdcStepper::storeSolvers();
 
   // IMEX_SDC advance
   Real first_dt       = a_dt;
@@ -527,30 +533,30 @@ Real imex_sdc::advance(const Real a_dt){
   Real t = 0.0;
   while(!accept_step && retry_step){
     num_corrections = 0;
-    imex_sdc::setup_subintervals(m_time, actual_dt);
+    CdrPlasmaImExSdcStepper::setupSubintervals(m_time, actual_dt);
 
     // First SDC sweep. No lagged slopes here. 
-    imex_sdc::integrate(actual_dt, m_time, false);
+    CdrPlasmaImExSdcStepper::integrate(actual_dt, m_time, false);
 
     // SDC correction sweeps. Need to take care of lagged terms. 
     for(int icorr = 0; icorr < Max(m_k, m_min_corr); icorr++){
       num_corrections++;
 
       // Initialize error and reconcile integrands (i.e. make them quadrature-ready)
-      imex_sdc::initialize_errors();
-      imex_sdc::reconcile_integrands();
+      CdrPlasmaImExSdcStepper::initializeErrors();
+      CdrPlasmaImExSdcStepper::reconcileIntegrands();
 
       // SDC correction along whole interval
-      imex_sdc::integrate(actual_dt, m_time, true);
+      CdrPlasmaImExSdcStepper::integrate(actual_dt, m_time, true);
 
       // Compute error and check if we need to keep iterating
-      imex_sdc::finalize_errors();
+      CdrPlasmaImExSdcStepper::finalizeErrors();
       if(m_max_error < m_err_thresh && m_adaptive_dt && icorr >= m_min_corr) break; // No need in going beyond
     }
 
     // Compute a new time step. If it is smaller than the minimum allowed CFL step, accept the step anyways
     if(m_adaptive_dt){
-      imex_sdc::compute_new_dt(accept_step, actual_dt, num_corrections);
+      CdrPlasmaImExSdcStepper::computeNewDt(accept_step, actual_dt, num_corrections);
       
       if(!accept_step){  // Step rejection, use the new dt for next step.
 	actual_dt = m_new_dt;
@@ -559,11 +565,11 @@ Real imex_sdc::advance(const Real a_dt){
 	retry_step  = num_reject <= m_max_retries;
 	
 	if(retry_step){
-	  imex_sdc::restore_solvers();
-	  imex_sdc::computeElectricField_into_scratch();
-	  imex_sdc::compute_cdr_gradients();
-	  imex_sdc::compute_cdr_velo(m_time);
-	  CdrPlasmaStepper::computeCdrDiffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
+	  CdrPlasmaImExSdcStepper::restoreSolvers();
+	  CdrPlasmaImExSdcStepper::computeElectricFieldIntoScratch();
+	  CdrPlasmaImExSdcStepper::computeCdrGradients();
+	  CdrPlasmaImExSdcStepper::computeCdrVelo(m_time);
+	  CdrPlasmaStepper::computeCdrDiffusion(m_fieldSolver_scratch->getElectricFieldCell(), m_fieldSolver_scratch->getElectricFieldEb());
 	}
       }
     }
@@ -574,18 +580,18 @@ Real imex_sdc::advance(const Real a_dt){
   }
 
   // Copy results back to solvers
-  imex_sdc::copy_phi_p_to_cdr();
-  imex_sdc::copy_sigma_p_to_sigma();
+  CdrPlasmaImExSdcStepper::copyPhiPToCdr();
+  CdrPlasmaImExSdcStepper::copySigmaPToSigma();
 
   // Always recompute velocities and diffusion coefficients before the next time step. The Poisson and RTE equations
   // have been updated when we come in here. 
-  imex_sdc::compute_cdr_velo(m_time + actual_dt);
-  CdrPlasmaStepper::computeCdrDiffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
+  CdrPlasmaImExSdcStepper::computeCdrVelo(m_time + actual_dt);
+  CdrPlasmaStepper::computeCdrDiffusion(m_fieldSolver_scratch->getElectricFieldCell(), m_fieldSolver_scratch->getElectricFieldEb());
 
 
   // Profile step
-  if(m_print_report)  imex_sdc::adaptive_report(first_dt, actual_dt, m_new_dt, num_corrections, num_reject, m_max_error);
-  if(m_profile_steps) imex_sdc::write_step_profile(actual_dt, m_max_error, m_p, num_corrections, num_reject);
+  if(m_print_report)  CdrPlasmaImExSdcStepper::adaptiveReport(first_dt, actual_dt, m_new_dt, num_corrections, num_reject, m_max_error);
+  if(m_profile_steps) CdrPlasmaImExSdcStepper::writeStepProfile(actual_dt, m_max_error, m_p, num_corrections, num_reject);
 
   // Store current error. 
   m_have_err  = true;
@@ -594,27 +600,27 @@ Real imex_sdc::advance(const Real a_dt){
   return actual_dt;
 }
 
-void imex_sdc::copy_cdr_to_phi_m0(){
-  CH_TIME("imex_sdc::copy_cdr_to_phi_m0");
+void CdrPlasmaImExSdcStepper::copyCdrToPhiM0(){
+  CH_TIME("CdrPlasmaImExSdcStepper::copyCdrToPhiM0");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::copy_cdr_to_phi_m0" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::copyCdrToPhiM0" << endl;
   }
 
   // CDR solvers
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>&  solver  = solver_it();
-    RefCountedPtr<cdr_storage>& storage = getCdrSolvers_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = getCdrStorage(solver_it);
     
-    EBAMRCellData& phi0 = storage->get_phi()[0];
+    EBAMRCellData& phi0 = storage->getPhi()[0];
     const EBAMRCellData& phi = solver->getPhi();
     DataOps::copy(phi0, phi);
   }
 }
 
-void imex_sdc::copy_sigma_to_sigma_m0(){
-  CH_TIME("imex_sdc::copy_sigma_sigma_m0");
+void CdrPlasmaImExSdcStepper::copySigmaToM0(){
+  CH_TIME("CdrPlasmaImExSdcStepper::copy_sigma_sigma_m0");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::copy_sigma_to_sigma_m0" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::copySigmaToM0" << endl;
   }
 
   // Copy sigma to starting state
@@ -623,19 +629,19 @@ void imex_sdc::copy_sigma_to_sigma_m0(){
   DataOps::copy(sigma0, sigma);
 }
 
-void imex_sdc::compute_FD_0(){
-  CH_TIME("imex_sdc::compute_FD_0");
+void CdrPlasmaImExSdcStepper::computeFD0(){
+  CH_TIME("CdrPlasmaImExSdcStepper::computeFD0");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::compute_FD_0" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::computeFD0" << endl;
   }
 
   if(m_k > 0){ // We only need this if we're actually doing any corrections....
     for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
-      RefCountedPtr<cdr_storage>& storage = getCdrSolvers_storage(solver_it);
+      RefCountedPtr<CdrStorage>& storage = getCdrStorage(solver_it);
     
-      EBAMRCellData& phi_0 = storage->get_phi()[0]; // phi_0
-      EBAMRCellData& FD_0  = storage->get_FD()[0];  // FD(phi_0)
+      EBAMRCellData& phi_0 = storage->getPhi()[0]; // phi_0
+      EBAMRCellData& FD_0  = storage->getFD()[0];  // FD(phi_0)
     
       if(solver->isDiffusive()){
 	solver->computeDivD(FD_0, phi_0);
@@ -651,10 +657,10 @@ void imex_sdc::compute_FD_0(){
   }
 }
 
-void imex_sdc::integrate(const Real a_dt, const Real a_time, const bool a_lagged_terms){
-  CH_TIME("imex_sdc::integrate");
+void CdrPlasmaImExSdcStepper::integrate(const Real a_dt, const Real a_time, const bool a_lagged_terms){
+  CH_TIME("CdrPlasmaImExSdcStepper::integrate");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::integrate" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::integrate" << endl;
   }
 
 
@@ -672,52 +678,52 @@ void imex_sdc::integrate(const Real a_dt, const Real a_time, const bool a_lagged
   for(int m = 0; m < m_p; m++){
 
     // Update source terms every time we go through this
-    imex_sdc::computeElectricField_into_scratch();
-    imex_sdc::compute_reaction_network(m, a_time, m_dtm[m]); // Ppdate the CDR and RTE source terms using the correct step size
+    CdrPlasmaImExSdcStepper::computeElectricFieldIntoScratch();
+    CdrPlasmaImExSdcStepper::computeReactionNetwork(m, a_time, m_dtm[m]); // Ppdate the CDR and RTE source terms using the correct step size
 
     // Always update boundary conditions on the way in. All of these calls use the stuff that reside in the solvers,
     // which is what we need to do at the start of the time step. In principle, these things do not change
     // and so we could probably store them somewhere for increased performance. 
     if(m == 0 && !a_lagged_terms){ // This updates the CDR boundary conditions; since these are used to compute the slopes,
       t0 = MPI_Wtime();            // and the m=0 hyperbolic slopes do not change, we only need to do this for the predictor. 
-      imex_sdc::compute_cdr_eb_states();
-      imex_sdc::computeCdrFluxes(a_time);
-      imex_sdc::compute_cdr_domain_states();
-      imex_sdc::computeCdrDomainFluxes(a_time);
-      imex_sdc::compute_sigma_flux();
+      CdrPlasmaImExSdcStepper::computeCdrEbStates();
+      CdrPlasmaImExSdcStepper::computeCdrFluxes(a_time);
+      CdrPlasmaImExSdcStepper::computeCdrDomainStates();
+      CdrPlasmaImExSdcStepper::computeCdrDomainFluxes(a_time);
+      CdrPlasmaImExSdcStepper::computeSigmaFlux();
       t1 = MPI_Wtime();
 
       total_time = -t0;
       setup_time = t1-t0;
     }
     
-    // This does the transient rte advance. Source terms were uåpdated in the compute_reaction_network routine above. 
+    // This does the transient rte advance. Source terms were uåpdated in the computeReactionNetwork routine above. 
     t0 = MPI_Wtime();
-    if(!(m_rte->isStationary())) imex_sdc::integrate_rte_transient(a_dt);
+    if(!(m_rte->isStationary())) CdrPlasmaImExSdcStepper::integrateRtTransient(a_dt);
 
     // This computes phi_(m+1) = phi_m + dtm*FAR_m(phi_m) + lagged quadrature and lagged advection-reaction
     t0 = MPI_Wtime();
-    imex_sdc::integrate_advection_reaction(a_dt, m, a_lagged_terms);
+    CdrPlasmaImExSdcStepper::integrateAdvectionReaction(a_dt, m, a_lagged_terms);
     t1 = MPI_Wtime();
     advect_time += t1-t0;
 
     // This does the diffusion advance. It also adds in the remaining lagged diffusion terms before the implicit diffusion solve
     t0 = MPI_Wtime();
-    imex_sdc::integrate_diffusion(a_dt, m, a_lagged_terms);
+    CdrPlasmaImExSdcStepper::integrateDiffusion(a_dt, m, a_lagged_terms);
     t1 = MPI_Wtime();
     diffusive_time += t1-t0;
 
     // After the diffusion step we update the Poisson and *stationary* RTE equations
-    Vector<EBAMRCellData*> cdr_densities_mp1 = imex_sdc::getCdrSolvers_phik(m+1);
-    EBAMRIVData& sigma_mp1 = imex_sdc::getSigmaSolverk(m+1);
+    Vector<EBAMRCellData*> cdr_densities_mp1 = CdrPlasmaImExSdcStepper::getCdrSolversPhiK(m+1);
+    EBAMRIVData& sigma_mp1 = CdrPlasmaImExSdcStepper::getSigmaSolverK(m+1);
     const Real t_mp1 = m_tm[m+1];
 
     // Update electric field and stationary RTE equations
-    if(m_consistent_E)   imex_sdc::update_poisson(cdr_densities_mp1, sigma_mp1);
+    if(m_consistent_E)   CdrPlasmaImExSdcStepper::updateField(cdr_densities_mp1, sigma_mp1);
     if(m_consistent_rte) {
       if(m_rte->isStationary()){
-	imex_sdc::compute_reaction_network(m+1, time + m_dtm[m], m_dtm[m]);
-	imex_sdc::integrate_rte_stationary();
+	CdrPlasmaImExSdcStepper::computeReactionNetwork(m+1, time + m_dtm[m], m_dtm[m]);
+	CdrPlasmaImExSdcStepper::integrateRtStationary();
       }
     }
 
@@ -726,16 +732,16 @@ void imex_sdc::integrate(const Real a_dt, const Real a_time, const bool a_lagged
     // boundary conditions in the next SDC sweep, or we allow the next time step to take care of this. 
     const int last = m == m_p-1;
     if(!last){
-      if(m_compute_S)      imex_sdc::compute_cdr_gradients(cdr_densities_mp1);
-      if(m_compute_v)      imex_sdc::compute_cdr_velo(cdr_densities_mp1, t_mp1);
-      if(m_compute_D)      imex_sdc::updateDiffusion_coefficients();
+      if(m_compute_S)      CdrPlasmaImExSdcStepper::computeCdrGradients(cdr_densities_mp1);
+      if(m_compute_v)      CdrPlasmaImExSdcStepper::computeCdrVelo(cdr_densities_mp1, t_mp1);
+      if(m_compute_D)      CdrPlasmaImExSdcStepper::updateDiffusionCoefficients();
 
       // Update boundary conditions for cdr and sigma equations. We need them for the next step
-      imex_sdc::compute_cdr_eb_states(cdr_densities_mp1);
-      imex_sdc::computeCdrFluxes(cdr_densities_mp1, t_mp1);
-      imex_sdc::compute_cdr_domain_states(cdr_densities_mp1);
-      imex_sdc::computeCdrDomainFluxes(cdr_densities_mp1, t_mp1);
-      imex_sdc::compute_sigma_flux();
+      CdrPlasmaImExSdcStepper::computeCdrEbStates(cdr_densities_mp1);
+      CdrPlasmaImExSdcStepper::computeCdrFluxes(cdr_densities_mp1, t_mp1);
+      CdrPlasmaImExSdcStepper::computeCdrDomainStates(cdr_densities_mp1);
+      CdrPlasmaImExSdcStepper::computeCdrDomainFluxes(cdr_densities_mp1, t_mp1);
+      CdrPlasmaImExSdcStepper::computeSigmaFlux();
     }
 
     time += m_dtm[m];
@@ -754,10 +760,10 @@ void imex_sdc::integrate(const Real a_dt, const Real a_time, const bool a_lagged
 #endif
 }
 
-void imex_sdc::integrate_advection_reaction(const Real a_dt, const int a_m, const bool a_lagged_terms){
-  CH_TIME("imex_sdc::integrate_advection_reaction");
+void CdrPlasmaImExSdcStepper::integrateAdvectionReaction(const Real a_dt, const int a_m, const bool a_lagged_terms){
+  CH_TIME("CdrPlasmaImExSdcStepper::integrateAdvectionReaction");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::integrate_advection_reaction" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::integrateAdvectionReaction" << endl;
   }
 
   // Advance phi_(m+1) = phi_m + dtm*F_A. These routines do nothing
@@ -767,7 +773,7 @@ void imex_sdc::integrate_advection_reaction(const Real a_dt, const int a_m, cons
   const bool skip = (a_m == 0 && a_lagged_terms);
   const Real t0 = MPI_Wtime();
   if(!skip){
-    imex_sdc::integrate_advection(a_dt, a_m, a_lagged_terms);
+    CdrPlasmaImExSdcStepper::integrateAdvection(a_dt, a_m, a_lagged_terms);
   }
   const Real t1 = MPI_Wtime();
 
@@ -777,25 +783,25 @@ void imex_sdc::integrate_advection_reaction(const Real a_dt, const int a_m, cons
   // phi_(m+1) = phi_m + dtm*FA_m, and we just increment with the reaction operator. 
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
-    RefCountedPtr<cdr_storage>& storage = getCdrSolvers_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = getCdrStorage(solver_it);
 
     // phi_(m+1) = phi_M
-    EBAMRCellData& phi_m1      = storage->get_phi()[a_m+1];
+    EBAMRCellData& phi_m1      = storage->getPhi()[a_m+1];
     EBAMRCellData& scratch     = storage->getScratch();
-    const EBAMRCellData& phi_m = storage->get_phi()[a_m];
+    const EBAMRCellData& phi_m = storage->getPhi()[a_m];
     
     // Increment with operator slopes. m=0 and corrector is a special case where we skipped the advective advance,
     // choosing instead to use the old slopes (which did not change)
     if(skip){ // Can use the old slopes
-      const EBAMRCellData& FAR_m = storage->get_FAR()[a_m]; // Slope, doesn't require recomputation. 
+      const EBAMRCellData& FAR_m = storage->getFAR()[a_m]; // Slope, doesn't require recomputation. 
       DataOps::copy(phi_m1, phi_m);
       DataOps::incr(phi_m1, FAR_m, m_dtm[a_m]);
       if(a_lagged_terms) {
 	DataOps::copy(scratch, FAR_m);
       }
     }
-    else{ // If we made it here, phi_(m+1) = phi_m + dtm*FA(phi_m) through the integrate_advection routine
-      EBAMRCellData& FAR_m     = storage->get_FAR()[a_m]; // Currently the old slope
+    else{ // If we made it here, phi_(m+1) = phi_m + dtm*FA(phi_m) through the integrateAdvection routine
+      EBAMRCellData& FAR_m     = storage->getFAR()[a_m]; // Currently the old slope
       EBAMRCellData& src = solver->getSource();    // Updated source
 
       // Increment swith source and then compute slope. This has already been done 
@@ -823,7 +829,7 @@ void imex_sdc::integrate_advection_reaction(const Real a_dt, const int a_m, cons
     // FAR_m above after the advection-reaction advance, but we also backed up the old term into scratch. 
     if(a_lagged_terms){
       DataOps::incr(phi_m1, scratch, -m_dtm[a_m]); // phi_(m+1)^(k+1) = phi_m^(k+1) + dtm*(FAR_m^(k+1) - FAR_m^k)
-      imex_sdc::quad(scratch, storage->get_F(), a_m);  // Does the quadrature of the lagged operator slopes. 
+      CdrPlasmaImExSdcStepper::quad(scratch, storage->getF(), a_m);  // Does the quadrature of the lagged operator slopes. 
       DataOps::incr(phi_m1, scratch, 0.5*a_dt);    // phi_(m+1)^(k+1) = phi_m^(k+1) + dtm*(FAR_m^(k+1) - FAR_m^k) + I_m^(m+1)
     }
   }
@@ -833,25 +839,25 @@ void imex_sdc::integrate_advection_reaction(const Real a_dt, const int a_m, cons
   EBAMRIVData& sigma_m1      = m_sigma_scratch->getSigmaSolver()[a_m+1];
   const EBAMRIVData& sigma_m = m_sigma_scratch->getSigmaSolver()[a_m];
   if(skip){
-    const EBAMRIVData& Fsig_m = m_sigma_scratch->get_Fold()[a_m]; // Here, we should be able to use either Fold or Fnew
+    const EBAMRIVData& Fsig_m = m_sigma_scratch->getFold()[a_m]; // Here, we should be able to use either Fold or Fnew
     DataOps::copy(sigma_m1, sigma_m);                            // since Fsig_0 is only computed once. 
     DataOps::incr(sigma_m1, Fsig_m, m_dtm[a_m]);
   }
 
   const Real t3 = MPI_Wtime();
   if(a_lagged_terms){ // Add in the lagged terms. When we make it here, sigma_(m+1) = sigma_m + dtm*Fsig_m. 
-    EBAMRIVData& Fsig_lag = m_sigma_scratch->get_Fold()[a_m];
+    EBAMRIVData& Fsig_lag = m_sigma_scratch->getFold()[a_m];
     DataOps::incr(sigma_m1, Fsig_lag, -m_dtm[a_m]);
 
     // Add in the quadrature term
     EBAMRIVData& scratch = m_sigma_scratch->getScratch();
-    imex_sdc::quad(scratch, m_sigma_scratch->get_Fold(), a_m);
+    CdrPlasmaImExSdcStepper::quad(scratch, m_sigma_scratch->getFold(), a_m);
     DataOps::incr(sigma_m1, scratch, 0.5*a_dt); // Mult by 0.5*a_dt due to scaling on [-1,1] for quadrature
   }
   const Real t4 = MPI_Wtime();
 
 #if 0
-  pout() << "integrate_advection_reaction::" << endl;
+  pout() << "integrateAdvectionReaction::" << endl;
   pout() << "t1-t0 = " << t1-t0 << endl;
   pout() << "t2-t1 = " << t2-t2 << endl;
   pout() << "t3-t2 = " << t3-t2 << endl;
@@ -859,10 +865,10 @@ void imex_sdc::integrate_advection_reaction(const Real a_dt, const int a_m, cons
 #endif
 }
 
-void imex_sdc::integrate_advection(const Real a_dt, const int a_m, const bool a_lagged_terms){
-  CH_TIME("imex_sdc::integrate_advection");
+void CdrPlasmaImExSdcStepper::integrateAdvection(const Real a_dt, const int a_m, const bool a_lagged_terms){
+  CH_TIME("CdrPlasmaImExSdcStepper::integrateAdvection");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::integrate_advection" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::integrateAdvection" << endl;
   }
 
   // TLDR; This routine should do phi_(m+1) = phi_m + dtm*FA_m, and sigma_(m+1) = sigma_m + dt*Fsig_m.
@@ -871,17 +877,17 @@ void imex_sdc::integrate_advection(const Real a_dt, const int a_m, const bool a_
   //       The lagged terms are not a part of this routine. 
 
   if(a_m == 0 && a_lagged_terms){
-    MayDay::Abort("imex_sdc::integrate_advection - (m==0 && corrector==true) logic bust which should never happen");
+    MayDay::Abort("CdrPlasmaImExSdcStepper::integrateAdvection - (m==0 && corrector==true) logic bust which should never happen");
   }
 
   // Advance cdr equations
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
-    RefCountedPtr<cdr_storage>& storage = getCdrSolvers_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = getCdrStorage(solver_it);
 
-    EBAMRCellData& phi_m1  = storage->get_phi()[a_m+1];
+    EBAMRCellData& phi_m1  = storage->getPhi()[a_m+1];
     EBAMRCellData& scratch = storage->getScratch();
-    EBAMRCellData& phi_m   = storage->get_phi()[a_m];
+    EBAMRCellData& phi_m   = storage->getPhi()[a_m];
 
     if(solver->isMobile()){
       const Real extrap_dt = m_extrap_advect ? 2.0*m_extrap_dt*m_dtm[a_m] : 0.0; // Factor of 2 due to EBPatchAdvect
@@ -901,17 +907,17 @@ void imex_sdc::integrate_advection(const Real a_dt, const int a_m, const bool a_
 
   // Update sigma. Also compute the new slope.
   EBAMRIVData& sigma_m1      = m_sigma_scratch->getSigmaSolver()[a_m+1];
-  EBAMRIVData& Fsig_new      = m_sigma_scratch->get_Fnew()[a_m];
+  EBAMRIVData& Fsig_new      = m_sigma_scratch->getFnew()[a_m];
   const EBAMRIVData& sigma_m = m_sigma_scratch->getSigmaSolver()[a_m];
   m_sigma->computeRHS(Fsig_new); // Fills Fsig_new with BCs from CDR solvers
   DataOps::copy(sigma_m1, sigma_m);
   DataOps::incr(sigma_m1, Fsig_new, m_dtm[a_m]);
 }
 
-void imex_sdc::integrate_diffusion(const Real a_dt, const int a_m, const bool a_lagged_terms){
-  CH_TIME("imex_sdc::integrate_diffusion");
+void CdrPlasmaImExSdcStepper::integrateDiffusion(const Real a_dt, const int a_m, const bool a_lagged_terms){
+  CH_TIME("CdrPlasmaImExSdcStepper::integrateDiffusion");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::integrate_diffusion" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::integrateDiffusion" << endl;
   }
 
   // TLDR: We're solving
@@ -921,11 +927,11 @@ void imex_sdc::integrate_diffusion(const Real a_dt, const int a_m, const bool a_
   // This routine does not modify FD_(m+1)^k. This is replaced by FD_(m+1)^(k+1) later on. 
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
-    RefCountedPtr<cdr_storage>& storage = imex_sdc::getCdrSolvers_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = CdrPlasmaImExSdcStepper::getCdrStorage(solver_it);
     
     if(solver->isDiffusive()){
-      EBAMRCellData& phi_m1      = storage->get_phi()[a_m+1]; // Advected solution. Possibly with lagged terms. 
-      const EBAMRCellData& phi_m = storage->get_phi()[a_m];
+      EBAMRCellData& phi_m1      = storage->getPhi()[a_m+1]; // Advected solution. Possibly with lagged terms. 
+      const EBAMRCellData& phi_m = storage->getPhi()[a_m];
 
       // Build the diffusion source term
       EBAMRCellData& source   = storage->getScratch();
@@ -934,7 +940,7 @@ void imex_sdc::integrate_diffusion(const Real a_dt, const int a_m, const bool a_
       
       DataOps::copy(init_soln, phi_m1);      // Copy initial solutions
       if(a_lagged_terms){
-	const EBAMRCellData& FD_m1k = storage->get_FD()[a_m+1];      // FD_(m+1)^k. Lagged term.
+	const EBAMRCellData& FD_m1k = storage->getFD()[a_m+1];      // FD_(m+1)^k. Lagged term.
 	DataOps::incr(init_soln, FD_m1k, -m_dtm[a_m]);
       }
       m_amr->averageDown(init_soln, m_realm, m_cdr->getPhase());
@@ -953,7 +959,7 @@ void imex_sdc::integrate_diffusion(const Real a_dt, const int a_m, const bool a_
       DataOps::floor(phi_m1, 0.0);
 
       // Update the operator slope
-      EBAMRCellData& FD_m1k = storage->get_FD()[a_m+1];
+      EBAMRCellData& FD_m1k = storage->getFD()[a_m+1];
       DataOps::setValue(FD_m1k, 0.0);
       DataOps::incr(FD_m1k, phi_m1, 1.0);
       DataOps::incr(FD_m1k, init_soln, -1.0);
@@ -963,40 +969,40 @@ void imex_sdc::integrate_diffusion(const Real a_dt, const int a_m, const bool a_
       m_amr->interpGhost(FD_m1k, m_realm, m_cdr->getPhase());
     }
     else{
-      EBAMRCellData& FD_m1k = storage->get_FD()[a_m+1];
+      EBAMRCellData& FD_m1k = storage->getFD()[a_m+1];
       DataOps::setValue(FD_m1k, 0.0);
     }
   }
 }
 
-void imex_sdc::reconcile_integrands(){
-  CH_TIME("imex_sdc::reconcile_integrands");
+void CdrPlasmaImExSdcStepper::reconcileIntegrands(){
+  CH_TIME("CdrPlasmaImExSdcStepper::reconcileIntegrands");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::reconcile_integrands" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::reconcileIntegrands" << endl;
   }
 
   // TLDR: When we come in here, all solutions (Poisson, CDR, RTE, Sigma) are known at node m_p. But we
   //       do need the extra slopes for the explicit operators
 
-  Vector<EBAMRCellData*> cdr_densities_p = imex_sdc::getCdrSolvers_phik(m_p);
-  EBAMRIVData& sigma_p = imex_sdc::getSigmaSolverk(m_p);
+  Vector<EBAMRCellData*> cdr_densities_p = CdrPlasmaImExSdcStepper::getCdrSolversPhiK(m_p);
+  EBAMRIVData& sigma_p = CdrPlasmaImExSdcStepper::getSigmaSolverK(m_p);
   const Real t_p = m_tm[m_p];
 
   // Update boundary conditions for cdr and sigma equations before getting the slope at the final node
-  imex_sdc::compute_cdr_eb_states(cdr_densities_p);
-  imex_sdc::computeCdrFluxes(cdr_densities_p, t_p);
-  imex_sdc::compute_cdr_domain_states(cdr_densities_p);
-  imex_sdc::computeCdrDomainFluxes(cdr_densities_p, t_p);
-  imex_sdc::compute_sigma_flux();
+  CdrPlasmaImExSdcStepper::computeCdrEbStates(cdr_densities_p);
+  CdrPlasmaImExSdcStepper::computeCdrFluxes(cdr_densities_p, t_p);
+  CdrPlasmaImExSdcStepper::computeCdrDomainStates(cdr_densities_p);
+  CdrPlasmaImExSdcStepper::computeCdrDomainFluxes(cdr_densities_p, t_p);
+  CdrPlasmaImExSdcStepper::computeSigmaFlux();
 
   // Now compute FAR_p - that wasn't done when we integrated
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
-    RefCountedPtr<cdr_storage>& storage = imex_sdc::getCdrSolvers_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = CdrPlasmaImExSdcStepper::getCdrStorage(solver_it);
     const int idx = solver_it.index();
 
     // This has not been computed yet. Do it.
-    EBAMRCellData& FAR_p     = storage->get_FAR()[m_p];
+    EBAMRCellData& FAR_p     = storage->getFAR()[m_p];
     EBAMRCellData& phi_p     = *cdr_densities_p[idx] ;
     const EBAMRCellData& src = solver->getSource();
 
@@ -1012,9 +1018,9 @@ void imex_sdc::reconcile_integrands(){
 
     // Build the integrand
     for (int m = 0; m <= m_p; m++){
-      EBAMRCellData& F_m   = storage->get_F()[m];
-      EBAMRCellData& FD_m  = storage->get_FD()[m];
-      EBAMRCellData& FAR_m = storage->get_FAR()[m];
+      EBAMRCellData& F_m   = storage->getF()[m];
+      EBAMRCellData& FD_m  = storage->getFD()[m];
+      EBAMRCellData& FAR_m = storage->getFAR()[m];
 
       DataOps::copy(F_m, FAR_m);
       if(solver->isDiffusive()){
@@ -1028,46 +1034,46 @@ void imex_sdc::reconcile_integrands(){
   }
 
   // Compute Fsig_p - that wasn't done either
-  EBAMRIVData& Fnew_p = m_sigma_scratch->get_Fnew()[m_p];
+  EBAMRIVData& Fnew_p = m_sigma_scratch->getFnew()[m_p];
   m_sigma->computeRHS(Fnew_p);
   for (int m = 0; m <= m_p; m++){
-    EBAMRIVData& Fold_m = m_sigma_scratch->get_Fold()[m];
-    EBAMRIVData& Fnew_m = m_sigma_scratch->get_Fnew()[m];
+    EBAMRIVData& Fold_m = m_sigma_scratch->getFold()[m];
+    EBAMRIVData& Fnew_m = m_sigma_scratch->getFnew()[m];
     DataOps::copy(Fold_m, Fnew_m);
   }
 }
 
-void imex_sdc::initialize_errors(){
-  CH_TIME("imex_sdc::corrector_initialize_errors");
+void CdrPlasmaImExSdcStepper::initializeErrors(){
+  CH_TIME("CdrPlasmaImExSdcStepper::corrector_initializeErrors");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::corrector_initialize_errors" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::corrector_initializeErrors" << endl;
   }
 
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
-    RefCountedPtr<cdr_storage>& storage = imex_sdc::getCdrSolvers_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = CdrPlasmaImExSdcStepper::getCdrStorage(solver_it);
     const int idx = solver_it.index();
     
     // These should be zero
     if(idx == m_error_idx || m_error_idx < 0){
-      EBAMRCellData& error = storage->get_error();
-      const EBAMRCellData& phi_final = storage->get_phi()[m_p];
+      EBAMRCellData& error = storage->getError();
+      const EBAMRCellData& phi_final = storage->getPhi()[m_p];
 
       DataOps::setValue(error, 0.0);
       DataOps::incr(error, phi_final, -1.0);
     }
   }
 
-  EBAMRIVData& error = m_sigma_scratch->get_error();
+  EBAMRIVData& error = m_sigma_scratch->getError();
   const EBAMRIVData& sigma_final = m_sigma_scratch->getSigmaSolver()[m_p];
   DataOps::setValue(error, 0.0);
   DataOps::incr(error, sigma_final, -1.0);
 }
 
-void imex_sdc::finalize_errors(){
-  CH_TIME("imex_sdc::corrector_finalize_errors");
+void CdrPlasmaImExSdcStepper::finalizeErrors(){
+  CH_TIME("CdrPlasmaImExSdcStepper::corrector_finalizeErrors");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::corrector_finalize_errors" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::corrector_finalizeErrors" << endl;
   }
 
   const Real safety = 1.E-20;
@@ -1075,13 +1081,13 @@ void imex_sdc::finalize_errors(){
   m_max_error = 0.0;
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
-    RefCountedPtr<cdr_storage>& storage = imex_sdc::getCdrSolvers_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = CdrPlasmaImExSdcStepper::getCdrStorage(solver_it);
     const int idx = solver_it.index();
 
     // Compute error
     if(idx == m_error_idx || m_error_idx < 0){
-      EBAMRCellData& error       = storage->get_error();
-      const EBAMRCellData& phi_p = storage->get_phi()[m_p];
+      EBAMRCellData& error       = storage->getError();
+      const EBAMRCellData& phi_p = storage->getPhi()[m_p];
       DataOps::incr(error, phi_p, 1.0);
 
       // Compute norms. Only coarsest level
@@ -1109,7 +1115,7 @@ void imex_sdc::finalize_errors(){
   }
 
   // Compute the surface charge conservation error
-  EBAMRIVData& error = m_sigma_scratch->get_error();
+  EBAMRIVData& error = m_sigma_scratch->getError();
   const EBAMRIVData& sigma_final = m_sigma_scratch->getSigmaSolver()[m_p];
   DataOps::incr(error, sigma_final, 1.0);
   m_sigma_error = 0.0; // I don't think this is ever used...
@@ -1117,14 +1123,14 @@ void imex_sdc::finalize_errors(){
 
 }
 
-void imex_sdc::compute_new_dt(bool& a_accept_step, const Real a_dt, const int a_num_corrections){
-  CH_TIME("imex_sdc::compute_new_dt");
+void CdrPlasmaImExSdcStepper::computeNewDt(bool& a_accept_step, const Real a_dt, const int a_num_corrections){
+  CH_TIME("CdrPlasmaImExSdcStepper::computeNewDt");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::compute_new_dt" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::computeNewDt" << endl;
   }
 
   // If a_dt was the smallest possible CFL or hardcap time step, we just have to accept it
-  const Real max_gl_dist = imex_sdc::get_max_node_distance();
+  const Real max_gl_dist = CdrPlasmaImExSdcStepper::getMaxNodeDistance();
   Real dt_cfl = 2.0*m_dt_cfl/max_gl_dist; // This is the smallest time step ON THE FINEST LEVEL
 
   // Try time step
@@ -1176,14 +1182,14 @@ void imex_sdc::compute_new_dt(bool& a_accept_step, const Real a_dt, const int a_
   m_have_dt_err = true;
 }
 
-void imex_sdc::adaptive_report(const Real a_first_dt, const Real a_dt, const Real a_new_dt, const int a_corr, const int a_rej, const Real a_max_err){
-  CH_TIME("imex_sdc::adaptive_report");
+void CdrPlasmaImExSdcStepper::adaptiveReport(const Real a_first_dt, const Real a_dt, const Real a_new_dt, const int a_corr, const int a_rej, const Real a_max_err){
+  CH_TIME("CdrPlasmaImExSdcStepper::adaptiveReport");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::adaptive_report" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::adaptiveReport" << endl;
   }
 
   pout() << "\n";
-  pout() << "imex_sdc::adaptive_report breakdown" << endl;
+  pout() << "CdrPlasmaImExSdcStepper::adaptiveReport breakdown" << endl;
   pout() << "--------------------------------\n";
   pout() << "\t Try dt       = " << a_first_dt << endl;
   pout() << "\t Advanced dt  = " << a_dt << endl;
@@ -1195,10 +1201,10 @@ void imex_sdc::adaptive_report(const Real a_first_dt, const Real a_dt, const Rea
   pout() << "\n";
 }
 
-void imex_sdc::computeDt(Real& a_dt, TimeCode& a_timeCode){
-  CH_TIME("imex_sdc::computeDt");
+void CdrPlasmaImExSdcStepper::computeDt(Real& a_dt, TimeCode& a_timeCode){
+  CH_TIME("CdrPlasmaImExSdcStepper::computeDt");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::computeDt" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::computeDt" << endl;
   }
 
   Real dt = 1.E99;
@@ -1207,7 +1213,7 @@ void imex_sdc::computeDt(Real& a_dt, TimeCode& a_timeCode){
   for (int lvl = 0; lvl < m_amr->getFinestLevel(); lvl++){
     Nref = Nref*m_amr->getRefinementRatios()[lvl];
   }
-  const Real max_gl_dist = imex_sdc::get_max_node_distance();
+  const Real max_gl_dist = CdrPlasmaImExSdcStepper::getMaxNodeDistance();
   m_dt_cfl = m_cdr->computeAdvectionDt();
 
   Real dt_cfl = 2.0*m_dt_cfl/max_gl_dist;
@@ -1275,33 +1281,33 @@ void imex_sdc::computeDt(Real& a_dt, TimeCode& a_timeCode){
 #endif
 }
 
-void imex_sdc::regridInternals(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel){
-  CH_TIME("imex_sdc::regridInternals");
+void CdrPlasmaImExSdcStepper::regridInternals(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel){
+  CH_TIME("CdrPlasmaImExSdcStepper::regridInternals");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::regridInternals" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::regridInternals" << endl;
   }
 
   // Nothing to see here
 }
 
-void imex_sdc::allocateInternals(){
-  CH_TIME("imex_sdc::allocateInternals");
+void CdrPlasmaImExSdcStepper::allocateInternals(){
+  CH_TIME("CdrPlasmaImExSdcStepper::allocateInternals");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::allocateInternals" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::allocateInternals" << endl;
   }
 
   m_cdr_error.resize(m_physics->getNumCdrSpecies());
   
-  imex_sdc::allocate_cdr_storage();
-  imex_sdc::allocate_poisson_storage();
-  imex_sdc::allocate_rte_storage();
-  imex_sdc::allocate_sigma_storage();
+  CdrPlasmaImExSdcStepper::allocateCdrStorage();
+  CdrPlasmaImExSdcStepper::allocateFieldStorage();
+  CdrPlasmaImExSdcStepper::allocateRtStorage();
+  CdrPlasmaImExSdcStepper::allocateSigmaStorage();
 
-  imex_sdc::setup_quadrature_nodes(m_p);
-  imex_sdc::setup_qmj(m_p);
+  CdrPlasmaImExSdcStepper::setupQuadratureNodes(m_p);
+  CdrPlasmaImExSdcStepper::setupQmj(m_p);
 }
 
-void imex_sdc::allocate_cdr_storage(){
+void CdrPlasmaImExSdcStepper::allocateCdrStorage(){
   const int ncomp       = 1;
   const int num_species = m_physics->getNumCdrSpecies();
 
@@ -1309,131 +1315,131 @@ void imex_sdc::allocate_cdr_storage(){
   
   for (CdrIterator<CdrSolver> solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
-    m_cdr_scratch[idx] = RefCountedPtr<cdr_storage> (new cdr_storage(m_amr, m_realm, m_cdr->getPhase(), ncomp));
+    m_cdr_scratch[idx] = RefCountedPtr<CdrStorage> (new CdrStorage(m_amr, m_realm, m_cdr->getPhase(), ncomp));
     m_cdr_scratch[idx]->allocateStorage(m_p);
   }
 }
 
-void imex_sdc::allocate_poisson_storage(){
+void CdrPlasmaImExSdcStepper::allocateFieldStorage(){
   const int ncomp = 1;
-  m_fieldSolver_scratch = RefCountedPtr<poisson_storage> (new poisson_storage(m_amr, m_realm, m_cdr->getPhase(), ncomp));
+  m_fieldSolver_scratch = RefCountedPtr<FieldStorage> (new FieldStorage(m_amr, m_realm, m_cdr->getPhase(), ncomp));
   m_fieldSolver_scratch->allocateStorage(m_p);
 }
 
-void imex_sdc::allocate_rte_storage(){
+void CdrPlasmaImExSdcStepper::allocateRtStorage(){
   const int ncomp       = 1;
   const int num_Photons = m_physics->getNumRtSpecies();
   m_rte_scratch.resize(num_Photons);
   
   for (RtIterator<RtSolver> solver_it(*m_rte); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
-    m_rte_scratch[idx] = RefCountedPtr<rte_storage> (new rte_storage(m_amr, m_realm, m_rte->getPhase(), ncomp));
+    m_rte_scratch[idx] = RefCountedPtr<RtStorage> (new RtStorage(m_amr, m_realm, m_rte->getPhase(), ncomp));
     m_rte_scratch[idx]->allocateStorage(m_p);
   }
 }
 
-void imex_sdc::allocate_sigma_storage(){
+void CdrPlasmaImExSdcStepper::allocateSigmaStorage(){
   const int ncomp = 1;
-  m_sigma_scratch = RefCountedPtr<sigma_storage> (new sigma_storage(m_amr, m_realm, m_cdr->getPhase(), ncomp));
+  m_sigma_scratch = RefCountedPtr<SigmaStorage> (new SigmaStorage(m_amr, m_realm, m_cdr->getPhase(), ncomp));
   m_sigma_scratch->allocateStorage(m_p);
 }
 
-void imex_sdc::deallocateInternals(){
-  CH_TIME("imex_sdc::deallocateInternals");
+void CdrPlasmaImExSdcStepper::deallocateInternals(){
+  CH_TIME("CdrPlasmaImExSdcStepper::deallocateInternals");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::deallocateInternals" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::deallocateInternals" << endl;
   }
 
   for (CdrIterator<CdrSolver> solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     m_cdr_scratch[idx]->deallocateStorage();
-    m_cdr_scratch[idx] = RefCountedPtr<cdr_storage>(0);
+    m_cdr_scratch[idx] = RefCountedPtr<CdrStorage>(0);
   }
 
   for (RtIterator<RtSolver> solver_it(*m_rte); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     m_rte_scratch[idx]->deallocateStorage();
-    m_rte_scratch[idx] = RefCountedPtr<rte_storage>(0);
+    m_rte_scratch[idx] = RefCountedPtr<RtStorage>(0);
   }
 
   m_cdr_scratch.resize(0);
   m_rte_scratch.resize(0);
 
   m_fieldSolver_scratch->deallocateStorage();
-  m_fieldSolver_scratch = RefCountedPtr<poisson_storage>(0);
+  m_fieldSolver_scratch = RefCountedPtr<FieldStorage>(0);
   
   m_sigma_scratch->deallocateStorage();
-  m_sigma_scratch = RefCountedPtr<sigma_storage>(0);
+  m_sigma_scratch = RefCountedPtr<SigmaStorage>(0);
 }
 
-void imex_sdc::computeElectricField_into_scratch(){
-  CH_TIME("imex_sdc::computeElectricField_into_scratch");
+void CdrPlasmaImExSdcStepper::computeElectricFieldIntoScratch(){
+  CH_TIME("CdrPlasmaImExSdcStepper::computeElectricFieldIntoScratch");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::computeElectricField_into_scratch" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::computeElectricFieldIntoScratch" << endl;
   }
   
-  EBAMRCellData& E_cell = m_fieldSolver_scratch->get_E_cell();
-  EBAMRFluxData& E_face = m_fieldSolver_scratch->get_E_face();
-  EBAMRIVData&   E_eb   = m_fieldSolver_scratch->get_E_eb();
-  EBAMRIFData&   E_dom  = m_fieldSolver_scratch->get_E_domain();
+  EBAMRCellData& E_cell = m_fieldSolver_scratch->getElectricFieldCell();
+  EBAMRFluxData& E_face = m_fieldSolver_scratch->getElectricFieldFace();
+  EBAMRIVData&   E_eb   = m_fieldSolver_scratch->getElectricFieldEb();
+  EBAMRIFData&   E_dom  = m_fieldSolver_scratch->getElectricFieldDomain();
 
   const MFAMRCellData& phi = m_fieldSolver->getPotential();
   
-  imex_sdc::computeElectricField(E_cell, m_cdr->getPhase(), phi);     // Compute cell-centered field
-  imex_sdc::computeElectricField(E_face, m_cdr->getPhase(), E_cell);  // Compute face-centered field
-  imex_sdc::computeElectricField(E_eb,   m_cdr->getPhase(), E_cell);  // EB-centered field
+  CdrPlasmaImExSdcStepper::computeElectricField(E_cell, m_cdr->getPhase(), phi);     // Compute cell-centered field
+  CdrPlasmaImExSdcStepper::computeElectricField(E_face, m_cdr->getPhase(), E_cell);  // Compute face-centered field
+  CdrPlasmaImExSdcStepper::computeElectricField(E_eb,   m_cdr->getPhase(), E_cell);  // EB-centered field
 
   CdrPlasmaStepper::extrapolateToDomainFaces(E_dom, m_cdr->getPhase(), E_cell);
 }
 
-void imex_sdc::compute_cdr_gradients(){
-  CH_TIME("imex_sdc::compute_cdr_gradients");
+void CdrPlasmaImExSdcStepper::computeCdrGradients(){
+  CH_TIME("CdrPlasmaImExSdcStepper::computeCdrGradients");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::compute_cdr_gradients" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::computeCdrGradients" << endl;
   }
 
-  imex_sdc::compute_cdr_gradients(m_cdr->getPhis());
+  CdrPlasmaImExSdcStepper::computeCdrGradients(m_cdr->getPhis());
 }
 
-void imex_sdc::compute_cdr_gradients(const Vector<EBAMRCellData*>& a_phis){
-  CH_TIME("imex_sdc::compute_cdr_gradients");
+void CdrPlasmaImExSdcStepper::computeCdrGradients(const Vector<EBAMRCellData*>& a_phis){
+  CH_TIME("CdrPlasmaImExSdcStepper::computeCdrGradients");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::compute_cdr_gradients" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::computeCdrGradients" << endl;
   }
 
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
-    RefCountedPtr<cdr_storage>& storage = imex_sdc::getCdrSolvers_storage(solver_it);
-    EBAMRCellData& grad = storage->get_gradient();
+    RefCountedPtr<CdrStorage>& storage = CdrPlasmaImExSdcStepper::getCdrStorage(solver_it);
+    EBAMRCellData& grad = storage->getGradient();
     m_amr->computeGradient(grad, *a_phis[idx], m_realm, m_cdr->getPhase());
     //    m_amr->averageDown(grad, m_realm, m_cdr->getPhase());
     m_amr->interpGhost(grad, m_realm, m_cdr->getPhase());
   }
 }
 
-void imex_sdc::compute_cdr_velo(const Real a_time){
-  CH_TIME("imex_sdc::compute_cdr_velo");
+void CdrPlasmaImExSdcStepper::computeCdrVelo(const Real a_time){
+  CH_TIME("CdrPlasmaImExSdcStepper::computeCdrVelo");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::compute_cdr_velo" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::computeCdrVelo" << endl;
   }
 
-  imex_sdc::compute_cdr_velo(m_cdr->getPhis(), a_time);
+  CdrPlasmaImExSdcStepper::computeCdrVelo(m_cdr->getPhis(), a_time);
 }
 
-void imex_sdc::compute_cdr_velo(const Vector<EBAMRCellData*>& a_phis, const Real a_time){
-  CH_TIME("imex_sdc::compute_cdr_velo(Vector<EBAMRCellData*>, Real)");
+void CdrPlasmaImExSdcStepper::computeCdrVelo(const Vector<EBAMRCellData*>& a_phis, const Real a_time){
+  CH_TIME("CdrPlasmaImExSdcStepper::computeCdrVelo(Vector<EBAMRCellData*>, Real)");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::compute_cdr_velo(Vector<EBAMRCellData*>, Real)" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::computeCdrVelo(Vector<EBAMRCellData*>, Real)" << endl;
   }
 
   Vector<EBAMRCellData*> velocities = m_cdr->getVelocities();
-  imex_sdc::computeCdrDriftVelocities(velocities, a_phis, m_fieldSolver_scratch->get_E_cell(), a_time);
+  CdrPlasmaImExSdcStepper::computeCdrDriftVelocities(velocities, a_phis, m_fieldSolver_scratch->getElectricFieldCell(), a_time);
 }
 
-void imex_sdc::compute_cdr_eb_states(){
-  CH_TIME("imex_sdc::compute_cdr_eb_states");
+void CdrPlasmaImExSdcStepper::computeCdrEbStates(){
+  CH_TIME("CdrPlasmaImExSdcStepper::computeCdrEbStates");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::compute_cdr_eb_states" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::computeCdrEbStates" << endl;
   }
 
   Vector<EBAMRIVData*>   eb_gradients;
@@ -1443,17 +1449,17 @@ void imex_sdc::compute_cdr_eb_states(){
   
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
-    RefCountedPtr<cdr_storage>& storage = imex_sdc::getCdrSolvers_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = CdrPlasmaImExSdcStepper::getCdrStorage(solver_it);
 
     cdr_states.push_back(&(solver->getPhi()));
-    eb_states.push_back(&(storage->get_eb_state()));
-    eb_gradients.push_back(&(storage->get_eb_grad()));
-    cdr_gradients.push_back(&(storage->get_gradient())); // Should already have been computed
+    eb_states.push_back(&(storage->getEbState()));
+    eb_gradients.push_back(&(storage->getEbGrad()));
+    cdr_gradients.push_back(&(storage->getGradient())); // Should already have been computed
   }
 
   // Extrapolate states to the EB and floor them so we cannot get negative values on the boundary. This
   // won't hurt mass conservation because the mass hasn't been injected yet
-  imex_sdc::extrapolateToEb(eb_states, m_cdr->getPhase(), cdr_states);
+  CdrPlasmaImExSdcStepper::extrapolateToEb(eb_states, m_cdr->getPhase(), cdr_states);
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     DataOps::floor(*eb_states[idx], 0.0);
@@ -1463,15 +1469,15 @@ void imex_sdc::compute_cdr_eb_states(){
   EBAMRIVData eb_gradient;
   m_amr->allocate(eb_gradient, m_realm, m_cdr->getPhase(), SpaceDim);
   for (int i = 0; i < cdr_states.size(); i++){
-    imex_sdc::extrapolateToEb(eb_gradient, m_cdr->getPhase(), *cdr_gradients[i]);
-    imex_sdc::projectFlux(*eb_gradients[i], eb_gradient);
+    CdrPlasmaImExSdcStepper::extrapolateToEb(eb_gradient, m_cdr->getPhase(), *cdr_gradients[i]);
+    CdrPlasmaImExSdcStepper::projectFlux(*eb_gradients[i], eb_gradient);
   }
 }
 
-void imex_sdc::compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_phis){
-  CH_TIME("imex_sdc::compute_cdr_eb_states(vec)");
+void CdrPlasmaImExSdcStepper::computeCdrEbStates(const Vector<EBAMRCellData*>& a_phis){
+  CH_TIME("CdrPlasmaImExSdcStepper::computeCdrEbStates(vec)");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::compute_cdr_eb_states(vec)" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::computeCdrEbStates(vec)" << endl;
   }
 
   Vector<EBAMRIVData*>   eb_gradients;
@@ -1479,16 +1485,16 @@ void imex_sdc::compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_phis){
   Vector<EBAMRCellData*> cdr_gradients;
   
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_storage>& storage = imex_sdc::getCdrSolvers_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = CdrPlasmaImExSdcStepper::getCdrStorage(solver_it);
 
-    eb_states.push_back(&(storage->get_eb_state()));
-    eb_gradients.push_back(&(storage->get_eb_grad()));
-    cdr_gradients.push_back(&(storage->get_gradient())); // Should already have been computed
+    eb_states.push_back(&(storage->getEbState()));
+    eb_gradients.push_back(&(storage->getEbGrad()));
+    cdr_gradients.push_back(&(storage->getGradient())); // Should already have been computed
   }
 
   // Extrapolate states to the EB and floor them so we cannot get negative values on the boundary. This
   // won't hurt mass conservation because the mass hasn't been injected yet
-  imex_sdc::extrapolateToEb(eb_states, m_cdr->getPhase(), a_phis);
+  CdrPlasmaImExSdcStepper::extrapolateToEb(eb_states, m_cdr->getPhase(), a_phis);
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.index();
     DataOps::floor(*eb_states[idx], 0.0);
@@ -1498,15 +1504,15 @@ void imex_sdc::compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_phis){
   EBAMRIVData eb_gradient;
   m_amr->allocate(eb_gradient, m_realm, m_cdr->getPhase(), SpaceDim);
   for (int i = 0; i < a_phis.size(); i++){
-    imex_sdc::extrapolateToEb(eb_gradient, m_cdr->getPhase(), *cdr_gradients[i]);
-    imex_sdc::projectFlux(*eb_gradients[i], eb_gradient);
+    CdrPlasmaImExSdcStepper::extrapolateToEb(eb_gradient, m_cdr->getPhase(), *cdr_gradients[i]);
+    CdrPlasmaImExSdcStepper::projectFlux(*eb_gradients[i], eb_gradient);
   }
 }
 
-void imex_sdc::compute_cdr_domain_states(){
-  CH_TIME("imex_sdc::compute_cdr_domain_states");
+void CdrPlasmaImExSdcStepper::computeCdrDomainStates(){
+  CH_TIME("CdrPlasmaImExSdcStepper::computeCdrDomainStates");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::compute_cdr_domain_states" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::computeCdrDomainStates" << endl;
   }
 
   Vector<EBAMRIFData*>   domain_gradients;
@@ -1516,30 +1522,30 @@ void imex_sdc::compute_cdr_domain_states(){
   
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
-    RefCountedPtr<cdr_storage>& storage = imex_sdc::getCdrSolvers_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = CdrPlasmaImExSdcStepper::getCdrStorage(solver_it);
 
     cdr_states.push_back(&(solver->getPhi()));
-    domain_states.push_back(&(storage->getDomain_state()));
-    domain_gradients.push_back(&(storage->getDomain_grad()));
-    cdr_gradients.push_back(&(storage->get_gradient())); // Should already be computed
+    domain_states.push_back(&(storage->getDomainState()));
+    domain_gradients.push_back(&(storage->getDomainGrad()));
+    cdr_gradients.push_back(&(storage->getGradient())); // Should already be computed
   }
 
   // Extrapolate states to the domain faces
-  imex_sdc::extrapolateToDomainFaces(domain_states, m_cdr->getPhase(), cdr_states);
+  CdrPlasmaImExSdcStepper::extrapolateToDomainFaces(domain_states, m_cdr->getPhase(), cdr_states);
 
   // We already have the cell-centered gradients, extrapolate them to the EB and project the flux. 
   EBAMRIFData grad;
   m_amr->allocate(grad, m_realm, m_cdr->getPhase(), SpaceDim);
   for (int i = 0; i < cdr_states.size(); i++){
-    imex_sdc::extrapolateToDomainFaces(grad, m_cdr->getPhase(), *cdr_gradients[i]);
-    imex_sdc::projectDomain(*domain_gradients[i], grad);
+    CdrPlasmaImExSdcStepper::extrapolateToDomainFaces(grad, m_cdr->getPhase(), *cdr_gradients[i]);
+    CdrPlasmaImExSdcStepper::projectDomain(*domain_gradients[i], grad);
   }
 }
 
-void imex_sdc::compute_cdr_domain_states(const Vector<EBAMRCellData*>& a_phis){
-  CH_TIME("imex_sdc::compute_cdr_domain_states");
+void CdrPlasmaImExSdcStepper::computeCdrDomainStates(const Vector<EBAMRCellData*>& a_phis){
+  CH_TIME("CdrPlasmaImExSdcStepper::computeCdrDomainStates");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::compute_cdr_domain_states" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::computeCdrDomainStates" << endl;
   }
 
   Vector<EBAMRIFData*>   domain_gradients;
@@ -1548,11 +1554,11 @@ void imex_sdc::compute_cdr_domain_states(const Vector<EBAMRCellData*>& a_phis){
   
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
-    RefCountedPtr<cdr_storage>& storage = this->getCdrSolvers_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = this->getCdrStorage(solver_it);
 
-    domain_states.push_back(&(storage->getDomain_state()));
-    domain_gradients.push_back(&(storage->getDomain_grad()));
-    cdr_gradients.push_back(&(storage->get_gradient()));
+    domain_states.push_back(&(storage->getDomainState()));
+    domain_gradients.push_back(&(storage->getDomainGrad()));
+    cdr_gradients.push_back(&(storage->getGradient()));
   }
 
   // Extrapolate states to the domain faces
@@ -1567,19 +1573,19 @@ void imex_sdc::compute_cdr_domain_states(const Vector<EBAMRCellData*>& a_phis){
   }
 }
 
-void imex_sdc::computeCdrFluxes(const Real a_time){
-  CH_TIME("imex_sdc::computeCdrFluxes");
+void CdrPlasmaImExSdcStepper::computeCdrFluxes(const Real a_time){
+  CH_TIME("CdrPlasmaImExSdcStepper::computeCdrFluxes");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::computeCdrFluxes" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::computeCdrFluxes" << endl;
   }
 
   this->computeCdrFluxes(m_cdr->getPhis(), a_time);
 }
 
-void imex_sdc::computeCdrFluxes(const Vector<EBAMRCellData*>& a_phis, const Real a_time){
-  CH_TIME("imex_sdc::computeCdrFluxes(Vector<EBAMRCellData*>, Real)");
+void CdrPlasmaImExSdcStepper::computeCdrFluxes(const Vector<EBAMRCellData*>& a_phis, const Real a_time){
+  CH_TIME("CdrPlasmaImExSdcStepper::computeCdrFluxes(Vector<EBAMRCellData*>, Real)");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::computeCdrFluxes(Vector<EBAMRCellData*>, Real)" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::computeCdrFluxes(Vector<EBAMRCellData*>, Real)" << endl;
   }
 
   Vector<EBAMRIVData*> cdr_fluxes;
@@ -1592,17 +1598,17 @@ void imex_sdc::computeCdrFluxes(const Vector<EBAMRCellData*>& a_phis, const Real
   cdr_fluxes = m_cdr->getEbFlux();
 
   for (CdrIterator<CdrSolver> solver_it(*m_cdr); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_storage>& storage = this->getCdrSolvers_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = this->getCdrStorage(solver_it);
 
-    EBAMRIVData& dens_eb = storage->get_eb_state();
-    EBAMRIVData& velo_eb = storage->get_eb_velo();
-    EBAMRIVData& flux_eb = storage->get_eb_flux();
-    EBAMRIVData& grad_eb = storage->get_eb_grad();
+    EBAMRIVData& dens_eb = storage->getEbState();
+    EBAMRIVData& velo_eb = storage->getEbVelo();
+    EBAMRIVData& flux_eb = storage->getEbFlux();
+    EBAMRIVData& grad_eb = storage->getEbGrad();
 
-    extrap_cdr_densities.push_back(&dens_eb);  // Computed in compute_cdr_eb_states
+    extrap_cdr_densities.push_back(&dens_eb);  // Computed in computeCdrEbStates
     extrap_cdr_velocities.push_back(&velo_eb); // Not yet computed
     extrap_cdr_fluxes.push_back(&flux_eb);     // Not yet computed
-    extrap_cdr_gradients.push_back(&grad_eb);  // Computed in compute_cdr_eb_states
+    extrap_cdr_gradients.push_back(&grad_eb);  // Computed in computeCdrEbStates
   }
 
 
@@ -1614,14 +1620,14 @@ void imex_sdc::computeCdrFluxes(const Vector<EBAMRCellData*>& a_phis, const Real
   // Compute RTE flux on the boundary
   for (RtIterator<RtSolver> solver_it(*m_rte); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>& solver   = solver_it();
-    RefCountedPtr<rte_storage>& storage = this->getRadiativeTransferSolvers_storage(solver_it);
+    RefCountedPtr<RtStorage>& storage = this->getRtStorage(solver_it);
 
-    EBAMRIVData& flux_eb = storage->get_eb_flux();
+    EBAMRIVData& flux_eb = storage->getEbFlux();
     solver->computeBoundaryFlux(flux_eb, solver->getPhi());
     extrap_rte_fluxes.push_back(&flux_eb);
   }
 
-  const EBAMRIVData& E = m_fieldSolver_scratch->get_E_eb();
+  const EBAMRIVData& E = m_fieldSolver_scratch->getElectricFieldEb();
   CdrPlasmaStepper::computeCdrFluxes(cdr_fluxes,
 				     extrap_cdr_fluxes,
 				     extrap_cdr_densities,
@@ -1632,19 +1638,19 @@ void imex_sdc::computeCdrFluxes(const Vector<EBAMRCellData*>& a_phis, const Real
 				     a_time);
 }
 
-void imex_sdc::computeCdrDomainFluxes(const Real a_time){
-  CH_TIME("imex_sdc::computeCdrDomainFluxes");
+void CdrPlasmaImExSdcStepper::computeCdrDomainFluxes(const Real a_time){
+  CH_TIME("CdrPlasmaImExSdcStepper::computeCdrDomainFluxes");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::computeCdrDomainFluxes" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::computeCdrDomainFluxes" << endl;
   }
 
   this->computeCdrDomainFluxes(m_cdr->getPhis(), a_time);
 }
 
-void imex_sdc::computeCdrDomainFluxes(const Vector<EBAMRCellData*>& a_phis, const Real a_time){
-  CH_TIME("imex_sdc::computeCdrDomainFluxes(Vector<EBAMRCellData*>, Real)");
+void CdrPlasmaImExSdcStepper::computeCdrDomainFluxes(const Vector<EBAMRCellData*>& a_phis, const Real a_time){
+  CH_TIME("CdrPlasmaImExSdcStepper::computeCdrDomainFluxes(Vector<EBAMRCellData*>, Real)");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::computeCdrDomainFluxes(Vector<EBAMRCellData*>, Real)" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::computeCdrDomainFluxes(Vector<EBAMRCellData*>, Real)" << endl;
   }
 
   Vector<EBAMRIFData*>   cdr_fluxes;
@@ -1660,13 +1666,13 @@ void imex_sdc::computeCdrDomainFluxes(const Vector<EBAMRCellData*>& a_phis, cons
   cdr_fluxes = m_cdr->getDomainFlux();
   cdr_velocities = m_cdr->getVelocities();
   for (CdrIterator<CdrSolver> solver_it(*m_cdr); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_storage>& storage = this->getCdrSolvers_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = this->getCdrStorage(solver_it);
 
-    EBAMRIFData& dens_domain = storage->getDomain_state();
-    EBAMRIFData& velo_domain = storage->getDomain_velo();
-    EBAMRIFData& flux_domain = storage->getDomain_flux();
-    EBAMRIFData& grad_domain = storage->getDomain_grad();
-    EBAMRCellData& gradient  = storage->get_gradient();
+    EBAMRIFData& dens_domain = storage->getDomainState();
+    EBAMRIFData& velo_domain = storage->getDomainVelo();
+    EBAMRIFData& flux_domain = storage->getDomainFlux();
+    EBAMRIFData& grad_domain = storage->getDomainGrad();
+    EBAMRCellData& gradient  = storage->getGradient();
 
     extrap_cdr_densities.push_back(&dens_domain);  // Has not been computed
     extrap_cdr_velocities.push_back(&velo_domain); // Has not been computed
@@ -1684,14 +1690,14 @@ void imex_sdc::computeCdrDomainFluxes(const Vector<EBAMRCellData*>& a_phis, cons
   // Compute RTE flux on domain faces
   for (RtIterator<RtSolver> solver_it(*m_rte); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>& solver   = solver_it();
-    RefCountedPtr<rte_storage>& storage = this->getRadiativeTransferSolvers_storage(solver_it);
+    RefCountedPtr<RtStorage>& storage = this->getRtStorage(solver_it);
 
-    EBAMRIFData& domain_flux = storage->getDomain_flux();
+    EBAMRIFData& domain_flux = storage->getDomainFlux();
     solver->computeDomainFlux(domain_flux, solver->getPhi());
     extrap_rte_fluxes.push_back(&domain_flux);
   }
 
-  const EBAMRIFData& E = m_fieldSolver_scratch->get_E_domain();
+  const EBAMRIFData& E = m_fieldSolver_scratch->getElectricFieldDomain();
 
   // This fills the solvers' domain fluxes
   CdrPlasmaStepper::computeCdrDomainFluxes(cdr_fluxes,
@@ -1704,10 +1710,10 @@ void imex_sdc::computeCdrDomainFluxes(const Vector<EBAMRCellData*>& a_phis, cons
 					   a_time);
 }
 
-void imex_sdc::compute_sigma_flux(){
-  CH_TIME("imex_sdc::compute_sigma_flux");
+void CdrPlasmaImExSdcStepper::computeSigmaFlux(){
+  CH_TIME("CdrPlasmaImExSdcStepper::computeSigmaFlux");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::compute_sigma_flux" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::computeSigmaFlux" << endl;
   }
 
   EBAMRIVData& flux = m_sigma->getFlux();
@@ -1724,40 +1730,40 @@ void imex_sdc::compute_sigma_flux(){
   m_sigma->resetCells(flux);
 }
 
-void imex_sdc::compute_reaction_network(const int a_m, const Real a_time, const Real a_dt){
-  CH_TIME("imex_sdc::compute_reaction_network");
+void CdrPlasmaImExSdcStepper::computeReactionNetwork(const int a_m, const Real a_time, const Real a_dt){
+  CH_TIME("CdrPlasmaImExSdcStepper::computeReactionNetwork");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::compute_reaction_network";
+    pout() << "CdrPlasmaImExSdcStepper::computeReactionNetwork";
   }
 
   Vector<EBAMRCellData*> cdr_sources = m_cdr->getSources();
   Vector<EBAMRCellData*> rte_sources = m_rte->getSources();
 
-  const Vector<EBAMRCellData*> cdr_densities = getCdrSolvers_phik(a_m);
+  const Vector<EBAMRCellData*> cdr_densities = getCdrSolversPhiK(a_m);
   const Vector<EBAMRCellData*> rte_densities = m_rte->getPhis();
-  const EBAMRCellData& E = m_fieldSolver_scratch->get_E_cell();
+  const EBAMRCellData& E = m_fieldSolver_scratch->getElectricFieldCell();
 
   CdrPlasmaStepper::advanceReactionNetwork(cdr_sources, rte_sources, cdr_densities, rte_densities, E, a_time, a_dt);
 }
 
-void imex_sdc::update_poisson(){
-  CH_TIME("imex_sdc::update_poisson(solver)");
+void CdrPlasmaImExSdcStepper::updateField(){
+  CH_TIME("CdrPlasmaImExSdcStepper::updateField(solver)");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::update_poisson(solver)" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::updateField(solver)" << endl;
   }
   
   if(m_do_poisson){ // Solve Poisson equation
     if((m_timeStep +1) % m_fast_poisson == 0){
       CdrPlasmaStepper::solvePoisson();
-      this->computeElectricField_into_scratch();
+      this->computeElectricFieldIntoScratch();
     }
   }
 }
 
-void imex_sdc::update_poisson(const Vector<EBAMRCellData*>& a_densities, const EBAMRIVData& a_sigma){
-  CH_TIME("imex_sdc::update_poisson(full)");
+void CdrPlasmaImExSdcStepper::updateField(const Vector<EBAMRCellData*>& a_densities, const EBAMRIVData& a_sigma){
+  CH_TIME("CdrPlasmaImExSdcStepper::updateField(full)");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::update_poisson(full)" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::updateField(full)" << endl;
   }
   
   if(m_do_poisson){ // Solve Poisson equation
@@ -1766,15 +1772,15 @@ void imex_sdc::update_poisson(const Vector<EBAMRCellData*>& a_densities, const E
 				     m_fieldSolver->getRho(),
 				     a_densities,
 				     a_sigma);
-	this->computeElectricField_into_scratch();
+      this->computeElectricFieldIntoScratch();
     }
   }
 }
 
-void imex_sdc::integrate_rte_transient(const Real a_dt){
-  CH_TIME("imex_sdc::integrate_rte_transient");
+void CdrPlasmaImExSdcStepper::integrateRtTransient(const Real a_dt){
+  CH_TIME("CdrPlasmaImExSdcStepper::integrateRtTransient");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::integrate_rte_transient" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::integrateRtTransient" << endl;
   }
 
   if(m_do_rte){
@@ -1789,10 +1795,10 @@ void imex_sdc::integrate_rte_transient(const Real a_dt){
   }
 }
 
-void imex_sdc::integrate_rte_stationary(){
-  CH_TIME("imex_sdc::integrate_rte_transient");
+void CdrPlasmaImExSdcStepper::integrateRtStationary(){
+  CH_TIME("CdrPlasmaImExSdcStepper::integrateRtTransient");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::integrate_rte_transient" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::integrateRtTransient" << endl;
   }
 
   if(m_do_rte){
@@ -1807,65 +1813,65 @@ void imex_sdc::integrate_rte_stationary(){
   }
 }
 
-void imex_sdc::updateDiffusion_coefficients(){
-  CH_TIME("imex_sdc::updateDiffusion_coefficients");
+void CdrPlasmaImExSdcStepper::updateDiffusionCoefficients(){
+  CH_TIME("CdrPlasmaImExSdcStepper::updateDiffusionCoefficients");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::updateDiffusion_coefficients" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::updateDiffusionCoefficients" << endl;
   }
-  CdrPlasmaStepper::computeCdrDiffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
+  CdrPlasmaStepper::computeCdrDiffusion(m_fieldSolver_scratch->getElectricFieldCell(), m_fieldSolver_scratch->getElectricFieldEb());
 }
 
-Vector<EBAMRCellData*> imex_sdc::getCdrSolvers_errors(){
-  CH_TIME("imex_sdc::getCdrSolvers_errors");
+Vector<EBAMRCellData*> CdrPlasmaImExSdcStepper::getCdrErrors(){
+  CH_TIME("CdrPlasmaImExSdcStepper::getCdrErrors");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::getCdrSolvers_errors" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::getCdrErrors" << endl;
   }
   
   Vector<EBAMRCellData*> ret;
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_storage>& storage = imex_sdc::getCdrSolvers_storage(solver_it);
-    ret.push_back(&(storage->get_error()));
+    RefCountedPtr<CdrStorage>& storage = CdrPlasmaImExSdcStepper::getCdrStorage(solver_it);
+    ret.push_back(&(storage->getError()));
   }
 
   return ret;
 }
 
-Vector<EBAMRCellData*> imex_sdc::getCdrSolvers_phik(const int a_m){
-  CH_TIME("imex_sdc::getCdrSolvers_phik");
+Vector<EBAMRCellData*> CdrPlasmaImExSdcStepper::getCdrSolversPhiK(const int a_m){
+  CH_TIME("CdrPlasmaImExSdcStepper::getCdrSolversPhiK");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::getCdrSolvers_phik" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::getCdrSolversPhiK" << endl;
   }
   
   Vector<EBAMRCellData*> ret;
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_storage>& storage = imex_sdc::getCdrSolvers_storage(solver_it);
-    ret.push_back(&(storage->get_phi()[a_m]));
+    RefCountedPtr<CdrStorage>& storage = CdrPlasmaImExSdcStepper::getCdrStorage(solver_it);
+    ret.push_back(&(storage->getPhi()[a_m]));
   }
 
   return ret;
 }
 
-EBAMRIVData& imex_sdc::getSigmaSolverk(const int a_m){
-  CH_TIME("imex_sdc::getSigmaSolverk");
+EBAMRIVData& CdrPlasmaImExSdcStepper::getSigmaSolverK(const int a_m){
+  CH_TIME("CdrPlasmaImExSdcStepper::getSigmaSolverK");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::getSigmaSolverk)" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::getSigmaSolverK)" << endl;
   }
   return m_sigma_scratch->getSigmaSolver()[a_m];
 }
 
-void imex_sdc::write_step_profile(const Real a_dt,
-				  const Real a_error,
-				  const int  a_substeps,
-				  const int  a_corrections,
-				  const int  a_rejections){
-  CH_TIME("sissdc::write_step_profile");
+void CdrPlasmaImExSdcStepper::writeStepProfile(const Real a_dt,
+					       const Real a_error,
+					       const int  a_substeps,
+					       const int  a_corrections,
+					       const int  a_rejections){
+  CH_TIME("sissdc::writeStepProfile");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::write_step_profile" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::writeStepProfile" << endl;
   }
 
   if(procID() == 0 ){
 
-    const std::string fname("imex_sdc_step_profile.txt");
+    const std::string fname("CdrPlasmaImExSdcStepper_step_profile.txt");
     
     bool write_header;
     { // Write header if we must
@@ -1902,10 +1908,10 @@ void imex_sdc::write_step_profile(const Real a_dt,
   }
 }
 
-void imex_sdc::store_solvers(){
-  CH_TIME("imex_sdc::store_solvers");
+void CdrPlasmaImExSdcStepper::storeSolvers(){
+  CH_TIME("CdrPlasmaImExSdcStepper::storeSolvers");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::store_solvers" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::storeSolvers" << endl;
   }
 
   if(m_k > 0 && m_adaptive_dt){
@@ -1913,16 +1919,16 @@ void imex_sdc::store_solvers(){
     // Poisson and RTE here.
 
     // Poisson
-    MFAMRCellData& previous    = m_fieldSolver_scratch->get_previous();
+    MFAMRCellData& previous    = m_fieldSolver_scratch->getPrevious();
     const MFAMRCellData& state = m_fieldSolver->getPotential();
     DataOps::copy(previous, state);
 
     // RTE
     for (RtIterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-      RefCountedPtr<rte_storage>& storage     = imex_sdc::getRadiativeTransferSolvers_storage(solver_it);
+      RefCountedPtr<RtStorage>& storage     = CdrPlasmaImExSdcStepper::getRtStorage(solver_it);
       const RefCountedPtr<RtSolver>& solver = solver_it();
 
-      EBAMRCellData& previous = storage->get_previous();
+      EBAMRCellData& previous = storage->getPrevious();
       const EBAMRCellData& state = solver->getPhi();
 
       DataOps::copy(previous, state);
@@ -1930,10 +1936,10 @@ void imex_sdc::store_solvers(){
   }
 }
 
-void imex_sdc::restore_solvers(){
-  CH_TIME("imex_sdc::restore_solvers");
+void CdrPlasmaImExSdcStepper::restoreSolvers(){
+  CH_TIME("CdrPlasmaImExSdcStepper::restoreSolvers");
   if(m_verbosity > 5){
-    pout() << "imex_sdc::restore_solvers" << endl;
+    pout() << "CdrPlasmaImExSdcStepper::restoreSolvers" << endl;
   }
 
   // IMEX_SDC does not manipulate cdr and sigma solvers until the end of the time step. Only need to do
@@ -1941,19 +1947,20 @@ void imex_sdc::restore_solvers(){
 
   // Poisson
   MFAMRCellData& state = m_fieldSolver->getPotential();
-  const MFAMRCellData& previous    = m_fieldSolver_scratch->get_previous();
+  const MFAMRCellData& previous    = m_fieldSolver_scratch->getPrevious();
 
   DataOps::copy(state, previous);
 
   // RTE
   for (RtIterator<RtSolver> solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<rte_storage>& storage     = imex_sdc::getRadiativeTransferSolvers_storage(solver_it);
+    RefCountedPtr<RtStorage>& storage     = CdrPlasmaImExSdcStepper::getRtStorage(solver_it);
     RefCountedPtr<RtSolver>& solver = solver_it();
 
-    EBAMRCellData& previous = storage->get_previous();
+    EBAMRCellData& previous = storage->getPrevious();
     EBAMRCellData& state = solver->getPhi();
 
     DataOps::copy(state, previous);
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

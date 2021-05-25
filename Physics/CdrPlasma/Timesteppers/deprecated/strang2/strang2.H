@@ -21,10 +21,10 @@ class strang2 : public TimeStepper {
 public:
   
   // Forward declare nested classes. I don't want to clutter this file.
-  class cdr_storage;
-  class poisson_storage;
-  class rte_storage;
-  class sigma_storage;
+  class CdrStorage;
+  class FieldStorage;
+  class RtStorage;
+  class SigmaStorage;
 
   
 public:
@@ -40,10 +40,10 @@ public:
   
 protected:
 
-  Vector<RefCountedPtr<cdr_storage> > m_cdr_scratch;
-  Vector<RefCountedPtr<rte_storage> > m_rte_scratch;
-  RefCountedPtr<poisson_storage>      m_fieldSolver_scratch;
-  RefCountedPtr<sigma_storage>        m_sigma_scratch;
+  Vector<RefCountedPtr<CdrStorage> > m_cdr_scratch;
+  Vector<RefCountedPtr<RtStorage> > m_rte_scratch;
+  RefCountedPtr<FieldStorage>      m_fieldSolver_scratch;
+  RefCountedPtr<SigmaStorage>        m_sigma_scratch;
 
   std::string m_splitting;
 
@@ -90,13 +90,13 @@ protected:
 
   TimeCode::which_code m_timeCode;
 
-  RefCountedPtr<cdr_storage>& get_cdr_storage(const CdrIterator& a_solverit);
-  RefCountedPtr<rte_storage>& get_rte_storage(const RtIterator& a_solverit);
+  RefCountedPtr<CdrStorage>& get_CdrStorage(const CdrIterator& a_solverit);
+  RefCountedPtr<RtStorage>& get_RtStorage(const RtIterator& a_solverit);
 
-  void allocate_cdr_storage();
-  void allocate_poisson_storage();
-  void allocate_rte_storage();
-  void allocate_sigma_storage();
+  void allocateCdrStorage();
+  void allocateFieldStorage();
+  void allocateRtStorage();
+  void allocateSigmaStorage();
   
   void backup_solutions();
   void revert_backup();
@@ -120,34 +120,34 @@ protected:
   void advanceEuler_diffusion(const Real a_time, const Real a_dt);
   void advanceTGA_diffusion(const Real a_time, const Real a_dt);
 
-  void update_poisson();
+  void updateField();
   void update_rte(const Real a_time);
   void advance_rte_stationary(const Real a_time);
 
 
   void compute_E_into_scratch();
-  void compute_cdr_eb_states();
-  void compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_phis);
-  void compute_cdr_domain_states();
-  void compute_cdr_domain_states(const Vector<EBAMRCellData*>& a_phis);
-  void compute_cdr_gradients();
-  void compute_cdr_gradients(const Vector<EBAMRCellData*>& a_phis);
+  void computeCdrEbStates();
+  void computeCdrEbStates(const Vector<EBAMRCellData*>& a_phis);
+  void computeCdrDomainStates();
+  void computeCdrDomainStates(const Vector<EBAMRCellData*>& a_phis);
+  void computeCdrGradients();
+  void computeCdrGradients(const Vector<EBAMRCellData*>& a_phis);
   void compute_cdr_fluxes(const Real a_time);
   void compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_phis, const Real a_time);
   void computeCdrDomainFluxes(const Real a_time);
   void computeCdrDomainFluxes(const Vector<EBAMRCellData*>& a_phis, const Real a_time);
-  void compute_cdr_velo(const Real a_time);
-  void compute_cdr_velo(const Vector<EBAMRCellData*>& a_phis, const Real a_time);
+  void computeCdrVelo(const Real a_time);
+  void computeCdrVelo(const Vector<EBAMRCellData*>& a_phis, const Real a_time);
   void compute_cdr_sources(const Real a_time);
   void compute_cdr_sources(const Vector<EBAMRCellData*>& a_phis, const Real a_time);
   void computeDt(Real& a_dt, TimeCode::which_code& a_timeCode);
-  void compute_sigma_flux();
-  void store_solvers();
-  void restore_solvers();
+  void computeSigmaFlux();
+  void storeSolvers();
+  void restoreSolvers();
 
   void compute_errors();
   
-  Real get_max_error();
+  Real getMaxError();
   Real restrict_dt() ;
 #include "CD_NamespaceFooter.H"
 

@@ -16,10 +16,10 @@
 #include <iomanip>
 #include <ParmParse.H>
 
-typedef strang2::cdr_storage     cdr_storage;
-typedef strang2::poisson_storage poisson_storage;
-typedef strang2::rte_storage     rte_storage;
-typedef strang2::sigma_storage   sigma_storage;
+typedef strang2::CdrStorage     CdrStorage;
+typedef strang2::FieldStorage FieldStorage;
+typedef strang2::RtStorage     RtStorage;
+typedef strang2::SigmaStorage   SigmaStorage;
 
 strang2::strang2(){
   m_rk_order     = 3;
@@ -217,11 +217,11 @@ strang2::~strang2(){
 
 }
 
-RefCountedPtr<cdr_storage>& strang2::get_cdr_storage(const CdrIterator& a_solverit){
+RefCountedPtr<CdrStorage>& strang2::get_CdrStorage(const CdrIterator& a_solverit){
   return m_cdr_scratch[a_solverit.get_solver()];
 }
 
-RefCountedPtr<rte_storage>& strang2::get_rte_storage(const RtIterator& a_solverit){
+RefCountedPtr<RtStorage>& strang2::get_RtStorage(const RtIterator& a_solverit){
   return m_rte_scratch[a_solverit.get_solver()];
 }
 
@@ -229,10 +229,10 @@ Real strang2::restrict_dt(){
   return 1.E99;
 }
 
-Real strang2::get_max_error(){
-  CH_TIME("strang2::get_max_error");
+Real strang2::getMaxError(){
+  CH_TIME("strang2::getMaxError");
   if(m_verbosity > 2){
-    pout() << "strang2::get_max_error" << endl;
+    pout() << "strang2::getMaxError" << endl;
   }
 
   Real cur_err = m_sigma_error;
@@ -257,10 +257,10 @@ Real strang2::advance(const Real a_dt){
   //           advancement. If you think that this may not be the case, activate the debugging below
 #if 0 // Debugging
   this->compute_E_into_scratch();
-  this->compute_cdr_gradients();
-  this->compute_cdr_velo(m_time);
+  this->computeCdrGradients();
+  this->computeCdrVelo(m_time);
   this->compute_cdr_sources(m_time);
-  TimeStepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
+  TimeStepper::compute_cdr_diffusion(m_fieldSolver_scratch->getElectricFieldCell(), m_fieldSolver_scratch->getElectricFieldEb());
 #endif
 
   this->backup_solutions(); // Store old solution. This stores the old solutions in storage->m_backup
@@ -316,15 +316,15 @@ Real strang2::advance(const Real a_dt){
   }
 
   // End of the large time step, resolve the Poisson and RTE equations
-  this->update_poisson();
+  this->updateField();
   this->update_rte(m_time + actual_dt);
   
   // Recompute source terms and velocities. This puts the cdr solvers back in useable state so that
   // we can reliably use them in the next time step (or anywhere else).
-  this->compute_cdr_gradients();
+  this->computeCdrGradients();
   this->compute_cdr_sources(m_time + a_dt);
-  this->compute_cdr_velo(m_time + a_dt);
-  TimeStepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
+  this->computeCdrVelo(m_time + a_dt);
+  TimeStepper::compute_cdr_diffusion(m_fieldSolver_scratch->getElectricFieldCell(), m_fieldSolver_scratch->getElectricFieldEb());
 
   // Print diagnostics
   if(m_print_diagno){
@@ -394,10 +394,10 @@ void strang2::advanceEuler_diffusion(const Real a_time, const Real a_dt){
 
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
       
     EBAMRCellData& exact_phi = solver->getPhi();
-    EBAMRCellData& wrong_phi = storage->get_error();
+    EBAMRCellData& wrong_phi = storage->getError();
     if(solver->isDiffusive()){
 
       // We advance the error but take the 2nd order solution as the initial guess
@@ -424,11 +424,11 @@ Real strang2::advance_one_step(const Real a_time, const Real a_dt){
   // the solvers with the intermediate Runge-Kutta stage (it lets us use a simpler interface).
   // The 'true' flag indicates that we should compute the embedded formula error, which we only do
   // on the first time step (the embedded splitting uses a Lie splitting)
-  this->store_solvers();
+  this->storeSolvers();
   this->advance_rk(a_time, 0.5*a_dt);
 
   // Update elliptic equations. 
-  if(m_consistent_E) this->update_poisson();
+  if(m_consistent_E) this->updateField();
   if(m_consistent_rte) this->update_rte(a_time + a_dt);
 
   // Embedded formula is the same for the first half step, but it should use another advective half step
@@ -436,16 +436,16 @@ Real strang2::advance_one_step(const Real a_time, const Real a_dt){
   // up those solutions first, and then revert later. 
   if(m_compute_error){
     this->copy_solvers_to_cache();                       // scratch -> e^(0.5*A*dt)u. Also does elliptic equations
-    this->store_solvers();                               // Store solvers
-    this->compute_cdr_gradients();                       // Compute gradients, then do velo and source
-    if(m_compute_v) this->compute_cdr_velo(a_time + a_dt);
+    this->storeSolvers();                               // Store solvers
+    this->computeCdrGradients();                       // Compute gradients, then do velo and source
+    if(m_compute_v) this->computeCdrVelo(a_time + a_dt);
     if(m_compute_S) this->compute_cdr_sources(a_time + a_dt);
     this->advance_rk(a_time, 0.5*a_dt);                  // Solvers now contain e^(0.5*A*dt)*e^(0.5*A*dt)*u
 
     // Last embedded diffusive step tep
     if(m_do_diffusion){
-      if(m_consistent_E) this->update_poisson();
-      TimeStepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
+      if(m_consistent_E) this->updateField();
+      TimeStepper::compute_cdr_diffusion(m_fieldSolver_scratch->getElectricFieldCell(), m_fieldSolver_scratch->getElectricFieldEb());
       this->advance_diffusion(a_time, a_dt);
     }
 
@@ -459,19 +459,19 @@ Real strang2::advance_one_step(const Real a_time, const Real a_dt){
   // Diffusion advance
   if(m_do_diffusion){
     if(m_compute_D){
-      TimeStepper::compute_cdr_diffusion(m_fieldSolver_scratch->get_E_cell(), m_fieldSolver_scratch->get_E_eb());
+      TimeStepper::compute_cdr_diffusion(m_fieldSolver_scratch->getElectricFieldCell(), m_fieldSolver_scratch->getElectricFieldEb());
     }
     this->advance_diffusion(a_time, a_dt);
   }
 
   // Update the electric field and RTE equations again
-  if(m_consistent_E) this->update_poisson();
+  if(m_consistent_E) this->updateField();
   if(m_consistent_rte) this->update_rte(a_time + a_dt);
 
   // Solvers need to be refilled with stuff
-  this->store_solvers();
-  this->compute_cdr_gradients();
-  if(m_compute_v) this->compute_cdr_velo(a_time + a_dt);
+  this->storeSolvers();
+  this->computeCdrGradients();
+  if(m_compute_v) this->computeCdrVelo(a_time + a_dt);
   if(m_compute_S) this->compute_cdr_sources(a_time + a_dt);
   this->advance_rk(a_time, 0.5*a_dt);
 }
@@ -483,7 +483,7 @@ Real strang2::advance_fixed(const int a_substeps, const Real a_dt){
   }
 
   this->compute_E_into_scratch(); // Compute the electric field
-  this->compute_cdr_gradients();  // Precompute gradients
+  this->computeCdrGradients();  // Precompute gradients
 
   Real sum_dt = 0.0;
   for (int step = 0; step < a_substeps; step++){
@@ -503,13 +503,13 @@ Real strang2::advance_fixed(const int a_substeps, const Real a_dt){
     // take care of the rest of the synchronization
     if(!last_step){
       // Update the electric field and RTE equations
-      if(m_consistent_E)   this->update_poisson();
+      if(m_consistent_E)   this->updateField();
       if(m_consistent_rte) this->update_rte(time);
 
       // Compute new velocities and source terms for the next advective step. No need to compute the
       // diffusion coefficients because they are automateically filled before advance_diffusion() call
-      if(m_compute_S) this->compute_cdr_gradients();
-      if(m_compute_v) this->compute_cdr_velo(time);
+      if(m_compute_S) this->computeCdrGradients();
+      if(m_compute_v) this->computeCdrVelo(time);
       if(m_compute_S) this->compute_cdr_sources(time);
     }
 
@@ -526,7 +526,7 @@ Real strang2::advance_adaptive(int& a_substeps, Real& a_dt, const Real a_time, c
   }
 
   this->compute_E_into_scratch();
-  this->compute_cdr_gradients();  // Precompute gradients
+  this->computeCdrGradients();  // Precompute gradients
 
   Real sum_dt = 0.0;
   const Real fudge = 1E-6;
@@ -575,7 +575,7 @@ Real strang2::advance_adaptive(int& a_substeps, Real& a_dt, const Real a_time, c
     }
     else{
       a_dt = m_safety*new_dt;
-      this->restore_solvers();
+      this->restoreSolvers();
     }
 
 #if 1 // Debug
@@ -604,13 +604,13 @@ Real strang2::advance_adaptive(int& a_substeps, Real& a_dt, const Real a_time, c
     // take care of the rest of the synchronization
     if(!last_step){
       // Update the electric field and RTE equations
-      if(m_consistent_E)   this->update_poisson();
+      if(m_consistent_E)   this->updateField();
       if(m_consistent_rte) this->update_rte(cur_time);
 
       // Compute new velocities and source terms for the next advective step. No need to compute the
       // diffusion coefficients because they are automateically filled before advance_diffusion() call
-      if(m_compute_S) this->compute_cdr_gradients();
-      if(m_compute_v) this->compute_cdr_velo(cur_time);
+      if(m_compute_S) this->computeCdrGradients();
+      if(m_compute_v) this->computeCdrVelo(cur_time);
       if(m_compute_S) this->compute_cdr_sources(cur_time);
     }
 
@@ -694,14 +694,14 @@ void strang2::advance_rkN2(const Real a_time, const Real a_dt, const int a_stage
 
   // u^(i) = u^(i-1) + third*dt*L(u^(i-1))
   for (int i = 0; i < a_stages-1; i++){
-    this->compute_cdr_eb_states();
+    this->computeCdrEbStates();
     this->compute_cdr_fluxes(a_time);
     this->computeCdrDomainFluxes(a_time);
-    this->compute_sigma_flux();
+    this->computeSigmaFlux();
 
     for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
-      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+      RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
 
       EBAMRCellData& rhs       = storage->getScratch();
       EBAMRCellData& phi       = solver->getPhi();  // u^i
@@ -723,28 +723,28 @@ void strang2::advance_rkN2(const Real a_time, const Real a_dt, const int a_stage
     m_sigma->computeRHS(rhs);
     DataOps::incr(sigma, rhs, beta*a_dt); // sigma^(i+1) = sigma^i + [1/(s-1)]*dt*F^i
 
-    if(m_consistent_E)   this->update_poisson();
+    if(m_consistent_E)   this->updateField();
     if(m_consistent_rte) this->update_rte(a_time + a_dt);
-    this->compute_cdr_gradients();
-    if(m_compute_v) this->compute_cdr_velo(a_time + a_dt);
+    this->computeCdrGradients();
+    if(m_compute_v) this->computeCdrVelo(a_time + a_dt);
     if(m_compute_S) this->compute_cdr_sources(a_time + a_dt);
   }
 
 
   { // u^(n+1) = (1/s)*u^n + {(s-1)/s]*u^(s-1) + (1/s)*dt*L[u^(s-1)]
-    this->compute_cdr_eb_states();
+    this->computeCdrEbStates();
     this->compute_cdr_fluxes(a_time);
     this->computeCdrDomainFluxes(a_time);
-    this->compute_sigma_flux();
+    this->computeSigmaFlux();
 
     for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
-      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+      RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
 
       EBAMRCellData& rhs       = storage->getScratch();
       EBAMRCellData& phi       = solver->getPhi();     // u^i
       const EBAMRCellData& src = solver->getSource();
-      const EBAMRCellData& pre = storage->get_previous(); // u^n
+      const EBAMRCellData& pre = storage->getPrevious(); // u^n
 
       solver->computeDivF(rhs, phi, 0.0, true); // RHS =  Div(u^i*v^i)
       DataOps::scale(rhs, -1.0);                // RHS = -Div(u^i*v^i)
@@ -761,7 +761,7 @@ void strang2::advance_rkN2(const Real a_time, const Real a_dt, const int a_stage
 
     EBAMRIVData& sigma     = m_sigma->getPhi();            // sigma^3
     EBAMRIVData& rhs       = m_sigma_scratch->getScratch();
-    const EBAMRIVData& pre = m_sigma_scratch->get_previous(); // sigma^n
+    const EBAMRIVData& pre = m_sigma_scratch->getPrevious(); // sigma^n
     m_sigma->computeRHS(rhs);
     DataOps::scale(sigma, alpha);           // sigma^(n+1) = (s-1/s)*sigma^i
     DataOps::incr(sigma, pre, sinv);        // sigma^(n+1) = (1/s)*sigma^n + (s-1/s)*sigma^i
@@ -790,14 +790,14 @@ void strang2::advance_rk33(const Real a_time, const Real a_dt){
 
   // u^1 = u^n + dt*L(u^n)
   { 
-    this->compute_cdr_eb_states();
+    this->computeCdrEbStates();
     this->compute_cdr_fluxes(a_time);
     this->computeCdrDomainFluxes(a_time);
-    this->compute_sigma_flux();
+    this->computeSigmaFlux();
   
     for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
-      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+      RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
     
       EBAMRCellData& phi       = solver->getPhi();    // u^n
       EBAMRCellData& rhs       = storage->getScratch();
@@ -821,27 +821,27 @@ void strang2::advance_rk33(const Real a_time, const Real a_dt){
     DataOps::incr(sigma, rhs, a_dt); // sigma^1 = sigma^n + dt*F^n
   }
 
-  if(m_consistent_E)   this->update_poisson();
+  if(m_consistent_E)   this->updateField();
   if(m_consistent_rte) this->update_rte(a_time + a_dt);
 
   // u^2 = 0.25*(3*u^n + u^1 + dt*L(u^1)). 
   { 
-    this->compute_cdr_gradients();
-    if(m_compute_v) this->compute_cdr_velo(a_time + a_dt);
+    this->computeCdrGradients();
+    if(m_compute_v) this->computeCdrVelo(a_time + a_dt);
     if(m_compute_S) this->compute_cdr_sources(a_time + a_dt);
-    this->compute_cdr_eb_states();
+    this->computeCdrEbStates();
     this->compute_cdr_fluxes(a_time);
     this->computeCdrDomainFluxes(a_time);
-    this->compute_sigma_flux();
+    this->computeSigmaFlux();
 
     for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
-      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+      RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
     
       EBAMRCellData& rhs       = storage->getScratch();
       EBAMRCellData& phi       = solver->getPhi();     // phi = u^1 = u^n + dt*L(u^n)
       const EBAMRCellData& src = solver->getSource();
-      const EBAMRCellData& pre = storage->get_previous(); // pre = u^n
+      const EBAMRCellData& pre = storage->getPrevious(); // pre = u^n
     
       solver->computeDivF(rhs, phi, 0.0, true); // RHS =  Div(u^1*v^1)
       DataOps::scale(rhs, -1.0);                // RHS = -Div(u^1*v^1)
@@ -858,35 +858,35 @@ void strang2::advance_rk33(const Real a_time, const Real a_dt){
 
     EBAMRIVData& sigma = m_sigma->getPhi();           // u^1
     EBAMRIVData& rhs = m_sigma_scratch->getScratch();   // Storage for right hand side
-    EBAMRIVData& pre = m_sigma_scratch->get_previous();  // u^n
+    EBAMRIVData& pre = m_sigma_scratch->getPrevious();  // u^n
     m_sigma->computeRHS(rhs);
     DataOps::incr(sigma, rhs, a_dt);  // sigma = u^1 + dt*L(u^1)
     DataOps::incr(sigma, pre, 3.0);   // sigma = 3*u^n + u^1 + dt*L(u^1)
     DataOps::scale(sigma, 0.25);      // sigma = 0.25*[3*u^n + u^1 + dt*L(u^1)]
   }
 
-  if(m_consistent_E)   this->update_poisson();
+  if(m_consistent_E)   this->updateField();
   if(m_consistent_rte) this->update_rte(a_time + a_dt);
 
   // u^3 = u^n + 2*u^2 + 2*dt*L(u^2). Embedded errors have already been computed so this only advances
   // the final stage of the solution. 
   {
-    this->compute_cdr_gradients();
-    if(m_compute_v) this->compute_cdr_velo(a_time + a_dt);
+    this->computeCdrGradients();
+    if(m_compute_v) this->computeCdrVelo(a_time + a_dt);
     if(m_compute_S) this->compute_cdr_sources(a_time + a_dt);
-    this->compute_cdr_eb_states();
+    this->computeCdrEbStates();
     this->compute_cdr_fluxes(a_time);
     this->computeCdrDomainFluxes(a_time);
-    this->compute_sigma_flux();
+    this->computeSigmaFlux();
 
     for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
-      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+      RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
     
       EBAMRCellData& rhs       = storage->getScratch();
       EBAMRCellData& phi       = solver->getPhi();     // phi = u^2
       const EBAMRCellData& src = solver->getSource();
-      const EBAMRCellData& pre = storage->get_previous(); // pre = u^n
+      const EBAMRCellData& pre = storage->getPrevious(); // pre = u^n
     
       solver->computeDivF(rhs, phi, 0.0, true); // RHS =  Div(u^2*v^2)
       DataOps::scale(rhs, -1.0);                // RHS = -Div(u^2*v^2)
@@ -905,7 +905,7 @@ void strang2::advance_rk33(const Real a_time, const Real a_dt){
 
     EBAMRIVData& sigma = m_sigma->getPhi();           // u^2
     EBAMRIVData& rhs = m_sigma_scratch->getScratch();   // Storage for right hand side
-    EBAMRIVData& pre = m_sigma_scratch->get_previous();  // u^n
+    EBAMRIVData& pre = m_sigma_scratch->getPrevious();  // u^n
     m_sigma->computeRHS(rhs);
     DataOps::incr(sigma, rhs, a_dt);  // sigma = u^2 + dt*L(u^2)
     DataOps::scale(sigma, 2.0);       // sigma = 2*u^2 + 2*dt*L(u^2)
@@ -942,14 +942,14 @@ void strang2::advance_rk43(const Real a_time, const Real a_dt){
 
   // u^(i) = u^(i-1) + third*dt*L(u^(i-1))
   for (int i = 0; i <= 1; i++){
-    this->compute_cdr_eb_states();
+    this->computeCdrEbStates();
     this->compute_cdr_fluxes(a_time);
     this->computeCdrDomainFluxes(a_time);
-    this->compute_sigma_flux();
+    this->computeSigmaFlux();
 
     for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
-      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+      RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
 
       EBAMRCellData& rhs       = storage->getScratch();
       EBAMRCellData& phi       = solver->getPhi();  // u^i
@@ -971,29 +971,29 @@ void strang2::advance_rk43(const Real a_time, const Real a_dt){
     m_sigma->computeRHS(rhs);
     DataOps::incr(sigma, rhs, 0.5*a_dt); // sigma^(i+1) = sigma^i + 0.5*dt*F^i
 
-    if(m_consistent_E)   this->update_poisson();
+    if(m_consistent_E)   this->updateField();
     if(m_consistent_rte) this->update_rte(a_time + a_dt);
-    this->compute_cdr_gradients();
-    if(m_compute_v) this->compute_cdr_velo(a_time + a_dt);
+    this->computeCdrGradients();
+    if(m_compute_v) this->computeCdrVelo(a_time + a_dt);
     if(m_compute_S) this->compute_cdr_sources(a_time + a_dt);
   }
 
 
   // u^3 = (2/3)*u^n + (1/3)*u^2 + (1/6)*dt*L(u^2)]
   { 
-    this->compute_cdr_eb_states();
+    this->computeCdrEbStates();
     this->compute_cdr_fluxes(a_time);
     this->computeCdrDomainFluxes(a_time);
-    this->compute_sigma_flux();
+    this->computeSigmaFlux();
 
     for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
-      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+      RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
 
       EBAMRCellData& rhs       = storage->getScratch();
       EBAMRCellData& phi       = solver->getPhi();     // u^2
       const EBAMRCellData& src = solver->getSource();
-      const EBAMRCellData& pre = storage->get_previous(); // u^n
+      const EBAMRCellData& pre = storage->getPrevious(); // u^n
 
       solver->computeDivF(rhs, phi, 0.0, true); // RHS =  Div(u^2*v^2)
       DataOps::scale(rhs, -1.0);                // RHS = -Div(u^2*v^2)
@@ -1011,30 +1011,30 @@ void strang2::advance_rk43(const Real a_time, const Real a_dt){
 
     EBAMRIVData& sigma     = m_sigma->getPhi();            // sigma^2
     EBAMRIVData& rhs       = m_sigma_scratch->getScratch();
-    const EBAMRIVData& pre = m_sigma_scratch->get_previous(); // sigma^n
+    const EBAMRIVData& pre = m_sigma_scratch->getPrevious(); // sigma^n
     m_sigma->computeRHS(rhs);
     DataOps::scale(sigma, 2.0);            // sigma^(n+1) = 2*sigma^2
     DataOps::incr(sigma, pre, 4.0);        // sigma^(n+1) = 4*sigma^n + 2*sigma^2
     DataOps::incr(sigma, rhs, a_dt);       // sigma^(n+1) = 4*sigma^n + 2*sigma^2 + dt*F^2
     DataOps::scale(sigma, sixth);          // sigma^(n+1) = (2/3)/*sigma^n + (1/3)*sigma^2 + (1/6)*dt*F^3
 
-    if(m_consistent_E)   this->update_poisson();
+    if(m_consistent_E)   this->updateField();
     if(m_consistent_rte) this->update_rte(a_time + a_dt);
-    this->compute_cdr_gradients();
-    if(m_compute_v) this->compute_cdr_velo(a_time + a_dt);
+    this->computeCdrGradients();
+    if(m_compute_v) this->computeCdrVelo(a_time + a_dt);
     if(m_compute_S) this->compute_cdr_sources(a_time + a_dt);
   }
 
   // u^(n+1) = u^3 + 0.5*dt*L(u^3)
   {
-    this->compute_cdr_eb_states();
+    this->computeCdrEbStates();
     this->compute_cdr_fluxes(a_time);
     this->computeCdrDomainFluxes(a_time);
-    this->compute_sigma_flux();
+    this->computeSigmaFlux();
 
     for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
-      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+      RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
 
       EBAMRCellData& rhs       = storage->getScratch();
       EBAMRCellData& phi       = solver->getPhi();  // u^i
@@ -1112,7 +1112,7 @@ void strang2::advance_rk53(const Real a_time, const Real a_dt){
   // Allocate extra storage on way in
   {
     for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
+      RefCountedPtr<CdrStorage>& storage = get_CdrStorage(solver_it);
       storage->allocate_extra_storage(4);
     }
     m_sigma_scratch->allocate_extra_storage(4);
@@ -1121,14 +1121,14 @@ void strang2::advance_rk53(const Real a_time, const Real a_dt){
   // u^1 = u^n + dt*b00*L(u^n)
   // 
   { 
-    this->compute_cdr_eb_states();
+    this->computeCdrEbStates();
     this->compute_cdr_fluxes(a_time);
     this->computeCdrDomainFluxes(a_time);
-    this->compute_sigma_flux();
+    this->computeSigmaFlux();
 
     for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
-      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+      RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
 
       EBAMRCellData& rhs       = *(storage->get_extra_storage()[2]); // Will become L(u^n)
       EBAMRCellData& phi       = solver->getPhi();                // u^n
@@ -1155,23 +1155,23 @@ void strang2::advance_rk53(const Real a_time, const Real a_dt){
     DataOps::setValue(sigma1, 0.0);
     DataOps::incr(sigma1, sigma, 1.0);     // Backup of sigma^1
 
-    if(m_consistent_E)   this->update_poisson();
+    if(m_consistent_E)   this->updateField();
     if(m_consistent_rte) this->update_rte(a_time + a_dt);
-    this->compute_cdr_gradients();
-    if(m_compute_v) this->compute_cdr_velo(a_time + a_dt);
+    this->computeCdrGradients();
+    if(m_compute_v) this->computeCdrVelo(a_time + a_dt);
     if(m_compute_S) this->compute_cdr_sources(a_time + a_dt);
   }
 
   // u^2 = u^1 + b11*L(u^1)
   { 
-    this->compute_cdr_eb_states();
+    this->computeCdrEbStates();
     this->compute_cdr_fluxes(a_time);
     this->computeCdrDomainFluxes(a_time);
-    this->compute_sigma_flux();
+    this->computeSigmaFlux();
 
     for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
-      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+      RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
 
       EBAMRCellData& rhs       = *(storage->get_extra_storage()[3]); // Will become L(u^1)
       EBAMRCellData& phi       = solver->getPhi();                // u^1
@@ -1198,27 +1198,27 @@ void strang2::advance_rk53(const Real a_time, const Real a_dt){
     DataOps::setValue(sigma2, 0.0);
     DataOps::incr(sigma2, sigma, 1.0);     // Backup of sigma^1
 
-    if(m_consistent_E)   this->update_poisson();
+    if(m_consistent_E)   this->updateField();
     if(m_consistent_rte) this->update_rte(a_time + a_dt);
-    this->compute_cdr_gradients();
-    if(m_compute_v) this->compute_cdr_velo(a_time + a_dt);
+    this->computeCdrGradients();
+    if(m_compute_v) this->computeCdrVelo(a_time + a_dt);
     if(m_compute_S) this->compute_cdr_sources(a_time + a_dt);
   }
 
   // u^3 = a20*u^n + a22*u^2 + b22*L(u^2)
   { 
-    this->compute_cdr_eb_states();
+    this->computeCdrEbStates();
     this->compute_cdr_fluxes(a_time);
     this->computeCdrDomainFluxes(a_time);
-    this->compute_sigma_flux();
+    this->computeSigmaFlux();
 
     for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
-      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+      RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
 
       EBAMRCellData& phi       = solver->getPhi();     // u^2
       EBAMRCellData& rhs       = storage->getScratch();  // RHS     
-      EBAMRCellData& pre       = storage->get_previous(); // u^n
+      EBAMRCellData& pre       = storage->getPrevious(); // u^n
       const EBAMRCellData& src = solver->getSource();    // S^3
 
       solver->computeDivF(rhs, phi, 0.0, true); // RHS =  Div(u^2*v^2)
@@ -1236,33 +1236,33 @@ void strang2::advance_rk53(const Real a_time, const Real a_dt){
 
     EBAMRIVData& sigma  = m_sigma->getPhi();            // sigma^2
     EBAMRIVData& rhs    = m_sigma_scratch->getScratch();  // RHS
-    EBAMRIVData& pre    = m_sigma_scratch->get_previous(); // sigma^n
+    EBAMRIVData& pre    = m_sigma_scratch->getPrevious(); // sigma^n
     m_sigma->computeRHS(rhs);
     DataOps::scale(sigma, a22);                           // sigma^3 = a2*sigma^2
     DataOps::incr(sigma, pre, a20);                       // sigma^3 = a20*sigma^n + a22*sigma^2
     DataOps::incr(sigma, rhs, a_dt*b22);                  // sigma^3 = a20*sigma^n + a22*sigma^2 + b22*dt*L(sigma^2)
 
-    if(m_consistent_E)   this->update_poisson();
+    if(m_consistent_E)   this->updateField();
     if(m_consistent_rte) this->update_rte(a_time + a_dt);
-    this->compute_cdr_gradients();
-    if(m_compute_v) this->compute_cdr_velo(a_time + a_dt);
+    this->computeCdrGradients();
+    if(m_compute_v) this->computeCdrVelo(a_time + a_dt);
     if(m_compute_S) this->compute_cdr_sources(a_time + a_dt);
   }
 
   // u^4 = a30*u^n + a31*u^1 + a33*u^3 + b30*dt*L(u^n) + b33*dt*L(u^3)
   { 
-    this->compute_cdr_eb_states();
+    this->computeCdrEbStates();
     this->compute_cdr_fluxes(a_time);
     this->computeCdrDomainFluxes(a_time);
-    this->compute_sigma_flux();
+    this->computeSigmaFlux();
 
     for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
-      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+      RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
 
       EBAMRCellData& phi       = solver->getPhi();                // u^3
       EBAMRCellData& rhs       = storage->getScratch();             // RHS     
-      const EBAMRCellData& pre = storage->get_previous();            // u^n
+      const EBAMRCellData& pre = storage->getPrevious();            // u^n
       const EBAMRCellData& u1  = *(storage->get_extra_storage()[0]); // u^1
       const EBAMRCellData& Lun = *(storage->get_extra_storage()[2]); // L(u^n)
       const EBAMRCellData& src = solver->getSource();               // S^3
@@ -1284,7 +1284,7 @@ void strang2::advance_rk53(const Real a_time, const Real a_dt){
 
     EBAMRIVData& sigma         = m_sigma->getPhi();               // sigma^3
     EBAMRIVData& rhs           = m_sigma_scratch->getScratch();     // RHS
-    const EBAMRIVData& pre     = m_sigma_scratch->get_previous();    // sigma^n
+    const EBAMRIVData& pre     = m_sigma_scratch->getPrevious();    // sigma^n
     const EBAMRIVData& sigma1  = *(m_sigma_scratch->get_extra_storage()[0]); // sigma^1
     const EBAMRIVData& Lsigman = *(m_sigma_scratch->get_extra_storage()[2]); // L(sigma^n)
     m_sigma->computeRHS(rhs);
@@ -1294,27 +1294,27 @@ void strang2::advance_rk53(const Real a_time, const Real a_dt){
     DataOps::incr(sigma,  Lsigman, a_dt*b30);  // sigma^3 = a30*sigma^n + a31*sigma^1 + a33*sigma^3 + b30*dt*L(sigma^n)
     DataOps::incr(sigma,  rhs,     a_dt*b33);  // sigma^3 = a30*sigma^n + a31*sigma^1 + a33*sigma^3 + b30*dt*L(sigma^n) + a33*dt
 
-    if(m_consistent_E)   this->update_poisson();
+    if(m_consistent_E)   this->updateField();
     if(m_consistent_rte) this->update_rte(a_time + a_dt);
-    this->compute_cdr_gradients();
-    if(m_compute_v) this->compute_cdr_velo(a_time + a_dt);
+    this->computeCdrGradients();
+    if(m_compute_v) this->computeCdrVelo(a_time + a_dt);
     if(m_compute_S) this->compute_cdr_sources(a_time + a_dt);
   }
 
   // u^(n+1) = a40*u^n + a41*u^1 + a42*u^2 + a44*u^4 + b40*dt*L(u^n) + b41*dt*L(u^1) + b44*dt*L(u^4)
   { 
-    this->compute_cdr_eb_states();
+    this->computeCdrEbStates();
     this->compute_cdr_fluxes(a_time);
     this->computeCdrDomainFluxes(a_time);
-    this->compute_sigma_flux();
+    this->computeSigmaFlux();
 
     for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
-      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+      RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
 
       EBAMRCellData& phi       = solver->getPhi();                // u^4
       EBAMRCellData& rhs       = storage->getScratch();             // RHS     
-      const EBAMRCellData& pre = storage->get_previous();            // u^n
+      const EBAMRCellData& pre = storage->getPrevious();            // u^n
       const EBAMRCellData& u1  = *(storage->get_extra_storage()[0]); // u^1
       const EBAMRCellData& u2  = *(storage->get_extra_storage()[1]); // u^2
       const EBAMRCellData& Lun = *(storage->get_extra_storage()[2]); // L(u^n)
@@ -1340,7 +1340,7 @@ void strang2::advance_rk53(const Real a_time, const Real a_dt){
 
     EBAMRIVData& sigma         = m_sigma->getPhi();               // sigma^4
     EBAMRIVData& rhs           = m_sigma_scratch->getScratch();     // RHS
-    const EBAMRIVData& pre     = m_sigma_scratch->get_previous();    // sigma^n
+    const EBAMRIVData& pre     = m_sigma_scratch->getPrevious();    // sigma^n
     const EBAMRIVData& sigma1  = *(m_sigma_scratch->get_extra_storage()[0]); // sigma^1
     const EBAMRIVData& sigma2  = *(m_sigma_scratch->get_extra_storage()[1]); // sigma^2
     const EBAMRIVData& Lsigman = *(m_sigma_scratch->get_extra_storage()[2]); // L(sigma^n)
@@ -1354,17 +1354,17 @@ void strang2::advance_rk53(const Real a_time, const Real a_dt){
     DataOps::incr(sigma,  Lsigma1, a_dt*b41);  // sigma^(n+1) += b41*dt*L(sigma^1)
     DataOps::incr(sigma,  rhs,     a_dt*b44);  // sigma^(n+1) += b44*dt*L(sigma^4)
 
-    if(m_consistent_E)   this->update_poisson();
+    if(m_consistent_E)   this->updateField();
     if(m_consistent_rte) this->update_rte(a_time + a_dt);
-    this->compute_cdr_gradients();
-    if(m_compute_v) this->compute_cdr_velo(a_time + a_dt);
+    this->computeCdrGradients();
+    if(m_compute_v) this->computeCdrVelo(a_time + a_dt);
     if(m_compute_S) this->compute_cdr_sources(a_time + a_dt);
   }
 
   // Deallocate extra storage on way out
   {
     for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
+      RefCountedPtr<CdrStorage>& storage = get_CdrStorage(solver_it);
       storage->deallocate_extra_storage();
     }
     m_sigma_scratch->deallocate_extra_storage();
@@ -1422,7 +1422,7 @@ void strang2::advance_rk54(const Real a_time, const Real a_dt){
   // Allocate extra storage on way in
   {
     for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
+      RefCountedPtr<CdrStorage>& storage = get_CdrStorage(solver_it);
       storage->allocate_extra_storage(3);
     }
     m_sigma_scratch->allocate_extra_storage(3);
@@ -1430,14 +1430,14 @@ void strang2::advance_rk54(const Real a_time, const Real a_dt){
 
   // u^1 = u^n + dt*b00*L(u^n)
   { 
-    this->compute_cdr_eb_states();
+    this->computeCdrEbStates();
     this->compute_cdr_fluxes(a_time);
     this->computeCdrDomainFluxes(a_time);
-    this->compute_sigma_flux();
+    this->computeSigmaFlux();
 
     for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
-      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+      RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
 
       EBAMRCellData& rhs       = storage->getScratch(); // rhs
       EBAMRCellData& phi       = solver->getPhi();    // u^n
@@ -1459,28 +1459,28 @@ void strang2::advance_rk54(const Real a_time, const Real a_dt){
     m_sigma->computeRHS(rhs);
     DataOps::incr(sigma, rhs, a_dt*b00);   // sigma^1 = sigma^n + dt*b00*L(sigma^n)
 
-    if(m_consistent_E)   this->update_poisson();
+    if(m_consistent_E)   this->updateField();
     if(m_consistent_rte) this->update_rte(a_time + a_dt);
-    this->compute_cdr_gradients();
-    if(m_compute_v) this->compute_cdr_velo(a_time + a_dt);
+    this->computeCdrGradients();
+    if(m_compute_v) this->computeCdrVelo(a_time + a_dt);
     if(m_compute_S) this->compute_cdr_sources(a_time + a_dt);
   }
 
   // u^2 = a10*u^n + a11*u^1 + b11*L(u^1)
   { 
-    this->compute_cdr_eb_states();
+    this->computeCdrEbStates();
     this->compute_cdr_fluxes(a_time);
     this->computeCdrDomainFluxes(a_time);
-    this->compute_sigma_flux();
+    this->computeSigmaFlux();
 
     for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
-      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+      RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
 
       EBAMRCellData& rhs       = storage->getScratch();  // rhs
       EBAMRCellData& phi       = solver->getPhi();     // u^1
       EBAMRCellData& u2        = *(storage->get_extra_storage()[0]); // Becomes u^2
-      const EBAMRCellData& pre = storage->get_previous(); // u^n
+      const EBAMRCellData& pre = storage->getPrevious(); // u^n
       const EBAMRCellData& src = solver->getSource();    // S^1
 
       solver->computeDivF(rhs, phi, 0.0, true); // RHS =  Div(u^1*v^1)
@@ -1500,7 +1500,7 @@ void strang2::advance_rk54(const Real a_time, const Real a_dt){
     EBAMRIVData& sigma     = m_sigma->getPhi();           // sigma^1
     EBAMRIVData& rhs       = m_sigma_scratch->getScratch(); // RHS
     EBAMRIVData& sigma2    = *(m_sigma_scratch->get_extra_storage()[0]); // Will become sigma^2
-    const EBAMRIVData& pre = m_sigma_scratch->get_previous();
+    const EBAMRIVData& pre = m_sigma_scratch->getPrevious();
     m_sigma->computeRHS(rhs);
     DataOps::scale(sigma, a11);            // sigma^2 = a11*sigma^1
     DataOps::incr(sigma, pre, a10);        // sigma^2 = a10*sigma^n + a11*sigma^1
@@ -1508,28 +1508,28 @@ void strang2::advance_rk54(const Real a_time, const Real a_dt){
     DataOps::setValue(sigma2, 0.0);
     DataOps::incr(sigma2, sigma, 1.0);     // Backup of sigma^2
 
-    if(m_consistent_E)   this->update_poisson();
+    if(m_consistent_E)   this->updateField();
     if(m_consistent_rte) this->update_rte(a_time + a_dt);
-    this->compute_cdr_gradients();
-    if(m_compute_v) this->compute_cdr_velo(a_time + a_dt);
+    this->computeCdrGradients();
+    if(m_compute_v) this->computeCdrVelo(a_time + a_dt);
     if(m_compute_S) this->compute_cdr_sources(a_time + a_dt);
   }
 
   // u^3 = a20*u^n + a22*u^2 + b22*L(u^2)
   { 
-    this->compute_cdr_eb_states();
+    this->computeCdrEbStates();
     this->compute_cdr_fluxes(a_time);
     this->computeCdrDomainFluxes(a_time);
-    this->compute_sigma_flux();
+    this->computeSigmaFlux();
 
     for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
-      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+      RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
 
       EBAMRCellData& phi       = solver->getPhi();     // u^2
       EBAMRCellData& rhs       = storage->getScratch();  // RHS
       EBAMRCellData& u3        = *(storage->get_extra_storage()[1]); // Becomes u^3
-      const EBAMRCellData& pre = storage->get_previous(); // u^n
+      const EBAMRCellData& pre = storage->getPrevious(); // u^n
       const EBAMRCellData& src = solver->getSource();    // S^3
 
       solver->computeDivF(rhs, phi, 0.0, true); // RHS =  Div(u^2*v^2)
@@ -1549,7 +1549,7 @@ void strang2::advance_rk54(const Real a_time, const Real a_dt){
     EBAMRIVData& sigma     = m_sigma->getPhi();            // sigma^2
     EBAMRIVData& rhs       = m_sigma_scratch->getScratch();  // RHS
     EBAMRIVData& sigma3    = *(m_sigma_scratch->get_extra_storage()[1]); // Becomes sigma^3
-    const EBAMRIVData& pre = m_sigma_scratch->get_previous(); // sigma^n
+    const EBAMRIVData& pre = m_sigma_scratch->getPrevious(); // sigma^n
     m_sigma->computeRHS(rhs);
     DataOps::scale(sigma, a22);                           // sigma^3 = a2*sigma^2
     DataOps::incr(sigma, pre, a20);                       // sigma^3 = a20*sigma^n + a22*sigma^2
@@ -1557,27 +1557,27 @@ void strang2::advance_rk54(const Real a_time, const Real a_dt){
     DataOps::setValue(sigma3, 0.0);
     DataOps::incr(sigma3, sigma, 1.0);
 
-    if(m_consistent_E)   this->update_poisson();
+    if(m_consistent_E)   this->updateField();
     if(m_consistent_rte) this->update_rte(a_time + a_dt);
-    this->compute_cdr_gradients();
-    if(m_compute_v) this->compute_cdr_velo(a_time + a_dt);
+    this->computeCdrGradients();
+    if(m_compute_v) this->computeCdrVelo(a_time + a_dt);
     if(m_compute_S) this->compute_cdr_sources(a_time + a_dt);
   }
 
   // u^4 = a30*u^n + a33*u^3 + b33*dt*L(u^3)
   { 
-    this->compute_cdr_eb_states();
+    this->computeCdrEbStates();
     this->compute_cdr_fluxes(a_time);
     this->computeCdrDomainFluxes(a_time);
-    this->compute_sigma_flux();
+    this->computeSigmaFlux();
 
     for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
-      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+      RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
 
       EBAMRCellData& phi       = solver->getPhi();                // u^3
       EBAMRCellData& rhs       = *(storage->get_extra_storage()[2]); // RHS, becomes L(u^3) after RHS computation
-      const EBAMRCellData& pre = storage->get_previous();            // u^n
+      const EBAMRCellData& pre = storage->getPrevious();            // u^n
       const EBAMRCellData& src = solver->getSource();               // S^3
 
       solver->computeDivF(rhs, phi, 0.0, true); // RHS =  Div(u^3*v^3)
@@ -1595,33 +1595,33 @@ void strang2::advance_rk54(const Real a_time, const Real a_dt){
 
     EBAMRIVData& sigma         = m_sigma->getPhi();                       // sigma^3
     EBAMRIVData& rhs           = *(m_sigma_scratch->get_extra_storage()[2]); // Becomes L(sigma^3) after RHS computation
-    const EBAMRIVData& pre     = m_sigma_scratch->get_previous();            // sigma^n
+    const EBAMRIVData& pre     = m_sigma_scratch->getPrevious();            // sigma^n
     m_sigma->computeRHS(rhs);
     DataOps::scale(sigma, a33);            // sigma^4 = a33*sigma^3
     DataOps::incr(sigma,  pre, a30);       // sigma^4 = a30*sigma^n + a33*sigma^3
     DataOps::incr(sigma,  rhs, a_dt*b33);  // sigma^3 = a30*sigma^n + a33*sigma^3 + b33*dt*L(u^3)
 
-    if(m_consistent_E)   this->update_poisson();
+    if(m_consistent_E)   this->updateField();
     if(m_consistent_rte) this->update_rte(a_time + a_dt);
-    this->compute_cdr_gradients();
-    if(m_compute_v) this->compute_cdr_velo(a_time + a_dt);
+    this->computeCdrGradients();
+    if(m_compute_v) this->computeCdrVelo(a_time + a_dt);
     if(m_compute_S) this->compute_cdr_sources(a_time + a_dt);
   }
 
   // u^(n+1) = a40*u^n + a42*u^2 + a43*u^3 + a44*u^4 + b43*L(u^3) + b44*L(u^4)
   { 
-    this->compute_cdr_eb_states();
+    this->computeCdrEbStates();
     this->compute_cdr_fluxes(a_time);
     this->computeCdrDomainFluxes(a_time);
-    this->compute_sigma_flux();
+    this->computeSigmaFlux();
 
     for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
       RefCountedPtr<CdrSolver>& solver   = solver_it();
-      RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+      RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
 
       EBAMRCellData& phi       = solver->getPhi();                // u^4
       EBAMRCellData& rhs       = storage->getScratch();             // RHS     
-      const EBAMRCellData& pre = storage->get_previous();            // u^n
+      const EBAMRCellData& pre = storage->getPrevious();            // u^n
       const EBAMRCellData& u2  = *(storage->get_extra_storage()[0]); // u^2
       const EBAMRCellData& u3  = *(storage->get_extra_storage()[1]); // u^3
       const EBAMRCellData& Lu3 = *(storage->get_extra_storage()[2]); // L(u^3)
@@ -1646,7 +1646,7 @@ void strang2::advance_rk54(const Real a_time, const Real a_dt){
 
     EBAMRIVData& sigma         = m_sigma->getPhi();               // sigma^4
     EBAMRIVData& rhs           = m_sigma_scratch->getScratch();     // RHS
-    const EBAMRIVData& pre     = m_sigma_scratch->get_previous();    // sigma^n
+    const EBAMRIVData& pre     = m_sigma_scratch->getPrevious();    // sigma^n
     const EBAMRIVData& sigma2  = *(m_sigma_scratch->get_extra_storage()[0]); // sigma^1
     const EBAMRIVData& sigma3  = *(m_sigma_scratch->get_extra_storage()[1]); // sigma^2
     const EBAMRIVData& Lsigma3 = *(m_sigma_scratch->get_extra_storage()[2]); // L(sigma^3)
@@ -1658,42 +1658,42 @@ void strang2::advance_rk54(const Real a_time, const Real a_dt){
     DataOps::incr(sigma,  Lsigma3, a_dt*b43);  // sigma^(n+1) += b43*dt*L(sigma^3)
     DataOps::incr(sigma,  rhs,     a_dt*b44);  // sigma^(n+1) += b44*dt*L(sigma^4)
 
-    if(m_consistent_E)   this->update_poisson();
+    if(m_consistent_E)   this->updateField();
     if(m_consistent_rte) this->update_rte(a_time + a_dt);
-    this->compute_cdr_gradients();
-    if(m_compute_v) this->compute_cdr_velo(a_time + a_dt);
+    this->computeCdrGradients();
+    if(m_compute_v) this->computeCdrVelo(a_time + a_dt);
     if(m_compute_S) this->compute_cdr_sources(a_time + a_dt);
   }
 
   // Deallocate extra storage on way out
   {
     for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      RefCountedPtr<cdr_storage>& storage = get_cdr_storage(solver_it);
+      RefCountedPtr<CdrStorage>& storage = get_CdrStorage(solver_it);
       storage->deallocate_extra_storage();
     }
     m_sigma_scratch->deallocate_extra_storage();
   }
 }
 
-void strang2::compute_cdr_gradients(){
-  CH_TIME("strang2::compute_cdr_gradients");
+void strang2::computeCdrGradients(){
+  CH_TIME("strang2::computeCdrGradients");
   if(m_verbosity > 5){
-    pout() << "strang2::compute_cdr_gradients" << endl;
+    pout() << "strang2::computeCdrGradients" << endl;
   }
 
-  strang2::compute_cdr_gradients(m_cdr->getPhis());
+  strang2::computeCdrGradients(m_cdr->getPhis());
 }
 
-void strang2::compute_cdr_gradients(const Vector<EBAMRCellData*>& a_phis){
-  CH_TIME("strang2::compute_cdr_gradients");
+void strang2::computeCdrGradients(const Vector<EBAMRCellData*>& a_phis){
+  CH_TIME("strang2::computeCdrGradients");
   if(m_verbosity > 5){
-    pout() << "strang2::compute_cdr_gradients" << endl;
+    pout() << "strang2::computeCdrGradients" << endl;
   }
 
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
-    EBAMRCellData& grad = storage->get_gradient();
+    RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
+    EBAMRCellData& grad = storage->getGradient();
 
     m_amr->computeGradient(grad, *a_phis[idx]);
     m_amr->averageDown(grad, m_cdr->getPhase());
@@ -1714,11 +1714,11 @@ void strang2::compute_errors(){
   // CDR errors
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
     const int which = solver_it.get_solver();
     
     const EBAMRCellData& phi = solver->getPhi();
-    EBAMRCellData& err       = storage->get_error();
+    EBAMRCellData& err       = storage->getError();
 
     // So far 'err' contains the embedded formula and 'phi' is the numerical solution
     DataOps::incr(err, phi, -1.0); // err -> (err-phi), this is opposite, but the norm takes the magnitude anyways
@@ -1740,7 +1740,7 @@ void strang2::compute_errors(){
 
   // Sigma error. So far, 'err' contains the embedded formula and 'phi' is the numerical solution
   EBAMRIVData& phi = m_sigma->getPhi();
-  EBAMRIVData& err = m_sigma_scratch->get_error();
+  EBAMRIVData& err = m_sigma_scratch->getError();
   DataOps::incr(err, phi, -1.0);
   DataOps::getMaxMinNorm(max, min, phi);
   DataOps::getMaxMinNorm(emax, emin, err);
@@ -1753,7 +1753,7 @@ void strang2::compute_errors(){
   DataOps::incr(err, phi, 1.0);
 
   // Maximum error
-  m_max_error = this->get_max_error();
+  m_max_error = this->getMaxError();
 }
 
 void strang2::computeDt(Real& a_dt, TimeCode::which_code& a_timeCode){
@@ -1813,13 +1813,13 @@ void strang2::regridInternals(){
 
   m_cdr_error.resize(m_plaskin->get_num_species());
   
-  this->allocate_cdr_storage();
-  this->allocate_poisson_storage();
-  this->allocate_rte_storage();
-  this->allocate_sigma_storage();
+  this->allocateCdrStorage();
+  this->allocateFieldStorage();
+  this->allocateRtStorage();
+  this->allocateSigmaStorage();
 }
 
-void strang2::allocate_cdr_storage(){
+void strang2::allocateCdrStorage(){
   const int ncomp       = 1;
   const int num_species = m_plaskin->get_num_species();
 
@@ -1827,32 +1827,32 @@ void strang2::allocate_cdr_storage(){
   
   for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
-    m_cdr_scratch[idx] = RefCountedPtr<cdr_storage> (new cdr_storage(m_rk_order, m_amr, m_cdr->getPhase(), ncomp));
+    m_cdr_scratch[idx] = RefCountedPtr<CdrStorage> (new CdrStorage(m_rk_order, m_amr, m_cdr->getPhase(), ncomp));
     m_cdr_scratch[idx]->allocate_storage();
   }
 }
 
-void strang2::allocate_poisson_storage(){
+void strang2::allocateFieldStorage(){
   const int ncomp = 1;
-  m_fieldSolver_scratch = RefCountedPtr<poisson_storage> (new poisson_storage(m_rk_order, m_amr, m_cdr->getPhase(), ncomp));
+  m_fieldSolver_scratch = RefCountedPtr<FieldStorage> (new FieldStorage(m_rk_order, m_amr, m_cdr->getPhase(), ncomp));
   m_fieldSolver_scratch->allocate_storage();
 }
 
-void strang2::allocate_rte_storage(){
+void strang2::allocateRtStorage(){
   const int ncomp       = 1;
   const int num_Photons = m_plaskin->get_num_Photons();
   m_rte_scratch.resize(num_Photons);
   
   for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
-    m_rte_scratch[idx] = RefCountedPtr<rte_storage> (new rte_storage(m_rk_order, m_amr, m_rte->getPhase(), ncomp));
+    m_rte_scratch[idx] = RefCountedPtr<RtStorage> (new RtStorage(m_rk_order, m_amr, m_rte->getPhase(), ncomp));
     m_rte_scratch[idx]->allocate_storage();
   }
 }
 
-void strang2::allocate_sigma_storage(){
+void strang2::allocateSigmaStorage(){
   const int ncomp = 1;
-  m_sigma_scratch = RefCountedPtr<sigma_storage> (new sigma_storage(m_rk_order, m_amr, m_cdr->getPhase(), ncomp));
+  m_sigma_scratch = RefCountedPtr<SigmaStorage> (new SigmaStorage(m_rk_order, m_amr, m_cdr->getPhase(), ncomp));
   m_sigma_scratch->allocate_storage();
 }
 
@@ -1865,23 +1865,23 @@ void strang2::deallocateInternals(){
   for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     m_cdr_scratch[idx]->deallocate_storage();
-    m_cdr_scratch[idx] = RefCountedPtr<cdr_storage>(0);
+    m_cdr_scratch[idx] = RefCountedPtr<CdrStorage>(0);
   }
 
   for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     const int idx = solver_it.get_solver();
     m_rte_scratch[idx]->deallocate_storage();
-    m_rte_scratch[idx] = RefCountedPtr<rte_storage>(0);
+    m_rte_scratch[idx] = RefCountedPtr<RtStorage>(0);
   }
 
   m_cdr_scratch.resize(0);
   m_rte_scratch.resize(0);
 
   m_fieldSolver_scratch->deallocate_storage();
-  m_fieldSolver_scratch = RefCountedPtr<poisson_storage>(0);
+  m_fieldSolver_scratch = RefCountedPtr<FieldStorage>(0);
   
   m_sigma_scratch->deallocate_storage();
-  m_sigma_scratch = RefCountedPtr<sigma_storage>(0);
+  m_sigma_scratch = RefCountedPtr<SigmaStorage>(0);
 }
 
 void strang2::backup_solutions(){
@@ -1894,7 +1894,7 @@ void strang2::backup_solutions(){
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
 
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
     EBAMRCellData& backup = storage->get_backup();
 
     DataOps::copy(backup, solver->getPhi());
@@ -1909,7 +1909,7 @@ void strang2::backup_solutions(){
   for (RtIterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<RtSolver>& solver = solver_it();
 
-    RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
+    RefCountedPtr<RtStorage>& storage = this->get_RtStorage(solver_it);
     EBAMRCellData& backup = storage->get_backup();
 
     DataOps::copy(backup, solver->getPhi());
@@ -1931,7 +1931,7 @@ void strang2::revert_backup(){
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
 
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
     const EBAMRCellData& backup = storage->get_backup();
 
     DataOps::copy(solver->getPhi(), backup);
@@ -1946,7 +1946,7 @@ void strang2::revert_backup(){
   for (RtIterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<RtSolver>& solver = solver_it();
 
-    RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
+    RefCountedPtr<RtStorage>& storage = this->get_RtStorage(solver_it);
     const EBAMRCellData& backup = storage->get_backup();
 
     DataOps::copy(solver->getPhi(), backup);
@@ -1966,16 +1966,16 @@ void strang2::copy_error_to_solvers(){
 
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
 
     EBAMRCellData& state      = solver->getPhi();
-    const EBAMRCellData& err  = storage->get_error();
+    const EBAMRCellData& err  = storage->getError();
 
     DataOps::copy(state, err);
   }
 
   EBAMRIVData& phi       = m_sigma->getPhi();
-  const EBAMRIVData& err = m_sigma_scratch->get_error();
+  const EBAMRIVData& err = m_sigma_scratch->getError();
   DataOps::setValue(phi, 0.0);
   DataOps::incr(phi, err, 1.0);
 }
@@ -1988,16 +1988,16 @@ void strang2::copy_solvers_to_error(){
 
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
 
     const EBAMRCellData& state = solver->getPhi();
-    EBAMRCellData& err   = storage->get_error();
+    EBAMRCellData& err   = storage->getError();
 
     DataOps::copy(err, state);
   }
 
   const EBAMRIVData& phi = m_sigma->getPhi();
-  EBAMRIVData& err = m_sigma_scratch->get_error();
+  EBAMRIVData& err = m_sigma_scratch->getError();
   DataOps::setValue(err, 0.0);
   DataOps::incr(err, phi, 1.0);
 }
@@ -2010,7 +2010,7 @@ void strang2::copy_solvers_to_cache(){
   
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
 
     const EBAMRCellData& state = solver->getPhi();
     EBAMRCellData& cache       = storage->get_cache();
@@ -2020,7 +2020,7 @@ void strang2::copy_solvers_to_cache(){
 
   for (RtIterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>& solver   = solver_it();
-    RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
+    RefCountedPtr<RtStorage>& storage = this->get_RtStorage(solver_it);
 
     const EBAMRCellData& state = solver->getPhi();
     EBAMRCellData& cache       = storage->get_cache();
@@ -2050,7 +2050,7 @@ void strang2::copy_cache_to_solvers(){
   
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
 
     EBAMRCellData& state       = solver->getPhi();
     const EBAMRCellData& cache = storage->get_cache();
@@ -2060,7 +2060,7 @@ void strang2::copy_cache_to_solvers(){
 
   for (RtIterator solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>& solver   = solver_it();
-    RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
+    RefCountedPtr<RtStorage>& storage = this->get_RtStorage(solver_it);
 
     EBAMRCellData& state       = solver->getPhi();
     const EBAMRCellData& cache = storage->get_cache();
@@ -2088,10 +2088,10 @@ void strang2::compute_E_into_scratch(){
     pout() << "strang2::compute_E_into_scratch" << endl;
   }
   
-  EBAMRCellData& E_cell = m_fieldSolver_scratch->get_E_cell();
-  EBAMRFluxData& E_face = m_fieldSolver_scratch->get_E_face();
-  EBAMRIVData&   E_eb   = m_fieldSolver_scratch->get_E_eb();
-  EBAMRIFData&   E_dom  = m_fieldSolver_scratch->get_E_domain();
+  EBAMRCellData& E_cell = m_fieldSolver_scratch->getElectricFieldCell();
+  EBAMRFluxData& E_face = m_fieldSolver_scratch->getElectricFieldFace();
+  EBAMRIVData&   E_eb   = m_fieldSolver_scratch->getElectricFieldEb();
+  EBAMRIFData&   E_dom  = m_fieldSolver_scratch->getElectricFieldDomain();
 
   const MFAMRCellData& phi = m_fieldSolver->getPotential();
   
@@ -2102,29 +2102,29 @@ void strang2::compute_E_into_scratch(){
   TimeStepper::extrapolate_to_domain_faces(E_dom, m_cdr->getPhase(), E_cell);
 }
 
-void strang2::compute_cdr_velo(const Real a_time){
-  CH_TIME("strang2::compute_cdr_velo");
+void strang2::computeCdrVelo(const Real a_time){
+  CH_TIME("strang2::computeCdrVelo");
   if(m_verbosity > 5){
-    pout() << "strang2::compute_cdr_velo" << endl;
+    pout() << "strang2::computeCdrVelo" << endl;
   }
 
-  this->compute_cdr_velo(m_cdr->getPhis(), a_time);
+  this->computeCdrVelo(m_cdr->getPhis(), a_time);
 }
 
-void strang2::compute_cdr_velo(const Vector<EBAMRCellData*>& a_phis, const Real a_time){
-  CH_TIME("strang2::compute_cdr_velo(Vector<EBAMRCellData*>, Real)");
+void strang2::computeCdrVelo(const Vector<EBAMRCellData*>& a_phis, const Real a_time){
+  CH_TIME("strang2::computeCdrVelo(Vector<EBAMRCellData*>, Real)");
   if(m_verbosity > 5){
-    pout() << "strang2::compute_cdr_velo(Vector<EBAMRCellData*>, Real)" << endl;
+    pout() << "strang2::computeCdrVelo(Vector<EBAMRCellData*>, Real)" << endl;
   }
 
   Vector<EBAMRCellData*> velocities = m_cdr->getVelocities();
-  this->computeCdrDriftVelocities(velocities, a_phis, m_fieldSolver_scratch->get_E_cell(), a_time);
+  this->computeCdrDriftVelocities(velocities, a_phis, m_fieldSolver_scratch->getElectricFieldCell(), a_time);
 }
 
-void strang2::compute_cdr_eb_states(){
-  CH_TIME("strang2::compute_cdr_eb_states");
+void strang2::computeCdrEbStates(){
+  CH_TIME("strang2::computeCdrEbStates");
   if(m_verbosity > 5){
-    pout() << "strang2::compute_cdr_eb_states" << endl;
+    pout() << "strang2::computeCdrEbStates" << endl;
   }
 
   Vector<EBAMRIVData*>   eb_gradients;
@@ -2134,12 +2134,12 @@ void strang2::compute_cdr_eb_states(){
   
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
 
     cdr_states.push_back(&(solver->getPhi()));
-    eb_states.push_back(&(storage->get_eb_state()));
-    eb_gradients.push_back(&(storage->get_eb_grad()));
-    cdr_gradients.push_back(&(storage->get_gradient())); // Should already have been computed
+    eb_states.push_back(&(storage->getEbState()));
+    eb_gradients.push_back(&(storage->getEbGrad()));
+    cdr_gradients.push_back(&(storage->getGradient())); // Should already have been computed
   }
 
   // Extrapolate states to the EB and floor them so we cannot get negative values on the boundary. This
@@ -2159,10 +2159,10 @@ void strang2::compute_cdr_eb_states(){
   }
 }
 
-void strang2::compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_phis){
-  CH_TIME("strang2::compute_cdr_eb_states(vec)");
+void strang2::computeCdrEbStates(const Vector<EBAMRCellData*>& a_phis){
+  CH_TIME("strang2::computeCdrEbStates(vec)");
   if(m_verbosity > 5){
-    pout() << "strang2::compute_cdr_eb_states(vec)" << endl;
+    pout() << "strang2::computeCdrEbStates(vec)" << endl;
   }
 
   Vector<EBAMRIVData*>   eb_gradients;
@@ -2170,11 +2170,11 @@ void strang2::compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_phis){
   Vector<EBAMRCellData*> cdr_gradients;
   
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
 
-    eb_states.push_back(&(storage->get_eb_state()));
-    eb_gradients.push_back(&(storage->get_eb_grad()));
-    cdr_gradients.push_back(&(storage->get_gradient())); // Should already have been computed
+    eb_states.push_back(&(storage->getEbState()));
+    eb_gradients.push_back(&(storage->getEbGrad()));
+    cdr_gradients.push_back(&(storage->getGradient())); // Should already have been computed
   }
 
   // Extrapolate states to the EB and floor them so we cannot get negative values on the boundary. This
@@ -2194,10 +2194,10 @@ void strang2::compute_cdr_eb_states(const Vector<EBAMRCellData*>& a_phis){
   }
 }
 
-void strang2::compute_cdr_domain_states(){
-  CH_TIME("strang2::compute_cdr_domain_states");
+void strang2::computeCdrDomainStates(){
+  CH_TIME("strang2::computeCdrDomainStates");
   if(m_verbosity > 5){
-    pout() << "strang2::compute_cdr_domain_states" << endl;
+    pout() << "strang2::computeCdrDomainStates" << endl;
   }
 
   Vector<EBAMRIFData*>   domain_gradients;
@@ -2207,12 +2207,12 @@ void strang2::compute_cdr_domain_states(){
   
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
 
     cdr_states.push_back(&(solver->getPhi()));
-    domain_states.push_back(&(storage->getDomain_state()));
-    domain_gradients.push_back(&(storage->getDomain_grad()));
-    cdr_gradients.push_back(&(storage->get_gradient())); // Should already be computed
+    domain_states.push_back(&(storage->getDomainState()));
+    domain_gradients.push_back(&(storage->getDomainGrad()));
+    cdr_gradients.push_back(&(storage->getGradient())); // Should already be computed
   }
 
   // Extrapolate states to the domain faces
@@ -2227,10 +2227,10 @@ void strang2::compute_cdr_domain_states(){
   }
 }
 
-void strang2::compute_cdr_domain_states(const Vector<EBAMRCellData*>& a_phis){
-  CH_TIME("strang2::compute_cdr_domain_states");
+void strang2::computeCdrDomainStates(const Vector<EBAMRCellData*>& a_phis){
+  CH_TIME("strang2::computeCdrDomainStates");
   if(m_verbosity > 5){
-    pout() << "strang2::compute_cdr_domain_states" << endl;
+    pout() << "strang2::computeCdrDomainStates" << endl;
   }
 
   Vector<EBAMRIFData*>   domain_gradients;
@@ -2239,11 +2239,11 @@ void strang2::compute_cdr_domain_states(const Vector<EBAMRCellData*>& a_phis){
   
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<CdrSolver>& solver = solver_it();
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
 
-    domain_states.push_back(&(storage->getDomain_state()));
-    domain_gradients.push_back(&(storage->getDomain_grad()));
-    cdr_gradients.push_back(&(storage->get_gradient()));
+    domain_states.push_back(&(storage->getDomainState()));
+    domain_gradients.push_back(&(storage->getDomainGrad()));
+    cdr_gradients.push_back(&(storage->getGradient()));
   }
 
   // Extrapolate states to the domain faces
@@ -2283,17 +2283,17 @@ void strang2::compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_phis, const Rea
   cdr_fluxes = m_cdr->getEbFlux();
 
   for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
 
-    EBAMRIVData& dens_eb = storage->get_eb_state();
-    EBAMRIVData& velo_eb = storage->get_eb_velo();
-    EBAMRIVData& flux_eb = storage->get_eb_flux();
-    EBAMRIVData& grad_eb = storage->get_eb_grad();
+    EBAMRIVData& dens_eb = storage->getEbState();
+    EBAMRIVData& velo_eb = storage->getEbVelo();
+    EBAMRIVData& flux_eb = storage->getEbFlux();
+    EBAMRIVData& grad_eb = storage->getEbGrad();
 
-    extrap_cdr_densities.push_back(&dens_eb);  // Computed in compute_cdr_eb_states
+    extrap_cdr_densities.push_back(&dens_eb);  // Computed in computeCdrEbStates
     extrap_cdr_velocities.push_back(&velo_eb); // Not yet computed
     extrap_cdr_fluxes.push_back(&flux_eb);     // Not yet computed
-    extrap_cdr_gradients.push_back(&grad_eb);  // Computed in compute_cdr_eb_states
+    extrap_cdr_gradients.push_back(&grad_eb);  // Computed in computeCdrEbStates
   }
 
 
@@ -2305,14 +2305,14 @@ void strang2::compute_cdr_fluxes(const Vector<EBAMRCellData*>& a_phis, const Rea
   // Compute RTE flux on the boundary
   for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>& solver   = solver_it();
-    RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
+    RefCountedPtr<RtStorage>& storage = this->get_RtStorage(solver_it);
 
-    EBAMRIVData& flux_eb = storage->get_eb_flux();
+    EBAMRIVData& flux_eb = storage->getEbFlux();
     solver->computeBoundaryFlux(flux_eb, solver->getPhi());
     extrap_rte_fluxes.push_back(&flux_eb);
   }
 
-  const EBAMRIVData& E = m_fieldSolver_scratch->get_E_eb();
+  const EBAMRIVData& E = m_fieldSolver_scratch->getElectricFieldEb();
   TimeStepper::compute_cdr_fluxes(cdr_fluxes,
 				   extrap_cdr_fluxes,
 				   extrap_cdr_densities,
@@ -2351,13 +2351,13 @@ void strang2::computeCdrDomainFluxes(const Vector<EBAMRCellData*>& a_phis, const
   cdr_fluxes = m_cdr->getDomainFlux();
   cdr_velocities = m_cdr->getVelocities();
   for (CdrIterator solver_it(*m_cdr); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
 
-    EBAMRIFData& dens_domain = storage->getDomain_state();
-    EBAMRIFData& velo_domain = storage->getDomain_velo();
-    EBAMRIFData& flux_domain = storage->getDomain_flux();
-    EBAMRIFData& grad_domain = storage->getDomain_grad();
-    EBAMRCellData& gradient  = storage->get_gradient();
+    EBAMRIFData& dens_domain = storage->getDomainState();
+    EBAMRIFData& velo_domain = storage->getDomainVelo();
+    EBAMRIFData& flux_domain = storage->getDomainFlux();
+    EBAMRIFData& grad_domain = storage->getDomainGrad();
+    EBAMRCellData& gradient  = storage->getGradient();
 
     extrap_cdr_densities.push_back(&dens_domain);  // Has not been computed
     extrap_cdr_velocities.push_back(&velo_domain); // Has not been computed
@@ -2375,14 +2375,14 @@ void strang2::computeCdrDomainFluxes(const Vector<EBAMRCellData*>& a_phis, const
   // Compute RTE flux on domain faces
   for (RtIterator solver_it(*m_rte); solver_it.ok(); ++solver_it){
     RefCountedPtr<RtSolver>& solver   = solver_it();
-    RefCountedPtr<rte_storage>& storage = this->get_rte_storage(solver_it);
+    RefCountedPtr<RtStorage>& storage = this->get_RtStorage(solver_it);
 
-    EBAMRIFData& domain_flux = storage->getDomain_flux();
+    EBAMRIFData& domain_flux = storage->getDomainFlux();
     solver->computeDomainFlux(domain_flux, solver->getPhi());
     extrap_rte_fluxes.push_back(&domain_flux);
   }
 
-  const EBAMRIFData& E = m_fieldSolver_scratch->get_E_domain();
+  const EBAMRIFData& E = m_fieldSolver_scratch->getElectricFieldDomain();
 
   // This fills the solvers' domain fluxes
   TimeStepper::computeCdrDomainFluxes(cdr_fluxes,
@@ -2395,10 +2395,10 @@ void strang2::computeCdrDomainFluxes(const Vector<EBAMRCellData*>& a_phis, const
 					  a_time);
 }
 
-void strang2::compute_sigma_flux(){
-  CH_TIME("strang2::compute_sigma_flux");
+void strang2::computeSigmaFlux(){
+  CH_TIME("strang2::computeSigmaFlux");
   if(m_verbosity > 5){
-    pout() << "strang2::compute_sigma_flux" << endl;
+    pout() << "strang2::computeSigmaFlux" << endl;
   }
 
   EBAMRIVData& flux = m_sigma->getFlux();
@@ -2432,12 +2432,12 @@ void strang2::compute_cdr_sources(const Vector<EBAMRCellData*>& a_phis, const Re
   
   Vector<EBAMRCellData*> cdr_sources = m_cdr->getSources();
   Vector<EBAMRCellData*> rte_states  = m_rte->getPhis();
-  EBAMRCellData& E                   = m_fieldSolver_scratch->get_E_cell();
+  EBAMRCellData& E                   = m_fieldSolver_scratch->getElectricFieldCell();
 
   Vector<EBAMRCellData*> cdr_gradients;
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
-    cdr_gradients.push_back(&(storage->get_gradient())); // These should already have been computed
+    RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
+    cdr_gradients.push_back(&(storage->getGradient())); // These should already have been computed
   }
 
   TimeStepper::compute_cdr_sources(cdr_sources, a_phis, cdr_gradients, rte_states, E, a_time, centering::cell_center);
@@ -2454,62 +2454,62 @@ void strang2::advance_rte_stationary(const Real a_time){
     Vector<EBAMRCellData*> rte_sources = m_rte->getSources();
     Vector<EBAMRCellData*> cdr_states  = m_cdr->getPhis();
 
-    EBAMRCellData& E = m_fieldSolver_scratch->get_E_cell();
+    EBAMRCellData& E = m_fieldSolver_scratch->getElectricFieldCell();
 
     const Real dummy_dt = 0.0;
     this->solve_rte(rte_states, rte_sources, cdr_states, E, a_time, dummy_dt, centering::cell_center);
   }
 }
 
-void strang2::store_solvers(){
-  CH_TIME("strang2::store_solvers");
+void strang2::storeSolvers(){
+  CH_TIME("strang2::storeSolvers");
   if(m_verbosity > 5){
-    pout() << "strang2::store_solvers" << endl;
+    pout() << "strang2::storeSolvers" << endl;
   }
 
   // Copy solver states into storage->m_previous
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
 
     EBAMRCellData& state = solver->getPhi();
-    EBAMRCellData& prev  = storage->get_previous();
+    EBAMRCellData& prev  = storage->getPrevious();
 
     DataOps::copy(prev, state);
   }
 
   // Copy solver state into storage->m_previous
   EBAMRIVData& phi = m_sigma->getPhi();
-  EBAMRIVData& pre = m_sigma_scratch->get_previous();
+  EBAMRIVData& pre = m_sigma_scratch->getPrevious();
   DataOps::setValue(pre, 0.0);
   DataOps::incr(pre, phi, 1.0);
 }
 
-void strang2::restore_solvers(){
-  CH_TIME("strang2::restore_solvers");
+void strang2::restoreSolvers(){
+  CH_TIME("strang2::restoreSolvers");
   if(m_verbosity > 5){
-    pout() << "strang2::restore_solvers" << endl;
+    pout() << "strang2::restoreSolvers" << endl;
   }
 
   for (CdrIterator solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<CdrSolver>& solver   = solver_it();
-    RefCountedPtr<cdr_storage>& storage = this->get_cdr_storage(solver_it);
+    RefCountedPtr<CdrStorage>& storage = this->get_CdrStorage(solver_it);
 
     EBAMRCellData& state = solver->getPhi();
-    EBAMRCellData& prev  = storage->get_previous();
+    EBAMRCellData& prev  = storage->getPrevious();
 
     DataOps::copy(state, prev);
   }
 
   EBAMRIVData& phi = m_sigma->getPhi();
-  EBAMRIVData& pre = m_sigma_scratch->get_previous();
+  EBAMRIVData& pre = m_sigma_scratch->getPrevious();
   DataOps::setValue(phi, 0.0);
   DataOps::incr(phi, pre, 1.0);
 }
 
-void strang2::update_poisson(){
+void strang2::updateField(){
   if(m_verbosity > 5){
-    pout() << "strang2::update_poisson" << endl;
+    pout() << "strang2::updateField" << endl;
   }
   
   if(m_do_poisson){ // Solve Poisson equation

@@ -8,11 +8,11 @@
 #include "euler_maruyama.H"
 #include "euler_maruyama_storage.H"
 
-euler_maruyama::cdr_storage::cdr_storage(){
+euler_maruyama::CdrStorage::CdrStorage(){
 
 }
 
-euler_maruyama::cdr_storage::cdr_storage(const RefCountedPtr<AmrMesh>& a_amr,
+euler_maruyama::CdrStorage::CdrStorage(const RefCountedPtr<AmrMesh>& a_amr,
 					 const phase::which_phase       a_phase,
 					 const int                      a_ncomp){
   m_amr   = a_amr;
@@ -20,11 +20,11 @@ euler_maruyama::cdr_storage::cdr_storage(const RefCountedPtr<AmrMesh>& a_amr,
   m_ncomp = a_ncomp;
 }
 
-euler_maruyama::cdr_storage::~cdr_storage(){
+euler_maruyama::CdrStorage::~CdrStorage(){
   deallocate_storage();
 }
 
-void euler_maruyama::cdr_storage::allocate_storage(){
+void euler_maruyama::CdrStorage::allocate_storage(){
   m_amr->allocate(m_scratch,  m_phase, m_ncomp);
   m_amr->allocate(m_scratch2, m_phase, m_ncomp);
   m_amr->allocate(m_gradient, m_phase, SpaceDim);
@@ -43,7 +43,7 @@ void euler_maruyama::cdr_storage::allocate_storage(){
   m_amr->allocate(m_scratchIF4,  m_phase, m_ncomp);
 }
 
-void euler_maruyama::cdr_storage::deallocate_storage(){
+void euler_maruyama::CdrStorage::deallocate_storage(){
   m_amr->deallocate(m_scratch);
   m_amr->deallocate(m_scratch2);
   m_amr->deallocate(m_gradient);
@@ -62,11 +62,11 @@ void euler_maruyama::cdr_storage::deallocate_storage(){
   m_amr->deallocate(m_scratchIF4);
 }
 
-euler_maruyama::poisson_storage::poisson_storage(){
+euler_maruyama::FieldStorage::FieldStorage(){
 
 }
 
-euler_maruyama::poisson_storage::poisson_storage(const RefCountedPtr<AmrMesh>& a_amr,
+euler_maruyama::FieldStorage::FieldStorage(const RefCountedPtr<AmrMesh>& a_amr,
 						 const phase::which_phase a_phase,
 						 const int a_ncomp){
   m_amr   = a_amr;
@@ -74,27 +74,27 @@ euler_maruyama::poisson_storage::poisson_storage(const RefCountedPtr<AmrMesh>& a
   m_ncomp = a_ncomp;
 }
 
-euler_maruyama::poisson_storage::~poisson_storage(){
+euler_maruyama::FieldStorage::~FieldStorage(){
   deallocate_storage();
 }
 
-void euler_maruyama::poisson_storage::allocate_storage(){
+void euler_maruyama::FieldStorage::allocate_storage(){
   m_amr->allocate(m_E_cell,   m_phase, SpaceDim);
   m_amr->allocate(m_E_eb,     m_phase, SpaceDim);
   m_amr->allocate(m_E_dom,    m_phase, SpaceDim);
 }
 
-void euler_maruyama::poisson_storage::deallocate_storage(){
+void euler_maruyama::FieldStorage::deallocate_storage(){
   m_amr->deallocate(m_E_cell);
   m_amr->deallocate(m_E_eb);
   m_amr->deallocate(m_E_dom);
 }
 
-euler_maruyama::rte_storage::rte_storage(){
+euler_maruyama::RtStorage::RtStorage(){
 
 }
 
-euler_maruyama::rte_storage::rte_storage(const RefCountedPtr<AmrMesh>& a_amr,
+euler_maruyama::RtStorage::RtStorage(const RefCountedPtr<AmrMesh>& a_amr,
 					 const phase::which_phase a_phase,
 					 const int a_ncomp){
   m_amr   = a_amr;
@@ -102,25 +102,25 @@ euler_maruyama::rte_storage::rte_storage(const RefCountedPtr<AmrMesh>& a_amr,
   m_ncomp = a_ncomp;
 }
 
-euler_maruyama::rte_storage::~rte_storage(){
+euler_maruyama::RtStorage::~RtStorage(){
 
 }
 
-void euler_maruyama::rte_storage::allocate_storage(){
+void euler_maruyama::RtStorage::allocate_storage(){
   m_amr->allocate(m_scratchIV,  m_phase, m_ncomp);
   m_amr->allocate(m_scratchIF,  m_phase, m_ncomp);
 }
 
-void euler_maruyama::rte_storage::deallocate_storage(){
+void euler_maruyama::RtStorage::deallocate_storage(){
   m_amr->deallocate(m_scratchIV);
   m_amr->deallocate(m_scratchIF);
 }
 
-euler_maruyama::sigma_storage::sigma_storage(){
+euler_maruyama::SigmaStorage::SigmaStorage(){
 
 }
 
-euler_maruyama::sigma_storage::sigma_storage(const RefCountedPtr<AmrMesh>& a_amr,
+euler_maruyama::SigmaStorage::SigmaStorage(const RefCountedPtr<AmrMesh>& a_amr,
 					     const phase::which_phase a_phase,
 					     const int a_ncomp){
   m_amr   = a_amr;
@@ -128,14 +128,14 @@ euler_maruyama::sigma_storage::sigma_storage(const RefCountedPtr<AmrMesh>& a_amr
   m_ncomp = a_ncomp;
 }
 
-euler_maruyama::sigma_storage::~sigma_storage(){
+euler_maruyama::SigmaStorage::~SigmaStorage(){
 
 }
   
-void euler_maruyama::sigma_storage::allocate_storage(){
+void euler_maruyama::SigmaStorage::allocate_storage(){
 
 }
 
-void euler_maruyama::sigma_storage::deallocate_storage(){
+void euler_maruyama::SigmaStorage::deallocate_storage(){
 
 #include "CD_NamespaceFooter.H"

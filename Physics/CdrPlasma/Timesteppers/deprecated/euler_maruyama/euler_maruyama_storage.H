@@ -13,31 +13,31 @@
 
 #include <RefCountedPtr.H>
 
-class euler_maruyama::cdr_storage {
+class euler_maruyama::CdrStorage {
 public:
 
-  cdr_storage();
-  cdr_storage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
-  ~cdr_storage();
+  CdrStorage();
+  CdrStorage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
+  ~CdrStorage();
 
   void allocate_storage();
   void deallocate_storage();
 
   EBAMRCellData& getScratch()  { return m_scratch;    }
   EBAMRCellData& getScratch2() { return m_scratch2;   }
-  EBAMRCellData& get_gradient() { return m_gradient;   }
+  EBAMRCellData& getGradient() { return m_gradient;   }
 
-  EBAMRIVData& get_eb_scratch1(){ return m_scratchIVs; }
-  EBAMRIVData& get_eb_scratchD(){ return m_scratchIVD; }
-  EBAMRIVData& get_eb_state(){    return m_scratchIV1; }
-  EBAMRIVData& get_eb_velo(){     return m_scratchIV2; }
-  EBAMRIVData& get_eb_flux(){     return m_scratchIV3; }
-  EBAMRIVData& get_eb_grad(){     return m_scratchIV4; }
+  EBAMRIVData& getEbScratch1(){ return m_scratchIVs; }
+  EBAMRIVData& getEbScratchD(){ return m_scratchIVD; }
+  EBAMRIVData& getEbState(){    return m_scratchIV1; }
+  EBAMRIVData& getEbVelo(){     return m_scratchIV2; }
+  EBAMRIVData& getEbFlux(){     return m_scratchIV3; }
+  EBAMRIVData& getEbGrad(){     return m_scratchIV4; }
 
-  EBAMRIFData& getDomain_state(){  return m_scratchIF1; }
-  EBAMRIFData& getDomain_velo(){   return m_scratchIF2; }
-  EBAMRIFData& getDomain_flux(){   return m_scratchIF3; }
-  EBAMRIFData& getDomain_grad(){   return m_scratchIF4; }
+  EBAMRIFData& getDomainState(){  return m_scratchIF1; }
+  EBAMRIFData& getDomainVelo(){   return m_scratchIF2; }
+  EBAMRIFData& getDomainFlux(){   return m_scratchIF3; }
+  EBAMRIFData& getDomainGrad(){   return m_scratchIF4; }
   
 protected:
 
@@ -62,19 +62,19 @@ protected:
   EBAMRIFData m_scratchIF4; // Scratch data
 };
 
-class euler_maruyama::poisson_storage {
+class euler_maruyama::FieldStorage {
 public:
 
-  poisson_storage();
-  poisson_storage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
-  ~poisson_storage();
+  FieldStorage();
+  FieldStorage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
+  ~FieldStorage();
 
   void allocate_storage();
   void deallocate_storage();
 
-  EBAMRCellData& get_E_cell()      {return m_E_cell;   }
-  EBAMRIVData& get_E_eb()          {return m_E_eb;     }
-  EBAMRIFData& get_E_domain()      {return m_E_dom;    }
+  EBAMRCellData& getElectricFieldCell()      {return m_E_cell;   }
+  EBAMRIVData& getElectricFieldEb()          {return m_E_eb;     }
+  EBAMRIFData& getElectricFieldDomain()      {return m_E_dom;    }
 
 protected:
 
@@ -87,18 +87,18 @@ protected:
   EBAMRIFData m_E_dom;           // E-field on domain faces
 };
 
-class euler_maruyama::rte_storage {
+class euler_maruyama::RtStorage {
 public:
 
-  rte_storage();
-  rte_storage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
-  ~rte_storage();
+  RtStorage();
+  RtStorage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
+  ~RtStorage();
 
   void allocate_storage();
   void deallocate_storage();
 
-  EBAMRIVData& get_eb_flux(){     return m_scratchIV; }
-  EBAMRIFData& getDomain_flux(){ return m_scratchIF; }
+  EBAMRIVData& getEbFlux(){     return m_scratchIV; }
+  EBAMRIFData& getDomainFlux(){ return m_scratchIF; }
 
 protected:
 
@@ -110,12 +110,12 @@ protected:
   EBAMRIFData m_scratchIF;
 };
 
-class euler_maruyama::sigma_storage {
+class euler_maruyama::SigmaStorage {
 public:
 
-  sigma_storage();
-  sigma_storage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
-  ~sigma_storage();
+  SigmaStorage();
+  SigmaStorage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
+  ~SigmaStorage();
   
   void allocate_storage();
   void deallocate_storage();

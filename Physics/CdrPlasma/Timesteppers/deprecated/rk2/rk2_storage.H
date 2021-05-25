@@ -18,23 +18,23 @@
   @details This class needs storage for the intermediate state, k1, k2, and 3 irregular data holders for extrapolated fluxes,
   extrapolated densities, and extrapolates velocities. 
 */
-class rk2::cdr_storage {
+class rk2::CdrStorage {
 public:
 
   /*!
     @brief Weak constructor
   */
-  cdr_storage();
+  CdrStorage();
 
   /*!
     @brief Constructor
   */
-  cdr_storage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
+  CdrStorage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
 
   /*!
     @brief Destructor
   */
-  ~cdr_storage();
+  ~CdrStorage();
 
   /*!
     @brief Allocate storage
@@ -49,7 +49,7 @@ public:
   /*!
     @brief Get phi
   */
-  virtual EBAMRCellData& get_phi(){
+  virtual EBAMRCellData& getPhi(){
     return m_phi;
   }
 
@@ -77,28 +77,28 @@ public:
   /*!
     @brief Get scratch storage
   */
-  virtual EBAMRIVData& get_eb_state(){
+  virtual EBAMRIVData& getEbState(){
     return m_scratchIV1;
   }
 
   /*!
     @brief Get scratch storage
   */
-  virtual EBAMRIVData& get_eb_velo(){
+  virtual EBAMRIVData& getEbVelo(){
     return m_scratchIV2;
   }
 
   /*!
     @brief Get scratch storage
   */
-  virtual EBAMRIVData& get_eb_flux(){
+  virtual EBAMRIVData& getEbFlux(){
     return m_scratchIV3;
   }
 
   /*!
     @brief Get scratch storage
   */
-  virtual EBAMRIVData& get_eb_grad(){
+  virtual EBAMRIVData& getEbGrad(){
     return m_scratchIV4;
   }
 
@@ -164,23 +164,23 @@ protected:
   @brief Clas for handling extra storage requirements for advancing the Poisson solver with rk2. This only includes the 
   intermediate state
 */
-class rk2::poisson_storage {
+class rk2::FieldStorage {
 public:
 
   /*!
     @brief Constructor
   */
-  poisson_storage();
+  FieldStorage();
 
   /*!
     @brief Full constructor
   */
-  poisson_storage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
+  FieldStorage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
 
   /*!
     @brief Destructor
   */
-  virtual ~poisson_storage();
+  virtual ~FieldStorage();
 
   /*!
     @brief Allocate storage
@@ -195,7 +195,7 @@ public:
   /*!
     @brief Get intermediate state
   */
-  virtual MFAMRCellData& get_phi(){
+  virtual MFAMRCellData& getPhi(){
     return m_phi;
   }
 
@@ -216,21 +216,21 @@ public:
   /*!
     @brief Get the electric field storage
   */
-  virtual EBAMRCellData& get_E_cell(){
+  virtual EBAMRCellData& getElectricFieldCell(){
     return m_E_cell;
   }
 
   /*!
     @brief Get the electric field storage
   */
-  virtual EBAMRFluxData& get_E_face(){
+  virtual EBAMRFluxData& getElectricFieldFace(){
     return m_E_face;
   }
 
   /*!
     @brief Get the electric field storage
   */
-  virtual EBAMRIVData& get_E_eb(){
+  virtual EBAMRIVData& getElectricFieldEb(){
     return m_E_eb;
   }
 
@@ -286,23 +286,23 @@ protected:
   @brief Clas for handling extra storage requirements for advancing rte equations with rk2. This only includes the 
   intermediate state and the eb flux
 */
-class rk2::rte_storage {
+class rk2::RtStorage {
 public:
 
   /*!
     @brief Weak constructor
   */
-  rte_storage();
+  RtStorage();
 
   /*!
     @brief Constructor
   */
-  rte_storage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
+  RtStorage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
 
   /*!
     @brief Destructor
   */
-  ~rte_storage();
+  ~RtStorage();
 
   /*!
     @brief Allocate storage
@@ -317,14 +317,14 @@ public:
   /*!
     @brief Get phi
   */
-  virtual EBAMRCellData& get_phi(){
+  virtual EBAMRCellData& getPhi(){
     return m_phi;
   }
 
   /*!
     @brief Get scratch storage
   */
-  virtual EBAMRIVData& get_eb_flux(){
+  virtual EBAMRIVData& getEbFlux(){
     return m_scratchIV;
   }
 
@@ -356,20 +356,20 @@ protected:
   EBAMRIVData m_scratchIV;
 };
 
-class rk2::sigma_storage {
+class rk2::SigmaStorage {
 public:
 
-  sigma_storage();
+  SigmaStorage();
   
   /*!
     @brief Constructor
   */
-  sigma_storage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
+  SigmaStorage(const RefCountedPtr<AmrMesh>& a_amr, const phase::which_phase a_phase, const int m_ncomp);
 
   /*!
     @brief Destructor
   */
-  ~sigma_storage();
+  ~SigmaStorage();
 
   /*!
     @brief Allocate storage
@@ -384,7 +384,7 @@ public:
   /*!
     @brief Get phi
   */
-  virtual EBAMRIVData& get_phi(){
+  virtual EBAMRIVData& getPhi(){
     return m_phi;
   }
 
