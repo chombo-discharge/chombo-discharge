@@ -62,9 +62,9 @@ namespace Physics {
       RealVect m_blob_center;
 
       // Indices for species
-      int m_electronIdx;
-      int m_positiveIdx;
-      int m_negativeIdx;
+      int m_ElectronIdx;
+      int m_PositiveIdx;
+      int m_NegativeIdx;
       int m_PhotonZ_idx;
 
       // Mobile ions or not

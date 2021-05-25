@@ -1,39 +1,44 @@
+/* chombo-discharge
+ * Copyright © 2021 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+ */
+
 /*!
-  @file   ito_plasma_air3_lea.H
-  @brief  Simple class for 3-species air plasma
+  @file   CD_ItoPlasmaAir3LEA.H
+  @brief  Declaration of a three-species air model with energy transport
   @author Robert Marskar
-  @date   June 2020
 */
 
-#ifndef _ITO_PLASMA_AIR3_LEA_
-#define _ITO_PLASMA_AIR3_LEA_
+#ifndef CD_ItoPlasmaAir3LEA_H
+#define CD_ItoPlasmaAir3LEA_H
 
+// Our includes
 #include <CD_ItoPlasmaPhysicsLEA.H>
-#include "CD_LookupTable.H"
+#include <CD_LookupTable.H>
+#include <CD_NamespaceHeader.H>
 
-#include "CD_NamespaceHeader.H"
 namespace Physics {
   namespace ItoPlasma{
 
     /*!
       @brief Abstract clas for specifying plasma kinetics
     */
-    class ito_plasma_air3_lea : public ItoPlasmaPhysicsLEA {
+    class ItoPlasmaAir3LEA : public ItoPlasmaPhysicsLEA {
     public:
 
-      class electron;
-      class positive;
-      class negative;
+      class Electron;
+      class Positive;
+      class Negative;
       class PhotonZ;
       
-      ito_plasma_air3_lea();
-      ~ito_plasma_air3_lea();
+      ItoPlasmaAir3LEA();
+      ~ItoPlasmaAir3LEA();
 
       Real computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_cdr_densities) const override;      
 
       Real computeAlpha(const RealVect a_E) const override;
 
-      Real compute_eta(const RealVect a_E) const;
+      Real computeEta(const RealVect a_E) const;
 
       void updateReactionRatesLEA(const RealVect a_E, const Vector<Real> a_mean_energies, const Real a_dx, const Real a_kappa) const override;
 
@@ -46,9 +51,9 @@ namespace Physics {
       RealVect m_blob_center;
 
       // Indices for species
-      int m_electron_idx;
-      int m_positive_idx;
-      int m_negative_idx;
+      int m_electronIdx;
+      int m_positiveIdx;
+      int m_negativeIdx;
       int m_PhotonZ_idx;
 
 
@@ -63,20 +68,20 @@ namespace Physics {
       Real m_photoi_factor;
 
       // Zheleznyak photoionization rates
-      Real excitation_rates(const Real a_E) const;
-      Real sergey_factor(const Real a_O2frac) const;
-      Real photo_rate(const Real a_E) const;
+      Real excitationRates(const Real a_E) const;
+      Real sergeyFactor(const Real a_O2frac) const;
+      Real photoionizationRate(const Real a_E) const;
 
       // Read file into table
-      void read_tables();
+      void readTables();
     };
 
     
-    class ito_plasma_air3_lea::electron : public ItoSpecies {
+    class ItoPlasmaAir3LEA::Electron : public ItoSpecies {
     public:
-      electron() = default;
-      electron(const LookupTable& a_mobility, const LookupTable& a_diffusion);
-      ~electron();
+      Electron() = default;
+      Electron(const LookupTable& a_mobility, const LookupTable& a_diffusion);
+      ~Electron();
 
       Real mobility(const Real a_energy) const override;
       Real diffusion(const Real a_energy) const override;
@@ -86,19 +91,19 @@ namespace Physics {
       LookupTable m_diffusion;
     };
 
-    class ito_plasma_air3_lea::positive : public ItoSpecies {
+    class ItoPlasmaAir3LEA::Positive : public ItoSpecies {
     public:
-      positive();
-      ~positive();
+      Positive();
+      ~Positive();
     };
 
-    class ito_plasma_air3_lea::negative : public ItoSpecies {
+    class ItoPlasmaAir3LEA::Negative : public ItoSpecies {
     public:
-      negative();
-      ~negative();
+      Negative();
+      ~Negative();
     };
 
-    class ito_plasma_air3_lea::PhotonZ : public RtSpecies {
+    class ItoPlasmaAir3LEA::PhotonZ : public RtSpecies {
     public:
       PhotonZ();
       ~PhotonZ();
@@ -118,6 +123,7 @@ namespace Physics {
     };
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

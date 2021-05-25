@@ -90,23 +90,23 @@ ItoPlasmaAir3LFA::ItoPlasmaAir3LFA(){
   m_ItoSpecies.resize(m_num_ItoSpecies);
   m_RtSpecies.resize(m_numRtSpecies);
 
-  m_electronIdx = 0;
-  m_positiveIdx = 1;
-  m_negativeIdx = 2;
+  m_ElectronIdx = 0;
+  m_PositiveIdx = 1;
+  m_NegativeIdx = 2;
   m_PhotonZ_idx  = 0;
 
-  m_ItoSpecies[m_electronIdx] = RefCountedPtr<ItoSpecies> (new Electron());
-  m_ItoSpecies[m_positiveIdx] = RefCountedPtr<ItoSpecies> (new Positive());
-  m_ItoSpecies[m_negativeIdx] = RefCountedPtr<ItoSpecies> (new Negative());
+  m_ItoSpecies[m_ElectronIdx] = RefCountedPtr<ItoSpecies> (new Electron());
+  m_ItoSpecies[m_PositiveIdx] = RefCountedPtr<ItoSpecies> (new Positive());
+  m_ItoSpecies[m_NegativeIdx] = RefCountedPtr<ItoSpecies> (new Negative());
   m_RtSpecies[m_PhotonZ_idx]  = RefCountedPtr<RtSpecies> (new PhotonZ());
 
   // To avoid that MPI ranks draw the same particle positions, increment the seed for each rank
   m_seed += procID();
   m_rng   = std::mt19937_64(m_seed);
 
-  List<ItoParticle>& Electrons = m_ItoSpecies[m_electronIdx]->getInitialParticles();
-  List<ItoParticle>& Positives = m_ItoSpecies[m_positiveIdx]->getInitialParticles();
-  List<ItoParticle>& Negatives = m_ItoSpecies[m_negativeIdx]->getInitialParticles();
+  List<ItoParticle>& Electrons = m_ItoSpecies[m_ElectronIdx]->getInitialParticles();
+  List<ItoParticle>& Positives = m_ItoSpecies[m_PositiveIdx]->getInitialParticles();
+  List<ItoParticle>& Negatives = m_ItoSpecies[m_NegativeIdx]->getInitialParticles();
 
   Electrons.clear();
   Positives.clear();
@@ -115,14 +115,14 @@ ItoPlasmaAir3LFA::ItoPlasmaAir3LFA(){
   this->drawSphereParticles(Electrons, Positives, m_num_particles, m_blob_center, m_blob_radius, m_particle_weight, 0.0, 0.0);
 
   // Particle-particle reactions
-  m_reactions.emplace("impact_ionization",      ItoPlasmaReaction({m_electronIdx}, {m_electronIdx, m_electronIdx, m_positiveIdx}));
-  m_reactions.emplace("Electron_attachment",    ItoPlasmaReaction({m_electronIdx}, {m_negativeIdx}));
-  m_reactions.emplace("Electron_recombination", ItoPlasmaReaction({m_electronIdx, m_positiveIdx}, {}));
-  m_reactions.emplace("ion_recombination",      ItoPlasmaReaction({m_positiveIdx, m_negativeIdx}, {}));
-  m_reactions.emplace("photo_excitation",       ItoPlasmaReaction({m_electronIdx}, {m_electronIdx}, {m_PhotonZ_idx}));
+  m_reactions.emplace("impact_ionization",      ItoPlasmaReaction({m_ElectronIdx}, {m_ElectronIdx, m_ElectronIdx, m_PositiveIdx}));
+  m_reactions.emplace("Electron_attachment",    ItoPlasmaReaction({m_ElectronIdx}, {m_NegativeIdx}));
+  m_reactions.emplace("Electron_recombination", ItoPlasmaReaction({m_ElectronIdx, m_PositiveIdx}, {}));
+  m_reactions.emplace("ion_recombination",      ItoPlasmaReaction({m_PositiveIdx, m_NegativeIdx}, {}));
+  m_reactions.emplace("photo_excitation",       ItoPlasmaReaction({m_ElectronIdx}, {m_ElectronIdx}, {m_PhotonZ_idx}));
 
   // Photo-reactions
-  m_photoReactions.emplace("zheleznyak",  ItoPlasmaPhotoReaction({m_PhotonZ_idx}, {m_electronIdx, m_positiveIdx}));
+  m_photoReactions.emplace("zheleznyak",  ItoPlasmaPhotoReaction({m_PhotonZ_idx}, {m_ElectronIdx, m_PositiveIdx}));
 
   // Set the ions diffusion coefficient
   m_ion_D = m_ion_mu*Units::kb*m_T/Units::Qe;
@@ -177,7 +177,7 @@ Real ItoPlasmaAir3LFA::computeAlpha(const RealVect a_E) const {
 
 Vector<Real> ItoPlasmaAir3LFA::computeItoMobilitiesLFA(const Real a_time, const RealVect a_pos, const RealVect a_E) const {
   Vector<Real> mobilities(m_num_ItoSpecies, m_ion_mu);
-  mobilities[m_electronIdx] = m_tables.at("mobility").getEntry(a_E.vectorLength());
+  mobilities[m_ElectronIdx] = m_tables.at("mobility").getEntry(a_E.vectorLength());
 
   return mobilities;
 }
@@ -191,7 +191,7 @@ Vector<Real> ItoPlasmaAir3LFA::computeItoDiffusionLFA(const Real         a_time,
 						      const RealVect     a_E,
 						      const Vector<Real> a_cdr_densities) const {
   Vector<Real> D(m_num_ItoSpecies, m_ion_D);
-  D[m_electronIdx] = m_tables.at("diffco").getEntry(a_E.vectorLength());
+  D[m_ElectronIdx] = m_tables.at("diffco").getEntry(a_E.vectorLength());
   
   return D;
 }
