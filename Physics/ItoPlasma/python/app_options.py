@@ -22,11 +22,11 @@ def write_template(args):
                      args.discharge_home + "/Source/RadiativeTransfer/McPhoto.options",\
                      args.discharge_home + "/Source/Geometry/GeoCoarsener.options", \
                      args.discharge_home + "/Geometries/" + args.geometry + "/" + args.geometry + ".options", \
-                     args.discharge_home + "/Physics/ito_plasma/timesteppers/" + args.TimeStepper + "/" + args.TimeStepper + ".options", \
-                     args.discharge_home + "/Physics/ito_plasma/plasma_models/" + args.physics + "/" + args.physics + ".options"]
+                     args.discharge_home + "/Physics/ItoPlasma/timesteppers/" + args.TimeStepper + "/" + args.TimeStepper + ".options", \
+                     args.discharge_home + "/Physics/ItoPlasma/PlasmaModels/" + args.physics + "/" + args.physics + ".options"]
 
     if not args.CellTagger == "none":
-        options_files.append(args.discharge_home + "/Physics/ito_plasma/CellTaggers/" + args.CellTagger + "/" + args.CellTagger + ".options")
+        options_files.append(args.discharge_home + "/Physics/ItoPlasma/CellTaggers/" + args.CellTagger + "/" + args.CellTagger + ".options")
         
     for opt in options_files:
         if os.path.exists(opt):

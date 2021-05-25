@@ -32,10 +32,10 @@ src_dirs = $(DISCHARGE_HOME)/Source \
 	$(DISCHARGE_HOME)/Source/RadiativeTransfer \
 	$(DISCHARGE_HOME)/Source/SigmaSolver \
 	$(DISCHARGE_HOME)/Geometries/RodDielectric\
-	$(DISCHARGE_HOME)/Physics/ito_plasma \
-	$(DISCHARGE_HOME)/Physics/ito_plasma/cell_taggers/ito_plasma_streamer_tagger\
-	$(DISCHARGE_HOME)/Physics/ito_plasma/time_steppers/ito_plasma_godunov\
-	$(DISCHARGE_HOME)/Physics/ito_plasma/plasma_models/ito_plasma_air3
+	$(DISCHARGE_HOME)/Physics/ItoPlasma \
+	$(DISCHARGE_HOME)/Physics/ItoPlasma/CellTaggers/ito_plasma_streamer_tagger\
+	$(DISCHARGE_HOME)/Physics/ItoPlasma/TimeSteppers/ito_plasma_godunov\
+	$(DISCHARGE_HOME)/Physics/ItoPlasma/PlasmaModels/ito_plasma_air3
 
 
 include $(CHOMBO_HOME)/mk/Make.example

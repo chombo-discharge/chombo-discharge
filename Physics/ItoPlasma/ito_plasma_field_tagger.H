@@ -1,5 +1,5 @@
 /*!
-  @file   ito_plasma_CdrPlasmaCurvatureTagger.H
+  @file   ito_plasma_field_tagger.H
   @brief  Declaration of an abstract field-only tagging class for ito plasmas
   @author Robert Marskar
   @date   May. 2018
@@ -19,18 +19,18 @@ namespace Physics {
       @details This class fetches the point-wise electric field. The class is pure, so users must implement 
       the actual tagging criterion themselves. 
     */
-    class ito_plasma_CdrPlasmaCurvatureTagger : public ito_plasma_tagger {
+    class ito_plasma_field_tagger : public ito_plasma_tagger {
     public:
 
       /*!
 	@brief Weak constructor, must subsequently call define
       */
-      ito_plasma_CdrPlasmaCurvatureTagger();
+      ito_plasma_field_tagger();
 
       /*!
 	@brief Destructor
       */
-      ~ito_plasma_CdrPlasmaCurvatureTagger();
+      ~ito_plasma_field_tagger();
 
       /*!
 	@brief Compute tracer fields

@@ -1,11 +1,11 @@
 /*!
-  @file   ito_plasma_CdrPlasmaCurvatureTagger.cpp
-  @brief  Implementation of ito_plasma_CdrPlasmaCurvatureTagger.H
+  @file   ito_plasma_field_tagger.cpp
+  @brief  Implementation of ito_plasma_field_tagger.H
   @author Robert Marskar
   @date   June 2020
 */
 
-#include "ito_plasma_CdrPlasmaCurvatureTagger.H"
+#include "ito_plasma_field_tagger.H"
 #include <CD_DataOps.H>
 
 #include <EBArith.H>
@@ -13,21 +13,21 @@
 #include "CD_NamespaceHeader.H"
 using namespace Physics::ito_plasma;
 
-ito_plasma_CdrPlasmaCurvatureTagger::ito_plasma_CdrPlasmaCurvatureTagger(){
-  CH_TIME("ito_plasma_CdrPlasmaCurvatureTagger::ito_plasma_CdrPlasmaCurvatureTagger");
+ito_plasma_field_tagger::ito_plasma_field_tagger(){
+  CH_TIME("ito_plasma_field_tagger::ito_plasma_field_tagger");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_CdrPlasmaCurvatureTagger::ito_plasma_CdrPlasmaCurvatureTagger" << endl;
+    pout() << "ito_plasma_field_tagger::ito_plasma_field_tagger" << endl;
   }
 
-  m_name = "ito_plasma_CdrPlasmaCurvatureTagger";
+  m_name = "ito_plasma_field_tagger";
 }
 
-ito_plasma_CdrPlasmaCurvatureTagger::~ito_plasma_CdrPlasmaCurvatureTagger(){
+ito_plasma_field_tagger::~ito_plasma_field_tagger(){
 
 }
 
-void ito_plasma_CdrPlasmaCurvatureTagger::allocateStorage(){
-  CH_TIME("ito_plasma_CdrPlasmaCurvatureTagger::allocateStorage");
+void ito_plasma_field_tagger::allocateStorage(){
+  CH_TIME("ito_plasma_field_tagger::allocateStorage");
   if(m_verbosity > 5){
     pout() << m_name + "::allocateStorage" << endl;
   }
@@ -37,8 +37,8 @@ void ito_plasma_CdrPlasmaCurvatureTagger::allocateStorage(){
   m_amr->allocate(m_grad_E,  m_realm, m_phase, SpaceDim);
 }
 
-void ito_plasma_CdrPlasmaCurvatureTagger::deallocateStorage(){
-  CH_TIME("ito_plasma_CdrPlasmaCurvatureTagger::deallocateStorage");
+void ito_plasma_field_tagger::deallocateStorage(){
+  CH_TIME("ito_plasma_field_tagger::deallocateStorage");
   if(m_verbosity > 5){
     pout() << m_name + "::deallocateStorage" << endl;
   }
@@ -48,8 +48,8 @@ void ito_plasma_CdrPlasmaCurvatureTagger::deallocateStorage(){
   m_amr->deallocate(m_grad_E);
 }
 
-void ito_plasma_CdrPlasmaCurvatureTagger::computeElectricField(EBAMRCellData& a_E, EBAMRCellData& a_grad_E){
-  CH_TIME("ito_plasma_CdrPlasmaCurvatureTagger::computeElectricField");
+void ito_plasma_field_tagger::computeElectricField(EBAMRCellData& a_E, EBAMRCellData& a_grad_E){
+  CH_TIME("ito_plasma_field_tagger::computeElectricField");
   if(m_verbosity > 5){
     pout() << m_name + "::computeElectricField" << endl;
   }
@@ -66,8 +66,8 @@ void ito_plasma_CdrPlasmaCurvatureTagger::computeElectricField(EBAMRCellData& a_
   m_amr->interpToCentroids(a_grad_E, m_realm, m_phase);
 }
 
-void ito_plasma_CdrPlasmaCurvatureTagger::computeTracers(){
-  CH_TIME("ito_plasma_CdrPlasmaCurvatureTagger::computeTracers");
+void ito_plasma_field_tagger::computeTracers(){
+  CH_TIME("ito_plasma_field_tagger::computeTracers");
   if(m_verbosity > 5){
     pout() << m_name + "::computeTracers" << endl;
   }

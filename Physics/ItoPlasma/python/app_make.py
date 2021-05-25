@@ -49,11 +49,11 @@ def write_template(args):
     makef.write('\t$(DISCHARGE_HOME)/Source/RadiativeTransfer \\\n')
     makef.write('\t$(DISCHARGE_HOME)/Source/SigmaSolver \\\n')
     makef.write('\t$(DISCHARGE_HOME)/Geometries/' + args.geometry + '\\\n')
-    makef.write('\t$(DISCHARGE_HOME)/Physics/ito_plasma \\\n')
+    makef.write('\t$(DISCHARGE_HOME)/Physics/ItoPlasma \\\n')
     if not args.CellTagger == "none":
-        makef.write('\t$(DISCHARGE_HOME)/Physics/ito_plasma/CellTaggers/'  + args.CellTagger + '\\\n')
-    makef.write('\t$(DISCHARGE_HOME)/Physics/ito_plasma/timesteppers/' + args.TimeStepper + '\\\n')
-    makef.write('\t$(DISCHARGE_HOME)/Physics/ito_plasma/plasma_models/' + args.physics + '\n')
+        makef.write('\t$(DISCHARGE_HOME)/Physics/ItoPlasma/CellTaggers/'  + args.CellTagger + '\\\n')
+    makef.write('\t$(DISCHARGE_HOME)/Physics/ItoPlasma/timesteppers/' + args.TimeStepper + '\\\n')
+    makef.write('\t$(DISCHARGE_HOME)/Physics/ItoPlasma/PlasmaModels/' + args.physics + '\n')
     makef.write('\n')
 
     makef.write('\n')
