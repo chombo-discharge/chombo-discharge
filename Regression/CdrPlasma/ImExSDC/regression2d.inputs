@@ -275,7 +275,7 @@ CdrPlasmaImExSdcStepper.profile_steps     = false  # Profile time steps with ord
 # ---------------------
 # Advection extrapolation. Currently does NOT work with subcycling (but I'm working on it...)
 # ---------------------
-CdrPlasmaImExSdcStepper.extrap_advect = true      # Time extrapolate with source and diffusion in advection step
+CdrPlasmaImExSdcStepper.extrap_advect = false      # Time extrapolate with source and diffusion in advection step
 
 # ====================================================================================================
 # AIR9EED_BOURDON CLASS OPTIONS

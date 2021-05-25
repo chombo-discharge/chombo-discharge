@@ -611,7 +611,7 @@ void Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialD
 
 
   // Regrid the operators
-  const int regsize = m_timeStepper->getRedistributionRegSize();
+  const int regsize = 1; // Relic of the ancient past when we specified how many variables to redistribute. 
   m_amr->regridOperators(a_lmin, a_lmax, regsize);
   const Real base_regrid = MPI_Wtime(); // Base regrid time
 
@@ -1306,7 +1306,7 @@ void Driver::setupFresh(const int a_initialRegrids){
   this->getGeometryTags();
   
   // Determine the redistribution register size
-  const int regsize = m_timeStepper->getRedistributionRegSize();
+  const int regsize = 1; // m_timeStepper->getRedistributionRegSize();
 
   // When we're setting up fresh, we need to regrid everything from the base level
   // and upwards. We have tags on m_geometricTagsDepth, so that is our current finest level. 
@@ -2383,7 +2383,7 @@ void Driver::readCheckpointFile(const std::string& a_restartFile){
   m_amr->setGrids(boxes, sim_loads);
   
   // Instantiate solvers and register operators
-  const int regsize = m_timeStepper->getRedistributionRegSize();
+  const int regsize = 1; // m_timeStepper->getRedistributionRegSize();
   m_timeStepper->setupSolvers();
   m_timeStepper->registerOperators();
   m_amr->regridOperators(base_level, finest_level, regsize);
