@@ -74,7 +74,7 @@ namespace Physics {
       /*!
 	@brief Get all species
       */
-      const Vector<RefCountedPtr<ItoSpecies> >& get_ItoSpecies() const;
+      const Vector<RefCountedPtr<ItoSpecies> >& getItoSpecies() const;
 
       /*!
 	@brief Get all Photons

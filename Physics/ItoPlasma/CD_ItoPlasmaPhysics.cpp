@@ -1,19 +1,25 @@
+/* chombo-discharge
+ * Copyright © 2021 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+ */
+
 /*!
-  @file   ItoPlasmaPhysics.cpp
-  @brief  Implementation of ItoPlasmaPhysics.H
+  @file   CD_ItoPlasmaPhysics.cpp
+  @brief  Implementation of CD_ItoPlasmaPhysics.H
   @author Robert Marskar
-  @date   June 2020
 */
 
-#include <CD_ItoPlasmaPhysics.H>
-#include <CD_Units.H>
-
-#include <PolyGeom.H>
-
+// Std includes
 #include <fstream>
 #include <sstream>
 
-#include "CD_NamespaceHeader.H"
+// Chombo includes
+#include <PolyGeom.H>
+
+// Our includes
+#include <CD_ItoPlasmaPhysics.H>
+#include <CD_Units.H>
+#include <CD_NamespaceHeader.H>
   
 using namespace Physics::ItoPlasma;
 
@@ -46,7 +52,7 @@ ItoPlasmaPhysics::ItoPlasmaPhysics(){
 ItoPlasmaPhysics::~ItoPlasmaPhysics(){
 }
 
-const Vector<RefCountedPtr<ItoSpecies> >& ItoPlasmaPhysics::get_ItoSpecies() const { 
+const Vector<RefCountedPtr<ItoSpecies> >& ItoPlasmaPhysics::getItoSpecies() const { 
   return m_ItoSpecies; 
 }
 
@@ -103,4 +109,5 @@ void ItoPlasmaPhysics::readFile(LookupTable& a_table, const std::string a_file){
   }
   infile.close();
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
