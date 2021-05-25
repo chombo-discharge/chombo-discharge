@@ -23,7 +23,7 @@ def write_template(args):
                      args.discharge_home + "/Source/Geometry/GeoCoarsener.options", \
                      args.discharge_home + "/Geometries/" + args.geometry + "/" + args.geometry + ".options", \
                      args.discharge_home + "/Physics/CdrPlasma/timesteppers/" + args.TimeStepper + "/" + args.TimeStepper + ".options", \
-                     args.discharge_home + "/Physics/CdrPlasma/plasma_models/" + args.physics + "/" + args.physics + ".options"]
+                     args.discharge_home + "/Physics/CdrPlasma/PlasmaModels/" + args.physics + "/" + args.physics + ".options"]
 
     if not args.CellTagger == "none":
         options_files.append(args.discharge_home + "/Physics/CdrPlasma/CellTaggers/" + args.CellTagger + "/" + args.CellTagger + ".options")

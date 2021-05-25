@@ -5,7 +5,7 @@ def write_template(args):
     # Make sure that every class can be found where they should
     geofile = args.discharge_home + "/Geometries" + "/" + args.geometry + "/" + args.geometry + ".H"
     tsfile  = args.discharge_home + "/Physics/CdrPlasma/timesteppers" + "/" + args.TimeStepper + "/" + args.TimeStepper + ".H"
-    kinfile = args.discharge_home + "/Physics/CdrPlasma/plasma_models" + "/" + args.physics + "/" + args.physics + ".H"
+    kinfile = args.discharge_home + "/Physics/CdrPlasma/PlasmaModels" + "/" + args.physics + "/" + args.physics + ".H"
     tagfile = args.discharge_home + "/Physics/CdrPlasma/CellTaggers" +  "/" + args.CellTagger + "/" + args.CellTagger + ".H"
     if not os.path.exists(geofile):
         print 'Could not find ' + geofile

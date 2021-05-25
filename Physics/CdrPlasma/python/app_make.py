@@ -52,7 +52,7 @@ def write_template(args):
     if not args.CellTagger == "none":
         makef.write('\t$(DISCHARGE_HOME)/Physics/CdrPlasma/CellTaggers/'  + args.CellTagger + '\\\n')
     makef.write('\t$(DISCHARGE_HOME)/Physics/CdrPlasma/timesteppers/' + args.TimeStepper + '\\\n')
-    makef.write('\t$(DISCHARGE_HOME)/Physics/CdrPlasma/plasma_models/' + args.physics + '\n')
+    makef.write('\t$(DISCHARGE_HOME)/Physics/CdrPlasma/PlasmaModels/' + args.physics + '\n')
     makef.write('\n')
 
     makef.write('\n')
