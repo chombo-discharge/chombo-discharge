@@ -6,7 +6,7 @@
 #include <CD_CdrGodunov.H>
 #include <CD_RtLayoutImplem.H>
 #include <CD_EddingtonSP1.H>
-#include "air9eed_bourdon.H"
+#include <CD_CdrPlasmaAir9EedBourdon.H>
 #include <CD_RodDielectric.H>
 #include <CD_CdrPlasmaImExSdcStepper.H>
 #include <CD_CdrPlasmaStreamerTagger.H>
@@ -34,7 +34,7 @@ int main(int argc, char* argv[]){
   // Get potential from input script 
   std::string basename; 
   {
-    ParmParse pp("air9eed_bourdon");
+    ParmParse pp("CdrPlasmaAir9EedBourdon");
     pp.get("potential", g_potential);
     pp.get("basename",  basename);
     setPoutBaseName(basename);
@@ -46,7 +46,7 @@ int main(int argc, char* argv[]){
   RefCountedPtr<GeoCoarsener> geocoarsen        = RefCountedPtr<GeoCoarsener> (new GeoCoarsener());
 
   // Set up physics 
-  RefCountedPtr<CdrPlasmaPhysics> physics      = RefCountedPtr<CdrPlasmaPhysics> (new air9eed_bourdon());
+  RefCountedPtr<CdrPlasmaPhysics> physics      = RefCountedPtr<CdrPlasmaPhysics> (new CdrPlasmaAir9EedBourdon());
   RefCountedPtr<CdrPlasmaStepper> timestepper  = RefCountedPtr<CdrPlasmaStepper> (new CdrPlasmaImExSdcStepper(physics));
   RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (new CdrPlasmaStreamerTagger(physics, timestepper, amr, compgeom));
 

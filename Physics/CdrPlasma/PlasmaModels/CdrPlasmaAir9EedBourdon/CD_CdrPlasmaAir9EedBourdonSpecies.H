@@ -1,16 +1,21 @@
+/* chombo-discharge
+ * Copyright © 2021 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+ */
+
 /*!
-  @file   air9eed_bourdon.H
-  @brief  Declaration of species for the BOLSIG-based 11-species air model
+  @file   CD_CdrPlasmaAir9EedBourdonSpecies.H
+  @brief  Declaration of species for the CdrPlasmaAir9EedBourdon model
   @author Robert Marskar
-  @date   Feb. 2018
 */
 
-#include "air9eed_bourdon.H"
+#ifndef CD_CdrPlasmaAir9EedBourdonSpecies_H
+#define CD_CdrPlasmaAir9EedBourdonSpecies_H
 
-#ifndef _AIR9EED_BOURDON_SPECIES_
-#define _AIR9EED_BOURDON_SPECIES_
+// Our includes
+#include <CD_CdrPlasmaAir9EedBourdon.H>
+#include <CD_NamespaceHeader.H>
 
-#include "CD_NamespaceHeader.H"
 namespace Physics {
   namespace CdrPlasma {
 
@@ -18,7 +23,7 @@ namespace Physics {
     /*!
       @brief Electron energy distribution
     */
-    class air9eed_bourdon::eed : public CdrSpecies {
+    class CdrPlasmaAir9EedBourdon::eed : public CdrSpecies {
     public:
 
       /*!
@@ -47,18 +52,18 @@ namespace Physics {
     /*!
       @brief Electron class
     */
-    class air9eed_bourdon::electron : public CdrSpecies {
+    class CdrPlasmaAir9EedBourdon::Electron : public CdrSpecies {
     public:
 
       /*!
 	@brief Constructor
       */
-      electron();
+      Electron();
 
       /*!
 	@brief Destructor
       */
-      virtual ~electron();
+      virtual ~Electron();
 
       /*!
 	@brief Initial data
@@ -77,7 +82,7 @@ namespace Physics {
     /*!
       @brief N2plus class
     */
-    class air9eed_bourdon::N2plus : public CdrSpecies {
+    class CdrPlasmaAir9EedBourdon::N2plus : public CdrSpecies {
     public:
 
       /*!
@@ -103,7 +108,7 @@ namespace Physics {
     /*!
       @brief N4plus class
     */
-    class air9eed_bourdon::N4plus : public CdrSpecies {
+    class CdrPlasmaAir9EedBourdon::N4plus : public CdrSpecies {
     public:
 
       /*!
@@ -127,7 +132,7 @@ namespace Physics {
     /*!
       @brief O2plus class
     */
-    class air9eed_bourdon::O2plus : public CdrSpecies {
+    class CdrPlasmaAir9EedBourdon::O2plus : public CdrSpecies {
     public:
 
       /*!
@@ -153,7 +158,7 @@ namespace Physics {
     /*!
       @brief O4plus class
     */
-    class air9eed_bourdon::O4plus : public CdrSpecies {
+    class CdrPlasmaAir9EedBourdon::O4plus : public CdrSpecies {
     public:
 
       /*!
@@ -177,7 +182,7 @@ namespace Physics {
     /*!
       @brief O2plusN2 class
     */
-    class air9eed_bourdon::O2plusN2 : public CdrSpecies {
+    class CdrPlasmaAir9EedBourdon::O2plusN2 : public CdrSpecies {
     public:
 
       /*!
@@ -201,7 +206,7 @@ namespace Physics {
     /*!
       @brief O2minus class
     */
-    class air9eed_bourdon::O2minus : public CdrSpecies {
+    class CdrPlasmaAir9EedBourdon::O2minus : public CdrSpecies {
     public:
 
       /*!
@@ -225,7 +230,7 @@ namespace Physics {
     /*!
       @brief Ominus class
     */
-    class air9eed_bourdon::Ominus : public CdrSpecies {
+    class CdrPlasmaAir9EedBourdon::Ominus : public CdrSpecies {
     public:
 
       /*!
@@ -250,17 +255,17 @@ namespace Physics {
     /*!
       @brief First Contribution to \gamma + O2 -> e + O2minus
     */
-    class air9eed_bourdon::Photon_one : public RtSpecies {
+    class CdrPlasmaAir9EedBourdon::PhotonOne : public RtSpecies {
     public:
       /*!
 	@brief Constructor
       */
-      Photon_one();
+      PhotonOne();
 
       /*!
 	@brief Destructor
       */
-      ~Photon_one();
+      ~PhotonOne();
 
       /*!
 	@brief Get the absorption coefficient
@@ -270,17 +275,17 @@ namespace Physics {
       /*!
 	@brief Get the lambda coefficient
       */
-      virtual Real get_lambda() const;
+      virtual Real getLambda() const;
 
       /*!
 	@brief Get the A-coefficient
       */
-      virtual Real get_A() const;
+      virtual Real getA() const;
 
       /*!
 	@brief Get the partial oxygen pressure
       */
-      virtual Real get_pO2() const;
+      virtual Real getPO2() const;
 
     protected:
       /*!
@@ -302,17 +307,17 @@ namespace Physics {
     /*!
       @brief First Contribution to \gamma + O2 -> e + O2minus
     */
-    class air9eed_bourdon::Photon_two : public RtSpecies {
+    class CdrPlasmaAir9EedBourdon::PhotonTwo : public RtSpecies {
     public:
       /*!
 	@brief Constructor
       */
-      Photon_two();
+      PhotonTwo();
 
       /*!
 	@brief Destructor
       */
-      ~Photon_two();
+      ~PhotonTwo();
 
       /*!
 	@brief Get the absorption coefficient
@@ -322,17 +327,17 @@ namespace Physics {
       /*!
 	@brief Get the lambda coefficient
       */
-      virtual Real get_lambda() const;
+      virtual Real getLambda() const;
 
       /*!
 	@brief Get the A-coefficient
       */
-      virtual Real get_A() const;
+      virtual Real getA() const;
 
       /*!
 	@brief Get the partial oxygen pressure
       */
-      virtual Real get_pO2() const;
+      virtual Real getPO2() const;
 
     protected:
       /*!
@@ -354,17 +359,17 @@ namespace Physics {
     /*!
       @brief First Contribution to \gamma + O2 -> e + O2minus
     */
-    class air9eed_bourdon::Photon_three : public RtSpecies {
+    class CdrPlasmaAir9EedBourdon::PhotonThree : public RtSpecies {
     public:
       /*!
 	@brief Constructor
       */
-      Photon_three();
+      PhotonThree();
 
       /*!
 	@brief Destructor
       */
-      ~Photon_three();
+      ~PhotonThree();
 
       /*!
 	@brief Get the absorption coefficient
@@ -374,17 +379,17 @@ namespace Physics {
       /*!
 	@brief Get the lambda coefficient
       */
-      virtual Real get_lambda() const;
+      virtual Real getLambda() const;
 
       /*!
 	@brief Get the A-coefficient
       */
-      virtual Real get_A() const;
+      virtual Real getA() const;
 
       /*!
 	@brief Get the partial oxygen pressure
       */
-      virtual Real get_pO2() const;
+      virtual Real getPO2() const;
 
     protected:
       /*!
@@ -404,6 +409,7 @@ namespace Physics {
     };
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

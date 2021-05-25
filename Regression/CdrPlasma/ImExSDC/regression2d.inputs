@@ -1,8 +1,8 @@
 # ====================================================================================================
 # POTENTIAL CURVE
 # ====================================================================================================
-air9eed_bourdon.potential = -10E3
-air9eed_bourdon.basename  = pout
+CdrPlasmaAir9EedBourdon.potential = -10E3
+CdrPlasmaAir9EedBourdon.basename  = pout
 
 # ====================================================================================================
 # AMR_MESH OPTIONS
@@ -280,28 +280,28 @@ CdrPlasmaImExSdcStepper.extrap_advect = true      # Time extrapolate with source
 # ====================================================================================================
 # AIR9EED_BOURDON CLASS OPTIONS
 # ====================================================================================================
-air9eed_bourdon.gas_pressure       = 1.0                          # Gas pressure
-air9eed_bourdon.transport_file     = air_transport_energy.txt     # Transport file
-air9eed_bourdon.uniform_tables     = 100	                  # Converted # of points in transport file
+CdrPlasmaAir9EedBourdon.gas_pressure       = 1.0                          # Gas pressure
+CdrPlasmaAir9EedBourdon.transport_file     = air_transport_energy.txt     # Transport file
+CdrPlasmaAir9EedBourdon.uniform_tables     = 100	                  # Converted # of points in transport file
 
-air9eed_bourdon.initial_ionization = 1.E10                        # Initial background ionization
+CdrPlasmaAir9EedBourdon.initial_ionization = 1.E10                        # Initial background ionization
 
-air9eed_bourdon.diffusive_electrons = true                        # Diffusive electrons or not
-air9eed_bourdon.mobile_ions         = true                        # Mobile ions or not
-air9eed_bourdon.diffusive_ions      = false                       # Diffusive ions or not
-air9eed_bourdon.ion_mobility        = 2.E-4                       # Ion mobility
+CdrPlasmaAir9EedBourdon.diffusive_electrons = true                        # Diffusive electrons or not
+CdrPlasmaAir9EedBourdon.mobile_ions         = true                        # Mobile ions or not
+CdrPlasmaAir9EedBourdon.diffusive_ions      = false                       # Diffusive ions or not
+CdrPlasmaAir9EedBourdon.ion_mobility        = 2.E-4                       # Ion mobility
 
-air9eed_bourdon.electrode_townsend2           = 1.E-3             # SEE on electrodes
-air9eed_bourdon.dielectric_townsend2          = 1.E-6             # SEE on dielectrics
-air9eed_bourdon.electrode_quantum_efficiency  = 1.E-6             # SEE on electrodes
-air9eed_bourdon.dielectric_quantum_efficiency = 1.E-6             # SEE on dielectrics
+CdrPlasmaAir9EedBourdon.electrode_townsend2           = 1.E-3             # SEE on electrodes
+CdrPlasmaAir9EedBourdon.dielectric_townsend2          = 1.E-6             # SEE on dielectrics
+CdrPlasmaAir9EedBourdon.electrode_quantum_efficiency  = 1.E-6             # SEE on electrodes
+CdrPlasmaAir9EedBourdon.dielectric_quantum_efficiency = 1.E-6             # SEE on dielectrics
 
-air9eed_bourdon.cathode_work    = 3                               # Work function (in eV) for electrodes
-air9eed_bourdon.dielectric_work = 1	                          # Work function (in eV) for dielectrics
+CdrPlasmaAir9EedBourdon.cathode_work    = 3                               # Work function (in eV) for electrodes
+CdrPlasmaAir9EedBourdon.dielectric_work = 1	                          # Work function (in eV) for dielectrics
 
-air9eed_bourdon.quenching_pressure         = 0.03947              # Quenching pressure
-air9eed_bourdon.photoionization_efficiency = 0.1                  # Photoionization efficiency
-air9eed_bourdon.excitation_efficiency      = 0.6                  # Excitation efficiency
+CdrPlasmaAir9EedBourdon.quenching_pressure         = 0.03947              # Quenching pressure
+CdrPlasmaAir9EedBourdon.photoionization_efficiency = 0.1                  # Photoionization efficiency
+CdrPlasmaAir9EedBourdon.excitation_efficiency      = 0.6                  # Excitation efficiency
 
 
 # ====================================================================================================
