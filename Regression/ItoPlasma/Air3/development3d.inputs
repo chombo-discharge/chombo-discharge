@@ -206,30 +206,30 @@ RodDielectric.sphere.radius             = 1.0           # Radius
 # ==================================================================================================== 
 # ITO_PLASMA_GODUNOV CLASS OPTIONS
 # ====================================================================================================
-ito_plasma_godunov.verbosity      = -10            # Verbosity
-ito_plasma_godunov.min_dt         = 1.E-10         # Minimum dt
-ito_plasma_godunov.max_dt         = 1.E-10         # Maximum dt
-ito_plasma_godunov.particle_realm = particle       # Particle Realm. Default is primal
-ito_plasma_godunov.box_sorting    = none         # Box sorting for load balancing. 'none', 'shuffle', 'std', 'morton'
-ito_plasma_godunov.load_balance   = true           # Load balance or not
-ito_plasma_godunov.load_index     = 0              # Which species to use for load balancing (-1 => all)
-ito_plasma_godunov.load_ppc       = 0              # Load estimate per cell (in addition to ppc)
-ito_plasma_godunov.nwo_reactions  = true           # Use or don't use the new reaction algorithm (presumably load balances better)
-ito_plasma_godunov.max_cells_hop  = 1.0            # Maximum cells to move in one time step
-ito_plasma_godunov.which_dt       = advection      # 'advection', 'diffusion', 'AdvectionDiffusion'
-ito_plasma_godunov.ppc            = 32             # Superparticle number of cells
-ito_plasma_godunov.eb_tolerance   = 1.0            # How many dx into the cell particles can live
-ito_plasma_godunov.merge_interval = 1              # How often to make superparticles
-ito_plasma_godunov.relax_factor   = 9999.5         # Factor in front of relaxation time	
-ito_plasma_godunov.regrid_super   = true           # Make superparticles after regrid or not
-ito_plasma_godunov.algorithm      = euler_maruyama # 'euler', 'euler_maruyama', 'midpoint'
-ito_plasma_godunov.profile        = true           # Profile advance or not
-ito_plasma_godunov.pvr_buffer     = 0              # PVR buffer for particles (overrides ito and McPhoto)
-ito_plasma_godunov.halo_buffer    = 2              # Halo buffer for particles (overrides ito and McPhoto)
-ito_plasma_godunov.filter_rho     = false          # Filter space charge or not
-ito_plasma_godunov.filter_cond    = false          # Filter conductivity or not. 
-ito_plasma_godunov.filter_1       = 0.5 1 4 true   # alpha = 0.5, stride = 1, N = 1, Compensation step = true.
-ito_plasma_godunov.filter_2       = 0.5 2 4 true   # alpha = 0.5, stride = 1, N = 1, Compensation step = true.
+ItoPlasmaGodunovStepper.verbosity      = -10            # Verbosity
+ItoPlasmaGodunovStepper.min_dt         = 1.E-10         # Minimum dt
+ItoPlasmaGodunovStepper.max_dt         = 1.E-10         # Maximum dt
+ItoPlasmaGodunovStepper.particle_realm = particle       # Particle Realm. Default is primal
+ItoPlasmaGodunovStepper.box_sorting    = none         # Box sorting for load balancing. 'none', 'shuffle', 'std', 'morton'
+ItoPlasmaGodunovStepper.load_balance   = true           # Load balance or not
+ItoPlasmaGodunovStepper.load_index     = 0              # Which species to use for load balancing (-1 => all)
+ItoPlasmaGodunovStepper.load_ppc       = 0              # Load estimate per cell (in addition to ppc)
+ItoPlasmaGodunovStepper.nwo_reactions  = true           # Use or don't use the new reaction algorithm (presumably load balances better)
+ItoPlasmaGodunovStepper.max_cells_hop  = 1.0            # Maximum cells to move in one time step
+ItoPlasmaGodunovStepper.which_dt       = advection      # 'advection', 'diffusion', 'AdvectionDiffusion'
+ItoPlasmaGodunovStepper.ppc            = 32             # Superparticle number of cells
+ItoPlasmaGodunovStepper.eb_tolerance   = 1.0            # How many dx into the cell particles can live
+ItoPlasmaGodunovStepper.merge_interval = 1              # How often to make superparticles
+ItoPlasmaGodunovStepper.relax_factor   = 9999.5         # Factor in front of relaxation time	
+ItoPlasmaGodunovStepper.regrid_super   = true           # Make superparticles after regrid or not
+ItoPlasmaGodunovStepper.algorithm      = euler_maruyama # 'euler', 'euler_maruyama', 'midpoint'
+ItoPlasmaGodunovStepper.profile        = true           # Profile advance or not
+ItoPlasmaGodunovStepper.pvr_buffer     = 0              # PVR buffer for particles (overrides ito and McPhoto)
+ItoPlasmaGodunovStepper.halo_buffer    = 2              # Halo buffer for particles (overrides ito and McPhoto)
+ItoPlasmaGodunovStepper.filter_rho     = false          # Filter space charge or not
+ItoPlasmaGodunovStepper.filter_cond    = false          # Filter conductivity or not. 
+ItoPlasmaGodunovStepper.filter_1       = 0.5 1 4 true   # alpha = 0.5, stride = 1, N = 1, Compensation step = true.
+ItoPlasmaGodunovStepper.filter_2       = 0.5 2 4 true   # alpha = 0.5, stride = 1, N = 1, Compensation step = true.
 
 # ====================================================================================================
 # ITO_PLASMA_AIR3 CLASS OPTIONS

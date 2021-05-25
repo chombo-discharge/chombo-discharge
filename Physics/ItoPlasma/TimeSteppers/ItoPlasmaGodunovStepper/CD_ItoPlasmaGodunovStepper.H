@@ -1,32 +1,37 @@
+/* chombo-discharge
+ * Copyright © 2021 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+ */
+
 /*!
-  @file   ItoPlasmaStepper.H
+  @file   CD_ItoPlasmaGodunovStepper.H
+  @brief  Declaration of a class which uses a semi-implicit Godunov method for Ito plasma equations
   @author Robert Marskar
-  @date   May 2020
-  @brief  Abstract class for integrating the Ito plasma equations
 */
 
-#ifndef _ITO_PLASMA_GODUNOV_
-#define _ITO_PLASMA_GODUNOV_
+#ifndef CD_ItoPlasmaGodunovStepper_H
+#define CD_ItoPlasmaGodunovStepper_H
 
+// Our includes
 #include <CD_ItoPlasmaStepper.H>
-#include "godunov_particle.H"
+#include <godunov_particle.H>
+#include <CD_NamespaceHeader.H>
 
-#include "CD_NamespaceHeader.H"
 namespace Physics {
   namespace ItoPlasma {
 
-    class ito_plasma_godunov : public ItoPlasmaStepper {
+    class ItoPlasmaGodunovStepper : public ItoPlasmaStepper {
     public:
 
       // Ctor and dtor
-      ito_plasma_godunov() = delete;
-      ito_plasma_godunov(RefCountedPtr<ItoPlasmaPhysics>& a_physics);
-      ~ito_plasma_godunov();
+      ItoPlasmaGodunovStepper() = delete;
+      ItoPlasmaGodunovStepper(RefCountedPtr<ItoPlasmaPhysics>& a_physics);
+      ~ItoPlasmaGodunovStepper();
 
       // IO routines
       int getNumberOfPlotVariables() const override;
       void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const override;
-      void write_conductivity(EBAMRCellData& a_output, int& a_icomp) const;
+      void writeConductivity(EBAMRCellData& a_output, int& a_icomp) const;
 
       // Advance routines
       Real advance(const Real a_dt) override;
@@ -83,42 +88,44 @@ namespace Physics {
       int m_merge_interval; // How often to merge superparticles
 
       // Routine for setting up extra particle storage
-      void setup_runtime_storage();
+      void setupRuntimeStorage();
 
       // Global routines
-      void set_old_positions();
-      void remap_godunov_particles(Vector<ParticleContainer<godunov_particle>* >& a_particles, const WhichParticles a_which);
+      void setOldPositions();
+      void remapGodunovParticles(Vector<ParticleContainer<godunov_particle>* >& a_particles, const WhichParticles a_which);
       void deposit_godunov_particles(const Vector<ParticleContainer<godunov_particle>* >& a_particles, const WhichParticles a_which);
-      void clear_godunov_particles(const Vector<ParticleContainer<godunov_particle>* >& a_particles, const WhichParticles a_which);
+      void clearGodunovParticles(const Vector<ParticleContainer<godunov_particle>* >& a_particles, const WhichParticles a_which);
 
       // Routines for semi-implicit Poisson solution
-      void compute_all_conductivities(const Vector<ParticleContainer<godunov_particle>* >& a_particles);
+      void computeAllConductivities(const Vector<ParticleContainer<godunov_particle>* >& a_particles);
       void compute_cell_conductivity(EBAMRCellData& a_conductivity, const Vector<ParticleContainer<godunov_particle>* >& a_particles);
       void compute_face_conductivity();
-      void setup_semi_implicit_poisson(const Real a_dt);
+      void setupSemiImplicitPoisson(const Real a_dt);
 
       // Routines for standard Poisson
-      void setup_standard_poisson();
+      void setupStandardPoisson();
 
       // Routines for semi-implicit regridding
-      void copy_conductivity_particles(Vector<ParticleContainer<godunov_particle>* >& a_conductivity_particles);
-      void copy_rho_dagger_particles(Vector<ParticleContainer<godunov_particle>* >& a_rho_dagger_particles);
-      void compute_regrid_conductivity();
-      void compute_regrid_rho();
+      void copyConductivityParticles(Vector<ParticleContainer<godunov_particle>* >& a_conductivity_particles);
+      void copyRhoDaggerParticles(Vector<ParticleContainer<godunov_particle>* >& a_rho_dagger_particles);
+      void computeRegridConductivity();
+      void computeRegridRho();
 
       // Specific routines for Euler-Maruyama
-      void advanceParticles_euler_maruyama(const Real a_dt);
-      void diffuse_particles_euler_maruyama(Vector<ParticleContainer<godunov_particle>* >& a_rho_dagger, const Real a_dt);
-      void step_euler_maruyama(const Real a_dt);
+      void advanceParticlesEulerMaruyama(const Real a_dt);
+      void diffuseParticlesEulerMaruyama(Vector<ParticleContainer<godunov_particle>* >& a_rho_dagger, const Real a_dt);
+      void stepEulerMaruyama(const Real a_dt);
       
       // Specific routines for trapezoidal integration
-      void advanceParticles_trapezoidal(const Real a_dt);
-      void pre_trapezoidal_predictor(Vector<ParticleContainer<godunov_particle>* >& a_rho_dagger, const Real a_dt);
-      void pre_trapezoidal_corrector(Vector<ParticleContainer<godunov_particle>* >& a_rho_dagger, const Real a_dt);
-      void trapezoidal_predictor(const Real a_dt);
-      void trapezoidal_corrector(const Real a_dt);
+      void advanceParticlesTrapezoidal(const Real a_dt);
+      void preTrapezoidalPredictor(Vector<ParticleContainer<godunov_particle>* >& a_rho_dagger, const Real a_dt);
+      void preTrapezoidalCorrector(Vector<ParticleContainer<godunov_particle>* >& a_rho_dagger, const Real a_dt);
+      void trapezoidalPredictor(const Real a_dt);
+      void trapezoidalCorrector(const Real a_dt);
     };
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif

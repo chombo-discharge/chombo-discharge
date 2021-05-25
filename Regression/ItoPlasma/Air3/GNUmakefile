@@ -34,7 +34,7 @@ src_dirs = $(DISCHARGE_HOME)/Source \
 	$(DISCHARGE_HOME)/Geometries/RodDielectric\
 	$(DISCHARGE_HOME)/Physics/ItoPlasma \
 	$(DISCHARGE_HOME)/Physics/ItoPlasma/CellTaggers/ItoPlasmaStreamerTagger\
-	$(DISCHARGE_HOME)/Physics/ItoPlasma/TimeSteppers/ito_plasma_godunov\
+	$(DISCHARGE_HOME)/Physics/ItoPlasma/TimeSteppers/ItoPlasmaGodunovStepper\
 	$(DISCHARGE_HOME)/Physics/ItoPlasma/PlasmaModels/ito_plasma_air3
 
 

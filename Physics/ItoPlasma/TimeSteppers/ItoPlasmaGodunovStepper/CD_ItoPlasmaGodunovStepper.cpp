@@ -1,27 +1,33 @@
+/* chombo-discharge
+ * Copyright © 2021 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+ */
+
 /*!
-  @file   ito_plasma_godunov.cpp
+  @file   CD_ItoPlasmaGodunovStepper.cpp
+  @brief  Implementation of CD_ItoPlasmaGodunovStepper.H
   @author Robert Marskar
-  @date   June 2020
-  @brief  Implementation of ito_plasma_godunov
 */
 
-#include "ito_plasma_godunov.H"
-#include <CD_DataOps.H>
-#include <CD_Units.H>
-#include "CD_FieldSolverMultigrid.H"
-
+// Chombo includes
 #include <ParmParse.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_ItoPlasmaGodunovStepper.H>
+#include <CD_DataOps.H>
+#include <CD_Units.H>
+#include <CD_FieldSolverMultigrid.H>
+#include <CD_NamespaceHeader.H>
+
 using namespace Physics::ItoPlasma;
 
-ito_plasma_godunov::ito_plasma_godunov(RefCountedPtr<ItoPlasmaPhysics>& a_physics){
-  m_name    = "ito_plasma_godunov";
+ItoPlasmaGodunovStepper::ItoPlasmaGodunovStepper(RefCountedPtr<ItoPlasmaPhysics>& a_physics){
+  m_name    = "ItoPlasmaGodunovStepper";
   m_physics = a_physics;
 
   m_dt_relax = 1.E99;
 
-  ParmParse pp("ito_plasma_godunov");
+  ParmParse pp("ItoPlasmaGodunovStepper");
   pp.get("particle_realm", m_particleRealm);
   pp.get("profile", m_profile);
   pp.get("load_ppc", m_load_ppc);
@@ -32,14 +38,14 @@ ito_plasma_godunov::ito_plasma_godunov(RefCountedPtr<ItoPlasmaPhysics>& a_physic
 
 }
 
-ito_plasma_godunov::~ito_plasma_godunov(){
+ItoPlasmaGodunovStepper::~ItoPlasmaGodunovStepper(){
 
 }
 
-int ito_plasma_godunov::getNumberOfPlotVariables() const {
-  CH_TIME("ito_plasma_godunov::getNumberOfPlotVariables");
+int ItoPlasmaGodunovStepper::getNumberOfPlotVariables() const {
+  CH_TIME("ItoPlasmaGodunovStepper::getNumberOfPlotVariables");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_godunov::getNumberOfPlotVariables" << endl;
+    pout() << "ItoPlasmaGodunovStepper::getNumberOfPlotVariables" << endl;
   }
 
   int ncomp = ItoPlasmaStepper::getNumberOfPlotVariables();
@@ -49,23 +55,23 @@ int ito_plasma_godunov::getNumberOfPlotVariables() const {
   return ncomp;
 }
 
-void ito_plasma_godunov::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const {
-  CH_TIME("ito_plasma_godunov::write_conductivity");
+void ItoPlasmaGodunovStepper::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const {
+  CH_TIME("ItoPlasmaGodunovStepper::writeConductivity");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_godunov::write_conductivity" << endl;
+    pout() << "ItoPlasmaGodunovStepper::writeConductivity" << endl;
   }
 
   ItoPlasmaStepper::writePlotData(a_output, a_plotVariableNames, a_icomp);
 
   // Do conductivity
-  this->write_conductivity(a_output, a_icomp);
+  this->writeConductivity(a_output, a_icomp);
   a_plotVariableNames.push_back("conductivity");
 }
 
-void ito_plasma_godunov::write_conductivity(EBAMRCellData& a_output, int& a_icomp) const {
-  CH_TIME("ItoPlasmaStepper::write_conductivity");
+void ItoPlasmaGodunovStepper::writeConductivity(EBAMRCellData& a_output, int& a_icomp) const {
+  CH_TIME("ItoPlasmaStepper::writeConductivity");
   if(m_verbosity > 5){
-    pout() << "ItoPlasmaStepper::write_conductivity" << endl;
+    pout() << "ItoPlasmaStepper::writeConductivity" << endl;
   }
 
   const Interval src_interv(0, 0);
@@ -82,10 +88,10 @@ void ito_plasma_godunov::write_conductivity(EBAMRCellData& a_output, int& a_icom
   a_icomp += 1;
 }
 
-void ito_plasma_godunov::allocate(){
-  CH_TIME("ito_plasma_godunov::allocate");
+void ItoPlasmaGodunovStepper::allocate(){
+  CH_TIME("ItoPlasmaGodunovStepper::allocate");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_godunov::allocate" << endl;
+    pout() << "ItoPlasmaGodunovStepper::allocate" << endl;
   }
 
   m_ito->allocateInternals();
@@ -114,8 +120,8 @@ void ito_plasma_godunov::allocate(){
   }
 }
 
-void ito_plasma_godunov::parseOptions() {
-  CH_TIME("ito_plasma_godunov::parseOptions");
+void ItoPlasmaGodunovStepper::parseOptions() {
+  CH_TIME("ItoPlasmaGodunovStepper::parseOptions");
   if(m_verbosity > 5){
     pout() << m_name + "::parseOptions" << endl;
   }
@@ -148,7 +154,7 @@ void ito_plasma_godunov::parseOptions() {
     m_algorithm = which_algorithm::trapezoidal;
   }
   else{
-    MayDay::Abort("ito_plasma_godunov::parseOptions - unknown algorithm requested");
+    MayDay::Abort("ItoPlasmaGodunovStepper::parseOptions - unknown algorithm requested");
   }
 
   // Dt limitation
@@ -163,7 +169,7 @@ void ito_plasma_godunov::parseOptions() {
     m_whichDt = which_dt::AdvectionDiffusion;
   }
   else{
-    MayDay::Abort("ito_plasma_godunov::parseOptions - unknown 'which_dt' requested");
+    MayDay::Abort("ItoPlasmaGodunovStepper::parseOptions - unknown 'which_dt' requested");
   }
 
   // Box sorting for load balancing
@@ -181,7 +187,7 @@ void ito_plasma_godunov::parseOptions() {
     m_boxSort = BoxSorting::Morton;
   }
   else {
-    MayDay::Abort("ito_plasma_godunov::parseOptions - unknown box sorting method requested for argument 'BoxSorting'");
+    MayDay::Abort("ItoPlasmaGodunovStepper::parseOptions - unknown box sorting method requested for argument 'BoxSorting'");
   }
 
   // Parse filterse
@@ -189,12 +195,12 @@ void ito_plasma_godunov::parseOptions() {
   
 
   // Setup runtime storage (requirements change with algorithm)
-  this->setup_runtime_storage();
+  this->setupRuntimeStorage();
   
 }
 
-void ito_plasma_godunov::parseRuntimeOptions() {
-  CH_TIME("ito_plasma_godunov::parseRuntimeOptions");
+void ItoPlasmaGodunovStepper::parseRuntimeOptions() {
+  CH_TIME("ItoPlasmaGodunovStepper::parseRuntimeOptions");
   if(m_verbosity > 5){
     pout() << m_name + "::parseRuntimeOptions" << endl;
   }
@@ -225,7 +231,7 @@ void ito_plasma_godunov::parseRuntimeOptions() {
     m_algorithm = which_algorithm::trapezoidal;
   }
   else{
-    MayDay::Abort("ito_plasma_godunov::parseOptions - unknown algorithm requested");
+    MayDay::Abort("ItoPlasmaGodunovStepper::parseOptions - unknown algorithm requested");
   }
 
   // Dt limitation
@@ -240,7 +246,7 @@ void ito_plasma_godunov::parseRuntimeOptions() {
     m_whichDt = which_dt::AdvectionDiffusion;
   }
   else{
-    MayDay::Abort("ito_plasma_godunov::parseOptions - unknown 'which_dt' requested");
+    MayDay::Abort("ItoPlasmaGodunovStepper::parseOptions - unknown 'which_dt' requested");
   }
 
   // Box sorting for load balancing
@@ -258,7 +264,7 @@ void ito_plasma_godunov::parseRuntimeOptions() {
     m_boxSort = BoxSorting::Morton;
   }
   else {
-    MayDay::Abort("ito_plasma_godunov::parseOptions - unknown box sorting method requested for argument 'BoxSorting'");
+    MayDay::Abort("ItoPlasmaGodunovStepper::parseOptions - unknown box sorting method requested for argument 'BoxSorting'");
   }
 
   // Parse filterse
@@ -266,7 +272,7 @@ void ito_plasma_godunov::parseRuntimeOptions() {
   
 
   // Setup runtime storage (requirements change with algorithm)
-  this->setup_runtime_storage();
+  this->setupRuntimeStorage();
 
   //
   m_ito->parseRuntimeOptions();
@@ -274,8 +280,8 @@ void ito_plasma_godunov::parseRuntimeOptions() {
   m_rte->parseRuntimeOptions();
 }
 
-void ito_plasma_godunov::allocateInternals(){
-  CH_TIME("ito_plasma_godunov::allocateInternals");
+void ItoPlasmaGodunovStepper::allocateInternals(){
+  CH_TIME("ItoPlasmaGodunovStepper::allocateInternals");
   if(m_verbosity > 5){
     pout() << m_name + "::allocateInternals" << endl;
   }
@@ -325,8 +331,8 @@ void ito_plasma_godunov::allocateInternals(){
   m_amr->allocate(m_EdotJ,          m_fluid_Realm,    m_phase, num_ItoSpecies);
 }
 
-Real ito_plasma_godunov::advance(const Real a_dt) {
-  CH_TIME("ito_plasma_godunov::advance");
+Real ItoPlasmaGodunovStepper::advance(const Real a_dt) {
+  CH_TIME("ItoPlasmaGodunovStepper::advance");
   if(m_verbosity > 5){
     pout() << m_name + "::advance" << endl;
   }
@@ -350,13 +356,13 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   particle_time -= MPI_Wtime();
   switch(m_algorithm){
   case which_algorithm::euler_maruyama:
-    this->advanceParticles_euler_maruyama(a_dt);
+    this->advanceParticlesEulerMaruyama(a_dt);
     break;
   case which_algorithm::trapezoidal:
-    this->advanceParticles_trapezoidal(a_dt);
+    this->advanceParticlesTrapezoidal(a_dt);
     break;
   default:
-    MayDay::Abort("ito_plasma_godunov::advance - logic bust");
+    MayDay::Abort("ItoPlasmaGodunovStepper::advance - logic bust");
   }
   particle_time += MPI_Wtime();
 
@@ -466,7 +472,7 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
     imbalance = 100. - imbalance;
 
     pout() << "\n";
-    pout() << "ito_plasma_godunov::advance breakdown:" << endl
+    pout() << "ItoPlasmaGodunovStepper::advance breakdown:" << endl
 	   << "======================================" << endl;
     printTimerHead();
     printTimerDiagnostics(particle_time, "Transport & Poisson (%)");
@@ -488,10 +494,10 @@ Real ito_plasma_godunov::advance(const Real a_dt) {
   return a_dt;
 }
 
-void ito_plasma_godunov::computeDt(Real& a_dt, TimeCode& a_timeCode){
-  CH_TIME("ito_plasma_godunov::computeDt");
+void ItoPlasmaGodunovStepper::computeDt(Real& a_dt, TimeCode& a_timeCode){
+  CH_TIME("ItoPlasmaGodunovStepper::computeDt");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_godunov::computeDt" << endl;
+    pout() << "ItoPlasmaGodunovStepper::computeDt" << endl;
   }
 
   a_dt = 1.E99;
@@ -541,10 +547,10 @@ void ito_plasma_godunov::computeDt(Real& a_dt, TimeCode& a_timeCode){
 #endif
 }
 
-void ito_plasma_godunov::preRegrid(const int a_lmin, const int a_oldFinestLevel){
-  CH_TIME("ito_plasma_godunov::preRegrid");
+void ItoPlasmaGodunovStepper::preRegrid(const int a_lmin, const int a_oldFinestLevel){
+  CH_TIME("ItoPlasmaGodunovStepper::preRegrid");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_godunov::preRegrid" << endl;
+    pout() << "ItoPlasmaGodunovStepper::preRegrid" << endl;
   }
 
   ItoPlasmaStepper::preRegrid(a_lmin, a_oldFinestLevel);
@@ -566,10 +572,10 @@ void ito_plasma_godunov::preRegrid(const int a_lmin, const int a_oldFinestLevel)
   }
 }
 
-void ito_plasma_godunov::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) {
-  CH_TIME("ito_plasma_godunov::regrid");
+void ItoPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) {
+  CH_TIME("ItoPlasmaGodunovStepper::regrid");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_godunov::regrid" << endl;
+    pout() << "ItoPlasmaGodunovStepper::regrid" << endl;
   }
 
   Real ito_time = 0.0;
@@ -606,7 +612,7 @@ void ito_plasma_godunov::regrid(const int a_lmin, const int a_oldFinestLevel, co
   m_sigma->regrid(a_lmin,   a_oldFinestLevel, a_newFinestLevel);
   sigma_time += MPI_Wtime();
 
-  // Allocate internal memory for ito_plasma_godunov now....
+  // Allocate internal memory for ItoPlasmaGodunovStepper now....
   MPI_Barrier(Chombo_MPI::comm);
   internal_time -= MPI_Wtime();
   this->allocateInternals();
@@ -630,16 +636,16 @@ void ito_plasma_godunov::regrid(const int a_lmin, const int a_oldFinestLevel, co
   // Recompute the conductivity and space charge densities.
   MPI_Barrier(Chombo_MPI::comm);
   setup_time -= MPI_Wtime();
-  this->compute_regrid_conductivity();
-  this->compute_regrid_rho();
-  this->setup_semi_implicit_poisson(m_prevDt);
+  this->computeRegridConductivity();
+  this->computeRegridRho();
+  this->setupSemiImplicitPoisson(m_prevDt);
   setup_time += MPI_Wtime();
 
   MPI_Barrier(Chombo_MPI::comm);
   solve_time -= MPI_Wtime();
   const bool converged = this->solvePoisson();
   if(!converged){
-    MayDay::Abort("ito_plasma_godunov::regrid - Poisson solve did not converge after regrid!!!");
+    MayDay::Abort("ItoPlasmaGodunovStepper::regrid - Poisson solve did not converge after regrid!!!");
   }
   solve_time += MPI_Wtime();
 
@@ -693,7 +699,7 @@ void ito_plasma_godunov::regrid(const int a_lmin, const int a_oldFinestLevel, co
     imbalance = 100. - imbalance;
 
     pout() << "\n";
-    pout() << "ito_plasma_godunov::regrid breakdown:" << endl
+    pout() << "ItoPlasmaGodunovStepper::regrid breakdown:" << endl
 	   << "======================================" << endl;
     printTimerHead();
     printTimerDiagnostics(ito_time,      "Ito regrid (%)");
@@ -712,10 +718,10 @@ void ito_plasma_godunov::regrid(const int a_lmin, const int a_oldFinestLevel, co
   }
 }
 
-void ito_plasma_godunov::setup_runtime_storage(){
-  CH_TIME("ito_plasma_godunov::setup_runtime_storage");
+void ItoPlasmaGodunovStepper::setupRuntimeStorage(){
+  CH_TIME("ItoPlasmaGodunovStepper::setupRuntimeStorage");
   if(m_verbosity > 5){
-    pout() << m_name + "::setup_runtime_storage" << endl;
+    pout() << m_name + "::setupRuntimeStorage" << endl;
   }
 
   switch (m_algorithm){
@@ -726,16 +732,16 @@ void ito_plasma_godunov::setup_runtime_storage(){
     ItoParticle::setNumRunTimeVectors(2); // For V^k and the diffusion hop. 
     break;
   default:
-    MayDay::Abort("ito_plasma_godunov::setup_runtime_storage - logic bust");
+    MayDay::Abort("ItoPlasmaGodunovStepper::setupRuntimeStorage - logic bust");
   }
 }
 
 
 
-void ito_plasma_godunov::set_old_positions(){
-  CH_TIME("ito_plasma_godunov::set_old_positions()");
+void ItoPlasmaGodunovStepper::setOldPositions(){
+  CH_TIME("ItoPlasmaGodunovStepper::setOldPositions()");
   if(m_verbosity > 5){
-    pout() << m_name + "::set_old_positions()" << endl;
+    pout() << m_name + "::setOldPositions()" << endl;
   }
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -759,10 +765,10 @@ void ito_plasma_godunov::set_old_positions(){
   }
 }
 
-void ito_plasma_godunov::remap_godunov_particles(Vector<ParticleContainer<godunov_particle>* >& a_particles, const WhichParticles a_WhichParticles){
-  CH_TIME("ito_plasma_godunov::remap_godunov_particles");
+void ItoPlasmaGodunovStepper::remapGodunovParticles(Vector<ParticleContainer<godunov_particle>* >& a_particles, const WhichParticles a_WhichParticles){
+  CH_TIME("ItoPlasmaGodunovStepper::remapGodunovParticles");
   if(m_verbosity > 5){
-    pout() << m_name + "::remap_godunov_particles" << endl;
+    pout() << m_name + "::remapGodunovParticles" << endl;
   }
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -801,13 +807,13 @@ void ito_plasma_godunov::remap_godunov_particles(Vector<ParticleContainer<goduno
       if(!mobile && !diffusive) a_particles[idx]->remap();
       break;
     default:
-      MayDay::Abort("ito_plasma_godunov::remap_godunov_particles - logic bust");
+      MayDay::Abort("ItoPlasmaGodunovStepper::remapGodunovParticles - logic bust");
     }
   }
 }
 
-void ito_plasma_godunov::deposit_godunov_particles(const Vector<ParticleContainer<godunov_particle>* >& a_particles, const WhichParticles a_WhichParticles){
-  CH_TIME("ito_plasma_godunov::deposit_godunov_particles");
+void ItoPlasmaGodunovStepper::deposit_godunov_particles(const Vector<ParticleContainer<godunov_particle>* >& a_particles, const WhichParticles a_WhichParticles){
+  CH_TIME("ItoPlasmaGodunovStepper::deposit_godunov_particles");
   if(m_verbosity > 5){
     pout() << m_name + "::deposit_godunov_particles" << endl;
   }
@@ -848,13 +854,13 @@ void ito_plasma_godunov::deposit_godunov_particles(const Vector<ParticleContaine
       if(!mobile && !diffusive) solver->depositParticles(solver->getPhi(), *a_particles[idx]);
       break;
     default:
-      MayDay::Abort("ito_plasma_godunov::deposit_godunov_particles - logic bust");
+      MayDay::Abort("ItoPlasmaGodunovStepper::deposit_godunov_particles - logic bust");
     }
   }
 }
 
-void ito_plasma_godunov::clear_godunov_particles(const Vector<ParticleContainer<godunov_particle>* >& a_particles, const WhichParticles a_WhichParticles){
-  CH_TIME("ito_plasma_godunov::clear_godunov_particles");
+void ItoPlasmaGodunovStepper::clearGodunovParticles(const Vector<ParticleContainer<godunov_particle>* >& a_particles, const WhichParticles a_WhichParticles){
+  CH_TIME("ItoPlasmaGodunovStepper::clearGodunovParticles");
   if(m_verbosity > 5){
     pout() << m_name + "::deposit_clearParticles" << endl;
   }
@@ -895,15 +901,15 @@ void ito_plasma_godunov::clear_godunov_particles(const Vector<ParticleContainer<
       if(!mobile && !diffusive) a_particles[idx]->clearParticles();
       break;
     default:
-      MayDay::Abort("ito_plasma_godunov::clear_godunov_particles - logic bust");
+      MayDay::Abort("ItoPlasmaGodunovStepper::clearGodunovParticles - logic bust");
     }
   }
 }
 
-void ito_plasma_godunov::compute_all_conductivities(const Vector<ParticleContainer<godunov_particle>* >& a_particles){
-  CH_TIME("ito_plasma_godunov::compute_all_conductivities");
+void ItoPlasmaGodunovStepper::computeAllConductivities(const Vector<ParticleContainer<godunov_particle>* >& a_particles){
+  CH_TIME("ItoPlasmaGodunovStepper::computeAllConductivities");
   if(m_verbosity > 5){
-    pout() << m_name + "::compute_all_conductivities" << endl;
+    pout() << m_name + "::computeAllConductivities" << endl;
   }
 
   this->compute_cell_conductivity(m_conduct_cell, a_particles);
@@ -912,8 +918,8 @@ void ito_plasma_godunov::compute_all_conductivities(const Vector<ParticleContain
   this->compute_face_conductivity();
 }
 
-void ito_plasma_godunov::compute_cell_conductivity(EBAMRCellData& a_conductivity, const Vector<ParticleContainer<godunov_particle>* >& a_particles){
-  CH_TIME("ito_plasma_godunov::compute_cell_conductivity(conductivity, godunov_particle");
+void ItoPlasmaGodunovStepper::compute_cell_conductivity(EBAMRCellData& a_conductivity, const Vector<ParticleContainer<godunov_particle>* >& a_particles){
+  CH_TIME("ItoPlasmaGodunovStepper::compute_cell_conductivity(conductivity, godunov_particle");
   if(m_verbosity > 5){
     pout() << m_name + "::compute_cell_conductivity(conductivity, godunov_particle)" << endl;
   }
@@ -973,8 +979,8 @@ void ito_plasma_godunov::compute_cell_conductivity(EBAMRCellData& a_conductivity
 
 }
 
-void ito_plasma_godunov::compute_face_conductivity(){
-  CH_TIME("ito_plasma_godunov::compute_face_conductivity");
+void ItoPlasmaGodunovStepper::compute_face_conductivity(){
+  CH_TIME("ItoPlasmaGodunovStepper::compute_face_conductivity");
   if(m_verbosity > 5){
     pout() << m_name + "::compute_face_conductivity" << endl;
   }
@@ -998,10 +1004,10 @@ void ito_plasma_godunov::compute_face_conductivity(){
 
 }
 
-void ito_plasma_godunov::setup_semi_implicit_poisson(const Real a_dt){
-  CH_TIME("ito_plasma_godunov::setup_semi_implicit_poisson");
+void ItoPlasmaGodunovStepper::setupSemiImplicitPoisson(const Real a_dt){
+  CH_TIME("ItoPlasmaGodunovStepper::setupSemiImplicitPoisson");
   if(m_verbosity > 5){
-    pout() << m_name + "::setup_semi_implicit_poisson" << endl;
+    pout() << m_name + "::setupSemiImplicitPoisson" << endl;
   }
 
   FieldSolverMultigrid* poisson = (FieldSolverMultigrid*) (&(*m_fieldSolver));
@@ -1040,10 +1046,10 @@ void ito_plasma_godunov::setup_semi_implicit_poisson(const Real a_dt){
   poisson->setNeedsMultigridSetup(false);
 }
 
-void ito_plasma_godunov::setup_standard_poisson(){
-  CH_TIME("ito_plasma_godunov::setup_standard_poisson");
+void ItoPlasmaGodunovStepper::setupStandardPoisson(){
+  CH_TIME("ItoPlasmaGodunovStepper::setupStandardPoisson");
   if(m_verbosity > 5){
-    pout() << m_name + "::setup_standard_poisson" << endl;
+    pout() << m_name + "::setupStandardPoisson" << endl;
   }
 
   FieldSolverMultigrid* poisson = (FieldSolverMultigrid*) (&(*m_fieldSolver));
@@ -1057,13 +1063,13 @@ void ito_plasma_godunov::setup_standard_poisson(){
   poisson->setNeedsMultigridSetup(false);
 }
 
-void ito_plasma_godunov::copy_conductivity_particles(Vector<ParticleContainer<godunov_particle>* >& a_conductivity_particles){
-  CH_TIME("ito_plasma_godunov::copy_conductivity_particles");
+void ItoPlasmaGodunovStepper::copyConductivityParticles(Vector<ParticleContainer<godunov_particle>* >& a_conductivity_particles){
+  CH_TIME("ItoPlasmaGodunovStepper::copyConductivityParticles");
   if(m_verbosity > 5){
-    pout() << m_name + "::copy_conductivity_particles" << endl;
+    pout() << m_name + "::copyConductivityParticles" << endl;
   }
 
-  this->clear_godunov_particles(a_conductivity_particles, WhichParticles::all);
+  this->clearGodunovParticles(a_conductivity_particles, WhichParticles::all);
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     const RefCountedPtr<ItoSolver>& solver   = solver_it();
@@ -1094,10 +1100,10 @@ void ito_plasma_godunov::copy_conductivity_particles(Vector<ParticleContainer<go
   }
 }
 
-void ito_plasma_godunov::copy_rho_dagger_particles(Vector<ParticleContainer<godunov_particle>* >& a_rho_dagger_particles){
-  CH_TIME("ito_plasma_godunov::copy_rho_dagger_particles");
+void ItoPlasmaGodunovStepper::copyRhoDaggerParticles(Vector<ParticleContainer<godunov_particle>* >& a_rho_dagger_particles){
+  CH_TIME("ItoPlasmaGodunovStepper::copyRhoDaggerParticles");
   if(m_verbosity > 5){
-    pout() << m_name + "::copy_rho_dagger_particles" << endl;
+    pout() << m_name + "::copyRhoDaggerParticles" << endl;
   }
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -1130,28 +1136,28 @@ void ito_plasma_godunov::copy_rho_dagger_particles(Vector<ParticleContainer<godu
   }
 }
 
-void ito_plasma_godunov::compute_regrid_conductivity(){
-  CH_TIME("ito_plasma_godunov::compute_regrid_conductivity");
+void ItoPlasmaGodunovStepper::computeRegridConductivity(){
+  CH_TIME("ItoPlasmaGodunovStepper::computeRegridConductivity");
   if(m_verbosity > 5){
-    pout() << m_name + "::compute_regrid_conductivity" << endl;
+    pout() << m_name + "::computeRegridConductivity" << endl;
   }
 
-  this->compute_all_conductivities(m_conductivity_particles);
+  this->computeAllConductivities(m_conductivity_particles);
 }
 
-void ito_plasma_godunov::compute_regrid_rho(){
-  CH_TIME("ito_plasma_godunov::compute_regrid_rho");
+void ItoPlasmaGodunovStepper::computeRegridRho(){
+  CH_TIME("ItoPlasmaGodunovStepper::computeRegridRho");
   if(m_verbosity > 5){
-    pout() << m_name + "::compute_regrid_rho" << endl;
+    pout() << m_name + "::computeRegridRho" << endl;
   }
 
   this->deposit_godunov_particles(m_rho_dagger_particles, WhichParticles::all);
 }
 
-void ito_plasma_godunov::advanceParticles_euler_maruyama(const Real a_dt){
-  CH_TIME("ito_plasma_godunov::advanceParticles_euler_maruyama");
+void ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt){
+  CH_TIME("ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama");
   if(m_verbosity > 5){
-    pout() << m_name + "::advanceParticles_euler_maruyama" << endl;
+    pout() << m_name + "::advanceParticlesEulerMaruyama" << endl;
   }
 
   Real posTime = 0.0;
@@ -1177,36 +1183,36 @@ void ito_plasma_godunov::advanceParticles_euler_maruyama(const Real a_dt){
   // 1. Store X^k positions.
   MPI_Barrier(Chombo_MPI::comm);
   posTime -= MPI_Wtime();
-  this->set_old_positions();
+  this->setOldPositions();
   posTime += MPI_Wtime();
 
   // 2. Diffuse the particles. This copies onto m_rho_dagger_particles and stores the hop on the full particles.
   MPI_Barrier(Chombo_MPI::comm);
   diffuseTime -= MPI_Wtime();
-  this->diffuse_particles_euler_maruyama(m_rho_dagger_particles, a_dt);
+  this->diffuseParticlesEulerMaruyama(m_rho_dagger_particles, a_dt);
   diffuseTime += MPI_Wtime();
 
   MPI_Barrier(Chombo_MPI::comm);
   remapGdnvTime -= MPI_Wtime();
-  this->remap_godunov_particles(m_rho_dagger_particles,   WhichParticles::all_diffusive);
+  this->remapGodunovParticles(m_rho_dagger_particles,   WhichParticles::all_diffusive);
   remapGdnvTime += MPI_Wtime();
 
   // 3. Solve the semi-implicit Poisson equation. Also, copy the particles used for computing the conductivity to scratch.
   MPI_Barrier(Chombo_MPI::comm);
   copyCondTime -= MPI_Wtime();
-  this->copy_conductivity_particles(m_conductivity_particles); // Sets particle "weights" = w*mu
+  this->copyConductivityParticles(m_conductivity_particles); // Sets particle "weights" = w*mu
   copyCondTime += MPI_Wtime();
 
   // Compute conductivity on mesh
   MPI_Barrier(Chombo_MPI::comm);
   condTime -= MPI_Wtime();
-  this->compute_all_conductivities(m_conductivity_particles);  // Deposits q_e*Z*w*mu on the mesh
+  this->computeAllConductivities(m_conductivity_particles);  // Deposits q_e*Z*w*mu on the mesh
   condTime += MPI_Wtime();
 
   // Setup Poisson solver
   MPI_Barrier(Chombo_MPI::comm);
   setupTime -= MPI_Wtime();
-  this->setup_semi_implicit_poisson(a_dt);                     // Multigrid setup
+  this->setupSemiImplicitPoisson(a_dt);                     // Multigrid setup
   setupTime += MPI_Wtime();
 
   // Compute space charge density 
@@ -1233,7 +1239,7 @@ void ito_plasma_godunov::advanceParticles_euler_maruyama(const Real a_dt){
 
   MPI_Barrier(Chombo_MPI::comm);
   particleTime -= MPI_Wtime();
-  this->step_euler_maruyama(a_dt);
+  this->stepEulerMaruyama(a_dt);
   particleTime += MPI_Wtime();
 
   MPI_Barrier(Chombo_MPI::comm);
@@ -1289,7 +1295,7 @@ void ito_plasma_godunov::advanceParticles_euler_maruyama(const Real a_dt){
     imbalance = 100. - imbalance;
 
     pout() << "\n";
-    pout() << "ito_plasma_godunov::euler_maruyama breakdown:" << endl
+    pout() << "ItoPlasmaGodunovStepper::euler_maruyama breakdown:" << endl
 	   << "======================================" << endl;
     printTimerHead();
     printTimerDiagnostics(posTime,         "Old position (%)");
@@ -1312,13 +1318,13 @@ void ito_plasma_godunov::advanceParticles_euler_maruyama(const Real a_dt){
   }
 }
 
-void ito_plasma_godunov::diffuse_particles_euler_maruyama(Vector<ParticleContainer<godunov_particle>* >& a_rho_dagger, const Real a_dt){
-  CH_TIME("ito_plasma_godunov::diffuse_particles_euler_maruyama");
+void ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruyama(Vector<ParticleContainer<godunov_particle>* >& a_rho_dagger, const Real a_dt){
+  CH_TIME("ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruyama");
   if(m_verbosity > 5){
-    pout() << m_name + "::diffuse_particles_euler_maruyama" << endl;
+    pout() << m_name + "::diffuseParticlesEulerMaruyama" << endl;
   }
 
-  this->clear_godunov_particles(a_rho_dagger, WhichParticles::all);
+  this->clearGodunovParticles(a_rho_dagger, WhichParticles::all);
 
   
 
@@ -1373,10 +1379,10 @@ void ito_plasma_godunov::diffuse_particles_euler_maruyama(Vector<ParticleContain
   }
 }
 
-void ito_plasma_godunov::step_euler_maruyama(const Real a_dt){
-  CH_TIME("ito_plasma_godunov::step_euler_maruyama");
+void ItoPlasmaGodunovStepper::stepEulerMaruyama(const Real a_dt){
+  CH_TIME("ItoPlasmaGodunovStepper::stepEulerMaruyama");
   if(m_verbosity > 5){
-    pout() << m_name + "::step_euler_maruyama" << endl;
+    pout() << m_name + "::stepEulerMaruyama" << endl;
   }
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -1411,45 +1417,45 @@ void ito_plasma_godunov::step_euler_maruyama(const Real a_dt){
   }
 }
 
-void ito_plasma_godunov::advanceParticles_trapezoidal(const Real a_dt){
-  CH_TIME("ito_plasma_godunov::advanceParticles_trapezoidal");
+void ItoPlasmaGodunovStepper::advanceParticlesTrapezoidal(const Real a_dt){
+  CH_TIME("ItoPlasmaGodunovStepper::advanceParticlesTrapezoidal");
   if(m_verbosity > 5){
-    pout() << m_name + "::advanceParticles_trapezoidal" << endl;
+    pout() << m_name + "::advanceParticlesTrapezoidal" << endl;
   }
 
   m_prevDt = 0.5*a_dt;  // Needed for regrids. 
 
-  this->set_old_positions();
+  this->setOldPositions();
 
   // ====== PREDICTOR BEGIN ======
-  this->pre_trapezoidal_predictor(m_rho_dagger_particles, a_dt);
-  this->remap_godunov_particles(m_rho_dagger_particles,   WhichParticles::all_diffusive); // Particles that were copied but not moved are in the right box.
+  this->preTrapezoidalPredictor(m_rho_dagger_particles, a_dt);
+  this->remapGodunovParticles(m_rho_dagger_particles,   WhichParticles::all_diffusive); // Particles that were copied but not moved are in the right box.
   this->deposit_godunov_particles(m_rho_dagger_particles, WhichParticles::all);           // All copies need to deposit. 
 
-  this->copy_conductivity_particles(m_conductivity_particles); 
-  this->compute_all_conductivities(m_conductivity_particles);        
-  this->setup_semi_implicit_poisson(a_dt);                     
+  this->copyConductivityParticles(m_conductivity_particles); 
+  this->computeAllConductivities(m_conductivity_particles);        
+  this->setupSemiImplicitPoisson(a_dt);                     
   this->solvePoisson();                                       
 
   this->setItoVelocityFunctions();
   m_ito->interpolateVelocities();
-  this->trapezoidal_predictor(a_dt); 
+  this->trapezoidalPredictor(a_dt); 
   this->remapParticles(WhichParticles::all_mobile_or_diffusive);
   // ====== PREDICTOR END ======
 
   // ====== CORRECTOR BEGIN =====
-  this->pre_trapezoidal_corrector(m_rho_dagger_particles, a_dt);                                    // Mobile or diffusive moves to X^dagger = X^k + 0.5*dt*V^k + hop
-  this->remap_godunov_particles(m_rho_dagger_particles, WhichParticles::all_mobile_or_diffusive);  // Only need to remap particles that were mobile or diffusive
+  this->preTrapezoidalCorrector(m_rho_dagger_particles, a_dt);                                    // Mobile or diffusive moves to X^dagger = X^k + 0.5*dt*V^k + hop
+  this->remapGodunovParticles(m_rho_dagger_particles, WhichParticles::all_mobile_or_diffusive);  // Only need to remap particles that were mobile or diffusive
   this->deposit_godunov_particles(m_rho_dagger_particles, WhichParticles::all);                    // Everything needs to deposit...
 
-  this->copy_conductivity_particles(m_conductivity_particles); 
-  this->compute_all_conductivities(m_conductivity_particles);        
-  this->setup_semi_implicit_poisson(0.5*a_dt);                 
+  this->copyConductivityParticles(m_conductivity_particles); 
+  this->computeAllConductivities(m_conductivity_particles);        
+  this->setupSemiImplicitPoisson(0.5*a_dt);                 
   this->solvePoisson();                                       
 
   this->setItoVelocityFunctions();
   m_ito->interpolateVelocities();
-  this->trapezoidal_corrector(a_dt); 
+  this->trapezoidalCorrector(a_dt); 
   this->remapParticles(WhichParticles::all_mobile_or_diffusive);
   // ====== CORRECTOR END =====
 
@@ -1461,10 +1467,10 @@ void ito_plasma_godunov::advanceParticles_trapezoidal(const Real a_dt){
   this->depositParticles(WhichParticles::all_mobile_or_diffusive);
 }
 
-void ito_plasma_godunov::pre_trapezoidal_predictor(Vector<ParticleContainer<godunov_particle>* >& a_rho_dagger, const Real a_dt){
-  CH_TIME("ito_plasma_godunov::pre_trapezoidal_predictor");
+void ItoPlasmaGodunovStepper::preTrapezoidalPredictor(Vector<ParticleContainer<godunov_particle>* >& a_rho_dagger, const Real a_dt){
+  CH_TIME("ItoPlasmaGodunovStepper::preTrapezoidalPredictor");
   if(m_verbosity > 5){
-    pout() << m_name + "::pre_trapezoidal_predictor" << endl;
+    pout() << m_name + "::preTrapezoidalPredictor" << endl;
   }
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -1510,10 +1516,10 @@ void ito_plasma_godunov::pre_trapezoidal_predictor(Vector<ParticleContainer<godu
   }
 }
 
-void ito_plasma_godunov::trapezoidal_predictor(const Real a_dt){
-  CH_TIME("ito_plasma_godunov::trapezoidal_predictor");
+void ItoPlasmaGodunovStepper::trapezoidalPredictor(const Real a_dt){
+  CH_TIME("ItoPlasmaGodunovStepper::trapezoidalPredictor");
   if(m_verbosity > 5){
-    pout() << m_name + "::trapezoidal_predictor" << endl;
+    pout() << m_name + "::trapezoidalPredictor" << endl;
   }
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -1550,10 +1556,10 @@ void ito_plasma_godunov::trapezoidal_predictor(const Real a_dt){
   }
 }
 
-void ito_plasma_godunov::pre_trapezoidal_corrector(Vector<ParticleContainer<godunov_particle>* >& a_rho_dagger, const Real a_dt){
-  CH_TIME("ito_plasma_godunov::pre_trapezoidal_corrector");
+void ItoPlasmaGodunovStepper::preTrapezoidalCorrector(Vector<ParticleContainer<godunov_particle>* >& a_rho_dagger, const Real a_dt){
+  CH_TIME("ItoPlasmaGodunovStepper::preTrapezoidalCorrector");
   if(m_verbosity > 5){
-    pout() << m_name + "::pre_trapezoidal_corrector" << endl;
+    pout() << m_name + "::preTrapezoidalCorrector" << endl;
   }
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -1597,10 +1603,10 @@ void ito_plasma_godunov::pre_trapezoidal_corrector(Vector<ParticleContainer<godu
   }
 }
 
-void ito_plasma_godunov::trapezoidal_corrector(const Real a_dt){
-  CH_TIME("ito_plasma_godunov::trapezoidal_corrector");
+void ItoPlasmaGodunovStepper::trapezoidalCorrector(const Real a_dt){
+  CH_TIME("ItoPlasmaGodunovStepper::trapezoidalCorrector");
   if(m_verbosity > 5){
-    pout() << m_name + "::trapezoidal_corrector" << endl;
+    pout() << m_name + "::trapezoidalCorrector" << endl;
   }
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
@@ -1637,4 +1643,5 @@ void ito_plasma_godunov::trapezoidal_corrector(const Real a_dt){
     }
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
