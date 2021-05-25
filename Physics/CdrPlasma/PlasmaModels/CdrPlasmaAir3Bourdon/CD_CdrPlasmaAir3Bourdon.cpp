@@ -1,27 +1,41 @@
-#include "air3_bourdon.H"
-#include "air3_bourdon_species.H"
-#include <CD_DataOps.H>
-#include <CD_Units.H> 
+/* chombo-discharge
+ * Copyright © 2021 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+ */
 
+/*!
+  @file   CD_CdrPlasmaAir3Bourdon.cpp
+  @brief  Implementation of CD_CdrPlasmaAir3Bourdon.H
+  @author Robert Marskar
+*/
+
+// Std includes
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <chrono>
 
+// Chombo includes
 #include <ParmParse.H>
 #include <PolyGeom.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_CdrPlasmaAir3Bourdon.H>
+#include <CD_CdrPlasmaAir3BourdonSpecies.H>
+#include <CD_DataOps.H>
+#include <CD_Units.H> 
+#include <CD_NamespaceHeader.H>
+
 using namespace Physics::CdrPlasma;
 
-std::string air3_bourdon::s_bolsig_mobility = "# Electron mobility (E/N, mu*N)";
-std::string air3_bourdon::s_bolsig_diffco   = "# Electron diffusion coefficient (E/N, D*N)";
-std::string air3_bourdon::s_bolsig_alpha    = "# Townsend ionization coeff (E/N, alpha/N)";
-std::string air3_bourdon::s_bolsig_eta      = "# Townsend attachment coeff (E/N, eta/N)";
+std::string CdrPlasmaAir3Bourdon::s_bolsig_mobility = "# Electron mobility (E/N, mu*N)";
+std::string CdrPlasmaAir3Bourdon::s_bolsig_diffco   = "# Electron diffusion coefficient (E/N, D*N)";
+std::string CdrPlasmaAir3Bourdon::s_bolsig_alpha    = "# Townsend ionization coeff (E/N, alpha/N)";
+std::string CdrPlasmaAir3Bourdon::s_bolsig_eta      = "# Townsend attachment coeff (E/N, eta/N)";
 
-air3_bourdon::air3_bourdon() {
+CdrPlasmaAir3Bourdon::CdrPlasmaAir3Bourdon() {
 
-  ParmParse pp("air3_bourdon");
+  ParmParse pp("CdrPlasmaAir3Bourdon");
 
   // Get input parameters
   pp.get("pressure",                      m_p);
@@ -30,8 +44,8 @@ air3_bourdon::air3_bourdon() {
   pp.get("transport_file",                m_transport_file);
   pp.get("uniform_tables",                m_uniform_entries);
   pp.get("use_alpha_corr",                m_alpha_corr);      
-  pp.get("mobile_electrons",              m_isMobile_electrons);    
-  pp.get("diffusive_electrons",           m_isDiffusive_electrons);
+  pp.get("mobile_electrons",              m_isMobile_Electrons);    
+  pp.get("diffusive_electrons",           m_isDiffusive_Electrons);
   pp.get("diffusive_ions",                m_isDiffusive_ions);
   pp.get("mobile_ions",                   m_isMobile_ions);
   pp.get("ion_mobility",                  m_ion_mobility);
@@ -59,10 +73,10 @@ air3_bourdon::air3_bourdon() {
   if(infile.good()){
     infile.close();
 
-    read_file_entries(m_e_mobility, air3_bourdon::s_bolsig_mobility);
-    read_file_entries(m_e_diffco,   air3_bourdon::s_bolsig_diffco);
-    read_file_entries(m_e_alpha,    air3_bourdon::s_bolsig_alpha);
-    read_file_entries(m_e_eta,      air3_bourdon::s_bolsig_eta);
+    readFileEntries(m_e_mobility, CdrPlasmaAir3Bourdon::s_bolsig_mobility);
+    readFileEntries(m_e_diffco,   CdrPlasmaAir3Bourdon::s_bolsig_diffco);
+    readFileEntries(m_e_alpha,    CdrPlasmaAir3Bourdon::s_bolsig_alpha);
+    readFileEntries(m_e_eta,      CdrPlasmaAir3Bourdon::s_bolsig_eta);
     
     m_e_mobility.scaleX(m_N*Units::Td);
     m_e_diffco.scaleX(m_N*Units::Td);
@@ -81,7 +95,7 @@ air3_bourdon::air3_bourdon() {
 
   }
   else{
-    MayDay::Abort("air3_bourdon::parseTransportFile - could not find transport data");
+    MayDay::Abort("CdrPlasmaAir3Bourdon::parseTransportFile - could not find transport data");
   }
 
 
@@ -89,14 +103,14 @@ air3_bourdon::air3_bourdon() {
   parseDomainBc();
 
   // Instantiate species. 
-  instantiate_species();
+  initSpecies();
 }
 
-air3_bourdon::~air3_bourdon() {
+CdrPlasmaAir3Bourdon::~CdrPlasmaAir3Bourdon() {
 
 }
 
-void air3_bourdon::read_file_entries(LookupTable& a_table, const std::string a_string){
+void CdrPlasmaAir3Bourdon::readFileEntries(LookupTable& a_table, const std::string a_string){
   Real x, y;
   bool read_line = false;
   std::ifstream infile(m_transport_file);
@@ -125,7 +139,7 @@ void air3_bourdon::read_file_entries(LookupTable& a_table, const std::string a_s
   infile.close();
 }
 
-void air3_bourdon::instantiate_species(){
+void CdrPlasmaAir3Bourdon::initSpecies(){
   m_numCdrSpecies = 3;
   m_numRtSpecies = 3;
 
@@ -137,19 +151,19 @@ void air3_bourdon::instantiate_species(){
   m_pho3_idx = 2;
 
   m_CdrSpecies.resize(m_numCdrSpecies);
-  m_CdrSpecies[m_elec_idx]  = RefCountedPtr<CdrSpecies> (new air3_bourdon::electron());
-  m_CdrSpecies[m_plus_idx]  = RefCountedPtr<CdrSpecies> (new air3_bourdon::M_plus());
-  m_CdrSpecies[m_minu_idx]  = RefCountedPtr<CdrSpecies> (new air3_bourdon::M_minus());
+  m_CdrSpecies[m_elec_idx]  = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir3Bourdon::Electron());
+  m_CdrSpecies[m_plus_idx]  = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir3Bourdon::MPlus());
+  m_CdrSpecies[m_minu_idx]  = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir3Bourdon::MMinus());
 
   m_RtSpecies.resize(m_numRtSpecies);
-  m_RtSpecies[m_pho1_idx] = RefCountedPtr<RtSpecies> (new air3_bourdon::Photon_one());
-  m_RtSpecies[m_pho2_idx] = RefCountedPtr<RtSpecies> (new air3_bourdon::Photon_two());
-  m_RtSpecies[m_pho3_idx] = RefCountedPtr<RtSpecies> (new air3_bourdon::Photon_three());
+  m_RtSpecies[m_pho1_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir3Bourdon::PhotonOne());
+  m_RtSpecies[m_pho2_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir3Bourdon::PhotonTwo());
+  m_RtSpecies[m_pho3_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir3Bourdon::PhotonThree());
 }
 
-void air3_bourdon::parseDomainBc(){
+void CdrPlasmaAir3Bourdon::parseDomainBc(){
 
-  ParmParse pp("air3_bourdon");
+  ParmParse pp("CdrPlasmaAir3Bourdon");
   std::string str;
 
   m_wallBc.resize(2*SpaceDim, 0); 
@@ -195,17 +209,17 @@ void air3_bourdon::parseDomainBc(){
   }
 }
 
-void air3_bourdon::advanceReactionNetwork(Vector<Real>&          a_particle_sources,
-					    Vector<Real>&          a_Photon_sources,
-					    const Vector<Real>     a_particle_densities,
-					    const Vector<RealVect> a_particle_gradients,
-					    const Vector<Real>     a_Photon_densities,
-					    const RealVect         a_E,
-					    const RealVect         a_pos,
-					    const Real             a_dx,
-					    const Real             a_dt,
-					    const Real             a_time,
-					    const Real             a_kappa) const {
+void CdrPlasmaAir3Bourdon::advanceReactionNetwork(Vector<Real>&          a_particle_sources,
+						  Vector<Real>&          a_Photon_sources,
+						  const Vector<Real>     a_particle_densities,
+						  const Vector<RealVect> a_particle_gradients,
+						  const Vector<Real>     a_Photon_densities,
+						  const RealVect         a_E,
+						  const RealVect         a_pos,
+						  const Real             a_dx,
+						  const Real             a_dt,
+						  const Real             a_time,
+						  const Real             a_kappa) const {
   const Real E      = a_E.vectorLength();
   const Real ve     = E*m_e_mobility.getEntry(E);
   
@@ -247,13 +261,13 @@ void air3_bourdon::advanceReactionNetwork(Vector<Real>&          a_particle_sour
   Sm += R2;
 
   // Photoionization, M + y => e + M+
-  const air3_bourdon::Photon_one*   Photon1 = static_cast<air3_bourdon::Photon_one*>   (&(*m_RtSpecies[m_pho1_idx]));
-  const air3_bourdon::Photon_two*   Photon2 = static_cast<air3_bourdon::Photon_two*>   (&(*m_RtSpecies[m_pho2_idx]));
-  const air3_bourdon::Photon_three* Photon3 = static_cast<air3_bourdon::Photon_three*> (&(*m_RtSpecies[m_pho3_idx]));
+  const CdrPlasmaAir3Bourdon::PhotonOne*   Photon1 = static_cast<CdrPlasmaAir3Bourdon::PhotonOne*>   (&(*m_RtSpecies[m_pho1_idx]));
+  const CdrPlasmaAir3Bourdon::PhotonTwo*   Photon2 = static_cast<CdrPlasmaAir3Bourdon::PhotonTwo*>   (&(*m_RtSpecies[m_pho2_idx]));
+  const CdrPlasmaAir3Bourdon::PhotonThree* Photon3 = static_cast<CdrPlasmaAir3Bourdon::PhotonThree*> (&(*m_RtSpecies[m_pho3_idx]));
 
   const Real Sph = m_photoi_eff*Units::c*m_O2frac*m_p*(Photon1->get_A()*a_Photon_densities[m_pho1_idx]
-							  + Photon2->get_A()*a_Photon_densities[m_pho2_idx]
-							  + Photon3->get_A()*a_Photon_densities[m_pho3_idx]);
+						       + Photon2->get_A()*a_Photon_densities[m_pho2_idx]
+						       + Photon3->get_A()*a_Photon_densities[m_pho3_idx]);
   Se += Sph;
   Sp += Sph;
 
@@ -267,10 +281,10 @@ void air3_bourdon::advanceReactionNetwork(Vector<Real>&          a_particle_sour
   return;
 }
 
-Vector<Real> air3_bourdon::computeCdrDiffusionCoefficients(const Real         a_time,
-							      const RealVect     a_pos,
-							      const RealVect     a_E,
-							      const Vector<Real> a_cdr_densities) const {
+Vector<Real> CdrPlasmaAir3Bourdon::computeCdrDiffusionCoefficients(const Real         a_time,
+								   const RealVect     a_pos,
+								   const RealVect     a_E,
+								   const Vector<Real> a_cdr_densities) const {
 
   Vector<Real> dco(m_numCdrSpecies, 0.0);
   dco[m_elec_idx] = m_e_diffco.getEntry(a_E.vectorLength());
@@ -280,10 +294,10 @@ Vector<Real> air3_bourdon::computeCdrDiffusionCoefficients(const Real         a_
   return dco;
 }
   
-Vector<RealVect> air3_bourdon::computeCdrDriftVelocities(const Real         a_time,
-						      const RealVect     a_pos,
-						      const RealVect     a_E,
-						      const Vector<Real> a_cdr_densities) const{
+Vector<RealVect> CdrPlasmaAir3Bourdon::computeCdrDriftVelocities(const Real         a_time,
+								 const RealVect     a_pos,
+								 const RealVect     a_E,
+								 const Vector<Real> a_cdr_densities) const{
   Vector<RealVect> vel(m_numCdrSpecies, RealVect::Zero);
 
   vel[m_elec_idx] = -a_E*m_e_mobility.getEntry(a_E.vectorLength());
@@ -293,16 +307,16 @@ Vector<RealVect> air3_bourdon::computeCdrDriftVelocities(const Real         a_ti
   return vel;
 }
   
-Vector<Real> air3_bourdon::computeCdrDomainFluxes(const Real           a_time,
-						     const RealVect       a_pos,
-						     const int            a_dir,
-						     const Side::LoHiSide a_side,
-						     const RealVect       a_E,
-						     const Vector<Real>   a_cdr_densities,
-						     const Vector<Real>   a_cdr_velocities,
-						     const Vector<Real>   a_cdr_gradients,
-						     const Vector<Real>   a_rte_fluxes,
-						     const Vector<Real>   a_extrap_cdr_fluxes) const{
+Vector<Real> CdrPlasmaAir3Bourdon::computeCdrDomainFluxes(const Real           a_time,
+							  const RealVect       a_pos,
+							  const int            a_dir,
+							  const Side::LoHiSide a_side,
+							  const RealVect       a_E,
+							  const Vector<Real>   a_cdr_densities,
+							  const Vector<Real>   a_cdr_velocities,
+							  const Vector<Real>   a_cdr_gradients,
+							  const Vector<Real>   a_rte_fluxes,
+							  const Vector<Real>   a_extrap_cdr_fluxes) const{
   Vector<Real> fluxes(m_numCdrSpecies, 0.0);
 
   int idx, sgn;
@@ -333,43 +347,43 @@ Vector<Real> air3_bourdon::computeCdrDomainFluxes(const Real           a_time,
   return fluxes;
 }
   
-Vector<Real> air3_bourdon::computeCdrElectrodeFluxes(const Real         a_time,
-							const RealVect     a_pos,
-							const RealVect     a_normal,
-							const RealVect     a_E,
-							const Vector<Real> a_cdr_densities,
-							const Vector<Real> a_cdr_velocities,
-							const Vector<Real> a_cdr_gradients,
-							const Vector<Real> a_rte_fluxes,
-							const Vector<Real> a_extrap_cdr_fluxes) const{
+Vector<Real> CdrPlasmaAir3Bourdon::computeCdrElectrodeFluxes(const Real         a_time,
+							     const RealVect     a_pos,
+							     const RealVect     a_normal,
+							     const RealVect     a_E,
+							     const Vector<Real> a_cdr_densities,
+							     const Vector<Real> a_cdr_velocities,
+							     const Vector<Real> a_cdr_gradients,
+							     const Vector<Real> a_rte_fluxes,
+							     const Vector<Real> a_extrap_cdr_fluxes) const{
   return computeCdrFluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients, a_rte_fluxes,
-			    a_extrap_cdr_fluxes, m_townsend2_electrode, m_electrode_quantum_efficiency);
+			  a_extrap_cdr_fluxes, m_townsend2_electrode, m_electrode_quantum_efficiency);
 }
 
-Vector<Real> air3_bourdon::computeCdrDielectricFluxes(const Real         a_time,
-							 const RealVect     a_pos,
-							 const RealVect     a_normal,
-							 const RealVect     a_E,
-							 const Vector<Real> a_cdr_densities,
-							 const Vector<Real> a_cdr_velocities,
-							 const Vector<Real> a_cdr_gradients,
-							 const Vector<Real> a_rte_fluxes,
-							 const Vector<Real> a_extrap_cdr_fluxes) const{
+Vector<Real> CdrPlasmaAir3Bourdon::computeCdrDielectricFluxes(const Real         a_time,
+							      const RealVect     a_pos,
+							      const RealVect     a_normal,
+							      const RealVect     a_E,
+							      const Vector<Real> a_cdr_densities,
+							      const Vector<Real> a_cdr_velocities,
+							      const Vector<Real> a_cdr_gradients,
+							      const Vector<Real> a_rte_fluxes,
+							      const Vector<Real> a_extrap_cdr_fluxes) const{
   return computeCdrFluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients, a_rte_fluxes,
-			    a_extrap_cdr_fluxes, m_townsend2_dielectric, m_dielectric_quantum_efficiency);
+			  a_extrap_cdr_fluxes, m_townsend2_dielectric, m_dielectric_quantum_efficiency);
 }
 
-Vector<Real> air3_bourdon::computeCdrFluxes(const Real         a_time,
-					      const RealVect     a_pos,
-					      const RealVect     a_normal,
-					      const RealVect     a_E,
-					      const Vector<Real> a_cdr_densities,
-					      const Vector<Real> a_cdr_velocities,
-					      const Vector<Real> a_cdr_gradients,
-					      const Vector<Real> a_rte_fluxes,
-					      const Vector<Real> a_extrap_cdr_fluxes,
-					      const Real         a_townsend2,
-					      const Real         a_quantum_efficiency) const{
+Vector<Real> CdrPlasmaAir3Bourdon::computeCdrFluxes(const Real         a_time,
+						    const RealVect     a_pos,
+						    const RealVect     a_normal,
+						    const RealVect     a_E,
+						    const Vector<Real> a_cdr_densities,
+						    const Vector<Real> a_cdr_velocities,
+						    const Vector<Real> a_cdr_gradients,
+						    const Vector<Real> a_rte_fluxes,
+						    const Vector<Real> a_extrap_cdr_fluxes,
+						    const Real         a_townsend2,
+						    const Real         a_quantum_efficiency) const{
   Vector<Real> fluxes(m_numCdrSpecies, 0.0);
 
   const bool cathode = PolyGeom::dot(a_E, a_normal) < 0.0;
@@ -394,14 +408,15 @@ Vector<Real> air3_bourdon::computeCdrFluxes(const Real         a_time,
   return fluxes;
 }
 
-Real air3_bourdon::initialSigma(const Real a_time, const RealVect a_pos) const {
+Real CdrPlasmaAir3Bourdon::initialSigma(const Real a_time, const RealVect a_pos) const {
   return 0.0;
 }
 
-Real air3_bourdon::computeAlpha(const RealVect a_E) const{
+Real CdrPlasmaAir3Bourdon::computeAlpha(const RealVect a_E) const{
   const Real E     = a_E.vectorLength();
   const Real alpha = m_e_alpha.getEntry(E);
 
   return alpha;
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

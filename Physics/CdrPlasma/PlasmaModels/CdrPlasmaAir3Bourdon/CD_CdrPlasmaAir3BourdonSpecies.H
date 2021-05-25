@@ -1,17 +1,31 @@
-#ifndef _AIR3_BOURDON_SPECIES_
-#define _AIR3_BOURDON_SPECIES_
+/* chombo-discharge
+ * Copyright © 2021 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+ */
 
-#include "air3_bourdon.H"
+/*!
+  @file   CD_CdrPlasmaAir3BourdonSpecies.H
+  @brief  Declaration of species for CdrPlasmaAir3Bourdon model
+  @author Robert Marskar
+*/
+
+#ifndef CD_CdrPlasmaAir3BourdonSpecies_H
+#define CD_CdrPlasmaAir3BourdonSpecies_H
+
+// Std includes
 #include <random>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_CdrPlasmaAir3Bourdon.H>
+#include <CD_NamespaceHeader.H>
+
 namespace Physics {
   namespace CdrPlasma {
 
-    class air3_bourdon::electron : public CdrSpecies {
+    class CdrPlasmaAir3Bourdon::Electron : public CdrSpecies {
     public:
-      electron();
-      ~electron() {}
+      Electron();
+      ~Electron() {}
       Real initialData(const RealVect a_pos, const Real a_time) const;
 
     protected:
@@ -21,10 +35,10 @@ namespace Physics {
       RealVect m_seed_pos;
     };
 
-    class air3_bourdon::M_plus : public CdrSpecies {
+    class CdrPlasmaAir3Bourdon::MPlus : public CdrSpecies {
     public:
-      M_plus();
-      ~M_plus(){}
+      MPlus();
+      ~MPlus(){}
       Real initialData(const RealVect a_pos, const Real a_time) const;
     protected:
       Real m_uniform_density;
@@ -33,17 +47,17 @@ namespace Physics {
       RealVect m_seed_pos;
     };
 
-    class air3_bourdon::M_minus : public CdrSpecies {
+    class CdrPlasmaAir3Bourdon::MMinus : public CdrSpecies {
     public:
-      M_minus();
-      ~M_minus(){}
+      MMinus();
+      ~MMinus(){}
       Real initialData(const RealVect a_pos, const Real a_time) const {return 0.0;}
     };
 
-    class air3_bourdon::Photon_one : public RtSpecies {
+    class CdrPlasmaAir3Bourdon::PhotonOne : public RtSpecies {
     public:
-      Photon_one();
-      ~Photon_one(){}
+      PhotonOne();
+      ~PhotonOne(){}
       Real getKappa(const RealVect a_pos) const { return m_lambda*m_pO2/sqrt(3.0);}
       Real get_lambda() const { return m_lambda;}
       Real get_A()      const { return m_A;}
@@ -55,10 +69,10 @@ namespace Physics {
       Real m_pO2;
     };
 
-    class air3_bourdon::Photon_two : public RtSpecies {
+    class CdrPlasmaAir3Bourdon::PhotonTwo : public RtSpecies {
     public:
-      Photon_two();
-      ~Photon_two(){}
+      PhotonTwo();
+      ~PhotonTwo(){}
       Real getKappa(const RealVect a_pos) const { return m_lambda*m_pO2/sqrt(3.0);}
       Real get_lambda() const { return m_lambda;}
       Real get_A()      const { return m_A;}
@@ -70,10 +84,10 @@ namespace Physics {
       Real m_pO2;
     };
 
-    class air3_bourdon::Photon_three : public RtSpecies {
+    class CdrPlasmaAir3Bourdon::PhotonThree : public RtSpecies {
     public:
-      Photon_three();
-      ~Photon_three(){}
+      PhotonThree();
+      ~PhotonThree(){}
       Real getKappa(const RealVect a_pos) const { return m_lambda*m_pO2/sqrt(3.0);}
       Real get_lambda() const { return m_lambda;}
       Real get_A()      const { return m_A;}
@@ -86,5 +100,7 @@ namespace Physics {
     };
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif

@@ -34,7 +34,7 @@ src_dirs = $(DISCHARGE_HOME)/Source \
 	$(DISCHARGE_HOME)/Physics/CdrPlasma \
 	$(DISCHARGE_HOME)/Physics/CdrPlasma/CellTaggers/CdrPlasmaStreamerTagger\
 	$(DISCHARGE_HOME)/Physics/CdrPlasma/Timesteppers/CdrPlasmaImExSdcStepper\
-	$(DISCHARGE_HOME)/Physics/CdrPlasma/PlasmaModels/air3_bourdon
+	$(DISCHARGE_HOME)/Physics/CdrPlasma/PlasmaModels/CdrPlasmaAir3Bourdon
 
 
 include $(CHOMBO_HOME)/mk/Make.example

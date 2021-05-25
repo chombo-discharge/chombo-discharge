@@ -6,7 +6,7 @@
 #include <CD_CdrGodunov.H>
 #include <CD_RtLayoutImplem.H>
 #include <CD_EddingtonSP1.H>
-#include "air3_bourdon.H"
+#include <CD_CdrPlasmaAir3Bourdon.H>
 #include <CD_RodDielectric.H>
 #include <CD_CdrPlasmaImExSdcStepper.H>
 #include <CD_CdrPlasmaStreamerTagger.H>
@@ -46,7 +46,7 @@ int main(int argc, char* argv[]){
   RefCountedPtr<GeoCoarsener> geocoarsen        = RefCountedPtr<GeoCoarsener> (new GeoCoarsener());
 
   // Set up physics 
-  RefCountedPtr<CdrPlasmaPhysics> physics      = RefCountedPtr<CdrPlasmaPhysics> (new air3_bourdon());
+  RefCountedPtr<CdrPlasmaPhysics> physics      = RefCountedPtr<CdrPlasmaPhysics> (new CdrPlasmaAir3Bourdon());
   RefCountedPtr<CdrPlasmaStepper> timestepper  = RefCountedPtr<CdrPlasmaStepper> (new CdrPlasmaImExSdcStepper(physics));
   RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (new CdrPlasmaStreamerTagger(physics, timestepper, amr, compgeom));
 

@@ -1,0 +1,40 @@
+# ====================================================================================================
+# AIR3_BOURDON CLASS OPTIONS
+# ====================================================================================================	
+CdrPlasmaAir3Bourdon.transport_file      = transport_data.txt              # Transport file
+CdrPlasmaAir3Bourdon.uniform_tables      = 100    	                   #  Converted # of points in transport file
+CdrPlasmaAir3Bourdon.pressure            = 1.0                             # Gas pressure
+CdrPlasmaAir3Bourdon.temperature         = 300                             # Gas temperature
+CdrPlasmaAir3Bourdon.use_alpha_corr      = false                           # Soloviev alpha correction	
+CdrPlasmaAir3Bourdon.mobile_electrons    = true                            # Mobile Electrons or not
+CdrPlasmaAir3Bourdon.diffusive_electrons = true                            # Diffusive Electrons or not
+CdrPlasmaAir3Bourdon.mobile_ions         = false                           # Mobile ions or not
+CdrPlasmaAir3Bourdon.diffusive_ions      = false                           # Diffusive ions or not
+CdrPlasmaAir3Bourdon.ion_mobility        = 2.E-4                           # Ion mobility
+
+CdrPlasmaAir3Bourdon.uniform_density       = 1.E10                         # Uniform density
+CdrPlasmaAir3Bourdon.seed_density          = 1.E17                         # Gaussian seed density
+CdrPlasmaAir3Bourdon.seed_radius           = 100E-6                        # Gaussian seed radius
+CdrPlasmaAir3Bourdon.seed_position         = 0 0 0                         # Gaussian seed position
+
+CdrPlasmaAir3Bourdon.electrode_townsend2           = 1.E-6                 # SEE on electrodes
+CdrPlasmaAir3Bourdon.dielectric_townsend2          = 1.E-6                 # SEE on dielectrics
+CdrPlasmaAir3Bourdon.electrode_quantum_efficiency  = 1.E-6                 # SEE on electrodes
+CdrPlasmaAir3Bourdon.dielectric_quantum_efficiency = 1.E-6                 # SEE on dielectrics
+
+CdrPlasmaAir3Bourdon.quenching_pressure            = 0.03947               # Quenching pressure for photo-emission (atm)
+CdrPlasmaAir3Bourdon.excitation_efficiency         = 0.6                   # Impact excitation efficiency
+CdrPlasmaAir3Bourdon.photoionization_efficiency    = 0.1                   # Photo-ionization efficiency
+CdrPlasmaAir3Bourdon.Photon1_A_coeff               = 1.12E-4               # Parameters from Bourdon et. al photoionization model
+CdrPlasmaAir3Bourdon.Photon1_lambda_coeff          = 4.15E-2               # Parameters from Bourdon et. al photoionization model
+CdrPlasmaAir3Bourdon.Photon2_A_coeff               = 2.88E-2               # Parameters from Bourdon et. al photoionization model
+CdrPlasmaAir3Bourdon.Photon2_lambda_coeff          = 1.09E-1               # Parameters from Bourdon et. al photoionization model
+CdrPlasmaAir3Bourdon.Photon3_A_coeff               = 2.76E-1               # Parameters from Bourdon et. al photoionization model
+CdrPlasmaAir3Bourdon.Photon3_lambda_coeff          = 6.69E-1               # Parameters from Bourdon et. al photoionization model
+
+CdrPlasmaAir3Bourdon.domain_bc_x_lo = extrap                               # Switch for BC on domain edge. 'extrap' or 'wall'
+CdrPlasmaAir3Bourdon.domain_bc_x_hi = extrap                               # Switch for BC on domain edge. 'extrap' or 'wall'
+CdrPlasmaAir3Bourdon.domain_bc_y_lo = extrap                               # Switch for BC on domain edge. 'extrap' or 'wall'
+CdrPlasmaAir3Bourdon.domain_bc_y_hi = extrap                               # Switch for BC on domain edge. 'extrap' or 'wall'
+CdrPlasmaAir3Bourdon.domain_bc_z_lo = extrap                               # Switch for BC on domain edge. 'extrap' or 'wall'
+CdrPlasmaAir3Bourdon.domain_bc_z_hi = extrap                               # Switch for BC on domain edge. 'extrap' or 'wall'
