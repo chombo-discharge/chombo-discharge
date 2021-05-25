@@ -116,7 +116,7 @@ ito_plasma_air3::ito_plasma_air3(){
   m_reactions.emplace("photo_excitation",       ItoPlasmaReaction({m_electron_idx}, {m_electron_idx}, {m_PhotonZ_idx}));
 
   // Photo-reactions
-  m_ItoPlasmaPhotoReactions.emplace("zheleznyak",  ItoPlasmaPhotoReaction({m_PhotonZ_idx}, {m_electron_idx, m_positive_idx}));
+  m_photoReactions.emplace("zheleznyak",  ItoPlasmaPhotoReaction({m_PhotonZ_idx}, {m_electron_idx, m_positive_idx}));
 
   // Set the ions diffusion coefficient
   m_ion_D = m_ion_mu*Units::kb*m_T/Units::Qe;

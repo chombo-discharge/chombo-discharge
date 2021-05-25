@@ -512,7 +512,7 @@ void ItoPlasmaPhysics::reconcilePhotoionization(Vector<List<ItoParticle>* >& a_p
     energies[i] *= newNumParticles[i];
   }
   
-  for (const auto& r : m_ItoPlasmaPhotoReactions){
+  for (const auto& r : m_photoReactions){
 
     // Source and targets
     const int& src                 = r.second.source();

@@ -258,7 +258,7 @@ namespace Physics {
 
       // These are all the reactions
       std::map<std::string, ItoPlasmaReaction> m_reactions; 
-      mutable std::map<std::string, ItoPlasmaPhotoReaction> m_ItoPlasmaPhotoReactions;
+      mutable std::map<std::string, ItoPlasmaPhotoReaction> m_photoReactions;
 
       // Lookup tables if you need them. 
       std::map<std::string, LookupTable> m_tables;

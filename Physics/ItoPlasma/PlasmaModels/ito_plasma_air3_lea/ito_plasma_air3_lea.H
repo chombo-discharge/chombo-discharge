@@ -8,7 +8,7 @@
 #ifndef _ITO_PLASMA_AIR3_LEA_
 #define _ITO_PLASMA_AIR3_LEA_
 
-#include "ito_plasma_physics_lea.H"
+#include <CD_ItoPlasmaPhysicsLEA.H>
 #include "CD_LookupTable.H"
 
 #include "CD_NamespaceHeader.H"
@@ -18,7 +18,7 @@ namespace Physics {
     /*!
       @brief Abstract clas for specifying plasma kinetics
     */
-    class ito_plasma_air3_lea : public ito_plasma_physics_lea {
+    class ito_plasma_air3_lea : public ItoPlasmaPhysicsLEA {
     public:
 
       class electron;

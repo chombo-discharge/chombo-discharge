@@ -33,7 +33,7 @@ ItoPlasmaPhysics::ItoPlasmaPhysics(){
   m_udist01 = std::uniform_real_distribution<Real>(0., 1.);
 
   m_reactions.clear();
-  m_ItoPlasmaPhotoReactions.clear();
+  m_photoReactions.clear();
 
   // Default
   m_ppc = 32;

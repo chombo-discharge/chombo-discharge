@@ -53,7 +53,7 @@ namespace Physics {
 	@brief This must be overridden.
       */
       void updateReactionRatesLEA(const RealVect a_E, const Vector<Real> a_mean_energies, const Real a_dx, const Real a_kappa) const override final {
-	MayDay::Abort("ito_plasma_physics_lea::updateReactionRatesLEA - should not end up here with an LFA model");
+	MayDay::Abort("ItoPlasmaPhysicsLEA::updateReactionRatesLEA - should not end up here with an LFA model");
       }
 
       /*!

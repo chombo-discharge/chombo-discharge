@@ -120,7 +120,7 @@ ito_plasma_air3_lea::ito_plasma_air3_lea(){
   m_reactions.emplace("electron_scattering",    ItoPlasmaReaction({m_electron_idx}, {m_electron_idx}, {friction_loss}));
 
   // Photo-reactions
-  //  m_ItoPlasmaPhotoReactions.emplace("zheleznyak",  ItoPlasmaPhotoReaction({m_PhotonZ_idx}, {m_electron_idx, m_positive_idx}, {photo_gain}));
+  //  m_photoReactions.emplace("zheleznyak",  ItoPlasmaPhotoReaction({m_PhotonZ_idx}, {m_electron_idx, m_positive_idx}, {photo_gain}));
 }
 
 ito_plasma_air3_lea::~ito_plasma_air3_lea(){
