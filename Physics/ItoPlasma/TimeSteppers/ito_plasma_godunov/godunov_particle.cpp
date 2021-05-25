@@ -8,7 +8,7 @@
 #include "godunov_particle.H"
 
 #include "CD_NamespaceHeader.H"
-using namespace Physics::ito_plasma;
+using namespace Physics::ItoPlasma;
 
 godunov_particle::godunov_particle() : BinItem(){
 }

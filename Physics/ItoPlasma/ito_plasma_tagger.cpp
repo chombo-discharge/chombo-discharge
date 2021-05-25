@@ -14,7 +14,7 @@
 #include <ParmParse.H>
 
 #include "CD_NamespaceHeader.H"
-using namespace Physics::ito_plasma;
+using namespace Physics::ItoPlasma;
 
 ito_plasma_tagger::ito_plasma_tagger(){
   CH_TIME("ito_plasma_tagger::ito_plasma_tagger");

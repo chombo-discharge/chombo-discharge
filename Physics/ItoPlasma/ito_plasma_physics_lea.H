@@ -12,7 +12,7 @@
 
 #include "CD_NamespaceHeader.H"
 namespace Physics {
-  namespace ito_plasma {
+  namespace ItoPlasma {
 
     /*!
       @brief Abstract clas for specifying plasma kinetics

@@ -22,7 +22,7 @@
 #include "CD_NamespaceHeader.H"
 
 namespace Physics {
-  namespace ito_plasma {
+  namespace ItoPlasma {
 
     // Differentiation between particles. 
     enum class which_particles {

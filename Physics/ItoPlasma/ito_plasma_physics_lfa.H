@@ -12,7 +12,7 @@
 
 #include "CD_NamespaceHeader.H"
 namespace Physics {
-  namespace ito_plasma {
+  namespace ItoPlasma {
 
     /*!
       @brief Middle layer for describing ito_plasma_physics in the LFA

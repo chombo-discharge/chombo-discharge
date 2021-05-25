@@ -25,12 +25,12 @@
 #include <CD_Photon.H>
 #include <CD_ItoParticle.H>
 #include "ito_reaction.H"
-#include "photo_reaction.H"
+#include <CD_ItoPlasmaPhotoReaction.H>
 #include "CD_LookupTable.H"
 
 #include "CD_NamespaceHeader.H"
 namespace Physics {
-  namespace ito_plasma {
+  namespace ItoPlasma {
 
     // Ease up on the typing.
     using ReactionPtrs  = std::deque<std::shared_ptr<ito_reaction> >;
@@ -251,7 +251,7 @@ namespace Physics {
 
       // These are all the reactions
       std::map<std::string, ito_reaction> m_reactions; 
-      mutable std::map<std::string, photo_reaction> m_photo_reactions;
+      mutable std::map<std::string, ItoPlasmaPhotoReaction> m_ItoPlasmaPhotoReactions;
 
       // Lookup tables if you need them. 
       std::map<std::string, LookupTable> m_tables;

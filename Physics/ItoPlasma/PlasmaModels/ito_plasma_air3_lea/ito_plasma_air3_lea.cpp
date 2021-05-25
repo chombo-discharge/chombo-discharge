@@ -11,7 +11,7 @@
 #include <ParmParse.H>
 
 #include "CD_NamespaceHeader.H"
-using namespace Physics::ito_plasma;
+using namespace Physics::ItoPlasma;
 
 ito_plasma_air3_lea::ito_plasma_air3_lea(){
   m_num_ItoSpecies = 3;
@@ -120,7 +120,7 @@ ito_plasma_air3_lea::ito_plasma_air3_lea(){
   m_reactions.emplace("electron_scattering",    ito_reaction({m_electron_idx}, {m_electron_idx}, {friction_loss}));
 
   // Photo-reactions
-  //  m_photo_reactions.emplace("zheleznyak",  photo_reaction({m_PhotonZ_idx}, {m_electron_idx, m_positive_idx}, {photo_gain}));
+  //  m_ItoPlasmaPhotoReactions.emplace("zheleznyak",  ItoPlasmaPhotoReaction({m_PhotonZ_idx}, {m_electron_idx, m_positive_idx}, {photo_gain}));
 }
 
 ito_plasma_air3_lea::~ito_plasma_air3_lea(){

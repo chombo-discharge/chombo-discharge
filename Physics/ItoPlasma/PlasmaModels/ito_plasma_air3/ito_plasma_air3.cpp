@@ -11,7 +11,7 @@
 #include <ParmParse.H>
 
 #include "CD_NamespaceHeader.H"
-using namespace Physics::ito_plasma;
+using namespace Physics::ItoPlasma;
 
 ito_plasma_air3::ito_plasma_air3(){
   m_num_ItoSpecies = 3;
@@ -116,7 +116,7 @@ ito_plasma_air3::ito_plasma_air3(){
   m_reactions.emplace("photo_excitation",       ito_reaction({m_electron_idx}, {m_electron_idx}, {m_PhotonZ_idx}));
 
   // Photo-reactions
-  m_photo_reactions.emplace("zheleznyak",  photo_reaction({m_PhotonZ_idx}, {m_electron_idx, m_positive_idx}));
+  m_ItoPlasmaPhotoReactions.emplace("zheleznyak",  ItoPlasmaPhotoReaction({m_PhotonZ_idx}, {m_electron_idx, m_positive_idx}));
 
   // Set the ions diffusion coefficient
   m_ion_D = m_ion_mu*Units::kb*m_T/Units::Qe;

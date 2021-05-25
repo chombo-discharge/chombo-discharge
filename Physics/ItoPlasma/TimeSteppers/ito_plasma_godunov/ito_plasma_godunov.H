@@ -13,7 +13,7 @@
 
 #include "CD_NamespaceHeader.H"
 namespace Physics {
-  namespace ito_plasma {
+  namespace ItoPlasma {
 
     class ito_plasma_godunov : public ito_plasma_stepper {
     public:

@@ -15,7 +15,7 @@
 
 #include "CD_NamespaceHeader.H"
   
-using namespace Physics::ito_plasma;
+using namespace Physics::ItoPlasma;
 
 ito_plasma_physics::ito_plasma_physics(){
 
@@ -27,7 +27,7 @@ ito_plasma_physics::ito_plasma_physics(){
   m_udist01 = std::uniform_real_distribution<Real>(0., 1.);
 
   m_reactions.clear();
-  m_photo_reactions.clear();
+  m_ItoPlasmaPhotoReactions.clear();
 
   // Default
   m_ppc = 32;

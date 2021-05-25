@@ -17,7 +17,7 @@
 
 #include "CD_NamespaceHeader.H"
 namespace Physics {
-  namespace ito_plasma {
+  namespace ItoPlasma {
   
     /*!
       @brief A particle class for use with Ito diffusion, i.e. drift-diffusion brownian walkers

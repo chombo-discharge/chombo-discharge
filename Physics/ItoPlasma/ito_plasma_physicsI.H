@@ -19,7 +19,7 @@
 #define ITO_PLASMA_PHYSICS_DEBUG 0
 
 #include "CD_NamespaceHeader.H"
-using namespace Physics::ito_plasma;
+using namespace Physics::ItoPlasma;
 
 inline
 RealVect ito_plasma_physics::randomPosition(const RealVect a_cellPos,
@@ -505,7 +505,7 @@ void ito_plasma_physics::reconcile_photoionization(Vector<List<ItoParticle>* >& 
     energies[i] *= newNumParticles[i];
   }
   
-  for (const auto& r : m_photo_reactions){
+  for (const auto& r : m_ItoPlasmaPhotoReactions){
 
     // Source and targets
     const int& src                 = r.second.source();

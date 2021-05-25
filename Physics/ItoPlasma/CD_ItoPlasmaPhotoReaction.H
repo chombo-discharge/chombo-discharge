@@ -13,26 +13,26 @@
 
 #include "CD_NamespaceHeader.H"
 namespace Physics {
-  namespace ito_plasma {
+  namespace ItoPlasma {
     
     /*!
       @brief Reaction class for ito_plasma_physics. 
-      @details To use this class you should initialize a photoreaction e.g. photo_reaction({0}, {0,1,3})
+      @details To use this class you should initialize a photoreaction e.g. ItoPlasmaPhotoReaction({0}, {0,1,3})
       to the reaction Y0 => X_0 + X_1 + X_3.
       @note Technically, this class can also do Y0 + Y1 => X_0 + X1 + X3, but I don't see where that would be used...
     */
-    class photo_reaction {
+    class ItoPlasmaPhotoReaction {
     public:
 
       /*!
 	@brief Allow, but you need full ctor to do anything. 
       */
-      photo_reaction() = default;
+      ItoPlasmaPhotoReaction() = default;
 
       /*!
 	@brief Full Ctor, includes possible Photons. 
       */
-      photo_reaction(const int a_source,
+      ItoPlasmaPhotoReaction(const int a_source,
 		     const std::initializer_list<int> a_targets) : m_source(a_source),
 								   m_targets(a_targets),
 								   m_energies(0) {
@@ -42,7 +42,7 @@ namespace Physics {
       /*!
 	@brief Full Ctor, includes energy of generated species. 
       */
-      photo_reaction(const int a_source,
+      ItoPlasmaPhotoReaction(const int a_source,
 		     const std::initializer_list<int> a_targets,
 		     const std::initializer_list<std::pair<int, Real> > a_energies) : m_source(a_source),
 										      m_targets(a_targets),
@@ -53,7 +53,7 @@ namespace Physics {
       /*!
 	@brief Dtor. Not much to see here.
       */
-      ~photo_reaction(){
+      ~ItoPlasmaPhotoReaction(){
 
       }
 
@@ -86,6 +86,6 @@ namespace Physics {
 }
 #include "CD_NamespaceFooter.H"
 
-#include "photo_reactionI.H"
+#include <CD_ItoPlasmaPhotoReactionImplem.H>
 
 #endif

@@ -12,7 +12,7 @@
 
 #include "CD_NamespaceHeader.H"
   
-using namespace Physics::ito_plasma;
+using namespace Physics::ItoPlasma;
 
 ito_plasma_streamer_tagger::ito_plasma_streamer_tagger(){
   m_name = "ito_plasma_streamer_tagger";

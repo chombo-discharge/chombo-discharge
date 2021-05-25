@@ -12,7 +12,7 @@
 
 #include "CD_NamespaceHeader.H"
 namespace Physics {
-  namespace ito_plasma {
+  namespace ItoPlasma {
   
     /*!
       @brief Refinement class for morrow_stephens plasma model only

@@ -12,7 +12,7 @@
 
 #include "CD_NamespaceHeader.H"
 namespace Physics {
-  namespace ito_plasma {
+  namespace ItoPlasma {
   
     /*!
       @brief Lightweight tagging class. Only tags cells based on electric field. 

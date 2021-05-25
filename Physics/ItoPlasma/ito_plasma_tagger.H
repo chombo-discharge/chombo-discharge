@@ -15,7 +15,7 @@
 
 #include "CD_NamespaceHeader.H"
 namespace Physics {
-  namespace ito_plasma {
+  namespace ItoPlasma {
   
     /*!
       @brief Abstract class for tagging cells across an AMR hierarchy
