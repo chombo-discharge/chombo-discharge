@@ -49,15 +49,6 @@ bool TimeStepper::needToRegrid(){
   return false;
 }
 
-int TimeStepper::getRedistributionRegSize() const {
-  CH_TIME("TimeStepper::getRedistributionRegSize");
-  if(m_verbosity > 5){
-    pout() << "TimeStepper::getRedistributionRegSize" << endl;
-  }
-
-  return 1;
-}
-
 void TimeStepper::parseRuntimeOptions() {
   CH_TIME("TimeStepper::parseRuntimeOptions");
   if(m_verbosity > 5){

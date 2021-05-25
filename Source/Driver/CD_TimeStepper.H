@@ -74,14 +74,6 @@ public:
   */
   virtual void postCheckpointSetup() = 0;
 
-  // REGISTRATION ROUTINES BELOW HERE
-  // --------------------------------
-  /*!
-    @brief Get the redistribution register size
-    @todo Remove this routine and everything that goes along with it. 
-  */
-  virtual int getRedistributionRegSize() const;
-
   /*!
     @brief Register realms to be used for the simulation
   */
