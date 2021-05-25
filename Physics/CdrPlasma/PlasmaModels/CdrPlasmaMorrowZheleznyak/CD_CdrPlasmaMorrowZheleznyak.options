@@ -1,0 +1,51 @@
+# ====================================================================================================
+# MORROW_ZHELEZNYAK CLASS OPTIONS
+# ====================================================================================================
+CdrPlasmaMorrowZheleznyak.gas_temperature               = 300                   # Gas temperature (K)
+CdrPlasmaMorrowZheleznyak.gas_N2_frac                   = 0.8                   # Mixing fraction of nitrogen
+CdrPlasmaMorrowZheleznyak.gas_O2_frac                   = 0.2                   # Mixing fraction of oxygen
+CdrPlasmaMorrowZheleznyak.gas_pressure                  = 1.0                   # Gas pressure (atm)
+
+CdrPlasmaMorrowZheleznyak.mobile_ions                   = false                 # Turn off ion mobility (true/false)
+CdrPlasmaMorrowZheleznyak.diffusive_electrons           = true                  # Electron diffusion on/off
+CdrPlasmaMorrowZheleznyak.use_alpha_correction          = true                  # Soloviev et. al alpha correction
+
+CdrPlasmaMorrowZheleznyak.electrode_townsend2           = 1.E-6                 # Townsend coefficient on electrodes
+CdrPlasmaMorrowZheleznyak.electrode_quantum_efficiency  = 1.E-6                 # Quantum efficiency on electrodes
+CdrPlasmaMorrowZheleznyak.dielectric_townsend2          = 1.E-6                 # Townsend coefficient on dielectrics
+CdrPlasmaMorrowZheleznyak.dielectric_quantum_efficiency = 1.E-6                 # Quantum efficiency on dielectrics
+
+CdrPlasmaMorrowZheleznyak.chemistry                     = rre                   # Tau-leaping, SSA, or RRE 
+CdrPlasmaMorrowZheleznyak.poiss_exp_swap                = 100                   # Swap from Poisson to exponential distribution
+CdrPlasmaMorrowZheleznyak.cutoff_poisson                = 1.0                   # Cutoff for Poisson distribution
+CdrPlasmaMorrowZheleznyak.seed                          = 0                     # RNG seed
+
+CdrPlasmaMorrowZheleznyak.uniform_density               = 0.E10                 # Initial background ionization
+CdrPlasmaMorrowZheleznyak.seed_density                  = 1.E16                 # Initial seed ionization
+CdrPlasmaMorrowZheleznyak.seed_radius                   = 100E-6                  # Initial seed radius
+CdrPlasmaMorrowZheleznyak.seed_position                 = 0. 0. 0.              # Initial seed position
+
+CdrPlasmaMorrowZheleznyak.particle_deposition           = ngp                   # 'ngp', 'cic', or 'tsc'
+CdrPlasmaMorrowZheleznyak.particle_weight               = 1.0                   # Initial particle weights
+CdrPlasmaMorrowZheleznyak.uniform_particles             = 0                     # Number of uniformly distributed particles in the domain
+CdrPlasmaMorrowZheleznyak.gaussian_particles            = 0                     # Number of Gaussian distributed particles in the domain
+CdrPlasmaMorrowZheleznyak.gaussian_center               = 0.0 0.0 0.0           # Gaussian seed center
+CdrPlasmaMorrowZheleznyak.gaussian_radius               = 500.E-6               # Gaussian seed radius
+
+CdrPlasmaMorrowZheleznyak.gas_quenching_pressure        = 0.03947               # Quenching pressure for photo-emission (atm)
+CdrPlasmaMorrowZheleznyak.photoi_factor                 = 1.0                   # Photoionization factor
+CdrPlasmaMorrowZheleznyak.photoi_seed                   = 0                     # RNG seed
+CdrPlasmaMorrowZheleznyak.photoi_f1                     = 2.925E15              # Lower frequency
+CdrPlasmaMorrowZheleznyak.photoi_f2                     = 3.059E15              # High frequency
+CdrPlasmaMorrowZheleznyak.photoi_K1                     = 2.65E-2               # Converted to (mPa)^-1
+CdrPlasmaMorrowZheleznyak.photoi_K2                     = 1.5                   # Converted to (mPa)^-1
+
+CdrPlasmaMorrowZheleznyak.domain_bc_x_lo                = extrap                # Switch for BC on domain edge. 'extrap' or 'wall'
+CdrPlasmaMorrowZheleznyak.domain_bc_x_hi                = extrap                # Switch for BC on domain edge. 'extrap' or 'wall'
+CdrPlasmaMorrowZheleznyak.domain_bc_y_lo                = extrap                # Switch for BC on domain edge. 'extrap' or 'wall'
+CdrPlasmaMorrowZheleznyak.domain_bc_y_hi                = extrap                # Switch for BC on domain edge. 'extrap' or 'wall'
+CdrPlasmaMorrowZheleznyak.domain_bc_z_lo                = extrap                # Switch for BC on domain edge. 'extrap' or 'wall'
+CdrPlasmaMorrowZheleznyak.domain_bc_z_hi                = extrap                # Switch for BC on domain edge. 'extrap' or 'wall'
+
+CdrPlasmaMorrowZheleznyak.extrap_electrode              = false                 # Switch for BC on electrode. 
+CdrPlasmaMorrowZheleznyak.extrap_dielectric             = false                 # Switch for BC on dielectric.

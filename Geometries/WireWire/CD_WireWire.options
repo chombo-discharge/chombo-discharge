@@ -1,0 +1,17 @@
+# ====================================================================================================
+# WIRE_WIRE CLASS OPTIONS
+#
+# Note: For this geometry a live wire gets V = 0.5V0 and a dead wire gets V=-0.5V0
+# In 2D the wires are spheres and only endpoint1 is used. 
+# ====================================================================================================
+WireWire.first.on        = true          # Wire on or not
+WireWire.first.live      = true          # Wire live or not
+WireWire.first.radius    = 0.1           # Wire radius
+WireWire.first.endpoint1 = 0.5 -2 0      # Wire endpoint
+WireWire.first.endpoint2 = 0.5  2 0      # Other endpoint
+
+WireWire.second.on        = true         # Wire on or not
+WireWire.second.live      = true         # Wire live or not
+WireWire.second.radius    = 0.1          # Wire radius
+WireWire.second.endpoint1 = -0.5 -2 0    # Wire endpoint
+WireWire.second.endpoint2 = -0.5  2 0    # Other endpoint

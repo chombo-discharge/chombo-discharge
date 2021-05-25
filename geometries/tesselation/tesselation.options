@@ -1,5 +1,0 @@
-# ====================================================================================================
-# TESSELATION GEOMETRY CLASS
-# ====================================================================================================
-tesselation.mesh_file   = myFile.ply    # Ply file
-tesselation.partitioner = sah           # Partitioner. Valid options are 'default', 'overlap', 'sah'

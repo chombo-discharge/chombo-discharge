@@ -1,0 +1,30 @@
+# ====================================================================================================
+# BROWNIAN_WALKER PHYSICS CLASS OPTIONS
+#
+# This class does an expclit AMR advection-diffusion simulation of Brownian walker particles drawn
+# from a Gaussian distribution. 
+# ====================================================================================================
+BrownianWalker.verbosity      = -1      # Verbosity
+BrownianWalker.realm          = primal  # Realm
+BrownianWalker.diffusion      = true    # Turn on/off diffusion
+BrownianWalker.advection      = true    # Turn on/off advection
+BrownianWalker.blob_amplitude = 1.0     # Blob amplitude
+BrownianWalker.blob_radius    = 0.1     # Blob radius
+BrownianWalker.blob_center    = 0 0     # Blob center
+BrownianWalker.seed           = 0       # RNG seed
+BrownianWalker.num_particles  = 100     # Number of initial particles
+BrownianWalker.max_cells_hop  = 1.0     # Maximum cells to move in one time step
+BrownianWalker.ppc            = -1      # Particles per cell. <= 0 turns off superparticles
+BrownianWalker.load_balance   = true    # Turn on/off particle load balancing
+
+
+# Velocity, diffusion, and CFL
+# ----------------------------
+BrownianWalker.diffco         = 1.0     # Diffusion coefficient
+BrownianWalker.omega          = 1.0     # Rotation velocity
+
+# Cell tagging stuff
+# ------------------
+BrownianWalker.refine_curv = 0.1          # Refine if curvature exceeds this
+BrownianWalker.refine_magn = 1E-2         # Only tag if magnitude eceeds this
+BrownianWalker.buffer      = 0            # Grow tagged cells     
