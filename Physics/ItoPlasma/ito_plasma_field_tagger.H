@@ -8,7 +8,7 @@
 #ifndef _ITO_PLASMA_FIELD_TAGGER_
 #define _ITO_PLASMA_FIELD_TAGGER_
 
-#include "ito_plasma_tagger.H"
+#include <CD_ItoPlasmaTagger.H>
 
 #include "CD_NamespaceHeader.H"
 namespace Physics {
@@ -19,7 +19,7 @@ namespace Physics {
       @details This class fetches the point-wise electric field. The class is pure, so users must implement 
       the actual tagging criterion themselves. 
     */
-    class ito_plasma_field_tagger : public ito_plasma_tagger {
+    class ito_plasma_field_tagger : public ItoPlasmaTagger {
     public:
 
       /*!

@@ -1,49 +1,55 @@
+/* chombo-discharge
+ * Copyright © 2021 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+ */
+
 /*!
-  @file   ito_plasma_tagger.cpp
-  @brief  Implementation of ito_plasma_tagger.H
+  @file   CD_ItoPlasmaTagger.cpp
+  @brief  Implementation of CD_ItoPlasmaTagger.H
   @author Robert marskar
-  @date   May. 2018
 */
 
-#include "ito_plasma_tagger.H"
-#include <CD_ItoIterator.H>
-#include <CD_RtIterator.H>
-#include <CD_DataOps.H>
-
+// Chombo includes
 #include <EBArith.H>
 #include <ParmParse.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_ItoPlasmaTagger.H>
+#include <CD_ItoIterator.H>
+#include <CD_RtIterator.H>
+#include <CD_DataOps.H>
+#include <CD_NamespaceHeader.H>
+
 using namespace Physics::ItoPlasma;
 
-ito_plasma_tagger::ito_plasma_tagger(){
-  CH_TIME("ito_plasma_tagger::ito_plasma_tagger");
+ItoPlasmaTagger::ItoPlasmaTagger(){
+  CH_TIME("ItoPlasmaTagger::ItoPlasmaTagger");
   m_verbosity = 10;
   if(m_verbosity > 5){
-    pout() << "ito_plasma_tagger::ito_plasma_tagger" << endl;
+    pout() << "ItoPlasmaTagger::ItoPlasmaTagger" << endl;
   }
 
-  m_name  = "ito_plasma_tagger";
+  m_name  = "ItoPlasmaTagger";
   m_phase = phase::gas;
   m_realm = Realm::Primal;
 }
 
-ito_plasma_tagger::ito_plasma_tagger(const RefCountedPtr<ItoPlasmaPhysics>&     a_physics,
-				     const RefCountedPtr<ItoPlasmaStepper>&     a_timeStepper,
-				     const RefCountedPtr<AmrMesh>&               a_amr,
-				     const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry) : ito_plasma_tagger() {
+ItoPlasmaTagger::ItoPlasmaTagger(const RefCountedPtr<ItoPlasmaPhysics>&     a_physics,
+				 const RefCountedPtr<ItoPlasmaStepper>&     a_timeStepper,
+				 const RefCountedPtr<AmrMesh>&               a_amr,
+				 const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry) : ItoPlasmaTagger() {
   this->define(a_physics, a_timeStepper, a_amr, a_computationalGeometry);
 }
 
-ito_plasma_tagger::~ito_plasma_tagger(){
+ItoPlasmaTagger::~ItoPlasmaTagger(){
 
 }
 
-void ito_plasma_tagger::define(const RefCountedPtr<ItoPlasmaPhysics>&     a_physics,
-			       const RefCountedPtr<ItoPlasmaStepper>&     a_timeStepper,
-			       const RefCountedPtr<AmrMesh>&               a_amr,
-			       const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry){
-  CH_TIME("ito_plasma_tagger::define");
+void ItoPlasmaTagger::define(const RefCountedPtr<ItoPlasmaPhysics>&     a_physics,
+			     const RefCountedPtr<ItoPlasmaStepper>&     a_timeStepper,
+			     const RefCountedPtr<AmrMesh>&               a_amr,
+			     const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry){
+  CH_TIME("ItoPlasmaTagger::define");
   if(m_verbosity > 5){
     pout() << m_name + "::define" << endl;
   }
@@ -54,8 +60,8 @@ void ito_plasma_tagger::define(const RefCountedPtr<ItoPlasmaPhysics>&     a_phys
   m_computationalGeometry    = a_computationalGeometry;
 }
 
-void ito_plasma_tagger::regrid(){
-  CH_TIME("ito_plasma_tagger::regrid");
+void ItoPlasmaTagger::regrid(){
+  CH_TIME("ItoPlasmaTagger::regrid");
   if(m_verbosity > 5){
     pout() << m_name + "::regrid" << endl;
   }
@@ -70,8 +76,8 @@ void ito_plasma_tagger::regrid(){
   }
 }
 
-void ito_plasma_tagger::setPhase(const phase::which_phase a_phase){
-  CH_TIME("ito_plasma_tagger::setPhase");
+void ItoPlasmaTagger::setPhase(const phase::which_phase a_phase){
+  CH_TIME("ItoPlasmaTagger::setPhase");
   if(m_verbosity > 5){
     pout() << m_name + "::setPhase" << endl;
   }
@@ -79,8 +85,8 @@ void ito_plasma_tagger::setPhase(const phase::which_phase a_phase){
   m_phase = a_phase;
 }
 
-int ito_plasma_tagger::getNumberOfPlotVariables(){
-  CH_TIME("ito_plasma_tagger::getNumberOfPlotVariables_cells");
+int ItoPlasmaTagger::getNumberOfPlotVariables(){
+  CH_TIME("ItoPlasmaTagger::getNumberOfPlotVariables_cells");
   if(m_verbosity > 5){
     pout() << m_name + "::getNumberOfPlotVariables" << endl;
   }
@@ -88,12 +94,12 @@ int ito_plasma_tagger::getNumberOfPlotVariables(){
   return m_num_tracers;
 }
 
-Vector<EBAMRCellData>& ito_plasma_tagger::getTracerFields() {
+Vector<EBAMRCellData>& ItoPlasmaTagger::getTracerFields() {
   return m_tracer;
 }
 
-void ito_plasma_tagger::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) {
-  CH_TIME("ito_plasma_tagger::writePlotData");
+void ItoPlasmaTagger::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) {
+  CH_TIME("ItoPlasmaTagger::writePlotData");
   if(m_verbosity > 5){
     pout() << m_name + "::writePlotData" << endl;
   }
@@ -122,8 +128,8 @@ void ito_plasma_tagger::writePlotData(EBAMRCellData& a_output, Vector<std::strin
   }
 }
 
-bool ito_plasma_tagger::tagCells(EBAMRTags& a_tags){
-  CH_TIME("ito_plasma_tagger::tagCells");
+bool ItoPlasmaTagger::tagCells(EBAMRTags& a_tags){
+  CH_TIME("ItoPlasmaTagger::tagCells");
   if(m_verbosity > 5){
     pout() << m_name + "::tagCells" << endl;
   }
@@ -203,15 +209,15 @@ bool ito_plasma_tagger::tagCells(EBAMRTags& a_tags){
   return got_new_tags;
 }
 
-void ito_plasma_tagger::refineCellsBox(DenseIntVectSet&          a_refined_tags,
-					 const Vector<EBCellFAB*>& a_tracers,
-					 const Vector<EBCellFAB*>& a_grad_tracers,
-					 const int                 a_lvl,
-					 const Box                 a_box,
-					 const EBISBox&            a_ebisbox,
-					 const Real                a_time,
-					 const Real                a_dx,
-					 const RealVect            a_origin){
+void ItoPlasmaTagger::refineCellsBox(DenseIntVectSet&          a_refined_tags,
+				     const Vector<EBCellFAB*>& a_tracers,
+				     const Vector<EBCellFAB*>& a_grad_tracers,
+				     const int                 a_lvl,
+				     const Box                 a_box,
+				     const EBISBox&            a_ebisbox,
+				     const Real                a_time,
+				     const Real                a_dx,
+				     const RealVect            a_origin){
 
 
   
@@ -277,15 +283,15 @@ void ito_plasma_tagger::refineCellsBox(DenseIntVectSet&          a_refined_tags,
   }
 }
 
-void ito_plasma_tagger::coarsenCellsBox(DenseIntVectSet&         a_coarsened_tags,
-					  const Vector<EBCellFAB*>& a_tracers,
-					  const Vector<EBCellFAB*>& a_grad_tracers,
-					  const int                 a_lvl,
-					  const Box                 a_box,
-					  const EBISBox&            a_ebisbox,
-					  const Real                a_time,
-					  const Real                a_dx,
-					  const RealVect            a_origin){
+void ItoPlasmaTagger::coarsenCellsBox(DenseIntVectSet&         a_coarsened_tags,
+				      const Vector<EBCellFAB*>& a_tracers,
+				      const Vector<EBCellFAB*>& a_grad_tracers,
+				      const int                 a_lvl,
+				      const Box                 a_box,
+				      const EBISBox&            a_ebisbox,
+				      const Real                a_time,
+				      const Real                a_dx,
+				      const RealVect            a_origin){
 
 
   
@@ -358,4 +364,5 @@ void ito_plasma_tagger::coarsenCellsBox(DenseIntVectSet&         a_coarsened_tag
     }
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

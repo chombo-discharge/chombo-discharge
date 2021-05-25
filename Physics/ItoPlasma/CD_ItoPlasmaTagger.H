@@ -1,45 +1,49 @@
+/* chombo-discharge
+ * Copyright © 2021 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+ */
+
 /*!
-  @file   ito_plasma_tagger.H
-  @brief  Shameless ripoff of CdrPlasmaTagger.H
+  @file   CD_ItoPlasmaTagger.H
+  @brief  Parent tagger class for ItoPlasma
   @author Robert Marskar
-  @date   June 2020. 
-  @todo   Rename to ito_plasma_tagger. 
 */
 
-#ifndef _ITO_PLASMA_TAGGER_
-#define _ITO_PLASMA_TAGGER_
+#ifndef CD_ItoPlasmaTagger_H
+#define CD_ItoPlasmaTagger_H
 
-#include "CD_CellTagger.H"
+// Our includes
+#include <CD_CellTagger.H>
 #include <CD_ItoPlasmaStepper.H>
 #include <CD_ItoPlasmaPhysics.H>
+#include <CD_NamespaceHeader.H>
 
-#include "CD_NamespaceHeader.H"
 namespace Physics {
   namespace ItoPlasma {
   
     /*!
       @brief Abstract class for tagging cells across an AMR hierarchy
     */
-    class ito_plasma_tagger : public CellTagger{
+    class ItoPlasmaTagger : public CellTagger{
     public:
 
       /*!
 	@brief Weak constructor, must subsequently call define
       */
-      ito_plasma_tagger();
+      ItoPlasmaTagger();
 
       /*!
 	@brief Full constructor
       */
-      ito_plasma_tagger(const RefCountedPtr<ItoPlasmaPhysics>&     a_physics,
-			const RefCountedPtr<ItoPlasmaStepper>&     a_timeStepper,
-			const RefCountedPtr<AmrMesh>&               a_amr,
-			const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
+      ItoPlasmaTagger(const RefCountedPtr<ItoPlasmaPhysics>&     a_physics,
+		      const RefCountedPtr<ItoPlasmaStepper>&     a_timeStepper,
+		      const RefCountedPtr<AmrMesh>&               a_amr,
+		      const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
 
       /*!
 	@brief Destructor
       */
-      virtual ~ito_plasma_tagger();
+      virtual ~ItoPlasmaTagger();
 
       /*!
 	@brief Define function
@@ -150,27 +154,27 @@ namespace Physics {
 	@brief Per-box refinement tags
       */
       virtual void refineCellsBox(DenseIntVectSet&          a_refined_tags,
-				    const Vector<EBCellFAB*>& a_tracers,
-				    const Vector<EBCellFAB*>& a_grad_tracers,
-				    const int                 a_lvl,
-				    const Box                 a_box,
-				    const EBISBox&            a_ebisbox,
-				    const Real                a_time,
-				    const Real                a_dx,
-				    const RealVect            a_origin);
+				  const Vector<EBCellFAB*>& a_tracers,
+				  const Vector<EBCellFAB*>& a_grad_tracers,
+				  const int                 a_lvl,
+				  const Box                 a_box,
+				  const EBISBox&            a_ebisbox,
+				  const Real                a_time,
+				  const Real                a_dx,
+				  const RealVect            a_origin);
 
       /*!
 	@brief Per-box coarsen
       */
       virtual void coarsenCellsBox(DenseIntVectSet&          a_refined_tags,
-				     const Vector<EBCellFAB*>& a_tracers,
-				     const Vector<EBCellFAB*>& a_grad_tracers,
-				     const int                 a_lvl,
-				     const Box                 a_box,
-				     const EBISBox&            a_ebisbox,
-				     const Real                a_time,
-				     const Real                a_dx,
-				     const RealVect            a_origin);
+				   const Vector<EBCellFAB*>& a_tracers,
+				   const Vector<EBCellFAB*>& a_grad_tracers,
+				   const int                 a_lvl,
+				   const Box                 a_box,
+				   const EBISBox&            a_ebisbox,
+				   const Real                a_time,
+				   const Real                a_dx,
+				   const RealVect            a_origin);
 
 
 
@@ -178,23 +182,25 @@ namespace Physics {
 	@brief Coarsen a cell based on a tracer field
       */
       virtual bool coarsenCell(const RealVect         a_pos,
-				const Real             a_time,
-				const Real             a_dx,
-				const int              a_lvl,
-				const Vector<Real>     a_tracer,
-				const Vector<RealVect> a_grad_tracer) = 0;
-
-      /*!
-	@brief Refine a cell based on a tracer field
-      */
-      virtual bool refineCell(const RealVect         a_pos,
 			       const Real             a_time,
 			       const Real             a_dx,
 			       const int              a_lvl,
 			       const Vector<Real>     a_tracer,
 			       const Vector<RealVect> a_grad_tracer) = 0;
+
+      /*!
+	@brief Refine a cell based on a tracer field
+      */
+      virtual bool refineCell(const RealVect         a_pos,
+			      const Real             a_time,
+			      const Real             a_dx,
+			      const int              a_lvl,
+			      const Vector<Real>     a_tracer,
+			      const Vector<RealVect> a_grad_tracer) = 0;
     };
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif
