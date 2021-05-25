@@ -511,7 +511,7 @@ void ito_plasma_physics::reconcile_photoionization(Vector<List<ItoParticle>* >& 
     const int& src                 = r.second.source();
     const std::deque<int>& targets = r.second.targets();
     
-    const std::deque<std::pair<int, Real> >& target_energies = r.second.get_target_energies();
+    const std::deque<std::pair<int, Real> >& target_energies = r.second.getTargetEnergies();
 
     for (ListIterator<Photon> lit(*a_Photons[src]); lit.ok(); ++lit){
       const Photon& phot  = lit();

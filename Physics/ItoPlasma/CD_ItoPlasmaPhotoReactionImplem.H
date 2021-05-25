@@ -1,16 +1,21 @@
+/* chombo-discharge
+ * Copyright © 2021 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+ */
+
 /*!
-  @file   ItoPlasmaPhotoReactionI.H
-  @brief  Implementation of ItoPlasmaPhotoReaction.H
+  @file   CD_ItoPlasmaPhotoReactionImplem.H
+  @brief  Implementation of CD_ItoPlasmaPhotoReaction.H
   @author Robert Marskar
-  @date   Aug. 2020
 */
 
-#ifndef _PHOTO_REACTIONI_H_
-#define _PHOTO_REACTIONI_H_
+// Our includes
+#ifndef CD_ItoPlasmaPhotoReactionImplem_H
+#define CD_ItoPlasmaPhotoReactionImplem_H
 
 #include <CD_ItoPlasmaPhotoReaction.H>
+#include <CD_NamespaceHeader.H>
 
-#include "CD_NamespaceHeader.H"
 using namespace Physics::ItoPlasma;
 
 inline
@@ -24,9 +29,10 @@ const std::deque<int>& ItoPlasmaPhotoReaction::targets() const {
 }
 
 inline
-const std::deque<std::pair<int, Real> >& ItoPlasmaPhotoReaction::get_target_energies() const{
+const std::deque<std::pair<int, Real> >& ItoPlasmaPhotoReaction::getTargetEnergies() const{
   return m_energies;
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif

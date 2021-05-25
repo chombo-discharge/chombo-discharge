@@ -1,17 +1,24 @@
+/* chombo-discharge
+ * Copyright © 2021 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+ */
+
 /*!
-  @file   Photon_reaction.H
+  @file   CD_ItoPlasmaPhotoReaction.H
   @brief  Declaration of a class for holding photoionization reaction types in ito_plasma physics
   @author Robert Marskar
-  @date   Aug. 2020
 */
 
-#ifndef _PHOTO_REACTION_H_
-#define _PHOTO_REACTION_H_
+#ifndef CD_ItoPlasmaPhotoReaction_H
+#define CD_ItoPlasmaPhotoReaction_H
 
+// Chombo includes
 #include <Vector.H>
 #include <RealVect.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_NamespaceHeader.H>
+
 namespace Physics {
   namespace ItoPlasma {
     
@@ -33,9 +40,9 @@ namespace Physics {
 	@brief Full Ctor, includes possible Photons. 
       */
       ItoPlasmaPhotoReaction(const int a_source,
-		     const std::initializer_list<int> a_targets) : m_source(a_source),
-								   m_targets(a_targets),
-								   m_energies(0) {
+			     const std::initializer_list<int> a_targets) : m_source(a_source),
+									   m_targets(a_targets),
+									   m_energies(0) {
 
       }
 
@@ -43,10 +50,10 @@ namespace Physics {
 	@brief Full Ctor, includes energy of generated species. 
       */
       ItoPlasmaPhotoReaction(const int a_source,
-		     const std::initializer_list<int> a_targets,
-		     const std::initializer_list<std::pair<int, Real> > a_energies) : m_source(a_source),
-										      m_targets(a_targets),
-										      m_energies(a_energies){
+			     const std::initializer_list<int> a_targets,
+			     const std::initializer_list<std::pair<int, Real> > a_energies) : m_source(a_source),
+											      m_targets(a_targets),
+											      m_energies(a_energies){
 
       }
 
@@ -73,7 +80,7 @@ namespace Physics {
 	@brief Get the energies of the produced targets
       */
       inline
-      const std::deque<std::pair<int, Real> >& get_target_energies() const;
+      const std::deque<std::pair<int, Real> >& getTargetEnergies() const;
       
 
     protected:
@@ -84,7 +91,8 @@ namespace Physics {
     };
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #include <CD_ItoPlasmaPhotoReactionImplem.H>
 
