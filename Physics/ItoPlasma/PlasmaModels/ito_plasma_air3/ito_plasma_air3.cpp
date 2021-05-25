@@ -109,11 +109,11 @@ ito_plasma_air3::ito_plasma_air3(){
   this->draw_sphere_particles(electrons, positives, m_num_particles, m_blob_center, m_blob_radius, m_particle_weight, 0.0, 0.0);
 
   // Particle-particle reactions
-  m_reactions.emplace("impact_ionization",      ito_reaction({m_electron_idx}, {m_electron_idx, m_electron_idx, m_positive_idx}));
-  m_reactions.emplace("electron_attachment",    ito_reaction({m_electron_idx}, {m_negative_idx}));
-  m_reactions.emplace("electron_recombination", ito_reaction({m_electron_idx, m_positive_idx}, {}));
-  m_reactions.emplace("ion_recombination",      ito_reaction({m_positive_idx, m_negative_idx}, {}));
-  m_reactions.emplace("photo_excitation",       ito_reaction({m_electron_idx}, {m_electron_idx}, {m_PhotonZ_idx}));
+  m_reactions.emplace("impact_ionization",      ItoPlasmaReaction({m_electron_idx}, {m_electron_idx, m_electron_idx, m_positive_idx}));
+  m_reactions.emplace("electron_attachment",    ItoPlasmaReaction({m_electron_idx}, {m_negative_idx}));
+  m_reactions.emplace("electron_recombination", ItoPlasmaReaction({m_electron_idx, m_positive_idx}, {}));
+  m_reactions.emplace("ion_recombination",      ItoPlasmaReaction({m_positive_idx, m_negative_idx}, {}));
+  m_reactions.emplace("photo_excitation",       ItoPlasmaReaction({m_electron_idx}, {m_electron_idx}, {m_PhotonZ_idx}));
 
   // Photo-reactions
   m_ItoPlasmaPhotoReactions.emplace("zheleznyak",  ItoPlasmaPhotoReaction({m_PhotonZ_idx}, {m_electron_idx, m_positive_idx}));

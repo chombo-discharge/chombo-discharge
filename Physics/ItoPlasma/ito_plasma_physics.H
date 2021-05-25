@@ -24,7 +24,7 @@
 #include <CD_RtSpecies.H>
 #include <CD_Photon.H>
 #include <CD_ItoParticle.H>
-#include "ito_reaction.H"
+#include <CD_ItoPlasmaReaction.H>
 #include <CD_ItoPlasmaPhotoReaction.H>
 #include "CD_LookupTable.H"
 
@@ -33,7 +33,7 @@ namespace Physics {
   namespace ItoPlasma {
 
     // Ease up on the typing.
-    using ReactionPtrs  = std::deque<std::shared_ptr<ito_reaction> >;
+    using ReactionPtrs  = std::deque<std::shared_ptr<ItoPlasmaReaction> >;
     using ReactionTypes = std::pair<ReactionPtrs, ReactionPtrs>;
 
     /*!
@@ -250,7 +250,7 @@ namespace Physics {
       Real m_eps;
 
       // These are all the reactions
-      std::map<std::string, ito_reaction> m_reactions; 
+      std::map<std::string, ItoPlasmaReaction> m_reactions; 
       mutable std::map<std::string, ItoPlasmaPhotoReaction> m_ItoPlasmaPhotoReactions;
 
       // Lookup tables if you need them. 

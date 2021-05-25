@@ -829,14 +829,14 @@ void ito_plasma_physics::advanceReactionNetwork(Vector<List<ItoParticle>* >& a_p
 inline
 ReactionTypes ito_plasma_physics::get_critical_reactions(const Vector<long long>& a_particles) const{
 
-  ReactionPtrs criticalReactions;    // std::deque<shared_ptr<ito_reaction> > under the hood
-  ReactionPtrs nonCriticalReactions; // std::deque<shared_ptr<ito_reaction> > under the hood
+  ReactionPtrs criticalReactions;    // std::deque<shared_ptr<ItoPlasmaReaction> > under the hood
+  ReactionPtrs nonCriticalReactions; // std::deque<shared_ptr<ItoPlasmaReaction> > under the hood
 
   const long long Ncrit = (long long) m_Ncrit; // Need long long version of this because because a_particles is long long
   
   for (const auto& r : m_reactions){
 
-    const std::map<int, int>& stateChange = r.second.getPhi_change();
+    const std::map<int, int>& stateChange = r.second.getStateChange();
 
     long long Lj    = std::numeric_limits<long long>::max();
     bool consuming  = false;
@@ -865,10 +865,10 @@ ReactionTypes ito_plasma_physics::get_critical_reactions(const Vector<long long>
 
     // Move reactions to where they should be
     if(crit){
-      criticalReactions.emplace_back(std::make_shared<ito_reaction>(r.second));
+      criticalReactions.emplace_back(std::make_shared<ItoPlasmaReaction>(r.second));
     }
     else{
-      nonCriticalReactions.emplace_back(std::make_shared<ito_reaction>(r.second));
+      nonCriticalReactions.emplace_back(std::make_shared<ItoPlasmaReaction>(r.second));
     }
   }
 
@@ -920,11 +920,11 @@ Real ito_plasma_physics::get_non_critical_step(const Vector<long long>& a_partic
 
     // 1. Compute propensities of all reactions. It is possible for propensities to be zero. Order matters,
     //    so use a deque
-    std::deque<std::pair<Real, std::shared_ptr<ito_reaction> > > reactions;
+    std::deque<std::pair<Real, std::shared_ptr<ItoPlasmaReaction> > > reactions;
     for(const auto& r : a_non_critical_reactions){
       const Real p = r->propensity(a_particles);
 
-      reactions.emplace_back(std::pair<Real, std::shared_ptr<ito_reaction> >(p, r));
+      reactions.emplace_back(std::pair<Real, std::shared_ptr<ItoPlasmaReaction> >(p, r));
     }
       
 
@@ -933,7 +933,7 @@ Real ito_plasma_physics::get_non_critical_step(const Vector<long long>& a_partic
     //    for (const auto& reaction : m_reactions){
     for (const auto& reaction : a_non_critical_reactions){
 
-      const auto& cur_reactants = reaction->get_reactants();
+      const auto& cur_reactants = reaction->getReactants();
       for (const auto& l : cur_reactants){
 	allReactants.insert(l); 
       }
@@ -950,8 +950,8 @@ Real ito_plasma_physics::get_non_critical_step(const Vector<long long>& a_partic
 
 	for (const auto& R : reactions){
 	  const Real& ap        = R.first;     // Reaction propensity.
-	  const ito_reaction& r = *(R.second); // Reaction. 
-	  const int muIJ        = r.getPhi_change(reactant); // State change of reactant due to current reaction
+	  const ItoPlasmaReaction& r = *(R.second); // Reaction. 
+	  const int muIJ        = r.getStateChange(reactant); // State change of reactant due to current reaction
 
 	  mu     += muIJ * ap;
 	  sigma2 += muIJ * muIJ * ap;
@@ -1080,8 +1080,8 @@ void ito_plasma_physics::tau_step(Vector<long long>&      a_particles,
     const long long num_reactions = this->poisson_reaction(a_propensities[i], a_dt);
 
     // Jump state and energy
-    a_reactions[i]->jump_state(a_particles, a_newPhotons, num_reactions);    // 
-    a_reactions[i]->jump_energy(energies,   a_mean_energies, a_sources, num_reactions, a_dt);
+    a_reactions[i]->jumpState(a_particles, a_newPhotons, num_reactions);    // 
+    a_reactions[i]->jumpEnergy(energies,   a_mean_energies, a_sources, num_reactions, a_dt);
   }
 
   // Recompute mean energies afterwards.
@@ -1106,9 +1106,9 @@ void ito_plasma_physics::tau_step(Vector<long long>&  a_particles,
 				  const Real          a_kappa,
 				  const Real          a_dt) const {
 
-  std::deque<std::shared_ptr<ito_reaction> > reactions;
+  std::deque<std::shared_ptr<ItoPlasmaReaction> > reactions;
   for (const auto& r : m_reactions){
-    reactions.emplace_back(std::make_shared<ito_reaction>(r.second));
+    reactions.emplace_back(std::make_shared<ItoPlasmaReaction>(r.second));
   }
 
   this->tau_step(a_particles, a_newPhotons, a_mean_energies, a_sources, reactions, a_dx, a_kappa, a_dt);
@@ -1174,9 +1174,9 @@ void ito_plasma_physics::ssa_step(Vector<long long>&  a_particles,
 				  const Real          a_dt) const {
 
   
-  std::deque<std::shared_ptr<ito_reaction> > reactions;
+  std::deque<std::shared_ptr<ItoPlasmaReaction> > reactions;
   for (const auto& r : m_reactions){
-    reactions.emplace_back(std::make_shared<ito_reaction>(r.second));
+    reactions.emplace_back(std::make_shared<ItoPlasmaReaction>(r.second));
   }
 
   // Compute all propensities
@@ -1202,9 +1202,9 @@ void ito_plasma_physics::ssa_step(Vector<long long>&       a_particles,
 				  const Real               a_kappa,
 				  const Real               a_dt) const {
 
-  std::deque<std::shared_ptr<ito_reaction> > reactions;
+  std::deque<std::shared_ptr<ItoPlasmaReaction> > reactions;
   for (const auto& r : m_reactions){
-    reactions.emplace_back(std::make_shared<ito_reaction>(r.second));
+    reactions.emplace_back(std::make_shared<ItoPlasmaReaction>(r.second));
   }
 
   this->ssa_step(a_particles, a_newPhotons, a_mean_energies, a_sources, a_propensities, reactions, a_A, a_dx, a_kappa, a_dt);
@@ -1247,8 +1247,8 @@ void ito_plasma_physics::ssa_step(Vector<long long>&      a_particles,
     }
 
     // Jump state and energy
-    a_reactions[r]->jump_state(a_particles, a_newPhotons,    one);
-    a_reactions[r]->jump_energy(energies, a_mean_energies, a_sources, one, a_dt); 
+    a_reactions[r]->jumpState(a_particles, a_newPhotons,    one);
+    a_reactions[r]->jumpEnergy(energies, a_mean_energies, a_sources, one, a_dt); 
 
 
     // Recompute mean energies afterwards.
@@ -1283,9 +1283,9 @@ void ito_plasma_physics::advance_ssa(Vector<long long>& a_particles,
     Real curDt = 0.0; // Simulated time within SSA
 
     // All the reactions
-    std::deque<std::shared_ptr<ito_reaction> > reactions;
+    std::deque<std::shared_ptr<ItoPlasmaReaction> > reactions;
     for (const auto& r : m_reactions){
-      reactions.emplace_back(std::make_shared<ito_reaction>(r.second));
+      reactions.emplace_back(std::make_shared<ItoPlasmaReaction>(r.second));
     }
 
     Real u1;     // Uniform random number on [0,1]

@@ -1,30 +1,35 @@
+/* chombo-discharge
+ * Copyright © 2021 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+ */
+
 /*!
-  @file   ito_reactionI.H
-  @brief  Implementation of ito_reaction.H
+  @file   CD_ItoPlasmaReactionImplem.H
+  @brief  Implementation of CD_ItoPlasmaReaction.H
   @author Robert Marskar
-  @date   Aug. 2020
 */
 
-#ifndef _ITO_REACTIONI_H_
-#define _ITO_REACTIONI_H_
+#ifndef CD_ItoPlasmaReactionImplem_H
+#define CD_ItoPlasmaReactionImplem_H
 
-#include "ito_reaction.H"
+// Our includes
+#include <CD_ItoPlasmaReaction.H>
+#include <CD_NamespaceHeader.H>
 
 #define ITO_REACTION_DEBUG 0
 
-#include "CD_NamespaceHeader.H"
 using namespace Physics::ItoPlasma;
 
 inline
-void ito_reaction::jump_state(Vector<long long>& a_particles,
-			      const long long    a_num_reactions) const {
+void ItoPlasmaReaction::jumpState(Vector<long long>& a_particles,
+				  const long long    a_num_reactions) const {
 #if ITO_REACTION_DEBUG
   if(a_num_reactions < 0) {
-    MayDay::Abort("ito_reaction::jump_state - can't have negative number of reactions!");
+    MayDay::Abort("ItoPlasmaReaction::jumpState - can't have negative number of reactions!");
   }
   for (int i = 0; i < a_particles.size(); i++){
     if(a_particles[i] < 0){
-      MayDay::Abort("ito_reaction::jump_state can't have negative particles on the way in");
+      MayDay::Abort("ItoPlasmaReaction::jumpState can't have negative particles on the way in");
     }
   }
 #endif
@@ -40,28 +45,28 @@ void ito_reaction::jump_state(Vector<long long>& a_particles,
 #if ITO_REACTION_DEBUG
   for (int i = 0; i < a_particles.size(); i++){
     if(a_particles[i] < 0){
-      MayDay::Abort("ito_reaction::jump_state can't have negative particles on the way out");
+      MayDay::Abort("ItoPlasmaReaction::jumpState can't have negative particles on the way out");
     }
   }
 #endif
 }
 
 inline
-void ito_reaction::jump_state(Vector<long long>& a_particles,
-			      Vector<long long>& a_Photons,
-			      const long long    a_num_reactions) const {
+void ItoPlasmaReaction::jumpState(Vector<long long>& a_particles,
+				  Vector<long long>& a_Photons,
+				  const long long    a_num_reactions) const {
 
-  this->jump_state(a_particles, a_num_reactions);
+  this->jumpState(a_particles, a_num_reactions);
 
-  for (const auto& r : m_Photon_products){
+  for (const auto& r : m_photon_products){
     a_Photons[r] += a_num_reactions;;
   }
 }
 
 inline
-void ito_reaction::jump_energy(Vector<Real>& a_energies, const Vector<Real>& a_mean_energies, const long long a_num_reactions) const {
+void ItoPlasmaReaction::jumpEnergy(Vector<Real>& a_energies, const Vector<Real>& a_mean_energies, const long long a_num_reactions) const {
   for (const auto& r : m_energy_jumps){
-    if(this->getPhi_change(r.first) < 0) { // Consuming reaction, this eats a_mean_energies.  
+    if(this->getStateChange(r.first) < 0) { // Consuming reaction, this eats a_mean_energies.  
       a_energies[r.first] -= a_mean_energies[r.first]*a_num_reactions;
     }
     else{
@@ -71,14 +76,14 @@ void ito_reaction::jump_energy(Vector<Real>& a_energies, const Vector<Real>& a_m
 }
 
 inline
-void ito_reaction::jump_energy(Vector<Real>&       a_energies,
-			       const Vector<Real>& a_mean_energies,
-			       const Vector<Real>& a_sources,
-			       const long long     a_num_reactions,
-			       const Real          a_dt) const {
+void ItoPlasmaReaction::jumpEnergy(Vector<Real>&       a_energies,
+				   const Vector<Real>& a_mean_energies,
+				   const Vector<Real>& a_sources,
+				   const long long     a_num_reactions,
+				   const Real          a_dt) const {
 
   for (const auto& r : m_energy_jumps){
-    if(this->getPhi_change(r.first) < 0) { // Consuming reaction, this eats a_mean_energies.  
+    if(this->getStateChange(r.first) < 0) { // Consuming reaction, this eats a_mean_energies.  
       a_energies[r.first] -= a_mean_energies[r.first]*a_num_reactions;
     }
     else{
@@ -90,12 +95,12 @@ void ito_reaction::jump_energy(Vector<Real>&       a_energies,
 }
 
 inline
-Real& ito_reaction::rate() const {
+Real& ItoPlasmaReaction::rate() const {
   return m_rate;
 }
 
 inline
-Real ito_reaction::propensity(const Vector<long long>& a_particles) const {
+Real ItoPlasmaReaction::propensity(const Vector<long long>& a_particles) const {
   Real a = m_rate;
 
   // Make a local copy of the particles
@@ -111,27 +116,27 @@ Real ito_reaction::propensity(const Vector<long long>& a_particles) const {
 }
 
 inline
-int ito_reaction::get_gi(const Vector<long long>& a_particles) const{
+int ItoPlasmaReaction::getGi(const Vector<long long>& a_particles) const{
   return 1; // For simplicity
 }
 
 inline
-const std::list<int>& ito_reaction::get_reactants() const{
+const std::list<int>& ItoPlasmaReaction::getReactants() const{
   return m_reactants;
 }
 
 inline
-const std::list<int>& ito_reaction::get_particle_products() const{
+const std::list<int>& ItoPlasmaReaction::getParticleProdcuts() const{
   return m_particle_products;
 }
 
 inline
-const std::list<int>& ito_reaction::get_Photon_products() const{
-  return m_Photon_products;
+const std::list<int>& ItoPlasmaReaction::getPhotonProducts() const{
+  return m_photon_products;
 }
 
 inline
-void ito_reaction::compute_state_change() {
+void ItoPlasmaReaction::computeStateChange() {
 
   // Consumed species
   for (const auto& r : m_reactants){
@@ -155,7 +160,7 @@ void ito_reaction::compute_state_change() {
 }
 
 inline
-void ito_reaction::compute_energy_change() {
+void ItoPlasmaReaction::computeEnergyChange() {
   for (const auto& r : m_energy_jumps){
     if(m_energyChange.find(r.first) == m_energyChange.end()){
       m_energyChange.emplace(r.first, r.second);
@@ -164,12 +169,12 @@ void ito_reaction::compute_energy_change() {
 }
 
 inline
-const std::map<int, int>& ito_reaction::getPhi_change() const {
+const std::map<int, int>& ItoPlasmaReaction::getStateChange() const {
   return m_phiChange;
 }
 
 inline
-const int ito_reaction::getPhi_change(const int a_idx) const {
+const int ItoPlasmaReaction::getStateChange(const int a_idx) const {
   int ret = 0;
   
   if(m_phiChange.find(a_idx) != m_phiChange.end()){
@@ -180,12 +185,12 @@ const int ito_reaction::getPhi_change(const int a_idx) const {
 }
 
 inline
-const std::map<int, Real>& ito_reaction::get_energy_change() const {
+const std::map<int, Real>& ItoPlasmaReaction::getEnergychange() const {
   return m_energyChange;
 }
 
 inline
-const Real ito_reaction::get_energy_change(const int a_idx) const {
+const Real ItoPlasmaReaction::getEnergychange(const int a_idx) const {
   Real ret = 0;
   
   if(m_energyChange.find(a_idx) != m_energyChange.end()){
@@ -194,6 +199,7 @@ const Real ito_reaction::get_energy_change(const int a_idx) const {
 
   return ret;
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
 
 #endif
