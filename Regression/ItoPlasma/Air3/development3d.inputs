@@ -271,14 +271,14 @@ ito_plasma_air3.photoi_K2          = 1.5        # Converted to (mPa)^-1
 # ====================================================================================================
 # ITO_PLASMA_STREAMER_TAGGER CLASS OPTIONS
 # ====================================================================================================
-ito_plasma_streamer_tagger.verbosity         = -1           # Verbosity
-ito_plasma_streamer_tagger.num_boxes         = 1            # Number of allowed tag boxes (0 = tags allowe everywhere)
-ito_plasma_streamer_tagger.box1_lo           = -1 -1 -1
-ito_plasma_streamer_tagger.box1_hi           = 1 1 100E-6
-ito_plasma_streamer_tagger.buffer            = 0           # Grow tagged cells
+ItoPlasmaStreamerTagger.verbosity         = -1           # Verbosity
+ItoPlasmaStreamerTagger.num_boxes         = 1            # Number of allowed tag boxes (0 = tags allowe everywhere)
+ItoPlasmaStreamerTagger.box1_lo           = -1 -1 -1
+ItoPlasmaStreamerTagger.box1_hi           = 1 1 100E-6
+ItoPlasmaStreamerTagger.buffer            = 0           # Grow tagged cells
 
-ito_plasma_streamer_tagger.refine_curvature  = 1.E99         # Curvature refinement
-ito_plasma_streamer_tagger.coarsen_curvature = 0.1          # Curvature coarsening	
-ito_plasma_streamer_tagger.refine_alpha      = 2.0          # Set alpha refinement. Lower  => More mesh
-ito_plasma_streamer_tagger.coarsen_alpha     = 1.E99         # Set alpha coarsening. Higher => Less mesh
-ito_plasma_streamer_tagger.max_coarsen_lvl   = 1            # Set max coarsening depth
+ItoPlasmaStreamerTagger.refine_curvature  = 1.E99         # Curvature refinement
+ItoPlasmaStreamerTagger.coarsen_curvature = 0.1          # Curvature coarsening	
+ItoPlasmaStreamerTagger.refine_alpha      = 2.0          # Set alpha refinement. Lower  => More mesh
+ItoPlasmaStreamerTagger.coarsen_alpha     = 1.E99         # Set alpha coarsening. Higher => Less mesh
+ItoPlasmaStreamerTagger.max_coarsen_lvl   = 1            # Set max coarsening depth

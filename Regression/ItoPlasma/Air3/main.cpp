@@ -9,7 +9,7 @@
 #include "ito_plasma_air3.H"
 #include <CD_RodDielectric.H>
 #include "ito_plasma_godunov.H"
-#include "ito_plasma_streamer_tagger.H"
+#include <CD_ItoPlasmaStreamerTagger.H>
 #include "ParmParse.H"
 
 // This is the potential curve (constant in this case). Modify it if you want to.
@@ -49,7 +49,7 @@ int main(int argc, char* argv[]){
   // Set up physics 
   RefCountedPtr<ItoPlasmaPhysics> physics      = RefCountedPtr<ItoPlasmaPhysics> (new ito_plasma_air3());
   RefCountedPtr<ItoPlasmaStepper> timestepper  = RefCountedPtr<ItoPlasmaStepper> (new ito_plasma_godunov(physics));
-  RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (new ito_plasma_streamer_tagger(physics, timestepper, amr, compgeom));
+  RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (new ItoPlasmaStreamerTagger(physics, timestepper, amr, compgeom));
 
   // Create solver factories
   auto poi_fact = new FieldSolverFactory<FieldSolverMultigrid>();
