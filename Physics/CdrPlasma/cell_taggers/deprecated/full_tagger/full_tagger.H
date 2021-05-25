@@ -97,7 +97,7 @@ protected:
   /*!
     @brief Compute centroid-centered ion densities
   */
-  virtual void compute_cdr_gradients(Vector<EBAMRCellData>& a_cdr_gradients);
+  virtual void computeCdrGradients(Vector<EBAMRCellData>& a_cdr_gradients);
 
   /*!
     @brief Compute electric field and gradient of |E| at centroids

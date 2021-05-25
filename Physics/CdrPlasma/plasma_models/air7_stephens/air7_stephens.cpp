@@ -34,8 +34,8 @@ std::string air7_stephens::s_bolsig_alphaO2  = "# O2 Ionization (E/N, rate/N)";
 air7_stephens::air7_stephens() {
 
   instantiate_species();
-  parse_transport_file();
-  parse_transport();
+  parseTransportFile();
+  parseTransport();
   parse_chemistry();
   parse_gas_params();
   parse_electron_mobility();
@@ -104,20 +104,20 @@ void air7_stephens::parse_chemistry(){
   }
 }
 
-void air7_stephens::parse_transport_file(){
+void air7_stephens::parseTransportFile(){
   ParmParse pp("air7_stephens");
   pp.get("transport_file",  m_transport_file);
   pp.get("uniform_tables",  m_uniform_entries);
   std::ifstream infile(m_transport_file);
   if(!infile.good()){
-    MayDay::Abort("air7_stephens::parse_transport_file - could not find transport data");
+    MayDay::Abort("air7_stephens::parseTransportFile - could not find transport data");
   }
   else{
     infile.close();
   }
 }
 
-void air7_stephens::parse_transport(){
+void air7_stephens::parseTransport(){
   ParmParse pp("air7_stephens");
 
   std::string str;

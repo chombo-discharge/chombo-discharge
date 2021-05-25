@@ -239,8 +239,8 @@ namespace Physics {
       int binomial_trials(const int a_trials, const Real a_p) const; // a_p is chance of success
 
       void read_file_entries(LookupTable& a_table, const std::string a_string);
-      void parse_transport_file();
-      void parse_transport();
+      void parseTransportFile();
+      void parseTransport();
       void parse_gas_params();
       void parse_electron_mobility();
       void parse_electron_diffco();

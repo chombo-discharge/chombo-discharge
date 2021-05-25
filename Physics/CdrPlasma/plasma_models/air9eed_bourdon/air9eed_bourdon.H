@@ -191,10 +191,10 @@ namespace Physics {
       LookupTable m_e_O2_to_e_O2;
       LookupTable m_alpha_townsend;
 
-      void parse_transport_file();
+      void parseTransportFile();
       void parse_photoi();
       void parse_see();
-      void parse_transport();
+      void parseTransport();
       void instantiate_species();
 
       // Compute electron energy in eV

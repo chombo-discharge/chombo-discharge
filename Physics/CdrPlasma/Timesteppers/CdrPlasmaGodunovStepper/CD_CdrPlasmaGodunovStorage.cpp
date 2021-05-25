@@ -1,35 +1,41 @@
+/* chombo-discharge
+ * Copyright © 2021 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+ */
+
 /*!
-  @file   godunov_storage.cpp
-  @brief  Implementation of godunov_storage.H
+  @file   CD_CdrPlasmaGodunovStorage.cpp
+  @brief  Implementation of CdrPlasmaGodunovStepper_storage.H
   @author Robert Marskar
   @date   Aug. 2019
 */
 
-#include "godunov.H"
-#include "godunov_storage.H"
+// Our includes
+#include <CD_CdrPlasmaGodunovStepper.H>
+#include <CD_CdrPlasmaGodunovStorage.H>
+#include <CD_NamespaceHeader.H>
 
-#include "CD_NamespaceHeader.H"
 using namespace Physics::CdrPlasma;
 
-godunov::cdr_storage::cdr_storage(){
+CdrPlasmaGodunovStepper::CdrStorage::CdrStorage(){
 
 }
 
-godunov::cdr_storage::cdr_storage(const RefCountedPtr<AmrMesh>& a_amr,
-				  const std::string              a_realm,
-				  const phase::which_phase       a_phase,
-				  const int                      a_ncomp){
+CdrPlasmaGodunovStepper::CdrStorage::CdrStorage(const RefCountedPtr<AmrMesh>& a_amr,
+						const std::string              a_realm,
+						const phase::which_phase       a_phase,
+						const int                      a_ncomp){
   m_amr   = a_amr;
   m_realm = a_realm;
   m_phase = a_phase;
   m_ncomp = a_ncomp;
 }
 
-godunov::cdr_storage::~cdr_storage(){
+CdrPlasmaGodunovStepper::CdrStorage::~CdrStorage(){
   deallocateStorage();
 }
 
-void godunov::cdr_storage::allocateStorage(){
+void CdrPlasmaGodunovStepper::CdrStorage::allocateStorage(){
   m_amr->allocate(m_scratch,  m_realm, m_phase, m_ncomp);
   m_amr->allocate(m_scratch2, m_realm, m_phase, m_ncomp);
   m_amr->allocate(m_scratch3, m_realm, m_phase, m_ncomp);
@@ -50,7 +56,7 @@ void godunov::cdr_storage::allocateStorage(){
   m_amr->allocate(m_scratchIF4, m_realm, m_phase, m_ncomp);
 }
 
-void godunov::cdr_storage::deallocateStorage(){
+void CdrPlasmaGodunovStepper::CdrStorage::deallocateStorage(){
   m_amr->deallocate(m_scratch);
   m_amr->deallocate(m_scratch2);
   m_amr->deallocate(m_scratch3);
@@ -71,87 +77,88 @@ void godunov::cdr_storage::deallocateStorage(){
   m_amr->deallocate(m_scratchIF4);
 }
 
-godunov::poisson_storage::poisson_storage(){
+CdrPlasmaGodunovStepper::FieldStorage::FieldStorage(){
 
 }
 
-godunov::poisson_storage::poisson_storage(const RefCountedPtr<AmrMesh>& a_amr,
-					  const std::string              a_realm,
-					  const phase::which_phase       a_phase,
-					  const int                      a_ncomp){
+CdrPlasmaGodunovStepper::FieldStorage::FieldStorage(const RefCountedPtr<AmrMesh>& a_amr,
+						    const std::string              a_realm,
+						    const phase::which_phase       a_phase,
+						    const int                      a_ncomp){
   m_amr   = a_amr;
   m_phase = a_phase;
   m_ncomp = a_ncomp;
   m_realm = a_realm;
 }
 
-godunov::poisson_storage::~poisson_storage(){
+CdrPlasmaGodunovStepper::FieldStorage::~FieldStorage(){
   deallocateStorage();
 }
 
-void godunov::poisson_storage::allocateStorage(){
+void CdrPlasmaGodunovStepper::FieldStorage::allocateStorage(){
   m_amr->allocate(m_E_cell, m_realm, m_phase, SpaceDim);
   m_amr->allocate(m_E_eb,   m_realm, m_phase, SpaceDim);
   m_amr->allocate(m_E_dom,  m_realm, m_phase, SpaceDim);
 }
 
-void godunov::poisson_storage::deallocateStorage(){
+void CdrPlasmaGodunovStepper::FieldStorage::deallocateStorage(){
   m_amr->deallocate(m_E_cell);
   m_amr->deallocate(m_E_eb);
   m_amr->deallocate(m_E_dom);
 }
 
-godunov::rte_storage::rte_storage(){
+CdrPlasmaGodunovStepper::RtStorage::RtStorage(){
 
 }
 
-godunov::rte_storage::rte_storage(const RefCountedPtr<AmrMesh>& a_amr,
-				  const std::string              a_realm,
-				  const phase::which_phase       a_phase,
-				  const int                      a_ncomp){
+CdrPlasmaGodunovStepper::RtStorage::RtStorage(const RefCountedPtr<AmrMesh>& a_amr,
+					      const std::string              a_realm,
+					      const phase::which_phase       a_phase,
+					      const int                      a_ncomp){
   m_amr   = a_amr;
   m_realm = a_realm;
   m_phase = a_phase;
   m_ncomp = a_ncomp;
 }
 
-godunov::rte_storage::~rte_storage(){
+CdrPlasmaGodunovStepper::RtStorage::~RtStorage(){
 
 }
 
-void godunov::rte_storage::allocateStorage(){
+void CdrPlasmaGodunovStepper::RtStorage::allocateStorage(){
   m_amr->allocate(m_scratchIV, m_realm, m_phase, m_ncomp);
   m_amr->allocate(m_scratchIF, m_realm, m_phase, m_ncomp);
 }
 
-void godunov::rte_storage::deallocateStorage(){
+void CdrPlasmaGodunovStepper::RtStorage::deallocateStorage(){
   m_amr->deallocate(m_scratchIV);
   m_amr->deallocate(m_scratchIF);
 }
 
-godunov::sigma_storage::sigma_storage(){
+CdrPlasmaGodunovStepper::SigmaStorage::SigmaStorage(){
 
 }
 
-godunov::sigma_storage::sigma_storage(const RefCountedPtr<AmrMesh>& a_amr,
-				      const std::string              a_realm,
-				      const phase::which_phase       a_phase,
-				      const int                      a_ncomp){
+CdrPlasmaGodunovStepper::SigmaStorage::SigmaStorage(const RefCountedPtr<AmrMesh>& a_amr,
+						    const std::string              a_realm,
+						    const phase::which_phase       a_phase,
+						    const int                      a_ncomp){
   m_amr   = a_amr;
   m_realm = a_realm;
   m_phase = a_phase;
   m_ncomp = a_ncomp;
 }
 
-godunov::sigma_storage::~sigma_storage(){
+CdrPlasmaGodunovStepper::SigmaStorage::~SigmaStorage(){
 
 }
 
-void godunov::sigma_storage::allocateStorage(){
+void CdrPlasmaGodunovStepper::SigmaStorage::allocateStorage(){
   m_amr->allocate(m_scratch, m_realm, m_phase, m_ncomp);
 }
 
-void godunov::sigma_storage::deallocateStorage(){
+void CdrPlasmaGodunovStepper::SigmaStorage::deallocateStorage(){
   m_amr->deallocate(m_scratch);
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

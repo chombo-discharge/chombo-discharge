@@ -1,32 +1,35 @@
+/* chombo-discharge
+ * Copyright © 2021 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+ */
+
 /*!
-  @file   godunov_storage.H
-  @brief  Declaration of scratch storage for godunov
+  @file   CD_CdrPlasmaGodunovStorage.H
+  @brief  Declaration of scratch storage for CdrPlasmaGodunovStepper
   @author Robert Marskar
-  @date   Feb. 2018
 */
 
-#ifndef _GODUNOV_STORAGE_
-#define _GODUNOV_STORAGE_
+#ifndef CD_CdrPlasmaGodunovStorage_H
+#define CD_CdrPlasmaGodunovStorage_H
 
-#include "godunov.H"
-#include "CD_AmrMesh.H"
+// Our includes
+#include <CD_CdrPlasmaGodunovStepper.H>
+#include <CD_AmrMesh.H>
+#include <CD_NamespaceHeader.H>
 
-#include <RefCountedPtr.H>
-
-#include "CD_NamespaceHeader.H"
 namespace Physics {
   namespace CdrPlasma {
   
-    class godunov::cdr_storage {
+    class CdrPlasmaGodunovStepper::CdrStorage {
     public:
 
-      cdr_storage();
-      cdr_storage(const RefCountedPtr<AmrMesh>& a_amr,
-		  const std::string              a_realm,
-		  const phase::which_phase       a_phase,
-		  const int m_ncomp);
+      CdrStorage();
+      CdrStorage(const RefCountedPtr<AmrMesh>& a_amr,
+		 const std::string              a_realm,
+		 const phase::which_phase       a_phase,
+		 const int m_ncomp);
     
-      ~cdr_storage();
+      ~CdrStorage();
 
       void allocateStorage();
       void deallocateStorage();
@@ -34,20 +37,20 @@ namespace Physics {
       EBAMRCellData& getScratch()  { return m_scratch;    }
       EBAMRCellData& getScratch2() { return m_scratch2;   }
       EBAMRCellData& getScratch3() { return m_scratch3;   }
-      EBAMRCellData& get_extrap()   { return m_cellExtr;  }
-      EBAMRCellData& get_gradient() { return m_gradient;   }
+      EBAMRCellData& getExtrap()   { return m_cellExtr;  }
+      EBAMRCellData& getGradient() { return m_gradient;   }
 
-      EBAMRIVData& get_eb_scratch1(){ return m_scratchIVs; }
-      EBAMRIVData& get_eb_scratchD(){ return m_scratchIVD; }
-      EBAMRIVData& get_eb_state(){    return m_scratchIV1; }
-      EBAMRIVData& get_eb_velo(){     return m_scratchIV2; }
-      EBAMRIVData& get_eb_flux(){     return m_scratchIV3; }
-      EBAMRIVData& get_eb_grad(){     return m_scratchIV4; }
+      EBAMRIVData& getEbScratch1(){ return m_scratchIVs; }
+      EBAMRIVData& getEbScratchD(){ return m_scratchIVD; }
+      EBAMRIVData& getEbState(){    return m_scratchIV1; }
+      EBAMRIVData& getEbVelo(){     return m_scratchIV2; }
+      EBAMRIVData& getEbFlux(){     return m_scratchIV3; }
+      EBAMRIVData& getEbGrad(){     return m_scratchIV4; }
 
-      EBAMRIFData& getDomain_state(){  return m_scratchIF1; }
-      EBAMRIFData& getDomain_velo(){   return m_scratchIF2; }
-      EBAMRIFData& getDomain_flux(){   return m_scratchIF3; }
-      EBAMRIFData& getDomain_grad(){   return m_scratchIF4; }
+      EBAMRIFData& getDomainState(){  return m_scratchIF1; }
+      EBAMRIFData& getDomainVelo(){   return m_scratchIF2; }
+      EBAMRIFData& getDomainFlux(){   return m_scratchIF3; }
+      EBAMRIFData& getDomainGrad(){   return m_scratchIF4; }
   
     protected:
       std::string             m_realm;
@@ -74,22 +77,22 @@ namespace Physics {
       EBAMRIFData m_scratchIF4; // Scratch data
     };
 
-    class godunov::poisson_storage {
+    class CdrPlasmaGodunovStepper::FieldStorage {
     public:
 
-      poisson_storage();
-      poisson_storage(const RefCountedPtr<AmrMesh>& a_amr,
-		      const std::string              a_realm,
-		      const phase::which_phase       a_phase,
-		      const int m_ncomp);
-      ~poisson_storage();
+      FieldStorage();
+      FieldStorage(const RefCountedPtr<AmrMesh>& a_amr,
+		   const std::string              a_realm,
+		   const phase::which_phase       a_phase,
+		   const int m_ncomp);
+      ~FieldStorage();
 
       void allocateStorage();
       void deallocateStorage();
 
-      EBAMRCellData& get_E_cell()      {return m_E_cell;   }
-      EBAMRIVData& get_E_eb()          {return m_E_eb;     }
-      EBAMRIFData& get_E_domain()      {return m_E_dom;    }
+      EBAMRCellData& getElectricFieldCell()      {return m_E_cell;   }
+      EBAMRIVData& getElectricFieldEb()          {return m_E_eb;     }
+      EBAMRIFData& getElectricFieldDomain()      {return m_E_dom;    }
 
     protected:
       std::string m_realm;
@@ -102,21 +105,21 @@ namespace Physics {
       EBAMRIFData m_E_dom;           // E-field on domain faces
     };
 
-    class godunov::rte_storage {
+    class CdrPlasmaGodunovStepper::RtStorage {
     public:
 
-      rte_storage();
-      rte_storage(const RefCountedPtr<AmrMesh>& a_amr,
-		  const std::string              a_realm,
-		  const phase::which_phase       a_phase,
-		  const int                      a_ncomp);
-      ~rte_storage();
+      RtStorage();
+      RtStorage(const RefCountedPtr<AmrMesh>& a_amr,
+		const std::string              a_realm,
+		const phase::which_phase       a_phase,
+		const int                      a_ncomp);
+      ~RtStorage();
 
       void allocateStorage();
       void deallocateStorage();
 
-      EBAMRIVData& get_eb_flux(){     return m_scratchIV; }
-      EBAMRIFData& getDomain_flux(){ return m_scratchIF; }
+      EBAMRIVData& getEbFlux(){     return m_scratchIV; }
+      EBAMRIFData& getDomainFlux(){ return m_scratchIF; }
 
     protected:
 
@@ -129,15 +132,15 @@ namespace Physics {
       EBAMRIFData m_scratchIF;
     };
 
-    class godunov::sigma_storage {
+    class CdrPlasmaGodunovStepper::SigmaStorage {
     public:
 
-      sigma_storage();
-      sigma_storage(const RefCountedPtr<AmrMesh>& a_amr,
-		    const std::string              a_realm,
-		    const phase::which_phase       a_phase,
-		    const int                      a_ncomp);
-      ~sigma_storage();
+      SigmaStorage();
+      SigmaStorage(const RefCountedPtr<AmrMesh>& a_amr,
+		   const std::string              a_realm,
+		   const phase::which_phase       a_phase,
+		   const int                      a_ncomp);
+      ~SigmaStorage();
   
       void allocateStorage();
       void deallocateStorage();
@@ -155,5 +158,7 @@ namespace Physics {
     };
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif

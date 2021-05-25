@@ -34,11 +34,11 @@ air9eed_bourdon::air9eed_bourdon(){
   m_eed_solve   = true; // Yes, we're doing an EED solve so we must have a Poisson solution first
   m_eed_index   = 0;    // Index for the EED equation
 
-  parse_transport_file();
+  parseTransportFile();
   parse_gas_parameters(m_Tg, m_p, m_N, m_O2frac, m_N2frac); // Get gas parameters
   parse_photoi();
   parse_see();
-  parse_transport();
+  parseTransport();
 
   instantiate_species();
 
@@ -54,14 +54,14 @@ air9eed_bourdon::~air9eed_bourdon(){
 
 }
 
-void air9eed_bourdon::parse_transport_file(){
+void air9eed_bourdon::parseTransportFile(){
   ParmParse pp("air9eed_bourdon");
   pp.get("transport_file",  m_transport_file);
   pp.get("uniform_tables", m_uniform_tables);
   
   std::ifstream infile(m_transport_file);
   if(!infile.good()){
-    MayDay::Abort("air9eed_bourdon::parse_transport_file - could not find transport data");
+    MayDay::Abort("air9eed_bourdon::parseTransportFile - could not find transport data");
   }
   else{
     infile.close();
@@ -103,7 +103,7 @@ void air9eed_bourdon::parse_see(){
   pp.get("dielectric_work",               m_dielectric_work);
 }
 
-void air9eed_bourdon::parse_transport(){
+void air9eed_bourdon::parseTransport(){
   ParmParse pp("air9eed_bourdon");
 
   std::string str;

@@ -106,7 +106,7 @@ void full_tagger::computeTracers(){
 
   // This is all computes on volumetric centroids
   this->compute_cdr_densities(m_cdr_densities);
-  this->compute_cdr_gradients(m_cdr_gradients);
+  this->computeCdrGradients(m_cdr_gradients);
   this->compute_E(m_E, m_grad_E);
   this->compute_rho(m_rho, m_grad_rho);
   this->compute_rte_densities(m_rte_densities);
@@ -342,10 +342,10 @@ void full_tagger::compute_cdr_densities(Vector<EBAMRCellData>& a_cdr_densities){
   }
 }
 
-void full_tagger::compute_cdr_gradients(Vector<EBAMRCellData>& a_cdr_gradients){
-  CH_TIME("full_tagger::compute_cdr_gradients");
+void full_tagger::computeCdrGradients(Vector<EBAMRCellData>& a_cdr_gradients){
+  CH_TIME("full_tagger::computeCdrGradients");
   if(m_verbosity > 5){
-    pout() << m_name + "::compute_cdr_gradients" << endl;
+    pout() << m_name + "::computeCdrGradients" << endl;
   }
 
   RefCountedPtr<CdrLayout>& cdr = m_timeStepper->get_cdr();

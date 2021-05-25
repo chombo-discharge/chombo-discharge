@@ -176,8 +176,8 @@ namespace Physics {
       int poisson_reaction(const Real a_propensity, const Real a_dt) const;
 
       void read_file_entries(LookupTable& a_table, const std::string a_string);
-      void parse_transport_file();
-      void parse_transport();
+      void parseTransportFile();
+      void parseTransport();
       void parse_gas_params();
       void parse_electron_mobility();
       void parse_electron_diffco();

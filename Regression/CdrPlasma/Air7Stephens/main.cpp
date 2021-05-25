@@ -8,7 +8,7 @@
 #include <CD_McPhoto.H>
 #include "air7_stephens.H"
 #include <CD_RodDielectric.H>
-#include "godunov.H"
+#include <CD_CdrPlasmaGodunovStepper.H>
 #include <CD_CdrPlasmaStreamerTagger.H>
 #include "ParmParse.H"
 
@@ -47,7 +47,7 @@ int main(int argc, char* argv[]){
 
   // Set up physics 
   RefCountedPtr<CdrPlasmaPhysics> physics      = RefCountedPtr<CdrPlasmaPhysics> (new air7_stephens());
-  RefCountedPtr<CdrPlasmaStepper> timestepper  = RefCountedPtr<CdrPlasmaStepper> (new godunov(physics));
+  RefCountedPtr<CdrPlasmaStepper> timestepper  = RefCountedPtr<CdrPlasmaStepper> (new CdrPlasmaGodunovStepper(physics));
   RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (new CdrPlasmaStreamerTagger(physics, timestepper, amr, compgeom));
 
   // Create solver factories

@@ -32,8 +32,8 @@ std::string air7_zheleznyak::s_bolsig_alphaO2  = "# O2 ionization (E/N, rate/N)"
 air7_zheleznyak::air7_zheleznyak() {
 
   instantiate_species();      
-  parse_transport_file();
-  parse_transport();
+  parseTransportFile();
+  parseTransport();
   parse_chemistry();
   parse_gas_params();
   parse_electron_mobility();
@@ -100,20 +100,20 @@ void air7_zheleznyak::parse_chemistry(){
   }
 }
 
-void air7_zheleznyak::parse_transport_file(){
+void air7_zheleznyak::parseTransportFile(){
   ParmParse pp("air7_zheleznyak");
   pp.get("transport_file",  m_transport_file);
   pp.get("uniform_tables",  m_uniform_entries);
   std::ifstream infile(m_transport_file);
   if(!infile.good()){
-    MayDay::Abort("air7_zheleznyak::parse_transport_file - could not find transport data");
+    MayDay::Abort("air7_zheleznyak::parseTransportFile - could not find transport data");
   }
   else{
     infile.close();
   }
 }
 
-void air7_zheleznyak::parse_transport(){
+void air7_zheleznyak::parseTransport(){
   ParmParse pp("air7_zheleznyak");
 
   std::string str;

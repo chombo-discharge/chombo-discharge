@@ -30,8 +30,8 @@ air3_zheleznyak::air3_zheleznyak() {
 
   instantiate_species();      
 
-  parse_transport_file(); 
-  parse_transport();
+  parseTransportFile(); 
+  parseTransport();
   parse_chemistry();
   parse_gas_params();
   parse_electron_mobility();
@@ -100,20 +100,20 @@ void air3_zheleznyak::parse_chemistry(){
   }
 }
 
-void air3_zheleznyak::parse_transport_file(){
+void air3_zheleznyak::parseTransportFile(){
   ParmParse pp("air3_zheleznyak");
   pp.get("transport_file",  m_transport_file);
   pp.get("uniform_tables",  m_uniform_entries);
   std::ifstream infile(m_transport_file);
   if(!infile.good()){
-    MayDay::Abort("air3_zheleznyak::parse_transport_file - could not find transport data");
+    MayDay::Abort("air3_zheleznyak::parseTransportFile - could not find transport data");
   }
   else{
     infile.close();
   }
 }
 
-void air3_zheleznyak::parse_transport(){
+void air3_zheleznyak::parseTransport(){
   ParmParse pp("air3_zheleznyak");
 
   std::string str;

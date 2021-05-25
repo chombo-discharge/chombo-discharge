@@ -81,7 +81,7 @@ air3_bourdon::air3_bourdon() {
 
   }
   else{
-    MayDay::Abort("air3_bourdon::parse_transport_file - could not find transport data");
+    MayDay::Abort("air3_bourdon::parseTransportFile - could not find transport data");
   }
 
 
