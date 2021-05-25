@@ -1,56 +1,63 @@
+/* chombo-discharge
+ * Copyright © 2021 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+ */
+
 /*!
-  @file   air7_zheleznyak.H
-  @brief  3-species and 8-Photon model for air
+  @file   CD_CdrPlasmaAir7Zheleznyak.cpp
+  @brief  Implementation of CD_CdrPlasmaAir7Zheleznyak.H
   @author Robert Marskar
-  @date   Feb. 2018
 */
 
-#include "air7_zheleznyak.H"
-#include "air7_zheleznyak_species.H"
-#include <CD_DataOps.H>
-#include <CD_Units.H> 
-
+// Std includes
 #include <iostream>
 #include <fstream>
 #include <sstream>
 #include <chrono>
 
+// Chombo includes
 #include <ParmParse.H>
 #include <PolyGeom.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_CdrPlasmaAir7Zheleznyak.H>
+#include <CD_CdrPlasmaAir7ZheleznyakSpecies.H>
+#include <CD_DataOps.H>
+#include <CD_Units.H> 
+#include <CD_NamespaceHeader.H>
+
 using namespace Physics::CdrPlasma;
 
-std::string air7_zheleznyak::s_bolsig_energy   = "# Electron mean energy (E/N, eV)";
-std::string air7_zheleznyak::s_bolsig_mobility = "# Electron mobility (E/N, mu*N)";
-std::string air7_zheleznyak::s_bolsig_diffco   = "# Electron diffusion coefficient (E/N, D*N)";
-std::string air7_zheleznyak::s_bolsig_alpha    = "# Townsend ionization coeff (E/N, alpha/N)";
-std::string air7_zheleznyak::s_bolsig_eta      = "# Townsend attachment coeff (E/N, eta/N)";
-std::string air7_zheleznyak::s_bolsig_alphaN2  = "# N2 ionization (E/N, rate/N)";
-std::string air7_zheleznyak::s_bolsig_alphaO2  = "# O2 ionization (E/N, rate/N)";
+std::string CdrPlasmaAir7Zheleznyak::s_bolsig_energy   = "# Electron mean energy (E/N, eV)";
+std::string CdrPlasmaAir7Zheleznyak::s_bolsig_mobility = "# Electron mobility (E/N, mu*N)";
+std::string CdrPlasmaAir7Zheleznyak::s_bolsig_diffco   = "# Electron diffusion coefficient (E/N, D*N)";
+std::string CdrPlasmaAir7Zheleznyak::s_bolsig_alpha    = "# Townsend ionization coeff (E/N, alpha/N)";
+std::string CdrPlasmaAir7Zheleznyak::s_bolsig_eta      = "# Townsend attachment coeff (E/N, eta/N)";
+std::string CdrPlasmaAir7Zheleznyak::s_bolsig_alphaN2  = "# N2 ionization (E/N, rate/N)";
+std::string CdrPlasmaAir7Zheleznyak::s_bolsig_alphaO2  = "# O2 ionization (E/N, rate/N)";
 
-air7_zheleznyak::air7_zheleznyak() {
+CdrPlasmaAir7Zheleznyak::CdrPlasmaAir7Zheleznyak() {
 
-  instantiate_species();      
+  initSpecies();      
   parseTransportFile();
   parseTransport();
-  parse_chemistry();
-  parse_gas_params();
-  parse_electron_mobility();
-  parse_electron_diffco();
-  parse_alpha();
-  parse_eta();
-  parse_temperature();
-  parse_see();
+  parseChemistry();
+  parseGasParameters();
+  parseElectronMobility();
+  parseElectronDiffusionCoefficient();
+  parseAlpha();
+  parseEta();
+  parseTemperature();
+  parseSEE();
   parseDomainBc();
-  init_rng();                 // Initialize random number generators
+  initRNG();                 // Initialize random number generators
 }
 
-air7_zheleznyak::~air7_zheleznyak() {
+CdrPlasmaAir7Zheleznyak::~CdrPlasmaAir7Zheleznyak() {
 
 }
 
-void air7_zheleznyak::read_file_entries(LookupTable& a_table, const std::string a_string){
+void CdrPlasmaAir7Zheleznyak::readFileEntries(LookupTable& a_table, const std::string a_string){
   Real x, y;
   bool read_line = false;
   std::ifstream infile(m_transport_file);
@@ -79,48 +86,48 @@ void air7_zheleznyak::read_file_entries(LookupTable& a_table, const std::string 
   infile.close();
 }
 
-void air7_zheleznyak::parse_chemistry(){
-  ParmParse pp("air7_zheleznyak");
+void CdrPlasmaAir7Zheleznyak::parseChemistry(){
+  ParmParse pp("CdrPlasmaAir7Zheleznyak");
 
   std::string str;
   pp.get("chemistry_dt", m_chemistry_dt);
   pp.get("chemistry_algorithm", str);
 
   if(str == "euler"){
-    m_chemistryAlgorithm = chemistryAlgorithm::euler;
+    m_ChemistryAlgorithm = ChemistryAlgorithm::euler;
   }
   else if(str == "rk2"){
-    m_chemistryAlgorithm = chemistryAlgorithm::rk2;
+    m_ChemistryAlgorithm = ChemistryAlgorithm::rk2;
   }
   else if(str == "rk4"){
-    m_chemistryAlgorithm = chemistryAlgorithm::rk4;
+    m_ChemistryAlgorithm = ChemistryAlgorithm::rk4;
   }
   else{
-    MayDay::Abort("air_eed::parse_chemistry - unknown chemistry algorithm requested");
+    MayDay::Abort("air_eed::parseChemistry - unknown chemistry algorithm requested");
   }
 }
 
-void air7_zheleznyak::parseTransportFile(){
-  ParmParse pp("air7_zheleznyak");
+void CdrPlasmaAir7Zheleznyak::parseTransportFile(){
+  ParmParse pp("CdrPlasmaAir7Zheleznyak");
   pp.get("transport_file",  m_transport_file);
   pp.get("uniform_tables",  m_uniform_entries);
   std::ifstream infile(m_transport_file);
   if(!infile.good()){
-    MayDay::Abort("air7_zheleznyak::parseTransportFile - could not find transport data");
+    MayDay::Abort("CdrPlasmaAir7Zheleznyak::parseTransportFile - could not find transport data");
   }
   else{
     infile.close();
   }
 }
 
-void air7_zheleznyak::parseTransport(){
-  ParmParse pp("air7_zheleznyak");
+void CdrPlasmaAir7Zheleznyak::parseTransport(){
+  ParmParse pp("CdrPlasmaAir7Zheleznyak");
 
   std::string str;
 
   pp.get("use_alpha_corr", str);      m_alpha_corr          = (str == "true") ? true : false;
-  pp.get("mobile_electrons", str);    m_isMobile_electrons    = (str == "true") ? true : false;
-  pp.get("diffusive_electrons", str); m_isDiffusive_electrons = (str == "true") ? true : false;
+  pp.get("mobile_electrons", str);    m_isMobile_Electrons    = (str == "true") ? true : false;
+  pp.get("diffusive_electrons", str); m_isDiffusive_Electrons = (str == "true") ? true : false;
   pp.get("diffusive_ions", str);      m_isDiffusive_ions      = (str == "true") ? true : false;
   pp.get("mobile_ions", str);         m_isMobile_ions         = (str == "true") ? true : false;
   
@@ -129,8 +136,8 @@ void air7_zheleznyak::parseTransport(){
   m_ion_diffusion = m_ion_mobility*(Units::kb*m_T)/Units::Qe;
 }
 
-void air7_zheleznyak::parse_gas_params(){
-  ParmParse pp("air7_zheleznyak");
+void CdrPlasmaAir7Zheleznyak::parseGasParameters(){
+  ParmParse pp("CdrPlasmaAir7Zheleznyak");
 
   // Pressure form input script
   pp.get("pressure",           m_p);
@@ -145,29 +152,29 @@ void air7_zheleznyak::parse_gas_params(){
   m_N = m_p*Units::Na/(m_T*Units::R);
 }
 
-void air7_zheleznyak::parse_electron_mobility(){
-  ParmParse pp("air7_zheleznyak");
+void CdrPlasmaAir7Zheleznyak::parseElectronMobility(){
+  ParmParse pp("CdrPlasmaAir7Zheleznyak");
 
-  read_file_entries(m_e_mobility, air7_zheleznyak::s_bolsig_mobility);
+  readFileEntries(m_e_mobility, CdrPlasmaAir7Zheleznyak::s_bolsig_mobility);
   m_e_mobility.scaleX(m_N*Units::Td);
   m_e_mobility.scaleY(1./m_N); 
   m_e_mobility.makeUniform(m_uniform_entries);
 }
 
-void air7_zheleznyak::parse_electron_diffco(){
-  ParmParse pp("air7_zheleznyak");
+void CdrPlasmaAir7Zheleznyak::parseElectronDiffusionCoefficient(){
+  ParmParse pp("CdrPlasmaAir7Zheleznyak");
   
-  read_file_entries(m_e_diffco, air7_zheleznyak::s_bolsig_diffco);
+  readFileEntries(m_e_diffco, CdrPlasmaAir7Zheleznyak::s_bolsig_diffco);
   m_e_diffco.scaleX(m_N*Units::Td);
   m_e_diffco.scaleY(1./m_N); 
   m_e_diffco.makeUniform(m_uniform_entries);
 }
 
-void air7_zheleznyak::parse_alpha(){
-  ParmParse pp("air7_zheleznyak");
-  read_file_entries(m_e_alpha,   air7_zheleznyak::s_bolsig_alpha);
-  read_file_entries(m_e_alphaN2, air7_zheleznyak::s_bolsig_alphaN2);
-  read_file_entries(m_e_alphaO2, air7_zheleznyak::s_bolsig_alphaO2);
+void CdrPlasmaAir7Zheleznyak::parseAlpha(){
+  ParmParse pp("CdrPlasmaAir7Zheleznyak");
+  readFileEntries(m_e_alpha,   CdrPlasmaAir7Zheleznyak::s_bolsig_alpha);
+  readFileEntries(m_e_alphaN2, CdrPlasmaAir7Zheleznyak::s_bolsig_alphaN2);
+  readFileEntries(m_e_alphaO2, CdrPlasmaAir7Zheleznyak::s_bolsig_alphaO2);
   
   m_e_alpha.scaleX(m_N*Units::Td);
   m_e_alphaN2.scaleX(m_N*Units::Td);
@@ -182,32 +189,32 @@ void air7_zheleznyak::parse_alpha(){
   m_e_alphaO2.makeUniform(m_uniform_entries);
 }
 
-void air7_zheleznyak::parse_eta(){
-  ParmParse pp("air7_zheleznyak");
-  read_file_entries(m_e_eta, air7_zheleznyak::s_bolsig_eta);
+void CdrPlasmaAir7Zheleznyak::parseEta(){
+  ParmParse pp("CdrPlasmaAir7Zheleznyak");
+  readFileEntries(m_e_eta, CdrPlasmaAir7Zheleznyak::s_bolsig_eta);
   m_e_eta.scaleX(m_N*Units::Td);
   m_e_eta.scaleY(m_N);
   m_e_eta.makeUniform(m_uniform_entries);
 }
 
-void air7_zheleznyak::parse_temperature(){
-  ParmParse pp("air7_zheleznyak");
-  read_file_entries(m_e_temperature, air7_zheleznyak::s_bolsig_energy);
+void CdrPlasmaAir7Zheleznyak::parseTemperature(){
+  ParmParse pp("CdrPlasmaAir7Zheleznyak");
+  readFileEntries(m_e_temperature, CdrPlasmaAir7Zheleznyak::s_bolsig_energy);
   m_e_temperature.scaleX(m_N*Units::Td);
   m_e_temperature.scaleY(2.0*Units::Qe/(3.0*Units::kb));
   m_e_temperature.makeUniform(m_uniform_entries);
 }
 
-void air7_zheleznyak::parse_see(){
-  ParmParse pp("air7_zheleznyak");
+void CdrPlasmaAir7Zheleznyak::parseSEE(){
+  ParmParse pp("CdrPlasmaAir7Zheleznyak");
   pp.get("electrode_townsend2",           m_townsend2_electrode);
   pp.get("dielectric_townsend2",          m_townsend2_dielectric);
   pp.get("electrode_quantum_efficiency",  m_electrode_quantum_efficiency);
   pp.get("dielectric_quantum_efficiency", m_dielectric_quantum_efficiency);
 }
 
-void air7_zheleznyak::init_rng(){
-  ParmParse pp("air7_zheleznyak");
+void CdrPlasmaAir7Zheleznyak::initRNG(){
+  ParmParse pp("CdrPlasmaAir7Zheleznyak");
   pp.get("rng_seed", m_rng_seed);
 
   pp.get("poiss_exp_swap", m_poiss_exp_swap);
@@ -219,7 +226,7 @@ void air7_zheleznyak::init_rng(){
   m_rng     = new std::mt19937_64(m_rng_seed);
 }
 
-void air7_zheleznyak::instantiate_species(){
+void CdrPlasmaAir7Zheleznyak::initSpecies(){
   m_numCdrSpecies = 7;
   m_numRtSpecies = 1;
 
@@ -234,22 +241,22 @@ void air7_zheleznyak::instantiate_species(){
   m_phot_idx         = 0;
 
   m_CdrSpecies.resize(m_numCdrSpecies);
-  m_CdrSpecies[m_elec_idx]      = RefCountedPtr<CdrSpecies>  (new air7_zheleznyak::electron());
-  m_CdrSpecies[m_N2plus_idx]    = RefCountedPtr<CdrSpecies> (new air7_zheleznyak::N2plus());
-  m_CdrSpecies[m_O2plus_idx]    = RefCountedPtr<CdrSpecies> (new air7_zheleznyak::O2plus());
-  m_CdrSpecies[m_N4plus_idx]    = RefCountedPtr<CdrSpecies> (new air7_zheleznyak::N4plus());
-  m_CdrSpecies[m_O4plus_idx]    = RefCountedPtr<CdrSpecies> (new air7_zheleznyak::O4plus());
-  m_CdrSpecies[m_O2plusN2_idx]  = RefCountedPtr<CdrSpecies> (new air7_zheleznyak::O2plusN2());
-  m_CdrSpecies[m_O2minus_idx]   = RefCountedPtr<CdrSpecies> (new air7_zheleznyak::O2minus());
+  m_CdrSpecies[m_elec_idx]      = RefCountedPtr<CdrSpecies>  (new CdrPlasmaAir7Zheleznyak::Electron());
+  m_CdrSpecies[m_N2plus_idx]    = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir7Zheleznyak::N2plus());
+  m_CdrSpecies[m_O2plus_idx]    = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir7Zheleznyak::O2plus());
+  m_CdrSpecies[m_N4plus_idx]    = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir7Zheleznyak::N4plus());
+  m_CdrSpecies[m_O4plus_idx]    = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir7Zheleznyak::O4plus());
+  m_CdrSpecies[m_O2plusN2_idx]  = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir7Zheleznyak::O2plusN2());
+  m_CdrSpecies[m_O2minus_idx]   = RefCountedPtr<CdrSpecies> (new CdrPlasmaAir7Zheleznyak::O2minus());
 
   m_RtSpecies.resize(m_numRtSpecies);
-  m_RtSpecies[m_phot_idx] = RefCountedPtr<RtSpecies> (new air7_zheleznyak::uv_Photon());
+  m_RtSpecies[m_phot_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir7Zheleznyak::uv_Photon());
 
 }
 
-void air7_zheleznyak::parseDomainBc(){
+void CdrPlasmaAir7Zheleznyak::parseDomainBc(){
 
-  ParmParse pp("air7_zheleznyak");
+  ParmParse pp("CdrPlasmaAir7Zheleznyak");
   std::string str;
 
   m_wallBc.resize(2*SpaceDim, 0); 
@@ -295,17 +302,17 @@ void air7_zheleznyak::parseDomainBc(){
   }
 }
 
-void air7_zheleznyak::advanceReactionNetwork(Vector<Real>&          a_particle_sources,
-					       Vector<Real>&          a_Photon_sources,
-					       const Vector<Real>     a_particle_densities,
-					       const Vector<RealVect> a_particle_gradients,
-					       const Vector<Real>     a_Photon_densities,
-					       const RealVect         a_E,
-					       const RealVect         a_pos,
-					       const Real             a_dx,
-					       const Real             a_dt,
-					       const Real             a_time,
-					       const Real             a_kappa) const{
+void CdrPlasmaAir7Zheleznyak::advanceReactionNetwork(Vector<Real>&          a_particle_sources,
+						     Vector<Real>&          a_Photon_sources,
+						     const Vector<Real>     a_particle_densities,
+						     const Vector<RealVect> a_particle_gradients,
+						     const Vector<Real>     a_Photon_densities,
+						     const RealVect         a_E,
+						     const RealVect         a_pos,
+						     const Real             a_dx,
+						     const Real             a_dt,
+						     const Real             a_time,
+						     const Real             a_kappa) const{
   Vector<Real>     cdr_src(m_numCdrSpecies, 0.0);
   Vector<Real>     rte_src(m_numRtSpecies, 0.0);
   Vector<Real>     cdr_phi(m_numCdrSpecies, 0.0);
@@ -329,8 +336,8 @@ void air7_zheleznyak::advanceReactionNetwork(Vector<Real>&          a_particle_s
   Real time  = a_time;
   
   for (int istep = 0; istep < nsteps; istep++){
-    if(m_chemistryAlgorithm == chemistryAlgorithm::euler){
-      advance_chemistry_euler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
+    if(m_ChemistryAlgorithm == ChemistryAlgorithm::euler){
+      advanceChemistryEuler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
 
       // Increment
       for (int i = 0; i < m_numCdrSpecies; i++){
@@ -342,10 +349,10 @@ void air7_zheleznyak::advanceReactionNetwork(Vector<Real>&          a_particle_s
 	a_Photon_sources[i] += rte_src[i];
       }
     }
-    else if(m_chemistryAlgorithm == chemistryAlgorithm::rk2){
+    else if(m_ChemistryAlgorithm == ChemistryAlgorithm::rk2){
 
       // Compute slope at k
-      advance_chemistry_euler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
+      advanceChemistryEuler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
       Vector<Real> k1 = cdr_src;
 
       // Euler update to k+1
@@ -360,18 +367,18 @@ void air7_zheleznyak::advanceReactionNetwork(Vector<Real>&          a_particle_s
       }
 
       // Re-compute slope at k
-      advance_chemistry_euler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
+      advanceChemistryEuler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
 
       // Funky notation, but checks out
       for (int i = 0; i < m_numCdrSpecies; i++){
 	cdr_phi[i] = cdr_phi[i] + dt*(0.5*cdr_src[i] - 0.5*k1[i]);
       }
     }
-    else if(m_chemistryAlgorithm == chemistryAlgorithm::rk4){
+    else if(m_ChemistryAlgorithm == ChemistryAlgorithm::rk4){
       const Vector<Real> cdr_phi0 = cdr_phi;
       
       // Compute k1 slope
-      advance_chemistry_euler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
+      advanceChemistryEuler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
       const Vector<Real> k1 = cdr_src;
 
       // Only Euler update for Photons.
@@ -383,21 +390,21 @@ void air7_zheleznyak::advanceReactionNetwork(Vector<Real>&          a_particle_s
       for (int i = 0; i < m_numCdrSpecies; i++){
 	cdr_phi[i] = cdr_phi0[i] + 0.5*dt*k1[i];
       }
-      advance_chemistry_euler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
+      advanceChemistryEuler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
       const Vector<Real> k2 = cdr_src;
 
       // Compute k3 slope
       for (int i = 0; i < m_numCdrSpecies; i++){
 	cdr_phi[i] = cdr_phi0[i] + 0.5*dt*k2[i];
       }
-      advance_chemistry_euler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
+      advanceChemistryEuler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
       const Vector<Real> k3 = cdr_src;
 
       // Compute k4 slope
       for (int i = 0; i < m_numCdrSpecies; i++){
 	cdr_phi[i] = cdr_phi0[i] + dt*k3[i];
       }
-      advance_chemistry_euler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
+      advanceChemistryEuler(cdr_src, rte_src, cdr_phi, a_particle_gradients, rte_phi, a_E, a_pos, a_dx, dt, time, a_kappa);
       const Vector<Real> k4 = cdr_src;
 
       for (int i = 0; i < m_numCdrSpecies; i++){
@@ -419,17 +426,17 @@ void air7_zheleznyak::advanceReactionNetwork(Vector<Real>&          a_particle_s
 
 }
 
-void air7_zheleznyak::advance_chemistry_euler(Vector<Real>&          a_particle_sources,
-					      Vector<Real>&          a_Photon_sources,
-					      Vector<Real>&          a_particle_densities,
-					      const Vector<RealVect> a_particle_gradients,
-					      const Vector<Real>     a_Photon_densities,
-					      const RealVect         a_E,
-					      const RealVect         a_pos,
-					      const Real             a_dx,
-					      const Real             a_dt,
-					      const Real             a_time,
-					      const Real             a_kappa) const{
+void CdrPlasmaAir7Zheleznyak::advanceChemistryEuler(Vector<Real>&          a_particle_sources,
+						    Vector<Real>&          a_Photon_sources,
+						    Vector<Real>&          a_particle_densities,
+						    const Vector<RealVect> a_particle_gradients,
+						    const Vector<Real>     a_Photon_densities,
+						    const RealVect         a_E,
+						    const RealVect         a_pos,
+						    const Real             a_dx,
+						    const Real             a_dt,
+						    const Real             a_time,
+						    const Real             a_kappa) const{
   const Real volume = pow(a_dx, SpaceDim);
   const Real E      = a_E.vectorLength();
   const Real ve     = E*m_e_mobility.getEntry(E);
@@ -559,15 +566,15 @@ void air7_zheleznyak::advance_chemistry_euler(Vector<Real>&          a_particle_
   }
 
   // Photon generation
-  const Real xfactor = excitation_rates(E)*sergey_factor(m_O2frac)*m_photoi_factor;
+  const Real xfactor = excitationRates(E)*sergeyFactor(m_O2frac)*m_photoi_factor;
   const Real Rgamma  = R1*xfactor;
-  const int num_phot = poisson_reaction(Rgamma*volume, a_dt);
+  const int num_phot = poissonReaction(Rgamma*volume, a_dt);
   a_Photon_sources[m_phot_idx] = 1.0*num_phot;
 
   return;
 }
 
-int air7_zheleznyak::poisson_reaction(const Real a_propensity, const Real a_dt) const{
+int CdrPlasmaAir7Zheleznyak::poissonReaction(const Real a_propensity, const Real a_dt) const{
   int value = 0;
   const Real mean = a_propensity*a_dt;
 
@@ -584,10 +591,10 @@ int air7_zheleznyak::poisson_reaction(const Real a_propensity, const Real a_dt) 
 }
 
 
-Vector<Real> air7_zheleznyak::computeCdrDiffusionCoefficients(const Real         a_time,
-								 const RealVect     a_pos,
-								 const RealVect     a_E,
-								 const Vector<Real> a_cdr_densities) const {
+Vector<Real> CdrPlasmaAir7Zheleznyak::computeCdrDiffusionCoefficients(const Real         a_time,
+								      const RealVect     a_pos,
+								      const RealVect     a_E,
+								      const Vector<Real> a_cdr_densities) const {
 
   Vector<Real> dco(m_numCdrSpecies, 0.0);
   dco[m_elec_idx] = m_e_diffco.getEntry(a_E.vectorLength());
@@ -604,10 +611,10 @@ Vector<Real> air7_zheleznyak::computeCdrDiffusionCoefficients(const Real        
 
 }
   
-Vector<RealVect> air7_zheleznyak::computeCdrDriftVelocities(const Real         a_time,
-							 const RealVect     a_pos,
-							 const RealVect     a_E,
-							 const Vector<Real> a_cdr_densities) const{
+Vector<RealVect> CdrPlasmaAir7Zheleznyak::computeCdrDriftVelocities(const Real         a_time,
+								    const RealVect     a_pos,
+								    const RealVect     a_E,
+								    const Vector<Real> a_cdr_densities) const{
   Vector<RealVect> vel(m_numCdrSpecies, RealVect::Zero);
 
   vel[m_elec_idx] = -a_E*m_e_mobility.getEntry(a_E.vectorLength());
@@ -623,16 +630,16 @@ Vector<RealVect> air7_zheleznyak::computeCdrDriftVelocities(const Real         a
   return vel;
 }
   
-Vector<Real> air7_zheleznyak::computeCdrDomainFluxes(const Real           a_time,
-							const RealVect       a_pos,
-							const int            a_dir,
-							const Side::LoHiSide a_side,
-							const RealVect       a_E,
-							const Vector<Real>   a_cdr_densities,
-							const Vector<Real>   a_cdr_velocities,
-							const Vector<Real>   a_cdr_gradients,
-							const Vector<Real>   a_rte_fluxes,
-							const Vector<Real>   a_extrap_cdr_fluxes) const{
+Vector<Real> CdrPlasmaAir7Zheleznyak::computeCdrDomainFluxes(const Real           a_time,
+							     const RealVect       a_pos,
+							     const int            a_dir,
+							     const Side::LoHiSide a_side,
+							     const RealVect       a_E,
+							     const Vector<Real>   a_cdr_densities,
+							     const Vector<Real>   a_cdr_velocities,
+							     const Vector<Real>   a_cdr_gradients,
+							     const Vector<Real>   a_rte_fluxes,
+							     const Vector<Real>   a_extrap_cdr_fluxes) const{
   Vector<Real> fluxes(m_numCdrSpecies, 0.0);
 
   int idx, sgn;
@@ -663,43 +670,43 @@ Vector<Real> air7_zheleznyak::computeCdrDomainFluxes(const Real           a_time
   return fluxes;
 }
   
-Vector<Real> air7_zheleznyak::computeCdrElectrodeFluxes(const Real         a_time,
-							   const RealVect     a_pos,
-							   const RealVect     a_normal,
-							   const RealVect     a_E,
-							   const Vector<Real> a_cdr_densities,
-							   const Vector<Real> a_cdr_velocities,
-							   const Vector<Real> a_cdr_gradients,
-							   const Vector<Real> a_rte_fluxes,
-							   const Vector<Real> a_extrap_cdr_fluxes) const{
+Vector<Real> CdrPlasmaAir7Zheleznyak::computeCdrElectrodeFluxes(const Real         a_time,
+								const RealVect     a_pos,
+								const RealVect     a_normal,
+								const RealVect     a_E,
+								const Vector<Real> a_cdr_densities,
+								const Vector<Real> a_cdr_velocities,
+								const Vector<Real> a_cdr_gradients,
+								const Vector<Real> a_rte_fluxes,
+								const Vector<Real> a_extrap_cdr_fluxes) const{
   return computeCdrFluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients, a_rte_fluxes,
-			    a_extrap_cdr_fluxes, m_townsend2_electrode, m_electrode_quantum_efficiency);
+			  a_extrap_cdr_fluxes, m_townsend2_electrode, m_electrode_quantum_efficiency);
 }
 
-Vector<Real> air7_zheleznyak::computeCdrDielectricFluxes(const Real         a_time,
-							    const RealVect     a_pos,
-							    const RealVect     a_normal,
-							    const RealVect     a_E,
-							    const Vector<Real> a_cdr_densities,
-							    const Vector<Real> a_cdr_velocities,
-							    const Vector<Real> a_cdr_gradients,
-							    const Vector<Real> a_rte_fluxes,
-							    const Vector<Real> a_extrap_cdr_fluxes) const{
+Vector<Real> CdrPlasmaAir7Zheleznyak::computeCdrDielectricFluxes(const Real         a_time,
+								 const RealVect     a_pos,
+								 const RealVect     a_normal,
+								 const RealVect     a_E,
+								 const Vector<Real> a_cdr_densities,
+								 const Vector<Real> a_cdr_velocities,
+								 const Vector<Real> a_cdr_gradients,
+								 const Vector<Real> a_rte_fluxes,
+								 const Vector<Real> a_extrap_cdr_fluxes) const{
   return computeCdrFluxes(a_time, a_pos, a_normal, a_E, a_cdr_densities, a_cdr_velocities, a_cdr_gradients, a_rte_fluxes,
-			    a_extrap_cdr_fluxes, m_townsend2_dielectric, m_dielectric_quantum_efficiency);
+			  a_extrap_cdr_fluxes, m_townsend2_dielectric, m_dielectric_quantum_efficiency);
 }
 
-Vector<Real> air7_zheleznyak::computeCdrFluxes(const Real         a_time,
-						 const RealVect     a_pos,
-						 const RealVect     a_normal,
-						 const RealVect     a_E,
-						 const Vector<Real> a_cdr_densities,
-						 const Vector<Real> a_cdr_velocities,
-						 const Vector<Real> a_cdr_gradients,
-						 const Vector<Real> a_rte_fluxes,
-						 const Vector<Real> a_extrap_cdr_fluxes,
-						 const Real         a_townsend2,
-						 const Real         a_quantum_efficiency) const{
+Vector<Real> CdrPlasmaAir7Zheleznyak::computeCdrFluxes(const Real         a_time,
+						       const RealVect     a_pos,
+						       const RealVect     a_normal,
+						       const RealVect     a_E,
+						       const Vector<Real> a_cdr_densities,
+						       const Vector<Real> a_cdr_velocities,
+						       const Vector<Real> a_cdr_gradients,
+						       const Vector<Real> a_rte_fluxes,
+						       const Vector<Real> a_extrap_cdr_fluxes,
+						       const Real         a_townsend2,
+						       const Real         a_quantum_efficiency) const{
   Vector<Real> fluxes(m_numCdrSpecies, 0.0);
 
 
@@ -711,11 +718,11 @@ Vector<Real> air7_zheleznyak::computeCdrFluxes(const Real         a_time,
   return fluxes;
 }
 
-Real air7_zheleznyak::initialSigma(const Real a_time, const RealVect a_pos) const {
+Real CdrPlasmaAir7Zheleznyak::initialSigma(const Real a_time, const RealVect a_pos) const {
   return 0.0;
 }
 
-Real air7_zheleznyak::computeAlpha(const RealVect a_E) const{
+Real CdrPlasmaAir7Zheleznyak::computeAlpha(const RealVect a_E) const{
   const Real E     = a_E.vectorLength();
   const Real alpha = m_e_alpha.getEntry(E);
   const Real eta   = m_e_eta.getEntry(E);
@@ -723,7 +730,7 @@ Real air7_zheleznyak::computeAlpha(const RealVect a_E) const{
   return alpha;
 }
 
-Real air7_zheleznyak::excitation_rates(const Real a_E) const{
+Real CdrPlasmaAir7Zheleznyak::excitationRates(const Real a_E) const{
   const Real Etd = a_E/(m_N*Units::Td);
 
   Real y = 1.0;
@@ -734,7 +741,8 @@ Real air7_zheleznyak::excitation_rates(const Real a_E) const{
   return y;
 }
 
-Real air7_zheleznyak::sergey_factor(const Real a_O2frac) const{
+Real CdrPlasmaAir7Zheleznyak::sergeyFactor(const Real a_O2frac) const{
   return 3E-2 + 0.4*pow(a_O2frac, 0.6);
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

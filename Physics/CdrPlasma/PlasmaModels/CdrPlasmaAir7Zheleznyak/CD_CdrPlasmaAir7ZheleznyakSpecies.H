@@ -1,23 +1,31 @@
+/* chombo-discharge
+ * Copyright © 2021 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+ */
+
 /*!
-  @file   air7_zheleznyak_species.H
+  @file   CD_CdrPlasmaAir7ZheleznyakSpecies.H
   @brief  Declaration of charged species and Photons for the air zheleznyak model
   @author Robert Marskar
 */
 
-#ifndef _AIR7_ZHELEZNYAK_SPECIES_
-#define _AIR7_ZHELEZNYAK_SPECIES_
+#ifndef CdrPlasmaAir7ZheleznyakSpecies_H
+#define CdrPlasmaAir7ZheleznyakSpecies_H
 
-#include "air7_zheleznyak.H"
+// Std includes
 #include <random>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_CdrPlasmaAir7Zheleznyak.H>
+#include <CD_NamespaceHeader.H>
+
 namespace Physics {
   namespace CdrPlasma {
   
-    class air7_zheleznyak::electron : public CdrSpecies {
+    class CdrPlasmaAir7Zheleznyak::Electron : public CdrSpecies {
     public:
-      electron();
-      ~electron() {}
+      Electron();
+      ~Electron() {}
       Real initialData(const RealVect a_pos, const Real a_time) const;
 
     protected:
@@ -27,7 +35,7 @@ namespace Physics {
       RealVect m_seed_pos;
     };
 
-    class air7_zheleznyak::N2plus : public CdrSpecies {
+    class CdrPlasmaAir7Zheleznyak::N2plus : public CdrSpecies {
     public:
       N2plus();
       ~N2plus(){}
@@ -40,7 +48,7 @@ namespace Physics {
       RealVect m_seed_pos;
     };
 
-    class air7_zheleznyak::O2plus : public CdrSpecies {
+    class CdrPlasmaAir7Zheleznyak::O2plus : public CdrSpecies {
     public:
       O2plus();
       ~O2plus(){}
@@ -53,7 +61,7 @@ namespace Physics {
       RealVect m_seed_pos;
     };
 
-    class air7_zheleznyak::N4plus : public CdrSpecies {
+    class CdrPlasmaAir7Zheleznyak::N4plus : public CdrSpecies {
     public:
       N4plus();
       ~N4plus(){}
@@ -61,7 +69,7 @@ namespace Physics {
     protected:
     };
 
-    class air7_zheleznyak::O4plus : public CdrSpecies {
+    class CdrPlasmaAir7Zheleznyak::O4plus : public CdrSpecies {
     public:
       O4plus();
       ~O4plus(){}
@@ -69,7 +77,7 @@ namespace Physics {
     protected:
     };
 
-    class air7_zheleznyak::O2plusN2 : public CdrSpecies {
+    class CdrPlasmaAir7Zheleznyak::O2plusN2 : public CdrSpecies {
     public:
       O2plusN2();
       ~O2plusN2(){}
@@ -77,20 +85,20 @@ namespace Physics {
     protected:
     };
 
-    class air7_zheleznyak::O2minus : public CdrSpecies {
+    class CdrPlasmaAir7Zheleznyak::O2minus : public CdrSpecies {
     public:
       O2minus();
       ~O2minus(){}
       Real initialData(const RealVect a_pos, const Real a_time) const {return 0.0;}
     };
 
-    class air7_zheleznyak::uv_Photon : public RtSpecies {
+    class CdrPlasmaAir7Zheleznyak::uv_Photon : public RtSpecies {
     public:
       uv_Photon();
       ~uv_Photon();
       Real getKappa(const RealVect a_pos) const;
-      Real get_random_kappa() const;
-      Real get_pO2() const { return m_pO2;}
+      Real getRandomKappa() const;
+      Real getPO2() const { return m_pO2;}
   
     protected:
   
@@ -106,5 +114,7 @@ namespace Physics {
     };
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif

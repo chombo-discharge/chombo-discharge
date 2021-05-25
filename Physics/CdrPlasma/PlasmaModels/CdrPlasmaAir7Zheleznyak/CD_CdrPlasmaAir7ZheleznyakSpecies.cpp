@@ -1,20 +1,29 @@
+/* chombo-discharge
+ * Copyright © 2021 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+ */
+
 /*!
-  @file air_zheleznyak_species.H
+  @file   CD_CdrPlasmaAir7ZheleznyakSpecies.cpp
+  @brief  Implementation of CD_CdrPlasmaAir7ZheleznyakSpecies.H
+  @author Robert Marskar
 */
 
-#include "air7_zheleznyak.H"
-#include "air7_zheleznyak_species.H"
-#include <CD_Units.H>
-
+// Std includes
 #include <chrono>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_CdrPlasmaAir7Zheleznyak.H>
+#include <CD_CdrPlasmaAir7ZheleznyakSpecies.H>
+#include <CD_Units.H>
+#include <CD_NamespaceHeader.H>
+
 using namespace Physics::CdrPlasma;
 
-air7_zheleznyak::electron::electron(){
-  m_name = "electron";
+CdrPlasmaAir7Zheleznyak::Electron::Electron(){
+  m_name = "Electron";
   m_chargeNumber = -1;
-  ParmParse pp("air7_zheleznyak");
+  ParmParse pp("CdrPlasmaAir7Zheleznyak");
   std::string str;
   Vector<Real> vec(SpaceDim);
   
@@ -27,10 +36,10 @@ air7_zheleznyak::electron::electron(){
   pp.getarr("seed_position", vec, 0, SpaceDim); m_seed_pos=RealVect(D_DECL(vec[0], vec[1], vec[2]));
 }
 
-air7_zheleznyak::N2plus::N2plus(){
+CdrPlasmaAir7Zheleznyak::N2plus::N2plus(){
   m_name = "N2plus";
   m_chargeNumber = 1;
-  ParmParse pp("air7_zheleznyak");
+  ParmParse pp("CdrPlasmaAir7Zheleznyak");
   std::string str;
   Vector<Real> vec(SpaceDim);
   
@@ -44,10 +53,10 @@ air7_zheleznyak::N2plus::N2plus(){
   pp.getarr("seed_position", vec, 0, SpaceDim); m_seed_pos=RealVect(D_DECL(vec[0], vec[1], vec[2]));
 }
 
-air7_zheleznyak::O2plus::O2plus(){
+CdrPlasmaAir7Zheleznyak::O2plus::O2plus(){
   m_name = "O2plus";
   m_chargeNumber = 1;
-  ParmParse pp("air7_zheleznyak");
+  ParmParse pp("CdrPlasmaAir7Zheleznyak");
   std::string str;
   Vector<Real> vec(SpaceDim);
   
@@ -61,67 +70,67 @@ air7_zheleznyak::O2plus::O2plus(){
   pp.getarr("seed_position", vec, 0, SpaceDim); m_seed_pos=RealVect(D_DECL(vec[0], vec[1], vec[2]));
 }
 
-air7_zheleznyak::N4plus::N4plus(){
+CdrPlasmaAir7Zheleznyak::N4plus::N4plus(){
   m_name = "N4plus";
   m_chargeNumber = 1;
-  ParmParse pp("air7_zheleznyak");
+  ParmParse pp("CdrPlasmaAir7Zheleznyak");
   std::string str;
   
   pp.get("mobile_ions", str);    m_isMobile    = (str == "true") ? true : false;
   pp.get("diffusive_ions", str); m_isDiffusive = (str == "true") ? true : false;
 }
 
-air7_zheleznyak::O4plus::O4plus(){
+CdrPlasmaAir7Zheleznyak::O4plus::O4plus(){
   m_name = "O4plus";
   m_chargeNumber = 1;
-  ParmParse pp("air7_zheleznyak");
+  ParmParse pp("CdrPlasmaAir7Zheleznyak");
   std::string str;
   
   pp.get("mobile_ions", str);    m_isMobile    = (str == "true") ? true : false;
   pp.get("diffusive_ions", str); m_isDiffusive = (str == "true") ? true : false;
 }
 
-air7_zheleznyak::O2plusN2::O2plusN2(){
+CdrPlasmaAir7Zheleznyak::O2plusN2::O2plusN2(){
   m_name = "O2plusN2";
   m_chargeNumber = 1;
-  ParmParse pp("air7_zheleznyak");
+  ParmParse pp("CdrPlasmaAir7Zheleznyak");
   std::string str;
   
   pp.get("mobile_ions", str);    m_isMobile    = (str == "true") ? true : false;
   pp.get("diffusive_ions", str); m_isDiffusive = (str == "true") ? true : false;
 }
 
-air7_zheleznyak::O2minus::O2minus(){
+CdrPlasmaAir7Zheleznyak::O2minus::O2minus(){
   m_name = "O2minus";
   m_chargeNumber = -1;
-  ParmParse pp("air7_zheleznyak");
+  ParmParse pp("CdrPlasmaAir7Zheleznyak");
   std::string str;
   
   pp.get("mobile_ions", str);    m_isMobile    = (str == "true") ? true : false;
   pp.get("diffusive_ions", str); m_isDiffusive = (str == "true") ? true : false;
 }
 
-Real air7_zheleznyak::electron::initialData(const RealVect a_pos, const Real a_time) const{
+Real CdrPlasmaAir7Zheleznyak::Electron::initialData(const RealVect a_pos, const Real a_time) const{
   const Real factor = (a_pos - m_seed_pos).vectorLength();
   return m_uniform_density + m_seed_density*exp(-factor*factor/(m_seed_rad*m_seed_rad));
 }
 
-Real air7_zheleznyak::N2plus::initialData(const RealVect a_pos, const Real a_time) const{
+Real CdrPlasmaAir7Zheleznyak::N2plus::initialData(const RealVect a_pos, const Real a_time) const{
   const Real factor = (a_pos - m_seed_pos).vectorLength();
   return m_frac*(m_uniform_density + m_seed_density*exp(-factor*factor/(m_seed_rad*m_seed_rad)));
 }
 
-Real air7_zheleznyak::O2plus::initialData(const RealVect a_pos, const Real a_time) const{
+Real CdrPlasmaAir7Zheleznyak::O2plus::initialData(const RealVect a_pos, const Real a_time) const{
   const Real factor = (a_pos - m_seed_pos).vectorLength();
   return m_frac*(m_uniform_density + m_seed_density*exp(-factor*factor/(m_seed_rad*m_seed_rad)));
 }
 
-air7_zheleznyak::uv_Photon::uv_Photon(){
+CdrPlasmaAir7Zheleznyak::uv_Photon::uv_Photon(){
   m_name   = "uv_Photon";
 
   Real pressure, O2_frac;
   
-  ParmParse pp("air7_zheleznyak");
+  ParmParse pp("CdrPlasmaAir7Zheleznyak");
   pp.get("photoi_f1",      m_f1);
   pp.get("photoi_f2",      m_f2);
   pp.get("photoi_K1",      m_K1);
@@ -142,16 +151,17 @@ air7_zheleznyak::uv_Photon::uv_Photon(){
   m_udist01 = new std::uniform_real_distribution<Real>(0.0, 1.0);
 }
 
-air7_zheleznyak::uv_Photon::~uv_Photon(){
+CdrPlasmaAir7Zheleznyak::uv_Photon::~uv_Photon(){
   
 }
 
-Real air7_zheleznyak::uv_Photon::getKappa(const RealVect a_pos) const {
-  return get_random_kappa();
+Real CdrPlasmaAir7Zheleznyak::uv_Photon::getKappa(const RealVect a_pos) const {
+  return getRandomKappa();
 }
 
-Real air7_zheleznyak::uv_Photon::get_random_kappa() const {
+Real CdrPlasmaAir7Zheleznyak::uv_Photon::getRandomKappa() const {
   const Real f = m_f1 + (*m_udist01)(*m_rng)*(m_f2 - m_f1);
   return m_K1*pow(m_K2/m_K1, (f-m_f1)/(m_f2-m_f1));
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
