@@ -1,23 +1,31 @@
+/* chombo-discharge
+ * Copyright © 2021 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+ */
+
 /*!
-  @file   air3_zheleznyak_species.H
-  @brief  Declaration of charged species and Photons for the air zheleznyak model
+  @file   CD_CdrPlasmaAir3ZheleznyakSpecies.H
+  @brief  Declaration of charged species and photons for the air zheleznyak model
   @author Robert Marskar
 */
 
-#ifndef _AIR3_ZHELEZNYAK_SPECIES_
-#define _AIR3_ZHELEZNYAK_SPECIES_
+#ifndef CD_CdrPlasmaAir3ZheleznyakSpecies_H
+#define CD_CdrPlasmaAir3ZheleznyakSpecies_H
 
-#include "air3_zheleznyak.H"
+// Std includes
 #include <random>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_CdrPlasmaAir3Zheleznyak.H>
+#include <CD_NamespaceHeader.H>
+
 namespace Physics {
   namespace CdrPlasma {
 
-    class air3_zheleznyak::electron : public CdrSpecies {
+    class CdrPlasmaAir3Zheleznyak::Electron : public CdrSpecies {
     public:
-      electron();
-      ~electron() {}
+      Electron();
+      ~Electron() {}
       Real initialData(const RealVect a_pos, const Real a_time) const;
 
     protected:
@@ -27,10 +35,10 @@ namespace Physics {
       RealVect m_seed_pos;
     };
 
-    class air3_zheleznyak::M_plus : public CdrSpecies {
+    class CdrPlasmaAir3Zheleznyak::MPlus : public CdrSpecies {
     public:
-      M_plus();
-      ~M_plus(){}
+      MPlus();
+      ~MPlus(){}
       Real initialData(const RealVect a_pos, const Real a_time) const;
     protected:
       Real m_uniform_density;
@@ -39,19 +47,19 @@ namespace Physics {
       RealVect m_seed_pos;
     };
 
-    class air3_zheleznyak::M_minus : public CdrSpecies {
+    class CdrPlasmaAir3Zheleznyak::MMinus : public CdrSpecies {
     public:
-      M_minus();
-      ~M_minus(){}
+      MMinus();
+      ~MMinus(){}
       Real initialData(const RealVect a_pos, const Real a_time) const {return 0.0;}
     };
 
-    class air3_zheleznyak::uv_Photon : public RtSpecies {
+    class CdrPlasmaAir3Zheleznyak::uv_Photon : public RtSpecies {
     public:
       uv_Photon();
       ~uv_Photon();
       Real getKappa(const RealVect a_pos) const;
-      Real get_random_kappa() const;
+      Real getRandomKappa() const;
       Real get_pO2() const { return m_pO2;}
   
     protected:
@@ -68,5 +76,7 @@ namespace Physics {
     };
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif
