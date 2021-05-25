@@ -1,44 +1,52 @@
+/* chombo-discharge
+ * Copyright © 2021 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+ */
+
 /*!
-  @file   godunov_particle.H
-  @brief  Declaration of a particle class for Ito diffusion
+  @file   CD_ItoPlasmaGodunovParticle.H
+  @brief  Declaration of a particle class for ItoPlasmaGodunovStepper
   @author Robert Marskar
-  @date   April 2020
 */
 
-#ifndef _GODUNOV_PARTICLE_
-#define _GODUNOV_PARTICLE_
+#ifndef CD_ItoPlasmaGodunovParticle_H
+#define CD_ItoPlasmaGodunovParticle_H
 
+// Std includes
 #include <string>
 #include <typeinfo>
 #include <cstdio>
 #include <cmath>
 
-#include "BinItem.H"
+// Chombo includes
+#include <BinItem.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_NamespaceHeader.H>
+
 namespace Physics {
   namespace ItoPlasma {
   
     /*!
       @brief A particle class for use with Ito diffusion, i.e. drift-diffusion brownian walkers
     */
-    class godunov_particle : public BinItem {
+    class ItoPlasmaGodunovParticle : public BinItem {
     public:
 
       /*!
 	@brief Default constructor
       */
-      godunov_particle();
+      ItoPlasmaGodunovParticle();
 
       /*!
 	@brief Constructor. Subsequently calls define
       */
-      godunov_particle(const RealVect a_position, const Real a_mass);
+      ItoPlasmaGodunovParticle(const RealVect a_position, const Real a_mass);
 
       /*!
 	@brief Default dtor
       */
-      virtual ~godunov_particle();
+      virtual ~ItoPlasmaGodunovParticle();
 
       /*!
 	@brief For non-default ctor
@@ -84,8 +92,7 @@ namespace Physics {
     };
   }
 }
-#include "CD_NamespaceFooter.H"
 
+#include <CD_NamespaceFooter.H>
 
 #endif
-

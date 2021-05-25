@@ -14,7 +14,7 @@
 
 // Our includes
 #include <CD_ItoPlasmaStepper.H>
-#include <godunov_particle.H>
+#include <CD_ItoPlasmaGodunovParticle.H>
 #include <CD_NamespaceHeader.H>
 
 namespace Physics {
@@ -82,8 +82,8 @@ namespace Physics {
       which_algorithm m_algorithm;
       which_dt        m_whichDt;
 
-      Vector<ParticleContainer<godunov_particle>* > m_conductivity_particles; // Used to store the particle that gave the sigma^k
-      Vector<ParticleContainer<godunov_particle>* > m_rho_dagger_particles;   // Used to store the particles that gave rho^dagger
+      Vector<ParticleContainer<ItoPlasmaGodunovParticle>* > m_conductivity_particles; // Used to store the particle that gave the sigma^k
+      Vector<ParticleContainer<ItoPlasmaGodunovParticle>* > m_rho_dagger_particles;   // Used to store the particles that gave rho^dagger
 
       int m_merge_interval; // How often to merge superparticles
 
@@ -92,13 +92,13 @@ namespace Physics {
 
       // Global routines
       void setOldPositions();
-      void remapGodunovParticles(Vector<ParticleContainer<godunov_particle>* >& a_particles, const WhichParticles a_which);
-      void deposit_godunov_particles(const Vector<ParticleContainer<godunov_particle>* >& a_particles, const WhichParticles a_which);
-      void clearGodunovParticles(const Vector<ParticleContainer<godunov_particle>* >& a_particles, const WhichParticles a_which);
+      void remapGodunovParticles(Vector<ParticleContainer<ItoPlasmaGodunovParticle>* >& a_particles, const WhichParticles a_which);
+      void deposit_ItoPlasmaGodunovParticles(const Vector<ParticleContainer<ItoPlasmaGodunovParticle>* >& a_particles, const WhichParticles a_which);
+      void clearGodunovParticles(const Vector<ParticleContainer<ItoPlasmaGodunovParticle>* >& a_particles, const WhichParticles a_which);
 
       // Routines for semi-implicit Poisson solution
-      void computeAllConductivities(const Vector<ParticleContainer<godunov_particle>* >& a_particles);
-      void compute_cell_conductivity(EBAMRCellData& a_conductivity, const Vector<ParticleContainer<godunov_particle>* >& a_particles);
+      void computeAllConductivities(const Vector<ParticleContainer<ItoPlasmaGodunovParticle>* >& a_particles);
+      void compute_cell_conductivity(EBAMRCellData& a_conductivity, const Vector<ParticleContainer<ItoPlasmaGodunovParticle>* >& a_particles);
       void compute_face_conductivity();
       void setupSemiImplicitPoisson(const Real a_dt);
 
@@ -106,20 +106,20 @@ namespace Physics {
       void setupStandardPoisson();
 
       // Routines for semi-implicit regridding
-      void copyConductivityParticles(Vector<ParticleContainer<godunov_particle>* >& a_conductivity_particles);
-      void copyRhoDaggerParticles(Vector<ParticleContainer<godunov_particle>* >& a_rho_dagger_particles);
+      void copyConductivityParticles(Vector<ParticleContainer<ItoPlasmaGodunovParticle>* >& a_conductivity_particles);
+      void copyRhoDaggerParticles(Vector<ParticleContainer<ItoPlasmaGodunovParticle>* >& a_rho_dagger_particles);
       void computeRegridConductivity();
       void computeRegridRho();
 
       // Specific routines for Euler-Maruyama
       void advanceParticlesEulerMaruyama(const Real a_dt);
-      void diffuseParticlesEulerMaruyama(Vector<ParticleContainer<godunov_particle>* >& a_rho_dagger, const Real a_dt);
+      void diffuseParticlesEulerMaruyama(Vector<ParticleContainer<ItoPlasmaGodunovParticle>* >& a_rho_dagger, const Real a_dt);
       void stepEulerMaruyama(const Real a_dt);
       
       // Specific routines for trapezoidal integration
       void advanceParticlesTrapezoidal(const Real a_dt);
-      void preTrapezoidalPredictor(Vector<ParticleContainer<godunov_particle>* >& a_rho_dagger, const Real a_dt);
-      void preTrapezoidalCorrector(Vector<ParticleContainer<godunov_particle>* >& a_rho_dagger, const Real a_dt);
+      void preTrapezoidalPredictor(Vector<ParticleContainer<ItoPlasmaGodunovParticle>* >& a_rho_dagger, const Real a_dt);
+      void preTrapezoidalCorrector(Vector<ParticleContainer<ItoPlasmaGodunovParticle>* >& a_rho_dagger, const Real a_dt);
       void trapezoidalPredictor(const Real a_dt);
       void trapezoidalCorrector(const Real a_dt);
     };
