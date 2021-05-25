@@ -1,38 +1,43 @@
+/* chombo-discharge
+ * Copyright © 2021 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+ */
+
 /*!
-  @file   morrow_bourdon.cpp
-  @brief  Implementation of morrow_bourdon.H
+  @file   CD_CdrPlasmaMorrowBourdon.cpp
+  @brief  Implementation of CD_CdrPlasmaMorrowBourdon.H
   @author Robert Marskar
-  @date   Jan. 2018
-  @todo   Really, really need to revise these functions since we've changed the scaling for the rte equations
 */
 
-#include "morrow_bourdon.H"
-#include <CD_Units.H>
-
+// Chombo includes
 #include <ParmParse.H>
 #include <PolyGeom.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_CdrPlasmaMorrowBourdon.H>
+#include <CD_Units.H>
+#include <CD_NamespaceHeader.H>
+
 using namespace Physics::CdrPlasma;
 
-morrow_bourdon::morrow_bourdon(){
-  CH_TIME("morrow_bourdon::morrow_bourdon");
+CdrPlasmaMorrowBourdon::CdrPlasmaMorrowBourdon(){
+  CH_TIME("CdrPlasmaMorrowBourdon::CdrPlasmaMorrowBourdon");
 
-  parse_gas();
-  parse_photoi();
-  parse_see();
-  parse_bc();
+  parseGas();
+  parsePhotoi();
+  parseSEE();
+  parseBc();
 
-  instantiate_species();
+  initSpecies();
 }
 
-morrow_bourdon::~morrow_bourdon(){
+CdrPlasmaMorrowBourdon::~CdrPlasmaMorrowBourdon(){
 
 
 }
 
-void morrow_bourdon::parse_gas(){
-  ParmParse pp("morrow_bourdon");
+void CdrPlasmaMorrowBourdon::parseGas(){
+  ParmParse pp("CdrPlasmaMorrowBourdon");
   pp.get("gas_temperature", m_temp);
   pp.get("gas_N2_frac",     m_fracN2);
   pp.get("gas_O2_frac",     m_fracO2);
@@ -43,8 +48,8 @@ void morrow_bourdon::parse_gas(){
   m_N   = m_p*Units::Na/(m_temp*Units::R);
 }
 
-void morrow_bourdon::parse_photoi(){
-  ParmParse pp("morrow_bourdon");
+void CdrPlasmaMorrowBourdon::parsePhotoi(){
+  ParmParse pp("CdrPlasmaMorrowBourdon");
   pp.get("gas_quenching_pressure",     m_pq);
   pp.get("excitation_efficiency",      m_exc_eff);
   pp.get("photoionization_efficiency", m_photo_eff);
@@ -52,18 +57,18 @@ void morrow_bourdon::parse_photoi(){
   m_pq *= Units::atm2pascal;
 }
 
-void morrow_bourdon::parse_see(){
-  ParmParse pp("morrow_bourdon");
+void CdrPlasmaMorrowBourdon::parseSEE(){
+  ParmParse pp("CdrPlasmaMorrowBourdon");
   pp.get("electrode_townsend2",           m_townsend2_conductor);
   pp.get("electrode_quantum_efficiency",  m_electrode_yield);
   pp.get("dielectric_townsend2",          m_townsend2_dielectric);
   pp.get("dielectric_quantum_efficiency", m_dielectric_yield);
 }
 
-void morrow_bourdon::parse_bc(){
+void CdrPlasmaMorrowBourdon::parseBc(){
 
   m_wallBc.resize(2*SpaceDim, 0); 
-  ParmParse pp("morrow_bourdon");
+  ParmParse pp("CdrPlasmaMorrowBourdon");
   for (int dir = 0; dir < SpaceDim; dir++){
     for (SideIterator sit; sit.ok(); ++sit){
       const Side::LoHiSide side = sit();
@@ -103,7 +108,7 @@ void morrow_bourdon::parse_bc(){
   }
 }
 
-void morrow_bourdon::instantiate_species(){
+void CdrPlasmaMorrowBourdon::initSpecies(){
   m_numCdrSpecies = 3;
   m_numRtSpecies = 3;
 
@@ -118,44 +123,44 @@ void morrow_bourdon::instantiate_species(){
   m_Photon2_idx = 1;
   m_Photon3_idx = 2;
   
-  m_CdrSpecies[m_nelec_idx]    = RefCountedPtr<CdrSpecies> (new morrow_bourdon::electron());
-  m_CdrSpecies[m_nplus_idx]    = RefCountedPtr<CdrSpecies> (new morrow_bourdon::positive_species());
-  m_CdrSpecies[m_nminu_idx]    = RefCountedPtr<CdrSpecies> (new morrow_bourdon::negative_species());
+  m_CdrSpecies[m_nelec_idx]    = RefCountedPtr<CdrSpecies> (new CdrPlasmaMorrowBourdon::Electron());
+  m_CdrSpecies[m_nplus_idx]    = RefCountedPtr<CdrSpecies> (new CdrPlasmaMorrowBourdon::PositiveSpecies());
+  m_CdrSpecies[m_nminu_idx]    = RefCountedPtr<CdrSpecies> (new CdrPlasmaMorrowBourdon::negative_species());
   
-  m_RtSpecies[m_Photon1_idx]  = RefCountedPtr<RtSpecies> (new morrow_bourdon::Photon_one());
-  m_RtSpecies[m_Photon2_idx]  = RefCountedPtr<RtSpecies> (new morrow_bourdon::Photon_two());
-  m_RtSpecies[m_Photon3_idx]  = RefCountedPtr<RtSpecies> (new morrow_bourdon::Photon_three());
+  m_RtSpecies[m_Photon1_idx]  = RefCountedPtr<RtSpecies> (new CdrPlasmaMorrowBourdon::PhotonOne());
+  m_RtSpecies[m_Photon2_idx]  = RefCountedPtr<RtSpecies> (new CdrPlasmaMorrowBourdon::PhotonTwo());
+  m_RtSpecies[m_Photon3_idx]  = RefCountedPtr<RtSpecies> (new CdrPlasmaMorrowBourdon::PhotonThree());
 }
 
-void morrow_bourdon::advanceReactionNetwork(Vector<Real>&          a_particle_sources,
-					      Vector<Real>&          a_Photon_sources,
-					      const Vector<Real>     a_particle_densities,
-					      const Vector<RealVect> a_particle_gradients,
-					      const Vector<Real>     a_Photon_densities,
-					      const RealVect         a_E,
-					      const RealVect         a_pos,
-					      const Real             a_dx,
-					      const Real             a_dt,
-					      const Real             a_time,
-					      const Real             a_kappa) const {
+void CdrPlasmaMorrowBourdon::advanceReactionNetwork(Vector<Real>&          a_particle_sources,
+						    Vector<Real>&          a_Photon_sources,
+						    const Vector<Real>     a_particle_densities,
+						    const Vector<RealVect> a_particle_gradients,
+						    const Vector<Real>     a_Photon_densities,
+						    const RealVect         a_E,
+						    const RealVect         a_pos,
+						    const Real             a_dx,
+						    const Real             a_dt,
+						    const Real             a_time,
+						    const Real             a_kappa) const {
 
   const Real alpha  = computeAlpha(a_E); // Ionization coefficient
-  const Real eta    = compute_eta(a_E);   // Attachment coefficient
-  const Real beta   = compute_beta(a_E);  // Recombination coefficient
+  const Real eta    = computeEta(a_E);   // Attachment coefficient
+  const Real beta   = computeBeta(a_E);  // Recombination coefficient
 
   // Cast so we can get A-coefficients
-  const morrow_bourdon::Photon_one*   Photon1 = static_cast<morrow_bourdon::Photon_one*>   (&(*m_RtSpecies[m_Photon1_idx]));
-  const morrow_bourdon::Photon_two*   Photon2 = static_cast<morrow_bourdon::Photon_two*>   (&(*m_RtSpecies[m_Photon2_idx]));
-  const morrow_bourdon::Photon_three* Photon3 = static_cast<morrow_bourdon::Photon_three*> (&(*m_RtSpecies[m_Photon3_idx]));
+  const CdrPlasmaMorrowBourdon::PhotonOne*   Photon1 = static_cast<CdrPlasmaMorrowBourdon::PhotonOne*>   (&(*m_RtSpecies[m_Photon1_idx]));
+  const CdrPlasmaMorrowBourdon::PhotonTwo*   Photon2 = static_cast<CdrPlasmaMorrowBourdon::PhotonTwo*>   (&(*m_RtSpecies[m_Photon2_idx]));
+  const CdrPlasmaMorrowBourdon::PhotonThree* Photon3 = static_cast<CdrPlasmaMorrowBourdon::PhotonThree*> (&(*m_RtSpecies[m_Photon3_idx]));
   
   // Densities and velocities
   const Real Ne  = a_particle_densities[m_nelec_idx]; 
   const Real Np  = a_particle_densities[m_nplus_idx];
   const Real Nn  = a_particle_densities[m_nminu_idx];
-  const Real Ve  = compute_ve(a_E).vectorLength();
-  const Real Sph = m_photo_eff*Units::c*m_fracO2*m_p*(Photon1->get_A()*a_Photon_densities[m_Photon1_idx]
-							 + Photon2->get_A()*a_Photon_densities[m_Photon2_idx]
-							 + Photon3->get_A()*a_Photon_densities[m_Photon3_idx]);
+  const Real Ve  = computeVe(a_E).vectorLength();
+  const Real Sph = m_photo_eff*Units::c*m_fracO2*m_p*(Photon1->getA()*a_Photon_densities[m_Photon1_idx]
+						      + Photon2->getA()*a_Photon_densities[m_Photon2_idx]
+						      + Photon3->getA()*a_Photon_densities[m_Photon3_idx]);
 
 
   Real& Se = a_particle_sources[m_nelec_idx];
@@ -173,21 +178,21 @@ void morrow_bourdon::advanceReactionNetwork(Vector<Real>&          a_particle_so
  
 }
 
-Vector<RealVect> morrow_bourdon::computeCdrDriftVelocities(const Real         a_time,
-							const RealVect     a_pos,
-							const RealVect     a_E,
-							const Vector<Real> a_cdr_densities) const {
+Vector<RealVect> CdrPlasmaMorrowBourdon::computeCdrDriftVelocities(const Real         a_time,
+								   const RealVect     a_pos,
+								   const RealVect     a_E,
+								   const Vector<Real> a_cdr_densities) const {
 
   Vector<RealVect> velocities(m_numCdrSpecies);
   
-  velocities[m_nelec_idx] = compute_ve(a_E);
-  velocities[m_nplus_idx] = compute_vp(a_E);
-  velocities[m_nminu_idx] = compute_vn(a_E);
+  velocities[m_nelec_idx] = computeVe(a_E);
+  velocities[m_nplus_idx] = computeVp(a_E);
+  velocities[m_nminu_idx] = computeVn(a_E);
 
   return velocities;
 }
 
-RealVect morrow_bourdon::compute_ve(const RealVect a_E) const{
+RealVect CdrPlasmaMorrowBourdon::computeVe(const RealVect a_E) const{
   RealVect ve = RealVect::Zero;
 
   const RealVect E = a_E*1.E-2;          // Morrow-Lowke wants E in V/cm
@@ -216,7 +221,7 @@ RealVect morrow_bourdon::compute_ve(const RealVect a_E) const{
   return ve;
 }
 
-RealVect morrow_bourdon::compute_vp(const RealVect a_E) const{
+RealVect CdrPlasmaMorrowBourdon::computeVp(const RealVect a_E) const{
   const RealVect E = a_E*1.E-2;           // E in V/cm
   RealVect vp = 2.34*E*m_p/Units::atm2pascal;  // Morrow-Lowke wants V/cm
   vp *= 0.01;                             // Morrow-Lowke expression is in cm/s
@@ -224,7 +229,7 @@ RealVect morrow_bourdon::compute_vp(const RealVect a_E) const{
   return vp;  
 }
 
-RealVect morrow_bourdon::compute_vn(const RealVect a_E) const{
+RealVect CdrPlasmaMorrowBourdon::computeVn(const RealVect a_E) const{
   RealVect vn = RealVect::Zero;
 
   const RealVect E = a_E*1.E-2;       // Morrow-Lowke wants E in V/cm
@@ -244,7 +249,7 @@ RealVect morrow_bourdon::compute_vn(const RealVect a_E) const{
   return vn;
 }
 
-Real morrow_bourdon::computeAlpha(const RealVect a_E) const{
+Real CdrPlasmaMorrowBourdon::computeAlpha(const RealVect a_E) const{
   Real alpha    = 0.;
   Real alphabyN = 0.;
 
@@ -267,16 +272,16 @@ Real morrow_bourdon::computeAlpha(const RealVect a_E) const{
   return alpha;
 }
 
-Real morrow_bourdon::compute_eta(const RealVect a_E) const{
+Real CdrPlasmaMorrowBourdon::computeEta(const RealVect a_E) const{
 
-  const Real eta2 = this->compute_eta2(a_E); 
-  const Real eta3 = this->compute_eta3(a_E);
+  const Real eta2 = this->computeEta2(a_E); 
+  const Real eta3 = this->computeEta3(a_E);
   const Real eta  = eta2 + eta3;
 
   return eta;
 }
 
-Real morrow_bourdon::compute_eta2(const RealVect a_E) const{
+Real CdrPlasmaMorrowBourdon::computeEta2(const RealVect a_E) const{
   Real eta2    = 0.;
   Real eta2byN = 0.;
 
@@ -300,7 +305,7 @@ Real morrow_bourdon::compute_eta2(const RealVect a_E) const{
   return eta2;
 }
 
-Real morrow_bourdon::compute_eta3(const RealVect a_E) const{
+Real CdrPlasmaMorrowBourdon::computeEta3(const RealVect a_E) const{
   const RealVect E = a_E*1.E-2;         // Morrow-Lowke wants E in V/cm
   const Real Emag  = E.vectorLength();  //
   const Real N     = m_N*1.E-6;         // Morrow-Lowke weants N in cm^3
@@ -317,20 +322,20 @@ Real morrow_bourdon::compute_eta3(const RealVect a_E) const{
   return eta3;
 }
 
-Real morrow_bourdon::compute_beta(const RealVect a_E) const{
+Real CdrPlasmaMorrowBourdon::computeBeta(const RealVect a_E) const{
   Real beta = 2.0E-7;
   beta *= 1.E-6; // Morrow-Lowke expression is in cm^3. Make it m^3
   return beta;
 }
 
-Real morrow_bourdon::compute_De(const RealVect a_E) const{
+Real CdrPlasmaMorrowBourdon::computeDe(const RealVect a_E) const{
   const RealVect E  = a_E*1.E-2;                 // Morrow-Lowke wants E in V/cm
   const Real Emag   = E.vectorLength();          //
   const Real N      = m_N*1.E-6;                 // Morrow-Lowke weants N in cm^3
   const Real EbyN   = Emag/N;                    //
 
   //
-  const RealVect Ve = this->compute_ve(a_E);     // Does it's own conversion, comes out in m/s (aka. mentally sane units)
+  const RealVect Ve = this->computeVe(a_E);     // Does it's own conversion, comes out in m/s (aka. mentally sane units)
   const Real ve     = Ve.vectorLength()*1.E-2;   // Make it cm/s
   Real De = 0.3341E9*pow(EbyN, 0.54069)*ve/(1.E-4 + Emag);
   
@@ -339,38 +344,38 @@ Real morrow_bourdon::compute_De(const RealVect a_E) const{
   return De;
 }
 
-Vector<Real> morrow_bourdon::computeCdrDiffusionCoefficients(const Real         a_time,
-								const RealVect     a_pos,
-								const RealVect     a_E,
-								const Vector<Real> a_cdr_densities) const {
+Vector<Real> CdrPlasmaMorrowBourdon::computeCdrDiffusionCoefficients(const Real         a_time,
+								     const RealVect     a_pos,
+								     const RealVect     a_E,
+								     const Vector<Real> a_cdr_densities) const {
 
   Vector<Real> diffCo(m_numCdrSpecies, 0.0);
-  diffCo[m_nelec_idx] = compute_De(a_E);
+  diffCo[m_nelec_idx] = computeDe(a_E);
   
   return diffCo;
 }
 
-Vector<Real> morrow_bourdon::computeCdrDielectricFluxes(const Real         a_time,
-							   const RealVect     a_pos,
-							   const RealVect     a_normal,
-							   const RealVect     a_E,
-							   const Vector<Real> a_cdr_densities,
-							   const Vector<Real> a_cdr_velocities,
-							   const Vector<Real> a_cdr_gradients,
-							   const Vector<Real> a_rte_fluxes,
-							   const Vector<Real> a_extrap_cdr_fluxes) const {
+Vector<Real> CdrPlasmaMorrowBourdon::computeCdrDielectricFluxes(const Real         a_time,
+								const RealVect     a_pos,
+								const RealVect     a_normal,
+								const RealVect     a_E,
+								const Vector<Real> a_cdr_densities,
+								const Vector<Real> a_cdr_velocities,
+								const Vector<Real> a_cdr_gradients,
+								const Vector<Real> a_rte_fluxes,
+								const Vector<Real> a_extrap_cdr_fluxes) const {
   // Outflux of species
   Vector<Real> fluxes(m_numCdrSpecies, 0.0);
 
   if(PolyGeom::dot(a_E, a_normal) > 0.0){ // Field points into gas phase
-    fluxes[m_nelec_idx] = Max(0.0, a_extrap_cdr_fluxes[m_nelec_idx]); // Outflow for electrons
+    fluxes[m_nelec_idx] = Max(0.0, a_extrap_cdr_fluxes[m_nelec_idx]); // Outflow for Electrons
     fluxes[m_nminu_idx] = Max(0.0, a_extrap_cdr_fluxes[m_nminu_idx]); // Outflow for negative species
   }
   else if(PolyGeom::dot(a_E, a_normal) < 0.0){ // Field points into dielectric
     fluxes[m_nplus_idx] = Max(0.0, a_extrap_cdr_fluxes[m_nplus_idx]); // Outflow for positive species
   }
   
-  // Add in photoelectric effect and ion bombardment for electrons by positive ions
+  // Add in photoelectric effect and ion bombardment for Electrons by positive ions
   if(PolyGeom::dot(a_E, a_normal) < 0.){
     fluxes[m_nelec_idx] += -a_rte_fluxes[m_Photon1_idx]*m_dielectric_yield;
     fluxes[m_nelec_idx] += -a_rte_fluxes[m_Photon2_idx]*m_dielectric_yield;
@@ -382,15 +387,15 @@ Vector<Real> morrow_bourdon::computeCdrDielectricFluxes(const Real         a_tim
   return fluxes;
 }
 
-Vector<Real> morrow_bourdon::computeCdrElectrodeFluxes(const Real         a_time,
-							  const RealVect     a_pos,
-							  const RealVect     a_normal,
-							  const RealVect     a_E,
-							  const Vector<Real> a_cdr_densities,
-							  const Vector<Real> a_cdr_velocities,
-							  const Vector<Real> a_cdr_gradients,
-							  const Vector<Real> a_rte_fluxes,
-							  const Vector<Real> a_extrap_cdr_fluxes) const {
+Vector<Real> CdrPlasmaMorrowBourdon::computeCdrElectrodeFluxes(const Real         a_time,
+							       const RealVect     a_pos,
+							       const RealVect     a_normal,
+							       const RealVect     a_E,
+							       const Vector<Real> a_cdr_densities,
+							       const Vector<Real> a_cdr_velocities,
+							       const Vector<Real> a_cdr_gradients,
+							       const Vector<Real> a_rte_fluxes,
+							       const Vector<Real> a_extrap_cdr_fluxes) const {
 
   Vector<Real> fluxes(m_numCdrSpecies, 0.0);
 
@@ -398,17 +403,7 @@ Vector<Real> morrow_bourdon::computeCdrElectrodeFluxes(const Real         a_time
   const bool is_cathode = PolyGeom::dot(a_E, a_normal) < 0.;
   const bool is_anode   = PolyGeom::dot(a_E, a_normal) > 0.;
   if(is_cathode){
-    fluxes = this->compute_cathode_flux(a_extrap_cdr_fluxes,
-					a_cdr_densities,
-					a_cdr_velocities,
-					a_rte_fluxes,
-					a_E,
-					a_pos,
-					a_normal,
-					a_time);
-  }
-  else if(is_anode){
-    fluxes = this->compute_anode_flux(a_extrap_cdr_fluxes,
+    fluxes = this->computeCathodeFlux(a_extrap_cdr_fluxes,
 				      a_cdr_densities,
 				      a_cdr_velocities,
 				      a_rte_fluxes,
@@ -417,19 +412,29 @@ Vector<Real> morrow_bourdon::computeCdrElectrodeFluxes(const Real         a_time
 				      a_normal,
 				      a_time);
   }
+  else if(is_anode){
+    fluxes = this->computeAnodeFlux(a_extrap_cdr_fluxes,
+				    a_cdr_densities,
+				    a_cdr_velocities,
+				    a_rte_fluxes,
+				    a_E,
+				    a_pos,
+				    a_normal,
+				    a_time);
+  }
 
   return fluxes;
 }
 
 
-Vector<Real> morrow_bourdon::compute_cathode_flux(const Vector<Real> a_extrapolated_fluxes,
-						  const Vector<Real> a_ion_densities,
-						  const Vector<Real> a_ion_velocities,
-						  const Vector<Real> a_Photon_fluxes,
-						  const RealVect     a_E,
-						  const RealVect     a_pos,
-						  const RealVect     a_normal,
-						  const Real         a_time) const{
+Vector<Real> CdrPlasmaMorrowBourdon::computeCathodeFlux(const Vector<Real> a_extrapolated_fluxes,
+							const Vector<Real> a_ion_densities,
+							const Vector<Real> a_ion_velocities,
+							const Vector<Real> a_Photon_fluxes,
+							const RealVect     a_E,
+							const RealVect     a_pos,
+							const RealVect     a_normal,
+							const Real         a_time) const{
   Vector<Real> fluxes(m_numCdrSpecies);
 
   // Set everything to outflow
@@ -437,7 +442,7 @@ Vector<Real> morrow_bourdon::compute_cathode_flux(const Vector<Real> a_extrapola
     fluxes[i] = Max(0., a_extrapolated_fluxes[i]);
   }
 
-  // For electrons, we add ion bombardment of positive ions and the photoelectric effect
+  // For Electrons, we add ion bombardment of positive ions and the photoelectric effect
   fluxes[m_nelec_idx] = 0.;
   fluxes[m_nelec_idx] += -Max(0., a_extrapolated_fluxes[m_nplus_idx])*m_townsend2_conductor;
 
@@ -449,14 +454,14 @@ Vector<Real> morrow_bourdon::compute_cathode_flux(const Vector<Real> a_extrapola
   return fluxes;
 }
 
-Vector<Real> morrow_bourdon::compute_anode_flux(const Vector<Real> a_extrapolated_fluxes,
-						const Vector<Real> a_ion_densities,
-						const Vector<Real> a_ion_velocities,
-						const Vector<Real> a_Photon_fluxes,
-						const RealVect     a_E,
-						const RealVect     a_pos,
-						const RealVect     a_normal,
-						const Real         a_time) const{
+Vector<Real> CdrPlasmaMorrowBourdon::computeAnodeFlux(const Vector<Real> a_extrapolated_fluxes,
+						      const Vector<Real> a_ion_densities,
+						      const Vector<Real> a_ion_velocities,
+						      const Vector<Real> a_Photon_fluxes,
+						      const RealVect     a_E,
+						      const RealVect     a_pos,
+						      const RealVect     a_normal,
+						      const Real         a_time) const{
   Vector<Real> fluxes(m_numCdrSpecies);
 
   // Set to outflux
@@ -468,16 +473,16 @@ Vector<Real> morrow_bourdon::compute_anode_flux(const Vector<Real> a_extrapolate
   return fluxes;
 }
 
-Vector<Real> morrow_bourdon::computeCdrDomainFluxes(const Real           a_time,
-						       const RealVect       a_pos,
-						       const int            a_dir,
-						       const Side::LoHiSide a_side,
-						       const RealVect       a_E,
-						       const Vector<Real>   a_cdr_densities,
-						       const Vector<Real>   a_cdr_velocities,
-						       const Vector<Real>   a_cdr_gradients,
-						       const Vector<Real>   a_rte_fluxes,
-						       const Vector<Real>   a_extrap_cdr_fluxes) const{
+Vector<Real> CdrPlasmaMorrowBourdon::computeCdrDomainFluxes(const Real           a_time,
+							    const RealVect       a_pos,
+							    const int            a_dir,
+							    const Side::LoHiSide a_side,
+							    const RealVect       a_E,
+							    const Vector<Real>   a_cdr_densities,
+							    const Vector<Real>   a_cdr_velocities,
+							    const Vector<Real>   a_cdr_gradients,
+							    const Vector<Real>   a_rte_fluxes,
+							    const Vector<Real>   a_extrap_cdr_fluxes) const{
   Vector<Real> fluxes(m_numCdrSpecies, 0.0); 
 
   int idx;
@@ -502,31 +507,31 @@ Vector<Real> morrow_bourdon::computeCdrDomainFluxes(const Real           a_time,
     }
   }
   else{
-    MayDay::Abort("morrow_bourdon::computeCdrDomainFluxes - uknown domain bc requested");
+    MayDay::Abort("CdrPlasmaMorrowBourdon::computeCdrDomainFluxes - uknown domain bc requested");
   }
 
   
   return fluxes;
 }
 
-Real morrow_bourdon::initialSigma(const Real a_time, const RealVect a_pos) const{
+Real CdrPlasmaMorrowBourdon::initialSigma(const Real a_time, const RealVect a_pos) const{
   return 0.;
 }
 
-morrow_bourdon::electron::electron(){
-  m_name      = "electron";
+CdrPlasmaMorrowBourdon::Electron::Electron(){
+  m_name      = "Electron";
   m_chargeNumber    = -1;
   m_isDiffusive = true;
   m_isMobile    = true;
   m_unit      = "m-3";
 
 
-  ParmParse pp("morrow_bourdon");
+  ParmParse pp("CdrPlasmaMorrowBourdon");
   std::string str = "true";
   pp.get("uniform_density",    m_uniform_density);
   pp.get("seed_density",       m_seed_density);
   pp.get("seed_radius",        m_seed_radius);
-  pp.get("electron_diffusion", str);
+  pp.get("Electron_diffusion", str);
   if(str == "true"){
     m_isDiffusive = true;
   }
@@ -538,18 +543,18 @@ morrow_bourdon::electron::electron(){
   m_seed_pos = RealVect(D_DECL(pos[0], pos[1], pos[2]));
 }
 
-morrow_bourdon::electron::~electron(){
+CdrPlasmaMorrowBourdon::Electron::~Electron(){
 }
 
-Real morrow_bourdon::electron::initialData(const RealVect a_pos, const Real a_time) const {
+Real CdrPlasmaMorrowBourdon::Electron::initialData(const RealVect a_pos, const Real a_time) const {
   const Real factor = (a_pos - m_seed_pos).vectorLength()/m_seed_radius;
   const Real seed   = m_seed_density*exp(-factor*factor);
 
   return seed + m_uniform_density;
 }
 
-morrow_bourdon::positive_species::positive_species(){
-  m_name      = "positive_species";
+CdrPlasmaMorrowBourdon::PositiveSpecies::PositiveSpecies(){
+  m_name      = "PositiveSpecies";
   m_chargeNumber    = 1;
   m_isDiffusive = false;
   m_isMobile    = true;
@@ -558,7 +563,7 @@ morrow_bourdon::positive_species::positive_species(){
   Vector<Real> pos(SpaceDim);
   std::string str;
   
-  ParmParse pp("morrow_bourdon");
+  ParmParse pp("CdrPlasmaMorrowBourdon");
   pp.get("uniform_density",  m_uniform_density);
   pp.get("seed_density",     m_seed_density);
   pp.get("seed_radius",      m_seed_radius);
@@ -566,10 +571,10 @@ morrow_bourdon::positive_species::positive_species(){
   pp.getarr("seed_position", pos, 0, SpaceDim);  m_seed_pos = RealVect(D_DECL(pos[0], pos[1], pos[2]));
 }
 
-morrow_bourdon::positive_species::~positive_species(){
+CdrPlasmaMorrowBourdon::PositiveSpecies::~PositiveSpecies(){
 }
 
-Real morrow_bourdon::positive_species::initialData(const RealVect a_pos, const Real a_time) const {
+Real CdrPlasmaMorrowBourdon::PositiveSpecies::initialData(const RealVect a_pos, const Real a_time) const {
   const Real factor = (a_pos - m_seed_pos).vectorLength()/m_seed_radius;
   const Real seed   = m_seed_density*exp(-factor*factor);
   
@@ -577,34 +582,34 @@ Real morrow_bourdon::positive_species::initialData(const RealVect a_pos, const R
 }
 
 
-morrow_bourdon::negative_species::negative_species(){
+CdrPlasmaMorrowBourdon::negative_species::negative_species(){
   m_name      = "negative_species";
   m_chargeNumber    = -1;
   m_isDiffusive = false;
   m_isMobile    = true;
   m_unit      = "m-3";
 
-  ParmParse pp("morrow_bourdon");
+  ParmParse pp("CdrPlasmaMorrowBourdon");
     
   // Turn off ion mobility
   std::string str;
   pp.get("mobile_ions", str); m_isMobile = (str == "true") ? true : false;
 }
 
-morrow_bourdon::negative_species::~negative_species(){
+CdrPlasmaMorrowBourdon::negative_species::~negative_species(){
 }
 
-Real morrow_bourdon::negative_species::initialData(const RealVect a_pos, const Real a_time) const {
+Real CdrPlasmaMorrowBourdon::negative_species::initialData(const RealVect a_pos, const Real a_time) const {
   return 0.;
 }
 
 
-morrow_bourdon::Photon_one::Photon_one(){
-  m_name     = "Photon_one";
+CdrPlasmaMorrowBourdon::PhotonOne::PhotonOne(){
+  m_name     = "PhotonOne";
   m_constant = true;
 
   Real O2_frac, pressure;
-  ParmParse pp("morrow_bourdon");
+  ParmParse pp("CdrPlasmaMorrowBourdon");
   pp.get("Photon1_A_coeff",      m_A);
   pp.get("Photon1_lambda_coeff", m_lambda);
   pp.get("gas_O2_frac",  O2_frac);
@@ -613,20 +618,20 @@ morrow_bourdon::Photon_one::Photon_one(){
   m_pO2 = pressure*O2_frac*Units::atm2pascal;
 }
 
-morrow_bourdon::Photon_one::~Photon_one(){
+CdrPlasmaMorrowBourdon::PhotonOne::~PhotonOne(){
   
 }
 
-Real morrow_bourdon::Photon_one::getKappa(const RealVect a_pos) const {
+Real CdrPlasmaMorrowBourdon::PhotonOne::getKappa(const RealVect a_pos) const {
   return m_lambda*m_pO2/sqrt(3.0); // I think this is correct.
 }
 
-morrow_bourdon::Photon_two::Photon_two(){
-  m_name     = "Photon_two";
+CdrPlasmaMorrowBourdon::PhotonTwo::PhotonTwo(){
+  m_name     = "PhotonTwo";
   m_constant = true;
 
   Real O2_frac, pressure;
-  ParmParse pp("morrow_bourdon");
+  ParmParse pp("CdrPlasmaMorrowBourdon");
   pp.get("Photon2_A_coeff",      m_A);
   pp.get("Photon2_lambda_coeff", m_lambda);
   pp.get("gas_O2_frac",  O2_frac);
@@ -635,19 +640,19 @@ morrow_bourdon::Photon_two::Photon_two(){
   m_pO2 = pressure*O2_frac*Units::atm2pascal;
 }
 
-morrow_bourdon::Photon_two::~Photon_two(){
+CdrPlasmaMorrowBourdon::PhotonTwo::~PhotonTwo(){
 }
 
-Real morrow_bourdon::Photon_two::getKappa(const RealVect a_pos) const {
+Real CdrPlasmaMorrowBourdon::PhotonTwo::getKappa(const RealVect a_pos) const {
   return m_lambda*m_pO2/sqrt(3.0); // I think this is correct.
 }
 
-morrow_bourdon::Photon_three::Photon_three(){
-  m_name     = "Photon_three";
+CdrPlasmaMorrowBourdon::PhotonThree::PhotonThree(){
+  m_name     = "PhotonThree";
   m_constant = true;
 
   Real O2_frac, pressure;
-  ParmParse pp("morrow_bourdon");
+  ParmParse pp("CdrPlasmaMorrowBourdon");
   pp.get("Photon3_A_coeff",      m_A);
   pp.get("Photon3_lambda_coeff", m_lambda);
   pp.get("gas_O2_frac",  O2_frac);
@@ -656,11 +661,12 @@ morrow_bourdon::Photon_three::Photon_three(){
   m_pO2 = pressure*O2_frac*Units::atm2pascal;  
 }
 
-morrow_bourdon::Photon_three::~Photon_three(){
+CdrPlasmaMorrowBourdon::PhotonThree::~PhotonThree(){
 }
 
-Real morrow_bourdon::Photon_three::getKappa(const RealVect a_pos) const {
+Real CdrPlasmaMorrowBourdon::PhotonThree::getKappa(const RealVect a_pos) const {
   return m_lambda*m_pO2/sqrt(3.0); // I think this is correct.
 
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
