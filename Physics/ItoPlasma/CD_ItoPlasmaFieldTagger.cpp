@@ -1,33 +1,39 @@
+/* chombo-discharge
+ * Copyright © 2021 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+ */
+
 /*!
-  @file   ito_plasma_field_tagger.cpp
-  @brief  Implementation of ito_plasma_field_tagger.H
+  @file   CD_ItoPlasmaFieldTagger.cpp
+  @brief  Implementation of CD_ItoPlasmaFieldTagger.H
   @author Robert Marskar
-  @date   June 2020
 */
 
-#include "ito_plasma_field_tagger.H"
-#include <CD_DataOps.H>
-
+// Chombo includes
 #include <EBArith.H>
 
-#include "CD_NamespaceHeader.H"
+// Our includes
+#include <CD_ItoPlasmaFieldTagger.H>
+#include <CD_DataOps.H>
+#include <CD_NamespaceHeader.H>
+
 using namespace Physics::ItoPlasma;
 
-ito_plasma_field_tagger::ito_plasma_field_tagger(){
-  CH_TIME("ito_plasma_field_tagger::ito_plasma_field_tagger");
+ItoPlasmaFieldTagger::ItoPlasmaFieldTagger(){
+  CH_TIME("ItoPlasmaFieldTagger::ItoPlasmaFieldTagger");
   if(m_verbosity > 5){
-    pout() << "ito_plasma_field_tagger::ito_plasma_field_tagger" << endl;
+    pout() << "ItoPlasmaFieldTagger::ItoPlasmaFieldTagger" << endl;
   }
 
-  m_name = "ito_plasma_field_tagger";
+  m_name = "ItoPlasmaFieldTagger";
 }
 
-ito_plasma_field_tagger::~ito_plasma_field_tagger(){
+ItoPlasmaFieldTagger::~ItoPlasmaFieldTagger(){
 
 }
 
-void ito_plasma_field_tagger::allocateStorage(){
-  CH_TIME("ito_plasma_field_tagger::allocateStorage");
+void ItoPlasmaFieldTagger::allocateStorage(){
+  CH_TIME("ItoPlasmaFieldTagger::allocateStorage");
   if(m_verbosity > 5){
     pout() << m_name + "::allocateStorage" << endl;
   }
@@ -37,8 +43,8 @@ void ito_plasma_field_tagger::allocateStorage(){
   m_amr->allocate(m_grad_E,  m_realm, m_phase, SpaceDim);
 }
 
-void ito_plasma_field_tagger::deallocateStorage(){
-  CH_TIME("ito_plasma_field_tagger::deallocateStorage");
+void ItoPlasmaFieldTagger::deallocateStorage(){
+  CH_TIME("ItoPlasmaFieldTagger::deallocateStorage");
   if(m_verbosity > 5){
     pout() << m_name + "::deallocateStorage" << endl;
   }
@@ -48,8 +54,8 @@ void ito_plasma_field_tagger::deallocateStorage(){
   m_amr->deallocate(m_grad_E);
 }
 
-void ito_plasma_field_tagger::computeElectricField(EBAMRCellData& a_E, EBAMRCellData& a_grad_E){
-  CH_TIME("ito_plasma_field_tagger::computeElectricField");
+void ItoPlasmaFieldTagger::computeElectricField(EBAMRCellData& a_E, EBAMRCellData& a_grad_E){
+  CH_TIME("ItoPlasmaFieldTagger::computeElectricField");
   if(m_verbosity > 5){
     pout() << m_name + "::computeElectricField" << endl;
   }
@@ -66,8 +72,8 @@ void ito_plasma_field_tagger::computeElectricField(EBAMRCellData& a_E, EBAMRCell
   m_amr->interpToCentroids(a_grad_E, m_realm, m_phase);
 }
 
-void ito_plasma_field_tagger::computeTracers(){
-  CH_TIME("ito_plasma_field_tagger::computeTracers");
+void ItoPlasmaFieldTagger::computeTracers(){
+  CH_TIME("ItoPlasmaFieldTagger::computeTracers");
   if(m_verbosity > 5){
     pout() << m_name + "::computeTracers" << endl;
   }
@@ -176,4 +182,5 @@ void ito_plasma_field_tagger::computeTracers(){
 
   this->deallocateStorage(); // No reason to keep the extra storage lying around...
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

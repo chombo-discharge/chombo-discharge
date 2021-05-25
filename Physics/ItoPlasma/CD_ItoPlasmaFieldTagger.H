@@ -1,16 +1,21 @@
+/* chombo-discharge
+ * Copyright © 2021 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+ */
+
 /*!
-  @file   ito_plasma_field_tagger.H
+  @file   CD_ItoPlasmaFieldTagger.H
   @brief  Declaration of an abstract field-only tagging class for ito plasmas
   @author Robert Marskar
-  @date   May. 2018
 */
 
-#ifndef _ITO_PLASMA_FIELD_TAGGER_
-#define _ITO_PLASMA_FIELD_TAGGER_
+#ifndef CD_ItoPlasmaFieldTagger_H
+#define CD_ItoPlasmaFieldTagger_H
 
+// Our includes
 #include <CD_ItoPlasmaTagger.H>
+#include <CD_NamespaceHeader.H>
 
-#include "CD_NamespaceHeader.H"
 namespace Physics {
   namespace ItoPlasma {
   
@@ -19,18 +24,18 @@ namespace Physics {
       @details This class fetches the point-wise electric field. The class is pure, so users must implement 
       the actual tagging criterion themselves. 
     */
-    class ito_plasma_field_tagger : public ItoPlasmaTagger {
+    class ItoPlasmaFieldTagger : public ItoPlasmaTagger {
     public:
 
       /*!
 	@brief Weak constructor, must subsequently call define
       */
-      ito_plasma_field_tagger();
+      ItoPlasmaFieldTagger();
 
       /*!
 	@brief Destructor
       */
-      ~ito_plasma_field_tagger();
+      ~ItoPlasmaFieldTagger();
 
       /*!
 	@brief Compute tracer fields
@@ -97,23 +102,25 @@ namespace Physics {
 	@brief Coarsen a cell based on a tracer field
       */
       virtual bool coarsenCell(const RealVect         a_pos,
-				const Real             a_time,
-				const Real             a_dx,
-				const int              a_lvl,
-				const Vector<Real>     a_tracer,
-				const Vector<RealVect> a_grad_tracer) = 0;
-
-      /*!
-	@brief Refine a cell based on a tracer field
-      */
-      virtual bool refineCell(const RealVect         a_pos,
 			       const Real             a_time,
 			       const Real             a_dx,
 			       const int              a_lvl,
 			       const Vector<Real>     a_tracer,
 			       const Vector<RealVect> a_grad_tracer) = 0;
+
+      /*!
+	@brief Refine a cell based on a tracer field
+      */
+      virtual bool refineCell(const RealVect         a_pos,
+			      const Real             a_time,
+			      const Real             a_dx,
+			      const int              a_lvl,
+			      const Vector<Real>     a_tracer,
+			      const Vector<RealVect> a_grad_tracer) = 0;
     };
   }
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>
+
 #endif
