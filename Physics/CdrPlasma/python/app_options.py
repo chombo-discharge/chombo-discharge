@@ -15,18 +15,18 @@ def write_template(args):
     optf.write(args.app_name + ".basename  = pout\n")
     optf.write('\n')
 
-    options_files = [args.discharge_home + "/Source/AmrMesh/AmrMesh.options", \
-                     args.discharge_home + "/Source/Driver/Driver.options", \
+    options_files = [args.discharge_home + "/Source/AmrMesh/CD_AmrMesh.options", \
+                     args.discharge_home + "/Source/Driver/CD_Driver.options", \
                      args.discharge_home + "//Source/Electrostatics/CD_" + args.field_solver + ".options",\
-                     args.discharge_home + "//Source/ConvectionDiffusionReaction/" + args.CdrSolver + ".options",\
-                     args.discharge_home + "/Source/RadiativeTransfer/" + args.RtSolver + ".options",\
-                     args.discharge_home + "/Source/Geometry/GeoCoarsener.options", \
-                     args.discharge_home + "/Geometries/" + args.geometry + "/" + args.geometry + ".options", \
-                     args.discharge_home + "/Physics/CdrPlasma/timesteppers/" + args.TimeStepper + "/" + args.TimeStepper + ".options", \
-                     args.discharge_home + "/Physics/CdrPlasma/PlasmaModels/" + args.physics + "/" + args.physics + ".options"]
+                     args.discharge_home + "//Source/ConvectionDiffusionReaction/CD_" + args.CdrSolver + ".options",\
+                     args.discharge_home + "/Source/RadiativeTransfer/CD_" + args.RtSolver + ".options",\
+                     args.discharge_home + "/Source/Geometry/CD_GeoCoarsener.options", \
+                     args.discharge_home + "/Geometries/" + args.geometry + "/CD_" + args.geometry + ".options", \
+                     args.discharge_home + "/Physics/CdrPlasma/Timesteppers/" + args.TimeStepper + "/CD_" + args.TimeStepper + ".options", \
+                     args.discharge_home + "/Physics/CdrPlasma/PlasmaModels/" + args.physics + "/CD_" + args.physics + ".options"]
 
     if not args.CellTagger == "none":
-        options_files.append(args.discharge_home + "/Physics/CdrPlasma/CellTaggers/" + args.CellTagger + "/" + args.CellTagger + ".options")
+        options_files.append(args.discharge_home + "/Physics/CdrPlasma/CellTaggers/" + args.CellTagger + "/CD_" + args.CellTagger + ".options")
         
     for opt in options_files:
         if os.path.exists(opt):

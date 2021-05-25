@@ -3,10 +3,10 @@ import sys
 
 def write_template(args):
     # Make sure that every class can be found where they should
-    geofile = args.discharge_home + "/Geometries" + "/" + args.geometry + "/" + args.geometry + ".H"
-    tsfile  = args.discharge_home + "/Physics/CdrPlasma/timesteppers" + "/" + args.TimeStepper + "/" + args.TimeStepper + ".H"
-    kinfile = args.discharge_home + "/Physics/CdrPlasma/PlasmaModels" + "/" + args.physics + "/" + args.physics + ".H"
-    tagfile = args.discharge_home + "/Physics/CdrPlasma/CellTaggers" +  "/" + args.CellTagger + "/" + args.CellTagger + ".H"
+    geofile = args.discharge_home + "/Geometries" + "/" + args.geometry + "/CD_" + args.geometry + ".H"
+    tsfile  = args.discharge_home + "/Physics/CdrPlasma/Timesteppers" + "/" + args.TimeStepper + "/CD_" + args.TimeStepper + ".H"
+    kinfile = args.discharge_home + "/Physics/CdrPlasma/PlasmaModels" + "/" + args.physics + "/CD_" + args.physics + ".H"
+    tagfile = args.discharge_home + "/Physics/CdrPlasma/CellTaggers" +  "/" + args.CellTagger + "/CD_" + args.CellTagger + ".H"
     if not os.path.exists(geofile):
         print 'Could not find ' + geofile
     if not os.path.exists(tsfile):
@@ -26,17 +26,17 @@ def write_template(args):
     mainf = open(main_filename, "w")
     mainf.write('#include "CD_Driver.H"\n')
     mainf.write('#include <CD_GeoCoarsener.H>\n')
-    mainf.write('#include "CD_FieldSolverFactory.H"\n')
-    mainf.write('#include "CD_' + args.field_solver + '.H"\n')
+    mainf.write('#include <CD_FieldSolverFactory.H>\n')
+    mainf.write('#include <CD_' + args.field_solver + '.H>\n')
     mainf.write('#include <CD_CdrLayoutImplem.H>\n')
-    mainf.write('#include "' + args.CdrSolver + '.H"\n')
+    mainf.write('#include <CD_' + args.CdrSolver + '.H>\n')
     mainf.write('#include <CD_RtLayoutImplem.H>\n')
-    mainf.write('#include "' + args.RtSolver + '.H"\n')
-    mainf.write('#include "' + args.physics + '.H"\n')
-    mainf.write('#include "' + args.geometry + '.H"\n')
-    mainf.write('#include "' + args.TimeStepper + '.H"\n')
+    mainf.write('#include <CD_' + args.RtSolver + '.H>\n')
+    mainf.write('#include <CD_' + args.physics + '.H>\n')
+    mainf.write('#include <CD_' + args.geometry + '.H>\n')
+    mainf.write('#include <CD_' + args.TimeStepper + '.H>\n')
     if not args.CellTagger == "none":
-        mainf.write('#include "' + args.CellTagger + '.H"\n')
+        mainf.write('#include <CD_' + args.CellTagger + '.H>\n')
     mainf.write('#include "ParmParse.H"\n')
     mainf.write("\n")
     
