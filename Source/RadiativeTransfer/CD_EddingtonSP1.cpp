@@ -17,6 +17,8 @@
 #include <ParmParse.H>
 #include <EBAMRIO.H>
 #include <BRMeshRefine.H>
+#include <NeumannConductivityEBBC.H>
+#include <DirichletConductivityEBBC.H>
 
 // Our includes
 #include <CD_EddingtonSP1.H>
@@ -24,6 +26,7 @@
 #include <CD_Units.H>
 #include <CD_ConductivityEddingtonSP1DomainBcFactory.H>
 #include <CD_RobinConductivityEbBcFactory.H>
+
 #include <CD_NamespaceHeader.H>
 
 #define EddingtonSP1_feature 1 // Comment Feb. 14 2018: I think we can keep this - it appears to produce the correct physics.
@@ -58,6 +61,7 @@ void EddingtonSP1::parseOptions(){
   }
 
   parseDomainBc();       // Parses domain bc
+  parseEbBc();              // Parse ebbc
   parseReflection();        // Parses "reflection coefficients"
   parseStationary();        // Parse stationary solver
   parsePlotVariables();     // Parses plot variables
@@ -222,6 +226,46 @@ void EddingtonSP1::parseDomainBc(){
 
       m_domainBc.setBc(curWall, std::make_pair(bcType, curFunc));
     }
+  }
+}
+
+void EddingtonSP1::parseEbBc(){
+  CH_TIME("EddingtonSP1::parseEbBc");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parseEbBc" << endl;
+  }
+
+  ParmParse pp(m_className.c_str());
+
+  const std::string bcString = "ebbc";
+  const int num = pp.countval(bcString.c_str());
+
+  if(num == 2){
+    Real val;
+    std::string str;
+
+    pp.get(bcString.c_str(), str, 0);
+    pp.get(bcString.c_str(), val, 1);
+
+    EbBcType bcType;
+
+    if(str == "dirichlet"){
+      bcType = EbBcType::Dirichlet;
+    }
+    else if(str == "neumann"){
+      bcType = EbBcType::Neumann;
+    }
+    else if(str == "robin"){
+      bcType = EbBcType::Robin;
+    }
+    else{
+      MayDay::Abort("EddingtonSP1::parseEbBc -- not dirichlet/neumann/robin!");
+    }
+
+    m_ebbc = std::make_pair(bcType, val);
+  }
+  else{
+    MayDay::Abort("EddingtonSP1::parseEbBc -- bad input argument. Should be in the form 'robin 0.0', 'dirichlet 0.0', etc");
   }
 }
 
@@ -735,10 +779,34 @@ void EddingtonSP1::setupOperatorFactory(){
   }
   auto fact = RefCountedPtr<ConductivityEddingtonSP1DomainBcFactory> (new ConductivityEddingtonSP1DomainBcFactory(m_domainBc, larsenCoeffs, m_amr->getProbLo()));
 
-  // Set the embedded boundary bc factory. This also uses the same coefficients. 
-  auto robinEbBcFactory = RefCountedPtr<RobinConductivityEbBcFactory> (new RobinConductivityEbBcFactory(m_amr->getProbLo()));
-  robinEbBcFactory->setCoefficients(robinCoefficients);
-  robinEbBcFactory->setStencilType(IrregStencil::StencilType::LeastSquares);
+  // Set the embedded boundary bc factory. This also uses the same coefficients.
+  RefCountedPtr<BaseEBBCFactory> ebbcFactory;
+  switch(m_ebbc.first){
+  case EbBcType::Dirichlet: {
+    auto dirichletEbBcFactory = RefCountedPtr<DirichletConductivityEBBCFactory> (new DirichletConductivityEBBCFactory());
+    dirichletEbBcFactory->setValue(m_ebbc.second);
+    dirichletEbBcFactory->setOrder(1);
+    ebbcFactory = RefCountedPtr<BaseEBBCFactory> (dirichletEbBcFactory);
+    break;
+  }
+  case EbBcType::Neumann: {
+    auto neumannEbBcFactory = RefCountedPtr<NeumannConductivityEBBCFactory> (new NeumannConductivityEBBCFactory());
+    neumannEbBcFactory->setValue(m_ebbc.second);
+    ebbcFactory = RefCountedPtr<BaseEBBCFactory> (neumannEbBcFactory);
+    break;
+  }
+  case EbBcType::Robin: {
+    auto robinEbBcFactory = RefCountedPtr<RobinConductivityEbBcFactory> (new RobinConductivityEbBcFactory(m_amr->getProbLo()));
+    robinEbBcFactory->setCoefficients(robinCoefficients);
+    robinEbBcFactory->setStencilType(IrregStencil::StencilType::LeastSquares);
+    ebbcFactory = RefCountedPtr<BaseEBBCFactory> (robinEbBcFactory);
+    break;
+  }
+  default:
+    MayDay::Abort("EddingtonSP1::setupOperatorFactory -- bad EBBC!");
+    break;
+  }
+
 
   //  Make relaxation type into int code
   int relaxType;
@@ -783,7 +851,7 @@ void EddingtonSP1::setupOperatorFactory(){
 										    m_amr->getDx()[0],
 										    m_amr->getRefinementRatios(),
 										    fact,
-										    robinEbBcFactory,
+										    ebbcFactory,
 										    ghost*IntVect::Unit,
 										    ghost*IntVect::Unit,
 										    relaxType,

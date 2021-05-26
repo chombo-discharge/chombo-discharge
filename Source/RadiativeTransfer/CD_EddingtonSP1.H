@@ -43,7 +43,6 @@ public:
   */
   static Real s_defaultDomainBcFunction(const RealVect a_position, const Real a_time);
 
-
   /*!
     @brief Constructor
   */
@@ -172,6 +171,15 @@ protected:
     FAS,
     VCycle,
     FCycle,
+  };
+
+  /*!
+    @brief Enum for boundary condition types on EBs
+  */
+  enum class EbBcType{
+    Dirichlet,
+    Neumann,
+    Robin
   };
   
   /*!
@@ -350,6 +358,11 @@ protected:
   std::map<EddingtonSP1DomainBc::Wall, EddingtonSP1DomainBc::BcFunction> m_domainBcFunctions;
 
   /*!
+    @brief Boundary condition on the embedded boundary
+  */
+  std::pair<EbBcType, Real> m_ebbc;
+
+  /*!
     @brief Set up geometric multigrid
   */
   virtual void setupMultigrid();
@@ -415,6 +428,11 @@ protected:
     @brief Parse domain BC settings
   */
   virtual void parseDomainBc();
+
+    /*!
+    @brief Parse domain BC settings
+  */
+  virtual void parseEbBc();
 
   /*!
     @brief Parse whether or not this is a stationary solver
