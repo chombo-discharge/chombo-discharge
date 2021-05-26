@@ -36,7 +36,8 @@ public:
   */
   enum class BcType {
     Dirichlet,
-    Neumann
+    Neumann,
+    Robin
   };
 
   /*!

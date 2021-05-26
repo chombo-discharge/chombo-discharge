@@ -23,9 +23,15 @@
 #include <CD_DataOps.H>
 #include <CD_Units.H>
 #include <CD_ConductivityDomainBcWrapper.H>
+#include <CD_ConductivityEddingtonSP1DomainBc.H>
+#include <CD_ConductivityEddingtonSP1DomainBcFactory.H>
 #include <CD_NamespaceHeader.H>
 
 #define EddingtonSP1_feature 1 // Comment Feb. 14 2018: I think we can keep this - it appears to produce the correct physics.
+
+Real EddingtonSP1::s_defaultDomainBcFunction(const RealVect a_position, const Real a_time){
+  return 1.0;
+}
 
 EddingtonSP1::EddingtonSP1() : RtSolver() {
   m_name = "EddingtonSP1";
@@ -34,6 +40,8 @@ EddingtonSP1::EddingtonSP1() : RtSolver() {
   m_verbosity  = -1;
   m_needsMultigridSetup = true;
   m_hasDeeperMultigridLevels = false;
+
+  this->setDefaultDomainBcFunctions();
 }
 
 EddingtonSP1::~EddingtonSP1(){
@@ -48,7 +56,8 @@ void EddingtonSP1::parseOptions(){
   if(m_verbosity > 5){
     pout() << m_name + "::parseOptions" << endl;
   }
-  
+
+  parseDomainBcNew();
   parseDomainBc();          // Parses domain BC options
   parseStationary();        // Parse stationary solver
   parsePlotVariables();     // Parses plot variables
@@ -63,6 +72,156 @@ void EddingtonSP1::parseRuntimeOptions(){
   
   parsePlotVariables();     // Parses plot variables
   parseMultigridSettings(); // Parses solver parameters for geometric multigrid
+}
+
+void EddingtonSP1::setDefaultDomainBcFunctions(){
+  CH_TIME("EddingtonSP1::setDefaultDomainBcFunctions");
+  if(m_verbosity > 5){
+    pout() << m_name + "::setDefaultDomainBcFunctions" << endl;
+  }
+
+  m_domainBcFunctions.clear();
+  for (int dir = 0; dir < SpaceDim; dir++){
+    for (SideIterator sit; sit.ok(); ++sit){
+      m_domainBcFunctions.emplace(std::make_pair(dir, sit()), EddingtonSP1::s_defaultDomainBcFunction);
+    }
+  }
+}
+
+void EddingtonSP1::setDomainBcWallFunction(const int a_dir, const Side::LoHiSide a_side, const EddingtonSP1DomainBc::BcFunction& a_function){
+  CH_TIME("EddingtonSP1::setDomainBcWallFunction");
+  if(m_verbosity > 4){
+    pout() << m_name + "::setDomainBcWallFunction" << endl;
+  }
+
+  const EddingtonSP1DomainBc::Wall curWall = std::make_pair(a_dir, a_side);
+
+  m_domainBcFunctions.at(curWall) = a_function;
+}
+
+std::string EddingtonSP1::makeBcString(const int a_dir, const Side::LoHiSide a_side) const {
+  CH_TIME("EddingtonSP1::makeBcString");
+  if(m_verbosity > 5){
+    pout() << m_name + "::makeBcString" << endl;
+  }
+
+  std::string strDir;
+  std::string strSide;
+  
+  if(a_dir == 0){
+    strDir = "x";
+  }
+  else if(a_dir == 1){
+    strDir = "y";
+  }
+  else if(a_dir == 2){
+    strDir = "z";
+  }
+
+  if(a_side == Side::Lo){
+    strSide = "lo";
+  }
+  else if(a_side == Side::Hi){
+    strSide = "hi";
+  }
+
+  const std::string ret = std::string("bc.") + strDir + std::string(".") + strSide;
+
+  return ret;
+}
+
+EddingtonSP1DomainBc::BcType EddingtonSP1::parseBcString(const std::string a_str) const {
+  CH_TIME("EddingtonSP1::parseBcString");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parseBcString" << endl;
+  }
+
+  EddingtonSP1DomainBc::BcType ret;
+
+  if(a_str == "dirichlet"){
+    ret = EddingtonSP1DomainBc::BcType::Dirichlet;
+  }
+  else if(a_str == "neumann"){
+    ret = EddingtonSP1DomainBc::BcType::Neumann;
+  }
+  else if(a_str == "robin"){
+    ret = EddingtonSP1DomainBc::BcType::Robin;
+  }
+  else{
+    MayDay::Abort("EddingtonSP1DomainBc::BcType - unknown BC type!");
+  }
+
+  return ret;
+}
+
+void EddingtonSP1::parseDomainBcNew(){
+  CH_TIME("EddingtonSP1::parseDomainBc");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parseDomainBc" << endl;
+  }
+
+  ParmParse pp(m_className.c_str());
+
+  for (int dir = 0; dir < SpaceDim; dir++){
+    for (SideIterator sit; sit.ok(); ++sit){
+      const EddingtonSP1DomainBc::Wall curWall = std::make_pair(dir, sit());
+      const std::string bcString = this->makeBcString(dir, sit());
+      const int num = pp.countval(bcString.c_str());
+
+      std::string str;
+
+      EddingtonSP1DomainBc::BcType      bcType;
+      EddingtonSP1DomainBc::BcFunction& bcFunc = m_domainBcFunctions.at(curWall);
+
+      std::function<Real(const RealVect, const Real)> curFunc;
+
+      switch(num){
+      case 1:{ // If only providing dirichlet_custom, neumann_custom, robin_custom, the second value is overridden and only the function is used as BC. 
+	pp.get(bcString.c_str(), str, 0);
+
+	// Set the function. Capture solver time by reference. 
+	curFunc = [&] (const RealVect a_pos, const Real a_time) {
+	  return bcFunc(a_pos, m_time);
+	};
+
+	// Ensure that we actually have a valid BC. 
+	if(str == "dirichlet_custom"){
+	  bcType  = EddingtonSP1DomainBc::BcType::Dirichlet;
+	}
+	else if(str == "neumann_custom"){
+	  bcType  = EddingtonSP1DomainBc::BcType::Neumann;
+	}
+	else if(str == "robin_custom"){
+	  bcType  = EddingtonSP1DomainBc::BcType::Robin;
+	}
+	else{
+	  MayDay::Abort("EddingtonSP1::parseDomainBc -- got only one argument but this argument was not in the form of e.g. 'neumann_custom'!");
+	}
+
+	break;
+      }
+      case 2:{ // Had two arguments in input, e.g. neumann 0.0. In this case we set the BC to be the specified function times the value. 
+	Real val;
+
+	pp.get(bcString.c_str(), str, 0);
+	pp.get(bcString.c_str(), val, 1);
+
+	bcType = this->parseBcString(str);
+
+	curFunc = [&] (const RealVect a_pos, const Real a_time) {
+	  return bcFunc(a_pos, m_time)*val;
+	};
+	break;
+      }
+      default: {
+	MayDay::Abort("EddingtonSP1::parseDomainBc -- unknown argument to domain bc");
+	break;
+      }
+      }
+
+      m_domainBc.setBc(curWall, std::make_pair(bcType, curFunc));
+    }
+  }
 }
 
 void EddingtonSP1::parseDomainBc(){
@@ -511,7 +670,7 @@ void EddingtonSP1::setACoefAndBCoef(){
 
       for (DataIterator dit = aco.dataIterator(); dit.ok(); ++dit){
 	const Box box = (m_amr->getGrids(m_realm)[lvl]).get(dit());
-	this->setACoefAndBCoef_box(aco[dit()], bco_irr[dit()], box, origin, dx, lvl, dit());
+	this->setACoefAndBCoefBox(aco[dit()], bco_irr[dit()], box, origin, dx, lvl, dit());
       }
     }
 
@@ -532,16 +691,16 @@ void EddingtonSP1::setACoefAndBCoef(){
 #endif
 }
 
-void EddingtonSP1::setACoefAndBCoef_box(EBCellFAB&       a_aco,
-					BaseIVFAB<Real>& a_bco,
-					const Box        a_box,
-					const RealVect   a_origin,
-					const Real       a_dx,
-					const int        a_lvl,
-					const DataIndex& a_dit){
-  CH_TIME("EddingtonSP1::setACoefAndBCoef_box");
+void EddingtonSP1::setACoefAndBCoefBox(EBCellFAB&       a_aco,
+				       BaseIVFAB<Real>& a_bco,
+				       const Box        a_box,
+				       const RealVect   a_origin,
+				       const Real       a_dx,
+				       const int        a_lvl,
+				       const DataIndex& a_dit){
+  CH_TIME("EddingtonSP1::setACoefAndBCoefBox");
   if(m_verbosity > 10){
-    pout() << m_name + "::setACoefAndBCoef_box" << endl;
+    pout() << m_name + "::setACoefAndBCoefBox" << endl;
   }
   
   const int comp  = 0;
