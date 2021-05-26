@@ -15,7 +15,7 @@
 
 ConductivityEddingtonSP1DomainBcFactory::ConductivityEddingtonSP1DomainBcFactory(const EddingtonSP1DomainBc& a_domainBc,
 										 const LarsenMap&            a_larsenCoefficients,
-										 const RealVect a_probLo){
+										 const RealVect              a_probLo){
   m_domainBc = a_domainBc;
   m_probLo   = a_probLo;
   m_larsen   = a_larsenCoefficients;

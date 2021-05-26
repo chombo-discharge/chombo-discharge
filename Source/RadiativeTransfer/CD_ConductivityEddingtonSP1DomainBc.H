@@ -35,7 +35,10 @@
 class ConductivityEddingtonSP1DomainBc : public ConductivityBaseDomainBC {
 public:
 
-  using LarsenMap = std::map<EddingtonSP1DomainBc::Wall, LarsenCoefficients>;
+  /*!
+    @brief Typedef for Larsen coefficients on each domain side
+  */
+  using LarsenMap = std::map<EddingtonSP1DomainBc::Wall, RefCountedPtr<RobinCoefficients> >;
 
   /*!
     @brief Constructor. This does nothing. 

@@ -75,11 +75,6 @@ public:
   void setBc(const Wall a_wall, const Bc a_func);
 
   /*!
-    @brief Set Larsen coefficients for a wall. 
-  */
-  void setRobinCoefficients(const Wall a_wall, const LarsenCoefficients& a_coefficients);
-
-  /*!
     @brief Returns the boundary condition for a side and direction
     @param[in] a_wall Coordinate direction and siden
     @note If the boundary condition for the associated side and direction has not been previously set, this routine will cause a run-time error. 

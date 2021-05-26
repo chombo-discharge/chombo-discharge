@@ -32,7 +32,10 @@
 class ConductivityEddingtonSP1DomainBcFactory : public BaseDomainBCFactory {
 public:
 
-  using LarsenMap = std::map<EddingtonSP1DomainBc::Wall, LarsenCoefficients>;
+  /*!
+    @brief Robin coefficients on each side of the domain bc
+  */
+  using LarsenMap = std::map<EddingtonSP1DomainBc::Wall, RefCountedPtr<RobinCoefficients> >;
 
   /*!
     @brief Weak construction is disallowed because it muddies the interface. 

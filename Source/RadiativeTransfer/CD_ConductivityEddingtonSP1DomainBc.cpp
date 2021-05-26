@@ -31,15 +31,20 @@ ConductivityEddingtonSP1DomainBc::ConductivityEddingtonSP1DomainBc(const Eddingt
 
       // Generate a BC object using Chombos BC data holders. 
       switch (bcType) {
-      case EddingtonSP1DomainBc::BcType::Dirichlet:
+      case EddingtonSP1DomainBc::BcType::Dirichlet:{
 	m_conductivityBaseDomainBcObjects.emplace(curWall, std::make_shared<DirichletConductivityDomainBC>());
 	break;
-      case EddingtonSP1DomainBc::BcType::Neumann:
+      }
+      case EddingtonSP1DomainBc::BcType::Neumann:{
 	m_conductivityBaseDomainBcObjects.emplace(curWall, std::make_shared<NeumannConductivityDomainBC>());
 	break;
-      case EddingtonSP1DomainBc::BcType::Robin:
-	m_conductivityBaseDomainBcObjects.emplace(curWall, std::make_shared<RobinConductivityDomainBc>());
+      }
+      case EddingtonSP1DomainBc::BcType::Robin:{
+	std::shared_ptr<RobinConductivityDomainBc> robinBc = std::make_shared<RobinConductivityDomainBc>();
+	robinBc->setCoefficients(a_coefficients.at(curWall));
+	m_conductivityBaseDomainBcObjects.emplace(curWall, robinBc);
 	break;
+      }
       default:
 	MayDay::Abort("ConductivityEddingtonSP1DomainBc -- unsupported boundary condition passed into ConductivityEddingtonSP1DomainBc");
       }
