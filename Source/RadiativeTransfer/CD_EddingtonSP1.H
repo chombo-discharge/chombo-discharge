@@ -107,11 +107,6 @@ public:
   virtual void registerOperators();
 
   /*!
-    @brief Set reflection coefficients. These must be obtained by integrals over the reflectivity.
-  */
-  virtual void setReflectionCoefficients(const Real r1, const Real r2);
-
-  /*!
     @brief Compute the boundary flux. For Eddington, the boundary flux is = c*phi/2
   */
   virtual void computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi);

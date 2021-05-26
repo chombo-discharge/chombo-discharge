@@ -347,16 +347,6 @@ void EddingtonSP1::preRegrid(const int a_base, const int a_oldFinestLevel){
   }
 }
 
-void EddingtonSP1::setReflectionCoefficients(const Real a_r1, const Real a_r2){
-  CH_TIME("EddingtonSP1::setReflectionCoefficients");
-  if(m_verbosity > 5){
-    pout() << m_name + "::setReflectionCoefficients" << endl;
-  }
-  
-  m_reflectionCoefficientOne = a_r1;
-  m_reflectionCoefficientTwo = a_r2;
-}
-
 void EddingtonSP1::allocateInternals(){
   CH_TIME("EddingtonSP1::allocateInternals");
   if(m_verbosity > 5){
@@ -729,26 +719,6 @@ void EddingtonSP1::setupOperatorFactory(){
     pout() << m_name + "::setupOperatorFactory" << endl;
   }
 
-  // Get the AMR stuff 
-  const int finest_level                 = m_amr->getFinestLevel();
-  const int ghost                        = m_amr->getNumberOfGhostCells();
-  const Vector<DisjointBoxLayout>& grids = m_amr->getGrids(m_realm);
-  const Vector<int>& refinement_ratios   = m_amr->getRefinementRatios();
-  const Vector<ProblemDomain>& domains   = m_amr->getDomains();
-  const Vector<Real>& dx                 = m_amr->getDx();
-  const RealVect& origin                 = m_amr->getProbLo();
-  const Vector<EBISLayout>& ebisl        = m_amr->getEBISLayout(m_realm, m_phase);
-  
-  const Vector<RefCountedPtr<EBQuadCFInterp> >& quadcfi  = m_amr->getEBQuadCFInterp(m_realm, m_phase);
-  const Vector<RefCountedPtr<EBFluxRegister> >& fastFR   = m_amr->getFluxRegister(m_realm, m_phase);
-
-  // AmrMesh uses RefCounted levelgrids. EbHelmholtzOpFactory does not. Convert them there. 
-  Vector<EBLevelGrid> levelgrids;
-  for (int lvl = 0; lvl <= finest_level; lvl++){ 
-    levelgrids.push_back(*(m_amr->getEBLevelGrid(m_realm, m_phase)[lvl])); 
-  }
-
-
   // Set the appropriate robin coefficients. 
   auto robinCoefficients = RefCountedPtr<LarsenCoefficients> (new LarsenCoefficients(m_RtSpecies, m_reflectionCoefficientOne, m_reflectionCoefficientTwo));
 
@@ -766,7 +736,7 @@ void EddingtonSP1::setupOperatorFactory(){
   auto fact = RefCountedPtr<ConductivityEddingtonSP1DomainBcFactory> (new ConductivityEddingtonSP1DomainBcFactory(m_domainBc, larsenCoeffs, m_amr->getProbLo()));
 
   // Set the embedded boundary bc factory. This also uses the same coefficients. 
-  auto robinEbBcFactory = RefCountedPtr<RobinConductivityEbBcFactory> (new RobinConductivityEbBcFactory(origin));
+  auto robinEbBcFactory = RefCountedPtr<RobinConductivityEbBcFactory> (new RobinConductivityEbBcFactory(m_amr->getProbLo()));
   robinEbBcFactory->setCoefficients(robinCoefficients);
   robinEbBcFactory->setStencilType(IrregStencil::StencilType::LeastSquares);
 
@@ -791,17 +761,27 @@ void EddingtonSP1::setupOperatorFactory(){
   const Real alpha =  1.0;
   const Real beta  = -1.0;
 
+  // Number of ghost cells. 
+  const int ghost = m_amr->getNumberOfGhostCells();
+
+
+  // AmrMesh uses RefCounted levelgrids. EbHelmholtzOpFactory does not. Convert them there. 
+  Vector<EBLevelGrid> levelgrids;
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){ 
+    levelgrids.push_back(*(m_amr->getEBLevelGrid(m_realm, m_phase)[lvl])); 
+  }
+
   // Create operator factory.
   m_operatorFactory = RefCountedPtr<EbHelmholtzOpFactory> (new EbHelmholtzOpFactory(levelgrids,
-										    quadcfi,
-										    fastFR,
+										    m_amr->getEBQuadCFInterp(m_realm, m_phase),
+										    m_amr->getFluxRegister(m_realm, m_phase),
 										    alpha,
 										    beta,
 										    m_aCoef.getData(),
 										    m_bco.getData(),
 										    m_bco_irreg.getData(),
-										    dx[0],
-										    refinement_ratios,
+										    m_amr->getDx()[0],
+										    m_amr->getRefinementRatios(),
 										    fact,
 										    robinEbBcFactory,
 										    ghost*IntVect::Unit,
