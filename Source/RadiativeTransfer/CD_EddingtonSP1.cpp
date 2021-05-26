@@ -22,7 +22,6 @@
 #include <CD_EddingtonSP1.H>
 #include <CD_DataOps.H>
 #include <CD_Units.H>
-#include <CD_ConductivityDomainBcWrapper.H>
 #include <CD_ConductivityEddingtonSP1DomainBc.H>
 #include <CD_ConductivityEddingtonSP1DomainBcFactory.H>
 #include <CD_NamespaceHeader.H>
@@ -58,7 +57,7 @@ void EddingtonSP1::parseOptions(){
     pout() << m_name + "::parseOptions" << endl;
   }
 
-  parseDomainBcNew();       // Parses domain bc
+  parseDomainBc();       // Parses domain bc
   parseReflection();        // Parses "reflection coefficients"
   parseStationary();        // Parse stationary solver
   parsePlotVariables();     // Parses plot variables
@@ -155,7 +154,7 @@ EddingtonSP1DomainBc::BcType EddingtonSP1::parseBcString(const std::string a_str
   return ret;
 }
 
-void EddingtonSP1::parseDomainBcNew(){
+void EddingtonSP1::parseDomainBc(){
   CH_TIME("EddingtonSP1::parseDomainBc");
   if(m_verbosity > 5){
     pout() << m_name + "::parseDomainBc" << endl;
@@ -222,70 +221,6 @@ void EddingtonSP1::parseDomainBcNew(){
       }
 
       m_domainBc.setBc(curWall, std::make_pair(bcType, curFunc));
-    }
-  }
-}
-
-void EddingtonSP1::parseDomainBc(){
-  CH_TIME("EddingtonSP1::parseDomainBc");
-  if(m_verbosity > 5){
-    pout() << m_name + "::parseDomainBc" << endl;
-  }
-
-  allocateWallBc();
-
-  // Get BC from input script
-  ParmParse pp(m_className.c_str());
-  
-  for (int dir = 0; dir < SpaceDim; dir++){
-    for (SideIterator sit; sit.ok(); ++sit){
-      const Side::LoHiSide side = sit();
-	
-      std::string str_dir;
-      if(dir == 0){
-	str_dir = "x";
-      }
-      else if(dir == 1){
-	str_dir = "y";
-      }
-      else if(dir == 2){
-	str_dir = "z";
-      }
-
-      if(side == Side::Lo){
-	std::string type;
-	std::string bc_string = "bc_" + str_dir + "_low";
-	if(pp.contains(bc_string.c_str())){
-	  pp.get(bc_string.c_str(), type);
-	  if(type == "neumann"){
-	    this->setNeumannWallBc(dir, Side::Lo, 0.0);
-	  }
-	  else if(type == "robin"){
-	    this->setRobinWallBc(dir, Side::Lo, 0.0);
-	  }
-	  else {
-	    std::string error = "EddingtonSP1::EddingtonSP1 - unknown bc requested for " + bc_string;
-	    MayDay::Abort(error.c_str());
-	  }
-	}
-      }
-      else if(side == Side::Hi){
-	std::string type;
-	std::string bc_string = "bc_" + str_dir + "_high";
-	if(pp.contains(bc_string.c_str())){
-	  pp.get(bc_string.c_str(), type);
-	  if(type == "neumann"){
-	    this->setNeumannWallBc(dir, Side::Hi, 0.0);
-	  }
-	  else if(type == "robin"){
-	    this->setRobinWallBc(dir, Side::Hi, 0.0);
-	  }
-	  else {
-	    std::string error = "EddingtonSP1::EddingtonSP1 - unknown bc requested for " + bc_string;
-	    MayDay::Abort(error.c_str());
-	  }
-	}
-      }
     }
   }
 }
@@ -394,17 +329,6 @@ void EddingtonSP1::parseReflection(){
 
   m_reflectionCoefficientOne = r/(2.0);
   m_reflectionCoefficientTwo = r/(3.0);
-}
-
-void EddingtonSP1::allocateWallBc(){
-  CH_TIME("EddingtonSP1::allocateWallBc");
-  if(m_verbosity > 5){
-    pout() << "EddingtonSP1::allocateWallBc" << endl;
-  }
-  m_wallBc.resize(2*SpaceDim);
-  for (int i = 0; i < 2*SpaceDim; i++){
-    m_wallBc[i] = RefCountedPtr<WallBc> (NULL);
-  }
 }
 
 void EddingtonSP1::preRegrid(const int a_base, const int a_oldFinestLevel){
@@ -805,6 +729,7 @@ void EddingtonSP1::setupOperatorFactory(){
     pout() << m_name + "::setupOperatorFactory" << endl;
   }
 
+  // Get the AMR stuff 
   const int finest_level                 = m_amr->getFinestLevel();
   const int ghost                        = m_amr->getNumberOfGhostCells();
   const Vector<DisjointBoxLayout>& grids = m_amr->getGrids(m_realm);
@@ -817,72 +742,54 @@ void EddingtonSP1::setupOperatorFactory(){
   const Vector<RefCountedPtr<EBQuadCFInterp> >& quadcfi  = m_amr->getEBQuadCFInterp(m_realm, m_phase);
   const Vector<RefCountedPtr<EBFluxRegister> >& fastFR   = m_amr->getFluxRegister(m_realm, m_phase);
 
+  // AmrMesh uses RefCounted levelgrids. EbHelmholtzOpFactory does not. Convert them there. 
   Vector<EBLevelGrid> levelgrids;
-
   for (int lvl = 0; lvl <= finest_level; lvl++){ 
-    levelgrids.push_back(*(m_amr->getEBLevelGrid(m_realm, m_phase)[lvl])); // AmrMesh uses RefCounted levelgrids. EBConductivityOp does not. 
+    levelgrids.push_back(*(m_amr->getEBLevelGrid(m_realm, m_phase)[lvl])); 
   }
 
-#if 0
-  Vector<EBLevelGrid> mg_levelgrids;
-  Vector<RefCountedPtr<EBLevelGrid> >& mg_eblg = m_amr->get_mg_eblg(m_realm, m_phase);
-  for (int lvl = 0; lvl < mg_eblg.size(); lvl++){
-    mg_levelgrids.push_back(*mg_eblg[lvl]);
-  }
-#endif
 
-  // Appropriate coefficients. 
-  const Real alpha =  1.0;
-  const Real beta  = -1.0;
+  // Set the appropriate robin coefficients. 
+  auto robinCoefficients = RefCountedPtr<LarsenCoefficients> (new LarsenCoefficients(m_RtSpecies, m_reflectionCoefficientOne, m_reflectionCoefficientTwo));
 
-  // Appropriate coefficients for this type of Robin BC
-  m_robinCoefficients = RefCountedPtr<LarsenCoefficients> (new LarsenCoefficients(m_RtSpecies, m_reflectionCoefficientOne, m_reflectionCoefficientTwo));
 
-  // Domain BC
-#if 0
-  m_robinDomainBcFactory = RefCountedPtr<RobinConductivityDomainBcFactory> (new RobinConductivityDomainBcFactory());
-  m_robinDomainBcFactory->setCoefficients(m_robinCoefficients);
-#else
-  RefCountedPtr<BaseDomainBCFactory> domfact = RefCountedPtr<BaseDomainBCFactory>(NULL);
-  ConductivityDomainBcWrapperFactory* bcfact = new ConductivityDomainBcWrapperFactory();
-  Vector<RefCountedPtr<RobinCoefficients> > coefs(2*SpaceDim, m_robinCoefficients);
-  bcfact->setWallBc(m_wallBc);
-  bcfact->setRobinCoefficients(coefs);
-  domfact = RefCountedPtr<BaseDomainBCFactory> (bcfact);
-#endif
-
-#if 1 // New domain bc stuff
-  // Set the same larsen coefficients on all domain sides. If you want to use different coefficients on different domain sides, here is where you would do it. 
+  // Set the domain bc factory. This can use arbitrary neumann/dirichelt/robin with functions. This the same larsen coefficients on all domain sides.
+  // If you want to use different coefficients on different domain sides, here is where you would do it. 
   std::map<EddingtonSP1DomainBc::Wall, RefCountedPtr<RobinCoefficients> > larsenCoeffs;
   for (int dir = 0; dir < SpaceDim; dir++){
     for (SideIterator sit; sit.ok(); ++sit){
       EddingtonSP1DomainBc::Wall curWall = std::make_pair(dir, sit());
 
-      larsenCoeffs.emplace(curWall, m_robinCoefficients);
+      larsenCoeffs.emplace(curWall, robinCoefficients);
     }
   }
   auto fact = RefCountedPtr<ConductivityEddingtonSP1DomainBcFactory> (new ConductivityEddingtonSP1DomainBcFactory(m_domainBc, larsenCoeffs, m_amr->getProbLo()));
 
-  
-
-#endif
-
-  // EBBC
-  m_robinEbBcFactory  = RefCountedPtr<RobinConductivityEbBcFactory> (new RobinConductivityEbBcFactory(origin));
-  m_robinEbBcFactory->setCoefficients(m_robinCoefficients);
-  m_robinEbBcFactory->setStencilType(IrregStencil::StencilType::LeastSquares);
+  // Set the embedded boundary bc factory. This also uses the same coefficients. 
+  auto robinEbBcFactory = RefCountedPtr<RobinConductivityEbBcFactory> (new RobinConductivityEbBcFactory(origin));
+  robinEbBcFactory->setCoefficients(robinCoefficients);
+  robinEbBcFactory->setStencilType(IrregStencil::StencilType::LeastSquares);
 
   //  Make relaxation type into int code
-  int relax_type = 0;
-  if(m_multigridRelaxMethod == RelaxationMethod::Jacobi){
-    relax_type = 0;
+  int relaxType;
+  switch(m_multigridRelaxMethod){
+  case RelaxationMethod::Jacobi:
+    relaxType = 0;
+    break;
+  case RelaxationMethod::GaussSeidel:
+    relaxType = 1;
+    break;
+  case RelaxationMethod::GSRBFast:
+    relaxType = 2;
+    break;
+  default:
+    MayDay::Abort("EddingtonSP1::setupOperatorFactory - logic bust when setting relaxation method");
+    break;
   }
-  else if(m_multigridRelaxMethod == RelaxationMethod::GaussSeidel){
-    relax_type = 1;
-  }
-  else if(m_multigridRelaxMethod == RelaxationMethod::GSRBFast){
-    relax_type = 2;
-  }
+
+  // alpha and beta-coefficients for the Helmholtz equation. 
+  const Real alpha =  1.0;
+  const Real beta  = -1.0;
 
   // Create operator factory.
   m_operatorFactory = RefCountedPtr<EbHelmholtzOpFactory> (new EbHelmholtzOpFactory(levelgrids,
@@ -896,10 +803,10 @@ void EddingtonSP1::setupOperatorFactory(){
 										    dx[0],
 										    refinement_ratios,
 										    fact,
-										    m_robinEbBcFactory,
+										    robinEbBcFactory,
 										    ghost*IntVect::Unit,
 										    ghost*IntVect::Unit,
-										    relax_type,
+										    relaxType,
 										    m_numCellsBottomDrop,
 										    -1,
 										    m_mg_levelgrids));
@@ -1205,28 +1112,6 @@ void EddingtonSP1::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
   }
 
   read<EBCellFAB>(a_handle, *m_phi[a_level], m_name, m_amr->getGrids(m_realm)[a_level], Interval(0,0), false);
-}
-
-void EddingtonSP1::setNeumannWallBc(const int a_dir, Side::LoHiSide a_side, const Real a_value){
-  CH_TIME("EddingtonSP1::setNeumannWallBc");
-  if(m_verbosity > 5){
-    pout() << "EddingtonSP1::setNeumannWallBc" << endl;
-  }
-
-  const int idx = WallBc::map_bc(a_dir, a_side);
-  m_wallBc[idx] = RefCountedPtr<WallBc> (new WallBc(a_dir, a_side, wallbc::neumann));
-  m_wallBc[idx]->setValue(a_value);
-}
-
-void EddingtonSP1::setRobinWallBc(const int a_dir, Side::LoHiSide a_side, const Real a_value){
-  CH_TIME("EddingtonSP1::setRobinWallBc");
-  if(m_verbosity > 5){
-    pout() << "EddingtonSP1::setRobinWallBc" << endl;
-  }
-
-  const int idx = WallBc::map_bc(a_dir, a_side);
-  m_wallBc[idx] = RefCountedPtr<WallBc> (new WallBc(a_dir, a_side, wallbc::robin));
-  m_wallBc[idx]->setValue(a_value);
 }
 
 #include <CD_NamespaceFooter.H>

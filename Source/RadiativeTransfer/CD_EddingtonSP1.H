@@ -28,9 +28,6 @@
 #include <CD_EbHelmholtzOpFactory.H>
 #include <CD_LarsenCoefficients.H>
 #include <CD_RobinConductivityEbBcFactory.H>
-#include <CD_RobinConductivityDomainBcFactory.H>
-#include <CD_ConductivityDomainBcWrapperFactory.H>
-#include <CD_WallBc.H>
 #include <CD_EddingtonSP1DomainBc.H>
 #include <CD_NamespaceHeader.H>
 
@@ -88,11 +85,6 @@ public:
     @brief Allocate internal storage
   */
   virtual void allocateInternals();
-
-  /*!
-    @brief Allocate wall bc
-  */
-  virtual void allocateWallBc();
   
   /*!
     @brief Cache state
@@ -326,26 +318,6 @@ protected:
   RefCountedPtr<EbHelmholtzOpFactory> m_operatorFactory;
 
   /*!
-    @brief Larsen coefficients for Photon outflow bc
-  */
-  RefCountedPtr<LarsenCoefficients> m_robinCoefficients;
-
-  /*!
-    @brief Photon outflow boundary conditions
-  */
-  RefCountedPtr<RobinConductivityEbBcFactory> m_robinEbBcFactory;
-
-  /*!
-    @brief Photon outflow boundary conditions
-  */
-  RefCountedPtr<RobinConductivityDomainBcFactory> m_robinDomainBcFactory;
-
-  /*!
-    @brief Wall boundary conditions
-  */
-  Vector<RefCountedPtr<WallBc> > m_wallBc;
-
-  /*!
     @brief MG levelsgrids
   */
   Vector<EBLevelGrid> m_mg_levelgrids;
@@ -438,16 +410,6 @@ protected:
   virtual EddingtonSP1DomainBc::BcType parseBcString(const std::string a_str) const;
 
   /*!
-    @brief Set Neumann wall boundary condition
-  */
-  virtual void setNeumannWallBc(const int a_dir, Side::LoHiSide a_side, const Real a_value);
-
-  /*!
-    @brief Set Robin wall BC
-  */
-  virtual void setRobinWallBc(const int a_dir, Side::LoHiSide a_side, const Real a_value);
-
-  /*!
     @brief Set up the TGA solver
   */
   virtual void setupTGA();
@@ -461,11 +423,6 @@ protected:
     @brief Parse domain BC settings
   */
   virtual void parseDomainBc();
-
-  /*!
-    @brief Parse domain BC settings
-  */
-  virtual void parseDomainBcNew();    
 
   /*!
     @brief Parse whether or not this is a stationary solver
