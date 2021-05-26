@@ -763,23 +763,22 @@ void EddingtonSP1::setupOperatorFactory(){
     pout() << m_name + "::setupOperatorFactory" << endl;
   }
 
-  // Set the appropriate robin coefficients. 
-  auto robinCoefficients = RefCountedPtr<LarsenCoefficients> (new LarsenCoefficients(m_RtSpecies, m_reflectionCoefficientOne, m_reflectionCoefficientTwo));
-
-
   // Set the domain bc factory. This can use arbitrary neumann/dirichelt/robin with functions. This the same larsen coefficients on all domain sides.
   // If you want to use different coefficients on different domain sides, here is where you would do it. 
   std::map<EddingtonSP1DomainBc::Wall, RefCountedPtr<RobinCoefficients> > larsenCoeffs;
   for (int dir = 0; dir < SpaceDim; dir++){
     for (SideIterator sit; sit.ok(); ++sit){
-      EddingtonSP1DomainBc::Wall curWall = std::make_pair(dir, sit());
+      EddingtonSP1DomainBc::Wall             curWall = std::make_pair(dir, sit());
+      const EddingtonSP1DomainBc::BcFunction curFunc = m_domainBc.getBc(curWall).second;
 
-      larsenCoeffs.emplace(curWall, robinCoefficients);
+      auto larsen = RefCountedPtr<LarsenCoefficients>(new LarsenCoefficients(m_RtSpecies, m_reflectionCoefficientOne, m_reflectionCoefficientTwo, curFunc));
+
+      larsenCoeffs.emplace(curWall, larsen);
     }
   }
   auto fact = RefCountedPtr<ConductivityEddingtonSP1DomainBcFactory> (new ConductivityEddingtonSP1DomainBcFactory(m_domainBc, larsenCoeffs, m_amr->getProbLo()));
 
-  // Set the embedded boundary bc factory. This also uses the same coefficients.
+  // Set the embedded boundary bc factory. This uses a constant value for the right-hand side on the EB. 
   RefCountedPtr<BaseEBBCFactory> ebbcFactory;
   switch(m_ebbc.first){
   case EbBcType::Dirichlet: {
@@ -796,6 +795,13 @@ void EddingtonSP1::setupOperatorFactory(){
     break;
   }
   case EbBcType::Robin: {
+    // Make the appropriate coefficients (Larsen) with right-hand side. 
+    std::function<Real(const RealVect, const Real) > ebFunc = [&](const RealVect a_pos, const Real a_time) {
+      return m_ebbc.second;
+    };
+    
+    auto robinCoefficients = RefCountedPtr<LarsenCoefficients> (new LarsenCoefficients(m_RtSpecies, m_reflectionCoefficientOne, m_reflectionCoefficientTwo, ebFunc));
+
     auto robinEbBcFactory = RefCountedPtr<RobinConductivityEbBcFactory> (new RobinConductivityEbBcFactory(m_amr->getProbLo()));
     robinEbBcFactory->setCoefficients(robinCoefficients);
     robinEbBcFactory->setStencilType(IrregStencil::StencilType::LeastSquares);
