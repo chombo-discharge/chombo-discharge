@@ -146,6 +146,7 @@ EddingtonSP1.gmg_cycle           = vcycle    # Cycle type. Only 'vcycle' support
 EddingtonSP1.gmg_relax_type      = gsrb      # Relaxation type. 'jacobi', 'gauss_seidel', or 'gsrb'
 EddingtonSP1.stochastic_photons  = false     # Draw discrete Photons from continuum distribution
 EddingtonSP1.seed                = 0         # Seed
+EddingtonSP1.ebbc                = robin 0.0     # Bc on embedded boundaries. 
 EddingtonSP1.bc.x.lo             = robin 0.0     # Boundary on domain. 'neumann' or 'robin'
 EddingtonSP1.bc.x.hi             = robin 0.0     # Boundary on domain. 'neumann' or 'robin'              
 EddingtonSP1.bc.y.lo             = robin 0.0     # Boundary on domain. 'neumann' or 'robin'
