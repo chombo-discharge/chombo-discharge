@@ -13,9 +13,12 @@
 #include <CD_ConductivityEddingtonSP1DomainBcFactory.H>
 #include <CD_NamespaceHeader.H>
 
-ConductivityEddingtonSP1DomainBcFactory::ConductivityEddingtonSP1DomainBcFactory(const EddingtonSP1DomainBc& a_domainBc, const RealVect a_probLo){
+ConductivityEddingtonSP1DomainBcFactory::ConductivityEddingtonSP1DomainBcFactory(const EddingtonSP1DomainBc& a_domainBc,
+										 const LarsenMap&            a_larsenCoefficients,
+										 const RealVect a_probLo){
   m_domainBc = a_domainBc;
   m_probLo   = a_probLo;
+  m_larsen   = a_larsenCoefficients;
 }
 
 ConductivityEddingtonSP1DomainBcFactory::~ConductivityEddingtonSP1DomainBcFactory(){
@@ -23,7 +26,7 @@ ConductivityEddingtonSP1DomainBcFactory::~ConductivityEddingtonSP1DomainBcFactor
 }
 
 ConductivityEddingtonSP1DomainBc* ConductivityEddingtonSP1DomainBcFactory::create(const ProblemDomain& a_domain, const EBISLayout& a_ebisl, const RealVect& a_dx) {
-  return new ConductivityEddingtonSP1DomainBc(m_domainBc, m_probLo);
+  return new ConductivityEddingtonSP1DomainBc(m_domainBc, m_larsen, m_probLo);
 }
 
 #include <CD_NamespaceFooter.H>

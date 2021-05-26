@@ -13,12 +13,14 @@
 #define CD_ConductivityEddingtonSP1DomainBc_H
 
 // Std includes
+#include <map>
 #include <memory>
 
 // Chombo includes
 #include <BaseDomainBC.H>
 
 // Our includes
+#include <CD_LarsenCoefficients.H>
 #include <CD_EddingtonSP1DomainBc.H>
 #include <CD_NamespaceHeader.H>
 
@@ -33,6 +35,8 @@
 class ConductivityEddingtonSP1DomainBc : public ConductivityBaseDomainBC {
 public:
 
+  using LarsenMap = std::map<EddingtonSP1DomainBc::Wall, LarsenCoefficients>;
+
   /*!
     @brief Constructor. This does nothing. 
   */
@@ -41,7 +45,9 @@ public:
   /*!
     @brief Full constructor
   */
-  ConductivityEddingtonSP1DomainBc(const EddingtonSP1DomainBc& a_domainBc, const RealVect a_probLo);
+  ConductivityEddingtonSP1DomainBc(const EddingtonSP1DomainBc& a_domainBc,
+				   const LarsenMap&            a_coefficients,
+				   const RealVect              a_probLo);
 
   /*!
     @brief Destructor. This does nothing.

@@ -12,6 +12,9 @@
 #ifndef CD_ConductivityEddingtonSP1DomainBcFactory_H
 #define CD_ConductivityEddingtonSP1DomainBcFactory_H
 
+// Std includes
+#include <map>
+
 // Chombo includes
 #include <BaseDomainBC.H>
 #include <ConductivityBaseDomainBC.H>
@@ -29,6 +32,8 @@
 class ConductivityEddingtonSP1DomainBcFactory : public BaseDomainBCFactory {
 public:
 
+  using LarsenMap = std::map<EddingtonSP1DomainBc::Wall, LarsenCoefficients>;
+
   /*!
     @brief Weak construction is disallowed because it muddies the interface. 
   */
@@ -39,7 +44,7 @@ public:
     @param[in] a_domainBc Domain boundary conditions.
     @param[in] a_probLo   Lower-left corner of the computational domain. 
   */
-  ConductivityEddingtonSP1DomainBcFactory(const EddingtonSP1DomainBc& a_domainBc, const RealVect a_probLo);
+  ConductivityEddingtonSP1DomainBcFactory(const EddingtonSP1DomainBc& a_domainBc, const LarsenMap& a_larseCoefficients, const RealVect a_probLo);
 
   /*!
     @brief Destructor. This does nothing.
@@ -63,6 +68,11 @@ protected:
     @brief Lower-left corner of computational domain
   */
   RealVect m_probLo;
+
+  /*!
+    @brief Larsen coefficients on domain walls
+  */
+  LarsenMap m_larsen;
 };
 
 #include <CD_NamespaceFooter.H>

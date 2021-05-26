@@ -21,6 +21,7 @@
 #include <LoHiSide.H>
 
 // Our includes
+#include <CD_LarsenCoefficients.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -72,6 +73,11 @@ public:
     @note If the boundary condition had been set previously, this code will overwrite the previous setting.
   */  
   void setBc(const Wall a_wall, const Bc a_func);
+
+  /*!
+    @brief Set Larsen coefficients for a wall. 
+  */
+  void setRobinCoefficients(const Wall a_wall, const LarsenCoefficients& a_coefficients);
 
   /*!
     @brief Returns the boundary condition for a side and direction

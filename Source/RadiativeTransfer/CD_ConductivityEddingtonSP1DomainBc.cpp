@@ -15,9 +15,12 @@
 
 // Our includes
 #include <CD_ConductivityEddingtonSP1DomainBc.H>
+#include <CD_RobinConductivityDomainBc.H>
 #include <CD_NamespaceHeader.H>
 
-ConductivityEddingtonSP1DomainBc::ConductivityEddingtonSP1DomainBc(const EddingtonSP1DomainBc& a_domainBc, const RealVect a_probLo){
+ConductivityEddingtonSP1DomainBc::ConductivityEddingtonSP1DomainBc(const EddingtonSP1DomainBc& a_domainBc,
+								   const LarsenMap&            a_coefficients,
+								   const RealVect              a_probLo){
   m_hasCoeff = false;
 
   for (int dir = 0; dir < SpaceDim; dir++){
@@ -33,6 +36,9 @@ ConductivityEddingtonSP1DomainBc::ConductivityEddingtonSP1DomainBc(const Eddingt
 	break;
       case EddingtonSP1DomainBc::BcType::Neumann:
 	m_conductivityBaseDomainBcObjects.emplace(curWall, std::make_shared<NeumannConductivityDomainBC>());
+	break;
+      case EddingtonSP1DomainBc::BcType::Robin:
+	m_conductivityBaseDomainBcObjects.emplace(curWall, std::make_shared<RobinConductivityDomainBc>());
 	break;
       default:
 	MayDay::Abort("ConductivityEddingtonSP1DomainBc -- unsupported boundary condition passed into ConductivityEddingtonSP1DomainBc");

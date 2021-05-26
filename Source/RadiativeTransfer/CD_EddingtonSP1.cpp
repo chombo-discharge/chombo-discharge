@@ -80,6 +80,9 @@ void EddingtonSP1::setDefaultDomainBcFunctions(){
     pout() << m_name + "::setDefaultDomainBcFunctions" << endl;
   }
 
+  m_reflectionCoefficientOne = 0.0;
+  m_reflectionCoefficientTwo = 0.0;
+
   m_domainBcFunctions.clear();
   for (int dir = 0; dir < SpaceDim; dir++){
     for (SideIterator sit; sit.ok(); ++sit){
