@@ -22,7 +22,6 @@
 #include <CD_EddingtonSP1.H>
 #include <CD_DataOps.H>
 #include <CD_Units.H>
-#include <CD_ConductivityEddingtonSP1DomainBc.H>
 #include <CD_ConductivityEddingtonSP1DomainBcFactory.H>
 #include <CD_NamespaceHeader.H>
 
