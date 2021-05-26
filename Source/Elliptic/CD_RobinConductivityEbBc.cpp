@@ -1,13 +1,17 @@
+/* chombo-discharge
+ * Copyright © 2021 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+ */
+
 /*!
-  @file RobinConductivityEbBc.cpp
-  @brief Implementation of RobinConductivityEbBc.H
+  @file   CD_RobinConductivityEbBc.cpp
+  @brief  Implementation of RobinConductivityEbBc.H
   @author Robert Marskar
-  @date Jan. 2018
 */
 
+// Our includes
 #include <CD_RobinConductivityEbBc.H>
-
-#include "CD_NamespaceHeader.H"
+#include <CD_NamespaceHeader.H>
   
 bool RobinConductivityEbBc::s_quadrant_based = false;
 int  RobinConductivityEbBc::s_lsq_radius     = 1;
@@ -187,8 +191,8 @@ void RobinConductivityEbBc::setCoefficients(const RefCountedPtr<RobinCoefficient
 }
 
 void RobinConductivityEbBc::setCoefficients(const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_aco,
-				      const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_bco,
-				      const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_rhs){
+					    const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_bco,
+					    const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_rhs){
   m_acodata = a_aco;
   m_bcodata = a_bco;
   m_rhsdata = a_rhs;
@@ -235,10 +239,14 @@ void RobinConductivityEbBc::applyEBFlux(EBCellFAB&                    a_lphi,
       rhs = (*m_rhsdata)[a_dit](vof, comp);
     }
 
+    if(a_useHomogeneous){
+      rhs = 0.0;
+    }
+
     Real flux = rhs/bco;
 
     const Real area = ebisbox.bndryArea(vof);
-    const Real bcoe = (*m_bcoe)[a_dit](vof, comp); // bco from Helmholtz equation, not the one from Robin bc
+    const Real bcoe = (*m_bcoe)[a_dit](vof, comp); // Note! bco from Helmholtz equation, not the one from Robin bc
 
     flux *= m_beta*bcoe*area;
 
@@ -249,4 +257,5 @@ void RobinConductivityEbBc::applyEBFlux(EBCellFAB&                    a_lphi,
 LayoutData<BaseIVFAB<VoFStencil> >* RobinConductivityEbBc::getFluxStencil(int ivar){
   return &m_bcstencils;
 }
-#include "CD_NamespaceFooter.H"
+
+#include <CD_NamespaceFooter.H>

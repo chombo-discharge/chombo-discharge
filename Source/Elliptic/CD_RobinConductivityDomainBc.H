@@ -51,8 +51,8 @@ public:
     @brief Set data-based coefficients
   */
   virtual void setCoefficients(const RefCountedPtr<LevelData<EBFluxFAB> >& a_aco,
-				const RefCountedPtr<LevelData<EBFluxFAB> >& a_bco,
-				const RefCountedPtr<LevelData<EBFluxFAB> >& a_rhs);
+			       const RefCountedPtr<LevelData<EBFluxFAB> >& a_bco,
+			       const RefCountedPtr<LevelData<EBFluxFAB> >& a_rhs);
 
   /*!
     @brief Face flux

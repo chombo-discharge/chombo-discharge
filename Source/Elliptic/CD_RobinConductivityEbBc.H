@@ -5,7 +5,7 @@
 
 /*!
   @file  CD_RobinConductivityEbBc.H
-  @brief Declaration of a Robin type EB boundary condition class for EbHelmholtzOp
+  @brief  Declaration of a Robin type EB boundary condition class for EbHelmholtzOp
   @author Robert Marskar
 */
 
@@ -70,8 +70,8 @@ public:
     @brief Set data-based coefficients
   */
   virtual void setCoefficients(const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_aco,
-			 const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_bco,
-			 const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_rhs);
+			       const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_bco,
+			       const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_rhs);
 
   /*!
     @brief Apply the eb flux

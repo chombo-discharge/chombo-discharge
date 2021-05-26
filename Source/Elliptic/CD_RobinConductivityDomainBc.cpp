@@ -44,8 +44,8 @@ void RobinConductivityDomainBc::setCoefficients(const Real a_aco, const Real a_b
 }
 
 void RobinConductivityDomainBc::setCoefficients(const RefCountedPtr<LevelData<EBFluxFAB> >& a_aco,
-						 const RefCountedPtr<LevelData<EBFluxFAB> >& a_bco,
-						 const RefCountedPtr<LevelData<EBFluxFAB> >& a_rhs){
+						const RefCountedPtr<LevelData<EBFluxFAB> >& a_bco,
+						const RefCountedPtr<LevelData<EBFluxFAB> >& a_rhs){
   MayDay::Abort("RobinConductivityDomainBc::setCoefficients - data-based not supported (yet)");
   m_acodata = a_aco;
   m_bcodata = a_bco;

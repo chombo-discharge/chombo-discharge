@@ -21,52 +21,27 @@
 #include <BiCGStabSolver.H>
 #include <EBBackwardEuler.H>
 #include <EBSimpleSolver.H>
-#include <EBConductivityOpFactory.H>
 
 // Our includes
 #include <CD_RtSolver.H>
 #include <CD_EbHelmholtzOpFactory.H>
-#include <CD_LarsenCoefficients.H>
-#include <CD_RobinConductivityEbBcFactory.H>
-#include <CD_RobinConductivityDomainBcFactory.H>
-#include <CD_ConductivityDomainBcWrapperFactory.H>
-#include <CD_WallBc.H>
+#include <CD_EddingtonSP1DomainBc.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
   @brief Radiative tranfer equation solver in the SP1 (diffusion) approximation. Also includes stochastically drawn Photons. 
 */
 class EddingtonSP1 : public RtSolver {
-protected:
-
-  /*!
-    @brief Enum class for supported bottom solvers in multigrid.
-  */
-  enum class BottomSolver {
-    Simple,
-    BiCGStab,
-    GMRES
-  };
-
-  /*!
-    @brief Enum for supported relaxation methods in multigrid. 
-  */
-  enum class RelaxationMethod {
-    Jacobi,
-    GaussSeidel,
-    GSRBFast
-  };
-
-  /*!
-    @brief Enum for multigrid cycle types. 
-  */
-  enum class MultigridType{
-    FAS,
-    VCycle,
-    FCycle,
-  };
-  
 public:
+
+  /*!
+    @brief Default function for space-time dependence of domain boundary conditions. 
+    @details This is a utility function 
+    @param[in] a_position Position in space
+    @param[in] a_time     Time
+    @return This returns one (1.0)
+  */
+  static Real s_defaultDomainBcFunction(const RealVect a_position, const Real a_time);
 
   /*!
     @brief Constructor
@@ -92,16 +67,20 @@ public:
     @brief Parse class options
   */
   virtual void parseRuntimeOptions();
+
+  /*!
+    @brief Set the boundary condition function on a wall. 
+    @param[in] a_dir Coordinate direction.
+    @param[in] a_side Side in the coordinate direction.
+    @param[in] a_function Boundary condition function.
+    @details This sets a boundary condition for a particular side on a wall. The user must also specify how to use this BC in the input script. 
+  */
+  virtual void setDomainBcWallFunction(const int a_dir, const Side::LoHiSide a_side, const EddingtonSP1DomainBc::BcFunction& a_function);
   
   /*!
     @brief Allocate internal storage
   */
   virtual void allocateInternals();
-
-  /*!
-    @brief Allocate wall bc
-  */
-  virtual void allocateWallBc();
   
   /*!
     @brief Cache state
@@ -122,11 +101,6 @@ public:
     @brief Register operators
   */
   virtual void registerOperators();
-
-  /*!
-    @brief Set reflection coefficients. These must be obtained by integrals over the reflectivity.
-  */
-  virtual void setReflectionCoefficients(const Real r1, const Real r2);
 
   /*!
     @brief Compute the boundary flux. For Eddington, the boundary flux is = c*phi/2
@@ -171,6 +145,42 @@ public:
   virtual int queryGhost() const;
 
 protected:
+
+  /*!
+    @brief Enum class for supported bottom solvers in multigrid.
+  */
+  enum class BottomSolver {
+    Simple,
+    BiCGStab,
+    GMRES
+  };
+
+  /*!
+    @brief Enum for supported relaxation methods in multigrid. 
+  */
+  enum class RelaxationMethod {
+    Jacobi,
+    GaussSeidel,
+    GSRBFast
+  };
+
+  /*!
+    @brief Enum for multigrid cycle types. 
+  */
+  enum class MultigridType{
+    FAS,
+    VCycle,
+    FCycle,
+  };
+
+  /*!
+    @brief Enum for boundary condition types on EBs
+  */
+  enum class EbBcType{
+    Dirichlet,
+    Neumann,
+    Robin
+  };
   
   /*!
     @brief Relaxation type for gmg
@@ -308,26 +318,6 @@ protected:
   RefCountedPtr<EbHelmholtzOpFactory> m_operatorFactory;
 
   /*!
-    @brief Larsen coefficients for Photon outflow bc
-  */
-  RefCountedPtr<LarsenCoefficients> m_robinCoefficients;
-
-  /*!
-    @brief Photon outflow boundary conditions
-  */
-  RefCountedPtr<RobinConductivityEbBcFactory> m_robinEbBcFactory;
-
-  /*!
-    @brief Photon outflow boundary conditions
-  */
-  RefCountedPtr<RobinConductivityDomainBcFactory> m_robinDomainBcFactory;
-
-  /*!
-    @brief Wall boundary conditions
-  */
-  Vector<RefCountedPtr<WallBc> > m_wallBc;
-
-  /*!
     @brief MG levelsgrids
   */
   Vector<EBLevelGrid> m_mg_levelgrids;
@@ -358,6 +348,21 @@ protected:
   EBAMRIVData m_bco_irreg;
 
   /*!
+    @brief Wrapper calss. 
+  */
+  EddingtonSP1DomainBc m_domainBc;
+
+  /*!
+    @brief Actual functions on domain edges (faces). 
+  */
+  std::map<EddingtonSP1DomainBc::Wall, EddingtonSP1DomainBc::BcFunction> m_domainBcFunctions;
+
+  /*!
+    @brief Boundary condition on the embedded boundary
+  */
+  std::pair<EbBcType, Real> m_ebbc;
+
+  /*!
     @brief Set up geometric multigrid
   */
   virtual void setupMultigrid();
@@ -375,7 +380,7 @@ protected:
   /*!
     @brief Set both aco and bco (irregular version)
   */
-  virtual void setACoefAndBCoef_box(EBCellFAB&       a_aco,
+  virtual void setACoefAndBCoefBox(EBCellFAB&       a_aco,
 				   BaseIVFAB<Real>& a_bco_irreg,
 				   const Box        a_cellbox,
 				   const RealVect   a_origin,
@@ -399,14 +404,15 @@ protected:
   virtual void setupMultigridSolver();
 
   /*!
-    @brief Set Neumann wall boundary condition
+    @brief Make domain bc string
   */
-  virtual void setNeumannWallBc(const int a_dir, Side::LoHiSide a_side, const Real a_value);
+  virtual std::string makeBcString(const int a_dir, const Side::LoHiSide a_side) const;
 
   /*!
-    @brief Set Robin wall BC
+    @brief Returns BC type based on string.
+    @param[in] a_str Boundary condition string. Must be "dirichlet number", "neumann number", "robin_number", "dirichlet_custom", "neumann_custom", or "robin_custom".
   */
-  virtual void setRobinWallBc(const int a_dir, Side::LoHiSide a_side, const Real a_value);
+  virtual EddingtonSP1DomainBc::BcType parseBcString(const std::string a_str) const;
 
   /*!
     @brief Set up the TGA solver
@@ -418,12 +424,40 @@ protected:
   */
   virtual void setupEuler();
 
-  // Parse options functions
-  virtual void parseDomainBc();    // Parses domain BC options
-  virtual void parseStationary();   // Parse stationary solver
-  virtual void parsePlotVariables();    // Parses plot variables
-  virtual void parseMultigridSettings(); // Parses solver parameters for geometric multigrid
-  virtual void parseReflection();   // Parse reflection coefficient
+  /*!
+    @brief Parse domain BC settings
+  */
+  virtual void parseDomainBc();
+
+    /*!
+    @brief Parse domain BC settings
+  */
+  virtual void parseEbBc();
+
+  /*!
+    @brief Parse whether or not this is a stationary solver
+  */
+  virtual void parseStationary();   
+
+  /*!
+    @brief Parse plot variables
+  */
+  virtual void parsePlotVariables();
+
+  /*!
+    @brief Parse multigrid settings
+  */
+  virtual void parseMultigridSettings();
+
+  /*!
+    @brief Parse reflection coefficients for Robin bcs
+  */
+  virtual void parseReflection();
+
+  /*!
+    @brief Set default domain BC functions.
+  */
+  virtual void setDefaultDomainBcFunctions();
 };
 
 #include <CD_NamespaceFooter.H>

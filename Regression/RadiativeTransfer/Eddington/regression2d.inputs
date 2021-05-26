@@ -65,7 +65,7 @@ Driver.refine_solid_solid_interface    = -1            # Refine solid-solid inte
 # ====================================================================================================
 # EDDINGTON_SP1 CLASS OPTIONS
 # ====================================================================================================
-EddingtonSP1.stationary          = false      # Stationary solver
+EddingtonSP1.stationary          = false     # Stationary solver
 EddingtonSP1.reflectivity        = 0.        # Reflectivity
 EddingtonSP1.use_tga             = false     # Use TGA for integration
 EddingtonSP1.plt_vars            = phi src   # Plot variables. Available are 'phi' and 'src'
@@ -78,17 +78,18 @@ EddingtonSP1.gmg_min_iter        = 5         # Minimum number of iterations
 EddingtonSP1.gmg_max_iter        = 32        # Maximum number of iterations
 EddingtonSP1.gmg_tolerance       = 1.E-6     # Residue tolerance
 EddingtonSP1.gmg_hang            = 0.2       # Solver hang
-EddingtonSP1.gmg_bottom_drop     = 2         # Bottom drop
+EddingtonSP1.gmg_bottom_drop     = 4         # Bottom drop
 EddingtonSP1.gmg_bottom_solver   = bicgstab  # Bottom solver type. Valid options are 'simple' and 'bicgstab'
 EddingtonSP1.gmg_bottom_relax    = 8         # Number of relaxations in bottom solve ('simple' solver only)
 EddingtonSP1.gmg_cycle           = vcycle    # Cycle type. Only 'vcycle' supported for now
 EddingtonSP1.gmg_relax_type      = gsrb      # Relaxation type. 'jacobi', 'gauss_seidel', or 'gsrb'
-EddingtonSP1.bc_x_low            = robin     # Boundary on domain. 'neumann' or 'robin'
-EddingtonSP1.bc_x_high           = robin     # Boundary on domain. 'neumann' or 'robin'              
-EddingtonSP1.bc_y_low            = robin     # Boundary on domain. 'neumann' or 'robin'
-EddingtonSP1.bc_y_high           = robin     # Boundary on domain. 'neumann' or 'robin'
-EddingtonSP1.bc_z_low            = robin     # Boundary on domain. 'neumann' or 'robin'
-EddingtonSP1.bc_z_high           = robin     # Boundary on domain. 'neumann' or 'robin'		
+EddingtonSP1.ebbc                = robin 0.0 # Bc on embedded boundaries. 
+EddingtonSP1.bc.x.lo             = robin 0.0 # Bc on domain side. 'dirichlet', 'neuman', or 'robin'
+EddingtonSP1.bc.x.hi             = robin 0.0 # Bc on domain side. 'dirichlet', 'neuman', or 'robin'
+EddingtonSP1.bc.y.lo             = robin 0.0 # Bc on domain side. 'dirichlet', 'neuman', or 'robin'
+EddingtonSP1.bc.y.hi             = robin 0.0 # Bc on domain side. 'dirichlet', 'neuman', or 'robin'
+EddingtonSP1.bc.z.lo             = robin 0.0 # Bc on domain side. 'dirichlet', 'neuman', or 'robin'
+EddingtonSP1.bc.z.hi             = robin 0.0 # Bc on domain side. 'dirichlet', 'neuman', or 'robin'
 
 # ====================================================================================================
 # GEO_COARSENER CLASS OPTIONS

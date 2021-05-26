@@ -151,8 +151,9 @@ ConductivityElectrostaticDomainBc::ElectrostaticDomainBcFuncEval::~Electrostatic
 }
 
 Real ConductivityElectrostaticDomainBc::ElectrostaticDomainBcFuncEval::value(const RealVect& a_point, const int& a_comp) const {
-  constexpr Real dummyDt = 0.0;
-  return m_bcFunc(a_point, dummyDt); // If everything has been done correctly, m_bcFunc will have captured m_time in FieldSolver by reference and not require anything else. 
+  constexpr Real dummyDt = 0.0;                 // If everything is done correctly, the BC function will have captured the solver time by reference so pass in a dummy here. 
+  return m_bcFunc(m_probLo + a_point, dummyDt); // Might seem weird but EbHelmholtzOp does not have access to the lower-left corner so we pass that in here.
+
 }
 
 Real ConductivityElectrostaticDomainBc::ElectrostaticDomainBcFuncEval::derivative(const RealVect& a_point, const int& a_comp, const int& a_derivDir) const {
