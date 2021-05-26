@@ -26,7 +26,15 @@ void EddingtonSP1DomainBc::setBc(const Wall a_wall, const Bc a_func){
   m_bcFunctions.emplace(a_wall, a_func);
 }
 
-EddingtonSP1DomainBc::Bc EddingtonSP1DomainBc::getBc(const Wall a_wall) const{
+EddingtonSP1DomainBc::Bc& EddingtonSP1DomainBc::getBc(const Wall a_wall) {
+  if(m_bcFunctions.find(a_wall) == m_bcFunctions.end()){
+    MayDay::Abort("EddingtonSP1DomainBc::getBc -- BC not found. Perhaps you've forgotten to set it...?");
+  }
+
+  return m_bcFunctions.at(a_wall);
+}
+
+const EddingtonSP1DomainBc::Bc& EddingtonSP1DomainBc::getBc(const Wall a_wall) const{
   if(m_bcFunctions.find(a_wall) == m_bcFunctions.end()){
     MayDay::Abort("EddingtonSP1DomainBc::getBc -- BC not found. Perhaps you've forgotten to set it...?");
   }

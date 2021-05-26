@@ -37,11 +37,12 @@ EddingtonSP1::EddingtonSP1() : RtSolver() {
   m_name = "EddingtonSP1";
   m_className = "EddingtonSP1";
 
-  m_verbosity  = -1;
-  m_needsMultigridSetup = true;
+  m_verbosity                = -1;
+  m_needsMultigridSetup      = true;
   m_hasDeeperMultigridLevels = false;
 
-  this->setDefaultDomainBcFunctions();
+  
+  this->setDefaultDomainBcFunctions(); // This fills m_domainBcFunctions with s_defaultDomainBcFunction on every domain side. 
 }
 
 EddingtonSP1::~EddingtonSP1(){
@@ -57,8 +58,8 @@ void EddingtonSP1::parseOptions(){
     pout() << m_name + "::parseOptions" << endl;
   }
 
-  parseDomainBcNew();
-  parseDomainBc();          // Parses domain BC options
+  parseDomainBcNew();       // Parses domain bc
+  parseReflection();        // Parses "reflection coefficients"
   parseStationary();        // Parse stationary solver
   parsePlotVariables();     // Parses plot variables
   parseMultigridSettings(); // Parses solver parameters for geometric multigrid
@@ -79,9 +80,6 @@ void EddingtonSP1::setDefaultDomainBcFunctions(){
   if(m_verbosity > 5){
     pout() << m_name + "::setDefaultDomainBcFunctions" << endl;
   }
-
-  m_reflectionCoefficientOne = 0.0;
-  m_reflectionCoefficientTwo = 0.0;
 
   m_domainBcFunctions.clear();
   for (int dir = 0; dir < SpaceDim; dir++){
@@ -203,17 +201,18 @@ void EddingtonSP1::parseDomainBcNew(){
 
 	break;
       }
-      case 2:{ // Had two arguments in input, e.g. neumann 0.0. In this case we set the BC to be the specified function times the value. 
+      case 2:{ // Had two arguments in input, e.g. neumann 0.0. In this case we set the BC to be the specified function times the value.
 	Real val;
-
+	
 	pp.get(bcString.c_str(), str, 0);
 	pp.get(bcString.c_str(), val, 1);
 
 	bcType = this->parseBcString(str);
 
-	curFunc = [&] (const RealVect a_pos, const Real a_time) {
+	curFunc = [&, val] (const RealVect a_pos, const Real a_time) {
 	  return bcFunc(a_pos, m_time)*val;
 	};
+
 	break;
       }
       default: {
@@ -852,6 +851,22 @@ void EddingtonSP1::setupOperatorFactory(){
   domfact = RefCountedPtr<BaseDomainBCFactory> (bcfact);
 #endif
 
+#if 1 // New domain bc stuff
+  // Set the same larsen coefficients on all domain sides. If you want to use different coefficients on different domain sides, here is where you would do it. 
+  std::map<EddingtonSP1DomainBc::Wall, RefCountedPtr<RobinCoefficients> > larsenCoeffs;
+  for (int dir = 0; dir < SpaceDim; dir++){
+    for (SideIterator sit; sit.ok(); ++sit){
+      EddingtonSP1DomainBc::Wall curWall = std::make_pair(dir, sit());
+
+      larsenCoeffs.emplace(curWall, m_robinCoefficients);
+    }
+  }
+  auto fact = RefCountedPtr<ConductivityEddingtonSP1DomainBcFactory> (new ConductivityEddingtonSP1DomainBcFactory(m_domainBc, larsenCoeffs, m_amr->getProbLo()));
+
+  
+
+#endif
+
   // EBBC
   m_robinEbBcFactory  = RefCountedPtr<RobinConductivityEbBcFactory> (new RobinConductivityEbBcFactory(origin));
   m_robinEbBcFactory->setCoefficients(m_robinCoefficients);
@@ -880,7 +895,7 @@ void EddingtonSP1::setupOperatorFactory(){
 										    m_bco_irreg.getData(),
 										    dx[0],
 										    refinement_ratios,
-										    domfact,
+										    fact,
 										    m_robinEbBcFactory,
 										    ghost*IntVect::Unit,
 										    ghost*IntVect::Unit,

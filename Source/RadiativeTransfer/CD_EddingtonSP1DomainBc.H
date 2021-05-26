@@ -79,7 +79,14 @@ public:
     @param[in] a_wall Coordinate direction and siden
     @note If the boundary condition for the associated side and direction has not been previously set, this routine will cause a run-time error. 
   */
-  Bc getBc(const Wall a_wall) const;
+  Bc& getBc(const Wall a_wall); 
+
+  /*!
+    @brief Returns the boundary condition for a side and direction
+    @param[in] a_wall Coordinate direction and siden
+    @note If the boundary condition for the associated side and direction has not been previously set, this routine will cause a run-time error. 
+  */
+  const Bc& getBc(const Wall a_wall) const;
 
 protected:
 
