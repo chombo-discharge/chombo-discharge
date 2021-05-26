@@ -65,11 +65,11 @@ Driver.refine_solid_solid_interface    = -1            # Refine solid-solid inte
 # ====================================================================================================
 # EDDINGTON_SP1 CLASS OPTIONS
 # ====================================================================================================
-EddingtonSP1.stationary          = true      # Stationary solver
+EddingtonSP1.stationary          = false      # Stationary solver
 EddingtonSP1.reflectivity        = 0.        # Reflectivity
 EddingtonSP1.use_tga             = false     # Use TGA for integration
 EddingtonSP1.plt_vars            = phi src   # Plot variables. Available are 'phi' and 'src'
-EddingtonSP1.gmg_verbosity       = 10        # GMG verbosity
+EddingtonSP1.gmg_verbosity       = -1        # GMG verbosity
 EddingtonSP1.gmg_coarsen         = 4         # Precoarsening of multigrid levels
 EddingtonSP1.gmg_pre_smooth      = 8         # Number of relaxations in downsweep
 EddingtonSP1.gmg_post_smooth     = 8         # Number of relaxations in upsweep
