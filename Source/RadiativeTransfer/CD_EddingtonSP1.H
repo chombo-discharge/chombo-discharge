@@ -21,13 +21,10 @@
 #include <BiCGStabSolver.H>
 #include <EBBackwardEuler.H>
 #include <EBSimpleSolver.H>
-#include <EBConductivityOpFactory.H>
 
 // Our includes
 #include <CD_RtSolver.H>
 #include <CD_EbHelmholtzOpFactory.H>
-#include <CD_LarsenCoefficients.H>
-#include <CD_RobinConductivityEbBcFactory.H>
 #include <CD_EddingtonSP1DomainBc.H>
 #include <CD_NamespaceHeader.H>
 

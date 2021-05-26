@@ -23,6 +23,7 @@
 #include <CD_DataOps.H>
 #include <CD_Units.H>
 #include <CD_ConductivityEddingtonSP1DomainBcFactory.H>
+#include <CD_RobinConductivityEbBcFactory.H>
 #include <CD_NamespaceHeader.H>
 
 #define EddingtonSP1_feature 1 // Comment Feb. 14 2018: I think we can keep this - it appears to produce the correct physics.
