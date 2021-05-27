@@ -742,6 +742,50 @@ void FieldSolverMultigrid::setupMultigridSolver(){
 }
 
 Vector<long long> FieldSolverMultigrid::computeLoads(const DisjointBoxLayout& a_dbl, const int a_level) {
+  CH_TIME("FieldSolverMultigrid::computeLoads");
+  if(m_verbosity > 5){
+    pout() << "FieldSolverMultigrid::computeLoads" << endl;
+  }
+
+  constexpr int numApply = 50;
+
+  if(m_needsMultigridSetup){
+    this->setupMultigrid();
+  }
+
+  // Dummy storage where the multigrid operator will do relaxations. 
+  MFAMRCellData dummy1, dummy2;
+
+  m_amr->allocate(dummy1, m_realm, 1);
+  m_amr->allocate(dummy2, m_realm, 1);
+
+  // Make an operator
+  auto oper = (MfHelmholtzOp*) m_operatorFactory->MGnewOp(m_amr->getDomains()[a_level], 0, false);
+
+  // Reset time
+  TimedDataIterator dit = a_dbl.timedDataIterator();
+  dit.clearTime();
+  dit.enableTime();
+
+  // Do some relaxations on each level. This includes BCs.
+  for (int k = 0; k < numApply; k++){
+    oper->applyOp(*dummy1[a_level], *dummy2[a_level], dit, true);
+  }
+
+  // Merge times
+  dit.disableTime();
+  dit.mergeTime();
+
+  // Now do the load balancing. When we do this, the boxes are standard-sorted! I.e. the new mesh ignores the desired sorting from AmrMesh
+  Vector<unsigned long long> loads = dit.getTime();
+
+  Vector<long long> ret(loads.size());
+  for (int i = 0; i < loads.size(); i++){
+    ret[i] = (long long) loads[i];
+  }
+
+  delete oper;
+
   return FieldSolver::computeLoads(a_dbl, a_level);
 }
 

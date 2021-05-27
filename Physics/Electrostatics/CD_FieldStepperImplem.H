@@ -255,7 +255,11 @@ namespace Physics {
 	  dit.mergeTime();
 
 	  // Now do the load balancing. When we do this, the boxes are standard-sorted! I.e. the new mesh ignores the desired sorting from AmrMesh
+#if 0 // old way
 	  Vector<unsigned long long> loads = dit.getTime();
+#else // new awy
+	  Vector<long long> loads = m_fieldSolver->computeLoads(a_grids[lvl], lvl);
+#endif
 	  a_boxes[lvl] = dit.getBoxes();
 
 	  // Do the desired sorting
