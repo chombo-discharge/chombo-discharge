@@ -16,9 +16,10 @@ CdrPlasmaImExSdcStepper.fast_rte         = 1       # Solve RTE every this time s
 CdrPlasmaImExSdcStepper.fast_poisson     = 1       # Solve Poisson every this time steps	
 CdrPlasmaImExSdcStepper.min_dt           = 0.      # Minimum permitted time step
 CdrPlasmaImExSdcStepper.max_dt           = 1.E99   # Maximum permitted time step
-CdrPlasmaImExSdcStepper.cfl              = 0.5     # CFL number
+CdrPlasmaImExSdcStepper.cfl              = 0.75    # CFL number
 CdrPlasmaImExSdcStepper.relax_time       = 1.0     # Relaxation time constant
 CdrPlasmaImExSdcStepper.source_comp      = interp  # Interpolated 'interp' or cell-average 'cell_ave' for source computations
+CdrPlasmaImExSdcStepper.use_tga          = false   # 'false' = Euler diffusion. 'true' = TGA diffusion
 
 # ------------------------------------
 # Nodes, subintervals, and corrections
@@ -27,15 +28,6 @@ CdrPlasmaImExSdcStepper.quad_nodes   = lobatto     # Nodes to be used for quadra
 CdrPlasmaImExSdcStepper.subintervals = 1           # Number of subintervals. This will be the maximum possible order.
 CdrPlasmaImExSdcStepper.corr_iter    = 1           # Number of iterations of the correction equation. Should be (subintervals-1)
                                                    # for maximum order
-
-# ---------------------------------------------------------	
-# Diffusive coupling
-#
-# This defines the weak coupling used for the implicit diffusion advance. 
-# ---------------------------------------------------------
-CdrPlasmaImExSdcStepper.diffusive_coupling = weak  # Diffusion coupling, either 'weak' or 'strong'
-CdrPlasmaImExSdcStepper.use_tga            = false # Use second order diffusion per substep ('true')
-CdrPlasmaImExSdcStepper.num_diff_corr      = 0     # Number of corrections for 'strong'
 
 # Adaptive time stepping
 # ---------------------------------------------------------
@@ -53,11 +45,6 @@ CdrPlasmaImExSdcStepper.error_index     = -1       # Error index. If -1, evaluat
 CdrPlasmaImExSdcStepper.safety          = 0.75     # Safety factor for time stepping
 
 # ---------------------------------------------------------	
-# "Asymptotic preserving". Development feature. 
-# ---------------------------------------------------------	
-CdrPlasmaImExSdcStepper.use_AP        = false      # Turn on the "asymptotic preserving" feature. 
-
-# ---------------------------------------------------------	
 # Debugging options
 # ---------------------------------------------------------
 CdrPlasmaImExSdcStepper.consistent_E      = true   # Use consistent E-field computations (update in between RK stages)
@@ -71,7 +58,7 @@ CdrPlasmaImExSdcStepper.do_poisson        = true   # Turn off code functionality
 CdrPlasmaImExSdcStepper.do_rte            = true   # Turn off code functionality. Only for debugging
 CdrPlasmaImExSdcStepper.profile_steps     = false  # Profile time steps with order, accuracy, cfl, etc.
 
-# ---------------------
-# Advection extrapolation. Currently does NOT work with subcycling (but I'm working on it...)
-# ---------------------
-CdrPlasmaImExSdcStepper.extrap_advect = true      # Time extrapolate with source and diffusion in advection step
+# -----------------------
+# Advection extrapolation
+# -----------------------
+CdrPlasmaImExSdcStepper.extrap_advect = false      # Time extrapolate with source and diffusion in advection step

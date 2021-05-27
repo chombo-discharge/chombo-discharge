@@ -151,8 +151,7 @@ void CdrPlasmaImExSdcStepper::parseDiffusionCoupling(){
   
   std::string str;
 
-  pp.get("use_tga", str);
-  m_useTGA = (str == "true") ? true : false;
+  pp.get("use_tga", m_useTGA);
 }
 
 void CdrPlasmaImExSdcStepper::parseAdaptiveOptions(){
