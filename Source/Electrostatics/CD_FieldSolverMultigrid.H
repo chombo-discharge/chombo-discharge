@@ -24,7 +24,6 @@
 // Our includes
 #include <CD_FieldSolver.H>
 #include <CD_MfHelmholtzOpFactory.H>
-
 #include <CD_NamespaceHeader.H>
 
 /*!
