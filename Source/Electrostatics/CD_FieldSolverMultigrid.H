@@ -162,6 +162,11 @@ public:
     @brief Get irregular b coefficient
   */
   virtual MFAMRIVData& getBCoefficientIrreg();
+
+  /*!
+    @brief Compute grid loads
+  */
+  virtual Vector<long long> computeLoads(const DisjointBoxLayout& a_dbl, const int a_level) override;
   
 protected:
 

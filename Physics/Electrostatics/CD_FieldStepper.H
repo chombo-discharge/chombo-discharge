@@ -63,11 +63,11 @@ namespace Physics {
       void preRegrid(const int a_lbase, const int a_finestLevel) override;
       bool loadBalanceThisRealm(const std::string a_realm) const override;
       void loadBalanceBoxes(Vector<Vector<int> >&            a_procs,
-			      Vector<Vector<Box> >&            a_boxes,
-			      const std::string                a_realm,
-			      const Vector<DisjointBoxLayout>& a_grids,
-			      const int                        a_lmin,
-			      const int                        a_finestLevel) override;
+			    Vector<Vector<Box> >&            a_boxes,
+			    const std::string                a_realm,
+			    const Vector<DisjointBoxLayout>& a_grids,
+			    const int                        a_lmin,
+			    const int                        a_finestLevel) override;
       void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
       void postRegrid() override;
 
@@ -80,7 +80,7 @@ namespace Physics {
       BoxSorting m_boxSort;
 
       RefCountedPtr<FieldSolver> m_fieldSolver;
-      RefCountedPtr<SigmaSolver>   m_sigma;
+      RefCountedPtr<SigmaSolver> m_sigma;
 
       std::string m_realm;
 

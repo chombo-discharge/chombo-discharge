@@ -277,6 +277,13 @@ public:
   virtual Vector<std::string> getPlotVariableNames() const;
 
   /*!
+    @brief Get computational loads for a level
+    @return Loads for each box on a grid level. 
+    @note The return vector should have the same order as the boxes in a_dbl. E.g. ret[0] must be the load for a_dbl.boxArray()[0];
+  */
+  virtual Vector<long long> computeLoads(const DisjointBoxLayout& a_dbl, const int a_level);
+
+  /*!
     @brief Get the Realm where this solver is registered. 
   */
   const std::string getRealm() const;
