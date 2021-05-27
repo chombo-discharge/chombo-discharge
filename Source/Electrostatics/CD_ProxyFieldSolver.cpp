@@ -78,6 +78,7 @@ Vector<RefCountedPtr<NWOEBQuadCFInterp> > ProxyFieldSolver::getInterp(){
 
   for (int lvl = 1; lvl <= finestLevel; lvl++){
     if(lvl > 0){
+      if(procID() == 0) std::cout << "making interp  = " << lvl-1 << "/" << lvl << std::endl;
       ret[lvl] = RefCountedPtr<NWOEBQuadCFInterp> (new NwoEbQuadCfInterp(m_amr->getGrids(m_realm)[lvl],
 									 m_amr->getGrids(m_realm)[lvl-1],
 									 m_amr->getEBISLayout(m_realm, phase::gas)[lvl],
@@ -132,7 +133,7 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi){
   ebbcFactory->setOrder(1);
 
   auto domainFactory = RefCountedPtr<DirichletConductivityDomainBCFactory> (new DirichletConductivityDomainBCFactory());
-  ebbcFactory->setValue(1.0);
+  domainFactory->setValue(0.0);
 
   auto factory = RefCountedPtr<NWOEBConductivityOpFactory> (new NWOEBConductivityOpFactory(levelGrids,
 											   interpolators,
@@ -153,7 +154,6 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi){
   EBSimpleSolver simpleSolver;
   simpleSolver.setNumSmooths(32);
 
-
   
   AMRMultiGrid<LevelData<EBCellFAB> > multigridSolver;
   multigridSolver.define(m_amr->getDomains()[0], *factory, &simpleSolver, 1 + m_amr->getFinestLevel());
@@ -170,6 +170,10 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi){
   multigridSolver.init( phi, rhs, m_amr->getFinestLevel(), 0);
   multigridSolver.solveNoInit(phi, rhs, m_amr->getFinestLevel(), 0);
   multigridSolver.m_verbosity = 10;
+
+  m_amr->averageDown(a_phi, m_realm, phase::gas);
+  m_amr->interpGhost(a_phi, m_realm, phase::gas);
+  
 }
 
 #include <CD_NamespaceFooter.H>
