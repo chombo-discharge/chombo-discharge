@@ -16,6 +16,8 @@
 #include <EBConductivityOpFactory.H>
 #include <DirichletConductivityDomainBC.H>
 #include <DirichletConductivityEBBC.H>
+#include <NeumannConductivityDomainBC.H>
+#include <NeumannConductivityEBBC.H>
 #include <ParmParse.H>
 
 // Our includes
@@ -42,18 +44,21 @@ void ProxyFieldSolver::registerOperators()  {
     MayDay::Abort("FieldSolverMultigrid::registerOperators - need to set AmrMesh!");
   }
   else{
-    m_amr->registerOperator(s_eb_coar_ave,     m_realm, phase::gas);
-    m_amr->registerOperator(s_eb_coar_ave,     m_realm, phase::solid);
+    // For regridding
     m_amr->registerOperator(s_eb_fill_patch,   m_realm, phase::gas);
     m_amr->registerOperator(s_eb_fill_patch,   m_realm, phase::solid);
+
+    // For coarsening
+    m_amr->registerOperator(s_eb_coar_ave,     m_realm, phase::gas);
+    m_amr->registerOperator(s_eb_coar_ave,     m_realm, phase::solid);
+
+    // For linearly filling ghost cells
     m_amr->registerOperator(s_eb_pwl_interp,   m_realm, phase::gas);
     m_amr->registerOperator(s_eb_pwl_interp,   m_realm, phase::solid);
-    m_amr->registerOperator(s_eb_quad_cfi,     m_realm, phase::gas);
-    m_amr->registerOperator(s_eb_quad_cfi,     m_realm, phase::solid);
+
+    // For interpolating to cell centroids
     m_amr->registerOperator(s_eb_irreg_interp, m_realm, phase::gas);
     m_amr->registerOperator(s_eb_irreg_interp, m_realm, phase::solid);
-    m_amr->registerOperator(s_eb_flux_reg,     m_realm, phase::gas);
-    m_amr->registerOperator(s_eb_flux_reg,     m_realm, phase::solid);
   }
 }
 
@@ -141,11 +146,11 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi){
   const Real beta  = -1.0;
 
   auto levelGrids    = this->getEBLevelGrids();
-
+  auto interpNWO     = this->getInterpNWO();
+  auto interpOld     = this->getInterpOld();
 
   const IntVect ghostPhi = m_amr->getNumberOfGhostCells()*IntVect::Unit;
   const IntVect ghostRHS = m_amr->getNumberOfGhostCells()*IntVect::Unit;
-
 
   auto ebbcFactory = RefCountedPtr<DirichletConductivityEBBCFactory> (new DirichletConductivityEBBCFactory());
   ebbcFactory->setValue(1.0);
@@ -155,9 +160,8 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi){
   domainFactory->setValue(0.0);
 
 
-  //  auto interpolators = this->getInterpNWO();
   auto factoryNWO = RefCountedPtr<NWOEBConductivityOpFactory> (new NWOEBConductivityOpFactory(levelGrids,
-											      this->getInterpNWO(),
+											      interpNWO,
 											      alpha,
 											      beta,
 											      aco.getData(),
@@ -172,7 +176,7 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi){
 											      2));
 
   auto factoryOld = RefCountedPtr<EBConductivityOpFactory> (new EBConductivityOpFactory(levelGrids,
-											this->getInterpOld(),
+											interpOld,
 											alpha,
 											beta,
 											aco.getData(),
