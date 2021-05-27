@@ -1,1 +1,2 @@
 # ProxyFieldSolver class options
+ProxyFieldSolver.plt_vars = phi rho E
