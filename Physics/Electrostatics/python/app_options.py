@@ -8,11 +8,11 @@ def write_template(args):
     optf = open(options_filename, 'w')
     
     # Write plasma kinetics options
-    options_files = [args.discharge_home + "/Source/AmrMesh/AmrMesh.options", \
-                     args.discharge_home + "/Source/Driver/Driver.options", \
+    options_files = [args.discharge_home + "/Source/AmrMesh/CD_AmrMesh.options", \
+                     args.discharge_home + "/Source/Driver/CD_Driver.options", \
                      args.discharge_home + "//Source/Electrostatics/CD_" + args.field_solver + ".options",\
-                     args.discharge_home + "/Source/Geometry/GeoCoarsener.options", \
-                     args.discharge_home + "/Geometries/" + args.geometry + "/" + args.geometry + ".options", \
+                     args.discharge_home + "/Source/Geometry/CD_GeoCoarsener.options", \
+                     args.discharge_home + "/Geometries/" + args.geometry + "/CD_" + args.geometry + ".options", \
                      args.discharge_home + "/Physics/Electrostatics/CD_FieldStepper.options"]
 
     for opt in options_files:
