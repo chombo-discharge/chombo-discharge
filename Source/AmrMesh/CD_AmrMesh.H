@@ -1088,6 +1088,10 @@ public:
     @return Box sorting method.
   */
   BoxSorting getBoxSorting() const;
+
+  RefCountedPtr<EBIndexSpace>& getEBIndexSpace(const phase::which_phase a_phase){
+    return m_multifluidIndexSpace->getEBIndexSpace(a_phase);
+  }
   
 protected:
 
