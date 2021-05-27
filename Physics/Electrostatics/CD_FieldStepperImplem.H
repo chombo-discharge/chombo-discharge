@@ -4,8 +4,8 @@
  */
 
 /*!
-  @file   FieldStepperImplem.H
-  @brief  Implementation of FieldStepper.H
+  @file   CD_FieldStepperImplem.H
+  @brief  Implementation of CD_FieldStepper.H
   @author Robert Marskar
 */
 
@@ -14,7 +14,6 @@
 
 // Chombo includes
 #include <ParmParse.H>
-#include <EBEllipticLoadBalance.H>
 
 // Our includes
 #include <CD_FieldStepper.H>
@@ -206,70 +205,29 @@ namespace Physics {
 
     template <class T>
     void FieldStepper<T>::loadBalanceBoxes(Vector<Vector<int> >&            a_procs,
-					      Vector<Vector<Box> >&            a_boxes,
-					      const std::string                a_realm,
-					      const Vector<DisjointBoxLayout>& a_grids,
-					      const int                        a_lmin,
-					      const int                        a_finestLevel){
+					   Vector<Vector<Box> >&            a_boxes,
+					   const std::string                a_realm,
+					   const Vector<DisjointBoxLayout>& a_grids,
+					   const int                        a_lmin,
+					   const int                        a_finestLevel){
       if(m_loadBalance){
-	constexpr int num_apply = 50;
-	
 	a_procs.resize(1+a_finestLevel);
 	a_boxes.resize(1+a_finestLevel);
 
-	FieldSolverMultigrid* solver = (FieldSolverMultigrid*) (&(*m_fieldSolver));
-
-	MFAMRCellData dummy1, dummy2;
-
-	m_amr->allocate(dummy1, m_realm, 1);
-	m_amr->allocate(dummy2, m_realm, 1);
-
-	const Vector<ProblemDomain>& domains = m_amr->getDomains();
-
-	// We need to make AmrMesh restore some operators that we need. This is overkill because we only need
-	// operators for ghost cell interpolation....
-
+	// We need to make AmrMesh restore some operators that we need. Note that this is overkill because we only need
+	// the multigrid ghost cell interpolation operator. But for simplicity, do all of them. 
 	m_amr->regridOperators(a_lmin, a_finestLevel, 1);
 
-	// Set up the operator factor and fetch it.
-	solver->setMultigridCoefficients();
-	solver->setupOperatorFactory();
-	RefCountedPtr<MfHelmholtzOpFactory>& factory = solver->getOperatorFactory();
 
-	// Go through each level and load balance. 
+	// Field solver implementation gets the responsibility of computing loads on each level. 
 	for (int lvl = 0; lvl <= a_finestLevel; lvl++){
-	  // Make an operator
-	  auto oper = RefCountedPtr<MfHelmholtzOp> ((MfHelmholtzOp*) factory->MGnewOp(domains[lvl], 0, false));
+	  Vector<long long> loads = m_fieldSolver->computeLoads(a_grids[lvl], lvl);
 
-	  // Reset time
-	  TimedDataIterator dit = a_grids[lvl].timedDataIterator();
-	  dit.clearTime();
-	  dit.enableTime();
-
-	  // Do some relaxations on each level. This includes BCs.
-	  for (int k = 0; k < num_apply; k++){
-	    oper->applyOp(*dummy1[lvl], *dummy2[lvl], dit, true);
-	  }
-
-	  // Merge times
-	  dit.disableTime();
-	  dit.mergeTime();
-
-	  // Now do the load balancing. When we do this, the boxes are standard-sorted! I.e. the new mesh ignores the desired sorting from AmrMesh
-	  Vector<unsigned long long> loads = dit.getTime();
-	  a_boxes[lvl] = dit.getBoxes();
-
-	  // Do the desired sorting
-	  LoadBalancing::sort(a_boxes[lvl], loads, m_boxSort);
-
-	  // Bah - need long long for LoadBalance
-	  Vector<long long> lloads(loads.size());
-	  for (int i = 0; i < loads.size(); i++){
-	    lloads[i] = (long long) loads[i];
-	  }
+	  // Do the desired sorting and load balancing
+	  a_boxes[lvl] = a_grids[lvl].boxArray();
 	  
-	  // Do the friggin load balancing. 
-	  LoadBalancing::makeBalance(a_procs[lvl], lloads, a_boxes[lvl]);
+	  LoadBalancing::sort(a_boxes[lvl], loads, m_boxSort);
+	  LoadBalancing::makeBalance(a_procs[lvl], loads, a_boxes[lvl]);
 	}
       }
     }
