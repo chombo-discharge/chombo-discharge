@@ -277,6 +277,11 @@ public:
   virtual Vector<std::string> getPlotVariableNames() const;
 
   /*!
+    @brief Get computational loads for a level
+  */
+  virtual Vector<long long> computeLoads(const DisjointBoxLayout& a_dbl, const int a_level);
+
+  /*!
     @brief Get the Realm where this solver is registered. 
   */
   const std::string getRealm() const;

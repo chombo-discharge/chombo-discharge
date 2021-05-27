@@ -842,6 +842,33 @@ Vector<std::string> FieldSolver::getPlotVariableNames() const {
   return names;
 }
 
+Vector<long long> FieldSolver::computeLoads(const DisjointBoxLayout& a_dbl, const int a_level){
+  CH_TIME("FieldSolver::computeLoads");
+  if(m_verbosity > 5){
+    pout() << "FieldSolver::computeLoads" << endl;
+  }
+
+  // Compute number of cells
+  Vector<int> numCells(a_dbl.size(), 0);
+  for (DataIterator dit = a_dbl.dataIterator(); dit.ok(); ++dit){
+    numCells[dit().intCode()] = a_dbl[dit()].numPts();
+  }
+
+#ifdef CH_MPI
+  int count = numCells.size();
+  Vector<int> tmp(count);
+  MPI_Allreduce(&(numCells[0]),&(tmp[0]), count, MPI_INT, MPI_SUM, Chombo_MPI::comm);
+  numCells = tmp;
+#endif
+
+  Vector<long long> loads(numCells.size());
+  for (int i = 0; i < loads.size(); i++){
+    loads[i] = (long long) numCells[i];
+  }
+
+  return loads;
+}
+
 Real FieldSolver::getTime() const{
   return m_time;
 }

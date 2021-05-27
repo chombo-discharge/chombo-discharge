@@ -741,6 +741,10 @@ void FieldSolverMultigrid::setupMultigridSolver(){
   m_multigridSolver.init(phi, rhs, finest_level, 0);
 }
 
+Vector<long long> FieldSolverMultigrid::computeLoads(const DisjointBoxLayout& a_dbl, const int a_level) {
+  return FieldSolver::computeLoads(a_dbl, a_level);
+}
+
 MFAMRCellData& FieldSolverMultigrid::getACoefficient(){
   return m_aCoef;
 }

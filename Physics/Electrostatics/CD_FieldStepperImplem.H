@@ -205,11 +205,11 @@ namespace Physics {
 
     template <class T>
     void FieldStepper<T>::loadBalanceBoxes(Vector<Vector<int> >&            a_procs,
-					      Vector<Vector<Box> >&            a_boxes,
-					      const std::string                a_realm,
-					      const Vector<DisjointBoxLayout>& a_grids,
-					      const int                        a_lmin,
-					      const int                        a_finestLevel){
+					   Vector<Vector<Box> >&            a_boxes,
+					   const std::string                a_realm,
+					   const Vector<DisjointBoxLayout>& a_grids,
+					   const int                        a_lmin,
+					   const int                        a_finestLevel){
       if(m_loadBalance){
 	constexpr int num_apply = 50;
 	
