@@ -786,7 +786,9 @@ Vector<long long> FieldSolverMultigrid::computeLoads(const DisjointBoxLayout& a_
 
   delete oper;
 
-  return FieldSolver::computeLoads(a_dbl, a_level);
+  return ret;
+
+  //  return FieldSolver::computeLoads(a_dbl, a_level);
 }
 
 MFAMRCellData& FieldSolverMultigrid::getACoefficient(){
