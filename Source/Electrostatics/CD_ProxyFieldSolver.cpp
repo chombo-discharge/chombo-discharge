@@ -13,8 +13,10 @@
 #include <AMRMultiGrid.H>
 #include <BiCGStabSolver.H>
 #include <NWOEBConductivityOpFactory.H>
+#include <EBConductivityOpFactory.H>
 #include <DirichletConductivityDomainBC.H>
 #include <DirichletConductivityEBBC.H>
+#include <ParmParse.H>
 
 // Our includes
 #include <CD_ProxyFieldSolver.H>
@@ -65,14 +67,13 @@ Vector<EBLevelGrid> ProxyFieldSolver::getEBLevelGrids(){
   return ret;
 }
 
-Vector<RefCountedPtr<NWOEBQuadCFInterp> > ProxyFieldSolver::getInterp(){
+Vector<RefCountedPtr<NWOEBQuadCFInterp> > ProxyFieldSolver::getInterpNWO(){
   const int finestLevel = m_amr->getFinestLevel();
   
   Vector<RefCountedPtr<NWOEBQuadCFInterp> > ret(1 + finestLevel);
 
   for (int lvl = 1; lvl <= finestLevel; lvl++){
     if(lvl > 0){
-      if(procID() == 0) std::cout << "making interp  = " << lvl-1 << "/" << lvl << std::endl;
       ret[lvl] = RefCountedPtr<NWOEBQuadCFInterp> (new NwoEbQuadCfInterp(m_amr->getGrids(m_realm)[lvl],
 									 m_amr->getGrids(m_realm)[lvl-1],
 									 m_amr->getEBISLayout(m_realm, phase::gas)[lvl],
@@ -84,6 +85,30 @@ Vector<RefCountedPtr<NWOEBQuadCFInterp> > ProxyFieldSolver::getInterp(){
 									 m_amr->getNumberOfGhostCells(),
 									 *(m_amr->getEBLevelGrid(m_realm, phase::gas)[lvl]->getCFIVS()),
 									 m_amr->getEBIndexSpace(phase::gas)));
+									 
+    }
+  }
+
+  
+  return ret;
+}
+
+Vector<RefCountedPtr<EBQuadCFInterp> > ProxyFieldSolver::getInterpOld(){
+  const int finestLevel = m_amr->getFinestLevel();
+  
+  Vector<RefCountedPtr<EBQuadCFInterp> > ret(1 + finestLevel);
+
+  for (int lvl = 1; lvl <= finestLevel; lvl++){
+    if(lvl > 0){
+      ret[lvl] = RefCountedPtr<EBQuadCFInterp> (new EBQuadCFInterp(m_amr->getGrids(m_realm)[lvl],
+								   m_amr->getGrids(m_realm)[lvl-1],
+								   m_amr->getEBISLayout(m_realm, phase::gas)[lvl],
+								   m_amr->getEBISLayout(m_realm, phase::gas)[lvl-1],
+								   m_amr->getDomains()[lvl-1],
+								   m_amr->getRefinementRatios()[lvl-1],
+								   1,
+								   *(m_amr->getEBLevelGrid(m_realm, phase::gas)[lvl]->getCFIVS()),
+								   m_amr->getEBIndexSpace(phase::gas)));
 									 
     }
   }
@@ -116,7 +141,7 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi){
   const Real beta  = -1.0;
 
   auto levelGrids    = this->getEBLevelGrids();
-  auto interpolators = this->getInterp();
+
 
   const IntVect ghostPhi = m_amr->getNumberOfGhostCells()*IntVect::Unit;
   const IntVect ghostRHS = m_amr->getNumberOfGhostCells()*IntVect::Unit;
@@ -129,27 +154,51 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi){
   auto domainFactory = RefCountedPtr<DirichletConductivityDomainBCFactory> (new DirichletConductivityDomainBCFactory());
   domainFactory->setValue(0.0);
 
-  auto factory = RefCountedPtr<NWOEBConductivityOpFactory> (new NWOEBConductivityOpFactory(levelGrids,
-											   interpolators,
-											   alpha,
-											   beta,
-											   aco.getData(),
-											   bco.getData(),
-											   bcoIrreg.getData(),
-											   m_amr->getDx()[0],
-											   m_amr->getRefinementRatios(),
-											   domainFactory,
-											   ebbcFactory,
-											   ghostPhi,
-											   ghostRHS,
-											   2));
+
+  //  auto interpolators = this->getInterpNWO();
+  auto factoryNWO = RefCountedPtr<NWOEBConductivityOpFactory> (new NWOEBConductivityOpFactory(levelGrids,
+											      this->getInterpNWO(),
+											      alpha,
+											      beta,
+											      aco.getData(),
+											      bco.getData(),
+											      bcoIrreg.getData(),
+											      m_amr->getDx()[0],
+											      m_amr->getRefinementRatios(),
+											      domainFactory,
+											      ebbcFactory,
+											      ghostPhi,
+											      ghostRHS,
+											      2));
+
+  auto factoryOld = RefCountedPtr<EBConductivityOpFactory> (new EBConductivityOpFactory(levelGrids,
+											this->getInterpOld(),
+											alpha,
+											beta,
+											aco.getData(),
+											bco.getData(),
+											bcoIrreg.getData(),
+											m_amr->getDx()[0],
+											m_amr->getRefinementRatios(),
+											domainFactory,
+											ebbcFactory,
+											ghostPhi,
+											ghostRHS,
+											2));
 
   
   BiCGStabSolver<LevelData<EBCellFAB> > bicgstab;
+  AMRMultiGrid<LevelData<EBCellFAB> >   multigridSolver;
 
-  
-  AMRMultiGrid<LevelData<EBCellFAB> > multigridSolver;
-  multigridSolver.define(m_amr->getDomains()[0], *factory, &bicgstab, 1 + m_amr->getFinestLevel());
+  ParmParse pp(m_className.c_str());
+  bool useNWO;
+  pp.get("use_nwo", useNWO);
+  if(useNWO){
+    multigridSolver.define(m_amr->getDomains()[0], *factoryNWO, &bicgstab, 1 + m_amr->getFinestLevel());
+  }
+  else{
+    multigridSolver.define(m_amr->getDomains()[0], *factoryOld, &bicgstab, 1 + m_amr->getFinestLevel());
+  }
   multigridSolver.setSolverParameters(16, 16, 16, 1, 32, 1E-30, 1E-30, 1E-60);
 
 

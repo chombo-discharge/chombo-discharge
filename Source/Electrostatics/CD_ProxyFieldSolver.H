@@ -46,7 +46,8 @@ protected:
   void solveOnePhase(EBAMRCellData& a_solution);
 
   Vector<EBLevelGrid> getEBLevelGrids();
-  Vector<RefCountedPtr<NWOEBQuadCFInterp> > getInterp();
+  Vector<RefCountedPtr<NWOEBQuadCFInterp> > getInterpNWO();
+  Vector<RefCountedPtr<EBQuadCFInterp> > getInterpOld();
 };
 
 #include <CD_NamespaceFooter.H>

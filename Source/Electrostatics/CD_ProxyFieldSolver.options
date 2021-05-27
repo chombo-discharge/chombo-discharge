@@ -1,2 +1,5 @@
+# ====================================
 # ProxyFieldSolver class options
-ProxyFieldSolver.plt_vars = phi rho E
+# ====================================
+ProxyFieldSolver.use_nwo  = true       # Use NWO or not
+ProxyFieldSolver.plt_vars = phi rho E  # Plot variables

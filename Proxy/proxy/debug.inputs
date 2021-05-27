@@ -60,14 +60,16 @@ Driver.refine_dielectric_gas_interface = -1               # Refine dielectric-ga
 Driver.refine_solid_gas_interface      = -1               # Refine solid-gas interfaces. -1 => ----"-----  
 Driver.refine_solid_solid_interface    = -1               # Refine solid-solid interfaces. -1 => ----"----- 
 
-
+# ====================================
 # ProxyFieldSolver class options
-ProxyFieldSolver.plt_vars = phi rho E
+# ====================================
+ProxyFieldSolver.use_nwo  = true       # Use NWO or not
+ProxyFieldSolver.plt_vars = phi rho E  # Plot variables
 
 # ====================================================================================================
 # GEO_COARSENER CLASS OPTIONS
 # ====================================================================================================
-GeoCoarsener.num_boxes   = 0            # Number of coarsening boxes (0 = don't coarsen)
+GeoCoarsener.num_boxes   = 1            # Number of coarsening boxes (0 = don't coarsen)
 GeoCoarsener.box1_lo     = -1 0 0.0  # Remove irregular cell tags 
 GeoCoarsener.box1_hi     = 1 1 0.0  # between these two corners
 GeoCoarsener.box1_lvl    = 0            # up to this level
