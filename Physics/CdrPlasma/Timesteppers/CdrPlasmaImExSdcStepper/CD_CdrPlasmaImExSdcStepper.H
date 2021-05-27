@@ -88,7 +88,6 @@ namespace Physics {
       bool m_print_report;
       bool m_have_err; 
       bool m_useTGA; // Second order diffusion
-      bool m_use_AP; // Use the AP scheme
   
 
       // Basically only debugging stuff
@@ -215,10 +214,8 @@ namespace Physics {
 
       // Parse optiosn that are not really used
       void parseNodes();
-      void parseAP();
       void parseDiffusionCoupling();
       void parseAdaptiveOptions();
-      void parseSubcycleOptions();
       void parseDebugOptions();
       void parseAdvectionOptions();
     };
