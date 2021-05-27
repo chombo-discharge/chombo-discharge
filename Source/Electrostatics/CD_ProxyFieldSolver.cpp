@@ -12,15 +12,9 @@
 // Chombo includes
 #include <AMRMultiGrid.H>
 #include <BiCGStabSolver.H>
-#include <BaseDomainBC.H>
-#include <BaseEBBC.H>
-#include <MFSimpleSolver.H>
-#include <GMRESSolver.H>
-#include <BaseBCFuncEval.H>
 #include <NWOEBConductivityOpFactory.H>
 #include <DirichletConductivityDomainBC.H>
 #include <DirichletConductivityEBBC.H>
-#include <EBSimpleSolver.H>
 
 // Our includes
 #include <CD_ProxyFieldSolver.H>
@@ -113,7 +107,7 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi){
   m_amr->allocate(bcoIrreg, m_realm, phase::gas, 1);
   m_amr->allocate(rho,      m_realm, phase::gas, 1);
 
-  DataOps::setValue(aco, 0.0);
+  DataOps::setValue(aco, 1.0);
   DataOps::setValue(bco, 1.0);
   DataOps::setValue(bcoIrreg, 1.0);
   DataOps::setValue(rho, 0.0);
@@ -151,13 +145,12 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi){
 											   2));
 
   
-  EBSimpleSolver simpleSolver;
-  simpleSolver.setNumSmooths(32);
+  BiCGStabSolver<LevelData<EBCellFAB> > bicgstab;
 
   
   AMRMultiGrid<LevelData<EBCellFAB> > multigridSolver;
-  multigridSolver.define(m_amr->getDomains()[0], *factory, &simpleSolver, 1 + m_amr->getFinestLevel());
-  multigridSolver.setSolverParameters(16, 16, 16, 1, 32, 1E-10, 1E-10, 1E-60);
+  multigridSolver.define(m_amr->getDomains()[0], *factory, &bicgstab, 1 + m_amr->getFinestLevel());
+  multigridSolver.setSolverParameters(16, 16, 16, 1, 32, 1E-30, 1E-30, 1E-60);
 
 
   // Solve
