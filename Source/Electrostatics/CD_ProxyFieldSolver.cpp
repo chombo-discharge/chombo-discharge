@@ -20,6 +20,7 @@
 
 // Our includes
 #include <CD_ProxyFieldSolver.H>
+#include <CD_NwoEbQuadCfInterp.H>
 #include <CD_DataOps.H>
 #include <CD_NamespaceHeader.H>
 
@@ -56,8 +57,64 @@ void ProxyFieldSolver::registerOperators()  {
   }
 }
 
+Vector<EBLevelGrid> ProxyFieldSolver::getEBLevelGrids(){
+  Vector<EBLevelGrid> ret;
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+    ret.push_back(*(m_amr->getEBLevelGrid(m_realm, phase::gas)[lvl]));
+  }
+
+  return ret;
+}
+
+Vector<RefCountedPtr<NWOEBQuadCFInterp> > ProxyFieldSolver::getInterp(){
+  const int finestLevel = m_amr->getFinestLevel();
+  
+  Vector<RefCountedPtr<NWOEBQuadCFInterp> > ret(1 + finestLevel);
+
+  for (int lvl = 1; lvl <= finestLevel; lvl++){
+    if(lvl > 0){
+      ret[lvl] = RefCountedPtr<NWOEBQuadCFInterp> (new NWOEBQuadCFInterp(m_amr->getGrids(m_realm)[lvl],
+									 m_amr->getGrids(m_realm)[lvl-1],
+									 m_amr->getEBISLayout(m_realm, phase::gas)[lvl],
+									 m_amr->getEBISLayout(m_realm, phase::gas)[lvl-1],
+									 m_amr->getDomains()[lvl-1],
+									 m_amr->getRefinementRatios()[lvl-1],
+									 1,
+									 m_amr->getDx()[lvl],
+									 m_amr->getNumberOfGhostCells()*IntVect::Unit,
+									 *(m_amr->getEBLevelGrid(m_realm, phase::gas)[lvl]->getCFIVS()),
+									 m_amr->getEBISLayout(m_realm, phase::gas)[0].getEBIS()));
+									 
+    }
+  }
+
+  
+  return ret;
+}
+
 void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi){
   DataOps::setValue(a_phi, 1.23456789);
+
+
+  // Define coefficients
+  EBAMRCellData aco;
+  EBAMRFluxData bco;
+  EBAMRIVData   bcoIrreg;
+
+  m_amr->allocate(aco,      m_realm, phase::gas, 1);
+  m_amr->allocate(bco,      m_realm, phase::gas, 1);
+  m_amr->allocate(bcoIrreg, m_realm, phase::gas, 1);
+
+  DataOps::setValue(aco, 0.0);
+  DataOps::setValue(bco, 1.0);
+  DataOps::setValue(bcoIrreg, 1.0);
+
+  const Real alpha =  0.0;
+  const Real beta  = -1.0;
+
+  auto levelGrids    = this->getEBLevelGrids();
+  auto interpolators = this->getInterp();
 }
 
 #include <CD_NamespaceFooter.H>

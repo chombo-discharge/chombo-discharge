@@ -12,6 +12,9 @@
 #ifndef CD_ProxyFieldSolver_H
 #define CD_ProxyFieldSolver_H
 
+// Chombo includes
+#include <NWOEBQuadCFInterp.H>
+
 // Our includes
 #include <CD_FieldSolver.H>
 #include <CD_NamespaceHeader.H>
@@ -41,7 +44,9 @@ public:
 protected:
 
   void solveOnePhase(EBAMRCellData& a_solution);
-  
+
+  Vector<EBLevelGrid> getEBLevelGrids();
+  Vector<RefCountedPtr<NWOEBQuadCFInterp> > getInterp();
 };
 
 #include <CD_NamespaceFooter.H>
