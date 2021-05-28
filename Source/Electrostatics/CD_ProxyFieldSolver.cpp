@@ -89,38 +89,30 @@ Vector<RefCountedPtr<NWOEBQuadCFInterp> > ProxyFieldSolver::getInterpNWO(){
       // Make the CFIVS
       const DisjointBoxLayout& fineGrids = m_amr->getGrids(m_realm)[lvl];
       LayoutData<IntVectSet> ghostCells(fineGrids);
-
       for (DataIterator dit = fineGrids.dataIterator(); dit.ok(); ++dit){
-	IntVectSet& ghosts = ghostCells[dit()];
 
-	ghosts.makeEmpty();
+	Box grownBox      = grow(fineGrids[dit()], nGhosts);
+	grownBox         &= m_amr->getDomains()[lvl];
+	ghostCells[dit()] = IntVectSet(grownBox);
 
-	Box grownBox = grow(fineGrids[dit()], nGhosts);
-
-	ghosts |= IntVectSet(grownBox);
-	ghosts -= fineGrids[dit()];
-
-	for (NeighborIterator nit(fineGrids); nit.ok(); ++nit){
-	  ghosts -= nit.box();
+	const Vector<LayoutIndex>& neighbors = (*m_amr->getNeighbors(m_realm, phase::gas)[lvl])[dit()];
+	for (int i = 0; i < neighbors.size(); i++){
+	  ghostCells[dit()] -= fineGrids[neighbors[i]];
 	}
+	ghostCells[dit()] -= fineGrids[dit()];
       }
 
-      // Choose if you want to fill more than one layer. 
-      LayoutData<IntVectSet>* ghostCellsPtr;
-      ghostCellsPtr = (m_amr->getEBLevelGrid(m_realm, phase::gas)[lvl]->getCFIVS());
-      ghostCellsPtr = &ghostCells;
-
-
+      // Define interpolator. 
       ret[lvl] = RefCountedPtr<NWOEBQuadCFInterp> (new NwoEbQuadCfInterp(m_amr->getGrids(m_realm)[lvl],
 									 m_amr->getGrids(m_realm)[lvl-1],
 									 m_amr->getEBISLayout(m_realm, phase::gas)[lvl],
 									 m_amr->getEBISLayout(m_realm, phase::gas)[lvl-1],
 									 m_amr->getDomains()[lvl-1],
 									 m_amr->getRefinementRatios()[lvl-1],
-									 m_amr->getNumberOfGhostCells(),
+									 nGhosts, 
 									 m_amr->getDx()[lvl],
-									 nGhosts,
-									 *ghostCellsPtr,
+									 nGhosts*IntVect::Unit,
+									 ghostCells,
 									 m_amr->getEBIndexSpace(phase::gas)));
     }
   }

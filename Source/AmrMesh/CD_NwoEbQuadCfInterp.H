@@ -56,7 +56,7 @@ public:
 		    const int&                         a_nref,
 		    const int&                         a_nvar,
 		    const Real&                        a_dxFine,
-		    const int&                         a_ghost,
+		    const IntVect&                     a_ghost,
 		    const LayoutData<IntVectSet>&      a_cfivs,
 		    const RefCountedPtr<EBIndexSpace>& a_ebisPtr);
 

@@ -347,7 +347,7 @@ void PhaseRealm::define_eb_quad_cfi(const int a_lmin){
 										 m_refinementRatios[lvl-1],
 										 ncomps,
 										 m_dx[lvl],
-										 m_numGhostCells,
+										 m_numGhostCells*IntVect::Unit,
 										 cfivs,
 										 m_ebis));
 

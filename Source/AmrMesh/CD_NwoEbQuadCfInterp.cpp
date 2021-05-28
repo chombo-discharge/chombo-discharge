@@ -25,7 +25,7 @@ NwoEbQuadCfInterp::NwoEbQuadCfInterp(const DisjointBoxLayout&           a_gridsF
 				     const int&                         a_nref,
 				     const int&                         a_nvar,
 				     const Real&                        a_dxFine,
-				     const int&                         a_ghost,
+				     const IntVect&                     a_ghost,
 				     const LayoutData<IntVectSet>&      a_cfivs,
 				     const RefCountedPtr<EBIndexSpace>& a_ebisPtr) {
   m_gridsFine  =  a_gridsFine ;          
@@ -36,7 +36,8 @@ NwoEbQuadCfInterp::NwoEbQuadCfInterp(const DisjointBoxLayout&           a_gridsF
   m_nref       =  a_nref      ;      
   m_nvar       =  a_nvar      ;      
   m_dxFine     =  a_dxFine    ;      
-  m_ghost      =  a_ghost*IntVect::Unit;
+  m_ghost      =  a_ghost     ;
+  
   defineInternals(a_cfivs, a_ebisPtr);
 }
 
@@ -51,10 +52,10 @@ void NwoEbQuadCfInterp::defineInternals(const LayoutData<IntVectSet>&  a_cfivs, 
 
   a_ebisPtr->fillEBISLayout(m_ebislCoFi,
 			    m_gridsCoFi,
-			    m_domainCoar, m_ghost[0]); // This originally had 4 ghost cells
+			    m_domainCoar, 4); 
 
   EBCellFactory fact(m_ebislCoFi);
-  m_bufferCoFi.define(m_gridsCoFi, m_nvar, m_ghost, fact); // This orginally had 4 ghost cells. 
+  m_bufferCoFi.define(m_gridsCoFi, m_nvar, 4*IntVect::Unit, fact);
 
   defineStencils(a_cfivs);
 }
