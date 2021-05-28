@@ -973,12 +973,12 @@ void Driver::parseOptions(){
   pp.get("output_names",             m_outputFileNames);
   pp.get("plot_interval",            m_plotInterval);
   pp.get("checkpoint_interval",      m_checkpointInterval);
-  pp.get("writeRegridFiles",       m_writeRegridFiles);
-  pp.get("writeRestartFiles",      m_writeRestartFiles);
+  pp.get("write_regrid_files",       m_writeRegridFiles);
+  pp.get("write_restart_files",      m_writeRestartFiles);
   pp.get("num_plot_ghost",           m_numPlotGhost);
   pp.get("allow_coarsening",         m_allowCoarsening);
   pp.get("geometry_only",            m_geometryOnly);
-  pp.get("ebis_memory_LoadBalancing", m_ebisMemoryLoadBalance);
+  pp.get("ebis_memory_load_balance", m_ebisMemoryLoadBalance);
   pp.get("max_steps",                m_maxSteps);
   pp.get("start_time",               m_startTime);
   pp.get("stop_time",                m_stopTime);
@@ -1007,8 +1007,8 @@ void Driver::parseRuntimeOptions(){
   pp.get("plot_interval",            m_plotInterval);
   pp.get("regrid_interval",          m_regridInterval);
   pp.get("checkpoint_interval",      m_checkpointInterval);
-  pp.get("writeRegridFiles",       m_writeRegridFiles);
-  pp.get("writeRestartFiles",      m_writeRestartFiles);
+  pp.get("write_regrid_files",       m_writeRegridFiles);
+  pp.get("write_restart_files",      m_writeRestartFiles);
   pp.get("num_plot_ghost",           m_numPlotGhost);
   pp.get("allow_coarsening",         m_allowCoarsening);
   pp.get("max_steps",                m_maxSteps);
