@@ -4,20 +4,20 @@
 AmrMesh.lo_corner       = -1 -1 -1    # Low corner of problem domain
 AmrMesh.hi_corner       =  1  1  1    # High corner of problem domain
 AmrMesh.verbosity       = -1          # Controls verbosity. 
-AmrMesh.coarsest_domain = 128 128 128 # Number of cells on coarsest domain
-AmrMesh.max_amr_depth   = 1           # Maximum amr depth
+AmrMesh.coarsest_domain = 128 128     # Number of cells on coarsest domain
+AmrMesh.max_amr_depth   = 1          # Maximum amr depth
 AmrMesh.max_sim_depth   = -1          # Maximum simulation depth
 AmrMesh.fill_ratio      = 1.0         # Fill ratio for grid generation
 AmrMesh.irreg_growth    = 2           # How much to grow irregular tagged cells
 AmrMesh.buffer_size     = 2           # Number of cells between grid levels
-AmrMesh.grid_algorithm  = br          # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
+AmrMesh.grid_algorithm  = tiled       # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
 AmrMesh.box_sorting     = morton      # 'none', 'shuffle', 'morton'
-AmrMesh.blocking_factor = 8          # Default blocking factor (16 in 3D)
+AmrMesh.blocking_factor = 16          # Default blocking factor (16 in 3D)
 AmrMesh.max_box_size    = 16          # Maximum allowed box size
 AmrMesh.max_ebis_box    = 16          # Maximum allowed box size
-AmrMesh.ref_rat         = 2 2 2 2 2 2 # Refinement ratios
-AmrMesh.num_ghost       = 3           # Number of ghost cells. Default is 3
-AmrMesh.lsf_ghost       = 3           # Number of ghost cells when writing level-set to grid
+AmrMesh.ref_rat         = 2 2 2 2 # Refinement ratios
+AmrMesh.num_ghost       = 2           # Number of ghost cells. Default is 3
+AmrMesh.lsf_ghost       = 2           # Number of ghost cells when writing level-set to grid
 AmrMesh.eb_ghost        = 4           # Set number of of ghost cells for EB stuff
 AmrMesh.centroid_sten   = linear      # Centroid interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
 AmrMesh.eb_sten         = pwl         # EB interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
@@ -63,13 +63,18 @@ Driver.refine_solid_solid_interface    = -1               # Refine solid-solid i
 # ====================================
 # ProxyFieldSolver class options
 # ====================================
-ProxyFieldSolver.use_nwo  = true       # Use NWO or not
+ProxyFieldSolver.use_nwo  = false      # Use NWO or not
 ProxyFieldSolver.plt_vars = phi rho E  # Plot variables
+ProxyFieldSolver.eb_order = 2          # BC order on EB
+ProxyFieldSolver.eb_val   =  1.0       # Dirichlet value on EB
+ProxyFieldSolver.dom_val  = -1.0       # Dirichlet value on domain
+ProxyFieldSolver.smooth   = 12         # Smoothings
+ProxyFieldSolver.relax    = 2          # Relaxation method
 
 # ====================================================================================================
 # GEO_COARSENER CLASS OPTIONS
 # ====================================================================================================
-GeoCoarsener.num_boxes   = 1            # Number of coarsening boxes (0 = don't coarsen)
+GeoCoarsener.num_boxes   = 0            # Number of coarsening boxes (0 = don't coarsen)
 GeoCoarsener.box1_lo     = -1 0 0.0  # Remove irregular cell tags 
 GeoCoarsener.box1_hi     = 1 1 0.0  # between these two corners
 GeoCoarsener.box1_lvl    = 0            # up to this level
@@ -79,8 +84,8 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 # ROD_DIELECTRIC CLASS OPTIONS
 # ====================================================================================================
 RodDielectric.electrode.on              = true          # Use electrode or not
-RodDielectric.electrode.endpoint1       = -0.3 -0.5     # One endpoint
-RodDielectric.electrode.endpoint2       = 0.3 0.5       # Other endpoint
+RodDielectric.electrode.endpoint1       = -0.5 -0.5     # One endpoint
+RodDielectric.electrode.endpoint2       = 0.5 0.5       # Other endpoint
 RodDielectric.electrode.radius          = 0.1           # Electrode radius
 RodDielectric.electrode.live            = true          # Live or not
 

@@ -1,5 +1,9 @@
 # ====================================
 # ProxyFieldSolver class options
 # ====================================
-ProxyFieldSolver.use_nwo  = true       # Use NWO or not
+ProxyFieldSolver.use_nwo  = false      # Use NWO or not
 ProxyFieldSolver.plt_vars = phi rho E  # Plot variables
+ProxyFieldSolver.eb_val   =  1.0       # Dirichlet value on EB
+ProxyFieldSolver.dom_val  = -1.0       # Dirichlet value on domain
+ProxyFieldSolver.smooth   = 12         # Smoothings
+ProxyFieldSolver.relax    = 2          # Relaxation method
