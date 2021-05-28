@@ -14,10 +14,14 @@
 #include <BiCGStabSolver.H>
 #include <NWOEBConductivityOpFactory.H>
 #include <EBConductivityOpFactory.H>
+#include <EBAMRPoissonOpFactory.H>
 #include <DirichletConductivityDomainBC.H>
 #include <DirichletConductivityEBBC.H>
+#include <DirichletPoissonDomainBC.H>
+#include <DirichletPoissonEBBC.H>
 #include <NeumannConductivityDomainBC.H>
 #include <NeumannConductivityEBBC.H>
+
 #include <ParmParse.H>
 
 // Our includes
@@ -190,10 +194,9 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi){
   pp.get("dom_val", dom_value);
 
   auto ebbcFactory = RefCountedPtr<DirichletConductivityEBBCFactory> (new DirichletConductivityEBBCFactory());
+  auto domainFactory = RefCountedPtr<DirichletConductivityDomainBCFactory> (new DirichletConductivityDomainBCFactory());
   ebbcFactory->setValue(eb_value);
   ebbcFactory->setOrder(eb_order);
-
-  auto domainFactory = RefCountedPtr<DirichletConductivityDomainBCFactory> (new DirichletConductivityDomainBCFactory());
   domainFactory->setValue(dom_value);
 
   int relaxType;
@@ -229,20 +232,51 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi){
 											ghostRHS,
 											relaxType));
 
+
+  auto poissonDomFactory = RefCountedPtr<DirichletPoissonDomainBCFactory> (new DirichletPoissonDomainBCFactory());
+  auto poissonEBFactory  = RefCountedPtr<DirichletPoissonEBBCFactory>     (new DirichletPoissonEBBCFactory());
+  poissonDomFactory->setValue(dom_value);
+  poissonEBFactory->setValue(eb_value);
+  poissonEBFactory->setOrder(eb_order);
+  auto factoryPoiss = RefCountedPtr<EBAMRPoissonOpFactory> (new EBAMRPoissonOpFactory(levelGrids,
+										      m_amr->getRefinementRatios(),
+										      interpOld,
+										      m_amr->getDx()[0]*RealVect::Unit,
+										      m_amr->getProbLo(),
+										      40,
+										      relaxType,
+										      poissonDomFactory,
+										      poissonEBFactory,
+										      alpha,
+										      beta,
+										      0.0,
+										      ghostPhi,
+										      ghostRHS));
+
+
   
   BiCGStabSolver<LevelData<EBCellFAB> > bicgstab;
   AMRMultiGrid<LevelData<EBCellFAB> >   multigridSolver;
 
-
+  bool useCond;
   bool useNWO;
+
+  pp.get("use_cond", useCond);
   pp.get("use_nwo", useNWO);
-  if(useNWO){
-    pout() << "using nwo ebconductivityop" << endl;
-    multigridSolver.define(m_amr->getDomains()[0], *factoryNWO, &bicgstab, 1 + m_amr->getFinestLevel());
+
+  if(useCond){
+    if(useNWO){
+      pout() << "using nwo ebconductivityop" << endl;
+      multigridSolver.define(m_amr->getDomains()[0], *factoryNWO, &bicgstab, 1 + m_amr->getFinestLevel());
+    }
+    else{
+      pout() << "using old ebconductivityop" << endl;
+      multigridSolver.define(m_amr->getDomains()[0], *factoryOld, &bicgstab, 1 + m_amr->getFinestLevel());
+    }
   }
   else{
-    pout() << "using old ebconductivityop" << endl;
-    multigridSolver.define(m_amr->getDomains()[0], *factoryOld, &bicgstab, 1 + m_amr->getFinestLevel());
+    pout() << "using ebamrpoissonopfactory" << endl;
+    multigridSolver.define(m_amr->getDomains()[0], *factoryPoiss, &bicgstab, 1 + m_amr->getFinestLevel());
   }
   int numSmooth;
   pp.get("smooth", numSmooth);
