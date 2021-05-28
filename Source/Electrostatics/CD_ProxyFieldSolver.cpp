@@ -185,22 +185,33 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi){
   const IntVect ghostPhi = m_amr->getNumberOfGhostCells()*IntVect::Unit;
   const IntVect ghostRHS = m_amr->getNumberOfGhostCells()*IntVect::Unit;
 
+  int relaxType;
   int  eb_order;
   Real eb_value;
   Real dom_value;
 
+  pp.get("relax",    relaxType);
   pp.get("eb_order", eb_order);
-  pp.get("eb_val",  eb_value);
-  pp.get("dom_val", dom_value);
+  pp.get("eb_val",   eb_value);
+  pp.get("dom_val",  dom_value);
 
+
+  // BC factories for conductivity ops
   auto ebbcFactory = RefCountedPtr<DirichletConductivityEBBCFactory> (new DirichletConductivityEBBCFactory());
   auto domainFactory = RefCountedPtr<DirichletConductivityDomainBCFactory> (new DirichletConductivityDomainBCFactory());
   ebbcFactory->setValue(eb_value);
   ebbcFactory->setOrder(eb_order);
   domainFactory->setValue(dom_value);
 
-  int relaxType;
-  pp.get("relax", relaxType);
+  
+
+  // BC factories for EBAMRPoissonOp
+  auto poissonDomFactory = RefCountedPtr<DirichletPoissonDomainBCFactory> (new DirichletPoissonDomainBCFactory());
+  auto poissonEBFactory  = RefCountedPtr<DirichletPoissonEBBCFactory>     (new DirichletPoissonEBBCFactory());
+  poissonDomFactory->setValue(dom_value);
+  poissonEBFactory->setValue(eb_value);
+  poissonEBFactory->setOrder(eb_order);
+
 
   auto factoryNWO = RefCountedPtr<NWOEBConductivityOpFactory> (new NWOEBConductivityOpFactory(levelGrids,
 											      interpNWO,
@@ -232,12 +243,7 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi){
 											ghostRHS,
 											relaxType));
 
-
-  auto poissonDomFactory = RefCountedPtr<DirichletPoissonDomainBCFactory> (new DirichletPoissonDomainBCFactory());
-  auto poissonEBFactory  = RefCountedPtr<DirichletPoissonEBBCFactory>     (new DirichletPoissonEBBCFactory());
-  poissonDomFactory->setValue(dom_value);
-  poissonEBFactory->setValue(eb_value);
-  poissonEBFactory->setOrder(eb_order);
+  
   auto factoryPoiss = RefCountedPtr<EBAMRPoissonOpFactory> (new EBAMRPoissonOpFactory(levelGrids,
 										      m_amr->getRefinementRatios(),
 										      interpOld,
@@ -280,7 +286,7 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi){
   }
   int numSmooth;
   pp.get("smooth", numSmooth);
-  multigridSolver.setSolverParameters(numSmooth, numSmooth/2, numSmooth/2, 1, 24, 1E-30, 1E-30, 1E-60);
+  multigridSolver.setSolverParameters(numSmooth, numSmooth, numSmooth, 1, 128, 1E-30, 1E-30, 1E-60);
 
 
   // Solve
