@@ -1,9 +1,12 @@
 # ====================================
 # ProxyFieldSolver class options
 # ====================================
-ProxyFieldSolver.use_nwo  = false      # Use NWO or not
+ProxyFieldSolver.use_cond = true       # Conductivity
+ProxyFieldSolver.use_nwo  = false      # Use NWO for conductivity or no
 ProxyFieldSolver.plt_vars = phi rho E  # Plot variables
-ProxyFieldSolver.eb_val   =  1.0       # Dirichlet value on EB
-ProxyFieldSolver.dom_val  = -1.0       # Dirichlet value on domain
-ProxyFieldSolver.smooth   = 12         # Smoothings
+ProxyFieldSolver.eb_order = 1          # BC order on EB
+ProxyFieldSolver.dom_val  = -1.        # Dirichlet value on domain
+ProxyFieldSolver.eb_val   =  1.        # Dirichlet value on EB	
+ProxyFieldSolver.phi_ini  =  1.        # Initial value for phi	
+ProxyFieldSolver.smooth   = 16         # Smoothings
 ProxyFieldSolver.relax    = 2          # Relaxation method

@@ -147,7 +147,7 @@ Vector<RefCountedPtr<EBQuadCFInterp> > ProxyFieldSolver::getInterpOld(){
 }
 
 void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi){
-  DataOps::setValue(a_phi, 1.23456789);
+
 
   ParmParse pp(m_className.c_str());
 
@@ -162,7 +162,7 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi){
   m_amr->allocate(bcoIrreg, m_realm, phase::gas, 1);
   m_amr->allocate(rho,      m_realm, phase::gas, 1);
 
-  DataOps::setValue(aco, 0.0);
+  DataOps::setValue(aco, 1.0);
   DataOps::setValue(bco, 1.0);
   DataOps::setValue(bcoIrreg, 1.0);
   DataOps::setValue(rho, 0.0);
@@ -181,12 +181,15 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi){
   int  eb_order;
   Real eb_value;
   Real dom_value;
+  Real phi_init;
 
   pp.get("relax",    relaxType);
   pp.get("eb_order", eb_order);
   pp.get("eb_val",   eb_value);
   pp.get("dom_val",  dom_value);
+  pp.get("phi_ini",  phi_init);
 
+  DataOps::setValue(a_phi, phi_init);
 
   // BC factories for conductivity ops
   auto ebbcFactory = RefCountedPtr<DirichletConductivityEBBCFactory> (new DirichletConductivityEBBCFactory());
@@ -194,7 +197,6 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi){
   ebbcFactory->setValue(eb_value);
   ebbcFactory->setOrder(eb_order);
   domainFactory->setValue(dom_value);
-
   
 
   // BC factories for EBAMRPoissonOp
@@ -289,8 +291,9 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi){
   m_amr->alias(rhs, rho);
 
   multigridSolver.init( phi, rhs, m_amr->getFinestLevel(), 0);
-  multigridSolver.solveNoInit(phi, rhs, m_amr->getFinestLevel(), 0);
+  multigridSolver.solveNoInit(phi, rhs, m_amr->getFinestLevel(), 0,false);
   multigridSolver.m_verbosity = 10;
+
 
   m_amr->averageDown(a_phi, m_realm, phase::gas);
   m_amr->interpGhost(a_phi, m_realm, phase::gas);
