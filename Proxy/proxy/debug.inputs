@@ -65,13 +65,13 @@ Driver.refine_solid_solid_interface    = -1               # Refine solid-solid i
 # ====================================
 ProxyFieldSolver.use_cond = true       # Conductivity
 ProxyFieldSolver.use_nwo  = false      # Use NWO for conductivity or no
-ProxyFieldSolver.plt_vars = phi resid E  # Plot variables
+ProxyFieldSolver.plt_vars = phi rho resid E  # Plot variables
 ProxyFieldSolver.eb_order = 1          # BC order on EB
 ProxyFieldSolver.dom_val  = -1.        # Dirichlet value on domain
 ProxyFieldSolver.eb_val   =  1.        # Dirichlet value on EB
-ProxyFieldSolver.phi_ini  =  1.E4       # Initial value for phi
+ProxyFieldSolver.phi_ini  =  1.E5       # Initial value for phi
 ProxyFieldSolver.smooth   = 16         # Smoothings
-ProxyFieldSolver.relax    = 1          # Relaxation method
+ProxyFieldSolver.relax    = 2          # Relaxation method
 
 # ====================================================================================================
 # GEO_COARSENER CLASS OPTIONS

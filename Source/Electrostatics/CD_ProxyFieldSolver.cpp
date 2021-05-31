@@ -34,7 +34,7 @@ bool ProxyFieldSolver::solve(MFAMRCellData&       a_potential,
 			     const EBAMRIVData&   a_sigma,
 			     const bool           a_zerophi) {
   DataOps::setValue(a_potential, 0.0);
-  DataOps::setValue(m_residue,   1.23456789);
+  DataOps::setValue(m_residue,   1.2345);
 
   EBAMRCellData gasData = m_amr->alias(phase::gas, a_potential);
   EBAMRCellData gasResi = m_amr->alias(phase::gas, m_residue);
@@ -148,8 +148,6 @@ Vector<RefCountedPtr<EBQuadCFInterp> > ProxyFieldSolver::getInterpOld(){
 }
 
 void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi, EBAMRCellData& a_residue){
-
-
   ParmParse pp(m_className.c_str());
 
   // Define coefficients
@@ -195,17 +193,17 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi, EBAMRCellData& a_resi
   // BC factories for conductivity ops
   auto ebbcFactory   = RefCountedPtr<DirichletConductivityEBBCFactory>     (new DirichletConductivityEBBCFactory());
   auto domainFactory = RefCountedPtr<DirichletConductivityDomainBCFactory> (new DirichletConductivityDomainBCFactory());
-  ebbcFactory->setValue(eb_value);
-  ebbcFactory->setOrder(eb_order);
+  ebbcFactory  ->setValue(eb_value);
+  ebbcFactory  ->setOrder(eb_order);
   domainFactory->setValue(dom_value);
   
 
   // BC factories for EBAMRPoissonOp
-  auto poissonDomFactory = RefCountedPtr<DirichletPoissonDomainBCFactory> (new DirichletPoissonDomainBCFactory());
   auto poissonEBFactory  = RefCountedPtr<DirichletPoissonEBBCFactory>     (new DirichletPoissonEBBCFactory());
+  auto poissonDomFactory = RefCountedPtr<DirichletPoissonDomainBCFactory> (new DirichletPoissonDomainBCFactory());
+  poissonEBFactory ->setValue(eb_value);
+  poissonEBFactory ->setOrder(eb_order);
   poissonDomFactory->setValue(dom_value);
-  poissonEBFactory->setValue(eb_value);
-  poissonEBFactory->setOrder(eb_order);
 
 
   auto factoryNWO = RefCountedPtr<NWOEBConductivityOpFactory> (new NWOEBConductivityOpFactory(levelGrids,
@@ -297,16 +295,12 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi, EBAMRCellData& a_resi
   const int baseLevel   = 0;
 
   multigridSolver.m_verbosity = 10;
-  
-  multigridSolver.init(phi, rhs, finestLevel, baseLevel);
-  multigridSolver.solveNoInitResid(phi, res, rhs, finestLevel, baseLevel, false);
+  multigridSolver.solve(phi, rhs, finestLevel, baseLevel, false);
 
-  // const Real finalResid = multigridSolver.computeAMRResidual(phi, rhs, finestLevel, baseLevel);
-  // if(procID() == 0) std::cout << "resid is = " << finalResid << std::endl;
+  const Real finalResid = multigridSolver.computeAMRResidual(res, phi, rhs, finestLevel, baseLevel);
 
   m_amr->averageDown(a_phi, m_realm, phase::gas);
   m_amr->interpGhost(a_phi, m_realm, phase::gas);
-  
 }
 
 #include <CD_NamespaceFooter.H>
