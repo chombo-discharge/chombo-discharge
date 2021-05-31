@@ -290,10 +290,16 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi){
   m_amr->alias(phi, a_phi);
   m_amr->alias(rhs, rho);
 
-  multigridSolver.init( phi, rhs, m_amr->getFinestLevel(), 0);
-  multigridSolver.solveNoInit(phi, rhs, m_amr->getFinestLevel(), 0,false);
-  multigridSolver.m_verbosity = 10;
+  const int finestLevel = m_amr->getFinestLevel();
+  const int baseLevel   = 0;
 
+  multigridSolver.m_verbosity = 10;
+  
+  multigridSolver.init       (phi, rhs, finestLevel, baseLevel);
+  multigridSolver.solveNoInit(phi, rhs, finestLevel, baseLevel, false);
+
+  const Real finalResid = multigridSolver.computeAMRResidual(phi, rhs, finestLevel, baseLevel);
+  if(procID() == 0) std::cout << "resid is = " << finalResid << std::endl;
 
   m_amr->averageDown(a_phi, m_realm, phase::gas);
   m_amr->interpGhost(a_phi, m_realm, phase::gas);

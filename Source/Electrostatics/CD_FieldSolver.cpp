@@ -4,8 +4,8 @@
  */
 
 /*! 
-  @file   FieldSolver.cpp
-  @brief  Implementation of FieldSolver.H
+  @file   CD_FieldSolver.cpp
+  @brief  Implementation of CD_FieldSolver.H
   @author Robert Marskar
 */
 

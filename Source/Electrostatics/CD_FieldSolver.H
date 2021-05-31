@@ -4,7 +4,7 @@
  */
 
 /*!
-  @file   FieldSolver.H
+  @file   CD_FieldSolver.H
   @brief  Contains declaration of an abstract electrostatic field solver. 
   @author Robert Marskar
 */
