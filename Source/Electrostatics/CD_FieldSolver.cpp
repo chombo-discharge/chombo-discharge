@@ -620,7 +620,7 @@ void FieldSolver::writePlotFile(){
 
   // Filename
   char file_char[1000];
-  sprintf(file_char, "%s.step%07d.%dd.hdf5", "FieldSolver", m_timeStep, SpaceDim);
+  sprintf(file_char, "%s.step%07d.%dd.hdf5", m_className.c_str(), m_timeStep, SpaceDim);
 
   // Alias
   Vector<LevelData<EBCellFAB>* > output_ptr(1+m_amr->getFinestLevel());

@@ -176,11 +176,12 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi, EBAMRCellData& a_resi
   const IntVect ghostPhi = m_amr->getNumberOfGhostCells()*IntVect::Unit;
   const IntVect ghostRHS = m_amr->getNumberOfGhostCells()*IntVect::Unit;
 
-  int  relaxType;
-  int  eb_order;
-  Real eb_value;
-  Real dom_value;
-  Real phi_init;
+  int         relaxType;
+  int         eb_order;
+  Real        eb_value;
+  Real        dom_value;
+  Real        phi_init;
+  std::string str;
 
   pp.get("relax",    relaxType);
   pp.get("eb_order", eb_order);
@@ -259,9 +260,11 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi, EBAMRCellData& a_resi
 
   bool useCond;
   bool useNWO;
-
+  int  numSmooth;
+  
+  pp.get("smooth", numSmooth);
   pp.get("use_cond", useCond);
-  pp.get("use_nwo", useNWO);
+  pp.get("use_nwo",  useNWO);
 
   if(useCond){
     if(useNWO){
@@ -277,8 +280,7 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi, EBAMRCellData& a_resi
     pout() << "using ebamrpoissonopfactory" << endl;
     multigridSolver.define(m_amr->getDomains()[0], *factoryPoiss, &bicgstab, 1 + m_amr->getFinestLevel());
   }
-  int numSmooth;
-  pp.get("smooth", numSmooth);
+
   multigridSolver.setSolverParameters(numSmooth, numSmooth, numSmooth, 1, 128, 1E-30, 1E-30, 1E-60);
 
 
@@ -297,10 +299,43 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi, EBAMRCellData& a_resi
   multigridSolver.m_verbosity = 10;
   multigridSolver.solve(phi, rhs, finestLevel, baseLevel, false);
 
-  const Real finalResid = multigridSolver.computeAMRResidual(res, phi, rhs, finestLevel, baseLevel);
+  multigridSolver.computeAMRResidual(res, phi, rhs, finestLevel, baseLevel);
 
-  m_amr->averageDown(a_phi, m_realm, phase::gas);
+
+
+
+  const Real resBefore = multigridSolver.computeAMRResidual(phi, rhs, finestLevel, baseLevel);
+  this->coarsenConservative(a_phi);
+  //  DataOps::setCoveredValue(a_phi, 0, 1.234567E8); // This also changes the residual (it shouldn't!)
+  const Real resAfter = multigridSolver.computeAMRResidual(phi, rhs, finestLevel, baseLevel);
+
   m_amr->interpGhost(a_phi, m_realm, phase::gas);
+  this->computeElectricField();
+  this->writePlotFile();
+
+  if(procID() == 0) std::cout << "Residual before = " << resBefore << std::endl;
+  if(procID() == 0) std::cout << "Residual after  = " << resAfter << std::endl;
+}
+
+void ProxyFieldSolver::coarsenMG(EBAMRCellData& a_phi){
+  for (int lvl = m_amr->getFinestLevel(); lvl > 0; lvl--){
+    EBMGAverage aveOp(m_amr->getGrids(m_realm)[lvl],
+		      m_amr->getGrids(m_realm)[lvl-1],
+		      m_amr->getEBISLayout(m_realm, phase::gas)[lvl],
+		      m_amr->getEBISLayout(m_realm, phase::gas)[lvl-1],
+		      m_amr->getDomains()[lvl-1],
+		      m_amr->getRefinementRatios()[lvl-1],
+		      1,
+		      m_amr->getEBIndexSpace(phase::gas),
+		      m_amr->getNumberOfGhostCells()*IntVect::Unit,
+		      true);
+	  
+    aveOp.average(*a_phi[lvl-1], *a_phi[lvl], Interval(0,0));
+  }
+}
+
+void ProxyFieldSolver::coarsenConservative(EBAMRCellData& a_phi){
+  m_amr->averageDown(a_phi, m_realm, phase::gas);
 }
 
 #include <CD_NamespaceFooter.H>

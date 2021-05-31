@@ -14,6 +14,7 @@
 
 // Chombo includes
 #include <NWOEBQuadCFInterp.H>
+#include <EBMGAverage.H>
 
 // Our includes
 #include <CD_FieldSolver.H>
@@ -44,10 +45,12 @@ public:
 protected:
 
   void solveOnePhase(EBAMRCellData& a_solution, EBAMRCellData& a_residue);
-
+  void coarsenMG(EBAMRCellData& a_solution);
+  void coarsenConservative(EBAMRCellData& a_solution);
+  
   Vector<EBLevelGrid> getEBLevelGrids();
   Vector<RefCountedPtr<NWOEBQuadCFInterp> > getInterpNWO();
-  Vector<RefCountedPtr<EBQuadCFInterp> > getInterpOld();
+  Vector<RefCountedPtr<EBQuadCFInterp> >    getInterpOld();
 };
 
 #include <CD_NamespaceFooter.H>

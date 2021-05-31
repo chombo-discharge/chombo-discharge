@@ -15,14 +15,14 @@ AmrMesh.box_sorting     = morton      # 'none', 'shuffle', 'morton'
 AmrMesh.blocking_factor = 16          # Default blocking factor (16 in 3D)
 AmrMesh.max_box_size    = 16          # Maximum allowed box size
 AmrMesh.max_ebis_box    = 16          # Maximum allowed box size
-AmrMesh.ref_rat         = 2           # Refinement ratios
+AmrMesh.ref_rat         = 2 2 2 2 # Refinement ratios
 AmrMesh.num_ghost       = 1           # Number of ghost cells. Default is 3
 AmrMesh.lsf_ghost       = 3           # Number of ghost cells when writing level-set to grid
 AmrMesh.eb_ghost        = 4           # Set number of of ghost cells for EB stuff
 AmrMesh.centroid_sten   = linear      # Centroid interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
 AmrMesh.eb_sten         = pwl         # EB interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
 AmrMesh.redist_radius   = 1           # Redistribution radius for hyperbolic conservation laws
-AmrMesh.ghost_interp    = pwl         # Ghost cell interpolation type. Valid options are 'pwl' or 'quad'
+AmrMesh.ghost_interp    = pwl        # Ghost cell interpolation type. Valid options are 'pwl' or 'quad'
 AmrMesh.ebcf            = true        # If you have EBCF crossing, this must be true. 
 
 # ====================================================================================================
@@ -68,17 +68,17 @@ ProxyFieldSolver.use_nwo  = false       # Use NWO for conductivity or no
 ProxyFieldSolver.plt_vars = phi resid E # Plot variables
 ProxyFieldSolver.eb_order = 1           # BC order on EB
 ProxyFieldSolver.dom_val  = -1.         # Dirichlet value on domain
-ProxyFieldSolver.eb_val   =  1.         # Dirichlet value on EB
-ProxyFieldSolver.phi_ini  =  1E3        # Initial value for phi
-ProxyFieldSolver.smooth   = 32          # Smoothings
+ProxyFieldSolver.eb_val   =  0.         # Dirichlet value on EB
+ProxyFieldSolver.phi_ini  =  100.0        # Initial value for phi
+ProxyFieldSolver.smooth   = 32         # Smoothings
 ProxyFieldSolver.relax    = 1           # Relaxation method
 
 # ====================================================================================================
 # GEO_COARSENER CLASS OPTIONS
 # ====================================================================================================
-GeoCoarsener.num_boxes   = 1            # Number of coarsening boxes (0 = don't coarsen)
-GeoCoarsener.box1_lo     = -2 0         # Remove irregular cell tags 
-GeoCoarsener.box1_hi     =  2 1 0       # between these two corners
+GeoCoarsener.num_boxes   = 1           # Number of coarsening boxes (0 = don't coarsen)
+GeoCoarsener.box1_lo     = -1 0 0.0  # Remove irregular cell tags 
+GeoCoarsener.box1_hi     = 1 1 0.0  # between these two corners
 GeoCoarsener.box1_lvl    = 0            # up to this level
 GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 
