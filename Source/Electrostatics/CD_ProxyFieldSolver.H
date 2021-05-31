@@ -43,7 +43,7 @@ public:
   
 protected:
 
-  void solveOnePhase(EBAMRCellData& a_solution);
+  void solveOnePhase(EBAMRCellData& a_solution, EBAMRCellData& a_residue);
 
   Vector<EBLevelGrid> getEBLevelGrids();
   Vector<RefCountedPtr<NWOEBQuadCFInterp> > getInterpNWO();

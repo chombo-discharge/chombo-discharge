@@ -21,7 +21,6 @@
 #include <DirichletPoissonEBBC.H>
 #include <NeumannConductivityDomainBC.H>
 #include <NeumannConductivityEBBC.H>
-
 #include <ParmParse.H>
 
 // Our includes
@@ -35,10 +34,12 @@ bool ProxyFieldSolver::solve(MFAMRCellData&       a_potential,
 			     const EBAMRIVData&   a_sigma,
 			     const bool           a_zerophi) {
   DataOps::setValue(a_potential, 0.0);
+  DataOps::setValue(m_residue,   1.23456789);
 
   EBAMRCellData gasData = m_amr->alias(phase::gas, a_potential);
+  EBAMRCellData gasResi = m_amr->alias(phase::gas, m_residue);
 
-  this->solveOnePhase(gasData);
+  this->solveOnePhase(gasData, gasResi);
   
   return true;
 }
@@ -109,7 +110,7 @@ Vector<RefCountedPtr<NWOEBQuadCFInterp> > ProxyFieldSolver::getInterpNWO(){
 									 m_amr->getEBISLayout(m_realm, phase::gas)[lvl-1],
 									 m_amr->getDomains()[lvl-1],
 									 m_amr->getRefinementRatios()[lvl-1],
-									 nGhosts, 
+									 1,
 									 m_amr->getDx()[lvl],
 									 nGhosts*IntVect::Unit,
 									 ghostCells,
@@ -146,7 +147,7 @@ Vector<RefCountedPtr<EBQuadCFInterp> > ProxyFieldSolver::getInterpOld(){
   return ret;
 }
 
-void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi){
+void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi, EBAMRCellData& a_residue){
 
 
   ParmParse pp(m_className.c_str());
@@ -177,7 +178,7 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi){
   const IntVect ghostPhi = m_amr->getNumberOfGhostCells()*IntVect::Unit;
   const IntVect ghostRHS = m_amr->getNumberOfGhostCells()*IntVect::Unit;
 
-  int relaxType;
+  int  relaxType;
   int  eb_order;
   Real eb_value;
   Real dom_value;
@@ -192,7 +193,7 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi){
   DataOps::setValue(a_phi, phi_init);
 
   // BC factories for conductivity ops
-  auto ebbcFactory = RefCountedPtr<DirichletConductivityEBBCFactory> (new DirichletConductivityEBBCFactory());
+  auto ebbcFactory   = RefCountedPtr<DirichletConductivityEBBCFactory>     (new DirichletConductivityEBBCFactory());
   auto domainFactory = RefCountedPtr<DirichletConductivityDomainBCFactory> (new DirichletConductivityDomainBCFactory());
   ebbcFactory->setValue(eb_value);
   ebbcFactory->setOrder(eb_order);
@@ -286,20 +287,22 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi){
   // Solve
   Vector<LevelData<EBCellFAB>* > phi;
   Vector<LevelData<EBCellFAB>* > rhs;
+  Vector<LevelData<EBCellFAB>* > res;
 
   m_amr->alias(phi, a_phi);
   m_amr->alias(rhs, rho);
+  m_amr->alias(res, a_residue);
 
   const int finestLevel = m_amr->getFinestLevel();
   const int baseLevel   = 0;
 
   multigridSolver.m_verbosity = 10;
   
-  multigridSolver.init       (phi, rhs, finestLevel, baseLevel);
-  multigridSolver.solveNoInit(phi, rhs, finestLevel, baseLevel, false);
+  multigridSolver.init(phi, rhs, finestLevel, baseLevel);
+  multigridSolver.solveNoInitResid(phi, res, rhs, finestLevel, baseLevel, false);
 
-  const Real finalResid = multigridSolver.computeAMRResidual(phi, rhs, finestLevel, baseLevel);
-  if(procID() == 0) std::cout << "resid is = " << finalResid << std::endl;
+  // const Real finalResid = multigridSolver.computeAMRResidual(phi, rhs, finestLevel, baseLevel);
+  // if(procID() == 0) std::cout << "resid is = " << finalResid << std::endl;
 
   m_amr->averageDown(a_phi, m_realm, phase::gas);
   m_amr->interpGhost(a_phi, m_realm, phase::gas);
