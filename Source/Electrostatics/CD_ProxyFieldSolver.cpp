@@ -21,6 +21,7 @@
 #include <DirichletPoissonEBBC.H>
 #include <NeumannConductivityDomainBC.H>
 #include <NeumannConductivityEBBC.H>
+#include <EBSimpleSolver.H>
 #include <ParmParse.H>
 
 // Our includes
@@ -149,22 +150,26 @@ Vector<RefCountedPtr<EBQuadCFInterp> > ProxyFieldSolver::getInterpOld(){
 
 void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi, EBAMRCellData& a_residue){
   ParmParse pp(m_className.c_str());
-  pout() << "setting up" << endl;
+
   // Define coefficients
+  EBAMRCellData rho;
   EBAMRCellData aco;
+  EBAMRCellData zero;
   EBAMRFluxData bco;
   EBAMRIVData   bcoIrreg;
-  EBAMRCellData rho;
+
 
   m_amr->allocate(aco,      m_realm, phase::gas, 1);
   m_amr->allocate(bco,      m_realm, phase::gas, 1);
   m_amr->allocate(bcoIrreg, m_realm, phase::gas, 1);
   m_amr->allocate(rho,      m_realm, phase::gas, 1);
+  m_amr->allocate(zero,     m_realm, phase::gas, 1);  
 
-  DataOps::setValue(aco, 1.0);
-  DataOps::setValue(bco, 1.0);
+  DataOps::setValue(zero,     0.0);
+  DataOps::setValue(aco,      1.0);
+  DataOps::setValue(bco,      1.0);
   DataOps::setValue(bcoIrreg, 1.0);
-  DataOps::setValue(rho, 1.0);
+  DataOps::setValue(rho,      0.0);
 
   const Real alpha =  0.;
   const Real beta  =  1.;
@@ -254,7 +259,6 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi, EBAMRCellData& a_resi
 										      ghostRHS));
 
 
-  
   BiCGStabSolver<LevelData<EBCellFAB> > bicgstab;
   AMRMultiGrid<LevelData<EBCellFAB> >   multigridSolver;
 
@@ -262,7 +266,7 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi, EBAMRCellData& a_resi
   bool useNWO;
   int  numSmooth;
   
-  pp.get("smooth", numSmooth);
+  pp.get("smooth",   numSmooth);
   pp.get("use_cond", useCond);
   pp.get("use_nwo",  useNWO);
 
@@ -281,23 +285,27 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi, EBAMRCellData& a_resi
     multigridSolver.define(m_amr->getDomains()[0], *factoryPoiss, &bicgstab, 1 + m_amr->getFinestLevel());
   }
 
-  multigridSolver.setSolverParameters(numSmooth, numSmooth, numSmooth, 1, 128, 1E-30, 1E-30, 1E-60);
+  multigridSolver.setSolverParameters(numSmooth, numSmooth, numSmooth, 1, 512, 1E-10, 1E-60, 1E-60);
 
 
   // Solve
   Vector<LevelData<EBCellFAB>* > phi;
   Vector<LevelData<EBCellFAB>* > rhs;
   Vector<LevelData<EBCellFAB>* > res;
+  Vector<LevelData<EBCellFAB>* > zer;
 
   m_amr->alias(phi, a_phi);
   m_amr->alias(rhs, rho);
   m_amr->alias(res, a_residue);
+  m_amr->alias(zer, zero);
 
   const int finestLevel = m_amr->getFinestLevel();
   const int baseLevel   = 0;
 
   multigridSolver.m_verbosity = 10;
-  multigridSolver.solve(phi, rhs, finestLevel, baseLevel, false);
+  multigridSolver.init(phi, rhs, finestLevel, baseLevel);
+  multigridSolver.m_convergenceMetric = multigridSolver.computeAMRResidual(zer, rhs, finestLevel, baseLevel);
+  multigridSolver.solveNoInit(phi, rhs, finestLevel, baseLevel, false);
   multigridSolver.computeAMRResidual(res, phi, rhs, finestLevel, baseLevel);
 
   // Sync and compute gradient. 

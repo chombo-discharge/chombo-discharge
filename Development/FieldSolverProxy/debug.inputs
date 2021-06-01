@@ -68,10 +68,10 @@ ProxyFieldSolver.use_nwo  = false       # Use NWO for conductivity or no
 ProxyFieldSolver.plt_vars = phi resid E # Plot variables
 ProxyFieldSolver.eb_order = 1           # BC order on EB
 ProxyFieldSolver.dom_val  = -1.         # Dirichlet value on domain
-ProxyFieldSolver.eb_val   =  0.         # Dirichlet value on EB
-ProxyFieldSolver.phi_ini  =  1.E3       # Initial value for phi
-ProxyFieldSolver.smooth   = 32          # Smoothings
-ProxyFieldSolver.relax    = 1           # Relaxation method
+ProxyFieldSolver.eb_val   =  1.         # Dirichlet value on EB
+ProxyFieldSolver.phi_ini  =  10.0        # Initial value for phi
+ProxyFieldSolver.smooth   = 16          # Smoothings
+ProxyFieldSolver.relax    = 2           # Relaxation method
 
 # ====================================================================================================
 # GEO_COARSENER CLASS OPTIONS
@@ -86,9 +86,9 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 # ROD_DIELECTRIC CLASS OPTIONS
 # ====================================================================================================
 RodDielectric.electrode.on              = true          # Use electrode or not
-RodDielectric.electrode.endpoint1       = -0.0 -0.5     # One endpoint
-RodDielectric.electrode.endpoint2       = -0.0 0.5       # Other endpoint
-RodDielectric.electrode.radius          = 0.02           # Electrode radius
+RodDielectric.electrode.endpoint1       = -0.5 -0.5     # One endpoint
+RodDielectric.electrode.endpoint2       =  0.5  0.5       # Other endpoint
+RodDielectric.electrode.radius          = 0.0625           # Electrode radius
 RodDielectric.electrode.live            = true          # Live or not
 
 RodDielectric.dielectric.on             = false         # Use dielectric or not
