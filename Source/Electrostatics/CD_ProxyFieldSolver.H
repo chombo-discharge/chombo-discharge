@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_ProxyFieldSolver.H
-  @brief  Development proxy for new multigrid solver
+  @brief  Declaration of a debugging class for Chombo multigrid codes. 
   @author Robert Marskar
 */
 
@@ -22,6 +22,7 @@
 
 /*!
   @brief Proxy class for field solver. This class ignores the other phase and uses a single-phase solver for the "gas phase".
+  @note  This class is not usable as a field solver - it is only meant for debugging and development of multigrid code/stencils. 
 */
 class ProxyFieldSolver : public FieldSolver {
 public:
