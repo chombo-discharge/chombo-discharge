@@ -70,13 +70,13 @@ ProxyFieldSolver.eb_order = 1           # BC order on EB
 ProxyFieldSolver.dom_val  = -1.         # Dirichlet value on domain
 ProxyFieldSolver.eb_val   =  1.         # Dirichlet value on EB
 ProxyFieldSolver.phi_ini  =  10.0        # Initial value for phi
-ProxyFieldSolver.smooth   = 16          # Smoothings
+ProxyFieldSolver.smooth   = 12          # Smoothings
 ProxyFieldSolver.relax    = 2           # Relaxation method
 
 # ====================================================================================================
 # GEO_COARSENER CLASS OPTIONS
 # ====================================================================================================
-GeoCoarsener.num_boxes   = 1            # Number of coarsening boxes (0 = don't coarsen)
+GeoCoarsener.num_boxes   = 0            # Number of coarsening boxes (0 = don't coarsen)
 GeoCoarsener.box1_lo     = -2 0         # Remove irregular cell tags 
 GeoCoarsener.box1_hi     =  2 1 0       # between these two corners
 GeoCoarsener.box1_lvl    = 0            # up to this level
