@@ -149,7 +149,7 @@ Vector<RefCountedPtr<EBQuadCFInterp> > ProxyFieldSolver::getInterpOld(){
 
 void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi, EBAMRCellData& a_residue){
   ParmParse pp(m_className.c_str());
-
+  pout() << "setting up" << endl;
   // Define coefficients
   EBAMRCellData aco;
   EBAMRFluxData bco;
@@ -164,7 +164,7 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi, EBAMRCellData& a_resi
   DataOps::setValue(aco, 1.0);
   DataOps::setValue(bco, 1.0);
   DataOps::setValue(bcoIrreg, 1.0);
-  DataOps::setValue(rho, 0.0);
+  DataOps::setValue(rho, 1.0);
 
   const Real alpha =  0.;
   const Real beta  =  1.;
@@ -298,23 +298,13 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi, EBAMRCellData& a_resi
 
   multigridSolver.m_verbosity = 10;
   multigridSolver.solve(phi, rhs, finestLevel, baseLevel, false);
-
   multigridSolver.computeAMRResidual(res, phi, rhs, finestLevel, baseLevel);
 
-
-
-
-  const Real resBefore = multigridSolver.computeAMRResidual(phi, rhs, finestLevel, baseLevel);
-  this->coarsenConservative(a_phi);
-  //  DataOps::setCoveredValue(a_phi, 0, 1.234567E8); // This also changes the residual (it shouldn't!)
-  const Real resAfter = multigridSolver.computeAMRResidual(phi, rhs, finestLevel, baseLevel);
-
+  // Sync and compute gradient. 
+  m_amr->averageDown(a_phi, m_realm, phase::gas);
   m_amr->interpGhost(a_phi, m_realm, phase::gas);
   this->computeElectricField();
   this->writePlotFile();
-
-  if(procID() == 0) std::cout << "Residual before = " << resBefore << std::endl;
-  if(procID() == 0) std::cout << "Residual after  = " << resAfter << std::endl;
 }
 
 void ProxyFieldSolver::coarsenMG(EBAMRCellData& a_phi){
