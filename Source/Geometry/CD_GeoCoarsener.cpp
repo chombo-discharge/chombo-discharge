@@ -72,7 +72,7 @@ GeoCoarsener::GeoCoarsener(){
 GeoCoarsener::~GeoCoarsener(){
 }
 
-void GeoCoarsener::coarsenTags(Vector<IntVectSet>& a_tags, const Vector<Real>& a_dx, const RealVect& a_origin) const {
+void GeoCoarsener::coarsenTags(Vector<IntVectSet>& a_tags, const Vector<Real>& a_dx, const RealVect& a_probLo) const {
   CH_TIME("GeoCoarsener::coarsenTags");
   if(!(m_coarsen_boxes.size() == m_coarsen_levels.size())){
     pout() << "GeoCoarsener::coarsenTags - m_geoCoarsen is not well defined. Skipping the coarsening step" << endl;
@@ -84,7 +84,7 @@ void GeoCoarsener::coarsenTags(Vector<IntVectSet>& a_tags, const Vector<Real>& a
 	const IntVectSet tmp = a_tags[lvl];
 	for (IVSIterator it(tmp); it.ok(); ++it){
 	  const IntVect iv   = it();
-	  const RealVect pos = a_origin + RealVect(iv)*a_dx[lvl] + 0.5*a_dx[lvl]*RealVect::Unit;
+	  const RealVect pos = a_probLo + RealVect(iv)*a_dx[lvl] + 0.5*a_dx[lvl]*RealVect::Unit;
 
 	  bool remove_tag = false;
 
@@ -97,7 +97,7 @@ void GeoCoarsener::coarsenTags(Vector<IntVectSet>& a_tags, const Vector<Real>& a
 	    const RealVect lo = m_coarsen_boxes[ibox].getLo();
 	    const RealVect hi = m_coarsen_boxes[ibox].getHi();
 
-	    const bool inverse     = (m_inverse[ibox] != 0) ? true : false;
+	    const bool inverse     = (m_inverse[ibox] == 1);
 	    const bool inside_box  = pos > lo && pos < hi;
 	    const bool coarsen_lvl = lvl >= m_coarsen_levels[ibox];
 
@@ -111,7 +111,7 @@ void GeoCoarsener::coarsenTags(Vector<IntVectSet>& a_tags, const Vector<Real>& a
 	    const RealVect lo = m_coarsen_boxes[ibox].getLo();
 	    const RealVect hi = m_coarsen_boxes[ibox].getHi();
 
-	    const bool inverse     = (m_inverse[ibox] != 0) ? true : false;
+	    const bool inverse     = (m_inverse[ibox] == 1);
 	    const bool inside_box  = pos > lo && pos < hi;
 	    const bool coarsen_lvl = lvl >= m_coarsen_levels[ibox];
 
