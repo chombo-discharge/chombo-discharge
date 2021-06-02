@@ -84,7 +84,7 @@ void GeoCoarsener::coarsenTags(Vector<IntVectSet>& a_tags, const Vector<Real>& a
 	const IntVectSet tmp = a_tags[lvl];
 	for (IVSIterator it(tmp); it.ok(); ++it){
 	  const IntVect iv   = it();
-	  const RealVect pos = a_origin + RealVect(iv)*a_dx[lvl];
+	  const RealVect pos = a_origin + RealVect(iv)*a_dx[lvl] + 0.5*a_dx[lvl]*RealVect::Unit;
 
 	  bool remove_tag = false;
 
