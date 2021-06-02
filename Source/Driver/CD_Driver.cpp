@@ -258,16 +258,16 @@ void Driver::getGeometryTags(){
     m_geomTags[lvl] |= solid_tags;
   }
 
-  // Remove tags using the geocoarsener if we have it
-  if(!m_geoCoarsen.isNull()){
-    m_geoCoarsen->coarsenTags(m_geomTags, m_amr->getDx(), m_amr->getProbLo());
-  }
-
   // Grow tags. This is an ad-hoc fix that prevents ugly grid near EBs (i.e. cases where only ghost cells are used
   // for elliptic equations)
   const int growth = m_amr->getIrregTagGrowth();
   for (int lvl = 0; lvl < maxdepth; lvl++){
     m_geomTags[lvl].grow(growth);
+  }
+
+  // Remove tags using the geocoarsener if we have it
+  if(!m_geoCoarsen.isNull()){
+    m_geoCoarsen->coarsenTags(m_geomTags, m_amr->getDx(), m_amr->getProbLo());
   }
 }
 

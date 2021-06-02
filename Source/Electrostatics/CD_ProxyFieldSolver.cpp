@@ -305,7 +305,7 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi, EBAMRCellData& a_resi
   multigridSolver.m_verbosity = 10;
   multigridSolver.init(phi, rhs, finestLevel, baseLevel);
   multigridSolver.m_convergenceMetric = multigridSolver.computeAMRResidual(zer, rhs, finestLevel, baseLevel);
-  multigridSolver.solveNoInit(phi, rhs, finestLevel, baseLevel, false);
+  multigridSolver.solveNoInit(phi, rhs, finestLevel, baseLevel, false, false);
   multigridSolver.computeAMRResidual(res, phi, rhs, finestLevel, baseLevel);
 
   // Sync and compute gradient. 
