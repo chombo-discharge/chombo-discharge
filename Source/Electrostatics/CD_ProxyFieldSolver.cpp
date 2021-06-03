@@ -31,6 +31,7 @@
 #include <CD_DataOps.H>
 #include <CD_NamespaceHeader.H>
 
+
 bool ProxyFieldSolver::solve(MFAMRCellData&       a_potential,
 			     const MFAMRCellData& a_rho,
 			     const EBAMRIVData&   a_sigma,
@@ -167,7 +168,7 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi, EBAMRCellData& a_resi
   m_amr->allocate(zero,     m_realm, phase::gas, 1);  
 
   DataOps::setValue(zero,     0.0);
-  DataOps::setValue(aco,      1.0);
+  DataOps::setValue(aco,      0.0);
   DataOps::setValue(bco,      1.0);
   DataOps::setValue(bcoIrreg, 1.0);
   DataOps::setValue(rho,      0.0);
@@ -275,6 +276,8 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi, EBAMRCellData& a_resi
 									 ghostRHS,
 									 relaxType));
 
+										   
+
   BiCGStabSolver<LevelData<EBCellFAB> > bicgstab;
   AMRMultiGrid<LevelData<EBCellFAB> >   multigridSolver;
 
@@ -309,7 +312,7 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi, EBAMRCellData& a_resi
     MayDay::Abort("Bad argument to 'factory'");
   }
 
-  multigridSolver.setSolverParameters(numSmooth, numSmooth, numSmooth, 1, 512, tolerance, 1E-60, 1E-60);
+  multigridSolver.setSolverParameters(numSmooth, numSmooth, numSmooth, 1, 32, tolerance, 1E-60, 1E-60);
 
 
   // Solve
@@ -332,13 +335,17 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi, EBAMRCellData& a_resi
 
   Real zerResid = multigridSolver.computeAMRResidual(res, zer, rhs, finestLevel, baseLevel);
   Real phiResid = multigridSolver.computeAMRResidual(res, phi, rhs, finestLevel, baseLevel);
-  while(phiResid >= zerResid*tolerance){
+
+  int iter = 0;
+  while(phiResid >= zerResid*tolerance && iter < 10 ){
     multigridSolver.m_convergenceMetric = multigridSolver.computeAMRResidual(zer, rhs, finestLevel, baseLevel);
 
 
     multigridSolver.solveNoInit(phi, rhs, finestLevel, baseLevel, false, false);
     coarsenConservative(a_phi);
     phiResid = multigridSolver.computeAMRResidual(res, phi, rhs, finestLevel, baseLevel);
+
+    iter++;
   }
   
   this->computeElectricField();
