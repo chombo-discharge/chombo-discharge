@@ -281,8 +281,10 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi, EBAMRCellData& a_resi
   bool useCond;
   bool useNWO;
   int  numSmooth;
+  Real tolerance;
   std::string whichFactory;
-  
+
+  pp.get("mg_tol",   tolerance);
   pp.get("smooth",   numSmooth);
   pp.get("factory",  whichFactory);
 
@@ -307,7 +309,7 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi, EBAMRCellData& a_resi
     MayDay::Abort("Bad argument to 'factory'");
   }
 
-  multigridSolver.setSolverParameters(numSmooth, numSmooth, numSmooth, 1, 512, 1E-10, 1E-60, 1E-60);
+  multigridSolver.setSolverParameters(numSmooth, numSmooth, numSmooth, 1, 512, tolerance, 1E-60, 1E-60);
 
 
   // Solve
@@ -327,13 +329,18 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi, EBAMRCellData& a_resi
   multigridSolver.m_verbosity = 10;
   multigridSolver.init(phi, rhs, finestLevel, baseLevel);
   multigridSolver.m_convergenceMetric = multigridSolver.computeAMRResidual(zer, rhs, finestLevel, baseLevel);
-  multigridSolver.solveNoInit(phi, rhs, finestLevel, baseLevel, false, false);
-  multigridSolver.computeAMRResidual(res, phi, rhs, finestLevel, baseLevel);
 
-  // Sync and compute gradient. 
-  m_amr->averageDown(a_phi, m_realm, phase::gas);
-  m_amr->interpGhost(a_phi, m_realm, phase::gas);
-  multigridSolver.computeAMRResidual(res, phi, rhs, finestLevel, baseLevel);
+  Real zerResid = multigridSolver.computeAMRResidual(res, zer, rhs, finestLevel, baseLevel);
+  Real phiResid = multigridSolver.computeAMRResidual(res, phi, rhs, finestLevel, baseLevel);
+  while(phiResid >= zerResid*tolerance){
+    multigridSolver.m_convergenceMetric = multigridSolver.computeAMRResidual(zer, rhs, finestLevel, baseLevel);
+
+
+    multigridSolver.solveNoInit(phi, rhs, finestLevel, baseLevel, false, false);
+    coarsenConservative(a_phi);
+    phiResid = multigridSolver.computeAMRResidual(res, phi, rhs, finestLevel, baseLevel);
+  }
+  
   this->computeElectricField();
   this->writePlotFile();
 }
