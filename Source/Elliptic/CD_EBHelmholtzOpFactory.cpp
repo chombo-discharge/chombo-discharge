@@ -33,6 +33,7 @@ EBHelmholtzOpFactory::EBHelmholtzOpFactory(const Real&              a_alpha,
 					   const IntVect&           a_ghostRhs,
 					   const RelaxationMethod&  a_relaxationMethod,
 					   const ProblemDomain&     a_bottomDomain,
+					   const int&               a_mgBlockingFactor,
 					   const AmrLevelGrids&     a_deeperLevelGrids){
 
   // Define constructor arguments. 
@@ -58,6 +59,7 @@ EBHelmholtzOpFactory::EBHelmholtzOpFactory(const Real&              a_alpha,
   
   m_relaxMethod         = a_relaxationMethod;
   m_bottomDomain        = a_bottomDomain;
+  m_mgBlockingFactor    = a_mgBlockingFactor;
   m_deeperLevelGrids    = a_deeperLevelGrids;
 
   m_numAmrLevels = m_amrLevelGrids.size();
@@ -118,11 +120,9 @@ void EBHelmholtzOpFactory::defineMultigridLevels(){
 	  mgEblgCoar = *m_deeperLevelGrids[curMgLevels-1];  // coarsest AMR level. So curMgLevels-1 is correct. 
 	}
 	else{
-	  hasCoarser = false;
-
 	  // Let the operator factory do the coarsening this time. 
 	  EBLevelGrid coarEblg;
-	  this->getCoarserLayout(mgEblgCoar, mgEblgFine, mgRefRatio, 16);
+	  hasCoarser = this->getCoarserLayout(mgEblgCoar, mgEblgFine, mgRefRatio, 16);
 	}
 
 	// Do not coarsen further if we end up with a domain smaller than m_bottomDomain. In this case

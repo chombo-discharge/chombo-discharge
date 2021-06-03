@@ -107,6 +107,7 @@ public:
 		       const IntVect&           a_ghostRHS,
 		       const RelaxationMethod&  a_relaxationMethod,
 		       const ProblemDomain&     a_bottomDomain,
+		       const int&               a_mgBlockingFactor,
 		       const AmrLevelGrids&     a_deeperLevelGrids = AmrLevelGrids());
   
   /*!
@@ -173,6 +174,9 @@ protected:
 
   // Bottom drop domain
   ProblemDomain m_bottomDomain;
+
+  // Blocking factor for when we create intermediate and deep multigrid levels
+  int m_mgBlockingFactor;
 
   // This is for using pre-defined grids for the deeper multigrid levels, i.e. for the levels that are coarsenings of m_amrLevelGrids[0]
   AmrLevelGrids    m_deeperLevelGrids;
