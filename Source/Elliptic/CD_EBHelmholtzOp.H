@@ -11,6 +11,9 @@
 #ifndef CD_EBHelmholtzOp_H
 #define CD_EBHelmholtzOp_H
 
+// Chombo includes
+#include <LevelTGA.H>
+
 // Our includes
 #include <CD_NamespaceHeader.H>
 
