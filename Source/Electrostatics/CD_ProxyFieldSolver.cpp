@@ -29,6 +29,7 @@
 #include <CD_ProxyFieldSolver.H>
 #include <CD_NwoEbQuadCfInterp.H>
 #include <CD_DataOps.H>
+#include <CD_EBHelmholtzOpFactory.H>
 #include <CD_NamespaceHeader.H>
 
 
