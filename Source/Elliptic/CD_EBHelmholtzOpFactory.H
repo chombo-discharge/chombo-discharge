@@ -28,9 +28,6 @@
 #include <CD_EBHelmholtzOp.H>
 #include <CD_NamespaceHeader.H>
 
-class HelmholtzEBBCFactory;
-class HelmholtzDomainBCFactory;
-
 /*!
   @brief Factory class for making variable-coefficient Helmholtz operators. 
 */
@@ -58,8 +55,8 @@ public:
   using AmrResolutions   = Vector<Real>;
   using AmrRefRatios     = Vector<int>;
 
-  using DomainBCFactory  = RefCountedPtr<BaseDomainBCFactory>;
-  using EBBCFactory      = RefCountedPtr<BaseEBBCFactory>;
+  using DomainBcFactory  = RefCountedPtr<BaseDomainBCFactory>; // Will be replaced with better BC class...
+  using EbBcFactory      = RefCountedPtr<BaseEBBCFactory>;     // Will be replaced with better BC class...
 
   /*!
     @brief Disallowed constructor. Use the full constructor
@@ -88,10 +85,10 @@ public:
     @param[in] a_ghostRhs         Number of ghost cells in right-hand side. 
     @param[in] a_relaxationMethod Relaxation method. 
     @param[in] a_bottomDomain     Coarsest domain on which we run multigrid. Must be a coarsening of the AMR problem domains. 
-    @param[in] a_deeperLevelGrids Optional object in case you want to pre-define the deeper multigrid levels.
+    @param[in] a_deeperLevelGrids Optional object in case you want to pre-define the deeper multigrid levels. 
     @note a_deeperLevelGrids exists because the default behavior in this factory is to use direct coarsening for deeper AMR levels. 
     However, this can prevent reaching "deep enough" into the multigrid hierarchy if you use small boxes (e.g. 16^3). So, a_deeperLevelGrids 
-    provide an option for using aggregation. 
+    provide an option for using aggregation. The first entry a_deeperLevelGrids[0] should be a a factor 2 coarsening of the coarsest AMR level. 
   */
   EBHelmholtzOpFactory(const Real&              a_alpha,
 		       const Real&              a_beta,
@@ -104,8 +101,8 @@ public:
 		       const AmrCellData&       a_amrAcoef,
 		       const AmrFluxData&       a_amrBcoef,
 		       const AmrIrreData&       a_amrBcoefIrreg,
-		       const DomainBCFactory&   a_domainBCFactory,
-		       const EBBCFactory&       a_ebbcFactory,
+		       const DomainBcFactory&   a_domainBCFactory,
+		       const EbBcFactory&       a_ebbcFactory,
 		       const IntVect&           a_ghostPhi,
 		       const IntVect&           a_ghostRHS,
 		       const RelaxationMethod&  a_relaxationMethod,
@@ -144,8 +141,15 @@ public:
 
 protected:
 
+  // Relaxation method
+  RelaxationMethod m_relaxMethod;
+
   // Number of AMR levels
   int m_numAmrLevels;
+
+  // Ghost cells
+  IntVect m_ghostPhi;
+  IntVect m_ghostRhs;
 
   // Alpha, beta. 
   Real m_alpha;
@@ -163,7 +167,29 @@ protected:
   AmrFluxData      m_amrBcoef;
   AmrIrreData      m_amrBcoefIrreg;
 
-  
+  // BC factories
+  DomainBcFactory m_domainBcFactory;
+  EbBcFactory     m_ebBcFactory;
+
+  // Bottom drop domain
+  ProblemDomain m_bottomDomain;
+
+  // This is for using pre-defined grids for the deeper multigrid levels, i.e. for the levels that are coarsenings of m_amrLevelGrids[0]
+  AmrLevelGrids    m_deeperLevelGrids;
+
+  // For checking if an AMR levels has multigrid levels
+  std::vector<bool>  m_hasMgLevels;
+
+  // MG operator things. Always weird to write this but e.g. m_mgLevelGrids[0] corresponds to the the multigrid levels below amr level 0. 
+  Vector<AmrLevelGrids> m_mgLevelGrids;
+  Vector<AmrCellData>   m_mgAcoef;
+  Vector<AmrFluxData>   m_mgBcoef;
+  Vector<AmrIrreData>   m_mgBcoefIrreg;
+
+  void defineMultigridLevels();
+  bool isCoarser(const ProblemDomain& a_eblgOne, const ProblemDomain& a_eblgTwo) const;
+  bool isFiner(const ProblemDomain& a_eblgOne, const ProblemDomain& a_eblgTwo) const;
+  bool getCoarserLayout(EBLevelGrid& a_coarseGrid, const EBLevelGrid& a_fineGrid, const int a_refRat, const int a_blockingFactor) const;
 };
 
 #include <CD_NamespaceFooter.H>
