@@ -12,8 +12,9 @@
 // Chombo includes
 #include <AMRMultiGrid.H>
 #include <BiCGStabSolver.H>
-#include <NWOEBConductivityOpFactory.H>
 #include <EBConductivityOpFactory.H>
+#include <NWOEBConductivityOpFactory.H>
+#include <slowEBCOFactory.H>
 #include <EBAMRPoissonOpFactory.H>
 #include <DirichletConductivityDomainBC.H>
 #include <DirichletConductivityEBBC.H>
@@ -35,7 +36,7 @@ bool ProxyFieldSolver::solve(MFAMRCellData&       a_potential,
 			     const EBAMRIVData&   a_sigma,
 			     const bool           a_zerophi) {
   DataOps::setValue(a_potential, 0.0);
-  DataOps::setValue(m_residue,   1.2345);
+  DataOps::setValue(m_residue,   0.0);
 
   EBAMRCellData gasData = m_amr->alias(phase::gas, a_potential);
   EBAMRCellData gasResi = m_amr->alias(phase::gas, m_residue);
@@ -259,30 +260,51 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi, EBAMRCellData& a_resi
 										      ghostRHS));
 
 
+  auto factorySlow = RefCountedPtr<slowEBCOFactory> (new slowEBCOFactory(levelGrids,
+									 interpOld,
+									 alpha,
+									 beta,
+									 aco.getData(),
+									 bco.getData(),
+									 bcoIrreg.getData(),
+									 m_amr->getDx()[0],
+									 m_amr->getRefinementRatios(),
+									 domainFactory,
+									 ebbcFactory,
+									 ghostPhi,
+									 ghostRHS,
+									 relaxType));
+
   BiCGStabSolver<LevelData<EBCellFAB> > bicgstab;
   AMRMultiGrid<LevelData<EBCellFAB> >   multigridSolver;
 
   bool useCond;
   bool useNWO;
   int  numSmooth;
+  std::string whichFactory;
   
   pp.get("smooth",   numSmooth);
-  pp.get("use_cond", useCond);
-  pp.get("use_nwo",  useNWO);
+  pp.get("factory",  whichFactory);
 
-  if(useCond){
-    if(useNWO){
-      pout() << "using nwo ebconductivityop" << endl;
-      multigridSolver.define(m_amr->getDomains()[0], *factoryNWO, &bicgstab, 1 + m_amr->getFinestLevel());
-    }
-    else{
-      pout() << "using old ebconductivityop" << endl;
-      multigridSolver.define(m_amr->getDomains()[0], *factoryOld, &bicgstab, 1 + m_amr->getFinestLevel());
-    }
+  if(whichFactory == "nwo"){
+    pout() << "using nwo ebconductivityop" << endl;
+    multigridSolver.define(m_amr->getDomains()[0], *factoryNWO, &bicgstab, 1 + m_amr->getFinestLevel());
   }
-  else{
+  else if(whichFactory == "cond"){
+    pout() << "using old ebconductivityop" << endl;
+    multigridSolver.define(m_amr->getDomains()[0], *factoryOld, &bicgstab, 1 + m_amr->getFinestLevel());
+  }
+  else if(whichFactory == "poiss"){
     pout() << "using ebamrpoissonopfactory" << endl;
     multigridSolver.define(m_amr->getDomains()[0], *factoryPoiss, &bicgstab, 1 + m_amr->getFinestLevel());
+  }
+  else if(whichFactory == "slowco"){
+    pout() << "using slowconductivity" << endl;
+    Chombo_EBIS::alias(&(*m_amr->getEBIndexSpace(phase::gas)));
+    multigridSolver.define(m_amr->getDomains()[0], *factorySlow, &bicgstab, 1 + m_amr->getFinestLevel());
+  }
+  else{
+    MayDay::Abort("Bad argument to 'factory'");
   }
 
   multigridSolver.setSolverParameters(numSmooth, numSmooth, numSmooth, 1, 512, 1E-10, 1E-60, 1E-60);
@@ -311,6 +333,7 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi, EBAMRCellData& a_resi
   // Sync and compute gradient. 
   m_amr->averageDown(a_phi, m_realm, phase::gas);
   m_amr->interpGhost(a_phi, m_realm, phase::gas);
+  multigridSolver.computeAMRResidual(res, phi, rhs, finestLevel, baseLevel);
   this->computeElectricField();
   this->writePlotFile();
 }
