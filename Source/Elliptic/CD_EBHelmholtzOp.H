@@ -547,6 +547,21 @@ protected:
     @brief Do homogeneous coarse-fine interpolation
   */
   void homogeneousCFInterp(LevelData<EBCellFAB>& a_phi);
+
+  /*!
+    @brief Inhomogeneous coarse-fine interpolation
+    @param[inout] a_phiFine Fine data. Ghost cells will be filled.
+    @param[inout] a_phiCoar Coarse data. 
+  */
+  void inhomogeneousCFInterp(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_phiCoar);
+
+  /*!
+    @brief Apply coarse-fine boundary conditions
+    @param[inout] a_phiFine     Fine data
+    @param[inout] a_phiCoar     Coarse data
+    @param[in]    a_homogeneous Homogeneous CF or not (i.e. coar data is zero);
+  */
+  void interpolateCF(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>* a_phiCoar, const bool a_homogeneous);
 };
 
 #include <CD_NamespaceFooter.H>

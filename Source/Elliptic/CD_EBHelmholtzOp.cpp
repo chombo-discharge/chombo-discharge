@@ -353,6 +353,26 @@ void EBHelmholtzOp::homogeneousCFInterp(LevelData<EBCellFAB>& a_phi){
   if(m_hasCoar) m_interpolator->coarseFineInterpH(a_phi, a_phi.interval());
 }
 
+void EBHelmholtzOp::inhomogeneousCFInterp(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar){
+  if(m_hasCoar) m_interpolator->coarseFineInterp(a_phiFine, a_phiCoar, a_phiFine.interval());
+}
+
+void EBHelmholtzOp::interpolateCF(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>* a_phiCoar, const bool a_homogeneous){
+  if(m_hasCoar){
+    if(a_homogeneous){
+      this->homogeneousCFInterp(a_phiFine);
+    }
+    else{
+      if(a_phiCoar == NULL){
+	MayDay::Error("EBHelmholtzOp::interpolateCF - trying inhomogeneous interpolation but phiCoar is NULL");
+      }
+      else{
+	this->inhomogeneousCFInterp(a_phiFine, *a_phiCoar);
+      }
+    }
+  }
+}
+
 void EBHelmholtzOp::relaxGauSai(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations){
   MayDay::Warning("EBHelmholtzOp::relaxGauSai - not implemented");
 }
