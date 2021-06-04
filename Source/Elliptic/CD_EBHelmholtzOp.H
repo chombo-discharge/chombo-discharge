@@ -296,6 +296,28 @@ public:
 		   const LevelData<EBCellFAB>& a_coarseCorrection,
 		   bool                        a_skip_res) override final;
 
+  /*!
+    @brief Prolongation onto AMR level
+    @param[out] a_correction       Interpolated correction
+    @param[in]  a_coarseCorrection Correction on coarse level
+  */
+  void AMRProlong(LevelData<EBCellFAB>&       a_correction,
+		  const LevelData<EBCellFAB>& a_coarseCorrection) override final;
+
+  /*!
+    @brief Update AMR residual
+  */
+  void AMRUpdateResidual(LevelData<EBCellFAB>&       a_residual,
+			 const LevelData<EBCellFAB>& a_correction,
+			 const LevelData<EBCellFAB>& a_coarseCorrection) override final;
+
+  /*!
+    @brief Set alpha coefficient and beta coefficient (can change as diffusion solvers progress)
+    @param[in] a_alpha Alpha-coefficient
+    @param[in] a_beta Beta-coefficient
+  */
+  void setAlphaAndBeta(const Real& a_alpha, const Real& a_beta) override final;
+
 protected:
 
   /*!
@@ -327,6 +349,16 @@ protected:
     @brief Refinement factor to fine level
   */
   int m_refToCoar;
+
+  /*!
+    @brief Alpha-coefficient
+  */
+  Real m_alpha;
+
+  /*!
+    @brief Beta-coefficient
+  */
+  Real m_beta;
 
   /*!
     @brief Fine level grid (if the operator has a fine level)
@@ -431,7 +463,12 @@ protected:
 		   const bool                         a_homogeneousPhysBC,
 		   AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp);
 
-  
+
+  /*!
+    @brief Calculate the weight of the diagonal term
+  */
+  void calculateAlphaWeight();
+  void calculateRelaxationCoefficient();
 };
 
 #include <CD_NamespaceFooter.H>

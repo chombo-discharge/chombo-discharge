@@ -67,6 +67,15 @@ EBHelmholtzOp::~EBHelmholtzOp(){
 
 }
 
+void EBHelmholtzOp::setAlphaAndBeta(const Real& a_alpha, const Real& a_beta) {
+  m_alpha = a_alpha;
+  m_beta  = a_beta;
+
+  // When we change alpha and beta we need to recompute relaxation coefficients...
+  this->calculateAlphaWeight(); 
+  this->calculateRelaxationCoefficient();
+}
+
 void EBHelmholtzOp::residual(LevelData<EBCellFAB>& a_residual, const LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_rhs, bool a_homogeneousPhysBC) {
   CH_assert(m_hasCoar = false);
   
@@ -239,6 +248,19 @@ void EBHelmholtzOp::AMRRestrict(LevelData<EBCellFAB>&       a_residualCoarse,
   this->scale(resThisLevel, -1.0);
 
   m_ebAverage.average(a_residualCoarse, resThisLevel, Interval(0,0));
+}
+
+void EBHelmholtzOp::AMRProlong(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_coarseCorrection) {
+  m_ebInterp.pwcInterp(a_correction, a_coarseCorrection, Interval(0,0));
+}
+
+void EBHelmholtzOp::AMRUpdateResidual(LevelData<EBCellFAB>&       a_residual,
+				      const LevelData<EBCellFAB>& a_correction,
+				      const LevelData<EBCellFAB>& a_coarseCorrection) {
+  LevelData<EBCellFAB> lcorr;
+  this->create(lcorr, a_correction);
+  this->applyOp(lcorr, a_correction, &a_coarseCorrection, true, false);
+  this->incr(a_residual, a_correction, -1.0);
 }
 
 void EBHelmholtzOp::applyOp(LevelData<EBCellFAB>&             a_Lphi,
