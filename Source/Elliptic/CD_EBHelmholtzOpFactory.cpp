@@ -87,8 +87,16 @@ void EBHelmholtzOpFactory::defineMultigridLevels(){
   m_hasMgLevels.resize(m_numAmrLevels);
 
   for (int amrLevel = 0; amrLevel < m_numAmrLevels; amrLevel++){
-    if(amrLevel == 0 || m_amrRefRatios[amrLevel] > 2){
+    m_hasMgLevels[amrLevel] = false;
+    
+    if(amrLevel == 0 && this->isCoarser(m_bottomDomain, m_amrLevelGrids[amrLevel]->getDomain())){
       m_hasMgLevels[amrLevel] = true;
+    }
+    else if(m_amrRefRatios[amrLevel-1] > 2){ // There must be one intermediate level 
+      m_hasMgLevels[amrLevel] = true;
+    }
+
+    if(m_hasMgLevels[amrLevel]){
       
       const int mgRefRatio = 2;
 
@@ -126,7 +134,18 @@ void EBHelmholtzOpFactory::defineMultigridLevels(){
 
 	// Do not coarsen further if we end up with a domain smaller than m_bottomDomain. In this case
 	// we will terminate the coarsening and let AMRMultiGrid do the bottom solve. 
-	if(hasCoarser && this->isCoarser(mgEblgCoar->getDomain(), m_bottomDomain)) hasCoarser = false;
+	if(hasCoarser){
+	  if(this->isCoarser(mgEblgCoar->getDomain(), m_bottomDomain)){
+	    hasCoarser = false;
+	  }
+
+	  // We should never be asked to make an coarsened MG level which is also an AMR level, so break here.
+	  for (int iamr = 0; iamr < m_numAmrLevels; iamr++){
+	    if(mgEblgCoar->getDomain() == m_amrLevelGrids[iamr]->getDomain()){
+	      hasCoarser = false;
+	    }
+	  }
+	}
 
 	// Ok, we have a valid coarser domain which is given by mgEblgCoar. Use that domain to make the coefficients. 
 	if(hasCoarser){
@@ -194,6 +213,15 @@ void EBHelmholtzOpFactory::defineMultigridLevels(){
     else{
       m_hasMgLevels[amrLevel] = false;
     }
+
+#if 1 // Debug
+    if(procID() == 0){
+      std::cout << "amrLevel = " << amrLevel << "\t domain = " << m_amrLevelGrids[amrLevel]->getDomain() << ":\n";
+      for (int mglevel = 0; mglevel < m_mgLevelGrids[amrLevel].size(); mglevel++){
+	std::cout << "\t mg level = " << mglevel << "\t mg domain = " << m_mgLevelGrids[amrLevel][mglevel]->getDomain() << "\n";
+      }
+    }
+#endif
   }
 }
 
