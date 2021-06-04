@@ -68,6 +68,8 @@ public:
 		const EBLevelGrid&                                   a_eblgCoar,
 		const EBLevelGrid&                                   a_eblgCoarMG,
 		const RefCountedPtr<EBMultigridInterpolator>&        a_interpolator,
+		const RefCountedPtr<EBFluxRegister>&                 a_fluxReg,
+		const RefCountedPtr<EbCoarAve>&                      a_coarAve,
 		const RefCountedPtr<HelmholtzDomainBc>&              a_domainBC,
 		const RefCountedPtr<HelmholtzEbBc>&                  a_ebBC,
 		const Real&                                          a_dx,
