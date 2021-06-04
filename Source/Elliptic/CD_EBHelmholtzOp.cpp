@@ -345,6 +345,15 @@ void EBHelmholtzOp::relaxJacobi(LevelData<EBCellFAB>& a_correction, const LevelD
 
   for (int iter = 0; iter < a_iterations; iter++){
     this->homogeneousCFInterp(a_correction);
+    this->applyOp(Lcorr, a_correction, true);
+
+    for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit){
+      Lcorr[dit()] -= a_residual[dit()];
+      Lcorr[dit()] *= m_relCoef[dit()];
+      Lcorr[dit()] *= -0.5; // Should this factor be here...?
+
+      a_correction[dit()] += Lcorr[dit()];
+    }
   }
   MayDay::Warning("EBHelmholtzOp::relaxJacobi - not implemented");
 }
