@@ -1499,7 +1499,8 @@ void AmrMesh::parseRefinementRatios(){
 
   // Pad with 2 if user didn't supply enough
   while(ratios.size() < m_maxAmrDepth){
-    ratios.push_back(2);
+    //    ratios.push_back(2);
+    ratios.push_back(ratios.back());
   }
   
   m_refinementRatios = ratios;
