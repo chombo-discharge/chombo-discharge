@@ -25,7 +25,7 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid &                                
 			     const EBLevelGrid &                                  a_eblg,
 			     const EBLevelGrid &                                  a_eblgCoar,
 			     const EBLevelGrid &                                  a_eblgCoarMG,
-			     const RefCountedPtr<EBMultigridInterpolator>&        a_quadCFI,
+			     const RefCountedPtr<EBMultigridInterpolator>&        a_interpolator,
 			     const RefCountedPtr<HelmholtzDomainBc>&              a_domainBC,
 			     const RefCountedPtr<HelmholtzEbBc>&                  a_ebBC,
 			     const Real    &                                      a_dx,
@@ -49,6 +49,7 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid &                                
   m_eblg(a_eblg),
   m_eblgCoar(),
   m_eblgCoarMG(),
+  m_interpolator(a_interpolator),
   m_refToFine(a_hasFine ? a_refToFine : 1),
   m_refToCoar(a_hasCoar ? a_refToCoar : 1),
   m_hasFine(a_hasFine),
@@ -349,11 +350,7 @@ void EBHelmholtzOp::relaxJacobi(LevelData<EBCellFAB>& a_correction, const LevelD
 }
 
 void EBHelmholtzOp::homogeneousCFInterp(LevelData<EBCellFAB>& a_phi){
-  MayDay::Warning("EBHelmholtzOp::homogeneousCFInterp");
-  if(m_hasCoar){
-    //    m_interpolator->interpolateHomogeneous(a_phi
-  }
-
+  if(m_hasCoar) m_interpolator->coarseFineInterpH(a_phi, a_phi.interval());
 }
 
 void EBHelmholtzOp::relaxGauSai(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations){
@@ -371,5 +368,6 @@ void EBHelmholtzOp::calculateAlphaWeight(){
 void EBHelmholtzOp::calculateRelaxationCoefficient(){
   MayDay::Warning("EBHelmholtzOp::calculateRelaxationCoefficient - not implemented");
 }
+
 
 #include <CD_NamespaceFooter.H>

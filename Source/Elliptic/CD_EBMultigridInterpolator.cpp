@@ -54,7 +54,6 @@ void EBMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>& a_phiFine, 
   EBQuadCFInterp::interpolate(a_phiFine, a_phiCoar, a_variables, false);
 }
 
-
 void EBMultigridInterpolator::coarseFineInterpH(LevelData<EBCellFAB>& a_phiFine, const Interval a_variables){
   EBQuadCFInterp::interpolate(a_phiFine, m_zeroCoar, a_variables, false);
 }

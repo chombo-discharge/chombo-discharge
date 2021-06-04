@@ -65,7 +65,7 @@ public:
 		const EBLevelGrid &                                  a_eblg,
 		const EBLevelGrid &                                  a_eblgCoar,
 		const EBLevelGrid &                                  a_eblgCoarMG,
-		const RefCountedPtr<EBMultigridInterpolator>&        a_quadCFI,
+		const RefCountedPtr<EBMultigridInterpolator>&        a_interpolator,
 		const RefCountedPtr<HelmholtzDomainBc>&              a_domainBC,
 		const RefCountedPtr<HelmholtzEbBc>&                  a_ebBC,
 		const Real    &                                      a_dx,
@@ -444,6 +444,11 @@ protected:
     @brief Prolongation operator from AMR level
   */
   EBMGInterp m_ebInterp;
+
+  /*!
+    @brief Interpolator object
+  */
+  RefCountedPtr<EBMultigridInterpolator> m_interpolator;
 
   /*!
     @brief A-coefficient in Helmholtz equation
