@@ -138,11 +138,13 @@ void EBHelmholtzOpFactory::defineMultigridLevels(){
 	  if(this->isCoarser(mgEblgCoar->getDomain(), m_bottomDomain)){
 	    hasCoarser = false;
 	  }
-
-	  // We should never be asked to make an coarsened MG level which is also an AMR level, so break here.
-	  for (int iamr = 0; iamr < m_numAmrLevels; iamr++){
-	    if(mgEblgCoar->getDomain() == m_amrLevelGrids[iamr]->getDomain()){
-	      hasCoarser = false;
+	  else{
+	    // Not so sure about this one, will we ever be asked to make an coarsened MG level which is also an AMR level? If not, this code
+	    // will reduce the coarsening efforts.
+	    for (int iamr = 0; iamr < m_numAmrLevels; iamr++){
+	      if(mgEblgCoar->getDomain() == m_amrLevelGrids[iamr]->getDomain()){
+		hasCoarser = false;
+	      }
 	    }
 	  }
 	}

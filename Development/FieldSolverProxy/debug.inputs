@@ -15,8 +15,8 @@ AmrMesh.box_sorting     = morton      # 'none', 'shuffle', 'morton'
 AmrMesh.blocking_factor = 8           # Default blocking factor (16 in 3D)
 AmrMesh.max_box_size    = 16          # Maximum allowed box size
 AmrMesh.max_ebis_box    = 16          # Maximum allowed box size
-AmrMesh.ref_rat         = 4 4 4       # Refinement ratios
-AmrMesh.num_ghost       = 3           # Number of ghost cells. Default is 3
+AmrMesh.ref_rat         = 4 2 2       # Refinement ratios
+AmrMesh.num_ghost       = 1           # Number of ghost cells. Default is 3
 AmrMesh.lsf_ghost       = 3           # Number of ghost cells when writing level-set to grid
 AmrMesh.eb_ghost        = 4           # Set number of of ghost cells for EB stuff
 AmrMesh.centroid_sten   = linear      # Centroid interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
@@ -69,8 +69,8 @@ ProxyFieldSolver.eb_order = 1           # BC order on EB
 ProxyFieldSolver.dom_val  = -1.         # Dirichlet value on domain
 ProxyFieldSolver.eb_val   =  1.         # Dirichlet value on EB
 ProxyFieldSolver.phi_ini  = 0.0         # Initial value for phi
-ProxyFieldSolver.smooth   = 32          # Smoothings
-ProxyFieldSolver.relax    = 1           # Relaxation method
+ProxyFieldSolver.smooth   = 16          # Smoothings
+ProxyFieldSolver.relax    = 2           # Relaxation method
 ProxyFieldSolver.mg_tol   = 1.E-10      # Multigrid tolerance
 
 # ====================================================================================================
@@ -91,8 +91,8 @@ RodDielectric.electrode.endpoint2       =  0.5  0.5     # Other endpoint
 RodDielectric.electrode.radius          = 0.1        # Electrode radius
 RodDielectric.electrode.live            = true          # Live or not
 
-RodDielectric.dielectric.on             = false         # Use dielectric or not
-RodDielectric.dielectric.shape          = perlin_box    # 'plane', 'box', 'perlin_box', 'sphere'
+RodDielectric.dielectric.on             = true         # Use dielectric or not
+RodDielectric.dielectric.shape          = sphere    # 'plane', 'box', 'perlin_box', 'sphere'
 RodDielectric.dielectric.permittivity   = 4             # Dielectric permittivity
 
 # Subsettings for 'plane'
@@ -116,8 +116,8 @@ RodDielectric.perlin_box.noise_freq     = 1 1 1         # Noise frequency
 RodDielectric.perlin_box.noise_reseed   = false         # Reseed noise or not
 
 # Subsettings for sphere
-RodDielectric.sphere.center             = 0 0 0         # Low corner
-RodDielectric.sphere.radius             = 0.5           # Radius
+RodDielectric.sphere.center             = 0.5 -0.5      # Low corner
+RodDielectric.sphere.radius             = 0.25          # Radius
 
 
 # ====================================================================================================

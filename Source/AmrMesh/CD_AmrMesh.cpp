@@ -780,6 +780,8 @@ void AmrMesh::parseOptions(){
   parseGhostInterpolation();
   parseCentroidStencils();
   parseEbCentroidStencils();
+
+  this->sanityCheck();
 }
 
 void AmrMesh::parseRuntimeOptions(){
@@ -1726,6 +1728,14 @@ void AmrMesh::sanityCheck() const {
   CH_assert(m_maxBoxSize >= 8 && m_maxBoxSize % m_blockingFactor == 0);
   CH_assert(m_fillRatioBR > 0. && m_fillRatioBR <= 1.0);
   CH_assert(m_bufferSizeBR > 0);
+
+  if(m_maxAmrDepth > 0){
+    for (int lvl = 0; lvl < m_maxAmrDepth; lvl++){
+      if(m_refinementRatios[lvl] > 2 && m_blockingFactor < 8){
+	MayDay::Abort("AmrMesh::sanityCheck -- can't use blocking factor < 8 with factor 4 refinement!");
+      }
+    }
+  }
 }
 
 bool AmrMesh::getEbCf() const {
