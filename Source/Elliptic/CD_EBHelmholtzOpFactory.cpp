@@ -70,6 +70,10 @@ EBHelmholtzOpFactory::EBHelmholtzOpFactory(const Real&                       a_a
   }
   
   this->defineMultigridLevels();
+
+#if 1 // Debug code, just making sure I have all the function signatures.
+  auto op = new EBHelmholtzOp();
+#endif
 }
   
 EBHelmholtzOpFactory::~EBHelmholtzOpFactory(){
