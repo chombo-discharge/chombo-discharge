@@ -191,9 +191,36 @@ protected:
   Vector<AmrFluxData>   m_mgBcoef;
   Vector<AmrIrreData>   m_mgBcoefIrreg;
 
+  /*!
+    @brief Function which defines the multigrid levels for this operator factory
+  */
   void defineMultigridLevels();
-  bool isCoarser(const ProblemDomain& a_eblgOne, const ProblemDomain& a_eblgTwo) const;
-  bool isFiner(const ProblemDomain& a_eblgOne, const ProblemDomain& a_eblgTwo) const;
+
+  /*!
+    @brief Check if a domain is coarser than the other
+    @param[in] a_domainOne The first domain
+    @param[in] a_domainTwo The second domain
+    @return Returns true of a_domainOne has fewer grid points than a_domainTwo
+  */
+  bool isCoarser(const ProblemDomain& a_domainOne, const ProblemDomain& a_domainTwo) const;
+
+  /*!
+    @brief Check if a domain is finer than the other
+    @param[in] a_domainOne The first domain
+    @param[in] a_domainTwo The second domain
+    @return Returns true of a_domainOne has more grid points than a_domainTwo
+  */
+  bool isFiner(const ProblemDomain& a_domainOne, const ProblemDomain& a_domainTwo) const;
+
+  /*!
+    @brief Constructor a coarseing of a fine level. 
+    @param[out] a_coarseGrid     The coarse grid layout. Must be a pointer to an undefined EBLevelGrid on input
+    @param[in]  a_fineGrid       The coarse grid layout. Must be a pointer to an undefined EBLevelGrid on input
+    @param[in]  a_refRat         Refinement ratio
+    @param[in]  a_blockingFactor Blocking factor to use for grid aggregation
+    @return This will return a multigrid level (i.e. one that is completely overlapping) the fine level. If we can, we use aggregation with
+    the blocking factor. Otherwise we try to coarsen directly. 
+  */
   bool getCoarserLayout(RefCountedPtr<EBLevelGrid>& a_coarseGrid, const EBLevelGrid& a_fineGrid, const int a_refRat, const int a_blockingFactor) const;
 
   /*!
