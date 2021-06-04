@@ -12,6 +12,8 @@
 #ifndef CD_EBHelmholtzOpFactory_H
 #define CD_EBHelmholtzOpFactory_H
 
+// Std includes
+
 // Chombo includes
 #include <RealVect.H>
 #include <EBLevelGrid.H>
@@ -20,8 +22,9 @@
 #include <EBCellFAB.H>
 #include <EBFluxFAB.H>
 #include <BaseIVFAB.H>
-#include <BaseDomainBC.H>
+#include <ConductivityBaseDomainBC.H>
 #include <BaseEBBC.H>
+
 
 // Our includes
 #include <CD_EbCoarAve.H>
@@ -34,15 +37,6 @@
 */
 class EBHelmholtzOpFactory : public AMRLevelOpFactory<LevelData<EBCellFAB> > {
 public:
-
-  /*!
-    @brief Relaxation method for the operators
-  */
-  enum class RelaxationMethod {
-    Jacobi,
-    GSRB,
-    GSRBFast,
-  };
 
   using AmrLevelGrids    = Vector<RefCountedPtr<EBLevelGrid> >;
   using AmrInterpolators = Vector<RefCountedPtr<EBMultigridInterpolator> >;
@@ -58,6 +52,8 @@ public:
 
   using DomainBcFactory  = RefCountedPtr<BaseDomainBCFactory>; // Will be replaced with better BC class...
   using EbBcFactory      = RefCountedPtr<BaseEBBCFactory>;     // Will be replaced with better BC class...
+
+  using RelaxType        = EBHelmholtzOp::RelaxationMethod;
 
   /*!
     @brief Disallowed constructor. Use the full constructor
@@ -90,6 +86,7 @@ public:
     @note a_deeperLevelGrids exists because the default behavior in this factory is to use direct coarsening for deeper AMR levels. 
     However, this can prevent reaching "deep enough" into the multigrid hierarchy if you use small boxes (e.g. 16^3). So, a_deeperLevelGrids 
     provide an option for using aggregation. The first entry a_deeperLevelGrids[0] should be a a factor 2 coarsening of the coarsest AMR level. 
+    @note This operator is for time-independent a- and b-coefficients. 
   */
   EBHelmholtzOpFactory(const Real&              a_alpha,
 		       const Real&              a_beta,
@@ -106,7 +103,7 @@ public:
 		       const EbBcFactory&       a_ebbcFactory,
 		       const IntVect&           a_ghostPhi,
 		       const IntVect&           a_ghostRHS,
-		       const RelaxationMethod&  a_relaxationMethod,
+		       const RelaxType&         a_relaxationMethod,
 		       const ProblemDomain&     a_bottomDomain,
 		       const int&               a_mgBlockingFactor,
 		       const AmrLevelGrids&     a_deeperLevelGrids = AmrLevelGrids());
@@ -144,7 +141,7 @@ public:
 protected:
 
   // Relaxation method
-  RelaxationMethod m_relaxMethod;
+  RelaxType m_relaxMethod;
 
   // Number of AMR levels
   int m_numAmrLevels;
@@ -244,6 +241,17 @@ protected:
 			   const EBLevelGrid&                 a_eblgCoar,
 			   const EBLevelGrid&                 a_eblgFine,
 			   const int                          a_refRat);
+
+
+  /*!
+    @brief Make an EBBC object. 
+  */
+  RefCountedPtr<ConductivityBaseEBBC> makeEbBcObject(const EBLevelGrid& a_eblg, const Real& a_dx) const;
+
+  /*!
+    @brief Make a domain BC object.
+  */
+  RefCountedPtr<ConductivityBaseDomainBC> makeDomainBcObject(const EBLevelGrid& a_eblg, const Real& a_dx) const;
 };
 
 #include <CD_NamespaceFooter.H>

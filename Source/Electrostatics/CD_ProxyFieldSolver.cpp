@@ -441,7 +441,7 @@ void ProxyFieldSolver::setupHelmholtz(){
 			    ebbcFactory,
 			    m_amr->getNumberOfGhostCells()*IntVect::Unit,
 			    m_amr->getNumberOfGhostCells()*IntVect::Unit,
-			    EBHelmholtzOpFactory::RelaxationMethod::Jacobi,
+			    EBHelmholtzOp::RelaxationMethod::Jacobi,
 			    bottomDomain,
 			    m_amr->getBlockingFactor());
 
