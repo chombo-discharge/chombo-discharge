@@ -398,7 +398,13 @@ void EBHelmholtzOp::calculateAlphaWeight(){
 }
 
 void EBHelmholtzOp::calculateRelaxationCoefficient(){
-  MayDay::Warning("EBHelmholtzOp::calculateRelaxationCoefficient - not implemented");
+  for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit){
+    const Box bx = m_eblg.getDBL()[dit()];
+
+    BaseFab<Real>& regRel = m_relCoef[dit()].getSingleValuedFAB();
+  }
+
+  MayDay::Wawrning("EBHelmholtzOp::calculateRelaxationCoefficient - not implemented");
 }
 
 VoFStencil EBHelmholtzOp::getFaceCenterFluxStencil(const FaceIndex& a_face, const DataIndex& a_dit) const {
