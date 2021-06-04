@@ -384,7 +384,17 @@ void EBHelmholtzOp::relaxGSRBFast(LevelData<EBCellFAB>& a_correction, const Leve
 }
 
 void EBHelmholtzOp::calculateAlphaWeight(){
-  MayDay::Warning("EBHelmholtzOp::calculateAlphaWeight - not implemented");
+  for (DataIterator dit(m_eblg.getDBL().dataIterator()); dit.ok(); ++dit){
+    VoFIterator& vofit = m_vofIterIrreg[dit()];
+    for (vofit.reset(); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+
+      const Real volFrac = m_eblg.getEBISL()[dit()].volFrac(vof);
+      const Real Aco     = (*m_Acoef)[dit()](vof, 0);
+
+      m_alphaDiagWeight[dit()](vof, 0) = volFrac*Aco;
+    }
+  }
 }
 
 void EBHelmholtzOp::calculateRelaxationCoefficient(){

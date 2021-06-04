@@ -499,6 +499,26 @@ protected:
   LevelData<EBCellFAB> m_relCoef;
 
   /*!
+    @brief Weights of diagonal alpha terms
+  */
+  LayoutData<BaseIVFAB<Real> > m_alphaDiagWeight;
+
+  /*!
+    @brief Weights of diagonal beta terms
+  */
+  LayoutData<BaseIVFAB<Real> > m_betaDiagWeight;
+
+  /*!
+    @brief VoFIterator for irregular cells
+  */
+  LayoutData<VoFIterator> m_vofIterIrreg;
+
+  /*!
+    @brief VoFIterator for "multi-cells". 
+  */
+  LayoutData<VoFIterator> m_vofIterMulti;
+
+  /*!
     @brief Apply operator on this level. This is a more general version which can turn on/off homogeneous and CF bcs.
     @param[out] a_Lphi              L(phi)
     @param[out] a_phi               Phi on this level
