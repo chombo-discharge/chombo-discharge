@@ -4,24 +4,24 @@
  */
 
 /*!
-  @file   CD_MultigridInterpolator.cpp
-  @brief  Implementation of CD_MultigridInterpolator.H
+  @file   CD_EBMultigridInterpolator.cpp
+  @brief  Implementation of CD_EBMultigridInterpolator.H
   @author Robert Marskar
 */
 
 // Our includes
-#include <CD_MultigridInterpolator.H>
+#include <CD_EBMultigridInterpolator.H>
 #include <CD_NamespaceHeader.H>
 
-MultigridInterpolator::MultigridInterpolator(){
+EBMultigridInterpolator::EBMultigridInterpolator(){
   m_isDefined = false;
 }
 
-MultigridInterpolator::MultigridInterpolator(const EBLevelGrid&            a_eblgFine,
-					     const EBLevelGrid&            a_eblgCoar,
-					     const int                     a_nRef,
-					     const int                     a_nVar,
-					     const LayoutData<IntVectSet>& a_ghostCells)
+EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid&            a_eblgFine,
+						 const EBLevelGrid&            a_eblgCoar,
+						 const int                     a_nRef,
+						 const int                     a_nVar,
+						 const LayoutData<IntVectSet>& a_ghostCells)
   : EBQuadCFInterp(a_eblgFine.getDBL(),
 		   a_eblgCoar.getDBL(),
 		   a_eblgFine.getEBISL(),
@@ -36,7 +36,7 @@ MultigridInterpolator::MultigridInterpolator(const EBLevelGrid&            a_ebl
   
 }
 
-MultigridInterpolator::~MultigridInterpolator(){
+EBMultigridInterpolator::~EBMultigridInterpolator(){
 
 }
 

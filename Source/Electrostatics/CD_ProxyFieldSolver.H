@@ -48,6 +48,7 @@ protected:
   void solveOnePhase(EBAMRCellData& a_solution, EBAMRCellData& a_residue);
   void coarsenMG(EBAMRCellData& a_solution);
   void coarsenConservative(EBAMRCellData& a_solution);
+  void setupHelmholtz();
   
   Vector<EBLevelGrid> getEBLevelGrids();
   Vector<RefCountedPtr<NWOEBQuadCFInterp> > getInterpNWO();

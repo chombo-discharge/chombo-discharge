@@ -24,7 +24,8 @@
 #include <BaseEBBC.H>
 
 // Our includes
-#include <CD_MultigridInterpolator.H>
+#include <CD_EbCoarAve.H>
+#include <CD_EBMultigridInterpolator.H>
 #include <CD_EBHelmholtzOp.H>
 #include <CD_NamespaceHeader.H>
 
@@ -44,9 +45,9 @@ public:
   };
 
   using AmrLevelGrids    = Vector<RefCountedPtr<EBLevelGrid> >;
-  using AmrInterpolators = Vector<RefCountedPtr<MultigridInterpolator> >;
+  using AmrInterpolators = Vector<RefCountedPtr<EBMultigridInterpolator> >;
   using AmrFluxRegisters = Vector<RefCountedPtr<EBFluxRegister> >;
-  using AmrCoarseners    = Vector<RefCountedPtr<EBCoarseAverage> >;
+  using AmrCoarseners    = Vector<RefCountedPtr<EbCoarAve> >;
   
   using AmrCellData      = Vector<RefCountedPtr<LevelData<EBCellFAB> > >;
   using AmrFluxData      = Vector<RefCountedPtr<LevelData<EBFluxFAB> > >;
@@ -193,7 +194,29 @@ protected:
   void defineMultigridLevels();
   bool isCoarser(const ProblemDomain& a_eblgOne, const ProblemDomain& a_eblgTwo) const;
   bool isFiner(const ProblemDomain& a_eblgOne, const ProblemDomain& a_eblgTwo) const;
-  bool getCoarserLayout(EBLevelGrid& a_coarseGrid, const EBLevelGrid& a_fineGrid, const int a_refRat, const int a_blockingFactor) const;
+  bool getCoarserLayout(RefCountedPtr<EBLevelGrid>& a_coarseGrid, const EBLevelGrid& a_fineGrid, const int a_refRat, const int a_blockingFactor) const;
+
+  /*!
+    @brief Coarsen coefficients (conservatively)
+    @param[out] a_coarAcoef      Coarse A-coefficient
+    @param[out] a_coarBcoef      Coarse B-coefficient
+    @param[out] a_coarBcoefIrreg Coarse B-coefficient on EB faces
+    @param[in]  a_fineAcoef      Fine A-coefficient
+    @param[in]  a_fineBcoef      Fine B-coefficient
+    @param[in]  a_fineBcoefIrreg Fine B-coefficient on EB faces
+    @param[in]  a_eblgCoar       Coarse grids
+    @param[in]  a_eblgFine       Fine grids
+    @param[in]  a_refRat         Coarsening factor
+  */
+  void coarsenCoefficients(LevelData<EBCellFAB>&              a_coarAcoef,
+			   LevelData<EBFluxFAB>&              a_coarBcoef,
+			   LevelData<BaseIVFAB<Real> >&       a_coarBcoefIrreg,
+			   const LevelData<EBCellFAB>&        a_fineAcoef,
+			   const LevelData<EBFluxFAB>&        a_fineBcoef,
+			   const LevelData<BaseIVFAB<Real> >& a_fineBcoefIrreg,
+			   const EBLevelGrid&                 a_eblgCoar,
+			   const EBLevelGrid&                 a_eblgFine,
+			   const int                          a_refRat);
 };
 
 #include <CD_NamespaceFooter.H>

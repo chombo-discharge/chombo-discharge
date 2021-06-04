@@ -107,32 +107,88 @@ void EBHelmholtzOpFactory::defineMultigridLevels(){
       while(hasCoarser){
 	
 	// Current number of multigrid levels and the multigrid level which we will coarsen. Note the inverse order here (first entry is finest level)
-	const int curMgLevels        =  m_mgLevelGrids[amrLevel].size();          
-	const EBLevelGrid mgEblgFine = *m_mgLevelGrids[amrLevel][curMgLevels-1]; 
+	const int curMgLevels         =  m_mgLevelGrids[amrLevel].size();          
+	const EBLevelGrid& mgEblgFine = *m_mgLevelGrids[amrLevel][curMgLevels-1]; 
 
 	// BoxLayout and domains for coarsening.
-	EBLevelGrid mgEblgCoar;
+	RefCountedPtr<EBLevelGrid> mgEblgCoar = RefCountedPtr<EBLevelGrid>(new EBLevelGrid());
 
 	// This is an overriding option where we use the pre-defined coarsenings in m_deeperMultigridLevels. This is only valid for coarsenings of
 	// the base AMR level, hence amrLevel == 0. Once those levels are exhausted we begin with direct coarsening. 
 	if(amrLevel == 0 && curMgLevels < m_deeperLevelGrids.size()){    
 	  hasCoarser = true;                                // Note that m_deeperLevelGrids[0] should be a factor 2 coarsening of the 
-	  mgEblgCoar = *m_deeperLevelGrids[curMgLevels-1];  // coarsest AMR level. So curMgLevels-1 is correct. 
+	  mgEblgCoar = m_deeperLevelGrids[curMgLevels-1];  // coarsest AMR level. So curMgLevels-1 is correct. 
 	}
 	else{
 	  // Let the operator factory do the coarsening this time. 
-	  EBLevelGrid coarEblg;
-	  hasCoarser = this->getCoarserLayout(mgEblgCoar, mgEblgFine, mgRefRatio, 16);
+	  hasCoarser = this->getCoarserLayout(mgEblgCoar, mgEblgFine, mgRefRatio, m_mgBlockingFactor);
 	}
 
 	// Do not coarsen further if we end up with a domain smaller than m_bottomDomain. In this case
 	// we will terminate the coarsening and let AMRMultiGrid do the bottom solve. 
-	if(this->isCoarser(mgEblgCoar.getDomain(), m_bottomDomain)) hasCoarser = false;
+	if(hasCoarser && this->isCoarser(mgEblgCoar->getDomain(), m_bottomDomain)) hasCoarser = false;
 
-	// Ok, we have a valid coarser domain, and it is given by mgCoarGrids and mgCoarDomain. 
+	// Ok, we have a valid coarser domain which is given by mgEblgCoar. Use that domain to make the coefficients. 
 	if(hasCoarser){
+	  const EBLevelGrid& eblgCoar        = *mgEblgCoar;
+	  const EBLevelGrid& eblgFine        =  mgEblgFine;
 
+	  const EBISLayout& ebislCoar        = eblgCoar.getEBISL();
+	  const EBISLayout& ebislFine        = eblgFine.getEBISL();
+
+	  const DisjointBoxLayout& gridsCoar = eblgCoar.getDBL();
+	  const DisjointBoxLayout& gridsFine = eblgFine.getDBL();
+
+	  const ProblemDomain& domainCoar    = eblgCoar.getDomain();
+	  const ProblemDomain& domainFine    = eblgFine.getDomain();
+
+
+	  // Make the irregular sets
+	  const int nghost = 1;
+	  LayoutData<IntVectSet> irregSets(gridsCoar);
+	  for (DataIterator dit(gridsCoar); dit.ok(); ++dit){
+	    Box bx = gridsCoar[dit()];
+	    bx.grow(nghost);
+	    bx &= domainCoar;
+
+	    const EBISBox& ebisbox = ebislCoar[dit()];
+
+	    irregSets[dit()] = ebisbox.getIrregIVS(bx);
+	  }
+	  
+	  // Factories
+	  EBCellFactory       cellFactory(mgEblgCoar->getEBISL());
+	  EBFluxFactory       fluxFactory(mgEblgCoar->getEBISL());
+	  BaseIVFactory<Real> irreFactory(mgEblgCoar->getEBISL(), irregSets);
+
+	  // Define coarsened coefficients
+	  RefCountedPtr<LevelData<EBCellFAB> >        coarAcoef     (new LevelData<EBCellFAB>       (gridsCoar, 1, nghost*IntVect::Unit, cellFactory));
+	  RefCountedPtr<LevelData<EBFluxFAB> >        coarBcoef     (new LevelData<EBFluxFAB>       (gridsCoar, 1, nghost*IntVect::Unit, fluxFactory));
+	  RefCountedPtr<LevelData<BaseIVFAB<Real> > > coarBcoefIrreg(new LevelData<BaseIVFAB<Real> >(gridsCoar, 1, nghost*IntVect::Unit, irreFactory));
+
+	  // These are the fine coefficients which will be coarsened.
+	  const LevelData<EBCellFAB>&        fineAcoef      = *m_mgAcoef[amrLevel].back();
+	  const LevelData<EBFluxFAB>&        fineBcoef      = *m_mgBcoef[amrLevel].back();
+	  const LevelData<BaseIVFAB<Real> >& fineBcoefIrreg = *m_mgBcoefIrreg[amrLevel].back();
+	  
+	  // Coarsen the coefficients
+	  this->coarsenCoefficients(*coarAcoef,
+				    *coarBcoef,
+				    *coarBcoefIrreg,
+				    fineAcoef,
+				    fineBcoef,
+				    fineBcoefIrreg,
+				    eblgCoar,
+				    eblgFine,
+				    mgRefRatio);
+
+
+	  m_mgLevelGrids[amrLevel].push_back(mgEblgCoar);
+	  m_mgAcoef[amrLevel].push_back(coarAcoef);
+	  m_mgBcoef[amrLevel].push_back(coarBcoef);
+	  m_mgBcoefIrreg[amrLevel].push_back(coarBcoefIrreg);
 	}
+
       }
     }
     else{
@@ -150,12 +206,11 @@ bool EBHelmholtzOpFactory::isFiner(const ProblemDomain& A, const ProblemDomain& 
   return A.domainBox().numPts() > B.domainBox().numPts();
 }
 
-bool EBHelmholtzOpFactory::getCoarserLayout(EBLevelGrid& a_coarEblg, const EBLevelGrid& a_fineEblg, const int a_refRat, const int a_blockingFactor) const {
+bool EBHelmholtzOpFactory::getCoarserLayout(RefCountedPtr<EBLevelGrid>& a_coarEblg, const EBLevelGrid& a_fineEblg, const int a_refRat, const int a_blockingFactor) const {
   // TLDR: This creates a coarsening of a_fineGrid with refinement factor 2. We first try to split the grid using a_blockingFactor. If that does not work we
   //       coarsen directly. If that does not work we are out of ideas.
 
   bool hasCoarser;
-  
 
   // This returns true if the fine grid fully covers the domain. The nature of this makes it
   // always true for the "deeper" multigridlevels,  but not so for the intermediate levels. 
@@ -188,6 +243,8 @@ bool EBHelmholtzOpFactory::getCoarserLayout(EBLevelGrid& a_coarEblg, const EBLev
       doAggregation = isFullyCovered(a_fineEblg);
     }
 
+    doCoarsen = a_fineEblg.getDBL().coarsenable(a_refRat);
+
     // Prefer aggregation over direct coarsening
     if(doAggregation){ 
       Vector<Box> boxes;
@@ -199,13 +256,13 @@ bool EBHelmholtzOpFactory::getCoarserLayout(EBLevelGrid& a_coarEblg, const EBLev
       LoadBalance(procs, boxes);
 
       coarDbl.define(boxes, procs, coarDomain);
-      a_coarEblg.define(coarDbl, coarDomain, m_ghostPhi.max(), a_fineEblg.getEBIS());
+      a_coarEblg->define(coarDbl, coarDomain, m_ghostPhi.max(), a_fineEblg.getEBIS());
 
       hasCoarser = true;
     }
     else if(doCoarsen){ // But use coarsening if we must.
       coarsen(coarDbl, a_fineEblg.getDBL(), a_refRat);
-      a_coarEblg.define(coarDbl, coarDomain, m_ghostPhi.max(), a_fineEblg.getEBIS());
+      a_coarEblg->define(coarDbl, coarDomain, m_ghostPhi.max(), a_fineEblg.getEBIS());
 
       hasCoarser = true;
     }
@@ -218,6 +275,39 @@ bool EBHelmholtzOpFactory::getCoarserLayout(EBLevelGrid& a_coarEblg, const EBLev
   }
 
   return hasCoarser;
+}
+
+void EBHelmholtzOpFactory::coarsenCoefficients(LevelData<EBCellFAB>&              a_coarAcoef,
+					       LevelData<EBFluxFAB>&              a_coarBcoef,
+					       LevelData<BaseIVFAB<Real> >&       a_coarBcoefIrreg,
+					       const LevelData<EBCellFAB>&        a_fineAcoef,
+					       const LevelData<EBFluxFAB>&        a_fineBcoef,
+					       const LevelData<BaseIVFAB<Real> >& a_fineBcoefIrreg,
+					       const EBLevelGrid&                 a_eblgCoar,
+					       const EBLevelGrid&                 a_eblgFine,
+					       const int                          a_refRat){
+
+  const Interval interv(0,0);
+  
+  if(a_refRat == 1){
+    a_fineAcoef.copyTo(a_coarAcoef);
+    a_fineBcoef.copyTo(a_coarBcoef);
+    a_fineBcoefIrreg.copyTo(a_coarBcoefIrreg);
+  }
+  else{
+    EbCoarAve averageOp(a_eblgFine.getDBL(),
+			a_eblgCoar.getDBL(),
+			a_eblgFine.getEBISL(),
+			a_eblgCoar.getEBISL(),
+			a_eblgCoar.getDomain(),
+			a_refRat,
+			1,
+			a_eblgCoar.getEBIS());
+
+    averageOp.average(a_coarAcoef,      a_fineAcoef,      interv);
+    averageOp.average(a_coarBcoef,      a_fineBcoef,      interv);
+    averageOp.average(a_coarBcoefIrreg, a_fineBcoefIrreg, interv);
+  }
 }
 
 EBHelmholtzOp* EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bool a_homogeneousOnly) {

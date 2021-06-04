@@ -27,6 +27,7 @@
 
 // Our includes
 #include <CD_ProxyFieldSolver.H>
+#include <CD_EBMultigridInterpolator.H>
 #include <CD_NwoEbQuadCfInterp.H>
 #include <CD_DataOps.H>
 #include <CD_EBHelmholtzOpFactory.H>
@@ -42,6 +43,8 @@ bool ProxyFieldSolver::solve(MFAMRCellData&       a_potential,
 
   EBAMRCellData gasData = m_amr->alias(phase::gas, a_potential);
   EBAMRCellData gasResi = m_amr->alias(phase::gas, m_residue);
+
+  this->setupHelmholtz(); // Just for testing, right now. 
 
   this->solveOnePhase(gasData, gasResi);
   
@@ -68,6 +71,10 @@ void ProxyFieldSolver::registerOperators()  {
     // For interpolating to cell centroids
     m_amr->registerOperator(s_eb_irreg_interp, m_realm, phase::gas);
     m_amr->registerOperator(s_eb_irreg_interp, m_realm, phase::solid);
+
+    // For making helmholtz happy
+    m_amr->registerOperator(s_eb_flux_reg, m_realm, phase::gas);
+    m_amr->registerOperator(s_eb_flux_reg, m_realm, phase::solid);
   }
 }
 
@@ -372,6 +379,72 @@ void ProxyFieldSolver::coarsenMG(EBAMRCellData& a_phi){
 
 void ProxyFieldSolver::coarsenConservative(EBAMRCellData& a_phi){
   m_amr->averageDown(a_phi, m_realm, phase::gas);
+}
+
+void ProxyFieldSolver::setupHelmholtz(){
+
+  const int finestLevel = m_amr->getFinestLevel();
+  
+  Vector<RefCountedPtr<EBMultigridInterpolator> > interpolators(1+finestLevel);
+  for (int lvl = 0; lvl <= finestLevel; lvl++){
+
+    if(lvl > 0){
+      const EBLevelGrid eblgFine = *m_amr->getEBLevelGrid(m_realm, phase::gas)[lvl];
+      const EBLevelGrid eblgCoar = *m_amr->getEBLevelGrid(m_realm, phase::gas)[lvl-1];
+      const LayoutData<IntVectSet>& cfivs = *eblgFine.getCFIVS();
+      
+      interpolators[lvl] = RefCountedPtr<EBMultigridInterpolator> (new EBMultigridInterpolator(eblgFine,
+											       eblgCoar,
+											       m_amr->getRefinementRatio(lvl, lvl-1),
+											       1,
+											       cfivs));
+    }
+  }
+
+  const Real alpha = 1.0;
+  const Real beta  = 1.0;
+
+  EBAMRCellData Aco;
+  EBAMRFluxData Bco;
+  EBAMRIVData   BcoIrreg;
+
+
+
+  m_amr->allocate(Aco,      m_realm, phase::gas, 1);
+  m_amr->allocate(Bco,      m_realm, phase::gas, 1);
+  m_amr->allocate(BcoIrreg, m_realm, phase::gas, 1);
+
+  auto ebbcFactory   = RefCountedPtr<DirichletConductivityEBBCFactory>     (new DirichletConductivityEBBCFactory());
+  auto domainFactory = RefCountedPtr<DirichletConductivityDomainBCFactory> (new DirichletConductivityDomainBCFactory());
+  ebbcFactory  ->setValue(1);
+  ebbcFactory  ->setOrder(1);
+  domainFactory->setValue(-1);
+
+  // Set the bottom domain. Don't go below 8x cells in any direction
+  ProblemDomain bottomDomain = m_amr->getDomains()[0];
+  while(bottomDomain.domainBox().longside() >= 16){
+    bottomDomain.coarsen(2);
+  }
+
+  EBHelmholtzOpFactory fact(alpha,
+			    beta,
+			    m_amr->getEBLevelGrid(m_realm, phase::gas),
+			    interpolators,
+			    m_amr->getFluxRegister(m_realm, phase::gas),
+			    m_amr->getCoarseAverage(m_realm, phase::gas),
+			    m_amr->getRefinementRatios(),
+			    m_amr->getDx(),
+			    Aco.getData(),
+			    Bco.getData(),
+			    BcoIrreg.getData(),
+			    domainFactory,
+			    ebbcFactory,
+			    m_amr->getNumberOfGhostCells()*IntVect::Unit,
+			    m_amr->getNumberOfGhostCells()*IntVect::Unit,
+			    EBHelmholtzOpFactory::RelaxationMethod::Jacobi,
+			    bottomDomain,
+			    m_amr->getBlockingFactor());
+
 }
 
 #include <CD_NamespaceFooter.H>
