@@ -37,7 +37,6 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid &                                
 			     const bool&                                          a_hasFine,
 			     const bool&                                          a_hasCoar,
 			     const bool&                                          a_hasMGObjects,
-			     const bool&                                          a_layoutChanged,
 			     const Real&                                          a_alpha,
 			     const Real&                                          a_beta,
 			     const RefCountedPtr<LevelData<EBCellFAB> >&          a_acoef,
@@ -54,6 +53,7 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid &                                
   m_interpolator(a_interpolator),
   m_fluxReg(a_fluxReg),
   m_coarAve(a_coarAve),
+  m_dx(a_dx),
   m_refToFine(a_hasFine ? a_refToFine : 1),
   m_refToCoar(a_hasCoar ? a_refToCoar : 1),
   m_hasFine(a_hasFine),
@@ -389,6 +389,60 @@ void EBHelmholtzOp::calculateAlphaWeight(){
 
 void EBHelmholtzOp::calculateRelaxationCoefficient(){
   MayDay::Warning("EBHelmholtzOp::calculateRelaxationCoefficient - not implemented");
+}
+
+VoFStencil EBHelmholtzOp::getFaceCenterFluxStencil(const FaceIndex& a_face, const DataIndex& a_dit) const {
+  VoFStencil fluxStencil;
+  
+  if(!a_face.isBoundary()){
+    fluxStencil.add(a_face.getVoF(Side::Hi),  1.0/m_dx);
+    fluxStencil.add(a_face.getVoF(Side::Lo), -1.0/m_dx);
+    fluxStencil *= (*m_Bcoef)[a_dit][a_face.direction()](a_face, 0);
+  }
+  else{// BC handles this
+  }
+
+  return fluxStencil;
+}
+
+VoFStencil EBHelmholtzOp::getFaceCentroidFluxStencil(const FaceIndex& a_face, const DataIndex& a_dit) const {
+  VoFStencil fluxStencil;
+  
+  const FaceStencil interpolationStencil = EBArith::getInterpStencil(a_face, IntVectSet(), m_eblg.getEBISL()[a_dit], m_eblg.getDomain());
+
+  for (int i = 0; i < interpolationStencil.size(); i++){
+    const FaceIndex& iface = interpolationStencil.face(i);
+    const Real& iweight    = interpolationStencil.weight(i);
+
+    VoFStencil fluxCenterStencil = this->getFaceCenterFluxStencil(iface, a_dit);
+    fluxCenterStencil *= iweight;
+
+    fluxStencil += fluxCenterStencil;
+  }
+
+  return fluxStencil;
+}
+
+VoFStencil EBHelmholtzOp::getDivFStencil(const VolIndex& a_vof, const DataIndex& a_dit) const {
+  VoFStencil divStencil;
+
+  const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
+
+  for (int dir = 0; dir < SpaceDim; dir++){
+    for (SideIterator sit; sit.ok(); ++sit){
+      const int isign = sign(sit());
+      
+      Vector<FaceIndex> faces = ebisbox.getFaces(a_vof, dir, sit());
+      for (auto f : faces.stdVector()){
+	VoFStencil centroidFluxStencil = this->getFaceCentroidFluxStencil(f, a_dit);
+	centroidFluxStencil *= sign(sit())*ebisbox.areaFrac(f)/m_dx;
+
+	divStencil += centroidFluxStencil;
+      }
+    }
+  }
+
+  return divStencil;
 }
 
 

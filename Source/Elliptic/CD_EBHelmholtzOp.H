@@ -79,7 +79,6 @@ public:
 		const bool&                                          a_hasFine,
 		const bool&                                          a_hasCoar,
 		const bool&                                          a_hasMGObjects,
-		const bool&                                          a_layoutChanged,
 		const Real&                                          a_alpha,
 		const Real&                                          a_beta,
 		const RefCountedPtr<LevelData<EBCellFAB> >&          a_acoef,
@@ -420,6 +419,11 @@ protected:
   Real m_beta;
 
   /*!
+    @brief Grid resolution;
+  */
+  Real m_dx;
+
+  /*!
     @brief Fine level grid (if the operator has a fine level)
   */
   EBLevelGrid m_eblgFine;
@@ -580,6 +584,28 @@ protected:
     @param[in]    a_homogeneous Homogeneous CF or not (i.e. coar data is zero);
   */
   void interpolateCF(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>* a_phiCoar, const bool a_homogeneous);
+
+  /*!
+    @brief Get the face-centered flux stencil
+    @param[in]  a_face Face
+    @param[in]  a_dit  Data index. Need because we multiply by B-coefficient
+    @return Returns a stencil for the face-centered flux for the given face
+  */
+  VoFStencil getFaceCenterFluxStencil(const FaceIndex& a_face, const DataIndex& a_dit) const;
+
+  /*!
+    @brief Get the face-centroid flux stencil
+    @param[in]  a_face Face
+    @param[in]  a_dit  Data index. Need because we multiply by B-coefficient
+    @return Returns a stencil for the face-centroid flux for the given face
+    @note The current version just interpolates the centered fluxes. 
+  */
+  VoFStencil getFaceCentroidFluxStencil(const FaceIndex& a_face, const DataIndex& a_dit) const;
+
+  /*!
+    @brief Get stencil for irregular cell (not kappa-divided). 
+  */
+  VoFStencil getDivFStencil(const VolIndex& a_vof, const DataIndex& a_dit) const;
 };
 
 #include <CD_NamespaceFooter.H>
