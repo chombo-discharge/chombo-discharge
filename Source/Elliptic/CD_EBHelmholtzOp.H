@@ -537,6 +537,11 @@ protected:
     @brief Calculate relaxation coefficient
   */
   void calculateRelaxationCoefficient();
+
+  /*!
+    @brief Do homogeneous coarse-fine interpolation
+  */
+  void homogeneousCFInterp(LevelData<EBCellFAB>& a_phi);
 };
 
 #include <CD_NamespaceFooter.H>

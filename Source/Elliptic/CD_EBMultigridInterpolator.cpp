@@ -9,6 +9,10 @@
   @author Robert Marskar
 */
 
+// Chombo includes
+#include <EBCellFactory.H>
+#include <EBLevelDataOps.H>
+
 // Our includes
 #include <CD_EBMultigridInterpolator.H>
 #include <CD_NamespaceHeader.H>
@@ -33,11 +37,26 @@ EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid&            a
 		   a_eblgFine.getEBIS(),
 		   true){
 
+  m_eblgFine = a_eblgFine;
+  m_eblgCoar = a_eblgCoar;
   
+  // Define a temp which is zero everywhere. Don't need ghost cells because the stencils should(!) only reach into valid cells AFAIK. 
+  EBCellFactory cellFact(m_eblgCoar.getEBISL());
+  m_zeroCoar.define(m_eblgCoar.getDBL(), a_nVar, IntVect::Zero, cellFact);
+  EBLevelDataOps::setToZero(m_zeroCoar);
 }
 
 EBMultigridInterpolator::~EBMultigridInterpolator(){
 
+}
+
+void EBMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar, const Interval a_variables){
+  EBQuadCFInterp::interpolate(a_phiFine, a_phiCoar, a_variables, false);
+}
+
+
+void EBMultigridInterpolator::coarseFineInterpH(LevelData<EBCellFAB>& a_phiFine, const Interval a_variables){
+  EBQuadCFInterp::interpolate(a_phiFine, m_zeroCoar, a_variables, false);
 }
 
 #include <CD_NamespaceFooter.H>

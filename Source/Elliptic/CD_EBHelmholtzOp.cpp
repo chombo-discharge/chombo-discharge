@@ -338,7 +338,22 @@ void EBHelmholtzOp::getFlux(EBFluxFAB&                  a_flux,
 }
 
 void EBHelmholtzOp::relaxJacobi(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations){
+
+  LevelData<EBCellFAB> Lcorr;
+  this->create(Lcorr, a_residual);
+
+  for (int iter = 0; iter < a_iterations; iter++){
+    this->homogeneousCFInterp(a_correction);
+  }
   MayDay::Warning("EBHelmholtzOp::relaxJacobi - not implemented");
+}
+
+void EBHelmholtzOp::homogeneousCFInterp(LevelData<EBCellFAB>& a_phi){
+  MayDay::Warning("EBHelmholtzOp::homogeneousCFInterp");
+  if(m_hasCoar){
+    //    m_interpolator->interpolateHomogeneous(a_phi
+  }
+
 }
 
 void EBHelmholtzOp::relaxGauSai(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations){
