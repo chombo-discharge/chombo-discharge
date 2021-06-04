@@ -53,9 +53,11 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid &                                
   m_refToCoar(a_hasCoar ? a_refToCoar : 1),
   m_hasFine(a_hasFine),
   m_hasCoar(a_hasCoar),
-  m_relaxationMethod(a_relaxationMethod)
-{
+  m_relaxationMethod(a_relaxationMethod) {
 
+  m_turnOffBCs = false; //
+
+  
   if(m_hasMGObjects){
     m_eblgCoarMG = a_eblgCoarMG;
   }
@@ -84,11 +86,14 @@ void EBHelmholtzOp::residual(LevelData<EBCellFAB>& a_residual, const LevelData<E
 }
 
 void EBHelmholtzOp::preCond(LevelData<EBCellFAB>& a_corr, const LevelData<EBCellFAB>& a_residual) {
-  MayDay::Warning("EBHelmholtzOp::preCond - not implemented");
+  EBLevelDataOps::assign(a_corr, a_residual);
+  EBLevelDataOps::scale(a_corr,  m_relCoef);
+
+  this->relax(a_corr, a_residual, 25);
 }
 
-void EBHelmholtzOp::applyOp(LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_phi, bool a_homogeneousPhysBc) {
-  MayDay::Warning("EBHelmholtzOp::applyOp - not implemented");
+void EBHelmholtzOp::applyOp(LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_phi, bool a_homogeneousPhysBC) {
+  this->applyOp(a_Lphi, a_phi, NULL, a_homogeneousPhysBC, true);
 }
 
 void EBHelmholtzOp::create(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) {
@@ -140,6 +145,26 @@ void EBHelmholtzOp::createCoarser(LevelData<EBCellFAB>& a_coarse, const LevelDat
   MayDay::Warning("EBHelmholtzOp::createCoarser - not implemented");
 }
 
+void EBHelmholtzOp::createCoarsened(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const int& a_refRat) {
+
+  DisjointBoxLayout dblCoFi;
+  EBISLayout        ebislCoFi;
+  ProblemDomain     domainCoFi;
+
+  // Make grids and EBISL
+  coarsen(dblCoFi, m_eblg.getDBL(), a_refRat);
+  domainCoFi = coarsen(m_eblg.getDomain(), a_refRat);
+  m_eblg.getEBIS()->fillEBISLayout(ebislCoFi, dblCoFi, domainCoFi, a_rhs.ghostVect()[0]);
+
+  if(m_refToCoar > 1){
+    ebislCoFi.setMaxRefinementRatio(m_refToCoar, m_eblg.getEBIS());
+  }
+
+  EBCellFactory factCoFi(ebislCoFi);
+  a_lhs.define(dblCoFi, a_rhs.nComp(), a_rhs.ghostVect(), factCoFi);
+  
+}
+
 void EBHelmholtzOp::relax(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, int a_iterations){
   switch(m_relaxationMethod){
   case RelaxationMethod::Jacobi:
@@ -173,7 +198,6 @@ void EBHelmholtzOp::prolongIncrement(LevelData<EBCellFAB>& a_phi, const LevelDat
 int EBHelmholtzOp::refToCoarser() {
   return m_refToCoar;
 }
-
 
 void EBHelmholtzOp::AMROperator(LevelData<EBCellFAB>&              a_Lphi,
 				const LevelData<EBCellFAB>&        a_phiFine,
@@ -290,6 +314,29 @@ Real EBHelmholtzOp::getSafety() const {
   return safety;
 }
 
+void EBHelmholtzOp::divideByIdentityCoef(LevelData<EBCellFAB>& a_rhs) {
+  for (DataIterator dit(a_rhs.disjointBoxLayout()); dit.ok(); ++dit){
+    a_rhs[dit()] /= (*m_Acoef)[dit()];
+  }
+}
+
+void EBHelmholtzOp::applyOpNoBoundary(LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_phi) {
+  m_turnOffBCs = true;
+  this->applyOp(a_Lphi, a_phi, true);
+  m_turnOffBCs = false;
+}
+
+void EBHelmholtzOp::fillGrad(const LevelData<EBCellFAB>& a_phi){
+}
+
+void EBHelmholtzOp::getFlux(EBFluxFAB&                  a_flux,
+			    const LevelData<EBCellFAB>& a_data,
+			    const Box&                  a_grid,
+			    const DataIndex&            a_dit,
+			    Real                        a_scale) {
+  MayDay::Warning("EBHelmholtzOp::getFlux - not implemented (yet)");
+}
+
 void EBHelmholtzOp::relaxJacobi(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations){
   MayDay::Warning("EBHelmholtzOp::relaxJacobi - not implemented");
 }
@@ -300,6 +347,14 @@ void EBHelmholtzOp::relaxGauSai(LevelData<EBCellFAB>& a_correction, const LevelD
 
 void EBHelmholtzOp::relaxGSRBFast(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations){
   MayDay::Warning("EBHelmholtzOp::relaxGauSai - not implemented");
+}
+
+void EBHelmholtzOp::calculateAlphaWeight(){
+  MayDay::Warning("EBHelmholtzOp::calculateAlphaWeight - not implemented");
+}
+
+void EBHelmholtzOp::calculateRelaxationCoefficient(){
+  MayDay::Warning("EBHelmholtzOp::calculateRelaxationCoefficient - not implemented");
 }
 
 #include <CD_NamespaceFooter.H>

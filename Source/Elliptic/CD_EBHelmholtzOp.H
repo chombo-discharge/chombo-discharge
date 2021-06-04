@@ -18,6 +18,7 @@
 #include <EBMGAverage.H>
 #include <EBMGInterp.H>
 #include <LevelTGA.H>
+#include <BaseIVFAB.H>
 
 // Our includes
 #include <CD_EBMultigridInterpolator.H>
@@ -318,6 +319,45 @@ public:
   */
   void setAlphaAndBeta(const Real& a_alpha, const Real& a_beta) override final;
 
+  /*!
+    @brief Create coarsening of data holder
+    @param[out] a_lhs    Coarsened data
+    @param[in]  a_rhs    Fine data
+    @param[in]  a_refRat Coarsening factor
+  */
+  void createCoarsened(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const int& a_refRat) override final;
+
+  /*!
+    @brief Divide by the a-coefficient
+    @param[inout] a_rhs Divided data
+  */
+  void divideByIdentityCoef(LevelData<EBCellFAB>& a_rhs) override final;
+
+  /*!
+    @brief Apply operator but turn off all BCs. 
+  */
+  void applyOpNoBoundary(LevelData<EBCellFAB>& a_ans, const LevelData<EBCellFAB>& a_phi) override final;
+
+  /*!
+    @brief Not called, I think
+    @param[in] a_phi Phi
+  */
+  void fillGrad(const LevelData<EBCellFAB>& a_phi) override final;
+
+  /*!
+    @brief Fill flux
+    @param[out] a_flux  Flux
+    @param[in]  a_data  Data for which we will compute the flux
+    @param[in]  a_grid  Grid
+    @param[in]  a_dit   Corresponding data index. 
+    @param[in]  a_scale Scaling factor
+  */
+  void getFlux(EBFluxFAB&                  a_flux,
+	       const LevelData<EBCellFAB>& a_data,
+	       const Box&                  a_grid,
+	       const DataIndex&            a_dit,
+	       Real                        a_scale) override final;
+
 protected:
 
   /*!
@@ -349,6 +389,11 @@ protected:
     @brief Refinement factor to fine level
   */
   int m_refToCoar;
+
+  /*!
+    @brief Turn off BCs or not. Used in applyOpNoBoundary
+  */
+  int m_turnOffBCs;
 
   /*!
     @brief Alpha-coefficient
@@ -400,6 +445,25 @@ protected:
   */
   EBMGInterp m_ebInterp;
 
+  /*!
+    @brief A-coefficient in Helmholtz equation
+  */
+  RefCountedPtr<LevelData<EBCellFAB> > m_Acoef;
+
+  /*!
+    @brief B-coefficient in Helmholtz equation
+  */
+  RefCountedPtr<LevelData<EBFluxFAB> > m_Bcoef;
+
+  /*!
+    @brief B-coefficient in Helmholtz equation, but on EB faces
+  */
+  RefCountedPtr<LevelData<BaseIVFAB<Real> > > m_BcoefIrreg;
+
+  /*!
+    @brief Relaxation coefficient
+  */
+  LevelData<EBCellFAB> m_relCoef;
 
   /*!
     @brief Apply operator on this level. This is a more general version which can turn on/off homogeneous and CF bcs.
@@ -468,6 +532,10 @@ protected:
     @brief Calculate the weight of the diagonal term
   */
   void calculateAlphaWeight();
+
+  /*!
+    @brief Calculate relaxation coefficient
+  */
   void calculateRelaxationCoefficient();
 };
 
