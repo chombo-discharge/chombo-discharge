@@ -19,9 +19,11 @@
 #include <EBMGInterp.H>
 #include <LevelTGA.H>
 #include <BaseIVFAB.H>
+#include <EBFluxRegister.H>
 
 // Our includes
 #include <CD_EBMultigridInterpolator.H>
+#include <CD_EbCoarAve.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -61,15 +63,15 @@ public:
   /*!
     @brief Full constructor
   */
-  EBHelmholtzOp(const EBLevelGrid &                                  a_eblgFine,
-		const EBLevelGrid &                                  a_eblg,
-		const EBLevelGrid &                                  a_eblgCoar,
-		const EBLevelGrid &                                  a_eblgCoarMG,
+  EBHelmholtzOp(const EBLevelGrid&                                   a_eblgFine,
+		const EBLevelGrid&                                   a_eblg,
+		const EBLevelGrid&                                   a_eblgCoar,
+		const EBLevelGrid&                                   a_eblgCoarMG,
 		const RefCountedPtr<EBMultigridInterpolator>&        a_interpolator,
 		const RefCountedPtr<HelmholtzDomainBc>&              a_domainBC,
 		const RefCountedPtr<HelmholtzEbBc>&                  a_ebBC,
-		const Real    &                                      a_dx,
-		const Real    &                                      a_dxCoar,
+		const Real&                                          a_dx,
+		const Real&                                          a_dxCoar,
 		const int&                                           a_refToFine,
 		const int&                                           a_refToCoar,
 		const bool&                                          a_hasFine,
@@ -128,6 +130,16 @@ public:
     @details This does a local copy from rhs to lhs
   */
   void assign(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) override final;
+
+  /*!
+    @brief Weird but true, coarsening between VCycles give better convergence
+  */
+  unsigned int orderOfAccuracy(void) const override final;
+
+  /*!
+    @brief Enforce CF consistency
+  */
+  void enforceCFConsistency(LevelData<EBCellFAB>& a_coarCorr, const LevelData<EBCellFAB>& a_fineCorr) override final;
 
   /*!
     @brief Compute the dot product??
@@ -451,6 +463,16 @@ protected:
   RefCountedPtr<EBMultigridInterpolator> m_interpolator;
 
   /*!
+    @brief Flux register
+  */
+  RefCountedPtr<EBFluxRegister> m_fluxReg;
+
+  /*!
+    @brief Conservative coarsener
+  */
+  RefCountedPtr<EbCoarAve> m_coarAve;
+
+  /*!
     @brief A-coefficient in Helmholtz equation
   */
   RefCountedPtr<LevelData<EBCellFAB> > m_Acoef;
@@ -484,12 +506,6 @@ protected:
 	       const LevelData<EBCellFAB>* const a_phiCoar,
 	       const bool                        a_homogeneousPhysBC,
 	       const bool                        a_homogeneousCFBC);
-
-  /*!
-    @brief Get factor for relaxation coefficient
-    @details Returns 0.5 if using Jacobi and 1 otherwise. 
-  */
-  Real getSafety() const;
 
   /*!
     @brief Jacobi relaxation

@@ -70,6 +70,14 @@ EBHelmholtzOp::~EBHelmholtzOp(){
 
 }
 
+unsigned int EBHelmholtzOp::orderOfAccuracy(void) const {
+  return 99;
+}
+
+void EBHelmholtzOp::enforceCFConsistency(LevelData<EBCellFAB>& a_coarCorr, const LevelData<EBCellFAB>& a_fineCorr){
+  m_coarAve->average(a_coarCorr, a_fineCorr, a_coarCorr.interval());
+}
+
 void EBHelmholtzOp::setAlphaAndBeta(const Real& a_alpha, const Real& a_beta) {
   m_alpha = a_alpha;
   m_beta  = a_beta;
@@ -296,25 +304,6 @@ void EBHelmholtzOp::applyOp(LevelData<EBCellFAB>&             a_Lphi,
   MayDay::Warning("EBHelmholtzOp::applyOp(big) - not implemented");
 }
 
-Real EBHelmholtzOp::getSafety() const {
-  Real safety;
-
-  switch(m_relaxationMethod){
-  case RelaxationMethod::Jacobi:
-    safety = 0.5;
-    break;
-  case RelaxationMethod::GSRB:
-    safety = 1.0;
-    break;
-  case RelaxationMethod::GSRBFast:
-    safety = 1.0;
-  default:
-    MayDay::Abort("EBHelmholtzOp::getSafety - bad relaxation method requested");
-  };
-
-  return safety;
-}
-
 void EBHelmholtzOp::divideByIdentityCoef(LevelData<EBCellFAB>& a_rhs) {
   for (DataIterator dit(a_rhs.disjointBoxLayout()); dit.ok(); ++dit){
     a_rhs[dit()] /= (*m_Acoef)[dit()];
@@ -348,11 +337,11 @@ void EBHelmholtzOp::relaxJacobi(LevelData<EBCellFAB>& a_correction, const LevelD
     this->applyOp(Lcorr, a_correction, true);
 
     for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit){
-      Lcorr[dit()] -= a_residual[dit()];
-      Lcorr[dit()] *= m_relCoef[dit()];
-      Lcorr[dit()] *= -0.5; // Should this factor be here...?
-
-      a_correction[dit()] += Lcorr[dit()];
+      Lcorr[dit()]        -= a_residual[dit()];
+      Lcorr[dit()]        *= m_relCoef[dit()];
+      Lcorr[dit()]        *= 0.5;                 
+      
+      a_correction[dit()] -= Lcorr[dit()]; // Recall, safety factor is already in m_relaxCoef
     }
   }
   MayDay::Warning("EBHelmholtzOp::relaxJacobi - not implemented");
