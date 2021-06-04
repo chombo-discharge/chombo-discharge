@@ -342,6 +342,8 @@ void EBHelmholtzOpFactory::coarsenCoefficients(LevelData<EBCellFAB>&            
 
 EBHelmholtzOp* EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bool a_homogeneousOnly) {
 
+  EBHelmholtzOp* ret = nullptr;
+  
   // Look through m_amrLevelGrids to see if we find a domain corresponding to a_fineDomain.
   // If we do, great. If we don't, then something has gone wrong and this function should never have been called.
   int amrLevel = -1;
@@ -351,7 +353,68 @@ EBHelmholtzOp* EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, 
     }
   }
 
-  if(amrLevel < 0) MayDay::Abort("EBHelmholtzOpFactory::MGnewOp - logic bust in MGnewOp, no corresponding amr level found");
+  if(amrLevel < 0) {
+    MayDay::Abort("EBHelmholtzOpFactory::MGnewOp - logic bust in MGnewOp, no corresponding amr level found");
+  }
+  else{ // Have a starting point, see if we can find the corresponding multigrid level
+    const AmrLevelGrids& mgLevelGrids = m_mgLevelGrids[amrLevel];
+
+    const int mgRefRat = 2;
+
+    // Things that are needed for defining the operator
+    Real mgDx;
+    RefCountedPtr<LevelData<EBCellFAB > >       Acoef;
+    RefCountedPtr<LevelData<EBFluxFAB > >       Bcoef;
+    RefCountedPtr<LevelData<BaseIVFAB<Real> > > BcoefIrreg;
+    RefCountedPtr<EBMultigridInterpolator>      interpolator;
+    RefCountedPtr<EBFluxRegister>               fluxreg;
+
+    bool foundMgLevel = false;
+
+    if(a_depth == 0){ // Asking for the AMR level. 
+      foundMgLevel = true;
+    }
+    else{ // Asking for a coarsening. No interp object here. 
+      // TLDR: Go through the coarsened levels for the specified amr level and see if we find a coarsening at the
+      //       specified depth.
+      
+      const int refToDepth = std::pow(2, a_depth);
+      const ProblemDomain coarDomain = coarsen(a_fineDomain, refToDepth);
+
+      const AmrLevelGrids& mgLevelGrids = m_mgLevelGrids[amrLevel];
+      const AmrCellData&   mgAcoef      = m_mgAcoef[amrLevel];
+      const AmrFluxData&   mgBcoef      = m_mgBcoef[amrLevel];
+      const AmrIrreData&   mgBcoefIrreg = m_mgBcoefIrreg[amrLevel];
+
+      int mgLevel;
+      for (int img = 0; img < mgLevelGrids.size(); img++){
+	if(mgLevelGrids[mgLevel]->getDomain() == coarDomain){
+	  mgLevel = img;
+	  break;
+	  foundMgLevel = true;
+	}
+      }
+
+      mgDx       = m_amrResolutions[amrLevel]*std::pow(mgRefRat, a_depth);
+      Acoef      = mgAcoef[mgLevel];
+      Bcoef      = mgBcoef[mgLevel];
+      BcoefIrreg = mgBcoefIrreg[mgLevel];
+
+      foundMgLevel = true;
+    }
+
+    // Make the operator
+    if(foundMgLevel){
+      const bool hasFine = false;
+      const bool hascoar = false;
+    }
+    
+
+  }
+
+  // We have a starting point, now see if 
+
+  
   
   return NULL; // Not implemented (yet);
 }
