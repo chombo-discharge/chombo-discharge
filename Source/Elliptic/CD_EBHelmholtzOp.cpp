@@ -394,12 +394,10 @@ void EBHelmholtzOp::calculateRelaxationCoefficient(){
 VoFStencil EBHelmholtzOp::getFaceCenterFluxStencil(const FaceIndex& a_face, const DataIndex& a_dit) const {
   VoFStencil fluxStencil;
   
-  if(!a_face.isBoundary()){
+  if(!a_face.isBoundary()){ // BC handles the boundary fluxes. 
     fluxStencil.add(a_face.getVoF(Side::Hi),  1.0/m_dx);
     fluxStencil.add(a_face.getVoF(Side::Lo), -1.0/m_dx);
     fluxStencil *= (*m_Bcoef)[a_dit][a_face.direction()](a_face, 0);
-  }
-  else{// BC handles this
   }
 
   return fluxStencil;
