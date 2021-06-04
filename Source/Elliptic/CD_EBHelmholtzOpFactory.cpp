@@ -16,25 +16,25 @@
 #include <CD_EBHelmholtzOpFactory.H>
 #include <CD_NamespaceHeader.H>
 
-EBHelmholtzOpFactory::EBHelmholtzOpFactory(const Real&              a_alpha,
-					   const Real&              a_beta,
-					   const AmrLevelGrids&     a_amrLevelGrids,
-					   const AmrInterpolators&  a_amrInterpolators,
-					   const AmrFluxRegisters&  a_amrFluxRegisters,
-					   const AmrCoarseners&     a_amrCoarseners,
-					   const AmrRefRatios&      a_amrRefRatios,
-					   const AmrResolutions&    a_amrResolutions,					   
-					   const AmrCellData&       a_amrAcoef,
-					   const AmrFluxData&       a_amrBcoef,
-					   const AmrIrreData&       a_amrBcoefIrreg,
-					   const DomainBcFactory&   a_domainBcFactory,
-					   const EbBcFactory&       a_ebBcFactory,
-					   const IntVect&           a_ghostPhi,
-					   const IntVect&           a_ghostRhs,
-					   const RelaxType&         a_relaxationMethod,
-					   const ProblemDomain&     a_bottomDomain,
-					   const int&               a_mgBlockingFactor,
-					   const AmrLevelGrids&     a_deeperLevelGrids){
+EBHelmholtzOpFactory::EBHelmholtzOpFactory(const Real&                       a_alpha,
+					   const Real&                       a_beta,
+					   const AmrLevelGrids&              a_amrLevelGrids,
+					   const AmrInterpolators&           a_amrInterpolators,
+					   const AmrFluxRegisters&           a_amrFluxRegisters,
+					   const AmrCoarseners&              a_amrCoarseners,
+					   const AmrRefRatios&               a_amrRefRatios,
+					   const AmrResolutions&             a_amrResolutions,					   
+					   const AmrCellData&                a_amrAcoef,
+					   const AmrFluxData&                a_amrBcoef,
+					   const AmrIrreData&                a_amrBcoefIrreg,
+					   const HelmholtzDomainBcFactory&   a_domainBcFactory,
+					   const HelmholtzEbBcFactory&       a_ebBcFactory,
+					   const IntVect&                    a_ghostPhi,
+					   const IntVect&                    a_ghostRhs,
+					   const RelaxType&                  a_relaxationMethod,
+					   const ProblemDomain&              a_bottomDomain,
+					   const int&                        a_mgBlockingFactor,
+					   const AmrLevelGrids&              a_deeperLevelGrids){
 
   // Define constructor arguments. 
   m_alpha               = a_alpha;

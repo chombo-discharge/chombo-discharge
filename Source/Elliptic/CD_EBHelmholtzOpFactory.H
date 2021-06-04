@@ -50,8 +50,11 @@ public:
   using AmrResolutions   = Vector<Real>;
   using AmrRefRatios     = Vector<int>;
 
-  using DomainBcFactory  = RefCountedPtr<BaseDomainBCFactory>; // Will be replaced with better BC class...
-  using EbBcFactory      = RefCountedPtr<BaseEBBCFactory>;     // Will be replaced with better BC class...
+  // These will be replaced after everything is running. God I hate the BC classes in Chombo. 
+  using HelmholtzDomainBcFactory  = RefCountedPtr<BaseDomainBCFactory>; // Will be replaced with better BC class...
+  using HelmholtzEbBcFactory      = RefCountedPtr<BaseEBBCFactory>;     // Will be replaced with better BC class...
+  using HelmholtzDomainBc         = RefCountedPtr<ConductivityBaseDomainBC>;
+  using HelmholtzEbBc             = RefCountedPtr<ConductivityBaseEBBC>;
 
   using RelaxType        = EBHelmholtzOp::RelaxationMethod;
 
@@ -88,25 +91,25 @@ public:
     provide an option for using aggregation. The first entry a_deeperLevelGrids[0] should be a a factor 2 coarsening of the coarsest AMR level. 
     @note This operator is for time-independent a- and b-coefficients. 
   */
-  EBHelmholtzOpFactory(const Real&              a_alpha,
-		       const Real&              a_beta,
-		       const AmrLevelGrids&     a_amrLevelGrids,
-		       const AmrInterpolators&  a_amrInterpolators,
-		       const AmrFluxRegisters&  a_amrFluxRegisters,
-		       const AmrCoarseners&     a_amrCoarseners,
-		       const AmrRefRatios&      a_amrRefRatios,
-		       const AmrResolutions&    a_amrResolutions,					   
-		       const AmrCellData&       a_amrAcoef,
-		       const AmrFluxData&       a_amrBcoef,
-		       const AmrIrreData&       a_amrBcoefIrreg,
-		       const DomainBcFactory&   a_domainBCFactory,
-		       const EbBcFactory&       a_ebbcFactory,
-		       const IntVect&           a_ghostPhi,
-		       const IntVect&           a_ghostRHS,
-		       const RelaxType&         a_relaxationMethod,
-		       const ProblemDomain&     a_bottomDomain,
-		       const int&               a_mgBlockingFactor,
-		       const AmrLevelGrids&     a_deeperLevelGrids = AmrLevelGrids());
+  EBHelmholtzOpFactory(const Real&                       a_alpha,
+		       const Real&                       a_beta,
+		       const AmrLevelGrids&              a_amrLevelGrids,
+		       const AmrInterpolators&           a_amrInterpolators,
+		       const AmrFluxRegisters&           a_amrFluxRegisters,
+		       const AmrCoarseners&              a_amrCoarseners,
+		       const AmrRefRatios&               a_amrRefRatios,
+		       const AmrResolutions&             a_amrResolutions,					   
+		       const AmrCellData&                a_amrAcoef,
+		       const AmrFluxData&                a_amrBcoef,
+		       const AmrIrreData&                a_amrBcoefIrreg,
+		       const HelmholtzDomainBcFactory&   a_domainBcFactory,
+		       const HelmholtzEbBcFactory&       a_ebbcFactory,
+		       const IntVect&                    a_ghostPhi,
+		       const IntVect&                    a_ghostRHS,
+		       const RelaxType&                  a_relaxationMethod,
+		       const ProblemDomain&              a_bottomDomain,
+		       const int&                        a_mgBlockingFactor,
+		       const AmrLevelGrids&              a_deeperLevelGrids = AmrLevelGrids());
   
   /*!
     @brief Destructor. Does nothing.
@@ -167,8 +170,8 @@ protected:
   AmrIrreData      m_amrBcoefIrreg;
 
   // BC factories
-  DomainBcFactory m_domainBcFactory;
-  EbBcFactory     m_ebBcFactory;
+  HelmholtzDomainBcFactory m_domainBcFactory;
+  HelmholtzEbBcFactory     m_ebBcFactory;
 
   // Bottom drop domain
   ProblemDomain m_bottomDomain;
@@ -246,12 +249,12 @@ protected:
   /*!
     @brief Make an EBBC object. 
   */
-  RefCountedPtr<ConductivityBaseEBBC> makeEbBcObject(const EBLevelGrid& a_eblg, const Real& a_dx) const;
+  HelmholtzEbBc makeEbBcObject(const EBLevelGrid& a_eblg, const Real& a_dx) const;
 
   /*!
     @brief Make a domain BC object.
   */
-  RefCountedPtr<ConductivityBaseDomainBC> makeDomainBcObject(const EBLevelGrid& a_eblg, const Real& a_dx) const;
+  HelmholtzDomainBc makeDomainBcObject(const EBLevelGrid& a_eblg, const Real& a_dx) const;
 };
 
 #include <CD_NamespaceFooter.H>
