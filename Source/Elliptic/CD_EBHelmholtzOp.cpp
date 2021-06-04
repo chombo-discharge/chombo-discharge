@@ -7,7 +7,8 @@
   @file   CD_EBHelmholtzOp.cpp
   @brief  Implementation of CD_EBHelmholtzOp.H
   @author Robert Marskar
-  @tood   Replace EBAMRPoissonOp::staticMaxNorm and don't use EBAMRPoissonOp dependencies
+  @todo   Replace EBAMRPoissonOp::staticMaxNorm and don't use EBAMRPoissonOp dependencies
+  @todo   Define prolongation/restriction objects. They're undefined. 
 */
 
 // Chombo includes
@@ -44,9 +45,20 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid &                                
 			     const IntVect&                                       a_ghostCellsRHS,
 			     const RelaxationMethod&                              a_relaxationMethod) :
   LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB>(false), // Time-independent
+  m_eblgFine(),
   m_eblg(a_eblg),
+  m_eblgCoar(),
+  m_eblgCoarMG(),
+  m_refToFine(a_hasFine ? a_refToFine : 1),
+  m_refToCoar(a_hasCoar ? a_refToCoar : 1),
+  m_hasFine(a_hasFine),
+  m_hasCoar(a_hasCoar),
   m_relaxationMethod(a_relaxationMethod)
 {
+
+  if(m_hasMGObjects){
+    m_eblgCoarMG = a_eblgCoarMG;
+  }
   
   
 }
@@ -55,8 +67,11 @@ EBHelmholtzOp::~EBHelmholtzOp(){
 
 }
 
-void EBHelmholtzOp::residual(LevelData<EBCellFAB>& a_residual, const LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_rhs, bool a_homogeneous) {
-  MayDay::Warning("EBHelmholtzOp::residual - not implemented");
+void EBHelmholtzOp::residual(LevelData<EBCellFAB>& a_residual, const LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_rhs, bool a_homogeneousPhysBC) {
+  CH_assert(m_hasCoar = false);
+  
+  this->applyOp(a_residual, a_phi, NULL, a_homogeneousPhysBC, true); // Only homogeneous CFBC. This shouldn't break because we shouldn't have a coar level.
+  this->axby(a_residual, a_residual, a_rhs, -1.0, 1.0);              // residual = rhs - L(phi). 
 }
 
 void EBHelmholtzOp::preCond(LevelData<EBCellFAB>& a_corr, const LevelData<EBCellFAB>& a_residual) {
@@ -111,6 +126,129 @@ void EBHelmholtzOp::setToZero(LevelData<EBCellFAB>& a_lhs) {
   EBLevelDataOps::setToZero(a_lhs);
 }
 
+void EBHelmholtzOp::createCoarser(LevelData<EBCellFAB>& a_coarse, const LevelData<EBCellFAB>& a_fine, bool a_ghosted) {
+  const DisjointBoxLayout& dbl = m_eblgCoarMG.getDBL();
+  MayDay::Warning("EBHelmholtzOp::createCoarser - not implemented");
+}
+
+void EBHelmholtzOp::relax(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, int a_iterations){
+  switch(m_relaxationMethod){
+  case RelaxationMethod::Jacobi:
+    this->relaxJacobi(a_correction, a_residual, a_iterations);
+    break;
+  case RelaxationMethod::GSRB:
+    this->relaxGauSai(a_correction, a_residual, a_iterations);
+    break;
+  case RelaxationMethod::GSRBFast:
+    this->relaxGSRBFast(a_correction, a_residual, a_iterations);
+    break;
+  default:
+    MayDay::Abort("EBHelmholtzOp::relax - bogus relaxation method requested");
+  };
+}
+
+void EBHelmholtzOp::restrictResidual(LevelData<EBCellFAB>& a_resCoar, LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_rhs) {
+
+  // Compute the residual on this level first. Make a temporary for that.
+  LevelData<EBCellFAB> res;
+  this->create(res, a_phi);
+  this->residual(res, a_phi, a_rhs, true);
+
+  m_ebAverageMG.average(a_resCoar, res, Interval(0,0));
+}
+
+void EBHelmholtzOp::prolongIncrement(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_correctCoarse) {
+  m_ebInterpMG.pwcInterp(a_phi, a_correctCoarse, Interval(0,0));
+}
+
+int EBHelmholtzOp::refToCoarser() {
+  return m_refToCoar;
+}
+
+
+void EBHelmholtzOp::AMROperator(LevelData<EBCellFAB>&              a_Lphi,
+				const LevelData<EBCellFAB>&        a_phiFine,
+				const LevelData<EBCellFAB>&        a_phi,
+				const LevelData<EBCellFAB>&        a_phiCoar,
+				const bool                         a_homogeneousPhysBC,
+				AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp){
+  MayDay::Warning("EBHelmholtz::AMROperator - not implemented");
+}
+
+void EBHelmholtzOp::AMROperatorNF(LevelData<EBCellFAB>&       a_Lphi,
+				  const LevelData<EBCellFAB>& a_phi,
+				  const LevelData<EBCellFAB>& a_phiCoar,
+				  bool                        a_homogeneousPhysBC) {
+  this->applyOp(a_Lphi, a_phi, &a_phiCoar, a_homogeneousPhysBC, false);
+}
+
+void EBHelmholtzOp::AMROperatorNC(LevelData<EBCellFAB>&              a_Lphi,
+				  const LevelData<EBCellFAB>&        a_phiFine,
+				  const LevelData<EBCellFAB>&        a_phi,
+				  bool                               a_homogeneousPhysBC,
+				  AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp) {
+  LevelData<EBCellFAB> phiCoar; // Should be safe on the bottom AMR level because only multigrid levels exist below. 
+  this->AMROperator(a_Lphi, a_phiFine, a_phi, phiCoar, a_homogeneousPhysBC, a_finerOp);
+}
+
+void EBHelmholtzOp::AMRResidual(LevelData<EBCellFAB>&              a_residual,
+				const LevelData<EBCellFAB>&        a_phiFine,
+				const LevelData<EBCellFAB>&        a_phi,
+				const LevelData<EBCellFAB>&        a_phiCoar,
+				const LevelData<EBCellFAB>&        a_rhs,
+				bool                               a_homogeneousPhysBC,
+				AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp) {
+  this->AMROperator(a_residual, a_phiFine, a_phi, a_phiCoar, a_homogeneousPhysBC, a_finerOp); // Compute L(phi) on this level.
+  this->axby(a_residual, a_residual, a_rhs, -1., 1.);
+}
+
+void EBHelmholtzOp::AMRResidualNF(LevelData<EBCellFAB>&              a_residual,
+				  const LevelData<EBCellFAB>&        a_phi,
+				  const LevelData<EBCellFAB>&        a_phiCoar,
+				  const LevelData<EBCellFAB>&        a_rhs,
+				  bool                               a_homogeneousPhysBC) {
+
+  // Simple, because we don't need to reflux. 
+  this->AMROperatorNF(a_residual, a_phi, a_phiCoar, a_homogeneousPhysBC);
+  this->axby(a_residual, a_residual, a_rhs, -1., 1.);
+}
+
+void EBHelmholtzOp::AMRResidualNC(LevelData<EBCellFAB>&              a_residual,
+				  const LevelData<EBCellFAB>&        a_phiFine,
+				  const LevelData<EBCellFAB>&        a_phi,
+				  const LevelData<EBCellFAB>&        a_rhs,
+				  bool                               a_homogeneousPhysBC,
+				  AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp) {
+  this->AMROperatorNC(a_residual, a_phiFine, a_phi, a_homogeneousPhysBC, a_finerOp);
+  this->axby(a_residual, a_residual, a_rhs, -1., 1.);
+}
+
+void EBHelmholtzOp::AMRRestrict(LevelData<EBCellFAB>&       a_residualCoarse,
+				const LevelData<EBCellFAB>& a_residual,
+				const LevelData<EBCellFAB>& a_correction,
+				const LevelData<EBCellFAB>& a_coarseCorrection,
+				bool                        a_skip_res) {
+
+  LevelData<EBCellFAB> resThisLevel;
+  this->create(resThisLevel, a_residual);
+  this->setToZero(resThisLevel);
+  
+  // We should average a_residual - L(correction, coarCorrection).
+  this->applyOp(resThisLevel, a_correction, &a_coarseCorrection, true, false);
+  this->incr(resThisLevel, a_residual, -1.0);
+  this->scale(resThisLevel, -1.0);
+
+  m_ebAverage.average(a_residualCoarse, resThisLevel, Interval(0,0));
+}
+
+void EBHelmholtzOp::applyOp(LevelData<EBCellFAB>&             a_Lphi,
+			    const LevelData<EBCellFAB>&       a_phi,
+			    const LevelData<EBCellFAB>* const a_phiCoar,
+			    const bool                        a_homogeneousPhysBC,
+			    const bool                        a_homogeneousCFBC){
+  MayDay::Warning("EBHelmholtzOp::applyOp(big) - not implemented");
+}
+
 Real EBHelmholtzOp::getSafety() const {
   Real safety;
 
@@ -128,6 +266,18 @@ Real EBHelmholtzOp::getSafety() const {
   };
 
   return safety;
+}
+
+void EBHelmholtzOp::relaxJacobi(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations){
+  MayDay::Warning("EBHelmholtzOp::relaxJacobi - not implemented");
+}
+
+void EBHelmholtzOp::relaxGauSai(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations){
+  MayDay::Warning("EBHelmholtzOp::relaxGauSai - not implemented");
+}
+
+void EBHelmholtzOp::relaxGSRBFast(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations){
+  MayDay::Warning("EBHelmholtzOp::relaxGauSai - not implemented");
 }
 
 #include <CD_NamespaceFooter.H>
