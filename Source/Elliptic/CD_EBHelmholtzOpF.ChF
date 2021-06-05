@@ -21,3 +21,17 @@
       chf_enddo
 
       end
+
+
+      subroutine invertrelaxationcoefficient(
+     &     chf_fra1[relcoef],
+     &     chf_box[cellbox])
+
+
+      integer chf_ddecl[i;j;k]
+
+      chf_multido[cellbox;i;j;k]
+         relcoef(chf_ix[i;j;k]) = 1./relcoef(chf_ix[i;j;k])
+      chf_enddo
+
+      end

@@ -422,10 +422,23 @@ void EBHelmholtzOp::calculateRelaxationCoefficient(){
 				  CHF_CONST_INT(dir),
 				  CHF_BOX(cellBox));
     }
+
+    // Invert the relaxation coefficient (in the irregular cells)
+    FORT_INVERTRELAXATIONCOEFFICIENT(CHF_FRA1(regRel, 0),
+				     CHF_BOX(cellBox));
+
+    // Do the same for the irregular cells.
+    VoFIterator& vofit = m_vofIterIrreg[dit()];
+    for (vofit.reset(); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+
+      const Real alphaWeight = m_alpha * m_alphaDiagWeight[dit()](vof, 0);
+      const Real  betaWeight = m_beta  * m_betaDiagWeight [dit()](vof, 0);
+
+      m_relCoef[dit()](vof, 0) = alphaWeight + betaWeight;
+    }
     
   }
-
-  MayDay::Warning("EBHelmholtzOp::calculateRelaxationCoefficient - not implemented");
 }
 
 VoFStencil EBHelmholtzOp::getFaceCenterFluxStencil(const FaceIndex& a_face, const DataIndex& a_dit) const {
