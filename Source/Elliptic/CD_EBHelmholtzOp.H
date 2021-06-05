@@ -464,6 +464,16 @@ protected:
   EBMGInterp m_ebInterp;
 
   /*!
+    @brief Domain bc object
+  */ 
+  RefCountedPtr<HelmholtzDomainBc> m_domainBc;
+
+  /*!
+    @brief Domain bc object
+  */ 
+  RefCountedPtr<HelmholtzEbBc> m_ebBc;
+
+  /*!
     @brief Interpolator object
   */
   RefCountedPtr<EBMultigridInterpolator> m_interpolator;

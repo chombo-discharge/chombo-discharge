@@ -1,0 +1,23 @@
+      subroutine addbcotermtoinvrelcoef(
+     &     chf_fra1[relcoef],
+     &     chf_const_fra1[bcoef],
+     &     chf_const_real[beta],
+     &     chf_const_real[dx],
+     &     chf_const_int[idir],
+     &     chf_box[cellbox])
+
+      integer chf_ddecl[i;j;k]
+      integer chf_ddecl[ii;jj;kk]
+      real fac;
+
+      chf_dterm[ii = chf_id(idir, 0);
+                jj = chf_id(idir, 1);
+                kk = chf_id(idir, 2)]
+
+      fac = beta/(dx*dx);
+
+      chf_multido[cellbox;i;j;k]
+         relcoef(chf_ix[i;j;k]) = relcoef(chf_ix[i;j;k]) - fac*(bcoef(chf_ix[i+ii;j+jj;k+kk]) + bcoef(chf_ix[i;j;k]))
+      chf_enddo
+
+      end

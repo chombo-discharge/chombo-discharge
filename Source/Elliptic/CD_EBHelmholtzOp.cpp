@@ -18,6 +18,7 @@
 
 // Our includes
 #include <CD_EBHelmholtzOp.H>
+#include <CD_EBHelmholtzOpF_F.H>
 #include <CD_NamespaceHeader.H>
 
 
@@ -28,8 +29,8 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid &                                
 			     const RefCountedPtr<EBMultigridInterpolator>&        a_interpolator,
 			     const RefCountedPtr<EBFluxRegister>&                 a_fluxReg,
 			     const RefCountedPtr<EbCoarAve>&                      a_coarAve,			       
-			     const RefCountedPtr<HelmholtzDomainBc>&              a_domainBC,
-			     const RefCountedPtr<HelmholtzEbBc>&                  a_ebBC,
+			     const RefCountedPtr<HelmholtzDomainBc>&              a_domainBc,
+			     const RefCountedPtr<HelmholtzEbBc>&                  a_ebBc,
 			     const Real    &                                      a_dx,
 			     const Real    &                                      a_dxCoar,
 			     const int&                                           a_refToFine,
@@ -53,6 +54,8 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid &                                
   m_interpolator(a_interpolator),
   m_fluxReg(a_fluxReg),
   m_coarAve(a_coarAve),
+  m_domainBc(a_domainBc),
+  m_ebBc(a_ebBc),
   m_dx(a_dx),
   m_refToFine(a_hasFine ? a_refToFine : 1),
   m_refToCoar(a_hasCoar ? a_refToCoar : 1),
@@ -399,12 +402,30 @@ void EBHelmholtzOp::calculateAlphaWeight(){
 
 void EBHelmholtzOp::calculateRelaxationCoefficient(){
   for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit){
-    const Box bx = m_eblg.getDBL()[dit()];
+    const Box cellBox = m_eblg.getDBL()[dit()];
 
+    // Set relaxation coefficient = aco*alpha
+    m_relCoef[dit()].setVal(0.0);
+    m_relCoef[dit()].plus((*m_Acoef)[dit()], 0, 0, 1);
+    m_relCoef[dit()] *= m_alpha;
+
+    // Add in the diagonal term for the variable-coefficient Laplacian operator
     BaseFab<Real>& regRel = m_relCoef[dit()].getSingleValuedFAB();
+    for (int dir = 0; dir < SpaceDim; dir++){
+
+      // This adds -(beta*bcoef(loFace) + beta*bcoef(hiFace))/dx^2 to the relaxation term.
+      BaseFab<Real>& regBcoDir = (*m_Bcoef)[dit()][dir].getSingleValuedFAB();
+      FORT_ADDBCOTERMTOINVRELCOEF(CHF_FRA1(regRel,0),
+				  CHF_CONST_FRA1(regBcoDir,0),
+				  CHF_CONST_REAL(m_beta),
+				  CHF_CONST_REAL(m_dx),
+				  CHF_CONST_INT(dir),
+				  CHF_BOX(cellBox));
+    }
+    
   }
 
-  MayDay::Wawrning("EBHelmholtzOp::calculateRelaxationCoefficient - not implemented");
+  MayDay::Warning("EBHelmholtzOp::calculateRelaxationCoefficient - not implemented");
 }
 
 VoFStencil EBHelmholtzOp::getFaceCenterFluxStencil(const FaceIndex& a_face, const DataIndex& a_dit) const {
