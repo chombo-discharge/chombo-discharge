@@ -435,9 +435,8 @@ void EBHelmholtzOp::calculateRelaxationCoefficient(){
       const Real alphaWeight = m_alpha * m_alphaDiagWeight[dit()](vof, 0);
       const Real  betaWeight = m_beta  * m_betaDiagWeight [dit()](vof, 0);
 
-      m_relCoef[dit()](vof, 0) = alphaWeight + betaWeight;
+      m_relCoef[dit()](vof, 0) = 1./(alphaWeight + betaWeight);
     }
-    
   }
 }
 
