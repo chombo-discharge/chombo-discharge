@@ -40,11 +40,11 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid &                                
 			     const bool&                                          a_hasMGObjects,
 			     const Real&                                          a_alpha,
 			     const Real&                                          a_beta,
-			     const RefCountedPtr<LevelData<EBCellFAB> >&          a_acoef,
-			     const RefCountedPtr<LevelData<EBFluxFAB> >&          a_bcoef,
-			     const RefCountedPtr<LevelData<BaseIVFAB<Real> > >&   a_bcoIrreg,
-			     const IntVect&                                       a_ghostCellsPhi,
-			     const IntVect&                                       a_ghostCellsRHS,
+			     const RefCountedPtr<LevelData<EBCellFAB> >&          a_Acoef,
+			     const RefCountedPtr<LevelData<EBFluxFAB> >&          a_Bcoef,
+			     const RefCountedPtr<LevelData<BaseIVFAB<Real> > >&   a_BcoefIrreg,
+			     const IntVect&                                       a_ghostPhi,
+			     const IntVect&                                       a_ghostRhs,
 			     const RelaxationMethod&                              a_relaxationMethod) :
   LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB>(false), // Time-independent
   m_eblgFine(),
@@ -57,24 +57,62 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid &                                
   m_domainBc(a_domainBc),
   m_ebBc(a_ebBc),
   m_dx(a_dx),
+  m_dxCoar(a_dxCoar),
   m_refToFine(a_hasFine ? a_refToFine : 1),
   m_refToCoar(a_hasCoar ? a_refToCoar : 1),
   m_hasFine(a_hasFine),
   m_hasCoar(a_hasCoar),
+  m_hasMGObjects(a_hasMGObjects),
+  m_alpha(a_alpha),
+  m_beta(a_beta),
+  m_Acoef(a_Acoef),
+  m_Bcoef(a_Bcoef),
+  m_BcoefIrreg(a_BcoefIrreg),
+  m_ghostPhi(a_ghostPhi),
+  m_ghostRhs(a_ghostRhs),
   m_relaxationMethod(a_relaxationMethod) {
 
-  m_turnOffBCs = false; //
+  // Do not touch these. 
+  m_nComp      = 1;
+  m_comp       = 0;
+  m_turnOffBCs = false;
 
-  
-  if(m_hasMGObjects){
-    m_eblgCoarMG = a_eblgCoarMG;
+
+  if(m_hasFine){
+    m_eblgFine = a_eblgFine;
+    m_dxFine   = m_dx/a_refToFine;
+  }
+
+  if(m_hasCoar){
+    m_eblgCoar = a_eblgCoar;
+    m_dxCoar   = m_dx*a_refToCoar;
+
+    // Define interpolation objects. Need to to think about this one because EBConductivityOp is a bit anal about the way it does this. 
   }
   
-  
+  if(m_hasMGObjects){
+    constexpr int mgRef = 2;
+    
+    m_eblgCoarMG = a_eblgCoarMG;
+
+    m_ebAverageMG.define(m_eblg.getDBL(),
+			 m_eblgCoarMG.getDBL(),
+			 m_eblg.getEBISL(),
+			 m_eblgCoarMG.getEBISL(),
+			 m_eblgCoarMG.getDomain(),
+			 mgRef,
+			 m_nComp,
+			 m_eblg.getEBIS(),
+			 m_ghostPhi);
+  }
 }
 
 EBHelmholtzOp::~EBHelmholtzOp(){
 
+}
+
+void EBHelmholtzOp::defineStencils(){
+  MayDay::Warning("EBHelmholtzOp::defineStencils - not implemented");
 }
 
 unsigned int EBHelmholtzOp::orderOfAccuracy(void) const {
@@ -204,11 +242,11 @@ void EBHelmholtzOp::restrictResidual(LevelData<EBCellFAB>& a_resCoar, LevelData<
   this->create(res, a_phi);
   this->residual(res, a_phi, a_rhs, true);
 
-  m_ebAverageMG.average(a_resCoar, res, Interval(0,0));
+  m_ebAverageMG.average(a_resCoar, res, a_resCoar.interval());
 }
 
 void EBHelmholtzOp::prolongIncrement(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_correctCoarse) {
-  m_ebInterpMG.pwcInterp(a_phi, a_correctCoarse, Interval(0,0));
+  m_ebInterpMG.pwcInterp(a_phi, a_correctCoarse, a_phi.interval());
 }
 
 int EBHelmholtzOp::refToCoarser() {
@@ -287,11 +325,11 @@ void EBHelmholtzOp::AMRRestrict(LevelData<EBCellFAB>&       a_residualCoarse,
   this->incr(resThisLevel, a_residual, -1.0);
   this->scale(resThisLevel, -1.0);
 
-  m_ebAverage.average(a_residualCoarse, resThisLevel, Interval(0,0));
+  m_ebAverage.average(a_residualCoarse, resThisLevel, a_residualCoarse.interval());
 }
 
 void EBHelmholtzOp::AMRProlong(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_coarseCorrection) {
-  m_ebInterp.pwcInterp(a_correction, a_coarseCorrection, Interval(0,0));
+  m_ebInterp.pwcInterp(a_correction, a_coarseCorrection, a_correction.interval());
 }
 
 void EBHelmholtzOp::AMRUpdateResidual(LevelData<EBCellFAB>&       a_residual,
@@ -334,25 +372,7 @@ void EBHelmholtzOp::getFlux(EBFluxFAB&                  a_flux,
   MayDay::Warning("EBHelmholtzOp::getFlux - not implemented (yet)");
 }
 
-void EBHelmholtzOp::relaxJacobi(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations){
 
-  LevelData<EBCellFAB> Lcorr;
-  this->create(Lcorr, a_residual);
-
-  for (int iter = 0; iter < a_iterations; iter++){
-    this->homogeneousCFInterp(a_correction);
-    this->applyOp(Lcorr, a_correction, true);
-
-    for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit){
-      Lcorr[dit()]        -= a_residual[dit()];
-      Lcorr[dit()]        *= m_relCoef[dit()];
-      Lcorr[dit()]        *= 0.5;                 
-      
-      a_correction[dit()] -= Lcorr[dit()]; // Recall, safety factor is already in m_relaxCoef
-    }
-  }
-  MayDay::Warning("EBHelmholtzOp::relaxJacobi - not implemented");
-}
 
 void EBHelmholtzOp::homogeneousCFInterp(LevelData<EBCellFAB>& a_phi){
   if(m_hasCoar) m_interpolator->coarseFineInterpH(a_phi, a_phi.interval());
@@ -378,6 +398,24 @@ void EBHelmholtzOp::interpolateCF(LevelData<EBCellFAB>& a_phiFine, const LevelDa
   }
 }
 
+void EBHelmholtzOp::relaxJacobi(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations){
+  LevelData<EBCellFAB> Lcorr;
+  this->create(Lcorr, a_residual);
+
+  for (int iter = 0; iter < a_iterations; iter++){
+    this->homogeneousCFInterp(a_correction);
+    this->applyOp(Lcorr, a_correction, true);
+
+    for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit){
+      Lcorr[dit()]        -= a_residual[dit()];
+      Lcorr[dit()]        *= m_relCoef[dit()];
+      Lcorr[dit()]        *= 0.5; // Safety factor for Jacobi        
+      
+      a_correction[dit()] -= Lcorr[dit()]; 
+    }
+  }
+}
+
 void EBHelmholtzOp::relaxGauSai(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations){
   MayDay::Warning("EBHelmholtzOp::relaxGauSai - not implemented");
 }
@@ -393,9 +431,9 @@ void EBHelmholtzOp::calculateAlphaWeight(){
       const VolIndex& vof = vofit();
 
       const Real volFrac = m_eblg.getEBISL()[dit()].volFrac(vof);
-      const Real Aco     = (*m_Acoef)[dit()](vof, 0);
+      const Real Aco     = (*m_Acoef)[dit()](vof, m_comp);
 
-      m_alphaDiagWeight[dit()](vof, 0) = volFrac*Aco;
+      m_alphaDiagWeight[dit()](vof, m_comp) = volFrac*Aco;
     }
   }
 }
@@ -406,7 +444,7 @@ void EBHelmholtzOp::calculateRelaxationCoefficient(){
 
     // Set relaxation coefficient = aco*alpha
     m_relCoef[dit()].setVal(0.0);
-    m_relCoef[dit()].plus((*m_Acoef)[dit()], 0, 0, 1);
+    m_relCoef[dit()].plus((*m_Acoef)[dit()], m_comp, m_comp, m_nComp);
     m_relCoef[dit()] *= m_alpha;
 
     // Add in the diagonal term for the variable-coefficient Laplacian operator
@@ -415,8 +453,8 @@ void EBHelmholtzOp::calculateRelaxationCoefficient(){
 
       // This adds -(beta*bcoef(loFace) + beta*bcoef(hiFace))/dx^2 to the relaxation term.
       BaseFab<Real>& regBcoDir = (*m_Bcoef)[dit()][dir].getSingleValuedFAB();
-      FORT_ADDBCOTERMTOINVRELCOEF(CHF_FRA1(regRel,0),
-				  CHF_CONST_FRA1(regBcoDir,0),
+      FORT_ADDBCOTERMTOINVRELCOEF(CHF_FRA1(regRel, m_comp),
+				  CHF_CONST_FRA1(regBcoDir, m_comp),
 				  CHF_CONST_REAL(m_beta),
 				  CHF_CONST_REAL(m_dx),
 				  CHF_CONST_INT(dir),
@@ -424,7 +462,7 @@ void EBHelmholtzOp::calculateRelaxationCoefficient(){
     }
 
     // Invert the relaxation coefficient (in the irregular cells)
-    FORT_INVERTRELAXATIONCOEFFICIENT(CHF_FRA1(regRel, 0),
+    FORT_INVERTRELAXATIONCOEFFICIENT(CHF_FRA1(regRel, m_comp),
 				     CHF_BOX(cellBox));
 
     // Do the same for the irregular cells.
@@ -432,10 +470,10 @@ void EBHelmholtzOp::calculateRelaxationCoefficient(){
     for (vofit.reset(); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
 
-      const Real alphaWeight = m_alpha * m_alphaDiagWeight[dit()](vof, 0);
-      const Real  betaWeight = m_beta  * m_betaDiagWeight [dit()](vof, 0);
+      const Real alphaWeight = m_alpha * m_alphaDiagWeight[dit()](vof, m_comp);
+      const Real  betaWeight = m_beta  * m_betaDiagWeight [dit()](vof, m_comp);
 
-      m_relCoef[dit()](vof, 0) = 1./(alphaWeight + betaWeight);
+      m_relCoef[dit()](vof, m_comp) = 1./(alphaWeight + betaWeight);
     }
   }
 }
@@ -446,7 +484,7 @@ VoFStencil EBHelmholtzOp::getFaceCenterFluxStencil(const FaceIndex& a_face, cons
   if(!a_face.isBoundary()){ // BC handles the boundary fluxes. 
     fluxStencil.add(a_face.getVoF(Side::Hi),  1.0/m_dx);
     fluxStencil.add(a_face.getVoF(Side::Lo), -1.0/m_dx);
-    fluxStencil *= (*m_Bcoef)[a_dit][a_face.direction()](a_face, 0);
+    fluxStencil *= (*m_Bcoef)[a_dit][a_face.direction()](a_face, m_comp);
   }
 
   return fluxStencil;

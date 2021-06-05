@@ -47,13 +47,7 @@ public:
   /*!
     @brief Disallowed default constructor
   */
-#if 0 // Default, just trying to get this shit to compile
   EBHelmholtzOp() = delete;
-#else
-  EBHelmholtzOp(){
-
-  }
-#endif
 
   /*!
     @brief Disallowed copy constructor
@@ -374,6 +368,16 @@ public:
 protected:
 
   /*!
+    @brief Number of components that we solve for (always one..)
+  */
+  int m_nComp;
+
+  /*!
+    @brief Component that we solve for
+  */
+  int m_comp;
+
+  /*!
     @brief Relaxation method
   */
   RelaxationMethod m_relaxationMethod;
@@ -409,6 +413,16 @@ protected:
   int m_turnOffBCs;
 
   /*!
+    @brief Ghost cells for phi
+  */
+  IntVect m_ghostPhi;
+
+  /*!
+    @brief Ghost cells for rhs (note, the operator rhs)
+  */
+  IntVect m_ghostRhs;
+
+  /*!
     @brief Alpha-coefficient
   */
   Real m_alpha;
@@ -419,9 +433,19 @@ protected:
   Real m_beta;
 
   /*!
+    @brief Grid resolution for finer level;
+  */
+  Real m_dxFine;
+
+  /*!
     @brief Grid resolution;
   */
   Real m_dx;
+
+  /*!
+    @brief Grid resolution for coarser level;
+  */
+  Real m_dxCoar;
 
   /*!
     @brief Fine level grid (if the operator has a fine level)
@@ -636,6 +660,11 @@ protected:
     @brief Get stencil for irregular cell (not kappa-divided). 
   */
   VoFStencil getDivFStencil(const VolIndex& a_vof, const DataIndex& a_dit) const;
+
+  /*!
+    @brief Define stencils
+  */
+  void defineStencils();
 };
 
 #include <CD_NamespaceFooter.H>
