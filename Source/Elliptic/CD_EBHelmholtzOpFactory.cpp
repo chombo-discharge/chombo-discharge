@@ -27,8 +27,8 @@ EBHelmholtzOpFactory::EBHelmholtzOpFactory(const Real&                       a_a
 					   const AmrCellData&                a_amrAcoef,
 					   const AmrFluxData&                a_amrBcoef,
 					   const AmrIrreData&                a_amrBcoefIrreg,
-					   const HelmholtzDomainBcFactory&   a_domainBcFactory,
-					   const HelmholtzEbBcFactory&       a_ebBcFactory,
+					   const EBHelmholtzDomainBcFactory& a_domainBcFactory,
+					   const EBHelmholtzEbBcFactory&     a_ebBcFactory,
 					   const IntVect&                    a_ghostPhi,
 					   const IntVect&                    a_ghostRhs,
 					   const RelaxType&                  a_relaxationMethod,
@@ -365,26 +365,40 @@ EBHelmholtzOp* EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, 
     // the multigrid operators only do relaxation and there's no fine-to-coar stuff. So hasFine = hasCoar = false.
     // But we might need to restrict and interpolate another, even coarser multigrid level so in that case we need
     // to define that. 
-    Real mgDx;
-    bool hasCoarMg;
+    EBLevelGrid eblgFine = EBLevelGrid();
+    EBLevelGrid eblg;
+    EBLevelGrid eblgCoar = EBLevelGrid();
+    EBLevelGrid eblgMgCoar;
+    
+    RefCountedPtr<EBMultigridInterpolator>             interpolator;  // Only if defined on an AMR level
+    RefCountedPtr<EBFluxRegister>                      fluxReg;       // Only if defined on an AMR level
+    RefCountedPtr<EbCoarAve>                           coarsener;     // Only if defined on an AMR level
+    
+    RefCountedPtr<EBHelmholtzOp::EBHelmholtzDomainBc>  dobc;
+    RefCountedPtr<EBHelmholtzOp::EBHelmholtzEbBc>      ebbc;
 
+    Real mgDx;
+    Real dx;
+    Real dxCoar;
+
+    bool hasCoarMg;
+    bool hasMGObjects;
+    
     RefCountedPtr<LevelData<EBCellFAB > >       Acoef;
     RefCountedPtr<LevelData<EBFluxFAB > >       Bcoef;
     RefCountedPtr<LevelData<BaseIVFAB<Real> > > BcoefIrreg;
-    RefCountedPtr<EBMultigridInterpolator>      interpolator;
-    RefCountedPtr<EBFluxRegister>               fluxreg;
-    EBLevelGrid eblg;
-    EBLevelGrid eblgMgCoar;
-
-    const bool hasFine = false;
-    const bool hasCoar = false; 
-    const EBLevelGrid eblgFine = EBLevelGrid();
-    const EBLevelGrid eblgCoar = EBLevelGrid();
-
 
     bool foundMgLevel = false;
 
-    if(a_depth == 0){ // Asking for the AMR level. 
+    if(a_depth == 0){ // Asking for the AMR level.
+      Acoef      = m_amrAcoef[amrLevel];
+      Bcoef      = m_amrBcoef[amrLevel];
+      BcoefIrreg = m_amrBcoefIrreg[amrLevel];
+
+      interpolator = m_amrInterpolators[amrLevel];
+      fluxReg      = m_amrFluxRegisters[amrLevel];
+      coarsener    = m_amrCoarseners[amrLevel];
+      
       foundMgLevel = true;
     }
     else{ // Asking for a coarsening. No interp object here. 
@@ -431,9 +445,33 @@ EBHelmholtzOp* EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, 
     if(foundMgLevel){
 
 
-      RefCountedPtr<ConductivityBaseEBBC> ebbc = this->makeEbBcObject(eblg, mgDx);
+      auto dobc = this->makeDomainBcObject(eblg, mgDx);
+      auto ebbc = this->makeEbBcObject    (eblg, mgDx);
 									
-      //      mgOp = new EBHelmholtzOp(eblgFine, eblg, eblgCoar, eblgMgCoar, interpolator, dobc, ebbc, dxMg
+      mgOp = new EBHelmholtzOp(EBLevelGrid(), // Multigrid operator, so no fine. 
+			       eblg,
+			       EBLevelGrid(), // Multigrid operator, so no coarse. 
+			       eblgMgCoar,
+			       interpolator,  // Only defined if an amr level
+			       fluxReg,       // Only defined if an amr level
+			       coarsener,     // Only defined if an amr level
+			       dobc,
+			       ebbc,
+			       dx,
+			       dxCoar,
+			       2,             // Bogus value. 
+			       2,             // Bogus value.
+			       false,         // Multigrid operator, so false.
+			       false,         // Multigrid operator, so false.
+			       hasMGObjects,
+			       m_alpha,
+			       m_beta,
+			       Acoef,
+			       Bcoef,
+			       BcoefIrreg,
+			       m_ghostPhi,
+			       m_ghostRhs,
+			       m_relaxMethod);
     }
     
 
@@ -467,16 +505,22 @@ int EBHelmholtzOpFactory::refToFiner(const ProblemDomain& a_domain) const {
   return ref;
 }
 
-RefCountedPtr<ConductivityBaseEBBC> EBHelmholtzOpFactory::makeEbBcObject(const EBLevelGrid& a_eblg, const Real& a_dx) const {
-  ConductivityBaseEBBC* bc = (ConductivityBaseEBBC*) m_ebBcFactory->create(a_eblg.getDomain(), a_eblg.getEBISL(), a_dx*RealVect::Unit, &m_ghostPhi, &m_ghostRhs);
+RefCountedPtr<EBHelmholtzOp::EBHelmholtzEbBc> EBHelmholtzOpFactory::makeEbBcObject(const EBLevelGrid& a_eblg, const Real& a_dx) const {
+  EBHelmholtzOp::EBHelmholtzEbBc* bc = (EBHelmholtzOp::EBHelmholtzEbBc*) m_ebBcFactory->create(a_eblg.getDomain(),
+											       a_eblg.getEBISL(),
+											       a_dx*RealVect::Unit,
+											       &m_ghostPhi,
+											       &m_ghostRhs);
 
-  return RefCountedPtr<ConductivityBaseEBBC> (bc);
+  return RefCountedPtr<EBHelmholtzOp::EBHelmholtzEbBc>(bc);
 }
 
-RefCountedPtr<ConductivityBaseDomainBC> EBHelmholtzOpFactory::makeDomainBcObject(const EBLevelGrid& a_eblg, const Real& a_dx) const {
-  ConductivityBaseDomainBC* bc = (ConductivityBaseDomainBC*) m_domainBcFactory->create(a_eblg.getDomain(), a_eblg.getEBISL(), a_dx*RealVect::Unit);
+RefCountedPtr<EBHelmholtzOp::EBHelmholtzDomainBc> EBHelmholtzOpFactory::makeDomainBcObject(const EBLevelGrid& a_eblg, const Real& a_dx) const {
+  EBHelmholtzOp::EBHelmholtzDomainBc* bc = (EBHelmholtzOp::EBHelmholtzDomainBc*) m_domainBcFactory->create(a_eblg.getDomain(),
+											    a_eblg.getEBISL(),
+											    a_dx*RealVect::Unit);
   
-  return RefCountedPtr<ConductivityBaseDomainBC>(bc);
+  return RefCountedPtr<EBHelmholtzOp::EBHelmholtzDomainBc>(bc);
 }
 
 #include <CD_NamespaceFooter.H>

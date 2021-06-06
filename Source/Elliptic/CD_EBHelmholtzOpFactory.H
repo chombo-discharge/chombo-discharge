@@ -51,10 +51,10 @@ public:
   using AmrRefRatios     = Vector<int>;
 
   // These will be replaced after everything is running. God I hate the BC classes in Chombo. 
-  using HelmholtzDomainBcFactory  = RefCountedPtr<BaseDomainBCFactory>; // Will be replaced with better BC class...
-  using HelmholtzEbBcFactory      = RefCountedPtr<BaseEBBCFactory>;     // Will be replaced with better BC class...
-  using HelmholtzDomainBc         = RefCountedPtr<ConductivityBaseDomainBC>;
-  using HelmholtzEbBc             = RefCountedPtr<ConductivityBaseEBBC>;
+  using EBHelmholtzDomainBcFactory  = RefCountedPtr<BaseDomainBCFactory>; // Will be replaced with better BC class...
+  using EBHelmholtzEbBcFactory      = RefCountedPtr<BaseEBBCFactory>;     // Will be replaced with better BC class...
+  // using EBHelmholtzDomainBc         = RefCountedPtr<EBHelmholtzOp::EBHelmholtzDomainBc>;
+  // using EBHelmholtzEbBc             = RefCountedPtr<EBHelmholtzOp::EBHelmholtzEbBc>;
 
   using RelaxType        = EBHelmholtzOp::RelaxationMethod;
 
@@ -102,8 +102,8 @@ public:
 		       const AmrCellData&                a_amrAcoef,
 		       const AmrFluxData&                a_amrBcoef,
 		       const AmrIrreData&                a_amrBcoefIrreg,
-		       const HelmholtzDomainBcFactory&   a_domainBcFactory,
-		       const HelmholtzEbBcFactory&       a_ebbcFactory,
+		       const EBHelmholtzDomainBcFactory& a_domainBcFactory,
+		       const EBHelmholtzEbBcFactory&     a_ebbcFactory,
 		       const IntVect&                    a_ghostPhi,
 		       const IntVect&                    a_ghostRHS,
 		       const RelaxType&                  a_relaxationMethod,
@@ -170,8 +170,8 @@ protected:
   AmrIrreData      m_amrBcoefIrreg;
 
   // BC factories
-  HelmholtzDomainBcFactory m_domainBcFactory;
-  HelmholtzEbBcFactory     m_ebBcFactory;
+  EBHelmholtzDomainBcFactory m_domainBcFactory;
+  EBHelmholtzEbBcFactory     m_ebBcFactory;
 
   // Bottom drop domain
   ProblemDomain m_bottomDomain;
@@ -249,12 +249,12 @@ protected:
   /*!
     @brief Make an EBBC object. 
   */
-  HelmholtzEbBc makeEbBcObject(const EBLevelGrid& a_eblg, const Real& a_dx) const;
+  RefCountedPtr<EBHelmholtzOp::EBHelmholtzEbBc> makeEbBcObject(const EBLevelGrid& a_eblg, const Real& a_dx) const;
 
   /*!
     @brief Make a domain BC object.
   */
-  HelmholtzDomainBc makeDomainBcObject(const EBLevelGrid& a_eblg, const Real& a_dx) const;
+  RefCountedPtr<EBHelmholtzOp::EBHelmholtzDomainBc> makeDomainBcObject(const EBLevelGrid& a_eblg, const Real& a_dx) const;
 };
 
 #include <CD_NamespaceFooter.H>
