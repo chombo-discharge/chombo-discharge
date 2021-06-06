@@ -32,7 +32,6 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid &                                
 			     const RefCountedPtr<EBHelmholtzDomainBc>&            a_domainBc,
 			     const RefCountedPtr<EBHelmholtzEbBc>&                a_ebBc,
 			     const Real    &                                      a_dx,
-			     const Real    &                                      a_dxCoar,
 			     const int&                                           a_refToFine,
 			     const int&                                           a_refToCoar,
 			     const bool&                                          a_hasFine,
@@ -57,7 +56,6 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid &                                
   m_domainBc(a_domainBc),
   m_ebBc(a_ebBc),
   m_dx(a_dx),
-  m_dxCoar(a_dxCoar),
   m_refToFine(a_hasFine ? a_refToFine : 1),
   m_refToCoar(a_hasCoar ? a_refToCoar : 1),
   m_hasFine(a_hasFine),
@@ -85,7 +83,6 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid &                                
 
   if(m_hasCoar){
     m_eblgCoar = a_eblgCoar;
-    m_dxCoar   = m_dx*a_refToCoar;
 
     // Define interpolation objects. Need to to think about this one because EBConductivityOp is a bit anal about the way it does this. 
   }

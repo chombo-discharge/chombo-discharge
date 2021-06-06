@@ -67,7 +67,6 @@ public:
 		const RefCountedPtr<EBHelmholtzDomainBc>&            a_domainBC,
 		const RefCountedPtr<EBHelmholtzEbBc>&                a_ebBC,
 		const Real&                                          a_dx,
-		const Real&                                          a_dxCoar,
 		const int&                                           a_refToFine,
 		const int&                                           a_refToCoar,
 		const bool&                                          a_hasFine,
@@ -441,11 +440,6 @@ protected:
     @brief Grid resolution;
   */
   Real m_dx;
-
-  /*!
-    @brief Grid resolution for coarser level;
-  */
-  Real m_dxCoar;
 
   /*!
     @brief Fine level grid (if the operator has a fine level)

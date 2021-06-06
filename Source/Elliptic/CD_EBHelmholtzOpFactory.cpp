@@ -442,13 +442,12 @@ EBHelmholtzOp* EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, 
 			     dobc,
 			     ebbc,          
 			     dx,            // Set from depth
-			     -1.0,          // Bogus value. 
-			     2,             // Bogus value. 
-			     2,             // Bogus value.
+			     1,             // Multigrid operator. Set to 1 in operator anyways. 
+			     1,             // Multigrid operator. Set to 1 in operator anyways. 
 			     false,         // Multigrid operator, so false.
 			     false,         // Multigrid operator, so false.
 			     hasMGObjects,
-			     m_alpha,
+			     m_alpha,   
 			     m_beta,
 			     Acoef,
 			     Bcoef,
@@ -467,16 +466,15 @@ EBHelmholtzOp* EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
 
   const int amrLevel = this->findAmrLevel(a_domain);
 
+  const bool hasFine = amrLevel < m_numAmrLevels - 1;
+  const bool hasCoar = amrLevel > 0;
+  
   EBLevelGrid eblgFine;
-  EBLevelGrid eblg = *m_amrLevelGrids[amrLevel];
   EBLevelGrid eblgCoar;
   EBLevelGrid eblgCoarMG;
 
-  const bool hasFine = amrLevel < m_numAmrLevels - 1;
-  const bool hasCoar = amrLevel > 0;
-
-  int refToFine = -1;
-  int refToCoar = -1;
+  int refToFine = 1;
+  int refToCoar = 1;
   
   if(hasCoar){
     eblgCoar  = *m_amrLevelGrids[amrLevel-1];
@@ -488,19 +486,16 @@ EBHelmholtzOp* EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
     refToFine  = m_amrRefRatios[amrLevel];
   }
 
-  const Real dx     = m_amrResolutions[amrLevel];
-  const Real dxCoar = (hasCoar) ? m_amrResolutions[amrLevel-1] : -1.0; // Doesn't matter if we don't have a coarse level.
-
   const bool hasMGObjects = m_hasMgLevels[amrLevel];
   if(hasMGObjects){
     eblgCoarMG = *m_mgLevelGrids[amrLevel][1];
   }
 
-  auto dobc = this->makeDomainBcObject(eblg, dx);
-  auto ebbc = this->makeEbBcObject    (eblg, dx);
+  auto dobc = this->makeDomainBcObject(*m_amrLevelGrids[amrLevel], m_amrResolutions[amrLevel]);
+  auto ebbc = this->makeEbBcObject    (*m_amrLevelGrids[amrLevel], m_amrResolutions[amrLevel]);
 
   op = new EBHelmholtzOp(eblgFine,
-			 eblg,
+			 *m_amrLevelGrids[amrLevel],
 			 eblgCoar,
 			 eblgCoarMG,
 			 m_amrInterpolators[amrLevel],
@@ -508,8 +503,7 @@ EBHelmholtzOp* EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
 			 m_amrCoarseners[amrLevel],
 			 dobc,
 			 ebbc,
-			 dx,
-			 dxCoar,
+			 m_amrResolutions[amrLevel],
 			 refToFine,
 			 refToCoar,
 			 hasFine,
