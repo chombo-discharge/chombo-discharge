@@ -445,6 +445,11 @@ void ProxyFieldSolver::setupHelmholtz(){
 			    bottomDomain,
 			    m_amr->getBlockingFactor());
 
+  BiCGStabSolver<LevelData<EBCellFAB> > bicgstab;
+  AMRMultiGrid<LevelData<EBCellFAB> > multigridSolver;
+  
+  multigridSolver.define(m_amr->getDomains()[0], fact, &bicgstab, 1 + m_amr->getFinestLevel());
+
 }
 
 #include <CD_NamespaceFooter.H>

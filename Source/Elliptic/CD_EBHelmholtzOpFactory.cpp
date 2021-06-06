@@ -570,4 +570,5 @@ int EBHelmholtzOpFactory::findAmrLevel(const ProblemDomain& a_domain) const{
   return amrLevel;
 }
 
+
 #include <CD_NamespaceFooter.H>
