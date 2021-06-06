@@ -258,9 +258,11 @@ protected:
 
   /*!
     @brief Find level corresponding to amr level
-    @param[in]
+    @param[in] a_domain Problem domain. 
+    @return Depth in m_amrLevelGrids corresponding to a_domain. 
+    @note Run-time error if no level was found. 
   */
-  int findAmrLevel(const ProblemDomain& a_domain, const int a_depth);
+  int findAmrLevel(const ProblemDomain& a_domain) const;
 };
 
 #include <CD_NamespaceFooter.H>

@@ -372,10 +372,9 @@ void EBHelmholtzOp::getFlux(EBFluxFAB&                  a_flux,
   MayDay::Warning("EBHelmholtzOp::getFlux - not implemented (yet)");
 }
 
-
-
 void EBHelmholtzOp::homogeneousCFInterp(LevelData<EBCellFAB>& a_phi){
-  if(m_hasCoar) m_interpolator->coarseFineInterpH(a_phi, a_phi.interval());
+  MayDay::Warning("EBHelmholtzOp::homogeneousCFInterp -- is this correct? For factor 4 refinement the coarse values would be 'in the wrong' place");
+  if(m_hasCoar) m_interpolator->coarseFineInterpH(a_phi, a_phi.interval()); 
 }
 
 void EBHelmholtzOp::inhomogeneousCFInterp(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar){
