@@ -255,6 +255,12 @@ protected:
     @brief Make a domain BC object.
   */
   RefCountedPtr<EBHelmholtzOp::EBHelmholtzDomainBc> makeDomainBcObject(const EBLevelGrid& a_eblg, const Real& a_dx) const;
+
+  /*!
+    @brief Find level corresponding to amr level
+    @param[in]
+  */
+  int findAmrLevel(const ProblemDomain& a_domain, const int a_depth);
 };
 
 #include <CD_NamespaceFooter.H>

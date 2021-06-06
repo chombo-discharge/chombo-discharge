@@ -365,21 +365,12 @@ EBHelmholtzOp* EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, 
     // the multigrid operators only do relaxation and there's no fine-to-coar stuff. So hasFine = hasCoar = false.
     // But we might need to restrict and interpolate another, even coarser multigrid level so in that case we need
     // to define that. 
-    EBLevelGrid eblgFine = EBLevelGrid();
     EBLevelGrid eblg;
-    EBLevelGrid eblgCoar = EBLevelGrid();
     EBLevelGrid eblgMgCoar;
     
     RefCountedPtr<EBMultigridInterpolator>             interpolator;  // Only if defined on an AMR level
     RefCountedPtr<EBFluxRegister>                      fluxReg;       // Only if defined on an AMR level
     RefCountedPtr<EbCoarAve>                           coarsener;     // Only if defined on an AMR level
-    
-    RefCountedPtr<EBHelmholtzOp::EBHelmholtzDomainBc>  dobc;
-    RefCountedPtr<EBHelmholtzOp::EBHelmholtzEbBc>      ebbc;
-
-    Real mgDx;
-    Real dx;
-    Real dxCoar;
 
     bool hasCoarMg;
     bool hasMGObjects;
@@ -391,22 +382,28 @@ EBHelmholtzOp* EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, 
     bool foundMgLevel = false;
 
     if(a_depth == 0){ // Asking for the AMR level.
-      Acoef      = m_amrAcoef[amrLevel];
-      Bcoef      = m_amrBcoef[amrLevel];
-      BcoefIrreg = m_amrBcoefIrreg[amrLevel];
+      eblg       = *m_amrLevelGrids[amrLevel];
+      Acoef      =  m_amrAcoef[amrLevel];
+      Bcoef      =  m_amrBcoef[amrLevel];
+      BcoefIrreg =  m_amrBcoefIrreg[amrLevel];
 
       interpolator = m_amrInterpolators[amrLevel];
       fluxReg      = m_amrFluxRegisters[amrLevel];
       coarsener    = m_amrCoarseners[amrLevel];
+
+      hasCoarMg = m_hasMgLevels[amrLevel];
+
+      if(hasCoarMg){
+	eblgMgCoar = *m_mgLevelGrids[amrLevel][1]; 
+      }
       
       foundMgLevel = true;
     }
-    else{ // Asking for a coarsening. No interp object here. 
+    else{ // Asking for a coarsening. No interp or flux reg object here.
+      
       // TLDR: Go through the coarsened levels for the specified amr level and see if we find a coarsening at the
       //       specified depth.
-      
-      const int refToDepth = std::pow(2, a_depth);
-      const ProblemDomain coarDomain = coarsen(a_fineDomain, refToDepth);
+      const ProblemDomain coarDomain = coarsen(a_fineDomain, std::pow(mgRefRat, a_depth));
 
       // These are the things that live below the AMR level corresponding to a_fineDomain. 
       const AmrLevelGrids& mgLevelGrids = m_mgLevelGrids[amrLevel];
@@ -418,21 +415,18 @@ EBHelmholtzOp* EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, 
       int mgLevel;
       for (int img = 0; img < mgLevelGrids.size(); img++){
 	if(mgLevelGrids[mgLevel]->getDomain() == coarDomain){
-	  mgLevel = img;
-	  break;
+	  mgLevel      = img;
 	  foundMgLevel = true;
+	  break;
 	}
       }
 
       // Found the multigrid level. We can define the operator. 
       if(foundMgLevel){
-	mgDx       =  m_amrResolutions[amrLevel]*std::pow(mgRefRat, a_depth);
 	Acoef      =  mgAcoef[mgLevel];
 	Bcoef      =  mgBcoef[mgLevel];
 	BcoefIrreg =  mgBcoefIrreg[mgLevel];
 	eblg       = *mgLevelGrids[mgLevel];
-
-
 
 	hasCoarMg = (mgLevel < mgLevelGrids.size() - 1); // This just means that mgLevel was not the last entry in mgLevelGrids so there's even coarser stuff below.
 	if(hasCoarMg){
@@ -444,9 +438,11 @@ EBHelmholtzOp* EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, 
     // Make the operator
     if(foundMgLevel){
 
+      const Real dx     = m_amrResolutions[amrLevel]*std::pow(mgRefRat, a_depth); // 
+      const Real dxCoar = (amrLevel > 0) ? m_amrResolutions[amrLevel-1] : -1.0;
 
-      auto dobc = this->makeDomainBcObject(eblg, mgDx);
-      auto ebbc = this->makeEbBcObject    (eblg, mgDx);
+      auto dobc = this->makeDomainBcObject(eblg, dx);
+      auto ebbc = this->makeEbBcObject    (eblg, dx);
 									
       mgOp = new EBHelmholtzOp(EBLevelGrid(), // Multigrid operator, so no fine. 
 			       eblg,
@@ -456,9 +452,9 @@ EBHelmholtzOp* EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, 
 			       fluxReg,       // Only defined if an amr level
 			       coarsener,     // Only defined if an amr level
 			       dobc,
-			       ebbc,
-			       dx,
-			       dxCoar,
+			       ebbc,          
+			       dx,            // Set from depth
+			       dxCoar,        // Bogus...?
 			       2,             // Bogus value. 
 			       2,             // Bogus value.
 			       false,         // Multigrid operator, so false.
@@ -473,19 +469,49 @@ EBHelmholtzOp* EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, 
 			       m_ghostRhs,
 			       m_relaxMethod);
     }
-    
-
   }
-
-  // We have a starting point, now see if 
-
   
-  
-  return NULL; // Not implemented (yet);
+  return mgOp;
 }
 
 EBHelmholtzOp* EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
-  return NULL; // Not implemented (yet);
+  EBHelmholtzOp* op;
+
+
+  int amrLevel = -1;
+  for (int lvl = 0; lvl < m_amrLevelGrids.size(); lvl++){
+    if(m_amrLevelGrids[lvl]->getDomain() == a_domain){
+      amrLevel = lvl;
+      break;
+    }
+  }
+
+  if(amrLevel < 0) MayDay::Abort("EBHelmholtzOpFactory::AMRnewOp - no corresponding amr level found!");
+
+  EBLevelGrid eblgFine;
+  EBLevelGrid eblg;
+  EBLevelGrid eblgCoar;
+  EBLevelGrid eblgCoarMG;
+
+  int refToFine = 2;
+  int refToCoar = 2;
+
+  Real dx     = m_amrResolutions[amrLevel];
+  Real dxCoar = -1;
+  
+  if(amrLevel > 0){
+    eblgCoar  = *m_amrLevelGrids[amrLevel-1];
+    dxCoar    = m_amrResolutions[amrLevel-1];
+    refToCoar = m_amrRefRatios[amrLevel-1];
+  }
+
+  if(amrLevel < m_numAmrLevels-1){
+    eblgCoar   = *m_amrLevelGrids[amrLevel-1];
+    dxCoar     = m_amrResolutions[amrLevel-1];
+    refToCoar  = m_amrRefRatios[amrLevel-1];
+  }
+
+  
 }
 
 int EBHelmholtzOpFactory::refToFiner(const ProblemDomain& a_domain) const {
