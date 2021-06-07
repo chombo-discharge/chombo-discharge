@@ -330,7 +330,8 @@ void EBHelmholtzOp::createCoarser(LevelData<EBCellFAB>& a_coarse, const LevelDat
 
 void EBHelmholtzOp::createCoarsened(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const int& a_refRat) {
   CH_assert(m_hasCoar);
-#if 0 // original code
+  pout() << "in create coarsened" << endl;
+#if 1 // original code
   DisjointBoxLayout dblCoFi;
   EBISLayout        ebislCoFi;
   ProblemDomain     domainCoFi;
@@ -350,6 +351,7 @@ void EBHelmholtzOp::createCoarsened(LevelData<EBCellFAB>& a_lhs, const LevelData
   EBCellFactory factCoFi(m_eblgCoFi.getEBISL());
   a_lhs.define(m_eblgCoFi.getDBL(), a_rhs.nComp(), a_rhs.ghostVect(), factCoFi);
 #endif
+  pout() << "done create coarsened" << endl;
   
 }
 

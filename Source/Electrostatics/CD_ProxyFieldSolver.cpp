@@ -449,8 +449,14 @@ void ProxyFieldSolver::setupHelmholtz(){
   BiCGStabSolver<LevelData<EBCellFAB> > bicgstab;
   AMRMultiGrid<LevelData<EBCellFAB> > multigridSolver;
 
+  Vector<LevelData<EBCellFAB>* > phi;
+  Vector<LevelData<EBCellFAB>* > rhs;
+
+  m_amr->alias(phi, Aco);
+  m_amr->alias(rhs, Aco);
+
   multigridSolver.define(m_amr->getDomains()[0], fact, &bicgstab, 1 + finestLevel);
-  multigridSolver.init(alpha, beta, finestLevel, 0);
+  multigridSolver.init(phi, rhs, finestLevel, 0);
 
 }
 
