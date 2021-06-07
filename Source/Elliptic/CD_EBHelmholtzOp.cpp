@@ -697,7 +697,7 @@ void EBHelmholtzOp::getFaceCenteredFlux(EBFaceFAB&       a_fluxCenter,
   faceBox.grow(a_dir, 1);
   faceBox &= m_eblg.getDomain();
   faceBox.grow(a_dir, -1);
-  faceBox.surroundingNodes();
+  faceBox.surroundingNodes(a_dir);
 
   BaseFab<Real>& regFlux       = a_fluxCenter.getSingleValuedFAB();
   const BaseFab<Real>& regPhi  = a_phi.getSingleValuedFAB();
