@@ -449,15 +449,30 @@ void ProxyFieldSolver::setupHelmholtz(){
   BiCGStabSolver<LevelData<EBCellFAB> > bicgstab;
   AMRMultiGrid<LevelData<EBCellFAB> > multigridSolver;
 
-  Vector<LevelData<EBCellFAB>* > phi;
-  Vector<LevelData<EBCellFAB>* > rhs;
 
-  m_amr->alias(phi, Aco);
-  m_amr->alias(rhs, Aco);
 
   multigridSolver.define(m_amr->getDomains()[0], fact, &bicgstab, 1 + finestLevel);
+
+  EBAMRCellData PHI;
+  EBAMRCellData RHS;
+
+  Vector<LevelData<EBCellFAB>* > phi;
+  Vector<LevelData<EBCellFAB>* > rhs; 
+  
+  m_amr->allocate(PHI, m_realm, phase::gas, 1);
+  m_amr->allocate(RHS, m_realm, phase::gas, 1);
+
+  m_amr->alias(phi, PHI);
+  m_amr->alias(rhs, RHS);
+
+  DataOps::setValue(PHI, 0.0);
+  DataOps::setValue(RHS, 0.0);
+  
   multigridSolver.init(phi, rhs, finestLevel, 0);
 
+  const Real res = multigridSolver.computeAMRResidual(phi, rhs, finestLevel, 0);
+
+  //  if(procID() == 0) std::cout << "helmholtz zero residual = " << res << std::endl;
 }
 
 #include <CD_NamespaceFooter.H>

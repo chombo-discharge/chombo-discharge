@@ -792,7 +792,7 @@ protected:
     @param[in]    a_dit  Data index
     @param[in]    a_dir  Coordinate direction
   */
-  void interpolateFluxes(EBFaceFAB& a_flux, const DataIndex& a_dit, const int a_dir);
+  void interpolateFluxes(EBFaceFAB& a_flux, const Box& a_cellBox, const DataIndex& a_dit, const int a_dir);
 
   /*!
     @brief Increment coarse flux register

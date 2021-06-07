@@ -133,9 +133,10 @@ void EBHelmholtzOp::defineStencils(){
   // Basic defines. 
   EBCellFactory cellFact(m_eblg.getEBISL());
   EBFluxFactory fluxFact(m_eblg.getEBISL());
+  
   m_scratch.define(m_eblg.getDBL(), m_nComp, m_ghostPhi, cellFact);
   m_relCoef.define(m_eblg.getDBL(), m_nComp, IntVect::Zero, cellFact);
-  m_flux.define( m_eblg.getDBL(), m_nComp, IntVect::Unit, fluxFact); // Need one ghost cell in order to be able to interpolate. 
+  m_flux.define(   m_eblg.getDBL(), m_nComp, IntVect::Unit, fluxFact); // Need one ghost cell in order to be able to interpolate. 
 
   m_opEBStencil.define(    m_eblg.getDBL());
   m_vofIterIrreg.define(   m_eblg.getDBL());
@@ -285,7 +286,7 @@ void EBHelmholtzOp::create(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFA
 }
 
 void EBHelmholtzOp::assign(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) {
-  a_rhs.localCopyTo(a_lhs);
+  a_rhs.copyTo(a_lhs);
 }
 
 Real EBHelmholtzOp::dotProduct(const LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) {
@@ -330,8 +331,7 @@ void EBHelmholtzOp::createCoarser(LevelData<EBCellFAB>& a_coarse, const LevelDat
 
 void EBHelmholtzOp::createCoarsened(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const int& a_refRat) {
   CH_assert(m_hasCoar);
-  pout() << "in create coarsened" << endl;
-#if 1 // original code
+#if 0 // original code
   DisjointBoxLayout dblCoFi;
   EBISLayout        ebislCoFi;
   ProblemDomain     domainCoFi;
@@ -351,8 +351,6 @@ void EBHelmholtzOp::createCoarsened(LevelData<EBCellFAB>& a_lhs, const LevelData
   EBCellFactory factCoFi(m_eblgCoFi.getEBISL());
   a_lhs.define(m_eblgCoFi.getDBL(), a_rhs.nComp(), a_rhs.ghostVect(), factCoFi);
 #endif
-  pout() << "done create coarsened" << endl;
-  
 }
 
 void EBHelmholtzOp::relax(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, int a_iterations){
@@ -395,7 +393,12 @@ void EBHelmholtzOp::AMROperator(LevelData<EBCellFAB>&              a_Lphi,
 				const LevelData<EBCellFAB>&        a_phiCoar,
 				const bool                         a_homogeneousPhysBC,
 				AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp){
-  MayDay::Warning("EBHelmholtz::AMROperator - not implemented");
+
+  this->applyOp(a_Lphi, a_phi, &a_phiCoar, a_homogeneousPhysBC, false);
+
+  if(m_hasFine){
+    this->reflux(a_Lphi, a_phiFine, a_phi, *a_finerOp);
+  }
 }
 
 void EBHelmholtzOp::AMROperatorNF(LevelData<EBCellFAB>&       a_Lphi,
@@ -648,8 +651,6 @@ void EBHelmholtzOp::computeAlphaWeight(){
 }
 
 void EBHelmholtzOp::computeRelaxationCoefficient(){
-  MayDay::Warning("EBHelmholtzOp::computeRelaxationCoefficients -- beware of domain cells which probably have a smaller relaxation factor. Check domain flux. ");
-  
   for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit){
     const Box cellBox = m_eblg.getDBL()[dit()];
 
@@ -760,7 +761,7 @@ void EBHelmholtzOp::getFaceCentroidFlux(EBFaceFAB&       a_fluxCentroid,
 
   
   this->getFaceCenteredFlux(a_fluxCentroid, a_phi, a_cellBox, a_dit, a_dir);
-  this->interpolateFluxes(a_fluxCentroid, a_dit, a_dir);
+  this->interpolateFluxes(  a_fluxCentroid,        a_cellBox, a_dit, a_dir);
 }
 
 void EBHelmholtzOp::getFaceCenteredFlux(EBFaceFAB&       a_fluxCenter,
@@ -805,7 +806,7 @@ void EBHelmholtzOp::getFaceCenteredFlux(EBFaceFAB&       a_fluxCenter,
   a_fluxCenter *= m_beta;
 }
 
-void EBHelmholtzOp::interpolateFluxes(EBFaceFAB& a_flux, const DataIndex& a_dit, const int a_dir){
+void EBHelmholtzOp::interpolateFluxes(EBFaceFAB& a_flux, const Box& a_cellBox, const DataIndex& a_dit, const int a_dir){
   const BaseIFFAB<FaceStencil>& faceStencils = m_interpStencil[a_dir][a_dit];
 
   BaseIFFAB<Real>& interpol = m_interpolant[a_dir][a_dit];
@@ -813,8 +814,11 @@ void EBHelmholtzOp::interpolateFluxes(EBFaceFAB& a_flux, const DataIndex& a_dit,
   const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
   const EBGraph& ebgraph = ebisbox.getEBGraph();
 
-  // Interpolate flux to centroid. 
-  for (FaceIterator faceIt(faceStencils.getIVS(), ebgraph, a_dir, FaceStop::SurroundingNoBoundary); faceIt.ok(); ++faceIt){
+
+  const IntVectSet ivs = faceStencils.getIVS() & a_cellBox;
+
+  // Interpolate flux to centroid.
+  for (FaceIterator faceIt(ivs, ebgraph, a_dir, FaceStop::SurroundingNoBoundary); faceIt.ok(); ++faceIt){
     const FaceIndex& face = faceIt();
     const FaceStencil& stencil = faceStencils(face, m_comp);
 
@@ -828,7 +832,7 @@ void EBHelmholtzOp::interpolateFluxes(EBFaceFAB& a_flux, const DataIndex& a_dit,
 
 
   // Copy the centroid flux back to the data holder.
-  for (FaceIterator faceIt(interpol.getIVS(), ebgraph, a_dir, FaceStop::SurroundingNoBoundary); faceIt.ok(); ++faceIt){
+  for (FaceIterator faceIt(ivs, ebgraph, a_dir, FaceStop::SurroundingNoBoundary); faceIt.ok(); ++faceIt){
     const FaceIndex& face = faceIt();
     a_flux(face, m_comp) = interpol(face, m_comp);
   }
@@ -862,23 +866,22 @@ void EBHelmholtzOp::incrementFRCoar(const LevelData<EBCellFAB>& a_phi){
 }
 
 void EBHelmholtzOp::incrementFRFine(const LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phi, AMRLevelOp<LevelData<EBCellFAB> >& a_finerOp){
-
+  CH_assert(m_hasFine);
   // Doing the nasty here -- phiFine needs new ghost cells.
   LevelData<EBCellFAB>& phiFine = (LevelData<EBCellFAB>&) a_phiFine;
-  EBHelmholtzOp& finerOp = (EBHelmholtzOp&) (a_finerOp);
+  EBHelmholtzOp& finerOp        = (EBHelmholtzOp&)       (a_finerOp);
   finerOp.inhomogeneousCFInterp(phiFine, a_phi);
   phiFine.exchange();
 
   LevelData<EBFluxFAB>& fineFlux = finerOp.getFlux();
-
   const Real scale = 1.0; 
 
-  // Compute 
+  // Compute
   for (DataIterator dit(m_eblgFine.getDBL()); dit.ok(); ++dit){
     for (int dir = 0; dir < SpaceDim; dir++){
-      EBFaceFAB& flux = fineFlux[dit()][dir];
+      EBFaceFAB& flux   = fineFlux[dit()][dir];
       const Box cellBox = m_eblgFine.getDBL()[dit()];
-
+      const EBISBox& ebisbox = m_eblgFine.getEBISL()[dit()];
       for (SideIterator sit; sit.ok(); ++sit){
 
 	Box stripBox = adjCellBox(cellBox, dir, sit(), 1);
@@ -886,15 +889,13 @@ void EBHelmholtzOp::incrementFRFine(const LevelData<EBCellFAB>& a_phiFine, const
 
 	// Computes fluxes for all faces oriented in +/- dir, but which are not boundary faces. Restrict the
 	// computation to stripBox
-	this->getFaceCentroidFlux(flux, phiFine[dit()], stripBox, dit(), dir);
+	finerOp.getFaceCentroidFlux(flux, phiFine[dit()], stripBox, dit(), dir);
 
 	// Increment flux register, recall that beta and the b-coefficient are included in getFaceCentroidFlux. 
 	m_fluxReg->incrementFineBoth(flux, scale, dit(), Interval(m_comp, m_comp), dir, sit());
       }
     }
   }
-
-  MayDay::Warning("EBHelmholtzOp::incrementFRFine - not implemented");
 }
 
 void EBHelmholtzOp::reflux(LevelData<EBCellFAB>&              a_Lphi,

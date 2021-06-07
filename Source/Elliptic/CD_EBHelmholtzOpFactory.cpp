@@ -483,7 +483,7 @@ EBHelmholtzOp* EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
   }
 
   if(hasFine){
-    eblgFine   = *m_amrLevelGrids[amrLevel];
+    eblgFine   = *m_amrLevelGrids[amrLevel+1];
     refToFine  = m_amrRefRatios[amrLevel];
   }
 
