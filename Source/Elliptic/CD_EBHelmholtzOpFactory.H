@@ -221,7 +221,7 @@ protected:
     @return This will return a multigrid level (i.e. one that is completely overlapping) the fine level. If we can, we use aggregation with
     the blocking factor. Otherwise we try to coarsen directly. 
   */
-  bool getCoarserLayout(RefCountedPtr<EBLevelGrid>& a_coarseGrid, const EBLevelGrid& a_fineGrid, const int a_refRat, const int a_blockingFactor) const;
+  bool getCoarserLayout(EBLevelGrid& a_coarseGrid, const EBLevelGrid& a_fineGrid, const int a_refRat, const int a_blockingFactor) const;
 
   /*!
     @brief Coarsen coefficients (conservatively)

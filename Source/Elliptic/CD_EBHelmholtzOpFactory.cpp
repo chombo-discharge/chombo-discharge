@@ -129,7 +129,7 @@ void EBHelmholtzOpFactory::defineMultigridLevels(){
 	}
 	else{
 	  // Let the operator factory do the coarsening this time. 
-	  hasCoarser = this->getCoarserLayout(mgEblgCoar, mgEblgFine, mgRefRatio, m_mgBlockingFactor);
+	  hasCoarser = this->getCoarserLayout(*mgEblgCoar, mgEblgFine, mgRefRatio, m_mgBlockingFactor);
 	}
 
 	// Do not coarsen further if we end up with a domain smaller than m_bottomDomain. In this case
@@ -162,7 +162,6 @@ void EBHelmholtzOpFactory::defineMultigridLevels(){
 
 	  const ProblemDomain& domainCoar    = eblgCoar.getDomain();
 	  const ProblemDomain& domainFine    = eblgFine.getDomain();
-
 
 	  // Make the irregular sets
 	  const int nghost = 1;
@@ -236,7 +235,7 @@ bool EBHelmholtzOpFactory::isFiner(const ProblemDomain& A, const ProblemDomain& 
   return A.domainBox().numPts() > B.domainBox().numPts();
 }
 
-bool EBHelmholtzOpFactory::getCoarserLayout(RefCountedPtr<EBLevelGrid>& a_coarEblg, const EBLevelGrid& a_fineEblg, const int a_refRat, const int a_blockingFactor) const {
+bool EBHelmholtzOpFactory::getCoarserLayout(EBLevelGrid& a_coarEblg, const EBLevelGrid& a_fineEblg, const int a_refRat, const int a_blockingFactor) const {
   // TLDR: This creates a coarsening of a_fineGrid with refinement factor 2. We first try to split the grid using a_blockingFactor. If that does not work we
   //       coarsen directly. If that does not work we are out of ideas.
 
@@ -286,13 +285,13 @@ bool EBHelmholtzOpFactory::getCoarserLayout(RefCountedPtr<EBLevelGrid>& a_coarEb
       LoadBalance(procs, boxes);
 
       coarDbl.define(boxes, procs, coarDomain);
-      a_coarEblg->define(coarDbl, coarDomain, m_ghostPhi.max(), a_fineEblg.getEBIS());
+      a_coarEblg.define(coarDbl, coarDomain, m_ghostPhi.max(), a_fineEblg.getEBIS());
 
       hasCoarser = true;
     }
     else if(doCoarsen){ // But use coarsening if we must.
       coarsen(coarDbl, a_fineEblg.getDBL(), a_refRat);
-      a_coarEblg->define(coarDbl, coarDomain, m_ghostPhi.max(), a_fineEblg.getEBIS());
+      a_coarEblg.define(coarDbl, coarDomain, m_ghostPhi.max(), a_fineEblg.getEBIS());
 
       hasCoarser = true;
     }
