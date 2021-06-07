@@ -406,11 +406,6 @@ protected:
   bool m_hasCoar;
 
   /*!
-    @brief True if there's an EBCF crossing
-  */
-  bool m_hasEBCF;
-
-  /*!
     @brief Refinement factor to fine level
   */
   int m_refToFine;
@@ -643,6 +638,11 @@ protected:
   void relaxGauSai(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations);
 
   /*!
+    @brief Red-black Gauss-Seidel relaxation
+  */
+  void gsrbColor(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_rhs, const IntVect& a_color);
+
+  /*!
     @brief Fast Gauss-seidel relaxation
     @param[inout] a_correction Correction
     @param[in]    a_residual   Residual
@@ -728,12 +728,6 @@ protected:
     @brief Define stencils
   */
   void defineStencils();
-
-  /*!
-    @brief Define stencils
-    @todo Not sure if we need this. 
-  */
-  void defineEBCFStencils();
 
   /*!
     @brief Compute flux on centroid faces.

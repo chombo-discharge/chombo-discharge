@@ -147,7 +147,6 @@ void EBHelmholtzOp::defineStencils(){
     m_vofIterDomHi [dir].define(m_eblg.getDBL());
     m_interpolant  [dir].define(m_eblg.getDBL());
     m_interpStencil[dir].define(m_eblg.getDBL());
-
   }
 
   EBArith::getMultiColors(m_colors);
@@ -211,7 +210,7 @@ void EBHelmholtzOp::defineStencils(){
 
       // Get stencil for this cell. 
       curStencil = this->getDivFStencil(vof, dit());
-      if(ebFluxStencil != NULL) curStencil += (*ebFluxStencil)[dit()](vof, m_comp);
+      if(ebFluxStencil != nullptr) curStencil += (*ebFluxStencil)[dit()](vof, m_comp);
 
       // Adjust the weight with domain boundary faces. 
       Real betaWeight = EBArith::getDiagWeight(curStencil, vof);
@@ -232,33 +231,15 @@ void EBHelmholtzOp::defineStencils(){
       
       m_betaDiagWeight[dit()](vof, m_comp) = betaWeight;
     }
+
+    m_opEBStencil[dit()] = RefCountedPtr<EBStencil>(new EBStencil(m_vofIterIrreg[dit()].getVector(), opStencil, m_eblg.getDBL()[dit()],
+							   m_eblg.getEBISL()[dit()], m_ghostPhi, m_ghostRhs, m_comp, m_nComp, true));
   }
     
   // Compute the alpha-weight and relaxation coefficient. 
   this->computeAlphaWeight();
   this->computeRelaxationCoefficient();
-
-  if(m_hasFine){
-    m_hasEBCF = m_fluxReg->hasEBCF();
-
-    if(m_hasEBCF){
-      this->defineEBCFStencils();
-    }
-  }
 }
-
-void EBHelmholtzOp::defineEBCFStencils(){
-  CH_assert(m_hasFine);
-  CH_assert(m_hasEBCF);
-
-  MayDay::Warning("EBHelmholtzOp::defineEBCFStencils -- not implemented and I'm not really convinced that I need this routine...");
-  for (int dir = 0; dir < SpaceDim; dir++){
-    for (SideIterator sit; sit.ok(); ++sit){
-
-    }
-  }
-}
-
 
 unsigned int EBHelmholtzOp::orderOfAccuracy(void) const {
   return 99;
@@ -280,7 +261,7 @@ void EBHelmholtzOp::setAlphaAndBeta(const Real& a_alpha, const Real& a_beta) {
 void EBHelmholtzOp::residual(LevelData<EBCellFAB>& a_residual, const LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_rhs, bool a_homogeneousPhysBC) {
   CH_assert(m_hasCoar = false);
   
-  this->applyOp(a_residual, a_phi, NULL, a_homogeneousPhysBC, true); // Only homogeneous CFBC. This shouldn't break because we shouldn't have a coar level.
+  this->applyOp(a_residual, a_phi, nullptr, a_homogeneousPhysBC, true); // Only homogeneous CFBC. This shouldn't break because we shouldn't have a coar level.
   this->axby(a_residual, a_residual, a_rhs, -1.0, 1.0);              // residual = rhs - L(phi). 
 }
 
@@ -292,7 +273,7 @@ void EBHelmholtzOp::preCond(LevelData<EBCellFAB>& a_corr, const LevelData<EBCell
 }
 
 void EBHelmholtzOp::applyOp(LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_phi, bool a_homogeneousPhysBC) {
-  this->applyOp(a_Lphi, a_phi, NULL, a_homogeneousPhysBC, true);
+  this->applyOp(a_Lphi, a_phi, nullptr, a_homogeneousPhysBC, true);
 }
 
 void EBHelmholtzOp::create(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) {
@@ -537,8 +518,8 @@ void EBHelmholtzOp::interpolateCF(LevelData<EBCellFAB>& a_phiFine, const LevelDa
       this->homogeneousCFInterp(a_phiFine);
     }
     else{
-      if(a_phiCoar == NULL){
-	MayDay::Error("EBHelmholtzOp::interpolateCF - trying inhomogeneous interpolation but phiCoar is NULL");
+      if(a_phiCoar == nullptr){
+	MayDay::Error("EBHelmholtzOp::interpolateCF - trying inhomogeneous interpolation but phiCoar is nullptr");
       }
       else{
 	this->inhomogeneousCFInterp(a_phiFine, *a_phiCoar);
@@ -566,7 +547,21 @@ void EBHelmholtzOp::relaxJacobi(LevelData<EBCellFAB>& a_correction, const LevelD
 }
 
 void EBHelmholtzOp::relaxGauSai(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations){
-  MayDay::Warning("EBHelmholtzOp::relaxGauSai - not implemented");
+  LevelData<EBCellFAB> Lcorr;
+  this->create(Lcorr, a_residual);
+
+  for (int iter = 0; iter < a_iterations; iter++){
+
+    for (int icolor = 0; icolor < m_colors.size(); icolor++){
+      this->homogeneousCFInterp(a_correction);
+      this->applyOp(Lcorr, a_correction, true);
+      this->gsrbColor(a_correction, Lcorr, a_residual, m_colors[icolor]);
+    }
+  }
+}
+
+void EBHelmholtzOp::gsrbColor(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_rhs, const IntVect& a_color){
+  MayDay::Warning("EBHelmholtzOp::gsrbColor - not implemented");
 }
 
 void EBHelmholtzOp::relaxGSRBFast(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations){
@@ -788,11 +783,10 @@ void EBHelmholtzOp::incrementFRCoar(const LevelData<EBCellFAB>& a_phi){
 
 	// Get the strip of cells immediately on the inside of the cellbox. 
 	Box stripBox = adjCellBox(cellBox, dir, sit(), 1); // On the outside of cellBox
-	stripBox.shift(dir, sign(flip(sit())));            // Make it on the inside. 
+	stripBox.shift(dir, sign(flip(sit())));            // Make it on the inside.
 
-	// Computes fluxes for all faces oriented in +/- dir, but which are not boundary faces. Comp restricted to stripBox.
-	// Note: it shouldn't matter than we do this for all boxes because the ones that are not near a CF will be waiting for the
-	//       CF boxes to finish anyways...
+	// Computes fluxes for all faces oriented in +/- dir, but which are not boundary faces. Restrict the
+	// calculation to stripBox
 	this->getFaceCentroidFlux(flux, a_phi[dit()], stripBox, dit(), dir);
 
 	// Increment flux register, recall that beta and the b-coefficient are included in getFaceCentroidFlux. 
@@ -825,9 +819,8 @@ void EBHelmholtzOp::incrementFRFine(const LevelData<EBCellFAB>& a_phiFine, const
 	Box stripBox = adjCellBox(cellBox, dir, sit(), 1);
 	stripBox.shift(dir, sign(flip(sit())));
 
-	// Computes fluxes for all faces oriented in +/- dir, but which are not boundary faces. Comp restricted to stripBox.
-	// Note: it shouldn't matter than we do this for all boxes because the ones that are not near a CF will be waiting for the
-	//       CF boxes to finish anyways...
+	// Computes fluxes for all faces oriented in +/- dir, but which are not boundary faces. Restrict the
+	// computation to stripBox
 	this->getFaceCentroidFlux(flux, phiFine[dit()], stripBox, dit(), dir);
 
 	// Increment flux register, recall that beta and the b-coefficient are included in getFaceCentroidFlux. 
