@@ -208,17 +208,19 @@ void EbFastFluxRegister::defineMasks(){
   const ProblemDomain& coarDomain = m_eblgCoar.getDomain();
 
   // Make a BoxLayoutData<FArrayBox> on gridsCoFi but where each box is grown by one cell.
-  Vector<Box> coFiBoxes = gridsCoFi.boxArray();
-  Vector<int> coFiProcs = gridsCoFi.procIDs();
-
   const int ghostCoFi = 1;
-  for (int i = 0; i < coFiBoxes.size(); i++){
-    coFiBoxes[i].grow(ghostCoFi);
-    //    coFiBoxes[i] &= coarDomain;
+  LayoutData<Box> grownBoxes(gridsCoFi);
+  for (DataIterator dit(gridsCoFi); dit.ok(); ++dit){
+    Box bx = gridsCoFi[dit()];
+    bx.grow(ghostCoFi);
+    bx &= coarDomain;
+    
+    grownBoxes[dit()] = bx;
   }
 
-  const DisjointBoxLayout grownCoFiGrid(coFiBoxes, coFiProcs);
-  BoxLayoutData<FArrayBox> coFiMask(grownCoFiGrid, ncomp);
+  const BoxLayout grownCoFiGrid(grownBoxes);
+  BoxLayoutData<FArrayBox> coFiMask(grownCoFiGrid, ncomp);  // Should be able to use DataIterator(gridsCoFi) to iterate through this. 
+  
 
   // Go through and set ghost cells on the outside of the gridsCoFi to 1,
   // all valid cells and ghost cells "inside" the grid are set to zero
@@ -236,13 +238,13 @@ void EbFastFluxRegister::defineMasks(){
       for (DataIterator dit = gridsCoar.dataIterator(); dit.ok(); ++dit){
 	coarMask[dit()].setVal(0.0);
       }
-
+      
       // Fine mask is also 0, except on the CF region. 
       NeighborIterator nit(gridsCoFi);
       for (DataIterator dit = gridsCoFi.dataIterator(); dit.ok(); ++dit){
 	const Box boxCoFi = gridsCoFi[dit()];
 
-	// Get CF cells outside the CoFi box. Subtract the neighbor boxes. 
+	// Get CF cells outside the CoFi box. Subtract the (ungrown) neighbor boxes. 
 	Box cfBoxCoFi = adjCellBox(boxCoFi, idir, sit(), 1);
 	IntVectSet cfIvsCoFi(cfBoxCoFi);
 	for (nit.begin(dit()); nit.ok(); ++nit){
