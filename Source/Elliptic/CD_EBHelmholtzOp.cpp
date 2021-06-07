@@ -331,26 +331,8 @@ void EBHelmholtzOp::createCoarser(LevelData<EBCellFAB>& a_coarse, const LevelDat
 
 void EBHelmholtzOp::createCoarsened(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const int& a_refRat) {
   CH_assert(m_hasCoar);
-#if 0 // original code
-  DisjointBoxLayout dblCoFi;
-  EBISLayout        ebislCoFi;
-  ProblemDomain     domainCoFi;
-
-  // Make grids and EBISL
-  coarsen(dblCoFi, m_eblg.getDBL(), a_refRat);
-  domainCoFi = coarsen(m_eblg.getDomain(), a_refRat);
-  m_eblg.getEBIS()->fillEBISLayout(ebislCoFi, dblCoFi, domainCoFi, a_rhs.ghostVect()[0]);
-
-  if(m_refToCoar > 1){
-    ebislCoFi.setMaxRefinementRatio(m_refToCoar, m_eblg.getEBIS());
-  }
-
-  EBCellFactory factCoFi(ebislCoFi);
-  a_lhs.define(dblCoFi, a_rhs.nComp(), a_rhs.ghostVect(), factCoFi);
-#else // New code
   EBCellFactory factCoFi(m_eblgCoFi.getEBISL());
   a_lhs.define(m_eblgCoFi.getDBL(), a_rhs.nComp(), a_rhs.ghostVect(), factCoFi);
-#endif
 }
 
 void EBHelmholtzOp::relax(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, int a_iterations){
@@ -497,7 +479,7 @@ void EBHelmholtzOp::applyOp(LevelData<EBCellFAB>&             a_Lphi,
   for (DataIterator dit(dbl); dit.ok(); ++dit){
     a_Lphi[dit()] *= (*m_Acoef)[dit()]; // That takes care of alpha*A*phi
 
-    // Now do beta*B*phi
+    // Now do the terms with beta*phi
 
     this->applyOpIrregular(a_Lphi[dit()], a_phi[dit()], dit(), a_homogeneousPhysBC);
   }

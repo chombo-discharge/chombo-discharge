@@ -451,7 +451,7 @@ void ProxyFieldSolver::setupHelmholtz(){
 
 
 
-  multigridSolver.define(m_amr->getDomains()[0], fact, &bicgstab, 1 + finestLevel);
+
 
   EBAMRCellData PHI;
   EBAMRCellData RHS;
@@ -467,10 +467,16 @@ void ProxyFieldSolver::setupHelmholtz(){
 
   DataOps::setValue(PHI, 0.0);
   DataOps::setValue(RHS, 0.0);
-  
+
+  pout() << "doing helm solve" << endl;
+  multigridSolver.define(m_amr->getDomains()[0], fact, &bicgstab, 1 + finestLevel);
   multigridSolver.init(phi, rhs, finestLevel, 0);
+  multigridSolver.setSolverParameters(32, 32, 32, 1, 32, 1.E-10, 1E-60, 1E-60);
+  multigridSolver.m_verbosity=10;
 
   const Real res = multigridSolver.computeAMRResidual(phi, rhs, finestLevel, 0);
+  multigridSolver.solveNoInit(phi, rhs, finestLevel, 0, false, false);
+  pout() << "end helm solve" << endl;
 
   //  if(procID() == 0) std::cout << "helmholtz zero residual = " << res << std::endl;
 }
