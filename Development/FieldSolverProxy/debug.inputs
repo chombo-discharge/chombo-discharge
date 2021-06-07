@@ -3,7 +3,7 @@
 # ====================================================================================================
 AmrMesh.lo_corner       = -1 -1       # Low corner of problem domain
 AmrMesh.hi_corner       =  1  1       # High corner of problem domain
-AmrMesh.verbosity       = 10          # Controls verbosity. 
+AmrMesh.verbosity       = -1          # Controls verbosity. 
 AmrMesh.coarsest_domain = 32 32       # Number of cells on coarsest domain
 AmrMesh.max_amr_depth   = 3           # Maximum amr depth
 AmrMesh.max_sim_depth   = -1          # Maximum simulation depth
@@ -28,7 +28,7 @@ AmrMesh.ebcf            = false        # If you have EBCF crossing, this must be
 # ====================================================================================================
 # DRIVER OPTIONS
 # ====================================================================================================
-Driver.verbosity                       = 20                # Engine verbosity
+Driver.verbosity                       = 2                # Engine verbosity
 Driver.geometry_generation             = chombo-discharge # Grid generation method, 'chombo-discharge' or 'chombo'
 Driver.geometry_scan_level             = 0                # Geometry scan level for chombo-discharge geometry generator
 Driver.ebis_memory_load_balance        = false            # If using Chombo geo-gen, use memory as loads for EBIS generation  

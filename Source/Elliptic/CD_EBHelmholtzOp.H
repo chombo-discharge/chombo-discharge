@@ -672,6 +672,7 @@ protected:
     @param[in]  a_face Face
     @param[in]  a_dit  Data index. Need because we multiply by B-coefficient
     @return Returns a stencil for the face-centered flux for the given face
+    @note If the face is a boundary face the returned stencil is empty. 
   */
   VoFStencil getFaceCenterFluxStencil(const FaceIndex& a_face, const DataIndex& a_dit) const;
 
@@ -686,6 +687,9 @@ protected:
 
   /*!
     @brief Get stencil for irregular cell (not kappa-divided). 
+    @param[in] a_vof Grid index
+    @param[in] a_dit DataIndex, needed because we multiply by the B-coefficient. 
+    @note Boundary faces are not included. 
   */
   VoFStencil getDivFStencil(const VolIndex& a_vof, const DataIndex& a_dit) const;
 

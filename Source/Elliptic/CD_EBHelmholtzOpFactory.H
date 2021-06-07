@@ -143,6 +143,9 @@ public:
 
 protected:
 
+  // For debugging
+  int m_verbosity; 
+
   // Relaxation method
   RelaxType m_relaxMethod;
 

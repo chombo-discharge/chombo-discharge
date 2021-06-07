@@ -9,7 +9,7 @@
   @author Robert Marskar
   @todo   Replace EBAMRPoissonOp::staticMaxNorm and don't use EBAMRPoissonOp dependencies
   @todo   When we redefine the EBBC, the getFluxStencil should return an empty stencil rather than a null pointer. Fix this in defineStencils() together with the other crap. 
-  @todo   Check relaxation weights for domain boundary cells. 
+  @todo   Check relaxation weights for domain boundary cells, they may be too large..?
 */
 
 // Chombo includes
@@ -23,34 +23,34 @@
 #include <CD_NamespaceHeader.H>
 
 
-EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid &                                  a_eblgFine,
-			     const EBLevelGrid &                                  a_eblg,
-			     const EBLevelGrid&                                   a_eblgCoFi,
-			     const EBLevelGrid &                                  a_eblgCoar,
-			     const EBLevelGrid &                                  a_eblgCoarMG,
-			     const RefCountedPtr<EBMultigridInterpolator>&        a_interpolator,
-			     const RefCountedPtr<EBFluxRegister>&                 a_fluxReg,
-			     const RefCountedPtr<EbCoarAve>&                      a_coarAve,			       
-			     const RefCountedPtr<EBHelmholtzDomainBc>&            a_domainBc,
-			     const RefCountedPtr<EBHelmholtzEbBc>&                a_ebBc,
-			     const Real    &                                      a_dx,
-			     const int&                                           a_refToFine,
-			     const int&                                           a_refToCoar,
-			     const bool&                                          a_hasFine,
-			     const bool&                                          a_hasCoar,
-			     const bool&                                          a_hasMGObjects,
-			     const Real&                                          a_alpha,
-			     const Real&                                          a_beta,
-			     const RefCountedPtr<LevelData<EBCellFAB> >&          a_Acoef,
-			     const RefCountedPtr<LevelData<EBFluxFAB> >&          a_Bcoef,
-			     const RefCountedPtr<LevelData<BaseIVFAB<Real> > >&   a_BcoefIrreg,
-			     const IntVect&                                       a_ghostPhi,
-			     const IntVect&                                       a_ghostRhs,
-			     const RelaxationMethod&                              a_relaxationMethod) :
+EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid&                                 a_eblgFine,
+			     const EBLevelGrid&                                 a_eblg,
+			     const EBLevelGrid&                                 a_eblgCoFi,
+			     const EBLevelGrid&                                 a_eblgCoar,
+			     const EBLevelGrid&                                 a_eblgCoarMG,
+			     const RefCountedPtr<EBMultigridInterpolator>&      a_interpolator,
+			     const RefCountedPtr<EBFluxRegister>&               a_fluxReg,
+			     const RefCountedPtr<EbCoarAve>&                    a_coarAve,			       
+			     const RefCountedPtr<EBHelmholtzDomainBc>&          a_domainBc,
+			     const RefCountedPtr<EBHelmholtzEbBc>&              a_ebBc,
+			     const Real&                                        a_dx,
+			     const int&                                         a_refToFine,
+			     const int&                                         a_refToCoar,
+			     const bool&                                        a_hasFine,
+			     const bool&                                        a_hasCoar,
+			     const bool&                                        a_hasMGObjects,
+			     const Real&                                        a_alpha,
+			     const Real&                                        a_beta,
+			     const RefCountedPtr<LevelData<EBCellFAB> >&        a_Acoef,
+			     const RefCountedPtr<LevelData<EBFluxFAB> >&        a_Bcoef,
+			     const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_BcoefIrreg,
+			     const IntVect&                                     a_ghostPhi,
+			     const IntVect&                                     a_ghostRhs,
+			     const RelaxationMethod&                            a_relaxationMethod) :
   LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB>(false), // Time-independent
   m_eblgFine(),
   m_eblg(a_eblg),
-  m_eblgCoFi(a_eblgCoFi),
+  m_eblgCoFi(),
   m_eblgCoar(),
   m_eblgCoarMG(),
   m_interpolator(a_interpolator),
@@ -73,7 +73,9 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid &                                
   m_ghostRhs(a_ghostRhs),
   m_relaxationMethod(a_relaxationMethod) {
 
-  // Do not touch these. 
+  
+  // Default settings. Always solve for comp = 0. If you want something different, copy your
+  // input two different data holders before you use AMRMultiGrid. 
   m_nComp      = 1;
   m_comp       = 0;
   m_turnOffBCs = false;
@@ -85,13 +87,15 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid &                                
 
   if(m_hasCoar){
     m_eblgCoar = a_eblgCoar;
+    m_eblgCoFi = a_eblgCoFi;
+    
     m_ebInterp.define(m_eblg.getDBL(),   m_eblgCoar.getDBL(), m_eblg.getEBISL(), m_eblgCoar.getEBISL(), m_eblgCoar.getDomain(),
 		      m_refToCoar, m_nComp, m_eblg.getEBIS(), m_ghostPhi);
 
     m_ebAverage.define(m_eblg.getDBL(), m_eblgCoFi.getDBL(), m_eblg.getEBISL(), m_eblgCoFi.getEBISL(), m_eblgCoFi.getDomain(),
 		       m_refToCoar, m_nComp, m_eblg.getEBIS(), m_ghostRhs);
   }
-  
+
   if(m_hasMGObjects){
     constexpr int mgRef = 2;
     
@@ -206,13 +210,12 @@ void EBHelmholtzOp::defineStencils(){
   }
     
   // Compute the alpha-weight and relaxation coefficient. 
-  this->computeAlphaWeight();
-  this->computeRelaxationCoefficient();
+  //  this->computeAlphaWeight();
+  //  this->computeRelaxationCoefficient();
 
   if(m_hasFine){
     //    CH_assert(m_fluxReg->isDefined());
   }
-
 }
 
 
