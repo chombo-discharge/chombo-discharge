@@ -814,10 +814,6 @@ protected:
 	      const LevelData<EBCellFAB>&        a_phi,
 	      AMRLevelOp<LevelData<EBCellFAB> >& a_finerOp);
 
-  /*!
-    @brief Run some debugging utilities
-  */
-  void debug();
 };
 
 #include <CD_NamespaceFooter.H>

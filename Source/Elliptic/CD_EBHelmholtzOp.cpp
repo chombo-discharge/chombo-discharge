@@ -115,10 +115,6 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid&                                 
 
   // Define data holders and stencils
   this->defineStencils();
-
-#if 1 // Run debug
-  this->debug();
-#endif
 }
 
 EBHelmholtzOp::~EBHelmholtzOp(){
@@ -263,8 +259,6 @@ void EBHelmholtzOp::setAlphaAndBeta(const Real& a_alpha, const Real& a_beta) {
 }
 
 void EBHelmholtzOp::residual(LevelData<EBCellFAB>& a_residual, const LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_rhs, bool a_homogeneousPhysBC) {
-  CH_assert(m_hasCoar = false);
-  
   this->applyOp(a_residual, a_phi, nullptr, a_homogeneousPhysBC, true); // Only homogeneous CFBC. This shouldn't break because we shouldn't have a coar level.
   this->axby(a_residual, a_residual, a_rhs, -1.0, 1.0);              // residual = rhs - L(phi). 
 }
@@ -375,7 +369,6 @@ void EBHelmholtzOp::AMROperator(LevelData<EBCellFAB>&              a_Lphi,
 				const LevelData<EBCellFAB>&        a_phiCoar,
 				const bool                         a_homogeneousPhysBC,
 				AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp){
-
   this->applyOp(a_Lphi, a_phi, &a_phiCoar, a_homogeneousPhysBC, false);
 
   if(m_hasFine){
@@ -828,8 +821,9 @@ void EBHelmholtzOp::incrementFRCoar(const LevelData<EBCellFAB>& a_phi){
   for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit){
     for (int dir = 0; dir < SpaceDim; dir++){
       EBFaceFAB& flux   = m_flux[dit()][dir];
-      const Box cellBox = m_eblg.getDBL()[dit()];
+      flux.setVal(0.0);
       
+      const Box cellBox = m_eblg.getDBL()[dit()];
       for (SideIterator sit; sit.ok(); ++sit){
 
 	// Get the strip of cells immediately on the inside of the cellbox. 
@@ -862,8 +856,9 @@ void EBHelmholtzOp::incrementFRFine(const LevelData<EBCellFAB>& a_phiFine, const
   for (DataIterator dit(m_eblgFine.getDBL()); dit.ok(); ++dit){
     for (int dir = 0; dir < SpaceDim; dir++){
       EBFaceFAB& flux   = fineFlux[dit()][dir];
+      flux.setVal(0.0);
+      
       const Box cellBox = m_eblgFine.getDBL()[dit()];
-      const EBISBox& ebisbox = m_eblgFine.getEBISL()[dit()];
       for (SideIterator sit; sit.ok(); ++sit){
 
 	Box stripBox = adjCellBox(cellBox, dir, sit(), 1);
@@ -890,17 +885,6 @@ void EBHelmholtzOp::reflux(LevelData<EBCellFAB>&              a_Lphi,
   this->incrementFRFine(a_phiFine, a_phi, a_finerOp);
 
   m_fluxReg->reflux(a_Lphi, a_Lphi.interval(), 1./m_dx);
-}
-
-void EBHelmholtzOp::debug(){
-  for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit){
-    const Box bx = m_eblg.getDBL()[dit()];
-    this->getFaceCentroidFlux(m_flux[dit()], m_scratch[dit()], bx, dit());
-  }
-
-  if(m_hasFine){
-    this->incrementFRCoar(m_scratch);
-  }
 }
 
 #include <CD_NamespaceFooter.H>
