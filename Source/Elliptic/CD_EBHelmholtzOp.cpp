@@ -205,17 +205,13 @@ void EBHelmholtzOp::defineStencils(){
 	}
       }
       
-      //      m_betaDiagWeight[dit()](vof, m_comp) = betaWeight;
+      m_betaDiagWeight[dit()](vof, m_comp) = betaWeight;
     }
   }
     
   // Compute the alpha-weight and relaxation coefficient. 
-  //  this->computeAlphaWeight();
-  //  this->computeRelaxationCoefficient();
-
-  if(m_hasFine){
-    //    CH_assert(m_fluxReg->isDefined());
-  }
+  this->computeAlphaWeight();
+  this->computeRelaxationCoefficient();
 }
 
 
