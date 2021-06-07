@@ -401,6 +401,11 @@ protected:
   bool m_hasCoar;
 
   /*!
+    @brief True if there's an EBCF crossing
+  */
+  bool m_hasEBCF;
+
+  /*!
     @brief Refinement factor to fine level
   */
   int m_refToFine;
@@ -534,6 +539,16 @@ protected:
     @brief Relaxation coefficient
   */
   LevelData<EBCellFAB> m_relCoef;
+
+  /*!
+    @brief Interpolant for when we want centroid fluxes
+  */
+  LayoutData<BaseIFFAB<Real> > m_interpolant[SpaceDim];
+
+  /*!
+    @brief Face centroid interpolation stencil
+  */
+  LayoutData<BaseIFFAB<FaceStencil> > m_interpStencil[SpaceDim];
 
   /*!
     @brief Operator stencil in irregular cells
@@ -698,10 +713,36 @@ protected:
   */
   void defineStencils();
 
-  /*!
-    @brief Define vofiterators
+
+    /*!
+    @brief Define stencils
   */
-  void defineData();
+  void defineEBCFStencils();
+
+  /*!
+    @brief Compute flux on centroid faces.
+    @note Does not include boundary faces. 
+  */
+  void getFaceCentroidFlux(EBFluxFAB&       a_fluxCentroid,
+			   const EBCellFAB& a_phi,
+			   const Box&       a_cellBox,
+			   const DataIndex& a_dit);
+
+  /*!
+    @brief Compute flux on centroid faces. 
+    @note Does not include boundary faces
+  */
+  void getFaceCentroidFlux(EBFaceFAB&       a_fluxCentroid,
+			   const EBCellFAB& a_phi,
+			   const Box&       a_cellBox,
+			   const DataIndex& a_dit,
+			   const int        a_dir);
+
+  /*!
+    @brief Interpolate fluxes in cut-cells
+  */
+  void interpolateFluxes(EBFluxFAB& a_flux, const DataIndex& a_dit);
+
 };
 
 #include <CD_NamespaceFooter.H>

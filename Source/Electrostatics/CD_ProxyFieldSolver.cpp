@@ -348,7 +348,6 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi, EBAMRCellData& a_resi
   while(phiResid >= zerResid*tolerance && iter < 10 ){
     multigridSolver.m_convergenceMetric = multigridSolver.computeAMRResidual(zer, rhs, finestLevel, baseLevel);
 
-
     multigridSolver.solveNoInit(phi, rhs, finestLevel, baseLevel, false, false);
     coarsenConservative(a_phi);
     phiResid = multigridSolver.computeAMRResidual(res, phi, rhs, finestLevel, baseLevel);

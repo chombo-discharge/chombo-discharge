@@ -10,6 +10,7 @@
   @todo   Replace EBAMRPoissonOp::staticMaxNorm and don't use EBAMRPoissonOp dependencies
   @todo   When we redefine the EBBC, the getFluxStencil should return an empty stencil rather than a null pointer. Fix this in defineStencils() together with the other crap. 
   @todo   Check relaxation weights for domain boundary cells, they may be too large..?
+  @todo   Review the EBCF code, I'm not sure it's correct...
 */
 
 // Chombo includes
@@ -127,9 +128,13 @@ void EBHelmholtzOp::defineStencils(){
   m_alphaDiagWeight.define(m_eblg.getDBL());
   m_betaDiagWeight.define( m_eblg.getDBL());
 
+
   for (int dir = 0; dir < SpaceDim; dir++){
-    m_vofIterDomLo[dir].define(m_eblg.getDBL());
-    m_vofIterDomHi[dir].define(m_eblg.getDBL());
+    m_vofIterDomLo [dir].define(m_eblg.getDBL());
+    m_vofIterDomHi [dir].define(m_eblg.getDBL());
+    m_interpolant  [dir].define(m_eblg.getDBL());
+    m_interpStencil[dir].define(m_eblg.getDBL());
+
   }
 
   EBArith::getMultiColors(m_colors);
@@ -172,12 +177,19 @@ void EBHelmholtzOp::defineStencils(){
 
       m_vofIterDomLo[dir][dit()].define(loIrreg, ebgraph);
       m_vofIterDomHi[dir][dit()].define(hiIrreg, ebgraph);
+
+      // Define the face interpolation stencils
+      m_interpStencil[dir][dit()].define(irregIVS, ebgraph, dir, m_nComp);
+      m_interpolant  [dir][dit()].define(irregIVS, ebgraph, dir, m_nComp);
+      for (FaceIterator faceIt(irregIVS, ebgraph, dir, FaceStop::SurroundingNoBoundary); faceIt.ok(); ++faceIt){
+	m_interpStencil[dir][dit()](faceIt(), m_comp) = EBArith::getInterpStencil(faceIt(), IntVectSet(), ebisbox, cellBox); 
+      }
     }
 
-    BaseIVFAB<VoFStencil> opStencil(irregIVS, ebgraph, m_nComp);
 
-    //    Build stencils and weights for irregular cells. 
+    // Build stencils and weights for irregular cells.
     VoFIterator& vofit = m_vofIterIrreg[dit()];
+    BaseIVFAB<VoFStencil> opStencil(irregIVS, ebgraph, m_nComp);
     for (vofit.reset(); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
       const IntVect& iv   = vof.gridIndex();
@@ -212,6 +224,26 @@ void EBHelmholtzOp::defineStencils(){
   // Compute the alpha-weight and relaxation coefficient. 
   this->computeAlphaWeight();
   this->computeRelaxationCoefficient();
+
+  if(m_hasFine){
+    m_hasEBCF = m_fluxReg->hasEBCF();
+
+    if(m_hasEBCF){
+      this->defineEBCFStencils();
+    }
+  }
+}
+
+void EBHelmholtzOp::defineEBCFStencils(){
+  CH_assert(m_hasFine);
+  CH_assert(m_hasEBCF);
+
+  MayDay::Warning("EBHelmholtzOp::defineEBCFStencils -- not implemented and I'm not really convinced that I need this routine...");
+  for (int dir = 0; dir < SpaceDim; dir++){
+    for (SideIterator sit; sit.ok(); ++sit){
+
+    }
+  }
 }
 
 
@@ -599,7 +631,8 @@ VoFStencil EBHelmholtzOp::getFaceCenterFluxStencil(const FaceIndex& a_face, cons
 VoFStencil EBHelmholtzOp::getFaceCentroidFluxStencil(const FaceIndex& a_face, const DataIndex& a_dit) const {
   VoFStencil fluxStencil;
   
-  const FaceStencil interpolationStencil = EBArith::getInterpStencil(a_face, IntVectSet(), m_eblg.getEBISL()[a_dit], m_eblg.getDomain());
+  //  const FaceStencil interpolationStencil = EBArith::getInterpStencil(a_face, IntVectSet(), m_eblg.getEBISL()[a_dit], m_eblg.getDomain());
+  const FaceStencil& interpolationStencil = m_interpStencil[a_face.direction()][a_dit](a_face, m_comp);
 
   for (int i = 0; i < interpolationStencil.size(); i++){
     const FaceIndex& iface = interpolationStencil.face(i);
@@ -634,6 +667,58 @@ VoFStencil EBHelmholtzOp::getDivFStencil(const VolIndex& a_vof, const DataIndex&
   }
 
   return divStencil;
+}
+
+void EBHelmholtzOp::getFaceCentroidFlux(EBFluxFAB&       a_fluxCentroid,
+					const EBCellFAB& a_phi,
+					const Box&       a_cellBox,
+					const DataIndex& a_dit){
+
+  for (int dir = 0; dir < SpaceDim; dir++){
+    EBFaceFAB& fluxCentroid = a_fluxCentroid[dir];
+    this->getFaceCentroidFlux(fluxCentroid, a_phi, a_cellBox, a_dit, dir);
+  }
+}
+
+void EBHelmholtzOp::getFaceCentroidFlux(EBFaceFAB&       a_fluxCentroid,
+					const EBCellFAB& a_phi,
+					const Box&       a_cellBox,
+					const DataIndex& a_dit,
+					const int        a_dir){
+
+  
+}
+
+void EBHelmholtzOp::interpolateFluxes(EBFluxFAB& a_flux, const DataIndex& a_dit){
+  for (int dir = 0; dir < SpaceDim; dir++){
+    const BaseIFFAB<FaceStencil>& faceStencils = m_interpStencil[dir][a_dit];
+
+    EBFaceFAB& centeredFlux   = a_flux[dir];
+    BaseIFFAB<Real>& interpol = m_interpolant[dir][a_dit];
+
+    const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
+    const EBGraph& ebgraph = ebisbox.getEBGraph();
+
+    // Interpolate flux to centroid. 
+    for (FaceIterator faceIt(faceStencils.getIVS(), ebgraph, dir, FaceStop::SurroundingNoBoundary); faceIt.ok(); ++faceIt){
+      const FaceIndex& face = faceIt();
+      const FaceStencil& stencil = faceStencils(face, m_comp);
+
+      Real centroidFlux = 0.0;
+      for (int i = 0; i < stencil.size(); i++){
+	centroidFlux += stencil.weight(i)*centeredFlux(face, m_comp);
+      }
+
+      interpol(face, m_comp) = centroidFlux;
+    }
+
+
+    // Copy the centroid flux back to the data holder.
+    for (FaceIterator faceIt(interpol.getIVS(), ebgraph, dir, FaceStop::SurroundingNoBoundary); faceIt.ok(); ++faceIt){
+      const FaceIndex& face = faceIt();
+      centeredFlux(face, m_comp) = interpol(face, m_comp);
+    }
+  }
 }
 
 #include <CD_NamespaceFooter.H>
