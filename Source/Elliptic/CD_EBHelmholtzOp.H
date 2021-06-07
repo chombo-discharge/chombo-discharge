@@ -541,6 +541,11 @@ protected:
   LevelData<EBCellFAB> m_relCoef;
 
   /*!
+    @brief For holding fluxes
+  */
+  LevelData<EBFluxFAB> m_flux;
+
+  /*!
     @brief Interpolant for when we want centroid fluxes
   */
   LayoutData<BaseIFFAB<Real> > m_interpolant[SpaceDim];
@@ -732,7 +737,7 @@ protected:
     @brief Compute flux on centroid faces. 
     @note Does not include boundary faces
   */
-  void getFaceCentroidFlux(EBFaceFAB&       a_fluxCentroid,
+  void getFaceCenteredFlux(EBFaceFAB&       a_fluxCenter,
 			   const EBCellFAB& a_phi,
 			   const Box&       a_cellBox,
 			   const DataIndex& a_dit,
@@ -742,7 +747,6 @@ protected:
     @brief Interpolate fluxes in cut-cells
   */
   void interpolateFluxes(EBFluxFAB& a_flux, const DataIndex& a_dit);
-
 };
 
 #include <CD_NamespaceFooter.H>

@@ -64,6 +64,40 @@ inline void FORTRAN_NAME(inlineINVERTRELAXATIONCOEFFICIENT, inlineINVERTRELAXATI
 }
 #endif  // GUARDINVERTRELAXATIONCOEFFICIENT 
 
+#ifndef GUARDGETINTERIORREGFLUX 
+#define GUARDGETINTERIORREGFLUX 
+// Prototype for Fortran procedure getinteriorregflux ...
+//
+void FORTRAN_NAME( GETINTERIORREGFLUX ,getinteriorregflux )(
+      CHFp_FRA1(regflux)
+      ,CHFp_CONST_FRA1(phi)
+      ,CHFp_CONST_FRA1(bco)
+      ,CHFp_CONST_INT(dir)
+      ,CHFp_CONST_REAL(dx)
+      ,CHFp_BOX(facebox) );
+
+#define FORT_GETINTERIORREGFLUX FORTRAN_NAME( inlineGETINTERIORREGFLUX, inlineGETINTERIORREGFLUX)
+#define FORTNT_GETINTERIORREGFLUX FORTRAN_NAME( GETINTERIORREGFLUX, getinteriorregflux)
+
+inline void FORTRAN_NAME(inlineGETINTERIORREGFLUX, inlineGETINTERIORREGFLUX)(
+      CHFp_FRA1(regflux)
+      ,CHFp_CONST_FRA1(phi)
+      ,CHFp_CONST_FRA1(bco)
+      ,CHFp_CONST_INT(dir)
+      ,CHFp_CONST_REAL(dx)
+      ,CHFp_BOX(facebox) )
+{
+ CH_TIMELEAF("FORT_GETINTERIORREGFLUX");
+ FORTRAN_NAME( GETINTERIORREGFLUX ,getinteriorregflux )(
+      CHFt_FRA1(regflux)
+      ,CHFt_CONST_FRA1(phi)
+      ,CHFt_CONST_FRA1(bco)
+      ,CHFt_CONST_INT(dir)
+      ,CHFt_CONST_REAL(dx)
+      ,CHFt_BOX(facebox) );
+}
+#endif  // GUARDGETINTERIORREGFLUX 
+
 }
 
 #endif

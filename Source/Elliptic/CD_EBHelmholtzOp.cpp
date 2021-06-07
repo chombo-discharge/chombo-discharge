@@ -119,8 +119,10 @@ EBHelmholtzOp::~EBHelmholtzOp(){
 
 void EBHelmholtzOp::defineStencils(){
   // Basic defines. 
-  EBCellFactory fact(m_eblg.getEBISL());
-  m_relCoef.define(m_eblg.getDBL(), m_nComp, IntVect::Zero, fact);
+  EBCellFactory cellFact(m_eblg.getEBISL());
+  EBFluxFactory fluxFact(m_eblg.getEBISL());
+  m_relCoef.define(m_eblg.getDBL(), m_nComp, IntVect::Zero, cellFact);
+  m_flux.define( m_eblg.getDBL(), m_nComp, IntVect::Unit, fluxFact); // Need one ghost cell in order to be able to interpolate. 
 
   m_opEBStencil.define(    m_eblg.getDBL());
   m_vofIterIrreg.define(   m_eblg.getDBL());
@@ -630,8 +632,7 @@ VoFStencil EBHelmholtzOp::getFaceCenterFluxStencil(const FaceIndex& a_face, cons
 
 VoFStencil EBHelmholtzOp::getFaceCentroidFluxStencil(const FaceIndex& a_face, const DataIndex& a_dit) const {
   VoFStencil fluxStencil;
-  
-  //  const FaceStencil interpolationStencil = EBArith::getInterpStencil(a_face, IntVectSet(), m_eblg.getEBISL()[a_dit], m_eblg.getDomain());
+
   const FaceStencil& interpolationStencil = m_interpStencil[a_face.direction()][a_dit](a_face, m_comp);
 
   for (int i = 0; i < interpolationStencil.size(); i++){
@@ -676,17 +677,53 @@ void EBHelmholtzOp::getFaceCentroidFlux(EBFluxFAB&       a_fluxCentroid,
 
   for (int dir = 0; dir < SpaceDim; dir++){
     EBFaceFAB& fluxCentroid = a_fluxCentroid[dir];
-    this->getFaceCentroidFlux(fluxCentroid, a_phi, a_cellBox, a_dit, dir);
+    this->getFaceCenteredFlux(fluxCentroid, a_phi, a_cellBox, a_dit, dir);
   }
+
+  this->interpolateFluxes(a_fluxCentroid, a_dit);
 }
 
-void EBHelmholtzOp::getFaceCentroidFlux(EBFaceFAB&       a_fluxCentroid,
+void EBHelmholtzOp::getFaceCenteredFlux(EBFaceFAB&       a_fluxCenter,
 					const EBCellFAB& a_phi,
 					const Box&       a_cellBox,
 					const DataIndex& a_dit,
 					const int        a_dir){
 
+  const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
+  const EBGraph& ebgraph = ebisbox.getEBGraph();
+    
+  // Make a face box which has no boundary faces. 
+  Box faceBox = a_cellBox;
+  faceBox.grow(a_dir, 1);
+  faceBox &= m_eblg.getDomain();
+  faceBox.grow(a_dir, -1);
+  faceBox.surroundingNodes();
+
+  BaseFab<Real>& regFlux       = a_fluxCenter.getSingleValuedFAB();
+  const BaseFab<Real>& regPhi  = a_phi.getSingleValuedFAB();
+  const BaseFab<Real>& regBco  = (*m_Bcoef)[a_dit][a_dir].getSingleValuedFAB();
+
+  FORT_GETINTERIORREGFLUX(CHF_FRA1(regFlux, m_comp),
+			   CHF_CONST_FRA1(regPhi, m_comp),
+			   CHF_CONST_FRA1(regBco, m_comp),
+			   CHF_CONST_INT(a_dir),
+			   CHF_CONST_REAL(m_dx),
+			   CHF_BOX(faceBox));
   
+  // Do the irregular cells
+  const BaseIFFAB<Real>& interpol = m_interpolant[a_dir][a_dit]; // 
+
+  for (FaceIterator faceIt(interpol.getIVS(), ebgraph, a_dir, FaceStop::SurroundingNoBoundary); faceIt.ok(); ++faceIt){
+    const FaceIndex& face = faceIt();
+
+    const Real phiHi = a_phi(face.getVoF(Side::Hi), m_comp);
+    const Real phiLo = a_phi(face.getVoF(Side::Lo), m_comp);
+    const Real bco   = (*m_Bcoef)[a_dit][a_dir](face, m_comp);
+
+    a_fluxCenter(face, m_comp) = bco*(phiHi-phiLo)/m_dx;
+  }
+
+  a_fluxCenter *= m_beta;
 }
 
 void EBHelmholtzOp::interpolateFluxes(EBFluxFAB& a_flux, const DataIndex& a_dit){

@@ -35,3 +35,33 @@
       chf_enddo
 
       end
+
+
+      subroutine getinteriorregflux(
+     &     chf_fra1[regflux],
+     &     chf_const_fra1[phi],
+     &     chf_const_fra1[bco],
+     &     chf_const_int[dir],
+     &     chf_const_real[dx],		          
+     &     chf_box[facebox])
+
+   
+      integer chf_ddecl[i;j;k]
+      integer chf_ddecl[ioff;joff;koff]
+      real invDx
+      real phiHi
+      real phiLo
+
+      chf_dterm[
+         ioff = chf_id(0,dir);
+         joff = chf_id(1,dir);
+         koff = chf_id(2,dir)]
+
+
+      invDx = 1./dx
+      
+      chf_multido[facebox;i;j;k]
+         regflux(chf_ix[i;j;k]) = bco(chf_ix[i;j;k]) * invDx *(phi(chf_ix[i;j;k]) - phi(chf_ix[i-ioff; j-joff; k-koff]))
+      chf_enddo
+
+      end
