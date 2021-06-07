@@ -466,22 +466,62 @@ void EBHelmholtzOp::applyOp(LevelData<EBCellFAB>&             a_Lphi,
   }
 
   this->setToZero(a_Lphi);
-  this->incr(a_Lphi, a_phi, m_alpha);
 
   const DisjointBoxLayout& dbl = a_Lphi.disjointBoxLayout();
   for (DataIterator dit(dbl); dit.ok(); ++dit){
-    a_Lphi[dit()] *= (*m_Acoef)[dit()]; // That takes care of alpha*A*phi
-
+    const Box cellBox = dbl[dit()];
     // Now do the terms with beta*phi
-
-    this->applyOpIrregular(a_Lphi[dit()], a_phi[dit()], dit(), a_homogeneousPhysBC);
+    this->applyOpRegular(  a_Lphi[dit()], a_phi[dit()], cellBox, dit(), a_homogeneousPhysBC);
+    this->applyOpIrregular(a_Lphi[dit()], a_phi[dit()], cellBox, dit(), a_homogeneousPhysBC); // Overwrites result in irregular cells. 
   }
-
-  
-  MayDay::Warning("EBHelmholtzOp::applyOp(big) - not implemented");
 }
 
-void EBHelmholtzOp::applyOpIrregular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, const DataIndex& a_dit, const bool a_homogeneousPhysBC){
+void EBHelmholtzOp::applyOpRegular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBC){
+  
+  // Alpha term
+  a_Lphi.setVal(0.0);
+  a_Lphi += (*m_Acoef)[a_dit];
+  a_Lphi *= m_alpha;
+
+  // Add domain flux to a_Lphi. 
+  this->applyDomainFlux(a_Lphi, a_phi, a_cellBox, a_dit, a_homogeneousPhysBC);
+
+  // It's an older code, sir, but it checks out.
+  BaseFab<Real>& Lphi      = a_Lphi.getSingleValuedFAB();
+  const BaseFab<Real>& phi = a_phi.getSingleValuedFAB(); 
+  BaseFab<Real> dummy(Box(IntVect::Zero, IntVect::Zero), 1);
+  BaseFab<Real>* bcoef[3];
+
+  for (int dir = 0; dir < 3; dir++){
+    if(dir >= SpaceDim){
+      bcoef[dir] = &dummy;
+    }
+    else{
+      bcoef[dir] = &(*m_Bcoef)[a_dit][dir].getSingleValuedFAB();
+    }
+  }
+
+  // Fill the ghost cells outside the domain so that we don't get an extra flux from the domain side. 
+  this->suppressDomainFlux((EBCellFAB&) a_phi, a_cellBox, a_dit);
+  FORT_LAPLACIANINPLACE(CHF_FRA1(Lphi, m_comp),
+			CHF_CONST_FRA1(phi, m_comp),
+			CHF_CONST_FRA1((*bcoef[0]), m_comp),
+			CHF_CONST_FRA1((*bcoef[1]), m_comp),
+			CHF_CONST_FRA1((*bcoef[2]), m_comp), // Not used for 2D. 
+			CHF_CONST_REAL(m_dx),
+			CHF_CONST_REAL(m_beta),
+			CHF_BOX(a_cellBox));
+}
+
+void EBHelmholtzOp::applyDomainFlux(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBC){
+  MayDay::Warning("EBHelmholtzOp::applyDomainFlux - not implemented");
+}
+
+void EBHelmholtzOp::suppressDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit){
+  MayDay::Warning("EBHelmholtzOp::suppressDomainFlux - not implemented");
+}
+
+void EBHelmholtzOp::applyOpIrregular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBC){
   m_opEBStencil[a_dit]->apply(a_Lphi, a_phi, m_alphaDiagWeight[a_dit], m_alpha, m_beta, false);
 
   if(!a_homogeneousPhysBC){
@@ -539,7 +579,6 @@ void EBHelmholtzOp::getFlux(EBFluxFAB&                  a_flux,
 }
 
 void EBHelmholtzOp::homogeneousCFInterp(LevelData<EBCellFAB>& a_phi){
-  MayDay::Warning("EBHelmholtzOp::homogeneousCFInterp -- is this correct? For factor 4 refinement the coarse values would be 'in the wrong' place");
   if(m_hasCoar) m_interpolator->coarseFineInterpH(a_phi, a_phi.interval()); 
 }
 

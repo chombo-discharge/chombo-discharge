@@ -118,9 +118,25 @@ public:
   void applyOp(LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_phi, bool a_homogeneousPhysBc) override final;
 
   /*!
+    @brief Apply operator in regular cells.
+    @param[in]
+  */
+  void applyOpRegular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBc);
+
+  /*!
+    @brief Apply domain flux. 
+  */
+  void applyDomainFlux(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBc);
+
+  /*!
+    @brief Fuck those ghost cells in particular
+  */
+  void suppressDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit);
+
+  /*!
     @brief Apply operator in irregular cells
   */
-  void applyOpIrregular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, const DataIndex& a_dit, const bool a_homogeneousPhysBC);
+  void applyOpIrregular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBC);
 
   /*!
     @brief Create data which clones the layout of the other

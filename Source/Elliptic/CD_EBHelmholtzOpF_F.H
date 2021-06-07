@@ -98,6 +98,46 @@ inline void FORTRAN_NAME(inlineGETINTERIORREGFLUX, inlineGETINTERIORREGFLUX)(
 }
 #endif  // GUARDGETINTERIORREGFLUX 
 
+#ifndef GUARDLAPLACIANINPLACE 
+#define GUARDLAPLACIANINPLACE 
+// Prototype for Fortran procedure laplacianinplace ...
+//
+void FORTRAN_NAME( LAPLACIANINPLACE ,laplacianinplace )(
+      CHFp_FRA1(Lphi)
+      ,CHFp_CONST_FRA1(phi)
+      ,CHFp_CONST_FRA1(bcoX)
+      ,CHFp_CONST_FRA1(bcoY)
+      ,CHFp_CONST_FRA1(bcoZ)
+      ,CHFp_CONST_REAL(dx)
+      ,CHFp_CONST_REAL(beta)
+      ,CHFp_BOX(cellBox) );
+
+#define FORT_LAPLACIANINPLACE FORTRAN_NAME( inlineLAPLACIANINPLACE, inlineLAPLACIANINPLACE)
+#define FORTNT_LAPLACIANINPLACE FORTRAN_NAME( LAPLACIANINPLACE, laplacianinplace)
+
+inline void FORTRAN_NAME(inlineLAPLACIANINPLACE, inlineLAPLACIANINPLACE)(
+      CHFp_FRA1(Lphi)
+      ,CHFp_CONST_FRA1(phi)
+      ,CHFp_CONST_FRA1(bcoX)
+      ,CHFp_CONST_FRA1(bcoY)
+      ,CHFp_CONST_FRA1(bcoZ)
+      ,CHFp_CONST_REAL(dx)
+      ,CHFp_CONST_REAL(beta)
+      ,CHFp_BOX(cellBox) )
+{
+ CH_TIMELEAF("FORT_LAPLACIANINPLACE");
+ FORTRAN_NAME( LAPLACIANINPLACE ,laplacianinplace )(
+      CHFt_FRA1(Lphi)
+      ,CHFt_CONST_FRA1(phi)
+      ,CHFt_CONST_FRA1(bcoX)
+      ,CHFt_CONST_FRA1(bcoY)
+      ,CHFt_CONST_FRA1(bcoZ)
+      ,CHFt_CONST_REAL(dx)
+      ,CHFt_CONST_REAL(beta)
+      ,CHFt_BOX(cellBox) );
+}
+#endif  // GUARDLAPLACIANINPLACE 
+
 }
 
 #endif
