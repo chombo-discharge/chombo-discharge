@@ -368,6 +368,11 @@ public:
 	       const DataIndex&            a_dit,
 	       Real                        a_scale) override final;
 
+  /*!
+    @brief Returns m_flux
+  */
+  LevelData<EBFluxFAB>& getFlux();
+
 protected:
 
   /*!

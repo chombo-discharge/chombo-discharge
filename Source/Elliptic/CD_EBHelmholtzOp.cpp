@@ -123,6 +123,10 @@ EBHelmholtzOp::~EBHelmholtzOp(){
 
 }
 
+LevelData<EBFluxFAB>& EBHelmholtzOp::getFlux(){
+  return m_flux;
+}
+
 void EBHelmholtzOp::defineStencils(){
   // Basic defines. 
   EBCellFactory cellFact(m_eblg.getEBISL());
@@ -776,7 +780,6 @@ void EBHelmholtzOp::incrementFRCoar(const LevelData<EBCellFAB>& a_phi){
   const Real scale = 1.0; 
 
   for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit){
-
     for (int dir = 0; dir < SpaceDim; dir++){
       EBFaceFAB& flux   = m_flux[dit()][dir];
       const Box cellBox = m_eblg.getDBL()[dit()];
@@ -787,7 +790,9 @@ void EBHelmholtzOp::incrementFRCoar(const LevelData<EBCellFAB>& a_phi){
 	Box stripBox = adjCellBox(cellBox, dir, sit(), 1); // On the outside of cellBox
 	stripBox.shift(dir, sign(flip(sit())));            // Make it on the inside. 
 
-	// Computes fluxes for all faces oriented in +/- dir, but which are not boundary faces. Comp restricted to stripBox. 
+	// Computes fluxes for all faces oriented in +/- dir, but which are not boundary faces. Comp restricted to stripBox.
+	// Note: it shouldn't matter than we do this for all boxes because the ones that are not near a CF will be waiting for the
+	//       CF boxes to finish anyways...
 	this->getFaceCentroidFlux(flux, a_phi[dit()], stripBox, dit(), dir);
 
 	// Increment flux register, recall that beta and the b-coefficient are included in getFaceCentroidFlux. 
@@ -805,10 +810,33 @@ void EBHelmholtzOp::incrementFRFine(const LevelData<EBCellFAB>& a_phiFine, const
   finerOp.inhomogeneousCFInterp(phiFine, a_phi);
   phiFine.exchange();
 
-  // Go through the fine grid and compute the fucxking
-  for (DataIterator dit = phiFine.dataIterator(); dit.ok(); ++dit){
+  LevelData<EBFluxFAB>& fineFlux = finerOp.getFlux();
 
+  const Real scale = 1.0; 
+
+  // Compute 
+  for (DataIterator dit(m_eblgFine.getDBL()); dit.ok(); ++dit){
+    for (int dir = 0; dir < SpaceDim; dir++){
+      EBFaceFAB& flux = fineFlux[dit()][dir];
+      const Box cellBox = m_eblgFine.getDBL()[dit()];
+
+      for (SideIterator sit; sit.ok(); ++sit){
+
+	Box stripBox = adjCellBox(cellBox, dir, sit(), 1);
+	stripBox.shift(dir, sign(flip(sit())));
+
+	// Computes fluxes for all faces oriented in +/- dir, but which are not boundary faces. Comp restricted to stripBox.
+	// Note: it shouldn't matter than we do this for all boxes because the ones that are not near a CF will be waiting for the
+	//       CF boxes to finish anyways...
+	this->getFaceCentroidFlux(flux, phiFine[dit()], stripBox, dit(), dir);
+
+	// Increment flux register, recall that beta and the b-coefficient are included in getFaceCentroidFlux. 
+	m_fluxReg->incrementFineBoth(flux, scale, dit(), Interval(m_comp, m_comp), dir, sit());
+      }
+    }
   }
+
+  MayDay::Warning("EBHelmholtzOp::incrementFRFine - not implemented");
 }
 
 void EBHelmholtzOp::reflux(LevelData<EBCellFAB>&              a_Lphi,
