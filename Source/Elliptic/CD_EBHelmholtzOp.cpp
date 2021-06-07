@@ -25,7 +25,6 @@
 #include <CD_EBHelmholtzOpF_F.H>
 #include <CD_NamespaceHeader.H>
 
-
 EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid&                                 a_eblgFine,
 			     const EBLevelGrid&                                 a_eblg,
 			     const EBLevelGrid&                                 a_eblgCoFi,
@@ -36,6 +35,7 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid&                                 
 			     const RefCountedPtr<EbCoarAve>&                    a_coarAve,			       
 			     const RefCountedPtr<EBHelmholtzDomainBc>&          a_domainBc,
 			     const RefCountedPtr<EBHelmholtzEbBc>&              a_ebBc,
+			     const RealVect&                                    a_probLo,
 			     const Real&                                        a_dx,
 			     const int&                                         a_refToFine,
 			     const int&                                         a_refToCoar,
@@ -61,6 +61,7 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid&                                 
   m_coarAve(a_coarAve),
   m_domainBc(a_domainBc),
   m_ebBc(a_ebBc),
+  m_probLo(a_probLo),
   m_dx(a_dx),
   m_refToFine(a_hasFine ? a_refToFine : 1),
   m_refToCoar(a_hasCoar ? a_refToCoar : 1),
@@ -82,6 +83,7 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid&                                 
   m_nComp      = 1;
   m_comp       = 0;
   m_turnOffBCs = false;
+  m_vecDx      = m_dx*RealVect::Unit;
 
   if(m_hasFine){
     m_eblgFine = a_eblgFine;
@@ -151,6 +153,12 @@ void EBHelmholtzOp::defineStencils(){
 
   EBArith::getMultiColors(m_colors);
 
+#if 1
+  if(procID() == 0) {
+    std::cout << m_colors << std::endl;
+  }
+#endif
+
   // First strip of cells on the inside of the computational domain. I.e. the "domain wall" cells where we need BCs. 
   for (int dir = 0; dir < SpaceDim; dir++){
     for (SideIterator sit; sit.ok(); ++sit){
@@ -162,6 +170,7 @@ void EBHelmholtzOp::defineStencils(){
   }
 
   // Fuck I hate the BC classes in Chombo.
+  // TODO: Remember to replace this stuff...
   Real fakeBeta = 1.0;
   m_domainBc->setCoef(m_eblg, fakeBeta, m_Bcoef);
   m_ebBc->setCoef(    m_eblg, fakeBeta, m_BcoefIrreg);
@@ -477,7 +486,60 @@ void EBHelmholtzOp::applyOp(LevelData<EBCellFAB>&             a_Lphi,
 			    const LevelData<EBCellFAB>* const a_phiCoar,
 			    const bool                        a_homogeneousPhysBC,
 			    const bool                        a_homogeneousCFBC){
+
+  if(m_hasCoar && !m_turnOffBCs){
+    this->interpolateCF((LevelData<EBCellFAB>&) a_phi, a_phiCoar, a_homogeneousCFBC);
+  }
+
+  this->setToZero(a_Lphi);
+  this->incr(a_Lphi, a_phi, m_alpha);
+
+  const DisjointBoxLayout& dbl = a_Lphi.disjointBoxLayout();
+  for (DataIterator dit(dbl); dit.ok(); ++dit){
+    a_Lphi[dit()] *= (*m_Acoef)[dit()];
+
+    // Term 
+
+    this->applyOpIrregular(a_Lphi[dit()], a_phi[dit()], dit(), a_homogeneousPhysBC);
+  }
+
+  
   MayDay::Warning("EBHelmholtzOp::applyOp(big) - not implemented");
+}
+
+void EBHelmholtzOp::applyOpIrregular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, const DataIndex& a_dit, const bool a_homogeneousPhysBC){
+  m_opEBStencil[a_dit]->apply(a_Lphi, a_phi, m_alphaDiagWeight[a_dit], m_alpha, m_beta, false);
+
+  if(!a_homogeneousPhysBC){
+    const Real factor = m_beta/m_dx; // Beta not handled inside m_ebBc but we will fix this (later). 
+    m_ebBc->applyEBFlux(a_Lphi, a_phi, m_vofIterIrreg[a_dit], (*m_eblg.getCFIVS()), a_dit, m_probLo, m_vecDx, factor, a_homogeneousPhysBC, 0.0);
+  }
+
+  for (int dir = 0; dir < SpaceDim; dir++){
+    Real flux;
+
+    // Lo side.
+    VoFIterator& vofitLo = m_vofIterDomLo[dir][a_dit];    
+    for (vofitLo.reset(); vofitLo.ok(); ++vofitLo){
+      const VolIndex& vof = vofitLo();
+
+      m_domainBc->getFaceFlux(flux, vof, m_comp, a_phi, m_probLo, m_vecDx, dir, Side::Lo, a_dit, 0.0, a_homogeneousPhysBC);
+
+      a_Lphi(vof, m_comp) -= flux*m_beta/m_dx;
+    }
+
+    // Hi side. Does this interpolate to centroids...????
+    VoFIterator& vofitHi = m_vofIterDomHi[dir][a_dit];
+    for (vofitHi.reset(); vofitHi.ok(); ++vofitHi){
+      const VolIndex& vof = vofitHi();
+
+      m_domainBc->getFaceFlux(flux, vof, m_comp, a_phi, m_probLo, m_vecDx, dir, Side::Hi, a_dit, 0.0, a_homogeneousPhysBC);
+
+      a_Lphi(vof, m_comp) += flux*m_beta/m_dx;
+    }
+  }
+
+  MayDay::Warning("EBHelmholtzOp::applyOpIrregular - domain bc does not interpolate to face centroids...");
 }
 
 void EBHelmholtzOp::divideByIdentityCoef(LevelData<EBCellFAB>& a_rhs) {
@@ -561,7 +623,15 @@ void EBHelmholtzOp::relaxGauSai(LevelData<EBCellFAB>& a_correction, const LevelD
 }
 
 void EBHelmholtzOp::gsrbColor(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_rhs, const IntVect& a_color){
-  MayDay::Warning("EBHelmholtzOp::gsrbColor - not implemented");
+  const DisjointBoxLayout& dbl = a_phi.disjointBoxLayout();
+  
+  for (DataIterator dit(dbl); dit.ok(); ++dit){
+    const Box box = dbl[dit()];
+
+    
+  }
+
+  MayDay::Warning("EBHelmholtzOp::gsrbColor - not implemented (yet");
 }
 
 void EBHelmholtzOp::relaxGSRBFast(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations){

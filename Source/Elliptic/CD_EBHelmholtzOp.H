@@ -60,30 +60,31 @@ public:
   /*!
     @brief Full constructor
   */
-  EBHelmholtzOp(const EBLevelGrid&                                   a_eblgFine,
-		const EBLevelGrid&                                   a_eblg,
-		const EBLevelGrid&                                   a_eblgCoFi,
-		const EBLevelGrid&                                   a_eblgCoar,
-		const EBLevelGrid&                                   a_eblgCoarMG,
-		const RefCountedPtr<EBMultigridInterpolator>&        a_interpolator,
-		const RefCountedPtr<EBFluxRegister>&                 a_fluxReg,
-		const RefCountedPtr<EbCoarAve>&                      a_coarAve,
-		const RefCountedPtr<EBHelmholtzDomainBc>&            a_domainBC,
-		const RefCountedPtr<EBHelmholtzEbBc>&                a_ebBC,
-		const Real&                                          a_dx,
-		const int&                                           a_refToFine,
-		const int&                                           a_refToCoar,
-		const bool&                                          a_hasFine,
-		const bool&                                          a_hasCoar,
-		const bool&                                          a_hasMGObjects,
-		const Real&                                          a_alpha,
-		const Real&                                          a_beta,
-		const RefCountedPtr<LevelData<EBCellFAB> >&          a_acoef,
-		const RefCountedPtr<LevelData<EBFluxFAB> >&          a_bcoef,
-		const RefCountedPtr<LevelData<BaseIVFAB<Real> > >&   a_bcoIrreg,
-		const IntVect&                                       a_ghostCellsPhi,
-		const IntVect&                                       a_ghostCellsRHS,
-		const RelaxationMethod&                              a_relaxationMethod);
+  EBHelmholtzOp(const EBLevelGrid&                                 a_eblgFine,
+		const EBLevelGrid&                                 a_eblg,
+		const EBLevelGrid&                                 a_eblgCoFi,
+		const EBLevelGrid&                                 a_eblgCoar,
+		const EBLevelGrid&                                 a_eblgCoarMG,
+		const RefCountedPtr<EBMultigridInterpolator>&      a_interpolator,
+		const RefCountedPtr<EBFluxRegister>&               a_fluxReg,
+		const RefCountedPtr<EbCoarAve>&                    a_coarAve,
+		const RefCountedPtr<EBHelmholtzDomainBc>&          a_domainBC,
+		const RefCountedPtr<EBHelmholtzEbBc>&              a_ebBC,
+		const RealVect&                                    a_probLo,
+		const Real&                                        a_dx,
+		const int&                                         a_refToFine,
+		const int&                                         a_refToCoar,
+		const bool&                                        a_hasFine,
+		const bool&                                        a_hasCoar,
+		const bool&                                        a_hasMGObjects,
+		const Real&                                        a_alpha,
+		const Real&                                        a_beta,
+		const RefCountedPtr<LevelData<EBCellFAB> >&        a_acoef,
+		const RefCountedPtr<LevelData<EBFluxFAB> >&        a_bcoef,
+		const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_bcoIrreg,
+		const IntVect&                                     a_ghostCellsPhi,
+		const IntVect&                                     a_ghostCellsRHS,
+		const RelaxationMethod&                            a_relaxationMethod);
 
   /*!
     @brief Dtor
@@ -115,6 +116,11 @@ public:
     @details This computes a_Lphi = L(a_phi) using homogeneous physical BCs or not
   */
   void applyOp(LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_phi, bool a_homogeneousPhysBc) override final;
+
+  /*!
+    @brief Apply operator in irregular cells
+  */
+  void applyOpIrregular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, const DataIndex& a_dit, const bool a_homogeneousPhysBC);
 
   /*!
     @brief Create data which clones the layout of the other
@@ -449,6 +455,16 @@ protected:
     @brief Grid resolution;
   */
   Real m_dx;
+
+  /*!
+    @brief Vector resolution
+  */
+  RealVect m_vecDx;
+
+  /*!
+    @brief Lower-left corner of domain
+  */
+  RealVect m_probLo;
 
   /*!
     @brief Fine level grid (if the operator has a fine level)

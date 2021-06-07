@@ -348,7 +348,10 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi, EBAMRCellData& a_resi
   while(phiResid >= zerResid*tolerance && iter < 10 ){
     multigridSolver.m_convergenceMetric = multigridSolver.computeAMRResidual(zer, rhs, finestLevel, baseLevel);
 
+    Real t1 = -MPI_Wtime();
     multigridSolver.solveNoInit(phi, rhs, finestLevel, baseLevel, false, false);
+    t1 += MPI_Wtime();
+    if(procID() == 0) std::cout << "solve time = " << t1 << std::endl;
     coarsenConservative(a_phi);
     phiResid = multigridSolver.computeAMRResidual(res, phi, rhs, finestLevel, baseLevel);
 
@@ -427,6 +430,7 @@ void ProxyFieldSolver::setupHelmholtz(){
 
   EBHelmholtzOpFactory fact(alpha,
 			    beta,
+			    m_amr->getProbLo(),
 			    m_amr->getEBLevelGrid(m_realm, phase::gas),
 			    interpolators,
 			    m_amr->getFluxRegister(m_realm, phase::gas),

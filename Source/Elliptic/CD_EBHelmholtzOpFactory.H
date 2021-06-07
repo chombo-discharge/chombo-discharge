@@ -72,6 +72,7 @@ public:
     @brief Full constructor
     @param[in] a_alpha            alpha-coefficient in Helmholtz operator.
     @param[in] a_beta             beta-coefficient in Helmholtz operator.
+    @param[in] a_probLo           Lower-left corner of domain
     @param[in] a_amrInterpolators Interpolator objects between AMR levels. 
     @param[in] a_amrCoarseners    Conservative coarseners between AMR levels. 
     @param[in] a_amrFluxRegisters Flux registers between AMR levels. 
@@ -93,6 +94,7 @@ public:
   */
   EBHelmholtzOpFactory(const Real&                       a_alpha,
 		       const Real&                       a_beta,
+		       const RealVect&                   a_probLo,
 		       const AmrLevelGrids&              a_amrLevelGrids,
 		       const AmrInterpolators&           a_amrInterpolators,
 		       const AmrFluxRegisters&           a_amrFluxRegisters,
@@ -159,6 +161,9 @@ protected:
   // Alpha, beta. 
   Real m_alpha;
   Real m_beta;
+
+  // Lower-left corner of domain
+  RealVect m_probLo;
 
   // Things that pertain to AMR levels. The first entry corresponds to the coarsest AMR level. 
   AmrLevelGrids    m_amrLevelGrids;

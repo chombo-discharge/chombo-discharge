@@ -18,6 +18,7 @@
 
 EBHelmholtzOpFactory::EBHelmholtzOpFactory(const Real&                       a_alpha,
 					   const Real&                       a_beta,
+					   const RealVect&                   a_probLo,
 					   const AmrLevelGrids&              a_amrLevelGrids,
 					   const AmrInterpolators&           a_amrInterpolators,
 					   const AmrFluxRegisters&           a_amrFluxRegisters,
@@ -39,6 +40,8 @@ EBHelmholtzOpFactory::EBHelmholtzOpFactory(const Real&                       a_a
   // Define constructor arguments. 
   m_alpha               = a_alpha;
   m_beta                = a_beta;
+
+  m_probLo              = a_probLo;
   
   m_amrLevelGrids       = a_amrLevelGrids;
   m_amrInterpolators    = a_amrInterpolators;
@@ -437,7 +440,8 @@ EBHelmholtzOp* EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, 
 			     fluxReg,       // Defined if an amr level
 			     coarsener,     // Defined if an amr level
 			     dobc,
-			     ebbc,          
+			     ebbc,
+			     m_probLo,
 			     dx,            // Set from depth
 			     1,             // Multigrid operator. Set to 1 in operator anyways. 
 			     1,             // Multigrid operator. Set to 1 in operator anyways. 
@@ -507,6 +511,7 @@ EBHelmholtzOp* EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
 			 m_amrCoarseners[amrLevel],
 			 dobc,
 			 ebbc,
+			 m_probLo,			 
 			 m_amrResolutions[amrLevel],
 			 refToFine,
 			 refToCoar,
