@@ -8,7 +8,8 @@
   @brief  Implementation of CD_EBHelmholtzOp.H
   @author Robert Marskar
   @todo   Replace EBAMRPoissonOp::staticMaxNorm and don't use EBAMRPoissonOp dependencies
-  @todo   Define prolongation/restriction objects. They're undefined. 
+  @todo   When we redefine the EBBC, the getFluxStencil should return an empty stencil rather than a null pointer. Fix this in defineStencils() together with the other crap. 
+  @todo   Check relaxation weights for domain boundary cells. 
 */
 
 // Chombo includes
@@ -24,6 +25,7 @@
 
 EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid &                                  a_eblgFine,
 			     const EBLevelGrid &                                  a_eblg,
+			     const EBLevelGrid&                                   a_eblgCoFi,
 			     const EBLevelGrid &                                  a_eblgCoar,
 			     const EBLevelGrid &                                  a_eblgCoarMG,
 			     const RefCountedPtr<EBMultigridInterpolator>&        a_interpolator,
@@ -48,6 +50,7 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid &                                
   LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB>(false), // Time-independent
   m_eblgFine(),
   m_eblg(a_eblg),
+  m_eblgCoFi(a_eblgCoFi),
   m_eblgCoar(),
   m_eblgCoarMG(),
   m_interpolator(a_interpolator),
@@ -75,7 +78,6 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid &                                
   m_comp       = 0;
   m_turnOffBCs = false;
 
-
   if(m_hasFine){
     m_eblgFine = a_eblgFine;
     m_dxFine   = m_dx/a_refToFine;
@@ -83,8 +85,11 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid &                                
 
   if(m_hasCoar){
     m_eblgCoar = a_eblgCoar;
+    m_ebInterp.define(m_eblg.getDBL(),   m_eblgCoar.getDBL(), m_eblg.getEBISL(), m_eblgCoar.getEBISL(), m_eblgCoar.getDomain(),
+		      m_refToCoar, m_nComp, m_eblg.getEBIS(), m_ghostPhi);
 
-    // Define interpolation objects. Need to to think about this one because EBConductivityOp is a bit anal about the way it does this. 
+    m_ebAverage.define(m_eblg.getDBL(), m_eblgCoFi.getDBL(), m_eblg.getEBISL(), m_eblgCoFi.getEBISL(), m_eblgCoFi.getDomain(),
+		       m_refToCoar, m_nComp, m_eblg.getEBIS(), m_ghostRhs);
   }
   
   if(m_hasMGObjects){
@@ -92,16 +97,15 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid &                                
     
     m_eblgCoarMG = a_eblgCoarMG;
 
-    m_ebAverageMG.define(m_eblg.getDBL(),
-			 m_eblgCoarMG.getDBL(),
-			 m_eblg.getEBISL(),
-			 m_eblgCoarMG.getEBISL(),
-			 m_eblgCoarMG.getDomain(),
-			 mgRef,
-			 m_nComp,
-			 m_eblg.getEBIS(),
-			 m_ghostPhi);
+    m_ebInterpMG.define(m_eblg.getDBL(), m_eblgCoarMG.getDBL(), m_eblg.getEBISL(), m_eblgCoarMG.getEBISL(), m_eblgCoarMG.getDomain(),
+			mgRef, m_nComp, m_eblg.getEBIS(), m_ghostPhi);
+
+    m_ebAverageMG.define(m_eblg.getDBL(), m_eblgCoarMG.getDBL(), m_eblg.getEBISL(), m_eblgCoarMG.getEBISL(), m_eblgCoarMG.getDomain(),
+			 mgRef, m_nComp, m_eblg.getEBIS(), m_ghostRhs);
   }
+
+  // Define data holders and stencils
+  this->defineStencils();
 }
 
 EBHelmholtzOp::~EBHelmholtzOp(){
@@ -109,8 +113,108 @@ EBHelmholtzOp::~EBHelmholtzOp(){
 }
 
 void EBHelmholtzOp::defineStencils(){
-  MayDay::Warning("EBHelmholtzOp::defineStencils - not implemented");
+  // Basic defines. 
+  EBCellFactory fact(m_eblg.getEBISL());
+  m_relCoef.define(m_eblg.getDBL(), m_nComp, IntVect::Zero, fact);
+
+  m_opEBStencil.define(    m_eblg.getDBL());
+  m_vofIterIrreg.define(   m_eblg.getDBL());
+  m_vofIterMulti.define(   m_eblg.getDBL());
+  m_alphaDiagWeight.define(m_eblg.getDBL());
+  m_betaDiagWeight.define( m_eblg.getDBL());
+
+  for (int dir = 0; dir < SpaceDim; dir++){
+    m_vofIterDomLo[dir].define(m_eblg.getDBL());
+    m_vofIterDomHi[dir].define(m_eblg.getDBL());
+  }
+
+  EBArith::getMultiColors(m_colors);
+
+  // First strip of cells on the inside of the computational domain. I.e. the "domain wall" cells where we need BCs. 
+  for (int dir = 0; dir < SpaceDim; dir++){
+    for (SideIterator sit; sit.ok(); ++sit){
+      Box domainBox = m_eblg.getDomain().domainBox();
+      Box sidebox   = adjCellBox(domainBox, dir, sit(), 1);
+      sidebox.shift(dir, sign(flip(sit())));
+      m_sideBox.emplace(std::make_pair(dir, sit()), sidebox);
+    }
+  }
+
+  // Fuck I hate the BC classes in Chombo.
+  Real fakeBeta = 1.0;
+  m_domainBc->setCoef(m_eblg, fakeBeta, m_Bcoef);
+  m_ebBc->setCoef(    m_eblg, fakeBeta, m_BcoefIrreg);
+  m_ebBc->define((*m_eblg.getCFIVS()), 1./m_dx);
+  LayoutData<BaseIVFAB<VoFStencil> >* ebFluxStencil = m_ebBc->getFluxStencil(m_nComp);
+
+  // Define everything
+  for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit){
+    const Box cellBox      = m_eblg.getDBL()[dit()];
+    const EBISBox& ebisbox = m_eblg.getEBISL()[dit()];
+    const EBGraph& ebgraph = ebisbox.getEBGraph();
+
+    const IntVectSet irregIVS = ebisbox.getIrregIVS(cellBox);
+    const IntVectSet multiIVS = ebisbox.getMultiCells(cellBox);
+
+    m_vofIterIrreg[dit()].define(irregIVS, ebgraph);
+    m_vofIterMulti[dit()].define(multiIVS, ebgraph);
+
+    m_alphaDiagWeight[dit()].define(irregIVS, ebgraph, m_nComp);
+    m_betaDiagWeight[dit()].define( irregIVS, ebgraph, m_nComp);
+
+    for (int dir = 0; dir < SpaceDim; dir++){
+      const IntVectSet loIrreg = irregIVS & m_sideBox.at(std::make_pair(dir, Side::Lo));
+      const IntVectSet hiIrreg = irregIVS & m_sideBox.at(std::make_pair(dir, Side::Hi));
+
+      m_vofIterDomLo[dir][dit()].define(loIrreg, ebgraph);
+      m_vofIterDomHi[dir][dit()].define(hiIrreg, ebgraph);
+    }
+
+    BaseIVFAB<VoFStencil> opStencil(irregIVS, ebgraph, m_nComp);
+
+    //    Build stencils and weights for irregular cells. 
+    VoFIterator& vofit = m_vofIterIrreg[dit()];
+    for (vofit.reset(); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+      const IntVect& iv   = vof.gridIndex();
+
+      VoFStencil& curStencil = opStencil(vof, m_comp);
+
+      // Get stencil for this cell. 
+      curStencil = this->getDivFStencil(vof, dit());
+      if(ebFluxStencil != NULL) curStencil += (*ebFluxStencil)[dit()](vof, m_comp);
+
+      // Adjust the weight with domain boundary faces. 
+      Real betaWeight = EBArith::getDiagWeight(curStencil, vof);
+      for (int dir = 0; dir < SpaceDim; dir++){
+	for (SideIterator sit; sit.ok(); ++sit){
+	  const Box sidebox = m_sideBox.at(std::make_pair(dir, sit()));
+
+	  if(sidebox.contains(iv)){
+	    Real weightedAreaFrac = 0.0;
+	    Vector<FaceIndex> faces = ebisbox.getFaces(vof, dir, sit());
+	    for (auto& f : faces.stdVector()){
+	      weightedAreaFrac += ebisbox.areaFrac(f)*(*m_Bcoef)[dit()][dir](f, m_comp)/(m_dx*m_dx);
+	    }
+	    betaWeight += -weightedAreaFrac;
+	  }
+	}
+      }
+      
+      //      m_betaDiagWeight[dit()](vof, m_comp) = betaWeight;
+    }
+  }
+    
+  // Compute the alpha-weight and relaxation coefficient. 
+  this->computeAlphaWeight();
+  this->computeRelaxationCoefficient();
+
+  if(m_hasFine){
+    //    CH_assert(m_fluxReg->isDefined());
+  }
+
 }
+
 
 unsigned int EBHelmholtzOp::orderOfAccuracy(void) const {
   return 99;
@@ -125,8 +229,8 @@ void EBHelmholtzOp::setAlphaAndBeta(const Real& a_alpha, const Real& a_beta) {
   m_beta  = a_beta;
 
   // When we change alpha and beta we need to recompute relaxation coefficients...
-  this->calculateAlphaWeight(); 
-  this->calculateRelaxationCoefficient();
+  this->computeAlphaWeight(); 
+  this->computeRelaxationCoefficient();
 }
 
 void EBHelmholtzOp::residual(LevelData<EBCellFAB>& a_residual, const LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_rhs, bool a_homogeneousPhysBC) {
@@ -192,12 +296,13 @@ void EBHelmholtzOp::setToZero(LevelData<EBCellFAB>& a_lhs) {
 }
 
 void EBHelmholtzOp::createCoarser(LevelData<EBCellFAB>& a_coarse, const LevelData<EBCellFAB>& a_fine, bool a_ghosted) {
-  const DisjointBoxLayout& dbl = m_eblgCoarMG.getDBL();
-  MayDay::Warning("EBHelmholtzOp::createCoarser - not implemented");
+  EBCellFactory factCoar(m_eblgCoarMG.getEBISL());
+  a_coarse.define(m_eblgCoarMG.getDBL(), a_fine.nComp(), a_fine.ghostVect(), factCoar);
 }
 
 void EBHelmholtzOp::createCoarsened(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const int& a_refRat) {
-
+  CH_assert(m_hasCoar);
+#if 0 // original code
   DisjointBoxLayout dblCoFi;
   EBISLayout        ebislCoFi;
   ProblemDomain     domainCoFi;
@@ -213,6 +318,10 @@ void EBHelmholtzOp::createCoarsened(LevelData<EBCellFAB>& a_lhs, const LevelData
 
   EBCellFactory factCoFi(ebislCoFi);
   a_lhs.define(dblCoFi, a_rhs.nComp(), a_rhs.ghostVect(), factCoFi);
+#else // New code
+  EBCellFactory factCoFi(m_eblgCoFi.getEBISL());
+  a_lhs.define(m_eblgCoFi.getDBL(), a_rhs.nComp(), a_rhs.ghostVect(), factCoFi);
+#endif
   
 }
 
@@ -420,7 +529,7 @@ void EBHelmholtzOp::relaxGSRBFast(LevelData<EBCellFAB>& a_correction, const Leve
   MayDay::Warning("EBHelmholtzOp::relaxGauSai - not implemented");
 }
 
-void EBHelmholtzOp::calculateAlphaWeight(){
+void EBHelmholtzOp::computeAlphaWeight(){
   for (DataIterator dit(m_eblg.getDBL().dataIterator()); dit.ok(); ++dit){
     VoFIterator& vofit = m_vofIterIrreg[dit()];
     for (vofit.reset(); vofit.ok(); ++vofit){
@@ -434,7 +543,9 @@ void EBHelmholtzOp::calculateAlphaWeight(){
   }
 }
 
-void EBHelmholtzOp::calculateRelaxationCoefficient(){
+void EBHelmholtzOp::computeRelaxationCoefficient(){
+  MayDay::Warning("EBHelmholtzOp::computeRelaxationCoefficients -- beware of domain cells which probably have a smaller relaxation factor. Check domain flux. ");
+  
   for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit){
     const Box cellBox = m_eblg.getDBL()[dit()];
 
@@ -525,6 +636,5 @@ VoFStencil EBHelmholtzOp::getDivFStencil(const VolIndex& a_vof, const DataIndex&
 
   return divStencil;
 }
-
 
 #include <CD_NamespaceFooter.H>

@@ -12,6 +12,9 @@
 #ifndef CD_EBHelmholtzOp_H
 #define CD_EBHelmholtzOp_H
 
+// Std includes
+#include <map>
+
 // Chombo includes
 #include <ConductivityBaseDomainBC.H>
 #include <BaseEBBC.H>
@@ -59,6 +62,7 @@ public:
   */
   EBHelmholtzOp(const EBLevelGrid&                                   a_eblgFine,
 		const EBLevelGrid&                                   a_eblg,
+		const EBLevelGrid&                                   a_eblgCoFi,
 		const EBLevelGrid&                                   a_eblgCoar,
 		const EBLevelGrid&                                   a_eblgCoarMG,
 		const RefCountedPtr<EBMultigridInterpolator>&        a_interpolator,
@@ -452,6 +456,11 @@ protected:
   EBLevelGrid m_eblg;
 
   /*!
+    @brief Coarsened of m_eblg
+  */
+  EBLevelGrid m_eblgCoFi;
+
+  /*!
     @brief Coarse level grid (if the operator has a coarse level)
   */
   EBLevelGrid m_eblgCoar;
@@ -527,6 +536,11 @@ protected:
   LevelData<EBCellFAB> m_relCoef;
 
   /*!
+    @brief Operator stencil in irregular cells
+  */
+  LayoutData<RefCountedPtr<EBStencil> > m_opEBStencil;
+
+  /*!
     @brief Weights of diagonal alpha terms
   */
   LayoutData<BaseIVFAB<Real> > m_alphaDiagWeight;
@@ -545,6 +559,26 @@ protected:
     @brief VoFIterator for "multi-cells". 
   */
   LayoutData<VoFIterator> m_vofIterMulti;
+
+  /*!
+    @brief VoF iterators for lo domain side. 
+  */
+  LayoutData<VoFIterator> m_vofIterDomLo[SpaceDim];
+
+  /*!
+    @brief VoF iterators for hi domain side
+  */
+  LayoutData<VoFIterator> m_vofIterDomHi[SpaceDim];
+
+  /*!
+    @brief Domain boxes on each side
+  */
+  std::map<std::pair<int, Side::LoHiSide>, Box> m_sideBox;
+
+  /*!
+    @brief "Colors" for the relaxation methods
+  */
+  Vector<IntVect> m_colors;
 
   /*!
     @brief Apply operator on this level. This is a more general version which can turn on/off homogeneous and CF bcs.
@@ -606,12 +640,12 @@ protected:
   /*!
     @brief Calculate the weight of the diagonal term
   */
-  void calculateAlphaWeight();
+  void computeAlphaWeight();
 
   /*!
     @brief Calculate relaxation coefficient
   */
-  void calculateRelaxationCoefficient();
+  void computeRelaxationCoefficient();
 
   /*!
     @brief Do homogeneous coarse-fine interpolation
@@ -659,6 +693,11 @@ protected:
     @brief Define stencils
   */
   void defineStencils();
+
+  /*!
+    @brief Define vofiterators
+  */
+  void defineData();
 };
 
 #include <CD_NamespaceFooter.H>

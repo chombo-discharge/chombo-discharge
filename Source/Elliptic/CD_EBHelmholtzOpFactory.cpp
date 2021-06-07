@@ -433,6 +433,7 @@ EBHelmholtzOp* EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, 
 									
     mgOp = new EBHelmholtzOp(EBLevelGrid(), // Multigrid operator, so no fine. 
 			     eblg,
+			     EBLevelGrid(), // Multigrid operator, so no cofi. 
 			     EBLevelGrid(), // Multigrid operator, so no coarse. 
 			     eblgMgCoar,
 			     interpolator,  // Defined if an amr level
@@ -467,7 +468,7 @@ EBHelmholtzOp* EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
 
   const bool hasFine = amrLevel < m_numAmrLevels - 1;
   const bool hasCoar = amrLevel > 0;
-  
+
   EBLevelGrid eblgFine;
   EBLevelGrid eblgCoar;
   EBLevelGrid eblgCoarMG;
@@ -493,8 +494,14 @@ EBHelmholtzOp* EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
   auto dobc = this->makeDomainBcObject(*m_amrLevelGrids[amrLevel], m_amrResolutions[amrLevel]);
   auto ebbc = this->makeEbBcObject    (*m_amrLevelGrids[amrLevel], m_amrResolutions[amrLevel]);
 
+  EBLevelGrid eblgCoFi;
+  if(hasCoar){
+    this->getCoarserLayout(eblgCoFi, *m_amrLevelGrids[amrLevel], refToCoar, m_mgBlockingFactor);
+  }
+
   op = new EBHelmholtzOp(eblgFine,
 			 *m_amrLevelGrids[amrLevel],
+			 eblgCoFi,
 			 eblgCoar,
 			 eblgCoarMG,
 			 m_amrInterpolators[amrLevel],
