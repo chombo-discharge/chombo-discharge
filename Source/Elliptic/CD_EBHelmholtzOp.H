@@ -541,6 +541,12 @@ protected:
   LevelData<EBCellFAB> m_relCoef;
 
   /*!
+    @brief Scratch data for debugging
+    @todo Remove later. 
+  */
+  LevelData<EBCellFAB> m_scratch;
+
+  /*!
     @brief For holding fluxes
   */
   LevelData<EBFluxFAB> m_flux;
@@ -718,15 +724,19 @@ protected:
   */
   void defineStencils();
 
-
-    /*!
+  /*!
     @brief Define stencils
+    @todo Not sure if we need this. 
   */
   void defineEBCFStencils();
 
   /*!
     @brief Compute flux on centroid faces.
-    @note Does not include boundary faces. 
+    @param[out] a_fluxCentroid Flux on centroids
+    @param[in   a_phi          Cell-centered data
+    @param[in]  a_cellBox      Cell-centered compute box.
+    @param[in]  a_dit          Data index
+    @note This computes the flux for all faces in a_cellBox except for boundary faces. 
   */
   void getFaceCentroidFlux(EBFluxFAB&       a_fluxCentroid,
 			   const EBCellFAB& a_phi,
@@ -734,8 +744,26 @@ protected:
 			   const DataIndex& a_dit);
 
   /*!
-    @brief Compute flux on centroid faces. 
-    @note Does not include boundary faces
+    @brief Compute centroid fluxes in a direction.
+    @param[out] a_fluxCentroid   Flux on face centroid
+    @param[in   a_phi          Cell-centered data
+    @param[in]  a_cellBox      Cell-centered compute box.
+    @param[in]  a_dit          Data index
+    @note This computes the flux for all dir-oriented faces in a_cellBox except for boundary faces. 
+  */
+  void getFaceCentroidFlux(EBFaceFAB&       a_fluxCentroid,
+			   const EBCellFAB& a_phi,
+			   const Box&       a_cellBox,
+			   const DataIndex& a_dit,
+			   const int        a_dir);
+
+  /*!
+    @brief Compute face-centered fluxes
+    @param[out] a_fluxCenter   Flux on center
+    @param[in   a_phi          Cell-centered data
+    @param[in]  a_cellBox      Cell-centered compute box.
+    @param[in]  a_dit          Data index
+    @note This computes the flux for all dir-oriented faces in a_cellBox except for boundary faces. 
   */
   void getFaceCenteredFlux(EBFaceFAB&       a_fluxCenter,
 			   const EBCellFAB& a_phi,
@@ -745,13 +773,31 @@ protected:
 
   /*!
     @brief Interpolate fluxes in cut-cells
+    @param[inout] a_flux Should contain face-centered fluxes on input and face centroid centered fluxes no output
+    @param[in]    a_dit  Data index
+    @param[in]    a_dir  Coordinate direction
   */
-  void interpolateFluxes(EBFluxFAB& a_flux, const DataIndex& a_dit);
+  void interpolateFluxes(EBFaceFAB& a_flux, const DataIndex& a_dit, const int a_dir);
 
   /*!
     @brief Increment coarse flux register
+    @param[in] a_phi Cell-centered data. 
   */
-  void incrementFRCoar(const LevelData<EBCellFAB>& a_phiCoar);
+  void incrementFRCoar(const LevelData<EBCellFAB>& a_phi);
+
+  /*!
+    @brief Increment coarse flux register
+    @param[in] a_phi Cell-centered data. 
+  */
+  void incrementFRFine(const LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phi, AMRLevelOp<LevelData<EBCellFAB> >& a_finerOp);
+
+  /*!
+    @brief Reflux algorithm.
+  */
+  void reflux(LevelData<EBCellFAB>&              Lphi,
+	      const LevelData<EBCellFAB>&        a_phiFine,
+	      const LevelData<EBCellFAB>&        a_phi,
+	      AMRLevelOp<LevelData<EBCellFAB> >& a_finerOp);
 
   /*!
     @brief Run some debugging utilities
