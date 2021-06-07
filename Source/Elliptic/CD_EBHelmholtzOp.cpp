@@ -758,4 +758,22 @@ void EBHelmholtzOp::interpolateFluxes(EBFluxFAB& a_flux, const DataIndex& a_dit)
   }
 }
 
+void EBHelmholtzOp::incrementFRCoar(const LevelData<EBCellFAB>& a_phi){
+  CH_assert(m_hasFine);
+
+  const Real scale = 1.0; // Beta and b-coeff are included in the flux calculation. 
+
+  for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit){
+    EBFluxFAB& flux = m_flux[dit()];
+
+    this->getFaceCentroidFlux(flux, a_phi[dit()], m_eblg.getDBL()[dit()], dit());
+
+    for (int dir = 0; dir < SpaceDim; dir++){
+      for (SideIterator sit; sit.ok(); ++sit){
+	m_fluxReg->incrementCoarseBoth(flux[dir], scale, dit(), Interval(m_comp, m_comp), dir, sit());
+      }
+    }
+  }
+}
+
 #include <CD_NamespaceFooter.H>

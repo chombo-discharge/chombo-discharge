@@ -747,6 +747,16 @@ protected:
     @brief Interpolate fluxes in cut-cells
   */
   void interpolateFluxes(EBFluxFAB& a_flux, const DataIndex& a_dit);
+
+  /*!
+    @brief Increment coarse flux register
+  */
+  void incrementFRCoar(const LevelData<EBCellFAB>& a_phiCoar);
+
+  /*!
+    @brief Run some debugging utilities
+  */
+  void debug();
 };
 
 #include <CD_NamespaceFooter.H>
