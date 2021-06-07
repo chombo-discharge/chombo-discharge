@@ -410,8 +410,6 @@ void ProxyFieldSolver::setupHelmholtz(){
   EBAMRFluxData Bco;
   EBAMRIVData   BcoIrreg;
 
-
-
   m_amr->allocate(Aco,      m_realm, phase::gas, 1);
   m_amr->allocate(Bco,      m_realm, phase::gas, 1);
   m_amr->allocate(BcoIrreg, m_realm, phase::gas, 1);
@@ -450,8 +448,9 @@ void ProxyFieldSolver::setupHelmholtz(){
 
   BiCGStabSolver<LevelData<EBCellFAB> > bicgstab;
   AMRMultiGrid<LevelData<EBCellFAB> > multigridSolver;
-  
-  multigridSolver.define(m_amr->getDomains()[0], fact, &bicgstab, 1 + m_amr->getFinestLevel());
+
+  multigridSolver.define(m_amr->getDomains()[0], fact, &bicgstab, 1 + finestLevel);
+  multigridSolver.init(alpha, beta, finestLevel, 0);
 
 }
 

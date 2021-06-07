@@ -153,12 +153,6 @@ void EBHelmholtzOp::defineStencils(){
 
   EBArith::getMultiColors(m_colors);
 
-#if 1
-  if(procID() == 0) {
-    std::cout << m_colors << std::endl;
-  }
-#endif
-
   // First strip of cells on the inside of the computational domain. I.e. the "domain wall" cells where we need BCs. 
   for (int dir = 0; dir < SpaceDim; dir++){
     for (SideIterator sit; sit.ok(); ++sit){
@@ -496,9 +490,9 @@ void EBHelmholtzOp::applyOp(LevelData<EBCellFAB>&             a_Lphi,
 
   const DisjointBoxLayout& dbl = a_Lphi.disjointBoxLayout();
   for (DataIterator dit(dbl); dit.ok(); ++dit){
-    a_Lphi[dit()] *= (*m_Acoef)[dit()];
+    a_Lphi[dit()] *= (*m_Acoef)[dit()]; // That takes care of alpha*A*phi
 
-    // Term 
+    // Now do beta*B*phi
 
     this->applyOpIrregular(a_Lphi[dit()], a_phi[dit()], dit(), a_homogeneousPhysBC);
   }
@@ -515,6 +509,7 @@ void EBHelmholtzOp::applyOpIrregular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, 
     m_ebBc->applyEBFlux(a_Lphi, a_phi, m_vofIterIrreg[a_dit], (*m_eblg.getCFIVS()), a_dit, m_probLo, m_vecDx, factor, a_homogeneousPhysBC, 0.0);
   }
 
+  // Do irregular faces on domain sides. m_domainBc should give the centroid-centered flux so we don't do interpolations here. 
   for (int dir = 0; dir < SpaceDim; dir++){
     Real flux;
 
@@ -538,8 +533,6 @@ void EBHelmholtzOp::applyOpIrregular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, 
       a_Lphi(vof, m_comp) += flux*m_beta/m_dx;
     }
   }
-
-  MayDay::Warning("EBHelmholtzOp::applyOpIrregular - domain bc does not interpolate to face centroids...");
 }
 
 void EBHelmholtzOp::divideByIdentityCoef(LevelData<EBCellFAB>& a_rhs) {
