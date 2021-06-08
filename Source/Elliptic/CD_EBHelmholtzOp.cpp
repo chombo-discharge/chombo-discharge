@@ -15,6 +15,7 @@
 #include <EBLevelDataOps.H>
 #include <EBCellFactory.H>
 #include <EBAMRPoissonOp.H>
+#include <EBConductivityOpF_F.H>
 
 // Our includes
 #include <CD_EBHelmholtzOp.H>
@@ -335,22 +336,6 @@ void EBHelmholtzOp::createCoarsened(LevelData<EBCellFAB>& a_lhs, const LevelData
   EBCellFactory fact(ebislCoFi);
   a_lhs.define(dblCoFi, m_nComp, a_rhs.ghostVect(), fact);
 #endif
-}
-
-void EBHelmholtzOp::relax(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, int a_iterations){
-  switch(m_relaxationMethod){
-  case RelaxationMethod::Jacobi:
-    this->relaxJacobi(a_correction, a_residual, a_iterations);
-    break;
-  case RelaxationMethod::GSRB:
-    this->relaxGauSai(a_correction, a_residual, a_iterations);
-    break;
-  case RelaxationMethod::GSRBFast:
-    this->relaxGSRBFast(a_correction, a_residual, a_iterations);
-    break;
-  default:
-    MayDay::Abort("EBHelmholtzOp::relax - bogus relaxation method requested");
-  };
 }
 
 void EBHelmholtzOp::restrictResidual(LevelData<EBCellFAB>& a_resCoar, LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_rhs) {
@@ -689,6 +674,22 @@ void EBHelmholtzOp::interpolateCF(LevelData<EBCellFAB>& a_phiFine, const LevelDa
   }
 }
 
+void EBHelmholtzOp::relax(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, int a_iterations){
+  switch(m_relaxationMethod){
+  case RelaxationMethod::Jacobi:
+    this->relaxJacobi(a_correction, a_residual, a_iterations);
+    break;
+  case RelaxationMethod::GSRB:
+    this->relaxGauSai(a_correction, a_residual, a_iterations);
+    break;
+  case RelaxationMethod::GSRBFast:
+    this->relaxGSRBFast(a_correction, a_residual, a_iterations);
+    break;
+  default:
+    MayDay::Abort("EBHelmholtzOp::relax - bogus relaxation method requested");
+  };
+}
+
 void EBHelmholtzOp::relaxJacobi(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations){
   LevelData<EBCellFAB> Lcorr;
   this->create(Lcorr, a_residual);
@@ -726,14 +727,55 @@ void EBHelmholtzOp::gsrbColor(LevelData<EBCellFAB>& a_phi, const LevelData<EBCel
   for (DataIterator dit(dbl); dit.ok(); ++dit){
     const Box box = dbl[dit()];
 
-    
-  }
+    BaseFab<Real>& phiReg        = a_phi    [dit()].getSingleValuedFAB();
+    const BaseFab<Real>& LphiReg = a_Lphi   [dit()].getSingleValuedFAB();
+    const BaseFab<Real>& rhsReg  = a_rhs    [dit()].getSingleValuedFAB();
+    const BaseFab<Real>& relReg  = m_relCoef[dit()].getSingleValuedFAB();
 
-  MayDay::Warning("EBHelmholtzOp::gsrbColor - not implemented (yet");
+    // Regular cells (well, plus whatever is not multi-valued)
+    IntVect loIV = box.smallEnd();
+    IntVect hiIV = box.bigEnd();
+    for (int dir = 0; dir < SpaceDim; dir++){
+      if(loIV[dir] % 2 != a_color[dir]) loIV[dir]++;
+    }
+
+    if(loIV <= hiIV){
+      const Box colorBox(loIV, hiIV);
+
+      FORT_GSRBEBCO(CHF_FRA1(phiReg, m_comp),
+		    CHF_CONST_FRA1(LphiReg, m_comp),
+		    CHF_CONST_FRA1(rhsReg, m_comp),
+		    CHF_CONST_FRA1(relReg, m_comp),
+		    CHF_BOX(colorBox));
+    }
+    
+
+    // Fortran took care of the irregular cells but multi-cells still remain
+    VoFIterator& vofit = m_vofIterMulti[dit()];
+    for (vofit.reset(); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+      const IntVect&  iv  = vof.gridIndex();
+
+      bool doThisCell = true;
+      for(int dir = 0; dir < SpaceDim; dir++){
+	if(iv[dir]%2 != a_color[dir]) doThisCell = false;
+      }
+
+      if(doThisCell){
+	const Real lambda = m_relCoef[dit()](vof, m_comp);
+	const Real Lphi   = a_Lphi[dit()](vof, m_comp);
+	const Real rhs    = a_rhs[dit()](vof, m_comp);
+	const Real resid  = rhs - Lphi;
+
+	a_phi[dit()](vof, m_comp) += lambda*resid;
+	
+      }
+    }
+  }
 }
 
 void EBHelmholtzOp::relaxGSRBFast(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations){
-  MayDay::Warning("EBHelmholtzOp::relaxGauSai - not implemented");
+  MayDay::Abort("EBHelmholtzOp::relaxGauSai - not implemented");
 }
 
 void EBHelmholtzOp::computeAlphaWeight(){
