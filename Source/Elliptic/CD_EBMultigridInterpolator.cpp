@@ -42,7 +42,7 @@ EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid&            a
   
   // Define a temp which is zero everywhere. Don't need ghost cells because the stencils should(!) only reach into valid cells AFAIK. 
   EBCellFactory cellFact(m_eblgCoar.getEBISL());
-  m_zeroCoar.define(m_eblgCoar.getDBL(), a_nVar, 2*IntVect::Unit, cellFact);
+  m_zeroCoar.define(m_eblgCoar.getDBL(), a_nVar, IntVect::Zero, cellFact);
   EBLevelDataOps::setToZero(m_zeroCoar);
 }
 

@@ -44,9 +44,11 @@ bool ProxyFieldSolver::solve(MFAMRCellData&       a_potential,
   EBAMRCellData gasData = m_amr->alias(phase::gas, a_potential);
   EBAMRCellData gasResi = m_amr->alias(phase::gas, m_residue);
 
-  this->solveHelmholtz(gasData, gasResi);
 
-  //  this->solveOnePhase(gasData, gasResi);
+
+  this->solveOnePhase(gasData, gasResi);
+
+  this->solveHelmholtz(gasData, gasResi);
   
   return true;
 }
@@ -357,6 +359,8 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi, EBAMRCellData& a_resi
 
     iter++;
   }
+
+  if(procID() == 0) std::cout << "solveOnePhase final resid = " << phiResid << std::endl;
   
   this->computeElectricField();
   this->writePlotFile();
@@ -414,7 +418,7 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
   m_amr->allocate(Bco,      m_realm, phase::gas, 1);
   m_amr->allocate(BcoIrreg, m_realm, phase::gas, 1);
 
-  DataOps::setValue(Aco, 1.0);
+  DataOps::setValue(Aco, 0.0);
   DataOps::setValue(Bco, 1.0);
   DataOps::setValue(BcoIrreg, 1.0);
 
@@ -457,7 +461,6 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
   EBAMRCellData RHS;
   m_amr->allocate(RHS, m_realm, phase::gas, 1);
   DataOps::setValue(RHS, 0.0);
-  DataOps::setValue(a_phi, 1.0);
 
   Vector<LevelData<EBCellFAB>* > phi;
   Vector<LevelData<EBCellFAB>* > res;
@@ -470,8 +473,15 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
   multigridSolver.define(m_amr->getDomains()[0], fact, &bicgstab, 1 + finestLevel);
   multigridSolver.m_verbosity=10;
   multigridSolver.init(phi, rhs, finestLevel, 0);
-  multigridSolver.setSolverParameters(32, 32, 32, 1, 32, 1.E-10, 1E-60, 1E-60);
-  multigridSolver.solveNoInit(phi, rhs, finestLevel, 0, false, false);
+  
+  // Print the initial residual
+  const Real phiResid = multigridSolver.computeAMRResidual(res, phi, rhs, finestLevel, 0);
+  if(procID() == 0) std::cout << "solveHelm initial resid = " << phiResid << std::endl;
+
+  
+
+  multigridSolver.setSolverParameters(16, 16, 16, 1, 16, 1.E-10, 1E-60, 1E-60);
+  multigridSolver.solveNoInit(phi, rhs, finestLevel, 0, true, false);
   multigridSolver.computeAMRResidual(res, phi, rhs, finestLevel, 0);
 
   m_amr->averageDown(a_phi, m_realm, phase::gas);

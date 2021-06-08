@@ -9,9 +9,6 @@
   @author Robert Marskar
   @todo   Replace EBAMRPoissonOp::staticMaxNorm and don't use EBAMRPoissonOp dependencies
   @todo   When we redefine the EBBC, the getFluxStencil should return an empty stencil rather than a null pointer. Fix this in defineStencils() together with the other crap. 
-  @todo   Check relaxation weights for domain boundary cells, they may be too large..?
-  @todo   Review the EBCF code, I'm not sure it's correct...
-  @todo   incrementFRCoar should only take the flux along the CF interface rather than all interior cells. 
 */
 
 // Chombo includes
@@ -76,7 +73,6 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid&                                 
   m_ghostRhs(a_ghostRhs),
   m_relaxationMethod(a_relaxationMethod) {
 
-  
   // Default settings. Always solve for comp = 0. If you want something different, copy your
   // input two different data holders before you use AMRMultiGrid. 
   m_nComp      = 1;
@@ -86,13 +82,12 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid&                                 
 
   if(m_hasFine){
     m_eblgFine = a_eblgFine;
-    m_dxFine   = m_dx/a_refToFine;
   }
 
   if(m_hasCoar){
     m_eblgCoar = a_eblgCoar;
     m_eblgCoFi = a_eblgCoFi;
-    
+
     m_ebInterp.define(m_eblg.getDBL(),   m_eblgCoar.getDBL(), m_eblg.getEBISL(), m_eblgCoar.getEBISL(), m_eblgCoar.getDomain(),
 		      m_refToCoar, m_nComp, m_eblg.getEBIS(), m_ghostPhi);
 
@@ -322,8 +317,24 @@ void EBHelmholtzOp::createCoarser(LevelData<EBCellFAB>& a_coarse, const LevelDat
 
 void EBHelmholtzOp::createCoarsened(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const int& a_refRat) {
   CH_assert(m_hasCoar);
+#if 1 // What I want
   EBCellFactory factCoFi(m_eblgCoFi.getEBISL());
   a_lhs.define(m_eblgCoFi.getDBL(), a_rhs.nComp(), a_rhs.ghostVect(), factCoFi);
+#else // What i have to try
+  DisjointBoxLayout dblCoFi;
+  coarsen(dblCoFi, m_eblg.getDBL(), a_refRat);
+
+  EBISLayout ebislCoFi;
+  ProblemDomain domainCoFi = coarsen(m_eblg.getDomain(), a_refRat);
+  m_eblg.getEBIS()->fillEBISLayout(ebislCoFi, dblCoFi, domainCoFi, a_rhs.ghostVect()[0]);
+
+  if(m_refToCoar > 1){
+    ebislCoFi.setMaxRefinementRatio(m_refToCoar, m_eblg.getEBIS());
+  }
+
+  EBCellFactory fact(ebislCoFi);
+  a_lhs.define(dblCoFi, m_nComp, a_rhs.ghostVect(), fact);
+#endif
 }
 
 void EBHelmholtzOp::relax(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, int a_iterations){
@@ -459,10 +470,14 @@ void EBHelmholtzOp::applyOp(LevelData<EBCellFAB>&             a_Lphi,
 			    const bool                        a_homogeneousCFBC){
 
   LevelData<EBCellFAB>& phi = (LevelData<EBCellFAB>& ) a_phi;
+
   if(m_hasCoar && !m_turnOffBCs){
-    this->interpolateCF(phi, a_phiCoar, a_homogeneousCFBC);
+    this->interpolateCF(phi, *a_phiCoar, a_homogeneousCFBC);
   }
+  
   phi.exchange();
+
+  this->setToZero(a_Lphi);
   
   const DisjointBoxLayout& dbl = a_Lphi.disjointBoxLayout();
   for (DataIterator dit(dbl); dit.ok(); ++dit){
@@ -500,7 +515,7 @@ void EBHelmholtzOp::applyOpRegular(EBCellFAB& a_Lphi, EBCellFAB& a_phi, const Bo
   }
 
   // Fill the ghost cells outside the domain so that we don't get an extra flux from the domain side. 
-  //  this->suppressDomainFlux((EBCellFAB&) a_phi, a_cellBox, a_dit);
+
   FORT_LAPLACIANINPLACE(CHF_FRA1(Lphi, m_comp),
 			CHF_CONST_FRA1(phi, m_comp),
 			CHF_CONST_FRA1((*bcoef[0]), m_comp),
@@ -516,7 +531,7 @@ void EBHelmholtzOp::applyDomainFlux(EBCellFAB& a_Lphi, EBCellFAB& a_phi, const B
   //       box, so that's what all the shifting is about.
   //
   //       I am leaving both a_Lphi and a_phi as options here because we may want to fill a_Lphi directly so as to avoid the current division-by-B in
-  //       the Fortran kernels. 
+  //       the Fortran kernels. In this case one can zero the domain flux by calling suppressDomainFlux...
 
   BaseFab<Real>& phiFAB = a_phi.getSingleValuedFAB();
   
@@ -568,6 +583,8 @@ void EBHelmholtzOp::applyDomainFlux(EBCellFAB& a_Lphi, EBCellFAB& a_phi, const B
       bco.shiftHalf(dir, 1);
     }
   }
+
+  //  this->suppressDomainFlux(a_phi, a_cellBox, a_dit);
 }
 
 void EBHelmholtzOp::suppressDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit){
@@ -598,7 +615,7 @@ void EBHelmholtzOp::suppressDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, c
 }
 
 void EBHelmholtzOp::applyOpIrregular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBC){
-  m_opEBStencil[a_dit]->apply(a_Lphi, a_phi, m_alphaDiagWeight[a_dit], m_alpha, m_beta, false);
+  m_opEBStencil[a_dit]->apply(a_Lphi, a_phi, m_alphaDiagWeight[a_dit], m_alpha, m_beta, false); // This includes stencils for interpolation to faces. 
 
   if(!a_homogeneousPhysBC){
     const Real factor = m_beta/m_dx; // Beta not handled inside m_ebBc but we will fix this (later). 
@@ -654,25 +671,20 @@ void EBHelmholtzOp::getFlux(EBFluxFAB&                  a_flux,
 }
 
 void EBHelmholtzOp::homogeneousCFInterp(LevelData<EBCellFAB>& a_phi){
-  if(m_hasCoar) m_interpolator->coarseFineInterpH(a_phi, a_phi.interval()); 
+  if(m_hasCoar) m_interpolator->coarseFineInterpH(a_phi, a_phi.interval());
 }
 
 void EBHelmholtzOp::inhomogeneousCFInterp(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar){
   if(m_hasCoar) m_interpolator->coarseFineInterp(a_phiFine, a_phiCoar, a_phiFine.interval());
 }
 
-void EBHelmholtzOp::interpolateCF(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>* a_phiCoar, const bool a_homogeneous){
+void EBHelmholtzOp::interpolateCF(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar, const bool a_homogeneous){
   if(m_hasCoar){
     if(a_homogeneous){
       this->homogeneousCFInterp(a_phiFine);
     }
     else{
-      if(a_phiCoar == nullptr){
-	MayDay::Error("EBHelmholtzOp::interpolateCF - trying inhomogeneous interpolation but phiCoar is nullptr");
-      }
-      else{
-	this->inhomogeneousCFInterp(a_phiFine, *a_phiCoar);
-      }
+      this->inhomogeneousCFInterp(a_phiFine, a_phiCoar);
     }
   }
 }
@@ -689,7 +701,7 @@ void EBHelmholtzOp::relaxJacobi(LevelData<EBCellFAB>& a_correction, const LevelD
       Lcorr[dit()]        -= a_residual[dit()];
       Lcorr[dit()]        *= m_relCoef[dit()];
       
-      a_correction[dit()] -= Lcorr[dit()]; 
+      a_correction[dit()] -= Lcorr[dit()];
     }
   }
 }
@@ -780,7 +792,7 @@ void EBHelmholtzOp::computeRelaxationCoefficient(){
   // Add safety factors for relaxations 
   switch(m_relaxationMethod){
   case RelaxationMethod::Jacobi: 
-    this->scale(m_relCoef, 0.5); 
+    this->scale(m_relCoef, 0.75); 
     break;
   default:
     break;
@@ -843,7 +855,6 @@ void EBHelmholtzOp::getFaceCentroidFlux(EBFluxFAB&       a_fluxCentroid,
 					const EBCellFAB& a_phi,
 					const Box&       a_cellBox,
 					const DataIndex& a_dit){
-
   for (int dir = 0; dir < SpaceDim; dir++){
     EBFaceFAB& fluxCentroid = a_fluxCentroid[dir];
     this->getFaceCentroidFlux(fluxCentroid, a_phi, a_cellBox, a_dit, dir);
@@ -907,17 +918,18 @@ void EBHelmholtzOp::interpolateFluxes(EBFaceFAB& a_flux, const Box& a_cellBox, c
   const BaseIFFAB<FaceStencil>& faceStencils = m_interpStencil[a_dir][a_dit];
 
   BaseIFFAB<Real>& interpol = m_interpolant[a_dir][a_dit];
+  interpol.setVal(0.0);
 
   const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
   const EBGraph& ebgraph = ebisbox.getEBGraph();
 
-
-  const IntVectSet ivs = faceStencils.getIVS() & a_cellBox;
+  const IntVectSet ivs = ebisbox.getIrregIVS(a_cellBox);
 
   // Interpolate flux to centroid.
   for (FaceIterator faceIt(ivs, ebgraph, a_dir, FaceStop::SurroundingNoBoundary); faceIt.ok(); ++faceIt){
     const FaceIndex& face = faceIt();
     const FaceStencil& stencil = faceStencils(face, m_comp);
+
 
     Real centroidFlux = 0.0;
     for (int i = 0; i < stencil.size(); i++){
@@ -943,7 +955,7 @@ void EBHelmholtzOp::incrementFRCoar(const LevelData<EBCellFAB>& a_phi){
   for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit){
     for (int dir = 0; dir < SpaceDim; dir++){
       EBFaceFAB& flux   = m_flux[dit()][dir];
-      
+
       const Box cellBox = m_eblg.getDBL()[dit()];
       for (SideIterator sit; sit.ok(); ++sit){
 
@@ -981,10 +993,10 @@ void EBHelmholtzOp::incrementFRFine(const LevelData<EBCellFAB>& a_phiFine, const
 	// The CF interface always ends at the boundary of a fine-level grid box, so we can run the computation for
 	// the subset of cells that align with the CF. 
 	Box stripBox = adjCellBox(cellBox, dir, sit(), 1);
-	stripBox.shift(dir, sign(flip(sit())));
+	stripBox.shift(dir, -sign(sit()));
 
 	// Computes fluxes for all faces oriented in +/- dir, but which are not boundary faces. 
-	finerOp.getFaceCentroidFlux(flux, phiFine[dit()], stripBox, dit(), dir);
+	finerOp.getFaceCentroidFlux(flux, phiFine[dit()], cellBox, dit(), dir);
 
 	// Increment flux register, recall that beta and the b-coefficient are included in getFaceCentroidFlux. 
 	m_fluxReg->incrementFineBoth(flux, scale, dit(), Interval(m_comp, m_comp), dir, sit());
@@ -999,6 +1011,7 @@ void EBHelmholtzOp::reflux(LevelData<EBCellFAB>&              a_Lphi,
 			   AMRLevelOp<LevelData<EBCellFAB> >& a_finerOp) {
 
   m_fluxReg->setToZero();
+  
   this->incrementFRCoar(a_phi);
   this->incrementFRFine(a_phiFine, a_phi, a_finerOp);
 

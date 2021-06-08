@@ -499,6 +499,7 @@ EBHelmholtzOp* EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
   EBLevelGrid eblgCoFi;
   if(hasCoar){
     this->getCoarserLayout(eblgCoFi, *m_amrLevelGrids[amrLevel], refToCoar, m_mgBlockingFactor);
+    CH_assert(eblgCoFi.isDefined());
   }
 
   op = new EBHelmholtzOp(eblgFine,

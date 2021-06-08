@@ -465,11 +465,6 @@ protected:
   Real m_beta;
 
   /*!
-    @brief Grid resolution for finer level;
-  */
-  Real m_dxFine;
-
-  /*!
     @brief Grid resolution;
   */
   Real m_dx;
@@ -724,7 +719,7 @@ protected:
     @param[inout] a_phiCoar     Coarse data
     @param[in]    a_homogeneous Homogeneous CF or not (i.e. coar data is zero);
   */
-  void interpolateCF(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>* a_phiCoar, const bool a_homogeneous);
+  void interpolateCF(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar, const bool a_homogeneous);
 
   /*!
     @brief Get the face-centered flux stencil
@@ -826,17 +821,6 @@ protected:
 	      const LevelData<EBCellFAB>&        a_phi,
 	      AMRLevelOp<LevelData<EBCellFAB> >& a_finerOp);
 
-private:
-
-  /*!
-    @brief Routines that I'm planning to get rid of...
-  */
-  void applyHomogeneousCFBCs(LevelData<EBCellFAB>& a_phi);
-
-  /*!
-    @brief Routines that I'm planning to get rid of...
-  */
-  void applyHomogeneousCFBCs(EBCellFAB& a_phi, const DataIndex& a_dit, const int a_dir, const Side::LoHiSide a_side);
 };
 
 #include <CD_NamespaceFooter.H>
