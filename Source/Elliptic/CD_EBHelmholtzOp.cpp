@@ -90,10 +90,10 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid&                                 
     m_eblgCoFi = a_eblgCoFi;
 
     m_ebInterp.define(m_eblg.getDBL(),   m_eblgCoar.getDBL(), m_eblg.getEBISL(), m_eblgCoar.getEBISL(), m_eblgCoar.getDomain(),
-		      m_refToCoar, m_nComp, m_eblg.getEBIS(), m_ghostPhi);
+    		      m_refToCoar, m_nComp, m_eblg.getEBIS(), m_ghostPhi);
 
     m_ebAverage.define(m_eblg.getDBL(), m_eblgCoFi.getDBL(), m_eblg.getEBISL(), m_eblgCoFi.getEBISL(), m_eblgCoFi.getDomain(),
-		       m_refToCoar, m_nComp, m_eblg.getEBIS(), m_ghostRhs);
+    		       m_refToCoar, m_nComp, m_eblg.getEBIS(), m_ghostRhs);
   }
 
   if(m_hasMGObjects){
@@ -187,7 +187,7 @@ void EBHelmholtzOp::defineStencils(){
       m_interpStencil[dir][dit()].define(irregIVS, ebgraph, dir, m_nComp);
       m_interpolant  [dir][dit()].define(irregIVS, ebgraph, dir, m_nComp);
       for (FaceIterator faceIt(irregIVS, ebgraph, dir, FaceStop::SurroundingNoBoundary); faceIt.ok(); ++faceIt){
-	m_interpStencil[dir][dit()](faceIt(), m_comp) = EBArith::getInterpStencil(faceIt(), IntVectSet(), ebisbox, cellBox); 
+	m_interpStencil[dir][dit()](faceIt(), m_comp) = EBArith::getInterpStencil(faceIt(), IntVectSet(), ebisbox, m_eblg.getDomain());
       }
     }
 
