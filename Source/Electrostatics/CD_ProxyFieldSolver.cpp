@@ -403,7 +403,7 @@ void ProxyFieldSolver::setupHelmholtz(){
     }
   }
 
-  const Real alpha = 1.0;
+  const Real alpha = 0.0;
   const Real beta  = 1.0;
 
   EBAMRCellData Aco;
@@ -413,6 +413,10 @@ void ProxyFieldSolver::setupHelmholtz(){
   m_amr->allocate(Aco,      m_realm, phase::gas, 1);
   m_amr->allocate(Bco,      m_realm, phase::gas, 1);
   m_amr->allocate(BcoIrreg, m_realm, phase::gas, 1);
+
+  DataOps::setValue(Aco, 1.0);
+  DataOps::setValue(Bco, 1.0);
+  DataOps::setValue(BcoIrreg, 1.0);
 
   auto ebbcFactory   = RefCountedPtr<DirichletConductivityEBBCFactory>     (new DirichletConductivityEBBCFactory());
   auto domainFactory = RefCountedPtr<DirichletConductivityDomainBCFactory> (new DirichletConductivityDomainBCFactory());
@@ -475,10 +479,11 @@ void ProxyFieldSolver::setupHelmholtz(){
   multigridSolver.m_verbosity=10;
 
   const Real res = multigridSolver.computeAMRResidual(phi, rhs, finestLevel, 0);
+
   multigridSolver.solveNoInit(phi, rhs, finestLevel, 0, false, false);
   pout() << "end helm solve" << endl;
 
-  //  if(procID() == 0) std::cout << "helmholtz zero residual = " << res << std::endl;
+  if(procID() == 0) std::cout << "helmholtz zero residual = " << res << std::endl;
 }
 
 #include <CD_NamespaceFooter.H>

@@ -464,12 +464,11 @@ void EBHelmholtzOp::applyOp(LevelData<EBCellFAB>&             a_Lphi,
   if(m_hasCoar && !m_turnOffBCs){
     this->interpolateCF((LevelData<EBCellFAB>&) a_phi, a_phiCoar, a_homogeneousCFBC);
   }
-
-  this->setToZero(a_Lphi);
-
+  
   const DisjointBoxLayout& dbl = a_Lphi.disjointBoxLayout();
   for (DataIterator dit(dbl); dit.ok(); ++dit){
     const Box cellBox = dbl[dit()];
+    
     // Now do the terms with beta*phi
     this->applyOpRegular(  a_Lphi[dit()], a_phi[dit()], cellBox, dit(), a_homogeneousPhysBC);
     this->applyOpIrregular(a_Lphi[dit()], a_phi[dit()], cellBox, dit(), a_homogeneousPhysBC); // Overwrites result in irregular cells. 
@@ -518,7 +517,26 @@ void EBHelmholtzOp::applyDomainFlux(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, c
 }
 
 void EBHelmholtzOp::suppressDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit){
-  MayDay::Warning("EBHelmholtzOp::suppressDomainFlux - not implemented");
+  const Box domainBox = m_eblg.getDomain().domainBox();
+
+  BaseFab<Real>& regFab = a_phi.getSingleValuedFAB();
+  
+  for (int dir = 0; dir < SpaceDim; dir++){
+    for (SideIterator sit; sit.ok(); ++sit){
+      const Box ghostBox = adjCellBox(domainBox, dir, sit(), 1); // Strip of cells outside domain.
+
+      // Phi defined over a_cellBox - get the ghost cells outside. 
+      Box grownBox = a_cellBox;
+      grownBox.growDir(dir, sit(), 1);
+      grownBox &= ghostBox;
+
+      // Set the ghost cells to the same value as the next "inside" cell. This will suppress the gradient on the domain faces. 
+      for (BoxIterator bit(grownBox); bit.ok(); ++bit){
+	const IntVect iv = bit();
+	regFab(iv, m_comp) = regFab(iv + sign(flip(sit()))*BASISV(dir), m_comp);
+      }
+    }
+  }
 }
 
 void EBHelmholtzOp::applyOpIrregular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBC){
@@ -543,7 +561,7 @@ void EBHelmholtzOp::applyOpIrregular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, 
       a_Lphi(vof, m_comp) -= flux*m_beta/m_dx;
     }
 
-    // Hi side. Does this interpolate to centroids...????
+    // Hi side. 
     VoFIterator& vofitHi = m_vofIterDomHi[dir][a_dit];
     for (vofitHi.reset(); vofitHi.ok(); ++vofitHi){
       const VolIndex& vof = vofitHi();
@@ -613,7 +631,6 @@ void EBHelmholtzOp::relaxJacobi(LevelData<EBCellFAB>& a_correction, const LevelD
     for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit){
       Lcorr[dit()]        -= a_residual[dit()];
       Lcorr[dit()]        *= m_relCoef[dit()];
-      Lcorr[dit()]        *= 0.5; // Safety factor for Jacobi        
       
       a_correction[dit()] -= Lcorr[dit()]; 
     }
@@ -701,6 +718,15 @@ void EBHelmholtzOp::computeRelaxationCoefficient(){
 
       m_relCoef[dit()](vof, m_comp) = 1./(alphaWeight + betaWeight);
     }
+  }
+
+  // Add safety factors for relaxations 
+  switch(m_relaxationMethod){
+  case RelaxationMethod::Jacobi: 
+    this->scale(m_relCoef, 0.5); 
+    break;
+  default:
+    break;
   }
 }
 
