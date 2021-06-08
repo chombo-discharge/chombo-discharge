@@ -407,7 +407,7 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
     }
   }
 
-  const Real alpha = 1.0;
+  const Real alpha = 0.0;
   const Real beta  = 1.0;
 
   EBAMRCellData Aco;
@@ -425,7 +425,7 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
   auto ebbcFactory   = RefCountedPtr<DirichletConductivityEBBCFactory>     (new DirichletConductivityEBBCFactory());
   auto domainFactory = RefCountedPtr<DirichletConductivityDomainBCFactory> (new DirichletConductivityDomainBCFactory());
   ebbcFactory  ->setValue(1.0);
-  ebbcFactory  ->setOrder(2);
+  ebbcFactory  ->setOrder(1);
   domainFactory->setValue(-1);
 
   // Set the bottom domain. Don't go below 8x cells in any direction
