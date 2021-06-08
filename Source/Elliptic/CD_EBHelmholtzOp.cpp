@@ -288,7 +288,7 @@ void EBHelmholtzOp::incr(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>
 }
 
 void EBHelmholtzOp::axby(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_x, const LevelData<EBCellFAB>& a_y, const Real a_a, const Real a_b) {
-  EBLevelDataOps::axby(a_lhs,a_x,a_y,a_a,a_b);
+  EBLevelDataOps::axby(a_lhs, a_x, a_y, a_a, a_b);
 }
 
 void EBHelmholtzOp::scale(LevelData<EBCellFAB>& a_lhs, const Real& a_scale) {
@@ -321,7 +321,7 @@ void EBHelmholtzOp::createCoarsened(LevelData<EBCellFAB>& a_lhs, const LevelData
 #if 0 // What I want
   EBCellFactory factCoFi(m_eblgCoFi.getEBISL());
   a_lhs.define(m_eblgCoFi.getDBL(), a_rhs.nComp(), a_rhs.ghostVect(), factCoFi);
-#else // What i have to try
+#else // What I will try. 
   DisjointBoxLayout dblCoFi;
   coarsen(dblCoFi, m_eblg.getDBL(), a_refRat);
 

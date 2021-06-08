@@ -513,8 +513,15 @@ EBHelmholtzOp* EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
   const bool hasCoar = amrLevel > 0;
 
   EBLevelGrid eblgFine;
+  EBLevelGrid eblg;
+  EBLevelGrid eblgCoFi;
   EBLevelGrid eblgCoar;
   EBLevelGrid eblgCoarMG;
+
+  Real dx;
+
+  eblg = *m_amrLevelGrids[amrLevel];
+  dx   = m_amrResolutions[amrLevel];
 
   int refToFine = 1;
   int refToCoar = 1;
@@ -529,25 +536,23 @@ EBHelmholtzOp* EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
     refToFine  = m_amrRefRatios[amrLevel];
   }
 
-//  const bool hasMGObjects = m_hasMgLevels[amrLevel];
-  const bool hasMGObjects = false;
+  const bool hasMGObjects = m_hasMgLevels[amrLevel];
   if(hasMGObjects){
     eblgCoarMG = *m_mgLevelGrids[amrLevel][1];
     CH_assert(eblgCoarMG.isDefined());
   }
 
-  auto dobc = this->makeDomainBcObject(*m_amrLevelGrids[amrLevel], m_amrResolutions[amrLevel]);
-  auto ebbc = this->makeEbBcObject    (*m_amrLevelGrids[amrLevel], m_amrResolutions[amrLevel]);
+  auto dobc = this->makeDomainBcObject(eblg, dx);
+  auto ebbc = this->makeEbBcObject    (eblg, dx);
 
-  EBLevelGrid eblgCoFi;
   if(hasCoar){
-    this->getCoarserLayout(eblgCoFi, *m_amrLevelGrids[amrLevel], refToCoar, m_mgBlockingFactor);
+    this->getCoarserLayout(eblgCoFi, eblg, refToCoar, m_mgBlockingFactor);
 
     CH_assert(eblgCoFi.isDefined());
   }
 
   op = new EBHelmholtzOp(eblgFine,
-			 *m_amrLevelGrids[amrLevel],
+			 eblg,
 			 eblgCoFi,
 			 eblgCoar,
 			 eblgCoarMG,
@@ -557,7 +562,7 @@ EBHelmholtzOp* EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
 			 dobc,
 			 ebbc,
 			 m_probLo,			 
-			 m_amrResolutions[amrLevel],
+			 dx,
 			 refToFine,
 			 refToCoar,
 			 hasFine,
