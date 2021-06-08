@@ -86,8 +86,8 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid&                                 
   }
 
   if(m_hasCoar){
-    m_eblgCoar = a_eblgCoar;
     m_eblgCoFi = a_eblgCoFi;
+    m_eblgCoar = a_eblgCoar;
 
     m_ebInterp.define(m_eblg.getDBL(),   m_eblgCoar.getDBL(), m_eblg.getEBISL(), m_eblgCoar.getEBISL(), m_eblgCoar.getDomain(),
     		      m_refToCoar, m_nComp, m_eblg.getEBIS(), m_ghostPhi);

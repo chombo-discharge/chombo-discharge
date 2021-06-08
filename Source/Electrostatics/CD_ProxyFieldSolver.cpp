@@ -401,7 +401,7 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
       
       interpolators[lvl] = RefCountedPtr<EBMultigridInterpolator> (new EBMultigridInterpolator(eblgFine,
 											       eblgCoar,
-											       m_amr->getRefinementRatio(lvl, lvl-1),
+											       m_amr->getRefinementRatios()[lvl-1],
 											       1,
 											       cfivs));
     }
@@ -425,12 +425,12 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
   auto ebbcFactory   = RefCountedPtr<DirichletConductivityEBBCFactory>     (new DirichletConductivityEBBCFactory());
   auto domainFactory = RefCountedPtr<DirichletConductivityDomainBCFactory> (new DirichletConductivityDomainBCFactory());
   ebbcFactory  ->setValue(1.0);
-  ebbcFactory  ->setOrder(1);
+  ebbcFactory  ->setOrder(2);
   domainFactory->setValue(-1);
 
   // Set the bottom domain. Don't go below 8x cells in any direction
   ProblemDomain bottomDomain = m_amr->getDomains()[0];
-  while(bottomDomain.domainBox().shortside() >= 4){
+  while(bottomDomain.domainBox().shortside() >= 8){
     bottomDomain.coarsen(2);
   }
 

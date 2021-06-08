@@ -9,9 +9,14 @@
   @author Robert Marskar
 */
 
-// Chombo includes
-#include <BRMeshRefine.H>
+#define EBHelmholtzOpFactoryDebug 1
+#if EBHelmholtzOpFactoryDebug
 #include <EBAMRPoissonOp.H>
+#endif
+
+// Chombo includes
+#include <ParmParse.H>
+#include <BRMeshRefine.H>
 
 // Our includes
 #include <CD_EBHelmholtzOpFactory.H>
@@ -131,7 +136,8 @@ void EBHelmholtzOpFactory::defineMultigridLevels(){
 	// the base AMR level, hence amrLevel == 0. Once those levels are exhausted we begin with direct coarsening. 
 	if(amrLevel == 0 && curMgLevels < m_deeperLevelGrids.size()){    
 	  hasCoarser = true;                                // Note that m_deeperLevelGrids[0] should be a factor 2 coarsening of the 
-	  mgEblgCoar = m_deeperLevelGrids[curMgLevels-1];  // coarsest AMR level. So curMgLevels-1 is correct. 
+	  mgEblgCoar = m_deeperLevelGrids[curMgLevels-1];  // coarsest AMR level. So curMgLevels-1 is correct.
+	  MayDay::Abort("wtf");
 	}
 	else{
 	  // Let the operator factory do the coarsening this time. 
@@ -147,11 +153,11 @@ void EBHelmholtzOpFactory::defineMultigridLevels(){
 	  else{
 	    // Not so sure about this one, will we ever be asked to make an coarsened MG level which is also an AMR level? If not, this code
 	    // will reduce the coarsening efforts.
-	    // for (int iamr = 0; iamr < m_numAmrLevels; iamr++){
-	    //   if(mgEblgCoar->getDomain() == m_amrLevelGrids[iamr]->getDomain()){
-	    // 	hasCoarser = false;
-	    //   }
-	    // }
+	    for (int iamr = 0; iamr < m_numAmrLevels; iamr++){
+	      if(mgEblgCoar->getDomain() == m_amrLevelGrids[iamr]->getDomain()){
+	    	hasCoarser = false;
+	      }
+	    }
 	  }
 	}
 
@@ -220,7 +226,7 @@ void EBHelmholtzOpFactory::defineMultigridLevels(){
       m_hasMgLevels[amrLevel] = false;
     }
 
-#if 1 // Debug
+#if EBHelmholtzOpFactoryDebug
     if(procID() == 0){
       std::cout << "amrLevel = " << amrLevel << "\t domain = " << m_amrLevelGrids[amrLevel]->getDomain() << ":\n";
       for (int mglevel = 0; mglevel < m_mgLevelGrids[amrLevel].size(); mglevel++){
@@ -240,34 +246,32 @@ bool EBHelmholtzOpFactory::isFiner(const ProblemDomain& A, const ProblemDomain& 
   return A.domainBox().numPts() > B.domainBox().numPts();
 }
 
-bool EBHelmholtzOpFactory::getCoarserLayout2(EBLevelGrid& a_coarEblg, const EBLevelGrid& a_fineEblg, const int a_refRat, const int a_blockingFactor) const {
-    DisjointBoxLayout dblCoFi;
-    ProblemDomain domCoFi;
-    bool dumbool;
-    bool hasCoarser = EBAMRPoissonOp::getCoarserLayouts(dblCoFi,
-							domCoFi,
-							a_fineEblg.getDBL(),
-							a_fineEblg.getEBISL(),
-							a_fineEblg.getDomain(),
-							a_refRat,
-							a_fineEblg.getEBIS(),
-							a_blockingFactor,
-							dumbool,
-							2);
-    if(hasCoarser){
-      a_coarEblg = EBLevelGrid(dblCoFi, domCoFi, 4, a_fineEblg.getEBIS());
-    }
-
-    return hasCoarser;
-}
-
 bool EBHelmholtzOpFactory::getCoarserLayout(EBLevelGrid& a_coarEblg, const EBLevelGrid& a_fineEblg, const int a_refRat, const int a_blockingFactor) const {
   // TLDR: This creates a coarsening of a_fineGrid with refinement factor 2. We first try to split the grid using a_blockingFactor. If that does not work we
   //       coarsen directly. If that does not work we are out of ideas.
-#if 1 // Debug
-  return this->getCoarserLayout2(a_coarEblg, a_fineEblg, a_refRat, a_blockingFactor);
+  bool hasCoarser = false;
+  
+#if EBHelmholtzOpFactoryDebug  
+  DisjointBoxLayout dblCoFi;
+  ProblemDomain domCoFi;
+  bool dumbool;
+  hasCoarser = EBAMRPoissonOp::getCoarserLayouts(dblCoFi,
+						 domCoFi,
+						 a_fineEblg.getDBL(),
+						 a_fineEblg.getEBISL(),
+						 a_fineEblg.getDomain(),
+						 a_refRat,
+						 a_fineEblg.getEBIS(),
+						 a_blockingFactor,
+						 dumbool,
+						 2);
+  if(hasCoarser){
+    a_coarEblg = EBLevelGrid(dblCoFi, domCoFi, 4, a_fineEblg.getEBIS());
+  }
+
+  return hasCoarser;
 #endif
-  bool hasCoarser;
+
 
   // This returns true if the fine grid fully covers the domain. The nature of this makes it
   // always true for the "deeper" multigridlevels,  but not so for the intermediate levels. 
@@ -374,6 +378,14 @@ void EBHelmholtzOpFactory::coarsenCoefficients(LevelData<EBCellFAB>&            
 EBHelmholtzOp* EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bool a_homogeneousOnly) {
   EBHelmholtzOp* mgOp = nullptr;
 
+  ParmParse pp;
+  bool turnOffMG = false;
+  pp.query("turn_off_multigrid", turnOffMG);
+  if(turnOffMG){
+    pout() << "turning off multigrid for EBHelmholtzOpFactory because 'turn_off_multigrid' = true" << endl;
+    return mgOp;
+  }
+  
   const int amrLevel = this->findAmrLevel(a_fineDomain); // Run-time abort if a_fineDomain is not found in anhy amr level. 
   
   const AmrLevelGrids& mgLevelGrids = m_mgLevelGrids[amrLevel];
@@ -517,7 +529,8 @@ EBHelmholtzOp* EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
     refToFine  = m_amrRefRatios[amrLevel];
   }
 
-  const bool hasMGObjects = m_hasMgLevels[amrLevel];
+//  const bool hasMGObjects = m_hasMgLevels[amrLevel];
+  const bool hasMGObjects = false;
   if(hasMGObjects){
     eblgCoarMG = *m_mgLevelGrids[amrLevel][1];
     CH_assert(eblgCoarMG.isDefined());

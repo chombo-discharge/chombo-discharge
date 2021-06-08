@@ -51,11 +51,11 @@ EBMultigridInterpolator::~EBMultigridInterpolator(){
 }
 
 void EBMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar, const Interval a_variables){
-  EBQuadCFInterp::interpolate(a_phiFine, a_phiCoar, a_variables, false);
+  EBQuadCFInterp::interpolate(a_phiFine, a_phiCoar, a_variables);
 }
 
 void EBMultigridInterpolator::coarseFineInterpH(LevelData<EBCellFAB>& a_phiFine, const Interval a_variables){
-  EBQuadCFInterp::interpolate(a_phiFine, m_zeroCoar, a_variables, false);
+  EBQuadCFInterp::interpolate(a_phiFine, m_zeroCoar, a_variables);
 }
 
 #include <CD_NamespaceFooter.H>
