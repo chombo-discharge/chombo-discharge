@@ -12,7 +12,6 @@
   @todo   Check relaxation weights for domain boundary cells, they may be too large..?
   @todo   Review the EBCF code, I'm not sure it's correct...
   @todo   incrementFRCoar should only take the flux along the CF interface rather than all interior cells. 
-  @todo   Remove scratch storage when we're done. 
 */
 
 // Chombo includes
@@ -130,7 +129,6 @@ void EBHelmholtzOp::defineStencils(){
   EBCellFactory cellFact(m_eblg.getEBISL());
   EBFluxFactory fluxFact(m_eblg.getEBISL());
   
-  m_scratch.define(m_eblg.getDBL(), m_nComp, m_ghostPhi, cellFact);
   m_relCoef.define(m_eblg.getDBL(), m_nComp, IntVect::Zero, cellFact);
   m_flux.define(   m_eblg.getDBL(), m_nComp, IntVect::Unit, fluxFact); // Need one ghost cell in order to be able to interpolate. 
 
@@ -940,7 +938,10 @@ void EBHelmholtzOp::interpolateFluxes(EBFaceFAB& a_flux, const Box& a_cellBox, c
 void EBHelmholtzOp::incrementFRCoar(const LevelData<EBCellFAB>& a_phi){
   CH_assert(m_hasFine);
 
-  const Real scale = 1.0; 
+  const Real scale = 1.0;
+
+  LevelData<EBCellFAB>& phi = (LevelData<EBCellFAB>&) a_phi;
+  phi.exchange();
 
   for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit){
     for (int dir = 0; dir < SpaceDim; dir++){

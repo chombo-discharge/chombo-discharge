@@ -575,12 +575,6 @@ protected:
   LevelData<EBCellFAB> m_relCoef;
 
   /*!
-    @brief Scratch data for debugging
-    @todo Remove later. 
-  */
-  LevelData<EBCellFAB> m_scratch;
-
-  /*!
     @brief For holding fluxes
   */
   LevelData<EBFluxFAB> m_flux;
