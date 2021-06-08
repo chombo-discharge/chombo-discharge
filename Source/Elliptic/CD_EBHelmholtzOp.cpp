@@ -514,7 +514,7 @@ void EBHelmholtzOp::applyOpRegular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, co
 }
 
 void EBHelmholtzOp::applyDomainFlux(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBC){
-  MayDay::Warning("EBHelmholtzOp::applyDomainFlux - not implemented");
+  //  MayDay::Warning("EBHelmholtzOp::applyDomainFlux - not implemented");
 }
 
 void EBHelmholtzOp::suppressDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit){
@@ -525,8 +525,10 @@ void EBHelmholtzOp::suppressDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, c
   for (int dir = 0; dir < SpaceDim; dir++){
     for (SideIterator sit; sit.ok(); ++sit){
       const Box ghostBox = adjCellBox(domainBox, dir, sit(), 1); // Strip of cells outside domain.
-
-      // Phi defined over a_cellBox - get the ghost cells outside. 
+      const int s        = sign(flip(sit())); // Make +1 for Side::Lo and -1 otherwise.
+      
+      // Phi defined over a_cellBox - get the ghost in a_phi that lie outside the domain and set them to the value in the cell 
+      // immediately on the inside. 
       Box grownBox = a_cellBox;
       grownBox.growDir(dir, sit(), 1);
       grownBox &= ghostBox;
@@ -534,7 +536,9 @@ void EBHelmholtzOp::suppressDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, c
       // Set the ghost cells to the same value as the next "inside" cell. This will suppress the gradient on the domain faces. 
       for (BoxIterator bit(grownBox); bit.ok(); ++bit){
 	const IntVect iv = bit();
-	regFab(iv, m_comp) = regFab(iv + sign(flip(sit()))*BASISV(dir), m_comp);
+	const IntVect ivNeigh = iv + s*BASISV(dir);
+
+	regFab(iv, m_comp) = regFab(ivNeigh, m_comp);
       }
     }
   }
@@ -556,7 +560,6 @@ void EBHelmholtzOp::applyOpIrregular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, 
     VoFIterator& vofitLo = m_vofIterDomLo[dir][a_dit];    
     for (vofitLo.reset(); vofitLo.ok(); ++vofitLo){
       const VolIndex& vof = vofitLo();
-
       m_domainBc->getFaceFlux(flux, vof, m_comp, a_phi, m_probLo, m_vecDx, dir, Side::Lo, a_dit, 0.0, a_homogeneousPhysBC);
 
       a_Lphi(vof, m_comp) -= flux*m_beta/m_dx;
@@ -909,6 +912,7 @@ void EBHelmholtzOp::incrementFRCoar(const LevelData<EBCellFAB>& a_phi){
 
 void EBHelmholtzOp::incrementFRFine(const LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phi, AMRLevelOp<LevelData<EBCellFAB> >& a_finerOp){
   CH_assert(m_hasFine);
+  
   // Doing the nasty here -- phiFine needs new ghost cells.
   LevelData<EBCellFAB>& phiFine = (LevelData<EBCellFAB>&) a_phiFine;
   EBHelmholtzOp& finerOp        = (EBHelmholtzOp&)       (a_finerOp);

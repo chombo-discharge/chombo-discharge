@@ -457,6 +457,7 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
   EBAMRCellData RHS;
   m_amr->allocate(RHS, m_realm, phase::gas, 1);
   DataOps::setValue(RHS, 0.0);
+  DataOps::setValue(a_phi, 1.0);
 
   Vector<LevelData<EBCellFAB>* > phi;
   Vector<LevelData<EBCellFAB>* > res;
@@ -470,7 +471,7 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
   multigridSolver.m_verbosity=10;
   multigridSolver.init(phi, rhs, finestLevel, 0);
   multigridSolver.setSolverParameters(32, 32, 32, 1, 32, 1.E-10, 1E-60, 1E-60);
-  multigridSolver.solveNoInit(phi, rhs, finestLevel, 0, true, false);
+  multigridSolver.solveNoInit(phi, rhs, finestLevel, 0, false, false);
   multigridSolver.computeAMRResidual(res, phi, rhs, finestLevel, 0);
 
   this->computeElectricField();

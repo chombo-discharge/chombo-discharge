@@ -84,12 +84,12 @@
       
       chf_multido[cellBox;i;j;k]
          lapl = CHF_DTERM[
-     &       bcoX(chf_ix[i+1;j  ;k  ])*(phi(chf_ix[i+1; j  ;  k  ]) - phi(chf_ix[i;  j;  k  ]))
-     &      -bcoX(chf_ix[i  ;j  ;k  ])*(phi(chf_ix[i;   j  ;  k  ]) - phi(chf_ix[i-1;j;  k  ]))*factor;
-     &      +bcoY(chf_ix[i  ;j+1;k  ])*(phi(chf_ix[i;   j+1;  k  ]) - phi(chf_ix[i;  j;  k  ]))
-     &      -bcoY(chf_ix[i  ;j  ;k  ])*(phi(chf_ix[i;   j  ;  k  ]) - phi(chf_ix[i  ;j-1;k  ]))*factor;
-     &      +bcoZ(chf_ix[i  ;j;  k+1])*(phi(chf_ix[i;   j  ;  k+1]) - phi(chf_ix[i;  j;  k  ]))
-     &      -bcoZ(chf_ix[i  ;j  ;k  ])*(phi(chf_ix[i;   j  ;  k  ]) - phi(chf_ix[i  ;j;  k-1]))*factor]
+     &       bcoX(chf_ix[i+1;j  ;k  ]) * (phi(chf_ix[i+1; j  ;  k  ]) - phi(chf_ix[i;  j;  k  ]))
+     &      -bcoX(chf_ix[i  ;j  ;k  ]) * (phi(chf_ix[i;   j  ;  k  ]) - phi(chf_ix[i-1;j;  k  ]))*factor;
+     &      +bcoY(chf_ix[i  ;j+1;k  ]) * (phi(chf_ix[i;   j+1;  k  ]) - phi(chf_ix[i;  j;  k  ]))
+     &      -bcoY(chf_ix[i  ;j  ;k  ]) * (phi(chf_ix[i;   j  ;  k  ]) - phi(chf_ix[i  ;j-1;k  ]))*factor;
+     &      +bcoZ(chf_ix[i  ;j;  k+1]) * (phi(chf_ix[i;   j  ;  k+1]) - phi(chf_ix[i;  j;  k  ]))
+     &      -bcoZ(chf_ix[i  ;j  ;k  ]) * (phi(chf_ix[i;   j  ;  k  ]) - phi(chf_ix[i  ;j;  k-1]))*factor]
 
          Lphi(chf_ix[i;j;k]) = Lphi(chf_ix[i;j;k]) + lapl
       chf_enddo      
