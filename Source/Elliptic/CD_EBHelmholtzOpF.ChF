@@ -8,7 +8,7 @@
 
       integer chf_ddecl[i;j;k]
       integer chf_ddecl[ii;jj;kk]
-      real fac;
+      real_t fac;
 
       chf_dterm[ii = chf_id(idir, 0);
                 jj = chf_id(idir, 1);
@@ -48,9 +48,9 @@
    
       integer chf_ddecl[i;j;k]
       integer chf_ddecl[ioff;joff;koff]
-      real invDx
-      real phiHi
-      real phiLo
+      real_t invDx
+      real_t phiHi
+      real_t phiLo
 
       chf_dterm[
          ioff = chf_id(0,dir);
@@ -77,20 +77,51 @@
      &     chf_box[cellBox])
 
       integer chf_ddecl[i;j;k]
-      real factor
-      real lapl
+      real_t factor
+      real_t lapl
 
       factor = beta/(dx*dx)
       
       chf_multido[cellBox;i;j;k]
          lapl = CHF_DTERM[
      &       bcoX(chf_ix[i+1;j  ;k  ]) * (phi(chf_ix[i+1; j  ;  k  ]) - phi(chf_ix[i;  j;  k  ]))
-     &      -bcoX(chf_ix[i  ;j  ;k  ]) * (phi(chf_ix[i;   j  ;  k  ]) - phi(chf_ix[i-1;j;  k  ]))*factor;
+     &      -bcoX(chf_ix[i  ;j  ;k  ]) * (phi(chf_ix[i;   j  ;  k  ]) - phi(chf_ix[i-1;j;  k  ]));
      &      +bcoY(chf_ix[i  ;j+1;k  ]) * (phi(chf_ix[i;   j+1;  k  ]) - phi(chf_ix[i;  j;  k  ]))
-     &      -bcoY(chf_ix[i  ;j  ;k  ]) * (phi(chf_ix[i;   j  ;  k  ]) - phi(chf_ix[i  ;j-1;k  ]))*factor;
+     &      -bcoY(chf_ix[i  ;j  ;k  ]) * (phi(chf_ix[i;   j  ;  k  ]) - phi(chf_ix[i  ;j-1;k  ]));
      &      +bcoZ(chf_ix[i  ;j;  k+1]) * (phi(chf_ix[i;   j  ;  k+1]) - phi(chf_ix[i;  j;  k  ]))
-     &      -bcoZ(chf_ix[i  ;j  ;k  ]) * (phi(chf_ix[i;   j  ;  k  ]) - phi(chf_ix[i  ;j;  k-1]))*factor]
+     &      -bcoZ(chf_ix[i  ;j  ;k  ]) * (phi(chf_ix[i;   j  ;  k  ]) - phi(chf_ix[i  ;j;  k-1]))]
 
-         Lphi(chf_ix[i;j;k]) = Lphi(chf_ix[i;j;k]) + lapl
+         Lphi(chf_ix[i;j;k]) = Lphi(chf_ix[i;j;k]) + lapl*factor
       chf_enddo      
+      end
+
+      subroutine helmholtzapplydomainflux(
+     &     chf_fra1[phi],
+     &     chf_const_fra1[flux],
+     &     chf_const_fra1[bco],
+     &     chf_const_real[dx],
+     &     chf_const_int[side],
+     &     chf_const_int[dir],		                    
+     &     chf_box[cellbox])
+
+
+      integer chf_ddecl[i;   j;   k   ]
+      integer chf_ddecl[ioff;joff;koff]
+
+      real_t scaledflux
+
+      chf_dterm[
+        ioff = chf_id(0,dir);
+        joff = chf_id(1, dir);
+        koff = chf_id(2, dir)]
+
+      chf_multido[cellbox; i;j;k]
+         if(side .eq. 1) then
+            scaledflux         = flux(chf_ix[i-ioff; j-joff; k-koff])/bco(chf_ix[i-ioff; j-joff; k-koff]) 	 
+            phi(chf_ix[i;j;k]) = phi (chf_ix[i-ioff; j-joff; k-koff]) + scaledflux*dx
+         else
+            scaledflux         = flux(chf_ix[i+ioff; j+joff; k+koff])/bco(chf_ix[i+ioff; j+joff; k+koff]) 	 
+            phi(chf_ix[i;j;k]) = phi( chf_ix[i+ioff; j+joff; k+koff]) - scaledflux*dx	 
+         endif
+      chf_enddo
       end

@@ -121,12 +121,14 @@ public:
     @brief Apply operator in regular cells.
     @param[in]
   */
-  void applyOpRegular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBc);
+  void applyOpRegular(EBCellFAB& a_Lphi, EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBc);
 
   /*!
     @brief Apply domain flux. 
+    @note This sets the ghost cells of phi to phi(i-1) = phi(i) + F*dx/bco such that when we take the centered difference we get
+          -bco*(phi(i) - phi(i-1))/dx = F. 
   */
-  void applyDomainFlux(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBc);
+  void applyDomainFlux(EBCellFAB& a_Lphi, EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBc);
 
   /*!
     @brief Fuck those ghost cells in particular
@@ -645,7 +647,7 @@ protected:
     @param[out] a_phiCoar           Coarse-level phi. If you have a coar this 
     @param[in]  a_homogeneousPhysBC Use homogeneous physical BCs or not
     @param[in]  a_homogeneousCFBC   Use homogeneous coarse-fine bcs or not
-    @note This routine does a nasty cast of a_phi in order to work the ghost cells. 
+    @note a_phi is not really const and we do a nasty cast. Leaving it as const because we only modify the ghost cells!
   */
   void applyOp(LevelData<EBCellFAB>&             a_Lphi,
 	       const LevelData<EBCellFAB>&       a_phi,

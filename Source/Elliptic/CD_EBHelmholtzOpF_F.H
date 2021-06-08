@@ -138,6 +138,43 @@ inline void FORTRAN_NAME(inlineLAPLACIANINPLACE, inlineLAPLACIANINPLACE)(
 }
 #endif  // GUARDLAPLACIANINPLACE 
 
+#ifndef GUARDHELMHOLTZAPPLYDOMAINFLUX 
+#define GUARDHELMHOLTZAPPLYDOMAINFLUX 
+// Prototype for Fortran procedure helmholtzapplydomainflux ...
+//
+void FORTRAN_NAME( HELMHOLTZAPPLYDOMAINFLUX ,helmholtzapplydomainflux )(
+      CHFp_FRA1(phi)
+      ,CHFp_CONST_FRA1(flux)
+      ,CHFp_CONST_FRA1(bco)
+      ,CHFp_CONST_REAL(dx)
+      ,CHFp_CONST_INT(side)
+      ,CHFp_CONST_INT(dir)
+      ,CHFp_BOX(cellbox) );
+
+#define FORT_HELMHOLTZAPPLYDOMAINFLUX FORTRAN_NAME( inlineHELMHOLTZAPPLYDOMAINFLUX, inlineHELMHOLTZAPPLYDOMAINFLUX)
+#define FORTNT_HELMHOLTZAPPLYDOMAINFLUX FORTRAN_NAME( HELMHOLTZAPPLYDOMAINFLUX, helmholtzapplydomainflux)
+
+inline void FORTRAN_NAME(inlineHELMHOLTZAPPLYDOMAINFLUX, inlineHELMHOLTZAPPLYDOMAINFLUX)(
+      CHFp_FRA1(phi)
+      ,CHFp_CONST_FRA1(flux)
+      ,CHFp_CONST_FRA1(bco)
+      ,CHFp_CONST_REAL(dx)
+      ,CHFp_CONST_INT(side)
+      ,CHFp_CONST_INT(dir)
+      ,CHFp_BOX(cellbox) )
+{
+ CH_TIMELEAF("FORT_HELMHOLTZAPPLYDOMAINFLUX");
+ FORTRAN_NAME( HELMHOLTZAPPLYDOMAINFLUX ,helmholtzapplydomainflux )(
+      CHFt_FRA1(phi)
+      ,CHFt_CONST_FRA1(flux)
+      ,CHFt_CONST_FRA1(bco)
+      ,CHFt_CONST_REAL(dx)
+      ,CHFt_CONST_INT(side)
+      ,CHFt_CONST_INT(dir)
+      ,CHFt_BOX(cellbox) );
+}
+#endif  // GUARDHELMHOLTZAPPLYDOMAINFLUX 
+
 }
 
 #endif

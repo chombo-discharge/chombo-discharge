@@ -471,12 +471,12 @@ void EBHelmholtzOp::applyOp(LevelData<EBCellFAB>&             a_Lphi,
     const Box cellBox = dbl[dit()];
     
     // Now do the terms with beta*phi
-    this->applyOpRegular(  a_Lphi[dit()], a_phi[dit()], cellBox, dit(), a_homogeneousPhysBC);
-    this->applyOpIrregular(a_Lphi[dit()], a_phi[dit()], cellBox, dit(), a_homogeneousPhysBC); // Overwrites result in irregular cells. 
+    this->applyOpRegular(  a_Lphi[dit()], phi[dit()], cellBox, dit(), a_homogeneousPhysBC);
+    this->applyOpIrregular(a_Lphi[dit()], phi[dit()], cellBox, dit(), a_homogeneousPhysBC); // Overwrites result in irregular cells. 
   }
 }
 
-void EBHelmholtzOp::applyOpRegular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBC){
+void EBHelmholtzOp::applyOpRegular(EBCellFAB& a_Lphi, EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBC){
   
   // Alpha term
   a_Lphi.setVal(0.0);
@@ -502,7 +502,7 @@ void EBHelmholtzOp::applyOpRegular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, co
   }
 
   // Fill the ghost cells outside the domain so that we don't get an extra flux from the domain side. 
-  this->suppressDomainFlux((EBCellFAB&) a_phi, a_cellBox, a_dit);
+  //  this->suppressDomainFlux((EBCellFAB&) a_phi, a_cellBox, a_dit);
   FORT_LAPLACIANINPLACE(CHF_FRA1(Lphi, m_comp),
 			CHF_CONST_FRA1(phi, m_comp),
 			CHF_CONST_FRA1((*bcoef[0]), m_comp),
@@ -513,8 +513,63 @@ void EBHelmholtzOp::applyOpRegular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, co
 			CHF_BOX(a_cellBox));
 }
 
-void EBHelmholtzOp::applyDomainFlux(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBC){
-  //  MayDay::Warning("EBHelmholtzOp::applyDomainFlux - not implemented");
+void EBHelmholtzOp::applyDomainFlux(EBCellFAB& a_Lphi, EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBC){
+  // TLDR: While we're developing this operator I'm resuing the old BC classes. This routine is weird because the domain bc needs a cell-centered flux
+  //       box, so that's what all the shifting is about.
+  //
+  //       I am leaving both a_Lphi and a_phi as options here because we may want to fill a_Lphi directly so as to avoid the current division-by-B in
+  //       the Fortran kernels. 
+
+  BaseFab<Real>& phiFAB = a_phi.getSingleValuedFAB();
+  
+  for (int dir = 0; dir < SpaceDim; dir++){
+
+    Box loBox;
+    Box hiBox;
+    int hasLo;
+    int hasHi;
+    EBArith::loHi(loBox, hasLo, hiBox, hasHi, m_eblg.getDomain(), a_cellBox, dir);
+    
+    if(hasLo == 1){
+      int side = -1;
+      Box lbox = loBox;
+      lbox.shift(dir, -1);
+      FArrayBox faceFlux(loBox, m_nComp);
+      m_domainBc->setCoef(m_eblg, m_beta, m_Bcoef);
+      m_domainBc->getFaceFlux(faceFlux, a_phi.getSingleValuedFAB(), m_probLo, m_vecDx, dir, Side::Lo, a_dit, 0.0, a_homogeneousPhysBC);
+
+      BaseFab<Real>& bco = (*m_Bcoef)[a_dit][dir].getSingleValuedFAB();
+      bco.shiftHalf(dir, 1);
+      FORT_HELMHOLTZAPPLYDOMAINFLUX(CHF_FRA1(phiFAB, m_comp),
+      				    CHF_CONST_FRA1(faceFlux, m_comp),
+      				    CHF_CONST_FRA1(bco,m_comp),
+      				    CHF_CONST_REAL(m_dx),
+				    CHF_CONST_INT(side),
+				    CHF_CONST_INT(dir),
+				    CHF_BOX(lbox));
+      bco.shiftHalf(dir, -1);
+    }
+
+    if(hasHi == 1){
+      int side = 1;
+      Box hbox = hiBox;
+      hbox.shift(dir, 1);
+      FArrayBox faceFlux(hiBox, m_nComp);
+      m_domainBc->setCoef(m_eblg, m_beta, m_Bcoef);
+      m_domainBc->getFaceFlux(faceFlux, a_phi.getSingleValuedFAB(), m_probLo, m_vecDx, dir, Side::Hi, a_dit, 0.0, a_homogeneousPhysBC);
+
+      BaseFab<Real>& bco     = (*m_Bcoef)[a_dit][dir].getSingleValuedFAB();
+      bco.shiftHalf(dir, -1);
+      FORT_HELMHOLTZAPPLYDOMAINFLUX(CHF_FRA1(phiFAB, m_comp),
+      				    CHF_CONST_FRA1(faceFlux, m_comp),
+      				    CHF_CONST_FRA1(bco,m_comp),
+      				    CHF_CONST_REAL(m_dx),
+				    CHF_CONST_INT(side),
+				    CHF_CONST_INT(dir),
+				    CHF_BOX(hbox));
+      bco.shiftHalf(dir, 1);
+    }
+  }
 }
 
 void EBHelmholtzOp::suppressDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit){
