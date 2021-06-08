@@ -243,7 +243,7 @@ unsigned int EBHelmholtzOp::orderOfAccuracy(void) const {
 }
 
 void EBHelmholtzOp::enforceCFConsistency(LevelData<EBCellFAB>& a_coarCorr, const LevelData<EBCellFAB>& a_fineCorr){
-  m_coarAve->average(a_coarCorr, a_fineCorr, a_coarCorr.interval());
+  //  m_coarAve->average(a_coarCorr, a_fineCorr, a_coarCorr.interval());
 }
 
 void EBHelmholtzOp::setAlphaAndBeta(const Real& a_alpha, const Real& a_beta) {
@@ -264,7 +264,7 @@ void EBHelmholtzOp::preCond(LevelData<EBCellFAB>& a_corr, const LevelData<EBCell
   EBLevelDataOps::assign(a_corr, a_residual);
   EBLevelDataOps::scale(a_corr,  m_relCoef);
 
-  this->relax(a_corr, a_residual, 25);
+  this->relax(a_corr, a_residual, 40);
 }
 
 void EBHelmholtzOp::applyOp(LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_phi, bool a_homogeneousPhysBC) {
@@ -940,24 +940,16 @@ void EBHelmholtzOp::incrementFRCoar(const LevelData<EBCellFAB>& a_phi){
 
   const Real scale = 1.0;
 
-  LevelData<EBCellFAB>& phi = (LevelData<EBCellFAB>&) a_phi;
-  phi.exchange();
-
   for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit){
     for (int dir = 0; dir < SpaceDim; dir++){
       EBFaceFAB& flux   = m_flux[dit()][dir];
-      flux.setVal(0.0);
       
       const Box cellBox = m_eblg.getDBL()[dit()];
       for (SideIterator sit; sit.ok(); ++sit){
 
-	// Get the strip of cells immediately on the inside of the cellbox. 
-	Box stripBox = adjCellBox(cellBox, dir, sit(), 1); // On the outside of cellBox
-	stripBox.shift(dir, sign(flip(sit())));            // Make it on the inside.
-
 	// Computes fluxes for all faces oriented in +/- dir, but which are not boundary faces. Restrict the
-	// calculation to stripBox
-	this->getFaceCentroidFlux(flux, a_phi[dit()], stripBox, dit(), dir);
+	// calculation to stripBox. Must do this for all faces because the CF interface does not align with a coarse box. 
+	this->getFaceCentroidFlux(flux, a_phi[dit()], cellBox, dit(), dir);
 
 	// Increment flux register, recall that beta and the b-coefficient are included in getFaceCentroidFlux. 
 	m_fluxReg->incrementCoarseBoth(flux, scale, dit(), Interval(m_comp, m_comp), dir, sit());
@@ -982,16 +974,16 @@ void EBHelmholtzOp::incrementFRFine(const LevelData<EBCellFAB>& a_phiFine, const
   for (DataIterator dit(m_eblgFine.getDBL()); dit.ok(); ++dit){
     for (int dir = 0; dir < SpaceDim; dir++){
       EBFaceFAB& flux   = fineFlux[dit()][dir];
-      flux.setVal(0.0);
       
       const Box cellBox = m_eblgFine.getDBL()[dit()];
       for (SideIterator sit; sit.ok(); ++sit){
 
+	// The CF interface always ends at the boundary of a fine-level grid box, so we can run the computation for
+	// the subset of cells that align with the CF. 
 	Box stripBox = adjCellBox(cellBox, dir, sit(), 1);
 	stripBox.shift(dir, sign(flip(sit())));
 
-	// Computes fluxes for all faces oriented in +/- dir, but which are not boundary faces. Restrict the
-	// computation to stripBox
+	// Computes fluxes for all faces oriented in +/- dir, but which are not boundary faces. 
 	finerOp.getFaceCentroidFlux(flux, phiFine[dit()], stripBox, dit(), dir);
 
 	// Increment flux register, recall that beta and the b-coefficient are included in getFaceCentroidFlux. 

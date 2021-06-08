@@ -826,6 +826,17 @@ protected:
 	      const LevelData<EBCellFAB>&        a_phi,
 	      AMRLevelOp<LevelData<EBCellFAB> >& a_finerOp);
 
+private:
+
+  /*!
+    @brief Routines that I'm planning to get rid of...
+  */
+  void applyHomogeneousCFBCs(LevelData<EBCellFAB>& a_phi);
+
+  /*!
+    @brief Routines that I'm planning to get rid of...
+  */
+  void applyHomogeneousCFBCs(EBCellFAB& a_phi, const DataIndex& a_dit, const int a_dir, const Side::LoHiSide a_side);
 };
 
 #include <CD_NamespaceFooter.H>

@@ -61,7 +61,7 @@
       invDx = 1./dx
       
       chf_multido[facebox;i;j;k]
-         regflux(chf_ix[i;j;k]) = bco(chf_ix[i;j;k]) * invDx *(phi(chf_ix[i;j;k]) - phi(chf_ix[i-ioff; j-joff; k-koff]))
+         regflux(chf_ix[i;j;k]) = bco(chf_ix[i;j;k]) * invDx * (phi(chf_ix[i;j;k]) - phi(chf_ix[i-ioff; j-joff; k-koff]))
       chf_enddo
 
       end

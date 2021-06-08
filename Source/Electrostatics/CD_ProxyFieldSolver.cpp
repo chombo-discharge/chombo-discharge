@@ -474,6 +474,8 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
   multigridSolver.solveNoInit(phi, rhs, finestLevel, 0, false, false);
   multigridSolver.computeAMRResidual(res, phi, rhs, finestLevel, 0);
 
+  m_amr->averageDown(a_phi, m_realm, phase::gas);
+  m_amr->interpGhost(a_phi, m_realm, phase::gas);
   this->computeElectricField();
   this->writePlotFile();
 }
