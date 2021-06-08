@@ -821,6 +821,10 @@ protected:
 	      const LevelData<EBCellFAB>&        a_phi,
 	      AMRLevelOp<LevelData<EBCellFAB> >& a_finerOp);
 
+
+private:
+
+  void applyHomogeneousCFBCs(LevelData<EBCellFAB>& a_phi);
 };
 
 #include <CD_NamespaceFooter.H>

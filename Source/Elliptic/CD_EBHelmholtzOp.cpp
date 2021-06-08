@@ -125,8 +125,8 @@ void EBHelmholtzOp::defineStencils(){
   EBCellFactory cellFact(m_eblg.getEBISL());
   EBFluxFactory fluxFact(m_eblg.getEBISL());
   
-  m_relCoef.define(m_eblg.getDBL(), m_nComp, IntVect::Zero, cellFact);
-  m_flux.define(   m_eblg.getDBL(), m_nComp, IntVect::Unit, fluxFact); // Need one ghost cell in order to be able to interpolate. 
+  m_relCoef.define(m_eblg.getDBL(), m_nComp, IntVect::Zero, cellFact); // Don't need ghost cells for this one. 
+  m_flux.define(   m_eblg.getDBL(), m_nComp, IntVect::Unit, fluxFact); // One ghost cell needed for face center to face centroid interpolation. 
 
   m_opEBStencil.define(    m_eblg.getDBL());
   m_vofIterIrreg.define(   m_eblg.getDBL());
@@ -148,7 +148,7 @@ void EBHelmholtzOp::defineStencils(){
     for (SideIterator sit; sit.ok(); ++sit){
       Box domainBox = m_eblg.getDomain().domainBox();
       Box sidebox   = adjCellBox(domainBox, dir, sit(), 1);
-      sidebox.shift(dir, sign(flip(sit())));
+      sidebox.shift(dir, -sign(sit()));
       m_sideBox.emplace(std::make_pair(dir, sit()), sidebox);
     }
   }
@@ -159,7 +159,7 @@ void EBHelmholtzOp::defineStencils(){
   m_domainBc->setCoef(m_eblg, fakeBeta, m_Bcoef);
   m_ebBc->setCoef(    m_eblg, fakeBeta, m_BcoefIrreg);
   m_ebBc->define((*m_eblg.getCFIVS()), 1./m_dx);
-  const LayoutData<BaseIVFAB<VoFStencil> >* const ebFluxStencil = m_ebBc->getFluxStencil(m_nComp);
+  const LayoutData<BaseIVFAB<VoFStencil> >* const ebFluxStencil = m_ebBc->getFluxStencil(m_comp);
 
   // Define everything
   for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit){
@@ -226,7 +226,7 @@ void EBHelmholtzOp::defineStencils(){
     }
 
     m_opEBStencil[dit()] = RefCountedPtr<EBStencil>(new EBStencil(m_vofIterIrreg[dit()].getVector(), opStencil, m_eblg.getDBL()[dit()],
-							   m_eblg.getEBISL()[dit()], m_ghostPhi, m_ghostRhs, m_comp, m_nComp, true));
+							   m_eblg.getEBISL()[dit()], m_ghostPhi, m_ghostRhs, m_comp, true));
   }
     
   // Compute the alpha-weight and relaxation coefficient. 
@@ -253,7 +253,7 @@ void EBHelmholtzOp::setAlphaAndBeta(const Real& a_alpha, const Real& a_beta) {
 
 void EBHelmholtzOp::residual(LevelData<EBCellFAB>& a_residual, const LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_rhs, bool a_homogeneousPhysBC) {
   this->applyOp(a_residual, a_phi, nullptr, a_homogeneousPhysBC, true); // Only homogeneous CFBC. This shouldn't break because we shouldn't have a coar level.
-  this->axby(a_residual, a_residual, a_rhs, -1.0, 1.0);              // residual = rhs - L(phi). 
+  this->axby(a_residual, a_residual, a_rhs, -1.0, 1.0);                 // residual = rhs - L(phi). 
 }
 
 void EBHelmholtzOp::preCond(LevelData<EBCellFAB>& a_corr, const LevelData<EBCellFAB>& a_residual) {
@@ -318,7 +318,7 @@ void EBHelmholtzOp::createCoarser(LevelData<EBCellFAB>& a_coarse, const LevelDat
 
 void EBHelmholtzOp::createCoarsened(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const int& a_refRat) {
   CH_assert(m_hasCoar);
-#if 1 // What I want
+#if 0 // What I want
   EBCellFactory factCoFi(m_eblgCoFi.getEBISL());
   a_lhs.define(m_eblgCoFi.getDBL(), a_rhs.nComp(), a_rhs.ghostVect(), factCoFi);
 #else // What i have to try
@@ -343,13 +343,14 @@ void EBHelmholtzOp::restrictResidual(LevelData<EBCellFAB>& a_resCoar, LevelData<
   // Compute the residual on this level first. Make a temporary for that.
   LevelData<EBCellFAB> res;
   this->create(res, a_phi);
+  this->setToZero(res);
   this->residual(res, a_phi, a_rhs, true);
 
   m_ebAverageMG.average(a_resCoar, res, a_resCoar.interval());
 }
 
 void EBHelmholtzOp::prolongIncrement(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_correctCoarse) {
-  m_ebInterpMG.pwcInterp(a_phi, a_correctCoarse, a_phi.interval());
+  m_ebInterpMG.pwcInterp(a_phi, a_correctCoarse, Interval(m_comp, m_comp));
 }
 
 int EBHelmholtzOp::refToCoarser() {
@@ -426,9 +427,12 @@ void EBHelmholtzOp::AMRRestrict(LevelData<EBCellFAB>&       a_residualCoarse,
   LevelData<EBCellFAB> resThisLevel;
   this->create(resThisLevel, a_residual);
   this->setToZero(resThisLevel);
+
+  const bool homogeneousPhysBC = true;
+  const bool homogeneousCFBC   = false;
   
   // We should average a_residual - L(correction, coarCorrection).
-  this->applyOp(resThisLevel, a_correction, &a_coarseCorrection, true, false);
+  this->applyOp(resThisLevel, a_correction, &a_coarseCorrection, homogeneousPhysBC, homogeneousCFBC);
   this->incr(resThisLevel, a_residual, -1.0);
   this->scale(resThisLevel, -1.0);
 
@@ -645,6 +649,7 @@ void EBHelmholtzOp::applyOpNoBoundary(LevelData<EBCellFAB>& a_Lphi, const LevelD
 }
 
 void EBHelmholtzOp::fillGrad(const LevelData<EBCellFAB>& a_phi){
+  MayDay::Warning("EBHelmholtzOp::fillGrad - not implemented (yet)");
 }
 
 void EBHelmholtzOp::getFlux(EBFluxFAB&                  a_flux,
@@ -656,7 +661,8 @@ void EBHelmholtzOp::getFlux(EBFluxFAB&                  a_flux,
 }
 
 void EBHelmholtzOp::homogeneousCFInterp(LevelData<EBCellFAB>& a_phi){
-  if(m_hasCoar) m_interpolator->coarseFineInterpH(a_phi, a_phi.interval());
+  //  if(m_hasCoar) m_interpolator->coarseFineInterpH(a_phi, a_phi.interval());
+  if(m_hasCoar) this->applyHomogeneousCFBCs(a_phi);
 }
 
 void EBHelmholtzOp::inhomogeneousCFInterp(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar){
@@ -742,6 +748,7 @@ void EBHelmholtzOp::gsrbColor(LevelData<EBCellFAB>& a_phi, const LevelData<EBCel
     if(loIV <= hiIV){
       const Box colorBox(loIV, hiIV);
 
+      // Note - replace this with our own kernel so we can develop code without coupling too hard to Chombo. 
       FORT_GSRBEBCO(CHF_FRA1(phiReg, m_comp),
 		    CHF_CONST_FRA1(LphiReg, m_comp),
 		    CHF_CONST_FRA1(rhsReg, m_comp),
@@ -798,14 +805,14 @@ void EBHelmholtzOp::computeRelaxationCoefficient(){
 
     // Set relaxation coefficient = aco*alpha
     m_relCoef[dit()].setVal(0.0);
-    m_relCoef[dit()].plus((*m_Acoef)[dit()], m_comp, m_comp, m_nComp);
+    m_relCoef[dit()] += (*m_Acoef)[dit()];
     m_relCoef[dit()] *= m_alpha;
 
     // Add in the diagonal term for the variable-coefficient Laplacian operator
     BaseFab<Real>& regRel = m_relCoef[dit()].getSingleValuedFAB();
     for (int dir = 0; dir < SpaceDim; dir++){
 
-      // This adds -(beta*bcoef(loFace) + beta*bcoef(hiFace))/dx^2 to the relaxation term.
+      // This adds -beta*(bcoef(loFace) + bcoef(hiFace))/dx^2 to the relaxation term.
       BaseFab<Real>& regBcoDir = (*m_Bcoef)[dit()][dir].getSingleValuedFAB();
       FORT_ADDBCOTERMTOINVRELCOEF(CHF_FRA1(regRel, m_comp),
 				  CHF_CONST_FRA1(regBcoDir, m_comp),
@@ -834,7 +841,7 @@ void EBHelmholtzOp::computeRelaxationCoefficient(){
   // Add safety factors for relaxations 
   switch(m_relaxationMethod){
   case RelaxationMethod::Jacobi: 
-    this->scale(m_relCoef, 0.75); 
+    this->scale(m_relCoef, 0.5); 
     break;
   default:
     break;
@@ -882,7 +889,7 @@ VoFStencil EBHelmholtzOp::getDivFStencil(const VolIndex& a_vof, const DataIndex&
       
       Vector<FaceIndex> faces = ebisbox.getFaces(a_vof, dir, sit());
       for (auto f : faces.stdVector()){
-	VoFStencil centroidFluxStencil = this->getFaceCentroidFluxStencil(f, a_dit);
+	VoFStencil centroidFluxStencil = this->getFaceCentroidFluxStencil(f, a_dit); // This includes multiplication by bco. 
 	centroidFluxStencil *= sign(sit())*ebisbox.areaFrac(f)/m_dx;
 
 	divStencil += centroidFluxStencil;
@@ -923,7 +930,8 @@ void EBHelmholtzOp::getFaceCenteredFlux(EBFaceFAB&       a_fluxCenter,
   const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
   const EBGraph& ebgraph = ebisbox.getEBGraph();
     
-  // Make a face box which has no boundary faces. 
+  // Make a face box which has no boundary faces.
+  // R.M comment: I don't think this is necessary....
   Box faceBox = a_cellBox;
   faceBox.grow(a_dir, 1);
   faceBox &= m_eblg.getDomain();
@@ -969,13 +977,13 @@ void EBHelmholtzOp::interpolateFluxes(EBFaceFAB& a_flux, const Box& a_cellBox, c
 
   // Interpolate flux to centroid.
   for (FaceIterator faceIt(ivs, ebgraph, a_dir, FaceStop::SurroundingNoBoundary); faceIt.ok(); ++faceIt){
-    const FaceIndex& face = faceIt();
+    const FaceIndex& face      = faceIt();
     const FaceStencil& stencil = faceStencils(face, m_comp);
 
 
     Real centroidFlux = 0.0;
     for (int i = 0; i < stencil.size(); i++){
-      centroidFlux += stencil.weight(i)*a_flux(face, m_comp);
+      centroidFlux += stencil.weight(i)*a_flux(stencil.face(i), m_comp);
     }
 
     interpol(face, m_comp) = centroidFlux;
@@ -1058,6 +1066,89 @@ void EBHelmholtzOp::reflux(LevelData<EBCellFAB>&              a_Lphi,
   this->incrementFRFine(a_phiFine, a_phi, a_finerOp);
 
   m_fluxReg->reflux(a_Lphi, a_Lphi.interval(), 1./m_dx);
+}
+
+void EBHelmholtzOp::applyHomogeneousCFBCs(LevelData<EBCellFAB>& a_phi){
+  for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit){
+    for (int dir = 0; dir < SpaceDim; dir++){
+      for (SideIterator sit; sit.ok(); ++sit){
+
+	CFIVS cfivs(m_eblg.getDomain(), m_eblg.getDBL()[dit()], m_eblg.getDBL(), dir, sit());
+
+	const IntVectSet& ivs = cfivs.getFineIVS();
+	if(!ivs.isEmpty()){
+	  
+	  Real halfdxcoar = (m_dx*m_refToCoar)/2.0;
+	  Real halfdxfine = m_dx/2.0;
+	  Real xg = halfdxcoar -   halfdxfine;
+	  Real xc = halfdxcoar +   halfdxfine;
+	  Real xf = halfdxcoar + 3*halfdxfine;
+	  Real hf = m_dx;
+	  Real denom = xf*xc*hf;
+
+	  const EBISBox& ebisBox = m_eblg.getEBISL()[dit()];
+	  const EBGraph& ebgraph = ebisBox.getEBGraph();
+	      
+	  for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	    const VolIndex& VoFGhost = vofit();
+
+	    IntVect ivGhost  = VoFGhost.gridIndex();
+
+	    Vector<VolIndex> farVoFs;
+	    Vector<VolIndex> closeVoFs = ebisBox.getVoFs(VoFGhost, dir, flip(sit()), 1);
+	    
+	    bool hasClose = (closeVoFs.size() > 0);
+	    bool hasFar = false;
+	    Real phic = 0.0;
+	    Real phif = 0.0;
+	    
+	    if (hasClose){
+	      const int& numClose = closeVoFs.size();
+	      for (int iVof=0;iVof<numClose;iVof++){
+		const VolIndex& vofClose = closeVoFs[iVof];
+		phic += a_phi[dit()](vofClose,0);
+	      }
+	      phic /= Real(numClose);
+
+	      farVoFs = ebisBox.getVoFs(VoFGhost, dir, flip(sit()), 2);
+	      hasFar   = (farVoFs.size()   > 0);
+	      if (hasFar)
+		{
+		  const int& numFar = farVoFs.size();
+		  for (int iVof=0;iVof<numFar;iVof++)
+		    {
+		      const VolIndex& vofFar = farVoFs[iVof];
+		      phif += a_phi[dit()](vofFar,0);
+		    }
+		  phif /= Real(numFar);
+		}
+	    }
+
+	    Real phiGhost;
+	    if (hasClose && hasFar)
+	      {
+		// quadratic interpolation  phi = ax^2 + bx + c
+		Real A = (phif*xc - phic*xf)/denom;
+		Real B = (phic*hf*xf - phif*xc*xc + phic*xf*xc)/denom;
+
+		phiGhost = A*xg*xg + B*xg;
+	      }
+	    else if (hasClose)
+	      {
+		//linear interpolation
+		Real slope =  phic/xc;
+		phiGhost   =  slope*xg;
+	      }
+	    else
+	      {
+		phiGhost = 0.0; //nothing to interpolate from
+	      }
+	    a_phi[dit()](VoFGhost, m_comp) = phiGhost;
+	  }
+	}
+      }
+    }
+  }
 }
 
 #include <CD_NamespaceFooter.H>

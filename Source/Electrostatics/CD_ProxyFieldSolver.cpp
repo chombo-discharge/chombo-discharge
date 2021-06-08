@@ -407,7 +407,7 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
     }
   }
 
-  const Real alpha = 0.0;
+  const Real alpha = 1.0;
   const Real beta  = 1.0;
 
   EBAMRCellData Aco;
@@ -430,7 +430,7 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
 
   // Set the bottom domain. Don't go below 8x cells in any direction
   ProblemDomain bottomDomain = m_amr->getDomains()[0];
-  while(bottomDomain.domainBox().longside() >= 16){
+  while(bottomDomain.domainBox().shortside() >= 4){
     bottomDomain.coarsen(2);
   }
 
@@ -478,9 +478,7 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
   const Real phiResid = multigridSolver.computeAMRResidual(res, phi, rhs, finestLevel, 0);
   if(procID() == 0) std::cout << "solveHelm initial resid = " << phiResid << std::endl;
 
-  
-
-  multigridSolver.setSolverParameters(16, 16, 16, 1, 16, 1.E-10, 1E-60, 1E-60);
+  multigridSolver.setSolverParameters(16, 16, 16, 1, 32, 1.E-10, 1E-60, 1E-60);
   multigridSolver.solveNoInit(phi, rhs, finestLevel, 0, true, false);
   multigridSolver.computeAMRResidual(res, phi, rhs, finestLevel, 0);
 
