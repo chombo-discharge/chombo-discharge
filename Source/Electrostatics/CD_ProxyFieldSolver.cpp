@@ -44,9 +44,9 @@ bool ProxyFieldSolver::solve(MFAMRCellData&       a_potential,
   EBAMRCellData gasData = m_amr->alias(phase::gas, a_potential);
   EBAMRCellData gasResi = m_amr->alias(phase::gas, m_residue);
 
-  this->setupHelmholtz(); // Just for testing, right now. 
+  this->solveHelmholtz(gasData, gasResi);
 
-  this->solveOnePhase(gasData, gasResi);
+  //  this->solveOnePhase(gasData, gasResi);
   
   return true;
 }
@@ -383,7 +383,7 @@ void ProxyFieldSolver::coarsenConservative(EBAMRCellData& a_phi){
   m_amr->averageDown(a_phi, m_realm, phase::gas);
 }
 
-void ProxyFieldSolver::setupHelmholtz(){
+void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res){
 
   const int finestLevel = m_amr->getFinestLevel();
   
@@ -420,7 +420,7 @@ void ProxyFieldSolver::setupHelmholtz(){
 
   auto ebbcFactory   = RefCountedPtr<DirichletConductivityEBBCFactory>     (new DirichletConductivityEBBCFactory());
   auto domainFactory = RefCountedPtr<DirichletConductivityDomainBCFactory> (new DirichletConductivityDomainBCFactory());
-  ebbcFactory  ->setValue(1);
+  ebbcFactory  ->setValue(1.0);
   ebbcFactory  ->setOrder(1);
   domainFactory->setValue(-1);
 
@@ -453,37 +453,28 @@ void ProxyFieldSolver::setupHelmholtz(){
   BiCGStabSolver<LevelData<EBCellFAB> > bicgstab;
   AMRMultiGrid<LevelData<EBCellFAB> > multigridSolver;
 
-
-
-
-
-  EBAMRCellData PHI;
+  // Set an empty right-hand side
   EBAMRCellData RHS;
-
-  Vector<LevelData<EBCellFAB>* > phi;
-  Vector<LevelData<EBCellFAB>* > rhs; 
-  
-  m_amr->allocate(PHI, m_realm, phase::gas, 1);
   m_amr->allocate(RHS, m_realm, phase::gas, 1);
-
-  m_amr->alias(phi, PHI);
-  m_amr->alias(rhs, RHS);
-
-  DataOps::setValue(PHI, 0.0);
   DataOps::setValue(RHS, 0.0);
 
-  pout() << "doing helm solve" << endl;
+  Vector<LevelData<EBCellFAB>* > phi;
+  Vector<LevelData<EBCellFAB>* > res;
+  Vector<LevelData<EBCellFAB>* > rhs; 
+
+  m_amr->alias(phi, a_phi);
+  m_amr->alias(res, a_res);
+  m_amr->alias(rhs, RHS);
+
   multigridSolver.define(m_amr->getDomains()[0], fact, &bicgstab, 1 + finestLevel);
+  multigridSolver.m_verbosity=10;
   multigridSolver.init(phi, rhs, finestLevel, 0);
   multigridSolver.setSolverParameters(32, 32, 32, 1, 32, 1.E-10, 1E-60, 1E-60);
-  multigridSolver.m_verbosity=10;
+  multigridSolver.solveNoInit(phi, rhs, finestLevel, 0, true, false);
+  multigridSolver.computeAMRResidual(res, phi, rhs, finestLevel, 0);
 
-  const Real res = multigridSolver.computeAMRResidual(phi, rhs, finestLevel, 0);
-
-  multigridSolver.solveNoInit(phi, rhs, finestLevel, 0, false, false);
-  pout() << "end helm solve" << endl;
-
-  if(procID() == 0) std::cout << "helmholtz zero residual = " << res << std::endl;
+  this->computeElectricField();
+  this->writePlotFile();
 }
 
 #include <CD_NamespaceFooter.H>

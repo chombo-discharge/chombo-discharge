@@ -140,7 +140,6 @@ void EBHelmholtzOp::defineStencils(){
   m_alphaDiagWeight.define(m_eblg.getDBL());
   m_betaDiagWeight.define( m_eblg.getDBL());
 
-
   for (int dir = 0; dir < SpaceDim; dir++){
     m_vofIterDomLo [dir].define(m_eblg.getDBL());
     m_vofIterDomHi [dir].define(m_eblg.getDBL());
@@ -166,7 +165,7 @@ void EBHelmholtzOp::defineStencils(){
   m_domainBc->setCoef(m_eblg, fakeBeta, m_Bcoef);
   m_ebBc->setCoef(    m_eblg, fakeBeta, m_BcoefIrreg);
   m_ebBc->define((*m_eblg.getCFIVS()), 1./m_dx);
-  LayoutData<BaseIVFAB<VoFStencil> >* ebFluxStencil = m_ebBc->getFluxStencil(m_nComp);
+  const LayoutData<BaseIVFAB<VoFStencil> >* const ebFluxStencil = m_ebBc->getFluxStencil(m_nComp);
 
   // Define everything
   for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit){
@@ -461,9 +460,11 @@ void EBHelmholtzOp::applyOp(LevelData<EBCellFAB>&             a_Lphi,
 			    const bool                        a_homogeneousPhysBC,
 			    const bool                        a_homogeneousCFBC){
 
+  LevelData<EBCellFAB>& phi = (LevelData<EBCellFAB>& ) a_phi;
   if(m_hasCoar && !m_turnOffBCs){
-    this->interpolateCF((LevelData<EBCellFAB>&) a_phi, a_phiCoar, a_homogeneousCFBC);
+    this->interpolateCF(phi, a_phiCoar, a_homogeneousCFBC);
   }
+  phi.exchange();
   
   const DisjointBoxLayout& dbl = a_Lphi.disjointBoxLayout();
   for (DataIterator dit(dbl); dit.ok(); ++dit){
