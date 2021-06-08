@@ -661,8 +661,8 @@ void EBHelmholtzOp::getFlux(EBFluxFAB&                  a_flux,
 }
 
 void EBHelmholtzOp::homogeneousCFInterp(LevelData<EBCellFAB>& a_phi){
-  //  if(m_hasCoar) m_interpolator->coarseFineInterpH(a_phi, a_phi.interval());
-  if(m_hasCoar) this->applyHomogeneousCFBCs(a_phi);
+  if(m_hasCoar) m_interpolator->coarseFineInterpH(a_phi, a_phi.interval());
+  //  if(m_hasCoar) this->applyHomogeneousCFBCs(a_phi); // Note that this is only here for development purposes -- this will be very slow because of the inline define
 }
 
 void EBHelmholtzOp::inhomogeneousCFInterp(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar){
@@ -718,7 +718,6 @@ void EBHelmholtzOp::relaxGauSai(LevelData<EBCellFAB>& a_correction, const LevelD
   this->create(Lcorr, a_residual);
 
   for (int iter = 0; iter < a_iterations; iter++){
-
     for (int icolor = 0; icolor < m_colors.size(); icolor++){
       this->homogeneousCFInterp(a_correction);
       this->applyOp(Lcorr, a_correction, true);
@@ -775,7 +774,6 @@ void EBHelmholtzOp::gsrbColor(LevelData<EBCellFAB>& a_phi, const LevelData<EBCel
 	const Real resid  = rhs - Lphi;
 
 	a_phi[dit()](vof, m_comp) += lambda*resid;
-	
       }
     }
   }
