@@ -230,6 +230,7 @@ protected:
     the blocking factor. Otherwise we try to coarsen directly. 
   */
   bool getCoarserLayout(EBLevelGrid& a_coarseGrid, const EBLevelGrid& a_fineGrid, const int a_refRat, const int a_blockingFactor) const;
+  bool getCoarserLayout2(EBLevelGrid& a_coarseGrid, const EBLevelGrid& a_fineGrid, const int a_refRat, const int a_blockingFactor) const;
 
   /*!
     @brief Coarsen coefficients (conservatively)

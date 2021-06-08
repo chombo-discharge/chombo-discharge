@@ -11,6 +11,7 @@
 
 // Chombo includes
 #include <BRMeshRefine.H>
+#include <EBAMRPoissonOp.H>
 
 // Our includes
 #include <CD_EBHelmholtzOpFactory.H>
@@ -71,6 +72,8 @@ EBHelmholtzOpFactory::EBHelmholtzOpFactory(const Real&                       a_a
   if(this->isFiner(m_bottomDomain, m_amrLevelGrids[0]->getDomain())){
     MayDay::Abort("EBHelmholtzOpFactory -- bottomsolver domain can't be larger than the base AMR domain!");
   }
+
+  MayDay::Warning("EBHelmholtzOpFactory::EBHelmholtzOpfactory -- remember to kill debug code...");
   
   this->defineMultigridLevels();
 }
@@ -144,11 +147,11 @@ void EBHelmholtzOpFactory::defineMultigridLevels(){
 	  else{
 	    // Not so sure about this one, will we ever be asked to make an coarsened MG level which is also an AMR level? If not, this code
 	    // will reduce the coarsening efforts.
-	    for (int iamr = 0; iamr < m_numAmrLevels; iamr++){
-	      if(mgEblgCoar->getDomain() == m_amrLevelGrids[iamr]->getDomain()){
-		hasCoarser = false;
-	      }
-	    }
+	    // for (int iamr = 0; iamr < m_numAmrLevels; iamr++){
+	    //   if(mgEblgCoar->getDomain() == m_amrLevelGrids[iamr]->getDomain()){
+	    // 	hasCoarser = false;
+	    //   }
+	    // }
 	  }
 	}
 
@@ -237,10 +240,33 @@ bool EBHelmholtzOpFactory::isFiner(const ProblemDomain& A, const ProblemDomain& 
   return A.domainBox().numPts() > B.domainBox().numPts();
 }
 
+bool EBHelmholtzOpFactory::getCoarserLayout2(EBLevelGrid& a_coarEblg, const EBLevelGrid& a_fineEblg, const int a_refRat, const int a_blockingFactor) const {
+    DisjointBoxLayout dblCoFi;
+    ProblemDomain domCoFi;
+    bool dumbool;
+    bool hasCoarser = EBAMRPoissonOp::getCoarserLayouts(dblCoFi,
+							domCoFi,
+							a_fineEblg.getDBL(),
+							a_fineEblg.getEBISL(),
+							a_fineEblg.getDomain(),
+							a_refRat,
+							a_fineEblg.getEBIS(),
+							a_blockingFactor,
+							dumbool,
+							2);
+    if(hasCoarser){
+      a_coarEblg = EBLevelGrid(dblCoFi, domCoFi, 4, a_fineEblg.getEBIS());
+    }
+
+    return hasCoarser;
+}
+
 bool EBHelmholtzOpFactory::getCoarserLayout(EBLevelGrid& a_coarEblg, const EBLevelGrid& a_fineEblg, const int a_refRat, const int a_blockingFactor) const {
   // TLDR: This creates a coarsening of a_fineGrid with refinement factor 2. We first try to split the grid using a_blockingFactor. If that does not work we
   //       coarsen directly. If that does not work we are out of ideas.
-
+#if 1 // Debug
+  return this->getCoarserLayout2(a_coarEblg, a_fineEblg, a_refRat, a_blockingFactor);
+#endif
   bool hasCoarser;
 
   // This returns true if the fine grid fully covers the domain. The nature of this makes it
@@ -338,6 +364,10 @@ void EBHelmholtzOpFactory::coarsenCoefficients(LevelData<EBCellFAB>&            
     averageOp.average(a_coarAcoef,      a_fineAcoef,      interv);
     averageOp.average(a_coarBcoef,      a_fineBcoef,      interv);
     averageOp.average(a_coarBcoefIrreg, a_fineBcoefIrreg, interv);
+
+    a_coarAcoef.exchange();
+    a_coarBcoef.exchange();
+    a_coarBcoefIrreg.exchange();
   }
 }
 
@@ -499,6 +529,7 @@ EBHelmholtzOp* EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
   EBLevelGrid eblgCoFi;
   if(hasCoar){
     this->getCoarserLayout(eblgCoFi, *m_amrLevelGrids[amrLevel], refToCoar, m_mgBlockingFactor);
+
     CH_assert(eblgCoFi.isDefined());
   }
 
