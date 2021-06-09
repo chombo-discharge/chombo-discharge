@@ -30,6 +30,8 @@
 #include <CD_EbCoarAve.H>
 #include <CD_EBMultigridInterpolator.H>
 #include <CD_EBHelmholtzOp.H>
+#include <CD_EBHelmholtzEBBCFactory.H>
+#include <CD_EBHelmholtzDomainBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
