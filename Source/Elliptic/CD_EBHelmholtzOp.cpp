@@ -314,24 +314,9 @@ void EBHelmholtzOp::createCoarser(LevelData<EBCellFAB>& a_coarse, const LevelDat
 
 void EBHelmholtzOp::createCoarsened(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const int& a_refRat) {
   CH_assert(m_hasCoar);
-#if 1 // What I want
+
   EBCellFactory factCoFi(m_eblgCoFi.getEBISL());
   a_lhs.define(m_eblgCoFi.getDBL(), a_rhs.nComp(), a_rhs.ghostVect(), factCoFi);
-#else // What I will try. 
-  DisjointBoxLayout dblCoFi;
-  coarsen(dblCoFi, m_eblg.getDBL(), a_refRat);
-
-  EBISLayout ebislCoFi;
-  ProblemDomain domainCoFi = coarsen(m_eblg.getDomain(), a_refRat);
-  m_eblg.getEBIS()->fillEBISLayout(ebislCoFi, dblCoFi, domainCoFi, a_rhs.ghostVect()[0]);
-
-  if(m_refToCoar > 1){
-    ebislCoFi.setMaxRefinementRatio(m_refToCoar, m_eblg.getEBIS());
-  }
-
-  EBCellFactory fact(ebislCoFi);
-  a_lhs.define(dblCoFi, m_nComp, a_rhs.ghostVect(), fact);
-#endif
 }
 
 void EBHelmholtzOp::restrictResidual(LevelData<EBCellFAB>& a_resCoar, LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_rhs) {

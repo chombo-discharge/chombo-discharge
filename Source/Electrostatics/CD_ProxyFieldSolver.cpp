@@ -48,7 +48,7 @@ bool ProxyFieldSolver::solve(MFAMRCellData&       a_potential,
 
   this->solveOnePhase(gasData, gasResi);
 
-  //  this->solveHelmholtz(gasData, gasResi);
+  this->solveHelmholtz(gasData, gasResi);
   
   return true;
 }

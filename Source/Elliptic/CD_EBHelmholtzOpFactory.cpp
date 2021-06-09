@@ -9,11 +9,6 @@
   @author Robert Marskar
 */
 
-#define EBHelmholtzOpFactoryDebug 0
-#if EBHelmholtzOpFactoryDebug
-#include <EBAMRPoissonOp.H>
-#endif
-
 // Chombo includes
 #include <ParmParse.H>
 #include <BRMeshRefine.H>
@@ -77,8 +72,6 @@ EBHelmholtzOpFactory::EBHelmholtzOpFactory(const Real&                       a_a
   if(this->isFiner(m_bottomDomain, m_amrLevelGrids[0]->getDomain())){
     MayDay::Abort("EBHelmholtzOpFactory -- bottomsolver domain can't be larger than the base AMR domain!");
   }
-
-  MayDay::Warning("EBHelmholtzOpFactory::EBHelmholtzOpfactory -- remember to kill debug code...");
   
   this->defineMultigridLevels();
 }
@@ -230,15 +223,6 @@ void EBHelmholtzOpFactory::defineMultigridLevels(){
     else{
       m_hasMgLevels[amrLevel] = false;
     }
-
-#if EBHelmholtzOpFactoryDebug
-    if(procID() == 0){
-      std::cout << "amrLevel = " << amrLevel << "\t domain = " << m_amrLevelGrids[amrLevel]->getDomain() << ":\n";
-      for (int mglevel = 0; mglevel < m_mgLevelGrids[amrLevel].size(); mglevel++){
-	std::cout << "\t mg level = " << mglevel << "\t mg domain = " << m_mgLevelGrids[amrLevel][mglevel]->getDomain() << "\n";
-      }
-    }
-#endif
   }
 }
 
@@ -256,28 +240,6 @@ bool EBHelmholtzOpFactory::getCoarserLayout(EBLevelGrid& a_coarEblg, const EBLev
   //       coarsen directly. If that does not work we are out of ideas.
   bool hasCoarser = false;
   
-#if EBHelmholtzOpFactoryDebug  
-  DisjointBoxLayout dblCoFi;
-  ProblemDomain domCoFi;
-  bool dumbool;
-  hasCoarser = EBAMRPoissonOp::getCoarserLayouts(dblCoFi,
-						 domCoFi,
-						 a_fineEblg.getDBL(),
-						 a_fineEblg.getEBISL(),
-						 a_fineEblg.getDomain(),
-						 a_refRat,
-						 a_fineEblg.getEBIS(),
-						 a_blockingFactor,
-						 dumbool,
-						 2);
-  if(hasCoarser){
-    a_coarEblg = EBLevelGrid(dblCoFi, domCoFi, 4, a_fineEblg.getEBIS());
-  }
-
-  return hasCoarser;
-#endif
-
-
   // This returns true if the fine grid fully covers the domain. The nature of this makes it
   // always true for the "deeper" multigridlevels,  but not so for the intermediate levels. 
   auto isFullyCovered = [&] (const EBLevelGrid& a_eblg) -> bool {
@@ -383,7 +345,7 @@ void EBHelmholtzOpFactory::coarsenCoefficients(LevelData<EBCellFAB>&            
 EBHelmholtzOp* EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bool a_homogeneousOnly) {
   EBHelmholtzOp* mgOp = nullptr;
 
-  ParmParse pp;
+  ParmParse pp("EBHelmholtzOp");
   bool turnOffMG = false;
   pp.query("turn_off_multigrid", turnOffMG);
   if(turnOffMG){
@@ -603,7 +565,6 @@ int EBHelmholtzOpFactory::refToFiner(const ProblemDomain& a_domain) const {
 }
 
 RefCountedPtr<EBHelmholtzOp::EBHelmholtzEbBc> EBHelmholtzOpFactory::makeEbBcObject(const EBLevelGrid& a_eblg, const Real& a_dx) const {
-  if(procID() == 0) std::cout << a_dx << std::endl;
   EBHelmholtzOp::EBHelmholtzEbBc* bc = (EBHelmholtzOp::EBHelmholtzEbBc*) m_ebBcFactory->create(a_eblg.getDomain(),
 											       a_eblg.getEBISL(),
 											       a_dx*RealVect::Unit,
