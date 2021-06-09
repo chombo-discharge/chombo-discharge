@@ -473,8 +473,8 @@ void EBHelmholtzOp::applyOpRegular(EBCellFAB& a_Lphi, EBCellFAB& a_phi, const Bo
   a_Lphi += (*m_Acoef)[a_dit];
   a_Lphi *= m_alpha;
 
-  // Add domain flux to a_Lphi. 
-  this->applyDomainFlux(a_Lphi, a_phi, a_cellBox, a_dit, a_homogeneousPhysBC);
+  // Fill a_phi such that centered differences pushes in the domain flux. 
+  this->applyDomainFlux(a_phi, a_cellBox, a_dit, a_homogeneousPhysBC);
 
   // It's an older code, sir, but it checks out.
   BaseFab<Real>& Lphi      = a_Lphi.getSingleValuedFAB();
@@ -502,12 +502,10 @@ void EBHelmholtzOp::applyOpRegular(EBCellFAB& a_Lphi, EBCellFAB& a_phi, const Bo
 			CHF_BOX(a_cellBox));
 }
 
-void EBHelmholtzOp::applyDomainFlux(EBCellFAB& a_Lphi, EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBC){
+void EBHelmholtzOp::applyDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBC){
   // TLDR: While we're developing this operator I'm resuing the old BC classes. This routine is weird because the domain bc needs a cell-centered flux
   //       box, so that's what all the shifting is about.
   //
-  //       I am leaving both a_Lphi and a_phi as options here because we may want to fill a_Lphi directly so as to avoid the current division-by-B in
-  //       the Fortran kernels. In this case one can zero the domain flux by calling suppressDomainFlux...
 
   BaseFab<Real>& phiFAB = a_phi.getSingleValuedFAB();
   
@@ -559,8 +557,6 @@ void EBHelmholtzOp::applyDomainFlux(EBCellFAB& a_Lphi, EBCellFAB& a_phi, const B
       bco.shiftHalf(dir, 1);
     }
   }
-
-  //  this->suppressDomainFlux(a_phi, a_cellBox, a_dit);
 }
 
 void EBHelmholtzOp::suppressDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit){
@@ -767,6 +763,12 @@ void EBHelmholtzOp::gsrbColor(LevelData<EBCellFAB>& a_phi, const LevelData<EBCel
 
 void EBHelmholtzOp::relaxGSRBFast(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations){
   MayDay::Abort("EBHelmholtzOp::relaxGauSai - not implemented");
+
+  for (int iter = 0; iter < a_iterations; iter++){
+    for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit){
+      
+    }
+  }
 }
 
 void EBHelmholtzOp::computeAlphaWeight(){

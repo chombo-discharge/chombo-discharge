@@ -128,7 +128,7 @@ public:
     @note This sets the ghost cells of phi to phi(i-1) = phi(i) + F*dx/bco such that when we take the centered difference we get
           -bco*(phi(i) - phi(i-1))/dx = F. 
   */
-  void applyDomainFlux(EBCellFAB& a_Lphi, EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBc);
+  void applyDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBc);
 
   /*!
     @brief Fuck those ghost cells in particular
@@ -633,6 +633,7 @@ protected:
     @brief "Colors" for the relaxation methods
   */
   Vector<IntVect> m_colors;
+
 
   /*!
     @brief Apply operator on this level. This is a more general version which can turn on/off homogeneous and CF bcs.

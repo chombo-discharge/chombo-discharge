@@ -42,6 +42,11 @@ EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid&            a
   m_eblgCoar = a_eblgCoar;
 
   this->defineCFIVS();
+  
+  // Define a temp which is zero everywhere. Don't need ghost cells because the stencils should(!) only reach into valid cells AFAIK. 
+  EBCellFactory cellFact(m_eblgCoar.getEBISL());
+  m_zeroCoar.define(m_eblgCoar.getDBL(), a_nVar, IntVect::Zero, cellFact);
+  EBLevelDataOps::setToZero(m_zeroCoar);
 }
 
 void EBMultigridInterpolator::defineCFIVS(){
@@ -65,6 +70,9 @@ void EBMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>& a_phiFine, 
 }
 
 void EBMultigridInterpolator::coarseFineInterpH(LevelData<EBCellFAB>& a_phiFine, const Interval a_variables){
+#if 0 // This is very slow code
+  EBQuadCFInterp::interpolate(a_phiFine, m_zeroCoar, a_variables);
+#else // Much faster code
   for (DataIterator dit(m_eblgFine.getDBL()); dit.ok(); ++dit){
 
     EBCellFAB& phi = a_phiFine[dit()];
@@ -163,6 +171,7 @@ void EBMultigridInterpolator::coarseFineInterpH(LevelData<EBCellFAB>& a_phiFine,
       }
     }
   }
+#endif
 }
 
 #include <CD_NamespaceFooter.H>
