@@ -80,6 +80,7 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid&                                 
   m_comp       = 0;
   m_turnOffBCs = false;
   m_vecDx      = m_dx*RealVect::Unit;
+  m_interval   = Interval(m_comp, m_comp);
 
   if(m_hasFine){
     m_eblgFine = a_eblgFine;
@@ -225,8 +226,7 @@ void EBHelmholtzOp::defineStencils(){
       m_betaDiagWeight[dit()](vof, m_comp) = betaWeight;
     }
 
-    m_opEBStencil[dit()] = RefCountedPtr<EBStencil>(new EBStencil(m_vofIterIrreg[dit()].getVector(), opStencil, m_eblg.getDBL()[dit()],
-							   m_eblg.getEBISL()[dit()], m_ghostPhi, m_ghostRhs, m_comp, true));
+    m_opEBStencil[dit()] = RefCountedPtr<EBStencil>(new EBStencil(m_vofIterIrreg[dit()].getVector(), opStencil, cellBox, ebisbox, m_ghostPhi, m_ghostRhs, m_comp, true));
   }
     
   // Compute the alpha-weight and relaxation coefficient. 
@@ -261,10 +261,6 @@ void EBHelmholtzOp::preCond(LevelData<EBCellFAB>& a_corr, const LevelData<EBCell
   EBLevelDataOps::scale(a_corr,  m_relCoef);
 
   this->relax(a_corr, a_residual, 40);
-}
-
-void EBHelmholtzOp::applyOp(LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_phi, bool a_homogeneousPhysBC) {
-  this->applyOp(a_Lphi, a_phi, nullptr, a_homogeneousPhysBC, true);
 }
 
 void EBHelmholtzOp::create(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) {
@@ -346,11 +342,11 @@ void EBHelmholtzOp::restrictResidual(LevelData<EBCellFAB>& a_resCoar, LevelData<
   this->setToZero(res);
   this->residual(res, a_phi, a_rhs, true);
 
-  m_ebAverageMG.average(a_resCoar, res, a_resCoar.interval());
+  m_ebAverageMG.average(a_resCoar, res, m_interval);
 }
 
 void EBHelmholtzOp::prolongIncrement(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_correctCoarse) {
-  m_ebInterpMG.pwcInterp(a_phi, a_correctCoarse, Interval(m_comp, m_comp));
+  m_ebInterpMG.pwcInterp(a_phi, a_correctCoarse, m_interval);
 }
 
 int EBHelmholtzOp::refToCoarser() {
@@ -430,17 +426,17 @@ void EBHelmholtzOp::AMRRestrict(LevelData<EBCellFAB>&       a_residualCoarse,
 
   const bool homogeneousPhysBC = true;
   const bool homogeneousCFBC   = false;
-  
+
   // We should average a_residual - L(correction, coarCorrection).
   this->applyOp(resThisLevel, a_correction, &a_coarseCorrection, homogeneousPhysBC, homogeneousCFBC);
   this->incr(resThisLevel, a_residual, -1.0);
   this->scale(resThisLevel, -1.0);
 
-  m_ebAverage.average(a_residualCoarse, resThisLevel, a_residualCoarse.interval());
+  m_ebAverage.average(a_residualCoarse, resThisLevel, m_interval);
 }
 
 void EBHelmholtzOp::AMRProlong(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_coarseCorrection) {
-  m_ebInterp.pwcInterp(a_correction, a_coarseCorrection, a_correction.interval());
+  m_ebInterp.pwcInterp(a_correction, a_coarseCorrection, m_interval);
 }
 
 void EBHelmholtzOp::AMRUpdateResidual(LevelData<EBCellFAB>&       a_residual,
@@ -450,6 +446,10 @@ void EBHelmholtzOp::AMRUpdateResidual(LevelData<EBCellFAB>&       a_residual,
   this->create(lcorr, a_correction);
   this->applyOp(lcorr, a_correction, &a_coarseCorrection, true, false);
   this->incr(a_residual, a_correction, -1.0);
+}
+
+void EBHelmholtzOp::applyOp(LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_phi, bool a_homogeneousPhysBC) {
+  this->applyOp(a_Lphi, a_phi, nullptr, a_homogeneousPhysBC, true);
 }
 
 void EBHelmholtzOp::applyOp(LevelData<EBCellFAB>&             a_Lphi,
@@ -465,8 +465,6 @@ void EBHelmholtzOp::applyOp(LevelData<EBCellFAB>&             a_Lphi,
   }
   
   phi.exchange();
-
-  this->setToZero(a_Lphi);
   
   const DisjointBoxLayout& dbl = a_Lphi.disjointBoxLayout();
   for (DataIterator dit(dbl); dit.ok(); ++dit){
@@ -504,7 +502,6 @@ void EBHelmholtzOp::applyOpRegular(EBCellFAB& a_Lphi, EBCellFAB& a_phi, const Bo
   }
 
   // Fill the ghost cells outside the domain so that we don't get an extra flux from the domain side. 
-
   FORT_LAPLACIANINPLACE(CHF_FRA1(Lphi, m_comp),
 			CHF_CONST_FRA1(phi, m_comp),
 			CHF_CONST_FRA1((*bcoef[0]), m_comp),
@@ -661,12 +658,12 @@ void EBHelmholtzOp::getFlux(EBFluxFAB&                  a_flux,
 }
 
 void EBHelmholtzOp::homogeneousCFInterp(LevelData<EBCellFAB>& a_phi){
-  if(m_hasCoar) m_interpolator->coarseFineInterpH(a_phi, a_phi.interval());
+  if(m_hasCoar) m_interpolator->coarseFineInterpH(a_phi, m_interval);
   //  if(m_hasCoar) this->applyHomogeneousCFBCs(a_phi); // Note that this is only here for development purposes -- this will be very slow because of the inline define
 }
 
 void EBHelmholtzOp::inhomogeneousCFInterp(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar){
-  if(m_hasCoar) m_interpolator->coarseFineInterp(a_phiFine, a_phiCoar, a_phiFine.interval());
+  if(m_hasCoar) m_interpolator->coarseFineInterp(a_phiFine, a_phiCoar, m_interval);
 }
 
 void EBHelmholtzOp::interpolateCF(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar, const bool a_homogeneous){
@@ -1012,7 +1009,7 @@ void EBHelmholtzOp::incrementFRCoar(const LevelData<EBCellFAB>& a_phi){
 	this->getFaceCentroidFlux(flux, a_phi[dit()], cellBox, dit(), dir);
 
 	// Increment flux register, recall that beta and the b-coefficient are included in getFaceCentroidFlux. 
-	m_fluxReg->incrementCoarseBoth(flux, scale, dit(), Interval(m_comp, m_comp), dir, sit());
+	m_fluxReg->incrementCoarseBoth(flux, scale, dit(), m_interval, dir, sit());
       }
     }
   }
@@ -1044,10 +1041,10 @@ void EBHelmholtzOp::incrementFRFine(const LevelData<EBCellFAB>& a_phiFine, const
 	stripBox.shift(dir, -sign(sit()));
 
 	// Computes fluxes for all faces oriented in +/- dir, but which are not boundary faces. 
-	finerOp.getFaceCentroidFlux(flux, phiFine[dit()], cellBox, dit(), dir);
+	finerOp.getFaceCentroidFlux(flux, phiFine[dit()], stripBox, dit(), dir);
 
 	// Increment flux register, recall that beta and the b-coefficient are included in getFaceCentroidFlux. 
-	m_fluxReg->incrementFineBoth(flux, scale, dit(), Interval(m_comp, m_comp), dir, sit());
+	m_fluxReg->incrementFineBoth(flux, scale, dit(), m_interval, dir, sit());
       }
     }
   }
@@ -1063,7 +1060,7 @@ void EBHelmholtzOp::reflux(LevelData<EBCellFAB>&              a_Lphi,
   this->incrementFRCoar(a_phi);
   this->incrementFRFine(a_phiFine, a_phi, a_finerOp);
 
-  m_fluxReg->reflux(a_Lphi, a_Lphi.interval(), 1./m_dx);
+  m_fluxReg->reflux(a_Lphi, m_interval, 1./m_dx);
 }
 
 void EBHelmholtzOp::applyHomogeneousCFBCs(LevelData<EBCellFAB>& a_phi){

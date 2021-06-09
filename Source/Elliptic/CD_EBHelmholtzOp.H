@@ -410,6 +410,11 @@ protected:
   int m_comp;
 
   /*!
+    @brief Interval
+  */
+  Interval m_interval;
+
+  /*!
     @brief Relaxation method
   */
   RelaxationMethod m_relaxationMethod;

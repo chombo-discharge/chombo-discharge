@@ -99,13 +99,18 @@ void EBHelmholtzOpFactory::defineMultigridLevels(){
 
   for (int amrLevel = 0; amrLevel < m_numAmrLevels; amrLevel++){
     m_hasMgLevels[amrLevel] = false;
-    
+#if 0    
     if(amrLevel == 0 && this->isCoarser(m_bottomDomain, m_amrLevelGrids[amrLevel]->getDomain())){
       m_hasMgLevels[amrLevel] = true;
     }
     else if(m_amrRefRatios[amrLevel-1] > 2){ // There must be one intermediate level 
       m_hasMgLevels[amrLevel] = true;
     }
+#else
+    if(amrLevel == 0 || m_amrRefRatios[amrLevel] > 2){
+      m_hasMgLevels[amrLevel] = true;
+    }
+#endif
 
     if(m_hasMgLevels[amrLevel]){
       
@@ -127,7 +132,7 @@ void EBHelmholtzOpFactory::defineMultigridLevels(){
 	
 	// Current number of multigrid levels and the multigrid level which we will coarsen. Note the inverse order here (first entry is finest level)
 	const int curMgLevels         =  m_mgLevelGrids[amrLevel].size();          
-	const EBLevelGrid& mgEblgFine = *m_mgLevelGrids[amrLevel][curMgLevels-1]; 
+	const EBLevelGrid& mgEblgFine = *m_mgLevelGrids[amrLevel].back();
 
 	// BoxLayout and domains for coarsening.
 	RefCountedPtr<EBLevelGrid> mgEblgCoar = RefCountedPtr<EBLevelGrid>(new EBLevelGrid());
@@ -598,6 +603,7 @@ int EBHelmholtzOpFactory::refToFiner(const ProblemDomain& a_domain) const {
 }
 
 RefCountedPtr<EBHelmholtzOp::EBHelmholtzEbBc> EBHelmholtzOpFactory::makeEbBcObject(const EBLevelGrid& a_eblg, const Real& a_dx) const {
+  if(procID() == 0) std::cout << a_dx << std::endl;
   EBHelmholtzOp::EBHelmholtzEbBc* bc = (EBHelmholtzOp::EBHelmholtzEbBc*) m_ebBcFactory->create(a_eblg.getDomain(),
 											       a_eblg.getEBISL(),
 											       a_dx*RealVect::Unit,
