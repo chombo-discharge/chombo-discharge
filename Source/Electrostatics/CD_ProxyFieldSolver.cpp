@@ -432,7 +432,7 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
 
   // Set the bottom domain. Don't go below 8x cells in any direction
   ProblemDomain bottomDomain = m_amr->getDomains()[0];
-  while(bottomDomain.domainBox().shortside() >= 8){
+  while(bottomDomain.domainBox().shortside() >= 4){
     bottomDomain.coarsen(2);
   }
 
@@ -454,7 +454,7 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
 			    m_amr->getNumberOfGhostCells()*IntVect::Unit,
 			    EBHelmholtzOp::RelaxationMethod::GauSaiMultiColorFast,
 			    bottomDomain,
-			    32);//m_amr->getMaxBoxSize());
+			    64);//m_amr->getMaxBoxSize());
 
   BiCGStabSolver<LevelData<EBCellFAB> > bicgstab;
   AMRMultiGrid<LevelData<EBCellFAB> > multigridSolver;

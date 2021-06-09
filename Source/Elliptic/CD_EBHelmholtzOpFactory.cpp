@@ -222,9 +222,6 @@ void EBHelmholtzOpFactory::defineMultigridLevels(){
 	}
       }
     }
-    else{
-      m_hasMgLevels[amrLevel] = false;
-    }
 
     if(m_mgLevelGrids[amrLevel].size() <= 1) {
       m_hasMgLevels[amrLevel] = false;
@@ -263,12 +260,11 @@ bool EBHelmholtzOpFactory::getCoarserLayout(EBLevelGrid& a_coarEblg, const EBLev
   if(hasCoarser){
     a_coarEblg.define(dblCoFi, domainCoFi, 4, a_fineEblg.getEBIS());
   }
-  return hasCoarser;
 #else
   
   // This returns true if the fine grid fully covers the domain. The nature of this makes it
   // always true for the "deeper" multigridlevels,  but not so for the intermediate levels. 
-  auto isFullyCovered = [&] (const EBLevelGrid& a_eblg) -> bool {
+  auto isFullyCovered = [=] (const EBLevelGrid& a_eblg) -> bool {
     unsigned long long numPtsLeft = a_eblg.getDomain().domainBox().numPts(); // Number of grid points in
     const DisjointBoxLayout& dbl  = a_eblg.getDBL();
 
@@ -276,7 +272,7 @@ bool EBHelmholtzOpFactory::getCoarserLayout(EBLevelGrid& a_coarEblg, const EBLev
       numPtsLeft -= dbl[lit()].numPts();
     }
 
-    return (numPtsLeft == 0ULL);
+    return (numPtsLeft == 0);
   };
 
   const ProblemDomain fineDomain   = a_fineEblg.getDomain();
@@ -284,59 +280,43 @@ bool EBHelmholtzOpFactory::getCoarserLayout(EBLevelGrid& a_coarEblg, const EBLev
   const DisjointBoxLayout& fineDbl = a_fineEblg.getDBL();
   DisjointBoxLayout coarDbl;
 
-  // Check if we can get a coarsenable domain. Don't want to coarsen to 1x1 so hence the factor of 2. 
+  // Check if we can get a coarsenable domain. Don't want to coarsen to 1x1 so hence the factor of 2 in the test here. 
   ProblemDomain test = fineDomain;
   if(refine(coarsen(test, 2*a_refRat), 2*a_refRat) == fineDomain){
+    const bool doCoarsen = a_fineEblg.getDBL().coarsenable(2*a_refRat);
 
-    bool doAggregation;
-    bool doCoarsen;
-
-    // Check if we are coarsening to an intermediate or "deep" level. If we are coarsening to a deep level we know that
-    // the grids will cover the domain, so the aggregation check is just a matter of testing for valid domain decompositions. 
-    if(this->isCoarser(coarDomain, m_amrLevelGrids[0]->getDomain())) {
-      doAggregation = (refine(coarsen(fineDomain, a_blockingFactor), a_blockingFactor) == fineDomain);
-
-      if(a_fineEblg.getDBL().size() <= 1) doAggregation = false;
-    }
-    else{ // For AMR levels the "simplest" way we can run with aggregation is if the fine grid covers the entire domain. There are probably generalizations of this. 
-      doAggregation = isFullyCovered(a_fineEblg);
-    }
-
-    //    doCoarsen = a_fineEblg.getDBL().coarsenable(a_refRat);
-    doCoarsen = fineDbl.coarsenable(2*a_refRat) && fineDbl.isClosed() && (fineDbl.size() > 0);
-
-    // Prefer aggregation over coarsening
-    if(doAggregation){ 
-      Vector<Box> boxes;
-      Vector<int> procs;
-
-      // We could have use our load balancing here, but I don't see why. 
-      domainSplit(coarDomain, boxes, a_blockingFactor);
-      mortonOrdering(boxes);
-      LoadBalance(procs, boxes);
-
-      coarDbl.define(boxes, procs, coarDomain);
-      a_coarEblg.define(coarDbl, coarDomain, m_ghostPhi.max(), a_fineEblg.getEBIS());
-
-      hasCoarser = true;
-    }
-    else if(doCoarsen){ // But use coarsening if we must.
+    // Use coarsening if we can. 
+    if(a_fineEblg.getDBL().coarsenable(2*a_refRat)){
       coarsen(coarDbl, a_fineEblg.getDBL(), a_refRat);
       a_coarEblg.define(coarDbl, coarDomain, m_ghostPhi.max(), a_fineEblg.getEBIS());
 
       hasCoarser = true;
     }
+    else { // Check if we can use box aggregation
+      if(isFullyCovered(a_fineEblg)){
+	Vector<Box> boxes;
+	Vector<int> procs;
 
-    else{ // Out of ideas. 
-      hasCoarser = false;
+	// We could have use our load balancing here, but I don't see why. 
+	domainSplit(coarDomain, boxes, a_blockingFactor);
+	mortonOrdering(boxes);
+	LoadBalance(procs, boxes);
+
+	coarDbl.define(boxes, procs, coarDomain);
+	a_coarEblg.define(coarDbl, coarDomain, m_ghostPhi.max(), a_fineEblg.getEBIS());
+
+	hasCoarser = true;
+      }
+      else{ // out of ideas
+	hasCoarser = false;
+      }
     }
   }
   else{ // Nothing we can do. 
     hasCoarser = false;
   }
-
-  return hasCoarser;
 #endif
+  return hasCoarser;
 }
 
 void EBHelmholtzOpFactory::coarsenCoefficients(LevelData<EBCellFAB>&              a_coarAcoef,
@@ -467,7 +447,6 @@ EBHelmholtzOp* EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, 
 
   // Make the operator
   if(foundMgLevel){
-
     const Real dx     = m_amrResolutions[amrLevel]*std::pow(mgRefRat, a_depth); // 
 
     auto dobc = this->makeDomainBcObject(eblg, dx);
@@ -498,10 +477,11 @@ EBHelmholtzOp* EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, 
 			     m_ghostPhi,
 			     m_ghostRhs,
 			     m_relaxMethod);
+
+
   }
   
   return mgOp;
- 
 }
 
 EBHelmholtzOp* EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
