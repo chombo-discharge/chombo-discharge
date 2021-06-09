@@ -9,6 +9,7 @@
   @author Robert Marskar
   @todo  m_zeroCoar exists because I want EBQuadCFInterp to run under the hood right now. Later, we will use the stencils directly and there
   will be no need for m_zeroCoar
+  @todo   Dropping in lo/hi CFIVS so we can move performance penalty to this class rather than EBHelmholtzOp
 */
 
 #ifndef CD_EBMultigridInterpolator_H
@@ -17,6 +18,7 @@
 // Chombo includes
 #include <EBLevelGrid.H>
 #include <EBQuadCFInterp.H>
+#include <CFIVS.H>
 
 // Our includes
 #include <CD_NamespaceHeader.H>
@@ -86,10 +88,24 @@ protected:
   EBLevelGrid m_eblgCoar;
 
   /*!
-    @brief Zero data on coarse grid
+    @brief Coarse-fine interface. 
+  */
+  LayoutData<CFIVS> m_loCFIVS[SpaceDim];
 
+  /*!
+    @brief Coarse-fine interface. 
+  */
+  LayoutData<CFIVS> m_hiCFIVS[SpaceDim];
+
+  /*!
+    @brief Zero data on coarse grid
   */
   LevelData<EBCellFAB> m_zeroCoar;
+
+  /*!
+    @brief Defines the CFIVS
+  */
+  void defineCFIVS();
 };
 
 #include <CD_NamespaceFooter.H>

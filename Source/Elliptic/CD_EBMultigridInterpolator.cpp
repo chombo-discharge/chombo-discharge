@@ -12,6 +12,7 @@
 // Chombo includes
 #include <EBCellFactory.H>
 #include <EBLevelDataOps.H>
+#include <InterpF_F.H>
 
 // Our includes
 #include <CD_EBMultigridInterpolator.H>
@@ -39,11 +40,20 @@ EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid&            a
 
   m_eblgFine = a_eblgFine;
   m_eblgCoar = a_eblgCoar;
-  
-  // Define a temp which is zero everywhere. Don't need ghost cells because the stencils should(!) only reach into valid cells AFAIK. 
-  EBCellFactory cellFact(m_eblgCoar.getEBISL());
-  m_zeroCoar.define(m_eblgCoar.getDBL(), a_nVar, IntVect::Zero, cellFact);
-  EBLevelDataOps::setToZero(m_zeroCoar);
+
+  this->defineCFIVS();
+}
+
+void EBMultigridInterpolator::defineCFIVS(){
+  for (int dir = 0; dir < SpaceDim; dir++){
+    m_loCFIVS[dir].define(m_eblgFine.getDBL());
+    m_hiCFIVS[dir].define(m_eblgFine.getDBL());
+
+    for (DataIterator dit(m_eblgFine.getDBL()); dit.ok(); ++dit){
+      m_loCFIVS[dir][dit()].define(m_eblgFine.getDomain(), m_eblgFine.getDBL()[dit()], m_eblgFine.getDBL(), dir, Side::Lo);
+      m_hiCFIVS[dir][dit()].define(m_eblgFine.getDomain(), m_eblgFine.getDBL()[dit()], m_eblgFine.getDBL(), dir, Side::Hi);
+    }
+  }
 }
 
 EBMultigridInterpolator::~EBMultigridInterpolator(){
@@ -55,7 +65,104 @@ void EBMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>& a_phiFine, 
 }
 
 void EBMultigridInterpolator::coarseFineInterpH(LevelData<EBCellFAB>& a_phiFine, const Interval a_variables){
-  EBQuadCFInterp::interpolate(a_phiFine, m_zeroCoar, a_variables);
+  for (DataIterator dit(m_eblgFine.getDBL()); dit.ok(); ++dit){
+
+    EBCellFAB& phi = a_phiFine[dit()];
+
+    const Real m_dx     = 1.0;
+    const Real m_dxCoar = m_dx*m_refRat;
+    
+    for (int dir = 0; dir < SpaceDim; dir++){
+      for (SideIterator sit; sit.ok(); ++sit){
+
+	const CFIVS* cfivsPtr = nullptr;
+	if(sit() == Side::Lo) {
+	  cfivsPtr = &m_loCFIVS[dir][dit()];
+	}
+	else{
+	  cfivsPtr = &m_hiCFIVS[dir][dit()];
+	}
+
+	const IntVectSet& ivs = cfivsPtr->getFineIVS();
+	if (cfivsPtr->isPacked() ){
+	  const int ihiorlo = sign(sit());
+	  FORT_INTERPHOMO(CHF_FRA(phi.getSingleValuedFAB()),
+			  CHF_BOX(cfivsPtr->packedBox()),
+			  CHF_CONST_REAL(m_dx),
+			  CHF_CONST_REAL(m_dxCoar),
+			  CHF_CONST_INT(dir),
+			  CHF_CONST_INT(ihiorlo));
+	}
+	else {
+	  if(!ivs.isEmpty()){
+	  
+	    Real halfdxcoar = m_dxCoar/2.0;
+	    Real halfdxfine = m_dx/2.0;
+	    Real xg = halfdxcoar -   halfdxfine;
+	    Real xc = halfdxcoar +   halfdxfine;
+	    Real xf = halfdxcoar + 3*halfdxfine;
+	    Real hf = m_dx;
+	    Real denom = xf*xc*hf;
+
+	    const EBISBox& ebisBox = m_eblgFine.getEBISL()[dit()];
+	    const EBGraph& ebgraph = ebisBox.getEBGraph();
+	      
+	    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	      const VolIndex& VoFGhost = vofit();
+
+	      IntVect ivGhost  = VoFGhost.gridIndex();
+
+	      Vector<VolIndex> farVoFs;
+	      Vector<VolIndex> closeVoFs = ebisBox.getVoFs(VoFGhost, dir, flip(sit()), 1);
+	    
+	      bool hasClose = (closeVoFs.size() > 0);
+	      bool hasFar = false;
+	      Real phic = 0.0;
+	      Real phif = 0.0;
+	    
+	      if (hasClose){
+		const int& numClose = closeVoFs.size();
+		for (int iVof=0;iVof<numClose;iVof++){
+		  const VolIndex& vofClose = closeVoFs[iVof];
+		  phic += phi(vofClose,0);
+		}
+		phic /= Real(numClose);
+
+		farVoFs = ebisBox.getVoFs(VoFGhost, dir, flip(sit()), 2);
+		hasFar   = (farVoFs.size()   > 0);
+		if (hasFar){
+		  const int& numFar = farVoFs.size();
+		  for (int iVof=0;iVof<numFar;iVof++){
+		    const VolIndex& vofFar = farVoFs[iVof];
+		    phif += phi(vofFar,0);
+		  }
+		  phif /= Real(numFar);
+		}
+	      }
+
+	      Real phiGhost;
+	      if (hasClose && hasFar){
+		// quadratic interpolation  phi = ax^2 + bx + c
+		Real A = (phif*xc - phic*xf)/denom;
+		Real B = (phic*hf*xf - phif*xc*xc + phic*xf*xc)/denom;
+
+		phiGhost = A*xg*xg + B*xg;
+	      }
+	      else if (hasClose){
+		//linear interpolation
+		Real slope =  phic/xc;
+		phiGhost   =  slope*xg;
+	      }
+	      else{
+		phiGhost = 0.0; //nothing to interpolate from
+	      }
+	      phi(VoFGhost, 0) = phiGhost;
+	    }
+	  }
+	}
+      }
+    }
+  }
 }
 
 #include <CD_NamespaceFooter.H>
