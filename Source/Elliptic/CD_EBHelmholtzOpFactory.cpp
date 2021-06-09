@@ -345,7 +345,7 @@ void EBHelmholtzOpFactory::coarsenCoefficients(LevelData<EBCellFAB>&            
 EBHelmholtzOp* EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bool a_homogeneousOnly) {
   EBHelmholtzOp* mgOp = nullptr;
 
-  ParmParse pp("EBHelmholtzOp");
+  ParmParse pp;
   bool turnOffMG = false;
   pp.query("turn_off_multigrid", turnOffMG);
   if(turnOffMG){
