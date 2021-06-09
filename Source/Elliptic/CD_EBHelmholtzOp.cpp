@@ -235,12 +235,11 @@ void EBHelmholtzOp::defineStencils(){
 }
 
 unsigned int EBHelmholtzOp::orderOfAccuracy(void) const {
-  return 2;
-  //  return 99;
+  return 99;
 }
 
 void EBHelmholtzOp::enforceCFConsistency(LevelData<EBCellFAB>& a_coarCorr, const LevelData<EBCellFAB>& a_fineCorr){
-  //  m_coarAve->average(a_coarCorr, a_fineCorr, a_coarCorr.interval());
+  m_coarAve->average(a_coarCorr, a_fineCorr, a_coarCorr.interval());
 }
 
 void EBHelmholtzOp::setAlphaAndBeta(const Real& a_alpha, const Real& a_beta) {
@@ -315,7 +314,7 @@ void EBHelmholtzOp::createCoarser(LevelData<EBCellFAB>& a_coarse, const LevelDat
 
 void EBHelmholtzOp::createCoarsened(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const int& a_refRat) {
   CH_assert(m_hasCoar);
-#if 0 // What I want
+#if 1 // What I want
   EBCellFactory factCoFi(m_eblgCoFi.getEBISL());
   a_lhs.define(m_eblgCoFi.getDBL(), a_rhs.nComp(), a_rhs.ghostVect(), factCoFi);
 #else // What I will try. 
@@ -450,7 +449,7 @@ void EBHelmholtzOp::AMRUpdateResidual(LevelData<EBCellFAB>&       a_residual,
   LevelData<EBCellFAB> lcorr;
   this->create(lcorr, a_correction);
   this->applyOp(lcorr, a_correction, &a_coarseCorrection, homogeneousPhysBC, homogeneousCFBC); // lcorr = L(phi, phiCoar)
-  this->incr(a_residual, lcorr, -1.0);                                                  // a_residual = 
+  this->incr(a_residual, lcorr, -1.0);                                                         // a_residual = a_residual - L(phi)
 }
 
 void EBHelmholtzOp::applyOp(LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_phi, bool a_homogeneousPhysBC) {
@@ -663,21 +662,11 @@ void EBHelmholtzOp::getFlux(EBFluxFAB&                  a_flux,
 }
 
 void EBHelmholtzOp::homogeneousCFInterp(LevelData<EBCellFAB>& a_phi){
-#if 0 // Code that I want
   if(m_hasCoar) m_interpolator->coarseFineInterpH(a_phi, m_interval);
-#else // Code that I'll try. Note that this is only here for development purposes -- this will be very slow because of the inline define
-  if(m_hasCoar) this->applyHomogeneousCFBCs(a_phi); 
-#endif
 }
 
 void EBHelmholtzOp::inhomogeneousCFInterp(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar){
-#if 0 // Code that I want
-  //  if(m_hasCoar) m_interpolator->coarseFineInterp(a_phiFine, a_phiCoar, m_interval);
-#else // Code that I'll try
-  EBQuadCFInterp& interpolator = (EBQuadCFInterp&) (*m_interpolator);
-  interpolator.interpolate(a_phiFine, a_phiCoar, m_interval);
-#endif
-
+  if(m_hasCoar) m_interpolator->coarseFineInterp(a_phiFine, a_phiCoar, m_interval);
 }
 
 void EBHelmholtzOp::interpolateCF(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar, const bool a_homogeneousCFBC){
@@ -1075,89 +1064,6 @@ void EBHelmholtzOp::reflux(LevelData<EBCellFAB>&              a_Lphi,
   this->incrementFRFine(a_phiFine, a_phi, a_finerOp);
 
   m_fluxReg->reflux(a_Lphi, m_interval, 1./m_dx);
-}
-
-void EBHelmholtzOp::applyHomogeneousCFBCs(LevelData<EBCellFAB>& a_phi){
-  for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit){
-    for (int dir = 0; dir < SpaceDim; dir++){
-      for (SideIterator sit; sit.ok(); ++sit){
-
-	CFIVS cfivs(m_eblg.getDomain(), m_eblg.getDBL()[dit()], m_eblg.getDBL(), dir, sit());
-
-	const IntVectSet& ivs = cfivs.getFineIVS();
-	if(!ivs.isEmpty()){
-	  
-	  Real halfdxcoar = (m_dx*m_refToCoar)/2.0;
-	  Real halfdxfine = m_dx/2.0;
-	  Real xg = halfdxcoar -   halfdxfine;
-	  Real xc = halfdxcoar +   halfdxfine;
-	  Real xf = halfdxcoar + 3*halfdxfine;
-	  Real hf = m_dx;
-	  Real denom = xf*xc*hf;
-
-	  const EBISBox& ebisBox = m_eblg.getEBISL()[dit()];
-	  const EBGraph& ebgraph = ebisBox.getEBGraph();
-	      
-	  for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	    const VolIndex& VoFGhost = vofit();
-
-	    IntVect ivGhost  = VoFGhost.gridIndex();
-
-	    Vector<VolIndex> farVoFs;
-	    Vector<VolIndex> closeVoFs = ebisBox.getVoFs(VoFGhost, dir, flip(sit()), 1);
-	    
-	    bool hasClose = (closeVoFs.size() > 0);
-	    bool hasFar = false;
-	    Real phic = 0.0;
-	    Real phif = 0.0;
-	    
-	    if (hasClose){
-	      const int& numClose = closeVoFs.size();
-	      for (int iVof=0;iVof<numClose;iVof++){
-		const VolIndex& vofClose = closeVoFs[iVof];
-		phic += a_phi[dit()](vofClose,0);
-	      }
-	      phic /= Real(numClose);
-
-	      farVoFs = ebisBox.getVoFs(VoFGhost, dir, flip(sit()), 2);
-	      hasFar   = (farVoFs.size()   > 0);
-	      if (hasFar)
-		{
-		  const int& numFar = farVoFs.size();
-		  for (int iVof=0;iVof<numFar;iVof++)
-		    {
-		      const VolIndex& vofFar = farVoFs[iVof];
-		      phif += a_phi[dit()](vofFar,0);
-		    }
-		  phif /= Real(numFar);
-		}
-	    }
-
-	    Real phiGhost;
-	    if (hasClose && hasFar)
-	      {
-		// quadratic interpolation  phi = ax^2 + bx + c
-		Real A = (phif*xc - phic*xf)/denom;
-		Real B = (phic*hf*xf - phif*xc*xc + phic*xf*xc)/denom;
-
-		phiGhost = A*xg*xg + B*xg;
-	      }
-	    else if (hasClose)
-	      {
-		//linear interpolation
-		Real slope =  phic/xc;
-		phiGhost   =  slope*xg;
-	      }
-	    else
-	      {
-		phiGhost = 0.0; //nothing to interpolate from
-	      }
-	    a_phi[dit()](VoFGhost, m_comp) = phiGhost;
-	  }
-	}
-      }
-    }
-  }
 }
 
 #include <CD_NamespaceFooter.H>
