@@ -729,12 +729,12 @@ void EBHelmholtzOp::gsrbColor(LevelData<EBCellFAB>& a_phi, const LevelData<EBCel
     if(loIV <= hiIV){
       const Box colorBox(loIV, hiIV);
 
-      // Note - replace this with our own kernel so we can develop code without coupling too hard to Chombo. 
-      FORT_GSRBEBCO(CHF_FRA1(phiReg, m_comp),
-		    CHF_CONST_FRA1(LphiReg, m_comp),
-		    CHF_CONST_FRA1(rhsReg, m_comp),
-		    CHF_CONST_FRA1(relReg, m_comp),
-		    CHF_BOX(colorBox));
+      // Note - replace this with our own kernel so we can develop code without coupling too hard to Chombo.
+      FORT_HELMHOLTZGSRBCOLOR(CHF_FRA1(phiReg, m_comp),
+			      CHF_CONST_FRA1(LphiReg, m_comp),
+			      CHF_CONST_FRA1(rhsReg, m_comp),
+			      CHF_CONST_FRA1(relReg, m_comp),
+			      CHF_BOX(colorBox));
     }
     
 

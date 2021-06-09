@@ -125,3 +125,17 @@
          endif
       chf_enddo
       end
+
+      subroutine helmholtzgsrbcolor(
+     &     chf_fra1[phi],
+     &     chf_const_fra1[lphi],
+     &     chf_const_fra1[rhs],
+     &     chf_const_fra1[relCoef],
+     &     chf_box[coloredBox])
+
+      integer chf_ddecl[i;j;k]
+
+      chf_multido[coloredBox;i;j;k;2]
+         phi(chf_ix[i;j;k]) = phi(chf_ix[i;j;k]) + relCoef(chf_ix[i;j;k]) * (rhs(chf_ix[i;j;k]) - lphi(chf_ix[i;j;k]))
+      chf_enddo
+      end

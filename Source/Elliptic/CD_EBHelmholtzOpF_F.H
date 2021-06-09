@@ -175,6 +175,37 @@ inline void FORTRAN_NAME(inlineHELMHOLTZAPPLYDOMAINFLUX, inlineHELMHOLTZAPPLYDOM
 }
 #endif  // GUARDHELMHOLTZAPPLYDOMAINFLUX 
 
+#ifndef GUARDHELMHOLTZGSRBCOLOR 
+#define GUARDHELMHOLTZGSRBCOLOR 
+// Prototype for Fortran procedure helmholtzgsrbcolor ...
+//
+void FORTRAN_NAME( HELMHOLTZGSRBCOLOR ,helmholtzgsrbcolor )(
+      CHFp_FRA1(phi)
+      ,CHFp_CONST_FRA1(lphi)
+      ,CHFp_CONST_FRA1(rhs)
+      ,CHFp_CONST_FRA1(relCoef)
+      ,CHFp_BOX(coloredBox) );
+
+#define FORT_HELMHOLTZGSRBCOLOR FORTRAN_NAME( inlineHELMHOLTZGSRBCOLOR, inlineHELMHOLTZGSRBCOLOR)
+#define FORTNT_HELMHOLTZGSRBCOLOR FORTRAN_NAME( HELMHOLTZGSRBCOLOR, helmholtzgsrbcolor)
+
+inline void FORTRAN_NAME(inlineHELMHOLTZGSRBCOLOR, inlineHELMHOLTZGSRBCOLOR)(
+      CHFp_FRA1(phi)
+      ,CHFp_CONST_FRA1(lphi)
+      ,CHFp_CONST_FRA1(rhs)
+      ,CHFp_CONST_FRA1(relCoef)
+      ,CHFp_BOX(coloredBox) )
+{
+ CH_TIMELEAF("FORT_HELMHOLTZGSRBCOLOR");
+ FORTRAN_NAME( HELMHOLTZGSRBCOLOR ,helmholtzgsrbcolor )(
+      CHFt_FRA1(phi)
+      ,CHFt_CONST_FRA1(lphi)
+      ,CHFt_CONST_FRA1(rhs)
+      ,CHFt_CONST_FRA1(relCoef)
+      ,CHFt_BOX(coloredBox) );
+}
+#endif  // GUARDHELMHOLTZGSRBCOLOR 
+
 }
 
 #endif
