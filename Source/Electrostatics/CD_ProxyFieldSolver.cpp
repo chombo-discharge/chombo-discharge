@@ -48,7 +48,7 @@ bool ProxyFieldSolver::solve(MFAMRCellData&       a_potential,
 
   this->solveOnePhase(gasData, gasResi);
 
-  this->solveHelmholtz(gasData, gasResi);
+  //  this->solveHelmholtz(gasData, gasResi);
   
   return true;
 }
@@ -361,7 +361,9 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi, EBAMRCellData& a_resi
   }
 
   if(procID() == 0) std::cout << "solveOnePhase final resid = " << phiResid << std::endl;
-  
+
+  m_amr->averageDown(a_phi, m_realm, phase::gas);
+  m_amr->interpGhost(a_phi, m_realm, phase::gas);
   this->computeElectricField();
   this->writePlotFile();
 }

@@ -239,7 +239,7 @@ unsigned int EBHelmholtzOp::orderOfAccuracy(void) const {
 }
 
 void EBHelmholtzOp::enforceCFConsistency(LevelData<EBCellFAB>& a_coarCorr, const LevelData<EBCellFAB>& a_fineCorr){
-  m_coarAve->average(a_coarCorr, a_fineCorr, a_coarCorr.interval());
+  //  m_coarAve->average(a_coarCorr, a_fineCorr, a_coarCorr.interval());
 }
 
 void EBHelmholtzOp::setAlphaAndBeta(const Real& a_alpha, const Real& a_beta) {
@@ -916,7 +916,7 @@ void EBHelmholtzOp::getFaceCentroidFlux(EBFaceFAB&       a_fluxCentroid,
 
   
   this->getFaceCenteredFlux(a_fluxCentroid, a_phi, a_cellBox, a_dit, a_dir);
-  this->interpolateFluxes(  a_fluxCentroid,        a_cellBox, a_dit, a_dir);
+  //  this->interpolateFluxes(  a_fluxCentroid,        a_cellBox, a_dit, a_dir);
 }
 
 void EBHelmholtzOp::getFaceCenteredFlux(EBFaceFAB&       a_fluxCenter,

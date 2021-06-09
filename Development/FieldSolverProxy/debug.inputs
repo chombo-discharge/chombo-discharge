@@ -76,7 +76,7 @@ ProxyFieldSolver.mg_tol   = 1.E-10      # Multigrid tolerance
 # ====================================================================================================
 # GEO_COARSENER CLASS OPTIONS
 # ====================================================================================================
-GeoCoarsener.num_boxes   = 1            # Number of coarsening boxes (0 = don't coarsen)
+GeoCoarsener.num_boxes   = 0            # Number of coarsening boxes (0 = don't coarsen)
 GeoCoarsener.box1_lo     = -2 0         # Remove irregular cell tags 
 GeoCoarsener.box1_hi     =  2 2.0       # between these two corners
 GeoCoarsener.box1_lvl    = 0            # up to this level

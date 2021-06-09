@@ -9,7 +9,7 @@
   @author Robert Marskar
 */
 
-#define EBHelmholtzOpFactoryDebug 1
+#define EBHelmholtzOpFactoryDebug 0
 #if EBHelmholtzOpFactoryDebug
 #include <EBAMRPoissonOp.H>
 #endif
