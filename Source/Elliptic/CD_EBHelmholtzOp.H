@@ -44,6 +44,7 @@ public:
   enum class RelaxationMethod {
     Jacobi,
     GSRB,
+    GSMultiColor,
     GSRBFast,
   };
 
@@ -659,17 +660,25 @@ protected:
   void relaxJacobi(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations);
 
   /*!
-    @brief Gauss-seidel relaxation
+    @brief Red-black Gauss-Seidel relaxation
     @param[inout] a_correction Correction
     @param[in]    a_residual   Residual
     @param[in]    a_iterations Number of iterations
   */
-  void relaxGauSai(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations);
+  void relaxGSRB(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations);
+
+  /*!
+    @brief Multi-colored gauss-seidel relaxation
+    @param[inout] a_correction Correction
+    @param[in]    a_residual   Residual
+    @param[in]    a_iterations Number of iterations
+  */
+  void relaxGSMultiColor(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations);
 
   /*!
     @brief Red-black Gauss-Seidel relaxation
   */
-  void gsrbColor(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_rhs, const IntVect& a_color);
+  void gauSaiMultiColor(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_rhs, const IntVect& a_color);
 
   /*!
     @brief Fast Gauss-seidel relaxation

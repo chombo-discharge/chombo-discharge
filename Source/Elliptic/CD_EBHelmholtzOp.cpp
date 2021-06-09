@@ -668,7 +668,10 @@ void EBHelmholtzOp::relax(LevelData<EBCellFAB>& a_correction, const LevelData<EB
     this->relaxJacobi(a_correction, a_residual, a_iterations);
     break;
   case RelaxationMethod::GSRB:
-    this->relaxGauSai(a_correction, a_residual, a_iterations);
+    this->relaxGSRB(a_correction, a_residual, a_iterations);
+    break;
+  case RelaxationMethod::GSMultiColor:
+    this->relaxGSMultiColor(a_correction, a_residual, a_iterations);
     break;
   case RelaxationMethod::GSRBFast:
     this->relaxGSRBFast(a_correction, a_residual, a_iterations);
@@ -695,7 +698,29 @@ void EBHelmholtzOp::relaxJacobi(LevelData<EBCellFAB>& a_correction, const LevelD
   }
 }
 
-void EBHelmholtzOp::relaxGauSai(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations){
+void EBHelmholtzOp::relaxGSRB(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations){
+  MayDay::Abort("EBHelmholtzOp::relaxGSRB - not implemented");
+  LevelData<EBCellFAB> Lcorr;
+  this->create(Lcorr, a_residual);
+
+  const IntVect red   = IntVect::Zero;
+  const IntVect black = IntVect::Unit;
+
+  for (int iter = 0; iter < a_iterations; iter++){
+
+    // Do red
+    this->homogeneousCFInterp(a_correction);
+    this->applyOp(Lcorr, a_correction, true);
+    this->gauSaiMultiColor(a_correction, Lcorr, a_residual, red);
+
+    // Do black
+    this->homogeneousCFInterp(a_correction);
+    this->applyOp(Lcorr, a_correction, true);
+    //    this->gauSaiMultiColor(a_correction, Lcorr, a_residual, red);
+  }
+}
+
+void EBHelmholtzOp::relaxGSMultiColor(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations){
   LevelData<EBCellFAB> Lcorr;
   this->create(Lcorr, a_residual);
 
@@ -703,12 +728,12 @@ void EBHelmholtzOp::relaxGauSai(LevelData<EBCellFAB>& a_correction, const LevelD
     for (int icolor = 0; icolor < m_colors.size(); icolor++){
       this->homogeneousCFInterp(a_correction);
       this->applyOp(Lcorr, a_correction, true);
-      this->gsrbColor(a_correction, Lcorr, a_residual, m_colors[icolor]);
+      this->gauSaiMultiColor(a_correction, Lcorr, a_residual, m_colors[icolor]);
     }
   }
 }
 
-void EBHelmholtzOp::gsrbColor(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_rhs, const IntVect& a_color){
+void EBHelmholtzOp::gauSaiMultiColor(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_rhs, const IntVect& a_color){
   const DisjointBoxLayout& dbl = a_phi.disjointBoxLayout();
   
   for (DataIterator dit(dbl); dit.ok(); ++dit){
