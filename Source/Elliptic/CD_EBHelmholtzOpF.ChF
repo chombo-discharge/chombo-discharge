@@ -139,3 +139,58 @@
          phi(chf_ix[i;j;k]) = phi(chf_ix[i;j;k]) + relCoef(chf_ix[i;j;k]) * (rhs(chf_ix[i;j;k]) - lphi(chf_ix[i;j;k]))
       chf_enddo
       end
+
+      subroutine helmholtzgsrb(
+     &     chf_fra1[phi],
+     &     chf_const_fra1[rhs],
+     &     chf_const_fra1[relcoef],
+     &     chf_const_fra1[acoef],
+     &     chf_const_fra1[b0],
+     &     chf_const_fra1[b1],
+     &     chf_const_fra1[b2],
+     &     chf_const_real[alpha],
+     &     chf_const_real[beta],
+     &     chf_const_real[dx],
+     &     chf_const_int[redBlack],
+     &     chf_box[region])
+
+      integer chf_ddecl[i;j;k]
+      real_t laplphi, dx0
+      integer imin,imax,indtot
+
+      dx0 = beta/(dx * dx)
+
+#if CH_SPACEDIM==3
+      do k=CHF_LBOUND[region; 2], CHF_UBOUND[region; 2]
+#endif
+#if CH_SPACEDIM > 1
+         do j=CHF_LBOUND[region; 1], CHF_UBOUND[region; 1]
+#endif
+            imin = CHF_LBOUND[region; 0]
+            CHF_DTERM[indtot = imin; + j ; + k ]
+
+            imin = imin + abs(mod(indtot + redBlack, 2))
+            imax = CHF_UBOUND[region; 0]
+            do i = imin, imax, 2
+               laplphi = CHF_DTERM[
+     &               b0(CHF_IX[i+1;j  ;k  ])*(phi(chf_ix[i+1;j  ;k  ]) - phi(chf_ix[i  ;j  ;k  ]))
+     &              -b0(CHF_IX[i  ;j  ;k  ])*(phi(chf_ix[i  ;j  ;k  ]) - phi(chf_ix[i-1;j  ;k  ]));
+     &              +b1(CHF_IX[i  ;j+1;k  ])*(phi(chf_ix[i  ;j+1;k  ]) - phi(chf_ix[i  ;j  ;k  ]))
+     &              -b1(CHF_IX[i  ;j  ;k  ])*(phi(chf_ix[i  ;j  ;k  ]) - phi(chf_ix[i  ;j-1;k  ]));
+     &              +b2(CHF_IX[i  ;j  ;k+1])*(phi(chf_ix[i  ;j  ;k+1]) - phi(chf_ix[i  ;j  ;k  ]))
+     &              -b2(CHF_IX[i  ;j  ;k  ])*(phi(chf_ix[i  ;j  ;k  ]) - phi(chf_ix[i  ;j  ;k-1]))]
+
+               laplphi = alpha*acoef(chf_ix[i;j;k])*phi(chf_ix[i;j;k]) + dx0*laplphi
+
+               phi(chf_ix[i;j;k]) = phi(chf_ix[i;j;k]) + relcoef(chf_ix[i;j;k])*(rhs(chf_ix[i;j;k]) - laplphi)
+
+            enddo
+#if CH_SPACEDIM > 1
+         enddo
+#endif
+#if CH_SPACEDIM==3
+      enddo
+#endif
+
+      return
+      end

@@ -70,7 +70,7 @@ ProxyFieldSolver.dom_val  = -1.         # Dirichlet value on domain
 ProxyFieldSolver.eb_val   =  1.         # Dirichlet value on EB
 ProxyFieldSolver.phi_ini  = 0.0         # Initial value for phi
 ProxyFieldSolver.smooth   = 16          # Smoothings
-ProxyFieldSolver.relax    = 1           # Relaxation method
+ProxyFieldSolver.relax    = 2           # Relaxation method
 ProxyFieldSolver.mg_tol   = 1.E-10      # Multigrid tolerance
 
 # ====================================================================================================

@@ -634,6 +634,20 @@ protected:
   */
   Vector<IntVect> m_colors;
 
+#if CH_SPACEDIM==2
+  LayoutData<VoFIterator >         m_vofItIrregColorDomLo[4][SpaceDim];
+  LayoutData<VoFIterator >         m_vofItIrregColorDomHi[4][SpaceDim];
+  LayoutData<BaseIVFAB<Real> >     m_cacheEBxDomainFluxLo[4][SpaceDim];
+  LayoutData<BaseIVFAB<Real> >     m_cacheEBxDomainFluxHi[4][SpaceDim];
+  LayoutData<RefCountedPtr<EBStencil> >  m_colorEBStencil[4];
+#elif CH_SPACEDIM==3
+  LayoutData<VoFIterator >         m_vofItIrregColorDomLo[8][SpaceDim];
+  LayoutData<VoFIterator >         m_vofItIrregColorDomHi[8][SpaceDim];
+  LayoutData<BaseIVFAB<Real> >     m_cacheEBxDomainFluxLo[8][SpaceDim];
+  LayoutData<BaseIVFAB<Real> >     m_cacheEBxDomainFluxHi[8][SpaceDim];
+  LayoutData<RefCountedPtr<EBStencil> >  m_colorEBStencil[8];
+#endif
+
 
   /*!
     @brief Apply operator on this level. This is a more general version which can turn on/off homogeneous and CF bcs.
@@ -757,6 +771,11 @@ protected:
     @brief Define stencils
   */
   void defineStencils();
+
+  /*!
+    @brief Define color stencils (which make relaxation go faster)
+  */
+  void defineColorStencils();
 
   /*!
     @brief Compute flux on centroid faces.

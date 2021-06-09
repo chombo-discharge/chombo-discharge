@@ -110,6 +110,7 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid&                                 
 
   // Define data holders and stencils
   this->defineStencils();
+  this->defineColorStencils();
 }
 
 EBHelmholtzOp::~EBHelmholtzOp(){
@@ -231,6 +232,68 @@ void EBHelmholtzOp::defineStencils(){
   // Compute the alpha-weight and relaxation coefficient. 
   this->computeAlphaWeight();
   this->computeRelaxationCoefficient();
+}
+
+void EBHelmholtzOp::defineColorStencils(){
+  const LayoutData<BaseIVFAB<VoFStencil> >* fluxStencil = m_ebBc->getFluxStencil(m_comp);
+
+  for (int icolor = 0; icolor < m_colors.size(); ++icolor){
+    m_colorEBStencil[icolor].define(m_eblg.getDBL());
+    
+    for(int dir = 0; dir < SpaceDim; dir++){
+      m_vofItIrregColorDomLo[icolor][dir].define(m_eblg.getDBL());
+      m_vofItIrregColorDomHi[icolor][dir].define(m_eblg.getDBL());
+      m_cacheEBxDomainFluxLo[icolor][dir].define(m_eblg.getDBL());
+      m_cacheEBxDomainFluxHi[icolor][dir].define(m_eblg.getDBL());
+    }
+
+    for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit){
+      const Box cellbox      = m_eblg.getDBL()[dit()];
+      const EBISBox& ebisbox = m_eblg.getEBISL()[dit()];
+      const EBGraph& ebgraph = ebisbox.getEBGraph();
+
+      IntVectSet ivsColor(DenseIntVectSet(cellbox, false));
+
+      VoFIterator& vofit = m_vofIterIrreg[dit()];
+      for (vofit.reset(); vofit.ok(); ++vofit){
+	const VolIndex& vof = vofit();
+	const IntVect&  iv  = vof.gridIndex();
+
+	bool doThisCell = true;
+	for (int dir = 0; dir < SpaceDim; dir++){
+	  if(iv[dir] % 2 != m_colors[icolor][dir]) doThisCell = false;
+	}
+
+	if(doThisCell) ivsColor |= iv;
+      }
+
+      BaseIVFAB<VoFStencil> colorStencils(ivsColor, ebgraph, m_nComp);
+	
+      for (int dir = 0; dir < SpaceDim; dir++){
+	const IntVectSet loIrregColor = ivsColor & m_sideBox.at(std::make_pair(dir, Side::Lo));
+	const IntVectSet hiIrregColor = ivsColor & m_sideBox.at(std::make_pair(dir, Side::Hi));
+
+	m_vofItIrregColorDomLo[icolor][dir][dit()].define(loIrregColor, ebgraph);
+	m_vofItIrregColorDomHi[icolor][dir][dit()].define(hiIrregColor, ebgraph);
+
+	m_cacheEBxDomainFluxLo[icolor][dir][dit()].define(loIrregColor, ebgraph, m_nComp);
+	m_cacheEBxDomainFluxHi[icolor][dir][dit()].define(hiIrregColor, ebgraph, m_nComp);
+      }
+
+      VoFIterator vofitColor(ivsColor, ebgraph);
+      for (vofitColor.reset(); vofitColor.ok(); ++vofitColor){
+	const VolIndex& vof = vofitColor();
+
+	VoFStencil& colorStencil = colorStencils(vof, m_comp);
+
+	colorStencil = this->getDivFStencil(vof, dit());
+	if(fluxStencil != nullptr) colorStencil += (*fluxStencil)[dit()](vof, m_comp);
+      }
+
+      m_colorEBStencil[icolor][dit()] = RefCountedPtr<EBStencil>
+	(new EBStencil(vofitColor.getVector(), colorStencils, cellbox, ebisbox, m_ghostPhi, m_ghostRhs, m_comp, true));
+    }
+  }
 }
 
 unsigned int EBHelmholtzOp::orderOfAccuracy(void) const {
@@ -762,9 +825,75 @@ void EBHelmholtzOp::gauSaiMultiColor(LevelData<EBCellFAB>& a_phi, const LevelDat
 void EBHelmholtzOp::relaxGSMultiColorFast(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations){
   MayDay::Abort("EBHelmholtzOp::relaxGauSai - not implemented");
 
+  const bool homogeneousPhysBC = true;
+
+  const DisjointBoxLayout& dbl = m_eblg.getDBL();
+  
   for (int iter = 0; iter < a_iterations; iter++){
-    for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit){
-      
+
+    // Fill ghost cells so we get domain BC flux. 
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      this->applyDomainFlux(a_correction[dit()], dbl[dit()], dit(), homogeneousPhysBC);
+    }
+
+    for (int redBlack = 0; redBlack <= 1; redBlack++){
+      a_correction.exchange();
+
+      if(m_hasCoar){
+	this->homogeneousCFInterp(a_correction);
+      }
+
+      for(DataIterator dit(dbl); dit.ok(); ++dit){
+	EBCellFAB&       phi = a_correction[dit()];
+	const EBCellFAB& rhs = a_residual[dit()];
+	const Box cellBox    = dbl[dit()];
+
+	// Cache phi
+	for (int c = 0; c < m_colors.size()/2; ++c){
+	  m_colorEBStencil[m_colors.size()/2*redBlack+c][dit()]->cachePhi(phi);
+	}
+
+	BaseFab<Real>& regPhi       = phi.getSingleValuedFAB();
+	const BaseFab<Real>& regRhs = rhs.getSingleValuedFAB();
+	const BaseFab<Real>& regRel = m_relCoef[dit()].getSingleValuedFAB();
+	const BaseFab<Real>& regAco = (*m_Acoef)[dit()].getSingleValuedFAB();
+
+	// It's an older code, sir, but it checks out.
+	BaseFab<Real>  dummy(Box(IntVect::Zero, IntVect::Zero), m_nComp);
+	BaseFab<Real>* regBco[3];
+	for (int dir = 0; dir < 3; dir++){
+	  if(dir >= SpaceDim){
+	    regBco[dir] = &dummy;
+	  }
+	  else{
+	    regBco[dir] = &(*m_Bcoef)[dit()][dir].getSingleValuedFAB();
+	  }
+	}
+
+	// It's an older code, sir, but it checks out.
+	FORT_HELMHOLTZGSRB(CHF_FRA1(        regPhi,     m_comp),
+			   CHF_CONST_FRA1(  regRhs,     m_comp),
+			   CHF_CONST_FRA1(  regRel,     m_comp),
+			   CHF_CONST_FRA1(  regAco,     m_comp),
+			   CHF_CONST_FRA1((*regBco[0]), m_comp),
+			   CHF_CONST_FRA1((*regBco[1]), m_comp),
+			   CHF_CONST_FRA1((*regBco[2]), m_comp),
+			   CHF_CONST_REAL(m_alpha),
+			   CHF_CONST_REAL(m_beta),
+			   CHF_CONST_REAL(m_dx),
+			   CHF_CONST_INT(redBlack),
+			   CHF_BOX(cellBox));
+
+	// Uncache phi
+	for (int c = 0; c < m_colors.size()/2; ++c){
+	  m_colorEBStencil[m_colors.size()/2*redBlack+c][dit()]->uncachePhi(phi);
+	}
+
+	// Irregular
+	for (int c = 0; c < m_colors.size()/2; ++c){
+	  //	  this->GSColorAllIrrgular(phi, rhs, m_colors.size()/2*redBlack+c, dit());
+	}
+      }
     }
   }
 }

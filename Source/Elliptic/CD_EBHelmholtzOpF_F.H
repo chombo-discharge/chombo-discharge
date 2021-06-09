@@ -206,6 +206,58 @@ inline void FORTRAN_NAME(inlineHELMHOLTZGAUSAICOLOR, inlineHELMHOLTZGAUSAICOLOR)
 }
 #endif  // GUARDHELMHOLTZGAUSAICOLOR 
 
+#ifndef GUARDHELMHOLTZGSRB 
+#define GUARDHELMHOLTZGSRB 
+// Prototype for Fortran procedure helmholtzgsrb ...
+//
+void FORTRAN_NAME( HELMHOLTZGSRB ,helmholtzgsrb )(
+      CHFp_FRA1(phi)
+      ,CHFp_CONST_FRA1(rhs)
+      ,CHFp_CONST_FRA1(relcoef)
+      ,CHFp_CONST_FRA1(acoef)
+      ,CHFp_CONST_FRA1(b0)
+      ,CHFp_CONST_FRA1(b1)
+      ,CHFp_CONST_FRA1(b2)
+      ,CHFp_CONST_REAL(alpha)
+      ,CHFp_CONST_REAL(beta)
+      ,CHFp_CONST_REAL(dx)
+      ,CHFp_CONST_INT(redBlack)
+      ,CHFp_BOX(region) );
+
+#define FORT_HELMHOLTZGSRB FORTRAN_NAME( inlineHELMHOLTZGSRB, inlineHELMHOLTZGSRB)
+#define FORTNT_HELMHOLTZGSRB FORTRAN_NAME( HELMHOLTZGSRB, helmholtzgsrb)
+
+inline void FORTRAN_NAME(inlineHELMHOLTZGSRB, inlineHELMHOLTZGSRB)(
+      CHFp_FRA1(phi)
+      ,CHFp_CONST_FRA1(rhs)
+      ,CHFp_CONST_FRA1(relcoef)
+      ,CHFp_CONST_FRA1(acoef)
+      ,CHFp_CONST_FRA1(b0)
+      ,CHFp_CONST_FRA1(b1)
+      ,CHFp_CONST_FRA1(b2)
+      ,CHFp_CONST_REAL(alpha)
+      ,CHFp_CONST_REAL(beta)
+      ,CHFp_CONST_REAL(dx)
+      ,CHFp_CONST_INT(redBlack)
+      ,CHFp_BOX(region) )
+{
+ CH_TIMELEAF("FORT_HELMHOLTZGSRB");
+ FORTRAN_NAME( HELMHOLTZGSRB ,helmholtzgsrb )(
+      CHFt_FRA1(phi)
+      ,CHFt_CONST_FRA1(rhs)
+      ,CHFt_CONST_FRA1(relcoef)
+      ,CHFt_CONST_FRA1(acoef)
+      ,CHFt_CONST_FRA1(b0)
+      ,CHFt_CONST_FRA1(b1)
+      ,CHFt_CONST_FRA1(b2)
+      ,CHFt_CONST_REAL(alpha)
+      ,CHFt_CONST_REAL(beta)
+      ,CHFt_CONST_REAL(dx)
+      ,CHFt_CONST_INT(redBlack)
+      ,CHFt_BOX(region) );
+}
+#endif  // GUARDHELMHOLTZGSRB 
+
 }
 
 #endif
