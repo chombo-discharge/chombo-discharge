@@ -44,10 +44,7 @@ bool ProxyFieldSolver::solve(MFAMRCellData&       a_potential,
   EBAMRCellData gasData = m_amr->alias(phase::gas, a_potential);
   EBAMRCellData gasResi = m_amr->alias(phase::gas, m_residue);
 
-
-
-  this->solveOnePhase(gasData, gasResi);
-
+  this->solveChombo( gasData, gasResi);
   this->solveHelmholtz(gasData, gasResi);
   
   return true;
@@ -160,7 +157,7 @@ Vector<RefCountedPtr<EBQuadCFInterp> > ProxyFieldSolver::getInterpOld(){
   return ret;
 }
 
-void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi, EBAMRCellData& a_residue){
+void ProxyFieldSolver::solveChombo(EBAMRCellData& a_phi, EBAMRCellData& a_residue){
   ParmParse pp(m_className.c_str());
 
   // Define coefficients
@@ -360,7 +357,7 @@ void ProxyFieldSolver::solveOnePhase(EBAMRCellData& a_phi, EBAMRCellData& a_resi
     iter++;
   }
 
-  if(procID() == 0) std::cout << "solveOnePhase final resid = " << phiResid << std::endl;
+  if(procID() == 0) std::cout << "solveChombo final resid = " << phiResid << std::endl;
 
   m_amr->averageDown(a_phi, m_realm, phase::gas);
   m_amr->interpGhost(a_phi, m_realm, phase::gas);
@@ -454,7 +451,7 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
 			    m_amr->getNumberOfGhostCells()*IntVect::Unit,
 			    EBHelmholtzOp::RelaxationMethod::GauSaiMultiColorFast,
 			    bottomDomain,
-			    m_amr->getBlockingFactor());
+			    32);//m_amr->getBlockingFactor());
 
   BiCGStabSolver<LevelData<EBCellFAB> > bicgstab;
   AMRMultiGrid<LevelData<EBCellFAB> > multigridSolver;
@@ -471,9 +468,10 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
   m_amr->alias(phi, a_phi);
   m_amr->alias(res, a_res);
   m_amr->alias(rhs, RHS);
-
+  pout() << "doing define" << endl;
   multigridSolver.define(m_amr->getDomains()[0], fact, &bicgstab, 1 + finestLevel);
   multigridSolver.m_verbosity=10;
+  pout() << "doing init" << endl;
   multigridSolver.init(phi, rhs, finestLevel, 0);
   
   // Print the initial residual

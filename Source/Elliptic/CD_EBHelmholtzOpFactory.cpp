@@ -92,18 +92,16 @@ void EBHelmholtzOpFactory::defineMultigridLevels(){
 
   for (int amrLevel = 0; amrLevel < m_numAmrLevels; amrLevel++){
     m_hasMgLevels[amrLevel] = false;
-#if 0    
+
     if(amrLevel == 0 && this->isCoarser(m_bottomDomain, m_amrLevelGrids[amrLevel]->getDomain())){
       m_hasMgLevels[amrLevel] = true;
     }
-    else if(m_amrRefRatios[amrLevel-1] > 2){ // There must be one intermediate level 
-      m_hasMgLevels[amrLevel] = true;
+
+    if(amrLevel > 0){
+      if(m_amrRefRatios[amrLevel-1] > 2){
+	m_hasMgLevels[amrLevel] = true;
+      }
     }
-#else
-    if(amrLevel == 0 || m_amrRefRatios[amrLevel] > 2){
-      m_hasMgLevels[amrLevel] = true;
-    }
-#endif
 
     if(m_hasMgLevels[amrLevel]){
       
@@ -135,7 +133,6 @@ void EBHelmholtzOpFactory::defineMultigridLevels(){
 	if(amrLevel == 0 && curMgLevels < m_deeperLevelGrids.size()){    
 	  hasCoarser = true;                                // Note that m_deeperLevelGrids[0] should be a factor 2 coarsening of the 
 	  mgEblgCoar = m_deeperLevelGrids[curMgLevels-1];  // coarsest AMR level. So curMgLevels-1 is correct.
-	  MayDay::Abort("wtf");
 	}
 	else{
 	  // Let the operator factory do the coarsening this time. 
@@ -229,7 +226,6 @@ void EBHelmholtzOpFactory::defineMultigridLevels(){
 bool EBHelmholtzOpFactory::isCoarser(const ProblemDomain& A, const ProblemDomain& B) const{
   return A.domainBox().numPts() < B.domainBox().numPts();
 }
-
 
 bool EBHelmholtzOpFactory::isFiner(const ProblemDomain& A, const ProblemDomain& B) const{
   return A.domainBox().numPts() > B.domainBox().numPts();
@@ -435,7 +431,6 @@ EBHelmholtzOp* EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, 
   if(foundMgLevel){
 
     const Real dx     = m_amrResolutions[amrLevel]*std::pow(mgRefRat, a_depth); // 
-    const Real dxCoar = (amrLevel > 0) ? m_amrResolutions[amrLevel-1] : -1.0;
 
     auto dobc = this->makeDomainBcObject(eblg, dx);
     auto ebbc = this->makeEbBcObject    (eblg, dx);
@@ -514,7 +509,7 @@ EBHelmholtzOp* EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
 
   if(hasCoar){
     this->getCoarserLayout(eblgCoFi, eblg, refToCoar, m_mgBlockingFactor);
-
+    eblgCoFi.setMaxRefinementRatio(refToCoar);
     CH_assert(eblgCoFi.isDefined());
   }
 
