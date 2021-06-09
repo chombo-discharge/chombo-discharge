@@ -469,7 +469,6 @@ void EBHelmholtzOp::AMRRestrict(LevelData<EBCellFAB>&       a_residualCoarse,
 
   LevelData<EBCellFAB> resThisLevel;
   this->create(resThisLevel, a_residual);
-  this->setToZero(resThisLevel);
 
   const bool homogeneousPhysBC = true;
   const bool homogeneousCFBC   = false;

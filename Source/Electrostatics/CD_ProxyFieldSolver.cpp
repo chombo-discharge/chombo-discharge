@@ -47,8 +47,8 @@ bool ProxyFieldSolver::solve(MFAMRCellData&       a_potential,
   EBAMRCellData gasData = m_amr->alias(phase::gas, a_potential);
   EBAMRCellData gasResi = m_amr->alias(phase::gas, m_residue);
 
-  this->solveChombo( gasData, gasResi);
   this->solveHelmholtz(gasData, gasResi);
+  this->solveChombo(   gasData, gasResi);
   
   return true;
 }
@@ -170,6 +170,7 @@ void ProxyFieldSolver::solveChombo(EBAMRCellData& a_phi, EBAMRCellData& a_residu
   EBAMRFluxData bco;
   EBAMRIVData   bcoIrreg;
 
+  Real t1;
 
   m_amr->allocate(aco,      m_realm, phase::gas, 1);
   m_amr->allocate(bco,      m_realm, phase::gas, 1);
@@ -239,20 +240,7 @@ void ProxyFieldSolver::solveChombo(EBAMRCellData& a_phi, EBAMRCellData& a_residu
 											      ghostRHS,
 											      relaxType));
 
-  auto factoryOld = RefCountedPtr<EBConductivityOpFactory> (new EBConductivityOpFactory(levelGrids,
-											interpOld,
-											alpha,
-											beta,
-											aco.getData(),
-											bco.getData(),
-											bcoIrreg.getData(),
-											m_amr->getDx()[0],
-											m_amr->getRefinementRatios(),
-											domainFactory,
-											ebbcFactory,
-											ghostPhi,
-											ghostRHS,
-											relaxType));
+
 
   
   auto factoryPoiss = RefCountedPtr<EBAMRPoissonOpFactory> (new EBAMRPoissonOpFactory(levelGrids,
@@ -285,6 +273,23 @@ void ProxyFieldSolver::solveChombo(EBAMRCellData& a_phi, EBAMRCellData& a_residu
 									 ghostPhi,
 									 ghostRHS,
 									 relaxType));
+  t1 = -MPI_Wtime();
+  auto factoryOld = RefCountedPtr<EBConductivityOpFactory> (new EBConductivityOpFactory(levelGrids,
+											interpOld,
+											alpha,
+											beta,
+											aco.getData(),
+											bco.getData(),
+											bcoIrreg.getData(),
+											m_amr->getDx()[0],
+											m_amr->getRefinementRatios(),
+											domainFactory,
+											ebbcFactory,
+											ghostPhi,
+											ghostRHS,
+											relaxType));
+  t1 += MPI_Wtime();
+  if(procID() == 0) std::cout << "ebcond oper time = " << t1 << std::endl;
 
 										   
 
@@ -301,6 +306,7 @@ void ProxyFieldSolver::solveChombo(EBAMRCellData& a_phi, EBAMRCellData& a_residu
   pp.get("smooth",   numSmooth);
   pp.get("factory",  whichFactory);
 
+  t1 = -MPI_Wtime();
   if(whichFactory == "nwo"){
     pout() << "using nwo ebconductivityop" << endl;
     multigridSolver.define(m_amr->getDomains()[0], *factoryNWO, &bicgstab, 1 + m_amr->getFinestLevel());
@@ -321,6 +327,8 @@ void ProxyFieldSolver::solveChombo(EBAMRCellData& a_phi, EBAMRCellData& a_residu
   else{
     MayDay::Abort("Bad argument to 'factory'");
   }
+  t1 += MPI_Wtime();
+  if(procID() == 0) std::cout << "ebcond define time = " << t1 << std::endl;
 
   multigridSolver.setSolverParameters(numSmooth, numSmooth, numSmooth, 1, 32, tolerance, 1E-60, 1E-60);
 
@@ -340,8 +348,12 @@ void ProxyFieldSolver::solveChombo(EBAMRCellData& a_phi, EBAMRCellData& a_residu
   const int baseLevel   = 0;
 
   multigridSolver.m_verbosity = 10;
+  t1 = -MPI_Wtime();
   multigridSolver.init(phi, rhs, finestLevel, baseLevel);
+  t1 += MPI_Wtime();
+  if(procID() == 0) std::cout << "ebcond init time = " << t1 << std::endl;
   multigridSolver.m_convergenceMetric = multigridSolver.computeAMRResidual(zer, rhs, finestLevel, baseLevel);
+  
 
   Real zerResid = multigridSolver.computeAMRResidual(res, zer, rhs, finestLevel, baseLevel);
   Real phiResid = multigridSolver.computeAMRResidual(res, phi, rhs, finestLevel, baseLevel);
@@ -350,7 +362,7 @@ void ProxyFieldSolver::solveChombo(EBAMRCellData& a_phi, EBAMRCellData& a_residu
   while(phiResid >= zerResid*tolerance && iter < 10 ){
     multigridSolver.m_convergenceMetric = multigridSolver.computeAMRResidual(zer, rhs, finestLevel, baseLevel);
 
-    Real t1 = -MPI_Wtime();
+    t1 = -MPI_Wtime();
     multigridSolver.solveNoInit(phi, rhs, finestLevel, baseLevel, false, false);
     t1 += MPI_Wtime();
     if(procID() == 0) std::cout << "chombo solve time = " << t1 << std::endl;
@@ -436,6 +448,9 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
     bottomDomain.coarsen(2);
   }
 
+  Real t1;
+
+  t1 = -MPI_Wtime();
   EBHelmholtzOpFactory fact(alpha,
 			    beta,
 			    m_amr->getProbLo(),
@@ -454,7 +469,9 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
 			    m_amr->getNumberOfGhostCells()*IntVect::Unit,
 			    EBHelmholtzOp::RelaxationMethod::GauSaiMultiColorFast,
 			    bottomDomain,
-			    64);//m_amr->getMaxBoxSize());
+			    32);//m_amr->getMaxBoxSize());
+  t1 += MPI_Wtime();
+  if(procID() == 0) std::cout << "helm oper create = " << t1 << "\n";
 
   BiCGStabSolver<LevelData<EBCellFAB> > bicgstab;
   AMRMultiGrid<LevelData<EBCellFAB> > multigridSolver;
@@ -471,27 +488,35 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
   m_amr->alias(phi, a_phi);
   m_amr->alias(res, a_res);
   m_amr->alias(rhs, RHS);
-  pout() << "doing define" << endl;
+
+  t1 = -MPI_Wtime();
   multigridSolver.define(m_amr->getDomains()[0], fact, &bicgstab, 1 + finestLevel);
+  t1 += MPI_Wtime();
+  if(procID() == 0) std::cout << "helm define time = " << t1 << "\n";
   multigridSolver.m_verbosity=10;
-  pout() << "doing init" << endl;
+  t1 = -MPI_Wtime();
   multigridSolver.init(phi, rhs, finestLevel, 0);
-  
+  t1 += MPI_Wtime();
+  if(procID() == 0) std::cout << "helm init time = " << t1 << "\n";
+
+
   // Print the initial residual
 
 
-  multigridSolver.setSolverParameters(16, 16, 16, 1, 16, 1.E-10, 1E-60, 1E-60);
-  Real t1 = -MPI_Wtime();
+  multigridSolver.setSolverParameters(16, 16, 16, 1, 32, 1.E-10, 1E-60, 1E-60);
+  t1 = -MPI_Wtime();
   multigridSolver.solveNoInit(phi, rhs, finestLevel, 0, true, false);
   t1 += MPI_Wtime();
   if(procID() == 0) std::cout << "helm solve time = " << t1 << "\n";
   const Real phiResid = multigridSolver.computeAMRResidual(res, phi, rhs, finestLevel, 0);
-  if(procID() == 0) std::cout << "solveHelm initial resid = " << phiResid << std::endl;
+  if(procID() == 0) std::cout << "solveHelm final resid = " << phiResid << std::endl;
 
   m_amr->averageDown(a_phi, m_realm, phase::gas);
   m_amr->interpGhost(a_phi, m_realm, phase::gas);
   this->computeElectricField();
   this->writePlotFile();
+
+  if(procID() == 0) std::cout << "\n" << std::endl;
 }
 
 #include <CD_NamespaceFooter.H>

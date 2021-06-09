@@ -77,8 +77,12 @@ EBHelmholtzOpFactory::EBHelmholtzOpFactory(const Real&                       a_a
   if(this->isFiner(m_bottomDomain, m_amrLevelGrids[0]->getDomain())){
     MayDay::Abort("EBHelmholtzOpFactory -- bottomsolver domain can't be larger than the base AMR domain!");
   }
-  
+
+  Real t1 = -MPI_Wtime();
   this->defineMultigridLevels();
+  t1 += MPI_Wtime();
+
+  if(procID() == 0) std::cout << "define MG levels time = " << t1 << "\n";
 }
   
 EBHelmholtzOpFactory::~EBHelmholtzOpFactory(){
@@ -132,7 +136,6 @@ void EBHelmholtzOpFactory::defineMultigridLevels(){
 
 	// BoxLayout and domains for coarsening.
 	RefCountedPtr<EBLevelGrid> mgEblgCoar = RefCountedPtr<EBLevelGrid>(new EBLevelGrid());
-
 	// This is an overriding option where we use the pre-defined coarsenings in m_deeperMultigridLevels. This is only valid for coarsenings of
 	// the base AMR level, hence amrLevel == 0. Once those levels are exhausted we begin with direct coarsening. 
 	if(amrLevel == 0 && curMgLevels < m_deeperLevelGrids.size()){    
@@ -205,14 +208,14 @@ void EBHelmholtzOpFactory::defineMultigridLevels(){
 
 	  // Coarsen the coefficients
 	  this->coarsenCoefficients(*coarAcoef,
-				    *coarBcoef,
-				    *coarBcoefIrreg,
-				    fineAcoef,
-				    fineBcoef,
-				    fineBcoefIrreg,
-				    eblgCoar,
-				    eblgFine,
-				    mgRefRatio);
+	  			    *coarBcoef,
+	  			    *coarBcoefIrreg,
+	  			    fineAcoef,
+	  			    fineBcoef,
+	  			    fineBcoefIrreg,
+	  			    eblgCoar,
+	  			    eblgFine,
+	  			    mgRefRatio);
 
 
 	  m_mgLevelGrids[amrLevel].push_back(mgEblgCoar);
@@ -264,7 +267,7 @@ bool EBHelmholtzOpFactory::getCoarserLayout(EBLevelGrid& a_coarEblg, const EBLev
   
   // This returns true if the fine grid fully covers the domain. The nature of this makes it
   // always true for the "deeper" multigridlevels,  but not so for the intermediate levels. 
-  auto isFullyCovered = [=] (const EBLevelGrid& a_eblg) -> bool {
+  auto isFullyCovered = [&] (const EBLevelGrid& a_eblg) -> bool {
     unsigned long long numPtsLeft = a_eblg.getDomain().domainBox().numPts(); // Number of grid points in
     const DisjointBoxLayout& dbl  = a_eblg.getDBL();
 
@@ -288,7 +291,7 @@ bool EBHelmholtzOpFactory::getCoarserLayout(EBLevelGrid& a_coarEblg, const EBLev
     // Use coarsening if we can. 
     if(a_fineEblg.getDBL().coarsenable(2*a_refRat)){
       coarsen(coarDbl, a_fineEblg.getDBL(), a_refRat);
-      a_coarEblg.define(coarDbl, coarDomain, m_ghostPhi.max(), a_fineEblg.getEBIS());
+      a_coarEblg.define(coarDbl, coarDomain, 4, a_fineEblg.getEBIS());
 
       hasCoarser = true;
     }
