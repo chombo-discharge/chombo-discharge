@@ -451,7 +451,7 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
 			    m_amr->getNumberOfGhostCells()*IntVect::Unit,
 			    EBHelmholtzOp::RelaxationMethod::GauSaiMultiColorFast,
 			    bottomDomain,
-			    32);//m_amr->getBlockingFactor());
+			    m_amr->getBlockingFactor());
 
   BiCGStabSolver<LevelData<EBCellFAB> > bicgstab;
   AMRMultiGrid<LevelData<EBCellFAB> > multigridSolver;
