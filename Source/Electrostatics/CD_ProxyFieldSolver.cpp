@@ -38,6 +38,9 @@ bool ProxyFieldSolver::solve(MFAMRCellData&       a_potential,
 			     const MFAMRCellData& a_rho,
 			     const EBAMRIVData&   a_sigma,
 			     const bool           a_zerophi) {
+  if(m_verbosity > 3){
+    pout() << "ProxyFieldSolver::solve(...)" << endl;
+  }
   DataOps::setValue(a_potential, 0.0);
   DataOps::setValue(m_residue,   0.0);
 
@@ -350,7 +353,7 @@ void ProxyFieldSolver::solveChombo(EBAMRCellData& a_phi, EBAMRCellData& a_residu
     Real t1 = -MPI_Wtime();
     multigridSolver.solveNoInit(phi, rhs, finestLevel, baseLevel, false, false);
     t1 += MPI_Wtime();
-    if(procID() == 0) std::cout << "solve time = " << t1 << std::endl;
+    if(procID() == 0) std::cout << "chombo solve time = " << t1 << std::endl;
     coarsenConservative(a_phi);
     phiResid = multigridSolver.computeAMRResidual(res, phi, rhs, finestLevel, baseLevel);
 
@@ -429,7 +432,7 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
 
   // Set the bottom domain. Don't go below 8x cells in any direction
   ProblemDomain bottomDomain = m_amr->getDomains()[0];
-  while(bottomDomain.domainBox().shortside() >= 32){
+  while(bottomDomain.domainBox().shortside() >= 8){
     bottomDomain.coarsen(2);
   }
 
@@ -451,7 +454,7 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
 			    m_amr->getNumberOfGhostCells()*IntVect::Unit,
 			    EBHelmholtzOp::RelaxationMethod::GauSaiMultiColorFast,
 			    bottomDomain,
-			    m_amr->getBlockingFactor());
+			    32);//m_amr->getMaxBoxSize());
 
   BiCGStabSolver<LevelData<EBCellFAB> > bicgstab;
   AMRMultiGrid<LevelData<EBCellFAB> > multigridSolver;
@@ -475,15 +478,15 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
   multigridSolver.init(phi, rhs, finestLevel, 0);
   
   // Print the initial residual
-  const Real phiResid = multigridSolver.computeAMRResidual(res, phi, rhs, finestLevel, 0);
-  if(procID() == 0) std::cout << "solveHelm initial resid = " << phiResid << std::endl;
+
 
   multigridSolver.setSolverParameters(16, 16, 16, 1, 16, 1.E-10, 1E-60, 1E-60);
   Real t1 = -MPI_Wtime();
   multigridSolver.solveNoInit(phi, rhs, finestLevel, 0, true, false);
   t1 += MPI_Wtime();
   if(procID() == 0) std::cout << "helm solve time = " << t1 << "\n";
-  multigridSolver.computeAMRResidual(res, phi, rhs, finestLevel, 0);
+  const Real phiResid = multigridSolver.computeAMRResidual(res, phi, rhs, finestLevel, 0);
+  if(procID() == 0) std::cout << "solveHelm initial resid = " << phiResid << std::endl;
 
   m_amr->averageDown(a_phi, m_realm, phase::gas);
   m_amr->interpGhost(a_phi, m_realm, phase::gas);

@@ -9,6 +9,11 @@
   @author Robert Marskar
 */
 
+#define EBHelmholtzOpFactoryDebug 1
+#if EBHelmholtzOpFactoryDebug
+#include <EBAMRPoissonOp.H>
+#endif
+
 // Chombo includes
 #include <ParmParse.H>
 #include <BRMeshRefine.H>
@@ -220,6 +225,10 @@ void EBHelmholtzOpFactory::defineMultigridLevels(){
     else{
       m_hasMgLevels[amrLevel] = false;
     }
+
+    if(m_mgLevelGrids[amrLevel].size() <= 1) {
+      m_hasMgLevels[amrLevel] = false;
+    }
   }
 }
 
@@ -235,6 +244,27 @@ bool EBHelmholtzOpFactory::getCoarserLayout(EBLevelGrid& a_coarEblg, const EBLev
   // TLDR: This creates a coarsening of a_fineGrid with refinement factor 2. We first try to split the grid using a_blockingFactor. If that does not work we
   //       coarsen directly. If that does not work we are out of ideas.
   bool hasCoarser = false;
+
+#if EBHelmholtzOpFactoryDebug
+  DisjointBoxLayout dblCoFi;
+  ProblemDomain domainCoFi;
+  bool dummy;
+  hasCoarser = EBAMRPoissonOp::getCoarserLayouts(dblCoFi,
+						 domainCoFi,
+						 a_fineEblg.getDBL(),
+						 a_fineEblg.getEBISL(),
+						 a_fineEblg.getDomain(),
+						 a_refRat,
+						 a_fineEblg.getEBIS(),
+						 a_blockingFactor,
+						 dummy,
+						 2);
+
+  if(hasCoarser){
+    a_coarEblg.define(dblCoFi, domainCoFi, 4, a_fineEblg.getEBIS());
+  }
+  return hasCoarser;
+#else
   
   // This returns true if the fine grid fully covers the domain. The nature of this makes it
   // always true for the "deeper" multigridlevels,  but not so for the intermediate levels. 
@@ -249,11 +279,14 @@ bool EBHelmholtzOpFactory::getCoarserLayout(EBLevelGrid& a_coarEblg, const EBLev
     return (numPtsLeft == 0ULL);
   };
 
+  const ProblemDomain fineDomain   = a_fineEblg.getDomain();
+  const ProblemDomain coarDomain   = coarsen(fineDomain, a_refRat);
+  const DisjointBoxLayout& fineDbl = a_fineEblg.getDBL();
+  DisjointBoxLayout coarDbl;
 
-  // Check if we can get a coarsenable domain. 
-  if(a_fineEblg.coarsenable(a_refRat)){
-    DisjointBoxLayout coarDbl;
-    ProblemDomain     coarDomain = coarsen(a_fineEblg.getDomain(), a_refRat);
+  // Check if we can get a coarsenable domain. Don't want to coarsen to 1x1 so hence the factor of 2. 
+  ProblemDomain test = fineDomain;
+  if(refine(coarsen(test, 2*a_refRat), 2*a_refRat) == fineDomain){
 
     bool doAggregation;
     bool doCoarsen;
@@ -261,15 +294,18 @@ bool EBHelmholtzOpFactory::getCoarserLayout(EBLevelGrid& a_coarEblg, const EBLev
     // Check if we are coarsening to an intermediate or "deep" level. If we are coarsening to a deep level we know that
     // the grids will cover the domain, so the aggregation check is just a matter of testing for valid domain decompositions. 
     if(this->isCoarser(coarDomain, m_amrLevelGrids[0]->getDomain())) {
-      doAggregation = (refine(coarsen(coarDomain, a_blockingFactor), a_blockingFactor) == coarDomain);
+      doAggregation = (refine(coarsen(fineDomain, a_blockingFactor), a_blockingFactor) == fineDomain);
+
+      if(a_fineEblg.getDBL().size() <= 1) doAggregation = false;
     }
-    else{ // The "simplest" way we can run with aggregation is if the fine grid covers the entire domain. There are probably generalizations of this. 
+    else{ // For AMR levels the "simplest" way we can run with aggregation is if the fine grid covers the entire domain. There are probably generalizations of this. 
       doAggregation = isFullyCovered(a_fineEblg);
     }
 
-    doCoarsen = a_fineEblg.getDBL().coarsenable(a_refRat);
+    //    doCoarsen = a_fineEblg.getDBL().coarsenable(a_refRat);
+    doCoarsen = fineDbl.coarsenable(2*a_refRat) && fineDbl.isClosed() && (fineDbl.size() > 0);
 
-    // Prefer aggregation over direct coarsening
+    // Prefer aggregation over coarsening
     if(doAggregation){ 
       Vector<Box> boxes;
       Vector<int> procs;
@@ -290,6 +326,7 @@ bool EBHelmholtzOpFactory::getCoarserLayout(EBLevelGrid& a_coarEblg, const EBLev
 
       hasCoarser = true;
     }
+
     else{ // Out of ideas. 
       hasCoarser = false;
     }
@@ -299,6 +336,7 @@ bool EBHelmholtzOpFactory::getCoarserLayout(EBLevelGrid& a_coarEblg, const EBLev
   }
 
   return hasCoarser;
+#endif
 }
 
 void EBHelmholtzOpFactory::coarsenCoefficients(LevelData<EBCellFAB>&              a_coarAcoef,

@@ -1556,11 +1556,11 @@ void AmrMesh::parseMaxBoxSize(){
   ParmParse pp("AmrMesh");
   int box_size;
   pp.get("max_box_size", box_size);
-  if(box_size >= 8 && box_size % 2 == 0){
+  if(box_size >= 4 && box_size % 2 == 0){
     m_maxBoxSize = box_size;
   }
   else{
-    MayDay::Abort("AmrMesh::parseMaxBoxSize - must have box_size >= 8 and divisible by 2");
+    MayDay::Abort("AmrMesh::parseMaxBoxSize - must have box_size >= 4 and divisible by 2");
   }
 }
 
