@@ -823,8 +823,6 @@ void EBHelmholtzOp::gauSaiMultiColor(LevelData<EBCellFAB>& a_phi, const LevelDat
 }
 
 void EBHelmholtzOp::relaxGSMultiColorFast(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations){
-  MayDay::Abort("EBHelmholtzOp::relaxGauSai - not implemented");
-
   const bool homogeneousPhysBC = true;
 
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
@@ -839,7 +837,7 @@ void EBHelmholtzOp::relaxGSMultiColorFast(LevelData<EBCellFAB>& a_correction, co
     for (int redBlack = 0; redBlack <= 1; redBlack++){
       a_correction.exchange();
 
-      if(m_hasCoar){
+      if(m_hasCoar) {
 	this->homogeneousCFInterp(a_correction);
       }
 
@@ -848,10 +846,7 @@ void EBHelmholtzOp::relaxGSMultiColorFast(LevelData<EBCellFAB>& a_correction, co
 	const EBCellFAB& rhs = a_residual[dit()];
 	const Box cellBox    = dbl[dit()];
 
-	// Cache phi
-	for (int c = 0; c < m_colors.size()/2; ++c){
-	  m_colorEBStencil[m_colors.size()/2*redBlack+c][dit()]->cachePhi(phi);
-	}
+
 
 	BaseFab<Real>& regPhi       = phi.getSingleValuedFAB();
 	const BaseFab<Real>& regRhs = rhs.getSingleValuedFAB();
@@ -870,7 +865,11 @@ void EBHelmholtzOp::relaxGSMultiColorFast(LevelData<EBCellFAB>& a_correction, co
 	  }
 	}
 
-	// It's an older code, sir, but it checks out.
+	// Cache phi
+	for (int c = 0; c < m_colors.size()/2; ++c){
+	  m_colorEBStencil[m_colors.size()/2*redBlack+c][dit()]->cachePhi(phi);
+	}
+
 	FORT_HELMHOLTZGSRB(CHF_FRA1(        regPhi,     m_comp),
 			   CHF_CONST_FRA1(  regRhs,     m_comp),
 			   CHF_CONST_FRA1(  regRel,     m_comp),
@@ -891,9 +890,60 @@ void EBHelmholtzOp::relaxGSMultiColorFast(LevelData<EBCellFAB>& a_correction, co
 
 	// Irregular
 	for (int c = 0; c < m_colors.size()/2; ++c){
-	  //	  this->GSColorAllIrrgular(phi, rhs, m_colors.size()/2*redBlack+c, dit());
+	  this->GauSaiMultiColorAllIrregular(phi, rhs, m_colors.size()/2*redBlack+c, dit());
 	}
       }
+    }
+  }
+}
+
+void EBHelmholtzOp::GauSaiMultiColorAllIrregular(EBCellFAB& a_phi, const EBCellFAB& a_rhs, const int& a_icolor, const DataIndex& a_dit){
+
+  const BaseIVFAB<Real>& alphaWeight = m_alphaDiagWeight[a_dit];
+  const BaseIVFAB<Real>& betaWeight  = m_betaDiagWeight [a_dit];
+  
+  // Cache fluxes on domain bcs. 
+  for (int dir = 0; dir < SpaceDim; dir++){
+    VoFIterator& vofitLo = m_vofItIrregColorDomLo[a_icolor][dir][a_dit];
+    VoFIterator& vofitHi = m_vofItIrregColorDomHi[a_icolor][dir][a_dit];
+    
+    for (vofitLo.reset(); vofitLo.ok(); ++vofitLo){
+      const VolIndex& vof = vofitLo();
+      Real flux;
+      m_domainBc->getFaceFlux(flux, vof, m_comp, a_phi, m_probLo, m_vecDx, dir, Side::Lo, a_dit, 0.0, true);
+      
+      m_cacheEBxDomainFluxLo[a_icolor][dir][a_dit](vof, m_comp) = flux;
+    }
+
+    for (vofitHi.reset(); vofitHi.ok(); ++vofitHi){
+      const VolIndex& vof = vofitHi();
+      Real flux;
+      m_domainBc->getFaceFlux(flux, vof, m_comp, a_phi, m_probLo, m_vecDx, dir, Side::Hi, a_dit, 0.0, true);
+      
+      m_cacheEBxDomainFluxHi[a_icolor][dir][a_dit](vof, m_comp) = flux;
+    }
+  }
+
+  // Stencil relaxation
+  m_colorEBStencil[a_icolor][a_dit]->relax(a_phi, a_rhs, alphaWeight, betaWeight, m_alpha, m_beta, 1.0);
+
+  // Apply domain flux
+  for (int dir = 0; dir < SpaceDim; dir++){
+    VoFIterator& vofitLo = m_vofItIrregColorDomLo[a_icolor][dir][a_dit];
+    VoFIterator& vofitHi = m_vofItIrregColorDomHi[a_icolor][dir][a_dit];
+
+    for (vofitLo.reset(); vofitLo.ok(); ++vofitLo){
+      const VolIndex& vof = vofitLo();
+      const Real lambda   = m_relCoef[a_dit](vof, m_comp);
+      
+      a_phi(vof, m_comp) += lambda * m_cacheEBxDomainFluxLo[a_icolor][dir][a_dit](vof, m_comp) * m_beta/m_dx;
+    }
+
+    for (vofitHi.reset(); vofitHi.ok(); ++vofitHi){
+      const VolIndex& vof = vofitHi();
+      const Real lambda   = m_relCoef[a_dit](vof, m_comp);
+      
+      a_phi(vof, m_comp) -= lambda * m_cacheEBxDomainFluxHi[a_icolor][dir][a_dit](vof, m_comp) * m_beta/m_dx;
     }
   }
 }
@@ -1036,7 +1086,7 @@ void EBHelmholtzOp::getFaceCentroidFlux(EBFaceFAB&       a_fluxCentroid,
 
   
   this->getFaceCenteredFlux(a_fluxCentroid, a_phi, a_cellBox, a_dit, a_dir);
-  this->interpolateFluxes(  a_fluxCentroid,        a_cellBox, a_dit, a_dir);
+  //  this->interpolateFluxes(  a_fluxCentroid,        a_cellBox, a_dit, a_dir);
 }
 
 void EBHelmholtzOp::getFaceCenteredFlux(EBFaceFAB&       a_fluxCenter,

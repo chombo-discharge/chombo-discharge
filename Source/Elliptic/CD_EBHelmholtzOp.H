@@ -694,6 +694,11 @@ protected:
   void relaxGSMultiColorFast(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations);
 
   /*!
+    @brief Optimized relaxation
+  */
+  void GauSaiMultiColorAllIrregular(EBCellFAB& a_phi, const EBCellFAB& a_rhs, const int& a_icolor, const DataIndex& a_dit);
+
+  /*!
     @brief Apply the AMR operator, i.e. compute L(phi) in an AMR context. 
     @param[out] a_residual          Residual on this level
     @param[in]  a_phiFine           Phi on fine level
