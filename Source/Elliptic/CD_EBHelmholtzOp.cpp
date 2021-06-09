@@ -235,7 +235,8 @@ void EBHelmholtzOp::defineStencils(){
 }
 
 unsigned int EBHelmholtzOp::orderOfAccuracy(void) const {
-  return 99;
+  return 2;
+  //  return 99;
 }
 
 void EBHelmholtzOp::enforceCFConsistency(LevelData<EBCellFAB>& a_coarCorr, const LevelData<EBCellFAB>& a_fineCorr){
@@ -252,7 +253,7 @@ void EBHelmholtzOp::setAlphaAndBeta(const Real& a_alpha, const Real& a_beta) {
 }
 
 void EBHelmholtzOp::residual(LevelData<EBCellFAB>& a_residual, const LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_rhs, bool a_homogeneousPhysBC) {
-  this->applyOp(a_residual, a_phi, nullptr, a_homogeneousPhysBC, true); // Only homogeneous CFBC. This shouldn't break because we shouldn't have a coar level.
+  this->applyOp(a_residual, a_phi, nullptr, a_homogeneousPhysBC, true); // 
   this->axby(a_residual, a_residual, a_rhs, -1.0, 1.0);                 // residual = rhs - L(phi). 
 }
 
@@ -379,7 +380,7 @@ void EBHelmholtzOp::AMROperatorNC(LevelData<EBCellFAB>&              a_Lphi,
 				  bool                               a_homogeneousPhysBC,
 				  AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp) {
   LevelData<EBCellFAB> phiCoar; // Should be safe on the bottom AMR level because only multigrid levels exist below. 
-  this->AMROperator(a_Lphi, a_phiFine, a_phi, phiCoar, a_homogeneousPhysBC, a_finerOp);
+  this->AMROperator(a_Lphi, a_phiFine, a_phi, phiCoar, a_homogeneousPhysBC, a_finerOp); 
 }
 
 void EBHelmholtzOp::AMRResidual(LevelData<EBCellFAB>&              a_residual,
@@ -389,8 +390,8 @@ void EBHelmholtzOp::AMRResidual(LevelData<EBCellFAB>&              a_residual,
 				const LevelData<EBCellFAB>&        a_rhs,
 				bool                               a_homogeneousPhysBC,
 				AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp) {
-  this->AMROperator(a_residual, a_phiFine, a_phi, a_phiCoar, a_homogeneousPhysBC, a_finerOp); // Compute L(phi) on this level.
-  this->axby(a_residual, a_residual, a_rhs, -1., 1.);
+  this->AMROperator(a_residual, a_phiFine, a_phi, a_phiCoar, a_homogeneousPhysBC, a_finerOp); // a_residual =  L(phi) 
+  this->axby(a_residual, a_rhs, a_residual, 1., -1.);                                         // a_residual = rhs - -L(phi)
 }
 
 void EBHelmholtzOp::AMRResidualNF(LevelData<EBCellFAB>&              a_residual,
@@ -400,8 +401,8 @@ void EBHelmholtzOp::AMRResidualNF(LevelData<EBCellFAB>&              a_residual,
 				  bool                               a_homogeneousPhysBC) {
 
   // Simple, because we don't need to reflux. 
-  this->AMROperatorNF(a_residual, a_phi, a_phiCoar, a_homogeneousPhysBC);
-  this->axby(a_residual, a_residual, a_rhs, -1., 1.);
+  this->AMROperatorNF(a_residual, a_phi, a_phiCoar, a_homogeneousPhysBC); // a_residual = L(phi)
+  this->axby(a_residual, a_rhs, a_residual, 1., -1.);                     // a_residual = rhs - L(phi)
 }
 
 void EBHelmholtzOp::AMRResidualNC(LevelData<EBCellFAB>&              a_residual,
@@ -410,8 +411,8 @@ void EBHelmholtzOp::AMRResidualNC(LevelData<EBCellFAB>&              a_residual,
 				  const LevelData<EBCellFAB>&        a_rhs,
 				  bool                               a_homogeneousPhysBC,
 				  AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp) {
-  this->AMROperatorNC(a_residual, a_phiFine, a_phi, a_homogeneousPhysBC, a_finerOp);
-  this->axby(a_residual, a_residual, a_rhs, -1., 1.);
+  this->AMROperatorNC(a_residual, a_phiFine, a_phi, a_homogeneousPhysBC, a_finerOp); // a_residual = L(phi)
+  this->axby(a_residual, a_rhs, a_residual, 1., -1.);                                // a_residual = rhs - L(phi)
 }
 
 void EBHelmholtzOp::AMRRestrict(LevelData<EBCellFAB>&       a_residualCoarse,
@@ -442,10 +443,14 @@ void EBHelmholtzOp::AMRProlong(LevelData<EBCellFAB>& a_correction, const LevelDa
 void EBHelmholtzOp::AMRUpdateResidual(LevelData<EBCellFAB>&       a_residual,
 				      const LevelData<EBCellFAB>& a_correction,
 				      const LevelData<EBCellFAB>& a_coarseCorrection) {
+
+  const bool homogeneousPhysBC = true;
+  const bool homogeneousCFBC   = false;
+  
   LevelData<EBCellFAB> lcorr;
   this->create(lcorr, a_correction);
-  this->applyOp(lcorr, a_correction, &a_coarseCorrection, true, false);
-  this->incr(a_residual, a_correction, -1.0);
+  this->applyOp(lcorr, a_correction, &a_coarseCorrection, homogeneousPhysBC, homogeneousCFBC); // lcorr = L(phi, phiCoar)
+  this->incr(a_residual, lcorr, -1.0);                                                  // a_residual = 
 }
 
 void EBHelmholtzOp::applyOp(LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_phi, bool a_homogeneousPhysBC) {
@@ -610,7 +615,7 @@ void EBHelmholtzOp::applyOpIrregular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, 
 
   // Do irregular faces on domain sides. m_domainBc should give the centroid-centered flux so we don't do interpolations here. 
   for (int dir = 0; dir < SpaceDim; dir++){
-    Real flux;
+    Real flux = 0.0;
 
     // Lo side.
     VoFIterator& vofitLo = m_vofIterDomLo[dir][a_dit];    
@@ -646,7 +651,7 @@ void EBHelmholtzOp::applyOpNoBoundary(LevelData<EBCellFAB>& a_Lphi, const LevelD
 }
 
 void EBHelmholtzOp::fillGrad(const LevelData<EBCellFAB>& a_phi){
-  MayDay::Warning("EBHelmholtzOp::fillGrad - not implemented (yet)");
+  MayDay::Abort("EBHelmholtzOp::fillGrad - not implemented (yet)");
 }
 
 void EBHelmholtzOp::getFlux(EBFluxFAB&                  a_flux,
@@ -654,21 +659,30 @@ void EBHelmholtzOp::getFlux(EBFluxFAB&                  a_flux,
 			    const Box&                  a_grid,
 			    const DataIndex&            a_dit,
 			    Real                        a_scale) {
-  MayDay::Warning("EBHelmholtzOp::getFlux - not implemented (yet)");
+  MayDay::Abort("EBHelmholtzOp::getFlux - not implemented (yet)");
 }
 
 void EBHelmholtzOp::homogeneousCFInterp(LevelData<EBCellFAB>& a_phi){
+#if 0 // Code that I want
   if(m_hasCoar) m_interpolator->coarseFineInterpH(a_phi, m_interval);
-  //  if(m_hasCoar) this->applyHomogeneousCFBCs(a_phi); // Note that this is only here for development purposes -- this will be very slow because of the inline define
+#else // Code that I'll try. Note that this is only here for development purposes -- this will be very slow because of the inline define
+  if(m_hasCoar) this->applyHomogeneousCFBCs(a_phi); 
+#endif
 }
 
 void EBHelmholtzOp::inhomogeneousCFInterp(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar){
-  if(m_hasCoar) m_interpolator->coarseFineInterp(a_phiFine, a_phiCoar, m_interval);
+#if 0 // Code that I want
+  //  if(m_hasCoar) m_interpolator->coarseFineInterp(a_phiFine, a_phiCoar, m_interval);
+#else // Code that I'll try
+  EBQuadCFInterp& interpolator = (EBQuadCFInterp&) (*m_interpolator);
+  interpolator.interpolate(a_phiFine, a_phiCoar, m_interval);
+#endif
+
 }
 
-void EBHelmholtzOp::interpolateCF(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar, const bool a_homogeneous){
+void EBHelmholtzOp::interpolateCF(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar, const bool a_homogeneousCFBC){
   if(m_hasCoar){
-    if(a_homogeneous){
+    if(a_homogeneousCFBC){
       this->homogeneousCFInterp(a_phiFine);
     }
     else{

@@ -720,11 +720,11 @@ protected:
 
   /*!
     @brief Apply coarse-fine boundary conditions
-    @param[inout] a_phiFine     Fine data
-    @param[inout] a_phiCoar     Coarse data
-    @param[in]    a_homogeneous Homogeneous CF or not (i.e. coar data is zero);
+    @param[inout] a_phiFine         Fine data
+    @param[inout] a_phiCoar         Coarse data
+    @param[in]    a_homogeneousCFBC Homogeneous CF or not (i.e. coar data is zero);
   */
-  void interpolateCF(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar, const bool a_homogeneous);
+  void interpolateCF(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar, const bool a_homogeneousCFBC);
 
   /*!
     @brief Get the face-centered flux stencil
