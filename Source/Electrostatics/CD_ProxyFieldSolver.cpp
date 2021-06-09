@@ -452,7 +452,7 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
 			    ebbcFactory,
 			    m_amr->getNumberOfGhostCells()*IntVect::Unit,
 			    m_amr->getNumberOfGhostCells()*IntVect::Unit,
-			    EBHelmholtzOp::RelaxationMethod::GSMultiColor,
+			    EBHelmholtzOp::RelaxationMethod::GauSaiMultiColor,
 			    bottomDomain,
 			    m_amr->getBlockingFactor());
 

@@ -662,24 +662,21 @@ void EBHelmholtzOp::interpolateCF(LevelData<EBCellFAB>& a_phiFine, const LevelDa
 
 void EBHelmholtzOp::relax(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, int a_iterations){
   switch(m_relaxationMethod){
-  case RelaxationMethod::Jacobi:
-    this->relaxJacobi(a_correction, a_residual, a_iterations);
+  case RelaxationMethod::PointJacobi:
+    this->relaxPointJacobi(a_correction, a_residual, a_iterations);
     break;
-  case RelaxationMethod::GSRB:
-    this->relaxGSRB(a_correction, a_residual, a_iterations);
-    break;
-  case RelaxationMethod::GSMultiColor:
+  case RelaxationMethod::GauSaiMultiColor:
     this->relaxGSMultiColor(a_correction, a_residual, a_iterations);
     break;
-  case RelaxationMethod::GSRBFast:
-    this->relaxGSRBFast(a_correction, a_residual, a_iterations);
+  case RelaxationMethod::GauSaiMultiColorFast:
+    this->relaxGSMultiColorFast(a_correction, a_residual, a_iterations);
     break;
   default:
     MayDay::Abort("EBHelmholtzOp::relax - bogus relaxation method requested");
   };
 }
 
-void EBHelmholtzOp::relaxJacobi(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations){
+void EBHelmholtzOp::relaxPointJacobi(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations){
   LevelData<EBCellFAB> Lcorr;
   this->create(Lcorr, a_residual);
 
@@ -693,28 +690,6 @@ void EBHelmholtzOp::relaxJacobi(LevelData<EBCellFAB>& a_correction, const LevelD
       
       a_correction[dit()] -= Lcorr[dit()];
     }
-  }
-}
-
-void EBHelmholtzOp::relaxGSRB(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations){
-  MayDay::Abort("EBHelmholtzOp::relaxGSRB - not implemented");
-  LevelData<EBCellFAB> Lcorr;
-  this->create(Lcorr, a_residual);
-
-  const IntVect red   = IntVect::Zero;
-  const IntVect black = IntVect::Unit;
-
-  for (int iter = 0; iter < a_iterations; iter++){
-
-    // Do red
-    this->homogeneousCFInterp(a_correction);
-    this->applyOp(Lcorr, a_correction, true);
-    this->gauSaiMultiColor(a_correction, Lcorr, a_residual, red);
-
-    // Do black
-    this->homogeneousCFInterp(a_correction);
-    this->applyOp(Lcorr, a_correction, true);
-    //    this->gauSaiMultiColor(a_correction, Lcorr, a_residual, red);
   }
 }
 
@@ -784,7 +759,7 @@ void EBHelmholtzOp::gauSaiMultiColor(LevelData<EBCellFAB>& a_phi, const LevelDat
   }
 }
 
-void EBHelmholtzOp::relaxGSRBFast(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations){
+void EBHelmholtzOp::relaxGSMultiColorFast(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations){
   MayDay::Abort("EBHelmholtzOp::relaxGauSai - not implemented");
 
   for (int iter = 0; iter < a_iterations; iter++){
@@ -849,10 +824,15 @@ void EBHelmholtzOp::computeRelaxationCoefficient(){
 
   // Add safety factors for relaxations 
   switch(m_relaxationMethod){
-  case RelaxationMethod::Jacobi: 
+  case RelaxationMethod::PointJacobi: 
     this->scale(m_relCoef, 0.5); 
     break;
+  case RelaxationMethod::GauSaiMultiColor:
+    break;
+  case RelaxationMethod::GauSaiMultiColorFast:
+    break;
   default:
+    MayDay::Error("EBHelmholtzOp::computeRelaxationCoefficient -- logic bust");
     break;
   }
 }

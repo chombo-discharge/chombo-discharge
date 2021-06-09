@@ -42,10 +42,9 @@ public:
     @brief Relaxation method for the operators
   */
   enum class RelaxationMethod {
-    Jacobi,
-    GSRB,
-    GSMultiColor,
-    GSRBFast,
+    PointJacobi,
+    GauSaiMultiColor,
+    GauSaiMultiColorFast,
   };
 
   /*!
@@ -657,15 +656,7 @@ protected:
     @param[in]    a_residual   Residual
     @param[in]    a_iterations Number of iterations
   */
-  void relaxJacobi(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations);
-
-  /*!
-    @brief Red-black Gauss-Seidel relaxation
-    @param[inout] a_correction Correction
-    @param[in]    a_residual   Residual
-    @param[in]    a_iterations Number of iterations
-  */
-  void relaxGSRB(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations);
+  void relaxPointJacobi(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations);
 
   /*!
     @brief Multi-colored gauss-seidel relaxation
@@ -686,7 +677,7 @@ protected:
     @param[in]    a_residual   Residual
     @param[in]    a_iterations Number of iterations
   */
-  void relaxGSRBFast(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations);
+  void relaxGSMultiColorFast(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations);
 
   /*!
     @brief Apply the AMR operator, i.e. compute L(phi) in an AMR context. 
