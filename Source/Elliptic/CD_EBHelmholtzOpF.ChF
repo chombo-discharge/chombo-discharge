@@ -126,7 +126,7 @@
       chf_enddo
       end
 
-      subroutine helmholtzgsrbcolor(
+      subroutine helmholtzgausaicolor(
      &     chf_fra1[phi],
      &     chf_const_fra1[lphi],
      &     chf_const_fra1[rhs],

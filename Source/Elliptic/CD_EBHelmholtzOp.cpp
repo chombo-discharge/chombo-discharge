@@ -15,8 +15,6 @@
 #include <EBLevelDataOps.H>
 #include <EBCellFactory.H>
 #include <EBAMRPoissonOp.H>
-#include <EBConductivityOpF_F.H>
-#include <InterpF_F.H>
 
 // Our includes
 #include <CD_EBHelmholtzOp.H>
@@ -755,11 +753,11 @@ void EBHelmholtzOp::gauSaiMultiColor(LevelData<EBCellFAB>& a_phi, const LevelDat
       const Box colorBox(loIV, hiIV);
 
       // Note - replace this with our own kernel so we can develop code without coupling too hard to Chombo.
-      FORT_HELMHOLTZGSRBCOLOR(CHF_FRA1(phiReg, m_comp),
-			      CHF_CONST_FRA1(LphiReg, m_comp),
-			      CHF_CONST_FRA1(rhsReg, m_comp),
-			      CHF_CONST_FRA1(relReg, m_comp),
-			      CHF_BOX(colorBox));
+      FORT_HELMHOLTZGAUSAICOLOR(CHF_FRA1(phiReg, m_comp),
+				CHF_CONST_FRA1(LphiReg, m_comp),
+				CHF_CONST_FRA1(rhsReg, m_comp),
+				CHF_CONST_FRA1(relReg, m_comp),
+				CHF_BOX(colorBox));
     }
     
 
