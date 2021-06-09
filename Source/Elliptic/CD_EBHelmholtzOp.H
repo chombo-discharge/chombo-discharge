@@ -826,6 +826,12 @@ protected:
 	      const LevelData<EBCellFAB>&        a_phi,
 	      AMRLevelOp<LevelData<EBCellFAB> >& a_finerOp);
 
+private:
+  
+  LayoutData<CFIVS> m_loCFIVS[SpaceDim];
+  LayoutData<CFIVS> m_hiCFIVS[SpaceDim];
+  void defineCFIVS();
+  void applyHomogeneousCFBCs(LevelData<EBCellFAB>& a_phi);
 };
 
 #include <CD_NamespaceFooter.H>
