@@ -8,7 +8,7 @@ AmrMesh.coarsest_domain = 64 64       # Number of cells on coarsest domain
 AmrMesh.max_amr_depth   = 2           # Maximum amr depth
 AmrMesh.max_sim_depth   = -1          # Maximum simulation depth
 AmrMesh.fill_ratio      = 1.0         # Fill ratio for grid generation
-AmrMesh.irreg_growth    = 0           # How much to grow irregular tagged cells
+AmrMesh.irreg_growth    = 2           # How much to grow irregular tagged cells
 AmrMesh.buffer_size     = 2           # Number of cells between grid levels
 AmrMesh.grid_algorithm  = br          # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
 AmrMesh.box_sorting     = morton      # 'none', 'shuffle', 'morton'
@@ -63,15 +63,16 @@ Driver.refine_solid_solid_interface    = -1               # Refine solid-solid i
 # ====================================
 # ProxyFieldSolver CLASS OPTIONS
 # ====================================
-ProxyFieldSolver.factory  = cond        # Operator factory. 'cond', 'nwo', 'poiss', or 'slowco'
-ProxyFieldSolver.plt_vars = phi resid E # Plot variables
-ProxyFieldSolver.eb_order = 1           # BC order on EB
-ProxyFieldSolver.dom_val  = -1.         # Dirichlet value on domain
-ProxyFieldSolver.eb_val   =  1.         # Dirichlet value on EB
-ProxyFieldSolver.phi_ini  = 0.0         # Initial value for phi
-ProxyFieldSolver.smooth   = 16          # Smoothings
-ProxyFieldSolver.relax    = 2           # Relaxation method
-ProxyFieldSolver.mg_tol   = 1.E-10      # Multigrid tolerance
+ProxyFieldSolver.plt_vars  = phi resid E # Plot variables
+ProxyFieldSolver.solver    = helm        # Our solver ('helmholtz') or ebconductivity op 'ebcond'
+ProxyFieldSolver.eb_bc     = dirichlet   # 'dirichlet', 'neumann', or 'robin'
+ProxyFieldSolver.domain_bc = dirichlet   # 'dirichlet', 'neumann', or 'robin'
+ProxyFieldSolver.eb_order  = 1           # BC order on EB (only for Dirichlet)
+ProxyFieldSolver.dom_val   = -1.         # Value on domain (not for Robin)
+ProxyFieldSolver.eb_val    =  0.         # Value on EB (not for Robin)
+ProxyFieldSolver.smooth    = 16          # Smoothings
+ProxyFieldSolver.relax     = 2           # Relaxation method
+ProxyFieldSolver.mg_tol    = 1.E-10      # Multigrid tolerance
 
 # ====================================================================================================
 # GEO_COARSENER CLASS OPTIONS

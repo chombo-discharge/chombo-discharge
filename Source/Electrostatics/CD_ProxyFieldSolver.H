@@ -17,6 +17,7 @@
 #include <EBMGAverage.H>
 
 // Our includes
+#include <CD_EBMultigridInterpolator.H>
 #include <CD_FieldSolver.H>
 #include <CD_NamespaceHeader.H>
 
@@ -45,15 +46,12 @@ public:
   
 protected:
 
-  void solveChombo(EBAMRCellData& a_solution, EBAMRCellData& a_residue);
+  void solveEBCond   (EBAMRCellData& a_solution, EBAMRCellData& a_residue);
   void solveHelmholtz(EBAMRCellData& a_solution, EBAMRCellData& a_residue);
-  void coarsenMG(EBAMRCellData& a_solution);
-  void coarsenConservative(EBAMRCellData& a_solution);
-
   
   Vector<EBLevelGrid> getEBLevelGrids();
-  Vector<RefCountedPtr<NWOEBQuadCFInterp> > getInterpNWO();
-  Vector<RefCountedPtr<EBQuadCFInterp> >    getInterpOld();
+  Vector<RefCountedPtr<EBQuadCFInterp> > getQuadCFI();
+  Vector<RefCountedPtr<EBMultigridInterpolator> > getMultigridInterpolators();
 };
 
 #include <CD_NamespaceFooter.H>

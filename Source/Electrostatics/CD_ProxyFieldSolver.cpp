@@ -33,6 +33,7 @@
 #include <CD_NwoEbQuadCfInterp.H>
 #include <CD_DataOps.H>
 #include <CD_EBHelmholtzOpFactory.H>
+#include <CD_RobinConductivityEbBcFactory.H>
 #include <CD_NamespaceHeader.H>
 
 
@@ -43,17 +44,30 @@ bool ProxyFieldSolver::solve(MFAMRCellData&       a_potential,
   if(m_verbosity > 3){
     pout() << "ProxyFieldSolver::solve(...)" << endl;
   }
+  
   DataOps::setValue(a_potential, 0.0);
   DataOps::setValue(m_residue,   0.0);
 
   EBAMRCellData gasData = m_amr->alias(phase::gas, a_potential);
   EBAMRCellData gasResi = m_amr->alias(phase::gas, m_residue);
 
-  if(procID() == 0) std::cout << "\n";
-  this->solveChombo(   gasData, gasResi);
-  if(procID() == 0) std::cout << "\n";
-  this->solveHelmholtz(gasData, gasResi);
-  if(procID() == 0) std::cout << "\n";
+  ParmParse pp(m_className.c_str());
+  std::string str;
+  pp.get("solver", str);
+
+  if(str == "ebcond"){
+    this->solveEBCond(   gasData, gasResi);
+  }
+  else if(str == "helm"){
+    this->solveHelmholtz(gasData, gasResi);
+  }
+
+  m_amr->averageDown(a_potential, m_realm);
+  m_amr->interpGhost(a_potential, m_realm);
+  
+  this->computeElectricField();
+  
+  this->writePlotFile();
   
   return true;
 }
@@ -95,52 +109,7 @@ Vector<EBLevelGrid> ProxyFieldSolver::getEBLevelGrids(){
   return ret;
 }
 
-Vector<RefCountedPtr<NWOEBQuadCFInterp> > ProxyFieldSolver::getInterpNWO(){
-  const int finestLevel = m_amr->getFinestLevel();
-  
-  Vector<RefCountedPtr<NWOEBQuadCFInterp> > ret(1 + finestLevel);
-
-  const int nGhosts = m_amr->getNumberOfGhostCells();
-  
-  for (int lvl = 1; lvl <= finestLevel; lvl++){
-    if(lvl > 0){
-
-      // Make the CFIVS
-      const DisjointBoxLayout& fineGrids = m_amr->getGrids(m_realm)[lvl];
-      LayoutData<IntVectSet> ghostCells(fineGrids);
-      for (DataIterator dit = fineGrids.dataIterator(); dit.ok(); ++dit){
-
-	Box grownBox      = grow(fineGrids[dit()], nGhosts);
-	grownBox         &= m_amr->getDomains()[lvl];
-	ghostCells[dit()] = IntVectSet(grownBox);
-
-	const Vector<LayoutIndex>& neighbors = (*m_amr->getNeighbors(m_realm, phase::gas)[lvl])[dit()];
-	for (int i = 0; i < neighbors.size(); i++){
-	  ghostCells[dit()] -= fineGrids[neighbors[i]];
-	}
-	ghostCells[dit()] -= fineGrids[dit()];
-      }
-
-      // Define interpolator. 
-      ret[lvl] = RefCountedPtr<NWOEBQuadCFInterp> (new NwoEbQuadCfInterp(m_amr->getGrids(m_realm)[lvl],
-									 m_amr->getGrids(m_realm)[lvl-1],
-									 m_amr->getEBISLayout(m_realm, phase::gas)[lvl],
-									 m_amr->getEBISLayout(m_realm, phase::gas)[lvl-1],
-									 m_amr->getDomains()[lvl-1],
-									 m_amr->getRefinementRatios()[lvl-1],
-									 1,
-									 m_amr->getDx()[lvl],
-									 nGhosts*IntVect::Unit,
-									 ghostCells,
-									 m_amr->getEBIndexSpace(phase::gas)));
-    }
-  }
-
-  
-  return ret;
-}
-
-Vector<RefCountedPtr<EBQuadCFInterp> > ProxyFieldSolver::getInterpOld(){
+Vector<RefCountedPtr<EBQuadCFInterp> > ProxyFieldSolver::getQuadCFI(){
   const int finestLevel = m_amr->getFinestLevel();
   
   Vector<RefCountedPtr<EBQuadCFInterp> > ret(1 + finestLevel);
@@ -165,252 +134,11 @@ Vector<RefCountedPtr<EBQuadCFInterp> > ProxyFieldSolver::getInterpOld(){
   return ret;
 }
 
-void ProxyFieldSolver::solveChombo(EBAMRCellData& a_phi, EBAMRCellData& a_residue){
-  ParmParse pp(m_className.c_str());
-
-  // Define coefficients
-  EBAMRCellData rho;
-  EBAMRCellData aco;
-  EBAMRCellData zero;
-  EBAMRFluxData bco;
-  EBAMRIVData   bcoIrreg;
-
-  Real t1;
-
-  m_amr->allocate(aco,      m_realm, phase::gas, 1);
-  m_amr->allocate(bco,      m_realm, phase::gas, 1);
-  m_amr->allocate(bcoIrreg, m_realm, phase::gas, 1);
-  m_amr->allocate(rho,      m_realm, phase::gas, 1);
-  m_amr->allocate(zero,     m_realm, phase::gas, 1);  
-
-  DataOps::setValue(zero,     0.0);
-  DataOps::setValue(aco,      0.0);
-  DataOps::setValue(bco,      1.0);
-  DataOps::setValue(bcoIrreg, 1.0);
-  DataOps::setValue(rho,      0.0);
-
-  const Real alpha =  0.;
-  const Real beta  =  1.;
-
-  auto levelGrids    = this->getEBLevelGrids();
-  auto interpNWO     = this->getInterpNWO();
-  auto interpOld     = this->getInterpOld();
-
-  const IntVect ghostPhi = m_amr->getNumberOfGhostCells()*IntVect::Unit;
-  const IntVect ghostRHS = m_amr->getNumberOfGhostCells()*IntVect::Unit;
-
-  int         relaxType;
-  int         eb_order;
-  Real        eb_value;
-  Real        dom_value;
-  Real        phi_init;
-  std::string str;
-
-  pp.get("relax",    relaxType);
-  pp.get("eb_order", eb_order);
-  pp.get("eb_val",   eb_value);
-  pp.get("dom_val",  dom_value);
-  pp.get("phi_ini",  phi_init);
-
-  DataOps::setValue(a_phi, phi_init);
-
-  // BC factories for conductivity ops
-  auto ebbcFactory   = RefCountedPtr<DirichletConductivityEBBCFactory>     (new DirichletConductivityEBBCFactory());
-  auto domainFactory = RefCountedPtr<DirichletConductivityDomainBCFactory> (new DirichletConductivityDomainBCFactory());
-  ebbcFactory  ->setValue(eb_value);
-  ebbcFactory  ->setOrder(eb_order);
-  domainFactory->setValue(dom_value);
-  
-
-  // BC factories for EBAMRPoissonOp
-  auto poissonEBFactory  = RefCountedPtr<DirichletPoissonEBBCFactory>     (new DirichletPoissonEBBCFactory());
-  auto poissonDomFactory = RefCountedPtr<DirichletPoissonDomainBCFactory> (new DirichletPoissonDomainBCFactory());
-  poissonEBFactory ->setValue(eb_value);
-  poissonEBFactory ->setOrder(eb_order);
-  poissonDomFactory->setValue(dom_value);
-
-
-  auto factoryNWO = RefCountedPtr<NWOEBConductivityOpFactory> (new NWOEBConductivityOpFactory(levelGrids,
-											      interpNWO,
-											      alpha,
-											      beta,
-											      aco.getData(),
-											      bco.getData(),
-											      bcoIrreg.getData(),
-											      m_amr->getDx()[0],
-											      m_amr->getRefinementRatios(),
-											      domainFactory,
-											      ebbcFactory,
-											      ghostPhi,
-											      ghostRHS,
-											      relaxType));
-
-
-
-  
-  auto factoryPoiss = RefCountedPtr<EBAMRPoissonOpFactory> (new EBAMRPoissonOpFactory(levelGrids,
-										      m_amr->getRefinementRatios(),
-										      interpOld,
-										      m_amr->getDx()[0]*RealVect::Unit,
-										      m_amr->getProbLo(),
-										      40,
-										      relaxType,
-										      poissonDomFactory,
-										      poissonEBFactory,
-										      alpha,
-										      beta,
-										      0.0,
-										      ghostPhi,
-										      ghostRHS));
-
-
-  auto factorySlow = RefCountedPtr<slowEBCOFactory> (new slowEBCOFactory(levelGrids,
-									 interpOld,
-									 alpha,
-									 beta,
-									 aco.getData(),
-									 bco.getData(),
-									 bcoIrreg.getData(),
-									 m_amr->getDx()[0],
-									 m_amr->getRefinementRatios(),
-									 domainFactory,
-									 ebbcFactory,
-									 ghostPhi,
-									 ghostRHS,
-									 relaxType));
-  t1 = -MPI_Wtime();
-  auto factoryOld = RefCountedPtr<EBConductivityOpFactory> (new EBConductivityOpFactory(levelGrids,
-											interpOld,
-											alpha,
-											beta,
-											aco.getData(),
-											bco.getData(),
-											bcoIrreg.getData(),
-											m_amr->getDx()[0],
-											m_amr->getRefinementRatios(),
-											domainFactory,
-											ebbcFactory,
-											ghostPhi,
-											ghostRHS,
-											relaxType));
-  t1 += MPI_Wtime();
-  if(procID() == 0) std::cout << "ebcond oper time = " << t1 << std::endl;
-
-										   
-
-  BiCGStabSolver<LevelData<EBCellFAB> > bicgstab;
-  AMRMultiGrid<LevelData<EBCellFAB> >   multigridSolver;
-
-  bool useCond;
-  bool useNWO;
-  int  numSmooth;
-  Real tolerance;
-  std::string whichFactory;
-
-  pp.get("mg_tol",   tolerance);
-  pp.get("smooth",   numSmooth);
-  pp.get("factory",  whichFactory);
-
-  t1 = -MPI_Wtime();
-  if(whichFactory == "nwo"){
-    pout() << "using nwo ebconductivityop" << endl;
-    multigridSolver.define(m_amr->getDomains()[0], *factoryNWO, &bicgstab, 1 + m_amr->getFinestLevel());
-  }
-  else if(whichFactory == "cond"){
-    pout() << "using old ebconductivityop" << endl;
-    multigridSolver.define(m_amr->getDomains()[0], *factoryOld, &bicgstab, 1 + m_amr->getFinestLevel());
-  }
-  else if(whichFactory == "poiss"){
-    pout() << "using ebamrpoissonopfactory" << endl;
-    multigridSolver.define(m_amr->getDomains()[0], *factoryPoiss, &bicgstab, 1 + m_amr->getFinestLevel());
-  }
-  else if(whichFactory == "slowco"){
-    pout() << "using slowconductivity" << endl;
-    Chombo_EBIS::alias(&(*m_amr->getEBIndexSpace(phase::gas)));
-    multigridSolver.define(m_amr->getDomains()[0], *factorySlow, &bicgstab, 1 + m_amr->getFinestLevel());
-  }
-  else{
-    MayDay::Abort("Bad argument to 'factory'");
-  }
-  t1 += MPI_Wtime();
-  if(procID() == 0) std::cout << "ebcond define time = " << t1 << std::endl;
-
-  multigridSolver.setSolverParameters(numSmooth, numSmooth, numSmooth, 1, 32, tolerance, 1E-60, 1E-60);
-
-
-  // Solve
-  Vector<LevelData<EBCellFAB>* > phi;
-  Vector<LevelData<EBCellFAB>* > rhs;
-  Vector<LevelData<EBCellFAB>* > res;
-  Vector<LevelData<EBCellFAB>* > zer;
-
-  m_amr->alias(phi, a_phi);
-  m_amr->alias(rhs, rho);
-  m_amr->alias(res, a_residue);
-  m_amr->alias(zer, zero);
-
+Vector<RefCountedPtr<EBMultigridInterpolator> > ProxyFieldSolver::getMultigridInterpolators(){
   const int finestLevel = m_amr->getFinestLevel();
-  const int baseLevel   = 0;
 
-  multigridSolver.m_verbosity = 10;
-  t1 = -MPI_Wtime();
-  multigridSolver.init(phi, rhs, finestLevel, baseLevel);
-  t1 += MPI_Wtime();
-  if(procID() == 0) std::cout << "ebcond init time = " << t1 << std::endl;
-  multigridSolver.m_convergenceMetric = multigridSolver.computeAMRResidual(zer, rhs, finestLevel, baseLevel);
-  
-
-  Real zerResid = multigridSolver.computeAMRResidual(res, zer, rhs, finestLevel, baseLevel);
-  Real phiResid = multigridSolver.computeAMRResidual(res, phi, rhs, finestLevel, baseLevel);
-
-  int iter = 0;
-  while(phiResid >= zerResid*tolerance && iter < 10 ){
-    multigridSolver.m_convergenceMetric = multigridSolver.computeAMRResidual(zer, rhs, finestLevel, baseLevel);
-
-    t1 = -MPI_Wtime();
-    multigridSolver.solveNoInit(phi, rhs, finestLevel, baseLevel, false, false);
-    t1 += MPI_Wtime();
-    if(procID() == 0) std::cout << "chombo solve time = " << t1 << std::endl;
-    coarsenConservative(a_phi);
-    phiResid = multigridSolver.computeAMRResidual(res, phi, rhs, finestLevel, baseLevel);
-
-    iter++;
-  }
-
-  if(procID() == 0) std::cout << "solveChombo final resid = " << phiResid << std::endl;
-
-  m_amr->averageDown(a_phi, m_realm, phase::gas);
-  m_amr->interpGhost(a_phi, m_realm, phase::gas);
-  this->computeElectricField();
-  this->writePlotFile();
-}
-
-void ProxyFieldSolver::coarsenMG(EBAMRCellData& a_phi){
-  for (int lvl = m_amr->getFinestLevel(); lvl > 0; lvl--){
-    EBMGAverage aveOp(m_amr->getGrids(m_realm)[lvl],
-		      m_amr->getGrids(m_realm)[lvl-1],
-		      m_amr->getEBISLayout(m_realm, phase::gas)[lvl],
-		      m_amr->getEBISLayout(m_realm, phase::gas)[lvl-1],
-		      m_amr->getDomains()[lvl-1],
-		      m_amr->getRefinementRatios()[lvl-1],
-		      1,
-		      m_amr->getEBIndexSpace(phase::gas),
-		      m_amr->getNumberOfGhostCells()*IntVect::Unit,
-		      true);
-	  
-    aveOp.average(*a_phi[lvl-1], *a_phi[lvl], Interval(0,0));
-  }
-}
-
-void ProxyFieldSolver::coarsenConservative(EBAMRCellData& a_phi){
-  m_amr->averageDown(a_phi, m_realm, phase::gas);
-}
-
-void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res){
-
-  const int finestLevel = m_amr->getFinestLevel();
-  
   Vector<RefCountedPtr<EBMultigridInterpolator> > interpolators(1+finestLevel);
+  
   for (int lvl = 0; lvl <= finestLevel; lvl++){
 
     if(lvl > 0){
@@ -426,22 +154,197 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
     }
   }
 
+  return interpolators;
+}
+
+void ProxyFieldSolver::solveEBCond(EBAMRCellData& a_phi, EBAMRCellData& a_residue){
+  ParmParse pp(m_className.c_str());
+  
+  const Real alpha =  0.;
+  const Real beta  =  1.;
+
+  // Define coefficients
+  EBAMRCellData rho;
+  EBAMRCellData aco;
+  EBAMRCellData zero;
+  EBAMRFluxData bco;
+  EBAMRIVData   bcoIrreg;
+
+  m_amr->allocate(aco,      m_realm, phase::gas, 1);
+  m_amr->allocate(bco,      m_realm, phase::gas, 1);
+  m_amr->allocate(bcoIrreg, m_realm, phase::gas, 1);
+  m_amr->allocate(rho,      m_realm, phase::gas, 1);
+  m_amr->allocate(zero,     m_realm, phase::gas, 1);  
+
+  DataOps::setValue(zero,     0.0);
+  DataOps::setValue(aco,      0.0);
+  DataOps::setValue(bco,      1.0);
+  DataOps::setValue(bcoIrreg, 1.0);
+  DataOps::setValue(rho,      0.0);
+
+  const IntVect ghostPhi = m_amr->getNumberOfGhostCells()*IntVect::Unit;
+  const IntVect ghostRHS = m_amr->getNumberOfGhostCells()*IntVect::Unit;
+
+  int         eb_order;
+  Real        eb_value;
+  Real        dom_value;
+  std::string str;
+
+  // Set up boundary conditions. 
+  RefCountedPtr<BaseEBBCFactory>     ebbcFactory;
+  RefCountedPtr<BaseDomainBCFactory> domainBcFactory;
+
+  // EBBC
+  pp.get("eb_bc", str);
+  if(str == "dirichlet"){
+    pp.get("eb_order", eb_order);
+    pp.get("eb_val",   eb_value);
+    
+    auto bcFactory = new DirichletConductivityEBBCFactory();
+    bcFactory->setValue(eb_value);
+    bcFactory->setOrder(eb_order);
+
+    ebbcFactory = RefCountedPtr<BaseEBBCFactory> (bcFactory);
+  }
+  else if(str == "neumann"){
+    pp.get("eb_val",   eb_value);
+    
+    auto bcFactory = new NeumannConductivityEBBCFactory();
+    bcFactory->setValue(eb_value);
+
+    ebbcFactory = RefCountedPtr<BaseEBBCFactory>(bcFactory);
+  }
+  else{
+    MayDay::Error("ProxyFieldSolver::solveEBCond - uknown EBBC factory requested");
+  }
+
+  // Domain BC
+  pp.get("domain_bc", str);
+  if(str == "dirichlet"){
+    pp.get("dom_val", dom_value);
+
+    auto bcFactory = new DirichletConductivityDomainBCFactory();
+    bcFactory->setValue(dom_value);
+
+    domainBcFactory = RefCountedPtr<BaseDomainBCFactory>(bcFactory);
+  }
+  else if(str == "neumann"){
+    pp.get("dom_val", dom_value);
+
+    auto bcFactory = new NeumannConductivityDomainBCFactory();
+    bcFactory->setValue(dom_value);
+
+    domainBcFactory = RefCountedPtr<BaseDomainBCFactory>(bcFactory);
+  }
+  else{
+    MayDay::Error("ProxyFieldSolver::solveEBCond - uknown EBBC factory requested");
+  }
+
+  int relaxType;
+  pp.get("relax",relaxType);
+
+  BiCGStabSolver<LevelData<EBCellFAB> > bicgstab;
+  AMRMultiGrid<LevelData<EBCellFAB> >   multigridSolver;  
+  EBConductivityOpFactory condFactory(this->getEBLevelGrids(),
+				      this->getQuadCFI(),
+				      alpha,
+				      beta,
+				      aco.getData(),
+				      bco.getData(),
+				      bcoIrreg.getData(),
+				      m_amr->getDx()[0],
+				      m_amr->getRefinementRatios(),
+				      domainBcFactory,
+				      ebbcFactory,
+				      ghostPhi,
+				      ghostRHS,
+				      relaxType);
+										   
+
+
+
+  int  numSmooth;
+  Real tolerance;
+
+  pp.get("mg_tol",   tolerance);
+  pp.get("smooth",   numSmooth);
+
+  const int finestLevel = m_amr->getFinestLevel();
+  const int baseLevel   = 0;
+
+  // Define
+  multigridSolver.define(m_amr->getDomains()[0], condFactory, &bicgstab, 1 + finestLevel);
+  multigridSolver.setSolverParameters(numSmooth, numSmooth, numSmooth, 1, 32, tolerance, 1E-60, 1E-60);
+
+  // Solve
+  Vector<LevelData<EBCellFAB>* > phi;
+  Vector<LevelData<EBCellFAB>* > rhs;
+  Vector<LevelData<EBCellFAB>* > res;
+  Vector<LevelData<EBCellFAB>* > zer;
+
+  m_amr->alias(phi, a_phi);
+  m_amr->alias(rhs, rho);
+  m_amr->alias(res, a_residue);
+  m_amr->alias(zer, zero);
+
+  multigridSolver.m_verbosity = 10;
+  multigridSolver.init(phi, rhs, finestLevel, baseLevel);
+  multigridSolver.m_convergenceMetric = multigridSolver.computeAMRResidual(zer, rhs, finestLevel, baseLevel);
+  multigridSolver.solveNoInit(phi, rhs, finestLevel, baseLevel, false);
+}
+
+void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_residue){
+  ParmParse pp(m_className.c_str());
+  
   const Real alpha = 0.0;
   const Real beta  = 1.0;
 
+  EBAMRCellData zero;
   EBAMRCellData Aco;
   EBAMRFluxData Bco;
   EBAMRIVData   BcoIrreg;
+  EBAMRCellData rho;
 
+  m_amr->allocate(zero,     m_realm, phase::gas, 1);
   m_amr->allocate(Aco,      m_realm, phase::gas, 1);
   m_amr->allocate(Bco,      m_realm, phase::gas, 1);
   m_amr->allocate(BcoIrreg, m_realm, phase::gas, 1);
+  m_amr->allocate(rho,      m_realm, phase::gas, 1);
 
-  DataOps::setValue(Aco, 0.0);
-  DataOps::setValue(Bco, 1.0);
+  DataOps::setValue(zero,     0.0);
+  DataOps::setValue(Aco,      0.0);
+  DataOps::setValue(Bco,      1.0);
   DataOps::setValue(BcoIrreg, 1.0);
+  DataOps::setValue(rho,      0.0);
 
-  auto helmFactory   = RefCountedPtr<EBHelmholtzDirichletEBBCFactory>      (new EBHelmholtzDirichletEBBCFactory(1, 1.0));
+  const IntVect ghostPhi = m_amr->getNumberOfGhostCells()*IntVect::Unit;
+  const IntVect ghostRhs = m_amr->getNumberOfGhostCells()*IntVect::Unit;
+
+  int         eb_order;
+  Real        eb_value;
+  Real        dom_value;
+  std::string str;
+
+  RefCountedPtr<EBHelmholtzEBBCFactory> ebbcFactory;
+
+  // EBBC
+  pp.get("eb_bc", str);
+  if(str == "dirichlet"){
+    pp.get("eb_order", eb_order);
+    pp.get("eb_val",   eb_value);
+
+    ebbcFactory = RefCountedPtr<EBHelmholtzEBBCFactory> (new EBHelmholtzDirichletEBBCFactory(eb_order, eb_value));
+  }
+  else if(str == "neumann"){
+    pp.get("eb_val", eb_value);
+
+    ebbcFactory = RefCountedPtr<EBHelmholtzEBBCFactory> (new EBHelmholtzNeumannEBBCFactory(eb_value));    
+  }
+  else{
+    MayDay::Error("ProxyFieldSolver::solveEBCond - uknown EBBC factory requested");
+  }
+
+  // Domain bc
   auto domainFactory = RefCountedPtr<DirichletConductivityDomainBCFactory> (new DirichletConductivityDomainBCFactory());
   domainFactory->setValue(-1);
 
@@ -451,14 +354,27 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
     bottomDomain.coarsen(2);
   }
 
-  Real t1;
+  // Relax stuff consistent with EBConductivityOp
+  EBHelmholtzOp::RelaxationMethod relaxType;
+  int relax;
+  pp.get("relax",relax);
+  switch(relax){
+  case 0:
+    relaxType = EBHelmholtzOp::RelaxationMethod::PointJacobi;
+    break;
+  case 1:
+    relaxType = EBHelmholtzOp::RelaxationMethod::GauSaiMultiColor;
+    break;
+  case 2:
+    relaxType = EBHelmholtzOp::RelaxationMethod::GauSaiMultiColorFast;
+    break;    
+  }
 
-  t1 = -MPI_Wtime();
   EBHelmholtzOpFactory fact(alpha,
 			    beta,
 			    m_amr->getProbLo(),
 			    m_amr->getEBLevelGrid(m_realm, phase::gas),
-			    interpolators,
+			    this->getMultigridInterpolators(),
 			    m_amr->getFluxRegister(m_realm, phase::gas),
 			    m_amr->getCoarseAverage(m_realm, phase::gas),
 			    m_amr->getRefinementRatios(),
@@ -467,57 +383,44 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
 			    Bco.getData(),
 			    BcoIrreg.getData(),
 			    domainFactory,
-			    helmFactory, //ebbcFactory,
-			    m_amr->getNumberOfGhostCells()*IntVect::Unit,
-			    m_amr->getNumberOfGhostCells()*IntVect::Unit,
-			    EBHelmholtzOp::RelaxationMethod::GauSaiMultiColorFast,
+			    ebbcFactory,
+			    ghostPhi,
+			    ghostRhs,
+			    relaxType,
 			    bottomDomain,
-			    32);//m_amr->getMaxBoxSize());
-  t1 += MPI_Wtime();
-  if(procID() == 0) std::cout << "helm oper create = " << t1 << "\n";
+			    m_amr->getMaxBoxSize());
 
   BiCGStabSolver<LevelData<EBCellFAB> > bicgstab;
   AMRMultiGrid<LevelData<EBCellFAB> > multigridSolver;
 
-  // Set an empty right-hand side
-  EBAMRCellData RHS;
-  m_amr->allocate(RHS, m_realm, phase::gas, 1);
-  DataOps::setValue(RHS, 0.0);
+  int  numSmooth;
+  Real tolerance;
 
+  pp.get("mg_tol",   tolerance);
+  pp.get("smooth",   numSmooth);
+  
+  const int baseLevel   = 0;
+  const int finestLevel = m_amr->getFinestLevel();
+
+  // Define
+  multigridSolver.define(m_amr->getDomains()[0], fact, &bicgstab, 1 + finestLevel);
+  multigridSolver.setSolverParameters(numSmooth, numSmooth, numSmooth, 1, 32, tolerance, 1E-60, 1E-60);
+  
+  // Solve
+  Vector<LevelData<EBCellFAB>* > zer;
   Vector<LevelData<EBCellFAB>* > phi;
   Vector<LevelData<EBCellFAB>* > res;
   Vector<LevelData<EBCellFAB>* > rhs; 
 
   m_amr->alias(phi, a_phi);
-  m_amr->alias(res, a_res);
-  m_amr->alias(rhs, RHS);
+  m_amr->alias(rhs, rho);
+  m_amr->alias(res, a_residue);
+  m_amr->alias(zer, zero);
 
-  t1 = -MPI_Wtime();
-  multigridSolver.define(m_amr->getDomains()[0], fact, &bicgstab, 1 + finestLevel);
-  t1 += MPI_Wtime();
-  if(procID() == 0) std::cout << "helm define time = " << t1 << "\n";
   multigridSolver.m_verbosity=10;
-  t1 = -MPI_Wtime();
   multigridSolver.init(phi, rhs, finestLevel, 0);
-  t1 += MPI_Wtime();
-  if(procID() == 0) std::cout << "helm init time = " << t1 << "\n";
-
-
-  // Print the initial residual
-
-
-  multigridSolver.setSolverParameters(16, 16, 16, 1, 32, 1.E-10, 1E-60, 1E-60);
-  t1 = -MPI_Wtime();
-  multigridSolver.solveNoInit(phi, rhs, finestLevel, 0, true, false);
-  t1 += MPI_Wtime();
-  if(procID() == 0) std::cout << "helm solve time = " << t1 << "\n";
-  const Real phiResid = multigridSolver.computeAMRResidual(res, phi, rhs, finestLevel, 0);
-  if(procID() == 0) std::cout << "solveHelm final resid = " << phiResid << std::endl;
-
-  m_amr->averageDown(a_phi, m_realm, phase::gas);
-  m_amr->interpGhost(a_phi, m_realm, phase::gas);
-  this->computeElectricField();
-  this->writePlotFile();
+  multigridSolver.m_convergenceMetric = multigridSolver.computeAMRResidual(zer, rhs, finestLevel, baseLevel);
+  multigridSolver.solveNoInit(phi, rhs, finestLevel, baseLevel, false);
 }
 
 #include <CD_NamespaceFooter.H>

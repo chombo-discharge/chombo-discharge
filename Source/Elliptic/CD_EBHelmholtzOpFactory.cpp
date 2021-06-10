@@ -77,11 +77,7 @@ EBHelmholtzOpFactory::EBHelmholtzOpFactory(const Real&             a_alpha,
     MayDay::Abort("EBHelmholtzOpFactory -- bottomsolver domain can't be larger than the base AMR domain!");
   }
 
-  Real t1 = -MPI_Wtime();
   this->defineMultigridLevels();
-  t1 += MPI_Wtime();
-
-  if(procID() == 0) std::cout << "define MG levels time = " << t1 << "\n";
 }
   
 EBHelmholtzOpFactory::~EBHelmholtzOpFactory(){
