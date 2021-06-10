@@ -443,6 +443,8 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
   ebbcFactory  ->setOrder(1);
   domainFactory->setValue(-1);
 
+  EBHelmholtzDirichletEBBCFactory helmFactory(1, 1.0);;
+
   // Set the bottom domain. Don't go below 8x cells in any direction
   ProblemDomain bottomDomain = m_amr->getDomains()[0];
   while(bottomDomain.domainBox().shortside() >= 4){

@@ -29,6 +29,16 @@ public:
   EBHelmholtzDirichletEBBCFactory();
 
   /*!
+    @brief Full constructor which sets order and value on EB
+  */
+  EBHelmholtzDirichletEBBCFactory(const int a_order, const Real a_value);
+
+  /*!
+    @brief Full constructor which sets order and value on EB
+  */
+  EBHelmholtzDirichletEBBCFactory(const int a_order, const std::function<Real(const RealVect& a_pos)>& a_value);
+
+  /*!
     @brief Destructor
   */
   ~EBHelmholtzDirichletEBBCFactory();

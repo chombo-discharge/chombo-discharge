@@ -19,6 +19,17 @@ EBHelmholtzDirichletEBBCFactory::EBHelmholtzDirichletEBBCFactory(){
   m_useFunction = false;
 }
 
+EBHelmholtzDirichletEBBCFactory::EBHelmholtzDirichletEBBCFactory(const int a_order, const Real a_value){
+  this->setOrder(a_order);
+  this->setValue(a_value);
+}
+
+
+EBHelmholtzDirichletEBBCFactory::EBHelmholtzDirichletEBBCFactory(const int a_order, const std::function<Real(const RealVect& a_pos)>& a_value){
+  this->setOrder(a_order);
+  this->setValue(a_value);
+}
+
 EBHelmholtzDirichletEBBCFactory::~EBHelmholtzDirichletEBBCFactory(){
 
 }
