@@ -166,7 +166,7 @@ void EBHelmholtzDirichletEBBC::applyEBFlux(EBCellFAB&         a_Lphi,
     value = m_constantValue;
   }
   else if(m_useFunction){
-    const RealVect pos = this->getBoundaryPosition(a_vof, a_phi, m_dx);
+    const RealVect pos = this->getBoundaryPosition(a_vof, a_dit);
     value = m_functionValue(pos);
   }
 

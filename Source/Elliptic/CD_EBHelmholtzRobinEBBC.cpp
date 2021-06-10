@@ -105,7 +105,7 @@ void EBHelmholtzRobinEBBC::define() {
 	B = m_constantB;
       }
       else if(m_useFunction){
-	const RealVect pos = RealVect::Zero;//this->getBoundaryPosition(vof, dit());
+	const RealVect pos = this->getBoundaryPosition(vof, dit());
 	A = m_functionA(pos);
 	B = m_functionB(pos);
       }

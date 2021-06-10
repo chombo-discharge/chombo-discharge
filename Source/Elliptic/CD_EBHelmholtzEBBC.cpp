@@ -46,11 +46,11 @@ const LayoutData<BaseIVFAB<VoFStencil> >& EBHelmholtzEBBC::getKappaDivFStencils(
   return m_kappaDivFStencils;
 }
 
-RealVect EBHelmholtzEBBC::getBoundaryPosition(const VolIndex& a_vof, const EBCellFAB& a_phi, const Real& a_dx) const {
-  const EBISBox&  ebisbox    = a_phi.getEBISBox();
+RealVect EBHelmholtzEBBC::getBoundaryPosition(const VolIndex& a_vof, const DataIndex& a_dit) const {
+  const EBISBox&  ebisbox    = m_eblg.getEBISL()[a_dit];
   const RealVect& ebCentroid = ebisbox.bndryCentroid(a_vof);
 
-  RealVect position = m_probLo + (0.5*RealVect::Unit + a_vof.gridIndex())*m_dx + ebCentroid*a_dx;
+  RealVect position = m_probLo + (0.5*RealVect::Unit + RealVect(a_vof.gridIndex()) + ebCentroid)*m_dx;
 
   return position;
 }

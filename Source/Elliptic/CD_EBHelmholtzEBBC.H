@@ -133,7 +133,7 @@ protected:
   /*!
     @brief Returns physical position at the boundary
   */
-  RealVect getBoundaryPosition(const VolIndex& a_vof, const EBCellFAB& a_phi, const Real& a_dx) const;
+  RealVect getBoundaryPosition(const VolIndex& a_vof, const DataIndex& a_dit) const;
 };
 
 #include <CD_NamespaceFooter.H>
