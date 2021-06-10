@@ -111,7 +111,7 @@ void EBHelmholtzRobinEBBC::define() {
       }
       else if(m_useData){
 	A = (*m_dataA)[dit()](vof, m_comp);
-	B = (*m_dataA)[dit()](vof, m_comp);
+	B = (*m_dataB)[dit()](vof, m_comp);
       }
 
       // The normal derivative is dphi/dn = (A*phi - C)/B and the (stencil) flux is
@@ -127,6 +127,31 @@ void EBHelmholtzRobinEBBC::applyEBFlux(EBCellFAB&         a_Lphi,
 				       const DataIndex&   a_dit,
 				       const Real&        a_beta) const {
 
+  // Recall that the "flux" is kappaDivF = area*dphi/dn/DeltaX where dphi/dn = (A*phi - C)/B. We already have the phi
+  // term in the stencil so only need to add -C/B.
+
+  Real B;
+  Real C;
+  if(m_useConstant){
+    B = m_constantB;
+    C = m_constantC;
+  }
+  else if(m_useFunction){
+    const RealVect pos = this->getBoundaryPosition(a_vof, a_dit);
+    B = m_functionB(pos);
+    C = m_functionC(pos);
+  }
+  else if(m_useData){
+    B = (*m_dataB)[a_dit](a_vof, m_comp);
+    C = (*m_dataC)[a_dit](a_vof, m_comp);
+  }
+
+  const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
+  const Real areaFrac    = ebisbox.bndryArea(a_vof);
+  const Real helmBco     = (*m_Bcoef)[a_dit](a_vof, m_comp);
+  const Real kappaDivF   = -a_beta*helmBco*areaFrac*C/(m_dx*B);
+
+  a_Lphi(a_vof, m_comp) += kappaDivF;
 }
 
 #include <CD_NamespaceFooter.H>
