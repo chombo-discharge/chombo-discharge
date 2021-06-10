@@ -7,12 +7,14 @@
   @file   CD_EBHelmholtzRobinEBBC.cpp
   @brief  Implementation of CD_EBHelmholtzRobinEBBC.H
   @author Robert Marskar
+  @todo   Add least squares implementation of extrapolation stuff. 
 */
 
 // Chombo includes
 #include <EBArith.H>
 
 // Our includes
+#include <CD_LeastSquares.H>
 #include <CD_EBHelmholtzRobinEBBC.H>
 #include <CD_NamespaceHeader.H>
 
@@ -55,9 +57,6 @@ VoFStencil EBHelmholtzRobinEBBC::getExtrapolationStencil(const VolIndex& a_vof, 
   const int order = EBArith::getFirstOrderExtrapolationStencil(extrapStencil, dist, m_dx*RealVect::Unit, a_vof, ebisbox, -1, &(*m_eblg.getCFIVS())[a_dit], m_comp);
 
   if(order == 0) MayDay::Error("EBHelmholtzRobinEBBC::getExtrapolationStencil - could not find stencil!");
-
-  extrapStencil.clear();
-  extrapStencil.add(a_vof, 1.0);
   
   return extrapStencil;
 }

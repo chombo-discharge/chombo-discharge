@@ -28,11 +28,12 @@
 // Our includes
 #include <CD_ProxyFieldSolver.H>
 #include <CD_EBMultigridInterpolator.H>
+#include <CD_EBHelmholtzOpFactory.H>
 #include <CD_EBHelmholtzNeumannEBBCFactory.H>
 #include <CD_EBHelmholtzDirichletEBBCFactory.H>
 #include <CD_EBHelmholtzRobinEBBCFactory.H>
 #include <CD_DataOps.H>
-#include <CD_EBHelmholtzOpFactory.H>
+#include <CD_RobinConductivityEbBcFactory.H>
 #include <CD_NamespaceHeader.H>
 
 
@@ -159,15 +160,23 @@ Vector<RefCountedPtr<EBMultigridInterpolator> > ProxyFieldSolver::getMultigridIn
 void ProxyFieldSolver::solveEBCond(EBAMRCellData& a_phi, EBAMRCellData& a_residue){
   ParmParse pp(m_className.c_str());
   
-  const Real alpha =  0.;
-  const Real beta  =  1.;
+  Real alpha;
+  Real beta;
+
+  Real Acoef;
+  Real Bcoef;
+
+  pp.get("alpha", alpha);
+  pp.get("beta",  beta);
+  pp.get("aco",   Acoef);
+  pp.get("bco",   Bcoef);
 
   // Define coefficients
-  EBAMRCellData rho;
-  EBAMRCellData aco;
   EBAMRCellData zero;
+  EBAMRCellData aco;
   EBAMRFluxData bco;
   EBAMRIVData   bcoIrreg;
+  EBAMRCellData rho;
 
   m_amr->allocate(aco,      m_realm, phase::gas, 1);
   m_amr->allocate(bco,      m_realm, phase::gas, 1);
@@ -176,9 +185,9 @@ void ProxyFieldSolver::solveEBCond(EBAMRCellData& a_phi, EBAMRCellData& a_residu
   m_amr->allocate(zero,     m_realm, phase::gas, 1);  
 
   DataOps::setValue(zero,     0.0);
-  DataOps::setValue(aco,      0.0);
-  DataOps::setValue(bco,      1.0);
-  DataOps::setValue(bcoIrreg, 1.0);
+  DataOps::setValue(aco,      Acoef);
+  DataOps::setValue(bco,      Bcoef);
+  DataOps::setValue(bcoIrreg, Bcoef);
   DataOps::setValue(rho,      0.0);
 
   const IntVect ghostPhi = m_amr->getNumberOfGhostCells()*IntVect::Unit;
@@ -212,6 +221,19 @@ void ProxyFieldSolver::solveEBCond(EBAMRCellData& a_phi, EBAMRCellData& a_residu
     bcFactory->setValue(eb_value);
 
     ebbcFactory = RefCountedPtr<BaseEBBCFactory>(bcFactory);
+  }
+  else if (str == "robin"){
+    pp.get("eb_val", eb_value);
+
+    // Coefficients for radiative transfer with Robin. 
+    const Real A =  1.5*eb_value;
+    const Real B = -1.0*eb_value;
+    const Real C =  0.0;
+
+    auto bcFactory = new RobinConductivityEbBcFactory(m_amr->getProbLo());
+    bcFactory->setCoefficients(A, B, C);
+    
+    ebbcFactory = RefCountedPtr<BaseEBBCFactory> (bcFactory);
   }
   else{
     MayDay::Error("ProxyFieldSolver::solveEBCond - uknown EBBC factory requested");

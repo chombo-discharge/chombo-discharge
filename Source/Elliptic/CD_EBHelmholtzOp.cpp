@@ -8,6 +8,7 @@
   @brief  Implementation of CD_EBHelmholtzOp.H
   @author Robert Marskar
   @todo   Replace EBAMRPoissonOp::staticMaxNorm and don't use EBAMRPoissonOp dependencies
+  @todo   LAPLACIANINPLACE could be made HELMHOLTZINPLACE and we could include the diagonal (alpha) term. 
   @note   If this breaks, we should look into the division by the relaxation factor (which not guard against divide-by-zero)
 */
 
@@ -79,6 +80,7 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid&                                 
   m_comp       = 0;
   m_turnOffBCs = false;
   m_interval   = Interval(m_comp, m_comp);
+
 
   if(m_hasFine){
     m_eblgFine = a_eblgFine;
@@ -312,7 +314,7 @@ void EBHelmholtzOp::setAlphaAndBeta(const Real& a_alpha, const Real& a_beta) {
 }
 
 void EBHelmholtzOp::residual(LevelData<EBCellFAB>& a_residual, const LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_rhs, bool a_homogeneousPhysBC) {
-  this->applyOp(a_residual, a_phi, nullptr, a_homogeneousPhysBC, true); // 
+  this->applyOp(a_residual, a_phi, nullptr, a_homogeneousPhysBC, true); // residual = L(phi)
   this->axby(a_residual, a_residual, a_rhs, -1.0, 1.0);                 // residual = rhs - L(phi). 
 }
 
@@ -528,7 +530,8 @@ void EBHelmholtzOp::applyOpRegular(EBCellFAB& a_Lphi, EBCellFAB& a_phi, const Bo
   
   // Alpha term
   a_Lphi.setVal(0.0);
-  a_Lphi += (*m_Acoef)[a_dit];
+  a_Lphi += a_phi;
+  a_Lphi *= (*m_Acoef)[a_dit];
   a_Lphi *= m_alpha;
 
   // Fill a_phi such that centered differences pushes in the domain flux. 
@@ -603,7 +606,7 @@ void EBHelmholtzOp::applyDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, cons
       m_domainBc->setCoef(m_eblg, m_beta, m_Bcoef);
       m_domainBc->getFaceFlux(faceFlux, a_phi.getSingleValuedFAB(), m_probLo, m_dx*RealVect::Unit, dir, Side::Hi, a_dit, 0.0, a_homogeneousPhysBC);
 
-      BaseFab<Real>& bco     = (*m_Bcoef)[a_dit][dir].getSingleValuedFAB();
+      BaseFab<Real>& bco = (*m_Bcoef)[a_dit][dir].getSingleValuedFAB();
       bco.shiftHalf(dir, -1);
       FORT_HELMHOLTZAPPLYDOMAINFLUX(CHF_FRA1(phiFAB, m_comp),
       				    CHF_CONST_FRA1(faceFlux, m_comp),
@@ -659,6 +662,7 @@ void EBHelmholtzOp::applyOpIrregular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, 
     VoFIterator& vofitLo = m_vofIterDomLo[dir][a_dit];    
     for (vofitLo.reset(); vofitLo.ok(); ++vofitLo){
       const VolIndex& vof = vofitLo();
+      
       m_domainBc->getFaceFlux(flux, vof, m_comp, a_phi, m_probLo, m_dx*RealVect::Unit, dir, Side::Lo, a_dit, 0.0, a_homogeneousPhysBC);
 
       a_Lphi(vof, m_comp) -= flux*m_beta/m_dx;
