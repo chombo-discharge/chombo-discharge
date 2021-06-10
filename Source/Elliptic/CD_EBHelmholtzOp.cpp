@@ -8,7 +8,7 @@
   @brief  Implementation of CD_EBHelmholtzOp.H
   @author Robert Marskar
   @todo   Replace EBAMRPoissonOp::staticMaxNorm and don't use EBAMRPoissonOp dependencies
-  @todo   When we redefine the EBBC, the getFluxStencil should return an empty stencil rather than a null pointer. Fix this in defineStencils() together with the other crap. 
+  @todo   Think about moving the BC define functions away from here and into the factory create functions. 
 */
 
 // Chombo includes
@@ -30,7 +30,7 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid&                                 
 			     const RefCountedPtr<EBFluxRegister>&               a_fluxReg,
 			     const RefCountedPtr<EbCoarAve>&                    a_coarAve,			       
 			     const RefCountedPtr<EBHelmholtzDomainBc>&          a_domainBc,
-			     const RefCountedPtr<EBHelmholtzEbBc>&              a_ebBc,
+			     const RefCountedPtr<EBHelmholtzEBBC>&              a_ebBc,
 			     const RealVect&                                    a_probLo,
 			     const Real&                                        a_dx,
 			     const int&                                         a_refToFine,
@@ -78,7 +78,6 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid&                                 
   m_nComp      = 1;
   m_comp       = 0;
   m_turnOffBCs = false;
-  m_vecDx      = m_dx*RealVect::Unit;
   m_interval   = Interval(m_comp, m_comp);
 
   if(m_hasFine){
@@ -154,13 +153,12 @@ void EBHelmholtzOp::defineStencils(){
     }
   }
 
-  // Fuck I hate the BC classes in Chombo.
-  // TODO: Remember to replace this stuff...
+  // Define BC objects. Can't do this in the factory because the BC objects will need the b-coefficient,
+  // but the factories won't know about that. I *could*
   Real fakeBeta = 1.0;
-  m_domainBc->setCoef(m_eblg, fakeBeta, m_Bcoef);
-  m_ebBc->setCoef(    m_eblg, fakeBeta, m_BcoefIrreg);
-  m_ebBc->define((*m_eblg.getCFIVS()), 1./m_dx);
-  const LayoutData<BaseIVFAB<VoFStencil> >* const ebFluxStencil = m_ebBc->getFluxStencil(m_comp);
+  m_domainBc->setCoef(m_eblg, fakeBeta, m_Bcoef); 
+  m_ebBc->define(m_eblg, m_BcoefIrreg, m_probLo, m_dx);
+  const LayoutData<BaseIVFAB<VoFStencil> >& ebFluxStencil = m_ebBc->getKappaDivFStencils();
 
   // Define everything
   for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit){
@@ -203,8 +201,8 @@ void EBHelmholtzOp::defineStencils(){
       VoFStencil& curStencil = opStencil(vof, m_comp);
 
       // Get stencil for this cell. 
-      curStencil = this->getKappaDivFStencil(vof, dit());
-      if(ebFluxStencil != nullptr) curStencil += (*ebFluxStencil)[dit()](vof, m_comp);
+      curStencil  = this->getKappaDivFStencil(vof, dit());
+      curStencil += ebFluxStencil[dit()](vof, m_comp);
 
       // Adjust the weight with domain boundary faces. 
       Real betaWeight = EBArith::getDiagWeight(curStencil, vof);
@@ -235,7 +233,7 @@ void EBHelmholtzOp::defineStencils(){
 }
 
 void EBHelmholtzOp::defineColorStencils(){
-  const LayoutData<BaseIVFAB<VoFStencil> >* fluxStencil = m_ebBc->getFluxStencil(m_comp);
+  const LayoutData<BaseIVFAB<VoFStencil> >& fluxStencil = m_ebBc->getKappaDivFStencils();
 
   for (int icolor = 0; icolor < m_colors.size(); ++icolor){
     m_colorEBStencil[icolor].define(m_eblg.getDBL());
@@ -286,8 +284,8 @@ void EBHelmholtzOp::defineColorStencils(){
 
 	VoFStencil& colorStencil = colorStencils(vof, m_comp);
 
-	colorStencil = this->getKappaDivFStencil(vof, dit());
-	if(fluxStencil != nullptr) colorStencil += (*fluxStencil)[dit()](vof, m_comp);
+	colorStencil  = this->getKappaDivFStencil(vof, dit());
+	colorStencil += fluxStencil[dit()](vof, m_comp);
       }
 
       m_colorEBStencil[icolor][dit()] = RefCountedPtr<EBStencil>
@@ -583,7 +581,7 @@ void EBHelmholtzOp::applyDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, cons
       lbox.shift(dir, -1);
       FArrayBox faceFlux(loBox, m_nComp);
       m_domainBc->setCoef(m_eblg, m_beta, m_Bcoef);
-      m_domainBc->getFaceFlux(faceFlux, a_phi.getSingleValuedFAB(), m_probLo, m_vecDx, dir, Side::Lo, a_dit, 0.0, a_homogeneousPhysBC);
+      m_domainBc->getFaceFlux(faceFlux, a_phi.getSingleValuedFAB(), m_probLo, m_dx*RealVect::Unit, dir, Side::Lo, a_dit, 0.0, a_homogeneousPhysBC);
 
       BaseFab<Real>& bco = (*m_Bcoef)[a_dit][dir].getSingleValuedFAB();
       bco.shiftHalf(dir, 1);
@@ -603,7 +601,7 @@ void EBHelmholtzOp::applyDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, cons
       hbox.shift(dir, 1);
       FArrayBox faceFlux(hiBox, m_nComp);
       m_domainBc->setCoef(m_eblg, m_beta, m_Bcoef);
-      m_domainBc->getFaceFlux(faceFlux, a_phi.getSingleValuedFAB(), m_probLo, m_vecDx, dir, Side::Hi, a_dit, 0.0, a_homogeneousPhysBC);
+      m_domainBc->getFaceFlux(faceFlux, a_phi.getSingleValuedFAB(), m_probLo, m_dx*RealVect::Unit, dir, Side::Hi, a_dit, 0.0, a_homogeneousPhysBC);
 
       BaseFab<Real>& bco     = (*m_Bcoef)[a_dit][dir].getSingleValuedFAB();
       bco.shiftHalf(dir, -1);
@@ -650,8 +648,7 @@ void EBHelmholtzOp::applyOpIrregular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, 
   m_opEBStencil[a_dit]->apply(a_Lphi, a_phi, m_alphaDiagWeight[a_dit], m_alpha, m_beta, false); // This includes stencils for interpolation to faces. 
 
   if(!a_homogeneousPhysBC){
-    const Real factor = m_beta/m_dx; // Beta not handled inside m_ebBc but we will fix this (later). 
-    m_ebBc->applyEBFlux(a_Lphi, a_phi, m_vofIterIrreg[a_dit], (*m_eblg.getCFIVS()), a_dit, m_probLo, m_vecDx, factor, a_homogeneousPhysBC, 0.0);
+    m_ebBc->applyEBFlux(m_vofIterIrreg[a_dit], a_Lphi, a_phi, a_dit, m_beta);
   }
 
   // Do irregular faces on domain sides. m_domainBc should give the centroid-centered flux so we don't do interpolations here. 
@@ -662,7 +659,7 @@ void EBHelmholtzOp::applyOpIrregular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, 
     VoFIterator& vofitLo = m_vofIterDomLo[dir][a_dit];    
     for (vofitLo.reset(); vofitLo.ok(); ++vofitLo){
       const VolIndex& vof = vofitLo();
-      m_domainBc->getFaceFlux(flux, vof, m_comp, a_phi, m_probLo, m_vecDx, dir, Side::Lo, a_dit, 0.0, a_homogeneousPhysBC);
+      m_domainBc->getFaceFlux(flux, vof, m_comp, a_phi, m_probLo, m_dx*RealVect::Unit, dir, Side::Lo, a_dit, 0.0, a_homogeneousPhysBC);
 
       a_Lphi(vof, m_comp) -= flux*m_beta/m_dx;
     }
@@ -672,7 +669,7 @@ void EBHelmholtzOp::applyOpIrregular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, 
     for (vofitHi.reset(); vofitHi.ok(); ++vofitHi){
       const VolIndex& vof = vofitHi();
 
-      m_domainBc->getFaceFlux(flux, vof, m_comp, a_phi, m_probLo, m_vecDx, dir, Side::Hi, a_dit, 0.0, a_homogeneousPhysBC);
+      m_domainBc->getFaceFlux(flux, vof, m_comp, a_phi, m_probLo, m_dx*RealVect::Unit, dir, Side::Hi, a_dit, 0.0, a_homogeneousPhysBC);
 
       a_Lphi(vof, m_comp) += flux*m_beta/m_dx;
     }
@@ -909,7 +906,7 @@ void EBHelmholtzOp::GauSaiMultiColorAllIrregular(EBCellFAB& a_phi, const EBCellF
     for (vofitLo.reset(); vofitLo.ok(); ++vofitLo){
       const VolIndex& vof = vofitLo();
       Real flux;
-      m_domainBc->getFaceFlux(flux, vof, m_comp, a_phi, m_probLo, m_vecDx, dir, Side::Lo, a_dit, 0.0, true);
+      m_domainBc->getFaceFlux(flux, vof, m_comp, a_phi, m_probLo, m_dx*RealVect::Unit, dir, Side::Lo, a_dit, 0.0, true);
       
       m_cacheEBxDomainFluxLo[a_icolor][dir][a_dit](vof, m_comp) = flux;
     }
@@ -917,7 +914,7 @@ void EBHelmholtzOp::GauSaiMultiColorAllIrregular(EBCellFAB& a_phi, const EBCellF
     for (vofitHi.reset(); vofitHi.ok(); ++vofitHi){
       const VolIndex& vof = vofitHi();
       Real flux;
-      m_domainBc->getFaceFlux(flux, vof, m_comp, a_phi, m_probLo, m_vecDx, dir, Side::Hi, a_dit, 0.0, true);
+      m_domainBc->getFaceFlux(flux, vof, m_comp, a_phi, m_probLo, m_dx*RealVect::Unit, dir, Side::Hi, a_dit, 0.0, true);
       
       m_cacheEBxDomainFluxHi[a_icolor][dir][a_dit](vof, m_comp) = flux;
     }

@@ -22,27 +22,26 @@
 #include <CD_EBHelmholtzOpFactory.H>
 #include <CD_NamespaceHeader.H>
 
-EBHelmholtzOpFactory::EBHelmholtzOpFactory(const Real&                       a_alpha,
-					   const Real&                       a_beta,
-					   const RealVect&                   a_probLo,
-					   const AmrLevelGrids&              a_amrLevelGrids,
-					   const AmrInterpolators&           a_amrInterpolators,
-					   const AmrFluxRegisters&           a_amrFluxRegisters,
-					   const AmrCoarseners&              a_amrCoarseners,
-					   const AmrRefRatios&               a_amrRefRatios,
-					   const AmrResolutions&             a_amrResolutions,					   
-					   const AmrCellData&                a_amrAcoef,
-					   const AmrFluxData&                a_amrBcoef,
-					   const AmrIrreData&                a_amrBcoefIrreg,
-					   const EBHelmholtzDomainBcFactory& a_domainBcFactory,
-					   const EBHelmholtzEbBcFactory&     a_ebBcFactory,
-					   const IntVect&                    a_ghostPhi,
-					   const IntVect&                    a_ghostRhs,
-					   const RelaxType&                  a_relaxationMethod,
-					   const ProblemDomain&              a_bottomDomain,
-					   const int&                        a_mgBlockingFactor,
-					   const AmrLevelGrids&              a_deeperLevelGrids){
-
+EBHelmholtzOpFactory::EBHelmholtzOpFactory(const Real&             a_alpha,
+					   const Real&             a_beta,
+					   const RealVect&         a_probLo,
+					   const AmrLevelGrids&    a_amrLevelGrids,
+					   const AmrInterpolators& a_amrInterpolators,
+					   const AmrFluxRegisters& a_amrFluxRegisters,
+					   const AmrCoarseners&    a_amrCoarseners,
+					   const AmrRefRatios&     a_amrRefRatios,
+					   const AmrResolutions&   a_amrResolutions,					   
+					   const AmrCellData&      a_amrAcoef,
+					   const AmrFluxData&      a_amrBcoef,
+					   const AmrIrreData&      a_amrBcoefIrreg,
+					   const DomainBCFactory&  a_domainBcFactory,
+					   const EBBCFactory&      a_ebbcFactory,
+					   const IntVect&          a_ghostPhi,
+					   const IntVect&          a_ghostRhs,
+					   const RelaxType&        a_relaxationMethod,
+					   const ProblemDomain&    a_bottomDomain,
+					   const int&              a_mgBlockingFactor,
+					   const AmrLevelGrids&    a_deeperLevelGrids){
   // Define constructor arguments. 
   m_alpha               = a_alpha;
   m_beta                = a_beta;
@@ -61,7 +60,7 @@ EBHelmholtzOpFactory::EBHelmholtzOpFactory(const Real&                       a_a
   m_amrBcoefIrreg       = a_amrBcoefIrreg;
   
   m_domainBcFactory     = a_domainBcFactory;
-  m_ebBcFactory         = a_ebBcFactory;
+  m_ebBcFactory         = a_ebbcFactory;
   
   m_ghostPhi            = a_ghostPhi;
   m_ghostRhs            = a_ghostRhs;
@@ -453,7 +452,7 @@ EBHelmholtzOp* EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, 
     const Real dx     = m_amrResolutions[amrLevel]*std::pow(mgRefRat, a_depth); // 
 
     auto dobc = this->makeDomainBcObject(eblg, dx);
-    auto ebbc = this->makeEbBcObject    (eblg, dx);
+    auto ebbc = RefCountedPtr<EBHelmholtzEBBC>(m_ebBcFactory->create());
     
     mgOp = new EBHelmholtzOp(EBLevelGrid(), // Multigrid operator, so no fine. 
 			     eblg,
@@ -464,7 +463,7 @@ EBHelmholtzOp* EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, 
 			     fluxReg,       // Defined if an amr level
 			     coarsener,     // Defined if an amr level
 			     dobc,
-			     ebbc,
+			     m_ebBcFactory->create(),			     
 			     m_probLo,
 			     dx,            // Set from depth
 			     1,             // Multigrid operator. Set to 1 in operator anyways. 
@@ -526,7 +525,6 @@ EBHelmholtzOp* EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
   }
 
   auto dobc = this->makeDomainBcObject(eblg, dx);
-  auto ebbc = this->makeEbBcObject    (eblg, dx);
 
   if(hasCoar){
     this->getCoarserLayout(eblgCoFi, eblg, refToCoar, m_mgBlockingFactor);
@@ -543,7 +541,7 @@ EBHelmholtzOp* EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
 			 m_amrFluxRegisters[amrLevel],
 			 m_amrCoarseners[amrLevel],
 			 dobc,
-			 ebbc,
+			 m_ebBcFactory->create(),
 			 m_probLo,			 
 			 dx,
 			 refToFine,
@@ -580,15 +578,15 @@ int EBHelmholtzOpFactory::refToFiner(const ProblemDomain& a_domain) const {
   return ref;
 }
 
-RefCountedPtr<EBHelmholtzOp::EBHelmholtzEbBc> EBHelmholtzOpFactory::makeEbBcObject(const EBLevelGrid& a_eblg, const Real& a_dx) const {
-  EBHelmholtzOp::EBHelmholtzEbBc* bc = (EBHelmholtzOp::EBHelmholtzEbBc*) m_ebBcFactory->create(a_eblg.getDomain(),
-											       a_eblg.getEBISL(),
-											       a_dx*RealVect::Unit,
-											       &m_ghostPhi,
-											       &m_ghostRhs);
+// RefCountedPtr<EBHelmholtzOp::EBHelmholtzEbBc> EBHelmholtzOpFactory::makeEbBcObject(const EBLevelGrid& a_eblg, const Real& a_dx) const {
+//   EBHelmholtzOp::EBHelmholtzEbBc* bc = (EBHelmholtzOp::EBHelmholtzEbBc*) m_ebBcFactory->create(a_eblg.getDomain(),
+// 											       a_eblg.getEBISL(),
+// 											       a_dx*RealVect::Unit,
+// 											       &m_ghostPhi,
+// 											       &m_ghostRhs);
 
-  return RefCountedPtr<EBHelmholtzOp::EBHelmholtzEbBc>(bc);
-}
+//   return RefCountedPtr<EBHelmholtzOp::EBHelmholtzEbBc>(bc);
+// }
 
 RefCountedPtr<EBHelmholtzOp::EBHelmholtzDomainBc> EBHelmholtzOpFactory::makeDomainBcObject(const EBLevelGrid& a_eblg, const Real& a_dx) const {
   EBHelmholtzOp::EBHelmholtzDomainBc* bc = (EBHelmholtzOp::EBHelmholtzDomainBc*) m_domainBcFactory->create(a_eblg.getDomain(),

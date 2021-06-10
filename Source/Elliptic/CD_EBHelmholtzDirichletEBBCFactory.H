@@ -61,7 +61,7 @@ public:
   /*!
     @brief Factory method
   */
-  EBHelmholtzEBBC* create() override;
+  RefCountedPtr<EBHelmholtzEBBC> create() override;
 
 protected:
 

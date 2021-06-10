@@ -38,7 +38,7 @@ class EBHelmholtzOp : public LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB> {
 public:
 
   using EBHelmholtzDomainBc = ConductivityBaseDomainBC;
-  using EBHelmholtzEbBc     = ConductivityBaseEBBC;
+  //  using EBHelmholtzEbBc     = ConductivityBaseEBBC;
 
   /*!
     @brief Relaxation method for the operators
@@ -71,7 +71,7 @@ public:
 		const RefCountedPtr<EBFluxRegister>&               a_fluxReg,
 		const RefCountedPtr<EbCoarAve>&                    a_coarAve,
 		const RefCountedPtr<EBHelmholtzDomainBc>&          a_domainBC,
-		const RefCountedPtr<EBHelmholtzEbBc>&              a_ebBC,
+		const RefCountedPtr<EBHelmholtzEBBC>&              a_ebBC,
 		const RealVect&                                    a_probLo,
 		const Real&                                        a_dx,
 		const int&                                         a_refToFine,
@@ -539,7 +539,7 @@ protected:
   /*!
     @brief Domain bc object
   */ 
-  RefCountedPtr<EBHelmholtzEbBc> m_ebBc;
+  RefCountedPtr<EBHelmholtzEBBC> m_ebBc;
 
   /*!
     @brief Interpolator object

@@ -52,9 +52,9 @@ void EBHelmholtzDirichletEBBCFactory::setValue(const std::function<Real(const Re
   m_functionValue = a_value;
 }
 
-EBHelmholtzEBBC* EBHelmholtzDirichletEBBCFactory::create() {
+RefCountedPtr<EBHelmholtzEBBC> EBHelmholtzDirichletEBBCFactory::create() {
 
-  EBHelmholtzDirichletEBBC* bc = new EBHelmholtzDirichletEBBC();
+  auto bc = new EBHelmholtzDirichletEBBC();
 
   bc->setOrder(m_order);
   if(m_useConstant){
@@ -64,7 +64,7 @@ EBHelmholtzEBBC* EBHelmholtzDirichletEBBCFactory::create() {
     bc->setValue(m_functionValue);
   }
 
-  return bc;
+  return RefCountedPtr<EBHelmholtzEBBC>(bc);
 }
 
 #include <CD_NamespaceFooter.H>

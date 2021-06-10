@@ -47,9 +47,9 @@ public:
 
   /*!
     @brief Factory method which returns new BC object. 
-    @note Defines are done in EBHelmholtzOp so no need to worry about that here. 
+    @note  Defines are done in EBHelmholtzOp so no need to worry about that here. 
   */
-  virtual EBHelmholtzEBBC* create() = 0;
+  virtual RefCountedPtr<EBHelmholtzEBBC> create() = 0;
 };
 
 #include <CD_NamespaceFooter.H>

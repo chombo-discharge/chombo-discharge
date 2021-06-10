@@ -124,11 +124,13 @@ bool EBHelmholtzDirichletEBBC::getSecondOrderStencil(std::pair<Real, VoFStencil>
   const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
 
   bool foundStencil = false;
+
+  bool dropOrder;
   Vector<VoFStencil> pointStencils;
   Vector<Real>       distanceAlongLine;
-  EBArith::johanStencil(foundStencil, pointStencils, distanceAlongLine, a_vof, ebisbox, m_dx*RealVect::Unit, (*m_eblg.getCFIVS())[a_dit]);
+  EBArith::johanStencil(dropOrder, pointStencils, distanceAlongLine, a_vof, ebisbox, m_dx*RealVect::Unit, (*m_eblg.getCFIVS())[a_dit]);
 
-  if(foundStencil){ // We know we can at least a second order approximation
+  if(!dropOrder){ // We know we can at least a second order approximation
 
     const Real x1    = distanceAlongLine[0];
     const Real x2    = distanceAlongLine[1];
@@ -141,12 +143,14 @@ bool EBHelmholtzDirichletEBBC::getSecondOrderStencil(std::pair<Real, VoFStencil>
     VoFStencil sten2 = pointStencils[1];
     
     sten1 *= -x2*x2/denom;
-    sten2 *= -x1*x1/denom;
+    sten2 *= +x1*x1/denom;
     
     sten  += sten1;
     sten  += sten2;
 
     a_stencil = std::make_pair(weight, sten);
+
+    foundStencil = true;
   }
 
   return foundStencil;

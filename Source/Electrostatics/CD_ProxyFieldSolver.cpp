@@ -48,8 +48,11 @@ bool ProxyFieldSolver::solve(MFAMRCellData&       a_potential,
   EBAMRCellData gasData = m_amr->alias(phase::gas, a_potential);
   EBAMRCellData gasResi = m_amr->alias(phase::gas, m_residue);
 
-  this->solveHelmholtz(gasData, gasResi);
+  if(procID() == 0) std::cout << "\n";
   this->solveChombo(   gasData, gasResi);
+  if(procID() == 0) std::cout << "\n";
+  this->solveHelmholtz(gasData, gasResi);
+  if(procID() == 0) std::cout << "\n";
   
   return true;
 }
@@ -437,13 +440,12 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
   DataOps::setValue(Bco, 1.0);
   DataOps::setValue(BcoIrreg, 1.0);
 
+  auto helmFactory   = RefCountedPtr<EBHelmholtzDirichletEBBCFactory>      (new EBHelmholtzDirichletEBBCFactory(1, 1.0));
   auto ebbcFactory   = RefCountedPtr<DirichletConductivityEBBCFactory>     (new DirichletConductivityEBBCFactory());
   auto domainFactory = RefCountedPtr<DirichletConductivityDomainBCFactory> (new DirichletConductivityDomainBCFactory());
   ebbcFactory  ->setValue(1.0);
   ebbcFactory  ->setOrder(1);
   domainFactory->setValue(-1);
-
-  EBHelmholtzDirichletEBBCFactory helmFactory(1, 1.0);;
 
   // Set the bottom domain. Don't go below 8x cells in any direction
   ProblemDomain bottomDomain = m_amr->getDomains()[0];
@@ -467,7 +469,7 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
 			    Bco.getData(),
 			    BcoIrreg.getData(),
 			    domainFactory,
-			    ebbcFactory,
+			    helmFactory, //ebbcFactory,
 			    m_amr->getNumberOfGhostCells()*IntVect::Unit,
 			    m_amr->getNumberOfGhostCells()*IntVect::Unit,
 			    EBHelmholtzOp::RelaxationMethod::GauSaiMultiColorFast,
@@ -518,8 +520,6 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
   m_amr->interpGhost(a_phi, m_realm, phase::gas);
   this->computeElectricField();
   this->writePlotFile();
-
-  if(procID() == 0) std::cout << "\n" << std::endl;
 }
 
 #include <CD_NamespaceFooter.H>

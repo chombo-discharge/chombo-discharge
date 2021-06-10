@@ -40,6 +40,8 @@
 class EBHelmholtzOpFactory : public AMRLevelOpFactory<LevelData<EBCellFAB> > {
 public:
 
+  using RelaxType        = EBHelmholtzOp::RelaxationMethod;
+
   using AmrLevelGrids    = Vector<RefCountedPtr<EBLevelGrid> >;
   using AmrInterpolators = Vector<RefCountedPtr<EBMultigridInterpolator> >;
   using AmrFluxRegisters = Vector<RefCountedPtr<EBFluxRegister> >;
@@ -52,13 +54,8 @@ public:
   using AmrResolutions   = Vector<Real>;
   using AmrRefRatios     = Vector<int>;
 
-  // These will be replaced after everything is running. God I hate the BC classes in Chombo. 
-  using EBHelmholtzDomainBcFactory  = RefCountedPtr<BaseDomainBCFactory>; // Will be replaced with better BC class...
-  using EBHelmholtzEbBcFactory      = RefCountedPtr<BaseEBBCFactory>;     // Will be replaced with better BC class...
-  // using EBHelmholtzDomainBc         = RefCountedPtr<EBHelmholtzOp::EBHelmholtzDomainBc>;
-  // using EBHelmholtzEbBc             = RefCountedPtr<EBHelmholtzOp::EBHelmholtzEbBc>;
-
-  using RelaxType        = EBHelmholtzOp::RelaxationMethod;
+  using DomainBCFactory  = RefCountedPtr<BaseDomainBCFactory>; // Will be replaced with better BC class...
+  using EBBCFactory      = RefCountedPtr<EBHelmholtzEBBCFactory>;
 
   /*!
     @brief Disallowed constructor. Use the full constructor
@@ -94,26 +91,26 @@ public:
     provide an option for using aggregation. The first entry a_deeperLevelGrids[0] should be a a factor 2 coarsening of the coarsest AMR level. 
     @note This operator is for time-independent a- and b-coefficients. 
   */
-  EBHelmholtzOpFactory(const Real&                       a_alpha,
-		       const Real&                       a_beta,
-		       const RealVect&                   a_probLo,
-		       const AmrLevelGrids&              a_amrLevelGrids,
-		       const AmrInterpolators&           a_amrInterpolators,
-		       const AmrFluxRegisters&           a_amrFluxRegisters,
-		       const AmrCoarseners&              a_amrCoarseners,
-		       const AmrRefRatios&               a_amrRefRatios,
-		       const AmrResolutions&             a_amrResolutions,					   
-		       const AmrCellData&                a_amrAcoef,
-		       const AmrFluxData&                a_amrBcoef,
-		       const AmrIrreData&                a_amrBcoefIrreg,
-		       const EBHelmholtzDomainBcFactory& a_domainBcFactory,
-		       const EBHelmholtzEbBcFactory&     a_ebbcFactory,
-		       const IntVect&                    a_ghostPhi,
-		       const IntVect&                    a_ghostRHS,
-		       const RelaxType&                  a_relaxationMethod,
-		       const ProblemDomain&              a_bottomDomain,
-		       const int&                        a_mgBlockingFactor,
-		       const AmrLevelGrids&              a_deeperLevelGrids = AmrLevelGrids());
+  EBHelmholtzOpFactory(const Real&             a_alpha,
+		       const Real&             a_beta,
+		       const RealVect&         a_probLo,
+		       const AmrLevelGrids&    a_amrLevelGrids,
+		       const AmrInterpolators& a_amrInterpolators,
+		       const AmrFluxRegisters& a_amrFluxRegisters,
+		       const AmrCoarseners&    a_amrCoarseners,
+		       const AmrRefRatios&     a_amrRefRatios,
+		       const AmrResolutions&   a_amrResolutions,					   
+		       const AmrCellData&      a_amrAcoef,
+		       const AmrFluxData&      a_amrBcoef,
+		       const AmrIrreData&      a_amrBcoefIrreg,
+		       const DomainBCFactory&  a_domainBcFactory,
+		       const EBBCFactory&      a_ebbcFactory,
+		       const IntVect&          a_ghostPhi,
+		       const IntVect&          ghostRHS,
+		       const RelaxType&        a_relaxationMethod,
+		       const ProblemDomain&    a_bottomDomain,
+		       const int&              a_mgBlockingFactor,
+		       const AmrLevelGrids&    a_deeperLevelGrids = AmrLevelGrids());
   
   /*!
     @brief Destructor. Does nothing.
@@ -180,8 +177,8 @@ protected:
   AmrIrreData      m_amrBcoefIrreg;
 
   // BC factories
-  EBHelmholtzDomainBcFactory m_domainBcFactory;
-  EBHelmholtzEbBcFactory     m_ebBcFactory;
+  DomainBCFactory m_domainBcFactory;
+  EBBCFactory     m_ebBcFactory;
 
   // Bottom drop domain
   ProblemDomain m_bottomDomain;
@@ -254,12 +251,6 @@ protected:
 			   const EBLevelGrid&                 a_eblgCoar,
 			   const EBLevelGrid&                 a_eblgFine,
 			   const int                          a_refRat);
-
-
-  /*!
-    @brief Make an EBBC object. 
-  */
-  RefCountedPtr<EBHelmholtzOp::EBHelmholtzEbBc> makeEbBcObject(const EBLevelGrid& a_eblg, const Real& a_dx) const;
 
   /*!
     @brief Make a domain BC object.
