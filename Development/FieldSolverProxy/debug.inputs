@@ -63,16 +63,20 @@ Driver.refine_solid_solid_interface    = -1               # Refine solid-solid i
 # ====================================
 # ProxyFieldSolver CLASS OPTIONS
 # ====================================
-ProxyFieldSolver.plt_vars  = phi resid E # Plot variables
+ProxyFieldSolver.alpha     = 1.0         # Alpha
+ProxyFieldSolver.beta      = -1.0        # Beta
+ProxyFieldSolver.aco       = 3.          # A-coefficient
+ProxyFieldSolver.bco       = 1.0         # B-coefficient	
 ProxyFieldSolver.solver    = helm        # Our solver ('helmholtz') or ebconductivity op 'ebcond'
-ProxyFieldSolver.eb_bc     = robin   # 'dirichlet', 'neumann', or 'robin'
+ProxyFieldSolver.eb_bc     = robin       # 'dirichlet', 'neumann', or 'robin'
 ProxyFieldSolver.domain_bc = dirichlet   # 'dirichlet', 'neumann', or 'robin'
 ProxyFieldSolver.eb_order  = 1           # BC order on EB (only for Dirichlet)
 ProxyFieldSolver.dom_val   = -1.         # Value on domain (For Robin, this is multiplier)
-ProxyFieldSolver.eb_val    =  0.1        # Value on EB (For robin, this is multiplier)
-ProxyFieldSolver.smooth    = 32          # Smoothings
-ProxyFieldSolver.relax     = 1           # Relaxation method
+ProxyFieldSolver.eb_val    =  1          # Value on EB (For robin, this is multiplier)
+ProxyFieldSolver.smooth    = 16          # Smoothings
+ProxyFieldSolver.relax     = 2           # Relaxation method
 ProxyFieldSolver.mg_tol    = 1.E-10      # Multigrid tolerance
+ProxyFieldSolver.plt_vars  = phi resid E # Plot variables
 
 # ====================================================================================================
 # GEO_COARSENER CLASS OPTIONS
@@ -86,7 +90,7 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 # ====================================================================================================
 # ROD_DIELECTRIC CLASS OPTIONS
 # ====================================================================================================
-RodDielectric.electrode.on              = true          # Use electrode or not
+RodDielectric.electrode.on              = false          # Use electrode or not
 RodDielectric.electrode.endpoint1       = -0.5 -0.5     # One endpoint
 RodDielectric.electrode.endpoint2       =  0.5  0.5     # Other endpoint
 RodDielectric.electrode.radius          = 0.1           # Electrode radius

@@ -295,8 +295,16 @@ void ProxyFieldSolver::solveEBCond(EBAMRCellData& a_phi, EBAMRCellData& a_residu
 void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_residue){
   ParmParse pp(m_className.c_str());
   
-  const Real alpha =  1.0;
-  const Real beta  = -1.0;
+  Real alpha;
+  Real beta;
+
+  Real Acoeff;
+  Real Bcoeff;
+
+  pp.get("alpha", alpha);
+  pp.get("beta",  beta);
+  pp.get("aco",   Acoeff);
+  pp.get("bco",   Bcoeff);
 
   EBAMRCellData zero;
   EBAMRCellData Aco;
@@ -311,9 +319,9 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
   m_amr->allocate(rho,      m_realm, phase::gas, 1);
 
   DataOps::setValue(zero,     0.0);
-  DataOps::setValue(Aco,      1.0);
-  DataOps::setValue(Bco,      1.0/3.0);
-  DataOps::setValue(BcoIrreg, 1.0/3.0);
+  DataOps::setValue(Aco,      Acoeff);
+  DataOps::setValue(Bco,      Bcoeff);
+  DataOps::setValue(BcoIrreg, Bcoeff);
   DataOps::setValue(rho,      0.0);
 
   const IntVect ghostPhi = m_amr->getNumberOfGhostCells()*IntVect::Unit;
