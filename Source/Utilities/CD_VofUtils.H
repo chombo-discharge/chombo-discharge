@@ -186,7 +186,7 @@ public:
     @param[in] a_addStartVof If false, a_startVof will not be included in the list. 
     @return Returns list of VoFs that can be found with a monotone path of radius <= a_radius. 
   */
-  static Vector<VolIndex> getAllVofsInMonotonePath(VolIndex& a_startVof, const EBISBox& a_ebisbox, const int a_radius, const bool a_addStartVof);
+  static Vector<VolIndex> getAllVofsInMonotonePath(const VolIndex& a_startVof, const EBISBox& a_ebisbox, const int a_radius, const bool a_addStartVof);
 
 protected:
 

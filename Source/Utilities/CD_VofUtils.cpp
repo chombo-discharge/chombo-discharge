@@ -311,7 +311,7 @@ Vector<VolIndex> VofUtils::getAllVofsSymmetric(const VolIndex&      a_startVof,
   return ret;
 }
 
-Vector<VolIndex> VofUtils::getAllVofsInMonotonePath(VolIndex& a_startVoF, const EBISBox& a_ebisbox, const int a_radius, const bool a_addStartVof){
+Vector<VolIndex> VofUtils::getAllVofsInMonotonePath(const VolIndex& a_startVoF, const EBISBox& a_ebisbox, const int a_radius, const bool a_addStartVof){
   Vector<VolIndex> ret;
   Vector<VolIndex> vofList;
 
