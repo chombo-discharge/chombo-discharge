@@ -54,13 +54,16 @@ VoFStencil EBHelmholtzRobinEBBC::getExtrapolationStencil(const VolIndex& a_vof, 
 
   IntVectSet ivs = IntVectSet();
 
-  EBArith::getExtrapolationStencil(extrapStencil, dist, m_dx*RealVect::Unit, a_vof, ebisbox, -1, &ivs, m_comp);
+  //  const int order = EBArith::getFirstOrderExtrapolationStencil(extrapStencil, dist, m_dx*RealVect::Unit, a_vof, ebisbox, -1, &ivs, m_comp);
+  const int order = EBArith::getFirstOrderExtrapolationStencil(extrapStencil, dist, m_dx*RealVect::Unit, a_vof, ebisbox, -1, &(*m_eblg.getCFIVS())[a_dit], m_comp);
+
+  if(order == 0) MayDay::Error("EBHelmholtzRobinEBBC::getExtrapolationStencil - could not find stencil!");
 
   return extrapStencil;
 }
 
 void EBHelmholtzRobinEBBC::define() {
-  if(!m_useConstant || !m_useFunction) MayDay::Error("EBHelmholtzRobinEBBC::define - not using constant or function!");
+  if(!(m_useConstant || m_useFunction)) MayDay::Error("EBHelmholtzRobinEBBC::define - not using constant or function!");
 
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
 
@@ -96,8 +99,13 @@ void EBHelmholtzRobinEBBC::define() {
       }
 
       // The normal derivative is dphi/dn = (A*phi - C)/B and the (stencil) flux is
-      // kappaDivF = area*b*dphidn/Delta x. Scale accordingly. 
-      stencils(vof, m_comp) *= A*areaFrac*helmBco/(B*m_dx);
+      // kappaDivF = area*b*dphidn/Delta x. Scale accordingly.
+      if(std::abs(B) > 0.0){
+	stencils(vof, m_comp) *= A*areaFrac*helmBco/(B*m_dx);
+      }
+      else{
+	stencils(vof, m_comp).clear();
+      }
     }
   }
 }
@@ -128,7 +136,9 @@ void EBHelmholtzRobinEBBC::applyEBFlux(EBCellFAB&         a_Lphi,
   const Real helmBco     = (*m_Bcoef)[a_dit](a_vof, m_comp);
   const Real kappaDivF   = -a_beta*helmBco*areaFrac*C/(m_dx*B);
 
-  a_Lphi(a_vof, m_comp) += kappaDivF;
+  if(std::abs(B) > 0.0){
+    a_Lphi(a_vof, m_comp) += kappaDivF;
+  }
 }
 
 #include <CD_NamespaceFooter.H>

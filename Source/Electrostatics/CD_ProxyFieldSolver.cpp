@@ -28,12 +28,11 @@
 // Our includes
 #include <CD_ProxyFieldSolver.H>
 #include <CD_EBMultigridInterpolator.H>
-#include <CD_EBHelmholtzDirichletEBBCFactory.H>
 #include <CD_EBHelmholtzNeumannEBBCFactory.H>
-#include <CD_NwoEbQuadCfInterp.H>
+#include <CD_EBHelmholtzDirichletEBBCFactory.H>
+#include <CD_EBHelmholtzRobinEBBCFactory.H>
 #include <CD_DataOps.H>
 #include <CD_EBHelmholtzOpFactory.H>
-#include <CD_RobinConductivityEbBcFactory.H>
 #include <CD_NamespaceHeader.H>
 
 
@@ -296,8 +295,8 @@ void ProxyFieldSolver::solveEBCond(EBAMRCellData& a_phi, EBAMRCellData& a_residu
 void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_residue){
   ParmParse pp(m_className.c_str());
   
-  const Real alpha = 0.0;
-  const Real beta  = 1.0;
+  const Real alpha =  1.0;
+  const Real beta  = -1.0;
 
   EBAMRCellData zero;
   EBAMRCellData Aco;
@@ -312,9 +311,9 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
   m_amr->allocate(rho,      m_realm, phase::gas, 1);
 
   DataOps::setValue(zero,     0.0);
-  DataOps::setValue(Aco,      0.0);
-  DataOps::setValue(Bco,      1.0);
-  DataOps::setValue(BcoIrreg, 1.0);
+  DataOps::setValue(Aco,      1.0);
+  DataOps::setValue(Bco,      1.0/3.0);
+  DataOps::setValue(BcoIrreg, 1.0/3.0);
   DataOps::setValue(rho,      0.0);
 
   const IntVect ghostPhi = m_amr->getNumberOfGhostCells()*IntVect::Unit;
@@ -339,6 +338,15 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
     pp.get("eb_val", eb_value);
 
     ebbcFactory = RefCountedPtr<EBHelmholtzEBBCFactory> (new EBHelmholtzNeumannEBBCFactory(eb_value));    
+  }
+  else if(str == "robin"){
+    pp.get("eb_val", eb_value);
+
+    // Coefficients for radiative transfer with Robin. 
+    const Real A =  1.5*eb_value;
+    const Real B = -1.0*eb_value;
+    const Real C =  0.0;
+    ebbcFactory = RefCountedPtr<EBHelmholtzEBBCFactory> (new EBHelmholtzRobinEBBCFactory(A, B, C));
   }
   else{
     MayDay::Error("ProxyFieldSolver::solveEBCond - uknown EBBC factory requested");

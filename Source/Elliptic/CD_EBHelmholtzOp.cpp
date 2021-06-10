@@ -8,7 +8,7 @@
   @brief  Implementation of CD_EBHelmholtzOp.H
   @author Robert Marskar
   @todo   Replace EBAMRPoissonOp::staticMaxNorm and don't use EBAMRPoissonOp dependencies
-  @todo   Think about moving the BC define functions away from here and into the factory create functions. 
+  @note   If this breaks, we should look into the division by the relaxation factor (which not guard against divide-by-zero)
 */
 
 // Chombo includes
