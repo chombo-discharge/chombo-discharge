@@ -28,9 +28,9 @@ class EBHelmholtzEBBC {
 public:
 
   /*!
-    @brief Constructor. 
+    @brief Default constructor. 
   */
-  EBHelmholtzEBBC() = delete;
+  EBHelmholtzEBBC();
 
   /*!
     @brief Destructor
@@ -48,14 +48,26 @@ public:
   EBHelmholtzEBBC& operator=(const EBHelmholtzEBBC& a_other) = delete;
 
   /*!
-    @brief Define function
+    @brief Define function that is called by EBHelmholtzOp
   */
-  virtual void define(const LayoutData<IntVectSet>& a_cfivs, const Real a_factor) = 0;
+  void define(const EBLevelGrid& a_eblg, const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_Bcoef, const Real a_factor);
 
   /*!
-    @brief Set the B-coefficient. This needs to be a separate function because the factories will not know about the coefficients. 
+    @brief Apply the EB flux. This is the version that is called by EBHelmholtzOp.
   */
-  virtual void setBcoef(EBLevelGrid& a_eblg, const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_Bcoef);
+  void applyEBFlux(VoFIterator&       a_vofit,
+			   EBCellFAB&         a_Lphi,
+			   const EBCellFAB&   a_phi,
+			   const RealVect&    a_probLo,
+			   const RealVect&    a_dx,
+			   const Real&        a_factor,
+			   const bool&        a_useHomogeneous) const;
+
+  /*!
+    @brief Get the flux stencil. 
+    @note Maybe this should be virtual....
+  */
+  const LayoutData<BaseIVFAB<VoFStencil> >& getFluxStencil() const;
 
 protected:
 
@@ -72,7 +84,23 @@ protected:
   /*!
     @brief Stencils for computing the flux
   */
-  LayoutData<BaseIVFAB<VoFStencil> > m_stencils;
+  LayoutData<BaseIVFAB<VoFStencil> > m_fluxStencil;
+
+  /*!
+    @brief User define function. 
+  */
+  virtual void define(const EBLevelGrid& a_eblg, const Real a_factor) = 0;
+
+  /*!
+    @brief Apply the EB flux in a VoF. 
+  */
+  virtual void applyEBFlux(EBCellFAB&         a_Lphi,
+			   const EBCellFAB&   a_phi,
+			   const VolIndex&    a_vof,
+			   const RealVect&    a_probLo,
+			   const RealVect&    a_dx,
+			   const Real&        a_factor,
+			   const bool&        a_useHomogeneous) const = 0;  
 
 };
 
