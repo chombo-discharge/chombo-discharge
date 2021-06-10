@@ -113,12 +113,26 @@ protected:
 			   const Real&        a_beta) const override;
 
   /*!
-    @brief Get an extrapolation stencil 
+    @brief Get an interpolation stencil 
     @param[in] a_vof Grid cell
     @param[in] a_dit Data index. 
     @note This extrapolates from cell-centers to the EB using a first order expression. 
   */
-  VoFStencil getExtrapolationStencil(const VolIndex& a_vof, const DataIndex& a_dit) const;
+  VoFStencil getInterpolationStencil(const VolIndex& a_vof, const DataIndex& a_dit) const;
+
+  /*!
+    @brief Get an interpolation stencil using all vofs in a monotone path (avoids reaching over EBs)
+    @param[in] a_vof Grid cell
+    @param[in] a_dit Data index. 
+  */
+  VoFStencil getMonoPathStencil(const VolIndex& a_vof, const DataIndex& a_dit) const;
+
+  /*!
+    @brief Get an interpolation stencil using Taylor extrapolation. 
+    @param[in] a_vof Grid cell
+    @param[in] a_dit Data index. 
+  */
+  VoFStencil getTaylorStencil(const VolIndex& a_vof, const DataIndex& a_dit) const;
 
 };
 

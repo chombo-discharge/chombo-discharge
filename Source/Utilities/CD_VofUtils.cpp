@@ -329,7 +329,7 @@ Vector<VolIndex> VofUtils::getAllVofsInMonotonePath(const VolIndex& a_startVoF, 
     ret = vofList;
   }
 
-return ret;
+  return ret;
 }
 
 void VofUtils::getAllVofsInMonotonePath(Vector<VolIndex>& a_vofList,
@@ -366,7 +366,7 @@ void VofUtils::getAllVofsInMonotonePath(Vector<VolIndex>& a_vofList,
 	  for (const auto& f : faces.stdVector()){
 	    const VolIndex& newStartVof = f.getVoF(Side::Lo);
 
-	    VofUtils::getAllVofsInMonotonePath(a_vofList, a_startVof, a_ebisbox, a_radius, newTimesMoved, newPathSign);
+	    VofUtils::getAllVofsInMonotonePath(a_vofList, newStartVof, a_ebisbox, a_radius, newTimesMoved, newPathSign);
 	  }
 	}
 
@@ -379,7 +379,7 @@ void VofUtils::getAllVofsInMonotonePath(Vector<VolIndex>& a_vofList,
 	  for (const auto& f : faces.stdVector()){
 	    const VolIndex& newStartVof = f.getVoF(Side::Hi);	    
 
-	    VofUtils::getAllVofsInMonotonePath(a_vofList, a_startVof, a_ebisbox, a_radius, newTimesMoved, newPathSign);
+	    VofUtils::getAllVofsInMonotonePath(a_vofList, newStartVof, a_ebisbox, a_radius, newTimesMoved, newPathSign);
 	  }
 	}
       }

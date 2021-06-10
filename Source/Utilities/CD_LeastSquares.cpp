@@ -176,10 +176,10 @@ VoFStencil LeastSquares::getBndryGradSten(const VolIndex& a_vof,
       allVofs = VofUtils::getAllVofsSymmetric(a_vof, a_ebisbox, cardinal.first, cardinal.second, radius, addStartingVof);
     }
 
-    // If we couldn't get enough cells using quadrants. Do this. 
-    if(allVofs.size() < numUnknowns){
-      allVofs = VofUtils::getAllConnectedVofsInRadius(a_vof, a_ebisbox, radius, IntVectSet());
-    }
+    // Try monotone path, then all connected vofs. Note that the starting vof should be in the list because this equation
+    // is eliminated by computGradSten. 
+    if(allVofs.size() < numUnknowns) allVofs = VofUtils::getAllVofsInMonotonePath(   a_vof, a_ebisbox, radius, true);
+    if(allVofs.size() < numUnknowns) allVofs = VofUtils::getAllConnectedVofsInRadius(a_vof, a_ebisbox, radius, IntVectSet());
 
     // Now build the stencil. 
     if(allVofs.size() >= numUnknowns){
@@ -368,14 +368,38 @@ std::map<IntVect, VoFStencil> LeastSquares::computeInterpolationStencil(const In
   return ret;
 }
 
-VoFStencil LeastSquares::getInterpolationStencilUsingAllVofsInRadius(const CellPosition a_cellPos,
-								     const CellPosition a_otherCellsPos,
-								     const VolIndex&    a_vof,
-								     const EBISBox&     a_ebisbox,
-								     const Real         a_dx,
-								     const int          a_p,
-								     const int          a_radius,
-								     const int          a_order){
+VoFStencil LeastSquares::getInterpolationStencilUsingAllVofsInMonotonePath(const CellPosition a_cellPos,
+									   const CellPosition a_otherCellsPos,
+									   const VolIndex&    a_vof,
+									   const EBISBox&     a_ebisbox,
+									   const Real         a_dx,
+									   const int          a_p,
+									   const int          a_radius,
+									   const int          a_order){
+
+  // Get all Vofs in a radius, and then compute the displacement vectors. 
+  Vector<VolIndex> vofs = VofUtils::getAllVofsInMonotonePath(a_vof, a_ebisbox, a_radius, true);
+  const Vector<RealVect> displacements = LeastSquares::getDisplacements(a_cellPos, a_otherCellsPos, a_vof, vofs, a_ebisbox, a_dx);
+
+  const int M = LeastSquares::getTaylorExpansionSize(a_order);
+  const int K = displacements.size();
+
+  VoFStencil ret;
+  if(K >= M) { // Have enough equations to compute.
+    ret = LeastSquares::computeInterpolationStencil(vofs, displacements, a_p, a_order);
+  }
+
+  return ret;
+}
+
+VoFStencil LeastSquares::getInterpolationStencilUsingAllConnectedVofsInRadius(const CellPosition a_cellPos,
+									      const CellPosition a_otherCellsPos,
+									      const VolIndex&    a_vof,
+									      const EBISBox&     a_ebisbox,
+									      const Real         a_dx,
+									      const int          a_p,
+									      const int          a_radius,
+									      const int          a_order){
 
   // Get all Vofs in a radius, and then compute the displacement vectors. 
   Vector<VolIndex> vofs = VofUtils::getAllConnectedVofsInRadius(a_vof, a_ebisbox, a_radius, IntVectSet());
@@ -392,5 +416,7 @@ VoFStencil LeastSquares::getInterpolationStencilUsingAllVofsInRadius(const CellP
 
   return ret;
 }
+
+
 
 #include <CD_NamespaceFooter.H>

@@ -48,28 +48,44 @@ void EBHelmholtzRobinEBBC::setCoefficients(const std::function<Real(const RealVe
   m_useFunction = true;
 }
 
-VoFStencil EBHelmholtzRobinEBBC::getExtrapolationStencil(const VolIndex& a_vof, const DataIndex& a_dit) const {
-  VoFStencil extrapStencil;
+VoFStencil EBHelmholtzRobinEBBC::getInterpolationStencil(const VolIndex& a_vof, const DataIndex& a_dit) const {
+  VoFStencil stencil;
+
+  if(stencil.size() == 0) stencil = this->getMonoPathStencil(a_vof, a_dit);
+  if(stencil.size() == 0) stencil = this->getTaylorStencil  (a_vof, a_dit);
+  
+  return stencil;
+}
+
+VoFStencil EBHelmholtzRobinEBBC::getMonoPathStencil(const VolIndex& a_vof, const DataIndex& a_dit) const {
+  const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
+  const int pow          = 0;  // Can't run with weighting when the starting vof is included
+  const int order        = 1;
+  const int radius       = 1;
+
+  const VoFStencil stencil = LeastSquares::getInterpolationStencilUsingAllVofsInMonotonePath(LeastSquares::CellPosition::Boundary,
+											     LeastSquares::CellPosition::Center,
+											     a_vof,
+											     ebisbox,
+											     m_dx,
+											     pow,
+											     radius,
+											     order);
+
+
+  return stencil;
+}
+
+VoFStencil EBHelmholtzRobinEBBC::getTaylorStencil(const VolIndex& a_vof, const DataIndex& a_dit) const {
+  VoFStencil stencil;
   
   const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
   const RealVect dist    = ebisbox.bndryCentroid(a_vof)*m_dx;
   IntVectSet ivs = IntVectSet();
 
+  EBArith::getFirstOrderExtrapolationStencil(stencil, dist, m_dx*RealVect::Unit, a_vof, ebisbox, -1, &ivs, m_comp);
 
-  extrapStencil = LeastSquares::getInterpolationStencilUsingAllVofsInRadius(LeastSquares::CellPosition::Boundary,
-									    LeastSquares::CellPosition::Center,
-									    a_vof,
-									    ebisbox,
-									    m_dx,
-									    0,
-									    1,
-									    1);
-  if(extrapStencil.size() == 0){
-    std::cout << "shit" << std::endl;
-    //    EBArith::getFirstOrderExtrapolationStencil(extrapStencil, dist, m_dx*RealVect::Unit, a_vof, ebisbox, -1, &ivs, m_comp);
-  }
-  
-  return extrapStencil;
+  return stencil;
 }
 
 void EBHelmholtzRobinEBBC::define() {
@@ -94,7 +110,7 @@ void EBHelmholtzRobinEBBC::define() {
       const Real areaFrac = ebisbox.bndryArea(vof);
       const Real helmBco  = (*m_Bcoef)[dit()](vof, m_comp);
 
-      stencils(vof, m_comp) = this->getExtrapolationStencil(vof, dit());
+      stencils(vof, m_comp) = this->getInterpolationStencil(vof, dit());
 
       Real A;
       Real B;

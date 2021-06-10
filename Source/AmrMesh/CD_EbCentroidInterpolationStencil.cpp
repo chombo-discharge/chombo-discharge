@@ -131,14 +131,14 @@ bool EbCentroidInterpolationStencil::getLeastSquaresInterpolationStencil(VoFSten
 
   const int weightingPower = 0;
   
-  a_sten = LeastSquares::getInterpolationStencilUsingAllVofsInRadius(LeastSquares::CellPosition::Boundary,
-								     LeastSquares::CellPosition::Center,
-								     a_vof,
-								     a_ebisbox,
-								     a_dx,
-								     weightingPower,
-								     m_radius,
-								     m_order);
+  a_sten = LeastSquares::getInterpolationStencilUsingAllConnectedVofsInRadius(LeastSquares::CellPosition::Boundary,
+									      LeastSquares::CellPosition::Center,
+									      a_vof,
+									      a_ebisbox,
+									      a_dx,
+									      weightingPower,
+									      m_radius,
+									      m_order);
 
   return (a_sten.size() > 0);
 }
