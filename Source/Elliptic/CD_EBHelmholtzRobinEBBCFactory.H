@@ -20,7 +20,11 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Base class for passing EB boundary conditions into EBHelmholtzOp. 
+  @brief Base class for making Robin boundary conditions with EBHelmholtzOp. 
+  @details Robin bcs are in the form A*phi + B*dphi/dn = C. We impose dphi/dn = (C - A*phi)/B where phi is extrapolated to the EB to first order. 
+  @note The B-coefficient is not the same as in the Helmholtz equation...
+  @note In our notation, n points into the computational domain. 
+*/
 */
 class EBHelmholtzRobinEBBCFactory : public EBHelmholtzEBBCFactory {
 public:
