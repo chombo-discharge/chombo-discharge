@@ -527,21 +527,16 @@ void EBHelmholtzOp::applyOp(LevelData<EBCellFAB>&             a_Lphi,
 }
 
 void EBHelmholtzOp::applyOpRegular(EBCellFAB& a_Lphi, EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBC){
-  
-  // Alpha term
-  a_Lphi.setVal(0.0);
-  a_Lphi += a_phi;
-  a_Lphi *= (*m_Acoef)[a_dit];
-  a_Lphi *= m_alpha;
-
   // Fill a_phi such that centered differences pushes in the domain flux. 
   this->applyDomainFlux(a_phi, a_cellBox, a_dit, a_homogeneousPhysBC);
 
-  // It's an older code, sir, but it checks out.
   BaseFab<Real>& Lphi      = a_Lphi.getSingleValuedFAB();
-  const BaseFab<Real>& phi = a_phi.getSingleValuedFAB(); 
-  BaseFab<Real> dummy(Box(IntVect::Zero, IntVect::Zero), 1);
-  BaseFab<Real>* bcoef[3];
+  const BaseFab<Real>& phi = a_phi.getSingleValuedFAB();
+  const BaseFab<Real>& aco = (*m_Acoef)[a_dit].getSingleValuedFAB();
+
+  // It's an older code, sir, but it checks out.
+  const BaseFab<Real> dummy(Box(IntVect::Zero, IntVect::Zero), 1);
+  const BaseFab<Real>* bcoef[3];
 
   for (int dir = 0; dir < 3; dir++){
     if(dir >= SpaceDim){
@@ -553,12 +548,14 @@ void EBHelmholtzOp::applyOpRegular(EBCellFAB& a_Lphi, EBCellFAB& a_phi, const Bo
   }
 
   // Fill the ghost cells outside the domain so that we don't get an extra flux from the domain side. 
-  FORT_LAPLACIANINPLACE(CHF_FRA1(Lphi, m_comp),
+  FORT_HELMHOLTZINPLACE(CHF_FRA1(Lphi, m_comp),
 			CHF_CONST_FRA1(phi, m_comp),
+			CHF_CONST_FRA1(aco, m_comp),
 			CHF_CONST_FRA1((*bcoef[0]), m_comp),
 			CHF_CONST_FRA1((*bcoef[1]), m_comp),
 			CHF_CONST_FRA1((*bcoef[2]), m_comp), // Not used for 2D. 
 			CHF_CONST_REAL(m_dx),
+			CHF_CONST_REAL(m_alpha),
 			CHF_CONST_REAL(m_beta),
 			CHF_BOX(a_cellBox));
 }

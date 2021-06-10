@@ -66,32 +66,34 @@
 
       end
 
-      subroutine laplacianinplace(
+      subroutine helmholtzinplace(
      &     chf_fra1[Lphi],
      &     chf_const_fra1[phi],
+     &     chf_const_fra1[aco],	
      &     chf_const_fra1[bcoX],
      &     chf_const_fra1[bcoY],
      &     chf_const_fra1[bcoZ],          
      &     chf_const_real[dx],
+     &     chf_const_real[alpha],     
      &     chf_const_real[beta],		               
      &     chf_box[cellBox])
 
       integer chf_ddecl[i;j;k]
       real_t factor
       real_t lapl
+      real_t diag
 
       factor = beta/(dx*dx)
       
       chf_multido[cellBox;i;j;k]
-         lapl = CHF_DTERM[
-     &       bcoX(chf_ix[i+1;j  ;k  ]) * (phi(chf_ix[i+1; j  ;  k  ]) - phi(chf_ix[i;  j;  k  ]))
-     &      -bcoX(chf_ix[i  ;j  ;k  ]) * (phi(chf_ix[i;   j  ;  k  ]) - phi(chf_ix[i-1;j;  k  ]));
-     &      +bcoY(chf_ix[i  ;j+1;k  ]) * (phi(chf_ix[i;   j+1;  k  ]) - phi(chf_ix[i;  j;  k  ]))
-     &      -bcoY(chf_ix[i  ;j  ;k  ]) * (phi(chf_ix[i;   j  ;  k  ]) - phi(chf_ix[i  ;j-1;k  ]));
-     &      +bcoZ(chf_ix[i  ;j;  k+1]) * (phi(chf_ix[i;   j  ;  k+1]) - phi(chf_ix[i;  j;  k  ]))
-     &      -bcoZ(chf_ix[i  ;j  ;k  ]) * (phi(chf_ix[i;   j  ;  k  ]) - phi(chf_ix[i  ;j;  k-1]))]
-
-         Lphi(chf_ix[i;j;k]) = Lphi(chf_ix[i;j;k]) + lapl*factor
+         Lphi(chf_ix[i;j;k]) = alpha*aco(chf_ix[i;j;k])*phi(chf_ix[i;j;k])
+     &      + factor*(CHF_DTERM[
+     &          bcoX(chf_ix[i+1;j  ;k  ]) * (phi(chf_ix[i+1; j  ;  k  ]) - phi(chf_ix[i;  j;  k  ]))
+     &         -bcoX(chf_ix[i  ;j  ;k  ]) * (phi(chf_ix[i;   j  ;  k  ]) - phi(chf_ix[i-1;j;  k  ]));
+     &         +bcoY(chf_ix[i  ;j+1;k  ]) * (phi(chf_ix[i;   j+1;  k  ]) - phi(chf_ix[i;  j;  k  ]))
+     &         -bcoY(chf_ix[i  ;j  ;k  ]) * (phi(chf_ix[i;   j  ;  k  ]) - phi(chf_ix[i  ;j-1;k  ]));
+     &         +bcoZ(chf_ix[i  ;j;  k+1]) * (phi(chf_ix[i;   j  ;  k+1]) - phi(chf_ix[i;  j;  k  ]))
+     &         -bcoZ(chf_ix[i  ;j  ;k  ]) * (phi(chf_ix[i;   j  ;  k  ]) - phi(chf_ix[i  ;j;  k-1]))])
       chf_enddo      
       end
 
