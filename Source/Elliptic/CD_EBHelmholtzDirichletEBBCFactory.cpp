@@ -10,6 +10,7 @@
 */
 
 // Our includes
+#include <CD_EBHelmholtzDirichletEBBC.H>
 #include <CD_EBHelmholtzDirichletEBBCFactory.H>
 #include <CD_NamespaceHeader.H>
 

@@ -13,12 +13,11 @@
 #define CD_EBHelmholtzDirichletEBBCFactory_H
 
 // Our includes
-#include <CD_EBHelmholtzDirichletEBBC.H>
 #include <CD_EBHelmholtzEBBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Base class for passing EB boundary conditions into EBHelmholtzOp. 
+  @brief Factory class for making Dirichlet BCs in EBHelmholtzEBBCFactory
 */
 class EBHelmholtzDirichletEBBCFactory : public EBHelmholtzEBBCFactory {
 public:

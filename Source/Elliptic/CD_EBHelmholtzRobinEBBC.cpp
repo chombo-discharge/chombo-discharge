@@ -19,7 +19,6 @@
 EBHelmholtzRobinEBBC::EBHelmholtzRobinEBBC(){
   m_useConstant = false;
   m_useFunction = false;
-  m_useData     = false;
 }
 
 
@@ -34,7 +33,6 @@ void EBHelmholtzRobinEBBC::setCoefficients(const Real a_A, const Real a_B, const
 
   m_useConstant = true;
   m_useFunction = false;
-  m_useData     = false;
 }
 
 void EBHelmholtzRobinEBBC::setCoefficients(const std::function<Real(const RealVect& a_pos) >& a_A,
@@ -46,19 +44,6 @@ void EBHelmholtzRobinEBBC::setCoefficients(const std::function<Real(const RealVe
 
   m_useConstant = false;
   m_useFunction = true;
-  m_useData     = false;
-}
-
-void EBHelmholtzRobinEBBC::setCoefficients(const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_A,
-					   const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_B,
-					   const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_C){
-  m_dataA = a_A;
-  m_dataB = a_B;
-  m_dataC = a_C;
-
-  m_useConstant = false;
-  m_useFunction = false;
-  m_useData     = true;
 }
 
 VoFStencil EBHelmholtzRobinEBBC::getExtrapolationStencil(const VolIndex& a_vof, const DataIndex& a_dit) const {
@@ -75,7 +60,7 @@ VoFStencil EBHelmholtzRobinEBBC::getExtrapolationStencil(const VolIndex& a_vof, 
 }
 
 void EBHelmholtzRobinEBBC::define() {
-  if(!m_useConstant || !m_useFunction || !m_useData) MayDay::Error("EBHelmholtzRobinEBBC::define - not using constant, function, or data!");
+  if(!m_useConstant || !m_useFunction) MayDay::Error("EBHelmholtzRobinEBBC::define - not using constant or function!");
 
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
 
@@ -109,10 +94,6 @@ void EBHelmholtzRobinEBBC::define() {
 	A = m_functionA(pos);
 	B = m_functionB(pos);
       }
-      else if(m_useData){
-	A = (*m_dataA)[dit()](vof, m_comp);
-	B = (*m_dataB)[dit()](vof, m_comp);
-      }
 
       // The normal derivative is dphi/dn = (A*phi - C)/B and the (stencil) flux is
       // kappaDivF = area*b*dphidn/Delta x. Scale accordingly. 
@@ -140,10 +121,6 @@ void EBHelmholtzRobinEBBC::applyEBFlux(EBCellFAB&         a_Lphi,
     const RealVect pos = this->getBoundaryPosition(a_vof, a_dit);
     B = m_functionB(pos);
     C = m_functionC(pos);
-  }
-  else if(m_useData){
-    B = (*m_dataB)[a_dit](a_vof, m_comp);
-    C = (*m_dataC)[a_dit](a_vof, m_comp);
   }
 
   const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];

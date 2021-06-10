@@ -4,39 +4,55 @@
  */
 
 /*
-  @file   CD_EBHelmholtzRobinEBBC.H
-  @brief  Declaration of a boundary condition class for EBHelmholtzOp
+  @file   CD_EBHelmholtzRobinEBBCFactory.H
+  @brief  Declaration of a factory class for EBHelmholtzRobinEBBCFactory
   @author Robert Marskar
 */
 
-#ifndef CD_EBHelmholtzRobinEBBC_H
-#define CD_EBHelmholtzRobinEBBC_H
+#ifndef CD_EBHelmholtzRobinEBBCFactory_H
+#define CD_EBHelmholtzRobinEBBCFactory_H
 
 // Std includes
 #include <functional>
 
 // Our includes
-#include <CD_EBHelmholtzEBBC.H>
+#include <CD_EBHelmholtzEBBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Base class for passing Robin EB boundary conditions into EBHelmholtzOp. 
-  @details Robin bcs are in the form A*phi + B*dphi/dn = C. We impose dphi/dn = (C - A*phi)/B where phi is extrapolated to the EB to first order. 
-  @note The B-coefficient is not the same as in the Helmholtz equation...
+  @brief Base class for passing EB boundary conditions into EBHelmholtzOp. 
 */
-class EBHelmholtzRobinEBBC : public EBHelmholtzEBBC {
+class EBHelmholtzRobinEBBCFactory : public EBHelmholtzEBBCFactory {
 public:
 
   /*!
-    @brief Default constructor. 
+    @brief Constructor. 
   */
-  EBHelmholtzRobinEBBC();
+  EBHelmholtzRobinEBBCFactory();
+
+  /*!
+    @brief Full constructor which sets constant coefficients
+    @param[in] a_A A-coefficient
+    @param[in] a_B B-coefficient
+    @param[in] a_C C-coefficient
+  */
+  EBHelmholtzRobinEBBCFactory(const Real a_A, const Real a_B, const Real a_C);
+
+  /*!
+    @brief Full constructor which sets variable coefficients
+    @param[in] a_A A-coefficient
+    @param[in] a_B B-coefficient
+    @param[in] a_C C-coefficient
+  */
+  EBHelmholtzRobinEBBCFactory(const std::function<Real(const RealVect& a_pos) >& a_A,
+			      const std::function<Real(const RealVect& a_pos) >& a_B,
+			      const std::function<Real(const RealVect& a_pos) >& a_C);
 
   /*!
     @brief Destructor
   */
-  ~EBHelmholtzRobinEBBC();
-  
+  ~EBHelmholtzRobinEBBCFactory();
+
   /*!
     @brief Set constant coefficients
     @param[in] a_A A-coefficient
@@ -55,10 +71,14 @@ public:
 		       const std::function<Real(const RealVect& a_pos) >& a_B,
 		       const std::function<Real(const RealVect& a_pos) >& a_C);
 
+  /*!
+    @brief Factory method
+  */
+  RefCountedPtr<EBHelmholtzEBBC> create() override;
 
 protected:
-
-  /*!
+  
+  /*
     @brief Use constant for BC
   */
   bool m_useConstant;
@@ -97,32 +117,8 @@ protected:
     @brief Function-based C-coefficient
   */
   std::function<Real(const RealVect& a_pos)> m_functionC;
-  
-  /*!
-    @brief User define function. 
-  */
-  virtual void define() override;
-
-  /*!
-    @brief Apply the EB flux in a VoF. 
-  */
-  virtual void applyEBFlux(EBCellFAB&         a_Lphi,
-			   const EBCellFAB&   a_phi,
-			   const VolIndex&    a_vof,
-			   const DataIndex&   a_dit,
-			   const Real&        a_beta) const override;
-
-  /*!
-    @brief Get an extrapolation stencil 
-    @param[in] a_vof Grid cell
-    @param[in] a_dit Data index. 
-    @note This extrapolates from cell-centers to the EB using a first order expression. 
-  */
-  VoFStencil getExtrapolationStencil(const VolIndex& a_vof, const DataIndex& a_dit) const;
-
 };
 
 #include <CD_NamespaceFooter.H>
 
 #endif
-
