@@ -64,7 +64,7 @@ EBHelmholtzEBBC* EBHelmholtzDirichletEBBCFactory::create() {
     bc->setValue(m_functionValue);
   }
 
-  return NULL;
+  return bc;
 }
 
 #include <CD_NamespaceFooter.H>
