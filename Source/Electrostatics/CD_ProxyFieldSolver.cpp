@@ -355,6 +355,7 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
   std::string str;
 
   RefCountedPtr<EBHelmholtzEBBCFactory> ebbcFactory;
+  RefCountedPtr<BaseDomainBCFactory> domainBcFactory;
 
   // EBBC
   pp.get("eb_bc", str);
@@ -383,8 +384,27 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
   }
 
   // Domain bc
-  auto domainFactory = RefCountedPtr<DirichletConductivityDomainBCFactory> (new DirichletConductivityDomainBCFactory());
-  domainFactory->setValue(-1);
+  pp.get("domain_bc", str);
+  if(str == "dirichlet"){
+    pp.get("dom_val", dom_value);
+
+    auto bcFactory = new DirichletConductivityDomainBCFactory();
+    bcFactory->setValue(dom_value);
+
+    domainBcFactory = RefCountedPtr<BaseDomainBCFactory>(bcFactory);
+  }
+  else if(str == "neumann"){
+    pp.get("dom_val", dom_value);
+
+    auto bcFactory = new NeumannConductivityDomainBCFactory();
+    bcFactory->setValue(dom_value);
+
+    domainBcFactory = RefCountedPtr<BaseDomainBCFactory>(bcFactory);
+  }
+  else{
+    MayDay::Error("ProxyFieldSolver::solveEBCond - uknown EBBC factory requested");
+  }
+
 
   // Set the bottom domain. Don't go below 8x cells in any direction
   ProblemDomain bottomDomain = m_amr->getDomains()[0];
@@ -420,7 +440,7 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
 			    Aco.getData(),
 			    Bco.getData(),
 			    BcoIrreg.getData(),
-			    domainFactory,
+			    domainBcFactory,
 			    ebbcFactory,
 			    ghostPhi,
 			    ghostRhs,
