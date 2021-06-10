@@ -765,12 +765,12 @@ protected:
   VoFStencil getFaceCentroidFluxStencil(const FaceIndex& a_face, const DataIndex& a_dit) const;
 
   /*!
-    @brief Get stencil for irregular cell (not kappa-divided). 
+    @brief Get finite-volume stencil for computing kappa*div(F). 
     @param[in] a_vof Grid index
     @param[in] a_dit DataIndex, needed because we multiply by the B-coefficient. 
     @note Boundary faces are not included. 
   */
-  VoFStencil getDivFStencil(const VolIndex& a_vof, const DataIndex& a_dit) const;
+  VoFStencil getKappaDivFStencil(const VolIndex& a_vof, const DataIndex& a_dit) const;
 
   /*!
     @brief Define stencils

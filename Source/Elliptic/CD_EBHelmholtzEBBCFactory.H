@@ -47,6 +47,7 @@ public:
 
   /*!
     @brief Factory method
+    @note This should 
   */
   virtual EBHelmholtzEBBC* create(const EBLevelGrid& a_eblg, const Real a_dx) = 0;
 

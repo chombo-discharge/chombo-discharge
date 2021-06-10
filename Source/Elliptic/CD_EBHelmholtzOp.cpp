@@ -203,7 +203,7 @@ void EBHelmholtzOp::defineStencils(){
       VoFStencil& curStencil = opStencil(vof, m_comp);
 
       // Get stencil for this cell. 
-      curStencil = this->getDivFStencil(vof, dit());
+      curStencil = this->getKappaDivFStencil(vof, dit());
       if(ebFluxStencil != nullptr) curStencil += (*ebFluxStencil)[dit()](vof, m_comp);
 
       // Adjust the weight with domain boundary faces. 
@@ -286,7 +286,7 @@ void EBHelmholtzOp::defineColorStencils(){
 
 	VoFStencil& colorStencil = colorStencils(vof, m_comp);
 
-	colorStencil = this->getDivFStencil(vof, dit());
+	colorStencil = this->getKappaDivFStencil(vof, dit());
 	if(fluxStencil != nullptr) colorStencil += (*fluxStencil)[dit()](vof, m_comp);
       }
 
@@ -1045,7 +1045,7 @@ VoFStencil EBHelmholtzOp::getFaceCentroidFluxStencil(const FaceIndex& a_face, co
   return fluxStencil;
 }
 
-VoFStencil EBHelmholtzOp::getDivFStencil(const VolIndex& a_vof, const DataIndex& a_dit) const {
+VoFStencil EBHelmholtzOp::getKappaDivFStencil(const VolIndex& a_vof, const DataIndex& a_dit) const {
   VoFStencil divStencil;
 
   const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
