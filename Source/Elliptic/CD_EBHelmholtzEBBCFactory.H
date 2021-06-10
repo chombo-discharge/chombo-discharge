@@ -20,7 +20,7 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Base class for passing EB boundary conditions into EBHelmholtzOp. 
+  @brief Factory class for making EBHelmholtzEBBCs. 
 */
 class EBHelmholtzEBBCFactory {
 public:
@@ -46,11 +46,10 @@ public:
   EBHelmholtzEBBCFactory& operator=(const EBHelmholtzEBBCFactory& a_other) = delete;
 
   /*!
-    @brief Factory method
-    @note This should 
+    @brief Factory method which returns new BC object. 
+    @note Defines are done in EBHelmholtzOp so no need to worry about that here. 
   */
   virtual EBHelmholtzEBBC* create() = 0;
-
 };
 
 #include <CD_NamespaceFooter.H>

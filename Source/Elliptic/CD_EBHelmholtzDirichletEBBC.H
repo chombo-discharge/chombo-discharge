@@ -102,6 +102,7 @@ protected:
     @param[out] a_vof     Grid cell
     @param[in]  a_ebisbox EBIS box
     @return If this returns true, a_stencil contains a valid stencil and weight. 
+    @note Always returns true... 
   */
   bool getFirstOrderStencil(std::pair<Real, VoFStencil>& a_stencil, const VolIndex& a_vof, const DataIndex& a_dit);
 

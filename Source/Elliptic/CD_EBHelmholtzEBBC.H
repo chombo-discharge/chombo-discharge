@@ -49,9 +49,10 @@ public:
 
   /*!
     @brief Define function that is called by EBHelmholtzOp
-    @param[in] a_eblg  Grid where this object is defined. 
-    @param[in] a_Bcoef B-coefficient. You will need this for the flux stencil. 
-    @param[in] a_dx    Grid resolution. 
+    @param[in] a_eblg   Grid where this object is defined. 
+    @param[in] a_Bcoef  B-coefficient. You will need this for the flux stencil. 
+    @param[in] a_probLo Lower-left corner of computational domain. Required if BC objects needs physical position. 
+    @param[in] a_dx     Grid resolution. 
   */
   void define(const EBLevelGrid& a_eblg, const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_Bcoef, const RealVect& m_probLo, const Real& a_dx);
 
@@ -83,12 +84,12 @@ protected:
   /*!
     @brief Component that everything is defined for. Always have m_comp = 0
   */
-  int m_comp;
+  constexpr static int m_comp = 0;
 
   /*!
     @brief Number of components. Always have m_nComp = 1
   */
-  int m_nComp;
+  constexpr static int m_nComp = 1;
 
   /*!
     @brief Grid resolution

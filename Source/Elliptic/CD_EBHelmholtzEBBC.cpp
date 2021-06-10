@@ -13,9 +13,10 @@
 #include <CD_EBHelmholtzEBBC.H>
 #include <CD_NamespaceHeader.H>
 
+constexpr int EBHelmholtzEBBC::m_comp;
+constexpr int EBHelmholtzEBBC::m_nComp;
+
 EBHelmholtzEBBC::EBHelmholtzEBBC(){
-  m_comp  = 0;
-  m_nComp = 1;
 }
 
 EBHelmholtzEBBC::~EBHelmholtzEBBC(){
