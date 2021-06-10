@@ -73,7 +73,6 @@ void EBHelmholtzDirichletEBBC::define() {
       const Real areaFrac = ebisbox.bndryArea(vof);
       const Real B        = Bcoef(vof, m_comp);
 
-
       bool foundStencil = false;
       std::pair<Real, VoFStencil> pairSten;
 
