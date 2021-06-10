@@ -25,9 +25,10 @@ EBHelmholtzEBBC::~EBHelmholtzEBBC(){
 void EBHelmholtzEBBC::applyEBFlux(VoFIterator&       a_vofit,
 				  EBCellFAB&         a_Lphi,
 				  const EBCellFAB&   a_phi,
+				  const DataIndex&   a_dit,
 				  const Real&        a_beta) const {
   for (a_vofit.reset(); a_vofit.ok(); ++a_vofit){
-    this->applyEBFlux(a_Lphi, a_phi, a_vofit(), a_beta);
+    this->applyEBFlux(a_Lphi, a_phi, a_vofit(), a_dit, a_beta);
   }
 }
 
@@ -44,11 +45,13 @@ const LayoutData<BaseIVFAB<VoFStencil> >& EBHelmholtzEBBC::getKappaDivFStencils(
   return m_kappaDivFStencils;
 }
 
-RealVect EBHelmholtzEBBC::position(VolIndex& a_vof, const EBCellFAB& a_phi) const {
+RealVect EBHelmholtzEBBC::getBoundaryPosition(const VolIndex& a_vof, const EBCellFAB& a_phi, const Real& a_dx) const {
   const EBISBox&  ebisbox    = a_phi.getEBISBox();
   const RealVect& ebCentroid = ebisbox.bndryCentroid(a_vof);
 
-  RealVect position = m_probLo + (0.5*RealVect::Unit + a_vof.gridIndex())*m_dx + ebCentroid*m_dx;
+  RealVect position = m_probLo + (0.5*RealVect::Unit + a_vof.gridIndex())*m_dx + ebCentroid*a_dx;
+
+  return position;
 }
 
 #include <CD_NamespaceFooter.H>

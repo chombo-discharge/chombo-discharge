@@ -57,14 +57,16 @@ public:
 
   /*!
     @brief Apply the EB flux. This is the version that is called by EBHelmholtzOp.
-    @param[in] a_vofit          Iterator for cut-cells
-    @param[in] a_Lphi           Operator kappa*L(phi)
-    @param[in] a_phi            Phi, cell-centered. 
-    @param[in] a_factor         Multiplication factor. 
+    @param[inout] a_vofit Iterator for cut-cells
+    @param[in]    a_Lphi  Operator kappa*L(phi)
+    @param[in]    a_phi   Phi, cell-centered. 
+    @param[in]    a_dit   Data index    
+    @param[in]    a_beta  Beta. Passed in from operator. 
   */
   void applyEBFlux(VoFIterator&       a_vofit,
 		   EBCellFAB&         a_Lphi,
 		   const EBCellFAB&   a_phi,
+		   const DataIndex&   a_dit,
 		   const Real&        a_beta) const;
 
   /*!
@@ -124,12 +126,13 @@ protected:
   virtual void applyEBFlux(EBCellFAB&         a_Lphi,
 			   const EBCellFAB&   a_phi,
 			   const VolIndex&    a_vof,
+			   const DataIndex&   a_dit,
 			   const Real&        a_beta) const = 0;
 
   /*!
     @brief Returns physical position at the boundary
   */
-  RealVect position(VolIndex& a_vof, const EBCellFAB& a_phi) const;
+  RealVect getBoundaryPosition(const VolIndex& a_vof, const EBCellFAB& a_phi, const Real& a_dx) const;
 };
 
 #include <CD_NamespaceFooter.H>

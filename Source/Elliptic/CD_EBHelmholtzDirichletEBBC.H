@@ -93,7 +93,26 @@ protected:
   virtual void applyEBFlux(EBCellFAB&         a_Lphi,
 			   const EBCellFAB&   a_phi,
 			   const VolIndex&    a_vof,
-			   const Real&        a_factor) const override;
+			   const DataIndex&   a_dit,
+			   const Real&        a_beta) const override;
+
+  /*!
+    @brief Get a first order approximation to the normal derivative on the EB
+    @param[out] a_stencil Weight and stencil
+    @param[out] a_vof     Grid cell
+    @param[in]  a_ebisbox EBIS box
+    @return If this returns true, a_stencil contains a valid stencil and weight. 
+  */
+  bool getFirstOrderStencil(std::pair<Real, VoFStencil>& a_stencil, const VolIndex& a_vof, const DataIndex& a_dit);
+
+  /*!
+    @brief Get a second order approximation to the normal derivative on the EB
+    @param[out] a_stencil Weight and stencil
+    @param[out] a_vof     Grid cell
+    @param[in]  a_ebisbox EBIS box
+    @return If this returns true, a_stencil contains a valid stencil and weight. 
+  */
+  bool getSecondOrderStencil(std::pair<Real, VoFStencil>& a_stencil, const VolIndex& a_vof, const DataIndex& a_dit);
 
 };
 
