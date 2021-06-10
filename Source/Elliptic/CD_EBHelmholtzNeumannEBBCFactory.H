@@ -33,7 +33,7 @@ public:
   EBHelmholtzNeumannEBBCFactory(const Real a_DphiDn);
 
   /*!
-    @brief Full constructor which sets order and value on EB
+    @brief Full constructor which sets dphi/dn on the EB. 
   */
   EBHelmholtzNeumannEBBCFactory(const std::function<Real(const RealVect& a_pos)>& a_DphiDn);
 
@@ -43,22 +43,22 @@ public:
   ~EBHelmholtzNeumannEBBCFactory();
 
   /*!
-    @brief Set the value on the EB. 
+    @brief Set the value of dphi/dn on the EB. 
   */
   void setDphiDn(const int a_DphiDn);
 
   /*!
-    @brief Set the value on the EB. 
+    @brief Set the value of dphi/dn on the EB. 
   */
   void setDphiDn(const std::function<Real(const RealVect& a_pos)>& a_DphiDn);
 
   /*!
-    @brief Set the value of B*dphi/dn on the eb
+    @brief Set the value of B*dphi/dn on the EB.
   */
   void setBxDphiDn(const int a_BxDphiDn);
 
   /*!
-    @brief Set the value on the EB. 
+    @brief Set the value of B*dphi/dn on the EB.
   */
   void setBxDphiDn(const std::function<Real(const RealVect& a_pos)>& a_BxDphiDn);
 

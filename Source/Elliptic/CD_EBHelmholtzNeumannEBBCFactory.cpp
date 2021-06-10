@@ -24,7 +24,6 @@ EBHelmholtzNeumannEBBCFactory::EBHelmholtzNeumannEBBCFactory(const Real a_DphiDn
   this->setDphiDn(a_DphiDn);
 }
 
-
 EBHelmholtzNeumannEBBCFactory::EBHelmholtzNeumannEBBCFactory(const std::function<Real(const RealVect& a_pos)>& a_DphiDn){
   this->setDphiDn(a_DphiDn);
 }
@@ -34,6 +33,7 @@ EBHelmholtzNeumannEBBCFactory::~EBHelmholtzNeumannEBBCFactory(){
 }
 
 void EBHelmholtzNeumannEBBCFactory::setDphiDn(const int a_DphiDn){
+  m_multByBco   = false;
   m_useConstant = true;
   m_useFunction = false;
   
@@ -41,6 +41,7 @@ void EBHelmholtzNeumannEBBCFactory::setDphiDn(const int a_DphiDn){
 }
 
 void EBHelmholtzNeumannEBBCFactory::setDphiDn(const std::function<Real(const RealVect& a_pos)>& a_DphiDn){
+  m_multByBco   = false;
   m_useConstant = false;
   m_useFunction = true;
   
@@ -62,7 +63,7 @@ RefCountedPtr<EBHelmholtzEBBC> EBHelmholtzNeumannEBBCFactory::create() {
   auto bc = new EBHelmholtzNeumannEBBC();
 
   if(m_multByBco){
-    if(m_useFunction) {
+    if(m_useConstant) {
       bc->setDphiDn(m_constantDphiDn);
     }
     else if(m_useFunction){
@@ -73,7 +74,7 @@ RefCountedPtr<EBHelmholtzEBBC> EBHelmholtzNeumannEBBCFactory::create() {
     }
   }
   else{
-    if(m_useFunction) {
+    if(m_useConstant) {
       bc->setBxDphiDn(m_constantDphiDn);
     }
     else if(m_useFunction){

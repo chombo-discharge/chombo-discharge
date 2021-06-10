@@ -29,6 +29,7 @@
 #include <CD_ProxyFieldSolver.H>
 #include <CD_EBMultigridInterpolator.H>
 #include <CD_EBHelmholtzDirichletEBBCFactory.H>
+#include <CD_EBHelmholtzNeumannEBBCFactory.H>
 #include <CD_NwoEbQuadCfInterp.H>
 #include <CD_DataOps.H>
 #include <CD_EBHelmholtzOpFactory.H>
@@ -441,10 +442,7 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
   DataOps::setValue(BcoIrreg, 1.0);
 
   auto helmFactory   = RefCountedPtr<EBHelmholtzDirichletEBBCFactory>      (new EBHelmholtzDirichletEBBCFactory(1, 1.0));
-  auto ebbcFactory   = RefCountedPtr<DirichletConductivityEBBCFactory>     (new DirichletConductivityEBBCFactory());
   auto domainFactory = RefCountedPtr<DirichletConductivityDomainBCFactory> (new DirichletConductivityDomainBCFactory());
-  ebbcFactory  ->setValue(1.0);
-  ebbcFactory  ->setOrder(1);
   domainFactory->setValue(-1);
 
   // Set the bottom domain. Don't go below 8x cells in any direction

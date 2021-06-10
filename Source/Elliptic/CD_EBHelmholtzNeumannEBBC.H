@@ -38,22 +38,22 @@ public:
   ~EBHelmholtzNeumannEBBC();
 
   /*!
-    @brief Set the value on the EB. 
+    @brief Set the value of dphi/dn on the EB. 
   */
   void setDphiDn(const int a_DphiDn);
 
   /*!
-    @brief Set the value on the EB. 
+    @brief Set the value of dphi/dn on the EB. 
   */
   void setDphiDn(const std::function<Real(const RealVect& a_pos)>& a_DphiDn);
 
   /*!
-    @brief Set the value on the EB. 
+    @brief Set the value of B*dphi/dn on the EB. 
   */
   void setBxDphiDn(const int a_BxDphiDn);
 
   /*!
-    @brief Set the value on the EB. 
+    @brief Set the value of B*dphi/dn on the EB. 
   */
   void setBxDphiDn(const std::function<Real(const RealVect& a_pos)>& a_BxDphiDn);
 
