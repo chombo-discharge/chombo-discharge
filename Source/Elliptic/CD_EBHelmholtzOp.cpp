@@ -8,8 +8,7 @@
   @brief  Implementation of CD_EBHelmholtzOp.H
   @author Robert Marskar
   @todo   Replace EBAMRPoissonOp::staticMaxNorm and don't use EBAMRPoissonOp dependencies
-  @todo   LAPLACIANINPLACE could be made HELMHOLTZINPLACE and we could include the diagonal (alpha) term. 
-  @note   If this breaks, we should look into the division by the relaxation factor (which not guard against divide-by-zero)
+  @note   If this ever breaks, we should look into the division by the relaxation factor (which not guard against divide-by-zero)
 */
 
 // Chombo includes
