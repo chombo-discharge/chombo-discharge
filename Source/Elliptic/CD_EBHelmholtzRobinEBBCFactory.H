@@ -25,7 +25,6 @@
   @note The B-coefficient is not the same as in the Helmholtz equation...
   @note In our notation, n points into the computational domain. 
 */
-*/
 class EBHelmholtzRobinEBBCFactory : public EBHelmholtzEBBCFactory {
 public:
 

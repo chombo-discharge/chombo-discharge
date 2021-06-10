@@ -55,12 +55,15 @@ bool ProxyFieldSolver::solve(MFAMRCellData&       a_potential,
   std::string str;
   pp.get("solver", str);
 
+  Real t1 = -MPI_Wtime();
   if(str == "ebcond"){
     this->solveEBCond(   gasData, gasResi);
   }
   else if(str == "helm"){
     this->solveHelmholtz(gasData, gasResi);
   }
+  t1 += MPI_Wtime();
+  if(procID() == 0) std::cout << "solve time = " << t1 << "\n";
 
   m_amr->averageDown(a_potential, m_realm);
   m_amr->interpGhost(a_potential, m_realm);
