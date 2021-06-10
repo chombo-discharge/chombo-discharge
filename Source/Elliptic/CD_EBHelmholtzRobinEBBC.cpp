@@ -62,6 +62,7 @@ VoFStencil EBHelmholtzRobinEBBC::getMonoPathStencil(const VolIndex& a_vof, const
   const int pow          = 0;  // Can't run with weighting when the starting vof is included
   const int order        = 1;
   const int radius       = 1;
+  const bool useStartVof = true;
 
   const VoFStencil stencil = LeastSquares::getInterpolationStencilUsingAllVofsInMonotonePath(LeastSquares::CellPosition::Boundary,
 											     LeastSquares::CellPosition::Center,
@@ -70,7 +71,8 @@ VoFStencil EBHelmholtzRobinEBBC::getMonoPathStencil(const VolIndex& a_vof, const
 											     m_dx,
 											     pow,
 											     radius,
-											     order);
+											     order,
+											     useStartVof);
 
 
   return stencil;

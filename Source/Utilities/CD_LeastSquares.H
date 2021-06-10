@@ -270,15 +270,15 @@ namespace LeastSquares {
 
   /*!
     @brief Get an interpolation stencil to a point in a cell with a specified order and radius. 
-    @param[in] a_cellPos       Position in the cell of the starting Vof.
-    @param[in] a_otherCellsPos Positions in the other cells.
-    @param[in] a_startVof      The vof to compute for.
-    @param[in] a_ebisbox       EBISBox.
-    @param[in] a_dx            Grid resolution.
-    @param[in] a_p             Power factor for weights.
-    @param[in] a_radius        Stencil radius.
-    @param[in] a_order         Interpolation order. 
-    @note This includes the starting Vof
+    @param[in] a_cellPos        Position in the cell of the starting Vof.
+    @param[in] a_otherCellsPos  Positions in the other cells.
+    @param[in] a_startVof       The vof to compute for.
+    @param[in] a_ebisbox        EBISBox.
+    @param[in] a_dx             Grid resolution.
+    @param[in] a_p              Power factor for weights.
+    @param[in] a_radius         Stencil radius.
+    @param[in] a_order          Interpolation order. 
+    @param[in] a_addStartingVof Add starting vof or not (can't be used with a_p > 0) as it would lead to ill-conditioned systems. 
   */
   VoFStencil getInterpolationStencilUsingAllVofsInMonotonePath(const CellPosition a_cellPos,
 							       const CellPosition a_otherCellsPos,
@@ -287,19 +287,20 @@ namespace LeastSquares {
 							       const Real         a_dx,
 							       const int          a_p,
 							       const int          a_radius,
-							       const int          a_order);
+							       const int          a_order,
+							       const bool         a_addStartingVof);
   
   /*!
     @brief Get an interpolation stencil to a point in a cell with a specified order and radius. 
-    @param[in] a_cellPos       Position in the cell of the starting Vof.
-    @param[in] a_otherCellsPos Positions in the other cells.
-    @param[in] a_startVof      The vof to compute for.
-    @param[in] a_ebisbox       EBISBox.
-    @param[in] a_dx            Grid resolution.
-    @param[in] a_p             Power factor for weights.
-    @param[in] a_radius        Stencil radius.
-    @param[in] a_order         Interpolation order. 
-    @note This includes the starting Vof
+    @param[in] a_cellPos        Position in the cell of the starting Vof.
+    @param[in] a_otherCellsPos  Positions in the other cells.
+    @param[in] a_startVof       The vof to compute for.
+    @param[in] a_ebisbox        EBISBox.
+    @param[in] a_dx             Grid resolution.
+    @param[in] a_p              Power factor for weights.
+    @param[in] a_radius         Stencil radius.
+    @param[in] a_order          Interpolation order. 
+    @param[in] a_addStartingVof Add starting vof or not (can't be used with a_p > 0) as it would lead to ill-conditioned systems. 
   */
   VoFStencil getInterpolationStencilUsingAllConnectedVofsInRadius(const CellPosition a_cellPos,
 								  const CellPosition a_otherCellsPos,
@@ -308,7 +309,8 @@ namespace LeastSquares {
 								  const Real         a_dx,
 								  const int          a_p,
 								  const int          a_radius,
-								  const int          a_order);
+								  const int          a_order,
+								  const bool         a_addStartingVof);
 
 
 

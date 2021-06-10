@@ -375,10 +375,15 @@ VoFStencil LeastSquares::getInterpolationStencilUsingAllVofsInMonotonePath(const
 									   const Real         a_dx,
 									   const int          a_p,
 									   const int          a_radius,
-									   const int          a_order){
+									   const int          a_order,
+									   const bool         a_addStartingVof){
+  // I will call this an error because the weights are 1/(|x-x0|^p but if you include the starting vof with a_p > 0this can lead to 1/0 expression
+  if(a_p > 0 && a_addStartingVof){
+    MayDay::Error("LeastSquares::getInterpolationStencilUsingAllVofsInMonotonePath - can't use a_p > 0 && a_addStartingVof (it's an ill-conditioned system of equations)");
+  }
 
   // Get all Vofs in a radius, and then compute the displacement vectors. 
-  Vector<VolIndex> vofs = VofUtils::getAllVofsInMonotonePath(a_vof, a_ebisbox, a_radius, true);
+  Vector<VolIndex> vofs = VofUtils::getAllVofsInMonotonePath(a_vof, a_ebisbox, a_radius, a_addStartingVof);
   const Vector<RealVect> displacements = LeastSquares::getDisplacements(a_cellPos, a_otherCellsPos, a_vof, vofs, a_ebisbox, a_dx);
 
   const int M = LeastSquares::getTaylorExpansionSize(a_order);
@@ -399,7 +404,12 @@ VoFStencil LeastSquares::getInterpolationStencilUsingAllConnectedVofsInRadius(co
 									      const Real         a_dx,
 									      const int          a_p,
 									      const int          a_radius,
-									      const int          a_order){
+									      const int          a_order,
+									      const bool         a_addStartingVof){
+  // I will call this an error because the weights are 1/(|x-x0|^p but if you include the starting vof with a_p > 0this can lead to 1/0 expression
+  if(a_p > 0 && a_addStartingVof){
+    MayDay::Error("LeastSquares::getInterpolationStencilUsingAllConnectedVofsInRadius - can't use a_p > 0 && a_addStartingVof (it's an ill-conditioned system of equations)");
+  }
 
   // Get all Vofs in a radius, and then compute the displacement vectors. 
   Vector<VolIndex> vofs = VofUtils::getAllConnectedVofsInRadius(a_vof, a_ebisbox, a_radius, IntVectSet());

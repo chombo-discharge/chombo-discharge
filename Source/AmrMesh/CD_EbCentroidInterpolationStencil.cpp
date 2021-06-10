@@ -130,6 +130,7 @@ bool EbCentroidInterpolationStencil::getLeastSquaresInterpolationStencil(VoFSten
   CH_TIME("EbCentroidInterpolationStencil::getLeastSquaresInterpolationStencil");
 
   const int weightingPower = 0;
+  const bool useStartVof   = true;
   
   a_sten = LeastSquares::getInterpolationStencilUsingAllConnectedVofsInRadius(LeastSquares::CellPosition::Boundary,
 									      LeastSquares::CellPosition::Center,
@@ -138,7 +139,8 @@ bool EbCentroidInterpolationStencil::getLeastSquaresInterpolationStencil(VoFSten
 									      a_dx,
 									      weightingPower,
 									      m_radius,
-									      m_order);
+									      m_order,
+									      useStartVof);
 
   return (a_sten.size() > 0);
 }
