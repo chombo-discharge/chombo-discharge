@@ -63,15 +63,15 @@ Driver.refine_solid_solid_interface    = -1               # Refine solid-solid i
 # ====================================
 # ProxyFieldSolver CLASS OPTIONS
 # ====================================
-ProxyFieldSolver.alpha     = 10.0         # Alpha
+ProxyFieldSolver.alpha     = 1.0         # Alpha
 ProxyFieldSolver.beta      = -1.0        # Beta
-ProxyFieldSolver.aco       = 1.          # A-coefficient
+ProxyFieldSolver.aco       = 3.          # A-coefficient
 ProxyFieldSolver.bco       = 1.0         # B-coefficient	
 ProxyFieldSolver.solver    = helm        # Our solver ('helmholtz') or ebconductivity op 'ebcond'
-ProxyFieldSolver.eb_bc     = dirichlet   # 'dirichlet', 'neumann', or 'robin'
+ProxyFieldSolver.eb_bc     = robin   # 'dirichlet', 'neumann', or 'robin'
 ProxyFieldSolver.domain_bc = dirichlet   # 'dirichlet', 'neumann', or 'robin'
 ProxyFieldSolver.eb_order  = 1           # BC order on EB (only for Dirichlet)
-ProxyFieldSolver.dom_val   = -1.         # Value on domain (For Robin, this is multiplier)
+ProxyFieldSolver.dom_val   = 1.         # Value on domain (For Robin, this is multiplier)
 ProxyFieldSolver.eb_val    =  1          # Value on EB (For robin, this is multiplier)
 ProxyFieldSolver.smooth    = 16          # Smoothings
 ProxyFieldSolver.relax     = 2           # Relaxation method
