@@ -54,9 +54,20 @@ VoFStencil EBHelmholtzRobinEBBC::getExtrapolationStencil(const VolIndex& a_vof, 
   const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
   const RealVect dist    = ebisbox.bndryCentroid(a_vof)*m_dx;
   IntVectSet ivs = IntVectSet();
-  const int order = EBArith::getFirstOrderExtrapolationStencil(extrapStencil, dist, m_dx*RealVect::Unit, a_vof, ebisbox, -1, &ivs, m_comp);
 
-  if(order == 0) MayDay::Error("EBHelmholtzRobinEBBC::getExtrapolationStencil - could not find stencil!");
+
+  extrapStencil = LeastSquares::getInterpolationStencilUsingAllVofsInRadius(LeastSquares::CellPosition::Boundary,
+									    LeastSquares::CellPosition::Center,
+									    a_vof,
+									    ebisbox,
+									    m_dx,
+									    0,
+									    1,
+									    1);
+  if(extrapStencil.size() == 0){
+    std::cout << "shit" << std::endl;
+    //    EBArith::getFirstOrderExtrapolationStencil(extrapStencil, dist, m_dx*RealVect::Unit, a_vof, ebisbox, -1, &ivs, m_comp);
+  }
   
   return extrapStencil;
 }

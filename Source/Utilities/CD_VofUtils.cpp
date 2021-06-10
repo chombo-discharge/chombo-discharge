@@ -311,4 +311,80 @@ Vector<VolIndex> VofUtils::getAllVofsSymmetric(const VolIndex&      a_startVof,
   return ret;
 }
 
+Vector<VolIndex> VofUtils::getAllVofsInMonotonePath(VolIndex& a_startVoF, const EBISBox& a_ebisbox, const int a_radius, const bool a_addStartVof){
+  Vector<VolIndex> ret;
+  Vector<VolIndex> vofList;
+
+  IntVect timesMoved = IntVect::Zero;
+  IntVect pathSign   = IntVect::Zero;
+
+  VofUtils::getAllVofsInMonotonePath(vofList, a_startVoF, a_ebisbox, a_radius, timesMoved, pathSign);
+
+  if(!a_addStartVof){
+    for (int i = 0; i < vofList.size(); i++){
+      if(vofList[i] != a_startVoF) ret.push_back(vofList[i]);
+    }
+  }
+  else{
+    ret = vofList;
+  }
+
+return ret;
+}
+
+void VofUtils::getAllVofsInMonotonePath(Vector<VolIndex>& a_vofList,
+					const VolIndex&   a_startVof,
+					const EBISBox&    a_ebisbox,
+					const int         a_radius,
+					const IntVect&    a_timesMoved,
+					const IntVect&    a_pathSign){
+
+  const ProblemDomain& a_domain = a_ebisbox.getDomain();
+
+  if(a_domain.contains(a_startVof.gridIndex())){
+
+    // Add if not already added
+    bool haveStartVof = false;
+    for (int ivof = 0; ivof < a_vofList.size(); ivof++){
+      if(a_vofList[ivof] == a_startVof) haveStartVof = true;
+    }
+
+    if(!haveStartVof) a_vofList.push_back(a_startVof);
+
+    for (int dir = 0; dir < SpaceDim; dir++){
+      if(a_timesMoved[dir] < a_radius){
+	const IntVect newTimesMoved = a_timesMoved + BASISV(dir);
+
+	Side::LoHiSide whichSide;
+	
+	// Move in the low direction. If we have already moved in the high direction we are not allowed to "turn back".
+	if(a_pathSign[dir] == -1 || a_pathSign[dir] == 0){
+	  IntVect newPathSign = a_pathSign;
+	  newPathSign[dir] = -1;
+
+	  Vector<FaceIndex> faces = a_ebisbox.getFaces(a_startVof, dir, Side::Lo);
+	  for (const auto& f : faces.stdVector()){
+	    const VolIndex& newStartVof = f.getVoF(Side::Lo);
+
+	    VofUtils::getAllVofsInMonotonePath(a_vofList, a_startVof, a_ebisbox, a_radius, newTimesMoved, newPathSign);
+	  }
+	}
+
+	// Move in the high direction. If we have already moved in the low direction we are not allowed to "turn back".
+	if(a_pathSign[dir] == 0 || a_pathSign[dir] == 1){
+	  IntVect newPathSign = a_pathSign;
+	  newPathSign[dir] = 1;
+
+	  Vector<FaceIndex> faces = a_ebisbox.getFaces(a_startVof, dir, Side::Hi);
+	  for (const auto& f : faces.stdVector()){
+	    const VolIndex& newStartVof = f.getVoF(Side::Hi);	    
+
+	    VofUtils::getAllVofsInMonotonePath(a_vofList, a_startVof, a_ebisbox, a_radius, newTimesMoved, newPathSign);
+	  }
+	}
+      }
+    }
+  }
+}
+
 #include <CD_NamespaceFooter.H>
