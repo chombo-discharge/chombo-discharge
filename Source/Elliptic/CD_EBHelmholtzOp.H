@@ -27,6 +27,8 @@
 // Our includes
 #include <CD_EBMultigridInterpolator.H>
 #include <CD_EbCoarAve.H>
+#include <CD_EBHelmholtzEBBC.H>
+#include <CD_EBHelmholtzDomainBC.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
