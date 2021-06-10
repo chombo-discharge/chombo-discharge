@@ -9,9 +9,6 @@
   @author Robert Marskar
 */
 
-// Chombo includes
-#include <EBArith.H>
-
 // Our includes
 #include <CD_LaPackUtils.H>
 #include <CD_LeastSquares.H>
