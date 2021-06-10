@@ -4,13 +4,13 @@
  */
 
 /*
-  @file   CD_EBHelmholtzEBBCFactoryFactory.H
+  @file   CD_EBHelmholtzEBBCFactory.H
   @brief  Declaration of a factory class for EBHelmholtzEBBCFactory
   @author Robert Marskar
 */
 
-#ifndef CD_EBHelmholtzEBBCFactoryFactory_H
-#define CD_EBHelmholtzEBBCFactoryFactory_H
+#ifndef CD_EBHelmholtzEBBCFactory_H
+#define CD_EBHelmholtzEBBCFactory_H
 
 // Chombo includes
 #include <EBLevelGrid.H>
@@ -49,7 +49,7 @@ public:
     @brief Factory method
     @note This should 
   */
-  virtual EBHelmholtzEBBC* create(const EBLevelGrid& a_eblg, const Real a_dx) = 0;
+  virtual EBHelmholtzEBBC* create() = 0;
 
 };
 

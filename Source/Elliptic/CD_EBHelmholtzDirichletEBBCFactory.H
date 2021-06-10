@@ -1,0 +1,86 @@
+/* chombo-discharge
+ * Copyright © 2021 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+ */
+
+/*
+  @file   CD_EBHelmholtzDirichletEBBCFactory.H
+  @brief  Declaration of a factory class for EBHelmholtzDirichletEBBCFactory
+  @author Robert Marskar
+*/
+
+#ifndef CD_EBHelmholtzDirichletEBBCFactory_H
+#define CD_EBHelmholtzDirichletEBBCFactory_H
+
+// Our includes
+#include <CD_EBHelmholtzDirichletEBBC.H>
+#include <CD_EBHelmholtzEBBCFactory.H>
+#include <CD_NamespaceHeader.H>
+
+/*!
+  @brief Base class for passing EB boundary conditions into EBHelmholtzOp. 
+*/
+class EBHelmholtzDirichletEBBCFactory : public EBHelmholtzEBBCFactory {
+public:
+
+  /*!
+    @brief Constructor. 
+  */
+  EBHelmholtzDirichletEBBCFactory();
+
+  /*!
+    @brief Destructor
+  */
+  ~EBHelmholtzDirichletEBBCFactory();
+
+  /*!
+    @brief Set BC order
+  */
+  void setOrder(const int a_order);
+
+  /*!
+    @brief Set the value on the EB. 
+  */
+  void setValue(const int a_value);
+
+  /*!
+    @brief Set the value on the EB. 
+  */
+  void setValue(const std::function<Real(const RealVect& a_pos)>& a_value);
+
+  /*!
+    @brief Factory method
+  */
+  EBHelmholtzEBBC* create() override;
+
+protected:
+
+  /*!
+    @brief Use constant for BC
+  */
+  bool m_useConstant;
+
+  /*!
+    @brief Use function for BC value
+  */
+  bool m_useFunction;
+
+  /*!
+    @brief Stencil approximation order,
+  */
+  int m_order;
+
+  /*!
+    @brief Value on EB
+  */
+  Real m_constantValue;
+
+  /*!
+    @brief Value on the EB. 
+  */
+  std::function<Real(const RealVect& a_pos) > m_functionValue;
+};
+
+#include <CD_NamespaceFooter.H>
+
+#endif
