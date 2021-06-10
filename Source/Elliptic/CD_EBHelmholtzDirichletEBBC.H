@@ -76,6 +76,11 @@ protected:
     @brief Value on the EB. 
   */
   std::function<Real(const RealVect& a_pos) > m_functionValue;
+
+  /*!
+    @brief Boundary weights
+  */
+  LayoutData<BaseIVFAB<Real> > m_boundaryWeights;
   
   /*!
     @brief User define function. 
@@ -88,8 +93,8 @@ protected:
   virtual void applyEBFlux(EBCellFAB&         a_Lphi,
 			   const EBCellFAB&   a_phi,
 			   const VolIndex&    a_vof,
-			   const Real&        a_factor,
-			   const bool&        a_useHomogeneous) const override;
+			   const Real&        a_factor) const override;
+
 };
 
 #include <CD_NamespaceFooter.H>

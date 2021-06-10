@@ -14,7 +14,8 @@
 #include <CD_NamespaceHeader.H>
 
 EBHelmholtzEBBC::EBHelmholtzEBBC(){
-
+  m_comp  = 0;
+  m_nComp = 1;
 }
 
 EBHelmholtzEBBC::~EBHelmholtzEBBC(){
@@ -24,10 +25,9 @@ EBHelmholtzEBBC::~EBHelmholtzEBBC(){
 void EBHelmholtzEBBC::applyEBFlux(VoFIterator&       a_vofit,
 				  EBCellFAB&         a_Lphi,
 				  const EBCellFAB&   a_phi,
-				  const Real&        a_factor,
-				  const bool&        a_useHomogeneous) const {
+				  const Real&        a_beta) const {
   for (a_vofit.reset(); a_vofit.ok(); ++a_vofit){
-    this->applyEBFlux(a_Lphi, a_phi, a_vofit(), a_factor, a_useHomogeneous);
+    this->applyEBFlux(a_Lphi, a_phi, a_vofit(), a_beta);
   }
 }
 
@@ -40,8 +40,8 @@ void EBHelmholtzEBBC::define(const EBLevelGrid& a_eblg, const RefCountedPtr<Leve
   this->define();
 }
 
-const LayoutData<BaseIVFAB<VoFStencil> >& EBHelmholtzEBBC::getKappaDivFStencil() const{
-  return m_kappaDivFStencil;
+const LayoutData<BaseIVFAB<VoFStencil> >& EBHelmholtzEBBC::getKappaDivFStencils() const{
+  return m_kappaDivFStencils;
 }
 
 RealVect EBHelmholtzEBBC::position(VolIndex& a_vof, const EBCellFAB& a_phi) const {

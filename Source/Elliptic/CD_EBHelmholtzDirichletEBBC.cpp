@@ -48,13 +48,48 @@ void EBHelmholtzDirichletEBBC::setValue(const std::function<Real(const RealVect&
 void EBHelmholtzDirichletEBBC::define() {
   if(!(m_order == 1  || m_order == 2 )) MayDay::Error("EBHelmholtzDirichletEBBC - order is not 1 or 2!");
   if(!(m_useConstant || m_useFunction)) MayDay::Error("EBHelmholtzDirichletEBBC - not using constant or function!");
+
+  const DisjointBoxLayout& dbl = m_eblg.getDBL();
+
+  m_boundaryWeights.define(dbl);
+  m_kappaDivFStencils.define(dbl);
+
+  for (DataIterator dit(dbl); dit.ok(); ++dit){
+    const Box box = dbl[dit()];
+    const EBISBox& ebisbox = m_eblg.getEBISL()[dit()];
+    const EBGraph& ebgraph = ebisbox.getEBGraph();
+    const IntVectSet& ivs  = ebisbox.getIrregIVS(box);
+
+    BaseIVFAB<Real>&       weights  = m_boundaryWeights  [dit()];
+    BaseIVFAB<VoFStencil>& stencils = m_kappaDivFStencils[dit()];
+
+    weights. define(ivs, ebgraph, m_nComp);
+    stencils.define(ivs, ebgraph, m_nComp);
+
+    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+      const Real areaFrac = ebisbox.bndryArea(vof);
+      
+      // Stencil and weight must be scaled by dx and the area fraction. 
+      weights (vof, m_comp) *= areaFrac/m_dx;
+      stencils(vof, m_comp) *= areaFrac/m_dx;
+    }
+  }
 }
 
 void EBHelmholtzDirichletEBBC::applyEBFlux(EBCellFAB&         a_Lphi,
 					   const EBCellFAB&   a_phi,
 					   const VolIndex&    a_vof,
-					   const Real&        a_factor,
-					   const bool&        a_useHomogeneous) const {
+					   const Real&        a_beta) const {
+
+  Real flux = 0.0;
+
+  // B-coefficient already a part of the stencil and weight, but beta is not. 
+  flux *= a_beta;
+
+  // 
+  a_Lphi(a_vof, m_comp) += flux;
+  
   return;
 }
 

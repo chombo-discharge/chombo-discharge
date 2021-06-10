@@ -28,6 +28,7 @@
 // Our includes
 #include <CD_ProxyFieldSolver.H>
 #include <CD_EBMultigridInterpolator.H>
+#include <CD_EBHelmholtzDirichletEBBCFactory.H>
 #include <CD_NwoEbQuadCfInterp.H>
 #include <CD_DataOps.H>
 #include <CD_EBHelmholtzOpFactory.H>

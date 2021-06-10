@@ -61,13 +61,11 @@ public:
     @param[in] a_Lphi           Operator kappa*L(phi)
     @param[in] a_phi            Phi, cell-centered. 
     @param[in] a_factor         Multiplication factor. 
-    @param[in] a_useHomogeneous Use homogeneous BCs or not. 
   */
   void applyEBFlux(VoFIterator&       a_vofit,
 		   EBCellFAB&         a_Lphi,
 		   const EBCellFAB&   a_phi,
-		   const Real&        a_factor,
-		   const bool&        a_useHomogeneous) const;
+		   const Real&        a_beta) const;
 
   /*!
     @brief Get the stencil for computing the finite-volume approximation to kappa*Div(F). 
@@ -76,9 +74,19 @@ public:
 	     B*wi*phi(i).
     @note    Multiplication by beta is done in the operator.
   */
-  const LayoutData<BaseIVFAB<VoFStencil> >& getKappaDivFStencil() const;
+  const LayoutData<BaseIVFAB<VoFStencil> >& getKappaDivFStencils() const;
 
 protected:
+
+  /*!
+    @brief Component that everything is defined for. Always have m_comp = 0
+  */
+  int m_comp;
+
+  /*!
+    @brief Number of components. Always have m_nComp = 1
+  */
+  int m_nComp;
 
   /*!
     @brief Grid resolution
@@ -103,7 +111,7 @@ protected:
   /*!
     @brief Stencils for computing the flux
   */
-  LayoutData<BaseIVFAB<VoFStencil> > m_kappaDivFStencil;
+  LayoutData<BaseIVFAB<VoFStencil> > m_kappaDivFStencils;
 
   /*!
     @brief User define function. 
@@ -116,8 +124,7 @@ protected:
   virtual void applyEBFlux(EBCellFAB&         a_Lphi,
 			   const EBCellFAB&   a_phi,
 			   const VolIndex&    a_vof,
-			   const Real&        a_factor,
-			   const bool&        a_useHomogeneous) const = 0;
+			   const Real&        a_beta) const = 0;
 
   /*!
     @brief Returns physical position at the boundary
