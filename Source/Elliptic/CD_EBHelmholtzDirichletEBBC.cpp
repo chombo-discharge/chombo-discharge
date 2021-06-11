@@ -77,13 +77,14 @@ void EBHelmholtzDirichletEBBC::define() {
       std::pair<Real, VoFStencil> pairSten;
 
       if(m_order == 1){
-	foundStencil = this->getLeastSquaresStencil(pairSten, vof, dit(), 1);
+	//	if(!foundStencil) foundStencil = this->getJohanStencil       (pairSten, vof, dit(), 1);	
+	if(!foundStencil) foundStencil = this->getLeastSquaresStencil(pairSten, vof, dit(), 1);
       }
       else if(m_order == 2){
-	foundStencil = this->getLeastSquaresStencil(pairSten, vof, dit(), 2);
-	if(!foundStencil){
-	  foundStencil = this->getLeastSquaresStencil(pairSten, vof, dit(), 1);
-	}
+	if(!foundStencil) foundStencil = this->getJohanStencil(pairSten, vof, dit(), 2);
+	if(!foundStencil) foundStencil = this->getLeastSquaresStencil(pairSten, vof, dit(), 2);
+	//	if(!foundStencil) foundStencil = this->getJohanStencil       (pairSten, vof, dit(), 1);	
+	if(!foundStencil) foundStencil = this->getLeastSquaresStencil(pairSten, vof, dit(), 1);
       }
 
       if(foundStencil){
@@ -144,7 +145,12 @@ bool EBHelmholtzDirichletEBBC::getJohanStencil(std::pair<Real, VoFStencil>& a_st
     VoFStencil stencil;
     
     if(a_order == 1){
+      const Real x1 = distanceAlongLine[0];
+      const Real di = 1./x1;
 
+      weight   = 1./x1;
+      stencil  = pointStencils[0];
+      stencil *= 1./x1;
     }
     else if(a_order == 2){
       const Real x1    = distanceAlongLine[0];
@@ -163,9 +169,9 @@ bool EBHelmholtzDirichletEBBC::getJohanStencil(std::pair<Real, VoFStencil>& a_st
     }
 
     a_stencil = std::make_pair(weight, stencil);
-  }
 
-  
+    foundStencil = true;
+  }
 
   return foundStencil;
 }
