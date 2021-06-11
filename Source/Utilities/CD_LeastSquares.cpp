@@ -12,9 +12,38 @@
 // Our includes
 #include <CD_LaPackUtils.H>
 #include <CD_LeastSquares.H>
-#include <CD_VofUtils.H>
 #include <CD_MultiIndex.H>
 #include <CD_NamespaceHeader.H>
+
+VoFStencil LeastSquares::getInterpolationStencil(const CellPosition a_cellPos,
+						 const CellPosition a_otherCellsPos,
+						 const Connectivity a_connectivity,						 
+						 const VolIndex&    a_startVof,
+						 const EBISBox&     a_ebisbox,
+						 const Real         a_dx,
+						 const int          a_p,
+						 const int          a_radius,
+						 const int          a_order,
+						 const bool         a_addStartingVof){
+
+  if(a_p > 0 && a_addStartingVof){
+    MayDay::Error("LeastSquares::getInterpolationStencilUsingAllConnectedVofsInRadius - can't use a_p > 0 && a_addStartingVof (it's an ill-conditioned system of equations)");
+  }
+
+  // Get all Vofs in a radius, and then compute the displacement vectors. 
+  Vector<VolIndex> vofs = VofUtils::getVofsInRadius(a_startVof, a_ebisbox, a_radius, a_connectivity, a_addStartingVof);
+  const Vector<RealVect> displacements = LeastSquares::getDisplacements(a_cellPos, a_otherCellsPos, a_startVof, vofs, a_ebisbox, a_dx);
+
+  const int M = LeastSquares::getTaylorExpansionSize(a_order);
+  const int K = displacements.size();
+
+  VoFStencil ret;
+  if(K >= M) { // Have enough equations to compute.
+    ret = LeastSquares::computeInterpolationStencil(vofs, displacements, a_p, a_order);
+  }
+
+  return ret;
+}
 
 RealVect LeastSquares::position(const CellPosition a_position,
 				const VolIndex&    a_vof,
@@ -162,21 +191,11 @@ VoFStencil LeastSquares::getBndryGradSten(const VolIndex& a_vof,
     const int radius      = a_order;
     const int numUnknowns = LeastSquares::getTaylorExpansionSize(a_order) - 1; 
 
-
-    // Get Vofs, try to use quadrants but if the normal is aligned with the grid just get a "symmetric" stencil. 
     Vector<VolIndex> allVofs;
-    if(VofUtils::isQuadrantWellDefined(normal)){ // Try to use quadrants. 
-      allVofs = VofUtils::getConnectedVofsInQuadrant(a_vof, a_ebisbox, normal, radius, addStartingVof);
-    }
-    else{
-      const std::pair<int, Side::LoHiSide> cardinal = VofUtils::getCardinalDirection(normal);
-      allVofs = VofUtils::getConnectedVofsSymmetric(a_vof, a_ebisbox, cardinal.first, cardinal.second, radius, addStartingVof);
-    }
 
-    // Try monotone path, then all connected vofs. Note that the starting vof should be in the list because this equation
-    // is eliminated by computGradSten. 
-    if(allVofs.size() < numUnknowns) allVofs = VofUtils::getVofsInMonotonePath(   a_vof, a_ebisbox, radius, true);
-    if(allVofs.size() < numUnknowns) allVofs = VofUtils::getConnectedVofsInRadius(a_vof, a_ebisbox, radius, IntVectSet());
+    // Monotone path first, try quadrant then radius, If that does not work
+    if(allVofs.size() < numUnknowns); allVofs = VofUtils::getVofsInQuadrant(a_vof, a_ebisbox, normal, radius, VofUtils::Connectivity::MonotonePath, true);
+    if(allVofs.size() < numUnknowns); allVofs = VofUtils::getVofsInRadius(  a_vof, a_ebisbox,         radius, VofUtils::Connectivity::MonotonePath, true);
 
     // Now build the stencil. 
     if(allVofs.size() >= numUnknowns){
@@ -364,66 +383,5 @@ std::map<IntVect, VoFStencil> LeastSquares::computeInterpolationStencil(const In
 
   return ret;
 }
-
-VoFStencil LeastSquares::getInterpolationStencilUsingAllVofsInMonotonePath(const CellPosition a_cellPos,
-									   const CellPosition a_otherCellsPos,
-									   const VolIndex&    a_vof,
-									   const EBISBox&     a_ebisbox,
-									   const Real         a_dx,
-									   const int          a_p,
-									   const int          a_radius,
-									   const int          a_order,
-									   const bool         a_addStartingVof){
-  // I will call this an error because the weights are 1/(|x-x0|^p but if you include the starting vof with a_p > 0this can lead to 1/0 expression
-  if(a_p > 0 && a_addStartingVof){
-    MayDay::Error("LeastSquares::getInterpolationStencilUsingAllVofsInMonotonePath - can't use a_p > 0 && a_addStartingVof (it's an ill-conditioned system of equations)");
-  }
-
-  // Get all Vofs in a radius, and then compute the displacement vectors. 
-  Vector<VolIndex> vofs = VofUtils::getVofsInMonotonePath(a_vof, a_ebisbox, a_radius, a_addStartingVof);
-  const Vector<RealVect> displacements = LeastSquares::getDisplacements(a_cellPos, a_otherCellsPos, a_vof, vofs, a_ebisbox, a_dx);
-
-  const int M = LeastSquares::getTaylorExpansionSize(a_order);
-  const int K = displacements.size();
-
-  VoFStencil ret;
-  if(K >= M) { // Have enough equations to compute.
-    ret = LeastSquares::computeInterpolationStencil(vofs, displacements, a_p, a_order);
-  }
-
-  return ret;
-}
-
-VoFStencil LeastSquares::getInterpolationStencilUsingAllConnectedVofsInRadius(const CellPosition a_cellPos,
-									      const CellPosition a_otherCellsPos,
-									      const VolIndex&    a_vof,
-									      const EBISBox&     a_ebisbox,
-									      const Real         a_dx,
-									      const int          a_p,
-									      const int          a_radius,
-									      const int          a_order,
-									      const bool         a_addStartingVof){
-  // I will call this an error because the weights are 1/(|x-x0|^p but if you include the starting vof with a_p > 0this can lead to 1/0 expression
-  if(a_p > 0 && a_addStartingVof){
-    MayDay::Error("LeastSquares::getInterpolationStencilUsingAllConnectedVofsInRadius - can't use a_p > 0 && a_addStartingVof (it's an ill-conditioned system of equations)");
-  }
-
-  // Get all Vofs in a radius, and then compute the displacement vectors. 
-  Vector<VolIndex> vofs = VofUtils::getConnectedVofsInRadius(a_vof, a_ebisbox, a_radius, IntVectSet());
-  vofs.push_back(a_vof);
-  const Vector<RealVect> displacements = LeastSquares::getDisplacements(a_cellPos, a_otherCellsPos, a_vof, vofs, a_ebisbox, a_dx);
-
-  const int M = LeastSquares::getTaylorExpansionSize(a_order);
-  const int K = displacements.size();
-
-  VoFStencil ret;
-  if(K >= M) { // Have enough equations to compute.
-    ret = LeastSquares::computeInterpolationStencil(vofs, displacements, a_p, a_order);
-  }
-
-  return ret;
-}
-
-
 
 #include <CD_NamespaceFooter.H>
