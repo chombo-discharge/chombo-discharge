@@ -77,12 +77,12 @@ void EBHelmholtzDirichletEBBC::define() {
       std::pair<Real, VoFStencil> pairSten;
 
       if(m_order == 1){
-	foundStencil = this->getStencil(pairSten, vof, dit(), 1);
+	foundStencil = this->getLeastSquaresStencil(pairSten, vof, dit(), 1);
       }
       else if(m_order == 2){
-	foundStencil = this->getStencil(pairSten, vof, dit(), 2);
+	foundStencil = this->getLeastSquaresStencil(pairSten, vof, dit(), 2);
 	if(!foundStencil){
-	  foundStencil = this->getStencil(pairSten, vof, dit(), 1);
+	  foundStencil = this->getLeastSquaresStencil(pairSten, vof, dit(), 1);
 	}
       }
 
@@ -103,12 +103,12 @@ void EBHelmholtzDirichletEBBC::define() {
   }
 }
 
-bool EBHelmholtzDirichletEBBC::getStencil(std::pair<Real, VoFStencil>& a_stencil, const VolIndex& a_vof, const DataIndex& a_dit, const int a_order) const {
-  bool foundStencil;
+bool EBHelmholtzDirichletEBBC::getLeastSquaresStencil(std::pair<Real, VoFStencil>& a_stencil, const VolIndex& a_vof, const DataIndex& a_dit, const int a_order) const {
+  bool foundStencil = false;
   
   const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
     
-  const VoFStencil gradientStencil = LeastSquares::getBndryGradSten(a_vof, ebisbox, m_dx, a_order, a_order, a_order);
+  const VoFStencil gradientStencil = LeastSquares::getBndryGradSten(a_vof, ebisbox, m_dx, a_order, 2*a_order, a_order);
 
   if(gradientStencil.size() > 0){
 
@@ -121,9 +121,51 @@ bool EBHelmholtzDirichletEBBC::getStencil(std::pair<Real, VoFStencil>& a_stencil
 
     foundStencil = true;
   }
-  else{
-    foundStencil = false;
+
+  return foundStencil;
+}
+
+bool EBHelmholtzDirichletEBBC::getJohanStencil(std::pair<Real, VoFStencil>& a_stencil, const VolIndex& a_vof, const DataIndex& a_dit, const int a_order) const {
+  if(!(a_order == 1 || a_order == 2)) MayDay::Abort("EBHelmholtzDirichletEBBC::getJohanStencil - only order 1 and 2 is supported!");
+  
+  bool foundStencil = false;
+
+  const EBISBox& ebisbox  = m_eblg.getEBISL()[a_dit];
+  const RealVect normal   = ebisbox.normal(a_vof);
+  const RealVect centroid = ebisbox.bndryCentroid(a_vof);
+
+  bool dropOrder;
+  Vector<VoFStencil> pointStencils;
+  Vector<Real>       distanceAlongLine;
+  EBArith::dataRayCast(dropOrder, pointStencils, distanceAlongLine, normal, centroid, a_vof, ebisbox, m_dx*RealVect::Unit, IntVectSet(), m_comp, a_order);
+
+  if(!dropOrder){
+    Real       weight;
+    VoFStencil stencil;
+    
+    if(a_order == 1){
+
+    }
+    else if(a_order == 2){
+      const Real x1    = distanceAlongLine[0];
+      const Real x2    = distanceAlongLine[1];
+      const Real denom = x2*x2*x1 - x1*x1*x2;
+
+      VoFStencil phi1Sten = pointStencils[0];
+      VoFStencil phi2Sten = pointStencils[1];
+
+      phi1Sten *= -x2*x2/denom;
+      phi2Sten *=  x1*x1/denom;
+
+      weight   = -x1*x1/denom + x2*x2/denom;
+      stencil += phi1Sten;
+      stencil += phi2Sten;
+    }
+
+    a_stencil = std::make_pair(weight, stencil);
   }
+
+  
 
   return foundStencil;
 }
