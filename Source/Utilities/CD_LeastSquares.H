@@ -84,7 +84,8 @@ public:
   */
   static VoFStencil getBndryGradSten(const VolIndex& a_vof,
 				     const EBISBox&  a_ebisbox,
-				     const Real&     a_dx,
+				     const Real      a_dx,
+				     const int       a_radius,
 				     const int       a_p,
 				     const int       a_order);
 

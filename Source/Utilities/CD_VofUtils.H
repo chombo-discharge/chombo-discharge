@@ -7,8 +7,6 @@
   @file   CD_VofUtils.H
   @brief  Various functions for getting Vofs near cut-cells
   @author Robert Marskar
-  @todo   General cleanup.
-  @todo   Add a routine which fetches quadrant-only cells
 */
 
 #ifndef CD_VofUtils_H

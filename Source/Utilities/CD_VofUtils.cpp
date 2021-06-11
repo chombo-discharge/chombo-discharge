@@ -102,6 +102,7 @@ Vector<VolIndex> VofUtils::getAllVofsInRadius(const VolIndex& a_startVof, const 
   Box bx(a_startVof.gridIndex(), a_startVof.gridIndex());
   bx.grow(a_radius);
   bx &= a_ebisbox.getDomain();
+  bx &= a_ebisbox.getRegion();
   for (BoxIterator bit(bx); bit.ok(); ++bit){
 
     const std::vector<VolIndex> vofsInThisCell = a_ebisbox.getVoFs(bit()).stdVector();
@@ -317,9 +318,11 @@ void VofUtils::getVofsInMonotonePath(Vector<VolIndex>& a_vofList,
 				     const int         a_radius,
 				     const IntVect&    a_timesMoved,
 				     const IntVect&    a_pathSign){
-  const ProblemDomain& a_domain = a_ebisbox.getDomain();
-
-  if(a_domain.contains(a_startVof.gridIndex())){
+  const IntVect iv            = a_startVof.gridIndex();
+  const ProblemDomain& domain = a_ebisbox.getDomain();
+  const Box& region           = a_ebisbox.getRegion();
+  
+  if(domain.contains(iv) && region.contains(iv)){
 
     // Add if not already added
     bool haveStartVof = false;

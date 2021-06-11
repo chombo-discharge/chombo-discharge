@@ -76,7 +76,7 @@ void EBHelmholtzDirichletEBBC::define() {
       bool foundStencil = false;
       std::pair<Real, VoFStencil> pairSten;
 
-      if(m_order == 1){
+      if(m_order == 1 || m_order == 2){
 	foundStencil = this->getFirstOrderStencil(pairSten, vof, dit());
       }
       else if(m_order == 2){
@@ -113,8 +113,22 @@ bool EBHelmholtzDirichletEBBC::getFirstOrderStencil(std::pair<Real, VoFStencil>&
   VoFStencil sten;
 
   EBArith::getLeastSquaresGradSten(sten, w, a_vof, ebisbox, m_dx*RealVect::Unit, m_eblg.getDomain(), m_comp);
-
   a_stencil = std::make_pair(w, sten);
+  
+#if 1 // For testing our weighted least squraes
+  VoFStencil gradientStencil = LeastSquares::getBndryGradSten(a_vof, m_eblg.getEBISL()[a_dit], 1.0, 2, 2, 2);
+
+  if(gradientStencil.size() > 0){
+    sten =  LeastSquares::projectGradSten(gradientStencil, -normal);
+    sten *= 1./m_dx;
+    w    = -LeastSquares::sumAllWeights(sten);
+  }
+  else{
+    sten.clear();
+    w = 0.0;
+  }
+  a_stencil = std::make_pair(w, sten);
+#endif
 
   return true;
 }

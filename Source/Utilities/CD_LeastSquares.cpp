@@ -45,6 +45,43 @@ VoFStencil LeastSquares::getInterpolationStencil(const CellPosition a_cellPos,
   return ret;
 }
 
+VoFStencil LeastSquares::getBndryGradSten(const VolIndex& a_vof,
+					  const EBISBox&  a_ebisbox,
+					  const Real      a_dx,
+					  const int       a_radius,
+					  const int       a_p,
+					  const int       a_order){
+  VoFStencil bndrySten;
+
+  const bool addStartingVof = false;
+  const RealVect normal     = a_ebisbox.normal(a_vof);
+
+  if(normal != RealVect::Zero){ // Can only do this if we actual have a normal vector. 
+    const int numUnknowns = LeastSquares::getTaylorExpansionSize(a_order) - 1; 
+
+    Vector<VolIndex> allVofs;
+
+    // Monotone path first, try quadrant then radius, If that does not work
+    if(allVofs.size() < numUnknowns); allVofs = VofUtils::getVofsInQuadrant(a_vof, a_ebisbox, normal, a_radius, VofUtils::Connectivity::MonotonePath,    false);
+    if(allVofs.size() < numUnknowns); allVofs = VofUtils::getVofsInRadius(  a_vof, a_ebisbox,         a_radius, VofUtils::Connectivity::MonotonePath,    false);
+    if(allVofs.size() < numUnknowns); allVofs = VofUtils::getVofsInRadius(  a_vof, a_ebisbox,         a_radius, VofUtils::Connectivity::SimplyConnected, false);
+
+    // Now build the stencil. 
+    if(allVofs.size() >= numUnknowns){
+      const Vector<RealVect> displacements = LeastSquares::getDisplacements(CellPosition::Boundary,
+									    CellPosition::Center,
+									    a_vof,
+									    allVofs,
+									    a_ebisbox,
+									    a_dx);
+    
+      bndrySten = LeastSquares::computeGradSten(allVofs, displacements, a_p, a_order); // This routine eliminates a_vof from the system of equations!
+    }
+  }
+
+  return bndrySten;
+}
+
 RealVect LeastSquares::position(const CellPosition a_position,
 				const VolIndex&    a_vof,
 				const EBISBox&     a_ebisbox,
@@ -177,41 +214,7 @@ VoFStencil LeastSquares::computeGradSten(const Vector<VolIndex>& a_allVofs,
 
 }
 
-VoFStencil LeastSquares::getBndryGradSten(const VolIndex& a_vof,
-					  const EBISBox&  a_ebisbox,
-					  const Real&     a_dx,
-					  const int       a_p,
-					  const int       a_order){
-  VoFStencil bndrySten;
 
-  const bool addStartingVof = false;
-  const RealVect normal     = a_ebisbox.normal(a_vof);
-
-  if(normal != RealVect::Zero){ // Can only do this if we actual have a normal vector. 
-    const int radius      = a_order;
-    const int numUnknowns = LeastSquares::getTaylorExpansionSize(a_order) - 1; 
-
-    Vector<VolIndex> allVofs;
-
-    // Monotone path first, try quadrant then radius, If that does not work
-    if(allVofs.size() < numUnknowns); allVofs = VofUtils::getVofsInQuadrant(a_vof, a_ebisbox, normal, radius, VofUtils::Connectivity::MonotonePath, true);
-    if(allVofs.size() < numUnknowns); allVofs = VofUtils::getVofsInRadius(  a_vof, a_ebisbox,         radius, VofUtils::Connectivity::MonotonePath, true);
-
-    // Now build the stencil. 
-    if(allVofs.size() >= numUnknowns){
-      const Vector<RealVect> displacements = LeastSquares::getDisplacements(CellPosition::Boundary,
-									    CellPosition::Center,
-									    a_vof,
-									    allVofs,
-									    a_ebisbox,
-									    a_dx);
-    
-      bndrySten = LeastSquares::computeGradSten(allVofs, displacements, a_p, a_order); // This routine eliminates a_vof from the system of equations!
-    }
-  }
-
-  return bndrySten;
-}
 
 VoFStencil LeastSquares::projectGradSten(const VoFStencil& a_stencil, const RealVect& a_projection) {
   VoFStencil sten;
