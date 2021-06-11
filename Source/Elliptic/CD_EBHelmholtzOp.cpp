@@ -21,6 +21,9 @@
 #include <CD_EBHelmholtzOpF_F.H>
 #include <CD_NamespaceHeader.H>
 
+constexpr int EBHelmholtzOp::m_nComp;
+constexpr int EBHelmholtzOp::m_comp;
+
 EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid&                                 a_eblgFine,
 			     const EBLevelGrid&                                 a_eblg,
 			     const EBLevelGrid&                                 a_eblgCoFi,
@@ -75,8 +78,6 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid&                                 
 
   // Default settings. Always solve for comp = 0. If you want something different, copy your
   // input two different data holders before you use AMRMultiGrid. 
-  m_nComp      = 1;
-  m_comp       = 0;
   m_turnOffBCs = false;
   m_interval   = Interval(m_comp, m_comp);
 

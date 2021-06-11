@@ -404,12 +404,12 @@ protected:
   /*!
     @brief Number of components that we solve for (always one..)
   */
-  int m_nComp;
+  static constexpr int m_nComp = 1;
 
   /*!
     @brief Component that we solve for
   */
-  int m_comp;
+  static constexpr int m_comp = 0;
 
   /*!
     @brief Interval
