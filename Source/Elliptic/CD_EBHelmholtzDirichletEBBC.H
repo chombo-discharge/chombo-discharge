@@ -116,7 +116,7 @@ protected:
     @param[in]  a_order   Attempted order for stencil. This is also the stencil radius. 
     @return If this returns true, a_stencil contains a valid stencil and weight. 
   */
-  bool getJohanStencil(std::pair<Real, VoFStencil>& a_stencil, const VolIndex& a_vof, const DataIndex& a_dit, const int a_order) const;
+  bool getJohansenStencil(std::pair<Real, VoFStencil>& a_stencil, const VolIndex& a_vof, const DataIndex& a_dit, const int a_order) const;
 
 };
 

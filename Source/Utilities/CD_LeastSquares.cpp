@@ -63,7 +63,7 @@ VoFStencil LeastSquares::getBndryGradSten(const VolIndex& a_vof,
 
     // Monotone path first, try quadrant then radius, If that does not work
     if(allVofs.size() < numUnknowns); allVofs = VofUtils::getVofsInQuadrant(a_vof, a_ebisbox, normal, a_radius, VofUtils::Connectivity::MonotonePath,    false);
-    if(allVofs.size() < numUnknowns); allVofs = VofUtils::getVofsInRadius(  a_vof, a_ebisbox,         a_radius, VofUtils::Connectivity::MonotonePath,    false);
+    if(allVofs.size() < numUnknowns); allVofs = VofUtils::getVofsInRadius(  a_vof, a_ebisbox,         a_radius, VofUtils::Connectivity::MonotonePath,    false);        
     if(allVofs.size() < numUnknowns); allVofs = VofUtils::getVofsInRadius(  a_vof, a_ebisbox,         a_radius, VofUtils::Connectivity::SimplyConnected, false);
 
     // Now build the stencil. 

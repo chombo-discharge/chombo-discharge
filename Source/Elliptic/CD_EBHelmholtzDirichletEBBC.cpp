@@ -76,14 +76,15 @@ void EBHelmholtzDirichletEBBC::define() {
       bool foundStencil = false;
       std::pair<Real, VoFStencil> pairSten;
 
+      // Note: For order 1 we prefer to use least squares because it is cheaper to compute than order 2, plus the fact that
+      //       it is more compact than the Johansen stencil. 1st order weighted least squares only requires 
       if(m_order == 1){
-	if(!foundStencil) foundStencil = this->getJohanStencil       (pairSten, vof, dit(), 1);	
 	if(!foundStencil) foundStencil = this->getLeastSquaresStencil(pairSten, vof, dit(), 1);
+	if(!foundStencil) foundStencil = this->getJohansenStencil    (pairSten, vof, dit(), 1);	
       }
       else if(m_order == 2){
-	if(!foundStencil) foundStencil = this->getJohanStencil       (pairSten, vof, dit(), 2);
-	if(!foundStencil) foundStencil = this->getJohanStencil       (pairSten, vof, dit(), 1);	
-	if(!foundStencil) foundStencil = this->getLeastSquaresStencil(pairSten, vof, dit(), 1);
+	if(!foundStencil) foundStencil = this->getJohansenStencil    (pairSten, vof, dit(), 2);
+	if(!foundStencil) foundStencil = this->getLeastSquaresStencil(pairSten, vof, dit(), 1);	
       }
 
       if(foundStencil){
@@ -96,7 +97,7 @@ void EBHelmholtzDirichletEBBC::define() {
       }
       else{
 	// Dead cell. No flux. 
-	weights(vof, m_comp) = 0.0;
+	weights (vof, m_comp) = 0.0;
 	stencils(vof, m_comp).clear();
       }
     }
@@ -125,8 +126,8 @@ bool EBHelmholtzDirichletEBBC::getLeastSquaresStencil(std::pair<Real, VoFStencil
   return foundStencil;
 }
 
-bool EBHelmholtzDirichletEBBC::getJohanStencil(std::pair<Real, VoFStencil>& a_stencil, const VolIndex& a_vof, const DataIndex& a_dit, const int a_order) const {
-  if(!(a_order == 1 || a_order == 2)) MayDay::Abort("EBHelmholtzDirichletEBBC::getJohanStencil - only order 1 and 2 is supported!");
+bool EBHelmholtzDirichletEBBC::getJohansenStencil(std::pair<Real, VoFStencil>& a_stencil, const VolIndex& a_vof, const DataIndex& a_dit, const int a_order) const {
+  if(!(a_order == 1 || a_order == 2)) MayDay::Abort("EBHelmholtzDirichletEBBC::getJohansenStencil - only order 1 and 2 is supported!");
   
   bool foundStencil = false;
 
