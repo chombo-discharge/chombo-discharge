@@ -64,6 +64,23 @@ public:
 					  const bool         a_addStartVof);
 
   /*!
+    @brief Fetch vofs in a quadrant, using a specified radius and with a specified connectivitiy between them.
+    @param[in] a_startVof     Starting Vof. 
+    @param[in] a_ebisbox      EBISBox.
+    @param[in] a_normal       Normal vector
+    @param[in] a_radius       Radius.
+    @param[in] a_connectivity Connectivity specification (e.g. monotone path or simplyconnected)
+    @param[in] a_addStartVof  If false, a_startVof will not be included in the list. 
+    @note This routine will fetch in a "symmetric" quadrant if the normal vector aligns with a coordinate direction
+  */
+  static Vector<VolIndex> getVofsInQuadrant(const VolIndex&    a_startVof,
+					    const EBISBox&     a_ebisbox,
+					    const RealVect&    a_normal,
+					    const int          a_radius,
+					    const Connectivity a_connectivity,
+					    const bool         a_addStartVof);
+
+  /*!
     @brief Check if a quadrant is well-defined for a direction in space.
     @param[in] a_normal The direction in space which defines the quadrant. 
     @return True if the quadrant is well defined and false otherwise. 
@@ -238,6 +255,24 @@ protected:
     @return Quadrant as IntVect. The IntVect is ill-defined if the quadrant is not well-defined. 
   */
   static IntVect getQuadrant(const RealVect a_normal);
+
+  /*!
+    @brief Get quadrant defined by direction in space. 
+    @param[in] a_normal The direction in space which defines the quadrant. 
+    @param[in] a_vof    Starting vof
+    @param[in] a_radius Quadrant radius
+    @return Quadrant as a box, with one of the corners on a_vof. 
+  */
+  static Box getQuadrant(const RealVect& a_normal, const VolIndex& a_vof, const EBISBox& a_ebisbox, const Real a_radius);
+
+  /*!
+    @brief Get "symmetric" quadrant defined by direction in space. 
+    @param[in] a_cardinal The direction in space which defines the quadrant. 
+    @param[in] a_vof      Starting vof
+    @param[in] a_radius   Quadrant radius
+    @return Quadrant as a box, with one of the corners on a_vof. 
+  */
+  static Box getSymmetricQuadrant(const std::pair<int, Side::LoHiSide>& a_cardinal, const VolIndex& a_vof, const EBISBox& a_ebisbox, const Real a_radius);
 
   /*!
     @brief Get all Vofs in a monotone path. Does not move more than a_radius in any direction. 
