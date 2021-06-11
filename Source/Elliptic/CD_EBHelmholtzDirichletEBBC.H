@@ -36,7 +36,8 @@ public:
   ~EBHelmholtzDirichletEBBC();
 
   /*!
-    @brief Set BC order
+    @brief Set BC order. 
+    @note The order is also the attempted radius of the stencil. 
   */
   void setOrder(const int a_order);
 
@@ -97,23 +98,15 @@ protected:
 			   const Real&        a_beta) const override;
 
   /*!
-    @brief Get a first order approximation to the normal derivative on the EB
+    @brief Get stencil with specified order. 
     @param[out] a_stencil Weight and stencil
     @param[out] a_vof     Grid cell
-    @param[in]  a_ebisbox EBIS box
+    @param[in]  a_dit     Data index
+    @param[in]  a_order   Attempted order for stencil. This is also the stencil radius. 
     @return If this returns true, a_stencil contains a valid stencil and weight. 
-    @note Always returns true... 
+    @note Stencils are computed using weighted least squares with squared inverse distance weighting. 
   */
-  bool getFirstOrderStencil(std::pair<Real, VoFStencil>& a_stencil, const VolIndex& a_vof, const DataIndex& a_dit);
-
-  /*!
-    @brief Get a second order approximation to the normal derivative on the EB
-    @param[out] a_stencil Weight and stencil
-    @param[out] a_vof     Grid cell
-    @param[in]  a_ebisbox EBIS box
-    @return If this returns true, a_stencil contains a valid stencil and weight. 
-  */
-  bool getSecondOrderStencil(std::pair<Real, VoFStencil>& a_stencil, const VolIndex& a_vof, const DataIndex& a_dit);
+  bool getStencil(std::pair<Real, VoFStencil>& a_stencil, const VolIndex& a_vof, const DataIndex& a_dit, const int a_order) const;
 
 };
 

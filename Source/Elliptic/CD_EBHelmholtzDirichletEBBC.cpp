@@ -76,13 +76,13 @@ void EBHelmholtzDirichletEBBC::define() {
       bool foundStencil = false;
       std::pair<Real, VoFStencil> pairSten;
 
-      if(m_order == 1 || m_order == 2){
-	foundStencil = this->getFirstOrderStencil(pairSten, vof, dit());
+      if(m_order == 1){
+	foundStencil = this->getStencil(pairSten, vof, dit(), 1);
       }
       else if(m_order == 2){
-	foundStencil = this->getSecondOrderStencil(pairSten, vof, dit());
+	foundStencil = this->getStencil(pairSten, vof, dit(), 2);
 	if(!foundStencil){
-	  foundStencil = this->getFirstOrderStencil(pairSten, vof, dit());
+	  foundStencil = this->getStencil(pairSten, vof, dit(), 1);
 	}
       }
 
@@ -95,8 +95,7 @@ void EBHelmholtzDirichletEBBC::define() {
 	stencils(vof, m_comp) *= B*areaFrac/m_dx;
       }
       else{
-	MayDay::Warning("EBHelmholtzDirichletEBBC::define - did not find stencil and this vof will default to homogeneous Neumann!");
-	
+	// Dead cell. No flux. 
 	weights(vof, m_comp) = 0.0;
 	stencils(vof, m_comp).clear();
       }
@@ -104,66 +103,26 @@ void EBHelmholtzDirichletEBBC::define() {
   }
 }
 
-bool EBHelmholtzDirichletEBBC::getFirstOrderStencil(std::pair<Real, VoFStencil>& a_stencil, const VolIndex& a_vof, const DataIndex& a_dit){
-  const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
-  const RealVect normal  = ebisbox.normal(a_vof);
-  const RealVect point   = ebisbox.bndryCentroid(a_vof);
-
-  Real w;
-  VoFStencil sten;
-
-  EBArith::getLeastSquaresGradSten(sten, w, a_vof, ebisbox, m_dx*RealVect::Unit, m_eblg.getDomain(), m_comp);
-  a_stencil = std::make_pair(w, sten);
+bool EBHelmholtzDirichletEBBC::getStencil(std::pair<Real, VoFStencil>& a_stencil, const VolIndex& a_vof, const DataIndex& a_dit, const int a_order) const {
+  bool foundStencil;
   
-#if 1 // For testing our weighted least squraes
-  VoFStencil gradientStencil = LeastSquares::getBndryGradSten(a_vof, m_eblg.getEBISL()[a_dit], 1.0, 2, 2, 2);
+  const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
+    
+  const VoFStencil gradientStencil = LeastSquares::getBndryGradSten(a_vof, ebisbox, m_dx, a_order, a_order, a_order);
 
   if(gradientStencil.size() > 0){
-    sten =  LeastSquares::projectGradSten(gradientStencil, -normal);
-    sten *= 1./m_dx;
-    w    = -LeastSquares::sumAllWeights(sten);
-  }
-  else{
-    sten.clear();
-    w = 0.0;
-  }
-  a_stencil = std::make_pair(w, sten);
-#endif
 
-  return true;
-}
-
-bool EBHelmholtzDirichletEBBC::getSecondOrderStencil(std::pair<Real, VoFStencil>& a_stencil, const VolIndex& a_vof, const DataIndex& a_dit){
-  const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
-
-  bool foundStencil = false;
-
-  bool dropOrder;
-  Vector<VoFStencil> pointStencils;
-  Vector<Real>       distanceAlongLine;
-  EBArith::johanStencil(dropOrder, pointStencils, distanceAlongLine, a_vof, ebisbox, m_dx*RealVect::Unit, (*m_eblg.getCFIVS())[a_dit]);
-
-  if(!dropOrder){ // We know we can at least a second order approximation
-
-    const Real x1    = distanceAlongLine[0];
-    const Real x2    = distanceAlongLine[1];
-    const Real denom = x2*x2*x1 - x1*x1*x2;
-
-    const Real weight = -x1*x1/denom + x2*x2/denom;
-
-    VoFStencil sten;
-    VoFStencil sten1 = pointStencils[0];
-    VoFStencil sten2 = pointStencils[1];
+    const RealVect normal  = ebisbox.normal(a_vof);
     
-    sten1 *= -x2*x2/denom;
-    sten2 *= +x1*x1/denom;
-    
-    sten  += sten1;
-    sten  += sten2;
+    const VoFStencil DphiDnStencil =  LeastSquares::projectGradSten(gradientStencil, -normal);
+    const Real boundaryWeight      = -LeastSquares::sumAllWeights(DphiDnStencil);
 
-    a_stencil = std::make_pair(weight, sten);
+    a_stencil = std::make_pair(boundaryWeight, DphiDnStencil);
 
     foundStencil = true;
+  }
+  else{
+    foundStencil = false;
   }
 
   return foundStencil;

@@ -28,7 +28,8 @@ public:
   EBHelmholtzDirichletEBBCFactory();
 
   /*!
-    @brief Full constructor which sets order and value on EB
+    @brief Full constructor which sets order and value on EB. 
+    @note The order is also the attempted radius of the stencil. 
   */
   EBHelmholtzDirichletEBBCFactory(const int a_order, const Real a_value);
 
@@ -44,6 +45,7 @@ public:
 
   /*!
     @brief Set BC order
+    @note The order is also the attempted radius of the stencil. 
   */
   void setOrder(const int a_order);
 
