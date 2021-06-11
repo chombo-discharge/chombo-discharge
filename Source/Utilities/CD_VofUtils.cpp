@@ -12,49 +12,50 @@
 #include <CD_VofUtils.H>
 #include <CD_NamespaceHeader.H>
 
-bool VofUtils::isQuadrantWellDefined(const RealVect a_normal){
-  bool ret = true;
+Vector<VolIndex> VofUtils::getVofsInRadius(const VolIndex&    a_startVof,
+					   const EBISBox&     a_ebisbox,
+					   const int          a_radius,
+					   const Connectivity a_connectivity,
+					   const bool         a_addStartVof){
+  Vector<VolIndex> vofs;
+  switch(a_connectivity){
+  case VofUtils::Connectivity::MonotonePath:
+    vofs = VofUtils::getVofsInMonotonePath(a_startVof, a_ebisbox, a_radius, a_addStartVof);
+    break;
+  case VofUtils::Connectivity::SimplyConnected:
+    vofs = VofUtils::getConnectedVofsInRadius(a_startVof, a_ebisbox, a_radius, a_addStartVof);
+    break;
+  case VofUtils::Connectivity::All:
+    vofs = VofUtils::getAllVofsInRadius(a_startVof, a_ebisbox, a_radius, a_addStartVof);
+    break;
+  }
 
-  const RealVect v = a_normal;///a_normal.vectorLength(); // Idiot guard. 
-  
-  for (int dir = 0; dir < SpaceDim; dir++){
-    if (std::abs(a_normal[dir]) == 1.0 || std::abs(a_normal[dir]) == 0.0) {
-      ret = false;
+  return vofs;
+}
+
+Vector<VolIndex> VofUtils::getVofsInMonotonePath(const VolIndex& a_startVoF, const EBISBox& a_ebisbox, const int a_radius, const bool a_addStartVof){
+  Vector<VolIndex> ret;
+  Vector<VolIndex> vofList;
+
+  IntVect timesMoved = IntVect::Zero;
+  IntVect pathSign   = IntVect::Zero;
+
+  VofUtils::getVofsInMonotonePath(vofList, a_startVoF, a_ebisbox, a_radius, timesMoved, pathSign);
+
+  if(!a_addStartVof){
+    for (int i = 0; i < vofList.size(); i++){
+      if(vofList[i] != a_startVoF) ret.push_back(vofList[i]);
     }
+  }
+  else{
+    ret = vofList;
   }
 
   return ret;
 }
 
-std::pair<int, Side::LoHiSide> VofUtils::getCardinalDirection(const RealVect a_normal){ 
-  std::pair<int, Side::LoHiSide> ret;
-  
-  for (int dir = 0; dir < SpaceDim; dir++){
-    if (a_normal[dir] == 1.0) {
-      ret = std::make_pair(dir, Side::Hi);
-    }
-    else if(a_normal[dir] == -1.0){
-      ret = std::make_pair(dir, Side::Lo);
-    }
-  }
-
-  return ret;
-}
-
-IntVect VofUtils::getQuadrant(const RealVect a_normal){
-
-  IntVect quadrant = IntVect::Zero;
-
-  for (int dir = 0; dir < SpaceDim; dir++){
-    if(a_normal[dir] < 0.0){
-      quadrant[dir] = -1;
-    }
-    else if (a_normal[dir] > 0.0 ) {
-      quadrant[dir] = 1;
-    }
-  }
-
-  return quadrant;
+Vector<VolIndex> VofUtils::getConnectedVofsInRadius(const VolIndex& a_startVof, const EBISBox& a_ebisbox, const int a_radius, const bool a_addStartVof){
+  MayDay::Abort("VofUtils::getConnectedVofsInRadius - not implemented");
 }
 
 Vector<VolIndex> VofUtils::getAllVofsInRadius(const VolIndex& a_startVof, const EBISBox& a_ebisbox, const int a_radius, const bool a_addStartVof){
@@ -78,18 +79,6 @@ Vector<VolIndex> VofUtils::getAllVofsInRadius(const VolIndex& a_startVof, const 
   }
 
   return allVofs;
-}
-
-Vector<VolIndex> VofUtils::getAllVofsInBox(const Box& a_box, const EBISBox& a_ebisbox){
-  Vector<VolIndex> ret;
-
-  Box bx = a_box;
-  bx    &= a_ebisbox.getDomain();
-  for (BoxIterator bit(bx); bit.ok(); ++bit){
-    ret.append(a_ebisbox.getVoFs(bit()));
-  }
-
-  return ret;
 }
 
 void VofUtils::excludeCells(Vector<VolIndex>& a_vofs, const Box& a_excludeBox){
@@ -142,8 +131,71 @@ void VofUtils::includeCells(Vector<VolIndex>& a_vofs, const IntVectSet& a_includ
   a_vofs = newVofs;
 }
 
+
+// STUFF BELOW HERE SHOULD BE PROTECTED!
+bool VofUtils::isQuadrantWellDefined(const RealVect a_normal){
+  bool ret = true;
+
+  const RealVect v = a_normal;///a_normal.vectorLength(); // Idiot guard. 
+  
+  for (int dir = 0; dir < SpaceDim; dir++){
+    if (std::abs(a_normal[dir]) == 1.0 || std::abs(a_normal[dir]) == 0.0) {
+      ret = false;
+    }
+  }
+
+  return ret;
+}
+
+std::pair<int, Side::LoHiSide> VofUtils::getCardinalDirection(const RealVect a_normal){ 
+  std::pair<int, Side::LoHiSide> ret;
+  
+  for (int dir = 0; dir < SpaceDim; dir++){
+    if (a_normal[dir] == 1.0) {
+      ret = std::make_pair(dir, Side::Hi);
+    }
+    else if(a_normal[dir] == -1.0){
+      ret = std::make_pair(dir, Side::Lo);
+    }
+  }
+
+  return ret;
+}
+
+IntVect VofUtils::getQuadrant(const RealVect a_normal){
+
+  IntVect quadrant = IntVect::Zero;
+
+  for (int dir = 0; dir < SpaceDim; dir++){
+    if(a_normal[dir] < 0.0){
+      quadrant[dir] = -1;
+    }
+    else if (a_normal[dir] > 0.0 ) {
+      quadrant[dir] = 1;
+    }
+  }
+
+  return quadrant;
+}
+
+
+
+Vector<VolIndex> VofUtils::getAllVofsInBox(const Box& a_box, const EBISBox& a_ebisbox){
+  Vector<VolIndex> ret;
+
+  Box bx = a_box;
+  bx    &= a_ebisbox.getDomain();
+  for (BoxIterator bit(bx); bit.ok(); ++bit){
+    ret.append(a_ebisbox.getVoFs(bit()));
+  }
+
+  return ret;
+}
+
+
+
 										       
-Vector<VolIndex> VofUtils::getConnectedVofs(const VolIndex& a_startVof, const Vector<VolIndex>& a_allVofs, const EBISBox& a_ebisbox){
+Vector<VolIndex> VofUtils::connectedVofsOnly(const VolIndex& a_startVof, const Vector<VolIndex>& a_allVofs, const EBISBox& a_ebisbox){
 
   // If a_allVofs does not contain a_startVof, add it.
   bool hasStartingVof = false;
@@ -214,33 +266,37 @@ Vector<VolIndex> VofUtils::getConnectedVofs(const VolIndex& a_startVof, const Ve
 
 }
 
-Vector<VolIndex> VofUtils::getAllConnectedVofsInRadius(const VolIndex&   a_startVof,
-						       const EBISBox&    a_ebisbox,
-						       const int         a_radius,
-						       const IntVectSet& a_excludeIVS){
+Vector<VolIndex> VofUtils::getConnectedVofsInRadius(const VolIndex&   a_startVof,
+						    const EBISBox&    a_ebisbox,
+						    const int         a_radius,
+						    const IntVectSet& a_excludeIVS){
   Vector<VolIndex> allVofs       = VofUtils::getAllVofsInRadius(a_startVof, a_ebisbox, a_radius, true);
-  Vector<VolIndex> connectedVofs = VofUtils::getConnectedVofs(a_startVof, allVofs, a_ebisbox);
+  Vector<VolIndex> connectedVofs = VofUtils::connectedVofsOnly(a_startVof, allVofs, a_ebisbox);
 
   VofUtils::excludeCells(connectedVofs, a_excludeIVS);
 
   return connectedVofs;
 }
 
-Vector<VolIndex> VofUtils::getAllConnectedVofsInBox(const VolIndex&   a_startVof,
-						    const EBISBox&    a_ebisbox,
-						    const Box&        a_box,
-						    const IntVectSet& a_excludeIVS){
+Vector<VolIndex> VofUtils::getConnectedVofsInBox(const VolIndex&   a_startVof,
+						 const EBISBox&    a_ebisbox,
+						 const Box&        a_box,
+						 const IntVectSet& a_excludeIVS){
 
   // Get all Vofs in box and exclude them so they don't include cells in a_excludeIVS
   Vector<VolIndex> allVofs       = VofUtils::getAllVofsInBox(a_box, a_ebisbox);
-  Vector<VolIndex> connectedVofs = VofUtils::getConnectedVofs(a_startVof, allVofs, a_ebisbox);
+  Vector<VolIndex> connectedVofs = VofUtils::connectedVofsOnly(a_startVof, allVofs, a_ebisbox);
 
   VofUtils::excludeCells(connectedVofs, a_excludeIVS);
 
   return connectedVofs;  
 }
 
-Vector<VolIndex> VofUtils::getAllVofsInQuadrant(const VolIndex& a_startVof, const EBISBox& a_ebisbox, const RealVect& a_normal, const int a_radius, const bool a_addStartVof) {
+Vector<VolIndex> VofUtils::getConnectedVofsInQuadrant(const VolIndex& a_startVof,
+						      const EBISBox&  a_ebisbox,
+						      const RealVect& a_normal,
+						      const int       a_radius,
+						      const bool      a_addStartVof) {
 
   Vector<VolIndex> ret;
   
@@ -249,13 +305,17 @@ Vector<VolIndex> VofUtils::getAllVofsInQuadrant(const VolIndex& a_startVof, cons
     // Define the quadrant
     const IntVect quadrant = VofUtils::getQuadrant(a_normal);
 
-    ret = VofUtils::getAllVofsInQuadrant(a_startVof, a_ebisbox, quadrant, a_radius, a_addStartVof);
+    ret = VofUtils::getConnectedVofsInQuadrant(a_startVof, a_ebisbox, quadrant, a_radius, a_addStartVof);
   }
 
   return ret;
 }
 
-Vector<VolIndex> VofUtils::getAllVofsInQuadrant(const VolIndex& a_startVof, const EBISBox& a_ebisbox, const IntVect a_quadrant, const int a_radius, const bool a_addStartVof) {
+Vector<VolIndex> VofUtils::getConnectedVofsInQuadrant(const VolIndex& a_startVof,
+						      const EBISBox&  a_ebisbox,
+						      const IntVect   a_quadrant,
+						      const int       a_radius,
+						      const bool      a_addStartVof) {
 
   Vector<VolIndex> ret;
   
@@ -272,7 +332,7 @@ Vector<VolIndex> VofUtils::getAllVofsInQuadrant(const VolIndex& a_startVof, cons
   bx &= a_ebisbox.getDomain().domainBox();
 
 
-  ret = VofUtils::getAllConnectedVofsInBox(a_startVof, a_ebisbox, bx, IntVectSet());
+  ret = VofUtils::getConnectedVofsInBox(a_startVof, a_ebisbox, bx, IntVectSet());
 
   if(a_addStartVof){
     ret.push_back(a_startVof);
@@ -281,12 +341,12 @@ Vector<VolIndex> VofUtils::getAllVofsInQuadrant(const VolIndex& a_startVof, cons
   return ret;
 }
 
-Vector<VolIndex> VofUtils::getAllVofsSymmetric(const VolIndex&      a_startVof,
-					       const EBISBox&       a_ebisbox,
-					       const int            a_cardinal,
-					       const Side::LoHiSide a_side,
-					       const int            a_radius,
-					       const bool           a_addStartVof){
+Vector<VolIndex> VofUtils::getConnectedVofsSymmetric(const VolIndex&      a_startVof,
+						     const EBISBox&       a_ebisbox,
+						     const int            a_cardinal,
+						     const Side::LoHiSide a_side,
+						     const int            a_radius,
+						     const bool           a_addStartVof){
   Vector<VolIndex> ret;
 
   // Create candiate box where we allow ourself to fetch Vofs. 
@@ -302,7 +362,7 @@ Vector<VolIndex> VofUtils::getAllVofsSymmetric(const VolIndex&      a_startVof,
   }
   bx &= a_ebisbox.getDomain().domainBox();
 
-  ret = VofUtils::getAllConnectedVofsInBox(a_startVof, a_ebisbox, bx, IntVectSet());
+  ret = VofUtils::getConnectedVofsInBox(a_startVof, a_ebisbox, bx, IntVectSet());
 
   if(a_addStartVof){
     ret.push_back(a_startVof);
@@ -311,33 +371,12 @@ Vector<VolIndex> VofUtils::getAllVofsSymmetric(const VolIndex&      a_startVof,
   return ret;
 }
 
-Vector<VolIndex> VofUtils::getAllVofsInMonotonePath(const VolIndex& a_startVoF, const EBISBox& a_ebisbox, const int a_radius, const bool a_addStartVof){
-  Vector<VolIndex> ret;
-  Vector<VolIndex> vofList;
-
-  IntVect timesMoved = IntVect::Zero;
-  IntVect pathSign   = IntVect::Zero;
-
-  VofUtils::getAllVofsInMonotonePath(vofList, a_startVoF, a_ebisbox, a_radius, timesMoved, pathSign);
-
-  if(!a_addStartVof){
-    for (int i = 0; i < vofList.size(); i++){
-      if(vofList[i] != a_startVoF) ret.push_back(vofList[i]);
-    }
-  }
-  else{
-    ret = vofList;
-  }
-
-  return ret;
-}
-
-void VofUtils::getAllVofsInMonotonePath(Vector<VolIndex>& a_vofList,
-					const VolIndex&   a_startVof,
-					const EBISBox&    a_ebisbox,
-					const int         a_radius,
-					const IntVect&    a_timesMoved,
-					const IntVect&    a_pathSign){
+void VofUtils::getVofsInMonotonePath(Vector<VolIndex>& a_vofList,
+				     const VolIndex&   a_startVof,
+				     const EBISBox&    a_ebisbox,
+				     const int         a_radius,
+				     const IntVect&    a_timesMoved,
+				     const IntVect&    a_pathSign){
 
   const ProblemDomain& a_domain = a_ebisbox.getDomain();
 
@@ -366,7 +405,7 @@ void VofUtils::getAllVofsInMonotonePath(Vector<VolIndex>& a_vofList,
 	  for (const auto& f : faces.stdVector()){
 	    const VolIndex& newStartVof = f.getVoF(Side::Lo);
 
-	    VofUtils::getAllVofsInMonotonePath(a_vofList, newStartVof, a_ebisbox, a_radius, newTimesMoved, newPathSign);
+	    VofUtils::getVofsInMonotonePath(a_vofList, newStartVof, a_ebisbox, a_radius, newTimesMoved, newPathSign);
 	  }
 	}
 
@@ -379,7 +418,7 @@ void VofUtils::getAllVofsInMonotonePath(Vector<VolIndex>& a_vofList,
 	  for (const auto& f : faces.stdVector()){
 	    const VolIndex& newStartVof = f.getVoF(Side::Hi);	    
 
-	    VofUtils::getAllVofsInMonotonePath(a_vofList, newStartVof, a_ebisbox, a_radius, newTimesMoved, newPathSign);
+	    VofUtils::getVofsInMonotonePath(a_vofList, newStartVof, a_ebisbox, a_radius, newTimesMoved, newPathSign);
 	  }
 	}
       }
