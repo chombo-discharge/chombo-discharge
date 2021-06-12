@@ -52,7 +52,7 @@ public:
   /*!
     @brief Set the value on the EB. 
   */
-  void setValue(const int a_value);
+  void setValue(const Real a_value);
 
   /*!
     @brief Set the value on the EB. 

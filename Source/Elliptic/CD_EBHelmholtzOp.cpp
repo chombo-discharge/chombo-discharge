@@ -156,7 +156,7 @@ void EBHelmholtzOp::defineStencils(){
   }
 
   // Define BC objects. Can't do this in the factory because the BC objects will need the b-coefficient,
-  // but the factories won't know about that. I *could*
+  // but the factories won't know about that. 
   Real fakeBeta = 1.0;
   m_domainBc->setCoef(m_eblg, fakeBeta, m_Bcoef); 
   m_ebBc->define(m_eblg, m_BcoefIrreg, m_probLo, m_dx);

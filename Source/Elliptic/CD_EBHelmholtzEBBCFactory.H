@@ -5,7 +5,7 @@
 
 /*
   @file   CD_EBHelmholtzEBBCFactory.H
-  @brief  Declaration of a factory class for EBHelmholtzEBBCFactory
+  @brief  Declaration of a factory class for making boundary condition objects for EBHelmholtzOp
   @author Robert Marskar
 */
 

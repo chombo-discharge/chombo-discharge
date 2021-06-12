@@ -12,8 +12,6 @@
 #ifndef CD_EBHelmholtzOpFactory_H
 #define CD_EBHelmholtzOpFactory_H
 
-// Std includes
-
 // Chombo includes
 #include <RealVect.H>
 #include <EBLevelGrid.H>
@@ -25,7 +23,6 @@
 #include <ConductivityBaseDomainBC.H>
 #include <BaseEBBC.H>
 
-
 // Our includes
 #include <CD_EbCoarAve.H>
 #include <CD_EBMultigridInterpolator.H>
@@ -36,6 +33,9 @@
 
 /*!
   @brief Factory class for making variable-coefficient Helmholtz operators. 
+  @note  This factory is designed for making EBHelmholtzOps which have time-independent coefficients. If you need new coefficients you better set up multigrid again.
+  @note  This factory is designed without time-dependence in BCs. Time-dependent BCs are still doable by letting the boundary condition classes carry a reference to 
+         an externally updated time. 
 */
 class EBHelmholtzOpFactory : public AMRLevelOpFactory<LevelData<EBCellFAB> > {
 public:

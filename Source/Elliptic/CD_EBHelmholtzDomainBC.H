@@ -16,7 +16,7 @@
 #include <EBLevelGrid.H>
 #include <RefCountedPtr.H>
 #include <LevelData.H>
-#include <BaseIVFAB.H>
+#include <EBFluxFAB.H>
 
 // Our includes
 #include <CD_NamespaceHeader.H>
@@ -30,7 +30,7 @@ public:
   /*!
     @brief Constructor. 
   */
-  EBHelmholtzDomainBC() = delete;
+  EBHelmholtzDomainBC();
 
   /*!
     @brief Destructor
@@ -50,14 +50,44 @@ public:
   /*!
     @brief Define function
   */
-  virtual void define(const LayoutData<IntVectSet>& a_cfivs, const Real a_factor) = 0;
+  virtual void define(const EBLevelGrid& a_eblg, const RefCountedPtr<LevelData<EBFluxFAB> >& a_Bcoef, const RealVect& m_probLo, const Real a_dx);
 
   /*!
-    @brief Set the B-coefficient. This needs to be a separate function because the factories will not know about the coefficients. 
+    @brief Get face flux. This is for regular cells
   */
-  virtual void setBcoef(EBLevelGrid& a_eblg, const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_Bcoef);
+  virtual void getFaceFlux(FArrayBox& a_faceFlux, const FArrayBox& a_phi, const int& dir, const Side::LoHiSide& a_side) = 0;
+
+  /*!
+    @brief Get face flux. This is for irregular cells. 
+  */
+  virtual void getFaceFlux(Real&                 a_faceFlux,
+			   const VolIndex&       a_vof,
+			   const EBCellFAB&      a_phi,
+			   const int&            a_dir,
+			   const Side::LoHiSide& a_side,
+			   const DataIndex&      a_dit) = 0;			   
 
 protected:
+
+  /*!
+    @brief Component that everything is defined for. Always have m_comp = 0
+  */
+  constexpr static int m_comp = 0;
+
+  /*!
+    @brief Number of components. Always have m_nComp = 1
+  */
+  constexpr static int m_nComp = 1;
+
+  /*!
+    @brief Grid resolution
+  */
+  Real m_dx;
+
+  /*!
+    @brief Lower-left corner of computational domain
+  */
+  RealVect m_probLo;
 
   /*!
     @brief Level grid
@@ -67,13 +97,12 @@ protected:
   /*!
     @brief B-coefficent. 
   */
-  RefCountedPtr<LevelData<BaseIVFAB<Real> > > m_Bcoef;
+  RefCountedPtr<LevelData<EBFluxFAB> > m_Bcoef;
 
   /*!
-    @brief Stencils for computing the flux
+    @brief Returns the cell-centered position at the boundary. 
   */
-  LayoutData<BaseIVFAB<VoFStencil> > m_stencils;
-
+  RealVect getBoundaryPosition(const VolIndex& a_vof, const int& a_dir, const Side::LoHiSide& a_side) const;
 };
 
 #include <CD_NamespaceFooter.H>

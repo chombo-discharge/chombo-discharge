@@ -39,7 +39,7 @@ void EBHelmholtzDirichletEBBCFactory::setOrder(const int a_order){
   m_order = a_order;
 }
 
-void EBHelmholtzDirichletEBBCFactory::setValue(const int a_value){
+void EBHelmholtzDirichletEBBCFactory::setValue(const Real a_value){
   m_useConstant = true;
   m_useFunction = false;
   

@@ -5,7 +5,7 @@
 
 /*
   @file   CD_EBHelmholtzDomainBCFactory.H
-  @brief  Declaration of a factory class for EBHelmholtzDomainBCFactory
+  @brief  Declaration of a factory class for making boundary condition objects for EBHelmholtzOp
   @author Robert Marskar
 */
 
@@ -14,13 +14,14 @@
 
 // Chombo includes
 #include <EBLevelGrid.H>
+#include <RefCountedPtr.H>
 
 // Our includes
 #include <CD_EBHelmholtzDomainBC.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Base class for passing EB boundary conditions into EBHelmholtzOp. 
+  @brief Base class for passing domain boundary conditions into EBHelmholtzOp. 
 */
 class EBHelmholtzDomainBCFactory {
 public:
@@ -48,7 +49,7 @@ public:
   /*!
     @brief Factory method
   */
-  virtual EBHelmholtzDomainBC* create(const EBLevelGrid& a_eblg, const Real a_dx) = 0;
+  virtual RefCountedPtr<EBHelmholtzDomainBC> create() = 0;
 
 };
 
