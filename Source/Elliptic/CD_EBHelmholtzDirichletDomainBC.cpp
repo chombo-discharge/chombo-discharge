@@ -63,7 +63,6 @@ void EBHelmholtzDirichletDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
 
     FORT_HELMHOLTZDIRICHLETFLUX(CHF_FRA1(a_faceFlux, m_comp),
 				CHF_CONST_FRA1(a_phi, m_comp),
-				CHF_CONST_FRA1(Bco, m_comp),
 				CHF_CONST_REAL(value),
 				CHF_CONST_REAL(m_dx),				  
 				CHF_CONST_INT(a_dir),
@@ -76,7 +75,6 @@ void EBHelmholtzDirichletDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
 
       FORT_HELMHOLTZDIRICHLETFLUX(CHF_FRA1(a_faceFlux, m_comp),
 				  CHF_CONST_FRA1(a_phi, m_comp),
-				  CHF_CONST_FRA1(Bco, m_comp),
 				  CHF_CONST_REAL(value),
 				  CHF_CONST_REAL(m_dx),				    
 				  CHF_CONST_INT(a_dir),
@@ -92,19 +90,18 @@ void EBHelmholtzDirichletDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
 	const Real value   = m_functionValue(pos);
 
 	a_faceFlux(iv, m_comp) = isign * ihdx * (value - a_phi(iv, m_comp));
-
-	if(a_side == Side::Lo){
-	  a_faceFlux(iv, m_comp) *= Bco(iv, m_comp);
-	}
-	else{
-	  a_faceFlux(iv, m_comp) *= Bco(iv + BASISV(a_dir), m_comp);
-	}
       }
     }
     else{
       MayDay::Abort("EBHelmholtzDirichletDomainBC::getFaceFlux -- logic bust");
     }
   }
+
+  FORT_HELMHOLTZMULTFLUXBYBCO(CHF_FRA1(a_faceFlux, m_comp),
+			      CHF_CONST_FRA1(Bco, m_comp),
+			      CHF_CONST_INT(a_dir),
+			      CHF_CONST_INT(isign),
+			      CHF_BOX(cellbox));      
 }
 
 Real EBHelmholtzDirichletDomainBC::getFaceFlux(const VolIndex&       a_vof,

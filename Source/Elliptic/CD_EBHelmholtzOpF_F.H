@@ -271,7 +271,6 @@ inline void FORTRAN_NAME(inlineHELMHOLTZAPPLYDOMAINFLUX, inlineHELMHOLTZAPPLYDOM
 void FORTRAN_NAME( HELMHOLTZDIRICHLETFLUX ,helmholtzdirichletflux )(
       CHFp_FRA1(flux)
       ,CHFp_CONST_FRA1(phi)
-      ,CHFp_CONST_FRA1(bco)
       ,CHFp_CONST_REAL(value)
       ,CHFp_CONST_REAL(dx)
       ,CHFp_CONST_INT(dir)
@@ -284,7 +283,6 @@ void FORTRAN_NAME( HELMHOLTZDIRICHLETFLUX ,helmholtzdirichletflux )(
 inline void FORTRAN_NAME(inlineHELMHOLTZDIRICHLETFLUX, inlineHELMHOLTZDIRICHLETFLUX)(
       CHFp_FRA1(flux)
       ,CHFp_CONST_FRA1(phi)
-      ,CHFp_CONST_FRA1(bco)
       ,CHFp_CONST_REAL(value)
       ,CHFp_CONST_REAL(dx)
       ,CHFp_CONST_INT(dir)
@@ -295,7 +293,6 @@ inline void FORTRAN_NAME(inlineHELMHOLTZDIRICHLETFLUX, inlineHELMHOLTZDIRICHLETF
  FORTRAN_NAME( HELMHOLTZDIRICHLETFLUX ,helmholtzdirichletflux )(
       CHFt_FRA1(flux)
       ,CHFt_CONST_FRA1(phi)
-      ,CHFt_CONST_FRA1(bco)
       ,CHFt_CONST_REAL(value)
       ,CHFt_CONST_REAL(dx)
       ,CHFt_CONST_INT(dir)

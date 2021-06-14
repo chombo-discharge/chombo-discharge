@@ -205,7 +205,6 @@ c flux and phi are cell-centered but bco is face-centered.
       subroutine helmholtzdirichletflux(
      &     chf_fra1[flux],
      &     chf_const_fra1[phi],
-     &     chf_const_fra1[bco],
      &     chf_const_real[value],
      &     chf_const_real[dx],
      &     chf_const_int[dir],
@@ -227,17 +226,6 @@ c Compute dphi/dn
       chf_multido[cellbox; i; j; k]
          flux(chf_ix[i;j;k]) = side * ihdx * (value - phi(chf_ix[i;j;k]))
       chf_enddo
-
-c Multiply by b-coefficient. Note that flux is cell-centered but bco is face-centered. 
-      if(side .eq. -1) then
-         chf_multido[cellbox; i; j; k]      
-            flux(chf_ix[i;j;k]) = flux(chf_ix[i;j;k]) * bco(chf_ix[i;j;k])
-         chf_enddo	          
-      else
-         chf_multido[cellbox; i; j; k]      
-            flux(chf_ix[i;j;k]) = flux(chf_ix[i;j;k]) * bco(chf_ix[i+ioff;j+joff;k+koff])
-         chf_enddo	    
-      endif
       
       return
       end
