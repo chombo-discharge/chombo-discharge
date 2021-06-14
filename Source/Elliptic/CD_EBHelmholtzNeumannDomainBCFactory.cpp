@@ -28,7 +28,6 @@ EBHelmholtzNeumannDomainBCFactory::EBHelmholtzNeumannDomainBCFactory(const std::
   this->setDphiDn(a_DphiDn);
 }
 
-
 EBHelmholtzNeumannDomainBCFactory::~EBHelmholtzNeumannDomainBCFactory(){
 
 }

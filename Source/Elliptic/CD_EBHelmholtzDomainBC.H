@@ -5,7 +5,7 @@
 
 /*
   @file   CD_EBHelmholtzDomainBC.H
-  @brief  Declaration of a boundary condition class for EBHelmholtzOp
+  @brief  Declaration of a domain boundary condition class for EBHelmholtzOp.
   @author Robert Marskar
 */
 
@@ -22,7 +22,7 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Base class for passing EB boundary conditions into EBHelmholtzOp. 
+  @brief Base class for passing domain boundary conditions into EBHelmholtzOp. 
 */
 class EBHelmholtzDomainBC {
 public:
@@ -53,11 +53,12 @@ public:
     @param[in] a_Bcoef  B-coefficient for Helmholtz equation
     @param[in] a_probLo Lower-left corner of computational domain
     @param[in] a_dx     Grid resolution
+    @note This sets the internals for the BC object. This is called by EBHelmholtzOp when it defines stencils. 
   */
   void define(const EBLevelGrid& a_eblg, const RefCountedPtr<LevelData<EBFluxFAB> >& a_Bcoef, const RealVect& m_probLo, const Real a_dx);
 
   /*!
-    @brief Get face flux. This is for regular cells
+    @brief Get face flux. This is for regular cells. 
     @param[inout] a_faceFlux       Face-centered flux. 
     @param[in]    a_phi            Cell-centered data
     @param[in]    a_dir            Coordinate direction
@@ -123,6 +124,9 @@ protected:
 
   /*!
     @brief Returns the cell-centered position at the boundary. 
+    @param[in] a_iv   Grid cell
+    @param[in] a_dir  Face coordinate direction
+    @param[in] a_side Lo/Hi side
   */
   RealVect getBoundaryPosition(const IntVect& a_iv, const int& a_dir, const Side::LoHiSide& a_side) const;
 };

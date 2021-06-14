@@ -5,7 +5,7 @@
 
 /*
   @file   CD_EBHelmholtzNeumannEBBC.cpp
-  @brief  Implementation of CD_EBHelmholtzDiricheltEBBC.H
+  @brief  Implementation of CD_EBHelmholtzNeumannEBBC.H
   @author Robert Marskar
 */
 

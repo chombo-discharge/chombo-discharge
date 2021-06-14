@@ -5,7 +5,7 @@
 
 /*
   @file   CD_EBHelmholtzDirichletEBBCFactory.H
-  @brief  Declaration of a factory class for EBHelmholtzDirichletEBBCFactory
+  @brief  Declaration of a factory class for making Dirichlet boundary conditions on EBs for EBHelmholtzOp
   @author Robert Marskar
 */
 
@@ -29,12 +29,16 @@ public:
 
   /*!
     @brief Full constructor which sets order and value on EB. 
+    @param[in] a_order Approximation order
+    @param[in] a_value Constant value on EB
     @note The order is also the attempted radius of the stencil. 
   */
   EBHelmholtzDirichletEBBCFactory(const int a_order, const Real a_value);
 
   /*!
-    @brief Full constructor which sets order and value on EB
+    @brief Full constructor which sets order and spatially varying value on EBs
+    @param[in] a_order Approximation order
+    @param[in] a_value Spatially varying value on EBs
   */
   EBHelmholtzDirichletEBBCFactory(const int a_order, const std::function<Real(const RealVect& a_pos)>& a_value);
 
@@ -45,7 +49,8 @@ public:
 
   /*!
     @brief Set BC order
-    @note The order is also the attempted radius of the stencil. 
+    @param[in] a_order Approximation order (1 and 2 are accepted)
+    @note For least squares, the order is also the attempted radius of the stencil. 
   */
   void setOrder(const int a_order);
 
@@ -56,7 +61,7 @@ public:
   void setValue(const Real a_value);
 
   /*!
-    @brief Set the value on the EB. 
+    @brief Set the spatially varying value on the EB. 
     @param[in] a_value Spatially dependent value on EB
   */
   void setValue(const std::function<Real(const RealVect& a_pos)>& a_value);

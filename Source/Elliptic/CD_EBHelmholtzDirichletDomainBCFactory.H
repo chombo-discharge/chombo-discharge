@@ -40,7 +40,7 @@ public:
   EBHelmholtzDirichletDomainBCFactory(const Real a_value);
 
   /*!
-    @brief Constructor. 
+    @brief Full constructor. 
     @param[in] a_value Spatially dependent value on domain side
   */
   EBHelmholtzDirichletDomainBCFactory(const std::function<Real(const RealVect& a_pos)>& a_value);

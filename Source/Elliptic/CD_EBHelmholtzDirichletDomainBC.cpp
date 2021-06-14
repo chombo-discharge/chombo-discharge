@@ -5,7 +5,7 @@
 
 /*
   @file   CD_EBHelmholtzDirichletDomainBC.cpp
-  @brief  Implementation of CD_EBHelmholtzDirichletDomainBC.cpp
+  @brief  Implementation of CD_EBHelmholtzDirichletDomainBC.H
   @author Robert Marskar
 */
 
@@ -58,6 +58,7 @@ void EBHelmholtzDirichletDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
   const BaseFab<Real>& Bco = (*m_Bcoef)[a_dit][a_dir].getSingleValuedFAB();
   const int isign          = (a_side == Side::Lo) ? -1 : 1;
 
+  // Compute dphi/dn, using the first interior cell and the value on the domain side. 
   if(a_useHomogeneous){
     const Real value = 0.0;
 
@@ -97,6 +98,7 @@ void EBHelmholtzDirichletDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
     }
   }
 
+  // Multiplies by B-coefficient.   
   FORT_HELMHOLTZMULTFLUXBYBCO(CHF_FRA1(a_faceFlux, m_comp),
 			      CHF_CONST_FRA1(Bco, m_comp),
 			      CHF_CONST_INT(a_dir),
@@ -121,16 +123,18 @@ Real EBHelmholtzDirichletDomainBC::getFaceFlux(const VolIndex&       a_vof,
   
   const Vector<FaceIndex> faces = ebisbox.getFaces(a_vof, a_dir, a_side);
 
+
   if(faces.size() > 0){
     if(faces.size() == 1){ // Get an interpolation stencil, using centered differences
       IntVectSet cfivs;
       const FaceStencil faceSten = EBArith::getInterpStencil(faces[0], cfivs, ebisbox, domain);
 
+      // Get dphi/dn on the boundary face. Use interpolation from face centers to the face centroid. 
       for (int i = 0; i < faceSten.size(); i++){
 	const Real& weight    = faceSten.weight(i);
 	const FaceIndex& face = faceSten.face(i);
 
-	// Get dphi/dx on the boundary
+
 	Real value;
 	if(a_useHomogeneous){
 	  value = 0.0;
@@ -141,6 +145,9 @@ Real EBHelmholtzDirichletDomainBC::getFaceFlux(const VolIndex&       a_vof,
 	  }
 	  else if(m_useFunction){
 	    value = m_functionValue(this->getBoundaryPosition(iv, a_dir, a_side));
+	  }
+	  else{
+	    MayDay::Abort("EBHelmholtzDirichletDomainBC::getFaceFlux - logic bust");
 	  }
 	}
 
@@ -157,7 +164,7 @@ Real EBHelmholtzDirichletDomainBC::getFaceFlux(const VolIndex&       a_vof,
       centroidFlux *= Bco*area;
     }
     else{
-      MayDay::Error("EBHelmholtzDirichletDomainBC -- boundary face is multivalued and EBHelmholtzDirichletDomainBC does not supportd that (yet)");
+      MayDay::Error("EBHelmholtzDirichletDomainBC -- boundary face is multivalued and EBHelmholtzDirichletDomainBC does not support this (yet)");
     }
   }
 
