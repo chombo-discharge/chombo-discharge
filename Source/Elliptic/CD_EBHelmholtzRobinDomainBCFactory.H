@@ -4,34 +4,34 @@
  */
 
 /*
-  @file   CD_EBHelmholtzRobinEBBCFactory.H
-  @brief  Declaration of a factory class for making Robin EB boundary conditions with EBHelmholtzOp
+  @file   CD_EBHelmholtzRobinDomainBCFactory.H
+  @brief  Declaration of a factory class for making Robin domain boundary conditions with EBHelmholtzOp
   @author Robert Marskar
 */
 
-#ifndef CD_EBHelmholtzRobinEBBCFactory_H
-#define CD_EBHelmholtzRobinEBBCFactory_H
+#ifndef CD_EBHelmholtzRobinDomainBCFactory_H
+#define CD_EBHelmholtzRobinDomainBCFactory_H
 
 // Std includes
 #include <functional>
 
 // Our includes
-#include <CD_EBHelmholtzEBBCFactory.H>
+#include <CD_EBHelmholtzDomainBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Base class for making Robin boundary conditions with EBHelmholtzOp. 
+  @brief Base class for making Robin domain boundary conditions with EBHelmholtzOp. 
   @details Robin bcs are in the form A*phi + B*dphi/dn = C. We impose dphi/dn = (C - A*phi)/B where phi is extrapolated to the EB to first order. 
   @note The B-coefficient is not the same as in the Helmholtz equation...
   @note In our notation, n points into the computational domain. 
 */
-class EBHelmholtzRobinEBBCFactory : public EBHelmholtzEBBCFactory {
+class EBHelmholtzRobinDomainBCFactory : public EBHelmholtzDomainBCFactory {
 public:
 
   /*!
     @brief Constructor. 
   */
-  EBHelmholtzRobinEBBCFactory();
+  EBHelmholtzRobinDomainBCFactory();
 
   /*!
     @brief Full constructor which sets constant coefficients
@@ -39,7 +39,7 @@ public:
     @param[in] a_B B-coefficient
     @param[in] a_C C-coefficient
   */
-  EBHelmholtzRobinEBBCFactory(const Real a_A, const Real a_B, const Real a_C);
+  EBHelmholtzRobinDomainBCFactory(const Real a_A, const Real a_B, const Real a_C);
 
   /*!
     @brief Full constructor which sets variable coefficients
@@ -47,14 +47,14 @@ public:
     @param[in] a_B B-coefficient
     @param[in] a_C C-coefficient
   */
-  EBHelmholtzRobinEBBCFactory(const std::function<Real(const RealVect& a_pos) >& a_A,
-			      const std::function<Real(const RealVect& a_pos) >& a_B,
-			      const std::function<Real(const RealVect& a_pos) >& a_C);
+  EBHelmholtzRobinDomainBCFactory(const std::function<Real(const RealVect& a_pos) >& a_A,
+				  const std::function<Real(const RealVect& a_pos) >& a_B,
+				  const std::function<Real(const RealVect& a_pos) >& a_C);
 
   /*!
     @brief Destructor
   */
-  ~EBHelmholtzRobinEBBCFactory();
+  ~EBHelmholtzRobinDomainBCFactory();
 
   /*!
     @brief Set constant coefficients
@@ -77,7 +77,7 @@ public:
   /*!
     @brief Factory method
   */
-  RefCountedPtr<EBHelmholtzEBBC> create() override;
+  RefCountedPtr<EBHelmholtzDomainBC> create() override;
 
 protected:
   

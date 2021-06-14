@@ -34,6 +34,7 @@
 #include <CD_EBHelmholtzRobinEBBCFactory.H>
 #include <CD_EBHelmholtzDirichletDomainBCFactory.H>
 #include <CD_EBHelmholtzNeumannDomainBCFactory.H>
+#include <CD_EBHelmholtzRobinDomainBCFactory.H>
 #include <CD_DataOps.H>
 #include <CD_RobinConductivityEbBcFactory.H>
 #include <CD_NamespaceHeader.H>

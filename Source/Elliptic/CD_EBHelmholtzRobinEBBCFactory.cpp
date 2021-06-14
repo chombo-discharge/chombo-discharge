@@ -63,7 +63,7 @@ RefCountedPtr<EBHelmholtzEBBC> EBHelmholtzRobinEBBCFactory::create() {
     bc->setCoefficients(m_functionA, m_functionB, m_functionC);
   }
   else {
-    MayDay::Error("EBHelmholtzRobinEBBCFactory::create - logic bust, you must set the BC values!");
+    MayDay::Error("EBHelmholtzRobinEBBCFactory::create - logic bust, you must set the Robin coefficients!");
   }
 
   return RefCountedPtr<EBHelmholtzEBBC> (bc);
