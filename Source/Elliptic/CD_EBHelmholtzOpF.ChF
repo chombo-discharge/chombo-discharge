@@ -97,36 +97,7 @@
       chf_enddo      
       end
 
-      subroutine helmholtzapplydomainflux(
-     &     chf_fra1[phi],
-     &     chf_const_fra1[flux],
-     &     chf_const_fra1[bco],
-     &     chf_const_real[dx],
-     &     chf_const_int[side],
-     &     chf_const_int[dir],		                    
-     &     chf_box[cellbox])
 
-
-      integer chf_ddecl[i;   j;   k   ]
-      integer chf_ddecl[ioff;joff;koff]
-
-      real_t scaledflux
-
-      chf_dterm[
-        ioff = chf_id(0,dir);
-        joff = chf_id(1, dir);
-        koff = chf_id(2, dir)]
-
-      chf_multido[cellbox; i;j;k]
-         if(side .eq. 1) then
-            scaledflux         = flux(chf_ix[i-ioff; j-joff; k-koff])/bco(chf_ix[i-ioff; j-joff; k-koff]) 	 
-            phi(chf_ix[i;j;k]) = phi (chf_ix[i-ioff; j-joff; k-koff]) + scaledflux*dx
-         else
-            scaledflux         = flux(chf_ix[i+ioff; j+joff; k+koff])/bco(chf_ix[i+ioff; j+joff; k+koff]) 	 
-            phi(chf_ix[i;j;k]) = phi( chf_ix[i+ioff; j+joff; k+koff]) - scaledflux*dx	 
-         endif
-      chf_enddo
-      end
 
       subroutine helmholtzgausaicolor(
      &     chf_fra1[phi],
@@ -197,6 +168,37 @@
       return
       end
 
+      subroutine helmholtzapplydomainflux(
+     &     chf_fra1[phi],
+     &     chf_const_fra1[flux],
+     &     chf_const_fra1[bco],
+     &     chf_const_real[dx],
+     &     chf_const_int[side],
+     &     chf_const_int[dir],		                    
+     &     chf_box[cellbox])
+
+
+      integer chf_ddecl[i;   j;   k   ]
+      integer chf_ddecl[ioff;joff;koff]
+
+      real_t scaledflux
+
+      chf_dterm[
+        ioff = chf_id(0,dir);
+        joff = chf_id(1, dir);
+        koff = chf_id(2, dir)]
+
+      chf_multido[cellbox; i;j;k]
+         if(side .eq. 1) then
+            scaledflux         = flux(chf_ix[i-ioff; j-joff; k-koff])/bco(chf_ix[i-ioff; j-joff; k-koff]) 	 
+            phi(chf_ix[i;j;k]) = phi (chf_ix[i-ioff; j-joff; k-koff]) + scaledflux*dx
+         else
+            scaledflux         = flux(chf_ix[i+ioff; j+joff; k+koff])/bco(chf_ix[i+ioff; j+joff; k+koff]) 	 
+            phi(chf_ix[i;j;k]) = phi( chf_ix[i+ioff; j+joff; k+koff]) - scaledflux*dx	 
+         endif
+      chf_enddo
+      end
+
       subroutine helmholtzdirichletflux(
      &     chf_fra1[flux],
      &     chf_const_fra1[phi],
@@ -205,8 +207,34 @@
      &     chf_const_real[dx],
      &     chf_const_int[dir],
      &     chf_const_int[side],     
-     &     chf_box[facebox])
+     &     chf_box[cellbox])
 
+      real_t ihdx
+      integer chf_ddecl[i;j;k]
+      integer chf_ddecl[ioff;joff;koff]
 
+      chf_dterm[
+         ioff = chf_id(0,dir);
+         joff = chf_id(1,dir);
+         koff = chf_id(2,dir)]      
+
+      ihdx = 2.0/dx
+
+c Compute dphi/dn
+      chf_multido[cellbox; i; j; k]
+         flux(chf_ix[i;j;k]) = side * ihdx * (value - phi(chf_ix[i;j;k]))
+      chf_enddo
+
+c Multiply by b-coefficient
+      if(side .eq. 1) then
+         chf_multido[cellbox; i; j; k]      
+            flux(chf_ix[i;j;k]) = flux(chf_ix[i;j;k]) * bco(chf_ix[i+ioff;j+joff;k+koff])
+         chf_enddo	    
+      else
+         chf_multido[cellbox; i; j; k]      
+            flux(chf_ix[i;j;k]) = flux(chf_ix[i;j;k]) * bco(chf_ix[i;j;k])
+         chf_enddo	    
+      endif
+      
       return
       end

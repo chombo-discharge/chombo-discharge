@@ -51,9 +51,9 @@ void EBHelmholtzDirichletDomainBC::getFaceFlux(FArrayBox&            a_faceFlux,
 					       const Side::LoHiSide& a_side,
 					       const DataIndex&      a_dit,
 					       const bool            a_useHomogeneous) const {
-  const Box facebox        = a_faceFlux.box();
+  const Box cellbox        = a_faceFlux.box();
   const BaseFab<Real>& Bco = (*m_Bcoef)[a_dit][a_dir].getSingleValuedFAB();
-  const int isign          = sign(a_side);
+  const int isign          = sign(a_side); 
 
   if(a_useHomogeneous){
     const Real value = 0.0;
@@ -65,7 +65,7 @@ void EBHelmholtzDirichletDomainBC::getFaceFlux(FArrayBox&            a_faceFlux,
 				CHF_CONST_REAL(m_dx),				  
 				CHF_CONST_INT(a_dir),
 				CHF_CONST_INT(isign),
-				CHF_BOX(facebox));
+				CHF_BOX(cellbox));
   }
   else{
     if(m_useConstant){
@@ -78,7 +78,7 @@ void EBHelmholtzDirichletDomainBC::getFaceFlux(FArrayBox&            a_faceFlux,
 				  CHF_CONST_REAL(m_dx),				    
 				  CHF_CONST_INT(a_dir),
 				  CHF_CONST_INT(isign),
-				  CHF_BOX(facebox));
+				  CHF_BOX(cellbox));
     }
     else if(m_useFunction){
       MayDay::Abort("EBHelmholtzDirichletDomainBC::getFaceFlux -- function not supported (yet)");
@@ -97,7 +97,7 @@ void EBHelmholtzDirichletDomainBC::getFaceFlux(Real&                 a_faceFlux,
 					       const DataIndex&      a_dit,
 					       const bool            a_useHomogeneous) const {
 
-
+  MayDay::Error("EBHelmholtzDirichletDomainBC::getFaceFlux - not implemented");
 }
 
 #include <CD_NamespaceFooter.H>
