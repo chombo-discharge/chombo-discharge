@@ -196,3 +196,17 @@
 
       return
       end
+
+      subroutine helmholtzdirichletflux(
+     &     chf_fra1[flux],
+     &     chf_const_fra1[phi],
+     &     chf_const_fra1[bco],
+     &     chf_const_real[value],
+     &     chf_const_real[dx],
+     &     chf_const_int[dir],
+     &     chf_const_int[side],     
+     &     chf_box[facebox])
+
+
+      return
+      end

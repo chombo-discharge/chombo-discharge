@@ -55,7 +55,12 @@ public:
   /*!
     @brief Get face flux. This is for regular cells
   */
-  virtual void getFaceFlux(FArrayBox& a_faceFlux, const FArrayBox& a_phi, const int& dir, const Side::LoHiSide& a_side) const = 0;
+  virtual void getFaceFlux(FArrayBox&            a_faceFlux,
+			   const FArrayBox&      a_phi,
+			   const int&            a_dir,
+			   const Side::LoHiSide& a_side,
+			   const DataIndex&      a_dit,
+			   const bool            a_useHomogeneous) const = 0;
 
   /*!
     @brief Get face flux. This is for irregular cells. 
@@ -65,7 +70,8 @@ public:
 			   const EBCellFAB&      a_phi,
 			   const int&            a_dir,
 			   const Side::LoHiSide& a_side,
-			   const DataIndex&      a_dit) const = 0;			   
+			   const DataIndex&      a_dit,
+			   const bool            a_useHomogeneous) const = 0;			   
 
 protected:
 

@@ -10,6 +10,7 @@
 */
 
 // Our includes
+#include <CD_EBHelmholtzOpF_F.H>
 #include <CD_EBHelmholtzDirichletDomainBC.H>
 #include <CD_NamespaceHeader.H>
 
@@ -44,8 +45,48 @@ void EBHelmholtzDirichletDomainBC::setValue(const std::function<Real(const RealV
   m_functionValue = a_value;
 }
 
-void EBHelmholtzDirichletDomainBC::getFaceFlux(FArrayBox& a_faceFlux, const FArrayBox& a_phi, const int& dir, const Side::LoHiSide& a_side) const {
-  
+void EBHelmholtzDirichletDomainBC::getFaceFlux(FArrayBox&            a_faceFlux,
+					       const FArrayBox&      a_phi,
+					       const int&            a_dir,
+					       const Side::LoHiSide& a_side,
+					       const DataIndex&      a_dit,
+					       const bool            a_useHomogeneous) const {
+  const Box facebox        = a_faceFlux.box();
+  const BaseFab<Real>& Bco = (*m_Bcoef)[a_dit][a_dir].getSingleValuedFAB();
+  const int isign          = sign(a_side);
+
+  if(a_useHomogeneous){
+    const Real value = 0.0;
+
+    FORT_HELMHOLTZDIRICHLETFLUX(CHF_FRA1(a_faceFlux, m_comp),
+				CHF_CONST_FRA1(a_phi, m_comp),
+				CHF_CONST_FRA1(Bco, m_comp),
+				CHF_CONST_REAL(value),
+				CHF_CONST_REAL(m_dx),				  
+				CHF_CONST_INT(a_dir),
+				CHF_CONST_INT(isign),
+				CHF_BOX(facebox));
+  }
+  else{
+    if(m_useConstant){
+      const Real value = m_constantValue;
+
+      FORT_HELMHOLTZDIRICHLETFLUX(CHF_FRA1(a_faceFlux, m_comp),
+				  CHF_CONST_FRA1(a_phi, m_comp),
+				  CHF_CONST_FRA1(Bco, m_comp),
+				  CHF_CONST_REAL(value),
+				  CHF_CONST_REAL(m_dx),				    
+				  CHF_CONST_INT(a_dir),
+				  CHF_CONST_INT(isign),
+				  CHF_BOX(facebox));
+    }
+    else if(m_useFunction){
+      MayDay::Abort("EBHelmholtzDirichletDomainBC::getFaceFlux -- function not supported (yet)");
+    }
+    else{
+      MayDay::Abort("EBHelmholtzDirichletDomainBC::getFaceFlux -- logic bust");
+    }
+  }
 }
 
 void EBHelmholtzDirichletDomainBC::getFaceFlux(Real&                 a_faceFlux,
@@ -53,7 +94,9 @@ void EBHelmholtzDirichletDomainBC::getFaceFlux(Real&                 a_faceFlux,
 					       const EBCellFAB&      a_phi,
 					       const int&            a_dir,
 					       const Side::LoHiSide& a_side,
-					       const DataIndex&      a_dit) const {
+					       const DataIndex&      a_dit,
+					       const bool            a_useHomogeneous) const {
+
 
 }
 

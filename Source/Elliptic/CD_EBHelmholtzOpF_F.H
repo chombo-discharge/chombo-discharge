@@ -264,6 +264,46 @@ inline void FORTRAN_NAME(inlineHELMHOLTZGSRB, inlineHELMHOLTZGSRB)(
 }
 #endif  // GUARDHELMHOLTZGSRB 
 
+#ifndef GUARDHELMHOLTZDIRICHLETFLUX 
+#define GUARDHELMHOLTZDIRICHLETFLUX 
+// Prototype for Fortran procedure helmholtzdirichletflux ...
+//
+void FORTRAN_NAME( HELMHOLTZDIRICHLETFLUX ,helmholtzdirichletflux )(
+      CHFp_FRA1(flux)
+      ,CHFp_CONST_FRA1(phi)
+      ,CHFp_CONST_FRA1(bco)
+      ,CHFp_CONST_REAL(value)
+      ,CHFp_CONST_REAL(dx)
+      ,CHFp_CONST_INT(dir)
+      ,CHFp_CONST_INT(side)
+      ,CHFp_BOX(facebox) );
+
+#define FORT_HELMHOLTZDIRICHLETFLUX FORTRAN_NAME( inlineHELMHOLTZDIRICHLETFLUX, inlineHELMHOLTZDIRICHLETFLUX)
+#define FORTNT_HELMHOLTZDIRICHLETFLUX FORTRAN_NAME( HELMHOLTZDIRICHLETFLUX, helmholtzdirichletflux)
+
+inline void FORTRAN_NAME(inlineHELMHOLTZDIRICHLETFLUX, inlineHELMHOLTZDIRICHLETFLUX)(
+      CHFp_FRA1(flux)
+      ,CHFp_CONST_FRA1(phi)
+      ,CHFp_CONST_FRA1(bco)
+      ,CHFp_CONST_REAL(value)
+      ,CHFp_CONST_REAL(dx)
+      ,CHFp_CONST_INT(dir)
+      ,CHFp_CONST_INT(side)
+      ,CHFp_BOX(facebox) )
+{
+ CH_TIMELEAF("FORT_HELMHOLTZDIRICHLETFLUX");
+ FORTRAN_NAME( HELMHOLTZDIRICHLETFLUX ,helmholtzdirichletflux )(
+      CHFt_FRA1(flux)
+      ,CHFt_CONST_FRA1(phi)
+      ,CHFt_CONST_FRA1(bco)
+      ,CHFt_CONST_REAL(value)
+      ,CHFt_CONST_REAL(dx)
+      ,CHFt_CONST_INT(dir)
+      ,CHFt_CONST_INT(side)
+      ,CHFt_BOX(facebox) );
+}
+#endif  // GUARDHELMHOLTZDIRICHLETFLUX 
+
 }
 
 #endif
