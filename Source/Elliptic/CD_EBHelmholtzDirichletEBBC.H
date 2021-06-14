@@ -37,17 +37,20 @@ public:
 
   /*!
     @brief Set BC order. 
+    @param[in] a_order Order
     @note The order is also the attempted radius of the stencil. 
   */
   void setOrder(const int a_order);
 
   /*!
     @brief Set the value on the EB. 
+    @param[in] a_value Constant value on EB
   */
   void setValue(const int a_value);
 
   /*!
     @brief Set the value on the EB. 
+    @param[in] a_value Spatially dependent value on EB
   */
   void setValue(const std::function<Real(const RealVect& a_pos)>& a_value);
 
@@ -89,7 +92,12 @@ protected:
   virtual void define() override;
 
   /*!
-    @brief Apply the EB flux in a VoF. 
+    @brief Apply the EB flux. This is the version that is called by EBHelmholtzOp.
+    @param[inout] a_vofit Iterator for cut-cells
+    @param[in]    a_Lphi  Operator kappa*L(phi)
+    @param[in]    a_phi   Phi, cell-centered. 
+    @param[in]    a_dit   Data index    
+    @param[in]    a_beta  Beta. Passed in from operator. 
   */
   virtual void applyEBFlux(EBCellFAB&         a_Lphi,
 			   const EBCellFAB&   a_phi,

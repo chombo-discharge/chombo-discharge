@@ -5,7 +5,7 @@
 
 /*
   @file   CD_EBHelmholtzDirichletDomainBCFactory.H
-  @brief  Declaration of a factory class for making boundary condition objects for EBHelmholtzOp
+  @brief  Declaration of a factory class for making Dirichlet domain boundary condition objects for EBHelmholtzOp
   @author Robert Marskar
 */
 
@@ -23,7 +23,7 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Base class for passing domain boundary conditions into EBHelmholtzOp. 
+  @brief Factory class for passing Dirichlet domain boundary conditions into EBHelmholtzOp. 
 */
 class EBHelmholtzDirichletDomainBCFactory : public EBHelmholtzDomainBCFactory {
 public:
@@ -51,12 +51,14 @@ public:
   ~EBHelmholtzDirichletDomainBCFactory();
 
   /*!
-    @brief Set the value on the domain side. 
+    @brief Set the constant value on the domain side. 
+    @param[in] a_value Constant value on all domain sides. 
   */
   void setValue(const Real a_value);
 
   /*!
-    @brief Set the value on the domain side. 
+    @brief Set the spatially dependent value on the domain side. 
+    @param[in] a_value Spatially dependent value on all domain sides. 
   */
   void setValue(const std::function<Real(const RealVect& a_pos)>& a_value);
 

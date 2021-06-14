@@ -9,6 +9,9 @@
   @author Robert Marskar
 */
 
+// Chombo includes
+#include <EBArith.H>
+
 // Our includes
 #include <CD_EBHelmholtzOpF_F.H>
 #include <CD_EBHelmholtzNeumannDomainBC.H>
@@ -39,7 +42,6 @@ void EBHelmholtzNeumannDomainBC::setDphiDn(const int a_DphiDn){
   
   m_constantDphiDn = a_DphiDn;
 }
-
 
 void EBHelmholtzNeumannDomainBC::setDphiDn(const std::function<Real(const RealVect& a_pos)>& a_DphiDn){
   m_multByBco   = false;
@@ -89,7 +91,8 @@ void EBHelmholtzNeumannDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
       }
     }
 
-    // Multiply by B-coefficient. 
+    // Multiply by B-coefficient. We always do this unless the user specifically called setBxDphiDn in which case the input value
+    // is already multiplied by the B-coefficient. 
     if(m_multByBco){
       FORT_HELMHOLTZMULTFLUXBYBCO(CHF_FRA1(a_faceFlux, m_comp),
 				  CHF_CONST_FRA1(Bco, m_comp),
@@ -98,9 +101,7 @@ void EBHelmholtzNeumannDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
 				  CHF_BOX(cellbox));      
     }
   }
-
 }
-
 
 Real EBHelmholtzNeumannDomainBC::getFaceFlux(const VolIndex&       a_vof,
 					     const EBCellFAB&      a_phi,
@@ -108,8 +109,55 @@ Real EBHelmholtzNeumannDomainBC::getFaceFlux(const VolIndex&       a_vof,
 					     const Side::LoHiSide& a_side,
 					     const DataIndex&      a_dit,
 					     const bool            a_useHomogeneous) const {
+  Real centroidFlux;
 
-  return 0.0;
+  if(a_useHomogeneous){
+    centroidFlux = 0.0;
+  }
+  else{
+
+    const int isign             = (a_side == Side::Lo) ? -1 : 1;
+    const Real ihdx             = 2.0/m_dx;
+    const IntVect iv            = a_vof.gridIndex();
+    const EBISBox& ebisbox      = m_eblg.getEBISL()[a_dit];
+    const ProblemDomain& domain = m_eblg.getDomain();
+
+    const Vector<FaceIndex> faces = ebisbox.getFaces(a_vof, a_dir, a_side);
+    if(faces.size() > 0){
+      if(faces.size() == 1){ // Get an interpolation stencil, using centered differences
+	IntVectSet cfivs;
+	const FaceStencil faceSten = EBArith::getInterpStencil(faces[0], cfivs, ebisbox, domain);
+
+	for (int i = 0; i < faceSten.size(); i++){
+	  const Real& weight    = faceSten.weight(i);
+	  const FaceIndex& face = faceSten.face(i);
+
+	  // Get dphi/dx on the boundary
+	  Real centeredDphiDn;
+	  if(m_useConstant){
+	    centeredDphiDn = m_constantDphiDn;
+	  }
+	  else if(m_useFunction){
+	    centeredDphiDn = m_functionDphiDn(this->getBoundaryPosition(iv, a_dir, a_side));
+	  }
+
+	  centroidFlux += weight * centeredDphiDn;
+	}
+
+	// Multiply by b-coefficient and aperture.
+	const FaceIndex& bndryFace = faces[0];
+	const Real Bco  = m_multByBco ? (*m_Bcoef)[a_dit][a_dir](bndryFace, m_comp) : 1.0;
+	const Real area = ebisbox.areaFrac(bndryFace);
+
+	centroidFlux *= -isign * area * Bco;
+      }
+      else{
+	MayDay::Error("EBHelmholtzNeumannDomainBC -- boundary face is multivalued and EBHelmholtzNeumannDomainBC does not supportd that (yet)");
+      }
+    }
+  }    
+
+  return centroidFlux;
 }
 
 #include <CD_NamespaceFooter.H>

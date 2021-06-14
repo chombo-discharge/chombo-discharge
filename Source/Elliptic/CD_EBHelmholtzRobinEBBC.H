@@ -40,17 +40,17 @@ public:
   
   /*!
     @brief Set constant coefficients
-    @param[in] a_A A-coefficient
-    @param[in] a_B B-coefficient
-    @param[in] a_C C-coefficient
+    @param[in] a_A Constant A-coefficient
+    @param[in] a_B Constant B-coefficient
+    @param[in] a_C Constant C-coefficient
   */
   void setCoefficients(const Real a_A, const Real a_B, const Real a_C);
 
   /*!
     @brief Set variable coefficients
-    @param[in] a_A A-coefficient
-    @param[in] a_B B-coefficient
-    @param[in] a_C C-coefficient
+    @param[in] a_A Spatially dependent A-coefficient
+    @param[in] a_B Spatially dependent B-coefficient
+    @param[in] a_C Spatially dependent C-coefficient
   */
   void setCoefficients(const std::function<Real(const RealVect& a_pos) >& a_A,
 		       const std::function<Real(const RealVect& a_pos) >& a_B,
@@ -105,7 +105,7 @@ protected:
   virtual void define() override;
 
   /*!
-    @brief Apply the EB flux in a VoF. 
+    @brief Apply the EB flux. 
   */
   virtual void applyEBFlux(EBCellFAB&         a_Lphi,
 			   const EBCellFAB&   a_phi,

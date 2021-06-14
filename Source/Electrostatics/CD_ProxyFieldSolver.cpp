@@ -393,20 +393,18 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
 
   // Domain bc
   pp.get("domain_bc", str);
+  pp.get("dom_val", dom_value);
+
+  // BC function. Spatially dependent. 
+  auto bcFunction = [dom_value](const RealVect& a_pos) -> Real {
+    return dom_value;
+  };
+  
   if(str == "dirichlet"){
-    pp.get("dom_val", dom_value);
-
-    //    domainBcFactory = RefCountedPtr<EBHelmholtzDomainBCFactory>(new EBHelmholtzDirichletDomainBCFactory(dom_value));
-
-    // Check that functions work correctly. 
-    auto bcFunction = [=](const RealVect& a_pos) -> Real {
-      return dom_value;
-    };
-
     domainBcFactory = RefCountedPtr<EBHelmholtzDomainBCFactory>(new EBHelmholtzDirichletDomainBCFactory(bcFunction));
   }
   else if(str == "neumann"){
-    MayDay::Abort("ProxyFieldSolver::solveHelm - Neumann not supported (yet)");
+    domainBcFactory = RefCountedPtr<EBHelmholtzDomainBCFactory>(new EBHelmholtzNeumannDomainBCFactory(bcFunction));
   }
   else{
     MayDay::Abort("ProxyFieldSolver::solveHelm - Robin not supported (yet)");

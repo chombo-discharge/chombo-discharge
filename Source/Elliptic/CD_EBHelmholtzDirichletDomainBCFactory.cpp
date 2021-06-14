@@ -14,7 +14,6 @@
 #include <CD_EBHelmholtzDirichletDomainBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
-
 EBHelmholtzDirichletDomainBCFactory::EBHelmholtzDirichletDomainBCFactory(){
   m_useConstant = false;
   m_useFunction = false;

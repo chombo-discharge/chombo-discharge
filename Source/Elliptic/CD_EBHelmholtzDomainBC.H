@@ -49,11 +49,22 @@ public:
 
   /*!
     @brief Define function
+    @param[in] a_eblg   Level grids
+    @param[in] a_Bcoef  B-coefficient for Helmholtz equation
+    @param[in] a_probLo Lower-left corner of computational domain
+    @param[in] a_dx     Grid resolution
   */
   void define(const EBLevelGrid& a_eblg, const RefCountedPtr<LevelData<EBFluxFAB> >& a_Bcoef, const RealVect& m_probLo, const Real a_dx);
 
   /*!
     @brief Get face flux. This is for regular cells
+    @param[inout] a_faceFlux       Face-centered flux. 
+    @param[in]    a_phi            Cell-centered data
+    @param[in]    a_dir            Coordinate direction
+    @param[in]    a_side           High or low side
+    @param[in]    a_dit            Data index
+    @param[in]    a_useHomogeneous Homogeneous physical BCs or not. 
+    @note a_faceFlux is defined in the first strip of interior cells on the (dir,side) edge of the domain. 
   */
   virtual void getFaceFlux(BaseFab<Real>&        a_faceFlux,
 			   const BaseFab<Real>&  a_phi,
@@ -64,6 +75,12 @@ public:
 
   /*!
     @brief Get face flux. This is for irregular cells. 
+    @param[in] a_vof            Grid cell
+    @param[in] a_phi            Cell-centered data
+    @param[in] a_dir            Coordinate direction
+    @param[in] a_side           High or low side
+    @param[in] a_dit            Data index
+    @param[in] a_useHomogeneous Homogeneous physical BCs or not. 
   */
   virtual Real getFaceFlux(const VolIndex&       a_vof,
 			   const EBCellFAB&      a_phi,

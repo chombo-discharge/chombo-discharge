@@ -10,7 +10,7 @@
 */
 
 // Our includes
-//#include <CD_EBHelmholtzNeumannDomainBC.H>
+#include <CD_EBHelmholtzNeumannDomainBC.H>
 #include <CD_EBHelmholtzNeumannDomainBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
@@ -61,6 +61,32 @@ void EBHelmholtzNeumannDomainBCFactory::setBxDphiDn(const std::function<Real(con
 
 RefCountedPtr<EBHelmholtzDomainBC> EBHelmholtzNeumannDomainBCFactory::create() {
 
+  auto bc = new EBHelmholtzNeumannDomainBC();
+
+  if(m_multByBco){
+    if(m_useConstant) {
+      bc->setDphiDn(m_constantDphiDn);
+    }
+    else if(m_useFunction){
+      bc->setDphiDn(m_functionDphiDn);
+    }
+    else{
+      MayDay::Error("EBHelmholtzEBBC::create - logic bust");
+    }
+  }
+  else{
+    if(m_useConstant) {
+      bc->setBxDphiDn(m_constantDphiDn);
+    }
+    else if(m_useFunction){
+      bc->setBxDphiDn(m_functionDphiDn);
+    }
+    else{
+      MayDay::Error("EBHelmholtzEBBC::create - logic bust");
+    }
+  }
+
+  return RefCountedPtr<EBHelmholtzNeumannDomainBC>(bc);
 }
 
 #include <CD_NamespaceFooter.H>

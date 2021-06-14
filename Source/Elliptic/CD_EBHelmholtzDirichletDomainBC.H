@@ -32,11 +32,13 @@ public:
 
   /*!
     @brief Constructor. 
+    @param[in] a_value Constant value on all domain sides. 
   */
   EBHelmholtzDirichletDomainBC(const Real a_value);
 
-    /*!
-    @brief Constructor. 
+  /*!
+    @brief Full constructor. 
+    @param[in] a_value Spatially dependent value on all domain sides. 
   */
   EBHelmholtzDirichletDomainBC(const std::function<Real(const RealVect& a_pos)>& a_value);
 
@@ -46,17 +48,26 @@ public:
   ~EBHelmholtzDirichletDomainBC();
 
   /*!
-    @brief Set the value on the domain side. 
+    @brief Set the constant value on the domain side. 
+    @param[in] a_value Constant value on all domain sides. 
   */
   void setValue(const Real a_value);
 
   /*!
-    @brief Set the value on the domain side. 
+    @brief Set the spatially dependent value on the domain side. 
+    @param[in] a_value Spatially dependent value on all domain sides. 
   */
   void setValue(const std::function<Real(const RealVect& a_pos)>& a_value);
 
   /*!
     @brief Get face flux. This is for regular cells
+    @param[inout] a_faceFlux       Face-centered flux. 
+    @param[in]    a_phi            Cell-centered data
+    @param[in]    a_dir            Coordinate direction
+    @param[in]    a_side           High or low side
+    @param[in]    a_dit            Data index
+    @param[in]    a_useHomogeneous Homogeneous physical BCs or not. 
+    @note a_faceFlux is defined in the first strip of interior cells on the (dir,side) edge of the domain. 
   */
   virtual void getFaceFlux(BaseFab<Real>&        a_faceFlux,
 			   const BaseFab<Real>&  a_phi,
@@ -67,6 +78,12 @@ public:
 
   /*!
     @brief Get face flux. This is for irregular cells. 
+    @param[in] a_vof            Grid cell
+    @param[in] a_phi            Cell-centered data
+    @param[in] a_dir            Coordinate direction
+    @param[in] a_side           High or low side
+    @param[in] a_dit            Data index
+    @param[in] a_useHomogeneous Homogeneous physical BCs or not. 
   */
   virtual Real getFaceFlux(const VolIndex&       a_vof,
 			   const EBCellFAB&      a_phi,
@@ -88,12 +105,12 @@ protected:
   bool m_useFunction;
 
   /*!
-    @brief Value on EB
+    @brief Constant value on domain sides. 
   */
   Real m_constantValue;
 
   /*!
-    @brief Value on the EB. 
+    @brief Spatially dependent value on domain sides
   */
   std::function<Real(const RealVect& a_pos) > m_functionValue;
 };

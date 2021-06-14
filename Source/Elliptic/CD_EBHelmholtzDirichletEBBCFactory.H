@@ -51,11 +51,13 @@ public:
 
   /*!
     @brief Set the value on the EB. 
+    @param[in] a_value Constant value on EB
   */
   void setValue(const Real a_value);
 
   /*!
     @brief Set the value on the EB. 
+    @param[in] a_value Spatially dependent value on EB
   */
   void setValue(const std::function<Real(const RealVect& a_pos)>& a_value);
 

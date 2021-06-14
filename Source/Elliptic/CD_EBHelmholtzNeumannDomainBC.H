@@ -26,17 +26,21 @@ class EBHelmholtzNeumannDomainBC : public EBHelmholtzDomainBC {
 public:
 
   /*!
-    @brief Constructor. Must subsequently call setValue. 
+    @brief Constructor. Must subsequently call setDphiDn or setBxDphiDn
   */
   EBHelmholtzNeumannDomainBC();
 
   /*!
     @brief Constructor. 
+    @param[in] a_DphiDn Constant value of dphi/dn on all domain sides. 
+    @note A positive values gives a flux INTO the domain. 
   */
-  EBHelmholtzNeumannDomainBC(const Real a_value);
+  EBHelmholtzNeumannDomainBC(const Real a_DphiDn);
 
-    /*!
-    @brief Constructor. 
+  /*!
+    @brief Full constructor. 
+    @param[in] a_DphiDn Spatially dependent value of dphi/dn on all domain sides. 
+    @note A positive values gives a flux INTO the domain. 
   */
   EBHelmholtzNeumannDomainBC(const std::function<Real(const RealVect& a_pos)>& a_value);
 
@@ -46,27 +50,42 @@ public:
   ~EBHelmholtzNeumannDomainBC();
 
   /*!
-    @brief Set the value of dphi/dn on the EB. 
+    @brief Set value of dphi/dn on the EB. 
+    @param[in] a_DphiDn Value of dphi/dn. 
+    @note A positive values gives a flux INTO the domain. 
   */
   void setDphiDn(const int a_DphiDn);
 
   /*!
-    @brief Set the value of dphi/dn on the EB. 
+    @brief Set spatially dependent value of dphi/dn on the EB. 
+    @param[in] a_DphiDn Value of dphi/dn. 
+    @note A positive values gives a flux INTO the domain. 
   */
   void setDphiDn(const std::function<Real(const RealVect& a_pos)>& a_DphiDn);
 
   /*!
     @brief Set the value of B*dphi/dn on the EB.
+    @param[in] a_BxDphiDn Value of B*dphi/dn. 
+    @note A positive values gives a flux INTO the domain. 
   */
   void setBxDphiDn(const int a_BxDphiDn);
 
   /*!
-    @brief Set the value of B*dphi/dn on the EB.
+    @brief Set the spatially dependent value of B*dphi/dn on the EB.
+    @param[in] a_BxDphiDn Value of B*dphi/dn. 
+    @note A positive values gives a flux INTO the domain. 
   */
   void setBxDphiDn(const std::function<Real(const RealVect& a_pos)>& a_BxDphiDn);
-
+  
   /*!
     @brief Get face flux. This is for regular cells
+    @param[inout] a_faceFlux       Face-centered flux. 
+    @param[in]    a_phi            Cell-centered data
+    @param[in]    a_dir            Coordinate direction
+    @param[in]    a_side           High or low side
+    @param[in]    a_dit            Data index
+    @param[in]    a_useHomogeneous Homogeneous physical BCs or not. 
+    @note a_faceFlux is defined in the first strip of interior cells on the (dir,side) edge of the domain. 
   */
   virtual void getFaceFlux(BaseFab<Real>&        a_faceFlux,
 			   const BaseFab<Real>&  a_phi,
@@ -77,6 +96,12 @@ public:
 
   /*!
     @brief Get face flux. This is for irregular cells. 
+    @param[in] a_vof            Grid cell
+    @param[in] a_phi            Cell-centered data
+    @param[in] a_dir            Coordinate direction
+    @param[in] a_side           High or low side
+    @param[in] a_dit            Data index
+    @param[in] a_useHomogeneous Homogeneous physical BCs or not. 
   */
   virtual Real getFaceFlux(const VolIndex&       a_vof,
 			   const EBCellFAB&      a_phi,
