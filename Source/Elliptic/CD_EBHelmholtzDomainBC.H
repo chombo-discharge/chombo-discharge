@@ -65,8 +65,7 @@ public:
   /*!
     @brief Get face flux. This is for irregular cells. 
   */
-  virtual void getFaceFlux(Real&                 a_faceFlux,
-			   const VolIndex&       a_vof,
+  virtual Real getFaceFlux(const VolIndex&       a_vof,
 			   const EBCellFAB&      a_phi,
 			   const int&            a_dir,
 			   const Side::LoHiSide& a_side,
@@ -108,7 +107,7 @@ protected:
   /*!
     @brief Returns the cell-centered position at the boundary. 
   */
-  RealVect getBoundaryPosition(const VolIndex& a_vof, const int& a_dir, const Side::LoHiSide& a_side) const;
+  RealVect getBoundaryPosition(const IntVect& a_iv, const int& a_dir, const Side::LoHiSide& a_side) const;
 };
 
 #include <CD_NamespaceFooter.H>

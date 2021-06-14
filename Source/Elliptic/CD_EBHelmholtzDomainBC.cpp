@@ -31,9 +31,9 @@ void EBHelmholtzDomainBC::define(const EBLevelGrid& a_eblg, const RefCountedPtr<
   m_dx      = a_dx;
 }
 
-RealVect EBHelmholtzDomainBC::getBoundaryPosition(const VolIndex& a_vof, const int& a_dir, const Side::LoHiSide& a_side) const {
+RealVect EBHelmholtzDomainBC::getBoundaryPosition(const IntVect& a_iv, const int& a_dir, const Side::LoHiSide& a_side) const {
 
-  RealVect pos = m_probLo + (0.5*RealVect::Unit + RealVect(a_vof.gridIndex()))*m_dx + 0.5*m_dx*RealVect(BASISV(a_dir))*sign(a_side);
+  const RealVect pos = m_probLo + (0.5*RealVect::Unit + RealVect(a_iv))*m_dx + 0.5*m_dx*RealVect(BASISV(a_dir))*sign(a_side);
 
   return pos;
 }

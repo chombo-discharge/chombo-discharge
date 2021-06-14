@@ -8,7 +8,7 @@
   @brief  Implementation of CD_EBHelmholtzOp.H
   @author Robert Marskar
   @todo   Replace EBAMRPoissonOp::staticMaxNorm and don't use EBAMRPoissonOp dependencies
-  @note   If this ever breaks, we should look into the division by the relaxation factor (which not guard against divide-by-zero)
+  @note   If this ever breaks, we should look into the division by the relaxation factor and applyDomainFlux, both of which do not guard against divide-by-zero. 
 */
 
 // Chombo includes
@@ -157,10 +157,9 @@ void EBHelmholtzOp::defineStencils(){
 
   // Define BC objects. Can't do this in the factory because the BC objects will need the b-coefficient,
   // but the factories won't know about that. 
-  Real fakeBeta = 1.0;
-  //  m_domainBc->setCoef(m_eblg, fakeBeta, m_Bcoef);
   m_domainBc->define(m_eblg, m_Bcoef, m_probLo, m_dx);
-  m_ebBc->define(m_eblg, m_BcoefIrreg, m_probLo, m_dx);
+  m_ebBc    ->define(m_eblg, m_BcoefIrreg, m_probLo, m_dx);
+  
   const LayoutData<BaseIVFAB<VoFStencil> >& ebFluxStencil = m_ebBc->getKappaDivFStencils();
 
   // Define everything
@@ -562,13 +561,12 @@ void EBHelmholtzOp::applyOpRegular(EBCellFAB& a_Lphi, EBCellFAB& a_phi, const Bo
 }
 
 void EBHelmholtzOp::applyDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBC){
-  // TLDR: While we're developing this operator I'm resuing the old BC classes. This routine is weird because the domain bc needs a cell-centered flux
-  //       box, so that's what all the shifting is about.
-  //
-
-  BaseFab<Real>& phiFAB = a_phi.getSingleValuedFAB();
+  // TLDR: We compute the flux on the domain edges and store it in a cell-centered box. We then monkey with the ghost cells
+  //       so that centered differences on the edge cells inject said flux.
   
   for (int dir = 0; dir < SpaceDim; dir++){
+
+    BaseFab<Real>& phiFAB = a_phi.getSingleValuedFAB();
 
     Box loBox;
     Box hiBox;
@@ -583,13 +581,12 @@ void EBHelmholtzOp::applyDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, cons
       FArrayBox faceFlux(loBox, m_nComp);
       m_domainBc->getFaceFlux(faceFlux, a_phi.getSingleValuedFAB(), dir, Side::Lo, a_dit, a_homogeneousPhysBC);
 
-      // loBox is cell-centered interior region. We will monkey with the ghost cells so that centered differences in this
-      // region injects the domain flux. 
+      // loBox is cell-centered interior region. 
       Box ghostBox = loBox;    
       ghostBox.shift(dir, -1);
       
       BaseFab<Real>& bco = (*m_Bcoef)[a_dit][dir].getSingleValuedFAB();
-      bco.shiftHalf(dir, 1);
+      //      bco.shiftHalf(dir, 1);
       FORT_HELMHOLTZAPPLYDOMAINFLUX(CHF_FRA1(phiFAB, m_comp),
       				    CHF_CONST_FRA1(faceFlux, m_comp),
       				    CHF_CONST_FRA1(bco,m_comp),
@@ -597,7 +594,7 @@ void EBHelmholtzOp::applyDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, cons
 				    CHF_CONST_INT(side),
 				    CHF_CONST_INT(dir),
 				    CHF_BOX(ghostBox));
-      bco.shiftHalf(dir, -1);
+      //      bco.shiftHalf(dir, -1);
     }
 
     if(hasHi == 1){
@@ -612,8 +609,8 @@ void EBHelmholtzOp::applyDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, cons
       Box ghostBox = hiBox;
       ghostBox.shift(dir, 1);
 
-      BaseFab<Real>& bco = (*m_Bcoef)[a_dit][dir].getSingleValuedFAB();
-      bco.shiftHalf(dir, -1);
+      const BaseFab<Real>& bco = (*m_Bcoef)[a_dit][dir].getSingleValuedFAB();
+      //      bco.shiftHalf(dir, -1);
       FORT_HELMHOLTZAPPLYDOMAINFLUX(CHF_FRA1(phiFAB, m_comp),
       				    CHF_CONST_FRA1(faceFlux, m_comp),
       				    CHF_CONST_FRA1(bco,m_comp),
@@ -621,7 +618,7 @@ void EBHelmholtzOp::applyDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, cons
 				    CHF_CONST_INT(side),
 				    CHF_CONST_INT(dir),
 				    CHF_BOX(ghostBox));
-      bco.shiftHalf(dir, 1);
+      //      bco.shiftHalf(dir, 1);
     }
   }
 }
@@ -662,14 +659,12 @@ void EBHelmholtzOp::applyOpIrregular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, 
 
   // Do irregular faces on domain sides. m_domainBc should give the centroid-centered flux so we don't do interpolations here. 
   for (int dir = 0; dir < SpaceDim; dir++){
-    Real flux = 0.0;
-
     // Lo side.
     VoFIterator& vofitLo = m_vofIterDomLo[dir][a_dit];    
     for (vofitLo.reset(); vofitLo.ok(); ++vofitLo){
       const VolIndex& vof = vofitLo();
       
-      //      m_domainBc->getFaceFlux(flux, vof, m_comp, a_phi, m_probLo, m_dx*RealVect::Unit, dir, Side::Lo, a_dit, 0.0, a_homogeneousPhysBC);
+      const Real flux = m_domainBc->getFaceFlux(vof, a_phi, dir, Side::Lo, a_dit, a_homogeneousPhysBC);
 
       a_Lphi(vof, m_comp) -= flux*m_beta/m_dx;
     }
@@ -679,7 +674,7 @@ void EBHelmholtzOp::applyOpIrregular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, 
     for (vofitHi.reset(); vofitHi.ok(); ++vofitHi){
       const VolIndex& vof = vofitHi();
 
-      //      m_domainBc->getFaceFlux(flux, vof, m_comp, a_phi, m_probLo, m_dx*RealVect::Unit, dir, Side::Hi, a_dit, 0.0, a_homogeneousPhysBC);
+      const Real flux = m_domainBc->getFaceFlux(vof, a_phi, dir, Side::Hi, a_dit, a_homogeneousPhysBC);      
 
       a_Lphi(vof, m_comp) += flux*m_beta/m_dx;
     }
@@ -915,16 +910,16 @@ void EBHelmholtzOp::GauSaiMultiColorAllIrregular(EBCellFAB& a_phi, const EBCellF
     
     for (vofitLo.reset(); vofitLo.ok(); ++vofitLo){
       const VolIndex& vof = vofitLo();
-      Real flux;
-      //      m_domainBc->getFaceFlux(flux, vof, m_comp, a_phi, m_probLo, m_dx*RealVect::Unit, dir, Side::Lo, a_dit, 0.0, true);
+      
+      const Real flux = m_domainBc->getFaceFlux(vof, a_phi, dir, Side::Lo, a_dit, true);
       
       m_cacheEBxDomainFluxLo[a_icolor][dir][a_dit](vof, m_comp) = flux;
     }
 
     for (vofitHi.reset(); vofitHi.ok(); ++vofitHi){
       const VolIndex& vof = vofitHi();
-      Real flux;
-      //      m_domainBc->getFaceFlux(flux, vof, m_comp, a_phi, m_probLo, m_dx*RealVect::Unit, dir, Side::Hi, a_dit, 0.0, true);
+      
+      const Real flux = m_domainBc->getFaceFlux(vof, a_phi, dir, Side::Hi, a_dit, true);
       
       m_cacheEBxDomainFluxHi[a_icolor][dir][a_dit](vof, m_comp) = flux;
     }

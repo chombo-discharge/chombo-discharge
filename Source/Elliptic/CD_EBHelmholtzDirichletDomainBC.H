@@ -68,8 +68,7 @@ public:
   /*!
     @brief Get face flux. This is for irregular cells. 
   */
-  virtual void getFaceFlux(Real&                 a_faceFlux,
-			   const VolIndex&       a_vof,
+  virtual Real getFaceFlux(const VolIndex&       a_vof,
 			   const EBCellFAB&      a_phi,
 			   const int&            a_dir,
 			   const Side::LoHiSide& a_side,
