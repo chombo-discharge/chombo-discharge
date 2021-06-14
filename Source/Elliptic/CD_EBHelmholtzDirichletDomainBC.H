@@ -58,8 +58,8 @@ public:
   /*!
     @brief Get face flux. This is for regular cells
   */
-  virtual void getFaceFlux(FArrayBox&            a_faceFlux,
-			   const FArrayBox&      a_phi,
+  virtual void getFaceFlux(BaseFab<Real>&        a_faceFlux,
+			   const BaseFab<Real>&  a_phi,
 			   const int&            a_dir,
 			   const Side::LoHiSide& a_side,
 			   const DataIndex&      a_dit,

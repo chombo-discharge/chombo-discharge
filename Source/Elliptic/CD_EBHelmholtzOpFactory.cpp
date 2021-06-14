@@ -447,8 +447,8 @@ EBHelmholtzOp* EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, 
   if(foundMgLevel){
     const Real dx     = m_amrResolutions[amrLevel]*std::pow(mgRefRat, a_depth); // 
 
-    auto dobc = this->makeDomainBcObject(eblg, dx);
-    auto ebbc = RefCountedPtr<EBHelmholtzEBBC>(m_ebBcFactory->create());
+    // auto dobc = this->makeDomainBcObject(eblg, dx);
+    // auto ebbc = RefCountedPtr<EBHelmholtzEBBC>(m_ebBcFactory->create());
     
     mgOp = new EBHelmholtzOp(EBLevelGrid(), // Multigrid operator, so no fine. 
 			     eblg,
@@ -458,7 +458,7 @@ EBHelmholtzOp* EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, 
 			     interpolator,  // Defined if an amr level
 			     fluxReg,       // Defined if an amr level
 			     coarsener,     // Defined if an amr level
-			     dobc,
+			     m_domainBcFactory->create(),			     
 			     m_ebBcFactory->create(),			     
 			     m_probLo,
 			     dx,            // Set from depth
@@ -520,7 +520,7 @@ EBHelmholtzOp* EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
     CH_assert(eblgCoarMG.isDefined());
   }
 
-  auto dobc = this->makeDomainBcObject(eblg, dx);
+  //  auto dobc = this->makeDomainBcObject(eblg, dx);
 
   if(hasCoar){
     this->getCoarserLayout(eblgCoFi, eblg, refToCoar, m_mgBlockingFactor);
@@ -536,7 +536,7 @@ EBHelmholtzOp* EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
 			 m_amrInterpolators[amrLevel],
 			 m_amrFluxRegisters[amrLevel],
 			 m_amrCoarseners[amrLevel],
-			 dobc,
+			 m_domainBcFactory->create(),
 			 m_ebBcFactory->create(),
 			 m_probLo,			 
 			 dx,
@@ -572,24 +572,6 @@ int EBHelmholtzOpFactory::refToFiner(const ProblemDomain& a_domain) const {
   if(!found) MayDay::Abort("EBHelmholtzOpFactory::refToFiner - Domain not found in the AMR hierarchy");
 
   return ref;
-}
-
-// RefCountedPtr<EBHelmholtzOp::EBHelmholtzEbBc> EBHelmholtzOpFactory::makeEbBcObject(const EBLevelGrid& a_eblg, const Real& a_dx) const {
-//   EBHelmholtzOp::EBHelmholtzEbBc* bc = (EBHelmholtzOp::EBHelmholtzEbBc*) m_ebBcFactory->create(a_eblg.getDomain(),
-// 											       a_eblg.getEBISL(),
-// 											       a_dx*RealVect::Unit,
-// 											       &m_ghostPhi,
-// 											       &m_ghostRhs);
-
-//   return RefCountedPtr<EBHelmholtzOp::EBHelmholtzEbBc>(bc);
-// }
-
-RefCountedPtr<EBHelmholtzOp::EBHelmholtzDomainBc> EBHelmholtzOpFactory::makeDomainBcObject(const EBLevelGrid& a_eblg, const Real& a_dx) const {
-  EBHelmholtzOp::EBHelmholtzDomainBc* bc = (EBHelmholtzOp::EBHelmholtzDomainBc*) m_domainBcFactory->create(a_eblg.getDomain(),
-													   a_eblg.getEBISL(),
-													   a_dx*RealVect::Unit);
-  
-  return RefCountedPtr<EBHelmholtzOp::EBHelmholtzDomainBc>(bc);
 }
 
 int EBHelmholtzOpFactory::findAmrLevel(const ProblemDomain& a_domain) const{

@@ -238,7 +238,7 @@ void FORTRAN_NAME( HELMHOLTZAPPLYDOMAINFLUX ,helmholtzapplydomainflux )(
       ,CHFp_CONST_REAL(dx)
       ,CHFp_CONST_INT(side)
       ,CHFp_CONST_INT(dir)
-      ,CHFp_BOX(cellbox) );
+      ,CHFp_BOX(ghostbox) );
 
 #define FORT_HELMHOLTZAPPLYDOMAINFLUX FORTRAN_NAME( inlineHELMHOLTZAPPLYDOMAINFLUX, inlineHELMHOLTZAPPLYDOMAINFLUX)
 #define FORTNT_HELMHOLTZAPPLYDOMAINFLUX FORTRAN_NAME( HELMHOLTZAPPLYDOMAINFLUX, helmholtzapplydomainflux)
@@ -250,7 +250,7 @@ inline void FORTRAN_NAME(inlineHELMHOLTZAPPLYDOMAINFLUX, inlineHELMHOLTZAPPLYDOM
       ,CHFp_CONST_REAL(dx)
       ,CHFp_CONST_INT(side)
       ,CHFp_CONST_INT(dir)
-      ,CHFp_BOX(cellbox) )
+      ,CHFp_BOX(ghostbox) )
 {
  CH_TIMELEAF("FORT_HELMHOLTZAPPLYDOMAINFLUX");
  FORTRAN_NAME( HELMHOLTZAPPLYDOMAINFLUX ,helmholtzapplydomainflux )(
@@ -260,7 +260,7 @@ inline void FORTRAN_NAME(inlineHELMHOLTZAPPLYDOMAINFLUX, inlineHELMHOLTZAPPLYDOM
       ,CHFt_CONST_REAL(dx)
       ,CHFt_CONST_INT(side)
       ,CHFt_CONST_INT(dir)
-      ,CHFt_BOX(cellbox) );
+      ,CHFt_BOX(ghostbox) );
 }
 #endif  // GUARDHELMHOLTZAPPLYDOMAINFLUX 
 

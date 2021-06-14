@@ -32,7 +32,7 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid&                                 
 			     const RefCountedPtr<EBMultigridInterpolator>&      a_interpolator,
 			     const RefCountedPtr<EBFluxRegister>&               a_fluxReg,
 			     const RefCountedPtr<EbCoarAve>&                    a_coarAve,			       
-			     const RefCountedPtr<EBHelmholtzDomainBc>&          a_domainBc,
+			     const RefCountedPtr<EBHelmholtzDomainBC>&          a_domainBc,
 			     const RefCountedPtr<EBHelmholtzEBBC>&              a_ebBc,
 			     const RealVect&                                    a_probLo,
 			     const Real&                                        a_dx,
@@ -158,7 +158,8 @@ void EBHelmholtzOp::defineStencils(){
   // Define BC objects. Can't do this in the factory because the BC objects will need the b-coefficient,
   // but the factories won't know about that. 
   Real fakeBeta = 1.0;
-  m_domainBc->setCoef(m_eblg, fakeBeta, m_Bcoef); 
+  //  m_domainBc->setCoef(m_eblg, fakeBeta, m_Bcoef);
+  m_domainBc->define(m_eblg, m_Bcoef, m_probLo, m_dx);
   m_ebBc->define(m_eblg, m_BcoefIrreg, m_probLo, m_dx);
   const LayoutData<BaseIVFAB<VoFStencil> >& ebFluxStencil = m_ebBc->getKappaDivFStencils();
 
@@ -576,13 +577,17 @@ void EBHelmholtzOp::applyDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, cons
     EBArith::loHi(loBox, hasLo, hiBox, hasHi, m_eblg.getDomain(), a_cellBox, dir);
     
     if(hasLo == 1){
-      int side = -1;
-      Box lbox = loBox;
-      lbox.shift(dir, -1);
-      FArrayBox faceFlux(loBox, m_nComp);
-      m_domainBc->setCoef(m_eblg, m_beta, m_Bcoef);
-      m_domainBc->getFaceFlux(faceFlux, a_phi.getSingleValuedFAB(), m_probLo, m_dx*RealVect::Unit, dir, Side::Lo, a_dit, 0.0, a_homogeneousPhysBC);
+      const int side = -1;
 
+      // Get domain flux. 
+      FArrayBox faceFlux(loBox, m_nComp);
+      m_domainBc->getFaceFlux(faceFlux, a_phi.getSingleValuedFAB(), dir, Side::Lo, a_dit, a_homogeneousPhysBC);
+
+      // loBox is cell-centered interior region. We will monkey with the ghost cells so that centered differences in this
+      // region injects the domain flux. 
+      Box ghostBox = loBox;    
+      ghostBox.shift(dir, -1);
+      
       BaseFab<Real>& bco = (*m_Bcoef)[a_dit][dir].getSingleValuedFAB();
       bco.shiftHalf(dir, 1);
       FORT_HELMHOLTZAPPLYDOMAINFLUX(CHF_FRA1(phiFAB, m_comp),
@@ -591,17 +596,21 @@ void EBHelmholtzOp::applyDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, cons
       				    CHF_CONST_REAL(m_dx),
 				    CHF_CONST_INT(side),
 				    CHF_CONST_INT(dir),
-				    CHF_BOX(lbox));
+				    CHF_BOX(ghostBox));
       bco.shiftHalf(dir, -1);
     }
 
     if(hasHi == 1){
-      int side = 1;
-      Box hbox = hiBox;
-      hbox.shift(dir, 1);
+      const int side = 1;
+
+      // Get domain flux. 
       FArrayBox faceFlux(hiBox, m_nComp);
-      m_domainBc->setCoef(m_eblg, m_beta, m_Bcoef);
-      m_domainBc->getFaceFlux(faceFlux, a_phi.getSingleValuedFAB(), m_probLo, m_dx*RealVect::Unit, dir, Side::Hi, a_dit, 0.0, a_homogeneousPhysBC);
+      m_domainBc->getFaceFlux(faceFlux, a_phi.getSingleValuedFAB(), dir, Side::Hi, a_dit, a_homogeneousPhysBC);
+
+      // hiBox is cell-centered interior region. We will monkey with the ghost cells so that centered differences in this
+      // region injects the domain flux. 
+      Box ghostBox = hiBox;
+      ghostBox.shift(dir, 1);
 
       BaseFab<Real>& bco = (*m_Bcoef)[a_dit][dir].getSingleValuedFAB();
       bco.shiftHalf(dir, -1);
@@ -611,7 +620,7 @@ void EBHelmholtzOp::applyDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, cons
       				    CHF_CONST_REAL(m_dx),
 				    CHF_CONST_INT(side),
 				    CHF_CONST_INT(dir),
-				    CHF_BOX(hbox));
+				    CHF_BOX(ghostBox));
       bco.shiftHalf(dir, 1);
     }
   }
@@ -660,7 +669,7 @@ void EBHelmholtzOp::applyOpIrregular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, 
     for (vofitLo.reset(); vofitLo.ok(); ++vofitLo){
       const VolIndex& vof = vofitLo();
       
-      m_domainBc->getFaceFlux(flux, vof, m_comp, a_phi, m_probLo, m_dx*RealVect::Unit, dir, Side::Lo, a_dit, 0.0, a_homogeneousPhysBC);
+      //      m_domainBc->getFaceFlux(flux, vof, m_comp, a_phi, m_probLo, m_dx*RealVect::Unit, dir, Side::Lo, a_dit, 0.0, a_homogeneousPhysBC);
 
       a_Lphi(vof, m_comp) -= flux*m_beta/m_dx;
     }
@@ -670,7 +679,7 @@ void EBHelmholtzOp::applyOpIrregular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, 
     for (vofitHi.reset(); vofitHi.ok(); ++vofitHi){
       const VolIndex& vof = vofitHi();
 
-      m_domainBc->getFaceFlux(flux, vof, m_comp, a_phi, m_probLo, m_dx*RealVect::Unit, dir, Side::Hi, a_dit, 0.0, a_homogeneousPhysBC);
+      //      m_domainBc->getFaceFlux(flux, vof, m_comp, a_phi, m_probLo, m_dx*RealVect::Unit, dir, Side::Hi, a_dit, 0.0, a_homogeneousPhysBC);
 
       a_Lphi(vof, m_comp) += flux*m_beta/m_dx;
     }
@@ -907,7 +916,7 @@ void EBHelmholtzOp::GauSaiMultiColorAllIrregular(EBCellFAB& a_phi, const EBCellF
     for (vofitLo.reset(); vofitLo.ok(); ++vofitLo){
       const VolIndex& vof = vofitLo();
       Real flux;
-      m_domainBc->getFaceFlux(flux, vof, m_comp, a_phi, m_probLo, m_dx*RealVect::Unit, dir, Side::Lo, a_dit, 0.0, true);
+      //      m_domainBc->getFaceFlux(flux, vof, m_comp, a_phi, m_probLo, m_dx*RealVect::Unit, dir, Side::Lo, a_dit, 0.0, true);
       
       m_cacheEBxDomainFluxLo[a_icolor][dir][a_dit](vof, m_comp) = flux;
     }
@@ -915,7 +924,7 @@ void EBHelmholtzOp::GauSaiMultiColorAllIrregular(EBCellFAB& a_phi, const EBCellF
     for (vofitHi.reset(); vofitHi.ok(); ++vofitHi){
       const VolIndex& vof = vofitHi();
       Real flux;
-      m_domainBc->getFaceFlux(flux, vof, m_comp, a_phi, m_probLo, m_dx*RealVect::Unit, dir, Side::Hi, a_dit, 0.0, true);
+      //      m_domainBc->getFaceFlux(flux, vof, m_comp, a_phi, m_probLo, m_dx*RealVect::Unit, dir, Side::Hi, a_dit, 0.0, true);
       
       m_cacheEBxDomainFluxHi[a_icolor][dir][a_dit](vof, m_comp) = flux;
     }

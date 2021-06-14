@@ -54,7 +54,7 @@ public:
   using AmrResolutions   = Vector<Real>;
   using AmrRefRatios     = Vector<int>;
 
-  using DomainBCFactory  = RefCountedPtr<BaseDomainBCFactory>; // Will be replaced with better BC class...
+  using DomainBCFactory  = RefCountedPtr<EBHelmholtzDomainBCFactory>; // Will be replaced with better BC class...
   using EBBCFactory      = RefCountedPtr<EBHelmholtzEBBCFactory>;
 
   /*!
@@ -251,11 +251,6 @@ protected:
 			   const EBLevelGrid&                 a_eblgCoar,
 			   const EBLevelGrid&                 a_eblgFine,
 			   const int                          a_refRat);
-
-  /*!
-    @brief Make a domain BC object.
-  */
-  RefCountedPtr<EBHelmholtzOp::EBHelmholtzDomainBc> makeDomainBcObject(const EBLevelGrid& a_eblg, const Real& a_dx) const;
 
   /*!
     @brief Find level corresponding to amr level

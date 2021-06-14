@@ -45,8 +45,8 @@ void EBHelmholtzDirichletDomainBC::setValue(const std::function<Real(const RealV
   m_functionValue = a_value;
 }
 
-void EBHelmholtzDirichletDomainBC::getFaceFlux(FArrayBox&            a_faceFlux,
-					       const FArrayBox&      a_phi,
+void EBHelmholtzDirichletDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
+					       const BaseFab<Real>&  a_phi,
 					       const int&            a_dir,
 					       const Side::LoHiSide& a_side,
 					       const DataIndex&      a_dit,

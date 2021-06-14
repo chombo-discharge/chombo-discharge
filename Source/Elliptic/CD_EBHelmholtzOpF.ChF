@@ -175,7 +175,7 @@
      &     chf_const_real[dx],
      &     chf_const_int[side],
      &     chf_const_int[dir],		                    
-     &     chf_box[cellbox])
+     &     chf_box[ghostbox])
 
 
       integer chf_ddecl[i;   j;   k   ]
@@ -188,15 +188,18 @@
         joff = chf_id(1, dir);
         koff = chf_id(2, dir)]
 
-      chf_multido[cellbox; i;j;k]
-         if(side .eq. 1) then
-            scaledflux         = flux(chf_ix[i-ioff; j-joff; k-koff])/bco(chf_ix[i-ioff; j-joff; k-koff]) 	 
-            phi(chf_ix[i;j;k]) = phi (chf_ix[i-ioff; j-joff; k-koff]) + scaledflux*dx
-         else
+c flux and phi are cell-centered but bco is face-centered. 
+      if(side .eq. -1) then
+         chf_multido[ghostbox; i;j;k]	       
             scaledflux         = flux(chf_ix[i+ioff; j+joff; k+koff])/bco(chf_ix[i+ioff; j+joff; k+koff]) 	 
             phi(chf_ix[i;j;k]) = phi( chf_ix[i+ioff; j+joff; k+koff]) - scaledflux*dx	 
-         endif
-      chf_enddo
+         chf_enddo      
+      else
+         chf_multido[ghostbox; i;j;k]	 
+            scaledflux         = flux(chf_ix[i-ioff; j-joff; k-koff])/bco(chf_ix[i-ioff; j-joff; k-koff]) 	 
+            phi(chf_ix[i;j;k]) = phi (chf_ix[i-ioff; j-joff; k-koff]) + scaledflux*dx
+         chf_enddo
+      endif	 
       end
 
       subroutine helmholtzdirichletflux(
