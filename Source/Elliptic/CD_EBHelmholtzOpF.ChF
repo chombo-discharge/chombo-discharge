@@ -241,3 +241,32 @@ c Multiply by b-coefficient. Note that flux is cell-centered but bco is face-cen
       
       return
       end
+
+      subroutine helmholtzmultfluxbybco(
+     &     chf_fra1[flux],
+     &     chf_const_fra1[bco],
+     &     chf_const_int[dir],
+     &     chf_const_int[side],     
+     &     chf_box[cellbox])
+
+      integer chf_ddecl[i;j;k]
+      integer chf_ddecl[ioff;joff;koff]
+
+      chf_dterm[
+         ioff = chf_id(0,dir);
+         joff = chf_id(1,dir);
+         koff = chf_id(2,dir)]      
+
+c Multiply by b-coefficient. Note that flux is cell-centered but bco is face-centered. 
+      if(side .eq. -1) then
+         chf_multido[cellbox; i; j; k]      
+            flux(chf_ix[i;j;k]) = flux(chf_ix[i;j;k]) * bco(chf_ix[i;j;k])
+         chf_enddo	          
+      else
+         chf_multido[cellbox; i; j; k]      
+            flux(chf_ix[i;j;k]) = flux(chf_ix[i;j;k]) * bco(chf_ix[i+ioff;j+joff;k+koff])
+         chf_enddo	    
+      endif
+      
+      return
+      end

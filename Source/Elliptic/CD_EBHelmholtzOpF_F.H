@@ -304,6 +304,37 @@ inline void FORTRAN_NAME(inlineHELMHOLTZDIRICHLETFLUX, inlineHELMHOLTZDIRICHLETF
 }
 #endif  // GUARDHELMHOLTZDIRICHLETFLUX 
 
+#ifndef GUARDHELMHOLTZMULTFLUXBYBCO 
+#define GUARDHELMHOLTZMULTFLUXBYBCO 
+// Prototype for Fortran procedure helmholtzmultfluxbybco ...
+//
+void FORTRAN_NAME( HELMHOLTZMULTFLUXBYBCO ,helmholtzmultfluxbybco )(
+      CHFp_FRA1(flux)
+      ,CHFp_CONST_FRA1(bco)
+      ,CHFp_CONST_INT(dir)
+      ,CHFp_CONST_INT(side)
+      ,CHFp_BOX(cellbox) );
+
+#define FORT_HELMHOLTZMULTFLUXBYBCO FORTRAN_NAME( inlineHELMHOLTZMULTFLUXBYBCO, inlineHELMHOLTZMULTFLUXBYBCO)
+#define FORTNT_HELMHOLTZMULTFLUXBYBCO FORTRAN_NAME( HELMHOLTZMULTFLUXBYBCO, helmholtzmultfluxbybco)
+
+inline void FORTRAN_NAME(inlineHELMHOLTZMULTFLUXBYBCO, inlineHELMHOLTZMULTFLUXBYBCO)(
+      CHFp_FRA1(flux)
+      ,CHFp_CONST_FRA1(bco)
+      ,CHFp_CONST_INT(dir)
+      ,CHFp_CONST_INT(side)
+      ,CHFp_BOX(cellbox) )
+{
+ CH_TIMELEAF("FORT_HELMHOLTZMULTFLUXBYBCO");
+ FORTRAN_NAME( HELMHOLTZMULTFLUXBYBCO ,helmholtzmultfluxbybco )(
+      CHFt_FRA1(flux)
+      ,CHFt_CONST_FRA1(bco)
+      ,CHFt_CONST_INT(dir)
+      ,CHFt_CONST_INT(side)
+      ,CHFt_BOX(cellbox) );
+}
+#endif  // GUARDHELMHOLTZMULTFLUXBYBCO 
+
 }
 
 #endif
