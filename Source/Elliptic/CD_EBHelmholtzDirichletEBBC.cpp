@@ -99,9 +99,6 @@ void EBHelmholtzDirichletEBBC::define() {
       	order--;
       }
 
-      // Last ditch effort is to run with Chombos least squares stencil
-      //      if(!foundStencil) foundStencil = this->getChomboLsqStencil(pairSten, vof, dit());
-
       if(foundStencil){
 	weights (vof, m_comp) = pairSten.first;
 	stencils(vof, m_comp) = pairSten.second;
