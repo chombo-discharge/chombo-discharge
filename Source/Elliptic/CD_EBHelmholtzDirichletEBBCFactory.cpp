@@ -39,10 +39,12 @@ EBHelmholtzDirichletEBBCFactory::~EBHelmholtzDirichletEBBCFactory(){
 }
 
 void EBHelmholtzDirichletEBBCFactory::setOrder(const int a_order){
+  CH_assert(a_order > 0);
   m_order = a_order;
 }
 
 void EBHelmholtzDirichletEBBCFactory::setWeight(const int a_weight){
+  CH_assert(a_weight > 0);
   m_weight = a_weight;
 }
 

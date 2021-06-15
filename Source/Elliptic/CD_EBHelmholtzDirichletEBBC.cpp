@@ -29,10 +29,12 @@ EBHelmholtzDirichletEBBC::~EBHelmholtzDirichletEBBC(){
 }
 
 void EBHelmholtzDirichletEBBC::setOrder(const int a_order){
+  CH_assert(a_order > 0);
   m_order = a_order;
 }
 
 void EBHelmholtzDirichletEBBC::setWeight(const int a_weight){
+  CH_assert(a_weight > 0);
   m_weight = a_weight;
 }
 
@@ -51,7 +53,7 @@ void EBHelmholtzDirichletEBBC::setValue(const std::function<Real(const RealVect&
 }
   
 void EBHelmholtzDirichletEBBC::define() {
-  if(!(m_order == 1  || m_order == 2 )) MayDay::Error("EBHelmholtzDirichletEBBC - order is not 1 or 2!");
+  if(  m_order <= 0  || m_weight <= 0 ) MayDay::Error("EBHelmholtzDirichletEBBC - must have order > 0 and weight > 0");
   if(!(m_useConstant || m_useFunction)) MayDay::Error("EBHelmholtzDirichletEBBC - not using constant or function!");
 
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
