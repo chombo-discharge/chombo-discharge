@@ -131,9 +131,10 @@ Real EBHelmholtzDirichletDomainBC::getFaceFlux(const VolIndex&       a_vof,
 
       // Get dphi/dn on the boundary face. Use interpolation from face centers to the face centroid. 
       for (int i = 0; i < faceSten.size(); i++){
-	const Real& weight    = faceSten.weight(i);
-	const FaceIndex& face = faceSten.face(i);
-
+	const Real& weight     = faceSten.weight(i);
+	const FaceIndex& face  = faceSten.face(i);
+	const VolIndex& curVof = face.getVoF(flip(a_side));
+	const IntVect& curIV   = curVof.gridIndex();
 
 	Real value;
 	if(a_useHomogeneous){
@@ -144,14 +145,14 @@ Real EBHelmholtzDirichletDomainBC::getFaceFlux(const VolIndex&       a_vof,
 	    value = m_constantValue;
 	  }
 	  else if(m_useFunction){
-	    value = m_functionValue(this->getBoundaryPosition(iv, a_dir, a_side));
+	    value = m_functionValue(this->getBoundaryPosition(curIV, a_dir, a_side));
 	  }
 	  else{
 	    MayDay::Abort("EBHelmholtzDirichletDomainBC::getFaceFlux - logic bust");
 	  }
 	}
 
-	const Real centeredFaceFlux = isign * ihdx * (value - a_phi(a_vof, m_comp));
+	const Real centeredFaceFlux = isign * ihdx * (value - a_phi(curVof, m_comp));
 
 	centroidFlux += centeredFaceFlux * weight;
       }

@@ -253,24 +253,33 @@ void ProxyFieldSolver::solveEBCond(EBAMRCellData& a_phi, EBAMRCellData& a_residu
 
   // Domain BC
   pp.get("domain_bc", str);
+  pp.get("dom_val", dom_value);  
   if(str == "dirichlet"){
-    pp.get("dom_val", dom_value);
-
     auto bcFactory = new DirichletConductivityDomainBCFactory();
     bcFactory->setValue(dom_value);
 
     domainBcFactory = RefCountedPtr<BaseDomainBCFactory>(bcFactory);
   }
   else if(str == "neumann"){
-    pp.get("dom_val", dom_value);
-
     auto bcFactory = new NeumannConductivityDomainBCFactory();
     bcFactory->setValue(dom_value);
 
     domainBcFactory = RefCountedPtr<BaseDomainBCFactory>(bcFactory);
   }
+  else if(str == "robin"){
+    auto bcFactory = new RobinConductivityDomainBcFactory();
+
+    // Coeffs for radiative transfer with Robin
+    const Real A =  1.5*dom_value;
+    const Real B = -1.0*dom_value;
+    const Real C = 0.0;
+
+    bcFactory->setCoefficients(A, B, C);
+
+    domainBcFactory = RefCountedPtr<BaseDomainBCFactory>(bcFactory);
+  }
   else{
-    MayDay::Error("ProxyFieldSolver::solveEBCond - uknown EBBC factory requested");
+    MayDay::Error("ProxyFieldSolver::solveEBCond - uknown domain factory requested");
   }
 
   int relaxType;
@@ -410,8 +419,17 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
   else if(str == "neumann"){
     domainBcFactory = RefCountedPtr<EBHelmholtzDomainBCFactory>(new EBHelmholtzNeumannDomainBCFactory(bcFunction));
   }
+  else if(str == "robin"){
+    
+    // Coeffs for radiative transfer with Robin
+    const Real A =  1.5*dom_value;
+    const Real B = -1.0*dom_value;
+    const Real C =  0.0;
+    
+    domainBcFactory = RefCountedPtr<EBHelmholtzDomainBCFactory>(new EBHelmholtzRobinDomainBCFactory(A, B, C));
+  }
   else{
-    MayDay::Abort("ProxyFieldSolver::solveHelm - Robin not supported (yet)");
+    MayDay::Abort("ProxyFieldSolver::solveHelm - unknown domain bc requested");
   }
 
 

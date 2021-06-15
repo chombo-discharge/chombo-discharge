@@ -54,6 +54,8 @@ void EBHelmholtzRobinDomainBCFactory::setCoefficients(const std::function<Real(c
 }
 
 RefCountedPtr<EBHelmholtzDomainBC> EBHelmholtzRobinDomainBCFactory::create() {
+  if(!(m_useConstant || m_useFunction)) MayDay::Abort("EBHelmholtzRobinDomaniBCFactory::create -- not using constant or function. Did you forget to set coefficients?");
+  
   EBHelmholtzRobinDomainBC* bc = new EBHelmholtzRobinDomainBC();
 
   if(m_useConstant){

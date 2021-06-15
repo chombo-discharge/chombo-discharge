@@ -16,7 +16,7 @@ AmrMesh.blocking_factor = 4           # Default blocking factor (16 in 3D)
 AmrMesh.max_box_size    = 8          # Maximum allowed box size
 AmrMesh.max_ebis_box    = 16          # Maximum allowed box size
 AmrMesh.ref_rat         = 2           # Refinement ratios
-AmrMesh.num_ghost       = 1           # Number of ghost cells. Default is 3
+AmrMesh.num_ghost       = 3           # Number of ghost cells. Default is 3
 AmrMesh.lsf_ghost       = 3           # Number of ghost cells when writing level-set to grid
 AmrMesh.eb_ghost        = 4           # Set number of of ghost cells for EB stuff
 AmrMesh.centroid_sten   = linear      # Centroid interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
@@ -48,7 +48,7 @@ Driver.output_directory                = ./               # Output directory
 Driver.output_names                    = simulation       # Simulation output names
 Driver.max_plot_depth                  = -1               # Restrict maximum plot depth (-1 => finest simulation level)
 Driver.max_chk_depth                   = -1               # Restrict chechkpoint depth (-1 => finest simulation level)	
-Driver.num_plot_ghost                  = 0                # Number of ghost cells to include in plots
+Driver.num_plot_ghost                  = 1                # Number of ghost cells to include in plots
 Driver.plt_vars                        = 0                # 'tags', 'mpi_rank', 'levelset'
 Driver.restart                         = 0                # Restart step (less or equal to 0 implies fresh simulation)
 Driver.allow_coarsening                = true             # Allows removal of grid levels according to CellTagger
@@ -63,17 +63,17 @@ Driver.refine_solid_solid_interface    = -1               # Refine solid-solid i
 # ====================================
 # ProxyFieldSolver CLASS OPTIONS
 # ====================================
-ProxyFieldSolver.alpha     = 0.0         # Alpha
-ProxyFieldSolver.beta      = 1.0         # Beta
-ProxyFieldSolver.aco       = 1.          # A-coefficient
-ProxyFieldSolver.bco       = 2.0         # B-coefficient	
-ProxyFieldSolver.solver    = helm        # Our solver ('helmholtz') or ebconductivity op 'ebcond'
+ProxyFieldSolver.alpha     = 1.0         # Alpha
+ProxyFieldSolver.beta      = -1          # Beta
+ProxyFieldSolver.aco       = 1.5         # A-coefficient
+ProxyFieldSolver.bco       = -1.0        # B-coefficient	
+ProxyFieldSolver.solver    = ebcond        # Our solver ('helmholtz') or ebconductivity op 'ebcond'
 ProxyFieldSolver.eb_bc     = dirichlet   # 'dirichlet', 'neumann', or 'robin'
-ProxyFieldSolver.domain_bc = dirichlet   # 'dirichlet', 'neumann', or 'robin'
-ProxyFieldSolver.eb_order  = 1           # BC order on EB (only for Dirichlet)
-ProxyFieldSolver.dom_val   = -5         # Value on domain (For Robin, this is multiplier)
-ProxyFieldSolver.eb_val    =  1          # Value on EB (For robin, this is multiplier)
-ProxyFieldSolver.smooth    = 8          # Smoothings
+ProxyFieldSolver.domain_bc = robin   # 'dirichlet', 'neumann', or 'robin'
+ProxyFieldSolver.eb_order  = 2           # BC order on EB (only for Dirichlet)
+ProxyFieldSolver.dom_val   = 1          # Value on domain (For Robin, this is multiplier)
+ProxyFieldSolver.eb_val    = 1          # Value on EB (For robin, this is multiplier)
+ProxyFieldSolver.smooth    = 16          # Smoothings
 ProxyFieldSolver.relax     = 2           # Relaxation method
 ProxyFieldSolver.mg_tol    = 1.E-10      # Multigrid tolerance
 ProxyFieldSolver.plt_vars  = phi resid E # Plot variables

@@ -129,8 +129,9 @@ Real EBHelmholtzNeumannDomainBC::getFaceFlux(const VolIndex&       a_vof,
 	const FaceStencil faceSten = EBArith::getInterpStencil(faces[0], cfivs, ebisbox, domain);
 
 	for (int i = 0; i < faceSten.size(); i++){
-	  const Real& weight    = faceSten.weight(i);
-	  const FaceIndex& face = faceSten.face(i);
+	  const Real& weight     = faceSten.weight(i);
+	  const FaceIndex& face  = faceSten.face(i);
+	  const VolIndex& curVof = face.getVoF(flip(a_side));
 
 	  // Get dphi/dx on the boundary
 	  Real centeredDphiDn;
@@ -138,7 +139,7 @@ Real EBHelmholtzNeumannDomainBC::getFaceFlux(const VolIndex&       a_vof,
 	    centeredDphiDn = m_constantDphiDn;
 	  }
 	  else if(m_useFunction){
-	    centeredDphiDn = m_functionDphiDn(this->getBoundaryPosition(iv, a_dir, a_side));
+	    centeredDphiDn = m_functionDphiDn(this->getBoundaryPosition(curVof.gridIndex(), a_dir, a_side));
 	  }
 
 	  centroidFlux += weight * centeredDphiDn;
