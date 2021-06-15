@@ -441,8 +441,10 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
 
 
   // Set the bottom domain. Don't go below 8x cells in any direction
+  int minCells;
+  pp.get("min_cells", minCells);
   ProblemDomain bottomDomain = m_amr->getDomains()[0];
-  while(bottomDomain.domainBox().shortside() >= 8){
+  while(bottomDomain.domainBox().shortside() >= 2*minCells){
     bottomDomain.coarsen(2);
   }
 

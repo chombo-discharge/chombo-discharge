@@ -135,7 +135,7 @@ protected:
 			      const int                    a_order) const;
 
   /*!
-    @brief Get johansen stencil with specified order. Not used but exists for backward compatibility testing and debuggin. 
+    @brief Get johansen stencil with specified order. Not used but exists for backward compatibility testing and debugging. 
     @param[out] a_stencil Weight and stencil
     @param[out] a_vof     Grid cell
     @param[in]  a_dit     Data index
@@ -143,6 +143,16 @@ protected:
     @return If this returns true, a_stencil contains a valid stencil and weight. 
   */
   bool getJohansenStencil(std::pair<Real, VoFStencil>& a_stencil, const VolIndex& a_vof, const DataIndex& a_dit, const int a_order) const;
+
+  /*!
+    @brief Get Chombo's least squares gradient stencil. Not used but kept for backward compatibility testing and debugging. 
+    @param[out] a_stencil Weight and stencil
+    @param[out] a_vof     Grid cell
+    @param[in]  a_dit     Data index
+    @param[in]  a_order   Attempted order for stencil. This is also the stencil radius. 
+    @return If this returns true, a_stencil contains a valid stencil and weight. 
+  */
+  bool getChomboLsqStencil(std::pair<Real, VoFStencil>& a_stencil, const VolIndex& a_vof, const DataIndex& a_dit) const;
 
 };
 
