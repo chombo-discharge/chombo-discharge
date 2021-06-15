@@ -43,6 +43,16 @@ public:
   };
 
   /*!
+    @brief Neighborhood type
+    @param[in] Quadrant. Only fetch vofs in a specified quadrant. 
+    @param[in] Radius.   Fetch all vofs in a specified radius. 
+  */
+  enum class Neighborhood {
+    Quadrant,
+    Radius
+  };
+
+  /*!
     @brief Disallowed
   */
   VofUtils() = delete;

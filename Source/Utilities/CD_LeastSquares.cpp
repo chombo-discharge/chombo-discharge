@@ -45,12 +45,13 @@ VoFStencil LeastSquares::getInterpolationStencil(const CellPosition a_cellPos,
   return ret;
 }
 
-VoFStencil LeastSquares::getBndryGradSten(const VolIndex& a_vof,
-					  const EBISBox&  a_ebisbox,
-					  const Real      a_dx,
-					  const int       a_radius,
-					  const int       a_p,
-					  const int       a_order){
+VoFStencil LeastSquares::getBndryGradSten(const VolIndex&    a_vof,
+					  const Neighborhood a_neighborhood,					  
+					  const EBISBox&     a_ebisbox,
+					  const Real         a_dx,
+					  const int          a_radius,
+					  const int          a_p,
+					  const int          a_order){
   VoFStencil bndrySten;
 
   const bool addStartingVof = false;
@@ -61,9 +62,16 @@ VoFStencil LeastSquares::getBndryGradSten(const VolIndex& a_vof,
 
     Vector<VolIndex> allVofs;
 
-    // Monotone path first, try quadrant then radius, If that does not work we're out of ideas (I'm NOT going to reach over EBs). 
-    if(allVofs.size() < numUnknowns); allVofs = VofUtils::getVofsInQuadrant(a_vof, a_ebisbox, normal, a_radius, VofUtils::Connectivity::MonotonePath,    false);
-    if(allVofs.size() < numUnknowns); allVofs = VofUtils::getVofsInRadius(  a_vof, a_ebisbox,         a_radius, VofUtils::Connectivity::MonotonePath,    false);        
+    switch(a_neighborhood){
+    case Neighborhood::Quadrant:
+      allVofs = VofUtils::getVofsInQuadrant(a_vof, a_ebisbox, normal, a_radius, VofUtils::Connectivity::MonotonePath,    false);
+      break;
+    case Neighborhood::Radius:
+      allVofs = VofUtils::getVofsInQuadrant(a_vof, a_ebisbox, normal, a_radius, VofUtils::Connectivity::MonotonePath,    false);
+      break;
+    default:
+      break;
+    }
 
     // Now build the stencil. 
     if(allVofs.size() >= numUnknowns){

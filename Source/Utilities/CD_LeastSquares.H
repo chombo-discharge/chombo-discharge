@@ -46,6 +46,7 @@ public:
   };
 
   using Connectivity = VofUtils::Connectivity;
+  using Neighborhood = VofUtils::Neighborhood;
 
   /*!
     @brief Get an interpolation stencil to a point in a cell with a specified order and radius. 
@@ -82,12 +83,13 @@ public:
     @details    This will first try to get all Vofs defined in the quadrant defined by the normal vector, i.e. 3 cells in 2D and up to 7 cells in 3D. If that
     does not work the routine will try to fetch a symmetric stencil. If that does not work it will get all Vofs within a certain radius. 
   */
-  static VoFStencil getBndryGradSten(const VolIndex& a_vof,
-				     const EBISBox&  a_ebisbox,
-				     const Real      a_dx,
-				     const int       a_radius,
-				     const int       a_p,
-				     const int       a_order);
+  static VoFStencil getBndryGradSten(const VolIndex&    a_vof,
+				     const Neighborhood a_neighborhood,				     
+				     const EBISBox&     a_ebisbox,
+				     const Real         a_dx,
+				     const int          a_radius,
+				     const int          a_p,
+				     const int          a_order);
 
   /*!
     @brief Return the sum of weights in the stencil, for a specific variable. 

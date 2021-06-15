@@ -16,6 +16,7 @@
 #include <functional>
 
 // Our includes
+#include <CD_VofUtils.H>
 #include <CD_EBHelmholtzEBBC.H>
 #include <CD_NamespaceHeader.H>
 
@@ -119,17 +120,22 @@ protected:
 
   /*!
     @brief Get stencil with specified order. 
-    @param[out] a_stencil Weight and stencil
-    @param[out] a_vof     Grid cell
-    @param[in]  a_dit     Data index
-    @param[in]  a_order   Attempted order for stencil. This is also the stencil radius. 
+    @param[out] a_stencil      Weight and stencil
+    @param[out] a_vof          Grid cell
+    @param[out] a_neighborhood Neighboorhood specifier
+    @param[in]  a_dit          Data index
+    @param[in]  a_order        Attempted order for stencil. This is also the stencil radius. 
     @return If this returns true, a_stencil contains a valid stencil and weight. 
     @note Stencils are computed using weighted least squares with squared inverse distance weighting. 
   */
-  bool getLeastSquaresStencil(std::pair<Real, VoFStencil>& a_stencil, const VolIndex& a_vof, const DataIndex& a_dit, const int a_order) const;
+  bool getLeastSquaresStencil(std::pair<Real, VoFStencil>& a_stencil,
+			      const VolIndex&              a_vof,
+			      const VofUtils::Neighborhood a_neighborhood,
+			      const DataIndex&             a_dit,
+			      const int                    a_order) const;
 
   /*!
-    @brief Get johansen stencil with specified order. 
+    @brief Get johansen stencil with specified order. Not used but exists for backward compatibility testing and debuggin. 
     @param[out] a_stencil Weight and stencil
     @param[out] a_vof     Grid cell
     @param[in]  a_dit     Data index

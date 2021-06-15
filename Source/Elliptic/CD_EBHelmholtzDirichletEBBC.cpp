@@ -80,17 +80,26 @@ void EBHelmholtzDirichletEBBC::define() {
       const Real areaFrac = ebisbox.bndryArea(vof);
       const Real B        = Bcoef(vof, m_comp);
 
+      int order;
       bool foundStencil = false;
       std::pair<Real, VoFStencil> pairSten;
 
       // Note: For order 1 we prefer to use least squares because it is cheaper to compute than order 2, plus the fact that
       //       it is more compact than the Johansen stencil. 1st order weighted least squares only requires 1 ghost cell.
-      int order = m_order;
+      order = m_order;
       while(!foundStencil && order > 0){
-	foundStencil = this->getLeastSquaresStencil(pairSten, vof, dit(), order);
-	order--;
+      	foundStencil = this->getLeastSquaresStencil(pairSten, vof, VofUtils::Neighborhood::Quadrant, dit(), order);
+      	order--;
       }
-      
+
+      // If we couldn't find in a quadrant, try a larger neighborhood
+      order = m_order;
+      while(!foundStencil && order > 0){
+      	foundStencil = this->getLeastSquaresStencil(pairSten, vof, VofUtils::Neighborhood::Radius, dit(), order);
+      	order--;
+      }
+
+      // Old code. 
       // if(m_order == 1){
       // 	if(!foundStencil) foundStencil = this->getLeastSquaresStencil(pairSten, vof, dit(), 1);
       // 	//	if(!foundStencil) foundStencil = this->getJohansenStencil    (pairSten, vof, dit(), 1);	
@@ -118,12 +127,16 @@ void EBHelmholtzDirichletEBBC::define() {
   }
 }
 
-bool EBHelmholtzDirichletEBBC::getLeastSquaresStencil(std::pair<Real, VoFStencil>& a_stencil, const VolIndex& a_vof, const DataIndex& a_dit, const int a_order) const {
+bool EBHelmholtzDirichletEBBC::getLeastSquaresStencil(std::pair<Real, VoFStencil>& a_stencil,
+						      const VolIndex&              a_vof,
+						      const VofUtils::Neighborhood a_neighborhood,
+						      const DataIndex&             a_dit,
+						      const int                    a_order) const {
   bool foundStencil = false;
   
   const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
     
-  const VoFStencil gradientStencil = LeastSquares::getBndryGradSten(a_vof, ebisbox, m_dx, a_order, m_weight, a_order);
+  const VoFStencil gradientStencil = LeastSquares::getBndryGradSten(a_vof, a_neighborhood, ebisbox, m_dx, a_order, m_weight, a_order);
 
   if(gradientStencil.size() > 0){
 
