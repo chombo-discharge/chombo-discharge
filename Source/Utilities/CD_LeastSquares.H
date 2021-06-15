@@ -73,7 +73,7 @@ public:
 
   /*!
     @brief Compute a least squares gradient stencil on the EB centroid with specified order. 
-    @details This routine eliminates the value on the boundary and the user will have to fetch the weight for this point from the returned stencil.
+    @details This routine eliminates the value on the boundary and the user will have to fetch the weight for this point from the returned stencil. 
     @param[in]  a_vof Input vof
     @param[in]  a_ebisbox ebisbox
     @param[in]  a_dx Resolution
@@ -310,8 +310,16 @@ public:
 
 
 
-
-
+  /*!
+    @brief Trim a system of equations down to a specified size. 
+    @details This will discard displacement vectors with the longest distance. If the system size is already equal to or smaller then this routine does nothing. 
+    @param[inout] a_vofs          Grid cells
+    @param[inout] a_displacements Displacement vectors
+    @param[in]    a_systemSize    Desired system size. 
+  */
+  static void trimSystem(Vector<VolIndex>& a_vofs,
+			 Vector<RealVect>& a_displacements,
+			 const int         a_systemSize);
 
 };
 

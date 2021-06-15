@@ -9,6 +9,9 @@
   @author Robert Marskar
 */
 
+// Std includes
+#include <vector>
+
 // Our includes
 #include <CD_LaPackUtils.H>
 #include <CD_LeastSquares.H>
@@ -64,10 +67,10 @@ VoFStencil LeastSquares::getBndryGradSten(const VolIndex&    a_vof,
 
     switch(a_neighborhood){
     case Neighborhood::Quadrant:
-      allVofs = VofUtils::getVofsInQuadrant(a_vof, a_ebisbox, normal, a_radius, VofUtils::Connectivity::MonotonePath,    false);
+      allVofs = VofUtils::getVofsInQuadrant(a_vof, a_ebisbox, normal, a_radius, VofUtils::Connectivity::MonotonePath, false);
       break;
     case Neighborhood::Radius:
-      allVofs = VofUtils::getVofsInQuadrant(a_vof, a_ebisbox, normal, a_radius, VofUtils::Connectivity::MonotonePath,    false);
+      allVofs = VofUtils::getVofsInRadius(a_vof, a_ebisbox, a_radius, VofUtils::Connectivity::MonotonePath, false);
       break;
     default:
       break;
@@ -81,7 +84,7 @@ VoFStencil LeastSquares::getBndryGradSten(const VolIndex&    a_vof,
 									    allVofs,
 									    a_ebisbox,
 									    a_dx);
-    
+      
       bndrySten = LeastSquares::computeGradSten(allVofs, displacements, a_p, a_order); // This routine eliminates a_vof from the system of equations!
     }
   }
@@ -392,6 +395,39 @@ std::map<IntVect, VoFStencil> LeastSquares::computeInterpolationStencil(const In
   }
 
   return ret;
+}
+
+
+void LeastSquares::trimSystem(Vector<VolIndex>& a_vofs,
+			      Vector<RealVect>& a_displacements,
+			      const int         a_systemSize){
+
+  const int inputSize = a_vofs.size();
+  
+  if(inputSize > a_systemSize){
+
+    // Make the system vector and sort it
+    std::vector<std::pair<VolIndex, RealVect> > system;
+    for (int i = 0; i < inputSize; i++){
+      system.emplace_back(std::make_pair(a_vofs[i], a_displacements[i]));
+    }
+
+    auto sortCrit = [](std::pair<VolIndex, RealVect> a, std::pair<VolIndex, RealVect> b) -> bool {
+      return a.second.vectorLength() > b.second.vectorLength();
+    };
+
+    std::sort(system.begin(), system.end(), sortCrit);
+
+
+    // Make output stuff
+    a_vofs.resize(a_systemSize);
+    a_displacements.resize(a_systemSize);
+
+    for (int i = 0; i < a_systemSize; i++){
+      a_vofs[i]          = system[i].first;
+      a_displacements[i] = system[i].second;
+    }
+  }
 }
 
 #include <CD_NamespaceFooter.H>

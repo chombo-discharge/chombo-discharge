@@ -99,17 +99,6 @@ void EBHelmholtzDirichletEBBC::define() {
       	order--;
       }
 
-      // Old code. 
-      // if(m_order == 1){
-      // 	if(!foundStencil) foundStencil = this->getLeastSquaresStencil(pairSten, vof, dit(), 1);
-      // 	//	if(!foundStencil) foundStencil = this->getJohansenStencil    (pairSten, vof, dit(), 1);	
-      // }
-      // else if(m_order == 2){
-      // 	if(!foundStencil) foundStencil = this->getLeastSquaresStencil(pairSten, vof, dit(), 2);
-      // 	//	if(!foundStencil) foundStencil = this->getJohansenStencil    (pairSten, vof, dit(), 2);	
-      // 	if(!foundStencil) foundStencil = this->getLeastSquaresStencil(pairSten, vof, dit(), 1);	
-      // }
-
       if(foundStencil){
 	weights (vof, m_comp) = pairSten.first;
 	stencils(vof, m_comp) = pairSten.second;
