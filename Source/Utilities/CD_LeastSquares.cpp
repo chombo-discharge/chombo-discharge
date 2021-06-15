@@ -61,10 +61,9 @@ VoFStencil LeastSquares::getBndryGradSten(const VolIndex& a_vof,
 
     Vector<VolIndex> allVofs;
 
-    // Monotone path first, try quadrant then radius, If that does not work
+    // Monotone path first, try quadrant then radius, If that does not work we're out of ideas (I'm NOT going to reach over EBs). 
     if(allVofs.size() < numUnknowns); allVofs = VofUtils::getVofsInQuadrant(a_vof, a_ebisbox, normal, a_radius, VofUtils::Connectivity::MonotonePath,    false);
     if(allVofs.size() < numUnknowns); allVofs = VofUtils::getVofsInRadius(  a_vof, a_ebisbox,         a_radius, VofUtils::Connectivity::MonotonePath,    false);        
-    if(allVofs.size() < numUnknowns); allVofs = VofUtils::getVofsInRadius(  a_vof, a_ebisbox,         a_radius, VofUtils::Connectivity::SimplyConnected, false);
 
     // Now build the stencil. 
     if(allVofs.size() >= numUnknowns){
@@ -158,7 +157,7 @@ Vector<Real> LeastSquares::makeDiagWeights(const Vector<RealVect>& a_displacemen
     for (int i = 0; i < a_displacements.size(); i++){
       const RealVect& d = a_displacements[i];
       const Real len    = d.vectorLength();
-      const Real w      = 1./std::pow(len, a_pow);
+      const Real w      = std::pow(len, -a_pow);
 
       ret[i] = w;
     }

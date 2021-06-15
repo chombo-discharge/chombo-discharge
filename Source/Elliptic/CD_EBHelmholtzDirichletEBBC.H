@@ -42,6 +42,13 @@ public:
   */
   void setOrder(const int a_order);
 
+    /*!
+    @brief Set stencil weights
+    @param[in] a_weight Weighting factor for least squares stencils
+    @note a_weight=0 can lead to ill-conditioned systems.
+  */
+  void setWeight(const int a_weight);
+
   /*!
     @brief Set the value on the EB. 
     @param[in] a_value Constant value on EB
@@ -70,6 +77,11 @@ protected:
     @brief Stencil approximation order,
   */
   int m_order;
+
+  /*!
+    @brief Distance weighting factor for stencils.
+  */
+  int m_weight;
 
   /*!
     @brief Value on EB

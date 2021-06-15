@@ -225,6 +225,8 @@ void ProxyFieldSolver::solveEBCond(EBAMRCellData& a_phi, EBAMRCellData& a_residu
     bcFactory->setOrder(eb_order);
 
     ebbcFactory = RefCountedPtr<BaseEBBCFactory> (bcFactory);
+
+    if(eb_order == 2 && m_amr->getNumberOfGhostCells() < 3)  MayDay::Abort("ProxyFieldSolver::solveEBCond - not enough ghost cells!");
   }
   else if(str == "neumann"){
     pp.get("eb_val",   eb_value);
@@ -371,6 +373,7 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
   const IntVect ghostRhs = m_amr->getNumberOfGhostCells()*IntVect::Unit;
 
   int         eb_order;
+  int         eb_weight;
   Real        eb_value;
   Real        dom_value;
   std::string str;
@@ -381,10 +384,14 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
   // EBBC
   pp.get("eb_bc", str);
   if(str == "dirichlet"){
-    pp.get("eb_order", eb_order);
-    pp.get("eb_val",   eb_value);
+    pp.get("eb_order",  eb_order);
+    pp.get("eb_val",    eb_value);
+    pp.get("eb_weight", eb_weight);
 
-    ebbcFactory = RefCountedPtr<EBHelmholtzEBBCFactory> (new EBHelmholtzDirichletEBBCFactory(eb_order, eb_value));
+    ebbcFactory = RefCountedPtr<EBHelmholtzEBBCFactory> (new EBHelmholtzDirichletEBBCFactory(eb_order, eb_weight, eb_value));
+
+    // Make sure we have enough ghost cells.
+    if(eb_order > m_amr->getNumberOfGhostCells()) MayDay::Abort("ProxyFieldSolver::solveHelm - not enough ghost cells!");
   }
   else if(str == "neumann"){
     pp.get("eb_val", eb_value);

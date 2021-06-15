@@ -29,18 +29,19 @@ public:
 
   /*!
     @brief Full constructor which sets order and value on EB. 
-    @param[in] a_order Approximation order
-    @param[in] a_value Constant value on EB
+    @param[in] a_order  Approximation order
+    @param[in] a_weight Weighting factor for stencils
+    @param[in] a_value  Constant value on EB
     @note The order is also the attempted radius of the stencil. 
   */
-  EBHelmholtzDirichletEBBCFactory(const int a_order, const Real a_value);
+  EBHelmholtzDirichletEBBCFactory(const int a_order, const int a_weight, const Real a_value);
 
   /*!
     @brief Full constructor which sets order and spatially varying value on EBs
     @param[in] a_order Approximation order
     @param[in] a_value Spatially varying value on EBs
   */
-  EBHelmholtzDirichletEBBCFactory(const int a_order, const std::function<Real(const RealVect& a_pos)>& a_value);
+  EBHelmholtzDirichletEBBCFactory(const int a_order, const int a_weight, const std::function<Real(const RealVect& a_pos)>& a_value);
 
   /*!
     @brief Destructor
@@ -53,6 +54,13 @@ public:
     @note For least squares, the order is also the attempted radius of the stencil. 
   */
   void setOrder(const int a_order);
+
+  /*!
+    @brief Set BC order
+    @param[in] a_weight Weight for least squares stencils. 
+    @note a_weight = 0 can lead to ill-conditioned least-squares systems. 
+  */
+  void setWeight(const int a_weight);
 
   /*!
     @brief Set the value on the EB. 
@@ -87,6 +95,11 @@ protected:
     @brief Stencil approximation order,
   */
   int m_order;
+
+  /*!
+    @brief Stencil weighting
+  */
+  int m_weight;
 
   /*!
     @brief Value on EB

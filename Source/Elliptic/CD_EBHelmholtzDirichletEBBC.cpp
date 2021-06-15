@@ -19,6 +19,7 @@
 
 EBHelmholtzDirichletEBBC::EBHelmholtzDirichletEBBC(){
   m_order       = -1;
+  m_weight      = -1;
   m_useConstant = false;
   m_useFunction = false;
 }
@@ -29,6 +30,10 @@ EBHelmholtzDirichletEBBC::~EBHelmholtzDirichletEBBC(){
 
 void EBHelmholtzDirichletEBBC::setOrder(const int a_order){
   m_order = a_order;
+}
+
+void EBHelmholtzDirichletEBBC::setWeight(const int a_weight){
+  m_weight = a_weight;
 }
 
 void EBHelmholtzDirichletEBBC::setValue(const int a_value){
@@ -77,15 +82,22 @@ void EBHelmholtzDirichletEBBC::define() {
       std::pair<Real, VoFStencil> pairSten;
 
       // Note: For order 1 we prefer to use least squares because it is cheaper to compute than order 2, plus the fact that
-      //       it is more compact than the Johansen stencil. 1st order weighted least squares only requires 
-      if(m_order == 1){
-	if(!foundStencil) foundStencil = this->getLeastSquaresStencil(pairSten, vof, dit(), 1);
-	if(!foundStencil) foundStencil = this->getJohansenStencil    (pairSten, vof, dit(), 1);	
+      //       it is more compact than the Johansen stencil. 1st order weighted least squares only requires 1 ghost cell.
+      int order = m_order;
+      while(!foundStencil && order > 0){
+	foundStencil = this->getLeastSquaresStencil(pairSten, vof, dit(), order);
+	order--;
       }
-      else if(m_order == 2){
-	if(!foundStencil) foundStencil = this->getJohansenStencil    (pairSten, vof, dit(), 2);
-	if(!foundStencil) foundStencil = this->getLeastSquaresStencil(pairSten, vof, dit(), 1);	
-      }
+      
+      // if(m_order == 1){
+      // 	if(!foundStencil) foundStencil = this->getLeastSquaresStencil(pairSten, vof, dit(), 1);
+      // 	//	if(!foundStencil) foundStencil = this->getJohansenStencil    (pairSten, vof, dit(), 1);	
+      // }
+      // else if(m_order == 2){
+      // 	if(!foundStencil) foundStencil = this->getLeastSquaresStencil(pairSten, vof, dit(), 2);
+      // 	//	if(!foundStencil) foundStencil = this->getJohansenStencil    (pairSten, vof, dit(), 2);	
+      // 	if(!foundStencil) foundStencil = this->getLeastSquaresStencil(pairSten, vof, dit(), 1);	
+      // }
 
       if(foundStencil){
 	weights (vof, m_comp) = pairSten.first;
@@ -109,7 +121,7 @@ bool EBHelmholtzDirichletEBBC::getLeastSquaresStencil(std::pair<Real, VoFStencil
   
   const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
     
-  const VoFStencil gradientStencil = LeastSquares::getBndryGradSten(a_vof, ebisbox, m_dx, a_order, a_order, a_order);
+  const VoFStencil gradientStencil = LeastSquares::getBndryGradSten(a_vof, ebisbox, m_dx, a_order, m_weight, a_order);
 
   if(gradientStencil.size() > 0){
 
