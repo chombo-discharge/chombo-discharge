@@ -5,7 +5,7 @@ AmrMesh.lo_corner       = -1 -1       # Low corner of problem domain
 AmrMesh.hi_corner       =  1  1       # High corner of problem domain
 AmrMesh.verbosity       = -1          # Controls verbosity. 
 AmrMesh.coarsest_domain = 64 64       # Number of cells on coarsest domain
-AmrMesh.max_amr_depth   = 6           # Maximum amr depth
+AmrMesh.max_amr_depth   = 4           # Maximum amr depth
 AmrMesh.max_sim_depth   = -1          # Maximum simulation depth
 AmrMesh.fill_ratio      = 1.0         # Fill ratio for grid generation
 AmrMesh.irreg_growth    = 5           # How much to grow irregular tagged cells
@@ -71,7 +71,7 @@ ProxyFieldSolver.solver    = helm        # Our solver ('helmholtz') or ebconduct
 ProxyFieldSolver.eb_bc     = dirichlet   # 'dirichlet', 'neumann', or 'robin'
 ProxyFieldSolver.domain_bc = dirichlet   # 'dirichlet', 'neumann', or 'robin'
 ProxyFieldSolver.eb_order  = 2           # BC order on EB (only for Dirichlet)
-ProxyFieldSolver.eb_weight = 2           # Weighting for least squares (only for helm)
+ProxyFieldSolver.eb_weight = 1           # Weighting for least squares (only for helm)
 ProxyFieldSolver.dom_val   = -1          # Value on domain (For Robin, this is multiplier)
 ProxyFieldSolver.eb_val    = 1           # Value on EB (For robin, this is multiplier)
 ProxyFieldSolver.smooth    = 16          # Smoothings
@@ -97,7 +97,7 @@ RodDielectric.electrode.endpoint2       =  0.5  0.5     # Other endpoint
 RodDielectric.electrode.radius          = 0.1           # Electrode radius
 RodDielectric.electrode.live            = true          # Live or not
 
-RodDielectric.dielectric.on             = false        # Use dielectric or not
+RodDielectric.dielectric.on             = true        # Use dielectric or not
 RodDielectric.dielectric.shape          = sphere    # 'plane', 'box', 'perlin_box', 'sphere'
 RodDielectric.dielectric.permittivity   = 4             # Dielectric permittivity
 

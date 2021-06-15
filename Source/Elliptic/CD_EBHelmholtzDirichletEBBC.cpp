@@ -93,11 +93,11 @@ void EBHelmholtzDirichletEBBC::define() {
       }
 
       // If we couldn't find in a quadrant, try a larger neighborhood
-      order = m_order;
-      while(!foundStencil && order > 0){
-      	foundStencil = this->getLeastSquaresStencil(pairSten, vof, VofUtils::Neighborhood::Radius, dit(), order);
-      	order--;
-      }
+      // order = m_order;
+      // while(!foundStencil && order > 0){
+      // 	foundStencil = this->getLeastSquaresStencil(pairSten, vof, VofUtils::Neighborhood::Radius, dit(), order);
+      // 	order--;
+      // }
 
       if(foundStencil){
 	weights (vof, m_comp) = pairSten.first;
