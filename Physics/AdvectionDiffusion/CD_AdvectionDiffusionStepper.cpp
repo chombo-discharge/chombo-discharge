@@ -102,7 +102,6 @@ void AdvectionDiffusionStepper::initialData(){
   if(m_solver->isMobile()){
     this->setVelocity();
   }
-
 }
 
 void AdvectionDiffusionStepper::setVelocity(){
