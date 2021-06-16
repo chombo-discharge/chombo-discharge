@@ -258,16 +258,16 @@ void Driver::getGeometryTags(){
     m_geomTags[lvl] |= solid_tags;
   }
 
-  // Remove tags using the geocoarsener if we have it
-  if(!m_geoCoarsen.isNull()){
-    m_geoCoarsen->coarsenTags(m_geomTags, m_amr->getDx(), m_amr->getProbLo());
-  }
-
   // Grow tags. This is an ad-hoc fix that prevents ugly grid near EBs (i.e. cases where only ghost cells are used
   // for elliptic equations)
   const int growth = m_amr->getIrregTagGrowth();
   for (int lvl = 0; lvl < maxdepth; lvl++){
     m_geomTags[lvl].grow(growth);
+  }
+
+  // Remove tags using the geocoarsener if we have it
+  if(!m_geoCoarsen.isNull()){
+    m_geoCoarsen->coarsenTags(m_geomTags, m_amr->getDx(), m_amr->getProbLo());
   }
 }
 
@@ -973,12 +973,12 @@ void Driver::parseOptions(){
   pp.get("output_names",             m_outputFileNames);
   pp.get("plot_interval",            m_plotInterval);
   pp.get("checkpoint_interval",      m_checkpointInterval);
-  pp.get("writeRegridFiles",       m_writeRegridFiles);
-  pp.get("writeRestartFiles",      m_writeRestartFiles);
+  pp.get("write_regrid_files",       m_writeRegridFiles);
+  pp.get("write_restart_files",      m_writeRestartFiles);
   pp.get("num_plot_ghost",           m_numPlotGhost);
   pp.get("allow_coarsening",         m_allowCoarsening);
   pp.get("geometry_only",            m_geometryOnly);
-  pp.get("ebis_memory_LoadBalancing", m_ebisMemoryLoadBalance);
+  pp.get("ebis_memory_load_balance", m_ebisMemoryLoadBalance);
   pp.get("max_steps",                m_maxSteps);
   pp.get("start_time",               m_startTime);
   pp.get("stop_time",                m_stopTime);
@@ -1007,8 +1007,8 @@ void Driver::parseRuntimeOptions(){
   pp.get("plot_interval",            m_plotInterval);
   pp.get("regrid_interval",          m_regridInterval);
   pp.get("checkpoint_interval",      m_checkpointInterval);
-  pp.get("writeRegridFiles",       m_writeRegridFiles);
-  pp.get("writeRestartFiles",      m_writeRestartFiles);
+  pp.get("write_regrid_files",       m_writeRegridFiles);
+  pp.get("write_restart_files",      m_writeRestartFiles);
   pp.get("num_plot_ghost",           m_numPlotGhost);
   pp.get("allow_coarsening",         m_allowCoarsening);
   pp.get("max_steps",                m_maxSteps);

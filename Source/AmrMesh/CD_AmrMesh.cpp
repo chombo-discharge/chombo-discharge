@@ -780,6 +780,8 @@ void AmrMesh::parseOptions(){
   parseGhostInterpolation();
   parseCentroidStencils();
   parseEbCentroidStencils();
+
+  this->sanityCheck();
 }
 
 void AmrMesh::parseRuntimeOptions(){
@@ -1497,7 +1499,8 @@ void AmrMesh::parseRefinementRatios(){
 
   // Pad with 2 if user didn't supply enough
   while(ratios.size() < m_maxAmrDepth){
-    ratios.push_back(2);
+    //    ratios.push_back(2);
+    ratios.push_back(ratios.back());
   }
   
   m_refinementRatios = ratios;
@@ -1553,11 +1556,11 @@ void AmrMesh::parseMaxBoxSize(){
   ParmParse pp("AmrMesh");
   int box_size;
   pp.get("max_box_size", box_size);
-  if(box_size >= 8 && box_size % 2 == 0){
+  if(box_size >= 4 && box_size % 2 == 0){
     m_maxBoxSize = box_size;
   }
   else{
-    MayDay::Abort("AmrMesh::parseMaxBoxSize - must have box_size >= 8 and divisible by 2");
+    MayDay::Abort("AmrMesh::parseMaxBoxSize - must have box_size >= 4 and divisible by 2");
   }
 }
 
@@ -1726,6 +1729,14 @@ void AmrMesh::sanityCheck() const {
   CH_assert(m_maxBoxSize >= 8 && m_maxBoxSize % m_blockingFactor == 0);
   CH_assert(m_fillRatioBR > 0. && m_fillRatioBR <= 1.0);
   CH_assert(m_bufferSizeBR > 0);
+
+  if(m_maxAmrDepth > 0){
+    for (int lvl = 0; lvl < m_maxAmrDepth; lvl++){
+      if(m_refinementRatios[lvl] > 2 && m_blockingFactor < 8){
+	MayDay::Abort("AmrMesh::sanityCheck -- can't use blocking factor < 8 with factor 4 refinement!");
+      }
+    }
+  }
 }
 
 bool AmrMesh::getEbCf() const {

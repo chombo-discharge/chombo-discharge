@@ -39,8 +39,11 @@ public:
 
   /*!
     @brief Coarsen tags
+    @param[in] a_tags   Tags to be modified. 
+    @param[in] a_dx     Grid resolutions. 
+    @param[in] a_probLo Domain origin. 
   */
-  virtual void coarsenTags(Vector<IntVectSet>& a_tags, const Vector<Real>& a_dx, const RealVect& a_origin) const;
+  virtual void coarsenTags(Vector<IntVectSet>& a_tags, const Vector<Real>& a_dx, const RealVect& a_probLo) const;
 
   /*!
     @brief Get coarsening boxes

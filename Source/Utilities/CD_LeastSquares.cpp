@@ -9,15 +9,88 @@
   @author Robert Marskar
 */
 
-// Chombo includes
-#include <EBArith.H>
+// Std includes
+#include <vector>
 
 // Our includes
 #include <CD_LaPackUtils.H>
 #include <CD_LeastSquares.H>
-#include <CD_VofUtils.H>
 #include <CD_MultiIndex.H>
 #include <CD_NamespaceHeader.H>
+
+VoFStencil LeastSquares::getInterpolationStencil(const CellPosition a_cellPos,
+						 const CellPosition a_otherCellsPos,
+						 const Connectivity a_connectivity,						 
+						 const VolIndex&    a_startVof,
+						 const EBISBox&     a_ebisbox,
+						 const Real         a_dx,
+						 const int          a_p,
+						 const int          a_radius,
+						 const int          a_order,
+						 const bool         a_addStartingVof){
+
+  if(a_p > 0 && a_addStartingVof){
+    MayDay::Error("LeastSquares::getInterpolationStencilUsingAllConnectedVofsInRadius - can't use a_p > 0 && a_addStartingVof (it's an ill-conditioned system of equations)");
+  }
+
+  // Get all Vofs in a radius, and then compute the displacement vectors. 
+  Vector<VolIndex> vofs = VofUtils::getVofsInRadius(a_startVof, a_ebisbox, a_radius, a_connectivity, a_addStartingVof);
+  const Vector<RealVect> displacements = LeastSquares::getDisplacements(a_cellPos, a_otherCellsPos, a_startVof, vofs, a_ebisbox, a_dx);
+
+  const int M = LeastSquares::getTaylorExpansionSize(a_order);
+  const int K = displacements.size();
+
+  VoFStencil ret;
+  if(K >= M) { // Have enough equations to compute.
+    ret = LeastSquares::computeInterpolationStencil(vofs, displacements, a_p, a_order);
+  }
+
+  return ret;
+}
+
+VoFStencil LeastSquares::getBndryGradSten(const VolIndex&    a_vof,
+					  const Neighborhood a_neighborhood,					  
+					  const EBISBox&     a_ebisbox,
+					  const Real         a_dx,
+					  const int          a_radius,
+					  const int          a_p,
+					  const int          a_order){
+  VoFStencil bndrySten;
+
+  const bool addStartingVof = false;
+  const RealVect normal     = a_ebisbox.normal(a_vof);
+
+  if(normal != RealVect::Zero){ // Can only do this if we actual have a normal vector. 
+    const int numUnknowns = LeastSquares::getTaylorExpansionSize(a_order) - 1; 
+
+    Vector<VolIndex> allVofs;
+
+    switch(a_neighborhood){
+    case Neighborhood::Quadrant:
+      allVofs = VofUtils::getVofsInQuadrant(a_vof, a_ebisbox, normal, a_radius, VofUtils::Connectivity::MonotonePath, false);
+      break;
+    case Neighborhood::Radius:
+      allVofs = VofUtils::getVofsInRadius(a_vof, a_ebisbox, a_radius, VofUtils::Connectivity::MonotonePath, false);
+      break;
+    default:
+      break;
+    }
+
+    // Now build the stencil. 
+    if(allVofs.size() >= numUnknowns){
+      const Vector<RealVect> displacements = LeastSquares::getDisplacements(CellPosition::Boundary,
+									    CellPosition::Center,
+									    a_vof,
+									    allVofs,
+									    a_ebisbox,
+									    a_dx);
+      
+      bndrySten = LeastSquares::computeGradSten(allVofs, displacements, a_p, a_order); // This routine eliminates a_vof from the system of equations!
+    }
+  }
+
+  return bndrySten;
+}
 
 RealVect LeastSquares::position(const CellPosition a_position,
 				const VolIndex&    a_vof,
@@ -95,7 +168,7 @@ Vector<Real> LeastSquares::makeDiagWeights(const Vector<RealVect>& a_displacemen
     for (int i = 0; i < a_displacements.size(); i++){
       const RealVect& d = a_displacements[i];
       const Real len    = d.vectorLength();
-      const Real w      = 1./std::pow(len, a_pow);
+      const Real w      = std::pow(len, -a_pow);
 
       ret[i] = w;
     }
@@ -151,51 +224,7 @@ VoFStencil LeastSquares::computeGradSten(const Vector<VolIndex>& a_allVofs,
 
 }
 
-VoFStencil LeastSquares::getBndryGradSten(const VolIndex& a_vof,
-					  const EBISBox&  a_ebisbox,
-					  const Real&     a_dx,
-					  const int       a_p,
-					  const int       a_order){
-  VoFStencil bndrySten;
 
-  const bool addStartingVof = false;
-  const RealVect normal     = a_ebisbox.normal(a_vof);
-
-  if(normal != RealVect::Zero){ // Can only do this if we actual have a normal vector. 
-    const int radius      = a_order;
-    const int numUnknowns = LeastSquares::getTaylorExpansionSize(a_order) - 1; 
-
-
-    // Get Vofs, try to use quadrants but if the normal is aligned with the grid just get a "symmetric" stencil. 
-    Vector<VolIndex> allVofs;
-    if(VofUtils::isQuadrantWellDefined(normal)){ // Try to use quadrants. 
-      allVofs = VofUtils::getAllVofsInQuadrant(a_vof, a_ebisbox, normal, radius, addStartingVof);
-    }
-    else{
-      const std::pair<int, Side::LoHiSide> cardinal = VofUtils::getCardinalDirection(normal);
-      allVofs = VofUtils::getAllVofsSymmetric(a_vof, a_ebisbox, cardinal.first, cardinal.second, radius, addStartingVof);
-    }
-
-    // If we couldn't get enough cells using quadrants. Do this. 
-    if(allVofs.size() < numUnknowns){
-      allVofs = VofUtils::getAllConnectedVofsInRadius(a_vof, a_ebisbox, radius, IntVectSet());
-    }
-
-    // Now build the stencil. 
-    if(allVofs.size() >= numUnknowns){
-      const Vector<RealVect> displacements = LeastSquares::getDisplacements(CellPosition::Boundary,
-									    CellPosition::Center,
-									    a_vof,
-									    allVofs,
-									    a_ebisbox,
-									    a_dx);
-    
-      bndrySten = LeastSquares::computeGradSten(allVofs, displacements, a_p, a_order); // This routine eliminates a_vof from the system of equations!
-    }
-  }
-
-  return bndrySten;
-}
 
 VoFStencil LeastSquares::projectGradSten(const VoFStencil& a_stencil, const RealVect& a_projection) {
   VoFStencil sten;
@@ -368,29 +397,37 @@ std::map<IntVect, VoFStencil> LeastSquares::computeInterpolationStencil(const In
   return ret;
 }
 
-VoFStencil LeastSquares::getInterpolationStencilUsingAllVofsInRadius(const CellPosition a_cellPos,
-								     const CellPosition a_otherCellsPos,
-								     const VolIndex&    a_vof,
-								     const EBISBox&     a_ebisbox,
-								     const Real         a_dx,
-								     const int          a_p,
-								     const int          a_radius,
-								     const int          a_order){
 
-  // Get all Vofs in a radius, and then compute the displacement vectors. 
-  Vector<VolIndex> vofs = VofUtils::getAllConnectedVofsInRadius(a_vof, a_ebisbox, a_radius, IntVectSet());
-  vofs.push_back(a_vof);
-  const Vector<RealVect> displacements = LeastSquares::getDisplacements(a_cellPos, a_otherCellsPos, a_vof, vofs, a_ebisbox, a_dx);
+void LeastSquares::trimSystem(Vector<VolIndex>& a_vofs,
+			      Vector<RealVect>& a_displacements,
+			      const int         a_systemSize){
 
-  const int M = LeastSquares::getTaylorExpansionSize(a_order);
-  const int K = displacements.size();
+  const int inputSize = a_vofs.size();
+  
+  if(inputSize > a_systemSize){
 
-  VoFStencil ret;
-  if(K >= M) { // Have enough equations to compute.
-    ret = LeastSquares::computeInterpolationStencil(vofs, displacements, a_p, a_order);
+    // Make the system vector and sort it
+    std::vector<std::pair<VolIndex, RealVect> > system;
+    for (int i = 0; i < inputSize; i++){
+      system.emplace_back(std::make_pair(a_vofs[i], a_displacements[i]));
+    }
+
+    auto sortCrit = [](std::pair<VolIndex, RealVect> a, std::pair<VolIndex, RealVect> b) -> bool {
+      return a.second.vectorLength() > b.second.vectorLength();
+    };
+
+    std::sort(system.begin(), system.end(), sortCrit);
+
+
+    // Make output stuff
+    a_vofs.resize(a_systemSize);
+    a_displacements.resize(a_systemSize);
+
+    for (int i = 0; i < a_systemSize; i++){
+      a_vofs[i]          = system[i].first;
+      a_displacements[i] = system[i].second;
+    }
   }
-
-  return ret;
 }
 
 #include <CD_NamespaceFooter.H>

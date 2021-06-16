@@ -127,15 +127,18 @@ bool CentroidInterpolationStencil::getLeastSquaresStencil(VoFStencil&           
 							  const IntVectSet&        a_cfivs){
 
   const int weightingPower = 0;
+  const bool useStartVof   = true;
   
-  a_sten = LeastSquares::getInterpolationStencilUsingAllVofsInRadius(LeastSquares::CellPosition::Centroid,
-								     LeastSquares::CellPosition::Center,
-								     a_vof,
-								     a_ebisbox,
-								     a_dx,
-								     weightingPower,
-								     m_radius,
-								     m_order);
+  a_sten = LeastSquares::getInterpolationStencil(LeastSquares::CellPosition::Centroid,
+						 LeastSquares::CellPosition::Center,
+						 LeastSquares::Connectivity::MonotonePath,						 
+						 a_vof,
+						 a_ebisbox,						 
+						 a_dx,
+						 weightingPower,
+						 m_radius,
+						 m_order,
+						 useStartVof);
 
   return (a_sten.size() > 0);
 }

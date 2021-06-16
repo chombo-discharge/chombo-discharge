@@ -347,7 +347,7 @@ void PhaseRealm::define_eb_quad_cfi(const int a_lmin){
 										 m_refinementRatios[lvl-1],
 										 ncomps,
 										 m_dx[lvl],
-										 m_numGhostCells,
+										 m_numGhostCells*IntVect::Unit,
 										 cfivs,
 										 m_ebis));
 
@@ -504,6 +504,7 @@ void PhaseRealm::define_flux_reg(const int a_lmin, const int a_regsize){
 
 
       if(has_fine){
+#if 1 // Our code
 	m_flux_reg[lvl] = RefCountedPtr<EBFluxRegister> (new EbFastFluxRegister(m_grids[lvl+1],
 										m_grids[lvl],
 										m_ebisl[lvl+1],
@@ -512,6 +513,16 @@ void PhaseRealm::define_flux_reg(const int a_lmin, const int a_regsize){
 										m_refinementRatios[lvl],
 										comps,
 										&(*m_ebis)));
+#else // Chombo code. Leaving this in place in case something breaks. 
+	m_flux_reg[lvl] = RefCountedPtr<EBFluxRegister> (new EBFluxRegister(m_grids[lvl+1],
+									    m_grids[lvl],
+									    m_ebisl[lvl+1],
+									    m_ebisl[lvl],
+									    m_domains[lvl].domainBox(),
+									    m_refinementRatios[lvl],
+									    comps,
+									    &(*m_ebis)));
+#endif
       }
     }
   }
