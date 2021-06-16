@@ -11,6 +11,7 @@
 
 // Chombo includes
 #include <EBArith.H>
+#include <NeighborIterator.H>
 
 // Our includes
 #include <CD_LeastSquares.H>
@@ -76,6 +77,7 @@ void EBHelmholtzDirichletEBBC::define() {
     weights. define(ivs, ebgraph, m_nComp);
     stencils.define(ivs, ebgraph, m_nComp);
 
+
     for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
       const Real areaFrac = ebisbox.bndryArea(vof);
@@ -90,6 +92,11 @@ void EBHelmholtzDirichletEBBC::define() {
       while(!foundStencil && order > 0){
       	foundStencil = this->getLeastSquaresStencil(pairSten, vof, VofUtils::Neighborhood::Quadrant, dit(), order);
       	order--;
+
+	// Check if stencil reaches too far across CF
+	if(foundStencil) {
+	  foundStencil = this->isStencilValidCF(pairSten.second, dit());
+	}
       }
 
       // If we couldn't find in a quadrant, try a larger neighborhood
@@ -97,6 +104,11 @@ void EBHelmholtzDirichletEBBC::define() {
       while(!foundStencil && order > 0){
       	foundStencil = this->getLeastSquaresStencil(pairSten, vof, VofUtils::Neighborhood::Radius, dit(), order);
       	order--;
+
+	// Check if stencil reaches too far across CF
+	if(foundStencil) {
+	  foundStencil = this->isStencilValidCF(pairSten.second, dit());
+	}
       }
 
       if(foundStencil){

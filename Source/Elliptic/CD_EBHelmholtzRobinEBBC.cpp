@@ -51,6 +51,9 @@ void EBHelmholtzRobinEBBC::setCoefficients(const std::function<Real(const RealVe
 VoFStencil EBHelmholtzRobinEBBC::getInterpolationStencil(const VolIndex& a_vof, const DataIndex& a_dit) const {
   VoFStencil stencil;
 
+  // First, try direct interpolation using least squares. Then, try Chombo taylor extrapolation. 
+  // I don't think it should be necessary to check if the stencils reach across the CF interface because
+  // EBHelmholtzOp always interpolates at least one ghost cell, and these stencils should really have a width of 1. 
   if(stencil.size() == 0) stencil = this->getMonoPathStencil(a_vof, a_dit);
   if(stencil.size() == 0) stencil = this->getTaylorStencil  (a_vof, a_dit);
   

@@ -162,7 +162,7 @@ Vector<RefCountedPtr<EBMultigridInterpolator> > ProxyFieldSolver::getMultigridIn
 											       eblgCoar,
 											       m_amr->getRefinementRatios()[lvl-1],
 											       1,
-											       cfivs));
+											       1));
     }
   }
 

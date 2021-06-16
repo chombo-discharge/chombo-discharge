@@ -49,12 +49,13 @@ public:
 
   /*!
     @brief Define function that is called by EBHelmholtzOp
-    @param[in] a_eblg   Grid where this object is defined. 
-    @param[in] a_Bcoef  B-coefficient. You will need this for the flux stencil. 
-    @param[in] a_probLo Lower-left corner of computational domain. Required if BC objects needs physical position. 
-    @param[in] a_dx     Grid resolution. 
+    @param[in] a_eblg    Grid where this object is defined. 
+    @param[in] a_Bcoef   B-coefficient. You will need this for the flux stencil. 
+    @param[in] a_probLo  Lower-left corner of computational domain. Required if BC objects needs physical position. 
+    @param[in] a_dx      Grid resolution. 
+    @param[in] a_ghostCF Number of ghost cells that are filled across CF interface. 
   */
-  void define(const EBLevelGrid& a_eblg, const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_Bcoef, const RealVect& m_probLo, const Real& a_dx);
+  void define(const EBLevelGrid& a_eblg, const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_Bcoef, const RealVect& m_probLo, const Real& a_dx, const int a_ghostCF);
 
   /*!
     @brief Apply the EB flux. This is the version that is called by EBHelmholtzOp.
@@ -90,6 +91,11 @@ protected:
     @brief Number of components. Always have m_nComp = 1
   */
   constexpr static int m_nComp = 1;
+
+  /*!
+    @brief Number of ghost cells that were filled across CF interface
+  */
+  int m_ghostCF;
 
   /*!
     @brief Grid resolution
@@ -129,6 +135,14 @@ protected:
 			   const VolIndex&    a_vof,
 			   const DataIndex&   a_dit,
 			   const Real&        a_beta) const = 0;
+
+  /*!
+    @brief Check if stencil is valid. 
+    @details This routine makes sure that the stencil a_stencil does not reach over the CF interface and into ghost cells that do not have valid data.
+    @param[in] a_stencil Stencil
+    @param[in] a_dit     Data index
+  */
+  bool isStencilValidCF(const VoFStencil& a_stencil, const DataIndex& a_dit) const;
 
   /*!
     @brief Returns physical position at the boundary

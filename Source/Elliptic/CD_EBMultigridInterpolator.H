@@ -52,13 +52,18 @@ public:
 			  const EBLevelGrid&            a_eblgCoar,
 			  const int                     a_nRef,
 			  const int                     a_nVar,
-			  const LayoutData<IntVectSet>& a_ghostCells);
+			  const int                     a_ghostCF);
 
 
   /*!
     @brief Dtor. Releases stencils. 
   */
   ~EBMultigridInterpolator();
+
+  /*!
+    @brief Return number of ghost cells across CF interface.
+  */
+  int getGhostCF() const;
 
   /*!
     @brief Do inhomogeneous interpolation
@@ -86,6 +91,11 @@ protected:
     @brief Coarse grids
   */
   EBLevelGrid m_eblgCoar;
+
+  /*!
+    @brief Number of ghost cells to fill across coarse-fine interface. 
+  */
+  int m_ghostCF;
 
   /*!
     @brief Coarse-fine interface. 

@@ -156,9 +156,10 @@ void EBHelmholtzOp::defineStencils(){
   }
 
   // Define BC objects. Can't do this in the factory because the BC objects will need the b-coefficient,
-  // but the factories won't know about that. 
+  // but the factories won't know about that.
+  const int ghostCF = m_hasCoar ? m_interpolator->getGhostCF() : 0;
   m_domainBc->define(m_eblg, m_Bcoef, m_probLo, m_dx);
-  m_ebBc    ->define(m_eblg, m_BcoefIrreg, m_probLo, m_dx);
+  m_ebBc    ->define(m_eblg, m_BcoefIrreg, m_probLo, m_dx, ghostCF);
   
   const LayoutData<BaseIVFAB<VoFStencil> >& ebFluxStencil = m_ebBc->getKappaDivFStencils();
 

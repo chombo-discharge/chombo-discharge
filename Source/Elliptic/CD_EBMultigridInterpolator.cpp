@@ -12,6 +12,7 @@
 // Chombo includes
 #include <EBCellFactory.H>
 #include <EBLevelDataOps.H>
+#include <NeighborIterator.H>
 #include <InterpF_F.H>
 
 // Our includes
@@ -22,21 +23,44 @@ EBMultigridInterpolator::EBMultigridInterpolator(){
   m_isDefined = false;
 }
 
-EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid&            a_eblgFine,
-						 const EBLevelGrid&            a_eblgCoar,
-						 const int                     a_nRef,
-						 const int                     a_nVar,
-						 const LayoutData<IntVectSet>& a_ghostCells)
-  : EBQuadCFInterp(a_eblgFine.getDBL(),
-		   a_eblgCoar.getDBL(),
-		   a_eblgFine.getEBISL(),
-		   a_eblgCoar.getEBISL(),
-		   a_eblgCoar.getDomain(),
-		   a_nRef,
-		   a_nVar,
-		   a_ghostCells,
-		   a_eblgFine.getEBIS(),
-		   true){
+EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
+						 const EBLevelGrid& a_eblgCoar,
+						 const int          a_nRef,
+						 const int          a_nVar,
+						 const int          a_ghostCF) {
+
+  if(a_ghostCF != 1) MayDay::Abort("EBMultigridInterpolator::EBMultigridInterpolator - only one ghost cell supported (for now)!");
+  if(a_ghostCF <= 0) MayDay::Abort("EBMultigridInterpolator::EBMultigridInterpolator - must interpolator at least one ghost cell!");
+  
+  m_ghostCF = a_ghostCF;
+
+  // Build the CFIVS for EBQuadCFInterp. 
+  const DisjointBoxLayout& dblFine = a_eblgFine.getDBL();
+  const ProblemDomain& domainFine  = a_eblgFine.getDomain();
+  
+  LayoutData<IntVectSet> cfivs(dblFine);
+  for (DataIterator dit(dblFine); dit.ok(); ++dit){
+    Box grownBox = grow(dblFine[dit()], m_ghostCF);
+    grownBox &= domainFine;
+
+    cfivs[dit()] = IntVectSet(grownBox);
+    
+    NeighborIterator nit(dblFine);
+    for (nit.begin(dit()); nit.ok(); ++ nit){
+      cfivs[dit()] -= dblFine[nit()];
+    }
+  }
+
+  EBQuadCFInterp::define(a_eblgFine.getDBL(),
+			 a_eblgCoar.getDBL(),
+			 a_eblgFine.getEBISL(),
+			 a_eblgCoar.getEBISL(),
+			 a_eblgCoar.getDomain(),
+			 a_nRef,
+			 a_nVar,
+			 cfivs,
+			 a_eblgFine.getEBIS(),
+			 true);
 
   m_eblgFine = a_eblgFine;
   m_eblgCoar = a_eblgCoar;
@@ -47,6 +71,10 @@ EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid&            a
   EBCellFactory cellFact(m_eblgCoar.getEBISL());
   m_zeroCoar.define(m_eblgCoar.getDBL(), a_nVar, IntVect::Zero, cellFact);
   EBLevelDataOps::setToZero(m_zeroCoar);
+}
+
+int EBMultigridInterpolator::getGhostCF() const{
+  return m_ghostCF;
 }
 
 void EBMultigridInterpolator::defineCFIVS(){
