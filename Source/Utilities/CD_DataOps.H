@@ -12,6 +12,8 @@
 #ifndef CD_DataOps_H
 #define CD_DataOps_H
 
+// Std includes
+
 // Our includes
 #include <CD_EBAMRData.H>
 #include <CD_MFInterfaceFAB.H>
@@ -208,6 +210,14 @@ public:
   static void setCoveredValue(EBAMRCellData& a_lhs, const int a_comp, const Real a_value);
 
   static void setCoveredValue(LevelData<EBCellFAB>& a_lhs, const int a_comp, const Real a_value);
+
+  static void setValue(MFAMRCellData& a_lhs, const std::function<Real(const RealVect)>& a_function, const RealVect a_probLo, const Vector<Real>& a_dx, const int a_comp);
+
+  static void setValue(LevelData<MFCellFAB>& a_lhs, const std::function<Real(const RealVect)>& a_function, const RealVect a_probLo, const Real a_dx, const int a_comp);
+
+  static void setValue(EBAMRCellData& a_lhs, const std::function<Real(const RealVect)>& a_function, const RealVect a_probLo, const Vector<Real>& a_dx, const int a_comp);
+
+  static void setValue(LevelData<EBCellFAB>& a_lhs, const std::function<Real(const RealVect)>& a_function, const RealVect a_probLo, const Real a_dx, const int a_comp);
 
   static void setValue(EBAMRCellData& a_lhs, const Real& a_value);
   

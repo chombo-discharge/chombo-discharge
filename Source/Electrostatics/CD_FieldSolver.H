@@ -12,6 +12,9 @@
 #ifndef CD_FieldSolver_H
 #define CD_FieldSolver_H
 
+// Std includes
+#include <functional>
+
 // Our includes
 #include <CD_ComputationalGeometry.H>
 #include <CD_AmrMesh.H>
@@ -144,6 +147,18 @@ public:
     @brief Register operators for AMR. Derived classes have to implement these. 
   */
   virtual void registerOperators() = 0;
+
+  /*!
+    @brief Set space charge to constant value everywhere
+    @param[in] a_rho Value of space charge
+  */
+  virtual void setRho(const Real a_rho);
+
+  /*!
+    @brief Set space charge to spatially dependent function
+    @param[in] a_rho Spatially dependent value of space charge
+  */
+  virtual void setRho(const std::function<Real(const RealVect)>& a_rho);
 
   /*!
     @brief Set the computational geometry
