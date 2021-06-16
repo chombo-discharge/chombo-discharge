@@ -581,20 +581,20 @@ void CdrSolver::computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelDa
 }
 
 void CdrSolver::fillDomainFlux(EBAMRFluxData& a_flux, const CdrBc a_whichFlux){
-  CH_TIME("CdrSolver::setDomainFlux(EBAMRFluxData, CdrBc)");
+  CH_TIME("CdrSolver::fillDomainFlux(EBAMRFluxData, CdrBc)");
   if(m_verbosity > 5){
-    pout() << m_name + "::setDomainFlux(EBAMRFluxData, CdrBc)" << endl;
+    pout() << m_name + "::fillDomainFlux(EBAMRFluxData, CdrBc)" << endl;
   }
-
+  
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     this->fillDomainFlux(*a_flux[lvl], a_whichFlux, lvl);
   }
 }
 
 void CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const CdrBc a_whichFlux, const int a_level) {
-  CH_TIME("CdrSolver::resetDomainFlux(LevelData<EBFluxFAB>, CdrBc, int)");
+  CH_TIME("CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>, CdrBc, int)");
   if(m_verbosity > 5){
-    pout() << m_name + "::resetDomainFlux(LevelData<EBFluxFAB>, CdrBc, int)" << endl;
+    pout() << m_name + "::fillDomainFlux(LevelData<EBFluxFAB>, CdrBc, int)" << endl;
   }
 
   const int comp  = 0;
@@ -619,8 +619,6 @@ void CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const CdrBc a_which
 
 	for (FaceIterator faceit(ivs, ebgraph, dir, stopCrit); faceit.ok(); ++faceit){
 	  const FaceIndex& face = faceit();
-
-	  flux(face, comp) = 0.0;
 
 	  switch(a_whichFlux){
 	  case CdrBc::External:{
@@ -1389,7 +1387,7 @@ void CdrSolver::setDomainFlux(const Real a_domainFlux){
     pout() << m_name + "::setDomainFlux(constant)" << endl;
   }
 
-  DataOps::setValue(m_domainFlux, 0.0);
+  DataOps::setValue(m_domainFlux, a_domainFlux);
 }
 
 void CdrSolver::setEbIndexSpace(const RefCountedPtr<EBIndexSpace>& a_ebis){

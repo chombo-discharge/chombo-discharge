@@ -95,7 +95,7 @@ void AdvectionDiffusionStepper::initialData(){
   m_solver->setSource(0.0);
   m_solver->setEbFlux(0.0);
   m_solver->setDomainFlux(0.0);
-  m_solver->setDomainBc(CdrBc::Wall);
+  m_solver->setDomainBc(CdrBc::External);
   if(m_solver->isDiffusive()){
     m_solver->setDiffusionCoefficient(m_faceCenteredDiffusionCoefficient);
   }
@@ -284,7 +284,6 @@ void AdvectionDiffusionStepper::regrid(const int a_lmin, const int a_oldFinestLe
   if(m_solver->isMobile()){
     this->setVelocity();
   }
-
 
   // Allocate memory for RK steps
   m_amr->allocate(m_tmp, m_realm, m_phase, 1);
