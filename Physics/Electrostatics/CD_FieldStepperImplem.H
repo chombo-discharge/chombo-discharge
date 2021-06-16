@@ -12,6 +12,9 @@
 #ifndef CD_FieldStepperImplem_H
 #define CD_FieldStepperImplem_H
 
+// Std includes
+#include <math.h>
+
 // Chombo includes
 #include <ParmParse.H>
 
@@ -104,26 +107,43 @@ namespace Physics {
     void FieldStepper<T>::allocate() {
       m_fieldSolver->allocateInternals();
       m_sigma->allocateInternals();
+
     }
 
     template <class T>
     void FieldStepper<T>::initialData(){
       ParmParse pp("FieldStepper");
-      pp.get("init_rho",   m_init_rho);
-      pp.get("init_sigma", m_init_sigma);
+
+      Real initRho;
+      Real initSigma;
+
+      Vector<Real> vec(SpaceDim);
+      Real     blobRadius;
+      RealVect blobCenter;
+      
+      pp.get("init_rho",   initRho);
+      pp.get("init_sigma", initSigma);
+      pp.get("rho_radius", blobRadius);
+      pp.getarr("rho_center", vec, 0, SpaceDim); blobCenter = RealVect(D_DECL(vec[0], vec[1], vec[2]));
 
       MFAMRCellData& state = m_fieldSolver->getPotential();  
       MFAMRCellData& rho   = m_fieldSolver->getRho();
       EBAMRIVData& sigma   = m_sigma->getPhi();
 
+      auto rhoFunc = [initRho, blobCenter, blobRadius](const RealVect a_position){
+	const RealVect dist = a_position-blobCenter;
+	const Real dist2    = dist.dotProduct(dist);
+	return initRho*exp(-dist2/(2*blobRadius*blobRadius));
+      };
+
+      // Set sigma to constant and set space charge to a function
       DataOps::setValue(state, 0.0);
-      DataOps::setValue(rho,   m_init_rho);
-      DataOps::setValue(sigma, m_init_sigma);
+      DataOps::setValue(sigma, initSigma);
+      m_fieldSolver->setRho(rhoFunc);
     }
 
     template <class T>
     void FieldStepper<T>::solvePoisson(){
-      
       MFAMRCellData& state = m_fieldSolver->getPotential();  
       MFAMRCellData& rho   = m_fieldSolver->getRho();
       EBAMRIVData& sigma   = m_sigma->getPhi();

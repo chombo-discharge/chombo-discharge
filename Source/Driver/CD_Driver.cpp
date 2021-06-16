@@ -1347,10 +1347,11 @@ void Driver::setupFresh(const int a_initialRegrids){
       m_amr->regridRealm(str, procs, boxes, lmin);
     }
   }
-  m_amr->regridOperators(lmin, lmax, regsize);                        // Regrid operators again.
-  this->regridInternals(lmax, lmax);          // Regrid internals for Driver.
-  m_timeStepper->regrid(lmin, lmax, lmax);   // Regrid solvers.
-
+  m_amr->regridOperators(lmin, lmax, regsize); // Regrid operators again.
+  this->regridInternals(lmax, lmax);           // Regrid internals for Driver.
+  m_timeStepper->regrid(lmin, lmax, lmax);     // Regrid solvers.
+  m_timeStepper->initialData();                // Need to fill with initial data again. 
+  
   // Do post initialize stuff
   m_timeStepper->postInitialize();
 
