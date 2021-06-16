@@ -313,23 +313,23 @@ void CdrTGA::setupOperatorFactory(){
   DataOps::setValue(m_aCoef, 1.0); // We're usually solving (1 - dt*nabla^2)*phi^(k+1) = phi^k + dt*S^k so aco=1
   DataOps::setValue(m_ebCenteredDiffusionCoefficient, 0.0);
   m_operatorFactory = RefCountedPtr<EbHelmholtzOpFactory> (new EbHelmholtzOpFactory(levelgrids,
-										 quadcfi,
-										 fastFR,
-										 alpha,
-										 beta,
-										 m_aCoef.getData(),
-										 m_faceCenteredDiffusionCoefficient.getData(),
-										 m_ebCenteredDiffusionCoefficient.getData(),
-										 dx[0],
-										 refinement_ratios,
-										 domfact,
-										 ebfact,
-										 ghost*IntVect::Unit,
-										 ghost*IntVect::Unit,
-										 relax_type,
-										 m_numCellsBottomDrop,
-										 -1,
-										 m_mg_levelgrids));
+										    quadcfi,
+										    fastFR,
+										    alpha,
+										    beta,
+										    m_aCoef.getData(),
+										    m_faceCenteredDiffusionCoefficient.getData(),
+										    m_ebCenteredDiffusionCoefficient.getData(),
+										    dx[0],
+										    refinement_ratios,
+										    domfact,
+										    ebfact,
+										    ghost*IntVect::Unit,
+										    ghost*IntVect::Unit,
+										    relax_type,
+										    m_numCellsBottomDrop,
+										    -1,
+										    m_mg_levelgrids));
 }
 
 void CdrTGA::setupMultigridSolver(){
@@ -368,13 +368,13 @@ void CdrTGA::setupMultigridSolver(){
   }
   
   m_multigridSolver->setSolverParameters(m_multigridPreSmooth,
-				    m_multigridPostSmooth,
-				    m_multigridBottomSmooth,
-				    gmg_type,
-				    m_multigridMaxIterations,
-				    m_multigridTolerance,
-				    m_multigridHang,
-				    1.E-90); // Residue set through other means
+					 m_multigridPostSmooth,
+					 m_multigridBottomSmooth,
+					 gmg_type,
+					 m_multigridMaxIterations,
+					 m_multigridTolerance,
+					 m_multigridHang,
+					 1.E-90); // Residue set through other means
 
 }
 
@@ -441,7 +441,7 @@ void CdrTGA::computeDivJ(EBAMRCellData& a_divJ, EBAMRCellData& a_phi, const Real
       
       this->averageVelocityToFaces(); // Update m_faceVelocity from m_cellVelocity
       this->advectToFaces(m_faceStates, a_phi, a_extrapDt); // Advect to faces
-      this->computeFlux(m_scratchFluxTwo, m_faceVelocity, m_faceStates, m_domainFlux);
+      this->computeAdvectionFlux(m_scratchFluxTwo, m_faceVelocity, m_faceStates, m_domainFlux);
 
       DataOps::incr(m_scratchFluxOne, m_scratchFluxTwo, 1.0);
     }
@@ -487,7 +487,7 @@ void CdrTGA::computeDivF(EBAMRCellData& a_divF, EBAMRCellData& a_phi, const Real
     }
     this->averageVelocityToFaces();
     this->advectToFaces(m_faceStates, a_phi, a_extrapDt);          // Face extrapolation to cell-centered faces
-    this->computeFlux(m_scratchFluxOne, m_faceVelocity, m_faceStates, m_domainFlux);  // Compute face-centered fluxes
+    this->computeAdvectionFlux(m_scratchFluxOne, m_faceVelocity, m_faceStates, m_domainFlux);  // Compute face-centered fluxes
 
     EBAMRIVData* ebflux;
     if(a_ebFlux){
