@@ -260,42 +260,6 @@
       return
       end
 
-      subroutine consdiv_block(
-     &     chf_fra1[udelrho],
-     &     chf_const_fra1[faceflux],
-     &     chf_const_int[facedir],
-     &     chf_const_int[tilesize],
-     &     chf_const_real[dx],
-     &     chf_box[dcalc],
-     &)
-
-      integer chf_ddecl[i; j; k]
-      integer chf_ddecl[ioff; joff; koff]
-      integer spacedim,iv
-      real_t  uave, rhodiff, hival, loval
-      chf_dterm[
-      ioff = chf_id(0,facedir);
-      joff = chf_id(1,facedir);
-      koff = chf_id(2,facedir)]
-
-      spacedim = CH_SPACEDIM
-
-#if CH_SPACEDIM==3
-      do k = CHF_LBOUND[dcalc;2], CHF_UBOUND[dcalc;2]
-#endif
-         do j = CHF_LBOUND[dcalc;1], CHF_UBOUND[dcalc;1]
-            do i = CHF_LBOUND[dcalc;0], CHF_UBOUND[dcalc;0]
-               hival = faceflux(chf_ix[i+ioff;j+joff;k+koff]);
-               loval = faceflux(chf_ix[i     ;j     ;k     ]);
-	       
-               udelrho(chf_ix[i;j;k]) = udelrho(chf_ix[i;j;k]) + (hival-loval)/dx
-            enddo
-         enddo
-#if CH_SPACEDIM==3
-      enddo
-#endif
-      end
-
       subroutine dflux_reg(
      &     chf_fra1[divD],
      &     chf_const_fra1[state],
