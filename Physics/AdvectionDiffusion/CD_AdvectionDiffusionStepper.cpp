@@ -181,8 +181,8 @@ int AdvectionDiffusionStepper::getNumberOfPlotVariables() const{
 }
 
 void AdvectionDiffusionStepper::writePlotData(EBAMRCellData&       a_output,
-						  Vector<std::string>& a_plotVariableNames,
-						  int&                 a_icomp) const {
+					      Vector<std::string>& a_plotVariableNames,
+					      int&                 a_icomp) const {
   a_plotVariableNames.append(m_solver->getPlotVariableNames());
   m_solver->writePlotData(a_output, a_icomp);
 }
@@ -229,7 +229,7 @@ Real AdvectionDiffusionStepper::advance(const Real a_dt){
     m_amr->interpGhost(state, m_realm, m_phase);
   }
   else if(m_integrator == 1){
-    m_solver->computeDivF(m_k1, state, a_dt);
+    m_solver->computeDivF(m_k1, state, m_solver->getDomainBc(), a_dt);
     DataOps::incr(state, m_k1, -a_dt);
     m_amr->averageDown(state, m_realm, m_phase);
 

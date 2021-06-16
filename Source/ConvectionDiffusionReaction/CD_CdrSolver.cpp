@@ -45,6 +45,10 @@ void CdrSolver::setRealm(const std::string a_realm) {
   m_realm = a_realm;
 }
 
+CdrBc CdrSolver::getDomainBc() const{
+  return m_domainBc;
+}
+
 Vector<std::string> CdrSolver::getPlotVariableNames() const {
   CH_TIME("CdrSolver::getPlotVariableNames");
   if(m_verbosity > 5){
@@ -453,7 +457,7 @@ void CdrSolver::computeDivergenceIrregular(LevelData<EBCellFAB>&              a_
 void CdrSolver::computeAdvectionFlux(EBAMRFluxData&       a_flux,
 				     const EBAMRFluxData& a_facePhi,
 				     const EBAMRFluxData& a_faceVelocity,
-				     const EBAMRIFData&   a_domainFlux){
+				     const CdrBc          a_domainBc){
   CH_TIME("CdrSolver::computeAdvectionFlux");
   if(m_verbosity > 5){
     pout() << m_name + "::computeAdvectionFlux" << endl;
@@ -464,15 +468,15 @@ void CdrSolver::computeAdvectionFlux(EBAMRFluxData&       a_flux,
   const int finest_level = m_amr->getFinestLevel();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    this->computeAdvectionFlux(*a_flux[lvl], *a_facePhi[lvl], *a_faceVelocity[lvl], *a_domainFlux[lvl], lvl);
+    this->computeAdvectionFlux(*a_flux[lvl], *a_facePhi[lvl], *a_faceVelocity[lvl], a_domainBc, lvl);
   }
 }
 
-void CdrSolver::computeAdvectionFlux(LevelData<EBFluxFAB>&              a_flux,
-				     const LevelData<EBFluxFAB>&        a_facePhi,
-				     const LevelData<EBFluxFAB>&        a_faceVelocity,
-				     const LevelData<DomainFluxIFFAB>&  a_domainFlux,
-				     const int                          a_lvl){
+void CdrSolver::computeAdvectionFlux(LevelData<EBFluxFAB>&       a_flux,
+				     const LevelData<EBFluxFAB>& a_facePhi,
+				     const LevelData<EBFluxFAB>& a_faceVelocity,
+				     const CdrBc                 a_domainBc,
+				     const int                   a_lvl){
 
   const int comp  = 0;
   const int ncomp = 1;
@@ -502,51 +506,25 @@ void CdrSolver::computeAdvectionFlux(LevelData<EBFluxFAB>&              a_flux,
 	const FaceIndex& face = faceit();
 	flx(face, comp) = vel(face, comp)*phi(face, comp);
       }
-
-      // Domain faces
-      for (SideIterator sit; sit.ok(); ++sit){
-	const BaseIFFAB<Real>& domflux = a_domainFlux[dit()](dir, sit());
-
-	const IntVectSet& ivs  = domflux.getIVS();
-	const EBGraph& ebgraph = domflux.getEBGraph();
-
-	const FaceStop::WhichFaces crit = FaceStop::AllBoundaryOnly;
-	for (FaceIterator faceit(ivs, ebgraph, dir, crit); faceit.ok(); ++faceit){
-	  const FaceIndex& face = faceit();
-	    
-	  if(m_domainBc == CdrBc::External){
-	    flx(face, comp) = domflux(face, comp);
-	  }
-	  else if(m_domainBc == CdrBc::Wall){
-	    flx(face, comp) = 0.0;
-	  }
-	  else if(m_domainBc == CdrBc::Outflow){
-	    flx(face, comp) = Max(0.0, sign(sit())*flx(face, comp));
-	  }
-	  else if(m_domainBc == CdrBc::Extrap){
-	    // Don't do anything, the solver should have extrapolated the face-centered state
-	  }
-	  else {
-	    MayDay::Abort("CdrSolver::computeAdvectionFlux - stop this madness!");
-	  }
-	}
-      }
     }
   }
+
+  // Reset flux on domain boundaries. 
+  this->fillDomainFlux(a_flux, a_domainBc, a_lvl);
 }
 
-void CdrSolver::computeDiffusionFlux(EBAMRFluxData& a_flux, const EBAMRCellData& a_phi){
+void CdrSolver::computeDiffusionFlux(EBAMRFluxData& a_flux, const EBAMRCellData& a_phi, const CdrBc a_domainBc){
   CH_TIME("CdrSolver::computeDiffusionFlux");
   if(m_verbosity > 5){
     pout() << m_name + "::computeDiffusionFlux" << endl;
   }
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    this->computeDiffusionFlux(*a_flux[lvl], *a_phi[lvl], lvl);
+    this->computeDiffusionFlux(*a_flux[lvl], *a_phi[lvl], a_domainBc, lvl);
   }
 }
 
-void CdrSolver::computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelData<EBCellFAB>& a_phi, const int a_lvl){
+void CdrSolver::computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelData<EBCellFAB>& a_phi, const CdrBc a_domainBc, const int a_lvl){
   CH_TIME("CdrSolver::computeDiffusionFlux(level)");
   if(m_verbosity > 5){
     pout() << m_name + "::computeDiffusionFlux(level)" << endl;
@@ -589,11 +567,7 @@ void CdrSolver::computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelDa
       for (FaceIterator faceit(ebisbox.getIrregIVS(cellbox), ebgraph, dir, stopcrit); faceit.ok(); ++faceit){
 	const FaceIndex& face = faceit();
 
-	if(face.isBoundary()){ // No boundary flux for diffusion stuff. Could be changed but that's the current status. 
-	  flux(face, comp) = 0.0;
-	}
-	else{
-
+	if(!face.isBoundary()){ 
 	  const VolIndex hiVoF = face.getVoF(Side::Hi);
 	  const VolIndex loVoF = face.getVoF(Side::Lo);
 
@@ -602,6 +576,8 @@ void CdrSolver::computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelDa
       }
     }
   }
+
+  this->fillDomainFlux(a_flux, a_domainBc, a_lvl);
 }
 
 void CdrSolver::fillDomainFlux(EBAMRFluxData& a_flux, const CdrBc a_whichFlux){
@@ -615,7 +591,7 @@ void CdrSolver::fillDomainFlux(EBAMRFluxData& a_flux, const CdrBc a_whichFlux){
   }
 }
 
-void CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const CdrBc a_whichFlux, const bool a_level) {
+void CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const CdrBc a_whichFlux, const int a_level) {
   CH_TIME("CdrSolver::resetDomainFlux(LevelData<EBFluxFAB>, CdrBc, int)");
   if(m_verbosity > 5){
     pout() << m_name + "::resetDomainFlux(LevelData<EBFluxFAB>, CdrBc, int)" << endl;
@@ -644,6 +620,8 @@ void CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const CdrBc a_which
 	for (FaceIterator faceit(ivs, ebgraph, dir, stopCrit); faceit.ok(); ++faceit){
 	  const FaceIndex& face = faceit();
 
+	  flux(face, comp) = 0.0;
+
 	  switch(a_whichFlux){
 	  case CdrBc::External:{
 	    flux(face, comp) = domflux(face, comp);
@@ -654,17 +632,18 @@ void CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const CdrBc a_which
 	    break;
 	  }
 	  case CdrBc::Outflow:{
-
-	    
-	    // Get the next interior face. 
-	    VolIndex interiorVof = face.getVoF(sit());
-	    Vector<FaceIndex> neighborFaces = ebisbox.getFaces(interiorVof, dir, sit());
-
 	    flux(face, comp) = 0.0;
-	    for (const auto& f : neighborFaces.stdVector()){
-	      flux(face, comp) += flux(f, comp);
+	    
+	    // Get the next interior face(s) and extrapolate from these. 
+	    VolIndex interiorVof = face.getVoF(flip(sit()));
+	    Vector<FaceIndex> neighborFaces = ebisbox.getFaces(interiorVof, dir, flip(sit()));
+
+	    if(neighborFaces.size() > 0){
+	      for (const auto& f : neighborFaces.stdVector()){
+		flux(face, comp) += flux(f, comp);
+	      }
+	      flux(face, comp) = std::max(0.0, sign(sit())*flux(face, comp))/neighborFaces.size();
 	    }
-	    flux(face, comp) = std::max(0.0, sign(sit())*flux(face, comp))/neighborFaces.size();
 	    
 	    break;
 	  }

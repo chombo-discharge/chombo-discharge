@@ -110,11 +110,13 @@ public:
     @param[out] a_divF      Divergence term, including redistribution magic. 
     @param[in]  a_phi       Cell-centered state
     @param[in]  a_extrapDt  Extrapolation in time, i.e. shifting of div(F) towards e.g. half time step. Only affects the advective term. 
+    @param[in]  a_domainBc  How to set domain fluxes
     @param[in]  a_useEbFlux If true, the embedded boundary flux will be included in div(F)
     @note a_phi is non-const because ghost cells will be re-filled
   */
   virtual void computeDivF(EBAMRCellData&  a_divF,
 			   EBAMRCellData&  a_phi,
+			   const CdrBc     a_domainBc,
 			   const Real      a_extrapDt,
 			   const bool      a_ebFlux = true) = 0;
 
@@ -122,11 +124,13 @@ public:
     @brief Compute div(D*grad(phi)) explicitly
     @param[out] a_divF      Divergence term, including redistribution magic. 
     @param[in]  a_phi       Cell-centered state
+    @param[in]  a_domainBc  How to set domain fluxes
     @param[in]  a_useEbFlux If true, the embedded boundary flux will be included in div(D)
     @note a_phi is non-const because ghost cells will be re-filled
   */
   virtual void computeDivD(EBAMRCellData& a_divD,
 			   EBAMRCellData& a_phi,
+			   const CdrBc     a_domainBc,			   
 			   const bool     a_ebFlux = false) = 0;
 
   /*!
@@ -497,6 +501,11 @@ public:
   */
   virtual EBAMRIFData& getDomainFlux();
 
+  /*!
+    @brief Get domain BC type
+  */
+  CdrBc getDomainBc() const;
+
 
 protected:
   
@@ -757,12 +766,12 @@ protected:
     @param[out] a_flux         Face-centered fluxes
     @param[in]  a_facePhi      Face-centered state
     @param[in]  a_faceVelocity Face-centered velocities
-    @param[in]  a_domainFlux   Domain flux
+    @param[in]  a_domainBc     How to set domain fluxes
   */
   virtual void computeAdvectionFlux(EBAMRFluxData&       a_flux,
 				    const EBAMRFluxData& a_facePhi,
 				    const EBAMRFluxData& a_faceVelocity,
-				    const EBAMRIFData&   a_domainFlux);
+				    const CdrBc          a_domainBc);
 
   /*!
     @brief Set up face-centered advection flux on a grid level
@@ -770,28 +779,31 @@ protected:
     @param[in]  a_facePhi      Face-centered state
     @param[in]  a_faceVelocity Face-centered velocities
     @param[in]  a_domainFlux   Domain flux
+    @param[in]  a_domainBc     How to set domain fluxes
     @param[in]  a_level        Grid level
   */
-  virtual void computeAdvectionFlux(LevelData<EBFluxFAB>&              a_flux,
-				    const LevelData<EBFluxFAB>&        a_facePhi,
-				    const LevelData<EBFluxFAB>&        a_faceVelocity,
-				    const LevelData<DomainFluxIFFAB>&  a_domainFlux,
-				    const int                          a_lvl);
+  virtual void computeAdvectionFlux(LevelData<EBFluxFAB>&       a_flux,
+				    const LevelData<EBFluxFAB>& a_facePhi,
+				    const LevelData<EBFluxFAB>& a_faceVelocity,
+				    const CdrBc                 a_domainBc,
+				    const int                   a_lvl);
 
   /*!
     @brief Compute the face-centered diffusion flux
-    @param[out] a_flux Face-centered flux
-    @param[in]  a_phi  Cell centered phi
+    @param[out] a_flux     Face-centered flux
+    @param[in]  a_phi      Cell centered phi
+    @param[in]  a_domainBc How to set domain fluxes
   */
-  virtual void computeDiffusionFlux(EBAMRFluxData& a_flux, const EBAMRCellData& a_phi);
+  virtual void computeDiffusionFlux(EBAMRFluxData& a_flux, const EBAMRCellData& a_phi, const CdrBc a_domainBc);
 
   /*!
     @brief Compute the face-centered diffusion flux
     @param[out] a_flux Face-centered flux
     @param[in]  a_phi  Cell centered phi
     @param[in]  a_lvl  Grid level
+    @param[in]  a_domainBc How to set domain fluxes
   */
-  virtual void computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelData<EBCellFAB>& a_phi, const int a_lvl);
+  virtual void computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelData<EBCellFAB>& a_phi, const CdrBc a_domainBc,  const int a_lvl);
 
   /*!
     @brief Set domain in data holder. This sets the flux on the boundary to either zero or to m_domainFlux
@@ -805,7 +817,7 @@ protected:
     @param[inout] a_flux Flux to be modified. 
     @param[in]    a_useDomainFlux Use domain flux or not If true, a_flux becomes m_domainFlux on domain boundaries. 
   */
-  virtual void fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const CdrBc a_whichFlux, const bool a_level);
+  virtual void fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const CdrBc a_whichFlux, const int a_level);
 
   /*!
     @brief Compute conservative divergence from fluxes. 
