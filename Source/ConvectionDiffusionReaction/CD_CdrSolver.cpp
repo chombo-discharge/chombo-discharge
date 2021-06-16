@@ -1352,8 +1352,8 @@ void CdrSolver::setDiffusionCoefficient(const Real a_diffusionCoefficient){
     m_faceCenteredDiffusionCoefficient[lvl]->exchange();
   }
 
-  m_amr->averageDown(m_faceCenteredDiffusionCoefficient,    m_realm, m_phase);
-  m_amr->averageDown(m_ebCenteredDiffusionCoefficient, m_realm, m_phase);
+  m_amr->averageDown(m_faceCenteredDiffusionCoefficient, m_realm, m_phase);
+  m_amr->averageDown(m_ebCenteredDiffusionCoefficient,   m_realm, m_phase);
 }
 
 void CdrSolver::setEbFlux(const EBAMRIVData& a_ebFlux){

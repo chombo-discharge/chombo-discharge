@@ -95,6 +95,7 @@ void AdvectionDiffusionStepper::initialData(){
   m_solver->setSource(0.0);
   m_solver->setEbFlux(0.0);
   m_solver->setDomainFlux(0.0);
+  m_solver->setDomainBc(CdrBc::Wall);
   if(m_solver->isDiffusive()){
     m_solver->setDiffusionCoefficient(m_faceCenteredDiffusionCoefficient);
   }
@@ -217,8 +218,6 @@ Real AdvectionDiffusionStepper::advance(const Real a_dt){
     DataOps::incr(state, m_k1, -0.5*a_dt);
     DataOps::incr(state, m_k2, -0.5*a_dt); // Done with deterministic update.
 
-    //m_solver->make_non_negative(state);
-
     // Add random diffusion flux. This is equivalent to a 1st order. Godunov splitting
     if(m_fhd){
       m_solver->gwnDiffusionSource(m_k1, state); // k1 holds random diffusion
@@ -279,7 +278,7 @@ void AdvectionDiffusionStepper::regrid(const int a_lmin, const int a_oldFinestLe
   m_solver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   m_solver->setSource(0.0);
   m_solver->setEbFlux(0.0);
-  m_solver->setDomainFlux(0.0);
+  m_solver->setDomainFlux(0.0);  
   if(m_solver->isDiffusive()){
     m_solver->setDiffusionCoefficient(m_faceCenteredDiffusionCoefficient);
   }
