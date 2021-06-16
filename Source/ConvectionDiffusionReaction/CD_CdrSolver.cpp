@@ -45,6 +45,10 @@ void CdrSolver::setRealm(const std::string a_realm) {
   m_realm = a_realm;
 }
 
+CdrBc CdrSolver::getDomainBc() const{
+  return m_domainBc;
+}
+
 Vector<std::string> CdrSolver::getPlotVariableNames() const {
   CH_TIME("CdrSolver::getPlotVariableNames");
   if(m_verbosity > 5){
@@ -450,13 +454,13 @@ void CdrSolver::computeDivergenceIrregular(LevelData<EBCellFAB>&              a_
   }
 }
 
-void CdrSolver::computeFlux(EBAMRFluxData&       a_flux,
-			    const EBAMRFluxData& a_facePhi,
-			    const EBAMRFluxData& a_faceVelocity,
-			    const EBAMRIFData&   a_domainFlux){
-  CH_TIME("CdrSolver::computeFlux");
+void CdrSolver::computeAdvectionFlux(EBAMRFluxData&       a_flux,
+				     const EBAMRFluxData& a_facePhi,
+				     const EBAMRFluxData& a_faceVelocity,
+				     const CdrBc          a_domainBc){
+  CH_TIME("CdrSolver::computeAdvectionFlux");
   if(m_verbosity > 5){
-    pout() << m_name + "::computeFlux" << endl;
+    pout() << m_name + "::computeAdvectionFlux" << endl;
   }
 
   const int comp  = 0;
@@ -464,76 +468,15 @@ void CdrSolver::computeFlux(EBAMRFluxData&       a_flux,
   const int finest_level = m_amr->getFinestLevel();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-
-#if 1 // New code
-    this->computeFlux(*a_flux[lvl], *a_facePhi[lvl], *a_faceVelocity[lvl], *a_domainFlux[lvl], lvl);
-#else // Old code (that we know works)
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    const ProblemDomain& domain  = m_amr->getDomains()[lvl];
-    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const Box box          = dbl.get(dit());
-      const EBISBox& ebisbox = ebisl[dit()];
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
-      const IntVectSet ivs(box);
-
-      for (int dir = 0; dir < SpaceDim; dir++){
-	EBFaceFAB& flx       = (*a_flux[lvl])[dit()][dir];
-	const EBFaceFAB& phi = (*a_facePhi[lvl])[dit()][dir];
-	const EBFaceFAB& vel = (*a_faceVelocity[lvl])[dit()][dir];
-
-	flx.setVal(0.0, comp);
-	flx += phi;
-	flx *= vel;
-
-	// Irregular faces
-	const FaceStop::WhichFaces stopcrit = FaceStop::SurroundingWithBoundary;
-	for (FaceIterator faceit(ebisbox.getIrregIVS(box), ebgraph, dir, stopcrit); faceit.ok(); ++faceit){
-	  const FaceIndex& face = faceit();
-	  flx(face, comp) = vel(face, comp)*phi(face, comp);
-	}
-
-	// Domain faces
-	for (SideIterator sit; sit.ok(); ++sit){
-	  BaseIFFAB<Real>& domflux = (*a_domainFlux[lvl])[dit()](dir, sit());
-
-	  const IntVectSet& ivs  = domflux.getIVS();
-	  const EBGraph& ebgraph = domflux.getEBGraph();
-
-	  const FaceStop::WhichFaces crit = FaceStop::AllBoundaryOnly;
-	  for (FaceIterator faceit(ivs, ebgraph, dir, crit); faceit.ok(); ++faceit){
-	    const FaceIndex& face = faceit();
-	    
-	    if(m_domainBc == CdrBc::External){
-	      flx(face, comp) = domflux(face, comp);
-	    }
-	    else if(m_domainBc == CdrBc::Wall){
-	      flx(face, comp) = 0.0;
-	    }
-	    else if(m_domainBc == CdrBc::Outflow){
-
-	      flx(face, comp) = Max(0.0, sign(sit())*flx(face, comp));
-	    }
-	    else if(m_domainBc == CdrBc::Extrap){
-	      // Don't do anything, the solver should have extrapolated the face-centered state
-	    }
-	    else {
-	      MayDay::Abort("CdrSolver::computeFlux - stop this madness!");
-	    }
-	  }
-	}
-      }
-    }
-#endif
+    this->computeAdvectionFlux(*a_flux[lvl], *a_facePhi[lvl], *a_faceVelocity[lvl], a_domainBc, lvl);
   }
 }
 
-void CdrSolver::computeFlux(LevelData<EBFluxFAB>&              a_flux,
-			    const LevelData<EBFluxFAB>&        a_facePhi,
-			    const LevelData<EBFluxFAB>&        a_faceVelocity,
-			    const LevelData<DomainFluxIFFAB>&  a_domainFlux,
-			    const int                          a_lvl){
+void CdrSolver::computeAdvectionFlux(LevelData<EBFluxFAB>&       a_flux,
+				     const LevelData<EBFluxFAB>& a_facePhi,
+				     const LevelData<EBFluxFAB>& a_faceVelocity,
+				     const CdrBc                 a_domainBc,
+				     const int                   a_lvl){
 
   const int comp  = 0;
   const int ncomp = 1;
@@ -563,51 +506,25 @@ void CdrSolver::computeFlux(LevelData<EBFluxFAB>&              a_flux,
 	const FaceIndex& face = faceit();
 	flx(face, comp) = vel(face, comp)*phi(face, comp);
       }
-
-      // Domain faces
-      for (SideIterator sit; sit.ok(); ++sit){
-	const BaseIFFAB<Real>& domflux = a_domainFlux[dit()](dir, sit());
-
-	const IntVectSet& ivs  = domflux.getIVS();
-	const EBGraph& ebgraph = domflux.getEBGraph();
-
-	const FaceStop::WhichFaces crit = FaceStop::AllBoundaryOnly;
-	for (FaceIterator faceit(ivs, ebgraph, dir, crit); faceit.ok(); ++faceit){
-	  const FaceIndex& face = faceit();
-	    
-	  if(m_domainBc == CdrBc::External){
-	    flx(face, comp) = domflux(face, comp);
-	  }
-	  else if(m_domainBc == CdrBc::Wall){
-	    flx(face, comp) = 0.0;
-	  }
-	  else if(m_domainBc == CdrBc::Outflow){
-	    flx(face, comp) = Max(0.0, sign(sit())*flx(face, comp));
-	  }
-	  else if(m_domainBc == CdrBc::Extrap){
-	    // Don't do anything, the solver should have extrapolated the face-centered state
-	  }
-	  else {
-	    MayDay::Abort("CdrSolver::computeFlux - stop this madness!");
-	  }
-	}
-      }
     }
   }
+
+  // Reset flux on domain boundaries. 
+  this->fillDomainFlux(a_flux, a_domainBc, a_lvl);
 }
 
-void CdrSolver::computeDiffusionFlux(EBAMRFluxData& a_flux, const EBAMRCellData& a_phi){
+void CdrSolver::computeDiffusionFlux(EBAMRFluxData& a_flux, const EBAMRCellData& a_phi, const CdrBc a_domainBc){
   CH_TIME("CdrSolver::computeDiffusionFlux");
   if(m_verbosity > 5){
     pout() << m_name + "::computeDiffusionFlux" << endl;
   }
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    this->computeDiffusionFlux(*a_flux[lvl], *a_phi[lvl], lvl);
+    this->computeDiffusionFlux(*a_flux[lvl], *a_phi[lvl], a_domainBc, lvl);
   }
 }
 
-void CdrSolver::computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelData<EBCellFAB>& a_phi, const int a_lvl){
+void CdrSolver::computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelData<EBCellFAB>& a_phi, const CdrBc a_domainBc, const int a_lvl){
   CH_TIME("CdrSolver::computeDiffusionFlux(level)");
   if(m_verbosity > 5){
     pout() << m_name + "::computeDiffusionFlux(level)" << endl;
@@ -650,11 +567,7 @@ void CdrSolver::computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelDa
       for (FaceIterator faceit(ebisbox.getIrregIVS(cellbox), ebgraph, dir, stopcrit); faceit.ok(); ++faceit){
 	const FaceIndex& face = faceit();
 
-	if(face.isBoundary()){ // No boundary flux for diffusion stuff. Could be changed but that's the current status. 
-	  flux(face, comp) = 0.0;
-	}
-	else{
-
+	if(!face.isBoundary()){ 
 	  const VolIndex hiVoF = face.getVoF(Side::Hi);
 	  const VolIndex loVoF = face.getVoF(Side::Lo);
 
@@ -663,7 +576,84 @@ void CdrSolver::computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelDa
       }
     }
   }
+
+  this->fillDomainFlux(a_flux, a_domainBc, a_lvl);
+}
+
+void CdrSolver::fillDomainFlux(EBAMRFluxData& a_flux, const CdrBc a_whichFlux){
+  CH_TIME("CdrSolver::fillDomainFlux(EBAMRFluxData, CdrBc)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::fillDomainFlux(EBAMRFluxData, CdrBc)" << endl;
+  }
   
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+    this->fillDomainFlux(*a_flux[lvl], a_whichFlux, lvl);
+  }
+}
+
+void CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const CdrBc a_whichFlux, const int a_level) {
+  CH_TIME("CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>, CdrBc, int)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::fillDomainFlux(LevelData<EBFluxFAB>, CdrBc, int)" << endl;
+  }
+
+  const int comp  = 0;
+  const int ncomp = 1;
+
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
+
+  for (DataIterator dit(dbl); dit.ok(); ++dit){
+    const EBISBox& ebisbox = m_amr->getEBISLayout(m_realm, m_phase)[a_level][dit()];
+    
+    for (int dir = 0; dir < SpaceDim; dir++){
+      EBFaceFAB& flux = a_flux[dit()][dir];
+
+      // Iterate over domain cells. I'm REALLY not sure about if this is performant...
+      for (SideIterator sit; sit.ok(); ++sit){
+	const BaseIFFAB<Real>& domflux = (*m_domainFlux[a_level])[dit()](dir, sit());
+
+	const IntVectSet& ivs  = domflux.getIVS();
+	const EBGraph& ebgraph = domflux.getEBGraph();
+
+	FaceStop::WhichFaces stopCrit = FaceStop::AllBoundaryOnly;
+
+	for (FaceIterator faceit(ivs, ebgraph, dir, stopCrit); faceit.ok(); ++faceit){
+	  const FaceIndex& face = faceit();
+
+	  switch(a_whichFlux){
+	  case CdrBc::External:{
+	    flux(face, comp) = domflux(face, comp);
+	    break;
+	  }
+	  case CdrBc::Wall:{
+	    flux(face, comp) = 0.0;
+	    break;
+	  }
+	  case CdrBc::Outflow:{
+	    flux(face, comp) = 0.0;
+	    
+	    // Get the next interior face(s) and extrapolate from these. 
+	    VolIndex interiorVof = face.getVoF(flip(sit()));
+	    Vector<FaceIndex> neighborFaces = ebisbox.getFaces(interiorVof, dir, flip(sit()));
+
+	    if(neighborFaces.size() > 0){
+	      for (const auto& f : neighborFaces.stdVector()){
+		flux(face, comp) += flux(f, comp);
+	      }
+	      flux(face, comp) = std::max(0.0, sign(sit())*flux(face, comp))/neighborFaces.size();
+	    }
+	    
+	    break;
+	  }
+	  case CdrBc::Extrap: // Don't do anything, the solver has responsibility. 
+	    break;
+	  default:
+	    MayDay::Abort("CdrSolver::fillDomainFlux - logic bust");
+	  }
+	}
+      }
+    }
+  }
 }
 
 void CdrSolver::conservativeDivergenceNoKappaDivision(EBAMRCellData& a_conservativeDivergence, EBAMRFluxData& a_flux, const EBAMRIVData& a_ebFlux){
@@ -1360,8 +1350,8 @@ void CdrSolver::setDiffusionCoefficient(const Real a_diffusionCoefficient){
     m_faceCenteredDiffusionCoefficient[lvl]->exchange();
   }
 
-  m_amr->averageDown(m_faceCenteredDiffusionCoefficient,    m_realm, m_phase);
-  m_amr->averageDown(m_ebCenteredDiffusionCoefficient, m_realm, m_phase);
+  m_amr->averageDown(m_faceCenteredDiffusionCoefficient, m_realm, m_phase);
+  m_amr->averageDown(m_ebCenteredDiffusionCoefficient,   m_realm, m_phase);
 }
 
 void CdrSolver::setEbFlux(const EBAMRIVData& a_ebFlux){
@@ -1397,7 +1387,7 @@ void CdrSolver::setDomainFlux(const Real a_domainFlux){
     pout() << m_name + "::setDomainFlux(constant)" << endl;
   }
 
-  DataOps::setValue(m_domainFlux, 0.0);
+  DataOps::setValue(m_domainFlux, a_domainFlux);
 }
 
 void CdrSolver::setEbIndexSpace(const RefCountedPtr<EBIndexSpace>& a_ebis){

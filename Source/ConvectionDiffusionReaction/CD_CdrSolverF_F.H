@@ -303,40 +303,6 @@ extern "C"
   }
 #endif  // GUARDADVECTION_DIFFUSION_DT_INVERT 
 
-#ifndef GUARDCONSDIV_BLOCK 
-#define GUARDCONSDIV_BLOCK 
-  // Prototype for Fortran procedure consdiv_block ...
-  //
-  void FORTRAN_NAME( CONSDIV_BLOCK ,consdiv_block )(
-						    CHFp_FRA1(udelrho)
-						    ,CHFp_CONST_FRA1(faceflux)
-						    ,CHFp_CONST_INT(facedir)
-						    ,CHFp_CONST_INT(tilesize)
-						    ,CHFp_CONST_REAL(dx)
-						    ,CHFp_BOX(dcalc) );
-
-#define FORT_CONSDIV_BLOCK FORTRAN_NAME( inlineCONSDIV_BLOCK, inlineCONSDIV_BLOCK)
-#define FORTNT_CONSDIV_BLOCK FORTRAN_NAME( CONSDIV_BLOCK, consdiv_block)
-
-  inline void FORTRAN_NAME(inlineCONSDIV_BLOCK, inlineCONSDIV_BLOCK)(
-								     CHFp_FRA1(udelrho)
-								     ,CHFp_CONST_FRA1(faceflux)
-								     ,CHFp_CONST_INT(facedir)
-								     ,CHFp_CONST_INT(tilesize)
-								     ,CHFp_CONST_REAL(dx)
-								     ,CHFp_BOX(dcalc) )
-  {
-    CH_TIMELEAF("FORT_CONSDIV_BLOCK");
-    FORTRAN_NAME( CONSDIV_BLOCK ,consdiv_block )(
-						 CHFt_FRA1(udelrho)
-						 ,CHFt_CONST_FRA1(faceflux)
-						 ,CHFt_CONST_INT(facedir)
-						 ,CHFt_CONST_INT(tilesize)
-						 ,CHFt_CONST_REAL(dx)
-						 ,CHFt_BOX(dcalc) );
-  }
-#endif  // GUARDCONSDIV_BLOCK 
-
 #ifndef GUARDDFLUX_REG 
 #define GUARDDFLUX_REG 
   // Prototype for Fortran procedure dflux_reg ...

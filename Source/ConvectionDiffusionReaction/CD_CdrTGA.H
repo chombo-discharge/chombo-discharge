@@ -88,24 +88,26 @@ public:
     @brief Compute div(nv - D*grad(n)) explicitly
   */
   virtual void computeDivJ(EBAMRCellData& a_divJ,
-			    EBAMRCellData& a_phi,
-			    const Real     a_extrapDt,
-			    const bool     a_ebFlux = true) override;
+			   EBAMRCellData& a_phi,
+			   const Real     a_extrapDt,
+			   const bool     a_ebFlux = true) override;
 
   /*!
     @brief Compute div(v*phi) explicitly
   */
   virtual void computeDivF(EBAMRCellData& a_divF,
-			    EBAMRCellData& a_phi,
-			    const Real     a_extrapDt,
-			    const bool     a_ebFlux = true) override;
+			   EBAMRCellData& a_phi,
+			   const CdrBc    a_domainBc,
+			   const Real     a_extrapDt,
+			   const bool     a_ebFlux = true) override;
 
   /*!
     @brief Compute div(D*grad(phi)) explicitly
   */
   virtual void computeDivD(EBAMRCellData& a_divD,
-			    EBAMRCellData& a_phi,
-			    const bool     a_ebFlux = false) override;
+			   EBAMRCellData& a_phi,
+			   const CdrBc    a_domainBc,			   
+			   const bool     a_ebFlux = false) override;
 
   /*!
     @brief Query number of ghost cells

@@ -790,7 +790,7 @@ void CdrPlasmaGodunovStepper::advanceTransportEuler(const Real a_dt){
 	solver->computeDivJ(scratch, phi, extrap_dt); // For explicit diffusion, scratch is computed as div(v*phi - D*grad(phi))
       }
       else{
-	solver->computeDivF(scratch, phi, extrap_dt); // For implicit diffusion, sratch is computed as div(v*phi)
+	solver->computeDivF(scratch, phi, solver->getDomainBc(), extrap_dt); // For implicit diffusion, sratch is computed as div(v*phi)
       }
       DataOps::scale(scratch, -1.0);     // scratch = -[div(F/J)]
       DataOps::scale(scratch, a_dt);     // scratch = [-div(F/J)]*dt
@@ -880,7 +880,7 @@ void CdrPlasmaGodunovStepper::advanceTransportRK2(const Real a_dt){
       solver->computeDivJ(scratch, phi, extrap_dt); // For explicit diffusion, scratch is computed as div(v*phi - D*grad(phi))
     }
     else{
-      solver->computeDivF(scratch, phi, extrap_dt); // For implicit diffusion, sratch is computed as div(v*phi)
+      solver->computeDivF(scratch, phi, solver->getDomainBc(), extrap_dt); // For implicit diffusion, sratch is computed as div(v*phi)
     }
     DataOps::scale(scratch, -1.0);     // scratch = -[div(F/J)]
     DataOps::scale(scratch, a_dt);     // scratch = [-div(F/J)]*dt
@@ -969,7 +969,7 @@ void CdrPlasmaGodunovStepper::advanceTransportRK2(const Real a_dt){
       DataOps::incr(phi, scratch, 0.5);
     }
     else{ // Implicit diffusion is a bit more tricky
-      solver->computeDivF(scratch, phi, extrap_dt); // For implicit diffusion, sratch is computed as div(v*phi)
+      solver->computeDivF(scratch, phi, solver->getDomainBc(), extrap_dt); // For implicit diffusion, sratch is computed as div(v*phi)
       DataOps::scale(scratch, -a_dt);     // scratch = [-div(F)]*dt
 
       // Solve the stinking diffusion equation. This is weird but we want to solve phiNew = phiOld + 0.5*dt*(k1+f(phiNew)),

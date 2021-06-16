@@ -95,13 +95,13 @@ void AdvectionDiffusionStepper::initialData(){
   m_solver->setSource(0.0);
   m_solver->setEbFlux(0.0);
   m_solver->setDomainFlux(0.0);
+  m_solver->setDomainBc(CdrBc::External);
   if(m_solver->isDiffusive()){
     m_solver->setDiffusionCoefficient(m_faceCenteredDiffusionCoefficient);
   }
   if(m_solver->isMobile()){
     this->setVelocity();
   }
-
 }
 
 void AdvectionDiffusionStepper::setVelocity(){
@@ -181,8 +181,8 @@ int AdvectionDiffusionStepper::getNumberOfPlotVariables() const{
 }
 
 void AdvectionDiffusionStepper::writePlotData(EBAMRCellData&       a_output,
-						  Vector<std::string>& a_plotVariableNames,
-						  int&                 a_icomp) const {
+					      Vector<std::string>& a_plotVariableNames,
+					      int&                 a_icomp) const {
   a_plotVariableNames.append(m_solver->getPlotVariableNames());
   m_solver->writePlotData(a_output, a_icomp);
 }
@@ -217,8 +217,6 @@ Real AdvectionDiffusionStepper::advance(const Real a_dt){
     DataOps::incr(state, m_k1, -0.5*a_dt);
     DataOps::incr(state, m_k2, -0.5*a_dt); // Done with deterministic update.
 
-    //m_solver->make_non_negative(state);
-
     // Add random diffusion flux. This is equivalent to a 1st order. Godunov splitting
     if(m_fhd){
       m_solver->gwnDiffusionSource(m_k1, state); // k1 holds random diffusion
@@ -229,7 +227,7 @@ Real AdvectionDiffusionStepper::advance(const Real a_dt){
     m_amr->interpGhost(state, m_realm, m_phase);
   }
   else if(m_integrator == 1){
-    m_solver->computeDivF(m_k1, state, a_dt);
+    m_solver->computeDivF(m_k1, state, m_solver->getDomainBc(), a_dt);
     DataOps::incr(state, m_k1, -a_dt);
     m_amr->averageDown(state, m_realm, m_phase);
 
@@ -279,14 +277,13 @@ void AdvectionDiffusionStepper::regrid(const int a_lmin, const int a_oldFinestLe
   m_solver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   m_solver->setSource(0.0);
   m_solver->setEbFlux(0.0);
-  m_solver->setDomainFlux(0.0);
+  m_solver->setDomainFlux(0.0);  
   if(m_solver->isDiffusive()){
     m_solver->setDiffusionCoefficient(m_faceCenteredDiffusionCoefficient);
   }
   if(m_solver->isMobile()){
     this->setVelocity();
   }
-
 
   // Allocate memory for RK steps
   m_amr->allocate(m_tmp, m_realm, m_phase, 1);

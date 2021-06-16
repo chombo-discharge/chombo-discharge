@@ -313,23 +313,23 @@ void CdrTGA::setupOperatorFactory(){
   DataOps::setValue(m_aCoef, 1.0); // We're usually solving (1 - dt*nabla^2)*phi^(k+1) = phi^k + dt*S^k so aco=1
   DataOps::setValue(m_ebCenteredDiffusionCoefficient, 0.0);
   m_operatorFactory = RefCountedPtr<EbHelmholtzOpFactory> (new EbHelmholtzOpFactory(levelgrids,
-										 quadcfi,
-										 fastFR,
-										 alpha,
-										 beta,
-										 m_aCoef.getData(),
-										 m_faceCenteredDiffusionCoefficient.getData(),
-										 m_ebCenteredDiffusionCoefficient.getData(),
-										 dx[0],
-										 refinement_ratios,
-										 domfact,
-										 ebfact,
-										 ghost*IntVect::Unit,
-										 ghost*IntVect::Unit,
-										 relax_type,
-										 m_numCellsBottomDrop,
-										 -1,
-										 m_mg_levelgrids));
+										    quadcfi,
+										    fastFR,
+										    alpha,
+										    beta,
+										    m_aCoef.getData(),
+										    m_faceCenteredDiffusionCoefficient.getData(),
+										    m_ebCenteredDiffusionCoefficient.getData(),
+										    dx[0],
+										    refinement_ratios,
+										    domfact,
+										    ebfact,
+										    ghost*IntVect::Unit,
+										    ghost*IntVect::Unit,
+										    relax_type,
+										    m_numCellsBottomDrop,
+										    -1,
+										    m_mg_levelgrids));
 }
 
 void CdrTGA::setupMultigridSolver(){
@@ -368,13 +368,13 @@ void CdrTGA::setupMultigridSolver(){
   }
   
   m_multigridSolver->setSolverParameters(m_multigridPreSmooth,
-				    m_multigridPostSmooth,
-				    m_multigridBottomSmooth,
-				    gmg_type,
-				    m_multigridMaxIterations,
-				    m_multigridTolerance,
-				    m_multigridHang,
-				    1.E-90); // Residue set through other means
+					 m_multigridPostSmooth,
+					 m_multigridBottomSmooth,
+					 gmg_type,
+					 m_multigridMaxIterations,
+					 m_multigridTolerance,
+					 m_multigridHang,
+					 1.E-90); // Residue set through other means
 
 }
 
@@ -435,25 +435,29 @@ void CdrTGA::computeDivJ(EBAMRCellData& a_divJ, EBAMRCellData& a_phi, const Real
     // We will let m_scratchFluxOne hold the total flux = advection + diffusion fluxes
     DataOps::setValue(m_scratchFluxOne, 0.0);
 
-    // Compute advection flux. This is mostly the same as computeDivF
+    // Compute advection flux. This is mostly the same as computeDivF. If we can, add domain fluxes here. 
     if(m_isMobile){
       m_amr->interpGhostPwl(m_cellVelocity, m_realm, m_phase);
       
       this->averageVelocityToFaces(); // Update m_faceVelocity from m_cellVelocity
       this->advectToFaces(m_faceStates, a_phi, a_extrapDt); // Advect to faces
-      this->computeFlux(m_scratchFluxTwo, m_faceVelocity, m_faceStates, m_domainFlux);
+      this->computeAdvectionFlux(m_scratchFluxTwo, m_faceVelocity, m_faceStates, m_domainBc);
 
       DataOps::incr(m_scratchFluxOne, m_scratchFluxTwo, 1.0);
     }
 
-    // Compute diffusion flux. 
+    // Compute diffusion flux. If we don't have advection, add the domain flux here. 
     if(m_isDiffusive){
-      this->computeDiffusionFlux(m_scratchFluxTwo, a_phi);
+      if(m_isMobile){
+	this->computeDiffusionFlux(m_scratchFluxTwo, a_phi, CdrBc::Wall); // Domain flux already in advective flux
+      }
+      else{
+	this->computeDiffusionFlux(m_scratchFluxTwo, a_phi, m_domainBc); // No advective deriv. Put flux here. 
+      }
       DataOps::incr(m_scratchFluxOne, m_scratchFluxTwo, -1.0);
     }
 
-    // General divergence computation. Also inject charge. Domain fluxes came in through the compute
-    // advective flux function and eb fluxes come in through the divergence computation.
+    // General divergence computation. Also inject charge. Domain fluxes came in above but eb fluxes come in here. 
     EBAMRIVData* ebflux;
     if(a_ebFlux){
       ebflux = &m_ebFlux;
@@ -470,7 +474,7 @@ void CdrTGA::computeDivJ(EBAMRCellData& a_divJ, EBAMRCellData& a_phi, const Real
   return;
 }
 
-void CdrTGA::computeDivF(EBAMRCellData& a_divF, EBAMRCellData& a_phi, const Real a_extrapDt, const bool a_ebFlux){
+void CdrTGA::computeDivF(EBAMRCellData& a_divF, EBAMRCellData& a_phi, const CdrBc a_whichBc, const Real a_extrapDt, const bool a_ebFlux){
   CH_TIME("CdrTGA::computeDivF(divF, state)");
   if(m_verbosity > 5){
     pout() << m_name + "::computeDivF(divF, state)" << endl;
@@ -485,9 +489,9 @@ void CdrTGA::computeDivF(EBAMRCellData& a_divF, EBAMRCellData& a_phi, const Real
     if(m_useMassWeightedRedistribution){
       this->setRedistWeights(a_phi);
     }
-    this->averageVelocityToFaces();
-    this->advectToFaces(m_faceStates, a_phi, a_extrapDt);          // Face extrapolation to cell-centered faces
-    this->computeFlux(m_scratchFluxOne, m_faceVelocity, m_faceStates, m_domainFlux);  // Compute face-centered fluxes
+    this->averageVelocityToFaces();                                                         // Cell-centered velocities become face-centered velocities. 
+    this->advectToFaces(m_faceStates, a_phi, a_extrapDt);                                   // Face extrapolation to cell-centered faces
+    this->computeAdvectionFlux(m_scratchFluxOne, m_faceVelocity, m_faceStates, a_whichBc);  // Compute face-centered fluxes
 
     EBAMRIVData* ebflux;
     if(a_ebFlux){
@@ -511,7 +515,7 @@ void CdrTGA::computeDivF(EBAMRCellData& a_divF, EBAMRCellData& a_phi, const Real
 
 }
 
-void CdrTGA::computeDivD(EBAMRCellData& a_divD, EBAMRCellData& a_phi, const bool a_ebFlux){
+void CdrTGA::computeDivD(EBAMRCellData& a_divD, EBAMRCellData& a_phi, const CdrBc a_domainBc, const bool a_ebFlux){
   CH_TIME("CdrTGA::computeDivD");
   if(m_verbosity > 5){
     pout() << m_name + "::computeDivD" << endl;
@@ -527,7 +531,7 @@ void CdrTGA::computeDivD(EBAMRCellData& a_divD, EBAMRCellData& a_phi, const bool
       this->setRedistWeights(a_phi);
     }
 
-    this->computeDiffusionFlux(m_scratchFluxOne, a_phi);  // Compute the face-centered diffusion flux
+    this->computeDiffusionFlux(m_scratchFluxOne, a_phi, a_domainBc);  // Compute the face-centered diffusion flux
 
     EBAMRIVData* ebflux;
     if(a_ebFlux){
