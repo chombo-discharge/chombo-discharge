@@ -643,7 +643,7 @@ void CdrPlasmaImExSdcStepper::computeFD0(){
       EBAMRCellData& FD_0  = storage->getFD()[0];  // FD(phi_0)
     
       if(solver->isDiffusive()){
-	solver->computeDivD(FD_0, phi_0);
+	solver->computeDivD(FD_0, phi_0, CdrBc::Wall); // Domain fluxes always come in through advection terms. 
 
 	// Shouldn't be necesary
 	m_amr->averageDown(FD_0, m_realm, m_cdr->getPhase());
@@ -890,7 +890,7 @@ void CdrPlasmaImExSdcStepper::integrateAdvection(const Real a_dt, const int a_m,
 
     if(solver->isMobile()){
       const Real extrap_dt = m_extrap_advect ? 2.0*m_extrap_dt*m_dtm[a_m] : 0.0; // Factor of 2 due to EBPatchAdvect
-      solver->computeDivF(scratch, phi_m, extrap_dt);                           // scratch =  Div(v_m*phi_m^(k+1))
+      solver->computeDivF(scratch, phi_m, solver->getDomainBc(), extrap_dt);     // scratch =  Div(v_m*phi_m^(k+1))
     
       DataOps::copy(phi_m1, phi_m);
       DataOps::incr(phi_m1, scratch, -m_dtm[a_m]);
@@ -1007,8 +1007,8 @@ void CdrPlasmaImExSdcStepper::reconcileIntegrands(){
 
     if(solver->isMobile()){
       const Real extrap_dt = m_extrap_advect ? 2.0*m_extrap_dt*m_dtm[m_p-1] : 0.0; // Factor of 2 because of EBPatchAdvect
-      solver->computeDivF(FAR_p, phi_p, extrap_dt);       // FAR_p =  Div(v_p*phi_p)
-      DataOps::scale(FAR_p, -1.0);                        // FAR_p = -Div(v_p*phi_p)
+      solver->computeDivF(FAR_p, phi_p, solver->getDomainBc(), extrap_dt);         // FAR_p =  Div(v_p*phi_p)
+      DataOps::scale(FAR_p, -1.0);                                                 // FAR_p = -Div(v_p*phi_p)
     }
     else{
       DataOps::setValue(FAR_p, 0.0);
