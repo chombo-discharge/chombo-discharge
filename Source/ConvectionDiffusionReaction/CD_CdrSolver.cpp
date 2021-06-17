@@ -22,6 +22,9 @@
 #include <CD_DataOps.H>
 #include <CD_NamespaceHeader.H>
 
+constexpr int CdrSolver::m_comp;
+constexpr int CdrSolver::m_nComp;
+
 CdrSolver::CdrSolver(){
   m_name       = "CdrSolver";
   m_className  = "CdrSolver";
@@ -1331,27 +1334,26 @@ void CdrSolver::setDiffusionCoefficient(const EBAMRFluxData& a_diffusionCoeffici
     a_ebDiffusionCoefficient[lvl]->localCopyTo(*m_ebCenteredDiffusionCoefficient[lvl]);
   }
 
-  m_amr->averageDown(m_faceCenteredDiffusionCoefficient,    m_realm, m_phase);
-  m_amr->averageDown(m_ebCenteredDiffusionCoefficient, m_realm, m_phase);
+  m_amr->averageDown(m_faceCenteredDiffusionCoefficient, m_realm, m_phase);
+  m_amr->averageDown(m_ebCenteredDiffusionCoefficient,   m_realm, m_phase);
 }
 
 void CdrSolver::setDiffusionCoefficient(const Real a_diffusionCoefficient){
-  CH_TIME("CdrSolver::setDiffusionCoefficient(real)");
+  CH_TIME("CdrSolver::setDiffusionCoefficient(Real)");
   if(m_verbosity > 5){
-    pout() << m_name + "::setDiffusionCoefficient(real)" << endl;
+    pout() << m_name + "::setDiffusionCoefficient(Real)" << endl;
   }
 
-  const int finest_level = m_amr->getFinestLevel();
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    DataOps::setValue(*m_faceCenteredDiffusionCoefficient[lvl],    a_diffusionCoefficient);
-    DataOps::setValue(*m_ebCenteredDiffusionCoefficient[lvl], a_diffusionCoefficient);
-
-    m_faceCenteredDiffusionCoefficient[lvl]->exchange();
-  }
+  DataOps::setValue(m_faceCenteredDiffusionCoefficient, a_diffusionCoefficient);
+  DataOps::setValue(m_ebCenteredDiffusionCoefficient,   a_diffusionCoefficient);
 
   m_amr->averageDown(m_faceCenteredDiffusionCoefficient, m_realm, m_phase);
   m_amr->averageDown(m_ebCenteredDiffusionCoefficient,   m_realm, m_phase);
+}
+
+void CdrSolver::setDiffusionCoefficient(const std::function<Real(const RealVect a_position)>& a_diffCo){
+  DataOps::setValue(m_faceCenteredDiffusionCoefficient, a_diffCo, m_amr->getProbLo(), m_amr->getDx(), m_comp);
+  DataOps::setValue(m_ebCenteredDiffusionCoefficient,   a_diffCo, m_amr->getProbLo(), m_amr->getDx(), m_comp);
 }
 
 void CdrSolver::setEbFlux(const EBAMRIVData& a_ebFlux){
@@ -1444,6 +1446,10 @@ void CdrSolver::setSource(const Real a_source){
   m_amr->interpGhost(m_source, m_realm, m_phase);
 }
 
+void CdrSolver::setSource(const std::function<Real(const RealVect a_position)> a_source){
+  DataOps::setValue(m_source, a_source, m_amr->getProbLo(), m_amr->getDx(), m_comp);
+}
+
 void CdrSolver::setTime(const int a_step, const Real a_time, const Real a_dt) {
   CH_TIME("CdrSolver::setTime");
   if(m_verbosity > 5){
@@ -1489,6 +1495,10 @@ void CdrSolver::setVelocity(const RealVect a_velo){
 
   m_amr->averageDown(m_cellVelocity, m_realm, m_phase);
   m_amr->interpGhost(m_cellVelocity, m_realm, m_phase);
+}
+
+void CdrSolver::setVelocity(const std::function<RealVect(const RealVect a_pos)>& a_velo){
+  DataOps::setValue(m_cellVelocity, a_velo, m_amr->getProbLo(), m_amr->getDx());
 }
 
 void CdrSolver::setPhase(const phase::which_phase a_phase){

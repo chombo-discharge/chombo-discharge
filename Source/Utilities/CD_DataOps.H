@@ -219,6 +219,18 @@ public:
 
   static void setValue(LevelData<EBCellFAB>& a_lhs, const std::function<Real(const RealVect)>& a_function, const RealVect a_probLo, const Real a_dx, const int a_comp);
 
+  static void setValue(EBAMRFluxData& a_lhs, const std::function<Real(const RealVect)>& a_function, const RealVect a_probLo, const Vector<Real>& a_dx, const int a_comp);
+
+  static void setValue(LevelData<EBFluxFAB>& a_lhs, const std::function<Real(const RealVect)>& a_function, const RealVect a_probLo, const Real a_dx, const int a_comp);
+
+  static void setValue(EBAMRIVData& a_lhs, const std::function<Real(const RealVect)>& a_function, const RealVect a_probLo, const Vector<Real>& a_dx, const int a_comp);
+
+  static void setValue(LevelData<BaseIVFAB<Real> >& a_lhs, const std::function<Real(const RealVect)>& a_function, const RealVect a_probLo, const Real a_dx, const int a_comp);
+
+  static void setValue(EBAMRCellData& a_lhs, const std::function<RealVect(const RealVect)>& a_function, const RealVect a_probLo, const Vector<Real>& a_dx);
+
+  static void setValue(LevelData<EBCellFAB>& a_lhs, const std::function<RealVect(const RealVect)>& a_function, const RealVect a_probLo, const Real a_dx);
+
   static void setValue(EBAMRCellData& a_lhs, const Real& a_value);
   
   static void setValue(EBAMRCellData& a_lhs, const Real a_value, const int a_comp);

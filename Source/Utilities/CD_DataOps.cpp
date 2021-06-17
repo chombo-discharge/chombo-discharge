@@ -1341,6 +1341,123 @@ void DataOps::setValue(LevelData<EBCellFAB>& a_lhs, const std::function<Real(con
   }
 }
 
+void DataOps::setValue(EBAMRFluxData& a_lhs, const std::function<Real(const RealVect)>& a_function, const RealVect a_probLo, const Vector<Real>& a_dx, const int a_comp){
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++){
+    DataOps::setValue(*a_lhs[lvl], a_function, a_probLo, a_dx[lvl], a_comp);
+  }
+}
+
+void DataOps::setValue(LevelData<EBFluxFAB>& a_lhs, const std::function<Real(const RealVect)>& a_function, const RealVect a_probLo, const Real a_dx, const int a_comp){
+  const DisjointBoxLayout& dbl = a_lhs.disjointBoxLayout();
+
+  for (DataIterator dit(dbl); dit.ok(); ++dit){
+    for (int dir = 0; dir < SpaceDim; dir++){
+      EBFaceFAB& lhs        = a_lhs[dit()][dir];
+      BaseFab<Real>& lhsFAB = lhs.getSingleValuedFAB();
+    
+      const Box box           = dbl[dit()];
+      const EBISBox& ebisbox  = lhs.getEBISBox();
+      const EBGraph& ebgraph  = ebisbox.getEBGraph();
+      const IntVectSet& irreg = ebisbox.getIrregIVS(box);
+
+      Box facebox = box;
+      facebox.surroundingNodes(dir);
+
+      // Regular cells
+      for (BoxIterator bit(facebox); bit.ok(); ++bit){
+	const IntVect iv = bit();
+
+	const RealVect pos = a_probLo + RealVect(iv)*a_dx;
+
+	lhsFAB(iv, a_comp) = a_function(pos);
+      }
+
+      // Irregular cells. 
+      const FaceStop::WhichFaces stopCrit = FaceStop::SurroundingWithBoundary;
+      for (FaceIterator faceIt(irreg, ebgraph, dir, stopCrit); faceIt.ok(); ++faceIt){
+	const FaceIndex& face = faceIt();
+	
+	const RealVect pos = EBArith::getFaceLocation(face, a_dx, a_probLo);
+
+	lhs(face, a_comp) = a_function(pos);
+      }
+    }
+  }
+}
+
+void DataOps::setValue(EBAMRIVData& a_lhs, const std::function<Real(const RealVect)>& a_function, const RealVect a_probLo, const Vector<Real>& a_dx, const int a_comp){
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++){
+    DataOps::setValue(*a_lhs[lvl], a_function, a_probLo, a_dx[lvl], a_comp);
+  }
+}
+
+void DataOps::setValue(LevelData<BaseIVFAB<Real> >& a_lhs, const std::function<Real(const RealVect)>& a_function, const RealVect a_probLo, const Real a_dx, const int a_comp){
+  // As we don't specify where the function should be evaluated, this routine sets a_lhs to be evaluated at the cell center.
+  const DisjointBoxLayout& dbl = a_lhs.disjointBoxLayout();
+
+  for (DataIterator dit(dbl); dit.ok(); ++dit){
+    BaseIVFAB<Real>& lhs    = a_lhs[dit()];
+
+    const EBGraph& ebgraph  = lhs.getEBGraph();
+    const IntVectSet& irreg = lhs.getIVS();
+
+    for (VoFIterator vofit(irreg, ebgraph); vofit.ok(); ++vofit){
+      const VolIndex vof = vofit();
+      const IntVect  iv  = vof.gridIndex();
+      const RealVect pos = a_probLo + (0.5*RealVect::Unit + RealVect(iv))*a_dx;
+
+      lhs(vof, a_comp) = a_function(pos);
+    }
+  }
+}
+
+void DataOps::setValue(EBAMRCellData& a_lhs, const std::function<RealVect(const RealVect)>& a_function, const RealVect a_probLo, const Vector<Real>& a_dx){
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++){
+    DataOps::setValue(*a_lhs[lvl], a_function, a_probLo, a_dx[lvl]);
+  }
+}
+
+void DataOps::setValue(LevelData<EBCellFAB>& a_lhs, const std::function<RealVect(const RealVect)>& a_function, const RealVect a_probLo, const Real a_dx){
+  CH_assert(a_lhs.nComp() == SpaceDim);
+  
+  const DisjointBoxLayout& dbl = a_lhs.disjointBoxLayout();
+
+  for (DataIterator dit(dbl); dit.ok(); ++dit){
+    EBCellFAB& lhs        = a_lhs[dit()];
+    BaseFab<Real>& lhsFAB = lhs.getSingleValuedFAB();
+    
+    const Box box           = dbl[dit()];
+    const EBISBox& ebisbox  = lhs.getEBISBox();
+    const EBGraph& ebgraph  = ebisbox.getEBGraph();
+    const IntVectSet& irreg = ebisbox.getIrregIVS(box);
+
+    // Regular cells
+    for (BoxIterator bit(box); bit.ok(); ++bit){
+      const IntVect iv = bit();
+
+      const RealVect pos = a_probLo + (0.5*RealVect::Unit + RealVect(iv))*a_dx;
+      const RealVect val = a_function(pos);
+      
+      for (int comp = 0; comp < SpaceDim; comp++){
+	lhsFAB(iv, comp) = val[comp];
+      }
+    }
+
+    // Irregular cells
+    for (VoFIterator vofit(irreg, ebgraph); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+      const IntVect& iv   = vof.gridIndex();
+      
+      const RealVect pos = a_probLo + (0.5*RealVect::Unit + RealVect(iv))*a_dx + ebisbox.centroid(vof)*a_dx;
+      const RealVect val = a_function(pos);
+
+      for (int comp = 0; comp < SpaceDim; comp++){
+	lhs(vof, comp) = val[comp];
+      }
+    }
+  }
+}
+
 void DataOps::setValue(EBAMRCellData& a_data, const Real& a_value){
   for (int lvl = 0; lvl < a_data.size(); lvl++){
     EBLevelDataOps::setVal(*a_data[lvl], a_value);

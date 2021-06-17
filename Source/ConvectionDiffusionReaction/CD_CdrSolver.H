@@ -16,6 +16,7 @@
 #include <random>
 #include <time.h>
 #include <chrono>
+#include <functional>
 
 // Our includes
 #include <CD_AmrMesh.H>
@@ -255,6 +256,12 @@ public:
   */
   virtual void setVelocity(const RealVect a_velo);
 
+    /*!
+    @brief Set velocity
+    @param[in] a_velo Velocity
+  */
+  virtual void setVelocity(const std::function<RealVect(const RealVect a_pos)>& a_velo);
+
   /*!
     @brief Set diffusion coefficients
     @param[in] a_diffusionCoefficient   Face-centered diffusion coefficient. 
@@ -269,6 +276,12 @@ public:
   */
   virtual void setDiffusionCoefficient(const Real a_diffusionCoefficient);
 
+    /*!
+    @brief Set diffusion coefficient
+    @param[in] a_diffCo Diffusion coefficient. 
+  */
+  virtual void setDiffusionCoefficient(const std::function<Real(const RealVect a_position)>& a_diffCo);
+
   /*!
     @brief Set source terms
     @param[in] a_source Source term.
@@ -281,6 +294,12 @@ public:
     @param[in] a_source Source term.
   */
   virtual void setSource(const Real a_source);
+
+  /*!
+    @brief Set source term
+    @param[in] a_source Source term.
+  */
+  virtual void setSource(const std::function<Real(const RealVect a_position)> a_source);
 
   /*!
     @brief Set the EB flux
@@ -508,6 +527,16 @@ public:
 
 
 protected:
+
+  /*!
+    @brief Component number in data holder
+  */
+  static constexpr int m_comp = 0;
+
+  /*!
+    @brief Number of components that this solver solves for
+  */
+  static constexpr int m_nComp = 1;
   
   /*!
     @brief Phase
