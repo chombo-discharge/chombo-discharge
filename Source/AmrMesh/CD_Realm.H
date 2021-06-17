@@ -96,7 +96,6 @@ public:
   // Get functions for stuff that are specific to phase, but is not necessarily const
   Vector<RefCountedPtr<EbCoarAve> >& getCoarseAverage(const phase::which_phase a_phase);
   Vector<RefCountedPtr<EbGhostCloud> >& getGhostCloud(const phase::which_phase a_phase);
-  Vector<RefCountedPtr<NwoEbQuadCfInterp> >& getNWOEBQuadCFInterp(const phase::which_phase a_phase);
   Vector<RefCountedPtr<EBQuadCFInterp> >& getEBQuadCFInterp(const phase::which_phase a_phase);
   Vector<RefCountedPtr<AggEBPWLFillPatch> >& getFillPatch(const phase::which_phase a_phase);
   Vector<RefCountedPtr<EBPWLFineInterp> >& getPwlInterpolator(const phase::which_phase a_phase);

@@ -777,7 +777,6 @@ void AmrMesh::parseOptions(){
   parseNumGhostCells();
   parseEbGhostCells();
   parseProbLoHiCorners();
-  parseGhostInterpolation();
   parseCentroidStencils();
   parseEbCentroidStencils();
 
@@ -801,22 +800,6 @@ void AmrMesh::parseProbLoHiCorners(){
   Vector<Real> v(SpaceDim);
   pp.getarr("lo_corner", v, 0, SpaceDim); m_probLo  = RealVect(D_DECL(v[0], v[1], v[2]));
   pp.getarr("hi_corner", v, 0, SpaceDim); m_prob_hi = RealVect(D_DECL(v[0], v[1], v[2]));
-}
-
-void AmrMesh::parseGhostInterpolation(){
-
-  std::string interp_type;
-  ParmParse pp("AmrMesh");
-  pp.get("ghost_interp", interp_type);
-  if(interp_type == "pwl"){
-    m_ghostCellInterpolationMethod = GhostInterpolation::PiecewiseLinear;
-  }
-  else if(interp_type == "quad"){
-    m_ghostCellInterpolationMethod = GhostInterpolation::Quadratic;
-  }
-  else{
-    MayDay::Abort("AmrMesh::parseGhostInterpolation - unknown ghost interpolation requested");
-  }
 }
 
 void AmrMesh::buildDomains(){
@@ -1293,15 +1276,7 @@ void AmrMesh::interpGhost(EBAMRCellData& a_data, const std::string a_realm, cons
     MayDay::Abort(str.c_str());
   }  
 
-  if(m_ghostCellInterpolationMethod == GhostInterpolation::PiecewiseLinear){
-    this->interpGhostPwl(a_data, a_realm, a_phase);
-  }
-  else if(m_ghostCellInterpolationMethod == GhostInterpolation::Quadratic){
-    this->interpGhostQuad(a_data, a_realm, a_phase);
-  }
-  else{
-    MayDay::Abort("AmrMesh::interpGhost - unsupported interpolation type requested");
-  }
+  this->interpGhostPwl(a_data, a_realm, a_phase);
 }
 
 void AmrMesh::interpGhost(LevelData<EBCellFAB>&       a_fineData,
@@ -1324,18 +1299,9 @@ void AmrMesh::interpGhost(LevelData<EBCellFAB>&       a_fineData,
     const int ncomps      = a_fineData.nComp();
     const Interval interv = Interval(0, ncomps-1);
     
-    if(m_ghostCellInterpolationMethod == GhostInterpolation::PiecewiseLinear){
-      AggEBPWLFillPatch& fillpatch = *m_realms[a_realm]->getFillPatch(a_phase)[a_fineLevel];
+    AggEBPWLFillPatch& fillpatch = *m_realms[a_realm]->getFillPatch(a_phase)[a_fineLevel];
     
-      fillpatch.interpolate(a_fineData, a_coarData, a_coarData, 0.0, 0.0, 0.0, interv);
-    }
-    else if(m_ghostCellInterpolationMethod == GhostInterpolation::Quadratic){
-      NwoEbQuadCfInterp& quadcfi = *m_realms[a_realm]->getNWOEBQuadCFInterp(a_phase)[a_fineLevel];
-      quadcfi.coarseFineInterp(a_fineData, a_coarData, 0, 0, ncomps);
-    }
-    else{
-      MayDay::Abort("AmrMesh::interpGhost - unsupported interpolation type requested");
-    }
+    fillpatch.interpolate(a_fineData, a_coarData, a_coarData, 0.0, 0.0, 0.0, interv);
   }
 }
 
@@ -1367,31 +1333,6 @@ void AmrMesh::interpGhost(MFAMRCellData& a_data, const std::string a_realm){
 
   if(!ebis_gas.isNull()) this->interpGhost(alias_g, a_realm, phase::gas);
   if(!ebis_sol.isNull()) this->interpGhost(alias_s, a_realm, phase::solid);
-}
-
-void AmrMesh::interpGhostQuad(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase){
-  CH_TIME("AmrMesh::interpGhostQuad(ebamrcell, Realm, phase)");
-  if(m_verbosity > 3){
-    pout() << "AmrMesh::interpGhostQuad(ebamrcell, Realm, phase)" << endl;
-  }
-
-  if(!this->queryRealm(a_realm)) {
-    std::string str = "AmrMesh::interpGhostQuad(ebamrcell, Realm, phase) - could not find Realm '" + a_realm + "'";
-    MayDay::Abort(str.c_str());
-  }
-
-  for (int lvl = m_finestLevel; lvl > 0; lvl--){
-    const int ncomps = a_data[lvl]->nComp();
-    const Interval interv(0, ncomps -1);
-
-    NwoEbQuadCfInterp& quadcfi = *m_realms[a_realm]->getNWOEBQuadCFInterp(a_phase)[lvl];
-
-    quadcfi.coarseFineInterp(*a_data[lvl], *a_data[lvl-1], 0, 0, ncomps);
-  }
-
-  for (int lvl = 0; lvl <= m_finestLevel; lvl++){
-    a_data[lvl]->exchange();
-  }
 }
 
 void AmrMesh::interpGhostPwl(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase){
@@ -1904,10 +1845,6 @@ Vector<RefCountedPtr<EbCoarAve> >& AmrMesh::getCoarseAverage(const std::string a
 
 Vector<RefCountedPtr<EbGhostCloud> >& AmrMesh::getGhostCloud(const std::string a_realm, const phase::which_phase a_phase){
   return m_realms[a_realm]->getGhostCloud(a_phase);
-}
-
-Vector<RefCountedPtr<NwoEbQuadCfInterp> >& AmrMesh::getNWOEBQuadCFInterp(const std::string a_realm, const phase::which_phase a_phase){
-  return m_realms[a_realm]->getNWOEBQuadCFInterp(a_phase);
 }
 
 Vector<RefCountedPtr<EBQuadCFInterp> >& AmrMesh::getEBQuadCFInterp(const std::string a_realm, const phase::which_phase a_phase){
