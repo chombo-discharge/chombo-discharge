@@ -30,6 +30,7 @@ CdrSolver::CdrSolver(){
   m_className  = "CdrSolver";
 
   this->setRealm(Realm::Primal);
+  this->setDefaultFluxFunctions(); // Must be populated somehow. 
 }
 
 CdrSolver::~CdrSolver(){
@@ -633,8 +634,8 @@ void CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const CdrBc a_which
 	    break;
 	  }
 	  case CdrBc::Function:{
-	    MayDay::Abort("CdrSolver::fillDomainFlux - function not implemented (yet)");
-	    flux(face, comp) = 0.0;
+	    const RealVect pos = EBArith::getFaceLocation(face, m_amr->getDx()[a_level],m_amr->getProbLo());
+	    flux(face, comp)   = -sign(sit()) * m_domainFluxFunctions.at(std::make_pair(dir, sit()))(pos, m_time);
 	    break;
 	  }
 	  case CdrBc::Outflow:{
@@ -1388,13 +1389,26 @@ void CdrSolver::setEbFlux(const Real a_ebFlux){
   }
 }
 
-void CdrSolver::setDomainFlux(const Real a_domainFlux){
-  CH_TIME("CdrSolver::setDomainFlux(constant)");
+void CdrSolver::setDomainFlux(const DomainFluxFunction& a_func){
+  CH_TIME("CdrSolver::setDomainFlux(DomainFluxFunction)");
   if(m_verbosity > 5){
-    pout() << m_name + "::setDomainFlux(constant)" << endl;
+    pout() << m_name + "::setDomainFlux(DomainFluxFunction)" << endl;
   }
 
-  DataOps::setValue(m_domainFlux, a_domainFlux);
+  for (int dir = 0; dir < SpaceDim; dir++){
+    for (SideIterator sit; sit.ok(); ++sit){
+      this->setDomainFlux(std::make_pair(dir, sit()), a_func);
+    }
+  }
+}
+
+void CdrSolver::setDomainFlux(const DomainWall a_wall, const DomainFluxFunction& a_func){
+  CH_TIME("CdrSolver::setDomainFlux(DomainWall, DomainFluxFunction)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::setDomainFlux(DomainWall, DomainFluxFunction)" << endl;
+  }
+
+  m_domainFluxFunctions.at(a_wall) = a_func;
 }
 
 void CdrSolver::setEbIndexSpace(const RefCountedPtr<EBIndexSpace>& a_ebis){
@@ -2078,7 +2092,7 @@ void CdrSolver::parseDomainBc(){
   else if(str == "wall"){
     setDomainBc(CdrBc::Wall);
   }
-  else if(str == "Function"){
+  else if(str == "function"){
     setDomainBc(CdrBc::Function);
   }
   else if(str == "outflow"){
@@ -2406,6 +2420,19 @@ void CdrSolver::parsePlotMode(){
   }
   else if(str == "numbers"){
     m_plotNumbers = true;
+  }
+}
+
+void CdrSolver::setDefaultFluxFunctions(){
+
+  auto zero = [](const RealVect a_pos, const Real a_time){
+    return 0.0;
+  };
+
+  for (int dir = 0; dir < SpaceDim; dir++){
+    for (SideIterator sit; sit.ok(); ++sit){
+      m_domainFluxFunctions.emplace(std::make_pair(dir, sit()), zero);
+    }
   }
 }
 

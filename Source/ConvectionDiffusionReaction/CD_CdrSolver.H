@@ -39,7 +39,7 @@ public:
   /*!
     @brief Alias for domain wall flux function
   */
-  using DomainFluxFunction = std::function<Real(const RealVect& a_pos)>;
+  using DomainFluxFunction = std::function<Real(const RealVect a_pos, const Real a_time)>;
 
   /*!
     @brief Default constructor. 
@@ -325,11 +325,14 @@ public:
   virtual void setEbFlux(const Real a_ebFlux);
 
   /*!
-    @brief Set the domain flux
-    @param[in] a_domainFlux Domain flux
-    @details This sets a constant domain flux on all domain faces. 
+    @brief Set domain flux function on all sides
   */
-  virtual void setDomainFlux(const Real a_domainFlux);
+  virtual void setDomainFlux(const DomainFluxFunction& a_func);
+
+  /*!
+    @brief Set domain flux function on specific side
+  */
+  virtual void setDomainFlux(const DomainWall a_wall, const DomainFluxFunction& a_func);
 
   /*!
     @brief Fill internal state with initial data
@@ -709,6 +712,11 @@ protected:
   EBAMRIVData m_ebCenteredDiffusionCoefficient;
 
   /*!
+    @brief Flux functions
+  */
+  std::map<DomainWall, DomainFluxFunction> m_domainFluxFunctions;
+
+  /*!
     @brief Verbosity
   */
   int m_verbosity;
@@ -1029,6 +1037,11 @@ protected:
     ®brief Parse source term stuff
   */
   virtual void parseExtrapolateSourceTerm();
+
+  /*!
+    @brief Set default flux functions
+  */
+  virtual void setDefaultFluxFunctions();
 };
 
 #include <CD_NamespaceFooter.H>

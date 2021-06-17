@@ -94,14 +94,19 @@ void AdvectionDiffusionStepper::initialData(){
 
   m_solver->setSource(0.0);
   m_solver->setEbFlux(0.0);
-  m_solver->setDomainFlux(0.0);
-  m_solver->setDomainBc(CdrBc::Data);
   if(m_solver->isDiffusive()){
     m_solver->setDiffusionCoefficient(m_faceCenteredDiffusionCoefficient);
   }
   if(m_solver->isMobile()){
     this->setVelocity();
   }
+
+  // Set flux functions
+  auto fluxFunc = [](const RealVect a_pos, const Real a_time){
+    return 1.0;
+  };
+
+  m_solver->setDomainFlux(fluxFunc);
 }
 
 void AdvectionDiffusionStepper::setVelocity(){
@@ -142,7 +147,6 @@ void AdvectionDiffusionStepper::readCheckpointData(HDF5Handle& a_handle, const i
 void AdvectionDiffusionStepper::postCheckpointSetup(){
   m_solver->setSource(0.0);
   m_solver->setEbFlux(0.0);
-  m_solver->setDomainFlux(0.0);
   if(m_solver->isDiffusive()){
     m_solver->setDiffusionCoefficient(m_faceCenteredDiffusionCoefficient);
   }
@@ -252,7 +256,6 @@ void AdvectionDiffusionStepper::regrid(const int a_lmin, const int a_oldFinestLe
   m_solver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   m_solver->setSource(0.0);
   m_solver->setEbFlux(0.0);
-  m_solver->setDomainFlux(0.0);  
   if(m_solver->isDiffusive()){
     m_solver->setDiffusionCoefficient(m_faceCenteredDiffusionCoefficient);
   }
