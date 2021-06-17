@@ -78,7 +78,7 @@ ProxyFieldSolver.smooth    = 8          # Smoothings
 ProxyFieldSolver.relax     = 2           # Relaxation method
 ProxyFieldSolver.mg_tol    = 1.E-10      # Multigrid tolerance
 ProxyFieldSolver.min_cells = 32          # Number of cells along the shortest coordinate in the bottom of multigrid.
-ProxyFieldSolver.plt_vars  = phi resid E # Plot variables
+ProxyFieldSolver.plt_vars  = phi resid E rho # Plot variables
 
 # ====================================================================================================
 # GEO_COARSENER CLASS OPTIONS

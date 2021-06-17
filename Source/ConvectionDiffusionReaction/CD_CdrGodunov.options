@@ -2,7 +2,7 @@
 # CDR_GDNV SOLVER SETTINGS
 # ----------------------------------------------------------------------------------------------------
 CdrGodunov.seed                  = -1                      # Seed. Random seed with seed < 0
-CdrGodunov.domain_bc             = kinetic                 # 'kinetic', 'wall', 'outflow', or 'extrap'
+CdrGodunov.domain_bc             = wall                    # 'data', 'function', 'wall', 'outflow', or 'extrap'
 CdrGodunov.mass_redist           = false                   # Mass-weighted redistribution or volume-weighted
 CdrGodunov.limit_slopes          = true                    # Use slope-limiters for godunov
 CdrGodunov.plt_vars              = phi vel src dco ebflux  # Plot variables. Options are 'phi', 'vel', 'dco', 'src'

@@ -328,6 +328,14 @@ void FieldSolver::regrid(const int a_lmin, const int a_old_finest, const int a_n
   this->computeElectricField();
 }
 
+void FieldSolver::setRho(const Real a_rho){
+  DataOps::setValue(m_rho, a_rho);
+}
+
+void FieldSolver::setRho(const std::function<Real(const RealVect)>& a_rho){
+  DataOps::setValue(m_rho, a_rho, m_amr->getProbLo(), m_amr->getDx(), 0);
+}
+
 void FieldSolver::setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry){
   CH_TIME("FieldSolver::setComputationalGeometry");
   if(m_verbosity > 5){

@@ -22,11 +22,15 @@
 #include <CD_DataOps.H>
 #include <CD_NamespaceHeader.H>
 
+constexpr int CdrSolver::m_comp;
+constexpr int CdrSolver::m_nComp;
+
 CdrSolver::CdrSolver(){
   m_name       = "CdrSolver";
   m_className  = "CdrSolver";
 
   this->setRealm(Realm::Primal);
+  this->setDefaultFluxFunctions(); // Must be populated somehow. 
 }
 
 CdrSolver::~CdrSolver(){
@@ -621,12 +625,17 @@ void CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const CdrBc a_which
 	  const FaceIndex& face = faceit();
 
 	  switch(a_whichFlux){
-	  case CdrBc::External:{
+	  case CdrBc::Data:{
 	    flux(face, comp) = domflux(face, comp);
 	    break;
 	  }
 	  case CdrBc::Wall:{
 	    flux(face, comp) = 0.0;
+	    break;
+	  }
+	  case CdrBc::Function:{
+	    const RealVect pos = EBArith::getFaceLocation(face, m_amr->getDx()[a_level],m_amr->getProbLo());
+	    flux(face, comp)   = -sign(sit()) * m_domainFluxFunctions.at(std::make_pair(dir, sit()))(pos, m_time);
 	    break;
 	  }
 	  case CdrBc::Outflow:{
@@ -645,7 +654,7 @@ void CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const CdrBc a_which
 	    
 	    break;
 	  }
-	  case CdrBc::Extrap: // Don't do anything, the solver has responsibility. 
+	  case CdrBc::Solver: // Don't do anything, the solver has responsibility. 
 	    break;
 	  default:
 	    MayDay::Abort("CdrSolver::fillDomainFlux - logic bust");
@@ -1331,27 +1340,26 @@ void CdrSolver::setDiffusionCoefficient(const EBAMRFluxData& a_diffusionCoeffici
     a_ebDiffusionCoefficient[lvl]->localCopyTo(*m_ebCenteredDiffusionCoefficient[lvl]);
   }
 
-  m_amr->averageDown(m_faceCenteredDiffusionCoefficient,    m_realm, m_phase);
-  m_amr->averageDown(m_ebCenteredDiffusionCoefficient, m_realm, m_phase);
+  m_amr->averageDown(m_faceCenteredDiffusionCoefficient, m_realm, m_phase);
+  m_amr->averageDown(m_ebCenteredDiffusionCoefficient,   m_realm, m_phase);
 }
 
 void CdrSolver::setDiffusionCoefficient(const Real a_diffusionCoefficient){
-  CH_TIME("CdrSolver::setDiffusionCoefficient(real)");
+  CH_TIME("CdrSolver::setDiffusionCoefficient(Real)");
   if(m_verbosity > 5){
-    pout() << m_name + "::setDiffusionCoefficient(real)" << endl;
+    pout() << m_name + "::setDiffusionCoefficient(Real)" << endl;
   }
 
-  const int finest_level = m_amr->getFinestLevel();
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    DataOps::setValue(*m_faceCenteredDiffusionCoefficient[lvl],    a_diffusionCoefficient);
-    DataOps::setValue(*m_ebCenteredDiffusionCoefficient[lvl], a_diffusionCoefficient);
-
-    m_faceCenteredDiffusionCoefficient[lvl]->exchange();
-  }
+  DataOps::setValue(m_faceCenteredDiffusionCoefficient, a_diffusionCoefficient);
+  DataOps::setValue(m_ebCenteredDiffusionCoefficient,   a_diffusionCoefficient);
 
   m_amr->averageDown(m_faceCenteredDiffusionCoefficient, m_realm, m_phase);
   m_amr->averageDown(m_ebCenteredDiffusionCoefficient,   m_realm, m_phase);
+}
+
+void CdrSolver::setDiffusionCoefficient(const std::function<Real(const RealVect a_position)>& a_diffCo){
+  DataOps::setValue(m_faceCenteredDiffusionCoefficient, a_diffCo, m_amr->getProbLo(), m_amr->getDx(), m_comp);
+  DataOps::setValue(m_ebCenteredDiffusionCoefficient,   a_diffCo, m_amr->getProbLo(), m_amr->getDx(), m_comp);
 }
 
 void CdrSolver::setEbFlux(const EBAMRIVData& a_ebFlux){
@@ -1381,13 +1389,26 @@ void CdrSolver::setEbFlux(const Real a_ebFlux){
   }
 }
 
-void CdrSolver::setDomainFlux(const Real a_domainFlux){
-  CH_TIME("CdrSolver::setDomainFlux(constant)");
+void CdrSolver::setDomainFlux(const DomainFluxFunction& a_func){
+  CH_TIME("CdrSolver::setDomainFlux(DomainFluxFunction)");
   if(m_verbosity > 5){
-    pout() << m_name + "::setDomainFlux(constant)" << endl;
+    pout() << m_name + "::setDomainFlux(DomainFluxFunction)" << endl;
   }
 
-  DataOps::setValue(m_domainFlux, a_domainFlux);
+  for (int dir = 0; dir < SpaceDim; dir++){
+    for (SideIterator sit; sit.ok(); ++sit){
+      this->setDomainFlux(std::make_pair(dir, sit()), a_func);
+    }
+  }
+}
+
+void CdrSolver::setDomainFlux(const DomainWall a_wall, const DomainFluxFunction& a_func){
+  CH_TIME("CdrSolver::setDomainFlux(DomainWall, DomainFluxFunction)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::setDomainFlux(DomainWall, DomainFluxFunction)" << endl;
+  }
+
+  m_domainFluxFunctions.at(a_wall) = a_func;
 }
 
 void CdrSolver::setEbIndexSpace(const RefCountedPtr<EBIndexSpace>& a_ebis){
@@ -1444,6 +1465,10 @@ void CdrSolver::setSource(const Real a_source){
   m_amr->interpGhost(m_source, m_realm, m_phase);
 }
 
+void CdrSolver::setSource(const std::function<Real(const RealVect a_position)> a_source){
+  DataOps::setValue(m_source, a_source, m_amr->getProbLo(), m_amr->getDx(), m_comp);
+}
+
 void CdrSolver::setTime(const int a_step, const Real a_time, const Real a_dt) {
   CH_TIME("CdrSolver::setTime");
   if(m_verbosity > 5){
@@ -1489,6 +1514,10 @@ void CdrSolver::setVelocity(const RealVect a_velo){
 
   m_amr->averageDown(m_cellVelocity, m_realm, m_phase);
   m_amr->interpGhost(m_cellVelocity, m_realm, m_phase);
+}
+
+void CdrSolver::setVelocity(const std::function<RealVect(const RealVect a_pos)>& a_velo){
+  DataOps::setValue(m_cellVelocity, a_velo, m_amr->getProbLo(), m_amr->getDx());
 }
 
 void CdrSolver::setPhase(const phase::which_phase a_phase){
@@ -2057,17 +2086,20 @@ void CdrSolver::parseDomainBc(){
 
   std::string str;
   pp.get("domain_bc", str);
-  if(str == "kinetic"){
-    setDomainBc(CdrBc::External);
-  }
-  else if(str == "outflow"){
-    setDomainBc(CdrBc::Outflow);
+  if(str == "data"){
+    setDomainBc(CdrBc::Data);
   }
   else if(str == "wall"){
     setDomainBc(CdrBc::Wall);
   }
-  else if(str == "extrap"){
-    setDomainBc(CdrBc::Extrap);
+  else if(str == "function"){
+    setDomainBc(CdrBc::Function);
+  }
+  else if(str == "outflow"){
+    setDomainBc(CdrBc::Outflow);
+  }
+  else if(str == "solver"){
+    setDomainBc(CdrBc::Solver);
   }
   else{
     MayDay::Abort("CdrSolver::parseDomainBc - unknown BC requested");
@@ -2388,6 +2420,19 @@ void CdrSolver::parsePlotMode(){
   }
   else if(str == "numbers"){
     m_plotNumbers = true;
+  }
+}
+
+void CdrSolver::setDefaultFluxFunctions(){
+
+  auto zero = [](const RealVect a_pos, const Real a_time){
+    return 0.0;
+  };
+
+  for (int dir = 0; dir < SpaceDim; dir++){
+    for (SideIterator sit; sit.ok(); ++sit){
+      m_domainFluxFunctions.emplace(std::make_pair(dir, sit()), zero);
+    }
   }
 }
 

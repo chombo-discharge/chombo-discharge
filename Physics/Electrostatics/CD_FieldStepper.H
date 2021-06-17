@@ -83,9 +83,6 @@ namespace Physics {
       RefCountedPtr<SigmaSolver> m_sigma;
 
       std::string m_realm;
-
-      Real m_init_rho;
-      Real m_init_sigma;
     };
   }
 }

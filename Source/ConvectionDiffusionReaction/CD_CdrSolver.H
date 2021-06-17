@@ -16,6 +16,7 @@
 #include <random>
 #include <time.h>
 #include <chrono>
+#include <functional>
 
 // Our includes
 #include <CD_AmrMesh.H>
@@ -29,6 +30,16 @@
 */
 class CdrSolver {
 public:
+
+  /*!
+    @brief Alias for domain wall
+  */
+  using DomainWall = std::pair<int, Side::LoHiSide>;
+
+  /*!
+    @brief Alias for domain wall flux function
+  */
+  using DomainFluxFunction = std::function<Real(const RealVect a_pos, const Real a_time)>;
 
   /*!
     @brief Default constructor. 
@@ -255,6 +266,12 @@ public:
   */
   virtual void setVelocity(const RealVect a_velo);
 
+    /*!
+    @brief Set velocity
+    @param[in] a_velo Velocity
+  */
+  virtual void setVelocity(const std::function<RealVect(const RealVect a_pos)>& a_velo);
+
   /*!
     @brief Set diffusion coefficients
     @param[in] a_diffusionCoefficient   Face-centered diffusion coefficient. 
@@ -268,6 +285,12 @@ public:
     @details This sets the diffusion coefficient to be constant on both faces and EB faces. 
   */
   virtual void setDiffusionCoefficient(const Real a_diffusionCoefficient);
+
+    /*!
+    @brief Set diffusion coefficient
+    @param[in] a_diffCo Diffusion coefficient. 
+  */
+  virtual void setDiffusionCoefficient(const std::function<Real(const RealVect a_position)>& a_diffCo);
 
   /*!
     @brief Set source terms
@@ -283,6 +306,12 @@ public:
   virtual void setSource(const Real a_source);
 
   /*!
+    @brief Set source term
+    @param[in] a_source Source term.
+  */
+  virtual void setSource(const std::function<Real(const RealVect a_position)> a_source);
+
+  /*!
     @brief Set the EB flux
     @param[in] a_ebFlux Flux on EB centroids. 
   */
@@ -296,11 +325,14 @@ public:
   virtual void setEbFlux(const Real a_ebFlux);
 
   /*!
-    @brief Set the domain flux
-    @param[in] a_domainFlux Domain flux
-    @details This sets a constant domain flux on all domain faces. 
+    @brief Set domain flux function on all sides
   */
-  virtual void setDomainFlux(const Real a_domainFlux);
+  virtual void setDomainFlux(const DomainFluxFunction& a_func);
+
+  /*!
+    @brief Set domain flux function on specific side
+  */
+  virtual void setDomainFlux(const DomainWall a_wall, const DomainFluxFunction& a_func);
 
   /*!
     @brief Fill internal state with initial data
@@ -508,6 +540,16 @@ public:
 
 
 protected:
+
+  /*!
+    @brief Component number in data holder
+  */
+  static constexpr int m_comp = 0;
+
+  /*!
+    @brief Number of components that this solver solves for
+  */
+  static constexpr int m_nComp = 1;
   
   /*!
     @brief Phase
@@ -668,6 +710,11 @@ protected:
     @brief Diffusion coefficients (can
   */
   EBAMRIVData m_ebCenteredDiffusionCoefficient;
+
+  /*!
+    @brief Flux functions
+  */
+  std::map<DomainWall, DomainFluxFunction> m_domainFluxFunctions;
 
   /*!
     @brief Verbosity
@@ -990,6 +1037,11 @@ protected:
     ®brief Parse source term stuff
   */
   virtual void parseExtrapolateSourceTerm();
+
+  /*!
+    @brief Set default flux functions
+  */
+  virtual void setDefaultFluxFunctions();
 };
 
 #include <CD_NamespaceFooter.H>

@@ -70,12 +70,7 @@ namespace Physics {
       RefCountedPtr<RtSolver>  m_solver;
       RefCountedPtr<RtSpecies> m_species;
 
-      // Stuff for source term
-      Real     m_blob_radius;    // Gaussian radius
-      Real     m_blob_amplitude; // Gaussian amplitude
-      RealVect m_blob_center;    // Center
-
-      void set_gaussian_source();
+      void setGaussianSource();
     };
   }
 }

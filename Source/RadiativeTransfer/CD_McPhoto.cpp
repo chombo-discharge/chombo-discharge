@@ -411,17 +411,15 @@ void McPhoto::allocateInternals(){
     pout() << m_name + "::allocateInternals" << endl;
   }
 
-  const int ncomp  = 1;
-
   // Allocate mesh data
-  m_amr->allocate(m_phi,        m_realm, m_phase, ncomp); 
-  m_amr->allocate(m_source,       m_realm, m_phase, ncomp);
-  m_amr->allocate(m_scratch,      m_realm, m_phase, ncomp);
-  m_amr->allocate(m_depositionNC, m_realm, m_phase, ncomp);
-  m_amr->allocate(m_massDiff,     m_realm, m_phase, ncomp);
+  m_amr->allocate(m_phi,          m_realm, m_phase, m_nComp); 
+  m_amr->allocate(m_source,       m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_scratch,      m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_depositionNC, m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_massDiff,     m_realm, m_phase, m_nComp);
 
   // Allocate particle data holders
-  m_amr->allocate(m_photons,        m_pvr_buffer, m_realm);
+  m_amr->allocate(m_photons,       m_pvr_buffer, m_realm);
   m_amr->allocate(m_bulkPhotons,   m_pvr_buffer, m_realm);
   m_amr->allocate(m_ebPhotons,     m_pvr_buffer, m_realm);
   m_amr->allocate(m_domainPhotons, m_pvr_buffer, m_realm);
@@ -814,12 +812,11 @@ void McPhoto::generatePhotons(ParticleContainer<Photon>& a_photons, const EBAMRC
   }
 
   const RealVect prob_lo = m_amr->getProbLo();
-  const int finest_level = m_amr->getFinestLevel();
 
   // Put here. 
   AMRParticles<Photon>& Photons = a_photons.getParticles();
 
-  for (int lvl = 0; lvl <= finest_level; lvl++){
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
     const ProblemDomain& dom     = m_amr->getDomains()[lvl];
     const Real dx                = m_amr->getDx()[lvl];
@@ -1004,8 +1001,7 @@ void McPhoto::depositKappaConservative(EBAMRCellData&              a_phi,
     pout() << m_name + "::depositKappaConservative" << endl;
   }
 
-  const int comp = 0;
-  const Interval interv(comp, comp);
+  const Interval interv(m_comp, m_comp);
 
   const RealVect origin  = m_amr->getProbLo();
   const int finest_level = m_amr->getFinestLevel();
@@ -1078,9 +1074,6 @@ void McPhoto::depositHybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massDif
     pout() << m_name + "::depositHybrid" << endl;
   }
 
-  const int comp  = 0;
-  const int ncomp = 1;
-
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
     const ProblemDomain& domain  = m_amr->getDomains()[lvl];
@@ -1100,14 +1093,14 @@ void McPhoto::depositHybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massDif
       for (vofit.reset(); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();
 	const Real kappa    = ebisbox.volFrac(vof);
-	const Real dc       = divH(vof, comp);
-	const Real dnc      = divNC(vof, comp);
+	const Real dc       = divH(vof, m_comp);
+	const Real dnc      = divNC(vof, m_comp);
 
 	// Note that if dc - kappa*dnc can be negative, i.e. we may end up STEALING mass
 	// from other cells. This is why there is a flag m_blendConservation which always
 	// gives positive definite results. 
-	divH(vof, comp)   = dc + (1-kappa)*dnc;          // On output, contains hybrid divergence
-	deltaM(vof, comp) = (1-kappa)*(dc - kappa*dnc);  // Remember, dc already scaled by kappa. 
+	divH(vof, m_comp)   = dc + (1-kappa)*dnc;          // On output, contains hybrid divergence
+	deltaM(vof, m_comp) = (1-kappa)*(dc - kappa*dnc);  // Remember, dc already scaled by kappa. 
       }
     }
   }
@@ -1119,12 +1112,9 @@ void McPhoto::incrementRedist(const EBAMRIVData& a_massDifference){
     pout() << m_name + "::incrementRedist" << endl;
   }
 
-  const int comp  = 0;
-  const int ncomp = 1;
-  const int finest_level = m_amr->getFinestLevel();
-  const Interval interv(comp, comp);
+  const Interval interv(m_comp, m_comp);
 
-  for (int lvl = 0; lvl <= finest_level; lvl++){
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
     
     EBLevelRedist& level_redist = *(m_amr->getLevelRedist(m_realm, m_phase)[lvl]);
@@ -1142,12 +1132,9 @@ void McPhoto::levelRedist(EBAMRCellData& a_phi){
     pout() << m_name + "::levelRedist" << endl;
   }
 
-  const int comp  = 0;
-  const int ncomp = 1;
-  const int finest_level = m_amr->getFinestLevel();
-  const Interval interv(comp, comp);
+  const Interval interv(m_comp, m_comp);
 
-  for (int lvl = 0; lvl <= finest_level; lvl++){
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     EBLevelRedist& level_redist = *(m_amr->getLevelRedist(m_realm, m_phase)[lvl]);
     level_redist.redistribute(*a_phi[lvl], interv);
     level_redist.setToZero();
@@ -1160,12 +1147,9 @@ void McPhoto::coarseFineIncrement(const EBAMRIVData& a_massDifference){
     pout() << m_name + "::coarseFineIncrement" << endl;
   }
 
-  const int comp  = 0;
-  const int ncomp = 1;
-  const int finest_level = m_amr->getFinestLevel();
-  const Interval interv(0,0);
+  const Interval interv(m_comp, m_comp);
 
-  for (int lvl = 0; lvl <= finest_level; lvl++){
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
 
     RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->getFineToCoarRedist(m_realm, m_phase)[lvl];
@@ -1203,15 +1187,13 @@ void McPhoto::coarseFineRedistribution(EBAMRCellData& a_phi){
     pout() << m_name + "::coarseFineRedistribution" << endl;
   }
 
-  const int comp         = 0;
-  const int ncomp        = 1;
-  const int finest_level = m_amr->getFinestLevel();
-  const Interval interv(comp, comp);
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
+  const Interval interv(m_comp, m_comp);
+  const int finestLevel = m_amr->getFinestLevel();
+  
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const Real dx       = m_amr->getDx()[lvl];
     const bool has_coar = lvl > 0;
-    const bool has_fine = lvl < finest_level;
+    const bool has_fine = lvl < finestLevel;
 
     RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->getCoarToFineRedist(m_realm, m_phase)[lvl];
     RefCountedPtr<EBCoarToCoarRedist>& coar2coar_redist = m_amr->getCoarToCoarRedist(m_realm, m_phase)[lvl];
@@ -1233,9 +1215,9 @@ void McPhoto::coarseFineRedistribution(EBAMRCellData& a_phi){
 }
 
 void McPhoto::advancePhotonsStationary(ParticleContainer<Photon>& a_bulkPhotons,
-					  ParticleContainer<Photon>& a_ebPhotons,
-					  ParticleContainer<Photon>& a_domainPhotons,
-					  ParticleContainer<Photon>& a_photons){
+				       ParticleContainer<Photon>& a_ebPhotons,
+				       ParticleContainer<Photon>& a_domainPhotons,
+				       ParticleContainer<Photon>& a_photons){
   CH_TIME("McPhoto::advancePhotonsStationary");
   if(m_verbosity > 5){
     pout() << m_name + "::advancePhotonsStationary" << endl;

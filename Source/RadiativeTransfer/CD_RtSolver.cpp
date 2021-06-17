@@ -17,6 +17,9 @@
 #include <CD_DataOps.H>
 #include <CD_NamespaceHeader.H>
 
+constexpr int RtSolver::m_comp;
+constexpr int RtSolver::m_nComp;
+
 RtSolver::RtSolver(){
   m_name      = "RtSolver";
   m_className = "RtSolver";
@@ -172,8 +175,6 @@ void RtSolver::setVerbosity(const int a_verbosity){
   if(m_verbosity > 5){
     pout() << m_name + "::setVerbosity" << endl;
   }
-  
-
 }
 
 void RtSolver::setSource(const EBAMRCellData& a_source){
@@ -192,6 +193,15 @@ void RtSolver::setSource(const EBAMRCellData& a_source){
   m_amr->interpGhost(m_source, m_realm, m_phase);
 }
 
+void RtSolver::setSource(const std::function<Real(const RealVect a_pos)> a_source){
+  CH_TIME("RtSolver::setSource(function)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::setSource(function)" << endl;
+  }
+
+  DataOps::setValue(m_source, a_source, m_amr->getProbLo(), m_amr->getDx(), 0);
+}
+
 void RtSolver::setSource(const Real a_source){
   CH_TIME("RtSolver::setSource(constant)");
   if(m_verbosity > 5){
@@ -200,11 +210,7 @@ void RtSolver::setSource(const Real a_source){
 
   const int finest_level = m_amr->getFinestLevel();
 
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    for (int comp = 0; comp < m_source[lvl]->nComp(); comp++){
-      DataOps::setValue(*m_source[lvl], a_source, comp);
-    }
-  }
+  DataOps::setValue(m_source, a_source);
 
   m_amr->averageDown(m_source, m_realm, m_phase);
   m_amr->interpGhost(m_source, m_realm, m_phase);

@@ -381,10 +381,9 @@ void EddingtonSP1::preRegrid(const int a_base, const int a_oldFinestLevel){
     pout() << m_name + "::preRegrid" << endl;
   }
 
-  const int ncomp = 1;
   const int finest_level = m_amr->getFinestLevel();
 
-  m_amr->allocate(m_cache, m_realm, m_phase, ncomp);
+  m_amr->allocate(m_cache, m_realm, m_phase, m_nComp);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
     m_phi[lvl]->localCopyTo(*m_cache[lvl]);
@@ -397,24 +396,22 @@ void EddingtonSP1::allocateInternals(){
     pout() << m_name + "::allocateInternals" << endl;
   }
   
-  const int ncomp = 1;
-
-  m_amr->allocate(m_aCoef,       m_realm, m_phase, ncomp);
-  m_amr->allocate(m_bco,       m_realm, m_phase, ncomp);
-  m_amr->allocate(m_bco_irreg, m_realm, m_phase, ncomp);
-  m_amr->allocate(m_phi,     m_realm, m_phase, ncomp);
-  m_amr->allocate(m_source,    m_realm, m_phase, ncomp);
-  m_amr->allocate(m_resid,     m_realm, m_phase, ncomp);
+  m_amr->allocate(m_aco,       m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_bco,       m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_bco_irreg, m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_phi,       m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_source,    m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_resid,     m_realm, m_phase, m_nComp);
 
   DataOps::setValue(m_resid,  0.0);
-  DataOps::setValue(m_phi,  0.0);
+  DataOps::setValue(m_phi,    0.0);
   DataOps::setValue(m_source, 0.0);
 
   this->setACoefAndBCoef();
 }
 
 void EddingtonSP1::deallocateInternals(){
-  m_amr->deallocate(m_aCoef);
+  m_amr->deallocate(m_aco);
   m_amr->deallocate(m_bco);
   m_amr->deallocate(m_bco_irreg);
   m_amr->deallocate(m_phi);
@@ -428,9 +425,7 @@ void EddingtonSP1::regrid(const int a_lmin, const int a_oldFinestLevel, const in
     pout() << m_name + "::regrid" << endl;
   }
 
-  const int comp  = 0;
-  const int ncomp = 1;
-  const Interval interv(comp, comp);
+  const Interval interv(m_comp, m_comp);
 
   this->allocateInternals();
 
@@ -478,7 +473,6 @@ bool EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCel
     pout() << m_name + "::advance(ebamrcell, ebamrcell)" << endl;
   }
 
-  const int ncomp        = 1;
   const int finest_level = m_amr->getFinestLevel();
 
   if(m_needsMultigridSetup){
@@ -490,8 +484,8 @@ bool EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCel
   // Must have a dummy for checking initial residual
   EBAMRCellData dummy;
   EBAMRCellData source;
-  m_amr->allocate(dummy,  m_realm, m_phase, ncomp);
-  m_amr->allocate(source, m_realm, m_phase, ncomp);
+  m_amr->allocate(dummy,  m_realm, m_phase, m_nComp);
+  m_amr->allocate(source, m_realm, m_phase, m_nComp);
   DataOps::setValue(dummy, 0.0);
 
   // Various source term manipulations. 
@@ -596,12 +590,9 @@ void EddingtonSP1::setMultigridCoefficients(){
     pout() << m_name + "::setMultigridCoefficients" << endl;
   }
 
-  const int ncomp = 1;
-  const int ghost = 3;
-
-  m_amr->allocate(m_aCoef,        m_realm, m_phase, ncomp, ghost);
-  m_amr->allocate(m_bco,        m_realm, m_phase, ncomp, ghost);
-  m_amr->allocate(m_bco_irreg,  m_realm, m_phase, ncomp, ghost);
+  m_amr->allocate(m_aco,        m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_bco,        m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_bco_irreg,  m_realm, m_phase, m_nComp);
 
   this->setACoefAndBCoef();
 }
@@ -615,7 +606,7 @@ void EddingtonSP1::setACoefAndBCoef(){
   // This loop fills aco with kappa and bco_irreg with 1./kappa
   if(m_RtSpecies->isKappaConstant()){
     const Real kap = m_RtSpecies->getKappa(RealVect::Zero);
-    DataOps::setValue(m_aCoef, kap);
+    DataOps::setValue(m_aco, kap);
     DataOps::setValue(m_bco, 1./kap);
     DataOps::setValue(m_bco_irreg, 1./kap);
   }
@@ -624,7 +615,7 @@ void EddingtonSP1::setACoefAndBCoef(){
       const RealVect origin = m_amr->getProbLo();
       const Real dx         = m_amr->getDx()[lvl];
     
-      LevelData<EBCellFAB>& aco            = *m_aCoef[lvl];
+      LevelData<EBCellFAB>& aco            = *m_aco[lvl];
       LevelData<EBFluxFAB>& bco            = *m_bco[lvl];
       LevelData<BaseIVFAB<Real> >& bco_irr = *m_bco_irreg[lvl];
 
@@ -634,18 +625,18 @@ void EddingtonSP1::setACoefAndBCoef(){
       }
     }
 
-    m_amr->averageDown(m_aCoef, m_realm, m_phase);
-    m_amr->interpGhost(m_aCoef, m_realm, m_phase);
-    DataOps::averageCellToFaceAllComps(m_bco, m_aCoef, m_amr->getDomains()); // Average aco onto face
+    m_amr->averageDown(m_aco, m_realm, m_phase);
+    m_amr->interpGhost(m_aco, m_realm, m_phase);
+    DataOps::averageCellToFaceAllComps(m_bco, m_aco, m_amr->getDomains()); // Average aco onto face
     DataOps::invert(m_bco); // Make m_bco = 1./kappa
   }
 
 #if EddingtonSP1_feature // Different scaling for the RTE
-  DataOps::scale(m_aCoef,       1.0);       // aco = c*kappa
+  DataOps::scale(m_aco,       1.0);       // aco = c*kappa
   DataOps::scale(m_bco,       1.0/(3.0)); // bco = c/(3*kappa)
   DataOps::scale(m_bco_irreg, 1.0/(3.0)); // bco = c/(3*kappa)
 #else // Original code before different scaling
-  DataOps::scale(m_aCoef,       Units::c);       // aco = c*kappa
+  DataOps::scale(m_aco,       Units::c);       // aco = c*kappa
   DataOps::scale(m_bco,       Units::c/(3.0)); // bco = c/(3*kappa)
   DataOps::scale(m_bco_irreg, Units::c/(3.0)); // bco = c/(3*kappa)
 #endif
@@ -663,9 +654,6 @@ void EddingtonSP1::setACoefAndBCoefBox(EBCellFAB&       a_aco,
     pout() << m_name + "::setACoefAndBCoefBox" << endl;
   }
   
-  const int comp  = 0;
-  const int ncomp = 1;
-  
   const EBISBox& ebisbox = a_aco.getEBISBox();
   const EBGraph& ebgraph = ebisbox.getEBGraph();
 
@@ -675,7 +663,7 @@ void EddingtonSP1::setACoefAndBCoefBox(EBCellFAB&       a_aco,
     const IntVect iv = bit();
 
     const RealVect pos = a_origin + iv*a_dx*RealVect::Unit;
-    aco_fab(iv, comp) = m_RtSpecies->getKappa(pos);
+    aco_fab(iv, m_comp) = m_RtSpecies->getKappa(pos);
   }
 
 
@@ -686,8 +674,8 @@ void EddingtonSP1::setACoefAndBCoefBox(EBCellFAB&       a_aco,
 
     const RealVect pos  = EBArith::getVofLocation(vof, a_dx*RealVect::Unit, a_origin);
     const Real tmp = m_RtSpecies->getKappa(pos);
-    a_aco(vof, comp) = tmp;
-    a_bco(vof, comp) = 1./tmp;
+    a_aco(vof, m_comp) = tmp;
+    a_bco(vof, m_comp) = 1./tmp;
   }
 }
 
@@ -851,7 +839,7 @@ void EddingtonSP1::setupOperatorFactory(){
 										    m_amr->getFluxRegister(m_realm, m_phase),
 										    alpha,
 										    beta,
-										    m_aCoef.getData(),
+										    m_aco.getData(),
 										    m_bco.getData(),
 										    m_bco_irreg.getData(),
 										    m_amr->getDx()[0],
@@ -911,10 +899,9 @@ void EddingtonSP1::setupMultigridSolver(){
   m_multigridSolver->m_verbosity = m_multigridVerbosity;
 
   // Dummies for init
-  const int ncomp = 1;
   EBAMRCellData dummy1, dummy2;
-  m_amr->allocate(dummy1, m_realm, m_phase, ncomp);
-  m_amr->allocate(dummy2, m_realm, m_phase, ncomp);
+  m_amr->allocate(dummy1, m_realm, m_phase, m_nComp);
+  m_amr->allocate(dummy2, m_realm, m_phase, m_nComp);
   DataOps::setValue(dummy1, 0.0);
   DataOps::setValue(dummy2, 0.0);
 
@@ -987,9 +974,7 @@ void EddingtonSP1::computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellD
     pout() << m_name + "::computeDomainFlux" << endl;
   }
 
-
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const int ncomp = a_data[lvl]->nComp();
       
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
     const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
@@ -1018,27 +1003,19 @@ void EddingtonSP1::computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellD
 	    const IntVect iv1   = iv0 - sgn*BASISV(dir);
 
 	    if(ebisbox.isCovered(iv0)){ // Just provide some bogus data because the face
-	      for (int comp = 0; comp < ncomp; comp++){
-		extrap(face, comp) = 0.0;
-	      }
+	      extrap(face, m_comp) = 0.0;
 	    }
 	    else{
 	      if(!ebisbox.isCovered(iv1)){ // linear extrapolation
-		for (int comp = 0; comp < ncomp; comp++){
-		  extrap(face, comp) = 1.5*data_fab(iv0, comp) - 0.5*data_fab(iv1, comp); // Should be ok
-		}
+		extrap(face, m_comp) = 1.5*data_fab(iv0, m_comp) - 0.5*data_fab(iv1, m_comp); // Should be ok
 	      }
 	      else{ // Not enough cells available, use cell-centered only
-		for (int comp = 0; comp < ncomp; comp++){
-		  extrap(face, comp) = data_fab(iv0, comp);
-		}
+		  extrap(face, m_comp) = data_fab(iv0, m_comp);
 	      }
 	    }
 
 	    // Necessary scaling
-	    for (int comp = 0; comp < ncomp; comp++){
-	      extrap(face, comp) = 0.5*Units::c*extrap(face, comp);
-	    }
+	    extrap(face, m_comp) = 0.5*Units::c*extrap(face, m_comp);
 	  }
 	}
       }
@@ -1056,7 +1033,7 @@ void EddingtonSP1::computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi
 
   m_amr->computeGradient(a_flux, a_phi, m_realm, m_phase); // flux = grad(phi)
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    DataOps::divideByScalar(*a_flux[lvl], *m_aCoef[lvl]);   // flux = grad(phi)/(c*kappa)
+    DataOps::divideByScalar(*a_flux[lvl], *m_aco[lvl]);   // flux = grad(phi)/(c*kappa)
     DataOps::scale(*a_flux[lvl], -Units::c*Units::c/3.0);  // flux = -c*grad(phi)/3.
   }
 
