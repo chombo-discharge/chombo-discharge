@@ -116,44 +116,19 @@ void AdvectionDiffusionStepper::setVelocity(){
 }
 
 void AdvectionDiffusionStepper::setVelocity(const int a_level){
-  // TLDR: This code goes down to each cell on grid level a_level and sets the velocity to omega*r
-    
-  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
-  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-    const Box& box = dbl.get(dit());
+  // TLDR: This code uses a lambda for setting the velocity field to omega*r
 
-    EBCellFAB& vel = (*(m_solver->getCellCenteredVelocity())[a_level])[dit()];
-    BaseFab<Real>& vel_reg = vel.getSingleValuedFAB();
+  const Real omega = m_omega;
+  
+  auto veloFunc = [&](const RealVect pos) -> RealVect {
+    const Real r     = sqrt(pos[0]*pos[0] + pos[1]*pos[1]);
+    const Real theta = atan2(pos[1], pos[0]);
 
-    vel.setVal(0.0);
-      
-    // Regular cells
-    for (BoxIterator bit(box); bit.ok(); ++bit){
-      const IntVect iv = bit();
-      const RealVect pos = m_amr->getProbLo() + (RealVect(iv) + 0.5*RealVect::Unit)*m_amr->getDx()[a_level];
+    return RealVect(D_DECL(-r*m_omega*sin(theta), r*m_omega*cos(theta), 0.));
+  };
 
-      const Real r     = sqrt(pos[0]*pos[0] + pos[1]*pos[1]);
-      const Real theta = atan2(pos[1],pos[0]);
+  m_solver->setVelocity(veloFunc);
 
-      vel_reg(iv,0) = -r*m_omega*sin(theta);
-      vel_reg(iv,1) =  r*m_omega*cos(theta);
-    }
-
-    // Irregular and multicells
-    VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_level])[dit()];
-    for (vofit.reset(); vofit.ok(); ++vofit){
-
-      const VolIndex vof = vofit();
-      const IntVect iv   = vof.gridIndex();
-      const RealVect pos = m_amr->getProbLo() + (RealVect(iv) + 0.5*RealVect::Unit)*m_amr->getDx()[a_level];
-
-      const Real r     = sqrt(pos[0]*pos[0] + pos[1]*pos[1]);
-      const Real theta = atan2(pos[1],pos[0]);
-
-      vel(vof,0) = -r*m_omega*sin(theta);
-      vel(vof,1) =  r*m_omega*cos(theta);
-    }
-  }
 }
 
 void AdvectionDiffusionStepper::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const {
