@@ -19,6 +19,7 @@
 #include <EBFluxRegister.H>
 #include <EBFluxRegister.H>
 #include <EBLevelRedist.H>
+#include <EBQuadCFInterp.H>
 #include <EBCoarToFineRedist.H>
 #include <EBMGInterp.H>
 #include <EBCoarToCoarRedist.H>
@@ -31,7 +32,6 @@
 #include <CD_MultiFluidIndexSpace.H>
 #include <CD_IrregAmrStencil.H>
 #include <CD_LoadBalancing.H>
-#include <CD_NwoEbQuadCfInterp.H>
 #include <CD_MFLevelGrid.H>
 #include <CD_EbCoarAve.H>
 #include <CD_DomainFluxIFFAB.H>
@@ -113,7 +113,6 @@ public:
 
   Vector<RefCountedPtr<EbCoarAve> >& getCoarseAverage();
   Vector<RefCountedPtr<EbGhostCloud> >& getGhostCloud();
-  Vector<RefCountedPtr<NwoEbQuadCfInterp> >& getNWOEBQuadCFInterp();
   Vector<RefCountedPtr<EBQuadCFInterp> >& getEBQuadCFInterp();
   Vector<RefCountedPtr<AggEBPWLFillPatch> >& getFillPatch();
   Vector<RefCountedPtr<EBPWLFineInterp> >& getPwlInterpolator();
@@ -175,9 +174,8 @@ protected:
 
   // Various operators
   Vector<RefCountedPtr<EbCoarAve> > m_coarave;
-  Vector<RefCountedPtr<NwoEbQuadCfInterp> > m_quadcfi;
   Vector<RefCountedPtr<EbGhostCloud> > m_ghostclouds;
-  Vector<RefCountedPtr<EBQuadCFInterp> > m_old_quadcfi;
+  Vector<RefCountedPtr<EBQuadCFInterp> > m_quadcfi;
   Vector<RefCountedPtr<AggEBPWLFillPatch> > m_pwl_fillpatch;
   Vector<RefCountedPtr<EBPWLFineInterp> > m_pwl_interp;
   Vector<RefCountedPtr<EBMGInterp> > m_ebmg_interp;

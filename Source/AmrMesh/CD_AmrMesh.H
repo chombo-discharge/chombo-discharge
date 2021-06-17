@@ -33,7 +33,6 @@
 #include <CD_MultiFluidIndexSpace.H>
 #include <CD_IrregAmrStencil.H>
 #include <CD_LoadBalancing.H>
-#include <CD_NwoEbQuadCfInterp.H>
 #include <CD_MFLevelGrid.H>
 #include <CD_EbCoarAve.H>
 #include <CD_DomainFluxIFFAB.H>
@@ -50,16 +49,6 @@
   @details This class handles most (if not all) spatial operations. Examples are grid generation, coarsening of data, interpolation of data, memory allocations etc. 
 */
 class AmrMesh {
-protected:
-  
-  /*!
-    @brief Enum for specifying how to interpolate ghost cells. 
-  */
-  enum class GhostInterpolation {
-    PiecewiseLinear,
-    Quadratic
-  };
-  
 public:
 
   /*!
@@ -581,14 +570,6 @@ public:
   void interpGhost(MFAMRCellData& a_data, const std::string a_realm);
 
   /*!
-    @brief Interpolate ghost cells over a Realm and phase. This uses quadratic interpolation.
-    @param[inout] a_data  Data to be interpolated
-    @param[in]    a_realm Realm name
-    @param[in]    a_phase Phase (gas or solid)
-  */
-  void interpGhostQuad(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase);
-
-  /*!
     @brief Interpolate ghost cells over a Realm and phase. This uses piecewise linear interpolation.
     @param[inout] a_data  Data to be interpolated
     @param[in]    a_realm Realm name
@@ -622,11 +603,6 @@ public:
     @brief Parse the low/high corners of the computational domain. 
   */
   void parseProbLoHiCorners();
-
-  /*!
-    @brief Set ghost cell interpolation type. Either piecewise linear or quadratic. 
-  */
-  void parseGhostInterpolation();
 
   /*!
     @brief Build domains
@@ -982,12 +958,7 @@ public:
   Vector<RefCountedPtr<EbGhostCloud> >& getGhostCloud(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
-    @brief Get the ghost cell interpolation utility
-  */
-  Vector<RefCountedPtr<NwoEbQuadCfInterp> >& getNWOEBQuadCFInterp(const std::string a_realm, const phase::which_phase a_phase);
-
-  /*!
-    @brief Get the old interpolation utility (needed for EBConductivityOps)
+    @brief Get the old interpolation utility (needed for multigrid)
   */
   Vector<RefCountedPtr<EBQuadCFInterp> >& getEBQuadCFInterp(const std::string a_realm, const phase::which_phase a_phase);
 
@@ -1142,11 +1113,6 @@ protected:
     @brief Stencil type for EB interpolation
   */
   IrregStencil::StencilType m_ebCentroidStencilType;
-
-  /*!
-    @brief Interpolation type
-  */
-  GhostInterpolation m_ghostCellInterpolationMethod;
 
   /*!
     @brief Coarsest box where we compute

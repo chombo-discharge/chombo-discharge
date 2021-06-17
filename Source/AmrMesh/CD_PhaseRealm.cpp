@@ -326,7 +326,6 @@ void PhaseRealm::define_eb_quad_cfi(const int a_lmin){
   const bool do_this_operator = this->queryOperator(s_eb_quad_cfi);
 
   m_quadcfi.resize(1 + m_finestLevel);
-  m_old_quadcfi.resize(1 + m_finestLevel);
   
   if(do_this_operator){
 
@@ -339,19 +338,7 @@ void PhaseRealm::define_eb_quad_cfi(const int a_lmin){
       if(has_coar){
 	const LayoutData<IntVectSet>& cfivs = *m_eblg[lvl]->getCFIVS();
 
-	m_quadcfi[lvl] = RefCountedPtr<NwoEbQuadCfInterp> (new NwoEbQuadCfInterp(m_grids[lvl],
-										 m_grids[lvl-1],
-										 m_ebisl[lvl],
-										 m_ebisl[lvl-1],
-										 m_domains[lvl-1],
-										 m_refinementRatios[lvl-1],
-										 ncomps,
-										 m_dx[lvl],
-										 m_numGhostCells*IntVect::Unit,
-										 cfivs,
-										 m_ebis));
-
-	m_old_quadcfi[lvl] = RefCountedPtr<EBQuadCFInterp> (new EBQuadCFInterp(m_grids[lvl],
+	m_quadcfi[lvl] = RefCountedPtr<EBQuadCFInterp> (new EBQuadCFInterp(m_grids[lvl],
 									       m_grids[lvl-1],
 									       m_ebisl[lvl],
 									       m_ebisl[lvl-1],
@@ -884,16 +871,10 @@ Vector<RefCountedPtr<EbGhostCloud> >& PhaseRealm::getGhostCloud() {
   return m_ghostclouds;
 }
 
-Vector<RefCountedPtr<NwoEbQuadCfInterp> >& PhaseRealm::getNWOEBQuadCFInterp() {
-  if(!this->queryOperator(s_eb_quad_cfi)) MayDay::Abort("PhaseRealm::getNWOEBQuadCFInterp - operator not registered!");
-  
-  return m_quadcfi;
-}
-
 Vector<RefCountedPtr<EBQuadCFInterp> >& PhaseRealm::getEBQuadCFInterp() {
   if(!this->queryOperator(s_eb_quad_cfi)) MayDay::Abort("PhaseRealm::getEBQuadCFInterp - operator not registered!");
   
-  return m_old_quadcfi;
+  return m_quadcfi;
 }
 
 Vector<RefCountedPtr<AggEBPWLFillPatch> >& PhaseRealm::getFillPatch() {
