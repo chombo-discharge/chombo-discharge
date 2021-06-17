@@ -32,6 +32,16 @@ class CdrSolver {
 public:
 
   /*!
+    @brief Alias for domain wall
+  */
+  using DomainWall = std::pair<int, Side::LoHiSide>;
+
+  /*!
+    @brief Alias for domain wall flux function
+  */
+  using DomainFluxFunction = std::function<Real(const RealVect& a_pos)>;
+
+  /*!
     @brief Default constructor. 
   */
   CdrSolver();

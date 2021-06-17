@@ -624,11 +624,16 @@ void CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const CdrBc a_which
 	  const FaceIndex& face = faceit();
 
 	  switch(a_whichFlux){
-	  case CdrBc::External:{
+	  case CdrBc::Data:{
 	    flux(face, comp) = domflux(face, comp);
 	    break;
 	  }
 	  case CdrBc::Wall:{
+	    flux(face, comp) = 0.0;
+	    break;
+	  }
+	  case CdrBc::Function:{
+	    MayDay::Abort("CdrSolver::fillDomainFlux - function not implemented (yet)");
 	    flux(face, comp) = 0.0;
 	    break;
 	  }
@@ -648,7 +653,7 @@ void CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const CdrBc a_which
 	    
 	    break;
 	  }
-	  case CdrBc::Extrap: // Don't do anything, the solver has responsibility. 
+	  case CdrBc::Solver: // Don't do anything, the solver has responsibility. 
 	    break;
 	  default:
 	    MayDay::Abort("CdrSolver::fillDomainFlux - logic bust");
@@ -2067,17 +2072,20 @@ void CdrSolver::parseDomainBc(){
 
   std::string str;
   pp.get("domain_bc", str);
-  if(str == "kinetic"){
-    setDomainBc(CdrBc::External);
-  }
-  else if(str == "outflow"){
-    setDomainBc(CdrBc::Outflow);
+  if(str == "data"){
+    setDomainBc(CdrBc::Data);
   }
   else if(str == "wall"){
     setDomainBc(CdrBc::Wall);
   }
-  else if(str == "extrap"){
-    setDomainBc(CdrBc::Extrap);
+  else if(str == "Function"){
+    setDomainBc(CdrBc::Function);
+  }
+  else if(str == "outflow"){
+    setDomainBc(CdrBc::Outflow);
+  }
+  else if(str == "solver"){
+    setDomainBc(CdrBc::Solver);
   }
   else{
     MayDay::Abort("CdrSolver::parseDomainBc - unknown BC requested");

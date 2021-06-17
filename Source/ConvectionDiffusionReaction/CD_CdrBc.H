@@ -19,10 +19,11 @@
   @brief Boundary condition types for the CDR solvers
 */
 enum class CdrBc {
-  External,
+  Data,
   Wall,
+  Function,
   Outflow,
-  Extrap
+  Solver
 };
 
 #include <CD_NamespaceFooter.H>

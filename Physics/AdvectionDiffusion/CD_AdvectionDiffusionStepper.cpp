@@ -95,7 +95,7 @@ void AdvectionDiffusionStepper::initialData(){
   m_solver->setSource(0.0);
   m_solver->setEbFlux(0.0);
   m_solver->setDomainFlux(0.0);
-  m_solver->setDomainBc(CdrBc::External);
+  m_solver->setDomainBc(CdrBc::Data);
   if(m_solver->isDiffusive()){
     m_solver->setDiffusionCoefficient(m_faceCenteredDiffusionCoefficient);
   }
