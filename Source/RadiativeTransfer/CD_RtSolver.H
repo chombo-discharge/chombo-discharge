@@ -12,6 +12,9 @@
 #ifndef CD_RtSolver_H
 #define CD_RtSolver_H
 
+// Std includes
+#include <functional>
+
 // Our includes
 #include <CD_ComputationalGeometry.H>
 #include <CD_AmrMesh.H>
@@ -189,6 +192,11 @@ public:
   */
   virtual void setSource(const Real a_source);
 
+    /*!
+    @brief Set source
+  */
+  virtual void setSource(const std::function<Real(const RealVect a_pos)> a_source);
+
   /*!
     @brief Write plot file
   */
@@ -260,6 +268,16 @@ public:
   virtual RefCountedPtr<RtSpecies>& getSpecies();
   
 protected:
+
+  /*!
+    @brief Component we solve for
+  */
+  static constexpr int m_comp = 0;
+
+    /*!
+    @brief Number of components
+  */
+  static constexpr int m_nComp = 1;
 
   /*!
     @brief Realm

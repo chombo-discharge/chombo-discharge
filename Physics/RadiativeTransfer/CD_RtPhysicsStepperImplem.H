@@ -9,6 +9,9 @@
   @author Robert Marskar
 */
 
+// Std includes
+#include <math.h>
+
 // Chombo includes
 #include <ParmParse.H>
 #include <PolyGeom.H>
@@ -29,9 +32,6 @@ RtPhysicsStepper<T>::RtPhysicsStepper(){
 
   pp.get   ("verbosity",      m_verbosity);
   pp.get   ("realm",          m_realm);
-  pp.get   ("blob_amplitude", m_blob_amplitude);
-  pp.get   ("blob_radius",    m_blob_radius);
-  pp.getarr("blob_center",    v, 0, SpaceDim); m_blob_center = RealVect(D_DECL(v[0], v[1], v[2]));
 }
     
 template <typename T>
@@ -56,7 +56,7 @@ template <typename T>
 void RtPhysicsStepper<T>::parseRuntimeOptions() {
   ParmParse pp("RtPhysicsStepper");
 
-  pp.get   ("verbosity", m_verbosity);
+  pp.get("verbosity",      m_verbosity);
       
   m_solver->parseRuntimeOptions();
 }
@@ -70,7 +70,7 @@ template <typename T>
 void RtPhysicsStepper<T>::initialData(){
   m_solver->initialData();
 
-  this->set_gaussian_source();
+  this->setGaussianSource();
 }
 
 template <typename T>
@@ -89,7 +89,7 @@ void RtPhysicsStepper<T>::readCheckpointData(HDF5Handle& a_handle, const int a_l
 
 template <typename T>
 void RtPhysicsStepper<T>::postCheckpointSetup() {
-  this->set_gaussian_source();
+  this->setGaussianSource();
 }
 
 template <typename T>
@@ -152,7 +152,7 @@ void RtPhysicsStepper<T>::regrid(const int a_lmin, const int a_oldFinestLevel, c
   m_solver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
 
   // Do the rest of the setup
-  this->set_gaussian_source();
+  this->setGaussianSource();
 }
 
 template <typename T>
@@ -160,35 +160,25 @@ void RtPhysicsStepper<T>::postRegrid(){
 }
 
 template <typename T>
-void RtPhysicsStepper<T>::set_gaussian_source(){
+void RtPhysicsStepper<T>::setGaussianSource(){
+  ParmParse pp("RtPhysicsStepper");
 
-  EBAMRCellData& source = m_solver->getSource();
-  const RealVect prob_lo = m_amr->getProbLo();
+  Vector<Real> v(SpaceDim);
+  RealVect blobCenter;
+  Real     blobAmp;
+  Real     blobRad;
+  
+  pp.get   ("blob_amplitude", blobAmp);
+  pp.get   ("blob_radius",    blobRad);
+  pp.getarr("blob_center",    v, 0, SpaceDim); blobCenter = RealVect(D_DECL(v[0], v[1], v[2]));
 
-  //
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, phase::gas)[lvl];
-    const Real dx                = m_amr->getDx()[lvl];
+  auto sourceFunction = [blobAmp, blobRad, blobCenter](const RealVect a_position) -> Real {
+    const RealVect dist = a_position-blobCenter;
+    const Real dist2    = dist.dotProduct(dist);
+    return blobAmp*exp(-dist2/(2*blobRad*blobRad));
+  };
 
-
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const Box box = dbl.get(dit());
-
-      FArrayBox& fab = (*source[lvl])[dit()].getFArrayBox();
-	  
-      for (BoxIterator bit(box); bit.ok(); ++bit){
-	const IntVect iv   = bit();
-	const RealVect pos = prob_lo + dx*(RealVect(iv) + 0.5*RealVect::Unit);
-
-	const RealVect v = (pos - m_blob_center)/m_blob_radius;
-	const Real factor = PolyGeom::dot(v,v);
-	const Real value = m_blob_amplitude*exp(-0.5*factor);
-
-	fab(iv,0) = int(value);
-      }
-    }
-  }
+  m_solver->setSource(sourceFunction);
 }
 
 #include <CD_NamespaceFooter.H>

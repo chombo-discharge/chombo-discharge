@@ -335,7 +335,7 @@ protected:
   /*!
     @brief a-coefficient
   */
-  EBAMRCellData m_aCoef;
+  EBAMRCellData m_aco;
 
   /*!
     @brief b-coefficient
