@@ -206,18 +206,19 @@ void ComputationalGeometry::buildSolidGeoServ(GeometryService*&   a_geoserver,
   }
 }
 
-Real ComputationalGeometry::curvature(const phase::which_phase a_phase, const RealVect a_pos, const Real a_dx) const {
+std::pair<Real, Real> ComputationalGeometry::getPrincipalCurvatures(const phase::which_phase a_phase, const RealVect a_pos, const Real a_dx) const {
 
   const RefCountedPtr<BaseIF>& impFunc = (a_phase == phase::gas) ? m_gas_if : m_sol_if;
 
-  Real curv;
+  std::pair<Real, Real> ret;
 #if CH_SPACEDIM==2
-  curv = this->curvature2D(impFunc, a_pos, a_dx);
+  const Real curv = this->curvature2D(impFunc, a_pos, a_dx);
+  ret = std::make_pair(curv, curv);
 #elif CH_SPACEDIM==3
-  curv = this->curvature3D(impFunc, a_pos, a_dx);
+  ret = this->curvature3D(impFunc, a_pos, a_dx);
 #endif
 
-  return curv;
+  return ret;
 }
 
 #if CH_SPACEDIM==2
@@ -255,9 +256,48 @@ Real ComputationalGeometry::curvature2D(const RefCountedPtr<BaseIF>& a_F, const 
 #endif
 
 #if CH_SPACEDIM==3
-Real ComputationalGeometry::curvature3D(const RefCountedPtr<BaseIF>& a_impFunc, const RealVect pos, const Real a_diffDx) const {
-  MayDay::Abort("ComputationalGeometry::curvature3D - not implememted");
-  return 0.0;
+std::pair<Real, Real> ComputationalGeometry::curvature3D(const RefCountedPtr<BaseIF>& a_impFunc, const RealVect a_pos, const Real a_diffDx) const {
+
+  // Some shortcuts
+  auto phi = [a_impFunc](const RealVect x) -> Real {
+    return a_impFunc->value(x);
+  };
+
+  const Real d      = a_diffDx;
+  const RealVect  x = a_pos;
+  const RealVect dx = a_diffDx*BASISREALV(0);
+  const RealVect dy = a_diffDx*BASISREALV(1);
+  const RealVect dz = a_diffDx*BASISREALV(2);
+
+  // Gradient terms to O(dx^2)
+  const Real Fx = (phi(x + dx) - phi(x-dx))/(2*d);
+  const Real Fy = (phi(x + dy) - phi(x-dy))/(2*d);
+  const Real Fz = (phi(x + dz) - phi(x-dz))/(2*d);
+
+  // Second order derivs to O(dx^2)
+  const Real Fxx = (phi(x + dx) - 2*phi(x) + phi(x-dx))/(d*d);
+  const Real Fyy = (phi(x + dy) - 2*phi(x) + phi(x-dy))/(d*d);
+  const Real Fzz = (phi(x + dz) - 2*phi(x) + phi(x-dz))/(d*d);
+
+  // Mixed derivs
+  const Real Fxy = (phi(x+dx+dy) + phi(x-dx-dy) - phi(x+dx-dy) - phi(x-dx+dy))/(4.*d*d);
+  const Real Fxz = (phi(x+dx+dz) + phi(x-dx-dz) - phi(x+dx-dz) - phi(x-dx+dz))/(4.*d*d);
+  const Real Fyz = (phi(x+dy+dz) + phi(x-dy-dz) - phi(x+dy-dz) - phi(x-dy+dz))/(4.*d*d);
+
+  // Expressions taken from Albin et. al. "Computational assessment of curvatures and principaldirections of implicit surfaces from 3D scalar data"
+  const Real denomH = std::pow(Fx*Fx + Fy*Fy + Fz*Fz, 3./2.);
+  const Real denomK = std::pow(Fx*Fx + Fy*Fy + Fz*Fz, 2.0);
+  const Real kH = (1./(2.*denomH)) * (Fx*Fx*(Fyy + Fzz) + Fy*Fy*(Fxx + Fzz) + Fz*Fz*(Fxx + Fyy))
+    - (1./denomH)*(Fx*Fy*Fxy + Fx*Fz*Fxz + Fy*Fz*Fyz);
+  const Real kK = (2./denomK)*(Fx*Fy*(Fxz*Fyz - Fxy*Fzz) + Fx*Fz*(Fxy*Fyz - Fxz*Fyy) + Fy*Fz*(Fxy*Fxz - Fyz*Fxx))
+    + (1./denomK)*(Fx*Fx*(Fyy*Fzz - Fyz*Fyz) + Fy*Fy*(Fxx*Fzz - Fxz*Fxz) + Fzz*(Fxx*Fyy - Fxy*Fxy));
+  
+
+  // Mixed derives
+  const Real kmin = kH - sqrt(std::abs(kH*kH - kK));
+  const Real kmax = kH + sqrt(std::abs(kH*kH - kK));
+  
+  return std::make_pair(kmin, kmax);
 }
 #endif
 

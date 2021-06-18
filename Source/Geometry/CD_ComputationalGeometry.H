@@ -127,7 +127,7 @@ public:
     @param[in] a_pos    Position where we evaluate curvature
     @param[in] a_diffDx Value to use for finite-difference evaluations. 
   */
-  Real curvature(const phase::which_phase a_phase, const RealVect pos, const Real a_diffDx) const;
+  std::pair<Real, Real> getPrincipalCurvatures(const phase::which_phase a_phase, const RealVect pos, const Real a_diffDx) const;
   
 protected:
 
@@ -180,7 +180,7 @@ protected:
 #if CH_SPACEDIM==2
   Real curvature2D(const RefCountedPtr<BaseIF>& a_impFunc, const RealVect pos, const Real a_diffDx) const;
 #elif CH_SPACEDIM==3
-  Real curvature3D(const RefCountedPtr<BaseIF>& a_impFunc, const RealVect pos, const Real a_diffDx) const;
+  std::pair<Real, Real> curvature3D(const RefCountedPtr<BaseIF>& a_impFunc, const RealVect pos, const Real a_diffDx) const;
 #endif
 
 };
