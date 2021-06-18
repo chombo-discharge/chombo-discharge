@@ -315,6 +315,11 @@ protected:
   Real m_wallClockTwo;
 
   /*!
+    @brief Curvature refinement threshold (multiple of dx)
+  */
+  Real m_refineCurvature;
+
+  /*!
     @brief Write regrid files or not
   */
   bool m_writeRegridFiles;

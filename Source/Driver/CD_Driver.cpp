@@ -181,8 +181,8 @@ void Driver::getGeometryTags(){
 
   m_geomTags.resize(maxdepth);
 
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
+  const RefCountedPtr<EBIndexSpace>& ebis_gas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
+  const RefCountedPtr<EBIndexSpace>& ebis_sol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
 
   CH_assert(ebis_gas != NULL);
 
@@ -216,14 +216,14 @@ void Driver::getGeometryTags(){
     // Gas-solid interface cells
     if(m_gasSolidInterfaceTagDepth > lvl){ 
       if(!ebis_sol.isNull()){
-	gas_tags = ebis_gas->irregCells(which_level);
+    	gas_tags = ebis_gas->irregCells(which_level);
       }
     }
 
     // Gas-Dielectric interface cells
     if(m_gasDielectricInterfaceTagDepth > lvl){
       if(!ebis_sol.isNull()){
-	gas_diel_tags = m_multifluidIndexSpace->interfaceRegion(cur_dom);
+    	gas_diel_tags = m_multifluidIndexSpace->interfaceRegion(cur_dom);
       }
     }
 
@@ -231,31 +231,50 @@ void Driver::getGeometryTags(){
     if(m_gasConductorInterfaceTagDepth > lvl){ 
       gas_solid_tags = ebis_gas->irregCells(which_level);
       if(!ebis_sol.isNull()){
-	gas_solid_tags -= m_multifluidIndexSpace->interfaceRegion(cur_dom);
+    	gas_solid_tags -= m_multifluidIndexSpace->interfaceRegion(cur_dom);
       }
     }
 
     // Solid-solid interfaces
     if(m_solidSolidInterfaceTagDepth > lvl){ 
       if(!ebis_sol.isNull()){
-	solid_tags = ebis_sol->irregCells(which_level);
+    	solid_tags = ebis_sol->irregCells(which_level);
 
-	// Do the intersection with the conductor cells
-	IntVectSet tmp = ebis_gas->irregCells(which_level);
-	tmp |= ebis_sol->irregCells(which_level);
-	tmp -= m_multifluidIndexSpace->interfaceRegion(cur_dom);
+    	// Do the intersection with the conductor cells
+    	IntVectSet tmp = ebis_gas->irregCells(which_level);
+    	tmp |= ebis_sol->irregCells(which_level);
+    	tmp -= m_multifluidIndexSpace->interfaceRegion(cur_dom);
 
-	solid_tags &= tmp;
+    	solid_tags &= tmp;
       }
     }
 
     m_geomTags[lvl].makeEmpty();
+
+    // Things from depth specifications
     m_geomTags[lvl] |= diel_tags;
     m_geomTags[lvl] |= cond_tags;
     m_geomTags[lvl] |= gas_diel_tags;
     m_geomTags[lvl] |= gas_solid_tags;
     m_geomTags[lvl] |= gas_tags;
     m_geomTags[lvl] |= solid_tags;
+
+
+    // Things from curvature
+    IntVectSet irregTags;
+    if(!ebis_gas.isNull()) irregTags |= ebis_gas->irregCells(which_level);
+    if(!ebis_sol.isNull()) irregTags |= ebis_sol->irregCells(which_level);
+
+    // Note: Currently evaluates curvature at cell center!
+    const Real dx         = m_amr->getDx()[lvl];
+    const RealVect probLo = m_amr->getProbLo();
+    for (IVSIterator ivsIt(irregTags); ivsIt.ok(); ++ivsIt){
+      const IntVect iv = ivsIt();
+      const RealVect pos = probLo + (0.5*RealVect::Unit + RealVect(iv))*dx;
+      const Real curv = m_computationalGeometry->curvature(phase::gas, pos, 1.E-4*dx);
+
+      if(std::abs(curv)*m_refineCurvature*dx >= 1.0 ) m_geomTags[lvl] |= iv;
+    }
   }
 
   // Grow tags. This is an ad-hoc fix that prevents ugly grid near EBs (i.e. cases where only ghost cells are used
@@ -269,6 +288,17 @@ void Driver::getGeometryTags(){
   if(!m_geoCoarsen.isNull()){
     m_geoCoarsen->coarsenTags(m_geomTags, m_amr->getDx(), m_amr->getProbLo());
   }
+
+#ifdef CH_MPI
+  // Processes may not agree what is the maximum tag depth. Make sure they're all on the same page. 
+  int deepestTagLevel = 0;
+  for (int lvl = 0; lvl < m_geomTags.size(); lvl++){
+    if(!m_geomTags[lvl].isEmpty()) deepestTagLevel = lvl;
+  }
+
+  int tmp = -1;
+  MPI_Allreduce(&deepestTagLevel, &m_geometricTagsDepth, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
+#endif
 }
 
 void Driver::getLoadsAndBoxes(long long& a_myPoints,
@@ -1070,6 +1100,7 @@ void Driver::parseGeometryRefinement(){
 
   int depth0;
 
+  pp.get("refine_curvature",                m_refineCurvature);
   pp.get("refine_geometry",                 depth0);
   pp.get("refine_electrodes",               m_conductorTagsDepth);
   pp.get("refine_dielectrics",              m_dielectricTagsDepth);
@@ -1077,21 +1108,25 @@ void Driver::parseGeometryRefinement(){
   pp.get("refine_dielectric_gas_interface", m_gasDielectricInterfaceTagDepth);
   pp.get("refine_solid_gas_interface",      m_gasSolidInterfaceTagDepth);
   pp.get("refine_solid_solid_interface",    m_solidSolidInterfaceTagDepth);
+
   
-  depth0                                = (depth0                               < 0) ? max_depth : depth0;
-  m_conductorTagsDepth                 = (m_conductorTagsDepth                < 0) ? depth0 : m_conductorTagsDepth;
-  m_dielectricTagsDepth                = (m_dielectricTagsDepth               < 0) ? depth0 : m_dielectricTagsDepth;
+  depth0                            = (depth0                           < 0) ? max_depth : depth0;
+  m_conductorTagsDepth              = (m_conductorTagsDepth             < 0) ? depth0 : m_conductorTagsDepth;
+  m_dielectricTagsDepth             = (m_dielectricTagsDepth            < 0) ? depth0 : m_dielectricTagsDepth;
   m_gasConductorInterfaceTagDepth   = (m_gasConductorInterfaceTagDepth  < 0) ? depth0 : m_gasConductorInterfaceTagDepth;
   m_gasDielectricInterfaceTagDepth  = (m_gasDielectricInterfaceTagDepth < 0) ? depth0 : m_gasDielectricInterfaceTagDepth;
   m_gasSolidInterfaceTagDepth       = (m_gasSolidInterfaceTagDepth      < 0) ? depth0 : m_gasSolidInterfaceTagDepth;
   m_solidSolidInterfaceTagDepth     = (m_solidSolidInterfaceTagDepth    < 0) ? depth0 : m_solidSolidInterfaceTagDepth;
 
+#if 1
+  if(procID() == 0) std::cout << "parseGeometryRefinement -- remove this code" << std::endl;
   m_geometricTagsDepth = Max(m_geometricTagsDepth, m_conductorTagsDepth);
   m_geometricTagsDepth = Max(m_geometricTagsDepth, m_dielectricTagsDepth);
   m_geometricTagsDepth = Max(m_geometricTagsDepth, m_gasConductorInterfaceTagDepth);
   m_geometricTagsDepth = Max(m_geometricTagsDepth, m_gasDielectricInterfaceTagDepth);
   m_geometricTagsDepth = Max(m_geometricTagsDepth, m_gasSolidInterfaceTagDepth);
   m_geometricTagsDepth = Max(m_geometricTagsDepth, m_solidSolidInterfaceTagDepth);
+#endif
 }
 
 void Driver::createOutputDirectories(){
@@ -1311,7 +1346,8 @@ void Driver::setupFresh(const int a_initialRegrids){
   // When we're setting up fresh, we need to regrid everything from the base level
   // and upwards. We have tags on m_geometricTagsDepth, so that is our current finest level. 
   const int lmin = 0;
-  m_amr->regridAmr(m_geomTags, lmin, m_geometricTagsDepth, m_geometricTagsDepth);
+  //  m_amr->regridAmr(m_geomTags, lmin, m_geometricTagsDepth, m_geometricTagsDepth);
+  m_amr->regridAmr(m_geomTags, lmin, -1);
   const int lmax = m_amr->getFinestLevel();
 
   // Allocate internal storage 

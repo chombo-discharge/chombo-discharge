@@ -223,29 +223,32 @@ Real ComputationalGeometry::curvature(const phase::which_phase a_phase, const Re
 #if CH_SPACEDIM==2
 Real ComputationalGeometry::curvature2D(const RefCountedPtr<BaseIF>& a_F, const RealVect a_pos, const Real a_diffDx) const {
   const Real dx      = a_diffDx;
-  const Real dx2     = dx*dx;
 
   // Points for centered differences
   const RealVect x0  = a_pos;
-  const RealVect xLo = a_pos - a_diffDx*BASISREALV(0);
-  const RealVect xHi = a_pos + a_diffDx*BASISREALV(0);
-  const RealVect yLo = a_pos - a_diffDx*BASISREALV(1);
-  const RealVect yHi = a_pos + a_diffDx*BASISREALV(1);
+  const RealVect xLo = x0 - a_diffDx*BASISREALV(0);
+  const RealVect xHi = x0 + a_diffDx*BASISREALV(0);
+  const RealVect yLo = x0 - a_diffDx*BASISREALV(1);
+  const RealVect yHi = x0 + a_diffDx*BASISREALV(1);
 
   // Points for mixed derivatives
-  const RealVect xll = a_pos - a_diffDx*BASISREALV(0) - a_diffDx*BASISREALV(1);
-  const RealVect xhh = a_pos + a_diffDx*BASISREALV(0) + a_diffDx*BASISREALV(1);
-  const RealVect xlh = a_pos - a_diffDx*BASISREALV(0) + a_diffDx*BASISREALV(1);
-  const RealVect xhl = a_pos + a_diffDx*BASISREALV(0) - a_diffDx*BASISREALV(1);
+  const RealVect xll = x0 - a_diffDx*BASISREALV(0) - a_diffDx*BASISREALV(1);
+  const RealVect xhh = x0 + a_diffDx*BASISREALV(0) + a_diffDx*BASISREALV(1);
+  const RealVect xlh = x0 - a_diffDx*BASISREALV(0) + a_diffDx*BASISREALV(1);
+  const RealVect xhl = x0 + a_diffDx*BASISREALV(0) - a_diffDx*BASISREALV(1);
 
-  
+  // Derivs to O(dx^2)
   const Real Fx  = (a_F->value(xHi) - a_F->value(xLo))/(2*dx);
   const Real Fy  = (a_F->value(yHi) - a_F->value(yLo))/(2*dx);
-  const Real Fxx = (a_F->value(xHi) - 2*a_F->value(x0) + a_F->value(xLo))/dx2;
-  const Real Fyy = (a_F->value(yHi) - 2*a_F->value(x0) + a_F->value(yLo))/dx2;
-  const Real Fxy = 0.25*(a_F->value(xll) + a_F->value(xhh) - a_F->value(xlh) - a_F->value(xhl))/dx2;
 
-  const Real curv = (Fy*Fy*Fxx - 2*Fx*Fy*Fxy + Fx*Fx*Fyy)/std::pow(Fx*Fx + Fy*Fy, 1.5);
+  // Second derivs to O(dx^2)
+  const Real Fxx = (a_F->value(xHi) - 2*a_F->value(x0) + a_F->value(xLo))/(dx*dx);
+  const Real Fyy = (a_F->value(yHi) - 2*a_F->value(x0) + a_F->value(yLo))/(dx*dx);
+
+  // Mixed deriv to O(dx^2)
+  const Real Fxy = (a_F->value(xll) + a_F->value(xhh) - a_F->value(xlh) - a_F->value(xhl))/(4.*dx*dx);
+
+  const Real curv = (-Fy*Fy*Fxx + 2*Fx*Fy*Fxy - Fx*Fx*Fyy)/std::pow(Fx*Fx + Fy*Fy, 3./2.);
 
   return curv;
 }
