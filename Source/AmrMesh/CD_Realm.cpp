@@ -28,6 +28,10 @@ Realm::Realm(){
   m_defined = false;
   m_verbosity = -1;
 
+  ParmParse pp("PhaseRealm");
+
+  pp.query("verbosity", m_verbosity);
+
   // Just empty points until define() is called
   m_realms.emplace(phase::gas,   RefCountedPtr<PhaseRealm> (new PhaseRealm()));
   m_realms.emplace(phase::solid, RefCountedPtr<PhaseRealm> (new PhaseRealm()));

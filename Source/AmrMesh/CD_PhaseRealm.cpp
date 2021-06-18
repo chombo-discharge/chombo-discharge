@@ -11,6 +11,7 @@
 
 // Chombo includes
 #include <EBArith.H>
+#include <ParmParse.H>
 
 // Our includes
 #include <CD_PhaseRealm.H>
@@ -24,6 +25,10 @@
 PhaseRealm::PhaseRealm(){
   m_defined   = false;
   m_verbosity = -1;
+
+  ParmParse pp("PhaseRealm");
+
+  pp.query("verbosity", m_verbosity);
 
   // Always do this shit. 
   this->registerOperator(s_eb_gradient);
