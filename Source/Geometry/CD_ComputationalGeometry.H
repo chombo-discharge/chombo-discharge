@@ -122,6 +122,13 @@ public:
   virtual void buildGeometriesFromFiles(const std::string&   a_gas_file,
 					const std::string&   a_sol_file);
 
+  /*!
+    @brief Compute curvature of the implicit function
+    @param[in] a_pos    Position where we evaluate curvature
+    @param[in] a_diffDx Value to use for finite-difference evaluations. 
+  */
+  Real curvature(const phase::which_phase a_phase, const RealVect pos, const Real a_diffDx) const;
+  
 protected:
 
   /*!
@@ -169,6 +176,12 @@ protected:
 				 const ProblemDomain a_finestDomain,
 				 const RealVect      a_origin,
 				 const Real          a_dx);
+
+#if CH_SPACEDIM==2
+  Real curvature2D(const RefCountedPtr<BaseIF>& a_impFunc, const RealVect pos, const Real a_diffDx) const;
+#elif CH_SPACEDIM==3
+  Real curvature3D(const RefCountedPtr<BaseIF>& a_impFunc, const RealVect pos, const Real a_diffDx) const;
+#endif
 
 };
 

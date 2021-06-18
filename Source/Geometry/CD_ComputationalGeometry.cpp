@@ -206,4 +206,56 @@ void ComputationalGeometry::buildSolidGeoServ(GeometryService*&   a_geoserver,
   }
 }
 
+Real ComputationalGeometry::curvature(const phase::which_phase a_phase, const RealVect a_pos, const Real a_dx) const {
+
+  const RefCountedPtr<BaseIF>& impFunc = (a_phase == phase::gas) ? m_gas_if : m_sol_if;
+
+  Real curv;
+#if CH_SPACEDIM==2
+  curv = this->curvature2D(impFunc, a_pos, a_dx);
+#elif CH_SPACEDIM==3
+  curv = this->curvature3D(impFunc, a_pos, a_dx);
+#endif
+
+  return curv;
+}
+
+#if CH_SPACEDIM==2
+Real ComputationalGeometry::curvature2D(const RefCountedPtr<BaseIF>& a_F, const RealVect a_pos, const Real a_diffDx) const {
+  const Real dx      = a_diffDx;
+  const Real dx2     = dx*dx;
+
+  // Points for centered differences
+  const RealVect x0  = a_pos;
+  const RealVect xLo = a_pos - a_diffDx*BASISREALV(0);
+  const RealVect xHi = a_pos + a_diffDx*BASISREALV(0);
+  const RealVect yLo = a_pos - a_diffDx*BASISREALV(1);
+  const RealVect yHi = a_pos + a_diffDx*BASISREALV(1);
+
+  // Points for mixed derivatives
+  const RealVect xll = a_pos - a_diffDx*BASISREALV(0) - a_diffDx*BASISREALV(1);
+  const RealVect xhh = a_pos + a_diffDx*BASISREALV(0) + a_diffDx*BASISREALV(1);
+  const RealVect xlh = a_pos - a_diffDx*BASISREALV(0) + a_diffDx*BASISREALV(1);
+  const RealVect xhl = a_pos + a_diffDx*BASISREALV(0) - a_diffDx*BASISREALV(1);
+
+  
+  const Real Fx  = (a_F->value(xHi) - a_F->value(xLo))/(2*dx);
+  const Real Fy  = (a_F->value(yHi) - a_F->value(yLo))/(2*dx);
+  const Real Fxx = (a_F->value(xHi) - 2*a_F->value(x0) + a_F->value(xLo))/dx2;
+  const Real Fyy = (a_F->value(yHi) - 2*a_F->value(x0) + a_F->value(yLo))/dx2;
+  const Real Fxy = 0.25*(a_F->value(xll) + a_F->value(xhh) - a_F->value(xlh) - a_F->value(xhl))/dx2;
+
+  const Real curv = (Fy*Fy*Fxx - 2*Fx*Fy*Fxy + Fx*Fx*Fyy)/std::pow(Fx*Fx + Fy*Fy, 1.5);
+
+  return curv;
+}
+#endif
+
+#if CH_SPACEDIM==3
+Real ComputationalGeometry::curvature3D(const RefCountedPtr<BaseIF>& a_impFunc, const RealVect pos, const Real a_diffDx) const {
+  MayDay::Abort("ComputationalGeometry::curvature3D - not implememted");
+  return 0.0;
+}
+#endif
+
 #include <CD_NamespaceFooter.H>
