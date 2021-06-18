@@ -827,7 +827,6 @@ void AmrMesh::buildDomains(){
 
 void AmrMesh::regrid(const Vector<IntVectSet>& a_tags,
 		     const int a_lmin,
-		     const int a_lmax,
 		     const int a_regsize,
 		     const int a_hardcap){
   CH_TIME("AmrMesh::regrid");
@@ -835,13 +834,12 @@ void AmrMesh::regrid(const Vector<IntVectSet>& a_tags,
     pout() << "AmrMesh::regrid" << endl;
   }
 
-  this->regridAmr(a_tags, a_lmin, a_lmax, a_hardcap);
-  this->regridOperators(a_lmin, a_lmax, a_regsize);
+  this->regridAmr(a_tags, a_lmin, a_hardcap);
+  this->regridOperators(a_lmin, a_regsize);
 }
 
 void AmrMesh::regridAmr(const Vector<IntVectSet>& a_tags,
 			const int a_lmin,
-			const int a_lmax,
 			const int a_hardcap){
   CH_TIME("AmrMesh::regridAmr(tags, level, level, hardcap)");
   if(m_verbosity > 1){
@@ -854,7 +852,7 @@ void AmrMesh::regridAmr(const Vector<IntVectSet>& a_tags,
   Vector<IntVectSet> tags = a_tags; // buildGrids destroys tags, so copy them
 
   // This is stuff that always gets done
-  this->buildGrids(tags, a_lmin, a_lmax, a_hardcap);
+  this->buildGrids(tags, a_lmin, a_hardcap);
 
   // Define Realms with the new grids and redo the Realm stuff
   this->defineRealms();
@@ -865,7 +863,6 @@ void AmrMesh::regridAmr(const Vector<IntVectSet>& a_tags,
 }
 
 void AmrMesh::regridOperators(const int a_lmin,
-			      const int a_lmax,
 			      const int a_regsize){
   CH_TIME("AmrMesh::regridOperators(procs, boxes, level)");
   if(m_verbosity > 1){
@@ -873,11 +870,11 @@ void AmrMesh::regridOperators(const int a_lmin,
   }
   
   for (auto& r : m_realms){
-    r.second->regridOperators(a_lmin, a_lmax, a_regsize);
+    r.second->regridOperators(a_lmin, a_regsize);
   }
 }
 
-void AmrMesh::buildGrids(Vector<IntVectSet>& a_tags, const int a_lmin, const int a_lmax, const int a_hardcap){
+void AmrMesh::buildGrids(Vector<IntVectSet>& a_tags, const int a_lmin, const int a_hardcap){
   CH_TIME("AmrMesh::buildGrids");
   if(m_verbosity > 2){
     pout() << "AmrMesh::buildGrids" << endl;
@@ -885,7 +882,6 @@ void AmrMesh::buildGrids(Vector<IntVectSet>& a_tags, const int a_lmin, const int
 
   // TLDR: a_lmin is the coarsest level that changes. A special condition is a_lmin=0 for which we assume
   //       that there are no prior grids.
-  //       a_lmax is the finest level that changes. This is typically 
 
   // base is the coarsest level which does not change. top_level is the finest level where we have tags. We should never
   // have tags on max_amr_depth, and we make that restriction here.

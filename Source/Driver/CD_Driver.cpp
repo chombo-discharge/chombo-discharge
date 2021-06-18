@@ -642,7 +642,7 @@ void Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialD
 
   // Regrid the operators
   const int regsize = 1; // Relic of the ancient past when we specified how many variables to redistribute. 
-  m_amr->regridOperators(a_lmin, a_lmax, regsize);
+  m_amr->regridOperators(a_lmin, regsize);
   const Real base_regrid = MPI_Wtime(); // Base regrid time
 
   // Regrid Driver, timestepper, and celltagger
@@ -791,11 +791,6 @@ void Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSt
 	  const int lmin = 0;
 	  const int lmax = m_amr->getFinestLevel();
 
-#if 0 // Debug test
-	  const Real t0 = MPI_Wtime();
-#endif
-
-	  // Regrid, the two options tells us to generate tags on [(lmin-1),(lmax-1)];
 	  this->regrid(lmin, lmax, false);
 	  if(m_verbosity > 0){
 	    this->gridReport();
@@ -803,17 +798,7 @@ void Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSt
 	  if(m_writeRegridFiles){
 	    this->writeRegridFile();
 	  }
-	      
-#if 0 // Debug test
-	  const Real t1 = MPI_Wtime();
-	  if(procID() == 0){
-	    std::cout << "step = " << m_timeStep << "\t tagging levels = [" << lmin << "," << lmax << "]"
-		      << "\t time = " << t1-t0 <<std::endl;
-	  }
-#endif
 	}
-
-
       }
 
       if(!first_step){
@@ -1109,7 +1094,6 @@ void Driver::parseGeometryRefinement(){
   pp.get("refine_solid_gas_interface",      m_gasSolidInterfaceTagDepth);
   pp.get("refine_solid_solid_interface",    m_solidSolidInterfaceTagDepth);
 
-  
   depth0                            = (depth0                           < 0) ? max_depth : depth0;
   m_conductorTagsDepth              = (m_conductorTagsDepth             < 0) ? depth0 : m_conductorTagsDepth;
   m_dielectricTagsDepth             = (m_dielectricTagsDepth            < 0) ? depth0 : m_dielectricTagsDepth;
@@ -1117,16 +1101,6 @@ void Driver::parseGeometryRefinement(){
   m_gasDielectricInterfaceTagDepth  = (m_gasDielectricInterfaceTagDepth < 0) ? depth0 : m_gasDielectricInterfaceTagDepth;
   m_gasSolidInterfaceTagDepth       = (m_gasSolidInterfaceTagDepth      < 0) ? depth0 : m_gasSolidInterfaceTagDepth;
   m_solidSolidInterfaceTagDepth     = (m_solidSolidInterfaceTagDepth    < 0) ? depth0 : m_solidSolidInterfaceTagDepth;
-
-#if 1
-  if(procID() == 0) std::cout << "parseGeometryRefinement -- remove this code" << std::endl;
-  m_geometricTagsDepth = Max(m_geometricTagsDepth, m_conductorTagsDepth);
-  m_geometricTagsDepth = Max(m_geometricTagsDepth, m_dielectricTagsDepth);
-  m_geometricTagsDepth = Max(m_geometricTagsDepth, m_gasConductorInterfaceTagDepth);
-  m_geometricTagsDepth = Max(m_geometricTagsDepth, m_gasDielectricInterfaceTagDepth);
-  m_geometricTagsDepth = Max(m_geometricTagsDepth, m_gasSolidInterfaceTagDepth);
-  m_geometricTagsDepth = Max(m_geometricTagsDepth, m_solidSolidInterfaceTagDepth);
-#endif
 }
 
 void Driver::createOutputDirectories(){
@@ -1289,14 +1263,8 @@ void Driver::setupGeometryOnly(){
     this->writeMemoryUsage();
   }
 
-  //  m_amr->set_num_ghost(m_timeStepper->queryGhost()); // Query solvers for ghost cells. Give it to AmrMesh before grid gen.
-  
-  Vector<IntVectSet> tags = m_geomTags;
-  const int a_lmin = 0;
-  const int a_lmax = m_geometricTagsDepth+1;
-  //  m_amr->buildGrids(tags, a_lmin, a_lmax);//m_geometricTagsDepth);
-  //  m_amr->define_eblevelgrid(a_lmin);
-  m_amr->regridAmr(m_geomTags, a_lmin, a_lmax);       // Regrid using geometric tags for now
+  // Regrid using geometric tags only.
+  m_amr->regridAmr(m_geomTags, 0);   
 
   if(m_verbosity > 0){
     this->gridReport();
@@ -1343,11 +1311,11 @@ void Driver::setupFresh(const int a_initialRegrids){
   // Determine the redistribution register size
   const int regsize = 1; // m_timeStepper->getRedistributionRegSize();
 
-  // When we're setting up fresh, we need to regrid everything from the base level
-  // and upwards. We have tags on m_geometricTagsDepth, so that is our current finest level. 
-  const int lmin = 0;
-  //  m_amr->regridAmr(m_geomTags, lmin, m_geometricTagsDepth, m_geometricTagsDepth);
-  m_amr->regridAmr(m_geomTags, lmin, -1);
+  // When we're setting up fresh, we need to regrid everything from the
+  // base level and upwards, so no hardcap on the permitted grids. 
+  const int lmin    = 0;
+  const int hardcap = -1;
+  m_amr->regridAmr(m_geomTags, lmin, hardcap);
   const int lmax = m_amr->getFinestLevel();
 
   // Allocate internal storage 
@@ -1360,7 +1328,7 @@ void Driver::setupFresh(const int a_initialRegrids){
   m_timeStepper->setupSolvers();                                 // Instantiate solvers
   m_timeStepper->synchronizeSolverTimes(m_timeStep, m_time, m_dt);  // Sync solver times
   m_timeStepper->registerOperators();
-  m_amr->regridOperators(lmin, lmax, regsize);
+  m_amr->regridOperators(lmin, regsize);
   m_timeStepper->allocate();
 
   // Fill solves with initial data
@@ -1383,7 +1351,7 @@ void Driver::setupFresh(const int a_initialRegrids){
       m_amr->regridRealm(str, procs, boxes, lmin);
     }
   }
-  m_amr->regridOperators(lmin, lmax, regsize); // Regrid operators again.
+  m_amr->regridOperators(lmin, regsize); // Regrid operators again.
   this->regridInternals(lmax, lmax);           // Regrid internals for Driver.
   m_timeStepper->regrid(lmin, lmax, lmax);     // Regrid solvers.
   m_timeStepper->initialData();                // Need to fill with initial data again. 
@@ -2423,13 +2391,11 @@ void Driver::readCheckpointFile(const std::string& a_restartFile){
   const int regsize = 1; // m_timeStepper->getRedistributionRegSize();
   m_timeStepper->setupSolvers();
   m_timeStepper->registerOperators();
-  m_amr->regridOperators(base_level, finest_level, regsize);
+  m_amr->regridOperators(base_level, regsize);
   m_timeStepper->allocate();
 
   // Allocate internal stuff (e.g. space for tags)
   this->allocateInternals();
-
-
 
   // Go through level by level and have solvers extract their data
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){

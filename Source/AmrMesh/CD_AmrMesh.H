@@ -538,7 +538,7 @@ public:
     @param[in]    a_hardcap Hardcap for the maximum grid level which can be generated. If a_hardcap < 0 there is no restriction beyond the AmrMesh restrictions.
     @details This will call the specified grid generation method and fill m_grids with the new grids. 
   */
-  void buildGrids(Vector<IntVectSet>& a_tags, const int a_lmin, const int a_lmax, const int a_hardcap = -1);
+  void buildGrids(Vector<IntVectSet>& a_tags, const int a_lmin, const int a_hardcap = -1);
 
   /*!
     @brief Interpolate ghost vectors over a Realm, using the default ghost cell interpolation metho. 
@@ -715,13 +715,11 @@ public:
     @brief Regrid function. Generate new grids and operators.
     @param[in] a_tags    Cell tags which will generate the grid. 
     @param[in] a_lmin    Coarsest grid level allowed to change. 
-    @param[in] a_lmax    Dead parameter. 
     @param[in] a_regsize Redistribution register size. 
     @param[in] a_hardcap Grid generation hardcap. 
   */
   void regrid(const Vector<IntVectSet>& a_tags,
 	      const int                 a_lmin,
-	      const int                 a_lmax,
 	      const int                 a_regsize=1, 
 	      const int                 a_hardcap=-1);
 
@@ -729,12 +727,10 @@ public:
     @brief Regrid AMR. This versions generates the grids and Realms, but not the operator. 
     @param[in] a_tags    Cell tags which will generate the grid. 
     @param[in] a_lmin    Coarsest grid level allowed to change. 
-    @param[in] a_lmax    Dead parameter. 
     @param[in] a_hardcap Grid generation hardcap. 
   */
   void regridAmr(const Vector<IntVectSet>& a_tags,
 		 const int                 a_lmin,
-		 const int                 a_lmax,
 		 const int                 a_hardcap=-1);
 
   /*!
@@ -760,11 +756,9 @@ public:
   /*!
     @brief Regrid AMR operators. This is done for all Realms. 
     @param[in] a_lmin    Coarsest grid level that has changed. 
-    @param[in] a_lmax    Dead parameter. 
     @param[in] a_regsize Dead parameter
   */
   void regridOperators(const int a_lmin,
-		       const int a_lmax,
 		       const int a_regsize=1);
 
   /*!

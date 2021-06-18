@@ -236,7 +236,7 @@ namespace Physics {
 
 	// We need to make AmrMesh restore some operators that we need. Note that this is overkill because we only need
 	// the multigrid ghost cell interpolation operator. But for simplicity, do all of them. 
-	m_amr->regridOperators(a_lmin, a_finestLevel, 1);
+	m_amr->regridOperators(a_lmin, 1);
 
 
 	// Field solver implementation gets the responsibility of computing loads on each level. 

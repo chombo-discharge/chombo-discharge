@@ -96,7 +96,7 @@ void PhaseRealm::regridBase(const int a_lmin){
   }
 }
 
-void PhaseRealm::regridOperators(const int a_lmin, const int a_lmax, const int a_regsize){
+void PhaseRealm::regridOperators(const int a_lmin, const int a_regsize){
   CH_TIME("PhaseRealm::regridOperators_phase");
   if(m_verbosity > 5){
     pout() << "PhaseRealm::regridOperators" << endl;

@@ -104,14 +104,14 @@ void Realm::regridBase(const int a_lmin){
   this->define_mflevelgrid(a_lmin);
 }
 
-void Realm::regridOperators(const int a_lmin, const int a_lmax, const int a_regsize){
+void Realm::regridOperators(const int a_lmin, const int a_regsize){
   CH_TIME("Realm::regridOperators");
   if(m_verbosity > 5){
     pout() << "Realm::regridOperators" << endl;
   }
 
   for (auto& r : m_realms){
-    r.second->regridOperators(a_lmin, a_lmax, a_regsize);
+    r.second->regridOperators(a_lmin, a_regsize);
   }
   this->define_masks(a_lmin);
 }
