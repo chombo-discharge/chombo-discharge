@@ -137,7 +137,7 @@ void PhaseRealm::registerOperator(const std::string a_operator){
        a_operator.compare(s_eb_pwl_interp)   == 0 ||
        a_operator.compare(s_eb_flux_reg)     == 0 ||
        a_operator.compare(s_eb_redist)       == 0 ||
-       a_operator.compare(s_noncons_div)  == 0 ||
+       a_operator.compare(s_noncons_div)     == 0 ||
        a_operator.compare(s_eb_copier)       == 0 ||
        a_operator.compare(s_eb_ghostcloud)   == 0 ||
        a_operator.compare(s_eb_gradient)     == 0 ||
