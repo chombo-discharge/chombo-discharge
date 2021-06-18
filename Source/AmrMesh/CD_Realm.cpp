@@ -9,6 +9,9 @@
   @author Robert Marskar
 */
 
+// Chombo includes
+#include <ParmParse.H>
+
 // Our includes
 #include <CD_Realm.H>
 #include <CD_NamespaceHeader.H>
