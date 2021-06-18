@@ -486,8 +486,9 @@ protected:
   void readVectorData(HDF5HeaderData& a_header, Vector<Real>& a_data, const std::string a_name, const int a_elements);
 
   /*!
-    @brief Do a regrid step. This regrid method regrids data inside each solver. The exception is the Poisson solver
-    whose solution is recomputed. The same goes for stationary RTE methods. 
+    @brief Do a regrid step. 
+    @param[in] a_lmin Coarsest level that is allowed to change during regrid
+    @param[in] a_lmax Finest level that can be generated during the regrid step. 
   */
   void regrid(const int a_lmin, const int a_lmax, const bool a_useInitialData);
 

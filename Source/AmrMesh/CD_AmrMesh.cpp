@@ -925,9 +925,9 @@ void AmrMesh::buildGrids(Vector<IntVectSet>& a_tags, const int a_lmin, const int
       MayDay::Abort("AmrMesh::regrid - logic bust, regridding with unknown regrid algorithm");
     }
     
-    m_finestLevel = Min(new_finestLevel, m_maxAmrDepth); // Don't exceed m_maxAmrDepth
+    m_finestLevel = Min(new_finestLevel, m_maxAmrDepth);        // Don't exceed m_maxAmrDepth
     m_finestLevel = Min(m_finestLevel,   m_maxSimulationDepth); // Don't exceed maximum simulation depth
-    m_finestLevel = Min(m_finestLevel,   hardcap);         // Don't exceed hardcap
+    m_finestLevel = Min(m_finestLevel,   hardcap);              // Don't exceed hardcap
   }
   else{ // Only end up here if we have a single grid level, i.e. just single-level grid decomposition. 
     new_boxes.resize(1);

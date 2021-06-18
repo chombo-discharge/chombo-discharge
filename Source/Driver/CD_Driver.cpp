@@ -789,7 +789,7 @@ void Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSt
 	  // We'll regrid levels lmin through lmax. As always, new grids on level l are generated through tags
 	  // on levels (l-1);
 	  const int lmin = 0;
-	  const int lmax = m_amr->getFinestLevel();
+	  const int lmax = m_amr->getFinestLevel() + 1; // This means that if we refine, we can only add one level at a time. 
 
 	  this->regrid(lmin, lmax, false);
 	  if(m_verbosity > 0){
@@ -1307,16 +1307,23 @@ void Driver::setupFresh(const int a_initialRegrids){
 
   // Get geometry tags
   this->getGeometryTags();
+
+  // TLDR:
+  // -----
+  // The stuff below here might seem a bit convoluted, but we are first letting AmrMesh compute a set of grids which 
+  // is load balanced by the patch volume. All realms and operators are set up with this initial set of grids. We then
+  // use those grids to let the time stepper predict computational loads, which we use to regrid both the realms and the time
+  // stepper. 
+
   
-  // Determine the redistribution register size
-  const int regsize = 1; // m_timeStepper->getRedistributionRegSize();
+  const int regsize = 1; // Relic of an ancient past. This is a dead para
 
   // When we're setting up fresh, we need to regrid everything from the
   // base level and upwards, so no hardcap on the permitted grids. 
   const int lmin    = 0;
   const int hardcap = -1;
   m_amr->regridAmr(m_geomTags, lmin, hardcap);
-  const int lmax = m_amr->getFinestLevel();
+  const int lmax = m_amr->getFinestLevel();   
 
   // Allocate internal storage 
   this->allocateInternals();
@@ -1351,10 +1358,10 @@ void Driver::setupFresh(const int a_initialRegrids){
       m_amr->regridRealm(str, procs, boxes, lmin);
     }
   }
-  m_amr->regridOperators(lmin, regsize); // Regrid operators again.
-  this->regridInternals(lmax, lmax);           // Regrid internals for Driver.
-  m_timeStepper->regrid(lmin, lmax, lmax);     // Regrid solvers.
-  m_timeStepper->initialData();                // Need to fill with initial data again. 
+  m_amr->regridOperators(lmin, regsize);    // Regrid operators again.
+  this->regridInternals(lmax, lmax);        // Regrid internals for Driver.
+  m_timeStepper->regrid(lmin, lmax, lmax);  // Regrid solvers.
+  m_timeStepper->initialData();             // Need to fill with initial data again. 
   
   // Do post initialize stuff
   m_timeStepper->postInitialize();
