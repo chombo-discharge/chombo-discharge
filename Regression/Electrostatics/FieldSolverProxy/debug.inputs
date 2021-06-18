@@ -135,3 +135,5 @@ FieldStepper.load_balance = false           # Load balance or not.
 FieldStepper.box_sorting  = morton          # If you load balance you can redo the box sorting. 
 FieldStepper.init_rho     = 0.0             # Space charge density
 FieldStepper.init_sigma   = 0.0             # Surface charge density
+FieldStepper.rho_center   = -0.5 -0.5       # Space charge blob center
+FieldStepper.rho_radius   = 0.25            # Space charge blob radius
