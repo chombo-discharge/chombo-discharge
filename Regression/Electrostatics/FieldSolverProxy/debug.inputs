@@ -51,6 +51,7 @@ Driver.num_plot_ghost                  = 1                # Number of ghost cell
 Driver.plt_vars                        = 0                # 'tags', 'mpi_rank', 'levelset'
 Driver.restart                         = 0                # Restart step (less or equal to 0 implies fresh simulation)
 Driver.allow_coarsening                = true             # Allows removal of grid levels according to CellTagger
+Driver.refine_curvature                = 10.              # Curvature based refinement. Refines cells if curvature*dx*this > 1
 Driver.refine_geometry                 = 0                # Refine geometry, -1 => Refine all the way down
 Driver.refine_electrodes               = -1               # Refine electrode surfaces. -1 => equal to refine_geometry
 Driver.refine_dielectrics              = -1               # Refine dielectric surfaces. -1 => equal to refine_geometry
