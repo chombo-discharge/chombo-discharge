@@ -260,22 +260,31 @@ void Driver::getGeometryTags(){
     m_geomTags[lvl] |= solid_tags;
 
 
-    // Things from curvature
-    IntVectSet irregTags;
-    if(!ebis_gas.isNull()) irregTags |= ebis_gas->irregCells(which_level);
-    if(!ebis_sol.isNull()) irregTags |= ebis_sol->irregCells(which_level);
+    // Evaluate curvature of the level-set function in the cut-cells. 
+    DisjointBoxLayout irregGrids = ebis_gas->getIrregGrids(cur_dom);
+    EBISLayout ebisl;
+    ebis_gas->fillEBISLayout(ebisl, irregGrids, cur_dom, 0);
 
-    // Note: Currently evaluates curvature at cell center! For this to be meaningful it should be on the centroid!
     const Real dx         = m_amr->getDx()[lvl];
     const RealVect probLo = m_amr->getProbLo();
-    for (IVSIterator ivsIt(irregTags); ivsIt.ok(); ++ivsIt){
-      const IntVect iv = ivsIt();
-      const RealVect pos = probLo + (0.5*RealVect::Unit + RealVect(iv))*dx;
+    
+    for (DataIterator dit(irregGrids); dit.ok(); ++dit){
+      const Box box = irregGrids[dit()];
+      const EBISBox& ebisbox = ebisl[dit()];
+      const EBGraph& ebgraph = ebisbox.getEBGraph();
+      const IntVectSet irreg = ebisbox.getIrregIVS(box);
 
-      const std::pair<Real, Real> curv = m_computationalGeometry->getPrincipalCurvatures(phase::gas, pos, 1.E-6*dx);
+      for (VoFIterator vofit(irreg, ebgraph); vofit.ok(); ++vofit){
+	const VolIndex& vof = vofit();
+	const IntVect iv = vof.gridIndex();
+	
+	const RealVect pos = probLo + (0.5*RealVect::Unit + RealVect(iv))*dx + ebisbox.bndryCentroid(vof)*dx;
 
-      // First entry in curv is the smallest. 
-      if(std::abs(curv.first)*m_refineCurvature*dx >= 1.0 ) m_geomTags[lvl] |= iv;
+	const std::pair<Real, Real> curv = m_computationalGeometry->getPrincipalCurvatures(phase::gas, pos, 1.E-4*dx);
+
+	// First entry in curv is the smallest. 
+	if(std::abs(curv.first)*m_refineCurvature*dx >= 1.0 ) m_geomTags[lvl] |= iv;
+      }
     }
   }
 
