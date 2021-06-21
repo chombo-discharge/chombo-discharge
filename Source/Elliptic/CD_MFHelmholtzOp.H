@@ -21,6 +21,9 @@
 
 // Our includes
 #include <CD_Phases.H>
+#include <CD_MFMultigridInterpolator.H>
+#include <CD_MFCoarAve.H>
+#include <CD_MFFluxReg.H>
 #include <CD_MFLevelGrid.H>
 #include <CD_MFBaseIVFAB.H>
 #include <CD_EBHelmholtzOp.H>
@@ -31,25 +34,40 @@
 class MFHelmholtzOp : public AMRLevelOp<LevelData<MFCellFAB> > {
 public:
 
+  using RelaxType = EBHelmholtzOp::RelaxationMethod;
+
   /*!
     @brief Constructor. Must subsequently call define(...)
   */
   MFHelmholtzOp();
 
-#if 0
-  MFHelmholtzOp(const MFLevelGrid&                            a_mflgFine,
-		const MFLevelGrid&                            a_mflg,
-		const MFLevelGrid&                            a_mflgCoar,
-		const MFLevelGrid&                            a_mflgCoFi,
-		const RefCountedPtr<MFMultigridInterpolator>& a_interpolator,
-		const RefCountedPtr<MFFluxReg>&               a_fluxReg,
-		const RefCountedPtr<MFCoarAve>&               a_coarAve,
-		const RefCountedPtr<EBHelmholtzDomainBC>&     a_domainBC,
-		const RefCountedPtr<EBHelmholtzEBBC>&         a_ebbc,
-		const RealVect&                               a_probLo,
-		const Real&                                   a_dx,
-		const int&
-#endif
+  /*!
+    @brief Full constructor
+  */
+  MFHelmholtzOp(const MFLevelGrid&                               a_mflgFine,
+		const MFLevelGrid&                               a_mflg,
+		const MFLevelGrid&                               a_mflgCoFi,		
+		const MFLevelGrid&                               a_mflgCoar,
+		const MFLevelGrid&                               a_mflgCoarMG,
+		const RefCountedPtr<MFMultigridInterpolator>&    a_interpolator,
+		const RefCountedPtr<MFFluxReg>&                  a_fluxReg,
+		const RefCountedPtr<MFCoarAve>&                  a_coarAve,
+		const RefCountedPtr<EBHelmholtzDomainBCFactory>& a_domainBC,
+		const RealVect&                                  a_probLo,
+		const Real&                                      a_dx,
+		const int&                                       a_refToCoar,
+		const bool&                                      a_hasCoar,
+		const bool&                                      a_hasFine,
+		const bool&                                      a_hasMGObjects,
+		const Real&                                      a_alpha,
+		const Real&                                      a_beta,
+		const RefCountedPtr<LevelData<MFCellFAB> >&      a_Acoef,
+		const RefCountedPtr<LevelData<MFFluxFAB> >&      a_Bcoef,
+		const RefCountedPtr<LevelData<MFBaseIVFAB> >&    a_BcoefIrreg,
+		const IntVect&                                   a_ghostPhi,
+		const IntVect&                                   a_ghostRhs,
+		const int&                                       a_jumpOrder,
+		const RelaxType&                                 a_relaxType);
 
   /*!
     @brief Destructor. 
@@ -313,6 +331,16 @@ public:
 protected:
 
   /*!
+    @brief Helmholtz operators on each phase. Note that I'm using int rather than Phase as identifier because that is the standard terminology for MFCellFAB. 
+  */
+  std::map<int, RefCountedPtr<EBHelmholtzOp> > m_helmOps;
+
+  /*!
+    @brief Arihmetic multifluid operators
+  */
+  LevelDataOps<MFCellFAB> m_ops;
+
+  /*!
     @brief Level grid
   */
   MFLevelGrid m_mflg;
@@ -326,11 +354,6 @@ protected:
     @brief Coarse grid
   */
   MFLevelGrid m_mflgCoar;
-
-  /*!
-    @brief Coarse multigrid-grid
-  */
-  MFLevelGrid m_mflgCoarMG;
   
   /*!
     @brief Coarsened version of this grid
@@ -338,14 +361,14 @@ protected:
   MFLevelGrid m_mflgCoFi;
 
   /*!
-    @brief Helmholtz operators on each phase. Note that I'm using int rather than Phase as identifier because that is the standard terminology for MFCellFAB. 
+    @brief Coarse multigrid-grid
   */
-  std::map<int, RefCountedPtr<EBHelmholtzOp> > m_helmOps;
+  MFLevelGrid m_mflgCoarMG;
 
   /*!
-    @brief Arihmetic multifluid operators
+    @brief Multifluid operator or not. 
   */
-  LevelDataOps<MFCellFAB> m_ops;
+  bool m_multifluid;
 
   /*!
     @brief Refinement factor to coarser AMR level

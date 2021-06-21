@@ -18,6 +18,38 @@ MFHelmholtzOp::MFHelmholtzOp(){
   MayDay::Abort("MFHelmholtzOp - weak construction is not allowed");
 }
 
+MFHelmholtzOp::MFHelmholtzOp(const MFLevelGrid&                               a_mflgFine,
+			     const MFLevelGrid&                               a_mflg,
+			     const MFLevelGrid&                               a_mflgCoFi,
+			     const MFLevelGrid&                               a_mflgCoar,
+			     const MFLevelGrid&                               a_mflgCoarMG,
+			     const RefCountedPtr<MFMultigridInterpolator>&    a_interpolator,
+			     const RefCountedPtr<MFFluxReg>&                  a_fluxReg,
+			     const RefCountedPtr<MFCoarAve>&                  a_coarAve,
+			     const RefCountedPtr<EBHelmholtzDomainBCFactory>& a_domainBcFactory,
+			     const RealVect&                                  a_probLo,
+			     const Real&                                      a_dx,
+			     const int&                                       a_refToCoar,
+			     const bool&                                      a_hasCoar,
+			     const bool&                                      a_hasFine,
+			     const bool&                                      a_hasMGObjects,
+			     const Real&                                      a_alpha,
+			     const Real&                                      a_beta,
+			     const RefCountedPtr<LevelData<MFCellFAB> >&      a_Acoef,
+			     const RefCountedPtr<LevelData<MFFluxFAB> >&      a_Bcoef,
+			     const RefCountedPtr<LevelData<MFBaseIVFAB> >&    a_BcoefIrreg,
+			     const IntVect&                                   a_ghostPhi,
+			     const IntVect&                                   a_ghostRhs,
+			     const int&                                       a_jumpOrder,
+			     const RelaxType&                                 a_relaxType){
+  m_mflg       = a_mflg;
+  m_multifluid = m_mflg.numPhases() > 1;
+
+
+  // Instantiate jump bc object. 
+  
+}
+
 MFHelmholtzOp::~MFHelmholtzOp(){
 
 }
@@ -157,22 +189,20 @@ void MFHelmholtzOp::applyOp(LevelData<MFCellFAB>&             a_Lphi,
 }
 
 void MFHelmholtzOp::interpolateCF(const LevelData<MFCellFAB>& a_phi, const LevelData<MFCellFAB>* a_phiCoar, const bool a_homogeneousCF){
-  if(m_hasCoar){
-    for (auto& op : m_helmOps){
-      LevelData<EBCellFAB> phi;
-      LevelData<EBCellFAB> phiCoar;
+  for (auto& op : m_helmOps){
+    LevelData<EBCellFAB> phi;
+    LevelData<EBCellFAB> phiCoar;
       
-      if(a_homogeneousCF){
-	MultifluidAlias::aliasMF(phi, op.first, (LevelData<MFCellFAB>&) a_phi);
+    if(a_homogeneousCF){
+      MultifluidAlias::aliasMF(phi, op.first, (LevelData<MFCellFAB>&) a_phi);
 
-	op.second->homogeneousCFInterp(phi);
-      }
-      else{
-	MultifluidAlias::aliasMF(phi,     op.first,  (LevelData<MFCellFAB>&) a_phi);
-	MultifluidAlias::aliasMF(phiCoar, op.first, *a_phiCoar);
+      op.second->homogeneousCFInterp(phi);
+    }
+    else{
+      MultifluidAlias::aliasMF(phi,     op.first,  (LevelData<MFCellFAB>&) a_phi);
+      MultifluidAlias::aliasMF(phiCoar, op.first, *a_phiCoar);
 
-	op.second->inhomogeneousCFInterp(phi, phiCoar);
-      }
+      op.second->inhomogeneousCFInterp(phi, phiCoar);
     }
   }
 }
