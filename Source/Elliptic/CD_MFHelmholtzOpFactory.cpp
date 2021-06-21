@@ -81,7 +81,7 @@ MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&             a_mfis,
 
   // Asking multigrid to do the bottom solve at a refined AMR level is classified as bad input.
   if(this->isFiner(m_bottomDomain, m_amrLevelGrids[0].getDomain())){
-    MayDay::Abort("EBHelmholtzOpFactory -- bottomsolver domain can't be larger than the base AMR domain!");
+    MayDay::Abort("MFHelmholtzOpFactory -- bottomsolver domain can't be larger than the base AMR domain!");
   }
 
   // Define the jump data and the multigrid levels. 
@@ -195,6 +195,25 @@ void MFHelmholtzOpFactory::defineMultigridLevels(){
 
 	// Ok, we can coarsen the domain define by mgMflgCoar. Set up that domain as a multigrid level. 
 	if(hasCoarser){
+
+	  RefCountedPtr<LevelData<MFCellFAB> >   coarAcoef;
+	  RefCountedPtr<LevelData<MFFluxFAB> >   coarBcoef;
+	  RefCountedPtr<LevelData<MFBaseIVFAB> > coarBcoefIrreg;
+
+	  const LevelData<MFCellFAB>&   fineAcoef      = *m_mgAcoef     [amrLevel].back();
+	  const LevelData<MFFluxFAB>&   fineBcoef      = *m_mgBcoef     [amrLevel].back();
+	  const LevelData<MFBaseIVFAB>& fineBcoefIrreg = *m_mgBcoefIrreg[amrLevel].back();
+
+	  this->coarsenCoefficients(*coarAcoef,
+				    *coarBcoef,
+				    *coarBcoefIrreg,
+				    fineAcoef,
+				    fineBcoef,
+				    fineBcoefIrreg,
+				    mgMflgCoar,
+				    mgMflgFine,
+				    mgRefRatio);
+	  
 	  m_mgLevelGrids[amrLevel].push_back(mgMflgCoar);
 	}
 
@@ -289,11 +308,9 @@ int MFHelmholtzOpFactory::refToFiner(const ProblemDomain& a_domain) const {
       ref   = m_amrRefRatios[ilev];
     }
   }
-
-  if(!found) MayDay::Abort("EBHelmholtzOpFactory::refToFiner - domain not found in AMR hiearchy.");
 }
 
-int MFHelmholtzOpFactory::findAmrLevel(const ProblemDomain& a_domain) const{
+int MFHelmholtzOpFactory::findAmrLevel(const ProblemDomain& a_domain) const {
   int amrLevel = -1;
   for (int lvl = 0; lvl < m_amrLevelGrids.size(); lvl++){
     if(m_amrLevelGrids[lvl].getDomain() == a_domain){
@@ -302,7 +319,7 @@ int MFHelmholtzOpFactory::findAmrLevel(const ProblemDomain& a_domain) const{
     }
   }
 
-  if(amrLevel < 0) MayDay::Abort("EBHelmholtzOpFactory::findAmrLevel - no corresponding amr level found!");
+  if(amrLevel < 0) MayDay::Abort("MFHelmholtzOpFactory::findAmrLevel - no corresponding amr level found!");
 
   return amrLevel;
 }

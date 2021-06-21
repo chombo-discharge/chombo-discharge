@@ -194,8 +194,10 @@ protected:
   Vector<AmrCellData>   m_mgAcoef;
   Vector<AmrFluxData>   m_mgBcoef;
   Vector<AmrIrreData>   m_mgBcoefIrreg;
-  Vector<AmrCoarseners> m_mgAveOp;
+
+  // Jump stuff on multigrid levels. Since the jump is only defined on one phase, so is the averaging operator. 
   Vector<EBAMRIVData>   m_mgJump;
+  Vector<Vector<RefCountedPtr<EbCoarAve> > > m_mgAveOp;
 
   /*!
     @brief Function which defines the multigrid levels for this operator factory
