@@ -89,7 +89,7 @@ MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&             a_mfis,
   // Define the jump data and the multigrid levels. 
   this->defineJump();
   this->defineMultigridLevels();
-  //  this->setJump(0.0, 0.0);
+  this->setJump(0.0, 0.0);
 }
 
 MFHelmholtzOpFactory::~MFHelmholtzOpFactory(){
@@ -130,7 +130,7 @@ void MFHelmholtzOpFactory::setJump(const EBAMRIVData& a_sigma, const Real& a_sca
       const int finestMGLevel   = 0;
       const int coarsestMGLevel = jumpMG.size() - 1;
       for (int img = finestMGLevel+1; img <= coarsestMGLevel; img++){
-	m_mgAveOp[amrLevel][img]->average(*jumpMG[img], *jumpMG[img-1], interv);
+  	m_mgAveOp[amrLevel][img]->average(*jumpMG[img], *jumpMG[img-1], interv);
       }
     }
   }
@@ -149,7 +149,7 @@ void MFHelmholtzOpFactory::defineJump(){
   //       boundary condition class. When we match the BC we get the data from here (the gas phase). Note that we define
   //       m_amrJump on all irregular cells, but the operators will do matching on a subset of them. 
   
-  m_amrJump.resize(1 + m_numAmrLevels);
+  m_amrJump.resize(m_numAmrLevels);
 
   for (int lvl = 0; lvl < m_numAmrLevels; lvl++){
     const DisjointBoxLayout& dbl = m_amrLevelGrids[lvl].getGrids();
@@ -210,6 +210,7 @@ void MFHelmholtzOpFactory::defineMultigridLevels(){
       m_mgBcoef     [amrLevel].push_back(m_amrBcoef[amrLevel]);
       m_mgBcoefIrreg[amrLevel].push_back(m_amrBcoefIrreg[amrLevel]);
       m_mgJump      [amrLevel].push_back(m_amrJump[amrLevel]);
+      m_mgAveOp     [amrLevel].push_back(RefCountedPtr<EbCoarAve>(nullptr));
 
       bool hasCoarser = true;
 
