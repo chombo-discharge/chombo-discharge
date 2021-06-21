@@ -7,7 +7,6 @@
   @file   CD_MFLevelGrid.H
   @brief  Declaration of a wrapper for wrapping multifluid EBLevelGrids
   @author Robert Marskar
-  @todo   Remove old code when it's no longer needed (after multifluid_rework). 
 */
 
 #ifndef CD_MFLevelGrid_H
@@ -20,7 +19,6 @@
 #include <EBLevelGrid.H>
 
 // Our includes
-#include <CD_Phases.H>
 #include <CD_MultiFluidIndexSpace.H>
 #include <CD_NamespaceHeader.H>
 
@@ -34,38 +32,6 @@ public:
     @brief Weak constructor, must subsequently call define
   */
   MFLevelGrid();
-
-  /*!
-    @brief Full constructor
-    @param[in] a_eblgs EBLevelGrids on both phases. 
-  */
-  MFLevelGrid(const std::map<Phase, EBLevelGrid>& a_eblgs);
-
-  /*!
-    @brief Define function
-    @param[in] a_eblgs EBLevelGrids on both phases. 
-  */
-  void define(const std::map<Phase, EBLevelGrid>& a_eblgs);
-
-  /*!
-    @brief Get EBLevelGrid on specific phase
-  */
-  const EBLevelGrid& getEBLevelGrid(const Phase a_phase) const;
-
-  /*!
-    @brief Compute the interface region
-    @param[in] a_box Grid box
-    @param[in] a_dit Data index
-  */
-  IntVectSet getInterfaceRegion(const Box& a_box, const DataIndex& a_dit);
-
-  /*!
-    @brief Get number of phases
-    @return Size of m_eblgs.
-  */
-  int getNumPhases() const;
-
-  // Old stuff below here. 
 
   /*!
     @brief Full constructor. Does full allocation
@@ -147,11 +113,6 @@ private:
   RefCountedPtr<MultiFluidIndexSpace> m_multifluidIndexSpace;
 
   Vector<EBLevelGrid> m_eblg;
-
-  /*!
-    @brief EBLevelGrids on each phase
-  */
-  std::map<Phase, EBLevelGrid> m_eblgs;
 };
 
 #include <CD_NamespaceFooter.H>

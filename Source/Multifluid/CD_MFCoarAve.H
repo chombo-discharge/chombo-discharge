@@ -16,7 +16,6 @@
 #include <map>
 
 // Our includes
-#include <CD_Phases.H>
 #include <CD_EbCoarAve.H>
 #include <CD_NamespaceHeader.H>
   
@@ -39,25 +38,24 @@ public:
   /*!
     @brief Full constructor. Calls define
   */
-  MFCoarAve(const std::map<Phase, RefCountedPtr<EbCoarAve> >& a_aveOps);
+  MFCoarAve(const Vector<RefCountedPtr<EbCoarAve> >& a_aveOps);
 
   /*!
     @brief Define function
   */
-  void define(const std::map<Phase, RefCountedPtr<EbCoarAve> >& a_aveOps);
+  void define(const Vector<RefCountedPtr<EbCoarAve> >& a_aveOps);
 
   /*!
     @brief get interpolation utility for phase
   */
-  const RefCountedPtr<EbCoarAve>& getAveOp(const Phase a_phase) const;
+  const RefCountedPtr<EbCoarAve>& getAveOp(const int a_phase) const;
   
 protected:
 
   /*!
     @brief Interpolation for each phase. 
   */
-  std::map<Phase, RefCountedPtr<EbCoarAve> > m_aveOps;
-  
+  Vector<RefCountedPtr<EbCoarAve> > m_aveOps;
 };
 
 #include <CD_NamespaceFooter.H>

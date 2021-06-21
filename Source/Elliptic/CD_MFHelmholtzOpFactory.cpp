@@ -89,7 +89,7 @@ MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&             a_mfis,
   // Define the jump data and the multigrid levels. 
   this->defineJump();
   this->defineMultigridLevels();
-  this->setJump(0.0, 0.0);
+  //  this->setJump(0.0, 0.0);
 }
 
 MFHelmholtzOpFactory::~MFHelmholtzOpFactory(){
@@ -115,7 +115,7 @@ void MFHelmholtzOpFactory::setJump(const EBAMRIVData& a_sigma, const Real& a_sca
 
   // Average down on AMR levels. 
   for (int lvl = m_numAmrLevels-1; lvl > 0; lvl--){
-    const RefCountedPtr<EbCoarAve>& aveOp = m_amrCoarseners[lvl].getAveOp(Phase::Gas);
+    const RefCountedPtr<EbCoarAve>& aveOp = m_amrCoarseners[lvl].getAveOp(m_mainPhase);
     aveOp->average(*m_amrJump[lvl-1], *m_amrJump[lvl], Interval(m_comp, m_comp));
   }
 
@@ -170,8 +170,6 @@ void MFHelmholtzOpFactory::defineJump(){
 }
 
 void MFHelmholtzOpFactory::defineMultigridLevels(){
-  MayDay::Warning("MFHelmholtzOpFactory::defineMultigridLevels -- not implemented");
-
   m_mgLevelGrids.resize(m_numAmrLevels);
   m_mgAcoef.resize(m_numAmrLevels);
   m_mgBcoef.resize(m_numAmrLevels);

@@ -7,7 +7,6 @@
   @file   CD_MFQuadCFInterp.H
   @brief  Wrapper class for holding multifluid EBQuadCFInterps
   @author Robert Marskar
-  @oto    Purge old code when multifluid has been reworked. 
 */
 
 #ifndef CD_MFQuadCFInterp_H
@@ -18,7 +17,6 @@
 #include <EBQuadCFInterp.H>
 
 // Our includes
-#include <CD_Phases.H>
 #include <CD_NamespaceHeader.H>
   
 /*!
@@ -36,25 +34,6 @@ public:
     @brief Destructor
   */
   ~MFQuadCFInterp();
-
-  /*!
-    @brief Full constructor
-    @param[in] Interpolators at various phases.
-  */
-  MFQuadCFInterp(const std::map<Phase, RefCountedPtr<EBQuadCFInterp> >& a_interpolators);
-
-  /*!
-    @brief Define function
-    @param[in] a_interpolators Interpolators for various phases.
-  */
-  void define(const std::map<Phase, RefCountedPtr<EBQuadCFInterp> >& a_interpolators);
-
-  /*!
-    @brief Get interpolation utility for phase
-  */
-  const RefCountedPtr<EBQuadCFInterp>& getInterpolator(const Phase a_phase) const;
-
-  // Old stuff below here. 
 
   /*!
     @brief Full constructor. Calls define
@@ -75,7 +54,6 @@ public:
     @brief get interpolation utility for phase
   */
   EBQuadCFInterp& getEBQuadCFInterp(const int a_phase);
-
   
 protected:
 
@@ -83,11 +61,6 @@ protected:
     @brief Interpolation for each phase. 
   */
   Vector<RefCountedPtr<EBQuadCFInterp> > m_quadcfi;
-
-  /*!
-    @brief Interpolation utility for each phase. 
-  */
-  std::map<Phase, RefCountedPtr<EBQuadCFInterp> > m_interpolators;
 };
 
 #include <CD_NamespaceFooter.H>

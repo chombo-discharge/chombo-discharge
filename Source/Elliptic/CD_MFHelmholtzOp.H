@@ -20,7 +20,6 @@
 #include <MFFluxFAB.H>
 
 // Our includes
-#include <CD_Phases.H>
 #include <CD_MFMultigridInterpolator.H>
 #include <CD_MFCoarAve.H>
 #include <CD_MFFluxReg.H>

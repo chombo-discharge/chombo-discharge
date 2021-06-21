@@ -35,7 +35,15 @@
 #include <CD_EBHelmholtzDirichletDomainBCFactory.H>
 #include <CD_EBHelmholtzNeumannDomainBCFactory.H>
 #include <CD_EBHelmholtzRobinDomainBCFactory.H>
+
 #include <CD_DataOps.H>
+
+// Includes for MFHelmholtzOpFactory
+#include <CD_MFHelmholtzOpFactory.H>
+#include <CD_MFQuadCFInterp.H>
+#include <CD_MFLevelGrid.H>
+#include <CD_MFFluxReg.H>
+#include <CD_MFCoarAve.H>
 
 // Old news
 #include <CD_RobinConductivityDomainBcFactory.H>
@@ -80,6 +88,9 @@ bool ProxyFieldSolver::solve(MFAMRCellData&       a_potential,
   this->computeElectricField();
   
   this->writePlotFile();
+
+  if(procID() == 0) std::cout << "setting up mfhelmholtz factory" << std::endl;
+  this->setupMF();
   
   return true;
 }
@@ -96,6 +107,10 @@ void ProxyFieldSolver::registerOperators()  {
     // For coarsening
     m_amr->registerOperator(s_eb_coar_ave,     m_realm, phase::gas);
     m_amr->registerOperator(s_eb_coar_ave,     m_realm, phase::solid);
+
+    // For multigrid interpolation
+    m_amr->registerOperator(s_eb_quad_cfi,     m_realm, phase::gas);
+    m_amr->registerOperator(s_eb_quad_cfi,     m_realm, phase::solid);
 
     // For linearly filling ghost cells
     m_amr->registerOperator(s_eb_pwl_interp,   m_realm, phase::gas);
@@ -146,7 +161,7 @@ Vector<RefCountedPtr<EBQuadCFInterp> > ProxyFieldSolver::getQuadCFI(){
   return ret;
 }
 
-Vector<RefCountedPtr<EBMultigridInterpolator> > ProxyFieldSolver::getMultigridInterpolators(){
+Vector<RefCountedPtr<EBMultigridInterpolator> > ProxyFieldSolver::getMultigridInterpolators(const phase::which_phase a_phase){
   const int finestLevel = m_amr->getFinestLevel();
 
   Vector<RefCountedPtr<EBMultigridInterpolator> > interpolators(1+finestLevel);
@@ -154,8 +169,8 @@ Vector<RefCountedPtr<EBMultigridInterpolator> > ProxyFieldSolver::getMultigridIn
   for (int lvl = 0; lvl <= finestLevel; lvl++){
 
     if(lvl > 0){
-      const EBLevelGrid eblgFine = *m_amr->getEBLevelGrid(m_realm, phase::gas)[lvl];
-      const EBLevelGrid eblgCoar = *m_amr->getEBLevelGrid(m_realm, phase::gas)[lvl-1];
+      const EBLevelGrid eblgFine = *m_amr->getEBLevelGrid(m_realm, a_phase)[lvl];
+      const EBLevelGrid eblgCoar = *m_amr->getEBLevelGrid(m_realm, a_phase)[lvl-1];
       const LayoutData<IntVectSet>& cfivs = *eblgFine.getCFIVS();
       
       interpolators[lvl] = RefCountedPtr<EBMultigridInterpolator> (new EBMultigridInterpolator(eblgFine,
@@ -468,7 +483,7 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
 			    beta,
 			    m_amr->getProbLo(),
 			    m_amr->getEBLevelGrid(m_realm, phase::gas),
-			    this->getMultigridInterpolators(),
+			    this->getMultigridInterpolators(phase::gas),
 			    m_amr->getFluxRegister(m_realm, phase::gas),
 			    m_amr->getCoarseAverage(m_realm, phase::gas),
 			    m_amr->getRefinementRatios(),
@@ -515,6 +530,106 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
   multigridSolver.init(phi, rhs, finestLevel, 0);
   multigridSolver.m_convergenceMetric = multigridSolver.computeAMRResidual(zer, rhs, finestLevel, baseLevel);
   multigridSolver.solveNoInit(phi, rhs, finestLevel, baseLevel, false);
+}
+
+void ProxyFieldSolver::setupMF(){
+
+  ParmParse pp("ProxyFieldSolver");
+  
+  Real alpha;
+  Real beta;
+
+  Real aco;
+  Real bco;
+
+  MFAMRCellData Aco;
+  MFAMRFluxData Bco;
+  MFAMRIVData   BcoIrreg;
+
+  m_amr->allocate(Aco,      m_realm, 1);
+  m_amr->allocate(Bco,      m_realm, 1);
+  m_amr->allocate(BcoIrreg, m_realm, 1);
+
+  pp.get("alpha", alpha);
+  pp.get("beta",  beta);
+  
+  pp.get("aco", aco);
+  pp.get("bco",  bco);
+
+  DataOps::setValue(Aco,      aco);
+  DataOps::setValue(Bco,      bco);
+  DataOps::setValue(BcoIrreg, bco);
+
+  const int numPhases = m_multifluidIndexSpace->numPhases();
+
+  const int finestLevel = m_amr->getFinestLevel();
+  Vector<MFLevelGrid>             mflg(1 + finestLevel);
+  Vector<MFMultigridInterpolator> mfInterp(1 + finestLevel);
+  Vector<MFFluxReg>               mfFluxReg(1 + finestLevel);
+  Vector<MFCoarAve>               mfCoarAve(1 + finestLevel);
+
+  const RefCountedPtr<EBIndexSpace>& ebisGas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
+  const RefCountedPtr<EBIndexSpace>& ebisSol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
+
+  for (int lvl = 0; lvl <= finestLevel; lvl++){
+    Vector<EBLevelGrid>                    eblgPhases(numPhases);
+    Vector<RefCountedPtr<EBMultigridInterpolator> > quadPhases(numPhases);
+    Vector<RefCountedPtr<EBFluxRegister> > fluxPhases(numPhases);
+    Vector<RefCountedPtr<EbCoarAve> >      avePhases(numPhases);
+
+    if(!ebisGas.isNull()) eblgPhases[phase::gas]   = *(m_amr->getEBLevelGrid(m_realm, phase::gas)  [lvl]);
+    if(!ebisSol.isNull()) eblgPhases[phase::solid] = *(m_amr->getEBLevelGrid(m_realm, phase::solid)[lvl]);
+
+    if(!ebisGas.isNull()) quadPhases[phase::gas]   = this->getMultigridInterpolators(phase::gas)  [lvl];
+    if(!ebisSol.isNull()) quadPhases[phase::solid] = this->getMultigridInterpolators(phase::solid)[lvl];
+
+    if(!ebisGas.isNull()) fluxPhases[phase::gas]   = (m_amr->getFluxRegister(m_realm, phase::gas)  [lvl]);
+    if(!ebisSol.isNull()) fluxPhases[phase::solid] = (m_amr->getFluxRegister(m_realm, phase::solid)[lvl]);
+
+    if(!ebisGas.isNull()) avePhases[phase::gas]   = (m_amr->getCoarseAverage(m_realm, phase::gas)  [lvl]);
+    if(!ebisSol.isNull()) avePhases[phase::solid] = (m_amr->getCoarseAverage(m_realm, phase::solid)[lvl]);
+
+    mflg[lvl].define(m_multifluidIndexSpace, eblgPhases);
+    mfInterp[lvl].define(quadPhases);
+    mfFluxReg[lvl].define(fluxPhases);
+    mfCoarAve[lvl].define(avePhases);
+  }
+
+  int minCells;
+  pp.get("min_cells", minCells);
+  ProblemDomain bottomDomain = m_amr->getDomains()[0];
+  while(bottomDomain.domainBox().shortside() >= 2*minCells){
+    bottomDomain.coarsen(2);
+  }
+
+  auto diriFactory = RefCountedPtr<EBHelmholtzDirichletDomainBCFactory> (new EBHelmholtzDirichletDomainBCFactory());
+  diriFactory->setValue(0.0);
+
+  const IntVect ghostPhi = m_amr->getNumberOfGhostCells()*IntVect::Unit;
+  const IntVect ghostRhs = m_amr->getNumberOfGhostCells()*IntVect::Unit;
+
+				   
+  MFHelmholtzOpFactory* fact = new MFHelmholtzOpFactory(m_multifluidIndexSpace,
+							alpha,
+							beta,
+							m_amr->getProbLo(),
+							mflg,
+							mfInterp,
+							mfFluxReg,
+							mfCoarAve,
+							m_amr->getRefinementRatios(),
+							m_amr->getDx(),
+							Aco.getData(),
+							Bco.getData(),
+							BcoIrreg.getData(),
+							diriFactory,
+							ghostPhi,
+							ghostRhs,
+							EBHelmholtzOp::RelaxationMethod::GauSaiMultiColor,
+							bottomDomain,
+							1,
+							1,
+							m_amr->getMaxBoxSize());
 }
 
 #include <CD_NamespaceFooter.H>

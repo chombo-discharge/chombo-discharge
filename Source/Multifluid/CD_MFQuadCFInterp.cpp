@@ -23,20 +23,8 @@ MFQuadCFInterp::MFQuadCFInterp(const Vector<RefCountedPtr<EBQuadCFInterp> >& a_q
   this->define(a_quadcfi);
 }
 
-MFQuadCFInterp::MFQuadCFInterp(const std::map<Phase, RefCountedPtr<EBQuadCFInterp> >& a_interpolators){
-  this->define(a_interpolators);
-}
-
 void MFQuadCFInterp::define(const Vector<RefCountedPtr<EBQuadCFInterp> >& a_quadcfi){
   m_quadcfi = a_quadcfi;
-}
-
-void MFQuadCFInterp::define(const std::map<Phase, RefCountedPtr<EBQuadCFInterp> >& a_interpolators){
-  m_interpolators = a_interpolators;
-}
-
-const RefCountedPtr<EBQuadCFInterp>& MFQuadCFInterp::getInterpolator(const Phase a_phase) const {
-  return m_interpolators.at(a_phase);
 }
 
 const RefCountedPtr<EBQuadCFInterp>& MFQuadCFInterp::getEBQuadCFInterpPointer(const int a_phase) const {

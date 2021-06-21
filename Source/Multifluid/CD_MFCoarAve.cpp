@@ -19,16 +19,16 @@ MFCoarAve::MFCoarAve(){
 MFCoarAve::~MFCoarAve(){
 }
 
-MFCoarAve::MFCoarAve(const std::map<Phase, RefCountedPtr<EbCoarAve> >& a_aveOps){
+MFCoarAve::MFCoarAve(const Vector<RefCountedPtr<EbCoarAve> >& a_aveOps){
   this->define(a_aveOps);
 }
 
-void MFCoarAve::define(const std::map<Phase, RefCountedPtr<EbCoarAve> >& a_aveOps){
+void MFCoarAve::define(const Vector<RefCountedPtr<EbCoarAve> >& a_aveOps){
   m_aveOps = a_aveOps;
 }
 
-const RefCountedPtr<EbCoarAve>& MFCoarAve::getAveOp(const Phase a_phase) const {
-  return m_aveOps.at(a_phase);
+const RefCountedPtr<EbCoarAve>& MFCoarAve::getAveOp(const int a_phase) const {
+  return m_aveOps[a_phase];
 }
 
 #include <CD_NamespaceFooter.H>

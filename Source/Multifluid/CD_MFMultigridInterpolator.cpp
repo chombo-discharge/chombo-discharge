@@ -17,7 +17,7 @@ MFMultigridInterpolator::MFMultigridInterpolator(){
 
 }
 
-MFMultigridInterpolator::MFMultigridInterpolator(const std::map<Phase, RefCountedPtr<EBMultigridInterpolator> >& a_interpolators){
+MFMultigridInterpolator::MFMultigridInterpolator(const Vector<RefCountedPtr<EBMultigridInterpolator> >& a_interpolators){
   this->define(a_interpolators);
 }
 
@@ -25,12 +25,12 @@ MFMultigridInterpolator::~MFMultigridInterpolator(){
 
 }
 
-void MFMultigridInterpolator::define(const std::map<Phase, RefCountedPtr<EBMultigridInterpolator> >& a_interpolators){
+void MFMultigridInterpolator::define(const Vector<RefCountedPtr<EBMultigridInterpolator> >& a_interpolators){
   m_interpolators = a_interpolators;
 }
 
-const RefCountedPtr<EBMultigridInterpolator>& MFMultigridInterpolator::getInterpolator(const Phase a_phase) const {
-  return m_interpolators.at(a_phase);
+const RefCountedPtr<EBMultigridInterpolator>& MFMultigridInterpolator::getInterpolator(const int a_phase) const {
+  return m_interpolators[a_phase];
 }
 
 #include <CD_NamespaceFooter.H>

@@ -18,39 +18,6 @@ MFLevelGrid::MFLevelGrid(){
 
 }
 
-MFLevelGrid::MFLevelGrid(const std::map<Phase, EBLevelGrid>& a_eblgs){
-  this->define(a_eblgs);
-}
-
-void MFLevelGrid::define(const std::map<Phase, EBLevelGrid>& a_eblgs){
-  m_eblgs = a_eblgs;
-}
-
-const EBLevelGrid& MFLevelGrid::getEBLevelGrid(const Phase a_phase) const{
-  return m_eblgs.at(a_phase);
-}
-
-IntVectSet MFLevelGrid::getInterfaceRegion(const Box& a_box, const DataIndex& a_dit){
-  IntVectSet ret;
-  
-  if(this->getNumPhases() == 2){
-    const EBLevelGrid& eblg1 = m_eblgs.at(Phase::Gas);
-    const EBLevelGrid& eblg2 = m_eblgs.at(Phase::Solid);
-      
-    const EBISBox& ebisbox1  = eblg1.getEBISL()[a_dit];
-    const EBISBox& ebisbox2  = eblg2.getEBISL()[a_dit];
-
-    ret = ebisbox1.getIrregIVS(a_box) & ebisbox2.getIrregIVS(a_box);    
-  }
-
-  return ret;
-}
-
-
-int MFLevelGrid::getNumPhases() const{
-  return m_eblgs.size();
-}
-
 void MFLevelGrid::setMaxRefinementRatio(const int a_refRat){
   for (int i = 0; i < m_eblg.size(); i++){
     m_eblg[i].setMaxRefinementRatio(a_refRat);

@@ -48,10 +48,11 @@ protected:
 
   void solveEBCond   (EBAMRCellData& a_solution, EBAMRCellData& a_residue);
   void solveHelmholtz(EBAMRCellData& a_solution, EBAMRCellData& a_residue);
+  void setupMF();
   
   Vector<EBLevelGrid> getEBLevelGrids();
   Vector<RefCountedPtr<EBQuadCFInterp> > getQuadCFI();
-  Vector<RefCountedPtr<EBMultigridInterpolator> > getMultigridInterpolators();
+  Vector<RefCountedPtr<EBMultigridInterpolator> > getMultigridInterpolators(const phase::which_phase a_phase);
 };
 
 #include <CD_NamespaceFooter.H>
