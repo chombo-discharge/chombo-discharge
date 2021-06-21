@@ -48,7 +48,10 @@ protected:
 
   void solveEBCond   (EBAMRCellData& a_solution, EBAMRCellData& a_residue);
   void solveHelmholtz(EBAMRCellData& a_solution, EBAMRCellData& a_residue);
-  void setupMF();
+  void solveMF(MFAMRCellData&       a_potential,
+	       const MFAMRCellData& a_rho,
+	       const EBAMRIVData&   a_sigma,
+	       const bool           a_zerophi = false);
   
   Vector<EBLevelGrid> getEBLevelGrids();
   Vector<RefCountedPtr<EBQuadCFInterp> > getQuadCFI();

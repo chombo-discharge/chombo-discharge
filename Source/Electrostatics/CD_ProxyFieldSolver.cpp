@@ -90,7 +90,7 @@ bool ProxyFieldSolver::solve(MFAMRCellData&       a_potential,
   this->writePlotFile();
 
   if(procID() == 0) std::cout << "setting up mfhelmholtz factory" << std::endl;
-  this->setupMF();
+  this->solveMF(a_potential, a_rho, a_sigma, a_zerophi);
   
   return true;
 }
@@ -532,7 +532,10 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
   multigridSolver.solveNoInit(phi, rhs, finestLevel, baseLevel, false);
 }
 
-void ProxyFieldSolver::setupMF(){
+void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
+			       const MFAMRCellData& a_rho,
+			       const EBAMRIVData&   a_sigma,
+			       const bool           a_zerophi){
 
   ParmParse pp("ProxyFieldSolver");
   
@@ -630,6 +633,8 @@ void ProxyFieldSolver::setupMF(){
 							1,
 							1,
 							m_amr->getMaxBoxSize());
+
+  fact->setJump(a_sigma, 1.0);
 }
 
 #include <CD_NamespaceFooter.H>
