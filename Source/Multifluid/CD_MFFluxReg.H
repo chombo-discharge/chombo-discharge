@@ -7,6 +7,7 @@
   @file   CD_MFFluxReg.H
   @brief  Wrapper class for holding multifluid EBFastFluxReg
   @author Robert Marskar
+  @todo   Purge old code when multifluid has been reworked. 
 */
 
 #ifndef CD_MFFluxReg_H
@@ -17,6 +18,7 @@
 #include <EBFluxRegister.H>
 
 // Our includes
+#include <CD_Phases.H>
 #include <CD_NamespaceHeader.H>
   
 /*!
@@ -31,9 +33,29 @@ public:
   MFFluxReg();
 
   /*!
+    @brief Constructor
+    @param[in] a_fluxRegs Flux registers on each phase. 
+  */
+  MFFluxReg(const std::map<Phase, RefCountedPtr<EBFluxRegister> >& a_fluxRegs);
+
+  /*!
     @brief Destructor
   */
   ~MFFluxReg();
+
+  /*!
+    @brief Define function
+    @param[in] a_fluxRegs Flux registers on each phase. 
+  */
+  void define(const std::map<Phase, RefCountedPtr<EBFluxRegister> >& a_fluxRegs);
+
+  /*!
+    @brief Get flux register on specific phase.
+    @param[in] a_phase
+  */
+  const RefCountedPtr<EBFluxRegister>& getFluxReg(const Phase a_phase) const;
+
+  // Old stuff below here
 
   /*!
     @brief Full constructor. Calls define
@@ -61,6 +83,11 @@ public:
   const EBFluxRegister& getFluxReg(const int a_phase) const;
   
 protected:
+
+  /*!
+    @brief Flux registers for each phase
+  */
+  std::map<Phase, RefCountedPtr<EBFluxRegister> > m_fluxRegs;
 
   /*!
     @brief Interpolation for each phase. 

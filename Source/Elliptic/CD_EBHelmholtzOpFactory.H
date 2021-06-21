@@ -144,9 +144,6 @@ public:
 
 protected:
 
-  // For debugging
-  int m_verbosity; 
-
   // Relaxation method
   RelaxType m_relaxMethod;
 
@@ -220,13 +217,12 @@ protected:
   bool isFiner(const ProblemDomain& a_domainOne, const ProblemDomain& a_domainTwo) const;
 
   /*!
-    @brief Constructor a coarseing of a fine level. 
+    @brief Construct coarsening of a grid level. 
     @param[out] a_coarseGrid     The coarse grid layout. Must be a pointer to an undefined EBLevelGrid on input
     @param[in]  a_fineGrid       The coarse grid layout. Must be a pointer to an undefined EBLevelGrid on input
     @param[in]  a_refRat         Refinement ratio
     @param[in]  a_blockingFactor Blocking factor to use for grid aggregation
-    @return This will return a multigrid level (i.e. one that is completely overlapping) the fine level. If we can, we use aggregation with
-    the blocking factor. Otherwise we try to coarsen directly. 
+    @return This will return a multigrid level (i.e. one that is completely overlapping) the fine level. If we can, we coarsen directly. 
   */
   bool getCoarserLayout(EBLevelGrid& a_coarseGrid, const EBLevelGrid& a_fineGrid, const int a_refRat, const int a_blockingFactor) const;
 
