@@ -42,6 +42,10 @@ MFHelmholtzOpFactory::MFHelmholtzOpFactory(const Real&             a_alpha,
 
 }
 
+MFHelmholtzOpFactory::~MFHelmholtzOpFactory(){
+
+}
+
 void MFHelmholtzOpFactory::defineMultigridLevels(){
   MayDay::Abort("MFHelmholtzOpFactory::defineMultigridLevels -- not implemented");
 }
@@ -75,3 +79,4 @@ int MFHelmholtzOpFactory::findAmrLevel(const ProblemDomain& a_domain) const{
 }
 
 #include <CD_NamespaceFooter.H>
+

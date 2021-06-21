@@ -79,8 +79,20 @@ Real MFHelmholtzOp::norm(const LevelData<MFCellFAB>& a_lhs, int a_order){
   return norm;
 }
 
+Real MFHelmholtzOp::dotProduct(const LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_2) {
+  MayDay::Abort("MFHelmholtzOp::dotProduct - not implemented");
+}
+
 void MFHelmholtzOp::create(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs){
   m_ops.create(a_lhs, a_rhs);
+}
+
+void MFHelmholtzOp::createCoarser(LevelData<MFCellFAB>& a_coarse, const LevelData<MFCellFAB>& a_fine, bool a_ghosted) {
+  MayDay::Abort("MFHelmholtzOp::createCoarser - not implemented");
+}
+
+void MFHelmholtzOp::createCoarsened(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs, const int& a_refRat) {
+  MayDay::Abort("MFHelmholtzOp::createCoarsened - not implemented");
 }
 
 void MFHelmholtzOp::preCond(LevelData<MFCellFAB>& a_corr, const LevelData<MFCellFAB>& a_residual) {

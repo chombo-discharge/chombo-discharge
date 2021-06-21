@@ -108,12 +108,33 @@ public:
   void create(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs) override final;
 
   /*!
+    @brief Create coarsened data
+    @param[out] a_coarse  Coarse data
+    @param[in]  a_fine    Fine data
+    @param[in]  a_ghosted Include ghost cells or nto
+  */
+  void createCoarser(LevelData<MFCellFAB>& a_coarse, const LevelData<MFCellFAB>& a_fine, bool a_ghosted) override final;
+
+  /*!
+    @brief Create coarsening of data holder
+    @param[out] a_lhs    Coarsened data
+    @param[in]  a_rhs    Fine data
+    @param[in]  a_refRat Coarsening factor
+  */
+  void createCoarsened(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs, const int& a_refRat) override final;
+  
+  /*!
     @brief Increment function
     @param[inout] a_lhs   On output, a_lhs = a_lhs + a_rhs*a_scale
     @param[in]    a_rhs   Data
     @param[in]    a_scale Scaling factor
   */
   void incr(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs, Real a_scale) override final;
+
+  /*!
+    @brief Dot product.
+  */
+  Real dotProduct(const LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_2) override final;
 
   /*!
     @brief Scale function
