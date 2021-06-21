@@ -605,8 +605,12 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
     bottomDomain.coarsen(2);
   }
 
+
+  auto pot = [](const RealVect& pos){
+    return pos[1];
+  };
   auto diriFactory = RefCountedPtr<EBHelmholtzDirichletDomainBCFactory> (new EBHelmholtzDirichletDomainBCFactory());
-  diriFactory->setValue(0.0);
+  diriFactory->setValue(pot);
 
   const IntVect ghostPhi = m_amr->getNumberOfGhostCells()*IntVect::Unit;
   const IntVect ghostRhs = m_amr->getNumberOfGhostCells()*IntVect::Unit;
