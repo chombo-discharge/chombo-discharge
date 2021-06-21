@@ -343,6 +343,9 @@ public:
 
   /*!
     @brief Update AMR residual
+    @param[in] a_residual         Residual
+    @param[in] a_correction       Correction
+    @param[in] a_coarseCorrection Coarse-level correction
   */
   void AMRUpdateResidual(LevelData<EBCellFAB>&       a_residual,
 			 const LevelData<EBCellFAB>& a_correction,
