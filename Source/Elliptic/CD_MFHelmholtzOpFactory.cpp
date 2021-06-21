@@ -97,6 +97,8 @@ MFHelmholtzOpFactory::~MFHelmholtzOpFactory(){
 }
 
 void MFHelmholtzOpFactory::setJump(const EBAMRIVData& a_sigma, const Real& a_scale){
+  const Interval interv(m_comp, m_comp);
+  
   for (int lvl = 0; lvl < m_numAmrLevels; lvl++){
     const DisjointBoxLayout& dbl = a_sigma[lvl]->disjointBoxLayout();
 
@@ -111,13 +113,27 @@ void MFHelmholtzOpFactory::setJump(const EBAMRIVData& a_sigma, const Real& a_sca
     m_amrJump[lvl]->exchange();
   }
 
-  // Average down data.
+  // Average down on AMR levels. 
   for (int lvl = m_numAmrLevels-1; lvl > 0; lvl--){
     const RefCountedPtr<EbCoarAve>& aveOp = m_amrCoarseners[lvl].getAveOp(Phase::Gas);
     aveOp->average(*m_amrJump[lvl-1], *m_amrJump[lvl], Interval(m_comp, m_comp));
   }
 
 
+  // Average down on MG levels. I'm not really sure if we need to do this. Also,
+  // note the weird reversed order for the levels. 
+  for(int amrLevel = 0; amrLevel < m_numAmrLevels; amrLevel++){
+
+    if(m_hasMgLevels[amrLevel]){
+      EBAMRIVData& jumpMG = m_mgJump[amrLevel];
+
+      const int finestMGLevel   = 0;
+      const int coarsestMGLevel = jumpMG.size() - 1;
+      for (int img = finestMGLevel+1; img <= coarsestMGLevel; img++){
+	m_mgAveOp[amrLevel][img]->average(*jumpMG[img], *jumpMG[img-1], interv);
+      }
+    }
+  }
 }
 
 void MFHelmholtzOpFactory::setJump(const Real& a_sigma, const Real& a_scale){
@@ -348,7 +364,72 @@ MFHelmholtzOp* MFHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, 
 }
 
 MFHelmholtzOp* MFHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
-  return new MFHelmholtzOp();
+  const int amrLevel = this->findAmrLevel(a_domain);
+
+  const bool hasFine = amrLevel < m_numAmrLevels - 1;
+  const bool hasCoar = amrLevel > 0;
+
+  MFLevelGrid mflgFine;
+  MFLevelGrid mflg;
+  MFLevelGrid mflgCoFi;
+  MFLevelGrid mflgCoar;
+  MFLevelGrid mflgCoarMG;
+
+  Real dx;
+
+  mflg = m_amrLevelGrids[amrLevel];
+  dx   = m_amrResolutions[amrLevel];
+
+  int refToCoar;
+
+  if(hasCoar){
+    mflgCoar = m_amrLevelGrids[amrLevel-1];
+    refToCoar = m_amrRefRatios[amrLevel-1];
+  }
+
+  if(hasFine){
+    mflgFine = m_amrLevelGrids[amrLevel+1];
+  }
+
+  const bool hasMGObjects = m_hasMgLevels[amrLevel];
+  if(hasMGObjects){
+    mflgCoarMG = m_mgLevelGrids[amrLevel][1];
+  }
+
+  if(hasCoar){ // Make a coarser layout
+    this->getCoarserLayout(mflgCoFi, mflg, refToCoar, m_mgBlockingFactor);
+    mflgCoFi.setMaxRefinementRatio(refToCoar);
+  }
+
+  MFHelmholtzOp* op = new MFHelmholtzOp(mflgFine,
+					mflg,
+					mflgCoFi,
+					mflgCoar,
+					mflgCoarMG,
+					m_amrInterpolators[amrLevel],
+					m_amrFluxRegisters[amrLevel],
+					m_amrCoarseners[amrLevel],
+					m_domainBcFactory->create(),
+					m_probLo,
+					dx,
+					refToCoar,
+					hasFine,
+					hasCoar,
+					hasMGObjects,
+					m_alpha,
+					m_beta,
+					m_amrAcoef[amrLevel],
+					m_amrBcoef[amrLevel],
+					m_amrBcoefIrreg[amrLevel],
+					m_ghostPhi,
+					m_ghostRhs,
+					m_ebbcOrder,
+					m_jumpOrder,
+					m_relaxMethod);
+
+  op->setJump(m_amrJump[amrLevel]);
+
+  return op;
 }
 
 bool MFHelmholtzOpFactory::isCoarser(const ProblemDomain& A, const ProblemDomain& B) const{

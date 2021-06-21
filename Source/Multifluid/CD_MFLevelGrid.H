@@ -96,6 +96,11 @@ public:
   virtual void define(const RefCountedPtr<MultiFluidIndexSpace>& a_multiFluidIndexSpace, const Vector<EBLevelGrid>& a_eblg);
 
   /*!
+    @brief Set max refinement ratio
+  */
+  virtual void setMaxRefinementRatio(const int a_refRat);
+
+  /*!
     @brief Get the index space
   */
   virtual const RefCountedPtr<MultiFluidIndexSpace>& getMfIndexSpace() const;
