@@ -17,6 +17,7 @@
 #include <MFFluxFAB.H>
 
 // Our includes
+#include <CD_MultiFluidIndexSpace.H>
 #include <CD_EBAMRData.H>
 #include <CD_MFHelmholtzOp.H>
 #include <CD_MFCoarAve.H>
@@ -32,6 +33,7 @@
 class MFHelmholtzOpFactory : public AMRLevelOpFactory<LevelData<MFCellFAB> > {
 public:
 
+  using MFIS             = RefCountedPtr<MultiFluidIndexSpace>;
   using AmrLevelGrids    = Vector<MFLevelGrid>;
   using AmrInterpolators = Vector<MFMultigridInterpolator>;
   using AmrFluxRegisters = Vector<MFFluxReg>;
@@ -61,7 +63,8 @@ public:
   /*!
     @brief Full constructor
   */
-  MFHelmholtzOpFactory(const Real&             a_alpha,
+  MFHelmholtzOpFactory(const MFIS&             a_mfis,
+		       const Real&             a_alpha,
 		       const Real&             a_beta,
 		       const RealVect&         a_probLo,
 		       const AmrLevelGrids&    a_amrLevelGrids,
@@ -129,6 +132,11 @@ protected:
     @brief Number of components that this operator solves for.
   */
   static constexpr int m_nComp = 1;
+
+  /*!
+    @brief Index space
+  */
+  MFIS m_mfis;
 
   // Relaxation method
   RelaxType m_relaxMethod;

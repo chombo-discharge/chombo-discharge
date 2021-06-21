@@ -21,7 +21,8 @@
 constexpr int MFHelmholtzOpFactory::m_comp;
 constexpr int MFHelmholtzOpFactory::m_nComp;
 
-MFHelmholtzOpFactory::MFHelmholtzOpFactory(const Real&             a_alpha,
+MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&             a_mfis,
+					   const Real&             a_alpha,
 					   const Real&             a_beta,
 					   const RealVect&         a_probLo,
 					   const AmrLevelGrids&    a_amrLevelGrids,
@@ -43,6 +44,8 @@ MFHelmholtzOpFactory::MFHelmholtzOpFactory(const Real&             a_alpha,
 					   const int&              a_blockingFactor,
 					   const AmrLevelGrids&    a_deeperLevelGrids){
 
+  m_mfis   = a_mfis;
+  
   m_alpha  = a_alpha;
   m_beta   = a_beta;
   m_probLo = a_probLo;
@@ -192,8 +195,6 @@ void MFHelmholtzOpFactory::defineMultigridLevels(){
 	  
 	}
 
-	
-
 	hasCoarser = false;
       }
     }
@@ -201,7 +202,7 @@ void MFHelmholtzOpFactory::defineMultigridLevels(){
 }
 
 bool MFHelmholtzOpFactory::getCoarserLayout(MFLevelGrid& a_coarMflg, const MFLevelGrid& a_fineMflg, const int a_refRat, const int a_blockingFactor) const {
-  MayDay::Abort("MFHelmholtzOpFactory::getCoarserLayout -- not implemented");
+  bool hasCoarser = false;
 
   // This returns true if the fine grid fully covers the domain. The nature of this makes it
   // always true for the "deeper" multigridlevels,  but not so for the intermediate levels. 
@@ -224,11 +225,12 @@ bool MFHelmholtzOpFactory::getCoarserLayout(MFLevelGrid& a_coarMflg, const MFLev
   // Check if we can get a coarsenable domain. Don't want to coarsen to 1x1 so hence the factor of 2 in the test here. 
   ProblemDomain test = fineDomain;
   if(refine(coarsen(test, 2*a_refRat), 2*a_refRat) == fineDomain){
-    const bool doCoarsen = a_fineMflg.getGrids().coarsenable(2*a_refRat);
-
+    
     // Use coarsening if we can
-    if(doCoarsen){
+    if(fineDbl.coarsenable(2*a_refRat)){
+      coarsen(coarDbl, fineDbl, a_refRat);
 
+      hasCoarser = true;
     }
     else{ // Check if we can use box aggregation 
       if(isFullyCovered(a_fineMflg)){
@@ -241,9 +243,21 @@ bool MFHelmholtzOpFactory::getCoarserLayout(MFLevelGrid& a_coarMflg, const MFLev
 	LoadBalance(procs, boxes);
 
 	coarDbl.define(boxes, procs, coarDomain);
+
+	hasCoarser = true;
       }
     }
+ 
+    // Ok, found a coarsened layout.
+    if(hasCoarser){
+      a_coarMflg = MFLevelGrid(coarDbl, coarDomain, 4, m_mfis);
+    }
   }
+  else{
+    hasCoarser = false;
+  }
+
+  return hasCoarser;
 }
 
 MFHelmholtzOp* MFHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bool a_homogeneousOnly) {
