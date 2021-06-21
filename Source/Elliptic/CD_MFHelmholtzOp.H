@@ -21,6 +21,7 @@
 
 // Our includes
 #include <CD_Phases.H>
+#include <CD_MFLevelGrid.H>
 #include <CD_MFBaseIVFAB.H>
 #include <CD_EBHelmholtzOp.H>
 #include <CD_EBHelmholtzDomainBCFactory.H>
@@ -34,6 +35,21 @@ public:
     @brief Constructor. Must subsequently call define(...)
   */
   MFHelmholtzOp();
+
+#if 0
+  MFHelmholtzOp(const MFLevelGrid&                            a_mflgFine,
+		const MFLevelGrid&                            a_mflg,
+		const MFLevelGrid&                            a_mflgCoar,
+		const MFLevelGrid&                            a_mflgCoFi,
+		const RefCountedPtr<MFMultigridInterpolator>& a_interpolator,
+		const RefCountedPtr<MFFluxReg>&               a_fluxReg,
+		const RefCountedPtr<MFCoarAve>&               a_coarAve,
+		const RefCountedPtr<EBHelmholtzDomainBC>&     a_domainBC,
+		const RefCountedPtr<EBHelmholtzEBBC>&         a_ebbc,
+		const RealVect&                               a_probLo,
+		const Real&                                   a_dx,
+		const int&
+#endif
 
   /*!
     @brief Destructor. 
@@ -295,6 +311,31 @@ public:
 		     AMRLevelOp<LevelData<MFCellFAB> >* a_finerOp) override final;
   
 protected:
+
+  /*!
+    @brief Level grid
+  */
+  MFLevelGrid m_mflg;
+
+  /*!
+    @brief Fine level grid
+  */
+  MFLevelGrid m_mflgFine;
+
+  /*!
+    @brief Coarse grid
+  */
+  MFLevelGrid m_mflgCoar;
+
+  /*!
+    @brief Coarse multigrid-grid
+  */
+  MFLevelGrid m_mflgCoarMG;
+  
+  /*!
+    @brief Coarsened version of this grid
+  */
+  MFLevelGrid m_mflgCoFi;
 
   /*!
     @brief Helmholtz operators on each phase. Note that I'm using int rather than Phase as identifier because that is the standard terminology for MFCellFAB. 

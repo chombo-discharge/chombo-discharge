@@ -79,8 +79,38 @@ Real MFHelmholtzOp::norm(const LevelData<MFCellFAB>& a_lhs, int a_order){
   return norm;
 }
 
-Real MFHelmholtzOp::dotProduct(const LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_2) {
+Real MFHelmholtzOp::dotProduct(const LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs) {
   MayDay::Abort("MFHelmholtzOp::dotProduct - not implemented");
+
+  Real accum = 0.0;
+  Real volum = 0.0;
+
+  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
+    const MFCellFAB& lhs = a_lhs[dit()];
+
+    Real phaseVolume;
+    for (int i = 0; i < lhs.numPhases(); i++){
+      const EBCellFAB& data1 = a_lhs[dit()].getPhase(i);
+      const EBCellFAB& data2 = a_rhs[dit()].getPhase(i);
+      const Box box = a_lhs.disjointBoxLayout()[dit()];
+
+      accum += EBLevelDataOps::sumKappaDotProduct(phaseVolume, data1, data2, box, EBLEVELDATAOPS_ALLVOFS, m_mflg.getDomain());
+      volum += phaseVolume;
+    }
+  }
+
+#ifdef CH_MPI
+  Real recv;
+  MPI_Allreduce(&accum, &recv, 1, MPI_CH_REAL, MPI_SUM, Chombo_MPI::comm); accum = recv;
+  MPI_Allreduce(&volum, &recv, 1, MPI_CH_REAL, MPI_SUM, Chombo_MPI::comm); volum = recv;
+#endif
+
+  Real ret = 0.0;
+  if(volum > 0.0){
+    ret = accum/volum;
+  }
+
+  return ret;
 }
 
 void MFHelmholtzOp::create(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs){
@@ -88,11 +118,11 @@ void MFHelmholtzOp::create(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFA
 }
 
 void MFHelmholtzOp::createCoarser(LevelData<MFCellFAB>& a_coarse, const LevelData<MFCellFAB>& a_fine, bool a_ghosted) {
-  MayDay::Abort("MFHelmholtzOp::createCoarser - not implemented");
+  MayDay::Warning("MFHelmholtzOp::createCoarser - not implemented");
 }
 
 void MFHelmholtzOp::createCoarsened(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs, const int& a_refRat) {
-  MayDay::Abort("MFHelmholtzOp::createCoarsened - not implemented");
+  MayDay::Warning("MFHelmholtzOp::createCoarsened - not implemented");
 }
 
 void MFHelmholtzOp::preCond(LevelData<MFCellFAB>& a_corr, const LevelData<MFCellFAB>& a_residual) {
@@ -158,11 +188,11 @@ void MFHelmholtzOp::axby(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>
 }
 
 void MFHelmholtzOp::updateJumpBC(const LevelData<MFCellFAB>& a_phi, const bool a_homogeneousPhysBC){
-  MayDay::Abort("MFHelmholtzOp::updateJumpBC -- not implemented (yet)");
+  MayDay::Warning("MFHelmholtzOp::updateJumpBC -- not implemented (yet)");
 }
 
 void MFHelmholtzOp::relax(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_residual, int a_iterations) {
-  MayDay::Abort("MFHelmholtzOp::relax - not implemented");
+  MayDay::Warning("MFHelmholtzOp::relax - not implemented");
 }
 
 void MFHelmholtzOp::restrictResidual(LevelData<MFCellFAB>& a_resCoar, LevelData<MFCellFAB>& a_phi, const LevelData<MFCellFAB>& a_rhs) {

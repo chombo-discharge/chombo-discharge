@@ -74,7 +74,6 @@ public:
 		const RefCountedPtr<EBHelmholtzEBBC>&              a_ebBC,
 		const RealVect&                                    a_probLo,
 		const Real&                                        a_dx,
-		const int&                                         a_refToFine,
 		const int&                                         a_refToCoar,
 		const bool&                                        a_hasFine,
 		const bool&                                        a_hasCoar,
@@ -501,11 +500,6 @@ protected:
     @brief True if there's a coarser level
   */
   bool m_hasCoar;
-
-  /*!
-    @brief Refinement factor to fine level
-  */
-  int m_refToFine;
 
   /*!
     @brief Refinement factor to fine level
