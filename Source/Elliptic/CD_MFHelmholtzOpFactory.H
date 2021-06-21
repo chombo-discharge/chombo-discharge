@@ -17,6 +17,7 @@
 #include <MFFluxFAB.H>
 
 // Our includes
+#include <CD_EBAMRData.H>
 #include <CD_MFHelmholtzOp.H>
 #include <CD_MFCoarAve.H>
 #include <CD_MFFluxReg.H>
@@ -73,11 +74,11 @@ public:
 		       const AmrFluxData&      a_amrBcoef,
 		       const AmrIrreData&      a_amrBcoefIrreg,
 		       const DomainBCFactory&  a_domainBcFactory,
-		       const EBBCFactory&      a_ebbcFactory,
 		       const IntVect&          a_ghostPhi,
 		       const IntVect&          a_ghostRhs,
-		       const RelaxType&        a_relaxtionMethod,
+		       const RelaxType&        a_relaxationMethod,
 		       const ProblemDomain&    a_bottomDomain,
+		       const int&              a_ebbcOrder,
 		       const int&              a_jumpOrder,
 		       const int&              a_blockingFactor,
 		       const AmrLevelGrids&    a_deeperLevelGrids = AmrLevelGrids());
@@ -86,6 +87,16 @@ public:
     @brief Destructor. Does nothing. 
   */
   ~MFHelmholtzOpFactory();
+
+  /*!
+    @brief Set jump condition
+  */
+  void setJump(const EBAMRIVData& a_sigma, const Real& a_scale);
+
+    /*!
+    @brief Set jump condition
+  */
+  void setJump(const Real& a_sigma, const Real& a_scale);
 
   /*!
     @brief Create multigrid operator
@@ -108,6 +119,16 @@ public:
   int refToFiner(const ProblemDomain& a_indexspace) const override final;
 
 protected:
+
+  /*!
+    @brief Component that this operator solves for
+  */
+  static constexpr int m_comp  = 0;
+
+  /*!
+    @brief Number of components that this operator solves for.
+  */
+  static constexpr int m_nComp = 1;
 
   // Relaxation method
   RelaxType m_relaxMethod;
@@ -138,15 +159,21 @@ protected:
   AmrFluxData      m_amrBcoef;
   AmrIrreData      m_amrBcoefIrreg;
 
-  // BC factories
+  // Domain Bc factory
   DomainBCFactory m_domainBcFactory;
-  EBBCFactory     m_ebBcFactory;
+
+  // Jump
+  EBAMRIVData m_amrJump;
 
   // Bottom drop domain
   ProblemDomain m_bottomDomain;
 
   // Blocking factor for when we create intermediate and deep multigrid levels
   int m_mgBlockingFactor;
+
+  // Order for BCs
+  int m_ebbcOrder;
+  int m_jumpOrder;
 
   // This is for using pre-defined grids for the deeper multigrid levels, i.e. for the levels that are coarsenings of m_amrLevelGrids[0]
   AmrLevelGrids    m_deeperLevelGrids;
@@ -159,11 +186,18 @@ protected:
   Vector<AmrCellData>   m_mgAcoef;
   Vector<AmrFluxData>   m_mgBcoef;
   Vector<AmrIrreData>   m_mgBcoefIrreg;
+  Vector<AmrCoarseners> m_mgAveOp;
+  Vector<EBAMRIVData>   m_mgJump;
 
   /*!
     @brief Function which defines the multigrid levels for this operator factory
   */
   void defineMultigridLevels();
+
+  /*!
+    @brief Define jump data
+  */
+  void defineJump();
 
   /*!
     @brief Check if a domain is coarser than the other

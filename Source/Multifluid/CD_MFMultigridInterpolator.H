@@ -34,7 +34,7 @@ public:
   /*!
     @brief Disallowed copy constructor. 
   */
-  MFMultigridInterpolator(const MFMultigridInterpolator& a_other) = delete;
+  MFMultigridInterpolator(const MFMultigridInterpolator& a_other) = default;
   
   /*!
     @brief Full constructor. Calls define function
@@ -49,7 +49,7 @@ public:
   /*!
     @brief Disallowed copy assignment.
   */
-  MFMultigridInterpolator& operator=(const MFMultigridInterpolator& a_other) = delete;
+  MFMultigridInterpolator& operator=(const MFMultigridInterpolator& a_other) = default;
 
   /*!
     @brief Define function
