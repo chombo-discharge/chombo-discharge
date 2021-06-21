@@ -55,7 +55,7 @@ public:
   */
   const RefCountedPtr<EBFluxRegister>& getFluxReg(const Phase a_phase) const;
 
-  // Old stuff below here
+  // OLD STUFF BELOW HERE
 
   /*!
     @brief Full constructor. Calls define

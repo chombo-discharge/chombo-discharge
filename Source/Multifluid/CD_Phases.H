@@ -17,9 +17,9 @@
 /*!
   @brief Enum for holding phase identifiers. 
 */
-enum class Phase {
-  Gas,
-  Solid
+enum class Phase : int {
+  Gas   = 0,
+  Solid = 1
 };
 
 #include <CD_NamespaceFooter.H>

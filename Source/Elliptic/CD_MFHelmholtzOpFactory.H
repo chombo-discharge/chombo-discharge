@@ -14,12 +14,16 @@
 
 // Chombo includes
 #include <MFCellFAB.H>
+#include <MFFluxFAB.H>
 
 // Our includes
-#include <CD_EBHelmholtzOp.H>
-#include <CD_MultifluidIndexSpace.H>
+#include <CD_MFHelmholtzOp.H>
 #include <CD_MFCoarAve.H>
 #include <CD_MFFluxReg.H>
+#include <CD_MFQuadCFInterp.H>
+#include <CD_MFLevelGrid.H>
+#include <CD_MFBaseIVFAB.H>
+#include <CD_NamespaceHeader.H>
 
 /*!
   @brief Factory class for making MFHelmholtzOp. 
@@ -28,7 +32,7 @@ class MFHelmholtzOpFactory : public AMRLevelOpFactory<LevelData<MFCellFAB> > {
 public:
 
   using AmrLevelGrids    = Vector<MFLevelGrid>;
-  using AmrInterpolators = Vector<MFQuadCInterp>;
+  using AmrInterpolators = Vector<MFQuadCFInterp>;
   using AmrFluxRegisters = Vector<MFFluxReg>;
   using AmrCoarseners    = Vector<MFCoarAve>;
   using AmrResolutions   = Vector<Real>;
@@ -41,7 +45,7 @@ public:
   using DomainBCFactory = RefCountedPtr<EBHelmholtzDomainBCFactory>;
   using EBBCFactory     = RefCountedPtr<EBHelmholtzEBBCFactory>;
 
-  using RelaxType       = EBHelmholtzOp::RelaxType;
+  using RelaxType       = EBHelmholtzOp::RelaxationMethod;
 
   /*!
     @brief Disallowed constructor
@@ -76,7 +80,7 @@ public:
 		       const ProblemDomain&    a_bottomDomain,
 		       const int&              a_jumpOrder,
 		       const int&              a_blockingFactor,
-		       const AMRLevelGrids&    a_deeperLevelGrids = AmrLevelGrids());
+		       const AmrLevelGrids&    a_deeperLevelGrids = AmrLevelGrids());
 
   /*!
     @brief Destructor. Does nothing. 
@@ -202,7 +206,7 @@ protected:
   */
   void coarsenCoefficients(LevelData<MFCellFAB>&         a_coarAcoef,
 			   LevelData<MFFluxFAB>&         a_coarBcoef,
-			   LevelData<MFBaseIVFAB> >&     a_coarBcoefIrreg,
+			   LevelData<MFBaseIVFAB>&       a_coarBcoefIrreg,
 			   const LevelData<MFCellFAB>&   a_fineAcoef,
 			   const LevelData<MFFluxFAB>&   a_fineBcoef,
 			   const LevelData<MFBaseIVFAB>& a_fineBcoefIrreg,
@@ -218,4 +222,7 @@ protected:
   */
   int findAmrLevel(const ProblemDomain& a_domain) const;
 };
+
+#include <CD_NamespaceFooter.H>
+
 #endif
