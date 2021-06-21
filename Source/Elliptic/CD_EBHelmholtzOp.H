@@ -94,6 +94,16 @@ public:
   ~EBHelmholtzOp();
 
   /*!
+    @brief Turn off BCs
+  */
+  void turnOffBCs();
+
+  /*!
+    @brief Turn on BCs
+  */
+  void turnOnBCs();
+
+  /*!
     @brief Compute residual on this level. 
     @param[out] a_residual          Residual rhs - L(phi)
     @param[in]  a_phi               phi
@@ -109,6 +119,42 @@ public:
     @details This just runs a few relaxations. 
   */
   void preCond(LevelData<EBCellFAB>& a_corr, const LevelData<EBCellFAB>& a_residual) override final;
+
+  
+  /*!
+    @brief Apply coarse-fine boundary conditions
+    @param[inout] a_phiFine         Fine data
+    @param[inout] a_phiCoar         Coarse data
+    @param[in]    a_homogeneousCFBC Homogeneous CF or not (i.e. coar data is zero);
+  */
+  void interpolateCF(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar, const bool a_homogeneousCFBC);
+
+  /*!
+    @brief Do homogeneous coarse-fine interpolation
+  */
+  void homogeneousCFInterp(LevelData<EBCellFAB>& a_phi);
+
+  /*!
+    @brief Inhomogeneous coarse-fine interpolation
+    @param[inout] a_phiFine Fine data. Ghost cells will be filled.
+    @param[inout] a_phiCoar Coarse data. 
+  */
+  void inhomogeneousCFInterp(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_phiCoar);
+
+  /*!
+    @brief Apply operator on this level. This is a more general version which can turn on/off homogeneous and CF bcs.
+    @param[out] a_Lphi              L(phi)
+    @param[out] a_phi               Phi on this level
+    @param[out] a_phiCoar           Coarse-level phi. If you have a coar this 
+    @param[in]  a_homogeneousPhysBC Use homogeneous physical BCs or not
+    @param[in]  a_homogeneousCFBC   Use homogeneous coarse-fine bcs or not
+    @note a_phi is not really const and we do a nasty cast. Leaving it as const because we only modify the ghost cells!
+  */
+  void applyOp(LevelData<EBCellFAB>&             a_Lphi,
+	       const LevelData<EBCellFAB>&       a_phi,
+	       const LevelData<EBCellFAB>* const a_phiCoar,
+	       const bool                        a_homogeneousPhysBC,
+	       const bool                        a_homogeneousCFBC);
 
   /*!
     @brief Apply operator 
@@ -243,6 +289,23 @@ public:
     @brief Return coarsening factor to coarser level (1 if there is no coarser level);
   */
   int refToCoarser() override final;
+  
+  /*!
+    @brief Apply the AMR operator, i.e. compute L(phi) in an AMR context. 
+    @param[out] a_residual          Residual on this level
+    @param[in]  a_phiFine           Phi on fine level
+    @param[in]  a_phi               Phi on this level
+    @param[in]  a_phiCoar           Phi on coar level
+    @param[in]  a_homogeneousPhysBC Use homogeneous physical BCs or not
+    @param[in]  a_finerOp           Finer operatator
+    @details This involves ghost cell interpolation if there's a coarse level, and refluxing if there's a fine level.
+  */
+  void AMROperator(LevelData<EBCellFAB>&              a_Lphi,
+		   const LevelData<EBCellFAB>&        a_phiFine,
+		   const LevelData<EBCellFAB>&        a_phi,
+		   const LevelData<EBCellFAB>&        a_phiCoar,
+		   const bool                         a_homogeneousPhysBC,
+		   AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp);
 
   /*!
     @brief Compute residual on this level. AMR version. 
@@ -655,21 +718,6 @@ protected:
 
 
   /*!
-    @brief Apply operator on this level. This is a more general version which can turn on/off homogeneous and CF bcs.
-    @param[out] a_Lphi              L(phi)
-    @param[out] a_phi               Phi on this level
-    @param[out] a_phiCoar           Coarse-level phi. If you have a coar this 
-    @param[in]  a_homogeneousPhysBC Use homogeneous physical BCs or not
-    @param[in]  a_homogeneousCFBC   Use homogeneous coarse-fine bcs or not
-    @note a_phi is not really const and we do a nasty cast. Leaving it as const because we only modify the ghost cells!
-  */
-  void applyOp(LevelData<EBCellFAB>&             a_Lphi,
-	       const LevelData<EBCellFAB>&       a_phi,
-	       const LevelData<EBCellFAB>* const a_phiCoar,
-	       const bool                        a_homogeneousPhysBC,
-	       const bool                        a_homogeneousCFBC);
-
-  /*!
     @brief Jacobi relaxation
     @param[inout] a_correction Correction
     @param[in]    a_residual   Residual
@@ -703,22 +751,6 @@ protected:
   */
   void GauSaiMultiColorAllIrregular(EBCellFAB& a_phi, const EBCellFAB& a_rhs, const int& a_icolor, const DataIndex& a_dit);
 
-  /*!
-    @brief Apply the AMR operator, i.e. compute L(phi) in an AMR context. 
-    @param[out] a_residual          Residual on this level
-    @param[in]  a_phiFine           Phi on fine level
-    @param[in]  a_phi               Phi on this level
-    @param[in]  a_phiCoar           Phi on coar level
-    @param[in]  a_homogeneousPhysBC Use homogeneous physical BCs or not
-    @param[in]  a_finerOp           Finer operatator
-    @details This involves ghost cell interpolation if there's a coarse level, and refluxing if there's a fine level.
-  */
-  void AMROperator(LevelData<EBCellFAB>&              a_Lphi,
-		   const LevelData<EBCellFAB>&        a_phiFine,
-		   const LevelData<EBCellFAB>&        a_phi,
-		   const LevelData<EBCellFAB>&        a_phiCoar,
-		   const bool                         a_homogeneousPhysBC,
-		   AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp);
 
 
   /*!
@@ -730,26 +762,6 @@ protected:
     @brief Calculate relaxation coefficient
   */
   void computeRelaxationCoefficient();
-
-  /*!
-    @brief Do homogeneous coarse-fine interpolation
-  */
-  void homogeneousCFInterp(LevelData<EBCellFAB>& a_phi);
-
-  /*!
-    @brief Inhomogeneous coarse-fine interpolation
-    @param[inout] a_phiFine Fine data. Ghost cells will be filled.
-    @param[inout] a_phiCoar Coarse data. 
-  */
-  void inhomogeneousCFInterp(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_phiCoar);
-
-  /*!
-    @brief Apply coarse-fine boundary conditions
-    @param[inout] a_phiFine         Fine data
-    @param[inout] a_phiCoar         Coarse data
-    @param[in]    a_homogeneousCFBC Homogeneous CF or not (i.e. coar data is zero);
-  */
-  void interpolateCF(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar, const bool a_homogeneousCFBC);
 
   /*!
     @brief Get the face-centered flux stencil

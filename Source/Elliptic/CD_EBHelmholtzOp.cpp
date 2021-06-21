@@ -118,6 +118,15 @@ EBHelmholtzOp::~EBHelmholtzOp(){
 
 }
 
+void EBHelmholtzOp::turnOffBCs(){
+  m_turnOffBCs = true;
+}
+
+
+void EBHelmholtzOp::turnOnBCs(){
+  m_turnOffBCs = false;
+}
+
 LevelData<EBFluxFAB>& EBHelmholtzOp::getFlux(){
   return m_flux;
 }

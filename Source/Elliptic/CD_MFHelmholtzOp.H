@@ -7,7 +7,7 @@
   @file   CD_MFHelmholtzOp.H
   @brief  Declaration of a factory class for making multifluid Helmholtz operators for multigrid. 
   @author Robert Marskar
-n*/
+  n*/
 
 #ifndef CD_MFHelmholtzOp_H
 #define CD_MFHelmholtzOp_H
@@ -46,6 +46,11 @@ public:
   void define();
 
   /*!
+    @brief Get Helmholtz operator
+  */
+  RefCountedPtr<EBHelmholtzOp>& getHelmOp(const int a_phase);
+
+  /*!
     @brief Return coarsening factor to coarser level (1 if there is no coarser level);
   */
   int refToCoarser() override final;
@@ -70,7 +75,7 @@ public:
   */
   void residual(LevelData<MFCellFAB>& a_residual, const LevelData<MFCellFAB>& a_phi, const LevelData<MFCellFAB>& a_rhs, const bool a_homogeneousPhysBc);
 
-    /*!
+  /*!
     @brief Precondition system before bottom solve
     @param[in] a_corr     Correction
     @param[in] a_residual Residual
@@ -148,6 +153,21 @@ public:
   void axby(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_x, const LevelData<MFCellFAB>& a_y, const Real a_a, const Real a_b) override final;
 
   /*!
+    @brief Restrict residual onto coarse level
+    @param[inout] a_resCoar      Coarse residual
+    @param[inout] a_phi Phi on this level
+    @param[in]    a_rhs Rhs on this level
+  */
+  void restrictResidual(LevelData<MFCellFAB>& a_resCoar, LevelData<MFCellFAB>& a_phi, const LevelData<MFCellFAB>& a_rhs) override final;
+
+  /*!
+    @brief Prolongation method. 
+    @param[out] a_phi  Correction on this level
+    @param[out] a_correctCoarse Correction on coarse level
+  */
+  void prolongIncrement(LevelData<MFCellFAB>& a_phi, const LevelData<MFCellFAB>& a_correctCoarse) override final;
+
+  /*!
     @brief Update AMR residual
     @param[in] a_residual         Residual
     @param[in] a_correction       Correction
@@ -177,23 +197,88 @@ public:
     @param[in]  a_coarseCorrection Correction on coarse level
   */
   void AMRProlong(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_coarseCorrection) override final;
-  
-protected:
 
   /*!
-    @brief Number of aliases needed. 
+    @brief Compute residual on this level. AMR version. 
+    @param[out] a_residual          Residual on this level
+    @param[in]  a_phiFine           Phi on fine level
+    @param[in]  a_phi               Phi on this level
+    @param[in]  a_phiCoar           Phi on coar level
+    @param[in]  a_rhs               Right-hand side on this level
+    @param[in]  a_homogeneousPhysBC Use homogeneous physical BCs or not
+    @param[in]  a_finerOp           Finer operatator
   */
-  static constexpr int m_numAlias = 6;
+  void AMRResidual(LevelData<MFCellFAB>&              a_residual,
+		   const LevelData<MFCellFAB>&        a_phiFine,
+		   const LevelData<MFCellFAB>&        a_phi,
+		   const LevelData<MFCellFAB>&        a_phiCoar,
+		   const LevelData<MFCellFAB>&        a_rhs,
+		   bool                               a_homogeneousPhysBC,
+		   AMRLevelOp<LevelData<MFCellFAB> >* a_finerOp) override final;
+
+  /*!
+    @brief Compute AMR residual on finest AMR level. 
+    @param[out] a_residual          Residual on this level
+    @param[in]  a_phi               Phi on this level
+    @param[in]  a_phiCoar           Phi on coar level
+    @param[in]  a_rhs               Right-hand side on this level
+    @param[in]  a_homogeneousPhysBC Use homogeneous physical BCs or not
+  */
+  void AMRResidualNF(LevelData<MFCellFAB>&              a_residual,
+		     const LevelData<MFCellFAB>&        a_phi,
+		     const LevelData<MFCellFAB>&        a_phiCoar,
+		     const LevelData<MFCellFAB>&        a_rhs,
+		     bool                               a_homogeneousPhysBC) override final;
+
+  /*!
+    @brief Compute AMR residual on coarsest
+    @param[out] a_residual Residual on this level
+    @param[in]  a_phiFine           Phi on fine level
+    @param[in]  a_phi               Phi on this level
+    @param[in]  a_rhs               Right-hand side on this level
+    @param[in]  a_homogeneousPhysBC Use homogeneous physical BCs or not
+    @param[in]  a_finerOp           Finer operator
+  */
+  void AMRResidualNC(LevelData<MFCellFAB>&              a_residual,
+		     const LevelData<MFCellFAB>&        a_phiFine,
+		     const LevelData<MFCellFAB>&        a_phi,
+		     const LevelData<MFCellFAB>&        a_rhs,
+		     bool                               a_homogeneousPhysBC,
+		     AMRLevelOp<LevelData<MFCellFAB> >* a_finerOp) override final;
+
+  /*!
+    @brief Apply the AMR operator, i.e. compute L(phi) in an AMR context, assuming no finer levels. 
+    @param[out] a_Lphi              L(phi)
+    @param[in]  a_phi               Phi on this level
+    @param[in]  a_phiCoar           Phi on coar level
+    @param[in]  a_homogeneousPhysBC Use homogeneous physical BCs or not
+    @details This involves ghost cell interpolation if there's a coarse level, and refluxing if there's a fine level.
+  */
+  void AMROperatorNF(LevelData<MFCellFAB>&       a_Lphi,
+		     const LevelData<MFCellFAB>& a_phi,
+		     const LevelData<MFCellFAB>& a_phiCoar,
+		     bool                        a_homogeneousPhysBC) override final;
+
+  /*!
+    @brief Apply the AMR operator, i.e. compute L(phi) in an AMR context, assuming no coarser AMR levels. 
+    @param[out] a_Lphi              L(phi)
+    @param[in]  a_phiFine           Phi on finer level
+    @param[in]  a_phi               Phi on this level
+    @param[in]  a_homogeneousPhysBC Use homogeneous physical BCs or not
+    @details This involves ghost cell interpolation if there's a coarse level, and refluxing if there's a fine level.
+  */
+  void AMROperatorNC(LevelData<MFCellFAB>&              a_Lphi,
+		     const LevelData<MFCellFAB>&        a_phi,
+		     const LevelData<MFCellFAB>&        a_phiCoar,
+		     bool                               a_homogeneousPhysBC,
+		     AMRLevelOp<LevelData<MFCellFAB> >* a_finerOp) override final;
+  
+protected:
 
   /*!
     @brief Helmholtz operators on each phase. Note that I'm using int rather than Phase as identifier because that is the standard terminology for MFCellFAB. 
   */
   std::map<int, RefCountedPtr<EBHelmholtzOp> > m_helmOps;
-
-  /*!
-    @brief Alias data
-  */
-  std::vector<LevelData<EBCellFAB>* > m_alias;
 
   /*!
     @brief Arihmetic multifluid operators
@@ -204,6 +289,63 @@ protected:
     @brief Refinement factor to coarser AMR level
   */
   int m_refToCoar;
+
+  /*!
+    @brief True if there is a coarser AMR level
+  */
+  bool m_hasCoar;
+
+  /*!
+    @brief True if there are multigrid levels
+  */
+  bool m_hasMGObjcts;
+
+  /*!
+    @brief Update the jump condition. 
+    @note Note sure how to do this function just yet. 
+  */
+  void updateJumpBC(const LevelData<MFCellFAB>& a_phi, const bool a_homogeneousPhysBC);
+
+  /*!
+    @brief Do coarse-fine interpolation
+    @param[inout] a_phi Fine-level data
+    @param[in]    a_phiCoar Coarse-level data
+    @param[in]    a_homogeneousCF Homogeneous interpolation or not. 
+    @note Only ghost cells in a_phi are touched. 
+  */
+  void interpolateCF(const LevelData<MFCellFAB>& a_phi, const LevelData<MFCellFAB>* a_phiCoar, const bool a_homogeneousCF);
+
+  /*!
+    @brief Apply operator on this level. This is a more general version which can turn on/off homogeneous and CF bcs.
+    @param[out] a_Lphi              L(phi)
+    @param[out] a_phi               Phi on this level
+    @param[out] a_phiCoar           Coarse-level phi. If you have a coar this 
+    @param[in]  a_homogeneousPhysBC Use homogeneous physical BCs or not
+    @param[in]  a_homogeneousCFBC   Use homogeneous coarse-fine bcs or not
+    @note a_phi is not really const and we do a nasty cast. Leaving it as const because we only modify the ghost cells!
+  */
+  void applyOp(LevelData<MFCellFAB>&             a_Lphi,
+	       const LevelData<MFCellFAB>&       a_phi,
+	       const LevelData<MFCellFAB>* const a_phiCoar,
+	       const bool                        a_homogeneousPhysBC,
+	       const bool                        a_homogeneousCFBC);
+
+  /*!
+    @brief Apply the AMR operator, i.e. compute L(phi) in an AMR context. 
+    @param[out] a_residual          Residual on this level
+    @param[in]  a_phiFine           Phi on fine level
+    @param[in]  a_phi               Phi on this level
+    @param[in]  a_phiCoar           Phi on coar level
+    @param[in]  a_homogeneousPhysBC Use homogeneous physical BCs or not
+    @param[in]  a_finerOp           Finer operatator
+    @details This involves ghost cell interpolation if there's a coarse level, and refluxing if there's a fine level.
+  */
+  void AMROperator(LevelData<MFCellFAB>&              a_Lphi,
+		   const LevelData<MFCellFAB>&        a_phiFine,
+		   const LevelData<MFCellFAB>&        a_phi,
+		   const LevelData<MFCellFAB>&        a_phiCoar,
+		   const bool                         a_homogeneousPhysBC,
+		   AMRLevelOp<LevelData<MFCellFAB> >* a_finerOp);
 };
 
 #include <CD_NamespaceFooter.H>
