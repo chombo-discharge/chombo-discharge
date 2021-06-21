@@ -48,7 +48,7 @@ MFHelmholtzOp::MFHelmholtzOp(const MFLevelGrid&                               a_
 
 
   // Instantiate jump bc object.
-  m_jumpBC = RefCountedPtr<JumpBc> (new JumpBc(m_mflg, *a_BcoefIrreg, a_dx, a_jumpOrder, nullptr));
+  m_jumpBC = RefCountedPtr<JumpBC> (new JumpBC(m_mflg, *a_BcoefIrreg, a_dx, a_jumpOrder, a_jumpOrder, a_jumpOrder));
   
 }
 

@@ -26,7 +26,7 @@
 #include <CD_MFFluxReg.H>
 #include <CD_MFLevelGrid.H>
 #include <CD_MFBaseIVFAB.H>
-#include <CD_JumpBc.H>
+#include <CD_JumpBC.H>
 #include <CD_EBHelmholtzOp.H>
 #include <CD_EBHelmholtzDomainBCFactory.H>
 #include <CD_EBHelmholtzEBBCFactory.H>
@@ -340,7 +340,7 @@ protected:
   /*!
     @brief BC jump object. This is the one that has the stencils and can compute derivatives. 
   */
-  RefCountedPtr<JumpBc> m_jumpBC;
+  RefCountedPtr<JumpBC> m_jumpBC;
 
   /*!
     @brief Actual BC jump in data-based format. This is the right-hand side of dphi/dn1 + dphi/dn2 = jump
