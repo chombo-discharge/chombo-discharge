@@ -14,7 +14,7 @@
 #include <CD_NamespaceHeader.H>
 
 MFHelmholtzOp::MFHelmholtzOp(){
-
+  MayDay::Abort("MFHelmholtzOp - weak construction is not allowed");
 }
 
 MFHelmholtzOp::~MFHelmholtzOp(){

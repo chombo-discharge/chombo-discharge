@@ -20,7 +20,7 @@
 #include <CD_MFHelmholtzOp.H>
 #include <CD_MFCoarAve.H>
 #include <CD_MFFluxReg.H>
-#include <CD_MFQuadCFInterp.H>
+#include <CD_MFMultigridInterpolator.H>
 #include <CD_MFLevelGrid.H>
 #include <CD_MFBaseIVFAB.H>
 #include <CD_NamespaceHeader.H>
@@ -32,7 +32,7 @@ class MFHelmholtzOpFactory : public AMRLevelOpFactory<LevelData<MFCellFAB> > {
 public:
 
   using AmrLevelGrids    = Vector<MFLevelGrid>;
-  using AmrInterpolators = Vector<MFQuadCFInterp>;
+  using AmrInterpolators = Vector<MFMultigridInterpolator>;
   using AmrFluxRegisters = Vector<MFFluxReg>;
   using AmrCoarseners    = Vector<MFCoarAve>;
   using AmrResolutions   = Vector<Real>;
