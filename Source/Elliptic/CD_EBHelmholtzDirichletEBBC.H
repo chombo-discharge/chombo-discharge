@@ -106,17 +106,19 @@ protected:
 
   /*!
     @brief Apply the EB flux. This is the version that is called by EBHelmholtzOp.
-    @param[inout] a_vofit Iterator for cut-cells
-    @param[in]    a_Lphi  Operator kappa*L(phi)
-    @param[in]    a_phi   Phi, cell-centered. 
-    @param[in]    a_dit   Data index    
-    @param[in]    a_beta  Beta. Passed in from operator. 
+    @param[inout] a_Lphi              Operator kappa*L(phi)
+    @param[in]    a_phi               Phi, cell-centered. 
+    @param[in]    a_vof               Grid cell
+    @param[in]    a_dit               Data index    
+    @param[in]    a_beta              Beta. Passed in from operator. 
+    @param[in]    a_homogeneousPhysBC Homogeneous BC or not. 
   */
   virtual void applyEBFlux(EBCellFAB&         a_Lphi,
 			   const EBCellFAB&   a_phi,
 			   const VolIndex&    a_vof,
 			   const DataIndex&   a_dit,
-			   const Real&        a_beta) const override;
+			   const Real&        a_beta,
+			   const bool&        a_homogeneousPhysBC) const override;
 
   /*!
     @brief Get stencil with specified order. 

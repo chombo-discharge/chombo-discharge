@@ -30,9 +30,10 @@ void EBHelmholtzEBBC::applyEBFlux(VoFIterator&       a_vofit,
 				  EBCellFAB&         a_Lphi,
 				  const EBCellFAB&   a_phi,
 				  const DataIndex&   a_dit,
-				  const Real&        a_beta) const {
+				  const Real&        a_beta,
+				  const bool&        a_homogeneousPhysBC) const {
   for (a_vofit.reset(); a_vofit.ok(); ++a_vofit){
-    this->applyEBFlux(a_Lphi, a_phi, a_vofit(), a_dit, a_beta);
+    this->applyEBFlux(a_Lphi, a_phi, a_vofit(), a_dit, a_beta, a_homogeneousPhysBC);
   }
 }
 

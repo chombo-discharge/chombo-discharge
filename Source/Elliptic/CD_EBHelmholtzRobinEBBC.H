@@ -111,7 +111,8 @@ protected:
 			   const EBCellFAB&   a_phi,
 			   const VolIndex&    a_vof,
 			   const DataIndex&   a_dit,
-			   const Real&        a_beta) const override;
+			   const Real&        a_beta,
+			   const bool&        a_homogeneousPhysBC) const override;
 
   /*!
     @brief Get an interpolation stencil 

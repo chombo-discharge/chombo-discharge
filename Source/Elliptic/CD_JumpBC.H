@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_JumpBC.H
-  @brief  Class for computing "jump interface" boundary conditions for multifluid code. 
+  @brief  Declaration of class for computing "jump interface" boundary conditions for multifluid Helmholtz code. 
   @author Robert Marskar
 */
 
@@ -27,7 +27,6 @@
 /*!
   @brief  Class for computing "jump interface" boundary conditions for multifluid code. 
 */
-
 class JumpBC {
 public:
 
@@ -45,6 +44,21 @@ public:
     @param[in] a_radius Stencil radius
   */
   JumpBC(const MFLevelGrid& a_mflg, const LevelData<MFBaseIVFAB>& a_Bcoef, const Real a_dx, const int a_order, const int a_weight, const int a_radius);
+
+  /*!
+    @brief Disallowed copy constructor
+  */
+  JumpBC(const JumpBC& a_other) = delete;
+
+  /*!
+    @brief Destructor. Does nothing.
+  */
+  ~JumpBC();
+
+  /*!
+    @brief Disallowed assignment constructor
+  */
+  JumpBC& operator=(const JumpBC& a_other) = delete;
 
   /*!
     @breif Return stencils

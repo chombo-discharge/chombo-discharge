@@ -661,9 +661,7 @@ void EBHelmholtzOp::suppressDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, c
 void EBHelmholtzOp::applyOpIrregular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBC){
   m_opEBStencil[a_dit]->apply(a_Lphi, a_phi, m_alphaDiagWeight[a_dit], m_alpha, m_beta, false); // This includes stencils for interpolation to faces. 
 
-  if(!a_homogeneousPhysBC){
-    m_ebBc->applyEBFlux(m_vofIterIrreg[a_dit], a_Lphi, a_phi, a_dit, m_beta);
-  }
+  m_ebBc->applyEBFlux(m_vofIterIrreg[a_dit], a_Lphi, a_phi, a_dit, m_beta, a_homogeneousPhysBC);
 
   // Do irregular faces on domain sides. m_domainBc should give the centroid-centered flux so we don't do interpolations here. 
   for (int dir = 0; dir < SpaceDim; dir++){
