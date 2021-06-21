@@ -11,6 +11,7 @@
 
 // Chombo includes
 #include <EBArith.H>
+#include <ParmParse.H>
 
 // Our includes
 #include <CD_PhaseRealm.H>
@@ -24,6 +25,10 @@
 PhaseRealm::PhaseRealm(){
   m_defined   = false;
   m_verbosity = -1;
+
+  ParmParse pp("PhaseRealm");
+
+  pp.query("verbosity", m_verbosity);
 
   // Always do this shit. 
   this->registerOperator(s_eb_gradient);
@@ -96,7 +101,7 @@ void PhaseRealm::regridBase(const int a_lmin){
   }
 }
 
-void PhaseRealm::regridOperators(const int a_lmin, const int a_lmax, const int a_regsize){
+void PhaseRealm::regridOperators(const int a_lmin, const int a_regsize){
   CH_TIME("PhaseRealm::regridOperators_phase");
   if(m_verbosity > 5){
     pout() << "PhaseRealm::regridOperators" << endl;
@@ -132,7 +137,7 @@ void PhaseRealm::registerOperator(const std::string a_operator){
        a_operator.compare(s_eb_pwl_interp)   == 0 ||
        a_operator.compare(s_eb_flux_reg)     == 0 ||
        a_operator.compare(s_eb_redist)       == 0 ||
-       a_operator.compare(s_noncons_div)  == 0 ||
+       a_operator.compare(s_noncons_div)     == 0 ||
        a_operator.compare(s_eb_copier)       == 0 ||
        a_operator.compare(s_eb_ghostcloud)   == 0 ||
        a_operator.compare(s_eb_gradient)     == 0 ||

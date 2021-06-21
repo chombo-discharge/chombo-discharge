@@ -181,8 +181,8 @@ void Driver::getGeometryTags(){
 
   m_geomTags.resize(maxdepth);
 
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
+  const RefCountedPtr<EBIndexSpace>& ebis_gas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
+  const RefCountedPtr<EBIndexSpace>& ebis_sol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
 
   CH_assert(ebis_gas != NULL);
 
@@ -216,14 +216,14 @@ void Driver::getGeometryTags(){
     // Gas-solid interface cells
     if(m_gasSolidInterfaceTagDepth > lvl){ 
       if(!ebis_sol.isNull()){
-	gas_tags = ebis_gas->irregCells(which_level);
+    	gas_tags = ebis_gas->irregCells(which_level);
       }
     }
 
     // Gas-Dielectric interface cells
     if(m_gasDielectricInterfaceTagDepth > lvl){
       if(!ebis_sol.isNull()){
-	gas_diel_tags = m_multifluidIndexSpace->interfaceRegion(cur_dom);
+    	gas_diel_tags = m_multifluidIndexSpace->interfaceRegion(cur_dom);
       }
     }
 
@@ -231,31 +231,61 @@ void Driver::getGeometryTags(){
     if(m_gasConductorInterfaceTagDepth > lvl){ 
       gas_solid_tags = ebis_gas->irregCells(which_level);
       if(!ebis_sol.isNull()){
-	gas_solid_tags -= m_multifluidIndexSpace->interfaceRegion(cur_dom);
+    	gas_solid_tags -= m_multifluidIndexSpace->interfaceRegion(cur_dom);
       }
     }
 
     // Solid-solid interfaces
     if(m_solidSolidInterfaceTagDepth > lvl){ 
       if(!ebis_sol.isNull()){
-	solid_tags = ebis_sol->irregCells(which_level);
+    	solid_tags = ebis_sol->irregCells(which_level);
 
-	// Do the intersection with the conductor cells
-	IntVectSet tmp = ebis_gas->irregCells(which_level);
-	tmp |= ebis_sol->irregCells(which_level);
-	tmp -= m_multifluidIndexSpace->interfaceRegion(cur_dom);
+    	// Do the intersection with the conductor cells
+    	IntVectSet tmp = ebis_gas->irregCells(which_level);
+    	tmp |= ebis_sol->irregCells(which_level);
+    	tmp -= m_multifluidIndexSpace->interfaceRegion(cur_dom);
 
-	solid_tags &= tmp;
+    	solid_tags &= tmp;
       }
     }
 
     m_geomTags[lvl].makeEmpty();
+
+    // Things from depth specifications
     m_geomTags[lvl] |= diel_tags;
     m_geomTags[lvl] |= cond_tags;
     m_geomTags[lvl] |= gas_diel_tags;
     m_geomTags[lvl] |= gas_solid_tags;
     m_geomTags[lvl] |= gas_tags;
     m_geomTags[lvl] |= solid_tags;
+
+
+    // Evaluate curvature of the level-set function in the cut-cells. 
+    DisjointBoxLayout irregGrids = ebis_gas->getIrregGrids(cur_dom);
+    EBISLayout ebisl;
+    ebis_gas->fillEBISLayout(ebisl, irregGrids, cur_dom, 0);
+
+    const Real dx         = m_amr->getDx()[lvl];
+    const RealVect probLo = m_amr->getProbLo();
+    
+    for (DataIterator dit(irregGrids); dit.ok(); ++dit){
+      const Box box = irregGrids[dit()];
+      const EBISBox& ebisbox = ebisl[dit()];
+      const EBGraph& ebgraph = ebisbox.getEBGraph();
+      const IntVectSet irreg = ebisbox.getIrregIVS(box);
+
+      for (VoFIterator vofit(irreg, ebgraph); vofit.ok(); ++vofit){
+	const VolIndex& vof = vofit();
+	const IntVect iv = vof.gridIndex();
+	
+	const RealVect pos = probLo + (0.5*RealVect::Unit + RealVect(iv))*dx + ebisbox.bndryCentroid(vof)*dx;
+
+	const std::pair<Real, Real> curv = m_computationalGeometry->getPrincipalCurvatures(phase::gas, pos, 1.E-4*dx);
+
+	// First entry in curv is the smallest. 
+	if(std::abs(curv.first)*m_refineCurvature*dx >= 1.0 ) m_geomTags[lvl] |= iv;
+      }
+    }
   }
 
   // Grow tags. This is an ad-hoc fix that prevents ugly grid near EBs (i.e. cases where only ghost cells are used
@@ -269,6 +299,17 @@ void Driver::getGeometryTags(){
   if(!m_geoCoarsen.isNull()){
     m_geoCoarsen->coarsenTags(m_geomTags, m_amr->getDx(), m_amr->getProbLo());
   }
+
+#ifdef CH_MPI
+  // Processes may not agree what is the maximum tag depth. Make sure they're all on the same page. 
+  int deepestTagLevel = 0;
+  for (int lvl = 0; lvl < m_geomTags.size(); lvl++){
+    if(!m_geomTags[lvl].isEmpty()) deepestTagLevel = lvl;
+  }
+
+  int tmp = -1;
+  MPI_Allreduce(&deepestTagLevel, &m_geometricTagsDepth, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
+#endif
 }
 
 void Driver::getLoadsAndBoxes(long long& a_myPoints,
@@ -612,7 +653,7 @@ void Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialD
 
   // Regrid the operators
   const int regsize = 1; // Relic of the ancient past when we specified how many variables to redistribute. 
-  m_amr->regridOperators(a_lmin, a_lmax, regsize);
+  m_amr->regridOperators(a_lmin, regsize);
   const Real base_regrid = MPI_Wtime(); // Base regrid time
 
   // Regrid Driver, timestepper, and celltagger
@@ -759,13 +800,8 @@ void Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSt
 	  // We'll regrid levels lmin through lmax. As always, new grids on level l are generated through tags
 	  // on levels (l-1);
 	  const int lmin = 0;
-	  const int lmax = m_amr->getFinestLevel();
+	  const int lmax = m_amr->getFinestLevel() + 1; // This means that if we refine, we can only add one level at a time. 
 
-#if 0 // Debug test
-	  const Real t0 = MPI_Wtime();
-#endif
-
-	  // Regrid, the two options tells us to generate tags on [(lmin-1),(lmax-1)];
 	  this->regrid(lmin, lmax, false);
 	  if(m_verbosity > 0){
 	    this->gridReport();
@@ -773,17 +809,7 @@ void Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSt
 	  if(m_writeRegridFiles){
 	    this->writeRegridFile();
 	  }
-	      
-#if 0 // Debug test
-	  const Real t1 = MPI_Wtime();
-	  if(procID() == 0){
-	    std::cout << "step = " << m_timeStep << "\t tagging levels = [" << lmin << "," << lmax << "]"
-		      << "\t time = " << t1-t0 <<std::endl;
-	  }
-#endif
 	}
-
-
       }
 
       if(!first_step){
@@ -1070,6 +1096,7 @@ void Driver::parseGeometryRefinement(){
 
   int depth0;
 
+  pp.get("refine_curvature",                m_refineCurvature);
   pp.get("refine_geometry",                 depth0);
   pp.get("refine_electrodes",               m_conductorTagsDepth);
   pp.get("refine_dielectrics",              m_dielectricTagsDepth);
@@ -1077,21 +1104,14 @@ void Driver::parseGeometryRefinement(){
   pp.get("refine_dielectric_gas_interface", m_gasDielectricInterfaceTagDepth);
   pp.get("refine_solid_gas_interface",      m_gasSolidInterfaceTagDepth);
   pp.get("refine_solid_solid_interface",    m_solidSolidInterfaceTagDepth);
-  
-  depth0                                = (depth0                               < 0) ? max_depth : depth0;
-  m_conductorTagsDepth                 = (m_conductorTagsDepth                < 0) ? depth0 : m_conductorTagsDepth;
-  m_dielectricTagsDepth                = (m_dielectricTagsDepth               < 0) ? depth0 : m_dielectricTagsDepth;
+
+  depth0                            = (depth0                           < 0) ? max_depth : depth0;
+  m_conductorTagsDepth              = (m_conductorTagsDepth             < 0) ? depth0 : m_conductorTagsDepth;
+  m_dielectricTagsDepth             = (m_dielectricTagsDepth            < 0) ? depth0 : m_dielectricTagsDepth;
   m_gasConductorInterfaceTagDepth   = (m_gasConductorInterfaceTagDepth  < 0) ? depth0 : m_gasConductorInterfaceTagDepth;
   m_gasDielectricInterfaceTagDepth  = (m_gasDielectricInterfaceTagDepth < 0) ? depth0 : m_gasDielectricInterfaceTagDepth;
   m_gasSolidInterfaceTagDepth       = (m_gasSolidInterfaceTagDepth      < 0) ? depth0 : m_gasSolidInterfaceTagDepth;
   m_solidSolidInterfaceTagDepth     = (m_solidSolidInterfaceTagDepth    < 0) ? depth0 : m_solidSolidInterfaceTagDepth;
-
-  m_geometricTagsDepth = Max(m_geometricTagsDepth, m_conductorTagsDepth);
-  m_geometricTagsDepth = Max(m_geometricTagsDepth, m_dielectricTagsDepth);
-  m_geometricTagsDepth = Max(m_geometricTagsDepth, m_gasConductorInterfaceTagDepth);
-  m_geometricTagsDepth = Max(m_geometricTagsDepth, m_gasDielectricInterfaceTagDepth);
-  m_geometricTagsDepth = Max(m_geometricTagsDepth, m_gasSolidInterfaceTagDepth);
-  m_geometricTagsDepth = Max(m_geometricTagsDepth, m_solidSolidInterfaceTagDepth);
 }
 
 void Driver::createOutputDirectories(){
@@ -1254,14 +1274,8 @@ void Driver::setupGeometryOnly(){
     this->writeMemoryUsage();
   }
 
-  //  m_amr->set_num_ghost(m_timeStepper->queryGhost()); // Query solvers for ghost cells. Give it to AmrMesh before grid gen.
-  
-  Vector<IntVectSet> tags = m_geomTags;
-  const int a_lmin = 0;
-  const int a_lmax = m_geometricTagsDepth+1;
-  //  m_amr->buildGrids(tags, a_lmin, a_lmax);//m_geometricTagsDepth);
-  //  m_amr->define_eblevelgrid(a_lmin);
-  m_amr->regridAmr(m_geomTags, a_lmin, a_lmax);       // Regrid using geometric tags for now
+  // Regrid using geometric tags only.
+  m_amr->regridAmr(m_geomTags, 0);   
 
   if(m_verbosity > 0){
     this->gridReport();
@@ -1304,15 +1318,23 @@ void Driver::setupFresh(const int a_initialRegrids){
 
   // Get geometry tags
   this->getGeometryTags();
-  
-  // Determine the redistribution register size
-  const int regsize = 1; // m_timeStepper->getRedistributionRegSize();
 
-  // When we're setting up fresh, we need to regrid everything from the base level
-  // and upwards. We have tags on m_geometricTagsDepth, so that is our current finest level. 
-  const int lmin = 0;
-  m_amr->regridAmr(m_geomTags, lmin, m_geometricTagsDepth, m_geometricTagsDepth);
-  const int lmax = m_amr->getFinestLevel();
+  // TLDR:
+  // -----
+  // The stuff below here might seem a bit convoluted, but we are first letting AmrMesh compute a set of grids which 
+  // is load balanced by the patch volume. All realms and operators are set up with this initial set of grids. We then
+  // use those grids to let the time stepper predict computational loads, which we use to regrid both the realms and the time
+  // stepper. 
+
+  
+  const int regsize = 1; // Relic of an ancient past. This is a dead para
+
+  // When we're setting up fresh, we need to regrid everything from the
+  // base level and upwards, so no hardcap on the permitted grids. 
+  const int lmin    = 0;
+  const int hardcap = -1;
+  m_amr->regridAmr(m_geomTags, lmin, hardcap);
+  const int lmax = m_amr->getFinestLevel();   
 
   // Allocate internal storage 
   this->allocateInternals();
@@ -1324,7 +1346,7 @@ void Driver::setupFresh(const int a_initialRegrids){
   m_timeStepper->setupSolvers();                                 // Instantiate solvers
   m_timeStepper->synchronizeSolverTimes(m_timeStep, m_time, m_dt);  // Sync solver times
   m_timeStepper->registerOperators();
-  m_amr->regridOperators(lmin, lmax, regsize);
+  m_amr->regridOperators(lmin, regsize);
   m_timeStepper->allocate();
 
   // Fill solves with initial data
@@ -1347,10 +1369,10 @@ void Driver::setupFresh(const int a_initialRegrids){
       m_amr->regridRealm(str, procs, boxes, lmin);
     }
   }
-  m_amr->regridOperators(lmin, lmax, regsize); // Regrid operators again.
-  this->regridInternals(lmax, lmax);           // Regrid internals for Driver.
-  m_timeStepper->regrid(lmin, lmax, lmax);     // Regrid solvers.
-  m_timeStepper->initialData();                // Need to fill with initial data again. 
+  m_amr->regridOperators(lmin, regsize);    // Regrid operators again.
+  this->regridInternals(lmax, lmax);        // Regrid internals for Driver.
+  m_timeStepper->regrid(lmin, lmax, lmax);  // Regrid solvers.
+  m_timeStepper->initialData();             // Need to fill with initial data again. 
   
   // Do post initialize stuff
   m_timeStepper->postInitialize();
@@ -2387,13 +2409,11 @@ void Driver::readCheckpointFile(const std::string& a_restartFile){
   const int regsize = 1; // m_timeStepper->getRedistributionRegSize();
   m_timeStepper->setupSolvers();
   m_timeStepper->registerOperators();
-  m_amr->regridOperators(base_level, finest_level, regsize);
+  m_amr->regridOperators(base_level, regsize);
   m_timeStepper->allocate();
 
   // Allocate internal stuff (e.g. space for tags)
   this->allocateInternals();
-
-
 
   // Go through level by level and have solvers extract their data
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
