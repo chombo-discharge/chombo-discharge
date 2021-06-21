@@ -165,22 +165,24 @@ void MFHelmholtzOpFactory::defineJump(){
     }
 
     BaseIVFactory<Real> fact(ebisl, irregCells);
-    m_amrJump[lvl] = RefCountedPtr<LevelData<BaseIVFAB<Real> > > (new LevelData<BaseIVFAB<Real> >(dbl, m_comp, IntVect::Zero, fact));
+    m_amrJump[lvl] = RefCountedPtr<LevelData<BaseIVFAB<Real> > > (new LevelData<BaseIVFAB<Real> >(dbl, m_nComp, IntVect::Zero, fact));
   }
 }
 
 void MFHelmholtzOpFactory::defineMultigridLevels(){
   m_mgLevelGrids.resize(m_numAmrLevels);
-  m_mgAcoef.resize(m_numAmrLevels);
-  m_mgBcoef.resize(m_numAmrLevels);
+  m_mgAcoef.     resize(m_numAmrLevels);
+  m_mgBcoef.     resize(m_numAmrLevels);
   m_mgBcoefIrreg.resize(m_numAmrLevels);
-  m_mgJump.resize(m_numAmrLevels);
-  m_hasMgLevels.resize(m_numAmrLevels);
+  m_mgJump.      resize(m_numAmrLevels);
+  m_hasMgLevels. resize(m_numAmrLevels);
+  m_mgAveOp.     resize(m_numAmrLevels);
 
   for (int amrLevel = 0; amrLevel < m_numAmrLevels; amrLevel++){
     m_hasMgLevels[amrLevel] = false;
 
-
+    // We can have a multigrid level either if the refinement factor to the coarse level is larger than two, or we are at the bottom
+    // of the AMR hierarchy.
     if(amrLevel == 0 && this->isCoarser(m_bottomDomain, m_amrLevelGrids[amrLevel].getDomain())){
       m_hasMgLevels[amrLevel] = true;
     }
@@ -197,36 +199,54 @@ void MFHelmholtzOpFactory::defineMultigridLevels(){
       constexpr int mgRefRatio = 2;
 
       m_mgLevelGrids[amrLevel].resize(0);
-      m_mgAcoef[amrLevel].resize(0);
-      m_mgBcoef[amrLevel].resize(0);
+      m_mgAcoef     [amrLevel].resize(0);
+      m_mgBcoef     [amrLevel].resize(0);
       m_mgBcoefIrreg[amrLevel].resize(0);
-      m_mgJump[amrLevel].resize(0);
+      m_mgJump      [amrLevel].resize(0);
+      m_mgAveOp     [amrLevel].resize(0);
 
       m_mgLevelGrids[amrLevel].push_back(m_amrLevelGrids[amrLevel]);
-      m_mgAcoef[amrLevel].push_back(m_amrAcoef[amrLevel]);
-      m_mgBcoef[amrLevel].push_back(m_amrBcoef[amrLevel]);
+      m_mgAcoef     [amrLevel].push_back(m_amrAcoef[amrLevel]);
+      m_mgBcoef     [amrLevel].push_back(m_amrBcoef[amrLevel]);
       m_mgBcoefIrreg[amrLevel].push_back(m_amrBcoefIrreg[amrLevel]);
-      m_mgJump[amrLevel].push_back(m_amrJump[amrLevel]);
+      m_mgJump      [amrLevel].push_back(m_amrJump[amrLevel]);
 
       bool hasCoarser = true;
 
       while(hasCoarser){
-
 	const int curMgLevels         = m_mgLevelGrids[amrLevel].size();
 	const MFLevelGrid& mgMflgFine = m_mgLevelGrids[amrLevel].back();
+
 
 	// This is the one we will define
 	MFLevelGrid mgMflgCoar;
 
 	// This is an overriding option where we use the pre-defined coarsenings in m_deeperMultigridLevels. This is only valid for coarsenings of
 	// the base AMR level, hence amrLevel == 0. Once those levels are exhausted we begin with direct coarsening. 
-	if(amrLevel == 0 && curMgLevels < m_deeperLevelGrids.size()){    
+	if(amrLevel == 0 && curMgLevels < m_deeperLevelGrids.size()){
 	  hasCoarser = true;                                // Note that m_deeperLevelGrids[0] should be a factor 2 coarsening of the 
 	  mgMflgCoar = m_deeperLevelGrids[curMgLevels-1];  // coarsest AMR level. So curMgLevels-1 is correct.
 	}
 	else{
 	  // Let the operator factory do the coarsening this time. 
 	  hasCoarser = this->getCoarserLayout(mgMflgCoar, mgMflgFine, mgRefRatio, m_mgBlockingFactor);
+	}
+
+	// Do not coarsen further if we end up with a domain smaller than m_bottomDomain. In this case
+	// we will terminate the coarsening and let AMRMultiGrid do the bottom solve. 
+	if(hasCoarser){
+	  if(this->isCoarser(mgMflgCoar.getDomain(), m_bottomDomain)){
+	    hasCoarser = false;
+	  }
+	  else{
+	    // Not so sure about this one, will we ever be asked to make an coarsened MG level which is also an AMR level? If not, this code
+	    // will reduce the coarsening efforts.
+	    for (int iamr = 0; iamr < m_numAmrLevels; iamr++){
+	      if(mgMflgCoar.getDomain() == m_amrLevelGrids[iamr].getDomain()){
+	    	hasCoarser = false;
+	      }
+	    }
+	  }
 	}
 
 	// Ok, we can coarsen the domain define by mgMflgCoar. Set up that domain as a multigrid level. 
@@ -238,7 +258,7 @@ void MFHelmholtzOpFactory::defineMultigridLevels(){
 	  Vector<int>        ebislComps;
 	  Vector<EBISLayout> ebislCoar;
 	  for (int i = 0; i < mgMflgCoar.numPhases(); i++){
-	    ebislComps.push_back(i);
+	    ebislComps.push_back(m_nComp);
 	    ebislCoar. push_back(mgMflgCoar.getEBLevelGrid(i).getEBISL());
 	  }
 
@@ -248,9 +268,12 @@ void MFHelmholtzOpFactory::defineMultigridLevels(){
 	  MFBaseIVFABFactory  ivFact    (ebislCoar, ebislComps);
 	  BaseIVFactory<Real> irregFact(mgMflgCoar.getEBLevelGrid(m_mainPhase).getEBISL());
 
-	  auto coarAcoef      = RefCountedPtr<LevelData<MFCellFAB> >        (new LevelData<MFCellFAB>        (dblCoar, m_nComp, IntVect::Zero, cellFact ));
-	  auto coarBcoef      = RefCountedPtr<LevelData<MFFluxFAB> >        (new LevelData<MFFluxFAB>        (dblCoar, m_nComp, IntVect::Zero, fluxFact ));
-	  auto coarBcoefIrreg = RefCountedPtr<LevelData<MFBaseIVFAB> >      (new LevelData<MFBaseIVFAB>      (dblCoar, m_nComp, IntVect::Zero, ivFact   ));
+	  // Multifluid a bit special -- number of components come in through the factory.
+	  const int dummy = 1;
+	  
+	  auto coarAcoef      = RefCountedPtr<LevelData<MFCellFAB> >        (new LevelData<MFCellFAB>        (dblCoar, dummy,   IntVect::Zero, cellFact ));
+	  auto coarBcoef      = RefCountedPtr<LevelData<MFFluxFAB> >        (new LevelData<MFFluxFAB>        (dblCoar, dummy,   IntVect::Zero, fluxFact ));
+	  auto coarBcoefIrreg = RefCountedPtr<LevelData<MFBaseIVFAB> >      (new LevelData<MFBaseIVFAB>      (dblCoar, dummy,   IntVect::Zero, ivFact   ));
 	  auto coarJump       = RefCountedPtr<LevelData<BaseIVFAB<Real> > > (new LevelData<BaseIVFAB<Real> > (dblCoar, m_nComp, IntVect::Zero, irregFact));
 
 	  const LevelData<MFCellFAB>&   fineAcoef      = *m_mgAcoef     [amrLevel].back();
@@ -259,14 +282,14 @@ void MFHelmholtzOpFactory::defineMultigridLevels(){
 
 	  // Coarsening coefficients. 
 	  this->coarsenCoefficients(*coarAcoef,
-				    *coarBcoef,
-				    *coarBcoefIrreg,
-				    fineAcoef,
-				    fineBcoef,
-				    fineBcoefIrreg,
-				    mgMflgCoar,
-				    mgMflgFine,
-				    mgRefRatio);
+	  			    *coarBcoef,
+	  			    *coarBcoefIrreg,
+	  			    fineAcoef,
+	  			    fineBcoef,
+	  			    fineBcoefIrreg,
+	  			    mgMflgCoar,
+	  			    mgMflgFine,
+	  			    mgRefRatio);
 	  DataOps::setValue(*coarJump, 0.0);
 
 	  // This is a special object for coarsening jump data between MG levels.
@@ -329,7 +352,7 @@ bool MFHelmholtzOpFactory::getCoarserLayout(MFLevelGrid& a_coarMflg, const MFLev
 
       hasCoarser = true;
     }
-    else{ // Check if we can use box aggregation 
+    else { // Check if we can use box aggregation 
       if(isFullyCovered(a_fineMflg)){
 	Vector<Box> boxes;
 	Vector<int> procs;
@@ -474,6 +497,8 @@ void MFHelmholtzOpFactory::coarsenCoefficients(LevelData<MFCellFAB>&         a_c
 					       const MFLevelGrid&            a_mflgFine,
 					       const int                     a_refRat){
 
+  const Interval interv(m_comp, m_comp);
+  
   if(a_refRat == 1){
     a_fineAcoef.     copyTo(a_coarAcoef     );
     a_fineBcoef.     copyTo(a_coarBcoef     );
@@ -489,22 +514,24 @@ void MFHelmholtzOpFactory::coarsenCoefficients(LevelData<MFCellFAB>&         a_c
       EbCoarAve aveOp(eblgFine.getDBL(), eblgCoar.getDBL(), eblgFine.getEBISL(), eblgCoar.getEBISL(), eblgCoar.getDomain(), a_refRat, m_nComp, eblgCoar.getEBIS());
 
       LevelData<EBCellFAB>        coarAco;
-      LevelData<EBCellFAB>        fineAco;
       LevelData<EBFluxFAB>        coarBco;
-      LevelData<EBFluxFAB>        fineBco;
       LevelData<BaseIVFAB<Real> > coarBcoIrreg;
+      
+      LevelData<EBCellFAB>        fineAco;
+      LevelData<EBFluxFAB>        fineBco;
       LevelData<BaseIVFAB<Real> > fineBcoIrreg;
 
       MultifluidAlias::aliasMF(coarAco,      i, a_coarAcoef);
-      MultifluidAlias::aliasMF(fineAco,      i, a_fineAcoef);
       MultifluidAlias::aliasMF(coarBco,      i, a_coarBcoef);
-      MultifluidAlias::aliasMF(fineBco,      i, a_fineBcoef);
       MultifluidAlias::aliasMF(coarBcoIrreg, i, a_coarBcoefIrreg);
+      
+      MultifluidAlias::aliasMF(fineAco,      i, a_fineAcoef);
+      MultifluidAlias::aliasMF(fineBco,      i, a_fineBcoef);
       MultifluidAlias::aliasMF(fineBcoIrreg, i, a_fineBcoefIrreg);
 
-      aveOp.average(coarAco,      fineAco,      Interval(m_comp, m_comp));
-      aveOp.average(coarBco,      fineBco,      Interval(m_comp, m_comp));
-      aveOp.average(coarBcoIrreg, fineBcoIrreg, Interval(m_comp, m_comp));
+      aveOp.average(coarAco,      fineAco,      interv);
+      aveOp.average(coarBco,      fineBco,      interv);
+      aveOp.average(coarBcoIrreg, fineBcoIrreg, interv);
 
       coarAco.     exchange();
       coarBco.     exchange();
