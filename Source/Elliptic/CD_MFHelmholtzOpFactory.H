@@ -134,6 +134,11 @@ protected:
   static constexpr int m_nComp = 1;
 
   /*!
+    @brief Main phase
+  */
+  static constexpr int m_mainPhase = 0;
+
+  /*!
     @brief Index space
   */
   MFIS m_mfis;

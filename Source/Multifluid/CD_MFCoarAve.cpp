@@ -27,8 +27,8 @@ void MFCoarAve::define(const std::map<Phase, RefCountedPtr<EbCoarAve> >& a_aveOp
   m_aveOps = a_aveOps;
 }
 
-EbCoarAve& MFCoarAve::getAveOp(const Phase a_phase){
-  return *m_aveOps.at(a_phase);
+const RefCountedPtr<EbCoarAve>& MFCoarAve::getAveOp(const Phase a_phase) const {
+  return m_aveOps.at(a_phase);
 }
 
 #include <CD_NamespaceFooter.H>

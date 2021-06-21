@@ -17,10 +17,12 @@
 #include <CD_MFHelmholtzOpFactory.H>
 #include <CD_MultifluidAlias.H>
 #include <CD_DataOps.H>
+#include <CD_MFBaseIVFAB.H>
 #include <CD_NamespaceHeader.H>
 
 constexpr int MFHelmholtzOpFactory::m_comp;
 constexpr int MFHelmholtzOpFactory::m_nComp;
+constexpr int MFHelmholtzOpFactory::m_mainPhase;
 
 MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&             a_mfis,
 					   const Real&             a_alpha,
@@ -87,6 +89,7 @@ MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&             a_mfis,
   // Define the jump data and the multigrid levels. 
   this->defineJump();
   this->defineMultigridLevels();
+  this->setJump(0.0, 0.0);
 }
 
 MFHelmholtzOpFactory::~MFHelmholtzOpFactory(){
@@ -94,11 +97,32 @@ MFHelmholtzOpFactory::~MFHelmholtzOpFactory(){
 }
 
 void MFHelmholtzOpFactory::setJump(const EBAMRIVData& a_sigma, const Real& a_scale){
-  MayDay::Warning("MFHelmholtzOp::setJump -- can't do data-based jump just yet");
+  for (int lvl = 0; lvl < m_numAmrLevels; lvl++){
+    const DisjointBoxLayout& dbl = a_sigma[lvl]->disjointBoxLayout();
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      const Box box = dbl[dit()];
+      const Interval interv(m_comp, m_comp);
+      (*m_amrJump[lvl])[dit()].copy(box, interv, box, (*a_sigma[lvl])[dit()], interv);
+    }
+
+    DataOps::scale(*m_amrJump[lvl], a_scale);
+
+    m_amrJump[lvl]->exchange();
+  }
+
+  // Average down data.
+  for (int lvl = m_numAmrLevels-1; lvl > 0; lvl--){
+    const RefCountedPtr<EbCoarAve>& aveOp = m_amrCoarseners[lvl].getAveOp(Phase::Gas);
+    aveOp->average(*m_amrJump[lvl-1], *m_amrJump[lvl], Interval(m_comp, m_comp));
+  }
+
+
 }
 
 void MFHelmholtzOpFactory::setJump(const Real& a_sigma, const Real& a_scale){
   DataOps::setValue(m_amrJump, a_sigma*a_scale);
+  
   for (int i = 0; i < m_mgJump.size(); i++){
     DataOps::setValue(m_mgJump[i], a_sigma*a_scale);
   }
@@ -111,11 +135,9 @@ void MFHelmholtzOpFactory::defineJump(){
   
   m_amrJump.resize(1 + m_numAmrLevels);
 
-  constexpr int mainPhase = 0;
-
   for (int lvl = 0; lvl < m_numAmrLevels; lvl++){
     const DisjointBoxLayout& dbl = m_amrLevelGrids[lvl].getGrids();
-    const EBLevelGrid& eblg      = m_amrLevelGrids[lvl].getEBLevelGrid(mainPhase);
+    const EBLevelGrid& eblg      = m_amrLevelGrids[lvl].getEBLevelGrid(m_mainPhase);
     const EBISLayout& ebisl      = eblg.getEBISL();
 
     LayoutData<IntVectSet> irregCells(dbl);
@@ -196,14 +218,32 @@ void MFHelmholtzOpFactory::defineMultigridLevels(){
 	// Ok, we can coarsen the domain define by mgMflgCoar. Set up that domain as a multigrid level. 
 	if(hasCoarser){
 
-	  RefCountedPtr<LevelData<MFCellFAB> >   coarAcoef;
-	  RefCountedPtr<LevelData<MFFluxFAB> >   coarBcoef;
-	  RefCountedPtr<LevelData<MFBaseIVFAB> > coarBcoefIrreg;
+	  const DisjointBoxLayout& dblCoar = mgMflgCoar.getGrids();
+
+	  // The Chombo multifluid things need Vector<EBISLayout> for the factories.
+	  Vector<int>        ebislComps;
+	  Vector<EBISLayout> ebislCoar;
+	  for (int i = 0; i < mgMflgCoar.numPhases(); i++){
+	    ebislComps.push_back(i);
+	    ebislCoar. push_back(mgMflgCoar.getEBLevelGrid(i).getEBISL());
+	  }
+
+	  // Factories for making coarse stuff. 
+	  MFCellFactory       cellFact  (ebislCoar, ebislComps);
+	  MFFluxFactory       fluxFact  (ebislCoar, ebislComps);
+	  MFBaseIVFABFactory  ivFact    (ebislCoar, ebislComps);
+	  BaseIVFactory<Real> irregFact(mgMflgCoar.getEBLevelGrid(m_mainPhase).getEBISL());
+
+	  auto coarAcoef      = RefCountedPtr<LevelData<MFCellFAB> >        (new LevelData<MFCellFAB>        (dblCoar, m_nComp, IntVect::Zero, cellFact ));
+	  auto coarBcoef      = RefCountedPtr<LevelData<MFFluxFAB> >        (new LevelData<MFFluxFAB>        (dblCoar, m_nComp, IntVect::Zero, fluxFact ));
+	  auto coarBcoefIrreg = RefCountedPtr<LevelData<MFBaseIVFAB> >      (new LevelData<MFBaseIVFAB>      (dblCoar, m_nComp, IntVect::Zero, ivFact   ));
+	  auto coarJump       = RefCountedPtr<LevelData<BaseIVFAB<Real> > > (new LevelData<BaseIVFAB<Real> > (dblCoar, m_nComp, IntVect::Zero, irregFact));
 
 	  const LevelData<MFCellFAB>&   fineAcoef      = *m_mgAcoef     [amrLevel].back();
 	  const LevelData<MFFluxFAB>&   fineBcoef      = *m_mgBcoef     [amrLevel].back();
 	  const LevelData<MFBaseIVFAB>& fineBcoefIrreg = *m_mgBcoefIrreg[amrLevel].back();
 
+	  // Coarsening coefficients. 
 	  this->coarsenCoefficients(*coarAcoef,
 				    *coarBcoef,
 				    *coarBcoefIrreg,
@@ -213,12 +253,33 @@ void MFHelmholtzOpFactory::defineMultigridLevels(){
 				    mgMflgCoar,
 				    mgMflgFine,
 				    mgRefRatio);
-	  
-	  m_mgLevelGrids[amrLevel].push_back(mgMflgCoar);
-	}
+	  DataOps::setValue(*coarJump, 0.0);
 
-	hasCoarser = false;
+	  // This is a special object for coarsening jump data between MG levels.
+	  const EBLevelGrid& eblgFine = mgMflgFine.getEBLevelGrid(m_mainPhase);
+	  const EBLevelGrid& eblgCoar = mgMflgCoar.getEBLevelGrid(m_mainPhase);
+	  RefCountedPtr<EbCoarAve> aveOp(new EbCoarAve(eblgFine.getDBL(),
+						       eblgCoar.getDBL(),
+						       eblgFine.getEBISL(),
+						       eblgCoar.getEBISL(),
+						       eblgCoar.getDomain(),
+						       mgRefRatio,
+						       m_nComp,
+						       eblgCoar.getEBIS()));
+	  
+	  // Append. Phew. 
+	  m_mgLevelGrids[amrLevel].push_back(mgMflgCoar    );
+	  m_mgAcoef     [amrLevel].push_back(coarAcoef     );
+	  m_mgBcoef     [amrLevel].push_back(coarBcoef     );
+	  m_mgBcoefIrreg[amrLevel].push_back(coarBcoefIrreg);
+	  m_mgJump      [amrLevel].push_back(coarJump      );
+	  m_mgAveOp     [amrLevel].push_back(aveOp         );
+	}
       }
+    }
+
+    if(m_mgLevelGrids[amrLevel].size() <= 1) {
+      m_hasMgLevels[amrLevel] = false;
     }
   }
 }

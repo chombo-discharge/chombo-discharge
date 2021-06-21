@@ -49,7 +49,7 @@ public:
   /*!
     @brief get interpolation utility for phase
   */
-  EbCoarAve& getAveOp(const Phase a_phase);
+  const RefCountedPtr<EbCoarAve>& getAveOp(const Phase a_phase) const;
   
 protected:
 
