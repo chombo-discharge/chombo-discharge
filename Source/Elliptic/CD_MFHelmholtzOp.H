@@ -26,6 +26,7 @@
 #include <CD_MFFluxReg.H>
 #include <CD_MFLevelGrid.H>
 #include <CD_MFBaseIVFAB.H>
+#include <CD_JumpBc.H>
 #include <CD_EBHelmholtzOp.H>
 #include <CD_EBHelmholtzDomainBCFactory.H>
 #include <CD_EBHelmholtzEBBCFactory.H>
@@ -66,6 +67,7 @@ public:
 		const RefCountedPtr<LevelData<MFBaseIVFAB> >&    a_BcoefIrreg,
 		const IntVect&                                   a_ghostPhi,
 		const IntVect&                                   a_ghostRhs,
+		const int&                                       a_ebbcOrder,
 		const int&                                       a_jumpOrder,
 		const RelaxType&                                 a_relaxType);
 
@@ -75,9 +77,9 @@ public:
   ~MFHelmholtzOp();
 
   /*!
-    @brief Define function. Not implemented (yet). 
+    @brief Set the jump boundary condition
   */
-  void define();
+  void setJump(const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_jump);
 
   /*!
     @brief Get Helmholtz operator
@@ -334,6 +336,21 @@ protected:
     @brief Helmholtz operators on each phase. Note that I'm using int rather than Phase as identifier because that is the standard terminology for MFCellFAB. 
   */
   std::map<int, RefCountedPtr<EBHelmholtzOp> > m_helmOps;
+
+  /*!
+    @brief BC jump object. This is the one that has the stencils and can compute derivatives. 
+  */
+  RefCountedPtr<JumpBc> m_jumpBC;
+
+  /*!
+    @brief Actual BC jump in data-based format. This is the right-hand side of dphi/dn1 + dphi/dn2 = jump
+  */
+  RefCountedPtr<LevelData<BaseIVFAB<Real> > > m_jump;
+
+  /*!
+    @brief Dirichlet BC values for each phase
+  */
+  std::map<int, RefCountedPtr<LevelData<BaseIVFAB<Real> > > > m_dirichletBcValues;
 
   /*!
     @brief Arihmetic multifluid operators

@@ -40,13 +40,15 @@ MFHelmholtzOp::MFHelmholtzOp(const MFLevelGrid&                               a_
 			     const RefCountedPtr<LevelData<MFBaseIVFAB> >&    a_BcoefIrreg,
 			     const IntVect&                                   a_ghostPhi,
 			     const IntVect&                                   a_ghostRhs,
+			     const int&                                       a_ebbcOrder,
 			     const int&                                       a_jumpOrder,
 			     const RelaxType&                                 a_relaxType){
   m_mflg       = a_mflg;
   m_multifluid = m_mflg.numPhases() > 1;
 
 
-  // Instantiate jump bc object. 
+  // Instantiate jump bc object.
+  m_jumpBC = RefCountedPtr<JumpBc> (new JumpBc(m_mflg, *a_BcoefIrreg, a_dx, a_jumpOrder, nullptr));
   
 }
 
@@ -54,8 +56,8 @@ MFHelmholtzOp::~MFHelmholtzOp(){
 
 }
 
-void MFHelmholtzOp::define(){
-
+void MFHelmholtzOp::setJump(const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_jump){
+  m_jump = a_jump;
 }
 
 int MFHelmholtzOp::refToCoarser() {
