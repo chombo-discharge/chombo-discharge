@@ -37,12 +37,14 @@ MFHelmholtzOp::MFHelmholtzOp(const MFLevelGrid&                               a_
 			     const MFFluxReg&                                 a_fluxReg,
 			     const MFCoarAve&                                 a_coarAve,
 			     const RefCountedPtr<EBHelmholtzDomainBCFactory>& a_domainBcFactory,
+			     const RefCountedPtr<EBHelmholtzEBBCFactory>&     a_ebBcFactory,			     
 			     const RealVect&                                  a_probLo,
 			     const Real&                                      a_dx,
 			     const int&                                       a_refToCoar,
 			     const bool&                                      a_hasFine,
 			     const bool&                                      a_hasCoar,			     
 			     const bool&                                      a_hasMGObjects,
+			     const bool&                                      a_isMGOperator,
 			     const Real&                                      a_alpha,
 			     const Real&                                      a_beta,
 			     const RefCountedPtr<LevelData<MFCellFAB> >&      a_Acoef,
@@ -50,7 +52,6 @@ MFHelmholtzOp::MFHelmholtzOp(const MFLevelGrid&                               a_
 			     const RefCountedPtr<LevelData<MFBaseIVFAB> >&    a_BcoefIrreg,
 			     const IntVect&                                   a_ghostPhi,
 			     const IntVect&                                   a_ghostRhs,
-			     const int&                                       a_ebbcOrder,
 			     const int&                                       a_jumpOrder,
 			     const RelaxType&                                 a_relaxType){
   CH_TIME("MFHelmholtzOp::MFHelmholtzOp");
@@ -88,15 +89,10 @@ MFHelmholtzOp::MFHelmholtzOp(const MFLevelGrid&                               a_
     EBLevelGrid eblgCoar    = a_hasCoar      ? a_mflgCoar.getEBLevelGrid(iphase)   : dummy;
     EBLevelGrid eblgCoarMG  = a_hasMGObjects ? a_mflgCoarMG.getEBLevelGrid(iphase) : dummy;
 
+    auto domainBC = a_domainBcFactory->create();
+    auto ebBC     = a_ebBcFactory->create();
 
-    // Development code. Give the operators Dirichlet EBBCs. This will be replaced by other stuff later. 
-    auto domainBC = RefCountedPtr<EBHelmholtzDirichletDomainBC> (new EBHelmholtzDirichletDomainBC());
-    auto ebBC     = RefCountedPtr<EBHelmholtzDirichletEBBC>     (new EBHelmholtzDirichletEBBC());
-
-    domainBC->setValue(-1.0);
-    ebBC->setValue(1.0);
-    ebBC->setOrder(1);
-    ebBC->setWeight(1);
+    if(a_isMGOperator) ebBC->setMG(true);
 
     // Alias the multifluid-coefficients onto a single phase. 
     RefCountedPtr<LevelData<EBCellFAB> >        Acoef       = RefCountedPtr<LevelData<EBCellFAB> >        (new LevelData<EBCellFAB>());

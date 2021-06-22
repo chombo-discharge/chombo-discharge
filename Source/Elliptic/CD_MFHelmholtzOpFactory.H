@@ -82,7 +82,6 @@ public:
 		       const IntVect&          a_ghostRhs,
 		       const RelaxType&        a_relaxationMethod,
 		       const ProblemDomain&    a_bottomDomain,
-		       const int&              a_ebbcOrder,
 		       const int&              a_jumpOrder,
 		       const int&              a_blockingFactor,
 		       const AmrLevelGrids&    a_deeperLevelGrids = AmrLevelGrids());
@@ -186,8 +185,7 @@ protected:
   // Blocking factor for when we create intermediate and deep multigrid levels
   int m_mgBlockingFactor;
 
-  // Order for BCs
-  int m_ebbcOrder;
+  // Order for jump BCs.
   int m_jumpOrder;
 
   // This is for using pre-defined grids for the deeper multigrid levels, i.e. for the levels that are coarsenings of m_amrLevelGrids[0]

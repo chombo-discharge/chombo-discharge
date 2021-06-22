@@ -719,7 +719,6 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
 							relaxType,
 							bottomDomain,
 							1,
-							1,
 							m_amr->getMaxBoxSize());
 
   fact->setJump(a_sigma, 0.0);

@@ -27,7 +27,7 @@ EBHelmholtzEBBC::~EBHelmholtzEBBC(){
 
 }
 
-void EBHelmholtzEBBC::setMGLevel(const bool a_isMGLevel){
+void EBHelmholtzEBBC::setMG(const bool a_isMGLevel){
   m_isMGLevel = a_isMGLevel;
 }
 

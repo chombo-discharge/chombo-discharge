@@ -76,7 +76,7 @@ public:
   /*!
     @brief Set whether or not this is an MG level
   */
-  void setMGLevel(const bool a_isMGLevel);
+  void setMG(const bool a_isMGLevel);
 
   /*!
     @brief Get the stencil for computing the finite-volume approximation to kappa*Div(F). 

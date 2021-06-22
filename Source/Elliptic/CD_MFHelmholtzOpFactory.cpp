@@ -43,7 +43,6 @@ MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&             a_mfis,
 					   const IntVect&          a_ghostRhs,
 					   const RelaxType&        a_relaxationMethod,
 					   const ProblemDomain&    a_bottomDomain,
-					   const int&              a_ebbcOrder,
 					   const int&              a_jumpOrder,
 					   const int&              a_blockingFactor,
 					   const AmrLevelGrids&    a_deeperLevelGrids){
@@ -74,7 +73,6 @@ MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&             a_mfis,
   m_relaxMethod  = a_relaxationMethod;
   m_bottomDomain = a_bottomDomain;
 
-  m_ebbcOrder = a_ebbcOrder;
   m_jumpOrder = a_jumpOrder;
 
   m_mgBlockingFactor = a_blockingFactor;
@@ -437,12 +435,14 @@ MFHelmholtzOp* MFHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
 					m_amrFluxRegisters[amrLevel],
 					m_amrCoarseners[amrLevel],
 					m_domainBcFactory,
+					m_ebBcFactory,
 					m_probLo,
 					dx,
 					refToCoar,
 					hasFine,
 					hasCoar,
 					hasMGObjects,
+					false, // Not an MG operator.
 					m_alpha,
 					m_beta,
 					m_amrAcoef[amrLevel],
@@ -450,7 +450,6 @@ MFHelmholtzOp* MFHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
 					m_amrBcoefIrreg[amrLevel],
 					m_ghostPhi,
 					m_ghostRhs,
-					m_ebbcOrder,
 					m_jumpOrder,
 					m_relaxMethod);
 
