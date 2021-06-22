@@ -674,6 +674,7 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
 
   multigridSolver.m_verbosity = 10;
   multigridSolver.init(phi, rhs, finestLevel, baseLevel);
+  multigridSolver.solveNoInit(phi, rhs, finestLevel, baseLevel, false);
 
   pout() << "init done" << endl;
 }

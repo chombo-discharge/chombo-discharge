@@ -354,6 +354,7 @@ void MFHelmholtzOp::interpolateCF(const LevelData<MFCellFAB>& a_phi, const Level
       op.second->inhomogeneousCFInterp(phi, phiCoar);
     }
   }
+
   if(m_debug) pout() << "MFHelmholtzOp::interpolateCF(end)" << endl;
 }
 
@@ -372,7 +373,7 @@ void MFHelmholtzOp::axby(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>
 }
 
 void MFHelmholtzOp::updateJumpBC(const LevelData<MFCellFAB>& a_phi, const bool a_homogeneousPhysBC){
-  MayDay::Warning("MFHelmholtzOp::updateJumpBC -- not implemented (yet)");
+  if(m_debug) pout() << "MFHelmholtzOp::updateJumpBC - not implemented" << endl;
 }
 
 void MFHelmholtzOp::relax(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_residual, int a_iterations) {
@@ -546,8 +547,24 @@ void MFHelmholtzOp::AMROperatorNC(LevelData<MFCellFAB>&              a_Lphi,
 				  bool                               a_homogeneousPhysBC,
 				  AMRLevelOp<LevelData<MFCellFAB> >* a_finerOp) {
   if(m_debug) pout() << "MFHelmholtzOp::AMROperatorNC(begin)" << endl;
-  LevelData<MFCellFAB> phiCoar;
-  this->AMROperator(a_Lphi, a_phiFine, a_phi, phiCoar, a_homogeneousPhysBC, a_finerOp);
+
+  // Must update the jump BC first. 
+  this->updateJumpBC(a_phi, a_homogeneousPhysBC);
+
+  for (auto& op : m_helmOps){
+    LevelData<EBCellFAB> Lphi;
+    LevelData<EBCellFAB> phiFine;
+    LevelData<EBCellFAB> phi;
+
+    MultifluidAlias::aliasMF(Lphi,    op.first, a_Lphi   );
+    MultifluidAlias::aliasMF(phiFine, op.first, a_phiFine);
+    MultifluidAlias::aliasMF(phi,     op.first, a_phi    );
+
+    MFHelmholtzOp* finerOp = (MFHelmholtzOp*) (a_finerOp);
+
+    op.second->AMROperatorNC(Lphi, phiFine, phi, a_homogeneousPhysBC, (finerOp->m_helmOps).at(op.first));
+  }
+  
   if(m_debug) pout() << "MFHelmholtzOp::AMROperatorNC(end)" << endl;
 }
 
@@ -557,7 +574,7 @@ void MFHelmholtzOp::AMROperator(LevelData<MFCellFAB>&              a_Lphi,
 				const LevelData<MFCellFAB>&        a_phiCoar,
 				const bool                         a_homogeneousPhysBC,
 				AMRLevelOp<LevelData<MFCellFAB> >* a_finerOp) {
-  if(m_debug) pout() << "MFHelmholtzOp::AMROperatorNC(begin)" << endl;
+  if(m_debug) pout() << "MFHelmholtzOp::AMROperator(begin)" << endl;
   // Update ghost cells and jump conditions first.
   this->interpolateCF(a_phi, &a_phiCoar, false);
   this->updateJumpBC(a_phi, a_homogeneousPhysBC);
@@ -575,11 +592,11 @@ void MFHelmholtzOp::AMROperator(LevelData<MFCellFAB>&              a_Lphi,
 
     MFHelmholtzOp* finerOp = (MFHelmholtzOp*) (a_finerOp);
 
-    op.second->turnOffBCs(); // Don't need to interpolate ghost cells again. 
+    op.second->turnOffBCs(); // Don't need to interpolate ghost cells again.
     op.second->AMROperator(Lphi, phiFine, phi, phiCoar, a_homogeneousPhysBC, (finerOp->m_helmOps).at(op.first));
     op.second->turnOnBCs();
   }
-  if(m_debug) pout() << "MFHelmholtzOp::AMROperatorNC(end)" << endl;
+  if(m_debug) pout() << "MFHelmholtzOp::AMROperator(end)" << endl;
 }
 
 #include <CD_NamespaceFooter.H>
