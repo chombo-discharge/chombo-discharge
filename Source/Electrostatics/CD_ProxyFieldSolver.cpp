@@ -501,6 +501,7 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
 			    m_amr->getMaxBoxSize());
 
   BiCGStabSolver<LevelData<EBCellFAB> > bicgstab;
+  EBSimpleSolver simpleSolver;
   AMRMultiGrid<LevelData<EBCellFAB> > multigridSolver;
 
   int  numSmooth;
@@ -508,12 +509,15 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
 
   pp.get("mg_tol",   tolerance);
   pp.get("smooth",   numSmooth);
+
+  simpleSolver.setNumSmooths(200);
   
   const int baseLevel   = 0;
   const int finestLevel = m_amr->getFinestLevel();
 
   // Define
   multigridSolver.define(m_amr->getDomains()[0], fact, &bicgstab, 1 + finestLevel);
+  //  multigridSolver.define(m_amr->getDomains()[0], fact, &simpleSolver, 1 + finestLevel);
   multigridSolver.setSolverParameters(numSmooth, numSmooth, numSmooth, 1, 32, tolerance, 1E-60, 1E-60);
   
   // Solve
@@ -655,11 +659,14 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
   const int baseLevel   = 0;
 
   MFSimpleSolver mfSolver;
-  mfSolver.setNumSmooths(numSmooth);
+  mfSolver.setNumSmooths(100);
+
+  BiCGStabSolver<LevelData<MFCellFAB> > bicgstab;
 
   // Define
-  multigridSolver.define(m_amr->getDomains()[0], *fact, &mfSolver, 1 + finestLevel);
-  multigridSolver.setSolverParameters(numSmooth, numSmooth, numSmooth, 1, 8, tolerance, 1E-60, 1E-60);
+  //  multigridSolver.define(m_amr->getDomains()[0], *fact, &mfSolver, 1 + finestLevel);
+  multigridSolver.define(m_amr->getDomains()[0], *fact, &bicgstab, 1 + finestLevel);
+  multigridSolver.setSolverParameters(numSmooth, numSmooth, numSmooth, 1, 32, tolerance, 1E-60, 1E-60);
 
   // Solve
   Vector<LevelData<MFCellFAB>* > phi;
@@ -674,7 +681,10 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
 
   multigridSolver.m_verbosity = 10;
   multigridSolver.init(phi, rhs, finestLevel, baseLevel);
+  Real t1 = -MPI_Wtime();
   multigridSolver.solveNoInit(phi, rhs, finestLevel, baseLevel, false);
+  t1 += MPI_Wtime();
+  if(procID() == 0) std::cout << "Multigrid solve time for MFHelm = " << t1 << std::endl;
 }
 
 #include <CD_NamespaceFooter.H>

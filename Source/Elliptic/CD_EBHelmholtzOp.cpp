@@ -724,6 +724,7 @@ void EBHelmholtzOp::interpolateCF(LevelData<EBCellFAB>& a_phiFine, const LevelDa
       this->homogeneousCFInterp(a_phiFine);
     }
     else{
+      if(a_phiCoar == nullptr) MayDay::Error("EBHelmholtzOp::interpolateCF -- calling inhomogeneousCFInterp with nullptr coarse is an error.");
       this->inhomogeneousCFInterp(a_phiFine, *a_phiCoar);
     }
   }
