@@ -344,7 +344,16 @@ void MFHelmholtzOp::createCoarsened(LevelData<MFCellFAB>& a_lhs, const LevelData
 void MFHelmholtzOp::preCond(LevelData<MFCellFAB>& a_corr, const LevelData<MFCellFAB>& a_residual) {
   CH_TIME("MFHelmholtzOp::preCond");
   //if(m_debug) pout() << "MFHelmholtzOp::preCond(begin)" << endl;
-  this->relax(a_corr, a_residual, 50);
+  //  this->relax(a_corr, a_residual, 40);
+  for (auto& op : m_helmOps){
+    LevelData<EBCellFAB> corr;
+    LevelData<EBCellFAB> resi;
+
+    MultifluidAlias::aliasMF(corr, op.first, a_corr);
+    MultifluidAlias::aliasMF(resi, op.first, a_residual);
+
+    op.second->preCond(corr, resi);
+  }
   //if(m_debug) pout() << "MFHelmholtzOp::preCond(end)" << endl;
 }
 
