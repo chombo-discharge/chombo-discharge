@@ -447,8 +447,10 @@ EBHelmholtzOp* EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, 
   if(foundMgLevel){
     const Real dx     = m_amrResolutions[amrLevel]*std::pow(mgRefRat, a_depth); // 
 
-    // auto dobc = this->makeDomainBcObject(eblg, dx);
-    // auto ebbc = RefCountedPtr<EBHelmholtzEBBC>(m_ebBcFactory->create());
+    auto domBC = m_domainBcFactory->create();
+    auto ebBC  = m_ebBcFactory->create();
+
+    ebBC->setMGLevel(true);
     
     mgOp = new EBHelmholtzOp(EBLevelGrid(), // Multigrid operator, so no fine. 
 			     eblg,
@@ -458,8 +460,8 @@ EBHelmholtzOp* EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, 
 			     interpolator,  // Defined if an amr level
 			     fluxReg,       // Defined if an amr level
 			     coarsener,     // Defined if an amr level
-			     m_domainBcFactory->create(),			     
-			     m_ebBcFactory->create(),			     
+			     domBC,
+			     ebBC,
 			     m_probLo,
 			     dx,            // Set from depth
 			     1,             // Multigrid operator. Set to 1 in operator anyways. 
