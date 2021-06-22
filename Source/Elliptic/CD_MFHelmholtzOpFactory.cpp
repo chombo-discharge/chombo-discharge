@@ -38,6 +38,7 @@ MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&             a_mfis,
 					   const AmrFluxData&      a_amrBcoef,
 					   const AmrIrreData&      a_amrBcoefIrreg,
 					   const DomainBCFactory&  a_domainBcFactory,
+					   const EBBCFactory&      a_ebBcFactory,					   
 					   const IntVect&          a_ghostPhi,
 					   const IntVect&          a_ghostRhs,
 					   const RelaxType&        a_relaxationMethod,
@@ -65,6 +66,7 @@ MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&             a_mfis,
   m_amrBcoefIrreg = a_amrBcoefIrreg;
 
   m_domainBcFactory = a_domainBcFactory;
+  m_ebBcFactory     = a_ebBcFactory;
 
   m_ghostPhi = a_ghostPhi;
   m_ghostRhs = a_ghostRhs;

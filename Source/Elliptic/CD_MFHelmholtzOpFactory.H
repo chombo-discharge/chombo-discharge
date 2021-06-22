@@ -77,6 +77,7 @@ public:
 		       const AmrFluxData&      a_amrBcoef,
 		       const AmrIrreData&      a_amrBcoefIrreg,
 		       const DomainBCFactory&  a_domainBcFactory,
+		       const EBBCFactory&      a_ebBcFactory,
 		       const IntVect&          a_ghostPhi,
 		       const IntVect&          a_ghostRhs,
 		       const RelaxType&        a_relaxationMethod,
@@ -172,8 +173,9 @@ protected:
   AmrFluxData      m_amrBcoef;
   AmrIrreData      m_amrBcoefIrreg;
 
-  // Domain Bc factory
+  // BC factories
   DomainBCFactory m_domainBcFactory;
+  EBBCFactory     m_ebBcFactory;
 
   // Jump
   EBAMRIVData m_amrJump;

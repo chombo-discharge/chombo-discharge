@@ -604,6 +604,74 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
     mfCoarAve[lvl].define(avePhases);
   }
 
+  // Set up BC factories
+  int         eb_order;
+  int         eb_weight;
+  Real        eb_value;
+  Real        dom_value;
+  std::string str;
+  
+  RefCountedPtr<EBHelmholtzEBBCFactory> ebbcFactory;
+  RefCountedPtr<EBHelmholtzDomainBCFactory> domainBcFactory;
+
+  // EBBC
+  pp.get("eb_bc", str);
+  if(str == "dirichlet"){
+    pp.get("eb_order",  eb_order);
+    pp.get("eb_val",    eb_value);
+    pp.get("eb_weight", eb_weight);
+
+    ebbcFactory = RefCountedPtr<EBHelmholtzEBBCFactory> (new EBHelmholtzDirichletEBBCFactory(eb_order, eb_weight, eb_value));
+
+    // Make sure we have enough ghost cells.
+    if(eb_order > m_amr->getNumberOfGhostCells()) MayDay::Abort("ProxyFieldSolver::solveHelm - not enough ghost cells!");
+  }
+  else if(str == "neumann"){
+    pp.get("eb_val", eb_value);
+
+    ebbcFactory = RefCountedPtr<EBHelmholtzEBBCFactory> (new EBHelmholtzNeumannEBBCFactory(eb_value));    
+  }
+  else if(str == "robin"){
+    pp.get("eb_val", eb_value);
+
+    // Coefficients for radiative transfer with Robin. 
+    const Real A =  1.5*eb_value;
+    const Real B = -1.0*eb_value;
+    const Real C =  0.0;
+    ebbcFactory = RefCountedPtr<EBHelmholtzEBBCFactory> (new EBHelmholtzRobinEBBCFactory(A, B, C));
+  }
+  else{
+    MayDay::Error("ProxyFieldSolver::solveEBCond - uknown EBBC factory requested");
+  }
+
+  // Domain bc
+  pp.get("domain_bc", str);
+  pp.get("dom_val", dom_value);
+
+  // BC function. Spatially dependent. 
+  auto bcFunction = [dom_value](const RealVect& a_pos) -> Real {
+    return dom_value;
+  };
+  
+  if(str == "dirichlet"){
+    domainBcFactory = RefCountedPtr<EBHelmholtzDomainBCFactory>(new EBHelmholtzDirichletDomainBCFactory(bcFunction));
+  }
+  else if(str == "neumann"){
+    domainBcFactory = RefCountedPtr<EBHelmholtzDomainBCFactory>(new EBHelmholtzNeumannDomainBCFactory(bcFunction));
+  }
+  else if(str == "robin"){
+    
+    // Coeffs for radiative transfer with Robin
+    const Real A =  1.5*dom_value;
+    const Real B = -1.0*dom_value;
+    const Real C =  0.0;
+    
+    domainBcFactory = RefCountedPtr<EBHelmholtzDomainBCFactory>(new EBHelmholtzRobinDomainBCFactory(A, B, C));
+  }
+  else{
+    MayDay::Abort("ProxyFieldSolver::solveHelm - unknown domain bc requested");
+  }
+
   int minCells;
   pp.get("min_cells", minCells);
   ProblemDomain bottomDomain = m_amr->getDomains()[0];
@@ -611,11 +679,6 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
     bottomDomain.coarsen(2);
   }
 
-  auto pot = [](const RealVect& pos){
-    return pos[1];
-  };
-  auto diriFactory = RefCountedPtr<EBHelmholtzDirichletDomainBCFactory> (new EBHelmholtzDirichletDomainBCFactory());
-  diriFactory->setValue(pot);
 
   const IntVect ghostPhi = m_amr->getNumberOfGhostCells()*IntVect::Unit;
   const IntVect ghostRhs = m_amr->getNumberOfGhostCells()*IntVect::Unit;
@@ -649,7 +712,8 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
 							Aco.getData(),
 							Bco.getData(),
 							BcoIrreg.getData(),
-							diriFactory,
+							domainBcFactory,
+							ebbcFactory,
 							ghostPhi,
 							ghostRhs,
 							relaxType,
