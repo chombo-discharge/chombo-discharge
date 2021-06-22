@@ -126,7 +126,7 @@ public:
     @param[inout] a_phiCoar         Coarse data
     @param[in]    a_homogeneousCFBC Homogeneous CF or not (i.e. coar data is zero);
   */
-  void interpolateCF(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar, const bool a_homogeneousCFBC);
+  void interpolateCF(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>* a_phiCoar, const bool a_homogeneousCFBC);
 
   /*!
     @brief Do homogeneous coarse-fine interpolation

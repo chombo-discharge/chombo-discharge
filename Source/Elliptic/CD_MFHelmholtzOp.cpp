@@ -220,9 +220,7 @@ Real MFHelmholtzOp::norm(const LevelData<MFCellFAB>& a_lhs, int a_order){
 
     MultifluidAlias::aliasMF(lhs, op.first, a_lhs);
 
-    const Real opNorm = op.second->norm(lhs, a_order);
-
-    norm = std::max(norm, opNorm);
+    norm = std::max(norm, op.second->norm(lhs, a_order));
   }
   if(m_debug) pout() << "MFHelmholtzOp::norm(end)" << endl;
   return norm;
@@ -259,6 +257,8 @@ Real MFHelmholtzOp::dotProduct(const LevelData<MFCellFAB>& a_lhs, const LevelDat
   }
   if(m_debug) pout() << "MFHelmholtzOp::dotProduct(end)" << endl;
 
+  MayDay::Abort("stop");
+
   return ret;
 }
 
@@ -294,7 +294,6 @@ void MFHelmholtzOp::createCoarsened(LevelData<MFCellFAB>& a_lhs, const LevelData
   }
 
   MFCellFactory cellFact(layouts, comps);
-  //  a_lhs.define(m_mflgCoFi.getGrids(), m_nComp, a_rhs.ghostVect(), cellFact);
   a_lhs.define(m_mflgCoFi.getGrids(), m_nComp, a_rhs.ghostVect(), cellFact);
   
   if(m_debug) pout() << "MFHelmholtzOp::createCoarsened(end)" << endl;
@@ -317,20 +316,30 @@ void MFHelmholtzOp::applyOp(LevelData<MFCellFAB>&             a_Lphi,
 			    const LevelData<MFCellFAB>* const a_phiCoar,
 			    const bool                        a_homogeneousPhysBC,
 			    const bool                        a_homogeneousCFBC){
-  if(m_debug) pout() << "MFHelmholtzOp::applyOp(big, begin)" << endl;  
+  if(m_debug) pout() << "MFHelmholtzOp::applyOp(big, begin)" << endl;
+  
   // We MUST have updated ghost cells before applying the matching conditions. 
-  this->interpolateCF(a_phi, a_phiCoar, a_homogeneousCFBC);
-  this->updateJumpBC(a_phi, a_homogeneousPhysBC);
+   this->interpolateCF(a_phi, a_phiCoar, a_homogeneousCFBC);
+   this->updateJumpBC(a_phi, a_homogeneousPhysBC);
 
   // Apply the operator on each level. 
   for (auto& op : m_helmOps){
-    LevelData<EBCellFAB>  Lphi;
-    LevelData<EBCellFAB>  phi;
-    LevelData<EBCellFAB>* phiCoar = nullptr;
+    LevelData<EBCellFAB> Lphi;
+    LevelData<EBCellFAB> phi;
+    LevelData<EBCellFAB> phiCoar;
+
+    MultifluidAlias::aliasMF(Lphi, op.first, a_Lphi);
+    MultifluidAlias::aliasMF(phi,  op.first, a_phi);
 
     // applyOp usually interpolates ghost cells, but we did that above in interpolateCF(...). 
     op.second->turnOffBCs();
-    op.second->applyOp(Lphi, phi, phiCoar, a_homogeneousPhysBC, a_homogeneousCFBC);
+    if(a_phiCoar != nullptr){
+      MultifluidAlias::aliasMF(phiCoar, op.first, *a_phiCoar);
+      op.second->applyOp(Lphi, phi, &phiCoar, a_homogeneousPhysBC, a_homogeneousCFBC);
+    }
+    else{
+      op.second->applyOp(Lphi, phi, nullptr, a_homogeneousPhysBC, a_homogeneousCFBC);
+    }
     op.second->turnOnBCs();
   }
   if(m_debug) pout() << "MFHelmholtzOp::applyOp(big, end)" << endl;  
@@ -348,6 +357,8 @@ void MFHelmholtzOp::interpolateCF(const LevelData<MFCellFAB>& a_phi, const Level
       op.second->homogeneousCFInterp(phi);
     }
     else{
+      if(a_phiCoar == nullptr) MayDay::Error("MFHelmholtzOp::interpolateCF -- calling inhomogeneousCFInterp with nullptr coarse is an error.");
+      
       MultifluidAlias::aliasMF(phi,     op.first,  (LevelData<MFCellFAB>&) a_phi);
       MultifluidAlias::aliasMF(phiCoar, op.first, *a_phiCoar);
 
@@ -362,7 +373,10 @@ void MFHelmholtzOp::residual(LevelData<MFCellFAB>& a_residual, const LevelData<M
   if(m_debug) pout() << "MFHelmholtzOp::residual(begin)" << endl;
   // Compute a_residual = rhs - L(phi) 
   this->applyOp(a_residual, a_phi, a_homogeneousPhysBC);
-  this->axby(a_residual, a_residual, a_rhs, -1.0, 1.0);
+
+  this->scale(a_residual, -1.0);
+  this->incr(a_residual, a_rhs, 1.0);
+
   if(m_debug) pout() << "MFHelmholtzOp::residual(end)" << endl;
 }
 
@@ -378,6 +392,7 @@ void MFHelmholtzOp::updateJumpBC(const LevelData<MFCellFAB>& a_phi, const bool a
 
 void MFHelmholtzOp::relax(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_residual, int a_iterations) {
   if(m_debug) pout() << "MFHelmholtzOp::relax(begin)" << endl;
+  
   // Operators are uncoupled for now.
   for (auto& op : m_helmOps){
     LevelData<EBCellFAB> correction;
@@ -489,7 +504,10 @@ void MFHelmholtzOp::AMRResidual(LevelData<MFCellFAB>&              a_residual,
   if(m_debug) pout() << "MFHelmholtzOp::AMRResidual(begin)" << endl;
   // Make residual = a_rhs - L(phi)
   this->AMROperator(a_residual, a_phiFine, a_phi, a_phiCoar, a_homogeneousPhysBC, a_finerOp);
-  this->axby(a_residual, a_residual, a_rhs, -1.0, 1.0);
+
+  this->scale(a_residual, -1.0);
+  this->incr(a_residual, a_rhs, 1.0);
+
   if(m_debug) pout() << "MFHelmholtzOp::AMRResidual(end)" << endl;
 }
 
@@ -501,7 +519,10 @@ void MFHelmholtzOp::AMRResidualNF(LevelData<MFCellFAB>&       a_residual,
   if(m_debug) pout() << "MFHelmholtzOp::AMRResidualNF(begin)" << endl;
   // Make residual = a_rhs - L(phi)  
   this->AMROperatorNF(a_residual, a_phi, a_phiCoar, a_homogeneousPhysBC);
-  this->axby(a_residual, a_residual, a_rhs, -1.0, 1.0);
+
+  this->scale(a_residual, -1.0);
+  this->incr(a_residual, a_rhs, 1.0);
+
   if(m_debug) pout() << "MFHelmholtzOp::AMRResidualNF(end)" << endl;
 }
 
@@ -513,7 +534,10 @@ void MFHelmholtzOp::AMRResidualNC(LevelData<MFCellFAB>&              a_residual,
 				  AMRLevelOp<LevelData<MFCellFAB> >* a_finerOp) {
   if(m_debug) pout() << "MFHelmholtzOp::AMResidualNC(begin)" << endl;
   this->AMROperatorNC(a_residual, a_phiFine, a_phi, a_homogeneousPhysBC, a_finerOp);
-  this->axby(a_residual, a_residual, a_rhs, -1.0, 1.0);
+
+  this->scale(a_residual, -1.0);
+  this->incr(a_residual, a_rhs, 1.0);
+
   if(m_debug) pout() << "MFHelmholtzOp::AMRResidualNC(end)" << endl;
 }
 

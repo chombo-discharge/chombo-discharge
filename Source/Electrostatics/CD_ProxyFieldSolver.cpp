@@ -77,6 +77,9 @@ bool ProxyFieldSolver::solve(MFAMRCellData&       a_potential,
   else if(str == "helm"){
     this->solveHelmholtz(gasData, gasResi);
   }
+  else if(str == "mfhelm"){
+    this->solveMF(a_potential, a_rho, a_sigma, a_zerophi);
+  }
   else{
     MayDay::Error("ProxyFieldSolver::solve - bad argument to ProxyFieldSolver.solver");
   }
@@ -89,9 +92,6 @@ bool ProxyFieldSolver::solve(MFAMRCellData&       a_potential,
   this->computeElectricField();
   
   this->writePlotFile();
-
-  if(procID() == 0) std::cout << "setting up mfhelmholtz factory" << std::endl;
-  this->solveMF(a_potential, a_rho, a_sigma, a_zerophi);
   
   return true;
 }
@@ -633,7 +633,7 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
 							diriFactory,
 							ghostPhi,
 							ghostRhs,
-							EBHelmholtzOp::RelaxationMethod::GauSaiMultiColor,
+							EBHelmholtzOp::RelaxationMethod::GauSaiMultiColorFast,
 							bottomDomain,
 							1,
 							1,
@@ -659,7 +659,7 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
 
   // Define
   multigridSolver.define(m_amr->getDomains()[0], *fact, &mfSolver, 1 + finestLevel);
-  multigridSolver.setSolverParameters(numSmooth, numSmooth, numSmooth, 1, 32, tolerance, 1E-60, 1E-60);
+  multigridSolver.setSolverParameters(numSmooth, numSmooth, numSmooth, 1, 8, tolerance, 1E-60, 1E-60);
 
   // Solve
   Vector<LevelData<MFCellFAB>* > phi;
@@ -675,8 +675,6 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
   multigridSolver.m_verbosity = 10;
   multigridSolver.init(phi, rhs, finestLevel, baseLevel);
   multigridSolver.solveNoInit(phi, rhs, finestLevel, baseLevel, false);
-
-  pout() << "init done" << endl;
 }
 
 #include <CD_NamespaceFooter.H>

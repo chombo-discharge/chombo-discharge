@@ -453,7 +453,7 @@ MFHelmholtzOp* MFHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
 					m_relaxMethod);
 
   // Give the operator access by reference to the jump data. 
-  //  op->setJump(m_amrJump[amrLevel]);
+  op->setJump(m_amrJump[amrLevel]);
 
   return op;
 }

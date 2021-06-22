@@ -120,7 +120,6 @@ void EBHelmholtzOp::turnOffBCs(){
   m_turnOffBCs = true;
 }
 
-
 void EBHelmholtzOp::turnOnBCs(){
   m_turnOffBCs = false;
 }
@@ -519,7 +518,7 @@ void EBHelmholtzOp::applyOp(LevelData<EBCellFAB>&             a_Lphi,
   LevelData<EBCellFAB>& phi = (LevelData<EBCellFAB>& ) a_phi;
 
   if(m_hasCoar && !m_turnOffBCs){
-    this->interpolateCF(phi, *a_phiCoar, a_homogeneousCFBC);
+    this->interpolateCF(phi, a_phiCoar, a_homogeneousCFBC);
   }
   
   phi.exchange();
@@ -719,13 +718,13 @@ void EBHelmholtzOp::inhomogeneousCFInterp(LevelData<EBCellFAB>& a_phiFine, const
   if(m_hasCoar) m_interpolator->coarseFineInterp(a_phiFine, a_phiCoar, m_interval);
 }
 
-void EBHelmholtzOp::interpolateCF(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar, const bool a_homogeneousCFBC){
+void EBHelmholtzOp::interpolateCF(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>* a_phiCoar, const bool a_homogeneousCFBC){
   if(m_hasCoar){
     if(a_homogeneousCFBC){
       this->homogeneousCFInterp(a_phiFine);
     }
     else{
-      this->inhomogeneousCFInterp(a_phiFine, a_phiCoar);
+      this->inhomogeneousCFInterp(a_phiFine, *a_phiCoar);
     }
   }
 }
