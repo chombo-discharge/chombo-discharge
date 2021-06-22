@@ -10,6 +10,7 @@
 */
 
 // Chombo includes
+#include <MFSimpleSolver.H>
 #include <AMRMultiGrid.H>
 #include <BiCGStabSolver.H>
 #include <EBConductivityOpFactory.H>
@@ -638,7 +639,43 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
 							1,
 							m_amr->getMaxBoxSize());
 
-  fact->setJump(a_sigma, 1.0);
+  fact->setJump(a_sigma, 0.0);
+
+  
+  // Define the multigrid solver
+  AMRMultiGrid<LevelData<MFCellFAB> >   multigridSolver;  
+
+
+  int  numSmooth;
+  Real tolerance;
+
+  pp.get("mg_tol",   tolerance);
+  pp.get("smooth",   numSmooth);
+
+  const int baseLevel   = 0;
+
+  MFSimpleSolver mfSolver;
+  mfSolver.setNumSmooths(numSmooth);
+
+  // Define
+  multigridSolver.define(m_amr->getDomains()[0], *fact, &mfSolver, 1 + finestLevel);
+  multigridSolver.setSolverParameters(numSmooth, numSmooth, numSmooth, 1, 32, tolerance, 1E-60, 1E-60);
+
+  // Solve
+  Vector<LevelData<MFCellFAB>* > phi;
+  Vector<LevelData<MFCellFAB>* > rhs;
+  Vector<LevelData<MFCellFAB>* > res;
+  //  Vector<LevelData<MFCellFAB>* > zer;
+
+  m_amr->alias(phi, a_potential);
+  m_amr->alias(rhs, a_rho);
+  m_amr->alias(res, m_residue);
+  //  m_amr->alias(zer, zero);
+
+  multigridSolver.m_verbosity = 10;
+  multigridSolver.init(phi, rhs, finestLevel, baseLevel);
+
+  pout() << "init done" << endl;
 }
 
 #include <CD_NamespaceFooter.H>

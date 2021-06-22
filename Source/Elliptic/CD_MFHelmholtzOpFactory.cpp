@@ -234,7 +234,7 @@ void MFHelmholtzOpFactory::defineMultigridLevels(){
 	}
 
 	// Do not coarsen further if we end up with a domain smaller than m_bottomDomain. In this case
-	// we will terminate the coarsening and let AMRMultiGrid do the bottom solve. 
+	// we will terminate the coarsening and let AMRMultiGrid do the bottom solve.
 	if(hasCoarser){
 	  if(this->isCoarser(mgMflgCoar.getDomain(), m_bottomDomain)){
 	    hasCoarser = false;
@@ -267,7 +267,7 @@ void MFHelmholtzOpFactory::defineMultigridLevels(){
 	  MFCellFactory       cellFact  (ebislCoar, ebislComps);
 	  MFFluxFactory       fluxFact  (ebislCoar, ebislComps);
 	  MFBaseIVFABFactory  ivFact    (ebislCoar, ebislComps);
-	  BaseIVFactory<Real> irregFact(mgMflgCoar.getEBLevelGrid(m_mainPhase).getEBISL());
+	  BaseIVFactory<Real> irregFact (mgMflgCoar.getEBLevelGrid(m_mainPhase).getEBISL());
 
 	  // Multifluid a bit special -- number of components come in through the factory.
 	  const int dummy = 1;
@@ -353,7 +353,7 @@ bool MFHelmholtzOpFactory::getCoarserLayout(MFLevelGrid& a_coarMflg, const MFLev
 
       hasCoarser = true;
     }
-    else { // Check if we can use box aggregation 
+    else if(false){// { // Check if we can use box aggregation 
       if(isFullyCovered(a_fineMflg)){
 	Vector<Box> boxes;
 	Vector<int> procs;
@@ -402,10 +402,10 @@ MFHelmholtzOp* MFHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
   mflg = m_amrLevelGrids[amrLevel];
   dx   = m_amrResolutions[amrLevel];
 
-  int refToCoar;
+  int refToCoar = 1;
 
   if(hasCoar){
-    mflgCoar = m_amrLevelGrids[amrLevel-1];
+    mflgCoar  = m_amrLevelGrids[amrLevel-1];
     refToCoar = m_amrRefRatios[amrLevel-1];
   }
 
@@ -419,8 +419,11 @@ MFHelmholtzOp* MFHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
   }
 
   if(hasCoar){ // Make a coarser layout
-    this->getCoarserLayout(mflgCoFi, mflg, refToCoar, m_mgBlockingFactor);
-    mflgCoFi.setMaxRefinementRatio(refToCoar);
+    const bool gotCoarse = this->getCoarserLayout(mflgCoFi, mflg, refToCoar, m_mgBlockingFactor);
+    if(refToCoar > 2){
+      mflgCoFi.setMaxRefinementRatio(refToCoar);
+    }
+    CH_assert(gotCoarse);
   }
 
   MFHelmholtzOp* op = new MFHelmholtzOp(mflgFine,
@@ -431,7 +434,7 @@ MFHelmholtzOp* MFHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
 					m_amrInterpolators[amrLevel],
 					m_amrFluxRegisters[amrLevel],
 					m_amrCoarseners[amrLevel],
-					m_domainBcFactory->create(),
+					m_domainBcFactory,
 					m_probLo,
 					dx,
 					refToCoar,
@@ -449,7 +452,8 @@ MFHelmholtzOp* MFHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
 					m_jumpOrder,
 					m_relaxMethod);
 
-  op->setJump(m_amrJump[amrLevel]);
+  // Give the operator access by reference to the jump data. 
+  //  op->setJump(m_amrJump[amrLevel]);
 
   return op;
 }
@@ -472,6 +476,8 @@ int MFHelmholtzOpFactory::refToFiner(const ProblemDomain& a_domain) const {
       ref   = m_amrRefRatios[ilev];
     }
   }
+
+  return ref;
 }
 
 int MFHelmholtzOpFactory::findAmrLevel(const ProblemDomain& a_domain) const {

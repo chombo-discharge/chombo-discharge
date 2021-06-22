@@ -71,10 +71,12 @@ DisjointBoxLayout MFLevelGrid::getGrids() const {
 }
 
 EBLevelGrid& MFLevelGrid::getEBLevelGrid(int a_phase){
+  CH_assert(a_phase < m_eblg.size());
   return m_eblg[a_phase];
 }
 
 const EBLevelGrid& MFLevelGrid::getEBLevelGrid(int a_phase) const {
+  CH_assert(a_phase < m_eblg.size());
   return m_eblg[a_phase];
 }
 
