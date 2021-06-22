@@ -347,7 +347,7 @@ void ProxyFieldSolver::solveEBCond(EBAMRCellData& a_phi, EBAMRCellData& a_residu
   m_amr->alias(res, a_residue);
   m_amr->alias(zer, zero);
 
-  multigridSolver.m_verbosity = 10;
+  //  multigridSolver.m_verbosity = 10;
   multigridSolver.init(phi, rhs, finestLevel, baseLevel);
   multigridSolver.m_convergenceMetric = multigridSolver.computeAMRResidual(zer, rhs, finestLevel, baseLevel);
   multigridSolver.solveNoInit(phi, rhs, finestLevel, baseLevel, false);
@@ -516,6 +516,7 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
   const int finestLevel = m_amr->getFinestLevel();
 
   // Define
+  //  bicgstab.m_verbosity=10;
   multigridSolver.define(m_amr->getDomains()[0], fact, &bicgstab, 1 + finestLevel);
   //  multigridSolver.define(m_amr->getDomains()[0], fact, &simpleSolver, 1 + finestLevel);
   multigridSolver.setSolverParameters(numSmooth, numSmooth, numSmooth, 1, 32, tolerance, 1E-60, 1E-60);
@@ -610,7 +611,6 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
     bottomDomain.coarsen(2);
   }
 
-
   auto pot = [](const RealVect& pos){
     return pos[1];
   };
@@ -659,9 +659,10 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
   const int baseLevel   = 0;
 
   MFSimpleSolver mfSolver;
-  mfSolver.setNumSmooths(100);
+  mfSolver.setNumSmooths(300);
 
   BiCGStabSolver<LevelData<MFCellFAB> > bicgstab;
+  //  bicgstab.m_verbosity=4;
 
   // Define
   //  multigridSolver.define(m_amr->getDomains()[0], *fact, &mfSolver, 1 + finestLevel);

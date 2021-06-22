@@ -368,11 +368,6 @@ protected:
   std::map<int, RefCountedPtr<LevelData<BaseIVFAB<Real> > > > m_dirichletBcValues;
 
   /*!
-    @brief Arihmetic multifluid operators
-  */
-  LevelDataOps<MFCellFAB> m_ops;
-
-  /*!
     @brief Level grid
   */
   MFLevelGrid m_mflg;

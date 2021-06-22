@@ -53,6 +53,7 @@ MFHelmholtzOp::MFHelmholtzOp(const MFLevelGrid&                               a_
 			     const int&                                       a_ebbcOrder,
 			     const int&                                       a_jumpOrder,
 			     const RelaxType&                                 a_relaxType){
+  CH_TIME("MFHelmholtzOp::MFHelmholtzOp");
   m_debug = false;
   ParmParse pp ("MFHelmholtzOp");
   pp.query("debug", m_debug);
@@ -135,44 +136,38 @@ MFHelmholtzOp::MFHelmholtzOp(const MFLevelGrid&                               a_
     m_helmOps.emplace(iphase, oper);
   }
 
-  Vector<EBISLayout> layouts;
-  Vector<int>        comps;
-  for (int iphase = 0; iphase < m_numPhases; iphase++){
-    layouts.push_back(m_mflg.getEBLevelGrid(iphase).getEBISL());
-    comps.push_back(m_nComp);
-  }
-  MFCellFactory* factory = new MFCellFactory(layouts, comps);
-  RefCountedPtr<DataFactory<MFCellFAB> > fac(factory);
-  m_ops.define(fac);
-
-
   //if(m_debug) pout() << "MFHelmholtzOp::MFHelmholtzOp -- end" << endl;
 }
 
 MFHelmholtzOp::~MFHelmholtzOp(){
+  CH_TIME("MFHelmholtzOp::~MFHelmholtzOp");
   //if(m_debug) pout() << "MFHelmholtzOp::~MFHelmholtzOp(begin)" << endl;
   //if(m_debug) pout() << "MFHelmholtzOp::~MFHelmholtzOp(end)" << endl;
 }
 
 void MFHelmholtzOp::setJump(const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_jump){
+  CH_TIME("MFHelmholtzOp::setJump");
   //if(m_debug) pout() << "MFHelmholtzOp::setJump(begin)" << endl;
   m_jump = a_jump;
   //if(m_debug) pout() << "MFHelmholtzOp::setJump(end)" << endl;
 }
 
 int MFHelmholtzOp::refToCoarser() {
+  CH_TIME("MFHelmholtzOp::refToCoarser");
   //if(m_debug) pout() << "MFHelmholtzOp::refToCoarser(begin)" << endl;
   //if(m_debug) pout() << "MFHelmholtzOp::refToCoarser(end)" << endl;
   return m_refToCoar;
 }
 
 unsigned int MFHelmholtzOp::orderOfAccuracy(void) const {
+  CH_TIME("MFHelmholtzOp::orderOfAccuracy");
   //if(m_debug) pout() << "MFHelmholtzOp::orderOfAccuracy(begin)" << endl;
   //if(m_debug) pout() << "MFHelmholtzOp::orderOfAccuracy(end)" << endl;
   return 99;
 }
 
 void MFHelmholtzOp::enforceCFConsistency(LevelData<MFCellFAB>& a_coarCorr, const LevelData<MFCellFAB>& a_fineCorr) {
+  CH_TIME("MFHelmholtzOp::enforceCFConsistency");
   //if(m_debug) pout() << "MFHelmholtzOp::enforceCFConsistency(begin)" << endl;
   for (auto& op : m_helmOps){
     LevelData<EBCellFAB> coarCorr;
@@ -187,6 +182,7 @@ void MFHelmholtzOp::enforceCFConsistency(LevelData<MFCellFAB>& a_coarCorr, const
 }
 
 void MFHelmholtzOp::incr(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs, Real a_scale){
+  CH_TIME("MFHelmholtzOp::incr");
   //if(m_debug) pout() << "MFHelmholtzOp::incr(begin)" << endl;
   for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
     a_lhs[dit()].plus(a_rhs[dit()], a_scale);
@@ -195,8 +191,8 @@ void MFHelmholtzOp::incr(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>
 }
 
 void MFHelmholtzOp::scale(LevelData<MFCellFAB>& a_lhs, const Real& a_scale) {
+  CH_TIME("MFHelmholtzOp::scale");
   //if(m_debug) pout() << "MFHelmholtzOp::scale(begin)" << endl;
-  //  m_ops.scale(a_lhs, a_scale);
   for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
     a_lhs[dit()] *= a_scale;
   }
@@ -204,17 +200,37 @@ void MFHelmholtzOp::scale(LevelData<MFCellFAB>& a_lhs, const Real& a_scale) {
 }
 
 void MFHelmholtzOp::setToZero(LevelData<MFCellFAB>& a_lhs) {
+  CH_TIME("MFHelmholtzOp::setToZero");
   //if(m_debug) pout() << "MFHelmholtzOp::setToZero(begin)" << endl;
-  m_ops.setToZero(a_lhs);
-  // for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
-  //   a_lhs[dit()].setVal(0.0);
-  // }
+#if 0
+  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
+    a_lhs[dit()].setVal(0.0);
+  }
+#else
+  for (auto& op : m_helmOps){
+    LevelData<EBCellFAB> lhs;
+
+    MultifluidAlias::aliasMF(lhs, op.first, a_lhs);
+    op.second->setToZero(lhs);
+  }
+#endif
   //if(m_debug) pout() << "MFHelmholtzOp::setToZero(end)" << endl;
 }
 
 void MFHelmholtzOp::assign(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs) {
+  CH_TIME("MFHelmholtzOp::assign");
   //if(m_debug) pout() << "MFHelmholtzOp::setToZero(assign)" << endl;
-  m_ops.assign(a_lhs, a_rhs);
+  //  a_rhs.copyTo(a_lhs);
+  for (auto& op : m_helmOps){
+    LevelData<EBCellFAB> lhs;
+    LevelData<EBCellFAB> rhs;
+
+    MultifluidAlias::aliasMF(lhs, op.first, a_lhs);
+    MultifluidAlias::aliasMF(rhs, op.first, a_rhs);
+
+    op.second->assign(lhs, rhs);
+  }
+
   // for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
   //   a_lhs[dit()].setVal(0.0);
   //   a_lhs[dit()] += a_rhs[dit()];
@@ -223,6 +239,7 @@ void MFHelmholtzOp::assign(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFA
 }
 
 Real MFHelmholtzOp::norm(const LevelData<MFCellFAB>& a_lhs, int a_order){
+  CH_TIME("MFHelmholtzOp::norm");
   //if(m_debug) pout() << "MFHelmholtzOp::norm(begin)" << endl;
   Real norm = 0.0;
   for (auto& op : m_helmOps){
@@ -230,17 +247,20 @@ Real MFHelmholtzOp::norm(const LevelData<MFCellFAB>& a_lhs, int a_order){
 
     MultifluidAlias::aliasMF(lhs, op.first, a_lhs);
 
-    norm = std::max(norm, op.second->norm(lhs, a_order));
+    const Real curNorm = op.second->norm(lhs, a_order); 
+    norm = std::max(norm, curNorm);
   }
   //if(m_debug) pout() << "MFHelmholtzOp::norm(end)" << endl;
   return norm;
 }
 
 Real MFHelmholtzOp::dotProduct(const LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs) {
-  //  //if(m_debug) pout() << "MFHelmholtzOp::dotProduct(begin)" << endl;
+  CH_TIME("MFHelmholtzOp::dotProduct");
+  //if(m_debug) pout() << "MFHelmholtzOp::dotProduct(begin)" << endl;
+  Real ret = 0.0;
+
   Real accum = 0.0;
   Real volum = 0.0;
-
   for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
     const MFCellFAB& lhs = a_lhs[dit()];
 
@@ -261,20 +281,20 @@ Real MFHelmholtzOp::dotProduct(const LevelData<MFCellFAB>& a_lhs, const LevelDat
   MPI_Allreduce(&volum, &recv, 1, MPI_CH_REAL, MPI_SUM, Chombo_MPI::comm); volum = recv;
 #endif
 
-  Real ret = 0.0;
+
   if(volum > 0.0){
     ret = accum/volum;
   }
-  //  //if(m_debug) pout() << "MFHelmholtzOp::dotProduct(end)" << endl;
+
+  //if(m_debug) pout() << "MFHelmholtzOp::dotProduct(end)" << endl;
 
   return ret;
 }
 
 void MFHelmholtzOp::create(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs){
+  CH_TIME("MFHelmholtzOp::create");
   //if(m_debug) pout() << "MFHelmholtzOp::create(begin) on level = " << m_mflg.getDomain() << endl;
-#if 0
-  m_ops.create(a_lhs, a_rhs);
-#else
+
   Vector<EBISLayout> layouts;
   Vector<int> comps;
   for (int iphase = 0; iphase < m_numPhases; iphase++){
@@ -284,11 +304,12 @@ void MFHelmholtzOp::create(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFA
 
   MFCellFactory cellFact(layouts, comps);
   a_lhs.define(m_mflg.getGrids(), m_nComp, a_rhs.ghostVect(), cellFact);
-#endif
+
   //if(m_debug) pout() << "MFHelmholtzOp::create(end)" << endl;
 }
 
 void MFHelmholtzOp::createCoarser(LevelData<MFCellFAB>& a_coarse, const LevelData<MFCellFAB>& a_fine, bool a_ghosted) {
+  CH_TIME("MFHelmholtzOp::createCoarser");
   //if(m_debug) pout() << "MFHelmholtzOp::createCoarser(begin) on level = " << m_mflg.getDomain() << endl;
   
   Vector<EBISLayout> layouts;
@@ -304,6 +325,7 @@ void MFHelmholtzOp::createCoarser(LevelData<MFCellFAB>& a_coarse, const LevelDat
 }
 
 void MFHelmholtzOp::createCoarsened(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs, const int& a_refRat) {
+  CH_TIME("MFHelmholtzOp::createCoarsened");
   //if(m_debug) pout() << "MFHelmholtzOp::createCoarsened(begin)" << endl;
 
   Vector<EBISLayout> layouts;
@@ -320,12 +342,14 @@ void MFHelmholtzOp::createCoarsened(LevelData<MFCellFAB>& a_lhs, const LevelData
 }
 
 void MFHelmholtzOp::preCond(LevelData<MFCellFAB>& a_corr, const LevelData<MFCellFAB>& a_residual) {
+  CH_TIME("MFHelmholtzOp::preCond");
   //if(m_debug) pout() << "MFHelmholtzOp::preCond(begin)" << endl;
-  this->relax(a_corr, a_residual, 40);
+  this->relax(a_corr, a_residual, 50);
   //if(m_debug) pout() << "MFHelmholtzOp::preCond(end)" << endl;
 }
 
 void MFHelmholtzOp::applyOp(LevelData<MFCellFAB>& a_Lphi, const LevelData<MFCellFAB>& a_phi, bool a_homogeneousPhysBC) {
+  CH_TIME("MFHelmholtzOp::applyOp(small)");
   //if(m_debug) pout() << "MFHelmholtzOp::applyOp(begin)" << endl;
   this->applyOp(a_Lphi, a_phi, nullptr, a_homogeneousPhysBC, true);
   //if(m_debug) pout() << "MFHelmholtzOp::applyOp(end)" << endl;
@@ -336,11 +360,12 @@ void MFHelmholtzOp::applyOp(LevelData<MFCellFAB>&             a_Lphi,
 			    const LevelData<MFCellFAB>* const a_phiCoar,
 			    const bool                        a_homogeneousPhysBC,
 			    const bool                        a_homogeneousCFBC){
+  CH_TIME("MFHelmholtzOp::applyOp(big)");
   //if(m_debug) pout() << "MFHelmholtzOp::applyOp(big, begin)" << endl;
   
   // We MUST have updated ghost cells before applying the matching conditions. 
    this->interpolateCF(a_phi, a_phiCoar, a_homogeneousCFBC);
-   this->updateJumpBC(a_phi, a_homogeneousPhysBC);
+   //this->updateJumpBC(a_phi, a_homogeneousPhysBC);
 
   // Apply the operator on each level. 
   for (auto& op : m_helmOps){
@@ -366,6 +391,7 @@ void MFHelmholtzOp::applyOp(LevelData<MFCellFAB>&             a_Lphi,
 }
 
 void MFHelmholtzOp::interpolateCF(const LevelData<MFCellFAB>& a_phi, const LevelData<MFCellFAB>* a_phiCoar, const bool a_homogeneousCF){
+  CH_TIME("MFHelmholtzOp::interpolateCF");
   //if(m_debug) pout() << "MFHelmholtzOp::interpolateCF(begin)" << endl;
   for (auto& op : m_helmOps){
     LevelData<EBCellFAB> phi;
@@ -390,27 +416,44 @@ void MFHelmholtzOp::interpolateCF(const LevelData<MFCellFAB>& a_phi, const Level
 }
 
 void MFHelmholtzOp::residual(LevelData<MFCellFAB>& a_residual, const LevelData<MFCellFAB>& a_phi, const LevelData<MFCellFAB>& a_rhs, const bool a_homogeneousPhysBC){
+  CH_TIME("MFHelmholtzOp::residual");
   //if(m_debug) pout() << "MFHelmholtzOp::residual(begin)" << endl;
-  // Compute a_residual = rhs - L(phi) 
+  // Compute a_residual = rhs - L(phi)
+
   this->applyOp(a_residual, a_phi, a_homogeneousPhysBC);
 
   this->scale(a_residual, -1.0);
   this->incr(a_residual, a_rhs, 1.0);
 
+
   //if(m_debug) pout() << "MFHelmholtzOp::residual(end)" << endl;
 }
 
 void MFHelmholtzOp::axby(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_x, const LevelData<MFCellFAB>& a_y, const Real a, const Real b) {
+  CH_TIME("MFHelmholtzOp::axby");
   //if(m_debug) pout() << "MFHelmholtzOp::axby(begin)" << endl;
-  m_ops.axby(a_lhs, a_x, a_y, a, b);
+
+  for (auto& op : m_helmOps){
+    LevelData<EBCellFAB> lhs;
+    LevelData<EBCellFAB> x;
+    LevelData<EBCellFAB> y;
+
+    MultifluidAlias::aliasMF(lhs, op.first, a_lhs);
+    MultifluidAlias::aliasMF(x,   op.first, a_x);
+    MultifluidAlias::aliasMF(y,   op.first, a_y);
+
+    op.second->axby(lhs, x, y, a, b);
+  }
   //if(m_debug) pout() << "MFHelmholtzOp::axby(end)" << endl;
 }
 
 void MFHelmholtzOp::updateJumpBC(const LevelData<MFCellFAB>& a_phi, const bool a_homogeneousPhysBC){
+  CH_TIME("MFHelmholtzOp::updateJumpBC");
   //if(m_debug) pout() << "MFHelmholtzOp::updateJumpBC - not implemented" << endl;
 }
 
 void MFHelmholtzOp::relax(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_residual, int a_iterations) {
+  CH_TIME("MFHelmholtzOp::relax");
   //if(m_debug) pout() << "MFHelmholtzOp::relax(begin)" << endl;
   
   // Operators are uncoupled for now.
@@ -427,6 +470,7 @@ void MFHelmholtzOp::relax(LevelData<MFCellFAB>& a_correction, const LevelData<MF
 }
 
 void MFHelmholtzOp::restrictResidual(LevelData<MFCellFAB>& a_resCoar, LevelData<MFCellFAB>& a_phi, const LevelData<MFCellFAB>& a_rhs) {
+  CH_TIME("MFHelmholtzOp::restrictResidual");
   //if(m_debug) pout() << "MFHelmholtzOp::restrictResidual(begin)" << endl;
   for (auto& op : m_helmOps){
     LevelData<EBCellFAB> resCoar;
@@ -443,6 +487,7 @@ void MFHelmholtzOp::restrictResidual(LevelData<MFCellFAB>& a_resCoar, LevelData<
 }
 
 void MFHelmholtzOp::prolongIncrement(LevelData<MFCellFAB>& a_phi, const LevelData<MFCellFAB>& a_correctCoarse) {
+  CH_TIME("MFHelmholtzOp::prolongIncrement");
   //if(m_debug) pout() << "MFHelmholtzOp::prolongIncrement(begin)" << endl;
   for (auto& op : m_helmOps){
     LevelData<EBCellFAB> phi;
@@ -459,10 +504,11 @@ void MFHelmholtzOp::prolongIncrement(LevelData<MFCellFAB>& a_phi, const LevelDat
 void MFHelmholtzOp::AMRUpdateResidual(LevelData<MFCellFAB>&       a_residual,
 				      const LevelData<MFCellFAB>& a_correction,
 				      const LevelData<MFCellFAB>& a_coarseCorrection){
+  CH_TIME("MFHelmholtzOp::AMRUpdateResidual");
   //if(m_debug) pout() << "MFHelmholtzOp::AMRUpdateResidual(begin)" << endl;
 
   // Need to update BC first!
-  this->updateJumpBC(a_correction, true);
+  //this->updateJumpBC(a_correction, true);
 
   for (auto& op : m_helmOps){
     LevelData<EBCellFAB> residual;
@@ -483,6 +529,7 @@ void MFHelmholtzOp::AMRRestrict(LevelData<MFCellFAB>&       a_residualCoarse,
 				const LevelData<MFCellFAB>& a_correction,
 				const LevelData<MFCellFAB>& a_coarseCorrection,
 				bool                        a_skip_res) {
+  CH_TIME("MFHelmholtzOp::AMRRestrict");
   //if(m_debug) pout() << "MFHelmholtzOp::AMRRestrict(begin)" << endl;
   for (auto& op : m_helmOps){
     LevelData<EBCellFAB> residualCoarse;
@@ -501,6 +548,7 @@ void MFHelmholtzOp::AMRRestrict(LevelData<MFCellFAB>&       a_residualCoarse,
 }
 
 void MFHelmholtzOp::AMRProlong(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_coarseCorrection) {
+  CH_TIME("MFHelmholtzOp::AMRProlong");
   //if(m_debug) pout() << "MFHelmholtzOp::AMRProlong(begin)" << endl;
   for (auto& op : m_helmOps){
     LevelData<EBCellFAB> correction;
@@ -521,6 +569,7 @@ void MFHelmholtzOp::AMRResidual(LevelData<MFCellFAB>&              a_residual,
 				const LevelData<MFCellFAB>&        a_rhs,
 				bool                               a_homogeneousPhysBC,
 				AMRLevelOp<LevelData<MFCellFAB> >* a_finerOp) {
+  CH_TIME("MFHelmholtzOp::AMRResidual");
   //if(m_debug) pout() << "MFHelmholtzOp::AMRResidual(begin)" << endl;
   // Make residual = a_rhs - L(phi)
   this->AMROperator(a_residual, a_phiFine, a_phi, a_phiCoar, a_homogeneousPhysBC, a_finerOp);
@@ -536,6 +585,7 @@ void MFHelmholtzOp::AMRResidualNF(LevelData<MFCellFAB>&       a_residual,
 				  const LevelData<MFCellFAB>& a_phiCoar,
 				  const LevelData<MFCellFAB>& a_rhs,
 				  bool                        a_homogeneousPhysBC) {
+  CH_TIME("MFHelmholtzOp::AMRResidualNF");
   //if(m_debug) pout() << "MFHelmholtzOp::AMRResidualNF(begin)" << endl;
   // Make residual = a_rhs - L(phi)  
   this->AMROperatorNF(a_residual, a_phi, a_phiCoar, a_homogeneousPhysBC);
@@ -552,6 +602,7 @@ void MFHelmholtzOp::AMRResidualNC(LevelData<MFCellFAB>&              a_residual,
 				  const LevelData<MFCellFAB>&        a_rhs,
 				  bool                               a_homogeneousPhysBC,
 				  AMRLevelOp<LevelData<MFCellFAB> >* a_finerOp) {
+  CH_TIME("MFHelmholtzOp::AMRResidualNC");
   //if(m_debug) pout() << "MFHelmholtzOp::AMResidualNC(begin)" << endl;
   this->AMROperatorNC(a_residual, a_phiFine, a_phi, a_homogeneousPhysBC, a_finerOp);
 
@@ -565,9 +616,10 @@ void MFHelmholtzOp::AMROperatorNF(LevelData<MFCellFAB>&       a_Lphi,
 				  const LevelData<MFCellFAB>& a_phi,
 				  const LevelData<MFCellFAB>& a_phiCoar,
 				  bool                        a_homogeneousPhysBC) {
+  CH_TIME("MFHelmholtzOp::AMROperatorNF");
   //if(m_debug) pout() << "MFHelmholtzOp::AMROperatorNF(begin)" << endl;
   this->interpolateCF(a_phi, &a_phiCoar, false);
-  this->updateJumpBC(a_phi, a_homogeneousPhysBC);
+  //this->updateJumpBC(a_phi, a_homogeneousPhysBC);
 
   for (auto& op : m_helmOps){
     LevelData<EBCellFAB> Lphi;
@@ -590,10 +642,11 @@ void MFHelmholtzOp::AMROperatorNC(LevelData<MFCellFAB>&              a_Lphi,
 				  const LevelData<MFCellFAB>&        a_phi,
 				  bool                               a_homogeneousPhysBC,
 				  AMRLevelOp<LevelData<MFCellFAB> >* a_finerOp) {
+  CH_TIME("MFHelmholtzOp::AMROperatorNC");
   //if(m_debug) pout() << "MFHelmholtzOp::AMROperatorNC(begin)" << endl;
 
   // Must update the jump BC first. 
-  this->updateJumpBC(a_phi, a_homogeneousPhysBC);
+  //this->updateJumpBC(a_phi, a_homogeneousPhysBC);
 
   for (auto& op : m_helmOps){
     LevelData<EBCellFAB> Lphi;
@@ -618,10 +671,11 @@ void MFHelmholtzOp::AMROperator(LevelData<MFCellFAB>&              a_Lphi,
 				const LevelData<MFCellFAB>&        a_phiCoar,
 				const bool                         a_homogeneousPhysBC,
 				AMRLevelOp<LevelData<MFCellFAB> >* a_finerOp) {
+  CH_TIME("MFHelmholtzOp::AMROperator");
   //if(m_debug) pout() << "MFHelmholtzOp::AMROperator(begin)" << endl;
   // Update ghost cells and jump conditions first.
   this->interpolateCF(a_phi, &a_phiCoar, false);
-  this->updateJumpBC(a_phi, a_homogeneousPhysBC);
+  //this->updateJumpBC(a_phi, a_homogeneousPhysBC);
 
   for (auto& op : m_helmOps){
     LevelData<EBCellFAB> Lphi;
