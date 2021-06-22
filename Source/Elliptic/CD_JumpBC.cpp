@@ -15,7 +15,7 @@
 #include <CD_NamespaceHeader.H>
 
 JumpBC::JumpBC(const MFLevelGrid& a_mflg, const LevelData<MFBaseIVFAB>& a_Bcoef, const Real a_dx, const int a_order, const int a_weight, const int a_radius){
-  MayDay::Warning("JumpBC::JumpBC -- not implemented");
+  //  MayDay::Warning("JumpBC::JumpBC -- not implemented");
 }
 
 JumpBC::~JumpBC(){

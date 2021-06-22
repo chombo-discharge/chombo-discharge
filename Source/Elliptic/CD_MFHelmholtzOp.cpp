@@ -402,6 +402,7 @@ void MFHelmholtzOp::applyOp(LevelData<MFCellFAB>&             a_Lphi,
 void MFHelmholtzOp::interpolateCF(const LevelData<MFCellFAB>& a_phi, const LevelData<MFCellFAB>* a_phiCoar, const bool a_homogeneousCF){
   CH_TIME("MFHelmholtzOp::interpolateCF");
   //if(m_debug) pout() << "MFHelmholtzOp::interpolateCF(begin)" << endl;
+  return;
   for (auto& op : m_helmOps){
     LevelData<EBCellFAB> phi;
     LevelData<EBCellFAB> phiCoar;
