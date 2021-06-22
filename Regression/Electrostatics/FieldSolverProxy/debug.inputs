@@ -23,7 +23,7 @@ AmrMesh.centroid_sten   = linear      # Centroid interp stencils. 'pwl', 'linear
 AmrMesh.eb_sten         = pwl         # EB interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
 AmrMesh.redist_radius   = 1           # Redistribution radius for hyperbolic conservation laws
 AmrMesh.ebcf            = true        # If you have EBCF crossing, this must be true.
-turn_off_multigrid = true
+#turn_off_multigrid = true
 
 # ====================================================================================================
 # DRIVER OPTIONS
@@ -72,7 +72,7 @@ ProxyFieldSolver.solver    = helm        # Our solver ('helmholtz') or ebconduct
 ProxyFieldSolver.eb_bc     = dirichlet   # 'dirichlet', 'neumann', or 'robin'
 ProxyFieldSolver.domain_bc = dirichlet   # 'dirichlet', 'neumann', or 'robin'
 ProxyFieldSolver.eb_order  = 1           # BC order on EB (only for Dirichlet)
-ProxyFieldSolver.eb_weight = 1           # Weighting for least squares (only for helm)
+ProxyFieldSolver.eb_weight = 2           # Weighting for least squares (only for helm)
 ProxyFieldSolver.dom_val   = -1          # Value on domain (For Robin, this is multiplier)
 ProxyFieldSolver.eb_val    = 1           # Value on EB (For robin, this is multiplier)
 ProxyFieldSolver.smooth    = 16          # Smoothings
@@ -99,7 +99,7 @@ RodDielectric.electrode.endpoint2       =  0.5  0.5     # Other endpoint
 RodDielectric.electrode.radius          = 0.025         # Electrode radius
 RodDielectric.electrode.live            = true          # Live or not
 
-RodDielectric.dielectric.on             = false         # Use dielectric or not
+RodDielectric.dielectric.on             = true         # Use dielectric or not
 RodDielectric.dielectric.shape          = sphere        # 'plane', 'box', 'perlin_box', 'sphere'
 RodDielectric.dielectric.permittivity   = 4             # Dielectric permittivity
 

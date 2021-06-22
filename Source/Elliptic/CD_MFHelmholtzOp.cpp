@@ -628,8 +628,11 @@ void MFHelmholtzOp::AMROperatorNF(LevelData<MFCellFAB>&       a_Lphi,
 				  bool                        a_homogeneousPhysBC) {
   CH_TIME("MFHelmholtzOp::AMROperatorNF");
   //if(m_debug) pout() << "MFHelmholtzOp::AMROperatorNF(begin)" << endl;
+
+  // Update ghost cells and jump conditions first. Doing an exchange is not sufficient here because
+  // the jump stencils might reach over CFs. 
   this->interpolateCF(a_phi, &a_phiCoar, false);
-  //this->updateJumpBC(a_phi, a_homogeneousPhysBC);
+  this->updateJumpBC(a_phi, a_homogeneousPhysBC);
 
   for (auto& op : m_helmOps){
     LevelData<EBCellFAB> Lphi;
@@ -655,8 +658,8 @@ void MFHelmholtzOp::AMROperatorNC(LevelData<MFCellFAB>&              a_Lphi,
   CH_TIME("MFHelmholtzOp::AMROperatorNC");
   //if(m_debug) pout() << "MFHelmholtzOp::AMROperatorNC(begin)" << endl;
 
-  // Must update the jump BC first. 
-  //this->updateJumpBC(a_phi, a_homogeneousPhysBC);
+  // Must update the jump BC first. Don't have coarser here so no need for CF interpolation.
+  this->updateJumpBC(a_phi, a_homogeneousPhysBC);
 
   for (auto& op : m_helmOps){
     LevelData<EBCellFAB> Lphi;
@@ -683,9 +686,11 @@ void MFHelmholtzOp::AMROperator(LevelData<MFCellFAB>&              a_Lphi,
 				AMRLevelOp<LevelData<MFCellFAB> >* a_finerOp) {
   CH_TIME("MFHelmholtzOp::AMROperator");
   //if(m_debug) pout() << "MFHelmholtzOp::AMROperator(begin)" << endl;
-  // Update ghost cells and jump conditions first.
+  
+  // Update ghost cells and jump conditions first. Doing an exchange is not sufficient here because
+  // the jump stencils might reach over CFs. 
   this->interpolateCF(a_phi, &a_phiCoar, false);
-  //this->updateJumpBC(a_phi, a_homogeneousPhysBC);
+  this->updateJumpBC(a_phi, a_homogeneousPhysBC);
 
   for (auto& op : m_helmOps){
     LevelData<EBCellFAB> Lphi;
