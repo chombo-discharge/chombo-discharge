@@ -42,6 +42,7 @@ public:
     @brief Relaxation method for the operators
   */
   enum class RelaxationMethod {
+    NoRelax,
     PointJacobi,
     GauSaiRedBlack,
     GauSaiMultiColor,

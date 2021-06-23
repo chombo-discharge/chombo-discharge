@@ -7,14 +7,12 @@
   @file   CD_EBHelmholtzOp.cpp
   @brief  Implementation of CD_EBHelmholtzOp.H
   @author Robert Marskar
-  @todo   Replace EBAMRPoissonOp::staticMaxNorm and don't use EBAMRPoissonOp dependencies
   @note   If this ever breaks, we should look into the division by the relaxation factor and applyDomainFlux, both of which do not guard against divide-by-zero. 
 */
 
 // Chombo includes
 #include <EBLevelDataOps.H>
 #include <EBCellFactory.H>
-#include <EBAMRPoissonOp.H>
 
 // Our includes
 #include <CD_EBHelmholtzOp.H>
@@ -361,15 +359,35 @@ void EBHelmholtzOp::scale(LevelData<EBCellFAB>& a_lhs, const Real& a_scale) {
 }
 
 Real EBHelmholtzOp::norm(const LevelData<EBCellFAB>& a_rhs, const int a_order) {
-  Real maxNorm = EBAMRPoissonOp::staticMaxNorm(a_rhs, m_eblg);
+  Real globalNorm = 0.0;
+  Real localNorm  = 0.0;
+  
+  for (DataIterator dit = a_rhs.dataIterator(); dit.ok(); ++dit){
+    const EBCellFAB& rhs       = a_rhs[dit()];
+    const FArrayBox& regRhs    = rhs.getFArrayBox();
+    const EBISBox& ebisbox     = rhs.getEBISBox();
+    const EBGraph& ebgraph     = ebisbox.getEBGraph();
+    const Box box              = a_rhs.disjointBoxLayout()[dit()];
+    const IntVectSet& irregIVS = ebisbox.getIrregIVS(box);
+
+    // Can replace with Fortran kernel if we need to.
+    for (BoxIterator bit(box); bit.ok(); ++bit){
+      const IntVect iv = bit();
+      if(ebisbox.isRegular(iv)) localNorm = std::max(localNorm, std::abs(regRhs(iv, m_comp)));
+    }
+
+    for (VoFIterator vofit(irregIVS, ebgraph); vofit.ok(); ++vofit){
+      localNorm = std::max(localNorm, std::abs(rhs(vofit(), m_comp)));
+    }
+  }
 
 #ifdef CH_MPI
-  Real tmp = 1;
-  MPI_Allreduce(&maxNorm, &tmp, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
-  maxNorm = tmp;
+  MPI_Allreduce(&localNorm, &globalNorm, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
+#else
+  globalNorm = localNorm;
 #endif
-
-  return maxNorm;
+  
+  return globalNorm;
 }
 
 void EBHelmholtzOp::setToZero(LevelData<EBCellFAB>& a_lhs) {
@@ -732,6 +750,8 @@ void EBHelmholtzOp::interpolateCF(LevelData<EBCellFAB>& a_phiFine, const LevelDa
 
 void EBHelmholtzOp::relax(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, int a_iterations){
   switch(m_relaxationMethod){
+  case RelaxationMethod::NoRelax: // Don't know why you would do this. 
+    break;
   case RelaxationMethod::PointJacobi:
     this->relaxPointJacobi(a_correction, a_residual, a_iterations);
     break;
@@ -906,8 +926,6 @@ void EBHelmholtzOp::relaxGSMultiColorFast(LevelData<EBCellFAB>& a_correction, co
 	EBCellFAB&       phi = a_correction[dit()];
 	const EBCellFAB& rhs = a_residual[dit()];
 	const Box cellBox    = dbl[dit()];
-
-
 
 	BaseFab<Real>& regPhi       = phi.getSingleValuedFAB();
 	const BaseFab<Real>& regRhs = rhs.getSingleValuedFAB();
