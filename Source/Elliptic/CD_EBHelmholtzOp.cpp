@@ -737,6 +737,7 @@ void EBHelmholtzOp::relax(LevelData<EBCellFAB>& a_correction, const LevelData<EB
     break;
   case RelaxationMethod::GauSaiRedBlack:
     this->relaxGSRedBlack(a_correction, a_residual, a_iterations);
+    break;
   case RelaxationMethod::GauSaiMultiColor:
     this->relaxGSMultiColor(a_correction, a_residual, a_iterations);
     break;
