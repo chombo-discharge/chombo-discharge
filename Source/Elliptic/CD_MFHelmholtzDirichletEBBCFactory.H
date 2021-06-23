@@ -79,7 +79,7 @@ public:
     @brief Factory method
     @param[in] a_jumpBC Jump bc object. 
   */
-  RefCountedPtr<EBHelmholtzEBBC> create(const RefCountedPtr<JumpBC>& a_jumpBC) override;
+  RefCountedPtr<EBHelmholtzEBBC> create(const int a_iphase, const RefCountedPtr<JumpBC>& a_jumpBC) const override;
 
 protected:
 

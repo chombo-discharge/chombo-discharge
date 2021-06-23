@@ -60,7 +60,7 @@ void MFHelmholtzDirichletEBBCFactory::setValue(const std::function<Real(const Re
   m_functionValue = a_value;
 }
 
-RefCountedPtr<EBHelmholtzEBBC> MFHelmholtzDirichletEBBCFactory::create(const RefCountedPtr<JumpBC>& a_jumpBC) {
+RefCountedPtr<EBHelmholtzEBBC> MFHelmholtzDirichletEBBCFactory::create(const int a_iphase, const RefCountedPtr<JumpBC>& a_jumpBC) const {
   auto bc = new MFHelmholtzDirichletEBBC(a_jumpBC);
 
   bc->setOrder(m_order);

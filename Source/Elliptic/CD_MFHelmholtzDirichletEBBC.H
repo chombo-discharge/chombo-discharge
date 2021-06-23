@@ -45,6 +45,11 @@ protected:
     @brief Jump bc object
   */
   RefCountedPtr<JumpBC> m_jumpBC;
+
+  /*!
+    @brief Phase
+  */
+  int m_phase;
 };
 
 #include <CD_NamespaceFooter.H>

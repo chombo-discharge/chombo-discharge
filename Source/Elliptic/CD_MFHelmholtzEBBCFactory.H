@@ -37,7 +37,7 @@ public:
   /*!
     @brief Factory method for 
   */
-  virtual RefCountedPtr<EBHelmholtzEBBC> create(const RefCountedPtr<JumpBC>& a_jumpBC) = 0;
+  virtual RefCountedPtr<EBHelmholtzEBBC> create(const int a_iphase, const RefCountedPtr<JumpBC>& a_jumpBC) const = 0;
 
 };
 
