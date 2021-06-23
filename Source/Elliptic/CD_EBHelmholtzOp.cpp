@@ -8,6 +8,8 @@
   @brief  Implementation of CD_EBHelmholtzOp.H
   @author Robert Marskar
   @note   If this ever breaks, we should look into the division by the relaxation factor and applyDomainFlux, both of which do not guard against divide-by-zero. 
+  @todo   The relaxation kernels should have memory outside of the kernels for easier access from MFHelmholtzOp.
+  @todo   The relaxation kernels should (probably) have a public interface so MFHelmholtzOp can use them. 
 */
 
 // Chombo includes
@@ -799,7 +801,7 @@ void EBHelmholtzOp::relaxGSRedBlack(LevelData<EBCellFAB>& a_correction, const Le
   }
 }
 
-void EBHelmholtzOp::gauSaiRedBlack(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_rhs, const int& a_redBlack){
+void EBHelmholtzOp::gauSaiRedBlack(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_rhs, const int& a_redBlack) const {
   const DisjointBoxLayout& dbl = a_phi.disjointBoxLayout();
   
   for (DataIterator dit(dbl); dit.ok(); ++dit){
@@ -851,7 +853,7 @@ void EBHelmholtzOp::relaxGSMultiColor(LevelData<EBCellFAB>& a_correction, const 
   }
 }
 
-void EBHelmholtzOp::gauSaiMultiColor(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_rhs, const IntVect& a_color){
+void EBHelmholtzOp::gauSaiMultiColor(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_rhs, const IntVect& a_color) const {
   const DisjointBoxLayout& dbl = a_phi.disjointBoxLayout();
   
   for (DataIterator dit(dbl); dit.ok(); ++dit){

@@ -118,7 +118,6 @@ public:
     @details This just runs a few relaxations. 
   */
   void preCond(LevelData<EBCellFAB>& a_corr, const LevelData<EBCellFAB>& a_residual) override final;
-
   
   /*!
     @brief Apply coarse-fine boundary conditions
@@ -130,6 +129,7 @@ public:
 
   /*!
     @brief Do homogeneous coarse-fine interpolation
+    @param[in] a_phi Data
   */
   void homogeneousCFInterp(LevelData<EBCellFAB>& a_phi);
 
@@ -139,6 +139,24 @@ public:
     @param[inout] a_phiCoar Coarse data. 
   */
   void inhomogeneousCFInterp(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_phiCoar);
+
+    /*!
+    @brief Red-black Gauss-Seidel kernel. Public because MFHelmholtzOp may want to use it. 
+    @param[in] a_phi Correction
+    @param[in] a_phi Lphi L(corrcetion)
+    @param[in] a_rhs Residual
+    @param[in] a_color "Color":
+  */
+  void gauSaiRedBlack(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_rhs, const int& a_redBlack) const;
+  
+  /*!
+    @brief Multi-colored Gauss-Seidel kernel. Public because MFHelmholtzOp may want to use use. 
+    @param[in] a_phi Correction
+    @param[in] a_phi Lphi L(corrcetion)
+    @param[in] a_rhs Residual
+    @param[in] a_color "Color":
+  */
+  void gauSaiMultiColor(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_rhs, const IntVect& a_color) const;
 
   /*!
     @brief Apply operator on this level. This is a more general version which can turn on/off homogeneous and CF bcs.
@@ -669,22 +687,22 @@ protected:
   /*!
     @brief VoFIterator for irregular cells
   */
-  LayoutData<VoFIterator> m_vofIterIrreg;
+  mutable LayoutData<VoFIterator> m_vofIterIrreg;
 
   /*!
     @brief VoFIterator for "multi-cells". 
   */
-  LayoutData<VoFIterator> m_vofIterMulti;
+  mutable LayoutData<VoFIterator> m_vofIterMulti;
 
   /*!
     @brief VoF iterators for lo domain side. 
   */
-  LayoutData<VoFIterator> m_vofIterDomLo[SpaceDim];
+  mutable LayoutData<VoFIterator> m_vofIterDomLo[SpaceDim];
 
   /*!
     @brief VoF iterators for hi domain side
   */
-  LayoutData<VoFIterator> m_vofIterDomHi[SpaceDim];
+  mutable LayoutData<VoFIterator> m_vofIterDomHi[SpaceDim];
 
   /*!
     @brief Domain boxes on each side
@@ -709,8 +727,7 @@ protected:
   LayoutData<BaseIVFAB<Real> >     m_cacheEBxDomainFluxHi[8][SpaceDim];
   LayoutData<RefCountedPtr<EBStencil> >  m_colorEBStencil[8];
 #endif
-
-
+  
   /*!
     @brief Jacobi relaxation
     @param[inout] a_correction Correction
@@ -726,32 +743,14 @@ protected:
     @param[in]    a_iterations Number of iterations
   */
   void relaxGSRedBlack(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations);
-  
-  /*!
-    @brief Red-black Gauss-Seidel kernel
-    @param[in] a_phi Correction
-    @param[in] a_phi Lphi L(corrcetion)
-    @param[in] a_rhs Residual
-    @param[in] a_color "Color":
-  */
-  void gauSaiRedBlack(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_rhs, const int& a_redBlack);
 
-    /*!
+  /*!
     @brief Multi-colored gauss-seidel relaxation
     @param[inout] a_correction Correction
     @param[in]    a_residual   Residual
     @param[in]    a_iterations Number of iterations
   */
   void relaxGSMultiColor(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations);
-
-  /*!
-    @brief Multi-colored Gauss-Seidel kernel
-    @param[in] a_phi Correction
-    @param[in] a_phi Lphi L(corrcetion)
-    @param[in] a_rhs Residual
-    @param[in] a_color "Color":
-  */
-  void gauSaiMultiColor(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_rhs, const IntVect& a_color);
 
   /*!
     @brief Fast Gauss-seidel relaxation
