@@ -13,7 +13,8 @@
 #include <CD_MFHelmholtzDirichletEBBC.H>
 #include <CD_NamespaceHeader.H>
 
-MFHelmholtzDirichletEBBC::MFHelmholtzDirichletEBBC(const RefCountedPtr<JumpBC>& a_jumpBC){
+MFHelmholtzDirichletEBBC::MFHelmholtzDirichletEBBC(const int a_phase, const RefCountedPtr<JumpBC>& a_jumpBC){
+  m_phase  = a_phase;
   m_jumpBC = a_jumpBC;
 
   m_order       = -1;

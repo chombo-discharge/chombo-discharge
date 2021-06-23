@@ -61,13 +61,49 @@ public:
   JumpBC& operator=(const JumpBC& a_other) = delete;
 
   /*!
-    @breif Return stencils
+    @brief Define function. Builds stencils. 
   */
-  const LayoutData<MFInterfaceFAB<VoFStencil> >& getStencils() const;
-
-
-protected:
+  void define(const MFLevelGrid& a_mflg, const LevelData<MFBaseIVFAB>& a_Bcoef, const Real a_dx, const int a_order, const int a_weight, const int a_radius);
   
+  /*!
+    @brief Return average stencils over EB faces. 
+  */
+  virtual const BaseIVFAB<VoFStencil>& getAvgStencils(const int a_phase, const DataIndex& a_dit) const;
+
+  /*!
+    @brief Get inhomogeneous contribution (part that is proportional to sigma). 
+    @param[in] a_phase Phase
+    @param[in] a_dit   Grid index
+    @return Returns inhomgoeneous contribution to phase a_phase
+  */
+  virtual const BaseIVFAB<Real>& getInhomogeneousContribution(const int a_phase, const DataIndex& a_dit) const;
+
+  /*!
+    @brief Get homogeneous contribution to phase a_phase (part that only affects interior cells, including cells on the other phase). 
+    @param[in] a_phase Phase
+    @param[in] a_dit   Grid index
+    @return Returns homogeneous contribution to phase a_phase
+  */
+  virtual const BaseIVFAB<Real>& getHomogeneousContribution(const int a_phase, const DataIndex& a_dit) const;
+  
+protected:
+
+  MFLevelGrid m_mflg;
+
+  /*!
+    @brief Computed inhomogeneous contribution
+  */
+  LayoutData<MFInterfaceFAB<Real> > m_inhomogeneousContrib;
+
+  /*!
+    @brief Computed homogeneous contribution
+  */
+  LayoutData<MFInterfaceFAB<Real> > m_homogeneousContrib;
+
+  /*!
+    @brief Average stencil
+  */
+  LayoutData<MFInterfaceFAB<VoFStencil> > m_avgStencils;
 };
 
 #include <CD_NamespaceFooter.H>
