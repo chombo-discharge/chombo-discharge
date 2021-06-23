@@ -41,26 +41,26 @@ public:
     @param[in] a_order Order
     @note The order is also the attempted radius of the stencil. 
   */
-  void setOrder(const int a_order);
+  virtual void setOrder(const int a_order);
 
-    /*!
+  /*!
     @brief Set stencil weights
     @param[in] a_weight Weighting factor for least squares stencils
     @note a_weight=0 can lead to ill-conditioned systems.
   */
-  void setWeight(const int a_weight);
+  virtual void setWeight(const int a_weight);
 
   /*!
     @brief Set the value on the EB. 
     @param[in] a_value Constant value on EB
   */
-  void setValue(const int a_value);
+  virtual void setValue(const int a_value);
 
   /*!
     @brief Set the value on the EB. 
     @param[in] a_value Spatially dependent value on EB
   */
-  void setValue(const std::function<Real(const RealVect& a_pos)>& a_value);
+  virtual void setValue(const std::function<Real(const RealVect& a_pos)>& a_value);
 
 protected:
 
@@ -130,11 +130,11 @@ protected:
     @return If this returns true, a_stencil contains a valid stencil and weight. 
     @note Stencils are computed using weighted least squares with squared inverse distance weighting. 
   */
-  bool getLeastSquaresStencil(std::pair<Real, VoFStencil>& a_stencil,
-			      const VolIndex&              a_vof,
-			      const VofUtils::Neighborhood a_neighborhood,
-			      const DataIndex&             a_dit,
-			      const int                    a_order) const;
+  virtual bool getLeastSquaresStencil(std::pair<Real, VoFStencil>& a_stencil,
+				      const VolIndex&              a_vof,
+				      const VofUtils::Neighborhood a_neighborhood,
+				      const DataIndex&             a_dit,
+				      const int                    a_order) const;
 
   /*!
     @brief Get johansen stencil with specified order. Not used but exists for backward compatibility testing and debugging. 
@@ -144,7 +144,7 @@ protected:
     @param[in]  a_order   Attempted order for stencil. This is also the stencil radius. 
     @return If this returns true, a_stencil contains a valid stencil and weight. 
   */
-  bool getJohansenStencil(std::pair<Real, VoFStencil>& a_stencil, const VolIndex& a_vof, const DataIndex& a_dit, const int a_order) const;
+  virtual bool getJohansenStencil(std::pair<Real, VoFStencil>& a_stencil, const VolIndex& a_vof, const DataIndex& a_dit, const int a_order) const;
 
   /*!
     @brief Get Chombo's least squares gradient stencil. Not used but kept for backward compatibility testing and debugging. 
@@ -154,7 +154,7 @@ protected:
     @param[in]  a_order   Attempted order for stencil. This is also the stencil radius. 
     @return If this returns true, a_stencil contains a valid stencil and weight. 
   */
-  bool getChomboLsqStencil(std::pair<Real, VoFStencil>& a_stencil, const VolIndex& a_vof, const DataIndex& a_dit) const;
+  virtual bool getChomboLsqStencil(std::pair<Real, VoFStencil>& a_stencil, const VolIndex& a_vof, const DataIndex& a_dit) const;
 
 };
 

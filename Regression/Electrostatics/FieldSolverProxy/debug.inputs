@@ -8,7 +8,7 @@ AmrMesh.coarsest_domain = 64 64      # Number of cells on coarsest domain
 AmrMesh.max_amr_depth   = 6           # Maximum amr depth
 AmrMesh.max_sim_depth   = -1          # Maximum simulation depth
 AmrMesh.fill_ratio      = 1.0         # Fill ratio for grid generation
-AmrMesh.irreg_growth    = 0           # How much to grow irregular tagged cells
+AmrMesh.irreg_growth    = 2           # How much to grow irregular tagged cells
 AmrMesh.buffer_size     = 1           # Number of cells between grid levels
 AmrMesh.grid_algorithm  = tiled       # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
 AmrMesh.box_sorting     = morton      # 'none', 'shuffle', 'morton'
@@ -23,7 +23,7 @@ AmrMesh.centroid_sten   = linear      # Centroid interp stencils. 'pwl', 'linear
 AmrMesh.eb_sten         = pwl         # EB interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
 AmrMesh.redist_radius   = 1           # Redistribution radius for hyperbolic conservation laws
 AmrMesh.ebcf            = true        # If you have EBCF crossing, this must be true.
-#turn_off_multigrid = true
+turn_off_multigrid = true
 
 # ====================================================================================================
 # DRIVER OPTIONS
@@ -52,7 +52,7 @@ Driver.num_plot_ghost                  = 1                # Number of ghost cell
 Driver.plt_vars                        = 0                # 'tags', 'mpi_rank', 'levelset'
 Driver.restart                         = 0                # Restart step (less or equal to 0 implies fresh simulation)
 Driver.allow_coarsening                = true             # Allows removal of grid levels according to CellTagger
-Driver.refine_curvature                = 10.             # Curvature based refinement. Refines cells if curvature*dx*this > 1
+Driver.refine_curvature                = 100.             # Curvature based refinement. Refines cells if curvature*dx*this > 1
 Driver.refine_geometry                 = 0                # Refine geometry, -1 => Refine all the way down
 Driver.refine_electrodes               = -1               # Refine electrode surfaces. -1 => equal to refine_geometry
 Driver.refine_dielectrics              = -1               # Refine dielectric surfaces. -1 => equal to refine_geometry
@@ -71,7 +71,7 @@ ProxyFieldSolver.bco       = 1.0         # B-coefficient
 ProxyFieldSolver.solver    = helm        # Our solver ('helmholtz') or ebconductivity op 'ebcond'
 ProxyFieldSolver.eb_bc     = dirichlet   # 'dirichlet', 'neumann', or 'robin'
 ProxyFieldSolver.domain_bc = dirichlet   # 'dirichlet', 'neumann', or 'robin'
-ProxyFieldSolver.eb_order  = 1           # BC order on EB (only for Dirichlet)
+ProxyFieldSolver.eb_order  = 2           # BC order on EB (only for Dirichlet)
 ProxyFieldSolver.eb_weight = 1           # Weighting for least squares (only for helm)
 ProxyFieldSolver.dom_val   = -1          # Value on domain (For Robin, this is multiplier)
 ProxyFieldSolver.eb_val    = 2           # Value on EB (For robin, this is multiplier)
@@ -99,7 +99,7 @@ RodDielectric.electrode.endpoint2       =  0.5  0.5     # Other endpoint
 RodDielectric.electrode.radius          = 0.025         # Electrode radius
 RodDielectric.electrode.live            = true          # Live or not
 
-RodDielectric.dielectric.on             = false         # Use dielectric or not
+RodDielectric.dielectric.on             = true          # Use dielectric or not
 RodDielectric.dielectric.shape          = sphere        # 'plane', 'box', 'perlin_box', 'sphere'
 RodDielectric.dielectric.permittivity   = 4             # Dielectric permittivity
 

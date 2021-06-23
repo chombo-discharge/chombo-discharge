@@ -529,7 +529,7 @@ void EBHelmholtzOp::applyOp(LevelData<EBCellFAB>&             a_Lphi,
     
     // Now do the terms with beta*phi
     this->applyOpRegular(  a_Lphi[dit()], phi[dit()], cellBox, dit(), a_homogeneousPhysBC);
-    this->applyOpIrregular(a_Lphi[dit()], phi[dit()], cellBox, dit(), a_homogeneousPhysBC); // Overwrites result in irregular cells. 
+    this->applyOpIrregular(a_Lphi[dit()], phi[dit()], cellBox, dit(), a_homogeneousPhysBC); // Overwrites result in irregular cells.
   }
 }
 

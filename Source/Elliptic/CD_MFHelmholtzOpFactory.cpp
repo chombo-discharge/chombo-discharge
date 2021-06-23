@@ -382,7 +382,18 @@ bool MFHelmholtzOpFactory::getCoarserLayout(MFLevelGrid& a_coarMflg, const MFLev
 }
 
 MFHelmholtzOp* MFHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bool a_homogeneousOnly) {
-  return nullptr; // Multigrid turned off, for now. 
+  MFHelmholtzOp* mgOp;
+  
+  ParmParse pp;
+  bool turnOffMG = false;
+  pp.query("turn_off_multigrid", turnOffMG);
+  if(turnOffMG){
+    pout() << "turning off multigrid for EBHelmholtzOpFactory because 'turn_off_multigrid' = true" << endl;
+    return mgOp;
+  }
+
+  MayDay::Abort("MFHelmholtzOpFactory::MGnewOp -- MG not supported. Please run with 'turn_off_multigrid=true'");
+
 }
 
 MFHelmholtzOp* MFHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {

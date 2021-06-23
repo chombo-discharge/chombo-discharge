@@ -74,6 +74,9 @@ RefCountedPtr<EBHelmholtzEBBC> EBHelmholtzDirichletEBBCFactory::create() {
   else if(m_useFunction){
     bc->setValue(m_functionValue);
   }
+  else{
+    MayDay::Error("EBHelmholtzDirichletEBBCFactory::create() - logic bust. Not using constant or function");
+  }
 
   return RefCountedPtr<EBHelmholtzEBBC>(bc);
 }
