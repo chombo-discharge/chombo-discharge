@@ -25,20 +25,19 @@ class MFHelmholtzDirichletEBBC : public EBHelmholtzDirichletEBBC {
 public:
 
   /*!
-    @brief Disallowed weak constructor. 
+    @brief Disallowed weak constructor. Factory must call the other version. 
   */
-  MFHelmholtzDirichletEBBC();
+  MFHelmholtzDirichletEBBC() = delete;
+
+  /*!
+    @brief Full constructor
+  */
+  MFHelmholtzDirichletEBBC(const RefCountedPtr<JumpBC>& a_jumpBC);
 
   /*!
     @brief Default constructor
   */
   ~MFHelmholtzDirichletEBBC();
-
-  /*!
-    @brief Set jump bc. Must be done prior to calling define
-    @param[in] a_jumpBC Jump bc object. 
-  */
-  void setJumpBC(const RefCountedPtr<JumpBC>& a_jumpBC);
 
 protected:
 
@@ -46,12 +45,6 @@ protected:
     @brief Jump bc object
   */
   RefCountedPtr<JumpBC> m_jumpBC;
-
-  /*!
-    @brief Define function. 
-    @note Overriding this because this BC class must adjust the stencils for the "matching condition". 
-  */
-  virtual void define() override;
 };
 
 #include <CD_NamespaceFooter.H>

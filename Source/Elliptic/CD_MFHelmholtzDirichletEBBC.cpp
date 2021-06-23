@@ -9,21 +9,21 @@
   @author Robert Marskar
 */
 
-
 // Our includes
 #include <CD_MFHelmholtzDirichletEBBC.H>
 #include <CD_NamespaceHeader.H>
 
-MFHelmholtzDirichletEBBC::MFHelmholtzDirichletEBBC() : EBHelmholtzDirichletEBBC() {
+MFHelmholtzDirichletEBBC::MFHelmholtzDirichletEBBC(const RefCountedPtr<JumpBC>& a_jumpBC){
+  m_jumpBC = a_jumpBC;
 
+  m_order       = -1;
+  m_weight      = -1;
+  m_useConstant = false;
+  m_useFunction = false;
 }
 
 MFHelmholtzDirichletEBBC::~MFHelmholtzDirichletEBBC(){
 
-}
-
-void MFHelmholtzDirichletEBBC::define() {
-  EBHelmholtzDirichletEBBC::define();
 }
 
 #include <CD_NamespaceFooter.H>

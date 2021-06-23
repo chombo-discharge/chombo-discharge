@@ -13,14 +13,14 @@
 #define CD_MFHelmholtzDirichletEBBCFactory_H
 
 // Our includes
-#include <CD_EBHelmholtzDirichletEBBCFactory.H>
+#include <CD_MFHelmholtzEBBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
   @brief Class for making Dirichlet boundary conditions on the EB in a multifluid context. 
   @note This class reuses EBHelmholtzDirichletEBBCFactory, but adjusts these on a subset of cells (the "matching" cells). 
 */
-class MFHelmholtzDirichletEBBCFactory : public EBHelmholtzDirichletEBBCFactory {
+class MFHelmholtzDirichletEBBCFactory : public MFHelmholtzEBBCFactory {
 public:
 
   /*!
@@ -50,10 +50,68 @@ public:
   ~MFHelmholtzDirichletEBBCFactory();
 
   /*!
-    @brief Factory method
+    @brief Set BC order
+    @param[in] a_order Approximation order (1 and 2 are accepted)
+    @note For least squares, the order is also the attempted radius of the stencil. 
   */
-  RefCountedPtr<EBHelmholtzEBBC> create() override;
+  virtual void setOrder(const int a_order);
 
+  /*!
+    @brief Set BC order
+    @param[in] a_weight Weight for least squares stencils. 
+    @note a_weight = 0 can lead to ill-conditioned least-squares systems. 
+  */
+  virtual void setWeight(const int a_weight);
+
+  /*!
+    @brief Set the value on the EB. 
+    @param[in] a_value Constant value on EB
+  */
+  virtual void setValue(const Real a_value);
+
+  /*!
+    @brief Set the spatially varying value on the EB. 
+    @param[in] a_value Spatially dependent value on EB
+  */
+  virtual void setValue(const std::function<Real(const RealVect& a_pos)>& a_value);
+
+  /*!
+    @brief Factory method
+    @param[in] a_jumpBC Jump bc object. 
+  */
+  RefCountedPtr<EBHelmholtzEBBC> create(const RefCountedPtr<JumpBC>& a_jumpBC) override;
+
+protected:
+
+  /*!
+    @brief Use constant for BC
+  */
+  bool m_useConstant;
+
+  /*!
+    @brief Use function for BC value
+  */
+  bool m_useFunction;
+
+  /*!
+    @brief Stencil approximation order,
+  */
+  int m_order;
+
+  /*!
+    @brief Stencil weighting
+  */
+  int m_weight;
+
+  /*!
+    @brief Value on EB
+  */
+  Real m_constantValue;
+
+  /*!
+    @brief Value on the EB. 
+  */
+  std::function<Real(const RealVect& a_pos) > m_functionValue;
 };
 
 #include <CD_NamespaceFooter.H>

@@ -14,23 +14,54 @@
 #include <CD_MFHelmholtzDirichletEBBC.H>
 #include <CD_NamespaceHeader.H>
 
-MFHelmholtzDirichletEBBCFactory::MFHelmholtzDirichletEBBCFactory()
-  : EBHelmholtzDirichletEBBCFactory(){
+MFHelmholtzDirichletEBBCFactory::MFHelmholtzDirichletEBBCFactory(){
+  m_order       = -1;
+  m_weight      = -1;
+  m_useConstant = false;
+  m_useFunction = false;
 }
 
-MFHelmholtzDirichletEBBCFactory::MFHelmholtzDirichletEBBCFactory(const int a_order, const int a_weight, const Real a_value)
-  : EBHelmholtzDirichletEBBCFactory(a_order, a_weight, a_value){
+MFHelmholtzDirichletEBBCFactory::MFHelmholtzDirichletEBBCFactory(const int a_order, const int a_weight, const Real a_value){
+  this->setOrder(a_order);
+  this->setWeight(a_weight);
+  this->setValue(a_value);
 }
 
-MFHelmholtzDirichletEBBCFactory::MFHelmholtzDirichletEBBCFactory(const int a_order, const int a_weight, const std::function<Real(const RealVect& a_pos)>& a_value)
-  : EBHelmholtzDirichletEBBCFactory(a_order, a_weight, a_value){
+MFHelmholtzDirichletEBBCFactory::MFHelmholtzDirichletEBBCFactory(const int a_order, const int a_weight, const std::function<Real(const RealVect& a_pos)>& a_value){
+  this->setOrder(a_order);
+  this->setWeight(a_weight);
+  this->setValue(a_value);
 }
 
 MFHelmholtzDirichletEBBCFactory::~MFHelmholtzDirichletEBBCFactory(){
 }
 
-RefCountedPtr<EBHelmholtzEBBC> MFHelmholtzDirichletEBBCFactory::create() {
-  auto bc = new MFHelmholtzDirichletEBBC();
+void MFHelmholtzDirichletEBBCFactory::setOrder(const int a_order){
+  CH_assert(a_order > 0);
+  m_order = a_order;
+}
+
+void MFHelmholtzDirichletEBBCFactory::setWeight(const int a_weight){
+  CH_assert(a_weight > 0);
+  m_weight = a_weight;
+}
+
+void MFHelmholtzDirichletEBBCFactory::setValue(const Real a_value){
+  m_useConstant = true;
+  m_useFunction = false;
+  
+  m_constantValue = a_value;
+}
+
+void MFHelmholtzDirichletEBBCFactory::setValue(const std::function<Real(const RealVect& a_pos)>& a_value){
+  m_useConstant = false;
+  m_useFunction = true;
+  
+  m_functionValue = a_value;
+}
+
+RefCountedPtr<EBHelmholtzEBBC> MFHelmholtzDirichletEBBCFactory::create(const RefCountedPtr<JumpBC>& a_jumpBC) {
+  auto bc = new MFHelmholtzDirichletEBBC(a_jumpBC);
 
   bc->setOrder(m_order);
   bc->setWeight(m_weight);
@@ -44,7 +75,7 @@ RefCountedPtr<EBHelmholtzEBBC> MFHelmholtzDirichletEBBCFactory::create() {
     MayDay::Error("MFHelmholtzDirichletEBBCFactory::create() - logic bust. Not using constant or function");
   }
 
-  return RefCountedPtr<EBHelmholtzEBBC>(bc);
+  return RefCountedPtr<EBHelmholtzEBBC> (bc);
 }
 
 #include <CD_NamespaceFooter.H>
