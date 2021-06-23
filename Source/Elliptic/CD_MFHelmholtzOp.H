@@ -35,7 +35,14 @@
 class MFHelmholtzOp : public AMRLevelOp<LevelData<MFCellFAB> > {
 public:
 
-  using RelaxType = EBHelmholtzOp::RelaxationMethod;
+  /*!
+    @brief Relaxation methods for this operator
+  */
+  enum class RelaxationMethod {
+    PointJacobi,
+    GauSaiRedBlack,
+    GauSaiMultiColor,
+  };
 
   /*!
     @brief Constructor. Must subsequently call define(...)
@@ -70,7 +77,7 @@ public:
 		const IntVect&                                   a_ghostPhi,
 		const IntVect&                                   a_ghostRhs,
 		const int&                                       a_jumpOrder,
-		const RelaxType&                                 a_relaxType);
+		const RelaxationMethod&                          a_relaxType);
 
   /*!
     @brief Destructor. 

@@ -49,7 +49,7 @@ public:
   using DomainBCFactory = RefCountedPtr<MFHelmholtzDomainBCFactory>;
   using EBBCFactory     = RefCountedPtr<MFHelmholtzEBBCFactory>;
 
-  using RelaxType       = EBHelmholtzOp::RelaxationMethod;
+  using RelaxType       = MFHelmholtzOp::RelaxationMethod;
 
   /*!
     @brief Disallowed constructor

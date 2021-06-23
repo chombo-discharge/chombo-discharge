@@ -7,6 +7,7 @@
   @file   CD_EBHelmholtzEBBC.H
   @brief  Declaration of a boundary condition class for EBHelmholtzOp
   @author Robert Marskar
+  @todo   The kappaDivF stencils can probably be removed as they are only really used with EBHelmholtzOps fast multicolor-scheme (relaxation done in-place). 
 */
 
 #ifndef CD_EBHelmholtzEBBC_H

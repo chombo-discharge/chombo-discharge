@@ -7,6 +7,7 @@
   @file   CD_EBHelmholtzOp.H
   @brief  Declaration of Helmholtz multigrid operators. 
   @author Robert Marskar
+  @todo   We can probably remove everything that is related to the fast multicolor scheme (red-black is just as fast). 
 */
 
 #ifndef CD_EBHelmholtzOp_H
@@ -36,9 +37,6 @@
 */
 class EBHelmholtzOp : public LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB> {
 public:
-
-  //  using EBHelmholtzDomainBc = ConductivityBaseDomainBC;
-  //  using EBHelmholtzEbBc     = ConductivityBaseEBBC;
 
   /*!
     @brief Relaxation method for the operators

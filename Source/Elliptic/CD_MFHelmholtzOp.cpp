@@ -53,7 +53,7 @@ MFHelmholtzOp::MFHelmholtzOp(const MFLevelGrid&                               a_
 			     const IntVect&                                   a_ghostPhi,
 			     const IntVect&                                   a_ghostRhs,
 			     const int&                                       a_jumpOrder,
-			     const RelaxType&                                 a_relaxType){
+			     const RelaxationMethod&                          a_relaxType){
   CH_TIME("MFHelmholtzOp::MFHelmholtzOp");
   m_debug = false;
   ParmParse pp ("MFHelmholtzOp");
@@ -103,6 +103,23 @@ MFHelmholtzOp::MFHelmholtzOp(const MFLevelGrid&                               a_
     MultifluidAlias::aliasMF(*Bcoef,      iphase, *a_Bcoef);
     MultifluidAlias::aliasMF(*BcoefIrreg, iphase, *a_BcoefIrreg);
 
+    EBHelmholtzOp::RelaxationMethod ebHelmRelax;
+
+    switch(a_relaxType){
+    case MFHelmholtzOp::RelaxationMethod::PointJacobi:
+      ebHelmRelax = EBHelmholtzOp::RelaxationMethod::PointJacobi;
+      break;
+    case MFHelmholtzOp::RelaxationMethod::GauSaiRedBlack:
+      ebHelmRelax = EBHelmholtzOp::RelaxationMethod::GauSaiRedBlack;
+      break;
+    case MFHelmholtzOp::RelaxationMethod::GauSaiMultiColor:
+      ebHelmRelax = EBHelmholtzOp::RelaxationMethod::GauSaiMultiColor;
+      break;
+    default:
+      MayDay::Error("MFHelmholtzOp::MFHelmholtzOp - unsupported relaxation method requested");
+      break;
+    }
+
     RefCountedPtr<EBHelmholtzOp> oper = RefCountedPtr<EBHelmholtzOp> (new EBHelmholtzOp(eblgFine,
 											eblg,
 											eblgCoFi,
@@ -126,7 +143,7 @@ MFHelmholtzOp::MFHelmholtzOp(const MFLevelGrid&                               a_
 											BcoefIrreg,
 											a_ghostPhi,
 											a_ghostRhs,
-											a_relaxType));
+											ebHelmRelax));
 
 
     m_helmOps.emplace(iphase, oper);

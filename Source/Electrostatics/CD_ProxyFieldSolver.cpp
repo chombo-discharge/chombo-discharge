@@ -702,21 +702,22 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
   const IntVect ghostPhi = m_amr->getNumberOfGhostCells()*IntVect::Unit;
   const IntVect ghostRhs = m_amr->getNumberOfGhostCells()*IntVect::Unit;
 
-  EBHelmholtzOp::RelaxationMethod relaxType;
+  MFHelmholtzOp::RelaxationMethod relaxType;
   int relax;
   pp.get("relax",relax);
   switch(relax){
   case 0:
-    relaxType = EBHelmholtzOp::RelaxationMethod::PointJacobi;
+    relaxType = MFHelmholtzOp::RelaxationMethod::PointJacobi;
     break;
   case 1:
-    relaxType = EBHelmholtzOp::RelaxationMethod::GauSaiMultiColor;
+    relaxType = MFHelmholtzOp::RelaxationMethod::GauSaiMultiColor;
     break;
-  case 2:
-    relaxType = EBHelmholtzOp::RelaxationMethod::GauSaiMultiColorFast;
-    break;    
+  case 3:
+    relaxType = MFHelmholtzOp::RelaxationMethod::GauSaiRedBlack;
+    break;
+  default:
+    MayDay::Error("ProxyFieldSolver::solveMF - bad relaxation method");
   }
-
 				   
   MFHelmholtzOpFactory* fact = new MFHelmholtzOpFactory(m_multifluidIndexSpace,
 							alpha,
