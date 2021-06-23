@@ -36,6 +36,7 @@
 #include <EBMGInterp.H>
 #include <PolyGeom.H>
 #include <EBQuadCFInterp.H>
+#include <EBCoarseAverage.H>
 #include <EBLevelGrid.H>
 #include <AMRTGA.H>
 #include <AMRPoissonOp.H>
@@ -629,6 +630,14 @@ public:
   const EBLevelGrid& getEBLG() const {
     return m_eblg;
   }
+
+  virtual unsigned int orderOfAccuracy(void) const  override {
+    return 99;
+  }
+
+  virtual void enforceCFConsistency(LevelData<EBCellFAB>& a_coarseCorrection, const LevelData<EBCellFAB>& a_correction) override{
+    m_ebCoarsen.average(a_coarseCorrection, a_correction, Interval(0,0));
+  }
   
 protected:
   
@@ -820,6 +829,8 @@ protected:
   ProblemDomain               m_domainCoarMG;
 
   Vector<IntVect> m_colors;
+
+  EBCoarseAverage m_ebCoarsen;
 
 private:
 

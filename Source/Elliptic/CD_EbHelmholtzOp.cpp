@@ -167,6 +167,8 @@ EbHelmholtzOp::EbHelmholtzOp(const EBLevelGrid &                                
 			 m_eblg.getEBISL(), m_eblgCoarsenedFine.getEBISL(),
 			 domainCoarsenedFine, m_refToCoar, ncomp, m_eblg.getEBIS(),
 			 a_ghostCellsRHS);
+
+      m_ebCoarsen.define(m_eblg,m_eblgCoar, m_eblgCoarsenedFine, m_refToCoar, 1);
     }
   }
 

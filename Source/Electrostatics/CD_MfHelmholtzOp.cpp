@@ -247,6 +247,18 @@ void MfHelmholtzOp::define(const RefCountedPtr<MultiFluidIndexSpace>&           
 #endif
 }
 
+void MfHelmholtzOp::enforceCFConsistency(LevelData<MFCellFAB>& a_coarseCorrection, const LevelData<MFCellFAB>& a_correction) {
+  for (int iphase = 0; iphase < m_phases; iphase++){
+    LevelData<EBCellFAB> coarseCorrection;
+    LevelData<EBCellFAB> correction;
+
+    MultifluidAlias::aliasMF(coarseCorrection, iphase, a_coarseCorrection);
+    MultifluidAlias::aliasMF(correction,       iphase, a_correction);
+
+    m_ebops[iphase]->enforceCFConsistency(coarseCorrection, correction);
+  }
+}
+
 void MfHelmholtzOp::setJump(const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_jump){
   m_jump = a_jump;
 }
