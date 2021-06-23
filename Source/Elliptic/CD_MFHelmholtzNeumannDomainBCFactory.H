@@ -4,13 +4,13 @@
  */
 
 /*
-  @file   CD_EBHelmholtzNeumannDomainBCFactory.H
-  @brief  Declaration of a factory class for making Neumann domain boundary condition objects for EBHelmholtzOp
+  @file   CD_MFHelmholtzNeumannDomainBCFactory.H
+  @brief  Declaration of a factory class for making Neumann domain boundary condition objects for MFHelmholtzOp
   @author Robert Marskar
 */
 
-#ifndef CD_EBHelmholtzNeumannDomainBCFactory_H
-#define CD_EBHelmholtzNeumannDomainBCFactory_H
+#ifndef CD_MFHelmholtzNeumannDomainBCFactory_H
+#define CD_MFHelmholtzNeumannDomainBCFactory_H
 
 // Std includes
 #include <functional>
@@ -19,38 +19,38 @@
 #include <EBLevelGrid.H>
 
 // Our includes
-#include <CD_EBHelmholtzDomainBCFactory.H>
+#include <CD_MFHelmholtzDomainBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Class for passing Neumann boundary domain boundary conditions into EBHelmholtzOp. 
+  @brief Class for passing Neumann boundary domain boundary conditions into MFHelmholtzOp. 
 */
-class EBHelmholtzNeumannDomainBCFactory : public EBHelmholtzDomainBCFactory {
+class MFHelmholtzNeumannDomainBCFactory : public MFHelmholtzDomainBCFactory {
 public:
 
   /*!
     @brief Constructor. 
   */
-  EBHelmholtzNeumannDomainBCFactory();
+  MFHelmholtzNeumannDomainBCFactory();
 
   /*!
     @brief Constructor. 
     @param[in] a_DphiDn Constant value of dphi/dn on all domain sides. 
     @note A positive values gives a flux INTO the domain. 
   */
-  EBHelmholtzNeumannDomainBCFactory(const Real a_DphiDn);
+  MFHelmholtzNeumannDomainBCFactory(const Real a_DphiDn);
 
   /*!
     @brief Full constructor. 
     @param[in] a_DphiDn Spatially dependent value of dphi/dn on all domain sides. 
     @note A positive values gives a flux INTO the domain. 
   */
-  EBHelmholtzNeumannDomainBCFactory(const std::function<Real(const RealVect& a_pos)>& a_DphiDn);
+  MFHelmholtzNeumannDomainBCFactory(const std::function<Real(const RealVect& a_pos)>& a_DphiDn);
 
   /*!
     @brief Destructor
   */
-  ~EBHelmholtzNeumannDomainBCFactory();
+  ~MFHelmholtzNeumannDomainBCFactory();
 
   /*!
     @brief Set value of dphi/dn on the EB. 
@@ -83,7 +83,7 @@ public:
   /*!
     @brief Factory method. 
   */
-  virtual RefCountedPtr<EBHelmholtzDomainBC> create() const override;
+  virtual RefCountedPtr<EBHelmholtzDomainBC> create(const int a_iphase) const override;
 
 protected:
 

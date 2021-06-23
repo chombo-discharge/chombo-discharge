@@ -4,36 +4,36 @@
  */
 
 /*
-  @file   CD_EBHelmholtzRobinDomainBCFactory.cpp
-  @brief  Implementation of CD_EBHelmholtzRobinDomainBCFactory.cpp
+  @file   CD_MFHelmholtzRobinDomainBCFactory.cpp
+  @brief  Implementation of CD_MFHelmholtzRobinDomainBCFactory.cpp
   @author Robert Marskar
 */
 
 // Our includes
 #include <CD_EBHelmholtzRobinDomainBC.H>
-#include <CD_EBHelmholtzRobinDomainBCFactory.H>
+#include <CD_MFHelmholtzRobinDomainBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
-EBHelmholtzRobinDomainBCFactory::EBHelmholtzRobinDomainBCFactory(){
+MFHelmholtzRobinDomainBCFactory::MFHelmholtzRobinDomainBCFactory(){
   m_useConstant = false;
   m_useFunction = false;
 }
 
-EBHelmholtzRobinDomainBCFactory::EBHelmholtzRobinDomainBCFactory(const Real a_A, const Real a_B, const Real a_C){
+MFHelmholtzRobinDomainBCFactory::MFHelmholtzRobinDomainBCFactory(const Real a_A, const Real a_B, const Real a_C){
   this->setCoefficients(a_A, a_B, a_C);
 }
 
-EBHelmholtzRobinDomainBCFactory::EBHelmholtzRobinDomainBCFactory(const std::function<Real(const RealVect& a_pos) >& a_A,
+MFHelmholtzRobinDomainBCFactory::MFHelmholtzRobinDomainBCFactory(const std::function<Real(const RealVect& a_pos) >& a_A,
 								 const std::function<Real(const RealVect& a_pos) >& a_B,
 								 const std::function<Real(const RealVect& a_pos) >& a_C){
   this->setCoefficients(a_A, a_B, a_C);
 }
 
-EBHelmholtzRobinDomainBCFactory::~EBHelmholtzRobinDomainBCFactory(){
+MFHelmholtzRobinDomainBCFactory::~MFHelmholtzRobinDomainBCFactory(){
 
 }
 
-void EBHelmholtzRobinDomainBCFactory::setCoefficients(const Real a_A, const Real a_B, const Real a_C){
+void MFHelmholtzRobinDomainBCFactory::setCoefficients(const Real a_A, const Real a_B, const Real a_C){
   m_constantA = a_A;
   m_constantB = a_B;
   m_constantC = a_C;
@@ -42,7 +42,7 @@ void EBHelmholtzRobinDomainBCFactory::setCoefficients(const Real a_A, const Real
   m_useFunction = false;
 }
 
-void EBHelmholtzRobinDomainBCFactory::setCoefficients(const std::function<Real(const RealVect& a_pos) >& a_A,
+void MFHelmholtzRobinDomainBCFactory::setCoefficients(const std::function<Real(const RealVect& a_pos) >& a_A,
 						      const std::function<Real(const RealVect& a_pos) >& a_B,
 						      const std::function<Real(const RealVect& a_pos) >& a_C){
   m_functionA = a_A;
@@ -53,8 +53,8 @@ void EBHelmholtzRobinDomainBCFactory::setCoefficients(const std::function<Real(c
   m_useFunction = true;
 }
 
-RefCountedPtr<EBHelmholtzDomainBC> EBHelmholtzRobinDomainBCFactory::create() const {
-  if(!(m_useConstant || m_useFunction)) MayDay::Abort("EBHelmholtzRobinDomaniBCFactory::create -- not using constant or function. Did you forget to set coefficients?");
+RefCountedPtr<EBHelmholtzDomainBC> MFHelmholtzRobinDomainBCFactory::create(const int a_iphase) const {
+  if(!(m_useConstant || m_useFunction)) MayDay::Abort("MFHelmholtzRobinDomaniBCFactory::create -- not using constant or function. Did you forget to set coefficients?");
   
   EBHelmholtzRobinDomainBC* bc = new EBHelmholtzRobinDomainBC();
 
@@ -65,7 +65,7 @@ RefCountedPtr<EBHelmholtzDomainBC> EBHelmholtzRobinDomainBCFactory::create() con
     bc->setCoefficients(m_functionA, m_functionB, m_functionC);
   }
   else {
-    MayDay::Error("EBHelmholtzRobinDomainBCFactory::create - logic bust, you must set the Robin coefficients!!");
+    MayDay::Error("MFHelmholtzRobinDomainBCFactory::create - logic bust, you must set the Robin coefficients!!");
   }
 
   return RefCountedPtr<EBHelmholtzDomainBC> (bc);

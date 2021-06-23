@@ -4,20 +4,20 @@
  */
 
 /*
-  @file   CD_EBHelmholtzDomainBCFactory.cpp
-  @brief  Declaration of a factory class for EBHelmholtzDomainBCFactory
+  @file   CD_MFHelmholtzDomainBCFactory.cpp
+  @brief  Implementation of CD_MFHelmholtzDomainBCFactory.H
   @author Robert Marskar
 */
 
 // Our includes
-#include <CD_EBHelmholtzDomainBCFactory.H>
+#include <CD_MFHelmholtzDomainBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
-EBHelmholtzDomainBCFactory::EBHelmholtzDomainBCFactory(){
+MFHelmholtzDomainBCFactory::MFHelmholtzDomainBCFactory(){
 
 }
 
-EBHelmholtzDomainBCFactory::~EBHelmholtzDomainBCFactory(){
+MFHelmholtzDomainBCFactory::~MFHelmholtzDomainBCFactory(){
 
 }
 

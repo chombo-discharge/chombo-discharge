@@ -46,7 +46,7 @@ public:
   using AmrFluxData      = Vector<RefCountedPtr<LevelData<MFFluxFAB> > >;
   using AmrIrreData      = Vector<RefCountedPtr<LevelData<MFBaseIVFAB> > >;
 
-  using DomainBCFactory = RefCountedPtr<EBHelmholtzDomainBCFactory>;
+  using DomainBCFactory = RefCountedPtr<MFHelmholtzDomainBCFactory>;
   using EBBCFactory     = RefCountedPtr<MFHelmholtzEBBCFactory>;
 
   using RelaxType       = EBHelmholtzOp::RelaxationMethod;

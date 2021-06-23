@@ -4,13 +4,13 @@
  */
 
 /*
-  @file   CD_EBHelmholtzDirichletDomainBCFactory.H
-  @brief  Declaration of a factory class for making Dirichlet domain boundary condition objects for EBHelmholtzOp
+  @file   CD_MFHelmholtzDirichletDomainBCFactory.H
+  @brief  Declaration of a factory class for making Dirichlet domain boundary condition objects for MFHelmholtzOp
   @author Robert Marskar
 */
 
-#ifndef CD_EBHelmholtzDirichletDomainBCFactory_H
-#define CD_EBHelmholtzDirichletDomainBCFactory_H
+#ifndef CD_MFHelmholtzDirichletDomainBCFactory_H
+#define CD_MFHelmholtzDirichletDomainBCFactory_H
 
 // Std includes
 #include <functional>
@@ -19,36 +19,36 @@
 #include <EBLevelGrid.H>
 
 // Our includes
-#include <CD_EBHelmholtzDomainBCFactory.H>
+#include <CD_MFHelmholtzDomainBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Factory class for passing Dirichlet domain boundary conditions into EBHelmholtzOp. 
+  @brief Factory class for passing Dirichlet domain boundary conditions into MFHelmholtzOp. 
 */
-class EBHelmholtzDirichletDomainBCFactory : public EBHelmholtzDomainBCFactory {
+class MFHelmholtzDirichletDomainBCFactory : public MFHelmholtzDomainBCFactory {
 public:
 
   /*!
     @brief Constructor. 
   */
-  EBHelmholtzDirichletDomainBCFactory();
+  MFHelmholtzDirichletDomainBCFactory();
 
   /*!
     @brief Constructor. 
     @param[in] a_value Constant value on domain side
   */
-  EBHelmholtzDirichletDomainBCFactory(const Real a_value);
+  MFHelmholtzDirichletDomainBCFactory(const Real a_value);
 
   /*!
     @brief Full constructor. 
     @param[in] a_value Spatially dependent value on domain side
   */
-  EBHelmholtzDirichletDomainBCFactory(const std::function<Real(const RealVect& a_pos)>& a_value);
+  MFHelmholtzDirichletDomainBCFactory(const std::function<Real(const RealVect& a_pos)>& a_value);
 
   /*!
     @brief Destructor
   */
-  ~EBHelmholtzDirichletDomainBCFactory();
+  ~MFHelmholtzDirichletDomainBCFactory();
 
   /*!
     @brief Set the constant value on the domain side. 
@@ -65,7 +65,7 @@ public:
   /*!
     @brief Factory method
   */
-  virtual RefCountedPtr<EBHelmholtzDomainBC> create() const override;
+  virtual RefCountedPtr<EBHelmholtzDomainBC> create(const int a_iphase) const override;
 
 protected:
   

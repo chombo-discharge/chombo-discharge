@@ -45,7 +45,7 @@ void EBHelmholtzDirichletDomainBCFactory::setValue(const std::function<Real(cons
   m_functionValue = a_value;
 }
 
-RefCountedPtr<EBHelmholtzDomainBC> EBHelmholtzDirichletDomainBCFactory::create() {
+RefCountedPtr<EBHelmholtzDomainBC> EBHelmholtzDirichletDomainBCFactory::create() const {
   if(!(m_useConstant || m_useFunction)) MayDay::Error("EBHelmholtzDirichletDomainBCFactory::create - logic bust, not using function or constant!");
   
   auto bc = new EBHelmholtzDirichletDomainBC();

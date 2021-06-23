@@ -28,7 +28,7 @@
 #include <CD_MFBaseIVFAB.H>
 #include <CD_JumpBC.H>
 #include <CD_EBHelmholtzOp.H>
-#include <CD_EBHelmholtzDomainBCFactory.H>
+#include <CD_MFHelmholtzDomainBCFactory.H>
 #include <CD_MFHelmholtzEBBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
@@ -53,7 +53,7 @@ public:
 		const MFMultigridInterpolator&                   a_interpolator,
 		const MFFluxReg&                                 a_fluxReg,
 		const MFCoarAve&                                 a_coarAve,
-		const RefCountedPtr<EBHelmholtzDomainBCFactory>& a_domainBcFactory,
+		const RefCountedPtr<MFHelmholtzDomainBCFactory>& a_domainBcFactory,
 		const RefCountedPtr<MFHelmholtzEBBCFactory>&     a_ebBcFactory,
 		const RealVect&                                  a_probLo,
 		const Real&                                      a_dx,

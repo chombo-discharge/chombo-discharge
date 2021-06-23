@@ -49,7 +49,7 @@ public:
   /*!
     @brief Factory method
   */
-  virtual RefCountedPtr<EBHelmholtzDomainBC> create() = 0;
+  virtual RefCountedPtr<EBHelmholtzDomainBC> create() const = 0;
 
 };
 

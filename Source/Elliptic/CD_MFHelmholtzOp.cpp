@@ -36,7 +36,7 @@ MFHelmholtzOp::MFHelmholtzOp(const MFLevelGrid&                               a_
 			     const MFMultigridInterpolator&                   a_interpolator,
 			     const MFFluxReg&                                 a_fluxReg,
 			     const MFCoarAve&                                 a_coarAve,
-			     const RefCountedPtr<EBHelmholtzDomainBCFactory>& a_domainBcFactory,
+			     const RefCountedPtr<MFHelmholtzDomainBCFactory>& a_domainBcFactory,
 			     const RefCountedPtr<MFHelmholtzEBBCFactory>&     a_ebBcFactory,			     
 			     const RealVect&                                  a_probLo,
 			     const Real&                                      a_dx,
@@ -89,7 +89,7 @@ MFHelmholtzOp::MFHelmholtzOp(const MFLevelGrid&                               a_
     EBLevelGrid eblgCoar    = a_hasCoar      ? a_mflgCoar.getEBLevelGrid(iphase)   : dummy;
     EBLevelGrid eblgCoarMG  = a_hasMGObjects ? a_mflgCoarMG.getEBLevelGrid(iphase) : dummy;
 
-    auto domainBC = a_domainBcFactory->create();
+    auto domainBC = a_domainBcFactory->create(iphase);
     auto ebBC     = a_ebBcFactory->create(m_jumpBC);
 
     if(a_isMGOperator) ebBC->setMG(true);

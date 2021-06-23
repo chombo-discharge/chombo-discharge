@@ -36,10 +36,13 @@
 #include <CD_EBHelmholtzDirichletDomainBCFactory.H>
 #include <CD_EBHelmholtzNeumannDomainBCFactory.H>
 #include <CD_EBHelmholtzRobinDomainBCFactory.H>
-#include <CD_MFHelmholtzDirichletEBBCFactory.H>
-#include <CD_DataOps.H>
 
 // Includes for MFHelmholtzOpFactory
+#include <CD_MFHelmholtzDirichletEBBCFactory.H>
+#include <CD_MFHelmholtzDirichletDomainBCFactory.H>
+#include <CD_MFHelmholtzNeumannDomainBCFactory.H>
+#include <CD_MFHelmholtzRobinDomainBCFactory.H>
+#include <CD_DataOps.H>
 #include <CD_MFHelmholtzOpFactory.H>
 #include <CD_MFQuadCFInterp.H>
 #include <CD_MFLevelGrid.H>
@@ -612,7 +615,7 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
   std::string str;
   
   RefCountedPtr<MFHelmholtzEBBCFactory> ebbcFactory;
-  RefCountedPtr<EBHelmholtzDomainBCFactory> domainBcFactory;
+  RefCountedPtr<MFHelmholtzDomainBCFactory> domainBcFactory;
 
   // EBBC
   pp.get("eb_bc", str);
@@ -655,10 +658,10 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
   };
   
   if(str == "dirichlet"){
-    domainBcFactory = RefCountedPtr<EBHelmholtzDomainBCFactory>(new EBHelmholtzDirichletDomainBCFactory(bcFunction));
+    domainBcFactory = RefCountedPtr<MFHelmholtzDomainBCFactory>(new MFHelmholtzDirichletDomainBCFactory(bcFunction));
   }
   else if(str == "neumann"){
-    domainBcFactory = RefCountedPtr<EBHelmholtzDomainBCFactory>(new EBHelmholtzNeumannDomainBCFactory(bcFunction));
+    domainBcFactory = RefCountedPtr<MFHelmholtzDomainBCFactory>(new MFHelmholtzNeumannDomainBCFactory(bcFunction));
   }
   else if(str == "robin"){
     
@@ -667,7 +670,7 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
     const Real B = -1.0*dom_value;
     const Real C =  0.0;
     
-    domainBcFactory = RefCountedPtr<EBHelmholtzDomainBCFactory>(new EBHelmholtzRobinDomainBCFactory(A, B, C));
+    domainBcFactory = RefCountedPtr<MFHelmholtzDomainBCFactory>(new MFHelmholtzRobinDomainBCFactory(A, B, C));
   }
   else{
     MayDay::Abort("ProxyFieldSolver::solveHelm - unknown domain bc requested");
