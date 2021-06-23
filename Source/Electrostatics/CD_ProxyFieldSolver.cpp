@@ -467,7 +467,7 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
     bottomDomain.coarsen(2);
   }
 
-  // Relax stuff consistent with EBConductivityOp
+  // Relax stuff consistent with EBConductivityOp (with exception of GauSaiRedBlack...)
   EBHelmholtzOp::RelaxationMethod relaxType;
   int relax;
   pp.get("relax",relax);
@@ -480,8 +480,15 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
     break;
   case 2:
     relaxType = EBHelmholtzOp::RelaxationMethod::GauSaiMultiColorFast;
-    break;    
+    break;
+  case 3:
+    relaxType = EBHelmholtzOp::RelaxationMethod::GauSaiRedBlack;
+    break;
+  default:
+    MayDay::Abort("ProxyFieldSolver::solveHelmholtz - unknown relaxation method requested");
+    break;
   }
+
 
   EBHelmholtzOpFactory fact(alpha,
 			    beta,
@@ -508,20 +515,28 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
   AMRMultiGrid<LevelData<EBCellFAB> > multigridSolver;
 
   int  numSmooth;
+  int  botSmooth;
   Real tolerance;
 
   pp.get("mg_tol",   tolerance);
   pp.get("smooth",   numSmooth);
+  pp.get("botsolver", str);
+  
+  pp.get("botsmooth", botSmooth);
 
-  simpleSolver.setNumSmooths(200);
+  simpleSolver.setNumSmooths(botSmooth);
   
   const int baseLevel   = 0;
   const int finestLevel = m_amr->getFinestLevel();
 
   // Define
   //  bicgstab.m_verbosity=10;
-  multigridSolver.define(m_amr->getDomains()[0], fact, &bicgstab, 1 + finestLevel);
-  //  multigridSolver.define(m_amr->getDomains()[0], fact, &simpleSolver, 1 + finestLevel);
+  if(str == "bicgstab"){
+    multigridSolver.define(m_amr->getDomains()[0], fact, &bicgstab, 1 + finestLevel);
+  }
+  else if(str == "simple"){
+    multigridSolver.define(m_amr->getDomains()[0], fact, &simpleSolver, 1 + finestLevel);
+  }
   multigridSolver.setSolverParameters(numSmooth, numSmooth, numSmooth, 1, 32, tolerance, 1E-60, 1E-60);
   
   // Solve

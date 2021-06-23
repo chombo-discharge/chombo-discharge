@@ -735,6 +735,8 @@ void EBHelmholtzOp::relax(LevelData<EBCellFAB>& a_correction, const LevelData<EB
   case RelaxationMethod::PointJacobi:
     this->relaxPointJacobi(a_correction, a_residual, a_iterations);
     break;
+  case RelaxationMethod::GauSaiRedBlack:
+    this->relaxGSRedBlack(a_correction, a_residual, a_iterations);
   case RelaxationMethod::GauSaiMultiColor:
     this->relaxGSMultiColor(a_correction, a_residual, a_iterations);
     break;
@@ -759,6 +761,58 @@ void EBHelmholtzOp::relaxPointJacobi(LevelData<EBCellFAB>& a_correction, const L
       Lcorr[dit()]        *= m_relCoef[dit()];
       
       a_correction[dit()] -= Lcorr[dit()];
+    }
+  }
+}
+
+void EBHelmholtzOp::relaxGSRedBlack(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations){
+  LevelData<EBCellFAB> Lcorr;
+  this->create(Lcorr, a_residual);
+
+  for (int iter = 0; iter < a_iterations; iter++){
+    for (int redBlack = 0; redBlack <= 1; redBlack++){
+      this->homogeneousCFInterp(a_correction);
+      this->applyOp(Lcorr, a_correction, true);
+      this->gauSaiRedBlack(a_correction, Lcorr, a_residual, redBlack);
+    }
+  }
+}
+
+void EBHelmholtzOp::gauSaiRedBlack(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_rhs, const int& a_redBlack){
+  const DisjointBoxLayout& dbl = a_phi.disjointBoxLayout();
+  
+  for (DataIterator dit(dbl); dit.ok(); ++dit){
+    const Box box = dbl[dit()];
+
+    BaseFab<Real>& phiReg        = a_phi    [dit()].getSingleValuedFAB();
+    const BaseFab<Real>& LphiReg = a_Lphi   [dit()].getSingleValuedFAB();
+    const BaseFab<Real>& rhsReg  = a_rhs    [dit()].getSingleValuedFAB();
+    const BaseFab<Real>& relReg  = m_relCoef[dit()].getSingleValuedFAB();
+
+    FORT_HELMHOLTZGAUSAIREDBLACK(CHF_FRA1(phiReg, m_comp),
+				 CHF_CONST_FRA1(LphiReg, m_comp),
+				 CHF_CONST_FRA1(rhsReg, m_comp),
+				 CHF_CONST_FRA1(relReg, m_comp),
+				 CHF_CONST_INT(a_redBlack),
+				 CHF_BOX(box));
+
+    // Fortran took care of the irregular cells but multi-cells still remain
+    VoFIterator& vofit = m_vofIterMulti[dit()];
+    for (vofit.reset(); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+      const IntVect&  iv  = vof.gridIndex();
+
+
+      const bool doThisCell = std::abs((iv.sum() + a_redBlack)%2) == 0;
+
+      if(doThisCell){
+	const Real lambda = m_relCoef[dit()](vof, m_comp);
+	const Real Lphi   = a_Lphi[dit()](vof, m_comp);
+	const Real rhs    = a_rhs[dit()](vof, m_comp);
+	const Real resid  = rhs - Lphi;
+
+	a_phi[dit()](vof, m_comp) += lambda*resid;
+      }
     }
   }
 }
@@ -797,7 +851,6 @@ void EBHelmholtzOp::gauSaiMultiColor(LevelData<EBCellFAB>& a_phi, const LevelDat
     if(loIV <= hiIV){
       const Box colorBox(loIV, hiIV);
 
-      // Note - replace this with our own kernel so we can develop code without coupling too hard to Chombo.
       FORT_HELMHOLTZGAUSAICOLOR(CHF_FRA1(phiReg, m_comp),
 				CHF_CONST_FRA1(LphiReg, m_comp),
 				CHF_CONST_FRA1(rhsReg, m_comp),
@@ -1012,6 +1065,8 @@ void EBHelmholtzOp::computeRelaxationCoefficient(){
   switch(m_relaxationMethod){
   case RelaxationMethod::PointJacobi: 
     this->scale(m_relCoef, 0.5); 
+    break;
+  case RelaxationMethod::GauSaiRedBlack:
     break;
   case RelaxationMethod::GauSaiMultiColor:
     break;

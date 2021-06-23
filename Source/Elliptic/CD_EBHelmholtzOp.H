@@ -45,6 +45,7 @@ public:
   */
   enum class RelaxationMethod {
     PointJacobi,
+    GauSaiRedBlack,
     GauSaiMultiColor,
     GauSaiMultiColorFast,
   };
@@ -719,7 +720,24 @@ protected:
   */
   void relaxPointJacobi(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations);
 
+    /*!
+    @brief Jacobi relaxation
+    @param[inout] a_correction Correction
+    @param[in]    a_residual   Residual
+    @param[in]    a_iterations Number of iterations
+  */
+  void relaxGSRedBlack(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations);
+  
   /*!
+    @brief Red-black Gauss-Seidel kernel
+    @param[in] a_phi Correction
+    @param[in] a_phi Lphi L(corrcetion)
+    @param[in] a_rhs Residual
+    @param[in] a_color "Color":
+  */
+  void gauSaiRedBlack(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_rhs, const int& a_redBlack);
+
+    /*!
     @brief Multi-colored gauss-seidel relaxation
     @param[inout] a_correction Correction
     @param[in]    a_residual   Residual
@@ -728,7 +746,11 @@ protected:
   void relaxGSMultiColor(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations);
 
   /*!
-    @brief Red-black Gauss-Seidel relaxation
+    @brief Multi-colored Gauss-Seidel kernel
+    @param[in] a_phi Correction
+    @param[in] a_phi Lphi L(corrcetion)
+    @param[in] a_rhs Residual
+    @param[in] a_color "Color":
   */
   void gauSaiMultiColor(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_rhs, const IntVect& a_color);
 
@@ -744,8 +766,6 @@ protected:
     @brief Optimized relaxation
   */
   void GauSaiMultiColorAllIrregular(EBCellFAB& a_phi, const EBCellFAB& a_rhs, const int& a_icolor, const DataIndex& a_dit);
-
-
 
   /*!
     @brief Calculate the weight of the diagonal term

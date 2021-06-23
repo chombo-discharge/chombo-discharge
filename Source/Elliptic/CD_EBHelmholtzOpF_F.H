@@ -144,6 +144,40 @@ inline void FORTRAN_NAME(inlineHELMHOLTZINPLACE, inlineHELMHOLTZINPLACE)(
 }
 #endif  // GUARDHELMHOLTZINPLACE 
 
+#ifndef GUARDHELMHOLTZGAUSAIREDBLACK 
+#define GUARDHELMHOLTZGAUSAIREDBLACK 
+// Prototype for Fortran procedure helmholtzgausairedblack ...
+//
+void FORTRAN_NAME( HELMHOLTZGAUSAIREDBLACK ,helmholtzgausairedblack )(
+      CHFp_FRA1(phi)
+      ,CHFp_CONST_FRA1(lphi)
+      ,CHFp_CONST_FRA1(rhs)
+      ,CHFp_CONST_FRA1(relCoef)
+      ,CHFp_CONST_INT(redBlack)
+      ,CHFp_BOX(box) );
+
+#define FORT_HELMHOLTZGAUSAIREDBLACK FORTRAN_NAME( inlineHELMHOLTZGAUSAIREDBLACK, inlineHELMHOLTZGAUSAIREDBLACK)
+#define FORTNT_HELMHOLTZGAUSAIREDBLACK FORTRAN_NAME( HELMHOLTZGAUSAIREDBLACK, helmholtzgausairedblack)
+
+inline void FORTRAN_NAME(inlineHELMHOLTZGAUSAIREDBLACK, inlineHELMHOLTZGAUSAIREDBLACK)(
+      CHFp_FRA1(phi)
+      ,CHFp_CONST_FRA1(lphi)
+      ,CHFp_CONST_FRA1(rhs)
+      ,CHFp_CONST_FRA1(relCoef)
+      ,CHFp_CONST_INT(redBlack)
+      ,CHFp_BOX(box) )
+{
+ CH_TIMELEAF("FORT_HELMHOLTZGAUSAIREDBLACK");
+ FORTRAN_NAME( HELMHOLTZGAUSAIREDBLACK ,helmholtzgausairedblack )(
+      CHFt_FRA1(phi)
+      ,CHFt_CONST_FRA1(lphi)
+      ,CHFt_CONST_FRA1(rhs)
+      ,CHFt_CONST_FRA1(relCoef)
+      ,CHFt_CONST_INT(redBlack)
+      ,CHFt_BOX(box) );
+}
+#endif  // GUARDHELMHOLTZGAUSAIREDBLACK 
+
 #ifndef GUARDHELMHOLTZGAUSAICOLOR 
 #define GUARDHELMHOLTZGAUSAICOLOR 
 // Prototype for Fortran procedure helmholtzgausaicolor ...
