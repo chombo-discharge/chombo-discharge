@@ -36,7 +36,7 @@
 #include <CD_EBHelmholtzDirichletDomainBCFactory.H>
 #include <CD_EBHelmholtzNeumannDomainBCFactory.H>
 #include <CD_EBHelmholtzRobinDomainBCFactory.H>
-
+#include <CD_MFHelmholtzDirichletEBBCFactory.H>
 #include <CD_DataOps.H>
 
 // Includes for MFHelmholtzOpFactory
@@ -611,7 +611,7 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
   Real        dom_value;
   std::string str;
   
-  RefCountedPtr<EBHelmholtzEBBCFactory> ebbcFactory;
+  RefCountedPtr<MFHelmholtzEBBCFactory> ebbcFactory;
   RefCountedPtr<EBHelmholtzDomainBCFactory> domainBcFactory;
 
   // EBBC
@@ -621,7 +621,7 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
     pp.get("eb_val",    eb_value);
     pp.get("eb_weight", eb_weight);
 
-    ebbcFactory = RefCountedPtr<EBHelmholtzEBBCFactory> (new EBHelmholtzDirichletEBBCFactory(eb_order, eb_weight, eb_value));
+    ebbcFactory = RefCountedPtr<MFHelmholtzEBBCFactory> (new MFHelmholtzDirichletEBBCFactory(eb_order, eb_weight, eb_value));
 
     // Make sure we have enough ghost cells.
     if(eb_order > m_amr->getNumberOfGhostCells()) MayDay::Abort("ProxyFieldSolver::solveHelm - not enough ghost cells!");
@@ -629,7 +629,7 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
   else if(str == "neumann"){
     pp.get("eb_val", eb_value);
 
-    ebbcFactory = RefCountedPtr<EBHelmholtzEBBCFactory> (new EBHelmholtzNeumannEBBCFactory(eb_value));    
+    MayDay::Abort("ProxyFieldSolver::solveMF - Neumann EB BCs not supported (yet)");
   }
   else if(str == "robin"){
     pp.get("eb_val", eb_value);
@@ -638,7 +638,8 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
     const Real A =  1.5*eb_value;
     const Real B = -1.0*eb_value;
     const Real C =  0.0;
-    ebbcFactory = RefCountedPtr<EBHelmholtzEBBCFactory> (new EBHelmholtzRobinEBBCFactory(A, B, C));
+
+    MayDay::Abort("ProxyFieldSolver::solveMF - Robin EB BCs not supported (yet)");
   }
   else{
     MayDay::Error("ProxyFieldSolver::solveEBCond - uknown EBBC factory requested");

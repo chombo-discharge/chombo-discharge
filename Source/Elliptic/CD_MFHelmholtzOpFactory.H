@@ -25,6 +25,7 @@
 #include <CD_MFMultigridInterpolator.H>
 #include <CD_MFLevelGrid.H>
 #include <CD_MFBaseIVFAB.H>
+#include <CD_MFHelmholtzEBBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -46,7 +47,7 @@ public:
   using AmrIrreData      = Vector<RefCountedPtr<LevelData<MFBaseIVFAB> > >;
 
   using DomainBCFactory = RefCountedPtr<EBHelmholtzDomainBCFactory>;
-  using EBBCFactory     = RefCountedPtr<EBHelmholtzEBBCFactory>;
+  using EBBCFactory     = RefCountedPtr<MFHelmholtzEBBCFactory>;
 
   using RelaxType       = EBHelmholtzOp::RelaxationMethod;
 

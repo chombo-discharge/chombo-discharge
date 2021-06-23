@@ -37,7 +37,7 @@ MFHelmholtzOp::MFHelmholtzOp(const MFLevelGrid&                               a_
 			     const MFFluxReg&                                 a_fluxReg,
 			     const MFCoarAve&                                 a_coarAve,
 			     const RefCountedPtr<EBHelmholtzDomainBCFactory>& a_domainBcFactory,
-			     const RefCountedPtr<EBHelmholtzEBBCFactory>&     a_ebBcFactory,			     
+			     const RefCountedPtr<MFHelmholtzEBBCFactory>&     a_ebBcFactory,			     
 			     const RealVect&                                  a_probLo,
 			     const Real&                                      a_dx,
 			     const int&                                       a_refToCoar,
@@ -90,7 +90,7 @@ MFHelmholtzOp::MFHelmholtzOp(const MFLevelGrid&                               a_
     EBLevelGrid eblgCoarMG  = a_hasMGObjects ? a_mflgCoarMG.getEBLevelGrid(iphase) : dummy;
 
     auto domainBC = a_domainBcFactory->create();
-    auto ebBC     = a_ebBcFactory->create();
+    auto ebBC     = a_ebBcFactory->create(m_jumpBC);
 
     if(a_isMGOperator) ebBC->setMG(true);
 

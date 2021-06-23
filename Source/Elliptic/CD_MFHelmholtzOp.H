@@ -29,7 +29,7 @@
 #include <CD_JumpBC.H>
 #include <CD_EBHelmholtzOp.H>
 #include <CD_EBHelmholtzDomainBCFactory.H>
-#include <CD_EBHelmholtzEBBCFactory.H>
+#include <CD_MFHelmholtzEBBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
 class MFHelmholtzOp : public AMRLevelOp<LevelData<MFCellFAB> > {
@@ -54,7 +54,7 @@ public:
 		const MFFluxReg&                                 a_fluxReg,
 		const MFCoarAve&                                 a_coarAve,
 		const RefCountedPtr<EBHelmholtzDomainBCFactory>& a_domainBcFactory,
-		const RefCountedPtr<EBHelmholtzEBBCFactory>&     a_ebBcFactory,
+		const RefCountedPtr<MFHelmholtzEBBCFactory>&     a_ebBcFactory,
 		const RealVect&                                  a_probLo,
 		const Real&                                      a_dx,
 		const int&                                       a_refToCoar,
