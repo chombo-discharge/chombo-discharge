@@ -719,7 +719,7 @@ void EBHelmholtzOp::applyOpNoBoundary(LevelData<EBCellFAB>& a_Lphi, const LevelD
 }
 
 void EBHelmholtzOp::fillGrad(const LevelData<EBCellFAB>& a_phi){
-  MayDay::Abort("EBHelmholtzOp::fillGrad - not implemented (yet)");
+  MayDay::Warning("EBHelmholtzOp::fillGrad - not implemented (yet)");
 }
 
 void EBHelmholtzOp::getFlux(EBFluxFAB&                  a_flux,
@@ -727,7 +727,7 @@ void EBHelmholtzOp::getFlux(EBFluxFAB&                  a_flux,
 			    const Box&                  a_grid,
 			    const DataIndex&            a_dit,
 			    Real                        a_scale) {
-  MayDay::Abort("EBHelmholtzOp::getFlux - not implemented (yet)");
+  MayDay::Warning("EBHelmholtzOp::getFlux - not implemented (yet)");
 }
 
 void EBHelmholtzOp::homogeneousCFInterp(LevelData<EBCellFAB>& a_phi){
@@ -767,7 +767,7 @@ void EBHelmholtzOp::relax(LevelData<EBCellFAB>& a_correction, const LevelData<EB
     this->relaxGSMultiColorFast(a_correction, a_residual, a_iterations);
     break;
   default:
-    MayDay::Abort("EBHelmholtzOp::relax - bogus relaxation method requested");
+    MayDay::Error("EBHelmholtzOp::relax - bogus relaxation method requested");
   };
 }
 
