@@ -103,6 +103,12 @@ public:
     @brief Return vof iterator which iterates over multi-phase cells on a specified phase and box. 
   */
   virtual VoFIterator& getMultiPhaseVofs(const int a_phase, const DataIndex& a_dit) const;
+
+  
+  /*!
+    @brief Set everything to zero. This is a debugging function.
+  */
+  void resetBC() const;
   
 protected:
 
@@ -257,10 +263,6 @@ protected:
   inline
   Real applyStencil(const VoFStencil& a_stencil, const EBCellFAB& a_phi) const;
 
-  /*!
-    @brief Set everything to zero. This is a debugging function.
-  */
-  void resetBC() const;
 };
 
 #include <CD_NamespaceFooter.H>

@@ -106,7 +106,7 @@ MFHelmholtzOp::MFHelmholtzOp(const MFLevelGrid&                               a_
     MultifluidAlias::aliasMF(*Bcoef,      iphase, *a_Bcoef);
     MultifluidAlias::aliasMF(*BcoefIrreg, iphase, *a_BcoefIrreg);
 
-    EBHelmholtzOp::RelaxationMethod ebHelmRelax = EBHelmholtzOp::RelaxationMethod::NoRelax;
+    EBHelmholtzOp::RelaxationMethod ebHelmRelax;
 
     switch(a_relaxType){
     case MFHelmholtzOp::RelaxationMethod::PointJacobi:
@@ -317,9 +317,11 @@ void MFHelmholtzOp::createCoarsened(LevelData<MFCellFAB>& a_lhs, const LevelData
 void MFHelmholtzOp::preCond(LevelData<MFCellFAB>& a_corr, const LevelData<MFCellFAB>& a_residual) {
   CH_TIME("MFHelmholtzOp::preCond");
 
-#if 1
+#if 0
   this->relax(a_corr, a_residual, 40);
 #else
+  m_jumpBC->resetBC();
+  
   for (auto& op : m_helmOps){
     LevelData<EBCellFAB> corr;
     LevelData<EBCellFAB> resi;
@@ -433,7 +435,7 @@ void MFHelmholtzOp::updateJumpBC(const LevelData<MFCellFAB>& a_phi, const bool a
 
 void MFHelmholtzOp::relax(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_residual, int a_iterations) {
   CH_TIME("MFHelmholtzOp::relax");
-
+#if 0
   switch(m_relaxType){
   case RelaxationMethod::PointJacobi:
     this->relaxPointJacobi(a_correction, a_residual, a_iterations);
@@ -447,6 +449,11 @@ void MFHelmholtzOp::relax(LevelData<MFCellFAB>& a_correction, const LevelData<MF
   default:
     MayDay::Error("MFHelmholtzOp::relax - bogus relaxation method requested");
   };
+#else
+  this->relaxGSRedBlack(a_correction, a_residual, a_iterations/4);
+  this->relaxPointJacobi(a_correction, a_residual, a_iterations/2);
+  this->relaxGSMultiColor(a_correction, a_residual, a_iterations/4);
+#endif
 }
 
 void MFHelmholtzOp::relaxPointJacobi(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_residual, const int a_iterations) {
@@ -489,11 +496,10 @@ void MFHelmholtzOp::relaxGSRedBlack(LevelData<MFCellFAB>& a_correction, const Le
     for (int redBlack=0;redBlack<=1; redBlack++){
 
       this->interpolateCF(a_correction, nullptr, true);
-
+      this->updateJumpBC(a_correction, true);
+      
       // For red-black we get better results if we update the jump BC after every operator correction. 
       for(auto& op : m_helmOps){
-	this->updateJumpBC(a_correction, true);
-	
 	MultifluidAlias::aliasMF(Lcorr, op.first, Lphi        );
 	MultifluidAlias::aliasMF(corr,  op.first, a_correction);
 	MultifluidAlias::aliasMF(resi,  op.first, a_residual  );
