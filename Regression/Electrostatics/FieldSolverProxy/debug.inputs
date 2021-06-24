@@ -4,7 +4,7 @@
 AmrMesh.lo_corner       = -1 -1       # Low corner of problem domain
 AmrMesh.hi_corner       =  1  1       # High corner of problem domain
 AmrMesh.verbosity       = -1          # Controls verbosity. 
-AmrMesh.coarsest_domain = 64 64      # Number of cells on coarsest domain
+AmrMesh.coarsest_domain = 64 64       # Number of cells on coarsest domain
 AmrMesh.max_amr_depth   = 3           # Maximum amr depth
 AmrMesh.max_sim_depth   = -1          # Maximum simulation depth
 AmrMesh.fill_ratio      = 1.0         # Fill ratio for grid generation
@@ -77,12 +77,12 @@ ProxyFieldSolver.jump_order = 2           # BC order on EB (only for Dirichlet)
 ProxyFieldSolver.jump_weight= 2           # Weighting for least squares (only for helm)
 ProxyFieldSolver.dom_val    = -1          # Value on domain (For Robin, this is multiplier)
 ProxyFieldSolver.eb_val     = 1           # Value on EB (For robin, this is multiplier)
-ProxyFieldSolver.smooth     = 10          # Smoothings
-ProxyFieldSolver.botsolver  = bicgstab    # 'simple' or 'bicgstab'
-ProxyFieldSolver.botsmooth  = 400         # Smoothings for bottom solver
+ProxyFieldSolver.smooth     = 16          # Smoothings
+ProxyFieldSolver.botsolver  = simple      # 'simple' or 'bicgstab'
+ProxyFieldSolver.botsmooth  = 40         # Smoothings for bottom solver
 ProxyFieldSolver.relax      = 2           # Relaxation method
 ProxyFieldSolver.mg_tol     = 1.E-20      # Multigrid tolerance
-ProxyFieldSolver.min_cells  = 16          # Number of cells along the shortest coordinate in the bottom of multigrid.
+ProxyFieldSolver.min_cells  = 8           # Number of cells along the shortest coordinate in the bottom of multigrid.
 ProxyFieldSolver.plt_vars   = phi resid E rho # Plot variables
 
 # ====================================================================================================
@@ -97,7 +97,7 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 # ====================================================================================================
 # ROD_DIELECTRIC CLASS OPTIONS
 # ====================================================================================================
-RodDielectric.electrode.on              = true          # Use electrode or not
+RodDielectric.electrode.on              = false          # Use electrode or not
 RodDielectric.electrode.endpoint1       = -0.5 -0.5     # One endpoint
 RodDielectric.electrode.endpoint2       =  0.5  0.5     # Other endpoint
 RodDielectric.electrode.radius          = 0.025         # Electrode radius

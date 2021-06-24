@@ -69,6 +69,8 @@ Real JumpBC::applyStencil(const VoFStencil& a_stencil, const EBCellFAB& a_phi) c
   for (int i = 0; i < a_stencil.size(); i++){
     contrib += a_stencil.weight(i)*a_phi(a_stencil.vof(i), m_comp);
   }
+
+  return contrib;
 }
 
 inline
@@ -118,8 +120,19 @@ void JumpBC::matchBC(const MFCellFAB&       a_phi,
     Vector<VolIndex> vofsPhase0 = ebisBoxPhase0.getVoFs(iv);
     Vector<VolIndex> vofsPhase1 = ebisBoxPhase1.getVoFs(iv);
 
+#if 1 // Original code
     for (const auto& v : vofsPhase0.stdVector()) bndryPhiPhase0(v, m_comp) = phiBndry;
     for (const auto& v : vofsPhase1.stdVector()) bndryPhiPhase1(v, m_comp) = phiBndry;
+#else // Debug code
+    if(a_homogeneousPhysBC){
+      for (const auto& v : vofsPhase0.stdVector()) bndryPhiPhase0(v, m_comp) = 0.0;
+      for (const auto& v : vofsPhase1.stdVector()) bndryPhiPhase1(v, m_comp) = 0.0;
+    }
+    else{
+      for (const auto& v : vofsPhase0.stdVector()) bndryPhiPhase0(v, m_comp) = 1.2345;
+      for (const auto& v : vofsPhase1.stdVector()) bndryPhiPhase1(v, m_comp) = 1.2345;
+    }
+#endif
   }
 }
 

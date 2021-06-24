@@ -223,7 +223,6 @@ void JumpBC::defineIterators(){
   }
 }	  
 
-
 bool JumpBC::getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFStencil>& a_stencil,
 						const VolIndex&              a_vof,
 						const EBISBox&               a_ebisbox,

@@ -7,7 +7,6 @@
   @file   CD_MFHelmholtzOp.H
   @brief  Declaration of a factory class for making multifluid Helmholtz operators for multigrid. 
   @author Robert Marskar
-  @todo   Remove the m_debug flag when the operator has settled in. 
 */
 
 #ifndef CD_MFHelmholtzOp_H
@@ -350,11 +349,6 @@ protected:
     @brief Number of components that we solve for.
   */
   static constexpr int m_nComp = 1;
-
-  /*!
-    @brief Verbosity. Used for debugging.
-  */
-  bool m_debug;
 
   /*!
     @brief Helmholtz operators on each phase. Note that I'm using int rather than Phase as identifier because that is the standard terminology for MFCellFAB. 
