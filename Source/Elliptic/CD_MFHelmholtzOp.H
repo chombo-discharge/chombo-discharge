@@ -145,6 +145,30 @@ public:
   void relax(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_residual, int a_iterations) override final;
 
   /*!
+    @brief Jacobi relaxation
+    @param[inout] a_correction Correction
+    @param[in]    a_residual   Residual
+    @param[in]    a_iterations Number of iterations
+  */
+  void relaxPointJacobi(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_residual, const int a_iterations);
+
+  /*!
+    @brief Jacobi relaxation
+    @param[inout] a_correction Correction
+    @param[in]    a_residual   Residual
+    @param[in]    a_iterations Number of iterations
+  */
+  void relaxGSRedBlack(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_residual, const int a_iterations);
+
+  /*!
+    @brief Multi-colored gauss-seidel relaxation
+    @param[inout] a_correction Correction
+    @param[in]    a_residual   Residual
+    @param[in]    a_iterations Number of iterations
+  */
+  void relaxGSMultiColor(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_residual, const int a_iterations);
+
+  /*!
     @brief Create method
     @param[out] a_lhs Clone
     @param[out] a_rhs Original data
@@ -349,6 +373,16 @@ protected:
     @brief Number of components that we solve for.
   */
   static constexpr int m_nComp = 1;
+
+  /*!
+    @brief Relaxation method
+  */
+  RelaxationMethod m_relaxType;
+
+  /*!
+    @brief "Colors" for the multi-coloered relaxation method
+  */
+  Vector<IntVect> m_colors;
 
   /*!
     @brief Helmholtz operators on each phase. Note that I'm using int rather than Phase as identifier because that is the standard terminology for MFCellFAB. 

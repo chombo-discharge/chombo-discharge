@@ -508,7 +508,7 @@ public:
   */
   LevelData<EBFluxFAB>& getFlux();
 
-  //protected:
+protected:
 
   /*!
     @brief Number of components that we solve for (always one..)
@@ -761,8 +761,6 @@ public:
     @param[in]    a_iterations Number of iterations
   */
   void relaxPointJacobi(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations);
-
-
 
     /*!
     @brief Jacobi relaxation
