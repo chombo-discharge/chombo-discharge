@@ -22,6 +22,8 @@ Real EBHelmholtzEBBC::applyStencil(const VoFStencil& a_stencil, const EBCellFAB&
   for (int i = 0; i < a_stencil.size(); i++){
     ret += a_stencil.weight(i)*a_phi(a_stencil.vof(i), m_comp);
   }
+
+  return ret;
 }
 
 #include <CD_NamespaceFooter.H>

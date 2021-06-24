@@ -134,9 +134,13 @@ void MFHelmholtzDirichletEBBC::applyEBFlux(EBCellFAB&         a_Lphi,
 					   const DataIndex&   a_dit,
 					   const Real&        a_beta,
 					   const bool&        a_homogeneousPhysBC) const {
+  // Apply the stencil for computing the contribution to kappaDivF. Note that division by dx is already done
+  // in the stencils.
+  
   // Homogeneous contribution
   a_Lphi(a_vof, m_comp) += a_beta*this->applyStencil(m_gradStencils[a_dit](a_vof, m_comp), a_phi);
-  
+
+  // Inhomogeneous contribution. 
   if(!a_homogeneousPhysBC){
     Real value;
     
@@ -148,8 +152,6 @@ void MFHelmholtzDirichletEBBC::applyEBFlux(EBCellFAB&         a_Lphi,
       value = m_functionValue(pos);
     }
 
-    // B-coefficient, area fraction, and division by dx (from Div(F)) already a part of the boundary weights, but
-    // beta is not. 
     a_Lphi(a_vof, m_comp) += a_beta*value*m_boundaryWeights[a_dit](a_vof, m_comp);
   }
   
