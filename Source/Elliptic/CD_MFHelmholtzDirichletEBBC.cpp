@@ -14,10 +14,7 @@
 #include <CD_LeastSquares.H>
 #include <CD_NamespaceHeader.H>
 
-MFHelmholtzDirichletEBBC::MFHelmholtzDirichletEBBC(const int a_phase, const RefCountedPtr<JumpBC>& a_jumpBC){
-  m_phase  = a_phase;
-  m_jumpBC = a_jumpBC;
-
+MFHelmholtzDirichletEBBC::MFHelmholtzDirichletEBBC(const int a_phase, const RefCountedPtr<JumpBC>& a_jumpBC) : MFHelmholtzEBBC(a_phase, a_jumpBC) {
   m_order       = -1;
   m_weight      = -1;
   m_useConstant = false;
@@ -128,7 +125,8 @@ void MFHelmholtzDirichletEBBC::define() {
   }
 }
 
-void MFHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&       a_vofit,
+void MFHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&       a_singlePhaseVofs,
+					   VoFIterator&       a_multiPhaseVofs,
 					   EBCellFAB&         a_Lphi,
 					   const EBCellFAB&   a_phi,
 					   const DataIndex&   a_dit,
@@ -136,14 +134,35 @@ void MFHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&       a_vofit,
 					   const bool&        a_homogeneousPhysBC) const {
   // Apply the stencil for computing the contribution to kappaDivF. Note divF is sum(faces) B*grad(Phi)/dx and that this
   // is the contribution from the EB face. B/dx is already included in the stencils and boundary weights, but beta is not.
-#if 0 // Original code
-  for(a_vofit.reset(); a_vofit.ok(); ++a_vofit){
-    const VolIndex& vof = a_vofit();
-#else
-    VoFIterator& vofit = m_jumpBC->getSinglePhaseVofs(m_phase, a_dit);
-  for(vofit.reset(); vofit.ok(); ++vofit){
-    const VolIndex& vof = vofit();
-#endif
+
+  // Do single phase cells
+  for(a_singlePhaseVofs.reset(); a_singlePhaseVofs.ok(); ++a_singlePhaseVofs){
+    const VolIndex& vof = a_singlePhaseVofs();
+
+    // Homogeneous contribution
+    a_Lphi(vof, m_comp) += a_beta*this->applyStencil(m_gradStencils[a_dit](vof, m_comp), a_phi);
+
+    // Inhomogeneous contribution. 
+    if(!a_homogeneousPhysBC){
+      Real value = 0.0;
+    
+      if(m_useConstant){
+	value = m_constantValue;
+      }
+      else if(m_useFunction){
+	const RealVect pos = this->getBoundaryPosition(vof, a_dit);
+	value = m_functionValue(pos);
+      }
+
+      a_Lphi(vof, m_comp) += a_beta*value*m_boundaryWeights[a_dit](vof, m_comp);
+    }
+  }
+
+  // Do multi-phasephase cells. Currently just a copy of the other.
+  return;
+  for(a_multiPhaseVofs.reset(); a_multiPhaseVofs.ok(); ++a_multiPhaseVofs){
+    const VolIndex& vof = a_multiPhaseVofs();
+
     // Homogeneous contribution
     a_Lphi(vof, m_comp) += a_beta*this->applyStencil(m_gradStencils[a_dit](vof, m_comp), a_phi);
 

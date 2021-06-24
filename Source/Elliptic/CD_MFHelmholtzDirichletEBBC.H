@@ -13,20 +13,14 @@
 #define CD_MFHelmholtzDirichletEBBC_H
 
 // Our includes
-#include <CD_EBHelmholtzDirichletEBBC.H>
-#include <CD_JumpBC.H>
+#include <CD_MFHelmholtzEBBC.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
   @brief Class for making Dirichlet boundary conditions on the EB in a multifluid context. 
 */
-class MFHelmholtzDirichletEBBC : public EBHelmholtzEBBC {
+class MFHelmholtzDirichletEBBC : public MFHelmholtzEBBC {
 public:
-
-  /*!
-    @brief Disallowed weak constructor. Factory must call the other version. 
-  */
-  MFHelmholtzDirichletEBBC() = delete;
 
   /*!
     @brief Full constructor
@@ -63,34 +57,8 @@ public:
     @param[in] a_value Spatially dependent value on EB
   */
   virtual void setValue(const std::function<Real(const RealVect& a_pos)>& a_value);
-  
-  /*!
-    @brief Apply the EB flux. This is the version that is called by EBHelmholtzOp.
-    @param[inout] a_vofit             Iterator for cut-cells
-    @param[inout] a_Lphi              Operator kappa*L(phi)
-    @param[in]    a_phi               Phi, cell-centered. 
-    @param[in]    a_dit               Data index    
-    @param[in]    a_beta              Beta. Passed in from operator. 
-    @param[in]    a_homogeneousPhysBC Homogeneous BC or not. 
-  */
-  virtual void applyEBFlux(VoFIterator&       a_vofit,
-			   EBCellFAB&         a_Lphi,
-			   const EBCellFAB&   a_phi,
-			   const DataIndex&   a_dit,
-			   const Real&        a_beta,
-			   const bool&        a_homogeneousPhysBC) const override;
 
 protected:
-
-  /*!
-    @brief Jump bc object
-  */
-  RefCountedPtr<JumpBC> m_jumpBC;
-
-  /*!
-    @brief Phase
-  */
-  int m_phase;
 
     /*!
     @brief Use constant for BC
@@ -136,6 +104,24 @@ protected:
     @brief User define function. 
   */
   virtual void define() override;
+
+  /*!
+    @brief Flux application function.
+    @param[inout] a_singlePhaseVofs   Iterator for single-phase cut-cells
+    @param[inout] a_multiPhaseVofs    Iterator for multi-phase cut-cells
+    @param[inout] a_Lphi              Operator kappa*L(phi)
+    @param[in]    a_phi               Phi, cell-centered. 
+    @param[in]    a_dit               Data index    
+    @param[in]    a_beta              Beta. Passed in from operator. 
+    @param[in]    a_homogeneousPhysBC Homogeneous BC or not. 
+  */
+  virtual void applyEBFlux(VoFIterator&       a_singlePhaseVofs,
+			   VoFIterator&       a_multiPhaseVofs,
+			   EBCellFAB&         a_Lphi,
+			   const EBCellFAB&   a_phi,
+			   const DataIndex&   a_dit,
+			   const Real&        a_beta,
+			   const bool&        a_homogeneousPhysBC) const override;
 
   /*!
     @brief Get stencil with specified order. 

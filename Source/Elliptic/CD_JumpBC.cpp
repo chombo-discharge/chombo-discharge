@@ -215,7 +215,7 @@ void JumpBC::defineIterators(){
       VoFIterator& multiPhaseVofIt  = multiPhaseVofs[dit()];
 
       singlePhaseVofIt.define(singlePhaseCells, ebgraph);
-      multiPhaseVofIt. define(singlePhaseCells, ebgraph);
+      multiPhaseVofIt. define(multiPhaseCells,  ebgraph);
     }
   }
 }	  
