@@ -444,22 +444,30 @@ void MFHelmholtzOp::relax(LevelData<MFCellFAB>& a_correction, const LevelData<MF
     op.second->relax(correction, residual, a_iterations);
   }
 #else
+  LevelData<MFCellFAB> opPhi;
+  this->create(opPhi, a_correction);
+  
   for (int i = 0; i < a_iterations; i++){
+    LevelData<EBCellFAB> Lcorr;
     LevelData<EBCellFAB> corr;
     LevelData<EBCellFAB> resi;
 
     // Interpolate ghost cells and match the BC.
-    this->interpolateCF(a_correction, nullptr, true);
-    this->updateJumpBC(a_correction, true);
+    for (int redBlack=0;redBlack<=1; redBlack++){
+      this->interpolateCF(a_correction, nullptr, true);
+      this->updateJumpBC(a_correction, true);
 
-    // Something simple, something true. 
-    for(auto& op : m_helmOps){
-      MultifluidAlias::aliasMF(corr, op.first, a_correction);
-      MultifluidAlias::aliasMF(resi, op.first, a_residual  );
+      // Something simple, something true. 
+      for(auto& op : m_helmOps){
+	MultifluidAlias::aliasMF(Lcorr, op.first, opPhi       );
+	MultifluidAlias::aliasMF(corr,  op.first, a_correction);
+	MultifluidAlias::aliasMF(resi,  op.first, a_residual  );
 
-      op.second->relaxPointJacobi(corr, resi, 1);
-      //            op.second->relaxGSRedBlack(corr, resi, 1);
-	    //      op.second->relaxGSMultiColor(corr, resi, 1);
+	//	op.second->relaxPointJacobi(corr, resi, 1);
+	op.second->gauSaiRedBlackKernel(Lcorr, corr, resi, redBlack);
+	//            op.second->relaxGSRedBlack(corr, resi, 1);
+	//      op.second->relaxGSMultiColor(corr, resi, 1);
+      }
     }
   }
 #endif
