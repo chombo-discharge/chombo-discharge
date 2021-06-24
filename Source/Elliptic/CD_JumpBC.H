@@ -31,6 +31,8 @@
 class JumpBC {
 public:
 
+  using BcoefPtr = RefCountedPtr<LevelData<MFBaseIVFAB> >;
+
   /*!
     @brief Disallowed weak construction
   */
@@ -38,13 +40,21 @@ public:
 
   /*!
     @brief Defining constructor
-    @param[in] a_mflg   Grids
-    @param[in] a_dx     Grid resolution
-    @param[in] a_order  Stencil approximation order
-    @param[in] a_weight Weighting factor for least squares
-    @param[in] a_radius Stencil radius
+    @param[in] a_mflg    Grids
+    @param[in] a_Bcoef   Helmholtz B-coefficient
+    @param[in] a_dx      Grid resolution
+    @param[in] a_order   Stencil approximation order
+    @param[in] a_weight  Weighting factor for least squares
+    @param[in] a_radius  Stencil radius
+    @param[in] a_ghostCF Number of grid cells that were filled across the CF. 
   */
-  JumpBC(const MFLevelGrid& a_mflg, const RefCountedPtr<LevelData<MFBaseIVFAB> >& a_Bcoef, const Real a_dx, const int a_order, const int a_weight, const int a_radius);
+  JumpBC(const MFLevelGrid& a_mflg,
+	 const BcoefPtr&    a_Bcoef,
+	 const Real         a_dx,
+	 const int          a_order,
+	 const int          a_weight,
+	 const int          a_radius,
+	 const int          a_ghostCF);
 
   /*!
     @brief Disallowed copy constructor
@@ -60,11 +70,6 @@ public:
     @brief Disallowed assignment constructor
   */
   JumpBC& operator=(const JumpBC& a_other) = delete;
-
-  /*!
-    @brief Define function. Builds stencils. 
-  */
-  void define(const MFLevelGrid& a_mflg, const RefCountedPtr<LevelData<MFBaseIVFAB> >& a_Bcoef, const Real a_dx, const int a_order, const int a_weight, const int a_radius);
 
   /*!
     @brief Match the BC
@@ -85,6 +90,16 @@ public:
   virtual const BaseIVFAB<Real>& getBndryPhi(const int a_phase, const DataIndex& a_dit) const;
   
 protected:
+
+  /*!
+    @brief Component where stencils are stored. 
+  */
+  static constexpr int m_comp = 0;
+
+    /*!
+    @brief Number of components in stencil
+  */
+  static constexpr int m_nComp = 1;
 
   /*!
     @brief Grids
@@ -117,6 +132,16 @@ protected:
   int m_radius;
 
   /*!
+    @brief Number of grid cells that were filled over the CF 
+  */
+  int m_ghostCF;
+
+  /*!
+    @brief Number of phases
+  */
+  int m_numPhases;
+
+  /*!
     @brief Value of phi on the boundary. 
   */
   LayoutData<MFInterfaceFAB<Real> > m_boundaryPhi;
@@ -137,24 +162,38 @@ protected:
   LayoutData<MFInterfaceFAB<Real> > m_avgBco;
 
   /*!
+    @brief Define function. Builds stencils. 
+  */
+  void define();
+
+  /*!
     @brief Get stencil with specified order. 
     @param[out] a_stencil      Weight and stencil
     @param[out] a_vof          Grid cell
+    @param[out] a_ebisbox      EBISBox
     @param[out] a_neighborhood Neighboorhood specifier
-    @param[in]  a_dit          Data index
     @param[in]  a_order        Attempted order for stencil. This is also the stencil radius. 
-    @param[in]  a_phase        Phase. 
     @return If this returns true, a_stencil contains a valid stencil and weight. 
     @note Stencils are computed using weighted least squares with squared inverse distance weighting. 
   */
   virtual bool getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFStencil>& a_stencil,
 						  const VolIndex&              a_vof,
+						  const EBISBox&               a_ebisbox,
 						  const VofUtils::Neighborhood a_neighborhood,
-						  const DataIndex&             a_dit,
-						  const int                    a_order,
-						  const int                    a_phase) const;
+						  const int                    a_order) const;
+
+  /*!
+    @brief Check if stencil is valid. 
+    @details This routine makes sure that the stencil a_stencil does not reach over the CF interface and into ghost cells that do not have valid data.
+    @param[in] a_stencil Stencil
+    @param[in] a_dit     Data index
+  */
+  inline
+  bool isStencilValidCF(const VoFStencil& a_stencil, const DataIndex& a_dit) const;
 };
 
 #include <CD_NamespaceFooter.H>
+
+#include <CD_JumpBCImplem.H>
 
 #endif

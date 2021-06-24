@@ -4,35 +4,26 @@
  */
 
 /*
-  @file   CD_EBHelmholtzEBBCImplem.H
-  @brief  Implementation of CD_EBHelmholtzEBBC.H
+  @file   CD_JumpBCImplem.H
+  @brief  Implementation of CD_JumpBC.H
   @author Robert Marskar
 */
 
-#ifndef CD_EBHelmholtzEBBCImplem_H
-#define CD_EBHelmholtzEBBCImplem_H
+#ifndef CD_JumpBCImplem_H
+#define CD_JumpBCImplem_H
 
 // Chombo includes
 #include <NeighborIterator.H>
 
 // Our includes
-#include <CD_EBHelmholtzEBBC.H>
+#include <CD_JumpBC.H>
 #include <CD_NamespaceHeader.H>
 
-inline
-Real EBHelmholtzEBBC::applyStencil(const VoFStencil& a_stencil, const EBCellFAB& a_phi) const {
-  Real ret = 0.0;
-  for (int i = 0; i < a_stencil.size(); i++){
-    ret += a_stencil.weight(i)*a_phi(a_stencil.vof(i), m_comp);
-  }
-
-  return ret;
-}
 
 inline
-bool EBHelmholtzEBBC::isStencilValidCF(const VoFStencil& a_stencil, const DataIndex& a_dit) const {
-  const DisjointBoxLayout& dbl = m_eblg.getDBL();
-  const ProblemDomain& domain  = m_eblg.getDomain();
+bool JumpBC::isStencilValidCF(const VoFStencil& a_stencil, const DataIndex& a_dit) const {
+  const DisjointBoxLayout& dbl = m_mflg.getGrids();
+  const ProblemDomain& domain  = m_mflg.getDomain();
 
   // Construct boxes that contain all the valid cells for this stencil. 
   std::vector<Box> validBoxes;

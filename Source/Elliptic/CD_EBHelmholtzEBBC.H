@@ -146,6 +146,7 @@ protected:
     @param[in] a_stencil Stencil
     @param[in] a_dit     Data index
   */
+  inline
   bool isStencilValidCF(const VoFStencil& a_stencil, const DataIndex& a_dit) const;
 
   /*!
