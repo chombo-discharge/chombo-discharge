@@ -111,6 +111,24 @@ public:
   void pointJacobiKernel(LevelData<EBCellFAB>& a_Lcorr, LevelData<EBCellFAB>& a_corr, const LevelData<EBCellFAB>& a_resid);
 
   /*!
+    @brief Red-black Gauss-Seidel kernel
+    @param[inout] a_Lcorr    Storage for computing L(a_corr)
+    @param[inout] a_corr     Correction
+    @param[in]    a_resid    Residual
+    @param[in]    a_redBlack Red or black
+  */
+  void gauSaiRedBlackKernel(LevelData<EBCellFAB>& a_Lcorr, LevelData<EBCellFAB>& a_corr, const LevelData<EBCellFAB>& a_resid, const int a_redBlack);
+
+  /*!
+    @brief Multi-color Gauss-Seidel kernel
+    @param[inout] a_Lcorr    Storage for computing L(a_corr)
+    @param[inout] a_corr     Correction
+    @param[in]    a_resid    Residual
+    @param[in]    a_color    Color
+  */
+  void gauSaiMultiColorKernel(LevelData<EBCellFAB>& a_Lcorr, LevelData<EBCellFAB>& a_corr, const LevelData<EBCellFAB>& a_resid, const IntVect a_color);
+
+  /*!
     @brief Compute residual on this level. 
     @param[out] a_residual          Residual rhs - L(phi)
     @param[in]  a_phi               phi

@@ -799,10 +799,14 @@ void EBHelmholtzOp::relaxGSRedBlack(LevelData<EBCellFAB>& a_correction, const Le
   for (int iter = 0; iter < a_iterations; iter++){
     for (int redBlack = 0; redBlack <= 1; redBlack++){
       this->homogeneousCFInterp(a_correction);
-      this->applyOp(Lcorr, a_correction, true);
-      this->gauSaiRedBlack(a_correction, Lcorr, a_residual, redBlack);
+      this->gauSaiRedBlackKernel(Lcorr, a_correction, a_residual, redBlack);
     }
   }
+}
+
+void EBHelmholtzOp::gauSaiRedBlackKernel(LevelData<EBCellFAB>& a_Lcorr, LevelData<EBCellFAB>& a_corr, const LevelData<EBCellFAB>& a_resid, const int a_redBlack){
+  this->applyOp(a_Lcorr, a_corr, true);
+  this->gauSaiRedBlack(a_corr, a_Lcorr, a_resid, a_redBlack);
 }
 
 void EBHelmholtzOp::gauSaiRedBlack(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_rhs, const int& a_redBlack) const {
@@ -851,10 +855,14 @@ void EBHelmholtzOp::relaxGSMultiColor(LevelData<EBCellFAB>& a_correction, const 
   for (int iter = 0; iter < a_iterations; iter++){
     for (int icolor = 0; icolor < m_colors.size(); icolor++){
       this->homogeneousCFInterp(a_correction);
-      this->applyOp(Lcorr, a_correction, true);
-      this->gauSaiMultiColor(a_correction, Lcorr, a_residual, m_colors[icolor]);
+      this->gauSaiMultiColorKernel(Lcorr, a_correction, a_residual, m_colors[icolor]);
     }
   }
+}
+
+void EBHelmholtzOp::gauSaiMultiColorKernel(LevelData<EBCellFAB>& a_Lcorr, LevelData<EBCellFAB>& a_corr, const LevelData<EBCellFAB>& a_resid, const IntVect a_color){
+  this->applyOp(a_Lcorr, a_corr, true);
+  this->gauSaiMultiColor(a_corr, a_Lcorr, a_resid, a_color);
 }
 
 void EBHelmholtzOp::gauSaiMultiColor(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_rhs, const IntVect& a_color) const {
