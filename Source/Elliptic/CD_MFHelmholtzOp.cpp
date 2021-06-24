@@ -318,6 +318,7 @@ void MFHelmholtzOp::preCond(LevelData<MFCellFAB>& a_corr, const LevelData<MFCell
   //  MayDay::Error("MFHelmholtzOp::preCond -- this one needs work");
   
   //  this->relax(a_corr, a_residual, 40);
+#if 1
   for (auto& op : m_helmOps){
     LevelData<EBCellFAB> corr;
     LevelData<EBCellFAB> resi;
@@ -327,6 +328,7 @@ void MFHelmholtzOp::preCond(LevelData<MFCellFAB>& a_corr, const LevelData<MFCell
 
     op.second->preCond(corr, resi);
   }
+#endif
 }
 
 void MFHelmholtzOp::applyOp(LevelData<MFCellFAB>& a_Lphi, const LevelData<MFCellFAB>& a_phi, bool a_homogeneousPhysBC) {
@@ -421,13 +423,17 @@ void MFHelmholtzOp::axby(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>
 void MFHelmholtzOp::updateJumpBC(const LevelData<MFCellFAB>& a_phi, const bool a_homogeneousPhysBC){
   CH_TIME("MFHelmholtzOp::updateJumpBC");
 
-  //  m_jumpBC->matchBC(a_phi, *m_jump, a_homogeneousPhysBC);
+  // Don't know if this is necessary but I'll do it anyways. For now. 
+  LevelData<MFCellFAB>& phi = (LevelData<MFCellFAB>&) a_phi;
+  phi.exchange();
+  
+  m_jumpBC->matchBC(a_phi, *m_jump, a_homogeneousPhysBC);
 }
 
 void MFHelmholtzOp::relax(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_residual, int a_iterations) {
   CH_TIME("MFHelmholtzOp::relax");
 
-#if 1 // Uncoupled operators
+#if 0 // Uncoupled operators
   for (auto& op : m_helmOps){
     LevelData<EBCellFAB> correction;
     LevelData<EBCellFAB> residual;
@@ -449,7 +455,7 @@ void MFHelmholtzOp::relax(LevelData<MFCellFAB>& a_correction, const LevelData<MF
     // Something simple, something true. 
     for(auto& op : m_helmOps){
       MultifluidAlias::aliasMF(corr, op.first, a_correction);
-      MultifluidAlias::aliasMF(resi,   op.first, a_residual);
+      MultifluidAlias::aliasMF(resi, op.first, a_residual  );
 
       op.second->relaxPointJacobi(corr, resi, 1);
     }

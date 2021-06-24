@@ -197,11 +197,6 @@ protected:
   LayoutData<MFInterfaceFAB<Real> > m_avgWeights;
 
   /*!
-    @brief Average b-coefficient
-  */
-  LayoutData<MFInterfaceFAB<Real> > m_avgBco;
-
-  /*!
     @brief Define function. Builds stencils. 
   */
   void defineStencils();

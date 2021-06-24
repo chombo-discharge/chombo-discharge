@@ -158,7 +158,7 @@ void MFHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&       a_singlePhaseVofs,
     }
   }
 
-  // Do multi-phasephase cells. Currently just a copy of the other.
+  // Do multi-phasephase cells. 
   for(a_multiPhaseVofs.reset(); a_multiPhaseVofs.ok(); ++a_multiPhaseVofs){
     const VolIndex& vof = a_multiPhaseVofs();
 
@@ -166,7 +166,7 @@ void MFHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&       a_singlePhaseVofs,
     a_Lphi(vof, m_comp) += a_beta*this->applyStencil(m_gradStencils[a_dit](vof, m_comp), a_phi);
 
     // Inhomogeneous contribution. 
-    if(!a_homogeneousPhysBC){
+    //    if(!a_homogeneousPhysBC){
       Real value = 0.0;
     
       if(m_useConstant){
@@ -180,7 +180,7 @@ void MFHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&       a_singlePhaseVofs,
       value = m_jumpBC->getBndryPhi(m_phase, a_dit)(vof, m_comp);
 
       a_Lphi(vof, m_comp) += a_beta*value*m_boundaryWeights[a_dit](vof, m_comp);
-    }
+      //    }
   }
 
   

@@ -482,7 +482,7 @@ public:
   */
   LevelData<EBFluxFAB>& getFlux();
 
-protected:
+  //protected:
 
   /*!
     @brief Number of components that we solve for (always one..)

@@ -69,8 +69,7 @@ void JumpBC::defineStencils(){
 
     m_boundaryPhi.define(dbl);
     m_avgStencils.define(dbl);
-    m_avgWeights.define(dbl);
-    m_avgBco.define(dbl);
+    m_avgWeights. define(dbl);
 
     for (DataIterator dit(dbl); dit.ok(); ++dit){
       const Box box = dbl[dit()];
@@ -78,7 +77,6 @@ void JumpBC::defineStencils(){
       m_boundaryPhi[dit()].define(m_mflg, dit());
       m_avgStencils[dit()].define(m_mflg, dit());
       m_avgWeights [dit()].define(m_mflg, dit());
-      m_avgBco     [dit()].define(m_mflg, dit());
     }
 
     // Build stencils and weights for each phase. 
@@ -92,15 +90,10 @@ void JumpBC::defineStencils(){
 	const EBGraph& ebgraph = ebisbox.getEBGraph();
 	const IntVectSet& ivs  = m_ivs[dit()];
 
-	// Build the average stencils. Only matters if the cell is a multi-valued cell. 
-	BaseIVFAB<VoFStencil>& avgStencils = m_avgStencils[dit()].getIVFAB(iphase);
-	BaseIVFAB<Real>& avgWeights        = m_avgWeights [dit()].getIVFAB(iphase);
-	BaseIVFAB<Real>& avgBco            = m_avgBco     [dit()].getIVFAB(iphase);
-	const BaseIVFAB<Real>& Bcoef       = (*m_Bcoef)   [dit()].getIVFAB(iphase);
-
 	// Build stencils like we always do
 	BaseIVFAB<VoFStencil> gradStencils(ivs, ebgraph, m_nComp);
 	BaseIVFAB<Real>       bndryWeights(ivs, ebgraph, m_nComp);
+	
 	for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
 	  const VolIndex& vof = vofit();
 
@@ -142,34 +135,40 @@ void JumpBC::defineStencils(){
 	  }
 	}
 
-	// Build average stencils
+	// Build the average stencils. Only matters if the cell is a multi-valued cell. 
+	BaseIVFAB<VoFStencil>& avgStencils =   m_avgStencils[dit()].getIVFAB(iphase);
+	BaseIVFAB<Real>& avgWeights        =   m_avgWeights [dit()].getIVFAB(iphase);
+	const BaseIVFAB<Real>& Bcoef       = (*m_Bcoef)     [dit()].getIVFAB(iphase);
+	
 	for (IVSIterator ivsIt(ivs); ivsIt.ok(); ++ivsIt){
 	  const IntVect iv = ivsIt();
 
 	  const VolIndex curVof(iv, 0);
 	  const Vector<VolIndex> allVofs = ebisbox.getVoFs(iv);
 
-	  Real& curBco           = avgBco     (curVof, m_comp);
 	  Real& curWeight        = avgWeights (curVof, m_comp);
 	  VoFStencil& curStencil = avgStencils(curVof, m_comp);
 
-	  curBco    = 0.0;
 	  curWeight = 0.0;
 	  curStencil.clear();
 
+	  Real avgBco = 0.0;
 	  for (int ivof = 0; ivof < allVofs.size(); ivof++){
 	    const VolIndex& vof = allVofs[ivof];
 
-	    curBco     += Bcoef       (vof, m_comp);
+	    avgBco     += Bcoef       (vof, m_comp);
 	    curWeight  += bndryWeights(vof, m_comp);
 	    curStencil += gradStencils(vof, m_comp);
 	  }
 
 	  const Real invNum = 1./allVofs.size();
 
-	  curBco     *= invNum;
+	  avgBco     *= invNum;
 	  curWeight  *= invNum;
 	  curStencil *= invNum;
+
+	  curStencil *= avgBco;
+	  curWeight  *= avgBco;
 	}
       }
     }
@@ -215,7 +214,7 @@ void JumpBC::defineIterators(){
       multiPhaseCells  |= m_ivs[dit()];
 
       VoFIterator& singlePhaseVofIt = singlePhaseVofs[dit()];
-      VoFIterator& multiPhaseVofIt  = multiPhaseVofs[dit()];
+      VoFIterator& multiPhaseVofIt  = multiPhaseVofs [dit()];
 
       singlePhaseVofIt.define(singlePhaseCells, ebgraph);
       multiPhaseVofIt. define(multiPhaseCells,  ebgraph);
@@ -230,7 +229,7 @@ bool JumpBC::getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFStencil>& a_s
 						const int                    a_order) const {
   bool foundStencil = false;
 
-  const RealVect normal   = a_ebisbox.normal(a_vof);  
+  const RealVect normal = a_ebisbox.normal(a_vof);  
     
   const VoFStencil gradientStencil = LeastSquares::getBndryGradSten(a_vof, a_neighborhood, a_ebisbox, m_dx, a_order, m_weight, a_order);
 

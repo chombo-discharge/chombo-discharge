@@ -7,6 +7,8 @@
   @file   CD_JumpBCImplem.H
   @brief  Implementation of CD_JumpBC.H
   @author Robert Marskar
+  @todo   The denominator should be precomputed for efficiency reasons. 
+  @todo   Inhomogeneous contribution is missing. 
 */
 
 #ifndef CD_JumpBCImplem_H
@@ -103,15 +105,12 @@ void JumpBC::matchBC(const MFCellFAB&       a_phi,
     const Real& weightPhase0 = m_avgWeights[a_dit].getIVFAB(firstPhase) (vof0, vofComp);
     const Real& weightPhase1 = m_avgWeights[a_dit].getIVFAB(secondPhase)(vof0, vofComp);
 
-    const Real& BcoPhase0 = m_avgBco[a_dit].getIVFAB(firstPhase) (vof0, vofComp);
-    const Real& BcoPhase1 = m_avgBco[a_dit].getIVFAB(secondPhase)(vof0, vofComp);
-
     // Compute the average jump.
     Real jump = 0.0;
     // Vector<VolIndex> vofs = blablabla.
 
     // Do the matching 
-    const Real denom         = 1./(weightPhase0*BcoPhase0 + weightPhase1*BcoPhase1); // This one is possible to precompute.
+    const Real denom         = 1./(weightPhase0 + weightPhase1); 
     const Real contribPhase0 = this->applyStencil(derivStenPhase0, phiPhase0);
     const Real contribPhase1 = this->applyStencil(derivStenPhase1, phiPhase1);
     const Real phiBndry      = denom*(jump - contribPhase0 - contribPhase1);
