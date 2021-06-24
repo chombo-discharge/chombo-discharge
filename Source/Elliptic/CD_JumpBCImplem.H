@@ -102,18 +102,17 @@ void JumpBC::matchBC(const MFCellFAB&       a_phi,
     const VoFStencil& derivStenPhase0 = m_avgStencils[a_dit].getIVFAB(firstPhase) (vof0, vofComp);
     const VoFStencil& derivStenPhase1 = m_avgStencils[a_dit].getIVFAB(secondPhase)(vof0, vofComp);
 
-    const Real& weightPhase0 = m_avgWeights[a_dit].getIVFAB(firstPhase) (vof0, vofComp);
-    const Real& weightPhase1 = m_avgWeights[a_dit].getIVFAB(secondPhase)(vof0, vofComp);
+    const Real& denomPhase0 = m_denom[a_dit].getIVFAB(firstPhase) (vof0, vofComp);
+    const Real& denomPhase1 = m_denom[a_dit].getIVFAB(secondPhase)(vof0, vofComp);
 
     // Compute the average jump.
     Real jump = 0.0; // Jump not computed (yet)
     // Vector<VolIndex> vofs = ebisBoxPhase0.getVofs(blablabla)
 
     // Do the matching 
-    const Real denom         = 1./(weightPhase0 + weightPhase1); 
     const Real contribPhase0 = this->applyStencil(derivStenPhase0, phiPhase0);
     const Real contribPhase1 = this->applyStencil(derivStenPhase1, phiPhase1);
-    const Real phiBndry      = denom*(jump - contribPhase0 - contribPhase1);
+    const Real phiBndry      = denomPhase0*jump - (contribPhase0 + contribPhase1); 
 
     // Copy the result to the individual phase data holders
     Vector<VolIndex> vofsPhase0 = ebisBoxPhase0.getVoFs(iv);

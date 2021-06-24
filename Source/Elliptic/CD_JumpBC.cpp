@@ -70,6 +70,7 @@ void JumpBC::defineStencils(){
     m_boundaryPhi.define(dbl);
     m_avgStencils.define(dbl);
     m_avgWeights. define(dbl);
+    m_denom.      define(dbl);
 
     for (DataIterator dit(dbl); dit.ok(); ++dit){
       const Box box = dbl[dit()];
@@ -77,6 +78,7 @@ void JumpBC::defineStencils(){
       m_boundaryPhi[dit()].define(m_mflg, dit());
       m_avgStencils[dit()].define(m_mflg, dit());
       m_avgWeights [dit()].define(m_mflg, dit());
+      m_denom      [dit()].define(m_mflg, dit());      
     }
 
     // Build stencils and weights for each phase. 
@@ -170,6 +172,33 @@ void JumpBC::defineStencils(){
 	  curStencil *= avgBco;
 	  curWeight  *= avgBco;
 	}
+      }
+    }
+
+    // For efficiency reasons, store 1/(bp*wp + bq*wq). Scale the average stencils by this value as well since we apply it anyways. 
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      constexpr int vofComp     = 0;
+      constexpr int firstPhase  = 0;
+      constexpr int secondPhase = 1;
+      
+      for (IVSIterator ivsIt(m_ivs[dit()]); ivsIt.ok(); ++ivsIt){
+	const IntVect iv = ivsIt();
+	const VolIndex vof0(iv, vofComp);
+
+	VoFStencil& derivStenPhase0 = m_avgStencils[dit()].getIVFAB(firstPhase) (vof0, vofComp);
+	VoFStencil& derivStenPhase1 = m_avgStencils[dit()].getIVFAB(secondPhase)(vof0, vofComp);
+
+	const Real& weightPhase0 = m_avgWeights[dit()].getIVFAB(firstPhase) (vof0, vofComp);
+	const Real& weightPhase1 = m_avgWeights[dit()].getIVFAB(secondPhase)(vof0, vofComp);
+
+	Real& denomPhase0 = m_denom[dit()].getIVFAB(firstPhase)(vof0, vofComp);
+	Real& denomPhase1 = m_denom[dit()].getIVFAB(firstPhase)(vof0, vofComp);
+
+	denomPhase0 = 1./(weightPhase0 + weightPhase1);
+	denomPhase1 = 1./(weightPhase0 + weightPhase1);
+
+	derivStenPhase0 *= denomPhase0;
+	derivStenPhase1 *= denomPhase1;
       }
     }
 

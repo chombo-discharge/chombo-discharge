@@ -192,6 +192,11 @@ protected:
   LayoutData<MFInterfaceFAB<VoFStencil> > m_avgStencils;
 
   /*!
+    @brief Denom factor
+  */
+  LayoutData<MFInterfaceFAB<Real> > m_denom;
+
+  /*!
     @brief Average weights
   */
   LayoutData<MFInterfaceFAB<Real> > m_avgWeights;
