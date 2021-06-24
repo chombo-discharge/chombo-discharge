@@ -93,6 +93,16 @@ public:
     @return Returns phi on the boundary. On multivalued cells, phi always lies on VolIndex(iv, 0). 
   */
   virtual const BaseIVFAB<Real>& getBndryPhi(const int a_phase, const DataIndex& a_dit) const;
+
+  /*!
+    @brief Return vof iterator which iterates over single-phase cells on a specific phase and box. 
+  */
+  virtual VoFIterator& getSinglePhaseVofs(const int a_phase, const DataIndex& a_dit) const;
+
+  /*!
+    @brief Return vof iterator which iterates over multi-phase cells on a specified phase and box. 
+  */
+  virtual VoFIterator& getMultiPhaseVofs(const int a_phase, const DataIndex& a_dit) const;
   
 protected:
 
@@ -155,6 +165,16 @@ protected:
     @brief Value of phi on the boundary. 
   */
   mutable LayoutData<MFInterfaceFAB<Real> > m_boundaryPhi;
+  
+  /*!
+    @brief Iterators for single-phase cells. The integer index is the phase. 
+  */
+  mutable std::map<int, std::shared_ptr<LayoutData<VoFIterator> > > m_singlePhaseVofs;
+
+  /*!
+    @brief Iterators for multi-phase cells. The integer index is the phase. 
+  */
+  mutable std::map<int, std::shared_ptr<LayoutData<VoFIterator> > > m_multiPhaseVofs;
 
   /*!
     @brief Average stencil
@@ -171,10 +191,16 @@ protected:
   */
   LayoutData<MFInterfaceFAB<Real> > m_avgBco;
 
+
   /*!
     @brief Define function. Builds stencils. 
   */
-  void define();
+  void defineStencils();
+
+  /*!
+    @brief Define function. Builds stencils. 
+  */
+  void defineIterators();
 
   /*!
     @brief Get stencil with specified order. 

@@ -37,7 +37,8 @@ JumpBC::JumpBC(const MFLevelGrid& a_mflg,
   m_numPhases = m_mflg.numPhases();
   m_isMGLevel = false;
 
-  this->define();
+  this->defineStencils();
+  this->defineIterators();
 }
 
 JumpBC::~JumpBC(){
@@ -48,7 +49,19 @@ void JumpBC::setMG(const bool a_isMGLevel){
   m_isMGLevel = a_isMGLevel;
 }
 
-void JumpBC::define(){
+const BaseIVFAB<Real>& JumpBC::getBndryPhi(const int a_phase, const DataIndex& a_dit) const {
+  return m_boundaryPhi[a_dit].getIVFAB(a_phase);
+}
+
+VoFIterator& JumpBC::getSinglePhaseVofs(const int a_phase, const DataIndex& a_dit) const{
+  return (*m_singlePhaseVofs.at(a_phase))[a_dit];
+}
+
+VoFIterator& JumpBC::getMultiPhaseVofs(const int a_phase, const DataIndex& a_dit) const{
+  return (*m_multiPhaseVofs.at(a_phase))[a_dit];
+}
+
+void JumpBC::defineStencils(){
   if(m_numPhases > 1) { // JumpBC will never be called unless it's a multiphase problem.
     
     const DisjointBoxLayout& dbl = m_mflg.getGrids();
@@ -166,9 +179,27 @@ void JumpBC::define(){
   }
 }
 
-const BaseIVFAB<Real>& JumpBC::getBndryPhi(const int a_phase, const DataIndex& a_dit) const {
-  return m_boundaryPhi[a_dit].getIVFAB(a_phase);
-}
+void JumpBC::defineIterators(){
+  const DisjointBoxLayout& dbl = m_mflg.getGrids();
+
+  for (int iphase = 0; iphase < m_numPhases; iphase++){
+    m_singlePhaseVofs.emplace(iphase, std::make_shared<LayoutData<VoFIterator> >() );
+    m_multiPhaseVofs .emplace(iphase, std::make_shared<LayoutData<VoFIterator> >() );
+
+    LayoutData<VoFIterator>& singlePhaseVofs = *m_singlePhaseVofs.at(iphase);
+    LayoutData<VoFIterator>& multiPhaseVofs  = *m_multiPhaseVofs. at(iphase);
+    
+    singlePhaseVofs.define(dbl);
+    multiPhaseVofs. define(dbl);
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+
+      // m_singlePhaseVofs[dit()].define(m_mflg, dit());
+      // m_multiPhaseVofs [dit()].define(m_mflg, dit());
+    }
+  }
+}	  
+
 
 bool JumpBC::getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFStencil>& a_stencil,
 						const VolIndex&              a_vof,
