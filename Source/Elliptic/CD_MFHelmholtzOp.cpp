@@ -78,8 +78,7 @@ MFHelmholtzOp::MFHelmholtzOp(const MFLevelGrid&                               a_
   EBArith::getMultiColors(m_colors);
 
   // Instantiate jump bc object.
-  //  const int ghostCF = a_interpolator.getGhostCF();
-  int ghostCF = 1;
+  const int ghostCF = a_hasCoar ? a_interpolator.getGhostCF() : 0;
   m_jumpBC = RefCountedPtr<JumpBC> (new JumpBC(m_mflg, a_BcoefIrreg, a_dx, a_jumpOrder, a_jumpWeight, a_jumpOrder, ghostCF));
   if(a_isMGOperator) m_jumpBC->setMG(true);
 
@@ -318,10 +317,9 @@ void MFHelmholtzOp::createCoarsened(LevelData<MFCellFAB>& a_lhs, const LevelData
 void MFHelmholtzOp::preCond(LevelData<MFCellFAB>& a_corr, const LevelData<MFCellFAB>& a_residual) {
   CH_TIME("MFHelmholtzOp::preCond");
 
-  //  MayDay::Error("MFHelmholtzOp::preCond -- this one needs work");
-  
-  //  this->relax(a_corr, a_residual, 40);
 #if 1
+  this->relax(a_corr, a_residual, 40);
+#else
   for (auto& op : m_helmOps){
     LevelData<EBCellFAB> corr;
     LevelData<EBCellFAB> resi;
