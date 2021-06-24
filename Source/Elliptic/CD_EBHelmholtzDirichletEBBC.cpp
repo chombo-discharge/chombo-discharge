@@ -128,26 +128,30 @@ void EBHelmholtzDirichletEBBC::define() {
   }
 }
 
-void EBHelmholtzDirichletEBBC::applyEBFlux(EBCellFAB&         a_Lphi,
+void EBHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&       a_vofit,
+					   EBCellFAB&         a_Lphi,
 					   const EBCellFAB&   a_phi,
-					   const VolIndex&    a_vof,
 					   const DataIndex&   a_dit,
 					   const Real&        a_beta,
 					   const bool&        a_homogeneousPhysBC) const {
-  if(!a_homogeneousPhysBC){
-    Real value;
+  for (a_vofit.reset(); a_vofit.ok(); ++a_vofit){
+    const VolIndex& vof = a_vofit();
     
-    if(m_useConstant){
-      value = m_constantValue;
-    }
-    else if(m_useFunction){
-      const RealVect pos = this->getBoundaryPosition(a_vof, a_dit);
-      value = m_functionValue(pos);
-    }
+    if(!a_homogeneousPhysBC){
+      Real value;
+    
+      if(m_useConstant){
+	value = m_constantValue;
+      }
+      else if(m_useFunction){
+	const RealVect pos = this->getBoundaryPosition(vof, a_dit);
+	value = m_functionValue(pos);
+      }
 
-    // B-coefficient, area fraction, and division by dx (from Div(F)) already a part of the boundary weights, but
-    // beta is not. 
-    a_Lphi(a_vof, m_comp) += a_beta*value*m_boundaryWeights[a_dit](a_vof, m_comp);
+      // B-coefficient, area fraction, and division by dx (from Div(F)) already a part of the boundary weights, but
+      // beta is not. 
+      a_Lphi(vof, m_comp) += a_beta*value*m_boundaryWeights[a_dit](vof, m_comp);
+    }
   }
   
   return;

@@ -67,12 +67,12 @@ public:
     @param[in]    a_beta              Beta. Passed in from operator. 
     @param[in]    a_homogeneousPhysBC Homogeneous BC or not. 
   */
-  void applyEBFlux(VoFIterator&       a_vofit,
-		   EBCellFAB&         a_Lphi,
-		   const EBCellFAB&   a_phi,
-		   const DataIndex&   a_dit,
-		   const Real&        a_beta,
-		   const bool&        a_homogeneousPhysBC) const;
+  virtual void applyEBFlux(VoFIterator&       a_vofit,
+			   EBCellFAB&         a_Lphi,
+			   const EBCellFAB&   a_phi,
+			   const DataIndex&   a_dit,
+			   const Real&        a_beta,
+			   const bool&        a_homogeneousPhysBC) const = 0;
 
   /*!
     @brief Set whether or not this is an MG level
@@ -139,16 +139,6 @@ protected:
     @brief User define function. 
   */
   virtual void define() = 0;
-
-  /*!
-    @brief Apply the EB flux in a VoF. 
-  */
-  virtual void applyEBFlux(EBCellFAB&         a_Lphi,
-			   const EBCellFAB&   a_phi,
-			   const VolIndex&    a_vof,
-			   const DataIndex&   a_dit,
-			   const Real&        a_beta,
-			   const bool&        a_homogeneousPhysBC) const = 0;
 
   /*!
     @brief Check if stencil is valid. 

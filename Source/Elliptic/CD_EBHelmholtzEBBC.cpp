@@ -31,17 +31,6 @@ void EBHelmholtzEBBC::setMG(const bool a_isMGLevel){
   m_isMGLevel = a_isMGLevel;
 }
 
-void EBHelmholtzEBBC::applyEBFlux(VoFIterator&       a_vofit,
-				  EBCellFAB&         a_Lphi,
-				  const EBCellFAB&   a_phi,
-				  const DataIndex&   a_dit,
-				  const Real&        a_beta,
-				  const bool&        a_homogeneousPhysBC) const {
-  for (a_vofit.reset(); a_vofit.ok(); ++a_vofit){
-    this->applyEBFlux(a_Lphi, a_phi, a_vofit(), a_dit, a_beta, a_homogeneousPhysBC);
-  }
-}
-
 void EBHelmholtzEBBC::define(const EBLevelGrid&                                 a_eblg,
 			     const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_Bcoef,
 			     const RealVect&                                    a_probLo,

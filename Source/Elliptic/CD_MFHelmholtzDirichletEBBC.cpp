@@ -128,31 +128,34 @@ void MFHelmholtzDirichletEBBC::define() {
   }
 }
 
-void MFHelmholtzDirichletEBBC::applyEBFlux(EBCellFAB&         a_Lphi,
+void MFHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&       a_vofit,
+					   EBCellFAB&         a_Lphi,
 					   const EBCellFAB&   a_phi,
-					   const VolIndex&    a_vof,
 					   const DataIndex&   a_dit,
 					   const Real&        a_beta,
 					   const bool&        a_homogeneousPhysBC) const {
   // Apply the stencil for computing the contribution to kappaDivF. Note divF is sum(faces) B*grad(Phi)/dx and that this
   // is the contribution from the EB face. B/dx is already included in the stencils and boundary weights, but beta is not.
-  
-  // Homogeneous contribution
-  a_Lphi(a_vof, m_comp) += a_beta*this->applyStencil(m_gradStencils[a_dit](a_vof, m_comp), a_phi);
-
-  // Inhomogeneous contribution. 
-  if(!a_homogeneousPhysBC){
-    Real value = 0.0;
+  for(a_vofit.reset(); a_vofit.ok(); ++a_vofit){
+    const VolIndex& vof = a_vofit();
     
-    if(m_useConstant){
-      value = m_constantValue;
-    }
-    else if(m_useFunction){
-      const RealVect pos = this->getBoundaryPosition(a_vof, a_dit);
-      value = m_functionValue(pos);
-    }
+    // Homogeneous contribution
+    a_Lphi(vof, m_comp) += a_beta*this->applyStencil(m_gradStencils[a_dit](vof, m_comp), a_phi);
 
-    a_Lphi(a_vof, m_comp) += a_beta*value*m_boundaryWeights[a_dit](a_vof, m_comp);
+    // Inhomogeneous contribution. 
+    if(!a_homogeneousPhysBC){
+      Real value = 0.0;
+    
+      if(m_useConstant){
+	value = m_constantValue;
+      }
+      else if(m_useFunction){
+	const RealVect pos = this->getBoundaryPosition(vof, a_dit);
+	value = m_functionValue(pos);
+      }
+
+      a_Lphi(vof, m_comp) += a_beta*value*m_boundaryWeights[a_dit](vof, m_comp);
+    }
   }
   
   return;
