@@ -159,7 +159,6 @@ void MFHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&       a_singlePhaseVofs,
   }
 
   // Do multi-phasephase cells. Currently just a copy of the other.
-  return;
   for(a_multiPhaseVofs.reset(); a_multiPhaseVofs.ok(); ++a_multiPhaseVofs){
     const VolIndex& vof = a_multiPhaseVofs();
 
