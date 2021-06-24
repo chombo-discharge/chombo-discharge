@@ -103,6 +103,14 @@ public:
   void turnOnBCs();
 
   /*!
+    @brief Point Jacobi kernel. 
+    @param[inout] a_Lcorr Storage for computing L(a_corr)
+    @param[inout] a_corr  Correction
+    @param[in]    a_resid Residual
+  */
+  void pointJacobiKernel(LevelData<EBCellFAB>& a_Lcorr, LevelData<EBCellFAB>& a_corr, const LevelData<EBCellFAB>& a_resid);
+
+  /*!
     @brief Compute residual on this level. 
     @param[out] a_residual          Residual rhs - L(phi)
     @param[in]  a_phi               phi
@@ -735,6 +743,8 @@ public:
     @param[in]    a_iterations Number of iterations
   */
   void relaxPointJacobi(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations);
+
+
 
     /*!
     @brief Jacobi relaxation

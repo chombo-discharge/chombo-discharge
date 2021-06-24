@@ -777,14 +777,18 @@ void EBHelmholtzOp::relaxPointJacobi(LevelData<EBCellFAB>& a_correction, const L
 
   for (int iter = 0; iter < a_iterations; iter++){
     this->homogeneousCFInterp(a_correction);
-    this->applyOp(Lcorr, a_correction, true);
+    this->pointJacobiKernel(Lcorr, a_correction, a_residual);
+  }
+}
 
-    for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit){
-      Lcorr[dit()]        -= a_residual[dit()];
-      Lcorr[dit()]        *= m_relCoef[dit()];
+void EBHelmholtzOp::pointJacobiKernel(LevelData<EBCellFAB>& a_Lcorr, LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual) {
+  this->applyOp(a_Lcorr, a_correction, true);
+
+  for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit){
+    a_Lcorr[dit()]        -= a_residual[dit()];
+    a_Lcorr[dit()]        *= m_relCoef[dit()];
       
-      a_correction[dit()] -= Lcorr[dit()];
-    }
+    a_correction[dit()] -= a_Lcorr[dit()];
   }
 }
 
