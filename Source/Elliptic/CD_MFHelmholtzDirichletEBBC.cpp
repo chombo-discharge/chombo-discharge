@@ -136,9 +136,14 @@ void MFHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&       a_vofit,
 					   const bool&        a_homogeneousPhysBC) const {
   // Apply the stencil for computing the contribution to kappaDivF. Note divF is sum(faces) B*grad(Phi)/dx and that this
   // is the contribution from the EB face. B/dx is already included in the stencils and boundary weights, but beta is not.
+#if 0 // Original code
   for(a_vofit.reset(); a_vofit.ok(); ++a_vofit){
     const VolIndex& vof = a_vofit();
-    
+#else
+    VoFIterator& vofit = m_jumpBC->getSinglePhaseVofs(m_phase, a_dit);
+  for(vofit.reset(); vofit.ok(); ++vofit){
+    const VolIndex& vof = vofit();
+#endif
     // Homogeneous contribution
     a_Lphi(vof, m_comp) += a_beta*this->applyStencil(m_gradStencils[a_dit](vof, m_comp), a_phi);
 
@@ -157,6 +162,8 @@ void MFHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&       a_vofit,
       a_Lphi(vof, m_comp) += a_beta*value*m_boundaryWeights[a_dit](vof, m_comp);
     }
   }
+
+  
   
   return;
 }
