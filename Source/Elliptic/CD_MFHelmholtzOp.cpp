@@ -448,7 +448,7 @@ void MFHelmholtzOp::relax(LevelData<MFCellFAB>& a_correction, const LevelData<MF
     LevelData<EBCellFAB> corr;
     LevelData<EBCellFAB> resi;
 
-    // Interpolate ghost cells and match the BC. 
+    // Interpolate ghost cells and match the BC.
     this->interpolateCF(a_correction, nullptr, true);
     this->updateJumpBC(a_correction, true);
 
@@ -457,7 +457,9 @@ void MFHelmholtzOp::relax(LevelData<MFCellFAB>& a_correction, const LevelData<MF
       MultifluidAlias::aliasMF(corr, op.first, a_correction);
       MultifluidAlias::aliasMF(resi, op.first, a_residual  );
 
-      op.second->relaxPointJacobi(corr, resi, 1);
+      //      op.second->relaxPointJacobi(corr, resi, 1);
+      op.second->relaxGSRedBlack(corr, resi, 1);
+      //      op.second->relaxGSMultiColor(corr, resi, 1);
     }
   }
 #endif

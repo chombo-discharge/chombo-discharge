@@ -7,7 +7,6 @@
   @file   CD_MFHelmholtzEBBC.H
   @brief  Declaration of an EB boundary condition class for MFHelmholtzOp.
   @author Robert Marskar
-  @todo   Consider using an interface here where we do matching in multiphase cells here in the base class (rather than giving the responsibility to derived classes)
 */
 
 #ifndef CD_MFHelmholtzEBBC_H
