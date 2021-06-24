@@ -64,6 +64,14 @@ bool JumpBC::isStencilValidCF(const VoFStencil& a_stencil, const DataIndex& a_di
   return valid;
 }
 
+inline
+void JumpBC::matchBC(const MFCellFAB&       a_phi,
+		     const BaseIVFAB<Real>& a_jump,
+		     const bool             a_homogeneousPhysBC,
+		     const DataIndex&       a_dit) const {
+
+}
+
 #include <CD_NamespaceFooter.H>
 
 #endif

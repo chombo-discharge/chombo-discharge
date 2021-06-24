@@ -72,14 +72,19 @@ public:
   JumpBC& operator=(const JumpBC& a_other) = delete;
 
   /*!
+    @brief Set special flag in case we need to drop stencil radius when the domain is small. 
+  */
+  void setMG(const bool a_isMGLevel);
+
+  /*!
     @brief Match the BC
     @param[in] a_phi               Cell-centered data
     @param[in] a_jump              Jump data, i.e. right-hand side of dphi/dn + dphi/m = jump
     @param[in] a_homogeneousPhysBC Homogeneous BC or not
   */
-  void matchBC(const LevelData<MFCellFAB>& a_phi,
+  void matchBC(const LevelData<MFCellFAB>&        a_phi,
 	       const LevelData<BaseIVFAB<Real> >& a_jump,
-	       const bool a_homogeneousPhysBC) const;
+	       const bool                         a_homogeneousPhysBC) const;
 
   /*!
     @brief Get phi on the boundary. 
@@ -110,6 +115,11 @@ protected:
     @brief B-coefficient
   */
   RefCountedPtr<LevelData<MFBaseIVFAB> > m_Bcoef;
+
+  /*!
+    @brief Is MG level or not
+  */
+  bool m_isMGLevel;
 
   /*!
     @brief Grid resolution
@@ -144,7 +154,7 @@ protected:
   /*!
     @brief Value of phi on the boundary. 
   */
-  LayoutData<MFInterfaceFAB<Real> > m_boundaryPhi;
+  mutable LayoutData<MFInterfaceFAB<Real> > m_boundaryPhi;
 
   /*!
     @brief Average stencil
@@ -190,6 +200,18 @@ protected:
   */
   inline
   bool isStencilValidCF(const VoFStencil& a_stencil, const DataIndex& a_dit) const;
+
+  /*!
+    @brief Match the BC
+    @param[in] a_phi               Cell-centered data
+    @param[in] a_jump              Jump data, i.e. right-hand side of dphi/dn + dphi/m = jump
+    @param[in] a_homogeneousPhysBC Homogeneous BC or not
+  */
+  inline
+  void matchBC(const MFCellFAB&       a_phi,
+	       const BaseIVFAB<Real>& a_jump,
+	       const bool             a_homogeneousPhysBC,
+	       const DataIndex&       a_dit) const;
 };
 
 #include <CD_NamespaceFooter.H>

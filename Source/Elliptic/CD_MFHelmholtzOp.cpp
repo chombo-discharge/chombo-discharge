@@ -78,7 +78,10 @@ MFHelmholtzOp::MFHelmholtzOp(const MFLevelGrid&                               a_
   }
 
   // Instantiate jump bc object.
-  m_jumpBC = RefCountedPtr<JumpBC> (new JumpBC(m_mflg, a_BcoefIrreg, a_dx, a_jumpOrder, a_jumpWeight, a_jumpOrder, 1));
+  //  const int ghostCF = a_interpolator.getGhostCF();
+  int ghostCF = 1;
+  m_jumpBC = RefCountedPtr<JumpBC> (new JumpBC(m_mflg, a_BcoefIrreg, a_dx, a_jumpOrder, a_jumpWeight, a_jumpOrder, ghostCF));
+  if(a_isMGOperator) m_jumpBC->setMG(true);
 
   // Make the operators on eachphase.
   for (int iphase = 0; iphase < m_numPhases; iphase++){

@@ -60,12 +60,17 @@ public:
   */
   const RefCountedPtr<EBMultigridInterpolator>& getInterpolator(const int a_phase) const;
 
+  /*!
+    @brief Get number of filled ghost cells
+  */
+  int getGhostCF() const;
+
 protected:
 
   /*!
     @brief Interpolators on each phase. 
   */
-  Vector<RefCountedPtr<EBMultigridInterpolator> > m_interpolators;
+  mutable Vector<RefCountedPtr<EBMultigridInterpolator> > m_interpolators;
 };
 
 #include <CD_NamespaceFooter.H>

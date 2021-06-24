@@ -33,4 +33,8 @@ const RefCountedPtr<EBMultigridInterpolator>& MFMultigridInterpolator::getInterp
   return m_interpolators[a_phase];
 }
 
+int MFMultigridInterpolator::getGhostCF() const {
+  return m_interpolators.front()->getGhostCF();
+}
+
 #include <CD_NamespaceFooter.H>

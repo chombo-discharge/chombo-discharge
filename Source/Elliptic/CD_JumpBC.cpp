@@ -35,6 +35,7 @@ JumpBC::JumpBC(const MFLevelGrid& a_mflg,
   m_radius    = a_radius;
   m_ghostCF   = a_ghostCF;
   m_numPhases = m_mflg.numPhases();
+  m_isMGLevel = false;
 
   this->define();
 }
@@ -43,8 +44,11 @@ JumpBC::~JumpBC(){
 
 }
 
-void JumpBC::define(){
+void JumpBC::setMG(const bool a_isMGLevel){
+  m_isMGLevel = a_isMGLevel;
+}
 
+void JumpBC::define(){
   if(m_numPhases > 1) { // JumpBC will never be called unless it's a multiphase problem.
     
     const DisjointBoxLayout& dbl = m_mflg.getGrids();
@@ -92,7 +96,7 @@ void JumpBC::define(){
 	  std::pair<Real, VoFStencil> pairSten;
 	  
 	  // Try quadrants first. 
-	  order = m_order;
+	  order = m_isMGLevel ? 1 : m_order;
 	  while(!foundStencil && order > 0){
 	    foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten, vof, ebisbox, VofUtils::Neighborhood::Quadrant, order);
 	    order--;
@@ -104,7 +108,7 @@ void JumpBC::define(){
 	  }
 
 	  // If we couldn't find in a quadrant, try a larger neighborhood
-	  order = m_order;
+	  order = m_isMGLevel ? 1 : m_order;
 	  while(!foundStencil && order > 0){
 	    foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten, vof, ebisbox, VofUtils::Neighborhood::Radius, order);
 	    order--;
@@ -132,9 +136,9 @@ void JumpBC::define(){
 	  const VolIndex curVof(iv, 0);
 	  const Vector<VolIndex> allVofs = ebisbox.getVoFs(iv);
 
-	  Real& curBco           = avgBco     (curVof, 0);
-	  Real& curWeight        = avgWeights (curVof, 0);
-	  VoFStencil& curStencil = avgStencils(curVof, 0);
+	  Real& curBco           = avgBco     (curVof, m_comp);
+	  Real& curWeight        = avgWeights (curVof, m_comp);
+	  VoFStencil& curStencil = avgStencils(curVof, m_comp);
 
 	  curBco    = 0.0;
 	  curWeight = 0.0;
@@ -188,10 +192,12 @@ bool JumpBC::getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFStencil>& a_s
   return foundStencil;
 }
 
-void JumpBC::matchBC(const LevelData<MFCellFAB>& a_phi,
+void JumpBC::matchBC(const LevelData<MFCellFAB>&        a_phi,
 		     const LevelData<BaseIVFAB<Real> >& a_jump,
-		     const bool a_homogeneousPhysBC) const {
-  MayDay::Warning("JumpBC::matchBC - not implemented (yet)");
+		     const bool                         a_homogeneousPhysBC) const {
+  for (DataIterator dit = a_phi.dataIterator(); dit.ok(); ++dit){
+    this->matchBC(a_phi[dit()], a_jump[dit()], a_homogeneousPhysBC, dit());
+  }
 }
 
 #include <CD_NamespaceFooter.H>
