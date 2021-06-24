@@ -424,7 +424,7 @@ void MFHelmholtzOp::axby(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>
 void MFHelmholtzOp::updateJumpBC(const LevelData<MFCellFAB>& a_phi, const bool a_homogeneousPhysBC){
   CH_TIME("MFHelmholtzOp::updateJumpBC");
 
-  // Don't know if this is necessary but I'll do it anyways. For now. 
+  // Must do this. 
   LevelData<MFCellFAB>& phi = (LevelData<MFCellFAB>&) a_phi;
   phi.exchange();
   
@@ -507,7 +507,9 @@ void MFHelmholtzOp::relaxPointJacobi(LevelData<MFCellFAB>& a_correction, const L
       MultifluidAlias::aliasMF(corr,  op.first, a_correction);
       MultifluidAlias::aliasMF(resi,  op.first, a_residual  );
 
+      op.second->turnOffBCs();
       op.second->pointJacobiKernel(Lcorr, corr, resi);
+      op.second->turnOnBCs();
     }
   }
 }
@@ -523,6 +525,7 @@ void MFHelmholtzOp::relaxGSRedBlack(LevelData<MFCellFAB>& a_correction, const Le
 
     // Interpolate ghost cells and match the BC.
     for (int redBlack=0;redBlack<=1; redBlack++){
+
       this->interpolateCF(a_correction, nullptr, true);
       this->updateJumpBC(a_correction, true);
 
@@ -532,7 +535,9 @@ void MFHelmholtzOp::relaxGSRedBlack(LevelData<MFCellFAB>& a_correction, const Le
 	MultifluidAlias::aliasMF(corr,  op.first, a_correction);
 	MultifluidAlias::aliasMF(resi,  op.first, a_residual  );
 
+	op.second->turnOffBCs();
 	op.second->gauSaiRedBlackKernel(Lcorr, corr, resi, redBlack);
+	op.second->turnOnBCs();
       }
     }
   }
@@ -558,7 +563,9 @@ void MFHelmholtzOp::relaxGSMultiColor(LevelData<MFCellFAB>& a_correction, const 
 	MultifluidAlias::aliasMF(corr,  op.first, a_correction);
 	MultifluidAlias::aliasMF(resi,  op.first, a_residual  );
 
+	op.second->turnOffBCs();
 	op.second->gauSaiMultiColorKernel(Lcorr, corr, resi, m_colors[icolor]);
+	op.second->turnOnBCs();
       }
     }
   }
