@@ -19,9 +19,8 @@
 
 /*!
   @brief Class for making Dirichlet boundary conditions on the EB in a multifluid context. 
-  @note This class reuses the stencils from EBHelmholtzDirichletEBBC, but adjusts these on a subset of cells (the "matching" cells). 
 */
-class MFHelmholtzDirichletEBBC : public EBHelmholtzDirichletEBBC {
+class MFHelmholtzDirichletEBBC : public EBHelmholtzEBBC {
 public:
 
   /*!
@@ -39,6 +38,37 @@ public:
   */
   ~MFHelmholtzDirichletEBBC();
 
+  /*!
+    @brief Set BC order. 
+    @param[in] a_order Order
+    @note The order is also the attempted radius of the stencil. 
+  */
+  virtual void setOrder(const int a_order);
+
+  /*!
+    @brief Set stencil weights
+    @param[in] a_weight Weighting factor for least squares stencils
+    @note a_weight=0 can lead to ill-conditioned systems.
+  */
+  virtual void setWeight(const int a_weight);
+
+  /*!
+    @brief Set the value on the EB. 
+    @param[in] a_value Constant value on EB
+  */
+  virtual void setValue(const int a_value);
+
+  /*!
+    @brief Set the value on the EB. 
+    @param[in] a_value Spatially dependent value on EB
+  */
+  virtual void setValue(const std::function<Real(const RealVect& a_pos)>& a_value);
+
+    /*!
+    @brief User define function. 
+  */
+  virtual void define() override;
+
 protected:
 
   /*!
@@ -50,6 +80,78 @@ protected:
     @brief Phase
   */
   int m_phase;
+
+    /*!
+    @brief Use constant for BC
+  */
+  bool m_useConstant;
+
+  /*!
+    @brief Use function for BC value
+  */
+  bool m_useFunction;
+
+  /*!
+    @brief Stencil approximation order,
+  */
+  int m_order;
+
+  /*!
+    @brief Distance weighting factor for stencils.
+  */
+  int m_weight;
+
+  /*!
+    @brief Value on EB
+  */
+  Real m_constantValue;
+
+  /*!
+    @brief Value on the EB. Does not apply to matching cells. 
+  */
+  std::function<Real(const RealVect& a_pos) > m_functionValue;
+
+  /*!
+    @brief Boundary weights for stencil. 
+  */
+  LayoutData<BaseIVFAB<Real> > m_boundaryWeights;
+
+  /*!
+    @brief Boundary weights for stencil. 
+  */
+  LayoutData<BaseIVFAB<VoFStencil> > m_gradStencils;
+
+  /*!
+    @brief Apply the EB flux. This is the version that is called by EBHelmholtzOp.
+    @param[inout] a_Lphi              Operator kappa*L(phi)
+    @param[in]    a_phi               Phi, cell-centered. 
+    @param[in]    a_vof               Grid cell
+    @param[in]    a_dit               Data index    
+    @param[in]    a_beta              Beta. Passed in from operator. 
+    @param[in]    a_homogeneousPhysBC Homogeneous BC or not. 
+  */
+  virtual void applyEBFlux(EBCellFAB&         a_Lphi,
+			   const EBCellFAB&   a_phi,
+			   const VolIndex&    a_vof,
+			   const DataIndex&   a_dit,
+			   const Real&        a_beta,
+			   const bool&        a_homogeneousPhysBC) const override;
+
+  /*!
+    @brief Get stencil with specified order. 
+    @param[out] a_stencil      Weight and stencil
+    @param[out] a_vof          Grid cell
+    @param[out] a_neighborhood Neighboorhood specifier
+    @param[in]  a_dit          Data index
+    @param[in]  a_order        Attempted order for stencil. This is also the stencil radius. 
+    @return If this returns true, a_stencil contains a valid stencil and weight. 
+    @note Stencils are computed using weighted least squares with squared inverse distance weighting. 
+  */
+  virtual bool getLeastSquaresStencil(std::pair<Real, VoFStencil>& a_stencil,
+				      const VolIndex&              a_vof,
+				      const VofUtils::Neighborhood a_neighborhood,
+				      const DataIndex&             a_dit,
+				      const int                    a_order) const;
 };
 
 #include <CD_NamespaceFooter.H>

@@ -162,8 +162,16 @@ protected:
     @brief Returns physical position at the boundary
   */
   RealVect getBoundaryPosition(const VolIndex& a_vof, const DataIndex& a_dit) const;
+
+  /*!
+    @brief Apply stencil to data holder and return result
+  */
+  inline
+  Real applyStencil(const VoFStencil& a_stencil, const EBCellFAB& a_phi) const;
 };
 
 #include <CD_NamespaceFooter.H>
+
+#include <CD_EBHelmholtzEBBCImplem.H>
 
 #endif
