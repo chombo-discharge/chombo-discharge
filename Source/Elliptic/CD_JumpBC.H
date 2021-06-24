@@ -248,6 +248,16 @@ protected:
 	       const bool             a_homogeneousPhysBC,
 	       const DataIndex&       a_dit) const;
 
+
+  /*!
+    @brief Apply a stencil and return the result
+    @param[in] a_stencil Stencil to apply
+    @param[in] a_phi     Data
+    @returns Returns S(phi), S being the stencil. 
+  */
+  inline
+  Real applyStencil(const VoFStencil& a_stencil, const EBCellFAB& a_phi) const;
+
   /*!
     @brief Set everything to zero. This is a debugging function.
   */

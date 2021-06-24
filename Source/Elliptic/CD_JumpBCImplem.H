@@ -64,18 +64,62 @@ bool JumpBC::isStencilValidCF(const VoFStencil& a_stencil, const DataIndex& a_di
 }
 
 inline
+Real JumpBC::applyStencil(const VoFStencil& a_stencil, const EBCellFAB& a_phi) const {
+  Real contrib = 0.0;
+  for (int i = 0; i < a_stencil.size(); i++){
+    contrib += a_stencil.weight(i)*a_phi(a_stencil.vof(i), m_comp);
+  }
+}
+
+inline
 void JumpBC::matchBC(const MFCellFAB&       a_phi,
 		     const BaseIVFAB<Real>& a_jump,
 		     const bool             a_homogeneousPhysBC,
 		     const DataIndex&       a_dit) const {
+  CH_assert(m_multiPhase);
+  
+  constexpr int vofComp     = 0;
+  constexpr int firstPhase  = 0;
+  constexpr int secondPhase = 1;
 
-  constexpr int vofComp = 0;
+  const EBCellFAB& phiPhase0 = a_phi.getPhase(firstPhase );
+  const EBCellFAB& phiPhase1 = a_phi.getPhase(secondPhase);
+
+  const EBISBox& ebisBoxPhase0 = phiPhase0.getEBISBox();
+  const EBISBox& ebisBoxPhase1 = phiPhase1.getEBISBox();
+
+  BaseIVFAB<Real>& bndryPhiPhase0 = m_boundaryPhi[a_dit].getIVFAB(firstPhase );
+  BaseIVFAB<Real>& bndryPhiPhase1 = m_boundaryPhi[a_dit].getIVFAB(secondPhase);
   
   for (IVSIterator ivsIt(m_ivs[a_dit]); ivsIt.ok(); ++ivsIt){
     const IntVect iv    = ivsIt();
     const VolIndex vof0 = VolIndex(iv, vofComp);
 
-    
+    const VoFStencil& derivStenPhase0 = m_avgStencils[a_dit].getIVFAB(firstPhase) (vof0, vofComp);
+    const VoFStencil& derivStenPhase1 = m_avgStencils[a_dit].getIVFAB(secondPhase)(vof0, vofComp);
+
+    const Real& weightPhase0 = m_avgWeights[a_dit].getIVFAB(firstPhase) (vof0, vofComp);
+    const Real& weightPhase1 = m_avgWeights[a_dit].getIVFAB(secondPhase)(vof0, vofComp);
+
+    const Real& BcoPhase0 = m_avgBco[a_dit].getIVFAB(firstPhase) (vof0, vofComp);
+    const Real& BcoPhase1 = m_avgBco[a_dit].getIVFAB(secondPhase)(vof0, vofComp);
+
+    // Compute the average jump.
+    Real jump = 0.0;
+    // Vector<VolIndex> vofs = blablabla.
+
+    // Do the matching 
+    const Real denom         = 1./(weightPhase0*BcoPhase0 + weightPhase1*BcoPhase1); // This one is possible to precompute.
+    const Real contribPhase0 = this->applyStencil(derivStenPhase0, phiPhase0);
+    const Real contribPhase1 = this->applyStencil(derivStenPhase1, phiPhase1);
+    const Real phiBndry      = denom*(jump - contribPhase0 - contribPhase1);
+
+    // Copy the result to the individual phase data holders
+    Vector<VolIndex> vofsPhase0 = ebisBoxPhase0.getVoFs(iv);
+    Vector<VolIndex> vofsPhase1 = ebisBoxPhase1.getVoFs(iv);
+
+    for (const auto& v : vofsPhase0.stdVector()) bndryPhiPhase0(v, m_comp) = phiBndry;
+    for (const auto& v : vofsPhase1.stdVector()) bndryPhiPhase1(v, m_comp) = phiBndry;
   }
 }
 
