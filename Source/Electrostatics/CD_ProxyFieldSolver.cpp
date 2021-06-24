@@ -562,12 +562,14 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
 			       const bool           a_zerophi){
 
   ParmParse pp("ProxyFieldSolver");
+  ParmParse pp2("RodDielectric");
   
   Real alpha;
   Real beta;
 
   Real aco;
   Real bco;
+  Real perm;
 
   MFAMRCellData Aco;
   MFAMRFluxData Bco;
@@ -586,6 +588,14 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
   DataOps::setValue(Aco,      aco);
   DataOps::setValue(Bco,      bco);
   DataOps::setValue(BcoIrreg, bco);
+
+  EBAMRFluxData B2    = m_amr->alias(phase::solid, Bco);
+  EBAMRIVData   B2Irr = m_amr->alias(phase::solid, BcoIrreg);
+
+  pp2.get("dielectric.permittivity", perm);
+
+  DataOps::setValue(B2,    perm);
+  DataOps::setValue(B2Irr, perm);
 
   const int numPhases = m_multifluidIndexSpace->numPhases();
 

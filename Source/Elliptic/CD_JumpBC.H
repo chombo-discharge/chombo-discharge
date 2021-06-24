@@ -243,7 +243,6 @@ protected:
 	       const bool             a_homogeneousPhysBC,
 	       const DataIndex&       a_dit) const;
 
-
   /*!
     @brief Apply a stencil and return the result
     @param[in] a_stencil Stencil to apply

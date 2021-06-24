@@ -162,28 +162,12 @@ void MFHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&       a_singlePhaseVofs,
   for(a_multiPhaseVofs.reset(); a_multiPhaseVofs.ok(); ++a_multiPhaseVofs){
     const VolIndex& vof = a_multiPhaseVofs();
 
+    const Real phiB = m_jumpBC->getBndryPhi(m_phase, a_dit)(vof, m_comp);
+
     // Homogeneous contribution
     a_Lphi(vof, m_comp) += a_beta*this->applyStencil(m_gradStencils[a_dit](vof, m_comp), a_phi);
-
-    // Inhomogeneous contribution. 
-    //    if(!a_homogeneousPhysBC){
-      Real value = 0.0;
-    
-      if(m_useConstant){
-	value = m_constantValue;
-      }
-      else if(m_useFunction){
-	const RealVect pos = this->getBoundaryPosition(vof, a_dit);
-	value = m_functionValue(pos);
-      }
-
-      value = m_jumpBC->getBndryPhi(m_phase, a_dit)(vof, m_comp);
-
-      a_Lphi(vof, m_comp) += a_beta*value*m_boundaryWeights[a_dit](vof, m_comp);
-      //    }
+    a_Lphi(vof, m_comp) += a_beta*phiB*m_boundaryWeights[a_dit](vof, m_comp);
   }
-
-  
   
   return;
 }

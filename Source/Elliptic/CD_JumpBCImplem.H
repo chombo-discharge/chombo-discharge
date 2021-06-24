@@ -106,8 +106,8 @@ void JumpBC::matchBC(const MFCellFAB&       a_phi,
     const Real& weightPhase1 = m_avgWeights[a_dit].getIVFAB(secondPhase)(vof0, vofComp);
 
     // Compute the average jump.
-    Real jump = 0.0;
-    // Vector<VolIndex> vofs = blablabla.
+    Real jump = 0.0; // Jump not computed (yet)
+    // Vector<VolIndex> vofs = ebisBoxPhase0.getVofs(blablabla)
 
     // Do the matching 
     const Real denom         = 1./(weightPhase0 + weightPhase1); 
@@ -119,19 +119,8 @@ void JumpBC::matchBC(const MFCellFAB&       a_phi,
     Vector<VolIndex> vofsPhase0 = ebisBoxPhase0.getVoFs(iv);
     Vector<VolIndex> vofsPhase1 = ebisBoxPhase1.getVoFs(iv);
 
-#if 1 // Original code
     for (const auto& v : vofsPhase0.stdVector()) bndryPhiPhase0(v, m_comp) = phiBndry;
     for (const auto& v : vofsPhase1.stdVector()) bndryPhiPhase1(v, m_comp) = phiBndry;
-#else // Debug code
-    if(a_homogeneousPhysBC){
-      for (const auto& v : vofsPhase0.stdVector()) bndryPhiPhase0(v, m_comp) = 0.0;
-      for (const auto& v : vofsPhase1.stdVector()) bndryPhiPhase1(v, m_comp) = 0.0;
-    }
-    else{
-      for (const auto& v : vofsPhase0.stdVector()) bndryPhiPhase0(v, m_comp) = 1.2345;
-      for (const auto& v : vofsPhase1.stdVector()) bndryPhiPhase1(v, m_comp) = 1.2345;
-    }
-#endif
   }
 }
 
