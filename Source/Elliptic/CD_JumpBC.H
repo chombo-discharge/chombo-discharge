@@ -212,6 +212,11 @@ protected:
 	       const BaseIVFAB<Real>& a_jump,
 	       const bool             a_homogeneousPhysBC,
 	       const DataIndex&       a_dit) const;
+
+  /*!
+    @brief Set everything to zero. This is a debugging function.
+  */
+  void resetBC() const;
 };
 
 #include <CD_NamespaceFooter.H>

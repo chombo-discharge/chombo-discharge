@@ -161,6 +161,8 @@ void JumpBC::define(){
 
       }
     }
+
+    this->resetBC();
   }
 }
 
@@ -190,6 +192,15 @@ bool JumpBC::getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFStencil>& a_s
   }
 
   return foundStencil;
+}
+
+void JumpBC::resetBC() const {
+  for (DataIterator dit = m_boundaryPhi.dataIterator(); dit.ok(); ++dit){
+    for (int iphase = 0; iphase < m_numPhases; iphase++){
+      BaseIVFAB<Real>& bndryPhi = m_boundaryPhi[dit()].getIVFAB(iphase);
+      bndryPhi.setVal(0.0);
+    }
+  }
 }
 
 void JumpBC::matchBC(const LevelData<MFCellFAB>&        a_phi,

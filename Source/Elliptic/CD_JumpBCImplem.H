@@ -19,7 +19,6 @@
 #include <CD_JumpBC.H>
 #include <CD_NamespaceHeader.H>
 
-
 inline
 bool JumpBC::isStencilValidCF(const VoFStencil& a_stencil, const DataIndex& a_dit) const {
   const DisjointBoxLayout& dbl = m_mflg.getGrids();
@@ -70,6 +69,11 @@ void JumpBC::matchBC(const MFCellFAB&       a_phi,
 		     const bool             a_homogeneousPhysBC,
 		     const DataIndex&       a_dit) const {
 
+  for (int iphase = 0; iphase < m_numPhases; iphase++){
+    BaseIVFAB<Real>& bndryPhi = m_boundaryPhi[a_dit].getIVFAB(iphase);
+
+    bndryPhi.setVal(0.0);
+  }
 }
 
 #include <CD_NamespaceFooter.H>
