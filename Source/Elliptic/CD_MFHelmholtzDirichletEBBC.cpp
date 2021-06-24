@@ -177,6 +177,8 @@ void MFHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&       a_singlePhaseVofs,
 	value = m_functionValue(pos);
       }
 
+      //      const Real value2 = m_jumpBC->getBndryPhi(m_phase, a_dit)(vof, m_comp);
+
       a_Lphi(vof, m_comp) += a_beta*value*m_boundaryWeights[a_dit](vof, m_comp);
     }
   }
