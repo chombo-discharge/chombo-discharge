@@ -37,8 +37,8 @@ JumpBC::JumpBC(const MFLevelGrid& a_mflg,
   m_numPhases = m_mflg.numPhases();
   m_isMGLevel = false;
 
-  this->defineStencils();
   this->defineIterators();
+  this->defineStencils();
 }
 
 JumpBC::~JumpBC(){
@@ -72,7 +72,8 @@ void JumpBC::defineStencils(){
     m_avgBco.define(dbl);
 
     for (DataIterator dit(dbl); dit.ok(); ++dit){
-
+      const Box box = dbl[dit()];
+      
       m_boundaryPhi[dit()].define(m_mflg, dit());
       m_avgStencils[dit()].define(m_mflg, dit());
       m_avgWeights [dit()].define(m_mflg, dit());
@@ -88,15 +89,13 @@ void JumpBC::defineStencils(){
 	const Box box          = dbl[dit()];
 	const EBISBox& ebisbox = ebisl[dit()];
 	const EBGraph& ebgraph = ebisbox.getEBGraph();
+	const IntVectSet& ivs  = m_ivs[dit()];
 
 	// Build the average stencils. Only matters if the cell is a multi-valued cell. 
 	BaseIVFAB<VoFStencil>& avgStencils = m_avgStencils[dit()].getIVFAB(iphase);
 	BaseIVFAB<Real>& avgWeights        = m_avgWeights [dit()].getIVFAB(iphase);
 	BaseIVFAB<Real>& avgBco            = m_avgBco     [dit()].getIVFAB(iphase);
 	const BaseIVFAB<Real>& Bcoef       = (*m_Bcoef)   [dit()].getIVFAB(iphase);
-
-	// Matching grid cells. 
-	const IntVectSet& ivs = avgWeights.getIVS();
 
 	// Build stencils like we always do
 	BaseIVFAB<VoFStencil> gradStencils(ivs, ebgraph, m_nComp);
@@ -171,7 +170,6 @@ void JumpBC::defineStencils(){
 	  curWeight  *= invNum;
 	  curStencil *= invNum;
 	}
-
       }
     }
 
@@ -182,6 +180,8 @@ void JumpBC::defineStencils(){
 void JumpBC::defineIterators(){
   const DisjointBoxLayout& dbl = m_mflg.getGrids();
 
+  m_ivs.define(dbl);
+  
   for (int iphase = 0; iphase < m_numPhases; iphase++){
     m_singlePhaseVofs.emplace(iphase, std::make_shared<LayoutData<VoFIterator> >() );
     m_multiPhaseVofs .emplace(iphase, std::make_shared<LayoutData<VoFIterator> >() );
@@ -201,15 +201,13 @@ void JumpBC::defineIterators(){
       const EBGraph& ebgraph    = ebisbox.getEBGraph();
       const IntVectSet allIrreg = ebisbox.getIrregIVS(box);
 
+      m_ivs[dit()] = m_mflg.interfaceRegion(dbl[dit()], dit());
+      
       IntVectSet singlePhaseCells = allIrreg;
       IntVectSet multiPhaseCells  = IntVectSet();
 
-      if(m_numPhases > 1){
-	const IntVectSet interfaceRegion = m_mflg.interfaceRegion(box, dit(), 0, 1);
-
-	singlePhaseCells -= interfaceRegion;
-	multiPhaseCells  |= interfaceRegion;
-      }
+      singlePhaseCells -= m_ivs[dit()];
+      multiPhaseCells  |= m_ivs[dit()];
 
       VoFIterator& singlePhaseVofIt = singlePhaseVofs[dit()];
       VoFIterator& multiPhaseVofIt  = multiPhaseVofs[dit()];

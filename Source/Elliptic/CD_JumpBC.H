@@ -177,6 +177,11 @@ protected:
   mutable std::map<int, std::shared_ptr<LayoutData<VoFIterator> > > m_multiPhaseVofs;
 
   /*!
+    @brief IntVectSet over which we run the "averaging"
+  */
+  LayoutData<IntVectSet> m_ivs;
+
+  /*!
     @brief Average stencil
   */
   LayoutData<MFInterfaceFAB<VoFStencil> > m_avgStencils;
