@@ -192,10 +192,30 @@ void JumpBC::defineIterators(){
     singlePhaseVofs.define(dbl);
     multiPhaseVofs. define(dbl);
 
-    for (DataIterator dit(dbl); dit.ok(); ++dit){
+    const EBLevelGrid& eblg = m_mflg.getEBLevelGrid(iphase);
+    const EBISLayout& ebisl = eblg.getEBISL();
 
-      // m_singlePhaseVofs[dit()].define(m_mflg, dit());
-      // m_multiPhaseVofs [dit()].define(m_mflg, dit());
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      const Box box             = dbl[dit()];
+      const EBISBox& ebisbox    = ebisl[dit()];
+      const EBGraph& ebgraph    = ebisbox.getEBGraph();
+      const IntVectSet allIrreg = ebisbox.getIrregIVS(box);
+
+      IntVectSet singlePhaseCells = allIrreg;
+      IntVectSet multiPhaseCells  = IntVectSet();
+
+      if(m_numPhases > 1){
+	const IntVectSet interfaceRegion = m_mflg.interfaceRegion(box, dit(), 0, 1);
+
+	singlePhaseCells -= interfaceRegion;
+	multiPhaseCells  |= interfaceRegion;
+      }
+
+      VoFIterator& singlePhaseVofIt = singlePhaseVofs[dit()];
+      VoFIterator& multiPhaseVofIt  = multiPhaseVofs[dit()];
+
+      singlePhaseVofIt.define(singlePhaseCells, ebgraph);
+      multiPhaseVofIt. define(singlePhaseCells, ebgraph);
     }
   }
 }	  
