@@ -44,6 +44,7 @@ MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&             a_mfis,
 					   const RelaxType&        a_relaxationMethod,
 					   const ProblemDomain&    a_bottomDomain,
 					   const int&              a_jumpOrder,
+					   const int&              a_jumpWeight,
 					   const int&              a_blockingFactor,
 					   const AmrLevelGrids&    a_deeperLevelGrids){
 
@@ -73,7 +74,8 @@ MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&             a_mfis,
   m_relaxMethod  = a_relaxationMethod;
   m_bottomDomain = a_bottomDomain;
 
-  m_jumpOrder = a_jumpOrder;
+  m_jumpOrder  = a_jumpOrder;
+  m_jumpWeight = a_jumpWeight;
 
   m_mgBlockingFactor = a_blockingFactor;
 
@@ -462,6 +464,7 @@ MFHelmholtzOp* MFHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
 					m_ghostPhi,
 					m_ghostRhs,
 					m_jumpOrder,
+					m_jumpWeight,
 					m_relaxMethod);
 
   // Give the operator access by reference to the jump data. 

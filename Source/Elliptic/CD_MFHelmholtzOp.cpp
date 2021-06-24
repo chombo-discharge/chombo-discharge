@@ -53,6 +53,7 @@ MFHelmholtzOp::MFHelmholtzOp(const MFLevelGrid&                               a_
 			     const IntVect&                                   a_ghostPhi,
 			     const IntVect&                                   a_ghostRhs,
 			     const int&                                       a_jumpOrder,
+			     const int&                                       a_jumpWeight,
 			     const RelaxationMethod&                          a_relaxType){
   CH_TIME("MFHelmholtzOp::MFHelmholtzOp");
   m_debug = false;
@@ -77,7 +78,7 @@ MFHelmholtzOp::MFHelmholtzOp(const MFLevelGrid&                               a_
   }
 
   // Instantiate jump bc object.
-  m_jumpBC = RefCountedPtr<JumpBC> (new JumpBC(m_mflg, a_BcoefIrreg, a_dx, a_jumpOrder, a_jumpOrder, a_jumpOrder));
+  m_jumpBC = RefCountedPtr<JumpBC> (new JumpBC(m_mflg, a_BcoefIrreg, a_dx, a_jumpOrder, a_jumpWeight, a_jumpOrder));
 
   // Make the operators on eachphase.
   for (int iphase = 0; iphase < m_numPhases; iphase++){

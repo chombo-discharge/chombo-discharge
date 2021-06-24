@@ -64,24 +64,26 @@ Driver.refine_solid_solid_interface    = -1               # Refine solid-solid i
 # ====================================
 # ProxyFieldSolver CLASS OPTIONS
 # ====================================
-ProxyFieldSolver.alpha     = 0.0         # Alpha
-ProxyFieldSolver.beta      = 1.0         # Beta
-ProxyFieldSolver.aco       = 1.0         # A-coefficient
-ProxyFieldSolver.bco       = 1.0         # B-coefficient	
-ProxyFieldSolver.solver    = helm        # Our solver ('helmholtz') or ebconductivity op 'ebcond'
-ProxyFieldSolver.eb_bc     = dirichlet   # 'dirichlet', 'neumann', or 'robin'
-ProxyFieldSolver.domain_bc = dirichlet   # 'dirichlet', 'neumann', or 'robin'
-ProxyFieldSolver.eb_order  = 2           # BC order on EB (only for Dirichlet)
-ProxyFieldSolver.eb_weight = 2           # Weighting for least squares (only for helm)
-ProxyFieldSolver.dom_val   = -1          # Value on domain (For Robin, this is multiplier)
-ProxyFieldSolver.eb_val    = 1           # Value on EB (For robin, this is multiplier)
-ProxyFieldSolver.smooth    = 10          # Smoothings
-ProxyFieldSolver.botsolver = bicgstab    # 'simple' or 'bicgstab'
-ProxyFieldSolver.botsmooth = 400         # Smoothings for bottom solver
-ProxyFieldSolver.relax     = 2           # Relaxation method
-ProxyFieldSolver.mg_tol    = 1.E-20      # Multigrid tolerance
-ProxyFieldSolver.min_cells = 16          # Number of cells along the shortest coordinate in the bottom of multigrid.
-ProxyFieldSolver.plt_vars  = phi resid E rho # Plot variables
+ProxyFieldSolver.alpha      = 0.0         # Alpha
+ProxyFieldSolver.beta       = 1.0         # Beta
+ProxyFieldSolver.aco        = 1.0         # A-coefficient
+ProxyFieldSolver.bco        = 1.0         # B-coefficient	
+ProxyFieldSolver.solver     = helm        # Our solver ('helmholtz') or ebconductivity op 'ebcond'
+ProxyFieldSolver.eb_bc      = dirichlet   # 'dirichlet', 'neumann', or 'robin'
+ProxyFieldSolver.domain_bc  = dirichlet   # 'dirichlet', 'neumann', or 'robin'
+ProxyFieldSolver.eb_order   = 2           # BC order on EB (only for Dirichlet)
+ProxyFieldSolver.eb_weight  = 2           # Weighting for least squares (only for helm)
+ProxyFieldSolver.jump_order = 2           # BC order on EB (only for Dirichlet)
+ProxyFieldSolver.jump_weight= 2           # Weighting for least squares (only for helm)
+ProxyFieldSolver.dom_val    = -1          # Value on domain (For Robin, this is multiplier)
+ProxyFieldSolver.eb_val     = 1           # Value on EB (For robin, this is multiplier)
+ProxyFieldSolver.smooth     = 10          # Smoothings
+ProxyFieldSolver.botsolver  = bicgstab    # 'simple' or 'bicgstab'
+ProxyFieldSolver.botsmooth  = 400         # Smoothings for bottom solver
+ProxyFieldSolver.relax      = 2           # Relaxation method
+ProxyFieldSolver.mg_tol     = 1.E-20      # Multigrid tolerance
+ProxyFieldSolver.min_cells  = 16          # Number of cells along the shortest coordinate in the bottom of multigrid.
+ProxyFieldSolver.plt_vars   = phi resid E rho # Plot variables
 
 # ====================================================================================================
 # GEO_COARSENER CLASS OPTIONS

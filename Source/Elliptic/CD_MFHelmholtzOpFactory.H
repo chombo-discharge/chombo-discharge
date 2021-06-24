@@ -84,6 +84,7 @@ public:
 		       const RelaxType&        a_relaxationMethod,
 		       const ProblemDomain&    a_bottomDomain,
 		       const int&              a_jumpOrder,
+		       const int&              a_jumpWeight,
 		       const int&              a_blockingFactor,
 		       const AmrLevelGrids&    a_deeperLevelGrids = AmrLevelGrids());
 
@@ -188,6 +189,7 @@ protected:
 
   // Order for jump BCs.
   int m_jumpOrder;
+  int m_jumpWeight;
 
   // This is for using pre-defined grids for the deeper multigrid levels, i.e. for the levels that are coarsenings of m_amrLevelGrids[0]
   AmrLevelGrids    m_deeperLevelGrids;

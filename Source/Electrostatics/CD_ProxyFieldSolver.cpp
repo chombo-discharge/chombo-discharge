@@ -718,6 +718,12 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
   default:
     MayDay::Error("ProxyFieldSolver::solveMF - bad relaxation method");
   }
+
+  int jumpOrder;
+  int jumpWeight;
+
+  pp.get("jump_order",  jumpOrder);
+  pp.get("jump_weight", jumpWeight);
 				   
   MFHelmholtzOpFactory* fact = new MFHelmholtzOpFactory(m_multifluidIndexSpace,
 							alpha,
@@ -738,7 +744,8 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
 							ghostRhs,
 							relaxType,
 							bottomDomain,
-							1,
+							jumpOrder,
+							jumpWeight,
 							m_amr->getMaxBoxSize());
 
   fact->setJump(a_sigma, 0.0);

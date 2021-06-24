@@ -77,6 +77,7 @@ public:
 		const IntVect&                                   a_ghostPhi,
 		const IntVect&                                   a_ghostRhs,
 		const int&                                       a_jumpOrder,
+		const int&                                       a_jumpWeight,
 		const RelaxationMethod&                          a_relaxType);
 
   /*!
