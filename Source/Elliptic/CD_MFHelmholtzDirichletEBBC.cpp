@@ -90,7 +90,7 @@ void MFHelmholtzDirichletEBBC::define() {
       // Try quadrants first. 
       order = m_isMGLevel ? 1 : m_order; 
       while(!foundStencil && order > 0){
-      	foundStencil = this->getLeastSquaresStencil(pairSten, vof, VofUtils::Neighborhood::Quadrant, dit(), order);
+      	foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten, vof, VofUtils::Neighborhood::Quadrant, dit(), order);
       	order--;
 
 	// Check if stencil reaches too far across CF
@@ -102,7 +102,7 @@ void MFHelmholtzDirichletEBBC::define() {
       // If we couldn't find in a quadrant, try a larger neighborhood
       order = m_isMGLevel ? 1 : m_order;      
       while(!foundStencil && order > 0){
-      	foundStencil = this->getLeastSquaresStencil(pairSten, vof, VofUtils::Neighborhood::Radius, dit(), order);
+      	foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten, vof, VofUtils::Neighborhood::Radius, dit(), order);
       	order--;
 
 	// Check if stencil reaches too far across CF
@@ -134,15 +134,15 @@ void MFHelmholtzDirichletEBBC::applyEBFlux(EBCellFAB&         a_Lphi,
 					   const DataIndex&   a_dit,
 					   const Real&        a_beta,
 					   const bool&        a_homogeneousPhysBC) const {
-  // Apply the stencil for computing the contribution to kappaDivF. Note that division by dx is already done
-  // in the stencils.
+  // Apply the stencil for computing the contribution to kappaDivF. Note divF is sum(faces) B*grad(Phi)/dx and that this
+  // is the contribution from the EB face. B/dx is already included in the stencils and boundary weights, but beta is not.
   
   // Homogeneous contribution
   a_Lphi(a_vof, m_comp) += a_beta*this->applyStencil(m_gradStencils[a_dit](a_vof, m_comp), a_phi);
 
   // Inhomogeneous contribution. 
   if(!a_homogeneousPhysBC){
-    Real value;
+    Real value = 0.0;
     
     if(m_useConstant){
       value = m_constantValue;
@@ -158,11 +158,11 @@ void MFHelmholtzDirichletEBBC::applyEBFlux(EBCellFAB&         a_Lphi,
   return;
 }
 
-bool MFHelmholtzDirichletEBBC::getLeastSquaresStencil(std::pair<Real, VoFStencil>& a_stencil,
-						      const VolIndex&              a_vof,
-						      const VofUtils::Neighborhood a_neighborhood,
-						      const DataIndex&             a_dit,
-						      const int                    a_order) const {
+bool MFHelmholtzDirichletEBBC::getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFStencil>& a_stencil,
+								  const VolIndex&              a_vof,
+								  const VofUtils::Neighborhood a_neighborhood,
+								  const DataIndex&             a_dit,
+								  const int                    a_order) const {
   bool foundStencil = false;
   
   const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];

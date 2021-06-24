@@ -29,16 +29,35 @@ void JumpBC::define(const MFLevelGrid& a_mflg, const LevelData<MFBaseIVFAB>& a_B
   //  MayDay::Warning("JumpBC::define - not implemented");
 }
 
-const BaseIVFAB<VoFStencil>& JumpBC::getAvgStencils(const int a_phase, const DataIndex& a_dit) const {
-  return m_avgStencils[a_dit].getIVFAB(a_phase);
+const BaseIVFAB<Real>& JumpBC::getBndryPhi(const int a_phase, const DataIndex& a_dit) const {
+  return m_boundaryPhi[a_dit].getIVFAB(a_phase);
 }
 
-const BaseIVFAB<Real>& JumpBC::getInhomogeneousContribution(const int a_phase, const DataIndex& a_dit) const {
-  return m_inhomogeneousContrib[a_dit].getIVFAB(a_phase);
-}
+bool JumpBC::getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFStencil>& a_stencil,
+						const VolIndex&              a_vof,
+						const VofUtils::Neighborhood a_neighborhood,
+						const DataIndex&             a_dit,
+						const int                    a_order,
+						const int                    a_phase) const {
+  bool foundStencil = false;
 
-const BaseIVFAB<Real>& JumpBC::getHomogeneousContribution(const int a_phase, const DataIndex& a_dit) const {
-  return m_homogeneousContrib[a_dit].getIVFAB(a_phase);
+  const EBLevelGrid& eblg = m_mflg.getEBLevelGrid(a_phase);
+  const EBISBox& ebisbox  = eblg.getEBISL()[a_dit];
+  const RealVect normal   = ebisbox.normal(a_vof);  
+    
+  const VoFStencil gradientStencil = LeastSquares::getBndryGradSten(a_vof, a_neighborhood, ebisbox, m_dx, a_order, m_weight, a_order);
+
+  if(gradientStencil.size() > 0 && normal != RealVect::Zero){
+    
+    const VoFStencil DphiDnStencil =  LeastSquares::projectGradSten(gradientStencil, -normal);
+    const Real boundaryWeight      = -LeastSquares::sumAllWeights(DphiDnStencil);
+
+    a_stencil = std::make_pair(boundaryWeight, DphiDnStencil);
+
+    foundStencil = true;
+  }
+
+  return foundStencil;
 }
 
 #include <CD_NamespaceFooter.H>

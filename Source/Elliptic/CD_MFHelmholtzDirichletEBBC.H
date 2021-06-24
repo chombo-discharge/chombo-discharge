@@ -147,11 +147,11 @@ protected:
     @return If this returns true, a_stencil contains a valid stencil and weight. 
     @note Stencils are computed using weighted least squares with squared inverse distance weighting. 
   */
-  virtual bool getLeastSquaresStencil(std::pair<Real, VoFStencil>& a_stencil,
-				      const VolIndex&              a_vof,
-				      const VofUtils::Neighborhood a_neighborhood,
-				      const DataIndex&             a_dit,
-				      const int                    a_order) const;
+  virtual bool getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFStencil>& a_stencil,
+						  const VolIndex&              a_vof,
+						  const VofUtils::Neighborhood a_neighborhood,
+						  const DataIndex&             a_dit,
+						  const int                    a_order) const;
 };
 
 #include <CD_NamespaceFooter.H>

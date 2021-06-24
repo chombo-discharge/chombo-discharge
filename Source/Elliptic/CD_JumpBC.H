@@ -20,6 +20,7 @@
 
 // Our includes
 #include <CD_MFLevelGrid.H>
+#include <CD_VofUtils.H>
 #include <CD_MFInterfaceFAB.H>
 #include <CD_MFBaseIVFAB.H>
 #include <CD_NamespaceHeader.H>
@@ -64,46 +65,79 @@ public:
     @brief Define function. Builds stencils. 
   */
   void define(const MFLevelGrid& a_mflg, const LevelData<MFBaseIVFAB>& a_Bcoef, const Real a_dx, const int a_order, const int a_weight, const int a_radius);
-  
-  /*!
-    @brief Return average stencils over EB faces. 
-  */
-  virtual const BaseIVFAB<VoFStencil>& getAvgStencils(const int a_phase, const DataIndex& a_dit) const;
 
   /*!
-    @brief Get inhomogeneous contribution (part that is proportional to sigma). 
+    @brief Get phi on the boundary. 
     @param[in] a_phase Phase
     @param[in] a_dit   Grid index
-    @return Returns inhomgoeneous contribution to phase a_phase
+    @return Returns phi on the boundary. On multivalued cells, phi always lies on VolIndex(iv, 0). 
   */
-  virtual const BaseIVFAB<Real>& getInhomogeneousContribution(const int a_phase, const DataIndex& a_dit) const;
-
-  /*!
-    @brief Get homogeneous contribution to phase a_phase (part that only affects interior cells, including cells on the other phase). 
-    @param[in] a_phase Phase
-    @param[in] a_dit   Grid index
-    @return Returns homogeneous contribution to phase a_phase
-  */
-  virtual const BaseIVFAB<Real>& getHomogeneousContribution(const int a_phase, const DataIndex& a_dit) const;
+  virtual const BaseIVFAB<Real>& getBndryPhi(const int a_phase, const DataIndex& a_dit) const;
   
 protected:
 
+  /*!
+    @brief Grids
+  */
   MFLevelGrid m_mflg;
 
   /*!
-    @brief Computed inhomogeneous contribution
+    @brief Grid resolution
   */
-  LayoutData<MFInterfaceFAB<Real> > m_inhomogeneousContrib;
+  Real m_dx;
 
   /*!
-    @brief Computed homogeneous contribution
+    @brief Stencil order
   */
-  LayoutData<MFInterfaceFAB<Real> > m_homogeneousContrib;
+  int m_order;
+
+  /*!
+    @brief Stencil order
+  */
+  int m_weight;
+
+  /*!
+    @brief Stencil order
+  */
+  int m_radius;
+
+  /*!
+    @brief Value of phi on the boundary. 
+  */
+  LayoutData<MFInterfaceFAB<Real> > m_boundaryPhi;
 
   /*!
     @brief Average stencil
   */
   LayoutData<MFInterfaceFAB<VoFStencil> > m_avgStencils;
+
+  /*!
+    @brief Average weights
+  */
+  LayoutData<MFInterfaceFAB<Real> > m_avgWeights;
+
+  /*!
+    @brief Average b-coefficient
+  */
+  LayoutData<MFInterfaceFAB<Real> > m_avgBco;
+
+  /*!
+    @brief Get stencil with specified order. 
+    @param[out] a_stencil      Weight and stencil
+    @param[out] a_vof          Grid cell
+    @param[out] a_neighborhood Neighboorhood specifier
+    @param[in]  a_dit          Data index
+    @param[in]  a_order        Attempted order for stencil. This is also the stencil radius. 
+    @param[in]  a_phase        Phase. 
+    @return If this returns true, a_stencil contains a valid stencil and weight. 
+    @note Stencils are computed using weighted least squares with squared inverse distance weighting. 
+  */
+  virtual bool getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFStencil>& a_stencil,
+						  const VolIndex&              a_vof,
+						  const VofUtils::Neighborhood a_neighborhood,
+						  const DataIndex&             a_dit,
+						  const int                    a_order,
+						  const int                    a_phase) const;
 };
 
 #include <CD_NamespaceFooter.H>
