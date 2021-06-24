@@ -44,7 +44,7 @@ public:
     @param[in] a_weight Weighting factor for least squares
     @param[in] a_radius Stencil radius
   */
-  JumpBC(const MFLevelGrid& a_mflg, const LevelData<MFBaseIVFAB>& a_Bcoef, const Real a_dx, const int a_order, const int a_weight, const int a_radius);
+  JumpBC(const MFLevelGrid& a_mflg, const RefCountedPtr<LevelData<MFBaseIVFAB> >& a_Bcoef, const Real a_dx, const int a_order, const int a_weight, const int a_radius);
 
   /*!
     @brief Disallowed copy constructor
@@ -64,7 +64,17 @@ public:
   /*!
     @brief Define function. Builds stencils. 
   */
-  void define(const MFLevelGrid& a_mflg, const LevelData<MFBaseIVFAB>& a_Bcoef, const Real a_dx, const int a_order, const int a_weight, const int a_radius);
+  void define(const MFLevelGrid& a_mflg, const RefCountedPtr<LevelData<MFBaseIVFAB> >& a_Bcoef, const Real a_dx, const int a_order, const int a_weight, const int a_radius);
+
+  /*!
+    @brief Match the BC
+    @param[in] a_phi               Cell-centered data
+    @param[in] a_jump              Jump data, i.e. right-hand side of dphi/dn + dphi/m = jump
+    @param[in] a_homogeneousPhysBC Homogeneous BC or not
+  */
+  void matchBC(const LevelData<MFCellFAB>& a_phi,
+	       const LevelData<BaseIVFAB<Real> >& a_jump,
+	       const bool a_homogeneousPhysBC) const;
 
   /*!
     @brief Get phi on the boundary. 
@@ -80,6 +90,11 @@ protected:
     @brief Grids
   */
   MFLevelGrid m_mflg;
+
+  /*!
+    @brief B-coefficient
+  */
+  RefCountedPtr<LevelData<MFBaseIVFAB> > m_Bcoef;
 
   /*!
     @brief Grid resolution

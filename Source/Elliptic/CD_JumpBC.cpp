@@ -15,7 +15,7 @@
 #include <CD_LeastSquares.H>
 #include <CD_NamespaceHeader.H>
 
-JumpBC::JumpBC(const MFLevelGrid& a_mflg, const LevelData<MFBaseIVFAB>& a_Bcoef, const Real a_dx, const int a_order, const int a_weight, const int a_radius){
+JumpBC::JumpBC(const MFLevelGrid& a_mflg, const RefCountedPtr<LevelData<MFBaseIVFAB> >& a_Bcoef, const Real a_dx, const int a_order, const int a_weight, const int a_radius){
   CH_TIME("JumpBC::JumpBC");
 
   this->define(a_mflg, a_Bcoef, a_dx, a_order, a_weight, a_radius);
@@ -25,7 +25,9 @@ JumpBC::~JumpBC(){
 
 }
 
-void JumpBC::define(const MFLevelGrid& a_mflg, const LevelData<MFBaseIVFAB>& a_Bcoef, const Real a_dx, const int a_order, const int a_weight, const int a_radius){
+void JumpBC::define(const MFLevelGrid& a_mflg, const RefCountedPtr<LevelData<MFBaseIVFAB> >& a_Bcoef, const Real a_dx, const int a_order, const int a_weight, const int a_radius){
+  m_mflg  = a_mflg;
+  //  m_Bcoef = a_Bcoef;
   //  MayDay::Warning("JumpBC::define - not implemented");
 }
 
@@ -58,6 +60,12 @@ bool JumpBC::getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFStencil>& a_s
   }
 
   return foundStencil;
+}
+
+void JumpBC::matchBC(const LevelData<MFCellFAB>& a_phi,
+		     const LevelData<BaseIVFAB<Real> >& a_jump,
+		     const bool a_homogeneousPhysBC) const {
+  MayDay::Abort("JumpBC::matchBC - not implemented (yet)");
 }
 
 #include <CD_NamespaceFooter.H>
