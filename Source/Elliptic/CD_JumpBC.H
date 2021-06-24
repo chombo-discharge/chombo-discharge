@@ -162,6 +162,11 @@ protected:
   int m_numPhases;
 
   /*!
+    @brief Multiphase or not
+  */
+  bool m_multiPhase;
+
+  /*!
     @brief Value of phi on the boundary. 
   */
   mutable LayoutData<MFInterfaceFAB<Real> > m_boundaryPhi;
@@ -195,7 +200,6 @@ protected:
     @brief Average b-coefficient
   */
   LayoutData<MFInterfaceFAB<Real> > m_avgBco;
-
 
   /*!
     @brief Define function. Builds stencils. 

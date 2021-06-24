@@ -69,10 +69,13 @@ void JumpBC::matchBC(const MFCellFAB&       a_phi,
 		     const bool             a_homogeneousPhysBC,
 		     const DataIndex&       a_dit) const {
 
-  for (int iphase = 0; iphase < m_numPhases; iphase++){
-    BaseIVFAB<Real>& bndryPhi = m_boundaryPhi[a_dit].getIVFAB(iphase);
+  constexpr int vofComp = 0;
+  
+  for (IVSIterator ivsIt(m_ivs[a_dit]); ivsIt.ok(); ++ivsIt){
+    const IntVect iv    = ivsIt();
+    const VolIndex vof0 = VolIndex(iv, vofComp);
 
-    bndryPhi.setVal(0.0);
+    
   }
 }
 

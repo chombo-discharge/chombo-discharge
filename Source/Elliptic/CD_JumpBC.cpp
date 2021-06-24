@@ -27,15 +27,16 @@ JumpBC::JumpBC(const MFLevelGrid& a_mflg,
 	       const int          a_ghostCF){
   CH_TIME("JumpBC::JumpBC");
   
-  m_mflg      = a_mflg;
-  m_Bcoef     = a_Bcoef;
-  m_dx        = a_dx;
-  m_weight    = a_weight;
-  m_order     = a_order;
-  m_radius    = a_radius;
-  m_ghostCF   = a_ghostCF;
-  m_numPhases = m_mflg.numPhases();
-  m_isMGLevel = false;
+  m_mflg       = a_mflg;
+  m_Bcoef      = a_Bcoef;
+  m_dx         = a_dx;
+  m_weight     = a_weight;
+  m_order      = a_order;
+  m_radius     = a_radius;
+  m_ghostCF    = a_ghostCF;
+  m_numPhases  = m_mflg.numPhases();
+  m_isMGLevel  = false;
+  m_multiPhase = m_numPhases > 1;
 
   this->defineIterators();
   this->defineStencils();
@@ -62,7 +63,7 @@ VoFIterator& JumpBC::getMultiPhaseVofs(const int a_phase, const DataIndex& a_dit
 }
 
 void JumpBC::defineStencils(){
-  if(m_numPhases > 1) { // JumpBC will never be called unless it's a multiphase problem.
+  if(m_multiPhase) { // JumpBC internals should never be called unless it's a multiphase problem.
     
     const DisjointBoxLayout& dbl = m_mflg.getGrids();
 
@@ -178,10 +179,14 @@ void JumpBC::defineStencils(){
 }
 
 void JumpBC::defineIterators(){
+  // TLDR: This function defines iterators for iterating over regular cut-cells and over multi-fluid cut-cells. The iterators
+  //       must exist for both single-phase and multi-phase vofs. This is true even if we're not actually solving a multiphase
+  //       problem because the boundary conditions classes will still need the iterators.
+  
   const DisjointBoxLayout& dbl = m_mflg.getGrids();
 
   m_ivs.define(dbl);
-  
+
   for (int iphase = 0; iphase < m_numPhases; iphase++){
     m_singlePhaseVofs.emplace(iphase, std::make_shared<LayoutData<VoFIterator> >() );
     m_multiPhaseVofs .emplace(iphase, std::make_shared<LayoutData<VoFIterator> >() );
@@ -255,8 +260,10 @@ void JumpBC::resetBC() const {
 void JumpBC::matchBC(const LevelData<MFCellFAB>&        a_phi,
 		     const LevelData<BaseIVFAB<Real> >& a_jump,
 		     const bool                         a_homogeneousPhysBC) const {
-  for (DataIterator dit = a_phi.dataIterator(); dit.ok(); ++dit){
-    this->matchBC(a_phi[dit()], a_jump[dit()], a_homogeneousPhysBC, dit());
+  if(m_multiPhase){
+    for (DataIterator dit = a_phi.dataIterator(); dit.ok(); ++dit){
+      this->matchBC(a_phi[dit()], a_jump[dit()], a_homogeneousPhysBC, dit());
+    }
   }
 }
 
