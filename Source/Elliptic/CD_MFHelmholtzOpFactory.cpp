@@ -265,7 +265,8 @@ void MFHelmholtzOpFactory::defineMultigridLevels(){
 	    ebislCoar. push_back(mgMflgCoar.getEBLevelGrid(i).getEBISL());
 	  }
 
-	  // Factories for making coarse stuff. 
+	  // Factories for making coarse stuff. Need one ghost cell because we interpolate b*grad(phi) to face centroids. 
+	  const int nghost = 1;
 	  MFCellFactory       cellFact  (ebislCoar, ebislComps);
 	  MFFluxFactory       fluxFact  (ebislCoar, ebislComps);
 	  MFBaseIVFABFactory  ivFact    (ebislCoar, ebislComps);
@@ -274,10 +275,10 @@ void MFHelmholtzOpFactory::defineMultigridLevels(){
 	  // Multifluid a bit special -- number of components come in through the factory.
 	  const int dummy = 1;
 	  
-	  auto coarAcoef      = RefCountedPtr<LevelData<MFCellFAB> >        (new LevelData<MFCellFAB>        (dblCoar, dummy,   IntVect::Zero, cellFact ));
-	  auto coarBcoef      = RefCountedPtr<LevelData<MFFluxFAB> >        (new LevelData<MFFluxFAB>        (dblCoar, dummy,   IntVect::Zero, fluxFact ));
-	  auto coarBcoefIrreg = RefCountedPtr<LevelData<MFBaseIVFAB> >      (new LevelData<MFBaseIVFAB>      (dblCoar, dummy,   IntVect::Zero, ivFact   ));
-	  auto coarJump       = RefCountedPtr<LevelData<BaseIVFAB<Real> > > (new LevelData<BaseIVFAB<Real> > (dblCoar, m_nComp, IntVect::Zero, irregFact));
+	  auto coarAcoef      = RefCountedPtr<LevelData<MFCellFAB> >        (new LevelData<MFCellFAB>        (dblCoar, dummy,   nghost*IntVect::Unit, cellFact ));
+	  auto coarBcoef      = RefCountedPtr<LevelData<MFFluxFAB> >        (new LevelData<MFFluxFAB>        (dblCoar, dummy,   nghost*IntVect::Unit, fluxFact ));
+	  auto coarBcoefIrreg = RefCountedPtr<LevelData<MFBaseIVFAB> >      (new LevelData<MFBaseIVFAB>      (dblCoar, dummy,   nghost*IntVect::Unit, ivFact   ));
+	  auto coarJump       = RefCountedPtr<LevelData<BaseIVFAB<Real> > > (new LevelData<BaseIVFAB<Real> > (dblCoar, m_nComp, nghost*IntVect::Zero, irregFact));
 
 	  const LevelData<MFCellFAB>&   fineAcoef      = *m_mgAcoef     [amrLevel].back();
 	  const LevelData<MFFluxFAB>&   fineBcoef      = *m_mgBcoef     [amrLevel].back();
@@ -384,18 +385,133 @@ bool MFHelmholtzOpFactory::getCoarserLayout(MFLevelGrid& a_coarMflg, const MFLev
 }
 
 MFHelmholtzOp* MFHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bool a_homogeneousOnly) {
-  MFHelmholtzOp* mgOp;
+  MFHelmholtzOp* mgOp = nullptr;
   
   ParmParse pp;
   bool turnOffMG = false;
   pp.query("turn_off_multigrid", turnOffMG);
   if(turnOffMG){
-    pout() << "turning off multigrid for EBHelmholtzOpFactory because 'turn_off_multigrid' = true" << endl;
+    pout() << "turning off multigrid for MFHelmholtzOpFactory because 'turn_off_multigrid' = true" << endl;
     return mgOp;
   }
 
-  MayDay::Abort("MFHelmholtzOpFactory::MGnewOp -- MG not supported. Please run with 'turn_off_multigrid=true'");
+  const int amrLevel = this->findAmrLevel(a_fineDomain); // Run-time abort if a_fineDomain is not found in anhy amr level. 
+  
+  const AmrLevelGrids& mgLevelGrids = m_mgLevelGrids[amrLevel];
 
+  const int mgRefRat = 2;
+
+  // Things that are needed for defining the operator. This might seem weird but
+  // the multigrid operators only do relaxation and there's no fine-to-coar stuff. So hasFine = hasCoar = false.
+  // But we might need to restrict and interpolate another, even coarser multigrid level so in that case we need
+  // to define that. 
+  MFLevelGrid mflg;
+  MFLevelGrid mflgMgCoar;
+    
+  MFMultigridInterpolator interpolator;  // Only if defined on an AMR level
+  MFFluxReg               fluxReg;       // Only if defined on an AMR level
+  MFCoarAve               coarsener;     // Only if defined on an AMR level
+
+  bool hasMGObjects;
+    
+  RefCountedPtr<LevelData<MFCellFAB > >       Acoef;
+  RefCountedPtr<LevelData<MFFluxFAB > >       Bcoef;
+  RefCountedPtr<LevelData<MFBaseIVFAB> >      BcoefIrreg;
+  RefCountedPtr<LevelData<BaseIVFAB<Real> > > jump;
+
+  bool foundMgLevel = false;
+
+  if(a_depth == 0){ // Asking for the AMR level.
+    mflg       =  m_amrLevelGrids[amrLevel];
+    Acoef      =  m_amrAcoef     [amrLevel];
+    Bcoef      =  m_amrBcoef     [amrLevel];
+    BcoefIrreg =  m_amrBcoefIrreg[amrLevel];
+    jump       =  m_amrJump      [amrLevel];
+
+    interpolator = m_amrInterpolators[amrLevel];
+    fluxReg      = m_amrFluxRegisters[amrLevel];
+    coarsener    = m_amrCoarseners[amrLevel];
+
+    hasMGObjects = m_hasMgLevels[amrLevel];
+
+    if(hasMGObjects){
+      mflgMgCoar = m_mgLevelGrids[amrLevel][1]; 
+    }
+      
+    foundMgLevel = true;
+  }
+  else{ // Asking for a coarsening. No interp or flux reg object here.
+    // TLDR: Go through the coarsened levels for the specified amr level and see if we find a coarsening at the
+    //       specified depth.
+    const ProblemDomain coarDomain = coarsen(a_fineDomain, std::pow(mgRefRat, a_depth));
+
+    // These are the things that live below the AMR level corresponding to a_fineDomain. 
+    const AmrLevelGrids& mgLevelGrids = m_mgLevelGrids[amrLevel];
+    const AmrCellData&   mgAcoef      = m_mgAcoef     [amrLevel];
+    const AmrFluxData&   mgBcoef      = m_mgBcoef     [amrLevel];
+    const AmrIrreData&   mgBcoefIrreg = m_mgBcoefIrreg[amrLevel];
+
+    // See if we have a corresponding multigrid level.
+    int mgLevel;
+    for (int img = 0; img < mgLevelGrids.size(); img++){
+      if(mgLevelGrids[img].getDomain() == coarDomain){
+	mgLevel      = img;
+	foundMgLevel = true;
+	break;
+      }
+    }
+
+    // Found the multigrid level. We can define the operator. 
+    if(foundMgLevel){
+      Acoef      =  mgAcoef     [mgLevel];
+      Bcoef      =  mgBcoef     [mgLevel];
+      BcoefIrreg =  mgBcoefIrreg[mgLevel];
+      mflg       =  mgLevelGrids[mgLevel];
+      jump       =  m_mgJump[amrLevel][mgLevel];
+
+      hasMGObjects = (mgLevel < mgLevelGrids.size() - 1); // This just means that mgLevel was not the last entry in mgLevelGrids so there's even coarser stuff below.
+      if(hasMGObjects){
+	mflgMgCoar = mgLevelGrids[mgLevel+1];
+      }
+    }
+  }
+
+  // Make the operator
+  if(foundMgLevel){
+    const Real dx     = m_amrResolutions[amrLevel]*std::pow(mgRefRat, a_depth); // 
+
+    mgOp = new MFHelmholtzOp(MFLevelGrid(),
+			     mflg,
+			     MFLevelGrid(),
+			     MFLevelGrid(),
+			     mflgMgCoar,
+			     interpolator,
+			     fluxReg,
+			     coarsener,
+			     m_domainBcFactory,
+			     m_ebBcFactory,
+			     m_probLo,
+			     dx,
+			     1,
+			     false,
+			     false,
+			     hasMGObjects,
+			     true,
+			     m_alpha,
+			     m_beta,
+			     Acoef,
+			     Bcoef,
+			     BcoefIrreg,
+			     m_ghostPhi,
+			     m_ghostRhs,
+			     m_jumpOrder,
+			     m_jumpWeight,
+			     m_relaxMethod);
+
+    mgOp->setJump(jump);
+  }
+  
+  return mgOp;
 }
 
 MFHelmholtzOp* MFHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {

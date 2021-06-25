@@ -67,8 +67,8 @@ MFHelmholtzOp::MFHelmholtzOp(const MFLevelGrid&                               a_
 
   if(a_hasCoar){
     m_refToCoar = a_refToCoar;
-    m_mflgCoFi = a_mflgCoFi;
-    m_mflgCoar = a_mflgCoar;
+    m_mflgCoFi  = a_mflgCoFi;
+    m_mflgCoar  = a_mflgCoar;
   }
 
   if(m_hasMGObjects){
@@ -78,26 +78,44 @@ MFHelmholtzOp::MFHelmholtzOp(const MFLevelGrid&                               a_
   EBArith::getMultiColors(m_colors);
 
   // Instantiate jump bc object.
-  const int ghostCF = a_hasCoar ? a_interpolator.getGhostCF() : 0;
+  const int ghostCF = a_hasCoar ? a_interpolator.getGhostCF() : 1;
   m_jumpBC = RefCountedPtr<JumpBC> (new JumpBC(m_mflg, a_BcoefIrreg, a_dx, a_jumpOrder, a_jumpWeight, a_jumpOrder, ghostCF));
   if(a_isMGOperator) m_jumpBC->setMG(true);
 
   // Make the operators on eachphase.
   for (int iphase = 0; iphase < m_numPhases; iphase++){
 
-    EBLevelGrid dummy;
-    EBLevelGrid eblgFine    = a_hasFine      ? a_mflgFine.getEBLevelGrid(iphase)   : dummy;
+
     EBLevelGrid eblg        = a_mflg.getEBLevelGrid(iphase);
-    EBLevelGrid eblgCoFi    = a_hasCoar      ? a_mflgCoFi.getEBLevelGrid(iphase)   : dummy;
-    EBLevelGrid eblgCoar    = a_hasCoar      ? a_mflgCoar.getEBLevelGrid(iphase)   : dummy;
+
+    EBLevelGrid dummy;
+    EBLevelGrid eblgFine    = a_hasFine      ? a_mflgFine.  getEBLevelGrid(iphase) : dummy;
+    EBLevelGrid eblgCoFi    = a_hasCoar      ? a_mflgCoFi.  getEBLevelGrid(iphase) : dummy;
+    EBLevelGrid eblgCoar    = a_hasCoar      ? a_mflgCoar.  getEBLevelGrid(iphase) : dummy;
     EBLevelGrid eblgCoarMG  = a_hasMGObjects ? a_mflgCoarMG.getEBLevelGrid(iphase) : dummy;
+
+    RefCountedPtr<EBMultigridInterpolator> interpolator = RefCountedPtr<EBMultigridInterpolator> (nullptr);
+    RefCountedPtr<EBFluxRegister> fluxRegister          = RefCountedPtr<EBFluxRegister> (nullptr);
+    RefCountedPtr<EbCoarAve> coarsener                  = RefCountedPtr<EbCoarAve> (nullptr);
+
+    if(!a_isMGOperator){
+      if(a_hasFine){
+	fluxRegister = a_fluxReg.getFluxRegPointer(iphase);
+      }
+    
+      coarsener    = a_coarAve.getAveOp(iphase);
+      //    }
+      if(a_hasCoar){
+	interpolator = a_interpolator.getInterpolator(iphase);
+      }
+    }
 
     auto domainBC = a_domainBcFactory->create(iphase);
     auto ebBC     = a_ebBcFactory    ->create(iphase, m_jumpBC);
 
     if(a_isMGOperator) ebBC->setMG(true);
 
-    // Alias the multifluid-coefficients onto a single phase. 
+    // Alias the multifluid-coefficients onto a single phase.
     RefCountedPtr<LevelData<EBCellFAB> >        Acoef       = RefCountedPtr<LevelData<EBCellFAB> >        (new LevelData<EBCellFAB>());
     RefCountedPtr<LevelData<EBFluxFAB> >        Bcoef       = RefCountedPtr<LevelData<EBFluxFAB> >        (new LevelData<EBFluxFAB>());
     RefCountedPtr<LevelData<BaseIVFAB<Real> > > BcoefIrreg  = RefCountedPtr<LevelData<BaseIVFAB<Real> > > (new LevelData<BaseIVFAB<Real> >());
@@ -128,9 +146,9 @@ MFHelmholtzOp::MFHelmholtzOp(const MFLevelGrid&                               a_
 											eblgCoFi,
 											eblgCoar,
 											eblgCoarMG,
-											a_interpolator.getInterpolator(iphase),
-											a_fluxReg.getFluxRegPointer(iphase),
-											a_coarAve.getAveOp(iphase),
+											interpolator,
+											fluxRegister,
+											coarsener,
 											domainBC,
 											ebBC,
 											a_probLo,
@@ -386,7 +404,6 @@ void MFHelmholtzOp::interpolateCF(const LevelData<MFCellFAB>& a_phi, const Level
     }
     else{
       if(a_phiCoar == nullptr) MayDay::Error("MFHelmholtzOp::interpolateCF -- calling inhomogeneousCFInterp with nullptr coarse is an error.");
-      
       MultifluidAlias::aliasMF(phi,     op.first,  (LevelData<MFCellFAB>&) a_phi);
       MultifluidAlias::aliasMF(phiCoar, op.first, *a_phiCoar);
 
@@ -426,7 +443,7 @@ void MFHelmholtzOp::axby(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>
 void MFHelmholtzOp::updateJumpBC(const LevelData<MFCellFAB>& a_phi, const bool a_homogeneousPhysBC){
   CH_TIME("MFHelmholtzOp::updateJumpBC");
 
-  // Must do this. 
+  // Must do this.
   LevelData<MFCellFAB>& phi = (LevelData<MFCellFAB>&) a_phi;
   phi.exchange();
   
@@ -467,9 +484,9 @@ void MFHelmholtzOp::relaxPointJacobi(LevelData<MFCellFAB>& a_correction, const L
 
     // Interpolate ghost cells and match the BC.
     this->interpolateCF(a_correction, nullptr, true);
-    this->updateJumpBC(a_correction, true);
+    this->updateJumpBC(a_correction,  true);
     
-    // Something simple, something true. 
+    // Something simple, something true.
     for(auto& op : m_helmOps){
       
       MultifluidAlias::aliasMF(Lcorr, op.first, Lphi        );
