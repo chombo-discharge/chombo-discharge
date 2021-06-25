@@ -132,6 +132,7 @@ void JumpBC::defineStencils(){
 	    gradStencils(vof, m_comp) = pairSten.second;
 	  }
 	  else{
+	    MayDay::Abort("stop, wtf");
 	    bndryWeights(vof, m_comp) = 0.0;
 	    gradStencils(vof, m_comp).clear();
 	  }

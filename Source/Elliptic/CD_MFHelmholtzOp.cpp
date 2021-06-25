@@ -443,7 +443,6 @@ void MFHelmholtzOp::axby(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>
 void MFHelmholtzOp::updateJumpBC(const LevelData<MFCellFAB>& a_phi, const bool a_homogeneousPhysBC){
   CH_TIME("MFHelmholtzOp::updateJumpBC");
 
-  // Must do this.
   LevelData<MFCellFAB>& phi = (LevelData<MFCellFAB>&) a_phi;
   phi.exchange();
   
