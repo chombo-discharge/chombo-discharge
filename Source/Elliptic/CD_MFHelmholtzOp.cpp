@@ -452,7 +452,7 @@ void MFHelmholtzOp::updateJumpBC(const LevelData<MFCellFAB>& a_phi, const bool a
 
 void MFHelmholtzOp::relax(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_residual, int a_iterations) {
   CH_TIME("MFHelmholtzOp::relax");
-#if 0
+#if 1
   switch(m_relaxType){
   case RelaxationMethod::PointJacobi:
     this->relaxPointJacobi(a_correction, a_residual, a_iterations);
@@ -488,6 +488,8 @@ void MFHelmholtzOp::relaxPointJacobi(LevelData<MFCellFAB>& a_correction, const L
     
     // Something simple, something true.
     for(auto& op : m_helmOps){
+      this->interpolateCF(a_correction, nullptr, true);
+      this->updateJumpBC(a_correction,  true);
       
       MultifluidAlias::aliasMF(Lcorr, op.first, Lphi        );
       MultifluidAlias::aliasMF(corr,  op.first, a_correction);
@@ -511,7 +513,6 @@ void MFHelmholtzOp::relaxGSRedBlack(LevelData<MFCellFAB>& a_correction, const Le
 
     // Interpolate ghost cells and match the BC.
     for (int redBlack=0;redBlack<=1; redBlack++){
-
       this->interpolateCF(a_correction, nullptr, true);
       this->updateJumpBC(a_correction, true);
       
