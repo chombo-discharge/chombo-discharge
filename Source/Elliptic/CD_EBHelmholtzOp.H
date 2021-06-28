@@ -130,7 +130,7 @@ public:
     @param[in]    a_resid    Residual
     @param[in]    a_color    Color
   */
-  void gauSaiMultiColorKernel(LevelData<EBCellFAB>& a_Lcorr, LevelData<EBCellFAB>& a_corr, const LevelData<EBCellFAB>& a_resid, const IntVect a_color);
+  void gauSaiMultiColorKernel(EBCellFAB& a_Lcorr, EBCellFAB& a_corr, const EBCellFAB& a_resid, const Box& a_cellBox, const DataIndex& a_dit, const IntVect& a_color);
 
   /*!
     @brief Compute residual on this level. 

@@ -529,28 +529,31 @@ void MFHelmholtzOp::relaxGSRedBlack(LevelData<MFCellFAB>& a_correction, const Le
 }
 
 void MFHelmholtzOp::relaxGSMultiColor(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_residual, const int a_iterations) {
-  LevelData<MFCellFAB> Lphi;
-  this->create(Lphi, a_correction);
+  LevelData<MFCellFAB> Lcorr;
+  this->create(Lcorr, a_correction);
+
+  const DisjointBoxLayout& dbl = m_mflg.getGrids();
 
   for (int i = 0; i < a_iterations; i++){
-    LevelData<EBCellFAB> Lcorr;
-    LevelData<EBCellFAB> corr;
-    LevelData<EBCellFAB> resi;
 
     // Interpolate ghost cells and match the BC.
-    this->updateJumpBC(a_correction, true);
     for (int icolor = 0; icolor < m_colors.size(); icolor++){
       this->interpolateCF(a_correction, nullptr, true);
+      this->updateJumpBC(a_correction, true);
 
-      // Something simple, something true. 
-      for(auto& op : m_helmOps){
-	MultifluidAlias::aliasMF(Lcorr, op.first, Lphi        );
-	MultifluidAlias::aliasMF(corr,  op.first, a_correction);
-	MultifluidAlias::aliasMF(resi,  op.first, a_residual  );
+      // Do relaxation on each patch
+      for (DataIterator dit(dbl); dit.ok(); ++dit){
+	const Box cellBox = dbl[dit()];
 
-	op.second->turnOffBCs();
-	op.second->gauSaiMultiColorKernel(Lcorr, corr, resi, m_colors[icolor]);
-	op.second->turnOnBCs();
+	for (auto& op : m_helmOps){
+	  const int iphase = op.first;
+
+	  EBCellFAB&       Lph = Lcorr       [dit()].getPhase(iphase);
+	  EBCellFAB&       phi = a_correction[dit()].getPhase(iphase);
+	  const EBCellFAB& res = a_residual  [dit()].getPhase(iphase);
+
+	  op.second->gauSaiMultiColorKernel(Lph, phi, res, cellBox, dit(), m_colors[icolor]);
+	}
       }
     }
   }

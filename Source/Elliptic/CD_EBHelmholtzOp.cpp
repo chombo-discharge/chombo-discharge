@@ -874,33 +874,43 @@ void EBHelmholtzOp::relaxGSMultiColor(LevelData<EBCellFAB>& a_correction, const 
   LevelData<EBCellFAB> Lcorr;
   this->create(Lcorr, a_residual);
 
+  const DisjointBoxLayout& dbl = m_eblg.getDBL();
+
   for (int iter = 0; iter < a_iterations; iter++){
     for (int icolor = 0; icolor < m_colors.size(); icolor++){
+      a_correction.exchange();
+      
       this->homogeneousCFInterp(a_correction);
-      this->gauSaiMultiColorKernel(Lcorr, a_correction, a_residual, m_colors[icolor]);
+      
+      for (DataIterator dit(dbl); dit.ok(); ++dit){
+	const Box cellBox = dbl[dit()];
+
+	this->gauSaiMultiColorKernel(Lcorr[dit()], a_correction[dit()], a_residual[dit()], cellBox, dit(), m_colors[icolor]);
+      }
     }
   }
 }
 
-void EBHelmholtzOp::gauSaiMultiColorKernel(LevelData<EBCellFAB>& a_Lcorr, LevelData<EBCellFAB>& a_corr, const LevelData<EBCellFAB>& a_resid, const IntVect a_color){
-  this->applyOp(a_Lcorr, a_corr, true);
-  this->gauSaiMultiColor(a_corr, a_Lcorr, a_resid, a_color);
-}
-
-void EBHelmholtzOp::gauSaiMultiColor(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_rhs, const IntVect& a_color) const {
-  const DisjointBoxLayout& dbl = a_phi.disjointBoxLayout();
+void EBHelmholtzOp::gauSaiMultiColorKernel(EBCellFAB&       a_Lcorr,
+					   EBCellFAB&       a_corr,
+					   const EBCellFAB& a_resid,
+					   const Box&       a_cellBox,
+					   const DataIndex& a_dit,
+					   const IntVect&   a_color){
+  const EBISBox& ebisbox   = m_eblg.getEBISL()[a_dit];
+  const EBCellFAB& relCoef = m_relCoef[a_dit];
   
-  for (DataIterator dit(dbl); dit.ok(); ++dit){
-    const Box box = dbl[dit()];
+  if(!ebisbox.isAllCovered()){
+    this->applyOp(a_Lcorr, a_corr, a_cellBox, a_dit, true);
 
-    BaseFab<Real>& phiReg        = a_phi    [dit()].getSingleValuedFAB();
-    const BaseFab<Real>& LphiReg = a_Lphi   [dit()].getSingleValuedFAB();
-    const BaseFab<Real>& rhsReg  = a_rhs    [dit()].getSingleValuedFAB();
-    const BaseFab<Real>& relReg  = m_relCoef[dit()].getSingleValuedFAB();
+    BaseFab<Real>& phiReg        = a_corr. getSingleValuedFAB();
+    const BaseFab<Real>& LphiReg = a_Lcorr.getSingleValuedFAB();
+    const BaseFab<Real>& rhsReg  = a_resid.getSingleValuedFAB();
+    const BaseFab<Real>& relReg  = relCoef.getSingleValuedFAB();
 
     // Regular cells (well, plus whatever is not multi-valued)
-    IntVect loIV = box.smallEnd();
-    IntVect hiIV = box.bigEnd();
+    IntVect loIV = a_cellBox.smallEnd();
+    IntVect hiIV = a_cellBox.bigEnd();
     for (int dir = 0; dir < SpaceDim; dir++){
       if(loIV[dir] % 2 != a_color[dir]) loIV[dir]++;
     }
@@ -917,7 +927,7 @@ void EBHelmholtzOp::gauSaiMultiColor(LevelData<EBCellFAB>& a_phi, const LevelDat
     
 
     // Fortran took care of the irregular cells but multi-cells still remain
-    VoFIterator& vofit = m_vofIterMulti[dit()];
+    VoFIterator& vofit = m_vofIterMulti[a_dit];
     for (vofit.reset(); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
       const IntVect&  iv  = vof.gridIndex();
@@ -928,12 +938,12 @@ void EBHelmholtzOp::gauSaiMultiColor(LevelData<EBCellFAB>& a_phi, const LevelDat
       }
 
       if(doThisCell){
-	const Real lambda = m_relCoef[dit()](vof, m_comp);
-	const Real Lphi   = a_Lphi[dit()](vof, m_comp);
-	const Real rhs    = a_rhs[dit()](vof, m_comp);
-	const Real resid  = rhs - Lphi;
+	const Real lambda = relCoef(vof, m_comp);
+	const Real Lcorr  = a_Lcorr(vof, m_comp);
+	const Real rhs    = a_resid(vof, m_comp);
+	const Real resid  = rhs - Lcorr;
 
-	a_phi[dit()](vof, m_comp) += lambda*resid;
+	a_corr(vof, m_comp) += lambda*resid;
       }
     }
   }
