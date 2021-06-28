@@ -226,9 +226,10 @@ void MFHelmholtzOp::setToZero(LevelData<MFCellFAB>& a_lhs) {
 
 void MFHelmholtzOp::assign(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs) {
   CH_TIME("MFHelmholtzOp::assign");
-  
+
+#if 1
   a_rhs.copyTo(a_lhs);
-#if 0
+#else
   for (auto& op : m_helmOps){
     LevelData<EBCellFAB> lhs;
     LevelData<EBCellFAB> rhs;
@@ -344,7 +345,7 @@ void MFHelmholtzOp::preCond(LevelData<MFCellFAB>& a_corr, const LevelData<MFCell
 #if 0
   this->relax(a_corr, a_residual, 40);
 #else
-  //  m_jumpBC->resetBC();
+  //m_jumpBC->resetBC();
   
   for (auto& op : m_helmOps){
     LevelData<EBCellFAB> corr;
