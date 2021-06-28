@@ -35,9 +35,35 @@ public:
   ~MFHelmholtzEBBCFactory();
 
   /*!
+    @brief Set BC order
+    @param[in] a_order Approximation order
+    @note For least squares, the order is also the attempted radius of the stencil. 
+  */
+  virtual void setOrder(const int a_order);
+
+  /*!
+    @brief Set BC order
+    @param[in] a_weight Weight for least squares stencils. 
+    @note a_weight = 0 can lead to ill-conditioned least-squares systems. 
+  */
+  virtual void setWeight(const int a_weight);
+
+  /*!
     @brief Factory method for 
   */
   virtual RefCountedPtr<EBHelmholtzEBBC> create(const int a_iphase, const RefCountedPtr<JumpBC>& a_jumpBC) const = 0;
+
+protected:
+  
+  /*!
+    @brief Stencil approximation order,
+  */
+  int m_order;
+
+  /*!
+    @brief Stencil weighting
+  */
+  int m_weight;
 
 };
 

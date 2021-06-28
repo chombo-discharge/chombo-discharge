@@ -50,20 +50,6 @@ public:
   ~MFHelmholtzDirichletEBBCFactory();
 
   /*!
-    @brief Set BC order
-    @param[in] a_order Approximation order (1 and 2 are accepted)
-    @note For least squares, the order is also the attempted radius of the stencil. 
-  */
-  virtual void setOrder(const int a_order);
-
-  /*!
-    @brief Set BC order
-    @param[in] a_weight Weight for least squares stencils. 
-    @note a_weight = 0 can lead to ill-conditioned least-squares systems. 
-  */
-  virtual void setWeight(const int a_weight);
-
-  /*!
     @brief Set the value on the EB. 
     @param[in] a_value Constant value on EB
   */
@@ -92,16 +78,6 @@ protected:
     @brief Use function for BC value
   */
   bool m_useFunction;
-
-  /*!
-    @brief Stencil approximation order,
-  */
-  int m_order;
-
-  /*!
-    @brief Stencil weighting
-  */
-  int m_weight;
 
   /*!
     @brief Value on EB

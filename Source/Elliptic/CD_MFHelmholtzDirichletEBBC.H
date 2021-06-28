@@ -33,20 +33,6 @@ public:
   ~MFHelmholtzDirichletEBBC();
 
   /*!
-    @brief Set BC order. 
-    @param[in] a_order Order
-    @note The order is also the attempted radius of the stencil. 
-  */
-  virtual void setOrder(const int a_order);
-
-  /*!
-    @brief Set stencil weights
-    @param[in] a_weight Weighting factor for least squares stencils
-    @note a_weight=0 can lead to ill-conditioned systems.
-  */
-  virtual void setWeight(const int a_weight);
-
-  /*!
     @brief Set the value on the EB. 
     @param[in] a_value Constant value on EB
   */
@@ -71,16 +57,6 @@ protected:
   bool m_useFunction;
 
   /*!
-    @brief Stencil approximation order,
-  */
-  int m_order;
-
-  /*!
-    @brief Distance weighting factor for stencils.
-  */
-  int m_weight;
-
-  /*!
     @brief Value on EB
   */
   Real m_constantValue;
@@ -98,46 +74,29 @@ protected:
   /*!
     @brief Boundary weights for stencil. 
   */
-  LayoutData<BaseIVFAB<VoFStencil> > m_gradStencils;
-
-    /*!
-    @brief User define function. 
-  */
-  virtual void define() override;
+  LayoutData<BaseIVFAB<VoFStencil> > m_boundaryStencils;
 
   /*!
-    @brief Flux application function.
+    @brief User define function. 
+  */
+  virtual void defineSinglePhase() override;
+
+  /*!
+    @brief Apply flux single phase
     @param[inout] a_singlePhaseVofs   Iterator for single-phase cut-cells
-    @param[inout] a_multiPhaseVofs    Iterator for multi-phase cut-cells
     @param[inout] a_Lphi              Operator kappa*L(phi)
     @param[in]    a_phi               Phi, cell-centered. 
     @param[in]    a_dit               Data index    
     @param[in]    a_beta              Beta. Passed in from operator. 
     @param[in]    a_homogeneousPhysBC Homogeneous BC or not. 
   */
-  virtual void applyEBFlux(VoFIterator&       a_singlePhaseVofs,
-			   VoFIterator&       a_multiPhaseVofs,
-			   EBCellFAB&         a_Lphi,
-			   const EBCellFAB&   a_phi,
-			   const DataIndex&   a_dit,
-			   const Real&        a_beta,
-			   const bool&        a_homogeneousPhysBC) const override;
+  virtual void applyEBFluxSinglePhase(VoFIterator&       a_singlePhaseVofs,
+				      EBCellFAB&         a_Lphi,
+				      const EBCellFAB&   a_phi,
+				      const DataIndex&   a_dit,
+				      const Real&        a_beta,
+				      const bool&        a_homogeneousPhysBC) const override;
 
-  /*!
-    @brief Get stencil with specified order. 
-    @param[out] a_stencil      Weight and stencil
-    @param[out] a_vof          Grid cell
-    @param[out] a_neighborhood Neighboorhood specifier
-    @param[in]  a_dit          Data index
-    @param[in]  a_order        Attempted order for stencil. This is also the stencil radius. 
-    @return If this returns true, a_stencil contains a valid stencil and weight. 
-    @note Stencils are computed using weighted least squares with squared inverse distance weighting. 
-  */
-  virtual bool getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFStencil>& a_stencil,
-						  const VolIndex&              a_vof,
-						  const VofUtils::Neighborhood a_neighborhood,
-						  const DataIndex&             a_dit,
-						  const int                    a_order) const;
 };
 
 #include <CD_NamespaceFooter.H>

@@ -36,16 +36,6 @@ MFHelmholtzDirichletEBBCFactory::MFHelmholtzDirichletEBBCFactory(const int a_ord
 MFHelmholtzDirichletEBBCFactory::~MFHelmholtzDirichletEBBCFactory(){
 }
 
-void MFHelmholtzDirichletEBBCFactory::setOrder(const int a_order){
-  CH_assert(a_order > 0);
-  m_order = a_order;
-}
-
-void MFHelmholtzDirichletEBBCFactory::setWeight(const int a_weight){
-  CH_assert(a_weight > 0);
-  m_weight = a_weight;
-}
-
 void MFHelmholtzDirichletEBBCFactory::setValue(const Real a_value){
   m_useConstant = true;
   m_useFunction = false;

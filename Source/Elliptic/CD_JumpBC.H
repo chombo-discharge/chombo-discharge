@@ -103,12 +103,11 @@ public:
     @brief Return vof iterator which iterates over multi-phase cells on a specified phase and box. 
   */
   virtual VoFIterator& getMultiPhaseVofs(const int a_phase, const DataIndex& a_dit) const;
-
   
   /*!
     @brief Set everything to zero. This is a debugging function.
   */
-  void resetBC() const;
+  virtual void resetBC() const;
   
 protected:
 

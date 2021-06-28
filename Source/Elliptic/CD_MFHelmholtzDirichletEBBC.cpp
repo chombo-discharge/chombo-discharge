@@ -25,16 +25,6 @@ MFHelmholtzDirichletEBBC::~MFHelmholtzDirichletEBBC(){
 
 }
 
-void MFHelmholtzDirichletEBBC::setOrder(const int a_order){
-  CH_assert(a_order > 0);
-  m_order = a_order;
-}
-
-void MFHelmholtzDirichletEBBC::setWeight(const int a_weight){
-  CH_assert(a_weight > 0);
-  m_weight = a_weight;
-}
-
 void MFHelmholtzDirichletEBBC::setValue(const int a_value){
   m_useConstant = true;
   m_useFunction = false;
@@ -49,7 +39,7 @@ void MFHelmholtzDirichletEBBC::setValue(const std::function<Real(const RealVect&
   m_functionValue = a_value;
 }
 
-void MFHelmholtzDirichletEBBC::define() {
+void MFHelmholtzDirichletEBBC::defineSinglePhase() {
   if(  m_order <= 0  || m_weight <= 0 ) MayDay::Error("MFHelmholtzDirichletEBBC - must have order > 0 and weight > 0");
   if(!(m_useConstant || m_useFunction)) MayDay::Error("MFHelmholtzDirichletEBBC - not using constant or function!");
 
@@ -57,8 +47,7 @@ void MFHelmholtzDirichletEBBC::define() {
   const ProblemDomain& domain  = m_eblg.getDomain();
   
   m_boundaryWeights.define(dbl);
-  m_kappaDivFStencils.define(dbl);
-  m_gradStencils.define(dbl);
+  m_boundaryStencils.define(dbl);
 
   for (DataIterator dit(dbl); dit.ok(); ++dit){
     const Box box          = dbl[dit()];
@@ -66,17 +55,18 @@ void MFHelmholtzDirichletEBBC::define() {
     const EBGraph& ebgraph = ebisbox.getEBGraph();
     const IntVectSet& ivs  = ebisbox.getIrregIVS(box);
 
-    BaseIVFAB<Real>&       weights  = m_boundaryWeights  [dit()];
-    BaseIVFAB<VoFStencil>& stencils = m_gradStencils[dit()];
+    BaseIVFAB<Real>&       weights  = m_boundaryWeights [dit()];
+    BaseIVFAB<VoFStencil>& stencils = m_boundaryStencils[dit()];
 
     const BaseIVFAB<Real>& Bcoef    = (*m_Bcoef)[dit()];
 
     weights. define(ivs, ebgraph, m_nComp);
     stencils.define(ivs, ebgraph, m_nComp);
-    m_kappaDivFStencils[dit()].define(ivs, ebgraph, m_nComp); // Left undefined because full flux is applied in applyEBFlux
 
-    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
+    VoFIterator& singlePhaseVofs = m_jumpBC->getSinglePhaseVofs(m_phase, dit());
+
+    for (singlePhaseVofs.reset(); singlePhaseVofs.ok(); ++singlePhaseVofs){
+      const VolIndex& vof = singlePhaseVofs();
       const Real areaFrac = ebisbox.bndryArea(vof);
       const Real B        = Bcoef(vof, m_comp);
 
@@ -125,13 +115,12 @@ void MFHelmholtzDirichletEBBC::define() {
   }
 }
 
-void MFHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&       a_singlePhaseVofs,
-					   VoFIterator&       a_multiPhaseVofs,
-					   EBCellFAB&         a_Lphi,
-					   const EBCellFAB&   a_phi,
-					   const DataIndex&   a_dit,
-					   const Real&        a_beta,
-					   const bool&        a_homogeneousPhysBC) const {
+void MFHelmholtzDirichletEBBC::applyEBFluxSinglePhase(VoFIterator&     a_singlePhaseVofs,
+						      EBCellFAB&       a_Lphi,
+						      const EBCellFAB& a_phi,
+						      const DataIndex& a_dit,
+						      const Real&      a_beta,
+						      const bool&      a_homogeneousPhysBC) const {
   // Apply the stencil for computing the contribution to kappaDivF. Note divF is sum(faces) B*grad(Phi)/dx and that this
   // is the contribution from the EB face. B/dx is already included in the stencils and boundary weights, but beta is not.
 
@@ -140,7 +129,7 @@ void MFHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&       a_singlePhaseVofs,
     const VolIndex& vof = a_singlePhaseVofs();
 
     // Homogeneous contribution
-    a_Lphi(vof, m_comp) += a_beta*this->applyStencil(m_gradStencils[a_dit](vof, m_comp), a_phi);
+    a_Lphi(vof, m_comp) += a_beta*this->applyStencil(m_boundaryStencils[a_dit](vof, m_comp), a_phi);
 
     // Inhomogeneous contribution. 
     if(!a_homogeneousPhysBC){
@@ -157,44 +146,10 @@ void MFHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&       a_singlePhaseVofs,
       a_Lphi(vof, m_comp) += a_beta*value*m_boundaryWeights[a_dit](vof, m_comp);
     }
   }
-
-  // Do multi-phasephase cells. 
-  for(a_multiPhaseVofs.reset(); a_multiPhaseVofs.ok(); ++a_multiPhaseVofs){
-    const VolIndex& vof = a_multiPhaseVofs();
-
-    const Real phiB = m_jumpBC->getBndryPhi(m_phase, a_dit)(vof, m_comp);
-
-    // Homogeneous contribution
-    a_Lphi(vof, m_comp) += a_beta*this->applyStencil(m_gradStencils[a_dit](vof, m_comp), a_phi);
-    a_Lphi(vof, m_comp) += a_beta*phiB*m_boundaryWeights[a_dit](vof, m_comp);
-  }
   
   return;
 }
 
-bool MFHelmholtzDirichletEBBC::getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFStencil>& a_stencil,
-								  const VolIndex&              a_vof,
-								  const VofUtils::Neighborhood a_neighborhood,
-								  const DataIndex&             a_dit,
-								  const int                    a_order) const {
-  bool foundStencil = false;
-  
-  const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
-  const RealVect normal  = ebisbox.normal(a_vof);  
-    
-  const VoFStencil gradientStencil = LeastSquares::getBndryGradSten(a_vof, a_neighborhood, ebisbox, m_dx, a_order, m_weight, a_order);
 
-  if(gradientStencil.size() > 0 && normal != RealVect::Zero){
-    
-    const VoFStencil DphiDnStencil =  LeastSquares::projectGradSten(gradientStencil, -normal);
-    const Real boundaryWeight      = -LeastSquares::sumAllWeights(DphiDnStencil);
-
-    a_stencil = std::make_pair(boundaryWeight, DphiDnStencil);
-
-    foundStencil = true;
-  }
-
-  return foundStencil;
-}
 
 #include <CD_NamespaceFooter.H>
