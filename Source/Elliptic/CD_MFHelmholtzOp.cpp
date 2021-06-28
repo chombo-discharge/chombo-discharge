@@ -446,7 +446,7 @@ void MFHelmholtzOp::updateJumpBC(const LevelData<MFCellFAB>& a_phi, const bool a
   LevelData<MFCellFAB>& phi = (LevelData<MFCellFAB>&) a_phi;
   phi.exchange();
   
-  //  m_jumpBC->matchBC(a_phi, *m_jump, a_homogeneousPhysBC);
+  m_jumpBC->matchBC(a_phi, *m_jump, a_homogeneousPhysBC);
 }
 
 void MFHelmholtzOp::relax(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_residual, int a_iterations) {
@@ -747,12 +747,14 @@ void MFHelmholtzOp::AMROperator(LevelData<MFCellFAB>&              a_Lphi,
 				const bool                         a_homogeneousPhysBC,
 				AMRLevelOp<LevelData<MFCellFAB> >* a_finerOp) {
   CH_TIME("MFHelmholtzOp::AMROperator");
-  
+
   // Update ghost cells and jump conditions first. Doing an exchange is not sufficient here because
   // the jump stencils might reach over CFs. 
   this->interpolateCF(a_phi, &a_phiCoar, false);
   this->updateJumpBC(a_phi, a_homogeneousPhysBC);
 
+  // Note: This could by optimized by calling the kernel functions directly on each patch. I don't think this will
+  //       be a lifesaver, but could potentially squeeze out ~10% more performance. 
   for (auto& op : m_helmOps){
     LevelData<EBCellFAB> Lphi;
     LevelData<EBCellFAB> phiFine;
