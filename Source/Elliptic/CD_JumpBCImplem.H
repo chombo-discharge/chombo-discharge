@@ -107,7 +107,7 @@ void JumpBC::matchBC(const MFCellFAB&       a_phi,
     const Real& denomPhase1 = m_denom[a_dit].getIVFAB(secondPhase)(vof0, vofComp);
 
     // Compute the average jump.
-    Real jump = 0.0; // Jump not computed (yet)
+    Real jump = 0.0; 
     if(!a_homogeneousPhysBC){
       Vector<VolIndex> vofs = ebisBoxPhase0.getVoFs(iv);
       for (const auto& v : vofs.stdVector()) jump += a_jump(v, m_comp);
