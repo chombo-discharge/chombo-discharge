@@ -81,7 +81,7 @@ ProxyFieldSolver.botsolver  = bicgstab    # 'simple' or 'bicgstab'
 ProxyFieldSolver.botsmooth  = 48          # Smoothings for bottom solver
 ProxyFieldSolver.relax      = 2           # Relaxation method
 ProxyFieldSolver.mg_tol     = 1.E-20      # Multigrid tolerance
-ProxyFieldSolver.min_cells  = 32          # Number of cells along the shortest coordinate in the bottom of multigrid.
+ProxyFieldSolver.min_cells  = 64          # Number of cells along the shortest coordinate in the bottom of multigrid.
 ProxyFieldSolver.plt_vars   = phi resid E rho # Plot variables
 
 # ====================================================================================================
