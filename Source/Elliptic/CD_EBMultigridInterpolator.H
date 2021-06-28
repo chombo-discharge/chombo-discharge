@@ -80,6 +80,11 @@ public:
   */
   void coarseFineInterpH(LevelData<EBCellFAB>& a_phiFine, const Interval a_variables);
 
+  /*!
+    @brief Do coarse-fine interpolation on a grid patch
+  */
+  void coarseFineInterpH(EBCellFAB& a_phiFine, const Interval a_variables, const DataIndex& a_dit);
+
 protected:
 
   /*!

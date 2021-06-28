@@ -46,9 +46,9 @@ public:
   ~MFMultigridInterpolator();
 
   /*!
-    @brief Disallowed copy assignment.
+    @brief Copy assignment
   */
-  MFMultigridInterpolator& operator=(const MFMultigridInterpolator& a_other) = default;
+  MFMultigridInterpolator& operator=(const MFMultigridInterpolator& a_other);
 
   /*!
     @brief Define function
@@ -58,7 +58,7 @@ public:
   /*!
     @brief Get interpolator for phase
   */
-  const RefCountedPtr<EBMultigridInterpolator>& getInterpolator(const int a_phase) const;
+  RefCountedPtr<EBMultigridInterpolator>& getInterpolator(const int a_phase) const;
 
   /*!
     @brief Get number of filled ghost cells

@@ -102,104 +102,105 @@ void EBMultigridInterpolator::coarseFineInterpH(LevelData<EBCellFAB>& a_phiFine,
   EBQuadCFInterp::interpolate(a_phiFine, m_zeroCoar, a_variables);
 #else // Much faster code
   for (DataIterator dit(m_eblgFine.getDBL()); dit.ok(); ++dit){
+    this->coarseFineInterpH(a_phiFine[dit()], a_variables, dit());
+  }
+#endif
+}
 
-    EBCellFAB& phi = a_phiFine[dit()];
+void EBMultigridInterpolator::coarseFineInterpH(EBCellFAB& a_phi, const Interval a_variables, const DataIndex& a_dit){
+  const Real m_dx     = 1.0;
+  const Real m_dxCoar = m_dx*m_refRat;
 
-    const Real m_dx     = 1.0;
-    const Real m_dxCoar = m_dx*m_refRat;
-    
-    for (int dir = 0; dir < SpaceDim; dir++){
-      for (SideIterator sit; sit.ok(); ++sit){
+  for (int dir = 0; dir < SpaceDim; dir++){
+    for (SideIterator sit; sit.ok(); ++sit){
 
-	const CFIVS* cfivsPtr = nullptr;
-	if(sit() == Side::Lo) {
-	  cfivsPtr = &m_loCFIVS[dir][dit()];
-	}
-	else{
-	  cfivsPtr = &m_hiCFIVS[dir][dit()];
-	}
+      const CFIVS* cfivsPtr = nullptr;
+      if(sit() == Side::Lo) {
+	cfivsPtr = &m_loCFIVS[dir][a_dit];
+      }
+      else{
+	cfivsPtr = &m_hiCFIVS[dir][a_dit];
+      }
 
-	const IntVectSet& ivs = cfivsPtr->getFineIVS();
-	if (cfivsPtr->isPacked() ){
-	  const int ihiorlo = sign(sit());
-	  FORT_INTERPHOMO(CHF_FRA(phi.getSingleValuedFAB()),
-			  CHF_BOX(cfivsPtr->packedBox()),
-			  CHF_CONST_REAL(m_dx),
-			  CHF_CONST_REAL(m_dxCoar),
-			  CHF_CONST_INT(dir),
-			  CHF_CONST_INT(ihiorlo));
-	}
-	else {
-	  if(!ivs.isEmpty()){
+      const IntVectSet& ivs = cfivsPtr->getFineIVS();
+      if (cfivsPtr->isPacked() ){
+	const int ihiorlo = sign(sit());
+	FORT_INTERPHOMO(CHF_FRA(a_phi.getSingleValuedFAB()),
+			CHF_BOX(cfivsPtr->packedBox()),
+			CHF_CONST_REAL(m_dx),
+			CHF_CONST_REAL(m_dxCoar),
+			CHF_CONST_INT(dir),
+			CHF_CONST_INT(ihiorlo));
+      }
+      else {
+	if(!ivs.isEmpty()){
 	  
-	    Real halfdxcoar = m_dxCoar/2.0;
-	    Real halfdxfine = m_dx/2.0;
-	    Real xg = halfdxcoar -   halfdxfine;
-	    Real xc = halfdxcoar +   halfdxfine;
-	    Real xf = halfdxcoar + 3*halfdxfine;
-	    Real hf = m_dx;
-	    Real denom = xf*xc*hf;
+	  Real halfdxcoar = m_dxCoar/2.0;
+	  Real halfdxfine = m_dx/2.0;
+	  Real xg = halfdxcoar -   halfdxfine;
+	  Real xc = halfdxcoar +   halfdxfine;
+	  Real xf = halfdxcoar + 3*halfdxfine;
+	  Real hf = m_dx;
+	  Real denom = xf*xc*hf;
 
-	    const EBISBox& ebisBox = m_eblgFine.getEBISL()[dit()];
-	    const EBGraph& ebgraph = ebisBox.getEBGraph();
+	  const EBISBox& ebisBox = m_eblgFine.getEBISL()[a_dit];
+	  const EBGraph& ebgraph = ebisBox.getEBGraph();
 	      
-	    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	      const VolIndex& VoFGhost = vofit();
+	  for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	    const VolIndex& VoFGhost = vofit();
 
-	      IntVect ivGhost  = VoFGhost.gridIndex();
+	    IntVect ivGhost  = VoFGhost.gridIndex();
 
-	      Vector<VolIndex> farVoFs;
-	      Vector<VolIndex> closeVoFs = ebisBox.getVoFs(VoFGhost, dir, flip(sit()), 1);
+	    Vector<VolIndex> farVoFs;
+	    Vector<VolIndex> closeVoFs = ebisBox.getVoFs(VoFGhost, dir, flip(sit()), 1);
 	    
-	      bool hasClose = (closeVoFs.size() > 0);
-	      bool hasFar = false;
-	      Real phic = 0.0;
-	      Real phif = 0.0;
+	    bool hasClose = (closeVoFs.size() > 0);
+	    bool hasFar = false;
+	    Real phic = 0.0;
+	    Real phif = 0.0;
 	    
-	      if (hasClose){
-		const int& numClose = closeVoFs.size();
-		for (int iVof=0;iVof<numClose;iVof++){
-		  const VolIndex& vofClose = closeVoFs[iVof];
-		  phic += phi(vofClose,0);
+	    if (hasClose){
+	      const int& numClose = closeVoFs.size();
+	      for (int iVof=0;iVof<numClose;iVof++){
+		const VolIndex& vofClose = closeVoFs[iVof];
+		phic += a_phi(vofClose,0);
+	      }
+	      phic /= Real(numClose);
+
+	      farVoFs = ebisBox.getVoFs(VoFGhost, dir, flip(sit()), 2);
+	      hasFar   = (farVoFs.size()   > 0);
+	      if (hasFar){
+		const int& numFar = farVoFs.size();
+		for (int iVof=0;iVof<numFar;iVof++){
+		  const VolIndex& vofFar = farVoFs[iVof];
+		  phif += a_phi(vofFar,0);
 		}
-		phic /= Real(numClose);
-
-		farVoFs = ebisBox.getVoFs(VoFGhost, dir, flip(sit()), 2);
-		hasFar   = (farVoFs.size()   > 0);
-		if (hasFar){
-		  const int& numFar = farVoFs.size();
-		  for (int iVof=0;iVof<numFar;iVof++){
-		    const VolIndex& vofFar = farVoFs[iVof];
-		    phif += phi(vofFar,0);
-		  }
-		  phif /= Real(numFar);
-		}
+		phif /= Real(numFar);
 	      }
-
-	      Real phiGhost;
-	      if (hasClose && hasFar){
-		// quadratic interpolation  phi = ax^2 + bx + c
-		Real A = (phif*xc - phic*xf)/denom;
-		Real B = (phic*hf*xf - phif*xc*xc + phic*xf*xc)/denom;
-
-		phiGhost = A*xg*xg + B*xg;
-	      }
-	      else if (hasClose){
-		//linear interpolation
-		Real slope =  phic/xc;
-		phiGhost   =  slope*xg;
-	      }
-	      else{
-		phiGhost = 0.0; //nothing to interpolate from
-	      }
-	      phi(VoFGhost, 0) = phiGhost;
 	    }
+
+	    Real phiGhost;
+	    if (hasClose && hasFar){
+	      // quadratic interpolation  phi = ax^2 + bx + c
+	      Real A = (phif*xc - phic*xf)/denom;
+	      Real B = (phic*hf*xf - phif*xc*xc + phic*xf*xc)/denom;
+
+	      phiGhost = A*xg*xg + B*xg;
+	    }
+	    else if (hasClose){
+	      //linear interpolation
+	      Real slope =  phic/xc;
+	      phiGhost   =  slope*xg;
+	    }
+	    else{
+	      phiGhost = 0.0; //nothing to interpolate from
+	    }
+	    a_phi(VoFGhost, 0) = phiGhost;
 	  }
 	}
       }
     }
   }
-#endif
 }
 
 #include <CD_NamespaceFooter.H>

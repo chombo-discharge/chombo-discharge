@@ -34,8 +34,6 @@
 class MFHelmholtzOp : public AMRLevelOp<LevelData<MFCellFAB> > {
 public:
 
-  Real tAlias;
-
   /*!
     @brief Relaxation methods for this operator
   */
@@ -430,6 +428,11 @@ protected:
     @brief Coarse multigrid-grid
   */
   MFLevelGrid m_mflgCoarMG;
+
+  /*!
+    @brief Multi grid interpolator
+  */
+  MFMultigridInterpolator m_interpolator;
 
   /*!
     @brief Multifluid operator or not. 

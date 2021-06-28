@@ -64,13 +64,17 @@ MFHelmholtzOp::MFHelmholtzOp(const MFLevelGrid&                               a_
   m_hasMGObjects = a_hasMGObjects;
   m_refToCoar    = a_refToCoar;
   m_relaxType    = a_relaxType;
+  m_hasCoar      = false;
 
   if(a_hasCoar){
+    m_hasCoar   = true;
     m_refToCoar = a_refToCoar;
     m_mflgCoFi  = a_mflgCoFi;
     m_mflgCoar  = a_mflgCoar;
   }
 
+  m_interpolator = a_interpolator;
+  
   if(m_hasMGObjects){
     m_mflgCoarMG   = a_mflgCoarMG;
   }
@@ -169,13 +173,10 @@ MFHelmholtzOp::MFHelmholtzOp(const MFLevelGrid&                               a_
 
     m_helmOps.emplace(iphase, oper);
   }
-
-  tAlias = 0.0;
 }
 
 MFHelmholtzOp::~MFHelmholtzOp(){
   CH_TIME("MFHelmholtzOp::~MFHelmholtzOp");
-  if(procID() == 0) std::cout << "total aliasing time = " << tAlias << "\n";
 }
 
 void MFHelmholtzOp::setJump(const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_jump){
@@ -199,10 +200,8 @@ void MFHelmholtzOp::enforceCFConsistency(LevelData<MFCellFAB>& a_coarCorr, const
     LevelData<EBCellFAB> coarCorr;
     LevelData<EBCellFAB> fineCorr;
 
-    tAlias -= MPI_Wtime();
     MultifluidAlias::aliasMF(coarCorr, op.first, a_coarCorr);
     MultifluidAlias::aliasMF(fineCorr, op.first, a_fineCorr);
-    tAlias += MPI_Wtime();
 
     op.second->enforceCFConsistency(coarCorr, fineCorr);
   }
@@ -239,10 +238,8 @@ void MFHelmholtzOp::assign(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFA
     LevelData<EBCellFAB> lhs;
     LevelData<EBCellFAB> rhs;
     
-    tAlias -= MPI_Wtime();
     MultifluidAlias::aliasMF(lhs, op.first, a_lhs);
     MultifluidAlias::aliasMF(rhs, op.first, a_rhs);
-    tAlias += MPI_Wtime();
 
     op.second->assign(lhs, rhs);
   }
@@ -256,9 +253,7 @@ Real MFHelmholtzOp::norm(const LevelData<MFCellFAB>& a_lhs, int a_order){
   for (auto& op : m_helmOps){
     LevelData<EBCellFAB> lhs;
 
-    tAlias -= MPI_Wtime();
     MultifluidAlias::aliasMF(lhs, op.first, a_lhs);
-    tAlias += MPI_Wtime();
 
     const Real curNorm = op.second->norm(lhs, a_order); 
     norm = std::max(norm, curNorm);
@@ -360,10 +355,8 @@ void MFHelmholtzOp::preCond(LevelData<MFCellFAB>& a_corr, const LevelData<MFCell
     LevelData<EBCellFAB> corr;
     LevelData<EBCellFAB> resi;
 
-    tAlias -= MPI_Wtime();    
     MultifluidAlias::aliasMF(corr, op.first, a_corr);
     MultifluidAlias::aliasMF(resi, op.first, a_residual);
-    tAlias += MPI_Wtime();    
 
     op.second->preCond(corr, resi);
   }
@@ -408,25 +401,31 @@ void MFHelmholtzOp::applyOp(LevelData<MFCellFAB>&             a_Lphi,
 void MFHelmholtzOp::interpolateCF(const LevelData<MFCellFAB>& a_phi, const LevelData<MFCellFAB>* a_phiCoar, const bool a_homogeneousCF){
   CH_TIME("MFHelmholtzOp::interpolateCF");
 
-  for (auto& op : m_helmOps){
-    LevelData<EBCellFAB> phi;
-    LevelData<EBCellFAB> phiCoar;
-      
-    if(a_homogeneousCF){
-      tAlias -= MPI_Wtime();    
-      MultifluidAlias::aliasMF(phi, op.first, (LevelData<MFCellFAB>&) a_phi);
-      tAlias += MPI_Wtime();    
+  if(m_hasCoar){ 
+    if(a_homogeneousCF){ // The homogeneous version will be called on every relaxation so we use a format which avoid having to alias data (which can be expensive). 
+      for (DataIterator dit = a_phi.dataIterator(); dit.ok(); ++dit){
+	for (auto& op : m_helmOps){
+	  const int iphase = op.first;
+	
+	  RefCountedPtr<EBMultigridInterpolator>& phaseInterpolator = m_interpolator.getInterpolator(iphase);
 
-      op.second->homogeneousCFInterp(phi);
+	  EBCellFAB& phi = (EBCellFAB&) a_phi[dit()].getPhase(iphase);
+	  
+	  phaseInterpolator->coarseFineInterpH(phi, Interval(0,0), dit());
+	}
+      }
     }
-    else{
-      if(a_phiCoar == nullptr) MayDay::Error("MFHelmholtzOp::interpolateCF -- calling inhomogeneousCFInterp with nullptr coarse is an error.");
-      tAlias -= MPI_Wtime();    
-      MultifluidAlias::aliasMF(phi,     op.first,  (LevelData<MFCellFAB>&) a_phi);
-      MultifluidAlias::aliasMF(phiCoar, op.first, *a_phiCoar);
-      tAlias += MPI_Wtime();    
+    else{ // Inhomogeneous coarse-fine is not called as often, so performance is not critical here. 
+      for (auto& op : m_helmOps){
+	LevelData<EBCellFAB> phi;
+	LevelData<EBCellFAB> phiCoar;
+      
+	if(a_phiCoar == nullptr) MayDay::Error("MFHelmholtzOp::interpolateCF -- calling inhomogeneousCFInterp with nullptr coarse is an error.");
+	MultifluidAlias::aliasMF(phi,     op.first,  (LevelData<MFCellFAB>&) a_phi);
+	MultifluidAlias::aliasMF(phiCoar, op.first, *a_phiCoar);
 
-      op.second->inhomogeneousCFInterp(phi, phiCoar);
+	op.second->inhomogeneousCFInterp(phi, phiCoar);
+      }
     }
   }
 }
@@ -448,11 +447,9 @@ void MFHelmholtzOp::axby(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>
     LevelData<EBCellFAB> x;
     LevelData<EBCellFAB> y;
 
-    tAlias -= MPI_Wtime();    
     MultifluidAlias::aliasMF(lhs, op.first, a_lhs);
     MultifluidAlias::aliasMF(x,   op.first, a_x);
     MultifluidAlias::aliasMF(y,   op.first, a_y);
-    tAlias += MPI_Wtime();    
 
     op.second->axby(lhs, x, y, a, b);
   }
@@ -584,11 +581,9 @@ void MFHelmholtzOp::restrictResidual(LevelData<MFCellFAB>& a_resCoar, LevelData<
     LevelData<EBCellFAB> phi;
     LevelData<EBCellFAB> rhs;
 
-    tAlias -= MPI_Wtime();    
     MultifluidAlias::aliasMF(resCoar, op.first, a_resCoar);
     MultifluidAlias::aliasMF(phi,     op.first, a_phi);
     MultifluidAlias::aliasMF(rhs,     op.first, a_rhs);
-    tAlias += MPI_Wtime();    
 
     op.second->restrictResidual(resCoar, phi, rhs);
   }
@@ -601,10 +596,8 @@ void MFHelmholtzOp::prolongIncrement(LevelData<MFCellFAB>& a_phi, const LevelDat
     LevelData<EBCellFAB> phi;
     LevelData<EBCellFAB> correctCoarse;
 
-    tAlias -= MPI_Wtime();    
     MultifluidAlias::aliasMF(phi,           op.first, a_phi);
     MultifluidAlias::aliasMF(correctCoarse, op.first, a_correctCoarse);
-    tAlias += MPI_Wtime();    
 
     op.second->prolongIncrement(phi, correctCoarse);
   }
@@ -623,11 +616,9 @@ void MFHelmholtzOp::AMRUpdateResidual(LevelData<MFCellFAB>&       a_residual,
     LevelData<EBCellFAB> correction;
     LevelData<EBCellFAB> coarseCorrection;
 
-    tAlias -= MPI_Wtime();    
     MultifluidAlias::aliasMF(residual,         op.first, a_residual);
     MultifluidAlias::aliasMF(correction,       op.first, a_correction);
     MultifluidAlias::aliasMF(coarseCorrection, op.first, a_coarseCorrection);
-    tAlias += MPI_Wtime();    
 
     op.second->AMRUpdateResidual(residual, correction, coarseCorrection);
   }
@@ -646,12 +637,10 @@ void MFHelmholtzOp::AMRRestrict(LevelData<MFCellFAB>&       a_residualCoarse,
     LevelData<EBCellFAB> correction;
     LevelData<EBCellFAB> coarseCorrection;
 
-    tAlias -= MPI_Wtime();    
     MultifluidAlias::aliasMF(residualCoarse,   op.first, a_residualCoarse);
     MultifluidAlias::aliasMF(residual,         op.first, a_residual);
     MultifluidAlias::aliasMF(correction,       op.first, a_correction);
     MultifluidAlias::aliasMF(coarseCorrection, op.first, a_coarseCorrection);
-    tAlias += MPI_Wtime();    
 
     op.second->AMRRestrict(residualCoarse, residual, correction, coarseCorrection, a_skip_res);
   }
@@ -664,10 +653,8 @@ void MFHelmholtzOp::AMRProlong(LevelData<MFCellFAB>& a_correction, const LevelDa
     LevelData<EBCellFAB> correction;
     LevelData<EBCellFAB> coarseCorrection;
 
-    tAlias -= MPI_Wtime();    
     MultifluidAlias::aliasMF(correction,       op.first, a_correction);
     MultifluidAlias::aliasMF(coarseCorrection, op.first, a_coarseCorrection);
-    tAlias += MPI_Wtime();    
 
     op.second->AMRProlong(correction, coarseCorrection);
   }
@@ -733,11 +720,9 @@ void MFHelmholtzOp::AMROperatorNF(LevelData<MFCellFAB>&       a_Lphi,
     LevelData<EBCellFAB> phi;
     LevelData<EBCellFAB> phiCoar;
 
-    tAlias -= MPI_Wtime();    
     MultifluidAlias::aliasMF(Lphi,    op.first, a_Lphi);
     MultifluidAlias::aliasMF(phi,     op.first, a_phi);
     MultifluidAlias::aliasMF(phiCoar, op.first, a_phiCoar);
-    tAlias += MPI_Wtime();    
 
     op.second->turnOffBCs(); // Don't need to interpolate ghost cells again. 
     op.second->AMROperatorNF(Lphi, phi, phiCoar, a_homogeneousPhysBC);
@@ -760,11 +745,9 @@ void MFHelmholtzOp::AMROperatorNC(LevelData<MFCellFAB>&              a_Lphi,
     LevelData<EBCellFAB> phiFine;
     LevelData<EBCellFAB> phi;
 
-    tAlias -= MPI_Wtime();    
     MultifluidAlias::aliasMF(Lphi,    op.first, a_Lphi   );
     MultifluidAlias::aliasMF(phiFine, op.first, a_phiFine);
     MultifluidAlias::aliasMF(phi,     op.first, a_phi    );
-    tAlias += MPI_Wtime();    
 
     MFHelmholtzOp* finerOp = (MFHelmholtzOp*) (a_finerOp);
 
@@ -793,12 +776,10 @@ void MFHelmholtzOp::AMROperator(LevelData<MFCellFAB>&              a_Lphi,
     LevelData<EBCellFAB> phi;
     LevelData<EBCellFAB> phiCoar;
 
-    tAlias -= MPI_Wtime();
     MultifluidAlias::aliasMF(Lphi,    op.first, a_Lphi);
     MultifluidAlias::aliasMF(phiFine, op.first, a_phiFine);
     MultifluidAlias::aliasMF(phi,     op.first, a_phi);
     MultifluidAlias::aliasMF(phiCoar, op.first, a_phiCoar);
-    tAlias += MPI_Wtime();
 
     MFHelmholtzOp* finerOp = (MFHelmholtzOp*) (a_finerOp);
 

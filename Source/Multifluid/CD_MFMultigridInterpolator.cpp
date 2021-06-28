@@ -25,11 +25,15 @@ MFMultigridInterpolator::~MFMultigridInterpolator(){
 
 }
 
+MFMultigridInterpolator& MFMultigridInterpolator::operator=(const MFMultigridInterpolator& a_other){
+  m_interpolators = a_other.m_interpolators;
+}
+
 void MFMultigridInterpolator::define(const Vector<RefCountedPtr<EBMultigridInterpolator> >& a_interpolators){
   m_interpolators = a_interpolators;
 }
 
-const RefCountedPtr<EBMultigridInterpolator>& MFMultigridInterpolator::getInterpolator(const int a_phase) const {
+RefCountedPtr<EBMultigridInterpolator>& MFMultigridInterpolator::getInterpolator(const int a_phase) const {
   return m_interpolators[a_phase];
 }
 
