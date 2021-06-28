@@ -556,7 +556,10 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
   multigridSolver.m_verbosity=10;
   multigridSolver.init(phi, rhs, finestLevel, 0);
   multigridSolver.m_convergenceMetric = multigridSolver.computeAMRResidual(zer, rhs, finestLevel, baseLevel);
+  Real t1 = -MPI_Wtime();
   multigridSolver.solveNoInit(phi, rhs, finestLevel, baseLevel, false);
+  t1 += MPI_Wtime();
+  if(procID() == 0) std::cout << "Multigrid solve time for Helm = " << t1 << std::endl;
 }
 
 void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,

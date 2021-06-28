@@ -34,6 +34,8 @@
 class MFHelmholtzOp : public AMRLevelOp<LevelData<MFCellFAB> > {
 public:
 
+  Real tAlias;
+
   /*!
     @brief Relaxation methods for this operator
   */
