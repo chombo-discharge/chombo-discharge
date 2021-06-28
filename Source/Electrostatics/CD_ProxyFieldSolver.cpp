@@ -563,7 +563,9 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
 			       const MFAMRCellData& a_rho,
 			       const EBAMRIVData&   a_sigma,
 			       const bool           a_zerophi){
-
+  const RefCountedPtr<EBIndexSpace>& ebisGas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
+  const RefCountedPtr<EBIndexSpace>& ebisSol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
+  
   ParmParse pp("ProxyFieldSolver");
   ParmParse pp2("RodDielectric");
   
@@ -592,24 +594,24 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
   DataOps::setValue(Bco,      bco);
   DataOps::setValue(BcoIrreg, bco);
 
-  EBAMRFluxData B2    = m_amr->alias(phase::solid, Bco);
-  EBAMRIVData   B2Irr = m_amr->alias(phase::solid, BcoIrreg);
+  if(!ebisSol.isNull()){
+    EBAMRFluxData B2    = m_amr->alias(phase::solid, Bco);
+    EBAMRIVData   B2Irr = m_amr->alias(phase::solid, BcoIrreg);
+    
+    pp2.get("dielectric.permittivity", perm);
 
-  pp2.get("dielectric.permittivity", perm);
-
-  DataOps::setValue(B2,    perm);
-  DataOps::setValue(B2Irr, perm);
+    DataOps::setValue(B2,    perm);
+    DataOps::setValue(B2Irr, perm);
+  }
 
   const int numPhases = m_multifluidIndexSpace->numPhases();
+
 
   const int finestLevel = m_amr->getFinestLevel();
   Vector<MFLevelGrid>             mflg(1 + finestLevel);
   Vector<MFMultigridInterpolator> mfInterp(1 + finestLevel);
   Vector<MFFluxReg>               mfFluxReg(1 + finestLevel);
   Vector<MFCoarAve>               mfCoarAve(1 + finestLevel);
-
-  const RefCountedPtr<EBIndexSpace>& ebisGas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
-  const RefCountedPtr<EBIndexSpace>& ebisSol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
 
   for (int lvl = 0; lvl <= finestLevel; lvl++){
     Vector<EBLevelGrid>                    eblgPhases(numPhases);
@@ -641,7 +643,7 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
   Real        eb_value;
   Real        dom_value;
   std::string str;
-  
+
   RefCountedPtr<MFHelmholtzEBBCFactory> ebbcFactory;
   RefCountedPtr<MFHelmholtzDomainBCFactory> domainBcFactory;
 
@@ -743,7 +745,7 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
 
   pp.get("jump_order",  jumpOrder);
   pp.get("jump_weight", jumpWeight);
-				   
+
   MFHelmholtzOpFactory* fact = new MFHelmholtzOpFactory(m_multifluidIndexSpace,
 							alpha,
 							beta,
