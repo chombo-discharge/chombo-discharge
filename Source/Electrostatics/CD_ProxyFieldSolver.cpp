@@ -40,6 +40,7 @@
 // Includes for MFHelmholtzOpFactory
 #include <CD_MFHelmholtzDirichletEBBCFactory.H>
 #include <CD_MFHelmholtzNeumannEBBCFactory.H>
+#include <CD_MFHelmholtzRobinEBBCFactory.H>
 #include <CD_MFHelmholtzDirichletDomainBCFactory.H>
 #include <CD_MFHelmholtzNeumannDomainBCFactory.H>
 #include <CD_MFHelmholtzRobinDomainBCFactory.H>
@@ -648,8 +649,8 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
   pp.get("eb_bc", str);
   if(str == "dirichlet"){
     pp.get("eb_order",  eb_order);
-    pp.get("eb_val",    eb_value);
     pp.get("eb_weight", eb_weight);
+    pp.get("eb_val",    eb_value);
 
     ebbcFactory = RefCountedPtr<MFHelmholtzEBBCFactory> (new MFHelmholtzDirichletEBBCFactory(eb_order, eb_weight, eb_value));
 
@@ -658,20 +659,24 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
   }
   else if(str == "neumann"){
     pp.get("eb_order",  eb_order);
-    pp.get("eb_val",    eb_value);
     pp.get("eb_weight", eb_weight);
+    pp.get("eb_val",    eb_value);
 
     ebbcFactory = RefCountedPtr<MFHelmholtzEBBCFactory> (new MFHelmholtzNeumannEBBCFactory(eb_order, eb_weight, eb_value));
   }
   else if(str == "robin"){
-    pp.get("eb_val", eb_value);
+    pp.get("eb_order",  eb_order);
+    pp.get("eb_weight", eb_weight);
+    pp.get("eb_val",    eb_value);
+
+
 
     // Coefficients for radiative transfer with Robin. 
     const Real A =  1.5*eb_value;
     const Real B = -1.0*eb_value;
     const Real C =  0.0;
 
-    MayDay::Abort("ProxyFieldSolver::solveMF - Robin EB BCs not supported (yet)");
+    ebbcFactory = RefCountedPtr<MFHelmholtzEBBCFactory> (new MFHelmholtzRobinEBBCFactory(eb_order, eb_weight, A, B, C));
   }
   else{
     MayDay::Error("ProxyFieldSolver::solveEBCond - uknown EBBC factory requested");
