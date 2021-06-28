@@ -209,10 +209,24 @@ public:
   void applyOp(LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_phi, bool a_homogeneousPhysBc) override final;
 
   /*!
-    @brief Apply operator in regular cells.
-    @param[in]
+    @brief Apply operator in a grid box. 
+    @param[out] a_Lphi              L(phi)
+    @param[in]  a_phi               Phi
+    @param[in]  a_cellBox           Grid box
+    @param[in]  a_dit               Data indxe
+    @param[in]  a_homogeneousPhysBC Homogeneous physical BCs or not
   */
-  void applyOpRegular(EBCellFAB& a_Lphi, EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBc);
+  void applyOp(EBCellFAB& a_Lphi, EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBC);
+
+  /*!
+    @brief Apply operator in regular cells.
+    @param[out] a_Lphi              L(phi)
+    @param[in]  a_phi               Phi
+    @param[in]  a_cellBox           Grid box
+    @param[in]  a_dit               Data indxe
+    @param[in]  a_homogeneousPhysBC Homogeneous physical BCs or not
+  */
+  void applyOpRegular(EBCellFAB& a_Lphi, EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBC);
 
   /*!
     @brief Apply domain flux. 

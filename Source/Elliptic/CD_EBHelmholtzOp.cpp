@@ -546,10 +546,24 @@ void EBHelmholtzOp::applyOp(LevelData<EBCellFAB>&             a_Lphi,
   const DisjointBoxLayout& dbl = a_Lphi.disjointBoxLayout();
   for (DataIterator dit(dbl); dit.ok(); ++dit){
     const Box cellBox = dbl[dit()];
-    
+
+
     // Now do the terms with beta*phi
+#if 0
     this->applyOpRegular(  a_Lphi[dit()], phi[dit()], cellBox, dit(), a_homogeneousPhysBC);
     this->applyOpIrregular(a_Lphi[dit()], phi[dit()], cellBox, dit(), a_homogeneousPhysBC); // Overwrites result in irregular cells.
+#else
+    this->applyOp(a_Lphi[dit()], phi[dit()], cellBox, dit(), a_homogeneousPhysBC);
+#endif
+  }
+}
+
+void EBHelmholtzOp::applyOp(EBCellFAB& a_Lphi, EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBC){
+  const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
+
+  if(!ebisbox.isAllCovered()){
+    this->applyOpRegular  (a_Lphi, a_phi, a_cellBox, a_dit, a_homogeneousPhysBC);
+    this->applyOpIrregular(a_Lphi, a_phi, a_cellBox, a_dit, a_homogeneousPhysBC);
   }
 }
 

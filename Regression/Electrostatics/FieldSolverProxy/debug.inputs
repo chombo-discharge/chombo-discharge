@@ -68,7 +68,7 @@ ProxyFieldSolver.beta       = -1.0        # Beta
 ProxyFieldSolver.aco        = 1.0         # A-coefficient
 ProxyFieldSolver.bco        = 1.0         # B-coefficient	
 ProxyFieldSolver.solver     = helm        # Our solver ('helmholtz') or ebconductivity op 'ebcond'
-ProxyFieldSolver.eb_bc      = robin   # 'dirichlet', 'neumann', or 'robin'
+ProxyFieldSolver.eb_bc      = dirichlet   # 'dirichlet', 'neumann', or 'robin'
 ProxyFieldSolver.domain_bc  = dirichlet   # 'dirichlet', 'neumann', or 'robin'
 ProxyFieldSolver.eb_order   = 2           # BC order on EB (only for Dirichlet)
 ProxyFieldSolver.eb_weight  = 2           # Weighting for least squares (only for helm)
@@ -128,7 +128,7 @@ RodDielectric.perlin_box.noise_reseed   = false         # Reseed noise or not
 
 # Subsettings for sphere
 RodDielectric.sphere.center             = 0.5 -0.5      # Low corner
-RodDielectric.sphere.radius             = 0.25          # Radius
+RodDielectric.sphere.radius             = 0.15          # Radius
 
 
 # ====================================================================================================

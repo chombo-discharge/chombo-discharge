@@ -87,6 +87,18 @@ public:
 	       const bool                         a_homogeneousPhysBC) const;
 
   /*!
+    @brief Match the BC
+    @param[in] a_phi               Cell-centered data
+    @param[in] a_jump              Jump data, i.e. right-hand side of dphi/dn + dphi/m = jump
+    @param[in] a_homogeneousPhysBC Homogeneous BC or not
+  */
+  inline
+  void matchBC(const MFCellFAB&       a_phi,
+	       const BaseIVFAB<Real>& a_jump,
+	       const bool             a_homogeneousPhysBC,
+	       const DataIndex&       a_dit) const;
+
+  /*!
     @brief Get phi on the boundary. 
     @param[in] a_phase Phase
     @param[in] a_dit   Grid index
@@ -241,17 +253,7 @@ protected:
   inline
   bool isStencilValidCF(const VoFStencil& a_stencil, const DataIndex& a_dit) const;
 
-  /*!
-    @brief Match the BC
-    @param[in] a_phi               Cell-centered data
-    @param[in] a_jump              Jump data, i.e. right-hand side of dphi/dn + dphi/m = jump
-    @param[in] a_homogeneousPhysBC Homogeneous BC or not
-  */
-  inline
-  void matchBC(const MFCellFAB&       a_phi,
-	       const BaseIVFAB<Real>& a_jump,
-	       const bool             a_homogeneousPhysBC,
-	       const DataIndex&       a_dit) const;
+
 
   /*!
     @brief Apply a stencil and return the result
