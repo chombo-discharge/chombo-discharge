@@ -464,7 +464,7 @@ void MFHelmholtzOp::updateJumpBC(const LevelData<MFCellFAB>& a_phi, const bool a
   LevelData<MFCellFAB>& phi = (LevelData<MFCellFAB>&) a_phi;
   phi.exchange();
   
-  //  m_jumpBC->matchBC(a_phi, *m_jump, a_homogeneousPhysBC);
+  m_jumpBC->matchBC(a_phi, *m_jump, a_homogeneousPhysBC);
 }
 
 void MFHelmholtzOp::relax(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_residual, int a_iterations) {
