@@ -511,9 +511,10 @@ void MFHelmholtzOp::relaxGSRedBlack(LevelData<MFCellFAB>& a_correction, const Le
     LevelData<EBCellFAB> resi;
 
     // Interpolate ghost cells and match the BC.
+
     for (int redBlack=0;redBlack<=1; redBlack++){
       this->interpolateCF(a_correction, nullptr, true);
-      this->updateJumpBC(a_correction, true);
+      this->updateJumpBC(a_correction, true);      
       
       // For red-black we get better results if we update the jump BC after every operator correction. 
       for(auto& op : m_helmOps){
@@ -539,10 +540,9 @@ void MFHelmholtzOp::relaxGSMultiColor(LevelData<MFCellFAB>& a_correction, const 
     LevelData<EBCellFAB> resi;
 
     // Interpolate ghost cells and match the BC.
-
+    this->updateJumpBC(a_correction, true);
     for (int icolor = 0; icolor < m_colors.size(); icolor++){
       this->interpolateCF(a_correction, nullptr, true);
-      this->updateJumpBC(a_correction, true);
 
       // Something simple, something true. 
       for(auto& op : m_helmOps){
@@ -594,7 +594,7 @@ void MFHelmholtzOp::AMRUpdateResidual(LevelData<MFCellFAB>&       a_residual,
   CH_TIME("MFHelmholtzOp::AMRUpdateResidual");
 
   // Need to update BC first!
-  this->updateJumpBC(a_correction, false);
+  this->updateJumpBC(a_correction, true);
 
   for (auto& op : m_helmOps){
     LevelData<EBCellFAB> residual;

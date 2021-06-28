@@ -108,7 +108,11 @@ void JumpBC::matchBC(const MFCellFAB&       a_phi,
 
     // Compute the average jump.
     Real jump = 0.0; // Jump not computed (yet)
-    // Vector<VolIndex> vofs = ebisBoxPhase0.getVofs(blablabla)
+    if(!a_homogeneousPhysBC){
+      Vector<VolIndex> vofs = ebisBoxPhase0.getVoFs(iv);
+      for (const auto& v : vofs.stdVector()) jump += a_jump(v, m_comp);
+      jump *= 1./vofs.size();
+    }
 
     // Do the matching
     const Real contribPhase0 = this->applyStencil(derivStenPhase0, phiPhase0);

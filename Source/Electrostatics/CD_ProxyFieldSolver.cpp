@@ -48,6 +48,7 @@
 #include <CD_MFLevelGrid.H>
 #include <CD_MFFluxReg.H>
 #include <CD_MFCoarAve.H>
+#include <CD_Units.H>
 
 // Old news
 #include <CD_RobinConductivityDomainBcFactory.H>
@@ -758,7 +759,9 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
 							jumpWeight,
 							m_amr->getMaxBoxSize());
 
-  fact->setJump(a_sigma, 0.0);
+  Real sigma;
+  pp.get("sigma", sigma);
+  fact->setJump(sigma, 1./Units::eps0);
 
   
   // Define the multigrid solver
