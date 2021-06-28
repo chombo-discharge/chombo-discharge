@@ -99,11 +99,6 @@ protected:
   std::function<Real(const RealVect& a_pos)> m_functionC;
 
   /*!
-    @brief Interpolation stencils
-  */
-  LayoutData<BaseIVFAB<VoFStencil> > m_interpolationStencils;
-
-  /*!
     @brief User define function. 
   */
   virtual void defineSinglePhase() override;

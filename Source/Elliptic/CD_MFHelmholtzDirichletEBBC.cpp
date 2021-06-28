@@ -45,9 +45,6 @@ void MFHelmholtzDirichletEBBC::defineSinglePhase() {
 
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
   const ProblemDomain& domain  = m_eblg.getDomain();
-  
-  m_boundaryWeights.define(dbl);
-  m_boundaryStencils.define(dbl);
 
   for (DataIterator dit(dbl); dit.ok(); ++dit){
     const Box box          = dbl[dit()];
@@ -56,12 +53,9 @@ void MFHelmholtzDirichletEBBC::defineSinglePhase() {
     const IntVectSet& ivs  = ebisbox.getIrregIVS(box);
 
     BaseIVFAB<Real>&       weights  = m_boundaryWeights [dit()];
-    BaseIVFAB<VoFStencil>& stencils = m_boundaryStencils[dit()];
-
+    BaseIVFAB<VoFStencil>& stencils = m_kappaDivFStencils[dit()];
+    
     const BaseIVFAB<Real>& Bcoef    = (*m_Bcoef)[dit()];
-
-    weights. define(ivs, ebgraph, m_nComp);
-    stencils.define(ivs, ebgraph, m_nComp);
 
     VoFIterator& singlePhaseVofs = m_jumpBC->getSinglePhaseVofs(m_phase, dit());
 
@@ -127,9 +121,6 @@ void MFHelmholtzDirichletEBBC::applyEBFluxSinglePhase(VoFIterator&     a_singleP
   // Do single phase cells
   for(a_singlePhaseVofs.reset(); a_singlePhaseVofs.ok(); ++a_singlePhaseVofs){
     const VolIndex& vof = a_singlePhaseVofs();
-
-    // Homogeneous contribution
-    a_Lphi(vof, m_comp) += a_beta*this->applyStencil(m_boundaryStencils[a_dit](vof, m_comp), a_phi);
 
     // Inhomogeneous contribution. 
     if(!a_homogeneousPhysBC){

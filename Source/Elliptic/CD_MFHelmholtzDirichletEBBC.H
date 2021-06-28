@@ -67,16 +67,6 @@ protected:
   std::function<Real(const RealVect& a_pos) > m_functionValue;
 
   /*!
-    @brief Boundary weights for stencil. 
-  */
-  LayoutData<BaseIVFAB<Real> > m_boundaryWeights;
-
-  /*!
-    @brief Boundary weights for stencil. 
-  */
-  LayoutData<BaseIVFAB<VoFStencil> > m_boundaryStencils;
-
-  /*!
     @brief User define function. 
   */
   virtual void defineSinglePhase() override;

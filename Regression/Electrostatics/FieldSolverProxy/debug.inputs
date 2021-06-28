@@ -68,7 +68,7 @@ ProxyFieldSolver.beta       = -1.0        # Beta
 ProxyFieldSolver.aco        = 1.0         # A-coefficient
 ProxyFieldSolver.bco        = 1.0         # B-coefficient	
 ProxyFieldSolver.solver     = helm        # Our solver ('helmholtz') or ebconductivity op 'ebcond'
-ProxyFieldSolver.eb_bc      = dirichlet   # 'dirichlet', 'neumann', or 'robin'
+ProxyFieldSolver.eb_bc      = robin   # 'dirichlet', 'neumann', or 'robin'
 ProxyFieldSolver.domain_bc  = dirichlet   # 'dirichlet', 'neumann', or 'robin'
 ProxyFieldSolver.eb_order   = 2           # BC order on EB (only for Dirichlet)
 ProxyFieldSolver.eb_weight  = 2           # Weighting for least squares (only for helm)
@@ -80,8 +80,8 @@ ProxyFieldSolver.smooth     = 16          # Smoothings
 ProxyFieldSolver.botsolver  = bicgstab    # 'simple' or 'bicgstab'
 ProxyFieldSolver.botsmooth  = 48          # Smoothings for bottom solver
 ProxyFieldSolver.relax      = 2           # Relaxation method
-ProxyFieldSolver.mg_tol     = 1.E-20      # Multigrid tolerance
-ProxyFieldSolver.min_cells  = 64          # Number of cells along the shortest coordinate in the bottom of multigrid.
+ProxyFieldSolver.mg_tol     = 1.E-10      # Multigrid tolerance
+ProxyFieldSolver.min_cells  = 32          # Number of cells along the shortest coordinate in the bottom of multigrid.
 ProxyFieldSolver.plt_vars   = phi resid E rho # Plot variables
 
 # ====================================================================================================
@@ -102,7 +102,7 @@ RodDielectric.electrode.endpoint2       =  0.5  0.5     # Other endpoint
 RodDielectric.electrode.radius          = 0.05          # Electrode radius
 RodDielectric.electrode.live            = true          # Live or not
 
-RodDielectric.dielectric.on             = true          # Use dielectric or not
+RodDielectric.dielectric.on             = false         # Use dielectric or not
 RodDielectric.dielectric.shape          = sphere        # 'plane', 'box', 'perlin_box', 'sphere'
 RodDielectric.dielectric.permittivity   = 1             # Dielectric permittivity
 

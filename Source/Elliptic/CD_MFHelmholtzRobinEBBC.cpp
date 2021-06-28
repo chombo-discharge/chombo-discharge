@@ -101,16 +101,15 @@ void MFHelmholtzRobinEBBC::defineSinglePhase() {
 
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
 
-  m_interpolationStencils.define(dbl);
-
   for (DataIterator dit(dbl); dit.ok(); ++dit){
     const Box box          = dbl[dit()];
     const EBISBox& ebisbox = m_eblg.getEBISL()[dit()];
     const EBGraph& ebgraph = ebisbox.getEBGraph();
     const IntVectSet& ivs  = ebisbox.getIrregIVS(box);
 
-    BaseIVFAB<VoFStencil>& stencils = m_interpolationStencils[dit()];
-    stencils.define(ivs, ebgraph, m_nComp);
+    BaseIVFAB<Real>&       weights  = m_boundaryWeights [dit()];
+    BaseIVFAB<VoFStencil>& stencils = m_kappaDivFStencils[dit()];
+    
 
     // Build interpolation stencils. 
     VoFIterator& singlePhaseVofs = m_jumpBC->getSinglePhaseVofs(m_phase, dit());
@@ -119,6 +118,7 @@ void MFHelmholtzRobinEBBC::defineSinglePhase() {
       const Real areaFrac = ebisbox.bndryArea(vof);
       const Real helmBco  = (*m_Bcoef)[dit()](vof, m_comp);
 
+      weights(vof,  m_comp) = 0.0;
       stencils(vof, m_comp) = this->getInterpolationStencil(vof, dit());
 
       Real A;
@@ -159,7 +159,7 @@ void MFHelmholtzRobinEBBC::applyEBFluxSinglePhase(VoFIterator&       a_singlePha
     const VolIndex& vof = a_singlePhaseVofs();
 
     // Homogeneous contribution
-    a_Lphi(vof, m_comp) += a_beta*this->applyStencil(m_interpolationStencils[a_dit](vof, m_comp), a_phi);
+    //    a_Lphi(vof, m_comp) += a_beta*this->applyStencil(m_interpolationStencils[a_dit](vof, m_comp), a_phi);
 
     // Inhomogeneous contribution
     if(!a_homogeneousPhysBC){

@@ -99,12 +99,7 @@ protected:
   /*!
     @brief Weights for matching cells.
   */
-  LayoutData<BaseIVFAB<Real> > m_matchingWeights;
-
-  /*!
-    @brief Stencils for matching cells
-  */
-  LayoutData<BaseIVFAB<VoFStencil> > m_matchingStencils;
+  LayoutData<BaseIVFAB<Real> > m_boundaryWeights;
 
   /*!
     @brief User define function. 

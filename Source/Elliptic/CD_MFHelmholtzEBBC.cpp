@@ -43,9 +43,8 @@ void MFHelmholtzEBBC::defineMultiPhase(){
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
   const ProblemDomain& domain  = m_eblg.getDomain();
 
+  m_boundaryWeights.  define(dbl);
   m_kappaDivFStencils.define(dbl);
-  m_matchingWeights.define(dbl);
-  m_matchingStencils.define(dbl);
 
   for (DataIterator dit(dbl); dit.ok(); ++dit){
     const Box box          = dbl[dit()];
@@ -53,11 +52,13 @@ void MFHelmholtzEBBC::defineMultiPhase(){
     const EBGraph& ebgraph = ebisbox.getEBGraph();
     const IntVectSet& ivs  = ebisbox.getIrregIVS(box);
     const BaseIVFAB<Real>& Bcoef    = (*m_Bcoef)[dit()];
+
+    // These are used to reconstruct gradients at the EB. They are left undefined for single-phase cells. 
+    m_boundaryWeights[dit()]  .define(ivs, ebgraph, m_nComp); 
+    m_kappaDivFStencils[dit()].define(ivs, ebgraph, m_nComp); 
     
-    m_kappaDivFStencils[dit()].define(ivs, ebgraph, m_nComp); // Left with empty stencils because full flux is applied in applyEBFlux. 
-    
-    BaseIVFAB<Real>&       weights  = m_matchingWeights  [dit()];
-    BaseIVFAB<VoFStencil>& stencils = m_matchingStencils[dit()];
+    BaseIVFAB<Real>&       weights  = m_boundaryWeights  [dit()];
+    BaseIVFAB<VoFStencil>& stencils = m_kappaDivFStencils[dit()];
 
     VoFIterator& multiPhaseVofs  = m_jumpBC->getMultiPhaseVofs(m_phase, dit());
 
@@ -141,11 +142,9 @@ void MFHelmholtzEBBC::applyEBFluxMultiPhase(VoFIterator&       a_multiPhaseVofs,
   for(a_multiPhaseVofs.reset(); a_multiPhaseVofs.ok(); ++a_multiPhaseVofs){
     const VolIndex& vof = a_multiPhaseVofs();
 
-    const Real phiB = m_jumpBC->getBndryPhi(m_phase, a_dit)(vof, m_comp);
-
     // Homogeneous contribution
-    a_Lphi(vof, m_comp) += a_beta*this->applyStencil(m_matchingStencils[a_dit](vof, m_comp), a_phi);
-    a_Lphi(vof, m_comp) += a_beta*phiB*m_matchingWeights[a_dit](vof, m_comp);
+    const Real phiB = m_jumpBC->getBndryPhi(m_phase, a_dit)(vof, m_comp);
+    a_Lphi(vof, m_comp) += a_beta*phiB*m_boundaryWeights[a_dit](vof, m_comp);
   }
   
   return;
