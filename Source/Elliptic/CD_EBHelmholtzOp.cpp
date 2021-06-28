@@ -329,7 +329,7 @@ void EBHelmholtzOp::preCond(LevelData<EBCellFAB>& a_corr, const LevelData<EBCell
   EBLevelDataOps::assign(a_corr, a_residual);
   EBLevelDataOps::scale(a_corr,  m_relCoef);
 
-  this->relax(a_corr, a_residual, 40);
+  //  this->relax(a_corr, a_residual, 40);
 }
 
 void EBHelmholtzOp::create(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) {

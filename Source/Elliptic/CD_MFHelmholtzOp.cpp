@@ -344,7 +344,7 @@ void MFHelmholtzOp::preCond(LevelData<MFCellFAB>& a_corr, const LevelData<MFCell
 #if 0
   this->relax(a_corr, a_residual, 40);
 #else
-  m_jumpBC->resetBC();
+  //  m_jumpBC->resetBC();
   
   for (auto& op : m_helmOps){
     LevelData<EBCellFAB> corr;
