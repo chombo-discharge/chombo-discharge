@@ -785,9 +785,9 @@ void EBHelmholtzOp::relaxPointJacobi(LevelData<EBCellFAB>& a_correction, const L
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
 
   for (int iter = 0; iter < a_iterations; iter++){
-    this->homogeneousCFInterp(a_correction);
-
     a_correction.exchange();
+
+    this->homogeneousCFInterp(a_correction);
 
     for (DataIterator dit(dbl); dit.ok(); ++dit){
       const Box cellBox = dbl[dit()];
@@ -812,39 +812,44 @@ void EBHelmholtzOp::relaxGSRedBlack(LevelData<EBCellFAB>& a_correction, const Le
   LevelData<EBCellFAB> Lcorr;
   this->create(Lcorr, a_residual);
 
+  const DisjointBoxLayout& dbl = m_eblg.getDBL();
+
   for (int iter = 0; iter < a_iterations; iter++){
     for (int redBlack = 0; redBlack <= 1; redBlack++){
+      a_correction.exchange();
+      
       this->homogeneousCFInterp(a_correction);
-      this->gauSaiRedBlackKernel(Lcorr, a_correction, a_residual, redBlack);
+      
+      for (DataIterator dit(dbl); dit.ok(); ++dit){
+	const Box cellBox = dbl[dit()];
+	
+	this->gauSaiRedBlackKernel(Lcorr[dit()], a_correction[dit()], a_residual[dit()], cellBox, dit(), redBlack);
+      }
     }
   }
 }
 
-void EBHelmholtzOp::gauSaiRedBlackKernel(LevelData<EBCellFAB>& a_Lcorr, LevelData<EBCellFAB>& a_corr, const LevelData<EBCellFAB>& a_resid, const int a_redBlack){
-  this->applyOp(a_Lcorr, a_corr, true);
-  this->gauSaiRedBlack(a_corr, a_Lcorr, a_resid, a_redBlack);
-}
-
-void EBHelmholtzOp::gauSaiRedBlack(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_rhs, const int& a_redBlack) const {
-  const DisjointBoxLayout& dbl = a_phi.disjointBoxLayout();
+void EBHelmholtzOp::gauSaiRedBlackKernel(EBCellFAB& a_Lcorr, EBCellFAB& a_corr, const EBCellFAB& a_resid, const Box& a_cellBox, const DataIndex& a_dit, const int& a_redBlack){
+  const EBISBox& ebisbox   = m_eblg.getEBISL()[a_dit];
+  const EBCellFAB& relCoef = m_relCoef[a_dit];
   
-  for (DataIterator dit(dbl); dit.ok(); ++dit){
-    const Box box = dbl[dit()];
+  if(!ebisbox.isAllCovered()){
+    this->applyOp(a_Lcorr, a_corr, a_cellBox, a_dit, true);
 
-    BaseFab<Real>& phiReg        = a_phi    [dit()].getSingleValuedFAB();
-    const BaseFab<Real>& LphiReg = a_Lphi   [dit()].getSingleValuedFAB();
-    const BaseFab<Real>& rhsReg  = a_rhs    [dit()].getSingleValuedFAB();
-    const BaseFab<Real>& relReg  = m_relCoef[dit()].getSingleValuedFAB();
+    BaseFab<Real>& phiReg        = a_corr .getSingleValuedFAB();
+    const BaseFab<Real>& LphiReg = a_Lcorr.getSingleValuedFAB();
+    const BaseFab<Real>& rhsReg  = a_resid.getSingleValuedFAB();
+    const BaseFab<Real>& relReg  = relCoef.getSingleValuedFAB();
 
     FORT_HELMHOLTZGAUSAIREDBLACK(CHF_FRA1(phiReg, m_comp),
 				 CHF_CONST_FRA1(LphiReg, m_comp),
 				 CHF_CONST_FRA1(rhsReg, m_comp),
 				 CHF_CONST_FRA1(relReg, m_comp),
 				 CHF_CONST_INT(a_redBlack),
-				 CHF_BOX(box));
+				 CHF_BOX(a_cellBox));
 
     // Fortran took care of the irregular cells but multi-cells still remain
-    VoFIterator& vofit = m_vofIterMulti[dit()];
+    VoFIterator& vofit = m_vofIterMulti[a_dit];
     for (vofit.reset(); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
       const IntVect&  iv  = vof.gridIndex();
@@ -853,12 +858,13 @@ void EBHelmholtzOp::gauSaiRedBlack(LevelData<EBCellFAB>& a_phi, const LevelData<
       const bool doThisCell = std::abs((iv.sum() + a_redBlack)%2) == 0;
 
       if(doThisCell){
-	const Real lambda = m_relCoef[dit()](vof, m_comp);
-	const Real Lphi   = a_Lphi[dit()](vof, m_comp);
-	const Real rhs    = a_rhs[dit()](vof, m_comp);
-	const Real resid  = rhs - Lphi;
+	const Real lambda = relCoef(vof, m_comp);
+	const Real Lcorr  = a_Lcorr(vof, m_comp);
+	const Real rhs    = a_resid(vof, m_comp);
+	
+	const Real resid  = rhs - Lcorr;
 
-	a_phi[dit()](vof, m_comp) += lambda*resid;
+	a_corr(vof, m_comp) += lambda*resid;
       }
     }
   }

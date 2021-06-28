@@ -105,10 +105,12 @@ public:
   /*!
     @brief Point Jacobi kernel. 
     @param[inout] a_Lcorr Storage for computing L(a_corr)
-    @param[inout] a_corr  Correction
-    @param[in]    a_resid Residual
+    @param[inout] a_corr    Correction
+    @param[in]    a_resid   Residual
+    @param[in]    a_cellBox Grid box
+    @param[in]    a_dit     Data index
   */
-  void pointJacobiKernel(EBCellFAB& a_Lcorr, EBCellFAB& a_corr, const EBCellFAB& a_resid, const Box& cellBox, const DataIndex& a_dit);
+  void pointJacobiKernel(EBCellFAB& a_Lcorr, EBCellFAB& a_corr, const EBCellFAB& a_resid, const Box& a_cellBox, const DataIndex& a_dit);
 
   /*!
     @brief Red-black Gauss-Seidel kernel
@@ -116,8 +118,10 @@ public:
     @param[inout] a_corr     Correction
     @param[in]    a_resid    Residual
     @param[in]    a_redBlack Red or black
+    @param[in]    a_cellBox  Grid box
+    @param[in]    a_dit      Data index
   */
-  void gauSaiRedBlackKernel(LevelData<EBCellFAB>& a_Lcorr, LevelData<EBCellFAB>& a_corr, const LevelData<EBCellFAB>& a_resid, const int a_redBlack);
+  void gauSaiRedBlackKernel(EBCellFAB& a_Lcorr, EBCellFAB& a_corr, const EBCellFAB& a_resid, const Box& a_cellBox, const DataIndex& a_dit, const int& a_redBlack);
 
   /*!
     @brief Multi-color Gauss-Seidel kernel
@@ -166,14 +170,6 @@ public:
   */
   void inhomogeneousCFInterp(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_phiCoar);
 
-    /*!
-    @brief Red-black Gauss-Seidel kernel. Public because MFHelmholtzOp may want to use it. 
-    @param[in] a_phi Correction
-    @param[in] a_phi Lphi L(corrcetion)
-    @param[in] a_rhs Residual
-    @param[in] a_color "Color":
-  */
-  void gauSaiRedBlack(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_rhs, const int& a_redBlack) const;
   
   /*!
     @brief Multi-colored Gauss-Seidel kernel. Public because MFHelmholtzOp may want to use use. 

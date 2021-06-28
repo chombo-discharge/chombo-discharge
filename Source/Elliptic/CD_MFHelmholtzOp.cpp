@@ -372,39 +372,23 @@ void MFHelmholtzOp::applyOp(LevelData<MFCellFAB>&             a_Lphi,
   // We need updated ghost cells in the CF before applying the matching conditions. 
   this->interpolateCF(a_phi, a_phiCoar, a_homogeneousCFBC);
   this->updateJumpBC(a_phi, a_homogeneousPhysBC);
-#if 0
-  // Apply the operator on each level. 
-  for (auto& op : m_helmOps){
-    LevelData<EBCellFAB> Lphi;
-    LevelData<EBCellFAB> phi;
-    LevelData<EBCellFAB> phiCoar;
 
-    MultifluidAlias::aliasMF(Lphi, op.first, a_Lphi);
-    MultifluidAlias::aliasMF(phi,  op.first, a_phi);
-
-    // applyOp usually interpolates ghost cells, but we did that above in interpolateCF(...). 
-    op.second->turnOffBCs();
-    if(a_phiCoar != nullptr){
-      MultifluidAlias::aliasMF(phiCoar, op.first, *a_phiCoar);
-      op.second->applyOp(Lphi, phi, &phiCoar, a_homogeneousPhysBC, a_homogeneousCFBC);
-    }
-    else{
-      op.second->applyOp(Lphi, phi, nullptr, a_homogeneousPhysBC, a_homogeneousCFBC);
-    }
-    op.second->turnOnBCs();
-  }
-#else
-  // Apply the operator on each level. 
+  // Apply the operator on each patch. 
   const DisjointBoxLayout& dbl = m_mflg.getGrids();
   
   for (DataIterator dit(dbl); dit.ok(); ++dit){
     const Box cellBox = dbl[dit()];
 
-    for (int iphase = 0; iphase < m_numPhases; iphase++){
-      m_helmOps.at(iphase)->applyOp(a_Lphi[dit()].getPhase(iphase), (EBCellFAB&) a_phi[dit()].getPhase(iphase), cellBox, dit(), a_homogeneousPhysBC);
+    for (auto& op : m_helmOps){
+      const int iphase = op.first;
+
+      // Doing the nasty, but applyOp will only monkey with ghost cells in a_phi.
+      EBCellFAB& Lph = (EBCellFAB&) a_Lphi[dit()].getPhase(iphase);
+      EBCellFAB& phi = (EBCellFAB&) a_phi [dit()].getPhase(iphase);
+
+      op.second->applyOp(Lph, phi, cellBox, dit(), a_homogeneousPhysBC);
     }
   }
-#endif
 }
 
 void MFHelmholtzOp::interpolateCF(const LevelData<MFCellFAB>& a_phi, const LevelData<MFCellFAB>* a_phiCoar, const bool a_homogeneousCF){
@@ -514,28 +498,31 @@ void MFHelmholtzOp::relaxPointJacobi(LevelData<MFCellFAB>& a_correction, const L
 }
 
 void MFHelmholtzOp::relaxGSRedBlack(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_residual, const int a_iterations) {
-  LevelData<MFCellFAB> Lphi;
-  this->create(Lphi, a_correction);
+  LevelData<MFCellFAB> Lcorr;
+  this->create(Lcorr, a_correction);
+
+  const DisjointBoxLayout& dbl = m_mflg.getGrids();
 
   for (int i = 0; i < a_iterations; i++){
-    LevelData<EBCellFAB> Lcorr;
-    LevelData<EBCellFAB> corr;
-    LevelData<EBCellFAB> resi;
 
     // Interpolate ghost cells and match the BC.
     for (int redBlack=0;redBlack<=1; redBlack++){
       this->interpolateCF(a_correction, nullptr, true);
-      this->updateJumpBC(a_correction, true);      
-      
-      // For red-black we get better results if we update the jump BC after every operator correction. 
-      for(auto& op : m_helmOps){
-	MultifluidAlias::aliasMF(Lcorr, op.first, Lphi        );
-	MultifluidAlias::aliasMF(corr,  op.first, a_correction);
-	MultifluidAlias::aliasMF(resi,  op.first, a_residual  );
+      this->updateJumpBC(a_correction, true);
 
-	op.second->turnOffBCs();
-	op.second->gauSaiRedBlackKernel(Lcorr, corr, resi, redBlack);
-	op.second->turnOnBCs();
+      // Do relaxation on each patch. 
+      for (DataIterator dit(dbl); dit.ok(); ++dit){
+	const Box cellBox = dbl[dit()];
+
+	for (auto& op : m_helmOps){
+	  const int iphase = op.first;
+
+	  EBCellFAB&       Lph = Lcorr       [dit()].getPhase(iphase);
+	  EBCellFAB&       phi = a_correction[dit()].getPhase(iphase);
+	  const EBCellFAB& res = a_residual  [dit()].getPhase(iphase);
+
+	  op.second->gauSaiRedBlackKernel(Lph, phi, res, cellBox, dit(), redBlack);
+	}
       }
     }
   }
