@@ -227,7 +227,8 @@ void MFHelmholtzOp::setToZero(LevelData<MFCellFAB>& a_lhs) {
 void MFHelmholtzOp::assign(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs) {
   CH_TIME("MFHelmholtzOp::assign");
   
-  //  a_rhs.copyTo(a_lhs);
+  a_rhs.copyTo(a_lhs);
+#if 0
   for (auto& op : m_helmOps){
     LevelData<EBCellFAB> lhs;
     LevelData<EBCellFAB> rhs;
@@ -237,6 +238,7 @@ void MFHelmholtzOp::assign(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFA
 
     op.second->assign(lhs, rhs);
   }
+#endif
 }
 
 Real MFHelmholtzOp::norm(const LevelData<MFCellFAB>& a_lhs, int a_order){
@@ -417,10 +419,7 @@ void MFHelmholtzOp::residual(LevelData<MFCellFAB>& a_residual, const LevelData<M
   CH_TIME("MFHelmholtzOp::residual");
 
   // Compute a_residual = rhs - L(phi)
-  this->interpolateCF(a_phi, nullptr, true);
-  this->updateJumpBC(a_phi, true);
   this->applyOp(a_residual, a_phi, a_homogeneousPhysBC);
-
   this->scale(a_residual, -1.0);
   this->incr(a_residual, a_rhs, 1.0);
 }
@@ -447,7 +446,7 @@ void MFHelmholtzOp::updateJumpBC(const LevelData<MFCellFAB>& a_phi, const bool a
   LevelData<MFCellFAB>& phi = (LevelData<MFCellFAB>&) a_phi;
   phi.exchange();
   
-  m_jumpBC->matchBC(a_phi, *m_jump, a_homogeneousPhysBC);
+  //  m_jumpBC->matchBC(a_phi, *m_jump, a_homogeneousPhysBC);
 }
 
 void MFHelmholtzOp::relax(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_residual, int a_iterations) {
