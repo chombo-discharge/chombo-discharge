@@ -769,9 +769,7 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
 							jumpWeight,
 							m_amr->getMaxBoxSize());
 
-  Real sigma;
-  pp.get("sigma", sigma);
-  fact->setJump(sigma, 1./Units::eps0);
+  fact->setJump(a_sigma, 1./Units::eps0);
 
   
   // Define the multigrid solver

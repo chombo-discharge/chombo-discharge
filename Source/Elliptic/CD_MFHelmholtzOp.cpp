@@ -451,7 +451,7 @@ void MFHelmholtzOp::updateJumpBC(const LevelData<MFCellFAB>& a_phi, const bool a
 
 void MFHelmholtzOp::relax(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_residual, int a_iterations) {
   CH_TIME("MFHelmholtzOp::relax");
-#if 1
+
   switch(m_relaxType){
   case RelaxationMethod::PointJacobi:
     this->relaxPointJacobi(a_correction, a_residual, a_iterations);
@@ -465,11 +465,6 @@ void MFHelmholtzOp::relax(LevelData<MFCellFAB>& a_correction, const LevelData<MF
   default:
     MayDay::Error("MFHelmholtzOp::relax - bogus relaxation method requested");
   };
-#else
-  this->relaxGSRedBlack(a_correction, a_residual, a_iterations/4);
-  this->relaxPointJacobi(a_correction, a_residual, a_iterations/2);
-  this->relaxGSMultiColor(a_correction, a_residual, a_iterations/4);
-#endif
 }
 
 void MFHelmholtzOp::relaxPointJacobi(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_residual, const int a_iterations) {
