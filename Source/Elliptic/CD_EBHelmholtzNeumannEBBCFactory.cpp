@@ -70,7 +70,7 @@ RefCountedPtr<EBHelmholtzEBBC> EBHelmholtzNeumannEBBCFactory::create() {
       bc->setDphiDn(m_functionDphiDn);
     }
     else{
-      MayDay::Error("EBHelmholtzEBBC::create - logic bust");
+      MayDay::Error("EBHelmholtzNeumannEBBCFactory::create - logic bust");
     }
   }
   else{
@@ -81,7 +81,7 @@ RefCountedPtr<EBHelmholtzEBBC> EBHelmholtzNeumannEBBCFactory::create() {
       bc->setBxDphiDn(m_functionDphiDn);
     }
     else{
-      MayDay::Error("EBHelmholtzEBBC::create - logic bust");
+      MayDay::Error("EBHelmholtzNeumannEBBCFactory::create() - logic bust");
     }
   }
 

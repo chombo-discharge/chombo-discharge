@@ -39,6 +39,7 @@
 
 // Includes for MFHelmholtzOpFactory
 #include <CD_MFHelmholtzDirichletEBBCFactory.H>
+#include <CD_MFHelmholtzNeumannEBBCFactory.H>
 #include <CD_MFHelmholtzDirichletDomainBCFactory.H>
 #include <CD_MFHelmholtzNeumannDomainBCFactory.H>
 #include <CD_MFHelmholtzRobinDomainBCFactory.H>
@@ -656,9 +657,11 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
     if(eb_order > m_amr->getNumberOfGhostCells()) MayDay::Abort("ProxyFieldSolver::solveHelm - not enough ghost cells!");
   }
   else if(str == "neumann"){
-    pp.get("eb_val", eb_value);
+    pp.get("eb_order",  eb_order);
+    pp.get("eb_val",    eb_value);
+    pp.get("eb_weight", eb_weight);
 
-    MayDay::Abort("ProxyFieldSolver::solveMF - Neumann EB BCs not supported (yet)");
+    ebbcFactory = RefCountedPtr<MFHelmholtzEBBCFactory> (new MFHelmholtzNeumannEBBCFactory(eb_order, eb_weight, eb_value));
   }
   else if(str == "robin"){
     pp.get("eb_val", eb_value);
