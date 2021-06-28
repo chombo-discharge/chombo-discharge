@@ -269,10 +269,14 @@ Real MFHelmholtzOp::dotProduct(const LevelData<MFCellFAB>& a_lhs, const LevelDat
     for (int i = 0; i < lhs.numPhases(); i++){
       const EBCellFAB& data1 = a_lhs[dit()].getPhase(i);
       const EBCellFAB& data2 = a_rhs[dit()].getPhase(i);
-      const Box box = a_lhs.disjointBoxLayout()[dit()];
+      const EBISBox& ebisbox = data1.getEBISBox();
 
-      accum += EBLevelDataOps::sumKappaDotProduct(phaseVolume, data1, data2, box, EBLEVELDATAOPS_ALLVOFS, m_mflg.getDomain());
-      volum += phaseVolume;
+      if(!ebisbox.isAllCovered()){
+	const Box box = a_lhs.disjointBoxLayout()[dit()];
+
+	accum += EBLevelDataOps::sumKappaDotProduct(phaseVolume, data1, data2, box, EBLEVELDATAOPS_ALLVOFS, m_mflg.getDomain());
+	volum += phaseVolume;
+      }
     }
   }
 
@@ -368,7 +372,7 @@ void MFHelmholtzOp::applyOp(LevelData<MFCellFAB>&             a_Lphi,
   // We need updated ghost cells in the CF before applying the matching conditions. 
   this->interpolateCF(a_phi, a_phiCoar, a_homogeneousCFBC);
   this->updateJumpBC(a_phi, a_homogeneousPhysBC);
-
+#if 0
   // Apply the operator on each level. 
   for (auto& op : m_helmOps){
     LevelData<EBCellFAB> Lphi;
@@ -389,10 +393,23 @@ void MFHelmholtzOp::applyOp(LevelData<MFCellFAB>&             a_Lphi,
     }
     op.second->turnOnBCs();
   }
+#else
+  // Apply the operator on each level. 
+  const DisjointBoxLayout& dbl = m_mflg.getGrids();
+  
+  for (DataIterator dit(dbl); dit.ok(); ++dit){
+    const Box cellBox = dbl[dit()];
+
+    for (int iphase = 0; iphase < m_numPhases; iphase++){
+      m_helmOps.at(iphase)->applyOp(a_Lphi[dit()].getPhase(iphase), (EBCellFAB&) a_phi[dit()].getPhase(iphase), cellBox, dit(), a_homogeneousPhysBC);
+    }
+  }
+#endif
 }
 
 void MFHelmholtzOp::interpolateCF(const LevelData<MFCellFAB>& a_phi, const LevelData<MFCellFAB>* a_phiCoar, const bool a_homogeneousCF){
   CH_TIME("MFHelmholtzOp::interpolateCF");
+
   for (auto& op : m_helmOps){
     LevelData<EBCellFAB> phi;
     LevelData<EBCellFAB> phiCoar;
@@ -468,27 +485,30 @@ void MFHelmholtzOp::relax(LevelData<MFCellFAB>& a_correction, const LevelData<MF
 }
 
 void MFHelmholtzOp::relaxPointJacobi(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_residual, const int a_iterations) {
-  LevelData<MFCellFAB> Lphi;
-  this->create(Lphi, a_correction);
+  LevelData<MFCellFAB> Lcorr;
+  this->create(Lcorr, a_correction);
+
+  const DisjointBoxLayout& dbl = m_mflg.getGrids();
 
   for (int i = 0; i < a_iterations; i++){
-    LevelData<EBCellFAB> Lcorr;
-    LevelData<EBCellFAB> corr;
-    LevelData<EBCellFAB> resi;
-
+    
     // Interpolate ghost cells and match the BC.
     this->interpolateCF(a_correction, nullptr, true);
     this->updateJumpBC(a_correction,  true);
-    
-    // Something simple, something true.
-    for(auto& op : m_helmOps){
-      MultifluidAlias::aliasMF(Lcorr, op.first, Lphi        );
-      MultifluidAlias::aliasMF(corr,  op.first, a_correction);
-      MultifluidAlias::aliasMF(resi,  op.first, a_residual  );
 
-      op.second->turnOffBCs();
-      op.second->pointJacobiKernel(Lcorr, corr, resi);
-      op.second->turnOnBCs();
+    // Do relaxation on each patch. 
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      const Box cellBox = dbl[dit()];
+
+      for (auto& op : m_helmOps){
+	const int iphase = op.first;
+
+	EBCellFAB&       Lph = Lcorr       [dit()].getPhase(iphase);
+	EBCellFAB&       phi = a_correction[dit()].getPhase(iphase);
+	const EBCellFAB& res = a_residual  [dit()].getPhase(iphase);
+
+	op.second->pointJacobiKernel(Lph, phi, res, cellBox, dit());
+      }
     }
   }
 }

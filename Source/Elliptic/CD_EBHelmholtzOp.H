@@ -108,7 +108,7 @@ public:
     @param[inout] a_corr  Correction
     @param[in]    a_resid Residual
   */
-  void pointJacobiKernel(LevelData<EBCellFAB>& a_Lcorr, LevelData<EBCellFAB>& a_corr, const LevelData<EBCellFAB>& a_resid);
+  void pointJacobiKernel(EBCellFAB& a_Lcorr, EBCellFAB& a_corr, const EBCellFAB& a_resid, const Box& cellBox, const DataIndex& a_dit);
 
   /*!
     @brief Red-black Gauss-Seidel kernel

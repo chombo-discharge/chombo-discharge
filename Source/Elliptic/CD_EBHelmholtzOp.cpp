@@ -547,14 +547,7 @@ void EBHelmholtzOp::applyOp(LevelData<EBCellFAB>&             a_Lphi,
   for (DataIterator dit(dbl); dit.ok(); ++dit){
     const Box cellBox = dbl[dit()];
 
-
-    // Now do the terms with beta*phi
-#if 0
-    this->applyOpRegular(  a_Lphi[dit()], phi[dit()], cellBox, dit(), a_homogeneousPhysBC);
-    this->applyOpIrregular(a_Lphi[dit()], phi[dit()], cellBox, dit(), a_homogeneousPhysBC); // Overwrites result in irregular cells.
-#else
     this->applyOp(a_Lphi[dit()], phi[dit()], cellBox, dit(), a_homogeneousPhysBC);
-#endif
   }
 }
 
@@ -789,20 +782,29 @@ void EBHelmholtzOp::relaxPointJacobi(LevelData<EBCellFAB>& a_correction, const L
   LevelData<EBCellFAB> Lcorr;
   this->create(Lcorr, a_residual);
 
+  const DisjointBoxLayout& dbl = m_eblg.getDBL();
+
   for (int iter = 0; iter < a_iterations; iter++){
     this->homogeneousCFInterp(a_correction);
-    this->pointJacobiKernel(Lcorr, a_correction, a_residual);
+
+    a_correction.exchange();
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      const Box cellBox = dbl[dit()];
+      this->pointJacobiKernel(Lcorr[dit()], a_correction[dit()], a_residual[dit()], cellBox, dit());
+    }
   }
 }
 
-void EBHelmholtzOp::pointJacobiKernel(LevelData<EBCellFAB>& a_Lcorr, LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual) {
-  this->applyOp(a_Lcorr, a_correction, true);
+void EBHelmholtzOp::pointJacobiKernel(EBCellFAB& a_Lcorr, EBCellFAB& a_correction, const EBCellFAB& a_residual, const Box& a_cellBox, const DataIndex& a_dit) {
+  const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
 
-  for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit){
-    a_Lcorr[dit()]        -= a_residual[dit()];
-    a_Lcorr[dit()]        *= m_relCoef[dit()];
-      
-    a_correction[dit()] -= a_Lcorr[dit()];
+  if(!ebisbox.isAllCovered()){
+    this->applyOp(a_Lcorr, a_correction, a_cellBox, a_dit, true);
+  
+    a_Lcorr      -= a_residual;
+    a_Lcorr      *= m_relCoef[a_dit];
+    a_correction -= a_Lcorr;
   }
 }
 
