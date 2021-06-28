@@ -346,7 +346,7 @@ void MFHelmholtzOp::createCoarsened(LevelData<MFCellFAB>& a_lhs, const LevelData
 void MFHelmholtzOp::preCond(LevelData<MFCellFAB>& a_corr, const LevelData<MFCellFAB>& a_residual) {
   CH_TIME("MFHelmholtzOp::preCond");
 
-#if 0
+#if 1
   this->relax(a_corr, a_residual, 40);
 #else
   //m_jumpBC->resetBC();
