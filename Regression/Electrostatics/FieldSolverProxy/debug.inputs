@@ -12,7 +12,7 @@ AmrMesh.irreg_growth    = 2           # How much to grow irregular tagged cells
 AmrMesh.buffer_size     = 1           # Number of cells between grid levels
 AmrMesh.grid_algorithm  = br          # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
 AmrMesh.box_sorting     = morton      # 'none', 'shuffle', 'morton'
-AmrMesh.blocking_factor = 8           # Default blocking factor (16 in 3D)
+AmrMesh.blocking_factor = 16           # Default blocking factor (16 in 3D)
 AmrMesh.max_box_size    = 16          # Maximum allowed box size
 AmrMesh.max_ebis_box    = 16          # Maximum allowed box size
 AmrMesh.ref_rat         = 2           # Refinement ratios
@@ -81,7 +81,7 @@ ProxyFieldSolver.botsolver  = bicgstab    # 'simple' or 'bicgstab'
 ProxyFieldSolver.botsmooth  = 48          # Smoothings for bottom solver
 ProxyFieldSolver.relax      = 2           # Relaxation method
 ProxyFieldSolver.mg_tol     = 1.E-10      # Multigrid tolerance
-ProxyFieldSolver.min_cells  = 32          # Number of cells along the shortest coordinate in the bottom of multigrid.
+ProxyFieldSolver.min_cells  = 8           # Number of cells along the shortest coordinate in the bottom of multigrid.
 ProxyFieldSolver.plt_vars   = phi resid E rho # Plot variables
 
 # ====================================================================================================
