@@ -109,7 +109,6 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid&                                 
 
   // Define data holders and stencils
   this->defineStencils();
-  this->defineColorStencils();
 }
 
 EBHelmholtzOp::~EBHelmholtzOp(){
@@ -241,68 +240,6 @@ void EBHelmholtzOp::defineStencils(){
   this->computeRelaxationCoefficient();
 }
 
-void EBHelmholtzOp::defineColorStencils(){
-  const LayoutData<BaseIVFAB<VoFStencil> >& fluxStencil = m_ebBc->getKappaDivFStencils();
-
-  for (int icolor = 0; icolor < m_colors.size(); ++icolor){
-    m_colorEBStencil[icolor].define(m_eblg.getDBL());
-    
-    for(int dir = 0; dir < SpaceDim; dir++){
-      m_vofItIrregColorDomLo[icolor][dir].define(m_eblg.getDBL());
-      m_vofItIrregColorDomHi[icolor][dir].define(m_eblg.getDBL());
-      m_cacheEBxDomainFluxLo[icolor][dir].define(m_eblg.getDBL());
-      m_cacheEBxDomainFluxHi[icolor][dir].define(m_eblg.getDBL());
-    }
-
-    for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit){
-      const Box cellbox      = m_eblg.getDBL()[dit()];
-      const EBISBox& ebisbox = m_eblg.getEBISL()[dit()];
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
-
-      IntVectSet ivsColor(DenseIntVectSet(cellbox, false));
-
-      VoFIterator& vofit = m_vofIterIrreg[dit()];
-      for (vofit.reset(); vofit.ok(); ++vofit){
-	const VolIndex& vof = vofit();
-	const IntVect&  iv  = vof.gridIndex();
-
-	bool doThisCell = true;
-	for (int dir = 0; dir < SpaceDim; dir++){
-	  if(iv[dir] % 2 != m_colors[icolor][dir]) doThisCell = false;
-	}
-
-	if(doThisCell) ivsColor |= iv;
-      }
-
-      BaseIVFAB<VoFStencil> colorStencils(ivsColor, ebgraph, m_nComp);
-	
-      for (int dir = 0; dir < SpaceDim; dir++){
-	const IntVectSet loIrregColor = ivsColor & m_sideBox.at(std::make_pair(dir, Side::Lo));
-	const IntVectSet hiIrregColor = ivsColor & m_sideBox.at(std::make_pair(dir, Side::Hi));
-
-	m_vofItIrregColorDomLo[icolor][dir][dit()].define(loIrregColor, ebgraph);
-	m_vofItIrregColorDomHi[icolor][dir][dit()].define(hiIrregColor, ebgraph);
-
-	m_cacheEBxDomainFluxLo[icolor][dir][dit()].define(loIrregColor, ebgraph, m_nComp);
-	m_cacheEBxDomainFluxHi[icolor][dir][dit()].define(hiIrregColor, ebgraph, m_nComp);
-      }
-
-      VoFIterator vofitColor(ivsColor, ebgraph);
-      for (vofitColor.reset(); vofitColor.ok(); ++vofitColor){
-	const VolIndex& vof = vofitColor();
-
-	VoFStencil& colorStencil = colorStencils(vof, m_comp);
-
-	colorStencil  = this->getKappaDivFStencil(vof, dit());
-	colorStencil += fluxStencil[dit()](vof, m_comp);
-      }
-
-      m_colorEBStencil[icolor][dit()] = RefCountedPtr<EBStencil>
-	(new EBStencil(vofitColor.getVector(), colorStencils, cellbox, ebisbox, m_ghostPhi, m_ghostRhs, m_comp, true));
-    }
-  }
-}
-
 unsigned int EBHelmholtzOp::orderOfAccuracy(void) const {
   return 99;
 }
@@ -329,7 +266,7 @@ void EBHelmholtzOp::preCond(LevelData<EBCellFAB>& a_corr, const LevelData<EBCell
   EBLevelDataOps::assign(a_corr, a_residual);
   EBLevelDataOps::scale(a_corr,  m_relCoef);
 
-  //  this->relax(a_corr, a_residual, 40);
+  this->relax(a_corr, a_residual, 40);
 }
 
 void EBHelmholtzOp::create(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) {
@@ -770,9 +707,6 @@ void EBHelmholtzOp::relax(LevelData<EBCellFAB>& a_correction, const LevelData<EB
   case RelaxationMethod::GauSaiMultiColor:
     this->relaxGSMultiColor(a_correction, a_residual, a_iterations);
     break;
-  case RelaxationMethod::GauSaiMultiColorFast:
-    this->relaxGSMultiColorFast(a_correction, a_residual, a_iterations);
-    break;
   default:
     MayDay::Error("EBHelmholtzOp::relax - bogus relaxation method requested");
   };
@@ -950,130 +884,6 @@ void EBHelmholtzOp::gauSaiMultiColorKernel(EBCellFAB&       a_Lcorr,
   }
 }
 
-void EBHelmholtzOp::relaxGSMultiColorFast(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations){
-  const bool homogeneousPhysBC = true;
-
-  const DisjointBoxLayout& dbl = m_eblg.getDBL();
-  
-  for (int iter = 0; iter < a_iterations; iter++){
-
-    // Fill ghost cells so we get domain BC flux. 
-    for (DataIterator dit(dbl); dit.ok(); ++dit){
-      this->applyDomainFlux(a_correction[dit()], dbl[dit()], dit(), homogeneousPhysBC);
-    }
-
-    for (int redBlack = 0; redBlack <= 1; redBlack++){
-      a_correction.exchange();
-
-      if(m_hasCoar) {
-	this->homogeneousCFInterp(a_correction);
-      }
-
-      for(DataIterator dit(dbl); dit.ok(); ++dit){
-	EBCellFAB&       phi = a_correction[dit()];
-	const EBCellFAB& rhs = a_residual[dit()];
-	const Box cellBox    = dbl[dit()];
-
-	BaseFab<Real>& regPhi       = phi.getSingleValuedFAB();
-	const BaseFab<Real>& regRhs = rhs.getSingleValuedFAB();
-	const BaseFab<Real>& regRel = m_relCoef[dit()].getSingleValuedFAB();
-	const BaseFab<Real>& regAco = (*m_Acoef)[dit()].getSingleValuedFAB();
-
-	// It's an older code, sir, but it checks out.
-	BaseFab<Real>  dummy(Box(IntVect::Zero, IntVect::Zero), m_nComp);
-	BaseFab<Real>* regBco[3];
-	for (int dir = 0; dir < 3; dir++){
-	  if(dir >= SpaceDim){
-	    regBco[dir] = &dummy;
-	  }
-	  else{
-	    regBco[dir] = &(*m_Bcoef)[dit()][dir].getSingleValuedFAB();
-	  }
-	}
-
-	// Cache phi
-	for (int c = 0; c < m_colors.size()/2; ++c){
-	  m_colorEBStencil[m_colors.size()/2*redBlack+c][dit()]->cachePhi(phi);
-	}
-
-	FORT_HELMHOLTZGSRB(CHF_FRA1(        regPhi,     m_comp),
-			   CHF_CONST_FRA1(  regRhs,     m_comp),
-			   CHF_CONST_FRA1(  regRel,     m_comp),
-			   CHF_CONST_FRA1(  regAco,     m_comp),
-			   CHF_CONST_FRA1((*regBco[0]), m_comp),
-			   CHF_CONST_FRA1((*regBco[1]), m_comp),
-			   CHF_CONST_FRA1((*regBco[2]), m_comp),
-			   CHF_CONST_REAL(m_alpha),
-			   CHF_CONST_REAL(m_beta),
-			   CHF_CONST_REAL(m_dx),
-			   CHF_CONST_INT(redBlack),
-			   CHF_BOX(cellBox));
-
-	// Uncache phi
-	for (int c = 0; c < m_colors.size()/2; ++c){
-	  m_colorEBStencil[m_colors.size()/2*redBlack+c][dit()]->uncachePhi(phi);
-	}
-
-	// Irregular
-	for (int c = 0; c < m_colors.size()/2; ++c){
-	  this->GauSaiMultiColorAllIrregular(phi, rhs, m_colors.size()/2*redBlack+c, dit());
-	}
-      }
-    }
-  }
-}
-
-void EBHelmholtzOp::GauSaiMultiColorAllIrregular(EBCellFAB& a_phi, const EBCellFAB& a_rhs, const int& a_icolor, const DataIndex& a_dit){
-
-  const BaseIVFAB<Real>& alphaWeight = m_alphaDiagWeight[a_dit];
-  const BaseIVFAB<Real>& betaWeight  = m_betaDiagWeight [a_dit];
-  
-  // Cache fluxes on domain bcs. 
-  for (int dir = 0; dir < SpaceDim; dir++){
-    VoFIterator& vofitLo = m_vofItIrregColorDomLo[a_icolor][dir][a_dit];
-    VoFIterator& vofitHi = m_vofItIrregColorDomHi[a_icolor][dir][a_dit];
-    
-    for (vofitLo.reset(); vofitLo.ok(); ++vofitLo){
-      const VolIndex& vof = vofitLo();
-      
-      const Real flux = m_domainBc->getFaceFlux(vof, a_phi, dir, Side::Lo, a_dit, true);
-      
-      m_cacheEBxDomainFluxLo[a_icolor][dir][a_dit](vof, m_comp) = flux;
-    }
-
-    for (vofitHi.reset(); vofitHi.ok(); ++vofitHi){
-      const VolIndex& vof = vofitHi();
-      
-      const Real flux = m_domainBc->getFaceFlux(vof, a_phi, dir, Side::Hi, a_dit, true);
-      
-      m_cacheEBxDomainFluxHi[a_icolor][dir][a_dit](vof, m_comp) = flux;
-    }
-  }
-
-  // Stencil relaxation
-  m_colorEBStencil[a_icolor][a_dit]->relax(a_phi, a_rhs, alphaWeight, betaWeight, m_alpha, m_beta, 1.0);
-
-  // Apply domain flux
-  for (int dir = 0; dir < SpaceDim; dir++){
-    VoFIterator& vofitLo = m_vofItIrregColorDomLo[a_icolor][dir][a_dit];
-    VoFIterator& vofitHi = m_vofItIrregColorDomHi[a_icolor][dir][a_dit];
-
-    for (vofitLo.reset(); vofitLo.ok(); ++vofitLo){
-      const VolIndex& vof = vofitLo();
-      const Real lambda   = m_relCoef[a_dit](vof, m_comp);
-      
-      a_phi(vof, m_comp) += lambda * m_cacheEBxDomainFluxLo[a_icolor][dir][a_dit](vof, m_comp) * m_beta/m_dx;
-    }
-
-    for (vofitHi.reset(); vofitHi.ok(); ++vofitHi){
-      const VolIndex& vof = vofitHi();
-      const Real lambda   = m_relCoef[a_dit](vof, m_comp);
-      
-      a_phi(vof, m_comp) -= lambda * m_cacheEBxDomainFluxHi[a_icolor][dir][a_dit](vof, m_comp) * m_beta/m_dx;
-    }
-  }
-}
-
 void EBHelmholtzOp::computeAlphaWeight(){
   for (DataIterator dit(m_eblg.getDBL().dataIterator()); dit.ok(); ++dit){
     VoFIterator& vofit = m_vofIterIrreg[dit()];
@@ -1125,22 +935,6 @@ void EBHelmholtzOp::computeRelaxationCoefficient(){
 
       m_relCoef[dit()](vof, m_comp) = 1./(alphaWeight + betaWeight);
     }
-  }
-
-  // Add safety factors for relaxations 
-  switch(m_relaxationMethod){
-  case RelaxationMethod::PointJacobi: 
-    //    this->scale(m_relCoef, 0.5); // Moved to kernel. 
-    break;
-  case RelaxationMethod::GauSaiRedBlack:
-    break;
-  case RelaxationMethod::GauSaiMultiColor:
-    break;
-  case RelaxationMethod::GauSaiMultiColorFast:
-    break;
-  default:
-    MayDay::Error("EBHelmholtzOp::computeRelaxationCoefficient -- logic bust");
-    break;
   }
 }
 

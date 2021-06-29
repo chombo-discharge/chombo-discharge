@@ -46,7 +46,6 @@ public:
     PointJacobi,
     GauSaiRedBlack,
     GauSaiMultiColor,
-    GauSaiMultiColorFast,
   };
 
   /*!
@@ -749,20 +748,6 @@ protected:
     @brief "Colors" for the relaxation methods
   */
   Vector<IntVect> m_colors;
-
-#if CH_SPACEDIM==2
-  LayoutData<VoFIterator >         m_vofItIrregColorDomLo[4][SpaceDim];
-  LayoutData<VoFIterator >         m_vofItIrregColorDomHi[4][SpaceDim];
-  LayoutData<BaseIVFAB<Real> >     m_cacheEBxDomainFluxLo[4][SpaceDim];
-  LayoutData<BaseIVFAB<Real> >     m_cacheEBxDomainFluxHi[4][SpaceDim];
-  LayoutData<RefCountedPtr<EBStencil> >  m_colorEBStencil[4];
-#elif CH_SPACEDIM==3
-  LayoutData<VoFIterator >         m_vofItIrregColorDomLo[8][SpaceDim];
-  LayoutData<VoFIterator >         m_vofItIrregColorDomHi[8][SpaceDim];
-  LayoutData<BaseIVFAB<Real> >     m_cacheEBxDomainFluxLo[8][SpaceDim];
-  LayoutData<BaseIVFAB<Real> >     m_cacheEBxDomainFluxHi[8][SpaceDim];
-  LayoutData<RefCountedPtr<EBStencil> >  m_colorEBStencil[8];
-#endif
   
   /*!
     @brief Jacobi relaxation
@@ -787,19 +772,6 @@ protected:
     @param[in]    a_iterations Number of iterations
   */
   void relaxGSMultiColor(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations);
-
-  /*!
-    @brief Fast Gauss-seidel relaxation
-    @param[inout] a_correction Correction
-    @param[in]    a_residual   Residual
-    @param[in]    a_iterations Number of iterations
-  */
-  void relaxGSMultiColorFast(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations);
-
-  /*!
-    @brief Optimized relaxation
-  */
-  void GauSaiMultiColorAllIrregular(EBCellFAB& a_phi, const EBCellFAB& a_rhs, const int& a_icolor, const DataIndex& a_dit);
 
   /*!
     @brief Calculate the weight of the diagonal term
@@ -841,11 +813,6 @@ protected:
     @brief Define stencils
   */
   void defineStencils();
-
-  /*!
-    @brief Define color stencils (which make relaxation go faster)
-  */
-  void defineColorStencils();
 
   /*!
     @brief Compute flux on centroid faces.
