@@ -100,7 +100,6 @@ VoFStencil LeastSquares::getBndryGradSten(const VolIndex&    a_vof,
 VoFStencil LeastSquares::getFaceGradSten(const FaceIndex&   a_face,
 					 const FaceLocation a_faceLocation,
 					 const CellLocation a_cellLocations,
-					 const Neighborhood a_neighborhood,					 
 					 const EBISBox&     a_ebisbox,
 					 const Real         a_dx,
 					 const int          a_radius,
@@ -115,7 +114,7 @@ VoFStencil LeastSquares::getFaceGradSten(const FaceIndex&   a_face,
     const VolIndex vofHi = a_face.getVoF(Side::Hi);
 
     // Get Vofs in monotone path for both lo/hi. The doing that will fetch duplicates (starting vof, for example) which we discard
-    // using std::set
+    // using std::set below. After that, just get the distances and solve the least squares system. 
     Vector<VolIndex> allVofs;
     Vector<VolIndex> loVofs = VofUtils::getVofsInRadius(vofLo, a_ebisbox, a_radius, VofUtils::Connectivity::MonotonePath, true);
     Vector<VolIndex> hiVofs = VofUtils::getVofsInRadius(vofHi, a_ebisbox, a_radius, VofUtils::Connectivity::MonotonePath, true);
@@ -130,13 +129,13 @@ VoFStencil LeastSquares::getFaceGradSten(const FaceIndex&   a_face,
     if(allVofs.size() >= numUnknowns){
       const Vector<RealVect> displacements = LeastSquares::getDisplacements(a_faceLocation, a_cellLocations, a_face, allVofs, a_ebisbox, a_dx);
 
-      //      VoFStencil gradSten = LeastSquares::computeGradSten(allVofs, displacements, a_p, a_order); // This routine eliminates a_vof from the system of equations!
+      const VoFStencil gradSten = LeastSquares::computeGradSten(allVofs, displacements, a_p, a_order, IntVectSet()); 
+
+      if(gradSten.size() > 0){
+	faceSten = LeastSquares::projectGradSten(gradSten, BASISREALV(faceDir));
+      }
     }
-
-    MayDay::Abort("LeastSquares::getFaceGradSten - not implemented");
   }
-
-
 
   return faceSten;
 }
@@ -147,6 +146,7 @@ RealVect LeastSquares::position(const CellLocation a_position,
 				const Real&        a_dx){
 
   RealVect ret;
+  
   switch(a_position){
   case Location::Cell::Center:
     ret = RealVect(a_vof.gridIndex()) + 0.5*RealVect::Unit;

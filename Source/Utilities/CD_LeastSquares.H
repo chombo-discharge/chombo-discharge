@@ -110,7 +110,6 @@ public:
   static VoFStencil getFaceGradSten(const FaceIndex&   a_face,
 				    const FaceLocation a_faceLoaction,
 				    const CellLocation a_cellLocation,
-				    const Neighborhood a_neighborhood,				    
 				    const EBISBox&     a_ebisbox,
 				    const Real         a_dx,
 				    const int          a_radius,
