@@ -88,7 +88,7 @@ void EBHelmholtzDirichletEBBC::define() {
       std::pair<Real, VoFStencil> pairSten;
 
       // Try quadrants first. 
-      order = m_isMGLevel ? 1 : m_order; 
+      order = m_order;
       while(!foundStencil && order > 0){
       	foundStencil = this->getLeastSquaresStencil(pairSten, vof, VofUtils::Neighborhood::Quadrant, dit(), order);
       	order--;
@@ -100,7 +100,7 @@ void EBHelmholtzDirichletEBBC::define() {
       }
 
       // If we couldn't find in a quadrant, try a larger neighborhood
-      order = m_isMGLevel ? 1 : m_order;      
+      order = m_order;
       while(!foundStencil && order > 0){
       	foundStencil = this->getLeastSquaresStencil(pairSten, vof, VofUtils::Neighborhood::Radius, dit(), order);
       	order--;

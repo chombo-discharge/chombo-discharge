@@ -84,7 +84,6 @@ MFHelmholtzOp::MFHelmholtzOp(const MFLevelGrid&                               a_
   // Instantiate jump bc object.
   const int ghostCF = a_hasCoar ? a_interpolator.getGhostCF() : 1;
   m_jumpBC = RefCountedPtr<JumpBC> (new JumpBC(m_mflg, a_BcoefIrreg, a_dx, a_jumpOrder, a_jumpWeight, a_jumpOrder, ghostCF));
-  if(a_isMGOperator) m_jumpBC->setMG(true);
 
   // Make the operators on eachphase.
   for (int iphase = 0; iphase < m_numPhases; iphase++){
@@ -116,8 +115,6 @@ MFHelmholtzOp::MFHelmholtzOp(const MFLevelGrid&                               a_
 
     auto domainBC = a_domainBcFactory->create(iphase);
     auto ebBC     = a_ebBcFactory    ->create(iphase, m_jumpBC);
-
-    if(a_isMGOperator) ebBC->setMG(true);
 
     // Alias the multifluid-coefficients onto a single phase.
     RefCountedPtr<LevelData<EBCellFAB> >        Acoef       = RefCountedPtr<LevelData<EBCellFAB> >        (new LevelData<EBCellFAB>());
@@ -347,9 +344,9 @@ void MFHelmholtzOp::preCond(LevelData<MFCellFAB>& a_corr, const LevelData<MFCell
   CH_TIME("MFHelmholtzOp::preCond");
 
 #if 1
-  this->relax(a_corr, a_residual, 40);
+  this->relax(a_corr, a_residual, 10);
 #else
-  //m_jumpBC->resetBC();
+  m_jumpBC->resetBC();
   
   for (auto& op : m_helmOps){
     LevelData<EBCellFAB> corr;
@@ -491,8 +488,9 @@ void MFHelmholtzOp::relaxPointJacobi(LevelData<MFCellFAB>& a_correction, const L
   for (int i = 0; i < a_iterations; i++){
     
     // Interpolate ghost cells and match the BC.
+
     this->interpolateCF(a_correction, nullptr, true);
-    this->updateJumpBC(a_correction,  true);
+    this->updateJumpBC(a_correction,  true);    
 
     // Do relaxation on each patch. 
     for (DataIterator dit(dbl); dit.ok(); ++dit){
@@ -521,8 +519,9 @@ void MFHelmholtzOp::relaxGSRedBlack(LevelData<MFCellFAB>& a_correction, const Le
 
     // Interpolate ghost cells and match the BC.
     for (int redBlack=0;redBlack<=1; redBlack++){
+
       this->interpolateCF(a_correction, nullptr, true);
-      this->updateJumpBC(a_correction, true);
+      this->updateJumpBC(a_correction, true);      
 
       // Do relaxation on each patch. 
       for (DataIterator dit(dbl); dit.ok(); ++dit){

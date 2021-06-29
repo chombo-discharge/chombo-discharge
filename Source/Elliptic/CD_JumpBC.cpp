@@ -35,7 +35,6 @@ JumpBC::JumpBC(const MFLevelGrid& a_mflg,
   m_radius     = a_radius;
   m_ghostCF    = a_ghostCF;
   m_numPhases  = m_mflg.numPhases();
-  m_isMGLevel  = false;
   m_multiPhase = m_numPhases > 1;
 
   this->defineIterators();
@@ -44,10 +43,6 @@ JumpBC::JumpBC(const MFLevelGrid& a_mflg,
 
 JumpBC::~JumpBC(){
 
-}
-
-void JumpBC::setMG(const bool a_isMGLevel){
-  m_isMGLevel = a_isMGLevel;
 }
 
 const BaseIVFAB<Real>& JumpBC::getBndryPhi(const int a_phase, const DataIndex& a_dit) const {
@@ -103,8 +98,8 @@ void JumpBC::defineStencils(){
 	  bool foundStencil = false;
 	  std::pair<Real, VoFStencil> pairSten;
 	  
-	  // Try quadrants first. 
-	  order = m_isMGLevel ? 1 : m_order;
+	  // Try quadrants first.
+	  order = m_order;
 	  while(!foundStencil && order > 0){
 	    foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten, vof, ebisbox, VofUtils::Neighborhood::Quadrant, order);
 	    order--;
@@ -116,7 +111,6 @@ void JumpBC::defineStencils(){
 	  }
 
 	  // If we couldn't find in a quadrant, try a larger neighborhood
-	  order = m_isMGLevel ? 1 : m_order;
 	  while(!foundStencil && order > 0){
 	    foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten, vof, ebisbox, VofUtils::Neighborhood::Radius, order);
 	    order--;
@@ -132,7 +126,6 @@ void JumpBC::defineStencils(){
 	    gradStencils(vof, m_comp) = pairSten.second;
 	  }
 	  else{
-	    MayDay::Abort("stop, wtf");
 	    bndryWeights(vof, m_comp) = 0.0;
 	    gradStencils(vof, m_comp).clear();
 	  }

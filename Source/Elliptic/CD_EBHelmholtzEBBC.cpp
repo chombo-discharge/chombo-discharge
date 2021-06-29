@@ -17,15 +17,10 @@ constexpr int EBHelmholtzEBBC::m_comp;
 constexpr int EBHelmholtzEBBC::m_nComp;
 
 EBHelmholtzEBBC::EBHelmholtzEBBC(){
-  m_isMGLevel = false;
 }
 
 EBHelmholtzEBBC::~EBHelmholtzEBBC(){
 
-}
-
-void EBHelmholtzEBBC::setMG(const bool a_isMGLevel){
-  m_isMGLevel = a_isMGLevel;
 }
 
 void EBHelmholtzEBBC::define(const EBLevelGrid&                                 a_eblg,

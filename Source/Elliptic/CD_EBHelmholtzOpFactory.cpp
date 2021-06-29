@@ -450,7 +450,7 @@ EBHelmholtzOp* EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, 
     auto domBC = m_domainBcFactory->create();
     auto ebBC  = m_ebBcFactory->create();
 
-    ebBC->setMG(true);
+    //    ebBC->setMG(true);
     
     mgOp = new EBHelmholtzOp(EBLevelGrid(), // Multigrid operator, so no fine. 
 			     eblg,

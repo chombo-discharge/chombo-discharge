@@ -72,11 +72,6 @@ public:
   JumpBC& operator=(const JumpBC& a_other) = delete;
 
   /*!
-    @brief Set special flag in case we need to drop stencil radius when the domain is small. 
-  */
-  void setMG(const bool a_isMGLevel);
-
-  /*!
     @brief Match the BC
     @param[in] a_phi               Cell-centered data
     @param[in] a_jump              Jump data, i.e. right-hand side of dphi/dn + dphi/m = jump
@@ -142,11 +137,6 @@ protected:
     @brief B-coefficient
   */
   RefCountedPtr<LevelData<MFBaseIVFAB> > m_Bcoef;
-
-  /*!
-    @brief Is MG level or not
-  */
-  bool m_isMGLevel;
 
   /*!
     @brief Grid resolution

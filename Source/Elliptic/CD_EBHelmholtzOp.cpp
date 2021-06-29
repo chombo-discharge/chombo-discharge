@@ -804,6 +804,7 @@ void EBHelmholtzOp::pointJacobiKernel(EBCellFAB& a_Lcorr, EBCellFAB& a_correctio
   
     a_Lcorr      -= a_residual;
     a_Lcorr      *= m_relCoef[a_dit];
+    a_Lcorr      *= 0.5;
     a_correction -= a_Lcorr;
   }
 }
@@ -1129,7 +1130,7 @@ void EBHelmholtzOp::computeRelaxationCoefficient(){
   // Add safety factors for relaxations 
   switch(m_relaxationMethod){
   case RelaxationMethod::PointJacobi: 
-    this->scale(m_relCoef, 0.5); 
+    //    this->scale(m_relCoef, 0.5); // Moved to kernel. 
     break;
   case RelaxationMethod::GauSaiRedBlack:
     break;

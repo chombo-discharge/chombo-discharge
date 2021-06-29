@@ -75,11 +75,6 @@ public:
 			   const bool&        a_homogeneousPhysBC) const = 0;
 
   /*!
-    @brief Set whether or not this is an MG level
-  */
-  void setMG(const bool a_isMGLevel);
-
-  /*!
     @brief Get the stencil for computing the finite-volume approximation to kappa*Div(F). 
     @details The finite volume approximation to kappa*Div(F) is sum(Fluxes)/dx. This routine should return the flux on the EB, i.e. (B*dphi/dn)/dx. The derivative
              can be written dphi/dn = w0*phi0 + sum(wi*phi(i)) where phi0 is a boundary weight and phi(i) are grid points. This routine should return the stencil
@@ -104,11 +99,6 @@ protected:
     @brief Number of ghost cells that were filled across CF interface
   */
   int m_ghostCF;
-
-  /*!
-    @brief Special flag for whether or not this boundary condition belongs to an MG level
-  */
-  bool m_isMGLevel;
 
   /*!
     @brief Grid resolution
