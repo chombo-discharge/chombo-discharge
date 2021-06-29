@@ -104,7 +104,7 @@ RodDielectric.electrode.live            = true          # Live or not
 
 RodDielectric.dielectric.on             = true          # Use dielectric or not
 RodDielectric.dielectric.shape          = sphere        # 'plane', 'box', 'perlin_box', 'sphere'
-RodDielectric.dielectric.permittivity   = 4             # Dielectric permittivity
+RodDielectric.dielectric.permittivity   = 5             # Dielectric permittivity
 
 # Subsettings for 'plane'
 RodDielectric.plane.point               = 0 0 0         # Plane point
