@@ -344,7 +344,7 @@ void MFHelmholtzOp::preCond(LevelData<MFCellFAB>& a_corr, const LevelData<MFCell
   CH_TIME("MFHelmholtzOp::preCond");
 
 #if 1
-  this->relax(a_corr, a_residual, 10);
+  this->relax(a_corr, a_residual, 40);
 #else
   m_jumpBC->resetBC();
   
