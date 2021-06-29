@@ -55,10 +55,10 @@ VoFStencil LeastSquares::getBndryGradSten(const VolIndex&    a_vof,
 					  const Real         a_dx,
 					  const int          a_radius,
 					  const int          a_p,
-					  const int          a_order){
+					  const int          a_order,
+					  const bool         a_addStartingVof){
   VoFStencil bndrySten;
 
-  const bool addStartingVof = false;
   const RealVect normal     = a_ebisbox.normal(a_vof);
 
   if(normal != RealVect::Zero){ // Can only do this if we actual have a normal vector. 
@@ -68,10 +68,10 @@ VoFStencil LeastSquares::getBndryGradSten(const VolIndex&    a_vof,
 
     switch(a_neighborhood){
     case Neighborhood::Quadrant:
-      allVofs = VofUtils::getVofsInQuadrant(a_vof, a_ebisbox, normal, a_radius, VofUtils::Connectivity::MonotonePath, false);
+      allVofs = VofUtils::getVofsInQuadrant(a_vof, a_ebisbox, normal, a_radius, VofUtils::Connectivity::MonotonePath, a_addStartingVof);
       break;
     case Neighborhood::Radius:
-      allVofs = VofUtils::getVofsInRadius(a_vof, a_ebisbox, a_radius, VofUtils::Connectivity::MonotonePath, false);
+      allVofs = VofUtils::getVofsInRadius(a_vof, a_ebisbox, a_radius, VofUtils::Connectivity::MonotonePath, a_addStartingVof);
       break;
     default:
       break;
@@ -91,6 +91,21 @@ VoFStencil LeastSquares::getBndryGradSten(const VolIndex&    a_vof,
   }
 
   return bndrySten;
+}
+
+VoFStencil LeastSquares::getFaceGradSten(const FaceIndex&   a_face,
+					 const Neighborhood a_neighborhood,
+					 const CellPosition a_cellPositions,
+					 const EBISBox&     a_ebisbox,
+					 const Real         a_dx,
+					 const int          a_radius,
+					 const int          a_p,
+					 const int          a_order){
+  VoFStencil faceSten;
+
+  MayDay::Abort("LeastSquares::getFaceGradSten - not implemented");
+
+  return faceSten;
 }
 
 RealVect LeastSquares::position(const CellPosition a_position,

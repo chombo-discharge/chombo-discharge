@@ -254,11 +254,11 @@ bool JumpBC::getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFStencil>& a_s
 
   const RealVect normal = a_ebisbox.normal(a_vof);  
     
-  const VoFStencil gradientStencil = LeastSquares::getBndryGradSten(a_vof, a_neighborhood, LeastSquares::CellPosition::Center, a_ebisbox, m_dx, a_order, m_weight, a_order);
+  const VoFStencil gradStencil = LeastSquares::getBndryGradSten(a_vof, a_neighborhood, LeastSquares::CellPosition::Center, a_ebisbox, m_dx, a_order, m_weight, a_order, false);
 
-  if(gradientStencil.size() > 0 && normal != RealVect::Zero){
+  if(gradStencil.size() > 0 && normal != RealVect::Zero){
     
-    const VoFStencil DphiDnStencil =  LeastSquares::projectGradSten(gradientStencil, -normal);
+    const VoFStencil DphiDnStencil =  LeastSquares::projectGradSten(gradStencil, -normal);
     const Real boundaryWeight      = -LeastSquares::sumAllWeights(DphiDnStencil);
 
     a_stencil = std::make_pair(boundaryWeight, DphiDnStencil);

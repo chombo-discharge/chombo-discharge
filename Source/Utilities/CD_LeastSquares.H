@@ -38,13 +38,9 @@ public:
     @brief Static class, no destruction here. 
   */
   ~LeastSquares() = delete;
-  
-  enum class CellPosition {
-    Center,
-    Centroid,
-    Boundary
-  };
 
+
+  using CellPosition = VofUtils::CellPosition;
   using Connectivity = VofUtils::Connectivity;
   using Neighborhood = VofUtils::Neighborhood;
 
@@ -74,6 +70,30 @@ public:
   /*!
     @brief Compute a least squares gradient stencil on the EB centroid with specified order. 
     @details This routine eliminates the value on the boundary and the user will have to fetch the weight for this point from the returned stencil. 
+    @param[in]  a_vof            Input vof
+    @param[in]  a_neighborhood   Neighboorhood specification
+    @param[in]  a_cellPositions  How to interpret cell positions
+    @param[in]  a_ebisbox        ebisbox
+    @param[in]  a_radius         Stencil radius
+    @param[in]  a_dx             Resolution
+    @param[in]  a_p              Weight scaling
+    @param[in]  a_order          Order of the gradient. 
+    @param[in]  a_addStartingVof Use a_vof in the expression for the gradient. This can be ill-conditioned for cell-centered expressions. 
+    @return     Returns a least squares stencil for evaluating an approximation normal derivative on the boundary centroid. 
+  */
+  static VoFStencil getBndryGradSten(const VolIndex&    a_vof,
+				     const Neighborhood a_neighborhood,
+				     const CellPosition a_cellPositions,
+				     const EBISBox&     a_ebisbox,
+				     const Real         a_dx,
+				     const int          a_radius,
+				     const int          a_p,
+				     const int          a_order,
+				     const bool         a_addStartingVof);
+
+  /*!
+    @brief Compute a least squares gradient stencil on a grid face. 
+    @details This routine computes grad(phi)*n(facedir) where n is the normal vector. 
     @param[in]  a_vof Input vof
     @param[in]  a_ebisbox ebisbox
     @param[in]  a_dx Resolution
@@ -83,14 +103,14 @@ public:
     @details    This will first try to get all Vofs defined in the quadrant defined by the normal vector, i.e. 3 cells in 2D and up to 7 cells in 3D. If that
     does not work the routine will try to fetch a symmetric stencil. If that does not work it will get all Vofs within a certain radius. 
   */
-  static VoFStencil getBndryGradSten(const VolIndex&    a_vof,
-				     const Neighborhood a_neighborhood,
-				     const CellPosition a_cellPositions,
-				     const EBISBox&     a_ebisbox,
-				     const Real         a_dx,
-				     const int          a_radius,
-				     const int          a_p,
-				     const int          a_order);
+  static VoFStencil getFaceGradSten(const FaceIndex&   a_face,
+				    const Neighborhood a_neighborhood,
+				    const CellPosition a_cellPositions,
+				    const EBISBox&     a_ebisbox,
+				    const Real         a_dx,
+				    const int          a_radius,
+				    const int          a_p,
+				    const int          a_order);
 
   /*!
     @brief Return the sum of weights in the stencil, for a specific variable. 
