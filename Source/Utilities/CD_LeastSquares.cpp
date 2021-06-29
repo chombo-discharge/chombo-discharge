@@ -80,14 +80,17 @@ VoFStencil LeastSquares::getBndryGradSten(const VolIndex&    a_vof,
 
     // Now build the stencil. 
     if(allVofs.size() >= numUnknowns){
+
       const Vector<RealVect> displacements = LeastSquares::getDisplacements(Location::Cell::Boundary,
 									    a_cellPositions,
 									    a_vof,
 									    allVofs,
 									    a_ebisbox,
 									    a_dx);
-      
-      bndrySten = LeastSquares::computeGradSten(allVofs, displacements, a_p, a_order); // This routine eliminates a_vof from the system of equations!
+
+      IntVectSet knownTerms;
+      knownTerms |= IntVect::Zero;
+      bndrySten = LeastSquares::computeGradSten(allVofs, displacements, a_p, a_order, knownTerms); // This routine eliminates a_vof from the system of equations!
     }
   }
 
@@ -282,16 +285,18 @@ Vector<Real> LeastSquares::makeDiagWeights(const Vector<RealVect>& a_displacemen
 VoFStencil LeastSquares::computeGradSten(const Vector<VolIndex>& a_allVofs,
 					 const Vector<RealVect>& a_displacements,
 					 const int               a_p,
-					 const int               a_order){
+					 const int               a_order,
+					 const IntVectSet        a_knownTerms){
   Vector<Real> weights = LeastSquares::makeDiagWeights(a_displacements, a_p);
 
-  return LeastSquares::computeGradSten(a_allVofs, a_displacements, weights, a_order);
+  return LeastSquares::computeGradSten(a_allVofs, a_displacements, weights, a_order, a_knownTerms);
 }
 
 VoFStencil LeastSquares::computeGradSten(const Vector<VolIndex>& a_allVofs,
 					 const Vector<RealVect>& a_displacements,
 					 const Vector<Real>&     a_weights,
-					 const int               a_order){
+					 const int               a_order,
+					 const IntVectSet        a_knownTerms){
 
 
   // TLDR: This routine 
@@ -300,10 +305,7 @@ VoFStencil LeastSquares::computeGradSten(const Vector<VolIndex>& a_allVofs,
     derivs |= BASISV(dir);
   }
 
-  IntVectSet knowns;
-  knowns |= IntVect::Zero;
-
-  std::map<IntVect, VoFStencil> taylorTerms = LeastSquares::computeInterpolationStencil(derivs, knowns, a_allVofs, a_displacements, a_weights, a_order);
+  std::map<IntVect, VoFStencil> taylorTerms = LeastSquares::computeInterpolationStencil(derivs, a_knownTerms, a_allVofs, a_displacements, a_weights, a_order);
 
   VoFStencil sten;
   for (const auto& m : taylorTerms){

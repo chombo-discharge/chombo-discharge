@@ -275,7 +275,8 @@ public:
   static VoFStencil computeGradSten(const Vector<VolIndex>& a_allVofs,
 				    const Vector<RealVect>& a_displacements,
 				    const int               a_p,
-				    const int               a_order);
+				    const int               a_order,
+				    const IntVectSet        a_knownTerms);
 
   /*!
     @brief Get a least squares gradient stencil solution for a system of first-order Taylor extrapolation for computing the gradient at a point.
@@ -291,7 +292,8 @@ public:
   static VoFStencil computeGradSten(const Vector<VolIndex>& a_allVofs,
 				    const Vector<RealVect>& a_displacements,
 				    const Vector<Real>&     a_weights,
-				    const int               a_order);
+				    const int               a_order,
+				    const IntVectSet        a_knownTerms);
   
   /*!
     @brief Get the size of a Taylor expansion for a given order
