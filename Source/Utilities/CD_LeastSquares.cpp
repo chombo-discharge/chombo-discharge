@@ -11,6 +11,7 @@
 
 // Std includes
 #include <vector>
+#include <set>
 
 // Our includes
 #include <CD_LaPackUtils.H>
@@ -94,8 +95,9 @@ VoFStencil LeastSquares::getBndryGradSten(const VolIndex&    a_vof,
 }
 
 VoFStencil LeastSquares::getFaceGradSten(const FaceIndex&   a_face,
-					 const Neighborhood a_neighborhood,
-					 const CellLocation a_cellPositions,
+					 const FaceLocation a_faceLocation,
+					 const CellLocation a_cellLocations,
+					 const Neighborhood a_neighborhood,					 
 					 const EBISBox&     a_ebisbox,
 					 const Real         a_dx,
 					 const int          a_radius,
@@ -109,13 +111,29 @@ VoFStencil LeastSquares::getFaceGradSten(const FaceIndex&   a_face,
     const VolIndex vofLo = a_face.getVoF(Side::Lo);
     const VolIndex vofHi = a_face.getVoF(Side::Hi);
 
-    // Get Vofs in monotone path for both lo/hi
-    const Vector<VolIndex> loVofs = VofUtils::getVofsInMonotonePath(vofLo, a_ebisbox, a_radius, true);
-    const Vector<VolIndex> hiVofs = VofUtils::getVofsInMonotonePath(vofHi, a_ebisbox, a_radius, true);
-    
+    // Get Vofs in monotone path for both lo/hi. The doing that will fetch duplicates (starting vof, for example) which we discard
+    // using std::set
+    Vector<VolIndex> allVofs;
+    Vector<VolIndex> loVofs = VofUtils::getVofsInRadius(vofLo, a_ebisbox, a_radius, VofUtils::Connectivity::MonotonePath, true);
+    Vector<VolIndex> hiVofs = VofUtils::getVofsInRadius(vofHi, a_ebisbox, a_radius, VofUtils::Connectivity::MonotonePath, true);
+
+    std::set<VolIndex> setVofs;
+    for (const auto& v : loVofs.stdVector()) setVofs.emplace(v);
+    for (const auto& v : hiVofs.stdVector()) setVofs.emplace(v);
+    for (const auto& v : setVofs           ) allVofs.push_back(v);
+
+    const int numUnknowns = LeastSquares::getTaylorExpansionSize(a_order);
+
+    if(allVofs.size() >= numUnknowns){
+      const Vector<RealVect> displacements = LeastSquares::getDisplacements(a_faceLocation, a_cellLocations, a_face, allVofs, a_ebisbox, a_dx);
+
+      //      VoFStencil gradSten = LeastSquares::computeGradSten(allVofs, displacements, a_p, a_order); // This routine eliminates a_vof from the system of equations!
+    }
+
+    MayDay::Abort("LeastSquares::getFaceGradSten - not implemented");
   }
 
-  MayDay::Abort("LeastSquares::getFaceGradSten - not implemented");
+
 
   return faceSten;
 }
@@ -146,6 +164,30 @@ RealVect LeastSquares::position(const CellLocation a_position,
   return ret;
 }
 
+RealVect LeastSquares::position(const FaceLocation a_position,
+				const FaceIndex&   a_face,
+				const EBISBox&     a_ebisbox,
+				const Real&        a_dx){
+  RealVect ret;
+  const IntVect iv = a_face.gridIndex(Side::Hi);
+  
+  switch(a_position){
+  case Location::Face::Center:
+    ret = (RealVect(iv) + 0.5*RealVect::Unit) - 0.5*BASISREALV(a_face.direction());
+    break;
+  case Location::Face::Centroid:
+    ret = (RealVect(iv) + 0.5*RealVect::Unit) - 0.5*BASISREALV(a_face.direction()) + a_ebisbox.centroid(a_face);
+    break;
+  default:
+    MayDay::Error("LeastSquares::positon - bad location input.");
+    break;
+  }
+
+  ret *= a_dx;
+
+  return ret;
+}
+
 RealVect LeastSquares::displacement(const CellLocation a_from,
 				    const CellLocation a_to,
 				    const VolIndex&    a_fromVof,
@@ -155,6 +197,18 @@ RealVect LeastSquares::displacement(const CellLocation a_from,
 
   const RealVect a = LeastSquares::position(a_from, a_fromVof, a_ebisbox, a_dx);
   const RealVect b = LeastSquares::position(a_to,   a_toVof,   a_ebisbox, a_dx);
+
+  return (b-a);
+}
+
+RealVect LeastSquares::displacement(const FaceLocation a_fromLoc,
+				    const CellLocation a_toLoc,
+				    const FaceIndex&   a_fromFace,
+				    const VolIndex&    a_toVof,
+				    const EBISBox&     a_ebisbox,
+				    const Real&        a_dx){
+  const RealVect a = LeastSquares::position(a_fromLoc, a_fromFace, a_ebisbox, a_dx);
+  const RealVect b = LeastSquares::position(a_toLoc,   a_toVof,    a_ebisbox, a_dx);
 
   return (b-a);
 }
@@ -186,6 +240,23 @@ Vector<RealVect> LeastSquares::getDisplacements(const CellLocation      a_from,
   for (int i = 0; i < a_toVofs.size(); i++){
     const RealVect d = LeastSquares::displacement(a_from, a_to, a_fromVof, a_toVofs[i], a_ebisbox, a_dx);
 
+    ret.push_back(d);
+  }
+
+  return ret;
+}
+
+Vector<RealVect> LeastSquares::getDisplacements(const FaceLocation      a_fromLoc,
+						const CellLocation      a_toLoc,
+						const FaceIndex&        a_fromFace,
+						const Vector<VolIndex>& a_toVofs,
+						const EBISBox&          a_ebisbox,
+						const Real&             a_dx){
+  Vector<RealVect> ret;
+
+  for (int i = 0; i < a_toVofs.size(); i++){
+    const RealVect d = LeastSquares::displacement(a_fromLoc, a_toLoc, a_fromFace, a_toVofs[i], a_ebisbox, a_dx);
+    
     ret.push_back(d);
   }
 

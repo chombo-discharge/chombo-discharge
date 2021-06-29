@@ -108,8 +108,9 @@ public:
     does not work the routine will try to fetch a symmetric stencil. If that does not work it will get all Vofs within a certain radius. 
   */
   static VoFStencil getFaceGradSten(const FaceIndex&   a_face,
-				    const Neighborhood a_neighborhood,
-				    const CellLocation a_cellPositions,
+				    const FaceLocation a_faceLoaction,
+				    const CellLocation a_cellLocation,
+				    const Neighborhood a_neighborhood,				    
 				    const EBISBox&     a_ebisbox,
 				    const Real         a_dx,
 				    const int          a_radius,
@@ -146,10 +147,23 @@ public:
     @param[in] a_vof       VolIndex to compute the position of
     @param[in] a_ebisbox   EBISBox
     @param[in] a_dx        Grid resolution
-    @return Tosition of a Vof, ignoring the "origin" of the coordinate system since this is only used together with LeastSquares::displacement(...)
+    @return Position of a face, ignoring the "origin" of the coordinate system since this is only used together with LeastSquares::displacement(...)
   */
-  static RealVect position(const CellLocation a_position,
+  static RealVect position(const CellLocation a_location,
 			   const VolIndex&    a_vof,
+			   const EBISBox&     a_ebisbox,
+			   const Real&        a_dx);
+
+    /*!
+    @brief Compute the position (ignoring the "origin) of a FaceIndex
+    @param[in] a_position  Position within the grid cell (e.g. center, centroid)
+    @param[in] a_face      Face
+    @param[in] a_ebisbox   EBISBox
+    @param[in] a_dx        Grid resolution
+    @return Position of a face, ignoring the "origin" of the coordinate system since this is only used together with LeastSquares::displacement(...)
+  */
+  static RealVect position(const FaceLocation a_location,
+			   const FaceIndex&   a_face,
 			   const EBISBox&     a_ebisbox,
 			   const Real&        a_dx);
   
@@ -166,6 +180,23 @@ public:
   static RealVect displacement(const CellLocation a_from,
 			       const CellLocation a_to,
 			       const VolIndex&    a_fromVof,
+			       const VolIndex&    a_toVof,
+			       const EBISBox&     a_ebisbox,
+			       const Real&        a_dx);
+
+  /*!
+    @brief Computes the distance between a vof and and a face
+    @param[in] a_fromLoc   Specifying position in the cell defined by a_fromVof
+    @param[in] a_toLoc     Specifying position in the cell defined by a_toVof
+    @param[in] a_fromFace  face to compute the distance from
+    @param[in] a_toVof     Vof to compute the distance to
+    @param[in] a_ebisbox   EBISBox
+    @param[in] a_dx        Grid resolution
+    @returns The vector pos(a_toVof) - pos(a_fromVof). 
+  */
+  static RealVect displacement(const FaceLocation a_fromLoc,
+			       const CellLocation a_toLoc,
+			       const FaceIndex&   a_fromFace,
 			       const VolIndex&    a_toVof,
 			       const EBISBox&     a_ebisbox,
 			       const Real&        a_dx);
@@ -203,6 +234,22 @@ public:
   static Vector<RealVect> getDisplacements(const CellLocation      a_from,
 					   const CellLocation      a_to,
 					   const VolIndex&         a_fromVof,
+					   const Vector<VolIndex>& a_toVofs,
+					   const EBISBox&          a_ebisbox,
+					   const Real&             a_dx);
+
+    /*!
+    @brief Get displacement vectors from a cell position to another cell position for a list of Vofs, i.e. x = (xFrom - xTo).
+    @param[in] a_fromLoc  Location on face
+    @param[in] a_toLoc    Location in Vofs
+    @param[in] a_fromFace Origin face
+    @param[in] a_toVofs   Vofs to compute the distance to/from
+    @param[in] a_ebisbox  EBISBox
+    @param[in] a_dx       Grid resolution
+  */
+  static Vector<RealVect> getDisplacements(const FaceLocation      a_fromLoc,
+					   const CellLocation      a_to,
+					   const FaceIndex&        a_fromFace,
 					   const Vector<VolIndex>& a_toVofs,
 					   const EBISBox&          a_ebisbox,
 					   const Real&             a_dx);
