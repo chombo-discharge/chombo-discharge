@@ -84,7 +84,8 @@ public:
     does not work the routine will try to fetch a symmetric stencil. If that does not work it will get all Vofs within a certain radius. 
   */
   static VoFStencil getBndryGradSten(const VolIndex&    a_vof,
-				     const Neighborhood a_neighborhood,				     
+				     const Neighborhood a_neighborhood,
+				     const CellPosition a_cellPositions,
 				     const EBISBox&     a_ebisbox,
 				     const Real         a_dx,
 				     const int          a_radius,

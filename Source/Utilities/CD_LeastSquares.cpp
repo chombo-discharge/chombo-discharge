@@ -49,7 +49,8 @@ VoFStencil LeastSquares::getInterpolationStencil(const CellPosition a_cellPos,
 }
 
 VoFStencil LeastSquares::getBndryGradSten(const VolIndex&    a_vof,
-					  const Neighborhood a_neighborhood,					  
+					  const Neighborhood a_neighborhood,
+					  const CellPosition a_cellPositions,
 					  const EBISBox&     a_ebisbox,
 					  const Real         a_dx,
 					  const int          a_radius,
@@ -79,7 +80,7 @@ VoFStencil LeastSquares::getBndryGradSten(const VolIndex&    a_vof,
     // Now build the stencil. 
     if(allVofs.size() >= numUnknowns){
       const Vector<RealVect> displacements = LeastSquares::getDisplacements(CellPosition::Boundary,
-									    CellPosition::Center,
+									    a_cellPositions,
 									    a_vof,
 									    allVofs,
 									    a_ebisbox,
