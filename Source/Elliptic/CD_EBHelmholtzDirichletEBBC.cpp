@@ -171,7 +171,7 @@ bool EBHelmholtzDirichletEBBC::getLeastSquaresStencil(std::pair<Real, VoFStencil
     
   const VoFStencil gradientStencil = LeastSquares::getBndryGradSten(a_vof,
 								    a_neighborhood,
-								    LeastSquares::Location::CellCenter,
+								    Location::Cell::Center,
 								    ebisbox,
 								    m_dx,
 								    a_order,

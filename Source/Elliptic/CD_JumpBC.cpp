@@ -258,7 +258,7 @@ bool JumpBC::getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFStencil>& a_s
     
   const VoFStencil gradStencil = LeastSquares::getBndryGradSten(a_vof,
 								a_neighborhood,
-								LeastSquares::Location::CellCenter,
+								Location::Cell::Center,
 								a_ebisbox,
 								m_dx,
 								a_order,

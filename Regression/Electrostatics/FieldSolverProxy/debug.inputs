@@ -104,7 +104,7 @@ RodDielectric.electrode.live            = true          # Live or not
 
 RodDielectric.dielectric.on             = true          # Use dielectric or not
 RodDielectric.dielectric.shape          = sphere        # 'plane', 'box', 'perlin_box', 'sphere'
-RodDielectric.dielectric.permittivity   = 500000             # Dielectric permittivity
+RodDielectric.dielectric.permittivity   = 5             # Dielectric permittivity
 
 # Subsettings for 'plane'
 RodDielectric.plane.point               = 0 0 0         # Plane point
@@ -139,6 +139,6 @@ FieldStepper.realm        = primal          # Primal Realm
 FieldStepper.load_balance = false           # Load balance or not.
 FieldStepper.box_sorting  = morton          # If you load balance you can redo the box sorting. 
 FieldStepper.init_rho     = 0.E-10          # Space charge density
-FieldStepper.init_sigma   = 0.E-10          # Surface charge density
+FieldStepper.init_sigma   = 1.E-11          # Surface charge density
 FieldStepper.rho_center   = -0.5 -0.5       # Space charge blob center
 FieldStepper.rho_radius   = 0.25            # Space charge blob radius

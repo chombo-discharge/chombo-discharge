@@ -67,8 +67,8 @@ VoFStencil EBHelmholtzRobinEBBC::getMonoPathStencil(const VolIndex& a_vof, const
   const int radius       = 1;
   const bool useStartVof = true;
 
-  const VoFStencil stencil = LeastSquares::getInterpolationStencil(LeastSquares::Location::EBCentroid,
-								   LeastSquares::Location::CellCenter,
+  const VoFStencil stencil = LeastSquares::getInterpolationStencil(Location::Cell::Boundary,
+								   Location::Cell::Center,
 								   LeastSquares::Connectivity::MonotonePath,
 								   a_vof,
 								   ebisbox,
