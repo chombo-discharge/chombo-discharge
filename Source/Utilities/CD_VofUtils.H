@@ -31,15 +31,6 @@ class VofUtils {
 public:
 
   /*!
-    @brief Enum for specifying where in the cell the data is associated
-  */
-  enum class CellPosition {
-    Center,
-    Centroid,
-    Boundary
-  };
-
-  /*!
     @brief Class for specifying connectivity of Vofs. 
     @details MontonePath:     Vofs must be reachable with monotone path. 
     @details SimplyConnected: All vofs must be connected

@@ -38,9 +38,18 @@ public:
     @brief Static class, no destruction here. 
   */
   ~LeastSquares() = delete;
+  
+  /*!
+    @brief Enum for specifying where in the cell/face the data is located. 
+  */
+  enum class Location {
+    CellCenter,
+    CellCentroid,
+    EBCentroid,
+    FaceCenter,
+    FaceCentroid,
+  };
 
-
-  using CellPosition = VofUtils::CellPosition;
   using Connectivity = VofUtils::Connectivity;
   using Neighborhood = VofUtils::Neighborhood;
 
@@ -56,8 +65,8 @@ public:
     @param[in] a_order          Interpolation order. 
     @param[in] a_addStartingVof Add starting vof or not (can't be used with a_p > 0) as it would lead to ill-conditioned systems. 
   */
-  static VoFStencil getInterpolationStencil(const CellPosition a_cellPos,
-					    const CellPosition a_otherCellsPos,
+  static VoFStencil getInterpolationStencil(const Location     a_cellPos,
+					    const Location     a_otherCellsPos,
 					    const Connectivity a_connectivity,					    
 					    const VolIndex&    a_startVof,
 					    const EBISBox&     a_ebisbox,
@@ -83,7 +92,7 @@ public:
   */
   static VoFStencil getBndryGradSten(const VolIndex&    a_vof,
 				     const Neighborhood a_neighborhood,
-				     const CellPosition a_cellPositions,
+				     const Location     a_cellPositions,
 				     const EBISBox&     a_ebisbox,
 				     const Real         a_dx,
 				     const int          a_radius,
@@ -105,7 +114,7 @@ public:
   */
   static VoFStencil getFaceGradSten(const FaceIndex&   a_face,
 				    const Neighborhood a_neighborhood,
-				    const CellPosition a_cellPositions,
+				    const Location     a_cellPositions,
 				    const EBISBox&     a_ebisbox,
 				    const Real         a_dx,
 				    const int          a_radius,
@@ -144,7 +153,7 @@ public:
     @param[in] a_dx        Grid resolution
     @return Tosition of a Vof, ignoring the "origin" of the coordinate system since this is only used together with LeastSquares::displacement(...)
   */
-  static RealVect position(const CellPosition a_position,
+  static RealVect position(const Location     a_position,
 			   const VolIndex&    a_vof,
 			   const EBISBox&     a_ebisbox,
 			   const Real&        a_dx);
@@ -159,8 +168,8 @@ public:
     @param[in] a_dx       Grid resolution
     @returns The vector pos(a_toVof) - pos(a_fromVof). 
   */
-  static RealVect displacement(const CellPosition a_from,
-			       const CellPosition a_to,
+  static RealVect displacement(const Location     a_from,
+			       const Location     a_to,
 			       const VolIndex&    a_fromVof,
 			       const VolIndex&    a_toVof,
 			       const EBISBox&     a_ebisbox,
@@ -178,8 +187,8 @@ public:
     @param[in] a_dxTo        Grid resolution for the a_toVof vof
     @returns The vector pos(a_toVof) - pos(a_fromVof). 
   */
-  static RealVect displacement(const CellPosition a_from,
-			       const CellPosition a_to,
+  static RealVect displacement(const Location     a_from,
+			       const Location     a_to,
 			       const VolIndex&    a_fromVof,
 			       const VolIndex&    a_toVof,
 			       const EBISBox&     a_ebisboxFrom,
@@ -196,8 +205,8 @@ public:
     @param[in] a_ebisbox EBISBox
     @param[in] a_dx      Grid resolution
   */
-  static Vector<RealVect> getDisplacements(const CellPosition      a_from,
-					   const CellPosition      a_to,
+  static Vector<RealVect> getDisplacements(const Location          a_from,
+					   const Location          a_to,
 					   const VolIndex&         a_fromVof,
 					   const Vector<VolIndex>& a_toVofs,
 					   const EBISBox&          a_ebisbox,

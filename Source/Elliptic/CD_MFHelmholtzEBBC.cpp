@@ -157,10 +157,20 @@ bool MFHelmholtzEBBC::getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFSten
 							 const int                    a_order) const {
   bool foundStencil = false;
   
+  const bool addStartVof = false;
+  
   const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
   const RealVect normal  = ebisbox.normal(a_vof);  
     
-  const VoFStencil gradStencil = LeastSquares::getBndryGradSten(a_vof, a_neighborhood, LeastSquares::CellPosition::Center, ebisbox, m_dx, a_order, m_weight, a_order, false);
+  const VoFStencil gradStencil = LeastSquares::getBndryGradSten(a_vof,
+								a_neighborhood,
+								LeastSquares::Location::CellCenter,
+								ebisbox,
+								m_dx,
+								a_order,
+								m_weight,
+								a_order,
+								addStartVof);
 
   if(gradStencil.size() > 0 && normal != RealVect::Zero){
     
