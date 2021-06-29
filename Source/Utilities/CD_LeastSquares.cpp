@@ -49,6 +49,81 @@ VoFStencil LeastSquares::getInterpolationStencil(const CellLocation a_cellPos,
   return ret;
 }
 
+VoFStencil LeastSquares::getGradSten(const VolIndex&    a_vof,
+				     const CellLocation a_gradLocation,
+				     const CellLocation a_cellLocation,
+				     const EBISBox&     a_ebisbox,
+				     const Real         a_dx,
+				     const int          a_radius,
+				     const int          a_p,
+				     const int          a_order,
+				     const IntVectSet   a_knownTerms){
+
+  VoFStencil gradSten;
+
+
+  const Vector<VolIndex> allVofs = VofUtils::getVofsInRadius(a_vof, a_ebisbox, a_radius, VofUtils::Connectivity::MonotonePath, true);
+
+  const int numUnknowns = LeastSquares::getTaylorExpansionSize(a_order) - a_knownTerms.numPts(); // Can be smaller than order if you've eliminated some equations. 
+
+  // Build the stencil if we can. 
+  if(allVofs.size() >= numUnknowns){
+
+    const Vector<RealVect> displacements = LeastSquares::getDisplacements(a_gradLocation,
+									  a_cellLocation,
+									  a_vof,
+									  allVofs,
+									  a_ebisbox,
+									  a_dx);
+
+      
+    gradSten = LeastSquares::computeGradSten(allVofs, displacements, a_p, a_order, a_knownTerms); 
+  }
+
+
+  return gradSten;
+}
+
+VoFStencil LeastSquares::getGradSten(const FaceIndex&   a_face,
+				     const FaceLocation a_gradLocation,
+				     const CellLocation a_cellLocation,
+				     const EBISBox&     a_ebisbox,
+				     const Real         a_dx,
+				     const int          a_radius,
+				     const int          a_p,
+				     const int          a_order,
+				     const IntVectSet   a_knownTerms){
+  VoFStencil gradSten;
+
+  if(!a_face.isBoundary()){
+    const int faceDir = a_face.direction();
+
+    const VolIndex vofLo = a_face.getVoF(Side::Lo);
+    const VolIndex vofHi = a_face.getVoF(Side::Hi);
+
+    // Get Vofs in monotone path for both lo/hi. The doing that will fetch duplicates (starting vof, for example) which we discard
+    // using std::set below. After that, just get the distances and solve the least squares system. 
+    Vector<VolIndex> allVofs;
+    Vector<VolIndex> loVofs = VofUtils::getVofsInRadius(vofLo, a_ebisbox, a_radius, VofUtils::Connectivity::MonotonePath, true);
+    Vector<VolIndex> hiVofs = VofUtils::getVofsInRadius(vofHi, a_ebisbox, a_radius, VofUtils::Connectivity::MonotonePath, true);
+
+    std::set<VolIndex> setVofs;
+    for (const auto& v : loVofs.stdVector()) setVofs.emplace(v);
+    for (const auto& v : hiVofs.stdVector()) setVofs.emplace(v);
+    for (const auto& v : setVofs           ) allVofs.push_back(v);
+
+    const int numUnknowns = LeastSquares::getTaylorExpansionSize(a_order) - a_knownTerms.numPts(); // Can be smaller than order if you've eliminated some equations. 
+
+    if(allVofs.size() >= numUnknowns){
+      const Vector<RealVect> displacements = LeastSquares::getDisplacements(a_gradLocation, a_cellLocation, a_face, allVofs, a_ebisbox, a_dx);
+
+      gradSten = LeastSquares::computeGradSten(allVofs, displacements, a_p, a_order, a_knownTerms);
+    }
+  }
+
+  return gradSten;
+}
+
 VoFStencil LeastSquares::getBndryGradSten(const VolIndex&    a_vof,
 					  const Neighborhood a_neighborhood,
 					  const CellLocation a_cellPositions,
@@ -95,49 +170,6 @@ VoFStencil LeastSquares::getBndryGradSten(const VolIndex&    a_vof,
   }
 
   return bndrySten;
-}
-
-VoFStencil LeastSquares::getFaceGradSten(const FaceIndex&   a_face,
-					 const FaceLocation a_faceLocation,
-					 const CellLocation a_cellLocations,
-					 const EBISBox&     a_ebisbox,
-					 const Real         a_dx,
-					 const int          a_radius,
-					 const int          a_p,
-					 const int          a_order){
-  VoFStencil faceSten;
-
-  if(!a_face.isBoundary()){
-    const int faceDir = a_face.direction();
-
-    const VolIndex vofLo = a_face.getVoF(Side::Lo);
-    const VolIndex vofHi = a_face.getVoF(Side::Hi);
-
-    // Get Vofs in monotone path for both lo/hi. The doing that will fetch duplicates (starting vof, for example) which we discard
-    // using std::set below. After that, just get the distances and solve the least squares system. 
-    Vector<VolIndex> allVofs;
-    Vector<VolIndex> loVofs = VofUtils::getVofsInRadius(vofLo, a_ebisbox, a_radius, VofUtils::Connectivity::MonotonePath, true);
-    Vector<VolIndex> hiVofs = VofUtils::getVofsInRadius(vofHi, a_ebisbox, a_radius, VofUtils::Connectivity::MonotonePath, true);
-
-    std::set<VolIndex> setVofs;
-    for (const auto& v : loVofs.stdVector()) setVofs.emplace(v);
-    for (const auto& v : hiVofs.stdVector()) setVofs.emplace(v);
-    for (const auto& v : setVofs           ) allVofs.push_back(v);
-
-    const int numUnknowns = LeastSquares::getTaylorExpansionSize(a_order);
-
-    if(allVofs.size() >= numUnknowns){
-      const Vector<RealVect> displacements = LeastSquares::getDisplacements(a_faceLocation, a_cellLocations, a_face, allVofs, a_ebisbox, a_dx);
-
-      const VoFStencil gradSten = LeastSquares::computeGradSten(allVofs, displacements, a_p, a_order, IntVectSet()); 
-
-      if(gradSten.size() > 0){
-	faceSten = LeastSquares::projectGradSten(gradSten, BASISREALV(faceDir));
-      }
-    }
-  }
-
-  return faceSten;
 }
 
 RealVect LeastSquares::position(const CellLocation a_position,

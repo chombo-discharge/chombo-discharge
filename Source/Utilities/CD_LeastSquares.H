@@ -72,6 +72,52 @@ public:
 					    const bool         a_addStartingVof);
 
   /*!
+    @brief Compute a least squares gradient stencil in a cell.
+    @details This routine computes grad(phi) using a least squares reconstruction to specified order. 
+    @param[in]  a_vof          Input vof
+    @param[in]  a_gradLocation Where (in the vof) the gradient is evaluated
+    @param[in]  a_cellLocation Cell locations
+    @param[in]  a_ebisbox      ebisbox
+    @param[in]  a_dx           Resolution
+    @param[in]  a_radius       Stencil radius
+    @param[in]  a_p            Weighting factor for least squares
+    @param[in]  a_order        Truncation order.
+    @return     Returns a least squares stencil for computing the gradient. The directional derivatives are in the components of the returned stencil. 
+  */
+  static VoFStencil getGradSten(const VolIndex&    a_vof,
+				const CellLocation a_gradLocation,
+				const CellLocation a_cellLocation,
+				const EBISBox&     a_ebisbox,
+				const Real         a_dx,
+				const int          a_radius,
+				const int          a_p,
+				const int          a_order,
+				const IntVectSet   a_knownTerms = IntVectSet());
+
+  /*!
+    @brief Compute a least squares gradient stencil on a grid face. 
+    @details This routine computes grad(phi) using a least squares reconstruction to specified order. 
+    @param[in]  a_face         Input face
+    @param[in]  a_gradLocation Where (on the face) the gradient will be computed
+    @param[in]  a_cellLocation Cell location
+    @param[in]  a_ebisbox      ebisbox
+    @param[in]  a_dx           Resolution
+    @param[in]  a_radius       Stencil radius
+    @param[in]  a_p            Weighting factor for least squares
+    @param[in]  a_order        Truncation order.
+    @return     Returns a least squares stencil for computing the gradient. The directional derivatives are in the components of the returned stencil. 
+  */
+  static VoFStencil getGradSten(const FaceIndex&   a_face,
+				const FaceLocation a_gradLocation,
+				const CellLocation a_cellLocation,
+				const EBISBox&     a_ebisbox,
+				const Real         a_dx,
+				const int          a_radius,
+				const int          a_p,
+				const int          a_order,
+				const IntVectSet   a_knownTerms = IntVectSet());
+
+  /*!
     @brief Compute a least squares gradient stencil on the EB centroid with specified order. 
     @details This routine eliminates the value on the boundary and the user will have to fetch the weight for this point from the returned stencil. 
     @param[in]  a_vof            Input vof
@@ -94,27 +140,6 @@ public:
 				     const int          a_p,
 				     const int          a_order,
 				     const bool         a_addStartingVof);
-
-  /*!
-    @brief Compute a least squares gradient stencil on a grid face. 
-    @details This routine computes grad(phi)*n(facedir) where n is the normal vector. 
-    @param[in]  a_vof Input vof
-    @param[in]  a_ebisbox ebisbox
-    @param[in]  a_dx Resolution
-    @param[in]  a_p Scaling
-    @param[in]  a_order
-    @return     Returns a least squares stencil for evaluating the a first order approximation to the normal derivative on the boundary centroid. 
-    @details    This will first try to get all Vofs defined in the quadrant defined by the normal vector, i.e. 3 cells in 2D and up to 7 cells in 3D. If that
-    does not work the routine will try to fetch a symmetric stencil. If that does not work it will get all Vofs within a certain radius. 
-  */
-  static VoFStencil getFaceGradSten(const FaceIndex&   a_face,
-				    const FaceLocation a_faceLoaction,
-				    const CellLocation a_cellLocation,
-				    const EBISBox&     a_ebisbox,
-				    const Real         a_dx,
-				    const int          a_radius,
-				    const int          a_p,
-				    const int          a_order);
 
   /*!
     @brief Return the sum of weights in the stencil, for a specific variable. 
