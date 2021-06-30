@@ -54,7 +54,7 @@ void EBHelmholtzDirichletEBBC::setValue(const std::function<Real(const RealVect&
 }
   
 void EBHelmholtzDirichletEBBC::define() {
-  if(  m_order <= 0  || m_weight <= 0 ) MayDay::Error("EBHelmholtzDirichletEBBC - must have order > 0 and weight > 0");
+  if(  m_order <= 0  || m_weight < 0  ) MayDay::Error("EBHelmholtzDirichletEBBC - must have order > 0 and weight >= 0");
   if(!(m_useConstant || m_useFunction)) MayDay::Error("EBHelmholtzDirichletEBBC - not using constant or function!");
 
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
