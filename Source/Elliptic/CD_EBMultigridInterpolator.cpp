@@ -21,13 +21,15 @@
 
 EBMultigridInterpolator::EBMultigridInterpolator(){
   m_isDefined = false;
+  m_order     = 2;
+  m_lsqWeight = 0;
 }
 
 EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
 						 const EBLevelGrid& a_eblgCoar,
 						 const int          a_nRef,
 						 const int          a_nVar,
-						 const int          a_ghostCF) {
+						 const int          a_ghostCF) : EBMultigridInterpolator() {
 
   if(a_ghostCF != 1) MayDay::Abort("EBMultigridInterpolator::EBMultigridInterpolator - only one ghost cell supported (for now)!");
   if(a_ghostCF <= 0) MayDay::Abort("EBMultigridInterpolator::EBMultigridInterpolator - must interpolator at least one ghost cell!");
@@ -71,6 +73,11 @@ EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
   EBCellFactory cellFact(m_eblgCoar.getEBISL());
   m_zeroCoar.define(m_eblgCoar.getDBL(), a_nVar, IntVect::Zero, cellFact);
   EBLevelDataOps::setToZero(m_zeroCoar);
+
+  // Start the least squares stuff
+  refine (m_eblgCoFi, m_eblgCoar, a_nRef);
+  coarsen(m_eblgFiCo, m_eblgFine, a_nRef);
+  this->defineEBCFIVS();
 }
 
 int EBMultigridInterpolator::getGhostCF() const{
@@ -200,6 +207,45 @@ void EBMultigridInterpolator::coarseFineInterpH(EBCellFAB& a_phi, const Interval
 	}
       }
     }
+  }
+}
+
+void EBMultigridInterpolator::defineEBCFIVS(){
+
+  const DisjointBoxLayout& dbl = m_eblgFine.getDBL();
+  const ProblemDomain& domain  = m_eblgFine.getDomain();
+  const EBISLayout& ebisl      = m_eblgFine.getEBISL();
+
+  m_ghostCells.define(dbl);
+
+  DataIterator     dit(dbl);
+  NeighborIterator nit(dbl);
+
+  for (dit.reset(); dit.ok(); ++dit){
+    const Box cellBox      = dbl[dit()];
+    const EBISBox& ebisbox = ebisl[dit()];
+    Box grownBox = grow(cellBox, m_ghostCF);
+    grownBox &= domain;
+
+    IntVectSet ghosts = IntVectSet(grownBox);
+    for (nit.begin(dit()); nit.ok(); ++nit){
+      ghosts -= dbl[dit()];
+    }
+
+    for (IVSIterator ivsIt(ghosts); ivsIt.ok(); ++ivsIt){
+      const IntVect iv = ivsIt();
+
+      Vector<VolIndex> vofs = ebisbox.getVoFs(iv);
+
+      for (const auto& v : vofs.stdVector()) m_ghostCells[dit()].emplace_back(v);
+    }
+  }
+
+}
+
+void EBMultigridInterpolator::resetGhostsEBCF(LevelData<EBCellFAB>& a_fineData) const {
+  for (DataIterator dit = a_fineData.dataIterator(); dit.ok(); ++dit){
+    
   }
 }
 

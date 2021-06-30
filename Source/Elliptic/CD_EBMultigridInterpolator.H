@@ -46,7 +46,7 @@ public:
     @param[in] a_eblgCoar   Coarse grids
     @param[in] a_refRat     Refinement ratio
     @param[in] a_nVar       Number of variables
-    @param[in] a_ghostCells Ghost cells to interpolate
+    @param[in] a_ghostCells Number of ghost cells to interpolate. 
   */
   EBMultigridInterpolator(const EBLevelGrid&            a_eblgFine,
 			  const EBLevelGrid&            a_eblgCoar,
@@ -98,9 +98,29 @@ protected:
   EBLevelGrid m_eblgCoar;
 
   /*!
+    @brief Refined coarse grids
+  */
+  EBLevelGrid m_eblgCoFi;
+  
+  /*!
+    @brief Coarsened fine grids
+  */
+  EBLevelGrid m_eblgFiCo;
+
+  /*!
     @brief Number of ghost cells to fill across coarse-fine interface. 
   */
   int m_ghostCF;
+
+  /*!
+    @brief Order of the interpolation
+  */
+  int m_order;
+
+  /*!
+    @brief Least squares weighting factor
+  */
+  int m_lsqWeight;
 
   /*!
     @brief Coarse-fine interface. 
@@ -118,9 +138,55 @@ protected:
   LevelData<EBCellFAB> m_zeroCoar;
 
   /*!
+    @brief Ghost cells that may require interpolation. 
+  */
+  LayoutData<std::vector<VolIndex> > m_ghostCells;
+
+  /*!
+    @brief Fine stencils
+  */
+  LayoutData<BaseIVFAB<VoFStencil> > m_fineStencils;
+
+  /*!
+    @brief Fine stencils
+  */
+  LayoutData<BaseIVFAB<VoFStencil> > m_coarStencils;
+
+  /*!
+    @brief Fine data. Contains a lot of ghost storage
+  */
+  LevelData<EBCellFAB> m_fineData;
+
+  /*!
     @brief Defines the CFIVS
   */
   void defineCFIVS();
+
+  /*!
+    @brief Define ghost cells to be filled in range m_ghostCF from each cut-cell
+  */
+  void defineEBCFIVS();
+
+  /*!
+    @brief Do the least squares define stuff
+  */
+  void defineLeastSquares();
+
+  /*!
+    @brief Reset EBCF ghost cells in data holder
+  */
+  void resetGhostsEBCF(LevelData<EBCellFAB>& a_fineData) const;
+
+  /*!
+    @brief Build an interpolation stencil
+  */
+  void getStencil(VoFStencil&      a_stencilFine,
+		  VoFStencil&      a_stencilCoar,
+		  const VolIndex&  a_vofFine,
+		  const EBISBox&   a_ebisboxFine,
+		  const EBISBox&   a_ebisboxCoFi,
+		  const DataIndex& a_dit,
+		  const Real&      a_dx);
 };
 
 #include <CD_NamespaceFooter.H>
