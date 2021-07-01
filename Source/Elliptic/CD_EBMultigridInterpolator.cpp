@@ -325,7 +325,10 @@ void EBMultigridInterpolator::defineStencils(){
   m_fineStencils.define(dblFine);
   m_coarStencils.define(dblFine);
 
-  for (DataIterator dit(dblFine); dit.ok(); ++dit){
+  DataIterator     dit(dblFine);
+  NeighborIterator nit(dblFine);
+
+  for (dit.reset(); dit.ok(); ++dit){
     const Box origFineBox  = dblFine[dit()];
     const Box origCoarBox  = dblCoar[dit()];
 
@@ -335,16 +338,34 @@ void EBMultigridInterpolator::defineStencils(){
     BaseFab<bool> maskFine(grownFineBox, nComp);
     BaseFab<bool> maskCoar(grownCoarBox, nComp);
 
-    maskFine.setVal(true);
-    maskCoar.setVal(true);
+    maskFine.setVal(false);
+    maskCoar.setVal(true );
 
+    // Coar mask is false everywhere under the fine grid box, and opposite for the fine mask. 
     for (BoxIterator bit(origFineBox); bit.ok(); ++bit){
       const IntVect fineIV = bit();
       const IntVect coarIV = coarsen(fineIV, m_refRat);
 
+      maskFine(fineIV, comp) = true;
       maskCoar(coarIV, comp) = false;
     }
 
+    // Same for parts of the current (grown) patch that overlaps with neighboring boxes. 
+    for (nit.begin(dit()); nit.ok(); ++nit){
+      const Box neighBox = dblFine[nit()];
+      const Box overlap  = neighBox & grownFineBox;
+
+      for (BoxIterator bit(overlap); bit.ok(); ++bit){
+	const IntVect fineIV = bit();
+	const IntVect coarIV = coarsen(fineIV, m_refRat);
+
+	maskFine(fineIV, comp) = true;
+	maskCoar(coarIV, comp) = false;
+      }
+    }
+
+
+    // Now go through each ghost cell and get an interpolation stencil to specified order. 
     const EBISBox& ebisboxFine = m_eblgFine.getEBISL()[dit()];
     const EBISBox& ebisboxCoar = m_eblgCoar.getEBISL()[dit()];
 
@@ -354,7 +375,6 @@ void EBMultigridInterpolator::defineStencils(){
     m_fineStencils[dit()].define(m_ghostCells[dit()], fineGraph, nComp);
     m_coarStencils[dit()].define(m_ghostCells[dit()], fineGraph, nComp);
 
-    // Define stencils in each ghost cell. 
     for (VoFIterator vofit(m_ghostCells[dit()], fineGraph); vofit.ok(); ++vofit){
       const VolIndex& ghostVof = vofit();
 
