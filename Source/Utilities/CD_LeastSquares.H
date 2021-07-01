@@ -407,18 +407,6 @@ public:
 								   const int               a_order);
 
 
-
-  /*!
-    @brief Trim a system of equations down to a specified size. 
-    @details This will discard displacement vectors with the longest distance. If the system size is already equal to or smaller then this routine does nothing. 
-    @param[inout] a_vofs          Grid cells
-    @param[inout] a_displacements Displacement vectors
-    @param[in]    a_systemSize    Desired system size. 
-  */
-  static void trimSystem(Vector<VolIndex>& a_vofs,
-			 Vector<RealVect>& a_displacements,
-			 const int         a_systemSize);
-
 };
 
 #include <CD_NamespaceFooter.H>
