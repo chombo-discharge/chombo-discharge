@@ -432,9 +432,8 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&          a_stencilFine,
   const Vector<VolIndex> ghostVofCoar = a_ebisboxCoar.getVoFs(coarsen(a_ghostVof.gridIndex(), m_refRat)); // Vofs correseponding to coarsen(a_ghostVof, refRat)
 
   // Get all Vofs in specified radii.
-   Vector<VolIndex> fineVofs = VofUtils::getVofsInRadius(a_ghostVof, a_ebisboxFine, fineRadius, VofUtils::Connectivity::MonotonePath, true);
+  Vector<VolIndex> fineVofs = VofUtils::getVofsInRadius(a_ghostVof, a_ebisboxFine, fineRadius, VofUtils::Connectivity::MonotonePath, true);
 
-   if(fineVofs.size() < 3) std::cout << "shit" << std::endl;
 
   
   
