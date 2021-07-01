@@ -364,7 +364,7 @@ public:
     if some of the terms in the expansion are known, typically used when computing an approximation to the gradient at a point in space
     where the scalar value is known. Note that this will modify the right hand side of the system, and the user will have to figure out 
     how to make sense of the stencil. 
-    @param[in] a_derives       Specification of which terms to obtain from the series.
+    @param[in] a_derivs        Specification of which terms to obtain from the series.
     @param[in] a_knownTerms    Which terms in the Taylor series are known, and will be eliminated from the least squares system. 
     @param[in] a_allVofs       Vofs to include in the interpolation method. 
     @param[in] a_displacements Displacement vectors from the Vofs to the interpolation point
@@ -389,7 +389,7 @@ public:
     if some of the terms in the expansion are known, typically used when computing an approximation to the gradient at a point in space
     where the scalar value is known. Note that this will modify the right hand side of the system, and the user will have to figure out 
     how to make sense of the stencil. 
-    @param[in] a_derives       Specification of which unknowns in the Taylor series will be returned.
+    @param[in] a_derivs        Specification of which unknowns in the Taylor series will be returned.
     @param[in] a_knownTerms    Which terms in the Taylor series are known. 
     @param[in] a_allVofs       Vofs to include in the interpolation method. 
     @param[in] a_displacements Displacement vectors from the Vofs to the interpolation point
@@ -408,6 +408,25 @@ public:
 
   /*!
     @brief Compute a least squares interpolation to a specified order. This version separates the stencils into two levels. 
+    @details This is the general version which lets the caller specify why derivatives he wants out of the interpolation. The user
+    specifies this via a_derivs where each IntVect represent a differentiation. E.g. IntVect(0,0,0) is just f, IntVect(1,0,0) = d/dx,
+    IntVect(1,1,2) = (d^4)/(dx dy dz^2) and so on. The stencils for the directional derivatives are coded onto the return map. E.g.
+    if a_derivs contains IntVect(1,0,0) the stencil for d/dx is found in map.at(IntVect(1,0,0)). The user can solve a smaller system
+    if some of the terms in the expansion are known, typically used when computing an approximation to the gradient at a point in space
+    where the scalar value is known. Note that this will modify the right hand side of the system, and the user will have to figure out 
+    how to make sense of the stencil. 
+    @param[in] a_derivs            Specification of which unknowns in the Taylor series will be returned.
+    @param[in] a_knownTerms        Which terms in the Taylor series are known. 
+    @param[in] a_fineVofs          Fine-level vofs to include in the interpolation method. 
+    @param[in] a_coarVofs          Coar-level vofs to include in the interpolation method. 
+    @param[in] a_fineDisplacements Displacement vectors from the fine Vofs to the interpolation point
+    @param[in] a_coarDisplacements Displacement vectors from the coar Vofs to the interpolation point
+    @param[in] a_p                 Weighting factor for weighted least squares
+    @param[in] a_order             Order of the interpolation. 
+    @return Stencils for each of the derivatives specified in the input argument. The first entry in the pair contains fine-grid vofs only,
+    and the second entry contains the coar vofs. 
+    @note This will throw an error if you don't have enough equations for obtaining the specified order. 
+    @note The return map is always initialized with empty stencils. If computing the pseudoinverse fails, the returned stencils are all empty. 
   */
   static std::map<IntVect, std::pair<VoFStencil, VoFStencil> > computeDualLevelStencils(const IntVectSet&       a_derivs,
 											const IntVectSet&       a_knownTerms,
@@ -420,6 +439,27 @@ public:
 
   /*!
     @brief Compute a least squares interpolation to a specified order. This version separates the stencils into two levels. 
+    @brief Compute a least squares interpolation to a specified order. This version separates the stencils into two levels. 
+    @details This is the general version which lets the caller specify why derivatives he wants out of the interpolation. The user
+    specifies this via a_derivs where each IntVect represent a differentiation. E.g. IntVect(0,0,0) is just f, IntVect(1,0,0) = d/dx,
+    IntVect(1,1,2) = (d^4)/(dx dy dz^2) and so on. The stencils for the directional derivatives are coded onto the return map. E.g.
+    if a_derivs contains IntVect(1,0,0) the stencil for d/dx is found in map.at(IntVect(1,0,0)). The user can solve a smaller system
+    if some of the terms in the expansion are known, typically used when computing an approximation to the gradient at a point in space
+    where the scalar value is known. Note that this will modify the right hand side of the system, and the user will have to figure out 
+    how to make sense of the stencil. 
+    @param[in] a_derivs            Specification of which unknowns in the Taylor series will be returned.
+    @param[in] a_knownTerms        Which terms in the Taylor series are known. 
+    @param[in] a_fineVofs          Fine-level vofs to include in the interpolation method. 
+    @param[in] a_coarVofs          Coar-level vofs to include in the interpolation method. 
+    @param[in] a_fineDisplacements Displacement vectors from the fine Vofs to the interpolation point
+    @param[in] a_coarDisplacements Displacement vectors from the coar Vofs to the interpolation point
+    @param[in] a_fineWeights       Weights for the fine level
+    @param[in] a_coarWeights       Weights for the coarse level
+    @param[in] a_order             Order of the interpolation. 
+    @return Stencils for each of the derivatives specified in the input argument. The first entry in the pair contains fine-grid vofs only,
+    and the second entry contains the coar vofs. 
+    @note This will throw an error if you don't have enough equations for obtaining the specified order. 
+    @note The return map is always initialized with empty stencils. If computing the pseudoinverse fails, the returned stencils are all empty. 
   */
   static std::map<IntVect, std::pair<VoFStencil, VoFStencil> > computeDualLevelStencils(const IntVectSet&       a_derivs,
 											const IntVectSet&       a_knownTerms,

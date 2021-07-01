@@ -31,6 +31,9 @@
 class EBMultigridInterpolator : public EBQuadCFInterp {
 public:
 
+  /*!
+    @brief Specification of cell-center or cell-centroid type of interpolation
+  */
   using CellLocation = Location::Cell;
 
   /*!
@@ -110,7 +113,6 @@ public:
   void coarseFineInterpH(EBCellFAB& a_phiFine, const Interval a_variables, const DataIndex& a_dit);
 
 protected:
-
   
   /*!
     @brief Defines the CFIVS
