@@ -197,7 +197,7 @@ protected:
   */
   bool getStencil(VoFStencil&          a_stencilFine,
 		  VoFStencil&          a_stencilCoar,
-		  const VolIndex&      a_vofFine,
+		  const VolIndex&      a_ghostVof,
 		  const EBISBox&       a_ebisboxFine,
 		  const EBISBox&       a_ebisboxCoar,
 		  const BaseFab<bool>& a_maskFine,

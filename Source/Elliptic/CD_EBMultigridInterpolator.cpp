@@ -8,8 +8,8 @@
   @brief  Implementation of CD_EBMultigridInterpolator.H
   @author Robert Marskar
   @todo   Consider making a completely new layout near the EB, so we don't define the temp holders for the full domain. 
-  @todo   Should probably redefine the fine and coFi data eblgs from scratch, so that ghost cells are safe...
   @todo   When we do the interpolation, we should copy from coarse to m_coarData and from fine to m_fineData and then run everything locally on each patch. 
+  @todo   Check the required number of ghost cells -- not sure if 2*ghostCF is correct.
 */
 
 // Chombo includes
@@ -20,6 +20,8 @@
 
 // Our includes
 #include <CD_EBMultigridInterpolator.H>
+#include <CD_VofUtils.H>
+#include <CD_LeastSquares.H>
 #include <CD_NamespaceHeader.H>
 
 EBMultigridInterpolator::EBMultigridInterpolator(){
@@ -318,9 +320,7 @@ void EBMultigridInterpolator::defineStencils(){
   const Real dxFine = 1.0;
   const Real dxCoar = dxFine*m_refRat;
 
-  // m_eblgCoar is a coarsening of m_eblgFine so they are accessible with the same iterators. 
   const DisjointBoxLayout& dblFine = m_eblgFine.getDBL();
-  const DisjointBoxLayout& dblCoar = m_eblgCoar.getDBL();
 
   m_fineStencils.define(dblFine);
   m_coarStencils.define(dblFine);
@@ -330,8 +330,6 @@ void EBMultigridInterpolator::defineStencils(){
 
   for (dit.reset(); dit.ok(); ++dit){
     const Box origFineBox  = dblFine[dit()];
-    const Box origCoarBox  = dblCoar[dit()];
-
     const Box grownFineBox = m_fineBoxes[dit()];
     const Box grownCoarBox = m_coarBoxes[dit()];
 
@@ -367,10 +365,10 @@ void EBMultigridInterpolator::defineStencils(){
 
     // Now go through each ghost cell and get an interpolation stencil to specified order. 
     const EBISBox& ebisboxFine = m_eblgFine.getEBISL()[dit()];
-    const EBISBox& ebisboxCoar = m_eblgCoar.getEBISL()[dit()];
+    const EBISBox& ebisboxCoar = m_eblgCoFi.getEBISL()[dit()];
 
     const EBGraph& fineGraph   = ebisboxFine.getEBGraph();
-    const EBGraph& coarGraph   = ebisboxFine.getEBGraph();
+    const EBGraph& coarGraph   = ebisboxCoar.getEBGraph();
 
     m_fineStencils[dit()].define(m_ghostCells[dit()], fineGraph, nComp);
     m_coarStencils[dit()].define(m_ghostCells[dit()], fineGraph, nComp);
@@ -418,7 +416,7 @@ void EBMultigridInterpolator::defineStencils(){
 
 bool EBMultigridInterpolator::getStencil(VoFStencil&          a_stencilFine,
 					 VoFStencil&          a_stencilCoar,
-					 const VolIndex&      a_vofFine,
+					 const VolIndex&      a_ghostVof,
 					 const EBISBox&       a_ebisboxFine,
 					 const EBISBox&       a_ebisboxCoar,
 					 const BaseFab<bool>& a_maskFine,
@@ -428,6 +426,17 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&          a_stencilFine,
 					 const int&           a_order,
 					 const int&           a_weight){
 
+  const int fineRadius = a_order;
+  const int coarRadius = std::max(1, fineRadius/2);
+
+  const Vector<VolIndex> ghostVofCoar = a_ebisboxCoar.getVoFs(coarsen(a_ghostVof.gridIndex(), m_refRat)); // Vofs correseponding to coarsen(a_ghostVof, refRat)
+
+  // Get all Vofs in specified radii.
+   Vector<VolIndex> fineVofs = VofUtils::getVofsInRadius(a_ghostVof, a_ebisboxFine, fineRadius, VofUtils::Connectivity::MonotonePath, true);
+
+   if(fineVofs.size() < 3) std::cout << "shit" << std::endl;
+
+  
   
   return true;
 }
