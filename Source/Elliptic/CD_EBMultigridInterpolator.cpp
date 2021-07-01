@@ -35,7 +35,7 @@ EBMultigridInterpolator::EBMultigridInterpolator(){
 
 EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
 						 const EBLevelGrid& a_eblgCoar,
-						 const int          a_refRat,
+n						 const int          a_refRat,
 						 const int          a_nVar,
 						 const int          a_ghostCF) : EBMultigridInterpolator() {
   CH_assert(a_ghostCF > 0);

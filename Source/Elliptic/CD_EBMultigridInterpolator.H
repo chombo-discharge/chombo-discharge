@@ -57,6 +57,27 @@ public:
 			  const int          a_nVar,
 			  const int          a_ghostCF);
 
+  /*!
+    @brief Full constructor
+    @param[in] a_eblgFine     Fine grids
+    @param[in] a_eblgCoar     Coarse grids
+    @param[in] a_cellLocation Interpration of data centering. Either on the cell center or the cell centroid. 
+    @param[in] a_refRat       Refinement ratio
+    @param[in] a_nVar         Number of variables
+    @param[in] a_ghostCF      Width of the ghost region to be filled
+    @param[in] a_order        Interpolation order
+    @param[in] a_order        Interpolation order
+    @param[in] a_weighting    Weighting factor least squares. 
+  */
+  EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
+			  const EBLevelGrid& a_eblgCoar,
+			  const CellLocation a_cellLocation,
+			  const int          a_refRat,
+			  const int          a_nVar,
+			  const int          a_ghostCF,
+			  const int          a_order,
+			  const int          a_weighting);
+			  
 
   /*!
     @brief Dtor. Releases stencils. 
