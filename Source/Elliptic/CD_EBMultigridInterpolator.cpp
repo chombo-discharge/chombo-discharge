@@ -110,13 +110,9 @@ void EBMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>& a_phiFine, 
 }
 
 void EBMultigridInterpolator::coarseFineInterpH(LevelData<EBCellFAB>& a_phiFine, const Interval a_variables){
-#if 0 // This is very slow code
-  EBQuadCFInterp::interpolate(a_phiFine, m_zeroCoar, a_variables);
-#else // Much faster code
   for (DataIterator dit(m_eblgFine.getDBL()); dit.ok(); ++dit){
     this->coarseFineInterpH(a_phiFine[dit()], a_variables, dit());
   }
-#endif
 }
 
 void EBMultigridInterpolator::coarseFineInterpH(EBCellFAB& a_phi, const Interval a_variables, const DataIndex& a_dit){
@@ -234,7 +230,7 @@ void EBMultigridInterpolator::defineGhosts(){
     NeighborIterator nit(dbl);
     for (nit.begin(dit()); nit.ok(); ++nit){
 	m_ghostCells[dit()] -= dbl[nit()];
-      }
+    }
 
     m_ghostCells[dit()] -= cellBox;
   }
@@ -416,7 +412,7 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&       a_stencilFine,
   VofUtils::includeCells(coarVofs, a_validCoarCells);
   VofUtils::onlyUnique(coarVofs);
 
-  std::cout << "got vofs = " << coarVofs.size() + fineVofs.size() << std::endl;
+  //  std::cout << "got vofs = " << coarVofs.size() + fineVofs.size() << std::endl;
   
   return true;
 }
