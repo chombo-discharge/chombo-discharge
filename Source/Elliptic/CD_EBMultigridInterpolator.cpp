@@ -7,6 +7,9 @@
   @file   CD_EBMultigridInterpolator.cpp
   @brief  Implementation of CD_EBMultigridInterpolator.H
   @author Robert Marskar
+  @todo   Consider making a completely new layout near the EB, so we don't define the temp holders for the full domain. 
+  @todo   Should probably redefine the fine and coFi data eblgs from scratch, so that ghost cells are safe...
+  @todo   When we do the interpolation, we should copy from coarse to m_coarData and from fine to m_fineData and then run everything locally on each patch. 
 */
 
 // Chombo includes
@@ -22,19 +25,17 @@
 EBMultigridInterpolator::EBMultigridInterpolator(){
   m_isDefined = false;
   m_order     = 2;
-  m_lsqWeight = 0;
+  m_weight    = 0;
 }
 
 EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
 						 const EBLevelGrid& a_eblgCoar,
-						 const int          a_nRef,
+						 const int          a_refRat,
 						 const int          a_nVar,
 						 const int          a_ghostCF) : EBMultigridInterpolator() {
-
-  if(a_ghostCF != 1) MayDay::Abort("EBMultigridInterpolator::EBMultigridInterpolator - only one ghost cell supported (for now)!");
-  if(a_ghostCF <= 0) MayDay::Abort("EBMultigridInterpolator::EBMultigridInterpolator - must interpolator at least one ghost cell!");
-  
-  m_ghostCF = a_ghostCF;
+  CH_assert(a_ghostCF > 0);
+  CH_assert(a_nVar > 0);
+  CH_assert(a_refRat%2 == 0);
 
   // Build the CFIVS for EBQuadCFInterp. 
   const DisjointBoxLayout& dblFine = a_eblgFine.getDBL();
@@ -42,7 +43,7 @@ EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
   
   LayoutData<IntVectSet> cfivs(dblFine);
   for (DataIterator dit(dblFine); dit.ok(); ++dit){
-    Box grownBox = grow(dblFine[dit()], m_ghostCF);
+    Box grownBox = grow(dblFine[dit()], 1);
     grownBox &= domainFine;
 
     cfivs[dit()] = IntVectSet(grownBox);
@@ -58,26 +59,23 @@ EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
 			 a_eblgFine.getEBISL(),
 			 a_eblgCoar.getEBISL(),
 			 a_eblgCoar.getDomain(),
-			 a_nRef,
+			 a_refRat,
 			 a_nVar,
 			 cfivs,
 			 a_eblgFine.getEBIS(),
 			 true);
-
   m_eblgFine = a_eblgFine;
   m_eblgCoar = a_eblgCoar;
-
   this->defineCFIVS();
-  
-  // Define a temp which is zero everywhere. Don't need ghost cells because the stencils should(!) only reach into valid cells AFAIK. 
-  EBCellFactory cellFact(m_eblgCoar.getEBISL());
-  m_zeroCoar.define(m_eblgCoar.getDBL(), a_nVar, IntVect::Zero, cellFact);
-  EBLevelDataOps::setToZero(m_zeroCoar);
 
-  // Start the least squares stuff
-  refine (m_eblgCoFi, m_eblgCoar, a_nRef);
-  coarsen(m_eblgFiCo, m_eblgFine, a_nRef);
+// NEW CONSTRUCTOR IMPLEMENTATION GOES BELOW HERE
+  m_refRat   = a_refRat;
+  m_nComp    = a_nVar;
+  m_ghostCF  = a_ghostCF;
+  
+  this->defineGrids(a_eblgFine, a_eblgCoar);
   this->defineEBCFIVS();
+  this->defineData();
 }
 
 int EBMultigridInterpolator::getGhostCF() const{
@@ -85,6 +83,8 @@ int EBMultigridInterpolator::getGhostCF() const{
 }
 
 void EBMultigridInterpolator::defineCFIVS(){
+
+  
   for (int dir = 0; dir < SpaceDim; dir++){
     m_loCFIVS[dir].define(m_eblgFine.getDBL());
     m_hiCFIVS[dir].define(m_eblgFine.getDBL());
@@ -240,11 +240,89 @@ void EBMultigridInterpolator::defineEBCFIVS(){
       for (const auto& v : vofs.stdVector()) m_ghostCells[dit()].emplace_back(v);
     }
   }
-
 }
 
-void EBMultigridInterpolator::resetGhostsEBCF(LevelData<EBCellFAB>& a_fineData) const {
-  for (DataIterator dit = a_fineData.dataIterator(); dit.ok(); ++dit){
+void EBMultigridInterpolator::defineGrids(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoar){
+  // Define the fine level grids. Use a shallow copy if we can.
+  const int ghostReq  = 2*m_ghostCF;
+  const int ghostFine = a_eblgFine.getGhost();
+  if(ghostFine >= ghostReq){ 
+    m_eblgFine = a_eblgFine;
+  }
+  else{ // Need to define from scratch
+    m_eblgFine.define(m_eblgFine.getDBL(), m_eblgFine.getDomain(), ghostReq, m_eblgFine.getEBIS());
+  }
+
+  // Coarse is just a copy.
+  m_eblgCoar = a_eblgCoar;
+
+  // Define the coarsened fine grids -- needs same number of ghost cells as m_eblgFine. 
+  coarsen(m_eblgCoFi, m_eblgFine, m_refRat);
+}
+
+void EBMultigridInterpolator::defineData(){
+  const DisjointBoxLayout& fineGrids = m_eblgFine.getDBL();
+  const DisjointBoxLayout& coFiGrids = m_eblgCoFi.getDBL();
+
+  const EBISLayout& fineEBISL        = m_eblgFine.getEBISL();
+  const EBISLayout& coFiEBISL        = m_eblgCoFi.getEBISL();
+
+  const ProblemDomain& fineDomain    = m_eblgFine.getDomain();
+  const ProblemDomain& coarDomain    = m_eblgCoFi.getDomain();
+
+  // Coarsen the fine-grid boxes and make a coarse layout, grown by a pretty big number of ghost cells...
+  LayoutData<Box> grownFineBoxes(fineGrids);
+  LayoutData<Box> grownCoarBoxes(coFiGrids);
+  
+  for (DataIterator dit(coFiGrids); dit.ok(); ++dit){
+    Box coarBox = grow(coFiGrids[dit()], 2*m_ghostCF);
+    Box fineBox = grow(fineGrids[dit()], 2*m_ghostCF);
+
+    grownCoarBoxes[dit()] = coarBox & coarDomain;
+    grownFineBoxes[dit()] = fineBox & fineDomain;
+  }
+
+  m_fineBoxes.define(grownFineBoxes);
+  m_coarBoxes.define(grownCoarBoxes);
+
+  m_fineData.define(m_fineBoxes, m_nComp, EBCellFactory(fineEBISL));
+  m_coarData.define(m_coarBoxes, m_nComp, EBCellFactory(coFiEBISL));
+
+
+#if 0 // Debug code
+  LevelData<EBCellFAB> coarData(m_eblgCoar.getDBL(), 1, IntVect::Zero, EBCellFactory(m_eblgCoar.getEBISL()));
+  EBLevelDataOps::setVal(coarData, 1.234);
+
+  for (DataIterator dit = m_coarData.dataIterator(); dit.ok(); ++dit){
+    m_coarData[dit()].setVal(0.0);
+  }
+
+  coarData.copyTo(m_coarData);
+
+  for (DataIterator dit = m_coarData.dataIterator(); dit.ok(); ++dit){
+    const Box cellBox      = m_eblgCoFi.getDBL()[dit()];
+    const Box grownBox     = m_coarBoxes[dit()];
+    const EBISBox& ebisbox = m_eblgCoFi.getEBISL()[dit()];
+    
+    IntVectSet ivs = IntVectSet(grownBox);
+    ivs -= cellBox;
+    
+    for (IVSIterator ivsIt(ivs); ivsIt.ok(); ++ivsIt){
+      const IntVect iv = ivsIt();
+
+      if(!ebisbox.isCovered(iv)){
+	std::cout << m_coarData[dit()](VolIndex(iv, 0), 0) << std::endl;
+      }
+    }
+  }
+#endif
+}
+
+void EBMultigridInterpolator::defineStencils(){
+
+  const DisjointBoxLayout& dblFine = m_eblgFine.getDBL();
+
+  for (DataIterator dit(dblFine); dit.ok(); ++dit){
     
   }
 }

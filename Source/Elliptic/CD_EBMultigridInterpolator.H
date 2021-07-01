@@ -48,11 +48,11 @@ public:
     @param[in] a_nVar       Number of variables
     @param[in] a_ghostCells Number of ghost cells to interpolate. 
   */
-  EBMultigridInterpolator(const EBLevelGrid&            a_eblgFine,
-			  const EBLevelGrid&            a_eblgCoar,
-			  const int                     a_nRef,
-			  const int                     a_nVar,
-			  const int                     a_ghostCF);
+  EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
+			  const EBLevelGrid& a_eblgCoar,
+			  const int          a_nRef,
+			  const int          a_nVar,
+			  const int          a_ghostCF);
 
 
   /*!
@@ -87,6 +87,26 @@ public:
 
 protected:
 
+  
+  /*!
+    @brief Defines the CFIVS
+  */
+  void defineCFIVS();
+
+    /*!
+    @brief Coarse-fine interface. 
+  */
+  LayoutData<CFIVS> m_loCFIVS[SpaceDim];
+
+  /*!
+    @brief Coarse-fine interface. 
+  */
+  LayoutData<CFIVS> m_hiCFIVS[SpaceDim];
+
+// ==================================================
+// NEW STUFF BELOW HERE
+// ==================================================
+
   /*!
     @brief Fine grids
   */
@@ -101,11 +121,26 @@ protected:
     @brief Refined coarse grids
   */
   EBLevelGrid m_eblgCoFi;
-  
+
   /*!
-    @brief Coarsened fine grids
+    @brief Grown box layout on the fine level
   */
-  EBLevelGrid m_eblgFiCo;
+  BoxLayout m_fineBoxes;
+
+  /*!
+    @brief Grown box layout on the coarse level
+  */
+  BoxLayout m_coarBoxes;
+
+  /*!
+    @brief Fine data. Contains a lot of ghost storage
+  */
+  BoxLayoutData<EBCellFAB> m_fineData;
+
+  /*!
+    @brief Coarsened data
+  */
+  BoxLayoutData<EBCellFAB> m_coarData;
 
   /*!
     @brief Number of ghost cells to fill across coarse-fine interface. 
@@ -120,22 +155,9 @@ protected:
   /*!
     @brief Least squares weighting factor
   */
-  int m_lsqWeight;
+  int m_weight;
 
-  /*!
-    @brief Coarse-fine interface. 
-  */
-  LayoutData<CFIVS> m_loCFIVS[SpaceDim];
 
-  /*!
-    @brief Coarse-fine interface. 
-  */
-  LayoutData<CFIVS> m_hiCFIVS[SpaceDim];
-
-  /*!
-    @brief Zero data on coarse grid
-  */
-  LevelData<EBCellFAB> m_zeroCoar;
 
   /*!
     @brief Ghost cells that may require interpolation. 
@@ -152,15 +174,7 @@ protected:
   */
   LayoutData<BaseIVFAB<VoFStencil> > m_coarStencils;
 
-  /*!
-    @brief Fine data. Contains a lot of ghost storage
-  */
-  LevelData<EBCellFAB> m_fineData;
 
-  /*!
-    @brief Defines the CFIVS
-  */
-  void defineCFIVS();
 
   /*!
     @brief Define ghost cells to be filled in range m_ghostCF from each cut-cell
@@ -168,14 +182,19 @@ protected:
   void defineEBCFIVS();
 
   /*!
-    @brief Do the least squares define stuff
+    @brief Define grids
   */
-  void defineLeastSquares();
+  void defineGrids(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoar);
 
   /*!
-    @brief Reset EBCF ghost cells in data holder
+    @brief Define data holders. 
   */
-  void resetGhostsEBCF(LevelData<EBCellFAB>& a_fineData) const;
+  void defineData();
+
+  /*!
+    @brief Define stencils
+  */
+  void defineStencils();
 
   /*!
     @brief Build an interpolation stencil
