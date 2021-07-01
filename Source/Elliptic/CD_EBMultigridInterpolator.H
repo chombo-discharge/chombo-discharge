@@ -195,17 +195,17 @@ protected:
   /*!
     @brief Build an interpolation stencil
   */
-  bool getStencil(VoFStencil&          a_stencilFine,
-		  VoFStencil&          a_stencilCoar,
-		  const VolIndex&      a_ghostVof,
-		  const EBISBox&       a_ebisboxFine,
-		  const EBISBox&       a_ebisboxCoar,
-		  const BaseFab<bool>& a_maskFine,
-		  const BaseFab<bool>& a_maskCoar,
-		  const Real&          a_dxFine,
-		  const Real&          a_dxCoar,
-		  const int&           a_order,
-		  const int&           a_weight);
+  bool getStencil(VoFStencil&       a_stencilFine,
+		  VoFStencil&       a_stencilCoar,
+		  const VolIndex&   a_ghostVof,
+		  const EBISBox&    a_ebisboxFine,
+		  const EBISBox&    a_ebisboxCoar,
+		  const IntVectSet& a_validFineCells,
+		  const IntVectSet& a_validCoarCells,
+		  const Real&       a_dxFine,
+		  const Real&       a_dxCoar,
+		  const int&        a_order,
+		  const int&        a_weight);
 };
 
 #include <CD_NamespaceFooter.H>

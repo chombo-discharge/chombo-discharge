@@ -10,6 +10,7 @@
   @todo   Consider making a completely new layout near the EB, so we don't define the temp holders for the full domain. 
   @todo   When we do the interpolation, we should copy from coarse to m_coarData and from fine to m_fineData and then run everything locally on each patch. 
   @todo   Check the required number of ghost cells -- not sure if 2*ghostCF is correct.
+  @todo   Think about what we need to do if we have multi-cells. We should probably only include coarse-grid cells that can be reached with a monotone path from the fine vof. 
 */
 
 // Chombo includes
@@ -333,19 +334,18 @@ void EBMultigridInterpolator::defineStencils(){
     const Box grownFineBox = m_fineBoxes[dit()];
     const Box grownCoarBox = m_coarBoxes[dit()];
 
-    BaseFab<bool> maskFine(grownFineBox, nComp);
-    BaseFab<bool> maskCoar(grownCoarBox, nComp);
-
-    maskFine.setVal(false);
-    maskCoar.setVal(true );
+    // Define the valid regions such that the interpolation does not include coarse grid cells that fall beneath the fine level,
+    // and no fine cells outside the CF.
+    IntVectSet validFineCells = IntVectSet();
+    IntVectSet validCoarCells = IntVectSet(grownCoarBox);
 
     // Coar mask is false everywhere under the fine grid box, and opposite for the fine mask. 
     for (BoxIterator bit(origFineBox); bit.ok(); ++bit){
       const IntVect fineIV = bit();
       const IntVect coarIV = coarsen(fineIV, m_refRat);
 
-      maskFine(fineIV, comp) = true;
-      maskCoar(coarIV, comp) = false;
+      validFineCells |= fineIV;
+      validCoarCells -= coarIV;
     }
 
     // Same for parts of the current (grown) patch that overlaps with neighboring boxes. 
@@ -357,11 +357,11 @@ void EBMultigridInterpolator::defineStencils(){
 	const IntVect fineIV = bit();
 	const IntVect coarIV = coarsen(fineIV, m_refRat);
 
-	maskFine(fineIV, comp) = true;
-	maskCoar(coarIV, comp) = false;
+	validFineCells |= fineIV;
+	validCoarCells -= coarIV;
       }
     }
-
+    
 
     // Now go through each ghost cell and get an interpolation stencil to specified order. 
     const EBISBox& ebisboxFine = m_eblgFine.getEBISL()[dit()];
@@ -388,8 +388,8 @@ void EBMultigridInterpolator::defineStencils(){
 					ghostVof,
 					ebisboxFine,
 					ebisboxCoar,
-					maskFine,
-					maskCoar,
+					validFineCells,
+					validCoarCells,
 					dxFine,
 					dxCoar,
 					order,
@@ -414,27 +414,28 @@ void EBMultigridInterpolator::defineStencils(){
   }
 }
 
-bool EBMultigridInterpolator::getStencil(VoFStencil&          a_stencilFine,
-					 VoFStencil&          a_stencilCoar,
-					 const VolIndex&      a_ghostVof,
-					 const EBISBox&       a_ebisboxFine,
-					 const EBISBox&       a_ebisboxCoar,
-					 const BaseFab<bool>& a_maskFine,
-					 const BaseFab<bool>& a_maskCoar,
-					 const Real&          a_dxFine,
-					 const Real&          a_dxCoar,
-					 const int&           a_order,
-					 const int&           a_weight){
+bool EBMultigridInterpolator::getStencil(VoFStencil&       a_stencilFine,
+					 VoFStencil&       a_stencilCoar,
+					 const VolIndex&   a_ghostVof,
+					 const EBISBox&    a_ebisboxFine,
+					 const EBISBox&    a_ebisboxCoar,
+					 const IntVectSet& a_validFineCells,
+					 const IntVectSet& a_validCoarCells,
+					 const Real&       a_dxFine,
+					 const Real&       a_dxCoar,
+					 const int&        a_order,
+					 const int&        a_weight){
 
   const int fineRadius = a_order;
   const int coarRadius = std::max(1, fineRadius/2);
 
   const Vector<VolIndex> ghostVofCoar = a_ebisboxCoar.getVoFs(coarsen(a_ghostVof.gridIndex(), m_refRat)); // Vofs correseponding to coarsen(a_ghostVof, refRat)
 
-  // Get all Vofs in specified radii.
+  // Get all Vofs in specified radii. Don't use cells that are not in a_validFineCells.
   Vector<VolIndex> fineVofs = VofUtils::getVofsInRadius(a_ghostVof, a_ebisboxFine, fineRadius, VofUtils::Connectivity::MonotonePath, true);
-
-
+  VofUtils::includeCells(fineVofs, a_validFineCells);
+  VofUtils::onlyUnique(fineVofs);
+  
   
   
   return true;

@@ -122,6 +122,13 @@ public:
   */
   static void includeCells(Vector<VolIndex>& a_vofs, const IntVectSet& a_includeIVS);
 
+  /*!
+    @brief Discard duplicates
+    @param[inout] a_vofs List of Vofs
+    @return Returns the same vofs with discarded duplicates. 
+  */
+  static void onlyUnique(Vector<VolIndex>& a_vofs);
+
 protected:
 
     /*!
