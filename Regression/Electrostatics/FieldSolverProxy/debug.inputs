@@ -67,7 +67,7 @@ ProxyFieldSolver.alpha      = 0.0         # Alpha
 ProxyFieldSolver.beta       = -1.0        # Beta
 ProxyFieldSolver.aco        = 1.0         # A-coefficient
 ProxyFieldSolver.bco        = 1.0         # B-coefficient	
-ProxyFieldSolver.solver     = mfhelm      # Our solver ('helmholtz') or ebconductivity op 'ebcond'
+ProxyFieldSolver.solver     = helm      # Our solver ('helmholtz') or ebconductivity op 'ebcond'
 ProxyFieldSolver.eb_bc      = dirichlet   # 'dirichlet', 'neumann', or 'robin'
 ProxyFieldSolver.domain_bc  = dirichlet   # 'dirichlet', 'neumann', or 'robin'
 ProxyFieldSolver.eb_order   = 1           # BC order on EB (only for Dirichlet)
@@ -102,7 +102,7 @@ RodDielectric.electrode.endpoint2       =  0.5  0.5     # Other endpoint
 RodDielectric.electrode.radius          = 0.05          # Electrode radius
 RodDielectric.electrode.live            = true          # Live or not
 
-RodDielectric.dielectric.on             = true          # Use dielectric or not
+RodDielectric.dielectric.on             = false          # Use dielectric or not
 RodDielectric.dielectric.shape          = sphere        # 'plane', 'box', 'perlin_box', 'sphere'
 RodDielectric.dielectric.permittivity   = 5.0             # Dielectric permittivity
 

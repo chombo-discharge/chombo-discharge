@@ -291,6 +291,7 @@ void EBMultigridInterpolator::defineStencils(){
   const Real dxCoar = dxFine*m_refRat;
 
   const DisjointBoxLayout& dblFine = m_eblgFine.getDBL();
+  const DisjointBoxLayout& dblCoar = m_eblgCoFi.getDBL();
 
   m_fineStencils.define(dblFine);
   m_coarStencils.define(dblFine);
@@ -318,16 +319,14 @@ void EBMultigridInterpolator::defineStencils(){
     NeighborIterator nit(dblFine);
     for (nit.begin(dit()); nit.ok(); ++nit){
       const Box overlap  = grownFineBox & dblFine[nit()];
-
+      
       for (BoxIterator bit(overlap); bit.ok(); ++bit){
 	const IntVect fineIV = bit();
-	const IntVect coarIV = coarsen(fineIV, m_refRat);
-
 	validFineCells |= fineIV;
-	validCoarCells -= coarIV;
       }
+
+      validCoarCells -= dblCoar[nit()];
     }
-    
 
     // Now go through each ghost cell and get an interpolation stencil to specified order. 
     const EBISBox& ebisboxFine = m_eblgFine.getEBISL()[dit()];
@@ -401,18 +400,21 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&       a_stencilFine,
   VofUtils::onlyUnique(fineVofs);
 
   // Get the coarse vof which we obtain by coarsening a_ghostVof
-  int numCoar = 1;
+  int numCoarsen = 1;
   VolIndex ghostVofCoar = a_ghostVof;
-  while(numCoar < m_refRat){
+  while(numCoarsen < m_refRat){
     ghostVofCoar = a_ebisboxFine.coarsen(ghostVofCoar);
-    numCoar *= 2;
+    numCoarsen *= 2;
   }
 
   Vector<VolIndex> coarVofs = VofUtils::getVofsInRadius(ghostVofCoar, a_ebisboxCoar, coarRadius, VofUtils::Connectivity::MonotonePath, true);
   VofUtils::includeCells(coarVofs, a_validCoarCells);
   VofUtils::onlyUnique(coarVofs);
 
-  //  std::cout << "got vofs = " << coarVofs.size() + fineVofs.size() << std::endl;
+#if 0 // Total vofs
+  int tot = fineVofs.size() + coarVofs.size();
+  std::cout << "vof = " << a_ghostVof << "\t" << "got fine/coar vofs = " << fineVofs.size() << "\t" << coarVofs.size() << "\t" << tot << "\n";
+#endif
   
   return true;
 }
