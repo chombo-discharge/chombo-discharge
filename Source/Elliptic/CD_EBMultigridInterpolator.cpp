@@ -390,7 +390,8 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&       a_stencilFine,
 					 const Real&       a_dxCoar,
 					 const int&        a_order,
 					 const int&        a_weight){
-
+  bool foundStencil = false;
+  
   const int fineRadius = a_order;
   const int coarRadius = std::max(1, fineRadius/m_refRat);
 
@@ -408,7 +409,6 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&       a_stencilFine,
   // Get all Vofs in specified radii. Don't use cells that are not in a_validFineCells.
   fineVofs = VofUtils::getVofsInRadius(a_ghostVof,   a_ebisboxFine, fineRadius, VofUtils::Connectivity::MonotonePath, false);
   coarVofs = VofUtils::getVofsInRadius(ghostVofCoar, a_ebisboxCoar, coarRadius, VofUtils::Connectivity::MonotonePath, true );
-
   
   VofUtils::includeCells(fineVofs, a_validFineCells);
   VofUtils::includeCells(coarVofs, a_validCoarCells);
@@ -416,19 +416,52 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&       a_stencilFine,
   VofUtils::onlyUnique(fineVofs);
   VofUtils::onlyUnique(coarVofs);
 
-  // Make displacement vectors
-  const auto cellCenter = Location::Cell::Center;
+  const int numEquations = coarVofs.size() + fineVofs.size();
+  const int numUnknowns  = LeastSquares::getTaylorExpansionSize(a_order);
 
-  Vector<RealVect> fineDisplacements;
-  Vector<RealVect> coarDisplacements;
+  if(numEquations >= numUnknowns) { // We have enough equations to get a stencil
+    // Make displacement vectors
+    const auto cellCenter = Location::Cell::Center;
 
-  for (const auto& fineVof : fineVofs.stdVector()){
-    fineDisplacements.push_back(LeastSquares::displacement(cellCenter, cellCenter, a_ghostVof, fineVof, a_ebisboxFine, a_dxFine));
+    Vector<RealVect> fineDisplacements;
+    Vector<RealVect> coarDisplacements;
+
+    for (const auto& fineVof : fineVofs.stdVector()){
+      fineDisplacements.push_back(LeastSquares::displacement(cellCenter, cellCenter, a_ghostVof, fineVof, a_ebisboxFine, a_dxFine));
+    }
+
+    for (const auto& coarVof : coarVofs.stdVector()){
+      coarDisplacements.push_back(LeastSquares::displacement(cellCenter, cellCenter, a_ghostVof, coarVof, a_ebisboxFine, a_ebisboxCoar, a_dxFine, a_dxCoar));
+    }
+
+
+    // LeastSquares computes all unknown terms in a Taylor expansion up to specified order. We want the 0th order term, i.e. the interpolated value,
+    // which in multi-index notation is the term (0,0), i.e. IntVect::Zero. The format of the two-level least squares routine is such that the
+    // fine stencil lies on the first index.
+    IntVect interpStenIndex = IntVect::Zero;
+    IntVectSet derivs       = IntVectSet(interpStenIndex);
+    IntVectSet knownTerms   = IntVectSet();
+    
+    std::map<IntVect, std::pair<VoFStencil, VoFStencil> > stencils = LeastSquares::computeDualLevelStencils(derivs,
+													    knownTerms,
+													    fineVofs,
+													    coarVofs,
+													    fineDisplacements,
+													    coarDisplacements,
+													    a_weight,
+													    a_order);
+    a_stencilFine = stencils.at(interpStenIndex).first;
+    a_stencilCoar = stencils.at(interpStenIndex).second;
+
+    if(a_stencilFine.size() != 0 || a_stencilCoar.size() != 0){
+      foundStencil = true;
+    }
+    else{
+      foundStencil = false;
+    }
   }
 
-  for (const auto& coarVof : coarVofs.stdVector()){
-    coarDisplacements.push_back(LeastSquares::displacement(cellCenter, cellCenter, a_ghostVof, coarVof, a_ebisboxFine, a_ebisboxCoar, a_dxFine, a_dxCoar));
-  }
+  return foundStencil;
 
 
   // Solve the corresponding least squares system if we can. 

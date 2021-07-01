@@ -528,19 +528,22 @@ std::map<IntVect, VoFStencil> LeastSquares::computeSingleLevelStencils(const Int
 	}
       }
     }
+    else{
+      MayDay::Warning("LeastSquares::computeSingleLevelStencils - could not perform singular value decomposition");
+    }
   }
 
   return ret;
 }
 
-std::map<IntVect, std::pair<VoFStencil, VoFStencil> > computeDualLevelStencils(const IntVectSet&       a_derivs,
-									       const IntVectSet&       a_knownTerms,
-									       const Vector<VolIndex>& a_fineVofs,
-									       const Vector<VolIndex>& a_coarVofs,
-									       const Vector<RealVect>& a_fineDisplacements,
-									       const Vector<RealVect>& a_coarDisplacements,
-									       const int               a_p,           
-									       const int               a_order){
+std::map<IntVect, std::pair<VoFStencil, VoFStencil> > LeastSquares::computeDualLevelStencils(const IntVectSet&       a_derivs,
+											     const IntVectSet&       a_knownTerms,
+											     const Vector<VolIndex>& a_fineVofs,
+											     const Vector<VolIndex>& a_coarVofs,
+											     const Vector<RealVect>& a_fineDisplacements,
+											     const Vector<RealVect>& a_coarDisplacements,
+											     const int               a_p,           
+											     const int               a_order){
   const Vector<Real> fineWeights = LeastSquares::makeDiagWeights(a_fineDisplacements, a_p);
   const Vector<Real> coarWeights = LeastSquares::makeDiagWeights(a_coarDisplacements, a_p);
 
@@ -564,7 +567,98 @@ std::map<IntVect, std::pair<VoFStencil, VoFStencil> > LeastSquares::computeDualL
 											     const Vector<Real>&     a_fineWeights,
 											     const Vector<Real>&     a_coarWeights,
 											     const int               a_order){
-  MayDay::Warning("LeastSquares::computeDualLevelStencils - not implemented");
+  // Initialize return stuff
+  std::map<IntVect, std::pair<VoFStencil, VoFStencil> > ret;
+
+  // Initialize return. 
+  for (IVSIterator ivsIt(a_derivs); ivsIt.ok(); ++ivsIt){
+    ret.emplace(ivsIt(), std::make_pair(VoFStencil(), VoFStencil()));
+  }
+
+  if(a_derivs.numPts() > 0){
+
+    const int M     = LeastSquares::getTaylorExpansionSize(a_order) - a_knownTerms.numPts(); // This is because some unknowns have been eliminated. 
+    const int Kfine = a_fineDisplacements.size();
+    const int Kcoar = a_coarDisplacements.size();
+    const int K     = Kfine + Kcoar;
+
+    const IntVectSet isect = a_derivs & a_knownTerms;
+
+    if(K < M)            MayDay::Abort("LeastSquares::computeSingleLevelStencils -- not enough equations to achieve desired order!");
+    if(!isect.isEmpty()) MayDay::Abort("LeastSquares::computeSingleLevelStencils - you have specified the same terms as both unknown and known");
+
+
+    // Build the A-matrix in column major order so we can use LaPackUtils::computePseudoInverse.
+    // Use of multi-indices makes higher-order Taylor series a walk in the park. 
+    int i = 0;
+    Vector<Real> linA    (K*M, 0.0);
+    Vector<Real> linAplus(M*K, 0.0);
+    for (MultiIndex mi(a_order); mi.ok(); ++mi){ // Loop over column
+
+      if(!a_knownTerms.contains(mi.getCurrentIndex())){ // Add column if it is an unknown in the lsq system. 
+	for (int k = 0; k < K; k++){
+	  if(k < Kfine){
+	    linA[i] = a_fineWeights[k]*mi.pow(a_fineDisplacements[k])/mi.factorial(); i++;
+	  }
+	  else{
+	    linA[i] = a_coarWeights[k]*mi.pow(a_coarDisplacements[k])/mi.factorial(); i++;
+	  }
+	}
+      }
+    }
+ 
+    // Compute the pseudo-inverse.
+    const bool foundSVD = LaPackUtils::computePseudoInverse(linAplus.stdVector(), linA.stdVector(), K, M);
+
+    if(foundSVD){
+      const MultiIndex mi(a_order);
+
+      // When we have eliminated rows in the linear system we can't use MultiIndex to map directly. 
+      // Rather, we need to first map the rows of A to indices and use that to fetch
+      // the row in Aplus corresponding to a specific unknown in the Taylor series. 
+      std::map<IntVect, int> rowMap;
+      int row = 0;
+      for (MultiIndex mi(a_order); mi.ok(); ++mi){
+	if(!a_knownTerms.contains(mi.getCurrentIndex())){ // This is the order in which A was built. 
+	  rowMap.emplace(mi.getCurrentIndex(), row);
+	  row++;
+	}
+      }
+
+      // Recall that linAplus is M*K so the stride is always M, starting at some specified row. 
+      for (IVSIterator ivsIt(a_derivs); ivsIt.ok(); ++ivsIt){
+	const IntVect deriv = ivsIt();
+
+	int irow;
+	if(rowMap.find(ivsIt()) != rowMap.end()){
+	  row = rowMap.at(ivsIt());
+	}
+	else{
+	  MayDay::Abort("LeastSquares::computeSingleLevelStencils -- map is out of range but this shouldn't happen!");
+	}
+
+	std::pair<VoFStencil, VoFStencil>& sten = ret.at(deriv);
+
+	sten.first. clear();
+	sten.second.clear();
+	
+	for (int k = 0; k < K; k++){
+	  const int idx = row + k*M;
+	  if(k < Kfine){
+	    sten.first.add(a_fineVofs[k], a_fineWeights[k]*linAplus[idx]);
+	  }
+	  else{
+	    sten.second.add(a_coarVofs[k], a_coarWeights[k]*linAplus[idx]);
+	  }
+	}
+      }
+    }
+    else{
+      MayDay::Warning("LeastSquares::computeDualLevelStencils - could not perform singular value decomposition");
+    }
+  }
+
+  return ret;
 }
 
 #include <CD_NamespaceFooter.H>
