@@ -262,7 +262,7 @@ public:
 					   const EBISBox&          a_ebisbox,
 					   const Real&             a_dx);
 
-    /*!
+  /*!
     @brief Get displacement vectors from a cell position to another cell position for a list of Vofs, i.e. x = (xFrom - xTo).
     @param[in] a_fromLoc  Location on face
     @param[in] a_toLoc    Location in Vofs

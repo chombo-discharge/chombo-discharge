@@ -394,10 +394,8 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&       a_stencilFine,
   const int fineRadius = a_order;
   const int coarRadius = std::max(1, fineRadius/m_refRat);
 
-  // Get all Vofs in specified radii. Don't use cells that are not in a_validFineCells.
-  Vector<VolIndex> fineVofs = VofUtils::getVofsInRadius(a_ghostVof, a_ebisboxFine, fineRadius, VofUtils::Connectivity::MonotonePath, false);
-  VofUtils::includeCells(fineVofs, a_validFineCells);
-  VofUtils::onlyUnique(fineVofs);
+  Vector<VolIndex> fineVofs;
+  Vector<VolIndex> coarVofs;
 
   // Get the coarse vof which we obtain by coarsening a_ghostVof
   int numCoarsen = 1;
@@ -407,9 +405,30 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&       a_stencilFine,
     numCoarsen *= 2;
   }
 
-  Vector<VolIndex> coarVofs = VofUtils::getVofsInRadius(ghostVofCoar, a_ebisboxCoar, coarRadius, VofUtils::Connectivity::MonotonePath, true);
+  // Get all Vofs in specified radii. Don't use cells that are not in a_validFineCells.
+  fineVofs = VofUtils::getVofsInRadius(a_ghostVof,   a_ebisboxFine, fineRadius, VofUtils::Connectivity::MonotonePath, false);
+  coarVofs = VofUtils::getVofsInRadius(ghostVofCoar, a_ebisboxCoar, coarRadius, VofUtils::Connectivity::MonotonePath, true );
+
+  
+  VofUtils::includeCells(fineVofs, a_validFineCells);
   VofUtils::includeCells(coarVofs, a_validCoarCells);
+  
+  VofUtils::onlyUnique(fineVofs);
   VofUtils::onlyUnique(coarVofs);
+
+  // Make displacement vectors
+  const auto cellCenter = Location::Cell::Center;
+
+  Vector<RealVect> fineDisplacements;
+  Vector<RealVect> coarDisplacements;
+
+  for (const auto& fineVof : fineVofs.stdVector()){
+    fineDisplacements.push_back(LeastSquares::displacement(cellCenter, cellCenter, a_ghostVof, fineVof, a_ebisboxFine, a_dxFine));
+  }
+
+  for (const auto& coarVof : coarVofs.stdVector()){
+    coarDisplacements.push_back(LeastSquares::displacement(cellCenter, cellCenter, a_ghostVof, coarVof, a_ebisboxFine, a_ebisboxCoar, a_dxFine, a_dxCoar));
+  }
 
 #if 0 // Total vofs
   int tot = fineVofs.size() + coarVofs.size();
