@@ -337,7 +337,7 @@ VoFStencil LeastSquares::computeGradSten(const Vector<VolIndex>& a_allVofs,
     derivs |= BASISV(dir);
   }
 
-  std::map<IntVect, VoFStencil> taylorTerms = LeastSquares::computeInterpolationStencil(derivs, a_knownTerms, a_allVofs, a_displacements, a_weights, a_order);
+  std::map<IntVect, VoFStencil> taylorTerms = LeastSquares::computeSingleLevelStencils(derivs, a_knownTerms, a_allVofs, a_displacements, a_weights, a_order);
 
   VoFStencil sten;
   for (const auto& m : taylorTerms){
@@ -431,32 +431,32 @@ VoFStencil LeastSquares::computeInterpolationStencil(const Vector<VolIndex>& a_a
 
   const IntVectSet knownTerms = IntVectSet();
 
-  std::map<IntVect, VoFStencil> allStens = LeastSquares::computeInterpolationStencil(derivs, knownTerms, a_allVofs, a_displacements, a_weights, a_order);
+  std::map<IntVect, VoFStencil> allStens = LeastSquares::computeSingleLevelStencils(derivs, knownTerms, a_allVofs, a_displacements, a_weights, a_order);
 
   ret = allStens.at(deriv);
 
   return ret;
 }
 
-std::map<IntVect, VoFStencil> LeastSquares::computeInterpolationStencil(const IntVectSet&       a_derivs,
-									const IntVectSet&       a_knownTerms,
-									const Vector<VolIndex>& a_allVofs,
-									const Vector<RealVect>& a_displacements,
-									const int               a_p,
-									const int               a_order){
+std::map<IntVect, VoFStencil> LeastSquares::computeSingleLevelStencils(const IntVectSet&       a_derivs,
+								       const IntVectSet&       a_knownTerms,
+								       const Vector<VolIndex>& a_allVofs,
+								       const Vector<RealVect>& a_displacements,
+								       const int               a_p,
+								       const int               a_order){
 
   const Vector<Real> weights = LeastSquares::makeDiagWeights(a_displacements, a_p);
 
-  return LeastSquares::computeInterpolationStencil(a_derivs, a_knownTerms, a_allVofs, a_displacements, weights, a_order);
+  return LeastSquares::computeSingleLevelStencils(a_derivs, a_knownTerms, a_allVofs, a_displacements, weights, a_order);
     
 }
 
-std::map<IntVect, VoFStencil> LeastSquares::computeInterpolationStencil(const IntVectSet&       a_derivs,
-									const IntVectSet&       a_knownTerms,
-									const Vector<VolIndex>& a_allVofs,
-									const Vector<RealVect>& a_displacements,
-									const Vector<Real>&     a_weights,
-									const int               a_order){
+std::map<IntVect, VoFStencil> LeastSquares::computeSingleLevelStencils(const IntVectSet&       a_derivs,
+								       const IntVectSet&       a_knownTerms,
+								       const Vector<VolIndex>& a_allVofs,
+								       const Vector<RealVect>& a_displacements,
+								       const Vector<Real>&     a_weights,
+								       const int               a_order){
   std::map<IntVect, VoFStencil> ret;
 
   // Initialize return. 
@@ -471,8 +471,8 @@ std::map<IntVect, VoFStencil> LeastSquares::computeInterpolationStencil(const In
 
     const IntVectSet isect = a_derivs & a_knownTerms;
 
-    if(K < M)            MayDay::Abort("LeastSquares::computeInterpolationStencil -- not enough equations to achieve desired order!");
-    if(!isect.isEmpty()) MayDay::Abort("LeastSquares::computeInterpolation - you have specified the same terms as both unknown and known");
+    if(K < M)            MayDay::Abort("LeastSquares::computeSingleLevelStencils -- not enough equations to achieve desired order!");
+    if(!isect.isEmpty()) MayDay::Abort("LeastSquares::computeSingleLevelStencils - you have specified the same terms as both unknown and known");
 
 
     // Build the A-matrix in column major order so we can use LaPackUtils::computePseudoInverse.
@@ -516,7 +516,7 @@ std::map<IntVect, VoFStencil> LeastSquares::computeInterpolationStencil(const In
 	  row = rowMap.at(ivsIt());
 	}
 	else{
-	  MayDay::Abort("LeastSquares::computeInterpolationStencil -- map is out of range but this shouldn't happen!");
+	  MayDay::Abort("LeastSquares::computeSingleLevelStencils -- map is out of range but this shouldn't happen!");
 	}
 
 	VoFStencil& sten = ret.at(deriv);
@@ -531,6 +531,40 @@ std::map<IntVect, VoFStencil> LeastSquares::computeInterpolationStencil(const In
   }
 
   return ret;
+}
+
+std::map<IntVect, std::pair<VoFStencil, VoFStencil> > computeDualLevelStencils(const IntVectSet&       a_derivs,
+									       const IntVectSet&       a_knownTerms,
+									       const Vector<VolIndex>& a_fineVofs,
+									       const Vector<VolIndex>& a_coarVofs,
+									       const Vector<RealVect>& a_fineDisplacements,
+									       const Vector<RealVect>& a_coarDisplacements,
+									       const int               a_p,           
+									       const int               a_order){
+  const Vector<Real> fineWeights = LeastSquares::makeDiagWeights(a_fineDisplacements, a_p);
+  const Vector<Real> coarWeights = LeastSquares::makeDiagWeights(a_coarDisplacements, a_p);
+
+  return LeastSquares::computeDualLevelStencils(a_derivs,
+						a_knownTerms,
+						a_fineVofs,
+						a_coarVofs,
+						a_fineDisplacements,
+						a_coarDisplacements,
+						fineWeights,
+						coarWeights,
+						a_order);
+}
+
+std::map<IntVect, std::pair<VoFStencil, VoFStencil> > LeastSquares::computeDualLevelStencils(const IntVectSet&       a_derivs,
+											     const IntVectSet&       a_knownTerms,
+											     const Vector<VolIndex>& a_fineVofs,
+											     const Vector<VolIndex>& a_coarVofs,
+											     const Vector<RealVect>& a_fineDisplacements,
+											     const Vector<RealVect>& a_coarDisplacements,
+											     const Vector<Real>&     a_fineWeights,
+											     const Vector<Real>&     a_coarWeights,
+											     const int               a_order){
+  MayDay::Warning("LeastSquares::computeDualLevelStencils - not implemented");
 }
 
 #include <CD_NamespaceFooter.H>

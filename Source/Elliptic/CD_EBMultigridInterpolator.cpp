@@ -430,6 +430,8 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&       a_stencilFine,
     coarDisplacements.push_back(LeastSquares::displacement(cellCenter, cellCenter, a_ghostVof, coarVof, a_ebisboxFine, a_ebisboxCoar, a_dxFine, a_dxCoar));
   }
 
+
+  // Solve the corresponding least squares system if we can. 
 #if 0 // Total vofs
   int tot = fineVofs.size() + coarVofs.size();
   std::cout << "vof = " << a_ghostVof << "\t" << "got fine/coar vofs = " << fineVofs.size() << "\t" << coarVofs.size() << "\t" << tot << "\n";

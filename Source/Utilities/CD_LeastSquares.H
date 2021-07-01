@@ -178,7 +178,7 @@ public:
 			   const EBISBox&     a_ebisbox,
 			   const Real&        a_dx);
 
-    /*!
+  /*!
     @brief Compute the position (ignoring the "origin) of a FaceIndex
     @param[in] a_position  Position within the grid cell (e.g. center, centroid)
     @param[in] a_face      Face
@@ -373,12 +373,12 @@ public:
     @return Stencils for each of the derivatives specified in the input argument. 
     @note This calls the more general version. 
   */
-  static std::map<IntVect, VoFStencil> computeInterpolationStencil(const IntVectSet&       a_derivs,
-								   const IntVectSet&       a_knownTerms,
-								   const Vector<VolIndex>& a_allVofs,
-								   const Vector<RealVect>& a_displacements,
-								   const int               a_p,
-								   const int               a_order);
+  static std::map<IntVect, VoFStencil> computeSingleLevelStencils(const IntVectSet&       a_derivs,
+								  const IntVectSet&       a_knownTerms,
+								  const Vector<VolIndex>& a_allVofs,
+								  const Vector<RealVect>& a_displacements,
+								  const int               a_p,
+								  const int               a_order);
 
   /*!
     @brief Compute a least squares interpolation to a specified order. 
@@ -399,12 +399,37 @@ public:
     @note This will throw an error if you don't have enough equations for obtaining the specified order. 
     @note The return map is always initialized with empty stencils. If computing the pseudoinverse fails, the returned stencils are all empty. 
   */
-  static std::map<IntVect, VoFStencil> computeInterpolationStencil(const IntVectSet&       a_derivs,
-								   const IntVectSet&       a_knownTerms,
-								   const Vector<VolIndex>& a_allVofs,
-								   const Vector<RealVect>& a_displacements,
-								   const Vector<Real>&     a_weights,
-								   const int               a_order);
+  static std::map<IntVect, VoFStencil> computeSingleLevelStencils(const IntVectSet&       a_derivs,
+								  const IntVectSet&       a_knownTerms,
+								  const Vector<VolIndex>& a_allVofs,
+								  const Vector<RealVect>& a_displacements,
+								  const Vector<Real>&     a_weights,
+								  const int               a_order);
+
+  /*!
+    @brief Compute a least squares interpolation to a specified order. This version separates the stencils into two levels. 
+  */
+  static std::map<IntVect, std::pair<VoFStencil, VoFStencil> > computeDualLevelStencils(const IntVectSet&       a_derivs,
+											const IntVectSet&       a_knownTerms,
+											const Vector<VolIndex>& a_fineVofs,
+											const Vector<VolIndex>& a_coarVofs,
+											const Vector<RealVect>& a_fineDisplacements,
+											const Vector<RealVect>& a_coarDisplacements,
+											const int               a_p,           
+											const int               a_order);
+
+  /*!
+    @brief Compute a least squares interpolation to a specified order. This version separates the stencils into two levels. 
+  */
+  static std::map<IntVect, std::pair<VoFStencil, VoFStencil> > computeDualLevelStencils(const IntVectSet&       a_derivs,
+											const IntVectSet&       a_knownTerms,
+											const Vector<VolIndex>& a_fineVofs,
+											const Vector<VolIndex>& a_coarVofs,
+											const Vector<RealVect>& a_fineDisplacements,
+											const Vector<RealVect>& a_coarDisplacements,
+											const Vector<Real>&     a_fineWeights,
+											const Vector<Real>&     a_coarWeights,
+											const int               a_order);
 
 
 };
