@@ -157,12 +157,10 @@ protected:
   */
   int m_weight;
 
-
-
   /*!
     @brief Ghost cells that may require interpolation. 
   */
-  LayoutData<std::vector<VolIndex> > m_ghostCells;
+  LayoutData<IntVectSet> m_ghostCells;
 
   /*!
     @brief Fine stencils
@@ -174,12 +172,10 @@ protected:
   */
   LayoutData<BaseIVFAB<VoFStencil> > m_coarStencils;
 
-
-
   /*!
     @brief Define ghost cells to be filled in range m_ghostCF from each cut-cell
   */
-  void defineEBCFIVS();
+  void defineGhosts();
 
   /*!
     @brief Define grids

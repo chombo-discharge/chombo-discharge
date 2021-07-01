@@ -74,8 +74,9 @@ EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
   m_ghostCF  = a_ghostCF;
   
   this->defineGrids(a_eblgFine, a_eblgCoar);
-  this->defineEBCFIVS();
+  this->defineGhosts();
   this->defineData();
+  this->defineStencils();
 }
 
 int EBMultigridInterpolator::getGhostCF() const{
@@ -210,7 +211,7 @@ void EBMultigridInterpolator::coarseFineInterpH(EBCellFAB& a_phi, const Interval
   }
 }
 
-void EBMultigridInterpolator::defineEBCFIVS(){
+void EBMultigridInterpolator::defineGhosts(){
 
   const DisjointBoxLayout& dbl = m_eblgFine.getDBL();
   const ProblemDomain& domain  = m_eblgFine.getDomain();
@@ -227,17 +228,9 @@ void EBMultigridInterpolator::defineEBCFIVS(){
     Box grownBox = grow(cellBox, m_ghostCF);
     grownBox &= domain;
 
-    IntVectSet ghosts = IntVectSet(grownBox);
+    m_ghostCells[dit()] = IntVectSet(grownBox);
     for (nit.begin(dit()); nit.ok(); ++nit){
-      ghosts -= dbl[dit()];
-    }
-
-    for (IVSIterator ivsIt(ghosts); ivsIt.ok(); ++ivsIt){
-      const IntVect iv = ivsIt();
-
-      Vector<VolIndex> vofs = ebisbox.getVoFs(iv);
-
-      for (const auto& v : vofs.stdVector()) m_ghostCells[dit()].emplace_back(v);
+      m_ghostCells[dit()] -= dbl[dit()];
     }
   }
 }
@@ -319,11 +312,53 @@ void EBMultigridInterpolator::defineData(){
 }
 
 void EBMultigridInterpolator::defineStencils(){
+  const int comp  = 0;
+  const int nComp = 1;
 
+  // m_eblgCoar is a coarsening of m_eblgFine so they are accessible with the same iterators. 
   const DisjointBoxLayout& dblFine = m_eblgFine.getDBL();
+  const DisjointBoxLayout& dblCoar = m_eblgCoar.getDBL();
+
+  m_fineStencils.define(dblFine);
+  m_coarStencils.define(dblFine);
 
   for (DataIterator dit(dblFine); dit.ok(); ++dit){
-    
+    const Box origFineBox  = dblFine[dit()];
+    const Box origCoarBox  = dblCoar[dit()];
+
+    const Box grownFineBox = m_fineBoxes[dit()];
+    const Box grownCoarBox = m_coarBoxes[dit()];
+
+    BaseFab<bool> maskFine(grownFineBox, nComp);
+    BaseFab<bool> maskCoar(grownCoarBox, nComp);
+
+    maskFine.setVal(true);
+    maskCoar.setVal(true);
+
+    for (BoxIterator bit(origFineBox); bit.ok(); ++bit){
+      const IntVect fineIV = bit();
+      const IntVect coarIV = coarsen(fineIV, m_refRat);
+
+      maskCoar(coarIV, comp) = false;
+    }
+
+    const EBISBox& ebisboxFine = m_eblgFine.getEBISL()[dit()];
+    const EBISBox& ebisboxCoar = m_eblgCoar.getEBISL()[dit()];
+
+    const EBGraph& fineGraph   = ebisboxFine.getEBGraph();
+    const EBGraph& coarGraph   = ebisboxFine.getEBGraph();
+
+    m_fineStencils[dit()].define(m_ghostCells[dit()], fineGraph, nComp);
+    m_coarStencils[dit()].define(m_ghostCells[dit()], fineGraph, nComp);
+
+    // Define stencils in each ghost cell. 
+    for (VoFIterator vofit(m_ghostCells[dit()], fineGraph); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+
+      VoFStencil& fineSten = m_fineStencils[dit()](vof, comp);
+      VoFStencil& coarSten = m_coarStencils[dit()](vof, comp);
+
+    }
   }
 }
 
