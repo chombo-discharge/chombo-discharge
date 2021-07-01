@@ -21,6 +21,7 @@
 #include <CFIVS.H>
 
 // Our includes
+#include <CD_Location.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -29,6 +30,8 @@
 */
 class EBMultigridInterpolator : public EBQuadCFInterp {
 public:
+
+  using CellLocation = Location::Cell;
 
   /*!
     @brief Default constructor. Must subsequently call define
@@ -106,6 +109,8 @@ protected:
 // ==================================================
 // NEW STUFF BELOW HERE
 // ==================================================
+
+  CellLocation m_cellLocation;
 
   /*!
     @brief Fine grids
@@ -195,17 +200,18 @@ protected:
   /*!
     @brief Build an interpolation stencil
   */
-  bool getStencil(VoFStencil&       a_stencilFine,
-		  VoFStencil&       a_stencilCoar,
-		  const VolIndex&   a_ghostVof,
-		  const EBISBox&    a_ebisboxFine,
-		  const EBISBox&    a_ebisboxCoar,
-		  const IntVectSet& a_validFineCells,
-		  const IntVectSet& a_validCoarCells,
-		  const Real&       a_dxFine,
-		  const Real&       a_dxCoar,
-		  const int&        a_order,
-		  const int&        a_weight);
+  bool getStencil(VoFStencil&         a_stencilFine,
+		  VoFStencil&         a_stencilCoar,
+		  const CellLocation& a_cellLocation,
+		  const VolIndex&     a_ghostVof,
+		  const EBISBox&      a_ebisboxFine,
+		  const EBISBox&      a_ebisboxCoar,
+		  const IntVectSet&   a_validFineCells,
+		  const IntVectSet&   a_validCoarCells,
+		  const Real&         a_dxFine,
+		  const Real&         a_dxCoar,
+		  const int&          a_order,
+		  const int&          a_weight);
 };
 
 #include <CD_NamespaceFooter.H>

@@ -27,9 +27,10 @@
 #include <CD_NamespaceHeader.H>
 
 EBMultigridInterpolator::EBMultigridInterpolator(){
-  m_isDefined = false;
-  m_order     = 1;
-  m_weight    = 0;
+  m_isDefined    = false;
+  m_order        = 1;
+  m_weight       = 0;
+  m_cellLocation = Location::Cell::Center;
 }
 
 EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
@@ -350,6 +351,7 @@ void EBMultigridInterpolator::defineStencils(){
       while(order > 0 && !foundStencil){
 	foundStencil = this->getStencil(fineSten,
 					coarSten,
+					m_cellLocation,					
 					ghostVof,
 					ebisboxFine,
 					ebisboxCoar,
@@ -379,17 +381,18 @@ void EBMultigridInterpolator::defineStencils(){
   }
 }
 
-bool EBMultigridInterpolator::getStencil(VoFStencil&       a_stencilFine,
-					 VoFStencil&       a_stencilCoar,
-					 const VolIndex&   a_ghostVof,
-					 const EBISBox&    a_ebisboxFine,
-					 const EBISBox&    a_ebisboxCoar,
-					 const IntVectSet& a_validFineCells,
-					 const IntVectSet& a_validCoarCells,
-					 const Real&       a_dxFine,
-					 const Real&       a_dxCoar,
-					 const int&        a_order,
-					 const int&        a_weight){
+bool EBMultigridInterpolator::getStencil(VoFStencil&         a_stencilFine,
+					 VoFStencil&         a_stencilCoar,
+					 const CellLocation& a_cellLocation,
+					 const VolIndex&     a_ghostVof,
+					 const EBISBox&      a_ebisboxFine,
+					 const EBISBox&      a_ebisboxCoar,
+					 const IntVectSet&   a_validFineCells,
+					 const IntVectSet&   a_validCoarCells,
+					 const Real&         a_dxFine,
+					 const Real&         a_dxCoar,
+					 const int&          a_order,
+					 const int&          a_weight){
   bool foundStencil = false;
   
   const int fineRadius = a_order;
@@ -420,24 +423,23 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&       a_stencilFine,
   const int numUnknowns  = LeastSquares::getTaylorExpansionSize(a_order);
 
   if(numEquations >= numUnknowns) { // We have enough equations to get a stencil
-    // Make displacement vectors
-    const auto cellCenter = Location::Cell::Center;
 
+    // Build displacement vectors
     Vector<RealVect> fineDisplacements;
     Vector<RealVect> coarDisplacements;
 
     for (const auto& fineVof : fineVofs.stdVector()){
-      fineDisplacements.push_back(LeastSquares::displacement(cellCenter, cellCenter, a_ghostVof, fineVof, a_ebisboxFine, a_dxFine));
+      fineDisplacements.push_back(LeastSquares::displacement(a_cellLocation, a_cellLocation, a_ghostVof, fineVof, a_ebisboxFine, a_dxFine));
     }
 
     for (const auto& coarVof : coarVofs.stdVector()){
-      coarDisplacements.push_back(LeastSquares::displacement(cellCenter, cellCenter, a_ghostVof, coarVof, a_ebisboxFine, a_ebisboxCoar, a_dxFine, a_dxCoar));
+      coarDisplacements.push_back(LeastSquares::displacement(a_cellLocation, a_cellLocation, a_ghostVof, coarVof, a_ebisboxFine, a_ebisboxCoar, a_dxFine, a_dxCoar));
     }
 
 
     // LeastSquares computes all unknown terms in a Taylor expansion up to specified order. We want the 0th order term, i.e. the interpolated value,
     // which in multi-index notation is the term (0,0), i.e. IntVect::Zero. The format of the two-level least squares routine is such that the
-    // fine stencil lies on the first index.
+    // fine stencil lies on the first index. This can be confusing, but the LeastSquares uses a very compact notation...
     IntVect interpStenIndex = IntVect::Zero;
     IntVectSet derivs       = IntVectSet(interpStenIndex);
     IntVectSet knownTerms   = IntVectSet();
@@ -469,8 +471,6 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&       a_stencilFine,
   int tot = fineVofs.size() + coarVofs.size();
   std::cout << "vof = " << a_ghostVof << "\t" << "got fine/coar vofs = " << fineVofs.size() << "\t" << coarVofs.size() << "\t" << tot << "\n";
 #endif
-  
-  return true;
 }
 
 #include <CD_NamespaceFooter.H>
