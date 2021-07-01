@@ -315,6 +315,9 @@ void EBMultigridInterpolator::defineStencils(){
   const int comp  = 0;
   const int nComp = 1;
 
+  const Real dxFine = 1.0;
+  const Real dxCoar = dxFine*m_refRat;
+
   // m_eblgCoar is a coarsening of m_eblgFine so they are accessible with the same iterators. 
   const DisjointBoxLayout& dblFine = m_eblgFine.getDBL();
   const DisjointBoxLayout& dblCoar = m_eblgCoar.getDBL();
@@ -353,13 +356,60 @@ void EBMultigridInterpolator::defineStencils(){
 
     // Define stencils in each ghost cell. 
     for (VoFIterator vofit(m_ghostCells[dit()], fineGraph); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
+      const VolIndex& ghostVof = vofit();
 
-      VoFStencil& fineSten = m_fineStencils[dit()](vof, comp);
-      VoFStencil& coarSten = m_coarStencils[dit()](vof, comp);
+      VoFStencil& fineSten = m_fineStencils[dit()](ghostVof, comp);
+      VoFStencil& coarSten = m_coarStencils[dit()](ghostVof, comp);
 
+      int order         = m_order;
+      bool foundStencil = false;
+      
+      while(order > 0 && !foundStencil){
+	foundStencil = this->getStencil(fineSten,
+					coarSten,
+					ghostVof,
+					ebisboxFine,
+					ebisboxCoar,
+					maskFine,
+					maskCoar,
+					dxFine,
+					dxCoar,
+					order,
+					m_weight);
+	
+	order--;
+      }
+
+      // Drop to order 0 if we never found a stencil, and issue an error code. 
+      if(!foundStencil){
+	fineSten.clear();
+
+	const Vector<VolIndex> coarVofs = ebisboxCoar.getVoFs(ghostVof.gridIndex());
+	for (int i = 0; i < coarVofs.size(); i++){
+	  coarSten.add(coarVofs[i], 1.0);
+	}
+	coarSten *= 1./coarVofs.size();
+	
+	MayDay::Warning("EBMultigridInterpolator::defineStencils -- could not find stencil and dropping to order 0");
+      }
     }
   }
+}
+
+bool EBMultigridInterpolator::getStencil(VoFStencil&          a_stencilFine,
+					 VoFStencil&          a_stencilCoar,
+					 const VolIndex&      a_vofFine,
+					 const EBISBox&       a_ebisboxFine,
+					 const EBISBox&       a_ebisboxCoar,
+					 const BaseFab<bool>& a_maskFine,
+					 const BaseFab<bool>& a_maskCoar,
+					 const Real&          a_dxFine,
+					 const Real&          a_dxCoar,
+					 const int&           a_order,
+					 const int&           a_weight){
+
+  
+  return true;
 }
 
 #include <CD_NamespaceFooter.H>
