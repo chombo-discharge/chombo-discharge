@@ -11,6 +11,7 @@
   @todo   When we do the interpolation, we should copy from coarse to m_coarData and from fine to m_fineData and then run everything locally on each patch. 
   @todo   Check the required number of ghost cells -- not sure if 2*ghostCF is correct.
   @todo   Think about what we need to do if we have multi-cells. We should probably only include coarse-grid cells that can be reached with a monotone path from the fine vof. 
+  @todo   defineGhosts should only do this near the EB
 */
 
 // Chombo includes
@@ -27,7 +28,7 @@
 
 EBMultigridInterpolator::EBMultigridInterpolator(){
   m_isDefined = false;
-  m_order     = 2;
+  m_order     = 1;
   m_weight    = 0;
 }
 
@@ -222,19 +223,20 @@ void EBMultigridInterpolator::defineGhosts(){
 
   m_ghostCells.define(dbl);
 
-  DataIterator     dit(dbl);
-  NeighborIterator nit(dbl);
-
-  for (dit.reset(); dit.ok(); ++dit){
+  for (DataIterator dit(dbl); dit.ok(); ++dit){
     const Box cellBox      = dbl[dit()];
     const EBISBox& ebisbox = ebisl[dit()];
     Box grownBox = grow(cellBox, m_ghostCF);
     grownBox &= domain;
 
     m_ghostCells[dit()] = IntVectSet(grownBox);
+
+    NeighborIterator nit(dbl);
     for (nit.begin(dit()); nit.ok(); ++nit){
-      m_ghostCells[dit()] -= dbl[dit()];
-    }
+	m_ghostCells[dit()] -= dbl[nit()];
+      }
+
+    m_ghostCells[dit()] -= cellBox;
   }
 }
 
@@ -283,35 +285,6 @@ void EBMultigridInterpolator::defineData(){
 
   m_fineData.define(m_fineBoxes, m_nComp, EBCellFactory(fineEBISL));
   m_coarData.define(m_coarBoxes, m_nComp, EBCellFactory(coFiEBISL));
-
-
-#if 0 // Debug code
-  LevelData<EBCellFAB> coarData(m_eblgCoar.getDBL(), 1, IntVect::Zero, EBCellFactory(m_eblgCoar.getEBISL()));
-  EBLevelDataOps::setVal(coarData, 1.234);
-
-  for (DataIterator dit = m_coarData.dataIterator(); dit.ok(); ++dit){
-    m_coarData[dit()].setVal(0.0);
-  }
-
-  coarData.copyTo(m_coarData);
-
-  for (DataIterator dit = m_coarData.dataIterator(); dit.ok(); ++dit){
-    const Box cellBox      = m_eblgCoFi.getDBL()[dit()];
-    const Box grownBox     = m_coarBoxes[dit()];
-    const EBISBox& ebisbox = m_eblgCoFi.getEBISL()[dit()];
-    
-    IntVectSet ivs = IntVectSet(grownBox);
-    ivs -= cellBox;
-    
-    for (IVSIterator ivsIt(ivs); ivsIt.ok(); ++ivsIt){
-      const IntVect iv = ivsIt();
-
-      if(!ebisbox.isCovered(iv)){
-	std::cout << m_coarData[dit()](VolIndex(iv, 0), 0) << std::endl;
-      }
-    }
-  }
-#endif
 }
 
 void EBMultigridInterpolator::defineStencils(){
@@ -326,10 +299,7 @@ void EBMultigridInterpolator::defineStencils(){
   m_fineStencils.define(dblFine);
   m_coarStencils.define(dblFine);
 
-  DataIterator     dit(dblFine);
-  NeighborIterator nit(dblFine);
-
-  for (dit.reset(); dit.ok(); ++dit){
+  for (DataIterator dit(dblFine); dit.ok(); ++dit){
     const Box origFineBox  = dblFine[dit()];
     const Box grownFineBox = m_fineBoxes[dit()];
     const Box grownCoarBox = m_coarBoxes[dit()];
@@ -348,10 +318,10 @@ void EBMultigridInterpolator::defineStencils(){
       validCoarCells -= coarIV;
     }
 
-    // Same for parts of the current (grown) patch that overlaps with neighboring boxes. 
+    // Same for parts of the current (grown) patch that overlaps with neighboring boxes.
+    NeighborIterator nit(dblFine);
     for (nit.begin(dit()); nit.ok(); ++nit){
-      const Box neighBox = dblFine[nit()];
-      const Box overlap  = neighBox & grownFineBox;
+      const Box overlap  = grownFineBox & dblFine[nit()];
 
       for (BoxIterator bit(overlap); bit.ok(); ++bit){
 	const IntVect fineIV = bit();
@@ -427,16 +397,26 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&       a_stencilFine,
 					 const int&        a_weight){
 
   const int fineRadius = a_order;
-  const int coarRadius = std::max(1, fineRadius/2);
-
-  const Vector<VolIndex> ghostVofCoar = a_ebisboxCoar.getVoFs(coarsen(a_ghostVof.gridIndex(), m_refRat)); // Vofs correseponding to coarsen(a_ghostVof, refRat)
+  const int coarRadius = std::max(1, fineRadius/m_refRat);
 
   // Get all Vofs in specified radii. Don't use cells that are not in a_validFineCells.
-  Vector<VolIndex> fineVofs = VofUtils::getVofsInRadius(a_ghostVof, a_ebisboxFine, fineRadius, VofUtils::Connectivity::MonotonePath, true);
+  Vector<VolIndex> fineVofs = VofUtils::getVofsInRadius(a_ghostVof, a_ebisboxFine, fineRadius, VofUtils::Connectivity::MonotonePath, false);
   VofUtils::includeCells(fineVofs, a_validFineCells);
   VofUtils::onlyUnique(fineVofs);
-  
-  
+
+  // Get the coarse vof which we obtain by coarsening a_ghostVof
+  int numCoar = 1;
+  VolIndex ghostVofCoar = a_ghostVof;
+  while(numCoar < m_refRat){
+    ghostVofCoar = a_ebisboxFine.coarsen(ghostVofCoar);
+    numCoar *= 2;
+  }
+
+  Vector<VolIndex> coarVofs = VofUtils::getVofsInRadius(ghostVofCoar, a_ebisboxCoar, coarRadius, VofUtils::Connectivity::MonotonePath, true);
+  VofUtils::includeCells(coarVofs, a_validCoarCells);
+  VofUtils::onlyUnique(coarVofs);
+
+  std::cout << "got vofs = " << coarVofs.size() + fineVofs.size() << std::endl;
   
   return true;
 }
