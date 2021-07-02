@@ -439,7 +439,6 @@ public:
 
   /*!
     @brief Compute a least squares interpolation to a specified order. This version separates the stencils into two levels. 
-    @brief Compute a least squares interpolation to a specified order. This version separates the stencils into two levels. 
     @details This is the general version which lets the caller specify why derivatives he wants out of the interpolation. The user
     specifies this via a_derivs where each IntVect represent a differentiation. E.g. IntVect(0,0,0) is just f, IntVect(1,0,0) = d/dx,
     IntVect(1,1,2) = (d^4)/(dx dy dz^2) and so on. The stencils for the directional derivatives are coded onto the return map. E.g.

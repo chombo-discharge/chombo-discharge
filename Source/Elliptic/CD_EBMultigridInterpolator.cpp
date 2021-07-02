@@ -28,8 +28,9 @@
 
 constexpr int EBMultigridInterpolator::m_stenComp;
 constexpr int EBMultigridInterpolator::m_nStenComp;
+constexpr int EBMultigridInterpolator::m_comp;
 
-EBMultigridInterpolator::EBMultigridInterpolator(){
+EBMultigridInterpolator::EBMultigridInterpolator() {
   m_isDefined    = false;
   m_order        = 2;
   m_weight       = 2;
@@ -442,10 +443,9 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&         a_stencilFine,
       coarDisplacements.push_back(LeastSquares::displacement(a_cellLocation, a_cellLocation, a_ghostVof, coarVof, a_ebisboxFine, a_ebisboxCoar, a_dxFine, a_dxCoar));
     }
 
-
     // LeastSquares computes all unknown terms in a Taylor expansion up to specified order. We want the 0th order term, i.e. the interpolated value,
     // which in multi-index notation is the term (0,0), i.e. IntVect::Zero. The format of the two-level least squares routine is such that the
-    // fine stencil lies on the first index. This can be confusing, but the LeastSquares uses a very compact notation...
+    // fine stencil lies on the first index. This can be confusing, but the LeastSquares uses a very compact notation. 
     IntVect interpStenIndex = IntVect::Zero;
     IntVectSet derivs       = IntVectSet(interpStenIndex);
     IntVectSet knownTerms   = IntVectSet();
@@ -476,31 +476,38 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&         a_stencilFine,
 void EBMultigridInterpolator::interp(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar, const Interval a_variables) const {
   CH_TIME("EBMultigridInterpolator::interp");
 
-  // Copy data to scratch data holders.
-  a_phiFine.copyTo(m_fineData);
-  a_phiCoar.copyTo(m_coarData);
+  for (int icomp = a_variables.begin(); icomp <= a_variables.end(); icomp++){
 
-  for (DataIterator dit = a_phiFine.dataIterator(); dit.ok(); ++dit){
-          EBCellFAB& dstFine = a_phiFine[dit()];
-    const EBCellFAB& srcFine = m_fineData[dit()];
-    const EBCellFAB& srcCoar = m_coarData[dit()];
+    // Copy data to scratch data holders.
+    const Interval srcInterv = Interval(icomp,   icomp);
+    const Interval dstInterv = Interval(m_comp,  m_comp);
+    
+    a_phiFine.copyTo(srcInterv, m_fineData, dstInterv);
+    a_phiCoar.copyTo(srcInterv, m_coarData, dstInterv);
 
-    const BaseIVFAB<VoFStencil>& fineStencils = m_fineStencils[dit()];
-    const BaseIVFAB<VoFStencil>& coarStencils = m_coarStencils[dit()];
+    for (DataIterator dit = a_phiFine.dataIterator(); dit.ok(); ++dit){
+      EBCellFAB& dstFine       = a_phiFine[dit()];
+      const EBCellFAB& srcFine = m_fineData[dit()];
+      const EBCellFAB& srcCoar = m_coarData[dit()];
 
-    for (VoFIterator vofit(fineStencils.getIVS(), fineStencils.getEBGraph()); vofit.ok(); ++vofit){
-      const VolIndex& ghostVoF = vofit();
+      const BaseIVFAB<VoFStencil>& fineStencils = m_fineStencils[dit()];
+      const BaseIVFAB<VoFStencil>& coarStencils = m_coarStencils[dit()];
 
-      const VoFStencil& fineSten = fineStencils(ghostVoF, m_stenComp);
-      const VoFStencil& coarSten = coarStencils(ghostVoF, m_stenComp);
+      for (VoFIterator vofit(fineStencils.getIVS(), fineStencils.getEBGraph()); vofit.ok(); ++vofit){
+	const VolIndex& ghostVoF = vofit();
 
-      for (int icomp = a_variables.begin(); icomp <= a_variables.end(); icomp++){
 	dstFine(ghostVoF, icomp) = 0.0;
 
+	// Fine and coarse stencils for this ghost vof
+	const VoFStencil& fineSten = fineStencils(ghostVoF, m_stenComp);
+	const VoFStencil& coarSten = coarStencils(ghostVoF, m_stenComp);
+
+	// Apply fine stencil
 	for (int ifine = 0; ifine < fineSten.size(); ifine++){
 	  dstFine(ghostVoF, icomp) += fineSten.weight(ifine) * srcFine(fineSten.vof(ifine), icomp);
 	}
-	
+
+	// Apply coarse stencil
 	for (int icoar = 0; icoar < coarSten.size(); icoar++){
 	  dstFine(ghostVoF, icomp) += coarSten.weight(icoar) * srcCoar(coarSten.vof(icoar), icomp);
 	}
@@ -513,22 +520,27 @@ void EBMultigridInterpolator::interpH(LevelData<EBCellFAB>& a_phiFine, const Int
   CH_TIME("EBMultigridInterpolator::interp");
 
   // Copy data to scratch data holders.
-  a_phiFine.copyTo(m_fineData);
+  for (int icomp = a_variables.begin(); icomp <= a_variables.end(); icomp++){
+    const Interval srcInterv = Interval(icomp,   icomp);
+    const Interval dstInterv = Interval(m_comp,  m_comp);
+    
+    a_phiFine.copyTo(srcInterv, m_fineData, dstInterv);
 
-  for (DataIterator dit = a_phiFine.dataIterator(); dit.ok(); ++dit){
-          EBCellFAB& dstFine = a_phiFine[dit()];
-    const EBCellFAB& srcFine = m_fineData[dit()];
+    for (DataIterator dit = a_phiFine.dataIterator(); dit.ok(); ++dit){
+      EBCellFAB& dstFine       = a_phiFine[dit()];
+      const EBCellFAB& srcFine = m_fineData[dit()];
 
-    const BaseIVFAB<VoFStencil>& fineStencils = m_fineStencils[dit()];
+      const BaseIVFAB<VoFStencil>& fineStencils = m_fineStencils[dit()];
 
-    for (VoFIterator vofit(fineStencils.getIVS(), fineStencils.getEBGraph()); vofit.ok(); ++vofit){
-      const VolIndex& ghostVoF = vofit();
+      for (VoFIterator vofit(fineStencils.getIVS(), fineStencils.getEBGraph()); vofit.ok(); ++vofit){
+	const VolIndex& ghostVoF = vofit();
 
-      const VoFStencil& fineSten = fineStencils(ghostVoF, m_stenComp);
-
-      for (int icomp = a_variables.begin(); icomp <= a_variables.end(); icomp++){
 	dstFine(ghostVoF, icomp) = 0.0;
 
+	// Fine stencil for this ghost vof
+	const VoFStencil& fineSten = fineStencils(ghostVoF, m_stenComp);
+
+	// Apply fine stencil
 	for (int ifine = 0; ifine < fineSten.size(); ifine++){
 	  dstFine(ghostVoF, icomp) += fineSten.weight(ifine) * srcFine(fineSten.vof(ifine), icomp);
 	}

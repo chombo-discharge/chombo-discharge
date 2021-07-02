@@ -109,6 +109,9 @@ public:
 
   /*!
     @brief Do coarse-fine interpolation on a grid patch
+    @param[in] a_phiFine   Fine-level data
+    @param[in] a_variables Variables to be interpolated
+    @param[in] a_dit       Data index
   */
   void coarseFineInterpH(EBCellFAB& a_phiFine, const Interval a_variables, const DataIndex& a_dit);
 
@@ -122,21 +125,12 @@ public:
 
   /*!
     @brief Homogeneous interpolation
-    @param[in] a_phiFine Fine-level data. We interpolate the ghost cells assuming that coarse-level data is zero everywhere. 
+    @param[in] a_phiFine   Fine-level data. We interpolate the ghost cells assuming that coarse-level data is zero everywhere. 
+    @param[in] a_variables Variables to be interpolated. 
   */
   void interpH(LevelData<EBCellFAB>& a_phiFine, const Interval a_variables) const;
 
 protected:
-  
-  /*!
-    @brief Component that interpolation stencil is stored at
-  */
-  static constexpr int m_stenComp = 0;
-
-  /*!
-    @brief Number of stencil components
-  */
-  static constexpr int m_nStenComp = 1;
   
   /*!
     @brief Defines the CFIVS
@@ -156,6 +150,21 @@ protected:
 // ==================================================
 // NEW STUFF BELOW HERE
 // ==================================================
+
+  /*!
+    @brief Component that interpolation stencil is stored at
+  */
+  static constexpr int m_stenComp = 0;
+
+  /*!
+    @brief Number of stencil components
+  */
+  static constexpr int m_nStenComp = 1;
+
+  /*!
+    @brief Component number
+  */
+  static constexpr int m_comp = 0;
 
   CellLocation m_cellLocation;
 
