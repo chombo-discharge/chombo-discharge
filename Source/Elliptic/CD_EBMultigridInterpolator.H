@@ -48,20 +48,6 @@ public:
 
   /*!
     @brief Full constructor
-    @param[in] a_eblgFine   Fine grids
-    @param[in] a_eblgCoar   Coarse grids
-    @param[in] a_refRat     Refinement ratio
-    @param[in] a_nVar       Number of variables
-    @param[in] a_ghostCells Number of ghost cells to interpolate. 
-  */
-  EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
-			  const EBLevelGrid& a_eblgCoar,
-			  const int          a_nRef,
-			  const int          a_nVar,
-			  const int          a_ghostCF);
-
-  /*!
-    @brief Full constructor
     @param[in] a_eblgFine     Fine grids
     @param[in] a_eblgCoar     Coarse grids
     @param[in] a_cellLocation Interpration of data centering. Either on the cell center or the cell centroid. 
@@ -189,6 +175,11 @@ protected:
     @brief Coarsened data
   */
   mutable BoxLayoutData<EBCellFAB> m_coarData;
+
+  /*!
+    @brief Minimum number of ghost cells in input
+  */
+  IntVect m_ghostInput;
 
   /*!
     @brief Number of ghost cells to fill across coarse-fine interface. 

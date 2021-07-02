@@ -8,8 +8,6 @@
   @brief  Implementation of CD_EBMultigridInterpolator.H
   @author Robert Marskar
   @todo   Consider making a completely new layout near the EB, so we don't define the temp holders for the full domain. 
-  @todo   Check the required number of ghost cells -- not sure if 2*ghostCF is correct.
-  @todo   defineGhosts should only do this near the EB
   @todo   Remove ParmParse stuff
   @todo   coarseFineInterpH is a mess. It doesn't even do the variables correctly. 
 */
@@ -49,19 +47,26 @@ EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
   CH_assert(a_ghostCF   > 0);
   CH_assert(a_nVar      > 0);
   CH_assert(a_refRat%2 == 0);
+
   
-  m_isDefined = true;
-}
+  const DisjointBoxLayout& gridsFine = a_eblgFine.getDBL();
+  const DisjointBoxLayout& gridsCoar = a_eblgCoar.getDBL();
 
-EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
-						 const EBLevelGrid& a_eblgCoar,
-						 const int          a_refRat,
-						 const int          a_nVar,
-						 const int          a_ghostCF) : EBMultigridInterpolator() {
-  CH_assert(a_ghostCF   > 0);
-  CH_assert(a_nVar      > 0);
-  CH_assert(a_refRat%2 == 0);
+  QuadCFInterp::define(gridsFine, &gridsCoar, 1.0, a_refRat, a_nVar, a_eblgFine.getDomain());
+  
+  m_refRat        = a_refRat;
+  m_nComp         = a_nVar;
+  m_ghostCF       = a_ghostCF;
+  m_order         = a_order;
+  m_cellLocation  = a_cellLocation;
+  
+  this->defineGrids(a_eblgFine, a_eblgCoar);
+  this->defineCFIVS();
+  this->defineGhosts();
+  this->defineData();
+  this->defineStencils();
 
+#if 1 // This is cod ethat should be removed once we get the performance we're after!
   // Build the CFIVS for EBQuadCFInterp. 
   const DisjointBoxLayout& dblFine = a_eblgFine.getDBL();
   const ProblemDomain& domainFine  = a_eblgFine.getDomain();
@@ -89,19 +94,9 @@ EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
 			 cfivs,
 			 a_eblgFine.getEBIS(),
 			 true);
-  m_eblgFine = a_eblgFine;
-  m_eblgCoar = a_eblgCoar;
-  this->defineCFIVS();
-
-// NEW CONSTRUCTOR IMPLEMENTATION GOES BELOW HERE
-  m_refRat   = a_refRat;
-  m_nComp    = a_nVar;
-  m_ghostCF  = a_ghostCF;
+#endif
   
-  this->defineGrids(a_eblgFine, a_eblgCoar);
-  this->defineGhosts();
-  this->defineData();
-  this->defineStencils();
+  m_isDefined = true;
 }
 
 int EBMultigridInterpolator::getGhostCF() const{
@@ -109,8 +104,6 @@ int EBMultigridInterpolator::getGhostCF() const{
 }
 
 void EBMultigridInterpolator::defineCFIVS(){
-
-  
   for (int dir = 0; dir < SpaceDim; dir++){
     m_loCFIVS[dir].define(m_eblgFine.getDBL());
     m_hiCFIVS[dir].define(m_eblgFine.getDBL());
