@@ -189,6 +189,7 @@ Vector<RefCountedPtr<EBMultigridInterpolator> > ProxyFieldSolver::getMultigridIn
       interpolators[lvl] = RefCountedPtr<EBMultigridInterpolator> (new EBMultigridInterpolator(eblgFine,
 											       eblgCoar,
 											       Location::Cell::Center,
+											       m_amr->getNumberOfGhostCells()*IntVect::Unit,
 											       m_amr->getRefinementRatios()[lvl-1],
 											       1,
 											       ghostCF,

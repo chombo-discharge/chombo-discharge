@@ -39,7 +39,7 @@ public:
   /*!
     @brief Default constructor. Must subsequently call define
   */
-  EBMultigridInterpolator();
+  EBMultigridInterpolator() = delete;
 
   /*!
     @brief Disallowed copy constructor.
@@ -61,6 +61,7 @@ public:
   EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
 			  const EBLevelGrid& a_eblgCoar,
 			  const CellLocation a_cellLocation,
+			  const IntVect&     a_minGhost,
 			  const int          a_refRat,
 			  const int          a_nVar,
 			  const int          a_ghostCF,
@@ -100,8 +101,6 @@ public:
     @param[in] a_dit       Data index
   */
   void coarseFineInterpH(EBCellFAB& a_phiFine, const Interval a_variables, const DataIndex& a_dit);
-
-
 
 protected:
   
@@ -179,7 +178,7 @@ protected:
   /*!
     @brief Minimum number of ghost cells in input
   */
-  IntVect m_ghostInput;
+  IntVect m_minGhost;
 
   /*!
     @brief Number of ghost cells to fill across coarse-fine interface. 

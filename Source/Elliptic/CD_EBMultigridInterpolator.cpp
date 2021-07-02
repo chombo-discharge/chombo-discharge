@@ -9,7 +9,7 @@
   @author Robert Marskar
   @todo   Consider making a completely new layout near the EB, so we don't define the temp holders for the full domain. 
   @todo   Remove ParmParse stuff
-  @todo   coarseFineInterpH is a mess. It doesn't even do the variables correctly. 
+  @todo   coarseFineInterpH is a mess. It doesn't even do the variables correctly. We should do our own regular interpolation. 
 */
 
 // Chombo includes
@@ -29,16 +29,10 @@ constexpr int EBMultigridInterpolator::m_stenComp;
 constexpr int EBMultigridInterpolator::m_nStenComp;
 constexpr int EBMultigridInterpolator::m_comp;
 
-EBMultigridInterpolator::EBMultigridInterpolator() {
-  m_isDefined    = false;
-  m_order        = 2;
-  m_weight       = 2;
-  m_cellLocation = Location::Cell::Center;
-}
-
 EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
 						 const EBLevelGrid& a_eblgCoar,
 						 const CellLocation a_cellLocation,
+						 const IntVect&     a_minGhost,
 						 const int          a_refRat,
 						 const int          a_nVar,
 						 const int          a_ghostCF,
@@ -47,7 +41,6 @@ EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
   CH_assert(a_ghostCF   > 0);
   CH_assert(a_nVar      > 0);
   CH_assert(a_refRat%2 == 0);
-
   
   const DisjointBoxLayout& gridsFine = a_eblgFine.getDBL();
   const DisjointBoxLayout& gridsCoar = a_eblgCoar.getDBL();
@@ -58,7 +51,9 @@ EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
   m_nComp         = a_nVar;
   m_ghostCF       = a_ghostCF;
   m_order         = a_order;
+  m_minGhost      = a_minGhost;
   m_cellLocation  = a_cellLocation;
+  m_weight        = a_weighting;
   
   this->defineGrids(a_eblgFine, a_eblgCoar);
   this->defineCFIVS();
@@ -66,7 +61,7 @@ EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
   this->defineData();
   this->defineStencils();
 
-#if 1 // This is cod ethat should be removed once we get the performance we're after!
+#if 1 // This is code that should be removed once we get the performance we're after!
   // Build the CFIVS for EBQuadCFInterp. 
   const DisjointBoxLayout& dblFine = a_eblgFine.getDBL();
   const ProblemDomain& domainFine  = a_eblgFine.getDomain();
@@ -137,12 +132,13 @@ void EBMultigridInterpolator::inhomogeneousInterpEBCF(LevelData<EBCellFAB>& a_ph
     const Interval srcInterv = Interval(icomp,   icomp);
     const Interval dstInterv = Interval(m_comp,  m_comp);
     
-    a_phiFine.copyTo(srcInterv, m_fineData, dstInterv);
+    //    a_phiFine.copyTo(srcInterv, m_fineData, dstInterv);
     a_phiCoar.copyTo(srcInterv, m_coarData, dstInterv);
 
     for (DataIterator dit = a_phiFine.dataIterator(); dit.ok(); ++dit){
       EBCellFAB& dstFine       = a_phiFine[dit()];
-      const EBCellFAB& srcFine = m_fineData[dit()];
+      //      const EBCellFAB& srcFine = m_fineData[dit()];
+      const EBCellFAB& srcFine = a_phiFine[dit()];
       const EBCellFAB& srcCoar = m_coarData[dit()];
 
       const BaseIVFAB<VoFStencil>& fineStencils = m_fineStencils[dit()];
@@ -164,7 +160,7 @@ void EBMultigridInterpolator::inhomogeneousInterpEBCF(LevelData<EBCellFAB>& a_ph
 
 	// Apply coarse stencil
 	for (int icoar = 0; icoar < coarSten.size(); icoar++){
-	  dstFine(ghostVoF, icomp) += coarSten.weight(icoar) * srcCoar(coarSten.vof(icoar), icomp);
+	  dstFine(ghostVoF, icomp) += coarSten.weight(icoar) * srcCoar(coarSten.vof(icoar), m_comp);
 	}
       }
     }
@@ -286,11 +282,11 @@ void EBMultigridInterpolator::homogeneousInterpEBCF(LevelData<EBCellFAB>& a_phiF
     const Interval srcInterv = Interval(icomp,   icomp);
     const Interval dstInterv = Interval(m_comp,  m_comp);
     
-    a_phiFine.copyTo(srcInterv, m_fineData, dstInterv);
+    //    a_phiFine.copyTo(srcInterv, m_fineData, dstInterv);
 
     for (DataIterator dit = a_phiFine.dataIterator(); dit.ok(); ++dit){
       EBCellFAB& dstFine       = a_phiFine[dit()];
-      const EBCellFAB& srcFine = m_fineData[dit()];
+      const EBCellFAB& srcFine = a_phiFine[dit()];
 
       const BaseIVFAB<VoFStencil>& fineStencils = m_fineStencils[dit()];
 
@@ -410,9 +406,10 @@ void EBMultigridInterpolator::defineStencils(){
   m_coarStencils.define(dblFine);
 
   for (DataIterator dit(dblFine); dit.ok(); ++dit){
-    const Box origFineBox  = dblFine[dit()];
-    const Box grownFineBox = m_fineBoxes[dit()];
-    const Box grownCoarBox = m_coarBoxes[dit()];
+    const Box origFineBox    = dblFine[dit()];
+    const Box ghostedFineBox = grow(origFineBox, m_minGhost);
+    const Box grownFineBox   = m_fineBoxes[dit()];
+    const Box grownCoarBox   = m_coarBoxes[dit()];
 
     // Define the valid regions such that the interpolation does not include coarse grid cells that fall beneath the fine level,
     // and no fine cells outside the CF.
@@ -440,6 +437,9 @@ void EBMultigridInterpolator::defineStencils(){
 
       validCoarCells -= dblCoar[nit()];
     }
+
+    // Restrict to the ghosted input box
+    validFineCells &= ghostedFineBox;
 
     // Now go through each ghost cell and get an interpolation stencil to specified order. 
     const EBISBox& ebisboxFine = m_eblgFine.getEBISL()[dit()];
@@ -475,6 +475,10 @@ void EBMultigridInterpolator::defineStencils(){
 					m_weight);
 	
 	order--;
+
+	if(!foundStencil){
+	  pout() << "EBMultigridInterpolator -- on domain = " << m_eblgFine.getDomain() << ", dropping order for vof = " << ghostVof << endl;
+	}
       }
 
       // Drop to order 0 if we never found a stencil, and issue an error code. 
