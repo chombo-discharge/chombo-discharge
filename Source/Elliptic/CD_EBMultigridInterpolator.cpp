@@ -26,10 +26,13 @@
 #include <CD_LeastSquares.H>
 #include <CD_NamespaceHeader.H>
 
+constexpr int EBMultigridInterpolator::m_stenComp;
+constexpr int EBMultigridInterpolator::m_nStenComp;
+
 EBMultigridInterpolator::EBMultigridInterpolator(){
   m_isDefined    = false;
-  m_order        = 1;
-  m_weight       = 0;
+  m_order        = 2;
+  m_weight       = 2;
   m_cellLocation = Location::Cell::Center;
 }
 
@@ -38,8 +41,8 @@ EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
 						 const int          a_refRat,
 						 const int          a_nVar,
 						 const int          a_ghostCF) : EBMultigridInterpolator() {
-  CH_assert(a_ghostCF > 0);
-  CH_assert(a_nVar > 0);
+  CH_assert(a_ghostCF   > 0);
+  CH_assert(a_nVar      > 0);
   CH_assert(a_refRat%2 == 0);
 
   // Build the CFIVS for EBQuadCFInterp. 
@@ -369,11 +372,14 @@ void EBMultigridInterpolator::defineStencils(){
       if(!foundStencil){
 	fineSten.clear();
 
-	const Vector<VolIndex> coarVofs = ebisboxCoar.getVoFs(ghostVof.gridIndex());
-	for (int i = 0; i < coarVofs.size(); i++){
-	  coarSten.add(coarVofs[i], 1.0);
+	int numCoarsen = 1;
+	VolIndex ghostVofCoar = ghostVof;
+	while(numCoarsen < m_refRat){
+	  ghostVofCoar = ebisboxFine.coarsen(ghostVofCoar);
+	  numCoarsen *= 2;
 	}
-	coarSten *= 1./coarVofs.size();
+
+	coarSten.add(ghostVofCoar, 1.0);
 	
 	MayDay::Warning("EBMultigridInterpolator::defineStencils -- could not find stencil and dropping to order 0");
       }
@@ -443,7 +449,7 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&         a_stencilFine,
     IntVect interpStenIndex = IntVect::Zero;
     IntVectSet derivs       = IntVectSet(interpStenIndex);
     IntVectSet knownTerms   = IntVectSet();
-    
+
     std::map<IntVect, std::pair<VoFStencil, VoFStencil> > stencils = LeastSquares::computeDualLevelStencils(derivs,
 													    knownTerms,
 													    fineVofs,
@@ -452,6 +458,7 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&         a_stencilFine,
 													    coarDisplacements,
 													    a_weight,
 													    a_order);
+
     a_stencilFine = stencils.at(interpStenIndex).first;
     a_stencilCoar = stencils.at(interpStenIndex).second;
 
@@ -464,13 +471,70 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&         a_stencilFine,
   }
 
   return foundStencil;
+}
 
+void EBMultigridInterpolator::interp(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar, const Interval a_variables) const {
+  CH_TIME("EBMultigridInterpolator::interp");
 
-  // Solve the corresponding least squares system if we can. 
-#if 0 // Total vofs
-  int tot = fineVofs.size() + coarVofs.size();
-  std::cout << "vof = " << a_ghostVof << "\t" << "got fine/coar vofs = " << fineVofs.size() << "\t" << coarVofs.size() << "\t" << tot << "\n";
-#endif
+  // Copy data to scratch data holders.
+  a_phiFine.copyTo(m_fineData);
+  a_phiCoar.copyTo(m_coarData);
+
+  for (DataIterator dit = a_phiFine.dataIterator(); dit.ok(); ++dit){
+          EBCellFAB& dstFine = a_phiFine[dit()];
+    const EBCellFAB& srcFine = m_fineData[dit()];
+    const EBCellFAB& srcCoar = m_coarData[dit()];
+
+    const BaseIVFAB<VoFStencil>& fineStencils = m_fineStencils[dit()];
+    const BaseIVFAB<VoFStencil>& coarStencils = m_coarStencils[dit()];
+
+    for (VoFIterator vofit(fineStencils.getIVS(), fineStencils.getEBGraph()); vofit.ok(); ++vofit){
+      const VolIndex& ghostVoF = vofit();
+
+      const VoFStencil& fineSten = fineStencils(ghostVoF, m_stenComp);
+      const VoFStencil& coarSten = coarStencils(ghostVoF, m_stenComp);
+
+      for (int icomp = a_variables.begin(); icomp <= a_variables.end(); icomp++){
+	dstFine(ghostVoF, icomp) = 0.0;
+
+	for (int ifine = 0; ifine < fineSten.size(); ifine++){
+	  dstFine(ghostVoF, icomp) += fineSten.weight(ifine) * srcFine(fineSten.vof(ifine), icomp);
+	}
+	
+	for (int icoar = 0; icoar < coarSten.size(); icoar++){
+	  dstFine(ghostVoF, icomp) += coarSten.weight(icoar) * srcCoar(coarSten.vof(icoar), icomp);
+	}
+      }
+    }
+  }
+}
+
+void EBMultigridInterpolator::interpH(LevelData<EBCellFAB>& a_phiFine, const Interval a_variables) const {
+  CH_TIME("EBMultigridInterpolator::interp");
+
+  // Copy data to scratch data holders.
+  a_phiFine.copyTo(m_fineData);
+
+  for (DataIterator dit = a_phiFine.dataIterator(); dit.ok(); ++dit){
+          EBCellFAB& dstFine = a_phiFine[dit()];
+    const EBCellFAB& srcFine = m_fineData[dit()];
+
+    const BaseIVFAB<VoFStencil>& fineStencils = m_fineStencils[dit()];
+
+    for (VoFIterator vofit(fineStencils.getIVS(), fineStencils.getEBGraph()); vofit.ok(); ++vofit){
+      const VolIndex& ghostVoF = vofit();
+
+      const VoFStencil& fineSten = fineStencils(ghostVoF, m_stenComp);
+
+      for (int icomp = a_variables.begin(); icomp <= a_variables.end(); icomp++){
+	dstFine(ghostVoF, icomp) = 0.0;
+
+	for (int ifine = 0; ifine < fineSten.size(); ifine++){
+	  dstFine(ghostVoF, icomp) += fineSten.weight(ifine) * srcFine(fineSten.vof(ifine), icomp);
+	}
+      }
+    }
+  }
 }
 
 #include <CD_NamespaceFooter.H>

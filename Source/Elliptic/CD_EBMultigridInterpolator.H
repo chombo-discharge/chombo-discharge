@@ -112,7 +112,31 @@ public:
   */
   void coarseFineInterpH(EBCellFAB& a_phiFine, const Interval a_variables, const DataIndex& a_dit);
 
+  /*!
+    @brief Inhomogeneous interpolation
+    @param[inout] a_phiFine   Fine-level data to be interpolated. 
+    @param[in]    a_phiCoar   Coarse-level data. 
+    @param[in]    a_variables Variables to be interpolated. 
+  */
+  void interp(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar, const Interval a_variables) const;
+
+  /*!
+    @brief Homogeneous interpolation
+    @param[in] a_phiFine Fine-level data. We interpolate the ghost cells assuming that coarse-level data is zero everywhere. 
+  */
+  void interpH(LevelData<EBCellFAB>& a_phiFine, const Interval a_variables) const;
+
 protected:
+  
+  /*!
+    @brief Component that interpolation stencil is stored at
+  */
+  static constexpr int m_stenComp = 0;
+
+  /*!
+    @brief Number of stencil components
+  */
+  static constexpr int m_nStenComp = 1;
   
   /*!
     @brief Defines the CFIVS
@@ -163,12 +187,12 @@ protected:
   /*!
     @brief Fine data. Contains a lot of ghost storage
   */
-  BoxLayoutData<EBCellFAB> m_fineData;
+  mutable BoxLayoutData<EBCellFAB> m_fineData;
 
   /*!
     @brief Coarsened data
   */
-  BoxLayoutData<EBCellFAB> m_coarData;
+  mutable BoxLayoutData<EBCellFAB> m_coarData;
 
   /*!
     @brief Number of ghost cells to fill across coarse-fine interface. 

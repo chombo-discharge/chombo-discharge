@@ -476,10 +476,25 @@ std::map<IntVect, VoFStencil> LeastSquares::computeSingleLevelStencils(const Int
 
 
     // Build the A-matrix in column major order so we can use LaPackUtils::computePseudoInverse.
-    // Use of multi-indices makes higher-order Taylor series a walk in the park. 
     int i = 0;
     Vector<Real> linA    (K*M, 0.0);
     Vector<Real> linAplus(M*K, 0.0);
+
+    // If we have an (unweighted) full system then our system A*x = b is 
+    //
+    //              A                   x             b
+    //             ===                 ===           ===
+    //     [1 (x-x0) (x-x0)^2 ...] [f(x)     ]     [f(x0)]
+    //     [1 (x-x1) (x-x1)^2 ...] [df/dx    ]     [f(x1)]
+    //     [1 (x-x2) (x-x2)^2 ...] [d^2f/dx^2]  =  [f(x2)]
+    //     [:   :      :         ] [    :    ]     [  :  ]
+    //     [:   :      :         ] [    :    ]     [  :  ]
+    //
+    // Columns can be eliminated through knownTerms, in which case we remove unknowns (i.e., rows) from the system.
+    // Extensions to 2D/3D simply use multi-index notation, and weights are simply multiplied into each row, i.e. we
+    // solve (w*A) * x = (w*b). Inverting the system gives x = [(w*A)^+ * w] * b where (w*A)^+ is the Moore-Penrose
+    // pseudoinverse of (W*A). Once we've computed (w*A)^+ we put the result of [(w*A)^+ * w] into a stencil.
+    
     for (MultiIndex mi(a_order); mi.ok(); ++mi){ // Loop over column
 
       if(!a_knownTerms.contains(mi.getCurrentIndex())){ // Add column if it is an unknown in the lsq system. 
@@ -567,6 +582,12 @@ std::map<IntVect, std::pair<VoFStencil, VoFStencil> > LeastSquares::computeDualL
 											     const Vector<Real>&     a_fineWeights,
 											     const Vector<Real>&     a_coarWeights,
 											     const int               a_order){
+  CH_assert(a_order > 0);
+  CH_assert(a_fineVofs.size() == a_fineDisplacements.size());
+  CH_assert(a_coarVofs.size() == a_coarDisplacements.size());
+  CH_assert(a_fineVofs.size() == a_fineWeights.      size());
+  CH_assert(a_coarVofs.size() == a_coarWeights.      size());
+  
   // Initialize return stuff
   std::map<IntVect, std::pair<VoFStencil, VoFStencil> > ret;
 
@@ -589,20 +610,36 @@ std::map<IntVect, std::pair<VoFStencil, VoFStencil> > LeastSquares::computeDualL
 
 
     // Build the A-matrix in column major order so we can use LaPackUtils::computePseudoInverse.
-    // Use of multi-indices makes higher-order Taylor series a walk in the park. 
     int i = 0;
     Vector<Real> linA    (K*M, 0.0);
     Vector<Real> linAplus(M*K, 0.0);
-    for (MultiIndex mi(a_order); mi.ok(); ++mi){ // Loop over column
 
-      if(!a_knownTerms.contains(mi.getCurrentIndex())){ // Add column if it is an unknown in the lsq system. 
-	for (int k = 0; k < K; k++){
+
+    // If we have an (unweighted) full system then our system A*x = b is 
+    //
+    //              A                   x             b
+    //             ===                 ===           ===
+    //     [1 (x-x0) (x-x0)^2 ...] [f(x)     ]     [f(x0)]
+    //     [1 (x-x1) (x-x1)^2 ...] [df/dx    ]     [f(x1)]
+    //     [1 (x-x2) (x-x2)^2 ...] [d^2f/dx^2]  =  [f(x2)]
+    //     [:   :      :         ] [    :    ]     [  :  ]
+    //     [:   :      :         ] [    :    ]     [  :  ]
+    //
+    // Columns can be eliminated through knownTerms, in which case we remove unknowns (i.e., rows) from the system.
+    // Extensions to 2D/3D simply use multi-index notation, and weights are simply multiplied into each row, i.e. we
+    // solve (w*A) * x = (w*b). Inverting the system gives x = [w * A^+ * w] * b where A^+ is the Moore-Penrose
+    // pseudoinverse. We put the result of [w * A^+ * w] into a stencil. 
+
+    for (MultiIndex mi(a_order); mi.ok(); ++mi){ // Loop over column    
+      if(!a_knownTerms.contains(mi.getCurrentIndex())){ 
+	for (int k = 0; k < K; k++){ // Fill column, write the system using the fine vofs first, then the coarse vofs. 
 	  if(k < Kfine){
-	    linA[i] = a_fineWeights[k]*mi.pow(a_fineDisplacements[k])/mi.factorial(); i++;
+	    linA[i] = a_fineWeights[k]*mi.pow(a_fineDisplacements[k])/mi.factorial(); 
 	  }
 	  else{
-	    linA[i] = a_coarWeights[k]*mi.pow(a_coarDisplacements[k])/mi.factorial(); i++;
+	    linA[i] = a_coarWeights[k-Kfine]*mi.pow(a_coarDisplacements[k-Kfine])/mi.factorial(); 
 	  }
+	  i++;
 	}
       }
     }
@@ -648,7 +685,7 @@ std::map<IntVect, std::pair<VoFStencil, VoFStencil> > LeastSquares::computeDualL
 	    sten.first.add(a_fineVofs[k], a_fineWeights[k]*linAplus[idx]);
 	  }
 	  else{
-	    sten.second.add(a_coarVofs[k], a_coarWeights[k]*linAplus[idx]);
+	    sten.second.add(a_coarVofs[k-Kfine], a_coarWeights[k-Kfine]*linAplus[idx]);
 	  }
 	}
       }

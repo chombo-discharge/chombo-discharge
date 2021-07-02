@@ -519,8 +519,6 @@ EBHelmholtzOp* EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
     CH_assert(eblgCoarMG.isDefined());
   }
 
-  //  auto dobc = this->makeDomainBcObject(eblg, dx);
-
   if(hasCoar){
     this->getCoarserLayout(eblgCoFi, eblg, refToCoar, m_mgBlockingFactor);
     eblgCoFi.setMaxRefinementRatio(refToCoar);

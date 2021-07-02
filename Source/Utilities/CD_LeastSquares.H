@@ -28,7 +28,7 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Static class containing useful routines for (weighted) least squares polynomial reconstruction.
+  @brief Static class containing useful routines for (weighted) least squares polynomial reconstruction. 
 */
 class LeastSquares {
 public:

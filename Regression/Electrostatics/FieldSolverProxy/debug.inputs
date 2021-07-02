@@ -51,10 +51,10 @@ Driver.num_plot_ghost                  = 1                # Number of ghost cell
 Driver.plt_vars                        = 0                # 'tags', 'mpi_rank', 'levelset'
 Driver.restart                         = 0                # Restart step (less or equal to 0 implies fresh simulation)
 Driver.allow_coarsening                = true             # Allows removal of grid levels according to CellTagger
-Driver.refine_curvature                = 0.             # Curvature based refinement. Refines cells if curvature*dx*this > 1
-Driver.refine_geometry                 = 0               # Refine geometry, -1 => Refine all the way down
-Driver.refine_electrodes               = 3               # Refine electrode surfaces. -1 => equal to refine_geometry
-Driver.refine_dielectrics              = 0                # Refine dielectric surfaces. -1 => equal to refine_geometry
+Driver.refine_curvature                = 0                # Curvature based refinement. Refines cells if curvature*dx*this > 1
+Driver.refine_geometry                 = -1               # Refine geometry, -1 => Refine all the way down
+Driver.refine_electrodes               = -1               # Refine electrode surfaces. -1 => equal to refine_geometry
+Driver.refine_dielectrics              = -1               # Refine dielectric surfaces. -1 => equal to refine_geometry
 Driver.refine_electrode_gas_interface  = -1               # Refine electrode-gas interfaces. -1 => ----"----- 
 Driver.refine_dielectric_gas_interface = -1               # Refine dielectric-gas interfaces. -1 => ----"-----
 Driver.refine_solid_gas_interface      = -1               # Refine solid-gas interfaces. -1 => ----"-----  
@@ -70,10 +70,10 @@ ProxyFieldSolver.bco        = 1.0         # B-coefficient
 ProxyFieldSolver.solver     = helm      # Our solver ('helmholtz') or ebconductivity op 'ebcond'
 ProxyFieldSolver.eb_bc      = dirichlet   # 'dirichlet', 'neumann', or 'robin'
 ProxyFieldSolver.domain_bc  = dirichlet   # 'dirichlet', 'neumann', or 'robin'
-ProxyFieldSolver.eb_order   = 1           # BC order on EB (only for Dirichlet)
-ProxyFieldSolver.eb_weight  = 0           # Weighting for least squares (only for helm)
-ProxyFieldSolver.jump_order = 1           # BC order on EB (only for Dirichlet)
-ProxyFieldSolver.jump_weight= 0           # Weighting for least squares (only for helm)
+ProxyFieldSolver.eb_order   = 2           # BC order on EB (only for Dirichlet)
+ProxyFieldSolver.eb_weight  = 1           # Weighting for least squares (only for helm)
+ProxyFieldSolver.jump_order = 2           # BC order on EB (only for Dirichlet)
+ProxyFieldSolver.jump_weight= 1           # Weighting for least squares (only for helm)
 ProxyFieldSolver.dom_val    = -1          # Value on domain (For Robin, this is multiplier)
 ProxyFieldSolver.eb_val     = 1           # Value on EB (For robin, this is multiplier)
 ProxyFieldSolver.smooth     = 12           # Smoothings
@@ -87,10 +87,10 @@ ProxyFieldSolver.plt_vars   = phi resid E rho # Plot variables
 # ====================================================================================================
 # GEO_COARSENER CLASS OPTIONS
 # ====================================================================================================
-GeoCoarsener.num_boxes   = 0            # Number of coarsening boxes (0 = don't coarsen)
+GeoCoarsener.num_boxes   = 1            # Number of coarsening boxes (0 = don't coarsen)
 GeoCoarsener.box1_lo     = -2 0         # Remove irregular cell tags 
 GeoCoarsener.box1_hi     =  2 2.0       # between these two corners
-GeoCoarsener.box1_lvl    = 1            # up to this level
+GeoCoarsener.box1_lvl    = 0            # up to this level
 GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 
 # ====================================================================================================

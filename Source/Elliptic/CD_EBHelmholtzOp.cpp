@@ -8,13 +8,13 @@
   @brief  Implementation of CD_EBHelmholtzOp.H
   @author Robert Marskar
   @note   If this ever breaks, we should look into the division by the relaxation factor and applyDomainFlux, both of which do not guard against divide-by-zero. 
-  @todo   The relaxation kernels should have memory outside of the kernels for easier access from MFHelmholtzOp.
-  @todo   The relaxation kernels should (probably) have a public interface so MFHelmholtzOp can use them. 
+  @todo   Remove ParmParse code from CF interpolation (also remove header)
 */
 
 // Chombo includes
 #include <EBLevelDataOps.H>
 #include <EBCellFactory.H>
+#include <ParmParse.H>
 
 // Our includes
 #include <CD_EBHelmholtzOp.H>
@@ -162,7 +162,7 @@ void EBHelmholtzOp::defineStencils(){
 
   // Define BC objects. Can't do this in the factory because the BC objects will need the b-coefficient,
   // but the factories won't know about that.
-  const int ghostCF = m_hasCoar ? m_interpolator->getGhostCF() : 0;
+  const int ghostCF = m_hasCoar ? m_interpolator->getGhostCF() : 99;
   m_domainBc->define(m_eblg, m_Bcoef, m_probLo, m_dx);
   m_ebBc    ->define(m_eblg, m_BcoefIrreg, m_probLo, m_dx, ghostCF);
   
@@ -675,11 +675,29 @@ void EBHelmholtzOp::getFlux(EBFluxFAB&                  a_flux,
 }
 
 void EBHelmholtzOp::homogeneousCFInterp(LevelData<EBCellFAB>& a_phi){
-  if(m_hasCoar) m_interpolator->coarseFineInterpH(a_phi, m_interval);
+  ParmParse pp;
+  bool newInterp = false;
+  pp.query("new_interp", newInterp);
+
+  if(newInterp){
+    if(m_hasCoar) m_interpolator->interpH(a_phi, m_interval);
+  }
+  else{
+    if(m_hasCoar) m_interpolator->coarseFineInterpH(a_phi, m_interval);
+  }
 }
 
 void EBHelmholtzOp::inhomogeneousCFInterp(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar){
-  if(m_hasCoar) m_interpolator->coarseFineInterp(a_phiFine, a_phiCoar, m_interval);
+  ParmParse pp;
+  bool newInterp = false;
+  pp.query("new_interp", newInterp);
+
+  if(newInterp){
+    if(m_hasCoar) m_interpolator->interp(a_phiFine, a_phiCoar, m_interval);
+  }
+  else{
+    if(m_hasCoar) m_interpolator->coarseFineInterp(a_phiFine, a_phiCoar, m_interval);
+  }
 }
 
 void EBHelmholtzOp::interpolateCF(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>* a_phiCoar, const bool a_homogeneousCFBC){
