@@ -191,10 +191,10 @@ Vector<RefCountedPtr<EBMultigridInterpolator> > ProxyFieldSolver::getMultigridIn
 											       Location::Cell::Center,
 											       m_amr->getNumberOfGhostCells()*IntVect::Unit,
 											       m_amr->getRefinementRatios()[lvl-1],
-											       1,
-											       ghostCF,
-											       2,
-											       0));
+											       1, // Variables
+											       ghostCF, // # of ghost cells to fill
+											       2, // Order
+											       2)); // Weight
     }
   }
 
