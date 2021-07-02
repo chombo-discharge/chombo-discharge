@@ -7,17 +7,18 @@
   @file   CD_EBMultigridInterpolator.H
   @brief  Declaration of a factory class for interpolating ghost cells in a multigrid context. 
   @author Robert Marskar
-  @todo  m_zeroCoar exists because I want EBQuadCFInterp to run under the hood right now. Later, we will use the stencils directly and there
-  will be no need for m_zeroCoar
   @todo   Dropping in lo/hi CFIVS so we can move performance penalty to this class rather than EBHelmholtzOp
 */
 
 #ifndef CD_EBMultigridInterpolator_H
 #define CD_EBMultigridInterpolator_H
 
+// Std includes
+#include <map>
+
 // Chombo includes
 #include <EBLevelGrid.H>
-#include <EBQuadCFInterp.H>
+#include <QuadCFInterp.H>
 #include <CFIVS.H>
 
 // Our includes
@@ -104,24 +105,7 @@ public:
 
 protected:
   
-  /*!
-    @brief Defines the CFIVS
-  */
-  void defineCFIVS();
 
-    /*!
-    @brief Coarse-fine interface. 
-  */
-  LayoutData<CFIVS> m_loCFIVS[SpaceDim];
-
-  /*!
-    @brief Coarse-fine interface. 
-  */
-  LayoutData<CFIVS> m_hiCFIVS[SpaceDim];
-
-// ==================================================
-// NEW STUFF BELOW HERE
-// ==================================================
 
   /*!
     @brief Component that interpolation stencil is stored at
@@ -138,6 +122,9 @@ protected:
   */
   static constexpr int m_comp = 0;
 
+  /*!
+    @brief How to interpret cell location
+  */
   CellLocation m_cellLocation;
 
   /*!
@@ -216,9 +203,29 @@ protected:
   LayoutData<BaseIVFAB<VoFStencil> > m_coarStencils;
 
   /*!
+    @brief Coarse-fine interface. 
+  */
+  LayoutData<CFIVS> m_loCFIVS[SpaceDim];
+
+  /*!
+    @brief Coarse-fine interface. 
+  */
+  LayoutData<CFIVS> m_hiCFIVS[SpaceDim];
+
+  /*!
+    @brief Regular coarse-fine interface boxes
+  */
+  LayoutData<std::map<std::pair<int, Side::LoHiSide>, Box> > m_cfivs;
+
+  /*!
+    @brief Defines the CFIVS
+  */
+  void defineCFIVS();
+
+  /*!
     @brief Define ghost cells to be filled in range m_ghostCF from each cut-cell
   */
-  void defineGhosts();
+  void defineGhostRegions();
 
   /*!
     @brief Define grids
@@ -228,7 +235,7 @@ protected:
   /*!
     @brief Define data holders. 
   */
-  void defineData();
+  void defineBuffers();
 
   /*!
     @brief Define stencils

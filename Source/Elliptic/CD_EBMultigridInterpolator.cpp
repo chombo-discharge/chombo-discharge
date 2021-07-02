@@ -7,8 +7,6 @@
   @file   CD_EBMultigridInterpolator.cpp
   @brief  Implementation of CD_EBMultigridInterpolator.H
   @author Robert Marskar
-  @todo   Consider making a completely new layout near the EB, so we don't define the temp holders for the full domain. 
-  @todo   Remove ParmParse stuff
   @todo   coarseFineInterpH is a mess. It doesn't even do the variables correctly. We should do our own regular interpolation. 
 */
 
@@ -58,8 +56,8 @@ EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
   
   this->defineGrids(a_eblgFine, a_eblgCoar);
   this->defineCFIVS();
-  this->defineGhosts();
-  this->defineData();
+  this->defineGhostRegions();
+  this->defineBuffers();
   this->defineStencils();
 
   m_isDefined = true;
@@ -148,8 +146,9 @@ void EBMultigridInterpolator::coarseFineInterpH(EBCellFAB& a_phi, const Interval
   const Real m_dx     = 1.0;
   const Real m_dxCoar = m_dx*m_refRat;
 
+  
   for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++){
-
+    
     // Do the regular interp. 
     for (int dir = 0; dir < SpaceDim; dir++){
       for (SideIterator sit; sit.ok(); ++sit){
@@ -194,14 +193,40 @@ void EBMultigridInterpolator::coarseFineInterpH(EBCellFAB& a_phi, const Interval
   }
 }
 
-void EBMultigridInterpolator::defineGhosts(){
-
+void EBMultigridInterpolator::defineGhostRegions(){
   const DisjointBoxLayout& dbl = m_eblgFine.getDBL();
   const ProblemDomain& domain  = m_eblgFine.getDomain();
   const EBISLayout& ebisl      = m_eblgFine.getEBISL();
 
-  m_ghostCells.define(dbl);
+  // Define the "regular" ghost interpolation regions. This is just one cell wide since the operator stencil
+  // has a width of 1 in regular cells. 
+  m_cfivs.define(dbl);
+  for (DataIterator dit(dbl); dit.ok(); ++dit){
+    const Box cellBox = dbl[dit()];
 
+    std::map<std::pair<int, Side::LoHiSide>, Box>& cfivsBoxes = m_cfivs[dit()];
+    
+    for (int dir = 0; dir < SpaceDim; dir++){
+      for (SideIterator sit; sit.ok(); ++sit){
+	const auto dirSide = std::make_pair(dir, sit());
+
+	IntVectSet cfivs = IntVectSet(adjCellBox(cellBox, dir, sit(), 1));
+
+	NeighborIterator nit(dbl); // Subtract the other boxes if they intersect this box. 
+	for (nit.begin(dit()); nit.ok(); ++nit){
+	  cfivs -= dbl[dit()];
+	}
+
+	cfivs.recalcMinBox();
+	
+	cfivsBoxes.emplace(dirSide, cfivs.minBox());
+      }
+    }
+  }
+  
+
+  // Define ghost cells to be interpolated near the EB. 
+  m_ghostCells.define(dbl);
   for (DataIterator dit(dbl); dit.ok(); ++dit){
     const Box cellBox      = dbl[dit()];
     const EBISBox& ebisbox = ebisl[dit()];
@@ -250,7 +275,7 @@ void EBMultigridInterpolator::defineGrids(const EBLevelGrid& a_eblgFine, const E
   coarsen(m_eblgCoFi, m_eblgFine, m_refRat);
 }
 
-void EBMultigridInterpolator::defineData(){
+void EBMultigridInterpolator::defineBuffers(){
   const DisjointBoxLayout& fineGrids = m_eblgFine.getDBL();
   const DisjointBoxLayout& coFiGrids = m_eblgCoFi.getDBL();
 
