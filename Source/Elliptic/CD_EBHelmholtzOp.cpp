@@ -78,7 +78,6 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid&                                 
   m_turnOffBCs = false;
   m_interval   = Interval(m_comp, m_comp);
 
-
   if(m_hasFine){
     m_eblgFine = a_eblgFine;
   }
@@ -1148,7 +1147,6 @@ void EBHelmholtzOp::reflux(LevelData<EBCellFAB>&              a_Lphi,
 			   const LevelData<EBCellFAB>&        a_phiFine,
 			   const LevelData<EBCellFAB>&        a_phi,
 			   AMRLevelOp<LevelData<EBCellFAB> >& a_finerOp) {
-
   m_fluxReg->setToZero();
   
   this->incrementFRCoar(a_phi);

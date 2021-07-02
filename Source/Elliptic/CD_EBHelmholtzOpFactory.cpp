@@ -286,7 +286,7 @@ bool EBHelmholtzOpFactory::getCoarserLayout(EBLevelGrid& a_coarEblg, const EBLev
     // Use coarsening if we can. 
     if(a_fineEblg.getDBL().coarsenable(2*a_refRat)){
       coarsen(coarDbl, a_fineEblg.getDBL(), a_refRat);
-      a_coarEblg.define(coarDbl, coarDomain, 4, a_fineEblg.getEBIS());
+      a_coarEblg.define(coarDbl, coarDomain, m_ghostPhi.max(), a_fineEblg.getEBIS());
 
       hasCoarser = true;
     }
