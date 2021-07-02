@@ -8,13 +8,11 @@
   @brief  Implementation of CD_EBHelmholtzOp.H
   @author Robert Marskar
   @note   If this ever breaks, we should look into the division by the relaxation factor and applyDomainFlux, both of which do not guard against divide-by-zero. 
-  @todo   Remove ParmParse code from CF interpolation (also remove header)
 */
 
 // Chombo includes
 #include <EBLevelDataOps.H>
 #include <EBCellFactory.H>
-#include <ParmParse.H>
 
 // Our includes
 #include <CD_EBHelmholtzOp.H>
