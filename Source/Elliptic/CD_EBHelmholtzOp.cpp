@@ -8,8 +8,7 @@
   @brief  Implementation of CD_EBHelmholtzOp.H
   @author Robert Marskar
   @note   If this ever breaks, we should look into the division by the relaxation factor and applyDomainFlux, both of which do not guard against divide-by-zero. 
-  @todo   The relaxation kernels should have memory outside of the kernels for easier access from MFHelmholtzOp.
-  @todo   The relaxation kernels should (probably) have a public interface so MFHelmholtzOp can use them. 
+  @todo   Check EBCF refluxing -- it might not be correct!
 */
 
 // Chombo includes
@@ -78,7 +77,6 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid&                                 
   // input two different data holders before you use AMRMultiGrid. 
   m_turnOffBCs = false;
   m_interval   = Interval(m_comp, m_comp);
-
 
   if(m_hasFine){
     m_eblgFine = a_eblgFine;
@@ -162,7 +160,7 @@ void EBHelmholtzOp::defineStencils(){
 
   // Define BC objects. Can't do this in the factory because the BC objects will need the b-coefficient,
   // but the factories won't know about that.
-  const int ghostCF = m_hasCoar ? m_interpolator->getGhostCF() : 0;
+  const int ghostCF = m_hasCoar ? m_interpolator->getGhostCF() : 99;
   m_domainBc->define(m_eblg, m_Bcoef, m_probLo, m_dx);
   m_ebBc    ->define(m_eblg, m_BcoefIrreg, m_probLo, m_dx, ghostCF);
   
@@ -1149,7 +1147,6 @@ void EBHelmholtzOp::reflux(LevelData<EBCellFAB>&              a_Lphi,
 			   const LevelData<EBCellFAB>&        a_phiFine,
 			   const LevelData<EBCellFAB>&        a_phi,
 			   AMRLevelOp<LevelData<EBCellFAB> >& a_finerOp) {
-
   m_fluxReg->setToZero();
   
   this->incrementFRCoar(a_phi);

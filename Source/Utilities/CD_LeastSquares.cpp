@@ -9,10 +9,6 @@
   @author Robert Marskar
 */
 
-// Std includes
-#include <vector>
-#include <set>
-
 // Our includes
 #include <CD_LaPackUtils.H>
 #include <CD_LeastSquares.H>
@@ -337,7 +333,7 @@ VoFStencil LeastSquares::computeGradSten(const Vector<VolIndex>& a_allVofs,
     derivs |= BASISV(dir);
   }
 
-  std::map<IntVect, VoFStencil> taylorTerms = LeastSquares::computeInterpolationStencil(derivs, a_knownTerms, a_allVofs, a_displacements, a_weights, a_order);
+  std::map<IntVect, VoFStencil> taylorTerms = LeastSquares::computeSingleLevelStencils(derivs, a_knownTerms, a_allVofs, a_displacements, a_weights, a_order);
 
   VoFStencil sten;
   for (const auto& m : taylorTerms){
@@ -431,57 +427,91 @@ VoFStencil LeastSquares::computeInterpolationStencil(const Vector<VolIndex>& a_a
 
   const IntVectSet knownTerms = IntVectSet();
 
-  std::map<IntVect, VoFStencil> allStens = LeastSquares::computeInterpolationStencil(derivs, knownTerms, a_allVofs, a_displacements, a_weights, a_order);
+  std::map<IntVect, VoFStencil> allStens = LeastSquares::computeSingleLevelStencils(derivs, knownTerms, a_allVofs, a_displacements, a_weights, a_order);
 
   ret = allStens.at(deriv);
 
   return ret;
 }
 
-std::map<IntVect, VoFStencil> LeastSquares::computeInterpolationStencil(const IntVectSet&       a_derivs,
-									const IntVectSet&       a_knownTerms,
-									const Vector<VolIndex>& a_allVofs,
-									const Vector<RealVect>& a_displacements,
-									const int               a_p,
-									const int               a_order){
+std::map<IntVect, VoFStencil> LeastSquares::computeSingleLevelStencils(const IntVectSet&       a_derivs,
+								       const IntVectSet&       a_knownTerms,
+								       const Vector<VolIndex>& a_allVofs,
+								       const Vector<RealVect>& a_displacements,
+								       const int               a_p,
+								       const int               a_order){
 
   const Vector<Real> weights = LeastSquares::makeDiagWeights(a_displacements, a_p);
 
-  return LeastSquares::computeInterpolationStencil(a_derivs, a_knownTerms, a_allVofs, a_displacements, weights, a_order);
+  return LeastSquares::computeSingleLevelStencils(a_derivs, a_knownTerms, a_allVofs, a_displacements, weights, a_order);
     
 }
 
-std::map<IntVect, VoFStencil> LeastSquares::computeInterpolationStencil(const IntVectSet&       a_derivs,
-									const IntVectSet&       a_knownTerms,
-									const Vector<VolIndex>& a_allVofs,
-									const Vector<RealVect>& a_displacements,
-									const Vector<Real>&     a_weights,
-									const int               a_order){
-  std::map<IntVect, VoFStencil> ret;
+std::map<IntVect, VoFStencil> LeastSquares::computeSingleLevelStencils(const IntVectSet&       a_derivs,
+								       const IntVectSet&       a_knownTerms,
+								       const Vector<VolIndex>& a_allVofs,
+								       const Vector<RealVect>& a_displacements,
+								       const Vector<Real>&     a_weights,
+								       const int               a_order){
+  // TLDR: This routine does a single-level least squares solve of a system of equations, each equation describing
+  //       a Taylor series expansion up to specified order (a_order). This routine "solves" this overdetermined system
+  //       using weighted least squares so that we can obtain terms in the Taylor series. The user will have specified
+  //       the desired unknowns (a_derivs) to be returned in stencil form as well as any terms that were already
+  //       known (a_knownTerms).
+  //
+  //       The least squares solve is done by LaPack, and so the least squares system matrix is filled in Fortran
+  //       order. The actual "solve" consists of using the Moore-Penrose pseudoinverse and once we have inverted
+  //       the system we can form stencils for each of the specified terms in the Taylor series.
+  //       
+  //       This routine does not contain much code, but can be difficult to understand.
 
-  // Initialize return. 
+  CH_assert(a_order > 0);
+  CH_assert(a_allVofs.size() == a_displacements.size());
+  CH_assert(a_allVofs.size() == a_weights.      size());
+
+
+  // Initialize return stuff. 
+  std::map<IntVect, VoFStencil> ret;
   for (IVSIterator ivsIt(a_derivs); ivsIt.ok(); ++ivsIt){
     ret.emplace(ivsIt(), VoFStencil());
   }
 
   if(a_derivs.numPts() > 0){
 
-    const int M = LeastSquares::getTaylorExpansionSize(a_order) - a_knownTerms.numPts(); // This is because some unknowns have been eliminated. 
+    const int M = LeastSquares::getTaylorExpansionSize(a_order) - a_knownTerms.numPts(); // This is because some unknowns (rows) can be been eliminated. 
     const int K = a_displacements.size();
 
     const IntVectSet isect = a_derivs & a_knownTerms;
 
-    if(K < M)            MayDay::Abort("LeastSquares::computeInterpolationStencil -- not enough equations to achieve desired order!");
-    if(!isect.isEmpty()) MayDay::Abort("LeastSquares::computeInterpolation - you have specified the same terms as both unknown and known");
+    if(K < M)            MayDay::Abort("LeastSquares::computeSingleLevelStencils -- not enough equations to achieve desired order!");
+    if(!isect.isEmpty()) MayDay::Abort("LeastSquares::computeSingleLevelStencils - you have specified the same terms as both unknown and known");
 
 
-    // Build the A-matrix in column major order so we can use LaPackUtils::computePseudoInverse.
-    // Use of multi-indices makes higher-order Taylor series a walk in the park. 
-    int i = 0;
-    Vector<Real> linA    (K*M, 0.0);
-    Vector<Real> linAplus(M*K, 0.0);
+    // Build the A-matrix in column major order (this is what Fortran wants) so we can use LaPackUtils::computePseudoInverse.
+    // ----------------------------------------------------------------------------------------------------------------------
+    // If we have an (unweighted) full system then our system A*x = b is 
+    //
+    //              A                   x             b
+    //             ===                 ===           ===
+    //     [1 (x-x0) (x-x0)^2 ...] [f(x)     ]     [f(x0)]
+    //     [1 (x-x1) (x-x1)^2 ...] [df/dx    ]     [f(x1)]
+    //     [1 (x-x2) (x-x2)^2 ...] [d^2f/dx^2]  =  [f(x2)]
+    //     [:   :      :         ] [    :    ]     [  :  ]
+    //     [:   :      :         ] [    :    ]     [  :  ]
+    //
+    // Extensions to 2D/3D simply use multi-index notation, and weights are simply multiplied into each row, i.e. we
+    // solve (w*A) * x = (w*b). Inverting the system gives x = [w * A^+ * w] * b where A^+ is the Moore-Penrose
+    // pseudoinverse. We put the result of [w * A^+ * w] into a stencil.
+    //
+    // Note that columns can be eliminated through knownTerms, in which case we remove unknowns (i.e., rows) from the system.
+    // This will also correspond to a modification of the right-hand side, but the required modifications are not accesible
+    // in this routine, and so the user will have to make sense of them.
+    
+    int i = 0; // Exists just because we fill memory linearly. 
+    Vector<Real> linA    (K*M, 0.0); // Equal to (w*A)
+    Vector<Real> linAplus(M*K, 0.0); // Equal to (w*A)^+
+    
     for (MultiIndex mi(a_order); mi.ok(); ++mi){ // Loop over column
-
       if(!a_knownTerms.contains(mi.getCurrentIndex())){ // Add column if it is an unknown in the lsq system. 
 	for (int k = 0; k < K; k++){ 
 	  linA[i] = a_weights[k]*mi.pow(a_displacements[k])/mi.factorial(); i++;
@@ -493,11 +523,18 @@ std::map<IntVect, VoFStencil> LeastSquares::computeInterpolationStencil(const In
     const bool foundSVD = LaPackUtils::computePseudoInverse(linAplus.stdVector(), linA.stdVector(), K, M);
 
     if(foundSVD){
-      const MultiIndex mi(a_order);
-
-      // When we have eliminated rows in the linear system we can't use MultiIndex to map directly. 
-      // Rather, we need to first map the rows of A to indices and use that to fetch
-      // the row in Aplus corresponding to a specific unknown in the Taylor series. 
+      // When we have eliminated rows in the linear system we can't use MultiIndex to map directly, this occurs because
+      // if we eliminated unknowns (rows) our system can be something like (if we eliminated term f(x)): 
+      //
+      //     [(x-x0) (x-x0)^2 ...] [df/dx    ]     [f(x0) - f(x)]
+      //     [(x-x1) (x-x1)^2 ...] [d^2f/dx^2]     [f(x1) - f(x)]
+      //     [(x-x2) (x-x2)^2 ...] [         ]  =  [f(x2) - f(x)]
+      //     [  :      :         ] [    :    ]     [  :         ]
+      //     [  :      :         ] [    :    ]     [  :         ]
+      //
+      // The MultiIndex won't know about this, and will (correctly!), believe that the first row corresponds to
+      // multi-index (0,0,0). Since that is truly not the case, we map the rows in A to multi-indices and use that to
+      // identify the row in (w*A)^+ that corresponds to a specific unknown in the Taylor series. This is what happens below. 
       std::map<IntVect, int> rowMap;
       int row = 0;
       for (MultiIndex mi(a_order); mi.ok(); ++mi){
@@ -516,54 +553,195 @@ std::map<IntVect, VoFStencil> LeastSquares::computeInterpolationStencil(const In
 	  row = rowMap.at(ivsIt());
 	}
 	else{
-	  MayDay::Abort("LeastSquares::computeInterpolationStencil -- map is out of range but this shouldn't happen!");
+	  MayDay::Abort("LeastSquares::computeSingleLevelStencils -- map is out of range but this shouldn't happen!");
 	}
 
 	VoFStencil& sten = ret.at(deriv);
 
 	sten.clear();
+
+	// Map the pseudoinverse into something that is usable by a stencil. Note that linAplus is (w*A)^+, but we want
+	// the term [(w*A)^+ * w], so we also need to multiply in the weights here (because the right-hand side was also weighted). 
 	for (int k = 0; k < K; k++){
 	  const int idx = row + k*M;
 	  sten.add(a_allVofs[k], a_weights[k]*linAplus[idx]);
 	}
       }
     }
+    else{
+      MayDay::Warning("LeastSquares::computeSingleLevelStencils - could not perform singular value decomposition");
+    }
   }
 
   return ret;
 }
 
+std::map<IntVect, std::pair<VoFStencil, VoFStencil> > LeastSquares::computeDualLevelStencils(const IntVectSet&       a_derivs,
+											     const IntVectSet&       a_knownTerms,
+											     const Vector<VolIndex>& a_fineVofs,
+											     const Vector<VolIndex>& a_coarVofs,
+											     const Vector<RealVect>& a_fineDisplacements,
+											     const Vector<RealVect>& a_coarDisplacements,
+											     const int               a_p,           
+											     const int               a_order){
+  const Vector<Real> fineWeights = LeastSquares::makeDiagWeights(a_fineDisplacements, a_p);
+  const Vector<Real> coarWeights = LeastSquares::makeDiagWeights(a_coarDisplacements, a_p);
 
-void LeastSquares::trimSystem(Vector<VolIndex>& a_vofs,
-			      Vector<RealVect>& a_displacements,
-			      const int         a_systemSize){
+  return LeastSquares::computeDualLevelStencils(a_derivs,
+						a_knownTerms,
+						a_fineVofs,
+						a_coarVofs,
+						a_fineDisplacements,
+						a_coarDisplacements,
+						fineWeights,
+						coarWeights,
+						a_order);
+}
 
-  const int inputSize = a_vofs.size();
+std::map<IntVect, std::pair<VoFStencil, VoFStencil> > LeastSquares::computeDualLevelStencils(const IntVectSet&       a_derivs,
+											     const IntVectSet&       a_knownTerms,
+											     const Vector<VolIndex>& a_fineVofs,
+											     const Vector<VolIndex>& a_coarVofs,
+											     const Vector<RealVect>& a_fineDisplacements,
+											     const Vector<RealVect>& a_coarDisplacements,
+											     const Vector<Real>&     a_fineWeights,
+											     const Vector<Real>&     a_coarWeights,
+											     const int               a_order){
+  // TLDR: This routine does a two-level least squares solve of a system of equations, each equation describing
+  //       a Taylor series expansion up to specified order (a_order). This routine "solves" this overdetermined system
+  //       using weighted least squares so that we can obtain terms in the Taylor series. The user will have specified
+  //       the desired unknowns (a_derivs) to be returned in stencil form as well as any terms that were already
+  //       known (a_knownTerms).
+  //
+  //       The least squares solve is done by LaPack, and so the least squares system matrix is filled in Fortran
+  //       order. The actual "solve" consists of using the Moore-Penrose pseudoinverse and once we have inverted
+  //       the system we can form stencils for each of the specified terms in the Taylor series.
+  //       
+  //       This routine does not contain much code, but can be difficult to understand. 
   
-  if(inputSize > a_systemSize){
+  CH_assert(a_order > 0);
+  CH_assert(a_fineVofs.size() == a_fineDisplacements.size());
+  CH_assert(a_coarVofs.size() == a_coarDisplacements.size());
+  CH_assert(a_fineVofs.size() == a_fineWeights.      size());
+  CH_assert(a_coarVofs.size() == a_coarWeights.      size());
+  
+  // Initialize return stuff
+  std::map<IntVect, std::pair<VoFStencil, VoFStencil> > ret;
+  for (IVSIterator ivsIt(a_derivs); ivsIt.ok(); ++ivsIt){
+    ret.emplace(ivsIt(), std::make_pair(VoFStencil(), VoFStencil()));
+  }
 
-    // Make the system vector and sort it
-    std::vector<std::pair<VolIndex, RealVect> > system;
-    for (int i = 0; i < inputSize; i++){
-      system.emplace_back(std::make_pair(a_vofs[i], a_displacements[i]));
+  if(a_derivs.numPts() > 0){
+
+    const int M     = LeastSquares::getTaylorExpansionSize(a_order) - a_knownTerms.numPts(); // This is because some unknowns (rows) can be eliminated. 
+    const int Kfine = a_fineDisplacements.size();
+    const int Kcoar = a_coarDisplacements.size();
+    const int K     = Kfine + Kcoar;
+
+    const IntVectSet isect = a_derivs & a_knownTerms;
+
+    if(K < M)            MayDay::Abort("LeastSquares::computeDualLevelStencils -- not enough equations to achieve desired order!");
+    if(!isect.isEmpty()) MayDay::Abort("LeastSquares::computeDualLevelStencils - you have specified the same terms as both unknown and known");
+
+
+    // Build the A-matrix in column major order (this is what Fortran wants) so we can use LaPackUtils::computePseudoInverse.
+    // ----------------------------------------------------------------------------------------------------------------------
+    // If we have an (unweighted) full system then our system A*x = b is 
+    //
+    //              A                   x             b
+    //             ===                 ===           ===
+    //     [1 (x-x0) (x-x0)^2 ...] [f(x)     ]     [f(x0)]
+    //     [1 (x-x1) (x-x1)^2 ...] [df/dx    ]     [f(x1)]
+    //     [1 (x-x2) (x-x2)^2 ...] [d^2f/dx^2]  =  [f(x2)]
+    //     [:   :      :         ] [    :    ]     [  :  ]
+    //     [:   :      :         ] [    :    ]     [  :  ]
+    //
+    // Extensions to 2D/3D simply use multi-index notation, and weights are simply multiplied into each row, i.e. we
+    // solve (w*A) * x = (w*b). Inverting the system gives x = [w * A^+ * w] * b where A^+ is the Moore-Penrose
+    // pseudoinverse. We put the result of [w * A^+ * w] into a stencil.
+    //
+    // Note that columns can be eliminated through knownTerms, in which case we remove unknowns (i.e., rows) from the system.
+    // This will also correspond to a modification of the right-hand side, but the required modifications are not accesible
+    // in this routine, and so the user will have to make sense of them.
+    
+    int i = 0; // Exists just because we fill memory linearly. 
+    Vector<Real> linA    (K*M, 0.0); // Equal to (w*A)
+    Vector<Real> linAplus(M*K, 0.0); // Equal to (w*A)^+
+    
+    for (MultiIndex mi(a_order); mi.ok(); ++mi){ // Loop over column    
+      if(!a_knownTerms.contains(mi.getCurrentIndex())){ 
+	for (int k = 0; k < K; k++){ // Fill column, write the system using the fine vofs first, then the coarse vofs. 
+	  if(k < Kfine){
+	    linA[i] = a_fineWeights[k]*mi.pow(a_fineDisplacements[k])/mi.factorial(); 
+	  }
+	  else{
+	    linA[i] = a_coarWeights[k-Kfine]*mi.pow(a_coarDisplacements[k-Kfine])/mi.factorial(); 
+	  }
+	  i++;
+	}
+      }
     }
+ 
+    // Compute the pseudo-inverse.
+    const bool foundSVD = LaPackUtils::computePseudoInverse(linAplus.stdVector(), linA.stdVector(), K, M);
 
-    auto sortCrit = [](std::pair<VolIndex, RealVect> a, std::pair<VolIndex, RealVect> b) -> bool {
-      return a.second.vectorLength() > b.second.vectorLength();
-    };
+    if(foundSVD){
+      // When we have eliminated rows in the linear system we can't use MultiIndex to map directly, this occurs because
+      // if we eliminated unknowns (rows) our system can be something like (if we eliminated term f(x)): 
+      //
+      //     [(x-x0) (x-x0)^2 ...] [df/dx    ]     [f(x0) - f(x)]
+      //     [(x-x1) (x-x1)^2 ...] [d^2f/dx^2]     [f(x1) - f(x)]
+      //     [(x-x2) (x-x2)^2 ...] [         ]  =  [f(x2) - f(x)]
+      //     [  :      :         ] [    :    ]     [  :         ]
+      //     [  :      :         ] [    :    ]     [  :         ]
+      //
+      // The MultiIndex won't know about this, and will (correctly!), believe that the first row corresponds to
+      // multi-index (0,0,0). Since that is truly not the case, we map the rows in A to multi-indices and use that to
+      // identify the row in (w*A)^+ that corresponds to a specific unknown in the Taylor series. This is what happens below. 
+      std::map<IntVect, int> rowMap;
+      int row = 0;
+      for (MultiIndex mi(a_order); mi.ok(); ++mi){
+	if(!a_knownTerms.contains(mi.getCurrentIndex())){ // This is the order in which A was built. 
+	  rowMap.emplace(mi.getCurrentIndex(), row);
+	  row++;
+	}
+      }
 
-    std::sort(system.begin(), system.end(), sortCrit);
+      // Recall that linAplus is M*K so the stride is always M, starting at some specified row. 
+      for (IVSIterator ivsIt(a_derivs); ivsIt.ok(); ++ivsIt){
+	const IntVect deriv = ivsIt();
 
+	if(rowMap.find(ivsIt()) != rowMap.end()){
+	  row = rowMap.at(ivsIt());
+	}
+	else{
+	  MayDay::Abort("LeastSquares::computeDualLevelStencils -- map is out of range but this shouldn't happen!");
+	}
 
-    // Make output stuff
-    a_vofs.resize(a_systemSize);
-    a_displacements.resize(a_systemSize);
+	std::pair<VoFStencil, VoFStencil>& sten = ret.at(deriv);
 
-    for (int i = 0; i < a_systemSize; i++){
-      a_vofs[i]          = system[i].first;
-      a_displacements[i] = system[i].second;
+	sten.first. clear();
+	sten.second.clear();
+
+	// Map the pseudoinverse into something that is usable by a stencil. Note that linAplus is (w*A)^+, but we want
+	// the term [(w*A)^+ * w], so we also need to multiply in the weights here (because the right-hand side was also weighted). 
+	for (int k = 0; k < K; k++){
+	  const int idx = row + k*M;
+	  if(k < Kfine){
+	    sten.first.add(a_fineVofs[k], a_fineWeights[k]*linAplus[idx]);
+	  }
+	  else{
+	    sten.second.add(a_coarVofs[k-Kfine], a_coarWeights[k-Kfine]*linAplus[idx]);
+	  }
+	}
+      }
+    }
+    else{
+      MayDay::Warning("LeastSquares::computeDualLevelStencils - could not perform singular value decomposition");
     }
   }
+
+  return ret;
 }
 
 #include <CD_NamespaceFooter.H>

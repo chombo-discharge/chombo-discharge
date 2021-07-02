@@ -171,6 +171,12 @@ Vector<RefCountedPtr<EBQuadCFInterp> > ProxyFieldSolver::getQuadCFI(){
 Vector<RefCountedPtr<EBMultigridInterpolator> > ProxyFieldSolver::getMultigridInterpolators(const phase::which_phase a_phase){
   const int finestLevel = m_amr->getFinestLevel();
 
+  ParmParse pp("ProxyFieldSolver");
+  int ghostCF, eb, mf;
+  pp.get("eb_order", eb);
+  pp.get("jump_order", mf);
+  ghostCF = std::max(eb, mf);
+
   Vector<RefCountedPtr<EBMultigridInterpolator> > interpolators(1+finestLevel);
   
   for (int lvl = 0; lvl <= finestLevel; lvl++){
@@ -182,9 +188,13 @@ Vector<RefCountedPtr<EBMultigridInterpolator> > ProxyFieldSolver::getMultigridIn
       
       interpolators[lvl] = RefCountedPtr<EBMultigridInterpolator> (new EBMultigridInterpolator(eblgFine,
 											       eblgCoar,
+											       Location::Cell::Center,
+											       m_amr->getNumberOfGhostCells()*IntVect::Unit,
 											       m_amr->getRefinementRatios()[lvl-1],
-											       1,
-											       1));
+											       1, // Variables
+											       ghostCF, // # of ghost cells to fill
+											       2, // Order
+											       2)); // Weight
     }
   }
 
@@ -481,7 +491,7 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
   case 1:
     relaxType = EBHelmholtzOp::RelaxationMethod::GauSaiMultiColor;
     break;
-  case 3:
+  case 2:
     relaxType = EBHelmholtzOp::RelaxationMethod::GauSaiRedBlack;
     break;
   default:
@@ -733,7 +743,7 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
   case 1:
     relaxType = MFHelmholtzOp::RelaxationMethod::GauSaiMultiColor;
     break;
-  case 3:
+  case 2:
     relaxType = MFHelmholtzOp::RelaxationMethod::GauSaiRedBlack;
     break;
   default:

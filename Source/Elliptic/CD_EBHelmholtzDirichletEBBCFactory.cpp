@@ -44,7 +44,7 @@ void EBHelmholtzDirichletEBBCFactory::setOrder(const int a_order){
 }
 
 void EBHelmholtzDirichletEBBCFactory::setWeight(const int a_weight){
-  CH_assert(a_weight > 0);
+  CH_assert(a_weight >= 0);
   m_weight = a_weight;
 }
 

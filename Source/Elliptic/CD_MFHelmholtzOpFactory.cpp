@@ -374,7 +374,7 @@ bool MFHelmholtzOpFactory::getCoarserLayout(MFLevelGrid& a_coarMflg, const MFLev
  
     // Ok, found a coarsened layout.
     if(hasCoarser){
-      a_coarMflg = MFLevelGrid(coarDbl, coarDomain, 4, m_mfis);
+      a_coarMflg = MFLevelGrid(coarDbl, coarDomain, m_ghostPhi.max(), m_mfis);
     }
   }
   else{
