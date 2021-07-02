@@ -79,7 +79,7 @@ public:
 			  const int          a_nVar,
 			  const int          a_ghostCF,
 			  const int          a_order,
-			  const int          a_weighting);
+			  const int          a_weighting = 0);
 			  
 
   /*!
@@ -115,20 +115,7 @@ public:
   */
   void coarseFineInterpH(EBCellFAB& a_phiFine, const Interval a_variables, const DataIndex& a_dit);
 
-  /*!
-    @brief Inhomogeneous interpolation
-    @param[inout] a_phiFine   Fine-level data to be interpolated. 
-    @param[in]    a_phiCoar   Coarse-level data. 
-    @param[in]    a_variables Variables to be interpolated. 
-  */
-  void interp(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar, const Interval a_variables) const;
 
-  /*!
-    @brief Homogeneous interpolation
-    @param[in] a_phiFine   Fine-level data. We interpolate the ghost cells assuming that coarse-level data is zero everywhere. 
-    @param[in] a_variables Variables to be interpolated. 
-  */
-  void interpH(LevelData<EBCellFAB>& a_phiFine, const Interval a_variables) const;
 
 protected:
   
@@ -268,6 +255,21 @@ protected:
 		  const Real&         a_dxCoar,
 		  const int&          a_order,
 		  const int&          a_weight);
+
+  /*!
+    @brief Inhomogeneous interpolation
+    @param[inout] a_phiFine   Fine-level data to be interpolated. 
+    @param[in]    a_phiCoar   Coarse-level data. 
+    @param[in]    a_variables Variables to be interpolated. 
+  */
+  void inhomogeneousInterpEBCF(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar, const Interval a_variables) const;
+
+  /*!
+    @brief Homogeneous interpolation
+    @param[in] a_phiFine   Fine-level data. We interpolate the ghost cells assuming that coarse-level data is zero everywhere. 
+    @param[in] a_variables Variables to be interpolated. 
+  */
+  void homogeneousInterpEBCF(LevelData<EBCellFAB>& a_phiFine, const Interval a_variables) const;
 };
 
 #include <CD_NamespaceFooter.H>

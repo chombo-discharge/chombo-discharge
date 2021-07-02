@@ -17,10 +17,7 @@
 #include <EBISBox.H>
 #include <IntVectSet.H>
 #include <RealVect.H>
-#include <ProblemDomain.H>
 #include <VolIndex.H>
-#include <PolyGeom.H>
-#include <EBISLayout.H>
 
 // Our includes
 #include <CD_VofUtils.H>

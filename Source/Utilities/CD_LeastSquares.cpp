@@ -9,10 +9,6 @@
   @author Robert Marskar
 */
 
-// Std includes
-#include <vector>
-#include <set>
-
 // Our includes
 #include <CD_LaPackUtils.H>
 #include <CD_LeastSquares.H>

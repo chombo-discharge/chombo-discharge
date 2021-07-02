@@ -675,29 +675,11 @@ void EBHelmholtzOp::getFlux(EBFluxFAB&                  a_flux,
 }
 
 void EBHelmholtzOp::homogeneousCFInterp(LevelData<EBCellFAB>& a_phi){
-  ParmParse pp;
-  bool newInterp = false;
-  pp.query("new_interp", newInterp);
-
-  if(newInterp){
-    if(m_hasCoar) m_interpolator->interpH(a_phi, m_interval);
-  }
-  else{
-    if(m_hasCoar) m_interpolator->coarseFineInterpH(a_phi, m_interval);
-  }
+  if(m_hasCoar) m_interpolator->coarseFineInterpH(a_phi, m_interval);
 }
 
 void EBHelmholtzOp::inhomogeneousCFInterp(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar){
-  ParmParse pp;
-  bool newInterp = false;
-  pp.query("new_interp", newInterp);
-
-  if(newInterp){
-    if(m_hasCoar) m_interpolator->interp(a_phiFine, a_phiCoar, m_interval);
-  }
-  else{
-    if(m_hasCoar) m_interpolator->coarseFineInterp(a_phiFine, a_phiCoar, m_interval);
-  }
+  if(m_hasCoar) m_interpolator->coarseFineInterp(a_phiFine, a_phiCoar, m_interval);
 }
 
 void EBHelmholtzOp::interpolateCF(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>* a_phiCoar, const bool a_homogeneousCFBC){
