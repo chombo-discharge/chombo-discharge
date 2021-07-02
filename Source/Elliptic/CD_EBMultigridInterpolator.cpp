@@ -17,6 +17,7 @@
 #include <EBLevelDataOps.H>
 #include <NeighborIterator.H>
 #include <InterpF_F.H>
+#include <EBAlias.H>
 #include <ParmParse.H> 
 
 // Our includes
@@ -61,36 +62,6 @@ EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
   this->defineData();
   this->defineStencils();
 
-#if 1 // This is code that should be removed once we get the performance we're after!
-  // Build the CFIVS for EBQuadCFInterp. 
-  const DisjointBoxLayout& dblFine = a_eblgFine.getDBL();
-  const ProblemDomain& domainFine  = a_eblgFine.getDomain();
-  
-  LayoutData<IntVectSet> cfivs(dblFine);
-  for (DataIterator dit(dblFine); dit.ok(); ++dit){
-    Box grownBox = grow(dblFine[dit()], 1);
-    grownBox &= domainFine;
-
-    cfivs[dit()] = IntVectSet(grownBox);
-    
-    NeighborIterator nit(dblFine);
-    for (nit.begin(dit()); nit.ok(); ++ nit){
-      cfivs[dit()] -= dblFine[nit()];
-    }
-  }
-
-  EBQuadCFInterp::define(a_eblgFine.getDBL(),
-			 a_eblgCoar.getDBL(),
-			 a_eblgFine.getEBISL(),
-			 a_eblgCoar.getEBISL(),
-			 a_eblgCoar.getDomain(),
-			 a_refRat,
-			 a_nVar,
-			 cfivs,
-			 a_eblgFine.getEBIS(),
-			 true);
-#endif
-  
   m_isDefined = true;
 }
 
@@ -115,29 +86,29 @@ EBMultigridInterpolator::~EBMultigridInterpolator(){
 }
 
 void EBMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar, const Interval a_variables){
-  EBQuadCFInterp::interpolate(a_phiFine, a_phiCoar, a_variables);
-
-  ParmParse pp;
-  bool newInterp = false;
-  pp.query("new_interp", newInterp);
-  if(newInterp) this->inhomogeneousInterpEBCF(a_phiFine, a_phiCoar, a_variables);
-}
-
-void EBMultigridInterpolator::inhomogeneousInterpEBCF(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar, const Interval a_variables) const {
   CH_TIME("EBMultigridInterpolator::interp");
 
+  LevelData<FArrayBox> fineAlias;
+  LevelData<FArrayBox> coarAlias;
+
+  aliasEB(fineAlias, (LevelData<EBCellFAB>&) a_phiFine);
+  aliasEB(coarAlias, (LevelData<EBCellFAB>&) a_phiCoar);
+  
+  QuadCFInterp::coarseFineInterp(fineAlias, coarAlias);
+
+  // Do corrections near the EBCF. 
   for (int icomp = a_variables.begin(); icomp <= a_variables.end(); icomp++){
 
     // Copy data to scratch data holders.
     const Interval srcInterv = Interval(icomp,   icomp);
     const Interval dstInterv = Interval(m_comp,  m_comp);
     
-    //    a_phiFine.copyTo(srcInterv, m_fineData, dstInterv);
+    // Need coarse data to be accesible by fine data, so I always have to copy here. 
     a_phiCoar.copyTo(srcInterv, m_coarData, dstInterv);
 
     for (DataIterator dit = a_phiFine.dataIterator(); dit.ok(); ++dit){
       EBCellFAB& dstFine       = a_phiFine[dit()];
-      //      const EBCellFAB& srcFine = m_fineData[dit()];
+
       const EBCellFAB& srcFine = a_phiFine[dit()];
       const EBCellFAB& srcCoar = m_coarData[dit()];
 
@@ -171,137 +142,53 @@ void EBMultigridInterpolator::coarseFineInterpH(LevelData<EBCellFAB>& a_phiFine,
   for (DataIterator dit(m_eblgFine.getDBL()); dit.ok(); ++dit){
     this->coarseFineInterpH(a_phiFine[dit()], a_variables, dit());
   }
-
-  ParmParse pp;
-  bool newInterp = false;
-  pp.query("new_interp", newInterp);
-  if(newInterp) this->homogeneousInterpEBCF(a_phiFine, a_variables);
 }
 
 void EBMultigridInterpolator::coarseFineInterpH(EBCellFAB& a_phi, const Interval a_variables, const DataIndex& a_dit){
   const Real m_dx     = 1.0;
   const Real m_dxCoar = m_dx*m_refRat;
 
-  for (int dir = 0; dir < SpaceDim; dir++){
-    for (SideIterator sit; sit.ok(); ++sit){
+  for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++){
 
-      const CFIVS* cfivsPtr = nullptr;
-      if(sit() == Side::Lo) {
-	cfivsPtr = &m_loCFIVS[dir][a_dit];
-      }
-      else{
-	cfivsPtr = &m_hiCFIVS[dir][a_dit];
-      }
+    // Do the regular interp. 
+    for (int dir = 0; dir < SpaceDim; dir++){
+      for (SideIterator sit; sit.ok(); ++sit){
 
-      const IntVectSet& ivs = cfivsPtr->getFineIVS();
-      if (cfivsPtr->isPacked() ){
-	const int ihiorlo = sign(sit());
-	FORT_INTERPHOMO(CHF_FRA(a_phi.getSingleValuedFAB()),
-			CHF_BOX(cfivsPtr->packedBox()),
-			CHF_CONST_REAL(m_dx),
-			CHF_CONST_REAL(m_dxCoar),
-			CHF_CONST_INT(dir),
-			CHF_CONST_INT(ihiorlo));
-      }
-      else {
-	if(!ivs.isEmpty()){
-	  
-	  Real halfdxcoar = m_dxCoar/2.0;
-	  Real halfdxfine = m_dx/2.0;
-	  Real xg = halfdxcoar -   halfdxfine;
-	  Real xc = halfdxcoar +   halfdxfine;
-	  Real xf = halfdxcoar + 3*halfdxfine;
-	  Real hf = m_dx;
-	  Real denom = xf*xc*hf;
+	const CFIVS* cfivsPtr = nullptr;
+	if(sit() == Side::Lo) {
+	  cfivsPtr = &m_loCFIVS[dir][a_dit];
+	}
+	else{
+	  cfivsPtr = &m_hiCFIVS[dir][a_dit];
+	}
 
-	  const EBISBox& ebisBox = m_eblgFine.getEBISL()[a_dit];
-	  const EBGraph& ebgraph = ebisBox.getEBGraph();
-	      
-	  for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	    const VolIndex& VoFGhost = vofit();
-
-	    IntVect ivGhost  = VoFGhost.gridIndex();
-
-	    Vector<VolIndex> farVoFs;
-	    Vector<VolIndex> closeVoFs = ebisBox.getVoFs(VoFGhost, dir, flip(sit()), 1);
-	    
-	    bool hasClose = (closeVoFs.size() > 0);
-	    bool hasFar = false;
-	    Real phic = 0.0;
-	    Real phif = 0.0;
-	    
-	    if (hasClose){
-	      const int& numClose = closeVoFs.size();
-	      for (int iVof=0;iVof<numClose;iVof++){
-		const VolIndex& vofClose = closeVoFs[iVof];
-		phic += a_phi(vofClose,0);
-	      }
-	      phic /= Real(numClose);
-
-	      farVoFs = ebisBox.getVoFs(VoFGhost, dir, flip(sit()), 2);
-	      hasFar   = (farVoFs.size()   > 0);
-	      if (hasFar){
-		const int& numFar = farVoFs.size();
-		for (int iVof=0;iVof<numFar;iVof++){
-		  const VolIndex& vofFar = farVoFs[iVof];
-		  phif += a_phi(vofFar,0);
-		}
-		phif /= Real(numFar);
-	      }
-	    }
-
-	    Real phiGhost;
-	    if (hasClose && hasFar){
-	      // quadratic interpolation  phi = ax^2 + bx + c
-	      Real A = (phif*xc - phic*xf)/denom;
-	      Real B = (phic*hf*xf - phif*xc*xc + phic*xf*xc)/denom;
-
-	      phiGhost = A*xg*xg + B*xg;
-	    }
-	    else if (hasClose){
-	      //linear interpolation
-	      Real slope =  phic/xc;
-	      phiGhost   =  slope*xg;
-	    }
-	    else{
-	      phiGhost = 0.0; //nothing to interpolate from
-	    }
-	    a_phi(VoFGhost, 0) = phiGhost;
-	  }
+	const IntVectSet& ivs = cfivsPtr->getFineIVS();
+	if (cfivsPtr->isPacked() ){
+	  const int ihiorlo = sign(sit());
+	  FORT_INTERPHOMO(CHF_FRA(a_phi.getSingleValuedFAB()),
+			  CHF_BOX(cfivsPtr->packedBox()),
+			  CHF_CONST_REAL(m_dx),
+			  CHF_CONST_REAL(m_dxCoar),
+			  CHF_CONST_INT(dir),
+			  CHF_CONST_INT(ihiorlo));
 	}
       }
     }
-  }
-}
 
-void EBMultigridInterpolator::homogeneousInterpEBCF(LevelData<EBCellFAB>& a_phiFine, const Interval a_variables) const {
-  CH_TIME("EBMultigridInterpolator::interp");
+    // Apply fine stencil near the EB. This might look weird but recall that ghostVof is a ghostCell on the other side of
+    // the refinment boundary, whereas the stencil only reaches into cells on the finel level. So, we are not
+    // writing to data that we will later fetch. 
+    const BaseIVFAB<VoFStencil>& fineStencils = m_fineStencils[a_dit];
+  
+    for (VoFIterator vofit(fineStencils.getIVS(), fineStencils.getEBGraph()); vofit.ok(); ++vofit){
+      const VolIndex& ghostVoF   = vofit();
+      const VoFStencil& fineSten = fineStencils(ghostVoF, m_stenComp);
+      
+      a_phi(ghostVoF, ivar) = 0.0;
 
-  // Copy data to scratch data holders.
-  for (int icomp = a_variables.begin(); icomp <= a_variables.end(); icomp++){
-    const Interval srcInterv = Interval(icomp,   icomp);
-    const Interval dstInterv = Interval(m_comp,  m_comp);
-    
-    //    a_phiFine.copyTo(srcInterv, m_fineData, dstInterv);
-
-    for (DataIterator dit = a_phiFine.dataIterator(); dit.ok(); ++dit){
-      EBCellFAB& dstFine       = a_phiFine[dit()];
-      const EBCellFAB& srcFine = a_phiFine[dit()];
-
-      const BaseIVFAB<VoFStencil>& fineStencils = m_fineStencils[dit()];
-
-      for (VoFIterator vofit(fineStencils.getIVS(), fineStencils.getEBGraph()); vofit.ok(); ++vofit){
-	const VolIndex& ghostVoF = vofit();
-
-	dstFine(ghostVoF, icomp) = 0.0;
-
-	// Fine stencil for this ghost vof
-	const VoFStencil& fineSten = fineStencils(ghostVoF, m_stenComp);
-
-	// Apply fine stencil
-	for (int ifine = 0; ifine < fineSten.size(); ifine++){
-	  dstFine(ghostVoF, icomp) += fineSten.weight(ifine) * srcFine(fineSten.vof(ifine), icomp);
-	}
+      for (int ifine = 0; ifine < fineSten.size(); ifine++){
+	CH_assert(ghostVoF != fineSten.vof(ifine));
+	a_phi(ghostVoF, ivar) += fineSten.weight(ifine) * a_phi(fineSten.vof(ifine), ivar);
       }
     }
   }

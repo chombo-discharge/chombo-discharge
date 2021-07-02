@@ -28,7 +28,7 @@
   @brief Multigrid interpolator class. 
   @note Currently just a shell of EBQuadCFInterp (so we have something to work with). 
 */
-class EBMultigridInterpolator : public EBQuadCFInterp {
+class EBMultigridInterpolator : public QuadCFInterp {
 public:
 
   /*!
@@ -181,6 +181,11 @@ protected:
   IntVect m_minGhost;
 
   /*!
+    @brief Refinement factor
+  */
+  int m_refRat;
+
+  /*!
     @brief Number of ghost cells to fill across coarse-fine interface. 
   */
   int m_ghostCF;
@@ -245,21 +250,6 @@ protected:
 		  const Real&         a_dxCoar,
 		  const int&          a_order,
 		  const int&          a_weight);
-
-  /*!
-    @brief Inhomogeneous interpolation
-    @param[inout] a_phiFine   Fine-level data to be interpolated. 
-    @param[in]    a_phiCoar   Coarse-level data. 
-    @param[in]    a_variables Variables to be interpolated. 
-  */
-  void inhomogeneousInterpEBCF(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar, const Interval a_variables) const;
-
-  /*!
-    @brief Homogeneous interpolation
-    @param[in] a_phiFine   Fine-level data. We interpolate the ghost cells assuming that coarse-level data is zero everywhere. 
-    @param[in] a_variables Variables to be interpolated. 
-  */
-  void homogeneousInterpEBCF(LevelData<EBCellFAB>& a_phiFine, const Interval a_variables) const;
 };
 
 #include <CD_NamespaceFooter.H>

@@ -466,8 +466,8 @@ std::map<IntVect, VoFStencil> LeastSquares::computeSingleLevelStencils(const Int
   //       This routine does not contain much code, but can be difficult to understand.
 
   CH_assert(a_order > 0);
-  CH_assert(a_fine.size() == a_displacements.size());
-  CH_assert(a_fine.size() == a_weights.      size());
+  CH_assert(a_allVofs.size() == a_displacements.size());
+  CH_assert(a_allVofs.size() == a_weights.      size());
 
 
   // Initialize return stuff. 
