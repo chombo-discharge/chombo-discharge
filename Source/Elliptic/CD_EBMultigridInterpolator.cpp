@@ -14,12 +14,11 @@
 #include <EBCellFactory.H>
 #include <EBLevelDataOps.H>
 #include <NeighborIterator.H>
-#include <InterpF_F.H>
 #include <EBAlias.H>
-#include <ParmParse.H> 
 
 // Our includes
 #include <CD_EBMultigridInterpolator.H>
+#include <CD_EBMultigridInterpolatorF_F.H>
 #include <CD_VofUtils.H>
 #include <CD_LeastSquares.H>
 #include <CD_NamespaceHeader.H>
@@ -55,7 +54,6 @@ EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
   m_weight        = a_weighting;
   
   this->defineGrids(a_eblgFine, a_eblgCoar);
-  this->defineCFIVS();
   this->defineGhostRegions();
   this->defineBuffers();
   this->defineStencils();
@@ -65,18 +63,6 @@ EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
 
 int EBMultigridInterpolator::getGhostCF() const{
   return m_ghostCF;
-}
-
-void EBMultigridInterpolator::defineCFIVS(){
-  for (int dir = 0; dir < SpaceDim; dir++){
-    m_loCFIVS[dir].define(m_eblgFine.getDBL());
-    m_hiCFIVS[dir].define(m_eblgFine.getDBL());
-
-    for (DataIterator dit(m_eblgFine.getDBL()); dit.ok(); ++dit){
-      m_loCFIVS[dir][dit()].define(m_eblgFine.getDomain(), m_eblgFine.getDBL()[dit()], m_eblgFine.getDBL(), dir, Side::Lo);
-      m_hiCFIVS[dir][dit()].define(m_eblgFine.getDomain(), m_eblgFine.getDBL()[dit()], m_eblgFine.getDBL(), dir, Side::Hi);
-    }
-  }
 }
 
 EBMultigridInterpolator::~EBMultigridInterpolator(){
@@ -91,7 +77,7 @@ void EBMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>& a_phiFine, 
 
   aliasEB(fineAlias, (LevelData<EBCellFAB>&) a_phiFine);
   aliasEB(coarAlias, (LevelData<EBCellFAB>&) a_phiCoar);
-  
+
   QuadCFInterp::coarseFineInterp(fineAlias, coarAlias);
 
   // Do corrections near the EBCF. 
@@ -143,33 +129,27 @@ void EBMultigridInterpolator::coarseFineInterpH(LevelData<EBCellFAB>& a_phiFine,
 }
 
 void EBMultigridInterpolator::coarseFineInterpH(EBCellFAB& a_phi, const Interval a_variables, const DataIndex& a_dit){
-  const Real m_dx     = 1.0;
-  const Real m_dxCoar = m_dx*m_refRat;
-
+  const Real dxFine = 1.0;
+  const Real dxCoar = 1.0 * m_refRat;
   
   for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++){
     
-    // Do the regular interp. 
+    // Do the regular interp on all sides of the current patch. 
     for (int dir = 0; dir < SpaceDim; dir++){
       for (SideIterator sit; sit.ok(); ++sit){
 
-	const CFIVS* cfivsPtr = nullptr;
-	if(sit() == Side::Lo) {
-	  cfivsPtr = &m_loCFIVS[dir][a_dit];
-	}
-	else{
-	  cfivsPtr = &m_hiCFIVS[dir][a_dit];
-	}
-
-	const IntVectSet& ivs = cfivsPtr->getFineIVS();
-	if (cfivsPtr->isPacked() ){
-	  const int ihiorlo = sign(sit());
-	  FORT_INTERPHOMO(CHF_FRA(a_phi.getSingleValuedFAB()),
-			  CHF_BOX(cfivsPtr->packedBox()),
-			  CHF_CONST_REAL(m_dx),
-			  CHF_CONST_REAL(m_dxCoar),
-			  CHF_CONST_INT(dir),
-			  CHF_CONST_INT(ihiorlo));
+	// Regular homogeneous interpolation on side sit() in direction dir
+	const Box ghostBox = m_cfivs[a_dit].at(std::make_pair(dir, sit()));
+	
+	if(!ghostBox.isEmpty()){
+	  const int hiLo = sign(sit()); // Low side => -1, high side => 1
+	  BaseFab<Real>& phiReg = a_phi.getSingleValuedFAB();
+	  FORT_MGINTERPHOMO(CHF_FRA1(phiReg, ivar),
+	  		    CHF_CONST_REAL(dxFine),
+	  		    CHF_CONST_REAL(dxCoar),
+	  		    CHF_CONST_INT(dir),
+	  		    CHF_CONST_INT(hiLo),
+	  		    CHF_BOX(ghostBox));
 	}
       }
     }
@@ -208,22 +188,21 @@ void EBMultigridInterpolator::defineGhostRegions(){
     
     for (int dir = 0; dir < SpaceDim; dir++){
       for (SideIterator sit; sit.ok(); ++sit){
-	const auto dirSide = std::make_pair(dir, sit());
 
 	IntVectSet cfivs = IntVectSet(adjCellBox(cellBox, dir, sit(), 1));
 
 	NeighborIterator nit(dbl); // Subtract the other boxes if they intersect this box. 
 	for (nit.begin(dit()); nit.ok(); ++nit){
-	  cfivs -= dbl[dit()];
+	  cfivs -= dbl[nit()];
 	}
 
+	cfivs &= domain;
 	cfivs.recalcMinBox();
 	
-	cfivsBoxes.emplace(dirSide, cfivs.minBox());
+	cfivsBoxes.emplace(std::make_pair(dir, sit()), cfivs.minBox());
       }
     }
   }
-  
 
   // Define ghost cells to be interpolated near the EB. 
   m_ghostCells.define(dbl);
@@ -251,7 +230,6 @@ void EBMultigridInterpolator::defineGhostRegions(){
       // 2. Only include ghost cells that are within range m_ghostCF of an irregular grid cell
       IntVectSet irreg = ebisbox.getIrregIVS(cellBox);
       irreg.grow(m_ghostCF);
-
       m_ghostCells[dit()] &= irreg;
     }
   }
@@ -496,7 +474,5 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&         a_stencilFine,
 
   return foundStencil;
 }
-
-
 
 #include <CD_NamespaceFooter.H>

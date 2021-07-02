@@ -19,7 +19,6 @@
 // Chombo includes
 #include <EBLevelGrid.H>
 #include <QuadCFInterp.H>
-#include <CFIVS.H>
 
 // Our includes
 #include <CD_Location.H>
@@ -201,16 +200,6 @@ protected:
     @brief Fine stencils
   */
   LayoutData<BaseIVFAB<VoFStencil> > m_coarStencils;
-
-  /*!
-    @brief Coarse-fine interface. 
-  */
-  LayoutData<CFIVS> m_loCFIVS[SpaceDim];
-
-  /*!
-    @brief Coarse-fine interface. 
-  */
-  LayoutData<CFIVS> m_hiCFIVS[SpaceDim];
 
   /*!
     @brief Regular coarse-fine interface boxes

@@ -491,7 +491,7 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
   case 1:
     relaxType = EBHelmholtzOp::RelaxationMethod::GauSaiMultiColor;
     break;
-  case 3:
+  case 2:
     relaxType = EBHelmholtzOp::RelaxationMethod::GauSaiRedBlack;
     break;
   default:
@@ -743,7 +743,7 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
   case 1:
     relaxType = MFHelmholtzOp::RelaxationMethod::GauSaiMultiColor;
     break;
-  case 3:
+  case 2:
     relaxType = MFHelmholtzOp::RelaxationMethod::GauSaiRedBlack;
     break;
   default:
