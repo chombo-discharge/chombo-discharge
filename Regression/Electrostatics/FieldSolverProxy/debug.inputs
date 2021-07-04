@@ -5,14 +5,14 @@ AmrMesh.lo_corner       = -1 -1       # Low corner of problem domain
 AmrMesh.hi_corner       =  1  1       # High corner of problem domain
 AmrMesh.verbosity       = -1          # Controls verbosity. 
 AmrMesh.coarsest_domain = 64 64       # Number of cells on coarsest domain
-AmrMesh.max_amr_depth   = 4           # Maximum amr depth
+AmrMesh.max_amr_depth   = 2           # Maximum amr depth
 AmrMesh.max_sim_depth   = -1          # Maximum simulation depth
 AmrMesh.fill_ratio      = 1.0         # Fill ratio for grid generation
-AmrMesh.irreg_growth    = 0           # How much to grow irregular tagged cells
+AmrMesh.irreg_growth    = 6           # How much to grow irregular tagged cells
 AmrMesh.buffer_size     = 2           # Number of cells between grid levels
 AmrMesh.grid_algorithm  = br          # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
 AmrMesh.box_sorting     = morton      # 'none', 'shuffle', 'morton'
-AmrMesh.blocking_factor = 4           # Default blocking factor (16 in 3D)
+AmrMesh.blocking_factor = 8           # Default blocking factor (16 in 3D)
 AmrMesh.max_box_size    = 16          # Maximum allowed box size
 AmrMesh.max_ebis_box    = 16          # Maximum allowed box size
 AmrMesh.ref_rat         = 2           # Refinement ratios
@@ -52,9 +52,9 @@ Driver.plt_vars                        = 0                # 'tags', 'mpi_rank', 
 Driver.restart                         = 0                # Restart step (less or equal to 0 implies fresh simulation)
 Driver.allow_coarsening                = true             # Allows removal of grid levels according to CellTagger
 Driver.refine_curvature                = 0                # Curvature based refinement. Refines cells if curvature*dx*this > 1
-Driver.refine_geometry                 = -1               # Refine geometry, -1 => Refine all the way down
-Driver.refine_electrodes               = -1               # Refine electrode surfaces. -1 => equal to refine_geometry
-Driver.refine_dielectrics              = -1               # Refine dielectric surfaces. -1 => equal to refine_geometry
+Driver.refine_geometry                 = 0               # Refine geometry, -1 => Refine all the way down
+Driver.refine_electrodes               = 10               # Refine electrode surfaces. -1 => equal to refine_geometry
+Driver.refine_dielectrics              = 0               # Refine dielectric surfaces. -1 => equal to refine_geometry
 Driver.refine_electrode_gas_interface  = -1               # Refine electrode-gas interfaces. -1 => ----"----- 
 Driver.refine_dielectric_gas_interface = -1               # Refine dielectric-gas interfaces. -1 => ----"-----
 Driver.refine_solid_gas_interface      = -1               # Refine solid-gas interfaces. -1 => ----"-----  
@@ -67,19 +67,19 @@ ProxyFieldSolver.alpha      = 0.0         # Alpha
 ProxyFieldSolver.beta       = -1.0        # Beta
 ProxyFieldSolver.aco        = 1.0         # A-coefficient
 ProxyFieldSolver.bco        = 1.0         # B-coefficient	
-ProxyFieldSolver.solver     = helm        # Our solver ('helmholtz') or ebconductivity op 'ebcond'
+ProxyFieldSolver.solver     = mfhelm        # Our solver ('helmholtz') or ebconductivity op 'ebcond'
 ProxyFieldSolver.eb_bc      = dirichlet   # 'dirichlet', 'neumann', or 'robin'
 ProxyFieldSolver.domain_bc  = dirichlet   # 'dirichlet', 'neumann', or 'robin'
-ProxyFieldSolver.eb_order   = 2           # BC order on EB (only for Dirichlet)
-ProxyFieldSolver.eb_weight  = 0           # Weighting for least squares (only for helm)
+ProxyFieldSolver.eb_order   = 1           # BC order on EB (only for Dirichlet)
+ProxyFieldSolver.eb_weight  = 1           # Weighting for least squares (only for helm)
 ProxyFieldSolver.jump_order = 1           # BC order on EB (only for Dirichlet)
 ProxyFieldSolver.jump_weight= 1           # Weighting for least squares (only for helm)
 ProxyFieldSolver.dom_val    = -1          # Value on domain (For Robin, this is multiplier)
 ProxyFieldSolver.eb_val     = 1           # Value on EB (For robin, this is multiplier)
-ProxyFieldSolver.smooth     = 12          # Smoothings
+ProxyFieldSolver.smooth     = 16          # Smoothings
 ProxyFieldSolver.botsolver  = bicgstab    # 'simple' or 'bicgstab'
 ProxyFieldSolver.botsmooth  = 48          # Smoothings for bottom solver
-ProxyFieldSolver.relax      = 2           # Relaxation method
+ProxyFieldSolver.relax      = 1           # Relaxation method
 ProxyFieldSolver.mg_tol     = 1.E-8       # Multigrid tolerance
 ProxyFieldSolver.min_cells  = 16          # Number of cells along the shortest coordinate in the bottom of multigrid.
 ProxyFieldSolver.plt_vars   = phi resid E rho # Plot variables
@@ -87,7 +87,7 @@ ProxyFieldSolver.plt_vars   = phi resid E rho # Plot variables
 # ====================================================================================================
 # GEO_COARSENER CLASS OPTIONS
 # ====================================================================================================
-GeoCoarsener.num_boxes   = 1            # Number of coarsening boxes (0 = don't coarsen)
+GeoCoarsener.num_boxes   = 0            # Number of coarsening boxes (0 = don't coarsen)
 GeoCoarsener.box1_lo     = -2 0         # Remove irregular cell tags 
 GeoCoarsener.box1_hi     =  2 2.0       # between these two corners
 GeoCoarsener.box1_lvl    = 0            # up to this level
@@ -102,9 +102,9 @@ RodDielectric.electrode.endpoint2       =  0.5  0.5     # Other endpoint
 RodDielectric.electrode.radius          = 0.05          # Electrode radius
 RodDielectric.electrode.live            = true          # Live or not
 
-RodDielectric.dielectric.on             = false          # Use dielectric or not
+RodDielectric.dielectric.on             = true          # Use dielectric or not
 RodDielectric.dielectric.shape          = sphere        # 'plane', 'box', 'perlin_box', 'sphere'
-RodDielectric.dielectric.permittivity   = 5.0             # Dielectric permittivity
+RodDielectric.dielectric.permittivity   = 10.0             # Dielectric permittivity
 
 # Subsettings for 'plane'
 RodDielectric.plane.point               = 0 0 0         # Plane point
