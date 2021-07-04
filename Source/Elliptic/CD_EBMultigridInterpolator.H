@@ -37,7 +37,7 @@ public:
   using CellLocation = Location::Cell;
 
   /*!
-    @brief Default constructor. Must subsequently call define
+    @brief Disallowed constructor. 
   */
   EBMultigridInterpolator() = delete;
 

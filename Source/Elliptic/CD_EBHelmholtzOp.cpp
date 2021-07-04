@@ -18,6 +18,7 @@
 // Our includes
 #include <CD_EBHelmholtzOp.H>
 #include <CD_EBHelmholtzOpF_F.H>
+#include <CD_EBMultigridRestrict.H>
 #include <CD_NamespaceHeader.H>
 
 constexpr int EBHelmholtzOp::m_nComp;

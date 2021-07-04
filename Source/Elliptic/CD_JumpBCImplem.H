@@ -7,8 +7,6 @@
   @file   CD_JumpBCImplem.H
   @brief  Implementation of CD_JumpBC.H
   @author Robert Marskar
-  @todo   The denominator should be precomputed for efficiency reasons. 
-  @todo   Inhomogeneous contribution is missing. 
 */
 
 #ifndef CD_JumpBCImplem_H
