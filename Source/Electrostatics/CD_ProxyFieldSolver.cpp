@@ -172,10 +172,14 @@ Vector<RefCountedPtr<EBMultigridInterpolator> > ProxyFieldSolver::getMultigridIn
   const int finestLevel = m_amr->getFinestLevel();
 
   ParmParse pp("ProxyFieldSolver");
-  int ghostCF, eb, mf;
-  pp.get("eb_order", eb);
-  pp.get("jump_order", mf);
-  ghostCF = std::max(eb, mf);
+
+  int ghostCF;
+  int weight;
+  int order;
+
+  pp.get("interp_weight", weight);
+  pp.get("interp_num", ghostCF);
+  pp.get("interp_order", order);
 
   Vector<RefCountedPtr<EBMultigridInterpolator> > interpolators(1+finestLevel);
   
@@ -193,8 +197,8 @@ Vector<RefCountedPtr<EBMultigridInterpolator> > ProxyFieldSolver::getMultigridIn
 											       m_amr->getRefinementRatios()[lvl-1],
 											       1, // Variables
 											       ghostCF, // # of ghost cells to fill
-											       2, // Order
-											       0)); // Weight
+											       order, // Order
+											       weight)); // Weight
     }
   }
 

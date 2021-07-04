@@ -8,6 +8,7 @@
   @brief  Implementation of CD_MFHelmholtzOp.H
   @author Robert Marskar
   @todo   Preconditioner needs work!
+  @todo   In relax, why does it help to end with a BC update?
 */
 
 // Chombo includes
@@ -477,6 +478,8 @@ void MFHelmholtzOp::relax(LevelData<MFCellFAB>& a_correction, const LevelData<MF
   default:
     MayDay::Error("MFHelmholtzOp::relax - bogus relaxation method requested");
   };
+
+  this->updateJumpBC(a_correction, true); // Why does this matter...?
 }
 
 void MFHelmholtzOp::relaxPointJacobi(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_residual, const int a_iterations) {
@@ -488,7 +491,6 @@ void MFHelmholtzOp::relaxPointJacobi(LevelData<MFCellFAB>& a_correction, const L
   for (int i = 0; i < a_iterations; i++){
     
     // Interpolate ghost cells and match the BC.
-
     this->interpolateCF(a_correction, nullptr, true);
     this->updateJumpBC(a_correction,  true);    
 
@@ -519,15 +521,14 @@ void MFHelmholtzOp::relaxGSRedBlack(LevelData<MFCellFAB>& a_correction, const Le
 
     // Interpolate ghost cells and match the BC.
     for (int redBlack=0;redBlack<=1; redBlack++){
-
       this->interpolateCF(a_correction, nullptr, true);
-      this->updateJumpBC(a_correction, true);      
-
-      // Do relaxation on each patch. 
+      this->updateJumpBC(a_correction, true);
+      
+      // Do relaxation on each patch.
       for (DataIterator dit(dbl); dit.ok(); ++dit){
 	const Box cellBox = dbl[dit()];
 
-	for (auto& op : m_helmOps){
+      	for (auto& op : m_helmOps){
 	  const int iphase = op.first;
 
 	  EBCellFAB&       Lph = Lcorr       [dit()].getPhase(iphase);
