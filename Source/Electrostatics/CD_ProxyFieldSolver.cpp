@@ -194,7 +194,7 @@ Vector<RefCountedPtr<EBMultigridInterpolator> > ProxyFieldSolver::getMultigridIn
 											       1, // Variables
 											       ghostCF, // # of ghost cells to fill
 											       2, // Order
-											       2)); // Weight
+											       0)); // Weight
     }
   }
 

@@ -1018,12 +1018,26 @@ void EBHelmholtzOp::getFaceCenteredFlux(EBFaceFAB&       a_fluxCenter,
   const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
   const EBGraph& ebgraph = ebisbox.getEBGraph();
     
-  // Make a face box which has no boundary faces.
-  // R.M comment: I don't think this is necessary....
-  Box faceBox = a_cellBox;
-  faceBox.grow(a_dir, 1);
-  faceBox &= m_eblg.getDomain();
-  faceBox.grow(a_dir, -1);
+  // Since a_fluxCenter is used as a basis for interpolation near the cut-cells, we need to fill fluxes on faces in direction that extends one cell
+  // outside of the cellbox in directions that are tangential to a_dir. We do not want to include domain faces here since that
+  // is taken care of elsewhere.
+
+  // Discard domain faces
+  Box compCellBox = a_cellBox;
+  compCellBox.grow(a_dir, 1);
+  compCellBox &= m_eblg.getDomain();
+  compCellBox.grow(a_dir, -1);
+
+  // Extend flux box in directions that are tangential to a_dir
+  for (int dir = 0; dir < SpaceDim; dir++){
+    if(dir != a_dir) {
+      compCellBox.grow(dir, 1);
+    }
+  }
+  compCellBox &= m_eblg.getDomain();
+
+  // cellbox -> facebox
+  Box faceBox = compCellBox;
   faceBox.surroundingNodes(a_dir);
 
   BaseFab<Real>& regFlux       = a_fluxCenter.getSingleValuedFAB();
@@ -1037,8 +1051,8 @@ void EBHelmholtzOp::getFaceCenteredFlux(EBFaceFAB&       a_fluxCenter,
 			   CHF_CONST_REAL(m_dx),
 			   CHF_BOX(faceBox));
   
-  // Do the irregular cells
-  const IntVectSet irregIVS = ebisbox.getIrregIVS(a_cellBox);
+  // Do the irregular cells. Again, need to fill face-centered fluxes
+  const IntVectSet irregIVS = ebisbox.getIrregIVS(compCellBox);
   for (FaceIterator faceIt(irregIVS, ebgraph, a_dir, FaceStop::SurroundingNoBoundary); faceIt.ok(); ++faceIt){
     const FaceIndex& face = faceIt();
 
@@ -1090,6 +1104,9 @@ void EBHelmholtzOp::incrementFRCoar(const LevelData<EBCellFAB>& a_phi){
 
   const Real scale = 1.0;
 
+  LevelData<EBCellFAB>& phiCoar = (LevelData<EBCellFAB>&) a_phi;
+  phiCoar.exchange();
+  
   for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit){
     for (int dir = 0; dir < SpaceDim; dir++){
       EBFaceFAB& flux   = m_flux[dit()][dir];
@@ -1097,8 +1114,8 @@ void EBHelmholtzOp::incrementFRCoar(const LevelData<EBCellFAB>& a_phi){
       const Box cellBox = m_eblg.getDBL()[dit()];
       for (SideIterator sit; sit.ok(); ++sit){
 
-	// Computes fluxes for all faces oriented in +/- dir, but which are not boundary faces. Restrict the
-	// calculation to stripBox. Must do this for all faces because the CF interface does not align with a coarse box. 
+	// Computes fluxes for all faces oriented in +/- dir, but which are not boundary faces. Must do this for all faces because
+	// the CF interface does not align with a coarse box. 
 	this->getFaceCentroidFlux(flux, a_phi[dit()], cellBox, dit(), dir);
 
 	// Increment flux register, recall that beta and the b-coefficient are included in getFaceCentroidFlux. 
@@ -1130,8 +1147,8 @@ void EBHelmholtzOp::incrementFRFine(const LevelData<EBCellFAB>& a_phiFine, const
 
 	// The CF interface always ends at the boundary of a fine-level grid box, so we can run the computation for
 	// the subset of cells that align with the CF. 
-	Box stripBox = adjCellBox(cellBox, dir, sit(), 1);
-	stripBox.shift(dir, -sign(sit()));
+	Box stripBox = adjCellBox(cellBox, dir, sit(), 1); // This box is outside the cellBox patch
+	stripBox.shift(dir, -sign(sit()));                 // This box is inside the cellBox patch
 
 	// Computes fluxes for all faces oriented in +/- dir, but which are not boundary faces. 
 	finerOp.getFaceCentroidFlux(flux, phiFine[dit()], stripBox, dit(), dir);
