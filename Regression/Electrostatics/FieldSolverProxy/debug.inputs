@@ -71,23 +71,23 @@ ProxyFieldSolver.solver     = mfhelm        # Our solver ('helmholtz') or ebcond
 ProxyFieldSolver.eb_bc      = dirichlet   # 'dirichlet', 'neumann', or 'robin'
 ProxyFieldSolver.domain_bc  = dirichlet   # 'dirichlet', 'neumann', or 'robin'
 ProxyFieldSolver.eb_order   = 1           # BC order on EB (only for Dirichlet)
-ProxyFieldSolver.eb_weight  = 1           # Weighting for least squares (only for helm)
+ProxyFieldSolver.eb_weight  = 0           # Weighting for least squares (only for helm)
 ProxyFieldSolver.jump_order = 1           # BC order on EB (only for Dirichlet)
-ProxyFieldSolver.jump_weight= 1           # Weighting for least squares (only for helm)
+ProxyFieldSolver.jump_weight= 0           # Weighting for least squares (only for helm)
 ProxyFieldSolver.dom_val    = -1          # Value on domain (For Robin, this is multiplier)
 ProxyFieldSolver.eb_val     = 1           # Value on EB (For robin, this is multiplier)
-ProxyFieldSolver.smooth     = 16          # Smoothings
+ProxyFieldSolver.smooth     = 10          # Smoothings
 ProxyFieldSolver.botsolver  = bicgstab    # 'simple' or 'bicgstab'
 ProxyFieldSolver.botsmooth  = 48          # Smoothings for bottom solver
 ProxyFieldSolver.relax      = 1           # Relaxation method
-ProxyFieldSolver.mg_tol     = 1.E-8       # Multigrid tolerance
+ProxyFieldSolver.mg_tol     = 1.E-10      # Multigrid tolerance
 ProxyFieldSolver.min_cells  = 16          # Number of cells along the shortest coordinate in the bottom of multigrid.
 ProxyFieldSolver.plt_vars   = phi resid E rho # Plot variables
 
 # ====================================================================================================
 # GEO_COARSENER CLASS OPTIONS
 # ====================================================================================================
-GeoCoarsener.num_boxes   = 0            # Number of coarsening boxes (0 = don't coarsen)
+GeoCoarsener.num_boxes   = 1            # Number of coarsening boxes (0 = don't coarsen)
 GeoCoarsener.box1_lo     = -2 0         # Remove irregular cell tags 
 GeoCoarsener.box1_hi     =  2 2.0       # between these two corners
 GeoCoarsener.box1_lvl    = 0            # up to this level
@@ -104,7 +104,7 @@ RodDielectric.electrode.live            = true          # Live or not
 
 RodDielectric.dielectric.on             = true          # Use dielectric or not
 RodDielectric.dielectric.shape          = sphere        # 'plane', 'box', 'perlin_box', 'sphere'
-RodDielectric.dielectric.permittivity   = 10.0             # Dielectric permittivity
+RodDielectric.dielectric.permittivity   = 5.0             # Dielectric permittivity
 
 # Subsettings for 'plane'
 RodDielectric.plane.point               = 0 0 0         # Plane point
@@ -139,6 +139,6 @@ FieldStepper.realm        = primal          # Primal Realm
 FieldStepper.load_balance = false           # Load balance or not.
 FieldStepper.box_sorting  = morton          # If you load balance you can redo the box sorting. 
 FieldStepper.init_rho     = 0.E-10          # Space charge density
-FieldStepper.init_sigma   = 0.E-10          # Surface charge density
+FieldStepper.init_sigma   = 0.E-11          # Surface charge density
 FieldStepper.rho_center   = -0.5 -0.5       # Space charge blob center
 FieldStepper.rho_radius   = 0.25            # Space charge blob radius
