@@ -27,6 +27,7 @@
 
 // Our includes
 #include <CD_EBMultigridInterpolator.H>
+#include <CD_EBMultigridRestrict.H>
 #include <CD_EbCoarAve.H>
 #include <CD_EBHelmholtzEBBC.H>
 #include <CD_EBHelmholtzDomainBC.H>
@@ -627,12 +628,14 @@ protected:
   /*!
     @brief Averaging operator to MG level
   */
-  EBMGAverage m_ebAverageMG;
+  //  EBMGAverage m_ebAverageMG;
+  EBMultigridRestrict m_ebRestrictMG;
 
   /*!
     @brief Averaging operator to AMR level
   */
-  EBMGAverage m_ebAverage;
+  //  EBMGAverage m_ebAverage;
+  EBMultigridRestrict m_ebRestrict;
 
   /*!
     @brief Prolongation operator from MG level

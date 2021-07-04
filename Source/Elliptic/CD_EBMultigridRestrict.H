@@ -24,7 +24,7 @@ public:
   /*!
     @brief Disallowed default constructor
   */
-  EBMultigridRestrict() = delete;
+  EBMultigridRestrict();
 
   /*!
     @brief Full constructor
@@ -52,6 +52,14 @@ public:
     @brief Disallowed assignment constructor
   */
   EBMultigridRestrict& operator=(const EBMultigridRestrict& a_other) = delete;
+
+  /*!
+    @brief Define function
+  */
+  void define(const EBLevelGrid& a_eblgFine,
+	      const EBLevelGrid& a_eblgCoar,
+	      const int&         a_refRat,
+	      const bool&        a_volumeWeighted);
 
   /*!
     @brief Restrict onto coarse
@@ -101,9 +109,9 @@ protected:
   bool m_volumeWeighted;
 
   /*!
-    @brief Interval
+    @brief Is defined or not
   */
-  Interval m_interval;
+  bool m_isDefined;
 
   /*!
     @brief Buffer for coarsened fine data. 
