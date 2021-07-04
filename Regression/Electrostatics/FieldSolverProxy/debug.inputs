@@ -71,17 +71,17 @@ ProxyFieldSolver.solver     = mfhelm        # Our solver ('helmholtz') or ebcond
 ProxyFieldSolver.eb_bc      = dirichlet   # 'dirichlet', 'neumann', or 'robin'
 ProxyFieldSolver.domain_bc  = dirichlet   # 'dirichlet', 'neumann', or 'robin'
 ProxyFieldSolver.interp_order = 2
-ProxyFieldSolver.interp_weight = 4
-ProxyFieldSolver.interp_num = 2		
+ProxyFieldSolver.interp_weight = 2
+ProxyFieldSolver.interp_num = 1		
 ProxyFieldSolver.eb_order   = 1          # BC order on EB (only for Dirichlet)
 ProxyFieldSolver.eb_weight  = 2           # Weighting for least squares (only for helm)
 ProxyFieldSolver.jump_order = 1           # BC order on EB (only for Dirichlet)
 ProxyFieldSolver.jump_weight= 2           # Weighting for least squares (only for helm)
 ProxyFieldSolver.dom_val    = -1          # Value on domain (For Robin, this is multiplier)
 ProxyFieldSolver.eb_val     = 1           # Value on EB (For robin, this is multiplier)
-ProxyFieldSolver.smooth     = 32          # Smoothings
-ProxyFieldSolver.botsolver  = bicgstab    # 'simple' or 'bicgstab'
-ProxyFieldSolver.botsmooth  = 16          # Smoothings for bottom solver
+ProxyFieldSolver.smooth     = 16          # Smoothings
+ProxyFieldSolver.botsolver  = simple    # 'simple' or 'bicgstab'
+ProxyFieldSolver.botsmooth  = 32          # Smoothings for bottom solver
 ProxyFieldSolver.relax      = 1           # Relaxation method
 ProxyFieldSolver.mg_tol     = 1.E-10      # Multigrid tolerance
 ProxyFieldSolver.min_cells  = 16          # Number of cells along the shortest coordinate in the bottom of multigrid.
@@ -90,7 +90,7 @@ ProxyFieldSolver.plt_vars   = phi resid E rho # Plot variables
 # ====================================================================================================
 # GEO_COARSENER CLASS OPTIONS
 # ====================================================================================================
-GeoCoarsener.num_boxes   = 0            # Number of coarsening boxes (0 = don't coarsen)
+GeoCoarsener.num_boxes   = 1            # Number of coarsening boxes (0 = don't coarsen)
 GeoCoarsener.box1_lo     = -2 0         # Remove irregular cell tags 
 GeoCoarsener.box1_hi     =  2 2.0       # between these two corners
 GeoCoarsener.box1_lvl    = 0            # up to this level

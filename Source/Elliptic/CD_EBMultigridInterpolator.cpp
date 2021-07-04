@@ -70,6 +70,9 @@ EBMultigridInterpolator::~EBMultigridInterpolator(){
 }
 
 void EBMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar, const Interval a_variables){
+  CH_assert(m_ghostCF <= a_phiFine.ghostVect().max());
+  CH_assert(m_ghostCF <= a_phiCoar.ghostVect().max());
+  
   CH_TIME("EBMultigridInterpolator::interp");
 
   LevelData<FArrayBox> fineAlias;
@@ -123,6 +126,7 @@ void EBMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>& a_phiFine, 
 }
 
 void EBMultigridInterpolator::coarseFineInterpH(LevelData<EBCellFAB>& a_phiFine, const Interval a_variables){
+  CH_assert(m_ghostCF <= a_phiFine.ghostVect().max());
   for (DataIterator dit(m_eblgFine.getDBL()); dit.ok(); ++dit){
     this->coarseFineInterpH(a_phiFine[dit()], a_variables, dit());
   }
