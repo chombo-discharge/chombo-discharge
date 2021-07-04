@@ -54,8 +54,8 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid&                                 
   m_eblgCoar(),
   m_eblgCoarMG(),
   m_interpolator(a_interpolator),
-  m_fluxReg(a_fluxReg),
   m_coarAve(a_coarAve),
+  m_fluxReg(a_fluxReg),
   m_domainBc(a_domainBc),
   m_ebBc(a_ebBc),
   m_probLo(a_probLo),
@@ -243,7 +243,7 @@ unsigned int EBHelmholtzOp::orderOfAccuracy(void) const {
 }
 
 void EBHelmholtzOp::enforceCFConsistency(LevelData<EBCellFAB>& a_coarCorr, const LevelData<EBCellFAB>& a_fineCorr){
-  m_coarAve->average(a_coarCorr, a_fineCorr, a_coarCorr.interval());
+  m_coarAve->average(a_coarCorr, a_fineCorr, m_interval);
 }
 
 void EBHelmholtzOp::setAlphaAndBeta(const Real& a_alpha, const Real& a_beta) {
