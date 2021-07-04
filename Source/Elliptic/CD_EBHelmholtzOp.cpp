@@ -89,7 +89,7 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid&                                 
     m_ebInterp.define(m_eblg.getDBL(),   m_eblgCoar.getDBL(), m_eblg.getEBISL(), m_eblgCoar.getEBISL(), m_eblgCoar.getDomain(),
     		      m_refToCoar, m_nComp, m_eblg.getEBIS(), m_ghostPhi);
 
-#if 0
+#if 1
     m_ebAverage.define(m_eblg.getDBL(), m_eblgCoFi.getDBL(), m_eblg.getEBISL(), m_eblgCoFi.getEBISL(), m_eblgCoFi.getDomain(),
     		       m_refToCoar, m_nComp, m_eblg.getEBIS(), m_ghostRhs);
 #else
@@ -105,7 +105,7 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid&                                 
     m_ebInterpMG.define(m_eblg.getDBL(), m_eblgCoarMG.getDBL(), m_eblg.getEBISL(), m_eblgCoarMG.getEBISL(), m_eblgCoarMG.getDomain(),
 			mgRef, m_nComp, m_eblg.getEBIS(), m_ghostPhi);
 
-#if 0
+#if 1
     m_ebAverageMG.define(m_eblg.getDBL(), m_eblgCoarMG.getDBL(), m_eblg.getEBISL(), m_eblgCoarMG.getEBISL(), m_eblgCoarMG.getDomain(),
 			 mgRef, m_nComp, m_eblg.getEBIS(), m_ghostRhs);
 #else
@@ -359,7 +359,7 @@ void EBHelmholtzOp::restrictResidual(LevelData<EBCellFAB>& a_resCoar, LevelData<
   this->setToZero(res);
   this->residual(res, a_phi, a_rhs, true);
 
-#if 0
+#if 1
   m_ebAverageMG.average(a_resCoar, res, m_interval);
 #else
   m_ebRestrictMG.restrict(a_resCoar, res, m_interval);
@@ -451,7 +451,7 @@ void EBHelmholtzOp::AMRRestrict(LevelData<EBCellFAB>&       a_residualCoarse,
   this->applyOp(resThisLevel, a_correction, &a_coarseCorrection, homogeneousPhysBC, homogeneousCFBC);
   this->incr(resThisLevel, a_residual, -1.0);
   this->scale(resThisLevel, -1.0);
-#if 0
+#if 1
   m_ebAverage.average(a_residualCoarse, resThisLevel, m_interval);
 #else
   m_ebRestrict.restrict(a_residualCoarse, resThisLevel, m_interval);
@@ -1049,6 +1049,7 @@ void EBHelmholtzOp::getFaceCenteredFlux(EBFaceFAB&       a_fluxCenter,
       compCellBox.grow(dir, 1);
     }
   }
+
   compCellBox &= m_eblg.getDomain();
 
   // cellbox -> facebox

@@ -254,7 +254,6 @@ bool JumpBC::getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFStencil>& a_s
   const bool addStartVof  = false;
   
   const RealVect normal = a_ebisbox.normal(a_vof);
-
     
   const VoFStencil gradStencil = LeastSquares::getBndryGradSten(a_vof,
 								a_neighborhood,
