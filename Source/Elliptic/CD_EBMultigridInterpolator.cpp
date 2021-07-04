@@ -52,7 +52,7 @@ EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
   m_minGhost      = a_minGhost;
   m_cellLocation  = a_cellLocation;
   m_weight        = a_weighting;
-  
+
   this->defineGrids(a_eblgFine, a_eblgCoar);
   this->defineGhostRegions();
   this->defineBuffers();
@@ -162,7 +162,7 @@ void EBMultigridInterpolator::coarseFineInterpH(EBCellFAB& a_phi, const Interval
     // the refinment boundary, whereas the stencil only reaches into cells on the finel level. So, we are not
     // writing to data that we will later fetch.
     const BaseIVFAB<VoFStencil>& fineStencils = m_fineStencils[a_dit];
-  
+
     for (VoFIterator vofit(fineStencils.getIVS(), fineStencils.getEBGraph()); vofit.ok(); ++vofit){
       const VolIndex& ghostVoF   = vofit();
       const VoFStencil& fineSten = fineStencils(ghostVoF, m_stenComp);
@@ -257,6 +257,7 @@ void EBMultigridInterpolator::defineGrids(const EBLevelGrid& a_eblgFine, const E
 
   // Define the coarsened fine grids -- needs same number of ghost cells as m_eblgFine.
   coarsen(m_eblgCoFi, m_eblgFine, m_refRat);
+  m_eblgCoFi.setMaxRefinementRatio(m_refRat);
 }
 
 void EBMultigridInterpolator::defineBuffers(){

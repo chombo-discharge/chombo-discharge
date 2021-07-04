@@ -47,9 +47,7 @@ void EBMultigridRestrict::define(const EBLevelGrid& a_eblgFine,
   if(!m_eblgFine.coarsenable(m_refRat)) MayDay::Error("EBMultigridRestrict -- fine layout is not coarsenable!");
 
   coarsen(m_eblgCoFi, m_eblgFine, m_refRat);
-  if(m_refRat > 2){
-    m_eblgCoFi.setMaxRefinementRatio(m_refRat);
-  }
+  m_eblgCoFi.setMaxRefinementRatio(m_refRat);
   
   m_coFiData.define(m_eblgCoFi.getDBL(), m_nComp, IntVect::Zero, EBCellFactory(m_eblgCoFi.getEBISL()));
 
