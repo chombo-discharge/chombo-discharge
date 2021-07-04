@@ -628,20 +628,12 @@ protected:
   /*!
     @brief Averaging operator to MG level
   */
-#if 1
-  EBMGAverage m_ebAverageMG;
-#else
   EBMultigridRestrict m_ebRestrictMG;
-#endif
 
   /*!
     @brief Averaging operator to AMR level
   */
-#if 1
-  EBMGAverage m_ebAverage;
-#else
   EBMultigridRestrict m_ebRestrict;
-#endif
 
   /*!
     @brief Prolongation operator from MG level

@@ -82,6 +82,8 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid&                                 
     m_eblgFine = a_eblgFine;
   }
 
+  const bool volWeighted = false;
+
   if(m_hasCoar){
     m_eblgCoFi = a_eblgCoFi;
     m_eblgCoar = a_eblgCoar;
@@ -89,12 +91,7 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid&                                 
     m_ebInterp.define(m_eblg.getDBL(),   m_eblgCoar.getDBL(), m_eblg.getEBISL(), m_eblgCoar.getEBISL(), m_eblgCoar.getDomain(),
     		      m_refToCoar, m_nComp, m_eblg.getEBIS(), m_ghostPhi);
 
-#if 1
-    m_ebAverage.define(m_eblg.getDBL(), m_eblgCoFi.getDBL(), m_eblg.getEBISL(), m_eblgCoFi.getEBISL(), m_eblgCoFi.getDomain(),
-    		       m_refToCoar, m_nComp, m_eblg.getEBIS(), m_ghostRhs);
-#else
-    m_ebRestrict.define(m_eblg, m_eblgCoar, m_refToCoar, false);
-#endif
+    m_ebRestrict.define(m_eblg, m_eblgCoar, m_refToCoar, volWeighted);
   }
 
   if(m_hasMGObjects){
@@ -105,12 +102,7 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid&                                 
     m_ebInterpMG.define(m_eblg.getDBL(), m_eblgCoarMG.getDBL(), m_eblg.getEBISL(), m_eblgCoarMG.getEBISL(), m_eblgCoarMG.getDomain(),
 			mgRef, m_nComp, m_eblg.getEBIS(), m_ghostPhi);
 
-#if 1
-    m_ebAverageMG.define(m_eblg.getDBL(), m_eblgCoarMG.getDBL(), m_eblg.getEBISL(), m_eblgCoarMG.getEBISL(), m_eblgCoarMG.getDomain(),
-			 mgRef, m_nComp, m_eblg.getEBIS(), m_ghostRhs);
-#else
-    m_ebRestrictMG.define(m_eblg, m_eblgCoarMG, mgRef, false);
-#endif
+    m_ebRestrictMG.define(m_eblg, m_eblgCoarMG, mgRef, volWeighted);
   }
 
   // Define data holders and stencils
@@ -359,11 +351,7 @@ void EBHelmholtzOp::restrictResidual(LevelData<EBCellFAB>& a_resCoar, LevelData<
   this->setToZero(res);
   this->residual(res, a_phi, a_rhs, true);
 
-#if 1
-  m_ebAverageMG.average(a_resCoar, res, m_interval);
-#else
   m_ebRestrictMG.restrict(a_resCoar, res, m_interval);
-#endif
 }
 
 void EBHelmholtzOp::prolongIncrement(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_correctCoarse) {
@@ -451,11 +439,8 @@ void EBHelmholtzOp::AMRRestrict(LevelData<EBCellFAB>&       a_residualCoarse,
   this->applyOp(resThisLevel, a_correction, &a_coarseCorrection, homogeneousPhysBC, homogeneousCFBC);
   this->incr(resThisLevel, a_residual, -1.0);
   this->scale(resThisLevel, -1.0);
-#if 1
-  m_ebAverage.average(a_residualCoarse, resThisLevel, m_interval);
-#else
+
   m_ebRestrict.restrict(a_residualCoarse, resThisLevel, m_interval);
-#endif
 }
 
 void EBHelmholtzOp::AMRProlong(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_coarseCorrection) {

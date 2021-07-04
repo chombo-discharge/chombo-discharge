@@ -71,8 +71,8 @@ ProxyFieldSolver.solver     = mfhelm        # Our solver ('helmholtz') or ebcond
 ProxyFieldSolver.eb_bc      = dirichlet   # 'dirichlet', 'neumann', or 'robin'
 ProxyFieldSolver.domain_bc  = dirichlet   # 'dirichlet', 'neumann', or 'robin'
 ProxyFieldSolver.interp_order = 2
-ProxyFieldSolver.interp_weight = 2
-ProxyFieldSolver.interp_num = 1		
+ProxyFieldSolver.interp_weight = 4
+ProxyFieldSolver.interp_num = 2		
 ProxyFieldSolver.eb_order   = 1          # BC order on EB (only for Dirichlet)
 ProxyFieldSolver.eb_weight  = 2           # Weighting for least squares (only for helm)
 ProxyFieldSolver.jump_order = 1           # BC order on EB (only for Dirichlet)
@@ -107,7 +107,7 @@ RodDielectric.electrode.live            = true          # Live or not
 
 RodDielectric.dielectric.on             = true          # Use dielectric or not
 RodDielectric.dielectric.shape          = sphere        # 'plane', 'box', 'perlin_box', 'sphere'
-RodDielectric.dielectric.permittivity   = 1.0           # Dielectric permittivity
+RodDielectric.dielectric.permittivity   = 10.0          # Dielectric permittivity
 
 # Subsettings for 'plane'
 RodDielectric.plane.point               = 0 0 0         # Plane point
