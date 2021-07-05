@@ -549,9 +549,7 @@ MFHelmholtzOp* MFHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
 
   if(hasCoar){ // Make a coarser layout
     const bool gotCoarse = this->getCoarserLayout(mflgCoFi, mflg, refToCoar, m_mgBlockingFactor);
-    if(refToCoar > 2){
-      mflgCoFi.setMaxRefinementRatio(refToCoar);
-    }
+    mflgCoFi.setMaxRefinementRatio(refToCoar);
     CH_assert(gotCoarse);
   }
 

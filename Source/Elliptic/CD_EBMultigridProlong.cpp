@@ -29,6 +29,8 @@ EBMultigridProlong::EBMultigridProlong(const EBLevelGrid& a_eblgFine,
 				       const int&         a_refRat,
 				       const bool&        a_volumeWeighted){
   this->define(a_eblgFine, a_eblgCoar, a_refRat, a_volumeWeighted);
+
+  MayDay::Abort("EBMultigridProlong -- this code breaks!!!");
 }
 
 void EBMultigridProlong::define(const EBLevelGrid& a_eblgFine,
@@ -42,7 +44,7 @@ void EBMultigridProlong::define(const EBLevelGrid& a_eblgFine,
 
   // Refine the coarse grid. This way we have an iterator which we can use on the coarse grid but which can access fine grid data. 
   refine(m_eblgFiCo, m_eblgCoar, m_refRat);
-  
+
   m_fineData.define(m_eblgFiCo.getDBL(), m_nComp, IntVect::Zero, EBCellFactory(m_eblgFiCo.getEBISL()));
 
   // Define stencils

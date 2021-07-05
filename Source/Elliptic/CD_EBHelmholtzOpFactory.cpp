@@ -404,7 +404,6 @@ EBHelmholtzOp* EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, 
 
     if(hasMGObjects){
       eblgMgCoar = *m_mgLevelGrids[amrLevel][1];
-      eblgMgCoar.setMaxRefinementRatio(2);
     }
       
     foundMgLevel = true;
@@ -440,7 +439,6 @@ EBHelmholtzOp* EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, 
       hasMGObjects = (mgLevel < mgLevelGrids.size() - 1); // This just means that mgLevel was not the last entry in mgLevelGrids so there's even coarser stuff below.
       if(hasMGObjects){
 	eblgMgCoar = *mgLevelGrids[mgLevel+1];
-	eblgMgCoar.setMaxRefinementRatio(2);
       }
     }
   }
@@ -451,8 +449,6 @@ EBHelmholtzOp* EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, 
 
     auto domBC = m_domainBcFactory->create();
     auto ebBC  = m_ebBcFactory->create();
-
-    //    ebBC->setMG(true);
     
     mgOp = new EBHelmholtzOp(EBLevelGrid(), // Multigrid operator, so no fine. 
 			     eblg,
@@ -518,13 +514,11 @@ EBHelmholtzOp* EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
   const bool hasMGObjects = m_hasMgLevels[amrLevel];
   if(hasMGObjects){
     eblgCoarMG = *m_mgLevelGrids[amrLevel][1];
-    eblgCoarMG.setMaxRefinementRatio(2);
     CH_assert(eblgCoarMG.isDefined());
   }
 
   if(hasCoar){
     this->getCoarserLayout(eblgCoFi, eblg, refToCoar, m_mgBlockingFactor);
-    eblgCoFi.setMaxRefinementRatio(refToCoar);
     CH_assert(eblgCoFi.isDefined());
   }
 

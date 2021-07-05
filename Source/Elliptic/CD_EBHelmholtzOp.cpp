@@ -91,7 +91,7 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid&                                 
     m_ebInterp.define(m_eblg.getDBL(),   m_eblgCoar.getDBL(), m_eblg.getEBISL(), m_eblgCoar.getEBISL(), m_eblgCoar.getDomain(),
     		      m_refToCoar, m_nComp, m_eblg.getEBIS(), m_ghostPhi);
 
-    m_ebProlong. define(m_eblg, m_eblgCoar, m_refToCoar, volWeighted);
+    //    m_ebProlong. define(m_eblg, m_eblgCoar, m_refToCoar, volWeighted);
     m_ebRestrict.define(m_eblg, m_eblgCoar, m_refToCoar, volWeighted);
   }
 
@@ -103,7 +103,7 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid&                                 
     m_ebInterpMG.define(m_eblg.getDBL(), m_eblgCoarMG.getDBL(), m_eblg.getEBISL(), m_eblgCoarMG.getEBISL(), m_eblgCoarMG.getDomain(),
     			mgRef, m_nComp, m_eblg.getEBIS(), m_ghostPhi);
     
-    m_ebProlongMG. define(m_eblg, m_eblgCoarMG, mgRef, volWeighted);
+    //    m_ebProlongMG. define(m_eblg, m_eblgCoarMG, mgRef, volWeighted);
     m_ebRestrictMG.define(m_eblg, m_eblgCoarMG, mgRef, volWeighted);
   }
 
