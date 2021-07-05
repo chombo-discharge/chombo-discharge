@@ -1,5 +1,5 @@
-#ifndef _CD_EBMULTIGRIDRESTRICTF_F_H_
-#define _CD_EBMULTIGRIDRESTRICTF_F_H_
+#ifndef _CD_EBMULTIGRIDDANCEF_F_H_
+#define _CD_EBMULTIGRIDDANCEF_F_H_
 
 #include "FORT_PROTO.H"
 #include "CH_Timer.H"
@@ -41,6 +41,37 @@ inline void FORTRAN_NAME(inlineRESTRICTREGULAR, inlineRESTRICTREGULAR)(
       ,CHFt_CONST_INT(reftocoar) );
 }
 #endif  // GUARDRESTRICTREGULAR 
+
+#ifndef GUARDPROLONGREGULAR 
+#define GUARDPROLONGREGULAR 
+// Prototype for Fortran procedure prolongregular ...
+//
+void FORTRAN_NAME( PROLONGREGULAR ,prolongregular )(
+      CHFp_FRA1(fineData)
+      ,CHFp_CONST_FRA1(coarData)
+      ,CHFp_BOX(coarBox)
+      ,CHFp_BOX(refBox)
+      ,CHFp_CONST_INT(refToCoar) );
+
+#define FORT_PROLONGREGULAR FORTRAN_NAME( inlinePROLONGREGULAR, inlinePROLONGREGULAR)
+#define FORTNT_PROLONGREGULAR FORTRAN_NAME( PROLONGREGULAR, prolongregular)
+
+inline void FORTRAN_NAME(inlinePROLONGREGULAR, inlinePROLONGREGULAR)(
+      CHFp_FRA1(fineData)
+      ,CHFp_CONST_FRA1(coarData)
+      ,CHFp_BOX(coarBox)
+      ,CHFp_BOX(refBox)
+      ,CHFp_CONST_INT(refToCoar) )
+{
+ CH_TIMELEAF("FORT_PROLONGREGULAR");
+ FORTRAN_NAME( PROLONGREGULAR ,prolongregular )(
+      CHFt_FRA1(fineData)
+      ,CHFt_CONST_FRA1(coarData)
+      ,CHFt_BOX(coarBox)
+      ,CHFt_BOX(refBox)
+      ,CHFt_CONST_INT(refToCoar) );
+}
+#endif  // GUARDPROLONGREGULAR 
 
 }
 

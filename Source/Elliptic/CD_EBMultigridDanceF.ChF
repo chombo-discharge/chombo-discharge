@@ -32,3 +32,35 @@
         ch_flops=ch_flops+CHF_POINTS[coarbox]*CHF_POINTS[refbox]*(2+CH_SPACEDIM)
         return
         end
+
+
+        subroutine prolongregular(
+     &     chf_fra1[fineData],
+     &     chf_const_fra1[coarData],
+     &     chf_box[coarBox],
+     &     chf_box[refBox],
+     &     chf_const_int[refToCoar])
+
+        integer chf_ddecl[iic;jjc;kkc]
+        integer chf_ddecl[iie;jje;kke]
+        integer chf_ddecl[iif;jjf;kkf]
+        real_t fineval, coarval
+
+        chf_multido[coarBox;iic;jjc;kkc]
+           chf_multido[refBox;iie;jje;kke]
+
+           chf_dterm[
+              iif  =  refTocoar*iic  + iie;
+              jjf  =  refTocoar*jjc  + jje;
+              kkf  =  refTocoar*kkc  + kke]
+
+           fineVal = fineData(chf_ix[iif;jjf;kkf])
+           coarVal = coarData(chf_ix[iic;jjc;kkc])
+
+           fineData(chf_ix[iif;jjf;kkf]) = fineVal + coarVal
+
+           chf_enddo
+        chf_enddo
+   
+        return
+        end

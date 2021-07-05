@@ -4,13 +4,13 @@
  */
 
 /*
-  @file   CD_EBMultigridRestrict.H
+  @file   CD_EBMultigridProlong.H
   @brief  Declaration of a class for doing multigrid restriction
   @author Robert Marskar
 */
 
-#ifndef CD_EBMultigridRestrict_H
-#define CD_EBMultigridRestrict_H
+#ifndef CD_EBMultigridProlong_H
+#define CD_EBMultigridProlong_H
 
 // Chombo includes
 #include <EBLevelGrid.H>
@@ -18,13 +18,13 @@
 // Our includes
 #include <CD_NamespaceHeader.H>
 
-class EBMultigridRestrict {
+class EBMultigridProlong {
 public:
 
   /*!
     @brief Disallowed default constructor
   */
-  EBMultigridRestrict();
+  EBMultigridProlong();
 
   /*!
     @brief Full constructor
@@ -33,28 +33,32 @@ public:
     @param[in] a_refRat         Refinement factor
     @param[in] a_volumeWeighted Use volume-weighted restriction or not
   */
-  EBMultigridRestrict(const EBLevelGrid& a_eblgFine,
-		      const EBLevelGrid& a_eblgCoar,
-		      const int&         a_refRat,
-		      const bool&        a_volumeWeighted);
+  EBMultigridProlong(const EBLevelGrid& a_eblgFine,
+		     const EBLevelGrid& a_eblgCoar,
+		     const int&         a_refRat,
+		     const bool&        a_volumeWeighted);
 
   /*!
     @brief Disallowed copy constructor
   */
-  EBMultigridRestrict(const EBMultigridRestrict& a_other) = delete;
+  EBMultigridProlong(const EBMultigridProlong& a_other) = delete;
 
   /*!
     @brief Destructor.
   */  
-  ~EBMultigridRestrict();
+  ~EBMultigridProlong();
 
   /*!
     @brief Disallowed assignment constructor
   */
-  EBMultigridRestrict& operator=(const EBMultigridRestrict& a_other) = delete;
+  EBMultigridProlong& operator=(const EBMultigridProlong& a_other) = delete;
 
   /*!
     @brief Define function
+    @param[in] a_eblgFine       Fine grids
+    @param[in] a_eblgCoar       Coarse grids
+    @param[in] a_refRat         Refinement factor
+    @param[in] a_volumeWeighted Use volume-weighted prolongation or not
   */
   void define(const EBLevelGrid& a_eblgFine,
 	      const EBLevelGrid& a_eblgCoar,
@@ -62,12 +66,12 @@ public:
 	      const bool&        a_volumeWeighted);
 
   /*!
-    @brief Restrict onto coarse
-    @param[inout] a_coarData  Coarse data to be restricted. 
-    @param[in]    a_fineData  Fine data
+    @brief Prolong onto coarse
+    @param[inout] a_fineData  Fine data to be interpolated.
+    @param[in]    a_coarData  Coarse data 
     @param[in]    a_variables Variables to restrict. 
   */
-  void restrict(LevelData<EBCellFAB>& a_coarData, const LevelData<EBCellFAB>& a_fineData, const Interval& a_variables) const;
+  void prolong(LevelData<EBCellFAB>& a_fineData, const LevelData<EBCellFAB>& a_coarData, const Interval& a_variables) const;
   
 protected:
 
@@ -94,9 +98,9 @@ protected:
   EBLevelGrid m_eblgCoar;
 
   /*!
-    @brief Coarsened fine grids
+    @brief Refine coarse grids
   */
-  EBLevelGrid m_eblgCoFi;
+  EBLevelGrid m_eblgFiCo;
 
   /*!
     @brief Refinement ratio between fine/coarse
@@ -114,19 +118,19 @@ protected:
   bool m_isDefined;
 
   /*!
-    @brief Buffer for coarsened fine data. 
+    @brief Refined coarse data. 
   */
-  mutable LevelData<EBCellFAB> m_coarData;
+  mutable LevelData<EBCellFAB> m_fineData;
   
   /*!
     @brief VoF iterator for irregular data
   */
-  mutable LayoutData<VoFIterator> m_vofitIrregCoar;
+  mutable LayoutData<VoFIterator> m_vofitIrregFine;
 
   /*!
     @brief Averaging stencils
   */
-  LayoutData<BaseIVFAB<VoFStencil> > m_restrictStencils;
+  LayoutData<BaseIVFAB<VoFStencil> > m_prolongStencils;
 
   /*!
     @brief Define stencils

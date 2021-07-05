@@ -14,7 +14,7 @@
 
 // Our includes
 #include <CD_EBMultigridRestrict.H>
-#include <CD_EBMultigridRestrictF_F.H>
+#include <CD_EBMultigridDanceF_F.H>
 #include <CD_NamespaceHeader.H>
 
 constexpr int EBMultigridRestrict::m_comp;
@@ -49,7 +49,7 @@ void EBMultigridRestrict::define(const EBLevelGrid& a_eblgFine,
   coarsen(m_eblgCoFi, m_eblgFine, m_refRat);
   m_eblgCoFi.setMaxRefinementRatio(m_refRat);
   
-  m_coFiData.define(m_eblgCoFi.getDBL(), m_nComp, IntVect::Zero, EBCellFactory(m_eblgCoFi.getEBISL()));
+  m_coarData.define(m_eblgCoFi.getDBL(), m_nComp, IntVect::Zero, EBCellFactory(m_eblgCoFi.getEBISL()));
 
   // Define stencils
   this->defineStencils();
@@ -69,8 +69,8 @@ void EBMultigridRestrict::defineStencils(){
   const EBISLayout& coarEBISL      = m_eblgCoFi.getEBISL();
   const EBISLayout& fineEBISL      = m_eblgFine.getEBISL();
   
-  m_avgStencils.define(coarDBL);
-  m_vofitIrreg. define(coarDBL);
+  m_restrictStencils.define(coarDBL);
+  m_vofitIrregCoar.  define(coarDBL);
 
   const int numFinePerCoar = std::pow(m_refRat, SpaceDim);
 
@@ -87,8 +87,8 @@ void EBMultigridRestrict::defineStencils(){
     const IntVectSet irregCoar = ebisboxCoar.getIrregIVS(cellBoxCoar);
     const IntVectSet irregFine = ebisboxFine.getIrregIVS(cellBoxFine);
 
-    BaseIVFAB<VoFStencil>& stencils = m_avgStencils[dit()];
-    VoFIterator& vofIter            = m_vofitIrreg[dit()];
+    BaseIVFAB<VoFStencil>& stencils = m_restrictStencils[dit()];
+    VoFIterator& vofIter            = m_vofitIrregCoar[dit()];
     
     stencils.define(irregCoar, ebgraphCoar, m_nComp);
     vofIter. define(irregCoar, ebgraphCoar);
@@ -142,7 +142,7 @@ void EBMultigridRestrict::restrict(LevelData<EBCellFAB>& a_coarData, const Level
     for (DataIterator dit(coarDBL); dit.ok(); ++dit){
       const Box coarBox = coarDBL[dit()];
       
-      EBCellFAB&       coFiData = m_coFiData[dit()];
+      EBCellFAB&       coFiData = m_coarData[dit()];
       const EBCellFAB& fineData = a_fineData[dit()];
 
       BaseFab<Real>&       coFiDataReg = coFiData.getSingleValuedFAB();
@@ -156,11 +156,11 @@ void EBMultigridRestrict::restrict(LevelData<EBCellFAB>& a_coarData, const Level
 			   CHF_CONST_INT(numFinePerCoar),
 			   CHF_CONST_INT(m_refRat));
       
-      VoFIterator& vofit = m_vofitIrreg[dit()];
+      VoFIterator& vofit = m_vofitIrregCoar[dit()];
       for (vofit.reset(); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();
 
-	const VoFStencil& sten = m_avgStencils[dit()](vof, m_comp);
+	const VoFStencil& sten = m_restrictStencils[dit()](vof, m_comp);
 
 	coFiData(vof, m_comp) = 0.0;
 	for (int i = 0; i < sten.size(); i++){
@@ -169,7 +169,7 @@ void EBMultigridRestrict::restrict(LevelData<EBCellFAB>& a_coarData, const Level
       }
     }
 
-    m_coFiData.copyTo(srcInterv, a_coarData, dstInterv);
+    m_coarData.copyTo(srcInterv, a_coarData, dstInterv);
   }
 }
 
