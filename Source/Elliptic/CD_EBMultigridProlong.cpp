@@ -25,16 +25,16 @@ EBMultigridProlong::EBMultigridProlong(){
 }
 
 EBMultigridProlong::EBMultigridProlong(const EBLevelGrid& a_eblgFine,
-					 const EBLevelGrid& a_eblgCoar,
-					 const int&         a_refRat,
-					 const bool&        a_volumeWeighted){
+				       const EBLevelGrid& a_eblgCoar,
+				       const int&         a_refRat,
+				       const bool&        a_volumeWeighted){
   this->define(a_eblgFine, a_eblgCoar, a_refRat, a_volumeWeighted);
 }
 
 void EBMultigridProlong::define(const EBLevelGrid& a_eblgFine,
-				 const EBLevelGrid& a_eblgCoar,
-				 const int&         a_refRat,
-				 const bool&        a_volumeWeighted){
+				const EBLevelGrid& a_eblgCoar,
+				const int&         a_refRat,
+				const bool&        a_volumeWeighted){
   m_eblgFine       = a_eblgFine;
   m_eblgCoar       = a_eblgCoar;
   m_refRat         = a_refRat;
@@ -42,7 +42,6 @@ void EBMultigridProlong::define(const EBLevelGrid& a_eblgFine,
 
   // Refine the coarse grid. This way we have an iterator which we can use on the coarse grid but which can access fine grid data. 
   refine(m_eblgFiCo, m_eblgCoar, m_refRat);
-  m_eblgFiCo.setMaxRefinementRatio(m_refRat);
   
   m_fineData.define(m_eblgFiCo.getDBL(), m_nComp, IntVect::Zero, EBCellFactory(m_eblgFiCo.getEBISL()));
 
@@ -72,36 +71,37 @@ void EBMultigridProlong::defineStencils(){
   for (DataIterator dit(coarDBL); dit.ok(); ++dit){
     const Box cellBoxCoar      = coarDBL[dit()];
     const Box cellBoxFine      = fineDBL[dit()];
-    
+
     const EBISBox& ebisboxCoar = coarEBISL[dit()];
     const EBISBox& ebisboxFine = fineEBISL[dit()];
     
     const EBGraph& ebgraphCoar = ebisboxCoar.getEBGraph();
     const EBGraph& ebgraphFine = ebisboxFine.getEBGraph();
-    
+
     const IntVectSet irregCoar = ebisboxCoar.getIrregIVS(cellBoxCoar);
-    const IntVectSet irregFine = ebisboxFine.getIrregIVS(cellBoxFine);
+    const IntVectSet irregFine = refine(irregCoar, m_refRat);
 
     BaseIVFAB<VoFStencil>& stencils = m_prolongStencils[dit()];
     VoFIterator& vofIter            = m_vofitIrregFine[dit()];
     
-    stencils.define(irregFine, ebgraphCoar, m_nComp);
-    vofIter. define(irregFine, ebgraphCoar);
+    stencils.define(irregFine, ebgraphFine, m_nComp);
+    vofIter. define(irregFine, ebgraphFine);
 
     // Iterate through the coarse VoFs and get all the refined vofs
     for (VoFIterator vofit(irregCoar, ebgraphCoar); vofit.ok(); ++vofit){
-      const VolIndex& vofCoar = vofIter();
-      const Real kappaCoar    = ebisboxCoar.volFrac(vofCoar);
-      
-      const Vector<VolIndex>& fineVofs = coarEBISL.refine(vofCoar, m_refRat, dit());
+      const VolIndex& vofCoar = vofit();
 
+      const Real kappaCoar    = ebisboxCoar.volFrac(vofCoar);
+
+      const Vector<VolIndex>& fineVofs = coarEBISL.refine(vofCoar, m_refRat, dit());
+#if 0
       Real sumKappaFine = 0.0;
       for (int i = 0; i < fineVofs.size(); i++){
 	sumKappaFine += ebisboxFine.volFrac(fineVofs[i]);
       }
-
+      
       const Real volFactor = kappaCoar/(numFinePerCoar*sumKappaFine);
-
+      
       for (int i = 0; i < fineVofs.size(); i++){
 	VoFStencil& sten = stencils(fineVofs[i], m_comp);
 	sten.clear();
@@ -113,6 +113,7 @@ void EBMultigridProlong::defineStencils(){
 	  sten.add(vofCoar, 1.0);
 	}
       }
+#endif
     }
   }
 }
@@ -138,7 +139,7 @@ void EBMultigridProlong::prolong(LevelData<EBCellFAB>& a_fineData, const LevelDa
       BaseFab<Real>&       fineDataReg = fineData.getSingleValuedFAB();
       const BaseFab<Real>& coarDataReg = coarData.getSingleValuedFAB();
 
-      fineData.setVal(0.0);
+      //      fineData.setVal(0.0);//
       FORT_PROLONGREGULAR(CHF_FRA1(fineDataReg,ivar),
 			  CHF_CONST_FRA1(coarDataReg,ivar),
 			  CHF_BOX(coarBox),

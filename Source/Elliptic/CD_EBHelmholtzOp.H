@@ -28,6 +28,7 @@
 // Our includes
 #include <CD_EBMultigridInterpolator.H>
 #include <CD_EBMultigridRestrict.H>
+#include <CD_EBMultigridProlong.H>
 #include <CD_EbCoarAve.H>
 #include <CD_EBHelmholtzEBBC.H>
 #include <CD_EBHelmholtzDomainBC.H>
@@ -639,11 +640,13 @@ protected:
     @brief Prolongation operator from MG level
   */
   EBMGInterp m_ebInterpMG;
+  EBMultigridProlong m_ebProlongMG;
 
   /*!
     @brief Prolongation operator from AMR level
   */
   EBMGInterp m_ebInterp;
+  EBMultigridProlong m_ebProlong;
 
   /*!
     @brief Domain bc object

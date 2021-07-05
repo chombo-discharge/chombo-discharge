@@ -403,7 +403,8 @@ EBHelmholtzOp* EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, 
     hasMGObjects = m_hasMgLevels[amrLevel];
 
     if(hasMGObjects){
-      eblgMgCoar = *m_mgLevelGrids[amrLevel][1]; 
+      eblgMgCoar = *m_mgLevelGrids[amrLevel][1];
+      eblgMgCoar.setMaxRefinementRatio(2);
     }
       
     foundMgLevel = true;
@@ -439,6 +440,7 @@ EBHelmholtzOp* EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, 
       hasMGObjects = (mgLevel < mgLevelGrids.size() - 1); // This just means that mgLevel was not the last entry in mgLevelGrids so there's even coarser stuff below.
       if(hasMGObjects){
 	eblgMgCoar = *mgLevelGrids[mgLevel+1];
+	eblgMgCoar.setMaxRefinementRatio(2);
       }
     }
   }
@@ -516,6 +518,7 @@ EBHelmholtzOp* EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
   const bool hasMGObjects = m_hasMgLevels[amrLevel];
   if(hasMGObjects){
     eblgCoarMG = *m_mgLevelGrids[amrLevel][1];
+    eblgCoarMG.setMaxRefinementRatio(2);
     CH_assert(eblgCoarMG.isDefined());
   }
 

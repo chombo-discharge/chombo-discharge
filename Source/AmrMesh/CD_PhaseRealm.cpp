@@ -186,8 +186,12 @@ void PhaseRealm::define_eblevelgrid(const int a_lmin){
 
   for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++){
     m_eblg[lvl]  = RefCountedPtr<EBLevelGrid> (new EBLevelGrid(m_grids[lvl], m_domains[lvl], m_numEbGhostsCells, &(*m_ebis)));
+
+    const bool hasCoar = lvl > 0;
+    const bool hasFine = lvl < m_finestLevel;
     
-    if(lvl > 0) m_eblg[lvl]->setMaxCoarseningRatio(m_refinementRatios[lvl-1], &(*m_ebis));
+    if(hasCoar) m_eblg[lvl]->setMaxCoarseningRatio(m_refinementRatios[lvl-1], &(*m_ebis));
+    if(hasFine) m_eblg[lvl]->setMaxRefinementRatio(m_refinementRatios[lvl]);
 
     m_ebisl[lvl] = m_eblg[lvl]->getEBISL();
   }
