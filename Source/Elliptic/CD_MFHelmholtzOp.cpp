@@ -8,6 +8,7 @@
   @brief  Implementation of CD_MFHelmholtzOp.H
   @author Robert Marskar
   @todo   Preconditioner needs work!
+  @todo   The interpolateCF functions should be in MFMultigridInterpolator
   @todo   In relax, why does it help to end with a BC update?
 */
 

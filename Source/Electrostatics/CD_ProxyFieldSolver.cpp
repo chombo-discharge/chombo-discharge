@@ -820,6 +820,8 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
   m_amr->alias(res, m_residue);
   //  m_amr->alias(zer, zero);
 
+  DataOps::setValue(a_potential, -1.0);
+
   multigridSolver.m_verbosity = 10;
   multigridSolver.init(phi, rhs, finestLevel, baseLevel);
   Real t1 = -MPI_Wtime();

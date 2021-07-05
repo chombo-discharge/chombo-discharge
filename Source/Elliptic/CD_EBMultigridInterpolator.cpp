@@ -480,7 +480,7 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&         a_stencilFine,
     a_stencilFine = stencils.at(interpStenIndex).first;
     a_stencilCoar = stencils.at(interpStenIndex).second;
 
-    if(a_stencilFine.size() != 0 || a_stencilCoar.size() != 0){
+    if(a_stencilFine.size() != 0 && a_stencilCoar.size() != 0){
       foundStencil = true;
     }
     else{

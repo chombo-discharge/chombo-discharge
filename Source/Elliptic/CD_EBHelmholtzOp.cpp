@@ -17,6 +17,7 @@
 
 // Our includes
 #include <CD_EBHelmholtzOp.H>
+#include <CD_LeastSquares.H>
 #include <CD_EBHelmholtzOpF_F.H>
 #include <CD_NamespaceHeader.H>
 
@@ -125,6 +126,10 @@ void EBHelmholtzOp::turnOnBCs(){
 
 LevelData<EBFluxFAB>& EBHelmholtzOp::getFlux(){
   return m_flux;
+}
+
+LevelData<EBCellFAB>& EBHelmholtzOp::getRelaxationWeights(){
+  return m_relCoef;
 }
 
 void EBHelmholtzOp::defineStencils(){
@@ -952,7 +957,7 @@ VoFStencil EBHelmholtzOp::getFaceCenterFluxStencil(const FaceIndex& a_face, cons
 
 VoFStencil EBHelmholtzOp::getFaceCentroidFluxStencil(const FaceIndex& a_face, const DataIndex& a_dit) const {
   VoFStencil fluxStencil;
-
+  
   const FaceStencil& interpolationStencil = m_interpStencil[a_face.direction()][a_dit](a_face, m_comp);
 
   for (int i = 0; i < interpolationStencil.size(); i++){

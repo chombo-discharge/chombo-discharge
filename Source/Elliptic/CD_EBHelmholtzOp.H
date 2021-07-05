@@ -517,6 +517,11 @@ public:
   */
   LevelData<EBFluxFAB>& getFlux();
 
+  /*!
+    @brief Returns relaxation weights
+  */
+  LevelData<EBCellFAB>& getRelaxationWeights();
+
 protected:
 
   /*!

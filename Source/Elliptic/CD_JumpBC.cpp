@@ -111,6 +111,7 @@ void JumpBC::defineStencils(){
 	  }
 
 	  // If we couldn't find in a quadrant, try a larger neighborhood
+	  order = m_order;
 	  while(!foundStencil && order > 0){
 	    foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten, vof, ebisbox, VofUtils::Neighborhood::Radius, order);
 	    order--;
@@ -188,11 +189,13 @@ void JumpBC::defineStencils(){
 	Real& denomPhase0 = m_denom[dit()].getIVFAB(firstPhase)(vof0, vofComp);
 	Real& denomPhase1 = m_denom[dit()].getIVFAB(firstPhase)(vof0, vofComp);
 
-	denomPhase0 = 1./(weightPhase0 + weightPhase1);
-	denomPhase1 = 1./(weightPhase0 + weightPhase1);
+	const Real denom = 1./(weightPhase0 + weightPhase1);
+	
+	denomPhase0 = denom;
+	denomPhase1 = denom;
 
-	derivStenPhase0 *= denomPhase0;
-	derivStenPhase1 *= denomPhase1;
+	derivStenPhase0 *= denom;
+	derivStenPhase1 *= denom;
       }
     }
 
