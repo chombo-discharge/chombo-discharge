@@ -7,7 +7,6 @@
   @file   CD_EBMultigridInterpolator.cpp
   @brief  Implementation of CD_EBMultigridInterpolator.H
   @author Robert Marskar
-  @todo   coarseFineInterpH is a mess. It doesn't even do the variables correctly. We should do our own regular interpolation. 
 */
 
 // Chombo includes
@@ -39,7 +38,7 @@ EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
   CH_assert(a_ghostCF   > 0);
   CH_assert(a_nVar      > 0);
   CH_assert(a_refRat%2 == 0);
-  
+
   const DisjointBoxLayout& gridsFine = a_eblgFine.getDBL();
   const DisjointBoxLayout& gridsCoar = a_eblgCoar.getDBL();
 
@@ -58,6 +57,10 @@ EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
   this->defineBuffers();
   this->defineStencils();
 
+  if(m_eblgFine.getMaxCoarseningRatio() < m_refRat){
+    m_eblgFine.setMaxCoarseningRatio(m_refRat, m_eblgFine.getEBIS());
+  }
+
   m_isDefined = true;
 }
 
@@ -72,7 +75,7 @@ EBMultigridInterpolator::~EBMultigridInterpolator(){
 void EBMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar, const Interval a_variables){
   CH_assert(m_ghostCF <= a_phiFine.ghostVect().max());
   CH_assert(m_ghostCF <= a_phiCoar.ghostVect().max());
-  
+
   CH_TIME("EBMultigridInterpolator::interp");
 
   LevelData<FArrayBox> fineAlias;
@@ -162,7 +165,7 @@ void EBMultigridInterpolator::coarseFineInterpH(EBCellFAB& a_phi, const Interval
     // the refinment boundary, whereas the stencil only reaches into cells on the finel level. So, we are not
     // writing to data that we will later fetch.
     const BaseIVFAB<VoFStencil>& fineStencils = m_fineStencils[a_dit];
-
+    
     for (VoFIterator vofit(fineStencils.getIVS(), fineStencils.getEBGraph()); vofit.ok(); ++vofit){
       const VolIndex& ghostVoF   = vofit();
       const VoFStencil& fineSten = fineStencils(ghostVoF, m_stenComp);
@@ -304,6 +307,9 @@ void EBMultigridInterpolator::defineStencils(){
   const DisjointBoxLayout& dblFine = m_eblgFine.getDBL();
   const DisjointBoxLayout& dblCoar = m_eblgCoFi.getDBL();
 
+  const EBISLayout& ebislFine = m_eblgFine.getEBISL();
+  const EBISLayout& ebislCoar = m_eblgCoFi.getEBISL();
+
   m_fineStencils.define(dblFine);
   m_coarStencils.define(dblFine);
 
@@ -347,7 +353,8 @@ void EBMultigridInterpolator::defineStencils(){
     validFineCells &= domFine;
     validCoarCells &= domCoar;
     
-    // Now go through each ghost cell and get an interpolation stencil to specified order. 
+    // Now go through each ghost cell and get an interpolation stencil to specified order.
+
     const EBISBox& ebisboxFine = m_eblgFine.getEBISL()[dit()];
     const EBISBox& ebisboxCoar = m_eblgCoFi.getEBISL()[dit()];
 
@@ -358,19 +365,21 @@ void EBMultigridInterpolator::defineStencils(){
     m_coarStencils[dit()].define(m_ghostCells[dit()], fineGraph, nComp);
 
     for (VoFIterator vofit(m_ghostCells[dit()], fineGraph); vofit.ok(); ++vofit){
-      const VolIndex& ghostVof = vofit();
-
-      VoFStencil& fineSten = m_fineStencils[dit()](ghostVof, comp);
-      VoFStencil& coarSten = m_coarStencils[dit()](ghostVof, comp);
+      const VolIndex& ghostVofFine = vofit();
+      const VolIndex& ghostVofCoar = ebislFine.coarsen(ghostVofFine, m_refRat, dit());
+      
+      VoFStencil& fineSten = m_fineStencils[dit()](ghostVofFine, comp);
+      VoFStencil& coarSten = m_coarStencils[dit()](ghostVofFine, comp);
 
       int order         = m_order;
       bool foundStencil = false;
-      
+						       
       while(order > 0 && !foundStencil){
 	foundStencil = this->getStencil(fineSten,
 					coarSten,
-					m_cellLocation,					
-					ghostVof,
+					m_cellLocation,
+					ghostVofFine,
+					ghostVofCoar,
 					ebisboxFine,
 					ebisboxCoar,
 					validFineCells,
@@ -383,33 +392,30 @@ void EBMultigridInterpolator::defineStencils(){
 	order--;
 
 	if(!foundStencil){
-	  pout() << "EBMultigridInterpolator -- on domain = " << m_eblgFine.getDomain() << ", dropping order for vof = " << ghostVof << endl;
+	  pout() << "EBMultigridInterpolator -- on domain = " << m_eblgFine.getDomain() << ", dropping order for vof = " << ghostVofFine << endl;
 	}
       }
 
       // Drop to order 0 if we never found a stencil, and issue an error code. 
       if(!foundStencil){
 	fineSten.clear();
-
-	int numCoarsen = 1;
-	VolIndex ghostVofCoar = ghostVof;
-	while(numCoarsen < m_refRat){
-	  ghostVofCoar = ebisboxFine.coarsen(ghostVofCoar);
-	  numCoarsen *= 2;
-	}
-
+	coarSten.clear();
+	
 	coarSten.add(ghostVofCoar, 1.0);
 	
 	MayDay::Warning("EBMultigridInterpolator::defineStencils -- could not find stencil and dropping to order 0");
       }
+
     }
+
   }
 }
 
 bool EBMultigridInterpolator::getStencil(VoFStencil&         a_stencilFine,
 					 VoFStencil&         a_stencilCoar,
 					 const CellLocation& a_cellLocation,
-					 const VolIndex&     a_ghostVof,
+					 const VolIndex&     a_ghostVofFine,
+					 const VolIndex&     a_ghostVofCoar,
 					 const EBISBox&      a_ebisboxFine,
 					 const EBISBox&      a_ebisboxCoar,
 					 const IntVectSet&   a_validFineCells,
@@ -418,25 +424,18 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&         a_stencilFine,
 					 const Real&         a_dxCoar,
 					 const int&          a_order,
 					 const int&          a_weight){
-  bool foundStencil = false;
+  bool foundStencil = true;
   
   const int fineRadius = a_order;
-  const int coarRadius = std::max(1, fineRadius/m_refRat);
+  const int coarRadius = std::max(2, fineRadius/m_refRat);
 
   Vector<VolIndex> fineVofs;
   Vector<VolIndex> coarVofs;
 
-  // Get the coarse vof which we obtain by coarsening a_ghostVof
-  int numCoarsen = 1;
-  VolIndex ghostVofCoar = a_ghostVof;
-  while(numCoarsen < m_refRat){
-    ghostVofCoar = a_ebisboxFine.coarsen(ghostVofCoar);
-    numCoarsen *= 2;
-  }
 
   // Get all Vofs in specified radii. Don't use cells that are not in a_validFineCells.
-  fineVofs = VofUtils::getVofsInRadius(a_ghostVof,   a_ebisboxFine, fineRadius, VofUtils::Connectivity::MonotonePath, false);
-  coarVofs = VofUtils::getVofsInRadius(ghostVofCoar, a_ebisboxCoar, coarRadius, VofUtils::Connectivity::MonotonePath, true );
+  fineVofs = VofUtils::getVofsInRadius(a_ghostVofFine, a_ebisboxFine, fineRadius, VofUtils::Connectivity::MonotonePath, false);
+  coarVofs = VofUtils::getVofsInRadius(a_ghostVofCoar, a_ebisboxCoar, coarRadius, VofUtils::Connectivity::MonotonePath, true );
   
   VofUtils::includeCells(fineVofs, a_validFineCells);
   VofUtils::includeCells(coarVofs, a_validCoarCells);
@@ -454,11 +453,11 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&         a_stencilFine,
     Vector<RealVect> coarDisplacements;
 
     for (const auto& fineVof : fineVofs.stdVector()){
-      fineDisplacements.push_back(LeastSquares::displacement(a_cellLocation, a_cellLocation, a_ghostVof, fineVof, a_ebisboxFine, a_dxFine));
+      fineDisplacements.push_back(LeastSquares::displacement(a_cellLocation, a_cellLocation, a_ghostVofFine, fineVof, a_ebisboxFine, a_dxFine));
     }
 
     for (const auto& coarVof : coarVofs.stdVector()){
-      coarDisplacements.push_back(LeastSquares::displacement(a_cellLocation, a_cellLocation, a_ghostVof, coarVof, a_ebisboxFine, a_ebisboxCoar, a_dxFine, a_dxCoar));
+      coarDisplacements.push_back(LeastSquares::displacement(a_cellLocation, a_cellLocation, a_ghostVofFine, coarVof, a_ebisboxFine, a_ebisboxCoar, a_dxFine, a_dxCoar));
     }
 
     // LeastSquares computes all unknown terms in a Taylor expansion up to specified order. We want the 0th order term, i.e. the interpolated value,
@@ -480,12 +479,10 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&         a_stencilFine,
     a_stencilFine = stencils.at(interpStenIndex).first;
     a_stencilCoar = stencils.at(interpStenIndex).second;
 
-    if(a_stencilFine.size() != 0 && a_stencilCoar.size() != 0){
-      foundStencil = true;
-    }
-    else{
-      foundStencil = false;
-    }
+    foundStencil = true;
+  }
+  else{
+    foundStencil = false;
   }
 
   return foundStencil;
