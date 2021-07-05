@@ -76,7 +76,6 @@ VoFStencil LeastSquares::getGradSten(const VolIndex&    a_vof,
     gradSten = LeastSquares::computeGradSten(allVofs, displacements, a_p, a_order, a_knownTerms); 
   }
 
-
   return gradSten;
 }
 
@@ -206,9 +205,18 @@ RealVect LeastSquares::position(const FaceLocation a_position,
   case Location::Face::Center:
     ret = (RealVect(iv) + 0.5*RealVect::Unit) - 0.5*BASISREALV(a_face.direction());
     break;
-  case Location::Face::Centroid:
-    ret = (RealVect(iv) + 0.5*RealVect::Unit) - 0.5*BASISREALV(a_face.direction()) + a_ebisbox.centroid(a_face);
+  case Location::Face::Centroid: {
+    ret = (RealVect(iv) + 0.5*RealVect::Unit) - 0.5*BASISREALV(a_face.direction());
+
+    const RealVect faceCentroid = a_ebisbox.centroid(a_face);
+    
+    for (int dir = 0; dir < SpaceDim; dir++){ // Direction a_face is undefined. 
+      if(dir != a_face.direction()){
+	ret[dir] += faceCentroid[dir];
+      }
+    }
     break;
+  }
   default:
     MayDay::Error("LeastSquares::positon - bad location input.");
     break;
@@ -353,10 +361,7 @@ VoFStencil LeastSquares::computeGradSten(const Vector<VolIndex>& a_allVofs,
   }
 
   return sten;
-
 }
-
-
 
 VoFStencil LeastSquares::projectGradSten(const VoFStencil& a_stencil, const RealVect& a_projection) {
   VoFStencil sten;

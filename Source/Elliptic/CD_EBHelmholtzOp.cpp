@@ -957,7 +957,7 @@ VoFStencil EBHelmholtzOp::getFaceCenterFluxStencil(const FaceIndex& a_face, cons
 
 VoFStencil EBHelmholtzOp::getFaceCentroidFluxStencil(const FaceIndex& a_face, const DataIndex& a_dit) const {
   VoFStencil fluxStencil;
-  
+#if 1  
   const FaceStencil& interpolationStencil = m_interpStencil[a_face.direction()][a_dit](a_face, m_comp);
 
   for (int i = 0; i < interpolationStencil.size(); i++){
@@ -969,6 +969,20 @@ VoFStencil EBHelmholtzOp::getFaceCentroidFluxStencil(const FaceIndex& a_face, co
 
     fluxStencil += fluxCenterStencil;
   }
+#else // This is how we would do the same using least squares. 
+  const VoFStencil gradSten = LeastSquares::getGradSten(a_face,
+					  LeastSquares::FaceLocation::Centroid,
+					  LeastSquares::CellLocation::Center,
+					  m_eblg.getEBISL()[a_dit],
+					  m_dx,
+					  1,
+					  2,
+					  2,
+					  IntVectSet());
+
+  fluxStencil = LeastSquares::projectGradSten(gradSten, BASISREALV(a_face.direction()));
+
+#endif
 
   return fluxStencil;
 }
