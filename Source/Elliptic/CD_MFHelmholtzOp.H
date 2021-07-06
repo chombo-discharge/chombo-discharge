@@ -63,6 +63,7 @@ public:
 		const RefCountedPtr<MFHelmholtzEBBCFactory>&     a_ebBcFactory,
 		const RealVect&                                  a_probLo,
 		const Real&                                      a_dx,
+		const int&                                       a_refToFine,
 		const int&                                       a_refToCoar,
 		const bool&                                      a_hasFine,
 		const bool&                                      a_hasCoar,		

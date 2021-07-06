@@ -34,7 +34,8 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid&                                 
 			     const RefCountedPtr<EBHelmholtzEBBC>&              a_ebBc,
 			     const RealVect&                                    a_probLo,
 			     const Real&                                        a_dx,
-			     const int&                                         a_refToCoar,
+			     const int&                                         a_refToFine,
+			     const int&                                         a_refToCoar,			     
 			     const bool&                                        a_hasFine,
 			     const bool&                                        a_hasCoar,
 			     const bool&                                        a_hasMGObjects,
@@ -60,6 +61,7 @@ EBHelmholtzOp::EBHelmholtzOp(const EBLevelGrid&                                 
   m_probLo(a_probLo),
   m_dx(a_dx),
   m_refToCoar(a_hasCoar ? a_refToCoar : 1),
+  m_refToFine(a_hasFine ? a_refToFine : 1),
   m_hasFine(a_hasFine),
   m_hasCoar(a_hasCoar),
   m_hasMGObjects(a_hasMGObjects),
@@ -165,8 +167,9 @@ void EBHelmholtzOp::defineStencils(){
 
   // Define BC objects. Can't do this in the factory because the BC objects will need the b-coefficient,
   // but the factories won't know about that.
+
   const int ghostCF = m_hasCoar ? m_interpolator->getGhostCF() : 99;
-  m_domainBc->define(m_eblg, m_Bcoef, m_probLo, m_dx);
+  m_domainBc->define(m_eblg, m_Bcoef,      m_probLo, m_dx);
   m_ebBc    ->define(m_eblg, m_BcoefIrreg, m_probLo, m_dx, ghostCF);
   
   const LayoutData<BaseIVFAB<VoFStencil> >& ebFluxStencil = m_ebBc->getKappaDivFStencils();
@@ -590,33 +593,6 @@ void EBHelmholtzOp::applyDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, cons
 				    CHF_CONST_INT(dir),
 				    CHF_BOX(ghostBox));
       //      bco.shiftHalf(dir, 1);
-    }
-  }
-}
-
-void EBHelmholtzOp::suppressDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit){
-  const Box domainBox = m_eblg.getDomain().domainBox();
-
-  BaseFab<Real>& regFab = a_phi.getSingleValuedFAB();
-  
-  for (int dir = 0; dir < SpaceDim; dir++){
-    for (SideIterator sit; sit.ok(); ++sit){
-      const Box ghostBox = adjCellBox(domainBox, dir, sit(), 1); // Strip of cells outside domain.
-      const int s        = sign(flip(sit())); // Make +1 for Side::Lo and -1 otherwise.
-      
-      // Phi defined over a_cellBox - get the ghost in a_phi that lie outside the domain and set them to the value in the cell 
-      // immediately on the inside. 
-      Box grownBox = a_cellBox;
-      grownBox.growDir(dir, sit(), 1);
-      grownBox &= ghostBox;
-
-      // Set the ghost cells to the same value as the next "inside" cell. This will suppress the gradient on the domain faces. 
-      for (BoxIterator bit(grownBox); bit.ok(); ++bit){
-	const IntVect iv = bit();
-	const IntVect ivNeigh = iv + s*BASISV(dir);
-
-	regFab(iv, m_comp) = regFab(ivNeigh, m_comp);
-      }
     }
   }
 }

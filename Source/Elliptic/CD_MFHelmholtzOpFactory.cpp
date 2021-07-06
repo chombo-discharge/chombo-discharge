@@ -493,6 +493,7 @@ MFHelmholtzOp* MFHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, 
 			     m_probLo,
 			     dx,
 			     1,
+			     1,
 			     false,
 			     false,
 			     hasMGObjects,
@@ -532,14 +533,16 @@ MFHelmholtzOp* MFHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
   dx   = m_amrResolutions[amrLevel];
 
   int refToCoar = 1;
+  int refToFine = 1;
 
   if(hasCoar){
     mflgCoar  = m_amrLevelGrids[amrLevel-1];
-    refToCoar = m_amrRefRatios[amrLevel-1];
+    refToCoar = m_amrRefRatios [amrLevel-1];
   }
 
   if(hasFine){
-    mflgFine = m_amrLevelGrids[amrLevel+1];
+    refToFine = m_amrRefRatios [amrLevel  ];
+    mflgFine  = m_amrLevelGrids[amrLevel+1];
   }
 
   const bool hasMGObjects = m_hasMgLevels[amrLevel];
@@ -565,6 +568,7 @@ MFHelmholtzOp* MFHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
 					m_ebBcFactory,
 					m_probLo,
 					dx,
+					refToFine,
 					refToCoar,
 					hasFine,
 					hasCoar,

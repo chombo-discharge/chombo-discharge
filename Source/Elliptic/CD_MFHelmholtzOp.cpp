@@ -43,6 +43,7 @@ MFHelmholtzOp::MFHelmholtzOp(const MFLevelGrid&                               a_
 			     const RefCountedPtr<MFHelmholtzEBBCFactory>&     a_ebBcFactory,			     
 			     const RealVect&                                  a_probLo,
 			     const Real&                                      a_dx,
+			     const int&                                       a_refToFine,			     
 			     const int&                                       a_refToCoar,
 			     const bool&                                      a_hasFine,
 			     const bool&                                      a_hasCoar,			     
@@ -65,13 +66,12 @@ MFHelmholtzOp::MFHelmholtzOp(const MFLevelGrid&                               a_
   m_multifluid   = m_numPhases > 1;
   m_hasMGObjects = a_hasMGObjects;
   m_refToCoar    = a_refToCoar;
+  m_refToCoar    = a_refToFine;
   m_relaxType    = a_relaxType;
-  m_hasCoar      = false;
+  m_hasCoar      = a_hasCoar;
   m_hasFine      = a_hasFine;
 
   if(a_hasCoar){
-    m_hasCoar   = true;
-    m_refToCoar = a_refToCoar;
     m_mflgCoFi  = a_mflgCoFi;
     m_mflgCoar  = a_mflgCoar;
   }
@@ -158,6 +158,7 @@ MFHelmholtzOp::MFHelmholtzOp(const MFLevelGrid&                               a_
 											ebBC,
 											a_probLo,
 											a_dx,
+											a_refToFine,
 											a_refToCoar,
 											a_hasFine,
 											a_hasCoar,

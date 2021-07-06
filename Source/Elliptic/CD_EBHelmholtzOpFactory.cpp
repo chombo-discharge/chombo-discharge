@@ -462,6 +462,7 @@ EBHelmholtzOp* EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, 
 			     ebBC,
 			     m_probLo,
 			     dx,            // Set from depth
+			     1,             // Multigrid operator. Set to 1 in operator anyways.
 			     1,             // Multigrid operator. Set to 1 in operator anyways. 
 			     false,         // Multigrid operator, so false.
 			     false,         // Multigrid operator, so false.
@@ -501,6 +502,7 @@ EBHelmholtzOp* EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
   dx   = m_amrResolutions[amrLevel];
 
   int refToCoar = 1;
+  int refToFine = 1;
   
   if(hasCoar){
     eblgCoar  = *m_amrLevelGrids[amrLevel-1];
@@ -508,6 +510,7 @@ EBHelmholtzOp* EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
   }
 
   if(hasFine){
+    refToFine  = m_amrRefRatios[amrLevel];
     eblgFine   = *m_amrLevelGrids[amrLevel+1];
   }
 
@@ -534,6 +537,7 @@ EBHelmholtzOp* EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
 			 m_ebBcFactory->create(),
 			 m_probLo,			 
 			 dx,
+			 refToFine,
 			 refToCoar,
 			 hasFine,
 			 hasCoar,

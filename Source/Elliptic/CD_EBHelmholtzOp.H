@@ -72,7 +72,8 @@ public:
 		const RefCountedPtr<EBHelmholtzEBBC>&              a_ebBC,
 		const RealVect&                                    a_probLo,
 		const Real&                                        a_dx,
-		const int&                                         a_refToCoar,
+		const int&                                         a_refToFine,
+		const int&                                         a_refToCoar,		
 		const bool&                                        a_hasFine,
 		const bool&                                        a_hasCoar,
 		const bool&                                        a_hasMGObjects,
@@ -99,6 +100,14 @@ public:
     @brief Turn on BCs
   */
   void turnOnBCs();
+
+  /*!
+    @brief Coarsen data from fine to coar level
+    @param[in] a_phi     Data on this level
+    @param[in] a_phiFine Data on finer level
+    @note This routine is used in AMROperator to ensure that EB fluxes which are described by stencils get consistent data under the fine level. 
+  */
+  void coarsen(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_phiFine);
 
   /*!
     @brief Point Jacobi kernel. 
@@ -229,12 +238,12 @@ public:
   void applyDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBc);
 
   /*!
-    @brief Fuck those ghost cells in particular
-  */
-  void suppressDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit);
-
-  /*!
     @brief Apply operator in irregular cells
+    @param[out] a_Lphi              L(phi)
+    @param[in]  a_phi               Cell-centered data
+    @param[in]  a_cellBox           Cell box
+    @param[in]  a_dit               Grid index
+    @param[in]  a_homogeneousPhysBC Homogeneous physical BCs or not
   */
   void applyOpIrregular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBC);
 
@@ -548,9 +557,14 @@ protected:
   bool m_hasCoar;
 
   /*!
-    @brief Refinement factor to fine level
+    @brief Refinement factor to coarse level
   */
   int m_refToCoar;
+
+  /*!
+    @brief Refinement factor to fine level
+  */
+  int m_refToFine;
 
   /*!
     @brief Turn off BCs or not. Used in applyOpNoBoundary
@@ -881,15 +895,6 @@ protected:
 	      const LevelData<EBCellFAB>&        a_phiFine,
 	      const LevelData<EBCellFAB>&        a_phi,
 	      AMRLevelOp<LevelData<EBCellFAB> >& a_finerOp);
- public:
-  /*!
-    @brief Coarsen data from fine to coar level
-    @param[in] a_phi     Data on this level
-    @param[in] a_phiFine Data on finer level
-    @note This routine is used in AMROperator to ensure that EB fluxes which are described by stencils get consistent data under the fine level. 
-  */
-  void coarsen(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_phiFine);
-
 };
 
 #include <CD_NamespaceFooter.H>
