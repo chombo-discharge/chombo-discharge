@@ -45,6 +45,18 @@ JumpBC::~JumpBC(){
 
 }
 
+int JumpBC::getOrder() const {
+  return m_order;
+}
+
+int JumpBC::getWeight() const {
+  return m_weight;
+}
+
+int JumpBC::getRadius() const {
+  return m_radius;
+}
+
 const BaseIVFAB<Real>& JumpBC::getBndryPhi(const int a_phase, const DataIndex& a_dit) const {
   return m_boundaryPhi[a_dit].getIVFAB(a_phase);
 }

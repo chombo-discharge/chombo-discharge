@@ -55,8 +55,14 @@ public:
     @param[in] a_probLo  Lower-left corner of computational domain. Required if BC objects needs physical position. 
     @param[in] a_dx      Grid resolution. 
     @param[in] a_ghostCF Number of ghost cells that are filled across CF interface. 
+    @param[in] a_refRat  Refinement factor to finer level. 
   */
-  void define(const EBLevelGrid& a_eblg, const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_Bcoef, const RealVect& m_probLo, const Real& a_dx, const int a_ghostCF);
+  void define(const EBLevelGrid& a_eblg,
+	      const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_Bcoef,
+	      const RealVect& m_probLo,
+	      const Real& a_dx,
+	      const int a_ghostCF,
+	      const int a_refRat = 1);
 
   /*!
     @brief Apply the EB flux. This is the version that is called by EBHelmholtzOp.
@@ -73,6 +79,11 @@ public:
 			   const DataIndex&   a_dit,
 			   const Real&        a_beta,
 			   const bool&        a_homogeneousPhysBC) const = 0;
+  
+  /*!
+    @brief Copy data to fine buffer
+  */
+  void copyFineDataToBuffer(const LevelData<EBCellFAB>& a_fineData) const;
 
   /*!
     @brief Get the stencil for computing the finite-volume approximation to kappa*Div(F). 
@@ -96,6 +107,16 @@ protected:
   constexpr static int m_nComp = 1;
 
   /*!
+    @brief If there is a fine level
+  */
+  bool m_hasFine;
+
+  /*!
+    @brief Refinement ratio between this level and the finer level
+  */
+  int m_refRat;
+
+  /*!
     @brief Number of ghost cells that were filled across CF interface
   */
   int m_ghostCF;
@@ -116,12 +137,22 @@ protected:
   EBLevelGrid m_eblg;
 
   /*!
+    @brief Refined version of m_eblg. 
+  */
+  EBLevelGrid m_eblgFine;
+
+  /*!
+    @brief Buffer for fine data. Uses the coarse-data layout. 
+  */
+  mutable LevelData<EBCellFAB> m_fineData;
+
+  /*!
     @brief B-coefficent. 
   */
   RefCountedPtr<LevelData<BaseIVFAB<Real> > > m_Bcoef;
 
   /*!
-    @brief Stencils for computing the flux
+    @brief Stencils for computing the flux on a single level. This is a single-level object. 
   */
   LayoutData<BaseIVFAB<VoFStencil> > m_kappaDivFStencils;
 

@@ -70,6 +70,21 @@ public:
     @brief Disallowed assignment constructor
   */
   JumpBC& operator=(const JumpBC& a_other) = delete;
+  
+  /*!
+    @brief Return stencil order
+  */
+  int getOrder() const;
+
+  /*!
+    @brief Return stencil weight (for least squares)
+  */
+  int getWeight() const;
+
+  /*!
+    @brief Return stencil radius (for least squares)
+  */
+  int getRadius() const;
 
   /*!
     @brief Match the BC

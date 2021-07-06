@@ -66,7 +66,7 @@ void MFHelmholtzEBBC::defineMultiPhase(){
     weights. define(ivs, ebgraph, m_nComp);
     stencils.define(ivs, ebgraph, m_nComp);
 
-    // Build stencils for each vof. 
+    // Build stencils for each vof. The order for the multiphase VoFs should follow the order for jumpBC, I think. 
     for (multiPhaseVofs.reset(); multiPhaseVofs.ok(); ++multiPhaseVofs){
       const VolIndex& vof = multiPhaseVofs();
       const Real areaFrac = ebisbox.bndryArea(vof);
@@ -77,7 +77,7 @@ void MFHelmholtzEBBC::defineMultiPhase(){
       std::pair<Real, VoFStencil> pairSten;
 
       // Try quadrants first. 
-      order = m_order;
+      order = m_jumpBC->getOrder();
       while(!foundStencil && order > 0){
       	foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten, vof, VofUtils::Neighborhood::Quadrant, dit(), order);
       	order--;
@@ -89,7 +89,7 @@ void MFHelmholtzEBBC::defineMultiPhase(){
       }
 
       // If we couldn't find in a quadrant, try a larger neighborhood
-      order = m_order;      
+      order = m_jumpBC->getOrder();      
       while(!foundStencil && order > 0){
       	foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten, vof, VofUtils::Neighborhood::Radius, dit(), order);
       	order--;

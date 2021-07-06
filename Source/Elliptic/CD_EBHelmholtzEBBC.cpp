@@ -9,6 +9,9 @@
   @author Robert Marskar
 */
 
+// Chombo includes
+#include <EBCellFactory.H>
+
 // Our includes
 #include <CD_EBHelmholtzEBBC.H>
 #include <CD_NamespaceHeader.H>
@@ -27,17 +30,31 @@ void EBHelmholtzEBBC::define(const EBLevelGrid&                                 
 			     const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_Bcoef,
 			     const RealVect&                                    a_probLo,
 			     const Real&                                        a_dx,
-			     const int                                          a_ghostCF){
+			     const int                                          a_ghostCF,
+			     const int                                          a_refRat){
   m_Bcoef   = a_Bcoef;
   m_eblg    = a_eblg;
   m_probLo  = a_probLo;
   m_dx      = a_dx;
   m_ghostCF = a_ghostCF;
+
+  if(a_refRat > 1){
+    m_hasFine = true;
+    m_refRat  = a_refRat;
+
+    refine(m_eblgFine, m_eblg, a_refRat);
+
+    m_fineData.define(m_eblgFine.getDBL(), m_nComp, IntVect::Zero, EBCellFactory(m_eblgFine.getEBISL()));
+  }
   
   this->define();
 }
 
-const LayoutData<BaseIVFAB<VoFStencil> >& EBHelmholtzEBBC::getKappaDivFStencils() const{
+void EBHelmholtzEBBC::copyFineDataToBuffer(const LevelData<EBCellFAB>& a_fineData) const {
+  a_fineData.copyTo(m_fineData);
+}
+
+const LayoutData<BaseIVFAB<VoFStencil> >& EBHelmholtzEBBC::getKappaDivFStencils() const {
   return m_kappaDivFStencils;
 }
 
