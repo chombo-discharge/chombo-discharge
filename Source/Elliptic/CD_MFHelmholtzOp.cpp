@@ -202,7 +202,8 @@ void MFHelmholtzOp::enforceCFConsistency(LevelData<MFCellFAB>& a_coarCorr, const
     MultifluidAlias::aliasMF(coarCorr, op.first, a_coarCorr);
     MultifluidAlias::aliasMF(fineCorr, op.first, a_fineCorr);
 
-    op.second->enforceCFConsistency(coarCorr, fineCorr);
+    //    op.second->enforceCFConsistency(coarCorr, fineCorr);
+    break;
   }
 }
 
