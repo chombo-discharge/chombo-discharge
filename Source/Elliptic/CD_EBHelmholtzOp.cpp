@@ -7,8 +7,6 @@
   @file   CD_EBHelmholtzOp.cpp
   @brief  Implementation of CD_EBHelmholtzOp.H
   @author Robert Marskar
-  @note   If this ever breaks, we should look into the division by the relaxation factor and applyDomainFlux, both of which do not guard against divide-by-zero. 
-  @todo   Check EBCF refluxing -- it might not be correct!
 */
 
 // Chombo includes
@@ -245,14 +243,6 @@ void EBHelmholtzOp::defineStencils(){
   this->computeRelaxationCoefficient();
 }
 
-unsigned int EBHelmholtzOp::orderOfAccuracy(void) const {
-  return 99;
-}
-
-void EBHelmholtzOp::enforceCFConsistency(LevelData<EBCellFAB>& a_coarCorr, const LevelData<EBCellFAB>& a_fineCorr){
-  m_coarAve->average(a_coarCorr, a_fineCorr, m_interval);
-}
-
 void EBHelmholtzOp::setAlphaAndBeta(const Real& a_alpha, const Real& a_beta) {
   m_alpha = a_alpha;
   m_beta  = a_beta;
@@ -375,6 +365,11 @@ void EBHelmholtzOp::AMROperator(LevelData<EBCellFAB>&              a_Lphi,
 				const LevelData<EBCellFAB>&        a_phiCoar,
 				const bool                         a_homogeneousPhysBC,
 				AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp){
+  if(m_hasFine){
+    EBHelmholtzOp* fineOp = (EBHelmholtzOp*) a_finerOp;
+    fineOp->coarsen((LevelData<EBCellFAB>&) a_phi, a_phiFine);
+  }
+  
   this->applyOp(a_Lphi, a_phi, &a_phiCoar, a_homogeneousPhysBC, false);
 
   if(m_hasFine){
@@ -1192,6 +1187,10 @@ void EBHelmholtzOp::reflux(LevelData<EBCellFAB>&              a_Lphi,
   this->incrementFRFine(a_phiFine, a_phi, a_finerOp);
 
   m_fluxReg->reflux(a_Lphi, m_interval, 1./m_dx);
+}
+
+void EBHelmholtzOp::coarsen(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_phiFine) {
+  m_coarAve->average(a_phi, a_phiFine, m_interval);
 }
 
 #include <CD_NamespaceFooter.H>

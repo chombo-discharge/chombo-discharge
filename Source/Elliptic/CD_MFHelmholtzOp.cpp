@@ -67,12 +67,17 @@ MFHelmholtzOp::MFHelmholtzOp(const MFLevelGrid&                               a_
   m_refToCoar    = a_refToCoar;
   m_relaxType    = a_relaxType;
   m_hasCoar      = false;
+  m_hasFine      = a_hasFine;
 
   if(a_hasCoar){
     m_hasCoar   = true;
     m_refToCoar = a_refToCoar;
     m_mflgCoFi  = a_mflgCoFi;
     m_mflgCoar  = a_mflgCoar;
+  }
+
+  if(m_hasFine){
+    m_coarAve = a_coarAve;
   }
 
   m_interpolator = a_interpolator;
@@ -89,10 +94,7 @@ MFHelmholtzOp::MFHelmholtzOp(const MFLevelGrid&                               a_
 
   // Make the operators on eachphase.
   for (int iphase = 0; iphase < m_numPhases; iphase++){
-
-
     EBLevelGrid eblg        = a_mflg.getEBLevelGrid(iphase);
-
     EBLevelGrid dummy;
     EBLevelGrid eblgFine    = a_hasFine      ? a_mflgFine.  getEBLevelGrid(iphase) : dummy;
     EBLevelGrid eblgCoFi    = a_hasCoar      ? a_mflgCoFi.  getEBLevelGrid(iphase) : dummy;
@@ -186,25 +188,6 @@ void MFHelmholtzOp::setJump(const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a
 int MFHelmholtzOp::refToCoarser() {
   CH_TIME("MFHelmholtzOp::refToCoarser");
   return m_refToCoar;
-}
-
-unsigned int MFHelmholtzOp::orderOfAccuracy(void) const {
-  CH_TIME("MFHelmholtzOp::orderOfAccuracy");
-  return 99;
-}
-
-void MFHelmholtzOp::enforceCFConsistency(LevelData<MFCellFAB>& a_coarCorr, const LevelData<MFCellFAB>& a_fineCorr) {
-  CH_TIME("MFHelmholtzOp::enforceCFConsistency");
-  for (auto& op : m_helmOps){
-    LevelData<EBCellFAB> coarCorr;
-    LevelData<EBCellFAB> fineCorr;
-
-    MultifluidAlias::aliasMF(coarCorr, op.first, a_coarCorr);
-    MultifluidAlias::aliasMF(fineCorr, op.first, a_fineCorr);
-
-    //    op.second->enforceCFConsistency(coarCorr, fineCorr);
-    break;
-  }
 }
 
 void MFHelmholtzOp::incr(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs, Real a_scale){
@@ -739,6 +722,20 @@ void MFHelmholtzOp::AMROperatorNC(LevelData<MFCellFAB>&              a_Lphi,
 				  AMRLevelOp<LevelData<MFCellFAB> >* a_finerOp) {
   CH_TIME("MFHelmholtzOp::AMROperatorNC");
 
+  if(m_hasFine){
+    MFHelmholtzOp* finerOp = (MFHelmholtzOp*) a_finerOp;
+
+    for(auto& op : finerOp->m_helmOps){
+      LevelData<EBCellFAB> phi;
+      LevelData<EBCellFAB> phiFine;
+
+      MultifluidAlias::aliasMF(phi,     op.first, a_phi);
+      MultifluidAlias::aliasMF(phiFine, op.first, a_phiFine);
+
+      op.second->coarsen(phi, phiFine);
+    }
+  }
+
   // Must update the jump BC first. Don't have coarser here so no need for CF interpolation.
   this->updateJumpBC(a_phi, a_homogeneousPhysBC);
 
@@ -765,6 +762,20 @@ void MFHelmholtzOp::AMROperator(LevelData<MFCellFAB>&              a_Lphi,
 				AMRLevelOp<LevelData<MFCellFAB> >* a_finerOp) {
   CH_TIME("MFHelmholtzOp::AMROperator");
 
+  if(m_hasFine){
+    MFHelmholtzOp* finerOp = (MFHelmholtzOp*) a_finerOp;
+
+    for(auto& op : finerOp->m_helmOps){
+      LevelData<EBCellFAB> phi;
+      LevelData<EBCellFAB> phiFine;
+
+      MultifluidAlias::aliasMF(phi,     op.first, a_phi);
+      MultifluidAlias::aliasMF(phiFine, op.first, a_phiFine);
+
+      op.second->coarsen(phi, phiFine);
+    }
+  }
+ 
   // Update ghost cells and jump conditions first. Doing an exchange is not sufficient here because
   // the jump stencils might reach over CFs. 
   this->interpolateCF(a_phi, &a_phiCoar, false);

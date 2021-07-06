@@ -100,17 +100,6 @@ public:
   int refToCoarser() override final;
 
   /*!
-    @brief Weird but true, coarsening between VCycles give better convergence
-  */
-  unsigned int orderOfAccuracy(void) const override final;
-
-  /*!
-    @brief Enforce CF consistency
-    @note This does conservative averaging on each phase. 
-  */
-  void enforceCFConsistency(LevelData<MFCellFAB>& a_coarCorr, const LevelData<MFCellFAB>& a_fineCorr) override final;
-
-  /*!
     @brief Compute residual on this level. 
     @param[out] a_residual          Residual rhs - L(phi)
     @param[in]  a_phi               phi
@@ -435,6 +424,11 @@ protected:
   MFMultigridInterpolator m_interpolator;
 
   /*!
+    @brief Coarsener
+  */
+  MFCoarAve m_coarAve;
+
+  /*!
     @brief Multifluid operator or not. 
   */
   bool m_multifluid;
@@ -458,6 +452,11 @@ protected:
     @brief True if there is a coarser AMR level
   */
   bool m_hasCoar;
+
+  /*!
+    @brief True if there is a finer AMR level
+  */
+  bool m_hasFine;
 
   /*!
     @brief True if there are multigrid levels
@@ -510,6 +509,7 @@ protected:
 		   const LevelData<MFCellFAB>&        a_phiCoar,
 		   const bool                         a_homogeneousPhysBC,
 		   AMRLevelOp<LevelData<MFCellFAB> >* a_finerOp);
+
 };
 
 #include <CD_NamespaceFooter.H>

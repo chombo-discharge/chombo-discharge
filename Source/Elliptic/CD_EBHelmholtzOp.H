@@ -7,7 +7,6 @@
   @file   CD_EBHelmholtzOp.H
   @brief  Declaration of Helmholtz multigrid operators. 
   @author Robert Marskar
-  @todo   We can probably remove everything that is related to the fast multicolor scheme (red-black is just as fast). 
 */
 
 #ifndef CD_EBHelmholtzOp_H
@@ -168,7 +167,6 @@ public:
     @param[inout] a_phiCoar Coarse data. 
   */
   void inhomogeneousCFInterp(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_phiCoar);
-
   
   /*!
     @brief Multi-colored Gauss-Seidel kernel. Public because MFHelmholtzOp may want to use use. 
@@ -252,16 +250,6 @@ public:
     @details This does a local copy from rhs to lhs
   */
   void assign(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) override final;
-
-  /*!
-    @brief Weird but true, coarsening between VCycles give better convergence
-  */
-  unsigned int orderOfAccuracy(void) const override final;
-
-  /*!
-    @brief Enforce CF consistency
-  */
-  void enforceCFConsistency(LevelData<EBCellFAB>& a_coarCorr, const LevelData<EBCellFAB>& a_fineCorr) override final;
 
   /*!
     @brief Compute the dot product??
@@ -870,23 +858,37 @@ protected:
 
   /*!
     @brief Increment coarse flux register
-    @param[in] a_phi Cell-centered data. 
+    @param[in] a_phi Cell-centered data on the coarse level. 
   */
   void incrementFRCoar(const LevelData<EBCellFAB>& a_phi);
 
   /*!
     @brief Increment coarse flux register
-    @param[in] a_phi Cell-centered data. 
+    @param[in] a_phiFine Cell-centered data on the fine level
+    @param[in] a_phi     Cell-centered data on the coarse level
+    @param[in] a_finerOp Finer operator
   */
   void incrementFRFine(const LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phi, AMRLevelOp<LevelData<EBCellFAB> >& a_finerOp);
 
   /*!
     @brief Reflux algorithm.
+    @param[inout] a_Lphi L(phiFine, phiCoar). This is modified along the CF interface to consistently account for fine-level fluxes. 
+    @param[in]    a_phiFine Data on finer level
+    @param[in]    a_phi     Data on this operator's level
+    @param[in]    a_finerOp Operator on fine level
   */
-  void reflux(LevelData<EBCellFAB>&              Lphi,
+  void reflux(LevelData<EBCellFAB>&              a_Lphi,
 	      const LevelData<EBCellFAB>&        a_phiFine,
 	      const LevelData<EBCellFAB>&        a_phi,
 	      AMRLevelOp<LevelData<EBCellFAB> >& a_finerOp);
+ public:
+  /*!
+    @brief Coarsen data from fine to coar level
+    @param[in] a_phi     Data on this level
+    @param[in] a_phiFine Data on finer level
+    @note This routine is used in AMROperator to ensure that EB fluxes which are described by stencils get consistent data under the fine level. 
+  */
+  void coarsen(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_phiFine);
 
 };
 
