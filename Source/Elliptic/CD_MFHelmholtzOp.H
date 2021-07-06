@@ -31,7 +31,7 @@
 #include <CD_MFHelmholtzEBBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
-class MFHelmholtzOp : public AMRLevelOp<LevelData<MFCellFAB> > {
+class MFHelmholtzOp : public LevelTGAHelmOp<LevelData<MFCellFAB>, MFFluxFAB> {
 public:
 
   /*!
@@ -99,6 +99,44 @@ public:
     @brief Return coarsening factor to coarser level (1 if there is no coarser level);
   */
   int refToCoarser() override final;
+
+  /*!
+    @brief Set alpha and beta
+    @param[in] a_alpha  Alpha
+    @param[in] a_beta   Beta
+  */
+  void setAlphaAndBeta(const Real& a_alpha, const Real& a_beta) override final;
+
+  /*!
+    @brief Divide by the a-coefficient
+    @param[inout] a_rhs Divided data
+  */
+  void divideByIdentityCoef(LevelData<MFCellFAB>& a_rhs) override final;
+
+  /*!
+    @brief Apply operator but turn off all BCs. 
+  */
+  void applyOpNoBoundary(LevelData<MFCellFAB>& a_ans, const LevelData<MFCellFAB>& a_phi) override final;
+
+    /*!
+    @brief Not called, I think
+    @param[in] a_phi Phi
+  */
+  void fillGrad(const LevelData<MFCellFAB>& a_phi) override final;
+
+  /*!
+    @brief Fill flux
+    @param[out] a_flux  Flux
+    @param[in]  a_data  Data for which we will compute the flux
+    @param[in]  a_grid  Grid
+    @param[in]  a_dit   Corresponding data index. 
+    @param[in]  a_scale Scaling factor
+  */
+  void getFlux(MFFluxFAB&                  a_flux,
+  	       const LevelData<MFCellFAB>& a_data,
+  	       const Box&                  a_grid,
+  	       const DataIndex&            a_dit,
+  	       Real                        a_scale) override final;
 
   /*!
     @brief Compute residual on this level. 

@@ -191,6 +191,57 @@ int MFHelmholtzOp::refToCoarser() {
   return m_refToCoar;
 }
 
+void MFHelmholtzOp::setAlphaAndBeta(const Real& a_alpha, const Real& a_beta){
+  CH_TIME("MFHelmholtzOp::setAlphaAndBeta");
+
+  for (auto& op : m_helmOps){
+    op.second->setAlphaAndBeta(a_alpha, a_beta);
+  }
+}
+
+void MFHelmholtzOp::divideByIdentityCoef(LevelData<MFCellFAB>& a_rhs) {
+  CH_TIME("MFHelmholtzOp::setAlphaAndBeta");
+
+  LevelData<EBCellFAB> rhs;
+  
+  for (auto& op : m_helmOps){
+    MultifluidAlias::aliasMF(rhs, op.first, a_rhs);
+    
+    op.second->divideByIdentityCoef(rhs);
+  }
+}
+
+void MFHelmholtzOp::applyOpNoBoundary(LevelData<MFCellFAB>& a_ans, const LevelData<MFCellFAB>& a_phi) {
+  LevelData<EBCellFAB> ans;
+  LevelData<EBCellFAB> phi;
+  
+  for (auto& op : m_helmOps){
+    MultifluidAlias::aliasMF(ans, op.first, a_ans);
+    MultifluidAlias::aliasMF(phi, op.first, a_phi);
+    
+    op.second->applyOpNoBoundary(ans, phi);
+  }
+}
+
+void MFHelmholtzOp::fillGrad(const LevelData<MFCellFAB>& a_phi){
+  LevelData<EBCellFAB> phi;
+
+  for (auto& op : m_helmOps){
+    MultifluidAlias::aliasMF(phi, op.first, a_phi);
+
+    op.second->fillGrad(phi);
+  }
+}
+
+void MFHelmholtzOp::getFlux(MFFluxFAB&                  a_flux,
+			    const LevelData<MFCellFAB>& a_data,
+			    const Box&                  a_grid,
+			    const DataIndex&            a_dit,
+			    Real                        a_scale) {
+  
+  MayDay::Warning("MFHelmholtzOp::getFlux - not implemented (yet)");
+}
+
 void MFHelmholtzOp::incr(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs, Real a_scale){
   CH_TIME("MFHelmholtzOp::incr");
   for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
