@@ -127,6 +127,12 @@ public:
   void applyOp(LevelData<MFCellFAB>& a_Lphi, const LevelData<MFCellFAB>& a_phi, bool a_homogeneousPhysBc) override final;
 
   /*!
+    @brief Time the applyOp routine
+    @param[in] a_timeDit Data iterator for computing the time of applyOp
+  */
+  void computeOperatorLoads(LevelData<MFCellFAB>& a_phi, TimedDataIterator& a_iterator);
+
+  /*!
     @brief Relaxation method. This does smoothing for the system L(correction) = residual
     @param[inout] a_correction Correction
     @param[in]    a_residual   Residual

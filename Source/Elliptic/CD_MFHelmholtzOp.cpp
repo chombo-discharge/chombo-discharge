@@ -353,6 +353,44 @@ void MFHelmholtzOp::applyOp(LevelData<MFCellFAB>& a_Lphi, const LevelData<MFCell
   this->applyOp(a_Lphi, a_phi, nullptr, a_homogeneousPhysBC, true);
 }
 
+void MFHelmholtzOp::computeOperatorLoads(LevelData<MFCellFAB>& a_phi, TimedDataIterator& a_timeDit) {
+  CH_TIME("MFHelmholtzOp::computeOperatorLoads");
+
+  LevelData<MFCellFAB> Lphi;
+  this->create(Lphi, a_phi);
+  
+  for (a_timeDit.reset(); a_timeDit.ok(); ++a_timeDit){
+
+    // Interpolation time with coarser
+    if(m_hasCoar){
+      for(auto& op : m_helmOps){
+	const int iphase = op.first;
+
+	RefCountedPtr<EBMultigridInterpolator>& phaseInterpolator = m_interpolator.getInterpolator(iphase);
+
+	EBCellFAB& phi = (EBCellFAB&) a_phi[a_timeDit()].getPhase(iphase);
+	  
+	phaseInterpolator->coarseFineInterpH(phi, Interval(0,0), a_timeDit());
+      }
+    }
+
+    // Matching time
+    m_jumpBC->matchBC(a_phi[a_timeDit()], (*m_jump)[a_timeDit()], true, a_timeDit());
+
+    // Apply operator application
+    for (auto& op : m_helmOps){
+      const Box cellBox = Lphi.disjointBoxLayout()[a_timeDit()];
+	
+      const int iphase = op.first;
+
+      EBCellFAB& Lph = Lphi [a_timeDit()].getPhase(iphase);
+      EBCellFAB& phi = a_phi[a_timeDit()].getPhase(iphase);
+
+      op.second->applyOp(Lph, phi, cellBox, a_timeDit(), true);
+    }
+  }
+}
+
 void MFHelmholtzOp::applyOp(LevelData<MFCellFAB>&             a_Lphi,
 			    const LevelData<MFCellFAB>&       a_phi,
 			    const LevelData<MFCellFAB>* const a_phiCoar,
