@@ -27,10 +27,6 @@
 constexpr int MFHelmholtzOp::m_comp;
 constexpr int MFHelmholtzOp::m_nComp;
 
-MFHelmholtzOp::MFHelmholtzOp(){
-  MayDay::Abort("MFHelmholtzOp - weak construction is not allowed");
-}
-
 MFHelmholtzOp::MFHelmholtzOp(const MFLevelGrid&                               a_mflgFine,
 			     const MFLevelGrid&                               a_mflg,
 			     const MFLevelGrid&                               a_mflgCoFi,
@@ -111,7 +107,7 @@ MFHelmholtzOp::MFHelmholtzOp(const MFLevelGrid&                               a_
       }
     
       coarsener    = a_coarAve.getAveOp(iphase);
-      //    }
+      
       if(a_hasCoar){
 	interpolator = a_interpolator.getInterpolator(iphase);
       }

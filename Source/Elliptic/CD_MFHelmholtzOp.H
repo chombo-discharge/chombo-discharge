@@ -46,7 +46,17 @@ public:
   /*!
     @brief Constructor. Must subsequently call define(...)
   */
-  MFHelmholtzOp();
+  MFHelmholtzOp() = delete;
+
+  /*!
+    @brief No copy construction allowed
+  */
+  MFHelmholtzOp(const MFHelmholtzOp& a_op) = delete;
+
+  /*!
+    @brief No move construction allowed.
+  */
+  MFHelmholtzOp(const MFHelmholtzOp&& a_op) = delete;
 
   /*!
     @brief Full constructor
@@ -84,6 +94,16 @@ public:
     @brief Destructor. 
   */
   ~MFHelmholtzOp();
+
+  /*!
+    @brief No copy assigment allowed
+  */
+  MFHelmholtzOp& operator=(const MFHelmholtzOp& a_oper) = delete;
+
+  /*!
+    @brief No move assigment allowed
+  */
+  MFHelmholtzOp& operator=(const MFHelmholtzOp&& a_oper) = delete;
 
   /*!
     @brief Set the jump boundary condition

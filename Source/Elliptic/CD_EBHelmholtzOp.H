@@ -58,6 +58,11 @@ public:
   EBHelmholtzOp(const EBHelmholtzOp& a_other) = delete;
 
   /*!
+    @brief Disallowed move constructor
+  */
+  EBHelmholtzOp(const EBHelmholtzOp&& a_other) = delete;
+
+  /*!
     @brief Full constructor
   */
   EBHelmholtzOp(const EBLevelGrid&                                 a_eblgFine,
@@ -90,6 +95,16 @@ public:
     @brief Dtor
   */
   ~EBHelmholtzOp();
+
+  /*!
+    @brief No copy assigment allowed
+  */
+  EBHelmholtzOp& operator=(const EBHelmholtzOp& a_oper) = delete;
+
+  /*!
+    @brief No move assigment allowed
+  */
+  EBHelmholtzOp& operator=(const EBHelmholtzOp&& a_oper) = delete;
 
   /*!
     @brief Turn off BCs
@@ -233,7 +248,7 @@ public:
   /*!
     @brief Apply domain flux. 
     @note This sets the ghost cells of phi to phi(i-1) = phi(i) + F*dx/bco such that when we take the centered difference we get
-          -bco*(phi(i) - phi(i-1))/dx = F. 
+    -bco*(phi(i) - phi(i-1))/dx = F. 
   */
   void applyDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBc);
 
