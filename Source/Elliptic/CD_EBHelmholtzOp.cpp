@@ -995,8 +995,6 @@ void EBHelmholtzOp::getFaceCentroidFlux(EBFaceFAB&       a_fluxCentroid,
 					const Box&       a_cellBox,
 					const DataIndex& a_dit,
 					const int        a_dir){
-
-  
   this->getFaceCenteredFlux(a_fluxCentroid, a_phi, a_cellBox, a_dit, a_dir);
   this->interpolateFluxes(  a_fluxCentroid,        a_cellBox, a_dit, a_dir);
 }
