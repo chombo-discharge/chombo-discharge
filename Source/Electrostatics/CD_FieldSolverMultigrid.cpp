@@ -7,6 +7,14 @@
   @file   FieldSolverMultigrid.cpp
   @brief  Implementation of FieldSolverMultigrid.H
   @author Robert Marskar
+  @todo   See if we can find a way to monkey the setup functions so that we don't have to explicitly cast in e.g. ItoPlasmaGodunovStepper. Maybe we can have
+          FieldSolver take extra arguments representing the conductivity or somesuch, and add a setupSolver() virtual routine...?
+  @todo   Replace vof iterators with iterations from AmrMesh
+  @todo   When specifying the bottom solver, use syntax "simple 400" to indicate the number of smoothings. 
+  @todo   gmg parameters should be specified as "FieldSolverMultigrid.gmg.<setting>"
+  @todo   B-coefficient => face permittivities
+  @todo   A-coefficient -> should be invisible for users
+  @todo   Purge the pre-coarsening stuff. 
 */
 
 // Chombo includes
@@ -26,13 +34,10 @@
 
 #define POISSON_MF_GMG_TIMER 0
 
-FieldSolverMultigrid::FieldSolverMultigrid(){
+FieldSolverMultigrid::FieldSolverMultigrid() : FieldSolver() {
   m_needsMultigridSetup      = true;
   m_hasDeeperMultigridLevels = false;
   m_className                = "FieldSolverMultigrid";
-
-  // We are setting some simple, default domain BC functions so users don't have to monkey with this whenever they need something "simple".
-  this->setDefaultDomainBcFunctions(); 
 }
 
 FieldSolverMultigrid::~FieldSolverMultigrid(){
@@ -283,7 +288,9 @@ void FieldSolverMultigrid::regrid(const int a_lmin, const int a_oldFinestLevel, 
   if(m_verbosity > 5){
     pout() << "FieldSolverMultigrid::regrid" << endl;
   }
+  
   FieldSolver::regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
+  
   m_needsMultigridSetup = true;
 }
 
@@ -700,14 +707,14 @@ void FieldSolverMultigrid::setupMultigridSolver(){
   }
 
   int gmg_type;
-  if(m_multigridType == MultigridType::FAS){
-    gmg_type = 0;
-  }
-  else if(m_multigridType == MultigridType::VCycle){
+  if(m_multigridType == MultigridType::VCycle){
     gmg_type = 1;
   }
-  else if(m_multigridType == MultigridType::FCycle){
+  else if(m_multigridType == MultigridType::WCycle){
     gmg_type = 2;
+  }
+  else{
+    MayDay::Abort("FieldSolverMultigrid::setupMultigridSolver - unknown cycle type requested");
   }
 
   m_multigridSolver.define(coar_dom, *m_operatorFactory, botsolver, 1 + finest_level);

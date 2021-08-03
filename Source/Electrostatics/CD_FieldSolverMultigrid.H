@@ -4,8 +4,8 @@
  */
 
 /*!
-  @file   FieldSolverMultigrid.H
-  @brief  Implementation of FieldSolver which uses geometric multigrid.
+  @file   CD_FieldSolverMultigrid.H
+  @brief  Declaration of FieldSolverMultigrid
   @author Robert Marskar
 */
 
@@ -27,7 +27,7 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Implementation of FieldSolver which uses a two-phase geometric multigrid solver
+  @brief Implementation of FieldSolver which uses a two-phase geometric multigrid solver. 
 */
 class FieldSolverMultigrid : public FieldSolver {
 protected:
@@ -54,24 +54,40 @@ protected:
     @brief Enum for multigrid cycle types. 
   */
   enum class MultigridType{
-    FAS,
     VCycle,
-    FCycle,
+    WCycle,
   };
   
 public:
 
   /*!
-    @brief Added because of CD_FieldStepper, which uses the operator factory to generate computational loads.
-  */
-  RefCountedPtr<MfHelmholtzOpFactory>& getOperatorFactory(){
-    return m_operatorFactory;
-  }
-
-  /*!
-    @brief Constructor
+    @brief Weak constructor. Sets basic parameters. 
   */
   FieldSolverMultigrid();
+
+  /*!
+    @brief Disallowed copy constructor
+    @param[in] a_other Other solver
+  */
+  FieldSolverMultigrid(const FieldSolverMultigrid& a_other) = delete;
+
+  /*!
+    @brief Disallowed move constructor
+    @param[in] a_other Other solver
+  */
+  FieldSolverMultigrid(const FieldSolverMultigrid&& a_other) = delete;
+
+  /*!
+    @brief Disallowed copy assignment operator
+    @param[in] a_other Other solver
+  */
+  FieldSolverMultigrid& operator=(const FieldSolverMultigrid& a_other) = delete;
+
+  /*!
+    @brief Disallowed move assignment operator
+    @param[in] a_other Other solver
+  */
+  FieldSolverMultigrid& operator=(const FieldSolverMultigrid&& a_other) = delete;
 
   /*!
     @brief Constructor
@@ -102,8 +118,9 @@ public:
   */
   virtual void parseRuntimeOptions() override;
 
-    /*!
+  /*!
     @brief Regrid method. 
+    @details This calls the parent regrid function first. We only need the overwrite because we have to signal that multigrid must be set up again. 
     @param[in] a_lmin           Coarsest level where grids did not change. 
     @param[in] a_oldFinestLevel Previous finest AMR level
     @param[in] a_newFinestLevel New finest AMR level. 

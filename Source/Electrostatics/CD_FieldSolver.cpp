@@ -40,6 +40,8 @@ FieldSolver::FieldSolver(){
   m_dataLocation = Location::Cell::Center;
   m_isVoltageSet = false;
   m_verbosity    = -1;
+
+  this->setDefaultDomainBcFunctions();
 }
 
 FieldSolver::~FieldSolver(){
@@ -438,6 +440,7 @@ void FieldSolver::setComputationalGeometry(const RefCountedPtr<ComputationalGeom
 
   m_computationalGeometry = a_computationalGeometry;
   m_multifluidIndexSpace  = m_computationalGeometry->getMfIndexSpace();
+
 
   this->setDefaultEbBcFunctions();
 }
