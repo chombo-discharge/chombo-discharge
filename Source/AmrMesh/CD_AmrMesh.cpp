@@ -4,8 +4,8 @@
  */
 
 /*!
-  @file   AmrMesh.cpp
-  @brief  Implementation of AmrMesh.H
+  @file   CD_AmrMesh.cpp
+  @brief  Implementation of CD_AmrMesh.H
   @author Robert Marskar
 */
 

@@ -25,20 +25,21 @@
 #include <CD_Units.H>
 #include <CD_NamespaceHeader.H>
 
+constexpr int FieldSolver::m_comp;
+constexpr int FieldSolver::m_nComp;
+
 Real FieldSolver::s_defaultDomainBcFunction(const RealVect a_position, const Real a_time){
   return 1.0;
 }
 
-Real FieldSolver::s_voltageOne(const Real a_time){
-  return 1.0;
-}
-
 FieldSolver::FieldSolver(){
+
+  // Default settings.
   m_className    = "FieldSolver";
   m_realm        = Realm::Primal;
   m_dataLocation = Location::Cell::Center;
-
-  this->setVerbosity(-1);
+  m_isVoltageSet = false;
+  m_verbosity    = -1;
 }
 
 FieldSolver::~FieldSolver(){
@@ -66,6 +67,7 @@ void FieldSolver::setDataLocation(const Location::Cell a_dataLocation){
 
 bool FieldSolver::solve(const bool a_zerophi) {
   CH_TIME("FieldSolver::solve(bool)");
+  CH_assert(m_isVoltageSet);
   if(m_verbosity > 5){
     pout() << "FieldSolver::solve(bool)" << endl;
   }
@@ -77,6 +79,7 @@ bool FieldSolver::solve(const bool a_zerophi) {
 
 bool FieldSolver::solve(MFAMRCellData& a_potential, const bool a_zerophi){
   CH_TIME("FieldSolver::solve(MFAMRCellData, bool)");
+  CH_assert(m_isVoltageSet);  
   if(m_verbosity > 5){
     pout() << "FieldSolver::solve(MFAMRCellData, bool)" << endl;
   }
@@ -100,10 +103,24 @@ void FieldSolver::computeElectricField(MFAMRCellData& a_electricField, const MFA
   if(m_verbosity > 5){
     pout() << "FieldSolver::computeElectricField(MFAMRCellData, MFAMRCellData)" << endl;
   }
+  
+#if 1 // Temporary warning showing that centroid-centered discretizations aren't ready (yet)
+  if(m_dataLocation == Location::Cell::Centroid){
+    pout() << "FieldSolver::computeElectricField - AmrMesh does not support centroid data for gradients (yet)" << endl;
+  }
+#endif
 
-  m_amr->computeGradient(a_electricField, a_potential, m_realm);
+  // Update ghost cells. Use scratch storage for this. 
+  MFAMRCellData scratch = m_amr->allocate<MFAMRCellData>(m_realm, m_nComp);
+  scratch.copy(a_potential);
+  m_amr->averageDown(scratch, m_realm);
+  m_amr->interpGhost(scratch, m_realm);
+
+  // Compute the cell-centered gradient everywhere. 
+  m_amr->computeGradient(a_electricField, scratch, m_realm);
   DataOps::scale(a_electricField, -1.0);
 
+  // Coarsen solution and update ghost cells. 
   m_amr->averageDown(a_electricField, m_realm);
   m_amr->interpGhost(a_electricField, m_realm);
 }
@@ -114,13 +131,12 @@ void FieldSolver::allocateInternals(){
     pout() << "FieldSolver::allocateInternals" << endl;
   }
 
-  const int ncomp = 1;
-
-  m_amr->allocate(m_potential,     m_realm, ncomp);
-  m_amr->allocate(m_rho,           m_realm, ncomp);
-  m_amr->allocate(m_residue,       m_realm, ncomp);
-  m_amr->allocate(m_sigma,         m_realm, phase::gas, ncomp);
+  m_amr->allocate(m_potential,     m_realm, m_nComp );
+  m_amr->allocate(m_rho,           m_realm, m_nComp );
+  m_amr->allocate(m_residue,       m_realm, m_nComp );
   m_amr->allocate(m_electricField, m_realm, SpaceDim);
+
+  m_amr->allocate(m_sigma,         m_realm, phase::gas, m_nComp);
 
   DataOps::setValue(m_potential,     0.0);
   DataOps::setValue(m_rho,           0.0);
@@ -135,10 +151,9 @@ void FieldSolver::preRegrid(const int a_lbase, const int a_oldFinestLevel){
     pout() << "FieldSolver::preRegrid" << endl;
   }
 
-  const int ncomp = 1;
-  const int finest_level = m_amr->getFinestLevel();
+  // TLDR: This version does a backup of m_potential on the old grid. 
   
-  m_amr->allocate(m_cache, m_realm, ncomp);
+  m_amr->allocate(m_cache, m_realm, m_nComp);
   
   for (int lvl = 0; lvl <= a_oldFinestLevel; lvl++){
     m_potential[lvl]->localCopyTo(*m_cache[lvl]);
@@ -151,61 +166,88 @@ void FieldSolver::computeDisplacementField(MFAMRCellData& a_displacementField, c
     pout() << "FieldSolver::computeDisplacementField" << endl;
   }
 
+  // TLDR: This computes the displacement field D = eps*E on both phases. The data is either cell-centered or centroid-centered, and the
+  //       permittivity can be spatially varying (in the dielectric). So, for the gas phase we only need to compute eps0*E while for the
+  //       dielectric phase we have to iterate through each cell and find the corresponding permittivity.
+
   const Vector<Dielectric>& dielectrics = m_computationalGeometry->getDielectrics();
 
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    LevelData<MFCellFAB>& D = *a_displacementField[lvl];
-    LevelData<MFCellFAB>& E = *a_electricField[lvl];
+  // Make D = eps0*E
+  DataOps::copy (a_displacementField, a_electricField);
+  DataOps::scale(a_displacementField, Units::eps0);  
+  //
+  if(m_multifluidIndexSpace->numPhases() > 1 && dielectrics.size() > 0){
 
-    LevelData<EBCellFAB> D_gas, D_solid;
-    LevelData<EBCellFAB> E_gas, E_solid;
+    // Lambda which gets the physical position of the data in the cell
+    auto physicalCoordinates = [&loc=this->m_dataLocation](const RealVect& probLo, const Real& dx, const VolIndex& vof, const EBISBox& ebisbox) -> RealVect{
+      RealVect ret = probLo + dx*RealVect(vof.gridIndex()); // Cell center. 
 
-    // This is all we need for the gas phase
-    MultifluidAlias::aliasMF(D_gas,   phase::gas, D);
-    MultifluidAlias::aliasMF(E_gas,   phase::gas, E);
-    E_gas.localCopyTo(D_gas);
-    DataOps::scale(D_gas,   Units::eps0);
+      if(loc == Location::Cell::Centroid){
+	ret += dx*ebisbox.centroid(vof); // Cell center -> cell centroid
+      }
 
-    // For the solid phase, we multiply by epsilon. 
-    if(m_multifluidIndexSpace->numPhases() > 1){
-      MultifluidAlias::aliasMF(D_solid, phase::solid, D);
-      MultifluidAlias::aliasMF(E_solid, phase::solid, E);
-      E_solid.localCopyTo(D_solid);
-      DataOps::scale(D_solid, Units::eps0);
+      return ret;
+    };
 
-      // Now scale by relative epsilon
-      if(dielectrics.size() > 0){
-	const RealVect dx            = m_amr->getDx()[lvl]*RealVect::Unit;
-	const RealVect origin        = m_amr->getProbLo();
-	const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-
-	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	  EBCellFAB& dg = D_gas[dit()];
-
-	  const Box box = dbl.get(dit());
-	  for (VoFIterator vofit(IntVectSet(box), dg.getEBISBox().getEBGraph()); vofit.ok(); ++vofit){
-	    const VolIndex& vof = vofit();
-	    const RealVect& pos = EBArith::getVofLocation(vof, origin, dx);
-
-	    Real dist = std::numeric_limits<Real>::infinity();
-	    int closest;
+    // Lambda which returns the relative permittivity at some position
+    auto permittivity = [&dielectrics](const RealVect& pos) -> Real{
+      Real minDist = std::numeric_limits<Real>::infinity();
+      int closest;
 	    
-	    for (int i = 0; i < dielectrics.size(); i++){
-	      const RefCountedPtr<BaseIF> func = dielectrics[i].getImplicitFunction();
+      for (int i = 0; i < dielectrics.size(); i++){
+	const RefCountedPtr<BaseIF> func = dielectrics[i].getImplicitFunction();
 
-	      const Real cur_dist = func->value(pos);
+	const Real curDist = func->value(pos);
 	
-	      if(std::abs(cur_dist) <= std::abs(dist)){
-		dist    = cur_dist;
-		closest = i;
-	      }
-	    }
+	if(std::abs(curDist) <= std::abs(minDist)){
+	  minDist = curDist;
+	  closest = i;
+	}
+      }
 	    
-	    const Real eps = dielectrics[closest].getPermittivity(pos);
+      return dielectrics[closest].getPermittivity(pos);
+    };
 
-	    for (int comp = 0; comp < dg.nComp(); comp++){
-	      dg(vof, comp) *= eps;
+    // Iterate through data
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+      const Real dx                = m_amr->getDx()[lvl];
+      const RealVect probLo        = m_amr->getProbLo();
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+      const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, phase::solid)[lvl];
+
+      for (DataIterator dit(dbl); dit.ok(); ++dit){
+	const Box cellBox      = dbl[dit()];
+	const EBISBox& ebisbox = ebisl[dit()];
+	const EBGraph& ebgraph = ebisbox.getEBGraph();
+	const IntVectSet ivs   = ebisbox.getIrregIVS(cellBox);
+
+	// Get handle to data on the solid phase
+	MFCellFAB& D    = (*a_displacementField[lvl])[dit()];
+	EBCellFAB& Dsol = D.getPhase(phase::solid);
+	FArrayBox& Dreg = Dsol.getFArrayBox();
+
+	// Regular cells
+	for (BoxIterator bit(cellBox); bit.ok(); ++bit){
+	  const IntVect iv   = bit();
+	  
+	  if(ebisbox.isRegular(iv)){
+	    const RealVect pos = probLo + dx*RealVect(iv);
+	    const Real epsRel  = permittivity(pos);
+	  
+	    for (int comp = 0; comp < SpaceDim; comp++){
+	      Dreg(iv, comp) *= epsRel;
 	    }
+	  }
+	}
+
+	// Irregular cells
+	for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+	  const VolIndex& vof = vofit();
+	  const RealVect pos  = physicalCoordinates(probLo, dx, vof, ebisbox);
+	  const Real epsRel   = permittivity(pos);
+
+	  for (int comp = 0; comp < SpaceDim; comp++){
+	    Dsol(vof, comp) *= epsRel;
 	  }
 	}
       }
@@ -303,28 +345,26 @@ void FieldSolver::regrid(const int a_lmin, const int a_old_finest, const int a_n
     pout() << "FieldSolver::regrid" << endl;
   }
 
-  const int comp  = 0;
-  const int ncomp = 1;
-  const Interval interv(comp, comp);
+  const Interval interv(m_comp, m_comp);
 
   this->allocateInternals();
 
   for (int i = 0; i < phase::numPhases; i++){
-    phase::which_phase cur_phase;    
+    phase::which_phase curPhase;    
     if(i == 0){
-      cur_phase = phase::gas;
+      curPhase = phase::gas;
     }
     else{
-      cur_phase = phase::solid;
+      curPhase = phase::solid;
     }
 
-    const RefCountedPtr<EBIndexSpace>& ebis = m_multifluidIndexSpace->getEBIndexSpace(cur_phase);
+    const RefCountedPtr<EBIndexSpace>& ebis = m_multifluidIndexSpace->getEBIndexSpace(curPhase);
 
     if(!ebis.isNull()){
-      EBAMRCellData potential_phase = m_amr->alias(cur_phase, m_potential);
-      EBAMRCellData scratch_phase   = m_amr->alias(cur_phase, m_cache);
+      EBAMRCellData potential_phase = m_amr->alias(curPhase, m_potential);
+      EBAMRCellData scratch_phase   = m_amr->alias(curPhase, m_cache);
 
-      Vector<RefCountedPtr<EBPWLFineInterp> >& interpolator = m_amr->getPwlInterpolator(m_realm, cur_phase);
+      Vector<RefCountedPtr<EBPWLFineInterp> >& interpolator = m_amr->getPwlInterpolator(m_realm, curPhase);
 
       // These levels have not changed
       for (int lvl = 0; lvl <= Max(0, a_lmin-1); lvl++){
@@ -344,7 +384,7 @@ void FieldSolver::regrid(const int a_lmin, const int a_old_finest, const int a_n
   m_amr->averageDown(m_potential, m_realm);
   m_amr->interpGhost(m_potential, m_realm);
 
-  // Now recompute E
+  // Recompute E. 
   this->computeElectricField();
 }
 
@@ -363,22 +403,28 @@ void FieldSolver::setComputationalGeometry(const RefCountedPtr<ComputationalGeom
   }
 
   m_computationalGeometry = a_computationalGeometry;
-  m_multifluidIndexSpace     = m_computationalGeometry->getMfIndexSpace();
+  m_multifluidIndexSpace  = m_computationalGeometry->getMfIndexSpace();
 
   this->setDefaultEbBcFunctions();
 }
 
 void FieldSolver::setAmr(const RefCountedPtr<AmrMesh>& a_amr){
-  CH_TIME("FieldSolver::setAmr");
+  CH_TIME("FieldSolver::setAmr(amr)");
   if(m_verbosity > 5){
-    pout() << "FieldSolver::setAmr" << endl;
+    pout() << "FieldSolver::setAmr(amr)" << endl;
   }
 
   m_amr = a_amr;
 }
 
 void FieldSolver::setVoltage(std::function<Real(const Real a_time)> a_voltage){
-  m_voltage = a_voltage;
+  CH_TIME("FieldSolver::setVoltage(std::function)");
+  if(m_verbosity > 4){
+    pout() << "FieldSolver::setVoltage(std::function)" << endl;
+  }
+  m_voltage      = a_voltage;
+  
+  m_isVoltageSet = true;
 }
 
 void FieldSolver::setDomainBcWallFunction(const int a_dir, const Side::LoHiSide a_side, const ElectrostaticDomainBc::BcFunction& a_function){
@@ -429,7 +475,7 @@ void FieldSolver::setRealm(const std::string a_realm){
   m_realm = a_realm;
 }
 
-const std::string FieldSolver::getRealm() const{
+std::string FieldSolver::getRealm() const{
   CH_TIME("FieldSolver::getRealm");
   if(m_verbosity > 5){
     pout() << "FieldSolver::getRealm" << endl;
@@ -533,6 +579,7 @@ void FieldSolver::setDefaultDomainBcFunctions(){
 
 void FieldSolver::setDefaultEbBcFunctions() {
   CH_TIME("FieldSolver::setDefaultEbBcFunctions");
+  CH_assert(!m_computationalGeometry.isNull());
   if(m_verbosity > 5){
     pout() << "FieldSolver::setDefaultEbBcFunctions" << endl;
   }
@@ -542,8 +589,8 @@ void FieldSolver::setDefaultEbBcFunctions() {
   for (int i = 0; i < electrodes.size(); i++){
     const Electrode& elec = electrodes[i];
 
-    Real val  = (elec.isLive()) ? 1.0 : 0.0;
-    Real frac = elec.getFraction();
+    const Real val  = (elec.isLive()) ? 1.0 : 0.0;
+    const Real frac = elec.getFraction();
     
     ElectrostaticEbBc::BcFunction curFunc = [&time=this->m_time, &voltage=this->m_voltage, val, frac](const RealVect a_position, const Real a_time){
       return voltage(time)*val*frac;
@@ -552,7 +599,6 @@ void FieldSolver::setDefaultEbBcFunctions() {
     m_ebBc.addEbBc(elec, curFunc);
   }
 }
-
 
 void FieldSolver::parseDomainBc(){
   CH_TIME("FieldSolver::parseDomainBc");
@@ -644,7 +690,7 @@ void FieldSolver::writePlotFile(){
 
   // Copy internal data to be plotted over to 'output'
   int icomp = 0;
-  writePlotData(output, icomp);
+  this->writePlotData(output, icomp);
 
   // Filename
   char file_char[1000];

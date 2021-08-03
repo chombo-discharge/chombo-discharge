@@ -4,7 +4,7 @@
  */
 
 /*!
-  @file   AmrMesh.H
+  @file   CD_AmrMesh.H
   @brief  Declaration of core class for handling AMR-related operations (with embedded boundaries)
   @author Robert Marskar
   @todo   a_lmax is a dead parameter in buildGrids. Fix this and the dependencies. 
@@ -110,6 +110,16 @@ public:
   */
   template<typename T, typename S>
   void alias(Vector<T*>& a_alias, const EBAMRData<S>& a_data);
+
+  /*!
+    @brief Create and allocate mesh storage on a particular realm
+    @param[in] a_realm  Realm
+    @param[in] a_nComp  Number of components
+    @param[in] a_nGhost Number of ghost cells
+    @return Returns storage
+  */
+  template <typename T>
+  T allocate(const std::string a_realm, const int a_nComp, const int a_nGhost = -1);
 
   /*!
     @brief Template class for generic allocation of particles

@@ -73,6 +73,11 @@ namespace Physics {
 
     template <class T>
     void FieldStepper<T>::setupSolvers(){
+
+      // Define a voltage function
+      auto voltage = [](const Real a_time) -> Real {
+	return 1.0;
+      };
       
       // Poisson setup
       m_fieldSolver = RefCountedPtr<FieldSolver> (new T());
@@ -80,7 +85,7 @@ namespace Physics {
       m_fieldSolver->parseOptions();
       m_fieldSolver->setAmr(m_amr);
       m_fieldSolver->setComputationalGeometry(m_computationalGeometry);
-      m_fieldSolver->setVoltage(FieldSolver::s_voltageOne);
+      m_fieldSolver->setVoltage(voltage);
       m_fieldSolver->setRealm(m_realm);
       m_fieldSolver->setTime(0, 0.0, 0.0);
 

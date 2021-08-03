@@ -4,8 +4,8 @@
  */
 
 /*!
-  @file   AmrMeshImplem.H
-  @brief  Implementation of AmrMesh.H
+  @file   CD_AmrMeshImplem.H
+  @brief  Implementation of CD_AmrMesh.H
   @author Robert Marskar
 */
 
@@ -63,6 +63,15 @@ void AmrMesh::alias(Vector<T*>& a_alias, const Vector<RefCountedPtr<T> >& a_data
 template<typename T, typename S>
 void AmrMesh::alias(Vector<T*>& a_alias, const EBAMRData<S>& a_data){
   return this->alias(a_alias, a_data.getData());
+}
+
+template <typename T>
+T AmrMesh::allocate(const std::string a_realm, const int a_nComp, const int a_nGhost){
+  T ret;
+
+  this->allocate(ret, a_realm, a_nComp, a_nGhost);
+
+  return ret;
 }
 
 template <typename T>
