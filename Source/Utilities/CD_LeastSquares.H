@@ -17,15 +17,16 @@
 #include <EBISBox.H>
 #include <IntVectSet.H>
 #include <RealVect.H>
-#include <ProblemDomain.H>
 #include <VolIndex.H>
-#include <PolyGeom.H>
-#include <EBISLayout.H>
 
 // Our includes
 #include <CD_VofUtils.H>
+#include <CD_Location.H>
 #include <CD_NamespaceHeader.H>
 
+/*!
+  @brief Static class containing useful routines for (weighted) least squares polynomial reconstruction. 
+*/
 class LeastSquares {
 public:
 
@@ -38,13 +39,9 @@ public:
     @brief Static class, no destruction here. 
   */
   ~LeastSquares() = delete;
-  
-  enum class CellPosition {
-    Center,
-    Centroid,
-    Boundary
-  };
 
+  using CellLocation = Location::Cell;
+  using FaceLocation = Location::Face;
   using Connectivity = VofUtils::Connectivity;
   using Neighborhood = VofUtils::Neighborhood;
 
@@ -60,8 +57,8 @@ public:
     @param[in] a_order          Interpolation order. 
     @param[in] a_addStartingVof Add starting vof or not (can't be used with a_p > 0) as it would lead to ill-conditioned systems. 
   */
-  static VoFStencil getInterpolationStencil(const CellPosition a_cellPos,
-					    const CellPosition a_otherCellsPos,
+  static VoFStencil getInterpolationStencil(const CellLocation a_cellPos,
+					    const CellLocation a_otherCellsPos,
 					    const Connectivity a_connectivity,					    
 					    const VolIndex&    a_startVof,
 					    const EBISBox&     a_ebisbox,
@@ -72,24 +69,74 @@ public:
 					    const bool         a_addStartingVof);
 
   /*!
+    @brief Compute a least squares gradient stencil in a cell.
+    @details This routine computes grad(phi) using a least squares reconstruction to specified order. 
+    @param[in]  a_vof          Input vof
+    @param[in]  a_gradLocation Where (in the vof) the gradient is evaluated
+    @param[in]  a_cellLocation Cell locations
+    @param[in]  a_ebisbox      ebisbox
+    @param[in]  a_dx           Resolution
+    @param[in]  a_radius       Stencil radius
+    @param[in]  a_p            Weighting factor for least squares
+    @param[in]  a_order        Truncation order.
+    @return     Returns a least squares stencil for computing the gradient. The directional derivatives are in the components of the returned stencil. 
+  */
+  static VoFStencil getGradSten(const VolIndex&    a_vof,
+				const CellLocation a_gradLocation,
+				const CellLocation a_cellLocation,
+				const EBISBox&     a_ebisbox,
+				const Real         a_dx,
+				const int          a_radius,
+				const int          a_p,
+				const int          a_order,
+				const IntVectSet   a_knownTerms = IntVectSet());
+
+  /*!
+    @brief Compute a least squares gradient stencil on a grid face. 
+    @details This routine computes grad(phi) using a least squares reconstruction to specified order. 
+    @param[in]  a_face         Input face
+    @param[in]  a_gradLocation Where (on the face) the gradient will be computed
+    @param[in]  a_cellLocation Cell location
+    @param[in]  a_ebisbox      ebisbox
+    @param[in]  a_dx           Resolution
+    @param[in]  a_radius       Stencil radius
+    @param[in]  a_p            Weighting factor for least squares
+    @param[in]  a_order        Truncation order.
+    @return     Returns a least squares stencil for computing the gradient. The directional derivatives are in the components of the returned stencil. 
+  */
+  static VoFStencil getGradSten(const FaceIndex&   a_face,
+				const FaceLocation a_gradLocation,
+				const CellLocation a_cellLocation,
+				const EBISBox&     a_ebisbox,
+				const Real         a_dx,
+				const int          a_radius,
+				const int          a_p,
+				const int          a_order,
+				const IntVectSet   a_knownTerms = IntVectSet());
+
+  /*!
     @brief Compute a least squares gradient stencil on the EB centroid with specified order. 
     @details This routine eliminates the value on the boundary and the user will have to fetch the weight for this point from the returned stencil. 
-    @param[in]  a_vof Input vof
-    @param[in]  a_ebisbox ebisbox
-    @param[in]  a_dx Resolution
-    @param[in]  a_p Scaling
-    @param[in]  a_order
-    @return     Returns a least squares stencil for evaluating the a first order approximation to the normal derivative on the boundary centroid. 
-    @details    This will first try to get all Vofs defined in the quadrant defined by the normal vector, i.e. 3 cells in 2D and up to 7 cells in 3D. If that
-    does not work the routine will try to fetch a symmetric stencil. If that does not work it will get all Vofs within a certain radius. 
+    @param[in]  a_vof            Input vof
+    @param[in]  a_neighborhood   Neighboorhood specification
+    @param[in]  a_cellPositions  How to interpret cell positions
+    @param[in]  a_ebisbox        ebisbox
+    @param[in]  a_radius         Stencil radius
+    @param[in]  a_dx             Resolution
+    @param[in]  a_p              Weight scaling
+    @param[in]  a_order          Order of the gradient. 
+    @param[in]  a_addStartingVof Use a_vof in the expression for the gradient. This can be ill-conditioned for cell-centered expressions. 
+    @return     Returns a least squares stencil for evaluating an approximation normal derivative on the boundary centroid. 
   */
   static VoFStencil getBndryGradSten(const VolIndex&    a_vof,
-				     const Neighborhood a_neighborhood,				     
+				     const Neighborhood a_neighborhood,
+				     const CellLocation a_cellPositions,
 				     const EBISBox&     a_ebisbox,
 				     const Real         a_dx,
 				     const int          a_radius,
 				     const int          a_p,
-				     const int          a_order);
+				     const int          a_order,
+				     const bool         a_addStartingVof);
 
   /*!
     @brief Return the sum of weights in the stencil, for a specific variable. 
@@ -121,10 +168,23 @@ public:
     @param[in] a_vof       VolIndex to compute the position of
     @param[in] a_ebisbox   EBISBox
     @param[in] a_dx        Grid resolution
-    @return Tosition of a Vof, ignoring the "origin" of the coordinate system since this is only used together with LeastSquares::displacement(...)
+    @return Position of a face, ignoring the "origin" of the coordinate system since this is only used together with LeastSquares::displacement(...)
   */
-  static RealVect position(const CellPosition a_position,
+  static RealVect position(const CellLocation a_location,
 			   const VolIndex&    a_vof,
+			   const EBISBox&     a_ebisbox,
+			   const Real&        a_dx);
+
+  /*!
+    @brief Compute the position (ignoring the "origin) of a FaceIndex
+    @param[in] a_position  Position within the grid cell (e.g. center, centroid)
+    @param[in] a_face      Face
+    @param[in] a_ebisbox   EBISBox
+    @param[in] a_dx        Grid resolution
+    @return Position of a face, ignoring the "origin" of the coordinate system since this is only used together with LeastSquares::displacement(...)
+  */
+  static RealVect position(const FaceLocation a_location,
+			   const FaceIndex&   a_face,
 			   const EBISBox&     a_ebisbox,
 			   const Real&        a_dx);
   
@@ -138,9 +198,26 @@ public:
     @param[in] a_dx       Grid resolution
     @returns The vector pos(a_toVof) - pos(a_fromVof). 
   */
-  static RealVect displacement(const CellPosition a_from,
-			       const CellPosition a_to,
+  static RealVect displacement(const CellLocation a_from,
+			       const CellLocation a_to,
 			       const VolIndex&    a_fromVof,
+			       const VolIndex&    a_toVof,
+			       const EBISBox&     a_ebisbox,
+			       const Real&        a_dx);
+
+  /*!
+    @brief Computes the distance between a vof and and a face
+    @param[in] a_fromLoc   Specifying position in the cell defined by a_fromVof
+    @param[in] a_toLoc     Specifying position in the cell defined by a_toVof
+    @param[in] a_fromFace  face to compute the distance from
+    @param[in] a_toVof     Vof to compute the distance to
+    @param[in] a_ebisbox   EBISBox
+    @param[in] a_dx        Grid resolution
+    @returns The vector pos(a_toVof) - pos(a_fromVof). 
+  */
+  static RealVect displacement(const FaceLocation a_fromLoc,
+			       const CellLocation a_toLoc,
+			       const FaceIndex&   a_fromFace,
 			       const VolIndex&    a_toVof,
 			       const EBISBox&     a_ebisbox,
 			       const Real&        a_dx);
@@ -157,8 +234,8 @@ public:
     @param[in] a_dxTo        Grid resolution for the a_toVof vof
     @returns The vector pos(a_toVof) - pos(a_fromVof). 
   */
-  static RealVect displacement(const CellPosition a_from,
-			       const CellPosition a_to,
+  static RealVect displacement(const CellLocation a_from,
+			       const CellLocation a_to,
 			       const VolIndex&    a_fromVof,
 			       const VolIndex&    a_toVof,
 			       const EBISBox&     a_ebisboxFrom,
@@ -175,9 +252,25 @@ public:
     @param[in] a_ebisbox EBISBox
     @param[in] a_dx      Grid resolution
   */
-  static Vector<RealVect> getDisplacements(const CellPosition      a_from,
-					   const CellPosition      a_to,
+  static Vector<RealVect> getDisplacements(const CellLocation      a_from,
+					   const CellLocation      a_to,
 					   const VolIndex&         a_fromVof,
+					   const Vector<VolIndex>& a_toVofs,
+					   const EBISBox&          a_ebisbox,
+					   const Real&             a_dx);
+
+  /*!
+    @brief Get displacement vectors from a cell position to another cell position for a list of Vofs, i.e. x = (xFrom - xTo).
+    @param[in] a_fromLoc  Location on face
+    @param[in] a_toLoc    Location in Vofs
+    @param[in] a_fromFace Origin face
+    @param[in] a_toVofs   Vofs to compute the distance to/from
+    @param[in] a_ebisbox  EBISBox
+    @param[in] a_dx       Grid resolution
+  */
+  static Vector<RealVect> getDisplacements(const FaceLocation      a_fromLoc,
+					   const CellLocation      a_to,
+					   const FaceIndex&        a_fromFace,
 					   const Vector<VolIndex>& a_toVofs,
 					   const EBISBox&          a_ebisbox,
 					   const Real&             a_dx);
@@ -203,7 +296,8 @@ public:
   static VoFStencil computeGradSten(const Vector<VolIndex>& a_allVofs,
 				    const Vector<RealVect>& a_displacements,
 				    const int               a_p,
-				    const int               a_order);
+				    const int               a_order,
+				    const IntVectSet        a_knownTerms);
 
   /*!
     @brief Get a least squares gradient stencil solution for a system of first-order Taylor extrapolation for computing the gradient at a point.
@@ -219,7 +313,8 @@ public:
   static VoFStencil computeGradSten(const Vector<VolIndex>& a_allVofs,
 				    const Vector<RealVect>& a_displacements,
 				    const Vector<Real>&     a_weights,
-				    const int               a_order);
+				    const int               a_order,
+				    const IntVectSet        a_knownTerms);
   
   /*!
     @brief Get the size of a Taylor expansion for a given order
@@ -266,7 +361,7 @@ public:
     if some of the terms in the expansion are known, typically used when computing an approximation to the gradient at a point in space
     where the scalar value is known. Note that this will modify the right hand side of the system, and the user will have to figure out 
     how to make sense of the stencil. 
-    @param[in] a_derives       Specification of which terms to obtain from the series.
+    @param[in] a_derivs        Specification of which terms to obtain from the series.
     @param[in] a_knownTerms    Which terms in the Taylor series are known, and will be eliminated from the least squares system. 
     @param[in] a_allVofs       Vofs to include in the interpolation method. 
     @param[in] a_displacements Displacement vectors from the Vofs to the interpolation point
@@ -275,12 +370,12 @@ public:
     @return Stencils for each of the derivatives specified in the input argument. 
     @note This calls the more general version. 
   */
-  static std::map<IntVect, VoFStencil> computeInterpolationStencil(const IntVectSet&       a_derivs,
-								   const IntVectSet&       a_knownTerms,
-								   const Vector<VolIndex>& a_allVofs,
-								   const Vector<RealVect>& a_displacements,
-								   const int               a_p,
-								   const int               a_order);
+  static std::map<IntVect, VoFStencil> computeSingleLevelStencils(const IntVectSet&       a_derivs,
+								  const IntVectSet&       a_knownTerms,
+								  const Vector<VolIndex>& a_allVofs,
+								  const Vector<RealVect>& a_displacements,
+								  const int               a_p,
+								  const int               a_order);
 
   /*!
     @brief Compute a least squares interpolation to a specified order. 
@@ -291,7 +386,7 @@ public:
     if some of the terms in the expansion are known, typically used when computing an approximation to the gradient at a point in space
     where the scalar value is known. Note that this will modify the right hand side of the system, and the user will have to figure out 
     how to make sense of the stencil. 
-    @param[in] a_derives       Specification of which unknowns in the Taylor series will be returned.
+    @param[in] a_derivs        Specification of which unknowns in the Taylor series will be returned.
     @param[in] a_knownTerms    Which terms in the Taylor series are known. 
     @param[in] a_allVofs       Vofs to include in the interpolation method. 
     @param[in] a_displacements Displacement vectors from the Vofs to the interpolation point
@@ -301,25 +396,77 @@ public:
     @note This will throw an error if you don't have enough equations for obtaining the specified order. 
     @note The return map is always initialized with empty stencils. If computing the pseudoinverse fails, the returned stencils are all empty. 
   */
-  static std::map<IntVect, VoFStencil> computeInterpolationStencil(const IntVectSet&       a_derivs,
-								   const IntVectSet&       a_knownTerms,
-								   const Vector<VolIndex>& a_allVofs,
-								   const Vector<RealVect>& a_displacements,
-								   const Vector<Real>&     a_weights,
-								   const int               a_order);
-
-
+  static std::map<IntVect, VoFStencil> computeSingleLevelStencils(const IntVectSet&       a_derivs,
+								  const IntVectSet&       a_knownTerms,
+								  const Vector<VolIndex>& a_allVofs,
+								  const Vector<RealVect>& a_displacements,
+								  const Vector<Real>&     a_weights,
+								  const int               a_order);
 
   /*!
-    @brief Trim a system of equations down to a specified size. 
-    @details This will discard displacement vectors with the longest distance. If the system size is already equal to or smaller then this routine does nothing. 
-    @param[inout] a_vofs          Grid cells
-    @param[inout] a_displacements Displacement vectors
-    @param[in]    a_systemSize    Desired system size. 
+    @brief Compute a least squares interpolation to a specified order. This version separates the stencils into two levels. 
+    @details This is the general version which lets the caller specify why derivatives he wants out of the interpolation. The user
+    specifies this via a_derivs where each IntVect represent a differentiation. E.g. IntVect(0,0,0) is just f, IntVect(1,0,0) = d/dx,
+    IntVect(1,1,2) = (d^4)/(dx dy dz^2) and so on. The stencils for the directional derivatives are coded onto the return map. E.g.
+    if a_derivs contains IntVect(1,0,0) the stencil for d/dx is found in map.at(IntVect(1,0,0)). The user can solve a smaller system
+    if some of the terms in the expansion are known, typically used when computing an approximation to the gradient at a point in space
+    where the scalar value is known. Note that this will modify the right hand side of the system, and the user will have to figure out 
+    how to make sense of the stencil. 
+    @param[in] a_derivs            Specification of which unknowns in the Taylor series will be returned.
+    @param[in] a_knownTerms        Which terms in the Taylor series are known. 
+    @param[in] a_fineVofs          Fine-level vofs to include in the interpolation method. 
+    @param[in] a_coarVofs          Coar-level vofs to include in the interpolation method. 
+    @param[in] a_fineDisplacements Displacement vectors from the fine Vofs to the interpolation point
+    @param[in] a_coarDisplacements Displacement vectors from the coar Vofs to the interpolation point
+    @param[in] a_p                 Weighting factor for weighted least squares
+    @param[in] a_order             Order of the interpolation. 
+    @return Stencils for each of the derivatives specified in the input argument. The first entry in the pair contains fine-grid vofs only,
+    and the second entry contains the coar vofs. 
+    @note This will throw an error if you don't have enough equations for obtaining the specified order. 
+    @note The return map is always initialized with empty stencils. If computing the pseudoinverse fails, the returned stencils are all empty. 
   */
-  static void trimSystem(Vector<VolIndex>& a_vofs,
-			 Vector<RealVect>& a_displacements,
-			 const int         a_systemSize);
+  static std::map<IntVect, std::pair<VoFStencil, VoFStencil> > computeDualLevelStencils(const IntVectSet&       a_derivs,
+											const IntVectSet&       a_knownTerms,
+											const Vector<VolIndex>& a_fineVofs,
+											const Vector<VolIndex>& a_coarVofs,
+											const Vector<RealVect>& a_fineDisplacements,
+											const Vector<RealVect>& a_coarDisplacements,
+											const int               a_p,           
+											const int               a_order);
+
+  /*!
+    @brief Compute a least squares interpolation to a specified order. This version separates the stencils into two levels. 
+    @details This is the general version which lets the caller specify why derivatives he wants out of the interpolation. The user
+    specifies this via a_derivs where each IntVect represent a differentiation. E.g. IntVect(0,0,0) is just f, IntVect(1,0,0) = d/dx,
+    IntVect(1,1,2) = (d^4)/(dx dy dz^2) and so on. The stencils for the directional derivatives are coded onto the return map. E.g.
+    if a_derivs contains IntVect(1,0,0) the stencil for d/dx is found in map.at(IntVect(1,0,0)). The user can solve a smaller system
+    if some of the terms in the expansion are known, typically used when computing an approximation to the gradient at a point in space
+    where the scalar value is known. Note that this will modify the right hand side of the system, and the user will have to figure out 
+    how to make sense of the stencil. 
+    @param[in] a_derivs            Specification of which unknowns in the Taylor series will be returned.
+    @param[in] a_knownTerms        Which terms in the Taylor series are known. 
+    @param[in] a_fineVofs          Fine-level vofs to include in the interpolation method. 
+    @param[in] a_coarVofs          Coar-level vofs to include in the interpolation method. 
+    @param[in] a_fineDisplacements Displacement vectors from the fine Vofs to the interpolation point
+    @param[in] a_coarDisplacements Displacement vectors from the coar Vofs to the interpolation point
+    @param[in] a_fineWeights       Weights for the fine level
+    @param[in] a_coarWeights       Weights for the coarse level
+    @param[in] a_order             Order of the interpolation. 
+    @return Stencils for each of the derivatives specified in the input argument. The first entry in the pair contains fine-grid vofs only,
+    and the second entry contains the coar vofs. 
+    @note This will throw an error if you don't have enough equations for obtaining the specified order. 
+    @note The return map is always initialized with empty stencils. If computing the pseudoinverse fails, the returned stencils are all empty. 
+  */
+  static std::map<IntVect, std::pair<VoFStencil, VoFStencil> > computeDualLevelStencils(const IntVectSet&       a_derivs,
+											const IntVectSet&       a_knownTerms,
+											const Vector<VolIndex>& a_fineVofs,
+											const Vector<VolIndex>& a_coarVofs,
+											const Vector<RealVect>& a_fineDisplacements,
+											const Vector<RealVect>& a_coarDisplacements,
+											const Vector<Real>&     a_fineWeights,
+											const Vector<Real>&     a_coarWeights,
+											const int               a_order);
+
 
 };
 

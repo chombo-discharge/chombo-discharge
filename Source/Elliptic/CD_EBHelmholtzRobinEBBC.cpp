@@ -67,8 +67,8 @@ VoFStencil EBHelmholtzRobinEBBC::getMonoPathStencil(const VolIndex& a_vof, const
   const int radius       = 1;
   const bool useStartVof = true;
 
-  const VoFStencil stencil = LeastSquares::getInterpolationStencil(LeastSquares::CellPosition::Boundary,
-								   LeastSquares::CellPosition::Center,
+  const VoFStencil stencil = LeastSquares::getInterpolationStencil(Location::Cell::Boundary,
+								   m_dataLocation,
 								   LeastSquares::Connectivity::MonotonePath,
 								   a_vof,
 								   ebisbox,
@@ -142,34 +142,40 @@ void EBHelmholtzRobinEBBC::define() {
   }
 }
 
-void EBHelmholtzRobinEBBC::applyEBFlux(EBCellFAB&         a_Lphi,
+void EBHelmholtzRobinEBBC::applyEBFlux(VoFIterator&       a_vofit,
+				       EBCellFAB&         a_Lphi,
 				       const EBCellFAB&   a_phi,
-				       const VolIndex&    a_vof,
 				       const DataIndex&   a_dit,
-				       const Real&        a_beta) const {
+				       const Real&        a_beta,
+				       const bool&        a_homogeneousPhysBC) const {
 
   // Recall that the "flux" is kappaDivF = area*dphi/dn/DeltaX where dphi/dn = (A*phi - C)/B. We already have the phi
   // term in the stencil so only need to add -C/B.
+  for (a_vofit.reset(); a_vofit.ok(); ++a_vofit){
+    const VolIndex& vof = a_vofit();
+    
+    if(!a_homogeneousPhysBC){
+      Real B;
+      Real C;
+      if(m_useConstant){
+	B = m_constantB;
+	C = m_constantC;
+      }
+      else if(m_useFunction){
+	const RealVect pos = this->getBoundaryPosition(vof, a_dit);
+	B = m_functionB(pos);
+	C = m_functionC(pos);
+      }
 
-  Real B;
-  Real C;
-  if(m_useConstant){
-    B = m_constantB;
-    C = m_constantC;
-  }
-  else if(m_useFunction){
-    const RealVect pos = this->getBoundaryPosition(a_vof, a_dit);
-    B = m_functionB(pos);
-    C = m_functionC(pos);
-  }
+      const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
+      const Real areaFrac    = ebisbox.bndryArea(vof);
+      const Real helmBco     = (*m_Bcoef)[a_dit](vof, m_comp);
+      const Real kappaDivF   = -a_beta*helmBco*areaFrac*C/(m_dx*B);
 
-  const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
-  const Real areaFrac    = ebisbox.bndryArea(a_vof);
-  const Real helmBco     = (*m_Bcoef)[a_dit](a_vof, m_comp);
-  const Real kappaDivF   = -a_beta*helmBco*areaFrac*C/(m_dx*B);
-
-  if(std::abs(B) > 0.0){
-    a_Lphi(a_vof, m_comp) += kappaDivF;
+      if(std::abs(B) > 0.0){
+	a_Lphi(vof, m_comp) += kappaDivF;
+      }
+    }
   }
 }
 

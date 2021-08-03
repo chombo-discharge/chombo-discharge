@@ -24,6 +24,7 @@
 #include <BaseEBBC.H>
 
 // Our includes
+#include <CD_Location.H>
 #include <CD_EbCoarAve.H>
 #include <CD_EBMultigridInterpolator.H>
 #include <CD_EBHelmholtzOp.H>
@@ -68,7 +69,13 @@ public:
   EBHelmholtzOpFactory(const EBHelmholtzOpFactory& a_otherFactory) = delete;
 
   /*!
+    @brief Disallowed move constructor. Use the full constructor
+  */
+  EBHelmholtzOpFactory(const EBHelmholtzOpFactory&& a_otherFactory) = delete;
+
+  /*!
     @brief Full constructor
+    @param[in] a_dataLocation     Assumed data centering
     @param[in] a_alpha            alpha-coefficient in Helmholtz operator.
     @param[in] a_beta             beta-coefficient in Helmholtz operator.
     @param[in] a_probLo           Lower-left corner of domain
@@ -91,7 +98,8 @@ public:
     provide an option for using aggregation. The first entry a_deeperLevelGrids[0] should be a a factor 2 coarsening of the coarsest AMR level. 
     @note This operator is for time-independent a- and b-coefficients. 
   */
-  EBHelmholtzOpFactory(const Real&             a_alpha,
+  EBHelmholtzOpFactory(const Location::Cell    a_dataLocation,
+		       const Real&             a_alpha,
 		       const Real&             a_beta,
 		       const RealVect&         a_probLo,
 		       const AmrLevelGrids&    a_amrLevelGrids,
@@ -122,6 +130,11 @@ public:
   */
   void operator=(const EBHelmholtzOpFactory& a_opin) = delete;
 
+    /*!
+    @brief Disallowed move assignment
+  */
+  void operator=(const EBHelmholtzOpFactory&& a_opin) = delete;
+
   /*!
     @brief Create multigrid operator
     @param[in] a_fineDomain      Domain
@@ -144,8 +157,8 @@ public:
 
 protected:
 
-  // For debugging
-  int m_verbosity; 
+  // Data location
+  Location::Cell m_dataLocation;
 
   // Relaxation method
   RelaxType m_relaxMethod;
@@ -220,13 +233,12 @@ protected:
   bool isFiner(const ProblemDomain& a_domainOne, const ProblemDomain& a_domainTwo) const;
 
   /*!
-    @brief Constructor a coarseing of a fine level. 
+    @brief Construct coarsening of a grid level. 
     @param[out] a_coarseGrid     The coarse grid layout. Must be a pointer to an undefined EBLevelGrid on input
     @param[in]  a_fineGrid       The coarse grid layout. Must be a pointer to an undefined EBLevelGrid on input
     @param[in]  a_refRat         Refinement ratio
     @param[in]  a_blockingFactor Blocking factor to use for grid aggregation
-    @return This will return a multigrid level (i.e. one that is completely overlapping) the fine level. If we can, we use aggregation with
-    the blocking factor. Otherwise we try to coarsen directly. 
+    @return This will return a multigrid level (i.e. one that is completely overlapping) the fine level. If we can, we coarsen directly. 
   */
   bool getCoarserLayout(EBLevelGrid& a_coarseGrid, const EBLevelGrid& a_fineGrid, const int a_refRat, const int a_blockingFactor) const;
 

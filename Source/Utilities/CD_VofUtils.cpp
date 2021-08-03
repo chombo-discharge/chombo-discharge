@@ -171,6 +171,18 @@ void VofUtils::includeCells(Vector<VolIndex>& a_vofs, const IntVectSet& a_includ
   a_vofs = newVofs;
 }
 
+void VofUtils::onlyUnique(Vector<VolIndex>& a_vofs){
+  std::set<VolIndex> setVofs;
+  for (int i = 0; i < a_vofs.size(); i++){
+    setVofs.insert(a_vofs[i]);
+  }
+
+  a_vofs.resize(0);
+  for (const auto& v : setVofs){
+    a_vofs.push_back(v);
+  }
+}
+
 bool VofUtils::isQuadrantWellDefined(const RealVect a_normal){
   bool ret = true;
 

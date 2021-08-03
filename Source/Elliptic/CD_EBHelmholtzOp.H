@@ -25,6 +25,7 @@
 #include <EBFluxRegister.H>
 
 // Our includes
+#include <CD_Location.H>
 #include <CD_EBMultigridInterpolator.H>
 #include <CD_EbCoarAve.H>
 #include <CD_EBHelmholtzEBBC.H>
@@ -37,16 +38,14 @@
 class EBHelmholtzOp : public LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB> {
 public:
 
-  //  using EBHelmholtzDomainBc = ConductivityBaseDomainBC;
-  //  using EBHelmholtzEbBc     = ConductivityBaseEBBC;
-
   /*!
     @brief Relaxation method for the operators
   */
   enum class RelaxationMethod {
+    NoRelax,
     PointJacobi,
+    GauSaiRedBlack,
     GauSaiMultiColor,
-    GauSaiMultiColorFast,
   };
 
   /*!
@@ -60,9 +59,15 @@ public:
   EBHelmholtzOp(const EBHelmholtzOp& a_other) = delete;
 
   /*!
+    @brief Disallowed move constructor
+  */
+  EBHelmholtzOp(const EBHelmholtzOp&& a_other) = delete;
+
+  /*!
     @brief Full constructor
   */
-  EBHelmholtzOp(const EBLevelGrid&                                 a_eblgFine,
+  EBHelmholtzOp(const Location::Cell                               a_dataLocation,
+		const EBLevelGrid&                                 a_eblgFine,
 		const EBLevelGrid&                                 a_eblg,
 		const EBLevelGrid&                                 a_eblgCoFi,
 		const EBLevelGrid&                                 a_eblgCoar,
@@ -75,7 +80,7 @@ public:
 		const RealVect&                                    a_probLo,
 		const Real&                                        a_dx,
 		const int&                                         a_refToFine,
-		const int&                                         a_refToCoar,
+		const int&                                         a_refToCoar,		
 		const bool&                                        a_hasFine,
 		const bool&                                        a_hasCoar,
 		const bool&                                        a_hasMGObjects,
@@ -94,6 +99,64 @@ public:
   ~EBHelmholtzOp();
 
   /*!
+    @brief No copy assigment allowed
+  */
+  EBHelmholtzOp& operator=(const EBHelmholtzOp& a_oper) = delete;
+
+  /*!
+    @brief No move assigment allowed
+  */
+  EBHelmholtzOp& operator=(const EBHelmholtzOp&& a_oper) = delete;
+
+  /*!
+    @brief Turn off BCs
+  */
+  void turnOffBCs();
+
+  /*!
+    @brief Turn on BCs
+  */
+  void turnOnBCs();
+
+  /*!
+    @brief Coarsen data from fine to coar level
+    @param[in] a_phi     Data on this level
+    @param[in] a_phiFine Data on finer level
+    @note This routine is used in AMROperator to ensure that EB fluxes which are described by stencils get consistent data under the fine level. 
+  */
+  void coarsen(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_phiFine);
+
+  /*!
+    @brief Point Jacobi kernel. 
+    @param[inout] a_Lcorr Storage for computing L(a_corr)
+    @param[inout] a_corr    Correction
+    @param[in]    a_resid   Residual
+    @param[in]    a_cellBox Grid box
+    @param[in]    a_dit     Data index
+  */
+  void pointJacobiKernel(EBCellFAB& a_Lcorr, EBCellFAB& a_corr, const EBCellFAB& a_resid, const Box& a_cellBox, const DataIndex& a_dit);
+
+  /*!
+    @brief Red-black Gauss-Seidel kernel
+    @param[inout] a_Lcorr    Storage for computing L(a_corr)
+    @param[inout] a_corr     Correction
+    @param[in]    a_resid    Residual
+    @param[in]    a_redBlack Red or black
+    @param[in]    a_cellBox  Grid box
+    @param[in]    a_dit      Data index
+  */
+  void gauSaiRedBlackKernel(EBCellFAB& a_Lcorr, EBCellFAB& a_corr, const EBCellFAB& a_resid, const Box& a_cellBox, const DataIndex& a_dit, const int& a_redBlack);
+
+  /*!
+    @brief Multi-color Gauss-Seidel kernel
+    @param[inout] a_Lcorr    Storage for computing L(a_corr)
+    @param[inout] a_corr     Correction
+    @param[in]    a_resid    Residual
+    @param[in]    a_color    Color
+  */
+  void gauSaiMultiColorKernel(EBCellFAB& a_Lcorr, EBCellFAB& a_corr, const EBCellFAB& a_resid, const Box& a_cellBox, const DataIndex& a_dit, const IntVect& a_color);
+
+  /*!
     @brief Compute residual on this level. 
     @param[out] a_residual          Residual rhs - L(phi)
     @param[in]  a_phi               phi
@@ -109,6 +172,51 @@ public:
     @details This just runs a few relaxations. 
   */
   void preCond(LevelData<EBCellFAB>& a_corr, const LevelData<EBCellFAB>& a_residual) override final;
+  
+  /*!
+    @brief Apply coarse-fine boundary conditions
+    @param[inout] a_phiFine         Fine data
+    @param[inout] a_phiCoar         Coarse data
+    @param[in]    a_homogeneousCFBC Homogeneous CF or not (i.e. coar data is zero);
+  */
+  void interpolateCF(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>* a_phiCoar, const bool a_homogeneousCFBC);
+
+  /*!
+    @brief Do homogeneous coarse-fine interpolation
+    @param[in] a_phi Data
+  */
+  void homogeneousCFInterp(LevelData<EBCellFAB>& a_phi);
+
+  /*!
+    @brief Inhomogeneous coarse-fine interpolation
+    @param[inout] a_phiFine Fine data. Ghost cells will be filled.
+    @param[inout] a_phiCoar Coarse data. 
+  */
+  void inhomogeneousCFInterp(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_phiCoar);
+  
+  /*!
+    @brief Multi-colored Gauss-Seidel kernel. Public because MFHelmholtzOp may want to use use. 
+    @param[in] a_phi Correction
+    @param[in] a_phi Lphi L(corrcetion)
+    @param[in] a_rhs Residual
+    @param[in] a_color "Color":
+  */
+  void gauSaiMultiColor(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_rhs, const IntVect& a_color) const;
+
+  /*!
+    @brief Apply operator on this level. This is a more general version which can turn on/off homogeneous and CF bcs.
+    @param[out] a_Lphi              L(phi)
+    @param[out] a_phi               Phi on this level
+    @param[out] a_phiCoar           Coarse-level phi. If you have a coar this 
+    @param[in]  a_homogeneousPhysBC Use homogeneous physical BCs or not
+    @param[in]  a_homogeneousCFBC   Use homogeneous coarse-fine bcs or not
+    @note a_phi is not really const and we do a nasty cast. Leaving it as const because we only modify the ghost cells!
+  */
+  void applyOp(LevelData<EBCellFAB>&             a_Lphi,
+	       const LevelData<EBCellFAB>&       a_phi,
+	       const LevelData<EBCellFAB>* const a_phiCoar,
+	       const bool                        a_homogeneousPhysBC,
+	       const bool                        a_homogeneousCFBC);
 
   /*!
     @brief Apply operator 
@@ -120,25 +228,39 @@ public:
   void applyOp(LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_phi, bool a_homogeneousPhysBc) override final;
 
   /*!
-    @brief Apply operator in regular cells.
-    @param[in]
+    @brief Apply operator in a grid box. 
+    @param[out] a_Lphi              L(phi)
+    @param[in]  a_phi               Phi
+    @param[in]  a_cellBox           Grid box
+    @param[in]  a_dit               Data indxe
+    @param[in]  a_homogeneousPhysBC Homogeneous physical BCs or not
   */
-  void applyOpRegular(EBCellFAB& a_Lphi, EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBc);
+  void applyOp(EBCellFAB& a_Lphi, EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBC);
+
+  /*!
+    @brief Apply operator in regular cells.
+    @param[out] a_Lphi              L(phi)
+    @param[in]  a_phi               Phi
+    @param[in]  a_cellBox           Grid box
+    @param[in]  a_dit               Data indxe
+    @param[in]  a_homogeneousPhysBC Homogeneous physical BCs or not
+  */
+  void applyOpRegular(EBCellFAB& a_Lphi, EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBC);
 
   /*!
     @brief Apply domain flux. 
     @note This sets the ghost cells of phi to phi(i-1) = phi(i) + F*dx/bco such that when we take the centered difference we get
-          -bco*(phi(i) - phi(i-1))/dx = F. 
+    -bco*(phi(i) - phi(i-1))/dx = F. 
   */
   void applyDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBc);
 
   /*!
-    @brief Fuck those ghost cells in particular
-  */
-  void suppressDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit);
-
-  /*!
     @brief Apply operator in irregular cells
+    @param[out] a_Lphi              L(phi)
+    @param[in]  a_phi               Cell-centered data
+    @param[in]  a_cellBox           Cell box
+    @param[in]  a_dit               Grid index
+    @param[in]  a_homogeneousPhysBC Homogeneous physical BCs or not
   */
   void applyOpIrregular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBC);
 
@@ -154,16 +276,6 @@ public:
     @details This does a local copy from rhs to lhs
   */
   void assign(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) override final;
-
-  /*!
-    @brief Weird but true, coarsening between VCycles give better convergence
-  */
-  unsigned int orderOfAccuracy(void) const override final;
-
-  /*!
-    @brief Enforce CF consistency
-  */
-  void enforceCFConsistency(LevelData<EBCellFAB>& a_coarCorr, const LevelData<EBCellFAB>& a_fineCorr) override final;
 
   /*!
     @brief Compute the dot product??
@@ -243,6 +355,23 @@ public:
     @brief Return coarsening factor to coarser level (1 if there is no coarser level);
   */
   int refToCoarser() override final;
+  
+  /*!
+    @brief Apply the AMR operator, i.e. compute L(phi) in an AMR context. 
+    @param[out] a_residual          Residual on this level
+    @param[in]  a_phiFine           Phi on fine level
+    @param[in]  a_phi               Phi on this level
+    @param[in]  a_phiCoar           Phi on coar level
+    @param[in]  a_homogeneousPhysBC Use homogeneous physical BCs or not
+    @param[in]  a_finerOp           Finer operatator
+    @details This involves ghost cell interpolation if there's a coarse level, and refluxing if there's a fine level.
+  */
+  void AMROperator(LevelData<EBCellFAB>&              a_Lphi,
+		   const LevelData<EBCellFAB>&        a_phiFine,
+		   const LevelData<EBCellFAB>&        a_phi,
+		   const LevelData<EBCellFAB>&        a_phiCoar,
+		   const bool                         a_homogeneousPhysBC,
+		   AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp);
 
   /*!
     @brief Compute residual on this level. AMR version. 
@@ -343,6 +472,9 @@ public:
 
   /*!
     @brief Update AMR residual
+    @param[in] a_residual         Residual
+    @param[in] a_correction       Correction
+    @param[in] a_coarseCorrection Coarse-level correction
   */
   void AMRUpdateResidual(LevelData<EBCellFAB>&       a_residual,
 			 const LevelData<EBCellFAB>& a_correction,
@@ -399,6 +531,11 @@ public:
   */
   LevelData<EBFluxFAB>& getFlux();
 
+  /*!
+    @brief Returns relaxation weights
+  */
+  LevelData<EBCellFAB>& getRelaxationWeights();
+
 protected:
 
   /*!
@@ -422,6 +559,11 @@ protected:
   RelaxationMethod m_relaxationMethod;
 
   /*!
+    @brief Data centering
+  */
+  Location::Cell m_dataLocation;
+
+  /*!
     @brief True if there is a multigrid level below this operator
   */
   bool m_hasMGObjects;
@@ -437,14 +579,14 @@ protected:
   bool m_hasCoar;
 
   /*!
-    @brief Refinement factor to fine level
+    @brief Refinement factor to coarse level
   */
-  int m_refToFine;
+  int m_refToCoar;
 
   /*!
     @brief Refinement factor to fine level
   */
-  int m_refToCoar;
+  int m_refToFine;
 
   /*!
     @brief Turn off BCs or not. Used in applyOpNoBoundary
@@ -592,9 +734,14 @@ protected:
   LayoutData<BaseIFFAB<FaceStencil> > m_interpStencil[SpaceDim];
 
   /*!
-    @brief Operator stencil in irregular cells
+    @brief Face centroid flux stencil. Defined on all faces connecting one or more irregular vofs
   */
-  LayoutData<RefCountedPtr<EBStencil> > m_opEBStencil;
+  LayoutData<BaseIFFAB<VoFStencil> > m_centroidFluxStencil[SpaceDim];
+
+  /*!
+    @brief Operator stencils in irregular cells (and ones that border irregular cells if using a centroid discretization)
+  */
+  LayoutData<BaseIVFAB<VoFStencil> > m_opStencils;
 
   /*!
     @brief Weights of diagonal alpha terms
@@ -609,22 +756,27 @@ protected:
   /*!
     @brief VoFIterator for irregular cells
   */
-  LayoutData<VoFIterator> m_vofIterIrreg;
+  mutable LayoutData<VoFIterator> m_vofIterIrreg;
 
   /*!
     @brief VoFIterator for "multi-cells". 
   */
-  LayoutData<VoFIterator> m_vofIterMulti;
+  mutable LayoutData<VoFIterator> m_vofIterMulti;
+
+  /*!
+    @brief VoFIterator which iterates over all cells that are 1) a cut-cell or 2) borders a cut-cell. 
+  */
+  mutable LayoutData<VoFIterator> m_vofIterStenc;
 
   /*!
     @brief VoF iterators for lo domain side. 
   */
-  LayoutData<VoFIterator> m_vofIterDomLo[SpaceDim];
+  mutable LayoutData<VoFIterator> m_vofIterDomLo[SpaceDim];
 
   /*!
     @brief VoF iterators for hi domain side
   */
-  LayoutData<VoFIterator> m_vofIterDomHi[SpaceDim];
+  mutable LayoutData<VoFIterator> m_vofIterDomHi[SpaceDim];
 
   /*!
     @brief Domain boxes on each side
@@ -635,37 +787,7 @@ protected:
     @brief "Colors" for the relaxation methods
   */
   Vector<IntVect> m_colors;
-
-#if CH_SPACEDIM==2
-  LayoutData<VoFIterator >         m_vofItIrregColorDomLo[4][SpaceDim];
-  LayoutData<VoFIterator >         m_vofItIrregColorDomHi[4][SpaceDim];
-  LayoutData<BaseIVFAB<Real> >     m_cacheEBxDomainFluxLo[4][SpaceDim];
-  LayoutData<BaseIVFAB<Real> >     m_cacheEBxDomainFluxHi[4][SpaceDim];
-  LayoutData<RefCountedPtr<EBStencil> >  m_colorEBStencil[4];
-#elif CH_SPACEDIM==3
-  LayoutData<VoFIterator >         m_vofItIrregColorDomLo[8][SpaceDim];
-  LayoutData<VoFIterator >         m_vofItIrregColorDomHi[8][SpaceDim];
-  LayoutData<BaseIVFAB<Real> >     m_cacheEBxDomainFluxLo[8][SpaceDim];
-  LayoutData<BaseIVFAB<Real> >     m_cacheEBxDomainFluxHi[8][SpaceDim];
-  LayoutData<RefCountedPtr<EBStencil> >  m_colorEBStencil[8];
-#endif
-
-
-  /*!
-    @brief Apply operator on this level. This is a more general version which can turn on/off homogeneous and CF bcs.
-    @param[out] a_Lphi              L(phi)
-    @param[out] a_phi               Phi on this level
-    @param[out] a_phiCoar           Coarse-level phi. If you have a coar this 
-    @param[in]  a_homogeneousPhysBC Use homogeneous physical BCs or not
-    @param[in]  a_homogeneousCFBC   Use homogeneous coarse-fine bcs or not
-    @note a_phi is not really const and we do a nasty cast. Leaving it as const because we only modify the ghost cells!
-  */
-  void applyOp(LevelData<EBCellFAB>&             a_Lphi,
-	       const LevelData<EBCellFAB>&       a_phi,
-	       const LevelData<EBCellFAB>* const a_phiCoar,
-	       const bool                        a_homogeneousPhysBC,
-	       const bool                        a_homogeneousCFBC);
-
+  
   /*!
     @brief Jacobi relaxation
     @param[inout] a_correction Correction
@@ -674,6 +796,14 @@ protected:
   */
   void relaxPointJacobi(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations);
 
+    /*!
+    @brief Jacobi relaxation
+    @param[inout] a_correction Correction
+    @param[in]    a_residual   Residual
+    @param[in]    a_iterations Number of iterations
+  */
+  void relaxGSRedBlack(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations);
+
   /*!
     @brief Multi-colored gauss-seidel relaxation
     @param[inout] a_correction Correction
@@ -681,42 +811,6 @@ protected:
     @param[in]    a_iterations Number of iterations
   */
   void relaxGSMultiColor(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations);
-
-  /*!
-    @brief Red-black Gauss-Seidel relaxation
-  */
-  void gauSaiMultiColor(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_rhs, const IntVect& a_color);
-
-  /*!
-    @brief Fast Gauss-seidel relaxation
-    @param[inout] a_correction Correction
-    @param[in]    a_residual   Residual
-    @param[in]    a_iterations Number of iterations
-  */
-  void relaxGSMultiColorFast(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations);
-
-  /*!
-    @brief Optimized relaxation
-  */
-  void GauSaiMultiColorAllIrregular(EBCellFAB& a_phi, const EBCellFAB& a_rhs, const int& a_icolor, const DataIndex& a_dit);
-
-  /*!
-    @brief Apply the AMR operator, i.e. compute L(phi) in an AMR context. 
-    @param[out] a_residual          Residual on this level
-    @param[in]  a_phiFine           Phi on fine level
-    @param[in]  a_phi               Phi on this level
-    @param[in]  a_phiCoar           Phi on coar level
-    @param[in]  a_homogeneousPhysBC Use homogeneous physical BCs or not
-    @param[in]  a_finerOp           Finer operatator
-    @details This involves ghost cell interpolation if there's a coarse level, and refluxing if there's a fine level.
-  */
-  void AMROperator(LevelData<EBCellFAB>&              a_Lphi,
-		   const LevelData<EBCellFAB>&        a_phiFine,
-		   const LevelData<EBCellFAB>&        a_phi,
-		   const LevelData<EBCellFAB>&        a_phiCoar,
-		   const bool                         a_homogeneousPhysBC,
-		   AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp);
-
 
   /*!
     @brief Calculate the weight of the diagonal term
@@ -729,24 +823,9 @@ protected:
   void computeRelaxationCoefficient();
 
   /*!
-    @brief Do homogeneous coarse-fine interpolation
+    @brief Define stencils
   */
-  void homogeneousCFInterp(LevelData<EBCellFAB>& a_phi);
-
-  /*!
-    @brief Inhomogeneous coarse-fine interpolation
-    @param[inout] a_phiFine Fine data. Ghost cells will be filled.
-    @param[inout] a_phiCoar Coarse data. 
-  */
-  void inhomogeneousCFInterp(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_phiCoar);
-
-  /*!
-    @brief Apply coarse-fine boundary conditions
-    @param[inout] a_phiFine         Fine data
-    @param[inout] a_phiCoar         Coarse data
-    @param[in]    a_homogeneousCFBC Homogeneous CF or not (i.e. coar data is zero);
-  */
-  void interpolateCF(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar, const bool a_homogeneousCFBC);
+  void defineStencils();
 
   /*!
     @brief Get the face-centered flux stencil
@@ -765,37 +844,6 @@ protected:
     @note The current version just interpolates the centered fluxes. 
   */
   VoFStencil getFaceCentroidFluxStencil(const FaceIndex& a_face, const DataIndex& a_dit) const;
-
-  /*!
-    @brief Get finite-volume stencil for computing kappa*div(F). 
-    @param[in] a_vof Grid index
-    @param[in] a_dit DataIndex, needed because we multiply by the B-coefficient. 
-    @note Boundary faces are not included. 
-  */
-  VoFStencil getKappaDivFStencil(const VolIndex& a_vof, const DataIndex& a_dit) const;
-
-  /*!
-    @brief Define stencils
-  */
-  void defineStencils();
-
-  /*!
-    @brief Define color stencils (which make relaxation go faster)
-  */
-  void defineColorStencils();
-
-  /*!
-    @brief Compute flux on centroid faces.
-    @param[out] a_fluxCentroid Flux on centroids
-    @param[in   a_phi          Cell-centered data
-    @param[in]  a_cellBox      Cell-centered compute box.
-    @param[in]  a_dit          Data index
-    @note This computes the flux for all faces in a_cellBox except for boundary faces. 
-  */
-  void getFaceCentroidFlux(EBFluxFAB&       a_fluxCentroid,
-			   const EBCellFAB& a_phi,
-			   const Box&       a_cellBox,
-			   const DataIndex& a_dit);
 
   /*!
     @brief Compute centroid fluxes in a direction.
@@ -819,40 +867,51 @@ protected:
     @param[in]  a_dit          Data index
     @note This computes the flux for all dir-oriented faces in a_cellBox except for boundary faces. 
   */
-  void getFaceCenteredFlux(EBFaceFAB&       a_fluxCenter,
+  void computeFaceCenteredFlux(EBFaceFAB&       a_fluxCenter,
 			   const EBCellFAB& a_phi,
 			   const Box&       a_cellBox,
 			   const DataIndex& a_dit,
 			   const int        a_dir);
 
   /*!
-    @brief Interpolate fluxes in cut-cells
-    @param[inout] a_flux Should contain face-centered fluxes on input and face centroid centered fluxes no output
-    @param[in]    a_dit  Data index
-    @param[in]    a_dir  Coordinate direction
+    @brief Compute face-centered fluxes
+    @param[out] a_fluxCenter   Flux on center
+    @param[in   a_phi          Cell-centered data
+    @param[in]  a_cellBox      Cell-centered compute box.
+    @param[in]  a_dit          Data index
+    @note This computes the flux for all dir-oriented faces in a_cellBox except for boundary faces. 
   */
-  void interpolateFluxes(EBFaceFAB& a_flux, const Box& a_cellBox, const DataIndex& a_dit, const int a_dir);
+  void computeFaceCentroidFlux(EBFaceFAB&       a_flux,
+			       const EBCellFAB& a_phi,
+			       const Box&       a_cellBox,
+			       const DataIndex& a_dit,
+			       const int        a_dir);  
 
   /*!
     @brief Increment coarse flux register
-    @param[in] a_phi Cell-centered data. 
+    @param[in] a_phi Cell-centered data on the coarse level. 
   */
   void incrementFRCoar(const LevelData<EBCellFAB>& a_phi);
 
   /*!
     @brief Increment coarse flux register
-    @param[in] a_phi Cell-centered data. 
+    @param[in] a_phiFine Cell-centered data on the fine level
+    @param[in] a_phi     Cell-centered data on the coarse level
+    @param[in] a_finerOp Finer operator
   */
   void incrementFRFine(const LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phi, AMRLevelOp<LevelData<EBCellFAB> >& a_finerOp);
 
   /*!
     @brief Reflux algorithm.
+    @param[inout] a_Lphi L(phiFine, phiCoar). This is modified along the CF interface to consistently account for fine-level fluxes. 
+    @param[in]    a_phiFine Data on finer level
+    @param[in]    a_phi     Data on this operator's level
+    @param[in]    a_finerOp Operator on fine level
   */
-  void reflux(LevelData<EBCellFAB>&              Lphi,
+  void reflux(LevelData<EBCellFAB>&              a_Lphi,
 	      const LevelData<EBCellFAB>&        a_phiFine,
 	      const LevelData<EBCellFAB>&        a_phi,
 	      AMRLevelOp<LevelData<EBCellFAB> >& a_finerOp);
-
 };
 
 #include <CD_NamespaceFooter.H>

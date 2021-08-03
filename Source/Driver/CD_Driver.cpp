@@ -60,7 +60,7 @@ Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeomet
   // Always register this Realm and these operators. 
   m_realm = Realm::Primal;
   m_amr->registerRealm(m_realm);
-  m_amr->registerOperator(s_eb_pwl_interp, m_realm, phase::gas); // For output
+  m_amr->registerOperator(s_eb_fill_patch, m_realm, phase::gas); 
 }
 
 Driver::~Driver(){

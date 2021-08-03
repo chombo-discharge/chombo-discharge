@@ -46,7 +46,7 @@ public:
   void define(const Vector<RefCountedPtr<EBQuadCFInterp> >& a_quadcfi);
 
   /*!
-    @brief Get interpolation utility
+    @brief get interpolation utility for phase
   */
   const RefCountedPtr<EBQuadCFInterp>& getEBQuadCFInterpPointer(const int a_phase) const;
 
@@ -54,20 +54,13 @@ public:
     @brief get interpolation utility for phase
   */
   EBQuadCFInterp& getEBQuadCFInterp(const int a_phase);
-
-  /*!
-    @brief get interpolation utility for phase
-  */
-  const EBQuadCFInterp& getEBQuadCFInterp(const int a_phase) const;
   
 protected:
-
 
   /*!
     @brief Interpolation for each phase. 
   */
   Vector<RefCountedPtr<EBQuadCFInterp> > m_quadcfi;
-  
 };
 
 #include <CD_NamespaceFooter.H>

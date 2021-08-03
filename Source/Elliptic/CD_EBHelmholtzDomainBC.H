@@ -19,6 +19,7 @@
 #include <EBFluxFAB.H>
 
 // Our includes
+#include <CD_Location.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -55,7 +56,11 @@ public:
     @param[in] a_dx     Grid resolution
     @note This sets the internals for the BC object. This is called by EBHelmholtzOp when it defines stencils. 
   */
-  void define(const EBLevelGrid& a_eblg, const RefCountedPtr<LevelData<EBFluxFAB> >& a_Bcoef, const RealVect& m_probLo, const Real a_dx);
+  void define(const Location::Cell                        a_dataLocation,
+	      const EBLevelGrid&                          a_eblg,
+	      const RefCountedPtr<LevelData<EBFluxFAB> >& a_Bcoef,
+	      const RealVect&                             a_probLo,
+	      const Real                                  a_dx);
 
   /*!
     @brief Get face flux. This is for regular cells. 
@@ -101,6 +106,11 @@ protected:
     @brief Number of components. Always have m_nComp = 1
   */
   constexpr static int m_nComp = 1;
+
+  /*!
+    @brief Assumed data centering
+  */
+  Location::Cell m_dataLocation;
 
   /*!
     @brief Grid resolution

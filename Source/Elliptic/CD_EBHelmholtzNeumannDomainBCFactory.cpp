@@ -58,7 +58,7 @@ void EBHelmholtzNeumannDomainBCFactory::setBxDphiDn(const std::function<Real(con
   m_multByBco = false;
 }
 
-RefCountedPtr<EBHelmholtzDomainBC> EBHelmholtzNeumannDomainBCFactory::create() {
+RefCountedPtr<EBHelmholtzDomainBC> EBHelmholtzNeumannDomainBCFactory::create() const {
 
   auto bc = new EBHelmholtzNeumannDomainBC();
 

@@ -358,7 +358,12 @@ void SigmaSolver::writePlotData(EBAMRCellData& a_output, int& a_comp){
   DataOps::setValue(scratch, 0.0);
   DataOps::incr(scratch, m_phi, 1.0);
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    scratch[lvl]->localCopyTo(Interval(0,0), *a_output[lvl], Interval(a_comp, a_comp));
+    if(m_realm == a_output.getRealm()){
+      scratch[lvl]->localCopyTo(Interval(0,0), *a_output[lvl], Interval(a_comp, a_comp));
+    }
+    else{
+      scratch[lvl]->copyTo(Interval(0,0), *a_output[lvl], Interval(a_comp, a_comp));
+    }
   }
   a_comp++;
 
@@ -366,7 +371,12 @@ void SigmaSolver::writePlotData(EBAMRCellData& a_output, int& a_comp){
   DataOps::setValue(scratch, 0.0);
   DataOps::incr(scratch, m_flux, 1.0);
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    scratch[lvl]->localCopyTo(Interval(0,0), *a_output[lvl], Interval(a_comp, a_comp));
+    if(m_realm == a_output.getRealm()){
+      scratch[lvl]->localCopyTo(Interval(0,0), *a_output[lvl], Interval(a_comp, a_comp));
+    }
+    else{
+      scratch[lvl]->copyTo(Interval(0,0), *a_output[lvl], Interval(a_comp, a_comp));
+    }
   }
   a_comp++;
 }

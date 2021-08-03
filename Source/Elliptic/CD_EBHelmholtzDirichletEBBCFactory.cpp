@@ -44,7 +44,7 @@ void EBHelmholtzDirichletEBBCFactory::setOrder(const int a_order){
 }
 
 void EBHelmholtzDirichletEBBCFactory::setWeight(const int a_weight){
-  CH_assert(a_weight > 0);
+  CH_assert(a_weight >= 0);
   m_weight = a_weight;
 }
 
@@ -73,6 +73,9 @@ RefCountedPtr<EBHelmholtzEBBC> EBHelmholtzDirichletEBBCFactory::create() {
   }
   else if(m_useFunction){
     bc->setValue(m_functionValue);
+  }
+  else{
+    MayDay::Error("EBHelmholtzDirichletEBBCFactory::create() - logic bust. Not using constant or function");
   }
 
   return RefCountedPtr<EBHelmholtzEBBC>(bc);

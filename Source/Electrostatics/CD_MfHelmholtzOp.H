@@ -83,7 +83,11 @@ public:
 		      const Real&                                   a_beta,
 		      const RealVect&                               a_origin);
 
+  virtual unsigned int orderOfAccuracy(void) const  override {
+    return 99;
+  }
 
+  virtual void enforceCFConsistency(LevelData<MFCellFAB>& a_coarseCorrection, const LevelData<MFCellFAB>& a_correction) override;
 
   /*!
     @brief Set jump condition

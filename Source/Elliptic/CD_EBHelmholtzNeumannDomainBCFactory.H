@@ -83,7 +83,7 @@ public:
   /*!
     @brief Factory method. 
   */
-  virtual RefCountedPtr<EBHelmholtzDomainBC> create() override;
+  virtual RefCountedPtr<EBHelmholtzDomainBC> create() const override;
 
 protected:
 

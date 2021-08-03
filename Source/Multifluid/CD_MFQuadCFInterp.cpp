@@ -35,8 +35,4 @@ EBQuadCFInterp& MFQuadCFInterp::getEBQuadCFInterp(const int a_phase) {
   return *m_quadcfi[a_phase];
 }
 
-const EBQuadCFInterp& MFQuadCFInterp::getEBQuadCFInterp(const int a_phase) const {
-  return *m_quadcfi[a_phase];
-}
-
 #include <CD_NamespaceFooter.H>

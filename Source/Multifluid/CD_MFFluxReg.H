@@ -29,16 +29,16 @@ public:
     @brief Constructor
   */
   MFFluxReg();
+  
+  /*!
+    @brief Full constructor. Calls define
+  */
+  MFFluxReg(const Vector<RefCountedPtr<EBFluxRegister> >& a_fastfr);
 
   /*!
     @brief Destructor
   */
   ~MFFluxReg();
-
-  /*!
-    @brief Full constructor. Calls define
-  */
-  MFFluxReg(const Vector<RefCountedPtr<EBFluxRegister> >& a_fastfr);
 
   /*!
     @brief Define function

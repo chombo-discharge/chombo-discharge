@@ -74,32 +74,38 @@ void EBHelmholtzNeumannEBBC::define() {
   }
 }
 
-void EBHelmholtzNeumannEBBC::applyEBFlux(EBCellFAB&         a_Lphi,
+void EBHelmholtzNeumannEBBC::applyEBFlux(VoFIterator&       a_vofit,
+					 EBCellFAB&         a_Lphi,
 					 const EBCellFAB&   a_phi,
-					 const VolIndex&    a_vof,
 					 const DataIndex&   a_dit,
-					 const Real&        a_beta) const {
+					 const Real&        a_beta,
+					 const bool&        a_homogeneousPhysBC) const {
 
   // TLDR: For Neumann, we want to add the flux beta*bco*area*(dphi/dn)/dx where the
   //       dx comes from the fact that the term we are computing will be added to kappa*div(F)
-  
-  Real value;
-  if(m_useConstant){
-    value = m_constantDphiDn;
-  }
-  else if(m_useFunction){
-    const RealVect pos = this->getBoundaryPosition(a_vof, a_dit);
-    value = m_functionDphiDn(pos);
-  }
+  for (a_vofit.reset(); a_vofit.ok(); ++a_vofit){
+    const VolIndex& vof = a_vofit();
+    
+    if(!a_homogeneousPhysBC){
+      Real value;
+      if(m_useConstant){
+	value = m_constantDphiDn;
+      }
+      else if(m_useFunction){
+	const RealVect pos = this->getBoundaryPosition(vof, a_dit);
+	value = m_functionDphiDn(pos);
+      }
 
-  // B-coefficient, area fraction, and division by dx (from Div(F)) already a part of the boundary weights, but
-  // beta is not.
-  const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
-  const Real areaFrac    = ebisbox.bndryArea(a_vof);
-  const Real B           = m_multByBco ? (*m_Bcoef)[a_dit](a_vof, m_comp) : 1;
-  const Real kappaDivF   = a_beta*B*value*areaFrac/m_dx;
+      // B-coefficient, area fraction, and division by dx (from Div(F)) already a part of the boundary weights, but
+      // beta is not.
+      const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
+      const Real areaFrac    = ebisbox.bndryArea(vof);
+      const Real B           = m_multByBco ? (*m_Bcoef)[a_dit](vof, m_comp) : 1;
+      const Real kappaDivF   = a_beta*B*value*areaFrac/m_dx;
   
-  a_Lphi(a_vof, m_comp) += kappaDivF;
+      a_Lphi(vof, m_comp) += kappaDivF;
+    }
+  }
   
   return;
 }

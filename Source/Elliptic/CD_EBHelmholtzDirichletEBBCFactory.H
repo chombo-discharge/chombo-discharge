@@ -53,31 +53,31 @@ public:
     @param[in] a_order Approximation order (1 and 2 are accepted)
     @note For least squares, the order is also the attempted radius of the stencil. 
   */
-  void setOrder(const int a_order);
+  virtual void setOrder(const int a_order);
 
   /*!
     @brief Set BC order
     @param[in] a_weight Weight for least squares stencils. 
     @note a_weight = 0 can lead to ill-conditioned least-squares systems. 
   */
-  void setWeight(const int a_weight);
+  virtual void setWeight(const int a_weight);
 
   /*!
     @brief Set the value on the EB. 
     @param[in] a_value Constant value on EB
   */
-  void setValue(const Real a_value);
+  virtual void setValue(const Real a_value);
 
   /*!
     @brief Set the spatially varying value on the EB. 
     @param[in] a_value Spatially dependent value on EB
   */
-  void setValue(const std::function<Real(const RealVect& a_pos)>& a_value);
+  virtual void setValue(const std::function<Real(const RealVect& a_pos)>& a_value);
 
   /*!
     @brief Factory method
   */
-  RefCountedPtr<EBHelmholtzEBBC> create() override;
+  virtual RefCountedPtr<EBHelmholtzEBBC> create() override;
 
 protected:
 

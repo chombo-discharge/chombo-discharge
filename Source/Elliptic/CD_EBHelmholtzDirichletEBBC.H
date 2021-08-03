@@ -41,26 +41,42 @@ public:
     @param[in] a_order Order
     @note The order is also the attempted radius of the stencil. 
   */
-  void setOrder(const int a_order);
+  virtual void setOrder(const int a_order);
 
-    /*!
+  /*!
     @brief Set stencil weights
     @param[in] a_weight Weighting factor for least squares stencils
     @note a_weight=0 can lead to ill-conditioned systems.
   */
-  void setWeight(const int a_weight);
+  virtual void setWeight(const int a_weight);
 
   /*!
     @brief Set the value on the EB. 
     @param[in] a_value Constant value on EB
   */
-  void setValue(const int a_value);
+  virtual void setValue(const int a_value);
 
   /*!
     @brief Set the value on the EB. 
     @param[in] a_value Spatially dependent value on EB
   */
-  void setValue(const std::function<Real(const RealVect& a_pos)>& a_value);
+  virtual void setValue(const std::function<Real(const RealVect& a_pos)>& a_value);
+
+  /*!
+    @brief Apply the EB flux. This is the version that is called by EBHelmholtzOp.
+    @param[inout] a_vofit             Iterator for cut-cells
+    @param[inout] a_Lphi              Operator kappa*L(phi)
+    @param[in]    a_phi               Phi, cell-centered. 
+    @param[in]    a_dit               Data index    
+    @param[in]    a_beta              Beta. Passed in from operator. 
+    @param[in]    a_homogeneousPhysBC Homogeneous BC or not. 
+  */
+  virtual void applyEBFlux(VoFIterator&       a_vofit,
+			   EBCellFAB&         a_Lphi,
+			   const EBCellFAB&   a_phi,
+			   const DataIndex&   a_dit,
+			   const Real&        a_beta,
+			   const bool&        a_homogeneousPhysBC) const override;
 
 protected:
 
@@ -98,25 +114,11 @@ protected:
     @brief Boundary weights
   */
   LayoutData<BaseIVFAB<Real> > m_boundaryWeights;
-  
+
   /*!
     @brief User define function. 
   */
   virtual void define() override;
-
-  /*!
-    @brief Apply the EB flux. This is the version that is called by EBHelmholtzOp.
-    @param[inout] a_vofit Iterator for cut-cells
-    @param[in]    a_Lphi  Operator kappa*L(phi)
-    @param[in]    a_phi   Phi, cell-centered. 
-    @param[in]    a_dit   Data index    
-    @param[in]    a_beta  Beta. Passed in from operator. 
-  */
-  virtual void applyEBFlux(EBCellFAB&         a_Lphi,
-			   const EBCellFAB&   a_phi,
-			   const VolIndex&    a_vof,
-			   const DataIndex&   a_dit,
-			   const Real&        a_beta) const override;
 
   /*!
     @brief Get stencil with specified order. 
@@ -128,11 +130,11 @@ protected:
     @return If this returns true, a_stencil contains a valid stencil and weight. 
     @note Stencils are computed using weighted least squares with squared inverse distance weighting. 
   */
-  bool getLeastSquaresStencil(std::pair<Real, VoFStencil>& a_stencil,
-			      const VolIndex&              a_vof,
-			      const VofUtils::Neighborhood a_neighborhood,
-			      const DataIndex&             a_dit,
-			      const int                    a_order) const;
+  virtual bool getLeastSquaresStencil(std::pair<Real, VoFStencil>& a_stencil,
+				      const VolIndex&              a_vof,
+				      const VofUtils::Neighborhood a_neighborhood,
+				      const DataIndex&             a_dit,
+				      const int                    a_order) const;
 
   /*!
     @brief Get johansen stencil with specified order. Not used but exists for backward compatibility testing and debugging. 
@@ -142,7 +144,7 @@ protected:
     @param[in]  a_order   Attempted order for stencil. This is also the stencil radius. 
     @return If this returns true, a_stencil contains a valid stencil and weight. 
   */
-  bool getJohansenStencil(std::pair<Real, VoFStencil>& a_stencil, const VolIndex& a_vof, const DataIndex& a_dit, const int a_order) const;
+  virtual bool getJohansenStencil(std::pair<Real, VoFStencil>& a_stencil, const VolIndex& a_vof, const DataIndex& a_dit, const int a_order) const;
 
   /*!
     @brief Get Chombo's least squares gradient stencil. Not used but kept for backward compatibility testing and debugging. 
@@ -152,7 +154,7 @@ protected:
     @param[in]  a_order   Attempted order for stencil. This is also the stencil radius. 
     @return If this returns true, a_stencil contains a valid stencil and weight. 
   */
-  bool getChomboLsqStencil(std::pair<Real, VoFStencil>& a_stencil, const VolIndex& a_vof, const DataIndex& a_dit) const;
+  virtual bool getChomboLsqStencil(std::pair<Real, VoFStencil>& a_stencil, const VolIndex& a_vof, const DataIndex& a_dit) const;
 
 };
 

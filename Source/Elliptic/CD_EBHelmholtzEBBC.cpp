@@ -10,7 +10,7 @@
 */
 
 // Chombo includes
-#include <NeighborIterator.H>
+#include <EBCellFactory.H>
 
 // Our includes
 #include <CD_EBHelmholtzEBBC.H>
@@ -26,31 +26,37 @@ EBHelmholtzEBBC::~EBHelmholtzEBBC(){
 
 }
 
-void EBHelmholtzEBBC::applyEBFlux(VoFIterator&       a_vofit,
-				  EBCellFAB&         a_Lphi,
-				  const EBCellFAB&   a_phi,
-				  const DataIndex&   a_dit,
-				  const Real&        a_beta) const {
-  for (a_vofit.reset(); a_vofit.ok(); ++a_vofit){
-    this->applyEBFlux(a_Lphi, a_phi, a_vofit(), a_dit, a_beta);
-  }
-}
-
-void EBHelmholtzEBBC::define(const EBLevelGrid&                                 a_eblg,
+void EBHelmholtzEBBC::define(const Location::Cell                               a_dataLocation,
+			     const EBLevelGrid&                                 a_eblg,
 			     const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_Bcoef,
 			     const RealVect&                                    a_probLo,
 			     const Real&                                        a_dx,
-			     const int                                          a_ghostCF){
-  m_Bcoef   = a_Bcoef;
-  m_eblg    = a_eblg;
-  m_probLo  = a_probLo;
-  m_dx      = a_dx;
-  m_ghostCF = a_ghostCF;
+			     const int                                          a_ghostCF,
+			     const int                                          a_refRat){
+  m_dataLocation = a_dataLocation;
+  m_Bcoef        = a_Bcoef;
+  m_eblg         = a_eblg;
+  m_probLo       = a_probLo;
+  m_dx           = a_dx;
+  m_ghostCF      = a_ghostCF;
+
+  if(a_refRat > 1){
+    m_hasFine = true;
+    m_refRat  = a_refRat;
+
+    refine(m_eblgFine, m_eblg, a_refRat);
+
+    m_fineData.define(m_eblgFine.getDBL(), m_nComp, IntVect::Zero, EBCellFactory(m_eblgFine.getEBISL()));
+  }
   
   this->define();
 }
 
-const LayoutData<BaseIVFAB<VoFStencil> >& EBHelmholtzEBBC::getKappaDivFStencils() const{
+void EBHelmholtzEBBC::copyFineDataToBuffer(const LevelData<EBCellFAB>& a_fineData) const {
+  a_fineData.copyTo(m_fineData);
+}
+
+const LayoutData<BaseIVFAB<VoFStencil> >& EBHelmholtzEBBC::getKappaDivFStencils() const {
   return m_kappaDivFStencils;
 }
 
@@ -61,49 +67,6 @@ RealVect EBHelmholtzEBBC::getBoundaryPosition(const VolIndex& a_vof, const DataI
   RealVect position = m_probLo + (0.5*RealVect::Unit + RealVect(a_vof.gridIndex()) + ebCentroid)*m_dx;
 
   return position;
-}
-
-bool EBHelmholtzEBBC::isStencilValidCF(const VoFStencil& a_stencil, const DataIndex& a_dit) const {
-  const DisjointBoxLayout& dbl = m_eblg.getDBL();
-  const ProblemDomain& domain  = m_eblg.getDomain();
-
-  // Construct boxes that contain all the valid cells for this stencil. 
-  std::vector<Box> validBoxes;
-  
-  Box curBox = dbl[a_dit];
-  curBox.grow(m_ghostCF);
-  curBox &= domain;
-  validBoxes.emplace_back(curBox);
-
-  NeighborIterator nit(dbl);
-  for (nit.begin(a_dit); nit.ok(); ++nit){
-    Box neighBox = dbl[nit()];
-    neighBox.grow(m_ghostCF);
-    neighBox &= domain;
-
-    validBoxes.emplace_back(neighBox);
-  }
-
-  // Now check that the stencil if the stencil. We set valid = false
-  // if any of the stencil points reaches out of the ghosted boxes. 
-  bool valid = true;
-  
-  for (int i = 0; i < a_stencil.size(); i++){
-    const VolIndex& vof = a_stencil.vof(i);
-    const IntVect& iv   = vof.gridIndex();
-    
-    bool insideOneBox = false;
-    for (const auto& b : validBoxes){
-      if(b.contains(iv)) insideOneBox = true;
-    }
-
-    if(!insideOneBox) {
-      valid = false;
-      break;
-    }
-  }
-
-  return valid;
 }
 
 #include <CD_NamespaceFooter.H>

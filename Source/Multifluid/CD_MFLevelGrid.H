@@ -12,6 +12,9 @@
 #ifndef CD_MFLevelGrid_H
 #define CD_MFLevelGrid_H
 
+// Std includes
+#include <map>
+
 // Chombo includes
 #include <EBLevelGrid.H>
 
@@ -57,6 +60,11 @@ public:
     @brief Define function
   */
   virtual void define(const RefCountedPtr<MultiFluidIndexSpace>& a_multiFluidIndexSpace, const Vector<EBLevelGrid>& a_eblg);
+
+  /*!
+    @brief Set max refinement ratio
+  */
+  virtual void setMaxRefinementRatio(const int a_refRat);
 
   /*!
     @brief Get the index space

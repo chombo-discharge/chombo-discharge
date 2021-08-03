@@ -18,6 +18,14 @@ MFLevelGrid::MFLevelGrid(){
 
 }
 
+void MFLevelGrid::setMaxRefinementRatio(const int a_refRat){
+  for (int i = 0; i < m_eblg.size(); i++){
+    m_eblg[i].setMaxRefinementRatio(a_refRat);
+  }
+}
+
+
+// Olde code below here
 
 MFLevelGrid::MFLevelGrid(const DisjointBoxLayout&          a_dbl,
 			 const ProblemDomain&              a_domain,
@@ -63,10 +71,12 @@ DisjointBoxLayout MFLevelGrid::getGrids() const {
 }
 
 EBLevelGrid& MFLevelGrid::getEBLevelGrid(int a_phase){
+  CH_assert(a_phase < m_eblg.size());
   return m_eblg[a_phase];
 }
 
 const EBLevelGrid& MFLevelGrid::getEBLevelGrid(int a_phase) const {
+  CH_assert(a_phase < m_eblg.size());
   return m_eblg[a_phase];
 }
 

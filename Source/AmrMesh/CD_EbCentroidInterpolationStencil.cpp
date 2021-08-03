@@ -132,8 +132,8 @@ bool EbCentroidInterpolationStencil::getLeastSquaresInterpolationStencil(VoFSten
   const int weightingPower = 0;
   const bool useStartVof   = true;
   
-  a_sten = LeastSquares::getInterpolationStencil(LeastSquares::CellPosition::Boundary,
-						 LeastSquares::CellPosition::Center,
+  a_sten = LeastSquares::getInterpolationStencil(Location::Cell::Boundary,
+						 Location::Cell::Center,
 						 LeastSquares::Connectivity::MonotonePath,
 						 a_vof,						 
 						 a_ebisbox,

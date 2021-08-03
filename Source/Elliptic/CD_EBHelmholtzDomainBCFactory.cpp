@@ -9,7 +9,6 @@
   @author Robert Marskar
 */
 
-
 // Our includes
 #include <CD_EBHelmholtzDomainBCFactory.H>
 #include <CD_NamespaceHeader.H>

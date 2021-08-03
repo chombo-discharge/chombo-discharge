@@ -7,6 +7,7 @@
   @file   CD_EBHelmholtzEBBC.H
   @brief  Declaration of a boundary condition class for EBHelmholtzOp
   @author Robert Marskar
+  @todo   The kappaDivF stencils can probably be removed as they are only really used with EBHelmholtzOps fast multicolor-scheme (relaxation done in-place). 
 */
 
 #ifndef CD_EBHelmholtzEBBC_H
@@ -19,6 +20,7 @@
 #include <BaseIVFAB.H>
 
 // Our includes
+#include <CD_Location.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -49,27 +51,42 @@ public:
 
   /*!
     @brief Define function that is called by EBHelmholtzOp
-    @param[in] a_eblg    Grid where this object is defined. 
-    @param[in] a_Bcoef   B-coefficient. You will need this for the flux stencil. 
-    @param[in] a_probLo  Lower-left corner of computational domain. Required if BC objects needs physical position. 
-    @param[in] a_dx      Grid resolution. 
-    @param[in] a_ghostCF Number of ghost cells that are filled across CF interface. 
+    @param[in] a_dataLocation Specification of data centering
+    @param[in] a_eblg         Grid where this object is defined. 
+    @param[in] a_Bcoef        B-coefficient. You will need this for the flux stencil. 
+    @param[in] a_probLo       Lower-left corner of computational domain. Required if BC objects needs physical position. 
+    @param[in] a_dx           Grid resolution. 
+    @param[in] a_ghostCF      Number of ghost cells that are filled across CF interface. 
+    @param[in] a_refRat       Refinement factor to finer level. 
   */
-  void define(const EBLevelGrid& a_eblg, const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_Bcoef, const RealVect& m_probLo, const Real& a_dx, const int a_ghostCF);
+  void define(const Location::Cell                               a_dataLocation,
+	      const EBLevelGrid&                                 a_eblg,
+	      const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_Bcoef,
+	      const RealVect&                                    a_probLo,
+	      const Real&                                        a_dx,
+	      const int                                          a_ghostCF,
+	      const int                                          a_refRat = 1);
 
   /*!
     @brief Apply the EB flux. This is the version that is called by EBHelmholtzOp.
-    @param[inout] a_vofit Iterator for cut-cells
-    @param[in]    a_Lphi  Operator kappa*L(phi)
-    @param[in]    a_phi   Phi, cell-centered. 
-    @param[in]    a_dit   Data index    
-    @param[in]    a_beta  Beta. Passed in from operator. 
+    @param[inout] a_vofit             Iterator for cut-cells
+    @param[in]    a_Lphi              Operator kappa*L(phi)
+    @param[in]    a_phi               Phi, cell-centered. 
+    @param[in]    a_dit               Data index    
+    @param[in]    a_beta              Beta. Passed in from operator. 
+    @param[in]    a_homogeneousPhysBC Homogeneous BC or not. 
   */
-  void applyEBFlux(VoFIterator&       a_vofit,
-		   EBCellFAB&         a_Lphi,
-		   const EBCellFAB&   a_phi,
-		   const DataIndex&   a_dit,
-		   const Real&        a_beta) const;
+  virtual void applyEBFlux(VoFIterator&       a_vofit,
+			   EBCellFAB&         a_Lphi,
+			   const EBCellFAB&   a_phi,
+			   const DataIndex&   a_dit,
+			   const Real&        a_beta,
+			   const bool&        a_homogeneousPhysBC) const = 0;
+  
+  /*!
+    @brief Copy data to fine buffer
+  */
+  void copyFineDataToBuffer(const LevelData<EBCellFAB>& a_fineData) const;
 
   /*!
     @brief Get the stencil for computing the finite-volume approximation to kappa*Div(F). 
@@ -93,6 +110,21 @@ protected:
   constexpr static int m_nComp = 1;
 
   /*!
+    @brief Data centering
+  */
+  Location::Cell m_dataLocation;
+
+  /*!
+    @brief If there is a fine level
+  */
+  bool m_hasFine;
+
+  /*!
+    @brief Refinement ratio between this level and the finer level
+  */
+  int m_refRat;
+
+  /*!
     @brief Number of ghost cells that were filled across CF interface
   */
   int m_ghostCF;
@@ -113,12 +145,22 @@ protected:
   EBLevelGrid m_eblg;
 
   /*!
+    @brief Refined version of m_eblg. 
+  */
+  EBLevelGrid m_eblgFine;
+
+  /*!
+    @brief Buffer for fine data. Uses the coarse-data layout. 
+  */
+  mutable LevelData<EBCellFAB> m_fineData;
+
+  /*!
     @brief B-coefficent. 
   */
   RefCountedPtr<LevelData<BaseIVFAB<Real> > > m_Bcoef;
 
   /*!
-    @brief Stencils for computing the flux
+    @brief Stencils for computing the flux on a single level. This is a single-level object. 
   */
   LayoutData<BaseIVFAB<VoFStencil> > m_kappaDivFStencils;
 
@@ -128,28 +170,28 @@ protected:
   virtual void define() = 0;
 
   /*!
-    @brief Apply the EB flux in a VoF. 
-  */
-  virtual void applyEBFlux(EBCellFAB&         a_Lphi,
-			   const EBCellFAB&   a_phi,
-			   const VolIndex&    a_vof,
-			   const DataIndex&   a_dit,
-			   const Real&        a_beta) const = 0;
-
-  /*!
     @brief Check if stencil is valid. 
     @details This routine makes sure that the stencil a_stencil does not reach over the CF interface and into ghost cells that do not have valid data.
     @param[in] a_stencil Stencil
     @param[in] a_dit     Data index
   */
+  inline
   bool isStencilValidCF(const VoFStencil& a_stencil, const DataIndex& a_dit) const;
 
   /*!
     @brief Returns physical position at the boundary
   */
   RealVect getBoundaryPosition(const VolIndex& a_vof, const DataIndex& a_dit) const;
+
+  /*!
+    @brief Apply stencil to data holder and return result
+  */
+  inline
+  Real applyStencil(const VoFStencil& a_stencil, const EBCellFAB& a_phi) const;
 };
 
 #include <CD_NamespaceFooter.H>
+
+#include <CD_EBHelmholtzEBBCImplem.H>
 
 #endif
