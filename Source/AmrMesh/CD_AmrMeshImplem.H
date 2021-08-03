@@ -66,15 +66,6 @@ void AmrMesh::alias(Vector<T*>& a_alias, const EBAMRData<S>& a_data){
 }
 
 template <typename T>
-T AmrMesh::allocate(const std::string a_realm, const int a_nComp, const int a_nGhost){
-  T ret;
-
-  this->allocate(ret, a_realm, a_nComp, a_nGhost);
-
-  return ret;
-}
-
-template <typename T>
 void AmrMesh::allocate(Vector<RefCountedPtr<ParticleData<T> > >& a_particles, const std::string a_realm){
   CH_TIME("AmrMesh::allocate(particle_data, Realm)");
   if(m_verbosity > 5){

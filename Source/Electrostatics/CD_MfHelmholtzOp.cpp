@@ -285,6 +285,7 @@ void MfHelmholtzOp::update_bc(const LevelData<MFCellFAB>& a_phi, const bool a_ho
   //  const Real t1 = MPI_Wtime();
 
   //  this->set_bc_from_levelset();
+  this->set_bc_from_levelset(); // Need to do this because level set functions might have changed from under us. 
   this->set_bc_from_matching(a_phi, a_homogeneous);
   //  const Real t2 = MPI_Wtime();
 

@@ -275,6 +275,16 @@ public:
   virtual int getNumberOfPlotVariables() const;
 
   /*!
+    @brief Get voltage function
+  */
+  const std::function<Real(const Real a_time)>& getVoltage() const;
+
+  /*!
+    @brief Get current voltage
+  */
+  Real getCurrentVoltage() const;
+
+  /*!
     @brief Get time. 
   */
   Real getTime() const;
@@ -291,7 +301,7 @@ public:
     @param[in] a_electricField The electric field. 
     @return Energy density
   */
-  Real computeEnergyDensity(const MFAMRCellData& a_electricField);
+  Real computeEnergy(const MFAMRCellData& a_electricField);
 
   /*!
     @brief Get output plot names.

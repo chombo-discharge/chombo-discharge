@@ -112,16 +112,6 @@ public:
   void alias(Vector<T*>& a_alias, const EBAMRData<S>& a_data);
 
   /*!
-    @brief Create and allocate mesh storage on a particular realm
-    @param[in] a_realm  Realm
-    @param[in] a_nComp  Number of components
-    @param[in] a_nGhost Number of ghost cells
-    @return Returns storage
-  */
-  template <typename T>
-  T allocate(const std::string a_realm, const int a_nComp, const int a_nGhost = -1);
-
-  /*!
     @brief Template class for generic allocation of particles
     @param[out] a_particles Particle data holder. 
     @param[out] a_realm     Realm on which the particles will be allocated. 

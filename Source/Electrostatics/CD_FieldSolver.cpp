@@ -111,7 +111,8 @@ void FieldSolver::computeElectricField(MFAMRCellData& a_electricField, const MFA
 #endif
 
   // Update ghost cells. Use scratch storage for this. 
-  MFAMRCellData scratch = m_amr->allocate<MFAMRCellData>(m_realm, m_nComp);
+  MFAMRCellData scratch;
+  m_amr->allocate(scratch, m_realm, m_nComp);
   scratch.copy(a_potential);
   m_amr->averageDown(scratch, m_realm);
   m_amr->interpGhost(scratch, m_realm);
@@ -151,7 +152,8 @@ void FieldSolver::preRegrid(const int a_lbase, const int a_oldFinestLevel){
     pout() << "FieldSolver::preRegrid" << endl;
   }
 
-  // TLDR: This version does a backup of m_potential on the old grid. 
+  // TLDR: This version does a backup of m_potential on the old grid. This is later used for interpolating onto
+  //       the new grid (in the regrid routine).
   
   m_amr->allocate(m_cache, m_realm, m_nComp);
   
@@ -255,74 +257,92 @@ void FieldSolver::computeDisplacementField(MFAMRCellData& a_displacementField, c
   }
 }
 
-Real FieldSolver::computeEnergyDensity(const MFAMRCellData& a_electricField){
-  CH_TIME("FieldSolver::computeEnergyDensity");
+Real FieldSolver::computeEnergy(const MFAMRCellData& a_electricField){
+  CH_TIME("FieldSolver::computeEnergy");
   if(m_verbosity > 5){
-    pout() << "FieldSolver::computeEnergyDensity" << endl;
+    pout() << "FieldSolver::computeEnergy" << endl;
   }
 
-  MFAMRCellData D, EdotD;   
-  m_amr->allocate(D, m_realm, SpaceDim);
-  m_amr->allocate(EdotD, m_realm, 1);
+  // TLDR: This routine computes Int(E*D dV) over the entire domain. Since we use conservative averaging, we coarsen E*D onto
+  //       the coarsest grid level and do the integratino there.
+
+  const bool reallyMultiPhase = (m_multifluidIndexSpace->numPhases() > 1);
+
+  // Allocate storage first, because we have no scratch storage for this. 
+  MFAMRCellData D;
+  MFAMRCellData EdotD;
+
+  m_amr->allocate(D,     m_realm,  SpaceDim);
+  m_amr->allocate(EdotD, m_realm,  1);  
+
+  // Compute D = eps*E and then the dot product E*D. 
   this->computeDisplacementField(D, a_electricField);
   DataOps::dotProduct(EdotD, D, a_electricField);
+  m_amr->averageDown(EdotD, m_realm);
 
-  Real U_g = 0.0;
-  Real U_s = 0.0;
 
-  // Energy in gas phase
-  EBAMRCellData data_g;
-  m_amr->allocatePointer(data_g);
-  m_amr->alias(data_g, phase::gas, EdotD);
-  m_amr->averageDown(data_g, m_realm, phase::gas);
-  DataOps::norm(U_g, *data_g[0], m_amr->getDomains()[0], 1);
+  // This defines a lambda which computes the energy in a specified phase
+  auto phaseEnergy = [&EdotD, &amr=this->m_amr] (const phase::which_phase a_phase) -> Real {
+    const EBAMRCellData phaseEdotD = amr->alias(a_phase, EdotD);
 
-  if(m_multifluidIndexSpace->numPhases() > 1){
-    EBAMRCellData data_s;
-    m_amr->allocatePointer(data_s);
-    m_amr->alias(data_s, phase::solid, EdotD);
-    m_amr->averageDown(data_s, m_realm, phase::solid);
-    DataOps::norm(U_s, *data_s[0], m_amr->getDomains()[0], 1);
-  }
+    Real energy;
+    
+    DataOps::norm(energy, *phaseEdotD[0], amr->getDomains()[0], 1);
 
-  return 0.5*(U_g + U_s);
+    return energy;
+  };
+
+  // Contributions from each phase. 
+  const Real Ug = phaseEnergy(phase::gas);
+  const Real Us = reallyMultiPhase ? phaseEnergy(phase::solid) : 0.0;
+
+  return 0.5*(Ug + Us);
 }
 
 Real FieldSolver::computeCapacitance(){
   CH_TIME("FieldSolver::computeCapacitance");
+  CH_assert(m_isVoltageSet);
   if(m_verbosity > 5){
     pout() << "FieldSolver::computeCapacitance" << endl;
   }
 
-  // TLDR; We MUST compute the energy density with the Laplace field, so no sources here...
-  Real C;
+  // TLDR: The energy density U = 0.5*C*V^2, or U = Int(E*D dV). We set the potential to one and solve the Poisson equation. 
+  //       We then compute U from E*D without sources and use C = 2*U/(V*V). The caveat to this approach is that the solver
+  //       may have been set with a zero voltage, non-zero space charge and non-zero surface charge. Here, we do a "clean" solve
+  //       with voltage set to 1, and without charges.
 
   MFAMRCellData phi;
+  MFAMRCellData E;  
   MFAMRCellData source;
   EBAMRIVData   sigma;
 
   m_amr->allocate(phi,    m_realm, 1);
+  m_amr->allocate(E,      m_realm, SpaceDim);
   m_amr->allocate(source, m_realm, 1);
   m_amr->allocate(sigma,  m_realm, phase::gas, 1);
 
   DataOps::setValue(phi,    0.0);
+  DataOps::setValue(E,      0.0);
   DataOps::setValue(source, 0.0);
   DataOps::setValue(sigma,  0.0);
 
-  this->solve(phi, source, sigma);
+  // Do a backup of the voltage.
+  auto voltageBackup = m_voltage;
+  auto voltageOne    = [](const Real a_time) -> Real { return 100.0; };
 
-  // Solve and compute energy density
-  MFAMRCellData E;
-  m_amr->allocate(E, m_realm, SpaceDim);
-  m_amr->computeGradient(E, phi, m_realm); // -E
-  const Real U = this->computeEnergyDensity(E); // Energy density
+  // Set the voltage to one and use that to compute the potential/E-field
+  this->setVoltage(voltageOne);
 
-  // U = 0.5*CV^2
-  const Real pot = m_voltage(m_time);
-  if(pot == 0.0){
-    MayDay::Abort("FieldSolver::compute_capacitance - error, can't compute energy density with V = 0");
-  }
-  C = 2.0*U/(pot*pot);
+  // Do a solve without a source term. 
+  this->solve(phi, source, sigma, true);
+  this->computeElectricField(E, phi);
+  
+  // The energy is U = 0.5*CV^2 so we can just compute the electrostatic energy and revert that expression.
+  const Real U = this->computeEnergy(E); // Electrostatic energy
+  const Real C = 2.0*U;                  // C = 2*U/(V*V) but voltage is 1.
+
+  // Set the voltage back to what it was. 
+  this->setVoltage(voltageBackup);
 
   return C;
 }
@@ -592,7 +612,7 @@ void FieldSolver::setDefaultEbBcFunctions() {
     const Real val  = (elec.isLive()) ? 1.0 : 0.0;
     const Real frac = elec.getFraction();
     
-    ElectrostaticEbBc::BcFunction curFunc = [&time=this->m_time, &voltage=this->m_voltage, val, frac](const RealVect a_position, const Real a_time){
+    ElectrostaticEbBc::BcFunction curFunc = [&, &time=this->m_time, &voltage=this->m_voltage, val, frac](const RealVect a_position, const Real a_time){
       return voltage(time)*val*frac;
     };
 
@@ -941,6 +961,14 @@ Vector<long long> FieldSolver::computeLoads(const DisjointBoxLayout& a_dbl, cons
   }
 
   return loads;
+}
+
+const std::function<Real(const Real a_time)>& FieldSolver::getVoltage() const{
+  return m_voltage;
+}
+
+Real FieldSolver::getCurrentVoltage() const{
+  return m_voltage(m_time);
 }
 
 Real FieldSolver::getTime() const{
