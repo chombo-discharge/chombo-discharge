@@ -525,8 +525,8 @@ void FieldSolver::setDefaultEbBcFunctions() {
     Real val  = (elec.isLive()) ? 1.0 : 0.0;
     Real frac = elec.getFraction();
     
-    ElectrostaticEbBc::BcFunction curFunc = [&, val, frac](const RealVect a_position, const Real a_time){
-      return m_voltage(m_time)*val*frac;
+    ElectrostaticEbBc::BcFunction curFunc = [&time=this->m_time, &voltage=this->m_voltage, val, frac](const RealVect a_position, const Real a_time){
+      return voltage(time)*val*frac;
     };
 
     m_ebBc.addEbBc(elec, curFunc);
@@ -559,8 +559,8 @@ void FieldSolver::parseDomainBc(){
       if(num == 1){
 	pp.get(bcString.c_str(), str, 0);
 
-	curFunc = [&] (const RealVect a_pos, const Real a_time) {
-	  return bcFunc(a_pos, m_time);
+	curFunc = [&bcFunc, &time = this->m_time] (const RealVect a_pos, const Real a_time) {
+	  return bcFunc(a_pos, time);
 	};
 
 	if(str == "dirichlet_custom"){
@@ -584,13 +584,13 @@ void FieldSolver::parseDomainBc(){
 	// Build a function computing the value at the boundary. 
 	switch (bcType){
 	case ElectrostaticDomainBc::BcType::Dirichlet:
-	  curFunc = [&, val] (const RealVect a_pos, const Real a_time){
-	    return bcFunc(a_pos, m_time)*m_voltage(m_time)*val;
+	  curFunc = [&bcFunc, &voltage=this->m_voltage, &time=this->m_time, val] (const RealVect a_pos, const Real a_time){
+	    return bcFunc(a_pos, time)*voltage(time)*val;
 	  };
 	  break;
 	case ElectrostaticDomainBc::BcType::Neumann:
-	  curFunc = [&, val] (const RealVect a_pos, const Real a_time){
-	    return bcFunc(a_pos, m_time)*val;
+	  curFunc = [&bcFunc, &time=this->m_time, val] (const RealVect a_pos, const Real a_time){
+	    return bcFunc(a_pos, time)*val;
 	  };
 	  break;
 	default:

@@ -184,8 +184,8 @@ void EddingtonSP1::parseDomainBc(){
 	pp.get(bcString.c_str(), str, 0);
 
 	// Set the function. Capture solver time by reference. 
-	curFunc = [&] (const RealVect a_pos, const Real a_time) {
-	  return bcFunc(a_pos, m_time);
+	curFunc = [&bcFunc, &time=this->m_time] (const RealVect a_pos, const Real a_time) {
+	  return bcFunc(a_pos, time);
 	};
 
 	// Ensure that we actually have a valid BC. 
@@ -212,8 +212,8 @@ void EddingtonSP1::parseDomainBc(){
 
 	bcType = this->parseBcString(str);
 
-	curFunc = [&, val] (const RealVect a_pos, const Real a_time) {
-	  return bcFunc(a_pos, m_time)*val;
+	curFunc = [&bcFunc, &time=this->m_time, val] (const RealVect a_pos, const Real a_time) {
+	  return bcFunc(a_pos, time)*val;
 	};
 
 	break;
@@ -464,6 +464,7 @@ void EddingtonSP1::registerOperators(){
     m_amr->registerOperator(s_eb_quad_cfi,     m_realm, m_phase);
     m_amr->registerOperator(s_eb_gradient,     m_realm, m_phase);
     m_amr->registerOperator(s_eb_irreg_interp, m_realm, m_phase);
+    m_amr->registerOperator(s_eb_pwl_interp,   m_realm, m_phase);
   }
 }
 
@@ -784,8 +785,8 @@ void EddingtonSP1::setupOperatorFactory(){
   }
   case EbBcType::Robin: {
     // Make the appropriate coefficients (Larsen) with right-hand side. 
-    std::function<Real(const RealVect, const Real) > ebFunc = [&](const RealVect a_pos, const Real a_time) {
-      return m_ebbc.second;
+    std::function<Real(const RealVect, const Real) > ebFunc = [&ebbc=this->m_ebbc](const RealVect a_pos, const Real a_time) {
+      return ebbc.second;
     };
     
     auto robinCoefficients = RefCountedPtr<LarsenCoefficients> (new LarsenCoefficients(m_RtSpecies, m_reflectionCoefficientOne, m_reflectionCoefficientTwo, ebFunc));
