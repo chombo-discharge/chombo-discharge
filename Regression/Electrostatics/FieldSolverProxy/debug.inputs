@@ -16,7 +16,7 @@ AmrMesh.blocking_factor = 8           # Default blocking factor (16 in 3D)
 AmrMesh.max_box_size    = 16          # Maximum allowed box size
 AmrMesh.max_ebis_box    = 16          # Maximum allowed box size
 AmrMesh.ref_rat         = 2           # Refinement ratios
-AmrMesh.num_ghost       = 2           # Number of ghost cells. Default is 3
+AmrMesh.num_ghost       = 3           # Number of ghost cells. Default is 3
 AmrMesh.lsf_ghost       = 1           # Number of ghost cells when writing level-set to grid
 AmrMesh.eb_ghost        = 4           # Set number of of ghost cells for EB stuff
 AmrMesh.centroid_sten   = linear      # Centroid interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
@@ -51,7 +51,7 @@ Driver.num_plot_ghost                  = 1                # Number of ghost cell
 Driver.plt_vars                        = 0                # 'tags', 'mpi_rank', 'levelset'
 Driver.restart                         = 0                # Restart step (less or equal to 0 implies fresh simulation)
 Driver.allow_coarsening                = true             # Allows removal of grid levels according to CellTagger
-Driver.refine_curvature                = 200              # Curvature based refinement. Refines cells if curvature*dx*this > 1
+Driver.refine_curvature                = 100              # Curvature based refinement. Refines cells if curvature*dx*this > 1
 Driver.refine_geometry                 = 0                # Refine geometry, -1 => Refine all the way down
 Driver.refine_electrodes               = -1               # Refine electrode surfaces. -1 => equal to refine_geometry
 Driver.refine_dielectrics              = -1               # Refine dielectric surfaces. -1 => equal to refine_geometry
@@ -63,7 +63,8 @@ Driver.refine_solid_solid_interface    = -1               # Refine solid-solid i
 # ====================================
 # ProxyFieldSolver CLASS OPTIONS
 # ====================================
-ProxyFieldSolver.alpha      = 0.04        # Alpha
+ProxyFieldSolver.centering  = centroid    # Centering
+ProxyFieldSolver.alpha      = 0.0         # Alpha
 ProxyFieldSolver.beta       = -1.0        # Beta
 ProxyFieldSolver.aco        = 0.0         # A-coefficient
 ProxyFieldSolver.bco        = 1.0         # B-coefficient	
@@ -72,19 +73,19 @@ ProxyFieldSolver.eb_bc      = dirichlet   # 'dirichlet', 'neumann', or 'robin'
 ProxyFieldSolver.domain_bc  = dirichlet   # 'dirichlet', 'neumann', or 'robin'
 ProxyFieldSolver.interp_order = 2
 ProxyFieldSolver.interp_weight = 2
-ProxyFieldSolver.interp_num = 2		
-ProxyFieldSolver.eb_order   = 2          # BC order on EB (only for Dirichlet)
+ProxyFieldSolver.interp_num = 3		
+ProxyFieldSolver.eb_order   = 2           # BC order on EB (only for Dirichlet)
 ProxyFieldSolver.eb_weight  = 2           # Weighting for least squares (only for helm)
-ProxyFieldSolver.jump_order = 2          # BC order on EB (only for Dirichlet)
+ProxyFieldSolver.jump_order = 2           # BC order on EB (only for Dirichlet)
 ProxyFieldSolver.jump_weight= 2           # Weighting for least squares (only for helm)
 ProxyFieldSolver.dom_val    = -1          # Value on domain (For Robin, this is multiplier)
 ProxyFieldSolver.eb_val     = 1           # Value on EB (For robin, this is multiplier)
-ProxyFieldSolver.smooth     = 16          # Smoothings
+ProxyFieldSolver.smooth     = 12          # Smoothings
 ProxyFieldSolver.botsolver  = bicgstab    # 'simple' or 'bicgstab'
 ProxyFieldSolver.botsmooth  = 16          # Smoothings for bottom solver
 ProxyFieldSolver.relax      = 1           # Relaxation method
 ProxyFieldSolver.mg_tol     = 1.E-10      # Multigrid tolerance
-ProxyFieldSolver.min_cells  = 32          # Number of cells along the shortest coordinate in the bottom of multigrid.
+ProxyFieldSolver.min_cells  = 8           # Number of cells along the shortest coordinate in the bottom of multigrid.
 ProxyFieldSolver.plt_vars   = phi resid E rho # Plot variables
 
 # ====================================================================================================
@@ -100,22 +101,22 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 # ROD_DIELECTRIC CLASS OPTIONS
 # ====================================================================================================
 RodDielectric.electrode.on              = true          # Use electrode or not
-RodDielectric.electrode.endpoint1       = -0.5 -0.5     # One endpoint
+RodDielectric.electrode.endpoint1       = -0.5 -0.0     # One endpoint
 RodDielectric.electrode.endpoint2       =  0.5  0.5     # Other endpoint
 RodDielectric.electrode.radius          = 0.05          # Electrode radius
 RodDielectric.electrode.live            = true          # Live or not
 
-RodDielectric.dielectric.on             = false          # Use dielectric or not
-RodDielectric.dielectric.shape          = sphere        # 'plane', 'box', 'perlin_box', 'sphere'
-RodDielectric.dielectric.permittivity   = 5             # Dielectric permittivity
+RodDielectric.dielectric.on             = true          # Use dielectric or not
+RodDielectric.dielectric.shape          = box        # 'plane', 'box', 'perlin_box', 'sphere'
+RodDielectric.dielectric.permittivity   = 10.0          # Dielectric permittivity
 
 # Subsettings for 'plane'
 RodDielectric.plane.point               = 0 0 0         # Plane point
 RodDielectric.plane.normal              = 0 0 1         # Plane normal vector (outward)
 
 # Subsettings for 'box'
-RodDielectric.box.lo_corner             = 0 0 0         # Low corner
-RodDielectric.box.hi_corner             = 1 1 1         # Hi corner
+RodDielectric.box.lo_corner             = -0.5000123 -2 0         # Low corner
+RodDielectric.box.hi_corner             = 0.5000123 -0.50000123 1         # Hi corner
 RodDielectric.box.curvature             = 0.1
 
 # Subsettings for 'perlin_box'

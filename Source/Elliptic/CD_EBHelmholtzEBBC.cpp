@@ -26,17 +26,19 @@ EBHelmholtzEBBC::~EBHelmholtzEBBC(){
 
 }
 
-void EBHelmholtzEBBC::define(const EBLevelGrid&                                 a_eblg,
+void EBHelmholtzEBBC::define(const Location::Cell                               a_dataLocation,
+			     const EBLevelGrid&                                 a_eblg,
 			     const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_Bcoef,
 			     const RealVect&                                    a_probLo,
 			     const Real&                                        a_dx,
 			     const int                                          a_ghostCF,
 			     const int                                          a_refRat){
-  m_Bcoef   = a_Bcoef;
-  m_eblg    = a_eblg;
-  m_probLo  = a_probLo;
-  m_dx      = a_dx;
-  m_ghostCF = a_ghostCF;
+  m_dataLocation = a_dataLocation;
+  m_Bcoef        = a_Bcoef;
+  m_eblg         = a_eblg;
+  m_probLo       = a_probLo;
+  m_dx           = a_dx;
+  m_ghostCF      = a_ghostCF;
 
   if(a_refRat > 1){
     m_hasFine = true;

@@ -18,6 +18,7 @@
 
 // Our includes
 #include <CD_MultiFluidIndexSpace.H>
+#include <CD_Location.H>
 #include <CD_EBAMRData.H>
 #include <CD_MFHelmholtzOp.H>
 #include <CD_MFCoarAve.H>
@@ -65,6 +66,7 @@ public:
     @brief Full constructor
   */
   MFHelmholtzOpFactory(const MFIS&             a_mfis,
+		       const Location::Cell    a_dataLocation,
 		       const Real&             a_alpha,
 		       const Real&             a_beta,
 		       const RealVect&         a_probLo,
@@ -144,6 +146,9 @@ protected:
     @brief Index space
   */
   MFIS m_mfis;
+
+  // Location
+  Location::Cell m_dataLocation;
 
   // Relaxation method
   RelaxType m_relaxMethod;

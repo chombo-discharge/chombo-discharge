@@ -20,6 +20,7 @@
 #include <BaseIVFAB.H>
 
 // Our includes
+#include <CD_Location.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -50,19 +51,21 @@ public:
 
   /*!
     @brief Define function that is called by EBHelmholtzOp
-    @param[in] a_eblg    Grid where this object is defined. 
-    @param[in] a_Bcoef   B-coefficient. You will need this for the flux stencil. 
-    @param[in] a_probLo  Lower-left corner of computational domain. Required if BC objects needs physical position. 
-    @param[in] a_dx      Grid resolution. 
-    @param[in] a_ghostCF Number of ghost cells that are filled across CF interface. 
-    @param[in] a_refRat  Refinement factor to finer level. 
+    @param[in] a_dataLocation Specification of data centering
+    @param[in] a_eblg         Grid where this object is defined. 
+    @param[in] a_Bcoef        B-coefficient. You will need this for the flux stencil. 
+    @param[in] a_probLo       Lower-left corner of computational domain. Required if BC objects needs physical position. 
+    @param[in] a_dx           Grid resolution. 
+    @param[in] a_ghostCF      Number of ghost cells that are filled across CF interface. 
+    @param[in] a_refRat       Refinement factor to finer level. 
   */
-  void define(const EBLevelGrid& a_eblg,
+  void define(const Location::Cell                               a_dataLocation,
+	      const EBLevelGrid&                                 a_eblg,
 	      const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_Bcoef,
-	      const RealVect& m_probLo,
-	      const Real& a_dx,
-	      const int a_ghostCF,
-	      const int a_refRat = 1);
+	      const RealVect&                                    a_probLo,
+	      const Real&                                        a_dx,
+	      const int                                          a_ghostCF,
+	      const int                                          a_refRat = 1);
 
   /*!
     @brief Apply the EB flux. This is the version that is called by EBHelmholtzOp.
@@ -105,6 +108,11 @@ protected:
     @brief Number of components. Always have m_nComp = 1
   */
   constexpr static int m_nComp = 1;
+
+  /*!
+    @brief Data centering
+  */
+  Location::Cell m_dataLocation;
 
   /*!
     @brief If there is a fine level

@@ -18,24 +18,26 @@
 constexpr int JumpBC::m_comp;
 constexpr int JumpBC::m_nComp;
 
-JumpBC::JumpBC(const MFLevelGrid& a_mflg,
-	       const BcoefPtr&    a_Bcoef,
-	       const Real         a_dx,
-	       const int          a_order,
-	       const int          a_weight,
-	       const int          a_radius,
-	       const int          a_ghostCF){
+JumpBC::JumpBC(const Location::Cell a_dataLocation,
+	       const MFLevelGrid&   a_mflg,
+	       const BcoefPtr&      a_Bcoef,
+	       const Real           a_dx,
+	       const int            a_order,
+	       const int            a_weight,
+	       const int            a_radius,
+	       const int            a_ghostCF){
   CH_TIME("JumpBC::JumpBC");
-  
-  m_mflg       = a_mflg;
-  m_Bcoef      = a_Bcoef;
-  m_dx         = a_dx;
-  m_weight     = a_weight;
-  m_order      = a_order;
-  m_radius     = a_radius;
-  m_ghostCF    = a_ghostCF;
-  m_numPhases  = m_mflg.numPhases();
-  m_multiPhase = m_numPhases > 1;
+
+  m_dataLocation = a_dataLocation;
+  m_mflg         = a_mflg;
+  m_Bcoef        = a_Bcoef;
+  m_dx           = a_dx;
+  m_weight       = a_weight;
+  m_order        = a_order;
+  m_radius       = a_radius;
+  m_ghostCF      = a_ghostCF;
+  m_numPhases    = m_mflg.numPhases();
+  m_multiPhase   = m_numPhases > 1;
 
   this->defineIterators();
   this->defineStencils();
@@ -71,7 +73,6 @@ VoFIterator& JumpBC::getMultiPhaseVofs(const int a_phase, const DataIndex& a_dit
 
 void JumpBC::defineStencils(){
   if(m_multiPhase) { // JumpBC internals should never be called unless it's a multiphase problem.
-    
     const DisjointBoxLayout& dbl = m_mflg.getGrids();
 
     m_boundaryPhi.define(dbl);
@@ -272,7 +273,7 @@ bool JumpBC::getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFStencil>& a_s
     
   const VoFStencil gradStencil = LeastSquares::getBndryGradSten(a_vof,
 								a_neighborhood,
-								Location::Cell::Center,
+								m_dataLocation,
 								a_ebisbox,
 								m_dx,
 								a_order,

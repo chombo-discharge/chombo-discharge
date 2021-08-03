@@ -25,6 +25,7 @@
 #include <EBFluxRegister.H>
 
 // Our includes
+#include <CD_Location.H>
 #include <CD_EBMultigridInterpolator.H>
 #include <CD_EbCoarAve.H>
 #include <CD_EBHelmholtzEBBC.H>
@@ -65,7 +66,8 @@ public:
   /*!
     @brief Full constructor
   */
-  EBHelmholtzOp(const EBLevelGrid&                                 a_eblgFine,
+  EBHelmholtzOp(const Location::Cell                               a_dataLocation,
+		const EBLevelGrid&                                 a_eblgFine,
 		const EBLevelGrid&                                 a_eblg,
 		const EBLevelGrid&                                 a_eblgCoFi,
 		const EBLevelGrid&                                 a_eblgCoar,
@@ -557,6 +559,11 @@ protected:
   RelaxationMethod m_relaxationMethod;
 
   /*!
+    @brief Data centering
+  */
+  Location::Cell m_dataLocation;
+
+  /*!
     @brief True if there is a multigrid level below this operator
   */
   bool m_hasMGObjects;
@@ -727,9 +734,14 @@ protected:
   LayoutData<BaseIFFAB<FaceStencil> > m_interpStencil[SpaceDim];
 
   /*!
-    @brief Operator stencil in irregular cells
+    @brief Face centroid flux stencil. Defined on all faces connecting one or more irregular vofs
   */
-  LayoutData<RefCountedPtr<EBStencil> > m_opEBStencil;
+  LayoutData<BaseIFFAB<VoFStencil> > m_centroidFluxStencil[SpaceDim];
+
+  /*!
+    @brief Operator stencils in irregular cells (and ones that border irregular cells if using a centroid discretization)
+  */
+  LayoutData<BaseIVFAB<VoFStencil> > m_opStencils;
 
   /*!
     @brief Weights of diagonal alpha terms
@@ -750,6 +762,11 @@ protected:
     @brief VoFIterator for "multi-cells". 
   */
   mutable LayoutData<VoFIterator> m_vofIterMulti;
+
+  /*!
+    @brief VoFIterator which iterates over all cells that are 1) a cut-cell or 2) borders a cut-cell. 
+  */
+  mutable LayoutData<VoFIterator> m_vofIterStenc;
 
   /*!
     @brief VoF iterators for lo domain side. 
@@ -806,6 +823,11 @@ protected:
   void computeRelaxationCoefficient();
 
   /*!
+    @brief Define stencils
+  */
+  void defineStencils();
+
+  /*!
     @brief Get the face-centered flux stencil
     @param[in]  a_face Face
     @param[in]  a_dit  Data index. Need because we multiply by B-coefficient
@@ -822,32 +844,6 @@ protected:
     @note The current version just interpolates the centered fluxes. 
   */
   VoFStencil getFaceCentroidFluxStencil(const FaceIndex& a_face, const DataIndex& a_dit) const;
-
-  /*!
-    @brief Get finite-volume stencil for computing kappa*div(F). 
-    @param[in] a_vof Grid index
-    @param[in] a_dit DataIndex, needed because we multiply by the B-coefficient. 
-    @note Boundary faces are not included. 
-  */
-  VoFStencil getKappaDivFStencil(const VolIndex& a_vof, const DataIndex& a_dit) const;
-
-  /*!
-    @brief Define stencils
-  */
-  void defineStencils();
-
-  /*!
-    @brief Compute flux on centroid faces.
-    @param[out] a_fluxCentroid Flux on centroids
-    @param[in   a_phi          Cell-centered data
-    @param[in]  a_cellBox      Cell-centered compute box.
-    @param[in]  a_dit          Data index
-    @note This computes the flux for all faces in a_cellBox except for boundary faces. 
-  */
-  void getFaceCentroidFlux(EBFluxFAB&       a_fluxCentroid,
-			   const EBCellFAB& a_phi,
-			   const Box&       a_cellBox,
-			   const DataIndex& a_dit);
 
   /*!
     @brief Compute centroid fluxes in a direction.
@@ -871,19 +867,25 @@ protected:
     @param[in]  a_dit          Data index
     @note This computes the flux for all dir-oriented faces in a_cellBox except for boundary faces. 
   */
-  void getFaceCenteredFlux(EBFaceFAB&       a_fluxCenter,
+  void computeFaceCenteredFlux(EBFaceFAB&       a_fluxCenter,
 			   const EBCellFAB& a_phi,
 			   const Box&       a_cellBox,
 			   const DataIndex& a_dit,
 			   const int        a_dir);
 
   /*!
-    @brief Interpolate fluxes in cut-cells
-    @param[inout] a_flux Should contain face-centered fluxes on input and face centroid centered fluxes no output
-    @param[in]    a_dit  Data index
-    @param[in]    a_dir  Coordinate direction
+    @brief Compute face-centered fluxes
+    @param[out] a_fluxCenter   Flux on center
+    @param[in   a_phi          Cell-centered data
+    @param[in]  a_cellBox      Cell-centered compute box.
+    @param[in]  a_dit          Data index
+    @note This computes the flux for all dir-oriented faces in a_cellBox except for boundary faces. 
   */
-  void interpolateFluxes(EBFaceFAB& a_flux, const Box& a_cellBox, const DataIndex& a_dit, const int a_dir);
+  void computeFaceCentroidFlux(EBFaceFAB&       a_flux,
+			       const EBCellFAB& a_phi,
+			       const Box&       a_cellBox,
+			       const DataIndex& a_dit,
+			       const int        a_dir);  
 
   /*!
     @brief Increment coarse flux register

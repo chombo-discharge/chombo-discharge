@@ -38,7 +38,7 @@ VoFStencil LeastSquares::getInterpolationStencil(const CellLocation a_cellPos,
   const int K = displacements.size();
 
   VoFStencil ret;
-  if(K >= M) { // Have enough equations to compute.
+  if(K > M) { // Have enough equations to compute.
     ret = LeastSquares::computeInterpolationStencil(vofs, displacements, a_p, a_order);
   }
 
@@ -63,7 +63,7 @@ VoFStencil LeastSquares::getGradSten(const VolIndex&    a_vof,
   const int numUnknowns = LeastSquares::getTaylorExpansionSize(a_order) - a_knownTerms.numPts(); // Can be smaller than order if you've eliminated some equations. 
 
   // Build the stencil if we can. 
-  if(allVofs.size() >= numUnknowns){
+  if(allVofs.size() > numUnknowns){
 
     const Vector<RealVect> displacements = LeastSquares::getDisplacements(a_gradLocation,
 									  a_cellLocation,
@@ -109,7 +109,7 @@ VoFStencil LeastSquares::getGradSten(const FaceIndex&   a_face,
 
     const int numUnknowns = LeastSquares::getTaylorExpansionSize(a_order) - a_knownTerms.numPts(); // Can be smaller than order if you've eliminated some equations. 
 
-    if(allVofs.size() >= numUnknowns){
+    if(allVofs.size() > numUnknowns){
       const Vector<RealVect> displacements = LeastSquares::getDisplacements(a_gradLocation, a_cellLocation, a_face, allVofs, a_ebisbox, a_dx);
 
       gradSten = LeastSquares::computeGradSten(allVofs, displacements, a_p, a_order, a_knownTerms);
@@ -149,7 +149,7 @@ VoFStencil LeastSquares::getBndryGradSten(const VolIndex&    a_vof,
     }
 
     // Now build the stencil. 
-    if(allVofs.size() >= numUnknowns){
+    if(allVofs.size() > numUnknowns){
 
       const Vector<RealVect> displacements = LeastSquares::getDisplacements(Location::Cell::Boundary,
 									    a_cellPositions,

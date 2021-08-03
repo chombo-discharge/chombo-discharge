@@ -25,6 +25,7 @@ constexpr int MFHelmholtzOpFactory::m_nComp;
 constexpr int MFHelmholtzOpFactory::m_mainPhase;
 
 MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&             a_mfis,
+					   const Location::Cell    a_dataLocation,
 					   const Real&             a_alpha,
 					   const Real&             a_beta,
 					   const RealVect&         a_probLo,
@@ -47,8 +48,8 @@ MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&             a_mfis,
 					   const int&              a_jumpWeight,
 					   const int&              a_blockingFactor,
 					   const AmrLevelGrids&    a_deeperLevelGrids){
-
-  m_mfis   = a_mfis;
+  m_mfis         = a_mfis;
+  m_dataLocation = a_dataLocation;
   
   m_alpha  = a_alpha;
   m_beta   = a_beta;
@@ -480,7 +481,8 @@ MFHelmholtzOp* MFHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, 
   if(foundMgLevel){
     const Real dx     = m_amrResolutions[amrLevel]*std::pow(mgRefRat, a_depth); // 
 
-    mgOp = new MFHelmholtzOp(MFLevelGrid(),
+    mgOp = new MFHelmholtzOp(m_dataLocation,
+			     MFLevelGrid(),
 			     mflg,
 			     MFLevelGrid(),
 			     MFLevelGrid(),
@@ -556,7 +558,8 @@ MFHelmholtzOp* MFHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
     CH_assert(gotCoarse);
   }
 
-  MFHelmholtzOp* op = new MFHelmholtzOp(mflgFine,
+  MFHelmholtzOp* op = new MFHelmholtzOp(m_dataLocation,
+					mflgFine,
 					mflg,
 					mflgCoFi,
 					mflgCoar,

@@ -19,6 +19,7 @@
 #include <Stencils.H>
 
 // Our includes
+#include <CD_Location.H>
 #include <CD_MFLevelGrid.H>
 #include <CD_VofUtils.H>
 #include <CD_MFInterfaceFAB.H>
@@ -39,22 +40,24 @@ public:
   JumpBC() = delete;
 
   /*!
-    @brief Defining constructor
-    @param[in] a_mflg    Grids
-    @param[in] a_Bcoef   Helmholtz B-coefficient
-    @param[in] a_dx      Grid resolution
-    @param[in] a_order   Stencil approximation order
-    @param[in] a_weight  Weighting factor for least squares
-    @param[in] a_radius  Stencil radius
-    @param[in] a_ghostCF Number of grid cells that were filled across the CF. 
+    @brief Defining constructo
+    @param[in] a_dataLocation Data centering
+    @param[in] a_mflg         Grids
+    @param[in] a_Bcoef        Helmholtz B-coefficient
+    @param[in] a_dx           Grid resolution
+    @param[in] a_order        Stencil approximation order
+    @param[in] a_weight       Weighting factor for least squares
+    @param[in] a_radius       Stencil radius
+    @param[in] a_ghostCF      Number of grid cells that were filled across the CF. 
   */
-  JumpBC(const MFLevelGrid& a_mflg,
-	 const BcoefPtr&    a_Bcoef,
-	 const Real         a_dx,
-	 const int          a_order,
-	 const int          a_weight,
-	 const int          a_radius,
-	 const int          a_ghostCF);
+  JumpBC(const Location::Cell a_dataLocation,
+	 const MFLevelGrid&   a_mflg,
+	 const BcoefPtr&      a_Bcoef,
+	 const Real           a_dx,
+	 const int            a_order,
+	 const int            a_weight,
+	 const int            a_radius,
+	 const int            a_ghostCF);
 
   /*!
     @brief Disallowed copy constructor
@@ -138,10 +141,15 @@ protected:
   */
   static constexpr int m_comp = 0;
 
-    /*!
+  /*!
     @brief Number of components in stencil
   */
   static constexpr int m_nComp = 1;
+
+  /*!
+    @brief Data centering
+  */
+  Location::Cell m_dataLocation;
 
   /*!
     @brief Grids

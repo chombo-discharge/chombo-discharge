@@ -20,6 +20,7 @@
 #include <MFFluxFAB.H>
 
 // Our includes
+#include <CD_Location.H>
 #include <CD_MFMultigridInterpolator.H>
 #include <CD_MFCoarAve.H>
 #include <CD_MFFluxReg.H>
@@ -61,7 +62,8 @@ public:
   /*!
     @brief Full constructor
   */
-  MFHelmholtzOp(const MFLevelGrid&                               a_mflgFine,
+  MFHelmholtzOp(const Location::Cell                             a_dataLocation,
+		const MFLevelGrid&                               a_mflgFine,
 		const MFLevelGrid&                               a_mflg,
 		const MFLevelGrid&                               a_mflgCoFi,		
 		const MFLevelGrid&                               a_mflgCoar,
@@ -427,6 +429,11 @@ protected:
     @brief Number of components that we solve for.
   */
   static constexpr int m_nComp = 1;
+
+  /*!
+    @brief Interpretation of data. Either on cell center or on cell centroid
+  */
+  Location::Cell m_dataLocation;
 
   /*!
     @brief Relaxation method

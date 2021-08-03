@@ -16,7 +16,7 @@ AmrMesh.blocking_factor = 8           # Default blocking factor (16 in 3D)
 AmrMesh.max_box_size    = 8           # Maximum allowed box size
 AmrMesh.max_ebis_box    = 16          # Maximum allowed box size
 AmrMesh.ref_rat         = 2           # Refinement ratios
-AmrMesh.num_ghost       = 2           # Number of ghost cells. Default is 3
+AmrMesh.num_ghost       = 3           # Number of ghost cells. Default is 3
 AmrMesh.lsf_ghost       = 1           # Number of ghost cells when writing level-set to grid
 AmrMesh.eb_ghost        = 4           # Set number of of ghost cells for EB stuff
 AmrMesh.centroid_sten   = linear      # Centroid interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
@@ -63,6 +63,7 @@ Driver.refine_solid_solid_interface    = -1               # Refine solid-solid i
 # ====================================
 # ProxyFieldSolver CLASS OPTIONS
 # ====================================
+ProxyFieldSolver.centering  = centroid    # Centering
 ProxyFieldSolver.alpha      = 0.0         # Alpha
 ProxyFieldSolver.beta       = -1.0        # Beta
 ProxyFieldSolver.aco        = 1.0         # A-coefficient
@@ -70,6 +71,9 @@ ProxyFieldSolver.bco        = 1.0         # B-coefficient
 ProxyFieldSolver.solver     = mfhelm      # Our solver ('helmholtz') or ebconductivity op 'ebcond'
 ProxyFieldSolver.eb_bc      = dirichlet   # 'dirichlet', 'neumann', or 'robin'
 ProxyFieldSolver.domain_bc  = dirichlet   # 'dirichlet', 'neumann', or 'robin'
+ProxyFieldSolver.interp_order = 2
+ProxyFieldSolver.interp_weight = 2
+ProxyFieldSolver.interp_num = 2		
 ProxyFieldSolver.eb_order   = 2           # BC order on EB (only for Dirichlet)
 ProxyFieldSolver.eb_weight  = 2           # Weighting for least squares (only for helm)
 ProxyFieldSolver.jump_order = 2           # BC order on EB (only for Dirichlet)

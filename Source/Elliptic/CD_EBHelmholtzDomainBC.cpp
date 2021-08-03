@@ -24,11 +24,16 @@ EBHelmholtzDomainBC::~EBHelmholtzDomainBC(){
 
 }
 
-void EBHelmholtzDomainBC::define(const EBLevelGrid& a_eblg, const RefCountedPtr<LevelData<EBFluxFAB> >& a_Bcoef, const RealVect& a_probLo, const Real a_dx){
-  m_eblg    = a_eblg;
-  m_Bcoef   = a_Bcoef;
-  m_probLo  = a_probLo;
-  m_dx      = a_dx;
+void EBHelmholtzDomainBC::define(const Location::Cell                        a_dataLocation,
+				 const EBLevelGrid&                          a_eblg,
+				 const RefCountedPtr<LevelData<EBFluxFAB> >& a_Bcoef,
+				 const RealVect&                             a_probLo,
+				 const Real                                  a_dx){
+  m_dataLocation = a_dataLocation;
+  m_eblg         = a_eblg;
+  m_Bcoef        = a_Bcoef;
+  m_probLo       = a_probLo;
+  m_dx           = a_dx;
 }
 
 RealVect EBHelmholtzDomainBC::getBoundaryPosition(const IntVect& a_iv, const int& a_dir, const Side::LoHiSide& a_side) const {

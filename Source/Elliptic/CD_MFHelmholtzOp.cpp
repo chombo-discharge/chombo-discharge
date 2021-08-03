@@ -27,7 +27,8 @@
 constexpr int MFHelmholtzOp::m_comp;
 constexpr int MFHelmholtzOp::m_nComp;
 
-MFHelmholtzOp::MFHelmholtzOp(const MFLevelGrid&                               a_mflgFine,
+MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_dataLocation,
+			     const MFLevelGrid&                               a_mflgFine,
 			     const MFLevelGrid&                               a_mflg,
 			     const MFLevelGrid&                               a_mflgCoFi,
 			     const MFLevelGrid&                               a_mflgCoar,
@@ -57,6 +58,7 @@ MFHelmholtzOp::MFHelmholtzOp(const MFLevelGrid&                               a_
 			     const RelaxationMethod&                          a_relaxType){
   CH_TIME("MFHelmholtzOp::MFHelmholtzOp");
 
+  m_dataLocation = a_dataLocation;
   m_mflg         = a_mflg;
   m_numPhases    = m_mflg.numPhases();
   m_multifluid   = m_numPhases > 1;
@@ -86,7 +88,7 @@ MFHelmholtzOp::MFHelmholtzOp(const MFLevelGrid&                               a_
 
   // Instantiate jump bc object.
   const int ghostCF = a_hasCoar ? a_interpolator.getGhostCF() : 1;
-  m_jumpBC = RefCountedPtr<JumpBC> (new JumpBC(m_mflg, a_BcoefIrreg, a_dx, a_jumpOrder, a_jumpWeight, a_jumpOrder, ghostCF));
+  m_jumpBC = RefCountedPtr<JumpBC> (new JumpBC(m_dataLocation, m_mflg, a_BcoefIrreg, a_dx, a_jumpOrder, a_jumpWeight, a_jumpOrder, ghostCF));
 
   // Make the operators on eachphase.
   for (int iphase = 0; iphase < m_numPhases; iphase++){
@@ -142,7 +144,8 @@ MFHelmholtzOp::MFHelmholtzOp(const MFLevelGrid&                               a_
       break;
     }
 
-    RefCountedPtr<EBHelmholtzOp> oper = RefCountedPtr<EBHelmholtzOp> (new EBHelmholtzOp(eblgFine,
+    RefCountedPtr<EBHelmholtzOp> oper = RefCountedPtr<EBHelmholtzOp> (new EBHelmholtzOp(m_dataLocation,
+											eblgFine,
 											eblg,
 											eblgCoFi,
 											eblgCoar,

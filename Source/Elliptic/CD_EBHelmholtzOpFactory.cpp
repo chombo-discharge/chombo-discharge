@@ -22,7 +22,8 @@
 #include <CD_EBHelmholtzOpFactory.H>
 #include <CD_NamespaceHeader.H>
 
-EBHelmholtzOpFactory::EBHelmholtzOpFactory(const Real&             a_alpha,
+EBHelmholtzOpFactory::EBHelmholtzOpFactory(const Location::Cell    a_dataLocation,
+					   const Real&             a_alpha,
 					   const Real&             a_beta,
 					   const RealVect&         a_probLo,
 					   const AmrLevelGrids&    a_amrLevelGrids,
@@ -42,7 +43,8 @@ EBHelmholtzOpFactory::EBHelmholtzOpFactory(const Real&             a_alpha,
 					   const ProblemDomain&    a_bottomDomain,
 					   const int&              a_mgBlockingFactor,
 					   const AmrLevelGrids&    a_deeperLevelGrids){
-  // Define constructor arguments. 
+  // Define constructor arguments.
+  m_dataLocation        = a_dataLocation;
   m_alpha               = a_alpha;
   m_beta                = a_beta;
 
@@ -450,7 +452,8 @@ EBHelmholtzOp* EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, 
     auto domBC = m_domainBcFactory->create();
     auto ebBC  = m_ebBcFactory->create();
     
-    mgOp = new EBHelmholtzOp(EBLevelGrid(), // Multigrid operator, so no fine. 
+    mgOp = new EBHelmholtzOp(m_dataLocation,
+			     EBLevelGrid(), // Multigrid operator, so no fine. 
 			     eblg,
 			     EBLevelGrid(), // Multigrid operator, so no cofi. 
 			     EBLevelGrid(), // Multigrid operator, so no coarse. 
@@ -525,7 +528,8 @@ EBHelmholtzOp* EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
     CH_assert(eblgCoFi.isDefined());
   }
 
-  op = new EBHelmholtzOp(eblgFine,
+  op = new EBHelmholtzOp(m_dataLocation,
+			 eblgFine,
 			 eblg,
 			 eblgCoFi,
 			 eblgCoar,

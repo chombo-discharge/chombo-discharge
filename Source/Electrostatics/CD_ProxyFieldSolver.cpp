@@ -503,8 +503,20 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
     break;
   }
 
+  pp.get("centering", str);
+  Location::Cell loc;
+  if(str == "centroid"){
+    loc = Location::Cell::Centroid;
+  }
+  else if(str == "center"){
+    loc = Location::Cell::Center;
+  }
+  else{
+    MayDay::Abort("CD_ProxyFieldSolver::solveHelm - logic bust");
+  }
 
-  EBHelmholtzOpFactory fact(alpha,
+  EBHelmholtzOpFactory fact(loc,
+			    alpha,
 			    beta,
 			    m_amr->getProbLo(),
 			    m_amr->getEBLevelGrid(m_realm, phase::gas),
@@ -756,11 +768,25 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
 
   int jumpOrder;
   int jumpWeight;
+  bool useCentroid;
 
-  pp.get("jump_order",  jumpOrder);
-  pp.get("jump_weight", jumpWeight);
+  pp.get("jump_order",   jumpOrder);
+  pp.get("jump_weight",  jumpWeight);
+  pp.get("centering", str);
+
+  Location::Cell loc;
+  if(str == "centroid"){
+    loc = Location::Cell::Centroid;
+  }
+  else if(str == "center"){
+    loc = Location::Cell::Center;
+  }
+  else{
+    MayDay::Abort("CD_ProxyFieldSolver::solveHelm - logic bust");
+  }
 
   MFHelmholtzOpFactory* fact = new MFHelmholtzOpFactory(m_multifluidIndexSpace,
+							loc,
 							alpha,
 							beta,
 							m_amr->getProbLo(),

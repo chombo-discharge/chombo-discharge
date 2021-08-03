@@ -164,7 +164,7 @@ bool MFHelmholtzEBBC::getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFSten
     
   const VoFStencil gradStencil = LeastSquares::getBndryGradSten(a_vof,
 								a_neighborhood,
-								Location::Cell::Center,
+								m_dataLocation,
 								ebisbox,
 								m_dx,
 								a_order,

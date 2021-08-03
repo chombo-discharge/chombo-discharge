@@ -24,6 +24,7 @@
 #include <BaseEBBC.H>
 
 // Our includes
+#include <CD_Location.H>
 #include <CD_EbCoarAve.H>
 #include <CD_EBMultigridInterpolator.H>
 #include <CD_EBHelmholtzOp.H>
@@ -68,7 +69,13 @@ public:
   EBHelmholtzOpFactory(const EBHelmholtzOpFactory& a_otherFactory) = delete;
 
   /*!
+    @brief Disallowed move constructor. Use the full constructor
+  */
+  EBHelmholtzOpFactory(const EBHelmholtzOpFactory&& a_otherFactory) = delete;
+
+  /*!
     @brief Full constructor
+    @param[in] a_dataLocation     Assumed data centering
     @param[in] a_alpha            alpha-coefficient in Helmholtz operator.
     @param[in] a_beta             beta-coefficient in Helmholtz operator.
     @param[in] a_probLo           Lower-left corner of domain
@@ -91,7 +98,8 @@ public:
     provide an option for using aggregation. The first entry a_deeperLevelGrids[0] should be a a factor 2 coarsening of the coarsest AMR level. 
     @note This operator is for time-independent a- and b-coefficients. 
   */
-  EBHelmholtzOpFactory(const Real&             a_alpha,
+  EBHelmholtzOpFactory(const Location::Cell    a_dataLocation,
+		       const Real&             a_alpha,
 		       const Real&             a_beta,
 		       const RealVect&         a_probLo,
 		       const AmrLevelGrids&    a_amrLevelGrids,
@@ -122,6 +130,11 @@ public:
   */
   void operator=(const EBHelmholtzOpFactory& a_opin) = delete;
 
+    /*!
+    @brief Disallowed move assignment
+  */
+  void operator=(const EBHelmholtzOpFactory&& a_opin) = delete;
+
   /*!
     @brief Create multigrid operator
     @param[in] a_fineDomain      Domain
@@ -143,6 +156,9 @@ public:
   int refToFiner(const ProblemDomain& a_indexspace) const override final;
 
 protected:
+
+  // Data location
+  Location::Cell m_dataLocation;
 
   // Relaxation method
   RelaxType m_relaxMethod;
