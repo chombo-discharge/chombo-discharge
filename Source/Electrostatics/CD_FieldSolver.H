@@ -221,9 +221,10 @@ public:
     @brief Write output data to a_output
     @param[inout] a_output Output data holder
     @param[inout] a_comp   Current component in a_output. 
+    @param[in]    a_forceNoInterp Forces data to be written using native centering
     @return On output, the solver will have written its plot variables to a_output and increment a_comp by the number of plotted variables. 
   */
-  virtual void writePlotData(EBAMRCellData& a_output, int& a_comp);
+  virtual void writePlotData(EBAMRCellData& a_output, int& a_comp, const bool a_forceNoInterp=false);
 
   /*!
     @brief Set Realm

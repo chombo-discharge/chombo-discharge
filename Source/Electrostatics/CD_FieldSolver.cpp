@@ -60,7 +60,7 @@ void FieldSolver::setDataLocation(const Location::Cell a_dataLocation){
     m_dataLocation = a_dataLocation; 
     break;    
   default:
-    MayDay::Abort("FieldSolver::setDataLocation - location must be either cell center or cell centroid");
+    MayDay::Error("FieldSolver::setDataLocation - location must be either cell center or cell centroid");
     break;
   }
 }
@@ -592,7 +592,7 @@ ElectrostaticDomainBc::BcType FieldSolver::parseBcString(const std::string a_str
     ret = ElectrostaticDomainBc::BcType::Neumann;
   }
   else{
-    MayDay::Abort("ElectrostaticDomainBc::BcType - unknown BC type!");
+    MayDay::Error("ElectrostaticDomainBc::BcType - unknown BC type!");
   }
 
   return ret;
@@ -686,7 +686,7 @@ void FieldSolver::parseDomainBc(){
 	  bcType  = ElectrostaticDomainBc::BcType::Neumann;
 	}
 	else{
-	  MayDay::Abort("FieldSolver::parseDomainBc -- got only one argument but this argument was not dirichlet/neumann_custom. Maybe you have the wrong BC specification?");
+	  MayDay::Error("FieldSolver::parseDomainBc -- got only one argument but this argument was not dirichlet/neumann_custom. Maybe you have the wrong BC specification?");
 	}
       }
       else if(num == 2){ // If we had two arguments the user has asked to run with less verbose specifications. E.g. "dirichlet 0.5" => V(x,t) = V(t) * 0.5 * F(x,t) 
@@ -710,13 +710,13 @@ void FieldSolver::parseDomainBc(){
 	  };
 	  break;
 	default:
-	  MayDay::Abort("FieldSolver::parseDomainBc -- unsupported boundary condition requested!");
+	  MayDay::Error("FieldSolver::parseDomainBc -- unsupported boundary condition requested!");
 	  break;
 	}
       }
       else{
 	const std::string errorString = "FieldSolver::parseDomainBc -- bad or no input parameter for " + bcString;
-	MayDay::Abort(errorString.c_str());
+	MayDay::Error(errorString.c_str());
       }
 
       m_domainBc.setBc(curWall, std::make_pair(bcType, curFunc));
@@ -730,32 +730,34 @@ void FieldSolver::writePlotFile(){
     pout() << "FieldSolver::writePlotFile" << endl;
   }
 
-  // Number of output components and their names
-  const int ncomps = this->getNumberOfPlotVariables();
-  const Vector<std::string> names = getPlotVariableNames();
+  // Number of output components
+  const int numPlotVars = this->getNumberOfPlotVariables();
+
+  // Get plot variable names
+  const Vector<std::string> plotVarNames = getPlotVariableNames();
 
   // Allocate storage for output
   EBAMRCellData output;
-  m_amr->allocate(output, m_realm, phase::gas, ncomps);
+  m_amr->allocate(output, m_realm, phase::gas, numPlotVars);
 
   // Copy internal data to be plotted over to 'output'
-  int icomp = 0;
-  this->writePlotData(output, icomp);
+  int icomp = 0; 
+  this->writePlotData(output, icomp, true);
 
   // Filename
   char file_char[1000];
   sprintf(file_char, "%s.step%07d.%dd.hdf5", m_className.c_str(), m_timeStep, SpaceDim);
 
-  // Alias
-  Vector<LevelData<EBCellFAB>* > output_ptr(1+m_amr->getFinestLevel());
-  m_amr->alias(output_ptr, output);
+  // Need to alias because EBHDF5 is not too smart. 
+  Vector<LevelData<EBCellFAB>* > outputPtr(1+m_amr->getFinestLevel());
+  m_amr->alias(outputPtr, output);
 
-  Vector<Real> covered_values(ncomps, 0.0);
+  Vector<Real> covered_values(numPlotVars, 0.0);
   string fname(file_char);
   writeEBHDF5(fname,
 	      m_amr->getGrids(m_realm),
-	      output_ptr,
-	      names,
+	      outputPtr,
+	      plotVarNames,
 	      m_amr->getDomains()[0].domainBox(),
 	      m_amr->getDx()[0],
 	      m_dt,
@@ -773,19 +775,19 @@ void FieldSolver::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) 
     pout() << "FieldSolver::writeCheckpointLevel" << endl;
   }
 
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
+  const RefCountedPtr<EBIndexSpace>& ebisGas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
+  const RefCountedPtr<EBIndexSpace>& ebisSol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
 
   // Used for aliasing phases
-  LevelData<EBCellFAB> potential_gas;
-  LevelData<EBCellFAB> potential_sol;
+  LevelData<EBCellFAB> potentialGas;
+  LevelData<EBCellFAB> potentialSol;
 
-  if(!ebis_gas.isNull()) MultifluidAlias::aliasMF(potential_gas,  phase::gas,   *m_potential[a_level]);
-  if(!ebis_sol.isNull()) MultifluidAlias::aliasMF(potential_sol,  phase::solid, *m_potential[a_level]);
+  if(!ebisGas.isNull()) MultifluidAlias::aliasMF(potentialGas,  phase::gas,   *m_potential[a_level]);
+  if(!ebisSol.isNull()) MultifluidAlias::aliasMF(potentialSol,  phase::solid, *m_potential[a_level]);
   
   // Write data
-  if(!ebis_gas.isNull()) write(a_handle, potential_gas, "poisson_g");
-  if(!ebis_sol.isNull()) write(a_handle, potential_sol, "poisson_s");
+  if(!ebisGas.isNull()) write(a_handle, potentialGas, "poisson_g");
+  if(!ebisSol.isNull()) write(a_handle, potentialSol, "poisson_s");
 }
 
 void FieldSolver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
@@ -794,19 +796,19 @@ void FieldSolver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
     pout() << "FieldSolver::readCheckpointLevel" << endl;
   }
 
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
+  const RefCountedPtr<EBIndexSpace> ebisGas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebisSol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
 
   // Used for aliasing phases
-  LevelData<EBCellFAB> potential_gas;
-  LevelData<EBCellFAB> potential_sol;
+  LevelData<EBCellFAB> potentialGas;
+  LevelData<EBCellFAB> potentialSol;
 
-  if(!ebis_gas.isNull()) MultifluidAlias::aliasMF(potential_gas,  phase::gas,   *m_potential[a_level]);
-  if(!ebis_sol.isNull()) MultifluidAlias::aliasMF(potential_sol,  phase::solid, *m_potential[a_level]);
+  if(!ebisGas.isNull()) MultifluidAlias::aliasMF(potentialGas,  phase::gas,   *m_potential[a_level]);
+  if(!ebisSol.isNull()) MultifluidAlias::aliasMF(potentialSol,  phase::solid, *m_potential[a_level]);
   
   // Read data
-  if(!ebis_gas.isNull()) read<EBCellFAB>(a_handle, potential_gas, "poisson_g", m_amr->getGrids(m_realm)[a_level], Interval(0,0), false);
-  if(!ebis_sol.isNull()) read<EBCellFAB>(a_handle, potential_sol, "poisson_s", m_amr->getGrids(m_realm)[a_level], Interval(0,0), false);
+  if(!ebisGas.isNull()) read<EBCellFAB>(a_handle, potentialGas, "poisson_g", m_amr->getGrids(m_realm)[a_level], Interval(0,0), false);
+  if(!ebisSol.isNull()) read<EBCellFAB>(a_handle, potentialSol, "poisson_s", m_amr->getGrids(m_realm)[a_level], Interval(0,0), false);
 }
 
 void FieldSolver::postCheckpoint(){
@@ -816,27 +818,20 @@ void FieldSolver::postCheckpoint(){
   }
 }
 
-void FieldSolver::writePlotData(EBAMRCellData& a_output, int& a_comp){
+void FieldSolver::writePlotData(EBAMRCellData& a_output, int& a_comp, const bool a_forceNoInterp){
   CH_TIME("FieldSolver::writePlotData");
   if(m_verbosity > 5){
     pout() << "FieldSolver::writePlotData" << endl;
   }
 
+  // This routine always outputs data on the centroid. If the data was defined on the center, 
+  const bool doInterp = (m_dataLocation == Location::Cell::Center) && !a_forceNoInterp;
+
   // Add phi to output
-  if(m_plotPotential) {
-    this->writeMultifluidData(a_output, a_comp, m_potential,  true);
-  }
-  if(m_plotRho) {
-    this->writeMultifluidData(a_output, a_comp, m_rho, false);
-    //    DataOps::setCoveredValue(a_output, a_comp-1, 0.0); // Why was this here? If the dielectric side contains charge, it should not be here. 
-  }
-  if(m_plotResidue) {
-    this->writeMultifluidData(a_output, a_comp, m_residue,  false);
-  }
-  if(m_plotElectricField) {
-    //    this->computeElectricField();
-    this->writeMultifluidData(a_output, a_comp, m_electricField, true);
-  }
+  if(m_plotPotential)     this->writeMultifluidData(a_output, a_comp, m_potential,     doInterp); // Possibly on cell center, so-recenter to centroid if needed
+  if(m_plotRho)           this->writeMultifluidData(a_output, a_comp, m_rho,           false);    // Always centroid
+  if(m_plotResidue)       this->writeMultifluidData(a_output, a_comp, m_residue,       false);    // Always centroid
+  if(m_plotElectricField) this->writeMultifluidData(a_output, a_comp, m_electricField, doInterp); // Possibly on cell center, so-recenter to centroid if needed
 }
 
 void FieldSolver::writeMultifluidData(EBAMRCellData& a_output, int& a_comp, const MFAMRCellData& a_data, const bool a_interp){
@@ -935,14 +930,14 @@ int FieldSolver::getNumberOfPlotVariables() const {
     pout() << "FieldSolver::getNumberOfPlotVariables" << endl;
   }
 
-  int num_output = 0;
+  int numPltVars = 0;
 
-  if(m_plotPotential)     num_output = num_output + 1;
-  if(m_plotRho)           num_output = num_output + 1;
-  if(m_plotResidue)       num_output = num_output + 1;
-  if(m_plotElectricField) num_output = num_output + SpaceDim;
+  if(m_plotPotential)     numPltVars = numPltVars + 1;
+  if(m_plotRho)           numPltVars = numPltVars + 1;
+  if(m_plotResidue)       numPltVars = numPltVars + 1;
+  if(m_plotElectricField) numPltVars = numPltVars + SpaceDim;
 
-  return num_output;
+  return numPltVars;
 }
 
 Vector<std::string> FieldSolver::getPlotVariableNames() const {
@@ -950,20 +945,22 @@ Vector<std::string> FieldSolver::getPlotVariableNames() const {
   if(m_verbosity > 5){
     pout() << "FieldSolver::getPlotVariableNames" << endl;
   }
-  Vector<std::string> names(0);
   
-  if(m_plotPotential) names.push_back("Electrostatic potential");
-  if(m_plotRho)       names.push_back("Space charge density");
-  if(m_plotResidue)   names.push_back("Electrostatic potential_residue");
+  Vector<std::string> pltVarNames(0);
+  
+  if(m_plotPotential) pltVarNames.push_back("Electrostatic potential");
+  if(m_plotRho)       pltVarNames.push_back("Space charge density");
+  if(m_plotResidue)   pltVarNames.push_back("Electrostatic potential_residue");
+  
   if(m_plotElectricField){
-    names.push_back("x-Electric field"); 
-    names.push_back("y-Electric field"); 
+    pltVarNames.push_back("x-Electric field"); 
+    pltVarNames.push_back("y-Electric field"); 
     if(SpaceDim == 3){
-      names.push_back("z-Electric field");
+      pltVarNames.push_back("z-Electric field");
     }
   }
   
-  return names;
+  return pltVarNames;
 }
 
 Vector<long long> FieldSolver::computeLoads(const DisjointBoxLayout& a_dbl, const int a_level){
