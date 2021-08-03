@@ -367,10 +367,11 @@ void FieldSolver::regrid(const int a_lmin, const int a_old_finest, const int a_n
 
   const Interval interv(m_comp, m_comp);
 
+  // Reallocate internals
   this->allocateInternals();
 
   for (int i = 0; i < phase::numPhases; i++){
-    phase::which_phase curPhase;    
+    phase::which_phase curPhase;
     if(i == 0){
       curPhase = phase::gas;
     }
@@ -386,10 +387,12 @@ void FieldSolver::regrid(const int a_lmin, const int a_old_finest, const int a_n
 
       Vector<RefCountedPtr<EBPWLFineInterp> >& interpolator = m_amr->getPwlInterpolator(m_realm, curPhase);
 
-      // These levels have not changed
+      // These levels have not changed so we can do a direct copy. 
       for (int lvl = 0; lvl <= Max(0, a_lmin-1); lvl++){
-	scratch_phase[lvl]->copyTo(*potential_phase[lvl]); // Base level should never change, but ownership might
+	scratch_phase[lvl]->copyTo(*potential_phase[lvl]); // Base level should never change, but ownership might. So no localCopyTo here...
       }
+
+      // These levels might have changed so we interpolate data here. 
       for (int lvl = Max(1,a_lmin); lvl <= a_new_finest; lvl++){
 	interpolator[lvl]->interpolate(*potential_phase[lvl], *potential_phase[lvl-1], interv);
 	if(lvl <= a_old_finest){
@@ -401,6 +404,7 @@ void FieldSolver::regrid(const int a_lmin, const int a_old_finest, const int a_n
     }
   }
 
+  // Synchronize over levels. 
   m_amr->averageDown(m_potential, m_realm);
   m_amr->interpGhost(m_potential, m_realm);
 
@@ -409,10 +413,20 @@ void FieldSolver::regrid(const int a_lmin, const int a_old_finest, const int a_n
 }
 
 void FieldSolver::setRho(const Real a_rho){
+  CH_TIME("FieldSolver::setRho(Real");
+  if(m_verbosity > 5){
+    pout() << "FieldSolver::setRho(Real)" << endl;
+  }
+  
   DataOps::setValue(m_rho, a_rho);
 }
 
 void FieldSolver::setRho(const std::function<Real(const RealVect)>& a_rho){
+  CH_TIME("FieldSolver::setRho(std::function");
+  if(m_verbosity > 5){
+    pout() << "FieldSolver::setRho(std::function)" << endl;
+  }
+  
   DataOps::setValue(m_rho, a_rho, m_amr->getProbLo(), m_amr->getDx(), 0);
 }
 
@@ -442,8 +456,8 @@ void FieldSolver::setVoltage(std::function<Real(const Real a_time)> a_voltage){
   if(m_verbosity > 4){
     pout() << "FieldSolver::setVoltage(std::function)" << endl;
   }
-  m_voltage      = a_voltage;
   
+  m_voltage      = a_voltage;
   m_isVoltageSet = true;
 }
 
@@ -491,7 +505,8 @@ void FieldSolver::setRealm(const std::string a_realm){
   CH_TIME("FieldSolver::setRealm");
   if(m_verbosity > 5){
     pout() << "FieldSolver::setRealm" << endl;
-  }  
+  }
+  
   m_realm = a_realm;
 }
 
@@ -604,6 +619,11 @@ void FieldSolver::setDefaultEbBcFunctions() {
     pout() << "FieldSolver::setDefaultEbBcFunctions" << endl;
   }
 
+  // TLDR: This sets the default potential function on the electrodes. We use a lambda for passing in
+  //       some member variables (m_voltage, m_time) and get other parameters directly from the electrodes.
+  //       We create one such voltage function for each electrode so that the voltage can be obtained
+  //       anywhere on the electrode.
+
   const Vector<Electrode> electrodes = m_computationalGeometry->getElectrodes();
 
   for (int i = 0; i < electrodes.size(); i++){
@@ -625,6 +645,16 @@ void FieldSolver::parseDomainBc(){
   if(m_verbosity > 5){
     pout() << "FieldSolver::parseDomainBc" << endl;
   }
+
+  // TLDR: This routine might seem big and complicated. What we are doing is that we are creating one function object which returns some value
+  //       anywhere in space and time on a domain edge (face). The FieldSolver class supports Dirichlet and Neumann, and the below code simply
+  //       creates those functions and associates them with an edge.
+  //
+  //       For flexibility we want to be able to specify the potential directy without invoking m_voltage, while at the same time we want to offer
+  //       the simplistic method of setting a domain side to be "grounded", "live", or otherwise given by some fraction of m_voltage. 
+  //       We thus make a distinction between "dirichlet" and "dirichlet_custom". The difference between these is that for "dirichlet_custom" the contents
+  //       of m_domainBcFunctions are used as boundary conditions. For "dirichlet 0.5" the contents of m_domainBcFunctions are multiplied by 0.5*m_voltage. 
+  //       The same approach is used for Neumann boundary conditions. 
   
   ParmParse pp(m_className.c_str());
 
@@ -638,11 +668,11 @@ void FieldSolver::parseDomainBc(){
       std::string str;
 
       ElectrostaticDomainBc::BcType      bcType;
-      ElectrostaticDomainBc::BcFunction& bcFunc = m_domainBcFunctions.at(curWall);
+      ElectrostaticDomainBc::BcFunction& bcFunc = m_domainBcFunctions.at(curWall); // = F(x,t) in the comments below
 
       std::function<Real(const RealVect, const Real)> curFunc;
 
-      if(num == 1){
+      if(num == 1){ // If we only had one argument the user has asked for "custom" boundary conditions, and we then pass in F(x,t) directly (evaluated at m_time)
 	pp.get(bcString.c_str(), str, 0);
 
 	curFunc = [&bcFunc, &time = this->m_time] (const RealVect a_pos, const Real a_time) {
@@ -656,10 +686,10 @@ void FieldSolver::parseDomainBc(){
 	  bcType  = ElectrostaticDomainBc::BcType::Neumann;
 	}
 	else{
-	  MayDay::Abort("FieldSolver::parseDomainBc -- got only one argument but this argument was not dirichlet_custom. Maybe you have the wrong BC specification?");
+	  MayDay::Abort("FieldSolver::parseDomainBc -- got only one argument but this argument was not dirichlet/neumann_custom. Maybe you have the wrong BC specification?");
 	}
       }
-      else if(num == 2){
+      else if(num == 2){ // If we had two arguments the user has asked to run with less verbose specifications. E.g. "dirichlet 0.5" => V(x,t) = V(t) * 0.5 * F(x,t) 
 	Real val;
 
 	pp.get(bcString.c_str(), str, 0);
