@@ -34,14 +34,34 @@ Real FieldSolver::s_voltageOne(const Real a_time){
 }
 
 FieldSolver::FieldSolver(){
-  m_className = "FieldSolver";
-  m_realm     = Realm::Primal;
+  m_className    = "FieldSolver";
+  m_realm        = Realm::Primal;
+  m_dataLocation = Location::Cell::Center;
 
   this->setVerbosity(-1);
 }
 
 FieldSolver::~FieldSolver(){
   
+}
+
+void FieldSolver::setDataLocation(const Location::Cell a_dataLocation){
+  CH_TIME("FieldSolver::setDataLocation(Location::Cell)");
+  if(m_verbosity > 5){
+    pout() << "FieldSolver::setDataLocation(Location::Cell)" << endl;
+  }
+  
+  switch(a_dataLocation){
+  case Location::Cell::Center:
+    m_dataLocation = a_dataLocation;
+    break;
+  case Location::Cell::Centroid:
+    m_dataLocation = a_dataLocation; 
+    break;    
+  default:
+    MayDay::Abort("FieldSolver::setDataLocation - location must be either cell center or cell centroid");
+    break;
+  }
 }
 
 bool FieldSolver::solve(const bool a_zerophi) {

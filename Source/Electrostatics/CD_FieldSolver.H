@@ -16,11 +16,11 @@
 #include <functional>
 
 // Our includes
+#include <CD_Location.H>
 #include <CD_ComputationalGeometry.H>
 #include <CD_AmrMesh.H>
 #include <CD_ElectrostaticDomainBc.H>
 #include <CD_ElectrostaticEbBc.H>
-
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -299,6 +299,11 @@ public:
   virtual Vector<long long> computeLoads(const DisjointBoxLayout& a_dbl, const int a_level);
 
   /*!
+    @brief Set the data location for the solver
+  */
+  virtual void setDataLocation(const Location::Cell a_dataLocation);
+
+  /*!
     @brief Get the Realm where this solver is registered. 
   */
   const std::string getRealm() const;
@@ -327,8 +332,18 @@ public:
     @brief Get the residue
   */
   MFAMRCellData& getResidue();
+
+  /*!
+    @brief Get data location
+  */
+  Location::Cell getDataLocation() const;
   
 protected:
+
+  /*!
+    @brief Data location
+  */
+  Location::Cell m_dataLocation;
 
   /*!
     @brief Realm
