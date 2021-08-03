@@ -824,7 +824,7 @@ void FieldSolver::writePlotData(EBAMRCellData& a_output, int& a_comp, const bool
     pout() << "FieldSolver::writePlotData" << endl;
   }
 
-  // This routine always outputs data on the centroid. If the data was defined on the center, 
+  // This routine always outputs data on the centroid. If the data was defined on the center we move it to the centroid (but not forcefully)
   const bool doInterp = (m_dataLocation == Location::Cell::Center) && !a_forceNoInterp;
 
   // Add phi to output
@@ -840,59 +840,61 @@ void FieldSolver::writeMultifluidData(EBAMRCellData& a_output, int& a_comp, cons
     pout() << "FieldSolver::writeMultifluidData" << endl;
   }
 
-  const int ncomp = a_data[0]->nComp();
+  // So the problem with the Chombo HDF5 I/O routines is that they are not really designed for multiphase. 
 
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
+  const int numComp = a_data[0]->nComp();
+
+  const RefCountedPtr<EBIndexSpace>& ebisGas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
+  const RefCountedPtr<EBIndexSpace>& ebisSol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
 
   // Allocate some scratch data that we can use
   EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_realm, phase::gas, ncomp);
+  m_amr->allocate(scratch, m_realm, phase::gas, numComp);
 
   //
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    LevelData<EBCellFAB> data_gas;
-    LevelData<EBCellFAB> data_sol;
+    LevelData<EBCellFAB> gasData;
+    LevelData<EBCellFAB> solData;
 
-    if(!ebis_gas.isNull()) MultifluidAlias::aliasMF(data_gas,  phase::gas,   *a_data[lvl]);
-    if(!ebis_sol.isNull()) MultifluidAlias::aliasMF(data_sol,  phase::solid, *a_data[lvl]);
+    if(!ebisGas.isNull()) MultifluidAlias::aliasMF(gasData,  phase::gas,   *a_data[lvl]);
+    if(!ebisSol.isNull()) MultifluidAlias::aliasMF(solData,  phase::solid, *a_data[lvl]);
 
-    data_gas.localCopyTo(*scratch[lvl]);
+    gasData.localCopyTo(*scratch[lvl]);
 
     // Copy all covered cells from the other phase
-    if(!ebis_sol.isNull()){
-      for (DataIterator dit = data_sol.dataIterator(); dit.ok(); ++dit){
-	const Box box = data_sol.disjointBoxLayout().get(dit());
+    if(!ebisSol.isNull()){
+      for (DataIterator dit = solData.dataIterator(); dit.ok(); ++dit){
+	const Box box = solData.disjointBoxLayout().get(dit());
 	const IntVectSet ivs(box);
-	const EBISBox& ebisb_gas = data_gas[dit()].getEBISBox();
-	const EBISBox& ebisb_sol = data_sol[dit()].getEBISBox();
+	const EBISBox& ebisboxGas = gasData[dit()].getEBISBox();
+	const EBISBox& ebisboxSol = solData[dit()].getEBISBox();
 
-	FArrayBox& scratch_gas    = (*scratch[lvl])[dit()].getFArrayBox();
-	const FArrayBox& fab_gas = data_gas[dit()].getFArrayBox();
-	const FArrayBox& fab_sol = data_sol[dit()].getFArrayBox();
+	FArrayBox& scratchGas    = (*scratch[lvl])[dit()].getFArrayBox();
+	const FArrayBox& fabGas = gasData[dit()].getFArrayBox();
+	const FArrayBox& fabSol = solData[dit()].getFArrayBox();
 
 	// TLDR: There are four cases
 	// 1. Both are covered => inside electrode
 	// 2. Gas is covered, solid is regular => inside solid phase only
 	// 3. Gas is regular, solid is covered => inside gas phase only
 	// 4. Gas is !(covered || regular) and solid is !(covered || regular) => on dielectric boundary
-	if(!(ebisb_gas.isAllCovered() && ebisb_sol.isAllCovered())){ // Outside electrode, lets do stuff
-	  if(ebisb_gas.isAllCovered() && ebisb_sol.isAllRegular()){ // Case 2, copy directly. 
-	    scratch_gas += fab_sol;
+	if(!(ebisboxGas.isAllCovered() && ebisboxSol.isAllCovered())){ // Outside electrode, lets do stuff
+	  if(ebisboxGas.isAllCovered() && ebisboxSol.isAllRegular()){ // Case 2, copy directly. 
+	    scratchGas += fabSol;
 	  }
-	  else if(ebisb_gas.isAllRegular() && ebisb_sol.isAllCovered()) { // Case 3. Inside gas phase. Already did this. 
+	  else if(ebisboxGas.isAllRegular() && ebisboxSol.isAllCovered()) { // Case 3. Inside gas phase. Already did this. 
 	  }
 	  else{ // Case 4, needs special treatment. 
 	    for (BoxIterator bit(box); bit.ok(); ++bit){ // Loop through all cells here
 	      const IntVect iv = bit();
-	      if(ebisb_gas.isCovered(iv) && !ebisb_sol.isCovered(iv)){   // Regular cells from phase 2
-		for (int comp = 0; comp < ncomp; comp++){
-		  scratch_gas(iv, comp) = fab_sol(iv, comp);
+	      if(ebisboxGas.isCovered(iv) && !ebisboxSol.isCovered(iv)){   // Regular cells from phase 2
+		for (int comp = 0; comp < numComp; comp++){
+		  scratchGas(iv, comp) = fabSol(iv, comp);
 		}
 	      }
-	      else if(ebisb_sol.isIrregular(iv) && ebisb_gas.isIrregular(iv)){ // Irregular cells. Use gas side data
-		for (int comp = 0; comp < ncomp; comp++){
-		  scratch_gas(iv, comp) = fab_gas(iv,comp);
+	      else if(ebisboxSol.isIrregular(iv) && ebisboxGas.isIrregular(iv)){ // Irregular cells. Use gas side data
+		for (int comp = 0; comp < numComp; comp++){
+		  scratchGas(iv, comp) = fabGas(iv,comp);
 		}
 	      }
 	    }
@@ -909,8 +911,8 @@ void FieldSolver::writeMultifluidData(EBAMRCellData& a_output, int& a_comp, cons
     m_amr->interpToCentroids(scratch, m_realm, phase::gas);
   }
 
-  const Interval src_interv(0, ncomp-1);
-  const Interval dst_interv(a_comp, a_comp + ncomp - 1);
+  const Interval src_interv(0, numComp-1);
+  const Interval dst_interv(a_comp, a_comp + numComp - 1);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     if(m_realm == a_output.getRealm()){
@@ -921,7 +923,7 @@ void FieldSolver::writeMultifluidData(EBAMRCellData& a_output, int& a_comp, cons
     }
   }
 
-  a_comp += ncomp;
+  a_comp += numComp;
 }
 
 int FieldSolver::getNumberOfPlotVariables() const {

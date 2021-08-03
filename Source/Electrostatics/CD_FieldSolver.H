@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_FieldSolver.H
-  @brief  Contains declaration of an abstract electrostatic field solver. 
+  @brief  Contains declaration of a base electrostatics solver class. 
   @author Robert Marskar
 */
 
@@ -28,7 +28,7 @@
 */
 class FieldSolver {
 public:
-  
+
   /*!
     @brief Default function for space-time dependence of domain boundary conditions. 
     @details This is a utility function 
@@ -272,21 +272,25 @@ public:
 
   /*!
     @brief Get number of output fields.
+    @return Number of plot variables
   */
   virtual int getNumberOfPlotVariables() const;
 
   /*!
     @brief Get voltage function
+    @return Returns m_voltage
   */
   const std::function<Real(const Real a_time)>& getVoltage() const;
 
   /*!
     @brief Get current voltage
+    @return Evaluates m_voltage(m_time) and returns the result. 
   */
   Real getCurrentVoltage() const;
 
   /*!
     @brief Get time. 
+    @return m_time
   */
   Real getTime() const;
 
@@ -375,32 +379,32 @@ protected:
   constexpr static int m_nComp = 1;
 
   /*!
-    @brief Data location
+    @brief Flag which specifies that data location. 
   */
   Location::Cell m_dataLocation;
 
   /*!
-    @brief Realm
+    @brief Realm where this solver is registered. 
   */
   std::string m_realm;
   
   /*!
-    @brief Class name
+    @brief Class name (i.e., "FieldSolver" for the base class)
   */
   std::string m_className;
 
   /*!
-    @brief MFindex space
+    @brief Multifluid index space. 
   */
   RefCountedPtr<MultiFluidIndexSpace> m_multifluidIndexSpace;
 
   /*!
-    @brief Computational geometry. Needed for passing in BCs on EBs. 
+    @brief Computational geometry. 
   */
   RefCountedPtr<ComputationalGeometry> m_computationalGeometry;
 
   /*!
-    @brief AMR; needed for grid stuff
+    @brief AMR - needed for pretty much everything. 
   */
   RefCountedPtr<AmrMesh> m_amr;
 
@@ -410,82 +414,72 @@ protected:
   MFAMRCellData m_cache;
 
   /*!
-    @brief State data (i.e. the potential)
+    @brief State data, i.e. the potential. The centering of this is the same as m_dataLocation. 
   */
   MFAMRCellData m_potential;
 
   /*!
-    @brief E-field
+    @brief Electric field. The centering of this is the same as m_dataLocation. 
   */
   MFAMRCellData m_electricField;
 
   /*!
-    @brief Space charge density. 
+    @brief Storage for space charge density.
   */
   MFAMRCellData m_rho;
 
   /*!
-    @brief Gas-side E-field
-  */
-  EBAMRCellData m_electricFieldGasSide;
-
-  /*!
-    @brief Solid-side E-field
-  */
-  EBAMRCellData m_electricFieldSolidSide;
-
-  /*!
-    @brief Surface charge density. 
+    @brief Storage for surface charge density. 
   */
   EBAMRIVData m_sigma;
 
   /*!
-    @brief Residue after solving Poisson equation. 
+    @brief Residue, e.g. used after solving Poisson equation. 
   */
   MFAMRCellData m_residue;
 
   /*!
-    @brief
+    @brief Flag for checking if voltage has been set. 
   */
   bool m_isVoltageSet;
 
   /*!
-    @brief Output state
+    @brief If true, potential will be added to plot files. 
   */
   bool m_plotPotential;
 
   /*!
-    @brief Output rhs
+    @brief If true, space charge will be added to plot files. 
   */
   bool m_plotRho;
 
   /*!
-    @brief Output electric field
+    @brief If true, the electric field will be added to plot files.
   */
   bool m_plotElectricField;
 
   /*!
-    @brief Output GMG residue
+    @brief If true, the residue will be added to plot files. 
   */
   bool m_plotResidue;
 
   /*!
-    @brief Verbosity
+    @brief Verbosity for this calss. 
   */
   int m_verbosity;
 
   /*!
-    @brief Time step
+    @brief Current time step
   */
   int m_timeStep;
 
   /*!
-    @brief Time step increment
+    @brief Last time step increment
   */
   Real m_dt;
 
   /*!
-    @brief Time
+    @brief Current time
   */
   Real m_time;
 
@@ -500,27 +494,27 @@ protected:
   ElectrostaticEbBc m_ebBc;
 
   /*!
-    @brief Domain BC functions
+    @brief Domain BC functions. This is used to map space/time to a voltage/field at the domain faces. 
   */
   std::map<ElectrostaticDomainBc::Wall, ElectrostaticDomainBc::BcFunction> m_domainBcFunctions;
 
   /*!
-    @brief BC functions (Dirichlet) on the electrodes
+    @brief BC functions (Dirichlet) on the electrodes. Used to map space/time to a voltage on the electrodes. 
   */
   std::vector<std::pair<Electrode, ElectrostaticEbBc::BcFunction> > m_electrodeBcFunctions;
 
   /*!
-    @brief Potential function. 
+    @brief Voltage function. 
   */
   std::function<Real(const Real a_time)> m_voltage;
 
   /*!
-    @brief Parses which plot variables to write to plot files
+    @brief Function which parses which plot variables to write to plot files
   */
   virtual void parsePlotVariables();
 
   /*!
-    @brief Parses domain boundary conditions. 
+    @brief Parse domain boundary conditions. 
   */
   virtual void parseDomainBc();
 
@@ -531,7 +525,7 @@ protected:
 
   /*!
     @brief Set default Dirichlet boundary conditions on the embedded boundaries. 
-    @details For each electrode the default boundary condition is set to m_voltage*electroc.getFraction(). 
+    @details For each electrode the default boundary condition is set to m_voltage*electrode.getFraction(). 
   */
   virtual void setDefaultEbBcFunctions();
 
@@ -541,13 +535,14 @@ protected:
     @param[inout] a_output Output data holder
     @param[inout] a_comp   Current component in a_output. 
     @param[in]    a_data   Multifluid data holder
-    @param[in]    a_interp Special flag which, if true, tells AmrMesh to interpolate the data to centroid (in irregular cells). 
+    @param[in]    a_interp Special flag which, if true, tells AmrMesh to interpolate the data to centroids (in irregular cells). 
   */
   virtual void writeMultifluidData(EBAMRCellData& a_output, int& a_comp, const MFAMRCellData& a_data, const bool a_interp);
 
   /*!
     @brief Returns BC type based on string.
     @param[in] a_str Boundary condition string. Must be "dirichlet number", "neumann number", "dirichlet_custom" or "neumann_custom"
+    @return This returns the boundary condition type, either ElectrostaticDomainBc::Dirichlet or ElectrostaticDomainBc::Neumann
   */
   virtual ElectrostaticDomainBc::BcType parseBcString(const std::string a_str) const;
 
