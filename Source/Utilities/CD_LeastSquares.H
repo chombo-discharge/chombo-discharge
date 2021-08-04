@@ -163,32 +163,6 @@ public:
   static VoFStencil projectGradSten(const VoFStencil& a_stencil, const RealVect& a_projection);
   
   /*!
-    @brief Compute the position (ignoring the "origin) of a Vof. 
-    @param[in] a_position  Position within the grid cell (e.g. center, centroid, boundary).
-    @param[in] a_vof       VolIndex to compute the position of
-    @param[in] a_ebisbox   EBISBox
-    @param[in] a_dx        Grid resolution
-    @return Position of a face, ignoring the "origin" of the coordinate system since this is only used together with LeastSquares::displacement(...)
-  */
-  static RealVect position(const CellLocation a_location,
-			   const VolIndex&    a_vof,
-			   const EBISBox&     a_ebisbox,
-			   const Real&        a_dx);
-
-  /*!
-    @brief Compute the position (ignoring the "origin) of a FaceIndex
-    @param[in] a_position  Position within the grid cell (e.g. center, centroid)
-    @param[in] a_face      Face
-    @param[in] a_ebisbox   EBISBox
-    @param[in] a_dx        Grid resolution
-    @return Position of a face, ignoring the "origin" of the coordinate system since this is only used together with LeastSquares::displacement(...)
-  */
-  static RealVect position(const FaceLocation a_location,
-			   const FaceIndex&   a_face,
-			   const EBISBox&     a_ebisbox,
-			   const Real&        a_dx);
-  
-  /*!
     @brief Computes the distance between two Vofs that are defined on the same grid level. 
     @param[in] a_from     Specifying position in the cell defined by a_fromVof
     @param[in] a_to       Specifying position in the cell defined by a_toVof

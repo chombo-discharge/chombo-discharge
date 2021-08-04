@@ -329,150 +329,15 @@ void FieldSolverMultigrid::setMultigridCoefficients(){
   const int ghosts = 1;
   const Real eps0  = m_computationalGeometry->getGasPermittivity();
   
-  m_amr->allocate(m_aCoef,      m_realm, ncomps);
-  m_amr->allocate(m_bCoefficient,      m_realm, ncomps);
-  m_amr->allocate(m_bCoefficientIrreg, m_realm, ncomps);
+  m_amr->allocate(m_aco,      m_realm, ncomps);
 
-  DataOps::setValue(m_aCoef,      0.0);  // Always zero for poisson equation, but that is done from alpha. 
-  DataOps::setValue(m_bCoefficient,      eps0); // Will override this later
-  DataOps::setValue(m_bCoefficientIrreg, eps0); // Will override this later
+
+  DataOps::setValue(m_aco,      0.0);  // Always zero for poisson equation, but that is done from alpha.
 
   this->setPermittivities(m_computationalGeometry->getDielectrics());
 }
 
-void FieldSolverMultigrid::setPermittivities(const Vector<Dielectric>& a_dielectrics){
-  CH_TIME("FieldSolverMultigrid::setPermittivities");
-  if(m_verbosity > 5){
-    pout() << "FieldSolverMultigrid::setPermittivities" << endl;
-  }
 
-  if(a_dielectrics.size() > 0){
-    const RealVect origin  = m_amr->getProbLo();
-    const Vector<Real> dx  = m_amr->getDx();
-    const int finest_level = m_amr->getFinestLevel();
-
-    for (int lvl = 0; lvl <= finest_level; lvl++){
-      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-      
-      LevelData<EBFluxFAB> bco;
-      LevelData<BaseIVFAB<Real> > bcoIrreg;
-
-      MultifluidAlias::aliasMF(bco,       phase::solid, *m_bCoefficient[lvl]);
-      MultifluidAlias::aliasMF(bcoIrreg, phase::solid, *m_bCoefficientIrreg[lvl]);
-
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	EBFluxFAB& perm          = bco[dit()];
-	BaseIVFAB<Real>& perm_eb = bcoIrreg[dit()];
-	const Box box            = dbl.get(dit());
-
-	this->setFacePermittivities(perm,  box, origin, dx[lvl], a_dielectrics);
-	this->setEbPermittivities(perm_eb, box, origin, dx[lvl], a_dielectrics);
-      }
-    }
-  }
-}
-
-void FieldSolverMultigrid::setFacePermittivities(EBFluxFAB&                a_perm,
-						 const Box&                a_box,
-						 const RealVect&           a_origin,
-						 const Real&               a_dx,
-						 const Vector<Dielectric>& a_dielectrics){
-  CH_TIME("FieldSolverMultigrid::setFacePermittivities");
-  if(m_verbosity > 10){
-    pout() << "FieldSolverMultigrid::setFacePermittivities" << endl;
-  }
-
-  const int comp         = 0;
-  const IntVectSet ivs   = IntVectSet(a_perm.getRegion());
-  const EBISBox& ebisbox = a_perm.getEBISBox();
-  const EBGraph& ebgraph = ebisbox.getEBGraph();
-  FaceStop::WhichFaces stop_crit = FaceStop::SurroundingWithBoundary;
-  
-  for (int dir = 0; dir < SpaceDim; dir++){
-
-    // Regular clels
-    Box facebox = a_box;
-    facebox.surroundingNodes(dir);
-    BaseFab<Real>& perm_fab = a_perm[dir].getSingleValuedFAB();
-    for (BoxIterator bit(facebox); bit.ok(); ++bit){
-      const IntVect iv = bit();
-      const RealVect pos     = a_origin + a_dx*RealVect(iv) + 0.5*a_dx*RealVect(BASISV(dir));
-
-      Real dist   = 1.E99;
-      int closest = 0;
-      for (int i = 0; i < a_dielectrics.size(); i++){
-	const RefCountedPtr<BaseIF> func = a_dielectrics[i].getImplicitFunction();
-
-	const Real cur_dist = func->value(pos);
-	
-	if(cur_dist <= dist){
-	  dist = cur_dist;
-	  closest = i;
-	}
-      }
-      perm_fab(iv, comp) = a_dielectrics[closest].getPermittivity(pos);
-    }
-    
-
-    // Irregular cells
-    const IntVectSet irreg = ebisbox.getIrregIVS(a_box);
-    for (FaceIterator faceit(irreg, ebgraph, dir, stop_crit); faceit.ok(); ++faceit){
-      const FaceIndex& face  = faceit();
-      const IntVect iv       = face.gridIndex(Side::Lo);
-      const RealVect pos     = a_origin + a_dx*RealVect(iv) + 0.5*a_dx*RealVect(BASISV(dir));
-      
-      Real dist   = 1.E99;
-      int closest = 0;
-      for (int i = 0; i < a_dielectrics.size(); i++){
-	const RefCountedPtr<BaseIF> func = a_dielectrics[i].getImplicitFunction();
-
-	const Real cur_dist = func->value(pos);
-	
-	if(cur_dist <= dist){
-	  dist = cur_dist;
-	  closest = i;
-	}
-      }
-      a_perm[dir](face, comp) = a_dielectrics[closest].getPermittivity(pos);
-    }
-  }
-}
-
-
-void FieldSolverMultigrid::setEbPermittivities(BaseIVFAB<Real>&          a_perm,
-					       const Box&                a_box,
-					       const RealVect&           a_origin,
-					       const Real&               a_dx,
-					       const Vector<Dielectric>& a_dielectrics){
-  CH_TIME("FieldSolverMultigrid::setEbPermittivities");
-  if(m_verbosity > 10){
-    pout() << "FieldSolverMultigrid::setEbPermittivities" << endl;
-  }
-  
-  const int comp         = 0;
-  const IntVectSet ivs   = a_perm.getIVS();
-  const EBGraph& ebgraph = a_perm.getEBGraph();
-
-  for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-    const VolIndex& vof = vofit();
-    const RealVect pos  = EBArith::getVofLocation(vof, a_dx, a_origin); // This is strictly speaking not on the boundary...
-      
-    Real dist   = 1.E99;
-    int closest = 0;
-    for (int i = 0; i < a_dielectrics.size(); i++){
-      const RefCountedPtr<BaseIF> func = a_dielectrics[i].getImplicitFunction();
-
-      const Real cur_dist = func->value(pos);
-	
-      if(cur_dist <= dist){
-	dist = cur_dist;
-	closest = i;
-      }
-    }
-
-    a_perm(vof, comp) = a_dielectrics[closest].getPermittivity(pos);
-  }
-}
 
 void FieldSolverMultigrid::defineDeeperMultigridLevels(){
   CH_TIME("FieldSolverMultigrid::define_mg_level");
@@ -654,9 +519,9 @@ void FieldSolverMultigrid::setupOperatorFactory(){
 										 mffluxreg,
 										 refinement_ratios,
 										 grids,
-										 m_aCoef,
-										 m_bCoefficient,
-										 m_bCoefficientIrreg,
+										 m_aco,
+										 m_permittivityFace,
+										 m_permittivityEB,
 										 alpha,
 										 beta,
 										 m_lengthScale,
@@ -794,20 +659,6 @@ Vector<long long> FieldSolverMultigrid::computeLoads(const DisjointBoxLayout& a_
   delete oper;
 
   return ret;
-
-  //  return FieldSolver::computeLoads(a_dbl, a_level);
-}
-
-MFAMRCellData& FieldSolverMultigrid::getACoefficient(){
-  return m_aCoef;
-}
-
-MFAMRFluxData& FieldSolverMultigrid::getBCoefficient(){
-  return m_bCoefficient;
-}
-
-MFAMRIVData& FieldSolverMultigrid::getBCoefficientIrreg(){
-  return m_bCoefficientIrreg;
 }
 
 void FieldSolverMultigrid::setNeedsMultigridSetup(const bool a_needsSetup){

@@ -362,6 +362,21 @@ public:
   MFAMRCellData& getResidue();
 
   /*!
+    @brief Get cell-centered permittivity
+  */
+  MFAMRCellData& getPermittivityCell();
+  
+  /*!
+    @brief Get face-centered permittivity
+  */
+  MFAMRFluxData& getPermittivityFace();
+
+  /*!
+    @brief Get irregular b coefficient
+  */
+  MFAMRIVData& getPermittivityEB();
+
+  /*!
     @brief Get data location
   */
   Location::Cell getDataLocation() const;
@@ -382,6 +397,11 @@ protected:
     @brief Flag which specifies that data location. 
   */
   Location::Cell m_dataLocation;
+
+  /*!
+    @brief Flag which specifies where the permittivities are stored
+  */
+  Location::Face m_faceLocation;
 
   /*!
     @brief Realm where this solver is registered. 
@@ -437,6 +457,21 @@ protected:
     @brief Residue, e.g. used after solving Poisson equation. 
   */
   MFAMRCellData m_residue;
+
+  /*!
+    @brief Cell permittivity
+  */
+  MFAMRCellData m_permittivityCell;
+
+  /*!
+    @brief Face permittivity. 
+  */
+  MFAMRFluxData m_permittivityFace;
+
+  /*!
+    @brief EB permittivity.
+  */
+  MFAMRIVData m_permittivityEB;
 
   /*!
     @brief Flag for checking if voltage has been set. 
@@ -530,6 +565,63 @@ protected:
   virtual void setDefaultEbBcFunctions();
 
   /*!
+    @brief Get relative permittivity at some point in space
+    @param[in] a_position Physical position
+    @note This routine is used for computing the permittivity inside dielectrics. 
+  */
+  inline
+  Real getDielectricPermittivity(const RealVect& a_pos);
+
+  /*!
+    @brief Set the permittivities
+    @param[in] a_dielectrics List of dielectrics
+    @details This sets m_permittivityCell, m_permittivityFace, and m_permittivityEB.
+  */
+  virtual void setPermittivities(const Vector<Dielectric>& a_dielectrics);
+
+  /*!
+    @brief Set cell-centered permittivities
+    @param[out] a_perm    Permittivity (on either cell center or centroid)
+    @param[in]  a_cellBox Computation box
+    @param[in]  a_ebisbox EBIS box
+    @param[in]  a_probLo  Lower-left corner off comptuational domain
+    @param[in]  a_dx      Resolution
+  */
+  virtual void setCellPermittivities(EBCellFAB&      a_perm,
+				     const Box&      a_cellBox,
+				     const EBISBox&  a_ebisbox,
+				     const RealVect& a_probLo,
+				     const Real&     a_dx);
+
+  /*!
+    @brief Set face-centered permittivities
+    @param[out] a_perm Permittivity (on face centroid or center)
+    @param[in]  a_cellBox Computation box
+    @param[in]  a_ebisbox EBIS box
+    @param[in]  a_probLo  Lower-left corner off comptuational domain
+    @param[in]  a_dx       Resolution
+  */
+  virtual void setFacePermittivities(EBFluxFAB&      a_perm,
+				     const Box&      a_cellBox,
+				     const EBISBox&  a_ebisbox,
+				     const RealVect& a_probLo,
+				     const Real&     a_dx);
+
+  /*!
+    @brief Set EB-centered permittivities
+    @param[out] a_perm Permittivity (on face centroid or center)
+    @param[in]  a_cellBox Computation box
+    @param[in]  a_ebisbox EBIS box
+    @param[in]  a_probLo  Lower-left corner off comptuational domain
+    @param[in]  a_dx       Resolution
+  */
+  virtual void setEbPermittivities(BaseIVFAB<Real>& a_perm,
+				   const Box&       a_cellBox,
+				   const EBISBox&   a_ebisbox,
+				   const RealVect&  a_origin,
+				   const Real&      a_dx);
+
+  /*!
     @brief Write multifluid data to single-fluid data holders. 
     @details This takes the valid data from each phase and writes it to a_output. 
     @param[inout] a_output Output data holder
@@ -556,5 +648,7 @@ protected:
 };
 
 #include <CD_NamespaceFooter.H>
+
+#include <CD_FieldSolverImplem.H>
 
 #endif

@@ -37,10 +37,10 @@ FieldSolver::FieldSolver(){
   // Default settings.
   m_className    = "FieldSolver";
   m_realm        = Realm::Primal;
-  m_dataLocation = Location::Cell::Center;
   m_isVoltageSet = false;
   m_verbosity    = -1;
 
+  this->setDataLocation(Location::Cell::Center);
   this->setDefaultDomainBcFunctions();
 }
 
@@ -55,12 +55,16 @@ void FieldSolver::setDataLocation(const Location::Cell a_dataLocation){
   }
   
   switch(a_dataLocation){
-  case Location::Cell::Center:
+  case Location::Cell::Center:{
     m_dataLocation = a_dataLocation;
+    m_faceLocation = Location::Face::Center;
     break;
-  case Location::Cell::Centroid:
-    m_dataLocation = a_dataLocation; 
-    break;    
+  }
+  case Location::Cell::Centroid:{
+    m_dataLocation = a_dataLocation;
+    m_faceLocation = Location::Face::Centroid;
+    break;
+  }
   default:
     MayDay::Error("FieldSolver::setDataLocation - location must be either cell center or cell centroid");
     break;
@@ -134,10 +138,13 @@ void FieldSolver::allocateInternals(){
     pout() << "FieldSolver::allocateInternals" << endl;
   }
 
-  m_amr->allocate(m_potential,     m_realm, m_nComp );
-  m_amr->allocate(m_rho,           m_realm, m_nComp );
-  m_amr->allocate(m_residue,       m_realm, m_nComp );
-  m_amr->allocate(m_electricField, m_realm, SpaceDim);
+  m_amr->allocate(m_potential,        m_realm, m_nComp );
+  m_amr->allocate(m_rho,              m_realm, m_nComp );
+  m_amr->allocate(m_residue,          m_realm, m_nComp );
+  m_amr->allocate(m_permittivityCell, m_realm, m_nComp);
+  m_amr->allocate(m_permittivityFace, m_realm, m_nComp);
+  m_amr->allocate(m_permittivityEB,   m_realm, m_nComp);
+  m_amr->allocate(m_electricField,    m_realm, SpaceDim);
 
   m_amr->allocate(m_sigma,         m_realm, phase::gas, m_nComp);
 
@@ -181,17 +188,6 @@ void FieldSolver::computeDisplacementField(MFAMRCellData& a_displacementField, c
   DataOps::scale(a_displacementField, Units::eps0);  
   //
   if(m_multifluidIndexSpace->numPhases() > 1 && dielectrics.size() > 0){
-
-    // Lambda which gets the physical position of the data in the cell
-    auto physicalCoordinates = [&loc=this->m_dataLocation](const RealVect& probLo, const Real& dx, const VolIndex& vof, const EBISBox& ebisbox) -> RealVect{
-      RealVect ret = probLo + dx*RealVect(vof.gridIndex()); // Cell center. 
-
-      if(loc == Location::Cell::Centroid){
-	ret += dx*ebisbox.centroid(vof); // Cell center -> cell centroid
-      }
-
-      return ret;
-    };
 
     // Lambda which returns the relative permittivity at some position
     auto permittivity = [&dielectrics](const RealVect& pos) -> Real{
@@ -247,7 +243,7 @@ void FieldSolver::computeDisplacementField(MFAMRCellData& a_displacementField, c
 	// Irregular cells
 	for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
 	  const VolIndex& vof = vofit();
-	  const RealVect pos  = physicalCoordinates(probLo, dx, vof, ebisbox);
+	  const RealVect pos  = probLo + Location::position(m_dataLocation, vof, ebisbox, dx);
 	  const Real epsRel   = permittivity(pos);
 
 	  for (int comp = 0; comp < SpaceDim; comp++){
@@ -727,6 +723,139 @@ void FieldSolver::parseDomainBc(){
   }
 }
 
+void FieldSolver::setPermittivities(const Vector<Dielectric>& a_dielectrics){
+  CH_TIME("FieldSolver::setPermittivities");
+  if(m_verbosity > 5){
+    pout() << "FieldSolver::setPermittivities" << endl;
+  }
+
+  const Real relEpsGas = m_computationalGeometry->getGasPermittivity();
+
+  DataOps::setValue(m_permittivityCell, relEpsGas);
+  DataOps::setValue(m_permittivityFace, relEpsGas); 
+  DataOps::setValue(m_permittivityEB,   relEpsGas); 
+
+  if(a_dielectrics.size() > 0 && m_multifluidIndexSpace->numPhases() > 1){
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+      const Real dx                = m_amr->getDx()[lvl];
+      const RealVect probLo        = m_amr->getProbLo();
+
+      LevelData<EBCellFAB>        cellPerm;
+      LevelData<EBFluxFAB>        facePerm;
+      LevelData<BaseIVFAB<Real> > ebPerm  ;
+
+      MultifluidAlias::aliasMF(cellPerm, phase::solid, *m_permittivityCell[lvl]);
+      MultifluidAlias::aliasMF(facePerm, phase::solid, *m_permittivityFace[lvl]);
+      MultifluidAlias::aliasMF(ebPerm,   phase::solid, *m_permittivityEB   [lvl]);
+
+      for (DataIterator dit(dbl); dit.ok(); ++dit){
+	EBCellFAB& cellPermFAB     = cellPerm[dit()];
+	EBFluxFAB& facePermFAB     = facePerm[dit()];
+	BaseIVFAB<Real>& ebPermFAB = ebPerm  [dit()];
+
+	
+	const Box cellBox          = dbl.get(dit());
+	const EBISBox& ebisbox     = cellPermFAB.getEBISBox();	
+
+	this->setCellPermittivities(cellPermFAB,  cellBox, ebisbox, probLo, dx);
+	this->setFacePermittivities(facePermFAB,  cellBox, ebisbox, probLo, dx);
+	this->setEbPermittivities  (ebPermFAB,    cellBox, ebisbox, probLo, dx);
+      }
+    }
+  }
+}
+
+void FieldSolver::setCellPermittivities(EBCellFAB&      a_relPerm,
+					const Box&      a_cellBox,
+					const EBISBox&  a_ebisbox,					
+					const RealVect& a_probLo,
+					const Real&     a_dx){
+  CH_TIME("FieldSolver::setCellPermittivities");
+  if(m_verbosity > 10){
+    pout() << "FieldSolver::setCellPermittivities" << endl;
+  }
+
+  const EBGraph& ebgraph = a_ebisbox.getEBGraph();
+  const IntVectSet irreg = a_ebisbox.getIrregIVS(a_cellBox);
+  
+  // Regular cells
+  BaseFab<Real>& relPermFAB = a_relPerm.getSingleValuedFAB();
+  for (BoxIterator bit(a_cellBox); bit.ok(); ++bit){
+    const IntVect iv = bit();
+    if(a_ebisbox.isRegular(iv)){
+      const RealVect pos = a_probLo + a_dx*RealVect(iv) + 0.5*RealVect::Unit;
+      relPermFAB(iv, m_comp) = this->getDielectricPermittivity(pos);
+    }
+  }
+
+  // Irregular cells
+  for (VoFIterator vofit(irreg, ebgraph); vofit.ok(); ++vofit){
+    const VolIndex& vof = vofit();
+    const RealVect pos  = Location::position(m_dataLocation, vof, a_ebisbox, a_dx);
+    a_relPerm(vof, m_comp) = this->getDielectricPermittivity(pos);
+  }
+}
+
+void FieldSolver::setFacePermittivities(EBFluxFAB&      a_relPerm,
+					const Box&      a_cellBox,
+					const EBISBox&  a_ebisbox,
+					const RealVect& a_probLo,
+					const Real&     a_dx){
+  CH_TIME("FieldSolver::setFacePermittivities");
+  if(m_verbosity > 10){
+    pout() << "FieldSolver::setFacePermittivities" << endl;
+  }
+
+  const EBGraph& ebgraph         = a_ebisbox.getEBGraph();
+  const IntVectSet irreg         = a_ebisbox.getIrregIVS(a_cellBox);
+  FaceStop::WhichFaces stop_crit = FaceStop::SurroundingWithBoundary;
+  
+  for (int dir = 0; dir < SpaceDim; dir++){
+
+    // Regular faces
+    Box facebox = a_cellBox;
+    facebox.surroundingNodes(dir);
+    BaseFab<Real>& relPermFAB = a_relPerm[dir].getSingleValuedFAB();
+    for (BoxIterator bit(facebox); bit.ok(); ++bit){
+      const IntVect iv   = bit();
+      const RealVect pos = a_probLo + a_dx*(RealVect(iv) + 0.5*RealVect::Unit) - 0.5*a_dx*BASISREALV(dir);
+      
+      relPermFAB(iv, m_comp) = this->getDielectricPermittivity(pos);
+    }
+    
+    // Irregular faces
+    for (FaceIterator faceit(irreg, ebgraph, dir, stop_crit); faceit.ok(); ++faceit){
+      const FaceIndex& face  = faceit();
+      const RealVect pos     = a_probLo + Location::position(m_faceLocation, face, a_ebisbox, a_dx);
+
+      a_relPerm[dir](face, m_comp) = this->getDielectricPermittivity(pos);
+    }
+  }
+}
+
+void FieldSolver::setEbPermittivities(BaseIVFAB<Real>& a_relPerm,
+				      const Box&       a_cellBox,
+				      const EBISBox&   a_ebisbox,
+				      const RealVect&  a_probLo,
+				      const Real&      a_dx){
+  CH_TIME("FieldSolver::setEbPermittivities");
+  if(m_verbosity > 10){
+    pout() << "FieldSolver::setEbPermittivities" << endl;
+  }
+  
+  const int comp         = 0;
+  const IntVectSet& ivs  = a_relPerm.getIVS();
+  const EBGraph& ebgraph = a_relPerm.getEBGraph();
+
+  for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+    const VolIndex& vof = vofit();
+    const RealVect pos  = Location::position(Location::Cell::Boundary, vof, a_ebisbox, a_dx);
+
+    a_relPerm(vof, m_comp) = this->getDielectricPermittivity(pos);
+  }
+}
+
 void FieldSolver::writePlotFile(){
   CH_TIME("FieldSolver::writePlotFile");
   if(m_verbosity > 5){
@@ -1021,6 +1150,18 @@ MFAMRCellData& FieldSolver::getRho(){
 
 MFAMRCellData& FieldSolver::getResidue(){
   return m_residue;
+}
+
+MFAMRCellData& FieldSolver::getPermittivityCell(){
+  return m_permittivityCell;
+}
+
+MFAMRFluxData& FieldSolver::getPermittivityFace(){
+  return m_permittivityFace;
+}
+
+MFAMRIVData& FieldSolver::getPermittivityEB(){
+  return m_permittivityEB;
 }
 
 #include <CD_NamespaceFooter.H>

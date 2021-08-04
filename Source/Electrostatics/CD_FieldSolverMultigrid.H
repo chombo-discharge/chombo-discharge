@@ -165,20 +165,10 @@ public:
   */
   virtual void setNeedsMultigridSetup(const bool a_needsSetup);
 
-    /*!
-    @brief Get a-coefficient
-  */
-  virtual MFAMRCellData& getACoefficient();
-
   /*!
-    @brief Get b-coefficient
+    @brief Get cell-centered permittivity
   */
-  virtual MFAMRFluxData& getBCoefficient();
 
-  /*!
-    @brief Get irregular b coefficient
-  */
-  virtual MFAMRIVData& getBCoefficientIrreg();
 
   /*!
     @brief Compute grid loads
@@ -295,19 +285,9 @@ protected:
   RefCountedPtr<MfHelmholtzOpFactory> m_operatorFactory;
   
   /*!
-    @brief b-coefficient
+    @brief Dummy coefficient for operator factory. 
   */
-  MFAMRCellData m_aCoef;
-
-  /*!
-    @brief b-coefficient
-  */
-  MFAMRFluxData m_bCoefficient;
-
-  /*!
-    @brief b-coefficient
-  */
-  MFAMRIVData m_bCoefficientIrreg;
+  MFAMRCellData m_aco;
 
   /*!
     @brief Zero
@@ -364,23 +344,7 @@ protected:
   */
   Vector<RefCountedPtr<MFLevelGrid> > m_mg_mflg;
 
-  /*!
-    @brief Set face-centered permittivities
-  */
-  virtual void setFacePermittivities(EBFluxFAB&                a_perm,
-				     const Box&                a_box,
-				     const RealVect&           a_origin,
-				     const Real&               a_dx,
-				     const Vector<Dielectric>& a_dielectrics);
 
-  /*!
-    @brief Set EB-centered permittivities
-  */
-  virtual void setEbPermittivities(BaseIVFAB<Real>&          a_perm,
-				   const Box&                a_box,
-				   const RealVect&           a_origin,
-				   const Real&               a_dx,
-				   const Vector<Dielectric>& a_dielectrics);
 
   /*!
     @brief Parse multigrid settings
@@ -392,10 +356,7 @@ protected:
   */
   virtual void parseKappaSource();
 
-    /*!
-    @brief Set the permittivities
-  */
-  virtual void setPermittivities(const Vector<Dielectric>& a_dielectrics);
+
   
   /*!
     @brief Define the deeper multigrid levels (the ones that live below the AMR levels)

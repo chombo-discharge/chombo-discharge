@@ -1016,8 +1016,8 @@ void ItoPlasmaGodunovStepper::setupSemiImplicitPoisson(const Real a_dt){
   poisson->setMultigridCoefficients();
 
   // Get bco and increment with mobilities
-  MFAMRFluxData& bco   = poisson->getBCoefficient();
-  MFAMRIVData& bco_irr = poisson->getBCoefficientIrreg();
+  MFAMRFluxData& bco   = poisson->getPermittivityFace();
+  MFAMRIVData& bco_irr = poisson->getPermittivityEB();
   
   EBAMRFluxData bco_gas;
   EBAMRIVData   bco_irr_gas;
