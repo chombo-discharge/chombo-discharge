@@ -612,7 +612,7 @@ public:
   /*!
     @brief Parse the grid generation algorithm. 
   */
-  void parsegridGeneration();
+  void parseGridGeneration();
 
   /*!
     @brief Parse the verbosity for AmrMesh. 

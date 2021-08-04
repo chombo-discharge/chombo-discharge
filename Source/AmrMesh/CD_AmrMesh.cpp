@@ -769,7 +769,7 @@ void AmrMesh::parseOptions(){
   parseBlockingFactor();
   parseMaxBoxSize();
   parseMaxEbisBoxSize();
-  parsegridGeneration();
+  parseGridGeneration();
   parseBrBufferSize();
   parseIrregTagGrowth();
   parseBrFillRatio();
@@ -779,6 +779,7 @@ void AmrMesh::parseOptions(){
   parseProbLoHiCorners();
   parseCentroidStencils();
   parseEbCentroidStencils();
+  parseMultigridInterpolator();
 
   this->sanityCheck();
 }
@@ -787,10 +788,11 @@ void AmrMesh::parseRuntimeOptions(){
   parseVerbosity();
   parseBlockingFactor();
   parseMaxBoxSize();
-  parsegridGeneration();
+  parseGridGeneration();
   parseBrBufferSize();
   parseIrregTagGrowth();
   parseBrFillRatio();
+  parseMultigridInterpolator();
 }
 
 void AmrMesh::parseProbLoHiCorners(){
@@ -1524,7 +1526,7 @@ void AmrMesh::parseBrBufferSize(){
   }
 }
 
-void AmrMesh::parsegridGeneration(){
+void AmrMesh::parseGridGeneration(){
 
   ParmParse pp("AmrMesh");
   std::string str;
@@ -1536,7 +1538,7 @@ void AmrMesh::parsegridGeneration(){
     m_gridGenerationMethod = GridGenerationMethod::Tiled;
   }
   else{
-    MayDay::Abort("AmrMesh::parsegridGeneration - unknown grid generation method requested");
+    MayDay::Abort("AmrMesh::parseGridGeneration - unknown grid generation method requested");
   }
 
   pp.get("box_sorting", str);
@@ -1553,7 +1555,7 @@ void AmrMesh::parsegridGeneration(){
     m_boxSort = BoxSorting::Morton;
   }
   else {
-    MayDay::Abort("AmrMesh::parsegridGeneration - unknown box sorting method requested");
+    MayDay::Abort("AmrMesh::parseGridGeneration - unknown box sorting method requested");
   }
 }
 
@@ -1975,8 +1977,21 @@ void AmrMesh::defineRealms(){
   }
 
   for (auto& r : m_realms){
-    r.second->define(m_grids, m_domains, m_refinementRatios, m_dx, m_probLo, m_finestLevel, m_numEbGhostsCells, m_numGhostCells, m_numLsfGhostCells, m_redistributionRadius,
-		     m_hasEbCf, m_centroidStencilType, m_ebCentroidStencilType, m_baseif, m_multifluidIndexSpace);
+    r.second->define(m_grids,
+		     m_domains,
+		     m_refinementRatios,
+		     m_dx,
+		     m_probLo,
+		     m_finestLevel,
+		     m_numEbGhostsCells,
+		     m_numGhostCells,
+		     m_numLsfGhostCells,
+		     m_redistributionRadius,
+		     m_hasEbCf,
+		     m_centroidStencilType,
+		     m_ebCentroidStencilType,
+		     m_baseif,
+		     m_multifluidIndexSpace);
   }
 }
 
@@ -2009,8 +2024,21 @@ void AmrMesh::regridRealm(const std::string           a_realm,
     grids[lvl].close();
   }
 
-  m_realms[a_realm]->define(grids, m_domains, m_refinementRatios, m_dx, m_probLo, m_finestLevel, m_numEbGhostsCells, m_numGhostCells, m_numLsfGhostCells, m_redistributionRadius,
-			    m_hasEbCf, m_centroidStencilType, m_ebCentroidStencilType, m_baseif, m_multifluidIndexSpace);
+  m_realms[a_realm]->define(grids,
+			    m_domains,
+			    m_refinementRatios,
+			    m_dx,
+			    m_probLo,
+			    m_finestLevel,
+			    m_numEbGhostsCells,
+			    m_numGhostCells,
+			    m_numLsfGhostCells,
+			    m_redistributionRadius,
+			    m_hasEbCf,
+			    m_centroidStencilType,
+			    m_ebCentroidStencilType,
+			    m_baseif,
+			    m_multifluidIndexSpace);
 
   m_realms[a_realm]->regridBase(a_lmin);
 }

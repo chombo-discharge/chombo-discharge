@@ -56,7 +56,7 @@ static const std::string s_eb_flux_reg     = "eb_flux_reg";
 static const std::string s_eb_redist       = "eb_redist";
 static const std::string s_eb_copier       = "eb_copier";
 static const std::string s_eb_ghostcloud   = "eb_ghostcloud";
-static const std::string s_noncons_div  = "eb_non_cons_div";
+static const std::string s_noncons_div     = "eb_non_cons_div";
 static const std::string s_levelset        = "levelset";
 
 /*!
