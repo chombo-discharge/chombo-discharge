@@ -76,9 +76,9 @@ void FieldSolverMultigrid::parseMultigridSettings(){
   pp.get("gmg_bott_smooth", m_multigridBottomSmooth);
   pp.get("gmg_max_iter",    m_multigridMaxIterations);
   pp.get("gmg_min_iter",    m_multigridMinIterations);
-  pp.get("gmg_tolerance",   m_multigridExitTolerance);
-  pp.get("gmg_hang",        m_multigridExitHang);
-  pp.get("gmg_bottom_drop", m_minCellsBottom);
+  pp.get("gmg_exit_tol",    m_multigridExitTolerance);
+  pp.get("gmg_exit_hang",   m_multigridExitHang);
+  pp.get("gmg_min_cells",   m_minCellsBottom);
   pp.get("gmg_bc_order",    m_multigridBcOrder);
 
   if(!(m_multigridBcOrder == 1 || m_multigridBcOrder == 2)){

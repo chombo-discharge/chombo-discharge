@@ -562,9 +562,9 @@ void CdrTGA::parseMultigridSettings(){
   pp.get("gmg_bott_smooth", m_multigridBottomSmooth);
   pp.get("gmg_max_iter",    m_multigridMaxIterations);
   pp.get("gmg_min_iter",    m_multigridMinIterations);
-  pp.get("gmg_tolerance",   m_multigridTolerance);
-  pp.get("gmg_hang",        m_multigridHang);
-  pp.get("gmg_bottom_drop", m_numCellsBottomDrop);
+  pp.get("gmg_exit_tol",    m_multigridTolerance);
+  pp.get("gmg_exit_hang",   m_multigridHang);
+  pp.get("gmg_min_cells",   m_numCellsBottomDrop);
 
   // Bottom solver
   pp.get("gmg_bottom_solver", str);
