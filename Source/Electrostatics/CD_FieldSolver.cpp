@@ -61,6 +61,8 @@ void FieldSolver::setDataLocation(const Location::Cell a_dataLocation){
     break;
   }
   case Location::Cell::Centroid:{
+    MayDay::Error("FieldSolver::setDataLocation - centroid discretization is not yet fully supported (due to the multigrid interpolator)");
+    
     m_dataLocation = a_dataLocation;
     m_faceLocation = Location::Face::Centroid;
     break;

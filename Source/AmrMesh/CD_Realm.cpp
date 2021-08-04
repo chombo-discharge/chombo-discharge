@@ -54,6 +54,9 @@ void Realm::define(const Vector<DisjointBoxLayout>& a_grids,
 		   const int a_num_ghost,
 		   const int a_lsf_ghost,
 		   const int a_redist_rad,
+		   const int a_mgInterpOrder,
+		   const int a_mgInterpRadius,
+		   const int a_mgInterpWeight,
 		   const bool a_ebcf,
 		   const IrregStencil::StencilType a_centroid_stencil,
 		   const IrregStencil::StencilType a_eb_stencil,
@@ -79,11 +82,39 @@ void Realm::define(const Vector<DisjointBoxLayout>& a_grids,
   const RefCountedPtr<EBIndexSpace>& ebis_gas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
   const RefCountedPtr<EBIndexSpace>& ebis_sol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
 
-  m_realms[phase::gas]->define(a_grids, a_domains, a_ref_rat, a_dx, m_probLo, a_finestLevel, a_ebghost, a_num_ghost, a_lsf_ghost, a_redist_rad,
+  m_realms[phase::gas]->define(a_grids,
+			       a_domains,
+			       a_ref_rat,
+			       a_dx,
+			       m_probLo,
+			       a_finestLevel,
+			       a_ebghost,
+			       a_num_ghost,
+			       a_lsf_ghost,
+			       a_redist_rad,
+			       a_mgInterpOrder,
+			       a_mgInterpRadius,
+			       a_mgInterpWeight,
 			       a_centroid_stencil, a_eb_stencil, a_ebcf, m_baseif.at(phase::gas), ebis_gas);
 
-  m_realms[phase::solid]->define(a_grids, a_domains, a_ref_rat, a_dx, m_probLo, a_finestLevel, a_ebghost, a_num_ghost, a_lsf_ghost, a_redist_rad,
-				 a_centroid_stencil, a_eb_stencil, a_ebcf, m_baseif.at(phase::solid), ebis_sol);
+  m_realms[phase::solid]->define(a_grids,
+				 a_domains,
+				 a_ref_rat,
+				 a_dx,
+				 m_probLo,
+				 a_finestLevel,
+				 a_ebghost,
+				 a_num_ghost,
+				 a_lsf_ghost,
+				 a_redist_rad,
+				 a_mgInterpOrder,
+				 a_mgInterpRadius,
+				 a_mgInterpWeight,
+				 a_centroid_stencil,
+				 a_eb_stencil,
+				 a_ebcf,
+				 m_baseif.at(phase::solid),
+				 ebis_sol);
 
 
 }
@@ -442,6 +473,10 @@ Vector<RefCountedPtr<EbGhostCloud> >& Realm::getGhostCloud(const phase::which_ph
 
 Vector<RefCountedPtr<EBQuadCFInterp> >& Realm::getEBQuadCFInterp(const phase::which_phase a_phase){
   return m_realms[a_phase]->getEBQuadCFInterp();
+}
+
+Vector<RefCountedPtr<EBMultigridInterpolator> >& Realm::getMultigridInterpolator(const phase::which_phase a_phase){
+  return m_realms[a_phase]->getMultigridInterpolator();
 }
 
 Vector<RefCountedPtr<AggEBPWLFillPatch> >& Realm::getFillPatch(const phase::which_phase a_phase){

@@ -38,6 +38,7 @@
 #include <CD_DomainFluxIFFABFactory.H>
 #include <CD_ParticleContainer.H>
 #include <CD_EbGhostCloud.H>
+#include <CD_EBMultigridInterpolator.H>
 #include <CD_NonConservativeDivergenceStencil.H>
 #include <CD_EbCentroidInterpolationStencil.H>
 #include <CD_CentroidInterpolationStencil.H>
@@ -58,6 +59,7 @@ static const std::string s_eb_copier       = "eb_copier";
 static const std::string s_eb_ghostcloud   = "eb_ghostcloud";
 static const std::string s_noncons_div     = "eb_non_cons_div";
 static const std::string s_levelset        = "levelset";
+static const std::string s_eb_multigrid    = "eb_multigrid";
 
 /*!
   @brief Class that holds important things for an AMR PhaseRealm. I.e. grids, operators, etc. 
@@ -80,6 +82,9 @@ public:
 	      const int a_num_ghost,
 	      const int a_lsf_ghost,
 	      const int a_redist_rad,
+	      const int a_mgInterpOrder,
+	      const int a_mgInterpRadius,
+	      const int a_mgInterpWeight,	      
 	      const IrregStencil::StencilType a_centroid_stencil,
 	      const IrregStencil::StencilType a_eb_stencil,
 	      const bool a_ebcf,
@@ -114,6 +119,7 @@ public:
   Vector<RefCountedPtr<EbCoarAve> >& getCoarseAverage();
   Vector<RefCountedPtr<EbGhostCloud> >& getGhostCloud();
   Vector<RefCountedPtr<EBQuadCFInterp> >& getEBQuadCFInterp();
+  Vector<RefCountedPtr<EBMultigridInterpolator> >& getMultigridInterpolator();
   Vector<RefCountedPtr<AggEBPWLFillPatch> >& getFillPatch();
   Vector<RefCountedPtr<EBPWLFineInterp> >& getPwlInterpolator();
   Vector<RefCountedPtr<EBMGInterp> >& getEBMGInterp();
@@ -138,6 +144,9 @@ protected:
   int m_numEbGhostsCells;
   int m_numLsfGhostCells;
   int m_redistributionRadius;
+  int m_multigridInterpolationOrder;
+  int m_multigridInterpolationRadius;
+  int m_multigridInterpolationWeight;
   RealVect m_probLo;
   IrregStencil::StencilType m_centroidStencilType;
   IrregStencil::StencilType m_ebCentroidStencilType;
@@ -176,6 +185,7 @@ protected:
   Vector<RefCountedPtr<EbCoarAve> > m_coarave;
   Vector<RefCountedPtr<EbGhostCloud> > m_ghostclouds;
   Vector<RefCountedPtr<EBQuadCFInterp> > m_quadcfi;
+  Vector<RefCountedPtr<EBMultigridInterpolator> > m_multigridInterpolator;
   Vector<RefCountedPtr<AggEBPWLFillPatch> > m_pwl_fillpatch;
   Vector<RefCountedPtr<EBPWLFineInterp> > m_pwl_interp;
   Vector<RefCountedPtr<EBMGInterp> > m_ebmg_interp;
@@ -199,6 +209,7 @@ protected:
   // Operator defines
   void define_eb_coar_ave(const int a_lmin);                       // Conservative coarsening
   void define_eb_quad_cfi(const int a_lmin);                       // Quadratic ghost cell interpolation
+  void define_eb_multigrid(const int a_lmin);                      // Multigrid interpolator
   void define_fillpatch(const int a_lmin);                         // Define operator for ghost cell interpolation
   void define_ebpwl_interp(const int a_lmin);                      // Define interpolator for piecewise interpolation
   void define_ebmg_interp(const int a_lmin);                       // Define interpolator used for e.g. multigrid

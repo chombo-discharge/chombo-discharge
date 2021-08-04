@@ -50,6 +50,9 @@ public:
 	      const int a_num_ghost,
 	      const int a_lsf_ghost,
 	      const int a_redist_rad,
+	      const int a_mgInterpOrder,
+	      const int a_mgInterpRadius,
+	      const int a_mgInterpWeight,
 	      const bool a_ebcf,
 	      const IrregStencil::StencilType a_centroid_stencil,
 	      const IrregStencil::StencilType a_eb_stencil,
@@ -97,6 +100,7 @@ public:
   Vector<RefCountedPtr<EbCoarAve> >& getCoarseAverage(const phase::which_phase a_phase);
   Vector<RefCountedPtr<EbGhostCloud> >& getGhostCloud(const phase::which_phase a_phase);
   Vector<RefCountedPtr<EBQuadCFInterp> >& getEBQuadCFInterp(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBMultigridInterpolator> >& getMultigridInterpolator(const phase::which_phase a_phase);
   Vector<RefCountedPtr<AggEBPWLFillPatch> >& getFillPatch(const phase::which_phase a_phase);
   Vector<RefCountedPtr<EBPWLFineInterp> >& getPwlInterpolator(const phase::which_phase a_phase);
   Vector<RefCountedPtr<EBMGInterp> >& getEBMGInterp(const phase::which_phase a_phase);

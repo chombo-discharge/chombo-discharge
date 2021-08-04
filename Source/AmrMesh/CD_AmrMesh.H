@@ -635,7 +635,7 @@ public:
   void parseMaxSimulationDepth();
 
   /*!
-    @brief Parse whether or not AmrMesh to forget about ebcf (user must guarantee that this is the case)
+   @brief Parse whether or not AmrMesh to forget about ebcf (user must guarantee that this is the case)
   */
   void parseEbCf();
 
@@ -960,6 +960,11 @@ public:
     @brief Get the old interpolation utility (needed for multigrid)
   */
   Vector<RefCountedPtr<EBQuadCFInterp> >& getEBQuadCFInterp(const std::string a_realm, const phase::which_phase a_phase);
+
+  /*!
+    @brief Get multigrid interpolation utility
+  */
+  Vector<RefCountedPtr<EBMultigridInterpolator> >& getMultigridInterpolator(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Get piecewise linear ghost cell interpolator

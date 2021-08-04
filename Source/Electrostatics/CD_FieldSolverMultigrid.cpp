@@ -269,18 +269,20 @@ void FieldSolverMultigrid::registerOperators(){
     MayDay::Abort("FieldSolverMultigrid::registerOperators - need to set AmrMesh!");
   }
   else{
-    m_amr->registerOperator(s_eb_coar_ave,     m_realm, phase::gas);
+    m_amr->registerOperator(s_eb_coar_ave,     m_realm, phase::gas  );
     m_amr->registerOperator(s_eb_coar_ave,     m_realm, phase::solid);
-    m_amr->registerOperator(s_eb_fill_patch,   m_realm, phase::gas);
+    m_amr->registerOperator(s_eb_fill_patch,   m_realm, phase::gas  );
     m_amr->registerOperator(s_eb_fill_patch,   m_realm, phase::solid);
-    m_amr->registerOperator(s_eb_pwl_interp,   m_realm, phase::gas);
+    m_amr->registerOperator(s_eb_pwl_interp,   m_realm, phase::gas  );
     m_amr->registerOperator(s_eb_pwl_interp,   m_realm, phase::solid);
-    m_amr->registerOperator(s_eb_quad_cfi,     m_realm, phase::gas);
+    m_amr->registerOperator(s_eb_quad_cfi,     m_realm, phase::gas  );
     m_amr->registerOperator(s_eb_quad_cfi,     m_realm, phase::solid);
-    m_amr->registerOperator(s_eb_irreg_interp, m_realm, phase::gas);
+    m_amr->registerOperator(s_eb_irreg_interp, m_realm, phase::gas  );
     m_amr->registerOperator(s_eb_irreg_interp, m_realm, phase::solid);
-    m_amr->registerOperator(s_eb_flux_reg,     m_realm, phase::gas);
+    m_amr->registerOperator(s_eb_flux_reg,     m_realm, phase::gas  );
     m_amr->registerOperator(s_eb_flux_reg,     m_realm, phase::solid);
+    m_amr->registerOperator(s_eb_multigrid,    m_realm, phase::gas  );
+    m_amr->registerOperator(s_eb_multigrid,    m_realm, phase::solid);    
   }
 }
 
@@ -415,20 +417,20 @@ void FieldSolverMultigrid::setupHelmholtzFactory(){
     Vector<RefCountedPtr<EBFluxRegister> >          fluxRegPhases(numPhases);
     Vector<RefCountedPtr<EbCoarAve> >               avePhases(numPhases);
 
-    if(!ebisGas.isNull()) eblgPhases[phase::gas]   = *(m_amr->getEBLevelGrid(m_realm, phase::gas)  [lvl]);
-    if(!ebisSol.isNull()) eblgPhases[phase::solid] = *(m_amr->getEBLevelGrid(m_realm, phase::solid)[lvl]);
+    if(!ebisGas.isNull()) eblgPhases[phase::gas  ]    = *(m_amr->getEBLevelGrid(m_realm, phase::gas)  [lvl]);
+    if(!ebisSol.isNull()) eblgPhases[phase::solid]    = *(m_amr->getEBLevelGrid(m_realm, phase::solid)[lvl]);
 
-    // if(!ebisGas.isNull()) interpPhases[phase::gas]   = this->getMultigridInterpolators(phase::gas)  [lvl];
-    // if(!ebisSol.isNull()) interpPhases[phase::solid] = this->getMultigridInterpolators(phase::solid)[lvl];
+    if(!ebisGas.isNull()) interpPhases[phase::gas  ]  = (m_amr->getMultigridInterpolator(m_realm, phase::gas  )[lvl]);
+    if(!ebisGas.isNull()) interpPhases[phase::solid]  = (m_amr->getMultigridInterpolator(m_realm, phase::solid)[lvl]);
 
-    if(!ebisGas.isNull()) fluxRegPhases[phase::gas]   = (m_amr->getFluxRegister(m_realm, phase::gas)  [lvl]);
+    if(!ebisGas.isNull()) fluxRegPhases[phase::gas  ] = (m_amr->getFluxRegister(m_realm, phase::gas)  [lvl]);
     if(!ebisSol.isNull()) fluxRegPhases[phase::solid] = (m_amr->getFluxRegister(m_realm, phase::solid)[lvl]);
 
-    if(!ebisGas.isNull()) avePhases[phase::gas]   = (m_amr->getCoarseAverage(m_realm, phase::gas)  [lvl]);
-    if(!ebisSol.isNull()) avePhases[phase::solid] = (m_amr->getCoarseAverage(m_realm, phase::solid)[lvl]);
+    if(!ebisGas.isNull()) avePhases[phase::gas  ]     = (m_amr->getCoarseAverage(m_realm, phase::gas)  [lvl]);
+    if(!ebisSol.isNull()) avePhases[phase::solid]     = (m_amr->getCoarseAverage(m_realm, phase::solid)[lvl]);
 
     mflg[lvl].define(m_multifluidIndexSpace, eblgPhases);
-    //    mfInterp[lvl].define(interpPhases);
+    mfInterp[lvl].define(interpPhases);
     mfFluxReg[lvl].define(fluxRegPhases);
     mfCoarAve[lvl].define(avePhases);
   }

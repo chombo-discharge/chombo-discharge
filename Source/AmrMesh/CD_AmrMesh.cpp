@@ -1859,6 +1859,10 @@ Vector<RefCountedPtr<EBQuadCFInterp> >& AmrMesh::getEBQuadCFInterp(const std::st
   return m_realms[a_realm]->getEBQuadCFInterp(a_phase);
 }
 
+Vector<RefCountedPtr<EBMultigridInterpolator> >& AmrMesh::getMultigridInterpolator(const std::string a_realm, const phase::which_phase a_phase){
+  return m_realms[a_realm]->getMultigridInterpolator(a_phase);
+}
+
 Vector<RefCountedPtr<AggEBPWLFillPatch> >& AmrMesh::getFillPatch(const std::string a_realm, const phase::which_phase a_phase){
   return m_realms[a_realm]->getFillPatch(a_phase);
 }
@@ -1987,6 +1991,9 @@ void AmrMesh::defineRealms(){
 		     m_numGhostCells,
 		     m_numLsfGhostCells,
 		     m_redistributionRadius,
+		     m_multigridInterpOrder,
+		     m_multigridInterpRadius,
+		     m_multigridInterpWeight,
 		     m_hasEbCf,
 		     m_centroidStencilType,
 		     m_ebCentroidStencilType,
@@ -2034,6 +2041,9 @@ void AmrMesh::regridRealm(const std::string           a_realm,
 			    m_numGhostCells,
 			    m_numLsfGhostCells,
 			    m_redistributionRadius,
+			    m_multigridInterpOrder,
+			    m_multigridInterpRadius,
+			    m_multigridInterpWeight,
 			    m_hasEbCf,
 			    m_centroidStencilType,
 			    m_ebCentroidStencilType,

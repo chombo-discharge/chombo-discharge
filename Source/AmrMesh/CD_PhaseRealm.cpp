@@ -20,6 +20,7 @@
 #include <CD_EbFastCoarToFineRedist.H>
 #include <CD_EbFastCoarToCoarRedist.H>
 #include <CD_EbFastFluxRegister.H>
+#include <CD_EBMultigridInterpolator.H>
 #include <CD_NamespaceHeader.H>
 
 PhaseRealm::PhaseRealm(){
@@ -49,6 +50,9 @@ void PhaseRealm::define(const Vector<DisjointBoxLayout>& a_grids,
 			const int a_num_ghost,
 			const int a_lsf_ghost,
 			const int a_redist_rad,
+			const int a_mgInterpOrder,
+			const int a_mgInterpRadius,
+			const int a_mgInterpWeight,			
 			const IrregStencil::StencilType a_centroid_stencil,
 			const IrregStencil::StencilType a_eb_stencil,
 			const bool a_ebcf,
@@ -70,6 +74,9 @@ void PhaseRealm::define(const Vector<DisjointBoxLayout>& a_grids,
   m_ebCentroidStencilType = a_eb_stencil;
   m_baseif = a_baseif;
   m_probLo = a_probLo;
+  m_multigridInterpolationOrder  = a_mgInterpOrder;
+  m_multigridInterpolationRadius = a_mgInterpRadius;
+  m_multigridInterpolationWeight = a_mgInterpWeight;
   
   if(!m_ebis.isNull()){
     m_defined = true;
@@ -108,19 +115,20 @@ void PhaseRealm::regridOperators(const int a_lmin, const int a_regsize){
   }
 
   if(m_defined){
-    this->define_eb_coar_ave(a_lmin);             // Define EbCoarAve on both phases
-    this->define_eb_quad_cfi(a_lmin);             // Define NwoEbQuadCfInterp on both phases.
-    this->define_fillpatch(a_lmin);               // Define operator for piecewise linear interpolation of ghost cells
-    this->define_ebpwl_interp(a_lmin);            // Define interpolator for piecewise interpolation of interior points
-    this->define_ebmg_interp(a_lmin);             // Define interpolator used for e.g. multigrid (or piecewise constant)
-    this->define_flux_reg(a_lmin,a_regsize);      // Define flux register
-    this->define_redist_oper(a_lmin, a_regsize);  // Define redistribution (phase::gas only)
-    this->define_gradsten(a_lmin);                // Make stencils for computing gradients
-    this->define_irreg_sten();                    // Make stencils for doing interpolation to centroids
-    this->define_noncons_sten();                  // Make stencils for nonconservative averaging
-    this->define_copier(a_lmin);                  // Make stencils for copier
-    this->define_ghostcloud(a_lmin);              // Make stencils for ghost clouds with particle depositions
-    this->define_levelset(a_lmin, m_numLsfGhostCells);   // Defining levelset
+    this->define_eb_coar_ave(a_lmin);                   // Define EbCoarAve on both phases
+    this->define_eb_quad_cfi(a_lmin);                   // Define NwoEbQuadCfInterp on both phases.
+    this->define_fillpatch(a_lmin);                     // Define operator for piecewise linear interpolation of ghost cells
+    this->define_ebpwl_interp(a_lmin);                  // Define interpolator for piecewise interpolation of interior points
+    this->define_ebmg_interp(a_lmin);                   // Define interpolator used for e.g. multigrid (or piecewise constant)
+    this->define_flux_reg(a_lmin,a_regsize);            // Define flux register
+    this->define_redist_oper(a_lmin, a_regsize);        // Define redistribution (phase::gas only)
+    this->define_gradsten(a_lmin);                      // Make stencils for computing gradients
+    this->define_irreg_sten();                          // Make stencils for doing interpolation to centroids
+    this->define_noncons_sten();                        // Make stencils for nonconservative averaging
+    this->define_copier(a_lmin);                        // Make stencils for copier
+    this->define_ghostcloud(a_lmin);                    // Make stencils for ghost clouds with particle depositions
+    this->define_levelset(a_lmin, m_numLsfGhostCells);  // Defining levelset
+    this->define_eb_multigrid(a_lmin);                  // Define multigrid interpolation objects
   }
 }
 
@@ -143,6 +151,7 @@ void PhaseRealm::registerOperator(const std::string a_operator){
        a_operator.compare(s_eb_gradient)     == 0 ||
        a_operator.compare(s_eb_irreg_interp) == 0 ||
        a_operator.compare(s_eb_mg_interp)    == 0 ||
+       a_operator.compare(s_eb_multigrid)    == 0 ||
        a_operator.compare(s_levelset)        == 0 )){
 
     const std::string str = "PhaseRealm::registerOperator - unknown operator '" + a_operator + "' requested";
@@ -260,11 +269,11 @@ void PhaseRealm::define_levelset(const int a_lmin, const int a_numGhost){
     pout() << "PhaseRealm::define_leveset" << endl;
   }
 
-  const bool do_this_operator = this->queryOperator(s_levelset);
+  const bool doThisOperator = this->queryOperator(s_levelset);
 
   m_levelset.resize(1 + m_finestLevel);
 
-  if(do_this_operator){
+  if(doThisOperator){
 
     const int comp  = 0;
     const int ncomp = 1;
@@ -300,11 +309,11 @@ void PhaseRealm::define_eb_coar_ave(const int a_lmin){
     pout() << "PhaseRealm::define_eb_coar_ave" << endl;
   }
 
-  const bool do_this_operator = this->queryOperator(s_eb_coar_ave);
+  const bool doThisOperator = this->queryOperator(s_eb_coar_ave);
 
   m_coarave.resize(1 + m_finestLevel);
   
-  if(do_this_operator){
+  if(doThisOperator){
     
     const int comps = SpaceDim;
 
@@ -332,14 +341,11 @@ void PhaseRealm::define_eb_quad_cfi(const int a_lmin){
     pout() << "PhaseRealm::define_eb_quad_cfi" << endl;
   }
 
-  const bool do_this_operator = this->queryOperator(s_eb_quad_cfi);
+  const bool doThisOperator = this->queryOperator(s_eb_quad_cfi);
 
   m_quadcfi.resize(1 + m_finestLevel);
   
-  if(do_this_operator){
-
-    const int ncomps = SpaceDim;
-
+  if(doThisOperator){
     for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++){
 
       const bool has_coar = lvl > 0;
@@ -361,6 +367,40 @@ void PhaseRealm::define_eb_quad_cfi(const int a_lmin){
   }
 }
 
+void PhaseRealm::define_eb_multigrid(const int a_lmin){
+  CH_TIME("PhaseRealm::define_eb_multigrid");
+  if(m_verbosity > 2){
+    pout() << "PhaseRealm::define_eb_multigrid" << endl;
+  }
+
+  const bool doThisOperator = this->queryOperator(s_eb_multigrid);
+
+  m_multigridInterpolator.resize(1 + m_finestLevel);
+  
+  if(doThisOperator){
+    for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++){
+
+      const bool hasCoar = lvl > 0;
+      
+      if(hasCoar){
+	const EBLevelGrid& eblgFine         = *m_eblg[lvl  ];
+	const EBLevelGrid& eblgCoar         = *m_eblg[lvl-1];
+	
+	const LayoutData<IntVectSet>& cfivs = *eblgFine.getCFIVS();
+
+	m_multigridInterpolator[lvl] = RefCountedPtr<EBMultigridInterpolator>(new EBMultigridInterpolator(eblgFine,
+													  eblgCoar,
+													  Location::Cell::Center,
+													  m_numGhostCells*IntVect::Unit,
+													  m_refinementRatios[lvl-1],
+													  1,
+													  m_multigridInterpolationRadius,
+													  m_multigridInterpolationOrder,
+													  m_multigridInterpolationWeight));
+      }
+    }
+  }
+}
 
 void PhaseRealm::define_fillpatch(const int a_lmin){
   CH_TIME("PhaseRealm::define_fillpatch");
@@ -368,11 +408,11 @@ void PhaseRealm::define_fillpatch(const int a_lmin){
     pout() << "PhaseRealm::define_fillpatch" << endl;
   }
 
-  const bool do_this_operator = this->queryOperator(s_eb_fill_patch);
+  const bool doThisOperator = this->queryOperator(s_eb_fill_patch);
 
   m_pwl_fillpatch.resize(1 + m_finestLevel);
   
-  if(do_this_operator){
+  if(doThisOperator){
     
     const int comps     = SpaceDim;
 
@@ -410,11 +450,11 @@ void PhaseRealm::define_ebpwl_interp(const int a_lmin){
     pout() << "PhaseRealm::define_ebpwl_interp" << endl;
   }
 
-  const bool do_this_operator = this->queryOperator(s_eb_pwl_interp);
+  const bool doThisOperator = this->queryOperator(s_eb_pwl_interp);
 
   m_pwl_interp.resize(1 + m_finestLevel);
 
-  if(do_this_operator){
+  if(doThisOperator){
 
 	
     const int comps     = SpaceDim;
@@ -447,11 +487,11 @@ void PhaseRealm::define_ebmg_interp(const int a_lmin){
     pout() << "PhaseRealm::define_ebmg_interp" << endl;
   }
 
-  const bool do_this_operator = this->queryOperator(s_eb_mg_interp);
+  const bool doThisOperator = this->queryOperator(s_eb_mg_interp);
 
   m_ebmg_interp.resize(1 + m_finestLevel);
 
-  if(do_this_operator){
+  if(doThisOperator){
 
     
     const int ncomps    = 1;
@@ -486,11 +526,11 @@ void PhaseRealm::define_flux_reg(const int a_lmin, const int a_regsize){
     pout() << "PhaseRealm::define_flux_reg" << endl;
   }
 
-  const bool do_this_operator = this->queryOperator(s_eb_flux_reg);
+  const bool doThisOperator = this->queryOperator(s_eb_flux_reg);
 
   m_flux_reg.resize(1 + m_finestLevel);
 
-  if(do_this_operator){
+  if(doThisOperator){
     
     const int comps = a_regsize;
     
@@ -538,14 +578,14 @@ void PhaseRealm::define_redist_oper(const int a_lmin, const int a_regsize){
   //       EBCoarToFine [l-1,l  ] 
   //       when level a_lmin changed we need to update fine-to-coar
 
-  const bool do_this_operator = this->queryOperator(s_eb_redist);
+  const bool doThisOperator = this->queryOperator(s_eb_redist);
 
   m_level_redist.resize(1 + m_finestLevel);
   m_fine_to_coar_redist.resize(1 + m_finestLevel);
   m_coar_to_coar_redist.resize(1 + m_finestLevel);
   m_coar_to_fine_redist.resize(1 + m_finestLevel);
 
-  if(do_this_operator){
+  if(doThisOperator){
     
     const int comps = a_regsize;
 
@@ -624,11 +664,11 @@ void PhaseRealm::define_gradsten(const int a_lmin){
     pout() << "PhaseRealm::define_gradsten" << endl;
   }
 
-  const bool do_this_operator = this->queryOperator(s_eb_gradient);
+  const bool doThisOperator = this->queryOperator(s_eb_gradient);
 
   m_gradsten.resize(1 + m_finestLevel);
 
-  if(do_this_operator){
+  if(doThisOperator){
     for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++){
       const DisjointBoxLayout& dbl = m_grids[lvl];
       const ProblemDomain& domain  = m_domains[lvl];
@@ -687,12 +727,12 @@ void PhaseRealm::define_copier(const int a_lmin){
     pout() << "PhaseRealm::define_copier" << endl;
   }
 
-  const bool do_this_operator = this->queryOperator(s_eb_copier);
+  const bool doThisOperator = this->queryOperator(s_eb_copier);
 
   m_copier.resize(1 + m_finestLevel);
   m_reverse_copier.resize(1 + m_finestLevel);
 
-  if(do_this_operator){
+  if(doThisOperator){
     
     for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++){
       m_copier[lvl] = RefCountedPtr<Copier> (new Copier(m_grids[lvl],
@@ -718,11 +758,11 @@ void PhaseRealm::define_ghostcloud(const int a_lmin){
     pout() << "PhaseRealm::define_ghostcloud" << endl;
   }
 
-  const bool do_this_operator = this->queryOperator(s_eb_copier);
+  const bool doThisOperator = this->queryOperator(s_eb_copier);
 
   m_ghostclouds.resize(1 + m_finestLevel);
 
-  if(do_this_operator){
+  if(doThisOperator){
     for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++){
       const bool has_coar = lvl > 0;
 
@@ -748,9 +788,9 @@ void PhaseRealm::define_irreg_sten(){
     pout() << "PhaseRealm::define_irreg_sten" << endl;
   }
 
-  const bool do_this_operator = this->queryOperator(s_eb_irreg_interp);
+  const bool doThisOperator = this->queryOperator(s_eb_irreg_interp);
 
-  if(do_this_operator){
+  if(doThisOperator){
     
     const int order = 1;
     const int rad   = 1;
@@ -783,9 +823,9 @@ void PhaseRealm::define_noncons_sten(){
     pout() << "PhaseRealm::define_noncons_sten" << endl;
   }
 
-  const bool do_this_operator = this->queryOperator(s_noncons_div);
+  const bool doThisOperator = this->queryOperator(s_noncons_div);
 
-  if(do_this_operator){
+  if(doThisOperator){
     const int order = 1; // Dummy argument
     const int rad   = m_redistributionRadius;
 
@@ -884,6 +924,12 @@ Vector<RefCountedPtr<EBQuadCFInterp> >& PhaseRealm::getEBQuadCFInterp() {
   if(!this->queryOperator(s_eb_quad_cfi)) MayDay::Abort("PhaseRealm::getEBQuadCFInterp - operator not registered!");
   
   return m_quadcfi;
+}
+
+Vector<RefCountedPtr<EBMultigridInterpolator> >& PhaseRealm::getMultigridInterpolator() {
+  if(!this->queryOperator(s_eb_multigrid)) MayDay::Abort("PhaseRealm::getEBMultigridInterpolator - operator not registered!");
+  
+  return m_multigridInterpolator;
 }
 
 Vector<RefCountedPtr<AggEBPWLFillPatch> >& PhaseRealm::getFillPatch() {
