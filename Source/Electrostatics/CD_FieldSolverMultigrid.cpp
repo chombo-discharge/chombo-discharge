@@ -148,12 +148,7 @@ void FieldSolverMultigrid::allocateInternals(){
   DataOps::setValue(m_zero, 0.0);
 }
 
-void FieldSolverMultigrid::setupSolver(){
-  CH_TIME("FieldSolverMultigrid::setupSolver()");
-  if(m_verbosity > 5){
-    pout() << "FieldSolverMultigrid::setupSolver()" << endl;
-  }
-}
+
 
 bool FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
 				 const MFAMRCellData& a_source,
@@ -167,7 +162,7 @@ bool FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
   bool converged = false;
 
   if(m_needsMultigridSetup){
-    this->setupMultigrid(); // This does everything, allocates coefficients, gets bc stuff and so on
+    this->setupSolver(); // This does everything, allocates coefficients, gets bc stuff and so on
   }
 
   const Real t0 = MPI_Wtime();
@@ -247,7 +242,7 @@ bool FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
 
   // Solver hang. Try again. 
   if(!converged){
-    this->setupMultigrid();
+    this->setupSolver();
     DataOps::setValue(a_phi, 0.0);
     m_multigridSolver.solveNoInitResid(phi, res, rhs, finest_level, 0, a_zerophi);
 
@@ -328,15 +323,6 @@ void FieldSolverMultigrid::registerOperators(){
     m_amr->registerOperator(s_eb_flux_reg,     m_realm, phase::gas);
     m_amr->registerOperator(s_eb_flux_reg,     m_realm, phase::solid);
   }
-}
-
-void FieldSolverMultigrid::setMultigridCoefficients(){
-  CH_TIME("FieldSolverMultigrid::setMultigridCoefficients");
-  if(m_verbosity > 5){
-    pout() << "FieldSolverMultigrid::setMultigridCoefficients" << endl;
-  }
-
-  //  this->setPermittivities();
 }
 
 void FieldSolverMultigrid::defineDeeperMultigridLevels(){
@@ -427,20 +413,20 @@ void FieldSolverMultigrid::defineDeeperMultigridLevels(){
   m_hasDeeperMultigridLevels = true;
 }
 
-void FieldSolverMultigrid::setupMultigrid(){
-  CH_TIME("FieldSolverMultigrid::setupMultigrid");
+void FieldSolverMultigrid::setupSolver(){
+  CH_TIME("FieldSolverMultigrid::setupSolver()");
   if(m_verbosity > 5){
-    pout() << "FieldSolverMultigrid::setupMultigrid" << endl;
+    pout() << "FieldSolverMultigrid::setupSolver()" << endl;
   }
 
   if(!m_hasDeeperMultigridLevels){
     this->defineDeeperMultigridLevels();     // Define MG levels. These don't change during regrids so we only need to set them once. 
   }
-  this->setMultigridCoefficients();       // Set coefficients
   this->setupOperatorFactory(); // Set the operator factory
-  this->setupMultigridSolver();           // Set up the AMR multigrid solver
+  this->setupMultigrid();           // Set up the AMR multigrid solver
 
   m_needsMultigridSetup = false;
+
 }
 
 void FieldSolverMultigrid::setupOperatorFactory(){
@@ -539,10 +525,10 @@ void FieldSolverMultigrid::setupOperatorFactory(){
   m_operatorFactory->setDirichletEbBc(m_ebBc);
 }
 
-void FieldSolverMultigrid::setupMultigridSolver(){
-  CH_TIME("FieldSolverMultigrid::setupMultigridSolver");
+void FieldSolverMultigrid::setupMultigrid(){
+  CH_TIME("FieldSolverMultigrid::setupMultigrid");
   if(m_verbosity > 5){
-    pout() << "FieldSolverMultigrid::setupMultigridSolver" << endl;
+    pout() << "FieldSolverMultigrid::setupMultigrid" << endl;
   }
 
   const int finest_level       = m_amr->getFinestLevel();
@@ -577,7 +563,7 @@ void FieldSolverMultigrid::setupMultigridSolver(){
     gmg_type = 2;
   }
   else{
-    MayDay::Abort("FieldSolverMultigrid::setupMultigridSolver - unknown cycle type requested");
+    MayDay::Abort("FieldSolverMultigrid::setupMultigrid - unknown cycle type requested");
   }
 
   m_multigridSolver.define(coar_dom, *m_operatorFactory, botsolver, 1 + finest_level);
@@ -620,7 +606,7 @@ Vector<long long> FieldSolverMultigrid::computeLoads(const DisjointBoxLayout& a_
   constexpr int numApply = 50;
 
   if(m_needsMultigridSetup){
-    this->setupMultigrid();
+    this->setupSolver();
   }
 
   // Dummy storage where the multigrid operator will do relaxations. 
@@ -657,10 +643,6 @@ Vector<long long> FieldSolverMultigrid::computeLoads(const DisjointBoxLayout& a_
   delete oper;
 
   return ret;
-}
-
-void FieldSolverMultigrid::setNeedsMultigridSetup(const bool a_needsSetup){
-  m_needsMultigridSetup = a_needsSetup;
 }
 
 #include <CD_NamespaceFooter.H>

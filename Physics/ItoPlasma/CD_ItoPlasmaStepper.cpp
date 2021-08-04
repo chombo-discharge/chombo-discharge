@@ -174,7 +174,7 @@ void ItoPlasmaStepper::initialData(){
     pout() << "ItoPlasmaStepper::initialData" << endl;
   }
 
-  m_fieldSolver->setPermittivities() // Set permittivities for Poisson operator
+  m_fieldSolver->setPermittivities(); // Set permittivities for Poisson operator
   m_ito->initialData(); // This deposits, of course. 
   m_rte->initialData();
   this->initialSigma();

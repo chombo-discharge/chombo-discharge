@@ -94,10 +94,6 @@ public:
   */
   virtual ~FieldSolverMultigrid();
 
-  /*!
-    @brief Set up multigrid solver
-  */
-  virtual void setupSolver() override;
 
   /*!
     @brief Solves Poisson equation onto a_phi using a_rho and a_sigma as right-hand sides. 
@@ -142,33 +138,13 @@ public:
     @brief Allocates internal storage. 
   */
   virtual void allocateInternals() override;
-
-  /*!
-    @brief Set up the geometric multigrid solver 
-  */
-  virtual void setupMultigrid();
   
   /*!
-    @brief Set multigrid coefficients. 
-    @details This sets the face-centered permittivities and the diagonal term (to zero). 
+    @brief Set up multigrid solver
   */
-  virtual void setMultigridCoefficients();
+  virtual void setupSolver() override;
 
-  /*!
-    @brief Set up the multigrid operator factory
-  */
-  virtual void setupOperatorFactory();
 
-  /*!
-    @brief Set up AMRMultiGrid
-  */
-  virtual void setupMultigridSolver();
-
-  /*!
-    @brief Set whether multigrid will be set up again before the next solve. 
-    @param[in] a_needsSetup If true, multigrid will be set up before the next solve. 
-  */
-  virtual void setNeedsMultigridSetup(const bool a_needsSetup);
 
   /*!
     @brief Compute grid loads
@@ -363,7 +339,16 @@ protected:
     @brief Define the deeper multigrid levels (the ones that live below the AMR levels)
   */
   virtual void defineDeeperMultigridLevels();
-  
+
+    /*!
+    @brief Set up the multigrid operator factory
+  */
+  virtual void setupOperatorFactory();
+
+  /*!
+    @brief Set up AMRMultiGrid
+  */
+  virtual void setupMultigrid();
 };
 
 #include <CD_NamespaceFooter.H>
