@@ -723,7 +723,7 @@ void FieldSolver::parseDomainBc(){
   }
 }
 
-void FieldSolver::setPermittivities(const Vector<Dielectric>& a_dielectrics){
+void FieldSolver::setPermittivities(){
   CH_TIME("FieldSolver::setPermittivities");
   if(m_verbosity > 5){
     pout() << "FieldSolver::setPermittivities" << endl;
@@ -733,9 +733,11 @@ void FieldSolver::setPermittivities(const Vector<Dielectric>& a_dielectrics){
 
   DataOps::setValue(m_permittivityCell, relEpsGas);
   DataOps::setValue(m_permittivityFace, relEpsGas); 
-  DataOps::setValue(m_permittivityEB,   relEpsGas); 
+  DataOps::setValue(m_permittivityEB,   relEpsGas);
 
-  if(a_dielectrics.size() > 0 && m_multifluidIndexSpace->numPhases() > 1){
+  const Vector<Dielectric>& dielectrics = m_computationalGeometry->getDielectrics();
+
+  if(dielectrics.size() > 0 && m_multifluidIndexSpace->numPhases() > 1){
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
       const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
       const Real dx                = m_amr->getDx()[lvl];

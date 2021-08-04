@@ -15,6 +15,7 @@
   @todo   B-coefficient => face permittivities
   @todo   A-coefficient -> should be invisible for users
   @todo   Purge the pre-coarsening stuff. 
+  @todo   Register the new multigrid interpolators
 */
 
 // Chombo includes
@@ -31,6 +32,9 @@
 #include <CD_ConductivityElectrostaticDomainBcFactory.H>
 #include <CD_Units.H>
 #include <CD_NamespaceHeader.H>
+
+constexpr Real FieldSolverMultigrid::m_alpha;
+constexpr Real FieldSolverMultigrid::m_beta;
 
 #define POISSON_MF_GMG_TIMER 0
 
@@ -325,19 +329,8 @@ void FieldSolverMultigrid::setMultigridCoefficients(){
     pout() << "FieldSolverMultigrid::setMultigridCoefficients" << endl;
   }
 
-  const int ncomps = 1;
-  const int ghosts = 1;
-  const Real eps0  = m_computationalGeometry->getGasPermittivity();
-  
-  m_amr->allocate(m_aco,      m_realm, ncomps);
-
-
-  DataOps::setValue(m_aco,      0.0);  // Always zero for poisson equation, but that is done from alpha.
-
-  this->setPermittivities(m_computationalGeometry->getDielectrics());
+  this->setPermittivities();
 }
-
-
 
 void FieldSolverMultigrid::defineDeeperMultigridLevels(){
   CH_TIME("FieldSolverMultigrid::define_mg_level");
@@ -484,8 +477,6 @@ void FieldSolverMultigrid::setupOperatorFactory(){
   }
 
   // Appropriate coefficients for poisson equation
-  const Real alpha =  1.0; // Recall that Aco is zero so put anything you want here. 
-  const Real beta  = -1.0;
 
   const IntVect ghost_phi = m_amr->getNumberOfGhostCells()*IntVect::Unit;
   const IntVect ghost_rhs = m_amr->getNumberOfGhostCells()*IntVect::Unit;
@@ -519,11 +510,11 @@ void FieldSolverMultigrid::setupOperatorFactory(){
 										 mffluxreg,
 										 refinement_ratios,
 										 grids,
-										 m_aco,
+										 m_permittivityCell,
 										 m_permittivityFace,
 										 m_permittivityEB,
-										 alpha,
-										 beta,
+										 m_alpha,
+										 m_beta,
 										 m_lengthScale,
 										 dx[0]*m_lengthScale,
 										 domains[0],

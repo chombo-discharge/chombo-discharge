@@ -188,6 +188,12 @@ public:
     @param[in] a_amr AmrMesh object. 
   */
   void setAmr(const RefCountedPtr<AmrMesh>& a_amr);
+  
+  /*!
+    @brief Set the permittivities
+    @details This sets m_permittivityCell, m_permittivityFace, and m_permittivityEB.
+  */
+  void setPermittivities();
 
   /*!
     @brief Write plot file
@@ -572,12 +578,6 @@ protected:
   inline
   Real getDielectricPermittivity(const RealVect& a_pos);
 
-  /*!
-    @brief Set the permittivities
-    @param[in] a_dielectrics List of dielectrics
-    @details This sets m_permittivityCell, m_permittivityFace, and m_permittivityEB.
-  */
-  virtual void setPermittivities(const Vector<Dielectric>& a_dielectrics);
 
   /*!
     @brief Set cell-centered permittivities

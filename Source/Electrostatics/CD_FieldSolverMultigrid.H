@@ -166,16 +166,21 @@ public:
   virtual void setNeedsMultigridSetup(const bool a_needsSetup);
 
   /*!
-    @brief Get cell-centered permittivity
-  */
-
-
-  /*!
     @brief Compute grid loads
   */
   virtual Vector<long long> computeLoads(const DisjointBoxLayout& a_dbl, const int a_level) override;
   
 protected:
+
+  /*!
+    @brief alpha-coefficient (for Helmholtz operator)
+  */
+  static constexpr Real m_alpha = 0.0;
+
+  /*!
+    @brief Beta-coefficient (for Helmholtz operator)
+  */
+  static constexpr Real m_beta  = -1.0;
 
   /*!
     @brief Relaxation type for gmg
@@ -283,11 +288,6 @@ protected:
     @brief Multigrid operator factory. 
   */
   RefCountedPtr<MfHelmholtzOpFactory> m_operatorFactory;
-  
-  /*!
-    @brief Dummy coefficient for operator factory. 
-  */
-  MFAMRCellData m_aco;
 
   /*!
     @brief Zero
@@ -344,8 +344,6 @@ protected:
   */
   Vector<RefCountedPtr<MFLevelGrid> > m_mg_mflg;
 
-
-
   /*!
     @brief Parse multigrid settings
   */
@@ -355,8 +353,6 @@ protected:
     @brief Parse m_kappaSource
   */
   virtual void parseKappaSource();
-
-
   
   /*!
     @brief Define the deeper multigrid levels (the ones that live below the AMR levels)
