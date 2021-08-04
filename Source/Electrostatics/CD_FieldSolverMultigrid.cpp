@@ -148,6 +148,13 @@ void FieldSolverMultigrid::allocateInternals(){
   DataOps::setValue(m_zero, 0.0);
 }
 
+void FieldSolverMultigrid::setupSolver(){
+  CH_TIME("FieldSolverMultigrid::setupSolver()");
+  if(m_verbosity > 5){
+    pout() << "FieldSolverMultigrid::setupSolver()" << endl;
+  }
+}
+
 bool FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
 				 const MFAMRCellData& a_source,
 				 const EBAMRIVData&   a_sigma,
@@ -329,7 +336,7 @@ void FieldSolverMultigrid::setMultigridCoefficients(){
     pout() << "FieldSolverMultigrid::setMultigridCoefficients" << endl;
   }
 
-  this->setPermittivities();
+  //  this->setPermittivities();
 }
 
 void FieldSolverMultigrid::defineDeeperMultigridLevels(){

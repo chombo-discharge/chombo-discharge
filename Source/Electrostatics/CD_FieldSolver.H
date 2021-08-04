@@ -73,6 +73,11 @@ public:
   virtual ~FieldSolver();
 
   /*!
+    @brief Set up solver routines
+  */
+  virtual void setupSolver() = 0;
+
+  /*!
     @brief Solve Poisson equation using m_potential, m_rho, and m_sigma. 
     @param[in] a_zeroPhi Set m_potential to zero before calling other function. 
     @return    True if we found a solution and false otherwise. 

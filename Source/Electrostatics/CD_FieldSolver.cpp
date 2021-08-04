@@ -408,6 +408,9 @@ void FieldSolver::regrid(const int a_lmin, const int a_old_finest, const int a_n
 
   // Recompute E. 
   this->computeElectricField();
+
+  // Set permittivities
+  this->setPermittivities();
 }
 
 void FieldSolver::setRho(const Real a_rho){

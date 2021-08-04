@@ -3194,6 +3194,7 @@ void CdrPlasmaStepper::initialData(){
 
 
   m_cdr->initialData();        // Initial data comes in through CdrSpecies, in this case supplied by physics
+  m_poisson->setPermittivities() // Set permittivities for Poisson operator
   if(!m_rte->isStationary()){
     m_rte->initialData();
   }
