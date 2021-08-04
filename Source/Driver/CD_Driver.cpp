@@ -652,8 +652,7 @@ void Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialD
 
 
   // Regrid the operators
-  const int regsize = 1; // Relic of the ancient past when we specified how many variables to redistribute. 
-  m_amr->regridOperators(a_lmin, regsize);
+  m_amr->regridOperators(a_lmin);
   const Real base_regrid = MPI_Wtime(); // Base regrid time
 
   // Regrid Driver, timestepper, and celltagger
@@ -1326,8 +1325,6 @@ void Driver::setupFresh(const int a_initialRegrids){
   // use those grids to let the time stepper predict computational loads, which we use to regrid both the realms and the time
   // stepper. 
 
-  
-  const int regsize = 1; // Relic of an ancient past. This is a dead para
 
   // When we're setting up fresh, we need to regrid everything from the
   // base level and upwards, so no hardcap on the permitted grids. 
@@ -1346,7 +1343,7 @@ void Driver::setupFresh(const int a_initialRegrids){
   m_timeStepper->setupSolvers();                                 // Instantiate solvers
   m_timeStepper->synchronizeSolverTimes(m_timeStep, m_time, m_dt);  // Sync solver times
   m_timeStepper->registerOperators();
-  m_amr->regridOperators(lmin, regsize);
+  m_amr->regridOperators(lmin);
   m_timeStepper->allocate();
 
   // Fill solves with initial data
@@ -1369,7 +1366,7 @@ void Driver::setupFresh(const int a_initialRegrids){
       m_amr->regridRealm(str, procs, boxes, lmin);
     }
   }
-  m_amr->regridOperators(lmin, regsize);    // Regrid operators again.
+  m_amr->regridOperators(lmin);             // Regrid operators again.
   this->regridInternals(lmax, lmax);        // Regrid internals for Driver.
   m_timeStepper->regrid(lmin, lmax, lmax);  // Regrid solvers.
   m_timeStepper->initialData();             // Need to fill with initial data again. 
@@ -2406,10 +2403,9 @@ void Driver::readCheckpointFile(const std::string& a_restartFile){
   m_amr->setGrids(boxes, sim_loads);
   
   // Instantiate solvers and register operators
-  const int regsize = 1; // m_timeStepper->getRedistributionRegSize();
   m_timeStepper->setupSolvers();
   m_timeStepper->registerOperators();
-  m_amr->regridOperators(base_level, regsize);
+  m_amr->regridOperators(base_level);
   m_timeStepper->allocate();
 
   // Allocate internal stuff (e.g. space for tags)

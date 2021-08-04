@@ -53,7 +53,6 @@ public:
 	      const int a_mgInterpOrder,
 	      const int a_mgInterpRadius,
 	      const int a_mgInterpWeight,
-	      const bool a_ebcf,
 	      const IrregStencil::StencilType a_centroid_stencil,
 	      const IrregStencil::StencilType a_eb_stencil,
 	      const std::map<phase::which_phase, RefCountedPtr<BaseIF> > a_baseif,
@@ -66,7 +65,7 @@ public:
   // Base and operator regrid
   void setGrids(const Vector<DisjointBoxLayout>& a_grids, const int a_finestLevel);
   void regridBase(const int a_lmin);
-  void regridOperators(const int a_lmin, const int a_regsize);
+  void regridOperators(const int a_lmin);
 
   // Register and query operator
   void registerOperator(const std::string a_operator, const phase::which_phase a_phase);
@@ -86,15 +85,15 @@ public:
   const Vector<ProblemDomain>& getDomains() const;
   Vector<RefCountedPtr<MFLevelGrid> >& getMFLevelGrid();
   
-  const RefCountedPtr<EBIndexSpace>& getEBIndexSpace(const phase::which_phase a_phase);
-  Vector<EBISLayout>& getEBISLayout(const phase::which_phase a_phase);
-  Vector<RefCountedPtr<EBLevelGrid> >& getEBLevelGrid(const phase::which_phase a_phase);
-  Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& getNeighbors(const phase::which_phase a_phase);
-  Vector<RefCountedPtr<LayoutData<VoFIterator> > >& getVofIterator(const phase::which_phase a_phase);
-  IrregAmrStencil<CentroidInterpolationStencil>& getCentroidInterpolationStencils(const phase::which_phase a_phase);
-  IrregAmrStencil<EbCentroidInterpolationStencil>& getEbCentroidInterpolationStencilStencils(const phase::which_phase a_phase);
-  IrregAmrStencil<NonConservativeDivergenceStencil>& getNonConservativeDivergenceStencils(const phase::which_phase a_phase);
-  Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& getGradientStencils(const phase::which_phase a_phase);
+  const RefCountedPtr<EBIndexSpace>& getEBIndexSpace(const phase::which_phase a_phase) const;
+  const Vector<EBISLayout>& getEBISLayout(const phase::which_phase a_phase) const;
+  const Vector<RefCountedPtr<EBLevelGrid> >& getEBLevelGrid(const phase::which_phase a_phase) const;
+  const Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& getNeighbors(const phase::which_phase a_phase) const;
+  Vector<RefCountedPtr<LayoutData<VoFIterator> > >& getVofIterator(const phase::which_phase a_phase) const;
+  const IrregAmrStencil<CentroidInterpolationStencil>& getCentroidInterpolationStencils(const phase::which_phase a_phase) const;
+  const IrregAmrStencil<EbCentroidInterpolationStencil>& getEbCentroidInterpolationStencilStencils(const phase::which_phase a_phase) const;
+  const IrregAmrStencil<NonConservativeDivergenceStencil>& getNonConservativeDivergenceStencils(const phase::which_phase a_phase) const;
+  const Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& getGradientStencils(const phase::which_phase a_phase) const;
 
   // Get functions for stuff that are specific to phase, but is not necessarily const
   Vector<RefCountedPtr<EbCoarAve> >& getCoarseAverage(const phase::which_phase a_phase);
@@ -112,7 +111,7 @@ public:
   Vector<RefCountedPtr<Copier> >& getCopier(const phase::which_phase a_phase);
   Vector<RefCountedPtr<Copier> >& getReverseCopier(const phase::which_phase a_phase);
 
-  EBAMRFAB& getLevelset(const phase::which_phase a_phase);
+  const EBAMRFAB& getLevelset(const phase::which_phase a_phase) const;
 
   AMRMask& getMask(const std::string a_mask, const int a_buffer);
   
@@ -132,7 +131,7 @@ protected:
   RefCountedPtr<MultiFluidIndexSpace> m_multifluidIndexSpace;
 
   // Phase Realms and implicit functions
-  std::map<phase::which_phase, RefCountedPtr<PhaseRealm> > m_realms;
+  mutable std::map<phase::which_phase, RefCountedPtr<PhaseRealm> > m_realms;
   std::map<phase::which_phase, RefCountedPtr<BaseIF> > m_baseif;
 
   // Map for checking which masks are present. 

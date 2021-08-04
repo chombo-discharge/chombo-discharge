@@ -325,18 +325,12 @@ void CdrSolver::computeDivG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const EBA
   this->incrementFluxRegister(a_G);                                        // Increment flux register
   this->incrementRedist(m_massDifference);                                 // Increment level redistribution register
 
-  const bool ebcf = m_amr->getEbCf();
-  if(ebcf){ // If we have EBCF, much more work with the CF interface
-    this->coarseFineIncrement(m_massDifference);              // Compute C2F, F2C, and C2C mass transfers
-    this->incrementRedistFlux();                              // Tell flux register about whats going on
-    this->hyperbolicRedistribution(a_divG, m_massDifference); // Level redistribution. Weights is a dummy parameter
-    this->coarseFineRedistribution(a_divG);                   // Do the coarse-fine redistribution
-    this->reflux(a_divG);                                     // Reflux
-  }
-  else{ // Much simpler if we don't have EBCF
-    this->hyperbolicRedistribution(a_divG, m_massDifference); // Level redistribution. Weights is a dummy parameter
-    this->reflux(a_divG);                                     // Reflux
-  }
+  // Redistribution and reflux magic. 
+  this->coarseFineIncrement(m_massDifference);              // Compute C2F, F2C, and C2C mass transfers
+  this->incrementRedistFlux();                              // Tell flux register about whats going on
+  this->hyperbolicRedistribution(a_divG, m_massDifference); // Level redistribution. Weights is a dummy parameter
+  this->coarseFineRedistribution(a_divG);                   // Do the coarse-fine redistribution
+  this->reflux(a_divG);                                     // Reflux
 }
 
 void CdrSolver::injectEbFlux(EBAMRCellData& a_phi, const EBAMRIVData& a_ebFlux, const Real a_dt){
@@ -356,17 +350,12 @@ void CdrSolver::injectEbFlux(EBAMRCellData& a_phi, const EBAMRIVData& a_ebFlux, 
   this->hybridDivergence(m_scratch, m_massDifference, m_nonConservativeDivG);  // Hybrid divergence
   this->incrementRedist(m_massDifference);                                     // Increment redistribution register
 
-  const bool ebcf = m_amr->getEbCf();
-  if(ebcf){ // Much more work with the EBCF interface. *Sigh*
-    this->coarseFineIncrement(m_massDifference);                 // Compute C2F, F2C, and C2C mass transfers
-    this->incrementRedistFlux();                                 // Tell flux register about whats going on
-    this->hyperbolicRedistribution(m_scratch, m_massDifference); // Level redistribution. 
-    this->coarseFineRedistribution(m_scratch);                   // Do the coarse-fine redistribution
-    this->reflux(m_scratch);                                     // Reflux
-  }
-  else{
-    this->hyperbolicRedistribution(m_scratch, m_massDifference);
-  }
+  // Redistribution and reflux magic. 
+  this->coarseFineIncrement(m_massDifference);                 // Compute C2F, F2C, and C2C mass transfers
+  this->incrementRedistFlux();                                 // Tell flux register about whats going on
+  this->hyperbolicRedistribution(m_scratch, m_massDifference); // Level redistribution. 
+  this->coarseFineRedistribution(m_scratch);                   // Do the coarse-fine redistribution
+  this->reflux(m_scratch);                                     // Reflux
 
   // Now do the increment. 
   DataOps::incr(a_phi, m_scratch, -a_dt);
@@ -1002,21 +991,19 @@ void CdrSolver::setRedistWeights(const EBAMRCellData& a_phi){
     EBLevelRedist& redist = *m_amr->getLevelRedist(m_realm, m_phase)[lvl];
     redist.resetWeights(*a_phi[lvl], comp);
 
-    if(m_amr->getEbCf()){
-      const bool has_coar = lvl > 0;
-      const bool has_fine = lvl < finest_level;
+    const bool has_coar = lvl > 0;
+    const bool has_fine = lvl < finest_level;
 
-      if(has_coar){
-	EBFineToCoarRedist& fine2coar = *m_amr->getFineToCoarRedist(m_realm, m_phase)[lvl];
-	fine2coar.resetWeights(*a_phi[lvl-1], comp);
-      }
-      if(has_fine){
-	EBCoarToCoarRedist& coar2coar = *m_amr->getCoarToCoarRedist(m_realm, m_phase)[lvl];
-	EBCoarToFineRedist& coar2fine = *m_amr->getCoarToFineRedist(m_realm, m_phase)[lvl];
+    if(has_coar){
+      EBFineToCoarRedist& fine2coar = *m_amr->getFineToCoarRedist(m_realm, m_phase)[lvl];
+      fine2coar.resetWeights(*a_phi[lvl-1], comp);
+    }
+    if(has_fine){
+      EBCoarToCoarRedist& coar2coar = *m_amr->getCoarToCoarRedist(m_realm, m_phase)[lvl];
+      EBCoarToFineRedist& coar2fine = *m_amr->getCoarToFineRedist(m_realm, m_phase)[lvl];
 
-	coar2coar.resetWeights(*a_phi[lvl], comp);
-	coar2fine.resetWeights(*a_phi[lvl], comp);
-      }
+      coar2coar.resetWeights(*a_phi[lvl], comp);
+      coar2fine.resetWeights(*a_phi[lvl], comp);
     }
   }
 }

@@ -24,7 +24,7 @@
 #include <CD_NamespaceHeader.H>
 
 PhaseRealm::PhaseRealm(){
-  m_defined   = false;
+  m_isDefined   = false;
   m_verbosity = -1;
 
   ParmParse pp("PhaseRealm");
@@ -40,47 +40,46 @@ PhaseRealm::~PhaseRealm(){
 
 }
 
-void PhaseRealm::define(const Vector<DisjointBoxLayout>& a_grids,
-			const Vector<ProblemDomain>& a_domains,
-			const Vector<int>& a_ref_rat,
-			const Vector<Real>& a_dx,
-			const RealVect a_probLo,
-			const int a_finestLevel,
-			const int a_ebghost,
-			const int a_num_ghost,
-			const int a_lsf_ghost,
-			const int a_redist_rad,
-			const int a_mgInterpOrder,
-			const int a_mgInterpRadius,
-			const int a_mgInterpWeight,			
-			const IrregStencil::StencilType a_centroid_stencil,
-			const IrregStencil::StencilType a_eb_stencil,
-			const bool a_ebcf,
+void PhaseRealm::define(const Vector<DisjointBoxLayout>&   a_grids,
+			const Vector<ProblemDomain>&       a_domains,
+			const Vector<int>&                 a_refRat,
+			const Vector<Real>&                a_dx,
+			const RealVect                     a_probLo,
+			const int                          a_finestLevel,
+			const int                          a_ebGhost,
+			const int                          a_numGhost,
+			const int                          a_lsfGhost,
+			const int                          a_redistRad,
+			const int                          a_mgInterpOrder,
+			const int                          a_mgInterpRadius,
+			const int                          a_mgInterpWeight,	      
+			const IrregStencil::StencilType    a_centroidStencil,
+			const IrregStencil::StencilType    a_ebStencil,
 			const RefCountedPtr<BaseIF>&       a_baseif,
 			const RefCountedPtr<EBIndexSpace>& a_ebis){
-
-  m_ebis = a_ebis;
-  m_finestLevel = a_finestLevel;
-  m_grids = a_grids;
-  m_domains = a_domains;
-  m_refinementRatios = a_ref_rat;
-  m_dx = a_dx;
-  m_hasEbCf = a_ebcf;
-  m_numEbGhostsCells = a_ebghost;
-  m_numGhostCells = a_num_ghost;
-  m_numLsfGhostCells = a_lsf_ghost;
-  m_redistributionRadius = a_redist_rad;
-  m_centroidStencilType = a_centroid_stencil;
-  m_ebCentroidStencilType = a_eb_stencil;
-  m_baseif = a_baseif;
-  m_probLo = a_probLo;
+  m_grids                        = a_grids;
+  m_domains                      = a_domains;
+  m_refinementRatios             = a_refRat;
+  m_dx                           = a_dx;
+  m_probLo                       = a_probLo;
+  m_finestLevel                  = a_finestLevel;
+  m_numEbGhostsCells             = a_ebGhost;
+  m_numGhostCells                = a_numGhost;
+  m_numLsfGhostCells             = a_lsfGhost;
+  m_redistributionRadius         = a_redistRad;
   m_multigridInterpolationOrder  = a_mgInterpOrder;
   m_multigridInterpolationRadius = a_mgInterpRadius;
   m_multigridInterpolationWeight = a_mgInterpWeight;
+  m_centroidStencilType          = a_centroidStencil;
+  m_ebCentroidStencilType        = a_ebStencil;
+  m_baseif                       = a_baseif;
+  m_ebis                         = a_ebis;
   
   if(!m_ebis.isNull()){
-    m_defined = true;
+    m_isDefined = true;
   }
+
+  m_hasEbCf = true;
 }
 
 void PhaseRealm::setGrids(const Vector<DisjointBoxLayout>& a_grids, const int a_finestLevel){
@@ -89,7 +88,7 @@ void PhaseRealm::setGrids(const Vector<DisjointBoxLayout>& a_grids, const int a_
     pout() << "PhaseRealm::setGrids" << endl;
   }
 
-  if(m_defined){
+  if(m_isDefined){
     m_grids = a_grids;
     m_finestLevel = a_finestLevel;
   }
@@ -101,34 +100,34 @@ void PhaseRealm::regridBase(const int a_lmin){
     pout() << "PhaseRealm::regridBase" << endl;
   }
 
-  if(m_defined){
-    this->define_eblevelgrid(a_lmin);
-    this->define_neighbors(a_lmin);
+  if(m_isDefined){
+    this->defineEBLevelGrid(a_lmin);
+    this->defineNeighbors(a_lmin);
     this->defineVofIterator(a_lmin);
   }
 }
 
-void PhaseRealm::regridOperators(const int a_lmin, const int a_regsize){
-  CH_TIME("PhaseRealm::regridOperators_phase");
+void PhaseRealm::regridOperators(const int a_lmin){
+  CH_TIME("PhaseRealm::regridOperators");
   if(m_verbosity > 5){
     pout() << "PhaseRealm::regridOperators" << endl;
   }
 
-  if(m_defined){
-    this->define_eb_coar_ave(a_lmin);                   // Define EbCoarAve on both phases
-    this->define_eb_quad_cfi(a_lmin);                   // Define NwoEbQuadCfInterp on both phases.
-    this->define_fillpatch(a_lmin);                     // Define operator for piecewise linear interpolation of ghost cells
-    this->define_ebpwl_interp(a_lmin);                  // Define interpolator for piecewise interpolation of interior points
-    this->define_ebmg_interp(a_lmin);                   // Define interpolator used for e.g. multigrid (or piecewise constant)
-    this->define_flux_reg(a_lmin,a_regsize);            // Define flux register
-    this->define_redist_oper(a_lmin, a_regsize);        // Define redistribution (phase::gas only)
-    this->define_gradsten(a_lmin);                      // Make stencils for computing gradients
-    this->define_irreg_sten();                          // Make stencils for doing interpolation to centroids
-    this->define_noncons_sten();                        // Make stencils for nonconservative averaging
-    this->define_copier(a_lmin);                        // Make stencils for copier
-    this->define_ghostcloud(a_lmin);                    // Make stencils for ghost clouds with particle depositions
-    this->define_levelset(a_lmin, m_numLsfGhostCells);  // Defining levelset
-    this->define_eb_multigrid(a_lmin);                  // Define multigrid interpolation objects
+  if(m_isDefined){
+    this->defineEbCoarAve(a_lmin);                   
+    this->defineEBQuadCFI(a_lmin);                   
+    this->defineFillPatch(a_lmin);                   
+    this->defineEBPWLInterp(a_lmin);                 
+    this->defineMultigridInjection(a_lmin);          
+    this->defineFluxReg(a_lmin, 1);                  
+    this->defineRedistOper(a_lmin, 1);               
+    this->defineGradSten(a_lmin);                    
+    this->defineIrregSten();                         
+    this->defineNonConsDivSten();                    
+    this->defineCopier(a_lmin);                      
+    this->defineGhostCloud(a_lmin);                  
+    this->defineLevelSet(a_lmin, m_numLsfGhostCells);
+    this->defineEBMultigrid(a_lmin);                 
   }
 }
 
@@ -159,23 +158,23 @@ void PhaseRealm::registerOperator(const std::string a_operator){
   }
 
   if(!this->queryOperator(a_operator)){
-    m_operator_map.emplace(a_operator, true);
+    m_operatorMap.emplace(a_operator, true);
   }
 }
 
-bool PhaseRealm::queryOperator(const std::string a_operator) {
+bool PhaseRealm::queryOperator(const std::string a_operator) const {
   CH_TIME("PhaseRealm::queryOperator");
   if(m_verbosity > 5){
     pout() << "PhaseRealm::queryOperator" << endl;
   }
 
-  //  return m_operator_map[a_operator];
+  //  return m_operatorMap[a_operator];
 
   bool ret = false;
-  if(m_defined){
+  if(m_isDefined){
     ret = true;
     
-    if(m_operator_map.find(a_operator) == m_operator_map.end()){
+    if(m_operatorMap.find(a_operator) == m_operatorMap.end()){
       ret = false;
     }
   }
@@ -184,10 +183,10 @@ bool PhaseRealm::queryOperator(const std::string a_operator) {
 }
   
 
-void PhaseRealm::define_eblevelgrid(const int a_lmin){
-  CH_TIME("PhaseRealm::define_eblevelgrid");
+void PhaseRealm::defineEBLevelGrid(const int a_lmin){
+  CH_TIME("PhaseRealm::defineEBLevelGrid");
   if(m_verbosity > 2){
-    pout() << "PhaseRealm::define_eblevelgrid" << endl;
+    pout() << "PhaseRealm::defineEBLevelGrid" << endl;
   }
 
   m_eblg.resize(1 + m_finestLevel);
@@ -211,14 +210,14 @@ void PhaseRealm::defineVofIterator(const int a_lmin){
     pout() << "PhaseRealm::defineVofIterator" << endl;
   }
 
-  m_vofiter.resize(1 + m_finestLevel);
+  m_vofIter.resize(1 + m_finestLevel);
 
   for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++){
       
-    m_vofiter[lvl] = RefCountedPtr<LayoutData<VoFIterator> > (new LayoutData<VoFIterator> (m_grids[lvl]));
+    m_vofIter[lvl] = RefCountedPtr<LayoutData<VoFIterator> > (new LayoutData<VoFIterator> (m_grids[lvl]));
     
     for (DataIterator dit = m_grids[lvl].dataIterator(); dit.ok(); ++dit){
-      VoFIterator& vofit = (*m_vofiter[lvl])[dit()];
+      VoFIterator& vofit = (*m_vofIter[lvl])[dit()];
 
       const Box& box         = m_grids[lvl].get(dit());
       const EBISBox& ebisbox = m_ebisl[lvl][dit()];
@@ -230,10 +229,10 @@ void PhaseRealm::defineVofIterator(const int a_lmin){
   }
 }
 
-void PhaseRealm::define_neighbors(const int a_lmin){
-  CH_TIME("PhaseRealm::define_neighbors");
+void PhaseRealm::defineNeighbors(const int a_lmin){
+  CH_TIME("PhaseRealm::defineNeighbors");
   if(m_verbosity > 2){
-    pout() << "PhaseRealm::define_neighbors" << endl;
+    pout() << "PhaseRealm::defineNeighbors" << endl;
   }
 
   m_neighbors.resize(1 + m_finestLevel);
@@ -263,8 +262,8 @@ void PhaseRealm::define_neighbors(const int a_lmin){
   }
 }
 
-void PhaseRealm::define_levelset(const int a_lmin, const int a_numGhost){
-  CH_TIME("PhaseRealm::define_levelset");
+void PhaseRealm::defineLevelSet(const int a_lmin, const int a_numGhost){
+  CH_TIME("PhaseRealm::defineLevelSet");
   if(m_verbosity > 2){
     pout() << "PhaseRealm::define_leveset" << endl;
   }
@@ -303,10 +302,10 @@ void PhaseRealm::define_levelset(const int a_lmin, const int a_numGhost){
   }
 }
 
-void PhaseRealm::define_eb_coar_ave(const int a_lmin){
-  CH_TIME("PhaseRealm::define_eb_coar_ave");
+void PhaseRealm::defineEbCoarAve(const int a_lmin){
+  CH_TIME("PhaseRealm::defineEbCoarAve");
   if(m_verbosity > 2){
-    pout() << "PhaseRealm::define_eb_coar_ave" << endl;
+    pout() << "PhaseRealm::defineEbCoarAve" << endl;
   }
 
   const bool doThisOperator = this->queryOperator(s_eb_coar_ave);
@@ -323,22 +322,22 @@ void PhaseRealm::define_eb_coar_ave(const int a_lmin){
 
       if(has_coar){
 	m_coarave[lvl] = RefCountedPtr<EbCoarAve> (new EbCoarAve(m_grids[lvl],
-									     m_grids[lvl-1],
-									     m_ebisl[lvl],
-									     m_ebisl[lvl-1],
-									     m_domains[lvl-1],
-									     m_refinementRatios[lvl-1],
-									     comps,
-									     &(*m_ebis)));
+								 m_grids[lvl-1],
+								 m_ebisl[lvl],
+								 m_ebisl[lvl-1],
+								 m_domains[lvl-1],
+								 m_refinementRatios[lvl-1],
+								 comps,
+								 &(*m_ebis)));
       }
     }
   }
 }
 
-void PhaseRealm::define_eb_quad_cfi(const int a_lmin){
-  CH_TIME("PhaseRealm::define_eb_quad_cfi");
+void PhaseRealm::defineEBQuadCFI(const int a_lmin){
+  CH_TIME("PhaseRealm::defineEBQuadCFI");
   if(m_verbosity > 2){
-    pout() << "PhaseRealm::define_eb_quad_cfi" << endl;
+    pout() << "PhaseRealm::defineEBQuadCFI" << endl;
   }
 
   const bool doThisOperator = this->queryOperator(s_eb_quad_cfi);
@@ -354,23 +353,23 @@ void PhaseRealm::define_eb_quad_cfi(const int a_lmin){
 	const LayoutData<IntVectSet>& cfivs = *m_eblg[lvl]->getCFIVS();
 
 	m_quadcfi[lvl] = RefCountedPtr<EBQuadCFInterp> (new EBQuadCFInterp(m_grids[lvl],
-									       m_grids[lvl-1],
-									       m_ebisl[lvl],
-									       m_ebisl[lvl-1],
-									       m_domains[lvl-1],
-									       m_refinementRatios[lvl-1],
-									       1,
-									       cfivs,
-									       &(*m_ebis)));
+									   m_grids[lvl-1],
+									   m_ebisl[lvl],
+									   m_ebisl[lvl-1],
+									   m_domains[lvl-1],
+									   m_refinementRatios[lvl-1],
+									   1,
+									   cfivs,
+									   &(*m_ebis)));
       }
     }
   }
 }
 
-void PhaseRealm::define_eb_multigrid(const int a_lmin){
-  CH_TIME("PhaseRealm::define_eb_multigrid");
+void PhaseRealm::defineEBMultigrid(const int a_lmin){
+  CH_TIME("PhaseRealm::defineEBMultigrid");
   if(m_verbosity > 2){
-    pout() << "PhaseRealm::define_eb_multigrid" << endl;
+    pout() << "PhaseRealm::defineEBMultigrid" << endl;
   }
 
   const bool doThisOperator = this->queryOperator(s_eb_multigrid);
@@ -402,15 +401,15 @@ void PhaseRealm::define_eb_multigrid(const int a_lmin){
   }
 }
 
-void PhaseRealm::define_fillpatch(const int a_lmin){
-  CH_TIME("PhaseRealm::define_fillpatch");
+void PhaseRealm::defineFillPatch(const int a_lmin){
+  CH_TIME("PhaseRealm::defineFillPatch");
   if(m_verbosity > 2){
-    pout() << "PhaseRealm::define_fillpatch" << endl;
+    pout() << "PhaseRealm::defineFillPatch" << endl;
   }
 
   const bool doThisOperator = this->queryOperator(s_eb_fill_patch);
 
-  m_pwl_fillpatch.resize(1 + m_finestLevel);
+  m_pwlFillPatch.resize(1 + m_finestLevel);
   
   if(doThisOperator){
     
@@ -427,7 +426,7 @@ void PhaseRealm::define_fillpatch(const int a_lmin){
 
       if(has_coar){
 	const LayoutData<IntVectSet>& cfivs = *m_eblg[lvl]->getCFIVS();
-	m_pwl_fillpatch[lvl] = RefCountedPtr<AggEBPWLFillPatch> (new AggEBPWLFillPatch(m_grids[lvl],
+	m_pwlFillPatch[lvl] = RefCountedPtr<AggEBPWLFillPatch> (new AggEBPWLFillPatch(m_grids[lvl],
 										       m_grids[lvl-1],
 										       m_ebisl[lvl],
 										       m_ebisl[lvl-1],
@@ -444,15 +443,15 @@ void PhaseRealm::define_fillpatch(const int a_lmin){
 }
 
 
-void PhaseRealm::define_ebpwl_interp(const int a_lmin){
-  CH_TIME("PhaseRealm::define_ebpwl_interp");
+void PhaseRealm::defineEBPWLInterp(const int a_lmin){
+  CH_TIME("PhaseRealm::defineEBPWLInterp");
   if(m_verbosity > 2){
-    pout() << "PhaseRealm::define_ebpwl_interp" << endl;
+    pout() << "PhaseRealm::defineEBPWLInterp" << endl;
   }
 
   const bool doThisOperator = this->queryOperator(s_eb_pwl_interp);
 
-  m_pwl_interp.resize(1 + m_finestLevel);
+  m_pwlInterpGhosts.resize(1 + m_finestLevel);
 
   if(doThisOperator){
 
@@ -468,7 +467,7 @@ void PhaseRealm::define_ebpwl_interp(const int a_lmin){
       const bool has_coar = lvl > 0;
 
       if(has_coar){
-	m_pwl_interp[lvl] = RefCountedPtr<EBPWLFineInterp> (new EBPWLFineInterp(m_grids[lvl],
+	m_pwlInterpGhosts[lvl] = RefCountedPtr<EBPWLFineInterp> (new EBPWLFineInterp(m_grids[lvl],
 										m_grids[lvl-1],
 										m_ebisl[lvl],
 										m_ebisl[lvl-1],
@@ -481,15 +480,15 @@ void PhaseRealm::define_ebpwl_interp(const int a_lmin){
   }
 }
 
-void PhaseRealm::define_ebmg_interp(const int a_lmin){
-  CH_TIME("PhaseRealm::define_ebmg_interp");
+void PhaseRealm::defineMultigridInjection(const int a_lmin){
+  CH_TIME("PhaseRealm::defineMultigridInjection");
   if(m_verbosity > 2){
-    pout() << "PhaseRealm::define_ebmg_interp" << endl;
+    pout() << "PhaseRealm::defineMultigridInjection" << endl;
   }
 
   const bool doThisOperator = this->queryOperator(s_eb_mg_interp);
 
-  m_ebmg_interp.resize(1 + m_finestLevel);
+  m_mgInjection.resize(1 + m_finestLevel);
 
   if(doThisOperator){
 
@@ -506,7 +505,7 @@ void PhaseRealm::define_ebmg_interp(const int a_lmin){
 
       if(has_coar){
 
-	m_ebmg_interp[lvl] = RefCountedPtr<EBMGInterp> (new EBMGInterp(m_grids[lvl],
+	m_mgInjection[lvl] = RefCountedPtr<EBMGInterp> (new EBMGInterp(m_grids[lvl],
 								       m_grids[lvl-1],
 								       m_ebisl[lvl],
 								       m_ebisl[lvl-1],
@@ -520,15 +519,15 @@ void PhaseRealm::define_ebmg_interp(const int a_lmin){
   }
 }
 
-void PhaseRealm::define_flux_reg(const int a_lmin, const int a_regsize){
-  CH_TIME("PhaseRealm::define_flux_reg");
+void PhaseRealm::defineFluxReg(const int a_lmin, const int a_regsize){
+  CH_TIME("PhaseRealm::defineFluxReg");
   if(m_verbosity > 2){
-    pout() << "PhaseRealm::define_flux_reg" << endl;
+    pout() << "PhaseRealm::defineFluxReg" << endl;
   }
 
   const bool doThisOperator = this->queryOperator(s_eb_flux_reg);
 
-  m_flux_reg.resize(1 + m_finestLevel);
+  m_fluxReg.resize(1 + m_finestLevel);
 
   if(doThisOperator){
     
@@ -541,7 +540,7 @@ void PhaseRealm::define_flux_reg(const int a_lmin, const int a_regsize){
 
       if(has_fine){
 #if 1 // Our code
-	m_flux_reg[lvl] = RefCountedPtr<EBFluxRegister> (new EbFastFluxRegister(m_grids[lvl+1],
+	m_fluxReg[lvl] = RefCountedPtr<EBFluxRegister> (new EbFastFluxRegister(m_grids[lvl+1],
 										m_grids[lvl],
 										m_ebisl[lvl+1],
 										m_ebisl[lvl],
@@ -550,7 +549,7 @@ void PhaseRealm::define_flux_reg(const int a_lmin, const int a_regsize){
 										comps,
 										&(*m_ebis)));
 #else // Chombo code. Leaving this in place in case something breaks. 
-	m_flux_reg[lvl] = RefCountedPtr<EBFluxRegister> (new EBFluxRegister(m_grids[lvl+1],
+	m_fluxReg[lvl] = RefCountedPtr<EBFluxRegister> (new EBFluxRegister(m_grids[lvl+1],
 									    m_grids[lvl],
 									    m_ebisl[lvl+1],
 									    m_ebisl[lvl],
@@ -564,10 +563,10 @@ void PhaseRealm::define_flux_reg(const int a_lmin, const int a_regsize){
   }
 }
 
-void PhaseRealm::define_redist_oper(const int a_lmin, const int a_regsize){
-  CH_TIME("PhaseRealm::define_redist_oper");
+void PhaseRealm::defineRedistOper(const int a_lmin, const int a_regsize){
+  CH_TIME("PhaseRealm::defineRedistOper");
   if(m_verbosity > 2){
-    pout() << "PhaseRealm::define_redist_oper" << endl;
+    pout() << "PhaseRealm::defineRedistOper" << endl;
   }
 
   // TLDR: All these operators either do stuff on an AMR level, or between a coarse and a fine level. The entries
@@ -580,10 +579,10 @@ void PhaseRealm::define_redist_oper(const int a_lmin, const int a_regsize){
 
   const bool doThisOperator = this->queryOperator(s_eb_redist);
 
-  m_level_redist.resize(1 + m_finestLevel);
-  m_fine_to_coar_redist.resize(1 + m_finestLevel);
-  m_coar_to_coar_redist.resize(1 + m_finestLevel);
-  m_coar_to_fine_redist.resize(1 + m_finestLevel);
+  m_levelRedist.resize(1 + m_finestLevel);
+  m_fineToCoarRedist.resize(1 + m_finestLevel);
+  m_coarToCoarRedist.resize(1 + m_finestLevel);
+  m_coarToFineRedist.resize(1 + m_finestLevel);
 
   if(doThisOperator){
     
@@ -596,7 +595,7 @@ void PhaseRealm::define_redist_oper(const int a_lmin, const int a_regsize){
 
 	      
       if(lvl >= a_lmin){
-	m_level_redist[lvl] = RefCountedPtr<EBLevelRedist> (new EBLevelRedist(m_grids[lvl],
+	m_levelRedist[lvl] = RefCountedPtr<EBLevelRedist> (new EBLevelRedist(m_grids[lvl],
 									      m_ebisl[lvl],
 									      m_domains[lvl],
 									      comps,
@@ -620,7 +619,7 @@ void PhaseRealm::define_redist_oper(const int a_lmin, const int a_regsize){
 			   m_refinementRatios[lvl-1],
 			   comps,
 			   m_redistributionRadius);
-	    m_fine_to_coar_redist[lvl] = RefCountedPtr<EBFineToCoarRedist> (redist);
+	    m_fineToCoarRedist[lvl] = RefCountedPtr<EBFineToCoarRedist> (redist);
 	    
 	  }
 	}
@@ -639,7 +638,7 @@ void PhaseRealm::define_redist_oper(const int a_lmin, const int a_regsize){
 			       m_refinementRatios[lvl],
 			       comps,
 			       m_redistributionRadius);
-	    m_coar_to_fine_redist[lvl] = RefCountedPtr<EBCoarToFineRedist> (c2f_redist);
+	    m_coarToFineRedist[lvl] = RefCountedPtr<EBCoarToFineRedist> (c2f_redist);
 
 
 	    auto c2c_redist = RefCountedPtr<EbFastCoarToCoarRedist> (new EbFastCoarToCoarRedist());
@@ -650,7 +649,7 @@ void PhaseRealm::define_redist_oper(const int a_lmin, const int a_regsize){
 			       m_refinementRatios[lvl],
 			       comps,
 			       m_redistributionRadius);
-	    m_coar_to_coar_redist[lvl] = RefCountedPtr<EBCoarToCoarRedist> (c2c_redist);
+	    m_coarToCoarRedist[lvl] = RefCountedPtr<EBCoarToCoarRedist> (c2c_redist);
 	  }
 	}
       }
@@ -658,10 +657,10 @@ void PhaseRealm::define_redist_oper(const int a_lmin, const int a_regsize){
   }
 }
 
-void PhaseRealm::define_gradsten(const int a_lmin){
-  CH_TIME("PhaseRealm::define_gradsten");
+void PhaseRealm::defineGradSten(const int a_lmin){
+  CH_TIME("PhaseRealm::defineGradSten");
   if(m_verbosity > 2){
-    pout() << "PhaseRealm::define_gradsten" << endl;
+    pout() << "PhaseRealm::defineGradSten" << endl;
   }
 
   const bool doThisOperator = this->queryOperator(s_eb_gradient);
@@ -721,16 +720,16 @@ void PhaseRealm::define_gradsten(const int a_lmin){
   }
 }
 
-void PhaseRealm::define_copier(const int a_lmin){
-  CH_TIME("PhaseRealm::define_copier");
+void PhaseRealm::defineCopier(const int a_lmin){
+  CH_TIME("PhaseRealm::defineCopier");
   if(m_verbosity > 3){
-    pout() << "PhaseRealm::define_copier" << endl;
+    pout() << "PhaseRealm::defineCopier" << endl;
   }
 
   const bool doThisOperator = this->queryOperator(s_eb_copier);
 
   m_copier.resize(1 + m_finestLevel);
-  m_reverse_copier.resize(1 + m_finestLevel);
+  m_reverseCopier.resize(1 + m_finestLevel);
 
   if(doThisOperator){
     
@@ -741,21 +740,21 @@ void PhaseRealm::define_copier(const int a_lmin){
 							m_numGhostCells*IntVect::Unit,
 							true));
       
-      m_reverse_copier[lvl] = RefCountedPtr<Copier> (new Copier(m_grids[lvl],
+      m_reverseCopier[lvl] = RefCountedPtr<Copier> (new Copier(m_grids[lvl],
 								m_grids[lvl],
 								m_domains[lvl],
 								m_numGhostCells*IntVect::Unit,
 								true));
-      m_reverse_copier[lvl]->reverse();
+      m_reverseCopier[lvl]->reverse();
     }
   }
 }
 
 
-void PhaseRealm::define_ghostcloud(const int a_lmin){
-  CH_TIME("PhaseRealm::define_ghostcloud");
+void PhaseRealm::defineGhostCloud(const int a_lmin){
+  CH_TIME("PhaseRealm::defineGhostCloud");
   if(m_verbosity > 3){
-    pout() << "PhaseRealm::define_ghostcloud" << endl;
+    pout() << "PhaseRealm::defineGhostCloud" << endl;
   }
 
   const bool doThisOperator = this->queryOperator(s_eb_copier);
@@ -782,10 +781,10 @@ void PhaseRealm::define_ghostcloud(const int a_lmin){
 }
 
 
-void PhaseRealm::define_irreg_sten(){
-  CH_TIME("PhaseRealm::define_irreg_sten");
+void PhaseRealm::defineIrregSten(){
+  CH_TIME("PhaseRealm::defineIrregSten");
   if(m_verbosity > 2){
-    pout() << "PhaseRealm::define_irreg_sten" << endl;
+    pout() << "PhaseRealm::defineIrregSten" << endl;
   }
 
   const bool doThisOperator = this->queryOperator(s_eb_irreg_interp);
@@ -817,10 +816,10 @@ void PhaseRealm::define_irreg_sten(){
   }
 }
 
-void PhaseRealm::define_noncons_sten(){
-  CH_TIME("PhaseRealm::define_noncons_sten");
+void PhaseRealm::defineNonConsDivSten(){
+  CH_TIME("PhaseRealm::defineNonConsDivSten");
   if(m_verbosity > 2){
-    pout() << "PhaseRealm::define_noncons_sten" << endl;
+    pout() << "PhaseRealm::defineNonConsDivSten" << endl;
   }
 
   const bool doThisOperator = this->queryOperator(s_noncons_div);
@@ -842,153 +841,149 @@ void PhaseRealm::define_noncons_sten(){
   }
 }
 
-const RefCountedPtr<EBIndexSpace>& PhaseRealm::getEBIndexSpace() {
+const RefCountedPtr<EBIndexSpace>& PhaseRealm::getEBIndexSpace() const {
   return m_ebis;
 }
 
-Vector<int>& PhaseRealm::getRefinementRatios() {
+const Vector<int>& PhaseRealm::getRefinementRatios() const {
   return m_refinementRatios;
 }
 
-Vector<Real>& PhaseRealm::getDx() {
+const Vector<Real>& PhaseRealm::getDx() const {
   return m_dx;
-}
-
-Vector<DisjointBoxLayout>& PhaseRealm::getGrids() {
-  return m_grids;
 }
 
 const Vector<DisjointBoxLayout>& PhaseRealm::getGrids() const {
   return m_grids;
 }
 
-Vector<ProblemDomain>& PhaseRealm::getDomains() {
+const Vector<ProblemDomain>& PhaseRealm::getDomains() const {
   return m_domains;
 }
 
-Vector<EBISLayout>& PhaseRealm::getEBISLayout() {
+const Vector<EBISLayout>& PhaseRealm::getEBISLayout() const {
   return m_ebisl;
 }
 
-Vector<RefCountedPtr<EBLevelGrid> >& PhaseRealm::getEBLevelGrid() {
+const Vector<RefCountedPtr<EBLevelGrid> >& PhaseRealm::getEBLevelGrid() const {
   return m_eblg;
 }
 
-Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& PhaseRealm::getNeighbors() {
+const Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& PhaseRealm::getNeighbors() const {
   return m_neighbors;
 }
-Vector<RefCountedPtr<LayoutData<VoFIterator> > >& PhaseRealm::getVofIterator() {
-  return m_vofiter;
+Vector<RefCountedPtr<LayoutData<VoFIterator> > >& PhaseRealm::getVofIterator() const {
+  return m_vofIter;
 }
 
-IrregAmrStencil<CentroidInterpolationStencil>& PhaseRealm::getCentroidInterpolationStencils() {
+const IrregAmrStencil<CentroidInterpolationStencil>& PhaseRealm::getCentroidInterpolationStencils() const {
   return *m_CentroidInterpolationStencil;
 }
 
-IrregAmrStencil<EbCentroidInterpolationStencil>& PhaseRealm::getEbCentroidInterpolationStencilStencils() {
+const IrregAmrStencil<EbCentroidInterpolationStencil>& PhaseRealm::getEbCentroidInterpolationStencilStencils() const {
   return *m_EbCentroidInterpolationStencil;
 }
 
-Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& PhaseRealm::getGradientStencils(){
+const Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& PhaseRealm::getGradientStencils() const {
   if(!this->queryOperator(s_eb_gradient)) MayDay::Abort("PhaseRealm::getGradientStencils - operator not registered!");
+  
   return m_gradsten;
 }
 
-// Throw errors if the operator does not exist
-
-IrregAmrStencil<NonConservativeDivergenceStencil>& PhaseRealm::getNonConservativeDivergenceStencils() {
+const IrregAmrStencil<NonConservativeDivergenceStencil>& PhaseRealm::getNonConservativeDivergenceStencils() const {
   if(!this->queryOperator(s_noncons_div)) MayDay::Abort("PhaseRealm::get_non_cons_div_stencils - operator not registered!");
   
   return *m_NonConservativeDivergenceStencil;
 }
 
-EBAMRFAB& PhaseRealm::getLevelset() {
-  if(!this->queryOperator(s_levelset)) MayDay::Abort("PhaseRealm::getLevelset - operator not registered!");
-
-  return m_levelset;
-}
-
-Vector<RefCountedPtr<EbCoarAve> >& PhaseRealm::getCoarseAverage() {
+Vector<RefCountedPtr<EbCoarAve> >& PhaseRealm::getCoarseAverage() const {
   if(!this->queryOperator(s_eb_coar_ave)) MayDay::Abort("PhaseRealm::getCoarseAverage - operator not registered!");
   
   return m_coarave;
 }
 
-Vector<RefCountedPtr<EbGhostCloud> >& PhaseRealm::getGhostCloud() {
+Vector<RefCountedPtr<EbGhostCloud> >& PhaseRealm::getGhostCloud() const {
   if(!this->queryOperator(s_eb_ghostcloud)) MayDay::Abort("PhaseRealm::getGhostCloud - operator not registered!");
   
   return m_ghostclouds;
 }
 
-Vector<RefCountedPtr<EBQuadCFInterp> >& PhaseRealm::getEBQuadCFInterp() {
+Vector<RefCountedPtr<EBQuadCFInterp> >& PhaseRealm::getEBQuadCFInterp() const {
   if(!this->queryOperator(s_eb_quad_cfi)) MayDay::Abort("PhaseRealm::getEBQuadCFInterp - operator not registered!");
   
   return m_quadcfi;
 }
 
-Vector<RefCountedPtr<EBMultigridInterpolator> >& PhaseRealm::getMultigridInterpolator() {
+Vector<RefCountedPtr<EBMultigridInterpolator> >& PhaseRealm::getMultigridInterpolator() const {
   if(!this->queryOperator(s_eb_multigrid)) MayDay::Abort("PhaseRealm::getEBMultigridInterpolator - operator not registered!");
   
   return m_multigridInterpolator;
 }
 
-Vector<RefCountedPtr<AggEBPWLFillPatch> >& PhaseRealm::getFillPatch() {
+Vector<RefCountedPtr<AggEBPWLFillPatch> >& PhaseRealm::getFillPatch() const {
   if(!this->queryOperator(s_eb_fill_patch)) MayDay::Abort("PhaseRealm::getFillPatch - operator not registered!");
   
-  return m_pwl_fillpatch;
+  return m_pwlFillPatch;
 }
 
-Vector<RefCountedPtr<EBPWLFineInterp> >& PhaseRealm::getPwlInterpolator() {
+Vector<RefCountedPtr<EBPWLFineInterp> >& PhaseRealm::getPwlInterpolator() const {
   if(!this->queryOperator(s_eb_pwl_interp)) MayDay::Abort("PhaseRealm::getPwlInterpolator - operator not registered!");
   
-  return m_pwl_interp;
+  return m_pwlInterpGhosts;
 }
 
-Vector<RefCountedPtr<EBMGInterp> >& PhaseRealm::getEBMGInterp() {
+Vector<RefCountedPtr<EBMGInterp> >& PhaseRealm::getEBMGInterp() const {
   if(!this->queryOperator(s_eb_mg_interp)) MayDay::Abort("PhaseRealm::getEBMGInterp - operator not registered!");
   
-  return m_ebmg_interp;
+  return m_mgInjection;
 }
 
-Vector<RefCountedPtr<EBFluxRegister> >&  PhaseRealm::getFluxRegister() {
+Vector<RefCountedPtr<EBFluxRegister> >&  PhaseRealm::getFluxRegister() const {
   if(!this->queryOperator(s_eb_flux_reg)) MayDay::Abort("PhaseRealm::getFluxRegister - operator not registered!");
 
-  return m_flux_reg;
+  return m_fluxReg;
 }
 
-Vector<RefCountedPtr<EBLevelRedist> >&  PhaseRealm::getLevelRedist() {
+Vector<RefCountedPtr<EBLevelRedist> >&  PhaseRealm::getLevelRedist() const {
   if(!this->queryOperator(s_eb_redist)) MayDay::Abort("PhaseRealm::getLevelRedist - operator not registered!");
 
-  return m_level_redist;
+  return m_levelRedist;
 }
 
-Vector<RefCountedPtr<EBCoarToFineRedist> >&  PhaseRealm::getCoarToFineRedist() {
+Vector<RefCountedPtr<EBCoarToFineRedist> >&  PhaseRealm::getCoarToFineRedist() const {
   if(!this->queryOperator(s_eb_redist)) MayDay::Abort("PhaseRealm::getCoarToFineRedist - operator not registered!");
 
-  return m_coar_to_fine_redist;
+  return m_coarToFineRedist;
 }
 
-Vector<RefCountedPtr<EBCoarToCoarRedist> >&  PhaseRealm::getCoarToCoarRedist() {
+Vector<RefCountedPtr<EBCoarToCoarRedist> >&  PhaseRealm::getCoarToCoarRedist() const {
   if(!this->queryOperator(s_eb_redist)) MayDay::Abort("PhaseRealm::get_coar_to_coar - operator not registered!");
 
-  return m_coar_to_coar_redist;
+  return m_coarToCoarRedist;
 }
 
-Vector<RefCountedPtr<EBFineToCoarRedist> >&  PhaseRealm::getFineToCoarRedist() {
+Vector<RefCountedPtr<EBFineToCoarRedist> >&  PhaseRealm::getFineToCoarRedist() const {
   if(!this->queryOperator(s_eb_redist)) MayDay::Abort("PhaseRealm::getFineToCoarRedist - operator not registered!");
 
-  return m_fine_to_coar_redist;
+  return m_fineToCoarRedist;
 }
 
-Vector<RefCountedPtr<Copier> >& PhaseRealm::getCopier() {
+Vector<RefCountedPtr<Copier> >& PhaseRealm::getCopier() const {
   if(!this->queryOperator(s_eb_copier)) MayDay::Abort("PhaseRealm::getCopier - operator not registered!");
 
   return m_copier;
 }
 
-Vector<RefCountedPtr<Copier> >& PhaseRealm::getReverseCopier() {
+Vector<RefCountedPtr<Copier> >& PhaseRealm::getReverseCopier() const {
   if(!this->queryOperator(s_eb_copier)) MayDay::Abort("PhaseRealm::getReverseCopier - operator not registered!");
   
-  return m_reverse_copier;
+  return m_reverseCopier;
 }
+
+const EBAMRFAB& PhaseRealm::getLevelset() const {
+  if(!this->queryOperator(s_levelset)) MayDay::Abort("PhaseRealm::getLevelset - operator not registered!");
+
+  return m_levelset;
+}
+
 #include <CD_NamespaceFooter.H>

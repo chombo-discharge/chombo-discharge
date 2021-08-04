@@ -973,20 +973,14 @@ void McPhoto::depositPhotons(EBAMRCellData&               a_phi,
 
            
   this->depositKappaConservative(a_phi, a_photons, a_deposition); // a_phi contains only weights, i.e. not divided by kappa
-  this->depositNonConservative(m_depositionNC, a_phi);              // Compute m_depositionNC = sum(kappa*Wc)/sum(kappa)
-  this->depositHybrid(a_phi, m_massDiff, m_depositionNC);           // Compute hybrid deposition, including mass differnce
-  this->incrementRedist(m_massDiff);                                 // Increment level redistribution register
+  this->depositNonConservative(m_depositionNC, a_phi);            // Compute m_depositionNC = sum(kappa*Wc)/sum(kappa)
+  this->depositHybrid(a_phi, m_massDiff, m_depositionNC);         // Compute hybrid deposition, including mass differnce
+  this->incrementRedist(m_massDiff);                              // Increment level redistribution register
 
   // Do the redistribution magic
-  const bool ebcf = m_amr->getEbCf();
-  if(ebcf){ // Mucho stuff to do here...
-    this->coarseFineIncrement(m_massDiff);       // Compute C2F, F2C, and C2C mass transfers
-    this->levelRedist(a_phi);           // Level redistribution. Weights is a dummy parameter
-    this->coarseFineRedistribution(a_phi);     // Do the coarse-fine redistribution
-  }
-  else{ // Very simple, redistribute this level.
-    this->levelRedist(a_phi);
-  }
+  this->coarseFineIncrement(m_massDiff); // Compute C2F, F2C, and C2C mass transfers
+  this->levelRedist(a_phi);              // Level redistribution. Weights is a dummy parameter
+  this->coarseFineRedistribution(a_phi); // Do the coarse-fine redistribution
 
   // Average down and interpolate
   m_amr->averageDown(a_phi, m_realm, m_phase);

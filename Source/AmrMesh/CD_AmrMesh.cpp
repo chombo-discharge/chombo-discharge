@@ -764,7 +764,6 @@ void AmrMesh::parseOptions(){
   parseCoarsestLevelNumCells();
   parseMaxAmrDepth();
   parseMaxSimulationDepth();
-  parseEbCf();
   parseRefinementRatios();
   parseBlockingFactor();
   parseMaxBoxSize();
@@ -829,7 +828,6 @@ void AmrMesh::buildDomains(){
 
 void AmrMesh::regrid(const Vector<IntVectSet>& a_tags,
 		     const int a_lmin,
-		     const int a_regsize,
 		     const int a_hardcap){
   CH_TIME("AmrMesh::regrid");
   if(m_verbosity > 1){
@@ -837,7 +835,7 @@ void AmrMesh::regrid(const Vector<IntVectSet>& a_tags,
   }
 
   this->regridAmr(a_tags, a_lmin, a_hardcap);
-  this->regridOperators(a_lmin, a_regsize);
+  this->regridOperators(a_lmin);
 }
 
 void AmrMesh::regridAmr(const Vector<IntVectSet>& a_tags,
@@ -864,15 +862,14 @@ void AmrMesh::regridAmr(const Vector<IntVectSet>& a_tags,
   }
 }
 
-void AmrMesh::regridOperators(const int a_lmin,
-			      const int a_regsize){
+void AmrMesh::regridOperators(const int a_lmin){
   CH_TIME("AmrMesh::regridOperators(procs, boxes, level)");
   if(m_verbosity > 1){
     pout() << "AmrMesh::regridOperators(procs, boxes, level)" << endl;
   }
   
   for (auto& r : m_realms){
-    r.second->regridOperators(a_lmin, a_regsize);
+    r.second->regridOperators(a_lmin);
   }
 }
 
@@ -1369,7 +1366,7 @@ void AmrMesh::interpToCentroids(EBAMRCellData& a_data, const std::string a_realm
     MayDay::Abort(str.c_str());
   }
   
-  IrregAmrStencil<CentroidInterpolationStencil>& stencil = m_realms[a_realm]->getCentroidInterpolationStencils(a_phase);
+  const IrregAmrStencil<CentroidInterpolationStencil>& stencil = m_realms[a_realm]->getCentroidInterpolationStencils(a_phase);
   stencil.apply(a_data);
 }
 
@@ -1414,18 +1411,6 @@ void AmrMesh::parseMaxSimulationDepth(){
   }
   else {
     m_maxSimulationDepth = m_maxAmrDepth;
-  }
-}
-
-void AmrMesh::parseEbCf(){
-  ParmParse pp("AmrMesh");
-  std::string str;
-  pp.get("ebcf", str);
-  if(str == "true"){
-    m_hasEbCf = true;
-  }
-  else if(str == "false"){
-    m_hasEbCf = false;
   }
 }
 
@@ -1686,10 +1671,6 @@ void AmrMesh::sanityCheck() const {
       }
     }
   }
-}
-
-bool AmrMesh::getEbCf() const {
-  return m_hasEbCf;
 }
 
 RealVect AmrMesh::getProbLo() const {
@@ -1994,7 +1975,6 @@ void AmrMesh::defineRealms(){
 		     m_multigridInterpOrder,
 		     m_multigridInterpRadius,
 		     m_multigridInterpWeight,
-		     m_hasEbCf,
 		     m_centroidStencilType,
 		     m_ebCentroidStencilType,
 		     m_baseif,
@@ -2044,7 +2024,6 @@ void AmrMesh::regridRealm(const std::string           a_realm,
 			    m_multigridInterpOrder,
 			    m_multigridInterpRadius,
 			    m_multigridInterpWeight,
-			    m_hasEbCf,
 			    m_centroidStencilType,
 			    m_ebCentroidStencilType,
 			    m_baseif,

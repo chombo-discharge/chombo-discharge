@@ -57,7 +57,6 @@ void Realm::define(const Vector<DisjointBoxLayout>& a_grids,
 		   const int a_mgInterpOrder,
 		   const int a_mgInterpRadius,
 		   const int a_mgInterpWeight,
-		   const bool a_ebcf,
 		   const IrregStencil::StencilType a_centroid_stencil,
 		   const IrregStencil::StencilType a_eb_stencil,
 		   const std::map<phase::which_phase, RefCountedPtr<BaseIF> > a_baseif,
@@ -95,7 +94,10 @@ void Realm::define(const Vector<DisjointBoxLayout>& a_grids,
 			       a_mgInterpOrder,
 			       a_mgInterpRadius,
 			       a_mgInterpWeight,
-			       a_centroid_stencil, a_eb_stencil, a_ebcf, m_baseif.at(phase::gas), ebis_gas);
+			       a_centroid_stencil,
+			       a_eb_stencil,
+			       m_baseif.at(phase::gas),
+			       ebis_gas);
 
   m_realms[phase::solid]->define(a_grids,
 				 a_domains,
@@ -112,11 +114,8 @@ void Realm::define(const Vector<DisjointBoxLayout>& a_grids,
 				 a_mgInterpWeight,
 				 a_centroid_stencil,
 				 a_eb_stencil,
-				 a_ebcf,
 				 m_baseif.at(phase::solid),
 				 ebis_sol);
-
-
 }
 
 void Realm::setGrids(const Vector<DisjointBoxLayout>& a_grids, const int a_finestLevel){
@@ -142,14 +141,14 @@ void Realm::regridBase(const int a_lmin){
   this->define_mflevelgrid(a_lmin);
 }
 
-void Realm::regridOperators(const int a_lmin, const int a_regsize){
+void Realm::regridOperators(const int a_lmin){
   CH_TIME("Realm::regridOperators");
   if(m_verbosity > 5){
     pout() << "Realm::regridOperators" << endl;
   }
 
   for (auto& r : m_realms){
-    r.second->regridOperators(a_lmin, a_regsize);
+    r.second->regridOperators(a_lmin);
   }
   this->define_masks(a_lmin);
 }
@@ -426,40 +425,39 @@ Vector<RefCountedPtr<MFLevelGrid> >& Realm::getMFLevelGrid(){
   return m_mflg;
 }
 
-const RefCountedPtr<EBIndexSpace>& Realm::getEBIndexSpace(const phase::which_phase a_phase) {
-
+const RefCountedPtr<EBIndexSpace>& Realm::getEBIndexSpace(const phase::which_phase a_phase) const {
   return m_realms[a_phase]->getEBIndexSpace();
 }
 
-Vector<EBISLayout>& Realm::getEBISLayout(const phase::which_phase a_phase) {
+const Vector<EBISLayout>& Realm::getEBISLayout(const phase::which_phase a_phase) const {
   return m_realms[a_phase]->getEBISLayout();
 }
 
-Vector<RefCountedPtr<EBLevelGrid> >& Realm::getEBLevelGrid(const phase::which_phase a_phase) {
+const Vector<RefCountedPtr<EBLevelGrid> >& Realm::getEBLevelGrid(const phase::which_phase a_phase) const {
   return m_realms[a_phase]->getEBLevelGrid();
 }
 
-Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& Realm::getNeighbors(const phase::which_phase a_phase) {
+const Vector<RefCountedPtr<LayoutData<Vector<LayoutIndex> > > >& Realm::getNeighbors(const phase::which_phase a_phase) const {
   return m_realms[a_phase]->getNeighbors();
 }
 
-Vector<RefCountedPtr<LayoutData<VoFIterator> > >& Realm::getVofIterator(const phase::which_phase a_phase) {
+Vector<RefCountedPtr<LayoutData<VoFIterator> > >& Realm::getVofIterator(const phase::which_phase a_phase) const {
   return m_realms[a_phase]->getVofIterator();
 }
 
-IrregAmrStencil<CentroidInterpolationStencil>& Realm::getCentroidInterpolationStencils(const phase::which_phase a_phase) {
+const IrregAmrStencil<CentroidInterpolationStencil>& Realm::getCentroidInterpolationStencils(const phase::which_phase a_phase) const {
   return m_realms[a_phase]->getCentroidInterpolationStencils();
 }
 
-IrregAmrStencil<EbCentroidInterpolationStencil>& Realm::getEbCentroidInterpolationStencilStencils(const phase::which_phase a_phase) {
+const IrregAmrStencil<EbCentroidInterpolationStencil>& Realm::getEbCentroidInterpolationStencilStencils(const phase::which_phase a_phase) const {
   return m_realms[a_phase]->getEbCentroidInterpolationStencilStencils();
 }
 
-IrregAmrStencil<NonConservativeDivergenceStencil>& Realm::getNonConservativeDivergenceStencils(const phase::which_phase a_phase) {
+const IrregAmrStencil<NonConservativeDivergenceStencil>& Realm::getNonConservativeDivergenceStencils(const phase::which_phase a_phase) const {
   return m_realms[a_phase]->getNonConservativeDivergenceStencils();
 }
 
-Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& Realm::getGradientStencils(const phase::which_phase a_phase){
+const Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& Realm::getGradientStencils(const phase::which_phase a_phase) const{
   return m_realms[a_phase]->getGradientStencils();
 }
 
@@ -495,7 +493,7 @@ Vector<RefCountedPtr<EBFluxRegister> >&  Realm::getFluxRegister(const phase::whi
   return m_realms[a_phase]->getFluxRegister();
 }
 
-Vector<RefCountedPtr<EBLevelRedist> >&  Realm::getLevelRedist(const phase::which_phase a_phase){
+Vector<RefCountedPtr<EBLevelRedist> >&  Realm::getLevelRedist(const phase::which_phase a_phase) {
   return m_realms[a_phase]->getLevelRedist();
 }
 
@@ -519,7 +517,7 @@ Vector<RefCountedPtr<Copier> >& Realm::getReverseCopier(const phase::which_phase
   return m_realms[a_phase]->getReverseCopier();
 }
 
-EBAMRFAB& Realm::getLevelset(const phase::which_phase a_phase) {
+const EBAMRFAB& Realm::getLevelset(const phase::which_phase a_phase) const {
   return m_realms[a_phase]->getLevelset();
 }
 

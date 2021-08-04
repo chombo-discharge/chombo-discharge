@@ -635,11 +635,6 @@ public:
   void parseMaxSimulationDepth();
 
   /*!
-   @brief Parse whether or not AmrMesh to forget about ebcf (user must guarantee that this is the case)
-  */
-  void parseEbCf();
-
-  /*!
     @brief Parse refinement ratios
   */
   void parseRefinementRatios();
@@ -725,7 +720,6 @@ public:
   */
   void regrid(const Vector<IntVectSet>& a_tags,
 	      const int                 a_lmin,
-	      const int                 a_regsize=1, 
 	      const int                 a_hardcap=-1);
 
   /*!
@@ -761,20 +755,13 @@ public:
   /*!
     @brief Regrid AMR operators. This is done for all Realms. 
     @param[in] a_lmin    Coarsest grid level that has changed. 
-    @param[in] a_regsize Dead parameter
   */
-  void regridOperators(const int a_lmin,
-		       const int a_regsize=1);
+  void regridOperators(const int a_lmin);
 
   /*!
     @brief Do a sanity check to make sure everything is set up correctly
   */
   void sanityCheck() const;
-
-  /*!
-    @brief True if there is ebcf crossing
-  */
-  bool getEbCf() const;
 
   /*!
     @brief Get finest grid level. 
@@ -1021,7 +1008,7 @@ public:
     @param[in] a_phase Phase (gas or solid)
   */
   const IrregAmrStencil<CentroidInterpolationStencil>& getCentroidInterpolationStencils(const std::string a_realm,
-									     const phase::which_phase a_phase) const;
+											const phase::which_phase a_phase) const;
 
   /*!
     @brief Get interpolation stencils for going from cell center to cell boundary centroid
@@ -1252,11 +1239,6 @@ protected:
     @brief radius for irregular stencils
   */
   int m_irregStenRadius;
-
-  /*!
-    @brief Grids have EB x CF crossing
-  */
-  bool m_hasEbCf;
 
   /*!
     @brief Has grids or not
