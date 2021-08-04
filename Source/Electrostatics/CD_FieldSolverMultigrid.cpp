@@ -23,6 +23,7 @@
 #include <CD_DataOps.H>
 #include <CD_MFQuadCFInterp.H>
 #include <CD_MFInterfaceFAB.H>
+#include <CD_MFMultigridInterpolator.H>
 #include <CD_JumpBc.H>
 #include <CD_AmrMesh.H>
 #include <CD_ConductivityElectrostaticDomainBcFactory.H>
@@ -116,7 +117,6 @@ void FieldSolverMultigrid::parseMultigridSettings(){
     MayDay::Error("FieldSolverMultigrid::parseMultigridSettings - logic bust in bottom solver. You must specify ' = bicgstab', ' = gmres', or ' = simple <number>'");
   }
 
-
   // Set the multigrid relaxation type. 
   pp.get("gmg_relax_type", str);
   if(str == "gsrb"){
@@ -160,13 +160,18 @@ void FieldSolverMultigrid::allocateInternals(){
 }
 
 bool FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
-				 const MFAMRCellData& a_source,
+				 const MFAMRCellData& a_rho,
 				 const EBAMRIVData&   a_sigma,
 				 const bool           a_zerophi){
   CH_TIME("FieldSolverMultigrid::solve(mfamrcell, mfamrcell");
   if(m_verbosity > 5){
     pout() << "FieldSolverMultigrid::solve(mfamrcell, mfamrcell)" << endl;
   }
+
+  // TLDR: The operator factory was set up as kappa*L(phi) = -kappa*div(eps*grad(phi)) which we use to solve the Poisson equation
+  //       div(eps*grad(phi)) = -rho/eps0. 
+  //
+  //       So, we must scale rho (which is defined on centroids) by kappa and divide by eps0. The minus-sign is in the operator. 
 
   bool converged = false;
 
@@ -175,14 +180,16 @@ bool FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
   }
 
   // Do the scaled space charge density
-  DataOps::copy (m_kappaRhoByEps0, a_source);
+  DataOps::copy (m_kappaRhoByEps0, a_rho);
   DataOps::scale(m_kappaRhoByEps0, 1./(Units::eps0));
   DataOps::scale(m_kappaRhoByEps0, 1./(m_lengthScale*m_lengthScale));
 
-  if(m_kappaSource){ // Scale source by kappa
+  // Special flag for when a_rho is on the centroid but was not scaled by kappa on input. The multigrid operator solves
+  // kappa*L(phi) = kappa*rho so the right-hand side must be kappa-weighted. 
+  if(m_kappaSource){ 
     DataOps::kappaScale(m_kappaRhoByEps0);
   }
-
+  
   // Do the scaled surface charge
   DataOps::copy (m_sigmaByEps0, a_sigma);
   DataOps::scale(m_sigmaByEps0, 1./(Units::eps0));
@@ -374,10 +381,75 @@ void FieldSolverMultigrid::setupSolver(){
   if(!m_hasDeeperMultigridLevels){
     this->defineDeeperMultigridLevels();     // Define MG levels. These don't change during regrids so we only need to set them once. 
   }
-  this->setupOperatorFactory(); // Set the operator factory
-  this->setupMultigrid();           // Set up the AMR multigrid solver
+  this->setupHelmholtzFactory(); // Set up the operator factory
+  this->setupOperatorFactory();  // Set the operator factory
+  this->setupMultigrid();        // Set up the AMR multigrid solver
 
   m_isSolverSetup = true;
+}
+
+void FieldSolverMultigrid::setupHelmholtzFactory(){
+  CH_TIME("FieldSolverMultigrid::setupHelmholtzFactory");
+  if(m_verbosity > 5){
+    pout() << "FieldSolverMultigrid::setupHelmholtzFactory" << endl;
+  }
+
+  pout() << "setting up helmholtz" << endl;
+
+  // 
+  const RefCountedPtr<EBIndexSpace>& ebisGas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
+  const RefCountedPtr<EBIndexSpace>& ebisSol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
+
+  // Need to set up multifluid wrappers
+  const int finestLevel = m_amr->getFinestLevel();
+  const int numPhases   = m_multifluidIndexSpace->numPhases();
+  
+  Vector<MFLevelGrid>             mflg     (1 + finestLevel);
+  Vector<MFMultigridInterpolator> mfInterp (1 + finestLevel);
+  Vector<MFFluxReg>               mfFluxReg(1 + finestLevel);
+  Vector<MFCoarAve>               mfCoarAve(1 + finestLevel);
+
+  for (int lvl = 0; lvl <= finestLevel; lvl++){
+    Vector<EBLevelGrid>                             eblgPhases(numPhases);
+    Vector<RefCountedPtr<EBMultigridInterpolator> > interpPhases(numPhases);
+    Vector<RefCountedPtr<EBFluxRegister> >          fluxRegPhases(numPhases);
+    Vector<RefCountedPtr<EbCoarAve> >               avePhases(numPhases);
+
+    if(!ebisGas.isNull()) eblgPhases[phase::gas]   = *(m_amr->getEBLevelGrid(m_realm, phase::gas)  [lvl]);
+    if(!ebisSol.isNull()) eblgPhases[phase::solid] = *(m_amr->getEBLevelGrid(m_realm, phase::solid)[lvl]);
+
+    // if(!ebisGas.isNull()) interpPhases[phase::gas]   = this->getMultigridInterpolators(phase::gas)  [lvl];
+    // if(!ebisSol.isNull()) interpPhases[phase::solid] = this->getMultigridInterpolators(phase::solid)[lvl];
+
+    if(!ebisGas.isNull()) fluxRegPhases[phase::gas]   = (m_amr->getFluxRegister(m_realm, phase::gas)  [lvl]);
+    if(!ebisSol.isNull()) fluxRegPhases[phase::solid] = (m_amr->getFluxRegister(m_realm, phase::solid)[lvl]);
+
+    if(!ebisGas.isNull()) avePhases[phase::gas]   = (m_amr->getCoarseAverage(m_realm, phase::gas)  [lvl]);
+    if(!ebisSol.isNull()) avePhases[phase::solid] = (m_amr->getCoarseAverage(m_realm, phase::solid)[lvl]);
+
+    mflg[lvl].define(m_multifluidIndexSpace, eblgPhases);
+    //    mfInterp[lvl].define(interpPhases);
+    mfFluxReg[lvl].define(fluxRegPhases);
+    mfCoarAve[lvl].define(avePhases);
+  }
+  
+
+#if 0
+  m_helmholtzFactory = RefCountedPtr<MFHelmholtzOpFactory>(new EBHelmholtzOpFactory(m_multifluixIndexSpace,
+										    m_dataLocation,
+										    m_alpha,
+										    m_beta,
+										    m_amr->getProbLo(),
+										    mflg,
+										    mfInterp,
+										    mfFluxReg,
+										    mfCoarAve,
+										    m_amr->getRefinementRatios(),
+										    m_amr->getDx(),
+										    m_permittivityCell.getData(), // Dummy argument (recall m_alpha = 0.0)
+										    m_permittivityFace.getData(),
+										    m_permittivityEB.getData(),
+#endif
 }
 
 void FieldSolverMultigrid::setupOperatorFactory(){

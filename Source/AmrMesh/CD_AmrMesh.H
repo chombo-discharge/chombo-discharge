@@ -697,6 +697,11 @@ public:
   void parseNumGhostCells();
 
   /*!
+    @brief Parse settings for the multigrid interpolator
+  */
+  void parseMultigridInterpolator();
+
+  /*!
     @brief Parse the default redistribution radius
   */
   void parseRedistributionRadius();
@@ -1192,6 +1197,21 @@ protected:
     @brief Number of ghost cells to use when writing level-set to grid
   */
   int m_numLsfGhostCells;
+
+  /*!
+    @brief Multigrid interpolation order
+  */
+  int m_multigridInterpOrder;
+
+  /*!
+    @brief Multigrid interpolation radius
+  */
+  int m_multigridInterpRadius;
+
+  /*!
+    @brief Multigrid interpolation weights
+  */
+  int m_multigridInterpWeight;
 
   /*!
     @brief Redistribution radius

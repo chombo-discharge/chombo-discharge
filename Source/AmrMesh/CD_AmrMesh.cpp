@@ -1592,6 +1592,16 @@ void AmrMesh::parseNumGhostCells(){
   pp.get("lsf_ghost", m_numLsfGhostCells);
 }
 
+void AmrMesh::parseMultigridInterpolator(){
+  CH_TIME("AmrMesh::parseMultigridInterpolator");
+
+  ParmParse pp("AmrMesh");
+
+  pp.get("mg_interp_order",  m_multigridInterpOrder);
+  pp.get("mg_interp_radius", m_multigridInterpRadius);
+  pp.get("mg_interp_weight", m_multigridInterpWeight);
+}
+
 void AmrMesh::parseRedistributionRadius(){
   ParmParse pp("AmrMesh");
   int rad = 1;

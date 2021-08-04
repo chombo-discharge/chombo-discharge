@@ -25,6 +25,7 @@
 // Our includes
 #include <CD_FieldSolver.H>
 #include <CD_MfHelmholtzOpFactory.H>
+#include <CD_MFHelmholtzOpFactory.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -144,8 +145,6 @@ public:
     @brief Set up multigrid solver
   */
   virtual void setupSolver() override;
-
-
 
   /*!
     @brief Compute grid loads
@@ -275,6 +274,11 @@ protected:
   RefCountedPtr<MfHelmholtzOpFactory> m_operatorFactory;
 
   /*!
+    @brief Multigrid operator factory. 
+  */
+  RefCountedPtr<MFHelmholtzOpFactory> m_helmholtzOpFactory;
+
+  /*!
     @brief Zero
   */
   MFAMRCellData m_zero;
@@ -344,10 +348,15 @@ protected:
   */
   virtual void defineDeeperMultigridLevels();
 
-    /*!
+  /*!
     @brief Set up the multigrid operator factory
   */
   virtual void setupOperatorFactory();
+
+  /*!
+    @brief Set up the multigrid operator factory
+  */
+  virtual void setupHelmholtzFactory();
 
   /*!
     @brief Set up AMRMultiGrid
