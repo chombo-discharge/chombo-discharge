@@ -7,6 +7,7 @@
   @file   CD_FieldSolverMultigrid.H
   @brief  Declaration of FieldSolverMultigrid
   @author Robert Marskar
+  @todo   Remove everything that has to do with "precoarsening" things. 
 */
 
 #ifndef CD_FieldSolverMultigrid_H
@@ -35,7 +36,7 @@ protected:
   /*!
     @brief Enum class for supported bottom solvers in multigrid.
   */
-  enum class BottomSolver {
+  enum class BottomSolverType {
     Simple,
     BiCGStab,
     GMRES
@@ -181,10 +182,10 @@ protected:
   /*!
     @brief Needs setup
   */
-  bool m_needsMultigridSetup;
+  bool m_isSolverSetup;
 
   /*!
-    @brief
+    @brief Check if solver has "deeper" multigrid levels. 
   */
   bool m_hasDeeperMultigridLevels;
 
@@ -199,9 +200,14 @@ protected:
   int m_multigridVerbosity;
 
   /*!
+    @brief Number of smoothing for multigrid
+  */
+  int m_multigridSmooth;
+
+  /*!
     @brief Number of smoothings before averaging
   */
-  int m_multigridPreSmoothg;
+  int m_multigridPreSmooth;
 
   /*!
     @brief Number of smoothings before averaging
@@ -226,9 +232,7 @@ protected:
   /*!
     @brief Bottom solver type
   */
-  //  int m_bottomSolver;
-
-  BottomSolver m_bottomSolver;
+  BottomSolverType m_bottomSolverType;
 
   /*!
     @brief Number of smoothing for bottom solver
@@ -238,7 +242,7 @@ protected:
   /*!
     @brief Set bottom drop depth
   */
-  int m_numCellsBottomDrop;
+  int m_minCellsBottom;
 
   /*!
     @brief Set bc order 
@@ -258,12 +262,12 @@ protected:
   /*!
     @brief 
   */
-  Real m_multigridTolerance;
+  Real m_multigridExitTolerance;
   
   /*!
     @brief 
   */
-  Real m_multigridHang;
+  Real m_multigridExitHang;
 
   /*!
     @brief Multigrid operator factory. 
@@ -278,12 +282,12 @@ protected:
   /*!
     @brief Scaled soruce
   */
-  MFAMRCellData m_scaledSource;
+  MFAMRCellData m_kappaRhoByEps0;
 
   /*!
     @brief Sigma
   */
-  EBAMRIVData m_scaledSigma;
+  EBAMRIVData m_sigmaByEps0;
 
   /*!
     @brief Geometric multigrid solver
