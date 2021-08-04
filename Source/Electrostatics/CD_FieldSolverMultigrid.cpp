@@ -9,7 +9,7 @@
   @author Robert Marskar
   @todo   When specifying the bottom solver, use syntax "simple 400" to indicate the number of smoothings. 
   @todo   gmg parameters should be specified as "FieldSolverMultigrid.gmg.<setting>"
-  @todo   Purge the pre-coarsening stuff. 
+  @todo   Purge the pre-coarsening stuff, e.g. defineDeeperMultigridLevels
   @todo   Register the new multigrid interpolators
   @todo   Once the new operator is in, check the computeLoads routine. 
 */
@@ -69,38 +69,55 @@ void FieldSolverMultigrid::parseMultigridSettings(){
 
   std::string str;
 
-  pp.get("gmg_coarsen",     m_numCoarseningsBeforeAggregation);
-  pp.get("gmg_verbosity",   m_multigridVerbosity);
-  pp.get("gmg_pre_smooth",  m_multigridPreSmooth);
-  pp.get("gmg_post_smooth", m_multigridPostSmooth);
-  pp.get("gmg_bott_smooth", m_multigridBottomSmooth);
-  pp.get("gmg_max_iter",    m_multigridMaxIterations);
-  pp.get("gmg_min_iter",    m_multigridMinIterations);
-  pp.get("gmg_exit_tol",    m_multigridExitTolerance);
-  pp.get("gmg_exit_hang",   m_multigridExitHang);
-  pp.get("gmg_min_cells",   m_minCellsBottom);
-  pp.get("gmg_bc_order",    m_multigridBcOrder);
+  pp.get("gmg_coarsen",      m_numCoarseningsBeforeAggregation);
+  pp.get("gmg_verbosity",    m_multigridVerbosity);
+  pp.get("gmg_pre_smooth",   m_multigridPreSmooth);
+  pp.get("gmg_post_smooth",  m_multigridPostSmooth);
+  pp.get("gmg_bott_smooth",  m_multigridBottomSmooth);
+  pp.get("gmg_max_iter",     m_multigridMaxIterations);
+  pp.get("gmg_min_iter",     m_multigridMinIterations);
+  pp.get("gmg_exit_tol",     m_multigridExitTolerance);
+  pp.get("gmg_exit_hang",    m_multigridExitHang);
+  pp.get("gmg_min_cells",    m_minCellsBottom);
+  pp.get("gmg_bc_order",     m_multigridBcOrder);
 
   if(!(m_multigridBcOrder == 1 || m_multigridBcOrder == 2)){
     MayDay::Abort("FieldSolverMultigrid::parseMultigridSettings - boundary condition order must be 1 or 2");
   }
 
-  // Bottom solver
-  pp.get("gmg_bottom_solver", str);
-  if(str == "simple"){
-    m_bottomSolverType = BottomSolverType::Simple;
+  // Fetch the desired bottom solver from the input script. We look for things like FieldSolverMultigrid.gmg_bottom_solver = bicgstab or '= simple <number>'
+  // where <number> is the number of relaxation for the smoothing solver. 
+  const int num = pp.countval("gmg_bottom_solver");
+  if(num == 1){
+    pp.get("gmg_bottom_solver", str);
+    if(str == "bicgstab"){
+      m_bottomSolverType = BottomSolverType::BiCGStab;
+    }
+    else if(str == "gmres"){
+      m_bottomSolverType = BottomSolverType::GMRES;
+    }
+    else{
+      MayDay::Error("FieldSolverMultigrid::parseMultigridSettings - logic bust, you've specified one parameter and I expected either 'bicgstab' or 'gmres'");
+    }
   }
-  else if(str == "bicgstab"){
-    m_bottomSolverType = BottomSolverType::BiCGStab;
-  }
-  else if(str == "gmres"){
-    m_bottomSolverType = BottomSolverType::GMRES;
+  else if(num == 2){
+    int numSmooth;
+    pp.get("gmg_bottom_solver", str,       0);
+    pp.get("gmg_bottom_solver", numSmooth, 1);
+    if(str == "simple"){
+      m_bottomSolverType = BottomSolverType::Simple;
+      m_mfsolver.setNumSmooths(numSmooth);
+    }
+    else{
+      MayDay::Error("FieldSolverMultigrid::parseMultigridSettings - logic bust, you've specified two parameters and I expected 'simple <number>'");
+    }
   }
   else{
-    MayDay::Abort("FieldSolverMultigrid::parseMultigridSettings - unknown bottom solver requested");
+    MayDay::Error("FieldSolverMultigrid::parseMultigridSettings - logic bust in bottom solver. You must specify ' = bicgstab', ' = gmres', or ' = simple <number>'");
   }
 
-  // Relaxation type
+
+  // Set the multigrid relaxation type. 
   pp.get("gmg_relax_type", str);
   if(str == "gsrb"){
     m_multigridRelaxMethod = RelaxationMethod::GSRBFast;
@@ -157,9 +174,6 @@ bool FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
     this->setupSolver(); // This does everything, allocates coefficients, gets bc stuff and so on
   }
 
-  const int ncomp        = 1;
-  const int finestLevel = m_amr->getFinestLevel();
-
   // Do the scaled space charge density
   DataOps::copy (m_kappaRhoByEps0, a_source);
   DataOps::scale(m_kappaRhoByEps0, 1./(Units::eps0));
@@ -183,19 +197,20 @@ bool FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
   m_amr->alias(zero,    m_zero);
 
   // GMG solve. Use phi = zero as initial metric. Want to reduce this by m_multigridExitTolerance
-  //  m_multigridSolver.init(phi, rhs, finestLevel, 0);
+  const int finestLevel = m_amr->getFinestLevel();
+  
   const Real phi_resid  = m_multigridSolver.computeAMRResidual(phi,  rhs, finestLevel, 0);
   const Real zero_resid = m_multigridSolver.computeAMRResidual(zero, rhs, finestLevel, 0);
 
   m_convergedResidue = zero_resid*m_multigridExitTolerance;
 
-
-  if(phi_resid > m_convergedResidue){ // Residual is too large, recompute solution
+  // Do a multigrid solve if the residual is too large
+  if(phi_resid > m_convergedResidue){ 
     m_multigridSolver.m_convergenceMetric = zero_resid;
     m_multigridSolver.solveNoInitResid(phi, res, rhs, finestLevel, 0, a_zerophi);
 
     const int status = m_multigridSolver.m_exitStatus;   // 1 => Initial norm sufficiently reduced
-    if(status == 1 || status == 8){  // 8 => Norm sufficiently small
+    if(status == 1 || status == 8){                      // 8 => Norm sufficiently small
       converged = true;
     }
   }
@@ -203,7 +218,7 @@ bool FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
     converged = true;
   }
 
-  // Solver hang. Try again. 
+#if 1 // Solver hang. I don't know why this would work but OK.
   if(!converged){
     this->setupSolver();
     DataOps::setValue(a_phi, 0.0);
@@ -214,12 +229,12 @@ bool FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
       converged = true;
     }
   }
+#endif
 
   m_multigridSolver.revert(phi, rhs, finestLevel, 0);
 
   m_amr->averageDown(a_phi, m_realm);
   m_amr->interpGhost(a_phi, m_realm);
-
 
   this->computeElectricField();
 
@@ -363,7 +378,6 @@ void FieldSolverMultigrid::setupSolver(){
   this->setupMultigrid();           // Set up the AMR multigrid solver
 
   m_isSolverSetup = true;
-
 }
 
 void FieldSolverMultigrid::setupOperatorFactory(){
