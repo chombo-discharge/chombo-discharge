@@ -24,16 +24,16 @@
 #include <CD_NamespaceHeader.H>
 
 PhaseRealm::PhaseRealm(){
+  // Default settings
   m_isDefined   = false;
   m_verbosity = -1;
 
-  ParmParse pp("PhaseRealm");
-
-  pp.query("verbosity", m_verbosity);
-
-  // Always do this shit. 
   this->registerOperator(s_eb_gradient);
   this->registerOperator(s_eb_irreg_interp);
+
+  // Adding this for debugging purposes. 
+  ParmParse pp("PhaseRealm");
+  pp.query("verbosity", m_verbosity);
 }
 
 PhaseRealm::~PhaseRealm(){
