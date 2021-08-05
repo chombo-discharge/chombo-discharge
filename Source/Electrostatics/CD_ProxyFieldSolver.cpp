@@ -690,7 +690,7 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
     pp.get("eb_weight", eb_weight);
     pp.get("eb_val",    eb_value);
 
-    ebbcFactory = RefCountedPtr<MFHelmholtzEBBCFactory> (new MFHelmholtzNeumannEBBCFactory(eb_order, eb_weight, eb_value));
+    ebbcFactory = RefCountedPtr<MFHelmholtzEBBCFactory> (new MFHelmholtzNeumannEBBCFactory(eb_value));
   }
   else if(str == "robin"){
     pp.get("eb_order",  eb_order);
@@ -704,7 +704,7 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
     const Real B = -1.0*eb_value;
     const Real C =  0.0;
 
-    ebbcFactory = RefCountedPtr<MFHelmholtzEBBCFactory> (new MFHelmholtzRobinEBBCFactory(eb_order, eb_weight, A, B, C));
+    ebbcFactory = RefCountedPtr<MFHelmholtzEBBCFactory> (new MFHelmholtzRobinEBBCFactory(A, B, C));
   }
   else{
     MayDay::Error("ProxyFieldSolver::solveEBCond - uknown EBBC factory requested");

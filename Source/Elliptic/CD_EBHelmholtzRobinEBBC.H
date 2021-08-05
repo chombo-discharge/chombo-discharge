@@ -76,6 +76,21 @@ public:
 protected:
 
   /*!
+    @brief Stencil order
+  */
+  int m_order;
+
+  /*!
+    @brief Stencil radius
+  */
+  int m_radius;
+
+  /*!
+    @brief Stencil weight
+  */
+  int m_weight;  
+
+  /*!
     @brief Use constant for BC
   */
   bool m_useConstant;

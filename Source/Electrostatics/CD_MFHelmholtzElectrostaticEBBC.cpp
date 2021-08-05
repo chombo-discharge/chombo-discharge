@@ -23,6 +23,18 @@ MFHelmholtzElectrostaticEBBC::MFHelmholtzElectrostaticEBBC(const int a_phase, co
   m_electrostaticBCs = a_electrostaticBCs;
 }
 
+void MFHelmholtzElectrostaticEBBC::setOrder(const int a_order){
+  CH_assert(m_order > 0);
+
+  m_order = a_order;
+}
+
+void MFHelmholtzElectrostaticEBBC::setWeight(const int a_weight){
+  CH_assert(m_weight >= 0);
+
+  m_weight = a_weight;
+}
+
 void MFHelmholtzElectrostaticEBBC::defineSinglePhase() {
   if(m_order <= 0 || m_weight < 0) MayDay::Error("MFHelmholtzElectrostaticEBBC - must have order > 0 and weight >= 0");
 
@@ -54,7 +66,7 @@ void MFHelmholtzElectrostaticEBBC::defineSinglePhase() {
       // Try quadrants first.
       order = m_order;
       while(!foundStencil && order > 0){
-      	foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten, vof, VofUtils::Neighborhood::Quadrant, dit(), order);
+      	foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten, vof, VofUtils::Neighborhood::Quadrant, dit(), order, m_weight);
       	order--;
 
 	// Check if stencil reaches too far across CF
@@ -66,7 +78,7 @@ void MFHelmholtzElectrostaticEBBC::defineSinglePhase() {
       // If we couldn't find in a quadrant, try a larger neighborhood
       order = m_order;
       while(!foundStencil && order > 0){
-      	foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten, vof, VofUtils::Neighborhood::Radius, dit(), order);
+      	foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten, vof, VofUtils::Neighborhood::Radius, dit(), order, m_weight);
       	order--;
 
 	// Check if stencil reaches too far across CF

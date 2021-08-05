@@ -19,10 +19,13 @@
 #include <CD_NamespaceHeader.H>
 
 EBHelmholtzRobinEBBC::EBHelmholtzRobinEBBC(){
+  m_order       = 1;
+  m_radius      = 1;
+  m_weight      = 0;   // Can't use weighted least squares when starting vof is included
+  
   m_useConstant = false;
   m_useFunction = false;
 }
-
 
 EBHelmholtzRobinEBBC::~EBHelmholtzRobinEBBC(){
 
@@ -62,9 +65,7 @@ VoFStencil EBHelmholtzRobinEBBC::getInterpolationStencil(const VolIndex& a_vof, 
 
 VoFStencil EBHelmholtzRobinEBBC::getMonoPathStencil(const VolIndex& a_vof, const DataIndex& a_dit) const {
   const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
-  const int pow          = 0;  // Can't run with weighting when the starting vof is included
-  const int order        = 1;
-  const int radius       = 1;
+
   const bool useStartVof = true;
 
   const VoFStencil stencil = LeastSquares::getInterpolationStencil(Location::Cell::Boundary,
@@ -73,9 +74,9 @@ VoFStencil EBHelmholtzRobinEBBC::getMonoPathStencil(const VolIndex& a_vof, const
 								   a_vof,
 								   ebisbox,
 								   m_dx,
-								   pow,
-								   radius,
-								   order,
+								   m_weight,
+								   m_radius,
+								   m_order,
 								   useStartVof);
 
 

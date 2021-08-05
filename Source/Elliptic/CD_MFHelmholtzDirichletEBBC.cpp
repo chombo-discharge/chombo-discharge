@@ -39,6 +39,18 @@ void MFHelmholtzDirichletEBBC::setValue(const std::function<Real(const RealVect&
   m_functionValue = a_value;
 }
 
+void MFHelmholtzDirichletEBBC::setOrder(const int a_order){
+  CH_assert(a_order > 0);
+
+  m_order = a_order;
+}
+
+void MFHelmholtzDirichletEBBC::setWeight(const int a_weight){
+  CH_assert(a_weight >= 0);
+
+  m_weight = a_weight;
+}
+
 void MFHelmholtzDirichletEBBC::defineSinglePhase() {
   if(  m_order <= 0  || m_weight <  0 ) MayDay::Error("MFHelmholtzDirichletEBBC - must have order > 0 and weight >= 0");
   if(!(m_useConstant || m_useFunction)) MayDay::Error("MFHelmholtzDirichletEBBC - not using constant or function!");
@@ -71,7 +83,7 @@ void MFHelmholtzDirichletEBBC::defineSinglePhase() {
       // Try quadrants first.
       order = m_order;
       while(!foundStencil && order > 0){
-      	foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten, vof, VofUtils::Neighborhood::Quadrant, dit(), order);
+      	foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten, vof, VofUtils::Neighborhood::Quadrant, dit(), order, m_weight);
       	order--;
 
 	// Check if stencil reaches too far across CF
@@ -83,7 +95,7 @@ void MFHelmholtzDirichletEBBC::defineSinglePhase() {
       // If we couldn't find in a quadrant, try a larger neighborhood
       order = m_order;
       while(!foundStencil && order > 0){
-      	foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten, vof, VofUtils::Neighborhood::Radius, dit(), order);
+      	foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten, vof, VofUtils::Neighborhood::Radius, dit(), order, m_weight);
       	order--;
 
 	// Check if stencil reaches too far across CF

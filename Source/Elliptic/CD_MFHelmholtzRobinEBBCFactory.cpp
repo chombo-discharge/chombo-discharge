@@ -14,30 +14,15 @@
 #include <CD_MFHelmholtzRobinEBBC.H>
 #include <CD_NamespaceHeader.H>
 
-MFHelmholtzRobinEBBCFactory::MFHelmholtzRobinEBBCFactory(){
-  m_order       = -1;
-  m_weight      = -1;
-  m_useConstant = false;
-  m_useFunction = false;
-}
-
-MFHelmholtzRobinEBBCFactory::MFHelmholtzRobinEBBCFactory(const int  a_order,
-							 const int  a_weight,
-							 const Real a_A,
+MFHelmholtzRobinEBBCFactory::MFHelmholtzRobinEBBCFactory(const Real a_A,
 							 const Real a_B,
 							 const Real a_C){
-  this->setOrder(a_order);
-  this->setWeight(a_weight);
   this->setCoefficients(a_A, a_B, a_C);
 }
 
-MFHelmholtzRobinEBBCFactory::MFHelmholtzRobinEBBCFactory(const int a_order,
-							 const int a_weight,
-							 const std::function<Real(const RealVect& a_pos)>& a_A,
+MFHelmholtzRobinEBBCFactory::MFHelmholtzRobinEBBCFactory(const std::function<Real(const RealVect& a_pos)>& a_A,
 							 const std::function<Real(const RealVect& a_pos)>& a_B,
 							 const std::function<Real(const RealVect& a_pos)>& a_C){
-  this->setOrder(a_order);
-  this->setWeight(a_weight);
   this->setCoefficients(a_A, a_B, a_C);
 }
 
@@ -66,8 +51,6 @@ void MFHelmholtzRobinEBBCFactory::setCoefficients(const std::function<Real(const
 
 RefCountedPtr<EBHelmholtzEBBC> MFHelmholtzRobinEBBCFactory::create(const int a_iphase, const RefCountedPtr<JumpBC>& a_jumpBC) const {
   auto bc = new MFHelmholtzRobinEBBC(a_iphase, a_jumpBC);
-  bc->setOrder(m_order);
-  bc->setWeight(m_weight);
 
   if(m_useConstant){
     bc->setCoefficients(m_constantA, m_constantB, m_constantC);

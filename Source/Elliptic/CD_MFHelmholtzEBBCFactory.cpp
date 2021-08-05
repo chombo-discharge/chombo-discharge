@@ -21,14 +21,4 @@ MFHelmholtzEBBCFactory::~MFHelmholtzEBBCFactory(){
 
 }
 
-void MFHelmholtzEBBCFactory::setOrder(const int a_order){
-  CH_assert(a_order > 0);
-  m_order = a_order;
-}
-
-void MFHelmholtzEBBCFactory::setWeight(const int a_weight){
-  CH_assert(a_weight > 0);
-  m_weight = a_weight;
-}
-
 #include <CD_NamespaceFooter.H>

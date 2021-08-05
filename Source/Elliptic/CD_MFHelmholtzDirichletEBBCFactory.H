@@ -26,7 +26,7 @@ public:
   /*!
     @brief Weak constructor. Must subsequently set order, weight, and value. 
   */
-  MFHelmholtzDirichletEBBCFactory();
+  MFHelmholtzDirichletEBBCFactory() = delete;
 
   /*!
     @brief Full constructor which sets order and value on EB. 
@@ -83,6 +83,16 @@ protected:
     @brief Value on EB
   */
   Real m_constantValue;
+
+  /*!
+    @brief Stencil order
+  */
+  int m_order;
+
+  /*!
+    @brief Stencil weight (for weighted least squares)
+  */
+  int m_weight;
 
   /*!
     @brief Value on the EB. 

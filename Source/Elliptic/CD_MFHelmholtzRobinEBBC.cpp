@@ -19,8 +19,10 @@
 #include <CD_NamespaceHeader.H>
 
 MFHelmholtzRobinEBBC::MFHelmholtzRobinEBBC(const int a_phase, const RefCountedPtr<JumpBC>& a_jumpBC) : MFHelmholtzEBBC(a_phase, a_jumpBC) {
-  m_order       = -1;
-  m_weight      = -1;
+  m_order       = 1; // Stencil order
+  m_radius      = 1; // Stencil radius
+  m_weight      = 0; // Can't run with weight when we include the starting vof
+  
   m_useConstant = false;
   m_useFunction = false;
 }
@@ -63,9 +65,7 @@ VoFStencil MFHelmholtzRobinEBBC::getInterpolationStencil(const VolIndex& a_vof, 
 
 VoFStencil MFHelmholtzRobinEBBC::getMonoPathStencil(const VolIndex& a_vof, const DataIndex& a_dit) const {
   const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
-  const int pow          = 0;  // Can't run with weighting when the starting vof is included
-  const int order        = 1;
-  const int radius       = 1;
+
   const bool useStartVof = true;
 
   const VoFStencil stencil = LeastSquares::getInterpolationStencil(Location::Cell::Boundary,
@@ -74,9 +74,9 @@ VoFStencil MFHelmholtzRobinEBBC::getMonoPathStencil(const VolIndex& a_vof, const
 								   a_vof,
 								   ebisbox,
 								   m_dx,
-								   pow,
-								   radius,
-								   order,
+								   m_weight,
+								   m_radius,
+								   m_order,
 								   useStartVof);
 
 
@@ -96,7 +96,7 @@ VoFStencil MFHelmholtzRobinEBBC::getTaylorStencil(const VolIndex& a_vof, const D
 }
   
 void MFHelmholtzRobinEBBC::defineSinglePhase() {
-  if(  m_order <= 0  || m_weight <= 0 ) MayDay::Error("MFHelmholtzRobinEBBC - must have order > 0 and weight > 0");
+  if(  m_order <= 0  || m_weight < 0 )  MayDay::Error("MFHelmholtzRobinEBBC - must have order > 0 and weight > 0");
   if(!(m_useConstant || m_useFunction)) MayDay::Error("MFHelmholtzRobinEBBC - not using constant or function!");
 
   const DisjointBoxLayout& dbl = m_eblg.getDBL();

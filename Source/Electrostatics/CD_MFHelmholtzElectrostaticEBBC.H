@@ -58,7 +58,27 @@ public:
   */
   MFHelmholtzElectrostaticEBBC& operator=(const MFHelmholtzElectrostaticEBBC&& a_other) = delete;
 
+  /*!
+    @brief Set stencil order
+  */
+  void setOrder(const int a_order);
+
+  /*!
+    @brief Set stencil weight
+  */
+  void setWeight(const int a_weight);
+
 protected:
+
+  /*!
+    @brief Stencil order
+  */
+  int m_order;
+
+  /*!
+    @brief Stencil weight
+  */
+  int m_weight;
 
   /*!
     @brief Electrostatic boundary conditions

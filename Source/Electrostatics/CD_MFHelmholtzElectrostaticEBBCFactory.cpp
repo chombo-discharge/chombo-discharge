@@ -15,10 +15,9 @@
 #include <CD_NamespaceHeader.H>
 
 MFHelmholtzElectrostaticEBBCFactory::MFHelmholtzElectrostaticEBBCFactory(const int a_order, const int a_weight, const ElectrostaticEbBc& a_electrostaticBCs){
+  m_order            = a_order;
+  m_weight           = a_weight;  
   m_electrostaticBCs = a_electrostaticBCs;
-
-  this->setOrder(a_order);
-  this->setWeight(a_weight);
 }
 
 MFHelmholtzElectrostaticEBBCFactory::~MFHelmholtzElectrostaticEBBCFactory(){
