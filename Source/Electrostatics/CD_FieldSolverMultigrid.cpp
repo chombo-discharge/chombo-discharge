@@ -438,7 +438,7 @@ void FieldSolverMultigrid::setupHelmholtzFactory(){
     if(!ebisSol.isNull()) eblgPhases[phase::solid]    = *(m_amr->getEBLevelGrid(m_realm, phase::solid)[lvl]);
 
     if(!ebisGas.isNull()) interpPhases[phase::gas  ]  = (m_amr->getMultigridInterpolator(m_realm, phase::gas  )[lvl]);
-    if(!ebisGas.isNull()) interpPhases[phase::solid]  = (m_amr->getMultigridInterpolator(m_realm, phase::solid)[lvl]);
+    if(!ebisSol.isNull()) interpPhases[phase::solid]  = (m_amr->getMultigridInterpolator(m_realm, phase::solid)[lvl]);
 
     if(!ebisGas.isNull()) fluxRegPhases[phase::gas  ] = (m_amr->getFluxRegister(m_realm, phase::gas)  [lvl]);
     if(!ebisSol.isNull()) fluxRegPhases[phase::solid] = (m_amr->getFluxRegister(m_realm, phase::solid)[lvl]);

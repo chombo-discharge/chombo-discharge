@@ -42,7 +42,7 @@ Real MFHelmholtzElectrostaticEBBC::getElectrodePotential(const RealVect& a_pos) 
   // Return potential of closest electrode
   const Real dummyDt = 0.0;
   
-  return 2*electrodeBCs[closestElectrode].second(a_pos, dummyDt);
+  return electrodeBCs[closestElectrode].second(a_pos, dummyDt);
 }
 
 #include <CD_NamespaceFooter.H>
