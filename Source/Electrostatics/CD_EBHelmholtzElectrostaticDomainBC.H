@@ -19,6 +19,8 @@
 
 /*!
   @brief Base class for passing domain boundary conditions into EBHelmholtzOp. 
+  @details This calss is a wrapper for Dirichlet/Neumann boundary conditions where the values/functions
+  are passed in through ElectrostaticDomainBc. 
 */
 class EBHelmholtzElectrostaticDomainBC : public EBHelmholtzDomainBC {
 public:
