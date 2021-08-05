@@ -73,8 +73,9 @@ void FieldSolverMultigrid::parseMultigridSettings(){
   ParmParse pp(m_className.c_str());
 
   std::string str;
-
+#if !(USE_NEW_HELMHOLTZ_FACTORY)
   pp.get("gmg_coarsen",      m_numCoarseningsBeforeAggregation);
+#endif
   pp.get("gmg_verbosity",    m_multigridVerbosity);
   pp.get("gmg_pre_smooth",   m_multigridPreSmooth);
   pp.get("gmg_post_smooth",  m_multigridPostSmooth);
@@ -291,6 +292,7 @@ void FieldSolverMultigrid::registerOperators(){
 }
 
 void FieldSolverMultigrid::defineDeeperMultigridLevels(){
+#if !(USE_NEW_HELMHOLTZ_FACTORY)
   CH_TIME("FieldSolverMultigrid::define_mg_level");
   if(m_verbosity > 5){
     pout() << "FieldSolverMultigrid::defineDeeperMultigridLevels" << endl;
@@ -374,7 +376,7 @@ void FieldSolverMultigrid::defineDeeperMultigridLevels(){
       break;
     }
   }
-  
+#endif  
   m_hasDeeperMultigridLevels = true;
 }
 
