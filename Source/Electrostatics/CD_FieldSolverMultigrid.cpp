@@ -32,7 +32,7 @@
 #include <CD_Units.H>
 #include <CD_NamespaceHeader.H>
 
-#define USE_NEW_HELMHOLTZ_FACTORY 0
+#define USE_NEW_HELMHOLTZ_FACTORY 1
 
 constexpr Real FieldSolverMultigrid::m_alpha;
 constexpr Real FieldSolverMultigrid::m_beta;
@@ -73,9 +73,7 @@ void FieldSolverMultigrid::parseMultigridSettings(){
   ParmParse pp(m_className.c_str());
 
   std::string str;
-#if !(USE_NEW_HELMHOLTZ_FACTORY)
   pp.get("gmg_coarsen",      m_numCoarseningsBeforeAggregation);
-#endif
   pp.get("gmg_verbosity",    m_multigridVerbosity);
   pp.get("gmg_pre_smooth",   m_multigridPreSmooth);
   pp.get("gmg_post_smooth",  m_multigridPostSmooth);
@@ -86,6 +84,9 @@ void FieldSolverMultigrid::parseMultigridSettings(){
   pp.get("gmg_exit_hang",    m_multigridExitHang);
   pp.get("gmg_min_cells",    m_minCellsBottom);
   pp.get("gmg_bc_order",     m_multigridBcOrder);
+  pp.get("gmg_bc_weight",    m_multigridBcWeight);
+  pp.get("gmg_jump_order",   m_multigridJumpOrder);
+  pp.get("gmg_jump_weight",  m_multigridJumpWeight);
 
   if(!(m_multigridBcOrder == 1 || m_multigridBcOrder == 2)){
     MayDay::Abort("FieldSolverMultigrid::parseMultigridSettings - boundary condition order must be 1 or 2");
@@ -124,11 +125,14 @@ void FieldSolverMultigrid::parseMultigridSettings(){
 
   // Set the multigrid relaxation type. 
   pp.get("gmg_relax_type", str);
-  if(str == "gsrb"){
-    m_multigridRelaxMethod = RelaxationMethod::GSRBFast;
+  if(str == "jacobi"){
+    m_multigridRelaxMethod = MFHelmholtzOp::RelaxationMethod::PointJacobi;
   }
-  else if( str == "gauss_seidel"){
-    m_multigridRelaxMethod = RelaxationMethod::GaussSeidel;
+  else if( str == "red_black"){
+    m_multigridRelaxMethod = MFHelmholtzOp::RelaxationMethod::GauSaiRedBlack;
+  }
+  else if( str == "multi_color"){
+    m_multigridRelaxMethod = MFHelmholtzOp::RelaxationMethod::GauSaiMultiColor;
   }
   else{
     MayDay::Abort("FieldSolverMultigrid::parseMultigridSettings - unsupported relaxation method requested");
@@ -292,7 +296,6 @@ void FieldSolverMultigrid::registerOperators(){
 }
 
 void FieldSolverMultigrid::defineDeeperMultigridLevels(){
-#if !(USE_NEW_HELMHOLTZ_FACTORY)
   CH_TIME("FieldSolverMultigrid::define_mg_level");
   if(m_verbosity > 5){
     pout() << "FieldSolverMultigrid::defineDeeperMultigridLevels" << endl;
@@ -376,7 +379,7 @@ void FieldSolverMultigrid::defineDeeperMultigridLevels(){
       break;
     }
   }
-#endif  
+
   m_hasDeeperMultigridLevels = true;
 }
 
@@ -389,6 +392,7 @@ void FieldSolverMultigrid::setupSolver(){
   if(!m_hasDeeperMultigridLevels){
     this->defineDeeperMultigridLevels();     // Define MG levels. These don't change during regrids so we only need to set them once. 
   }
+
   this->setupHelmholtzFactory(); // Set up the operator factory
   this->setupOperatorFactory();  // Set the operator factory
   this->setupMultigrid();        // Set up the AMR multigrid solver
@@ -402,9 +406,6 @@ void FieldSolverMultigrid::setupHelmholtzFactory(){
     pout() << "FieldSolverMultigrid::setupHelmholtzFactory" << endl;
   }
 
-  pout() << "setting up helmholtz" << endl;
-
-  // 
   const RefCountedPtr<EBIndexSpace>& ebisGas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
   const RefCountedPtr<EBIndexSpace>& ebisSol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
 
@@ -418,10 +419,10 @@ void FieldSolverMultigrid::setupHelmholtzFactory(){
   Vector<MFCoarAve>               mfCoarAve(1 + finestLevel);
 
   for (int lvl = 0; lvl <= finestLevel; lvl++){
-    Vector<EBLevelGrid>                             eblgPhases(numPhases);
-    Vector<RefCountedPtr<EBMultigridInterpolator> > interpPhases(numPhases);
+    Vector<EBLevelGrid>                             eblgPhases   (numPhases);
+    Vector<RefCountedPtr<EBMultigridInterpolator> > interpPhases (numPhases);
     Vector<RefCountedPtr<EBFluxRegister> >          fluxRegPhases(numPhases);
-    Vector<RefCountedPtr<EbCoarAve> >               avePhases(numPhases);
+    Vector<RefCountedPtr<EbCoarAve> >               avePhases    (numPhases);
 
     if(!ebisGas.isNull()) eblgPhases[phase::gas  ]    = *(m_amr->getEBLevelGrid(m_realm, phase::gas)  [lvl]);
     if(!ebisSol.isNull()) eblgPhases[phase::solid]    = *(m_amr->getEBLevelGrid(m_realm, phase::solid)[lvl]);
@@ -435,47 +436,27 @@ void FieldSolverMultigrid::setupHelmholtzFactory(){
     if(!ebisGas.isNull()) avePhases[phase::gas  ]     = (m_amr->getCoarseAverage(m_realm, phase::gas)  [lvl]);
     if(!ebisSol.isNull()) avePhases[phase::solid]     = (m_amr->getCoarseAverage(m_realm, phase::solid)[lvl]);
 
-    mflg[lvl].define(m_multifluidIndexSpace, eblgPhases);
-    mfInterp[lvl].define(interpPhases);
+    mflg[lvl].     define(m_multifluidIndexSpace, eblgPhases);
+    mfInterp[lvl]. define(interpPhases);
     mfFluxReg[lvl].define(fluxRegPhases);
     mfCoarAve[lvl].define(avePhases);
   }
 
-  // Coarsest domain used for multigrid
+  // Coarsest domain used for multigrid. The user specifies the minimum number of cells in any
+  // coordinate direction, and we coarsen until we have a domain which satisfies that constraint. 
   ProblemDomain bottomDomain = m_amr->getDomains()[0];
   while(bottomDomain.domainBox().shortside() >= 2*m_minCellsBottom){
     bottomDomain.coarsen(2);
   }
 
-  // Number of ghost cells in data holders
+  // Number of ghost cells in data holders. 
   const IntVect ghostPhi = m_amr->getNumberOfGhostCells()*IntVect::Unit;
   const IntVect ghostRhs = m_amr->getNumberOfGhostCells()*IntVect::Unit;
 
   // Set up Dirichlet boundary conditions for now
-#if 1
-  RefCountedPtr<MFHelmholtzEBBCFactory> ebbcFactory;
-  RefCountedPtr<MFHelmholtzDomainBCFactory> domainBcFactory;
-
-  int  jumpOrder = 2;  // Needs to be input parameter
-  int  jumpWeight = 2; // Needs to be input parameter
+  auto ebbcFactory     = RefCountedPtr<MFHelmholtzEBBCFactory>     (new MFHelmholtzDirichletEBBCFactory(m_multigridBcOrder, m_multigridBcWeight, 1.0));
+  auto domainBcFactory = RefCountedPtr<MFHelmholtzDomainBCFactory> (new MFHelmholtzDirichletDomainBCFactory(-1.0));
   
-  int  eb_order  = 2; // Needs to be input parameter
-  int  eb_weight = 2; // Needs to be input parameter
-
-  auto relaxType = MFHelmholtzOp::RelaxationMethod::GauSaiRedBlack; // Needs to be input parameter
-
-  // dummies
-  Real eb_value  = 1.0;
-  auto bcFunction = [](const RealVect& a_pos) -> Real {
-    return -1.0;
-  };
-
-  ebbcFactory     = RefCountedPtr<MFHelmholtzEBBCFactory>     (new MFHelmholtzDirichletEBBCFactory(eb_order, eb_weight, eb_value));
-  domainBcFactory = RefCountedPtr<MFHelmholtzDomainBCFactory> (new MFHelmholtzDirichletDomainBCFactory(bcFunction));
-#endif
-  
-
-#if 1
   m_helmholtzOpFactory = RefCountedPtr<MFHelmholtzOpFactory>(new MFHelmholtzOpFactory(m_multifluidIndexSpace,
 										      m_dataLocation,
 										      m_alpha,
@@ -494,14 +475,12 @@ void FieldSolverMultigrid::setupHelmholtzFactory(){
 										      ebbcFactory,
 										      ghostPhi,
 										      ghostRhs,
-										      relaxType,
+										      m_multigridRelaxMethod,
 										      bottomDomain,
-										      jumpOrder,
-										      jumpWeight,
+										      m_multigridJumpOrder,
+										      m_multigridJumpWeight,
 										      m_amr->getMaxBoxSize()));
-										    
-										    
-#endif
+
 }
 
 void FieldSolverMultigrid::setupOperatorFactory(){
@@ -545,7 +524,6 @@ void FieldSolverMultigrid::setupOperatorFactory(){
   }
 
   // Appropriate coefficients for poisson equation
-
   const IntVect ghost_phi = m_amr->getNumberOfGhostCells()*IntVect::Unit;
   const IntVect ghost_rhs = m_amr->getNumberOfGhostCells()*IntVect::Unit;
 
@@ -558,16 +536,6 @@ void FieldSolverMultigrid::setupOperatorFactory(){
   // on the domain [-1,1] in the x-direction
   m_lengthScale = 2./(domains[0].size(0)*dx[0]);
 
-  int relax_type;
-  if(m_multigridRelaxMethod == RelaxationMethod::Jacobi){
-    relax_type = 0;
-  }
-  else if(m_multigridRelaxMethod == RelaxationMethod::GaussSeidel){
-    relax_type = 1;
-  }
-  else if(m_multigridRelaxMethod == RelaxationMethod::GSRBFast){
-    relax_type = 2;
-  }
 
   auto domfact = RefCountedPtr<ConductivityElectrostaticDomainBcFactory> (new ConductivityElectrostaticDomainBcFactory(m_domainBc, m_amr->getProbLo()));
 
@@ -591,7 +559,7 @@ void FieldSolverMultigrid::setupOperatorFactory(){
 										 ghost_phi,
 										 ghost_rhs,
 										 m_multigridBcOrder,
-										 relax_type,
+										    1,
 										 m_minCellsBottom,
 										 1 + finestLevel,
 										 mg_levelgrids));
@@ -636,7 +604,8 @@ void FieldSolverMultigrid::setupMultigrid(){
     MayDay::Error("FieldSolverMultigrid::setupMultigrid - logic bust in multigrid type selection");
   }
 
-#if !(USE_NEW_HELHOLMHOLTZ_FACTORY)   // This code should be removed later when the new operator is functional
+  // This code should be removed later when the new operator is functional
+#if !(USE_NEW_HELMHOLTZ_FACTORY)
   if(m_bottomSolverType == BottomSolverType::Simple){
     m_mfsolver.setNumSmooths(m_numSmoothingsForSimpleSolver);
     bottomSolver = &m_mfsolver;
@@ -688,14 +657,14 @@ void FieldSolverMultigrid::setupMultigrid(){
   DataOps::setValue(dummy1, 0.0);
   DataOps::setValue(dummy2, 0.0);
 
-  // Aliasing because Chombo is not too clever about smart pointers. 
+  // Aliasing because AMRMultigrid@Chombo is not too clever when it comes to smart pointers. 
   Vector<LevelData<MFCellFAB>* > phi;
   Vector<LevelData<MFCellFAB>* > rhs;
 
   m_amr->alias(phi, dummy1);
   m_amr->alias(rhs, dummy2);
 
-  // Init the solver. This instantiates the all the operators. 
+  // Init the solver. This instantiates the all the operators in AMRMultiGrid so we can just call "solve"
   m_multigridSolver.init(phi, rhs, finestLevel, 0);
 }
 

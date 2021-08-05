@@ -166,7 +166,7 @@ protected:
   /*!
     @brief Relaxation type for gmg
   */
-  RelaxationMethod m_multigridRelaxMethod;
+  MFHelmholtzOp::RelaxationMethod m_multigridRelaxMethod;
 
   /*!
     @brief GMG multigrid type
@@ -247,6 +247,21 @@ protected:
     @brief Set bc order 
   */
   int m_multigridBcOrder;
+
+  /*!
+    @brief Set bc weight (used for weighted least squares)
+  */
+  int m_multigridBcWeight;
+
+  /*!
+    @brief Set bc jump order 
+  */
+  int m_multigridJumpOrder;
+
+  /*!
+    @brief Set bc jump weight (used for weighted least squares)
+  */
+  int m_multigridJumpWeight;
 
   /*!
     @brief Length scale for the Poisson equation

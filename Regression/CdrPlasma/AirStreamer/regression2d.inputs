@@ -94,10 +94,13 @@ FieldSolverMultigrid.gmg_exit_tol      = 1.E-10    # Residue tolerance
 FieldSolverMultigrid.gmg_exit_hang     = 0.2       # Solver hang
 FieldSolverMultigrid.gmg_min_cells     = 4         # Bottom drop
 FieldSolverMultigrid.gmg_bc_order      = 2         # Boundary condition order for multigrid
+FieldSolverMultigrid.gmg_bc_weight     = 2         # Boundary condition weights (for least squares)
+FieldSolverMultigrid.gmg_jump_order    = 2         # Boundary condition order for jump conditions
+FieldSolverMultigrid.gmg_jump_weight   = 2         # Boundary condition weight for jump conditions (for least squares)
 FieldSolverMultigrid.gmg_bottom_solver = bicgstab  # Bottom solver type. 'simple', 'bicgstab', or 'gmres'
 FieldSolverMultigrid.gmg_bottom_relax  = 32        # Number of relaxations in bottom solve ('simple' solver only)
 FieldSolverMultigrid.gmg_cycle         = vcycle    # Cycle type. Only 'vcycle' supported for now
-FieldSolverMultigrid.gmg_relax_type    = gsrb      # Relaxation type. 'jacobi', 'gauss_seidel', or 'gsrb'
+FieldSolverMultigrid.gmg_relax_type    = red_black # Relaxation type. 'jacobi', 'multi_color', or 'red_black'
 
 # ====================================================================================================
 # CDR_GDNV SOLVER SETTINGS
