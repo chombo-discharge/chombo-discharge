@@ -16,11 +16,12 @@
 #include <CD_NamespaceHeader.H>
 
 EBHelmholtzElectrostaticDomainBC::EBHelmholtzElectrostaticDomainBC(const ElectrostaticDomainBc& a_electrostaticBCs){
+  m_electrostaticBCs = a_electrostaticBCs;
+  
   for (int dir = 0; dir < SpaceDim; dir++){
     for (SideIterator sit; sit.ok(); ++sit){
-      const ElectrostaticDomainBc::Wall        curWall = std::make_pair(dir, sit());
-      const ElectrostaticDomainBc::BcType&     bcType  = a_electrostaticBCs.getBc(curWall).first;
-      const ElectrostaticDomainBc::BcFunction& bcFunc  = a_electrostaticBCs.getBc(curWall).second;
+      const ElectrostaticDomainBc::Wall    curWall = std::make_pair(dir, sit());
+      const ElectrostaticDomainBc::BcType& bcType  = m_electrostaticBCs.getBc(curWall).first;
 
       // Make a lambda which allows us to pass in the function using EBHelmholtzDomainBC API, which takes a std::function<Real(const RealVect a_position)>
       // type of function.
@@ -30,12 +31,13 @@ EBHelmholtzElectrostaticDomainBC::EBHelmholtzElectrostaticDomainBC(const Electro
       // from FieldSolver, and in that solver we capture FieldSolver::m_time by reference.
       // 
       // This might seem clunky, but I can't see any other way of doing it properly without changing EBHelmholtzOp to a time-dependent operator (which
-      // I really don't want to do).
-      //
-      // Here is the function
-      auto func = [&bcFunc](const RealVect& a_position) -> Real {
-	constexpr Real dummyDt = 0.0;
-	return bcFunc(a_position, dummyDt);
+      // I really don't want to do). 
+      auto func = [curWall, &BC = this->m_electrostaticBCs](const RealVect& a_position) -> Real {
+	const Real dummyDt = 0.0;
+
+	const ElectrostaticDomainBc::BcFunction& wallBcFunction = BC.getBc(curWall).second; // This is a function Real(const RealVect, const Real)
+	
+	return wallBcFunction(a_position, dummyDt);
       };
 
       // Create either a Dirichlet or Neumann boundary condition object for the current domain edge (face in 3D).
@@ -57,21 +59,34 @@ EBHelmholtzElectrostaticDomainBC::~EBHelmholtzElectrostaticDomainBC(){
 
 }
 
+void EBHelmholtzElectrostaticDomainBC::define(const Location::Cell                        a_dataLocation,
+					      const EBLevelGrid&                          a_eblg,
+					      const RefCountedPtr<LevelData<EBFluxFAB> >& a_Bcoef,
+					      const RealVect&                             a_probLo,
+					      const Real                                  a_dx) {
+  for (int dir = 0; dir < SpaceDim; dir++){
+    for (SideIterator sit; sit.ok(); ++sit){
+      auto& bcPtr = m_bcObjects.at(std::make_pair(dir, sit()));
+
+      bcPtr->define(a_dataLocation, a_eblg, a_Bcoef, a_probLo, a_dx);
+    }
+  }
+}
+
 void EBHelmholtzElectrostaticDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
 						   const BaseFab<Real>&  a_phi,
 						   const int&            a_dir,
 						   const Side::LoHiSide& a_side,
 						   const DataIndex&      a_dit,
 						   const bool            a_useHomogeneous) const {
-
   const auto& bcPtr = m_bcObjects.at(std::make_pair(a_dir, a_side));
 
   bcPtr->getFaceFlux(a_faceFlux,
-		     a_phi,
-		     a_dir,
-		     a_side,
-		     a_dit,
-		     a_useHomogeneous);
+  		     a_phi,
+  		     a_dir,
+  		     a_side,
+  		     a_dit,
+  		     a_useHomogeneous);
 }
 
 Real EBHelmholtzElectrostaticDomainBC::getFaceFlux(const VolIndex&       a_vof,
@@ -80,7 +95,6 @@ Real EBHelmholtzElectrostaticDomainBC::getFaceFlux(const VolIndex&       a_vof,
 						   const Side::LoHiSide& a_side,
 						   const DataIndex&      a_dit,
 						   const bool            a_useHomogeneous) const {
-
   const auto& bcPtr = m_bcObjects.at(std::make_pair(a_dir, a_side));
 
   return bcPtr->getFaceFlux(a_vof, a_phi, a_dir, a_side, a_dit, a_useHomogeneous);

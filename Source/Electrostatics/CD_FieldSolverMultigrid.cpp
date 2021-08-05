@@ -192,7 +192,9 @@ bool FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
   // Do the scaled space charge density
   DataOps::copy (m_kappaRhoByEps0, a_rho);
   DataOps::scale(m_kappaRhoByEps0, 1./(Units::eps0));
+#if !(USE_NEW_HELMHOLTZ_FACTORY)
   DataOps::scale(m_kappaRhoByEps0, 1./(m_lengthScale*m_lengthScale));
+#endif
 
   // Special flag for when a_rho is on the centroid but was not scaled by kappa on input. The multigrid operator solves
   // kappa*L(phi) = kappa*rho so the right-hand side must be kappa-weighted. 
@@ -203,8 +205,12 @@ bool FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
   // Do the scaled surface charge
   DataOps::copy (m_sigmaByEps0, a_sigma);
   DataOps::scale(m_sigmaByEps0, 1./(Units::eps0));
+#if !(USE_NEW_HELMHOLTZ_FACTORY)
   DataOps::scale(m_sigmaByEps0, 1./(m_lengthScale*m_lengthScale));
-  m_operatorFactory->setJump(m_sigmaByEps0, 1.0);
+  m_operatorFactory->setJump(m_sigmaByEps0, 1.0);  
+#else
+  m_helmholtzOpFactory->setJump(m_sigmaByEps0, 1.0);
+#endif
 
   // Aliasing
   Vector<LevelData<MFCellFAB>* > phi, cpy, rhs, res, zero;
@@ -458,7 +464,8 @@ void FieldSolverMultigrid::setupHelmholtzFactory(){
 
   // Set up Dirichlet boundary conditions for now
   auto ebbcFactory     = RefCountedPtr<MFHelmholtzEBBCFactory>     (new MFHelmholtzDirichletEBBCFactory(m_multigridBcOrder, m_multigridBcWeight, 1.0));
-  auto domainBcFactory = RefCountedPtr<MFHelmholtzDomainBCFactory> (new MFHelmholtzDirichletDomainBCFactory(-1.0));
+  //  auto domainBcFactory = RefCountedPtr<MFHelmholtzDomainBCFactory> (new MFHelmholtzDirichletDomainBCFactory(-1.0));
+  auto domainBcFactory = RefCountedPtr<MFHelmholtzDomainBCFactory> (new MFHelmholtzElectrostaticDomainBCFactory(m_domainBc));
   
   m_helmholtzOpFactory = RefCountedPtr<MFHelmholtzOpFactory>(new MFHelmholtzOpFactory(m_multifluidIndexSpace,
 										      m_dataLocation,

@@ -16,7 +16,6 @@
 
 MFHelmholtzElectrostaticDomainBCFactory::MFHelmholtzElectrostaticDomainBCFactory(const ElectrostaticDomainBc& a_electrostaticBCs){
   m_electrostaticBCs = a_electrostaticBCs;
-
 }
 
 MFHelmholtzElectrostaticDomainBCFactory::~MFHelmholtzElectrostaticDomainBCFactory(){

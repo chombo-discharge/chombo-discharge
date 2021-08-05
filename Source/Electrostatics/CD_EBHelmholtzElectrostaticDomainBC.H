@@ -40,11 +40,6 @@ public:
   EBHelmholtzElectrostaticDomainBC(const ElectrostaticDomainBc& a_electrostaticBCs);
 
   /*!
-    @brief Destructor
-  */
-  ~EBHelmholtzElectrostaticDomainBC();
-
-  /*!
     @brief Disallowed -- don't see why you would need it.
     @param[in] a_other Other operator
   */
@@ -57,6 +52,11 @@ public:
   EBHelmholtzElectrostaticDomainBC(const EBHelmholtzElectrostaticDomainBC&& a_other) = delete;
 
   /*!
+    @brief Destructor
+  */
+  ~EBHelmholtzElectrostaticDomainBC();
+
+  /*!
     @brief Disallowed - don't see why you would need it.
     @param[in] a_other Other operator
   */
@@ -67,6 +67,20 @@ public:
     @param[in] a_other Other operator
   */
   EBHelmholtzElectrostaticDomainBC& operator=(const EBHelmholtzElectrostaticDomainBC&& a_other) = delete;
+
+  /*!
+    @brief Define function
+    @param[in] a_eblg   Level grids
+    @param[in] a_Bcoef  B-coefficient for Helmholtz equation
+    @param[in] a_probLo Lower-left corner of computational domain
+    @param[in] a_dx     Grid resolution
+    @note Overriding because this is a wrapper class for Dirichlet/Neumann, and those objects need defining. 
+  */
+  void define(const Location::Cell                        a_dataLocation,
+	      const EBLevelGrid&                          a_eblg,
+	      const RefCountedPtr<LevelData<EBFluxFAB> >& a_Bcoef,
+	      const RealVect&                             a_probLo,
+	      const Real                                  a_dx) override final;
 
   /*!
     @brief Get face flux. This is for regular cells. 
@@ -102,6 +116,11 @@ public:
 		   const bool            a_useHomogeneous) const override final;
 
 protected:
+
+  /*!
+    @brief Electrostatic domain boundary conditions
+  */
+  ElectrostaticDomainBc m_electrostaticBCs;
 
   /*!
     @brief BC objects on each domain side. 
