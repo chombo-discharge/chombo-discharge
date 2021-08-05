@@ -47,11 +47,11 @@ void MFHelmholtzEBBC::defineMultiPhase(){
   m_kappaDivFStencils.define(dbl);
 
   for (DataIterator dit(dbl); dit.ok(); ++dit){
-    const Box box          = dbl[dit()];
-    const EBISBox& ebisbox = m_eblg.getEBISL()[dit()];
-    const EBGraph& ebgraph = ebisbox.getEBGraph();
-    const IntVectSet& ivs  = ebisbox.getIrregIVS(box);
-    const BaseIVFAB<Real>& Bcoef    = (*m_Bcoef)[dit()];
+    const Box box                = dbl[dit()];
+    const EBISBox& ebisbox       = m_eblg.getEBISL()[dit()];
+    const EBGraph& ebgraph       = ebisbox.getEBGraph();
+    const IntVectSet& ivs        = ebisbox.getIrregIVS(box);
+    const BaseIVFAB<Real>& Bcoef = (*m_Bcoef)[dit()];
 
     // These are used to reconstruct gradients at the EB. They are left undefined for single-phase cells. 
     m_boundaryWeights[dit()]  .define(ivs, ebgraph, m_nComp); 
@@ -128,7 +128,7 @@ void MFHelmholtzEBBC::applyEBFlux(VoFIterator&       a_vofit,
   VoFIterator& multiPhaseVofs  = m_jumpBC->getMultiPhaseVofs (m_phase, a_dit);
 
   this->applyEBFluxSinglePhase(singlePhaseVofs, a_Lphi, a_phi, a_dit, a_beta, a_homogeneousPhysBC);
-  this->applyEBFluxMultiPhase  (multiPhaseVofs, a_Lphi, a_phi, a_dit, a_beta, a_homogeneousPhysBC);
+  this->applyEBFluxMultiPhase (multiPhaseVofs,  a_Lphi, a_phi, a_dit, a_beta, a_homogeneousPhysBC);
 }
 
 void MFHelmholtzEBBC::applyEBFluxMultiPhase(VoFIterator&       a_multiPhaseVofs,

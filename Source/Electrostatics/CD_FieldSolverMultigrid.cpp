@@ -27,6 +27,7 @@
 #include <CD_MFHelmholtzDirichletEBBCFactory.H>
 #include <CD_MFHelmholtzDirichletDomainBCFactory.H>
 #include <CD_MFHelmholtzElectrostaticDomainBCFactory.H>
+#include <CD_MFHelmholtzElectrostaticEBBCFactory.H>
 #include <CD_JumpBc.H>
 #include <CD_AmrMesh.H>
 #include <CD_ConductivityElectrostaticDomainBcFactory.H>
@@ -463,7 +464,8 @@ void FieldSolverMultigrid::setupHelmholtzFactory(){
   const IntVect ghostRhs = m_amr->getNumberOfGhostCells()*IntVect::Unit;
 
   // Set up Dirichlet boundary conditions for now
-  auto ebbcFactory     = RefCountedPtr<MFHelmholtzEBBCFactory>     (new MFHelmholtzDirichletEBBCFactory(m_multigridBcOrder, m_multigridBcWeight, 1.0));
+  // auto ebbcFactory     = RefCountedPtr<MFHelmholtzEBBCFactory>     (new MFHelmholtzDirichletEBBCFactory(m_multigridBcOrder, m_multigridBcWeight, 1.0));
+  auto ebbcFactory     = RefCountedPtr<MFHelmholtzEBBCFactory>     (new MFHelmholtzElectrostaticEBBCFactory(m_multigridBcOrder, m_multigridBcWeight, m_ebBc));
   //  auto domainBcFactory = RefCountedPtr<MFHelmholtzDomainBCFactory> (new MFHelmholtzDirichletDomainBCFactory(-1.0));
   auto domainBcFactory = RefCountedPtr<MFHelmholtzDomainBCFactory> (new MFHelmholtzElectrostaticDomainBCFactory(m_domainBc));
   
