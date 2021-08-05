@@ -26,6 +26,7 @@
 #include <CD_MFMultigridInterpolator.H>
 #include <CD_MFHelmholtzDirichletEBBCFactory.H>
 #include <CD_MFHelmholtzDirichletDomainBCFactory.H>
+#include <CD_MFHelmholtzElectrostaticDomainBCFactory.H>
 #include <CD_JumpBc.H>
 #include <CD_AmrMesh.H>
 #include <CD_ConductivityElectrostaticDomainBcFactory.H>

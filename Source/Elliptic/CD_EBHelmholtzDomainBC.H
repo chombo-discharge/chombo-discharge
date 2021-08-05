@@ -44,9 +44,19 @@ public:
   EBHelmholtzDomainBC(const EBHelmholtzDomainBC& a_other) = delete;
 
   /*!
+    @brief Disallowed -- don't see why you would need it.
+  */
+  EBHelmholtzDomainBC(const EBHelmholtzDomainBC&& a_other) = delete;
+
+  /*!
     @brief Disallowed - don't see why you would need it.
   */
   EBHelmholtzDomainBC& operator=(const EBHelmholtzDomainBC& a_other) = delete;
+
+  /*!
+    @brief Disallowed - don't see why you would need it.
+  */
+  EBHelmholtzDomainBC& operator=(const EBHelmholtzDomainBC&& a_other) = delete;
 
   /*!
     @brief Define function
