@@ -139,11 +139,10 @@ public:
 	      const RefCountedPtr<BaseIF>&       a_baseif,
 	      const RefCountedPtr<EBIndexSpace>& a_ebis);
 
-  // Base and operator regrid
   /*!
     @brief Set grid method
     @param[in] a_grids       New grids
-    @param[in] a_finsetLevel New finest grid level
+    @param[in] a_finestLevel New finest grid level
     @details This sets m_grids to be a_grids, but does not perform a regrid of remaining members.
   */
   void setGrids(const Vector<DisjointBoxLayout>& a_grids, const int a_finestLevel);
