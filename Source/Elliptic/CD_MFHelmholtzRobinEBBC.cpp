@@ -154,15 +154,12 @@ void MFHelmholtzRobinEBBC::applyEBFluxSinglePhase(VoFIterator&       a_singlePha
 						  const bool&        a_homogeneousPhysBC) const {
 
   // TLDR: For Robin, the flux is b*dphi/dn = beta*b*A*phi/B - beta*b*C/B and we have stored
-  //       the term b*A*phi/B in the interpolation stencil. The other term we compute below. 
-  for (a_singlePhaseVofs.reset(); a_singlePhaseVofs.ok(); ++a_singlePhaseVofs){
-    const VolIndex& vof = a_singlePhaseVofs();
+  //       the term b*A*phi/B in the interpolation stencil and return it to the operator. The other term we compute below.
 
-    // Homogeneous contribution
-    //    a_Lphi(vof, m_comp) += a_beta*this->applyStencil(m_interpolationStencils[a_dit](vof, m_comp), a_phi);
+  if(!a_homogeneousPhysBC){  
+    for (a_singlePhaseVofs.reset(); a_singlePhaseVofs.ok(); ++a_singlePhaseVofs){
+      const VolIndex& vof = a_singlePhaseVofs();
 
-    // Inhomogeneous contribution
-    if(!a_homogeneousPhysBC){
       Real B;
       Real C;
       if(m_useConstant){

@@ -114,12 +114,12 @@ void MFHelmholtzElectrostaticEBBC::applyEBFluxSinglePhase(VoFIterator&       a_s
   // is the contribution from the EB face. B/dx is already included in the stencils and boundary weights, but beta is not.
 
   // Do single phase cells
-  for(a_singlePhaseVofs.reset(); a_singlePhaseVofs.ok(); ++a_singlePhaseVofs){
-    const VolIndex& vof = a_singlePhaseVofs();
-
-    // Inhomogeneous contribution. 
-    if(!a_homogeneousPhysBC){
-      Real value = 1.0;
+  if(!a_homogeneousPhysBC){  
+    for(a_singlePhaseVofs.reset(); a_singlePhaseVofs.ok(); ++a_singlePhaseVofs){
+      const VolIndex& vof  = a_singlePhaseVofs();
+      
+      const RealVect pos   = this->getBoundaryPosition(vof, a_dit);      
+      const Real     value = this->getElectrodePotential(pos);      
 
       a_Lphi(vof, m_comp) += a_beta*value*m_boundaryWeights[a_dit](vof, m_comp);
     }

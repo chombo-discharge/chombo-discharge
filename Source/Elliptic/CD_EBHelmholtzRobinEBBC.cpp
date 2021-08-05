@@ -152,10 +152,11 @@ void EBHelmholtzRobinEBBC::applyEBFlux(VoFIterator&       a_vofit,
 
   // Recall that the "flux" is kappaDivF = area*dphi/dn/DeltaX where dphi/dn = (A*phi - C)/B. We already have the phi
   // term in the stencil so only need to add -C/B.
-  for (a_vofit.reset(); a_vofit.ok(); ++a_vofit){
-    const VolIndex& vof = a_vofit();
+  if(!a_homogeneousPhysBC){  
+    for (a_vofit.reset(); a_vofit.ok(); ++a_vofit){
+      const VolIndex& vof = a_vofit();
     
-    if(!a_homogeneousPhysBC){
+
       Real B;
       Real C;
       if(m_useConstant){

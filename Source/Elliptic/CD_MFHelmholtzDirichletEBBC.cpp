@@ -130,13 +130,12 @@ void MFHelmholtzDirichletEBBC::applyEBFluxSinglePhase(VoFIterator&     a_singleP
   // Apply the stencil for computing the contribution to kappaDivF. Note divF is sum(faces) B*grad(Phi)/dx and that this
   // is the contribution from the EB face. B/dx is already included in the stencils and boundary weights, but beta is not.
 
-  // Do single phase cells
-  for(a_singlePhaseVofs.reset(); a_singlePhaseVofs.ok(); ++a_singlePhaseVofs){
-    const VolIndex& vof = a_singlePhaseVofs();
+  // Do single phase cells. Only inhomogeneous contribution here. 
+  if(!a_homogeneousPhysBC){  
+    for(a_singlePhaseVofs.reset(); a_singlePhaseVofs.ok(); ++a_singlePhaseVofs){
+      const VolIndex& vof = a_singlePhaseVofs();
 
-    // Inhomogeneous contribution. 
-    if(!a_homogeneousPhysBC){
-      Real value = 0.0;
+      Real value;
     
       if(m_useConstant){
 	value = m_constantValue;

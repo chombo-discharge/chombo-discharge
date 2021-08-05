@@ -83,10 +83,10 @@ void EBHelmholtzNeumannEBBC::applyEBFlux(VoFIterator&       a_vofit,
 
   // TLDR: For Neumann, we want to add the flux beta*bco*area*(dphi/dn)/dx where the
   //       dx comes from the fact that the term we are computing will be added to kappa*div(F)
-  for (a_vofit.reset(); a_vofit.ok(); ++a_vofit){
-    const VolIndex& vof = a_vofit();
+  if(!a_homogeneousPhysBC){
+    for (a_vofit.reset(); a_vofit.ok(); ++a_vofit){
+      const VolIndex& vof = a_vofit();
     
-    if(!a_homogeneousPhysBC){
       Real value;
       if(m_useConstant){
 	value = m_constantDphiDn;

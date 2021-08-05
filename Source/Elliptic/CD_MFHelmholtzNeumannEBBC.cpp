@@ -63,10 +63,10 @@ void MFHelmholtzNeumannEBBC::applyEBFluxSinglePhase(VoFIterator&       a_singleP
 
   // TLDR: For Neumann, we want to add the flux beta*bco*area*(dphi/dn)/dx where the
   //       dx comes from the fact that the term we are computing will be added to kappa*div(F)
-  for (a_singlePhaseVofs.reset(); a_singlePhaseVofs.ok(); ++a_singlePhaseVofs){
-    const VolIndex& vof = a_singlePhaseVofs();
-    
-    if(!a_homogeneousPhysBC){
+  if(!a_homogeneousPhysBC){  
+    for (a_singlePhaseVofs.reset(); a_singlePhaseVofs.ok(); ++a_singlePhaseVofs){
+      const VolIndex& vof = a_singlePhaseVofs();
+
       Real value;
       if(m_useConstant){
 	value = m_constantDphiDn;

@@ -106,8 +106,17 @@ protected:
 				      const Real&        a_beta,
 				      const bool&        a_homogeneousPhysBC) const override;
 
+  /*!
+    @brief Get electrode potential
+    @param[in] a_pos Position in space
+  */
+  inline
+  Real getElectrodePotential(const RealVect& a_pos) const;
+
 };
 
 #include <CD_NamespaceFooter.H>
+
+#include <CD_MFHelmholtzElectrostaticEBBCImplem.H>
 
 #endif
