@@ -92,11 +92,12 @@ public:
 		   const bool            a_useHomogeneous) const override final;
 
 protected:
-  
+
   /*!
-    @brief Functions for electrostatic domain boundary conditions
+    @brief BC objects on each domain side. 
+    @details These are instantiated in the constructor where we construct Neumann/Dirichlet on each domain side. 
   */
-  ElectrostaticDomainBc m_electrostaticBCs;
+  std::map<ElectrostaticDomainBc::Wall, std::shared_ptr<EBHelmholtzDomainBC> > m_bcObjects;
   
 };
 
