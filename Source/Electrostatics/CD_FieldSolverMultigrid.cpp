@@ -32,6 +32,8 @@
 #include <CD_Units.H>
 #include <CD_NamespaceHeader.H>
 
+#define USE_NEW_HELMHOLTZ_FACTORY 0
+
 constexpr Real FieldSolverMultigrid::m_alpha;
 constexpr Real FieldSolverMultigrid::m_beta;
 
@@ -632,7 +634,7 @@ void FieldSolverMultigrid::setupMultigrid(){
     MayDay::Error("FieldSolverMultigrid::setupMultigrid - logic bust in multigrid type selection");
   }
 
-#if 1   // This code should be removed later when the new operator is functional
+#if !(USE_NEW_HELHOLMHOLTZ_FACTORY)   // This code should be removed later when the new operator is functional
   if(m_bottomSolverType == BottomSolverType::Simple){
     m_mfsolver.setNumSmooths(m_numSmoothingsForSimpleSolver);
     bottomSolver = &m_mfsolver;
@@ -656,7 +658,11 @@ void FieldSolverMultigrid::setupMultigrid(){
   const ProblemDomain coarsestDomain = m_amr->getDomains()[0];
 
   // Define the Chombo multigrid solver
+#if USE_NEW_HELMHOLTZ_FACTORY
+  m_multigridSolver.define(coarsestDomain, *m_helmholtzOpFactory, bottomSolver, 1 + finestLevel);
+#else
   m_multigridSolver.define(coarsestDomain, *m_operatorFactory, bottomSolver, 1 + finestLevel);
+#endif
   m_multigridSolver.setSolverParameters(m_multigridPreSmooth,
 					m_multigridPostSmooth,
 					m_multigridBottomSmooth,
