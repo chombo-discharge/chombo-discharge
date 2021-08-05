@@ -39,7 +39,9 @@ Real MFHelmholtzElectrostaticEBBC::getElectrodePotential(const RealVect& a_pos) 
     }
   }
 
-  // Return potential of closest electrode
+  // Return potential of closest electrode. Again, following the (perhaps odd) convention that the FieldSolver is "time dependent" but the operator
+  // factory is not, we've passed the time in by reference to the functions in m_electrostaticBCs. Calling those functions simply ignore the time-argument
+  // and uses FieldSolver::m_dt instead. So, we can just use a dummy dt here.
   const Real dummyDt = 0.0;
   
   return electrodeBCs[closestElectrode].second(a_pos, dummyDt);

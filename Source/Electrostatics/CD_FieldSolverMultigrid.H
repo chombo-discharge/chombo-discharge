@@ -7,7 +7,6 @@
   @file   CD_FieldSolverMultigrid.H
   @brief  Declaration of FieldSolverMultigrid
   @author Robert Marskar
-  @todo   Remove everything that has to do with "precoarsening" things. 
 */
 
 #ifndef CD_FieldSolverMultigrid_H
@@ -16,20 +15,16 @@
 // Chombo includes
 #include <AMRMultiGrid.H>
 #include <BiCGStabSolver.H>
-#include <BaseDomainBC.H>
-#include <BaseEBBC.H>
 #include <MFSimpleSolver.H>
 #include <GMRESSolver.H>
-#include <BaseBCFuncEval.H>
 
 // Our includes
 #include <CD_FieldSolver.H>
-#include <CD_MfHelmholtzOpFactory.H>
 #include <CD_MFHelmholtzOpFactory.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Implementation of FieldSolver which uses a two-phase geometric multigrid solver. 
+  @brief Implementation of FieldSolver which uses multigrid. 
 */
 class FieldSolverMultigrid : public FieldSolver {
 protected:
@@ -41,15 +36,6 @@ protected:
     Simple,
     BiCGStab,
     GMRES
-  };
-
-  /*!
-    @brief Enum for supported relaxation methods in multigrid. 
-  */
-  enum class RelaxationMethod {
-    Jacobi,
-    GaussSeidel,
-    GSRBFast
   };
 
   /*!
@@ -95,7 +81,6 @@ public:
     @brief Constructor
   */
   virtual ~FieldSolverMultigrid();
-
 
   /*!
     @brief Solves Poisson equation onto a_phi using a_rho and a_sigma as right-hand sides. 
@@ -172,6 +157,11 @@ protected:
     @brief GMG multigrid type
   */
   MultigridType m_multigridType;
+  
+  /*!
+    @brief Bottom solver type
+  */
+  BottomSolverType m_bottomSolverType;
 
   /*!
     @brief Scale by kappa or not
@@ -182,16 +172,6 @@ protected:
     @brief Needs setup
   */
   bool m_isSolverSetup;
-
-  /*!
-    @brief Check if solver has "deeper" multigrid levels. 
-  */
-  bool m_hasDeeperMultigridLevels;
-
-  /*!
-    @brief Number of coarsening levels for multigrid
-  */
-  int m_numCoarseningsBeforeAggregation;
 
   /*!
     @brief Verbosity for geometric multigrid
@@ -229,11 +209,6 @@ protected:
   int m_multigridMinIterations;
 
   /*!
-    @brief Bottom solver type
-  */
-  BottomSolverType m_bottomSolverType;
-
-  /*!
     @brief Number of smoothing for bottom solver
   */
   int m_numSmoothingsForSimpleSolver;
@@ -264,29 +239,21 @@ protected:
   int m_multigridJumpWeight;
 
   /*!
-    @brief Length scale for the Poisson equation
-  */
-  Real m_lengthScale;
-
-  /*!
-    @brief Target residue. If they residue is greater than this, we have a problematic cell. 
+    @brief Solver residue. If the residue is greater than this, we have a problematic cell. 
   */
   Real m_convergedResidue;
 
   /*!
-    @brief 
+    @brief Exit tolerance for multigrid. 
+    @details Multigrid exits if L(phi) < tolerance*L(phi=0)
   */
   Real m_multigridExitTolerance;
   
   /*!
-    @brief 
+    @brief Exit hang for multigrid
+    @details Multigrid exits if residue is not reduce by at least this factor. 
   */
   Real m_multigridExitHang;
-
-  /*!
-    @brief Multigrid operator factory. 
-  */
-  RefCountedPtr<MfHelmholtzOpFactory> m_operatorFactory;
 
   /*!
     @brief Multigrid operator factory. 
@@ -329,26 +296,6 @@ protected:
   MFSimpleSolver m_mfsolver;
 
   /*!
-    @brief Coarsened MG grids
-  */
-  Vector<DisjointBoxLayout> m_deeperMultigridGrids;
-
-  /*!
-    @brief Coarsened problem domains
-  */
-  Vector<ProblemDomain> m_deeperMultigridDomains;
-
-  /*!
-    @brief Coarsened EBLevelGrids
-  */
-  Vector<Vector<RefCountedPtr<EBLevelGrid> > > m_mg_eblg;
-
-  /*!
-    @brief EBLevelgrids for the multigrid pre-coarsening
-  */
-  Vector<RefCountedPtr<MFLevelGrid> > m_mg_mflg;
-
-  /*!
     @brief Parse multigrid settings
   */
   virtual void parseMultigridSettings();
@@ -357,16 +304,6 @@ protected:
     @brief Parse m_kappaSource
   */
   virtual void parseKappaSource();
-  
-  /*!
-    @brief Define the deeper multigrid levels (the ones that live below the AMR levels)
-  */
-  virtual void defineDeeperMultigridLevels();
-
-  /*!
-    @brief Set up the multigrid operator factory
-  */
-  virtual void setupOperatorFactory();
 
   /*!
     @brief Set up the multigrid operator factory
