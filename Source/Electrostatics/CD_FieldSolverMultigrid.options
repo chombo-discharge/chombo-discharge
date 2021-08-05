@@ -1,5 +1,5 @@
 # ====================================================================================================
-# FIELD_SOLVER_MULTIGRID CLASS OPTIONS (MULTIFLUID GMG SOLVER SETTINGS)
+# FieldSolverMultigrid class options
 # ====================================================================================================
 FieldSolverMultigrid.bc.x.lo      = dirichlet 0.0     # Bc type (see docs)
 FieldSolverMultigrid.bc.x.hi      = dirichlet 0.0     # Bc type (see docs)
