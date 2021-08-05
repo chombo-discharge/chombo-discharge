@@ -389,9 +389,11 @@ void FieldSolverMultigrid::setupSolver(){
     pout() << "FieldSolverMultigrid::setupSolver()" << endl;
   }
 
+#if !(USE_NEW_HELMHOLTZ_FACTORY)
   if(!m_hasDeeperMultigridLevels){
     this->defineDeeperMultigridLevels();     // Define MG levels. These don't change during regrids so we only need to set them once. 
   }
+#endif
 
   this->setupHelmholtzFactory(); // Set up the operator factory
   this->setupOperatorFactory();  // Set the operator factory
