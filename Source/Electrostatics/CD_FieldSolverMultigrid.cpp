@@ -24,6 +24,8 @@
 #include <CD_MFQuadCFInterp.H>
 #include <CD_MFInterfaceFAB.H>
 #include <CD_MFMultigridInterpolator.H>
+#include <CD_MFHelmholtzDirichletEBBCFactory.H>
+#include <CD_MFHelmholtzDirichletDomainBCFactory.H>
 #include <CD_JumpBc.H>
 #include <CD_AmrMesh.H>
 #include <CD_ConductivityElectrostaticDomainBcFactory.H>
@@ -434,23 +436,67 @@ void FieldSolverMultigrid::setupHelmholtzFactory(){
     mfFluxReg[lvl].define(fluxRegPhases);
     mfCoarAve[lvl].define(avePhases);
   }
+
+  // Coarsest domain used for multigrid
+  ProblemDomain bottomDomain = m_amr->getDomains()[0];
+  while(bottomDomain.domainBox().shortside() >= 2*m_minCellsBottom){
+    bottomDomain.coarsen(2);
+  }
+
+  // Number of ghost cells in data holders
+  const IntVect ghostPhi = m_amr->getNumberOfGhostCells()*IntVect::Unit;
+  const IntVect ghostRhs = m_amr->getNumberOfGhostCells()*IntVect::Unit;
+
+  // Set up Dirichlet boundary conditions for now
+#if 1
+  RefCountedPtr<MFHelmholtzEBBCFactory> ebbcFactory;
+  RefCountedPtr<MFHelmholtzDomainBCFactory> domainBcFactory;
+
+  int  jumpOrder = 2;  // Needs to be input parameter
+  int  jumpWeight = 2; // Needs to be input parameter
+  
+  int  eb_order  = 2; // Needs to be input parameter
+  int  eb_weight = 2; // Needs to be input parameter
+
+  auto relaxType = MFHelmholtzOp::RelaxationMethod::GauSaiRedBlack; // Needs to be input parameter
+
+  // dummies
+  Real eb_value  = 1.0;
+  auto bcFunction = [](const RealVect& a_pos) -> Real {
+    return -1.0;
+  };
+
+  ebbcFactory     = RefCountedPtr<MFHelmholtzEBBCFactory>     (new MFHelmholtzDirichletEBBCFactory(eb_order, eb_weight, eb_value));
+  domainBcFactory = RefCountedPtr<MFHelmholtzDomainBCFactory> (new MFHelmholtzDirichletDomainBCFactory(bcFunction));
+#endif
   
 
-#if 0
-  m_helmholtzFactory = RefCountedPtr<MFHelmholtzOpFactory>(new EBHelmholtzOpFactory(m_multifluixIndexSpace,
-										    m_dataLocation,
-										    m_alpha,
-										    m_beta,
-										    m_amr->getProbLo(),
-										    mflg,
-										    mfInterp,
-										    mfFluxReg,
-										    mfCoarAve,
-										    m_amr->getRefinementRatios(),
-										    m_amr->getDx(),
-										    m_permittivityCell.getData(), // Dummy argument (recall m_alpha = 0.0)
-										    m_permittivityFace.getData(),
-										    m_permittivityEB.getData(),
+#if 1
+  m_helmholtzOpFactory = RefCountedPtr<MFHelmholtzOpFactory>(new MFHelmholtzOpFactory(m_multifluidIndexSpace,
+										      m_dataLocation,
+										      m_alpha,
+										      m_beta,
+										      m_amr->getProbLo(),
+										      mflg,
+										      mfInterp,
+										      mfFluxReg,
+										      mfCoarAve,
+										      m_amr->getRefinementRatios(),
+										      m_amr->getDx(),
+										      m_permittivityCell.getData(), // Dummy argument (recall m_alpha = 0.0)
+										      m_permittivityFace.getData(),
+										      m_permittivityEB.getData(),
+										      domainBcFactory,
+										      ebbcFactory,
+										      ghostPhi,
+										      ghostRhs,
+										      relaxType,
+										      bottomDomain,
+										      jumpOrder,
+										      jumpWeight,
+										      m_amr->getMaxBoxSize()));
+										    
+										    
 #endif
 }
 
