@@ -19,8 +19,10 @@
 
 /*!
   @brief Base class for passing domain boundary conditions into EBHelmholtzOp. 
-  @details This calss is a wrapper for Dirichlet/Neumann boundary conditions where the values/functions
-  are passed in through ElectrostaticDomainBc. 
+  @details This calss is a wrapper for Dirichlet/Neumann boundary conditions where the values/functions are passed in through ElectrostaticDomainBc. 
+  @note For this class to operate correctly with time-dependent boundary conditions, the user must ensure that
+  the time dependence is captured by reference. The time argument in ElectrostaticDomainBc::BcFunction by this class,
+  so whatever function is put in there, it must capture time by reference. 
 */
 class EBHelmholtzElectrostaticDomainBC : public EBHelmholtzDomainBC {
 public:
@@ -31,7 +33,9 @@ public:
   EBHelmholtzElectrostaticDomainBC() = delete;
 
   /*!
-    @brief Not allowed, use the full constructor. 
+    @brief Full constructor.
+    @param[in] a_electrostaticBCs Electrostatic domain boundary condition functions (in time and space)
+
   */
   EBHelmholtzElectrostaticDomainBC(const ElectrostaticDomainBc& a_electrostaticBCs);
 
@@ -42,21 +46,25 @@ public:
 
   /*!
     @brief Disallowed -- don't see why you would need it.
+    @param[in] a_other Other operator
   */
   EBHelmholtzElectrostaticDomainBC(const EBHelmholtzElectrostaticDomainBC& a_other) = delete;
 
   /*!
     @brief Disallowed -- don't see why you would need it.
+    @param[in] a_other Other operator
   */
   EBHelmholtzElectrostaticDomainBC(const EBHelmholtzElectrostaticDomainBC&& a_other) = delete;
 
   /*!
     @brief Disallowed - don't see why you would need it.
+    @param[in] a_other Other operator
   */
   EBHelmholtzElectrostaticDomainBC& operator=(const EBHelmholtzElectrostaticDomainBC& a_other) = delete;
 
   /*!
     @brief Disallowed - don't see why you would need it.
+    @param[in] a_other Other operator
   */
   EBHelmholtzElectrostaticDomainBC& operator=(const EBHelmholtzElectrostaticDomainBC&& a_other) = delete;
 
@@ -75,7 +83,7 @@ public:
 		   const int&            a_dir,
 		   const Side::LoHiSide& a_side,
 		   const DataIndex&      a_dit,
-			   const bool            a_useHomogeneous) const override final;
+		   const bool            a_useHomogeneous) const override final;
 
   /*!
     @brief Get face flux. This is for irregular cells. 
