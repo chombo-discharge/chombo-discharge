@@ -30,13 +30,12 @@
 #include <CD_ConductivityEddingtonSP1DomainBcFactory.H>
 #include <CD_RobinConductivityEbBcFactory.H>
 #endif
-#include <CD_EBHelmholtzDirichletEBBCFactory.H>
+#include <CD_EBHelmholtzDirichletEBBCFactory.H>      
 #include <CD_EBHelmholtzNeumannEBBCFactory.H>
 #include <CD_EBHelmholtzRobinEBBCFactory.H>
-#include <CD_EBHelmholtzDirichletDomainBCFactory.H>
+#include <CD_EBHelmholtzDirichletDomainBCFactory.H> // Domain stuff should be collapsed
 #include <CD_EBHelmholtzNeumannDomainBCFactory.H>
 #include <CD_EBHelmholtzRobinDomainBCFactory.H>
-#include <CD_EBMultigridInterpolator.H>
 #include <CD_NamespaceHeader.H>
 
 constexpr Real EddingtonSP1::m_alpha;
@@ -52,7 +51,6 @@ EddingtonSP1::EddingtonSP1() : RtSolver() {
   m_name         = "EddingtonSP1";
   m_className    = "EddingtonSP1";
   
-
   m_verbosity                = -1;
   m_isSolverSetup            = false;
   m_hasDeeperMultigridLevels = false;
@@ -120,7 +118,6 @@ std::string EddingtonSP1::makeBcString(const int a_dir, const Side::LoHiSide a_s
   }
 
   // TLDR: Returns string in format "bc.x.lo"
-
   std::string strDir;
   std::string strSide;
   
@@ -605,7 +602,7 @@ void EddingtonSP1::setupSolver(){
   
   this->setMultigridCoefficients(); // Set coefficients, kappa, aco, bco
   this->setupOperatorFactory();     // Set the operator factory
-  //  this->setupHelmholtzFactory();    // Set up the Helmholtz operator factory
+  this->setupHelmholtzFactory();    // Set up the Helmholtz operator factory
   this->setupMultigrid();     // Set up the AMR multigrid solver
 
   if(!m_stationary){
@@ -954,10 +951,10 @@ void EddingtonSP1::setupMultigrid(){
   const int finestLevel              = m_amr->getFinestLevel();
   const ProblemDomain coarsestDomain = m_amr->getDomains()[0];
 
-  
   // Define AMRMultiGrid
   m_multigridSolver = RefCountedPtr<AMRMultiGrid<LevelData<EBCellFAB> > > (new AMRMultiGrid<LevelData<EBCellFAB> >());
   m_multigridSolver->define(coarsestDomain, *m_operatorFactory, botsolver, 1 + finestLevel);
+  //  m_multigridSolver->define(coarsestDomain, *m_helmholtzOpFactory, botsolver, 1 + finestLevel);
   m_multigridSolver->setSolverParameters(m_multigridPreSmooth,
 					 m_multigridPostSmooth,
 					 m_multigridBottomSmooth,
