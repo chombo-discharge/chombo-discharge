@@ -209,7 +209,7 @@ protected:
   /*!
     @brief Relaxation type for gmg
   */
-  RelaxationMethod m_multigridRelaxMethod;
+  EBHelmholtzOp::RelaxationMethod m_multigridRelaxMethod;
 
   /*!
     @brief GMG multigrid type

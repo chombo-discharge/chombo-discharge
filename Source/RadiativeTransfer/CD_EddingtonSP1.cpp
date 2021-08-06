@@ -370,14 +370,14 @@ void EddingtonSP1::parseMultigridSettings(){
 
   // Relaxation type
   pp.get("gmg_relax_type", str);
-  if(str == "gsrb"){
-    m_multigridRelaxMethod = RelaxationMethod::GSRBFast;
+  if(str == "jacobi"){
+    m_multigridRelaxMethod = EBHelmholtzOp::RelaxationMethod::PointJacobi;    
   }
-  else if(str == "jacobi"){
-    m_multigridRelaxMethod = RelaxationMethod::Jacobi;
+  else if(str == "red_black"){
+    m_multigridRelaxMethod = EBHelmholtzOp::RelaxationMethod::GauSaiRedBlack;    
   }
-  else if(str == "gauss_seidel"){
-    m_multigridRelaxMethod = RelaxationMethod::GaussSeidel;
+  else if(str == "multi_color"){
+    m_multigridRelaxMethod = EBHelmholtzOp::RelaxationMethod::GauSaiMultiColor;
   }
   else{
     MayDay::Abort("EddingtonSP1::parseMultigridSettings - unknown relaxation method requested");
@@ -605,7 +605,7 @@ void EddingtonSP1::setupSolver(){
   
   this->setMultigridCoefficients(); // Set coefficients, kappa, aco, bco
   this->setupOperatorFactory();     // Set the operator factory
-  this->setupHelmholtzFactory();    // Set up the Helmholtz operator factory
+  //  this->setupHelmholtzFactory();    // Set up the Helmholtz operator factory
   this->setupMultigrid();     // Set up the AMR multigrid solver
 
   if(!m_stationary){
@@ -823,7 +823,7 @@ void EddingtonSP1::setupHelmholtzFactory(){
 										       ebBcFactory,
 										       ghostPhi,
 										       ghostRhs,
-										       EBHelmholtzOp::RelaxationMethod::GauSaiRedBlack, // Needs to be input parameter
+										       m_multigridRelaxMethod,
 										       bottomDomain,
 										       m_amr->getMaxBoxSize()));
 										       
@@ -888,23 +888,6 @@ void EddingtonSP1::setupOperatorFactory(){
   }
 
 
-  //  Make relaxation type into int code
-  int relaxType;
-  switch(m_multigridRelaxMethod){
-  case RelaxationMethod::Jacobi:
-    relaxType = 0;
-    break;
-  case RelaxationMethod::GaussSeidel:
-    relaxType = 1;
-    break;
-  case RelaxationMethod::GSRBFast:
-    relaxType = 2;
-    break;
-  default:
-    MayDay::Abort("EddingtonSP1::setupOperatorFactory - logic bust when setting relaxation method");
-    break;
-  }
-
   // alpha and beta-coefficients for the Helmholtz equation. 
   const Real alpha =  1.0;
   const Real beta  = -1.0;
@@ -934,7 +917,7 @@ void EddingtonSP1::setupOperatorFactory(){
 										    ebbcFactory,
 										    ghost*IntVect::Unit,
 										    ghost*IntVect::Unit,
-										    relaxType,
+										    2,
 										    m_minCellsBottom,
 										    -1,
 										    m_mg_levelgrids));
