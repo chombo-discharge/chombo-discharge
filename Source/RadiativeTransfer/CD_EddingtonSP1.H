@@ -232,6 +232,11 @@ protected:
   bool m_useTGA;
 
   /*!
+    @brief Use kappa scaling for source or not
+  */
+  bool m_kappaScale;
+
+  /*!
     @brief Verbosity for geometric multigrid
   */
   int m_multigridVerbosity;
@@ -479,6 +484,11 @@ protected:
     @brief Parse multigrid settings
   */
   virtual void parseMultigridSettings();
+
+  /*!
+    @brief Parse kappa-scaling or not
+  */
+  virtual void parseKappaScale();
 
   /*!
     @brief Parse reflection coefficients for Robin bcs

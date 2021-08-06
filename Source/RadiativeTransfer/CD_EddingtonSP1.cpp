@@ -75,6 +75,7 @@ void EddingtonSP1::parseOptions(){
   this->parseStationary();        // Parse stationary solver
   this->parsePlotVariables();     // Parses plot variables
   this->parseMultigridSettings(); // Parses solver parameters for geometric multigrid
+  this->parseKappaScale();        // Parses kappa-scaling
 }
 
 void EddingtonSP1::parseRuntimeOptions(){
@@ -85,6 +86,7 @@ void EddingtonSP1::parseRuntimeOptions(){
   
   this->parsePlotVariables();     // Parses plot variables
   this->parseMultigridSettings(); // Parses solver parameters for geometric multigrid
+  this->parseKappaScale();        // Parses kappa-scaling
 }
 
 void EddingtonSP1::setDefaultDomainBcFunctions(){
@@ -322,6 +324,12 @@ void EddingtonSP1::parsePlotVariables(){
   }
 }
 
+void EddingtonSP1::parseKappaScale(){
+  ParmParse pp(m_className.c_str());
+
+  pp.get("kappa_scale", m_kappaScale);
+}
+
 void EddingtonSP1::parseMultigridSettings(){
   ParmParse pp(m_className.c_str());
 
@@ -519,13 +527,15 @@ bool EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCel
     this->setupSolver();
   }
 
-  bool converged;
+  bool converged = false;
 
   // Must have a dummy for checking initial residual
   EBAMRCellData dummy;
   EBAMRCellData source;
+  
   m_amr->allocate(dummy,  m_realm, m_phase, m_nComp);
   m_amr->allocate(source, m_realm, m_phase, m_nComp);
+  
   DataOps::setValue(dummy, 0.0);
 
   // Various source term manipulations. 
@@ -533,7 +543,7 @@ bool EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCel
   DataOps::incr(source, a_source, 1.0);
   DataOps::scale(source, 1./Units::c); // Source should be scaled by 1./c0
 
-  if(m_stationary){ // Should kappa-scale for transient solvres
+  if(m_kappaScale){ // Should kappa-scale for transient solvres
     DataOps::kappaScale(source);
   }
 
