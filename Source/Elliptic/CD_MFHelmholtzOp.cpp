@@ -55,7 +55,7 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
 			     const IntVect&                                   a_ghostRhs,
 			     const int&                                       a_jumpOrder,
 			     const int&                                       a_jumpWeight,
-			     const RelaxationMethod&                          a_relaxType){
+			     const Smoother&                                  a_relaxType){
   CH_TIME("MFHelmholtzOp::MFHelmholtzOp");
 
   m_dataLocation = a_dataLocation;
@@ -65,7 +65,7 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
   m_hasMGObjects = a_hasMGObjects;
   m_refToCoar    = a_refToCoar;
   m_refToCoar    = a_refToFine;
-  m_relaxType    = a_relaxType;
+  m_smoother    = a_relaxType;
   m_hasCoar      = a_hasCoar;
   m_hasFine      = a_hasFine;
 
@@ -127,17 +127,17 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
     MultifluidAlias::aliasMF(*Bcoef,      iphase, *a_Bcoef);
     MultifluidAlias::aliasMF(*BcoefIrreg, iphase, *a_BcoefIrreg);
 
-    EBHelmholtzOp::RelaxationMethod ebHelmRelax;
+    EBHelmholtzOp::Smoother ebHelmRelax;
 
     switch(a_relaxType){
-    case MFHelmholtzOp::RelaxationMethod::PointJacobi:
-      ebHelmRelax = EBHelmholtzOp::RelaxationMethod::PointJacobi;
+    case MFHelmholtzOp::Smoother::PointJacobi:
+      ebHelmRelax = EBHelmholtzOp::Smoother::PointJacobi;
       break;
-    case MFHelmholtzOp::RelaxationMethod::GauSaiRedBlack:
-      ebHelmRelax = EBHelmholtzOp::RelaxationMethod::GauSaiRedBlack;
+    case MFHelmholtzOp::Smoother::GauSaiRedBlack:
+      ebHelmRelax = EBHelmholtzOp::Smoother::GauSaiRedBlack;
       break;
-    case MFHelmholtzOp::RelaxationMethod::GauSaiMultiColor:
-      ebHelmRelax = EBHelmholtzOp::RelaxationMethod::GauSaiMultiColor;
+    case MFHelmholtzOp::Smoother::GauSaiMultiColor:
+      ebHelmRelax = EBHelmholtzOp::Smoother::GauSaiMultiColor;
       break;
     default:
       MayDay::Error("MFHelmholtzOp::MFHelmholtzOp - unsupported relaxation method requested");
@@ -539,14 +539,14 @@ void MFHelmholtzOp::updateJumpBC(const LevelData<MFCellFAB>& a_phi, const bool a
 void MFHelmholtzOp::relax(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_residual, int a_iterations) {
   CH_TIME("MFHelmholtzOp::relax");
 
-  switch(m_relaxType){
-  case RelaxationMethod::PointJacobi:
+  switch(m_smoother){
+  case Smoother::PointJacobi:
     this->relaxPointJacobi(a_correction, a_residual, a_iterations);
     break;
-  case RelaxationMethod::GauSaiRedBlack:
+  case Smoother::GauSaiRedBlack:
     this->relaxGSRedBlack(a_correction, a_residual, a_iterations);
     break;
-  case RelaxationMethod::GauSaiMultiColor:
+  case Smoother::GauSaiMultiColor:
     this->relaxGSMultiColor(a_correction, a_residual, a_iterations);
     break;
   default:

@@ -41,7 +41,7 @@
 class EBHelmholtzOpFactory : public AMRLevelOpFactory<LevelData<EBCellFAB> > {
 public:
 
-  using RelaxType        = EBHelmholtzOp::RelaxationMethod;
+  using Smoother        = EBHelmholtzOp::Smoother;
 
   using AmrLevelGrids    = Vector<RefCountedPtr<EBLevelGrid> >;
   using AmrInterpolators = Vector<RefCountedPtr<EBMultigridInterpolator> >;
@@ -115,7 +115,7 @@ public:
 		       const EBBCFactory&      a_ebbcFactory,
 		       const IntVect&          a_ghostPhi,
 		       const IntVect&          a_ghostRHS,
-		       const RelaxType&        a_relaxationMethod,
+		       const Smoother&        a_relaxationMethod,
 		       const ProblemDomain&    a_bottomDomain,
 		       const int&              a_mgBlockingFactor,
 		       const AmrLevelGrids&    a_deeperLevelGrids = AmrLevelGrids());
@@ -161,7 +161,7 @@ protected:
   Location::Cell m_dataLocation;
 
   // Relaxation method
-  RelaxType m_relaxMethod;
+  Smoother m_smoother;
 
   // Number of AMR levels
   int m_numAmrLevels;

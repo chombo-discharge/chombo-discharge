@@ -49,7 +49,7 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                               
 			     const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_BcoefIrreg,
 			     const IntVect&                                     a_ghostPhi,
 			     const IntVect&                                     a_ghostRhs,
-			     const RelaxationMethod&                            a_relaxationMethod) :
+			     const Smoother&                                    a_smoother) :
   LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB>(false), // Time-independent
   m_dataLocation(a_dataLocation),
   m_eblgFine(),
@@ -76,7 +76,7 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                               
   m_BcoefIrreg(a_BcoefIrreg),
   m_ghostPhi(a_ghostPhi),
   m_ghostRhs(a_ghostRhs),
-  m_relaxationMethod(a_relaxationMethod) {
+  m_smoother(a_smoother) {
 
   // Default settings. Always solve for comp = 0. If you want something different, copy your
   // input two different data holders before you use AMRMultiGrid. 
@@ -790,16 +790,16 @@ void EBHelmholtzOp::interpolateCF(LevelData<EBCellFAB>& a_phiFine, const LevelDa
 }
 
 void EBHelmholtzOp::relax(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, int a_iterations){
-  switch(m_relaxationMethod){
-  case RelaxationMethod::NoRelax: // Don't know why you would do this. 
+  switch(m_smoother){
+  case Smoother::NoRelax: // Don't know why you would do this. 
     break;
-  case RelaxationMethod::PointJacobi:
+  case Smoother::PointJacobi:
     this->relaxPointJacobi(a_correction, a_residual, a_iterations);
     break;
-  case RelaxationMethod::GauSaiRedBlack:
+  case Smoother::GauSaiRedBlack:
     this->relaxGSRedBlack(a_correction, a_residual, a_iterations);
     break;
-  case RelaxationMethod::GauSaiMultiColor:
+  case Smoother::GauSaiMultiColor:
     this->relaxGSMultiColor(a_correction, a_residual, a_iterations);
     break;
   default:

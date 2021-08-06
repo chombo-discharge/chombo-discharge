@@ -109,13 +109,13 @@ void FieldSolverMultigrid::parseMultigridSettings(){
   // Set the multigrid relaxation type. 
   pp.get("gmg_relax_type", str);
   if(str == "jacobi"){
-    m_multigridRelaxMethod = MFHelmholtzOp::RelaxationMethod::PointJacobi;
+    m_multigridRelaxMethod = MFHelmholtzOp::Smoother::PointJacobi;
   }
   else if( str == "red_black"){
-    m_multigridRelaxMethod = MFHelmholtzOp::RelaxationMethod::GauSaiRedBlack;
+    m_multigridRelaxMethod = MFHelmholtzOp::Smoother::GauSaiRedBlack;
   }
   else if( str == "multi_color"){
-    m_multigridRelaxMethod = MFHelmholtzOp::RelaxationMethod::GauSaiMultiColor;
+    m_multigridRelaxMethod = MFHelmholtzOp::Smoother::GauSaiMultiColor;
   }
   else{
     MayDay::Abort("FieldSolverMultigrid::parseMultigridSettings - unsupported relaxation method requested");

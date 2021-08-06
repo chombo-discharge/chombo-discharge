@@ -41,7 +41,7 @@ public:
   /*!
     @brief Relaxation method for the operators
   */
-  enum class RelaxationMethod {
+  enum class Smoother {
     NoRelax,
     PointJacobi,
     GauSaiRedBlack,
@@ -91,7 +91,7 @@ public:
 		const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_bcoIrreg,
 		const IntVect&                                     a_ghostCellsPhi,
 		const IntVect&                                     a_ghostCellsRHS,
-		const RelaxationMethod&                            a_relaxationMethod);
+		const Smoother&                                    a_smoother);
 
   /*!
     @brief Dtor
@@ -556,7 +556,7 @@ protected:
   /*!
     @brief Relaxation method
   */
-  RelaxationMethod m_relaxationMethod;
+  Smoother m_smoother;
 
   /*!
     @brief Data centering

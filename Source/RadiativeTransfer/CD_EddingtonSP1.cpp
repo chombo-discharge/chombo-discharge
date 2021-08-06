@@ -371,13 +371,13 @@ void EddingtonSP1::parseMultigridSettings(){
   // Relaxation type
   pp.get("gmg_relax_type", str);
   if(str == "jacobi"){
-    m_multigridRelaxMethod = EBHelmholtzOp::RelaxationMethod::PointJacobi;    
+    m_multigridRelaxMethod = EBHelmholtzOp::Smoother::PointJacobi;    
   }
   else if(str == "red_black"){
-    m_multigridRelaxMethod = EBHelmholtzOp::RelaxationMethod::GauSaiRedBlack;    
+    m_multigridRelaxMethod = EBHelmholtzOp::Smoother::GauSaiRedBlack;    
   }
   else if(str == "multi_color"){
-    m_multigridRelaxMethod = EBHelmholtzOp::RelaxationMethod::GauSaiMultiColor;
+    m_multigridRelaxMethod = EBHelmholtzOp::Smoother::GauSaiMultiColor;
   }
   else{
     MayDay::Abort("EddingtonSP1::parseMultigridSettings - unknown relaxation method requested");

@@ -183,7 +183,7 @@ protected:
   /*!
     @brief Enum for supported relaxation methods in multigrid. 
   */
-  enum class RelaxationMethod {
+  enum class Smoother {
     Jacobi,
     GaussSeidel,
     GSRBFast
@@ -209,7 +209,7 @@ protected:
   /*!
     @brief Relaxation type for gmg
   */
-  EBHelmholtzOp::RelaxationMethod m_multigridRelaxMethod;
+  EBHelmholtzOp::Smoother m_multigridRelaxMethod;
 
   /*!
     @brief GMG multigrid type

@@ -485,18 +485,18 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
   }
 
   // Relax stuff consistent with EBConductivityOp (with exception of GauSaiRedBlack...)
-  EBHelmholtzOp::RelaxationMethod relaxType;
+  EBHelmholtzOp::Smoother relaxType;
   int relax;
   pp.get("relax",relax);
   switch(relax){
   case 0:
-    relaxType = EBHelmholtzOp::RelaxationMethod::PointJacobi;
+    relaxType = EBHelmholtzOp::Smoother::PointJacobi;
     break;
   case 1:
-    relaxType = EBHelmholtzOp::RelaxationMethod::GauSaiMultiColor;
+    relaxType = EBHelmholtzOp::Smoother::GauSaiMultiColor;
     break;
   case 2:
-    relaxType = EBHelmholtzOp::RelaxationMethod::GauSaiRedBlack;
+    relaxType = EBHelmholtzOp::Smoother::GauSaiRedBlack;
     break;
   default:
     MayDay::Abort("ProxyFieldSolver::solveHelmholtz - unknown relaxation method requested");
@@ -749,18 +749,18 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
   const IntVect ghostPhi = m_amr->getNumberOfGhostCells()*IntVect::Unit;
   const IntVect ghostRhs = m_amr->getNumberOfGhostCells()*IntVect::Unit;
 
-  MFHelmholtzOp::RelaxationMethod relaxType;
+  MFHelmholtzOp::Smoother relaxType;
   int relax;
   pp.get("relax",relax);
   switch(relax){
   case 0:
-    relaxType = MFHelmholtzOp::RelaxationMethod::PointJacobi;
+    relaxType = MFHelmholtzOp::Smoother::PointJacobi;
     break;
   case 1:
-    relaxType = MFHelmholtzOp::RelaxationMethod::GauSaiMultiColor;
+    relaxType = MFHelmholtzOp::Smoother::GauSaiMultiColor;
     break;
   case 2:
-    relaxType = MFHelmholtzOp::RelaxationMethod::GauSaiRedBlack;
+    relaxType = MFHelmholtzOp::Smoother::GauSaiRedBlack;
     break;
   default:
     MayDay::Error("ProxyFieldSolver::solveMF - bad relaxation method");

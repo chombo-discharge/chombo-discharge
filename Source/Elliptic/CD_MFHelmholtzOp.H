@@ -38,7 +38,7 @@ public:
   /*!
     @brief Relaxation methods for this operator
   */
-  enum class RelaxationMethod {
+  enum class Smoother {
     PointJacobi,
     GauSaiRedBlack,
     GauSaiMultiColor,
@@ -90,7 +90,7 @@ public:
 		const IntVect&                                   a_ghostRhs,
 		const int&                                       a_jumpOrder,
 		const int&                                       a_jumpWeight,
-		const RelaxationMethod&                          a_relaxType);
+		const Smoother&                                   a_relaxType);
 
   /*!
     @brief Destructor. 
@@ -438,7 +438,7 @@ protected:
   /*!
     @brief Relaxation method
   */
-  RelaxationMethod m_relaxType;
+  Smoother m_smoother;
 
   /*!
     @brief "Colors" for the multi-coloered relaxation method
