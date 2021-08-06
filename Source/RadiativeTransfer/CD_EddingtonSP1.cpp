@@ -433,10 +433,14 @@ void EddingtonSP1::allocateInternals(){
   m_amr->allocate(m_phi,           m_realm, m_phase, m_nComp);
   m_amr->allocate(m_source,        m_realm, m_phase, m_nComp);
   m_amr->allocate(m_resid,         m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_zero,          m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_scaledSource,  m_realm, m_phase, m_nComp);
 
-  DataOps::setValue(m_resid,  0.0);
-  DataOps::setValue(m_phi,    0.0);
-  DataOps::setValue(m_source, 0.0);
+  DataOps::setValue(m_resid,        0.0);
+  DataOps::setValue(m_phi,          0.0);
+  DataOps::setValue(m_source,       0.0);
+  DataOps::setValue(m_zero,         0.0);
+  DataOps::setValue(m_scaledSource, 0.0);
 
   this->setHelmholtzCoefficients();
 }
@@ -505,44 +509,38 @@ bool EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCel
     pout() << m_name + "::advance(ebamrcell, ebamrcell)" << endl;
   }
 
-  const int finestLevel = m_amr->getFinestLevel();
+  bool converged = false;
 
   if(!m_isSolverSetup){
     this->setupSolver();
   }
 
-  bool converged = false;
-
-  // Must have a dummy for checking initial residual
-  EBAMRCellData dummy;
-  EBAMRCellData source;
-  
-  m_amr->allocate(dummy,  m_realm, m_phase, m_nComp);
-  m_amr->allocate(source, m_realm, m_phase, m_nComp);
-  
-  DataOps::setValue(dummy, 0.0);
-
-  // Various source term manipulations. 
-  DataOps::setValue(source, 0.0);
-  DataOps::incr(source, a_source, 1.0);
-  DataOps::scale(source, 1./Units::c); // Source should be scaled by 1./c0
-
-  if(m_kappaScale){ // Should kappa-scale for transient solvres
-    DataOps::kappaScale(source);
+  // Modify the source term.  Operator is scaled by kappa and source term might also have to be scaled by kappa
+  DataOps::copy(m_scaledSource, a_source);     // Copy source term
+  DataOps::scale(m_scaledSource, 1./Units::c); // Source should be scaled by 1./c0 (due to the way we do the EBHelmholtzOp coefficients)
+  if(m_kappaScale){ 
+    DataOps::kappaScale(m_scaledSource);
   }
 
-  Vector<LevelData<EBCellFAB>* > phi, rhs, res, zero;
+  // Aliasing, because Chombo is not too smart. 
+  Vector<LevelData<EBCellFAB>* > phi;
+  Vector<LevelData<EBCellFAB>* > rhs;
+  Vector<LevelData<EBCellFAB>* > res;
+  Vector<LevelData<EBCellFAB>* > zero;
+
   m_amr->alias(phi,  a_phi);
-  m_amr->alias(rhs,  source);
+  m_amr->alias(rhs,  m_scaledSource);
   m_amr->alias(res,  m_resid);
-  m_amr->alias(zero, dummy);
+  m_amr->alias(zero, m_zero);
 
+  const int finestLevel = m_amr->getFinestLevel();
+  
   if(m_stationary){
-    const Real phi_resid  = m_multigridSolver->computeAMRResidual(phi,  rhs, finestLevel, 0); // Incoming residual
-    const Real zero_resid = m_multigridSolver->computeAMRResidual(zero, rhs, finestLevel, 0); // Zero residual
+    const Real phiResid  = m_multigridSolver->computeAMRResidual(phi,  rhs, finestLevel, 0); // Incoming residual
+    const Real zeroResid = m_multigridSolver->computeAMRResidual(zero, rhs, finestLevel, 0); // Zero residual
 
-    if(phi_resid > zero_resid*m_multigridExitTolerance){ // Residual is too large
-      m_multigridSolver->m_convergenceMetric = zero_resid;
+    if(phiResid > zeroResid*m_multigridExitTolerance){ // Residual is too large
+      m_multigridSolver->m_convergenceMetric = zeroResid;
       m_multigridSolver->solveNoInitResid(phi, res, rhs, finestLevel, 0, a_zerophi);
       
       const int status = m_multigridSolver->m_exitStatus;  // 1 => Initial norm sufficiently reduced

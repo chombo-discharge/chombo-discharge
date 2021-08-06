@@ -362,6 +362,16 @@ protected:
   EBAMRCellData m_resid;
 
   /*!
+    @brief Always zero
+  */
+  EBAMRCellData m_zero;
+
+    /*!
+    @brief Scaled source term
+  */
+  EBAMRCellData m_scaledSource;
+
+  /*!
     @brief a-coefficient
   */
   EBAMRCellData m_helmAco;
