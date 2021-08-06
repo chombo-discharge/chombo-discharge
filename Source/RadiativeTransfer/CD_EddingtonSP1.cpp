@@ -32,8 +32,9 @@
 #endif
 #include <CD_EBHelmholtzDirichletEBBCFactory.H>      
 #include <CD_EBHelmholtzNeumannEBBCFactory.H>
-#include <CD_EBHelmholtzRobinEBBCFactory.H>
-#include <CD_EBHelmholtzDirichletDomainBCFactory.H> // Domain stuff should be collapsed
+#include <CD_EBHelmholtzLarsenEBBCFactory.H>
+#include <CD_EBHelmholtzLarsenDomainBCFactory.H>
+#include <CD_EBHelmholtzDirichletDomainBCFactory.H> // Domain stuff should be collapsed since we need a wrapper anyways. 
 #include <CD_EBHelmholtzNeumannDomainBCFactory.H>
 #include <CD_EBHelmholtzRobinDomainBCFactory.H>
 #include <CD_NamespaceHeader.H>
@@ -406,8 +407,8 @@ void EddingtonSP1::parseReflection(){
   Real r;
   pp.get("reflectivity", r);
 
-  m_reflectionCoefficientOne = r/(2.0);
-  m_reflectionCoefficientTwo = r/(3.0);
+  m_reflectCoefOne = r/(2.0);
+  m_reflectCoefTwo = r/(3.0);
 }
 
 void EddingtonSP1::preRegrid(const int a_base, const int a_oldFinestLevel){
@@ -798,9 +799,9 @@ void EddingtonSP1::setupHelmholtzFactory(){
   const IntVect ghostPhi   = m_amr->getNumberOfGhostCells()*IntVect::Unit;
   const IntVect ghostRhs   = m_amr->getNumberOfGhostCells()*IntVect::Unit;
   
-  // Just run with some default BCs for now
-  auto domainBcFactory = RefCountedPtr<EBHelmholtzDirichletDomainBCFactory>(new EBHelmholtzDirichletDomainBCFactory(       1.0));
-  auto ebBcFactory     = RefCountedPtr<EBHelmholtzDirichletEBBCFactory>    (new EBHelmholtzDirichletEBBCFactory    (2, 2, -1.0));
+  // Just run with Larsen for now. These need to be updated with proper source terms. 
+  auto domainBcFactory = RefCountedPtr<EBHelmholtzDomainBCFactory> (new EBHelmholtzLarsenDomainBCFactory(m_RtSpecies, m_reflectCoefOne, m_reflectCoefTwo));
+  auto ebBcFactory     = RefCountedPtr<EBHelmholtzEBBCFactory>     (new EBHelmholtzLarsenEBBCFactory    (m_RtSpecies, m_reflectCoefOne, m_reflectCoefTwo));
 
   // Set up the operator
   m_helmholtzOpFactory = RefCountedPtr<EBHelmholtzOpFactory> (new EBHelmholtzOpFactory(m_dataLocation,
@@ -842,7 +843,7 @@ void EddingtonSP1::setupOperatorFactory(){
       EddingtonSP1DomainBc::Wall             curWall = std::make_pair(dir, sit());
       const EddingtonSP1DomainBc::BcFunction curFunc = m_domainBc.getBc(curWall).second;
 
-      auto larsen = RefCountedPtr<LarsenCoefficients>(new LarsenCoefficients(m_RtSpecies, m_reflectionCoefficientOne, m_reflectionCoefficientTwo, curFunc));
+      auto larsen = RefCountedPtr<LarsenCoefficients>(new LarsenCoefficients(m_RtSpecies, m_reflectCoefOne, m_reflectCoefTwo, curFunc));
 
       larsenCoeffs.emplace(curWall, larsen);
     }
@@ -871,7 +872,7 @@ void EddingtonSP1::setupOperatorFactory(){
       return ebbc.second;
     };
     
-    auto robinCoefficients = RefCountedPtr<LarsenCoefficients> (new LarsenCoefficients(m_RtSpecies, m_reflectionCoefficientOne, m_reflectionCoefficientTwo, ebFunc));
+    auto robinCoefficients = RefCountedPtr<LarsenCoefficients> (new LarsenCoefficients(m_RtSpecies, m_reflectCoefOne, m_reflectCoefTwo, ebFunc));
 
     auto robinEbBcFactory = RefCountedPtr<RobinConductivityEbBcFactory> (new RobinConductivityEbBcFactory(m_amr->getProbLo()));
     robinEbBcFactory->setCoefficients(robinCoefficients);
@@ -953,8 +954,8 @@ void EddingtonSP1::setupMultigrid(){
 
   // Define AMRMultiGrid
   m_multigridSolver = RefCountedPtr<AMRMultiGrid<LevelData<EBCellFAB> > > (new AMRMultiGrid<LevelData<EBCellFAB> >());
-  m_multigridSolver->define(coarsestDomain, *m_operatorFactory, botsolver, 1 + finestLevel);
-  //  m_multigridSolver->define(coarsestDomain, *m_helmholtzOpFactory, botsolver, 1 + finestLevel);
+    m_multigridSolver->define(coarsestDomain, *m_operatorFactory, botsolver, 1 + finestLevel);
+    //m_multigridSolver->define(coarsestDomain, *m_helmholtzOpFactory, botsolver, 1 + finestLevel);
   m_multigridSolver->setSolverParameters(m_multigridPreSmooth,
 					 m_multigridPostSmooth,
 					 m_multigridBottomSmooth,

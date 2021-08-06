@@ -27,6 +27,17 @@ EBHelmholtzRobinEBBC::EBHelmholtzRobinEBBC(){
   m_useFunction = false;
 }
 
+EBHelmholtzRobinEBBC::EBHelmholtzRobinEBBC(const Real a_A, const Real a_B, const Real a_C) : EBHelmholtzRobinEBBC() {
+  this->setCoefficients(a_A, a_B, a_C);
+}
+
+
+EBHelmholtzRobinEBBC::EBHelmholtzRobinEBBC(const std::function<Real(const RealVect& a_pos) >& a_A,
+					   const std::function<Real(const RealVect& a_pos) >& a_B,
+					   const std::function<Real(const RealVect& a_pos) >& a_C) : EBHelmholtzRobinEBBC() {
+  this->setCoefficients(a_A, a_B, a_C);
+}
+
 EBHelmholtzRobinEBBC::~EBHelmholtzRobinEBBC(){
 
 }

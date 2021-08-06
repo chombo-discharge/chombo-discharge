@@ -294,17 +294,12 @@ protected:
   /*!
     @brief Reflection coefficient
   */
-  Real m_reflectionCoefficientOne;
+  Real m_reflectCoefOne;
 
   /*!
     @brief Reflection coefficient
   */
-  Real m_reflectionCoefficientTwo;
-
-  /*!
-    @brief RNG
-  */
-  std::mt19937_64* m_rng;
+  Real m_reflectCoefTwo;
 
   /*!
     @brief Geometric multigrid solver

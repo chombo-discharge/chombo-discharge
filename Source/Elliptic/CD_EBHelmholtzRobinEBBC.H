@@ -29,9 +29,27 @@ class EBHelmholtzRobinEBBC : public EBHelmholtzEBBC {
 public:
 
   /*!
-    @brief Default constructor. 
+    @brief Default constructor. Must subsequently set coefficients.
   */
   EBHelmholtzRobinEBBC();
+
+  /*!
+    @brief Full constructor. 
+    @param[in] a_A Constant A-coefficient
+    @param[in] a_B Constant B-coefficient
+    @param[in] a_C Constant C-coefficient
+  */
+  EBHelmholtzRobinEBBC(const Real a_A, const Real a_B, const Real a_C);
+
+  /*!
+    @brief Full constructor
+    @param[in] a_A Spatially dependent A-coefficient
+    @param[in] a_B Spatially dependent B-coefficient
+    @param[in] a_C Spatially dependent C-coefficient
+  */
+  EBHelmholtzRobinEBBC(const std::function<Real(const RealVect& a_pos) >& a_A,
+		       const std::function<Real(const RealVect& a_pos) >& a_B,
+		       const std::function<Real(const RealVect& a_pos) >& a_C);
 
   /*!
     @brief Destructor

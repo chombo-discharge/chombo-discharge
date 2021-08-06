@@ -496,6 +496,13 @@ public:
   void createCoarsened(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const int& a_refRat) override final;
 
   /*!
+    @brief Do diagonal scaling
+    @param[inout] a_rhs           Data to be scaled
+    @param[in]    a_kappaWeighted Use kappa-weighted scaling or not
+  */
+  void diagonalScale(LevelData<EBCellFAB> & a_rhs, bool a_kappaWeighted);
+
+  /*!
     @brief Divide by the a-coefficient
     @param[inout] a_rhs Divided data
   */

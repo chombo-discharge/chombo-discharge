@@ -745,6 +745,17 @@ void EBHelmholtzOp::applyOpIrregular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, 
   }
 }
 
+void EBHelmholtzOp::diagonalScale(LevelData<EBCellFAB> & a_rhs, bool a_kappaWeighted){
+
+  // Scale by volume fraction if asked. 
+  if(a_kappaWeighted) EBLevelDataOps::kappaWeight(a_rhs);
+
+  // Scale by a-coefficient and alpha, too.
+  for (DataIterator dit(a_rhs.dataIterator()); dit.ok(); ++dit){
+    a_rhs[dit()] *= (*m_Acoef)[dit()];
+  }
+}
+
 void EBHelmholtzOp::divideByIdentityCoef(LevelData<EBCellFAB>& a_rhs) {
   for (DataIterator dit(a_rhs.disjointBoxLayout()); dit.ok(); ++dit){
     a_rhs[dit()] /= (*m_Acoef)[dit()];
