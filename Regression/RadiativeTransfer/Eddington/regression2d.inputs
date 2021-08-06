@@ -86,13 +86,13 @@ EddingtonSP1.gmg_bottom_solver   = bicgstab  # Bottom solver type. Valid options
 EddingtonSP1.gmg_bottom_relax    = 8         # Number of relaxations in bottom solve ('simple' solver only)
 EddingtonSP1.gmg_cycle           = vcycle    # Cycle type. Only 'vcycle' supported for now
 EddingtonSP1.gmg_relax_type      = gsrb      # Relaxation type. 'jacobi', 'gauss_seidel', or 'gsrb'
-EddingtonSP1.ebbc                = robin 0.0 # Bc on embedded boundaries. 
-EddingtonSP1.bc.x.lo             = robin 0.0 # Bc on domain side. 'dirichlet', 'neuman', or 'robin'
-EddingtonSP1.bc.x.hi             = robin 0.0 # Bc on domain side. 'dirichlet', 'neuman', or 'robin'
-EddingtonSP1.bc.y.lo             = robin 0.0 # Bc on domain side. 'dirichlet', 'neuman', or 'robin'
-EddingtonSP1.bc.y.hi             = robin 0.0 # Bc on domain side. 'dirichlet', 'neuman', or 'robin'
-EddingtonSP1.bc.z.lo             = robin 0.0 # Bc on domain side. 'dirichlet', 'neuman', or 'robin'
-EddingtonSP1.bc.z.hi             = robin 0.0 # Bc on domain side. 'dirichlet', 'neuman', or 'robin'
+EddingtonSP1.ebbc                = larsen 0.0 # Bc on embedded boundaries. 
+EddingtonSP1.bc.x.lo             = larsen 0.0 # Bc on domain side. 'dirichlet', 'neuman', or 'larsen'
+EddingtonSP1.bc.x.hi             = larsen 0.0 # Bc on domain side. 'dirichlet', 'neuman', or 'larsen'
+EddingtonSP1.bc.y.lo             = larsen 0.0 # Bc on domain side. 'dirichlet', 'neuman', or 'larsen'
+EddingtonSP1.bc.y.hi             = larsen 0.0 # Bc on domain side. 'dirichlet', 'neuman', or 'larsen'
+EddingtonSP1.bc.z.lo             = larsen 0.0 # Bc on domain side. 'dirichlet', 'neuman', or 'larsen'
+EddingtonSP1.bc.z.hi             = larsen 0.0 # Bc on domain side. 'dirichlet', 'neuman', or 'larsen'
 
 # ====================================================================================================
 # GEO_COARSENER CLASS OPTIONS

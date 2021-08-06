@@ -1,29 +1,31 @@
 # ====================================================================================================
-# EDDINGTON_SP1 CLASS OPTIONS
+# EddingtonSP1 class options
 # ====================================================================================================
-EddingtonSP1.stationary          = true      # Stationary solver
-EddingtonSP1.reflectivity        = 0.        # Reflectivity
-EddingtonSP1.use_tga             = false     # Use TGA for integration
-EddingtonSP1.plt_vars            = phi src   # Plot variables. Available are 'phi' and 'src'
-EddingtonSP1.gmg_verbosity       = -1        # GMG verbosity
-EddingtonSP1.gmg_coarsen         = 4         # Precoarsening of multigrid levels
-EddingtonSP1.gmg_pre_smooth      = 8         # Number of relaxations in downsweep
-EddingtonSP1.gmg_post_smooth     = 8         # Number of relaxations in upsweep
-EddingtonSP1.gmg_bott_smooth     = 8         # NUmber of relaxations before dropping to bottom solver
-EddingtonSP1.gmg_min_iter        = 5         # Minimum number of iterations
-EddingtonSP1.gmg_max_iter        = 32        # Maximum number of iterations
-EddingtonSP1.gmg_exit_tol        = 1.E-6     # Residue tolerance
-EddingtonSP1.gmg_exit_hang       = 0.2       # Solver hang
-EddingtonSP1.gmg_min_cells       = 2         # Bottom drop
-EddingtonSP1.gmg_bottom_solver   = bicgstab  # Bottom solver type. Valid options are 'simple' and 'bicgstab'
-EddingtonSP1.gmg_bottom_relax    = 8         # Number of relaxations in bottom solve ('simple' solver only)
-EddingtonSP1.gmg_cycle           = vcycle    # Cycle type. Only 'vcycle' supported for now
-EddingtonSP1.gmg_relax_type      = gsrb      # Relaxation type. 'jacobi', 'gauss_seidel', or 'gsrb'
-EddingtonSP1.ebbc                = robin 0.0 # Bc on embedded boundaries. For Robin, the second value is a dummy value. 
-EddingtonSP1.bc.x.lo             = robin 0.0 # Bc on domain side. 'dirichlet', 'neuman', or 'robin'
-EddingtonSP1.bc.x.hi             = robin 0.0 # Bc on domain side. 'dirichlet', 'neuman', or 'robin'
-EddingtonSP1.bc.y.lo             = robin 0.0 # Bc on domain side. 'dirichlet', 'neuman', or 'robin'
-EddingtonSP1.bc.y.hi             = robin 0.0 # Bc on domain side. 'dirichlet', 'neuman', or 'robin'
-EddingtonSP1.bc.z.lo             = robin 0.0 # Bc on domain side. 'dirichlet', 'neuman', or 'robin'
-EddingtonSP1.bc.z.hi             = robin 0.0 # Bc on domain side. 'dirichlet', 'neuman', or 'robin'
-EddingtonSP1.bc.z.hi             = robin 0.0 # Boundary on domain. 'neumann' or 'robin'		
+EddingtonSP1.stationary          = true         # Stationary solver
+EddingtonSP1.reflectivity        = 0.           # Reflectivity
+EddingtonSP1.use_tga             = false        # Use TGA for integration
+EddingtonSP1.plt_vars            = phi src      # Plot variables. Available are 'phi' and 'src'
+
+EddingtonSP1.ebbc                = larsen 0.0   # Bc on embedded boundaries
+EddingtonSP1.bc.x.lo             = larsen 0.0   # Bc on domain side. 'dirichlet', 'neuman', or 'larsen'
+EddingtonSP1.bc.x.hi             = larsen 0.0   # Bc on domain side. 'dirichlet', 'neuman', or 'larsen'
+EddingtonSP1.bc.y.lo             = larsen 0.0   # Bc on domain side. 'dirichlet', 'neuman', or 'larsen'
+EddingtonSP1.bc.y.hi             = larsen 0.0   # Bc on domain side. 'dirichlet', 'neuman', or 'larsen'
+EddingtonSP1.bc.z.lo             = larsen 0.0   # Bc on domain side. 'dirichlet', 'neuman', or 'larsen'
+EddingtonSP1.bc.z.hi             = larsen 0.0   # Bc on domain side. 'dirichlet', 'neuman', or 'larsen'
+EddingtonSP1.bc.z.hi             = larsen 0.0   # Boundary on domain. 'neumann' or 'larsen'
+
+EddingtonSP1.gmg_verbosity       = -1           # GMG verbosity
+EddingtonSP1.gmg_coarsen         = 4            # Precoarsening of multigrid levels
+EddingtonSP1.gmg_pre_smooth      = 8            # Number of relaxations in downsweep
+EddingtonSP1.gmg_post_smooth     = 8            # Number of relaxations in upsweep
+EddingtonSP1.gmg_bott_smooth     = 8            # NUmber of relaxations before dropping to bottom solver
+EddingtonSP1.gmg_min_iter        = 5            # Minimum number of iterations
+EddingtonSP1.gmg_max_iter        = 32           # Maximum number of iterations
+EddingtonSP1.gmg_exit_tol        = 1.E-6        # Residue tolerance
+EddingtonSP1.gmg_exit_hang       = 0.2          # Solver hang
+EddingtonSP1.gmg_min_cells       = 2            # Bottom drop
+EddingtonSP1.gmg_bottom_solver   = bicgstab     # Bottom solver type. Valid options are 'simple' and 'bicgstab'
+EddingtonSP1.gmg_bottom_relax    = 8            # Number of relaxations in bottom solve ('simple' solver only)
+EddingtonSP1.gmg_cycle           = vcycle       # Cycle type. Only 'vcycle' supported for now
+EddingtonSP1.gmg_relax_type      = gsrb         # Relaxation type. 'jacobi', 'gauss_seidel', or 'gsrb'

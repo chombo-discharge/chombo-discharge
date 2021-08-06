@@ -21,7 +21,6 @@ EddingtonSP1DomainBc::~EddingtonSP1DomainBc() {
   m_bcFunctions.clear();
 }
 
-
 void EddingtonSP1DomainBc::setBc(const Wall a_wall, const Bc a_func){
   m_bcFunctions.emplace(a_wall, a_func);
 }

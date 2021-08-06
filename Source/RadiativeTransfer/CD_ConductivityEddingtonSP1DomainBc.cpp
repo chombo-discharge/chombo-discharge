@@ -39,7 +39,7 @@ ConductivityEddingtonSP1DomainBc::ConductivityEddingtonSP1DomainBc(const Eddingt
 	m_conductivityBaseDomainBcObjects.emplace(curWall, std::make_shared<NeumannConductivityDomainBC>());
 	break;
       }
-      case EddingtonSP1DomainBc::BcType::Robin:{ // Robin requires more than purely Dirichlet or Neumann because we must also set the coefficients for the BC. 
+      case EddingtonSP1DomainBc::BcType::Larsen:{ // Robin requires more than purely Dirichlet or Neumann because we must also set the coefficients for the BC. 
 	std::shared_ptr<RobinConductivityDomainBc> robinBc = std::make_shared<RobinConductivityDomainBc>();
 	robinBc->setCoefficients(a_coefficients.at(curWall));
 	m_conductivityBaseDomainBcObjects.emplace(curWall, robinBc);

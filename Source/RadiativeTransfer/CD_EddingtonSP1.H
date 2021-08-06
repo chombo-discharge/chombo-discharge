@@ -29,7 +29,7 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Radiative tranfer equation solver in the SP1 (diffusion) approximation. Also includes stochastically drawn Photons. 
+  @brief Radiative tranfer equation solver in the SP1 (diffusion) approximation. 
 */
 class EddingtonSP1 : public RtSolver {
 public:
@@ -39,34 +39,54 @@ public:
     @details This is a utility function 
     @param[in] a_position Position in space
     @param[in] a_time     Time
-    @return This returns one (1.0)
+    @return Returns 1.0
   */
   static Real s_defaultDomainBcFunction(const RealVect a_position, const Real a_time);
 
   /*!
-    @brief Constructor
+    @brief Weak constructor
   */
   EddingtonSP1();
+
+  /*!
+    @brief Disallowed copy construction
+  */
+  EddingtonSP1(const EddingtonSP1& a_other) = delete;
+
+  /*!
+    @brief Disallowed move construction
+  */
+  EddingtonSP1(const EddingtonSP1&& a_other) = delete;
 
   /*!
     @brief Destructor
   */
   virtual ~EddingtonSP1();
 
+    /*!
+    @brief Disallowed copy assignment
+  */
+  EddingtonSP1& operator=(const EddingtonSP1& a_other) = delete;
+
+  /*!
+    @brief Disallowed move assignment
+  */
+  EddingtonSP1& operator=(const EddingtonSP1&& a_other) = delete;
+
   /*!
     @brief Advance RTE onto state a_phi
   */
-  virtual bool advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_source, const bool a_zerophi = false);
+  virtual bool advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_source, const bool a_zerophi = false) override;
 
   /*!
     @brief Parse class options
   */
-  virtual void parseOptions();
+  virtual void parseOptions() override;
 
   /*!
     @brief Parse class options
   */
-  virtual void parseRuntimeOptions();
+  virtual void parseRuntimeOptions() override;
 
   /*!
     @brief Set the boundary condition function on a wall. 
@@ -80,76 +100,81 @@ public:
   /*!
     @brief Allocate internal storage
   */
-  virtual void allocateInternals();
+  virtual void allocateInternals() override;
   
   /*!
     @brief Cache state
   */
-  virtual void preRegrid(const int a_base, const int a_oldFinestLevel);
+  virtual void preRegrid(const int a_base, const int a_oldFinestLevel) override;
 
   /*!
     @brief Deallocate internal storage
   */
-  virtual void deallocateInternals();
+  virtual void deallocateInternals() override;
 
   /*!
     @brief Regrid function for this class
   */
-  virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel);
+  virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
 
   /*!
     @brief Register operators
   */
-  virtual void registerOperators();
+  virtual void registerOperators() override;
 
   /*!
     @brief Compute the boundary flux. For Eddington, the boundary flux is = c*phi/2
   */
-  virtual void computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi);
+  virtual void computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi) override;
 
   /*!
     @brief Compute the domain flux. For Eddington, the domain flux is = c*phi/2
   */
-  virtual void computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_phi);
+  virtual void computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_phi) override;
 
   /*!
     @brief Compute the flux
     @details For diffusive models, the flux will be something like grad(a_phi). For higher-order models, the flux 
     will be contained in a_phi (somehow);
   */
-  virtual void computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi);
+  virtual void computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi) override;
 
   /*!
     @brief Get isotropic part. 
   */
-  virtual void computeDensity(EBAMRCellData& a_isotropic, const EBAMRCellData& a_phi);
+  virtual void computeDensity(EBAMRCellData& a_isotropic, const EBAMRCellData& a_phi)override;
 
   /*!
     @brief Write plot file
   */
-  virtual void writePlotFile();
+  virtual void writePlotFile() override;
 
   /*!
     @brief Write checkpoint data into handle
   */
-  virtual void writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const;
+  virtual void writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const override;
 
   /*!
     @brief Read checkpoint data from handle
   */
-  virtual void readCheckpointLevel(HDF5Handle& a_handle, const int a_level);
-
-  /*!
-    @brief Return required number of ghost cells
-  */
-  virtual int queryGhost() const;
+  virtual void readCheckpointLevel(HDF5Handle& a_handle, const int a_level) override;
 
 protected:
 
   /*!
+    @brief alpha-coefficient for Helmholtz operator
+  */
+  static constexpr Real m_alpha = 1.0;
+
+  /*!
+    @brief Beta-coefficient for Helmholtz operator
+  */
+  static constexpr Real m_beta = 1.0;
+
+  /*!
     @brief Enum class for supported bottom solvers in multigrid.
   */
-  enum class BottomSolver {
+  enum class BottomSolverType {
     Simple,
     BiCGStab,
     GMRES
@@ -168,9 +193,8 @@ protected:
     @brief Enum for multigrid cycle types. 
   */
   enum class MultigridType{
-    FAS,
     VCycle,
-    FCycle,
+    WCycle,
   };
 
   /*!
@@ -179,7 +203,7 @@ protected:
   enum class EbBcType{
     Dirichlet,
     Neumann,
-    Robin
+    Larsen
   };
   
   /*!
@@ -206,11 +230,6 @@ protected:
     @brief Use tga for transient solevs
   */
   bool m_useTGA;
-
-  /*!
-    @brief Use the source term to draw stochastic Photons
-  */
-  bool m_stochastic_Photons;
 
   /*!
     @brief Verbosity for geometric multigrid
@@ -250,7 +269,7 @@ protected:
   /*!
     @brief Bottom solver type
   */
-  BottomSolver m_bottomSolver;
+  BottomSolverType m_bottomSolver;
 
   /*!
     @brief Number of smoothing for bottom solver
@@ -260,22 +279,17 @@ protected:
   /*!
     @brief Set bottom drop depth
   */
-  int m_numCellsBottomDrop;
-
-  /*!
-    @brief RNG seed
-  */
-  int m_seed;
+  int m_minCellsBottom;
 
   /*!
     @brief 
   */
-  Real m_multigridTolerance;
+  Real m_multigridExitTolerance;
   
   /*!
     @brief 
   */
-  Real m_multigridHang;
+  Real m_multigridExitHang;
 
   /*!
     @brief Reflection coefficient
@@ -405,12 +419,14 @@ protected:
 
   /*!
     @brief Make domain bc string
+    @details Used for pasing boundary conditions from input script. 
+    @returns Returns string of type "bc.x.lo", "bc.y.hi" etc. 
   */
   virtual std::string makeBcString(const int a_dir, const Side::LoHiSide a_side) const;
 
   /*!
     @brief Returns BC type based on string.
-    @param[in] a_str Boundary condition string. Must be "dirichlet number", "neumann number", "robin_number", "dirichlet_custom", "neumann_custom", or "robin_custom".
+    @param[in] a_str Boundary condition string. Must be "dirichlet <number>", "neumann <number>", "robin <number>", "dirichlet_custom", "neumann_custom", or "robin_custom".
   */
   virtual EddingtonSP1DomainBc::BcType parseBcString(const std::string a_str) const;
 
