@@ -30,24 +30,49 @@ class LarsenCoefficients : public RobinCoefficients {
 public:
 
   /*!
+    @brief Alias for BC function
+  */
+  using BcFunction = std::function<Real(const RealVect a_pos, const Real a_time)>;
+
+  /*!
     @brief Don't see why anyone would need this constructor
   */
   LarsenCoefficients() = delete;
 
   /*!
+    @brief No copy construction
+  */
+  LarsenCoefficients(const LarsenCoefficients& a_other) = delete;
+
+  /*!
+    @brief No move construction
+  */
+  LarsenCoefficients(const LarsenCoefficients&& a_other) = delete;
+
+  /*!
     @brief Constructor. Source term is set to zero. 
+    @param[in] a_RtSpecies Radiative transfer species
+    @param[in] a_r1 "First reflection coefficient"
+    @param[in] a_r2 "Second reflection coefficient"
+    @details Larsen coefficients (in Robin format) are set based on kappa and reflection coefficients
   */
   LarsenCoefficients(const RefCountedPtr<RtSpecies>& a_RtSpecies,
 		     const Real                      a_r1,
 		     const Real                      a_r2);
 
-    /*!
-    @brief Constructor. 
+  /*!
+    @brief Constructor. Source term is set to zero. 
+    @param[in] a_RtSpecies Radiative transfer species
+    @param[in] a_r1        "First reflection coefficient"
+    @param[in] a_r2        "Second reflection coefficient"
+    @param[in] a_bcFunction Source term on boundary
+    @details Larsen coefficients (in Robin format) are set based on kappa and reflection coefficients. The last parameter provides
+    an option to include sources on the boundaries. To include time-dependence, a_bcFunction should capture an external time by reference.
   */
   LarsenCoefficients(const RefCountedPtr<RtSpecies>& a_RtSpecies,
 		     const Real                      a_r1,
 		     const Real                      a_r2,
-		     const std::function<Real(const RealVect a_pos, const Real a_time)>& a_bcFunction);
+		     const BcFunction&               a_bcFunction);
 
   /*!
     @brief Destructor
@@ -55,34 +80,54 @@ public:
   ~LarsenCoefficients();
 
   /*!
+    @brief No move assignment
+  */
+  LarsenCoefficients& operator=(const LarsenCoefficients& a_other) = delete;
+
+  /*!
+    @brief No copy assignment
+  */
+  LarsenCoefficients& operator=(const LarsenCoefficients&& a_other) = delete; 
+
+  /*!
     @brief aco. Equal to 0.5*3*kappa*kappa*(1 + 3*r2)/(1 - 2*r1)
+    @param[in] a_pos Position
   */
   virtual Real aco(const RealVect a_pos) const override;
 
   /*!
     @brief bco. Equal to -kappa
+    @param[in] a_pos Position
   */
   virtual Real bco(const RealVect a_pos) const override;
 
   /*!
-    @brief Surface source term. Returns whatever is set in setRhsFunction. 
+    @brief Surface source term. 
+    @param[in] a_pos Position
   */
   virtual Real rhs(const RealVect a_pos) const override;
-
-  /*!
-    @brief Set function for source term. 
-  */
-  virtual void setRhsFunction(const std::function<Real(const RealVect a_pos, const Real a_time)>& a_bcFunction);
     
 protected:
 
+  /*!
+    @brief Radiative transfer species
+  */
   RefCountedPtr<RtSpecies> m_RtSpecies;
 
+  /*!
+    @brief "First reflection coefficient"
+  */
   Real m_reflectionCoefficientOne;
-    
+
+  /*!
+    @brief "Second reflection coefficient"
+  */
   Real m_reflectionCoefficientTwo;
 
-  std::function<Real(RealVect a_pos, Real a_time) > m_bcFunction;
+  /*!
+    @brief Boundary source term
+  */
+  BcFunction m_bcFunction;
 };
 
 #include <CD_NamespaceFooter.H>

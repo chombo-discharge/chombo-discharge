@@ -28,7 +28,7 @@ LarsenCoefficients::LarsenCoefficients(const RefCountedPtr<RtSpecies>& a_RtSpeci
 LarsenCoefficients::LarsenCoefficients(const RefCountedPtr<RtSpecies>& a_RtSpecies,
 				       const Real                      a_r1,
 				       const Real                      a_r2,
-				       const std::function<Real(const RealVect a_pos, const Real a_time)>& a_bcFunction){
+				       const BcFunction&               a_bcFunction){
   m_RtSpecies                = a_RtSpecies;
   m_reflectionCoefficientOne = a_r1;
   m_reflectionCoefficientTwo = a_r2;
@@ -57,10 +57,6 @@ Real LarsenCoefficients::rhs(const RealVect a_pos) const {
   const Real dummyDt = 0.0;
 
   return m_bcFunction(a_pos, dummyDt);
-}
-
-void LarsenCoefficients::setRhsFunction(const std::function<Real(const RealVect a_pos, const Real a_time)>& a_bcFunction){
-  m_bcFunction = a_bcFunction;
 }
 
 #include <CD_NamespaceFooter.H>
