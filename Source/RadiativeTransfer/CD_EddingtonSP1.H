@@ -384,7 +384,7 @@ protected:
   /*!
     @brief Set up geometric multigrid
   */
-  virtual void setupMultigrid();
+  virtual void setupSolver();
 
   /*!
     @brief Set kappa
@@ -425,7 +425,7 @@ protected:
   /*!
     @brief Set the GMG solver
   */
-  virtual void setupMultigridSolver();
+  virtual void setupMultigrid();
 
   /*!
     @brief Make domain bc string

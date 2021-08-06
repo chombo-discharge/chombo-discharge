@@ -15,17 +15,28 @@
 
 // Chombo includes
 #include <ParmParse.H>
+#if 1 // All of these should be removed
 #include <EBAMRIO.H>
 #include <BRMeshRefine.H>
 #include <NeumannConductivityEBBC.H>
 #include <DirichletConductivityEBBC.H>
+#endif
 
 // Our includes
 #include <CD_EddingtonSP1.H>
 #include <CD_DataOps.H>
 #include <CD_Units.H>
+#if 1 // Should be removed
 #include <CD_ConductivityEddingtonSP1DomainBcFactory.H>
 #include <CD_RobinConductivityEbBcFactory.H>
+#endif
+#include <CD_EBHelmholtzDirichletEBBC.H>
+#include <CD_EBHelmholtzNeumannEBBC.H>
+#include <CD_EBHelmholtzRobinEBBC.H>
+#include <CD_EBHelmholtzDirichletDomainBC.H>
+#include <CD_EBHelmholtzNeumannDomainBC.H>
+#include <CD_EBHelmholtzRobinDomainBC.H>
+#include <CD_EBMultigridInterpolator.H>
 #include <CD_NamespaceHeader.H>
 
 constexpr Real EddingtonSP1::m_alpha;
@@ -490,6 +501,7 @@ void EddingtonSP1::registerOperators(){
     m_amr->registerOperator(s_eb_gradient,     m_realm, m_phase);
     m_amr->registerOperator(s_eb_irreg_interp, m_realm, m_phase);
     m_amr->registerOperator(s_eb_pwl_interp,   m_realm, m_phase);
+    m_amr->registerOperator(s_eb_multigrid,    m_realm, m_phase);
   }
 }
 
@@ -502,7 +514,7 @@ bool EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCel
   const int finestLevel = m_amr->getFinestLevel();
 
   if(m_needsMultigridSetup){
-    this->setupMultigrid();
+    this->setupSolver();
   }
 
   bool converged;
@@ -578,10 +590,10 @@ bool EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCel
   return converged;
 }
 
-void EddingtonSP1::setupMultigrid(){
-  CH_TIME("EddingtonSP1::setupMultigrid");
+void EddingtonSP1::setupSolver(){
+  CH_TIME("EddingtonSP1::setupSolver");
   if(m_verbosity > 5){
-    pout() << m_name + "::setupMultigrid" << endl;
+    pout() << m_name + "::setupSolver" << endl;
   }
 
   if(!m_hasDeeperMultigridLevels){
@@ -592,7 +604,7 @@ void EddingtonSP1::setupMultigrid(){
   this->setMultigridCoefficients(); // Set coefficients, kappa, aco, bco
   this->setupOperatorFactory();     // Set the operator factory
   this->setupHelmholtzFactory();    // Set up the Helmholtz operator factory
-  this->setupMultigridSolver();     // Set up the AMR multigrid solver
+  this->setupMultigrid();     // Set up the AMR multigrid solver
 
   if(!m_stationary){
     if(m_useTGA){
@@ -880,13 +892,11 @@ void EddingtonSP1::setupOperatorFactory(){
 										    m_mg_levelgrids));
 }
 
-void EddingtonSP1::setupMultigridSolver(){
-  CH_TIME("EddingtonSP1::setupMultigridSolver");
+void EddingtonSP1::setupMultigrid(){
+  CH_TIME("EddingtonSP1::setupMultigrid");
   if(m_verbosity > 5){
-    pout() << m_name + "::setupMultigridSolver" << endl;
+    pout() << m_name + "::setupMultigrid" << endl;
   }
-
-
 
   // Select bottom solver
   LinearSolver<LevelData<EBCellFAB> >* botsolver = NULL;
@@ -907,7 +917,7 @@ void EddingtonSP1::setupMultigridSolver(){
     gmgType = 2;
     break;
   default:
-    MayDay::Error("EddingtonSP1::setupMultigridSolver -- logic bust in multigrid type selection");
+    MayDay::Error("EddingtonSP1::setupMultigrid -- logic bust in multigrid type selection");
   }
 
   const int finestLevel              = m_amr->getFinestLevel();
@@ -956,18 +966,12 @@ void EddingtonSP1::setupTGA(){
     pout() << m_name + "::setupTGA" << endl;
   }
   
-  const int finestLevel       = m_amr->getFinestLevel();
+  const int finestLevel              = m_amr->getFinestLevel();
   const ProblemDomain coarsestDomain = m_amr->getDomains()[0];
-  const Vector<int> ref_rat    = m_amr->getRefinementRatios();
+  const Vector<int> refRat           = m_amr->getRefinementRatios();
 
   m_tgaSolver = RefCountedPtr<AMRTGA<LevelData<EBCellFAB> > >
-    (new AMRTGA<LevelData<EBCellFAB> > (m_multigridSolver, *m_operatorFactory, coarsestDomain, ref_rat, 1 + finestLevel, m_multigridSolver->m_verbosity));
-
-  // Must init gmg for TGA
-  Vector<LevelData<EBCellFAB>* > phi, rhs;
-  m_amr->alias(phi, m_phi);
-  m_amr->alias(rhs, m_source);
-  m_multigridSolver->init(phi, rhs, finestLevel, 0);
+    (new AMRTGA<LevelData<EBCellFAB> > (m_multigridSolver, *m_operatorFactory, coarsestDomain, refRat, 1 + finestLevel, m_multigridSolver->m_verbosity));
 }
 
 void EddingtonSP1::setupEuler(){
@@ -976,12 +980,12 @@ void EddingtonSP1::setupEuler(){
     pout() << m_name + "::setupEuler" << endl;
   }
 
-  const int finestLevel       = m_amr->getFinestLevel();
+  const int finestLevel              = m_amr->getFinestLevel();
   const ProblemDomain coarsestDomain = m_amr->getDomains()[0];
-  const Vector<int> ref_rat    = m_amr->getRefinementRatios();
+  const Vector<int> refRat           = m_amr->getRefinementRatios();
 
   m_eulerSolver = RefCountedPtr<EBBackwardEuler> 
-    (new EBBackwardEuler (m_multigridSolver, *m_operatorFactory, coarsestDomain, ref_rat, 1 + finestLevel, m_multigridSolver->m_verbosity));
+    (new EBBackwardEuler (m_multigridSolver, *m_operatorFactory, coarsestDomain, refRat, 1 + finestLevel, m_multigridSolver->m_verbosity));
 }
 
 void EddingtonSP1::computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi){
