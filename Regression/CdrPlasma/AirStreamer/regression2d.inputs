@@ -152,13 +152,13 @@ EddingtonSP1.gmg_cycle           = vcycle    # Cycle type. Only 'vcycle' support
 EddingtonSP1.gmg_ebbc_weight     = 2            # EBBC weight (only for Dirichlet)
 EddingtonSP1.gmg_ebbc_order      = 2            # EBBC order (only for Dirichlet)
 EddingtonSP1.gmg_smoother        = red_black    # Relaxation type. 'jacobi', 'red_black', or 'multi_color'
-EddingtonSP1.ebbc                = robin 0.0     # Bc on embedded boundaries. 
-EddingtonSP1.bc.x.lo             = robin 0.0     # Boundary on domain. 'neumann' or 'robin'
-EddingtonSP1.bc.x.hi             = robin 0.0     # Boundary on domain. 'neumann' or 'robin'              
-EddingtonSP1.bc.y.lo             = robin 0.0     # Boundary on domain. 'neumann' or 'robin'
-EddingtonSP1.bc.y.hi             = robin 0.0     # Boundary on domain. 'neumann' or 'robin'
-EddingtonSP1.bc.z.lo             = robin 0.0     # Boundary on domain. 'neumann' or 'robin'
-EddingtonSP1.bc.z.hi             = robin 0.0     # Boundary on domain. 'neumann' or 'robin'		
+EddingtonSP1.ebbc                = larsen 0.0     # Bc on embedded boundaries. 
+EddingtonSP1.bc.x.lo             = larsen 0.0     # Boundary on domain. 'neumann' or 'robin'
+EddingtonSP1.bc.x.hi             = larsen 0.0     # Boundary on domain. 'neumann' or 'robin'              
+EddingtonSP1.bc.y.lo             = larsen 0.0     # Boundary on domain. 'neumann' or 'robin'
+EddingtonSP1.bc.y.hi             = larsen 0.0     # Boundary on domain. 'neumann' or 'robin'
+EddingtonSP1.bc.z.lo             = larsen 0.0     # Boundary on domain. 'neumann' or 'robin'
+EddingtonSP1.bc.z.hi             = larsen 0.0     # Boundary on domain. 'neumann' or 'robin'		
 
 # ====================================================================================================
 # GEO_COARSENER CLASS OPTIONS
