@@ -7,7 +7,6 @@
   @file   CD_EddingtonSP1.H
   @brief  Declaration of a first order Eddington solver for radiative transfer
   @author Robert Marskar
-  @todo   Need to review the coefficients and flux computation routines. They have only been reviewed by students (I think)
 */
 
 #ifndef CD_EddingtonSP1_H
@@ -19,9 +18,10 @@
 // Chombo includes
 #include <AMRMultiGrid.H>
 #include <AMRTGA.H>
-#include <BiCGStabSolver.H>
 #include <EBBackwardEuler.H>
 #include <EBSimpleSolver.H>
+#include <BiCGStabSolver.H>
+#include <GMRESSolver.H>
 
 // Our includes
 #include <CD_RtSolver.H>
@@ -95,8 +95,8 @@ public:
 
   /*!
     @brief Set the boundary condition function on a wall. 
-    @param[in] a_dir Coordinate direction.
-    @param[in] a_side Side in the coordinate direction.
+    @param[in] a_dir      Coordinate direction.
+    @param[in] a_side     Side (low/high)
     @param[in] a_function Boundary condition function.
     @details This sets a boundary condition for a particular side on a wall. The user must also specify how to use this BC in the input script. 
   */
@@ -147,7 +147,7 @@ public:
   virtual void computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_phi) override;
 
   /*!
-    @brief Compute the flux
+    @brief Compute the flux. For Eddington, the flux is F = -c/(3*kappa)*grad(phi)
     @param[out] a_flux Cell-centered flux
     @param[in]  a_phi  Isotropic part of RTE solution
   */
@@ -198,6 +198,7 @@ protected:
   enum class BottomSolverType {
     Simple,
     BiCGStab,
+    GMRES,
   };
 
   /*!
@@ -335,6 +336,11 @@ protected:
     @brief Conjugate gradient solver bottom MG level
   */
   BiCGStabSolver<LevelData<EBCellFAB> > m_bicgstab;
+
+  /*!
+    @brief GMRES solver
+  */
+  GMRESSolver<LevelData<EBCellFAB> > m_gmres;
 
   /*!
     @brief TGA solver
