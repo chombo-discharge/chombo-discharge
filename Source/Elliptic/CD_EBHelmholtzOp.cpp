@@ -701,15 +701,14 @@ void EBHelmholtzOp::applyDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, cons
 }
 
 void EBHelmholtzOp::applyOpIrregular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBC){
-  
   // Apply the operator in all cells where we needed an explicit stencil. 
   VoFIterator& vofit = m_vofIterStenc[a_dit];
   for (vofit.reset(); vofit.ok(); ++vofit){
     const VolIndex& vof     = vofit();
-    const VoFStencil& stenc = m_opStencils[a_dit](vof, m_comp);
-    const Real& aco         = (*m_Acoef)  [a_dit](vof, m_comp);
+    const VoFStencil& stenc = m_opStencils[a_dit](vof, m_comp);      // = Finite volume stencil representation of Int[B*grad(phi)]dA
+    const Real& alphaDiag   = m_alphaDiagWeight[a_dit](vof, m_comp); // = kappa * alpha * aco
     
-    a_Lphi(vof, m_comp) = m_alpha * aco * a_phi(vof, m_comp);
+    a_Lphi(vof, m_comp) = alphaDiag * a_phi(vof, m_comp);
     
     for (int i = 0; i < stenc.size(); i++){
       const VolIndex& ivof = stenc.vof(i);
@@ -999,7 +998,7 @@ void EBHelmholtzOp::computeAlphaWeight(){
       const Real volFrac = m_eblg.getEBISL()[dit()].volFrac(vof);
       const Real Aco     = (*m_Acoef)[dit()](vof, m_comp);
 
-      m_alphaDiagWeight[dit()](vof, m_comp) = volFrac*Aco;
+      m_alphaDiagWeight[dit()](vof, m_comp) = volFrac * Aco;
     }
   }
 }
