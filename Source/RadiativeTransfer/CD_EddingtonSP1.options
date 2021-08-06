@@ -28,4 +28,4 @@ EddingtonSP1.gmg_min_cells       = 2            # Bottom drop
 EddingtonSP1.gmg_bottom_solver   = bicgstab     # Bottom solver type. Valid options are 'simple' and 'bicgstab'
 EddingtonSP1.gmg_bottom_relax    = 8            # Number of relaxations in bottom solve ('simple' solver only)
 EddingtonSP1.gmg_cycle           = vcycle       # Cycle type. Only 'vcycle' supported for now
-EddingtonSP1.gmg_relax_type      = gsrb         # Relaxation type. 'jacobi', 'gauss_seidel', or 'gsrb'
+EddingtonSP1.gmg_relax_type      = red_black    # Relaxation type. 'jacobi', 'red_black', or 'multi_color'
