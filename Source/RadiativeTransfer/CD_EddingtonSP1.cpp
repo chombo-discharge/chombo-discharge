@@ -645,12 +645,6 @@ void EddingtonSP1::setHelmholtzCoefficients(){
   DataOps::scale(m_helmAco,      1.0);       // m_helmAco      = c*kappa
   DataOps::scale(m_helmBco,      1.0/(3.0)); // m_helmBco      = c/(3*kappa)
   DataOps::scale(m_helmBcoIrreg, 1.0/(3.0)); // m_helmBcoIrreg = c/(3*kappa)
-
-#if 1 // Debug
-  DataOps::setValue(m_helmAco, 1.0);
-  DataOps::setValue(m_helmBco, 1.0);
-  DataOps::setValue(m_helmBcoIrreg, 1.0);
-#endif
 }
 
 void EddingtonSP1::setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
