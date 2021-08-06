@@ -33,10 +33,7 @@
 #include <CD_EBHelmholtzDirichletEBBCFactory.H>      
 #include <CD_EBHelmholtzNeumannEBBCFactory.H>
 #include <CD_EBHelmholtzLarsenEBBCFactory.H>
-#include <CD_EBHelmholtzLarsenDomainBCFactory.H>
-#include <CD_EBHelmholtzDirichletDomainBCFactory.H> // Domain stuff should be collapsed since we need a wrapper anyways. 
-#include <CD_EBHelmholtzNeumannDomainBCFactory.H>
-#include <CD_EBHelmholtzRobinDomainBCFactory.H>
+#include <CD_EBHelmholtzEddingtonSP1DomainBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
 constexpr Real EddingtonSP1::m_alpha;
@@ -814,11 +811,11 @@ void EddingtonSP1::setupHelmholtzFactory(){
   RefCountedPtr<EBHelmholtzDomainBCFactory> domainBcFactory;
   RefCountedPtr<EBHelmholtzEBBCFactory> ebbcFactory;
   
-  // Just run with Larsen for now. These need to be updated with proper source terms. 
-  domainBcFactory = RefCountedPtr<EBHelmholtzDomainBCFactory> (new EBHelmholtzLarsenDomainBCFactory(m_RtSpecies, m_reflectCoefOne, m_reflectCoefTwo, 0.0));
+  // Domain bcs use a wrapper for fetching the bc function on a specified edge
+  domainBcFactory = RefCountedPtr<EBHelmholtzDomainBCFactory> (new EBHelmholtzEddingtonSP1DomainBCFactory(m_domainBc, m_RtSpecies, m_reflectCoefOne, m_reflectCoefTwo));
 
-  // This sets up the embedded boundary conditions. In parseEBBC we happened to read a line from the input script in the format = <type> <value>
-  // which was put into a function. Here, 
+  // For EBs we run with only one type of BC (for now). This code sets up the embedded boundary conditions. In parseEBBC we happened to
+  // read a line from the input script in the format = <type> <value> which was put into a function. Associate that function here. 
   switch(m_ebbc.first) {
   case EBBCType::Dirichlet:
     ebbcFactory = RefCountedPtr<EBHelmholtzDirichletEBBCFactory> (new EBHelmholtzDirichletEBBCFactory(m_multigridBcOrder, m_multigridBcWeight, m_ebbc.second));

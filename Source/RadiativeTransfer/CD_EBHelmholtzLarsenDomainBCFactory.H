@@ -24,6 +24,11 @@ class EBHelmholtzLarsenDomainBCFactory : public EBHelmholtzRobinDomainBCFactory 
 public:
 
   /*!
+    @brief Alias for source function
+  */
+  using SourceFunction = std::function<Real(const RealVect& a_position, const Real a_time)>;
+
+  /*!
     @brief Disallowed weak constructor
   */
   EBHelmholtzLarsenDomainBCFactory() = delete;
@@ -39,7 +44,18 @@ public:
   EBHelmholtzLarsenDomainBCFactory(const RefCountedPtr<RtSpecies>& a_species,
 				   const Real                      a_r1,
 				   const Real                      a_r2,
-				   const Real                      a_source);
+				   const SourceFunction            a_source);
+
+  /*!
+    @brief Constructor. Source term is set to zero. 
+    @param[in] a_species Radiative transfer species
+    @param[in] a_r1      "First reflection coefficient"
+    @param[in] a_r2      "Second reflection coefficient"
+    @details Larsen coefficients (in Robin format) are set based on kappa and reflection coefficients. 
+  */
+  EBHelmholtzLarsenDomainBCFactory(const RefCountedPtr<RtSpecies>& a_species,
+				   const Real                      a_r1,
+				   const Real                      a_r2);
 
   /*!
     @brief No copy construction
@@ -86,7 +102,7 @@ protected:
   /*!
     @brief Source term
   */
-  Real m_source;
+  SourceFunction m_source;
 
   /*!
     @brief Set Robin coefficients
