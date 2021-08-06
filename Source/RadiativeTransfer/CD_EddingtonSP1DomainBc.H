@@ -21,7 +21,6 @@
 #include <LoHiSide.H>
 
 // Our includes
-#include <CD_LarsenCoefficients.H>
 #include <CD_NamespaceHeader.H>
 
 /*!

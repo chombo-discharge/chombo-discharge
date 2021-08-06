@@ -13,6 +13,7 @@
 #define CD_EBHelmholtzEddingtonDomainBC_H
 
 // Our includes
+#include <CD_RtSpecies.H>
 #include <CD_EddingtonSP1DomainBc.H>
 #include <CD_EBHelmholtzDomainBC.H>
 #include <CD_NamespaceHeader.H>

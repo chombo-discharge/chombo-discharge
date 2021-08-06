@@ -52,9 +52,7 @@
 #include <CD_MFCoarAve.H>
 #include <CD_Units.H>
 
-// Old news
-#include <CD_RobinConductivityDomainBcFactory.H>
-#include <CD_RobinConductivityEbBcFactory.H>
+// Blaargh
 #include <CD_NamespaceHeader.H>
 
 
@@ -272,19 +270,6 @@ void ProxyFieldSolver::solveEBCond(EBAMRCellData& a_phi, EBAMRCellData& a_residu
 
     ebbcFactory = RefCountedPtr<BaseEBBCFactory>(bcFactory);
   }
-  else if (str == "robin"){
-    pp.get("eb_val", eb_value);
-
-    // Coefficients for radiative transfer with Robin. 
-    const Real A =  1.5*eb_value;
-    const Real B = -1.0*eb_value;
-    const Real C =  0.0;
-
-    auto bcFactory = new RobinConductivityEbBcFactory(m_amr->getProbLo());
-    bcFactory->setCoefficients(A, B, C);
-    
-    ebbcFactory = RefCountedPtr<BaseEBBCFactory> (bcFactory);
-  }
   else{
     MayDay::Error("ProxyFieldSolver::solveEBCond - uknown EBBC factory requested");
   }
@@ -301,18 +286,6 @@ void ProxyFieldSolver::solveEBCond(EBAMRCellData& a_phi, EBAMRCellData& a_residu
   else if(str == "neumann"){
     auto bcFactory = new NeumannConductivityDomainBCFactory();
     bcFactory->setValue(dom_value);
-
-    domainBcFactory = RefCountedPtr<BaseDomainBCFactory>(bcFactory);
-  }
-  else if(str == "robin"){
-    auto bcFactory = new RobinConductivityDomainBcFactory();
-
-    // Coeffs for radiative transfer with Robin
-    const Real A =  1.5*dom_value;
-    const Real B = -1.0*dom_value;
-    const Real C = 0.0;
-
-    bcFactory->setCoefficients(A, B, C);
 
     domainBcFactory = RefCountedPtr<BaseDomainBCFactory>(bcFactory);
   }
