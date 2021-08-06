@@ -24,7 +24,6 @@
 
 // Our includes
 #include <CD_RtSolver.H>
-#include <CD_EbHelmholtzOpFactory.H>
 #include <CD_EBHelmholtzOpFactory.H>
 #include <CD_EddingtonSP1DomainBc.H>
 #include <CD_NamespaceHeader.H>
@@ -76,8 +75,12 @@ public:
 
   /*!
     @brief Advance RTE onto state a_phi
+    @param[in]    a_dt      Time step
+    @param[inout] a_phi     RTE solution
+    @param[in]    a_source  Source term
+    @param[in]    a_zeroPhi Set phi to zero in initial guess for multigrid solve
   */
-  virtual bool advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_source, const bool a_zerophi = false) override;
+  virtual bool advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_source, const bool a_zeroPhi = false) override;
 
   /*!
     @brief Parse class options
@@ -105,6 +108,8 @@ public:
   
   /*!
     @brief Cache state
+    @param[in] a_base           Coarsest level that did not change during regrid
+    @param[in] a_oldFinestLevel Finest level before the regrid
   */
   virtual void preRegrid(const int a_base, const int a_oldFinestLevel) override;
 
@@ -115,6 +120,9 @@ public:
 
   /*!
     @brief Regrid function for this class
+    @param[in] a_lmin           Coarsest level that changed during regrid
+    @param[in] a_oldFinestLevel Finest level before the regrid
+    @param[in] a_newFinestLevel Finest level after the regrid
   */
   virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
 
@@ -125,25 +133,32 @@ public:
 
   /*!
     @brief Compute the boundary flux. For Eddington, the boundary flux is = c*phi/2
+    @param[out] a_ebFlux Flux on the EBs
+    @param[in]  a_phi    Isotropic part of the RTE solution
   */
   virtual void computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi) override;
 
   /*!
     @brief Compute the domain flux. For Eddington, the domain flux is = c*phi/2
+    @param[out] a_domainFlux Flux on the domain sides
+    @param[in]  a_phi        Isotropic part of the RTE solution
   */
   virtual void computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_phi) override;
 
   /*!
     @brief Compute the flux
-    @details For diffusive models, the flux will be something like grad(a_phi). For higher-order models, the flux 
-    will be contained in a_phi (somehow);
+    @param[out] a_flux Cell-centered flux
+    @param[in]  a_phi  Isotropic part of RTE solution
   */
   virtual void computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi) override;
 
   /*!
     @brief Get isotropic part. 
+    @param[out] a_isotropic Isotropic part of RTE solution
+    @param[in]  a_phi       RTE solution
+    @details For Eddington, only the isotropic part is solved for so this routine just copies. 
   */
-  virtual void computeDensity(EBAMRCellData& a_isotropic, const EBAMRCellData& a_phi)override;
+  virtual void computeDensity(EBAMRCellData& a_isotropic, const EBAMRCellData& a_phi) override;
 
   /*!
     @brief Write plot file
@@ -151,12 +166,16 @@ public:
   virtual void writePlotFile() override;
 
   /*!
-    @brief Write checkpoint data into handle
+    @brief Write checkpoint data into HDF5 file
+    @param[out] a_handle HDF5 file
+    @param[in]  a_level  Grid level
   */
   virtual void writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const override;
 
   /*!
     @brief Read checkpoint data from handle
+    @param[out] a_handle HDF5 file
+    @param[in]  a_level  Grid level
   */
   virtual void readCheckpointLevel(HDF5Handle& a_handle, const int a_level) override;
 
@@ -200,7 +219,7 @@ protected:
   /*!
     @brief Enum for boundary condition types on EBs
   */
-  enum class EBBCType{
+  enum class EBBCType {
     Dirichlet,
     Neumann,
     Larsen
@@ -222,11 +241,6 @@ protected:
   bool m_isSolverSetup;
 
   /*!
-    @brief Has deeper MG levels or not
-  */
-  bool m_hasDeeperMultigridLevels;
-
-  /*!
     @brief Use tga for transient solevs
   */
   bool m_useTGA;
@@ -240,11 +254,6 @@ protected:
     @brief Verbosity for geometric multigrid
   */
   int m_multigridVerbosity;
-
-  /*!
-    @brief Precoarsening for multigrid
-  */
-  int m_numCoarseningsBeforeAggregation;
 
   /*!
     @brief Number of smoothings before averaging
@@ -342,39 +351,29 @@ protected:
   RefCountedPtr<EBHelmholtzOpFactory> m_helmholtzOpFactory;
 
   /*!
-    @brief Operator factory
-  */
-  RefCountedPtr<EbHelmholtzOpFactory> m_operatorFactory;
-
-  /*!
-    @brief MG levelsgrids
-  */
-  Vector<EBLevelGrid> m_mg_levelgrids;
-
-  /*!
     @brief multi-fluid simple solver
   */
   EBSimpleSolver m_simpleSolver;
   
   /*!
-    @brief Residue for stationary solver
+    @brief Multigrid residue
   */
   EBAMRCellData m_resid;
 
   /*!
     @brief a-coefficient
   */
-  EBAMRCellData m_aco;
+  EBAMRCellData m_helmAco;
 
   /*!
     @brief b-coefficient
   */
-  EBAMRFluxData m_bco;
+  EBAMRFluxData m_helmBco;
 
   /*!
     @brief b-coefficient
   */
-  EBAMRIVData m_bco_irreg;
+  EBAMRIVData m_helmBcoIrreg;
 
   /*!
     @brief Wrapper calss. 
@@ -387,7 +386,7 @@ protected:
   std::map<EddingtonSP1DomainBc::Wall, EddingtonSP1DomainBc::BcFunction> m_domainBcFunctions;
 
   /*!
-    @brief Boundary condition on the embedded boundary
+    @brief Associated boundary condition on the embedded boundary
   */
   std::pair<EBBCType, Real> m_ebbc;
 
@@ -397,9 +396,9 @@ protected:
   virtual void setupSolver();
 
   /*!
-    @brief Set kappa
+    @brief Set multigrid coefficients
   */
-  virtual void setMultigridCoefficients();
+  virtual void setHelmholtzCoefficients();
 
   /*!
     @brief Set the a-coefficient and b-coefficient
@@ -417,16 +416,6 @@ protected:
 				   const int        a_lvl,
 				   const DataIndex& a_dit);
 
-  /*!
-    @brief Define the GMG levels
-  */
-  virtual void defineDeeperMultigridLevels();
-  
-  /*!
-    @brief Set the operator factory
-  */
-  virtual void setupOperatorFactory();
-
     /*!
     @brief Set the operator factory
   */
@@ -439,6 +428,8 @@ protected:
 
   /*!
     @brief Make domain bc string
+    @param[in] a_dir  Coordinate direction
+    @param[in] a_side Side
     @details Used for pasing boundary conditions from input script. 
     @returns Returns string of type "bc.x.lo", "bc.y.hi" etc. 
   */
