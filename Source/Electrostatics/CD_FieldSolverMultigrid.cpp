@@ -154,7 +154,7 @@ void FieldSolverMultigrid::allocateInternals(){
 bool FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
 				 const MFAMRCellData& a_rho,
 				 const EBAMRIVData&   a_sigma,
-				 const bool           a_zerophi){
+				 const bool           a_zeroPhi){
   CH_TIME("FieldSolverMultigrid::solve(mfamrcell, mfamrcell");
   if(m_verbosity > 5){
     pout() << "FieldSolverMultigrid::solve(mfamrcell, mfamrcell)" << endl;
@@ -164,7 +164,6 @@ bool FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
   //       div(eps*grad(phi)) = -rho/eps0. 
   //
   //       So, we must scale rho (which is defined on centroids) by kappa and divide by eps0. The minus-sign is in the operator. 
-
   bool converged = false;
 
   if(!m_isSolverSetup){
@@ -204,10 +203,9 @@ bool FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
   m_convergedResidue = zero_resid*m_multigridExitTolerance;
 
   // Do a multigrid solve if the residual is too large
-  Real t0 = -MPI_Wtime();
   if(phi_resid > m_convergedResidue){ 
     m_multigridSolver.m_convergenceMetric = zero_resid;
-    m_multigridSolver.solveNoInitResid(phi, res, rhs, finestLevel, 0, a_zerophi);
+    m_multigridSolver.solveNoInitResid(phi, res, rhs, finestLevel, 0, a_zeroPhi);
 
     const int status = m_multigridSolver.m_exitStatus;   // 1 => Initial norm sufficiently reduced
     if(status == 1 || status == 8){                      // 8 => Norm sufficiently small
@@ -217,26 +215,6 @@ bool FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
   else{ // Solution is already converged
     converged = true;
   }
-  t0 += MPI_Wtime();
-#if USE_NEW_HELMHOLTZ_FACTORY
-  if(procID() == 0) std::cout << "solve time with new factory = " << t0 << "\n";
-#else
-  if(procID() == 0) std::cout << "solve time with old factory = " << t0 << "\n";
-#endif
-
-
-#if 1 // Solver hang. I don't know why this would work but OK.
-  if(!converged){
-    this->setupSolver();
-    DataOps::setValue(a_phi, 0.0);
-    m_multigridSolver.solveNoInitResid(phi, res, rhs, finestLevel, 0, a_zerophi);
-
-    const int status = m_multigridSolver.m_exitStatus;   // 1 => Initial norm sufficiently reduced
-    if(status == 1 || status == 8 || status == 9){  // 8 => Norm sufficiently small
-      converged = true;
-    }
-  }
-#endif
 
   m_multigridSolver.revert(phi, rhs, finestLevel, 0);
 
