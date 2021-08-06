@@ -17,7 +17,6 @@ EddingtonSP1.bc.z.hi             = larsen 0.0   # Bc on domain side. 'dirichlet'
 EddingtonSP1.bc.z.hi             = larsen 0.0   # Boundary on domain. 'neumann' or 'larsen'
 
 EddingtonSP1.gmg_verbosity       = -1           # GMG verbosity
-EddingtonSP1.gmg_coarsen         = 4            # Precoarsening of multigrid levels
 EddingtonSP1.gmg_pre_smooth      = 8            # Number of relaxations in downsweep
 EddingtonSP1.gmg_post_smooth     = 8            # Number of relaxations in upsweep
 EddingtonSP1.gmg_bott_smooth     = 8            # NUmber of relaxations before dropping to bottom solver
