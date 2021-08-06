@@ -16,22 +16,8 @@
 
 EBHelmholtzLarsenDomainBCFactory::EBHelmholtzLarsenDomainBCFactory(const RefCountedPtr<RtSpecies>& a_species,
 								   const Real                      a_r1,
-								   const Real                      a_r2){
-  m_species = a_species;
-  m_r1      = a_r1;
-  m_r2      = a_r2;
-
-  m_source = [](const RealVect a_position, const Real a_time){
-    return 0.0;
-  };
-
-  this->setRobinCoefficients();
-}
-
-EBHelmholtzLarsenDomainBCFactory::EBHelmholtzLarsenDomainBCFactory(const RefCountedPtr<RtSpecies>& a_species,
-								   const Real                      a_r1,
 								   const Real                      a_r2,
-								   const SourceFunction&           a_source){
+								   const Real                      a_source){
   m_species = a_species;
   m_r1      = a_r1;
   m_r2      = a_r2;
@@ -66,9 +52,7 @@ void EBHelmholtzLarsenDomainBCFactory::setRobinCoefficients(){
   // This is the right-hand side of the Robin BC, i.e. the source function. Time is a dummy parameter, and the user should
   // have captured some external time (e.g., RtSolver::m_time) by reference in the function that was passed into the full constructor. 
   m_functionC = [source=this->m_source](const RealVect& a_position){
-    constexpr Real dummyDt = 0.0;
-    
-    return source(a_position, dummyDt);
+    return source;
   };
 
   // Call parent function

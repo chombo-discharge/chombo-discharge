@@ -200,7 +200,7 @@ protected:
   /*!
     @brief Enum for boundary condition types on EBs
   */
-  enum class EbBcType{
+  enum class EBBCType{
     Dirichlet,
     Neumann,
     Larsen
@@ -389,7 +389,7 @@ protected:
   /*!
     @brief Boundary condition on the embedded boundary
   */
-  std::pair<EbBcType, Real> m_ebbc;
+  std::pair<EBBCType, Real> m_ebbc;
 
   /*!
     @brief Set up geometric multigrid
@@ -463,12 +463,12 @@ protected:
   /*!
     @brief Parse domain BC settings
   */
-  virtual void parseDomainBc();
+  virtual void parseDomainBC();
 
     /*!
     @brief Parse domain BC settings
   */
-  virtual void parseEbBc();
+  virtual void parseEBBC();
 
   /*!
     @brief Parse whether or not this is a stationary solver

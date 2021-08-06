@@ -24,11 +24,6 @@ class EBHelmholtzLarsenEBBCFactory : public EBHelmholtzRobinEBBCFactory {
 public:
 
   /*!
-    @brief Alias for BC function
-  */
-  using SourceFunction = std::function<Real(const RealVect a_position, const Real a_time)>;
-
-  /*!
     @brief Disallowed weak constructor
   */
   EBHelmholtzLarsenEBBCFactory() = delete;
@@ -38,25 +33,13 @@ public:
     @param[in] a_species Radiative transfer species
     @param[in] a_r1      "First reflection coefficient"
     @param[in] a_r2      "Second reflection coefficient"
+    @param[in] a_source  "Source term
     @details Larsen coefficients (in Robin format) are set based on kappa and reflection coefficients. 
   */
   EBHelmholtzLarsenEBBCFactory(const RefCountedPtr<RtSpecies>& a_species,
 			       const Real                      a_r1,
-			       const Real                      a_r2);
-
-  /*!
-    @brief Constructor. Source term is set to zero. 
-    @param[in] a_species    Radiative transfer species
-    @param[in] a_r1        "First reflection coefficient"
-    @param[in] a_r2        "Second reflection coefficient"
-    @param[in] a_source     Source term on boundary
-    @details Larsen coefficients (in Robin format) are set based on kappa and reflection coefficients. The last parameter provides
-    an option to include sources on the boundaries. To include time-dependence, a_bcFunction should capture an external time by reference.
-  */
-  EBHelmholtzLarsenEBBCFactory(const RefCountedPtr<RtSpecies>& a_species,
-			       const Real                      a_r1,
 			       const Real                      a_r2,
-			       const SourceFunction&           a_source);
+			       const Real                      a_source);
 
   /*!
     @brief No copy construction
@@ -103,7 +86,7 @@ protected:
   /*!
     @brief Source term
   */
-  SourceFunction m_source;
+  Real m_source;
 
   /*!
     @brief Set Robin coefficients

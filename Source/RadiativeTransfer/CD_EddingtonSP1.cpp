@@ -69,8 +69,8 @@ void EddingtonSP1::parseOptions(){
     pout() << m_name + "::parseOptions" << endl;
   }
 
-  this->parseDomainBc();          // Parses domain bc
-  this->parseEbBc();              // Parse ebbc
+  this->parseDomainBC();          // Parses domain bc
+  this->parseEBBC();              // Parse ebbc
   this->parseReflection();        // Parses "reflection coefficients"
   this->parseStationary();        // Parse stationary solver
   this->parsePlotVariables();     // Parses plot variables
@@ -170,10 +170,10 @@ EddingtonSP1DomainBc::BcType EddingtonSP1::parseBcString(const std::string a_str
   return ret;
 }
 
-void EddingtonSP1::parseDomainBc(){
-  CH_TIME("EddingtonSP1::parseDomainBc");
+void EddingtonSP1::parseDomainBC(){
+  CH_TIME("EddingtonSP1::parseDomainBC");
   if(m_verbosity > 5){
-    pout() << m_name + "::parseDomainBc" << endl;
+    pout() << m_name + "::parseDomainBC" << endl;
   }
 
   // TLDR: This routine might seem big and complicated. What we are doing is that we are creating one function object which returns some value
@@ -221,7 +221,7 @@ void EddingtonSP1::parseDomainBc(){
 	  bcType  = EddingtonSP1DomainBc::BcType::Larsen;
 	}
 	else{
-	  MayDay::Abort("EddingtonSP1::parseDomainBc -- got only one argument but this argument was not in the form of e.g. 'neumann_custom'!");
+	  MayDay::Abort("EddingtonSP1::parseDomainBC -- got only one argument but this argument was not in the form of e.g. 'neumann_custom'!");
 	}
 
 	break;
@@ -241,7 +241,7 @@ void EddingtonSP1::parseDomainBc(){
 	break;
       }
       default: {
-	MayDay::Abort("EddingtonSP1::parseDomainBc -- unknown argument to domain bc");
+	MayDay::Abort("EddingtonSP1::parseDomainBC -- unknown argument to domain bc");
 	break;
       }
       }
@@ -251,10 +251,10 @@ void EddingtonSP1::parseDomainBc(){
   }
 }
 
-void EddingtonSP1::parseEbBc(){
-  CH_TIME("EddingtonSP1::parseEbBc");
+void EddingtonSP1::parseEBBC(){
+  CH_TIME("EddingtonSP1::parseEBBC");
   if(m_verbosity > 5){
-    pout() << m_name + "::parseEbBc" << endl;
+    pout() << m_name + "::parseEBBC" << endl;
   }
 
   ParmParse pp(m_className.c_str());
@@ -269,25 +269,25 @@ void EddingtonSP1::parseEbBc(){
     pp.get(bcString.c_str(), str, 0);
     pp.get(bcString.c_str(), val, 1);
 
-    EbBcType bcType;
+    EBBCType bcType;
 
     if(str == "dirichlet"){
-      bcType = EbBcType::Dirichlet;
+      bcType = EBBCType::Dirichlet;
     }
     else if(str == "neumann"){
-      bcType = EbBcType::Neumann;
+      bcType = EBBCType::Neumann;
     }
     else if(str == "larsen"){
-      bcType = EbBcType::Larsen;
+      bcType = EBBCType::Larsen;
     }
     else{
-      MayDay::Abort("EddingtonSP1::parseEbBc -- not dirichlet/neumann/larsen!");
+      MayDay::Abort("EddingtonSP1::parseEBBC -- not dirichlet/neumann/larsen!");
     }
 
     m_ebbc = std::make_pair(bcType, val);
   }
   else{
-    MayDay::Abort("EddingtonSP1::parseEbBc -- bad input argument. Should be in the form 'larsen 0.0', 'dirichlet 0.0', etc");
+    MayDay::Abort("EddingtonSP1::parseEBBC -- bad input argument. Should be in the form 'larsen 0.0', 'dirichlet 0.0', etc");
   }
 }
 
@@ -812,8 +812,25 @@ void EddingtonSP1::setupHelmholtzFactory(){
   const IntVect ghostRhs   = m_amr->getNumberOfGhostCells()*IntVect::Unit;
   
   // Just run with Larsen for now. These need to be updated with proper source terms. 
-  auto domainBcFactory = RefCountedPtr<EBHelmholtzDomainBCFactory> (new EBHelmholtzLarsenDomainBCFactory(m_RtSpecies, m_reflectCoefOne, m_reflectCoefTwo));
-  auto ebBcFactory     = RefCountedPtr<EBHelmholtzEBBCFactory>     (new EBHelmholtzLarsenEBBCFactory    (m_RtSpecies, m_reflectCoefOne, m_reflectCoefTwo));
+  auto domainBcFactory = RefCountedPtr<EBHelmholtzDomainBCFactory> (new EBHelmholtzLarsenDomainBCFactory(m_RtSpecies, m_reflectCoefOne, m_reflectCoefTwo, 0.0));
+
+  // This sets up the embedded boundary conditions. In parseEBBC we happened to read a line from the input script in the format = <type> <value>
+  // which was put into a function. Here, 
+  RefCountedPtr<EBHelmholtzEBBCFactory> ebbcFactory;
+  switch(m_ebbc.first) {
+  case EBBCType::Dirichlet:
+    ebbcFactory = RefCountedPtr<EBHelmholtzDirichletEBBCFactory> (new EBHelmholtzDirichletEBBCFactory(m_multigridBcOrder, m_multigridBcWeight, m_ebbc.second));
+    break;
+  case EBBCType::Neumann:
+    ebbcFactory = RefCountedPtr<EBHelmholtzEBBCFactory> (new EBHelmholtzNeumannEBBCFactory(m_ebbc.second));
+    break;
+  case EBBCType::Larsen: 
+    ebbcFactory = RefCountedPtr<EBHelmholtzEBBCFactory> (new EBHelmholtzLarsenEBBCFactory (m_RtSpecies, m_reflectCoefOne, m_reflectCoefTwo, m_ebbc.second));
+    break;
+  default:
+    MayDay::Error("EddingtonSP1::setupHelmholtzFactory - logic bust in EB BC factory");
+    break;
+  }
 
   // Set up the operator
   m_helmholtzOpFactory = RefCountedPtr<EBHelmholtzOpFactory> (new EBHelmholtzOpFactory(m_dataLocation,
@@ -830,7 +847,7 @@ void EddingtonSP1::setupHelmholtzFactory(){
 										       m_bco.getData(),
 										       m_bco_irreg.getData(),
 										       domainBcFactory,
-										       ebBcFactory,
+										       ebbcFactory,
 										       ghostPhi,
 										       ghostRhs,
 										       m_multigridRelaxMethod,
@@ -865,20 +882,20 @@ void EddingtonSP1::setupOperatorFactory(){
   // Set the embedded boundary bc factory. This uses a constant value for the right-hand side on the EB. 
   RefCountedPtr<BaseEBBCFactory> ebbcFactory;
   switch(m_ebbc.first){
-  case EbBcType::Dirichlet: {
+  case EBBCType::Dirichlet: {
     auto dirichletEbBcFactory = RefCountedPtr<DirichletConductivityEBBCFactory> (new DirichletConductivityEBBCFactory());
     dirichletEbBcFactory->setValue(m_ebbc.second);
     dirichletEbBcFactory->setOrder(1);
     ebbcFactory = RefCountedPtr<BaseEBBCFactory> (dirichletEbBcFactory);
     break;
   }
-  case EbBcType::Neumann: {
+  case EBBCType::Neumann: {
     auto neumannEbBcFactory = RefCountedPtr<NeumannConductivityEBBCFactory> (new NeumannConductivityEBBCFactory());
     neumannEbBcFactory->setValue(m_ebbc.second);
     ebbcFactory = RefCountedPtr<BaseEBBCFactory> (neumannEbBcFactory);
     break;
   }
-  case EbBcType::Larsen: {
+  case EBBCType::Larsen: {
     // Make the appropriate coefficients (Larsen) with right-hand side. 
     std::function<Real(const RealVect, const Real) > ebFunc = [&ebbc=this->m_ebbc](const RealVect a_pos, const Real a_time) {
       return ebbc.second;
