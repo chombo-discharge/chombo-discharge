@@ -267,6 +267,16 @@ protected:
   int m_multigridMinIterations;
 
   /*!
+    @brief Multigrid EBBC order (only relevant for Dirichlet)
+  */
+  int m_multigridBcOrder;
+
+    /*!
+    @brief Multigrid EBBC weight (only relevant for Dirichlet)
+  */
+  int m_multigridBcWeight;
+
+  /*!
     @brief Bottom solver type
   */
   BottomSolverType m_bottomSolverType;

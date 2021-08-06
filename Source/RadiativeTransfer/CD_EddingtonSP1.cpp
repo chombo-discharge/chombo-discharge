@@ -327,16 +327,18 @@ void EddingtonSP1::parseMultigridSettings(){
 
   std::string str;
 
-  pp.get("gmg_verbosity",   m_multigridVerbosity);
-  pp.get("gmg_coarsen",     m_numCoarseningsBeforeAggregation);
-  pp.get("gmg_pre_smooth",  m_multigridPreSmooth);
-  pp.get("gmg_post_smooth", m_multigridPostSmooth);
-  pp.get("gmg_bott_smooth", m_multigridBottomSmooth);
-  pp.get("gmg_max_iter",    m_multigridMaxIterations);
-  pp.get("gmg_min_iter",    m_multigridMinIterations);
-  pp.get("gmg_exit_tol",    m_multigridExitTolerance);
-  pp.get("gmg_exit_hang",   m_multigridExitHang);
-  pp.get("gmg_min_cells",   m_minCellsBottom);
+  pp.get("gmg_verbosity",    m_multigridVerbosity);
+  pp.get("gmg_coarsen",      m_numCoarseningsBeforeAggregation);
+  pp.get("gmg_pre_smooth",   m_multigridPreSmooth);
+  pp.get("gmg_post_smooth",  m_multigridPostSmooth);
+  pp.get("gmg_bott_smooth",  m_multigridBottomSmooth);
+  pp.get("gmg_max_iter",     m_multigridMaxIterations);
+  pp.get("gmg_min_iter",     m_multigridMinIterations);
+  pp.get("gmg_exit_tol",     m_multigridExitTolerance);
+  pp.get("gmg_exit_hang",    m_multigridExitHang);
+  pp.get("gmg_min_cells",    m_minCellsBottom);
+  pp.get("gmg_bc_order",     m_multigridBcOrder);
+  pp.get("gmg_bc_weight",    m_multigridBcWeight);
 
   // Fetch the desired bottom solver from the input script. We look for things like EddingtonSP1.gmg_bottom_solver = bicgstab or '= simple <number>'
   // where <number> is the number of relaxation for the smoothing solver. 
