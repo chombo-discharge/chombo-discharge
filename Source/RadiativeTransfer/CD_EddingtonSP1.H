@@ -7,6 +7,7 @@
   @file   CD_EddingtonSP1.H
   @brief  Declaration of a first order Eddington solver for radiative transfer
   @author Robert Marskar
+  @todo   Need to review the coefficients and flux computation routines. They have only been reviewed by students (I think)
 */
 
 #ifndef CD_EddingtonSP1_H
@@ -401,20 +402,18 @@ protected:
   virtual void setHelmholtzCoefficients();
 
   /*!
-    @brief Set the a-coefficient and b-coefficient
+    @brief Set aco and bco (on irregular faces only)
+    @param[out] a_helmAco      Helmholtz A-coefficient on on data centers
+    @param[out] a_helmBcoIrreg Helmholtz B-coefficient on EB faces
+    @param[in]  a_cellBox      Computation box
+    @param[in]  a_lvl          Grid level
+    @param[in]  a_dit          Grid index
   */
-  virtual void setACoefAndBCoef();
-
-  /*!
-    @brief Set both aco and bco (irregular version)
-  */
-  virtual void setACoefAndBCoefBox(EBCellFAB&       a_aco,
-				   BaseIVFAB<Real>& a_bco_irreg,
-				   const Box        a_cellbox,
-				   const RealVect   a_origin,
-				   const Real       a_dx,
-				   const int        a_lvl,
-				   const DataIndex& a_dit);
+  virtual void setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
+					   BaseIVFAB<Real>& a_helmBcoIrreg,
+					   const Box        a_cellBox,
+					   const int        a_lvl,
+					   const DataIndex& a_dit);
 
     /*!
     @brief Set the operator factory

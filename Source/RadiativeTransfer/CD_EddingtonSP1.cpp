@@ -429,16 +429,16 @@ void EddingtonSP1::allocateInternals(){
   
   m_amr->allocate(m_helmAco,       m_realm, m_phase, m_nComp);
   m_amr->allocate(m_helmBco,       m_realm, m_phase, m_nComp);
-  m_amr->allocate(m_helmBcoIrreg, m_realm, m_phase, m_nComp);
-  m_amr->allocate(m_phi,       m_realm, m_phase, m_nComp);
-  m_amr->allocate(m_source,    m_realm, m_phase, m_nComp);
-  m_amr->allocate(m_resid,     m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_helmBcoIrreg,  m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_phi,           m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_source,        m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_resid,         m_realm, m_phase, m_nComp);
 
   DataOps::setValue(m_resid,  0.0);
   DataOps::setValue(m_phi,    0.0);
   DataOps::setValue(m_source, 0.0);
 
-  this->setACoefAndBCoef();
+  this->setHelmholtzCoefficients();
 }
 
 void EddingtonSP1::deallocateInternals(){
@@ -610,38 +610,31 @@ void EddingtonSP1::setHelmholtzCoefficients(){
     pout() << m_name + "::setHelmholtzCoefficients" << endl;
   }
 
-  m_amr->allocate(m_helmAco,       m_realm, m_phase, m_nComp);
-  m_amr->allocate(m_helmBco,       m_realm, m_phase, m_nComp);
-  m_amr->allocate(m_helmBcoIrreg, m_realm, m_phase, m_nComp);
-
-  this->setACoefAndBCoef();
-}
-
-void EddingtonSP1::setACoefAndBCoef(){
-  CH_TIME("EddingtonSP1::setACoefAndBCoef");
-  if(m_verbosity > 5){
-    pout() << m_name + "::setACoefAndBCoef" << endl;
-  }
-
   // This loop fills aco with kappa and bco_irreg with 1./kappa
   if(m_RtSpecies->isKappaConstant()){
     const Real kap = m_RtSpecies->getKappa(RealVect::Zero);
-    DataOps::setValue(m_helmAco, kap);
-    DataOps::setValue(m_helmBco, 1./kap);
+    
+    DataOps::setValue(m_helmAco,         kap);
+    DataOps::setValue(m_helmBco,      1./kap);
     DataOps::setValue(m_helmBcoIrreg, 1./kap);
   }
-  else{ // If kappa is not constant, we need to go through each cell to determine it
+  else{ // If kappa is not constant, we must go through every cell. 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-      const RealVect origin = m_amr->getProbLo();
-      const Real dx         = m_amr->getDx()[lvl];
-    
-      LevelData<EBCellFAB>& aco            = *m_helmAco[lvl];
-      LevelData<EBFluxFAB>& bco            = *m_helmBco[lvl];
-      LevelData<BaseIVFAB<Real> >& bco_irr = *m_helmBcoIrreg[lvl];
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
 
-      for (DataIterator dit = aco.dataIterator(); dit.ok(); ++dit){
-	const Box box = (m_amr->getGrids(m_realm)[lvl]).get(dit());
-	this->setACoefAndBCoefBox(aco[dit()], bco_irr[dit()], box, origin, dx, lvl, dit());
+    
+      LevelData<EBCellFAB>& helmAco             = *m_helmAco[lvl];
+      LevelData<EBFluxFAB>& helmBco             = *m_helmBco[lvl];
+      LevelData<BaseIVFAB<Real> >& helmBcoIrreg = *m_helmBcoIrreg[lvl];
+
+      for (DataIterator dit(dbl); dit.ok(); ++dit){
+	const Box cellBox = (m_amr->getGrids(m_realm)[lvl]).get(dit());
+	
+	this->setHelmholtzCoefficientsBox(helmAco[dit()],
+					  helmBcoIrreg[dit()],
+					  cellBox,
+					  lvl,
+					  dit());
       }
     }
 
@@ -649,50 +642,52 @@ void EddingtonSP1::setACoefAndBCoef(){
     m_amr->interpGhost(m_helmAco, m_realm, m_phase);
     
     DataOps::averageCellToFaceAllComps(m_helmBco, m_helmAco, m_amr->getDomains()); // Average aco onto face
-    DataOps::invert(m_helmBco); // Make m_helmBco = 1./kappa
+    DataOps::invert(m_helmBco);                                                    // Make m_helmBco = 1./kappa
   }
 
 
-  DataOps::scale(m_helmAco,       1.0);       // aco = c*kappa
-  DataOps::scale(m_helmBco,       1.0/(3.0)); // bco = c/(3*kappa)
-  DataOps::scale(m_helmBcoIrreg, 1.0/(3.0)); // bco = c/(3*kappa)
-
+  DataOps::scale(m_helmAco,      1.0);       // m_helmAco      = c*kappa
+  DataOps::scale(m_helmBco,      1.0/(3.0)); // m_helmBco      = c/(3*kappa)
+  DataOps::scale(m_helmBcoIrreg, 1.0/(3.0)); // m_helmBcoIrreg = c/(3*kappa)
 }
 
-void EddingtonSP1::setACoefAndBCoefBox(EBCellFAB&       a_aco,
-				       BaseIVFAB<Real>& a_bco,
-				       const Box        a_box,
-				       const RealVect   a_origin,
-				       const Real       a_dx,
-				       const int        a_lvl,
-				       const DataIndex& a_dit){
-  CH_TIME("EddingtonSP1::setACoefAndBCoefBox");
+void EddingtonSP1::setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
+					       BaseIVFAB<Real>& a_helmBcoIrreg,
+					       const Box        a_cellBox,
+					       const int        a_lvl,
+					       const DataIndex& a_dit){
+  CH_TIME("EddingtonSP1::setHelmholtzCoefficientsBox");
   if(m_verbosity > 10){
-    pout() << m_name + "::setACoefAndBCoefBox" << endl;
+    pout() << m_name + "::setHelmholtzCoefficientsBox" << endl;
   }
+
+  const RealVect probLo        = m_amr->getProbLo();
+  const Real dx                = m_amr->getDx()[a_lvl];
   
-  const EBISBox& ebisbox = a_aco.getEBISBox();
+  const EBISBox& ebisbox = a_helmAco.getEBISBox();
   const EBGraph& ebgraph = ebisbox.getEBGraph();
 
   // Regular aco
-  BaseFab<Real>& aco_fab = a_aco.getSingleValuedFAB();
-  for (BoxIterator bit(a_box); bit.ok(); ++bit){
+  BaseFab<Real>& helmAcoReg = a_helmAco.getSingleValuedFAB();
+  for (BoxIterator bit(a_cellBox); bit.ok(); ++bit){
     const IntVect iv = bit();
 
-    const RealVect pos = a_origin + iv*a_dx*RealVect::Unit;
-    aco_fab(iv, m_comp) = m_RtSpecies->getKappa(pos);
+    if(ebisbox.isRegular(iv)){
+      const RealVect pos = probLo + iv*dx*RealVect::Unit;
+      helmAcoReg(iv, m_comp) = m_RtSpecies->getKappa(pos);
+    }
   }
 
-
-  // Irregular stuff
+  // Irregular cells
   VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[a_dit];
   for (vofit.reset(); vofit.ok(); ++vofit){
     const VolIndex& vof = vofit();
 
-    const RealVect pos  = EBArith::getVofLocation(vof, a_dx*RealVect::Unit, a_origin);
-    const Real tmp = m_RtSpecies->getKappa(pos);
-    a_aco(vof, m_comp) = tmp;
-    a_bco(vof, m_comp) = 1./tmp;
+    const RealVect pos  = EBArith::getVofLocation(vof, dx*RealVect::Unit, probLo);
+    const Real kappa    = m_RtSpecies->getKappa(pos);
+    
+    a_helmAco(vof, m_comp)      = kappa;
+    a_helmBcoIrreg(vof, m_comp) = 1./kappa;
   }
 }
 
@@ -926,7 +921,7 @@ void EddingtonSP1::computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellD
 		extrap(face, m_comp) = 1.5*data_fab(iv0, m_comp) - 0.5*data_fab(iv1, m_comp); // Should be ok
 	      }
 	      else{ // Not enough cells available, use cell-centered only
-		  extrap(face, m_comp) = data_fab(iv0, m_comp);
+		extrap(face, m_comp) = data_fab(iv0, m_comp);
 	      }
 	    }
 
@@ -945,11 +940,11 @@ void EddingtonSP1::computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi
     pout() << m_name + "::computeFlux" << endl;
   }
 
-  m_amr->computeGradient(a_flux, a_phi, m_realm, m_phase); // flux = grad(phi)
+  m_amr->computeGradient(a_flux, a_phi, m_realm, m_phase);   // flux = grad(phi)
   
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    DataOps::divideByScalar(*a_flux[lvl], *m_helmAco[lvl]);    // flux = grad(phi)/(c*kappa)
-    DataOps::scale(*a_flux[lvl], -Units::c*Units::c/3.0);  // flux = -c*grad(phi)/3.
+    DataOps::divideByScalar(*a_flux[lvl], *m_helmAco[lvl]);  // flux = grad(phi)/(c*kappa)
+    DataOps::scale(*a_flux[lvl], -Units::c*Units::c/3.0);    // flux = -c*grad(phi)/3.
   }
 
   m_amr->averageDown(a_flux, m_realm, m_phase);
