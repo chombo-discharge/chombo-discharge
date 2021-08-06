@@ -577,8 +577,6 @@ bool EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCel
   m_amr->averageDown(a_phi, m_realm, m_phase);
   m_amr->interpGhost(a_phi, m_realm, m_phase);
 
-  DataOps::floor(a_phi, 0.0);
-
   return converged;
 }
 

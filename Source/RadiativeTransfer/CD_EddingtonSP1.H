@@ -190,7 +190,7 @@ protected:
   /*!
     @brief Beta-coefficient for Helmholtz operator
   */
-  static constexpr Real m_beta = 1.0;
+  static constexpr Real m_beta = -1.0;
 
   /*!
     @brief Enum class for supported bottom solvers in multigrid.
