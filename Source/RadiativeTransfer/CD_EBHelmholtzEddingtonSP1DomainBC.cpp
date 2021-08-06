@@ -13,6 +13,7 @@
 #include <CD_EBHelmholtzEddingtonSP1DomainBC.H>
 #include <CD_EBHelmholtzDirichletDomainBC.H>
 #include <CD_EBHelmholtzNeumannDomainBC.H>
+#include <CD_EBHelmholtzLarsenDomainBC.H>
 #include <CD_NamespaceHeader.H>
 
 EBHelmholtzEddingtonSP1DomainBC::EBHelmholtzEddingtonSP1DomainBC(const EddingtonSP1DomainBc&     a_eddingtonBCs,
@@ -55,7 +56,7 @@ EBHelmholtzEddingtonSP1DomainBC::EBHelmholtzEddingtonSP1DomainBC(const Eddington
 	m_bcObjects.emplace(curWall, std::make_shared<EBHelmholtzNeumannDomainBC>(func));
 	break;
       case EddingtonSP1DomainBc::BcType::Larsen:
-	MayDay::Error("EBHelmholtzEddingtonSp1DomainBC -- need to grok Larsen interface");
+	m_bcObjects.emplace(curWall, std::make_shared<EBHelmholtzLarsenDomainBC>(m_species, m_r1, m_r2, func));
 	break;	
       default:
 	MayDay::Error("EBHelmholtzEddingtonSP1DomainBC::EBHelmholtzEddingtonSP1DomainBC - unsupported boundary condition passed into constructor!");

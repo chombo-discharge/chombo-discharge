@@ -36,6 +36,8 @@
 #include <CD_EBHelmholtzEddingtonSP1DomainBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
+#define USE_NEW_FACTORY 1
+
 constexpr Real EddingtonSP1::m_alpha;
 constexpr Real EddingtonSP1::m_beta;
 
@@ -984,8 +986,12 @@ void EddingtonSP1::setupMultigrid(){
 
   // Define AMRMultiGrid
   m_multigridSolver = RefCountedPtr<AMRMultiGrid<LevelData<EBCellFAB> > > (new AMRMultiGrid<LevelData<EBCellFAB> >());
-    m_multigridSolver->define(coarsestDomain, *m_operatorFactory, botsolver, 1 + finestLevel);
-    //m_multigridSolver->define(coarsestDomain, *m_helmholtzOpFactory, botsolver, 1 + finestLevel);
+#if USE_NEW_FACTORY
+  m_multigridSolver->define(coarsestDomain, *m_helmholtzOpFactory, botsolver, 1 + finestLevel);
+#else
+  m_multigridSolver->define(coarsestDomain, *m_operatorFactory, botsolver, 1 + finestLevel);
+#endif
+
   m_multigridSolver->setSolverParameters(m_multigridPreSmooth,
 					 m_multigridPostSmooth,
 					 m_multigridBottomSmooth,
@@ -1028,9 +1034,13 @@ void EddingtonSP1::setupTGA(){
   const int finestLevel              = m_amr->getFinestLevel();
   const ProblemDomain coarsestDomain = m_amr->getDomains()[0];
   const Vector<int> refRat           = m_amr->getRefinementRatios();
-
+#if USE_NEW_FACTORY
+    m_tgaSolver = RefCountedPtr<AMRTGA<LevelData<EBCellFAB> > >
+    (new AMRTGA<LevelData<EBCellFAB> > (m_multigridSolver, *m_helmholtzOpFactory, coarsestDomain, refRat, 1 + finestLevel, m_multigridSolver->m_verbosity));
+#else
   m_tgaSolver = RefCountedPtr<AMRTGA<LevelData<EBCellFAB> > >
     (new AMRTGA<LevelData<EBCellFAB> > (m_multigridSolver, *m_operatorFactory, coarsestDomain, refRat, 1 + finestLevel, m_multigridSolver->m_verbosity));
+#endif
 }
 
 void EddingtonSP1::setupEuler(){
@@ -1043,8 +1053,13 @@ void EddingtonSP1::setupEuler(){
   const ProblemDomain coarsestDomain = m_amr->getDomains()[0];
   const Vector<int> refRat           = m_amr->getRefinementRatios();
 
+#if USE_NEW_FACTORY
   m_eulerSolver = RefCountedPtr<EBBackwardEuler> 
+    (new EBBackwardEuler (m_multigridSolver, *m_helmholtzOpFactory, coarsestDomain, refRat, 1 + finestLevel, m_multigridSolver->m_verbosity));
+#else
+    m_eulerSolver = RefCountedPtr<EBBackwardEuler> 
     (new EBBackwardEuler (m_multigridSolver, *m_operatorFactory, coarsestDomain, refRat, 1 + finestLevel, m_multigridSolver->m_verbosity));
+#endif
 }
 
 void EddingtonSP1::computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi){

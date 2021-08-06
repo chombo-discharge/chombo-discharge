@@ -14,19 +14,19 @@
 
 // Our includes
 #include <CD_RtSpecies.H>
-#include <CD_EBHelmholtzRobinDomainBCFactory.H>
+#include <CD_EBHelmholtzDomainBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
   @brief Class for making Larsen boundary conditions 
 */
-class EBHelmholtzLarsenDomainBCFactory : public EBHelmholtzRobinDomainBCFactory {
+class EBHelmholtzLarsenDomainBCFactory : public EBHelmholtzDomainBCFactory {
 public:
 
   /*!
     @brief Alias for source function
   */
-  using SourceFunction = std::function<Real(const RealVect& a_position, const Real a_time)>;
+  using SourceFunction = std::function<Real(const RealVect& a_position)>;
 
   /*!
     @brief Disallowed weak constructor
@@ -82,6 +82,11 @@ public:
   */
   EBHelmholtzLarsenDomainBCFactory& operator=(const EBHelmholtzLarsenDomainBCFactory&& a_other) = delete;
 
+  /*!
+    @brief Factory method
+  */
+  virtual RefCountedPtr<EBHelmholtzDomainBC> create() const override;
+
 protected:
 
   /*!
@@ -103,11 +108,6 @@ protected:
     @brief Source term
   */
   SourceFunction m_source;
-
-  /*!
-    @brief Set Robin coefficients
-  */
-  void setRobinCoefficients();
 };
 
 #include <CD_NamespaceFooter.H>
