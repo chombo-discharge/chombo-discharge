@@ -369,7 +369,7 @@ void EddingtonSP1::parseMultigridSettings(){
   }
 
   // Relaxation type
-  pp.get("gmg_relax_type", str);
+  pp.get("gmg_smoother", str);
   if(str == "jacobi"){
     m_multigridRelaxMethod = EBHelmholtzOp::Smoother::PointJacobi;    
   }

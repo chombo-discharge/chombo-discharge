@@ -97,7 +97,7 @@ FieldSolverMultigrid.gmg_jump_weight   = 2         # Boundary condition weight f
 FieldSolverMultigrid.gmg_bottom_solver = bicgstab  # Bottom solver type. 'simple', 'bicgstab', or 'gmres'
 FieldSolverMultigrid.gmg_bottom_relax  = 32        # Number of relaxations in bottom solve ('simple' solver only)
 FieldSolverMultigrid.gmg_cycle         = vcycle    # Cycle type. Only 'vcycle' supported for now
-FieldSolverMultigrid.gmg_relax_type    = red_black # Relaxation type. 'jacobi', 'multi_color', or 'red_black'
+FieldSolverMultigrid.gmg_smoother      = red_black # Relaxation type. 'jacobi', 'multi_color', or 'red_black'
 
 # ====================================================================================================
 # CDR_GDNV SOLVER SETTINGS
@@ -147,7 +147,7 @@ EddingtonSP1.gmg_min_cells       = 2         # Bottom drop
 EddingtonSP1.gmg_bottom_solver   = bicgstab  # Bottom solver type. Valid options are 'simple' and 'bicgstab'
 EddingtonSP1.gmg_bottom_relax    = 8         # Number of relaxations in bottom solve ('simple' solver only)
 EddingtonSP1.gmg_cycle           = vcycle    # Cycle type. Only 'vcycle' supported for now
-EddingtonSP1.gmg_relax_type      = red_black    # Relaxation type. 'jacobi', 'red_black', or 'multi_color'
+EddingtonSP1.gmg_smoother        = red_black    # Relaxation type. 'jacobi', 'red_black', or 'multi_color'
 EddingtonSP1.stochastic_photons  = false     # Draw discrete Photons from continuum distribution
 EddingtonSP1.seed                = 0         # Seed
 EddingtonSP1.ebbc                = robin 0.0     # Bc on embedded boundaries. 
