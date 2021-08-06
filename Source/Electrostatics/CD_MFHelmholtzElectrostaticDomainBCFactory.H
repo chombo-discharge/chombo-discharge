@@ -18,7 +18,7 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Base class for passing domain boundary conditions into MFHelmholtzOp. 
+  @brief Class for passing electrostatic boundary conditions into MFHelmholtzOp
 */
 class MFHelmholtzElectrostaticDomainBCFactory : public MFHelmholtzDomainBCFactory{
 public:

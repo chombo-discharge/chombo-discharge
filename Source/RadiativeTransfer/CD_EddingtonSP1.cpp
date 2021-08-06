@@ -164,7 +164,7 @@ EddingtonSP1DomainBc::BcType EddingtonSP1::parseBcString(const std::string a_str
     ret = EddingtonSP1DomainBc::BcType::Larsen;
   }
   else{
-    MayDay::Abort("EddingtonSP1DomainBc::BcType - unknown BC type!");
+    MayDay::Error("EddingtonSP1DomainBc::BcType - unknown BC type!");
   }
 
   return ret;
@@ -191,13 +191,13 @@ void EddingtonSP1::parseDomainBC(){
   for (int dir = 0; dir < SpaceDim; dir++){
     for (SideIterator sit; sit.ok(); ++sit){
       const EddingtonSP1DomainBc::Wall curWall = std::make_pair(dir, sit());
-      const std::string bcString = this->makeBcString(dir, sit());
-      const int num = pp.countval(bcString.c_str());
+      const std::string bcString               = this->makeBcString(dir, sit());
+      const int num                            = pp.countval(bcString.c_str());
 
       std::string str;
 
-      EddingtonSP1DomainBc::BcType      bcType;
-      EddingtonSP1DomainBc::BcFunction& bcFunc = m_domainBcFunctions.at(curWall);
+      EddingtonSP1DomainBc::BcType      bcType;                                   // Will be set based on what comes in through the input script
+      EddingtonSP1DomainBc::BcFunction& bcFunc = m_domainBcFunctions.at(curWall); // Will be set based on what comes in through the input script
 
       std::function<Real(const RealVect, const Real)> curFunc;
 
@@ -221,7 +221,7 @@ void EddingtonSP1::parseDomainBC(){
 	  bcType  = EddingtonSP1DomainBc::BcType::Larsen;
 	}
 	else{
-	  MayDay::Abort("EddingtonSP1::parseDomainBC -- got only one argument but this argument was not in the form of e.g. 'neumann_custom'!");
+	  MayDay::Error("EddingtonSP1::parseDomainBC -- got only one argument but this argument was not in the form of e.g. 'neumann_custom'!");
 	}
 
 	break;
@@ -240,10 +240,9 @@ void EddingtonSP1::parseDomainBC(){
 
 	break;
       }
-      default: {
-	MayDay::Abort("EddingtonSP1::parseDomainBC -- unknown argument to domain bc");
+      default: 
+	MayDay::Error("EddingtonSP1::parseDomainBC -- unknown argument to domain bc");
 	break;
-      }
       }
 
       m_domainBc.setBc(curWall, std::make_pair(bcType, curFunc));
@@ -281,13 +280,13 @@ void EddingtonSP1::parseEBBC(){
       bcType = EBBCType::Larsen;
     }
     else{
-      MayDay::Abort("EddingtonSP1::parseEBBC -- not dirichlet/neumann/larsen!");
+      MayDay::Error("EddingtonSP1::parseEBBC -- not dirichlet/neumann/larsen!");
     }
 
     m_ebbc = std::make_pair(bcType, val);
   }
   else{
-    MayDay::Abort("EddingtonSP1::parseEBBC -- bad input argument. Should be in the form 'larsen 0.0', 'dirichlet 0.0', etc");
+    MayDay::Error("EddingtonSP1::parseEBBC -- bad input argument. Should be in the form 'larsen 0.0', 'dirichlet 0.0', etc");
   }
 }
 
@@ -388,7 +387,7 @@ void EddingtonSP1::parseMultigridSettings(){
     m_multigridRelaxMethod = EBHelmholtzOp::Smoother::GauSaiMultiColor;
   }
   else{
-    MayDay::Abort("EddingtonSP1::parseMultigridSettings - unknown relaxation method requested");
+    MayDay::Error("EddingtonSP1::parseMultigridSettings - unknown relaxation method requested");
   }
 
   // Cycle type
@@ -397,7 +396,7 @@ void EddingtonSP1::parseMultigridSettings(){
     m_multigridType = MultigridType::VCycle;
   }
   else{
-    MayDay::Abort("EddingtonSP1::parseMultigridSettings - unknown cycle type requested");
+    MayDay::Error("EddingtonSP1::parseMultigridSettings - unknown cycle type requested");
   }
 
   // No lower than 2. 
@@ -501,7 +500,7 @@ void EddingtonSP1::registerOperators(){
   }
 
   if(m_amr.isNull()){
-    MayDay::Abort("EddingtonSP1::registerOperators - need to set AmrMesh!");
+    MayDay::Error("EddingtonSP1::registerOperators - need to set AmrMesh!");
   }
   else{
     m_amr->registerOperator(s_eb_coar_ave,     m_realm, m_phase);
@@ -810,13 +809,16 @@ void EddingtonSP1::setupHelmholtzFactory(){
   // Number of ghost cells in data holders
   const IntVect ghostPhi   = m_amr->getNumberOfGhostCells()*IntVect::Unit;
   const IntVect ghostRhs   = m_amr->getNumberOfGhostCells()*IntVect::Unit;
+
+  // Handle to boundary condition factories for domain and EB in an EBHelmholtzOp context.
+  RefCountedPtr<EBHelmholtzDomainBCFactory> domainBcFactory;
+  RefCountedPtr<EBHelmholtzEBBCFactory> ebbcFactory;
   
   // Just run with Larsen for now. These need to be updated with proper source terms. 
-  auto domainBcFactory = RefCountedPtr<EBHelmholtzDomainBCFactory> (new EBHelmholtzLarsenDomainBCFactory(m_RtSpecies, m_reflectCoefOne, m_reflectCoefTwo, 0.0));
+  domainBcFactory = RefCountedPtr<EBHelmholtzDomainBCFactory> (new EBHelmholtzLarsenDomainBCFactory(m_RtSpecies, m_reflectCoefOne, m_reflectCoefTwo, 0.0));
 
   // This sets up the embedded boundary conditions. In parseEBBC we happened to read a line from the input script in the format = <type> <value>
   // which was put into a function. Here, 
-  RefCountedPtr<EBHelmholtzEBBCFactory> ebbcFactory;
   switch(m_ebbc.first) {
   case EBBCType::Dirichlet:
     ebbcFactory = RefCountedPtr<EBHelmholtzDirichletEBBCFactory> (new EBHelmholtzDirichletEBBCFactory(m_multigridBcOrder, m_multigridBcWeight, m_ebbc.second));
@@ -877,10 +879,12 @@ void EddingtonSP1::setupOperatorFactory(){
       larsenCoeffs.emplace(curWall, larsen);
     }
   }
+
+  // Handle to boundary condition factories for domain and EB in an EBHelmholtzOp context. 
+  RefCountedPtr<BaseEBBCFactory> ebbcFactory;
   auto fact = RefCountedPtr<ConductivityEddingtonSP1DomainBcFactory> (new ConductivityEddingtonSP1DomainBcFactory(m_domainBc, larsenCoeffs, m_amr->getProbLo()));
 
   // Set the embedded boundary bc factory. This uses a constant value for the right-hand side on the EB. 
-  RefCountedPtr<BaseEBBCFactory> ebbcFactory;
   switch(m_ebbc.first){
   case EBBCType::Dirichlet: {
     auto dirichletEbBcFactory = RefCountedPtr<DirichletConductivityEBBCFactory> (new DirichletConductivityEBBCFactory());
@@ -910,7 +914,7 @@ void EddingtonSP1::setupOperatorFactory(){
     break;
   }
   default:
-    MayDay::Abort("EddingtonSP1::setupOperatorFactory -- bad EBBC!");
+    MayDay::Error("EddingtonSP1::setupOperatorFactory -- bad EBBC!");
     break;
   }
 

@@ -4,69 +4,71 @@
  */
 
 /*
-  @file   CD_EBHelmholtzElectrostaticDomainBC.H
+  @file   CD_EBHelmholtzEddingtonDomainBC.H
   @brief  Declaration of a domain boundary condition class for EBHelmholtzOp.
   @author Robert Marskar
 */
 
-#ifndef CD_EBHelmholtzElectrostaticDomainBC_H
-#define CD_EBHelmholtzElectrostaticDomainBC_H
+#ifndef CD_EBHelmholtzEddingtonDomainBC_H
+#define CD_EBHelmholtzEddingtonDomainBC_H
 
 // Our includes
-#include <CD_ElectrostaticDomainBc.H>
+#include <CD_EddingtonSP1DomainBc.H>
 #include <CD_EBHelmholtzDomainBC.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Class for passing electrostatic domain boundary conditions into EBHelmholtzOp. 
-  @details This calss is a wrapper for Dirichlet/Neumann boundary conditions where the values/functions are passed in through ElectrostaticDomainBc. 
+  @brief Class for passing EddingtonSP1 domain boundary conditions into EBHelmholtzOp. 
+  @details This calss is a wrapper for Dirichlet/Neumann boundary conditions where the values/functions are passed in through EddingtonDomainBc
   @note For this class to operate correctly with time-dependent boundary conditions, the user must ensure that
   the time dependence is captured by reference. The time argument in ElectrostaticDomainBc::BcFunction by this class,
   so whatever function is put in there, it must capture time by reference. 
 */
-class EBHelmholtzElectrostaticDomainBC : public EBHelmholtzDomainBC {
+class EBHelmholtzEddingtonSP1DomainBC : public EBHelmholtzDomainBC {
 public:
 
   /*!
     @brief Not allowed, use the full constructor. 
   */
-  EBHelmholtzElectrostaticDomainBC() = delete;
+  EBHelmholtzEddingtonSP1DomainBC() = delete;
 
   /*!
-    @brief Full constructor.
-    @param[in] a_electrostaticBCs Electrostatic domain boundary condition functions (in time and space)
-
+    @brief Full constructor
+    @param[in] a_eddingtonBCs EddingtonSP1 boundary conditions on domain sides
+    @param[in] a_species      Radiative transfer species
+    @param[in] a_r1           "First reflection coefficient"
+    @param[in] a_r2           "Second reflection coefficient"
   */
-  EBHelmholtzElectrostaticDomainBC(const ElectrostaticDomainBc& a_electrostaticBCs);
-
-  /*!
-    @brief Disallowed -- don't see why you would need it.
-    @param[in] a_other Other operator
-  */
-  EBHelmholtzElectrostaticDomainBC(const EBHelmholtzElectrostaticDomainBC& a_other) = delete;
+  EBHelmholtzEddingtonSP1DomainBC(const EddingtonSP1DomainBc& a_eddingtonBCs, const RefCountedPtr<RtSpecies>& a_species, const Real a_r1, const Real a_r2);
 
   /*!
     @brief Disallowed -- don't see why you would need it.
     @param[in] a_other Other operator
   */
-  EBHelmholtzElectrostaticDomainBC(const EBHelmholtzElectrostaticDomainBC&& a_other) = delete;
+  EBHelmholtzEddingtonSP1DomainBC(const EBHelmholtzEddingtonSP1DomainBC& a_other) = delete;
+
+  /*!
+    @brief Disallowed -- don't see why you would need it.
+    @param[in] a_other Other operator
+  */
+  EBHelmholtzEddingtonSP1DomainBC(const EBHelmholtzEddingtonSP1DomainBC&& a_other) = delete;
 
   /*!
     @brief Destructor
   */
-  ~EBHelmholtzElectrostaticDomainBC();
+  ~EBHelmholtzEddingtonSP1DomainBC();
 
   /*!
     @brief Disallowed - don't see why you would need it.
     @param[in] a_other Other operator
   */
-  EBHelmholtzElectrostaticDomainBC& operator=(const EBHelmholtzElectrostaticDomainBC& a_other) = delete;
+  EBHelmholtzEddingtonSP1DomainBC& operator=(const EBHelmholtzEddingtonSP1DomainBC& a_other) = delete;
 
   /*!
     @brief Disallowed - don't see why you would need it.
     @param[in] a_other Other operator
   */
-  EBHelmholtzElectrostaticDomainBC& operator=(const EBHelmholtzElectrostaticDomainBC&& a_other) = delete;
+  EBHelmholtzEddingtonSP1DomainBC& operator=(const EBHelmholtzEddingtonSP1DomainBC&& a_other) = delete;
 
   /*!
     @brief Define function
@@ -118,16 +120,30 @@ public:
 protected:
 
   /*!
-    @brief Electrostatic domain boundary conditions
+    @brief Eddington domain boundary conditions
   */
-  ElectrostaticDomainBc m_electrostaticBCs;
+  EddingtonSP1DomainBc m_eddingtonBCs;
+
+  /*!
+    @brief Radiative transfer species
+  */
+  RefCountedPtr<RtSpecies> m_species;
+
+  /*!
+    @brief "First reflection coefficient"
+  */
+  Real m_r1;
+
+  /*!
+    @brief "Second reflection coefficient"
+  */
+  Real m_r2;
 
   /*!
     @brief BC objects on each domain side. 
     @details These are instantiated in the constructor where we construct Neumann/Dirichlet on each domain side. 
   */
-  std::map<ElectrostaticDomainBc::Wall, std::shared_ptr<EBHelmholtzDomainBC> > m_bcObjects;
-  
+  std::map<EddingtonSP1DomainBc::Wall, std::shared_ptr<EBHelmholtzDomainBC> > m_bcObjects;
 };
 
 #include <CD_NamespaceFooter.H>
