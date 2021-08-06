@@ -337,8 +337,8 @@ void EddingtonSP1::parseMultigridSettings(){
   pp.get("gmg_exit_tol",     m_multigridExitTolerance);
   pp.get("gmg_exit_hang",    m_multigridExitHang);
   pp.get("gmg_min_cells",    m_minCellsBottom);
-  pp.get("gmg_bc_order",     m_multigridBcOrder);
-  pp.get("gmg_bc_weight",    m_multigridBcWeight);
+  pp.get("gmg_ebbc_order",   m_multigridBcOrder);
+  pp.get("gmg_ebbc_weight",  m_multigridBcWeight);
 
   // Fetch the desired bottom solver from the input script. We look for things like EddingtonSP1.gmg_bottom_solver = bicgstab or '= simple <number>'
   // where <number> is the number of relaxation for the smoothing solver. 
