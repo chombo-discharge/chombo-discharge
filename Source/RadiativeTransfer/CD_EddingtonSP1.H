@@ -25,6 +25,7 @@
 // Our includes
 #include <CD_RtSolver.H>
 #include <CD_EbHelmholtzOpFactory.H>
+#include <CD_EBHelmholtzOpFactory.H>
 #include <CD_EddingtonSP1DomainBc.H>
 #include <CD_NamespaceHeader.H>
 
@@ -177,7 +178,6 @@ protected:
   enum class BottomSolverType {
     Simple,
     BiCGStab,
-    GMRES
   };
 
   /*!
@@ -269,7 +269,7 @@ protected:
   /*!
     @brief Bottom solver type
   */
-  BottomSolverType m_bottomSolver;
+  BottomSolverType m_bottomSolverType;
 
   /*!
     @brief Number of smoothing for bottom solver
@@ -325,6 +325,11 @@ protected:
     @brief Euler solver
   */
   RefCountedPtr<EBBackwardEuler> m_eulerSolver;
+
+  /*!
+    @brief Operator factory
+  */
+  RefCountedPtr<EBHelmholtzOpFactory> m_helmholtzFactory;
 
   /*!
     @brief Operator factory
@@ -411,6 +416,11 @@ protected:
     @brief Set the operator factory
   */
   virtual void setupOperatorFactory();
+
+    /*!
+    @brief Set the operator factory
+  */
+  virtual void setupHelmholtzFactory();
 
   /*!
     @brief Set the GMG solver

@@ -75,10 +75,6 @@ void FieldSolverMultigrid::parseMultigridSettings(){
   pp.get("gmg_jump_order",   m_multigridJumpOrder);
   pp.get("gmg_jump_weight",  m_multigridJumpWeight);
 
-  if(!(m_multigridBcOrder == 1 || m_multigridBcOrder == 2)){
-    MayDay::Abort("FieldSolverMultigrid::parseMultigridSettings - boundary condition order must be 1 or 2");
-  }
-
   // Fetch the desired bottom solver from the input script. We look for things like FieldSolverMultigrid.gmg_bottom_solver = bicgstab or '= simple <number>'
   // where <number> is the number of relaxation for the smoothing solver. 
   const int num = pp.countval("gmg_bottom_solver");

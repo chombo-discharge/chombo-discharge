@@ -327,16 +327,32 @@ void EddingtonSP1::parseMultigridSettings(){
   pp.get("gmg_exit_hang",   m_multigridExitHang);
   pp.get("gmg_min_cells",   m_minCellsBottom);
 
-  // Bottom solver
-  pp.get("gmg_bottom_solver", str);
-  if(str == "simple"){
-    m_bottomSolver = BottomSolverType::Simple;
+  // Fetch the desired bottom solver from the input script. We look for things like EddingtonSP1.gmg_bottom_solver = bicgstab or '= simple <number>'
+  // where <number> is the number of relaxation for the smoothing solver. 
+  const int num = pp.countval("gmg_bottom_solver");
+  if(num == 1){
+    pp.get("gmg_bottom_solver", str);
+    if(str == "bicgstab"){
+      m_bottomSolverType = BottomSolverType::BiCGStab;
+    }
+    else{
+      MayDay::Error("FieldSolverMultigrid::parseMultigridSettings - logic bust, you've specified one parameter and I expected either 'bicgstab' or 'gmres'");
+    }
   }
-  else if(str == "bicgstab"){
-    m_bottomSolver = BottomSolverType::BiCGStab;
+  else if(num == 2){
+    int numSmooth;
+    pp.get("gmg_bottom_solver", str,       0);
+    pp.get("gmg_bottom_solver", numSmooth, 1);
+    if(str == "simple"){
+      m_bottomSolverType = BottomSolverType::Simple;
+      m_simpleSolver.setNumSmooths(numSmooth);
+    }
+    else{
+      MayDay::Error("FieldSolverMultigrid::parseMultigridSettings - logic bust, you've specified two parameters and I expected 'simple <number>'");
+    }
   }
   else{
-    MayDay::Abort("EddingtonSP1::parseMultigridSettings - unknown bottom solver requested");
+    MayDay::Error("FieldSolverMultigrid::parseMultigridSettings - logic bust in bottom solver. You must specify ' = bicgstab', ' = gmres', or ' = simple <number>'");
   }
 
   // Relaxation type
@@ -573,9 +589,10 @@ void EddingtonSP1::setupMultigrid(){
     m_hasDeeperMultigridLevels = true;
   }
   
-  this->setMultigridCoefficients();       // Set coefficients, kappa, aco, bco
-  this->setupOperatorFactory(); // Set the operator factory
-  this->setupMultigridSolver();        // Set up the AMR multigrid solver
+  this->setMultigridCoefficients(); // Set coefficients, kappa, aco, bco
+  this->setupOperatorFactory();     // Set the operator factory
+  this->setupHelmholtzFactory();    // Set up the Helmholtz operator factory
+  this->setupMultigridSolver();     // Set up the AMR multigrid solver
 
   if(!m_stationary){
     if(m_useTGA){
@@ -746,6 +763,14 @@ void EddingtonSP1::defineDeeperMultigridLevels(){
   }
 }
 
+void EddingtonSP1::setupHelmholtzFactory(){
+  CH_TIME("EddingtonSP1::setupHelmholtzFactory");
+  if(m_verbosity > 5){
+    pout() << m_name + "::setupHelmholtzFactory" << endl;
+  }
+
+}
+
 void EddingtonSP1::setupOperatorFactory(){
   CH_TIME("EddingtonSP1::setupOperatorFactory");
   if(m_verbosity > 5){
@@ -861,16 +886,14 @@ void EddingtonSP1::setupMultigridSolver(){
     pout() << m_name + "::setupMultigridSolver" << endl;
   }
 
-  const int finestLevel       = m_amr->getFinestLevel();
-  const ProblemDomain coar_dom = m_amr->getDomains()[0];
+
 
   // Select bottom solver
   LinearSolver<LevelData<EBCellFAB> >* botsolver = NULL;
-  if(m_bottomSolver == BottomSolverType::Simple){
-    m_simpleSolver.setNumSmooths(m_numSmoothingsForSimpleSolver);
+  if(m_bottomSolverType == BottomSolverType::Simple){
     botsolver = &m_simpleSolver;
   }
-  else if(m_bottomSolver == BottomSolverType::BiCGStab){
+  else if(m_bottomSolverType == BottomSolverType::BiCGStab){
     botsolver = &m_bicgstab;
   }
 
@@ -887,8 +910,13 @@ void EddingtonSP1::setupMultigridSolver(){
     MayDay::Error("EddingtonSP1::setupMultigridSolver -- logic bust in multigrid type selection");
   }
 
+  const int finestLevel              = m_amr->getFinestLevel();
+  const ProblemDomain coarsestDomain = m_amr->getDomains()[0];
+
+  
+  // Define AMRMultiGrid
   m_multigridSolver = RefCountedPtr<AMRMultiGrid<LevelData<EBCellFAB> > > (new AMRMultiGrid<LevelData<EBCellFAB> >());
-  m_multigridSolver->define(coar_dom, *m_operatorFactory, botsolver, 1 + finestLevel);
+  m_multigridSolver->define(coarsestDomain, *m_operatorFactory, botsolver, 1 + finestLevel);
   m_multigridSolver->setSolverParameters(m_multigridPreSmooth,
 					 m_multigridPostSmooth,
 					 m_multigridBottomSmooth,
@@ -929,11 +957,11 @@ void EddingtonSP1::setupTGA(){
   }
   
   const int finestLevel       = m_amr->getFinestLevel();
-  const ProblemDomain coar_dom = m_amr->getDomains()[0];
+  const ProblemDomain coarsestDomain = m_amr->getDomains()[0];
   const Vector<int> ref_rat    = m_amr->getRefinementRatios();
 
   m_tgaSolver = RefCountedPtr<AMRTGA<LevelData<EBCellFAB> > >
-    (new AMRTGA<LevelData<EBCellFAB> > (m_multigridSolver, *m_operatorFactory, coar_dom, ref_rat, 1 + finestLevel, m_multigridSolver->m_verbosity));
+    (new AMRTGA<LevelData<EBCellFAB> > (m_multigridSolver, *m_operatorFactory, coarsestDomain, ref_rat, 1 + finestLevel, m_multigridSolver->m_verbosity));
 
   // Must init gmg for TGA
   Vector<LevelData<EBCellFAB>* > phi, rhs;
@@ -949,11 +977,11 @@ void EddingtonSP1::setupEuler(){
   }
 
   const int finestLevel       = m_amr->getFinestLevel();
-  const ProblemDomain coar_dom = m_amr->getDomains()[0];
+  const ProblemDomain coarsestDomain = m_amr->getDomains()[0];
   const Vector<int> ref_rat    = m_amr->getRefinementRatios();
 
   m_eulerSolver = RefCountedPtr<EBBackwardEuler> 
-    (new EBBackwardEuler (m_multigridSolver, *m_operatorFactory, coar_dom, ref_rat, 1 + finestLevel, m_multigridSolver->m_verbosity));
+    (new EBBackwardEuler (m_multigridSolver, *m_operatorFactory, coarsestDomain, ref_rat, 1 + finestLevel, m_multigridSolver->m_verbosity));
 }
 
 void EddingtonSP1::computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi){
@@ -1045,7 +1073,6 @@ void EddingtonSP1::computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi
   m_amr->averageDown(a_flux, m_realm, m_phase);
   m_amr->interpGhost(a_flux, m_realm, m_phase);
 }
-
 
 void EddingtonSP1::computeDensity(EBAMRCellData& a_isotropic, const EBAMRCellData& a_phi){
   CH_TIME("EddingtonSP1::computeDensity");
