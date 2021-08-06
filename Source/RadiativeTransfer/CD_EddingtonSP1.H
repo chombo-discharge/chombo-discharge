@@ -219,7 +219,7 @@ protected:
   /*!
     @brief Needs setup
   */
-  bool m_needsMultigridSetup;
+  bool m_isSolverSetup;
 
   /*!
     @brief Has deeper MG levels or not
@@ -329,7 +329,7 @@ protected:
   /*!
     @brief Operator factory
   */
-  RefCountedPtr<EBHelmholtzOpFactory> m_helmholtzFactory;
+  RefCountedPtr<EBHelmholtzOpFactory> m_helmholtzOpFactory;
 
   /*!
     @brief Operator factory

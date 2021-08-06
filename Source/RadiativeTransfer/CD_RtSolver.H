@@ -19,6 +19,7 @@
 #include <CD_ComputationalGeometry.H>
 #include <CD_AmrMesh.H>
 #include <CD_RtSpecies.H>
+#include <CD_Location.H>
 #include <CD_NamespaceHeader.H>
   
 /*!
@@ -273,6 +274,11 @@ protected:
     @brief Number of components
   */
   static constexpr int m_nComp = 1;
+
+  /*!
+    @brief Data location
+  */
+  Location::Cell m_dataLocation;
 
   /*!
     @brief Realm

@@ -349,7 +349,7 @@ void FieldSolverMultigrid::setupHelmholtzFactory(){
   const IntVect ghostPhi = m_amr->getNumberOfGhostCells()*IntVect::Unit;
   const IntVect ghostRhs = m_amr->getNumberOfGhostCells()*IntVect::Unit;
 
-  // Set up Dirichlet boundary conditions for now
+  // BC factories. 
   auto ebbcFactory     = RefCountedPtr<MFHelmholtzEBBCFactory>     (new MFHelmholtzElectrostaticEBBCFactory(m_multigridBcOrder, m_multigridBcWeight, m_ebBc));
   auto domainBcFactory = RefCountedPtr<MFHelmholtzDomainBCFactory> (new MFHelmholtzElectrostaticDomainBCFactory(m_domainBc));
   

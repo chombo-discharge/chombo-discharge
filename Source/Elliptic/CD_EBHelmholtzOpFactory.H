@@ -114,7 +114,7 @@ public:
 		       const DomainBCFactory&  a_domainBcFactory,
 		       const EBBCFactory&      a_ebbcFactory,
 		       const IntVect&          a_ghostPhi,
-		       const IntVect&          ghostRHS,
+		       const IntVect&          a_ghostRHS,
 		       const RelaxType&        a_relaxationMethod,
 		       const ProblemDomain&    a_bottomDomain,
 		       const int&              a_mgBlockingFactor,

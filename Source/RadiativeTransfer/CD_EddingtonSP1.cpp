@@ -30,12 +30,12 @@
 #include <CD_ConductivityEddingtonSP1DomainBcFactory.H>
 #include <CD_RobinConductivityEbBcFactory.H>
 #endif
-#include <CD_EBHelmholtzDirichletEBBC.H>
-#include <CD_EBHelmholtzNeumannEBBC.H>
-#include <CD_EBHelmholtzRobinEBBC.H>
-#include <CD_EBHelmholtzDirichletDomainBC.H>
-#include <CD_EBHelmholtzNeumannDomainBC.H>
-#include <CD_EBHelmholtzRobinDomainBC.H>
+#include <CD_EBHelmholtzDirichletEBBCFactory.H>
+#include <CD_EBHelmholtzNeumannEBBCFactory.H>
+#include <CD_EBHelmholtzRobinEBBCFactory.H>
+#include <CD_EBHelmholtzDirichletDomainBCFactory.H>
+#include <CD_EBHelmholtzNeumannDomainBCFactory.H>
+#include <CD_EBHelmholtzRobinDomainBCFactory.H>
 #include <CD_EBMultigridInterpolator.H>
 #include <CD_NamespaceHeader.H>
 
@@ -49,12 +49,14 @@ Real EddingtonSP1::s_defaultDomainBcFunction(const RealVect a_position, const Re
 EddingtonSP1::EddingtonSP1() : RtSolver() {
 
   // Default settings
-  m_name      = "EddingtonSP1";
-  m_className = "EddingtonSP1";
+  m_name         = "EddingtonSP1";
+  m_className    = "EddingtonSP1";
+  
 
   m_verbosity                = -1;
-  m_needsMultigridSetup      = true;
+  m_isSolverSetup            = false;
   m_hasDeeperMultigridLevels = false;
+  m_dataLocation             = Location::Cell::Center;  
   
   this->setDefaultDomainBcFunctions(); // This fills m_domainBcFunctions with s_defaultDomainBcFunction on every domain side. 
 }
@@ -481,7 +483,7 @@ void EddingtonSP1::regrid(const int a_lmin, const int a_oldFinestLevel, const in
     }
   }
 
-  m_needsMultigridSetup = true;
+  m_isSolverSetup = false;
 }
 
 void EddingtonSP1::registerOperators(){
@@ -513,7 +515,7 @@ bool EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCel
 
   const int finestLevel = m_amr->getFinestLevel();
 
-  if(m_needsMultigridSetup){
+  if(!m_isSolverSetup){
     this->setupSolver();
   }
 
@@ -615,7 +617,7 @@ void EddingtonSP1::setupSolver(){
     }
   }
 
-  m_needsMultigridSetup = false;
+  m_isSolverSetup = true;
 }
 
 void EddingtonSP1::setMultigridCoefficients(){
@@ -781,6 +783,52 @@ void EddingtonSP1::setupHelmholtzFactory(){
     pout() << m_name + "::setupHelmholtzFactory" << endl;
   }
 
+  const int finestLevel = m_amr->getFinestLevel();
+
+  const Vector<RefCountedPtr<EBLevelGrid> >&             levelGrids   = m_amr->getEBLevelGrid          (m_realm, m_phase);
+  const Vector<RefCountedPtr<EbCoarAve> >&               coarAve      = m_amr->getCoarseAverage        (m_realm, m_phase);
+  const Vector<RefCountedPtr<EBFluxRegister> >&          fluxReg      = m_amr->getFluxRegister         (m_realm, m_phase);
+  const Vector<RefCountedPtr<EBMultigridInterpolator> >& interpolator = m_amr->getMultigridInterpolator(m_realm, m_phase);
+
+  // Coarsest domain used for multigrid. The user specifies the minimum number of cells in any
+  // coordinate direction, and we coarsen until we have a domain which satisfies that constraint. 
+  ProblemDomain bottomDomain = m_amr->getDomains()[0];
+  while(bottomDomain.domainBox().shortside() >= 2*m_minCellsBottom){
+    bottomDomain.coarsen(2);
+  }
+
+  // Number of ghost cells in data holders
+  const IntVect ghostPhi   = m_amr->getNumberOfGhostCells()*IntVect::Unit;
+  const IntVect ghostRhs   = m_amr->getNumberOfGhostCells()*IntVect::Unit;
+  
+  // Just run with some default BCs for now
+  auto domainBcFactory = RefCountedPtr<EBHelmholtzDirichletDomainBCFactory>(new EBHelmholtzDirichletDomainBCFactory(       1.0));
+  auto ebBcFactory     = RefCountedPtr<EBHelmholtzDirichletEBBCFactory>    (new EBHelmholtzDirichletEBBCFactory    (2, 2, -1.0));
+
+  // Set up the operator
+  m_helmholtzOpFactory = RefCountedPtr<EBHelmholtzOpFactory> (new EBHelmholtzOpFactory(m_dataLocation,
+										       m_alpha,
+										       m_beta,
+										       m_amr->getProbLo(),
+										       levelGrids,
+										       interpolator,
+										       fluxReg,
+										       coarAve,
+										       m_amr->getRefinementRatios(),
+										       m_amr->getDx(),
+										       m_aco.getData(),
+										       m_bco.getData(),
+										       m_bco_irreg.getData(),
+										       domainBcFactory,
+										       ebBcFactory,
+										       ghostPhi,
+										       ghostRhs,
+										       EBHelmholtzOp::RelaxationMethod::GauSaiRedBlack, // Needs to be input parameter
+										       bottomDomain,
+										       m_amr->getMaxBoxSize()));
+										       
+
+  
 }
 
 void EddingtonSP1::setupOperatorFactory(){
