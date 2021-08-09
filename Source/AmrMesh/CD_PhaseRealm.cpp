@@ -115,7 +115,6 @@ void PhaseRealm::regridOperators(const int a_lmin){
 
   if(m_isDefined){
     this->defineEbCoarAve(a_lmin);                   
-    this->defineEBQuadCFI(a_lmin);                   
     this->defineFillPatch(a_lmin);                   
     this->defineEBPWLInterp(a_lmin);                 
     this->defineMultigridInjection(a_lmin);          
@@ -139,7 +138,6 @@ void PhaseRealm::registerOperator(const std::string a_operator){
 
   // These are the supported operators - issue an error if we ask for something that is not supported. 
   if(!(a_operator.compare(s_eb_coar_ave)     == 0 ||
-       a_operator.compare(s_eb_quad_cfi)     == 0 ||
        a_operator.compare(s_eb_fill_patch)   == 0 ||
        a_operator.compare(s_eb_pwl_interp)   == 0 ||
        a_operator.compare(s_eb_flux_reg)     == 0 ||
@@ -329,38 +327,6 @@ void PhaseRealm::defineEbCoarAve(const int a_lmin){
 								 m_refinementRatios[lvl-1],
 								 comps,
 								 &(*m_ebis)));
-      }
-    }
-  }
-}
-
-void PhaseRealm::defineEBQuadCFI(const int a_lmin){
-  CH_TIME("PhaseRealm::defineEBQuadCFI");
-  if(m_verbosity > 2){
-    pout() << "PhaseRealm::defineEBQuadCFI" << endl;
-  }
-
-  const bool doThisOperator = this->queryOperator(s_eb_quad_cfi);
-
-  m_quadcfi.resize(1 + m_finestLevel);
-  
-  if(doThisOperator){
-    for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++){
-
-      const bool has_coar = lvl > 0;
-      
-      if(has_coar){
-	const LayoutData<IntVectSet>& cfivs = *m_eblg[lvl]->getCFIVS();
-
-	m_quadcfi[lvl] = RefCountedPtr<EBQuadCFInterp> (new EBQuadCFInterp(m_grids[lvl],
-									   m_grids[lvl-1],
-									   m_ebisl[lvl],
-									   m_ebisl[lvl-1],
-									   m_domains[lvl-1],
-									   m_refinementRatios[lvl-1],
-									   1,
-									   cfivs,
-									   &(*m_ebis)));
       }
     }
   }
@@ -906,12 +872,6 @@ Vector<RefCountedPtr<EbGhostCloud> >& PhaseRealm::getGhostCloud() const {
   if(!this->queryOperator(s_eb_ghostcloud)) MayDay::Abort("PhaseRealm::getGhostCloud - operator not registered!");
   
   return m_ghostclouds;
-}
-
-Vector<RefCountedPtr<EBQuadCFInterp> >& PhaseRealm::getEBQuadCFInterp() const {
-  if(!this->queryOperator(s_eb_quad_cfi)) MayDay::Abort("PhaseRealm::getEBQuadCFInterp - operator not registered!");
-  
-  return m_quadcfi;
 }
 
 Vector<RefCountedPtr<EBMultigridInterpolator> >& PhaseRealm::getMultigridInterpolator() const {

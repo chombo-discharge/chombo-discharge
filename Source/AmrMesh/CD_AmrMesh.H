@@ -952,11 +952,6 @@ public:
   Vector<RefCountedPtr<EbGhostCloud> >& getGhostCloud(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
-    @brief Get the old interpolation utility (needed for multigrid)
-  */
-  Vector<RefCountedPtr<EBQuadCFInterp> >& getEBQuadCFInterp(const std::string a_realm, const phase::which_phase a_phase);
-
-  /*!
     @brief Get multigrid interpolation utility
   */
   Vector<RefCountedPtr<EBMultigridInterpolator> >& getMultigridInterpolator(const std::string a_realm, const phase::which_phase a_phase);

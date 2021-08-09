@@ -19,7 +19,6 @@
 #include <EBFluxRegister.H>
 #include <EBFluxRegister.H>
 #include <EBLevelRedist.H>
-#include <EBQuadCFInterp.H>
 #include <EBCoarToFineRedist.H>
 #include <EBMGInterp.H>
 #include <EBCoarToCoarRedist.H>
@@ -49,7 +48,6 @@
 static const std::string s_eb_gradient     = "eb_gradient"    ;  // For computing gradients
 static const std::string s_eb_irreg_interp = "eb_irreg_interp";  // For data recentering
 static const std::string s_eb_coar_ave     = "eb_coar_ave"    ;  // For coarsening
-static const std::string s_eb_quad_cfi     = "eb_quad_cfi"    ;  // Chombo multigrid interpolator
 static const std::string s_eb_fill_patch   = "eb_fill_patch"  ;  // For regridding data
 static const std::string s_eb_pwl_interp   = "eb_pwl_interp"  ;  // For linearly filling ghost cells
 static const std::string s_eb_mg_interp    = "eb_mg_interp"   ;  // For multigrid injection
@@ -257,11 +255,6 @@ public:
     @brief Get deposition operator
   */
   Vector<RefCountedPtr<EbGhostCloud> >& getGhostCloud() const;
-
-  /*!
-    @brief Get old-style Chombo multigrid interpolator
-  */
-  Vector<RefCountedPtr<EBQuadCFInterp> >& getEBQuadCFInterp() const;
 
   /*!
     @brief Get multigrid interpolator
@@ -476,11 +469,6 @@ protected:
   mutable Vector<RefCountedPtr<EbGhostCloud> > m_ghostclouds;
 
   /*!
-    @brief Chombo's old multigrid interpolation utility
-  */
-  mutable Vector<RefCountedPtr<EBQuadCFInterp> > m_quadcfi;
-
-  /*!
     @brief Multigrid interpolation utility
   */
   mutable Vector<RefCountedPtr<EBMultigridInterpolator> > m_multigridInterpolator;
@@ -568,12 +556,6 @@ protected:
     @param[in] a_lmin Coarsest grid level that changes
   */  
   void defineEbCoarAve(const int a_lmin);
-
-  /*!
-    @brief Define Chombo old multigrid interpolator utility
-    @param[in] a_lmin Coarsest grid level that changes
-  */  
-  void defineEBQuadCFI(const int a_lmin);
 
   /*!
     @brief Define multigrid interpolation utility

@@ -1836,10 +1836,6 @@ Vector<RefCountedPtr<EbGhostCloud> >& AmrMesh::getGhostCloud(const std::string a
   return m_realms[a_realm]->getGhostCloud(a_phase);
 }
 
-Vector<RefCountedPtr<EBQuadCFInterp> >& AmrMesh::getEBQuadCFInterp(const std::string a_realm, const phase::which_phase a_phase){
-  return m_realms[a_realm]->getEBQuadCFInterp(a_phase);
-}
-
 Vector<RefCountedPtr<EBMultigridInterpolator> >& AmrMesh::getMultigridInterpolator(const std::string a_realm, const phase::which_phase a_phase){
   return m_realms[a_realm]->getMultigridInterpolator(a_phase);
 }

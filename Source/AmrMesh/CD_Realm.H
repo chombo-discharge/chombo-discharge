@@ -265,12 +265,6 @@ public:
   Vector<RefCountedPtr<EbGhostCloud> >& getGhostCloud(const phase::which_phase a_phase);
 
   /*!
-    @brief Get Chombo EBQuadCFInterp
-    @param[in] a_phase Phase
-  */
-  Vector<RefCountedPtr<EBQuadCFInterp> >& getEBQuadCFInterp(const phase::which_phase a_phase);
-
-  /*!
     @brief Get the multigrid interpolator
     @param[in] a_phase Phase
   */

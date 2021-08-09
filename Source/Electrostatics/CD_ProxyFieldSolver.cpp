@@ -16,6 +16,7 @@
 #include <EBConductivityOpFactory.H>
 #include <NWOEBConductivityOpFactory.H>
 #include <slowEBCOFactory.H>
+#include <EBQuadCFInterp.H>
 #include <EBAMRPoissonOpFactory.H>
 #include <DirichletConductivityDomainBC.H>
 #include <DirichletConductivityEBBC.H>
@@ -112,10 +113,6 @@ void ProxyFieldSolver::registerOperators()  {
     // For coarsening
     m_amr->registerOperator(s_eb_coar_ave,     m_realm, phase::gas);
     m_amr->registerOperator(s_eb_coar_ave,     m_realm, phase::solid);
-
-    // For multigrid interpolation
-    m_amr->registerOperator(s_eb_quad_cfi,     m_realm, phase::gas);
-    m_amr->registerOperator(s_eb_quad_cfi,     m_realm, phase::solid);
 
     // For linearly filling ghost cells
     m_amr->registerOperator(s_eb_pwl_interp,   m_realm, phase::gas);

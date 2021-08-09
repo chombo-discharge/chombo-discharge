@@ -447,10 +447,6 @@ Vector<RefCountedPtr<EbGhostCloud> >& Realm::getGhostCloud(const phase::which_ph
   return m_realms[a_phase]->getGhostCloud();
 }
 
-Vector<RefCountedPtr<EBQuadCFInterp> >& Realm::getEBQuadCFInterp(const phase::which_phase a_phase){
-  return m_realms[a_phase]->getEBQuadCFInterp();
-}
-
 Vector<RefCountedPtr<EBMultigridInterpolator> >& Realm::getMultigridInterpolator(const phase::which_phase a_phase){
   return m_realms[a_phase]->getMultigridInterpolator();
 }
