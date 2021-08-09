@@ -82,6 +82,11 @@ public:
   virtual void registerOperators() override;
 
   /*!
+    @brief Allocate internal storage
+  */
+  virtual void allocateInternals() override;
+
+  /*!
     @brief Compute div(J) explicitly, where J = nV - D*grad(n)
     @param[out] a_divJ      Divergence term, i.e. finite volume approximation to 
     @param[in]  a_phi       Cell-centered state
@@ -197,6 +202,11 @@ protected:
     @brief GMRES solver
   */
   GMRESSolver<LevelData<EBCellFAB> > m_gmres;
+
+  /*!
+    @brief Data which is always zero. 
+  */
+  EBAMRCellData m_zero;
 
   /*!
     @brief Verbosity for geometric multigrid

@@ -32,19 +32,31 @@ CdrTGA::~CdrTGA(){
 }
 
 void CdrTGA::registerOperators() {
-  if(m_amr.isNull()){
-    MayDay::Abort("CdrGA::registerOperators - need to set AmrMesh!");
+  CH_TIME("CdrTGA::registerOperators");
+  if(m_verbosity > 5){
+    pout() << m_name + "::registerOperators" << endl;
   }
-  else{
-
-    // Need to register everything that the base class registered, plus the amr interpolator
-    CdrSolver::registerOperators();
+  
+  // Need to register everything that the base class registered, plus the amr interpolator
+  CdrSolver::registerOperators();
     
-    m_amr->registerOperator(s_eb_multigrid, m_realm, m_phase);
-  }
+  m_amr->registerOperator(s_eb_multigrid, m_realm, m_phase);
 }
 
+void CdrTGA::allocateInternals() {
+  CH_TIME("CdrTGA::allocateInternals");
+  if(m_verbosity > 5){
+    pout() << m_name + "::allocateInternals" << endl;
+  }
 
+  CdrSolver::allocateInternals();
+
+  if(m_isDiffusive){
+    m_amr->allocate(m_zero, m_realm, m_phase, m_nComp);
+
+    DataOps::setValue(m_zero, 0.0);
+  }
+}
 
 void CdrTGA::advanceEuler(EBAMRCellData&       a_newPhi,
 			  const EBAMRCellData& a_oldPhi,
@@ -60,42 +72,46 @@ void CdrTGA::advanceEuler(EBAMRCellData&       a_newPhi,
     
     bool converged = false;
 
-    const int comp         = 0;
-    const int ncomp        = 1;
     const int finestLevel = m_amr->getFinestLevel();
 
-    // Set convergence metric. Make zero = 0 and m_scratch = phi^k + dt*S^k. Then
-    // compute the residue L(zero) - m_scratch which sets the convergence metric. 
-    EBAMRCellData zero;
-    m_amr->allocate(zero, m_realm, m_phase, m_nComp);
-    DataOps::setValue(zero, 0.0);
+    // We first compute a convergence metric where we stop iterating further. We are solving
+    //
+    //    dphi/dt = L(phi) + rho
+    //
+    // where L(phi) = Div(D*grad(phi))
+    //
+    // This is discretized as phi^(k+1) - dt*L(phi^(k+1)) = phi^k + dt*rho. We set the "source term" to m_scratch = phi^k + dt*rho
+    // which yields phi^(k+1) - dt*L(phi^(k+1)) = m_scratch. We reset the alpha and beta coefficients to 1 and -dt in the TGA operator
+    // lets and compute the residual using phi^(k+1)=0. Then we set the convergence metric. 
+
     DataOps::copy(m_scratch, a_oldPhi);
     DataOps::incr(m_scratch, a_source, a_dt);
 
-    Vector<LevelData<EBCellFAB>* > orez;
-    Vector<LevelData<EBCellFAB>* > shr;
-    m_amr->alias(orez, zero);
-    m_amr->alias(shr,  m_scratch);
+    Vector<LevelData<EBCellFAB>* > zero;
+    Vector<LevelData<EBCellFAB>* > rhs;
+    
+    m_amr->alias(zero, m_zero);
+    m_amr->alias(rhs,  m_scratch);
 
     m_eulerSolver->resetAlphaAndBeta(1.0, -a_dt);
     
-    const Real zero_resid = m_multigridSolver->computeAMRResidual(orez, shr, finestLevel, 0);
-    const Real stopcrit   = zero_resid;
-    m_multigridSolver->m_convergenceMetric = zero_resid;
+    const Real zeroResid = m_multigridSolver->computeAMRResidual(zero, rhs, finestLevel, 0);
+    
+    m_multigridSolver->m_convergenceMetric = zeroResid;
 
+    // Now do the backward Euler solve. 
+    Vector<LevelData<EBCellFAB>* > newPhi;
+    Vector<LevelData<EBCellFAB>* > oldPhi;
+    Vector<LevelData<EBCellFAB>* > source;
+    
+    m_amr->alias(newPhi, a_newPhi);
+    m_amr->alias(oldPhi, a_oldPhi);
+    m_amr->alias(source, a_source);
 
-    // Now do the solve. 
-    Vector<LevelData<EBCellFAB>* > new_state, old_state, source;
-    m_amr->alias(new_state, a_newPhi);
-    m_amr->alias(old_state, a_oldPhi);
-    m_amr->alias(source,    a_source);
-
-
-    // Euler solve
-    DataOps::setValue(m_ebCenteredDiffusionCoefficient, 0.0);
-    m_eulerSolver->oneStep(new_state, old_state, source, a_dt, 0, finestLevel, false);
+    m_eulerSolver->oneStep(newPhi, oldPhi, source, a_dt, 0, finestLevel, false);
+    
     const int status = m_multigridSolver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
-    if(status == 1 || status == 8 || status == 9){  // 8 => Norm sufficiently small
+    if(status == 1 || status == 8 || status == 9){       // 8 => Norm sufficiently small
       converged = true;
     }
   }
@@ -103,8 +119,6 @@ void CdrTGA::advanceEuler(EBAMRCellData&       a_newPhi,
     DataOps::copy(a_newPhi, a_oldPhi);
   }
 }
-
-
 
 void CdrTGA::advanceTGA(EBAMRCellData&       a_newPhi,
 			const EBAMRCellData& a_oldPhi,
@@ -125,25 +139,19 @@ void CdrTGA::advanceTGA(EBAMRCellData&       a_newPhi,
     const int finestLevel = m_amr->getFinestLevel();
 
     // Do the aliasing stuff
-    Vector<LevelData<EBCellFAB>* > new_state;
-    Vector<LevelData<EBCellFAB>* > old_state;
+    Vector<LevelData<EBCellFAB>* > newPhi;
+    Vector<LevelData<EBCellFAB>* > oldPhi;
     Vector<LevelData<EBCellFAB>* > source;
 
-    m_amr->alias(new_state, a_newPhi);
-    m_amr->alias(old_state, a_oldPhi);
+    m_amr->alias(newPhi, a_newPhi);
+    m_amr->alias(oldPhi, a_oldPhi);
     m_amr->alias(source,    a_source);
 
-    const Real alpha = 0.0;
-    const Real beta  = 1.0;
-
-    DataOps::setValue(m_ebCenteredDiffusionCoefficient, 0.0);
-
-    // TGA solve
-    m_tgaSolver->resetAlphaAndBeta(alpha, beta); // Needed...?
-    m_tgaSolver->oneStep(new_state, old_state, source, a_dt, 0, finestLevel, false);
+    // Now do the TGA solve
+    m_tgaSolver->oneStep(newPhi, oldPhi, source, a_dt, 0, finestLevel, false);
 
     const int status = m_multigridSolver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
-    if(status == 1 || status == 8 || status == 9){  // 8 => Norm sufficiently small
+    if(status == 1 || status == 8 || status == 9){       // 8 => Norm sufficiently small
       converged = true;
     }
   }
