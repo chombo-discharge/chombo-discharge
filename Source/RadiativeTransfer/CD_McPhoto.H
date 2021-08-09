@@ -53,6 +53,26 @@ public:
   McPhoto();
 
   /*!
+    @brief Disallowed copy constructor
+  */
+  McPhoto(const McPhoto& a_other);
+  
+  /*!
+    @brief Disallowed move constructor
+  */
+  McPhoto(const McPhoto&& a_other);
+
+  /*!
+    @brief Disallowed assignment operator
+  */
+  McPhoto& operator=(const McPhoto& a_other);
+  
+  /*!
+    @brief Disallowed move assignement operator
+  */
+  McPhoto& operator=(const McPhoto&& a_other);
+
+  /*!
     @brief Destructor
   */
   virtual ~McPhoto();

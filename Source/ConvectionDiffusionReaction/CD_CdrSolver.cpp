@@ -26,11 +26,14 @@ constexpr int CdrSolver::m_comp;
 constexpr int CdrSolver::m_nComp;
 
 CdrSolver::CdrSolver(){
+
+  // Default options. 
   m_name       = "CdrSolver";
   m_className  = "CdrSolver";
 
-  this->setRealm(Realm::Primal);
-  this->setDefaultFluxFunctions(); // Must be populated somehow. 
+  this->setRealm(Realm::Primal);      // Always primal as default. 
+  this->setDefaultFluxFunctions();    // Must be populated somehow -- the default functions are wall functions. 
+  this->setDomainBc(CdrBc::Function); // Set to function
 }
 
 CdrSolver::~CdrSolver(){
@@ -74,15 +77,6 @@ Vector<std::string> CdrSolver::getPlotVariableNames() const {
   if(m_plotEbFlux && m_isMobile) names.push_back(m_name + " eb_flux");
   
   return names;
-}
-
-int CdrSolver::queryGhost() const {
-  CH_TIME("CdrSolver::queryGhost");
-  if(m_verbosity > 5){
-    pout() << m_name + "::queryGhost" << endl;
-  }
-
-  return 3;
 }
 
 int CdrSolver::getNumberOfPlotVariables() const {
@@ -590,9 +584,6 @@ void CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const CdrBc a_which
     pout() << m_name + "::fillDomainFlux(LevelData<EBFluxFAB>, CdrBc, int)" << endl;
   }
 
-  const int comp  = 0;
-  const int ncomp = 1;
-
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
 
   for (DataIterator dit(dbl); dit.ok(); ++dit){
@@ -615,20 +606,20 @@ void CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const CdrBc a_which
 
 	  switch(a_whichFlux){
 	  case CdrBc::Data:{
-	    flux(face, comp) = domflux(face, comp);
+	    flux(face, m_comp) = domflux(face, m_comp);
 	    break;
 	  }
 	  case CdrBc::Wall:{
-	    flux(face, comp) = 0.0;
+	    flux(face, m_comp) = 0.0;
 	    break;
 	  }
 	  case CdrBc::Function:{
 	    const RealVect pos = EBArith::getFaceLocation(face, m_amr->getDx()[a_level],m_amr->getProbLo());
-	    flux(face, comp)   = -sign(sit()) * m_domainFluxFunctions.at(std::make_pair(dir, sit()))(pos, m_time);
+	    flux(face, m_comp)   = -sign(sit()) * m_domainFluxFunctions.at(std::make_pair(dir, sit()))(pos, m_time);
 	    break;
 	  }
 	  case CdrBc::Outflow:{
-	    flux(face, comp) = 0.0;
+	    flux(face, m_comp) = 0.0;
 	    
 	    // Get the next interior face(s) and extrapolate from these. 
 	    VolIndex interiorVof = face.getVoF(flip(sit()));
@@ -636,9 +627,9 @@ void CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const CdrBc a_which
 
 	    if(neighborFaces.size() > 0){
 	      for (const auto& f : neighborFaces.stdVector()){
-		flux(face, comp) += flux(f, comp);
+		flux(face, m_comp) += flux(f, m_comp);
 	      }
-	      flux(face, comp) = std::max(0.0, sign(sit())*flux(face, comp))/neighborFaces.size();
+	      flux(face, m_comp) = std::max(0.0, sign(sit())*flux(face, m_comp))/neighborFaces.size();
 	    }
 	    
 	    break;
@@ -1463,8 +1454,8 @@ void CdrSolver::setTime(const int a_step, const Real a_time, const Real a_dt) {
   }
 
   m_timeStep = a_step;
-  m_time = a_time;
-  m_dt   = a_dt;
+  m_time     = a_time;
+  m_dt       = a_dt;
 }
 
 void CdrSolver::setVelocity(const EBAMRCellData& a_velo){

@@ -103,6 +103,11 @@ public:
 
   /*!
     @brief Compute div(D*grad(phi)) explicitly
+    @param[out] a_divF      Divergence term, including redistribution magic. 
+    @param[in]  a_phi       Cell-centered state
+    @param[in]  a_domainBc  How to set domain fluxes
+    @param[in]  a_useEbFlux If true, the embedded boundary flux will be included in div(D)
+    @note a_phi is non-const because ghost cells will be interpolated in this routine. Valid data in a_phi is not touched. 
   */
   virtual void computeDivD(EBAMRCellData& a_divD,
 			   EBAMRCellData& a_phi,
@@ -115,12 +120,21 @@ public:
   virtual int queryGhost() const = 0;
 
   /*!
-    @brief Implicit diffusion TGA advance with source terms
+    @brief Implicit diffusion TGA advance without source term.
+    @param[inout] a_newPhi Solution at time t + dt
+    @param[in]    a_oldPhi Solution at time t
+    @param[in]    a_dt     Time step
+    @note This version sets the source term to zero. 
   */
   virtual void advanceTGA(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const Real a_dt) override;
 
   /*!
-    @brief Implicit diffusion TGA advance with source terms
+    @brief Implicit diffusion TGA advance with source term.
+    @param[inout] a_newPhi Solution at time t + dt
+    @param[in]    a_oldPhi Solution at time t
+    @param[in]    a_source Source (at t+dt/2)
+    @param[in]    a_dt     Time step
+    @note Source term should be centered at t+dt/2 for second order convergence. 
   */
   virtual void advanceTGA(EBAMRCellData&       a_newPhi,
 			  const EBAMRCellData& a_oldPhi,
