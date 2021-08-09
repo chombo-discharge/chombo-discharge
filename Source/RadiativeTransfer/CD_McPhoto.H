@@ -24,7 +24,6 @@
 #include <CD_RtSolver.H>
 #include <CD_EbParticleInterp.H>
 #include <CD_ParticleContainer.H>
-#include <CD_WallBc.H>
 #include <CD_Photon.H>
 #include <CD_NamespaceHeader.H>
 
@@ -32,6 +31,7 @@
   @brief Radiative tranfer equation solver using Monte-Carlo simulation.
   @details This class is, by default, a non-stationary radiative transfer solver which simulates computational photons that can also be deposited on the mesh. Various
   options are available for specifying how the photons are generated, and how they are propagated (e.g. with speed of light or instantaneously). 
+  @note The solver is missing appropriate boundary conditions on domain faces. 
 */
 class McPhoto : public RtSolver {
 public:
@@ -474,17 +474,12 @@ protected:
   /*!
     @brief RNG engine
   */
-  std::mt19937_64* m_rng; // Engine
-
-  /*!
-    @brief Distribution on [0,1]
-  */
-  std::uniform_real_distribution<Real>* m_udist01; 
+  std::mt19937_64 m_rng; 
 
   /*!
     @brief Distribution on [-1,1]
   */
-  std::uniform_real_distribution<Real>* m_udist11; 
+  std::uniform_real_distribution<Real> m_udist11; 
 
   /*!
     @brief Deposition type
@@ -535,12 +530,6 @@ protected:
     @brief This is a particle container that can be used to add Photons directly. 
   */
   ParticleContainer<Photon> m_sourcePhotons;
-
-  /*!
-    @brief Domain boundary conditions
-    @todo Replace wallbc by something better -- wallbc is very old code and it stinks. 
-  */
-  Vector<wallbc::which_bc> m_domainBC;
 
   /*!
     @brief Draw photons in a cell and volume
@@ -674,14 +663,9 @@ protected:
   void parseDeposition();
 
   /*!
-    @brief Parse domain BCs
-  */
-  void parseDomainBc();
-
-  /*!
     @brief Parse PVR buffer
   */
-  void parsePvrBuffer();
+  void parseBuffer();
 
   /*!
     @brief Parse plot variables

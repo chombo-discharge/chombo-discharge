@@ -96,8 +96,7 @@ void McPhoto::parseOptions(){
   this->parsePhotoGeneration();
   this->parseSourceType();
   this->parseDeposition();
-  this->parseDomainBc();
-  this->parsePvrBuffer();
+  this->parseBuffer();
   this->parsePlotVariables();
   this->parseInstantaneous();
   this->parseDivergenceComputation();
@@ -113,8 +112,7 @@ void McPhoto::parseRuntimeOptions(){
   this->parsePhotoGeneration();
   this->parseSourceType();
   this->parseDeposition();
-  this->parseDomainBc();
-  this->parsePvrBuffer();
+  this->parseBuffer();
   this->parsePlotVariables();
   this->parseInstantaneous();
   this->parseDivergenceComputation();
@@ -145,10 +143,9 @@ void McPhoto::parseRNG(){
     m_seed = std::chrono::system_clock::now().time_since_epoch().count();
     m_seed += procID(); 
   }
-  m_rng = new std::mt19937_64(m_seed);
+  m_rng = std::mt19937_64(m_seed);
 
-  m_udist01 = new uniform_real_distribution<Real>( 0.0, 1.0);
-  m_udist11 = new uniform_real_distribution<Real>(-1.0, 1.0);
+  m_udist11 = std::uniform_real_distribution<Real>(-1.0, 1.0);
 }
 
 void McPhoto::parseInstantaneous(){
@@ -281,58 +278,14 @@ void McPhoto::parseDeposition(){
   }
 }
 
-void McPhoto::parseDomainBc(){
-  CH_TIME("McPhoto::parseDomainBc");
+void McPhoto::parseBuffer(){
+  CH_TIME("McPhoto::parseBuffer");
   if(m_verbosity > 5){
-    pout() << m_name + "::parseDomainBc" << endl;
-  }
-  
-  m_domainBC.resize(2*SpaceDim);
-  for (int dir = 0; dir < SpaceDim; dir++){
-    for (SideIterator sit; sit.ok(); ++sit){
-      const Side::LoHiSide side = sit();
-      const int idx = domainBcMap(dir, side);
-
-      ParmParse pp(m_className.c_str());
-      std::string str_dir;
-      if(dir == 0){
-	str_dir = "x";
-      }
-      else if(dir == 1){
-	str_dir = "y";
-      }
-      else if(dir == 2){
-	str_dir = "z";
-      }
-
-      std::string sidestr = (side == Side::Lo) ? "_low" : "_high";
-      std::string bc_string = "bc_" + str_dir + sidestr;
-      std::string type;
-      pp.get(bc_string.c_str(), type);
-      if(type == "outflow"){
-	m_domainBC[idx] = wallbc::outflow;
-      }
-      else if(type == "symmetry"){
-	m_domainBC[idx] = wallbc::symmetry;
-      }
-      else if(type == "wall"){
-	m_domainBC[idx] = wallbc::wall;
-      }
-      else {
-	std::string error = "McPhoto::setDomainBc - unsupported boundary condition requested: " + bc_string;
-	MayDay::Error(error.c_str());
-      }
-    }
-  }
-}
-
-void McPhoto::parsePvrBuffer(){
-  CH_TIME("McPhoto::parsePvrBuffer");
-  if(m_verbosity > 5){
-    pout() << m_name + "::parsePvrBuffer" << endl;
+    pout() << m_name + "::parseBuffer" << endl;
   }
   
   ParmParse pp(m_className.c_str());
+  
   pp.get("pvr_buffer",   m_pvrBuffer);
   pp.get("halo_buffer",  m_haloBuffer);
 }
@@ -699,11 +652,11 @@ int McPhoto::getNumberOfPlotVariables() const{
 int McPhoto::randomPoisson(const Real a_mean){
   if(a_mean < m_poissonExponentialSwapLimit){
     std::poisson_distribution<int> pdist(a_mean);
-    return pdist(*m_rng);
+    return pdist(m_rng);
   }
   else {
     std::normal_distribution<Real> ndist(a_mean, sqrt(a_mean));
-    return (int) round(ndist(*m_rng));
+    return (int) round(ndist(m_rng));
   }
 }
 
@@ -715,7 +668,7 @@ int McPhoto::domainBcMap(const int a_dir, const Side::LoHiSide a_side) {
 
 Real McPhoto::randomExponential(const Real a_mean){
   std::exponential_distribution<Real> dist(a_mean);
-  return dist(*m_rng);
+  return dist(m_rng);
 }
 
 RealVect McPhoto::randomDirection(){
@@ -733,8 +686,8 @@ RealVect McPhoto::randomDirection2D(){
   Real x2 = 2.0;
   Real r  = x1*x1 + x2*x2;
   while(r >= 1.0 || r < EPS){
-    x1 = (*m_udist11)(*m_rng);
-    x2 = (*m_udist11)(*m_rng);
+    x1 = (m_udist11)(m_rng);
+    x2 = (m_udist11)(m_rng);
     r  = x1*x1 + x2*x2;
   }
 
@@ -749,8 +702,8 @@ RealVect McPhoto::randomDirection3D(){
   Real x2 = 2.0;
   Real r  = x1*x1 + x2*x2;
   while(r >= 1.0 || r < EPS){
-    x1 = (*m_udist11)(*m_rng);
-    x2 = (*m_udist11)(*m_rng);
+    x1 = (m_udist11)(m_rng);
+    x2 = (m_udist11)(m_rng);
     r  = x1*x1 + x2*x2;
   }
 
@@ -986,7 +939,7 @@ void McPhoto::depositPhotons(EBAMRCellData&              a_phi,
 
 void McPhoto::depositKappaConservative(EBAMRCellData&              a_phi,
 				       const AMRParticles<Photon>& a_photons,
-				       const DepositionType a_deposition){
+				       const DepositionType        a_deposition){
   CH_TIME("McPhoto::depositKappaConservative");
   if(m_verbosity > 5){
     pout() << m_name + "::depositKappaConservative" << endl;
