@@ -106,6 +106,11 @@ public:
   virtual const RefCountedPtr<BaseIF>& getSolidImplicitFunction() const;
 
   /*!
+    @brief Get implicit function
+  */
+  virtual const RefCountedPtr<BaseIF>& getImplicitFunction(const phase::which_phase a_phase) const;
+
+  /*!
     @brief Build MFIndexSpace
     @details This will build the gas and solid phase domain. The input is the finest-level stuff and you can control the division
     into boxes as well as the maximum number of coarsenings. The computed domain is (a_origin, a_origin + a_box*a_dx)

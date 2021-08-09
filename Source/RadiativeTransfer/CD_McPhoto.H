@@ -29,7 +29,9 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Radiative tranfer equation solver using stationary Monte-Carlo
+  @brief Radiative tranfer equation solver using Monte-Carlo simulation.
+  @details This class is, by default, a non-stationary radiative transfer solver which simulates computational photons that can also be deposited on the mesh. Various
+  options are available for specifying how the photons are generated, and how they are propagated (e.g. with speed of light or instantaneously). 
 */
 class McPhoto : public RtSolver {
 public:
@@ -45,58 +47,88 @@ public:
   virtual ~McPhoto();
 
   /*!
-    @brief Advance RTE and deposit Photons on a_phi
-    @details This routine switches between stationary and transient solvers depending on what you ask for. 
+    @brief Advance RTE and deposit photon particles on the mesh
+    @param[in]  a_dt Time step
+    @param[out] a_phi     Photon density on the mesh
+    @param[in]  a_source  Source term, i.e. number of photons produced per unit time. The photons will be generated
+    based on what the user specifies in the input parameters for this class. I.e., whether or not a_source will generate stochastic or deterministic photons, and
+    scaled based on what a_source actually contains (number of photons, number/volume, number/second, number/(volume*second)). 
+    @param[in]  a_zeroPhi Dead parameter not used in this implementation. 
+    @note This is the "fluid interface" to the radiative transfer solver in which the solver uses discrete photons for sampling the isotropic density. Particle codes
+    will probably use advancePhotonsInstantaneous or advancePhotonsTransient .
+    @details This routine switches between stationary and transient solvers depending on whether or not the solver is stationary. 
   */
-  virtual bool advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_source, const bool a_zerophi = false);
+  virtual bool advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_source, const bool a_zeroPhi = false) override;
 
   /*!
-    @brief Instantaneous solver or not
+    @brief Instantaneous solver or not. 
   */
   virtual bool isInstantaneous();
 
   /*!
-    @brief Generate Photons
+    @brief Generate computational photon sfrom a source term 
+    @param[out] a_photons Computational photons. 
+    @param[in]  a_source  Source term, i.e. number of photons produced per unit time. The photons will be generated
+    based on what the user specifies in the input parameters for this class. I.e., whether or not a_source will generate stochastic or deterministic photons, and
+    scaled based on what a_source actually contains (number of photons, number/volume, number/second, number/(volume*second)). 
+    @param[in] a_dt Time step
+    @details This will generate photons and put them in a_particles
   */
-  virtual void generatePhotons(ParticleContainer<Photon>& a_particles, const EBAMRCellData& a_source, const Real a_dt);
+  virtual void generatePhotons(ParticleContainer<Photon>& a_photons, const EBAMRCellData& a_source, const Real a_dt);
 
   /*!
-    @brief Move Photons and absorb them. 
-    @details This is the routine that is used to move Photons when the solver is stationary. 
+    @brief Move photons and absorb them on various objects
+    @param[out]   a_bulkPhotons   Photons absorbed on the mesh
+    @param[out]   a_ebPhotons     Photons absorbed on the EB
+    @param[out]   a_domainPhotons Photons absorbed on the domain edges (faces)
+    @param[inout] a_photons       Original photons
+    @note This routine moves photons with an instantaneous kernel, i.e. all photons are always absorbed and none are left behind as free-flight photons (i.e. a_photons will
+    be empty on output)
   */
-  virtual void advancePhotonsStationary(ParticleContainer<Photon>& a_bulkPhotons,
-					ParticleContainer<Photon>& a_ebPhotons,
-					ParticleContainer<Photon>& a_domainPhotons,
-					ParticleContainer<Photon>& a_photons);
+  virtual void advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhotons,
+					   ParticleContainer<Photon>& a_ebPhotons,
+					   ParticleContainer<Photon>& a_domainPhotons,
+					   ParticleContainer<Photon>& a_photons);
 
   /*!
-    @brief This moves the Photons over a time step dt. If a Photon is absorbed in the gas, it is put in
-    a_bulkPhotons. If it is absorbed on the EB, it is put in a_ebPhotons etc. 
-    @details This is the routine that is used to move Photons when the solver is transient. 
+    @brief Move photons and absorb them on various objects
+    @param[out]   a_bulkPhotons   Photons absorbed on the mesh
+    @param[out]   a_ebPhotons     Photons absorbed on the EB
+    @param[out]   a_domainPhotons Photons absorbed on the domain edges (faces)
+    @param[inout] a_photons       Original photons
+    @param[in]    a_dt            Time step
+    @note This routine moves photons with a transient kernel, i.e. all photons propagate at most c*dt and checks are made to determine if they are absorbed on the mesh
+    or various objects (EB, domain). a_photons may be non-empty on output, in which case there are still free-flight photons in the solver. 
   */
   virtual void advancePhotonsTransient(ParticleContainer<Photon>& a_bulkPhotons,
 				       ParticleContainer<Photon>& a_ebPhotons,
 				       ParticleContainer<Photon>& a_domainPhotons,
-				       ParticleContainer<Photon>& a_oPhotons,
+				       ParticleContainer<Photon>& a_photons,
 				       const Real                 a_dt);
 
   /*!
-    @brief Remap Photons
+    @brief Remap computational particles. This remaps m_photons
   */
   virtual void remap();
 
   /*!
-    @brief Remap Photons
+    @brief Remap computational particles
+    @param[in] a_photons Computational particles to be remapped.
   */
   virtual void remap(ParticleContainer<Photon>& a_photons);
 
   /*!
-    @brief Deposit Photons
+    @brief Deposit photons on the mesh. 
+    @details This deposits m_photons onto m_phi
   */
   virtual void depositPhotons();
 
   /*!
-    @brief Deposit Photons
+    @brief Deposit photons
+    @param[out] a_phi        Deposited mesh density
+    @param[in]  a_photons    Computational photons to be deposited
+    @param[in]  a_deposition Deposition method
+    @note The deposition procedure is also dependent on specification of various class options.     
   */
   virtual void depositPhotons(EBAMRCellData&                    a_phi,
 			      const ParticleContainer<Photon>&  a_particles,
@@ -609,11 +641,6 @@ protected:
     @brief Parse deposition
   */
   void parseDeposition();
-
-  /*!
-    @brief Parse bisection step
-  */
-  void parseBisectStep();
 
   /*!
     @brief Parse domain BCs
