@@ -1489,7 +1489,7 @@ void ItoSolver::depositConductivity(EBAMRCellData& a_phi, ParticleContainer<ItoP
   this->depositConductivity(a_phi, a_particles, m_deposition);
 }
 
-void ItoSolver::depositConductivity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles, const DepositionType::Which a_deposition){
+void ItoSolver::depositConductivity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles, const DepositionType a_deposition){
   CH_TIME("ItoSolver::depositConductivity(state, particles, deposition_type)");
   if(m_verbosity > 5){
     pout() << m_name + "::depositConductivity(state, particles, deposition_type)" << endl;
@@ -1518,7 +1518,7 @@ void ItoSolver::depositDiffusivity(EBAMRCellData& a_phi, ParticleContainer<ItoPa
   this->depositDiffusivity(a_phi, a_particles, m_deposition);
 }
 
-void ItoSolver::depositDiffusivity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles, const DepositionType::Which a_deposition){
+void ItoSolver::depositDiffusivity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles, const DepositionType a_deposition){
   CH_TIME("ItoSolver::depositDiffusivity(state, particles, deposition_type)");
   if(m_verbosity > 5){
     pout() << m_name + "::depositDiffusivity(state, particles, deposition_type)" << endl;
@@ -1547,7 +1547,7 @@ void ItoSolver::depositEnergyDensity(EBAMRCellData& a_phi, ParticleContainer<Ito
   this->depositEnergyDensity(a_phi, a_particles, m_deposition);
 }
 
-void ItoSolver::depositEnergyDensity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles, const DepositionType::Which a_deposition){
+void ItoSolver::depositEnergyDensity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles, const DepositionType a_deposition){
   CH_TIME("ItoSolver::depositEnergyDensity(state, particles, deposition_type)");
   if(m_verbosity > 5){
     pout() << m_name + "::depositEnergyDensity(state, particles, deposition_type)" << endl;
@@ -2776,7 +2776,7 @@ void ItoSolver::remap(const WhichContainer a_container){
   particles.remap();
 }
 
-DepositionType::Which ItoSolver::getDeposition() const {
+DepositionType ItoSolver::getDeposition() const {
   return m_deposition;
 }
 

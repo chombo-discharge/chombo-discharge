@@ -944,7 +944,7 @@ void McPhoto::depositPhotons(){
 
 void McPhoto::depositPhotons(EBAMRCellData&                    a_phi,
 			     const ParticleContainer<Photon>& a_photons,
-			     const DepositionType::Which&      a_deposition){
+			     const DepositionType&      a_deposition){
   CH_TIME("McPhoto::depositPhotons(ParticleContainer)");
   if(m_verbosity > 5){
     pout() << m_name + "::depositPhotons(ParticleContainer)" << endl;
@@ -955,7 +955,7 @@ void McPhoto::depositPhotons(EBAMRCellData&                    a_phi,
 
 void McPhoto::depositPhotons(EBAMRCellData&               a_phi,
 			     const AMRParticles<Photon>&  a_photons,
-			     const DepositionType::Which& a_deposition){
+			     const DepositionType& a_deposition){
   CH_TIME("McPhoto::depositPhotons(AMRParticles)");
   if(m_verbosity > 5){
     pout() << m_name + "::depositPhotons(AMRParticles)" << endl;
@@ -979,7 +979,7 @@ void McPhoto::depositPhotons(EBAMRCellData&               a_phi,
 
 void McPhoto::depositKappaConservative(EBAMRCellData&              a_phi,
 				       const AMRParticles<Photon>& a_photons,
-				       const DepositionType::Which a_deposition){
+				       const DepositionType a_deposition){
   CH_TIME("McPhoto::depositKappaConservative");
   if(m_verbosity > 5){
     pout() << m_name + "::depositKappaConservative" << endl;

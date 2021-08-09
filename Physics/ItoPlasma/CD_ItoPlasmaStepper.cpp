@@ -2960,7 +2960,7 @@ void ItoPlasmaStepper::advancePhotons(const Real a_dt){
       solver->clear(sourcePhotons);
 
       // Instantaneous advance
-      solver->advancePhotonsStationary(bulkPhotons, ebPhotons, domainPhotons, Photons);
+      solver->advancePhotonsInstantaneous(bulkPhotons, ebPhotons, domainPhotons, Photons);
     }
     else{
       // Add source Photons
@@ -3362,7 +3362,7 @@ void ItoPlasmaStepper::computeEdotJSourceNWO2(const Real a_dt){
 
     ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::bulk);
 
-    const DepositionType::Which deposition = solver->getDeposition();
+    const DepositionType deposition = solver->getDeposition();
 
     if((mobile || diffusive) && q != 0){
 

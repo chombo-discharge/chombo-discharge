@@ -190,6 +190,14 @@ public:
   bool queryRealm(const std::string a_realm) const;
 
   /*!
+    @brief Check if mesh has an EBCF
+    @note Not implemented.
+  */
+  bool getEbCf(){
+    return true;
+  }
+
+  /*!
     @brief Register a new Realm
     @param[in] a_realm Realm name
   */

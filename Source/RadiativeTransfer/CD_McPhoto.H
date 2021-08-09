@@ -132,14 +132,14 @@ public:
   */
   virtual void depositPhotons(EBAMRCellData&                    a_phi,
 			      const ParticleContainer<Photon>&  a_particles,
-			      const DepositionType::Which&      a_deposition);
+			      const DepositionType&      a_deposition);
 
   /*!
     @brief Deposit Photons
   */
   virtual void depositPhotons(EBAMRCellData&               a_phi,
 			      const AMRParticles<Photon>&  a_photons,
-			      const DepositionType::Which& a_deposition);
+			      const DepositionType& a_deposition);
 
   /*!
     @brief Sort the m_photons container by cell
@@ -481,12 +481,12 @@ protected:
   /*!
     @brief Deposition type
   */
-  DepositionType::Which m_deposition;
+  DepositionType m_deposition;
 
   /*!
     @brief Plot deposition type
   */
-  DepositionType::Which m_plot_deposition;
+  DepositionType m_plot_deposition;
 
   /*!
     @brief Coarse data for interpolation of deposition clouds
@@ -575,7 +575,7 @@ protected:
   */
   void depositKappaConservative(EBAMRCellData&              a_phi,
 				const AMRParticles<Photon>& a_particles,
-				const DepositionType::Which a_deposition);
+				const DepositionType a_deposition);
 
   /*!
     @brief Make the "non-conservative" kappa deposition

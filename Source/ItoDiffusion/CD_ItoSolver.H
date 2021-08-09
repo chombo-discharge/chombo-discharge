@@ -183,7 +183,7 @@ public:
     @brief Deposit conductivities
     @details This deposits weight*mobility (not multiplied by charge)
   */
-  virtual void depositConductivity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles, const DepositionType::Which a_deposition);
+  virtual void depositConductivity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles, const DepositionType a_deposition);
 
   /*!
     @brief Deposit diffusivity
@@ -201,7 +201,7 @@ public:
     @brief Deposit diffusivity
     @details This deposits weight*D (not multiplied by charge)
   */
-  virtual void depositDiffusivity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles, const DepositionType::Which a_deposition);
+  virtual void depositDiffusivity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles, const DepositionType a_deposition);
 
   /*!
     @brief Deposit diffusivity
@@ -219,7 +219,7 @@ public:
     @brief Deposit energy
     @details This deposits weight*energy
   */
-  virtual void depositEnergyDensity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles, const DepositionType::Which a_deposition);
+  virtual void depositEnergyDensity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles, const DepositionType a_deposition);
 
   /*!
     @brief Compute average mobility. Must sort the particles by cell first. 
@@ -257,7 +257,7 @@ public:
     @brief Deposit the particles onto a_phi. The result is put on the a_comp compoennt
   */
   template <class T>
-  void depositParticles(EBAMRCellData& a_phi, const ParticleContainer<T>& a_particles, const DepositionType::Which  a_deposition);
+  void depositParticles(EBAMRCellData& a_phi, const ParticleContainer<T>& a_particles, const DepositionType  a_deposition);
 
   /*!
     @brief Deposit the total weight of the particles in the grid cells
@@ -695,7 +695,7 @@ public:
   /*!
     @brief Get deposition method
   */
-  DepositionType::Which getDeposition() const;
+  DepositionType getDeposition() const;
 
   /*!
     @brief Return phase
@@ -960,12 +960,12 @@ protected:
   /*!
     @brief Mass/charge deposition type
   */
-  DepositionType::Which m_deposition; 
+  DepositionType m_deposition; 
 
   /*!
     @brief Plot deposition type
   */
-  DepositionType::Which m_plot_deposition; 
+  DepositionType m_plot_deposition; 
 
   /*!
     @brief Deposited particles
@@ -1061,36 +1061,36 @@ protected:
     @brief This computes the "conservative" deposition, multiplied by kappa
   */
   template <class T>
-  void depositKappaConservative(EBAMRCellData&               a_phi,
+  void depositKappaConservative(EBAMRCellData&              a_phi,
 				const ParticleContainer<T>& a_particles,
-				const DepositionType::Which  a_deposition);
+				const DepositionType        a_deposition);
 
   /*!
     @brief Just as depositKappaConservative, but using a PVR buffer where particle clouds on coarse levels are
     interpolated to fine levels. 
   */
   template <class T>
-  void depositKappaConservativeWithPVR(EBAMRCellData&               a_phi,
+  void depositKappaConservativeWithPVR(EBAMRCellData&              a_phi,
 				       const ParticleContainer<T>& a_particles,
-				       const DepositionType::Which  a_deposition);
+				       const DepositionType        a_deposition);
 
   /*!
     @brief Just as depositKappaConservative, but using halo particles when depositing particles from coarse levels to fine
     levels
   */
   template <class T>
-  void depositKappaConservativeNoPVR_native(EBAMRCellData&               a_phi,
+  void depositKappaConservativeNoPVR_native(EBAMRCellData&              a_phi,
 					    const ParticleContainer<T>& a_particles,
-					    const DepositionType::Which  a_deposition);
+					    const DepositionType        a_deposition);
 
   /*!
     @brief Just as depositKappaConservative, but using halo particles when depositing particles from coarse levels to fine
     levels
   */
   template <class T>
-  void depositKappaConservativeNoPVR_NGP(EBAMRCellData&               a_phi,
+  void depositKappaConservativeNoPVR_NGP(EBAMRCellData&              a_phi,
 					 const ParticleContainer<T>& a_particles,
-					 const DepositionType::Which  a_deposition);
+					 const DepositionType        a_deposition);
 
   /*!
     @brief Make the "non-conservative" kappa deposition

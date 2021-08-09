@@ -83,7 +83,7 @@ bool CdrSpecies::initializeWithFunction() const{
   return m_initializeWithFunction;
 }
 
-DepositionType::Which CdrSpecies::getDeposition() {
+DepositionType CdrSpecies::getDeposition() {
   return m_deposition;
 }
 
