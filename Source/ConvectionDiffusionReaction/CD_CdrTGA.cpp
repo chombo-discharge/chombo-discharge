@@ -195,7 +195,6 @@ void CdrTGA::setupDiffusionSolver(){
   if(m_verbosity > 5){
     pout() << m_name + "::setupDiffusionSolver" << endl;
   }
-  m_verbosity = 10;
 
   this->setupHelmholtzFactory();
   this->setupMultigrid();
