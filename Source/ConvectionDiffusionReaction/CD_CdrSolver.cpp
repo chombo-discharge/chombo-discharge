@@ -95,6 +95,46 @@ int CdrSolver::getNumberOfPlotVariables() const {
   return num_output;
 }
 
+void CdrSolver::advanceEuler(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const Real a_dt){
+  CH_TIME("CdrSolver::advanceEuler(no source)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::advanceEuler(no source)" << endl;
+  }
+  
+  if(m_isDiffusive){
+    
+    // Create a source term = S = 0.0 and then call the other version. 
+    EBAMRCellData src;
+    m_amr->allocate(src, m_realm, m_phase, m_nComp);
+    DataOps::setValue(src, 0.0);
+
+    this->advanceEuler(a_newPhi, a_oldPhi, src, a_dt);
+  }
+  else{
+    DataOps::copy(a_newPhi, a_oldPhi);
+  }
+}
+
+void CdrSolver::advanceTGA(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const Real a_dt){
+  CH_TIME("CdrSolver::advanceTGA(no source)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::advanceTGA(no source)" << endl;
+  }
+
+  if(m_isDiffusive){
+
+    // Create a source term = S = 0.0 and then call the other version. 
+    EBAMRCellData src;
+    m_amr->allocate(src, m_realm, m_phase, m_nComp);
+    DataOps::setValue(src, 0.0);
+
+    this->advanceTGA(a_newPhi, a_oldPhi, src, a_dt);
+  }
+  else{
+    DataOps::copy(a_newPhi, a_oldPhi);
+  }
+}
+
 void CdrSolver::allocateInternals(){
   CH_TIME("CdrSolver::allocateInternals");
   if(m_verbosity > 5){

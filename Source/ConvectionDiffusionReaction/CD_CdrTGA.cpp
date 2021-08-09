@@ -44,25 +44,7 @@ void CdrTGA::registerOperators() {
   }
 }
 
-void CdrTGA::advanceEuler(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const Real a_dt){
-  CH_TIME("CdrTGA::advanceEuler(no source)");
-  if(m_verbosity > 5){
-    pout() << m_name + "::advanceEuler(no source)" << endl;
-  }
-  
-  if(m_isDiffusive){
-    
-    // Create a source term = S = 0.0 and then call the other version. 
-    EBAMRCellData src;
-    m_amr->allocate(src, m_realm, m_phase, m_nComp);
-    DataOps::setValue(src, 0.0);
 
-    this->advanceEuler(a_newPhi, a_oldPhi, src, a_dt);
-  }
-  else{
-    DataOps::copy(a_newPhi, a_oldPhi);
-  }
-}
 
 void CdrTGA::advanceEuler(EBAMRCellData&       a_newPhi,
 			  const EBAMRCellData& a_oldPhi,
@@ -122,27 +104,7 @@ void CdrTGA::advanceEuler(EBAMRCellData&       a_newPhi,
   }
 }
 
-void CdrTGA::advanceTGA(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const Real a_dt){
-  CH_TIME("CdrTGA::advanceTGA(no source)");
-  if(m_verbosity > 5){
-    pout() << m_name + "::advanceTGA(no source)" << endl;
-  }
 
-  if(m_isDiffusive){
-
-    // Dummy source term
-    const int ncomp = 1;
-    EBAMRCellData src;
-    m_amr->allocate(src, m_realm, m_phase, ncomp);
-    DataOps::setValue(src, 0.0);
-
-    // Call other version
-    advanceTGA(a_newPhi, a_oldPhi, src, a_dt);
-  }
-  else{
-    DataOps::copy(a_newPhi, a_oldPhi);
-  }
-}
 
 void CdrTGA::advanceTGA(EBAMRCellData&       a_newPhi,
 			const EBAMRCellData& a_oldPhi,
@@ -240,7 +202,7 @@ void CdrTGA::setupHelmholtzFactory(){
   DataOps::setValue(m_helmAcoef, 1.0);
 
   // Set up the operator
-  m_helmholtzOpFactory = RefCountedPtr<EBHelmholtzOpFactory> (new EBHelmholtzOpFactory(Location::Cell::Center,
+  m_poissonOpFactory = RefCountedPtr<EBHelmholtzOpFactory> (new EBHelmholtzOpFactory(Location::Cell::Center,
 										       alpha,
 										       beta,
 										       m_amr->getProbLo(),
@@ -303,10 +265,7 @@ void CdrTGA::setupMultigrid(){
 
   // Define AMRMultiGrid
   m_multigridSolver = RefCountedPtr<AMRMultiGrid<LevelData<EBCellFAB> > > (new AMRMultiGrid<LevelData<EBCellFAB> >());
-
-  pout() << "doing define" << endl;
-  if(m_helmholtzOpFactory.isNull()) pout() << "factory is null" << endl;
-  m_multigridSolver->define(coarsestDomain, *m_helmholtzOpFactory, botsolver, 1 + finestLevel);
+  m_multigridSolver->define(coarsestDomain, *m_poissonOpFactory, botsolver, 1 + finestLevel);
   m_multigridSolver->setSolverParameters(m_multigridPreSmooth,
 					 m_multigridPostSmooth,
 					 m_multigridBottomSmooth,
@@ -351,7 +310,7 @@ void CdrTGA::setupTGA(){
   const Vector<int> ref_rat    = m_amr->getRefinementRatios();
 
   m_tgaSolver = RefCountedPtr<AMRTGA<LevelData<EBCellFAB> > >
-    (new AMRTGA<LevelData<EBCellFAB> > (m_multigridSolver, *m_helmholtzOpFactory, coar_dom, ref_rat, 1 + finestLevel, m_multigridSolver->m_verbosity));
+    (new AMRTGA<LevelData<EBCellFAB> > (m_multigridSolver, *m_poissonOpFactory, coar_dom, ref_rat, 1 + finestLevel, m_multigridSolver->m_verbosity));
 }
 
 void CdrTGA::setupEuler(){
@@ -365,7 +324,7 @@ void CdrTGA::setupEuler(){
   const Vector<int> ref_rat    = m_amr->getRefinementRatios();
 
   m_eulerSolver = RefCountedPtr<EBBackwardEuler> 
-    (new EBBackwardEuler (m_multigridSolver, *m_helmholtzOpFactory, coar_dom, ref_rat, 1 + finestLevel, m_multigridSolver->m_verbosity));
+    (new EBBackwardEuler (m_multigridSolver, *m_poissonOpFactory, coar_dom, ref_rat, 1 + finestLevel, m_multigridSolver->m_verbosity));
 }
 
 void CdrTGA::computeDivJ(EBAMRCellData& a_divJ, EBAMRCellData& a_phi, const Real a_extrapDt, const bool a_ebFlux){

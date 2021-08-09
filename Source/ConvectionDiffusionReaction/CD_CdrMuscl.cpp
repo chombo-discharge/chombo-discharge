@@ -122,7 +122,7 @@ void CdrMuscl::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_ph
 }
 
 void CdrMuscl::allocateInternals(){
-  CdrSolver::allocateInternals();
+  CdrTGA::allocateInternals();
 
   if(m_isDiffusive){
     this->setupDiffusionSolver();

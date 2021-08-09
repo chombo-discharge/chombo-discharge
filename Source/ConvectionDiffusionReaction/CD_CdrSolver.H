@@ -100,7 +100,7 @@ public:
     @param[in]    a_dt     Time step
     @note This calls the other version with a zero source term. 
   */
-  virtual void advanceTGA(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const Real a_dt) = 0;
+  virtual void advanceTGA(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const Real a_dt);
 
   /*!
     @brief Implicit diffusion TGA advance with source term.
@@ -122,7 +122,7 @@ public:
     @param[in]    a_dt     Time step
     @note This calls the other version with a zero source term. 
   */
-  virtual void advanceEuler(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const Real a_dt) = 0;
+  virtual void advanceEuler(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const Real a_dt);
 
   /*!
     @brief Implicit diffusion Euler advance with source term.

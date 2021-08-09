@@ -82,7 +82,12 @@ public:
   virtual void registerOperators() override;
 
   /*!
-    @brief Compute div(nv - D*grad(n)) explicitly
+    @brief Compute div(J) explicitly, where J = nV - D*grad(n)
+    @param[out] a_divJ      Divergence term, i.e. finite volume approximation to 
+    @param[in]  a_phi       Cell-centered state
+    @param[in]  a_extrapDt  Extrapolation in time, i.e. shifting of div(J) towards e.g. half time step. Only affects the advective term. 
+    @param[in]  a_ebFlux    If true, the embedded boundary flux will injected and included in div(J)
+    @note a_phi is non-const because ghost cells will be re-filled
   */
   virtual void computeDivJ(EBAMRCellData& a_divJ,
 			   EBAMRCellData& a_phi,
@@ -91,6 +96,12 @@ public:
 
   /*!
     @brief Compute div(v*phi) explicitly
+    @param[out] a_divF      Divergence term, i.e. finite volume approximation to Div(v*phi), including redistribution magic. 
+    @param[in]  a_phi       Cell-centered state
+    @param[in]  a_extrapDt  Extrapolation in time, i.e. shifting of div(F) towards e.g. half time step. Only affects the advective term. 
+    @param[in]  a_domainBc  How to set domain fluxes
+    @param[in]  a_ebFlux    If true, the embedded boundary flux will injected be included in div(F)
+    @note a_phi is non-const because ghost cells will be interpolated in this routine. Valid data in a_phi is not touched. 
   */
   virtual void computeDivF(EBAMRCellData& a_divF,
 			   EBAMRCellData& a_phi,
@@ -112,15 +123,6 @@ public:
 			   const bool     a_ebFlux = false) override final;
 
   /*!
-    @brief Implicit diffusion TGA advance without source term.
-    @param[inout] a_newPhi Solution at time t + dt
-    @param[in]    a_oldPhi Solution at time t
-    @param[in]    a_dt     Time step
-    @note This version sets the source term to zero. 
-  */
-  virtual void advanceTGA(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const Real a_dt) override final;
-
-  /*!
     @brief Implicit diffusion TGA advance with source term.
     @param[inout] a_newPhi Solution at time t + dt
     @param[in]    a_oldPhi Solution at time t
@@ -132,24 +134,22 @@ public:
 			  const EBAMRCellData& a_oldPhi,
 			  const EBAMRCellData& a_source,
 			  const Real           a_dt) override final;
-
+  
   /*!
-    @brief Implicit diffusion Euler advance without source terms
-  */
-  virtual void advanceEuler(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const Real a_dt) override final;
-
-  /*!
-    @brief Implicit diffusion Euler advance with source terms
+    @brief Implicit diffusion Euler advance with source term.
+    @param[inout] a_newPhi Solution at time t + dt
+    @param[in]    a_oldPhi Solution at time t
+    @param[in]    a_source Source term. 
+    @param[in]    a_dt     Time step
+    @note For purely implicit Euler the source term should be centered at t+dt (otherwise it's an implicit-explicit method)
+    @details This solves the implicit diffusion equation equation a_newPhi - a_oldPhi = dt*Laplacian(a_newPhi) + dt*a_source. 
   */
   virtual void advanceEuler(EBAMRCellData&       a_newPhi,
 			    const EBAMRCellData& a_oldPhi,
 			    const EBAMRCellData& a_source,
 			    const Real           a_dt) override final;
 
-  /*!
-    @brief Write plot data
-  */
-  virtual void writePlotData(EBAMRCellData& a_output, int& a_comp) override final;
+
 
 protected:
 
@@ -181,7 +181,7 @@ protected:
   /*!
     @brief Operator factory
   */
-  RefCountedPtr<EBHelmholtzOpFactory> m_helmholtzOpFactory;
+  RefCountedPtr<EBHelmholtzOpFactory> m_poissonOpFactory;
 
   /*!
     @brief Conjugate gradient solver bottom MG level
@@ -287,6 +287,13 @@ protected:
     @brief Parse solver settings for geometric multigrid
   */
   virtual void parseMultigridSettings();
+
+  /*!
+    @brief Write output data to a_output
+    @param[inout] a_output Output data holder.
+    @param[inout] a_icomp  Starting component where this solver begins writing the output. 
+  */
+  virtual void writePlotData(EBAMRCellData& a_output, int& a_comp) override final;
 };
 
 #include <CD_NamespaceFooter.H>

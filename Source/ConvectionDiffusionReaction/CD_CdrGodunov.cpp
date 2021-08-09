@@ -141,7 +141,7 @@ void CdrGodunov::allocateInternals(){
     pout() << m_name + "::allocateInternals" << endl;
   }
 
-  CdrSolver::allocateInternals();
+  CdrTGA::allocateInternals();
 
   if(m_isDiffusive){
     this->setupDiffusionSolver();
