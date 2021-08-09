@@ -13,7 +13,6 @@
 #include <ParmParse.H>
 #include <EBAMRIO.H>
 #include <EBArith.H>
-#include <EBAlias.H>
 
 // Our includes
 #include <CD_CdrSolver.H>
