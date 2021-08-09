@@ -103,7 +103,7 @@ void AdvectionDiffusionStepper::initialData(){
 
   // Set flux functions
   auto fluxFunc = [](const RealVect a_pos, const Real a_time){
-    return 1.0;
+    return 0.0;
   };
 
   m_solver->setDomainFlux(fluxFunc);
