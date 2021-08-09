@@ -1298,6 +1298,7 @@ void CdrSolver::setComputationalGeometry(const RefCountedPtr<ComputationalGeomet
   if(m_verbosity > 5){
     pout() << m_name + "::setComputationalGeometry" << endl;
   }
+  
   m_computationalGeometry = a_computationalGeometry;
 
   const RefCountedPtr<MultiFluidIndexSpace> MultiFluidIndexSpace = m_computationalGeometry->getMfIndexSpace();

@@ -485,77 +485,91 @@ public:
   virtual Real computeSourceDt(const Real a_max, const Real a_tolerance);
   
   /*!
-    @brief Compute the total mass in m_phi
+    @brief Compute the "physical mass" in m_phi
+    @details This conservatively coarsens the solution and computes on the coarsest level only
   */
   virtual Real computeMass();
 
   /*!
     @brief Compute the total charge in m_phi
+    @details Calls computeMass and multiplies by charge
   */
   virtual Real computeCharge();
 
   /*!
-    @brief Diffusive or not
+    @brief Return true if the solver is diffusive and false otherwise
   */
   virtual bool isDiffusive();
 
   /*!
-    @brief Mobile or not
+    @brief Return true if the solver is mobile and false otherwise
   */
   virtual bool isMobile();
 
   /*!
     @brief Check if we can extrapolate
+    @details Special flag for when we operate with Godunov methods that extrapolate to half time step. 
+    @todo Move to CdrGdnv since this only affects that implementation. 
   */
   virtual bool extrapolateSourceTerm() const;
   
   /*!
     @brief Get the cell-centered phi
+    @return m_phi
   */
   virtual EBAMRCellData& getPhi();
 
   /*!
     @brief Get the source term
+    @return m_source
   */
   virtual EBAMRCellData& getSource();
 
   /*!
     @brief Get the cell-centered velocity
+    @return m_cellVelocity
   */
   virtual EBAMRCellData& getCellCenteredVelocity();
 
   /*!
     @brief Get the face-centered velocities
+    @return m_faceVelocity
   */
   virtual EBAMRFluxData& getFaceCenteredVelocity();
 
   /*!
     @brief Get the eb-centered velocities
+    @return m_ebVelocity
   */
   virtual EBAMRIVData& getEbCenteredVelocity();
 
   /*!
     @brief Get the face-centered diffusion coefficient
+    @return m_faceCentereDiffusionCoefficient
   */
   virtual EBAMRFluxData& getFaceCenteredDiffusionCoefficient();
 
   /*!
     @brief Get the EB-centered diffusion coefficient
+    @return m_ebCentereDiffusionCoefficient
   */
   virtual EBAMRIVData& getEbCenteredDiffusionCoefficient();
 
   /*!
     @brief Get the eb flux data holder
+    @return m_ebFlux
   */
   virtual EBAMRIVData& getEbFlux();
 
   /*!
     @brief Get the domain flux data holder
+    @return m_domainFlux
   */
   virtual EBAMRIFData& getDomainFlux();
 
   /*!
     @brief Get domain BC type
+    @return m_domainBc
   */
   CdrBc getDomainBc() const;
 
@@ -573,12 +587,12 @@ protected:
   static constexpr int m_nComp = 1;
   
   /*!
-    @brief Phase
+    @brief Index space
   */
   RefCountedPtr<EBIndexSpace> m_ebis;
 
   /*!
-    @brief Species
+    @brief Species through which e.g. mobility/diffusion and initial conditions is passed. 
   */
   RefCountedPtr<CdrSpecies> m_species;
   
@@ -593,17 +607,12 @@ protected:
   RefCountedPtr<AmrMesh> m_amr;
 
   /*!
-    @brief Stencils for interpolating flux to centroids
+    @brief Stencils for interpolating face-centered fluxes to face centroids
   */
   Vector<RefCountedPtr<LayoutData<BaseIFFAB<FaceStencil> > > > m_interpStencils[SpaceDim];
 
   /*!
-    @brief Stencils for computing the non-conservative divergence
-  */
-  Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > > m_stencils_nc;
-
-  /*!
-    @brief Storage for flux interpolant
+    @brief Storage for flux interpolant, i.e. temporary storage for face-centered fluxes. 
   */
   Vector<RefCountedPtr<LevelData<BaseIFFAB<Real> > > > m_interpolant[SpaceDim];
 
@@ -623,22 +632,23 @@ protected:
   CdrBc m_domainBc;
 
   /*!
-    @brief Name
+    @brief Solver name
   */
   std::string m_name;
 
   /*!
     @brief Class name. 
+    @details This will be different for different implementations of CdrSolver
   */
   std::string m_className;
 
   /*!
-    @brief Realm
+    @brief Realm where this solver is registered
   */
   std::string m_realm;
 
   /*!
-    @brief State data (i.e. the ion density)
+    @brief Cell-centered data (i.e. the advected-diffused quantity)
   */
   EBAMRCellData m_phi;
 
@@ -663,37 +673,37 @@ protected:
   EBAMRCellData m_scratch;
 
   /*!
-    @brief Scratch storage
+    @brief Scratch storage for flux
   */
   EBAMRFluxData m_scratchFluxOne;
 
   /*!
-    @brief Scratch storage
+    @brief Scratch storage for flux
   */
   EBAMRFluxData m_scratchFluxTwo;
 
   /*!
-    @brief Scratch storage
+    @brief Scratch storage for the non-conservative divergence
   */
   EBAMRIVData m_nonConservativeDivG;
 
   /*!
-    @brief Scratch storage
+    @brief Scratch storage for the mass difference
   */
   EBAMRIVData m_massDifference;
 
   /*!
-    @brief Zero flux
+    @brief Scratch storage for the EB flux
   */
   EBAMRIVData m_ebZero;
 
   /*!
-    @brief Cached state vector for regrid. DO NOT TOUCH!
+    @brief Cached state vector for regrid. 
   */
   EBAMRCellData m_cachePhi;
 
   /*!
-    @brief Cached source term for regrids. DO NOT TOUCH!
+    @brief Cached source term for regrids. 
   */
   EBAMRCellData m_cacheSource;
 
@@ -723,22 +733,24 @@ protected:
   EBAMRCellData m_aCoef;
 
   /*!
-    @brief Diffusion coefficients (can
+    @brief Diffusion coefficients on face centers
   */
   EBAMRFluxData m_faceCenteredDiffusionCoefficient;
 
   /*!
-    @brief Diffusion coefficients (can
+    @brief Diffusion coefficients on EB faces
   */
   EBAMRIVData m_ebCenteredDiffusionCoefficient;
 
   /*!
-    @brief Flux functions
+    @brief Domain flux functions 
+    @details Used when the user specifies that the domain flux is function-based
   */
   std::map<DomainWall, DomainFluxFunction> m_domainFluxFunctions;
 
   /*!
-    @brief Verbosity
+    @brief Solver verbosity. 
+    @details A high number gives lots of output 
   */
   int m_verbosity;
 
@@ -753,7 +765,7 @@ protected:
   Real m_time;
 
   /*!
-    @brief Time step
+    @brief Last time step increment. 
   */
   Real m_dt;
 
@@ -768,12 +780,12 @@ protected:
   bool m_blendConservation;
 
   /*!
-    @brief Also solve for diffusion
+    @brief Is the solver diffusive or not
   */
   bool m_isDiffusive;
 
   /*!
-    @brief Also solve for advection/convection
+    @brief Solve for advection/convection or not
   */
   bool m_isMobile;
   
@@ -783,7 +795,7 @@ protected:
   bool m_extrapolateSourceTerm;
 
   /*!
-    @brief Output state
+    @brief If true, m_phi is added to plot files. 
   */
   bool m_plotPhi;
 
