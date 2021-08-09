@@ -34,11 +34,6 @@ public:
   virtual ~CdrMuscl();
 
   /*!
-    @brief Query number of ghost cells
-  */
-  virtual int queryGhost() const override;
-
-  /*!
     @brief Parse options
   */
   virtual void parseOptions() override;

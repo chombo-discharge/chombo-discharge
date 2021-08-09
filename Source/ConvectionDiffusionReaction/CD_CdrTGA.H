@@ -5,8 +5,9 @@
 
 /*!
   @file   CD_CdrTGA.H
-  @brief  Extensions of CdrSolver which use EbHelmholtzOp and TGA for diffusion parts
+  @brief  Extensions of CdrSolver which use EBHelmholtzOp for diffusion
   @author Robert Marskar
+  @todo   This class should have its own registerOperators routine
 */
 
 #ifndef CD_CdrTGA_H
@@ -23,9 +24,10 @@
 #include <BiCGStabSolver.H>
 #include <EBBackwardEuler.H>
 #include <EBSimpleSolver.H>
+#include <GMRESSolver.H>
 
 // Our includes
-#include <CD_EbHelmholtzOpFactory.H>
+#include <CD_EBHelmholtzOpFactory.H>
 #include <CD_CdrSolver.H>
 #include <CD_NamespaceHeader.H>
   
@@ -38,28 +40,18 @@ protected:
   /*!
     @brief Enum class for supported bottom solvers in multigrid.
   */
-  enum class BottomSolver {
+  enum class BottomSolverType {
     Simple,
     BiCGStab,
     GMRES
   };
 
   /*!
-    @brief Enum for supported relaxation methods in multigrid. 
-  */
-  enum class RelaxationMethod {
-    Jacobi,
-    GaussSeidel,
-    GSRB,
-  };
-
-  /*!
     @brief Enum for multigrid cycle types. 
   */
-  enum class MultigridType {
-    FAS,
+  enum class MultigridType{
     VCycle,
-    FCycle,
+    WCycle,
   };
   
 public:
@@ -85,12 +77,17 @@ public:
   virtual void parseRuntimeOptions() = 0;
 
   /*!
+    @brief Register operator
+  */
+  virtual void registerOperators() override;
+
+  /*!
     @brief Compute div(nv - D*grad(n)) explicitly
   */
   virtual void computeDivJ(EBAMRCellData& a_divJ,
 			   EBAMRCellData& a_phi,
 			   const Real     a_extrapDt,
-			   const bool     a_ebFlux = true) override;
+			   const bool     a_ebFlux = true) override final;
 
   /*!
     @brief Compute div(v*phi) explicitly
@@ -99,7 +96,7 @@ public:
 			   EBAMRCellData& a_phi,
 			   const CdrBc    a_domainBc,
 			   const Real     a_extrapDt,
-			   const bool     a_ebFlux = true) override;
+			   const bool     a_ebFlux = true) override final;
 
   /*!
     @brief Compute div(D*grad(phi)) explicitly
@@ -112,12 +109,7 @@ public:
   virtual void computeDivD(EBAMRCellData& a_divD,
 			   EBAMRCellData& a_phi,
 			   const CdrBc    a_domainBc,			   
-			   const bool     a_ebFlux = false) override;
-
-  /*!
-    @brief Query number of ghost cells
-  */
-  virtual int queryGhost() const = 0;
+			   const bool     a_ebFlux = false) override final;
 
   /*!
     @brief Implicit diffusion TGA advance without source term.
@@ -126,7 +118,7 @@ public:
     @param[in]    a_dt     Time step
     @note This version sets the source term to zero. 
   */
-  virtual void advanceTGA(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const Real a_dt) override;
+  virtual void advanceTGA(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const Real a_dt) override final;
 
   /*!
     @brief Implicit diffusion TGA advance with source term.
@@ -139,12 +131,12 @@ public:
   virtual void advanceTGA(EBAMRCellData&       a_newPhi,
 			  const EBAMRCellData& a_oldPhi,
 			  const EBAMRCellData& a_source,
-			  const Real           a_dt) override;
+			  const Real           a_dt) override final;
 
   /*!
     @brief Implicit diffusion Euler advance without source terms
   */
-  virtual void advanceEuler(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const Real a_dt) override;
+  virtual void advanceEuler(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const Real a_dt) override final;
 
   /*!
     @brief Implicit diffusion Euler advance with source terms
@@ -152,19 +144,19 @@ public:
   virtual void advanceEuler(EBAMRCellData&       a_newPhi,
 			    const EBAMRCellData& a_oldPhi,
 			    const EBAMRCellData& a_source,
-			    const Real           a_dt) override;
+			    const Real           a_dt) override final;
 
   /*!
     @brief Write plot data
   */
-  virtual void writePlotData(EBAMRCellData& a_output, int& a_comp);
+  virtual void writePlotData(EBAMRCellData& a_output, int& a_comp) override final;
 
 protected:
 
   /*!
     @brief Relaxation type for gmg
   */
-  RelaxationMethod m_multigridRelaxMethod;
+  EBHelmholtzOp::Smoother m_smoother;
 
   /*!
     @brief GMG multigrid type
@@ -189,7 +181,7 @@ protected:
   /*!
     @brief Operator factory
   */
-  RefCountedPtr<EbHelmholtzOpFactory> m_operatorFactory;
+  RefCountedPtr<EBHelmholtzOpFactory> m_helmholtzOpFactory;
 
   /*!
     @brief Conjugate gradient solver bottom MG level
@@ -202,19 +194,14 @@ protected:
   EBSimpleSolver m_simpleSolver;
 
   /*!
-    @brief MG levelsgrids
+    @brief GMRES solver
   */
-  Vector<EBLevelGrid> m_mg_levelgrids;
+  GMRESSolver<LevelData<EBCellFAB> > m_gmres;
 
   /*!
     @brief Verbosity for geometric multigrid
   */
   int m_multigridVerbosity;
-
-  /*!
-    @brief Pre-coarsening of GMG levels
-  */
-  int m_numCoarseningsBeforeAggregation;
 
   /*!
     @brief Number of smoothings before averaging
@@ -244,7 +231,7 @@ protected:
   /*!
     @brief Bottom solver type
   */
-  BottomSolver m_bottomSolver;
+  BottomSolverType m_bottomSolverType;
 
   /*!
     @brief Number of smoothing for bottom solver
@@ -254,22 +241,17 @@ protected:
   /*!
     @brief Set bottom drop depth
   */
-  int m_numCellsBottomDrop;
-
-  /*!
-    @brief Has deeper MG levels or not
-  */
-  bool m_hasDeeperMultigridLevels;
+  int m_minCellsBottom;
 
   /*!
     @brief Multigrid tolerance
   */
-  Real m_multigridTolerance;
+  Real m_multigridExitTolerance;
   
   /*!
     @brief Multigrid hand
   */
-  Real m_multigridHang;
+  Real m_multigridExitHang;
 
   /*!
     @brief Advection-only extrapolation to faces
@@ -277,24 +259,19 @@ protected:
   virtual void advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt) = 0;
 
   /*!
-    @brief Set up geometric multigrid
+    @brief Set up diffusion solver
   */
-  virtual void setupMultigrid();
-
-  /*!
-    @brief Define the GMG levels
-  */
-  virtual void defineDeeperMultigridLevels();
+  virtual void setupDiffusionSolver();
 
   /*!
     @brief Setup the operator factory
   */
-  virtual void setupOperatorFactory();
+  virtual void setupHelmholtzFactory();
 
   /*!
     @brief Setup multigrid
   */
-  virtual void setupMultigridSolver();
+  virtual void setupMultigrid();
 
   /*!
     @brief Setup the TGA solver

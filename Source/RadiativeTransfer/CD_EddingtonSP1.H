@@ -202,15 +202,6 @@ protected:
   };
 
   /*!
-    @brief Enum for supported relaxation methods in multigrid. 
-  */
-  enum class Smoother {
-    Jacobi,
-    GaussSeidel,
-    GSRBFast
-  };
-
-  /*!
     @brief Enum for multigrid cycle types. 
   */
   enum class MultigridType{

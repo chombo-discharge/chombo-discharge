@@ -70,10 +70,6 @@ void CdrGodunov::parseSlopeLimiter(){
   m_slopelim = (str == "true") ? true : false;
 }
 
-int CdrGodunov::queryGhost() const {
-  return 3;
-}
-
 void CdrGodunov::averageVelocityToFaces(){
   CH_TIME("CdrGodunov::averageVelocityToFaces(public, full)");
   if(m_verbosity > 5){
@@ -148,7 +144,7 @@ void CdrGodunov::allocateInternals(){
   CdrSolver::allocateInternals();
 
   if(m_isDiffusive){
-    this->setupMultigrid();
+    this->setupDiffusionSolver();
   }
 
   if(m_isMobile){

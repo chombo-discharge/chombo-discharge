@@ -46,11 +46,6 @@ public:
   virtual void parseRuntimeOptions() override;
 
   /*!
-    @brief Query number of ghost cells
-  */
-  virtual int queryGhost() const override;
-
-  /*!
     @brief Allocate internal stuff
   */
   virtual void allocateInternals() override;
