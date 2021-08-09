@@ -7,7 +7,7 @@
   @file   CD_CdrTGA.H
   @brief  Extensions of CdrSolver which use EBHelmholtzOp for diffusion
   @author Robert Marskar
-  @todo   This class should have its own registerOperators routine
+  @todo   HelmholtzOpFactory should be replaced by EBPoissonOpFactory
 */
 
 #ifndef CD_CdrTGA_H

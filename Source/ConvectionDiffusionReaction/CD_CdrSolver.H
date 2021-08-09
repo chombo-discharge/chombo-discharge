@@ -728,11 +728,6 @@ protected:
   EBAMRIFData m_domainFlux;
 
   /*!
-    @brief Dummy data
-  */
-  EBAMRCellData m_aCoef;
-
-  /*!
     @brief Diffusion coefficients on face centers
   */
   EBAMRFluxData m_faceCenteredDiffusionCoefficient;

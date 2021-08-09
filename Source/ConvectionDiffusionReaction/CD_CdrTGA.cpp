@@ -234,6 +234,11 @@ void CdrTGA::setupHelmholtzFactory(){
   const Real alpha = 1.0;
   const Real beta  = 1.0;
 
+  // Transient storage which will be removed when we transition to Poisson operator
+  EBAMRCellData m_helmAcoef;
+  m_amr->allocate(m_helmAcoef, m_realm, m_phase, 1);
+  DataOps::setValue(m_helmAcoef, 1.0);
+
   // Set up the operator
   m_helmholtzOpFactory = RefCountedPtr<EBHelmholtzOpFactory> (new EBHelmholtzOpFactory(Location::Cell::Center,
 										       alpha,
@@ -245,7 +250,7 @@ void CdrTGA::setupHelmholtzFactory(){
 										       coarAve,
 										       m_amr->getRefinementRatios(),
 										       m_amr->getDx(),
-										       m_aCoef.getData(),
+										       m_helmAcoef.getData(),
 										       m_faceCenteredDiffusionCoefficient.getData(),
 										       m_ebCenteredDiffusionCoefficient.getData(),
 										       domainBcFactory,
