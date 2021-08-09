@@ -193,7 +193,7 @@ void McPhoto::parsePhotoGeneration(){
     m_photogen = PhotonGeneration::Stochastic;
   }
   else{
-    MayDay::Abort("McPhoto::set_PhotonGeneration - unknown Photon generation type requested");
+    MayDay::Error("McPhoto::set_PhotonGeneration - unknown Photon generation type requested");
   }
 }
 
@@ -221,7 +221,7 @@ void McPhoto::parseSourceType(){
     m_src_type = SourceType::PerSecond;
   }
   else{
-    MayDay::Abort("McPhoto::setSourceType - unknown source type requested");
+    MayDay::Error("McPhoto::setSourceType - unknown source type requested");
   }
 }
 
@@ -254,7 +254,7 @@ void McPhoto::parseDeposition(){
     m_deposition = DepositionType::W4;
   }
   else{
-    MayDay::Abort("McPhoto::set_deposition_type - unknown interpolant requested");
+    MayDay::Error("McPhoto::set_deposition_type - unknown interpolant requested");
   }
 
   pp.get("plot_deposition", str);
@@ -276,7 +276,7 @@ void McPhoto::parseDeposition(){
     m_plot_deposition = DepositionType::W4;
   }
   else{
-    MayDay::Abort("McPhoto::set_deposition_type - unknown interpolant requested");
+    MayDay::Error("McPhoto::set_deposition_type - unknown interpolant requested");
   }
 }
 
@@ -319,7 +319,7 @@ void McPhoto::parseDomainBc(){
       }
       else {
 	std::string error = "McPhoto::setDomainBc - unsupported boundary condition requested: " + bc_string;
-	MayDay::Abort(error.c_str());
+	MayDay::Error(error.c_str());
       }
     }
   }
@@ -422,11 +422,11 @@ void McPhoto::preRegrid(const int a_lmin, const int a_oldFinestLevel){
     pout() << m_name + "::pre_grid" << endl;
   }
 
-  m_photons.preRegrid(a_lmin);         // TLDR: This moves Photons from l >= a_lmin to Max(a_lmin-1,0)
-  m_bulkPhotons.preRegrid(a_lmin);    // TLDR: This moves Photons from l >= a_lmin to Max(a_lmin-1,0)
-  m_ebPhotons.preRegrid(a_lmin);      // TLDR: This moves Photons from l >= a_lmin to Max(a_lmin-1,0)
-  m_domainPhotons.preRegrid(a_lmin);  // TLDR: This moves Photons from l >= a_lmin to Max(a_lmin-1,0)
-  m_sourcePhotons.preRegrid(a_lmin);  // TLDR: This moves Photons from l >= a_lmin to Max(a_lmin-1,0)
+  m_photons.      preRegrid(a_lmin); 
+  m_bulkPhotons.  preRegrid(a_lmin); 
+  m_ebPhotons.    preRegrid(a_lmin); 
+  m_domainPhotons.preRegrid(a_lmin); 
+  m_sourcePhotons.preRegrid(a_lmin); 
 }
 
 void McPhoto::deallocateInternals(){
@@ -470,6 +470,62 @@ void McPhoto::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_n
 
   // Deposit
   this->depositPhotons();
+}
+
+void McPhoto::sortPhotonsByCell(const WhichContainer& a_which){
+  CH_TIME("McPhoto::sortPhotonsByCell(WhichContainer)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::sortPhotonsByCell(WhichContainer)" << endl;
+  }
+
+  switch(a_which){
+  case WhichContainer::Photons:
+    m_photons.sortParticlesByCell();
+    break;
+  case WhichContainer::Bulk:
+    m_bulkPhotons.sortParticlesByCell();
+    break;
+  case WhichContainer::EB:
+    m_ebPhotons.sortParticlesByCell();
+    break;
+  case WhichContainer::Domain:
+    m_domainPhotons.sortParticlesByCell();
+    break;
+  case WhichContainer::Source:
+    m_sourcePhotons.sortParticlesByCell();
+    break;    
+  default:
+    MayDay::Error("McPhoto::sortPhotonsByCell -- logic bust");
+    break;
+  }
+}
+
+void McPhoto::sortPhotonsByPatch(const WhichContainer& a_which){
+  CH_TIME("McPhoto::sortPhotonsByPatch(WhichContainer)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::sortPhotonsByPatch(WhichContainer)" << endl;
+  }
+
+  switch(a_which){
+  case WhichContainer::Photons:
+    m_photons.sortParticlesByPatch();
+    break;
+  case WhichContainer::Bulk:
+    m_bulkPhotons.sortParticlesByPatch();
+    break;
+  case WhichContainer::EB:
+    m_ebPhotons.sortParticlesByPatch();
+    break;
+  case WhichContainer::Domain:
+    m_domainPhotons.sortParticlesByPatch();
+    break;
+  case WhichContainer::Source:
+    m_sourcePhotons.sortParticlesByPatch();
+    break;    
+  default:
+    MayDay::Error("McPhoto::sortPhotonsByPatch -- logic bust");
+    break;
+  }
 }
 
 void McPhoto::sortPhotonsByCell(){
@@ -569,15 +625,16 @@ void McPhoto::registerOperators(){
   }
 
   if(m_amr.isNull()){
-    MayDay::Abort("McPhoto::registerOperators - need to set AmrMesh!");
+    MayDay::Error("McPhoto::registerOperators - m_amr is null, need to set AmrMesh.");
   }
   else{
-    m_amr->registerOperator(s_eb_coar_ave,     m_realm, m_phase);
-    m_amr->registerOperator(s_eb_fill_patch,   m_realm, m_phase);
-    m_amr->registerOperator(s_eb_mg_interp,    m_realm, m_phase);
-    m_amr->registerOperator(s_eb_redist,       m_realm, m_phase);
-    m_amr->registerOperator(s_noncons_div,  m_realm, m_phase);
-    m_amr->registerOperator(s_eb_copier,       m_realm, m_phase);
+    m_amr->registerOperator(s_eb_coar_ave,   m_realm, m_phase);
+    m_amr->registerOperator(s_eb_fill_patch, m_realm, m_phase);
+    m_amr->registerOperator(s_eb_mg_interp,  m_realm, m_phase);
+    m_amr->registerOperator(s_eb_redist,     m_realm, m_phase);
+    m_amr->registerOperator(s_noncons_div,   m_realm, m_phase);
+    m_amr->registerOperator(s_eb_copier,     m_realm, m_phase);
+    
     if(m_pvr_buffer <= 0){
       m_amr->registerOperator(s_eb_ghostcloud, m_realm, m_phase);
     }
@@ -601,17 +658,17 @@ void McPhoto::computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellData& 
   if(m_verbosity > 5){
     pout() << m_name + "::computeDomainFlux" << endl;
   }
-  
+
   DataOps::setValue(a_domainflux, 0.0);
 }
 
 void McPhoto::computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi){
   const std::string str = "McPhoto::computeFlux - Fluid flux can't be computed with discrete Photons. Calling this is an error";
-  MayDay::Abort(str.c_str());
+  MayDay::Error(str.c_str());
 }
 
 void McPhoto::computeDensity(EBAMRCellData& a_isotropic, const EBAMRCellData& a_phi){
-  MayDay::Abort("McPhoto::computeDensity - Calling this is an error");
+  MayDay::Error("McPhoto::computeDensity - Calling this is an error");
 }
 
 void McPhoto::writePlotFile(){
@@ -620,7 +677,7 @@ void McPhoto::writePlotFile(){
     pout() << m_name + "::writePlotFile" << endl;
   }
 
-  MayDay::Abort("McPhoto::writePlotFile - not implemented");
+  MayDay::Error("McPhoto::writePlotFile - not implemented");
 }
 
 void McPhoto::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const {
@@ -927,7 +984,7 @@ int McPhoto::drawPhotons(const Real a_source, const Real a_volume, const Real a_
     num_photons = round(a_source*factor);
   }
   else{
-    MayDay::Abort("mc::drawPhotons - unknown generation requested. Aborting...");
+    MayDay::Error("mc::drawPhotons - unknown generation requested. Aborting...");
   }
 
   return num_photons;
@@ -942,9 +999,9 @@ void McPhoto::depositPhotons(){
   this->depositPhotons(m_phi, m_photons, m_deposition);
 }
 
-void McPhoto::depositPhotons(EBAMRCellData&                    a_phi,
+void McPhoto::depositPhotons(EBAMRCellData&                   a_phi,
 			     const ParticleContainer<Photon>& a_photons,
-			     const DepositionType&      a_deposition){
+			     const DepositionType&            a_deposition){
   CH_TIME("McPhoto::depositPhotons(ParticleContainer)");
   if(m_verbosity > 5){
     pout() << m_name + "::depositPhotons(ParticleContainer)" << endl;
@@ -953,14 +1010,13 @@ void McPhoto::depositPhotons(EBAMRCellData&                    a_phi,
   this->depositPhotons(a_phi, a_photons.getParticles(), a_deposition);
 }
 
-void McPhoto::depositPhotons(EBAMRCellData&               a_phi,
-			     const AMRParticles<Photon>&  a_photons,
-			     const DepositionType& a_deposition){
+void McPhoto::depositPhotons(EBAMRCellData&              a_phi,
+			     const AMRParticles<Photon>& a_photons,
+			     const DepositionType&       a_deposition){
   CH_TIME("McPhoto::depositPhotons(AMRParticles)");
   if(m_verbosity > 5){
     pout() << m_name + "::depositPhotons(AMRParticles)" << endl;
   }
-
            
   this->depositKappaConservative(a_phi, a_photons, a_deposition); // a_phi contains only weights, i.e. not divided by kappa
   this->depositNonConservative(m_depositionNC, a_phi);            // Compute m_depositionNC = sum(kappa*Wc)/sum(kappa)
@@ -1479,7 +1535,7 @@ void McPhoto::advancePhotonsTransient(ParticleContainer<Photon>& a_bulkPhotons,
 	    domPhotons.transfer(lit);
 	  }
 	  else{
-	    MayDay::Abort("McPhoto::advancePhotonsTransient - logic bust");
+	    MayDay::Error("McPhoto::advancePhotonsTransient - logic bust");
 	  }
 	}
       }

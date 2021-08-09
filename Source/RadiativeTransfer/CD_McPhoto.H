@@ -37,6 +37,17 @@ class McPhoto : public RtSolver {
 public:
 
   /*!
+    @brief Enum class for identifying various containers. Only used for interface reasons. 
+  */
+  enum class WhichContainer {
+    Photons,
+    Bulk,
+    EB,
+    Domain,
+    Source
+  };
+
+  /*!
     @brief Constructor
   */
   McPhoto();
@@ -128,18 +139,35 @@ public:
     @param[out] a_phi        Deposited mesh density
     @param[in]  a_photons    Computational photons to be deposited
     @param[in]  a_deposition Deposition method
-    @note The deposition procedure is also dependent on specification of various class options.     
+    @note Calls the other version
   */
-  virtual void depositPhotons(EBAMRCellData&                    a_phi,
-			      const ParticleContainer<Photon>&  a_particles,
-			      const DepositionType&      a_deposition);
+  virtual void depositPhotons(EBAMRCellData&                   a_phi,
+			      const ParticleContainer<Photon>& a_particles,
+			      const DepositionType&            a_deposition);
 
   /*!
-    @brief Deposit Photons
+    @brief Deposit on the mesh. 
+    @param[out] a_phi        Deposited mesh density
+    @param[in]  a_photons    Computational photons to be deposited
+    @param[in]  a_deposition Deposition method
   */
   virtual void depositPhotons(EBAMRCellData&               a_phi,
 			      const AMRParticles<Photon>&  a_photons,
-			      const DepositionType& a_deposition);
+			      const DepositionType&        a_deposition);
+
+  /*!
+    @brief Sort container by cell
+    @details WhichContainer::Photon = m_photons, WhichContainer::EB = m_ebPhotons and so on. 
+    @param[in] a_which Which container to sort. 
+  */
+  virtual void sortPhotonsByCell(const WhichContainer& a_which);
+
+  /*!
+    @brief Sort container by patch
+    @details WhichContainer::Photon = m_photons, WhichContainer::EB = m_ebPhotons and so on. 
+    @param[in] a_which Which container to sort. 
+  */
+  virtual void sortPhotonsByPatch(const WhichContainer& a_which);
 
   /*!
     @brief Sort the m_photons container by cell
@@ -147,7 +175,7 @@ public:
   virtual void sortPhotonsByCell();
 
   /*!
-    @brief Sort the m_photons container by cell
+    @brief Sort the m_photons container by patch
   */
   virtual void sortPhotonsByPatch();
 
@@ -157,7 +185,7 @@ public:
   virtual void sortBulkPhotonsByCell();
 
   /*!
-    @brief Sort the m_bulkPhotons container by cell
+    @brief Sort the m_bulkPhotons container by patch
   */
   virtual void sortBulkPhotonsByPatch();
 
@@ -167,7 +195,7 @@ public:
   virtual void sortSourcePhotonsByCell();
 
   /*!
-    @brief Sort the m_sourcePhotons container by cell
+    @brief Sort the m_sourcePhotons container by patch
   */
   virtual void sortSourcePhotonsByPatch();
 
@@ -177,7 +205,7 @@ public:
   virtual void sortEbPhotonsByCell();
 
   /*!
-    @brief Sort the m_sourcePhotons container by cell
+    @brief Sort the m_sourcePhotons container by patch
   */
   virtual void sortEbPhotonsByPatch();
 
@@ -187,66 +215,73 @@ public:
   virtual void sortDomainPhotonsByCell();
 
   /*!
-    @brief Sort the m_sourcePhotons container by cell
+    @brief Sort the m_sourcePhotons container by patch
   */
   virtual void sortDomainPhotonsByPatch();
 
   /*!
-    Parse options
+    @brief Parse class options
   */
-  virtual void parseOptions();
+  virtual void parseOptions() override;
 
   /*!
-    Parse options
+    @brief Parse runtime options
   */
-  virtual void parseRuntimeOptions();
+  virtual void parseRuntimeOptions() override;
   
   /*!
     @brief Allocate internal storage
   */
-  virtual void allocateInternals();
+  virtual void allocateInternals() override;
 
   /*!
-    @brief Stuff to do before a regrid
+    @brief preRegrid operations
+    @param[in] a_base Coarsest level which changes during regrid
+    @param[in] a_oldFinestLevel Finest grid level before regrid
   */
-  virtual void preRegrid(const int a_base, const int a_oldFinestLevel);
+  virtual void preRegrid(const int a_base, const int a_oldFinestLevel) override;
 
   /*!
     @brief Deallocate internal storage
   */
-  virtual void deallocateInternals();
+  virtual void deallocateInternals() override;
 
   /*!
     @brief Regrid function for this class
+    @param[in] a_lmin Coarsest level that changed during regrid
+    @param[i]  a_oldFinestLevel Finest grid level before the regrid
+    @param[i]  a_newFinestLevel Finest grid level after the regrid
   */
-  virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel);
+  virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
 
   /*!
-    @brief Register operators
+    @brief Register operators that this solver needs.
   */
-  virtual void registerOperators();
+  virtual void registerOperators() override;
 
   /*!
-    @brief Compute the boundary flux. For Eddington, the boundary flux is = c*phi/2
+    @brief Compute the boundary flux. 
+    @note This sets the boundary flux to zero. If you want to use a boundary flux, use it through m_ebPhotons
   */
-  virtual void computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi);
+  virtual void computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi) override;
 
   /*!
-    @brief Compute the domain flux. For Eddington, the domain flux is = c*phi/2
+    @brief Compute the domain flux. 
+    @note This sets the boundary flux to zero. If you want to use a domain flux, use it through m_domainPhotons
   */
-  virtual void computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_phi);
+  virtual void computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_phi) override;
 
   /*!
     @brief Compute the flux
-    @details For diffusive models, the flux will be something like grad(a_phi). For higher-order models, the flux 
-    will be contained in a_phi (somehow);
+    @note Issues an error -- currently don't know how to compute the mesh flux from computational photons....
   */
-  virtual void computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi);
+  virtual void computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi) override;
 
   /*!
-    @brief Get isotropic part. 
+    @brief Compute isotropic radiative density from mesh solution
+    @note Issues an error - this routine doesn't make a lot of sense, really. 
   */
-  virtual void computeDensity(EBAMRCellData& a_isotropic, const EBAMRCellData& a_phi);
+  virtual void computeDensity(EBAMRCellData& a_isotropic, const EBAMRCellData& a_phi) override;
 
   /*!
     @brief Clear data holder
@@ -554,28 +589,33 @@ protected:
   Real randomExponential(const Real a_mean);
 
   /*!
-    @brief Random direction
+    @brief Compute and return a random direction in 2D/3D space. 
   */
   RealVect randomDirection();
 
 #if CH_SPACEDIM==2
   /*!
     @brief Random direction in 2D
+    @return Returns a random direction (in 2D)
   */
   RealVect randomDirection2D();
 #elif CH_SPACEDIM==3
   /*!
-    @brief Random direction in 2D
+    @brief Random direction in 3D
+    @return Returns a random direction (in 3D)
   */
   RealVect randomDirection3D();
 #endif
 
   /*!
     @brief This computes the "conservative" deposition, multiplied by kappa
+    @param[out] a_phi       Mesh density. 
+    @param[in] a_particles  Particles to be deposited
+    @param[in] a_deposition Deposition method
   */
   void depositKappaConservative(EBAMRCellData&              a_phi,
 				const AMRParticles<Photon>& a_particles,
-				const DepositionType a_deposition);
+				const DepositionType        a_deposition);
 
   /*!
     @brief Make the "non-conservative" kappa deposition
