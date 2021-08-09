@@ -180,6 +180,20 @@ Vector<RefCountedPtr<EBMultigridInterpolator> > ProxyFieldSolver::getMultigridIn
   pp.get("interp_order", order);
 
   Vector<RefCountedPtr<EBMultigridInterpolator> > interpolators(1+finestLevel);
+
+  std::string str;
+  
+  pp.get("centering", str);
+  Location::Cell loc;
+  if(str == "centroid"){
+    loc = Location::Cell::Centroid;
+  }
+  else if(str == "center"){
+    loc = Location::Cell::Center;
+  }
+  else{
+    MayDay::Abort("CD_ProxyFieldSolver::solveHelm - logic bust");
+  }
   
   for (int lvl = 0; lvl <= finestLevel; lvl++){
 
@@ -190,7 +204,7 @@ Vector<RefCountedPtr<EBMultigridInterpolator> > ProxyFieldSolver::getMultigridIn
       
       interpolators[lvl] = RefCountedPtr<EBMultigridInterpolator> (new EBMultigridInterpolator(eblgFine,
 											       eblgCoar,
-											       Location::Cell::Center,
+											       loc,
 											       m_amr->getNumberOfGhostCells()*IntVect::Unit,
 											       m_amr->getRefinementRatios()[lvl-1],
 											       1, // Variables
