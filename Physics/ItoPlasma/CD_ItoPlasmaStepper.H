@@ -316,17 +316,9 @@ namespace Physics {
       void advancePhotons(const Real a_dt);
 
       // Routines for sorting particles. These routines are here because RtLayout is general for RtSolver, and I'm too
-      // lazy to write an McPhoto_layout. So here you go. 
-      void sortPhotonsByCell();
-      void sortPhotonsByPatch();
-      void sortSourcePhotonsByCell();
-      void sortSourcePhotonsByPatch();
-      void sortBulkPhotonsByCell();
-      void sortBulkPhotonsByPatch();
-      void sortEbPhotonsByCell();
-      void sortEbPhotonsByPatch();
-      void sortDomainPhotonsByCell();
-      void sortDomainPhotonsByPatch();
+      // lazy to write an McPhoto_layout. So here you go.
+      void sortPhotonsByCell(McPhoto::WhichContainer a_which);
+      void sortPhotonsByPatch(McPhoto::WhichContainer a_which);
 
       // Routines for computing EdotJ per species, including the diffusive contribution. a_source is defined on the particle Realm.
       void computeEdotJSource(const Real a_dt);

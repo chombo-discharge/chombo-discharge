@@ -388,8 +388,8 @@ Real ItoPlasmaGodunovStepper::advance(const Real a_dt) {
   MPI_Barrier(Chombo_MPI::comm);
   sort_time = -MPI_Wtime();
   m_ito->sortParticlesByCell(ItoSolver::WhichContainer::bulk);
-  this->sortBulkPhotonsByCell();
-  this->sortSourcePhotonsByCell();
+  this->sortPhotonsByCell(McPhoto::WhichContainer::Bulk);
+  this->sortPhotonsByCell(McPhoto::WhichContainer::Source);
   sort_time += MPI_Wtime();
 
   // Chemistry kernel.
@@ -410,8 +410,8 @@ Real ItoPlasmaGodunovStepper::advance(const Real a_dt) {
   MPI_Barrier(Chombo_MPI::comm);
   sort_time -= MPI_Wtime();
   m_ito->sortParticlesByPatch(ItoSolver::WhichContainer::bulk);
-  this->sortBulkPhotonsByPatch();
-  this->sortSourcePhotonsByPatch();
+  this->sortPhotonsByPatch(McPhoto::WhichContainer::Bulk);
+  this->sortPhotonsByPatch(McPhoto::WhichContainer::Source);
   sort_time += MPI_Wtime();
 
   // Clear other data holders for now. BC comes later...
