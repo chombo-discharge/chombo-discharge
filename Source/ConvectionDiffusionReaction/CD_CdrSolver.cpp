@@ -444,11 +444,11 @@ void CdrSolver::computeDivG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const EBA
   this->incrementRedist(m_massDifference);                                 // Increment level redistribution register
 
   // Redistribution and reflux magic. 
-  this->coarseFineIncrement(m_massDifference);              // Compute C2F, F2C, and C2C mass transfers
-  this->incrementRedistFlux();                              // Tell flux register about whats going on on refinement boundaries. 
-  this->hyperbolicRedistribution(a_divG, m_massDifference); // Level redistribution. 
-  this->coarseFineRedistribution(a_divG);                   // Do the coarse-fine redistribution
-  this->reflux(a_divG);                                     // Reflux
+  this->coarseFineIncrement(m_massDifference); // Compute C2F, F2C, and C2C mass transfers
+  this->incrementRedistFlux();                 // Tell flux register about whats going on on refinement boundaries. 
+  this->hyperbolicRedistribution(a_divG);      // Level redistribution. 
+  this->coarseFineRedistribution(a_divG);      // Do the coarse-fine redistribution
+  this->reflux(a_divG);                        // Reflux
 }
 
 void CdrSolver::computeAdvectionFlux(EBAMRFluxData&       a_flux,
@@ -1164,59 +1164,68 @@ void CdrSolver::hybridDivergence(LevelData<EBCellFAB>&              a_hybridDive
   }
 }
 
-void CdrSolver::setRedistWeights(const EBAMRCellData& a_phi){
-  CH_TIME("CdrSolver::setRedistWeights");
+void CdrSolver::setRedistWeights(const EBAMRCellData& a_weights){
+  CH_TIME("CdrSolver::setRedistWeights(EBAMRCellData)");
   if(m_verbosity > 5){
-    pout() << m_name + "::setRedistWeights" << endl;
+    pout() << m_name + "::setRedistWeights(EBAMRCellData)" << endl;
   }
 
-  const int comp  = 0;
-  const int ncomp = 1;
-  const int finest_level = m_amr->getFinestLevel();
+  CH_assert(a_weights[0]->nComp() == 1);
 
-  for (int lvl = 0; lvl <= finest_level; lvl++){
+  // This function sets the weights for redistribution (the default is to use volume-weighted). This applies
+  // to level-redistribution, fine-to-coar redistribution, coarse-to-fine redistribution, and the heinous
+  // re-redistribution. 
+
+  const int finestLevel = m_amr->getFinestLevel();
+
+  for (int lvl = 0; lvl <= finestLevel; lvl++){
+
+    // Level redistribution
     EBLevelRedist& redist = *m_amr->getLevelRedist(m_realm, m_phase)[lvl];
-    redist.resetWeights(*a_phi[lvl], comp);
+    redist.resetWeights(*a_weights[lvl], m_comp);
 
-    const bool has_coar = lvl > 0;
-    const bool has_fine = lvl < finest_level;
+    const bool hasCoar = lvl > 0;
+    const bool hasFine = lvl < finestLevel;
 
-    if(has_coar){
-      EBFineToCoarRedist& fine2coar = *m_amr->getFineToCoarRedist(m_realm, m_phase)[lvl];
-      fine2coar.resetWeights(*a_phi[lvl-1], comp);
+    if(hasCoar){
+      EBFineToCoarRedist& fine2coarRedist = *m_amr->getFineToCoarRedist(m_realm, m_phase)[lvl];
+      fine2coarRedist.resetWeights(*a_weights[lvl-1], m_comp);
     }
-    if(has_fine){
-      EBCoarToCoarRedist& coar2coar = *m_amr->getCoarToCoarRedist(m_realm, m_phase)[lvl];
-      EBCoarToFineRedist& coar2fine = *m_amr->getCoarToFineRedist(m_realm, m_phase)[lvl];
+    if(hasFine){
+      EBCoarToCoarRedist& coar2coarRedist = *m_amr->getCoarToCoarRedist(m_realm, m_phase)[lvl];
+      EBCoarToFineRedist& coar2fineRedist = *m_amr->getCoarToFineRedist(m_realm, m_phase)[lvl];
 
-      coar2coar.resetWeights(*a_phi[lvl], comp);
-      coar2fine.resetWeights(*a_phi[lvl], comp);
+      coar2coarRedist.resetWeights(*a_weights[lvl], m_comp);
+      coar2fineRedist.resetWeights(*a_weights[lvl], m_comp);
     }
   }
 }
 
-void CdrSolver::hyperbolicRedistribution(EBAMRCellData& a_divF, const EBAMRIVData&   a_massDifference) {
-  CH_TIME("CdrSolver::hyberbolic_redistribution");
+void CdrSolver::hyperbolicRedistribution(EBAMRCellData& a_divF){
+  CH_TIME("CdrSolver::hyberbolicRedistribution(EBAMRCellData)");
   if(m_verbosity > 5){
-    pout() << m_name + "::hyperbolicRedistribution" << endl;
+    pout() << m_name + "::hyperbolicRedistribution(EBAMRCellData)" << endl;
   }
 
-  const int comp  = 0;
-  const int ncomp = 1;
-  const int finest_level = m_amr->getFinestLevel();
-  const Interval interv(comp, comp);
+  CH_assert(a_divF[0]->nComp() == 1);
 
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    EBLevelRedist& level_redist = *(m_amr->getLevelRedist(m_realm, m_phase)[lvl]);
-    level_redist.redistribute(*a_divF[lvl], interv);
-    level_redist.setToZero();
+  // This function ONLY redistributes on a grid level. If you don't have EBxCF crossings, thats the end of the story but in
+  // general we also need to account for mass that redistributes over refinement boundaries. 
+
+  const Interval interv(m_comp, m_comp);
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+    EBLevelRedist& levelRedist = *(m_amr->getLevelRedist(m_realm, m_phase)[lvl]);
+    
+    levelRedist.redistribute(*a_divF[lvl], interv);
+    levelRedist.setToZero();
   }
 }
 
 void CdrSolver::interpolateFluxToFaceCentroids(LevelData<EBFluxFAB>& a_flux, const int a_lvl){
-  CH_TIME("CdrSolver::interpolateFluxToFaceCentroids");
+  CH_TIME("CdrSolver::interpolateFluxToFaceCentroids(LD<EBFluxFAB>, int)");
   if(m_verbosity > 5){
-    pout() << m_name + "::interpolateFluxToFaceCentroids" << endl;
+    pout() << m_name + "::interpolateFluxToFaceCentroids(LD<EBFluxFAB>, int)" << endl;
   }
 
   CH_assert(a_flux.nComp() == 1);
@@ -1269,66 +1278,67 @@ void CdrSolver::interpolateFluxToFaceCentroids(LevelData<EBFluxFAB>& a_flux, con
 }
 
 void CdrSolver::resetFluxRegister(){
-  CH_TIME("CdrSolver::resetFluxRegister");
+  CH_TIME("CdrSolver::resetFluxRegister()");
   if(m_verbosity > 5){
-    pout() << m_name + "::resetFluxRegister" << endl;
+    pout() << m_name + "::resetFluxRegister()" << endl;
   }
-  
-  const int finest_level = m_amr->getFinestLevel();
-  
-  Vector<RefCountedPtr<EBFluxRegister> >& fluxreg = m_amr->getFluxRegister(m_realm, m_phase);
 
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    const bool has_fine = lvl < finest_level;
-    if(has_fine){
-      fluxreg[lvl]->setToZero();
+  // Function just sets the flux register to zero (so we can increment it later). 
+  const int finestLevel = m_amr->getFinestLevel();
+  
+  for (int lvl = 0; lvl <= finestLevel; lvl++){
+    if(lvl < finestLevel){ // Because flux registers between level l and level l+1 live on level l. 
+      RefCountedPtr<EBFluxRegister>& fluxReg = m_amr->getFluxRegister(m_realm, m_phase)[lvl];
+      
+      fluxReg->setToZero();
     }
   }
-  
 }
 
 void CdrSolver::incrementFluxRegister(const EBAMRFluxData& a_flux){
-  CH_TIME("CdrSolver::incrementFluxRegister(flux)");
+  CH_TIME("CdrSolver::incrementFluxRegister(EBAMRFluxData)");
   if(m_verbosity > 5){
-    pout() << m_name + "::incrementFluxRegister(flux)" << endl;
+    pout() << m_name + "::incrementFluxRegister(EBAMRFluxData)" << endl;
   }
 
-  const int comp  = 0;
-  const int ncomp = 1;
-  const int finest_level = m_amr->getFinestLevel();
-  const Interval interv(comp, comp);
+  CH_assert(a_flux[0]->nComp() == 1);
 
-  Vector<RefCountedPtr<EBFluxRegister> >& fluxreg = m_amr->getFluxRegister(m_realm, m_phase);
+  // TLDR: To enforce flux matching on refinement boundaries we must have coarse flux = sum(fine fluxes). Fortunately
+  //       Chombo has operators to handle that choreography, and this function provides the necessary fluxes to that operator.
   
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    const ProblemDomain& domain  = m_amr->getDomains()[lvl];
-    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-    
-    const bool has_coar = lvl > 0;
-    const bool has_fine = lvl < finest_level;
+  const int finestLevel = m_amr->getFinestLevel();
+  
+  const Interval interv(m_comp, m_comp);
 
-    if(has_fine){
-      fluxreg[lvl]->setToZero();
+  Vector<RefCountedPtr<EBFluxRegister> >& fluxReg = m_amr->getFluxRegister(m_realm, m_phase);
+  
+  for (int lvl = 0; lvl <= finestLevel; lvl++){
+    const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
+    const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    
+    const bool hasCoar = lvl > 0;
+    const bool hasFine = lvl < finestLevel;
+
+    // Reset flux register first. 
+    if(hasFine){
+      fluxReg[lvl]->setToZero();
     }
 
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const EBISBox& ebisbox = ebisl[dit()];
-      const Box box          = dbl.get(dit());
-      
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
       for (int dir = 0; dir < SpaceDim; dir++){
-	const Real scale      = 1.0;
-	const EBFaceFAB& flux = (*a_flux[lvl])[dit()][dir];
+	const Real       scale = 1.0;
+	const EBFaceFAB& flux  = (*a_flux[lvl])[dit()][dir];
 
-	// Increment flux register for irregular/regular. Add both from coarse to fine and from fine to coarse
-	if(has_fine){
+	// Increment flux register for irregular/regular. Add both from coarse to fine and from fine to coarse. 
+	if(hasFine){ 
 	  for (SideIterator sit; sit.ok(); ++sit){
-	    fluxreg[lvl]->incrementCoarseBoth(flux, scale, dit(), interv, dir, sit());
+	    fluxReg[lvl]->incrementCoarseBoth(flux, scale, dit(), interv, dir, sit()); // Register between lvl and lvl+1
 	  }
 	}
-	if(has_coar){
+	
+	if(hasCoar){
 	  for (SideIterator sit; sit.ok(); ++sit){
-	    fluxreg[lvl-1]->incrementFineBoth(flux, scale, dit(), interv, dir, sit());
+	    fluxReg[lvl-1]->incrementFineBoth(flux, scale, dit(), interv, dir, sit()); // Register between lvl-1 and lvl. 
 	  }
 	}
       }
@@ -1337,74 +1347,87 @@ void CdrSolver::incrementFluxRegister(const EBAMRFluxData& a_flux){
 }
 
 void CdrSolver::incrementRedist(const EBAMRIVData& a_massDifference){
-  CH_TIME("CdrSolver::incrementRedist");
+  CH_TIME("CdrSolver::incrementRedist(EBAMRIVData)");
   if(m_verbosity > 5){
-    pout() << m_name + "::incrementRedist" << endl;
+    pout() << m_name + "::incrementRedist(EBAMRIVData)" << endl;
   }
 
-  const int comp  = 0;
-  const int ncomp = 1;
-  const int finest_level = m_amr->getFinestLevel();
-  const Interval interv(comp, comp);
+  CH_assert(a_massDifference[0]->nComp() == 1);
 
-  for (int lvl = 0; lvl <= finest_level; lvl++){
+  // a_massDifference is the mass to be smooshed back onto the grid through redistribution. Here, we increment the level-only
+  // redistribution object with that mass. 
+
+  const Interval interv(m_comp, m_comp);
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
     
-    EBLevelRedist& level_redist = *(m_amr->getLevelRedist(m_realm, m_phase)[lvl]);
-    level_redist.setToZero();
+    EBLevelRedist& levelRedist = *(m_amr->getLevelRedist(m_realm, m_phase)[lvl]);
+    
+    levelRedist.setToZero();
 
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      level_redist.increment((*a_massDifference[lvl])[dit()], dit(), interv);
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      levelRedist.increment((*a_massDifference[lvl])[dit()], dit(), interv);
     }
   }
 }
 
 void CdrSolver::nonConservativeDivergence(EBAMRIVData& a_nonConservativeDivergence, const EBAMRCellData& a_divG){
-  CH_TIME("CdrSolver::nonConservativeDivergence");
+  CH_TIME("CdrSolver::nonConservativeDivergence(EBAMRIVData, EBAMRCellData)");
   if(m_verbosity > 5){
-    pout() << m_name + "::nonConservativeDivergence" << endl;
+    pout() << m_name + "::nonConservativeDivergence(EBAMRIVData, EBAMRCellData)" << endl;
   }
 
-  if(m_blendConservation){
+  CH_assert(a_nonConservativeDivergence[0]->nComp() == 1);
+  CH_assert(a_divG                     [0]->nComp() == 1);
+
+  // TLDR: This routine computes the non-conservative divergence divNC(G) = sum(kappa*div(G))/sum(kappa). This is done through
+  //       AmrMesh's stencil in cut cells. The neighborhood consists of cells that can be reached with a monotone path. 
+
+  if(m_blendConservation){ 
     const IrregAmrStencil<NonConservativeDivergenceStencil>& stencils = m_amr->getNonConservativeDivergenceStencils(m_realm, m_phase);
+    
     stencils.apply(a_nonConservativeDivergence, a_divG);
   }
-  else{
+  else{// Mostly for debugging. 
     DataOps::setValue(a_nonConservativeDivergence, 0.0);
   }
 }
 
 void CdrSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel){
-  CH_TIME("CdrSolver::regrid");
+  CH_TIME("CdrSolver::regrid(int, int, int)");
   if(m_verbosity > 5){
-    pout() << m_name + "::regrid" << endl;
+    pout() << m_name + "::regrid(int, int, int)" << endl;
   }
 
-  const int comp  = 0;
-  const int ncomp = 1;
-  const Interval interv(comp, comp);
+  const Interval interv(m_comp, m_comp);
 
+  // Allocate internal storage. This will fill m_phi with invalid data, but preRegrid(...) should have been called
+  // prior to this routine so the old m_phi (before the regrid) is stored in m_cachedPhi. 
   this->allocateInternals();
 
-  Vector<RefCountedPtr<EBPWLFineInterp> >& interpolator = m_amr->getPwlInterpolator(m_realm, m_phase);
-
-  // These levels have not changed
+  // These levels have not changed, but load balancing could have changed the processor ownership of data. 
   for (int lvl = 0; lvl <= Max(0,a_lmin-1); lvl++){
-    m_cachePhi[lvl]->copyTo(*m_phi[lvl]); // Base level should never change, but ownership can.
+    m_cachePhi   [lvl]->copyTo(*m_phi   [lvl]); // Base level should never change, but ownership can.
     m_cacheSource[lvl]->copyTo(*m_source[lvl]); // Base level should never change, but ownership can.
   }
 
   // These levels have changed
   for (int lvl = Max(1,a_lmin); lvl <= a_newFinestLevel; lvl++){
-    interpolator[lvl]->interpolate(*m_phi[lvl], *m_phi[lvl-1], interv);
-    interpolator[lvl]->interpolate(*m_source[lvl], *m_source[lvl-1], interv);
+    RefCountedPtr<EBPWLFineInterp>& interpolator = m_amr->getPwlInterpolator(m_realm, m_phase)[lvl]; // The interpolator for interpolator from lvl-1 to lvl lives on lvl
+
+    // Linearly interpolate (with limiters) from level lvl-1 to lvl
+    interpolator->interpolate(*m_phi   [lvl], *m_phi   [lvl-1], interv);
+    interpolator->interpolate(*m_source[lvl], *m_source[lvl-1], interv);
+
+    // There could be parts of the new grid that overlapped with the old grid (on level lvl) -- we don't want
+    // to pollute the solution with interpolation there since we already have valid data. 
     if(lvl <= Min(a_oldFinestLevel, a_newFinestLevel)){
-      m_cachePhi[lvl]->copyTo(*m_phi[lvl]);
+      m_cachePhi   [lvl]->copyTo(*m_phi[lvl]);
       m_cacheSource[lvl]->copyTo(*m_source[lvl]);
     }
   }
 
-  //  DataOps::floor(m_phi, 0.0);
   m_amr->averageDown(m_phi, m_realm, m_phase);
   m_amr->interpGhost(m_phi, m_realm, m_phase);
 
@@ -1413,28 +1436,28 @@ void CdrSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a
 }
 
 void CdrSolver::reflux(EBAMRCellData& a_phi){
-  CH_TIME("CdrSolver::reflux");
+  CH_TIME("CdrSolver::reflux(EBAMRCellData)");
   if(m_verbosity > 5){
-    pout() << m_name + "::reflux" << endl;
+    pout() << m_name + "::reflux(EBAMRCellData)" << endl;
   }
+
+  CH_assert(a_phi[0]->nComp() == 1);
+
+  const int finestLevel = m_amr->getFinestLevel();
   
-  const int comp  = 0;
-  const int ncomp = 1;
-  const int finest_level = m_amr->getFinestLevel();
-  const Interval interv(comp, comp);
+  const Interval interv(m_comp, m_comp);
 
   Vector<RefCountedPtr<EBFluxRegister > >& fluxreg = m_amr->getFluxRegister(m_realm, m_phase);
 
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    const Real dx       = m_amr->getDx()[lvl];
-    const bool has_coar = lvl > 0;
-    const bool has_fine = lvl < finest_level;
-
-    if(has_fine){
-      const Real scale = 1.0/dx;
+  for (int lvl = 0; lvl <= finestLevel; lvl++){
+    if(lvl < finestLevel){
+      RefCountedPtr<EBFluxRegister>& fluxReg = m_amr->getFluxRegister(m_realm, m_phase)[lvl]; // Flux matching between lvl and lvl-1 lives on lvl-1
       
-      fluxreg[lvl]->reflux(*a_phi[lvl], interv, scale);
-      fluxreg[lvl]->setToZero();
+      const Real dx    = m_amr->getDx()[lvl];
+      const Real scale = 1.0/dx;
+
+      fluxReg->reflux(*a_phi[lvl], interv, scale);
+      fluxReg->setToZero();
     }
   }
 }

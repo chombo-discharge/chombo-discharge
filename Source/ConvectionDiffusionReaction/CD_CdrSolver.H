@@ -409,7 +409,7 @@ public:
 
   /*!
     @brief Set redistribution weights
-    @param[in] a_weights Weights to use for redistribution (e.g. mass)
+    @param[in] a_weights Weights to use for redistribution (e.g., mass)
   */
   virtual void setRedistWeights(const EBAMRCellData& a_weights);
 
@@ -883,6 +883,7 @@ protected:
     @brief Compute the non-conservative divergence
     @param[out] a_nonConservativeDivergence Non-conservative divergence.
     @param[in]  a_divG                      Conservative divergence.
+    @note This will compute the non-conservative divergence as divNC(G) = sum(kappa*div(G))/sum(kappa) in the cut-cell neighborhood. 
   */
   virtual void nonConservativeDivergence(EBAMRIVData& a_nonConservativeDivergence, const EBAMRCellData& a_divG);
 
@@ -945,7 +946,7 @@ protected:
   virtual void incrementFluxRegister(const EBAMRFluxData& a_flux);
 
   /*!
-    @brief Reset the flux register
+    @brief Set flux registers to zero (so they can be increment later). 
   */
   virtual void resetFluxRegister();
 
@@ -959,19 +960,20 @@ protected:
   /*!
     @brief Do mass redistribution on each level. 
     @param[inout] a_stableDivergence Hybrid divergence on input, stable and conservative divergence on output. 
-    @param[in]    a_massDifference Mass difference
-    @details This does not account for distribution across refinement boundaries (need the other routines for that). 
+    @note This only redistributes on the level -- it does not account for distribution across refinement boundaries (need the other routines for that). 
   */
-  virtual void hyperbolicRedistribution(EBAMRCellData& a_stableDivergence, const EBAMRIVData& a_massDifference);
+  virtual void hyperbolicRedistribution(EBAMRCellData& a_stableDivergence);
 
   /*!
     @brief Increment redistribution flux registers. 
+    @note This just tells the flux registers about whats going on near EB refinement boundaries. 
   */
   virtual void incrementRedistFlux();
 
   /*!
     @brief Increment redistribution objects with mass to be redistributed.
     @param[in] a_massDifference Mass to be redistributed. 
+    @note This only increments the level-register -- must call coarseFineIncrement to do the other registers. 
   */
   virtual void incrementRedist(const EBAMRIVData& a_massDifference);
 
