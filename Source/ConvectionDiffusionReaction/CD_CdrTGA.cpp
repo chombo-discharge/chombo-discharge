@@ -335,7 +335,7 @@ void CdrTGA::setupEuler(){
     (new EBBackwardEuler (m_multigridSolver, *m_poissonOpFactory, coar_dom, ref_rat, 1 + finestLevel, m_multigridSolver->m_verbosity));
 }
 
-void CdrTGA::computeDivJ(EBAMRCellData& a_divJ, EBAMRCellData& a_phi, const Real a_extrapDt, const bool a_ebFlux){
+void CdrTGA::computeDivJ(EBAMRCellData& a_divJ, EBAMRCellData& a_phi, const Real a_extrapDt, const bool a_ebFlux, const bool a_domainFlux){
   CH_TIME("CdrTGA::computeDivJ(divF, state)");
   if(m_verbosity > 5){
     pout() << m_name + "::computeDivJ(divF, state)" << endl;
@@ -362,7 +362,7 @@ void CdrTGA::computeDivJ(EBAMRCellData& a_divJ, EBAMRCellData& a_phi, const Real
       
       this->averageVelocityToFaces(); // Update m_faceVelocity from m_cellVelocity
       this->advectToFaces(m_faceStates, a_phi, a_extrapDt); // Advect to faces
-      this->computeAdvectionFlux(m_scratchFluxTwo, m_faceVelocity, m_faceStates, m_domainBc);
+      this->computeAdvectionFlux(m_scratchFluxTwo, m_faceVelocity, m_faceStates, a_domainFlux);
 
       DataOps::incr(m_scratchFluxOne, m_scratchFluxTwo, 1.0);
     }
@@ -370,10 +370,10 @@ void CdrTGA::computeDivJ(EBAMRCellData& a_divJ, EBAMRCellData& a_phi, const Real
     // Compute diffusion flux. If we don't have advection, add the domain flux here. 
     if(m_isDiffusive){
       if(m_isMobile){
-	this->computeDiffusionFlux(m_scratchFluxTwo, a_phi, CdrBc::Wall); // Domain flux already in advective flux
+	this->computeDiffusionFlux(m_scratchFluxTwo, a_phi, false); // Domain flux already in advective flux
       }
       else{
-	this->computeDiffusionFlux(m_scratchFluxTwo, a_phi, m_domainBc); // No advective deriv. Put flux here. 
+	this->computeDiffusionFlux(m_scratchFluxTwo, a_phi, a_domainFlux); // No advective deriv. Put flux here. 
       }
       DataOps::incr(m_scratchFluxOne, m_scratchFluxTwo, -1.0);
     }
@@ -395,7 +395,7 @@ void CdrTGA::computeDivJ(EBAMRCellData& a_divJ, EBAMRCellData& a_phi, const Real
   return;
 }
 
-void CdrTGA::computeDivF(EBAMRCellData& a_divF, EBAMRCellData& a_phi, const CdrBc a_whichBc, const Real a_extrapDt, const bool a_ebFlux){
+void CdrTGA::computeDivF(EBAMRCellData& a_divF, EBAMRCellData& a_phi, const Real a_extrapDt, const bool a_ebFlux, const bool a_domainFlux){
   CH_TIME("CdrTGA::computeDivF(divF, state)");
   if(m_verbosity > 5){
     pout() << m_name + "::computeDivF(divF, state)" << endl;
@@ -410,9 +410,9 @@ void CdrTGA::computeDivF(EBAMRCellData& a_divF, EBAMRCellData& a_phi, const CdrB
     if(m_useMassWeightedRedistribution){
       this->setRedistWeights(a_phi);
     }
-    this->averageVelocityToFaces();                                                         // Cell-centered velocities become face-centered velocities. 
-    this->advectToFaces(m_faceStates, a_phi, a_extrapDt);                                   // Face extrapolation to cell-centered faces
-    this->computeAdvectionFlux(m_scratchFluxOne, m_faceVelocity, m_faceStates, a_whichBc);  // Compute face-centered fluxes
+    this->averageVelocityToFaces();                                                           // Cell-centered velocities become face-centered velocities. 
+    this->advectToFaces(m_faceStates, a_phi, a_extrapDt);                                     // Face extrapolation to cell-centered faces
+    this->computeAdvectionFlux(m_scratchFluxOne, m_faceVelocity, m_faceStates, a_domainFlux); // Compute face-centered fluxes
 
     EBAMRIVData* ebflux;
     if(a_ebFlux){
@@ -436,7 +436,7 @@ void CdrTGA::computeDivF(EBAMRCellData& a_divF, EBAMRCellData& a_phi, const CdrB
 
 }
 
-void CdrTGA::computeDivD(EBAMRCellData& a_divD, EBAMRCellData& a_phi, const CdrBc a_domainBc, const bool a_ebFlux){
+void CdrTGA::computeDivD(EBAMRCellData& a_divD, EBAMRCellData& a_phi, const bool a_ebFlux, const bool a_domainFlux){
   CH_TIME("CdrTGA::computeDivD");
   if(m_verbosity > 5){
     pout() << m_name + "::computeDivD" << endl;
@@ -452,7 +452,7 @@ void CdrTGA::computeDivD(EBAMRCellData& a_divD, EBAMRCellData& a_phi, const CdrB
       this->setRedistWeights(a_phi);
     }
 
-    this->computeDiffusionFlux(m_scratchFluxOne, a_phi, a_domainBc);  // Compute the face-centered diffusion flux
+    this->computeDiffusionFlux(m_scratchFluxOne, a_phi, a_domainFlux);  // Compute the face-centered diffusion flux
 
     EBAMRIVData* ebflux;
     if(a_ebFlux){

@@ -97,7 +97,8 @@ public:
   virtual void computeDivJ(EBAMRCellData& a_divJ,
 			   EBAMRCellData& a_phi,
 			   const Real     a_extrapDt,
-			   const bool     a_ebFlux = true) override final;
+			   const bool     a_ebFlux = true,
+			   const bool     a_domainFlux = true) override final;
 
   /*!
     @brief Compute div(v*phi) explicitly
@@ -110,9 +111,9 @@ public:
   */
   virtual void computeDivF(EBAMRCellData& a_divF,
 			   EBAMRCellData& a_phi,
-			   const CdrBc    a_domainBc,
 			   const Real     a_extrapDt,
-			   const bool     a_ebFlux = true) override final;
+			   const bool     a_ebFlux = true,
+			   const bool     a_domainFlux = true) override final;
 
   /*!
     @brief Compute div(D*grad(phi)) explicitly
@@ -124,8 +125,8 @@ public:
   */
   virtual void computeDivD(EBAMRCellData& a_divD,
 			   EBAMRCellData& a_phi,
-			   const CdrBc    a_domainBc,			   
-			   const bool     a_ebFlux = false) override final;
+			   const bool     a_ebFlux = false,
+			   const bool     a_domainFlux = false) override final;
 
   /*!
     @brief Implicit diffusion TGA advance with source term.

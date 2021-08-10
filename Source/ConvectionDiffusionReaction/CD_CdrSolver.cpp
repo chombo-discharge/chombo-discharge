@@ -30,13 +30,51 @@ CdrSolver::CdrSolver(){
   m_name       = "CdrSolver";
   m_className  = "CdrSolver";
 
-  this->setRealm(Realm::Primal);      // Always primal as default. 
-  this->setDefaultFluxFunctions();    // Must be populated somehow -- the default functions are wall functions. 
-  this->setDomainBc(CdrBc::Function); // Set to function
+  this->setRealm(Realm::Primal); // Always primal as default.
+  this->setDefaultDomainBC();    // Set default domain BCs (wall)
 }
 
 CdrSolver::~CdrSolver(){
 
+}
+
+void CdrSolver::setDefaultDomainBC(){
+  CH_TIME("CdrSolver::setDefaultDomainBC");
+  if(m_verbosity > 5){
+    pout() << m_name + "::setDefaultDomainBC" << endl;
+  }
+
+  auto zero = [](const RealVect a_position, const Real a_time){
+    return 0.0;
+  };
+
+  for (int dir = 0; dir < SpaceDim; dir++){
+    for (SideIterator sit; sit.ok(); ++sit){
+      const CdrDomainBC::DomainSide domainSide = std::make_pair(dir, sit());
+
+      this->setDomainBcType    (domainSide, CdrDomainBC::BcType::Wall);
+      this->setDomainBcFunction(domainSide, zero);
+    }
+  }
+}
+
+void CdrSolver::setDomainBcType(const CdrDomainBC::DomainSide a_domainSide, const CdrDomainBC::BcType a_bcType){
+  CH_TIME("CdrSolver::setDomainBcType");
+  if(m_verbosity > 5){
+    pout() << m_name + "::setDomainBcType" << endl;
+  }
+
+  m_domainBC.setBcType(a_domainSide, a_bcType);
+}
+
+
+void CdrSolver::setDomainBcFunction(const CdrDomainBC::DomainSide a_domainSide, const CdrDomainBC::FluxFunction a_fluxFunction){
+  CH_TIME("CdrSolver::setDomainBcFunction");
+  if(m_verbosity > 5){
+    pout() << m_name + "::setDomainBcFunction" << endl;
+  }
+
+  m_domainBC.setBcFunction(a_domainSide, a_fluxFunction);
 }
 
 std::string CdrSolver::getName() const {
@@ -49,10 +87,6 @@ std::string CdrSolver::getRealm() const {
 
 void CdrSolver::setRealm(const std::string a_realm) {
   m_realm = a_realm;
-}
-
-CdrBc CdrSolver::getDomainBc() const{
-  return m_domainBc;
 }
 
 Vector<std::string> CdrSolver::getPlotVariableNames() const {
@@ -480,7 +514,7 @@ void CdrSolver::computeDivergenceIrregular(LevelData<EBCellFAB>&              a_
 void CdrSolver::computeAdvectionFlux(EBAMRFluxData&       a_flux,
 				     const EBAMRFluxData& a_facePhi,
 				     const EBAMRFluxData& a_faceVelocity,
-				     const CdrBc          a_domainBc){
+				     const bool           a_addDomainFlux){
   CH_TIME("CdrSolver::computeAdvectionFlux");
   if(m_verbosity > 5){
     pout() << m_name + "::computeAdvectionFlux" << endl;
@@ -491,14 +525,20 @@ void CdrSolver::computeAdvectionFlux(EBAMRFluxData&       a_flux,
   const int finest_level = m_amr->getFinestLevel();
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
-    this->computeAdvectionFlux(*a_flux[lvl], *a_facePhi[lvl], *a_faceVelocity[lvl], a_domainBc, lvl);
+    this->computeAdvectionFlux(*a_flux[lvl], *a_facePhi[lvl], *a_faceVelocity[lvl], lvl);
+  }
+
+  if(a_addDomainFlux){
+    this->fillDomainFlux(a_flux);
+  }
+  else{
+    this->resetDomainFlux(a_flux);
   }
 }
 
 void CdrSolver::computeAdvectionFlux(LevelData<EBFluxFAB>&       a_flux,
 				     const LevelData<EBFluxFAB>& a_facePhi,
 				     const LevelData<EBFluxFAB>& a_faceVelocity,
-				     const CdrBc                 a_domainBc,
 				     const int                   a_lvl){
 
   const int comp  = 0;
@@ -531,23 +571,27 @@ void CdrSolver::computeAdvectionFlux(LevelData<EBFluxFAB>&       a_flux,
       }
     }
   }
-
-  // Reset flux on domain boundaries. 
-  this->fillDomainFlux(a_flux, a_domainBc, a_lvl);
 }
 
-void CdrSolver::computeDiffusionFlux(EBAMRFluxData& a_flux, const EBAMRCellData& a_phi, const CdrBc a_domainBc){
+void CdrSolver::computeDiffusionFlux(EBAMRFluxData& a_flux, const EBAMRCellData& a_phi, const bool a_addDomainFlux){
   CH_TIME("CdrSolver::computeDiffusionFlux");
   if(m_verbosity > 5){
     pout() << m_name + "::computeDiffusionFlux" << endl;
   }
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    this->computeDiffusionFlux(*a_flux[lvl], *a_phi[lvl], a_domainBc, lvl);
+    this->computeDiffusionFlux(*a_flux[lvl], *a_phi[lvl], lvl);
+  }
+
+  if(a_addDomainFlux){
+    this->fillDomainFlux(a_flux);
+  }
+  else{
+    this->resetDomainFlux(a_flux);
   }
 }
 
-void CdrSolver::computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelData<EBCellFAB>& a_phi, const CdrBc a_domainBc, const int a_lvl){
+void CdrSolver::computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelData<EBCellFAB>& a_phi, const int a_lvl){
   CH_TIME("CdrSolver::computeDiffusionFlux(level)");
   if(m_verbosity > 5){
     pout() << m_name + "::computeDiffusionFlux(level)" << endl;
@@ -599,25 +643,52 @@ void CdrSolver::computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelDa
       }
     }
   }
-
-  this->fillDomainFlux(a_flux, a_domainBc, a_lvl);
 }
 
-void CdrSolver::fillDomainFlux(EBAMRFluxData& a_flux, const CdrBc a_whichFlux){
-  CH_TIME("CdrSolver::fillDomainFlux(EBAMRFluxData, CdrBc)");
+
+void CdrSolver::resetDomainFlux(EBAMRFluxData& a_flux){
+  CH_TIME("CdrSolver::resetDomainFlux(EBAMRFluxData)");
   if(m_verbosity > 5){
-    pout() << m_name + "::fillDomainFlux(EBAMRFluxData, CdrBc)" << endl;
+    pout() << m_name + "::resetDomainFlux(EBAMRFluxData)" << endl;
+  }
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      for (int dir = 0; dir < SpaceDim; dir++){
+	EBFaceFAB& flux = (*a_flux[lvl])[dit()][dir];
+
+	for (SideIterator sit; sit.ok(); ++sit){
+	  const BaseIFFAB<Real>& domFlux = (*m_domainFlux[lvl])[dit()](dir, sit());
+
+	  const IntVectSet& ivs  = domFlux.getIVS();
+	  const EBGraph& ebgraph = domFlux.getEBGraph();
+
+	  for (FaceIterator faceIt(ivs, ebgraph, dir, FaceStop::AllBoundaryOnly); faceIt.ok(); ++faceIt){
+	    flux(faceIt(), m_comp) = 0.0;
+	  }
+	}
+      }
+    }
+  }
+}
+
+void CdrSolver::fillDomainFlux(EBAMRFluxData& a_flux){
+  CH_TIME("CdrSolver::fillDomainFlux(EBAMRFluxData)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::fillDomainFlux(EBAMRFluxData)" << endl;
   }
   
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    this->fillDomainFlux(*a_flux[lvl], a_whichFlux, lvl);
+    this->fillDomainFlux(*a_flux[lvl], lvl);
   }
 }
 
-void CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const CdrBc a_whichFlux, const int a_level) {
-  CH_TIME("CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>, CdrBc, int)");
+void CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const int a_level) {
+  CH_TIME("CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>, int)");
   if(m_verbosity > 5){
-    pout() << m_name + "::fillDomainFlux(LevelData<EBFluxFAB>, CdrBc, int)" << endl;
+    pout() << m_name + "::fillDomainFlux(LevelData<EBFluxFAB>, int)" << endl;
   }
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
@@ -630,31 +701,33 @@ void CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const CdrBc a_which
 
       // Iterate over domain cells. I'm REALLY not sure about if this is performant...
       for (SideIterator sit; sit.ok(); ++sit){
+	const CdrDomainBC::DomainSide    domainSide = std::make_pair(dir, sit());
+	const CdrDomainBC::BcType&       bcType     = m_domainBC.getBcType(domainSide);
+	const CdrDomainBC::FluxFunction& bcFunction = m_domainBC.getBcFunction(domainSide);
+
 	const BaseIFFAB<Real>& domflux = (*m_domainFlux[a_level])[dit()](dir, sit());
+	const IntVectSet& ivs          = domflux.getIVS();
+	const EBGraph& ebgraph         = domflux.getEBGraph();
 
-	const IntVectSet& ivs  = domflux.getIVS();
-	const EBGraph& ebgraph = domflux.getEBGraph();
-
-	FaceStop::WhichFaces stopCrit = FaceStop::AllBoundaryOnly;
-
-	for (FaceIterator faceit(ivs, ebgraph, dir, stopCrit); faceit.ok(); ++faceit){
+	// Iterate through faces on the boundary and set the BC condition. 
+	for (FaceIterator faceit(ivs, ebgraph, dir, FaceStop::AllBoundaryOnly); faceit.ok(); ++faceit){
 	  const FaceIndex& face = faceit();
 
-	  switch(a_whichFlux){
-	  case CdrBc::Data:{
+	  switch(bcType){
+	  case CdrDomainBC::BcType::DataBased:{
 	    flux(face, m_comp) = domflux(face, m_comp);
 	    break;
 	  }
-	  case CdrBc::Wall:{
+	  case CdrDomainBC::BcType::Wall:{	    
 	    flux(face, m_comp) = 0.0;
 	    break;
 	  }
-	  case CdrBc::Function:{
+	  case CdrDomainBC::BcType::Function:{	    	    
 	    const RealVect pos = EBArith::getFaceLocation(face, m_amr->getDx()[a_level],m_amr->getProbLo());
-	    flux(face, m_comp)   = -sign(sit()) * m_domainFluxFunctions.at(std::make_pair(dir, sit()))(pos, m_time);
+	    flux(face, m_comp)   = -sign(sit()) * bcFunction(pos, m_time);
 	    break;
 	  }
-	  case CdrBc::Outflow:{
+	  case CdrDomainBC::BcType::Outflow:{
 	    flux(face, m_comp) = 0.0;
 	    
 	    // Get the next interior face(s) and extrapolate from these. 
@@ -670,7 +743,7 @@ void CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const CdrBc a_which
 	    
 	    break;
 	  }
-	  case CdrBc::Solver: // Don't do anything, the solver has responsibility. 
+	  case CdrDomainBC::BcType::External: // Don't do anything, the solver has responsibility. 
 	    break;
 	  default:
 	    MayDay::Abort("CdrSolver::fillDomainFlux - logic bust");
@@ -1319,15 +1392,6 @@ void CdrSolver::registerOperators(){
   }
 }
 
-void CdrSolver::setDomainBc(const CdrBc a_bctype){
-  CH_TIME("CdrSolver::setDomainBc");
-  if(m_verbosity > 5){
-    pout() << m_name + "::setDomainBc" << endl;
-  }
-
-  m_domainBc = a_bctype;
-}
-
 void CdrSolver::setComputationalGeometry(const RefCountedPtr<ComputationalGeometry> a_computationalGeometry){
   CH_TIME("CdrSolver::setComputationalGeometry");
   if(m_verbosity > 5){
@@ -1401,28 +1465,6 @@ void CdrSolver::setEbFlux(const Real a_ebFlux){
   for (int lvl = 0; lvl <= finest_level; lvl++){
     DataOps::setValue(*m_ebFlux[lvl], a_ebFlux);
   }
-}
-
-void CdrSolver::setDomainFlux(const DomainFluxFunction& a_func){
-  CH_TIME("CdrSolver::setDomainFlux(DomainFluxFunction)");
-  if(m_verbosity > 5){
-    pout() << m_name + "::setDomainFlux(DomainFluxFunction)" << endl;
-  }
-
-  for (int dir = 0; dir < SpaceDim; dir++){
-    for (SideIterator sit; sit.ok(); ++sit){
-      this->setDomainFlux(std::make_pair(dir, sit()), a_func);
-    }
-  }
-}
-
-void CdrSolver::setDomainFlux(const DomainWall a_wall, const DomainFluxFunction& a_func){
-  CH_TIME("CdrSolver::setDomainFlux(DomainWall, DomainFluxFunction)");
-  if(m_verbosity > 5){
-    pout() << m_name + "::setDomainFlux(DomainWall, DomainFluxFunction)" << endl;
-  }
-
-  m_domainFluxFunctions.at(a_wall) = a_func;
 }
 
 void CdrSolver::setEbIndexSpace(const RefCountedPtr<EBIndexSpace>& a_ebis){
@@ -2098,26 +2140,6 @@ EBAMRIFData& CdrSolver::getDomainFlux(){
 void CdrSolver::parseDomainBc(){
   ParmParse pp(m_className.c_str());
 
-  std::string str;
-  pp.get("domain_bc", str);
-  if(str == "data"){
-    setDomainBc(CdrBc::Data);
-  }
-  else if(str == "wall"){
-    setDomainBc(CdrBc::Wall);
-  }
-  else if(str == "function"){
-    setDomainBc(CdrBc::Function);
-  }
-  else if(str == "outflow"){
-    setDomainBc(CdrBc::Outflow);
-  }
-  else if(str == "solver"){
-    setDomainBc(CdrBc::Solver);
-  }
-  else{
-    MayDay::Abort("CdrSolver::parseDomainBc - unknown BC requested");
-  }
 }
 
 void CdrSolver::parseExtrapolateSourceTerm(){
@@ -2434,19 +2456,6 @@ void CdrSolver::parsePlotMode(){
   }
   else if(str == "numbers"){
     m_plotNumbers = true;
-  }
-}
-
-void CdrSolver::setDefaultFluxFunctions(){
-
-  auto zero = [](const RealVect a_pos, const Real a_time){
-    return 0.0;
-  };
-
-  for (int dir = 0; dir < SpaceDim; dir++){
-    for (SideIterator sit; sit.ok(); ++sit){
-      m_domainFluxFunctions.emplace(std::make_pair(dir, sit()), zero);
-    }
   }
 }
 

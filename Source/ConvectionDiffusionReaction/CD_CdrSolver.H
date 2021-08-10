@@ -22,7 +22,6 @@
 #include <CD_AmrMesh.H>
 #include <CD_ComputationalGeometry.H>
 #include <CD_CdrSpecies.H>
-#include <CD_CdrBc.H>
 #include <CD_CdrDomainBC.H>
 #include <CD_NamespaceHeader.H>
 
@@ -34,20 +33,6 @@
 */
 class CdrSolver {
 public:
-
-  /*!
-    @brief Alias for domain wall
-    @details Just used for easily identifying a coordinate direction/side when we set domain boundary conditions. 
-  */
-  using DomainWall = std::pair<int, Side::LoHiSide>;
-
-  /*!
-    @brief Alias for domain wall flux function
-    @param[in] a_pos  Physical position
-    @param[in] a_time Time
-    @details This is just a wrapper for a polymorphic way of setting the flux on the domain boundaries from a function. 
-  */
-  using DomainFluxFunction = std::function<Real(const RealVect a_pos, const Real a_time)>;
 
   /*!
     @brief Default constructor. 
@@ -65,19 +50,19 @@ public:
     @brief Disallowed move constructor
     @param[in] a_other Other solver
   */
-  CdrSolver(const CdrSolver&& a_other);
+  CdrSolver(const CdrSolver&& a_other) = delete;
 
   /*!
     @brief Disallowed assignment operator
     @param[in] a_other Other solver
   */
-  CdrSolver& operator=(const CdrSolver& a_other);
+  CdrSolver& operator=(const CdrSolver& a_other) = delete;
   
   /*!
     @brief Disallowed move assignement operator
     @param[in] a_other Other solver
   */
-  CdrSolver& operator=(const CdrSolver&& a_other);
+  CdrSolver& operator=(const CdrSolver&& a_other) = delete;
 
   /*!
     @brief Constructor
@@ -93,6 +78,25 @@ public:
     @brief Parse runtime options
   */
   virtual void parseRuntimeOptions() = 0;
+
+  /*!
+    @brief Set default boundary conditions (wall type)
+  */
+  virtual void setDefaultDomainBC();
+
+  /*!
+    @brief Set domain bc type on domain side
+    @param[in] a_domainSide Domain side
+    @param[in] a_bcType     Boundary condition type
+  */
+  virtual void setDomainBcType(const CdrDomainBC::DomainSide a_domainSide, const CdrDomainBC::BcType a_bcType);
+
+    /*!
+    @brief Set domain bc type on domain side
+    @param[in] a_domainSide   Domain side
+    @param[in] a_fluxFunction Flux function
+  */
+  virtual void setDomainBcFunction(const CdrDomainBC::DomainSide a_domainSide, const CdrDomainBC::FluxFunction a_fluxFunction);
 
   /*!
     @brief Implicit diffusion TGA advance without source term.
@@ -141,44 +145,48 @@ public:
 
   /*!
     @brief Compute div(J) explicitly, where J = nV - D*grad(n)
-    @param[out] a_divJ      Divergence term, i.e. finite volume approximation to 
-    @param[in]  a_phi       Cell-centered state
-    @param[in]  a_extrapDt  Extrapolation in time, i.e. shifting of div(J) towards e.g. half time step. Only affects the advective term. 
-    @param[in]  a_ebFlux    If true, the embedded boundary flux will injected and included in div(J)
+    @param[out] a_divJ       Divergence term, i.e. finite volume approximation to 
+    @param[in]  a_phi        Cell-centered state
+    @param[in]  a_extrapDt   Extrapolation in time, i.e. shifting of div(J) towards e.g. half time step. Only affects the advective term. 
+    @param[in]  a_ebFlux     If true, the embedded boundary flux will injected and included in div(J)
+    @param[in]  a_domainFlux If true, the domain flux will injected and included in div(J)
     @note a_phi is non-const because ghost cells will be re-filled
   */
   virtual void computeDivJ(EBAMRCellData& a_divJ,
 			   EBAMRCellData& a_phi,
 			   const Real     a_extrapDt,
-			   const bool     a_ebFlux = true) = 0;
+			   const bool     a_ebFlux = true,
+			   const bool     a_domainFlux = true) = 0;
 
   /*!
     @brief Compute div(v*phi) explicitly
-    @param[out] a_divF      Divergence term, i.e. finite volume approximation to Div(v*phi), including redistribution magic. 
-    @param[in]  a_phi       Cell-centered state
-    @param[in]  a_extrapDt  Extrapolation in time, i.e. shifting of div(F) towards e.g. half time step. Only affects the advective term. 
-    @param[in]  a_domainBc  How to set domain fluxes
-    @param[in]  a_ebFlux    If true, the embedded boundary flux will injected be included in div(F)
+    @param[out] a_divF       Divergence term, i.e. finite volume approximation to Div(v*phi), including redistribution magic. 
+    @param[in]  a_phi        Cell-centered state
+    @param[in]  a_extrapDt   Extrapolation in time, i.e. shifting of div(F) towards e.g. half time step. Only affects the advective term. 
+    @param[in]  a_domainBc   How to set domain fluxes
+    @param[in]  a_ebFlux     If true, the embedded boundary flux will injected be included in div(F)
+    @param[in]  a_domainFlux If true, the domain flux will injected and included in div(F)
     @note a_phi is non-const because ghost cells will be interpolated in this routine. Valid data in a_phi is not touched. 
   */
   virtual void computeDivF(EBAMRCellData&  a_divF,
 			   EBAMRCellData&  a_phi,
-			   const CdrBc     a_domainBc,
 			   const Real      a_extrapDt,
-			   const bool      a_ebFlux = true) = 0;
+			   const bool      a_ebFlux = true,
+			   const bool      a_domainFlux = true) = 0;
 
   /*!
     @brief Compute div(D*grad(phi)) explicitly
-    @param[out] a_divF      Divergence term, i.e. finite volume approximation to Div(D*Grad(phi)), including redistribution magic. 
-    @param[in]  a_phi       Cell-centered state
-    @param[in]  a_domainBc  Flag for setting domain boundary conditions
-    @param[in]  a_useEbFlux If true, the embedded boundary flux will be injected and included in div(D)
+    @param[out] a_divF       Divergence term, i.e. finite volume approximation to Div(D*Grad(phi)), including redistribution magic. 
+    @param[in]  a_phi        Cell-centered state
+    @param[in]  a_domainBc   Flag for setting domain boundary conditions
+    @param[in]  a_useEbFlux  If true, the embedded boundary flux will be injected and included in div(D)
+    @param[in]  a_domainFlux If true, the domain flux will injected and included in div(D)
     @note a_phi is non-const because ghost cells will be interpolated in this routine. Valid data in a_phi is not touched. 
   */
   virtual void computeDivD(EBAMRCellData& a_divD,
 			   EBAMRCellData& a_phi,
-			   const CdrBc    a_domainBc,			   
-			   const bool     a_ebFlux = false) = 0;
+			   const bool     a_ebFlux = false,
+			   const bool     a_domainFlux = false) = 0;
 
   /*!
     @brief Compute div(G) where G is a general face-centered flux on face centers and EB centers
@@ -249,13 +257,6 @@ public:
     @param[in] a_amr AmrMesh object. 
   */
   virtual void setAmr(const RefCountedPtr<AmrMesh>& a_amr);
-
-  /*!
-    @brief Set domain bc type.
-    @param[in] a_bcType Boundary condition type. 
-    @note See fillDomainFlux for understanding how domain fluxes are filled in this solver. 
-  */
-  virtual void setDomainBc(const CdrBc a_bcType);
 
   /*!
     @brief Set phase.
@@ -352,23 +353,6 @@ public:
     @details This sets a constant EB-flux on all EBs. 
   */
   virtual void setEbFlux(const Real a_ebFlux);
-
-  /*!
-    @brief Set domain flux function on all sides
-    @param[in] a_func Polymorphic function for setting the domain flux. 
-    @note For the function to actually be used, CdrBc must be set to CdrBc::Function. 
-    @note This calls the other version for all sides
-    @see setDomainBc
-  */
-  virtual void setDomainFlux(const DomainFluxFunction& a_func);
-
-  /*!
-    @brief Set domain flux function on a specific side
-    @param[in] a_wall Domain wall where the function is set. 
-    @param[in] a_func Polymorphic function for setting the domain flux. 
-    @note For the function to actually be used, CdrBc must be set to CdrBc::Function. 
-  */
-  virtual void setDomainFlux(const DomainWall a_wall, const DomainFluxFunction& a_func);
 
   /*!
     @brief Fill m_phi state with initial data from m_species
@@ -568,12 +552,6 @@ public:
   */
   virtual EBAMRIFData& getDomainFlux();
 
-  /*!
-    @brief Get domain BC type
-    @return m_domainBc
-  */
-  CdrBc getDomainBc() const;
-
 protected:
 
   /*!
@@ -641,11 +619,6 @@ protected:
     @brief Realm where this solver is registered
   */
   std::string m_realm;
-  
-  /*!
-    @brief Domain bc condition
-  */
-  CdrBc m_domainBc;
 
   /*!
     @brief Domain BCs
@@ -746,7 +719,7 @@ protected:
     @brief Domain flux functions 
     @details Used when the user specifies that the domain flux is function-based
   */
-  std::map<DomainWall, DomainFluxFunction> m_domainFluxFunctions;
+  std::map<CdrDomainBC::DomainSide, CdrDomainBC::FluxFunction> m_domainFluxFunctions;
 
   /*!
     @brief Solver verbosity. 
@@ -843,61 +816,64 @@ protected:
 
   /*!
     @brief Set up face-centered advection flux.
-    @param[out] a_flux         Face-centered fluxes
-    @param[in]  a_facePhi      Face-centered state
-    @param[in]  a_faceVelocity Face-centered velocities
-    @param[in]  a_domainBc     How to set domain fluxes
+    @param[out] a_flux          Face-centered fluxes
+    @param[in]  a_facePhi       Face-centered state
+    @param[in]  a_faceVelocity  Face-centered velocities
+    @param[in]  a_addDomainFlux Add the domain flux 
   */
   virtual void computeAdvectionFlux(EBAMRFluxData&       a_flux,
 				    const EBAMRFluxData& a_facePhi,
 				    const EBAMRFluxData& a_faceVelocity,
-				    const CdrBc          a_domainBc);
+				    const bool           a_addDomainFlux = true);
 
   /*!
     @brief Set up face-centered advection flux on a grid level
-    @param[out] a_flux         Face-centered fluxes
-    @param[in]  a_facePhi      Face-centered state
-    @param[in]  a_faceVelocity Face-centered velocities
-    @param[in]  a_domainFlux   Domain flux
-    @param[in]  a_domainBc     How to set domain fluxes
-    @param[in]  a_level        Grid level
+    @param[out] a_flux          Face-centered fluxes
+    @param[in]  a_facePhi       Face-centered state
+    @param[in]  a_faceVelocity  Face-centered velocities
+    @param[in]  a_domainFlux    Domain flux
+    @param[in]  a_level         Grid level
   */
   virtual void computeAdvectionFlux(LevelData<EBFluxFAB>&       a_flux,
 				    const LevelData<EBFluxFAB>& a_facePhi,
 				    const LevelData<EBFluxFAB>& a_faceVelocity,
-				    const CdrBc                 a_domainBc,
 				    const int                   a_lvl);
 
   /*!
     @brief Compute the face-centered diffusion flux
-    @param[out] a_flux     Face-centered flux
-    @param[in]  a_phi      Cell centered phi
-    @param[in]  a_domainBc How to set domain fluxes
+    @param[out] a_flux          Face-centered flux
+    @param[in]  a_phi           Cell centered phi
+    @param[in]  a_addDomainFlux Add domain flux or not
   */
-  virtual void computeDiffusionFlux(EBAMRFluxData& a_flux, const EBAMRCellData& a_phi, const CdrBc a_domainBc);
+  virtual void computeDiffusionFlux(EBAMRFluxData& a_flux, const EBAMRCellData& a_phi, const bool a_addDomainFlux);
 
   /*!
     @brief Compute the face-centered diffusion flux
     @param[out] a_flux Face-centered flux
     @param[in]  a_phi  Cell centered phi
     @param[in]  a_lvl  Grid level
-    @param[in]  a_domainBc How to set domain fluxes
   */
-  virtual void computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelData<EBCellFAB>& a_phi, const CdrBc a_domainBc,  const int a_lvl);
+  virtual void computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelData<EBCellFAB>& a_phi, const int a_lvl);
+
+  /*!
+    @brief Set flux to zero on domain boundaries
+    @param[in] a_flux Flux data holder
+  */
+  virtual void resetDomainFlux(EBAMRFluxData& a_flux);
 
   /*!
     @brief Set domain in data holder. This sets the flux on the boundary to either zero or to m_domainFlux
     @param[inout] a_flux Flux to be modified. 
     @param[in]    a_useDomainFlux Use domain flux or not If true, a_flux becomes m_domainFlux on domain boundaries. 
   */
-  virtual void fillDomainFlux(EBAMRFluxData& a_flux, const CdrBc a_whichFlux);
+  virtual void fillDomainFlux(EBAMRFluxData& a_flux);
 
   /*!
     @brief Set domain in data holder. This sets the flux on the boundary to either zero or to m_domainFlux
     @param[inout] a_flux Flux to be modified. 
     @param[in]    a_useDomainFlux Use domain flux or not If true, a_flux becomes m_domainFlux on domain boundaries. 
   */
-  virtual void fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const CdrBc a_whichFlux, const int a_level);
+  virtual void fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const int a_level);
 
   /*!
     @brief Compute conservative divergence from fluxes. 
@@ -1080,11 +1056,6 @@ protected:
     ®brief Parse source term stuff
   */
   virtual void parseExtrapolateSourceTerm();
-
-  /*!
-    @brief Set default flux functions
-  */
-  virtual void setDefaultFluxFunctions();
 
   /*!
     @brief Gaussian noise field
