@@ -453,6 +453,7 @@ void CdrSolver::computeAdvectionFlux(EBAMRFluxData&       a_flux,
   else{
     this->resetDomainFlux(a_flux);
   }
+  this->resetDomainFlux(a_flux);
 }
 
 void CdrSolver::computeAdvectionFlux(LevelData<EBFluxFAB>&       a_flux,
@@ -555,8 +556,9 @@ void CdrSolver::computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelDa
 
       // Fortran kernel -- this computes f = D(face)*(phi(iv_high) - phi(iv-low))/dx
       BaseFab<Real>& regFlux      = flux.getSingleValuedFAB();
-      const BaseFab<Real>& regPhi = phi.getSingleValuedFAB();
-      const BaseFab<Real>& regDco = dco.getSingleValuedFAB();
+      const BaseFab<Real>& regPhi = phi. getSingleValuedFAB();
+      const BaseFab<Real>& regDco = dco. getSingleValuedFAB();
+      
       FORT_DFLUX_REG(CHF_FRA1(regFlux, m_comp),
 		     CHF_CONST_FRA1(regPhi, m_comp),
 		     CHF_CONST_FRA1(regDco, m_comp),
@@ -586,21 +588,45 @@ void CdrSolver::resetDomainFlux(EBAMRFluxData& a_flux){
     pout() << m_name + "::resetDomainFlux(EBAMRFluxData)" << endl;
   }
 
+  // TLDR: This routine iterates through all faces in a_flux which are boundary faces and sets the flux there to zero. No
+  //       Fortran kernel here because the box we iterate over has a smaller dimension (it's a slice). 
+
+  constexpr Real zero = 0.0;
+
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const ProblemDomain& domain  = m_amr->getDomains()[lvl];
+    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
 
     for (DataIterator dit(dbl); dit.ok(); ++dit){
+      const Box      cellBox = dbl  [dit()];
+      const EBISBox& ebisbox = ebisl[dit()];
+      const EBGraph& ebgraph = ebisbox.getEBGraph();
+      
       for (int dir = 0; dir < SpaceDim; dir++){
-	EBFaceFAB& flux = (*a_flux[lvl])[dit()][dir];
-
+	EBFaceFAB& flux        = (*a_flux[lvl])[dit()][dir];
+	BaseFab<Real>& regFlux = flux.getSingleValuedFAB();
+	
 	for (SideIterator sit; sit.ok(); ++sit){
-	  const BaseIFFAB<Real>& domFlux = (*m_domainFlux[lvl])[dit()](dir, sit());
+	  const Side::LoHiSide side = sit();
+	  
+	  // Create a cell box which lies next to the domain 
+	  Box boundaryCellBox;
+	  boundaryCellBox  = adjCellBox(domain.domainBox(), dir, side, -1); 
+	  boundaryCellBox &= cellBox;
 
-	  const IntVectSet& ivs  = domFlux.getIVS();
-	  const EBGraph& ebgraph = domFlux.getEBGraph();
+	  // Do the regular cells -- note the shift to make sure that cell indices map to face indices. 
+	  const int     sign  = (side == Side::Lo) ? 0 : 1;
+	  const IntVect shift = sign*BASISV(dir);
 
-	  for (FaceIterator faceIt(ivs, ebgraph, dir, FaceStop::AllBoundaryOnly); faceIt.ok(); ++faceIt){
-	    flux(faceIt(), m_comp) = 0.0;
+	  for (BoxIterator bit(boundaryCellBox); bit.ok(); ++bit){
+	    regFlux(bit() + shift, m_comp) = zero;
+	  }
+
+	  // Do the irregular cells
+	  const IntVectSet irregIVS = ebisbox.getIrregIVS(boundaryCellBox);
+	  for (FaceIterator faceIt(irregIVS, ebgraph, dir, FaceStop::AllBoundaryOnly); faceIt.ok(); ++faceIt){
+	    flux(faceIt(), m_comp) = zero;
 	  }
 	}
       }
