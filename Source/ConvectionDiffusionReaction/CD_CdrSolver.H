@@ -23,6 +23,7 @@
 #include <CD_ComputationalGeometry.H>
 #include <CD_CdrSpecies.H>
 #include <CD_CdrBc.H>
+#include <CD_CdrDomainBC.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
