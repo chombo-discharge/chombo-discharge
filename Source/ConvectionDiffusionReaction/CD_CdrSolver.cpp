@@ -39,11 +39,11 @@ CdrSolver::~CdrSolver(){
 
 }
 
-std::string CdrSolver::getName(){
+std::string CdrSolver::getName() const {
   return m_name;
 }
 
-const std::string CdrSolver::getRealm() const {
+std::string CdrSolver::getRealm() const {
   return m_realm;
 }
 

@@ -436,13 +436,13 @@ public:
     @brief Get the realm where this solver is registered. 
     @return Returns realm name. 
   */
-  virtual const std::string getRealm() const;
+  virtual std::string getRealm() const;
 
   /*!
     @brief Get solver name
     @note Not necessarily equal to class name (we can have many CdrSolvers instantiated). 
   */
-  virtual std::string getName();
+  virtual std::string getName() const;
 
   /*!
     @brief Get output plot names
@@ -574,7 +574,6 @@ public:
   */
   CdrBc getDomainBc() const;
 
-
 protected:
 
   /*!
@@ -628,11 +627,6 @@ protected:
   phase::which_phase m_phase;
 
   /*!
-    @brief Domain bc condition
-  */
-  CdrBc m_domainBc;
-
-  /*!
     @brief Solver name
   */
   std::string m_name;
@@ -647,6 +641,16 @@ protected:
     @brief Realm where this solver is registered
   */
   std::string m_realm;
+  
+  /*!
+    @brief Domain bc condition
+  */
+  CdrBc m_domainBc;
+
+  /*!
+    @brief Domain BCs
+  */
+  CdrDomainBC m_domainBC;
 
   /*!
     @brief Cell-centered data (i.e. the advected-diffused quantity)
