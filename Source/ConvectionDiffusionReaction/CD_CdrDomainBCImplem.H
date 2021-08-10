@@ -27,7 +27,7 @@ CdrDomainBC::CdrDomainBC(){
 
     for (int dir = 0; dir < SpaceDim; dir++){
     for (SideIterator sit; sit.ok(); ++sit){
-      const DomainSide domainSide = this->domainSide(a_dir, sit());
+      const DomainSide domainSide = this->domainSide(dir, sit());
 
       m_bcTypes.emplace(domainSide, BcType::Wall);
       m_bcFunctions.emplace(domainSide, wallBc);
