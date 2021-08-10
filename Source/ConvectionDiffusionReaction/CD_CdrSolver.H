@@ -80,23 +80,27 @@ public:
   virtual void parseRuntimeOptions() = 0;
 
   /*!
-    @brief Set default boundary conditions (wall type)
+    @brief This sets default boundary conditions (wall type). 
+    @details Called in constructor for setting domain BCs.
+    @note This sets the domain boundary condition to be a wall BC (no incoming/outgoing mass). This is the default
+    behavior -- if the user wants different BCs he can call setDomainBcType and setDomainBcFunction. 
   */
-  virtual void setDefaultDomainBC();
+  void setDefaultDomainBC();
 
   /*!
-    @brief Set domain bc type on domain side
+    @brief Set domain bc type on domain side. 
     @param[in] a_domainSide Domain side
     @param[in] a_bcType     Boundary condition type
   */
-  virtual void setDomainBcType(const CdrDomainBC::DomainSide a_domainSide, const CdrDomainBC::BcType a_bcType);
+  void setDomainBcType(const CdrDomainBC::DomainSide a_domainSide, const CdrDomainBC::BcType a_bcType);
 
     /*!
-    @brief Set domain bc type on domain side
+    @brief Set domain bc function on particular domain side
     @param[in] a_domainSide   Domain side
     @param[in] a_fluxFunction Flux function
+    @note This only associates a function with a domain side -- to use it one must also call setDomainBcType(a_domainSide, BcType::Function)
   */
-  virtual void setDomainBcFunction(const CdrDomainBC::DomainSide a_domainSide, const CdrDomainBC::FluxFunction a_fluxFunction);
+  void setDomainBcFunction(const CdrDomainBC::DomainSide a_domainSide, const CdrDomainBC::FluxFunction a_fluxFunction);
 
   /*!
     @brief Implicit diffusion TGA advance without source term.

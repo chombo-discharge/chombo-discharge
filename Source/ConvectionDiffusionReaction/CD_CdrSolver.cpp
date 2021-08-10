@@ -44,6 +44,9 @@ void CdrSolver::setDefaultDomainBC(){
     pout() << m_name + "::setDefaultDomainBC" << endl;
   }
 
+  // TLDR: This sets the domain boundary condition to be a wall BC (no incoming/outgoing mass). 
+
+  // Lambda function for wall bc -- mostly left in place so I can remind myself how to do this.
   auto zero = [](const RealVect a_position, const Real a_time){
     return 0.0;
   };
@@ -78,14 +81,29 @@ void CdrSolver::setDomainBcFunction(const CdrDomainBC::DomainSide a_domainSide, 
 }
 
 std::string CdrSolver::getName() const {
+  CH_TIME("CdrSolver::getName");
+  if(m_verbosity > 5){
+    pout() << m_name + "::getName" << endl;
+  }
+  
   return m_name;
 }
 
 std::string CdrSolver::getRealm() const {
+  CH_TIME("CdrSolver::getRealm");
+  if(m_verbosity > 5){
+    pout() << m_name + "::getRealm" << endl;
+  }
+  
   return m_realm;
 }
 
 void CdrSolver::setRealm(const std::string a_realm) {
+  CH_TIME("CdrSolver::setRealm");
+  if(m_verbosity > 5){
+    pout() << m_name + "::setRealm" << endl;
+  }
+  
   m_realm = a_realm;
 }
 
@@ -94,22 +112,21 @@ Vector<std::string> CdrSolver::getPlotVariableNames() const {
   if(m_verbosity > 5){
     pout() << m_name + "::getPlotVariableNames" << endl;
   }
+
+  // TLDR: Possible plot variables is the density (m_phi), diffusion coefficient, source term, velocity, and eb flux. This
+  //       function returns the associated plot variable names, and will be used in the plot files. 
   
-  Vector<std::string> names(0);
+  Vector<std::string> plotVarNames(0);
   
-  if(m_plotPhi)                                   names.push_back(m_name + " phi");
-  if(m_plotDiffusionCoefficient && m_isDiffusive) names.push_back(m_name + " diffusion_coefficient");
-  if(m_plotSource)                                names.push_back(m_name + " source");
-  if(m_plotVelocity && m_isMobile){
-    names.push_back("x-Velocity " + m_name);
-    names.push_back("y-Velocity " + m_name);
-    if(SpaceDim == 3){
-      names.push_back("z-Velocity " + m_name);
-    }
-  }
-  if(m_plotEbFlux && m_isMobile) names.push_back(m_name + " eb_flux");
+  if(m_plotPhi)                                     plotVarNames.push_back(m_name + " phi");
+  if(m_plotDiffusionCoefficient && m_isDiffusive)   plotVarNames.push_back(m_name + " diffusion_coefficient");
+  if(m_plotSource)                                  plotVarNames.push_back(m_name + " source");
+  if(m_plotVelocity && m_isMobile)                  plotVarNames.push_back("x-Velocity " + m_name);
+  if(m_plotVelocity && m_isMobile)                  plotVarNames.push_back("y-Velocity " + m_name);
+  if(m_plotVelocity && m_isMobile && SpaceDim == 3) plotVarNames.push_back("z-Velocity " + m_name);
+  if(m_plotEbFlux && (m_isMobile || m_isDiffusive)) plotVarNames.push_back(m_name + " eb_flux");
   
-  return names;
+  return plotVarNames;
 }
 
 int CdrSolver::getNumberOfPlotVariables() const {
@@ -118,15 +135,18 @@ int CdrSolver::getNumberOfPlotVariables() const {
     pout() << m_name + "::getNumberOfPlotVariables" << endl;
   }
 
-  int num_output = 0;
+  // TLDR: Possible plot variables is the density (m_phi), diffusion coefficient, source term, velocity, and eb flux. This
+  //       function returns the number of variables that this sum up to (a vector field is 2/3 variables in 2D/3D)
 
-  if(m_plotPhi)                                   num_output = num_output + 1;
-  if(m_plotDiffusionCoefficient && m_isDiffusive) num_output = num_output + 1;
-  if(m_plotSource)                                num_output = num_output + 1;
-  if(m_plotVelocity && m_isMobile)                num_output = num_output + SpaceDim;
-  if(m_plotEbFlux && m_isMobile)                  num_output = num_output + 1;
+  int numPlotVars = 0;
 
-  return num_output;
+  if(m_plotPhi)                                   numPlotVars = numPlotVars + 1;
+  if(m_plotDiffusionCoefficient && m_isDiffusive) numPlotVars = numPlotVars + 1;
+  if(m_plotSource)                                numPlotVars = numPlotVars + 1;
+  if(m_plotVelocity && m_isMobile)                numPlotVars = numPlotVars + SpaceDim;
+  if(m_plotEbFlux && m_isMobile)                  numPlotVars = numPlotVars + 1;
+
+  return numPlotVars;
 }
 
 void CdrSolver::advanceEuler(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const Real a_dt){
@@ -134,10 +154,10 @@ void CdrSolver::advanceEuler(EBAMRCellData& a_newPhi, const EBAMRCellData& a_old
   if(m_verbosity > 5){
     pout() << m_name + "::advanceEuler(no source)" << endl;
   }
-  
+
+  // TLDR: We are solving phi^(k+1) - phi^k - dt*Div(D*Grad(phi^(k+1))) = 0.0. We create a source term = 0 and call the implementation
+  //       version.
   if(m_isDiffusive){
-    
-    // Create a source term = S = 0.0 and then call the other version. 
     EBAMRCellData src;
     m_amr->allocate(src, m_realm, m_phase, m_nComp);
     DataOps::setValue(src, 0.0);
@@ -155,9 +175,10 @@ void CdrSolver::advanceTGA(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPh
     pout() << m_name + "::advanceTGA(no source)" << endl;
   }
 
-  if(m_isDiffusive){
+  // TLDR: We are solving the TGA equation (a second order implicit Runge-Kutta scheme). We create a source term = 0 and call the
+  //       implementation version. 
 
-    // Create a source term = S = 0.0 and then call the other version. 
+  if(m_isDiffusive){
     EBAMRCellData src;
     m_amr->allocate(src, m_realm, m_phase, m_nComp);
     DataOps::setValue(src, 0.0);
