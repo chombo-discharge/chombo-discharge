@@ -94,13 +94,13 @@ public:
   virtual void parseRuntimeOptions() override;
 
   /*!
-    @brief Set the boundary condition function on a wall. 
+    @brief Set the boundary condition function on a domain side
     @param[in] a_dir      Coordinate direction.
     @param[in] a_side     Side (low/high)
     @param[in] a_function Boundary condition function.
-    @details This sets a boundary condition for a particular side on a wall. The user must also specify how to use this BC in the input script. 
+    @details This sets a boundary condition for a particular domain side. The user must also specify how to use this BC in the input script. 
   */
-  virtual void setDomainBcWallFunction(const int a_dir, const Side::LoHiSide a_side, const EddingtonSP1DomainBc::BcFunction& a_function);
+  virtual void setDomainSideBcFunction(const int a_dir, const Side::LoHiSide a_side, const EddingtonSP1DomainBc::BcFunction& a_function);
   
   /*!
     @brief Allocate internal storage
@@ -391,7 +391,7 @@ protected:
   /*!
     @brief Actual functions on domain edges (faces). 
   */
-  std::map<EddingtonSP1DomainBc::Wall, EddingtonSP1DomainBc::BcFunction> m_domainBcFunctions;
+  std::map<EddingtonSP1DomainBc::DomainSide, EddingtonSP1DomainBc::BcFunction> m_domainBcFunctions;
 
   /*!
     @brief Associated boundary condition on the embedded boundary

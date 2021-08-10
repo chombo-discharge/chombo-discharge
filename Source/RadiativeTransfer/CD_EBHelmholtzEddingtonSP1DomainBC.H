@@ -144,7 +144,7 @@ protected:
     @brief BC objects on each domain side. 
     @details These are instantiated in the constructor where we construct Neumann/Dirichlet on each domain side. 
   */
-  std::map<EddingtonSP1DomainBc::Wall, std::shared_ptr<EBHelmholtzDomainBC> > m_bcObjects;
+  std::map<EddingtonSP1DomainBc::DomainSide, std::shared_ptr<EBHelmholtzDomainBC> > m_bcObjects;
 };
 
 #include <CD_NamespaceFooter.H>

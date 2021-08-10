@@ -25,8 +25,7 @@
 
 /*!
   @brief Class which maps boundary condition types to a side and direction. 
-  @details This class is simply meant to hold boundary conditions for use in various FieldSolver code. It provides no functionality otherwise,
-  and has no dependencies, other than standard C++14. 
+  @details This class is simply meant to hold boundary conditions for use in EddingtonSP1. It provides no functionality otherwise,
 */
 class EddingtonSP1DomainBc {
 public:
@@ -48,7 +47,7 @@ public:
   /*!
     @brief Alias for mapping a direction and side.
   */
-  using Wall = std::pair<int, Side::LoHiSide>;
+  using DomainSide = std::pair<int, Side::LoHiSide>;
   
   /*!
     @brief Alias for mapping a bctype and function. 
@@ -67,25 +66,25 @@ public:
 
   /*!
     @brief Set the boundary condition on a domain side. You must set both the type, and the associated function. 
-    @param[in] a_wall Coordinate direction and side
-    @param[in] a_bc   BC type and function
+    @param[in] a_domainSide Coordinate direction and side
+    @param[in] a_bc         BC type and function
     @note If the boundary condition had been set previously, this code will overwrite the previous setting.
   */  
-  void setBc(const Wall a_wall, const Bc a_func);
+  void setBc(const DomainSide a_domainSide, const Bc a_bc);
 
   /*!
     @brief Returns the boundary condition for a side and direction
-    @param[in] a_wall Coordinate direction and siden
+    @param[in] a_domainSide Coordinate direction and siden
     @note If the boundary condition for the associated side and direction has not been previously set, this routine will cause a run-time error. 
   */
-  Bc& getBc(const Wall a_wall); 
+  Bc& getBc(const DomainSide a_domainSide); 
 
   /*!
     @brief Returns the boundary condition for a side and direction
-    @param[in] a_wall Coordinate direction and siden
+    @param[in] a_domainSide Coordinate direction and siden
     @note If the boundary condition for the associated side and direction has not been previously set, this routine will cause a run-time error. 
   */
-  const Bc& getBc(const Wall a_wall) const;
+  const Bc& getBc(const DomainSide a_domainSide) const;
 
 protected:
 
@@ -93,7 +92,7 @@ protected:
     @brief This holds the map to the boundary condition type and side. The first entry in the map is the direction and side of the boundary condition.
     The other entry in the map is the BC type, and the associated function which returns the value in space and time of the BC. 
   */
-  std::map<Wall, Bc> m_bcFunctions;
+  std::map<DomainSide, Bc> m_bcFunctions;
 
 };
 

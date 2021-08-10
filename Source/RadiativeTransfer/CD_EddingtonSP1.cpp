@@ -90,15 +90,15 @@ void EddingtonSP1::setDefaultDomainBcFunctions(){
   }
 }
 
-void EddingtonSP1::setDomainBcWallFunction(const int a_dir, const Side::LoHiSide a_side, const EddingtonSP1DomainBc::BcFunction& a_function){
-  CH_TIME("EddingtonSP1::setDomainBcWallFunction");
+void EddingtonSP1::setDomainSideBcFunction(const int a_dir, const Side::LoHiSide a_side, const EddingtonSP1DomainBc::BcFunction& a_function){
+  CH_TIME("EddingtonSP1::setDomainSideBcFunction");
   if(m_verbosity > 4){
-    pout() << m_name + "::setDomainBcWallFunction" << endl;
+    pout() << m_name + "::setDomainSideBcFunction" << endl;
   }
 
-  const EddingtonSP1DomainBc::Wall curWall = std::make_pair(a_dir, a_side);
+  const EddingtonSP1DomainBc::DomainSide domainSide = std::make_pair(a_dir, a_side);
 
-  m_domainBcFunctions.at(curWall) = a_function;
+  m_domainBcFunctions.at(domainSide) = a_function;
 }
 
 std::string EddingtonSP1::makeBcString(const int a_dir, const Side::LoHiSide a_side) const {
@@ -177,14 +177,14 @@ void EddingtonSP1::parseDomainBC(){
 
   for (int dir = 0; dir < SpaceDim; dir++){
     for (SideIterator sit; sit.ok(); ++sit){
-      const EddingtonSP1DomainBc::Wall curWall = std::make_pair(dir, sit());
-      const std::string bcString               = this->makeBcString(dir, sit());
-      const int num                            = pp.countval(bcString.c_str());
+      const EddingtonSP1DomainBc::DomainSide domainSide = std::make_pair(dir, sit());
+      const std::string bcString                        = this->makeBcString(dir, sit());
+      const int num                                     = pp.countval(bcString.c_str());
 
       std::string str;
 
       EddingtonSP1DomainBc::BcType      bcType;                                   // Will be set based on what comes in through the input script
-      EddingtonSP1DomainBc::BcFunction& bcFunc = m_domainBcFunctions.at(curWall); // Will be set based on what comes in through the input script
+      EddingtonSP1DomainBc::BcFunction& bcFunc = m_domainBcFunctions.at(domainSide); // Will be set based on what comes in through the input script
 
       std::function<Real(const RealVect, const Real)> curFunc;
 
@@ -232,7 +232,7 @@ void EddingtonSP1::parseDomainBC(){
 	break;
       }
 
-      m_domainBc.setBc(curWall, std::make_pair(bcType, curFunc));
+      m_domainBc.setBc(domainSide, std::make_pair(bcType, curFunc));
     }
   }
 }

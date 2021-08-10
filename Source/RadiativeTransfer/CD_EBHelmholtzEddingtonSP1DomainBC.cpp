@@ -27,8 +27,8 @@ EBHelmholtzEddingtonSP1DomainBC::EBHelmholtzEddingtonSP1DomainBC(const Eddington
   
   for (int dir = 0; dir < SpaceDim; dir++){
     for (SideIterator sit; sit.ok(); ++sit){
-      const EddingtonSP1DomainBc::Wall    curWall = std::make_pair(dir, sit());
-      const EddingtonSP1DomainBc::BcType& bcType  = m_eddingtonBCs.getBc(curWall).first;
+      const EddingtonSP1DomainBc::DomainSide domainSide = std::make_pair(dir, sit());
+      const EddingtonSP1DomainBc::BcType&    bcType     = m_eddingtonBCs.getBc(domainSide).first;
 
       // Make a lambda which allows us to pass in the function using EBHelmholtzDomainBC API, which takes a std::function<Real(const RealVect a_position)>
       // type of function.
@@ -39,24 +39,24 @@ EBHelmholtzEddingtonSP1DomainBC::EBHelmholtzEddingtonSP1DomainBC(const Eddington
       // 
       // This might seem clunky, but I can't see any other way of doing it properly without changing EBHelmholtzOp to a time-dependent operator (which
       // I really don't want to do). 
-      auto func = [curWall, &BC = this->m_eddingtonBCs](const RealVect& a_position) -> Real {
+      auto func = [domainSide, &BC = this->m_eddingtonBCs](const RealVect& a_position) -> Real {
 	const Real dummyDt = 0.0;
 
-	const EddingtonSP1DomainBc::BcFunction& wallBcFunction = BC.getBc(curWall).second; // This is a function Real(const RealVect, const Real)
+	const EddingtonSP1DomainBc::BcFunction& bcFunction = BC.getBc(domainSide).second; // This is a function Real(const RealVect, const Real)
 	
-	return wallBcFunction(a_position, dummyDt);
+	return bcFunction(a_position, dummyDt);
       };
 
       // Create either a Dirichlet or Neumann boundary condition object for the current domain edge (face in 3D).
       switch(bcType) {
       case EddingtonSP1DomainBc::BcType::Dirichlet:
-	m_bcObjects.emplace(curWall, std::make_shared<EBHelmholtzDirichletDomainBC>(func));
+	m_bcObjects.emplace(domainSide, std::make_shared<EBHelmholtzDirichletDomainBC>(func));
 	break;
       case EddingtonSP1DomainBc::BcType::Neumann:
-	m_bcObjects.emplace(curWall, std::make_shared<EBHelmholtzNeumannDomainBC>(func));
+	m_bcObjects.emplace(domainSide, std::make_shared<EBHelmholtzNeumannDomainBC>(func));
 	break;
       case EddingtonSP1DomainBc::BcType::Larsen:
-	m_bcObjects.emplace(curWall, std::make_shared<EBHelmholtzLarsenDomainBC>(m_species, m_r1, m_r2, func));
+	m_bcObjects.emplace(domainSide, std::make_shared<EBHelmholtzLarsenDomainBC>(m_species, m_r1, m_r2, func));
 	break;	
       default:
 	MayDay::Error("EBHelmholtzEddingtonSP1DomainBC::EBHelmholtzEddingtonSP1DomainBC - unsupported boundary condition passed into constructor!");
