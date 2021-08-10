@@ -243,7 +243,7 @@ public:
 
   /*!
     @brief Set species
-    @param[in] a_species Species. 
+    @param[in] a_species Species (where this solver gets its name, charge, initial conditions etc). 
   */
   virtual void setSpecies(const RefCountedPtr<CdrSpecies> a_species);
   
@@ -261,7 +261,7 @@ public:
 
   /*!
     @brief Set phase.
-    @param[in] a_phase Phse.
+    @param[in] a_phase Phase.
   */
   virtual void setPhase(phase::which_phase a_phase);
 
@@ -296,7 +296,7 @@ public:
 
   /*!
     @brief Set velocity using a polymorphic function. 
-    @param[in] a_velocity Velocity to be set. 
+    @param[in] a_velocity Velocity to be set. You can use e.g. a lambda to set it. 
   */
   virtual void setVelocity(const std::function<RealVect(const RealVect a_pos)>& a_velocity);
 
@@ -372,6 +372,7 @@ public:
   /*!
     @brief Write plot file
     @details The name of the plot file is m_name.stepXXXXX.DIM.hdf5
+    @note This calls writePlotData(...)
   */
   virtual void writePlotFile();
 
@@ -379,8 +380,10 @@ public:
     @brief Write output data to a_output
     @param[inout] a_output Output data holder.
     @param[inout] a_icomp  Starting component where this solver begins writing the output. 
+    @note This will write the plot data in this solver to a_output, starting on a_comp
+    @note This routine writes m_phi on centroids (and not cell-centers). 
   */
-  virtual void writePlotData(EBAMRCellData& a_output, int& a_comp);
+  virtual void writePlotData(EBAMRCellData& a_output, int& a_icomp);
 
   /*!
     @brief Write checkpoint data into HDF5 file. 

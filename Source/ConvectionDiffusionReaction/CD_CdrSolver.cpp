@@ -1577,10 +1577,12 @@ void CdrSolver::setEbIndexSpace(const RefCountedPtr<EBIndexSpace>& a_ebis){
 }
 
 void CdrSolver::setSpecies(const RefCountedPtr<CdrSpecies> a_species){
-  CH_TIME("CdrSolver::setSpecies");
+  CH_TIME("CdrSolver::setSpecies(RefCountedPtr<CdrSpecies>)");
   if(m_verbosity > 5){
-    pout() << m_name + "::setSpecies" << endl;
+    pout() << m_name + "::setSpecies(RefCountedPtr<CdrSpecies>)" << endl;
   }
+
+  CH_assert(!a_species.isNull());
 
   m_species     = a_species;
   m_name        = m_species->getName();
@@ -1589,46 +1591,47 @@ void CdrSolver::setSpecies(const RefCountedPtr<CdrSpecies> a_species){
 }
 
 void CdrSolver::setSource(const EBAMRCellData& a_source){
-  CH_TIME("CdrSolver::setSource");
+  CH_TIME("CdrSolver::setSource(EBAMRCellData)");
   if(m_verbosity > 5){
-    pout() << m_name + "::setSource" << endl;
+    pout() << m_name + "::setSource(EBAMRCellData)" << endl;
   }
 
-  const int finest_level = m_amr->getFinestLevel();
+  CH_assert(a_source[0]->nComp() == 1);
 
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    a_source[lvl]->localCopyTo(*m_source[lvl]);
-  }
+  m_source.copy(a_source);
 
   m_amr->averageDown(m_source, m_realm, m_phase);
   m_amr->interpGhost(m_source, m_realm, m_phase);
 }
 
 void CdrSolver::setSource(const Real a_source){
-  CH_TIME("CdrSolver::setSource");
+  CH_TIME("CdrSolver::setSource(Real)");
   if(m_verbosity > 5){
-    pout() << m_name + "::setSource" << endl;
+    pout() << m_name + "::setSource(Real)" << endl;
   }
 
-  const int comp = 0;
-  const int finest_level = m_amr->getFinestLevel();
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    DataOps::setValue(*m_source[lvl], a_source, comp);
-  }
+  DataOps::setValue(m_source, a_source);
 
   m_amr->averageDown(m_source, m_realm, m_phase);
   m_amr->interpGhost(m_source, m_realm, m_phase);
 }
 
 void CdrSolver::setSource(const std::function<Real(const RealVect a_position)> a_source){
+  CH_TIME("CdrSolver::setSource(std::function<Real(const RealVect a_position)>)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::setSource(std::function<Real(const RealVect a_position)>)" << endl;
+  }
+  
   DataOps::setValue(m_source, a_source, m_amr->getProbLo(), m_amr->getDx(), m_comp);
+
+  m_amr->averageDown(m_source, m_realm, m_phase);
+  m_amr->interpGhost(m_source, m_realm, m_phase);
 }
 
 void CdrSolver::setTime(const int a_step, const Real a_time, const Real a_dt) {
-  CH_TIME("CdrSolver::setTime");
+  CH_TIME("CdrSolver::setTime(int, Real, Real)");
   if(m_verbosity > 5){
-    pout() << m_name + "::setTime" << endl;
+    pout() << m_name + "::setTime(int, Real, Real)" << endl;
   }
 
   m_timeStep = a_step;
@@ -1642,30 +1645,24 @@ void CdrSolver::setVelocity(const EBAMRCellData& a_velo){
     pout() << m_name + "::setVelocity" << endl;
   }
 
-  const int finest_level = m_amr->getFinestLevel();
+  CH_assert(a_velo[0]->nComp() == SpaceDim);
 
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    a_velo[lvl]->localCopyTo(*m_cellVelocity[lvl]);
-  }
+  m_cellVelocity.copy(a_velo);
 
   m_amr->averageDown(m_cellVelocity, m_realm, m_phase);
   m_amr->interpGhost(m_cellVelocity, m_realm, m_phase);
 }
 
 void CdrSolver::setVelocity(const RealVect a_velo){
-  CH_TIME("CdrSolver::setVelocity");
+  CH_TIME("CdrSolver::setVelocity(RealVect)");
   if(m_verbosity > 5){
-    pout() << m_name + "::setVelocity" << endl;
+    pout() << m_name + "::setVelocity(RealVect)" << endl;
   }
 
-  const int finest_level = m_amr->getFinestLevel();
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     for (int dir = 0; dir < SpaceDim; dir++){
       DataOps::setValue(*m_cellVelocity[lvl], a_velo[dir], dir);
     }
-
-    m_cellVelocity[lvl]->exchange();
   }
 
   m_amr->averageDown(m_cellVelocity, m_realm, m_phase);
@@ -1673,41 +1670,49 @@ void CdrSolver::setVelocity(const RealVect a_velo){
 }
 
 void CdrSolver::setVelocity(const std::function<RealVect(const RealVect a_pos)>& a_velo){
+  CH_TIME("CdrSolver::setVelocity(std::function<RealVect(const RealVect a_pos)>)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::setVelocity(std::function<RealVect(const RealVect a_pos)>)" << endl;
+  }
+  
   DataOps::setValue(m_cellVelocity, a_velo, m_amr->getProbLo(), m_amr->getDx());
 }
 
 void CdrSolver::setPhase(const phase::which_phase a_phase){
-  CH_TIME("CdrSolver::setPhase");
+  CH_TIME("CdrSolver::setPhase(phase::which_phase)");
   if(m_verbosity > 5){
-    pout() << m_name + "::setPhase" << endl;
+    pout() << m_name + "::setPhase(phase::which_phase)" << endl;
   }
 
   m_phase = a_phase;
 }
 
 void CdrSolver::setVerbosity(const int a_verbosity){
-  CH_TIME("CdrSolver::setVerbosity");
+  CH_TIME("CdrSolver::setVerbosity(int)");
   m_verbosity = a_verbosity;
   
   if(m_verbosity > 5){
-    pout() << m_name + "::setVerbosity" << endl;
+    pout() << m_name + "::setVerbosity(int)" << endl;
   }
 }
 
 void CdrSolver::writePlotFile(){
-  CH_TIME("CdrSolver::writePlotFile");
+  CH_TIME("CdrSolver::writePlotFile()");
   if(m_verbosity > 5){
-    pout() << m_name + "::writePlotFile" << endl;
+    pout() << m_name + "::writePlotFile()" << endl;
   }
 
+  // We recycle the writePlotData(...) routine to write a plot file. That routine is used for external
+  // calls to this solver when we want to populate an external plot file with data from this class. Nothing
+  // wrong with reusing it here. 
 
   // Number of output components and their names
-  const int ncomps = getNumberOfPlotVariables();
-  const Vector<std::string> names = getPlotVariableNames();
+  const int numPlotVars                  = this->getNumberOfPlotVariables();
+  const Vector<std::string> plotVarNames = this->getPlotVariableNames();
 
   // Allocate storage
   EBAMRCellData output;
-  m_amr->allocate(output, m_realm, m_phase, ncomps);
+  m_amr->allocate(output, m_realm, m_phase, numPlotVars);
   DataOps::setValue(output, 0.0);
 
   // Copy internal data to be plotted over to 'output'
@@ -1715,63 +1720,66 @@ void CdrSolver::writePlotFile(){
   this->writePlotData(output, icomp);
 
   // Filename
-  char file_char[100];
-  sprintf(file_char, "%s.step%07d.%dd.hdf5", m_name.c_str(), m_timeStep, SpaceDim);
-
-  // Alias
-  Vector<LevelData<EBCellFAB>* > output_ptr;
-  m_amr->alias(output_ptr, output);
+  char filename[100];
+  sprintf(filename, "%s.step%07d.%dd.hdf5", m_name.c_str(), m_timeStep, SpaceDim);
+  std::string fname(filename);
   
-  Vector<Real> covered_values(ncomps, 0.0);
-  string fname(file_char);
+  // Alias, because Chombo's EBAMRIO wants raw pointers (but we stick to smart pointers, like God intended). 
+  Vector<LevelData<EBCellFAB>* > outputPtr;
+  m_amr->alias(outputPtr, output);
+
   writeEBHDF5(fname,
 	      m_amr->getGrids(m_realm),
-	      output_ptr,
-	      names,
+	      outputPtr,
+	      plotVarNames,
 	      m_amr->getDomains()[0].domainBox(),
 	      m_amr->getDx()[0],
 	      m_dt,
 	      m_time,
 	      m_amr->getRefinementRatios(),
 	      m_amr->getFinestLevel() + 1,
-	      true,
-	      covered_values,
+	      false,
+	      Vector<Real>(numPlotVars, 0.0), //coveredValues,
 	      IntVect::Unit);
 }
 
-void CdrSolver::writePlotData(EBAMRCellData& a_output, int& a_comp){
-  CH_TIME("CdrSolver::writePlotData");
+void CdrSolver::writePlotData(EBAMRCellData& a_output, int& a_icomp){
+  CH_TIME("CdrSolver::writePlotData(EBAMRCellData, int)");
   if(m_verbosity > 5){
-    pout() << m_name + "::writePlotData" << endl;
+    pout() << m_name + "::writePlotData(EBAMRCellData, int)" << endl;
   }
+
+  // TLDR: This routine writes plot data to an "external" data holder a_output, starting on a_icomp. The intention
+  //       behind that is that a_output is a plot file which accumulates data over many solvers. Note that because
+  //       this solver is cell-centered, we interpolate m_phi to centroids when outputting it. 
 
   // Plot state
   if(m_plotPhi) {
-    this->writeData(a_output, a_comp, m_phi, true);
+    this->writeData(a_output, a_icomp, m_phi, true);
   }
 
-  // Plot diffusion coefficients
-  if(m_plotDiffusionCoefficient && m_isDiffusive) { // Need to compute the cell-centerd stuff first
+  // Plot diffusion coefficients. These are stored on face centers but we need cell-centered data for output. 
+  if(m_plotDiffusionCoefficient && m_isDiffusive) { 
     DataOps::setValue(m_scratch, 0.0);
     DataOps::averageFaceToCell(m_scratch, m_faceCenteredDiffusionCoefficient, m_amr->getDomains());
-    this->writeData(a_output, a_comp, m_scratch,   false);
+    this->writeData(a_output, a_icomp, m_scratch, false);
   }
 
   // Plot source terms
   if(m_plotSource) {
-    this->writeData(a_output, a_comp, m_source, false);
+    this->writeData(a_output, a_icomp, m_source, false);
   }
 
   // Plot velocities
   if(m_plotVelocity && m_isMobile) {
-    this->writeData(a_output, a_comp, m_cellVelocity, false);
+    this->writeData(a_output, a_icomp, m_cellVelocity, false);
   }
 
-  // Plot EB fluxes
+  // Plot EB fluxes. These are stored on sparse data structures but we need them on cell centers. So copy them to scratch and write data. 
   if(m_plotEbFlux && m_isMobile){
     DataOps::setValue(m_scratch, 0.0);
     DataOps::incr(m_scratch, m_ebFlux, 1.0);
-    this->writeData(a_output, a_comp, m_scratch, false);
+    this->writeData(a_output, a_icomp, m_scratch, false);
   }
 }
 
