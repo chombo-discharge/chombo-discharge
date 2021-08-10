@@ -15,6 +15,19 @@
 
 ElectrostaticDomainBc::ElectrostaticDomainBc() {
   m_bcFunctions.clear();
+
+  // 
+  auto zero = [](const RealVect a_pos, const Real a_time){
+    return 0.0;
+  };
+
+  for (int dir = 0; dir < SpaceDim; dir++){
+    for (SideIterator sit; sit.ok(); ++sit){
+      const DomainSide domainSide = std::make_pair(dir, sit());
+
+      m_bcFunctions.emplace(domainSide, std::make_pair(BcType::Neumann, zero));
+    }
+  }
 }
 
 ElectrostaticDomainBc::~ElectrostaticDomainBc() {
@@ -22,14 +35,10 @@ ElectrostaticDomainBc::~ElectrostaticDomainBc() {
 }
 
 void ElectrostaticDomainBc::setBc(const DomainSide a_domainSide, const Bc a_bc){
-  m_bcFunctions.emplace(a_domainSide, a_bc);
+  m_bcFunctions.at(a_domainSide) = a_bc;
 }
 
 ElectrostaticDomainBc::Bc ElectrostaticDomainBc::getBc(const DomainSide a_domainSide) const{
-  if(m_bcFunctions.find(a_domainSide) == m_bcFunctions.end()){
-    MayDay::Abort("ElectrostaticDomainBc::getBc -- BC not found. Perhaps you've forgotten to set it...?");
-  }
-
   return m_bcFunctions.at(a_domainSide);
 }
 

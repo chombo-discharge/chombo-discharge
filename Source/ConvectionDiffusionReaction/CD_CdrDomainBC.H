@@ -62,10 +62,10 @@ public:
   CdrDomainBC();
 
   /*!
-    @brief Disallowed copy constructor
+    @brief Copy constructor
     @param[in] a_other Other 
   */
-  CdrDomainBC(const CdrDomainBC& a_other) = delete;
+  CdrDomainBC(const CdrDomainBC& a_other) = default;
 
   /*!
     @brief Disallowed copy constructor
@@ -74,10 +74,10 @@ public:
   CdrDomainBC(const CdrDomainBC&& a_other) = delete;
 
   /*!
-    @brief Disallowed copy assignment
+    @brief Copy assignment
     @param[in] a_other Other 
   */
-  CdrDomainBC& operator=(const CdrDomainBC& a_other) = delete;
+  CdrDomainBC& operator=(const CdrDomainBC& a_other) = default;
 
   /*!
     @brief Disallowed move assignment

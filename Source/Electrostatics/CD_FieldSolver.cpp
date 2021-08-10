@@ -465,17 +465,6 @@ void FieldSolver::setVoltage(std::function<Real(const Real a_time)> a_voltage){
   m_isVoltageSet = true;
 }
 
-void FieldSolver::setDomainSideBcFunction(const int a_dir, const Side::LoHiSide a_side, const ElectrostaticDomainBc::BcFunction& a_function){
-  CH_TIME("FieldSolver::setDomainSideBcFunction");
-  if(m_verbosity > 4){
-    pout() << "FieldSolver::setDomainSideBcFunction" << endl;
-  }
-
-  const ElectrostaticDomainBc::DomainSide domainSide = std::make_pair(a_dir, a_side);
-
-  m_domainBcFunctions.at(domainSide) = a_function;
-}
-
 void FieldSolver::setElectrodeDirichletFunction(const int a_electrode, const ElectrostaticEbBc::BcFunction& a_function){
   CH_TIME("FieldSolver::setElectrodeDirichletFunction");
   if(m_verbosity > 5){
@@ -642,6 +631,17 @@ void FieldSolver::setDefaultEbBcFunctions() {
 
     m_ebBc.addEbBc(elec, curFunc);
   }
+}
+
+void FieldSolver::setDomainSideBcFunction(const int a_dir, const Side::LoHiSide a_side, const ElectrostaticDomainBc::BcFunction& a_function){
+  CH_TIME("FieldSolver::setDomainSideBcFunction");
+  if(m_verbosity > 4){
+    pout() << "FieldSolver::setDomainSideBcFunction" << endl;
+  }
+
+  const ElectrostaticDomainBc::DomainSide domainSide = std::make_pair(a_dir, a_side);
+
+  m_domainBcFunctions.at(domainSide) = a_function;
 }
 
 void FieldSolver::parseDomainBc(){

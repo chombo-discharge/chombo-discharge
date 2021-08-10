@@ -55,9 +55,33 @@ public:
   using Bc = std::pair<BcType, BcFunction>;
   
   /*!
-    @brief Initializing constructor. This does nothing. 
+    @brief Initializing constructor. Populates with zero data.
   */
   ElectrostaticDomainBc();
+
+  /*!
+    @brief Copy constructor
+    @param[in] a_other Other
+  */
+  ElectrostaticDomainBc(const ElectrostaticDomainBc& a_other) = default;
+
+  /*!
+    @brief Disallowed move constructor
+    @param[in] a_other Other
+  */
+  ElectrostaticDomainBc(const ElectrostaticDomainBc&& a_other) = delete;
+
+  /*!
+    @brief Copy assignment
+    @param[in] a_other Other
+  */
+  ElectrostaticDomainBc& operator=(const ElectrostaticDomainBc& a_other) = default;
+
+  /*!
+    @brief Disallowed move assignment
+    @param[in] a_other Other
+  */
+  ElectrostaticDomainBc& operator=(const ElectrostaticDomainBc&& a_other) = delete;
 
   /*!
     @brief Destructor. This 
