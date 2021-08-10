@@ -361,7 +361,7 @@ public:
 
   /*!
     @brief Fill m_phi state with initial data from m_species
-    @note This will call initialDataParticles() and initialDataFunction()
+    @note This will call initialDataParticles() and initialDataFunction().
   */
   virtual void initialData();
 
@@ -887,7 +887,7 @@ protected:
   virtual void nonConservativeDivergence(EBAMRIVData& a_nonConservativeDivergence, const EBAMRCellData& a_divG);
 
   /*!
-    @brief Use the non-conservative divergence to make the conservative divergence hold the hybrid divergence
+    @brief Use the non-conservative divergence to make the conservative divergence hold the hybrid divergence. 
     @param[inout] a_hybridDivergence          On input, contains the conservative divergence (without kappa division). Contains hybrid divergence on output.
     @param[out]   a_massDifference            Mass difference between updating with hybrid divergence and true divergence
     @param[in]    a_nonConservativeDivergence Non-conservative divergence.
@@ -913,6 +913,7 @@ protected:
     @param[out] a_divJ Conservative divergence. Not kappa-divided. 
     @param[in]  a_flux Face-centered fluxes
     @param[in]  a_lvl  Grid level
+    @note This computes the finite volume approximation to div(J) in regular cells -- cut-cells (in a_divJ are set to zero)
   */
   virtual void conservativeDivergenceRegular(LevelData<EBCellFAB>& a_divJ, const LevelData<EBFluxFAB>& a_flux, const int a_lvl);
 
@@ -964,7 +965,7 @@ protected:
   virtual void hyperbolicRedistribution(EBAMRCellData& a_stableDivergence, const EBAMRIVData& a_massDifference);
 
   /*!
-    @brief Increment redistribution flux registers
+    @brief Increment redistribution flux registers. 
   */
   virtual void incrementRedistFlux();
 
@@ -995,16 +996,19 @@ protected:
 
   /*!
     @brief Fill initial data from a distribution function
+    @note This increments m_phi on the mesh with data from m_species->initialData().
   */
   virtual void initialDataDistribution();
 
   /*!
     @brief Fill initial data from particles
+    @note This will set m_phi to zero before depositing the particles (which are deposited with an NGP scheme, ignoring modifactions near cut-cells)
   */
   virtual void initialDataParticles();
 
   /*!
     @brief Define stencils for doing face-centered to face-centroid-centered states. 
+    @note This computes standard finite-difference stencils for interpolating from face centers to face centroids. 
   */
   virtual void defineInterpolationStencils();
 

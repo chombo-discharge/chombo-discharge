@@ -7,6 +7,9 @@
   @file   CD_CdrSolver.cpp
   @brief  Implementation of CD_CdrSolver.H
   @author Robert Marskar
+  @todo   Need to parse domain BCs!
+  @todo   Code walk starts on line 859 ::conservativeDivergenceRegular(...)
+  @todo   Should computeAdvectionFlux and computeDiffusionFlux be ghosted... filling fluxes on ghost faces...?
 */
 
 // Chombo includes
@@ -854,42 +857,47 @@ void CdrSolver::computeDivergenceIrregular(LevelData<EBCellFAB>&              a_
 }
 
 void CdrSolver::conservativeDivergenceRegular(LevelData<EBCellFAB>& a_divJ, const LevelData<EBFluxFAB>& a_flux, const int a_lvl){
-  CH_TIME("CdrSolver::conservativeDivergenceRegular");
+  CH_TIME("CdrSolver::conservativeDivergenceRegular(LD<EBCellFAB>, LD<EBFluxFAB>, int)");
   if(m_verbosity > 5){
-    pout() << m_name + "::conservativeDivergenceRegular" << endl;
+    pout() << m_name + "::conservativeDivergenceRegular(LD<EBCellFAB>, LD<EBFluxFAB>, int)" << endl;
   }
 
   CH_assert(a_divJ.nComp() == 1);
   CH_assert(a_flux.nComp() == 1);
 
-  const int comp  = 0;
-  const int ncomp = 1;
+  // We compute the conservative divergence in regular grid cells. The divergence is in the form
+  // kappa*div(J) = sum(fluxes)/dx
+
 
   const DisjointBoxLayout dbl = m_amr->getGrids(m_realm)[a_lvl];
   const ProblemDomain domain  = m_amr->getDomains()[a_lvl];
   const Real dx               = m_amr->getDx()[a_lvl];
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-    EBCellFAB& divJ         = a_divJ[dit()];
-    BaseFab<Real>& divJ_fab = divJ.getSingleValuedFAB();
-    const Box box = dbl.get(dit());
+    const Box cellBox       = dbl.get(dit());
+    
+    EBCellFAB&     divJ     = a_divJ[dit()];
+    BaseFab<Real>& divJReg  = divJ.getSingleValuedFAB();
 
     divJ.setVal(0.0);
+    
     for (int dir = 0; dir < SpaceDim; dir++){
-      const EBFaceFAB& flx         = a_flux[dit()][dir];
-      const BaseFab<Real>& flx_fab = flx.getSingleValuedFAB();
+      const EBFaceFAB&     flux    = a_flux[dit()][dir];
+      const BaseFab<Real>& fluxReg = flux.getSingleValuedFAB();
 
-      FORT_CONSDIV_REG(CHF_FRA1(divJ_fab, comp),
-		       CHF_CONST_FRA1(flx_fab, comp),
+      // Fortran kernel -- this does divJ(iv) += (fluxReg(iv+1)-fluxReg(iv))/dx. 
+      FORT_CONSDIV_REG(CHF_FRA1(divJReg, m_comp),
+		       CHF_CONST_FRA1(fluxReg, m_comp),
 		       CHF_CONST_INT(dir),
 		       CHF_CONST_REAL(dx),
-		       CHF_BOX(box));
+		       CHF_BOX(cellBox));
     }
 
+    // Reset irregular grid cells -- these are set by interpolating fluxes to centroids and calling computeDivergenceIrregular(....)
     VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[dit()];
     for (vofit.reset(); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
-      divJ(vof, comp) = 0.0;
+      divJ(vof, m_comp) = 0.0;
     }
   }
 
@@ -897,44 +905,38 @@ void CdrSolver::conservativeDivergenceRegular(LevelData<EBCellFAB>& a_divJ, cons
 }
 
 void CdrSolver::defineInterpolationStencils(){
-  CH_TIME("CdrSolver::defineInterpolationStencils");
+  CH_TIME("CdrSolver::defineInterpolationStencils()");
   if(m_verbosity > 5){
-    pout() << m_name + "::defineInterpolationStencils" << endl;
+    pout() << m_name + "::defineInterpolationStencils()" << endl;
   }
 
-  const int comp            = 0;
-  const int ncomp           = 1;
-  const int finest_level    = m_amr->getFinestLevel();
-  FaceStop::WhichFaces stop = FaceStop::SurroundingWithBoundary;
+  // This routine defines interpolation stencils for going from face-centered fluxes to face-centroid fluxes. 
+
+  const int finestLevel    = m_amr->getFinestLevel();
   
   for (int dir = 0; dir < SpaceDim; dir++){
-    (m_interpStencils[dir]).resize(1 + finest_level);
+    (m_interpStencils[dir]).resize(1 + finestLevel);
 
-    for (int lvl = 0; lvl <= finest_level; lvl++){
+    for (int lvl = 0; lvl <= finestLevel; lvl++){
       const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
       const ProblemDomain& domain  = m_amr->getDomains()[lvl];
       const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
 
-      m_interpStencils[dir][lvl] = RefCountedPtr<LayoutData<BaseIFFAB<FaceStencil> > >
-	(new LayoutData<BaseIFFAB<FaceStencil> >(dbl));
-
-      LayoutData<IntVectSet> cfivs(dbl);
-      EBArith::defineCFIVS(cfivs, dbl, domain);
+      m_interpStencils[dir][lvl] = RefCountedPtr<LayoutData<BaseIFFAB<FaceStencil> > > (new LayoutData<BaseIFFAB<FaceStencil> >(dbl));
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 	BaseIFFAB<FaceStencil>& sten = (*m_interpStencils[dir][lvl])[dit()];
-	const Box box          = dbl.get(dit());
-	const EBISBox& ebisbox = ebisl[dit()];
-	const EBGraph& ebgraph = ebisbox.getEBGraph();
-	const IntVectSet ivs   = ebisbox.getIrregIVS(box);
+	const Box        cellBox  = dbl  [dit()];
+	const EBISBox&   ebisbox  = ebisl[dit()];
+	const EBGraph&   ebgraph  = ebisbox.getEBGraph();
+	const IntVectSet irregIVS = ebisbox.getIrregIVS(cellBox);
 
-	sten.define(ivs, ebisbox.getEBGraph(), dir, ncomp);
+	sten.define(irregIVS, ebisbox.getEBGraph(), dir, m_nComp);
 	
-	for (FaceIterator faceit(ivs, ebgraph, dir, stop); faceit.ok(); ++faceit){
-	  const FaceIndex& face = faceit();
-	  FaceStencil& facesten = sten(face,comp);
+	for (FaceIterator faceIt(irregIVS, ebgraph, dir, FaceStop::SurroundingWithBoundary); faceIt.ok(); ++faceIt){
+	  const FaceIndex& face = faceIt();
 
-	  facesten = EBArith::getInterpStencil(face, cfivs[dit()], ebisbox, domain.domainBox());
+	  sten(face, m_comp) = EBArith::getInterpStencil(face, IntVectSet(), ebisbox, domain.domainBox());
 	}
       }
     }
@@ -942,53 +944,59 @@ void CdrSolver::defineInterpolationStencils(){
 }
 
 void CdrSolver::incrementRedistFlux(){
-  CH_TIME("CdrSolver::incrementRedistFlux");
+  CH_TIME("CdrSolver::incrementRedistFlux()");
   if(m_verbosity > 5){
-    pout() << m_name + "::incrementRedistFlux" << endl;
+    pout() << m_name + "::incrementRedistFlux()" << endl;
   }
 
-  const int comp         = 0;
-  const int ncomp        = 1;
-  const int finest_level = m_amr->getFinestLevel();
-  const Interval interv(comp, comp);
+  // This routine lets the flux register know what is going on with the cut-cell mass redistribution
+  // across the coarse-fine boundary. 
 
-  for (int lvl = 0; lvl <= finest_level; lvl++){
+  const int finestLevel = m_amr->getFinestLevel();
+  
+  const Interval interv(m_comp, m_comp);
+
+  for (int lvl = 0; lvl <= finestLevel; lvl++){
     const Real dx       = m_amr->getDx()[lvl];
-    const bool has_coar = lvl > 0;
-    const bool has_fine = lvl < finest_level;
+    const bool hasCoar = lvl > 0;
+    const bool hasFine = lvl < finestLevel;
     
-    if(has_fine){
-      RefCountedPtr<EBFluxRegister>& fluxreg = m_amr->getFluxRegister(m_realm, m_phase)[lvl];
+    if(hasFine){
+      RefCountedPtr<EBFluxRegister>&     fluxReg         = m_amr->getFluxRegister    (m_realm, m_phase)[lvl];
       RefCountedPtr<EBCoarToFineRedist>& coar2fineRedist = m_amr->getCoarToFineRedist(m_realm, m_phase)[lvl];
       RefCountedPtr<EBCoarToCoarRedist>& coar2coarRedist = m_amr->getCoarToCoarRedist(m_realm, m_phase)[lvl];
       
       const Real scale = -dx;
 
-      fluxreg->incrementRedistRegister(*coar2fineRedist, interv, scale);
-      fluxreg->incrementRedistRegister(*coar2coarRedist, interv, scale);
-
+      fluxReg->incrementRedistRegister(*coar2fineRedist, interv, scale);
+      fluxReg->incrementRedistRegister(*coar2coarRedist, interv, scale);
     }
   }
 }
 
 void CdrSolver::initialData(){
-  CH_TIME("CdrSolver::initialData");
+  CH_TIME("CdrSolver::initialData()");
   if(m_verbosity > 5){
-    pout() << m_name + "::initialData" << endl;
+    pout() << m_name + "::initialData()" << endl;
   }
 
-  const bool deposit_function  = m_species->initializeWithFunction();
+  // CdrSolver can be initialized in several way -- we can fill the initial data with analytic data from a mesh, or we can
+  // deposit particles (with an NGP scheme) on the mesh. This function does both -- first particles if we have them and
+  // then we increment with the function. 
+
+  const bool depositFunction  = m_species->initializeWithFunction();
   const bool depositParticles = m_species->initializeWithParticles();
 
   DataOps::setValue(m_phi, 0.0);
-  
+
+  // Deposit particles if we have them. 
   if(depositParticles){
-    initialDataParticles();
+    this->initialDataParticles();
   }
 
-  // Increment with function values if this is also called for
-  if(deposit_function){
-    initialDataDistribution();
+  // Increment with function values if this is also called for. 
+  if(depositFunction){
+    this->initialDataDistribution();
   }
 
   m_amr->averageDown(m_phi, m_realm, m_phase);
@@ -996,49 +1004,41 @@ void CdrSolver::initialData(){
 }
 
 void CdrSolver::initialDataDistribution(){
-  CH_TIME("CdrSolver::initialDataDistribution");
+  CH_TIME("CdrSolver::initialDataDistribution()");
   if(m_verbosity > 5){
-    pout() << m_name + "::initialDataDistribution" << endl;
+    pout() << m_name + "::initialDataDistribution()" << endl;
   }
 
-  const RealVect origin  = m_amr->getProbLo();
-  const int finest_level = m_amr->getFinestLevel();
-
-  // Copy this
-  DataOps::copy(m_scratch, m_phi);
+  // TLDR: We just run through every cell in the grid and increment by m_species->initialData
   
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    const Real dx = m_amr->getDx()[lvl];
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+    const Real               dx     = m_amr->getDx()[lvl];
+    const RealVect           probLo = m_amr->getProbLo();
+    const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
+    const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
 
-    for (DataIterator dit = m_phi[lvl]->dataIterator(); dit.ok(); ++dit){
-      EBCellFAB& state         = (*m_phi[lvl])[dit()];
-      const EBCellFAB& scratch = (*m_scratch[lvl])[dit()];
-      const Box box            = m_phi[lvl]->disjointBoxLayout().get(dit());
-      const EBISBox& ebisbox   = state.getEBISBox();
-
-      BaseFab<Real>& reg_state   = state.getSingleValuedFAB();
-      const BaseFab<Real>& reg_scratch = scratch.getSingleValuedFAB();
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      const Box        cellBox = dbl[dit()];
+      const EBISBox&   ebisbox = ebisl[dit()];
+      
+      EBCellFAB&       phi     = (*m_phi[lvl])[dit()];
+      BaseFab<Real>&   regPhi  = phi.getSingleValuedFAB();
 
       // Regular cells
-      for (BoxIterator bit(box); bit.ok(); ++bit){
-	const IntVect iv = bit();
-	const RealVect pos = origin + RealVect(iv)*dx + 0.5*dx*RealVect::Unit;
+      for (BoxIterator bit(cellBox); bit.ok(); ++bit){
+	const IntVect iv   = bit();
+	const RealVect pos = probLo + RealVect(iv)*dx + 0.5*dx*RealVect::Unit;
 
-	for (int comp = 0; comp < state.nComp(); comp++){
-	  reg_state(iv, comp) = reg_scratch(iv, comp) + m_species->initialData(pos, m_time);
-	}
+	regPhi(iv, m_comp) = regPhi(iv, m_comp) + m_species->initialData(pos, m_time);
       }
 
       // Irreg and multicells
       VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
       for (vofit.reset(); vofit.ok(); ++vofit){
 	const VolIndex& vof = vofit();
-	const Real kappa    = ebisbox.volFrac(vof);
-	const RealVect pos  = EBArith::getVofLocation(vof, m_amr->getDx()[lvl]*RealVect::Unit, origin);
+	const RealVect pos  = EBArith::getVofLocation(vof, m_amr->getDx()[lvl]*RealVect::Unit, probLo);
 	
-	for (int comp = 0; comp < state.nComp(); comp++){
-	  state(vof, comp) = scratch(vof, comp) + m_species->initialData(pos, m_time);
-	}
+	phi(vof, m_comp) = phi(vof, m_comp) + m_species->initialData(pos, m_time);
       }
     }
   }
@@ -1055,56 +1055,68 @@ void CdrSolver::initialDataParticles(){
     pout() << m_name + "::initialDataParticles" << endl;
   }
 
-  const int halo_buffer = 0;
-  const int pvr_buffer  = 0;
+  // TLDR: This function deposits a list of initial particles on the mesh using
+  //       an NGP scheme, ignoring conservation in cut-cells. Please refers to
+  //       the particle API to see the details of the ParticleContainer<T> type and
+  //       deposition methods.
 
-  const List<Particle>& init_particles = m_species->getInitialParticles();
+  const List<Particle>& initialParticles = m_species->getInitialParticles();
 
-  if(init_particles.length() > 0){
+  if(initialParticles.length() > 0){
 
+    constexpr int pvrBuffer = 0; // No PVR buffer means that particles live in their natural grid cells. 
+
+    // Make a ParticleContainer<T> and redistribute particles over the AMR hierarchy. 
     ParticleContainer<Particle> particles;
-    m_amr->allocate(particles, pvr_buffer, m_realm);
+    m_amr->allocate(particles, pvrBuffer, m_realm);
     particles.addParticles(m_species->getInitialParticles());
 
-    // We will deposit onto m_phi, using m_scratch as a scratch holder for interpolation stuff
+    // This function will be called BEFORE initialDataFunction, we it is safe to set m_phi to zero
     DataOps::setValue(m_phi, 0.0);
   
-    // Deposit onto mseh
+    // Deposit onto mesh. 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-      const RealVect dx            = m_amr->getDx()[lvl]*RealVect::Unit;
-      const RealVect origin        = m_amr->getProbLo();
-      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-      const ProblemDomain& dom     = m_amr->getDomains()[lvl];
-      const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+      const RealVect           dx     = m_amr->getDx()[lvl]*RealVect::Unit;
+      const RealVect           probLo = m_amr->getProbLo();
+      const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
+      const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
     
-      // 2. Deposit this levels particles and exchange ghost cells
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	const Box box          = dbl.get(dit());
+      // 2. Deposit this levels particles. We use an NGP scheme to do this. 
+      for (DataIterator dit(dbl); dit.ok(); ++dit){
+	const Box      cellBox = dbl  [dit()];
 	const EBISBox& ebisbox = ebisl[dit()];
-	EbParticleInterp interp(box, ebisbox, dx, origin, true);
+
+	// Make the deposition object and put the particles on the grid. 
+	const bool forceIrregNGP = true;
+	EbParticleInterp interp(cellBox, ebisbox, dx, probLo, forceIrregNGP);
+	
 	interp.deposit(particles[lvl][dit()].listItems(), (*m_phi[lvl])[dit()].getFArrayBox(), DepositionType::NGP);
       }
-    }
 
-#if CH_SPACEDIM==2 // Only do this scaling for planar cartesian
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-      const Real dx = m_amr->getDx()[lvl];
-      DataOps::scale(*m_phi[lvl], 1./dx);
+#if CH_SPACEDIM==2 // Scale for 2D Cartesian. We do this because the 2D deposition object will normalize by 1/(dx*dx), but we want 1/(dx*dx*dx) in both 2D and 3D
+      DataOps::scale(*m_phi[lvl], 1./dx[0]);
+#endif      
     }
-#endif
   }
 }
 
-void CdrSolver::hybridDivergence(EBAMRCellData&     a_hybrid_div,
+void CdrSolver::hybridDivergence(EBAMRCellData&     a_hybridDivergence,
 				 EBAMRIVData&       a_massDifference,
 				 const EBAMRIVData& a_nonConservativeDivergence){
-  CH_TIME("CdrSolver::hybridDivergence(AMR)");
+  CH_TIME("CdrSolver::hybridDivergence(EBAMRCellData, EBAMRIVData, EBAMRIVData)");
   if(m_verbosity > 5){
-    pout() << m_name + "::hybridDivergence(AMR)" << endl;
+    pout() << m_name + "::hybridDivergence(EBAMRCellData, EBAMRIVData, EBAMRIVData)" << endl;
   }
 
+  CH_assert(a_hybridDivergence         [0]->nComp() == 1);
+  CH_assert(a_massDifference           [0]->nComp() == 1);
+  CH_assert(a_nonConservativeDivergence[0]->nComp() == 1);
+
+  // On input, a_hybridDivergence must contain kappa*div(F). We also have the non-conservative divergence computed, so we just compute
+  // the regular hybrid divergence and the mass loss/gain. 
+
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    hybridDivergence(*a_hybrid_div[lvl], *a_massDifference[lvl], *a_nonConservativeDivergence[lvl], lvl);
+    this->hybridDivergence(*a_hybridDivergence[lvl], *a_massDifference[lvl], *a_nonConservativeDivergence[lvl], lvl);
   }
 }
 
@@ -1112,37 +1124,42 @@ void CdrSolver::hybridDivergence(LevelData<EBCellFAB>&              a_hybridDive
 				 LevelData<BaseIVFAB<Real> >&       a_massDifference,
 				 const LevelData<BaseIVFAB<Real> >& a_nonConservativeDivergence,
 				 const int                          a_lvl){
-  CH_TIME("CdrSolver::hybridDivergence(level)");
+  CH_TIME("CdrSolver::hybridDivergence(LD<EBCellFAB>, LD<BaseIVFAB<Real> >, LD<BaseIVFAB<Real> >, int)");
   if(m_verbosity > 5){
-    pout() << m_name + "::hybridDivergence(level)" << endl;
+    pout() << m_name + "::hybridDivergence(LD<EBCellFAB>, LD<BaseIVFAB<Real> >, LD<BaseIVFAB<Real> >, int)" << endl;
   }
-  
-  const int comp  = 0;
-  const int ncomp = 1;
+
+  CH_assert(a_hybridDivergence.         nComp() == 1);
+  CH_assert(a_massDifference.           nComp() == 1);
+  CH_assert(a_nonConservativeDivergence.nComp() == 1);  
+
+
+  // TLDR: We want to compute a stable approximation to the divergence using Dh = kappa*Dc + (1-kappa)*Dnc where
+  //       Dh is the hybrid divergence and Dc/Dnc are the conservative and non-conservative divergences. On the way in
+  //       we had a_hybridDivergence = kappa*Dc. 
   
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
   const ProblemDomain& domain  = m_amr->getDomains()[a_lvl];
   const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[a_lvl];
     
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-    EBCellFAB& divH               = a_hybridDivergence[dit()];  // On input, this contains kappa*div(F)
-    BaseIVFAB<Real>& deltaM       = a_massDifference[dit()];
-    const BaseIVFAB<Real>& divNC  = a_nonConservativeDivergence[dit()]; 
-
-    const Box box          = dbl.get(dit());
+    EBCellFAB&             divH   = a_hybridDivergence         [dit()];  // On input, this contains kappa*div(F)
+    BaseIVFAB<Real>&       deltaM = a_massDifference           [dit()];
+    const BaseIVFAB<Real>& divNC  = a_nonConservativeDivergence[dit()];  // On input, this contains the non-conservative divergence.
+    
     const EBISBox& ebisbox = ebisl[dit()];
 
     VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[dit()];
     for (vofit.reset(); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
       const Real kappa    = ebisbox.volFrac(vof);
-      const Real dc       = divH(vof, comp);
-      const Real dnc      = divNC(vof, comp);
+      const Real dc       = divH (vof, m_comp);
+      const Real dnc      = divNC(vof, m_comp);
 
       // Note to self: deltaM = (1-kappa)*(dc - kappa*dnc) because dc was not divided by kappa,
       // which it would be otherwise. 
-      divH(vof, comp)   = dc + (1-kappa)*dnc;          // On output, contains hybrid divergence
-      deltaM(vof, comp) = (1-kappa)*(dc - kappa*dnc);
+      divH  (vof, m_comp) = dc + (1-kappa)*dnc;          // On output, contains hybrid divergence
+      deltaM(vof, m_comp) = (1-kappa)*(dc - kappa*dnc);  // On output, contains mass loss/gain. 
     }
   }
 }
@@ -1202,6 +1219,8 @@ void CdrSolver::interpolateFluxToFaceCentroids(LevelData<EBFluxFAB>& a_flux, con
     pout() << m_name + "::interpolateFluxToFaceCentroids" << endl;
   }
 
+  CH_assert(a_flux.nComp() == 1);
+
   // TLDR: We are given face-centered fluxes which we want to put on face centroids. To do this we store face-centered
   //       fluxes on temporary storage and just interpolate them to face centroids.
   
@@ -1223,8 +1242,9 @@ void CdrSolver::interpolateFluxToFaceCentroids(LevelData<EBFluxFAB>& a_flux, con
       for (int dir = 0; dir < SpaceDim; dir++){
 	EBFaceFAB& faceFlux = a_flux[dit()][dir];
 
-	// Make a copy of faceFlux which we use as interpolant. 
-	EBFaceFAB clone(ebisbox, faceFlux.getRegion(), dir, m_nComp);
+	// Make a copy of faceFlux which we use as interpolant. EBFaceFAB
+	// needs a cell box, so here you go. 
+	EBFaceFAB clone(ebisbox, faceFlux.getCellRegion(), dir, m_nComp);
 	clone.setVal(0.0);
 	clone += faceFlux;
 
