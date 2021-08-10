@@ -194,10 +194,9 @@ public:
 
   /*!
     @brief Compute div(G) where G is a general face-centered flux on face centers and EB centers
-    @param[in]    a_divG div(G). This includes redistribution
+    @param[in]    a_divG div(G). This includes redistribution and refluxing. 
     @param[inout] a_G Vector field which contains face-centered fluxes on input. Contains face-centroid fluxes on output. 
     @param[in]    a_ebFlux Flux on the EB centroids
-    @note If you also want charge injection through the domain sides, you must put those in a_G before entering this routine
   */
   virtual void computeDivG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const EBAMRIVData& a_ebFlux);
 
@@ -365,15 +364,6 @@ public:
     @note This will call initialDataParticles() and initialDataFunction()
   */
   virtual void initialData();
-
-  /*!
-    @brief Inject the EB flux. This includes redistribution magic. 
-    @param[inout] a_phi    Cell-centered states. On output it will include the EB flux. 
-    @param[in]    a_ebFlux EB flux. 
-    @param[in]    a_dt     Time step. 
-    @details This routine is equivalent to an update phi^(k+1) = phi^k - dt*div(G) where G is non-zero only on the EB
-  */
-  virtual void injectEbFlux(EBAMRCellData& a_phi, const EBAMRIVData& a_ebFlux, const Real a_dt);
 
   /*!
     @brief Allocate internal storage
@@ -829,6 +819,8 @@ protected:
     @param[in]  a_facePhi       Face-centered state
     @param[in]  a_faceVelocity  Face-centered velocities
     @param[in]  a_addDomainFlux Add the domain flux 
+    @note This computes flux = phi*vel on all face centers. If a_addDomainFlux is true, we enforce BC fluxes on the domain sides. Otherwise, the flux on the domain
+    sides is set to zero. 
   */
   virtual void computeAdvectionFlux(EBAMRFluxData&       a_flux,
 				    const EBAMRFluxData& a_facePhi,
@@ -842,6 +834,8 @@ protected:
     @param[in]  a_faceVelocity  Face-centered velocities
     @param[in]  a_domainFlux    Domain flux
     @param[in]  a_level         Grid level
+    @note This computes flux = v*phi on all face centers. If a_addDomainFlux is true, we enforce BC fluxes on the domain sides. Otherwise, the flux on the domain
+    sides is set to zero. 
   */
   virtual void computeAdvectionFlux(LevelData<EBFluxFAB>&       a_flux,
 				    const LevelData<EBFluxFAB>& a_facePhi,
@@ -853,6 +847,8 @@ protected:
     @param[out] a_flux          Face-centered flux
     @param[in]  a_phi           Cell centered phi
     @param[in]  a_addDomainFlux Add domain flux or not
+    @note This computes flux = D*grad(phi) on all face centers. If a_addDomainFlux is true, we enforce BC fluxes on the domain sides. Otherwise, the flux on the domain
+    sides is set to zero. 
   */
   virtual void computeDiffusionFlux(EBAMRFluxData& a_flux, const EBAMRCellData& a_phi, const bool a_addDomainFlux);
 
@@ -891,13 +887,6 @@ protected:
     @param[in]  a_ebFlux                 EB flux. 
   */
   virtual void conservativeDivergenceNoKappaDivision(EBAMRCellData& a_conservativeDivergence, EBAMRFluxData& a_flux, const EBAMRIVData& a_ebFlux);
-
-  /*!
-    @brief Compute the conservative divergence with the assumption that only the eb-flux is non-zero
-    @param[out] a_conservativeDivergence Conservative divergence.
-    @param[in]  a_ebFlux                 EB flux
-  */
-  virtual void conservativeDivergenceNoKappaDivisionOnlyEbFlux(EBAMRCellData& a_conservativeDivergence, const EBAMRIVData& a_ebFlux);
 
   /*!
     @brief Compute the non-conservative divergence
@@ -976,6 +965,7 @@ protected:
   /*!
     @brief Increment the coarse-fine redist with mass difference (only for EB x CF)
     @param[in] a_massDifference Mass difference
+    @note This increments the so-called redistribution registers for ensuring that redistributed mass around the cut cells ends up in the right place. 
   */
   virtual void coarseFineIncrement(const EBAMRIVData& m_massDifference);
 
@@ -1001,6 +991,7 @@ protected:
   /*!
     @brief Do coarse-fine redistribution
     @param[inout] a_phi On output, this will be incremented with redistributed mass across refinement boundaries. 
+    @note This redistributes mass around the CF region, using the coarse-fine redistribution registers
   */
   virtual void coarseFineRedistribution(EBAMRCellData& a_phi);
 
