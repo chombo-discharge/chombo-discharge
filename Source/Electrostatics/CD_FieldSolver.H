@@ -266,13 +266,13 @@ public:
   virtual void setVoltage(std::function<Real(const Real a_time)> a_voltage);
   
   /*!
-    @brief Boundary condition function on a wall. 
+    @brief Boundary condition function on a domain side
     @param[in] a_dir Coordinate direction.
     @param[in] a_side Side in the coordinate direction.
     @param[in] a_function Boundary condition function.
     @details This sets a boundary condition for a particular side on a wall. The user must also specify how to use this BC in the input script. 
   */
-  virtual void setDomainBcWallFunction(const int a_dir, const Side::LoHiSide a_side, const ElectrostaticDomainBc::BcFunction& a_function);
+  virtual void setDomainSideBcFunction(const int a_dir, const Side::LoHiSide a_side, const ElectrostaticDomainBc::BcFunction& a_function);
 
   /*!
     @brief Set embedded boundary Dirichlet function on a specific electrode.
@@ -542,7 +542,7 @@ protected:
   /*!
     @brief Domain BC functions. This is used to map space/time to a voltage/field at the domain faces. 
   */
-  std::map<ElectrostaticDomainBc::Wall, ElectrostaticDomainBc::BcFunction> m_domainBcFunctions;
+  std::map<ElectrostaticDomainBc::DomainSide, ElectrostaticDomainBc::BcFunction> m_domainBcFunctions;
 
   /*!
     @brief BC functions (Dirichlet) on the electrodes. Used to map space/time to a voltage on the electrodes. 

@@ -126,7 +126,7 @@ protected:
     @brief BC objects on each domain side. 
     @details These are instantiated in the constructor where we construct Neumann/Dirichlet on each domain side. 
   */
-  std::map<ElectrostaticDomainBc::Wall, std::shared_ptr<EBHelmholtzDomainBC> > m_bcObjects;
+  std::map<ElectrostaticDomainBc::DomainSide, std::shared_ptr<EBHelmholtzDomainBC> > m_bcObjects;
   
 };
 

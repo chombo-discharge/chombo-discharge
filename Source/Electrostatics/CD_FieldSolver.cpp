@@ -465,15 +465,15 @@ void FieldSolver::setVoltage(std::function<Real(const Real a_time)> a_voltage){
   m_isVoltageSet = true;
 }
 
-void FieldSolver::setDomainBcWallFunction(const int a_dir, const Side::LoHiSide a_side, const ElectrostaticDomainBc::BcFunction& a_function){
-  CH_TIME("FieldSolver::setDomainBcWallFunction");
+void FieldSolver::setDomainSideBcFunction(const int a_dir, const Side::LoHiSide a_side, const ElectrostaticDomainBc::BcFunction& a_function){
+  CH_TIME("FieldSolver::setDomainSideBcFunction");
   if(m_verbosity > 4){
-    pout() << "FieldSolver::setDomainBcWallFunction" << endl;
+    pout() << "FieldSolver::setDomainSideBcFunction" << endl;
   }
 
-  const ElectrostaticDomainBc::Wall curWall = std::make_pair(a_dir, a_side);
+  const ElectrostaticDomainBc::DomainSide domainSide = std::make_pair(a_dir, a_side);
 
-  m_domainBcFunctions.at(curWall) = a_function;
+  m_domainBcFunctions.at(domainSide) = a_function;
 }
 
 void FieldSolver::setElectrodeDirichletFunction(const int a_electrode, const ElectrostaticEbBc::BcFunction& a_function){
@@ -665,14 +665,14 @@ void FieldSolver::parseDomainBc(){
   for (int dir = 0; dir < SpaceDim; dir++){
     for (SideIterator sit; sit.ok(); ++sit){
 
-      const ElectrostaticDomainBc::Wall curWall = std::make_pair(dir, sit());
+      const ElectrostaticDomainBc::DomainSide domainSide = std::make_pair(dir, sit());
       const std::string bcString = this->makeBcString(dir, sit());
       const int num = pp.countval(bcString.c_str());
 
       std::string str;
 
       ElectrostaticDomainBc::BcType      bcType;
-      ElectrostaticDomainBc::BcFunction& bcFunc = m_domainBcFunctions.at(curWall); // = F(x,t) in the comments below
+      ElectrostaticDomainBc::BcFunction& bcFunc = m_domainBcFunctions.at(domainSide); // = F(x,t) in the comments below
 
       std::function<Real(const RealVect, const Real)> curFunc;
 
@@ -723,7 +723,7 @@ void FieldSolver::parseDomainBc(){
 	MayDay::Error(errorString.c_str());
       }
 
-      m_domainBc.setBc(curWall, std::make_pair(bcType, curFunc));
+      m_domainBc.setBc(domainSide, std::make_pair(bcType, curFunc));
     }
   }
 }

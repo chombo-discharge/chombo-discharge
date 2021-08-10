@@ -22,16 +22,16 @@ ElectrostaticDomainBc::~ElectrostaticDomainBc() {
 }
 
 
-void ElectrostaticDomainBc::setBc(const Wall a_wall, const Bc a_func){
-  m_bcFunctions.emplace(a_wall, a_func);
+void ElectrostaticDomainBc::setBc(const DomainSide a_domainSide, const Bc a_func){
+  m_bcFunctions.emplace(a_domainSide, a_func);
 }
 
-ElectrostaticDomainBc::Bc ElectrostaticDomainBc::getBc(const Wall a_wall) const{
-  if(m_bcFunctions.find(a_wall) == m_bcFunctions.end()){
+ElectrostaticDomainBc::Bc ElectrostaticDomainBc::getBc(const DomainSide a_domainSide) const{
+  if(m_bcFunctions.find(a_domainSide) == m_bcFunctions.end()){
     MayDay::Abort("ElectrostaticDomainBc::getBc -- BC not found. Perhaps you've forgotten to set it...?");
   }
 
-  return m_bcFunctions.at(a_wall);
+  return m_bcFunctions.at(a_domainSide);
 }
 
 #include <CD_NamespaceFooter.H>
