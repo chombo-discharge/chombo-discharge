@@ -749,10 +749,9 @@ void CdrSolver::conservativeDivergenceNoKappaDivision(EBAMRCellData& a_conservat
     const ProblemDomain& domain  = m_amr->getDomains()[lvl];
     const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
 
-    this->conservativeDivergenceRegular(*a_conservativeDivergence[lvl], *a_flux[lvl], lvl);  // Compute kappa*div(F) in regular cells
-    this->setupFluxInterpolant(*a_flux[lvl], lvl);                                           // Copy face-centered fluxes in a_flux to m_interpolant
-    this->interpolateFluxToFaceCentroids(*a_flux[lvl], lvl);                                 // Interpolate fluxes w m_interpolant. Copy 2 a_flux
-    this->computeDivergenceIrregular(*a_conservativeDivergence[lvl], *a_ebFlux[lvl], lvl);   // Recompute divergence on irregular cells
+    this->conservativeDivergenceRegular(*a_conservativeDivergence[lvl], *a_flux[lvl], lvl);              // Compute kappa*div(F) in regular cells
+    this->interpolateFluxToFaceCentroids(*a_flux[lvl], lvl);                                             // Interpolate fluxes to centroids. 
+    this->computeDivergenceIrregular(*a_conservativeDivergence[lvl], *a_flux[lvl], *a_ebFlux[lvl], lvl); // Recompute divergence on irregular cells
 
     a_conservativeDivergence[lvl]->exchange();
   }
@@ -762,11 +761,12 @@ void CdrSolver::conservativeDivergenceNoKappaDivision(EBAMRCellData& a_conservat
 }
 
 void CdrSolver::computeDivergenceIrregular(LevelData<EBCellFAB>&              a_divG,
+					   const LevelData<EBFluxFAB>&        a_centroidFlux,
 					   const LevelData<BaseIVFAB<Real> >& a_ebFlux,
 					   const int                          a_lvl){
-  CH_TIME("CdrSolver::computeDivergenceIrregular(LD<EBCellFAB>, LD<BaseIVFAB<Real> >, int)");
+  CH_TIME("CdrSolver::computeDivergenceIrregular(LD<EBCellFAB>, LD<EBFluxFAB>, LD<BaseIVFAB<Real> >, int)");
   if(m_verbosity > 5){
-    pout() << m_name + "::computeDivergenceIrregular(LD<EBCellFAB>, LD<BaseIVFAB<Real> >, int)" << endl;
+    pout() << m_name + "::computeDivergenceIrregular(LD<EBCellFAB>, LD<EBFluxFAB>, LD<BaseIVFAB<Real> >, int)" << endl;
   }
 
   // This computes the conservative divergence kappa*div(F) = sum(fluxes) in cut-cells. This includes
@@ -779,7 +779,6 @@ void CdrSolver::computeDivergenceIrregular(LevelData<EBCellFAB>&              a_
   const Real dx                = m_amr->getDx()[a_lvl];
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-    //    const Box box          = dbl.get(dit());
     const EBISBox& ebisbox = ebisl[dit()];
 
     EBCellFAB& divG               = a_divG[dit()];
@@ -787,25 +786,27 @@ void CdrSolver::computeDivergenceIrregular(LevelData<EBCellFAB>&              a_
 
     VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[dit()];
     for (vofit.reset(); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
-      const Real area     = ebisbox.bndryArea(vof);
+      const VolIndex& vof    = vofit();
+      const Real      ebArea = ebisbox.bndryArea(vof);
 
-      // EB flux
-      divG(vof, m_comp) = ebflux(vof,m_comp)*area;
+      // Add the EB flux contribution to our sum(fluxes)
+      divG(vof, m_comp) = ebflux(vof,m_comp)*ebArea;
 
-      // Face fluxes
+      // Add face flux contributions to our sum(fluxes). 
       for (int dir = 0; dir < SpaceDim; dir++){
-
-	const BaseIFFAB<Real>& flux = (*(m_interpolant[dir])[a_lvl])[dit()];
+	const EBFaceFAB& flux = a_centroidFlux[dit()][dir];
 
 	for (SideIterator sit; sit.ok(); ++sit){
-	  const int isign = sign(sit());
-	  const Vector<FaceIndex> faces = ebisbox.getFaces(vof, dir, sit());
+	  const Side::LoHiSide side = sit();
+	  
+	  const int isign               = sign(side);
+	  const Vector<FaceIndex> faces = ebisbox.getFaces(vof, dir, side);
 
 	  for (int iface = 0; iface < faces.size(); iface++){
-	    const FaceIndex face = faces[iface];
-	    const Real face_area = ebisbox.areaFrac(face);
-	    divG(vof, m_comp) += isign*face_area*flux(face, m_comp);
+	    const FaceIndex face     = faces[iface];
+	    const Real      faceArea = ebisbox.areaFrac(face);
+	    
+	    divG(vof, m_comp) += isign*faceArea*flux(face, m_comp);
 	  }
 	}
       }
@@ -1164,6 +1165,8 @@ void CdrSolver::interpolateFluxToFaceCentroids(LevelData<EBFluxFAB>& a_flux, con
   if(m_verbosity > 5){
     pout() << m_name + "::interpolateFluxToFaceCentroids" << endl;
   }
+
+  this->setupFluxInterpolant(a_flux, a_lvl);
   
   const int comp  = 0;
   const int ncomp = 1;

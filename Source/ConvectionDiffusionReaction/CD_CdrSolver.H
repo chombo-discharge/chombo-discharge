@@ -944,11 +944,14 @@ protected:
 
   /*!
     @brief Compute conservative divergence on irregular cells (not kappa divided)
-    @param[out] a_divG   Conservative divergence (not kappa divided)
-    @param[in]  a_ebFlux EB flux
-    @param[in]  a_lvl    Grid level
+    @param[out] a_divG         Conservative divergence (not kappa divided)
+    @param[out] a_centroidFlux Face centroid centered fluxes
+    @param[in]  a_ebFlux       EB flux
+    @param[in]  a_lvl          Grid level
+    @note This overwrites the result of divG in cut-cells, using the eb flux and face centroid fluxes to compute kappa*div(G) = sum(fluxes)/dx
   */
   virtual void computeDivergenceIrregular(LevelData<EBCellFAB>&              a_divG,
+					  const LevelData<EBFluxFAB>&        a_centroidFluxes,
 					  const LevelData<BaseIVFAB<Real> >& a_ebFlux,
 					  const int                          a_lvl);
 
