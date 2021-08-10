@@ -220,11 +220,13 @@ public:
     @brief Perform pre-regrid operations. 
     @param[in] a_lbase          Coarsest level that changed during regrid. 
     @param[in] a_oldFinestLevel Finest grid level before the regrid operation. 
+    @note This stores m_phi and m_source. 
   */
   virtual void preRegrid(const int a_lbase, const int a_oldFinestLevel);
 
   /*!
     @brief Deallocate internal storage
+    @note This deallocates a bunch of storage which is not needed (during regrids). It can be used to trim memory during Berger-Rigoutsous regrids (which EAT memory). 
   */
   virtual void deallocateInternals();
 
@@ -375,6 +377,7 @@ public:
 
   /*!
     @brief Allocate internal storage
+    @note This allocates a bunch of storage -- if the solver is not diffusive or mobile then we do our best to trim memory. 
   */
   virtual void allocateInternals();
 
@@ -815,6 +818,8 @@ protected:
     @brief Average cell-centered velocities to face centers
     @param[out] a_faceVelocity Face-centered velocities
     @param[in]  a_cellVelocity Cell-centered velocities
+    @note This sets the velocity component normal to the face to be the arithmetic average of the cell center velocities on the low/high side of the face. 
+    @note Virtual because some solvers might want to do this differently. 
   */
   virtual void averageVelocityToFaces(EBAMRFluxData& a_faceVelocity, const EBAMRCellData& a_cellVelocity);
 

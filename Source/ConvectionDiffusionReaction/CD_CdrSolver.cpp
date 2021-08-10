@@ -200,8 +200,7 @@ void CdrSolver::allocateInternals(){
   //       storage for velocities/diffusion coefficients if those fields are not going to be used. Somewhat confusingly,
   //       we allocate pointers for these fields but no memory blocks (for interface reasons). 
 
-  // These three are allocated no matter what -- we will always need the state (and probably also the source term), and the scratch
-  // storage is used during regrids. 
+  // These three are allocated no matter what -- we will always need the state (and probably also the source term)
   m_amr->allocate(m_phi,     m_realm, m_phase, m_nComp);
   m_amr->allocate(m_source,  m_realm, m_phase, m_nComp);
   m_amr->allocate(m_scratch, m_realm, m_phase, m_nComp);
@@ -267,11 +266,12 @@ void CdrSolver::allocateInternals(){
 }
 
 void CdrSolver::deallocateInternals(){
-  CH_TIME("CdrSolver::deallocateInternals");
+  CH_TIME("CdrSolver::deallocateInternals()");
   if(m_verbosity > 5){
-    pout() << m_name + "::deallocateInternals" << endl;
+    pout() << m_name + "::deallocateInternals()" << endl;
   }
 
+  // TLDR: This deallocates a bunch of storage. This can be used during regrids to trim memory (because the Berger-Rigoutsous algorithm eats memory). 
   m_amr->deallocate(m_phi);
   m_amr->deallocate(m_source);
   m_amr->deallocate(m_faceVelocity);
@@ -286,9 +286,9 @@ void CdrSolver::deallocateInternals(){
 }
 
 void CdrSolver::averageVelocityToFaces(){
-  CH_TIME("CdrSolver::averageVelocityToFaces(public, full)");
+  CH_TIME("CdrSolver::averageVelocityToFaces()");
   if(m_verbosity > 5){
-    pout() << m_name + "::averageVelocityToFaces(public, full)" << endl;
+    pout() << m_name + "::averageVelocityToFaces()" << endl;
   }
 
   this->averageVelocityToFaces(m_faceVelocity, m_cellVelocity); // Average velocities to face centers for all levels
@@ -300,9 +300,9 @@ void CdrSolver::averageVelocityToFaces(EBAMRFluxData& a_faceVelocity, const EBAM
     pout() << m_name + "::averageVelocityToFaces" << endl;
   }
 
-  const int finest_level = m_amr->getFinestLevel();
-  for (int lvl = 0; lvl <= finest_level; lvl++){
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     DataOps::averageCellToFace(*a_faceVelocity[lvl], *a_cellVelocity[lvl], m_amr->getDomains()[lvl]);
+    
     a_faceVelocity[lvl]->exchange();
   }
 }
@@ -312,15 +312,12 @@ void CdrSolver::preRegrid(const int a_lmin, const int a_oldFinestLevel){
   if(m_verbosity > 5){
     pout() << m_name + "::preRegrid" << endl;
   }
-
-  const int ncomp        = 1;
-  const int finest_level = m_amr->getFinestLevel();
   
-  m_amr->allocate(m_cachePhi,    m_realm, m_phase, ncomp);
-  m_amr->allocate(m_cacheSource, m_realm, m_phase, ncomp);
+  m_amr->allocate(m_cachePhi,    m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_cacheSource, m_realm, m_phase, m_nComp);
   
   for (int lvl = 0; lvl <= a_oldFinestLevel; lvl++){
-    m_phi[lvl]->localCopyTo(*m_cachePhi[lvl]);
+    m_phi   [lvl]->localCopyTo(*m_cachePhi   [lvl]);
     m_source[lvl]->localCopyTo(*m_cacheSource[lvl]);
   }
 }
@@ -331,12 +328,9 @@ void CdrSolver::coarseFineIncrement(const EBAMRIVData& a_massDifference){
     pout() << m_name + "::coarseFineIncrement" << endl;
   }
 
-  const int comp  = 0;
-  const int ncomp = 1;
-  const int finest_level = m_amr->getFinestLevel();
-  const Interval interv(0,0);
+  const Interval interv(m_comp, m_comp);
 
-  for (int lvl = 0; lvl <= finest_level; lvl++){
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
 
     RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->getFineToCoarRedist(m_realm, m_phase)[lvl];
