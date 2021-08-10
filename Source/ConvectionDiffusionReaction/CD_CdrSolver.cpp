@@ -48,14 +48,14 @@ void CdrSolver::setDefaultDomainBC(){
 
   // Lambda function for wall bc -- mostly left in place so I can remind myself how to do this.
   auto zero = [](const RealVect a_position, const Real a_time){
-    return 1.0;
+    return 0.0;
   };
 
   for (int dir = 0; dir < SpaceDim; dir++){
     for (SideIterator sit; sit.ok(); ++sit){
       const CdrDomainBC::DomainSide domainSide = std::make_pair(dir, sit());
 
-      this->setDomainBcType    (domainSide, CdrDomainBC::BcType::Function);
+      this->setDomainBcType    (domainSide, CdrDomainBC::BcType::Wall);
       this->setDomainBcFunction(domainSide, zero);
     }
   }
