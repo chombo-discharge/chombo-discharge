@@ -155,6 +155,9 @@ void CdrSolver::advanceEuler(EBAMRCellData& a_newPhi, const EBAMRCellData& a_old
     pout() << m_name + "::advanceEuler(EBAMRCellData, EBAMRCellData, Real)" << endl;
   }
 
+  CH_assert(a_newPhi[0]->nComp() == 1);
+  CH_assert(a_oldPhi[0]->nComp() == 1);
+
   // TLDR: We are solving phi^(k+1) - phi^k - dt*Div(D*Grad(phi^(k+1))) = 0.0. We create a source term = 0 and call the implementation
   //       version.
   if(m_isDiffusive){
@@ -174,6 +177,9 @@ void CdrSolver::advanceTGA(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPh
   if(m_verbosity > 5){
     pout() << m_name + "::advanceTGA(EBAMRCellData, EBAMRCellData, Real)" << endl;
   }
+
+  CH_assert(a_newPhi[0]->nComp() == 1);
+  CH_assert(a_oldPhi[0]->nComp() == 1);
 
   // TLDR: We are solving the TGA equation (a second order implicit Runge-Kutta scheme). We create a source term = 0 and call the
   //       implementation version. 
@@ -260,9 +266,8 @@ void CdrSolver::allocateInternals(){
   DataOps::setValue(m_massDifference,      0.0);
   DataOps::setValue(m_nonConservativeDivG, 0.0);
 
-  // This defines interpolation stencils and space for interpolants. 
+  // Define interpolation stencils
   this->defineInterpolationStencils();
-  this->defineInterpolant();
 }
 
 void CdrSolver::deallocateInternals(){
@@ -300,6 +305,9 @@ void CdrSolver::averageVelocityToFaces(EBAMRFluxData& a_faceVelocity, const EBAM
     pout() << m_name + "::averageVelocityToFaces(EBAMRFluxData, EBAMRCellData)" << endl;
   }
 
+  CH_assert(a_faceVelocity[0]->nComp() == 1       );
+  CH_assert(a_cellVelocity[0]->nComp() == SpaceDim);
+
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     DataOps::averageCellToFace(*a_faceVelocity[lvl], *a_cellVelocity[lvl], m_amr->getDomains()[lvl]);
     
@@ -327,6 +335,8 @@ void CdrSolver::coarseFineIncrement(const EBAMRIVData& a_massDifference){
   if(m_verbosity > 5){
     pout() << m_name + "::coarseFineIncrement(EBAMRIVData)" << endl;
   }
+
+  CH_assert(a_massDifference[0]->nComp() == 1);
 
   // TLDR: This routine increments masses for the coarse-fine redistribution. In the algorithm we can have an EBCF situation
   //       where we 1) redistribute mass to ghost cells, 2) redistribute mass into the part under the fine grid. Fortunately,
@@ -373,6 +383,8 @@ void CdrSolver::coarseFineRedistribution(EBAMRCellData& a_phi){
   if(m_verbosity > 5){
     pout() << m_name + "::coarseFineRedistribution(EBAMRCellData)" << endl;
   }
+  
+  CH_assert(a_phi[0]->nComp() == 1);
 
   // TLDR: This routine does the coarse-fine redistribution. In the algorithm we can have an EBCF situation
   //       where we 1) redistribute mass to ghost cells, 2) redistribute mass into the part under the fine grid. Fortunately,
@@ -412,6 +424,10 @@ void CdrSolver::computeDivG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const EBA
     pout() << m_name + "::computeDivG(EBAMRCellData, EBAMRFluxData, EBAMRIVData)" << endl;
   }
 
+  CH_assert(a_divG  [0]->nComp() == 1);
+  CH_assert(a_G     [0]->nComp() == 1);
+  CH_assert(a_ebFlux[0]->nComp() == 1);
+
   // TLDR: This routine computes a finite volume approximation to Div(G) where G is a flux, stored on face centers and eb faces. The routine uses
   //       flux matching on refinement boundaries and the so-called hybrid divergence in the cut-cells. The mass which is missed by the hybrid
   //       divergence is smooshed back in through Chombo's redistribution registers. 
@@ -440,6 +456,10 @@ void CdrSolver::computeAdvectionFlux(EBAMRFluxData&       a_flux,
   if(m_verbosity > 5){
     pout() << m_name + "::computeAdvectionFlux(EBAMRFluxData, EBAMRFluxData, EBAMRFluxData, bool)" << endl;
   }
+
+  CH_assert(a_flux        [0]->nComp() == 1);
+  CH_assert(a_facePhi     [0]->nComp() == 1);
+  CH_assert(a_faceVelocity[0]->nComp() == 1);
 
   // Computes the advection flux F = phi*v. This includes domain boundary faces. 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
@@ -502,6 +522,9 @@ void CdrSolver::computeDiffusionFlux(EBAMRFluxData& a_flux, const EBAMRCellData&
     pout() << m_name + "::computeDiffusionFlux(EBAMRFluxData, EBAMRCellData, bool)" << endl;
   }
 
+  CH_assert(a_flux[0]->nComp() == 1);
+  CH_assert(a_phi [0]->nComp() == 1);
+
   // Computes the diffusion flux F = D*Grad(phi). This includes domain boundary faces. 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     this->computeDiffusionFlux(*a_flux[lvl], *a_phi[lvl], lvl);
@@ -523,7 +546,7 @@ void CdrSolver::computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelDa
   }
 
   CH_assert(a_flux.nComp() == 1);
-  CH_assert(a_phi .nComp() == 1);
+  CH_assert(a_phi. nComp() == 1);
 
   // TLDR: This routine computes the diffusion flux F = D*Grad(phi) on face centers. Since this uses centered differencing
   //       and we don't have valid data outside the computational domain we only do the differencing for interior faces,
@@ -587,6 +610,8 @@ void CdrSolver::resetDomainFlux(EBAMRFluxData& a_flux){
     pout() << m_name + "::resetDomainFlux(EBAMRFluxData)" << endl;
   }
 
+  CH_assert(a_flux[0]->nComp() == 1);
+
   // TLDR: This routine iterates through all faces in a_flux which are boundary faces and sets the flux there to zero. No
   //       Fortran kernel here because the box we iterate over has a smaller dimension (it's a slice). 
 
@@ -638,6 +663,8 @@ void CdrSolver::fillDomainFlux(EBAMRFluxData& a_flux){
   if(m_verbosity > 5){
     pout() << m_name + "::fillDomainFlux(EBAMRFluxData)" << endl;
   }
+
+  CH_assert(a_flux[0]->nComp() == 1);
   
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     this->fillDomainFlux(*a_flux[lvl], lvl);
@@ -649,6 +676,8 @@ void CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const int a_level) 
   if(m_verbosity > 5){
     pout() << m_name + "::fillDomainFlux(LD<EBFluxFAB>, int)" << endl;
   }
+
+  CH_assert(a_flux.nComp() == 1);
 
   // TLDR: This iterates through all domain faces and sets the BC flux to either data-based, function-based, wall bc, or extrapolated outflow. This
   //       routine uses a face-iterator (because of BaseIFFAB<T>), but performance should be acceptable since we go through a very small number of faces. 
@@ -736,6 +765,10 @@ void CdrSolver::conservativeDivergenceNoKappaDivision(EBAMRCellData& a_conservat
     pout() << m_name + "::conservativeDivergenceNoKappaDivision(EBAMRCellData, EBAMRFluxData, EBAMRIVData)" << endl;
   }
 
+  CH_assert(a_conservativeDivergence[0]->nComp() == 1);
+  CH_assert(a_flux                  [0]->nComp() == 1);
+  CH_assert(a_ebFlux                [0]->nComp() == 1);
+
   // This routine computes the "regular" finite volume conservative divergence Sum(fluxes) but does not divide by the volume fraction (which a naive implementation would).
   // Rather, this no-kappa-divided divergence is used for computing another divergence (a hybrid) divergence which represents a stable update to
   // the hyperbolic equation.
@@ -769,9 +802,12 @@ void CdrSolver::computeDivergenceIrregular(LevelData<EBCellFAB>&              a_
     pout() << m_name + "::computeDivergenceIrregular(LD<EBCellFAB>, LD<EBFluxFAB>, LD<BaseIVFAB<Real> >, int)" << endl;
   }
 
-  // This computes the conservative divergence kappa*div(F) = sum(fluxes) in cut-cells. This includes
-  // fluxes on the EB face. This routine uses data in m_interpolant which must hold fluxes on cut-cell face 
-  // centroids (taken care of in interpolateFluxToFaceCentroids)
+  CH_assert(a_divG.        nComp() == 1);
+  CH_assert(a_centroidFlux.nComp() == 1);
+  CH_assert(a_ebFlux.      nComp() == 1);
+
+  // This computes the conservative divergence kappa*div(F) = sum(fluxes) in cut-cells. Fluxes
+  // must be face centroid centered!
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
   const ProblemDomain& domain  = m_amr->getDomains()[a_lvl];
@@ -1166,51 +1202,48 @@ void CdrSolver::interpolateFluxToFaceCentroids(LevelData<EBFluxFAB>& a_flux, con
     pout() << m_name + "::interpolateFluxToFaceCentroids" << endl;
   }
 
-  this->setupFluxInterpolant(a_flux, a_lvl);
-  
-  const int comp  = 0;
-  const int ncomp = 1;
-  const Interval interv(comp, comp);
+  // TLDR: We are given face-centered fluxes which we want to put on face centroids. To do this we store face-centered
+  //       fluxes on temporary storage and just interpolate them to face centroids.
   
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
   const ProblemDomain& domain  = m_amr->getDomains()[a_lvl];
   const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[a_lvl];
 
-  const FaceStop::WhichFaces stop = FaceStop::SurroundingWithBoundary;
-
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-    const Box box = dbl.get(dit());
-    const EBISBox& ebisbox = ebisl[dit()];
-    const EBGraph& ebgraph = ebisbox.getEBGraph();
-    const IntVectSet ivs   = ebisbox.getIrregIVS(box);
-    
-    for (int dir = 0; dir < SpaceDim; dir++){
-      BaseIFFAB<Real>& interpolant = (*(m_interpolant[dir])[a_lvl])[dit()]; // Holds the face-centered flux
-      BaseIFFAB<Real> centroid_flux;
-      EBFaceFAB& faceFlux = a_flux[dit()][dir];
+    const Box        cellBox  = dbl.get(dit());
+    const EBISBox&   ebisbox  = ebisl[dit()];
+    const EBGraph&   ebgraph  = ebisbox.getEBGraph();
+    const IntVectSet irregIVS = ebisbox.getIrregIVS(cellBox);
 
-      // Compute face centroid flux
-      centroid_flux.define(ivs, ebgraph, dir, ncomp);
-      for (FaceIterator faceit(ivs, ebgraph, dir, stop); faceit.ok(); ++faceit){
-	const FaceIndex& face   = faceit();
-	const FaceStencil& sten = (*m_interpStencils[dir][a_lvl])[dit()](face, comp);
+    const bool isRegular   = ebisbox.isRegular(cellBox);
+    const bool isCovered   = ebisbox.isCovered(cellBox);
+    const bool isIrregular = !isRegular && !isCovered;
 
-	centroid_flux(face, comp) = 0.;
-	Real sum = 0.0;
-	for (int i = 0; i < sten.size(); i++){
-	  const FaceIndex& iface = sten.face(i);
-	  const Real iweight     = sten.weight(i);
-	  sum += iweight;
+    if(isIrregular){
+      for (int dir = 0; dir < SpaceDim; dir++){
+	EBFaceFAB& faceFlux = a_flux[dit()][dir];
+
+	// Make a copy of faceFlux which we use as interpolant. 
+	EBFaceFAB clone(ebisbox, faceFlux.getRegion(), dir, m_nComp);
+	clone.setVal(0.0);
+	clone += faceFlux;
+
+	// Compute face centroid flux on cut-cell face centroids. Since a_flux enforces boundary conditions
+	// we include domain boundary cut-cell faces in the interpolation. 
+	for (FaceIterator faceit(irregIVS, ebgraph, dir, FaceStop::SurroundingWithBoundary); faceit.ok(); ++faceit){
+	  const FaceIndex& face   = faceit();
+	  const FaceStencil& sten = (*m_interpStencils[dir][a_lvl])[dit()](face, m_comp);
+
+	  faceFlux(face, m_comp) = 0.;
+
+	  for (int i = 0; i < sten.size(); i++){
+	    const FaceIndex& iface = sten.face(i);
+	    const Real iweight     = sten.weight(i);
 	  
-	  centroid_flux(face, comp) += iweight*interpolant(iface, comp);
+	    faceFlux(face, m_comp) += iweight * clone(iface, m_comp);
+	  }
 	}
-
-	faceFlux(face, comp) = centroid_flux(face, comp);
       }
-
-      // Copy centroid flux into a_flux
-      interpolant.setVal(0.0);
-      interpolant.copy(box, interv, box, centroid_flux, interv);
     }
   }
 }
@@ -1627,41 +1660,6 @@ void CdrSolver::setVerbosity(const int a_verbosity){
   
   if(m_verbosity > 5){
     pout() << m_name + "::setVerbosity" << endl;
-  }
-}
-
-void CdrSolver::setupFluxInterpolant(const LevelData<EBFluxFAB>& a_flux, const int a_lvl){
-  CH_TIME("CdrSolver::setupFluxInterpolant");
-  if(m_verbosity > 5){
-    pout() << m_name + "::setupFluxInterpolant" << endl;
-  }
-
-  const int ncomp = 1;
-  const int comp  = 0;
-  
-  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
-  const ProblemDomain& domain  = m_amr->getDomains()[a_lvl];
-  const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[a_lvl];
-
-  for (int dir = 0; dir < SpaceDim; dir++){
-    
-    const LayoutData<IntVectSet>& grown_set = (*(m_interpSets[dir])[a_lvl]);
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      BaseIFFAB<Real>& interpol   = (*(m_interpolant[dir])[a_lvl])[dit()];
-      const Box& box              = dbl.get(dit());
-      const EBISBox& ebisbox      = ebisl[dit()];
-      const EBGraph& ebgraph      = ebisbox.getEBGraph();
-      const EBFaceFAB& flux       = a_flux[dit()][dir];
-      const IntVectSet ivs        = grown_set[dit()] & box;
-      const FaceStop::WhichFaces stopcrit = FaceStop::SurroundingWithBoundary;
-
-      for (FaceIterator faceit(ivs, ebgraph, dir, stopcrit); faceit.ok(); ++faceit){
-	const FaceIndex& face = faceit();
-	interpol(face, comp) = flux(face, comp);
-      }
-    }
-
-    (*(m_interpolant[dir])[a_lvl]).exchange();
   }
 }
 
@@ -2221,41 +2219,6 @@ void CdrSolver::parsePlotVariables(){
     else if(str[i] == "dco")    m_plotDiffusionCoefficient = true; 
     else if(str[i] == "src")    m_plotSource               = true;
     else if(str[i] == "ebflux") m_plotEbFlux               = true;
-  }
-}
-
-void CdrSolver::defineInterpolant(){
-  CH_TIME("CdrSolver::defineInterpolant");
-  if(m_verbosity > 5){
-    pout() << m_name + "::defineInterpolant" << endl;
-  }
-
-  const int ncomp = 1;
-
-
-  for (int dir = 0; dir < SpaceDim; dir++){
-    //    Vector<RefCountedPtr<LevelData<BaseIFFAB<Real> > > > interpolant = m_interpolant[SpaceDim];
-    //    Vector<RefCountedPtr<LayoutData<BaseIFFAB<Real> > > > grown_sets = m_interpSets[SpaceDim];
-
-    m_interpolant[dir].resize(1 + m_amr->getFinestLevel());
-    m_interpSets[dir].resize(1 + m_amr->getFinestLevel());
-    
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-      const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-      const ProblemDomain& domain  = m_amr->getDomains()[lvl];
-      
-      (m_interpolant[dir])[lvl] = RefCountedPtr<LevelData<BaseIFFAB<Real> > > (new LevelData<BaseIFFAB<Real> >());
-      (m_interpSets[dir])[lvl] = RefCountedPtr<LayoutData<IntVectSet> > (new LayoutData<IntVectSet>());
-
-      EBArith::defineFluxInterpolant(*(m_interpolant[dir])[lvl],
-				     *(m_interpSets[dir])[lvl], 
-				     dbl,
-				     ebisl,
-				     domain,
-				     ncomp,
-				     dir);
-    }
   }
 }
 

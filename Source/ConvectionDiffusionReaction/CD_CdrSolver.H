@@ -587,16 +587,6 @@ protected:
   Vector<RefCountedPtr<LayoutData<BaseIFFAB<FaceStencil> > > > m_interpStencils[SpaceDim];
 
   /*!
-    @brief Storage for flux interpolant, i.e. temporary storage for face-centered fluxes. 
-  */
-  Vector<RefCountedPtr<LevelData<BaseIFFAB<Real> > > > m_interpolant[SpaceDim];
-
-  /*!
-    @brief Cells on which to compute the flux interpolant
-  */
-  Vector<RefCountedPtr<LayoutData<IntVectSet> > > m_interpSets[SpaceDim];
-
-  /*!
     @brief Phase
   */
   phase::which_phase m_phase;
@@ -927,14 +917,6 @@ protected:
   virtual void conservativeDivergenceRegular(LevelData<EBCellFAB>& a_divJ, const LevelData<EBFluxFAB>& a_flux, const int a_lvl);
 
   /*!
-    @brief Compute flux interpolant
-    @param[in] a_flux The flux to be interpolated to face centroids
-    @param[in] a_lvl  Grid level
-    @details This fills m_interpolant
-  */
-  virtual void setupFluxInterpolant(const LevelData<EBFluxFAB>& a_flux, const int a_lvl);
-
-  /*!
     @brief Interpolate flux to centroids
     @param[out] a_flux Centroid fluxes
     @param[in]  a_lvl  Grid level
@@ -1025,11 +1007,6 @@ protected:
     @brief Define stencils for doing face-centered to face-centroid-centered states. 
   */
   virtual void defineInterpolationStencils();
-
-  /*!
-    @brief Define interpolant for holding the face-interpolated results. 
-  */
-  virtual void defineInterpolant();
 
   /*!
     @brief Parses domain BC options
