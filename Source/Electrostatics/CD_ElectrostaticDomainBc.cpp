@@ -21,7 +21,6 @@ ElectrostaticDomainBc::~ElectrostaticDomainBc() {
   m_bcFunctions.clear();
 }
 
-
 void ElectrostaticDomainBc::setBc(const DomainSide a_domainSide, const Bc a_bc){
   m_bcFunctions.emplace(a_domainSide, a_bc);
 }

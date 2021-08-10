@@ -58,11 +58,46 @@ public:
     @brief Initializing constructor.
     @details This populates m_bcTypes and m_bcFunctions with BcType::Wall and flux functions which return zero (i.e., also wall). 
   */
+  inline
   CdrDomainBC();
+
+  /*!
+    @brief Disallowed copy constructor
+    @param[in] a_other Other 
+  */
+  CdrDomainBC(const CdrDomainBC& a_other) = delete;
+
+  /*!
+    @brief Disallowed copy constructor
+    @param[in] a_other Other 
+  */
+  CdrDomainBC(const CdrDomainBC&& a_other) = delete;
+
+  /*!
+    @brief Disallowed copy assignment
+    @param[in] a_other Other 
+  */
+  CdrDomainBC& operator=(const CdrDomainBC& a_other) = delete;
+
+  /*!
+    @brief Disallowed move assignment
+    @param[in] a_other Other 
+  */
+  CdrDomainBC& operator=(const CdrDomainBC&& a_other) = delete;
+
+  /*!
+    @brief Create a domain side from dir/side
+    @param[in] a_dir  Coordinate direction
+    @param[in] a_side Low/high side
+    @return Returns std::pair<int, Side::LoHiSide>(a_dir, a_sit)
+  */
+  inline
+  DomainSide domainSide(const int a_dir, const Side::LoHiSide a_side) const;
 
   /*!
     @brief Destructor. Does nothing. 
   */
+  inline
   ~CdrDomainBC();
 
   /*!
@@ -70,6 +105,7 @@ public:
     @param[in] a_domainSide Domain side
     @returns Returns the BC type on the domain side
   */
+  inline
   const BcType& getBcType(const DomainSide& a_domainSide) const;
 
     /*!
@@ -77,6 +113,7 @@ public:
     @param[in] a_domainSide Domain side
     @returns Returns the BC function on the domain side
   */
+  inline
   const FluxFunction& getBcFunction(const DomainSide& a_domainSide) const;
 
   /*!
@@ -84,6 +121,7 @@ public:
     @param[in] a_domainSide Domain side
     @param[in] a_bcType     Domain BC type
   */
+  inline
   void setBcType(const DomainSide& a_domainSide, const BcType& a_bcType);
 
   /*!
@@ -91,6 +129,7 @@ public:
     @param[in] a_domainSide Domain side
     @param[in] a_function   Flux function on domain side
   */
+  inline
   void setBcFunction(const DomainSide& a_domainSide, const FluxFunction& a_function);
 
 protected:
@@ -107,5 +146,7 @@ protected:
 };
 
 #include <CD_NamespaceFooter.H>
+
+#include <CD_CdrDomainBCImplem.H>
 
 #endif
