@@ -15,29 +15,34 @@
 
 EddingtonSP1DomainBc::EddingtonSP1DomainBc() {
   m_bcFunctions.clear();
+
+  // 
+  auto zero = [](const RealVect a_pos, const Real a_time){
+    return 0.0;
+  };
+
+  for (int dir = 0; dir < SpaceDim; dir++){
+    for (SideIterator sit; sit.ok(); ++sit){
+      const DomainSide domainSide = std::make_pair(dir, sit());
+
+      m_bcFunctions.emplace(domainSide, std::make_pair(BcType::Neumann, zero));
+    }
+  }
 }
 
 EddingtonSP1DomainBc::~EddingtonSP1DomainBc() {
   m_bcFunctions.clear();
 }
 
-void EddingtonSP1DomainBc::setBc(const DomainSide a_domainSide, const Bc a_func){
-  m_bcFunctions.emplace(a_domainSide, a_func);
+void EddingtonSP1DomainBc::setBc(const DomainSide a_domainSide, const Bc a_bc){
+  m_bcFunctions.at(a_domainSide) = a_bc;  
 }
 
 EddingtonSP1DomainBc::Bc& EddingtonSP1DomainBc::getBc(const DomainSide a_domainSide) {
-  if(m_bcFunctions.find(a_domainSide) == m_bcFunctions.end()){
-    MayDay::Abort("EddingtonSP1DomainBc::getBc -- BC not found. Perhaps you've forgotten to set it...?");
-  }
-
   return m_bcFunctions.at(a_domainSide);
 }
 
 const EddingtonSP1DomainBc::Bc& EddingtonSP1DomainBc::getBc(const DomainSide a_domainSide) const{
-  if(m_bcFunctions.find(a_domainSide) == m_bcFunctions.end()){
-    MayDay::Abort("EddingtonSP1DomainBc::getBc -- BC not found. Perhaps you've forgotten to set it...?");
-  }
-
   return m_bcFunctions.at(a_domainSide);
 }
 

@@ -55,9 +55,33 @@ public:
   using Bc = std::pair<BcType, BcFunction>;
   
   /*!
-    @brief Initializing constructor. This does nothing. 
+    @brief Initializing constructor. This populates the bc. 
   */
   EddingtonSP1DomainBc();
+
+  /*!
+    @brief Copy constructor
+    @param[in] a_domainBc Other
+  */
+  EddingtonSP1DomainBc(const EddingtonSP1DomainBc& a_domainBc) = default;
+
+  /*!
+    @brief Disallowedd move constructor
+    @param[in] a_domainBc Other
+  */
+  EddingtonSP1DomainBc(const EddingtonSP1DomainBc&& a_domainBc) = delete;
+
+  /*!
+    @brief Copy assignment
+    @param[in] a_domainBc Other
+  */
+  EddingtonSP1DomainBc& operator=(const EddingtonSP1DomainBc& a_domainBc) = default;
+
+  /*!
+    @brief Disallowed move assignment
+    @param[in] a_domainBc Other
+  */
+  EddingtonSP1DomainBc& operator=(const EddingtonSP1DomainBc&& a_domainBc) = delete;
 
   /*!
     @brief Destructor. This 
