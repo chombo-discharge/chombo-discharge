@@ -885,6 +885,7 @@ protected:
     @param[out] a_conservativeDivergence Conservative divergence computed as div(F) using finite volumes. Not divided by kappa. 
     @param[in]  a_flux                   Face-centered fluxes. Includes domain fluxes.
     @param[in]  a_ebFlux                 EB flux. 
+    @note This computes the conservative divergence kappa*div(F) = sum(fluxes). 
   */
   virtual void conservativeDivergenceNoKappaDivision(EBAMRCellData& a_conservativeDivergence, EBAMRFluxData& a_flux, const EBAMRIVData& a_ebFlux);
 

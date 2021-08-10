@@ -721,7 +721,7 @@ void CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const int a_level) 
 	    break;
 	  }
 	  default:
-	    MayDay::Error("CdrSolver::fillDomainFlux - trying to fill unsupported domain bc flux type");
+	    MayDay::Error("CdrSolver::fillDomainFlux(LD<EBFluxFAB>, int) - trying to fill unsupported domain bc flux type");
 	    break;
 	  }
 	}
@@ -731,16 +731,18 @@ void CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const int a_level) 
 }
 
 void CdrSolver::conservativeDivergenceNoKappaDivision(EBAMRCellData& a_conservativeDivergence, EBAMRFluxData& a_flux, const EBAMRIVData& a_ebFlux){
-  CH_TIME("CdrSolver::conservativeDivergenceNoKappaDivision");
+  CH_TIME("CdrSolver::conservativeDivergenceNoKappaDivision(EBAMRCellData, EBAMRFluxData, EBAMRIVData)");
   if(m_verbosity > 5){
-    pout() << m_name + "::conservativeDivergenceNoKappaDivision" << endl;
+    pout() << m_name + "::conservativeDivergenceNoKappaDivision(EBAMRCellData, EBAMRFluxData, EBAMRIVData)" << endl;
   }
 
-  const int comp  = 0;
-  const int ncomp = 1;
-  const int finest_level = m_amr->getFinestLevel();
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
+  // This routine computes the "regular" finite volume conservative divergence Sum(fluxes) but does not divide by the volume fraction (which a naive implementation would).
+  // Rather, this no-kappa-divided divergence is used for computing another divergence (a hybrid) divergence which represents a stable update to
+  // the hyperbolic equation.
+  //
+  // This routine computes just that: a_conservativeDivergence = kappa*div(F) = Sum(fluxes).
+  //
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     a_flux[lvl]->exchange();
     
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
