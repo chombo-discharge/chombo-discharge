@@ -196,65 +196,72 @@ void CdrSolver::allocateInternals(){
     pout() << m_name + "::allocateInternals" << endl;
   }
 
-  const int sca = 1;
-  const int vec = SpaceDim;
+  // TLDR: This allocates a number of fields for this solver. We wish to trim memory if we can, so we don't allocate
+  //       storage for velocities/diffusion coefficients if those fields are not going to be used. Somewhat confusingly,
+  //       we allocate pointers for these fields but no memory blocks (for interface reasons). 
 
-  // This is allocated no matter what. 
-  m_amr->allocate(m_phi,     m_realm, m_phase, sca);
-  m_amr->allocate(m_source,  m_realm, m_phase, sca);
-  m_amr->allocate(m_scratch, m_realm, m_phase, sca);
+  // These three are allocated no matter what -- we will always need the state (and probably also the source term), and the scratch
+  // storage is used during regrids. 
+  m_amr->allocate(m_phi,     m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_source,  m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_scratch, m_realm, m_phase, m_nComp);
   
-  DataOps::setValue(m_phi,      0.0);
-  DataOps::setValue(m_source,   0.0);
-  DataOps::setValue(m_scratch,  0.0);
+  DataOps::setValue(m_phi,     0.0);
+  DataOps::setValue(m_source,  0.0);
+  DataOps::setValue(m_scratch, 0.0);
 
   // Only allocate memory for cell-centered and face-centered velocities if the solver is mobile. Otherwise, allocate
   // a NULL pointer that we can pass around in TimeStepper in order to handle special cases
   if(m_isMobile){
-    m_amr->allocate(m_faceVelocity, m_realm, m_phase, sca);
-    m_amr->allocate(m_cellVelocity, m_realm, m_phase, vec);
-    m_amr->allocate(m_faceStates,   m_realm, m_phase, sca);
-    
-    DataOps::setValue(m_faceVelocity,  0.0);
-    DataOps::setValue(m_cellVelocity,  0.0);
+    m_amr->allocate(m_cellVelocity, m_realm, m_phase, SpaceDim);
+    m_amr->allocate(m_faceVelocity, m_realm, m_phase, m_nComp );      
+    m_amr->allocate(m_faceStates,   m_realm, m_phase, m_nComp );
+
+    DataOps::setValue(m_cellVelocity, 0.0);    
+    DataOps::setValue(m_faceVelocity, 0.0);
+    DataOps::setValue(m_faceStates,   0.0);
   }
   else{
     m_amr->allocatePointer(m_faceVelocity);
     m_amr->allocatePointer(m_cellVelocity);
+    m_amr->allocatePointer(m_faceStates  );
   }
 
   // Only allocate memory for diffusion coefficients if we need it. Otherwise, allocate a NULL pointer that we can
-  // pass around in TimeStepper in order to handle special cases
+  // pass around pointers in case we need it. This might seem confusing but its easier to resize those vectors
+  // and set nullpointers when we iterate through grid levels and patches. 
   if(m_isDiffusive){
-    m_amr->allocate(m_faceCenteredDiffusionCoefficient, m_realm, m_phase, sca);
-    m_amr->allocate(m_ebCenteredDiffusionCoefficient,   m_realm, m_phase, sca);
+    m_amr->allocate(m_faceCenteredDiffusionCoefficient, m_realm, m_phase, m_nComp);
+    m_amr->allocate(m_ebCenteredDiffusionCoefficient,   m_realm, m_phase, m_nComp);
     
     DataOps::setValue(m_faceCenteredDiffusionCoefficient, 0.0);
     DataOps::setValue(m_ebCenteredDiffusionCoefficient,   0.0);
   }
   else{
     m_amr->allocatePointer(m_faceCenteredDiffusionCoefficient);
-    m_amr->allocatePointer(m_ebCenteredDiffusionCoefficient);
+    m_amr->allocatePointer(m_ebCenteredDiffusionCoefficient  );
   }
 
-  // Allocate stuff for holding fluxes
+  // Allocate stuff for holding fluxes -- this data is used when computing advection and diffusion fluxes. 
   if(m_isDiffusive || m_isMobile){
-    m_amr->allocate(m_scratchFluxOne, m_realm, m_phase, sca);
-    m_amr->allocate(m_scratchFluxTwo, m_realm, m_phase, sca);
+    m_amr->allocate(m_scratchFluxOne, m_realm, m_phase, m_nComp);
+    m_amr->allocate(m_scratchFluxTwo, m_realm, m_phase, m_nComp);
   }
 
-  // These don't consume (much) memory so just allocate them 
-  m_amr->allocate(m_ebFlux,              m_realm, m_phase, sca);
-  m_amr->allocate(m_ebZero,              m_realm, m_phase, sca);
-  m_amr->allocate(m_domainFlux,          m_realm, m_phase, sca);
-  m_amr->allocate(m_massDifference,      m_realm, m_phase, sca);
-  m_amr->allocate(m_nonConservativeDivG, m_realm, m_phase, sca);
+  // These don't consume (much) memory so we always allocate them. 
+  m_amr->allocate(m_ebFlux,              m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_ebZero,              m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_domainFlux,          m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_massDifference,      m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_nonConservativeDivG, m_realm, m_phase, m_nComp);
   
-  DataOps::setValue(m_ebFlux,     0.0);
-  DataOps::setValue(m_ebZero,     0.0);
-  DataOps::setValue(m_domainFlux, 0.0);
+  DataOps::setValue(m_ebFlux,              0.0);
+  DataOps::setValue(m_ebZero,              0.0);
+  DataOps::setValue(m_domainFlux,          0.0);
+  DataOps::setValue(m_massDifference,      0.0);
+  DataOps::setValue(m_nonConservativeDivG, 0.0);
 
-  // This defines interpolation stencils and space for interpolants
+  // This defines interpolation stencils and space for interpolants. 
   this->defineInterpolationStencils();
   this->defineInterpolant();
 }
