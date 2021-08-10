@@ -48,14 +48,14 @@ void CdrSolver::setDefaultDomainBC(){
 
   // Lambda function for wall bc -- mostly left in place so I can remind myself how to do this.
   auto zero = [](const RealVect a_position, const Real a_time){
-    return 0.0;
+    return 1.0;
   };
 
   for (int dir = 0; dir < SpaceDim; dir++){
     for (SideIterator sit; sit.ok(); ++sit){
       const CdrDomainBC::DomainSide domainSide = std::make_pair(dir, sit());
 
-      this->setDomainBcType    (domainSide, CdrDomainBC::BcType::Wall);
+      this->setDomainBcType    (domainSide, CdrDomainBC::BcType::Function);
       this->setDomainBcFunction(domainSide, zero);
     }
   }
@@ -453,7 +453,6 @@ void CdrSolver::computeAdvectionFlux(EBAMRFluxData&       a_flux,
   else{
     this->resetDomainFlux(a_flux);
   }
-  this->resetDomainFlux(a_flux);
 }
 
 void CdrSolver::computeAdvectionFlux(LevelData<EBFluxFAB>&       a_flux,
@@ -646,36 +645,54 @@ void CdrSolver::fillDomainFlux(EBAMRFluxData& a_flux){
 }
 
 void CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const int a_level) {
-  CH_TIME("CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>, int)");
+  CH_TIME("CdrSolver::fillDomainFlux(LD<EBFluxFAB>, int)");
   if(m_verbosity > 5){
-    pout() << m_name + "::fillDomainFlux(LevelData<EBFluxFAB>, int)" << endl;
+    pout() << m_name + "::fillDomainFlux(LD<EBFluxFAB>, int)" << endl;
   }
 
+  // TLDR: This iterates through all domain faces and sets the BC flux to either data-based, function-based, wall bc, or extrapolated outflow. This
+  //       routine uses a face-iterator (because of BaseIFFAB<T>), but performance should be acceptable since we go through a very small number of faces. 
+
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
+  const ProblemDomain& domain  = m_amr->getDomains()[a_level];
+  const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[a_level];
 
   for (DataIterator dit(dbl); dit.ok(); ++dit){
-    const EBISBox& ebisbox = m_amr->getEBISLayout(m_realm, m_phase)[a_level][dit()];
+    const EBISBox& ebisbox = ebisl[dit()];
+    const EBGraph& ebgraph = ebisbox.getEBGraph();
+    const Box      cellBox = dbl[dit()];
     
     for (int dir = 0; dir < SpaceDim; dir++){
       EBFaceFAB& flux = a_flux[dit()][dir];
 
       // Iterate over domain cells. I'm REALLY not sure about if this is performant...
       for (SideIterator sit; sit.ok(); ++sit){
-	const CdrDomainBC::DomainSide    domainSide = std::make_pair(dir, sit());
+	const Side::LoHiSide side = sit();
+	
+	const CdrDomainBC::DomainSide    domainSide = std::make_pair(dir, side);
 	const CdrDomainBC::BcType&       bcType     = m_domainBC.getBcType(domainSide);
 	const CdrDomainBC::FluxFunction& bcFunction = m_domainBC.getBcFunction(domainSide);
 
-	const BaseIFFAB<Real>& domflux = (*m_domainFlux[a_level])[dit()](dir, sit());
-	const IntVectSet& ivs          = domflux.getIVS();
-	const EBGraph& ebgraph         = domflux.getEBGraph();
+	// Data-based BC holders -- needed if bcType is CdrDomainBC::BcType::DataBased. 
+	const BaseIFFAB<Real>& dataBasedFlux = (*m_domainFlux[a_level])[dit()](dir, side);
 
-	// Iterate through faces on the boundary and set the BC condition. 
+	// Create a box which abuts the current domain side
+	Box boundaryCellBox;
+	boundaryCellBox  = adjCellBox(domain.domainBox(), dir, side, -1); 
+	boundaryCellBox &= cellBox;
+
+	// Use a face-iterator here to go through domain faces -- sort of have to do this because of (the odd) design decision to use a BaseIFFAB for holding
+	// the domain fluxes.
+	//
+	// A FaceIterator may be inefficient, but we are REALLY going through a very small number of faces so there shouldn't be a performance hit here. 
+	const IntVectSet ivs(boundaryCellBox);
 	for (FaceIterator faceit(ivs, ebgraph, dir, FaceStop::AllBoundaryOnly); faceit.ok(); ++faceit){
 	  const FaceIndex& face = faceit();
 
+	  // Set the flux on the BC. This can be data-based, wall, function-based, outflow (extrapolated). 
 	  switch(bcType){
 	  case CdrDomainBC::BcType::DataBased:{
-	    flux(face, m_comp) = domflux(face, m_comp);
+	    flux(face, m_comp) = dataBasedFlux(face, m_comp);
 	    break;
 	  }
 	  case CdrDomainBC::BcType::Wall:{	    
@@ -703,10 +720,9 @@ void CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const int a_level) 
 	    
 	    break;
 	  }
-	  case CdrDomainBC::BcType::External: // Don't do anything, the solver has responsibility. 
-	    break;
 	  default:
-	    MayDay::Abort("CdrSolver::fillDomainFlux - logic bust");
+	    MayDay::Error("CdrSolver::fillDomainFlux - trying to fill unsupported domain bc flux type");
+	    break;
 	  }
 	}
       }

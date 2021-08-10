@@ -870,14 +870,13 @@ protected:
   /*!
     @brief Set domain in data holder. This sets the flux on the boundary to either zero or to m_domainFlux
     @param[inout] a_flux Flux to be modified. 
-    @param[in]    a_useDomainFlux Use domain flux or not If true, a_flux becomes m_domainFlux on domain boundaries. 
   */
   virtual void fillDomainFlux(EBAMRFluxData& a_flux);
 
   /*!
     @brief Set domain in data holder. This sets the flux on the boundary to either zero or to m_domainFlux
-    @param[inout] a_flux Flux to be modified. 
-    @param[in]    a_useDomainFlux Use domain flux or not If true, a_flux becomes m_domainFlux on domain boundaries. 
+    @param[inout] a_flux  Flux to be modified. 
+    @param[in]    a_level Grid level
   */
   virtual void fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const int a_level);
 

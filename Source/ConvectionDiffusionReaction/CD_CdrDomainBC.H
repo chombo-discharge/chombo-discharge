@@ -38,7 +38,6 @@ public:
     Wall,
     Function,
     Outflow,
-    External
   };
 
   /*!
