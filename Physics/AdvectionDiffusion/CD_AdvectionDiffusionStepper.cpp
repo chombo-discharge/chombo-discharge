@@ -62,7 +62,6 @@ void AdvectionDiffusionStepper::setupSolvers(){
   m_solver->setPhase(m_phase);
   m_solver->setAmr(m_amr);
   m_solver->setComputationalGeometry(m_computationalGeometry);
-  m_solver->sanityCheck();
   m_solver->setRealm(m_realm);
   
   if(!m_solver->isMobile() && !m_solver->isDiffusive()){

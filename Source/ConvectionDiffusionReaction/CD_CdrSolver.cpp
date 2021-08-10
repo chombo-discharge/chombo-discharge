@@ -1462,53 +1462,41 @@ void CdrSolver::reflux(EBAMRCellData& a_phi){
   }
 }
 
-void CdrSolver::sanityCheck(){
-  CH_TIME("CdrSolver::sanityCheck");
-  if(m_verbosity > 5){
-    pout() << m_name + "::sanityCheck" << endl;
-  }
-
-  CH_assert(!m_computationalGeometry.isNull());
-  CH_assert(!m_amr.isNull());
-  CH_assert(!m_species.isNull());
-  CH_assert(!m_ebis.isNull());
-}
-
 void CdrSolver::setAmr(const RefCountedPtr<AmrMesh>& a_amr){
-  CH_TIME("CdrSolver::setAmr");
+  CH_TIME("CdrSolver::setAmr(AmrMesh)");
   if(m_verbosity > 5){
-    pout() << m_name + "::setAmr" << endl;
+    pout() << m_name + "::setAmr(AmrMesh)" << endl;
   }
+
+  CH_assert(!a_amr.isNull());
 
   m_amr = a_amr;
-
 }
 
 void CdrSolver::registerOperators(){
-  CH_TIME("CdrSolver::registerOperators");
+  CH_TIME("CdrSolver::registerOperators()");
   if(m_verbosity > 5){
-    pout() << m_name + "::registerOperators" << endl;
+    pout() << m_name + "::registerOperators()" << endl;
   }
 
-  if(m_amr.isNull()){
-    MayDay::Abort("CdrSolver::registerOperators - need to set AmrMesh!");
-  }
-  else{
-    m_amr->registerOperator(s_eb_coar_ave,     m_realm, m_phase);
-    m_amr->registerOperator(s_eb_fill_patch,   m_realm, m_phase);
-    m_amr->registerOperator(s_eb_pwl_interp,   m_realm, m_phase);
-    m_amr->registerOperator(s_eb_flux_reg,     m_realm, m_phase);
-    m_amr->registerOperator(s_eb_redist,       m_realm, m_phase);
-    m_amr->registerOperator(s_eb_irreg_interp, m_realm, m_phase);
-    m_amr->registerOperator(s_noncons_div,  m_realm, m_phase);
-  }
+  CH_assert(!m_amr.isNull());
+
+  m_amr->registerOperator(s_eb_coar_ave,     m_realm, m_phase);
+  m_amr->registerOperator(s_eb_fill_patch,   m_realm, m_phase);
+  m_amr->registerOperator(s_eb_pwl_interp,   m_realm, m_phase);
+  m_amr->registerOperator(s_eb_flux_reg,     m_realm, m_phase);
+  m_amr->registerOperator(s_eb_redist,       m_realm, m_phase);
+  m_amr->registerOperator(s_eb_irreg_interp, m_realm, m_phase);
+  m_amr->registerOperator(s_noncons_div,     m_realm, m_phase);
 }
 
 void CdrSolver::setComputationalGeometry(const RefCountedPtr<ComputationalGeometry> a_computationalGeometry){
-  CH_TIME("CdrSolver::setComputationalGeometry");
+  CH_TIME("CdrSolver::setComputationalGeometry(RefCountedPtr<ComputationalGeometry>)");
   if(m_verbosity > 5){
-    pout() << m_name + "::setComputationalGeometry" << endl;
+    pout() << m_name + "::setComputationalGeometry(RefCountedPtr<ComputationalGeometry>)" << endl;
   }
+
+  CH_assert(!a_computationalGeometry.isNull());
   
   m_computationalGeometry = a_computationalGeometry;
 
@@ -1518,17 +1506,17 @@ void CdrSolver::setComputationalGeometry(const RefCountedPtr<ComputationalGeomet
 }
 
 void CdrSolver::setDiffusionCoefficient(const EBAMRFluxData& a_diffusionCoefficient, const EBAMRIVData& a_ebDiffusionCoefficient){
-  CH_TIME("CdrSolver::setDiffusionCoefficient(ebamrflux, ebamriv)");
+  CH_TIME("CdrSolver::setDiffusionCoefficient(EBAMRFluxData, EBAMRIVData)");
   if(m_verbosity > 5){
-    pout() << m_name + "::setDiffusionCoefficient(ebamrflux, ebamriv)" << endl;
+    pout() << m_name + "::setDiffusionCoefficient(EBAMRFluxData, EBAMRIVData)" << endl;
   }
 
-  const int finest_level = m_amr->getFinestLevel();
+  CH_assert(a_diffusionCoefficient  [0]->nComp() == 1);
+  CH_assert(a_ebDiffusionCoefficient[0]->nComp() == 1);
 
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    a_diffusionCoefficient[lvl]->localCopyTo(*m_faceCenteredDiffusionCoefficient[lvl]);
-    a_ebDiffusionCoefficient[lvl]->localCopyTo(*m_ebCenteredDiffusionCoefficient[lvl]);
-  }
+  // Do a copy -- realms do not have to be the same. 
+  m_faceCenteredDiffusionCoefficient.copy(a_diffusionCoefficient);
+  m_ebCenteredDiffusionCoefficient.  copy(a_ebDiffusionCoefficient);
 
   m_amr->averageDown(m_faceCenteredDiffusionCoefficient, m_realm, m_phase);
   m_amr->averageDown(m_ebCenteredDiffusionCoefficient,   m_realm, m_phase);
@@ -1548,42 +1536,42 @@ void CdrSolver::setDiffusionCoefficient(const Real a_diffusionCoefficient){
 }
 
 void CdrSolver::setDiffusionCoefficient(const std::function<Real(const RealVect a_position)>& a_diffCo){
+  CH_TIME("CdrSolver::setDiffusionCoefficient(std::function<Real(const RealVect a_position)>))");
+  if(m_verbosity > 5){
+    pout() << m_name + "::setDiffusionCoefficient(std::function<Real(const RealVect a_position)>)" << endl;
+  }
+  
   DataOps::setValue(m_faceCenteredDiffusionCoefficient, a_diffCo, m_amr->getProbLo(), m_amr->getDx(), m_comp);
   DataOps::setValue(m_ebCenteredDiffusionCoefficient,   a_diffCo, m_amr->getProbLo(), m_amr->getDx(), m_comp);
 }
 
 void CdrSolver::setEbFlux(const EBAMRIVData& a_ebFlux){
-  CH_TIME("CdrSolver::setEbFlux(variable)");
+  CH_TIME("CdrSolver::setEbFlux(a_ebFlux)");
   if(m_verbosity > 5){
-    pout() << m_name + "::setEbFlux(variable)" << endl;
+    pout() << m_name + "::setEbFlux(a_ebFlux)" << endl;
   }
 
-  const int comp         = 0;
-  const int finest_level = m_amr->getFinestLevel();
-  const Interval interv(comp, comp);
+  CH_assert(a_ebFlux[0]->nComp() == 1);
 
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    a_ebFlux[lvl]->localCopyTo(interv, *m_ebFlux[lvl], interv);
-  }
+  m_ebFlux.copy(a_ebFlux);
 }
 
 void CdrSolver::setEbFlux(const Real a_ebFlux){
-  CH_TIME("CdrSolver::setEbFlux(constant)");
+  CH_TIME("CdrSolver::setEbFlux(Real)");
   if(m_verbosity > 5){
-    pout() << m_name + "::setEbFlux(constant)" << endl;
+    pout() << m_name + "::setEbFlux(Real)" << endl;
   }
 
-  const int finest_level = m_amr->getFinestLevel();
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    DataOps::setValue(*m_ebFlux[lvl], a_ebFlux);
-  }
+  DataOps::setValue(m_ebFlux, a_ebFlux);
 }
 
 void CdrSolver::setEbIndexSpace(const RefCountedPtr<EBIndexSpace>& a_ebis){
-  CH_TIME("CdrSolver::setEbIndexSpace");
+  CH_TIME("CdrSolver::setEbIndexSpace(RefCountedPtr<EBIndexSpace>)");
   if(m_verbosity > 5){
-    pout() << m_name + "::setEbIndexSpace" << endl;
+    pout() << m_name + "::setEbIndexSpace(RefCountedPtr<EBIndexSpace>)" << endl;
   }
+
+  CH_assert(!a_ebis.isNull());
 
   m_ebis = a_ebis;
 }
@@ -1594,8 +1582,8 @@ void CdrSolver::setSpecies(const RefCountedPtr<CdrSpecies> a_species){
     pout() << m_name + "::setSpecies" << endl;
   }
 
-  m_species   = a_species;
-  m_name      = m_species->getName();
+  m_species     = a_species;
+  m_name        = m_species->getName();
   m_isDiffusive = m_species->isDiffusive();
   m_isMobile    = m_species->isMobile();
 }

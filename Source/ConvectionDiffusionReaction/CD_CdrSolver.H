@@ -231,13 +231,9 @@ public:
 
   /*!
     @brief Register operators for AMR operations
+    @note This includes operators for redistribution, flux registers, regridding, ghost cell interpolation, and conservative coarsening. 
   */
   virtual void registerOperators();
-
-  /*!
-    @brief Do a sanity check
-  */
-  virtual void sanityCheck();
 
   /*!
     @brief Set the realm for this solver.
@@ -308,6 +304,7 @@ public:
     @brief Data-based version of setting diffusion coefficients (which are stored on faces)
     @param[in] a_diffusionCoefficient   Face-centered diffusion coefficient. 
     @param[in] a_ebDiffusionCoefficient EB-centered diffusion coefficient. 
+    @note Realms do not have to be the same. 
   */
   virtual void setDiffusionCoefficient(const EBAMRFluxData& a_diffusionCoefficient, const EBAMRIVData& a_ebDiffusionCoefficient);
 
@@ -349,6 +346,7 @@ public:
   /*!
     @brief Data-based version of setting the EB flux
     @param[in] a_ebFlux Flux on EB centroids. 
+    @note a_ebFlux does not have to be the same realm as in the solver. 
   */
   virtual void setEbFlux(const EBAMRIVData& a_ebFlux);
 
