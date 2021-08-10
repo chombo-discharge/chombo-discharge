@@ -857,12 +857,13 @@ protected:
     @param[out] a_flux Face-centered flux
     @param[in]  a_phi  Cell centered phi
     @param[in]  a_lvl  Grid level
+    @note This computes flux = D*grad(phi) on all face centers. The flux is set to zero on domain edges/faces
   */
   virtual void computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelData<EBCellFAB>& a_phi, const int a_lvl);
 
   /*!
     @brief Set flux to zero on domain boundaries
-    @param[in] a_flux Flux data holder
+    @param[in] a_flux Flux data holder -- on domain edges this is modified so the flux is zero. 
   */
   virtual void resetDomainFlux(EBAMRFluxData& a_flux);
 

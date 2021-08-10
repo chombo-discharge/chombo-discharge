@@ -525,45 +525,55 @@ void CdrSolver::computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelDa
   CH_assert(a_flux.nComp() == 1);
   CH_assert(a_phi .nComp() == 1);
 
+  // TLDR: This routine computes the diffusion flux F = D*Grad(phi) on face centers. Since this uses centered differencing
+  //       and we don't have valid data outside the computational domain we only do the differencing for interior faces,
+  //       setting the flux to zero on domain faces. 
+
   const Real dx                = m_amr->getDx()[a_lvl];
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
+  const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[a_lvl];
+  const ProblemDomain& domain  = m_amr->getDomains()[a_lvl];
 
-  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-    const Box& cellbox = dbl.get(dit());
-
-    const EBCellFAB& state = a_phi[dit()];
-    const EBISBox& ebisbox = state.getEBISBox();
-    const EBGraph& ebgraph = ebisbox.getEBGraph();
+  for (DataIterator dit(dbl); dit.ok(); ++dit){
+    const EBCellFAB& phi     = a_phi[dit()];
+    const Box&       cellBox = dbl  [dit()];    
+    const EBISBox&   ebisbox = ebisl[dit()];
+    const EBGraph&   ebgraph = ebisbox.getEBGraph();
 
     for (int dir = 0; dir < SpaceDim; dir++){
-      EBFaceFAB& flux = a_flux[dit()][dir];
+      EBFaceFAB& flux      = a_flux[dit()][dir];
       const EBFaceFAB& dco = (*m_faceCenteredDiffusionCoefficient[a_lvl])[dit()][dir];
 
-      // Do regular cells
-      Box facebox = cellbox;
-      facebox.surroundingNodes(dir);
+      flux.setVal(0.0);
+      
+      // Only want interior faces -- the domain flux will be set to zero (what else would it be...?)
+      Box compBox = cellBox;
+      compBox.grow(dir, 1);
+      compBox &= domain;
+      compBox.grow(dir, -1);
+      compBox.surroundingNodes(dir);
 
-      BaseFab<Real>& regFlux        = flux.getSingleValuedFAB();
-      const BaseFab<Real>& regState = state.getSingleValuedFAB();
-      const BaseFab<Real>& regDco   = dco.getSingleValuedFAB();
+      // Fortran kernel -- this computes f = D(face)*(phi(iv_high) - phi(iv-low))/dx
+      BaseFab<Real>& regFlux      = flux.getSingleValuedFAB();
+      const BaseFab<Real>& regPhi = phi.getSingleValuedFAB();
+      const BaseFab<Real>& regDco = dco.getSingleValuedFAB();
       FORT_DFLUX_REG(CHF_FRA1(regFlux, m_comp),
-		     CHF_CONST_FRA1(regState, m_comp),
+		     CHF_CONST_FRA1(regPhi, m_comp),
 		     CHF_CONST_FRA1(regDco, m_comp),
 		     CHF_CONST_INT(dir),
 		     CHF_CONST_REAL(dx),
-		     CHF_BOX(facebox));
+		     CHF_BOX(compBox));
 
 
-      // Now redo the irregular faces
-      const FaceStop::WhichFaces stopcrit = FaceStop::SurroundingWithBoundary;
-      for (FaceIterator faceit(ebisbox.getIrregIVS(cellbox), ebgraph, dir, stopcrit); faceit.ok(); ++faceit){
+      // Irregular faces need to be redone. 
+      for (FaceIterator faceit(ebisbox.getIrregIVS(cellBox), ebgraph, dir, FaceStop::SurroundingWithBoundary); faceit.ok(); ++faceit){
 	const FaceIndex& face = faceit();
 
 	if(!face.isBoundary()){ 
 	  const VolIndex hiVoF = face.getVoF(Side::Hi);
 	  const VolIndex loVoF = face.getVoF(Side::Lo);
 
-	  flux(face, m_comp) = dco(face,m_comp)*(state(hiVoF,m_comp) - state(loVoF, m_comp))/dx;
+	  flux(face, m_comp) = dco(face,m_comp) * (phi(hiVoF,m_comp) - phi(loVoF, m_comp))/dx;
 	}
       }
     }
