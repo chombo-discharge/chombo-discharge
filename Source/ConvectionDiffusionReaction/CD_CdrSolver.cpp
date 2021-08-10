@@ -1784,17 +1784,22 @@ void CdrSolver::writePlotData(EBAMRCellData& a_output, int& a_icomp){
 }
 
 void CdrSolver::writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp){
-  CH_TIME("CdrSolver::writeData");
+  CH_TIME("CdrSolver::writeData(EBAMRCellData, int, EBAMRCellData, bool)");
   if(m_verbosity > 5){
-    pout() << m_name + "::writeData" << endl;
+    pout() << m_name + "::writeData(EBAMRCellData, int, EBAMRCellData, bool)" << endl;
   }
 
-  const int comp = 0;
+  // TLDR: This routine copies from a data holder to another data, but in a general way where components don't align (which prevents
+  //       us from using one-line methods). A special flag (a_interp) tells us to interpolate to cell centroids or not.
+
+  // Number of components we are working with. 
+  const int comp  = 0;
   const int ncomp = a_data[0]->nComp();
 
-  const Interval src_interv(0, ncomp-1);
-  const Interval dst_interv(a_comp, a_comp + ncomp - 1);
+  const Interval srcInterv(0, ncomp-1);                 // This is the component range in scratch which we want to copy from
+  const Interval dstInterv(a_comp, a_comp + ncomp - 1); // This is the component range in a_output which we want to copy into
 
+  // Copy data to scratch and interpolate scratch to cell centroids if we are asked to. 
   EBAMRCellData scratch;
   m_amr->allocate(scratch, m_realm, m_phase, ncomp);
   DataOps::copy(scratch, a_data);
@@ -1806,13 +1811,14 @@ void CdrSolver::writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellD
   m_amr->averageDown(scratch, m_realm, m_phase);
   m_amr->interpGhost(scratch, m_realm, m_phase);
 
-
+  // Need a more general copy method because we can't call DataOps::copy (because realms might not be the same) and
+  // we can't call EBAMRData<T>::copy either (because components don't align). So -- general type of copy here.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     if(m_realm == a_output.getRealm()){
-      scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
+      scratch[lvl]->localCopyTo(srcInterv, *a_output[lvl], dstInterv);
     }
     else{
-      scratch[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
+      scratch[lvl]->copyTo(srcInterv, *a_output[lvl], dstInterv);
     }
   }
 
@@ -1822,30 +1828,32 @@ void CdrSolver::writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellD
 }
 
 void CdrSolver::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const {
-  CH_TIME("CdrSolver::writeCheckpointLevel");
+  CH_TIME("CdrSolver::writeCheckpointLevel(HDF5Handle, int)");
   if(m_verbosity > 5){
-    pout() << m_name + "::writeCheckpointLevel" << endl;
+    pout() << m_name + "::writeCheckpointLevel(HDF5Handle, int)" << endl;
   }
 
   // Write state vector
-  write(a_handle, *m_phi[a_level], m_name);
-  write(a_handle, *m_source[a_level],   m_name+"_src");
+  write(a_handle, *m_phi   [a_level], m_name       );
+  write(a_handle, *m_source[a_level], m_name+"_src");
 }
 
 void CdrSolver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
-  CH_TIME("CdrSolver::readCheckpointLevel");
+  CH_TIME("CdrSolver::readCheckpointLevel(HDF5Handle, int)");
   if(m_verbosity > 5){
-    pout() << m_name + "::readCheckpointLevel" << endl;
+    pout() << m_name + "::readCheckpointLevel(HDF5Handle, int)" << endl;
   }
+  
+  const Interval interv(m_comp, m_comp);
 
-  read<EBCellFAB>(a_handle, *m_phi[a_level], m_name, m_amr->getGrids(m_realm)[a_level], Interval(0,0), false);
-  read<EBCellFAB>(a_handle, *m_source[a_level], m_name+"_src", m_amr->getGrids(m_realm)[a_level], Interval(0,0), false);
+  read<EBCellFAB>(a_handle, *m_phi   [a_level], m_name,        m_amr->getGrids(m_realm)[a_level], interv, false);
+  read<EBCellFAB>(a_handle, *m_source[a_level], m_name+"_src", m_amr->getGrids(m_realm)[a_level], interv, false);
 }
 
 Real CdrSolver::computeAdvectionDt(){
-  CH_TIME("CdrSolver::computeAdvectionDt");
+  CH_TIME("CdrSolver::computeAdvectionDt()");
   if(m_verbosity > 5){
-    pout() << m_name + "::computeAdvectionDt" << endl;
+    pout() << m_name + "::computeAdvectionDt()" << endl;
   }
 
   Real min_dt = std::numeric_limits<Real>::max();
