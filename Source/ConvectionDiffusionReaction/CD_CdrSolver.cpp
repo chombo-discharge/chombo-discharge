@@ -749,7 +749,7 @@ void CdrSolver::conservativeDivergenceNoKappaDivision(EBAMRCellData& a_conservat
     const ProblemDomain& domain  = m_amr->getDomains()[lvl];
     const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
 
-    this->conservativeDivergenceRegular(*a_conservativeDivergence[lvl], *a_flux[lvl], lvl);
+    this->conservativeDivergenceRegular(*a_conservativeDivergence[lvl], *a_flux[lvl], lvl);  // Compute kappa*div(F) in regular cells
     this->setupFluxInterpolant(*a_flux[lvl], lvl);                                           // Copy face-centered fluxes in a_flux to m_interpolant
     this->interpolateFluxToFaceCentroids(*a_flux[lvl], lvl);                                 // Interpolate fluxes w m_interpolant. Copy 2 a_flux
     this->computeDivergenceIrregular(*a_conservativeDivergence[lvl], *a_ebFlux[lvl], lvl);   // Recompute divergence on irregular cells
@@ -764,13 +764,14 @@ void CdrSolver::conservativeDivergenceNoKappaDivision(EBAMRCellData& a_conservat
 void CdrSolver::computeDivergenceIrregular(LevelData<EBCellFAB>&              a_divG,
 					   const LevelData<BaseIVFAB<Real> >& a_ebFlux,
 					   const int                          a_lvl){
-  CH_TIME("CdrSolver::computeDivergenceIrregular");
+  CH_TIME("CdrSolver::computeDivergenceIrregular(LD<EBCellFAB>, LD<BaseIVFAB<Real> >, int)");
   if(m_verbosity > 5){
-    pout() << m_name + "::computeDivergenceIrregular" << endl;
+    pout() << m_name + "::computeDivergenceIrregular(LD<EBCellFAB>, LD<BaseIVFAB<Real> >, int)" << endl;
   }
 
-  const int comp  = 0;
-  const int ncomp = 1;
+  // This computes the conservative divergence kappa*div(F) = sum(fluxes) in cut-cells. This includes
+  // fluxes on the EB face. This routine uses data in m_interpolant which must hold fluxes on cut-cell face 
+  // centroids (taken care of in interpolateFluxToFaceCentroids)
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
   const ProblemDomain& domain  = m_amr->getDomains()[a_lvl];
@@ -778,7 +779,7 @@ void CdrSolver::computeDivergenceIrregular(LevelData<EBCellFAB>&              a_
   const Real dx                = m_amr->getDx()[a_lvl];
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-    const Box box          = dbl.get(dit());
+    //    const Box box          = dbl.get(dit());
     const EBISBox& ebisbox = ebisl[dit()];
 
     EBCellFAB& divG               = a_divG[dit()];
@@ -790,7 +791,7 @@ void CdrSolver::computeDivergenceIrregular(LevelData<EBCellFAB>&              a_
       const Real area     = ebisbox.bndryArea(vof);
 
       // EB flux
-      divG(vof, comp) = ebflux(vof,comp)*area;
+      divG(vof, m_comp) = ebflux(vof,m_comp)*area;
 
       // Face fluxes
       for (int dir = 0; dir < SpaceDim; dir++){
@@ -804,13 +805,13 @@ void CdrSolver::computeDivergenceIrregular(LevelData<EBCellFAB>&              a_
 	  for (int iface = 0; iface < faces.size(); iface++){
 	    const FaceIndex face = faces[iface];
 	    const Real face_area = ebisbox.areaFrac(face);
-	    divG(vof, comp) += isign*face_area*flux(face, comp);
+	    divG(vof, m_comp) += isign*face_area*flux(face, m_comp);
 	  }
 	}
       }
 
       // Scale divG by dx but not by kappa.
-      divG(vof, comp) *= 1./dx;
+      divG(vof, m_comp) *= 1./dx;
     }
   }
 }
