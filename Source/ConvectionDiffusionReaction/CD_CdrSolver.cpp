@@ -2322,6 +2322,37 @@ EBAMRIFData& CdrSolver::getDomainFlux(){
   return m_domainFlux;
 }
 
+std::string CdrSolver::makeBcString(const int a_dir, const Side::LoHiSide a_side) const {
+  CH_TIME("FieldSolver::makeBcString(int, Side::LoHiSide)");
+  if(m_verbosity > 5){
+    pout() << "FieldSolver::makeBcString(int, Side::LoHiSide)" << endl;
+  }
+
+  std::string strDir;
+  std::string strSide;
+  
+  if(a_dir == 0){
+    strDir = "x";
+  }
+  else if(a_dir == 1){
+    strDir = "y";
+  }
+  else if(a_dir == 2){
+    strDir = "z";
+  }
+
+  if(a_side == Side::Lo){
+    strSide = "lo";
+  }
+  else if(a_side == Side::Hi){
+    strSide = "hi";
+  }
+
+  const std::string ret = std::string("bc.") + strDir + std::string(".") + strSide;
+
+  return ret;
+}
+
 void CdrSolver::parseDomainBc(){
   CH_TIME("CdrSolver::parseDomainBc()");
   if(m_verbosity > 5){
@@ -2329,6 +2360,36 @@ void CdrSolver::parseDomainBc(){
   }
   
   ParmParse pp(m_className.c_str());
+
+  for (int dir = 0; dir < SpaceDim; dir++){
+    for (SideIterator sit; sit.ok(); ++sit){
+      const Side::LoHiSide side = sit();
+      
+      const CdrDomainBC::DomainSide domainSide = std::make_pair(dir, side);
+      const std::string             bcString   = this->makeBcString(dir, side);
+
+      std::string str;
+      pp.get(bcString.c_str(), str);
+
+      // Set domain bc from input script evaluations.
+      if(str == "data"){
+	this->setDomainBcType(domainSide, CdrDomainBC::BcType::DataBased);
+      }
+      else if (str == "function"){
+	this->setDomainBcType(domainSide, CdrDomainBC::BcType::Function);
+      }
+      else if (str == "wall"){
+	this->setDomainBcType(domainSide, CdrDomainBC::BcType::Wall);
+      }
+      else if (str == "outflow"){
+	this->setDomainBcType(domainSide, CdrDomainBC::BcType::Outflow);
+      }
+      else{
+	const std::string errorString = "CdrSolver::parseDomain BC - bad argument '" + bcString + "'";
+	MayDay::Error(errorString.c_str());
+      }
+    }
+  }
 }
 
 void CdrSolver::parseExtrapolateSourceTerm(){

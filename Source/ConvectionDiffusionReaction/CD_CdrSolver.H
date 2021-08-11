@@ -1045,6 +1045,14 @@ protected:
     ®brief Parse source term stuff
   */
   virtual void parseExtrapolateSourceTerm();
+  
+  /*!
+    @brief Shortcut for making a boundary condition string. 
+    @param[in] a_dir  Direction.
+    @param[in] a_side Coordinate side. 
+    @return Returns string of type m_className.bc.direction.side. 
+  */
+  virtual std::string makeBcString(const int a_dir, const Side::LoHiSide a_side) const;
 
   /*!
     @brief Gaussian noise field
