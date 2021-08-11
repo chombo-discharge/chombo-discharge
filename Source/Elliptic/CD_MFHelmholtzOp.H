@@ -61,6 +61,38 @@ public:
 
   /*!
     @brief Full constructor
+  /*!
+    @brief Full constructor
+    @param[in] a_dataLocation  Data location, either cell center or cell centroid
+    @param[in] a_mflgFine      Fine grids
+    @param[in] a_mflg          Grids on this level
+    @param[in] a_mflgCoFi      Coarsening of fine level grids
+    @param[in] a_mflgCoar      Coarse grids
+    @param[in] a_mflgCoarMG    Multigrid-grids
+    @param[in] a_interpolator  Interpolator
+    @param[in] a_fluxReg       Flux register
+    @param[in] a_coarAve       Coarsener
+    @param[in] a_domainBC      Domain BC
+    @param[in] a_ebBC          Boundary conditions on EBs
+    @param[in] a_probLo        Lower-left corner of computational domain
+    @param[in] a_dx            Grid resolution
+    @param[in] a_refToFine     Refinement ratio to fine level
+    @param[in] a_refToCoar     Refinement ratio to coarse level
+    @param[in] a_hasFine       Has fine level or not
+    @param[in] a_hasCoar       Has coarse level or not
+    @param[in] a_hasMGObjects  Has multigrid-objects (special objects between AMR levels, or below the AMR levels)
+    @param[in] a_isMGOperator  Is MG operator or not
+    @param[in] a_alpha         Operator alpha
+    @param[in] a_beta          Operator beta
+    @param[in] a_acoef         Operator A-coefficient
+    @param[in] a_bcoef         Operator B-coefficient
+    @param[in] a_bcoef         Operator B-coefficient (on EB faces)
+    @param[in] a_ghostCellsPhi Ghost cells in data holders
+    @param[in] a_ghostCellsPhi Ghost cells in data holders
+    @param[in] a_jumpOrder     Stencil order to use on jump cells
+    @param[in] a_jumpWeights   Weights for least squares stencils on jump cells
+    @param[in] a_smoother      Which smoother to use
+  */
   */
   MFHelmholtzOp(const Location::Cell                             a_dataLocation,
 		const MFLevelGrid&                               a_mflgFine,
@@ -71,8 +103,8 @@ public:
 		const MFMultigridInterpolator&                   a_interpolator,
 		const MFFluxReg&                                 a_fluxReg,
 		const MFCoarAve&                                 a_coarAve,
-		const RefCountedPtr<MFHelmholtzDomainBCFactory>& a_domainBcFactory,
-		const RefCountedPtr<MFHelmholtzEBBCFactory>&     a_ebBcFactory,
+		const RefCountedPtr<MFHelmholtzDomainBCFactory>& a_domainBC,
+		const RefCountedPtr<MFHelmholtzEBBCFactory>&     a_ebBC,
 		const RealVect&                                  a_probLo,
 		const Real&                                      a_dx,
 		const int&                                       a_refToFine,
@@ -90,7 +122,7 @@ public:
 		const IntVect&                                   a_ghostRhs,
 		const int&                                       a_jumpOrder,
 		const int&                                       a_jumpWeight,
-		const Smoother&                                   a_relaxType);
+		const Smoother&                                  a_smoother);
 
   /*!
     @brief Destructor. 
