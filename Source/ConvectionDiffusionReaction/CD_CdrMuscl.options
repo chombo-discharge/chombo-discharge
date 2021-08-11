@@ -26,4 +26,4 @@ CdrMuscl.gmg_min_cells        = 2                       # Bottom drop
 CdrMuscl.gmg_bottom_solver    = bicgstab                # Bottom solver type. Valid options are 'simple' and 'bicgstab'
 CdrMuscl.gmg_bottom_relax     = 8                       # Number of relaxations in bottom solve ('simple' solver only)
 CdrMuscl.gmg_cycle            = vcycle                  # Cycle type. Only 'vcycle' supported for now
-CdrMuscl.gmg_smoother          = red_black               # Relaxation type. 'jacobi', 'multi_color', or 'red_black'
+CdrMuscl.gmg_smoother         = red_black               # Relaxation type. 'jacobi', 'multi_color', or 'red_black'
