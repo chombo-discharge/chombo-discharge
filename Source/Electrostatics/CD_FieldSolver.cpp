@@ -33,7 +33,8 @@ Real FieldSolver::s_defaultDomainBcFunction(const RealVect a_position, const Rea
 }
 
 FieldSolver::FieldSolver(){
-
+  CH_TIME("FieldSolver::FieldSolver()");
+    
   // Default settings.
   m_className    = "FieldSolver";
   m_realm        = Realm::Primal;
@@ -53,6 +54,9 @@ void FieldSolver::setDataLocation(const Location::Cell a_dataLocation){
   if(m_verbosity > 5){
     pout() << "FieldSolver::setDataLocation(Location::Cell)" << endl;
   }
+
+  // This sets the data location for the FieldSolver -- we issue a warning regarding centroid discretizations because
+  // the rest of chombo-discharge has not caught up with the centroid formulation. 
   
   switch(a_dataLocation){
   case Location::Cell::Center:{
@@ -111,12 +115,9 @@ void FieldSolver::computeElectricField(MFAMRCellData& a_electricField, const MFA
   if(m_verbosity > 5){
     pout() << "FieldSolver::computeElectricField(MFAMRCellData, MFAMRCellData)" << endl;
   }
-  
-#if 1 // Temporary warning showing that centroid-centered discretizations aren't ready (yet)
-  if(m_dataLocation == Location::Cell::Centroid){
-    pout() << "FieldSolver::computeElectricField - AmrMesh does not support centroid data for gradients (yet)" << endl;
-  }
-#endif
+
+  CH_assert(a_electricField[0]->nComp() == SpaceDim);
+  CH_assert(a_potential    [0]->nComp() == 1       );
 
   // Update ghost cells. Use scratch storage for this. 
   MFAMRCellData scratch;
@@ -135,9 +136,9 @@ void FieldSolver::computeElectricField(MFAMRCellData& a_electricField, const MFA
 }
 
 void FieldSolver::allocateInternals(){
-  CH_TIME("FieldSolver::allocateInternals");
+  CH_TIME("FieldSolver::allocateInternals()");
   if(m_verbosity > 5){
-    pout() << "FieldSolver::allocateInternals" << endl;
+    pout() << "FieldSolver::allocateInternals()" << endl;
   }
 
   m_amr->allocate(m_potential,        m_realm, m_nComp );
@@ -148,7 +149,7 @@ void FieldSolver::allocateInternals(){
   m_amr->allocate(m_permittivityEB,   m_realm, m_nComp);
   m_amr->allocate(m_electricField,    m_realm, SpaceDim);
 
-  m_amr->allocate(m_sigma,         m_realm, phase::gas, m_nComp);
+  m_amr->allocate(m_sigma,            m_realm, phase::gas, m_nComp);
 
   DataOps::setValue(m_potential,     0.0);
   DataOps::setValue(m_rho,           0.0);
@@ -158,9 +159,9 @@ void FieldSolver::allocateInternals(){
 }
 
 void FieldSolver::preRegrid(const int a_lbase, const int a_oldFinestLevel){
-  CH_TIME("FieldSolver::preRegrid");
+  CH_TIME("FieldSolver::preRegrid(int, int)");
   if(m_verbosity > 5){
-    pout() << "FieldSolver::preRegrid" << endl;
+    pout() << "FieldSolver::preRegrid(int, int)" << endl;
   }
 
   // TLDR: This version does a backup of m_potential on the old grid. This is later used for interpolating onto
@@ -174,10 +175,13 @@ void FieldSolver::preRegrid(const int a_lbase, const int a_oldFinestLevel){
 }
 
 void FieldSolver::computeDisplacementField(MFAMRCellData& a_displacementField, const MFAMRCellData& a_electricField){
-  CH_TIME("FieldSolver::computeDisplacementField");
+  CH_TIME("FieldSolver::computeDisplacementField(MFAMRCellData, MFAMRCellData)");
   if(m_verbosity > 5){
-    pout() << "FieldSolver::computeDisplacementField" << endl;
+    pout() << "FieldSolver::computeDisplacementField(MFAMRCellData, MFAMRCellData)" << endl;
   }
+
+  CH_assert(a_displacementField[0]->nComp() == SpaceDim);
+  CH_assert(a_electricField    [0]->nComp() == SpaceDim);
 
   // TLDR: This computes the displacement field D = eps*E on both phases. The data is either cell-centered or centroid-centered, and the
   //       permittivity can be spatially varying (in the dielectric). So, for the gas phase we only need to compute eps0*E while for the
@@ -258,10 +262,12 @@ void FieldSolver::computeDisplacementField(MFAMRCellData& a_displacementField, c
 }
 
 Real FieldSolver::computeEnergy(const MFAMRCellData& a_electricField){
-  CH_TIME("FieldSolver::computeEnergy");
+  CH_TIME("FieldSolver::computeEnergy(MFAMRCellData)");
   if(m_verbosity > 5){
-    pout() << "FieldSolver::computeEnergy" << endl;
+    pout() << "FieldSolver::computeEnergy(MFAMRCellData)" << endl;
   }
+
+  CH_assert(a_electricField[0]->nComp() == SpaceDim);
 
   // TLDR: This routine computes Int(E*D dV) over the entire domain. Since we use conservative averaging, we coarsen E*D onto
   //       the coarsest grid level and do the integratino there.
@@ -300,11 +306,12 @@ Real FieldSolver::computeEnergy(const MFAMRCellData& a_electricField){
 }
 
 Real FieldSolver::computeCapacitance(){
-  CH_TIME("FieldSolver::computeCapacitance");
-  CH_assert(m_isVoltageSet);
+  CH_TIME("FieldSolver::computeCapacitance()");
   if(m_verbosity > 5){
-    pout() << "FieldSolver::computeCapacitance" << endl;
+    pout() << "FieldSolver::computeCapacitance()" << endl;
   }
+
+  CH_assert(m_isVoltageSet);
 
   // TLDR: The energy density U = 0.5*C*V^2, or U = Int(E*D dV). We set the potential to one and solve the Poisson equation. 
   //       We then compute U from E*D without sources and use C = 2*U/(V*V). The caveat to this approach is that the solver
@@ -359,10 +366,10 @@ void FieldSolver::deallocateInternals(){
   m_amr->deallocate(m_sigma);
 }
 
-void FieldSolver::regrid(const int a_lmin, const int a_old_finest, const int a_new_finest){
-  CH_TIME("FieldSolver::regrid");
+void FieldSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel){
+  CH_TIME("FieldSolver::regrid(int, int, int)");
   if(m_verbosity > 5){
-    pout() << "FieldSolver::regrid" << endl;
+    pout() << "FieldSolver::regrid(int, int, int)" << endl;
   }
 
   const Interval interv(m_comp, m_comp);
@@ -393,9 +400,12 @@ void FieldSolver::regrid(const int a_lmin, const int a_old_finest, const int a_n
       }
 
       // These levels might have changed so we interpolate data here. 
-      for (int lvl = Max(1,a_lmin); lvl <= a_new_finest; lvl++){
+      for (int lvl = Max(1,a_lmin); lvl <= a_newFinestLevel; lvl++){
 	interpolator[lvl]->interpolate(*potential_phase[lvl], *potential_phase[lvl-1], interv);
-	if(lvl <= a_old_finest){
+
+	// Not all regions on the new grids are "new cells" -- for the ones that are not we don't want to
+	// pollute the solution with interpolation errors so we copy. 
+	if(lvl <= a_oldFinestLevel){
 	  scratch_phase[lvl]->copyTo(*potential_phase[lvl]);
 	}
 
