@@ -8,7 +8,6 @@ CdrGodunov.bc.y.lo               = wall                    # 'data', 'function',
 CdrGodunov.bc.y.hi               = wall                    # 'data', 'function', 'wall', or 'outflow'
 CdrGodunov.bc.z.lo               = wall                    # 'data', 'function', 'wall', or 'outflow'
 CdrGodunov.bc.z.hi               = wall                    # 'data', 'function', 'wall', or 'outflow'
-CdrGodunov.mass_redist           = false                   # Mass-weighted redistribution or volume-weighted
 CdrGodunov.limit_slopes          = true                    # Use slope-limiters for godunov
 CdrGodunov.plt_vars              = phi vel src dco ebflux  # Plot variables. Options are 'phi', 'vel', 'dco', 'src'
 CdrGodunov.extrapolateSourceTerm = true                    # Flag for including source term for time-extrapolation
