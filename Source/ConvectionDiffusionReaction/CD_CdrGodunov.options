@@ -2,7 +2,12 @@
 # CDR_GDNV SOLVER SETTINGS
 # ----------------------------------------------------------------------------------------------------
 CdrGodunov.seed                  = -1                      # Seed. Random seed with seed < 0
-CdrGodunov.domain_bc             = wall                    # 'data', 'function', 'wall', 'outflow', or 'extrap'
+CdrGodunov.bc.x.lo               = wall                    # 'data', 'function', 'wall', or 'outflow'
+CdrGodunov.bc.x.hi               = wall                    # 'data', 'function', 'wall', or 'outflow'
+CdrGodunov.bc.y.lo               = wall                    # 'data', 'function', 'wall', or 'outflow'
+CdrGodunov.bc.y.hi               = wall                    # 'data', 'function', 'wall', or 'outflow'
+CdrGodunov.bc.z.lo               = wall                    # 'data', 'function', 'wall', or 'outflow'
+CdrGodunov.bc.z.hi               = wall                    # 'data', 'function', 'wall', or 'outflow'
 CdrGodunov.mass_redist           = false                   # Mass-weighted redistribution or volume-weighted
 CdrGodunov.limit_slopes          = true                    # Use slope-limiters for godunov
 CdrGodunov.plt_vars              = phi vel src dco ebflux  # Plot variables. Options are 'phi', 'vel', 'dco', 'src'
@@ -11,7 +16,6 @@ CdrGodunov.plot_mode             = density                 # Plot densities 'den
 CdrGodunov.blend_conservation    = true                    # Turn on/off blending with nonconservative divergenceo
 CdrGodunov.redist_mass_weighted  = false                   # Mass weighted redistribution or not
 CdrGodunov.gmg_verbosity         = -1                      # GMG verbosity
-CdrGodunov.gmg_coarsen           = 4                       # Precoarsening of multigrid levels	
 CdrGodunov.gmg_pre_smooth        = 6                       # Number of relaxations in GMG downsweep
 CdrGodunov.gmg_post_smooth       = 6                       # Number of relaxations in upsweep
 CdrGodunov.gmg_bott_smooth       = 6                       # NUmber of relaxations before dropping to bottom solver

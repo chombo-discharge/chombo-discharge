@@ -2,7 +2,12 @@
 # CDR_MUSCL SOLVER SETTINGS
 # ----------------------------------------------------------------------------------------------------
 CdrMuscl.seed                 = -1                      # Seed. Random seed with seed < 0
-CdrMuscl.domain_bc            = wall                    # 'kinetic', 'wall', 'outflow', or 'extrap'
+CdrMuscl.bc.x.lo              = wall                    # 'data', 'function', 'wall', or 'outflow'
+CdrMuscl.bc.x.hi              = wall                    # 'data', 'function', 'wall', or 'outflow'
+CdrMuscl.bc.y.lo              = wall                    # 'data', 'function', 'wall', or 'outflow'
+CdrMuscl.bc.y.hi              = wall                    # 'data', 'function', 'wall', or 'outflow'
+CdrMuscl.bc.z.lo              = wall                    # 'data', 'function', 'wall', or 'outflow'
+CdrMuscl.bc.z.hi              = wall                    # 'data', 'function', 'wall', or 'outflow'
 CdrMuscl.mass_redist          = false                   # Mass-weighted redistribution or volume-weighted
 CdrMuscl.limit_slopes         = true                    # Use slope-limiters or not
 CdrMuscl.plt_vars             = phi vel src dco ebflux  # Plot variables. Options are 'phi', 'vel', 'dco', 'src'
