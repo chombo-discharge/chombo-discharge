@@ -3171,8 +3171,8 @@ void CdrPlasmaStepper::setupSolvers(){
   if(m_verbosity > 5){
     pout() << "CdrPlasmaStepper::setupSolvers" << endl;
   }
+  
   parseOptions();
-  this->sanityCheck();
 
   // Make solvers
   this->setupCdr();
@@ -3193,7 +3193,8 @@ void CdrPlasmaStepper::initialData(){
   }
 
 
-  m_cdr->initialData();        // Initial data comes in through CdrSpecies, in this case supplied by physics
+  m_cdr->initialData();               // Initial data comes in through CdrSpecies, in this case supplied by physics
+  m_fieldSolver->setPermittivities(); // Set permittivities for Poisson operator
   if(!m_rte->isStationary()){
     m_rte->initialData();
   }
@@ -3675,7 +3676,6 @@ void CdrPlasmaStepper::setupCdr(){
   m_cdr->setAmr(m_amr);
   m_cdr->setComputationalGeometry(m_computationalGeometry);
   m_cdr->setPhase(phase::gas);
-  m_cdr->sanityCheck();
   m_cdr->setRealm(m_realm);
 }
 

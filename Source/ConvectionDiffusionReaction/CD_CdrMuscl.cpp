@@ -63,10 +63,6 @@ void CdrMuscl::parseSlopeLimiter(){
   m_slopelim = (str == "true") ? true : false;
 }
 
-int CdrMuscl::queryGhost() const {
-  return 3;
-}
-
 void CdrMuscl::advance_advect(EBAMRCellData& a_phi, const Real a_dt){
   CH_TIME("CdrMuscl::advance_advect");
   if(m_verbosity > 5){
@@ -126,10 +122,10 @@ void CdrMuscl::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_ph
 }
 
 void CdrMuscl::allocateInternals(){
-  CdrSolver::allocateInternals();
+  CdrTGA::allocateInternals();
 
   if(m_isDiffusive){
-    this->setupMultigrid();
+    this->setupDiffusionSolver();
   }
 }
 

@@ -1,5 +1,5 @@
 # ====================================================================================================
-# FIELD_SOLVER_MULTIGRID CLASS OPTIONS (MULTIFLUID GMG SOLVER SETTINGS)
+# FieldSolverMultigrid class options
 # ====================================================================================================
 FieldSolverMultigrid.bc.x.lo      = dirichlet 0.0     # Bc type (see docs)
 FieldSolverMultigrid.bc.x.hi      = dirichlet 0.0     # Bc type (see docs)
@@ -10,19 +10,20 @@ FieldSolverMultigrid.bc.z.hi      = dirichlet 0.0     # Bc type (see docs)
 FieldSolverMultigrid.plt_vars     = phi rho E res     # Plot variables. Possible vars are 'phi', 'rho', 'E', 'res'
 FieldSolverMultigrid.kappa_source = true              # Volume weighted space charge density or not (depends on algorithm)
 
-FieldSolverMultigrid.auto_tune         = false     # Do some auto-tuning
-FieldSolverMultigrid.gmg_coarsen       = 4         # Number of coarsenings to use before level aggregation
 FieldSolverMultigrid.gmg_verbosity     = -1        # GMG verbosity
 FieldSolverMultigrid.gmg_pre_smooth    = 12        # Number of relaxations in downsweep
 FieldSolverMultigrid.gmg_post_smooth   = 12        # Number of relaxations in upsweep
 FieldSolverMultigrid.gmg_bott_smooth   = 12        # NUmber of relaxations before dropping to bottom solver
 FieldSolverMultigrid.gmg_min_iter      = 5         # Minimum number of iterations
 FieldSolverMultigrid.gmg_max_iter      = 32        # Maximum number of iterations
-FieldSolverMultigrid.gmg_tolerance     = 1.E-10    # Residue tolerance
-FieldSolverMultigrid.gmg_hang          = 0.2       # Solver hang
-FieldSolverMultigrid.gmg_bottom_drop   = 4         # Bottom drop
+FieldSolverMultigrid.gmg_exit_tol      = 1.E-10    # Residue tolerance
+FieldSolverMultigrid.gmg_exit_hang     = 0.2       # Solver hang
+FieldSolverMultigrid.gmg_min_cells     = 4         # Bottom drop
 FieldSolverMultigrid.gmg_bc_order      = 2         # Boundary condition order for multigrid
+FieldSolverMultigrid.gmg_bc_weight     = 2         # Boundary condition weights (for least squares)
+FieldSolverMultigrid.gmg_jump_order    = 2         # Boundary condition order for jump conditions
+FieldSolverMultigrid.gmg_jump_weight   = 2         # Boundary condition weight for jump conditions (for least squares)
 FieldSolverMultigrid.gmg_bottom_solver = bicgstab  # Bottom solver type. 'simple', 'bicgstab', or 'gmres'
 FieldSolverMultigrid.gmg_bottom_relax  = 32        # Number of relaxations in bottom solve ('simple' solver only)
 FieldSolverMultigrid.gmg_cycle         = vcycle    # Cycle type. Only 'vcycle' supported for now. 
-FieldSolverMultigrid.gmg_relax_type    = gsrb      # Relaxation type. 'gauss_seidel', or 'gsrb'
+FieldSolverMultigrid.gmg_smoother      = red_black # Relaxation type. 'jacobi', 'multi_color', or 'red_black'

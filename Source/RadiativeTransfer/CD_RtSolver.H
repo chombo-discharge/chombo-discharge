@@ -19,6 +19,7 @@
 #include <CD_ComputationalGeometry.H>
 #include <CD_AmrMesh.H>
 #include <CD_RtSpecies.H>
+#include <CD_Location.H>
 #include <CD_NamespaceHeader.H>
   
 /*!
@@ -43,7 +44,7 @@ public:
   virtual std::string getName();
 
   /*!
-    @brief Get Realm
+    @brief Get the realm where the solver lives
   */
   virtual const std::string getRealm() const;
 
@@ -223,11 +224,6 @@ public:
   virtual void readCheckpointLevel(HDF5Handle& a_handle, const int a_level) = 0;
 
   /*!
-    @brief Return required number of ghost cells
-  */
-  virtual int queryGhost() const = 0;
-
-  /*!
     @brief Get number of output fields
   */
   virtual int getNumberOfPlotVariables() const;
@@ -278,6 +274,11 @@ protected:
     @brief Number of components
   */
   static constexpr int m_nComp = 1;
+
+  /*!
+    @brief Data location
+  */
+  Location::Cell m_dataLocation;
 
   /*!
     @brief Realm

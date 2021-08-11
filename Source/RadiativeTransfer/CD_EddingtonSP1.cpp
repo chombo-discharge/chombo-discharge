@@ -16,42 +16,38 @@
 // Chombo includes
 #include <ParmParse.H>
 #include <EBAMRIO.H>
-#include <BRMeshRefine.H>
-#include <NeumannConductivityEBBC.H>
-#include <DirichletConductivityEBBC.H>
 
 // Our includes
 #include <CD_EddingtonSP1.H>
 #include <CD_DataOps.H>
 #include <CD_Units.H>
-#include <CD_ConductivityEddingtonSP1DomainBcFactory.H>
-#include <CD_RobinConductivityEbBcFactory.H>
-
+#include <CD_EBHelmholtzDirichletEBBCFactory.H>      
+#include <CD_EBHelmholtzNeumannEBBCFactory.H>
+#include <CD_EBHelmholtzLarsenEBBCFactory.H>
+#include <CD_EBHelmholtzEddingtonSP1DomainBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
-#define EddingtonSP1_feature 1 // Comment Feb. 14 2018: I think we can keep this - it appears to produce the correct physics.
+constexpr Real EddingtonSP1::m_alpha;
+constexpr Real EddingtonSP1::m_beta;
 
 Real EddingtonSP1::s_defaultDomainBcFunction(const RealVect a_position, const Real a_time){
   return 1.0;
 }
 
 EddingtonSP1::EddingtonSP1() : RtSolver() {
-  m_name = "EddingtonSP1";
-  m_className = "EddingtonSP1";
 
-  m_verbosity                = -1;
-  m_needsMultigridSetup      = true;
-  m_hasDeeperMultigridLevels = false;
-
+  // Default settings
+  m_name          = "EddingtonSP1";
+  m_className     = "EddingtonSP1";
+  
+  m_verbosity     = -1;
+  m_isSolverSetup = false;
+  m_dataLocation  = Location::Cell::Center;  
   
   this->setDefaultDomainBcFunctions(); // This fills m_domainBcFunctions with s_defaultDomainBcFunction on every domain side. 
 }
 
 EddingtonSP1::~EddingtonSP1(){
-}
-
-int EddingtonSP1::queryGhost() const{
-  return 3;
 }
 
 void EddingtonSP1::parseOptions(){
@@ -60,12 +56,13 @@ void EddingtonSP1::parseOptions(){
     pout() << m_name + "::parseOptions" << endl;
   }
 
-  parseDomainBc();       // Parses domain bc
-  parseEbBc();              // Parse ebbc
-  parseReflection();        // Parses "reflection coefficients"
-  parseStationary();        // Parse stationary solver
-  parsePlotVariables();     // Parses plot variables
-  parseMultigridSettings(); // Parses solver parameters for geometric multigrid
+  this->parseDomainBC();          // Parses domain bc
+  this->parseEBBC();              // Parse ebbc
+  this->parseReflection();        // Parses "reflection coefficients"
+  this->parseStationary();        // Parse stationary solver
+  this->parsePlotVariables();     // Parses plot variables
+  this->parseMultigridSettings(); // Parses solver parameters for geometric multigrid
+  this->parseKappaScale();        // Parses kappa-scaling
 }
 
 void EddingtonSP1::parseRuntimeOptions(){
@@ -74,8 +71,9 @@ void EddingtonSP1::parseRuntimeOptions(){
     pout() << m_name + "::parseRuntimeOptions" << endl;
   }
   
-  parsePlotVariables();     // Parses plot variables
-  parseMultigridSettings(); // Parses solver parameters for geometric multigrid
+  this->parsePlotVariables();     // Parses plot variables
+  this->parseMultigridSettings(); // Parses solver parameters for geometric multigrid
+  this->parseKappaScale();        // Parses kappa-scaling
 }
 
 void EddingtonSP1::setDefaultDomainBcFunctions(){
@@ -92,15 +90,15 @@ void EddingtonSP1::setDefaultDomainBcFunctions(){
   }
 }
 
-void EddingtonSP1::setDomainBcWallFunction(const int a_dir, const Side::LoHiSide a_side, const EddingtonSP1DomainBc::BcFunction& a_function){
-  CH_TIME("EddingtonSP1::setDomainBcWallFunction");
+void EddingtonSP1::setDomainSideBcFunction(const int a_dir, const Side::LoHiSide a_side, const EddingtonSP1DomainBc::BcFunction& a_function){
+  CH_TIME("EddingtonSP1::setDomainSideBcFunction");
   if(m_verbosity > 4){
-    pout() << m_name + "::setDomainBcWallFunction" << endl;
+    pout() << m_name + "::setDomainSideBcFunction" << endl;
   }
 
-  const EddingtonSP1DomainBc::Wall curWall = std::make_pair(a_dir, a_side);
+  const EddingtonSP1DomainBc::DomainSide domainSide = std::make_pair(a_dir, a_side);
 
-  m_domainBcFunctions.at(curWall) = a_function;
+  m_domainBcFunctions.at(domainSide) = a_function;
 }
 
 std::string EddingtonSP1::makeBcString(const int a_dir, const Side::LoHiSide a_side) const {
@@ -109,6 +107,7 @@ std::string EddingtonSP1::makeBcString(const int a_dir, const Side::LoHiSide a_s
     pout() << m_name + "::makeBcString" << endl;
   }
 
+  // TLDR: Returns string in format "bc.x.lo"
   std::string strDir;
   std::string strSide;
   
@@ -148,39 +147,49 @@ EddingtonSP1DomainBc::BcType EddingtonSP1::parseBcString(const std::string a_str
   else if(a_str == "neumann"){
     ret = EddingtonSP1DomainBc::BcType::Neumann;
   }
-  else if(a_str == "robin"){
-    ret = EddingtonSP1DomainBc::BcType::Robin;
+  else if(a_str == "larsen"){
+    ret = EddingtonSP1DomainBc::BcType::Larsen;
   }
   else{
-    MayDay::Abort("EddingtonSP1DomainBc::BcType - unknown BC type!");
+    MayDay::Error("EddingtonSP1DomainBc::BcType - unknown BC type!");
   }
 
   return ret;
 }
 
-void EddingtonSP1::parseDomainBc(){
-  CH_TIME("EddingtonSP1::parseDomainBc");
+void EddingtonSP1::parseDomainBC(){
+  CH_TIME("EddingtonSP1::parseDomainBC");
   if(m_verbosity > 5){
-    pout() << m_name + "::parseDomainBc" << endl;
+    pout() << m_name + "::parseDomainBC" << endl;
   }
+
+  // TLDR: This routine might seem big and complicated. What we are doing is that we are creating one function object which returns some value
+  //       anywhere in space and time on a domain edge (face). The code below simply creates those functions and associates them with an edge (face in 3D)
+  //
+  //       Because of the stationary interface of EBHelmholtzOp and the transient interface of the radiative transfer solvers, we capture the time by solver
+  //       time (RtSolver::m_time) by reference in these functions. That allows us to pass the functions in as stationary-looking functions in EBHelmholtzOp,
+  //       yet retain transient BCs.
+  //
+  //       For flexibility we want to be able to specify the BC functions in two forms, using a multiplier or not. The specification for this is e.g.
+  //       "dirichlet <number>" in which case the bc function is multiplied by <number>. Use "dirichlet_custom" to use the bc functions directly.
 
   ParmParse pp(m_className.c_str());
 
   for (int dir = 0; dir < SpaceDim; dir++){
     for (SideIterator sit; sit.ok(); ++sit){
-      const EddingtonSP1DomainBc::Wall curWall = std::make_pair(dir, sit());
-      const std::string bcString = this->makeBcString(dir, sit());
-      const int num = pp.countval(bcString.c_str());
+      const EddingtonSP1DomainBc::DomainSide domainSide = std::make_pair(dir, sit());
+      const std::string bcString                        = this->makeBcString(dir, sit());
+      const int num                                     = pp.countval(bcString.c_str());
 
       std::string str;
 
-      EddingtonSP1DomainBc::BcType      bcType;
-      EddingtonSP1DomainBc::BcFunction& bcFunc = m_domainBcFunctions.at(curWall);
+      EddingtonSP1DomainBc::BcType      bcType;                                   // Will be set based on what comes in through the input script
+      EddingtonSP1DomainBc::BcFunction& bcFunc = m_domainBcFunctions.at(domainSide); // Will be set based on what comes in through the input script
 
       std::function<Real(const RealVect, const Real)> curFunc;
 
       switch(num){
-      case 1:{ // If only providing dirichlet_custom, neumann_custom, robin_custom, the second value is overridden and only the function is used as BC. 
+      case 1:{ // If only providing dirichlet_custom, neumann_custom, larsen_custom, the second value is overridden and only the function is used as BC. 
 	pp.get(bcString.c_str(), str, 0);
 
 	// Set the function. Capture solver time by reference. 
@@ -195,11 +204,11 @@ void EddingtonSP1::parseDomainBc(){
 	else if(str == "neumann_custom"){
 	  bcType  = EddingtonSP1DomainBc::BcType::Neumann;
 	}
-	else if(str == "robin_custom"){
-	  bcType  = EddingtonSP1DomainBc::BcType::Robin;
+	else if(str == "larsen_custom"){
+	  bcType  = EddingtonSP1DomainBc::BcType::Larsen;
 	}
 	else{
-	  MayDay::Abort("EddingtonSP1::parseDomainBc -- got only one argument but this argument was not in the form of e.g. 'neumann_custom'!");
+	  MayDay::Error("EddingtonSP1::parseDomainBC -- got only one argument but this argument was not in the form of e.g. 'neumann_custom'!");
 	}
 
 	break;
@@ -218,21 +227,20 @@ void EddingtonSP1::parseDomainBc(){
 
 	break;
       }
-      default: {
-	MayDay::Abort("EddingtonSP1::parseDomainBc -- unknown argument to domain bc");
+      default: 
+	MayDay::Error("EddingtonSP1::parseDomainBC -- unknown argument to domain bc");
 	break;
       }
-      }
 
-      m_domainBc.setBc(curWall, std::make_pair(bcType, curFunc));
+      m_domainBc.setBc(domainSide, std::make_pair(bcType, curFunc));
     }
   }
 }
 
-void EddingtonSP1::parseEbBc(){
-  CH_TIME("EddingtonSP1::parseEbBc");
+void EddingtonSP1::parseEBBC(){
+  CH_TIME("EddingtonSP1::parseEBBC");
   if(m_verbosity > 5){
-    pout() << m_name + "::parseEbBc" << endl;
+    pout() << m_name + "::parseEBBC" << endl;
   }
 
   ParmParse pp(m_className.c_str());
@@ -247,25 +255,25 @@ void EddingtonSP1::parseEbBc(){
     pp.get(bcString.c_str(), str, 0);
     pp.get(bcString.c_str(), val, 1);
 
-    EbBcType bcType;
+    EBBCType bcType;
 
     if(str == "dirichlet"){
-      bcType = EbBcType::Dirichlet;
+      bcType = EBBCType::Dirichlet;
     }
     else if(str == "neumann"){
-      bcType = EbBcType::Neumann;
+      bcType = EBBCType::Neumann;
     }
-    else if(str == "robin"){
-      bcType = EbBcType::Robin;
+    else if(str == "larsen"){
+      bcType = EBBCType::Larsen;
     }
     else{
-      MayDay::Abort("EddingtonSP1::parseEbBc -- not dirichlet/neumann/robin!");
+      MayDay::Error("EddingtonSP1::parseEBBC -- not dirichlet/neumann/larsen!");
     }
 
     m_ebbc = std::make_pair(bcType, val);
   }
   else{
-    MayDay::Abort("EddingtonSP1::parseEbBc -- bad input argument. Should be in the form 'robin 0.0', 'dirichlet 0.0', etc");
+    MayDay::Error("EddingtonSP1::parseEBBC -- bad input argument. Should be in the form 'larsen 0.0', 'dirichlet 0.0', etc");
   }
 }
 
@@ -302,47 +310,73 @@ void EddingtonSP1::parsePlotVariables(){
   }
 }
 
+void EddingtonSP1::parseKappaScale(){
+  ParmParse pp(m_className.c_str());
+
+  pp.get("kappa_scale", m_kappaScale);
+}
+
 void EddingtonSP1::parseMultigridSettings(){
   ParmParse pp(m_className.c_str());
 
   std::string str;
 
-  pp.get("gmg_verbosity",   m_multigridVerbosity);
-  pp.get("gmg_coarsen",     m_numCoarseningsBeforeAggregation);
-  pp.get("gmg_pre_smooth",  m_multigridPreSmooth);
-  pp.get("gmg_post_smooth", m_multigridPostSmooth);
-  pp.get("gmg_bott_smooth", m_multigridBottomSmooth);
-  pp.get("gmg_max_iter",    m_multigridMaxIterations);
-  pp.get("gmg_min_iter",    m_multigridMinIterations);
-  pp.get("gmg_tolerance",   m_multigridTolerance);
-  pp.get("gmg_hang",        m_multigridHang);
-  pp.get("gmg_bottom_drop", m_numCellsBottomDrop);
+  pp.get("gmg_verbosity",    m_multigridVerbosity);
+  pp.get("gmg_pre_smooth",   m_multigridPreSmooth);
+  pp.get("gmg_post_smooth",  m_multigridPostSmooth);
+  pp.get("gmg_bott_smooth",  m_multigridBottomSmooth);
+  pp.get("gmg_max_iter",     m_multigridMaxIterations);
+  pp.get("gmg_min_iter",     m_multigridMinIterations);
+  pp.get("gmg_exit_tol",     m_multigridExitTolerance);
+  pp.get("gmg_exit_hang",    m_multigridExitHang);
+  pp.get("gmg_min_cells",    m_minCellsBottom);
+  pp.get("gmg_ebbc_order",   m_multigridBcOrder);
+  pp.get("gmg_ebbc_weight",  m_multigridBcWeight);
 
-  // Bottom solver
-  pp.get("gmg_bottom_solver", str);
-  if(str == "simple"){
-    m_bottomSolver = BottomSolver::Simple;
+  // Fetch the desired bottom solver from the input script. We look for things like EddingtonSP1.gmg_bottom_solver = bicgstab or '= simple <number>'
+  // where <number> is the number of relaxation for the smoothing solver. 
+  const int num = pp.countval("gmg_bottom_solver");
+  if(num == 1){
+    pp.get("gmg_bottom_solver", str);
+    if(str == "bicgstab"){
+      m_bottomSolverType = BottomSolverType::BiCGStab;
+    }
+    else if(str == "gmres"){
+      m_bottomSolverType = BottomSolverType::GMRES;
+    }
+    else{
+      MayDay::Error("EddingtonSP1::parseMultigridSettings - logic bust, you've specified one parameter and I expected either 'bicgstab' or 'gmres'");
+    }
   }
-  else if(str == "bicgstab"){
-    m_bottomSolver = BottomSolver::BiCGStab;
+  else if(num == 2){
+    int numSmooth;
+    pp.get("gmg_bottom_solver", str,       0);
+    pp.get("gmg_bottom_solver", numSmooth, 1);
+    if(str == "simple"){
+      m_bottomSolverType = BottomSolverType::Simple;
+      m_simpleSolver.setNumSmooths(numSmooth);
+    }
+    else{
+      MayDay::Error("EddingtonSP1::parseMultigridSettings - logic bust, you've specified two parameters and I expected 'simple <number>'");
+    }
   }
   else{
-    MayDay::Abort("EddingtonSP1::parseMultigridSettings - unknown bottom solver requested");
+    MayDay::Error("EddingtonSP1::parseMultigridSettings - logic bust in bottom solver. You must specify ' = bicgstab', ' = gmres', or ' = simple <number>'");
   }
 
   // Relaxation type
-  pp.get("gmg_relax_type", str);
-  if(str == "gsrb"){
-    m_multigridRelaxMethod = RelaxationMethod::GSRBFast;
+  pp.get("gmg_smoother", str);
+  if(str == "jacobi"){
+    m_multigridRelaxMethod = EBHelmholtzOp::Smoother::PointJacobi;    
   }
-  else if(str == "jacobi"){
-    m_multigridRelaxMethod = RelaxationMethod::Jacobi;
+  else if(str == "red_black"){
+    m_multigridRelaxMethod = EBHelmholtzOp::Smoother::GauSaiRedBlack;    
   }
-  else if(str == "gauss_seidel"){
-    m_multigridRelaxMethod = RelaxationMethod::GaussSeidel;
+  else if(str == "multi_color"){
+    m_multigridRelaxMethod = EBHelmholtzOp::Smoother::GauSaiMultiColor;
   }
   else{
-    MayDay::Abort("EddingtonSP1::parseMultigridSettings - unknown relaxation method requested");
+    MayDay::Error("EddingtonSP1::parseMultigridSettings - unknown relaxation method requested");
   }
 
   // Cycle type
@@ -351,12 +385,12 @@ void EddingtonSP1::parseMultigridSettings(){
     m_multigridType = MultigridType::VCycle;
   }
   else{
-    MayDay::Abort("EddingtonSP1::parseMultigridSettings - unknown cycle type requested");
+    MayDay::Error("EddingtonSP1::parseMultigridSettings - unknown cycle type requested");
   }
 
   // No lower than 2. 
-  if(m_numCellsBottomDrop < 2){
-    m_numCellsBottomDrop = 2;
+  if(m_minCellsBottom < 2){
+    m_minCellsBottom = 2;
   }
 }
 
@@ -371,8 +405,8 @@ void EddingtonSP1::parseReflection(){
   Real r;
   pp.get("reflectivity", r);
 
-  m_reflectionCoefficientOne = r/(2.0);
-  m_reflectionCoefficientTwo = r/(3.0);
+  m_reflectCoefOne = r/(2.0);
+  m_reflectCoefTwo = r/(3.0);
 }
 
 void EddingtonSP1::preRegrid(const int a_base, const int a_oldFinestLevel){
@@ -381,11 +415,11 @@ void EddingtonSP1::preRegrid(const int a_base, const int a_oldFinestLevel){
     pout() << m_name + "::preRegrid" << endl;
   }
 
-  const int finest_level = m_amr->getFinestLevel();
+  const int finestLevel = m_amr->getFinestLevel();
 
   m_amr->allocate(m_cache, m_realm, m_phase, m_nComp);
 
-  for (int lvl = 0; lvl <= finest_level; lvl++){
+  for (int lvl = 0; lvl <= finestLevel; lvl++){ // 
     m_phi[lvl]->localCopyTo(*m_cache[lvl]);
   }
 }
@@ -396,24 +430,28 @@ void EddingtonSP1::allocateInternals(){
     pout() << m_name + "::allocateInternals" << endl;
   }
   
-  m_amr->allocate(m_aco,       m_realm, m_phase, m_nComp);
-  m_amr->allocate(m_bco,       m_realm, m_phase, m_nComp);
-  m_amr->allocate(m_bco_irreg, m_realm, m_phase, m_nComp);
-  m_amr->allocate(m_phi,       m_realm, m_phase, m_nComp);
-  m_amr->allocate(m_source,    m_realm, m_phase, m_nComp);
-  m_amr->allocate(m_resid,     m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_helmAco,       m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_helmBco,       m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_helmBcoIrreg,  m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_phi,           m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_source,        m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_resid,         m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_zero,          m_realm, m_phase, m_nComp);
+  m_amr->allocate(m_scaledSource,  m_realm, m_phase, m_nComp);
 
-  DataOps::setValue(m_resid,  0.0);
-  DataOps::setValue(m_phi,    0.0);
-  DataOps::setValue(m_source, 0.0);
+  DataOps::setValue(m_resid,        0.0);
+  DataOps::setValue(m_phi,          0.0);
+  DataOps::setValue(m_source,       0.0);
+  DataOps::setValue(m_zero,         0.0);
+  DataOps::setValue(m_scaledSource, 0.0);
 
-  this->setACoefAndBCoef();
+  this->setHelmholtzCoefficients();
 }
 
 void EddingtonSP1::deallocateInternals(){
-  m_amr->deallocate(m_aco);
-  m_amr->deallocate(m_bco);
-  m_amr->deallocate(m_bco_irreg);
+  m_amr->deallocate(m_helmAco);
+  m_amr->deallocate(m_helmBco);
+  m_amr->deallocate(m_helmBcoIrreg);
   m_amr->deallocate(m_phi);
   m_amr->deallocate(m_source);
   m_amr->deallocate(m_resid);
@@ -436,7 +474,7 @@ void EddingtonSP1::regrid(const int a_lmin, const int a_oldFinestLevel, const in
     m_cache[lvl]->copyTo(*m_phi[lvl]); // Base level should never change, but ownership might
   }
 
-  // These levels have changed
+  // These levels have changed and so we interpolate the data.
   for (int lvl = Max(1,a_lmin); lvl <= a_newFinestLevel; lvl++){
     interpolator[lvl]->interpolate(*m_phi[lvl], *m_phi[lvl-1], interv);
 
@@ -445,7 +483,10 @@ void EddingtonSP1::regrid(const int a_lmin, const int a_oldFinestLevel, const in
     }
   }
 
-  m_needsMultigridSetup = true;
+  m_amr->averageDown(m_phi, m_realm, m_phase);
+  m_amr->interpGhost(m_phi, m_realm, m_phase);
+
+  m_isSolverSetup = false;
 }
 
 void EddingtonSP1::registerOperators(){
@@ -455,63 +496,66 @@ void EddingtonSP1::registerOperators(){
   }
 
   if(m_amr.isNull()){
-    MayDay::Abort("EddingtonSP1::registerOperators - need to set AmrMesh!");
+    MayDay::Error("EddingtonSP1::registerOperators - need to set AmrMesh!");
   }
   else{
     m_amr->registerOperator(s_eb_coar_ave,     m_realm, m_phase);
     m_amr->registerOperator(s_eb_fill_patch,   m_realm, m_phase);
     m_amr->registerOperator(s_eb_flux_reg,     m_realm, m_phase);
-    m_amr->registerOperator(s_eb_quad_cfi,     m_realm, m_phase);
     m_amr->registerOperator(s_eb_gradient,     m_realm, m_phase);
     m_amr->registerOperator(s_eb_irreg_interp, m_realm, m_phase);
     m_amr->registerOperator(s_eb_pwl_interp,   m_realm, m_phase);
+    m_amr->registerOperator(s_eb_multigrid,    m_realm, m_phase);
   }
 }
 
-bool EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_source, const bool a_zerophi){
+bool EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_source, const bool a_zeroPhi){
   CH_TIME("EddingtonSP1::advance(ebamrcell, ebamrcell)");
   if(m_verbosity > 5){
     pout() << m_name + "::advance(ebamrcell, ebamrcell)" << endl;
   }
 
-  const int finest_level = m_amr->getFinestLevel();
+  // TLDR: We are solving the equation
+  //
+  // (1/c) d(Phi)/dt + kappa*Phi - div(1/(3*kappa) grad(Phi)) = eta/c
+  //
+  // Our EBHelmholtzOp takes the A-coefficient as and the b-coefficient as 1/(3*kappa). Other than that,
+  // the only weird thing about our discretization is that we solve for the "time" c*dt and scale the isotropic
+  // term by c
 
-  if(m_needsMultigridSetup){
-    this->setupMultigrid();
+  bool converged = false;
+
+  if(!m_isSolverSetup){
+    this->setupSolver();
   }
 
-  bool converged;
-
-  // Must have a dummy for checking initial residual
-  EBAMRCellData dummy;
-  EBAMRCellData source;
-  m_amr->allocate(dummy,  m_realm, m_phase, m_nComp);
-  m_amr->allocate(source, m_realm, m_phase, m_nComp);
-  DataOps::setValue(dummy, 0.0);
-
-  // Various source term manipulations. 
-  DataOps::setValue(source, 0.0);
-  DataOps::incr(source, a_source, 1.0);
-#if EddingtonSP1_feature
-  DataOps::scale(source, 1./Units::c); // Source should be scaled by 1./c0
-#endif
-  if(m_stationary){ // Should kappa-scale for transient solvres
-    DataOps::kappaScale(source);
+  // Modify the source term.  Operator is scaled by kappa and source term might also have to be scaled by kappa
+  DataOps::copy(m_scaledSource, a_source);     // Copy source term
+  DataOps::scale(m_scaledSource, 1./Units::c); // Source should be scaled by 1./c0 (due to the way we do the EBHelmholtzOp coefficients)
+  if(m_kappaScale){ 
+    DataOps::kappaScale(m_scaledSource);
   }
 
-  Vector<LevelData<EBCellFAB>* > phi, rhs, res, zero;
+  // Aliasing, because Chombo is not too smart. 
+  Vector<LevelData<EBCellFAB>* > phi;
+  Vector<LevelData<EBCellFAB>* > rhs;
+  Vector<LevelData<EBCellFAB>* > res;
+  Vector<LevelData<EBCellFAB>* > zero;
+
   m_amr->alias(phi,  a_phi);
-  m_amr->alias(rhs,  source);
+  m_amr->alias(rhs,  m_scaledSource);
   m_amr->alias(res,  m_resid);
-  m_amr->alias(zero, dummy);
+  m_amr->alias(zero, m_zero);
 
+  const int finestLevel = m_amr->getFinestLevel();
+  
   if(m_stationary){
-    const Real phi_resid  = m_multigridSolver->computeAMRResidual(phi,  rhs, finest_level, 0); // Incoming residual
-    const Real zero_resid = m_multigridSolver->computeAMRResidual(zero, rhs, finest_level, 0); // Zero residual
+    const Real phiResid  = m_multigridSolver->computeAMRResidual(phi,  rhs, finestLevel, 0); // Incoming residual
+    const Real zeroResid = m_multigridSolver->computeAMRResidual(zero, rhs, finestLevel, 0); // Zero residual
 
-    if(phi_resid > zero_resid*m_multigridTolerance){ // Residual is too large
-      m_multigridSolver->m_convergenceMetric = zero_resid;
-      m_multigridSolver->solveNoInitResid(phi, res, rhs, finest_level, 0, a_zerophi);
+    if(phiResid > zeroResid*m_multigridExitTolerance){ // Residual is too large
+      m_multigridSolver->m_convergenceMetric = zeroResid;
+      m_multigridSolver->solveNoInitResid(phi, res, rhs, finestLevel, 0, a_zeroPhi);
       
       const int status = m_multigridSolver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
       if(status == 1 || status == 8 || status == 9){  // 8 => Norm sufficiently small
@@ -521,24 +565,16 @@ bool EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCel
     else{ // Solution is already good enough
       converged = true;
     }
-    m_multigridSolver->revert(phi, rhs, finest_level, 0);
+    m_multigridSolver->revert(phi, rhs, finestLevel, 0);
 
     DataOps::setCoveredValue(a_phi, 0, 0.0);
   }
   else{
     if(m_useTGA){
-#if EddingtonSP1_feature
-      m_tgaSolver->oneStep(res, phi, rhs, Units::c*a_dt, 0, finest_level, m_time);
-#else
-      m_tgaSolver->oneStep(res, phi, rhs, a_dt, 0, finest_level, m_time);
-#endif
+      m_tgaSolver->oneStep(res, phi, rhs, Units::c*a_dt, 0, finestLevel, m_time);
     }
     else{
-#if EddingtonSP1_feature
-      m_eulerSolver->oneStep(res, phi, rhs, Units::c*a_dt, 0, finest_level, false);
-#else
-      m_eulerSolver->oneStep(res, phi, rhs, a_dt, 0, finest_level, false);
-#endif
+      m_eulerSolver->oneStep(res, phi, rhs, Units::c*a_dt, 0, finestLevel, false);
     }
     
     const int status = m_multigridSolver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
@@ -553,9 +589,189 @@ bool EddingtonSP1::advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCel
   m_amr->averageDown(a_phi, m_realm, m_phase);
   m_amr->interpGhost(a_phi, m_realm, m_phase);
 
-  DataOps::floor(a_phi, 0.0);
-
   return converged;
+}
+
+void EddingtonSP1::setupSolver(){
+  CH_TIME("EddingtonSP1::setupSolver");
+  if(m_verbosity > 5){
+    pout() << m_name + "::setupSolver" << endl;
+  }
+  
+  this->setHelmholtzCoefficients(); // Set coefficients, kappa, aco, bco
+  this->setupHelmholtzFactory();    // Set up the Helmholtz operator factory
+  this->setupMultigrid();           // Set up the AMR multigrid solver
+
+  if(!m_stationary){
+    if(m_useTGA){
+      this->setupTGA();             // Set up TGA integrator
+    }
+    else{
+      this->setupEuler();           // Set up backward Euler integrator
+    }
+  }
+
+  m_isSolverSetup = true;
+}
+
+void EddingtonSP1::setHelmholtzCoefficients(){
+  CH_TIME("EddingtonSP1::setHelmholtzCoefficients");
+  if(m_verbosity > 5){
+    pout() << m_name + "::setHelmholtzCoefficients" << endl;
+  }
+
+  // This loop fills aco with kappa and bco_irreg with 1./kappa
+  if(m_RtSpecies->isKappaConstant()){
+    const Real kap = m_RtSpecies->getKappa(RealVect::Zero);
+    
+    DataOps::setValue(m_helmAco,         kap);
+    DataOps::setValue(m_helmBco,      1./kap);
+    DataOps::setValue(m_helmBcoIrreg, 1./kap);
+  }
+  else{ // If kappa is not constant, we must go through every cell. 
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+
+      LevelData<EBCellFAB>&        helmAco      = *m_helmAco[lvl];
+      LevelData<EBFluxFAB>&        helmBco      = *m_helmBco[lvl];
+      LevelData<BaseIVFAB<Real> >& helmBcoIrreg = *m_helmBcoIrreg[lvl];
+
+      for (DataIterator dit(dbl); dit.ok(); ++dit){
+	const Box cellBox = (m_amr->getGrids(m_realm)[lvl]).get(dit());
+	
+	this->setHelmholtzCoefficientsBox(helmAco[dit()],
+					  helmBcoIrreg[dit()],
+					  cellBox,
+					  lvl,
+					  dit());
+      }
+    }
+
+    m_amr->averageDown(m_helmAco, m_realm, m_phase);
+    m_amr->interpGhost(m_helmAco, m_realm, m_phase);
+    
+    DataOps::averageCellToFaceAllComps(m_helmBco, m_helmAco, m_amr->getDomains()); // Average aco onto face
+    DataOps::invert(m_helmBco);                                                    // Make m_helmBco = 1./kappa
+  }
+
+
+  DataOps::scale(m_helmAco,      1.0);       // m_helmAco      = kappa
+  DataOps::scale(m_helmBco,      1.0/(3.0)); // m_helmBco      = 1/(3*kappa)
+  DataOps::scale(m_helmBcoIrreg, 1.0/(3.0)); // m_helmBcoIrreg = 1/(3*kappa)
+}
+
+void EddingtonSP1::setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
+					       BaseIVFAB<Real>& a_helmBcoIrreg,
+					       const Box        a_cellBox,
+					       const int        a_lvl,
+					       const DataIndex& a_dit){
+  CH_TIME("EddingtonSP1::setHelmholtzCoefficientsBox");
+  if(m_verbosity > 10){
+    pout() << m_name + "::setHelmholtzCoefficientsBox" << endl;
+  }
+
+  const RealVect probLo        = m_amr->getProbLo();
+  const Real dx                = m_amr->getDx()[a_lvl];
+  
+  const EBISBox& ebisbox = a_helmAco.getEBISBox();
+  const EBGraph& ebgraph = ebisbox.getEBGraph();
+
+  // Regular aco
+  BaseFab<Real>& helmAcoReg = a_helmAco.getSingleValuedFAB();
+  for (BoxIterator bit(a_cellBox); bit.ok(); ++bit){
+    const IntVect iv = bit();
+
+    if(ebisbox.isRegular(iv)){
+      const RealVect pos = probLo + iv*dx*RealVect::Unit;
+      helmAcoReg(iv, m_comp) = m_RtSpecies->getKappa(pos);
+    }
+  }
+
+  // Irregular cells
+  VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[a_dit];
+  for (vofit.reset(); vofit.ok(); ++vofit){
+    const VolIndex& vof = vofit();
+
+    const RealVect pos   = probLo + Location::position(m_dataLocation, vof, ebisbox, dx);
+    const Real     kappa = m_RtSpecies->getKappa(pos);
+    
+    a_helmAco     (vof, m_comp) = kappa;
+    a_helmBcoIrreg(vof, m_comp) = 1./kappa;
+  }
+}
+
+void EddingtonSP1::setupHelmholtzFactory(){
+  CH_TIME("EddingtonSP1::setupHelmholtzFactory");
+  if(m_verbosity > 5){
+    pout() << m_name + "::setupHelmholtzFactory" << endl;
+  }
+
+  const int finestLevel = m_amr->getFinestLevel();
+
+  const Vector<RefCountedPtr<EBLevelGrid> >&             levelGrids   = m_amr->getEBLevelGrid          (m_realm, m_phase);
+  const Vector<RefCountedPtr<EbCoarAve> >&               coarAve      = m_amr->getCoarseAverage        (m_realm, m_phase);
+  const Vector<RefCountedPtr<EBFluxRegister> >&          fluxReg      = m_amr->getFluxRegister         (m_realm, m_phase);
+  const Vector<RefCountedPtr<EBMultigridInterpolator> >& interpolator = m_amr->getMultigridInterpolator(m_realm, m_phase);
+
+  // Coarsest domain used for multigrid. The user specifies the minimum number of cells in any
+  // coordinate direction, and we coarsen until we have a domain which satisfies that constraint. 
+  ProblemDomain bottomDomain = m_amr->getDomains()[0];
+  while(bottomDomain.domainBox().shortside() >= 2*m_minCellsBottom){
+    bottomDomain.coarsen(2);
+  }
+
+  // Number of ghost cells in data holders
+  const IntVect ghostPhi   = m_amr->getNumberOfGhostCells()*IntVect::Unit;
+  const IntVect ghostRhs   = m_amr->getNumberOfGhostCells()*IntVect::Unit;
+
+  // Handle to boundary condition factories for domain and EB in an EBHelmholtzOp context.
+  RefCountedPtr<EBHelmholtzDomainBCFactory> domainBcFactory;
+  RefCountedPtr<EBHelmholtzEBBCFactory> ebbcFactory;
+  
+  // Domain bcs use a wrapper for fetching the bc function on a specified edge
+  domainBcFactory = RefCountedPtr<EBHelmholtzDomainBCFactory> (new EBHelmholtzEddingtonSP1DomainBCFactory(m_domainBc, m_RtSpecies, m_reflectCoefOne, m_reflectCoefTwo));
+
+  // For EBs we run with only one type of BC (for now). This code sets up the embedded boundary conditions. In parseEBBC we happened to
+  // read a line from the input script in the format = <type> <value> which was put into a function. Associate that function here. 
+  switch(m_ebbc.first) {
+  case EBBCType::Dirichlet:
+    ebbcFactory = RefCountedPtr<EBHelmholtzDirichletEBBCFactory> (new EBHelmholtzDirichletEBBCFactory(m_multigridBcOrder, m_multigridBcWeight, m_ebbc.second));
+    break;
+  case EBBCType::Neumann:
+    ebbcFactory = RefCountedPtr<EBHelmholtzEBBCFactory> (new EBHelmholtzNeumannEBBCFactory(m_ebbc.second));
+    break;
+  case EBBCType::Larsen: 
+    ebbcFactory = RefCountedPtr<EBHelmholtzEBBCFactory> (new EBHelmholtzLarsenEBBCFactory (m_RtSpecies, m_reflectCoefOne, m_reflectCoefTwo, m_ebbc.second));
+    break;
+  default:
+    MayDay::Error("EddingtonSP1::setupHelmholtzFactory - logic bust in EB BC factory");
+    break;
+  }
+
+  // Set up the operator
+  m_helmholtzOpFactory = RefCountedPtr<EBHelmholtzOpFactory> (new EBHelmholtzOpFactory(m_dataLocation,
+										       m_alpha,
+										       m_beta,
+										       m_amr->getProbLo(),
+										       levelGrids,
+										       interpolator,
+										       fluxReg,
+										       coarAve,
+										       m_amr->getRefinementRatios(),
+										       m_amr->getDx(),
+										       m_helmAco.getData(),
+										       m_helmBco.getData(),
+										       m_helmBcoIrreg.getData(),
+										       domainBcFactory,
+										       ebbcFactory,
+										       ghostPhi,
+										       ghostRhs,
+										       m_multigridRelaxMethod,
+										       bottomDomain,
+										       m_amr->getMaxBoxSize()));
+										       
+
+  
 }
 
 void EddingtonSP1::setupMultigrid(){
@@ -564,355 +780,70 @@ void EddingtonSP1::setupMultigrid(){
     pout() << m_name + "::setupMultigrid" << endl;
   }
 
-  if(!m_hasDeeperMultigridLevels){
-    this->defineDeeperMultigridLevels();
-    m_hasDeeperMultigridLevels = true;
-  }
-  
-  this->setMultigridCoefficients();       // Set coefficients, kappa, aco, bco
-  this->setupOperatorFactory(); // Set the operator factory
-  this->setupMultigridSolver();        // Set up the AMR multigrid solver
-
-  if(!m_stationary){
-    if(m_useTGA){
-      this->setupTGA();
-    }
-    else{
-      this->setupEuler();
-    }
-  }
-
-  m_needsMultigridSetup = false;
-}
-
-void EddingtonSP1::setMultigridCoefficients(){
-  CH_TIME("EddingtonSP1::setMultigridCoefficients");
-  if(m_verbosity > 5){
-    pout() << m_name + "::setMultigridCoefficients" << endl;
-  }
-
-  m_amr->allocate(m_aco,        m_realm, m_phase, m_nComp);
-  m_amr->allocate(m_bco,        m_realm, m_phase, m_nComp);
-  m_amr->allocate(m_bco_irreg,  m_realm, m_phase, m_nComp);
-
-  this->setACoefAndBCoef();
-}
-
-void EddingtonSP1::setACoefAndBCoef(){
-  CH_TIME("EddingtonSP1::setACoefAndBCoef");
-  if(m_verbosity > 5){
-    pout() << m_name + "::setACoefAndBCoef" << endl;
-  }
-
-  // This loop fills aco with kappa and bco_irreg with 1./kappa
-  if(m_RtSpecies->isKappaConstant()){
-    const Real kap = m_RtSpecies->getKappa(RealVect::Zero);
-    DataOps::setValue(m_aco, kap);
-    DataOps::setValue(m_bco, 1./kap);
-    DataOps::setValue(m_bco_irreg, 1./kap);
-  }
-  else{ // If kappa is not constant, we need to go through each cell to determine it
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-      const RealVect origin = m_amr->getProbLo();
-      const Real dx         = m_amr->getDx()[lvl];
-    
-      LevelData<EBCellFAB>& aco            = *m_aco[lvl];
-      LevelData<EBFluxFAB>& bco            = *m_bco[lvl];
-      LevelData<BaseIVFAB<Real> >& bco_irr = *m_bco_irreg[lvl];
-
-      for (DataIterator dit = aco.dataIterator(); dit.ok(); ++dit){
-	const Box box = (m_amr->getGrids(m_realm)[lvl]).get(dit());
-	this->setACoefAndBCoefBox(aco[dit()], bco_irr[dit()], box, origin, dx, lvl, dit());
-      }
-    }
-
-    m_amr->averageDown(m_aco, m_realm, m_phase);
-    m_amr->interpGhost(m_aco, m_realm, m_phase);
-    DataOps::averageCellToFaceAllComps(m_bco, m_aco, m_amr->getDomains()); // Average aco onto face
-    DataOps::invert(m_bco); // Make m_bco = 1./kappa
-  }
-
-#if EddingtonSP1_feature // Different scaling for the RTE
-  DataOps::scale(m_aco,       1.0);       // aco = c*kappa
-  DataOps::scale(m_bco,       1.0/(3.0)); // bco = c/(3*kappa)
-  DataOps::scale(m_bco_irreg, 1.0/(3.0)); // bco = c/(3*kappa)
-#else // Original code before different scaling
-  DataOps::scale(m_aco,       Units::c);       // aco = c*kappa
-  DataOps::scale(m_bco,       Units::c/(3.0)); // bco = c/(3*kappa)
-  DataOps::scale(m_bco_irreg, Units::c/(3.0)); // bco = c/(3*kappa)
-#endif
-}
-
-void EddingtonSP1::setACoefAndBCoefBox(EBCellFAB&       a_aco,
-				       BaseIVFAB<Real>& a_bco,
-				       const Box        a_box,
-				       const RealVect   a_origin,
-				       const Real       a_dx,
-				       const int        a_lvl,
-				       const DataIndex& a_dit){
-  CH_TIME("EddingtonSP1::setACoefAndBCoefBox");
-  if(m_verbosity > 10){
-    pout() << m_name + "::setACoefAndBCoefBox" << endl;
-  }
-  
-  const EBISBox& ebisbox = a_aco.getEBISBox();
-  const EBGraph& ebgraph = ebisbox.getEBGraph();
-
-  // Regular aco
-  BaseFab<Real>& aco_fab = a_aco.getSingleValuedFAB();
-  for (BoxIterator bit(a_box); bit.ok(); ++bit){
-    const IntVect iv = bit();
-
-    const RealVect pos = a_origin + iv*a_dx*RealVect::Unit;
-    aco_fab(iv, m_comp) = m_RtSpecies->getKappa(pos);
-  }
-
-
-  // Irregular stuff
-  VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[a_dit];
-  for (vofit.reset(); vofit.ok(); ++vofit){
-    const VolIndex& vof = vofit();
-
-    const RealVect pos  = EBArith::getVofLocation(vof, a_dx*RealVect::Unit, a_origin);
-    const Real tmp = m_RtSpecies->getKappa(pos);
-    a_aco(vof, m_comp) = tmp;
-    a_bco(vof, m_comp) = 1./tmp;
-  }
-}
-
-void EddingtonSP1::defineDeeperMultigridLevels(){
-  CH_TIME("EddingtonSP1::defineDeeperMultigridLevels");
-  if(m_verbosity > 5){
-    pout() << m_name + "::defineDeeperMultigridLevels" << endl;
-  }
-
-  const int coar_ref = 2;
-
-  Vector<ProblemDomain> m_mg_domains(0);
-  Vector<DisjointBoxLayout> m_mg_grids(0);
-  
-  m_mg_domains.resize(0);
-  m_mg_grids.resize(0);
-  m_mg_levelgrids.resize(0);
-
-  // Get some stuff from AmrMesh on how to decompose the levels
-  const Vector<ProblemDomain>& domains = m_amr->getDomains();
-  const int max_box_size               = m_amr->getMaxBoxSize();
-  const int blocking_factor            = m_amr->getBlockingFactor();
-  const int num_numEbGhostsCells       = m_amr->getNumberOfEbGhostCells();
-
-  int num_coar       = 0;
-  bool has_coar      = true;
-  ProblemDomain fine = domains[0];
-
-  // Coarsen problem domains and create grids
-  while(num_coar < m_numCoarseningsBeforeAggregation || !has_coar){
-
-    // Check if we can coarsen
-    const ProblemDomain coar = fine.coarsen(coar_ref);
-    const Box coar_box       = coar.domainBox();
-    for (int dir = 0; dir < SpaceDim; dir++){
-      if(coar_box.size()[dir] < max_box_size || coar_box.size()[dir]%max_box_size != 0){
-	has_coar = false;
-      }
-    }
-
-    if(has_coar){
-      // Split the domain into pieces, then order and load balance them
-      Vector<Box> boxes;
-      Vector<int> proc_assign;
-      domainSplit(coar, boxes, max_box_size, blocking_factor);
-      mortonOrdering(boxes);
-      LoadBalancing::makeBalance(proc_assign, boxes);
-
-      // Add problem domain and grid
-      m_mg_domains.push_back(coar);
-      m_mg_grids.push_back(DisjointBoxLayout(boxes, proc_assign, coar));
-
-      // Define the EBLevelGrids
-      const int idx = m_mg_grids.size() - 1; // Last element added
-      m_mg_levelgrids.push_back(EBLevelGrid(m_mg_grids[idx],
-					    m_mg_domains[idx],
-					    num_numEbGhostsCells,
-					    m_ebis));
-
-      // Next iterate
-      fine = coar;
-      num_coar++;
-    }
-    else{
-      break;
-    }
-  }
-}
-
-void EddingtonSP1::setupOperatorFactory(){
-  CH_TIME("EddingtonSP1::setupOperatorFactory");
-  if(m_verbosity > 5){
-    pout() << m_name + "::setupOperatorFactory" << endl;
-  }
-
-  // Set the domain bc factory. This can use arbitrary neumann/dirichelt/robin with functions. This the same larsen coefficients on all domain sides.
-  // If you want to use different coefficients on different domain sides, here is where you would do it. 
-  std::map<EddingtonSP1DomainBc::Wall, RefCountedPtr<RobinCoefficients> > larsenCoeffs;
-  for (int dir = 0; dir < SpaceDim; dir++){
-    for (SideIterator sit; sit.ok(); ++sit){
-      EddingtonSP1DomainBc::Wall             curWall = std::make_pair(dir, sit());
-      const EddingtonSP1DomainBc::BcFunction curFunc = m_domainBc.getBc(curWall).second;
-
-      auto larsen = RefCountedPtr<LarsenCoefficients>(new LarsenCoefficients(m_RtSpecies, m_reflectionCoefficientOne, m_reflectionCoefficientTwo, curFunc));
-
-      larsenCoeffs.emplace(curWall, larsen);
-    }
-  }
-  auto fact = RefCountedPtr<ConductivityEddingtonSP1DomainBcFactory> (new ConductivityEddingtonSP1DomainBcFactory(m_domainBc, larsenCoeffs, m_amr->getProbLo()));
-
-  // Set the embedded boundary bc factory. This uses a constant value for the right-hand side on the EB. 
-  RefCountedPtr<BaseEBBCFactory> ebbcFactory;
-  switch(m_ebbc.first){
-  case EbBcType::Dirichlet: {
-    auto dirichletEbBcFactory = RefCountedPtr<DirichletConductivityEBBCFactory> (new DirichletConductivityEBBCFactory());
-    dirichletEbBcFactory->setValue(m_ebbc.second);
-    dirichletEbBcFactory->setOrder(1);
-    ebbcFactory = RefCountedPtr<BaseEBBCFactory> (dirichletEbBcFactory);
-    break;
-  }
-  case EbBcType::Neumann: {
-    auto neumannEbBcFactory = RefCountedPtr<NeumannConductivityEBBCFactory> (new NeumannConductivityEBBCFactory());
-    neumannEbBcFactory->setValue(m_ebbc.second);
-    ebbcFactory = RefCountedPtr<BaseEBBCFactory> (neumannEbBcFactory);
-    break;
-  }
-  case EbBcType::Robin: {
-    // Make the appropriate coefficients (Larsen) with right-hand side. 
-    std::function<Real(const RealVect, const Real) > ebFunc = [&ebbc=this->m_ebbc](const RealVect a_pos, const Real a_time) {
-      return ebbc.second;
-    };
-    
-    auto robinCoefficients = RefCountedPtr<LarsenCoefficients> (new LarsenCoefficients(m_RtSpecies, m_reflectionCoefficientOne, m_reflectionCoefficientTwo, ebFunc));
-
-    auto robinEbBcFactory = RefCountedPtr<RobinConductivityEbBcFactory> (new RobinConductivityEbBcFactory(m_amr->getProbLo()));
-    robinEbBcFactory->setCoefficients(robinCoefficients);
-    robinEbBcFactory->setStencilType(IrregStencil::StencilType::LeastSquares);
-    ebbcFactory = RefCountedPtr<BaseEBBCFactory> (robinEbBcFactory);
-    break;
-  }
-  default:
-    MayDay::Abort("EddingtonSP1::setupOperatorFactory -- bad EBBC!");
-    break;
-  }
-
-
-  //  Make relaxation type into int code
-  int relaxType;
-  switch(m_multigridRelaxMethod){
-  case RelaxationMethod::Jacobi:
-    relaxType = 0;
-    break;
-  case RelaxationMethod::GaussSeidel:
-    relaxType = 1;
-    break;
-  case RelaxationMethod::GSRBFast:
-    relaxType = 2;
-    break;
-  default:
-    MayDay::Abort("EddingtonSP1::setupOperatorFactory - logic bust when setting relaxation method");
-    break;
-  }
-
-  // alpha and beta-coefficients for the Helmholtz equation. 
-  const Real alpha =  1.0;
-  const Real beta  = -1.0;
-
-  // Number of ghost cells. 
-  const int ghost = m_amr->getNumberOfGhostCells();
-
-
-  // AmrMesh uses RefCounted levelgrids. EbHelmholtzOpFactory does not. Convert them there. 
-  Vector<EBLevelGrid> levelgrids;
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){ 
-    levelgrids.push_back(*(m_amr->getEBLevelGrid(m_realm, m_phase)[lvl])); 
-  }
-
-  // Create operator factory.
-  m_operatorFactory = RefCountedPtr<EbHelmholtzOpFactory> (new EbHelmholtzOpFactory(levelgrids,
-										    m_amr->getEBQuadCFInterp(m_realm, m_phase),
-										    m_amr->getFluxRegister(m_realm, m_phase),
-										    alpha,
-										    beta,
-										    m_aco.getData(),
-										    m_bco.getData(),
-										    m_bco_irreg.getData(),
-										    m_amr->getDx()[0],
-										    m_amr->getRefinementRatios(),
-										    fact,
-										    ebbcFactory,
-										    ghost*IntVect::Unit,
-										    ghost*IntVect::Unit,
-										    relaxType,
-										    m_numCellsBottomDrop,
-										    -1,
-										    m_mg_levelgrids));
-}
-
-void EddingtonSP1::setupMultigridSolver(){
-  CH_TIME("EddingtonSP1::setupMultigridSolver");
-  if(m_verbosity > 5){
-    pout() << m_name + "::setupMultigridSolver" << endl;
-  }
-
-  const int finest_level       = m_amr->getFinestLevel();
-  const ProblemDomain coar_dom = m_amr->getDomains()[0];
-
-  // Select bottom solver
+  // Select the bottom solver
   LinearSolver<LevelData<EBCellFAB> >* botsolver = NULL;
-  if(m_bottomSolver == BottomSolver::Simple){
-    m_simpleSolver.setNumSmooths(m_numSmoothingsForSimpleSolver);
+  if(m_bottomSolverType == BottomSolverType::Simple){
     botsolver = &m_simpleSolver;
   }
-  else if(m_bottomSolver == BottomSolver::BiCGStab){
+  else if(m_bottomSolverType == BottomSolverType::BiCGStab){
     botsolver = &m_bicgstab;
+  }
+  else if(m_bottomSolverType == BottomSolverType::GMRES){
+    botsolver = &m_gmres;
+    m_gmres.m_verbosity = 0; // Shut up. 
   }
 
   // Make m_multigridType into an int for multigrid
-  int gmg_type;
-  if(m_multigridType == MultigridType::FAS){
-    gmg_type = 0;
-  }
-  else if(m_multigridType == MultigridType::VCycle){
-    gmg_type = 1;
-  }
-  else if(m_multigridType == MultigridType::FCycle){
-    gmg_type = 2;
+  int gmgType;
+  switch(m_multigridType){
+  case MultigridType::VCycle:
+    gmgType = 1;
+    break;
+  case MultigridType::WCycle:
+    gmgType = 2;
+    break;
+  default:
+    MayDay::Error("EddingtonSP1::setupMultigrid -- logic bust in multigrid type selection");
   }
 
+  const int finestLevel              = m_amr->getFinestLevel();
+  const ProblemDomain coarsestDomain = m_amr->getDomains()[0];
+
+  // Define AMRMultiGrid
   m_multigridSolver = RefCountedPtr<AMRMultiGrid<LevelData<EBCellFAB> > > (new AMRMultiGrid<LevelData<EBCellFAB> >());
-  m_multigridSolver->define(coar_dom, *m_operatorFactory, botsolver, 1 + finest_level);
+  
+  m_multigridSolver->define(coarsestDomain, *m_helmholtzOpFactory, botsolver, 1 + finestLevel);
   m_multigridSolver->setSolverParameters(m_multigridPreSmooth,
 					 m_multigridPostSmooth,
 					 m_multigridBottomSmooth,
-					 gmg_type,
+					 gmgType,
 					 m_multigridMaxIterations,
-					 m_multigridTolerance,
-					 m_multigridHang,
+					 m_multigridExitTolerance,
+					 m_multigridExitHang,
 					 1.E-99); // Residue set through other means
-  m_multigridSolver->m_imin    = m_multigridMinIterations;
+  
+  m_multigridSolver->m_imin      = m_multigridMinIterations;
   m_multigridSolver->m_verbosity = m_multigridVerbosity;
 
   // Dummies for init
-  EBAMRCellData dummy1, dummy2;
+  EBAMRCellData dummy1;
+  EBAMRCellData dummy2;
+  
   m_amr->allocate(dummy1, m_realm, m_phase, m_nComp);
   m_amr->allocate(dummy2, m_realm, m_phase, m_nComp);
+  
   DataOps::setValue(dummy1, 0.0);
   DataOps::setValue(dummy2, 0.0);
 
   // Aliasing
-  Vector<LevelData<EBCellFAB>* > phi, rhs;
+  Vector<LevelData<EBCellFAB>* > phi;
+  Vector<LevelData<EBCellFAB>* > rhs;
+
   m_amr->alias(phi, dummy1);
   m_amr->alias(rhs, dummy2);
 
-  // Init solver
-  m_multigridSolver->init(phi, rhs, finest_level, 0);
+  // Init solver. This instantiates all the operators in AMRMultiGrid so we can just call "solve"
+  m_multigridSolver->init(phi, rhs, finestLevel, 0);
 }
 
 void EddingtonSP1::setupTGA(){
@@ -921,18 +852,12 @@ void EddingtonSP1::setupTGA(){
     pout() << m_name + "::setupTGA" << endl;
   }
   
-  const int finest_level       = m_amr->getFinestLevel();
-  const ProblemDomain coar_dom = m_amr->getDomains()[0];
-  const Vector<int> ref_rat    = m_amr->getRefinementRatios();
-
+  const int finestLevel              = m_amr->getFinestLevel();
+  const ProblemDomain coarsestDomain = m_amr->getDomains()[0];
+  const Vector<int> refRat           = m_amr->getRefinementRatios();
+  
   m_tgaSolver = RefCountedPtr<AMRTGA<LevelData<EBCellFAB> > >
-    (new AMRTGA<LevelData<EBCellFAB> > (m_multigridSolver, *m_operatorFactory, coar_dom, ref_rat, 1 + finest_level, m_multigridSolver->m_verbosity));
-
-  // Must init gmg for TGA
-  Vector<LevelData<EBCellFAB>* > phi, rhs;
-  m_amr->alias(phi, m_phi);
-  m_amr->alias(rhs, m_source);
-  m_multigridSolver->init(phi, rhs, finest_level, 0);
+    (new AMRTGA<LevelData<EBCellFAB> > (m_multigridSolver, *m_helmholtzOpFactory, coarsestDomain, refRat, 1 + finestLevel, m_multigridSolver->m_verbosity));
 }
 
 void EddingtonSP1::setupEuler(){
@@ -941,14 +866,12 @@ void EddingtonSP1::setupEuler(){
     pout() << m_name + "::setupEuler" << endl;
   }
 
-  const int finest_level       = m_amr->getFinestLevel();
-  const ProblemDomain coar_dom = m_amr->getDomains()[0];
-  const Vector<int> ref_rat    = m_amr->getRefinementRatios();
+  const int finestLevel              = m_amr->getFinestLevel();
+  const ProblemDomain coarsestDomain = m_amr->getDomains()[0];
+  const Vector<int> refRat           = m_amr->getRefinementRatios();
 
   m_eulerSolver = RefCountedPtr<EBBackwardEuler> 
-    (new EBBackwardEuler (m_multigridSolver, *m_operatorFactory, coar_dom, ref_rat, 1 + finest_level, m_multigridSolver->m_verbosity));
-
-  // Note: If this crashes, try to init gmg first
+    (new EBBackwardEuler (m_multigridSolver, *m_helmholtzOpFactory, coarsestDomain, refRat, 1 + finestLevel, m_multigridSolver->m_verbosity));
 }
 
 void EddingtonSP1::computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi){
@@ -957,10 +880,13 @@ void EddingtonSP1::computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellDat
     pout() << m_name + "::computeBoundaryFlux" << endl;
   }
 
-  const int finest_level = m_amr->getFinestLevel();
+  // TLDR: Equations say boundary flux => F_n = c*Psi/2, so we
+  //       extrapolate the solution to the boundary and multiply by c/2. 
+
+  const int finestLevel = m_amr->getFinestLevel();
   
   const IrregAmrStencil<EbCentroidInterpolationStencil>& sten = m_amr->getEbCentroidInterpolationStencilStencils(m_realm, m_phase);
-  for(int lvl = 0; lvl <= finest_level; lvl++){
+  for(int lvl = 0; lvl <= finestLevel; lvl++){
     sten.apply(*a_ebFlux[lvl], *a_phi[lvl], lvl, true);
   }
 
@@ -975,6 +901,8 @@ void EddingtonSP1::computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellD
     pout() << m_name + "::computeDomainFlux" << endl;
   }
 
+  // Equations say boundary flux => F_n = c*Psi/2.
+  // This code simply extrapolates to the boundary, using linear interpolation if it can.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
       
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
@@ -1011,7 +939,7 @@ void EddingtonSP1::computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellD
 		extrap(face, m_comp) = 1.5*data_fab(iv0, m_comp) - 0.5*data_fab(iv1, m_comp); // Should be ok
 	      }
 	      else{ // Not enough cells available, use cell-centered only
-		  extrap(face, m_comp) = data_fab(iv0, m_comp);
+		extrap(face, m_comp) = data_fab(iv0, m_comp);
 	      }
 	    }
 
@@ -1030,18 +958,21 @@ void EddingtonSP1::computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi
     pout() << m_name + "::computeFlux" << endl;
   }
 
-  const int finest_level = m_amr->getFinestLevel();
+  // Equations say flux = -c/(3*kappa)*grad(Psi).
+  //
+  // We happen that our discretization uses Aco = kappa, so we just divide by it rather than computing
+  // it on the mesh again.
 
-  m_amr->computeGradient(a_flux, a_phi, m_realm, m_phase); // flux = grad(phi)
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    DataOps::divideByScalar(*a_flux[lvl], *m_aco[lvl]);   // flux = grad(phi)/(c*kappa)
-    DataOps::scale(*a_flux[lvl], -Units::c*Units::c/3.0);  // flux = -c*grad(phi)/3.
+  m_amr->computeGradient(a_flux, a_phi, m_realm, m_phase);   // flux = grad(phi)
+  
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+    DataOps::divideByScalar(*a_flux[lvl], *m_helmAco[lvl]);  // flux = grad(phi)/(c*kappa)
+    DataOps::scale(*a_flux[lvl], -Units::c*Units::c/3.0);    // flux = -c*grad(phi)/3.
   }
 
   m_amr->averageDown(a_flux, m_realm, m_phase);
   m_amr->interpGhost(a_flux, m_realm, m_phase);
 }
-
 
 void EddingtonSP1::computeDensity(EBAMRCellData& a_isotropic, const EBAMRCellData& a_phi){
   CH_TIME("EddingtonSP1::computeDensity");
@@ -1049,10 +980,10 @@ void EddingtonSP1::computeDensity(EBAMRCellData& a_isotropic, const EBAMRCellDat
     pout() << m_name + "::computeDensity" << endl;
   }
 
-  const int finest_level = m_amr->getFinestLevel();
+  // For EddingtonSP1, the solution vector is only the isotropic part of the RTE, so just copy over. 
   
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    const Interval interv(0,0);
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+    const Interval interv(m_comp, m_comp);
     a_phi[lvl]->localCopyTo(interv, *a_isotropic[lvl], interv);
   }
 }

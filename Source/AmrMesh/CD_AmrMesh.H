@@ -4,7 +4,7 @@
  */
 
 /*!
-  @file   AmrMesh.H
+  @file   CD_AmrMesh.H
   @brief  Declaration of core class for handling AMR-related operations (with embedded boundaries)
   @author Robert Marskar
   @todo   a_lmax is a dead parameter in buildGrids. Fix this and the dependencies. 
@@ -188,6 +188,14 @@ public:
     @return True if the Realm exists and false otherwise. 
   */
   bool queryRealm(const std::string a_realm) const;
+
+  /*!
+    @brief Check if mesh has an EBCF
+    @note Not implemented.
+  */
+  bool getEbCf(){
+    return true;
+  }
 
   /*!
     @brief Register a new Realm
@@ -612,7 +620,7 @@ public:
   /*!
     @brief Parse the grid generation algorithm. 
   */
-  void parsegridGeneration();
+  void parseGridGeneration();
 
   /*!
     @brief Parse the verbosity for AmrMesh. 
@@ -633,11 +641,6 @@ public:
     @brief Set maximum simulation depth. 
   */
   void parseMaxSimulationDepth();
-
-  /*!
-    @brief Parse whether or not AmrMesh to forget about ebcf (user must guarantee that this is the case)
-  */
-  void parseEbCf();
 
   /*!
     @brief Parse refinement ratios
@@ -697,6 +700,11 @@ public:
   void parseNumGhostCells();
 
   /*!
+    @brief Parse settings for the multigrid interpolator
+  */
+  void parseMultigridInterpolator();
+
+  /*!
     @brief Parse the default redistribution radius
   */
   void parseRedistributionRadius();
@@ -720,7 +728,6 @@ public:
   */
   void regrid(const Vector<IntVectSet>& a_tags,
 	      const int                 a_lmin,
-	      const int                 a_regsize=1, 
 	      const int                 a_hardcap=-1);
 
   /*!
@@ -756,20 +763,13 @@ public:
   /*!
     @brief Regrid AMR operators. This is done for all Realms. 
     @param[in] a_lmin    Coarsest grid level that has changed. 
-    @param[in] a_regsize Dead parameter
   */
-  void regridOperators(const int a_lmin,
-		       const int a_regsize=1);
+  void regridOperators(const int a_lmin);
 
   /*!
     @brief Do a sanity check to make sure everything is set up correctly
   */
   void sanityCheck() const;
-
-  /*!
-    @brief True if there is ebcf crossing
-  */
-  bool getEbCf() const;
 
   /*!
     @brief Get finest grid level. 
@@ -952,9 +952,9 @@ public:
   Vector<RefCountedPtr<EbGhostCloud> >& getGhostCloud(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
-    @brief Get the old interpolation utility (needed for multigrid)
+    @brief Get multigrid interpolation utility
   */
-  Vector<RefCountedPtr<EBQuadCFInterp> >& getEBQuadCFInterp(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBMultigridInterpolator> >& getMultigridInterpolator(const std::string a_realm, const phase::which_phase a_phase);
 
   /*!
     @brief Get piecewise linear ghost cell interpolator
@@ -1011,7 +1011,7 @@ public:
     @param[in] a_phase Phase (gas or solid)
   */
   const IrregAmrStencil<CentroidInterpolationStencil>& getCentroidInterpolationStencils(const std::string a_realm,
-									     const phase::which_phase a_phase) const;
+											const phase::which_phase a_phase) const;
 
   /*!
     @brief Get interpolation stencils for going from cell center to cell boundary centroid
@@ -1194,6 +1194,21 @@ protected:
   int m_numLsfGhostCells;
 
   /*!
+    @brief Multigrid interpolation order
+  */
+  int m_multigridInterpOrder;
+
+  /*!
+    @brief Multigrid interpolation radius
+  */
+  int m_multigridInterpRadius;
+
+  /*!
+    @brief Multigrid interpolation weights
+  */
+  int m_multigridInterpWeight;
+
+  /*!
     @brief Redistribution radius
   */
   int m_redistributionRadius;
@@ -1227,11 +1242,6 @@ protected:
     @brief radius for irregular stencils
   */
   int m_irregStenRadius;
-
-  /*!
-    @brief Grids have EB x CF crossing
-  */
-  bool m_hasEbCf;
 
   /*!
     @brief Has grids or not

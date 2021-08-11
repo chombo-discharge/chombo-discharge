@@ -42,7 +42,7 @@ MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&             a_mfis,
 					   const EBBCFactory&      a_ebBcFactory,					   
 					   const IntVect&          a_ghostPhi,
 					   const IntVect&          a_ghostRhs,
-					   const RelaxType&        a_relaxationMethod,
+					   const Smoother&         a_smoother,
 					   const ProblemDomain&    a_bottomDomain,
 					   const int&              a_jumpOrder,
 					   const int&              a_jumpWeight,
@@ -72,7 +72,7 @@ MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&             a_mfis,
   m_ghostPhi = a_ghostPhi;
   m_ghostRhs = a_ghostRhs;
 
-  m_relaxMethod  = a_relaxationMethod;
+  m_smoother     = a_smoother;
   m_bottomDomain = a_bottomDomain;
 
   m_jumpOrder  = a_jumpOrder;
@@ -509,7 +509,7 @@ MFHelmholtzOp* MFHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, 
 			     m_ghostRhs,
 			     m_jumpOrder,
 			     m_jumpWeight,
-			     m_relaxMethod);
+			     m_smoother);
 
     mgOp->setJump(jump);
   }
@@ -586,7 +586,7 @@ MFHelmholtzOp* MFHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
 					m_ghostRhs,
 					m_jumpOrder,
 					m_jumpWeight,
-					m_relaxMethod);
+					m_smoother);
 
   // Give the operator access by reference to the jump data. 
   op->setJump(m_amrJump[amrLevel]);

@@ -29,20 +29,16 @@ public:
   /*!
     @brief Weak constructor. Must subsequently set order, weight, and value. 
   */
-  MFHelmholtzRobinEBBCFactory();
+  MFHelmholtzRobinEBBCFactory() = delete;
 
   /*!
     @brief Full constructor which sets order and value on EB. 
-    @param[in] a_order  Approximation order
-    @param[in] a_weight Weighting factor for stencils
     @param[in] a_A      Constant A-coefficient
     @param[in] a_B      Constant B-coefficient
     @param[in] a_C      Constant C-coefficient
     @note The order is also the attempted radius of the stencil. 
   */
-  MFHelmholtzRobinEBBCFactory(const int  a_order,
-			      const int  a_weight,
-			      const Real a_A,
+  MFHelmholtzRobinEBBCFactory(const Real a_A,
 			      const Real a_B,
 			      const Real a_C);
 
@@ -55,9 +51,7 @@ public:
     @param[in] a_C      Spatially avrying C-coefficient
 
   */
-  MFHelmholtzRobinEBBCFactory(const int a_order,
-			      const int a_weight,
-			      const std::function<Real(const RealVect& a_pos)>& a_A,
+  MFHelmholtzRobinEBBCFactory(const std::function<Real(const RealVect& a_pos)>& a_A,
 			      const std::function<Real(const RealVect& a_pos)>& a_B,
 			      const std::function<Real(const RealVect& a_pos)>& a_C);
 

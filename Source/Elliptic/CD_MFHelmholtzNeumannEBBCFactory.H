@@ -30,19 +30,17 @@ public:
 
   /*!
     @brief Full constructor which sets order and value on EB. 
-    @param[in] a_order  Approximation order
-    @param[in] a_weight Weighting factor for stencils
     @param[in] a_value  Constant value on EB
     @note The order is also the attempted radius of the stencil. 
   */
-  MFHelmholtzNeumannEBBCFactory(const int a_order, const int a_weight, const Real a_value);
+  MFHelmholtzNeumannEBBCFactory(const Real a_value);
 
   /*!
     @brief Full constructor which sets order and spatially varying value on EBs
     @param[in] a_order Approximation order
     @param[in] a_value Spatially varying value on EBs
   */
-  MFHelmholtzNeumannEBBCFactory(const int a_order, const int a_weight, const std::function<Real(const RealVect& a_pos)>& a_value);
+  MFHelmholtzNeumannEBBCFactory(const std::function<Real(const RealVect& a_pos)>& a_value);
 
   /*!
     @brief Default constructor

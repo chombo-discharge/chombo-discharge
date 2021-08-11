@@ -26,7 +26,8 @@ void ElectrostaticEbBc::clear(){
 }
 
 void ElectrostaticEbBc::addEbBc(const Electrode& a_electrode, const BcFunction& a_bcFunction){
-  m_bcFunctions.emplace_back(std::make_pair(a_electrode, a_bcFunction));
+  //  m_bcFunctions.emplace_back(std::make_pair(a_electrode, a_bcFunction));
+  m_bcFunctions.emplace_back(a_electrode, a_bcFunction);
 }
 
 void ElectrostaticEbBc::setEbBc(const int a_electrode, const BcFunction& a_bcFunction){

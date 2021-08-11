@@ -147,7 +147,7 @@ void ItoPlasmaStepper::setParticleBuffers(){
   for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<McPhoto>& solver = solver_it();
 
-    solver->setHalobuffer(m_halo_buffer);
+    solver->setHaloBuffer(m_halo_buffer);
     solver->setPVRBuffer(m_pvr_buffer);
   }
 }
@@ -174,6 +174,7 @@ void ItoPlasmaStepper::initialData(){
     pout() << "ItoPlasmaStepper::initialData" << endl;
   }
 
+  m_fieldSolver->setPermittivities(); // Set permittivities for Poisson operator
   m_ito->initialData(); // This deposits, of course. 
   m_rte->initialData();
   this->initialSigma();
@@ -2959,7 +2960,7 @@ void ItoPlasmaStepper::advancePhotons(const Real a_dt){
       solver->clear(sourcePhotons);
 
       // Instantaneous advance
-      solver->advancePhotonsStationary(bulkPhotons, ebPhotons, domainPhotons, Photons);
+      solver->advancePhotonsInstantaneous(bulkPhotons, ebPhotons, domainPhotons, Photons);
     }
     else{
       // Add source Photons
@@ -2972,115 +2973,26 @@ void ItoPlasmaStepper::advancePhotons(const Real a_dt){
   }
 }
 
-void ItoPlasmaStepper::sortPhotonsByCell(){
-  CH_TIME("ItoPlasmaStepper::sortPhotonsByCell()");
+void ItoPlasmaStepper::sortPhotonsByCell(McPhoto::WhichContainer a_which){
+  CH_TIME("ItoPlasmaStepper::sortPhotonsByCell(McPhoto::WhichContainer)");
   if(m_verbosity > 5){
-    pout() << "ItoPlasmaStepper::sortPhotonsByCell()" << endl;
+    pout() << "ItoPlasmaStepper::sortPhotonsByCell(McPhoto::WhichContainer)" << endl;
   }
 
   for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->sortPhotonsByCell();
+    solver_it()->sortPhotonsByCell(a_which);
   }
 }
 
-void ItoPlasmaStepper::sortPhotonsByPatch(){
-  CH_TIME("ItoPlasmaStepper::sortPhotonsByPatch()");
+void ItoPlasmaStepper::sortPhotonsByPatch(McPhoto::WhichContainer a_which){
+  CH_TIME("ItoPlasmaStepper::sortPhotonsByPatch(McPhoto::WhichContainer)");
   if(m_verbosity > 5){
-    pout() << "ItoPlasmaStepper::sortPhotonsByPatch()" << endl;
+    pout() << "ItoPlasmaStepper::sortPhotonsByPatch(McPhoto::WhichContainer)" << endl;
   }
 
   for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->sortPhotonsByPatch();
+    solver_it()->sortPhotonsByPatch(a_which);
   }
-}
-
-void ItoPlasmaStepper::sortSourcePhotonsByCell(){
-  CH_TIME("ItoPlasmaStepper::sortSourcePhotonsByCell()");
-  if(m_verbosity > 5){
-    pout() << "ItoPlasmaStepper::sortSourcePhotonsByCell()" << endl;
-  }
-  
-  for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->sortSourcePhotonsByCell();
-  }
-}
-
-void ItoPlasmaStepper::sortSourcePhotonsByPatch(){
-  CH_TIME("ItoPlasmaStepper::sortSourcePhotonsByPatch()");
-  if(m_verbosity > 5){
-    pout() << "ItoPlasmaStepper::sortSourcePhotonsByPatch()" << endl;
-  }
-
-  for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->sortSourcePhotonsByPatch();
-  }
-}
-
-void ItoPlasmaStepper::sortBulkPhotonsByCell(){
-  CH_TIME("ItoPlasmaStepper::sortBulkPhotonsByCell()");
-  if(m_verbosity > 5){
-    pout() << "ItoPlasmaStepper::sortBulkPhotonsByCell()" << endl;
-  }
-
-  for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->sortBulkPhotonsByCell();
-  }
-}
-
-void ItoPlasmaStepper::sortBulkPhotonsByPatch(){
-  CH_TIME("ItoPlasmaStepper::sortBulkPhotonsByPatch()");
-  if(m_verbosity > 5){
-    pout() << "ItoPlasmaStepper::sortBulkPhotonsByPatch()" << endl;
-  }
-
-  for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->sortBulkPhotonsByPatch();
-  }
-}
-
-void ItoPlasmaStepper::sortEbPhotonsByCell(){
-  CH_TIME("ItoPlasmaStepper::sortEbPhotonsByCell()");
-  if(m_verbosity > 5){
-    pout() << "ItoPlasmaStepper::sortEbPhotonsByCell()" << endl;
-  }
-
-  for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->sortEbPhotonsByCell();
-  }
-}
-
-void ItoPlasmaStepper::sortEbPhotonsByPatch(){
-  CH_TIME("ItoPlasmaStepper::sortEbPhotonsByPatch()");
-  if(m_verbosity > 5){
-    pout() << "ItoPlasmaStepper::sortEbPhotonsByPatch()" << endl;
-  }
-
-  for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->sortEbPhotonsByPatch();
-  }
-}
-
-void ItoPlasmaStepper::sortDomainPhotonsByCell(){
-  CH_TIME("ItoPlasmaStepper::sortDomainPhotonsByCell()");
-  if(m_verbosity > 5){
-    pout() << "ItoPlasmaStepper::sortDomainPhotonsByCell()" << endl;
-  }
-
-  for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->sortDomainPhotonsByCell();
-  }
-}
-
-void ItoPlasmaStepper::sortDomainPhotonsByPatch(){
-  CH_TIME("ItoPlasmaStepper::sortDomainPhotonsByPatch()");
-  if(m_verbosity > 5){
-    pout() << "ItoPlasmaStepper::sortDomainPhotonsByPatch()" << endl;
-  }
-
-  for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->sortDomainPhotonsByPatch();
-  }
-
 }
 
 bool ItoPlasmaStepper::loadBalanceThisRealm(const std::string a_realm) const{
@@ -3361,7 +3273,7 @@ void ItoPlasmaStepper::computeEdotJSourceNWO2(const Real a_dt){
 
     ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::bulk);
 
-    const DepositionType::Which deposition = solver->getDeposition();
+    const DepositionType deposition = solver->getDeposition();
 
     if((mobile || diffusive) && q != 0){
 

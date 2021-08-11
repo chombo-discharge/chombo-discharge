@@ -24,16 +24,6 @@ MFHelmholtzEBBC::~MFHelmholtzEBBC(){
 
 }
 
-void MFHelmholtzEBBC::setOrder(const int a_order){
-  CH_assert(a_order > 0);
-  m_order = a_order;
-}
-
-void MFHelmholtzEBBC::setWeight(const int a_weight){
-  CH_assert(a_weight > 0);
-  m_weight = a_weight;
-}
-
 void MFHelmholtzEBBC::define(){
   this->defineMultiPhase();
   this->defineSinglePhase();
@@ -47,11 +37,11 @@ void MFHelmholtzEBBC::defineMultiPhase(){
   m_kappaDivFStencils.define(dbl);
 
   for (DataIterator dit(dbl); dit.ok(); ++dit){
-    const Box box          = dbl[dit()];
-    const EBISBox& ebisbox = m_eblg.getEBISL()[dit()];
-    const EBGraph& ebgraph = ebisbox.getEBGraph();
-    const IntVectSet& ivs  = ebisbox.getIrregIVS(box);
-    const BaseIVFAB<Real>& Bcoef    = (*m_Bcoef)[dit()];
+    const Box box                = dbl[dit()];
+    const EBISBox& ebisbox       = m_eblg.getEBISL()[dit()];
+    const EBGraph& ebgraph       = ebisbox.getEBGraph();
+    const IntVectSet& ivs        = ebisbox.getIrregIVS(box);
+    const BaseIVFAB<Real>& Bcoef = (*m_Bcoef)[dit()];
 
     // These are used to reconstruct gradients at the EB. They are left undefined for single-phase cells. 
     m_boundaryWeights[dit()]  .define(ivs, ebgraph, m_nComp); 
@@ -71,15 +61,16 @@ void MFHelmholtzEBBC::defineMultiPhase(){
       const VolIndex& vof = multiPhaseVofs();
       const Real areaFrac = ebisbox.bndryArea(vof);
       const Real B        = Bcoef(vof, m_comp);
+      const int weight    = m_jumpBC->getWeight();
 
       int order;
       bool foundStencil = false;
       std::pair<Real, VoFStencil> pairSten;
 
       // Try quadrants first. 
-      order = m_jumpBC->getOrder();
+      order  = m_jumpBC->getOrder();
       while(!foundStencil && order > 0){
-      	foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten, vof, VofUtils::Neighborhood::Quadrant, dit(), order);
+      	foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten, vof, VofUtils::Neighborhood::Quadrant, dit(), order, weight);
       	order--;
 
 	// Check if stencil reaches too far across CF
@@ -91,7 +82,7 @@ void MFHelmholtzEBBC::defineMultiPhase(){
       // If we couldn't find in a quadrant, try a larger neighborhood
       order = m_jumpBC->getOrder();      
       while(!foundStencil && order > 0){
-      	foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten, vof, VofUtils::Neighborhood::Radius, dit(), order);
+      	foundStencil = this->getLeastSquaresBoundaryGradStencil(pairSten, vof, VofUtils::Neighborhood::Radius, dit(), order, weight);
       	order--;
 
 	// Check if stencil reaches too far across CF
@@ -128,7 +119,7 @@ void MFHelmholtzEBBC::applyEBFlux(VoFIterator&       a_vofit,
   VoFIterator& multiPhaseVofs  = m_jumpBC->getMultiPhaseVofs (m_phase, a_dit);
 
   this->applyEBFluxSinglePhase(singlePhaseVofs, a_Lphi, a_phi, a_dit, a_beta, a_homogeneousPhysBC);
-  this->applyEBFluxMultiPhase  (multiPhaseVofs, a_Lphi, a_phi, a_dit, a_beta, a_homogeneousPhysBC);
+  this->applyEBFluxMultiPhase (multiPhaseVofs,  a_Lphi, a_phi, a_dit, a_beta, a_homogeneousPhysBC);
 }
 
 void MFHelmholtzEBBC::applyEBFluxMultiPhase(VoFIterator&       a_multiPhaseVofs,
@@ -154,7 +145,8 @@ bool MFHelmholtzEBBC::getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFSten
 							 const VolIndex&              a_vof,
 							 const VofUtils::Neighborhood a_neighborhood,
 							 const DataIndex&             a_dit,
-							 const int                    a_order) const {
+							 const int                    a_order,
+							 const int                    a_weight) const {
   bool foundStencil = false;
   
   const bool addStartVof = false;
@@ -168,7 +160,7 @@ bool MFHelmholtzEBBC::getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFSten
 								ebisbox,
 								m_dx,
 								a_order,
-								m_weight,
+								a_weight,
 								a_order,
 								addStartVof);
 

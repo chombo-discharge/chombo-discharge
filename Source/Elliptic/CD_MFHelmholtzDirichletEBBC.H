@@ -44,6 +44,16 @@ public:
   */
   virtual void setValue(const std::function<Real(const RealVect& a_pos)>& a_value);
 
+  /*!
+    @brief Set stencil order
+  */
+  void setOrder(const int a_order);
+
+  /*!
+    @brief Set stencil weight
+  */
+  void setWeight(const int a_weight);
+
 protected:
 
     /*!
@@ -60,6 +70,16 @@ protected:
     @brief Value on EB
   */
   Real m_constantValue;
+
+  /*!
+    @brief Stencil order
+  */
+  int m_order;
+
+  /*!
+    @brief Stencil weight
+  */
+  int m_weight;
 
   /*!
     @brief Value on the EB. Does not apply to matching cells. 

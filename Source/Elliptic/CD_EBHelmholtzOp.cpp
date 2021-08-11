@@ -49,7 +49,7 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                               
 			     const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_BcoefIrreg,
 			     const IntVect&                                     a_ghostPhi,
 			     const IntVect&                                     a_ghostRhs,
-			     const RelaxationMethod&                            a_relaxationMethod) :
+			     const Smoother&                                    a_smoother) :
   LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB>(false), // Time-independent
   m_dataLocation(a_dataLocation),
   m_eblgFine(),
@@ -76,7 +76,7 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                               
   m_BcoefIrreg(a_BcoefIrreg),
   m_ghostPhi(a_ghostPhi),
   m_ghostRhs(a_ghostRhs),
-  m_relaxationMethod(a_relaxationMethod) {
+  m_smoother(a_smoother) {
 
   // Default settings. Always solve for comp = 0. If you want something different, copy your
   // input two different data holders before you use AMRMultiGrid. 
@@ -701,15 +701,14 @@ void EBHelmholtzOp::applyDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, cons
 }
 
 void EBHelmholtzOp::applyOpIrregular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBC){
-  
   // Apply the operator in all cells where we needed an explicit stencil. 
   VoFIterator& vofit = m_vofIterStenc[a_dit];
   for (vofit.reset(); vofit.ok(); ++vofit){
     const VolIndex& vof     = vofit();
-    const VoFStencil& stenc = m_opStencils[a_dit](vof, m_comp);
-    const Real& aco         = (*m_Acoef)  [a_dit](vof, m_comp);
+    const VoFStencil& stenc = m_opStencils[a_dit](vof, m_comp);      // = Finite volume stencil representation of Int[B*grad(phi)]dA
+    const Real& alphaDiag   = m_alphaDiagWeight[a_dit](vof, m_comp); // = kappa * alpha * aco
     
-    a_Lphi(vof, m_comp) = m_alpha * aco * a_phi(vof, m_comp);
+    a_Lphi(vof, m_comp) = alphaDiag * a_phi(vof, m_comp);
     
     for (int i = 0; i < stenc.size(); i++){
       const VolIndex& ivof = stenc.vof(i);
@@ -742,6 +741,17 @@ void EBHelmholtzOp::applyOpIrregular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, 
 
       a_Lphi(vof, m_comp) += flux*m_beta/m_dx;
     }
+  }
+}
+
+void EBHelmholtzOp::diagonalScale(LevelData<EBCellFAB> & a_rhs, bool a_kappaWeighted){
+
+  // Scale by volume fraction if asked. 
+  if(a_kappaWeighted) EBLevelDataOps::kappaWeight(a_rhs);
+
+  // Scale by a-coefficient and alpha, too.
+  for (DataIterator dit(a_rhs.dataIterator()); dit.ok(); ++dit){
+    a_rhs[dit()] *= (*m_Acoef)[dit()];
   }
 }
 
@@ -790,16 +800,16 @@ void EBHelmholtzOp::interpolateCF(LevelData<EBCellFAB>& a_phiFine, const LevelDa
 }
 
 void EBHelmholtzOp::relax(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, int a_iterations){
-  switch(m_relaxationMethod){
-  case RelaxationMethod::NoRelax: // Don't know why you would do this. 
+  switch(m_smoother){
+  case Smoother::NoRelax: // Don't know why you would do this. 
     break;
-  case RelaxationMethod::PointJacobi:
+  case Smoother::PointJacobi:
     this->relaxPointJacobi(a_correction, a_residual, a_iterations);
     break;
-  case RelaxationMethod::GauSaiRedBlack:
+  case Smoother::GauSaiRedBlack:
     this->relaxGSRedBlack(a_correction, a_residual, a_iterations);
     break;
-  case RelaxationMethod::GauSaiMultiColor:
+  case Smoother::GauSaiMultiColor:
     this->relaxGSMultiColor(a_correction, a_residual, a_iterations);
     break;
   default:
@@ -988,7 +998,7 @@ void EBHelmholtzOp::computeAlphaWeight(){
       const Real volFrac = m_eblg.getEBISL()[dit()].volFrac(vof);
       const Real Aco     = (*m_Acoef)[dit()](vof, m_comp);
 
-      m_alphaDiagWeight[dit()](vof, m_comp) = volFrac*Aco;
+      m_alphaDiagWeight[dit()](vof, m_comp) = volFrac * Aco;
     }
   }
 }

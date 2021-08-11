@@ -224,32 +224,6 @@ void CdrLayout<T>::setVerbosity(const int a_verbosity){
 }
 
 template <class T>
-void CdrLayout<T>::set_bc(CdrBc a_bc){
-  CH_TIME("CdrLayout<T>::set_bc");
-  if(m_verbosity > 5){
-    pout() << "CdrLayout<T>::set_bc" << endl;
-  }
-
-  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<CdrSolver>& solver = solver_it();
-    solver->setDomainBc(a_bc);
-  }
-}
-
-template <class T>
-void CdrLayout<T>::sanityCheck(){
-  CH_TIME("CdrLayout<T>::sanityCheck");
-  if(m_verbosity > 5){
-    pout() << "CdrLayout<T>::sanityCheck" << endl;
-  }
-
-  for (CdrIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<CdrSolver>& solver = solver_it();
-    solver->sanityCheck();
-  }
-}
-
-template <class T>
 void CdrLayout<T>::setTime(const int a_step, const Real a_time, const Real a_dt) {
   CH_TIME("CdrLayout<T>::setTime");
   if(m_verbosity > 5){

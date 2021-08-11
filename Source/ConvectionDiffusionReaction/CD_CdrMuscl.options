@@ -2,8 +2,12 @@
 # CDR_MUSCL SOLVER SETTINGS
 # ----------------------------------------------------------------------------------------------------
 CdrMuscl.seed                 = -1                      # Seed. Random seed with seed < 0
-CdrMuscl.domain_bc            = wall                    # 'kinetic', 'wall', 'outflow', or 'extrap'
-CdrMuscl.mass_redist          = false                   # Mass-weighted redistribution or volume-weighted
+CdrMuscl.bc.x.lo              = wall                    # 'data', 'function', 'wall', or 'outflow'
+CdrMuscl.bc.x.hi              = wall                    # 'data', 'function', 'wall', or 'outflow'
+CdrMuscl.bc.y.lo              = wall                    # 'data', 'function', 'wall', or 'outflow'
+CdrMuscl.bc.y.hi              = wall                    # 'data', 'function', 'wall', or 'outflow'
+CdrMuscl.bc.z.lo              = wall                    # 'data', 'function', 'wall', or 'outflow'
+CdrMuscl.bc.z.hi              = wall                    # 'data', 'function', 'wall', or 'outflow'
 CdrMuscl.limit_slopes         = true                    # Use slope-limiters or not
 CdrMuscl.plt_vars             = phi vel src dco ebflux  # Plot variables. Options are 'phi', 'vel', 'dco', 'src'
 CdrMuscl.plot_mode            = density                 # Plot densities 'density' or particle numbers ('numbers')
@@ -16,10 +20,10 @@ CdrMuscl.gmg_post_smooth      = 6                       # Number of relaxations 
 CdrMuscl.gmg_bott_smooth      = 6                       # NUmber of relaxations before dropping to bottom solver
 CdrMuscl.gmg_min_iter         = 5                       # Minimum number of iterations
 CdrMuscl.gmg_max_iter         = 32                      # Maximum number of iterations
-CdrMuscl.gmg_tolerance        = 1.E-8                   # Residue tolerance
-CdrMuscl.gmg_hang             = 0.2                     # Solver hang
-CdrMuscl.gmg_bottom_drop      = 2                       # Bottom drop
+CdrMuscl.gmg_exit_tol         = 1.E-8                   # Residue tolerance
+CdrMuscl.gmg_exit_hang        = 0.2                     # Solver hang
+CdrMuscl.gmg_min_cells        = 2                       # Bottom drop
 CdrMuscl.gmg_bottom_solver    = bicgstab                # Bottom solver type. Valid options are 'simple' and 'bicgstab'
 CdrMuscl.gmg_bottom_relax     = 8                       # Number of relaxations in bottom solve ('simple' solver only)
 CdrMuscl.gmg_cycle            = vcycle                  # Cycle type. Only 'vcycle' supported for now
-CdrMuscl.gmg_relax_type       = gsrb                    # Relaxation type. 'jacobi', 'gauss_seidel', or 'gsrb'
+CdrMuscl.gmg_smoother         = red_black               # Relaxation type. 'jacobi', 'multi_color', or 'red_black'

@@ -16,6 +16,7 @@
 #include <EBConductivityOpFactory.H>
 #include <NWOEBConductivityOpFactory.H>
 #include <slowEBCOFactory.H>
+#include <EBQuadCFInterp.H>
 #include <EBAMRPoissonOpFactory.H>
 #include <DirichletConductivityDomainBC.H>
 #include <DirichletConductivityEBBC.H>
@@ -52,9 +53,7 @@
 #include <CD_MFCoarAve.H>
 #include <CD_Units.H>
 
-// Old news
-#include <CD_RobinConductivityDomainBcFactory.H>
-#include <CD_RobinConductivityEbBcFactory.H>
+// Blaargh
 #include <CD_NamespaceHeader.H>
 
 
@@ -114,10 +113,6 @@ void ProxyFieldSolver::registerOperators()  {
     // For coarsening
     m_amr->registerOperator(s_eb_coar_ave,     m_realm, phase::gas);
     m_amr->registerOperator(s_eb_coar_ave,     m_realm, phase::solid);
-
-    // For multigrid interpolation
-    m_amr->registerOperator(s_eb_quad_cfi,     m_realm, phase::gas);
-    m_amr->registerOperator(s_eb_quad_cfi,     m_realm, phase::solid);
 
     // For linearly filling ghost cells
     m_amr->registerOperator(s_eb_pwl_interp,   m_realm, phase::gas);
@@ -182,6 +177,20 @@ Vector<RefCountedPtr<EBMultigridInterpolator> > ProxyFieldSolver::getMultigridIn
   pp.get("interp_order", order);
 
   Vector<RefCountedPtr<EBMultigridInterpolator> > interpolators(1+finestLevel);
+
+  std::string str;
+  
+  pp.get("centering", str);
+  Location::Cell loc;
+  if(str == "centroid"){
+    loc = Location::Cell::Centroid;
+  }
+  else if(str == "center"){
+    loc = Location::Cell::Center;
+  }
+  else{
+    MayDay::Abort("CD_ProxyFieldSolver::solveHelm - logic bust");
+  }
   
   for (int lvl = 0; lvl <= finestLevel; lvl++){
 
@@ -192,7 +201,7 @@ Vector<RefCountedPtr<EBMultigridInterpolator> > ProxyFieldSolver::getMultigridIn
       
       interpolators[lvl] = RefCountedPtr<EBMultigridInterpolator> (new EBMultigridInterpolator(eblgFine,
 											       eblgCoar,
-											       Location::Cell::Center,
+											       loc,
 											       m_amr->getNumberOfGhostCells()*IntVect::Unit,
 											       m_amr->getRefinementRatios()[lvl-1],
 											       1, // Variables
@@ -272,19 +281,6 @@ void ProxyFieldSolver::solveEBCond(EBAMRCellData& a_phi, EBAMRCellData& a_residu
 
     ebbcFactory = RefCountedPtr<BaseEBBCFactory>(bcFactory);
   }
-  else if (str == "robin"){
-    pp.get("eb_val", eb_value);
-
-    // Coefficients for radiative transfer with Robin. 
-    const Real A =  1.5*eb_value;
-    const Real B = -1.0*eb_value;
-    const Real C =  0.0;
-
-    auto bcFactory = new RobinConductivityEbBcFactory(m_amr->getProbLo());
-    bcFactory->setCoefficients(A, B, C);
-    
-    ebbcFactory = RefCountedPtr<BaseEBBCFactory> (bcFactory);
-  }
   else{
     MayDay::Error("ProxyFieldSolver::solveEBCond - uknown EBBC factory requested");
   }
@@ -301,18 +297,6 @@ void ProxyFieldSolver::solveEBCond(EBAMRCellData& a_phi, EBAMRCellData& a_residu
   else if(str == "neumann"){
     auto bcFactory = new NeumannConductivityDomainBCFactory();
     bcFactory->setValue(dom_value);
-
-    domainBcFactory = RefCountedPtr<BaseDomainBCFactory>(bcFactory);
-  }
-  else if(str == "robin"){
-    auto bcFactory = new RobinConductivityDomainBcFactory();
-
-    // Coeffs for radiative transfer with Robin
-    const Real A =  1.5*dom_value;
-    const Real B = -1.0*dom_value;
-    const Real C = 0.0;
-
-    bcFactory->setCoefficients(A, B, C);
 
     domainBcFactory = RefCountedPtr<BaseDomainBCFactory>(bcFactory);
   }
@@ -485,18 +469,18 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
   }
 
   // Relax stuff consistent with EBConductivityOp (with exception of GauSaiRedBlack...)
-  EBHelmholtzOp::RelaxationMethod relaxType;
+  EBHelmholtzOp::Smoother relaxType;
   int relax;
   pp.get("relax",relax);
   switch(relax){
   case 0:
-    relaxType = EBHelmholtzOp::RelaxationMethod::PointJacobi;
+    relaxType = EBHelmholtzOp::Smoother::PointJacobi;
     break;
   case 1:
-    relaxType = EBHelmholtzOp::RelaxationMethod::GauSaiMultiColor;
+    relaxType = EBHelmholtzOp::Smoother::GauSaiMultiColor;
     break;
   case 2:
-    relaxType = EBHelmholtzOp::RelaxationMethod::GauSaiRedBlack;
+    relaxType = EBHelmholtzOp::Smoother::GauSaiRedBlack;
     break;
   default:
     MayDay::Abort("ProxyFieldSolver::solveHelmholtz - unknown relaxation method requested");
@@ -690,7 +674,7 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
     pp.get("eb_weight", eb_weight);
     pp.get("eb_val",    eb_value);
 
-    ebbcFactory = RefCountedPtr<MFHelmholtzEBBCFactory> (new MFHelmholtzNeumannEBBCFactory(eb_order, eb_weight, eb_value));
+    ebbcFactory = RefCountedPtr<MFHelmholtzEBBCFactory> (new MFHelmholtzNeumannEBBCFactory(eb_value));
   }
   else if(str == "robin"){
     pp.get("eb_order",  eb_order);
@@ -704,7 +688,7 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
     const Real B = -1.0*eb_value;
     const Real C =  0.0;
 
-    ebbcFactory = RefCountedPtr<MFHelmholtzEBBCFactory> (new MFHelmholtzRobinEBBCFactory(eb_order, eb_weight, A, B, C));
+    ebbcFactory = RefCountedPtr<MFHelmholtzEBBCFactory> (new MFHelmholtzRobinEBBCFactory(A, B, C));
   }
   else{
     MayDay::Error("ProxyFieldSolver::solveEBCond - uknown EBBC factory requested");
@@ -749,18 +733,18 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
   const IntVect ghostPhi = m_amr->getNumberOfGhostCells()*IntVect::Unit;
   const IntVect ghostRhs = m_amr->getNumberOfGhostCells()*IntVect::Unit;
 
-  MFHelmholtzOp::RelaxationMethod relaxType;
+  MFHelmholtzOp::Smoother relaxType;
   int relax;
   pp.get("relax",relax);
   switch(relax){
   case 0:
-    relaxType = MFHelmholtzOp::RelaxationMethod::PointJacobi;
+    relaxType = MFHelmholtzOp::Smoother::PointJacobi;
     break;
   case 1:
-    relaxType = MFHelmholtzOp::RelaxationMethod::GauSaiMultiColor;
+    relaxType = MFHelmholtzOp::Smoother::GauSaiMultiColor;
     break;
   case 2:
-    relaxType = MFHelmholtzOp::RelaxationMethod::GauSaiRedBlack;
+    relaxType = MFHelmholtzOp::Smoother::GauSaiRedBlack;
     break;
   default:
     MayDay::Error("ProxyFieldSolver::solveMF - bad relaxation method");

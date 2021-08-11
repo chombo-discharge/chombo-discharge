@@ -15,21 +15,15 @@
 #include <CD_NamespaceHeader.H>
 
 MFHelmholtzNeumannEBBCFactory::MFHelmholtzNeumannEBBCFactory(){
-  m_order       = -1;
-  m_weight      = -1;
   m_useConstant = false;
   m_useFunction = false;
 }
 
-MFHelmholtzNeumannEBBCFactory::MFHelmholtzNeumannEBBCFactory(const int a_order, const int a_weight, const Real a_DphiDn){
-  this->setOrder(a_order);
-  this->setWeight(a_weight);
+MFHelmholtzNeumannEBBCFactory::MFHelmholtzNeumannEBBCFactory(const Real a_DphiDn){
   this->setDphiDn(a_DphiDn);
 }
 
-MFHelmholtzNeumannEBBCFactory::MFHelmholtzNeumannEBBCFactory(const int a_order, const int a_weight, const std::function<Real(const RealVect& a_pos)>& a_DphiDn){
-  this->setOrder(a_order);
-  this->setWeight(a_weight);
+MFHelmholtzNeumannEBBCFactory::MFHelmholtzNeumannEBBCFactory(const std::function<Real(const RealVect& a_pos)>& a_DphiDn){
   this->setDphiDn(a_DphiDn);
 }
 
@@ -62,9 +56,6 @@ void MFHelmholtzNeumannEBBCFactory::setBxDphiDn(const std::function<Real(const R
 
 RefCountedPtr<EBHelmholtzEBBC> MFHelmholtzNeumannEBBCFactory::create(const int a_iphase, const RefCountedPtr<JumpBC>& a_jumpBC) const {
   auto bc = new MFHelmholtzNeumannEBBC(a_iphase, a_jumpBC);
-
-  bc->setOrder(m_order);
-  bc->setWeight(m_weight);
   
   if(m_multByBco){
     if(m_useConstant){

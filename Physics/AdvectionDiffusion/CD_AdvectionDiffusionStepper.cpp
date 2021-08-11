@@ -62,7 +62,6 @@ void AdvectionDiffusionStepper::setupSolvers(){
   m_solver->setPhase(m_phase);
   m_solver->setAmr(m_amr);
   m_solver->setComputationalGeometry(m_computationalGeometry);
-  m_solver->sanityCheck();
   m_solver->setRealm(m_realm);
   
   if(!m_solver->isMobile() && !m_solver->isDiffusive()){
@@ -103,10 +102,10 @@ void AdvectionDiffusionStepper::initialData(){
 
   // Set flux functions
   auto fluxFunc = [](const RealVect a_pos, const Real a_time){
-    return 1.0;
+    return 0.0;
   };
 
-  m_solver->setDomainFlux(fluxFunc);
+  //  m_solver->setDomainFlux(fluxFunc);
 }
 
 void AdvectionDiffusionStepper::setVelocity(){
@@ -206,7 +205,9 @@ Real AdvectionDiffusionStepper::advance(const Real a_dt){
     m_amr->interpGhost(state, m_realm, m_phase);
   }
   else if(m_integrator == 1){
-    m_solver->computeDivF(m_k1, state, m_solver->getDomainBc(), a_dt);
+    const bool addDomainFlux = true;
+    
+    m_solver->computeDivF(m_k1, state, a_dt, addDomainFlux);
     DataOps::incr(state, m_k1, -a_dt);
     m_amr->averageDown(state, m_realm, m_phase);
 

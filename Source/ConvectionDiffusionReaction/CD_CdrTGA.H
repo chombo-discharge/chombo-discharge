@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_CdrTGA.H
-  @brief  Extensions of CdrSolver which use EbHelmholtzOp and TGA for diffusion parts
+  @brief  Extensions of CdrSolver which use EBHelmholtzOp for diffusion solves
   @author Robert Marskar
 */
 
@@ -23,9 +23,10 @@
 #include <BiCGStabSolver.H>
 #include <EBBackwardEuler.H>
 #include <EBSimpleSolver.H>
+#include <GMRESSolver.H>
 
 // Our includes
-#include <CD_EbHelmholtzOpFactory.H>
+#include <CD_EBHelmholtzOpFactory.H>
 #include <CD_CdrSolver.H>
 #include <CD_NamespaceHeader.H>
   
@@ -38,28 +39,18 @@ protected:
   /*!
     @brief Enum class for supported bottom solvers in multigrid.
   */
-  enum class BottomSolver {
+  enum class BottomSolverType {
     Simple,
     BiCGStab,
     GMRES
   };
 
   /*!
-    @brief Enum for supported relaxation methods in multigrid. 
-  */
-  enum class RelaxationMethod {
-    Jacobi,
-    GaussSeidel,
-    GSRB,
-  };
-
-  /*!
     @brief Enum for multigrid cycle types. 
   */
-  enum class MultigridType {
-    FAS,
+  enum class MultigridType{
     VCycle,
-    FCycle,
+    WCycle,
   };
   
 public:
@@ -85,72 +76,92 @@ public:
   virtual void parseRuntimeOptions() = 0;
 
   /*!
-    @brief Compute div(nv - D*grad(n)) explicitly
+    @brief Register operator
+  */
+  virtual void registerOperators() override;
+
+  /*!
+    @brief Allocate internal storage
+  */
+  virtual void allocateInternals() override;
+
+  /*!
+    @brief Compute div(J) explicitly, where J = nV - D*grad(n)
+    @param[out] a_divJ      Divergence term, i.e. finite volume approximation to 
+    @param[in]  a_phi       Cell-centered state
+    @param[in]  a_extrapDt  Extrapolation in time, i.e. shifting of div(J) towards e.g. half time step. Only affects the advective term. 
+    @param[in]  a_ebFlux    If true, the embedded boundary flux will injected and included in div(J)
+    @note a_phi is non-const because ghost cells will be re-filled
   */
   virtual void computeDivJ(EBAMRCellData& a_divJ,
 			   EBAMRCellData& a_phi,
 			   const Real     a_extrapDt,
-			   const bool     a_ebFlux = true) override;
+			   const bool     a_ebFlux = true,
+			   const bool     a_domainFlux = true) override final;
 
   /*!
     @brief Compute div(v*phi) explicitly
+    @param[out] a_divF      Divergence term, i.e. finite volume approximation to Div(v*phi), including redistribution magic. 
+    @param[in]  a_phi       Cell-centered state
+    @param[in]  a_extrapDt  Extrapolation in time, i.e. shifting of div(F) towards e.g. half time step. Only affects the advective term. 
+    @param[in]  a_domainBc  How to set domain fluxes
+    @param[in]  a_ebFlux    If true, the embedded boundary flux will injected be included in div(F)
+    @note a_phi is non-const because ghost cells will be interpolated in this routine. Valid data in a_phi is not touched. 
   */
   virtual void computeDivF(EBAMRCellData& a_divF,
 			   EBAMRCellData& a_phi,
-			   const CdrBc    a_domainBc,
 			   const Real     a_extrapDt,
-			   const bool     a_ebFlux = true) override;
+			   const bool     a_ebFlux = true,
+			   const bool     a_domainFlux = true) override final;
 
   /*!
     @brief Compute div(D*grad(phi)) explicitly
+    @param[out] a_divF      Divergence term, including redistribution magic. 
+    @param[in]  a_phi       Cell-centered state
+    @param[in]  a_domainBc  How to set domain fluxes
+    @param[in]  a_useEbFlux If true, the embedded boundary flux will be included in div(D)
+    @note a_phi is non-const because ghost cells will be interpolated in this routine. Valid data in a_phi is not touched. 
   */
   virtual void computeDivD(EBAMRCellData& a_divD,
 			   EBAMRCellData& a_phi,
-			   const CdrBc    a_domainBc,			   
-			   const bool     a_ebFlux = false) override;
+			   const bool     a_ebFlux = false,
+			   const bool     a_domainFlux = false) override final;
 
   /*!
-    @brief Query number of ghost cells
-  */
-  virtual int queryGhost() const = 0;
-
-  /*!
-    @brief Implicit diffusion TGA advance with source terms
-  */
-  virtual void advanceTGA(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const Real a_dt) override;
-
-  /*!
-    @brief Implicit diffusion TGA advance with source terms
+    @brief Implicit diffusion TGA advance with source term.
+    @param[inout] a_newPhi Solution at time t + dt
+    @param[in]    a_oldPhi Solution at time t
+    @param[in]    a_source Source (at t+dt/2)
+    @param[in]    a_dt     Time step
+    @note Source term should be centered at t+dt/2 for second order convergence. 
   */
   virtual void advanceTGA(EBAMRCellData&       a_newPhi,
 			  const EBAMRCellData& a_oldPhi,
 			  const EBAMRCellData& a_source,
-			  const Real           a_dt) override;
-
+			  const Real           a_dt) override final;
+  
   /*!
-    @brief Implicit diffusion Euler advance without source terms
-  */
-  virtual void advanceEuler(EBAMRCellData& a_newPhi, const EBAMRCellData& a_oldPhi, const Real a_dt) override;
-
-  /*!
-    @brief Implicit diffusion Euler advance with source terms
+    @brief Implicit diffusion Euler advance with source term.
+    @param[inout] a_newPhi Solution at time t + dt
+    @param[in]    a_oldPhi Solution at time t
+    @param[in]    a_source Source term. 
+    @param[in]    a_dt     Time step
+    @note For purely implicit Euler the source term should be centered at t+dt (otherwise it's an implicit-explicit method)
+    @details This solves the implicit diffusion equation equation a_newPhi - a_oldPhi = dt*Laplacian(a_newPhi) + dt*a_source. 
   */
   virtual void advanceEuler(EBAMRCellData&       a_newPhi,
 			    const EBAMRCellData& a_oldPhi,
 			    const EBAMRCellData& a_source,
-			    const Real           a_dt) override;
+			    const Real           a_dt) override final;
 
-  /*!
-    @brief Write plot data
-  */
-  virtual void writePlotData(EBAMRCellData& a_output, int& a_comp);
+
 
 protected:
 
   /*!
     @brief Relaxation type for gmg
   */
-  RelaxationMethod m_multigridRelaxMethod;
+  EBHelmholtzOp::Smoother m_smoother;
 
   /*!
     @brief GMG multigrid type
@@ -175,7 +186,7 @@ protected:
   /*!
     @brief Operator factory
   */
-  RefCountedPtr<EbHelmholtzOpFactory> m_operatorFactory;
+  RefCountedPtr<EBHelmholtzOpFactory> m_helmholtzOpFactory;
 
   /*!
     @brief Conjugate gradient solver bottom MG level
@@ -188,19 +199,19 @@ protected:
   EBSimpleSolver m_simpleSolver;
 
   /*!
-    @brief MG levelsgrids
+    @brief GMRES solver
   */
-  Vector<EBLevelGrid> m_mg_levelgrids;
+  GMRESSolver<LevelData<EBCellFAB> > m_gmres;
+
+  /*!
+    @brief Data which is always zero. 
+  */
+  EBAMRCellData m_zero;
 
   /*!
     @brief Verbosity for geometric multigrid
   */
   int m_multigridVerbosity;
-
-  /*!
-    @brief Pre-coarsening of GMG levels
-  */
-  int m_numCoarseningsBeforeAggregation;
 
   /*!
     @brief Number of smoothings before averaging
@@ -230,7 +241,7 @@ protected:
   /*!
     @brief Bottom solver type
   */
-  BottomSolver m_bottomSolver;
+  BottomSolverType m_bottomSolverType;
 
   /*!
     @brief Number of smoothing for bottom solver
@@ -240,22 +251,17 @@ protected:
   /*!
     @brief Set bottom drop depth
   */
-  int m_numCellsBottomDrop;
-
-  /*!
-    @brief Has deeper MG levels or not
-  */
-  bool m_hasDeeperMultigridLevels;
+  int m_minCellsBottom;
 
   /*!
     @brief Multigrid tolerance
   */
-  Real m_multigridTolerance;
+  Real m_multigridExitTolerance;
   
   /*!
     @brief Multigrid hand
   */
-  Real m_multigridHang;
+  Real m_multigridExitHang;
 
   /*!
     @brief Advection-only extrapolation to faces
@@ -263,24 +269,19 @@ protected:
   virtual void advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt) = 0;
 
   /*!
-    @brief Set up geometric multigrid
+    @brief Set up diffusion solver
   */
-  virtual void setupMultigrid();
-
-  /*!
-    @brief Define the GMG levels
-  */
-  virtual void defineDeeperMultigridLevels();
+  virtual void setupDiffusionSolver();
 
   /*!
     @brief Setup the operator factory
   */
-  virtual void setupOperatorFactory();
+  virtual void setupHelmholtzFactory();
 
   /*!
     @brief Setup multigrid
   */
-  virtual void setupMultigridSolver();
+  virtual void setupMultigrid();
 
   /*!
     @brief Setup the TGA solver
@@ -296,6 +297,13 @@ protected:
     @brief Parse solver settings for geometric multigrid
   */
   virtual void parseMultigridSettings();
+
+  /*!
+    @brief Write output data to a_output
+    @param[inout] a_output Output data holder.
+    @param[inout] a_icomp  Starting component where this solver begins writing the output. 
+  */
+  virtual void writePlotData(EBAMRCellData& a_output, int& a_comp) override final;
 };
 
 #include <CD_NamespaceFooter.H>

@@ -4,8 +4,8 @@
  */
 
 /*!
-  @file   FieldSolverMultigrid.H
-  @brief  Implementation of FieldSolver which uses geometric multigrid.
+  @file   CD_FieldSolverMultigrid.H
+  @brief  Declaration of FieldSolverMultigrid
   @author Robert Marskar
 */
 
@@ -15,19 +15,16 @@
 // Chombo includes
 #include <AMRMultiGrid.H>
 #include <BiCGStabSolver.H>
-#include <BaseDomainBC.H>
-#include <BaseEBBC.H>
 #include <MFSimpleSolver.H>
 #include <GMRESSolver.H>
-#include <BaseBCFuncEval.H>
 
 // Our includes
 #include <CD_FieldSolver.H>
-#include <CD_MfHelmholtzOpFactory.H>
+#include <CD_MFHelmholtzOpFactory.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Implementation of FieldSolver which uses a two-phase geometric multigrid solver
+  @brief Implementation of FieldSolver which uses multigrid. 
 */
 class FieldSolverMultigrid : public FieldSolver {
 protected:
@@ -35,43 +32,50 @@ protected:
   /*!
     @brief Enum class for supported bottom solvers in multigrid.
   */
-  enum class BottomSolver {
+  enum class BottomSolverType {
     Simple,
     BiCGStab,
     GMRES
   };
 
   /*!
-    @brief Enum for supported relaxation methods in multigrid. 
-  */
-  enum class RelaxationMethod {
-    Jacobi,
-    GaussSeidel,
-    GSRBFast
-  };
-
-  /*!
     @brief Enum for multigrid cycle types. 
   */
   enum class MultigridType{
-    FAS,
     VCycle,
-    FCycle,
+    WCycle,
   };
   
 public:
 
   /*!
-    @brief Added because of CD_FieldStepper, which uses the operator factory to generate computational loads.
-  */
-  RefCountedPtr<MfHelmholtzOpFactory>& getOperatorFactory(){
-    return m_operatorFactory;
-  }
-
-  /*!
-    @brief Constructor
+    @brief Weak constructor. Sets basic parameters. 
   */
   FieldSolverMultigrid();
+
+  /*!
+    @brief Disallowed copy constructor
+    @param[in] a_other Other solver
+  */
+  FieldSolverMultigrid(const FieldSolverMultigrid& a_other) = delete;
+
+  /*!
+    @brief Disallowed move constructor
+    @param[in] a_other Other solver
+  */
+  FieldSolverMultigrid(const FieldSolverMultigrid&& a_other) = delete;
+
+  /*!
+    @brief Disallowed copy assignment operator
+    @param[in] a_other Other solver
+  */
+  FieldSolverMultigrid& operator=(const FieldSolverMultigrid& a_other) = delete;
+
+  /*!
+    @brief Disallowed move assignment operator
+    @param[in] a_other Other solver
+  */
+  FieldSolverMultigrid& operator=(const FieldSolverMultigrid&& a_other) = delete;
 
   /*!
     @brief Constructor
@@ -102,8 +106,9 @@ public:
   */
   virtual void parseRuntimeOptions() override;
 
-    /*!
+  /*!
     @brief Regrid method. 
+    @details This calls the parent regrid function first. We only need the overwrite because we have to signal that multigrid must be set up again. 
     @param[in] a_lmin           Coarsest level where grids did not change. 
     @param[in] a_oldFinestLevel Previous finest AMR level
     @param[in] a_newFinestLevel New finest AMR level. 
@@ -120,48 +125,11 @@ public:
     @brief Allocates internal storage. 
   */
   virtual void allocateInternals() override;
-
-  /*!
-    @brief Set up the geometric multigrid solver 
-  */
-  virtual void setupMultigrid();
   
   /*!
-    @brief Set multigrid coefficients. 
-    @details This sets the face-centered permittivities and the diagonal term (to zero). 
+    @brief Set up multigrid solver
   */
-  virtual void setMultigridCoefficients();
-
-  /*!
-    @brief Set up the multigrid operator factory
-  */
-  virtual void setupOperatorFactory();
-
-  /*!
-    @brief Set up AMRMultiGrid
-  */
-  virtual void setupMultigridSolver();
-
-  /*!
-    @brief Set whether multigrid will be set up again before the next solve. 
-    @param[in] a_needsSetup If true, multigrid will be set up before the next solve. 
-  */
-  virtual void setNeedsMultigridSetup(const bool a_needsSetup);
-
-    /*!
-    @brief Get a-coefficient
-  */
-  virtual MFAMRCellData& getACoefficient();
-
-  /*!
-    @brief Get b-coefficient
-  */
-  virtual MFAMRFluxData& getBCoefficient();
-
-  /*!
-    @brief Get irregular b coefficient
-  */
-  virtual MFAMRIVData& getBCoefficientIrreg();
+  virtual void setupSolver() override;
 
   /*!
     @brief Compute grid loads
@@ -171,14 +139,29 @@ public:
 protected:
 
   /*!
+    @brief alpha-coefficient (for Helmholtz operator)
+  */
+  static constexpr Real m_alpha = 0.0;
+
+  /*!
+    @brief Beta-coefficient (for Helmholtz operator)
+  */
+  static constexpr Real m_beta  = -1.0;
+
+  /*!
     @brief Relaxation type for gmg
   */
-  RelaxationMethod m_multigridRelaxMethod;
+  MFHelmholtzOp::Smoother m_multigridRelaxMethod;
 
   /*!
     @brief GMG multigrid type
   */
   MultigridType m_multigridType;
+  
+  /*!
+    @brief Bottom solver type
+  */
+  BottomSolverType m_bottomSolverType;
 
   /*!
     @brief Scale by kappa or not
@@ -188,17 +171,7 @@ protected:
   /*!
     @brief Needs setup
   */
-  bool m_needsMultigridSetup;
-
-  /*!
-    @brief
-  */
-  bool m_hasDeeperMultigridLevels;
-
-  /*!
-    @brief Number of coarsening levels for multigrid
-  */
-  int m_numCoarseningsBeforeAggregation;
+  bool m_isSolverSetup;
 
   /*!
     @brief Verbosity for geometric multigrid
@@ -206,9 +179,14 @@ protected:
   int m_multigridVerbosity;
 
   /*!
+    @brief Number of smoothing for multigrid
+  */
+  int m_multigridSmooth;
+
+  /*!
     @brief Number of smoothings before averaging
   */
-  int m_multigridPreSmoothg;
+  int m_multigridPreSmooth;
 
   /*!
     @brief Number of smoothings before averaging
@@ -231,13 +209,6 @@ protected:
   int m_multigridMinIterations;
 
   /*!
-    @brief Bottom solver type
-  */
-  //  int m_bottomSolver;
-
-  BottomSolver m_bottomSolver;
-
-  /*!
     @brief Number of smoothing for bottom solver
   */
   int m_numSmoothingsForSimpleSolver;
@@ -245,7 +216,7 @@ protected:
   /*!
     @brief Set bottom drop depth
   */
-  int m_numCellsBottomDrop;
+  int m_minCellsBottom;
 
   /*!
     @brief Set bc order 
@@ -253,44 +224,41 @@ protected:
   int m_multigridBcOrder;
 
   /*!
-    @brief Length scale for the Poisson equation
+    @brief Set bc weight (used for weighted least squares)
   */
-  Real m_lengthScale;
+  int m_multigridBcWeight;
 
   /*!
-    @brief Target residue. If they residue is greater than this, we have a problematic cell. 
+    @brief Set bc jump order 
+  */
+  int m_multigridJumpOrder;
+
+  /*!
+    @brief Set bc jump weight (used for weighted least squares)
+  */
+  int m_multigridJumpWeight;
+
+  /*!
+    @brief Solver residue. If the residue is greater than this, we have a problematic cell. 
   */
   Real m_convergedResidue;
 
   /*!
-    @brief 
+    @brief Exit tolerance for multigrid. 
+    @details Multigrid exits if L(phi) < tolerance*L(phi=0)
   */
-  Real m_multigridTolerance;
+  Real m_multigridExitTolerance;
   
   /*!
-    @brief 
+    @brief Exit hang for multigrid
+    @details Multigrid exits if residue is not reduce by at least this factor. 
   */
-  Real m_multigridHang;
+  Real m_multigridExitHang;
 
   /*!
     @brief Multigrid operator factory. 
   */
-  RefCountedPtr<MfHelmholtzOpFactory> m_operatorFactory;
-  
-  /*!
-    @brief b-coefficient
-  */
-  MFAMRCellData m_aCoef;
-
-  /*!
-    @brief b-coefficient
-  */
-  MFAMRFluxData m_bCoefficient;
-
-  /*!
-    @brief b-coefficient
-  */
-  MFAMRIVData m_bCoefficientIrreg;
+  RefCountedPtr<MFHelmholtzOpFactory> m_helmholtzOpFactory;
 
   /*!
     @brief Zero
@@ -300,12 +268,12 @@ protected:
   /*!
     @brief Scaled soruce
   */
-  MFAMRCellData m_scaledSource;
+  MFAMRCellData m_kappaRhoByEps0;
 
   /*!
     @brief Sigma
   */
-  EBAMRIVData m_scaledSigma;
+  EBAMRIVData m_sigmaByEps0;
 
   /*!
     @brief Geometric multigrid solver
@@ -328,44 +296,6 @@ protected:
   MFSimpleSolver m_mfsolver;
 
   /*!
-    @brief Coarsened MG grids
-  */
-  Vector<DisjointBoxLayout> m_deeperMultigridGrids;
-
-  /*!
-    @brief Coarsened problem domains
-  */
-  Vector<ProblemDomain> m_deeperMultigridDomains;
-
-  /*!
-    @brief Coarsened EBLevelGrids
-  */
-  Vector<Vector<RefCountedPtr<EBLevelGrid> > > m_mg_eblg;
-
-  /*!
-    @brief EBLevelgrids for the multigrid pre-coarsening
-  */
-  Vector<RefCountedPtr<MFLevelGrid> > m_mg_mflg;
-
-  /*!
-    @brief Set face-centered permittivities
-  */
-  virtual void setFacePermittivities(EBFluxFAB&                a_perm,
-				     const Box&                a_box,
-				     const RealVect&           a_origin,
-				     const Real&               a_dx,
-				     const Vector<Dielectric>& a_dielectrics);
-
-  /*!
-    @brief Set EB-centered permittivities
-  */
-  virtual void setEbPermittivities(BaseIVFAB<Real>&          a_perm,
-				   const Box&                a_box,
-				   const RealVect&           a_origin,
-				   const Real&               a_dx,
-				   const Vector<Dielectric>& a_dielectrics);
-
-  /*!
     @brief Parse multigrid settings
   */
   virtual void parseMultigridSettings();
@@ -375,16 +305,15 @@ protected:
   */
   virtual void parseKappaSource();
 
-    /*!
-    @brief Set the permittivities
-  */
-  virtual void setPermittivities(const Vector<Dielectric>& a_dielectrics);
-  
   /*!
-    @brief Define the deeper multigrid levels (the ones that live below the AMR levels)
+    @brief Set up the multigrid operator factory
   */
-  virtual void defineDeeperMultigridLevels();
-  
+  virtual void setupHelmholtzFactory();
+
+  /*!
+    @brief Set up AMRMultiGrid
+  */
+  virtual void setupMultigrid();
 };
 
 #include <CD_NamespaceFooter.H>

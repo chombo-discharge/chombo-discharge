@@ -116,20 +116,10 @@ public:
   virtual void setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
 
   /*!
-    @brief Do a sanity check
-  */
-  virtual void sanityCheck();
-
-  /*!
     @brief Set phase
     @details This must be done BEFORE callilng setComputationalGeometry
   */
   virtual void setPhase(phase::which_phase a_phase = phase::gas);
-
-  /*!
-    @brief Set phase
-  */
-  virtual void set_bc(CdrBc a_bc);
 
   /*!
     @brief Set verbosity.
@@ -307,11 +297,6 @@ protected:
     @brief phase
   */
   phase::which_phase m_phase;
-
-  /*!
-    @brief
-  */
-  CdrBc m_bc_type;
 };
 
 /*!

@@ -133,10 +133,11 @@ void EBHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&       a_vofit,
 					   const DataIndex&   a_dit,
 					   const Real&        a_beta,
 					   const bool&        a_homogeneousPhysBC) const {
-  for (a_vofit.reset(); a_vofit.ok(); ++a_vofit){
-    const VolIndex& vof = a_vofit();
+  if(!a_homogeneousPhysBC){  
+    for (a_vofit.reset(); a_vofit.ok(); ++a_vofit){
+      const VolIndex& vof = a_vofit();
     
-    if(!a_homogeneousPhysBC){
+
       Real value;
     
       if(m_useConstant){

@@ -16,7 +16,6 @@
 #include <CD_ItoPlasmaGodunovStepper.H>
 #include <CD_DataOps.H>
 #include <CD_Units.H>
-#include <CD_FieldSolverMultigrid.H>
 #include <CD_NamespaceHeader.H>
 
 using namespace Physics::ItoPlasma;
@@ -389,8 +388,8 @@ Real ItoPlasmaGodunovStepper::advance(const Real a_dt) {
   MPI_Barrier(Chombo_MPI::comm);
   sort_time = -MPI_Wtime();
   m_ito->sortParticlesByCell(ItoSolver::WhichContainer::bulk);
-  this->sortBulkPhotonsByCell();
-  this->sortSourcePhotonsByCell();
+  this->sortPhotonsByCell(McPhoto::WhichContainer::Bulk);
+  this->sortPhotonsByCell(McPhoto::WhichContainer::Source);
   sort_time += MPI_Wtime();
 
   // Chemistry kernel.
@@ -411,8 +410,8 @@ Real ItoPlasmaGodunovStepper::advance(const Real a_dt) {
   MPI_Barrier(Chombo_MPI::comm);
   sort_time -= MPI_Wtime();
   m_ito->sortParticlesByPatch(ItoSolver::WhichContainer::bulk);
-  this->sortBulkPhotonsByPatch();
-  this->sortSourcePhotonsByPatch();
+  this->sortPhotonsByPatch(McPhoto::WhichContainer::Bulk);
+  this->sortPhotonsByPatch(McPhoto::WhichContainer::Source);
   sort_time += MPI_Wtime();
 
   // Clear other data holders for now. BC comes later...
@@ -1010,14 +1009,12 @@ void ItoPlasmaGodunovStepper::setupSemiImplicitPoisson(const Real a_dt){
     pout() << m_name + "::setupSemiImplicitPoisson" << endl;
   }
 
-  FieldSolverMultigrid* poisson = (FieldSolverMultigrid*) (&(*m_fieldSolver));
-
   // Set coefficients as usual
-  poisson->setMultigridCoefficients();
+  m_fieldSolver->setPermittivities();
 
   // Get bco and increment with mobilities
-  MFAMRFluxData& bco   = poisson->getBCoefficient();
-  MFAMRIVData& bco_irr = poisson->getBCoefficientIrreg();
+  MFAMRFluxData& bco   = m_fieldSolver->getPermittivityFace();
+  MFAMRIVData& bco_irr = m_fieldSolver->getPermittivityEB();
   
   EBAMRFluxData bco_gas;
   EBAMRIVData   bco_irr_gas;
@@ -1040,10 +1037,8 @@ void ItoPlasmaGodunovStepper::setupSemiImplicitPoisson(const Real a_dt){
   m_amr->averageDown(bco_gas,     m_fluid_Realm, phase::gas);
   m_amr->averageDown(bco_irr_gas, m_fluid_Realm, phase::gas);
 
-  // Set up the multigrid solver
-  poisson->setupOperatorFactory();
-  poisson->setupMultigridSolver();
-  poisson->setNeedsMultigridSetup(false);
+  // Set up the solver
+  m_fieldSolver->setupSolver();
 }
 
 void ItoPlasmaGodunovStepper::setupStandardPoisson(){
@@ -1052,15 +1047,9 @@ void ItoPlasmaGodunovStepper::setupStandardPoisson(){
     pout() << m_name + "::setupStandardPoisson" << endl;
   }
 
-  FieldSolverMultigrid* poisson = (FieldSolverMultigrid*) (&(*m_fieldSolver));
-
   // Set coefficients as usual
-  poisson->setMultigridCoefficients();
-
-  // Set up the multigrid solver
-  poisson->setupOperatorFactory();
-  poisson->setupMultigridSolver();
-  poisson->setNeedsMultigridSetup(false);
+  m_fieldSolver->setPermittivities();
+  m_fieldSolver->setupSolver();
 }
 
 void ItoPlasmaGodunovStepper::copyConductivityParticles(Vector<ParticleContainer<ItoPlasmaGodunovParticle>* >& a_conductivity_particles){

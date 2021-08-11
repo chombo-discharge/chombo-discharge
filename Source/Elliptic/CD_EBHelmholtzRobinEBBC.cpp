@@ -19,10 +19,24 @@
 #include <CD_NamespaceHeader.H>
 
 EBHelmholtzRobinEBBC::EBHelmholtzRobinEBBC(){
+  m_order       = 1;
+  m_radius      = 1;
+  m_weight      = 0;   // Can't use weighted least squares when starting vof is included
+  
   m_useConstant = false;
   m_useFunction = false;
 }
 
+EBHelmholtzRobinEBBC::EBHelmholtzRobinEBBC(const Real a_A, const Real a_B, const Real a_C) : EBHelmholtzRobinEBBC() {
+  this->setCoefficients(a_A, a_B, a_C);
+}
+
+
+EBHelmholtzRobinEBBC::EBHelmholtzRobinEBBC(const std::function<Real(const RealVect& a_pos) >& a_A,
+					   const std::function<Real(const RealVect& a_pos) >& a_B,
+					   const std::function<Real(const RealVect& a_pos) >& a_C) : EBHelmholtzRobinEBBC() {
+  this->setCoefficients(a_A, a_B, a_C);
+}
 
 EBHelmholtzRobinEBBC::~EBHelmholtzRobinEBBC(){
 
@@ -62,9 +76,7 @@ VoFStencil EBHelmholtzRobinEBBC::getInterpolationStencil(const VolIndex& a_vof, 
 
 VoFStencil EBHelmholtzRobinEBBC::getMonoPathStencil(const VolIndex& a_vof, const DataIndex& a_dit) const {
   const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
-  const int pow          = 0;  // Can't run with weighting when the starting vof is included
-  const int order        = 1;
-  const int radius       = 1;
+
   const bool useStartVof = true;
 
   const VoFStencil stencil = LeastSquares::getInterpolationStencil(Location::Cell::Boundary,
@@ -73,9 +85,9 @@ VoFStencil EBHelmholtzRobinEBBC::getMonoPathStencil(const VolIndex& a_vof, const
 								   a_vof,
 								   ebisbox,
 								   m_dx,
-								   pow,
-								   radius,
-								   order,
+								   m_weight,
+								   m_radius,
+								   m_order,
 								   useStartVof);
 
 
@@ -151,10 +163,11 @@ void EBHelmholtzRobinEBBC::applyEBFlux(VoFIterator&       a_vofit,
 
   // Recall that the "flux" is kappaDivF = area*dphi/dn/DeltaX where dphi/dn = (A*phi - C)/B. We already have the phi
   // term in the stencil so only need to add -C/B.
-  for (a_vofit.reset(); a_vofit.ok(); ++a_vofit){
-    const VolIndex& vof = a_vofit();
+  if(!a_homogeneousPhysBC){  
+    for (a_vofit.reset(); a_vofit.ok(); ++a_vofit){
+      const VolIndex& vof = a_vofit();
     
-    if(!a_homogeneousPhysBC){
+
       Real B;
       Real C;
       if(m_useConstant){

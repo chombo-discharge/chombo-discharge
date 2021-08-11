@@ -58,6 +58,21 @@ public:
 
 protected:
 
+  /*!
+    @brief Stencil order
+  */
+  int m_order;
+
+  /*!
+    @brief Stencil weight
+  */
+  int m_weight;
+
+  /*!
+    @brief Stencil radius
+  */
+  int m_radius;
+
   /*
     @brief Use constant for BC
   */

@@ -37,12 +37,12 @@ void EbParticleInterp::define(const Box&      a_domain,
   m_irr_ngp = a_force_irreg_ngp;
 }
 
-void EbParticleInterp::depositParticle(FArrayBox&       a_rho,
-				       const RealVect&  a_probLo,
-				       const RealVect&  a_dx,
-				       const RealVect&  a_position,
-				       const Real&      a_mass,
-				       const DepositionType::Which a_interpType){
+void EbParticleInterp::depositParticle(FArrayBox&           a_rho,
+				       const RealVect&      a_probLo,
+				       const RealVect&      a_dx,
+				       const RealVect&      a_position,
+				       const Real&          a_mass,
+				       const DepositionType a_interpType){
 
   const RealVect rv = (a_position - a_probLo)/a_dx;
   const IntVect iv = IntVect(D_DECL(floor(rv[0]), floor(rv[1]), floor(rv[2])));
@@ -97,12 +97,12 @@ void EbParticleInterp::depositParticle(FArrayBox&       a_rho,
   }
 }
 
-void EbParticleInterp::depositParticle2(FArrayBox&       a_rho,
-					const RealVect&  a_probLo,
-					const RealVect&  a_dx,
-					const RealVect&  a_position,
-					const Real&      a_mass,
-					const DepositionType::Which a_interpType){
+void EbParticleInterp::depositParticle2(FArrayBox&           a_rho,
+					const RealVect&      a_probLo,
+					const RealVect&      a_dx,
+					const RealVect&      a_position,
+					const Real&          a_mass,
+					const DepositionType a_interpType){
 
   const RealVect rv = (a_position - a_probLo)/a_dx;
   const IntVect iv = IntVect(D_DECL(floor(rv[0]), floor(rv[1]), floor(rv[2])));
@@ -141,12 +141,12 @@ void EbParticleInterp::depositParticle2(FArrayBox&       a_rho,
   }
 }
 
-void EbParticleInterp::depositParticle4(FArrayBox&       a_rho,
-					const RealVect&  a_probLo,
-					const RealVect&  a_dx,
-					const RealVect&  a_position,
-					const Real&      a_mass,
-					const DepositionType::Which a_interpType){
+void EbParticleInterp::depositParticle4(FArrayBox&           a_rho,
+					const RealVect&      a_probLo,
+					const RealVect&      a_dx,
+					const RealVect&      a_position,
+					const Real&          a_mass,
+					const DepositionType a_interpType){
 
   const RealVect rv = (a_position - a_probLo)/a_dx;
   const IntVect iv = IntVect(D_DECL(floor(rv[0]), floor(rv[1]), floor(rv[2])));
@@ -185,12 +185,12 @@ void EbParticleInterp::depositParticle4(FArrayBox&       a_rho,
   }
 }
 
-void EbParticleInterp::interpolateParticle(Real&             a_particleField,
-					   const FArrayBox&  a_field,
-					   const RealVect&   a_probLo,
-					   const RealVect&   a_dx,
-					   const RealVect&   a_position,
-					   const DepositionType::Which a_interpType){
+void EbParticleInterp::interpolateParticle(Real&                a_particleField,
+					   const FArrayBox&     a_field,
+					   const RealVect&      a_probLo,
+					   const RealVect&      a_dx,
+					   const RealVect&      a_position,
+					   const DepositionType a_interpType){
   const RealVect rv = (a_position - a_probLo)/a_dx;
   const IntVect iv = IntVect(D_DECL(floor(rv[0]), floor(rv[1]), floor(rv[2])));
 
@@ -243,12 +243,12 @@ void EbParticleInterp::interpolateParticle(Real&             a_particleField,
   }
 }
 
-void EbParticleInterp::interpolateParticle(RealVect&         a_particleField,
-					   const FArrayBox&  a_field,
-					   const RealVect&   a_probLo,
-					   const RealVect&   a_dx,
-					   const RealVect&   a_position,
-					   const DepositionType::Which a_interpType){
+void EbParticleInterp::interpolateParticle(RealVect&            a_particleField,
+					   const FArrayBox&     a_field,
+					   const RealVect&      a_probLo,
+					   const RealVect&      a_dx,
+					   const RealVect&      a_position,
+					   const DepositionType a_interpType){
   const RealVect rv = (a_position - a_probLo)/a_dx;
   const IntVect iv = IntVect(D_DECL(floor(rv[0]), floor(rv[1]), floor(rv[2])));
 

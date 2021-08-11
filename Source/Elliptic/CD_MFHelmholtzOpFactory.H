@@ -50,7 +50,7 @@ public:
   using DomainBCFactory = RefCountedPtr<MFHelmholtzDomainBCFactory>;
   using EBBCFactory     = RefCountedPtr<MFHelmholtzEBBCFactory>;
 
-  using RelaxType       = MFHelmholtzOp::RelaxationMethod;
+  using Smoother       = MFHelmholtzOp::Smoother;
 
   /*!
     @brief Disallowed constructor
@@ -83,7 +83,7 @@ public:
 		       const EBBCFactory&      a_ebBcFactory,
 		       const IntVect&          a_ghostPhi,
 		       const IntVect&          a_ghostRhs,
-		       const RelaxType&        a_relaxationMethod,
+		       const Smoother&         a_smoother,
 		       const ProblemDomain&    a_bottomDomain,
 		       const int&              a_jumpOrder,
 		       const int&              a_jumpWeight,
@@ -151,7 +151,7 @@ protected:
   Location::Cell m_dataLocation;
 
   // Relaxation method
-  RelaxType m_relaxMethod;
+  Smoother m_smoother;
 
   // Number of AMR levels
   int m_numAmrLevels;

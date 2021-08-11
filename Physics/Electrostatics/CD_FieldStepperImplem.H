@@ -20,7 +20,7 @@
 
 // Our includes
 #include <CD_FieldStepper.H>
-#include <CD_FieldSolverMultigrid.H>
+#include <CD_DataOps.H>
 #include <CD_NamespaceHeader.H>
 
 namespace Physics {
@@ -73,6 +73,11 @@ namespace Physics {
 
     template <class T>
     void FieldStepper<T>::setupSolvers(){
+
+      // Define a voltage function
+      auto voltage = [](const Real a_time) -> Real {
+	return 1.0;
+      };
       
       // Poisson setup
       m_fieldSolver = RefCountedPtr<FieldSolver> (new T());
@@ -80,7 +85,7 @@ namespace Physics {
       m_fieldSolver->parseOptions();
       m_fieldSolver->setAmr(m_amr);
       m_fieldSolver->setComputationalGeometry(m_computationalGeometry);
-      m_fieldSolver->setVoltage(FieldSolver::s_voltageOne);
+      m_fieldSolver->setVoltage(voltage);
       m_fieldSolver->setRealm(m_realm);
       m_fieldSolver->setTime(0, 0.0, 0.0);
 
@@ -140,6 +145,7 @@ namespace Physics {
       DataOps::setValue(state, 0.0);
       DataOps::setValue(sigma, initSigma);
       m_fieldSolver->setRho(rhoFunc);
+      m_fieldSolver->setPermittivities();
     }
 
     template <class T>
@@ -236,7 +242,7 @@ namespace Physics {
 
 	// We need to make AmrMesh restore some operators that we need. Note that this is overkill because we only need
 	// the multigrid ghost cell interpolation operator. But for simplicity, do all of them. 
-	m_amr->regridOperators(a_lmin, 1);
+	m_amr->regridOperators(a_lmin);
 
 
 	// Field solver implementation gets the responsibility of computing loads on each level. 

@@ -64,7 +64,7 @@ Real CylinderSdf::value(const RealVect& a_point) const{
     retval = sqrt(f*f + g*g);
   }
   else{
-    MayDay::Abort("CylinderSdf::value - logic bust!");
+    MayDay::Error("CylinderSdf::value - logic bust, maybe center1 = center2?");
   }
 
   // The above value of retval is correct for m_fluidInside. Otherwise, flip it. 

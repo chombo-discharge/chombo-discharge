@@ -18,18 +18,19 @@
 // Chombo includes
 #include <AMRMultiGrid.H>
 #include <AMRTGA.H>
-#include <BiCGStabSolver.H>
 #include <EBBackwardEuler.H>
 #include <EBSimpleSolver.H>
+#include <BiCGStabSolver.H>
+#include <GMRESSolver.H>
 
 // Our includes
 #include <CD_RtSolver.H>
-#include <CD_EbHelmholtzOpFactory.H>
+#include <CD_EBHelmholtzOpFactory.H>
 #include <CD_EddingtonSP1DomainBc.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Radiative tranfer equation solver in the SP1 (diffusion) approximation. Also includes stochastically drawn Photons. 
+  @brief Radiative tranfer equation solver in the SP1 (diffusion) approximation. 
 */
 class EddingtonSP1 : public RtSolver {
 public:
@@ -39,153 +40,188 @@ public:
     @details This is a utility function 
     @param[in] a_position Position in space
     @param[in] a_time     Time
-    @return This returns one (1.0)
+    @return Returns 1.0
   */
   static Real s_defaultDomainBcFunction(const RealVect a_position, const Real a_time);
 
   /*!
-    @brief Constructor
+    @brief Weak constructor
   */
   EddingtonSP1();
+
+  /*!
+    @brief Disallowed copy construction
+  */
+  EddingtonSP1(const EddingtonSP1& a_other) = delete;
+
+  /*!
+    @brief Disallowed move construction
+  */
+  EddingtonSP1(const EddingtonSP1&& a_other) = delete;
 
   /*!
     @brief Destructor
   */
   virtual ~EddingtonSP1();
 
+    /*!
+    @brief Disallowed copy assignment
+  */
+  EddingtonSP1& operator=(const EddingtonSP1& a_other) = delete;
+
+  /*!
+    @brief Disallowed move assignment
+  */
+  EddingtonSP1& operator=(const EddingtonSP1&& a_other) = delete;
+
   /*!
     @brief Advance RTE onto state a_phi
+    @param[in]    a_dt      Time step
+    @param[inout] a_phi     RTE solution
+    @param[in]    a_source  Source term
+    @param[in]    a_zeroPhi Set phi to zero in initial guess for multigrid solve
   */
-  virtual bool advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_source, const bool a_zerophi = false);
+  virtual bool advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_source, const bool a_zeroPhi = false) override;
 
   /*!
     @brief Parse class options
   */
-  virtual void parseOptions();
+  virtual void parseOptions() override;
 
   /*!
     @brief Parse class options
   */
-  virtual void parseRuntimeOptions();
+  virtual void parseRuntimeOptions() override;
 
   /*!
-    @brief Set the boundary condition function on a wall. 
-    @param[in] a_dir Coordinate direction.
-    @param[in] a_side Side in the coordinate direction.
+    @brief Set the boundary condition function on a domain side
+    @param[in] a_dir      Coordinate direction.
+    @param[in] a_side     Side (low/high)
     @param[in] a_function Boundary condition function.
-    @details This sets a boundary condition for a particular side on a wall. The user must also specify how to use this BC in the input script. 
+    @details This sets a boundary condition for a particular domain side. The user must also specify how to use this BC in the input script. 
   */
-  virtual void setDomainBcWallFunction(const int a_dir, const Side::LoHiSide a_side, const EddingtonSP1DomainBc::BcFunction& a_function);
+  virtual void setDomainSideBcFunction(const int a_dir, const Side::LoHiSide a_side, const EddingtonSP1DomainBc::BcFunction& a_function);
   
   /*!
     @brief Allocate internal storage
   */
-  virtual void allocateInternals();
+  virtual void allocateInternals() override;
   
   /*!
     @brief Cache state
+    @param[in] a_base           Coarsest level that did not change during regrid
+    @param[in] a_oldFinestLevel Finest level before the regrid
   */
-  virtual void preRegrid(const int a_base, const int a_oldFinestLevel);
+  virtual void preRegrid(const int a_base, const int a_oldFinestLevel) override;
 
   /*!
     @brief Deallocate internal storage
   */
-  virtual void deallocateInternals();
+  virtual void deallocateInternals() override;
 
   /*!
     @brief Regrid function for this class
+    @param[in] a_lmin           Coarsest level that changed during regrid
+    @param[in] a_oldFinestLevel Finest level before the regrid
+    @param[in] a_newFinestLevel Finest level after the regrid
   */
-  virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel);
+  virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
 
   /*!
     @brief Register operators
   */
-  virtual void registerOperators();
+  virtual void registerOperators() override;
 
   /*!
     @brief Compute the boundary flux. For Eddington, the boundary flux is = c*phi/2
+    @param[out] a_ebFlux Flux on the EBs
+    @param[in]  a_phi    Isotropic part of the RTE solution
   */
-  virtual void computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi);
+  virtual void computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi) override;
 
   /*!
     @brief Compute the domain flux. For Eddington, the domain flux is = c*phi/2
+    @param[out] a_domainFlux Flux on the domain sides
+    @param[in]  a_phi        Isotropic part of the RTE solution
   */
-  virtual void computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_phi);
+  virtual void computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_phi) override;
 
   /*!
-    @brief Compute the flux
-    @details For diffusive models, the flux will be something like grad(a_phi). For higher-order models, the flux 
-    will be contained in a_phi (somehow);
+    @brief Compute the flux. For Eddington, the flux is F = -c/(3*kappa)*grad(phi)
+    @param[out] a_flux Cell-centered flux
+    @param[in]  a_phi  Isotropic part of RTE solution
   */
-  virtual void computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi);
+  virtual void computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi) override;
 
   /*!
     @brief Get isotropic part. 
+    @param[out] a_isotropic Isotropic part of RTE solution
+    @param[in]  a_phi       RTE solution
+    @details For Eddington, only the isotropic part is solved for so this routine just copies. 
   */
-  virtual void computeDensity(EBAMRCellData& a_isotropic, const EBAMRCellData& a_phi);
+  virtual void computeDensity(EBAMRCellData& a_isotropic, const EBAMRCellData& a_phi) override;
 
   /*!
     @brief Write plot file
   */
-  virtual void writePlotFile();
+  virtual void writePlotFile() override;
 
   /*!
-    @brief Write checkpoint data into handle
+    @brief Write checkpoint data into HDF5 file
+    @param[out] a_handle HDF5 file
+    @param[in]  a_level  Grid level
   */
-  virtual void writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const;
+  virtual void writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const override;
 
   /*!
     @brief Read checkpoint data from handle
+    @param[out] a_handle HDF5 file
+    @param[in]  a_level  Grid level
   */
-  virtual void readCheckpointLevel(HDF5Handle& a_handle, const int a_level);
-
-  /*!
-    @brief Return required number of ghost cells
-  */
-  virtual int queryGhost() const;
+  virtual void readCheckpointLevel(HDF5Handle& a_handle, const int a_level) override;
 
 protected:
 
   /*!
-    @brief Enum class for supported bottom solvers in multigrid.
+    @brief alpha-coefficient for Helmholtz operator
   */
-  enum class BottomSolver {
-    Simple,
-    BiCGStab,
-    GMRES
-  };
+  static constexpr Real m_alpha = 1.0;
 
   /*!
-    @brief Enum for supported relaxation methods in multigrid. 
+    @brief Beta-coefficient for Helmholtz operator
   */
-  enum class RelaxationMethod {
-    Jacobi,
-    GaussSeidel,
-    GSRBFast
+  static constexpr Real m_beta = -1.0;
+
+  /*!
+    @brief Enum class for supported bottom solvers in multigrid.
+  */
+  enum class BottomSolverType {
+    Simple,
+    BiCGStab,
+    GMRES,
   };
 
   /*!
     @brief Enum for multigrid cycle types. 
   */
   enum class MultigridType{
-    FAS,
     VCycle,
-    FCycle,
+    WCycle,
   };
 
   /*!
     @brief Enum for boundary condition types on EBs
   */
-  enum class EbBcType{
+  enum class EBBCType {
     Dirichlet,
     Neumann,
-    Robin
+    Larsen
   };
   
   /*!
     @brief Relaxation type for gmg
   */
-  RelaxationMethod m_multigridRelaxMethod;
+  EBHelmholtzOp::Smoother m_multigridRelaxMethod;
 
   /*!
     @brief GMG multigrid type
@@ -195,12 +231,7 @@ protected:
   /*!
     @brief Needs setup
   */
-  bool m_needsMultigridSetup;
-
-  /*!
-    @brief Has deeper MG levels or not
-  */
-  bool m_hasDeeperMultigridLevels;
+  bool m_isSolverSetup;
 
   /*!
     @brief Use tga for transient solevs
@@ -208,19 +239,14 @@ protected:
   bool m_useTGA;
 
   /*!
-    @brief Use the source term to draw stochastic Photons
+    @brief Use kappa scaling for source or not
   */
-  bool m_stochastic_Photons;
+  bool m_kappaScale;
 
   /*!
     @brief Verbosity for geometric multigrid
   */
   int m_multigridVerbosity;
-
-  /*!
-    @brief Precoarsening for multigrid
-  */
-  int m_numCoarseningsBeforeAggregation;
 
   /*!
     @brief Number of smoothings before averaging
@@ -248,9 +274,19 @@ protected:
   int m_multigridMinIterations;
 
   /*!
+    @brief Multigrid EBBC order (only relevant for Dirichlet)
+  */
+  int m_multigridBcOrder;
+
+    /*!
+    @brief Multigrid EBBC weight (only relevant for Dirichlet)
+  */
+  int m_multigridBcWeight;
+
+  /*!
     @brief Bottom solver type
   */
-  BottomSolver m_bottomSolver;
+  BottomSolverType m_bottomSolverType;
 
   /*!
     @brief Number of smoothing for bottom solver
@@ -260,37 +296,27 @@ protected:
   /*!
     @brief Set bottom drop depth
   */
-  int m_numCellsBottomDrop;
-
-  /*!
-    @brief RNG seed
-  */
-  int m_seed;
+  int m_minCellsBottom;
 
   /*!
     @brief 
   */
-  Real m_multigridTolerance;
+  Real m_multigridExitTolerance;
   
   /*!
     @brief 
   */
-  Real m_multigridHang;
+  Real m_multigridExitHang;
 
   /*!
     @brief Reflection coefficient
   */
-  Real m_reflectionCoefficientOne;
+  Real m_reflectCoefOne;
 
   /*!
     @brief Reflection coefficient
   */
-  Real m_reflectionCoefficientTwo;
-
-  /*!
-    @brief RNG
-  */
-  std::mt19937_64* m_rng;
+  Real m_reflectCoefTwo;
 
   /*!
     @brief Geometric multigrid solver
@@ -301,6 +327,11 @@ protected:
     @brief Conjugate gradient solver bottom MG level
   */
   BiCGStabSolver<LevelData<EBCellFAB> > m_bicgstab;
+
+  /*!
+    @brief GMRES solver
+  */
+  GMRESSolver<LevelData<EBCellFAB> > m_gmres;
 
   /*!
     @brief TGA solver
@@ -315,12 +346,7 @@ protected:
   /*!
     @brief Operator factory
   */
-  RefCountedPtr<EbHelmholtzOpFactory> m_operatorFactory;
-
-  /*!
-    @brief MG levelsgrids
-  */
-  Vector<EBLevelGrid> m_mg_levelgrids;
+  RefCountedPtr<EBHelmholtzOpFactory> m_helmholtzOpFactory;
 
   /*!
     @brief multi-fluid simple solver
@@ -328,24 +354,34 @@ protected:
   EBSimpleSolver m_simpleSolver;
   
   /*!
-    @brief Residue for stationary solver
+    @brief Multigrid residue
   */
   EBAMRCellData m_resid;
 
   /*!
+    @brief Always zero
+  */
+  EBAMRCellData m_zero;
+
+    /*!
+    @brief Scaled source term
+  */
+  EBAMRCellData m_scaledSource;
+
+  /*!
     @brief a-coefficient
   */
-  EBAMRCellData m_aco;
+  EBAMRCellData m_helmAco;
 
   /*!
     @brief b-coefficient
   */
-  EBAMRFluxData m_bco;
+  EBAMRFluxData m_helmBco;
 
   /*!
     @brief b-coefficient
   */
-  EBAMRIVData m_bco_irreg;
+  EBAMRIVData m_helmBcoIrreg;
 
   /*!
     @brief Wrapper calss. 
@@ -355,62 +391,59 @@ protected:
   /*!
     @brief Actual functions on domain edges (faces). 
   */
-  std::map<EddingtonSP1DomainBc::Wall, EddingtonSP1DomainBc::BcFunction> m_domainBcFunctions;
+  std::map<EddingtonSP1DomainBc::DomainSide, EddingtonSP1DomainBc::BcFunction> m_domainBcFunctions;
 
   /*!
-    @brief Boundary condition on the embedded boundary
+    @brief Associated boundary condition on the embedded boundary
   */
-  std::pair<EbBcType, Real> m_ebbc;
+  std::pair<EBBCType, Real> m_ebbc;
 
   /*!
     @brief Set up geometric multigrid
   */
-  virtual void setupMultigrid();
+  virtual void setupSolver();
 
   /*!
-    @brief Set kappa
+    @brief Set multigrid coefficients
   */
-  virtual void setMultigridCoefficients();
+  virtual void setHelmholtzCoefficients();
 
   /*!
-    @brief Set the a-coefficient and b-coefficient
+    @brief Set aco and bco (on irregular faces only)
+    @param[out] a_helmAco      Helmholtz A-coefficient on on data centers
+    @param[out] a_helmBcoIrreg Helmholtz B-coefficient on EB faces
+    @param[in]  a_cellBox      Computation box
+    @param[in]  a_lvl          Grid level
+    @param[in]  a_dit          Grid index
   */
-  virtual void setACoefAndBCoef();
+  virtual void setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
+					   BaseIVFAB<Real>& a_helmBcoIrreg,
+					   const Box        a_cellBox,
+					   const int        a_lvl,
+					   const DataIndex& a_dit);
 
-  /*!
-    @brief Set both aco and bco (irregular version)
-  */
-  virtual void setACoefAndBCoefBox(EBCellFAB&       a_aco,
-				   BaseIVFAB<Real>& a_bco_irreg,
-				   const Box        a_cellbox,
-				   const RealVect   a_origin,
-				   const Real       a_dx,
-				   const int        a_lvl,
-				   const DataIndex& a_dit);
-
-  /*!
-    @brief Define the GMG levels
-  */
-  virtual void defineDeeperMultigridLevels();
-  
-  /*!
+    /*!
     @brief Set the operator factory
   */
-  virtual void setupOperatorFactory();
+  virtual void setupHelmholtzFactory();
 
   /*!
     @brief Set the GMG solver
   */
-  virtual void setupMultigridSolver();
+  virtual void setupMultigrid();
 
   /*!
     @brief Make domain bc string
+    @param[in] a_dir  Coordinate direction
+    @param[in] a_side Side
+    @details Used for pasing boundary conditions from input script. 
+    @returns Returns string of type "bc.x.lo", "bc.y.hi" etc. 
   */
   virtual std::string makeBcString(const int a_dir, const Side::LoHiSide a_side) const;
 
   /*!
     @brief Returns BC type based on string.
-    @param[in] a_str Boundary condition string. Must be "dirichlet number", "neumann number", "robin_number", "dirichlet_custom", "neumann_custom", or "robin_custom".
+    @param[in] a_str Boundary condition string. Must be "dirichlet <number>", "neumann <number>", "robin <number>", "dirichlet_custom", "neumann_custom", or "robin_custom".
   */
   virtual EddingtonSP1DomainBc::BcType parseBcString(const std::string a_str) const;
 
@@ -427,12 +460,12 @@ protected:
   /*!
     @brief Parse domain BC settings
   */
-  virtual void parseDomainBc();
+  virtual void parseDomainBC();
 
     /*!
     @brief Parse domain BC settings
   */
-  virtual void parseEbBc();
+  virtual void parseEBBC();
 
   /*!
     @brief Parse whether or not this is a stationary solver
@@ -448,6 +481,11 @@ protected:
     @brief Parse multigrid settings
   */
   virtual void parseMultigridSettings();
+
+  /*!
+    @brief Parse kappa-scaling or not
+  */
+  virtual void parseKappaScale();
 
   /*!
     @brief Parse reflection coefficients for Robin bcs

@@ -44,9 +44,19 @@ public:
   EBHelmholtzDomainBC(const EBHelmholtzDomainBC& a_other) = delete;
 
   /*!
+    @brief Disallowed -- don't see why you would need it.
+  */
+  EBHelmholtzDomainBC(const EBHelmholtzDomainBC&& a_other) = delete;
+
+  /*!
     @brief Disallowed - don't see why you would need it.
   */
   EBHelmholtzDomainBC& operator=(const EBHelmholtzDomainBC& a_other) = delete;
+
+  /*!
+    @brief Disallowed - don't see why you would need it.
+  */
+  EBHelmholtzDomainBC& operator=(const EBHelmholtzDomainBC&& a_other) = delete;
 
   /*!
     @brief Define function
@@ -56,11 +66,11 @@ public:
     @param[in] a_dx     Grid resolution
     @note This sets the internals for the BC object. This is called by EBHelmholtzOp when it defines stencils. 
   */
-  void define(const Location::Cell                        a_dataLocation,
-	      const EBLevelGrid&                          a_eblg,
-	      const RefCountedPtr<LevelData<EBFluxFAB> >& a_Bcoef,
-	      const RealVect&                             a_probLo,
-	      const Real                                  a_dx);
+  virtual void define(const Location::Cell                        a_dataLocation,
+		      const EBLevelGrid&                          a_eblg,
+		      const RefCountedPtr<LevelData<EBFluxFAB> >& a_Bcoef,
+		      const RealVect&                             a_probLo,
+		      const Real                                  a_dx);
 
   /*!
     @brief Get face flux. This is for regular cells. 

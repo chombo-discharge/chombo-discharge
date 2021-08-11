@@ -199,14 +199,17 @@ bool VofUtils::isQuadrantWellDefined(const RealVect a_normal){
 
 std::pair<int, Side::LoHiSide> VofUtils::getCardinalDirection(const RealVect a_normal){ 
   std::pair<int, Side::LoHiSide> ret;
+
+  const int cardDir = a_normal.maxDir(true);
   
-  for (int dir = 0; dir < SpaceDim; dir++){
-    if (a_normal[dir] == 1.0) {
-      ret = std::make_pair(dir, Side::Hi);
-    }
-    else if(a_normal[dir] == -1.0){
-      ret = std::make_pair(dir, Side::Lo);
-    }
+  if(a_normal[cardDir] < 0.0){
+    ret = std::make_pair(cardDir, Side::Lo);
+  }
+  else if(a_normal[cardDir] > 0.0){
+    ret = std::make_pair(cardDir, Side::Hi);
+  }
+  else{
+    MayDay::Error("VofUtils::getCardinalDirection -- I got a zero normal vector so there's no quadrant to be defined!");
   }
 
   return ret;

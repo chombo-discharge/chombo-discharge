@@ -43,20 +43,6 @@ public:
     @brief Default constructor
   */
   ~MFHelmholtzEBBC();
-
-  /*!
-    @brief Set BC order
-    @param[in] a_order Approximation order
-    @note For least squares, the order is also the attempted radius of the stencil. 
-  */
-  virtual void setOrder(const int a_order);
-
-  /*!
-    @brief Set BC order
-    @param[in] a_weight Weight for least squares stencils. 
-    @note a_weight = 0 can lead to ill-conditioned least-squares systems. 
-  */
-  virtual void setWeight(const int a_weight);
   
   /*!
     @brief Apply the EB flux. This is the version that is called by EBHelmholtzOp.
@@ -85,16 +71,6 @@ protected:
     @brief Phase
   */
   int m_phase;
-
-  /*!
-    @brief Order for stencils. 
-  */
-  int m_order;
-
-  /*!
-    @brief Weight for stencils. 
-  */
-  int m_weight;
 
   /*!
     @brief Weights for matching cells.
@@ -155,6 +131,7 @@ protected:
     @param[out] a_neighborhood Neighboorhood specifier
     @param[in]  a_dit          Data index
     @param[in]  a_order        Attempted order for stencil. This is also the stencil radius. 
+    @param[in]  a_weight       Weighting factor for weighted least squares
     @return If this returns true, a_stencil contains a valid stencil and weight. 
     @note Stencils are computed using weighted least squares with squared inverse distance weighting. 
   */
@@ -162,7 +139,8 @@ protected:
 						  const VolIndex&              a_vof,
 						  const VofUtils::Neighborhood a_neighborhood,
 						  const DataIndex&             a_dit,
-						  const int                    a_order) const;
+						  const int                    a_order,
+						  const int                    a_weight) const;
 };
 
 #include <CD_NamespaceFooter.H>

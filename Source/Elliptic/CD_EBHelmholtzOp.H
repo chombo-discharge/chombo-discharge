@@ -41,7 +41,7 @@ public:
   /*!
     @brief Relaxation method for the operators
   */
-  enum class RelaxationMethod {
+  enum class Smoother {
     NoRelax,
     PointJacobi,
     GauSaiRedBlack,
@@ -55,16 +55,44 @@ public:
 
   /*!
     @brief Disallowed copy constructor
+    @param[in] a_other Other operator
   */
   EBHelmholtzOp(const EBHelmholtzOp& a_other) = delete;
 
   /*!
     @brief Disallowed move constructor
+    @param[in] a_other Other operator
   */
   EBHelmholtzOp(const EBHelmholtzOp&& a_other) = delete;
 
   /*!
     @brief Full constructor
+    @param[in] a_dataLocation  Data location, either cell center or cell centroid
+    @param[in] a_eblgFine      Fine grids
+    @param[in] a_eblg          Grids on this level
+    @param[in] a_eblgCoFi      Coarsening of fine level grids
+    @param[in] a_eblgCoar      Coarse grids
+    @param[in] a_eblgCoarMG    Multigrid-grids
+    @param[in] a_interpolator  Interpolator
+    @param[in] a_fluxReg       Flux register
+    @param[in] a_coarAve       Coarsener
+    @param[in] a_domainBC      Domain BC
+    @param[in] a_ebBC          Boundary conditions on EBs
+    @param[in] a_probLo        Lower-left corner of computational domain
+    @param[in] a_dx            Grid resolution
+    @param[in] a_refToFine     Refinement ratio to fine level
+    @param[in] a_refToCoar     Refinement ratio to coarse level
+    @param[in] a_hasFine       Has fine level or not
+    @param[in] a_hasCoar       Has coarse level or not
+    @param[in] a_hasMGObjects  Has multigrid-objects (special objects between AMR levels, or below the AMR levels)
+    @param[in] a_alpha         Operator alpha
+    @param[in] a_beta          Operator beta
+    @param[in] a_Acoef         Operator A-coefficient
+    @param[in] a_Bcoef         Operator B-coefficient
+    @param[in] a_BcoefIrreg    Operator B-coefficient (on EB faces)
+    @param[in] a_ghostCellsPhi Ghost cells in data holders
+    @param[in] a_ghostCellsPhi Ghost cells in data holders
+    @param[in] a_smoother      Which smoother to use
   */
   EBHelmholtzOp(const Location::Cell                               a_dataLocation,
 		const EBLevelGrid&                                 a_eblgFine,
@@ -86,12 +114,12 @@ public:
 		const bool&                                        a_hasMGObjects,
 		const Real&                                        a_alpha,
 		const Real&                                        a_beta,
-		const RefCountedPtr<LevelData<EBCellFAB> >&        a_acoef,
-		const RefCountedPtr<LevelData<EBFluxFAB> >&        a_bcoef,
-		const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_bcoIrreg,
+		const RefCountedPtr<LevelData<EBCellFAB> >&        a_Acoef,
+		const RefCountedPtr<LevelData<EBFluxFAB> >&        a_Bcoef,
+		const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_BcoIrreg,
 		const IntVect&                                     a_ghostCellsPhi,
 		const IntVect&                                     a_ghostCellsRHS,
-		const RelaxationMethod&                            a_relaxationMethod);
+		const Smoother&                                    a_smoother);
 
   /*!
     @brief Dtor
@@ -100,11 +128,13 @@ public:
 
   /*!
     @brief No copy assigment allowed
+    @param[in] a_other Other operator
   */
   EBHelmholtzOp& operator=(const EBHelmholtzOp& a_oper) = delete;
 
   /*!
     @brief No move assigment allowed
+    @param[in] a_other Other operator
   */
   EBHelmholtzOp& operator=(const EBHelmholtzOp&& a_oper) = delete;
 
@@ -496,6 +526,13 @@ public:
   void createCoarsened(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const int& a_refRat) override final;
 
   /*!
+    @brief Do diagonal scaling
+    @param[inout] a_rhs           Data to be scaled
+    @param[in]    a_kappaWeighted Use kappa-weighted scaling or not
+  */
+  void diagonalScale(LevelData<EBCellFAB> & a_rhs, bool a_kappaWeighted);
+
+  /*!
     @brief Divide by the a-coefficient
     @param[inout] a_rhs Divided data
   */
@@ -556,7 +593,7 @@ protected:
   /*!
     @brief Relaxation method
   */
-  RelaxationMethod m_relaxationMethod;
+  Smoother m_smoother;
 
   /*!
     @brief Data centering

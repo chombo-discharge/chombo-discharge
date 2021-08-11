@@ -43,6 +43,8 @@ public:
   void parseRuntimeOptions() override final{ }
   
   void registerOperators() override final;
+
+  void setupSolver() override final{}
   
 protected:
 

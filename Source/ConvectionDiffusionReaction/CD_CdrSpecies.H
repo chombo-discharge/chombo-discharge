@@ -94,7 +94,7 @@ public:
   /*!
     @brief Get deposition
   */
-  virtual DepositionType::Which getDeposition();
+  virtual DepositionType getDeposition();
 
   /*!
     @brief Get initial particles
@@ -151,7 +151,7 @@ protected:
   /*!
     @brief Deposition type for initial particles
   */
-  DepositionType::Which m_deposition;
+  DepositionType m_deposition;
 };
 
 #include <CD_NamespaceFooter.H>

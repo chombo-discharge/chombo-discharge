@@ -70,10 +70,6 @@ void CdrGodunov::parseSlopeLimiter(){
   m_slopelim = (str == "true") ? true : false;
 }
 
-int CdrGodunov::queryGhost() const {
-  return 3;
-}
-
 void CdrGodunov::averageVelocityToFaces(){
   CH_TIME("CdrGodunov::averageVelocityToFaces(public, full)");
   if(m_verbosity > 5){
@@ -145,10 +141,10 @@ void CdrGodunov::allocateInternals(){
     pout() << m_name + "::allocateInternals" << endl;
   }
 
-  CdrSolver::allocateInternals();
+  CdrTGA::allocateInternals();
 
   if(m_isDiffusive){
-    this->setupMultigrid();
+    this->setupDiffusionSolver();
   }
 
   if(m_isMobile){
@@ -157,7 +153,6 @@ void CdrGodunov::allocateInternals(){
     const Vector<int>& ref_ratios                    = m_amr->getRefinementRatios();
     const Vector<Real>& dx                           = m_amr->getDx();
     const int finest_level                           = m_amr->getFinestLevel();
-    const bool has_ebcf                              = m_amr->getEbCf();
     m_level_advect.resize(1 + finest_level);
   
     for (int lvl = 0; lvl <= finest_level; lvl++){
@@ -171,8 +166,6 @@ void CdrGodunov::allocateInternals(){
 	eblg_coar = *eblgs[lvl-1];
 	ref_rat   = ref_ratios[lvl-1];
       }
-
-      const bool forceNoEBCF = !has_ebcf;
     
       m_level_advect[lvl] = RefCountedPtr<EBAdvectLevelIntegrator> (new EBAdvectLevelIntegrator(*eblgs[lvl],
 												eblg_coar,
@@ -180,7 +173,7 @@ void CdrGodunov::allocateInternals(){
 												dx[lvl]*RealVect::Unit,
 												has_coar,
 												has_fine,
-												forceNoEBCF,
+												false,
 												m_slopelim,
 												m_ebis));
     }

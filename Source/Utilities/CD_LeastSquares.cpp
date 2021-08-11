@@ -167,65 +167,7 @@ VoFStencil LeastSquares::getBndryGradSten(const VolIndex&    a_vof,
   return bndrySten;
 }
 
-RealVect LeastSquares::position(const CellLocation a_position,
-				const VolIndex&    a_vof,
-				const EBISBox&     a_ebisbox,
-				const Real&        a_dx){
 
-  RealVect ret;
-  
-  switch(a_position){
-  case Location::Cell::Center:
-    ret = RealVect(a_vof.gridIndex()) + 0.5*RealVect::Unit;
-    break;
-  case Location::Cell::Centroid:
-    ret = RealVect(a_vof.gridIndex()) + 0.5*RealVect::Unit + a_ebisbox.centroid(a_vof);
-    break;
-  case Location::Cell::Boundary:
-    ret = RealVect(a_vof.gridIndex()) + 0.5*RealVect::Unit + a_ebisbox.bndryCentroid(a_vof);
-    break;
-  default:
-    MayDay::Error("LeastSquares::position -- bad location input.");
-    break;
-  }
-
-  ret *= a_dx;
-
-  return ret;
-}
-
-RealVect LeastSquares::position(const FaceLocation a_position,
-				const FaceIndex&   a_face,
-				const EBISBox&     a_ebisbox,
-				const Real&        a_dx){
-  RealVect ret;
-  const IntVect iv = a_face.gridIndex(Side::Hi);
-  
-  switch(a_position){
-  case Location::Face::Center:
-    ret = (RealVect(iv) + 0.5*RealVect::Unit) - 0.5*BASISREALV(a_face.direction());
-    break;
-  case Location::Face::Centroid: {
-    ret = (RealVect(iv) + 0.5*RealVect::Unit) - 0.5*BASISREALV(a_face.direction());
-
-    const RealVect faceCentroid = a_ebisbox.centroid(a_face);
-    
-    for (int dir = 0; dir < SpaceDim; dir++){ // Direction a_face is undefined. 
-      if(dir != a_face.direction()){
-	ret[dir] += faceCentroid[dir];
-      }
-    }
-    break;
-  }
-  default:
-    MayDay::Error("LeastSquares::positon - bad location input.");
-    break;
-  }
-
-  ret *= a_dx;
-
-  return ret;
-}
 
 RealVect LeastSquares::displacement(const CellLocation a_from,
 				    const CellLocation a_to,
@@ -234,8 +176,8 @@ RealVect LeastSquares::displacement(const CellLocation a_from,
 				    const EBISBox&     a_ebisbox,
 				    const Real&        a_dx){
 
-  const RealVect a = LeastSquares::position(a_from, a_fromVof, a_ebisbox, a_dx);
-  const RealVect b = LeastSquares::position(a_to,   a_toVof,   a_ebisbox, a_dx);
+  const RealVect a = Location::position(a_from, a_fromVof, a_ebisbox, a_dx);
+  const RealVect b = Location::position(a_to,   a_toVof,   a_ebisbox, a_dx);
 
   return (b-a);
 }
@@ -246,8 +188,8 @@ RealVect LeastSquares::displacement(const FaceLocation a_fromLoc,
 				    const VolIndex&    a_toVof,
 				    const EBISBox&     a_ebisbox,
 				    const Real&        a_dx){
-  const RealVect a = LeastSquares::position(a_fromLoc, a_fromFace, a_ebisbox, a_dx);
-  const RealVect b = LeastSquares::position(a_toLoc,   a_toVof,    a_ebisbox, a_dx);
+  const RealVect a = Location::position(a_fromLoc, a_fromFace, a_ebisbox, a_dx);
+  const RealVect b = Location::position(a_toLoc,   a_toVof,    a_ebisbox, a_dx);
 
   return (b-a);
 }
@@ -261,8 +203,8 @@ RealVect LeastSquares::displacement(const CellLocation a_from,
 				    const Real&        a_dxFrom,
 				    const Real&        a_dxTo){
 
-  const RealVect a = LeastSquares::position(a_from, a_fromVof, a_ebisboxFrom, a_dxFrom);
-  const RealVect b = LeastSquares::position(a_to,   a_toVof,   a_ebisboxTo,   a_dxTo);
+  const RealVect a = Location::position(a_from, a_fromVof, a_ebisboxFrom, a_dxFrom);
+  const RealVect b = Location::position(a_to,   a_toVof,   a_ebisboxTo,   a_dxTo);
 
   return (b-a);
 }

@@ -88,7 +88,7 @@ void ItoSolver::depositParticles(EBAMRCellData& a_phi, const ParticleContainer<T
 template <class T>
 void ItoSolver::depositParticles(EBAMRCellData&               a_phi,
 				   const ParticleContainer<T>& a_particles,
-				   const DepositionType::Which  a_deposition){
+				   const DepositionType  a_deposition){
   CH_TIME("ItoSolver::depositParticles");
   if(m_verbosity > 5){
     pout() << m_name + "::depositParticles" << endl;
@@ -120,7 +120,7 @@ void ItoSolver::depositParticles(EBAMRCellData&               a_phi,
 template <class T>
 void ItoSolver::depositKappaConservative(EBAMRCellData&               a_phi,
 					   const ParticleContainer<T>& a_particles,
-					   const DepositionType::Which  a_deposition){
+					   const DepositionType  a_deposition){
   CH_TIME("ItoSolver::depositKappaConservative");
   if(m_verbosity > 5){
     pout() << m_name + "::depositKappaConservative" << endl;
@@ -147,7 +147,7 @@ void ItoSolver::depositKappaConservative(EBAMRCellData&               a_phi,
 template <class T>
 void ItoSolver::depositKappaConservativeWithPVR(EBAMRCellData&               a_phi,
 						  const ParticleContainer<T>& a_particles,
-						  const DepositionType::Which  a_deposition){
+						  const DepositionType  a_deposition){
   CH_TIME("ItoSolver::depositKappaConservativeWithPVR");
   if(m_verbosity > 5){
     pout() << m_name + "::depositKappaConservativeWithPVR" << endl;
@@ -208,7 +208,7 @@ void ItoSolver::depositKappaConservativeWithPVR(EBAMRCellData&               a_p
 template <class T>
 void ItoSolver::depositKappaConservativeNoPVR_native(EBAMRCellData&               a_phi,
 						       const ParticleContainer<T>& a_particles,
-						       const DepositionType::Which  a_deposition){
+						       const DepositionType  a_deposition){
   CH_TIME("ItoSolver::depositKappaConservativeNoPVR_native");
   if(m_verbosity > 5){
     pout() << m_name + "::depositKappaConservativeNoPVR_native" << endl;
@@ -300,7 +300,7 @@ void ItoSolver::depositKappaConservativeNoPVR_native(EBAMRCellData&             
 template <class T>
 void ItoSolver::depositKappaConservativeNoPVR_NGP(EBAMRCellData&               a_phi,
 						    const ParticleContainer<T>& a_particles,
-						    const DepositionType::Which  a_deposition){
+						    const DepositionType  a_deposition){
   CH_TIME("ItoSolver::depositKappaConservativeNoPVR_NGP");
   if(m_verbosity > 5){
     pout() << m_name + "::depositKappaConservativeNoPVR_NGP" << endl;
@@ -357,7 +357,7 @@ void ItoSolver::depositKappaConservativeNoPVR_NGP(EBAMRCellData&               a
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box box          = dbl.get(dit());
       const EBISBox& ebisbox = ebisl[dit()];
-      EbParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin, DepositionType::NGP);
+      EbParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin, m_irreg_ngp_deposition);
       interp.deposit((*halo_particles[lvl])[dit()].listItems(), (*a_phi[lvl])[dit()].getFArrayBox(), DepositionType::NGP);
     }    
   }
