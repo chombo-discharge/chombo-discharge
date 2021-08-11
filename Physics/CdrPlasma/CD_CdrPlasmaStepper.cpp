@@ -3171,8 +3171,8 @@ void CdrPlasmaStepper::setupSolvers(){
   if(m_verbosity > 5){
     pout() << "CdrPlasmaStepper::setupSolvers" << endl;
   }
+  
   parseOptions();
-  this->sanityCheck();
 
   // Make solvers
   this->setupCdr();
@@ -3676,7 +3676,6 @@ void CdrPlasmaStepper::setupCdr(){
   m_cdr->setAmr(m_amr);
   m_cdr->setComputationalGeometry(m_computationalGeometry);
   m_cdr->setPhase(phase::gas);
-  m_cdr->sanityCheck();
   m_cdr->setRealm(m_realm);
 }
 
