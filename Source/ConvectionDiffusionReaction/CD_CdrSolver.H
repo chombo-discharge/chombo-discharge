@@ -464,6 +464,7 @@ public:
     @param[in] a_max       Maximum value of m_phi
     @param[in] a_tolerance Tolerance
     @details This computes dt = phi/source, but only for cells where phi lies within a_tolerance*a_max (and source > 0)
+    @todo An old routine which we could (probably) remove. 
   */
   virtual Real computeSourceDt(const Real a_max, const Real a_tolerance);
   

@@ -7,8 +7,7 @@
   @file   CD_CdrSolver.cpp
   @brief  Implementation of CD_CdrSolver.H
   @author Robert Marskar
-  @todo   Need to parse domain BCs!
-  @todo   Code walk starts on line 1853 ::computeAdvectionDt(...)
+  @todo   Need to implement parseDomainBc
   @todo   Should computeAdvectionFlux and computeDiffusionFlux be ghosted... filling fluxes on ghost faces...?
 */
 
@@ -1871,7 +1870,7 @@ Real CdrSolver::computeAdvectionDt(){
       const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
       const Real dx                = m_amr->getDx()[lvl];
 
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      for (DataIterator dit(dbl); dit.ok(); ++dit){
 	EBCellFAB& dt          = (*m_scratch     [lvl])[dit()];
 	const EBCellFAB& velo  = (*m_cellVelocity[lvl])[dit()];
 	const Box cellBox      = dbl.get(dit());
@@ -1936,7 +1935,7 @@ Real CdrSolver::computeDiffusionDt(){
       const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
       const Real dx                = m_amr->getDx()[lvl];
 
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      for (DataIterator dit(dbl); dit.ok(); ++dit){
 	EBCellFAB&             dt         = (*m_scratch[lvl])[dit()];
 	const Box              cellBox    = dbl  [dit()];
 	const EBISBox&         ebisbox    = ebisl[dit()];
@@ -2035,7 +2034,7 @@ Real CdrSolver::computeAdvectionDiffusionDt(){
       const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
       const Real dx                = m_amr->getDx()[lvl];
 
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      for (DataIterator dit(dbl); dit.ok(); ++dit){
 	EBCellFAB&             dt         = (*m_scratch                       [lvl])[dit()];
 	const EBCellFAB&       velo       = (*m_cellVelocity                  [lvl])[dit()];
 	const BaseIVFAB<Real>& diffCoEB   = (*m_ebCenteredDiffusionCoefficient[lvl])[dit()];
@@ -2118,50 +2117,53 @@ Real CdrSolver::computeAdvectionDiffusionDt(){
 }
 
 Real CdrSolver::computeSourceDt(const Real a_max, const Real a_tolerance){
-  CH_TIME("CdrSolver::computeSourceDt");
+  CH_TIME("CdrSolver::computeSourceDt(Real, Real)");
   if(m_verbosity > 5){
-    pout() << m_name + "::computeSourceDt" << endl;
+    pout() << m_name + "::computeSourceDt(Real, Real)" << endl;
   }
 
-  const int comp = 0;
+  // This routine computes the time step dt = phi/source but only for cells where phi lies within a_tolerance*a_max. It's an old
+  // routine -- and one that is hardly ever used. 
   
-  Real min_dt = 1.E99;
+  Real minDt = std::numeric_limits<Real>::max();
 
   if(a_max > 0.0){
-    const int finest_level = m_amr->getFinestLevel();
-    for (int lvl = 0; lvl <= finest_level; lvl++){
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
       const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
       const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
       const Real dx                = m_amr->getDx()[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	const EBCellFAB& state  = (*m_phi[lvl])[dit()];
-	const EBCellFAB& source = (*m_source[lvl])[dit()];
-	const Box box           = dbl.get(dit());
+	const EBCellFAB& phi     = (*m_phi   [lvl])[dit()];
+	const EBCellFAB& source  = (*m_source[lvl])[dit()];
+	const Box        cellBox = dbl             [dit()];
 
-	const BaseFab<Real>& state_fab  = state.getSingleValuedFAB();
-	const BaseFab<Real>& source_fab = source.getSingleValuedFAB();
+	// Fortran kernel -- computes dt = phi/source but only if phi > a_max*a_tolerance and source > 0.0
+	const BaseFab<Real>& phiReg = phi.getSingleValuedFAB();
+	const BaseFab<Real>& srcReg = source.getSingleValuedFAB();
 
-
-	FORT_SOURCE_DT(CHF_REAL(min_dt),
-		       CHF_CONST_FRA1(state_fab, comp),
-		       CHF_CONST_FRA1(source_fab, comp),
+	FORT_SOURCE_DT(CHF_REAL(minDt),
+		       CHF_CONST_FRA1(phiReg, m_comp),
+		       CHF_CONST_FRA1(srcReg, m_comp),
 		       CHF_CONST_REAL(a_tolerance),
 		       CHF_CONST_REAL(a_max),
-		       CHF_BOX(box));
+		       CHF_BOX(cellBox));
 
+	// Same as the Fortran kernel, but for cut-cells only. 
 	VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
 	for (vofit.reset(); vofit.ok(); ++vofit){
 	  const VolIndex vof = vofit();
 
-	  const Real phi = state(vof, comp);
-	  const Real src = source(vof, comp);
+	  const Real curPhi = phi   (vof, m_comp);
+	  const Real curSrc = source(vof, m_comp);
 
-	  Real thisdt = 1.E99;
-	  if(Abs(phi) > a_tolerance*a_max && src > 0.0){
-	    thisdt = Abs(phi/src);
+	  Real curDt = std::numeric_limits<Real>::max();
+	  
+	  if(std::abs(curPhi) > a_tolerance*a_max && curSrc > 0.0){
+	    curDt = std::abs(curPhi/curSrc);
 	  }
-	  min_dt = Min(min_dt, thisdt);
+	  
+	  minDt = std::min(minDt, curDt);
 	}
       }
     }
@@ -2169,39 +2171,43 @@ Real CdrSolver::computeSourceDt(const Real a_max, const Real a_tolerance){
 
 #ifdef CH_MPI
   Real tmp = 1.;
-  int result = MPI_Allreduce(&min_dt, &tmp, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
+  int result = MPI_Allreduce(&minDt, &tmp, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
   if(result != MPI_SUCCESS){
     MayDay::Error("CdrSolver::computeSourceDt() - communication error on norm");
   }
-  min_dt = tmp;
+  minDt = tmp;
 #endif
   
-  return min_dt;
-
+  return minDt;
 }
 
 Real CdrSolver::computeMass(){
-  CH_TIME("CdrSolver::computeMass");
+  CH_TIME("CdrSolver::computeMass()");
   if(m_verbosity > 5){
-    pout() << m_name + "::computeMass" << endl;
+    pout() << m_name + "::computeMass()" << endl;
   }
 
-  Real mass = 0.;
-  const int base = 0;
-  const Real dx = m_amr->getDx()[base];
-  m_amr->averageDown(m_phi, m_realm, m_phase);
+  // TLDR: We have conservative coarsening so we just coarsen the solution and compute the mass on the coarsest level only.
   
-  DataOps::kappaSum(mass, *m_phi[base]);
+  m_amr->averageDown(m_phi, m_realm, m_phase);
+
+  const Real dx  = m_amr->getDx()[0];
+
+  Real mass = 0.;
+  DataOps::kappaSum(mass, *m_phi[0]);
+
   mass *= pow(dx, SpaceDim);
   
   return mass;
 }
 
 Real CdrSolver::computeCharge(){
-  CH_TIME("CdrSolver::computeCharge");
+  CH_TIME("CdrSolver::computeCharge()");
   if(m_verbosity > 5){
-    pout() << m_name + "::computeCharge" << endl;
+    pout() << m_name + "::computeCharge()" << endl;
   }
+
+  // TLDR: Compute the mass on the coarsest level and multiply by charge number. 
 
   const Real Q = this->computeMass()*m_species->getChargeNumber();
 
@@ -2209,62 +2215,126 @@ Real CdrSolver::computeCharge(){
 }
 
 bool CdrSolver::extrapolateSourceTerm() const {
+  CH_TIME("CdrSolver::extrapolateSourceTerm()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::extrapolateSourceTerm()" << endl;
+  }
+  
   return m_extrapolateSourceTerm;
 }
 
 bool CdrSolver::isDiffusive(){
+  CH_TIME("CdrSolver::isDiffusive()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::isDiffusive()" << endl;
+  }
+  
   return m_isDiffusive;
 }
 
 bool CdrSolver::isMobile(){
+  CH_TIME("CdrSolver::isMobile()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::isMobile()" << endl;
+  }
+  
   return m_isMobile;
 }
 
 EBAMRCellData& CdrSolver::getPhi(){
+  CH_TIME("CdrSolver::getPhi()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::getPhi()" << endl;
+  }
+  
   return m_phi;
 }
 
 EBAMRCellData& CdrSolver::getSource(){
+  CH_TIME("CdrSolver::getSource()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::getSource()" << endl;
+  }
+  
   return m_source;
 }
 
 EBAMRCellData& CdrSolver::getCellCenteredVelocity(){
+  CH_TIME("CdrSolver::getCellCenteredVelocity()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::getCellCenteredVelocity()" << endl;
+  }
+  
   return m_cellVelocity;
 }
 
 EBAMRFluxData& CdrSolver::getFaceCenteredVelocity(){
+  CH_TIME("CdrSolver::getFaceCenteredVelocity()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::getFaceCenteredVelocity()" << endl;
+  }
+  
   return m_faceVelocity;
 }
 
 EBAMRIVData& CdrSolver::getEbCenteredVelocity(){
+  CH_TIME("CdrSolver::getEbCenteredVelocity()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::getEbCenteredVelocity()" << endl;
+  }
+  
   return m_ebVelocity;
 }
 
 EBAMRFluxData& CdrSolver::getFaceCenteredDiffusionCoefficient(){
+  CH_TIME("CdrSolver::getFaceCenteredDiffusionCoefficient()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::getFaceCenteredDiffusionCoefficient()" << endl;
+  }
+  
   return m_faceCenteredDiffusionCoefficient;
 }
 
 EBAMRIVData& CdrSolver::getEbCenteredDiffusionCoefficient(){
+  CH_TIME("CdrSolver::getEbCenteredDiffusionCoefficient()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::getEbCenteredDiffusionCoefficient()" << endl;
+  }
+  
   return m_ebCenteredDiffusionCoefficient;
 }
 
 EBAMRIVData& CdrSolver::getEbFlux(){
+  CH_TIME("CdrSolver::getEbFlux()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::getEbFlux()" << endl;
+  }
+  
   return m_ebFlux;
 }
 
 EBAMRIFData& CdrSolver::getDomainFlux(){
+  CH_TIME("CdrSolver::getDomainFlux()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::getDomainFlux()" << endl;
+  }
+  
   return m_domainFlux;
 }
 
 void CdrSolver::parseDomainBc(){
+  CH_TIME("CdrSolver::parseDomainBc()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parseDomainBc()" << endl;
+  }
+  
   ParmParse pp(m_className.c_str());
-
 }
 
 void CdrSolver::parseExtrapolateSourceTerm(){
-  CH_TIME("CdrSolver::parseExtrapolateSourceTerm");
+  CH_TIME("CdrSolver::parseExtrapolateSourceTerm()");
   if(m_verbosity > 5){
-    pout() << m_name + "::parseExtrapolateSourceTerm" << endl;
+    pout() << m_name + "::parseExtrapolateSourceTerm()" << endl;
   }
   
   ParmParse pp(m_className.c_str());
@@ -2275,9 +2345,9 @@ void CdrSolver::parseExtrapolateSourceTerm(){
 }
 
 void CdrSolver::parseDivergenceComputation(){
-  CH_TIME("CdrSolver::parseDivergenceComputation");
+  CH_TIME("CdrSolver::parseDivergenceComputation()");
   if(m_verbosity > 5){
-    pout() << m_name + "::parseDivergenceComputation" << endl;
+    pout() << m_name + "::parseDivergenceComputation()" << endl;
   }
 
   ParmParse pp(m_className.c_str());
@@ -2287,17 +2357,24 @@ void CdrSolver::parseDivergenceComputation(){
 }
 
 void CdrSolver::parsePlotVariables(){
-  ParmParse pp(m_className.c_str());
-  const int num = pp.countval("plt_vars");
-  Vector<std::string> str(num);
-  pp.getarr("plt_vars", str, 0, num);
+  CH_TIME("CdrSolver::parsePlotVariables()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parsePlotVariables()" << endl;
+  }
 
   m_plotPhi                  = false;
   m_plotVelocity             = false;
   m_plotDiffusionCoefficient = false;
   m_plotSource               = false;
   m_plotEbFlux               = false;
-  
+
+  // Parse plot variables from command line
+  ParmParse pp(m_className.c_str());
+  const int num = pp.countval("plt_vars");
+  Vector<std::string> str(num);
+  pp.getarr("plt_vars", str, 0, num);
+
+  // Set plot variables
   for (int i = 0; i < num; i++){
     if(     str[i] == "phi")    m_plotPhi                  = true;
     else if(str[i] == "vel")    m_plotVelocity             = true;
@@ -2308,22 +2385,34 @@ void CdrSolver::parsePlotVariables(){
 }
 
 void CdrSolver::gwnDiffusionSource(EBAMRCellData& a_noiseSource, const EBAMRCellData& a_cellPhi){
-  CH_TIME("CdrSolver::gwnDiffusionSource");
+  CH_TIME("CdrSolver::gwnDiffusionSource(EBAMRCellData, EBAMRCellData)");
   if(m_verbosity > 5){
-    pout() << m_name + "::gwnDiffusionSource" << endl;
+    pout() << m_name + "::gwnDiffusionSource(EBAMRCellData, EBAMRCellData)" << endl;
   }
 
+  CH_assert(a_noiseSource[0]->nComp() == 1);
+  CH_assert(a_cellPhi    [0]->nComp() == 1);
+
+  // This routine computes a Gaussian white noise source term for the fluctuating convection-diffusion equation. The source
+  // term enters the convection-diffusion equation as
+  //
+  //    d(phi)/dt = Div(D*Grad(phi) - Z*sqrt(2*D*phi)) where Z is a Gaussian random field.
+  //
+  // In this routine we compute the finite volume approximation to Div(Z*sqrt(2*D*phi)) using standard finite volume routines. The only difference
+  // is that the flux is defined as Z*sqrt(2*D*phi) but we don't have phi on face centers. Worse, setting phi to be the arithmetic average can easily
+  // lead to negative density, so we use the Heaviside smoothing from Kim et. al. The paper is
+  // "Stochastic Simulation of Reaction-Diffusion Systems: A Fluctuating-Hydrodynamics Approach", 10.1063/1.4978775.
+  //
+  // This does not guarantee against negative densities, but its surely better than the naive approach. Note that once we have the fluctuating term, we simply
+  // compute Div(G). 
+
   if(m_isDiffusive){
-    const int comp  = 0;
-    const int ncomp = 1;
+    this->smoothHeavisideFaces(m_scratchFluxOne, a_cellPhi);                  // m_scratchFluxOne = phis on faces (smoothing as to avoid negative densities)
+    DataOps::multiply(m_scratchFluxOne, m_faceCenteredDiffusionCoefficient);  // m_scratchFluxOne = D*phis
+    DataOps::scale(m_scratchFluxOne, 2.0);                                    // m_scratchFluxOne = 2*D*phis
+    DataOps::squareRoot(m_scratchFluxOne);                                    // m_scratchFluxOne = sqrt(2*D*phis)
 
-    this->fillGwn(m_scratchFluxTwo, 1.0);                         // Gaussian White Noise = W/sqrt(dV)
-    this->smoothHeavisideFaces(m_scratchFluxOne, a_cellPhi); // m_scratchFluxOne = phis
-    DataOps::multiply(m_scratchFluxOne, m_faceCenteredDiffusionCoefficient);                // m_scratchFluxOne = D*phis
-    DataOps::scale(m_scratchFluxOne, 2.0);                        // m_scratchFluxOne = 2*D*phis
-    DataOps::squareRoot(m_scratchFluxOne);                       // m_scratchFluxOne = sqrt(2*D*phis)
-
-#if 0 // Debug
+#if 0 // Debug, check if we have negative face values
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
       for (int dir = 0; dir <SpaceDim; dir++){
 	Real max, min;
@@ -2334,11 +2423,12 @@ void CdrSolver::gwnDiffusionSource(EBAMRCellData& a_noiseSource, const EBAMRCell
       }
     }
 #endif
+
+    this->fillGwn(m_scratchFluxTwo, 1.0);                         // Gaussian White Noise = W/sqrt(dV)
+    DataOps::multiply(m_scratchFluxOne, m_scratchFluxTwo);        // Now m_scratchFluxOne holds the fluctuating cell-centered flux Z*sqrt(2*D*phi). 
+    this->computeDivG(a_noiseSource, m_scratchFluxOne, m_ebZero); // Compute the finite volume approximation and make it into a source term. 
   
-    DataOps::multiply(m_scratchFluxOne, m_scratchFluxTwo);                     // Holds random, cell-centered flux
-    this->conservativeDivergenceNoKappaDivision(a_noiseSource, m_scratchFluxOne, m_ebZero); 
-  
-#if 0 // Debug
+#if 0 // Debug, check if we have NaNs/Infs
     m_amr->averageDown(a_noiseSource, m_realm, m_phase);
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
       if(EBLevelDataOps::checkNANINF(*a_noiseSource[lvl])){
@@ -2353,159 +2443,147 @@ void CdrSolver::gwnDiffusionSource(EBAMRCellData& a_noiseSource, const EBAMRCell
 }
 
 void CdrSolver::smoothHeavisideFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellPhi){
-  CH_TIME("CdrSolver::smoothHeavisideFaces");
+  CH_TIME("CdrSolver::smoothHeavisideFaces(EBAMRFluxData, EBAMRCellData)");
   if(m_verbosity > 5){
-    pout() << m_name + "::smoothHeavisideFaces" << endl;
+    pout() << m_name + "::smoothHeavisideFaces(EBAMRFluxData, EBAMRCellData)" << endl;
   }
 
-  const int comp  = 0;
-  const int ncomp = 1;
-  const int finest_level = m_amr->getFinestLevel();
+  CH_assert(a_facePhi[0]->nComp() == 1);
+  CH_assert(a_cellPhi[0]->nComp() == 1);
 
-  for (int lvl = 0; lvl <= finest_level; lvl++){
+  // This routine is taken from  Kim et. al. "Stochastic Simulation of Reaction-Diffusion Systems: A Fluctuating-Hydrodynamics Approach" (10.1063/1.4978775).
+  // It is inspired by a desire to gradually turn off fluctuations as the number of particles in a grid become small, as to avoid negative densities. So, we
+  // compute the value of phi on faces with the following rules:
+  //
+  //    1. If theres more than one particle in the cells, we take the arithmetic average as usual. 
+  //    2. If there's between zero and one particle in the cells, we use an averaging function phis = 0.5*(phiLo + phiHi) * loFactor * hiFactor
+  //       where loFactor and hiFactor are the number of particles in the grid cell. 
+
+  // Loop over levels. 
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
     const ProblemDomain& domain  = m_amr->getDomains()[lvl];
     const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
     const Real dx                = m_amr->getDx()[lvl];
     const Real vol               = pow(dx, SpaceDim);
     
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const Box& box = dbl.get(dit());
-      const EBISBox& ebisbox = ebisl[dit()];
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      const Box&        cellBox  = dbl  [dit()];
+      const EBISBox&    ebisbox  = ebisl[dit()];
+      const EBGraph&    ebgraph  = ebisbox.getEBGraph();
+      const IntVectSet& irregIVS = ebisbox.getIrregIVS(cellBox);      
 
       for (int dir = 0; dir < SpaceDim; dir++){
-	EBFaceFAB& face_states       = (*a_facePhi[lvl])[dit()][dir];
-	const EBCellFAB& cell_states = (*a_cellPhi[lvl])[dit()];
+	EBFaceFAB&       facePhi = (*a_facePhi[lvl])[dit()][dir];
+	const EBCellFAB& cellPhi = (*a_cellPhi[lvl])[dit()];
 
-	BaseFab<Real>& reg_face       = face_states.getSingleValuedFAB();
-	const BaseFab<Real>& reg_cell = cell_states.getSingleValuedFAB();
+	BaseFab<Real>&       faceReg = facePhi.getSingleValuedFAB();
+	const BaseFab<Real>& cellReg = cellPhi.getSingleValuedFAB();
 
-	Box facebox = box;
-	//	facebox.grow(dir,1);
-	facebox.surroundingNodes(dir);
-
-	// This will also do irregular cells and boundary faces
-	FORT_HEAVISIDE_MEAN(CHF_FRA1(reg_face, comp),  
-			    CHF_CONST_FRA1(reg_cell, comp),
+	// Regular faces (this will also do irregular faces but we fix those below)
+	Box faceBox = cellBox;
+	faceBox.surroundingNodes(dir);	
+	FORT_HEAVISIDE_MEAN(CHF_FRA1(faceReg, m_comp),  
+			    CHF_CONST_FRA1(cellReg, m_comp),
 			    CHF_CONST_INT(dir),
 			    CHF_CONST_REAL(dx),
-			    CHF_BOX(facebox));
+			    CHF_BOX(faceBox));
 
-	// Fix up irregular cell faces
-	const IntVectSet& irreg = ebisbox.getIrregIVS(box);
+	// Fix up irregular cell faces. This is the same kernel as above but irregular faces only...
 	const FaceStop::WhichFaces stopcrit = FaceStop::SurroundingNoBoundary;
-	for (FaceIterator faceit(irreg, ebgraph, dir, stopcrit); faceit.ok(); ++faceit){
+	for (FaceIterator faceit(irregIVS, ebgraph, dir, stopcrit); faceit.ok(); ++faceit){
 	  const FaceIndex& face = faceit();
 
+	  const VolIndex loVof = face.getVoF(Side::Lo);
+	  const VolIndex hiVof = face.getVoF(Side::Hi);
 
-	  const VolIndex lovof = face.getVoF(Side::Lo);
-	  const VolIndex hivof = face.getVoF(Side::Hi);
-
-	  const Real loval = Max(0.0, cell_states(lovof, comp));
-	  const Real hival = Max(0.0, cell_states(hivof, comp));
-
+	  const Real loVal = std::max(0.0, cellPhi(loVof, m_comp));
+	  const Real hiVal = std::max(0.0, cellPhi(hiVof, m_comp));
 
 	  Real Hlo;
-	  if(loval*vol <= 0.0){
+	  if(loVal*vol <= 0.0){
 	    Hlo = 0.0;
 	  }
-	  else if(loval*vol >= 1.0){
+	  else if(loVal*vol >= 1.0){
 	    Hlo = 1.0;
 	  }
 	  else{
-	    Hlo = loval*vol;
+	    Hlo = loVal*vol;
 	  }
 
 	  Real Hhi;
-	  if(hival*vol <= 0.0){
+	  if(hiVal*vol <= 0.0){
 	    Hhi = 0.0;
 	  }
-	  else if(hival*vol >= 1.0){
+	  else if(hiVal*vol >= 1.0){
 	    Hhi = 1.0;
 	  }
 	  else{
-	    Hhi = hival*vol;
+	    Hhi = hiVal*vol;
 	  }
 
-
-	  face_states(face, comp) = 0.5*(hival + loval)*Hlo*Hhi;
-	}
-
-	// No random flux on domain faces. Reset those. 
-	for (SideIterator sit; sit.ok(); ++sit){
-	  Box sidebox;
-	  if(sit() == Side::Lo){
-	    sidebox = bdryLo(domain, dir, 1);
-	  }
-	  else if(sit() == Side::Hi){
-	    sidebox = bdryHi(domain, dir, 1);
-	  }
-	  
-	  sidebox &= facebox;
-
-	  Box cellbox = sidebox.enclosedCells(dir);
-
-	  const IntVectSet ivs(cellbox);
-	  const FaceStop::WhichFaces stopcrit = FaceStop::AllBoundaryOnly;
-	  for (FaceIterator faceit(ivs, ebgraph, dir, stopcrit); faceit.ok(); ++faceit){
-	    face_states(faceit(), comp) = 0.0;
-	  }
+	  facePhi(face, m_comp) = 0.5*(hiVal + loVal)*Hlo*Hhi;
 	}
       }
     }
 
-    // Covered is bogus
+    // Covered faces are bogus. 
     EBLevelDataOps::setCoveredVal(*a_facePhi[lvl], 0.0);
   }
+
+  // No random flux on domain faces. 
+  this->resetDomainFlux(a_facePhi);
 }
 
 void CdrSolver::fillGwn(EBAMRFluxData& a_noise, const Real a_sigma){
-  CH_TIME("CdrSolver::fillGwn");
+  CH_TIME("CdrSolver::fillGwn(EBAMRFluxData, Real)");
   if(m_verbosity > 5){
-    pout() << m_name + "::fillGwn" << endl;
+    pout() << m_name + "::fillGwn(EBAMRFluxData, Real)" << endl;
   }
 
-  const int comp  = 0;
-  const int ncomp = 1;
-  const int finest_level = m_amr->getFinestLevel();
+  CH_assert(a_noise[0]->nComp() == 1);
 
+  // TLDR: This routine draws a random number from a Gaussian distribution at each cell face. This is used
+  //       in FHD routines where we want to compute a finite volume approximation to the FHD diffusion noise
+  //       term. 
+
+  // Gaussian white noise distribution -- this should be centered at 0 and we will usually have a_sigma=1 
   std::normal_distribution<double> GWN(0.0, a_sigma);
 
-  for (int lvl = 0; lvl <= finest_level; lvl++){
+  DataOps::setValue(a_noise, 0.0);
+  
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
     const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
     const Real dx                = m_amr->getDx()[lvl];
     const Real vol               = pow(dx, SpaceDim);
     const Real ivol              = sqrt(1./vol);
     
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const Box& box = dbl.get(dit());
-      const EBISBox& ebisbox = ebisl[dit()];
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      const Box&     cellBox  = dbl  [dit()];
+      const EBISBox& ebisbox  = ebisl[dit()];
+      const EBGraph& ebgraph  = ebisbox.getEBGraph();
+      const IntVectSet& irreg = ebisbox.getIrregIVS(cellBox);      
 
       for (int dir = 0; dir < SpaceDim; dir++){
 	EBFaceFAB& noise = (*a_noise[lvl])[dit()][dir];
 
-	Box facebox = box;
-	facebox.surroundingNodes(dir);
-
-	noise.setVal(0.0);
-
 	// Regular faces
-	BaseFab<Real>& noise_reg = noise.getSingleValuedFAB();
+	Box facebox = cellBox;
+	facebox.surroundingNodes(dir);
+	
+	BaseFab<Real>& noiseReg = noise.getSingleValuedFAB();
 	for (BoxIterator bit(facebox); bit.ok(); ++bit){
 	  const IntVect iv = bit();
-	  noise_reg(iv, comp) = GWN(m_rng)*ivol;
+	  noiseReg(iv, m_comp) = GWN(m_rng)*ivol;
 	}
 
-	// // Irregular faces
-	const IntVectSet& irreg = ebisbox.getIrregIVS(box);
+	// Irregular faces
 	const FaceStop::WhichFaces stopcrit = FaceStop::SurroundingNoBoundary;
 	for (FaceIterator faceit(irreg, ebgraph, dir, stopcrit); faceit.ok(); ++faceit){
 	  const FaceIndex& face = faceit();
 
-	  noise(face, comp) = GWN(m_rng)*ivol;
+	  noise(face, m_comp) = GWN(m_rng)*ivol;
 	}
       }
     }
@@ -2513,10 +2591,13 @@ void CdrSolver::fillGwn(EBAMRFluxData& a_noise, const Real a_sigma){
 }
 
 void CdrSolver::parseRngSeed(){
-  CH_TIME("CdrSolver::parseRngSeed");
+  CH_TIME("CdrSolver::parseRngSeed()");
   if(m_verbosity > 5){
-    pout() << m_name + "::parseRngSeed" << endl;
-  }  
+    pout() << m_name + "::parseRngSeed()" << endl;
+  }
+
+  // Parse a random seed. If a seed < 0 is used we generate one from the system clock. 
+  
   ParmParse pp(m_className.c_str());
   pp.get("seed", m_seed);
   if(m_seed < 0) m_seed = std::chrono::system_clock::now().time_since_epoch().count();
@@ -2525,10 +2606,13 @@ void CdrSolver::parseRngSeed(){
 }
 
 void CdrSolver::parsePlotMode(){
-  CH_TIME("CdrSolver::parsePlotMode");
+  CH_TIME("CdrSolver::parsePlotMode()");
   if(m_verbosity > 5){
-    pout() << m_name + "::parsePlotMode" << endl;
-  }  
+    pout() << m_name + "::parsePlotMode()" << endl;
+  }
+
+  // Parses plot mode. 
+  
   ParmParse pp(m_className.c_str());
 
   m_plotNumbers = false;
