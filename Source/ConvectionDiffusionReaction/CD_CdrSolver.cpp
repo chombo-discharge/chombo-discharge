@@ -8,7 +8,7 @@
   @brief  Implementation of CD_CdrSolver.H
   @author Robert Marskar
   @todo   Need to parse domain BCs!
-  @todo   Code walk starts on line 859 ::conservativeDivergenceRegular(...)
+  @todo   Code walk starts on line 1853 ::computeAdvectionDt(...)
   @todo   Should computeAdvectionFlux and computeDiffusionFlux be ghosted... filling fluxes on ghost faces...?
 */
 
@@ -1856,67 +1856,80 @@ Real CdrSolver::computeAdvectionDt(){
     pout() << m_name + "::computeAdvectionDt()" << endl;
   }
 
-  Real min_dt = std::numeric_limits<Real>::max();
+  // TLDR: For advection we must have dt <= dx/(|vx|+|vy|+|vz|). E.g., with first order upwind phi^(k+1)_i = phi^k_i - (v*dt) * (phi^k_i - phi^k_(i-1))/dx so
+  //       if phi^k_(i-1) == 0 then (1 - v*dt/dx) > 0.0 yields a positive definite solution (more general analysis certainly possible..)
+
+  Real minDt = std::numeric_limits<Real>::max();
 
   if(m_isMobile){
-    const int comp = 0;
 
-    DataOps::setValue(m_scratch, min_dt);
-    
+    // We use m_scratch for holding dx/(|vx| + |vy| + |vz|)
+    DataOps::setValue(m_scratch, minDt);
+
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
       const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
       const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
       const Real dx                = m_amr->getDx()[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	EBCellFAB& dt          = (*m_scratch[lvl])[dit()];
+	EBCellFAB& dt          = (*m_scratch     [lvl])[dit()];
 	const EBCellFAB& velo  = (*m_cellVelocity[lvl])[dit()];
-	const Box box          = dbl.get(dit());
+	const Box cellBox      = dbl.get(dit());
 
-	BaseFab<Real>& dt_fab         = dt.getSingleValuedFAB();
-	const BaseFab<Real>& velo_fab = velo.getSingleValuedFAB();
-	FORT_ADVECTION_DT(CHF_FRA1(dt_fab, comp),
-			  CHF_CONST_FRA(velo_fab),
+	// Regular cells -- the Fortran kernels computes dtReg = dx/(|vx|+|vy|+|vz|)
+	BaseFab<Real>&       dtReg   = dt.getSingleValuedFAB();
+	const BaseFab<Real>& veloReg = velo.getSingleValuedFAB();
+	FORT_ADVECTION_DT(CHF_FRA1(dtReg, m_comp),
+			  CHF_CONST_FRA(veloReg),
 			  CHF_CONST_REAL(dx),
-			  CHF_BOX(box));
+			  CHF_BOX(cellBox));
 
 
+	// Same kernel as above, but for irregular cells. 
 	VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
 	for (vofit.reset(); vofit.ok(); ++vofit){
 	  const VolIndex& vof = vofit();
 	
 	  Real vel = 0.0;
 	  for (int dir = 0; dir < SpaceDim; dir++){
-	    vel += Abs(velo(vof, dir));
+	    vel += std::abs(velo(vof, dir));
 	  }
 
-	  dt(vof, comp) = dx/vel;
+	  dt(vof, m_comp) = dx/vel;
 	}
       }
     }
 
     Real maxVal = std::numeric_limits<Real>::max();
     
-    DataOps::setCoveredValue(m_scratch, comp, maxVal);
-    DataOps::getMaxMin(maxVal, min_dt, m_scratch, comp);
+    DataOps::setCoveredValue(m_scratch, m_comp, maxVal);  // Covered cells don't matter -- make sure they don't trigger anything (because MaxMin might reach into them). 
+    DataOps::getMaxMin(maxVal, minDt, m_scratch, m_comp); // Get maximum and minimum. 
   }
 
 
-  return min_dt;
+  return minDt;
 }
 
 Real CdrSolver::computeDiffusionDt(){
-  CH_TIME("CdrSolver::computeDiffusionDt");
+  CH_TIME("CdrSolver::computeDiffusionDt()");
   if(m_verbosity > 5){
-    pout() << m_name + "::computeDiffusionDt" << endl;
+    pout() << m_name + "::computeDiffusionDt()" << endl;
   }
 
-  Real min_dt = std::numeric_limits<Real>::max();
+  // TLDR: For advection we must have dt <= (dx*dx)/(2*d*D) where D is diffusion coefficient and d is spatial dimensions.
+  //       E.g. in 1D, centered differencing yields
+  //
+  //          phi^(k+1)_i = phi^k_i - dt*D*(phi^k_(i+1) - 2*phi^k_i + phi^k_(i-1))/(dx*dx).
+  //
+  //       So for phi^k_(i-1) = phi^k_(i+1) = 0 we have phi^(k+1)_i = phi^k * (1 - 2*dt*D/(dx*dx)) which is positive definite only for dt < (dx*dx)/(2*D). Again,
+  //       a more general analysis could be made.
+
+  Real minDt = std::numeric_limits<Real>::max();
 
   if(m_isDiffusive){
-    const int comp  = 0;
 
-    DataOps::setValue(m_scratch, min_dt);
+    // We use scratch for holding dx*dx/(2*d*D)
+    DataOps::setValue(m_scratch, minDt);
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
       const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
@@ -1924,75 +1937,97 @@ Real CdrSolver::computeDiffusionDt(){
       const Real dx                = m_amr->getDx()[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	EBCellFAB& dt                   = (*m_scratch[lvl])[dit()];
-	const Box box                   = dbl.get(dit());
-	const EBISBox& ebisbox          = ebisl[dit()];
-	const BaseIVFAB<Real>& diffcoEB = (*m_ebCenteredDiffusionCoefficient[lvl])[dit()];
+	EBCellFAB&             dt         = (*m_scratch[lvl])[dit()];
+	const Box              cellBox    = dbl  [dit()];
+	const EBISBox&         ebisbox    = ebisl[dit()];
+	const EBFluxFAB&       diffCoFace = (*m_faceCenteredDiffusionCoefficient[lvl])[dit()];
+	const BaseIVFAB<Real>& diffcoEB   = (*m_ebCenteredDiffusionCoefficient[lvl])[dit()];
 
-	// Regular faces
+	// Fortran kernel. Strictly speaking, we should have a kernel which increments with the diffusion coefficients on each face since the finite volume
+	// approximation to the Laplacian becomes (in 1D) Div*(D*Grad(phi)) = -D_(i-1/2)*(phi_i - phi_(i-1)) + D_(i+1/2)*(phi_(i+1)-phi_i). A good kernel
+	// would do just that, but a lazy programmer just find the largest diffusion coefficient and uses that as an approximation. 
 	for (int dir = 0; dir < SpaceDim; dir++){
-	  BaseFab<Real>& dt_fab           = dt.getSingleValuedFAB();
-	  const EBFaceFAB& diffco         = (*m_faceCenteredDiffusionCoefficient[lvl])[dit()][dir];
-	  const BaseFab<Real>& diffco_fab = diffco.getSingleValuedFAB();
+	  BaseFab<Real>&       dtReg     = dt.getSingleValuedFAB();
+	  const EBFaceFAB&     diffCo    = diffCoFace[dir];
+	  const BaseFab<Real>& diffCoReg = diffCo.getSingleValuedFAB();
 	  
-	  FORT_DIFFUSION_DT(CHF_FRA1(dt_fab, comp),
-			    CHF_CONST_FRA1(diffco_fab, comp),
+	  FORT_DIFFUSION_DT(CHF_FRA1(dtReg, m_comp),
+			    CHF_CONST_FRA1(diffCoReg, m_comp),
 			    CHF_CONST_REAL(dx),
 			    CHF_CONST_INT(dir),
-			    CHF_BOX(box));
+			    CHF_BOX(cellBox));
 	}
 
-	// Irregular faces. 
+	// Same kernel as above, but including the EB face. 
 	VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
 	for (vofit.reset(); vofit.ok(); ++vofit){
 	  const VolIndex vof = vofit();
 
-	  Real irregD  = diffcoEB(vof, comp);
+	  // Go through faces in the cut cell and fine the face which has the largest diffusion coefficient. We just
+	  // use that as an approximation for computing dt. 
+	  Real maxD  = diffcoEB(vof, m_comp);
 	  
 	  for (int dir = 0; dir < SpaceDim; dir++){
-	    const EBFaceFAB& diffcoFace = (*m_faceCenteredDiffusionCoefficient[lvl])[dit()][dir];
+	    const EBFaceFAB& diffcoFace = diffCoFace[dir];
 	    for (SideIterator sit; sit.ok(); ++sit){
 	      const Vector<FaceIndex> faces = ebisbox.getFaces(vof, dir, sit());
 
 	      for (int iface = 0; iface < faces.size(); iface++){
 		const FaceIndex& face = faces[iface];
 		
-		irregD = std::max(irregD, diffcoFace(face, comp));
+		maxD = std::max(maxD, diffcoFace(face, m_comp));
 	      }
 	    }
 	  }
 
-	  dt(vof, comp) = dx*dx/(2.0*SpaceDim*irregD);
+	  dt(vof, m_comp) = (dx*dx) / (2.0*SpaceDim*maxD);
 	}
       }
 
       Real maxVal = std::numeric_limits<Real>::max();
     
-      DataOps::setCoveredValue(m_scratch, comp, maxVal);
-      DataOps::getMaxMin(maxVal, min_dt, m_scratch, comp);
+      DataOps::setCoveredValue(m_scratch, m_comp, maxVal);  // Set covered to something large (in case MaxMin triggers covered cells)
+      DataOps::getMaxMin(maxVal, minDt, m_scratch, m_comp);
     }
   }
 
-  return min_dt;
+  return minDt;
 }
 
 Real CdrSolver::computeAdvectionDiffusionDt(){
-  CH_TIME("CdrSolver::computeAdvectionDiffusionDt");
+  CH_TIME("CdrSolver::computeAdvectionDiffusionDt()");
   if(m_verbosity > 5){
-    pout() << m_name + "::computeAdvectionDiffusionDt" << endl;
+    pout() << m_name + "::computeAdvectionDiffusionDt()" << endl;
   }
 
-  Real min_dt = std::numeric_limits<Real>::max();
+  // In 1D we have, e.g. d(phi)/dt = -d/dx(v*phi) + D*d^2(phi)/dx^2. Discretizing it with e.g. first order upwind and centered differencing yields
+  //
+  //    phi^(k+1)_i = phi^k_i - dt*v*[phi^k_i - phi^k_(i-1)]/dx + dt*D*[phi^k_(i+1) - 2*phi^k_i + phi^k_(i-1)]/(dx*dx).
+  //
+  // Setting phi_(i-1) = phi_(i+1) = 0 yields phi^(k+1)_i = phi^k_i - (dt*v/dx)*phi^k_i - 2*D*dt/(dx*dx)*phi_i^k. This is positive definite only if
+  // 
+  //    (1 - dt*v/dx - 2*D*dt/(dx*dx)) > 0.0
+  //
+  // which yields
+  //
+  //    dt <= 1/(v/dx + 2*D/(dx*dx).
+  //
+  // Generalization to 3D yields dt <= 1/[(|vx|+|vy|+|vz)/dx + 2*d*D/(dx*dx)]. The below kernels compute the factor in all grid cells, and we return the
+  // smallest value. 
+  
 
+  Real minDt = std::numeric_limits<Real>::max();
+
+  // Default to advection or diffusion time steps if the solver is only advective/diffusive. 
   if(m_isMobile && !m_isDiffusive){
-    min_dt = this->computeAdvectionDt();
+    minDt = this->computeAdvectionDt();
   }
   else if(!m_isMobile && m_isDiffusive){
-    min_dt = this->computeDiffusionDt();
+    minDt = this->computeDiffusionDt();
   }
   else if(m_isMobile && m_isDiffusive){
-    const int comp  = 0;
 
+    // scratch is used for holding dt in the form above. 
     DataOps::setValue(m_scratch, 0.0);
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
@@ -2001,82 +2036,85 @@ Real CdrSolver::computeAdvectionDiffusionDt(){
       const Real dx                = m_amr->getDx()[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	EBCellFAB& dt                   = (*m_scratch[lvl])[dit()];
-	const EBISBox& ebisbox          = ebisl[dit()];
-	const EBCellFAB& velo           = (*m_cellVelocity[lvl])[dit()];
-	const BaseIVFAB<Real>& diffcoEB = (*m_ebCenteredDiffusionCoefficient[lvl])[dit()];
-	const Box box                   = dbl.get(dit());
+	EBCellFAB&             dt         = (*m_scratch                       [lvl])[dit()];
+	const EBCellFAB&       velo       = (*m_cellVelocity                  [lvl])[dit()];
+	const BaseIVFAB<Real>& diffCoEB   = (*m_ebCenteredDiffusionCoefficient[lvl])[dit()];
+	const EBFluxFAB&       diffCoFace = (*m_faceCenteredDiffusionCoefficient[lvl])[dit()];
+	
+	const EBISBox& ebisbox          = ebisl[dit()];	
+	const Box      cellBox          = dbl  [dit()];
 
 	dt.setVal(0.0);
 
-	// Regular cells. First compute dt = 2*D*d/(dx*dx)
-	BaseFab<Real>& dt_fab         = dt.getSingleValuedFAB();
-
-	// Regular faces
+	// Regular faces. The first kernel finds the diffusion contribution only, using the maximum diffusion coefficient
+	// on one of the faces. After the dir-loop dtReg will contain 2*d*D/(dx*dx) where D is the largest coefficient on one
+	// of the faces of the cell. 
+	BaseFab<Real>& dtReg = dt.getSingleValuedFAB();
+	
 	for (int dir = 0; dir < SpaceDim; dir++){
-	  const EBFaceFAB& diffco         = (*m_faceCenteredDiffusionCoefficient[lvl])[dit()][dir];
-	  const BaseFab<Real>& diffco_fab = diffco.getSingleValuedFAB();
-	  FORT_ADVECTION_DIFFUSION_DT_ONE(CHF_FRA1(dt_fab, comp),
-					  CHF_CONST_FRA1(diffco_fab, comp),
+	  const BaseFab<Real>& diffCoReg = diffCoFace[dir].getSingleValuedFAB();
+	  FORT_ADVECTION_DIFFUSION_DT_ONE(CHF_FRA1(dtReg, m_comp),
+					  CHF_CONST_FRA1(diffCoReg, m_comp),
 					  CHF_CONST_REAL(dx),
 					  CHF_CONST_INT(dir),
-					  CHF_BOX(box));
+					  CHF_BOX(cellBox));
 	}
 
-	// Add the advective contribution so that dt_fab = (|Vx|+|Vy|+|Vz|)/dx + 2*d*D/(dx*dx)
-	const BaseFab<Real>& velo_fab = velo.getSingleValuedFAB();
-	FORT_ADVECTION_DIFFUSION_DT_TWO(CHF_FRA1(dt_fab, comp),  
-					CHF_CONST_FRA(velo_fab),
+	// The second kernel increments with the advective contribution so that dtReg = (|Vx|+|Vy|+|Vz|)/dx + 2*d*D/(dx*dx)
+	const BaseFab<Real>& veloReg = velo.getSingleValuedFAB();
+	FORT_ADVECTION_DIFFUSION_DT_TWO(CHF_FRA1(dtReg, m_comp),  
+					CHF_CONST_FRA(veloReg),
 					CHF_CONST_REAL(dx),
-					CHF_BOX(box));
+					CHF_BOX(cellBox));
 
-	// Invert the result. 
-	FORT_ADVECTION_DIFFUSION_DT_INVERT(CHF_FRA1(dt_fab, comp),  
-					   CHF_BOX(box));
+	// Invert the result so dtReg = 1/(|Vx|+|Vy|+|Vz|)/dx + 2*d*D/(dx*dx). 
+	FORT_ADVECTION_DIFFUSION_DT_INVERT(CHF_FRA1(dtReg, m_comp),
+					   CHF_BOX(cellBox));
 
 
-	// Irregular cells
+	// Same kernel as above, but for cut-cells only. 
 	VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
 	for (vofit.reset(); vofit.ok(); ++vofit){
 	  const VolIndex vof = vofit();
 
-	  // Compute advective velocity. 
+	  // Compute |vx|+|vy|+|vz| in the cut-cell. 
 	  Real vel = 0.0;
 	  for (int dir = 0; dir < SpaceDim; dir++){
 	    vel += std::abs(velo(vof, dir));
 	  }
 
-	  // Find largest diffusion coefficient. 
-	  Real irregD  = diffcoEB(vof, comp);
+	  // Find largest diffusion coefficient in one of the faces of the cut-cell. 
+	  Real maxD  = diffCoEB(vof, m_comp);
+	  
 	  for (int dir = 0; dir < SpaceDim; dir++){
-	    const EBFaceFAB& diffcoFace = (*m_faceCenteredDiffusionCoefficient[lvl])[dit()][dir];
+	    const EBFaceFAB& diffCo = diffCoFace[dir];
+	    
 	    for (SideIterator sit; sit.ok(); ++sit){
 	      const Vector<FaceIndex> faces = ebisbox.getFaces(vof, dir, sit());
 
 	      for (int iface = 0; iface < faces.size(); iface++){
 		const FaceIndex& face = faces[iface];
 		
-		irregD = std::max(irregD, diffcoFace(face, comp));
+		maxD = std::max(maxD, diffCo(face, m_comp));
 	      }
 	    }
 	  }
 
-	  const Real idtA  = vel/dx;
-	  const Real idtD  = (2*SpaceDim*irregD)/(dx*dx);
+	  const Real inverseDtA  = vel/dx;
+	  const Real inverseDtD  = (2*SpaceDim*maxD)/(dx*dx);
 
-	  dt(vof, comp) = 1.0/(idtA + idtD);
+	  dt(vof, m_comp) = 1.0/(inverseDtA + inverseDtD);
 	}
       }
     }
 
     Real maxVal = std::numeric_limits<Real>::max();
     
-    DataOps::setCoveredValue(m_scratch, comp, maxVal);  // Covered cells are bogus. 
-    DataOps::getMaxMin(maxVal, min_dt, m_scratch, comp);
+    DataOps::setCoveredValue(m_scratch, m_comp, maxVal);  // Covered cells are bogus -- set them to a large value for safety. 
+    DataOps::getMaxMin(maxVal, minDt, m_scratch, m_comp);
   }
 
-
-  return min_dt;
+  return minDt;
 }
 
 Real CdrSolver::computeSourceDt(const Real a_max, const Real a_tolerance){
