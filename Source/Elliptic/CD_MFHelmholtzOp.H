@@ -93,7 +93,6 @@ public:
     @param[in] a_jumpWeights   Weights for least squares stencils on jump cells
     @param[in] a_smoother      Which smoother to use
   */
-  */
   MFHelmholtzOp(const Location::Cell                             a_dataLocation,
 		const MFLevelGrid&                               a_mflgFine,
 		const MFLevelGrid&                               a_mflg,
