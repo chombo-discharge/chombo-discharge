@@ -1387,11 +1387,11 @@ void Driver::setupFresh(const int a_initialRegrids){
   // Initial regrids
   for (int i = 0; i < a_initialRegrids; i++){
     if(m_verbosity > 5){
-      pout() << "Driver::initial_regrids" << endl;
+      pout() << "Driver -- initial regrid # " << i + 1 << endl;
     }
 
-    const int lmin = 1;
-    const int lmax = m_amr->getFinestLevel();
+    const int lmin = 0;
+    const int lmax = m_amr->getFinestLevel() + 1;
     this->regrid(lmin, lmax, true);
 
     if(m_verbosity > 0){
@@ -1407,8 +1407,6 @@ void Driver::setupForRestart(const int a_initialRegrids, const std::string a_res
   }
 
   this->checkRestartFile(a_restartFile);
-
-
 
   this->sanityCheck();                                    // Sanity check before doing anything expensive
 
@@ -1448,8 +1446,8 @@ void Driver::setupForRestart(const int a_initialRegrids, const std::string a_res
       pout() << "Driver -- initial regrid # " << i + 1 << endl;
     }
 
-    const int lmin = 1;
-    const int lmax = m_amr->getFinestLevel();
+    const int lmin = 0;
+    const int lmax = m_amr->getFinestLevel() + 1;
     this->regrid(lmin, lmax, false);
 
     if(m_verbosity > 0){
