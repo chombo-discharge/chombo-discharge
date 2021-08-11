@@ -84,9 +84,9 @@ public:
     @param[in] a_isMGOperator  Is MG operator or not
     @param[in] a_alpha         Operator alpha
     @param[in] a_beta          Operator beta
-    @param[in] a_acoef         Operator A-coefficient
-    @param[in] a_bcoef         Operator B-coefficient
-    @param[in] a_bcoef         Operator B-coefficient (on EB faces)
+    @param[in] a_Acoef         Operator A-coefficient
+    @param[in] a_Bcoef         Operator B-coefficient
+    @param[in] a_BcoefIrreg    Operator B-coefficient (on EB faces)
     @param[in] a_ghostCellsPhi Ghost cells in data holders
     @param[in] a_ghostCellsPhi Ghost cells in data holders
     @param[in] a_jumpOrder     Stencil order to use on jump cells

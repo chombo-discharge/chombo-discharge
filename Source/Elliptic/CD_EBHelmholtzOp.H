@@ -87,9 +87,9 @@ public:
     @param[in] a_hasMGObjects  Has multigrid-objects (special objects between AMR levels, or below the AMR levels)
     @param[in] a_alpha         Operator alpha
     @param[in] a_beta          Operator beta
-    @param[in] a_acoef         Operator A-coefficient
-    @param[in] a_bcoef         Operator B-coefficient
-    @param[in] a_bcoef         Operator B-coefficient (on EB faces)
+    @param[in] a_Acoef         Operator A-coefficient
+    @param[in] a_Bcoef         Operator B-coefficient
+    @param[in] a_BcoefIrreg    Operator B-coefficient (on EB faces)
     @param[in] a_ghostCellsPhi Ghost cells in data holders
     @param[in] a_ghostCellsPhi Ghost cells in data holders
     @param[in] a_smoother      Which smoother to use
@@ -114,9 +114,9 @@ public:
 		const bool&                                        a_hasMGObjects,
 		const Real&                                        a_alpha,
 		const Real&                                        a_beta,
-		const RefCountedPtr<LevelData<EBCellFAB> >&        a_acoef,
-		const RefCountedPtr<LevelData<EBFluxFAB> >&        a_bcoef,
-		const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_bcoIrreg,
+		const RefCountedPtr<LevelData<EBCellFAB> >&        a_Acoef,
+		const RefCountedPtr<LevelData<EBFluxFAB> >&        a_Bcoef,
+		const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_BcoIrreg,
 		const IntVect&                                     a_ghostCellsPhi,
 		const IntVect&                                     a_ghostCellsRHS,
 		const Smoother&                                    a_smoother);
