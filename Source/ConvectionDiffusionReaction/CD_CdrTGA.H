@@ -5,9 +5,8 @@
 
 /*!
   @file   CD_CdrTGA.H
-  @brief  Extensions of CdrSolver which use EBHelmholtzOp for diffusion
+  @brief  Extensions of CdrSolver which use EBHelmholtzOp for diffusion solves
   @author Robert Marskar
-  @todo   HelmholtzOpFactory should be replaced by EBPoissonOpFactory
 */
 
 #ifndef CD_CdrTGA_H
