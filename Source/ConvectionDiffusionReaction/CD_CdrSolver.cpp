@@ -1026,9 +1026,11 @@ void CdrSolver::initialDataDistribution(){
       // Regular cells
       for (BoxIterator bit(cellBox); bit.ok(); ++bit){
 	const IntVect iv   = bit();
-	const RealVect pos = probLo + RealVect(iv)*dx + 0.5*dx*RealVect::Unit;
+	if(ebisbox.isRegular(iv)){	  
+	  const RealVect pos = probLo + RealVect(iv)*dx + 0.5*dx*RealVect::Unit;
 
-	regPhi(iv, m_comp) = regPhi(iv, m_comp) + m_species->initialData(pos, m_time);
+	  regPhi(iv, m_comp) = regPhi(iv, m_comp) + m_species->initialData(pos, m_time);
+	}
       }
 
       // Irreg and multicells
