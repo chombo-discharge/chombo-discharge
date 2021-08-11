@@ -204,13 +204,17 @@ void CdrTGA::setupHelmholtzFactory(){
   const Real alpha = 1.0;
   const Real beta  = 1.0;
 
-  // Transient storage which will be removed when we transition to Poisson operator
+  // We need to have the Helmholtz A-coefficient=1 because we will end up solving equations like
+  //
+  //    phi^(k+1) - dt*Div(D*Grad(phi^(k+1)) = phi^k + dt*rho
+  //
+  // and in that case we have alpha * A = 1 and beta = -dt. EBHelmholtzOpFactory shouldn't be doing any
   EBAMRCellData m_helmAcoef;
   m_amr->allocate(m_helmAcoef, m_realm, m_phase, 1);
   DataOps::setValue(m_helmAcoef, 1.0);
 
   // Set up the operator
-  m_poissonOpFactory = RefCountedPtr<EBHelmholtzOpFactory> (new EBHelmholtzOpFactory(Location::Cell::Center,
+  m_helmholtzOpFactory = RefCountedPtr<EBHelmholtzOpFactory> (new EBHelmholtzOpFactory(Location::Cell::Center,
 										       alpha,
 										       beta,
 										       m_amr->getProbLo(),
@@ -273,7 +277,7 @@ void CdrTGA::setupMultigrid(){
 
   // Define AMRMultiGrid
   m_multigridSolver = RefCountedPtr<AMRMultiGrid<LevelData<EBCellFAB> > > (new AMRMultiGrid<LevelData<EBCellFAB> >());
-  m_multigridSolver->define(coarsestDomain, *m_poissonOpFactory, botsolver, 1 + finestLevel);
+  m_multigridSolver->define(coarsestDomain, *m_helmholtzOpFactory, botsolver, 1 + finestLevel);
   m_multigridSolver->setSolverParameters(m_multigridPreSmooth,
 					 m_multigridPostSmooth,
 					 m_multigridBottomSmooth,
@@ -318,7 +322,7 @@ void CdrTGA::setupTGA(){
   const Vector<int> ref_rat    = m_amr->getRefinementRatios();
 
   m_tgaSolver = RefCountedPtr<AMRTGA<LevelData<EBCellFAB> > >
-    (new AMRTGA<LevelData<EBCellFAB> > (m_multigridSolver, *m_poissonOpFactory, coar_dom, ref_rat, 1 + finestLevel, m_multigridSolver->m_verbosity));
+    (new AMRTGA<LevelData<EBCellFAB> > (m_multigridSolver, *m_helmholtzOpFactory, coar_dom, ref_rat, 1 + finestLevel, m_multigridSolver->m_verbosity));
 }
 
 void CdrTGA::setupEuler(){
@@ -332,7 +336,7 @@ void CdrTGA::setupEuler(){
   const Vector<int> ref_rat    = m_amr->getRefinementRatios();
 
   m_eulerSolver = RefCountedPtr<EBBackwardEuler> 
-    (new EBBackwardEuler (m_multigridSolver, *m_poissonOpFactory, coar_dom, ref_rat, 1 + finestLevel, m_multigridSolver->m_verbosity));
+    (new EBBackwardEuler (m_multigridSolver, *m_helmholtzOpFactory, coar_dom, ref_rat, 1 + finestLevel, m_multigridSolver->m_verbosity));
 }
 
 void CdrTGA::computeDivJ(EBAMRCellData& a_divJ, EBAMRCellData& a_phi, const Real a_extrapDt, const bool a_ebFlux, const bool a_domainFlux){

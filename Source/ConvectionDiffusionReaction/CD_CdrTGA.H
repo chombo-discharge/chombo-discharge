@@ -187,7 +187,7 @@ protected:
   /*!
     @brief Operator factory
   */
-  RefCountedPtr<EBHelmholtzOpFactory> m_poissonOpFactory;
+  RefCountedPtr<EBHelmholtzOpFactory> m_helmholtzOpFactory;
 
   /*!
     @brief Conjugate gradient solver bottom MG level
