@@ -290,9 +290,8 @@ void Driver::getGeometryTags(){
 
   // Grow tags. This is an ad-hoc fix that prevents ugly grid near EBs (i.e. cases where only ghost cells are used
   // for elliptic equations)
-  const int growth = m_amr->getIrregTagGrowth();
   for (int lvl = 0; lvl < maxdepth; lvl++){
-    m_geomTags[lvl].grow(growth);
+    m_geomTags[lvl].grow(m_irregTagGrowth);
   }
 
   // Remove tags using the geocoarsener if we have it
@@ -1013,9 +1012,10 @@ void Driver::parseOptions(){
   m_restart   = (m_restartStep > 0) ? true : false;
 
   // Stuff that's a little too verbose to include here directly. 
-  parsePlotVariables();
-  parseGeometryGeneration();
-  parseGeometryRefinement();
+  this->parsePlotVariables();
+  this->parseGeometryGeneration();
+  this->parseGeometryRefinement();
+  this->parseIrregTagGrowth();
 }
 
 void Driver::parseRuntimeOptions(){
@@ -1038,8 +1038,9 @@ void Driver::parseRuntimeOptions(){
   pp.get("allow_coarsening",         m_allowCoarsening);
   pp.get("max_steps",                m_maxSteps);
   pp.get("stop_time",                m_stopTime);
-
-  parsePlotVariables();
+  
+  this->parsePlotVariables();
+  this->parseIrregTagGrowth();  
 }
 
 void Driver::parsePlotVariables(){
@@ -1059,6 +1060,18 @@ void Driver::parsePlotVariables(){
   }
 }
 
+void Driver::parseIrregTagGrowth(){
+  CH_TIME("Driver::parseIrregTagGrowth()");
+  if(m_verbosity > 5){
+    pout() << "Driver::parseIrregTagGrowth()" << endl;
+  }
+
+  ParmParse pp("Driver");
+
+  pp.get("grow_geo_tags", m_irregTagGrowth);
+
+  m_irregTagGrowth = std::max(0, m_irregTagGrowth);
+}
 
 void Driver::parseGeometryGeneration(){
   CH_TIME("Driver::parseGeometryGeneration");

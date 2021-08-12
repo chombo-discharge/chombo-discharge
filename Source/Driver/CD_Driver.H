@@ -164,6 +164,11 @@ protected:
   int m_verbosity;
 
   /*!
+    @brief Irregular tag growth
+  */
+  int m_irregTagGrowth;
+
+  /*!
     @brief Geometry scan level. 
     @details This is a special option for when we use chombo-discharge's geometry generation method. 
   */
@@ -408,6 +413,11 @@ protected:
     @brief Parse option for geometry generation
   */
   void parseGeometryGeneration();
+
+  /*!
+    @brief Parse irregular tag growth
+  */
+  void parseIrregTagGrowth();
 
   /*!
     @brief Create output directories
