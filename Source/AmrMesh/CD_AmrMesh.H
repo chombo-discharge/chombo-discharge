@@ -851,74 +851,84 @@ public:
   /*!
     @brief Get the coarsening utility
   */
-  Vector<RefCountedPtr<EbCoarAve> >& getCoarseAverage(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EbCoarAve> >& getCoarseAverage(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get the ghost cloud particle magic
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
   */
-  Vector<RefCountedPtr<EbGhostCloud> >& getGhostCloud(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EbGhostCloud> >& getGhostCloud(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get multigrid interpolation utility
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
   */
-  Vector<RefCountedPtr<EBMultigridInterpolator> >& getMultigridInterpolator(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBMultigridInterpolator> >& getMultigridInterpolator(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get piecewise linear ghost cell interpolator
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
   */
-  Vector<RefCountedPtr<AggEBPWLFillPatch> >& getFillPatch(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<AggEBPWLFillPatch> >& getFillPatch(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get interpolator 
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
   */
-  Vector<RefCountedPtr<EBPWLFineInterp> >& getPwlInterpolator(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBPWLFineInterp> >& getPwlInterpolator(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get interpolator 
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
   */
-  Vector<RefCountedPtr<EBMGInterp> >& getEBMGInterp(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBMGInterp> >& getEBMGInterp(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get flux register
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
   */
-  Vector<RefCountedPtr<EBFluxRegister> >&  getFluxRegister(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBFluxRegister> >&  getFluxRegister(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get redistribution
+    @param[in] a_realm Realm name
+    @param[in] a_phase Phase (gas or solid)
   */
-  Vector<RefCountedPtr<EBLevelRedist> >&  getLevelRedist(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBLevelRedist> >&  getLevelRedist(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get coar-to-fine redistribution for a Realm and phase
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
   */
-  Vector<RefCountedPtr<EBCoarToFineRedist> >&  getCoarToFineRedist(const std::string        a_realm,
-								   const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBCoarToFineRedist> >&  getCoarToFineRedist(const std::string a_realm, const phase::which_phase a_phase) const;
   
   /*!
     @brief Get coar-to-coar redistribution objects
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
   */
-  Vector<RefCountedPtr<EBCoarToCoarRedist> >&  getCoarToCoarRedist(const std::string        a_realm,
-								   const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBCoarToCoarRedist> >&  getCoarToCoarRedist(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get coar-to-coar redistribution redistribution objects
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
   */
-  Vector<RefCountedPtr<EBFineToCoarRedist> >&  getFineToCoarRedist(const std::string        a_realm,
-								   const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBFineToCoarRedist> >&  getFineToCoarRedist(const std::string a_realm, const phase::which_phase a_phase) const;
   
   /*!
     @brief Get interpolation stencils for going from cell center to cell centroid
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
   */
-  const IrregAmrStencil<CentroidInterpolationStencil>& getCentroidInterpolationStencils(const std::string a_realm,
-											const phase::which_phase a_phase) const;
+  const IrregAmrStencil<CentroidInterpolationStencil>& getCentroidInterpolationStencils(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get interpolation stencils for going from cell center to cell boundary centroid
@@ -940,14 +950,14 @@ public:
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
   */
-  Vector<RefCountedPtr<Copier> >& getCopier(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<Copier> >& getCopier(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get reverse copier
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
   */
-  Vector<RefCountedPtr<Copier> >& getReverseCopier(const std::string a_realm, const phase::which_phase a_phase);
+  Vector<RefCountedPtr<Copier> >& getReverseCopier(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get the name of all Realms

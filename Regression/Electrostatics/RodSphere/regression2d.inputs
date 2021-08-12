@@ -9,7 +9,6 @@ AmrMesh.max_amr_depth   = 4           # Maximum amr depth
 AmrMesh.max_sim_depth   = -1          # Maximum simulation depth
 AmrMesh.mg_coarsen      = 4           # Pre-coarsening of MG levels, useful for deeper bottom solves 
 AmrMesh.fill_ratio      = 1.0         # Fill ratio for grid generation
-AmrMesh.irreg_growth    = 2           # How much to grow irregular tagged cells
 AmrMesh.buffer_size     = 2           # Number of cells between grid levels
 AmrMesh.grid_algorithm  = tiled       # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
 AmrMesh.box_sorting     = morton      # Box sorting algorithm
@@ -56,6 +55,7 @@ Driver.num_plot_ghost                  = 1             # Number of ghost cells t
 Driver.plt_vars                        = 0             # 'tags', 'mpi_rank'
 Driver.restart                         = 0             # Restart step (less or equal to 0 implies fresh simulation)
 Driver.allow_coarsening                = true          # Allows removal of grid levels according to CellTagger
+Driver.grow_geo_tags                   = 2                # How much to grow tags when using geometry-based refinement. 
 Driver.refine_curvature                = 10.              # Curvature based refinement. Refines cells if curvature*dx*this > 1
 Driver.refine_geometry                 = -1            # Refine geometry, -1 => Refine all the way down
 Driver.refine_electrodes               = -1            # Refine electrode surfaces. -1 => equal to refine_geometry
