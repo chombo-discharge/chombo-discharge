@@ -16,8 +16,6 @@
 
 // Chombo includes
 #include <DisjointBoxLayout.H>
-#include <CD_EbCoarAve.H>
-#include <EBFluxRegister.H>
 #include <EBFluxRegister.H>
 #include <EBLevelRedist.H>
 #include <EBCoarToFineRedist.H>
@@ -29,12 +27,12 @@
 
 // Our includes
 #include <CD_EBAMRData.H>
+#include <CD_EbCoarAve.H>
 #include <CD_ComputationalGeometry.H>
 #include <CD_MultiFluidIndexSpace.H>
 #include <CD_IrregAmrStencil.H>
 #include <CD_LoadBalancing.H>
 #include <CD_MFLevelGrid.H>
-#include <CD_EbCoarAve.H>
 #include <CD_DomainFluxIFFAB.H>
 #include <CD_DomainFluxIFFABFactory.H>
 #include <CD_ParticleContainer.H>
@@ -52,7 +50,7 @@ class AmrMesh {
 public:
 
   /*!
-    @brief Constructor
+    @brief Default constructor. 
   */
   AmrMesh();
 
@@ -84,17 +82,6 @@ public:
     @param[in] a_other Other AmrMesh
   */
   AmrMesh& operator=(const AmrMesh&& a_other) = delete;
-
-  /*!
-    @brief Parse options. Called during the constructor. 
-  */
-  void parseOptions();
-
-  /*!
-    @brief Parse runtime options
-    @note Called by Driver as simulations progress. 
-  */
-  void parseRuntimeOptions();
 
   /*!
     @brief Deallocate data. 
@@ -188,6 +175,17 @@ public:
   */
   template <typename T>
   void allocatePointer(EBAMRData<T>& a_data, const int a_finestLevel) const;
+
+  /*!
+    @brief Parse options. Called during the constructor. 
+  */
+  void parseOptions();
+
+  /*!
+    @brief Parse runtime options
+    @note Called by Driver as simulations progress. 
+  */
+  void parseRuntimeOptions();  
 
   /*!
     @brief Register an operator over a realm and a phase. 
