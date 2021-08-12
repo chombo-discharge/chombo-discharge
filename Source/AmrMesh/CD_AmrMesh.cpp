@@ -37,28 +37,19 @@ AmrMesh::AmrMesh(){
   m_finestLevel = 0;
   m_hasGrids    = false;
 
-#if 1
-  // I have no idea why this work, and we should check that out. But, for some reason
-  // if we use refinement of 4, without a 2 at the end (even if this is NOT used anywhere?!?!?), we get memory
-  // leaks through define_eblevelgrid() in the setMaxCoarseningRatio stuff. I don't know if this leak is real,
-  // but that's what valgrind tells me....
-  //
-  // Robert Marskar, Dec 7 (2018)
-  //
+  // Some things might require a vector which is just a tiny bit longer. 
   m_refinementRatios.resize(m_maxAmrDepth);
   m_refinementRatios.push_back(2);
-#endif
-
 }
 
 AmrMesh::~AmrMesh(){
   
 }
 
-EBAMRCellData AmrMesh::alias(const phase::which_phase a_phase, const MFAMRCellData& a_mfdata){
-  CH_TIME("AmrMesh::alias(phase, mfamrcelldata)");
+EBAMRCellData AmrMesh::alias(const phase::which_phase a_phase, const MFAMRCellData& a_mfdata) const {
+  CH_TIME("AmrMesh::alias(phase::which_phase, MFAMRCellData)");
   if(m_verbosity > 5){
-    pout() << "AmrMesh::alias(phase, mfamrcelldata)" << endl;
+    pout() << "AmrMesh::alias(phase::which_phase, MFAMRCellData)" << endl;
   }
 
   EBAMRCellData ret;
@@ -72,10 +63,10 @@ EBAMRCellData AmrMesh::alias(const phase::which_phase a_phase, const MFAMRCellDa
   return ret;
 }
 
-EBAMRFluxData AmrMesh::alias(const phase::which_phase a_phase, const MFAMRFluxData& a_mfdata){
-  CH_TIME("AmrMesh::alias(phase, mfamrfluxdata)");
+EBAMRFluxData AmrMesh::alias(const phase::which_phase a_phase, const MFAMRFluxData& a_mfdata) const {
+  CH_TIME("AmrMesh::alias(phase::which_phase, MFAMRFluxData)");
   if(m_verbosity > 5){
-    pout() << "AmrMesh::alias(phase, mfamrfluxdata)" << endl;
+    pout() << "AmrMesh::alias(phase::which_phase, MFAMRFluxData)" << endl;
   }
 
   EBAMRFluxData ret;
@@ -89,7 +80,7 @@ EBAMRFluxData AmrMesh::alias(const phase::which_phase a_phase, const MFAMRFluxDa
   return ret;
 }
 
-EBAMRIVData AmrMesh::alias(const phase::which_phase a_phase, const MFAMRIVData& a_mfdata){
+EBAMRIVData AmrMesh::alias(const phase::which_phase a_phase, const MFAMRIVData& a_mfdata) const {
   CH_TIME("AmrMesh::alias(phase, mfamrivdata)");
   if(m_verbosity > 5){
     pout() << "AmrMesh::alias(phase, mfamrivdata)" << endl;
@@ -107,10 +98,10 @@ EBAMRIVData AmrMesh::alias(const phase::which_phase a_phase, const MFAMRIVData& 
 void AmrMesh::alias(EBAMRCellData&           a_data,
 		    const phase::which_phase a_phase,
 		    const MFAMRCellData&     a_mfdata,
-		    const int                a_finestLevel){
-  CH_TIME("AmrMesh::alias(hardcap)");
+		    const int                a_finestLevel) const {
+  CH_TIME("AmrMesh::alias(EBAMRCellData, phase::which_phase, MFAMRCellData, int))");
   if(m_verbosity > 5){
-    pout() << "AmrMesh::alias(hardcap)" << endl;
+    pout() << "AmrMesh::alias(EBAMRCellData, phase::which_phase, MFAMRCellData, int)" << endl;
   }
 
   for (int lvl = 0; lvl <= a_finestLevel; lvl++){
@@ -121,8 +112,8 @@ void AmrMesh::alias(EBAMRCellData&           a_data,
 void AmrMesh::alias(EBAMRFluxData&           a_data,
 		    const phase::which_phase a_phase,
 		    const MFAMRFluxData&     a_mfdata,
-		    const int                a_finestLevel){
-  CH_TIME("AmrMesh::alias(hardcap)");
+		    const int                a_finestLevel) const {
+  CH_TIME("AmrMesh::alias(EBAMRFluxData, phase::which_phase, EBAMRFluxData, int)");
   if(m_verbosity > 5){
     pout() << "AmrMesh::alias(hardcap)" << endl;
   }
@@ -132,10 +123,10 @@ void AmrMesh::alias(EBAMRFluxData&           a_data,
   }
 }
 
-void AmrMesh::alias(EBAMRCellData& a_data, const phase::which_phase a_phase, const MFAMRCellData& a_mfdata){
-  CH_TIME("AmrMesh::alias");
+void AmrMesh::alias(EBAMRCellData& a_data, const phase::which_phase a_phase, const MFAMRCellData& a_mfdata) const {
+  CH_TIME("AmrMesh::alias(EBAMRCellData, phase::which_phase, MFAMRCellData)");
   if(m_verbosity > 5){
-    pout() << "AmrMesh::alias" << endl;
+    pout() << "AmrMesh::alias(EBAMRCellData, phase::which_phase, MFAMRCellData)" << endl;
   }
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
@@ -143,10 +134,10 @@ void AmrMesh::alias(EBAMRCellData& a_data, const phase::which_phase a_phase, con
   }
 }
 
-void AmrMesh::alias(EBAMRFluxData& a_data, const phase::which_phase a_phase, const MFAMRFluxData& a_mfdata){
-  CH_TIME("AmrMesh::alias");
+void AmrMesh::alias(EBAMRFluxData& a_data, const phase::which_phase a_phase, const MFAMRFluxData& a_mfdata) const {
+  CH_TIME("AmrMesh::alias(EBAMRFluxData, phase::which_phase, MFAMRFluxData)");
   if(m_verbosity > 5){
-    pout() << "AmrMesh::alias" << endl;
+    pout() << "AmrMesh::alias(EBAMRFluxData, phase::which_phase, MFAMRFluxData)" << endl;
   }
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
@@ -154,10 +145,10 @@ void AmrMesh::alias(EBAMRFluxData& a_data, const phase::which_phase a_phase, con
   }
 }
 
-void AmrMesh::alias(EBAMRIVData& a_data, const phase::which_phase a_phase, const MFAMRIVData& a_mfdata){
-  CH_TIME("AmrMesh::alias");
+void AmrMesh::alias(EBAMRIVData& a_data, const phase::which_phase a_phase, const MFAMRIVData& a_mfdata) const {
+  CH_TIME("AmrMesh::alias(EBAMRIVData, phase::which_phase, MFAMRIVData)");
   if(m_verbosity > 5){
-    pout() << "AmrMesh::alias" << endl;
+    pout() << "AmrMesh::alias(EBAMRIVData, phase::which_phase, MFAMRIVData)" << endl;
   }
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
@@ -169,31 +160,31 @@ void AmrMesh::allocate(EBAMRCellData&           a_data,
 		       const std::string        a_realm,
 		       const phase::which_phase a_phase,
 		       const int                a_ncomp,
-		       const int                a_ghost){
-  CH_TIME("AmrMesh::allocate(ebamrcell, Realm, phase, comp, ghost)");
+		       const int                a_ghost) const {
+  CH_TIME("AmrMesh::allocate(EBAMRCellData, string, phase::which_phase, int, int)");
   if(m_verbosity > 5){
-    pout() << "AmrMesh::allocate(ebamrcell, Realm, phase, comp, ghost)" << endl;
+    pout() << "AmrMesh::allocate(EBAMRCellData, string, phase::which_phase, int, int)" << endl;
   }
 
+  CH_assert(a_ncomp > 0);
+
+  // This allocates data on a specific realm and phase with specified number of components and ghost cells. If a_ghost < 0
+  // we use the default number of ghost cells in AmrMesh. 
+
   if(!this->queryRealm(a_realm)) {
-    std::string str = "AmrMesh::allocate(ebamcell, Realm, phase, comp, ghost) - could not find Realm '" + a_realm + "'";
+    const std::string str = "AmrMesh::allocate(EBAMRCellData, string, phase::which_phase, int, int) - could not find realm '" + a_realm + "'";
     MayDay::Abort(str.c_str());
   }
 
-  const int ghost = (a_ghost == -1) ? m_numGhostCells : a_ghost;
+  const int ghost = (a_ghost < 0) ? m_numGhostCells : a_ghost;
 
   a_data.resize(1 + m_finestLevel);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
     const DisjointBoxLayout& dbl = m_realms[a_realm]->getGrids()[lvl];
     const EBISLayout& ebisl      = m_realms[a_realm]->getEBISLayout(a_phase)[lvl];
-    
-    EBCellFactory fact(ebisl);
 
-    a_data[lvl] = RefCountedPtr<LevelData<EBCellFAB> >
-      (new LevelData<EBCellFAB>(dbl, a_ncomp, ghost*IntVect::Unit, fact));
-
-    EBLevelDataOps::setVal(*a_data[lvl], 0.0);
+    a_data[lvl] = RefCountedPtr<LevelData<EBCellFAB> > (new LevelData<EBCellFAB>(dbl, a_ncomp, ghost*IntVect::Unit, EBCellFactory(ebisl)) );
   }
 
   a_data.setRealm(a_realm);
@@ -203,18 +194,23 @@ void AmrMesh::allocate(EBAMRFluxData&           a_data,
 		       const std::string        a_realm,
 		       const phase::which_phase a_phase,
 		       const int                a_ncomp,
-		       const int                a_ghost){
-  CH_TIME("AmrMesh::allocate(ebamrflux, Realm, phase, comp, ghost)");
+		       const int                a_ghost) const {
+  CH_TIME("AmrMesh::allocate(EBAMRFluxData, string, phase::which_phase, int, int)");
   if(m_verbosity > 5){
-    pout() << "AmrMesh::allocate(ebamrflux, Realm, phase, comp, ghost)" << endl;
+    pout() << "AmrMesh::allocate(EBAMRFluxData, string, phase::which_phase, int, int)" << endl;
   }
 
+  CH_assert(a_ncomp > 0);
+
+  // This allocates data on a specific realm and phase with specified number of components and ghost cells. If a_ghost < 0
+  // we use the default number of ghost cells in AmrMesh. 
+
   if(!this->queryRealm(a_realm)) {
-    std::string str = "AmrMesh::allocate(ebamrflux, Realm, phase, comp, ghost) - could not find Realm '" + a_realm + "'";
+    const std::string str = "AmrMesh::allocate(EBAMRFluxData, string, phase::which_phase, int, int) - could not find realm '" + a_realm + "'";
     MayDay::Abort(str.c_str());
   }
 
-  const int ghost = (a_ghost == -1) ? m_numGhostCells : a_ghost;
+  const int ghost = (a_ghost < 0) ? m_numGhostCells : a_ghost;
 
   a_data.resize(1 + m_finestLevel);
 
@@ -222,12 +218,7 @@ void AmrMesh::allocate(EBAMRFluxData&           a_data,
     const DisjointBoxLayout& dbl = m_realms[a_realm]->getGrids()[lvl];
     const EBISLayout& ebisl      = m_realms[a_realm]->getEBISLayout(a_phase)[lvl];
 
-    EBFluxFactory fact(ebisl);
-
-    a_data[lvl] = RefCountedPtr<LevelData<EBFluxFAB> >
-      (new LevelData<EBFluxFAB>(dbl, a_ncomp, ghost*IntVect::Unit, fact));
-
-    EBLevelDataOps::setVal(*a_data[lvl], 0.0);
+    a_data[lvl] = RefCountedPtr<LevelData<EBFluxFAB> > (new LevelData<EBFluxFAB>(dbl, a_ncomp, ghost*IntVect::Unit, EBFluxFactory(ebisl)));
   }
 
   a_data.setRealm(a_realm);
@@ -237,18 +228,23 @@ void AmrMesh::allocate(EBAMRIVData&             a_data,
 		       const std::string        a_realm,
 		       const phase::which_phase a_phase,
 		       const int                a_ncomp,
-		       const int                a_ghost){
-  CH_TIME("AmrMesh::allocate(ebamriv, Realm, phase, comp, ghost)");
+		       const int                a_ghost) const { 
+  CH_TIME("AmrMesh::allocate(EBAMRIVData, string, phase::which_phase, int, int)");
   if(m_verbosity > 5){
-    pout() << "AmrMesh::allocate(ebamriv, Realm, phase, comp, ghost)" << endl;
+    pout() << "AmrMesh::allocate(EBAMRIVData, string, phase::which_phase, int, int)" << endl;
   }
 
+  CH_assert(a_ncomp > 0);
+
+  // This allocates data on a specific realm and phase with specified number of components and ghost cells. If a_ghost < 0
+  // we use the default number of ghost cells in AmrMesh. 
+
   if(!this->queryRealm(a_realm)) {
-    std::string str = "AmrMesh::allocate(ebamriv, Realm, phase, comp, ghost) - could not find Realm '" + a_realm + "'";
+    const std::string str = "AmrMesh::allocate(EBAMRIVData, string, phase::which_phase, int, int) - could not find realm '" + a_realm + "'";
     MayDay::Abort(str.c_str());
   }
 
-  const int ghost = (a_ghost == -1) ? m_numGhostCells : a_ghost;
+  const int ghost = (a_ghost < 0) ? m_numGhostCells : a_ghost;
 
   a_data.resize(1 + m_finestLevel);
 
@@ -257,21 +253,16 @@ void AmrMesh::allocate(EBAMRIVData&             a_data,
     const EBISLayout& ebisl      = m_realms[a_realm]->getEBISLayout(a_phase)[lvl];
     const ProblemDomain& domain  = m_realms[a_realm]->getDomains()[lvl];
     
-    LayoutData<IntVectSet> irreg_sets(dbl);
+    LayoutData<IntVectSet> irregCells(dbl);
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       Box box = dbl.get(dit());
       box.grow(ghost);
       box &= domain;
 
-      irreg_sets[dit()] = ebisl[dit()].getIrregIVS(box);
+      irregCells[dit()] = ebisl[dit()].getIrregIVS(box);
     }
 
-    BaseIVFactory<Real> fact(ebisl, irreg_sets);
-
-    a_data[lvl] = RefCountedPtr<LevelData<BaseIVFAB<Real> > >
-      (new LevelData<BaseIVFAB<Real> >(dbl, a_ncomp, ghost*IntVect::Unit, fact));
-
-    EBLevelDataOps::setVal(*a_data[lvl], 0.0);
+    a_data[lvl] = RefCountedPtr<LevelData<BaseIVFAB<Real> > > (new LevelData<BaseIVFAB<Real> >(dbl, a_ncomp, ghost*IntVect::Unit, BaseIVFactory<Real>(ebisl, irregCells)));
   }
 
   a_data.setRealm(a_realm);
@@ -281,18 +272,23 @@ void AmrMesh::allocate(EBAMRIFData&             a_data,
 		       const std::string        a_realm,
 		       const phase::which_phase a_phase,
 		       const int                a_ncomp,
-		       const int                a_ghost){
-  CH_TIME("AmrMesh::allocate(ebamrifdata, Realm, phase, comp, ghost)");
+		       const int                a_ghost) const {
+  CH_TIME("AmrMesh::allocate(EBAMRIFData, string, phase::which_phase, int, int)");
   if(m_verbosity > 5){
-    pout() << "AmrMesh::allocate(ebamrifdata, Realm, phase, comp, ghost)" << endl;
+    pout() << "AmrMesh::allocate(EBAMRIFData, string, phase::which_phase, int, int)" << endl;
   }
 
+  CH_assert(a_ncomp > 0);
+
+  // This allocates data on a specific realm and phase with specified number of components and ghost cells. If a_ghost < 0
+  // we use the default number of ghost cells in AmrMesh. 
+
   if(!this->queryRealm(a_realm)) {
-    std::string str = "AmrMesh::allocate(ebamrifdata, Realm, phase, comp, ghost) - could not find Realm '" + a_realm + "'";
+    std::string str = "AmrMesh::allocate(EBAMRIFData, string, phase::which_phase, int, int) - could not find realm '" + a_realm + "'";
     MayDay::Abort(str.c_str());
   }
 
-  const int ghost = (a_ghost == -1) ? m_numGhostCells : a_ghost;
+  const int ghost = (a_ghost < 0) ? m_numGhostCells : a_ghost;
 
   a_data.resize(1 + m_finestLevel);
 
@@ -300,58 +296,60 @@ void AmrMesh::allocate(EBAMRIFData&             a_data,
     const DisjointBoxLayout& dbl = m_realms[a_realm]->getGrids()[lvl];
     const EBISLayout& ebisl      = m_realms[a_realm]->getEBISLayout(a_phase)[lvl];
     const ProblemDomain& domain  = m_realms[a_realm]->getDomains()[lvl];
-    
-    DomainFluxIFFABFactory fact(ebisl, domain);
 
-    a_data[lvl] = RefCountedPtr<LevelData<DomainFluxIFFAB> >
-      (new LevelData<DomainFluxIFFAB>(dbl, a_ncomp, ghost*IntVect::Unit, fact));
+    a_data[lvl] = RefCountedPtr<LevelData<DomainFluxIFFAB> > (new LevelData<DomainFluxIFFAB>(dbl, a_ncomp, ghost*IntVect::Unit, DomainFluxIFFABFactory(ebisl, domain)));
   }
 
   a_data.setRealm(a_realm);
 }
 
-void AmrMesh::allocate(EBAMRBool& a_data, const std::string a_realm, const int a_ncomp, const int a_ghost){
-  CH_TIME("AmrMesh::allocate(ebamrbool, Realm, comp, ghost)");
+void AmrMesh::allocate(EBAMRBool& a_data, const std::string a_realm, const int a_ncomp, const int a_ghost) const {
+  CH_TIME("AmrMesh::allocate(EBAMRBool, string, int, int)");
   if(m_verbosity > 5){
-    pout() << "AmrMesh::allocate(ebamrbool, Realm, comp, ghost)" << endl;
+    pout() << "AmrMesh::allocate(EBAMRBool, string, int, int)" << endl;
   }
 
+  CH_assert(a_ncomp > 0);
+
   if(!this->queryRealm(a_realm)) {
-    std::string str = "AmrMesh::allocate(ebamrbool, Realm, phase, comp, ghost) - could not find Realm '" + a_realm + "'";
+    std::string str = "AmrMesh::allocate(EBAMRBool, string, int, int) - could not find realm '" + a_realm + "'";
     MayDay::Abort(str.c_str());
   }
+
+  const int ghost = (a_ghost < 0) ? m_numGhostCells : a_ghost;
 
   a_data.resize(1 + m_finestLevel);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
     const DisjointBoxLayout& dbl = m_realms[a_realm]->getGrids()[lvl];
     
-    a_data[lvl] = RefCountedPtr<LevelData<BaseFab<bool> > >
-      (new LevelData<BaseFab<bool> >(dbl, a_ncomp, a_ghost*IntVect::Unit));
+    a_data[lvl] = RefCountedPtr<LevelData<BaseFab<bool> > > (new LevelData<BaseFab<bool> >(dbl, a_ncomp, ghost*IntVect::Unit));
   }
 
   a_data.setRealm(a_realm);
 }
 
-void AmrMesh::allocate(MFAMRCellData& a_data, const std::string a_realm, const int a_ncomp, const int a_ghost){
-  CH_TIME("AmrMesh::allocate(mfamrcell, Realm, comp, ghost)");
+void AmrMesh::allocate(MFAMRCellData& a_data, const std::string a_realm, const int a_ncomp, const int a_ghost) const {
+  CH_TIME("AmrMesh::allocate(MFAMRCellData, string, int, int)");
   if(m_verbosity > 5){
-    pout() << "AmrMesh::allocate(mfamrcell, Realm, comp, ghost)" << endl;
+    pout() << "AmrMesh::allocate(MFAMRCellData, string, int, int)" << endl;
   }
 
+  CH_assert(a_ncomp > 0);
+
   if(!this->queryRealm(a_realm)) {
-    std::string str = "AmrMesh::allocate(mfamrcell, Realm, comp, ghost) - could not find Realm '" + a_realm + "'";
+    std::string str = "AmrMesh::allocate(MFAMRCellData, string, int, int) - could not find realm '" + a_realm + "'";
     MayDay::Abort(str.c_str());
   }
 
-  const int ghost   = (a_ghost == -1) ? m_numGhostCells : a_ghost;
-  const int ignored = a_ncomp;
+  const int ghost   = (a_ghost < 0) ? m_numGhostCells : a_ghost;
+  const int ignored = a_ncomp;                                    // Strange but true thing -- number of components come in through the factory. 
   const int nphases = m_multifluidIndexSpace->numPhases();
 
   a_data.resize(1 + m_finestLevel);
 
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_realms[a_realm]->getEBIndexSpace(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_realms[a_realm]->getEBIndexSpace(phase::solid);
+  const RefCountedPtr<EBIndexSpace> ebisGas = m_realms[a_realm]->getEBIndexSpace(phase::gas);
+  const RefCountedPtr<EBIndexSpace> ebisSol = m_realms[a_realm]->getEBIndexSpace(phase::solid);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
     const DisjointBoxLayout& dbl = m_realms[a_realm]->getGrids()[lvl];
@@ -359,39 +357,38 @@ void AmrMesh::allocate(MFAMRCellData& a_data, const std::string a_realm, const i
     Vector<EBISLayout> ebisl(nphases);
     Vector<int>        comps(nphases, a_ncomp);
 
-    if(!ebis_gas.isNull()) ebisl[phase::gas]   = m_realms[a_realm]->getEBISLayout(phase::gas)[lvl];
-    if(!ebis_sol.isNull()) ebisl[phase::solid] = m_realms[a_realm]->getEBISLayout(phase::solid)[lvl];
+    if(!ebisGas.isNull()) ebisl[phase::gas]   = m_realms[a_realm]->getEBISLayout(phase::gas)[lvl];
+    if(!ebisSol.isNull()) ebisl[phase::solid] = m_realms[a_realm]->getEBISLayout(phase::solid)[lvl];
     
     MFCellFactory factory(ebisl, comps);
 
-    a_data[lvl] = RefCountedPtr<LevelData<MFCellFAB> >
-      (new LevelData<MFCellFAB>(dbl, ignored, ghost*IntVect::Unit, factory));
-
-    MFLevelDataOps::setVal(*a_data[lvl], 0.0);
+    a_data[lvl] = RefCountedPtr<LevelData<MFCellFAB> > (new LevelData<MFCellFAB>(dbl, ignored, ghost*IntVect::Unit, factory));
   }
 
   a_data.setRealm(a_realm);
 }
 
-void AmrMesh::allocate(MFAMRFluxData& a_data, const std::string a_realm, const int a_ncomp, const int a_ghost){
-  CH_TIME("AmrMesh::allocate(mfamrflux, Realm, comp, ghost)");
+void AmrMesh::allocate(MFAMRFluxData& a_data, const std::string a_realm, const int a_ncomp, const int a_ghost) const {
+  CH_TIME("AmrMesh::allocate(MFAMRFluxData, string, int, int)");
   if(m_verbosity > 5){
-    pout() << "AmrMesh::allocate(mfamrflux, Realm, comp, ghost)" << endl;
+    pout() << "AmrMesh::allocate(MFAMRFluxData, string, int, int)" << endl;
   }
 
+  CH_assert(a_ncomp > 0);
+
   if(!this->queryRealm(a_realm)) {
-    std::string str = "AmrMesh::allocate(mfamrflux, Realm, comp, ghost) - could not find Realm '" + a_realm + "'";
+    std::string str = "AmrMesh::allocate(MFAMRFluxData, string, int, int) - could not find realm '" + a_realm + "'";
     MayDay::Abort(str.c_str());
   }
 
-  const int ghost   = (a_ghost == -1) ? m_numGhostCells : a_ghost;
-  const int ignored = a_ncomp;
+  const int ghost   = (a_ghost < 0) ? m_numGhostCells : a_ghost;
+  const int ignored = a_ncomp;                                    // Strange but true thing -- number of components come in through the factory. 
   const int nphases = m_multifluidIndexSpace->numPhases();
 
   a_data.resize(1 + m_finestLevel);
 
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_realms[a_realm]->getEBIndexSpace(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_realms[a_realm]->getEBIndexSpace(phase::solid);
+  const RefCountedPtr<EBIndexSpace>& ebisGas = m_realms[a_realm]->getEBIndexSpace(phase::gas);
+  const RefCountedPtr<EBIndexSpace>& ebisSol = m_realms[a_realm]->getEBIndexSpace(phase::solid);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
     const DisjointBoxLayout& dbl = m_realms[a_realm]->getGrids()[lvl];
@@ -399,37 +396,38 @@ void AmrMesh::allocate(MFAMRFluxData& a_data, const std::string a_realm, const i
     Vector<EBISLayout> ebisl(nphases);
     Vector<int>        comps(nphases, a_ncomp);
 
-    if(!ebis_gas.isNull()) ebisl[phase::gas]   = m_realms[a_realm]->getEBISLayout(phase::gas)[lvl];
-    if(!ebis_sol.isNull()) ebisl[phase::solid] = m_realms[a_realm]->getEBISLayout(phase::solid)[lvl];
+    if(!ebisGas.isNull()) ebisl[phase::gas]   = m_realms[a_realm]->getEBISLayout(phase::gas)[lvl];
+    if(!ebisSol.isNull()) ebisl[phase::solid] = m_realms[a_realm]->getEBISLayout(phase::solid)[lvl];
     
     MFFluxFactory factory(ebisl, comps);
 
-    a_data[lvl] = RefCountedPtr<LevelData<MFFluxFAB> >
-      (new LevelData<MFFluxFAB>(dbl, ignored, ghost*IntVect::Unit, factory));
+    a_data[lvl] = RefCountedPtr<LevelData<MFFluxFAB> > (new LevelData<MFFluxFAB>(dbl, ignored, ghost*IntVect::Unit, factory));
   }
 
   a_data.setRealm(a_realm);
 }
 
-void AmrMesh::allocate(MFAMRIVData& a_data, const std::string a_realm, const int a_ncomp, const int a_ghost){
-  CH_TIME("AmrMesh::allocate(mfamrivdata, Realm, comp, ghost)");
+void AmrMesh::allocate(MFAMRIVData& a_data, const std::string a_realm, const int a_ncomp, const int a_ghost) const {
+  CH_TIME("AmrMesh::allocate(MFAMRIVData, string, int, int)");
   if(m_verbosity > 5){
-    pout() << "AmrMesh::allocate(mfamrivdata, Realm, comp, ghost)" << endl;
+    pout() << "AmrMesh::allocate(MFAMRIVData, string, int, int)" << endl;
   }
+
+  CH_assert(a_ncomp > 0);
   
   if(!this->queryRealm(a_realm)) {
-    std::string str = "AmrMesh::allocate(mfamrivdata, Realm, comp, ghost) - could not find Realm '" + a_realm + "'";
+    std::string str = "AmrMesh::allocate(MFAMRIVData, string, int, int) - could not find realm '" + a_realm + "'";
     MayDay::Abort(str.c_str());
   }
 
-  const int ghost   = (a_ghost == -1) ? m_numGhostCells : a_ghost;
+  const int ghost   = (a_ghost < 0) ? m_numGhostCells : a_ghost;
   const int ignored = a_ncomp;
   const int nphases = m_multifluidIndexSpace->numPhases();
 
   a_data.resize(1 + m_finestLevel);
 
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_realms[a_realm]->getEBIndexSpace(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_realms[a_realm]->getEBIndexSpace(phase::solid);
+  const RefCountedPtr<EBIndexSpace>& ebisGas = m_realms[a_realm]->getEBIndexSpace(phase::gas);
+  const RefCountedPtr<EBIndexSpace>& ebisSol = m_realms[a_realm]->getEBIndexSpace(phase::solid);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
     const DisjointBoxLayout& dbl = m_realms[a_realm]->getGrids()[lvl];
@@ -437,210 +435,195 @@ void AmrMesh::allocate(MFAMRIVData& a_data, const std::string a_realm, const int
     Vector<EBISLayout> ebisl(nphases);
     Vector<int>        comps(nphases, a_ncomp);
 
-    if(!ebis_gas.isNull()) ebisl[phase::gas]   = m_realms[a_realm]->getEBISLayout(phase::gas)[lvl];
-    if(!ebis_sol.isNull()) ebisl[phase::solid] = m_realms[a_realm]->getEBISLayout(phase::solid)[lvl];
+    if(!ebisGas.isNull()) ebisl[phase::gas]   = m_realms[a_realm]->getEBISLayout(phase::gas)[lvl];
+    if(!ebisSol.isNull()) ebisl[phase::solid] = m_realms[a_realm]->getEBISLayout(phase::solid)[lvl];
     
     MFBaseIVFABFactory factory(ebisl, comps);
 
-    a_data[lvl] = RefCountedPtr<LevelData<MFBaseIVFAB> >
-      (new LevelData<MFBaseIVFAB>(dbl, ignored, ghost*IntVect::Unit, factory));
+    a_data[lvl] = RefCountedPtr<LevelData<MFBaseIVFAB> > (new LevelData<MFBaseIVFAB>(dbl, ignored, ghost*IntVect::Unit, factory));
   }
 
   a_data.setRealm(a_realm);
 }
 
-void AmrMesh::reallocate(EBAMRCellData& a_data, const phase::which_phase a_phase, const int a_lmin){
-  CH_TIME("AmrMesh::reallocate(ebamrcell, Realm, phase, lmin)");
+void AmrMesh::reallocate(EBAMRCellData& a_data, const phase::which_phase a_phase, const int a_lmin) const {
+  CH_TIME("AmrMesh::reallocate(EBAMRCellData, phase::which_phase, int)");
   if(m_verbosity > 5){
-    pout() << "AmrMesh::reallocate(ebamrcell, Realm, phase, lmin)" << endl;
+    pout() << "AmrMesh::reallocate(EBAMRCellData, phase::which_phase, int)" << endl;
   }
+
+  CH_assert(a_lmin >= 0);
+
+  // TLDR: This reallocates data from a_lmin on the same realm as before. Phase needs to be specified because EBAMRCellData does not know about phases.
+  //       Data under a_lmin is not touched. 
 
   const std::string a_realm = a_data.getRealm();
 
   if(!this->queryRealm(a_realm)) {
-    std::string str = "AmrMesh::allocate(ebamrcell, Realm, phase, lmin) - could not find Realm '" + a_realm + "'";
+    std::string str = "AmrMesh::reallocate(EBAMRCellData, phase::which_phase, int) - could not find realm '" + a_realm + "'";
     MayDay::Abort(str.c_str());
   }
 
   const IntVect ghost = a_data[0]->ghostVect();
-  const int ncomp     = a_data[0]->nComp();
+  const int     ncomp = a_data[0]->nComp();
 
   a_data.resize(1 + m_finestLevel);
-
-  const int lmin = Max(0, a_lmin+1);
   
   for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++){
     const DisjointBoxLayout& dbl = m_realms[a_realm]->getGrids()[lvl];
     const EBISLayout& ebisl      = m_realms[a_realm]->getEBISLayout(a_phase)[lvl];
-    
-    EBCellFactory fact(ebisl);
 
-    a_data[lvl] = RefCountedPtr<LevelData<EBCellFAB> >
-      (new LevelData<EBCellFAB>(dbl, ncomp, ghost, fact));
-
-    EBLevelDataOps::setVal(*a_data[lvl], 0.0);
+    a_data[lvl] = RefCountedPtr<LevelData<EBCellFAB> > (new LevelData<EBCellFAB>(dbl, ncomp, ghost, EBCellFactory(ebisl)));
   }
 }
 
-void AmrMesh::reallocate(EBAMRFluxData& a_data, const phase::which_phase a_phase, const int a_lmin){
-  CH_TIME("AmrMesh::reallocate(ebamrflux, Realm, phase, lmin)");
+void AmrMesh::reallocate(EBAMRFluxData& a_data, const phase::which_phase a_phase, const int a_lmin) const {
+  CH_TIME("AmrMesh::reallocate(EBAMRFluxData, phase::which_phase, int)");
   if(m_verbosity > 5){
-    pout() << "AmrMesh::reallocate(ebamrflux, Realm, phase, lmin)" << endl;
+    pout() << "AmrMesh::reallocate(EBAMRFluxData, phase::which_phase, int)" << endl;
   }
+
+  CH_assert(a_lmin >= 0);
 
   const std::string a_realm = a_data.getRealm();
 
   if(!this->queryRealm(a_realm)) {
-    std::string str = "AmrMesh::reallocate(ebamrflux, Realm, phase, lmin) - could not find Realm '" + a_realm + "'";
+    std::string str = "AmrMesh::reallocate(EBAMRFluxData, phase::which_phase, int) - could not find realm '" + a_realm + "'";
     MayDay::Abort(str.c_str());
   }
 
   const IntVect ghost = a_data[0]->ghostVect();
-  const int ncomp     = a_data[0]->nComp();
+  const int     ncomp = a_data[0]->nComp();
 
   a_data.resize(1 + m_finestLevel);
-
-  const int lmin = Max(0, a_lmin+1);
   
   for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++){
     const DisjointBoxLayout& dbl = m_realms[a_realm]->getGrids()[lvl];
     const EBISLayout& ebisl      = m_realms[a_realm]->getEBISLayout(a_phase)[lvl];
-    
-    EBFluxFactory fact(ebisl);
 
-    a_data[lvl] = RefCountedPtr<LevelData<EBFluxFAB> > (new LevelData<EBFluxFAB>(dbl, ncomp, ghost, fact));
-
-    EBLevelDataOps::setVal(*a_data[lvl], 0.0);
+    a_data[lvl] = RefCountedPtr<LevelData<EBFluxFAB> > (new LevelData<EBFluxFAB>(dbl, ncomp, ghost, EBFluxFactory(ebisl)));
   }
 }
 
-void AmrMesh::reallocate(EBAMRIVData& a_data, const phase::which_phase a_phase, const int a_lmin){
-  CH_TIME("AmrMesh::reallocate(ebamriv, Realm, phase, lmin)");
+void AmrMesh::reallocate(EBAMRIVData& a_data, const phase::which_phase a_phase, const int a_lmin) const {
+  CH_TIME("AmrMesh::reallocate(EBAMRIVData, phase::which_phase, int)");
   if(m_verbosity > 5){
-    pout() << "AmrMesh::reallocate(ebamriv, Realm, phase, lmin)" << endl;
+    pout() << "AmrMesh::reallocate(EBAMRIVData, phase::which_phase, int)" << endl;
   }
+
+  CH_assert(a_lmin >= 0);
 
   const std::string a_realm = a_data.getRealm();
 
   if(!this->queryRealm(a_realm)) {
-    std::string str = "AmrMesh::reallocate(ebamriv, Realm, phase, lmin) - could not find Realm '" + a_realm + "'";
+    std::string str = "AmrMesh::reallocate(EBAMRIVData, phase::which_phase, int) - could not find realm '" + a_realm + "'";
     MayDay::Abort(str.c_str());
   }
 
   const IntVect ghost = a_data[0]->ghostVect();
-  const int ncomp     = a_data[0]->nComp();
+  const int     ncomp = a_data[0]->nComp();
 
   a_data.resize(1 + m_finestLevel);
-
-  const int lmin = Max(0, a_lmin+1);
 
   for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++){
     const DisjointBoxLayout& dbl = m_realms[a_realm]->getGrids()[lvl];
     const EBISLayout& ebisl      = m_realms[a_realm]->getEBISLayout(a_phase)[lvl];
     const ProblemDomain& domain  = m_realms[a_realm]->getDomains()[lvl];
     
-    LayoutData<IntVectSet> irreg_sets(dbl);
+    LayoutData<IntVectSet> irregCells(dbl);
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       Box box = dbl.get(dit());
       box.grow(ghost);
       box &= domain;
 
-      irreg_sets[dit()] = ebisl[dit()].getIrregIVS(box);
+      irregCells[dit()] = ebisl[dit()].getIrregIVS(box);
     }
 
-    BaseIVFactory<Real> fact(ebisl, irreg_sets);
-
-    a_data[lvl] = RefCountedPtr<LevelData<BaseIVFAB<Real> > >
-      (new LevelData<BaseIVFAB<Real> >(dbl, ncomp, ghost, fact));
-
-    EBLevelDataOps::setVal(*a_data[lvl], 0.0);
+    a_data[lvl] = RefCountedPtr<LevelData<BaseIVFAB<Real> > > (new LevelData<BaseIVFAB<Real> >(dbl, ncomp, ghost, BaseIVFactory<Real>(ebisl, irregCells)));
   }
 }
 
-void AmrMesh::reallocate(EBAMRIFData& a_data, const phase::which_phase a_phase, const int a_lmin){
-  CH_TIME("AmrMesh::reallocate(ebamrifdata, Realm, phase, lmin)");
+void AmrMesh::reallocate(EBAMRIFData& a_data, const phase::which_phase a_phase, const int a_lmin) const {
+  CH_TIME("AmrMesh::reallocate(EBAMRIFData, phase::which_phase, int)");
   if(m_verbosity > 5){
-    pout() << "AmrMesh::reallocate(ebamrifdata, Realm, phase, lmin)" << endl;
+    pout() << "AmrMesh::reallocate(EBAMRIFData, phase::which_phase, int)" << endl;
   }
+
+  CH_assert(a_lmin >= 0);
 
   const std::string a_realm = a_data.getRealm(); 
 
   if(!this->queryRealm(a_realm)) {
-    std::string str = "AmrMesh::reallocate(ebamrif, Realm, phase, lmin) - could not find Realm '" + a_realm + "'";
+    std::string str = "AmrMesh::reallocate(EBAMRIFData, phase::which_phase, int) - could not find realm '" + a_realm + "'";
     MayDay::Abort(str.c_str());
   }
 
   const IntVect ghost = a_data[0]->ghostVect();
-  const int ncomp     = a_data[0]->nComp();
+  const int     ncomp = a_data[0]->nComp();
 
   a_data.resize(1 + m_finestLevel);
-
-  const int lmin = Max(0, a_lmin+1);
 
   for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++){
     const DisjointBoxLayout& dbl = m_realms[a_realm]->getGrids()[lvl];
     const EBISLayout& ebisl      = m_realms[a_realm]->getEBISLayout(a_phase)[lvl];
     const ProblemDomain& domain  = m_realms[a_realm]->getDomains()[lvl];
-    
-    DomainFluxIFFABFactory fact(ebisl, domain);
 
-    a_data[lvl] = RefCountedPtr<LevelData<DomainFluxIFFAB> >
-      (new LevelData<DomainFluxIFFAB>(dbl, ncomp, ghost, fact));
+    a_data[lvl] = RefCountedPtr<LevelData<DomainFluxIFFAB> > (new LevelData<DomainFluxIFFAB>(dbl, ncomp, ghost, DomainFluxIFFABFactory(ebisl, domain)));
   }
 }
 
-void AmrMesh::reallocate(EBAMRBool& a_data, const int a_lmin){
-  CH_TIME("AmrMesh::reallocate(ebamrbool, Realm, lmin)");
+void AmrMesh::reallocate(EBAMRBool& a_data, const int a_lmin) const {
+  CH_TIME("AmrMesh::reallocate(EBAMRBool, int)");
   if(m_verbosity > 5){
-    pout() << "AmrMesh::reallocate(ebamrbool, Realm, lmin)" << endl;
+    pout() << "AmrMesh::reallocate(EBAMRBool, int)" << endl;
   }
+
+  CH_assert(a_lmin >= 0);
 
   const std::string a_realm = a_data.getRealm();
 
   if(!this->queryRealm(a_realm)) {
-    std::string str = "AmrMesh::reallocate(ebamrbool, Realm, lmin) - could not find Realm '" + a_realm + "'";
+    std::string str = "AmrMesh::reallocate(EBAMRBool, int) - could not find realm '" + a_realm + "'";
     MayDay::Abort(str.c_str());
   }
   
   const IntVect ghost = a_data[0]->ghostVect();
-  const int ncomp     = a_data[0]->nComp();
+  const int     ncomp = a_data[0]->nComp();
 
   a_data.resize(1 + m_finestLevel);
 
-  const int lmin = Max(0, a_lmin+1);
 
   for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++){
     const DisjointBoxLayout& dbl = m_realms[a_realm]->getGrids()[lvl];
 
-    a_data[lvl] = RefCountedPtr<LevelData<BaseFab<bool> > >
-      (new LevelData<BaseFab<bool> >(dbl, ncomp, ghost));
+    a_data[lvl] = RefCountedPtr<LevelData<BaseFab<bool> > > (new LevelData<BaseFab<bool> >(dbl, ncomp, ghost));
   }
 }
 
-void AmrMesh::reallocate(MFAMRCellData& a_data, const int a_lmin){
-  CH_TIME("AmrMesh::reallocate(mfamrcell, Realm, lmin)");
+void AmrMesh::reallocate(MFAMRCellData& a_data, const int a_lmin) const {
+  CH_TIME("AmrMesh::reallocate(MFAMRCellData, int)");
   if(m_verbosity > 5){
-    pout() << "AmrMesh::reallocate(mfamrcell, Realm, lmin)" << endl;
+    pout() << "AmrMesh::reallocate(MFAMRCellData, int)" << endl;
   }
+
+  CH_assert(a_lmin >= 0);
 
   const std::string a_realm = a_data.getRealm();
 
   if(!this->queryRealm(a_realm)) {
-    std::string str = "AmrMesh::reallocate(mfamrcell, Realm, lmin) - could not find Realm '" + a_realm + "'";
+    std::string str = "AmrMesh::reallocate(MFAMRCellData,int) - could not find realm '" + a_realm + "'";
     MayDay::Abort(str.c_str());
   }
 
-  const IntVect ghost = a_data[0]->ghostVect();
-  const int ncomp = a_data[0]->nComp();
-  const int ignored = ncomp;
-  const int nphases = m_multifluidIndexSpace->numPhases();
+  const IntVect ghost   = a_data[0]->ghostVect();
+  const int     ncomp   = a_data[0]->nComp();
+  const int     ignored = ncomp; // A strange but true thing -- for multifluid data we pass in the number of components through the factory. 
+  const int     nphases = m_multifluidIndexSpace->numPhases();
 
   a_data.resize(1 + m_finestLevel);
 
-  const int lmin = Max(0, a_lmin+1);
-
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_realms[a_realm]->getEBIndexSpace(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_realms[a_realm]->getEBIndexSpace(phase::solid);
+  const RefCountedPtr<EBIndexSpace>& ebisGas = m_realms[a_realm]->getEBIndexSpace(phase::gas);
+  const RefCountedPtr<EBIndexSpace>& ebisSol = m_realms[a_realm]->getEBIndexSpace(phase::solid);
 
   for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++){
     Vector<EBISLayout> ebisl(nphases);
@@ -648,214 +631,237 @@ void AmrMesh::reallocate(MFAMRCellData& a_data, const int a_lmin){
 
     const DisjointBoxLayout& dbl = m_realms[a_realm]->getGrids()[lvl];
 
-    if(!ebis_gas.isNull()) ebisl[phase::gas]   = m_realms[a_realm]->getEBISLayout(phase::gas)[lvl];
-    if(!ebis_sol.isNull()) ebisl[phase::solid] = m_realms[a_realm]->getEBISLayout(phase::solid)[lvl];
+    if(!ebisGas.isNull()) ebisl[phase::gas]   = m_realms[a_realm]->getEBISLayout(phase::gas)  [lvl];
+    if(!ebisSol.isNull()) ebisl[phase::solid] = m_realms[a_realm]->getEBISLayout(phase::solid)[lvl];
     
     MFCellFactory factory(ebisl, comps);
 
     a_data[lvl] = RefCountedPtr<LevelData<MFCellFAB> > (new LevelData<MFCellFAB>(dbl, ignored, ghost, factory));
-
-    MFLevelDataOps::setVal(*a_data[lvl], 0.0);
   }
 }
 
-void AmrMesh::reallocate(MFAMRFluxData& a_data, const int a_lmin){
-  CH_TIME("AmrMesh::allocate(mfamrflux, Realm, lmin)");
+void AmrMesh::reallocate(MFAMRFluxData& a_data, const int a_lmin) const {
+  CH_TIME("AmrMesh::allocate(MFAMRFluxData, int)");
   if(m_verbosity > 5){
-    pout() << "AmrMesh::allocate(mfamrflux, Realm, lmin)" << endl;
+    pout() << "AmrMesh::allocate(MFAMRFluxData, int)" << endl;
   }
+
+  CH_assert(a_lmin >= 0);
 
   const std::string a_realm = a_data.getRealm(); 
 
   if(!this->queryRealm(a_realm)) {
-    std::string str = "AmrMesh::reallocate(mfamrflux, Realm, lmin) - could not find Realm '" + a_realm + "'";
+    std::string str = "AmrMesh::reallocate(MFAMRFluxData, int) - could not find realm '" + a_realm + "'";
     MayDay::Abort(str.c_str());
   }
 
-  const IntVect ghost = a_data[0]->ghostVect();
-  const int ncomp     = a_data[0]->nComp();
-  const int ignored   = ncomp;
-  const int nphases   = m_multifluidIndexSpace->numPhases();
+  const IntVect ghost   = a_data[0]->ghostVect();
+  const int     ncomp   = a_data[0]->nComp();
+  const int     ignored = ncomp; // Strange but true thing, for multifluid data the number of components come in through the factory. 
+  const int     nphases = m_multifluidIndexSpace->numPhases();
 
   a_data.resize(1 + m_finestLevel);
 
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_realms[a_realm]->getEBIndexSpace(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_realms[a_realm]->getEBIndexSpace(phase::solid);
-
-  const int lmin = Max(0, a_lmin+1);
+  const RefCountedPtr<EBIndexSpace>& ebisGas = m_realms[a_realm]->getEBIndexSpace(phase::gas);
+  const RefCountedPtr<EBIndexSpace>& ebisSol = m_realms[a_realm]->getEBIndexSpace(phase::solid);
 
   for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++){
-    const DisjointBoxLayout& dbl = m_realms[a_realm]->getGrids()[lvl];
-    
     Vector<EBISLayout> ebisl(nphases);
     Vector<int>        comps(nphases, ncomp);
 
-    if(!ebis_gas.isNull()) ebisl[phase::gas]   = m_realms[a_realm]->getEBISLayout(phase::gas)[lvl];
-    if(!ebis_sol.isNull()) ebisl[phase::solid] = m_realms[a_realm]->getEBISLayout(phase::solid)[lvl];
+    const DisjointBoxLayout& dbl = m_realms[a_realm]->getGrids()[lvl];
+
+    if(!ebisGas.isNull()) ebisl[phase::gas]   = m_realms[a_realm]->getEBISLayout(phase::gas)  [lvl];
+    if(!ebisSol.isNull()) ebisl[phase::solid] = m_realms[a_realm]->getEBISLayout(phase::solid)[lvl];
     
     MFFluxFactory factory(ebisl, comps);
 
-    a_data[lvl] = RefCountedPtr<LevelData<MFFluxFAB> >
-      (new LevelData<MFFluxFAB>(dbl, ignored, ghost, factory));
+    a_data[lvl] = RefCountedPtr<LevelData<MFFluxFAB> > (new LevelData<MFFluxFAB>(dbl, ignored, ghost, factory));
   }
 }
 
-void AmrMesh::reallocate(MFAMRIVData& a_data, const int a_lmin){
-  CH_TIME("AmrMesh::allocate(mfamrivdata, Realm, lmin)");
+void AmrMesh::reallocate(MFAMRIVData& a_data, const int a_lmin) const {
+  CH_TIME("AmrMesh::allocate(MFAMRIVData, int)");
   if(m_verbosity > 5){
-    pout() << "AmrMesh::allocate(mfamrivdata, Realm, lmin)" << endl;
+    pout() << "AmrMesh::allocate(MFAMRIVData, int)" << endl;
   }
+
+  CH_assert(a_lmin >= 0);
 
   const std::string a_realm = a_data.getRealm();
 
   if(!this->queryRealm(a_realm)) {
-    std::string str = "AmrMesh::reallocate(mfamrivdata, Realm, lmin) - could not find Realm '" + a_realm + "'";
+    std::string str = "AmrMesh::reallocate(MFAMRIVData, int) - could not find realm '" + a_realm + "'";
     MayDay::Abort(str.c_str());
   }
 
-  const IntVect ghost = a_data[0]->ghostVect();
-  const int ncomp     = a_data[0]->nComp();
-  const int ignored   = ncomp;
-  const int nphases   = m_multifluidIndexSpace->numPhases();
+  const IntVect ghost   = a_data[0]->ghostVect();
+  const int     ncomp   = a_data[0]->nComp();
+  const int     ignored = ncomp; // Strange but true thing, for multifluid data the number of components come in through the factory. 
+  const int     nphases = m_multifluidIndexSpace->numPhases();
 
   a_data.resize(1 + m_finestLevel);
 
-  const RefCountedPtr<EBIndexSpace> ebis_gas = m_realms[a_realm]->getEBIndexSpace(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebis_sol = m_realms[a_realm]->getEBIndexSpace(phase::solid);
+  const RefCountedPtr<EBIndexSpace>& ebisGas = m_realms[a_realm]->getEBIndexSpace(phase::gas);
+  const RefCountedPtr<EBIndexSpace>& ebisSol = m_realms[a_realm]->getEBIndexSpace(phase::solid);
 
   const int lmin = Max(0, a_lmin+1);
 
   for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++){
-    const DisjointBoxLayout& dbl = m_realms[a_realm]->getGrids()[lvl];
-    
     Vector<EBISLayout> ebisl(nphases);
     Vector<int>        comps(nphases, ncomp);
+	
+    const DisjointBoxLayout& dbl = m_realms[a_realm]->getGrids()[lvl];
 
-    if(!ebis_sol.isNull()) ebisl[phase::gas]   = m_realms[a_realm]->getEBISLayout(phase::gas)[lvl];
-    if(!ebis_sol.isNull()) ebisl[phase::solid] = m_realms[a_realm]->getEBISLayout(phase::solid)[lvl];
+    if(!ebisGas.isNull()) ebisl[phase::gas]   = m_realms[a_realm]->getEBISLayout(phase::gas)  [lvl];
+    if(!ebisSol.isNull()) ebisl[phase::solid] = m_realms[a_realm]->getEBISLayout(phase::solid)[lvl];
     
     MFBaseIVFABFactory factory(ebisl, comps);
 
-    a_data[lvl] = RefCountedPtr<LevelData<MFBaseIVFAB> >
-      (new LevelData<MFBaseIVFAB>(dbl, ignored, ghost, factory));
+    a_data[lvl] = RefCountedPtr<LevelData<MFBaseIVFAB> > (new LevelData<MFBaseIVFAB>(dbl, ignored, ghost, factory));
   }
 }
 
 void AmrMesh::setMultifluidIndexSpace(const RefCountedPtr<MultiFluidIndexSpace>& a_multiFluidIndexSpace){
-  CH_TIME("AmrMesh::setMultifluidIndexSpace");
+  CH_TIME("AmrMesh::setMultifluidIndexSpace(RefCountedPtr<MultifluidIndexSpace>");
   if(m_verbosity > 5){
-    pout() << "AmrMesh::setMultifluidIndexSpace" << endl;
+    pout() << "AmrMesh::setMultifluidIndexSpace(RefCountedPtr<MultifluidIndexSpace>)" << endl;
   }
+
+  CH_assert(!a_multiFluidIndexSpace.isNull());
 
   m_multifluidIndexSpace = a_multiFluidIndexSpace;
 }
 
-void AmrMesh::setBaseImplicitFunction(const phase::which_phase a_phase, const RefCountedPtr<BaseIF>& a_baseif){
-  CH_TIME("AmrMesh::setBaseImplicitFunction");
+void AmrMesh::setBaseImplicitFunction(const phase::which_phase a_phase, const RefCountedPtr<BaseIF>& a_baseIF){
+  CH_TIME("AmrMesh::setBaseImplicitFunction(phase::which_phase, RefCountedPtr<BaseIF>)");
   if(m_verbosity > 5){
-    pout() << "AmrMesh::setBaseImplicitFunction" << endl;
+    pout() << "AmrMesh::setBaseImplicitFunction(phase::which_phase, RefCountedPtr<BaseIF>)" << endl;
   }
 
-  m_baseif.emplace(a_phase, a_baseif);
+  CH_assert(!a_baseIF.isNull());
+
+  m_baseif.emplace(a_phase, a_baseIF);
 }
 
 void AmrMesh::parseOptions(){
-  parseVerbosity();
-  parseCoarsestLevelNumCells();
-  parseMaxAmrDepth();
-  parseMaxSimulationDepth();
-  parseRefinementRatios();
-  parseBlockingFactor();
-  parseMaxBoxSize();
-  parseMaxEbisBoxSize();
-  parseGridGeneration();
-  parseBrBufferSize();
-  parseIrregTagGrowth();
-  parseBrFillRatio();
-  parseRedistributionRadius();;
-  parseNumGhostCells();
-  parseEbGhostCells();
-  parseProbLoHiCorners();
-  parseCentroidStencils();
-  parseEbCentroidStencils();
-  parseMultigridInterpolator();
+  CH_TIME("AmrMesh::parseOptions()");
+
+  this->parseVerbosity();
+  
+  if(m_verbosity > 5){
+    pout() << "AmrMesh::parseOptions()" << endl;
+  }
+
+  this->parseCoarsestLevelNumCells();
+  this->parseMaxAmrDepth();
+  this->parseMaxSimulationDepth();
+  this->parseRefinementRatios();
+  this->parseBlockingFactor();
+  this->parseMaxBoxSize();
+  this->parseMaxEbisBoxSize();
+  this->parseGridGeneration();
+  this->parseBrBufferSize();
+  this->parseIrregTagGrowth();
+  this->parseBrFillRatio();
+  this->parseRedistributionRadius();;
+  this->parseNumGhostCells();
+  this->parseEbGhostCells();
+  this->parseProbLoHiCorners();
+  this->parseCentroidStencils();
+  this->parseEbCentroidStencils();
+  this->parseMultigridInterpolator();
 
   this->sanityCheck();
 }
 
 void AmrMesh::parseRuntimeOptions(){
-  parseVerbosity();
-  parseBlockingFactor();
-  parseMaxBoxSize();
-  parseGridGeneration();
-  parseBrBufferSize();
-  parseIrregTagGrowth();
-  parseBrFillRatio();
-  parseMultigridInterpolator();
+  CH_TIME("AmrMesh::parseRuntimeOptions()");
+  if(m_verbosity > 5){
+    pout() << "AmrMesh::parseRuntimeOptions()" << endl;
+  }
+  
+  this->parseVerbosity();
+  this->parseBlockingFactor();
+  this->parseMaxBoxSize();
+  this->parseGridGeneration();
+  this->parseBrBufferSize();
+  this->parseIrregTagGrowth();
+  this->parseBrFillRatio();
+  this->parseMultigridInterpolator();
 }
 
 void AmrMesh::parseProbLoHiCorners(){
+  CH_TIME("AmrMesh::parseProbLoHiCorners()");
+  if(m_verbosity > 5){
+    pout() << "AmrMesh::parseProbLoHiCorners()" << endl;
+  }
 
   ParmParse pp("AmrMesh");
 
   Vector<Real> v(SpaceDim);
-  pp.getarr("lo_corner", v, 0, SpaceDim); m_probLo  = RealVect(D_DECL(v[0], v[1], v[2]));
-  pp.getarr("hi_corner", v, 0, SpaceDim); m_prob_hi = RealVect(D_DECL(v[0], v[1], v[2]));
+  
+  pp.getarr("lo_corner", v, 0, SpaceDim); m_probLo = RealVect(D_DECL(v[0], v[1], v[2]));
+  pp.getarr("hi_corner", v, 0, SpaceDim); m_probHi = RealVect(D_DECL(v[0], v[1], v[2]));
 }
 
 void AmrMesh::buildDomains(){
-  CH_TIME("AmrMesh::buildDomains");
+  CH_TIME("AmrMesh::buildDomains()");
   if(m_verbosity > 5){
-    pout() << "AmrMesh::buildDomains" << endl;
+    pout() << "AmrMesh::buildDomains()" << endl;
   }
 
-  const int nlevels = 1 + m_maxAmrDepth;
+  const int numLevels = 1 + m_maxAmrDepth;
   
-  m_domains.resize(nlevels);
-  m_dx.resize(nlevels);
-  m_grids.resize(nlevels);
+  m_domains.resize(numLevels);
+  m_dx.     resize(numLevels);
+  m_grids.  resize(numLevels);
 
-
-  m_dx[0] = (m_prob_hi[0] - m_probLo[0])/m_numCells[0];
+  m_dx     [0] = (m_probHi[0] - m_probLo[0])/m_numCells[0];
   m_domains[0] = ProblemDomain(IntVect::Zero, m_numCells - IntVect::Unit);
 
   for (int lvl = 1; lvl <= m_maxAmrDepth; lvl++){
-    m_dx[lvl]      = m_dx[lvl-1]/m_refinementRatios[lvl-1];
+    m_dx     [lvl] = m_dx[lvl-1]/m_refinementRatios[lvl-1];
     m_domains[lvl] = m_domains[lvl-1];
+    
     m_domains[lvl].refine(m_refinementRatios[lvl-1]);
   }
 }
 
 void AmrMesh::regrid(const Vector<IntVectSet>& a_tags,
-		     const int a_lmin,
-		     const int a_hardcap){
-  CH_TIME("AmrMesh::regrid");
+		     const int                 a_lmin,
+		     const int                 a_hardcap){
+  CH_TIME("AmrMesh::regrid(Vector<IntVectSet>, int, int)");
   if(m_verbosity > 1){
-    pout() << "AmrMesh::regrid" << endl;
+    pout() << "AmrMesh::regrid(Vector<IntVectSet>, int, int)" << endl;
   }
+
+  CH_assert(a_lmin >= 0);
+
+  // This function does a _full_ regrid, i.e. it first regrids the base AMR functionality (grids and geometric information),
+  // and then regrids every registered operator. 
 
   this->regridAmr(a_tags, a_lmin, a_hardcap);
   this->regridOperators(a_lmin);
 }
 
 void AmrMesh::regridAmr(const Vector<IntVectSet>& a_tags,
-			const int a_lmin,
-			const int a_hardcap){
-  CH_TIME("AmrMesh::regridAmr(tags, level, level, hardcap)");
+			const int                 a_lmin,
+			const int                 a_hardcap){
+  CH_TIME("AmrMesh::regridAmr(Vector<IntVectSet>, int, int)");
   if(m_verbosity > 1){
-    pout() << "AmrMesh::regridAmr(tags, level, level, hardcap)" << endl;
+    pout() << "AmrMesh::regridAmr(Vector<IntVectSet>, int, int)" << endl;
   }
+
+  CH_assert(a_lmin >= 0);
 
   // TLDR: This is the version that reads boxes. AmrMesh makes the grids from the tags and load balances them
   //       by using the patch volume. Those grids are then sent to the various Realms. 
   
-  Vector<IntVectSet> tags = a_tags; // buildGrids destroys tags, so copy them
+  Vector<IntVectSet> tags = a_tags; // buildGrids destroys tags, so we actually have to copy them. 
 
-  // This is stuff that always gets done
-  this->buildGrids(tags, a_lmin, a_hardcap);
-
-  // Define Realms with the new grids and redo the Realm stuff
-  this->defineRealms();
+  this->buildGrids(tags, a_lmin, a_hardcap); // Build AMR grids -- the realm grids are defined with these grids. 
+  this->defineRealms();                      // Define Realms with the new grids and redo the Realm stuff
 
   for (auto& r : m_realms){
     r.second->regridBase(a_lmin);
@@ -863,9 +869,9 @@ void AmrMesh::regridAmr(const Vector<IntVectSet>& a_tags,
 }
 
 void AmrMesh::regridOperators(const int a_lmin){
-  CH_TIME("AmrMesh::regridOperators(procs, boxes, level)");
+  CH_TIME("AmrMesh::regridOperators(int)");
   if(m_verbosity > 1){
-    pout() << "AmrMesh::regridOperators(procs, boxes, level)" << endl;
+    pout() << "AmrMesh::regridOperators(int)" << endl;
   }
   
   for (auto& r : m_realms){
@@ -874,13 +880,13 @@ void AmrMesh::regridOperators(const int a_lmin){
 }
 
 void AmrMesh::buildGrids(Vector<IntVectSet>& a_tags, const int a_lmin, const int a_hardcap){
-  CH_TIME("AmrMesh::buildGrids");
+  CH_TIME("AmrMesh::buildGrids(Vector<IntVectSet>, int, int)");
   if(m_verbosity > 2){
-    pout() << "AmrMesh::buildGrids" << endl;
+    pout() << "AmrMesh::buildGrids(Vector<IntVectSet>, int, int)" << endl;
   }
 
-  // TLDR: a_lmin is the coarsest level that changes. A special condition is a_lmin=0 for which we assume
-  //       that there are no prior grids.
+  // TLDR: a_lmin is the coarsest level that changes and a_hardcap is a hardcap for the maximum grid level that can
+  //       be generated. If a_hardcap < 0 the restriction is m_maxAmrDepth.
 
   // base is the coarsest level which does not change. top_level is the finest level where we have tags. We should never
   // have tags on max_amr_depth, and we make that restriction here.
@@ -892,7 +898,7 @@ void AmrMesh::buildGrids(Vector<IntVectSet>& a_tags, const int a_lmin, const int
   Vector<Vector<Box> > old_boxes(1 + top_level);
 
   // Enforce potential hardcap. 
-  const int hardcap = (a_hardcap == -1) ? m_maxAmrDepth : a_hardcap;
+  const int hardcap = (a_hardcap < 0) ? m_maxAmrDepth : a_hardcap;
 
   // Inside this loop we make the boxes. 
   if(m_maxAmrDepth > 0 && hardcap > 0){
@@ -935,7 +941,9 @@ void AmrMesh::buildGrids(Vector<IntVectSet>& a_tags, const int a_lmin, const int
     m_finestLevel = 0;
   }
 
-  if(a_lmin == 0){ // Coarsest level also changes in this case, but that's not caught by the regridders. 
+  // Coarsest level also changes in this case, but that's not caught by the regridders. We have to do this because the blocking
+  // factor could have been changed during runtime option parsing. 
+  if(a_lmin == 0){ 
     domainSplit(m_domains[0], new_boxes[0], m_maxBoxSize, m_blockingFactor);
   }
 
@@ -1678,7 +1686,7 @@ RealVect AmrMesh::getProbLo() const {
 }
 
 RealVect AmrMesh::getProbHi() const {
-  return m_prob_hi;
+  return m_probHi;
 }
 
 int AmrMesh::getFinestLevel() const {
@@ -1898,9 +1906,9 @@ Vector<RefCountedPtr<Copier> >& AmrMesh::getReverseCopier(const std::string a_re
 }
 
 bool AmrMesh::queryRealm(const std::string a_realm) const {
-  CH_TIME("AmrMesh::queryRealm");
+  CH_TIME("AmrMesh::queryRealm(string)");
   if(m_verbosity > 5){
-    pout() << "AmrMesh::queryRealm" << endl;
+    pout() << "AmrMesh::queryRealm(string)" << endl;
   }
 
   bool ret = true;
@@ -1912,10 +1920,19 @@ bool AmrMesh::queryRealm(const std::string a_realm) const {
   return ret;
 }
 
-void AmrMesh::registerRealm(const std::string a_realm){
-  CH_TIME("AmrMesh::registerRealm");
+bool AmrMesh::getEbCf() const{
+  CH_TIME("AmrMesh::getEbCf()");
   if(m_verbosity > 5){
-    pout() << "AmrMesh::registerRealm" << endl;
+    pout() << "AmrMesh::getEbCf()" << endl;
+  }
+  
+  return true;
+}
+
+void AmrMesh::registerRealm(const std::string a_realm){
+  CH_TIME("AmrMesh::registerRealm(string)");
+  if(m_verbosity > 5){
+    pout() << "AmrMesh::registerRealm(string)" << endl;
   }
 
   if(!this->queryRealm(a_realm)){
@@ -1924,13 +1941,13 @@ void AmrMesh::registerRealm(const std::string a_realm){
 }
 
 void AmrMesh::registerOperator(const std::string a_operator, const std::string a_realm, const phase::which_phase a_phase){
-  CH_TIME("AmrMesh::registerOperator(operator, Realm, phase)");
+  CH_TIME("AmrMesh::registerOperator(string, string, phase::which_phase)");
   if(m_verbosity > 5){
-    pout() << "AmrMesh::registerOperator(operator, Realm, phase)" << endl;
+    pout() << "AmrMesh::registerOperator(string, string, phase::which_phase)" << endl;
   }
 
   if(!this->queryRealm(a_realm)) {
-    std::string str = "AmrMesh::registerOperator(operator, Realm, phase) - could not find Realm '" + a_realm + "'";
+    const std::string str = "AmrMesh::registerOperator(string, string, phase::which_phase) - could not find realm '" + a_realm + "'";
     MayDay::Abort(str.c_str());
   }
 
@@ -1938,13 +1955,13 @@ void AmrMesh::registerOperator(const std::string a_operator, const std::string a
 }
 
 void AmrMesh::registerMask(const std::string a_mask, const int a_buffer, const std::string a_realm){
-  CH_TIME("AmrMesh::registerMask(mask, Realm, buffer)");
+  CH_TIME("AmrMesh::registerMask(string, int, string)");
   if(m_verbosity > 5){
-    pout() << "AmrMesh::registerMask(mask, Realm, buffer)" << endl;
+    pout() << "AmrMesh::registerMask(string, int, string)" << endl;
   }
 
   if(!this->queryRealm(a_realm)) {
-    std::string str = "AmrMesh::registerMask(mask, Realm, buffer) - could not find Realm '" + a_realm + "'";
+    const std::string str = "AmrMesh::registerMask(string, int, string) - could not find realm '" + a_realm + "'";
     MayDay::Abort(str.c_str());
   }
 
