@@ -127,7 +127,7 @@ CXXSTD         = 14
 #USE_COMPLEX   =
 USE_EB         = TRUE
 #USE_CCSE      =
-#USE_HDF       =
+USE_HDF        = FALSE
 #HDFINCFLAGS   = -I<hdf_serial_dir>/include
 #HDFLIBFLAGS   = -L<hdf_serial_dir>/lib -lhdf5 -lz
 ## Note: don't set the HDFMPI* variables if you don't have parallel HDF installed
