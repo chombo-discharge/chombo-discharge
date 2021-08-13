@@ -465,7 +465,7 @@ void ScanShop::printNumBoxesLevel(const int a_level){
 }
 
 void ScanShop::gatherBoxesParallel(Vector<Box>& a_boxes){
-
+#ifdef CH_MPI
   // 1. Linearize local boxes
   int send_size    = 2*CH_SPACEDIM;                 // Message size for one box
   int send_count   = a_boxes.size()*send_size;      // Number of elements sent from this rank
@@ -528,6 +528,7 @@ void ScanShop::gatherBoxesParallel(Vector<Box>& a_boxes){
 
   delete recv_buffer;
   delete send_buffer;
+#endif
 }
 
 #include <CD_NamespaceFooter.H>

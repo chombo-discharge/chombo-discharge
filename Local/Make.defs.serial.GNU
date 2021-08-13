@@ -114,11 +114,11 @@ DEBUG          = FALSE
 OPT            = HIGH
 PRECISION      = DOUBLE
 #PROFILE       =
-CXX            = g++-6
+CXX            = g++
 FC             = gfortran
-MPI            = FALSE
+#MPI           =
 ## Note: don't set the MPICXX variable if you don't have MPI installed
-#MPICXX         = mpicxx
+#MPICXX        =
 #OBJMODEL      =
 #XTRACONFIG    =
 ## Optional features
@@ -128,11 +128,11 @@ CXXSTD         = 14
 USE_EB         = TRUE
 #USE_CCSE      =
 USE_HDF        = FALSE
-#HDFINCFLAGS    = -I/usr/local/serial-hdf5-1.8.14/include
-#HDFLIBFLAGS    = -L/usr/local/serial-hdf5-1.8.14/lib -lhdf5 -lz
+#HDFINCFLAGS   = -I<hdf_serial_dir>/include
+#HDFLIBFLAGS   = -L<hdf_serial_dir>/lib -lhdf5 -lz
 ## Note: don't set the HDFMPI* variables if you don't have parallel HDF installed
-#HDFMPIINCFLAGS = -I/usr/local/hdf5-1.8.14/include
-#HDFMPILIBFLAGS = -L/usr/local/hdf5-1.8.14/lib -lhdf5 -lz
+#HDFMPIINCFLAGS= -I<hdf_parallel_dir>/include
+#HDFMPILIBFLAGS= -L<hdf_parallel_dir>/lib -lhdf5 -lz
 USE_MF         = TRUE
 #USE_MT        =
 #USE_SETVAL    =

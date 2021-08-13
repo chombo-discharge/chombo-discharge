@@ -135,13 +135,17 @@ void AdvectionDiffusionStepper::setVelocity(const int a_level){
 
 }
 
+#ifdef CH_USE_HDF5
 void AdvectionDiffusionStepper::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const {
   m_solver->writeCheckpointLevel(a_handle, a_lvl);
 }
+#endif
 
+#ifdef CH_USE_HDF5
 void AdvectionDiffusionStepper::readCheckpointData(HDF5Handle& a_handle, const int a_lvl){
   m_solver->readCheckpointLevel(a_handle, a_lvl);
 }
+#endif
 
 void AdvectionDiffusionStepper::postCheckpointSetup(){
   m_solver->setSource(0.0);

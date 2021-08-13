@@ -117,12 +117,16 @@ public:
   /*!
     @brief Write checkpoint data into handle
   */
+#ifdef CH_USE_HDF5
   virtual void writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const;
+#endif  
 
   /*!
     @brief Read checkpoint data from handle
   */
+#ifdef CH_USE_HDF5
   virtual void readCheckpointLevel(HDF5Handle& a_handle, const int a_level);
+#endif
 
   /*!
     @brief Write output data to a_output

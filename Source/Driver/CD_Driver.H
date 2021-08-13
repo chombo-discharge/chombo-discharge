@@ -494,12 +494,16 @@ protected:
   /*!
     @brief Read checkpoint file
   */
+#ifdef CH_USE_HDF5  
   void readCheckpointFile(const std::string& a_restartFile);
+#endif
 
   /*!
     @brief Read vector data up to and including a_step
   */
+#ifdef CH_USE_HDF5  
   void readVectorData(HDF5HeaderData& a_header, Vector<Real>& a_data, const std::string a_name, const int a_elements);
+#endif
 
   /*!
     @brief Do a regrid step. 
@@ -549,7 +553,9 @@ protected:
   /*!
     @brief Set for restart
   */
+#ifdef CH_USE_HDF5
   void setupForRestart(const int a_initialRegrids, const std::string a_restartFile);
+#endif
 
   /*!
     @brief Set up for geometry only
@@ -609,32 +615,44 @@ protected:
   /*!
     @brief Write checkpoint data
   */
+#ifdef CH_USE_HDF5
   void writeCheckpointLevel(HDF5Handle& a_handle, const int a_level);
-
+#endif
+  
   /*!
     @brief Write tags
   */
+#ifdef CH_USE_HDF5  
   void writeCheckpointTags(HDF5Handle& a_handle, const int a_level);
+#endif
 
   /*!
     @brief Write checkpoint Realm loads
   */
+#ifdef CH_USE_HDF5    
   void writeCheckpointRealmLoads(HDF5Handle& a_handle, const int a_level);
+#endif
 
   /*!
     @brief Write checkpoint data
   */
+#ifdef CH_USE_HDF5      
   void readCheckpointLevel(HDF5Handle& a_handle, const int a_level);
+#endif
 
   /*!
     @brief Read Realm loads. 
   */
+#ifdef CH_USE_HDF5        
   void readCheckpointRealmLoads(Vector<long int>& a_loads, HDF5Handle& a_handle, const std::string a_realm, const int a_level);
+#endif
 
   /*!
     @brief Write vector data to a HDF5Header. This writes up to a_step
   */
+#ifdef CH_USE_HDF5  
   void writeVectorData(HDF5HeaderData& a_header, const Vector<Real>& a_data, const std::string a_name, const int a_elem);
+#endif
 
   /*!
     @brief Write the geometry to file. 

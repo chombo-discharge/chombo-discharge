@@ -119,72 +119,72 @@ Real rk2::advance(const Real a_dt){
   }
 
   // Prepare for k1 advance
-  const Real t0 = MPI_Wtime();
+  const Real t0 = Timer::wallClock();
   this->compute_E_at_start_of_time_step();
-  const Real t00 = MPI_Wtime();
+  const Real t00 = Timer::wallClock();
   this->computeCdrVelo_at_start_of_time_step();
-  const Real t01 = MPI_Wtime();
+  const Real t01 = Timer::wallClock();
   this->computeCdrEbStates_at_start_of_time_step();
-  const Real t02 = MPI_Wtime();
+  const Real t02 = Timer::wallClock();
   this->compute_cdr_diffco_at_start_of_time_step();
-  const Real t03 = MPI_Wtime();
+  const Real t03 = Timer::wallClock();
   this->compute_cdr_sources_at_start_of_time_step();
-  const Real t04 = MPI_Wtime();
+  const Real t04 = Timer::wallClock();
   this->compute_cdr_fluxes_at_start_of_time_step();
-  const Real t05 = MPI_Wtime();
+  const Real t05 = Timer::wallClock();
   this->computeSigmaFlux_at_start_of_time_step();
 
   // Do k1 advance
-  const Real t1 = MPI_Wtime();
+  const Real t1 = Timer::wallClock();
   this->advance_cdr_k1(a_dt);
-  const Real t10 = MPI_Wtime();
+  const Real t10 = Timer::wallClock();
   this->advance_sigma_k1(a_dt);
-  const Real t11 = MPI_Wtime();
+  const Real t11 = Timer::wallClock();
   this->solve_poisson_k1();
-  const Real t12 = MPI_Wtime();
+  const Real t12 = Timer::wallClock();
   this->compute_E_after_k1();
-  const Real t13 = MPI_Wtime();
+  const Real t13 = Timer::wallClock();
   if(m_rte->isStationary()){
     this->advance_rte_k1_stationary(a_dt);
   }
   else{
     this->advance_rte_k1_transient(a_dt);
   }
-  const Real t14 = MPI_Wtime();
+  const Real t14 = Timer::wallClock();
 
   // Recompute things in order to do k2 advance
-  const Real t2 = MPI_Wtime();
+  const Real t2 = Timer::wallClock();
   this->computeCdrEbStates_after_k1();
-  const Real t20 = MPI_Wtime();
+  const Real t20 = Timer::wallClock();
   this->computeCdrVelo_after_k1(a_dt);
-  const Real t21 = MPI_Wtime();
+  const Real t21 = Timer::wallClock();
   this->compute_cdr_diffco_after_k1(a_dt);
-  const Real t22 = MPI_Wtime();
+  const Real t22 = Timer::wallClock();
   this->compute_cdr_sources_after_k1(a_dt);
-  const Real t23 = MPI_Wtime();
+  const Real t23 = Timer::wallClock();
   this->compute_cdr_fluxes_after_k1(a_dt);
-  const Real t24 = MPI_Wtime();
+  const Real t24 = Timer::wallClock();
   this->computeSigmaFlux_after_k1();
-  const Real t25 = MPI_Wtime();
+  const Real t25 = Timer::wallClock();
   
   // Do k2 advance
-  const Real t3 = MPI_Wtime();
-  const Real t30 = MPI_Wtime();
+  const Real t3 = Timer::wallClock();
+  const Real t30 = Timer::wallClock();
   this->advance_cdr_k2(a_dt);
-  const Real t31 = MPI_Wtime();
+  const Real t31 = Timer::wallClock();
   this->advance_sigma_k2(a_dt);
-  const Real t32 = MPI_Wtime();
+  const Real t32 = Timer::wallClock();
   this->solve_poisson_k2();
-  const Real t33 = MPI_Wtime();
+  const Real t33 = Timer::wallClock();
   this->compute_E_after_k2();
-  const Real t34 = MPI_Wtime();
+  const Real t34 = Timer::wallClock();
   if(m_rte->isStationary()){
     this->advance_rte_k2_stationary(a_dt);
   }
   else{
     this->advance_rte_k2_transient(a_dt);
   }
-  const Real t4 = MPI_Wtime();
+  const Real t4 = Timer::wallClock();
 
 #if RK2_DEBUG_TIMER
   pout() << endl;

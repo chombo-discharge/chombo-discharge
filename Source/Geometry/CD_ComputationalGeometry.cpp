@@ -114,6 +114,7 @@ void ComputationalGeometry::buildGeometries(const ProblemDomain   a_finestDomain
   }
 }
 
+#ifdef CH_USE_HDF5
 void ComputationalGeometry::buildGeometriesFromFiles(const std::string&   a_gas_file,
 						     const std::string&   a_sol_file){
 
@@ -134,6 +135,7 @@ void ComputationalGeometry::buildGeometriesFromFiles(const std::string&   a_gas_
     ebis_sol = RefCountedPtr<EBIndexSpace> (NULL);
   }
 }
+#endif
 
 void ComputationalGeometry::buildGasGeoServ(GeometryService*&   a_geoserver,
 					    const ProblemDomain a_finestDomain,

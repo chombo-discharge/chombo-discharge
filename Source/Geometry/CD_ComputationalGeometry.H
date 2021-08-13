@@ -124,8 +124,10 @@ public:
   /*!
     @brief Build geometries from files
   */
+#ifdef CH_USE_HDF5
   virtual void buildGeometriesFromFiles(const std::string&   a_gas_file,
 					const std::string&   a_sol_file);
+#endif
 
   /*!
     @brief Compute curvature of the implicit function

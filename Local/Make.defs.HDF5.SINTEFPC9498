@@ -127,9 +127,9 @@ CXXSTD         = 14
 #USE_COMPLEX   =
 USE_EB         = TRUE
 #USE_CCSE      =
-USE_HDF        = FALSE
-#HDFINCFLAGS    = -I/usr/local/serial-hdf5-1.8.14/include
-#HDFLIBFLAGS    = -L/usr/local/serial-hdf5-1.8.14/lib -lhdf5 -lz
+USE_HDF        = TRUE
+HDFINCFLAGS    = -I/usr/local/serial-hdf5-1.8.14/include
+HDFLIBFLAGS    = -L/usr/local/serial-hdf5-1.8.14/lib -lhdf5 -lz
 ## Note: don't set the HDFMPI* variables if you don't have parallel HDF installed
 #HDFMPIINCFLAGS = -I/usr/local/hdf5-1.8.14/include
 #HDFMPILIBFLAGS = -L/usr/local/hdf5-1.8.14/lib -lhdf5 -lz

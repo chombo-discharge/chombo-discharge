@@ -20,6 +20,7 @@
 #include <CD_CdrIterator.H>
 #include <CD_RtIterator.H>
 #include <CD_Units.H>
+#include <CD_Timer.H>
 #include <CD_NamespaceHeader.H>
 
 // C-style VLA methods can have occasional memory issues. Use them at your own peril. 
@@ -3989,7 +3990,7 @@ Real CdrPlasmaStepper::computeRelaxationTime(){
   const int finest_level = 0;
   const Real SAFETY      = 1.E-20;
 
-  Real t1 = MPI_Wtime();
+  Real t1 = Timer::wallClock();
   EBAMRCellData E, J, dt;
   m_amr->allocate(E,  m_realm, m_cdr->getPhase(), SpaceDim);
   m_amr->allocate(J,  m_realm, m_cdr->getPhase(), SpaceDim);
@@ -4089,7 +4090,7 @@ RefCountedPtr<SigmaSolver>& CdrPlasmaStepper::getSigmaSolver(){
   return m_sigma;
 }
 
-// New functions for Driver
+#ifdef CH_USE_HDF5
 void CdrPlasmaStepper::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const{
   CH_TIME("Driver::writeCheckpointData");
   if(m_verbosity > 3){
@@ -4111,7 +4112,9 @@ void CdrPlasmaStepper::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl
   m_fieldSolver->writeCheckpointLevel(a_handle, a_lvl);
   m_sigma->writeCheckpointLevel(a_handle, a_lvl);
 }
+#endif
 
+#ifdef CH_USE_HDF5
 void CdrPlasmaStepper::readCheckpointData(HDF5Handle& a_handle, const int a_lvl){
   CH_TIME("Driver::readCheckpointData");
   if(m_verbosity > 3){
@@ -4131,6 +4134,7 @@ void CdrPlasmaStepper::readCheckpointData(HDF5Handle& a_handle, const int a_lvl)
   m_fieldSolver->readCheckpointLevel(a_handle, a_lvl);
   m_sigma->readCheckpointLevel(a_handle, a_lvl);
 }
+#endif
 
 int CdrPlasmaStepper::getNumberOfPlotVariables() const{
   CH_TIME("CdrPlasmaStepper::getNumberOfPlotVariables");

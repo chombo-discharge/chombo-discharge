@@ -12,6 +12,7 @@
 // Chombo includes
 #include <ParmParse.H>
 #include <BRMeshRefine.H>
+#include <LoadBalance.H>
 
 // Our includes
 #include <CD_MFHelmholtzOpFactory.H>

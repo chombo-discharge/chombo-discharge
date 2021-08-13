@@ -116,9 +116,9 @@ PRECISION      = DOUBLE
 #PROFILE       =
 CXX            = g++-6
 FC             = gfortran
-MPI            = FALSE
+MPI            = TRUE	
 ## Note: don't set the MPICXX variable if you don't have MPI installed
-#MPICXX         = mpicxx
+MPICXX         = mpicxx
 #OBJMODEL      =
 #XTRACONFIG    =
 ## Optional features
