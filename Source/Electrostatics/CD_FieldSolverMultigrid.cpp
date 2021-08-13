@@ -148,7 +148,9 @@ void FieldSolverMultigrid::allocateInternals(){
   m_amr->allocate(m_kappaRhoByEps0, m_realm,             m_nComp);
   m_amr->allocate(m_sigmaByEps0,    m_realm, phase::gas, m_nComp);
 
-  DataOps::setValue(m_zero, 0.0);
+  DataOps::setValue(m_zero,           0.0);
+  DataOps::setValue(m_kappaRhoByEps0, 0.0);
+  DataOps::setValue(m_sigmaByEps0,    0.0);
 }
 
 bool FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
@@ -159,6 +161,8 @@ bool FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
   if(m_verbosity > 5){
     pout() << "FieldSolverMultigrid::solve(mfamrcell, mfamrcell)" << endl;
   }
+
+  this->writePlotFile();
 
   // TLDR: The operator factory was set up as kappa*L(phi) = -kappa*div(eps*grad(phi)) which we use to solve the Poisson equation
   //       div(eps*grad(phi)) = -rho/eps0. 
@@ -179,6 +183,11 @@ bool FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
   if(m_kappaSource){ 
     DataOps::kappaScale(m_kappaRhoByEps0);
   }
+
+  m_amr->averageDown(a_phi, m_realm);
+  m_amr->averageDown(m_kappaRhoByEps0, m_realm);
+  m_amr->interpGhost(m_kappaRhoByEps0, m_realm);
+  m_amr->interpGhost(a_phi, m_realm);
   
   // Do the scaled surface charge
   DataOps::copy (m_sigmaByEps0, a_sigma);

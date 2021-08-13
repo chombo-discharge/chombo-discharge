@@ -46,16 +46,16 @@ Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeomet
   m_amr->sanityCheck();                 // Sanity check, make sure everything is set up correctly
   m_amr->buildDomains();                // Build domains and resolutions, nothing else
 
+  // Ok we're ready to go. 
+  m_timeStep      = 0;
+  m_time          = 0.0;
+  m_dt            = 0.0;  
+
   // Parse some class options
   parseOptions();
 
   // Create output directories. 
   createOutputDirectories();
-
-  // Ok we're ready to go. 
-  m_timeStep          = 0;
-  m_time          = 0.0;
-  m_dt            = 0.0;
 
   // Always register this Realm and these operators. 
   m_realm = Realm::Primal;
@@ -603,9 +603,15 @@ void Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialD
 
   const Real start_time = MPI_Wtime();   // Timer
 
-  const bool got_new_tags = this->tagCells(tags, m_tags); // Tag cells
+  // We are allowing geometric tags to change under the hood, but we need a method for detecting if they changed. If they did,
+  // we certainly have to regrid.
+  if(m_needsNewGeometricTags){
+    this->getGeometryTags();
+  }
 
-  if(!got_new_tags){
+  const bool newCellTags = this->tagCells(tags, m_tags); // Tag cells using the cell tagger
+
+  if(!newCellTags && !m_needsNewGeometricTags){
     if(a_useInitialData){
       m_timeStepper->initialData();
     }
@@ -678,6 +684,7 @@ void Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialD
 		       solver_regrid - base_regrid);
   }
 
+  m_needsNewGeometricTags = false;
 }
 
 void Driver::regridInternals(const int a_oldFinestLevel, const int a_newFinestLevel){
@@ -1038,7 +1045,8 @@ void Driver::parseRuntimeOptions(){
   pp.get("allow_coarsening",         m_allowCoarsening);
   pp.get("max_steps",                m_maxSteps);
   pp.get("stop_time",                m_stopTime);
-  
+
+  this->parseGeometryRefinement();  
   this->parsePlotVariables();
   this->parseIrregTagGrowth();  
 }
@@ -1106,6 +1114,19 @@ void Driver::parseGeometryRefinement(){
 
   const int max_depth = m_amr->getMaxAmrDepth();
 
+  // These are special options. We are allowing geometry refinement criteria to change as simulations progress (i.e. m_timeStep > 0) where we call
+  // this routine again. But we need something to tell us that we got new refinement criteria for geometric tags so we can avoid regrid if they didn't change.
+  // This is my clunky way of doing that. 
+  
+  const auto c1 = m_refineCurvature;
+  const auto c2 = m_conductorTagsDepth;
+  const auto c3 = m_dielectricTagsDepth;
+  const auto c4 = m_gasConductorInterfaceTagDepth;
+  const auto c5 = m_gasDielectricInterfaceTagDepth;
+  const auto c6 = m_gasSolidInterfaceTagDepth;
+  const auto c7 = m_solidSolidInterfaceTagDepth;
+
+
   int depth0;
 
   pp.get("refine_curvature",                m_refineCurvature);
@@ -1124,6 +1145,22 @@ void Driver::parseGeometryRefinement(){
   m_gasDielectricInterfaceTagDepth  = (m_gasDielectricInterfaceTagDepth < 0) ? depth0 : m_gasDielectricInterfaceTagDepth;
   m_gasSolidInterfaceTagDepth       = (m_gasSolidInterfaceTagDepth      < 0) ? depth0 : m_gasSolidInterfaceTagDepth;
   m_solidSolidInterfaceTagDepth     = (m_solidSolidInterfaceTagDepth    < 0) ? depth0 : m_solidSolidInterfaceTagDepth;
+
+  if(m_timeStep > 0){ // Simulation is already running, and we need to check if we need new geometric tags for regridding. 
+    if(c1 != m_refineCurvature                ||
+       c2 != m_conductorTagsDepth             ||
+       c3 != m_dielectricTagsDepth            ||
+       c4 != m_gasConductorInterfaceTagDepth  ||
+       c5 != m_gasDielectricInterfaceTagDepth ||
+       c6 != m_gasSolidInterfaceTagDepth      ||
+       c7 != m_solidSolidInterfaceTagDepth){
+      
+      m_needsNewGeometricTags = true;
+    }
+  }
+  else{ // Fresh simulation -- we should have gotten geometric tags before entering regrid so we can set this to false. 
+    m_needsNewGeometricTags = false;
+  }
 }
 
 void Driver::createOutputDirectories(){
@@ -2416,6 +2453,7 @@ void Driver::readCheckpointFile(const std::string& a_restartFile){
   // Instantiate solvers and register operators
   m_timeStepper->setupSolvers();
   m_timeStepper->registerOperators();
+  m_timeStepper->synchronizeSolverTimes(m_timeStep, m_time, m_dt);  
   m_amr->regridOperators(base_level);
   m_timeStepper->allocate();
 

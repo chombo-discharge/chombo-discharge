@@ -65,7 +65,7 @@ void FieldSolver::setDataLocation(const Location::Cell a_dataLocation){
     break;
   }
   case Location::Cell::Centroid:{
-    MayDay::Error("FieldSolver::setDataLocation - centroid discretization is not yet fully supported (due to the multigrid interpolator)");
+    MayDay::Error("FieldSolver::setDataLocation - centroid discretization is not yet fully supported in chombo-discharge");
     
     m_dataLocation = a_dataLocation;
     m_faceLocation = Location::Face::Centroid;
@@ -156,6 +156,9 @@ void FieldSolver::allocateInternals(){
   DataOps::setValue(m_sigma,         0.0);
   DataOps::setValue(m_residue,       0.0);
   DataOps::setValue(m_electricField, 0.0);
+
+  // Set permittivities
+  this->setPermittivities();  
 }
 
 void FieldSolver::preRegrid(const int a_lbase, const int a_oldFinestLevel){
@@ -935,8 +938,8 @@ void FieldSolver::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) 
   if(!ebisSol.isNull()) MultifluidAlias::aliasMF(potentialSol,  phase::solid, *m_potential[a_level]);
   
   // Write data
-  if(!ebisGas.isNull()) write(a_handle, potentialGas, "poisson_g");
-  if(!ebisSol.isNull()) write(a_handle, potentialSol, "poisson_s");
+  if(!ebisGas.isNull()) write(a_handle, potentialGas, "FieldSolver::m_potential(gas)"  );
+  if(!ebisSol.isNull()) write(a_handle, potentialSol, "FieldSolver::m_potential(solid)");
 }
 
 void FieldSolver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
@@ -945,8 +948,8 @@ void FieldSolver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
     pout() << "FieldSolver::readCheckpointLevel" << endl;
   }
 
-  const RefCountedPtr<EBIndexSpace> ebisGas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebisSol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
+  const RefCountedPtr<EBIndexSpace>& ebisGas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
+  const RefCountedPtr<EBIndexSpace>& ebisSol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
 
   // Used for aliasing phases
   LevelData<EBCellFAB> potentialGas;
@@ -956,8 +959,8 @@ void FieldSolver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
   if(!ebisSol.isNull()) MultifluidAlias::aliasMF(potentialSol,  phase::solid, *m_potential[a_level]);
   
   // Read data
-  if(!ebisGas.isNull()) read<EBCellFAB>(a_handle, potentialGas, "poisson_g", m_amr->getGrids(m_realm)[a_level], Interval(0,0), false);
-  if(!ebisSol.isNull()) read<EBCellFAB>(a_handle, potentialSol, "poisson_s", m_amr->getGrids(m_realm)[a_level], Interval(0,0), false);
+  if(!ebisGas.isNull()) read<EBCellFAB>(a_handle, potentialGas, "FieldSolver::m_potential(gas)",   m_amr->getGrids(m_realm)[a_level], Interval(0,0), false);
+  if(!ebisSol.isNull()) read<EBCellFAB>(a_handle, potentialSol, "FieldSolver::m_potential(solid)", m_amr->getGrids(m_realm)[a_level], Interval(0,0), false);
 }
 
 void FieldSolver::postCheckpoint(){
