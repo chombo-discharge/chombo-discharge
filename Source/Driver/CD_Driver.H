@@ -325,6 +325,12 @@ protected:
   Real m_refineCurvature;
 
   /*!
+    @brief Special option for when geometric tags are changed during a simulation. 
+    @details This becomes = true in parseGeometryRefinement every time the geometric refinement criteria changed, and it always becomes false after a regrid. 
+  */
+  bool m_needsNewGeometricTags;
+
+  /*!
     @brief Write regrid files or not
   */
   bool m_writeRegridFiles;
