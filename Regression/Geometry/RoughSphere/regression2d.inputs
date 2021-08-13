@@ -54,7 +54,7 @@ Driver.plt_vars                        = mpi_rank levelset # 'tags', 'mpi_rank',
 Driver.restart                         = 0             # Restart step (less or equal to 0 implies fresh simulation)
 Driver.allow_coarsening                = true          # Allows removal of grid levels according to CellTagger
 Driver.grow_geo_tags                   = 2                # How much to grow tags when using geometry-based refinement. 
-Driver.refine_curvature                = 10.              # Curvature based refinement. Refines cells if curvature*dx*this > 1
+Driver.refine_angles                   = 30.              # Refine cells if angle between elements exceed this value.
 Driver.refine_geometry                 = -1            # Refine geometry, -1 => Refine all the way down
 Driver.refine_electrodes               = -1            # Refine electrode surfaces. -1 => equal to refine_geometry
 Driver.refine_dielectrics              = -1            # Refine dielectric surfaces. -1 => equal to refine_geometry
