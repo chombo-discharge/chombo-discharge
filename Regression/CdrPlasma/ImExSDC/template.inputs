@@ -31,7 +31,6 @@ AmrMesh.centroid_sten   = linear      # Centroid interp stencils. 'pwl', 'linear
 AmrMesh.eb_sten         = pwl         # EB interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
 AmrMesh.redist_radius   = 1           # Redistribution radius for hyperbolic conservation laws
 AmrMesh.load_balance    = volume      # Load balancing algorithm. Valid options are 'volume' or 'elliptic'
-AmrMesh.ebcf            = true        # If you have EBCF crossing, this must be true. 
 
 # ====================================================================================================
 # DRIVER OPTIONS
@@ -95,7 +94,6 @@ FieldSolverMultigrid.gmg_bc_weight     = 2         # Boundary condition weights 
 FieldSolverMultigrid.gmg_jump_order    = 2         # Boundary condition order for jump conditions
 FieldSolverMultigrid.gmg_jump_weight   = 2         # Boundary condition weight for jump conditions (for least squares)
 FieldSolverMultigrid.gmg_bottom_solver = bicgstab  # Bottom solver type. 'simple', 'bicgstab', or 'gmres'
-FieldSolverMultigrid.gmg_bottom_relax  = 32        # Number of relaxations in bottom solve ('simple' solver only)
 FieldSolverMultigrid.gmg_cycle         = vcycle    # Cycle type. Only 'vcycle' supported for now
 FieldSolverMultigrid.gmg_smoother      = red_black # Relaxation type. 'jacobi', 'multi_color', or 'red_black'
 
@@ -125,7 +123,6 @@ CdrGodunov.gmg_exit_tol         = 1.E-8                   # Residue tolerance
 CdrGodunov.gmg_exit_hang        = 0.2                     # Solver hang
 CdrGodunov.gmg_min_cells        = 2                       # Bottom drop
 CdrGodunov.gmg_bottom_solver    = bicgstab                # Bottom solver type. Valid options are 'simple' and 'bicgstab'
-CdrGodunov.gmg_bottom_relax     = 8                       # Number of relaxations in bottom solve ('simple' solver only)
 CdrGodunov.gmg_cycle            = vcycle                  # Cycle type. Only 'vcycle' supported for now
 CdrGodunov.gmg_smoother          = red_black               # Relaxation type. 'jacobi', 'multi_color', or 'red_black'
 
@@ -148,7 +145,6 @@ EddingtonSP1.gmg_exit_tol        = 1.E-6     # Residue tolerance
 EddingtonSP1.gmg_exit_hang       = 0.2       # Solver hang
 EddingtonSP1.gmg_min_cells       = 2         # Bottom drop
 EddingtonSP1.gmg_bottom_solver   = bicgstab     # Bottom solver type. Valid options are 'simple <number>' and 'bicgstab'
-EddingtonSP1.gmg_bottom_relax    = 8         # Number of relaxations in bottom solve ('simple' solver only)
 EddingtonSP1.gmg_cycle           = vcycle    # Cycle type. Only 'vcycle' supported for now
 EddingtonSP1.gmg_ebbc_weight     = 2            # EBBC weight (only for Dirichlet)
 EddingtonSP1.gmg_ebbc_order      = 2            # EBBC order (only for Dirichlet)

@@ -24,6 +24,5 @@ CdrGodunov.gmg_exit_tol          = 1.E-8                   # Residue tolerance
 CdrGodunov.gmg_exit_hang         = 0.2                     # Solver hang
 CdrGodunov.gmg_min_cells         = 2                       # Bottom drop
 CdrGodunov.gmg_bottom_solver     = bicgstab                # Bottom solver type. Valid options are 'simple' and 'bicgstab'
-CdrGodunov.gmg_bottom_relax      = 8                       # Number of relaxations in bottom solve ('simple' solver only)
 CdrGodunov.gmg_cycle             = vcycle                  # Cycle type. Only 'vcycle' supported for now
 CdrGodunov.gmg_smoother          = red_black               # Relaxation type. 'jacobi', 'multi_color', or 'red_black'
