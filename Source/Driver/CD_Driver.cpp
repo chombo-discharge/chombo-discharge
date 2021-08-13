@@ -1144,7 +1144,7 @@ void Driver::parseGeometryRefinement(){
 
   int depth0;
 
-  pp.get("refine_curvature",                m_refineAngle);
+  pp.get("refine_angles",                   m_refineAngle);
   pp.get("refine_geometry",                 depth0);
   pp.get("refine_electrodes",               m_conductorTagsDepth);
   pp.get("refine_dielectrics",              m_dielectricTagsDepth);
