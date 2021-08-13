@@ -2416,6 +2416,7 @@ void Driver::readCheckpointFile(const std::string& a_restartFile){
   // Instantiate solvers and register operators
   m_timeStepper->setupSolvers();
   m_timeStepper->registerOperators();
+  m_timeStepper->synchronizeSolverTimes(m_timeStep, m_time, m_dt);  
   m_amr->regridOperators(base_level);
   m_timeStepper->allocate();
 

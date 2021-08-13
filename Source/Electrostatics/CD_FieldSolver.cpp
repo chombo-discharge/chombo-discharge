@@ -65,7 +65,7 @@ void FieldSolver::setDataLocation(const Location::Cell a_dataLocation){
     break;
   }
   case Location::Cell::Centroid:{
-    MayDay::Error("FieldSolver::setDataLocation - centroid discretization is not yet fully supported (due to the multigrid interpolator)");
+    MayDay::Error("FieldSolver::setDataLocation - centroid discretization is not yet fully supported in chombo-discharge");
     
     m_dataLocation = a_dataLocation;
     m_faceLocation = Location::Face::Centroid;
@@ -156,6 +156,9 @@ void FieldSolver::allocateInternals(){
   DataOps::setValue(m_sigma,         0.0);
   DataOps::setValue(m_residue,       0.0);
   DataOps::setValue(m_electricField, 0.0);
+
+  // Set permittivities
+  this->setPermittivities();  
 }
 
 void FieldSolver::preRegrid(const int a_lbase, const int a_oldFinestLevel){
@@ -945,8 +948,8 @@ void FieldSolver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
     pout() << "FieldSolver::readCheckpointLevel" << endl;
   }
 
-  const RefCountedPtr<EBIndexSpace> ebisGas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
-  const RefCountedPtr<EBIndexSpace> ebisSol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
+  const RefCountedPtr<EBIndexSpace>& ebisGas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
+  const RefCountedPtr<EBIndexSpace>& ebisSol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
 
   // Used for aliasing phases
   LevelData<EBCellFAB> potentialGas;
