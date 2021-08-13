@@ -320,9 +320,9 @@ protected:
   Real m_wallClockTwo;
 
   /*!
-    @brief Curvature refinement threshold (multiple of dx)
+    @brief Angle refinement threshold
   */
-  Real m_refineCurvature;
+  Real m_refineAngle;
 
   /*!
     @brief Special option for when geometric tags are changed during a simulation. 

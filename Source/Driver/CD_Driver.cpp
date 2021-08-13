@@ -14,6 +14,7 @@
 
 // Chombo includes
 #include <EBArith.H>
+#include <PolyGeom.H>
 #include <EBAlias.H>
 #include <LevelData.H>
 #include <EBCellFAB.H>
@@ -23,6 +24,7 @@
 
 // Our includes
 #include <CD_Driver.H>
+#include <CD_VofUtils.H>
 #include <CD_DataOps.H>
 #include <CD_MultifluidAlias.H>
 #include <CD_Units.H>
@@ -260,30 +262,43 @@ void Driver::getGeometryTags(){
     m_geomTags[lvl] |= solid_tags;
 
 
-    // Evaluate curvature of the level-set function in the cut-cells. 
+    // Evaluate angles between cut-cells and refine based on that. 
     DisjointBoxLayout irregGrids = ebis_gas->getIrregGrids(cur_dom);
     EBISLayout ebisl;
-    ebis_gas->fillEBISLayout(ebisl, irregGrids, cur_dom, 0);
+    ebis_gas->fillEBISLayout(ebisl, irregGrids, cur_dom, 1); // Need one ghost cell because we fetch neighboring vofs. 
 
     const Real dx         = m_amr->getDx()[lvl];
     const RealVect probLo = m_amr->getProbLo();
     
     for (DataIterator dit(irregGrids); dit.ok(); ++dit){
       const Box box = irregGrids[dit()];
+
       const EBISBox& ebisbox = ebisl[dit()];
       const EBGraph& ebgraph = ebisbox.getEBGraph();
       const IntVectSet irreg = ebisbox.getIrregIVS(box);
 
       for (VoFIterator vofit(irreg, ebgraph); vofit.ok(); ++vofit){
-	const VolIndex& vof = vofit();
-	const IntVect iv = vof.gridIndex();
+	const VolIndex& vof    = vofit();
+	const IntVect   iv     = vof.gridIndex();
+	const RealVect  normal = ebisbox.normal(vof);
 	
-	const RealVect pos = probLo + (0.5*RealVect::Unit + RealVect(iv))*dx + ebisbox.bndryCentroid(vof)*dx;
+	// Check the angle between the normal vector in this irregular cell and neighboring irregular cells. If the
+	// angle exceeds a specified threshold the cell is refined. 
+	const Vector<VolIndex> otherVofs = VofUtils::getVofsInRadius(vof, ebisbox, 1, VofUtils::Connectivity::MonotonePath, false);
 
-	const std::pair<Real, Real> curv = m_computationalGeometry->getPrincipalCurvatures(phase::gas, pos, 1.E-4*dx);
+	for (int i = 0; i < otherVofs.size(); i++){
+	  const VolIndex& curVof = otherVofs[i];
 
-	// First entry in curv is the smallest. 
-	if(std::abs(curv.first)*m_refineCurvature*dx >= 1.0 ) m_geomTags[lvl] |= iv;
+	  if(ebisbox.isIrregular(curVof.gridIndex())){ // Only check irregular cells
+	    constexpr Real degreesPerRadian = 180.0/Units::pi;
+	    const RealVect curNormal = ebisbox.normal(curVof);
+	    const Real cosAngle      = PolyGeom::dot(normal, curNormal)/(normal.vectorLength()*curNormal.vectorLength());
+	    const Real theta         = acos(cosAngle)*degreesPerRadian;
+
+	    // Refine if angle exceeds threshold
+	    if(std::abs(theta) > m_refineAngle) m_geomTags[lvl] |= iv;
+	  }
+	}
       }
     }
   }
@@ -1118,7 +1133,7 @@ void Driver::parseGeometryRefinement(){
   // this routine again. But we need something to tell us that we got new refinement criteria for geometric tags so we can avoid regrid if they didn't change.
   // This is my clunky way of doing that. 
   
-  const auto c1 = m_refineCurvature;
+  const auto c1 = m_refineAngle;
   const auto c2 = m_conductorTagsDepth;
   const auto c3 = m_dielectricTagsDepth;
   const auto c4 = m_gasConductorInterfaceTagDepth;
@@ -1129,7 +1144,7 @@ void Driver::parseGeometryRefinement(){
 
   int depth0;
 
-  pp.get("refine_curvature",                m_refineCurvature);
+  pp.get("refine_angles",                   m_refineAngle);
   pp.get("refine_geometry",                 depth0);
   pp.get("refine_electrodes",               m_conductorTagsDepth);
   pp.get("refine_dielectrics",              m_dielectricTagsDepth);
@@ -1147,7 +1162,7 @@ void Driver::parseGeometryRefinement(){
   m_solidSolidInterfaceTagDepth     = (m_solidSolidInterfaceTagDepth    < 0) ? depth0 : m_solidSolidInterfaceTagDepth;
 
   if(m_timeStep > 0){ // Simulation is already running, and we need to check if we need new geometric tags for regridding. 
-    if(c1 != m_refineCurvature                ||
+    if(c1 != m_refineAngle                    ||
        c2 != m_conductorTagsDepth             ||
        c3 != m_dielectricTagsDepth            ||
        c4 != m_gasConductorInterfaceTagDepth  ||
