@@ -14,6 +14,7 @@
 
 // Our includes
 #include <CD_ItoPlasmaGodunovStepper.H>
+#include <CD_Timer.H>
 #include <CD_DataOps.H>
 #include <CD_Units.H>
 #include <CD_NamespaceHeader.H>
@@ -351,8 +352,8 @@ Real ItoPlasmaGodunovStepper::advance(const Real a_dt) {
   
   // Particle algorithms
   MPI_Barrier(Chombo_MPI::comm);
-  total_time     = -MPI_Wtime();
-  particle_time -= MPI_Wtime();
+  total_time     = -Timer::wallClock();
+  particle_time -= Timer::wallClock();
   switch(m_algorithm){
   case which_algorithm::euler_maruyama:
     this->advanceParticlesEulerMaruyama(a_dt);
@@ -363,20 +364,20 @@ Real ItoPlasmaGodunovStepper::advance(const Real a_dt) {
   default:
     MayDay::Abort("ItoPlasmaGodunovStepper::advance - logic bust");
   }
-  particle_time += MPI_Wtime();
+  particle_time += Timer::wallClock();
 
   // Compute current and relaxation time.
   MPI_Barrier(Chombo_MPI::comm);
-  relax_time = -MPI_Wtime();
+  relax_time = -Timer::wallClock();
   this->computeJ(m_J, a_dt);
   m_dt_relax = this->computeRelaxationTime(); // This is for the restricting the next step.
-  relax_time += MPI_Wtime();
+  relax_time += Timer::wallClock();
 
   // Move Photons
   MPI_Barrier(Chombo_MPI::comm);
-  Photon_time = -MPI_Wtime();
+  Photon_time = -Timer::wallClock();
   this->advancePhotons(a_dt);
-  Photon_time += MPI_Wtime();
+  Photon_time += Timer::wallClock();
 
   // If we are using the LEA, we must compute the Ohmic heating term. This must be done
   // BEFORE sorting the particles per cell. 
@@ -386,61 +387,61 @@ Real ItoPlasmaGodunovStepper::advance(const Real a_dt) {
   
   // Sort the particles and Photons per cell so we can call reaction algorithms
   MPI_Barrier(Chombo_MPI::comm);
-  sort_time = -MPI_Wtime();
+  sort_time = -Timer::wallClock();
   m_ito->sortParticlesByCell(ItoSolver::WhichContainer::bulk);
   this->sortPhotonsByCell(McPhoto::WhichContainer::Bulk);
   this->sortPhotonsByCell(McPhoto::WhichContainer::Source);
-  sort_time += MPI_Wtime();
+  sort_time += Timer::wallClock();
 
   // Chemistry kernel.
   MPI_Barrier(Chombo_MPI::comm);
-  reaction_time = -MPI_Wtime();
+  reaction_time = -Timer::wallClock();
   this->advanceReactionNetwork(a_dt);
-  reaction_time += MPI_Wtime();
+  reaction_time += Timer::wallClock();
 
   // Make superparticles. 
   MPI_Barrier(Chombo_MPI::comm);
-  super_time = -MPI_Wtime();
+  super_time = -Timer::wallClock();
   if((m_timeStep+1) % m_merge_interval == 0 && m_merge_interval > 0){
     m_ito->makeSuperparticles(ItoSolver::WhichContainer::bulk, m_ppc);
   }
-  super_time += MPI_Wtime();
+  super_time += Timer::wallClock();
 
   // Sort particles per patch.
   MPI_Barrier(Chombo_MPI::comm);
-  sort_time -= MPI_Wtime();
+  sort_time -= Timer::wallClock();
   m_ito->sortParticlesByPatch(ItoSolver::WhichContainer::bulk);
   this->sortPhotonsByPatch(McPhoto::WhichContainer::Bulk);
   this->sortPhotonsByPatch(McPhoto::WhichContainer::Source);
-  sort_time += MPI_Wtime();
+  sort_time += Timer::wallClock();
 
   // Clear other data holders for now. BC comes later...
   MPI_Barrier(Chombo_MPI::comm);
-  clear_time = -MPI_Wtime();
+  clear_time = -Timer::wallClock();
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     solver_it()->clear(ItoSolver::WhichContainer::eb);
     solver_it()->clear(ItoSolver::WhichContainer::domain);
   }
-  clear_time += MPI_Wtime();
+  clear_time += Timer::wallClock();
 
   //
   MPI_Barrier(Chombo_MPI::comm);
-  deposit_time -= MPI_Wtime();
+  deposit_time -= Timer::wallClock();
   m_ito->depositParticles();
-  deposit_time += MPI_Wtime();
+  deposit_time += Timer::wallClock();
 
   // Prepare next step
   MPI_Barrier(Chombo_MPI::comm);
-  velo_time -= MPI_Wtime();
+  velo_time -= Timer::wallClock();
   this->computeItoVelocities();
-  velo_time += MPI_Wtime();
+  velo_time += Timer::wallClock();
 
   MPI_Barrier(Chombo_MPI::comm);
-  diff_time -= MPI_Wtime();
+  diff_time -= Timer::wallClock();
   this->computeItoDiffusion();
-  diff_time += MPI_Wtime();
+  diff_time += Timer::wallClock();
 
-  total_time += MPI_Wtime();
+  total_time += Timer::wallClock();
 
   if(m_profile){
 
@@ -591,35 +592,35 @@ void ItoPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLeve
   Real total_time = 0.0;
 
   // Regrid solvers
-  total_time -= MPI_Wtime();
-  ito_time -= MPI_Wtime();
+  total_time -= Timer::wallClock();
+  ito_time -= Timer::wallClock();
   m_ito->regrid(a_lmin,     a_oldFinestLevel, a_newFinestLevel);
-  ito_time += MPI_Wtime();
+  ito_time += Timer::wallClock();
   
   MPI_Barrier(Chombo_MPI::comm);
-  poisson_time -= MPI_Wtime();
+  poisson_time -= Timer::wallClock();
   m_fieldSolver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
-  poisson_time += MPI_Wtime();
+  poisson_time += Timer::wallClock();
 
   MPI_Barrier(Chombo_MPI::comm);
-  rte_time -= MPI_Wtime();
+  rte_time -= Timer::wallClock();
   m_rte->regrid(a_lmin,     a_oldFinestLevel, a_newFinestLevel);
-  rte_time += MPI_Wtime();
+  rte_time += Timer::wallClock();
 
   MPI_Barrier(Chombo_MPI::comm);
-  sigma_time -= MPI_Wtime();
+  sigma_time -= Timer::wallClock();
   m_sigma->regrid(a_lmin,   a_oldFinestLevel, a_newFinestLevel);
-  sigma_time += MPI_Wtime();
+  sigma_time += Timer::wallClock();
 
   // Allocate internal memory for ItoPlasmaGodunovStepper now....
   MPI_Barrier(Chombo_MPI::comm);
-  internal_time -= MPI_Wtime();
+  internal_time -= Timer::wallClock();
   this->allocateInternals();
-  internal_time += MPI_Wtime();
+  internal_time += Timer::wallClock();
 
   // We need to remap/regrid the stored particles as well.
   MPI_Barrier(Chombo_MPI::comm);
-  gdnv_time -= MPI_Wtime();
+  gdnv_time -= Timer::wallClock();
   const Vector<DisjointBoxLayout>& grids = m_amr->getGrids(m_particleRealm);
   const Vector<ProblemDomain>& domains   = m_amr->getDomains();
   const Vector<Real>& dx                 = m_amr->getDx();
@@ -630,46 +631,46 @@ void ItoPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLeve
     m_rho_dagger_particles[idx]->regrid(  grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
     m_conductivity_particles[idx]->regrid(grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
   }
-  gdnv_time += MPI_Wtime();
+  gdnv_time += Timer::wallClock();
   
   // Recompute the conductivity and space charge densities.
   MPI_Barrier(Chombo_MPI::comm);
-  setup_time -= MPI_Wtime();
+  setup_time -= Timer::wallClock();
   this->computeRegridConductivity();
   this->computeRegridRho();
   this->setupSemiImplicitPoisson(m_prevDt);
-  setup_time += MPI_Wtime();
+  setup_time += Timer::wallClock();
 
   MPI_Barrier(Chombo_MPI::comm);
-  solve_time -= MPI_Wtime();
+  solve_time -= Timer::wallClock();
   const bool converged = this->solvePoisson();
   if(!converged){
     MayDay::Abort("ItoPlasmaGodunovStepper::regrid - Poisson solve did not converge after regrid!!!");
   }
-  solve_time += MPI_Wtime();
+  solve_time += Timer::wallClock();
 
   // Regrid superparticles.
   MPI_Barrier(Chombo_MPI::comm);
-  super_time -= MPI_Wtime();
+  super_time -= Timer::wallClock();
   if(m_regrid_superparticles){
     m_ito->sortParticlesByCell( ItoSolver::WhichContainer::bulk);
     m_ito->makeSuperparticles(    ItoSolver::WhichContainer::bulk, m_ppc);
     m_ito->sortParticlesByPatch(ItoSolver::WhichContainer::bulk);
   }
-  super_time += MPI_Wtime();
+  super_time += Timer::wallClock();
 
   // Now let the ito solver deposit its actual particles... In the above it deposit m_rho_dagger_particles.
   MPI_Barrier(Chombo_MPI::comm);
-  cleanup_time -= MPI_Wtime();
+  cleanup_time -= Timer::wallClock();
   m_ito->depositParticles();
 
   // Recompute new velocities and diffusion coefficients
   this->computeItoVelocities();
   this->computeItoDiffusion();
-  cleanup_time += MPI_Wtime();
+  cleanup_time += Timer::wallClock();
 
   MPI_Barrier(Chombo_MPI::comm);
-  total_time += MPI_Wtime();
+  total_time += Timer::wallClock();
 
   if(m_profile){
 
@@ -1165,92 +1166,92 @@ void ItoPlasmaGodunovStepper::advanceParticlesEulerMaruyama(const Real a_dt){
   Real totalTime = 0.0;
 
 
-  totalTime -= MPI_Wtime();
+  totalTime -= Timer::wallClock();
 
   m_prevDt = a_dt; // Needed for regrids.
 
   // 1. Store X^k positions.
   MPI_Barrier(Chombo_MPI::comm);
-  posTime -= MPI_Wtime();
+  posTime -= Timer::wallClock();
   this->setOldPositions();
-  posTime += MPI_Wtime();
+  posTime += Timer::wallClock();
 
   // 2. Diffuse the particles. This copies onto m_rho_dagger_particles and stores the hop on the full particles.
   MPI_Barrier(Chombo_MPI::comm);
-  diffuseTime -= MPI_Wtime();
+  diffuseTime -= Timer::wallClock();
   this->diffuseParticlesEulerMaruyama(m_rho_dagger_particles, a_dt);
-  diffuseTime += MPI_Wtime();
+  diffuseTime += Timer::wallClock();
 
   MPI_Barrier(Chombo_MPI::comm);
-  remapGdnvTime -= MPI_Wtime();
+  remapGdnvTime -= Timer::wallClock();
   this->remapGodunovParticles(m_rho_dagger_particles,   WhichParticles::all_diffusive);
-  remapGdnvTime += MPI_Wtime();
+  remapGdnvTime += Timer::wallClock();
 
   // 3. Solve the semi-implicit Poisson equation. Also, copy the particles used for computing the conductivity to scratch.
   MPI_Barrier(Chombo_MPI::comm);
-  copyCondTime -= MPI_Wtime();
+  copyCondTime -= Timer::wallClock();
   this->copyConductivityParticles(m_conductivity_particles); // Sets particle "weights" = w*mu
-  copyCondTime += MPI_Wtime();
+  copyCondTime += Timer::wallClock();
 
   // Compute conductivity on mesh
   MPI_Barrier(Chombo_MPI::comm);
-  condTime -= MPI_Wtime();
+  condTime -= Timer::wallClock();
   this->computeAllConductivities(m_conductivity_particles);  // Deposits q_e*Z*w*mu on the mesh
-  condTime += MPI_Wtime();
+  condTime += Timer::wallClock();
 
   // Setup Poisson solver
   MPI_Barrier(Chombo_MPI::comm);
-  setupTime -= MPI_Wtime();
+  setupTime -= Timer::wallClock();
   this->setupSemiImplicitPoisson(a_dt);                     // Multigrid setup
-  setupTime += MPI_Wtime();
+  setupTime += Timer::wallClock();
 
   // Compute space charge density 
   MPI_Barrier(Chombo_MPI::comm);
-  depositGdnvTime -= MPI_Wtime();
+  depositGdnvTime -= Timer::wallClock();
   this->deposit_ItoPlasmaGodunovParticles(m_rho_dagger_particles, WhichParticles::all_diffusive); // Diffusive should be enough because state is not changed for others. 
-  depositGdnvTime += MPI_Wtime();
+  depositGdnvTime += Timer::wallClock();
 
   MPI_Barrier(Chombo_MPI::comm);
-  poissonTime -= MPI_Wtime();
+  poissonTime -= Timer::wallClock();
   this->solvePoisson();                                       // Solve the stinking equation.
-  poissonTime += MPI_Wtime();
+  poissonTime += Timer::wallClock();
 
   // 4. Recompute velocities with the new electric field, then do the actual semi-implicit Euler-Maruyama update.
   MPI_Barrier(Chombo_MPI::comm);
-  velocityTime -= MPI_Wtime();
+  velocityTime -= Timer::wallClock();
 #if 1 // This is what the algorithm says. 
   this->setItoVelocityFunctions();
   m_ito->interpolateVelocities();
 #else // Have to use this for LEA - need to debug. 
   this->computeItoVelocities();
 #endif
-  velocityTime += MPI_Wtime();
+  velocityTime += Timer::wallClock();
 
   MPI_Barrier(Chombo_MPI::comm);
-  particleTime -= MPI_Wtime();
+  particleTime -= Timer::wallClock();
   this->stepEulerMaruyama(a_dt);
-  particleTime += MPI_Wtime();
+  particleTime += Timer::wallClock();
 
   MPI_Barrier(Chombo_MPI::comm);
-  remapTime -= MPI_Wtime();
+  remapTime -= Timer::wallClock();
   this->remapParticles(WhichParticles::all_mobile_or_diffusive);
-  remapTime += MPI_Wtime();
+  remapTime += Timer::wallClock();
 
   // 5. Do intersection test and remove EB particles. These particles are NOT allowed to react later.
   MPI_Barrier(Chombo_MPI::comm);
-  isectTime -= MPI_Wtime();
+  isectTime -= Timer::wallClock();
   const bool delete_eb_particles = true;
   this->intersectParticles(     WhichParticles::all_mobile_or_diffusive, EbRepresentation::ImplicitFunction, delete_eb_particles); 
   this->removeCoveredParticles(WhichParticles::all_mobile_or_diffusive, EbRepresentation::ImplicitFunction, m_eb_tolerance);
-  isectTime += MPI_Wtime();
+  isectTime += Timer::wallClock();
 
   // 6. Deposit particles. This shouldn't be necessary unless we want to compute (E,J)
   MPI_Barrier(Chombo_MPI::comm);
-  depositTime -= MPI_Wtime();
+  depositTime -= Timer::wallClock();
   this->depositParticles(WhichParticles::all_mobile_or_diffusive);
-  depositTime += MPI_Wtime();
+  depositTime += Timer::wallClock();
 
-  totalTime += MPI_Wtime();
+  totalTime += Timer::wallClock();
 
   if(m_profile){
 

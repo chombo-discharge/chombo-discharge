@@ -13,6 +13,7 @@
 #include <limits>
 #include <algorithm>
 #include <iostream>
+#include <cmath>
 
 // Our includes
 #include <CD_LaPackUtils.H>

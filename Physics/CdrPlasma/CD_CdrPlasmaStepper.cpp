@@ -20,6 +20,7 @@
 #include <CD_CdrIterator.H>
 #include <CD_RtIterator.H>
 #include <CD_Units.H>
+#include <CD_Timer.H>
 #include <CD_NamespaceHeader.H>
 
 // C-style VLA methods can have occasional memory issues. Use them at your own peril. 
@@ -3989,7 +3990,7 @@ Real CdrPlasmaStepper::computeRelaxationTime(){
   const int finest_level = 0;
   const Real SAFETY      = 1.E-20;
 
-  Real t1 = MPI_Wtime();
+  Real t1 = Timer::wallClock();
   EBAMRCellData E, J, dt;
   m_amr->allocate(E,  m_realm, m_cdr->getPhase(), SpaceDim);
   m_amr->allocate(J,  m_realm, m_cdr->getPhase(), SpaceDim);

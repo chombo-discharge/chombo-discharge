@@ -29,6 +29,7 @@
 #include <CD_MultifluidAlias.H>
 #include <CD_Units.H>
 #include <CD_MemoryReport.H>
+#include <CD_Timer.H>
 #include <CD_NamespaceHeader.H>
 
 Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry,
@@ -616,7 +617,7 @@ void Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialD
 
   Vector<IntVectSet> tags;
 
-  const Real start_time = MPI_Wtime();   // Timer
+  const Real start_time = Timer::wallClock();   // Timer
 
   // We are allowing geometric tags to change under the hood, but we need a method for detecting if they changed. If they did,
   // we certainly have to regrid.
@@ -649,7 +650,7 @@ void Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialD
   // Deallocate unnecessary storage
   this->deallocateInternals();          // Deallocate internal storage for Driver
   
-  const Real cell_tags = MPI_Wtime();    // Timer
+  const Real cell_tags = Timer::wallClock();    // Timer
 
   // Regrid AMR. Only levels [lmin, lmax] are allowed to change. 
   const int old_finestLevel = m_amr->getFinestLevel();
@@ -673,7 +674,7 @@ void Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialD
 
   // Regrid the operators
   m_amr->regridOperators(a_lmin);
-  const Real base_regrid = MPI_Wtime(); // Base regrid time
+  const Real base_regrid = Timer::wallClock(); // Base regrid time
 
   // Regrid Driver, timestepper, and celltagger
   this->regridInternals(old_finestLevel, new_finestLevel);          // Regrid internals for Driver
@@ -690,7 +691,7 @@ void Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialD
   // If it wants to, TimeStepper can do a postRegrid operation. 
   m_timeStepper->postRegrid();
 
-  const Real solver_regrid = MPI_Wtime(); // Timer
+  const Real solver_regrid = Timer::wallClock(); // Timer
 
   if(m_verbosity > 1){
     this->regridReport(solver_regrid - start_time,
@@ -803,7 +804,7 @@ void Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSt
       this->gridReport();
     }
 
-    m_wallClockStart = MPI_Wtime();
+    m_wallClockStart = Timer::wallClock();
 
     while(m_time < a_endTime && m_timeStep < a_maxSteps && !last_step){
       const int max_sim_depth = m_amr->getMaxSimulationDepth();
@@ -864,9 +865,9 @@ void Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSt
 
 
       // Time stepper advances solutions
-      m_wallClockOne = MPI_Wtime();
+      m_wallClockOne = Timer::wallClock();
       const Real actual_dt = m_timeStepper->advance(m_dt);
-      m_wallClockTwo = MPI_Wtime();
+      m_wallClockTwo = Timer::wallClock();
 
       // Synchronize times
       m_dt    = actual_dt;
@@ -1247,8 +1248,9 @@ void Driver::createOutputDirectories(){
       std::cout << "Driver::set_outputDirectoryectory - master could not create crash directory" << std::endl;
     }    
   }
-  
+#ifdef CH_MPI  
   MPI_Barrier(Chombo_MPI::comm);
+#endif
   if(success != 0){
     MayDay::Abort("Driver::set_outputDirectoryectory - could not create directories for output");
   }
@@ -1318,12 +1320,12 @@ void Driver::setupGeometryOnly(){
     EBIndexSpace::s_useMemoryLoadBalance = false;
   }
 
-  const Real t0 = MPI_Wtime();
+  const Real t0 = Timer::wallClock();
   m_computationalGeometry->buildGeometries(m_amr->getFinestDomain(),
 					    m_amr->getProbLo(),
 					    m_amr->getFinestDx(),
 					    m_amr->getMaxEbisBoxSize());
-  const Real t1 = MPI_Wtime();
+  const Real t1 = Timer::wallClock();
   if(procID() == 0) std::cout << "geotime = " << t1 - t0 << std::endl;
 
   // Set implicit functions now. 
@@ -2034,7 +2036,7 @@ void Driver::writePlotFile(const std::string a_filename){
 
   // Assemble data
   int icomp = 0;             // Used as reference for output components
-  Real t_assemble = -MPI_Wtime();
+  Real t_assemble = -Timer::wallClock();
   if(m_verbosity >= 3){
     pout() << "Driver::writePlotFile - assembling data..." << endl;
   }
@@ -2080,14 +2082,14 @@ void Driver::writePlotFile(const std::string a_filename){
   // Write internal data
   names.append(this->getPlotVariableNames());
   this->writePlotData(output, icomp);
-  t_assemble += MPI_Wtime();
+  t_assemble += Timer::wallClock();
 
 
   // Write HDF5 file
   if(m_verbosity >= 3){
     pout() << "Driver::writePlotFile - writing plot file..." << endl;
   }
-  Real t_write = -MPI_Wtime();
+  Real t_write = -Timer::wallClock();
 
   // Write.
 #ifdef CH_USE_HDF5
@@ -2104,7 +2106,7 @@ void Driver::writePlotFile(const std::string a_filename){
 	      false,
 	      Vector<Real>(),
 	      m_numPlotGhost*IntVect::Unit);
-  t_write += MPI_Wtime();
+  t_write += Timer::wallClock();
 
   const Real t_tot = t_write + t_assemble;
   if(m_verbosity >= 3){
@@ -2267,7 +2269,7 @@ void Driver::writeCheckpointFile(){
   header.writeToFile(handle_out);
 
   // Write stuff level by level
-  const Real t0 = MPI_Wtime();
+  const Real t0 = Timer::wallClock();
   if(m_verbosity >= 3){
     pout() << "Driver::writeCheckpointFile - writing checkpoint file..." << endl;
   }
@@ -2284,7 +2286,7 @@ void Driver::writeCheckpointFile(){
     // Driver checkpoints internal data
     this->writeCheckpointLevel(handle_out, lvl); 
   }
-  const Real t1 = MPI_Wtime();
+  const Real t1 = Timer::wallClock();
 
   if(m_verbosity >= 3){
     pout() << "Driver::writeCheckpointFile - writing checkpoint file... DONE! " << endl

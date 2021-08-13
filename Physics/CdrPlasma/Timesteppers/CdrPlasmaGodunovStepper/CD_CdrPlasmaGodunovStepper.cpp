@@ -12,8 +12,10 @@
 // Chombo includes
 #include <ParmParse.H>
 
+// Our includes
 #include <CD_CdrPlasmaGodunovStepper.H>
 #include <CD_CdrPlasmaGodunovStorage.H>
+#include <CD_Timer.H>
 #include <CD_DataOps.H>
 #include <CD_Units.H>
 #include <CD_NamespaceHeader.H>
@@ -271,12 +273,12 @@ Real CdrPlasmaGodunovStepper::advance(const Real a_dt){
   Real t_tot  = 0.0;
 
   Real t0, t1;
-  t0 = MPI_Wtime();
+  t0 = Timer::wallClock();
   t_tot  = -t0;
 
   // These calls are responsible for filling CDR and sigma solver boundary conditions
   // on the EB and on the domain walls
-  t0 = MPI_Wtime();
+  t0 = Timer::wallClock();
   CdrPlasmaGodunovStepper::computeElectricFieldIntoScratch();       // Compute the electric field
   CdrPlasmaGodunovStepper::computeCdrGradients();        // Compute cdr gradients
   CdrPlasmaGodunovStepper::extrapolateSourceTerm(a_dt);            // If we used advective extrapolation, BCs are more work. 
@@ -285,54 +287,54 @@ Real CdrPlasmaGodunovStepper::advance(const Real a_dt){
   CdrPlasmaGodunovStepper::computeCdrDomainStates();    // Extrapolate cell-centered states to domain edges
   CdrPlasmaGodunovStepper::computeCdrDomainFluxes();    // Extrapolate cell-centered fluxes to domain edges
   CdrPlasmaGodunovStepper::computeSigmaFlux();           // Update charge flux for sigma solver
-  t1 = MPI_Wtime();
+  t1 = Timer::wallClock();
   t_filBC = t1 - t0;
   
-  t0 = MPI_Wtime();
+  t0 = Timer::wallClock();
   CdrPlasmaGodunovStepper::advanceTransport(a_dt);
-  t1 = MPI_Wtime();
+  t1 = Timer::wallClock();
   t_tran = t1 - t0;
   
-  t0 = MPI_Wtime();
+  t0 = Timer::wallClock();
   if((m_timeStep +1) % m_fast_poisson == 0){
     CdrPlasmaStepper::solvePoisson();         // Update the Poisson equation
   }
-  t1 = MPI_Wtime();
+  t1 = Timer::wallClock();
   t_pois = t1 - t0;
 
-  t0 = MPI_Wtime();
+  t0 = Timer::wallClock();
   CdrPlasmaGodunovStepper::computeElectricFieldIntoScratch();       // Update electric fields too
-  t1 = MPI_Wtime();
+  t1 = Timer::wallClock();
   t_filE = t1-t0;
 
-  t0 = MPI_Wtime();
+  t0 = Timer::wallClock();
   //  CdrPlasmaGodunovStepper::computeCdrGradients();        // I'm not doing this. Gradients don't change that much. 
   CdrPlasmaGodunovStepper::computeReactionNetwork(a_dt); // Advance the reaction network. Put the result in solvers
-  t1 = MPI_Wtime();
+  t1 = Timer::wallClock();
   t_reac = t1-t0;
 
   // Move Photons
-  t0 = MPI_Wtime();
+  t0 = Timer::wallClock();
   if((m_timeStep +1) % m_fast_rte == 0){
     CdrPlasmaGodunovStepper::advanceRadiativeTransfer(a_dt);              // Update RTE equations
   }
-  t1 = MPI_Wtime();
+  t1 = Timer::wallClock();
   t_rte = t1-t0;
 
   // Post step
-  t0 = MPI_Wtime();
+  t0 = Timer::wallClock();
   CdrPlasmaGodunovStepper::postStep();
-  t1 = MPI_Wtime();
+  t1 = Timer::wallClock();
   t_post = t1 - t0;
   
   // Update velocities and diffusion coefficients. We don't do sources here.
-  t0 = MPI_Wtime();
+  t0 = Timer::wallClock();
   CdrPlasmaGodunovStepper::computeCdrDriftVelocities(m_time + a_dt);
-  t1 = MPI_Wtime();
+  t1 = Timer::wallClock();
   t_filV = t1 - t0;
-  t0 = MPI_Wtime();
+  t0 = Timer::wallClock();
   CdrPlasmaGodunovStepper::computeCdrDiffusionCoefficients(m_time + a_dt);
-  t1 = MPI_Wtime();
+  t1 = Timer::wallClock();
   t_filD = t1 - t0;
   t_tot += t1;
 

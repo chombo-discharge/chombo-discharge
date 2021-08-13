@@ -1,6 +1,7 @@
 #include "CD_Driver.H"
 #include <CD_ItoMerge.H>
 #include <CD_PointMass.H>
+#include <CD_Timer.H>
 
 #include <iostream>
 #include <fstream>
@@ -68,9 +69,9 @@ int main(int argc, char* argv[]){
   // Do particle merging/splitting
 
   Tree<PointMass> tree(inputParticles, Mass);
-  const Real t0 = MPI_Wtime();
+  const Real t0 = Timer::wallClock();
   tree.buildTree(ppc);
-  const Real t1 = MPI_Wtime();
+  const Real t1 = Timer::wallClock();
 
   // Create output particles
   std::vector<PointMass> outputParticles(0);
