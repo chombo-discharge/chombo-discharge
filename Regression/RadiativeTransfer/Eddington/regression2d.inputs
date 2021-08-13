@@ -26,7 +26,6 @@ AmrMesh.centroid_sten   = linear      # Centroid interp stencils. 'pwl', 'linear
 AmrMesh.eb_sten         = pwl         # EB interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
 AmrMesh.redist_radius   = 1           # Redistribution radius for hyperbolic conservation laws
 AmrMesh.load_balance    = volume      # Load balancing algorithm. Valid options are 'volume' or 'elliptic'
-AmrMesh.ebcf            = true        # If you have EBCF crossing, this must be true. 
 
 # ====================================================================================================
 # DRIVER OPTIONS
@@ -83,7 +82,6 @@ EddingtonSP1.gmg_exit_tol        = 1.E-6     # Residue tolerance
 EddingtonSP1.gmg_exit_hang       = 0.2       # Solver hang
 EddingtonSP1.gmg_min_cells       = 4         # Bottom drop
 EddingtonSP1.gmg_bottom_solver   = bicgstab     # Bottom solver type. Valid options are 'simple <number>' and 'bicgstab'
-EddingtonSP1.gmg_bottom_relax    = 8         # Number of relaxations in bottom solve ('simple' solver only)
 EddingtonSP1.gmg_cycle           = vcycle    # Cycle type. Only 'vcycle' supported for now
 EddingtonSP1.gmg_ebbc_weight     = 2            # EBBC weight (only for Dirichlet)
 EddingtonSP1.gmg_ebbc_order      = 2            # EBBC order (only for Dirichlet)
