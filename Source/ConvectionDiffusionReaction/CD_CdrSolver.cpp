@@ -1729,6 +1729,7 @@ void CdrSolver::writePlotFile(){
   Vector<LevelData<EBCellFAB>* > outputPtr;
   m_amr->alias(outputPtr, output);
 
+#ifdef CH_USE_HDF5
   writeEBHDF5(fname,
 	      m_amr->getGrids(m_realm),
 	      outputPtr,
@@ -1742,6 +1743,7 @@ void CdrSolver::writePlotFile(){
 	      false,
 	      Vector<Real>(numPlotVars, 0.0), //coveredValues,
 	      IntVect::Unit);
+#endif
 }
 
 void CdrSolver::writePlotData(EBAMRCellData& a_output, int& a_icomp){
@@ -1828,6 +1830,7 @@ void CdrSolver::writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellD
   a_comp += ncomp;
 }
 
+#ifdef CH_USE_HDF5
 void CdrSolver::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const {
   CH_TIME("CdrSolver::writeCheckpointLevel(HDF5Handle, int)");
   if(m_verbosity > 5){
@@ -1838,7 +1841,9 @@ void CdrSolver::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) co
   write(a_handle, *m_phi   [a_level], m_name       );
   write(a_handle, *m_source[a_level], m_name+"_src");
 }
+#endif
 
+#ifdef CH_USE_HDF5
 void CdrSolver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
   CH_TIME("CdrSolver::readCheckpointLevel(HDF5Handle, int)");
   if(m_verbosity > 5){
@@ -1850,6 +1855,7 @@ void CdrSolver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
   read<EBCellFAB>(a_handle, *m_phi   [a_level], m_name,        m_amr->getGrids(m_realm)[a_level], interv, false);
   read<EBCellFAB>(a_handle, *m_source[a_level], m_name+"_src", m_amr->getGrids(m_realm)[a_level], interv, false);
 }
+#endif
 
 Real CdrSolver::computeAdvectionDt(){
   CH_TIME("CdrSolver::computeAdvectionDt()");

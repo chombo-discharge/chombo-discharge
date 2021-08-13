@@ -390,14 +390,18 @@ public:
     @paramo[out] a_handle HDF5 file. 
     @param[in]   a_level Grid level
   */
+#ifdef CH_USE_HDF5
   virtual void writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const;
+#endif
 
   /*!
     @brief Read checkpoint data from HDF5 file. 
     @param[in] a_handle HDF5 handle.
     @param[in] const int a_level Grid level
   */
+#ifdef CH_USE_HDF5  
   virtual void readCheckpointLevel(HDF5Handle& a_handle, const int a_level);
+#endif
 
   /*!
     @brief Regrid this solver. 

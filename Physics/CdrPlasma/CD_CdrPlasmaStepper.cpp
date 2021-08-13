@@ -4089,7 +4089,7 @@ RefCountedPtr<SigmaSolver>& CdrPlasmaStepper::getSigmaSolver(){
   return m_sigma;
 }
 
-// New functions for Driver
+#ifdef CH_USE_HDF5
 void CdrPlasmaStepper::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const{
   CH_TIME("Driver::writeCheckpointData");
   if(m_verbosity > 3){
@@ -4111,7 +4111,9 @@ void CdrPlasmaStepper::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl
   m_fieldSolver->writeCheckpointLevel(a_handle, a_lvl);
   m_sigma->writeCheckpointLevel(a_handle, a_lvl);
 }
+#endif
 
+#ifdef CH_USE_HDF5
 void CdrPlasmaStepper::readCheckpointData(HDF5Handle& a_handle, const int a_lvl){
   CH_TIME("Driver::readCheckpointData");
   if(m_verbosity > 3){
@@ -4131,6 +4133,7 @@ void CdrPlasmaStepper::readCheckpointData(HDF5Handle& a_handle, const int a_lvl)
   m_fieldSolver->readCheckpointLevel(a_handle, a_lvl);
   m_sigma->readCheckpointLevel(a_handle, a_lvl);
 }
+#endif
 
 int CdrPlasmaStepper::getNumberOfPlotVariables() const{
   CH_TIME("CdrPlasmaStepper::getNumberOfPlotVariables");

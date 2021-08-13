@@ -40,8 +40,12 @@ namespace Physics {
       virtual void registerOperators() override;
 
       // IO routines
+#ifdef CH_USE_HDF5
       virtual void writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const override;
+#endif
+#ifdef CH_USE_HDF5
       virtual void readCheckpointData(HDF5Handle& a_handle, const int a_lvl) override;
+#endif      
       virtual void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const override;
       virtual int  getNumberOfPlotVariables() const override;
 

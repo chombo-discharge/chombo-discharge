@@ -285,6 +285,7 @@ void ItoPlasmaStepper::postCheckpointPoisson(){
   // std::cout << Emax << std::endl;
 }
 
+#ifdef CH_USE_HDF5
 void ItoPlasmaStepper::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const {
   CH_TIME("ItoPlasmaStepper::writeCheckpointData");
   if(m_verbosity > 5){
@@ -304,7 +305,9 @@ void ItoPlasmaStepper::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl
   m_fieldSolver->writeCheckpointLevel(a_handle, a_lvl);
   m_sigma->writeCheckpointLevel(a_handle, a_lvl);
 }
+#endif
 
+#ifdef CH_USE_HDF5
 void ItoPlasmaStepper::readCheckpointData(HDF5Handle& a_handle, const int a_lvl){
   CH_TIME("ItoPlasmaStepper::readCheckpointData");
   if(m_verbosity > 5){
@@ -324,6 +327,7 @@ void ItoPlasmaStepper::readCheckpointData(HDF5Handle& a_handle, const int a_lvl)
   m_fieldSolver->readCheckpointLevel(a_handle, a_lvl);
   m_sigma->readCheckpointLevel(a_handle, a_lvl);
 }
+#endif
 
 void ItoPlasmaStepper::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const {
   CH_TIME("ItoPlasmaStepper::writePlotData");

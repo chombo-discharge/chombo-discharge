@@ -906,6 +906,8 @@ void FieldSolver::writePlotFile(){
 
   Vector<Real> covered_values(numPlotVars, 0.0);
   string fname(file_char);
+
+#ifdef CH_USE_HDF5
   writeEBHDF5(fname,
 	      m_amr->getGrids(m_realm),
 	      outputPtr,
@@ -919,8 +921,10 @@ void FieldSolver::writePlotFile(){
 	      false,
 	      covered_values,
 	      IntVect::Unit);
+#endif
 }
 
+#ifdef CH_USE_HDF5
 void FieldSolver::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const {
   CH_TIME("FieldSolver::writeCheckpointLevel");
   if(m_verbosity > 5){
@@ -941,7 +945,9 @@ void FieldSolver::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) 
   if(!ebisGas.isNull()) write(a_handle, potentialGas, "FieldSolver::m_potential(gas)"  );
   if(!ebisSol.isNull()) write(a_handle, potentialSol, "FieldSolver::m_potential(solid)");
 }
+#endif
 
+#ifdef CH_USE_HDF5
 void FieldSolver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
   CH_TIME("FieldSolver::readCheckpointLevel");
   if(m_verbosity > 5){
@@ -962,6 +968,7 @@ void FieldSolver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
   if(!ebisGas.isNull()) read<EBCellFAB>(a_handle, potentialGas, "FieldSolver::m_potential(gas)",   m_amr->getGrids(m_realm)[a_level], Interval(0,0), false);
   if(!ebisSol.isNull()) read<EBCellFAB>(a_handle, potentialSol, "FieldSolver::m_potential(solid)", m_amr->getGrids(m_realm)[a_level], Interval(0,0), false);
 }
+#endif
 
 void FieldSolver::postCheckpoint(){
   CH_TIME("FieldSolver::postCheckpoint");

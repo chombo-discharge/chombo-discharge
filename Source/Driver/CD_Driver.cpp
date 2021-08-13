@@ -850,10 +850,8 @@ void Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSt
 	if(m_writeLoads){
 	  this->writeComputationalLoads();
 	}
-#ifdef CH_USE_HDF5
 	this->writeCrashFile();
 	//	this->writeCheckpointFile();
-#endif
 
 	MayDay::Abort("Driver::run - the time step became too small");
       }
@@ -1296,7 +1294,11 @@ void Driver::setup(const std::string a_inputFile, const int a_initialRegrids, co
 #endif
     }
     else{
+#ifdef CH_USE_HDF5
       this->setupForRestart(a_initialRegrids, a_restartFile);
+#else
+      this->setupFresh(a_initialRegrids);
+#endif
     }
   }
 }
@@ -1465,6 +1467,7 @@ void Driver::setupFresh(const int a_initialRegrids){
   }
 }
 
+#ifdef CH_USE_HDF5
 void Driver::setupForRestart(const int a_initialRegrids, const std::string a_restartFile){
   CH_TIME("Driver::setupForRestart");
   if(m_verbosity > 5){
@@ -1493,6 +1496,7 @@ void Driver::setupForRestart(const int a_initialRegrids, const std::string a_res
   // Read checkpoint file
   this->readCheckpointFile(a_restartFile); // Read checkpoint file - this sets up amr, instantiates solvers and fills them
 
+
   // Time stepper does post checkpoint setup
   m_timeStepper->postCheckpointSetup();
   
@@ -1519,9 +1523,8 @@ void Driver::setupForRestart(const int a_initialRegrids, const std::string a_res
       this->gridReport();
     }
   }
-
-
 }
+#endif
 
 void Driver::checkRestartFile(const std::string a_restartFile) const {
   CH_TIME("Driver::checkRestartFile");
@@ -1925,6 +1928,7 @@ void Driver::writeGeometry(){
   sprintf(file_char, "%s.geometry.%dd.hdf5", prefix.c_str(), SpaceDim);
   string fname(file_char);
 
+#ifdef CH_USE_HDF5
   writeEBHDF5(fname, 
 	      grids,
 	      output_ptr,
@@ -1938,6 +1942,7 @@ void Driver::writeGeometry(){
 	      replace_covered,
 	      covered_values,
 	      m_numPlotGhost*IntVect::Unit);
+#endif
 }
 
 void Driver::writePlotFile(){
@@ -2084,7 +2089,8 @@ void Driver::writePlotFile(const std::string a_filename){
   }
   Real t_write = -MPI_Wtime();
 
-  // Write. 
+  // Write.
+#ifdef CH_USE_HDF5
   writeEBHDF5(a_filename, 
 	      m_amr->getGrids(m_realm),
 	      output_ptr,
@@ -2107,6 +2113,7 @@ void Driver::writePlotFile(const std::string a_filename){
 	   << "\t Assemble data = " << 100.*t_assemble/t_tot << "%" << endl
 	   << "\t Write time    = " << 100.*t_write/t_tot << "%" << endl;
   }
+#endif
 }
 
 void Driver::writePlotData(EBAMRCellData& a_output, int& a_comp){
@@ -2222,11 +2229,14 @@ void Driver::writeLevelset(EBAMRCellData& a_output, int& a_comp){
   a_comp = a_comp + 2;
 }
 
+
 void Driver::writeCheckpointFile(){
   CH_TIME("Driver::writeCheckpointFile");
   if(m_verbosity > 3){
     pout() << "Driver::writeCheckpointFile" << endl;
   }
+
+#ifdef CH_USE_HDF5  
   
   const int finest_level = m_amr->getFinestLevel();
   int finest_chk_level  = Min(m_maxCheckpointDepth, finest_level);
@@ -2282,8 +2292,11 @@ void Driver::writeCheckpointFile(){
   }
   
   handle_out.close();
+#endif  
 }
 
+
+#ifdef CH_USE_HDF5
 void Driver::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level){
   CH_TIME("Driver::writeCheckpointLevel");
   if(m_verbosity > 5){
@@ -2294,7 +2307,9 @@ void Driver::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level){
   this->writeCheckpointRealmLoads(a_handle, a_level);
 
 }
+#endif
 
+#ifdef CH_USE_HDF5
 void Driver::writeCheckpointTags(HDF5Handle& a_handle, const int a_level){
   CH_TIME("Driver::writeCheckpointTags");
   if(m_verbosity > 5){
@@ -2328,7 +2343,9 @@ void Driver::writeCheckpointTags(HDF5Handle& a_handle, const int a_level){
   // Write tags
   write(a_handle, scratch, "tagged_cells");
 }
+#endif
 
+#ifdef CH_USE_HDF5
 void Driver::writeCheckpointRealmLoads(HDF5Handle& a_handle, const int a_level){
   CH_TIME("Driver::writeCheckpointRealmLoads");
   if(m_verbosity > 5){
@@ -2357,7 +2374,9 @@ void Driver::writeCheckpointRealmLoads(HDF5Handle& a_handle, const int a_level){
     write(a_handle, scratch, str);
   }
 }
+#endif
 
+#ifdef CH_USE_HDF5
 void Driver::readCheckpointFile(const std::string& a_restartFile){
   CH_TIME("Driver::readCheckpointFile");
   if(m_verbosity > 3){
@@ -2489,7 +2508,9 @@ void Driver::readCheckpointFile(const std::string& a_restartFile){
   // Close input file
   handle_in.close();
 }
+#endif
 
+#ifdef CH_USE_HDF5
 void Driver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
   CH_TIME("Driver::readCheckpointLevel");
   if(m_verbosity > 5){
@@ -2526,7 +2547,9 @@ void Driver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
     }
   }
 }
+#endif
 
+#ifdef CH_USE_HDF5
 void Driver::readCheckpointRealmLoads(Vector<long int>& a_loads, HDF5Handle& a_handle, const std::string a_realm, const int a_level){
   CH_TIME("Driver::readCheckpointRealmLoads(...)");
   if(m_verbosity > 5){
@@ -2544,7 +2567,9 @@ void Driver::readCheckpointRealmLoads(Vector<long int>& a_loads, HDF5Handle& a_h
     a_loads[ibox] = lround(fab.max());
   }
 }
+#endif
 
+#ifdef CH_USE_HDF5
 void Driver::writeVectorData(HDF5HeaderData&     a_header,
 			     const Vector<Real>& a_data,
 			     const std::string   a_name,
@@ -2564,7 +2589,9 @@ void Driver::writeVectorData(HDF5HeaderData&     a_header,
     a_header.m_real[identifier] = a_data[i];
   }
 }
+#endif
 
+#ifdef CH_USE_HDF5
 void Driver::readVectorData(HDF5HeaderData& a_header,
 			    Vector<Real>&         a_data,
 			    const std::string     a_name,
@@ -2584,5 +2611,6 @@ void Driver::readVectorData(HDF5HeaderData& a_header,
     a_data[i] = a_header.m_real[identifier];
   }
 }
+#endif
 
 #include <CD_NamespaceFooter.H>

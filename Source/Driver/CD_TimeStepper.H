@@ -96,14 +96,18 @@ public:
     @param[inout] a_handle HDF5 handle
     @param[in]    a_lvl    Grid level
   */
+#ifdef CH_USE_HDF5
   virtual void writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const = 0;
+#endif
 
   /*!
     @brief Read checkpoint data from file
     @param[inout] a_handle HDF5 handle
     @param[in]    a_lvl    Grid level
   */
+#ifdef CH_USE_HDF5  
   virtual void readCheckpointData(HDF5Handle& a_handle, const int a_lvl) = 0;
+#endif
 
   /*!
     @brief Write plot data to file

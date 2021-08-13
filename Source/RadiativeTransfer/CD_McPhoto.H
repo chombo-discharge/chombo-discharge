@@ -304,14 +304,18 @@ public:
     @param[inout] a_handle HDF5 file
     @param[in]    a_level Grid level
   */
+#ifdef CH_USE_HDF5
   virtual void writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const override;
+#endif
 
   /*!
     @brief Read checkpoint data from handle
     @param[inout] a_handle HDF5 file
     @param[in]    a_level Grid level
   */
+#ifdef CH_USE_HDF5  
   virtual void readCheckpointLevel(HDF5Handle& a_handle, const int a_level) override;
+#endif
 
   /*!
     @brief Get output plot names

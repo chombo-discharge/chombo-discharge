@@ -1044,6 +1044,8 @@ void EddingtonSP1::writePlotFile(){
 
   Vector<Real> covered_values(ncomps, 0.0);
   string fname(file_char);
+
+#ifdef CH_USE_HDF5
   writeEBHDF5(fname,
 	      m_amr->getGrids(m_realm),
 	      output_ptr,
@@ -1056,8 +1058,10 @@ void EddingtonSP1::writePlotFile(){
 	      m_amr->getFinestLevel() + 1,
 	      true,
 	      covered_values);
+#endif
 }
 
+#ifdef CH_USE_HDF5
 void EddingtonSP1::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const {
   CH_TIME("EddingtonSP1::writeCheckpointLevel");
   if(m_verbosity > 5){
@@ -1067,7 +1071,9 @@ void EddingtonSP1::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level)
   // Write state vector
   write(a_handle, *m_phi[a_level], m_name);
 }
+#endif
 
+#ifdef CH_USE_HDF5
 void EddingtonSP1::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
   CH_TIME("EddingtonSP1::readCheckpointLevel");
   if(m_verbosity > 5){
@@ -1076,5 +1082,6 @@ void EddingtonSP1::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
 
   read<EBCellFAB>(a_handle, *m_phi[a_level], m_name, m_amr->getGrids(m_realm)[a_level], Interval(0,0), false);
 }
+#endif
 
 #include <CD_NamespaceFooter.H>
