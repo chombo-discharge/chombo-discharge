@@ -17,12 +17,15 @@
 
 inline
 Real Timer::wallClock(){
-
+#ifdef CH_MPI
+  return MPI_Wtime();
+#else
   // TLDR: This just returns the current time in seconds (since an arbitrary time in the past). 
   const auto currentTime       = std::chrono::steady_clock::now();
   const auto durationInSeconds = std::chrono::duration<Real>(currentTime.time_since_epoch());
 
   return durationInSeconds.count();
+#endif
 }
 
 inline
@@ -31,7 +34,7 @@ Timer::~Timer() {
 }
 
 inline
-void Timer::startEvent(const std::string a_event) {
+void Timer::startEvent(const std::string a_event) noexcept {
 
   // Only start an event if it has not already been started. 
   if (m_events.find(a_event) == m_events.end() ) {
@@ -42,7 +45,7 @@ void Timer::startEvent(const std::string a_event) {
 }
 
 inline
-void Timer::stopEvent(const std::string a_event) {
+void Timer::stopEvent(const std::string a_event) noexcept {
   if (m_events.find(a_event) == m_events.end()) {
     tuple<bool, TimePoint, TimePoint>& event = m_events.at(a_event);
 

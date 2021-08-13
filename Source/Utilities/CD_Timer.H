@@ -87,7 +87,7 @@ public:
     @note This will give a run-time error if the event has already been started (i.e. startEvent(a_event) has not been called prior). 
   */
   inline
-  void startEvent(const std::string a_event);
+  void startEvent(const std::string a_event) noexcept;
 
   /*!
     @brief Stop an event
@@ -95,7 +95,7 @@ public:
     @note This will give a run-time error if the event has not already been started (i.e. startEvent(a_event) has not been called prior). 
   */
   inline
-  void stopEvent(const std::string a_event);
+  void stopEvent(const std::string a_event) noexcept;
 
   /*!
     @brief Reset all events. 
@@ -103,6 +103,24 @@ public:
   */
   inline
   void resetEvents();
+
+  /*!
+    @brief Reset/remove an event
+  */
+  inline
+  void resetEvents(const std::string a_event) noexcept;
+
+  /*!
+    @brief Print all timed events to cout.
+  */
+  inline
+  void reportEvents() const noexcept;
+
+  /*!
+    @brief Report a particular event
+  */
+  inline
+  void reportEvent(const std::string a_event) const noexcept;
 
 protected:
 
