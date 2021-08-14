@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_DcelVertexImplem.H
-  @brief  Implementaion of CD_DcelVertex.H
+  @brief  Implementation of CD_DcelVertex.H
   @author Robert Marskar
 */
 
@@ -24,29 +24,29 @@ namespace Dcel {
   template <class T>
   inline
   VertexT<T>::VertexT(){
-    m_pos    = Vec3::zero();
-    m_normal = Vec3::zero();
+    m_position = Vec3::zero();
+    m_normal   = Vec3::zero();
 
     m_faces.resize(0);
   }
 
   template <class T>
   inline
-  VertexT<T>::VertexT(const Vec3& a_pos) : VertexT() {
-    m_pos    = a_pos;
+  VertexT<T>::VertexT(const Vec3& a_position) : VertexT() {
+    m_position = a_position;
   }
 
   template <class T>
   inline
-  VertexT<T>::VertexT(const Vec3& a_pos, const Vec3& a_normal) : VertexT() {
-    m_pos    = a_pos;
-    m_normal = a_normal;
+  VertexT<T>::VertexT(const Vec3& a_position, const Vec3& a_normal) : VertexT() {
+    m_position = a_position;
+    m_normal   = a_normal;
   }
 
   template <class T>
   inline
   VertexT<T>::VertexT(const VertexT<T>& a_otherVertex){
-    m_pos          = a_otherVertex.m_pos;
+    m_position     = a_otherVertex.m_position;
     m_normal       = a_otherVertex.m_m_normal;
     m_outgoingEdge = a_otherVertex.m_outgoingEdge;
   }
@@ -59,16 +59,16 @@ namespace Dcel {
 
   template <class T>
   inline
-  void VertexT<T>::define(const Vec3& a_pos, const EdgePtr& a_edge, const Vec3& a_normal) noexcept {
-    m_pos    = a_pos;
-    m_outgoingEdge   = a_edge;
-    m_normal = a_normal;
+  void VertexT<T>::define(const Vec3& a_position, const EdgePtr& a_edge, const Vec3& a_normal) noexcept {
+    m_position     = a_position;
+    m_outgoingEdge = a_edge;
+    m_normal       = a_normal;
   }
 
   template <class T>
   inline
-  void VertexT<T>::setPosition(const Vec3& a_pos) noexcept {
-    m_pos = a_pos;
+  void VertexT<T>::setPosition(const Vec3& a_position) noexcept {
+    m_position = a_position;
   }
 
   template <class T>
@@ -105,7 +105,9 @@ namespace Dcel {
   inline
   void VertexT<T>::computeVertexNormalAverage(const std::vector<FacePtr>& a_faces) noexcept {
     m_normal = Vec3::zero();
-    
+
+    // TLDR: We simply compute the sum of the normal vectors for each face in a_faces and then normalize. This
+    //       will yield an "average" of the normal vectors of the faces circulating this vertex. 
     for (const auto& f : a_faces){
       m_normal += f->getNormal();
     }
@@ -116,7 +118,7 @@ namespace Dcel {
   template <class T>
   inline
   void VertexT<T>::computeVertexNormalAngleWeighted() noexcept {
-    computeVertexNormalAngleWeighted(m_faces);
+    this->computeVertexNormalAngleWeighted(m_faces);
   }
 
   template <class T>
@@ -124,7 +126,18 @@ namespace Dcel {
   void VertexT<T>::computeVertexNormalAngleWeighted(const std::vector<FacePtr>& a_faces) noexcept {
     m_normal = Vec3::zero();
 
-    // This is more complicated than it looks, and it happens because we want the two half edges that has the current vertex
+    // This routine computes the pseudonormal from pseudnormal algorithm from Baerentzen and Aanes in 
+    // "Signed distance computation using the angle weighted pseudonormal" (DOI: 10.1109/TVCG.2005.49).
+    // This algorithm computes an average normal vector using the normal vectors of each face connected
+    // to this vertex, i.e. in the form
+    //
+    //    n = sum(w * n(face))/sum(w)
+    //
+    // where w are weights for each face. This weight is given by the subtended angle of the face, which means the angle spanned
+    // by the incoming/outgoing edges of the face that pass through this vertex. 
+    //
+    //
+    // The below code is more complicated than it looks. It happens because we want the two half edges that has the current vertex
     // as a mutual vertex (i.e. the "incoming" and "outgoing" edges into this vertex). Normally we'd just iterate through edges,
     // but if it happens that an input face is flipped, this will result in infinite iteration. Instead, we have stored the pointers
     // to each face connected to this vertex. We look through each face to find the endpoints of the edges the have the current vertex
@@ -185,13 +198,13 @@ namespace Dcel {
   template <class T>
   inline
   Vec3T<T>& VertexT<T>::getPosition() noexcept {
-    return (m_pos);
+    return (m_position);
   }
 
   template <class T>
   inline
   const Vec3T<T>& VertexT<T>::getPosition() const noexcept {
-    return (m_pos);
+    return (m_position);
   }
 
   template <class T>
@@ -233,7 +246,7 @@ namespace Dcel {
   template <class T>
   inline
   T VertexT<T>::signedDistance(const Vec3& a_x0) const noexcept {
-    const auto delta = a_x0 - m_pos;
+    const auto delta = a_x0 - m_position;
     const T dist     = delta.length();
     const T dot      = m_normal.dot(delta);
     const int sign   = (dot > 0.) ? 1 : -1;
@@ -244,7 +257,7 @@ namespace Dcel {
   template <class T>
   inline
   T VertexT<T>::unsignedDistance2(const Vec3& a_x0) const noexcept {
-    const auto d = a_x0 - m_pos;
+    const auto d = a_x0 - m_position;
 
     return d.dot(d);
   }
