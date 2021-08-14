@@ -7,6 +7,7 @@
   @file   CD_DcelEdgeImplem.H
   @brief  Implementation of CD_DcelEdge.H
   @author Robert Marskar
+  @todo   Include m_face in constructors
 */
 
 #ifndef CD_DcelEdgeImplem_H
@@ -24,6 +25,7 @@ namespace Dcel {
   template <class T>
   inline
   EdgeT<T>::EdgeT(){
+    m_face         = nullptr;
     m_vertex       = nullptr;
     m_pairEdge     = nullptr;
     m_nextEdge     = nullptr;
@@ -42,6 +44,7 @@ namespace Dcel {
   template <class T>
   inline
   EdgeT<T>::EdgeT(const Edge& a_otherEdge) : EdgeT<T>() {
+    m_face         = a_otherEdge.m_face;    
     m_vertex       = a_otherEdge.m_vertex;
     m_pairEdge     = a_otherEdge.m_pairEdge;
     m_nextEdge     = a_otherEdge.m_nextEdge;
@@ -237,13 +240,13 @@ namespace Dcel {
     const T t = this->projectPointToEdge(a_x0);
 
     T retval;
-    if(t <= 0.0) {
+    if(t <= 0.0) { // Closest point is the starting vertex
       retval = this->getVertex()->signedDistance(a_x0);
     }
-    else if(t >= 1.0){
+    else if(t >= 1.0){ // Closest point is the end vertex
       retval = this->getOtherVertex()->signedDistance(a_x0);
     }
-    else{
+    else{ // Closest point is the edge itself. 
       const Vec3 linePoint = m_vertex->getPosition() + t*m_x2x1;
       const Vec3 delta     = a_x0 - linePoint;
       const T dot          = m_normal.dot(delta);
@@ -264,7 +267,7 @@ namespace Dcel {
     constexpr T zero = 0.0;
     constexpr T one  = 1.0;
     
-    t = std::min(std::max(zero,t), one);
+    t = std::min(std::max(zero,t), one); // Edge is on t=[0,1]. 
 
     const Vec3T<T> linePoint = m_vertex->getPosition() + t*m_x2x1;
     const Vec3T<T> delta     = a_x0 - linePoint;
