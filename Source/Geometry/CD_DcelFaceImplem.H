@@ -96,6 +96,7 @@ namespace Dcel {
   void FaceT<T>::computeArea() noexcept {
     m_area = 0.0;
 
+    // This computes the area of any N-side polygon. 
     const auto vertices = this->gatherVertices();
 
     for (int i = 0; i < vertices.size() - 1; i++){
@@ -127,7 +128,9 @@ namespace Dcel {
     const auto vertices = this->gatherVertices();
     
     const int N = vertices.size();
-  
+
+    // To compute the normal vector we find three vertices in this polygon face. They span a plane, and we just compute the
+    // normal vector of that plane.
     for (int i = 0; i < N; i++){
       const auto& x0 = vertices[i]      ->getPosition();
       const auto& x1 = vertices[(i+1)%N]->getPosition();
@@ -144,6 +147,8 @@ namespace Dcel {
   template <class T>
   inline
   void FaceT<T>::computePolygon2D() noexcept{
+
+    // See CD_DcelPoly.H to see how the 2D embedding operates. 
     m_poly2 = std::make_shared<Polygon2D<T> >(m_normal, this->getAllVertexCoordinates());
   }
 
@@ -282,11 +287,11 @@ namespace Dcel {
 
     const bool inside = this->isPointInsideFace(a_x0);
 
-    if(inside){ 
+    if(inside){ // Projects to inside so distance and sign are straightforward to compute. 
       retval = m_normal.dot(a_x0 - m_centroid);
     }
     else {
-      for (const auto& e : m_edges){
+      for (const auto& e : m_edges){ // Projects to outside so edge/vertex are closest. Check that distance. 
 	const T curDist = e->signedDistance(a_x0);
 
 	retval = (curDist*curDist < retval*retval) ? curDist : retval;
@@ -303,13 +308,13 @@ namespace Dcel {
 
     const bool inside = this->isPointInsideFace(a_x0);
 
-    if(inside){
+    if(inside){ // Projects to inside the polygon face so distance is straightforward. 
       const T normDist = m_normal.dot(a_x0-m_centroid);
       
       retval = normDist*normDist;
     }
     else{
-      for (const auto& e : m_edges){
+      for (const auto& e : m_edges){ // Projects to outside so edge/vertex are closest.
 	const T curDist2 = e->unsignedDistance2(a_x0);
 
 	retval = (curDist2 < retval) ? curDist2 : retval;
