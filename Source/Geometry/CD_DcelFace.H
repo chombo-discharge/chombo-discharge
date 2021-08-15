@@ -21,7 +21,7 @@
 #include <CD_DcelAlgorithms.H>
 #include <CD_DcelVertex.H>
 #include <CD_DcelEdge.H>
-#include <CD_DcelPoly.H>
+#include <CD_DcelPolygon2D.H>
 #include <CD_NamespaceHeader.H>
 
 namespace Dcel {
