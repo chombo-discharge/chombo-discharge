@@ -28,8 +28,7 @@ namespace Dcel {
     m_startEdge = a_face.getHalfEdge();
     m_curEdge   = m_startEdge;
     m_fullLoop  = false;
-  
-    m_iterMode = IterationMode::Faces;
+    m_iterMode  = IterationMode::Faces;
   }
 
   template <class T>
@@ -38,8 +37,7 @@ namespace Dcel {
     m_startEdge = a_face.getHalfEdge();
     m_curEdge   = m_startEdge;
     m_fullLoop  = false;
-
-    m_iterMode = IterationMode::Faces;
+    m_iterMode  = IterationMode::Faces;
   }
 
   template <class T>
@@ -48,7 +46,6 @@ namespace Dcel {
     m_startEdge = a_vert.getOutgoingEdge();
     m_curEdge   = m_startEdge;
     m_fullLoop  = false;
-
     m_iterMode  = IterationMode::Vertices;
   }
 
@@ -58,7 +55,6 @@ namespace Dcel {
     m_startEdge = a_vert.getOutgoingEdge();
     m_curEdge   = m_startEdge;
     m_fullLoop  = false;
-
     m_iterMode  = IterationMode::Vertices;
   }
 
