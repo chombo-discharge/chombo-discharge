@@ -18,7 +18,6 @@
 
 // Our includes
 #include <CD_Vec.H>
-#include <CD_DcelAlgorithms.H>
 #include <CD_DcelVertex.H>
 #include <CD_DcelEdge.H>
 #include <CD_DcelPolygon2D.H>
@@ -136,7 +135,7 @@ namespace Dcel {
       @note See CD_DcelAlgorithms.H for options (and CD_DcelPolyImplem.H for how the algorithms operate). 
     */
     inline
-    void setInsideOutsideAlgorithm(const InsideOutsideAlgorithm& a_algorithm) noexcept;
+    void setInsideOutsideAlgorithm(typename Dcel::Polygon2D<T>::InsideOutsideAlgorithm& a_algorithm) noexcept;
 
     /*!
       @brief Get modifiable half-edge
@@ -267,7 +266,7 @@ namespace Dcel {
     /*!
       @brief Algorithm for inside/outside tests
     */
-    InsideOutsideAlgorithm m_poly2Algorithm;
+    typename Polygon2D<T>::InsideOutsideAlgorithm m_poly2Algorithm;
 
     /*!
       @brief Compute the area of this polygon

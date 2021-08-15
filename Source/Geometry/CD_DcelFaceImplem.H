@@ -24,7 +24,7 @@ namespace Dcel {
   FaceT<T>::FaceT(){
     m_halfEdge       = nullptr;
     m_normal         = Vec3::zero();
-    m_poly2Algorithm = InsideOutsideAlgorithm::CrossingNumber;
+    m_poly2Algorithm = Polygon2D<T>::InsideOutsideAlgorithm::CrossingNumber;
   }
 
   template <class T>
@@ -87,7 +87,7 @@ namespace Dcel {
 
   template <class T>
   inline
-  void FaceT<T>::setInsideOutsideAlgorithm(const InsideOutsideAlgorithm& a_algorithm) noexcept {
+  void FaceT<T>::setInsideOutsideAlgorithm(typename Dcel::Polygon2D<T>::InsideOutsideAlgorithm& a_algorithm) noexcept {
     m_poly2Algorithm = a_algorithm;
   }
 

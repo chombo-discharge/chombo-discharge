@@ -37,6 +37,15 @@ namespace Dcel {
   public:
 
     /*!
+      @brief Supported algorithms for performing inside/outside tests when checking if a point projects to the inside or outside of a polygon face. 
+    */
+    enum class InsideOutsideAlgorithm {
+      SubtendedAngle,
+      CrossingNumber,
+      WindingNumber
+    };
+
+    /*!
       @brief Alias to cut down on typing
     */
     using Vec2 = Vec2T<T>;
