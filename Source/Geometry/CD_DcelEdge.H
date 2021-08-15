@@ -27,7 +27,7 @@ namespace Dcel {
   template <class T> class VertexT;
   template <class T> class EdgeT;
   template <class T> class FaceT;
-  template <class T> class edgeIteratorT;
+  template <class T> class EdgeIteratorT;
   
   /*!
     @brief Class which represents a half-edge in a double-edge connected list (DCEL). 
@@ -82,7 +82,7 @@ namespace Dcel {
     /*!
       @brief Alias to cut down on typing
     */    
-    using edgeIterator = edgeIteratorT<T>;
+    using EdgeIterator = EdgeIteratorT<T>;
 
     /*!
       @brief Default constructor. Sets all pointers to zero and vectors to zero vectors

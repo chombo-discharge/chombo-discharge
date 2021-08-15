@@ -28,7 +28,7 @@ namespace Dcel {
   template <class T> class VertexT;
   template <class T> class EdgeT;
   template <class T> class FaceT;
-  template <class T> class edgeIteratorT;
+  template <class T> class EdgeIteratorT;
 
   /*!
     @brief Class which represents a vertex node in a double-edge connected list (DCEL). 
@@ -78,9 +78,9 @@ namespace Dcel {
     using FacePtr = std::shared_ptr<Face>;
 
     /*!
-      @brief Alias to cut down on typing. Note that this is std::shared_ptr<edgeIteratorT<T> >
+      @brief Alias to cut down on typing. Note that this is std::shared_ptr<EdgeIteratorT<T> >
     */        
-    using edgeIterator = edgeIteratorT<T>;
+    using EdgeIterator = EdgeIteratorT<T>;
 
     /*!
       @brief Default constructor. 

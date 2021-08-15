@@ -30,7 +30,7 @@ namespace Dcel {
     @details This class can be used so that it either visits all the half-edges in a face, or all the outgoing half-edges from a vertex. 
   */
   template <class T>
-  class edgeIteratorT {
+  class EdgeIteratorT {
   public:
 
     /*!
@@ -66,35 +66,35 @@ namespace Dcel {
     /*!
       @brief Default construction is not allowed. Use one of the full constructors
     */
-    edgeIteratorT() = delete;
+    EdgeIteratorT() = delete;
 
     /*!
       @brief Constructor, taking a face as argument. The iterator begins at the half-edge pointer contained in the face
       @param[in] a_face DCEL polygon face
       @note This constructor will will iterate through the half-edges in the polygon face. 
     */
-    edgeIteratorT(Face& a_face);
+    EdgeIteratorT(Face& a_face);
 
     /*!
       @brief Constructor, taking a face as argument. The iterator begins at the half-edge pointer contained in the face
       @param[in] a_face DCEL polygon face
       @note This constructor will will iterate through the half-edges in the polygon face. 
     */    
-    edgeIteratorT(const Face& a_face);
+    EdgeIteratorT(const Face& a_face);
 
     /*!
       @brief Constructor, taking a vertex as argument. The iterator begins at the outgoing half-edge from the vertex
       @param[in] a_vertex DCEL vertex
       @note This constructor will will iterate through the outgoing half-edges from a vertex. 
     */        
-    edgeIteratorT(Vertex& a_vertex);
+    EdgeIteratorT(Vertex& a_vertex);
 
     /*!
       @brief Constructor, taking a vertex as argument. The iterator begins at the outgoing half-edge from the vertex
       @param[in] a_vertex DCEL vertex
       @note This constructor will will iterate through the outgoing half-edges from a vertex. 
     */            
-    edgeIteratorT(const Vertex& a_vertex);
+    EdgeIteratorT(const Vertex& a_vertex);
 
     /*!
       @brief Operator returning a pointer to the current half-edge

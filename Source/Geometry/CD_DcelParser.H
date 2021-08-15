@@ -40,7 +40,7 @@ namespace Dcel {
       using Face   = FaceT<T>;
       using Mesh   = MeshT<T>;
 
-      using edgeIterator = edgeIteratorT<T>;
+      using EdgeIterator = EdgeIteratorT<T>;
 
       /*!
 	@brief Read an ASCII .ply file and put it in a mesh

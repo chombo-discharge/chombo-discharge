@@ -30,7 +30,7 @@ namespace Dcel {
   template <class T> class VertexT;
   template <class T> class EdgeT;
   template <class T> class FaceT;
-  template <class T> class edgeIteratorT;
+  template <class T> class EdgeIteratorT;
 
   /*!
     @brief Class which represents a polygon face in a double-edge connected list (DCEL). 
@@ -84,7 +84,7 @@ namespace Dcel {
     /*!
       @brief Alias to cut down on typing
     */            
-    using edgeIterator = edgeIteratorT<T>;
+    using EdgeIterator = EdgeIteratorT<T>;
 
     /*!
       @brief Default constructor. Sets the half-edge to zero and the inside/outside algorithm to crossing number algorithm

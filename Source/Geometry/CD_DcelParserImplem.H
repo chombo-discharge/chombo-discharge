@@ -217,7 +217,7 @@ namespace Dcel {
       const auto& vertexEnd   = nextEdge->getVertex();
 
       for (const auto& p : vertexStart->getFaces()){
-	for (edgeIterator edgeIt(*p); edgeIt.ok(); ++edgeIt){
+	for (EdgeIterator edgeIt(*p); edgeIt.ok(); ++edgeIt){
 	  const auto& polyCurEdge  = edgeIt();
 	  const auto& polyNextEdge = polyCurEdge->getNextEdge();
 

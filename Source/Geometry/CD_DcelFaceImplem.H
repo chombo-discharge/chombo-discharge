@@ -68,7 +68,7 @@ namespace Dcel {
   void FaceT<T>::computeAndStoreEdges() noexcept {
     m_edges.resize(0);
 
-    for (edgeIterator edgeIt(*this); edgeIt.ok(); ++edgeIt){
+    for (EdgeIterator edgeIt(*this); edgeIt.ok(); ++edgeIt){
       m_edges.emplace_back(edgeIt());
     }
   }
@@ -217,7 +217,7 @@ namespace Dcel {
   std::vector<std::shared_ptr<VertexT<T> > > FaceT<T>::gatherVertices() const noexcept {
     std::vector<VertexPtr> vertices;
 
-    for (edgeIterator iter(*this); iter.ok(); ++iter){
+    for (EdgeIterator iter(*this); iter.ok(); ++iter){
       EdgePtr& edge = iter();
       vertices.emplace_back(edge->getVertex());
     }
@@ -230,7 +230,7 @@ namespace Dcel {
   std::vector<Vec3T<T> > FaceT<T>::getAllVertexCoordinates() const noexcept {
     std::vector<Vec3> ret;
 
-    for (edgeIterator iter(*this); iter.ok(); ++iter){
+    for (EdgeIterator iter(*this); iter.ok(); ++iter){
       EdgePtr& edge = iter();
       ret.emplace_back(edge->getVertex()->getPosition());
     }

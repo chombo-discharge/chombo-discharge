@@ -148,7 +148,7 @@ namespace Dcel {
     for (const auto& f : a_faces){
       
       std::vector<VertexPtr> inoutVertices(0);
-      for (edgeIterator edgeIt(f->getHalfEdge()); edgeIt.ok(); ++edgeIt){
+      for (EdgeIterator edgeIt(f->getHalfEdge()); edgeIt.ok(); ++edgeIt){
 	const auto& e = edgeIt();
 
 	const auto& v1 = e->getVertex();
