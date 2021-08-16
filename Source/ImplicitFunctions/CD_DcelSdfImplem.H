@@ -20,14 +20,16 @@
 using namespace Dcel;
 
 template <class T>
-DcelSdf<T>::DcelSdf(const std::shared_ptr<Mesh>& a_mesh, const bool a_flipInside){
+DcelSdf<T>::DcelSdf(const std::shared_ptr<Mesh>& a_mesh, const bool a_flipInside, const Real a_zCoord){
   m_mesh       = a_mesh;
+  m_zCoord     = a_zCoord;
   m_flipInside = a_flipInside;
 }
 
 template <class T>
 DcelSdf<T>::DcelSdf(const DcelSdf& a_object){
   m_mesh       = a_object.m_mesh;
+  m_zCoord     = a_object.m_zCoord;
   m_flipInside = a_object.m_flipInside;
 }
 
@@ -38,8 +40,12 @@ DcelSdf<T>::~DcelSdf(){
 
 template <class T>
 Real DcelSdf<T>::value(const RealVect& a_point) const {
-  
+
+#if CH_SPACEDIM==2
+  Vec3 p(a_point[0], a_point[1], m_zCoord);
+#else
   Vec3 p(a_point[0], a_point[1], a_point[2]);
+#endif
 
   T retval = m_mesh->signedDistance(p); // Note that Dcel::mesh can return either positive or negative for outside, depending on the orientation of the input normals. 
   

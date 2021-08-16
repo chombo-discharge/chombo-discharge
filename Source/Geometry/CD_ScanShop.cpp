@@ -19,28 +19,27 @@
 #include <CD_ScanShop.H>
 #include <CD_NamespaceHeader.H>
 
-#define DEBUG 0
-
-bool ScanShop::s_irregularBalance = true;
-bool ScanShop::s_recursive        = true;
-int ScanShop::s_grow              = 4;
+#define DEBUG_ScanShop 0
 
 ScanShop::ScanShop(const BaseIF&       a_localGeom,
 		   const int           a_verbosity,
 		   const Real          a_dx,
-		   const RealVect      a_origin,
+		   const RealVect      a_probLo,
 		   const ProblemDomain a_finestDomain,
 		   const ProblemDomain a_scanLevel,
+		   const int           a_maxGhostEB,
 		   const Real          a_thrshdVoF)
   : GeometryShop(a_localGeom, a_verbosity, a_dx*RealVect::Unit, a_thrshdVoF) {
 
+  CH_TIME("ScanShop::ScanShop(BaseIF, int, Real, RealVect, ProblemDomain, ProblemDomain, int, Real)");
 
-  m_baseif = &a_localGeom;
+  m_baseIF       = &a_localGeom;
   m_hasScanLevel = false;
+  m_maxGhostEB   = a_maxGhostEB;
 
   // EBISLevel doesn't give resolution, origin, and problem domains through makeGrids, so we
-  // need to construct these here, and then extract the proper resolution when we actually do makeGrids
-  ScanShop::makeDomains(a_dx, a_origin, a_finestDomain, a_scanLevel);
+  // need to construct these here, and then extract the proper resolution when we actually call makeGrids
+  ScanShop::makeDomains(a_dx, a_probLo, a_finestDomain, a_scanLevel);
 }
 
 ScanShop::~ScanShop(){
@@ -48,12 +47,12 @@ ScanShop::~ScanShop(){
 }
 
 void ScanShop::makeDomains(const Real          a_dx,
-			   const RealVect      a_origin,
+			   const RealVect      a_probLo,
 			   const ProblemDomain a_finestDomain,
 			   const ProblemDomain a_scanLevel){
-  CH_TIME("ScanShop::makeDomains");
+  CH_TIME("ScanShop::makeDomains(Real, RealVect, ProblemDomain, ProblemDomain)");
 
-  m_origin = a_origin;
+  m_probLo = a_probLo;
   
   m_dx.resize(0);
   m_domains.resize(0);
@@ -92,6 +91,7 @@ void ScanShop::makeGrids(const ProblemDomain& a_domain,
 			 DisjointBoxLayout&   a_grids,
 			 const int&           a_maxGridSize,
 			 const int&           a_maxIrregGridSize){
+  CH_TIME("ScanShop::makeDomains(ProblemDomain, DisjointBoxLayout, int, int)");  
 
   // Build the scan level first
   if(!m_hasScanLevel){
@@ -100,7 +100,7 @@ void ScanShop::makeGrids(const ProblemDomain& a_domain,
     }
     ScanShop::buildFinerLevels(m_scanLevel, a_maxGridSize);   // Traverse towards finer levels
 
-#if DEBUG
+#if DEBUG_ScanShop
     for (int lvl = 0; lvl < m_domains.size(); lvl++){
       ScanShop::printNumBoxesLevel(lvl);
     }
@@ -135,30 +135,42 @@ void ScanShop::makeGrids(const ProblemDomain& a_domain,
   }
 }
 
-bool ScanShop::isRegular(const Box a_box, const RealVect a_origin, const Real a_dx){
+bool ScanShop::isRegular(const Box a_box, const RealVect a_probLo, const Real a_dx) const {
+  CH_TIME("ScanShop::isRegular(Box, RealVect, Real)");
+
+  bool ret;
+  
   for (BoxIterator bit(a_box); bit.ok(); ++bit){
     const IntVect iv = bit();
-    const RealVect a_point = a_origin + a_dx*(0.5*RealVect::Unit + RealVect(iv));
-    if(m_baseif->value(a_point) > -0.5*a_dx){
-      return false;
+    const RealVect a_point = a_probLo + a_dx*(0.5*RealVect::Unit + RealVect(iv));
+    if(m_baseIF->value(a_point) > -0.5*a_dx){
+      ret = false;
+      break;
     }
   }
 
-  return true;
+  return ret;
 }
 
-bool ScanShop::isCovered(const Box a_box, const RealVect a_origin, const Real a_dx){
+bool ScanShop::isCovered(const Box a_box, const RealVect a_probLo, const Real a_dx) const {
+  CH_TIME("ScanShop::isCovered(Box, RealVect, Real)");
+
+  bool ret = true;
+  
   for (BoxIterator bit(a_box); bit.ok(); ++bit){
     const IntVect iv = bit();
-    const RealVect a_point = a_origin + a_dx*(0.5*RealVect::Unit + RealVect(iv));
-    if(m_baseif->value(a_point) < 0.5*a_dx) return false;
+    const RealVect a_point = a_probLo + a_dx*(0.5*RealVect::Unit + RealVect(iv));
+    if(m_baseIF->value(a_point) < 0.5*a_dx) {
+      ret = false;
+      break;
+    }
   }
 
-  return true;
+  return ret;
 }
 
 void ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize){
-  CH_TIME("ScanShop::buildCoarseLevel");
+  CH_TIME("ScanShop::buildCoarseLevel(int, int)");
 
   // This function does the following:
   // 1. Break up the domain into chunks of max size a_maxGridSize and load balance them trivially
@@ -183,11 +195,11 @@ void ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize){
     const Box box = dbl.get(dit());
     
     Box grownBox = box;
-    grownBox.grow(ScanShop::s_grow);
+    grownBox.grow(m_maxGhostEB);
     grownBox &= m_domains[a_level];
 
-    const bool isRegular = ScanShop::isRegular(grownBox, m_origin, m_dx[a_level]);
-    const bool isCovered = ScanShop::isCovered(grownBox, m_origin, m_dx[a_level]);
+    const bool isRegular = ScanShop::isRegular(grownBox, m_probLo, m_dx[a_level]);
+    const bool isCovered = ScanShop::isCovered(grownBox, m_probLo, m_dx[a_level]);
 
     if(isRegular && !isCovered){
       map[dit()].setRegular();
@@ -206,7 +218,7 @@ void ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize){
     }
   }
 
-#if DEBUG // Debug first map
+#if DEBUG_ScanShop // Debug first map
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     if(map[dit()].m_which == -1) MayDay::Abort("ScanShop::buildCoarseLevel - initial map shouldn't get -1");
   }
@@ -242,7 +254,7 @@ void ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize){
   // 5. Finally, copy the map
   map.copyTo(*m_boxMaps[a_level]);
 
-#if DEBUG // Debug first map
+#if DEBUG_ScanShop // Debug first map
   for (DataIterator dit = m_grids[a_level].dataIterator(); dit.ok(); ++dit){
     if((*m_boxMaps[a_level])[dit()].m_which == -1) MayDay::Abort("ScanShop::buildCoarseLevel - final map shouldn't get -1");
   }
@@ -253,8 +265,7 @@ void ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize){
 }
 
 void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSize){
-  CH_TIME("ScanShop::buildFinerLevels");
-
+  CH_TIME("ScanShop::buildFinerLevels(int, int)");
 
   if(a_coarserLevel > 0){
 
@@ -304,11 +315,11 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
       const Box box = CutCellDBL.get(dit());
       
       Box grownBox = box;
-      grownBox.grow(ScanShop::s_grow);
+      grownBox.grow(m_maxGhostEB);
       grownBox &= m_domains[fineLvl];
 
-      const bool isRegular = ScanShop::isRegular(grownBox, m_origin, m_dx[fineLvl]);
-      const bool isCovered = ScanShop::isCovered(grownBox, m_origin, m_dx[fineLvl]);
+      const bool isRegular = ScanShop::isRegular(grownBox, m_probLo, m_dx[fineLvl]);
+      const bool isCovered = ScanShop::isCovered(grownBox, m_probLo, m_dx[fineLvl]);
 
       if(isRegular){
 	CutCellMap[dit()].setRegular();
@@ -323,7 +334,7 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
 	CutCellBoxes.push_back(box);
       }
       else{
-	MayDay::Abort("ScanShop::buildCoarseLevel - logic bust");
+	MayDay::Abort("ScanShop::buildFinerLevels - logic bust!");
       }
     }
     
@@ -356,7 +367,7 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
     mapFineCoar.copyTo(*m_boxMaps[fineLvl]);
     CutCellMap.copyTo(*m_boxMaps[fineLvl]);
 
-#if DEBUG // Dummy check the box maps
+#if DEBUG_ScanShop // Dummy check the box maps
     for (DataIterator dit = CutCellDBL.dataIterator(); dit.ok(); ++dit){
       if(CutCellMap[dit()].m_which == -1) MayDay::Abort("ScanShop::buildFinerLevels - CutCellMap shouldn't get -1");
     }
@@ -377,10 +388,10 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
 
 GeometryService::InOut ScanShop::InsideOutside(const Box&           a_region,
 					       const ProblemDomain& a_domain,
-					       const RealVect&      a_origin,
+					       const RealVect&      a_probLo,
 					       const Real&          a_dx,
 					       const DataIndex&     a_dit) const{
-  CH_TIME("ScanShop::InsideOutSide");
+  CH_TIME("ScanShop::InsideOutSide(Box, ProblemDomain, RealVect, Real, DataIndex)");
 
   // Find the level corresponding to a_domain
   int whichLevel = -1;
@@ -416,18 +427,18 @@ GeometryService::InOut ScanShop::InsideOutside(const Box&           a_region,
     }
     else{
       ret= GeometryService::Irregular;
-      //      return GeometryService::InsideOutside(a_region, domain, a_origin, a_dx, a_dit);
+      //      return GeometryService::InsideOutside(a_region, domain, a_probLo, a_dx, a_dit);
     }
   }
   else{
-    ret = GeometryService::InsideOutside(a_region, domain, a_origin, a_dx, a_dit);
+    ret = GeometryService::InsideOutside(a_region, domain, a_probLo, a_dx, a_dit);
   }
 
   return ret;
 }
 
-void ScanShop::printNumBoxesLevel(const int a_level){
-  CH_TIME("ScanShop::printNumBoxesLevel");
+void ScanShop::printNumBoxesLevel(const int a_level) const {
+  CH_TIME("ScanShop::printNumBoxesLevel(int)");
 
   const DisjointBoxLayout&     dbl = m_grids[a_level];
   const LevelData<BoxType>& boxMap = *m_boxMaps[a_level];
@@ -461,73 +472,70 @@ void ScanShop::printNumBoxesLevel(const int a_level){
 	      << "\t CutCell boxes = " << numCutCell << "\n"
 	      << std::endl;
   }
-    
 }
 
-void ScanShop::gatherBoxesParallel(Vector<Box>& a_boxes){
+void ScanShop::gatherBoxesParallel(Vector<Box>& a_boxes) const {
+  CH_TIME("ScanShop::gatherBoxesParallel(Vector<Box>)");
+  
 #ifdef CH_MPI
   // 1. Linearize local boxes
-  int send_size    = 2*CH_SPACEDIM;                 // Message size for one box
-  int send_count   = a_boxes.size()*send_size;      // Number of elements sent from this rank
-#if 0 // Why did I multiply by send_size TWICE...?
-  int* send_buffer = new int[send_count*send_size]; // Send buffer for this rank. 
-#else
-  int* send_buffer = new int[send_count]; // Send buffer for this rank
-#endif
-  int* send_buf2   = send_buffer;                   // Backup address. Going to monkey with pointer increments on send buffer
+  int sendSize     = 2*CH_SPACEDIM;                 // Message size for one box
+  int sendCount    = a_boxes.size()*sendSize;      // Number of elements sent from this rank
+  int* sendBuffer  = new int[sendCount]; // Send buffer for this rank
+  int* sendBuffer2 = sendBuffer;                   // Backup address. Going to monkey with pointer increments on send buffer
 
-  // Linearize a_boxes onto send_buffer
-  for (int i = 0; i < a_boxes.size(); i++, send_buffer+=send_size){
+  // Linearize a_boxes onto sendBuffer
+  for (int i = 0; i < a_boxes.size(); i++, sendBuffer+=sendSize){
     const Box& b = a_boxes[i];
-    D_TERM6(send_buffer[0] =b.smallEnd(0); send_buffer[1] =b.bigEnd(0);,
-	    send_buffer[2] =b.smallEnd(1); send_buffer[3] =b.bigEnd(1);,
-	    send_buffer[4] =b.smallEnd(2); send_buffer[5] =b.bigEnd(2);,
-	    send_buffer[6] =b.smallEnd(3); send_buffer[7] =b.bigEnd(3);,
-	    send_buffer[8] =b.smallEnd(4); send_buffer[9] =b.bigEnd(4);,
-	    send_buffer[10]=b.smallEnd(5); send_buffer[11]=b.bigEnd(5););
+    D_TERM6(sendBuffer[0] =b.smallEnd(0); sendBuffer[1] =b.bigEnd(0);,
+	    sendBuffer[2] =b.smallEnd(1); sendBuffer[3] =b.bigEnd(1);,
+	    sendBuffer[4] =b.smallEnd(2); sendBuffer[5] =b.bigEnd(2);,
+	    sendBuffer[6] =b.smallEnd(3); sendBuffer[7] =b.bigEnd(3);,
+	    sendBuffer[8] =b.smallEnd(4); sendBuffer[9] =b.bigEnd(4);,
+	    sendBuffer[10]=b.smallEnd(5); sendBuffer[11]=b.bigEnd(5););
   }
-  send_buffer = send_buf2; // Revert point to start of array
+  sendBuffer = sendBuffer2; // Revert point to start of array
 
 
   // 2. Get the number of elements sent from each rank
-  int* send_counts = new int[numProc()];
-  MPI_Allgather(&send_count, 1, MPI_INT, send_counts, 1, MPI_INT, Chombo_MPI::comm);
+  int* sendCounts = new int[numProc()];
+  MPI_Allgather(&sendCount, 1, MPI_INT, sendCounts, 1, MPI_INT, Chombo_MPI::comm);
 
   // 3. Compute offsets
   int* offsets = new int[numProc()];
   offsets[0] = 0;
   for (int i = 0; i < numProc()-1; i++){
-    offsets[i+1] = offsets[i] + send_counts[i];
+    offsets[i+1] = offsets[i] + sendCounts[i];
   }
 
   // 4. Allocate storage for total buffer size
-  int total_count = 0;
+  int totalCount = 0;
   for (int i = 0; i < numProc(); i++){
-    total_count += send_counts[i];
+    totalCount += sendCounts[i];
   }
-  int* recv_buffer = new int[total_count];
+  int* receiveBuffer = new int[totalCount];
 
   // 5. MPI send
-  MPI_Allgatherv(send_buffer, send_count, MPI_INT, recv_buffer, send_counts, offsets, MPI_INT, Chombo_MPI::comm);
+  MPI_Allgatherv(sendBuffer, sendCount, MPI_INT, receiveBuffer, sendCounts, offsets, MPI_INT, Chombo_MPI::comm);
 
   // 6. Delinearize buffer, make it into boxes
   a_boxes.resize(0);
-  int* recv_buf2 = recv_buffer; // Going to monkey with pointer increments again
-  for (int i = 0; i < total_count/send_size; i++, recv_buffer+=send_size){
+  int* recv_buf2 = receiveBuffer; // Going to monkey with pointer increments again
+  for (int i = 0; i < totalCount/sendSize; i++, receiveBuffer+=sendSize){
     IntVect lo, hi;
-    D_TERM6(lo[0] = recv_buffer[0];  hi[0] = recv_buffer[1];,
-	    lo[1] = recv_buffer[2];  hi[1] = recv_buffer[3];,
-	    lo[2] = recv_buffer[4];  hi[2] = recv_buffer[5];,
-	    lo[3] = recv_buffer[6];  hi[3] = recv_buffer[7];,
-	    lo[4] = recv_buffer[8];  hi[4] = recv_buffer[9];,
-	    lo[5] = recv_buffer[10]; hi[5] = recv_buffer[11];);
+    D_TERM6(lo[0] = receiveBuffer[0];  hi[0] = receiveBuffer[1];,
+	    lo[1] = receiveBuffer[2];  hi[1] = receiveBuffer[3];,
+	    lo[2] = receiveBuffer[4];  hi[2] = receiveBuffer[5];,
+	    lo[3] = receiveBuffer[6];  hi[3] = receiveBuffer[7];,
+	    lo[4] = receiveBuffer[8];  hi[4] = receiveBuffer[9];,
+	    lo[5] = receiveBuffer[10]; hi[5] = receiveBuffer[11];);
 
     a_boxes.push_back(Box(lo, hi));
   }
-  recv_buffer = recv_buf2;
+  receiveBuffer = recv_buf2;
 
-  delete recv_buffer;
-  delete send_buffer;
+  delete receiveBuffer;
+  delete sendBuffer;
 #endif
 }
 

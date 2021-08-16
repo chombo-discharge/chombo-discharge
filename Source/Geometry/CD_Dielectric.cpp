@@ -7,7 +7,7 @@
   @file   CD_Dielectric.cpp
   @brief  Implementation of CD_Dielectric.H
   @author Robert marskar
-  @date Nov. 2017
+  @date   Nov. 2017
 */
 
 // Our includes
@@ -15,44 +15,75 @@
 #include <CD_NamespaceHeader.H>
   
 Dielectric::Dielectric(){
+  CH_TIME("Dielectric::Dielectric()");
+
+  m_isDefined = false;
 }
   
-Dielectric::Dielectric(RefCountedPtr<BaseIF> a_baseif, Real a_permittivity){
-  this->define(a_baseif, a_permittivity);
+Dielectric::Dielectric(const RefCountedPtr<BaseIF>& a_baseIF, const Real a_permittivity) : Dielectric() {
+  CH_TIME("Dielectric::Dielectric(RefCountedPtr<BaseIF>, Real)");
+
+  CH_assert(!a_baseIF.isNull());
+  
+  this->define(a_baseIF, a_permittivity);
 }
 
-Dielectric::Dielectric(RefCountedPtr<BaseIF> a_baseif, Real (*a_permittivity)(const RealVect a_pos)){
-  this->define(a_baseif, a_permittivity);
+Dielectric::Dielectric(const RefCountedPtr<BaseIF>& a_baseIF, const std::function<Real(const RealVect a_pos)>& a_permittivity) : Dielectric() {
+  CH_TIME("Dielectric::Dielectric(RefCountedPtr<BaseIF>, std::function<Real(const RealVect a_pos)>)");
+
+  CH_assert(!a_baseIF.isNull());  
+  
+  this->define(a_baseIF, a_permittivity);
 }
 
 Dielectric::~Dielectric(){
 }
 
-void Dielectric::define(RefCountedPtr<BaseIF> a_baseif, Real a_permittivity){
-  m_baseif       = a_baseif;
-  m_permittivity = a_permittivity;
+void Dielectric::define(const RefCountedPtr<BaseIF>& a_baseIF, const Real a_permittivity){
+  CH_TIME("Dielectric::define(RefCountedPtr<BaseIF>, Real)");
 
-  m_constant = true;
+  CH_assert(!a_baseIF.isNull());
+  
+  m_baseIF               = a_baseIF;
+  m_constantPermittivity = a_permittivity;
+  m_useConstant          = true;
+  m_isDefined            = true;
 }
 
-void Dielectric::define(RefCountedPtr<BaseIF> a_baseif, Real (*a_permittivity)(const RealVect a_pos)){
-  m_baseif               = a_baseif;
-  m_variablepermittivity = a_permittivity;
+void Dielectric::define(const RefCountedPtr<BaseIF>& a_baseIF, const std::function<Real(const RealVect a_pos)>& a_permittivity){
+  CH_TIME("Dielectric::define(RefCountedPtr<BaseIF>, std::function<Real(const RealVect a_pos)>)");  
+
+  CH_assert(!a_baseIF.isNull());
   
-  m_constant = false;
+  m_baseIF               = a_baseIF;
+  m_variablePermittivity = a_permittivity;
+  m_useConstant          = false;
+  m_isDefined            = true;
 }
 
 const RefCountedPtr<BaseIF>& Dielectric::getImplicitFunction() const {
-  return m_baseif;
+  CH_TIME("Dielectric::getImplicitFunction()");
+
+  CH_assert(m_isDefined);
+  
+  return (m_baseIF);
 }
   
 Real Dielectric::getPermittivity(const RealVect a_pos) const {
-  if(m_constant){
-    return m_permittivity;
+  CH_TIME("Dielectric::getPermittivity(RealVect)");
+  
+  CH_assert(m_isDefined);
+
+  Real ret = 1.0;
+  
+  if(m_useConstant){
+    ret = m_constantPermittivity;
   }
   else{
-    return m_variablepermittivity(a_pos);
+    ret = m_variablePermittivity(a_pos);
   }
+
+  return ret;
 }
 
 #include <CD_NamespaceFooter.H>

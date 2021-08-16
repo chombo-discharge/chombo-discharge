@@ -22,18 +22,18 @@
 
 /*!
   @brief Utility class for removing geometrically tagged cells
-  @details This class is an optimization class for coarsening of EBs. The usage of this class is simple; the user defines m_coarsen_boxes and a level for each coarsening box. These are passed to plasma_engine which will remove geometric tags in those regions (above the level specified)
+  @details This class is an optimization class for coarsening of EBs. The usage of this class is simple; the user defines a set of boxes in which we will remove tags. 
 */
 class GeoCoarsener {
 public:
 
   /*!
-    @brief Constructor
+    @brief Constructor. This parses boxes/voxels from the input script. 
   */
   GeoCoarsener();
 
   /*!
-    @brief Destructor
+    @brief Destructor (does nothing)
   */
   virtual ~GeoCoarsener();
 
@@ -41,31 +41,31 @@ public:
     @brief Coarsen tags
     @param[in] a_tags   Tags to be modified. 
     @param[in] a_dx     Grid resolutions. 
-    @param[in] a_probLo Domain origin. 
+    @param[in] a_probLo Lower-left corner of simulation domain. 
   */
   virtual void coarsenTags(Vector<IntVectSet>& a_tags, const Vector<Real>& a_dx, const RealVect& a_probLo) const;
 
   /*!
     @brief Get coarsening boxes
   */
-  virtual Vector<RealBox> getCoarsenBoxes();
+  virtual Vector<RealBox> getCoarsenBoxes() const;
 
   /*!
     @brief Get coarsening levels
   */
-  virtual Vector<int> getCoarsenLevels();
+  virtual Vector<int> getCoarsenLevels() const;
   
 protected:
 
   /*!
     @brief Coarsening boxes
   */
-  Vector<RealBox> m_coarsen_boxes;
+  Vector<RealBox> m_coarsenBoxes;
 
   /*!
     @brief Coarsening levels. Tags are removed above this level
   */
-  Vector<int> m_coarsen_levels;
+  Vector<int> m_coarsenLevels;
 
   /*!
     @brief Inverse box or not

@@ -1,5 +1,5 @@
 # ====================================================================================================
-# AMR_MESH OPTIONS
+# AmrMesh class options
 # ====================================================================================================
 AmrMesh.lo_corner        = -1 -1 -1    # Low corner of problem domain
 AmrMesh.hi_corner        =  1  1  1    # High corner of problem domain

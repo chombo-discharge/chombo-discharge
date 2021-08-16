@@ -1,5 +1,5 @@
 # ====================================================================================================
-# GEO_COARSENER CLASS OPTIONS
+# GeoCoarsener class options
 # ====================================================================================================
 GeoCoarsener.num_boxes   = 0            # Number of coarsening boxes (0 = don't coarsen)
 GeoCoarsener.box1_lo     = 0.0 0.0 0.0  # Remove irregular cell tags 

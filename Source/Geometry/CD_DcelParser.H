@@ -25,25 +25,49 @@
 #include "CD_NamespaceHeader.H"
 
 namespace Dcel {
-  namespace parser {
+
+  /*!
+    @brief Namespace which encapsulates possible file parsers for building DCEL meshes
+  */
+  namespace Parser {
   
     /*!
-      @class PLY
-      @brief Class for generation a Dcel::mesh from the Stanford PLY file format
+      @brief Class for generation a Dcel::MeshT<T> from the Stanford PLY file format
+      @note T is the precision used for storing the mesh. 
     */
     template <class T>
     class PLY {
     public:
 
+      /*!
+	@brief Alias for cutting down on typing
+      */
       using Vertex = VertexT<T>;
-      using Edge   = EdgeT<T>;
-      using Face   = FaceT<T>;
-      using Mesh   = MeshT<T>;
-
-      using edgeIterator = edgeIteratorT<T>;
 
       /*!
-	@brief Read an ASCII .ply file and put it in a mesh
+	@brief Alias for cutting down on typing
+      */      
+      using Edge = EdgeT<T>;
+
+      /*!
+	@brief Alias for cutting down on typing
+      */      
+      using Face = FaceT<T>;
+
+      /*!
+	@brief Alias for cutting down on typing
+      */            
+      using Mesh = MeshT<T>;
+
+      /*!
+	@brief Alias for cutting down on typing
+      */            
+      using EdgeIterator = EdgeIteratorT<T>;
+
+      /*!
+	@brief Static function which reads an ASCII .ply file and puts it in a mesh. 
+	@param[out] a_mesh     DCEL mesh 
+	@param[in]  a_filename File name
       */
       inline
       static void readASCII(Mesh& a_mesh, const std::string a_filename);
@@ -52,47 +76,49 @@ namespace Dcel {
 
       /*!
 	@brief Read an ASCII header
-	@param[out]   a_numVertices  Number of vertices
-	@param[out]   a_numFaces  Number of faces
-	@param[inout] a_inputstream   File
+	@details This reads the number of vertices and faces in the PLY file. Note that it only reads the header. 
+	@param[out]   a_numVertices Number of vertices
+	@param[out]   a_numFaces    Number of faces
+	@param[inout] a_inputStream File stream. On output, the filestream is at the end of the PLY header. 
       */
       inline
       static void readHeaderASCII(int&           a_numVertices,
 				  int&           a_numFaces,
-				  std::ifstream& a_inputstream);
+				  std::ifstream& a_inputStream);
 
       /*!
-	@brief Read ASCII vertices. The next getline() from inputstream must read the first vertex (i.e. don't rewind the stream
-	before entering this routine)
+	@brief Read ASCII vertices. 
+	@param[out] a_vertices DCEL vertices. These are constructed in this routine.
+	@param[in]  a_numVertices Number of vertices to read
+	@param[in]  a_inputStream Input file stream. 
+	@note The next getline() from a_inputStream must read the first vertex (i.e. don't rewind the stream before entering this routine)
       */
       inline
       static void readVerticesASCII(std::vector<std::shared_ptr<Vertex> >& a_vertices,
 				    const int                              a_numVertices,
-				    std::ifstream&                         a_inputstream);
+				    std::ifstream&                         a_inputStream);
 
       /*!
-	@brief Read ASCII faces and create mesh connectivity. The next getline() from inputstream must read the first face,
-	i.e. we assume that read_ascii_vertices was called IMMEDIATELY before this function. That function will center the fstream 
-	on the correct line
+	@brief Read ASCII faces and create mesh connectivity. 
+	@param[out] a_faces DCEL faces. Constructured in this routine. 
+	@param[out] a_edges DCEL edges. Constructured in this routine. 
+	@param[out] a_vertices DCEL edges. Constructured in readVerticesASCII. 
+	@note The next getline() from inputStream must read the first face, i.e. we assume that read_ascii_vertices was called IMMEDIATELY before this function. 
+	That function will center the fstream on the correct line in the input file. 
       */
       inline
-      static void readFacesASCII(std::vector<std::shared_ptr<Face> >&   a_faces,
-				 std::vector<std::shared_ptr<Edge> >&   a_edges,
-				 std::vector<std::shared_ptr<Vertex> >& a_vertices,
-				 const int                              a_numFaces,
-				 std::ifstream&                         a_inputstream);
+      static void readFacesASCII(std::vector<std::shared_ptr<Face> >&         a_faces,
+				 std::vector<std::shared_ptr<Edge> >&         a_edges,
+				 const std::vector<std::shared_ptr<Vertex> >& a_vertices,
+				 const int                                    a_numFaces,
+				 std::ifstream&                               a_inputStream);
 
       /*!
-	@brief This sets all pair edges
+	@brief Reconcile pair edges, i.e. find the pair edge for every constructed half-edge
+	@param[inout] a_edges Half edges. 
       */
       inline
       static void reconcilePairEdges(std::vector<std::shared_ptr<Edge> >& a_edges);
-
-      /*!
-	@brief Clean up memory
-      */
-      inline
-      static void clearFaceCache(std::vector<std::shared_ptr<Vertex> >& a_vertices);
     };
   }
 }
