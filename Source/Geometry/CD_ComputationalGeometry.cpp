@@ -143,8 +143,8 @@ void ComputationalGeometry::buildGeometries(const ProblemDomain   a_finestDomain
   // Build the geoservers. 
   Vector<GeometryService*> geoservers(2, NULL);
   
-  this->buildGasGeoServ  (geoservers[phase::gas],   a_finestDomain, a_probLo, a_finestDx);
-  this->buildSolidGeoServ(geoservers[phase::solid], a_finestDomain, a_probLo, a_finestDx);
+  this->buildGasGeometry  (geoservers[phase::gas],   a_finestDomain, a_probLo, a_finestDx);
+  this->buildSolidGeometry(geoservers[phase::solid], a_finestDomain, a_probLo, a_finestDx);
 
   // Define the multifluid index space.
   const bool useDistributedData = m_useScanShop;
@@ -165,11 +165,11 @@ void ComputationalGeometry::buildGeometries(const ProblemDomain   a_finestDomain
   }
 }
 
-void ComputationalGeometry::buildGasGeoServ(GeometryService*&   a_geoserver,
+void ComputationalGeometry::buildGasGeometry(GeometryService*&  a_geoserver,
 					    const ProblemDomain a_finestDomain,
 					    const RealVect      a_probLo,
-					    const Real          a_dx){
-  CH_TIME("ComputationalGeometry::buildGasGeoServ(GeometryService, ProblemDomain, RealVect, Real)");
+					    const Real          a_finestDx){
+  CH_TIME("ComputationalGeometry::buildGasGeometry(GeometryService, ProblemDomain, RealVect, Real)");
   
   // The gas phase is the intersection of the region outside every object, so IntersectionIF is correct here. We build the
   // various parts and then create the implicit function for the gas-phas using constructive solid geometry.
@@ -187,7 +187,7 @@ void ComputationalGeometry::buildGasGeoServ(GeometryService*&   a_geoserver,
   if(m_useScanShop){
     a_geoserver = static_cast<GeometryService*> (new ScanShop(*m_implicitFunctionGas,
 							      0,
-							      a_dx,
+							      a_finestDx,
 							      a_probLo,
 							      a_finestDomain,
 							      m_scanDomain,
@@ -195,45 +195,54 @@ void ComputationalGeometry::buildGasGeoServ(GeometryService*&   a_geoserver,
 							      s_thresh));
   }
   else{ // Chombo geometry generation
-    a_geoserver = static_cast<GeometryService*> (new GeometryShop(*m_implicitFunctionGas, 0, a_dx*RealVect::Unit, s_thresh));
+    a_geoserver = static_cast<GeometryService*> (new GeometryShop(*m_implicitFunctionGas, 0, a_finestDx*RealVect::Unit, s_thresh));
   }
 }
 
-void ComputationalGeometry::buildSolidGeoServ(GeometryService*&   a_geoserver,
+void ComputationalGeometry::buildSolidGeometry(GeometryService*&   a_geoserver,
 					      const ProblemDomain a_finestDomain,
 					      const RealVect      a_probLo,
-					      const Real          a_dx){
-  CH_TIME("ComputationalGeometry::buildSolidGeoServ(GeometryService, ProblemDomain, RealVect, Real)");  
+					      const Real          a_finestDx){
+  CH_TIME("ComputationalGeometry::buildSolidGeometry(GeometryService, ProblemDomain, RealVect, Real)");  
   
-  // The gas ebis is the intersection of dielectrics
-  Vector<BaseIF*> parts_dielectrics, parts_electrodes;
+  // The "solid phase", i.e. the part inside dielectrics is a bit more complicated to compute. We want to get the region
+  // outside the electrodes but inside the dielectrics. Fortunately there is a way to do this.
+
+  // Get all the parts (dielectrics/electrodes)
+  Vector<BaseIF*> dielectricParts;
+  Vector<BaseIF*> electrodeParts;
+  
   for (int i = 0; i < m_dielectrics.size(); i++){
-    parts_dielectrics.push_back(&(*m_dielectrics[i].getImplicitFunction()));
+    dielectricParts.push_back(&(*m_dielectrics[i].getImplicitFunction()));
   }
+  
   for (int i = 0; i < m_electrodes.size(); i++){
-    parts_electrodes.push_back(&(*m_electrodes[i].getImplicitFunction()));
+    electrodeParts.push_back(&(*m_electrodes[i].getImplicitFunction()));
   }
 
   // Create EBIndexSpace. If there are no solid phases, return null
-  if(parts_dielectrics.size() == 0){
+  if(dielectricParts.size() == 0){
     a_geoserver = NULL;
   }
   else {
     Vector<BaseIF*> parts;
 
-    RefCountedPtr<BaseIF> diel_baseif = RefCountedPtr<BaseIF> (new IntersectionIF(parts_dielectrics)); // Gas outside dielectric
-    RefCountedPtr<BaseIF> elec_baseif = RefCountedPtr<BaseIF> (new IntersectionIF(parts_electrodes));  // Gas outside electrodes
-    RefCountedPtr<BaseIF> diel_compif = RefCountedPtr<BaseIF> (new ComplementIF(*diel_baseif));        // Inside of dielectrics
+    RefCountedPtr<BaseIF> dielBaseIF = RefCountedPtr<BaseIF> (new IntersectionIF(dielectricParts)); // This gives the region outside the dielectrics. 
+    RefCountedPtr<BaseIF> elecBaseIF = RefCountedPtr<BaseIF> (new IntersectionIF(electrodeParts )); // This is the region outside the the electrodes. 
+    RefCountedPtr<BaseIF> dielCompIF = RefCountedPtr<BaseIF> (new ComplementIF  (*dielBaseIF   ));  // This is the region inside the dielectrics. 
 
-    parts.push_back(&(*diel_compif)); // Parts for intersection
-    parts.push_back(&(*elec_baseif)); // Parts for intersection
+    // We want the function which is the region inside the dielectrics and outside the electrodes, i.e. the intersection of the region "inside"
+    // dielectrics and outside the electrods. 
+    parts.push_back(&(*dielCompIF)); 
+    parts.push_back(&(*elecBaseIF)); 
     
     m_implicitFunctionSolid = RefCountedPtr<BaseIF> (new IntersectionIF(parts)); 
 
+    // Build the EBIS geometry. Use either ScanShop or Chombo here. 
     if(m_useScanShop){
       a_geoserver = static_cast<GeometryService*> (new ScanShop(*m_implicitFunctionSolid,
 								0,
-								a_dx,
+								a_finestDx,
 								a_probLo,
 								a_finestDomain,
 								m_scanDomain,
@@ -241,7 +250,7 @@ void ComputationalGeometry::buildSolidGeoServ(GeometryService*&   a_geoserver,
 								s_thresh));
     }
     else{ // Chombo geometry generation
-      a_geoserver = static_cast<GeometryService*> (new GeometryShop(*m_implicitFunctionSolid, 0, a_dx*RealVect::Unit, s_thresh));
+      a_geoserver = static_cast<GeometryService*> (new GeometryShop(*m_implicitFunctionSolid, 0, a_finestDx*RealVect::Unit, s_thresh));
     }
   }
 }

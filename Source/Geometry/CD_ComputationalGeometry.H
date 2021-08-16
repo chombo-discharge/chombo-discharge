@@ -181,20 +181,28 @@ protected:
   RefCountedPtr<BaseIF> m_implicitFunctionSolid;
 
   /*!
-    @brief Geometry server for gas phase
+    @brief Set up the geometry generation tool for the gas phase.
+    @param[inout] a_geoserver     Geometry service object which is later used for making build the EB information.
+    @param[in]    a_finestDomain  Finest domain which will be used
+    @param[in]    a_probLo        Lower-left corner of simulation domain.
+    @param[in]    a_finestDx      Finest resolution which will be used.
   */
-  void buildGasGeoServ(GeometryService*&   a_geoserver,
+  void buildGasGeometry(GeometryService*&  a_geoserver,
 		       const ProblemDomain a_finestDomain,
 		       const RealVect      a_probLo,
-		       const Real          a_dx);
+		       const Real          a_finestDx);
 
   /*!
-    @brief Geometry server for solid phas
+    @brief Set up the geometry generation tool for the solid phase, i.e. the part inside the dielectrics. 
+    @param[inout] a_geoserver     Geometry service object which is later used for making build the EB information.
+    @param[in]    a_finestDomain  Finest domain which will be used
+    @param[in]    a_probLo        Lower-left corner of simulation domain.
+    @param[in]    a_finestDx      Finest resolution which will be used.
   */
-  void buildSolidGeoServ(GeometryService*&   a_geoserver,
+  void buildSolidGeometry(GeometryService*&  a_geoserver,
 			 const ProblemDomain a_finestDomain,
 			 const RealVect      a_probLo,
-			 const Real          a_dx);
+			 const Real          a_finestDx);
 
 };
 
