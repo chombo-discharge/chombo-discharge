@@ -493,13 +493,6 @@ public:
     @brief Return true if the solver is mobile and false otherwise
   */
   virtual bool isMobile();
-
-  /*!
-    @brief Check if we can extrapolate
-    @details Special flag for when we operate with Godunov methods that extrapolate to half time step. 
-    @todo Move to CdrGdnv since this only affects that implementation. 
-  */
-  virtual bool extrapolateSourceTerm() const;
   
   /*!
     @brief Get the cell-centered phi
@@ -754,11 +747,6 @@ protected:
     @brief Solve for advection/convection or not
   */
   bool m_isMobile;
-  
-  /*!
-    @brief Turn on/off source terms when time-extrapolating
-  */
-  bool m_extrapolateSourceTerm;
 
   /*!
     @brief If true, m_phi is added to plot files. 
@@ -1044,11 +1032,6 @@ protected:
     @brief Parse the conservation
   */
   virtual void parseDivergenceComputation();
-
-  /*!
-    ®brief Parse source term stuff
-  */
-  virtual void parseExtrapolateSourceTerm();
   
   /*!
     @brief Shortcut for making a boundary condition string. 

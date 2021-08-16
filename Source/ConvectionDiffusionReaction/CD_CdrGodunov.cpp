@@ -23,193 +23,141 @@ ExtrapAdvectBCFactory s_physibc;
 #include "CD_NamespaceHeader.H"
 
 CdrGodunov::CdrGodunov() : CdrTGA() {
+  CH_TIME("CdrGodunov::CdrGodunov()");
+
+  // Class name and name. 
   m_className = "CdrGodunov";
-  m_name       = "CdrGodunov";
+  m_name      = "CdrGodunov";
 }
 
 CdrGodunov::~CdrGodunov(){
-
+  CH_TIME("CdrGodunov::~CdrGodunov()");
 }
 
 void CdrGodunov::parseOptions(){
-  CH_TIME("CdrGodunov::parseOptions");
+  CH_TIME("CdrGodunov::parseOptions()");
   if(m_verbosity > 5){
-    pout() << m_name + "::parseOptions" << endl;
+    pout() << m_name + "::parseOptions()" << endl;
   }
   
-  parseDomainBc();               // Parses domain BC options
-  parseSlopeLimiter();           // Parses slope limiter settings
-  parsePlotVariables();          // Parses plot variables
-  parsePlotMode();               // Parse plot mdoe
-  parseMultigridSettings();          // Parses solver parameters for geometric multigrid
-  parseExtrapolateSourceTerm();  // Parse source term extrapolation for time-centering advective comps
-  parseRngSeed();                // Get a seed
-  parseDivergenceComputation();  // Nonlinear divergence blending
+  this->parseDomainBc();               // Parses domain BC options
+  this->parseSlopeLimiter();           // Parses slope limiter settings
+  this->parsePlotVariables();          // Parses plot variables
+  this->parsePlotMode();               // Parse plot mdoe
+  this->parseMultigridSettings();      // Parses solver parameters for geometric multigrid
+  this->parseExtrapolateSourceTerm();  // Parse source term extrapolation for time-centering advective comps
+  this->parseRngSeed();                // Get a seed
+  this->parseDivergenceComputation();  // Nonlinear divergence blending
 }
 
 void CdrGodunov::parseRuntimeOptions(){
-  CH_TIME("CdrGodunov::parseRuntimeOptions");
+  CH_TIME("CdrGodunov::parseRuntimeOptions()");
   if(m_verbosity > 5){
-    pout() << m_name + "::parseRuntimeOptions" << endl;
+    pout() << m_name + "::parseRuntimeOptions()" << endl;
   }
 
-  parseSlopeLimiter();
-  parsePlotVariables();
-  parsePlotMode();
-  parseMultigridSettings();
-  parseDomainBc();
-  parseExtrapolateSourceTerm();
-  parseDivergenceComputation();
+  this->parseSlopeLimiter();
+  this->parsePlotVariables();
+  this->parsePlotMode();
+  this->parseMultigridSettings();
+  this->parseDomainBc();
+  this->parseExtrapolateSourceTerm();
+  this->parseDivergenceComputation();
+}
+
+
+void CdrGodunov::parseExtrapolateSourceTerm(){
+  CH_TIME("CdrGodunov::parseExtrapolateSourceTerm()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parseExtrapolateSourceTerm()" << endl;
+  }
+  
+  ParmParse pp(m_className.c_str());
+
+  pp.get("extrapolateSourceTerm", m_extrapolateSourceTerm);
 }
 
 void CdrGodunov::parseSlopeLimiter(){
+  CH_TIME("CdrGodunov::parseSlopeLimiter()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parseSlopeLimiter()" << endl;
+  }
+  
   ParmParse pp(m_className.c_str());
 
-  std::string str;
-  pp.get("limit_slopes", str);
-  m_slopelim = (str == "true") ? true : false;
-}
-
-void CdrGodunov::averageVelocityToFaces(){
-  CH_TIME("CdrGodunov::averageVelocityToFaces(public, full)");
-  if(m_verbosity > 5){
-    pout() << m_name + "::averageVelocityToFaces(public, full)" << endl;
-  }
-  this->averageVelocityToFaces(m_faceVelocity, m_cellVelocity); // Average velocities to face centers for all levels
-}
-
-void CdrGodunov::averageVelocityToFaces(EBAMRFluxData& a_faceVelocity, const EBAMRCellData& a_cellVelocity){
-  CH_TIME("CdrGodunov::averageVelocityToFaces");
-  if(m_verbosity > 5){
-    pout() << m_name + "::averageVelocityToFaces" << endl;
-  }
-
-  const int finest_level = m_amr->getFinestLevel();
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    DataOps::averageCellToFace(*a_faceVelocity[lvl], *a_cellVelocity[lvl], m_amr->getDomains()[lvl]);
-    a_faceVelocity[lvl]->exchange();
-  }
-
-  // Fix up boundary velocities to ensure no influx. This is (probably) the easiest way to handle this for CdrGodunov
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    const ProblemDomain& domain  = m_amr->getDomains()[lvl];
-    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-
-      EBFluxFAB& velo = (*a_faceVelocity[lvl])[dit()];
-      for (int dir = 0; dir < SpaceDim; dir++){
-	for (SideIterator sit; sit.ok(); ++sit){
-	  Box box   = dbl.get(dit());
-	  box &= domain;
-	  box.surroundingNodes(dir); // Convert to facebox
-
-	  const int isign = sign(sit());
-
-	  Box cell_box = box;
-	  cell_box.shiftHalf(dir, isign);
-	  
-	  if(!domain.contains(cell_box)){
-	    cell_box &= domain;
-
-	    Box bndry_box = adjCellBox(cell_box, dir, sit(), 1);
-	    bndry_box.shift(dir, -isign);
-
-	    IntVectSet ivs(bndry_box);
-	    for (VoFIterator vofit(ivs, ebisl[dit()].getEBGraph()); vofit.ok(); ++vofit){
-	      const VolIndex& vof = vofit();
-	      Vector<FaceIndex> faces = ebisl[dit()].getFaces(vof, dir, sit());
-
-	      for (int iface = 0; iface < faces.size(); iface++){
-		const FaceIndex& face = faces[iface];
-
-		if(velo[dir](face, 0)*isign < 0.0){
-		  //		  velo[dir](face, 0) = 0.0;
-		}
-	      }
-	    }
-	  }
-	}
-      }
-    }
-  }
+  pp.get("limit_slopes", m_limitSlopes);
 }
 
 void CdrGodunov::allocateInternals(){
-  CH_TIME("CdrSolver::allocateInternals");
+  CH_TIME("CdrSolver::allocateInternals()");
   if(m_verbosity > 5){
-    pout() << m_name + "::allocateInternals" << endl;
+    pout() << m_name + "::allocateInternals()" << endl;
   }
 
+  // Call parent method. 
   CdrTGA::allocateInternals();
 
-  if(m_isDiffusive){
-    this->setupDiffusionSolver();
-  }
 
+  // Allocate levelAdvect only if the solver is mobile. See Chombo design docs for how the EBAdvectLevelIntegrator operates. 
   if(m_isMobile){
     const Vector<RefCountedPtr<EBLevelGrid> >& eblgs = m_amr->getEBLevelGrid(m_realm, m_phase);
     const Vector<DisjointBoxLayout>& grids           = m_amr->getGrids(m_realm);
-    const Vector<int>& ref_ratios                    = m_amr->getRefinementRatios();
+    const Vector<int>& refRatios                     = m_amr->getRefinementRatios();
     const Vector<Real>& dx                           = m_amr->getDx();
-    const int finest_level                           = m_amr->getFinestLevel();
-    m_level_advect.resize(1 + finest_level);
-  
-    for (int lvl = 0; lvl <= finest_level; lvl++){
-
-      const bool has_coar = lvl > 0;
-      const bool has_fine = lvl < finest_level;
-
-      int ref_rat = 1;
-      EBLevelGrid eblg_coar;
-      if(has_coar){
-	eblg_coar = *eblgs[lvl-1];
-	ref_rat   = ref_ratios[lvl-1];
-      }
+    const int finestLevel                            = m_amr->getFinestLevel();
     
-      m_level_advect[lvl] = RefCountedPtr<EBAdvectLevelIntegrator> (new EBAdvectLevelIntegrator(*eblgs[lvl],
-												eblg_coar,
-												ref_rat,
+    m_levelAdvect.resize(1 + finestLevel);
+  
+    for (int lvl = 0; lvl <= finestLevel; lvl++){
+
+      const bool hasCoar = lvl > 0;
+      const bool hasFine = lvl < finestLevel;
+
+      int refRat = 1;
+      EBLevelGrid coarEblg;
+      if(hasCoar){
+	coarEblg = *eblgs[lvl-1];
+	refRat   = refRatios[lvl-1];
+      }
+
+      // Note: There is a "bug" in the function signature in Chombo. The second-to-last argument is the slope limiter and not the EBCF things. 
+      m_levelAdvect[lvl] = RefCountedPtr<EBAdvectLevelIntegrator> (new EBAdvectLevelIntegrator(*eblgs[lvl],
+												coarEblg,
+												refRat,
 												dx[lvl]*RealVect::Unit,
-												has_coar,
-												has_fine,
+												hasCoar,
+												hasFine,
 												false,
-												m_slopelim,
+												m_limitSlopes,
 												m_ebis));
     }
   }
 }
   
-void CdrGodunov::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt){
-  CH_TIME("CdrGodunov::advectToFaces");
+void CdrGodunov::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellPhi, const Real a_extrapDt){
+  CH_TIME("CdrGodunov::advectToFaces(EBAMRFluxDat, EBAMRCellData, Real)");
   if(m_verbosity > 5){
-    pout() << m_name + "::advectToFaces" << endl;
+    pout() << m_name + "::advectToFaces(EBAMRFluxDat, EBAMRCellData, Real)" << endl;
   }
 
-  // Compute source for extrapolation
+  CH_assert(a_facePhi[0]->nComp() == 1);
+  CH_assert(a_cellPhi[0]->nComp() == 1);
+
+    // If we are extrapolating in time the source term will yield different states on the face centers. The source term is the source
+    // S^k + Div(D*Grad(Phi)), which we add to the solver below. It is stored on m_scratch (which won't be used elsewhere, I think). 
   if(m_extrapolateSourceTerm && a_extrapDt > 0.0){
-#if 0 // R.M. April 2020 - disabling this for now. 
-    if(m_isDiffusive){
-      const int finest_level = m_amr->getFinestLevel();
-      Vector<LevelData<EBCellFAB>* > scratchAlias, stateAlias;
-      m_amr->alias(scratchAlias, m_scratch);
-      m_amr->alias(stateAlias,   a_phi);
-      m_multigridSolver->computeAMROperator(scratchAlias, stateAlias, finest_level, 0, false);
+    this->computeDivD(m_scratch, (EBAMRCellData&) a_cellPhi, false, false); // This will touch ghost cells in a_cellPhi, but those should be linearly interpolated anyways. 
 
-      // computeAMROperator fucks my ghost cells. 
-      m_amr->interpGhostPwl(const_cast<EBAMRCellData&> (a_phi), m_realm, m_phase);
-    }
-#endif
-
-    DataOps::copy(m_scratch, m_source);
-    m_amr->averageDown(m_scratch,     m_realm, m_phase);
-    m_amr->interpGhostPwl(m_scratch, m_realm, m_phase);
+    DataOps::incr(m_scratch, m_source, 1.0);
+    
+    m_amr->averageDown(m_scratch, m_realm, m_phase);
+    m_amr->interpGhost(m_scratch, m_realm, m_phase);
   }
   else{
     DataOps::setValue(m_scratch, 0.0);
   }
 
-  // Extrapolate face-centered state on every level
+  // This code extrapolates the cell-centered state to face centers on every grid level. 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
     const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
@@ -217,24 +165,26 @@ void CdrGodunov::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_
     const Real dx                = m_amr->getDx()[lvl];
 
     for (DataIterator dit = dbl.dataIterator();dit.ok(); ++dit){
+      
+      EBFluxFAB& facePhi       = (*a_facePhi     [lvl])[dit()];
+      const EBCellFAB& cellPhi = (*a_cellPhi     [lvl])[dit()];
+      const EBCellFAB& cellVel = (*m_cellVelocity[lvl])[dit()];
+      const EBFluxFAB& faceVel = (*m_faceVelocity[lvl])[dit()];
+      const EBCellFAB& source  = (*m_scratch     [lvl])[dit()];
+      const EBISBox& ebisbox   = ebisl[dit()];
+      const Real time          = 0.0;
 
-      EBFluxFAB& extrap_state   = (*a_facePhi[lvl])[dit()];
-      const EBCellFAB& state    = (*a_phi[lvl])[dit()];
-      const EBCellFAB& cell_vel = (*m_cellVelocity[lvl])[dit()];
-      const EBFluxFAB& face_vel = (*m_faceVelocity[lvl])[dit()];
-      const EBCellFAB& source   = (*m_scratch[lvl])[dit()];
-      const EBISBox& ebisbox    = ebisl[dit()];
-      const Box& box            = dbl.get(dit());
-      const Real time           = 0.0;
+      EBAdvectPatchIntegrator& ebpatchad = m_levelAdvect[lvl]->getPatchAdvect(dit());
 
-      EBAdvectPatchIntegrator& ebpatchad = m_level_advect[lvl]->getPatchAdvect(dit());
+      // These are settings for EBAdvectPatchIntegrator -- it's not a very pretty design but the object has settings
+      // that permits it to run advection code (through setDoingVel(0)). 
+      ebpatchad.setVelocities(cellVel, faceVel); // Set cell/face velocities
+      ebpatchad.setDoingVel(0);                  // If setDoingVel(0) EBAdvectLevelIntegrator advects a scalar. 
+      ebpatchad.setEBPhysIBC(s_physibc);         // Set the BC object
+      ebpatchad.setCurComp(m_comp);              // Solving for m_comp = 0
 
-      ebpatchad.setVelocities(cell_vel, face_vel);
-      ebpatchad.setDoingVel(0);
-      ebpatchad.setEBPhysIBC(s_physibc);
-      ebpatchad.setCurComp(0);
-
-      ebpatchad.extrapolateBCG(extrap_state, state, source, dit(), time, a_extrapDt);
+      // Extrapolate to face-centers. The face-centered states are Godunov-style extrapolated in time to a_extrapDt. 
+      ebpatchad.extrapolateBCG(facePhi, cellPhi, source, dit(), time, a_extrapDt);
     }
   }
 }

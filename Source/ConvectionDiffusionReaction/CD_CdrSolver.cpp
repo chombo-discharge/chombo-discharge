@@ -2222,15 +2222,6 @@ Real CdrSolver::computeCharge(){
   return Q;
 }
 
-bool CdrSolver::extrapolateSourceTerm() const {
-  CH_TIME("CdrSolver::extrapolateSourceTerm()");
-  if(m_verbosity > 5){
-    pout() << m_name + "::extrapolateSourceTerm()" << endl;
-  }
-  
-  return m_extrapolateSourceTerm;
-}
-
 bool CdrSolver::isDiffusive(){
   CH_TIME("CdrSolver::isDiffusive()");
   if(m_verbosity > 5){
@@ -2400,18 +2391,6 @@ void CdrSolver::parseDomainBc(){
   }
 }
 
-void CdrSolver::parseExtrapolateSourceTerm(){
-  CH_TIME("CdrSolver::parseExtrapolateSourceTerm()");
-  if(m_verbosity > 5){
-    pout() << m_name + "::parseExtrapolateSourceTerm()" << endl;
-  }
-  
-  ParmParse pp(m_className.c_str());
-
-  std::string str;
-  pp.get("extrapolateSourceTerm", str);
-  m_extrapolateSourceTerm = (str == "true") ? true : false;
-}
 
 void CdrSolver::parseDivergenceComputation(){
   CH_TIME("CdrSolver::parseDivergenceComputation()");

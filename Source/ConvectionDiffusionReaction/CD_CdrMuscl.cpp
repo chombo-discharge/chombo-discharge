@@ -35,8 +35,6 @@ void CdrMuscl::parseOptions(){
   parsePlotVariables();          // Parses plot variables
   parseMultigridSettings();      // Parses solver parameters for geometric multigrid
   parseDivergenceComputation();  // Nonlinear divergence blending
-
-  m_extrapolateSourceTerm = false; // This class can't extrapolate with source term (yet)
 }
 
 void CdrMuscl::parseRuntimeOptions(){
@@ -51,8 +49,6 @@ void CdrMuscl::parseRuntimeOptions(){
   parsePlotVariables();          // Parses plot variables
   parseMultigridSettings();      // Parses solver parameters for geometric multigrid
   parseDivergenceComputation();  // Nonlinear divergence blending
-
-  m_extrapolateSourceTerm = false; // This class can't extrapolate with source term (yet)
 }
 
 void CdrMuscl::parseSlopeLimiter(){
