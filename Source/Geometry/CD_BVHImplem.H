@@ -34,7 +34,7 @@ namespace BVH {
 
   template <class T, class P, class BV>
   inline
-  NodeT<T, P, BV>::NodeT(NodePtr& a_parent) : NodeT<T, P, BV>() {
+  NodeT<T, P, BV>::NodeT(const NodePtr& a_parent) : NodeT<T, P, BV>() {
     m_parent   = a_parent;
     m_depth    = a_parent.m_depth + 1;
     m_nodeType = NodeType::Leaf;
@@ -247,6 +247,31 @@ namespace BVH {
 
   template <class T, class P, class BV>
   inline
+  T NodeT<T, P, BV>::pruneTree(const Vec3& a_point, const Prune a_pruning) const noexcept {
+    T ret;
+    
+    switch(a_pruning){
+    case Prune::Ordered:
+      ret = this->pruneOrdered(a_point);
+      break;
+    case Prune::Ordered2:
+      ret = this->pruneOrdered2(a_point);
+      break;
+    case Prune::Unordered:
+      ret = this->pruneUnordered(a_point);
+      break;
+    case Prune::Unordered2:
+      ret = this->pruneUnordered2(a_point);
+      break;
+    default:
+      std::cerr << "In file CD_BVHImplem function NodeT<T, P, BV>::pruneTree(Vec3, Prune) -- bad input enum for 'Prune'\n";
+    };
+
+    return ret;
+  }
+
+  template <class T, class P, class BV>
+  inline
   T NodeT<T, P, BV>::pruneOrdered(const Vec3& a_point) const noexcept {
 
     T minDist = std::numeric_limits<T>::infinity();
@@ -259,6 +284,11 @@ namespace BVH {
   template <class T, class P, class BV>
   inline
   void NodeT<T, P, BV>::pruneOrdered(T& a_closest, const Vec3& a_point) const noexcept  {
+
+    // TLDR: Beginning at some node, this routine descends the left/right branches in the tree. It always descends the branch with the shortest distance
+    //       to the bounding volume first. The other branch is investigated only after the full sub-tree beneath the first branch has completed. Since the shortest
+    //       distance to primitives is updated underway, there is a decent chance that the secondary subtree can be pruned. Hence why this routine is more efficient
+    //       than prunedUnordered.
     if(m_nodeType == NodeType::Leaf){
       leafCalls++;
       const T primDist = this->getDistanceToPrimitives(a_point);
@@ -269,9 +299,10 @@ namespace BVH {
     }
     else {
       reguCalls++;
-      const T minL = m_left ->getDistanceToBoundingVolume(a_point);
-      const T minR = m_right->getDistanceToBoundingVolume(a_point);
+      const T minL = m_left ->getDistanceToBoundingVolume(a_point); // Distance from a_point to the left sub-trees bounding volume. 
+      const T minR = m_right->getDistanceToBoundingVolume(a_point); // Distance from a_point to the right sub-trees bounding volume. 
 
+      // Check the sub-tree with the shortest distance between a_point and the sub-trees bounding volume first. 
       const auto leftFirst = (minL < minR);
     
       const auto first  = leftFirst ? m_left  : m_right;
@@ -303,6 +334,13 @@ namespace BVH {
   template <class T, class P, class BV>
   inline
   void NodeT<T, P, BV>::pruneOrdered2(T& a_minDist2, std::shared_ptr<const P>& a_closest, const Vec3& a_point) const noexcept  {
+
+    // TLDR: Beginning at some node, this routine descends the left/right branches in the tree. It always descends the branch with the shortest distance
+    //       to the bounding volume first. The other branch is investigated only after the full sub-tree beneath the first branch has completed. Since the shortest
+    //       distance to primitives is updated underway, there is a decent chance that the secondary subtree can be pruned. Hence why this routine is more efficient
+    //       than prunedUnordered. The only difference between this routine is that we prune based on the squared unsigned distance. This
+    //       permits us to skip some computations involving a couple of square roots and only compute the signed distance at the end. 
+    
     if(m_nodeType == NodeType::Leaf){
       leafCalls++;
       for (const auto& p : m_primitives){
@@ -319,6 +357,7 @@ namespace BVH {
       const auto minL2 = m_left ->getDistanceToBoundingVolume2(a_point);
       const auto minR2 = m_right->getDistanceToBoundingVolume2(a_point);
 
+      // Check the sub-tree with the shortest unsigned squared distance between a_point and the sub-trees bounding volume first.       
       const auto leftFirst = (minL2 < minR2);
     
       const auto first  = leftFirst ? m_left  : m_right;
@@ -399,116 +438,6 @@ namespace BVH {
       if(minL2 < a_minDist2) m_left ->pruneOrdered2(a_minDist2, a_closest, a_point);
       if(minR2 < a_minDist2) m_right->pruneOrdered2(a_minDist2, a_closest, a_point);
     }
-  }
-
-  template <class T, class P, class BV>
-  inline
-  T NodeT<T, P, BV>::prunePriorityQueue(const Vec3& a_point) const noexcept {
-  
-    using QueueElement = std::pair<T, std::shared_ptr<const Node> >;
-      
-    auto CompareElements = [](const QueueElement& a_q1, const QueueElement& a_q2){
-      return a_q1.first > a_q2.first;
-    };
-
-    std::vector<QueueElement> Q(0);
-
-    const auto ds = this->getDistanceToBoundingVolume(a_point);
-    const auto N  = std::make_shared<const Node>(*this);
-    Q.emplace_back(QueueElement(ds, N));
-
-    auto d = std::numeric_limits<T>::infinity();
-
-    while(!Q.empty()) {
-
-      std::sort(Q.begin(), Q.end(), CompareElements);
-      const QueueElement cur = Q.back();
-      Q.pop_back();
-
-      const auto ds = cur.first;
-      const auto N  = cur.second;
-    
-      if (ds*ds < d*d){
-	if(N->getNodeType() == NodeType::Leaf){
-	  const T primDist = N->getDistanceToPrimitives(a_point);
-	
-	  if(std::abs(primDist) < std::abs(d)){
-	    d = primDist;
-	  }
-	}
-	else{
-	  const auto& lN = N->getLeft();
-	  const auto& rN = N->getRight();
-
-	  const T dl = lN->getDistanceToBoundingVolume(a_point);
-	  const T dr = rN->getDistanceToBoundingVolume(a_point);
-	
-	  if(dl*dl < d*d) Q.emplace_back(QueueElement(dl, std::make_shared<const Node>(*lN)));
-	  if(dr*dr < d*d) Q.emplace_back(QueueElement(dr, std::make_shared<const Node>(*rN)));
-	}
-      }
-    }
-  
-    return d;
-  }
-
-  template <class T, class P, class BV>
-  inline
-  T NodeT<T, P, BV>::prunePriorityQueue2(const Vec3& a_point) const noexcept {
-  
-    using QueueElement = std::pair<T, std::shared_ptr<const Node> >;
-      
-    auto CompareElements = [](const QueueElement& a_q1, const QueueElement& a_q2){
-      return a_q1.first > a_q2.first;
-    };
-  
-    std::shared_ptr<const P> closestPrimitive = nullptr;
-    auto minDist2 = std::numeric_limits<T>::infinity();
-
-    std::vector<QueueElement> Q(0);
-
-    // Push node onto queue.
-    const auto d = this->getDistanceToBoundingVolume2(a_point);
-    const auto N = std::make_shared<const Node>(*this);
-    Q.emplace_back(QueueElement(d, N));
-
-
-    while(!Q.empty()) {
-
-
-      std::sort(Q.begin(), Q.end(), CompareElements);
-      const QueueElement cur = Q.back();
-      Q.pop_back();
-
-      const auto dist2 = cur.first;
-    
-      if (dist2 < minDist2){
-	const auto curNode = cur.second;
-      
-	if(curNode->getNodeType() == NodeType::Leaf){
-	  for (const auto& p : curNode->getPrimitives()){
-	    const auto curDist2 = p->unsignedDistance2(a_point);
-
-	    if(curDist2 < minDist2){
-	      minDist2         = curDist2;
-	      closestPrimitive = p;
-	    }
-	  }
-	}
-	else{
-	  const auto& leftNode  = curNode->getLeft();
-	  const auto& rightNode = curNode->getRight();
-
-	  const T distL2 = leftNode ->getDistanceToBoundingVolume2(a_point);
-	  const T distR2 = rightNode->getDistanceToBoundingVolume2(a_point);
-	
-	  if(distL2 < minDist2) Q.emplace_back(QueueElement(distL2, std::make_shared<const Node>(*leftNode)));
-	  if(distR2 < minDist2) Q.emplace_back(QueueElement(distR2, std::make_shared<const Node>(*rightNode)));
-	}
-      }
-    }
-
-    return closestPrimitive->signedDistance(a_point);
   }
 }
 

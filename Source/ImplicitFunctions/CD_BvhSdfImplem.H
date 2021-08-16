@@ -45,7 +45,7 @@ BvhSdf<T, BV>::BvhSdf(const BvhSdf& a_primitive) : BvhSdf() {
 template <class T, class BV>
 BvhSdf<T, BV>::~BvhSdf(){
   if(m_numCalled > 0L){
-    std::cout << "On destructor: Calls: " << m_numCalled << "\t Tot: " << m_timespan.count() << "\t Avg./Call = " << m_timespan.count()/(1.0*m_numCalled) << std::endl;
+    std::cout << "In file CD_BvhSdfImplem: BvhSdf::~BvhSdf() On destructor: Calls: " << m_numCalled << "\t Tot: " << m_timespan.count() << "\t Avg./Call = " << m_timespan.count()/(1.0*m_numCalled) << std::endl;
   }
 }
 
@@ -54,7 +54,7 @@ Real BvhSdf<T, BV>::value(const RealVect& a_point) const {
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
   Vec3 p(a_point[0], a_point[1], a_point[2]); 
 
-  auto d = m_root->pruneOrdered2(p);
+  auto d = m_root->pruneTree(p);
 
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
   duration<double> time_span = duration_cast<duration<double>>(t2 - t1);
