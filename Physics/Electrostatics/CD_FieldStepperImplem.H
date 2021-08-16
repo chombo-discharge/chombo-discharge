@@ -181,7 +181,7 @@ namespace Physics {
 
 #ifdef CH_USE_HDF5    
     template <class T>
-    void FieldStepper<T>::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl){
+    void FieldStepper<T>::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const {
     }
 #endif
 

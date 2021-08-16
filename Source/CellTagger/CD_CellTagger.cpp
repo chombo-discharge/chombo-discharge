@@ -19,59 +19,91 @@
 #include <CD_NamespaceHeader.H>
 
 CellTagger::CellTagger(){
-  CH_TIME("CellTagger::CellTagger");
-  m_verbosity = 10;
-  if(m_verbosity > 5){
-    pout() << "CellTagger::CellTagger" << endl;
-  }
+  CH_TIME("CellTagger::CellTagger()");
 
-  m_name  = "CellTagger";
+  // Defaeult settings
+  m_verbosity = -1;
+  m_buffer    = 0;
+  m_name      = "CellTagger";
 }
 
 CellTagger::~CellTagger(){
-
+  CH_TIME("CellTagger::~CellTagger()");
 }
 
-int CellTagger::getNumberOfPlotVariables(){
+int CellTagger::getNumberOfPlotVariables() const {
+  CH_TIME("CellTagger::getNumberOfPlotVariables()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::getNumberOfPlotVariables()" << endl;
+  }        
+  
   return 0;
 }
 
-int CellTagger::getBuffer(){
-  return m_buffer;
+int CellTagger::getBuffer() const {
+  CH_TIME("CellTagger::getBuffer()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::getBuffer()" << endl;
+  }      
+  
+  return (m_buffer);
 }
 
 void CellTagger::parseRuntimeOptions(){
-
+  CH_TIME("CellTagger::parseRunTimeOptions()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parseRuntimeOptions()" << endl;
+  }    
 }
 
 void CellTagger::parseBoxes(){
+  CH_TIME("CellTagger::parseBoxes()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parseBoxes()" << endl;
+  }  
+
+  // TLDR: This code parses strings from the command line in the form
+  //
+  //    m_name.num_boxes = 0
+  //
+  // If num_boxes > 0 we process lines
+  //
+  //    m_name.box1_lo = 0 0 0
+  //    m_name.box1_hi = 1 1 1
+  //    m_name.box2_lo = 0 0 0
+  //    m_name.box2_hi = 1 1 
+  //
+  // We then populate m_tagBoxes with RealBox (an axis-aligned box with physical coordinates). These
+  // boxes can be used in tagCells(...) to prune regions in space where tagging is unnecessary. Users
+  // are free to leave num_boxes=0 if they don't want to that. 
   
   ParmParse pp(m_name.c_str());
 
-  int num_boxes = 0;
-  pp.get("num_boxes", num_boxes);
+  int numBoxes;
+  pp.get("num_boxes", numBoxes);
 
   m_tagBoxes.resize(0);
-  if(num_boxes > 0){
-    m_tagBoxes.resize(num_boxes);
+  
+  if(numBoxes > 0){
+    m_tagBoxes.resize(numBoxes);
 
-    const int ndigits = (int) log10((double) num_boxes) + 1;
+    const int ndigits = (int) log10(1.0*numBoxes) + 1;
       
-    for (int ibox = 0; ibox < num_boxes; ibox++){
+    for (int ibox = 0; ibox < numBoxes; ibox++){
       char* cstr = new char[ndigits];
       sprintf(cstr, "%d", 1+ibox);
 
-      std::string str1 = "box" + std::string(cstr) + "_lo";
-      std::string str2 = "box" + std::string(cstr) + "_hi";
+      const std::string str1 = "box" + std::string(cstr) + "_lo";
+      const std::string str2 = "box" + std::string(cstr) + "_hi";
 
-      Vector<Real> corner_lo(SpaceDim);
-      Vector<Real> corner_hi(SpaceDim);
+      Vector<Real> cornerLo(SpaceDim);
+      Vector<Real> cornerHi(SpaceDim);
 
-      pp.getarr(str1.c_str(), corner_lo, 0, SpaceDim);
-      pp.getarr(str2.c_str(), corner_hi, 0, SpaceDim);
+      pp.getarr(str1.c_str(), cornerLo, 0, SpaceDim);
+      pp.getarr(str2.c_str(), cornerHi, 0, SpaceDim);
 
-      const RealVect c1 = RealVect(D_DECL(corner_lo[0], corner_lo[1], corner_lo[2]));
-      const RealVect c2 = RealVect(D_DECL(corner_hi[0], corner_hi[1], corner_hi[2]));
+      const RealVect c1 = RealVect(D_DECL(cornerLo[0], cornerLo[1], cornerLo[2]));
+      const RealVect c2 = RealVect(D_DECL(cornerHi[0], cornerHi[1], cornerHi[2]));
 
       m_tagBoxes[ibox] = RealBox(c1,c2);
 	
@@ -81,38 +113,57 @@ void CellTagger::parseBoxes(){
 }
 
 void CellTagger::parseBuffer(){
-
+  CH_TIME("CellTagger::parseBuffer()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parseBuffer()" << endl;
+  }
+  
+  // Just parse the refinement buffer. This 
   ParmParse pp(m_name.c_str());
+  
   pp.get("buffer", m_buffer);
-  m_buffer = Max(0, m_buffer);
+  
+  m_buffer = std::max(0, m_buffer);
 }
 
 void CellTagger::parseVerbosity(){
-  CH_TIME("CellTagger::parseVerbosity");
+  CH_TIME("CellTagger::parseVerbosity()");
 
   ParmParse pp(m_name.c_str());
+  
   pp.get("verbosity", m_verbosity);
+
+  if(m_verbosity > 5){
+    pout() << m_name + "::parseVerbosity()" << endl;
+  }
 }
 
-void CellTagger::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp){
-  CH_TIME("CellTagger::writePlotData");
-  if(m_verbosity > 3){
-    pout() << "CellTagger::writePlotData" << endl;
+void CellTagger::writePlotData(EBAMRCellData& a_output, const Vector<std::string>& a_plotVariableNames, int& a_icomp) const {
+  CH_TIME("CellTagger::writePlotData(EBAMRCellData, Vector<std::string>, int)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::writePlotData(EBAMRCellData, Vector<std::string>, int)" << endl;
   }
 }
 
 bool CellTagger::insideTagBox(const RealVect a_pos){
-  bool do_this_refine = (m_tagBoxes.size() > 0) ? false : true;
+  CH_TIME("CellTagger::insideTagBox(RealVect)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::insideTagBox(RealVect)" << endl;
+  }
+  
+  bool doThisRefine = (m_tagBoxes.size() > 0) ? false : true; // If we don't have any boxes, everything goes. 
+  
   for (int ibox = 0; ibox < m_tagBoxes.size(); ibox++){
     const RealVect lo = m_tagBoxes[ibox].getLo();
     const RealVect hi = m_tagBoxes[ibox].getHi();
 
+    // In this case a_pos is inside the tag box and we permit cell tagging. 
     if(a_pos >= lo && a_pos <= hi){
-      do_this_refine = true;
+      doThisRefine = true;
     }
   }
 
-  return do_this_refine;
+  return doThisRefine;
 }
 
 #include <CD_NamespaceFooter.H>
