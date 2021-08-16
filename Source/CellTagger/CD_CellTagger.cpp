@@ -145,7 +145,7 @@ void CellTagger::writePlotData(EBAMRCellData& a_output, const Vector<std::string
   }
 }
 
-bool CellTagger::insideTagBox(const RealVect a_pos){
+bool CellTagger::insideTagBox(const RealVect a_pos) const {
   CH_TIME("CellTagger::insideTagBox(RealVect)");
   if(m_verbosity > 5){
     pout() << m_name + "::insideTagBox(RealVect)" << endl;

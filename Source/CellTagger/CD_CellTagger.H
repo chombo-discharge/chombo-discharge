@@ -117,7 +117,7 @@ protected:
     @param[in] a_pos Physical coordinates. 
     @return Returns true if a_pos is inside any of the boxes in m_tagBoxes. Otherwise it returns false. 
   */
-  bool insideTagBox(const RealVect a_pos);
+  bool insideTagBox(const RealVect a_pos) const;
 
   /*!
     @brief Parse boxes.
