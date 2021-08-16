@@ -154,34 +154,32 @@ void CdrGodunov::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_
     DataOps::setValue(m_scratch, 0.0);
   }
 
-  // This code extrapolates the cell-centered state to face centers on every grid level. 
+  // This code extrapolates the cell-centered state to face centers on every grid level, in both space and time. 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
     const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
     const ProblemDomain& domain  = m_amr->getDomains()[lvl];
     const Real dx                = m_amr->getDx()[lvl];
 
-    for (DataIterator dit = dbl.dataIterator();dit.ok(); ++dit){
-      
-      EBFluxFAB& facePhi       = (*a_facePhi     [lvl])[dit()];
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      EBFluxFAB&       facePhi = (*a_facePhi     [lvl])[dit()];
       const EBCellFAB& cellPhi = (*a_cellPhi     [lvl])[dit()];
       const EBCellFAB& cellVel = (*m_cellVelocity[lvl])[dit()];
       const EBFluxFAB& faceVel = (*m_faceVelocity[lvl])[dit()];
-      const EBCellFAB& source  = (*m_scratch     [lvl])[dit()];
-      const EBISBox& ebisbox   = ebisl[dit()];
+      const EBCellFAB& source  = (*m_scratch     [lvl])[dit()]; // Note: the source consists of the source term and the diffusive contribution. 
       const Real time          = 0.0;
 
-      EBAdvectPatchIntegrator& ebpatchad = m_levelAdvect[lvl]->getPatchAdvect(dit());
+      EBAdvectPatchIntegrator& ebAdvectPatch = m_levelAdvect[lvl]->getPatchAdvect(dit());
 
       // These are settings for EBAdvectPatchIntegrator -- it's not a very pretty design but the object has settings
       // that permits it to run advection code (through setDoingVel(0)). 
-      ebpatchad.setVelocities(cellVel, faceVel);       // Set cell/face velocities
-      ebpatchad.setDoingVel(0);                        // If setDoingVel(0) EBAdvectLevelIntegrator advects a scalar. 
-      ebpatchad.setEBPhysIBC(ExtrapAdvectBCFactory()); // Set the BC object. It won't matter what we use here because CdrSolver runs its own BC routines. 
-      ebpatchad.setCurComp(m_comp);                    // Solving for m_comp = 0
+      ebAdvectPatch.setVelocities(cellVel, faceVel);       // Set cell/face velocities
+      ebAdvectPatch.setDoingVel(0);                        // If setDoingVel(0) EBAdvectLevelIntegrator advects a scalar. 
+      ebAdvectPatch.setEBPhysIBC(ExtrapAdvectBCFactory()); // Set the BC object. It won't matter what we use here because CdrSolver runs its own BC routines. 
+      ebAdvectPatch.setCurComp(m_comp);                    // Solving for m_comp = 0
 
       // Extrapolate to face-centers. The face-centered states are Godunov-style extrapolated in time to a_extrapDt. 
-      ebpatchad.extrapolateBCG(facePhi, cellPhi, source, dit(), time, a_extrapDt);
+      ebAdvectPatch.extrapolateBCG(facePhi, cellPhi, source, dit(), time, a_extrapDt);
     }
   }
 }

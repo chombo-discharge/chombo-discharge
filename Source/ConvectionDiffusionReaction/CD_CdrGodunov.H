@@ -58,15 +58,6 @@ public:
 protected:
 
   /*!
-    @brief Godunov face extrapolation method for advection
-    @param[out] a_facePhi  Phi on face centers
-    @param[in]  a_cellPhi  Phi on cell centers
-    @param[in]  a_extrapDt Time centering (i.e. extrapolation) of the face-centered states. 
-    @details This functions calls Chombo code which implements the Graves/Trebotich discretization. 
-  */
-  virtual void advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt) override;
-
-  /*!
     @brief Advection object -- this implements the Graves/Trebotich discretization. 
   */
   Vector<RefCountedPtr<EBAdvectLevelIntegrator> > m_levelAdvect;
@@ -90,6 +81,15 @@ protected:
     ®brief Parse whether or not to include a source-term in the Godunov extrapolation.
   */
   virtual void parseExtrapolateSourceTerm();
+  
+  /*!
+    @brief Godunov face extrapolation method for advection
+    @param[out] a_facePhi  Phi on face centers
+    @param[in]  a_cellPhi  Phi on cell centers
+    @param[in]  a_extrapDt Time centering (i.e. extrapolation) of the face-centered states. 
+    @details This functions calls Chombo code which implements the Graves/Trebotich discretization. 
+  */
+  virtual void advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt) override;
 };
 
 #include <CD_NamespaceFooter.H>
