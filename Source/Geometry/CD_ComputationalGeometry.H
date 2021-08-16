@@ -32,9 +32,6 @@
 class ComputationalGeometry {
 public:
 
-  static bool s_use_new_gshop;
-  static ProblemDomain s_ScanDomain;
-
   /*!
     @brief Constructor
   */
@@ -46,100 +43,95 @@ public:
   virtual ~ComputationalGeometry();
 
   /*!
-    @brief Minimum refines
-  */
-  static int s_minRef;
-
-  /*!
-    @brief Maximum refines
-  */
-  static int s_maxRef;
-
-  /*!
     @brief Threshold for Vof computation
   */
-  static Real s_thresh;
+  constexpr static Real s_thresh = 1.E-15;
   
   /*!
     @brief Get dielectrics
     @return Dielectrics (m_dielectrics)
   */
-  virtual const Vector<Dielectric>& getDielectrics() const;
+  const Vector<Dielectric>& getDielectrics() const;
 
   /*!
     @brief Get electrodes
     @return Electrodes (m_dielectrics)
   */
-  virtual const Vector<Electrode>& getElectrodes() const;
+  const Vector<Electrode>& getElectrodes() const;
 
   /*!
     @brief Get the background gas permittivity
     @return Background gas permittivity
   */
-  virtual Real getGasPermittivity() const;
+  Real getGasPermittivity() const;
+
+  /*!
+    @brief Calls for ComputationalGeometry to use ScanShop rather than Chombo's default geometry generation tool.
+    @param[in] a_startDomain Coarse domain where ScanShop begins the load balancing recursion process.
+  */
+  void useScanShop(const ProblemDomain a_beginDomain);
+
+  /*!
+    @brief Calls for ComputationalGeometry to use Chombo's geometry generation tool
+  */
+  void useChomboShop();
   
   /*!
     @brief Set dielectrics
     @param[in] a_dielectrics Dielectris
   */
-  virtual void setDielectrics(Vector<Dielectric>& a_dielectrics);
+  void setDielectrics(const Vector<Dielectric>& a_dielectrics);
 
   /*!
     @brief Set electrodes
     @param[in] a_electrodes Electrodes
   */
-  virtual void setElectrodes(Vector<Electrode>& a_electrodes);
+  void setElectrodes(const Vector<Electrode>& a_electrodes);
 
   /*!
     @brief Set the background permittivity
     @param[in] a_eps0 Gas permittivity
   */
-  virtual void setGasPermittivity(const Real a_eps0);
+  void setGasPermittivity(const Real a_eps0);
 
   /*!
     @brief Get the multifluid index space
   */
-  virtual const RefCountedPtr<MultiFluidIndexSpace>& getMfIndexSpace() const;
+  const RefCountedPtr<MultiFluidIndexSpace>& getMfIndexSpace() const;
 
   /*!
     @brief Get the implicit function used to generate the gas-phase EBIS
   */
-  virtual const RefCountedPtr<BaseIF>& getGasImplicitFunction() const;
+  const RefCountedPtr<BaseIF>& getGasImplicitFunction() const;
 
   /*!
     @brief Get the implicit function used to generate the solid-phase EBIS
   */
-  virtual const RefCountedPtr<BaseIF>& getSolidImplicitFunction() const;
+  const RefCountedPtr<BaseIF>& getSolidImplicitFunction() const;
 
   /*!
     @brief Get implicit function
     @param[in] a_phase Phase
   */
-  virtual const RefCountedPtr<BaseIF>& getImplicitFunction(const phase::which_phase a_phase) const;
+  const RefCountedPtr<BaseIF>& getImplicitFunction(const phase::which_phase a_phase) const;
 
   /*!
     @brief Build MFIndexSpace
     @param[in] a_finestDomain Finest domain
     @param[in] a_probLo       Lower-left corner
     @param[in] a_finestDx     Finest grid resolution
-    @param[i] a_nCellMax      Max cells
-    @param[i] a_maxCoarsen    Max coarsenings
+    @param[in] a_nCellMax     Patch size
+    @param[in] a_numEbGhost   Maximum number of EB ghosts that will be encountered.
+    @param[in] a_maxCoarsen   Max coarsenings to run. If = -1 then coarsen all the way down. 
     @details This will build the gas and solid phase domain. The input is the finest-level stuff and you can control the division
-    into boxes as well as the maximum number of coarsenings. The computed domain is (a_origin, a_origin + a_box*a_dx)
+    into boxes as well as the maximum number of coarsenings. The computed domain is (a_probLo, a_probLo + a_box*a_dx)
   */
-  virtual void buildGeometries(const ProblemDomain   a_finestDomain,
-			       const RealVect        a_origin,
-			       const Real            a_finestDx,
-			       const int             a_nCellMax = -1,
-			       const int             a_maxCoarsen = -1);
-
-  /*!
-    @brief Compute curvature of the implicit function
-    @param[in] a_pos    Position where we evaluate curvature
-    @param[in] a_diffDx Value to use for finite-difference evaluations. 
-    @return Return principal curvatures. In 2D both entries are the same, in 3D the smallest curvature goes first. 
-  */
-  std::pair<Real, Real> getPrincipalCurvatures(const phase::which_phase a_phase, const RealVect pos, const Real a_diffDx) const;
+  virtual void buildGeometries(const ProblemDomain a_finestDomain,
+			       const RealVect      a_probLo,
+			       const Real          a_finestDx,
+			       const int           a_nCellMax = -1,
+			       const int           a_maxGhostEB = 4,
+			       const int           a_maxCoarsen = -1);
   
 protected:
 
@@ -154,6 +146,21 @@ protected:
   Real m_eps0;
 
   /*!
+    @brief True if we use the chombo-discharge geometry generation utility.
+  */
+  bool m_useScanShop;
+
+  /*!
+    @brief Grid level where we begin using ScanShop
+  */
+  ProblemDomain m_scanDomain;
+
+  /*!
+    @brief Maximum number of ghost cells that we will ever need
+  */
+  int m_maxGhostEB;
+
+  /*!
     @brief dielectrics
   */
   Vector<Dielectric> m_dielectrics;
@@ -166,34 +173,28 @@ protected:
   /*!
     @brief The gas-phase implicit function
   */
-  RefCountedPtr<BaseIF> m_gas_if;
+  RefCountedPtr<BaseIF> m_implicitFunctionGas;
 
   /*!
     @brief The solid-phase implicit function
   */
-  RefCountedPtr<BaseIF> m_sol_if;
+  RefCountedPtr<BaseIF> m_implicitFunctionSolid;
 
   /*!
     @brief Geometry server for gas phase
   */
-  virtual void buildGasGeoServ(GeometryService*&   a_geoserver,
-			       const ProblemDomain a_finestDomain,
-			       const RealVect      a_origin,
-			       const Real          a_dx);
+  void buildGasGeoServ(GeometryService*&   a_geoserver,
+		       const ProblemDomain a_finestDomain,
+		       const RealVect      a_probLo,
+		       const Real          a_dx);
 
   /*!
     @brief Geometry server for solid phas
   */
-  virtual void buildSolidGeoServ(GeometryService*&   a_geoserver,
-				 const ProblemDomain a_finestDomain,
-				 const RealVect      a_origin,
-				 const Real          a_dx);
-
-#if CH_SPACEDIM==2
-  Real curvature2D(const RefCountedPtr<BaseIF>& a_impFunc, const RealVect pos, const Real a_diffDx) const;
-#elif CH_SPACEDIM==3
-  std::pair<Real, Real> curvature3D(const RefCountedPtr<BaseIF>& a_impFunc, const RealVect pos, const Real a_diffDx) const;
-#endif
+  void buildSolidGeoServ(GeometryService*&   a_geoserver,
+			 const ProblemDomain a_finestDomain,
+			 const RealVect      a_probLo,
+			 const Real          a_dx);
 
 };
 

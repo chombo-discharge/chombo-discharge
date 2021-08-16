@@ -1104,16 +1104,8 @@ void Driver::parseGeometryGeneration(){
   ParmParse pp("Driver");
   pp.get("geometry_generation", m_geometryGeneration);
   pp.get("geometry_scan_level", m_geoScanLevel);
-  
 
-  if(m_geometryGeneration == "chombo-discharge"){ // Need to activate some flags that trigger the correct code. 
-    ComputationalGeometry::s_use_new_gshop = true;
-    EBISLevel::s_distributedData            = true;
-    ComputationalGeometry::s_ScanDomain = m_amr->getDomains()[m_geoScanLevel];
-  }
-  else if(m_geometryGeneration == "chombo"){
-  }
-  else{
+  if(!(m_geometryGeneration == "chombo-discharge" || m_geometryGeneration == "chombo")){
     MayDay::Abort("Driver:parseGeometryGeneration - unsupported argument requested");
   }
 }
@@ -1313,18 +1305,28 @@ void Driver::setupGeometryOnly(){
 
   this->sanityCheck();
 
-  if(m_ebisMemoryLoadBalance){
-    EBIndexSpace::s_useMemoryLoadBalance = true;
-  }
-  else {
-    EBIndexSpace::s_useMemoryLoadBalance = false;
-  }
-
   const Real t0 = Timer::wallClock();
+
+  // Need to activate some flags that trigger Chombo or chombo-discharge geo-generation method.
+  if(m_geometryGeneration == "chombo-discharge"){
+    EBISLevel::s_distributedData = true;
+    m_computationalGeometry->useScanShop(m_amr->getDomains()[m_geoScanLevel]);
+  }
+  else if(m_geometryGeneration == "chombo"){
+    m_computationalGeometry->useChomboShop();
+
+    if(m_ebisMemoryLoadBalance){
+      EBIndexSpace::s_useMemoryLoadBalance = true;
+    }
+    else {
+      EBIndexSpace::s_useMemoryLoadBalance = false;
+    }
+  }
   m_computationalGeometry->buildGeometries(m_amr->getFinestDomain(),
-					    m_amr->getProbLo(),
-					    m_amr->getFinestDx(),
-					    m_amr->getMaxEbisBoxSize());
+					   m_amr->getProbLo(),
+					   m_amr->getFinestDx(),
+					   m_amr->getMaxEbisBoxSize(),
+					   m_amr->getNumberOfEbGhostCells());
   const Real t1 = Timer::wallClock();
   if(procID() == 0) std::cout << "geotime = " << t1 - t0 << std::endl;
 
@@ -1363,17 +1365,25 @@ void Driver::setupFresh(const int a_initialRegrids){
 
   this->sanityCheck();                                    // Sanity check before doing anything expensive
 
-  if(m_ebisMemoryLoadBalance){
-    EBIndexSpace::s_useMemoryLoadBalance = true;
+  // Need to specify geometry generation method. 
+  if(m_geometryGeneration == "chombo-discharge"){
+    EBISLevel::s_distributedData = true;
+    m_computationalGeometry->useScanShop(m_amr->getDomains()[m_geoScanLevel]);
   }
-  else {
-    EBIndexSpace::s_useMemoryLoadBalance = false;
-  }
-
+  else if(m_geometryGeneration == "chombo"){
+    if(m_ebisMemoryLoadBalance){
+      EBIndexSpace::s_useMemoryLoadBalance = true;
+    }
+    else {
+      EBIndexSpace::s_useMemoryLoadBalance = false;
+    }
+    m_computationalGeometry->useChomboShop();
+  }  
   m_computationalGeometry->buildGeometries(m_amr->getFinestDomain(),
-					    m_amr->getProbLo(),
-					    m_amr->getFinestDx(),
-					    m_amr->getMaxEbisBoxSize());
+					   m_amr->getProbLo(),
+					   m_amr->getFinestDx(),
+					   m_amr->getMaxEbisBoxSize(),
+					   m_amr->getNumberOfEbGhostCells());
 
 
   // Register Realms
@@ -1480,10 +1490,26 @@ void Driver::setupForRestart(const int a_initialRegrids, const std::string a_res
 
   this->sanityCheck();                                    // Sanity check before doing anything expensive
 
+  // Need to activate some flags that trigger Chombo or chombo-discharge geo-generation method.
+  if(m_geometryGeneration == "chombo-discharge"){
+    EBISLevel::s_distributedData = true;
+    m_computationalGeometry->useScanShop(m_amr->getDomains()[m_geoScanLevel]);
+  }
+  else if(m_geometryGeneration == "chombo"){
+    m_computationalGeometry->useChomboShop();
+
+    if(m_ebisMemoryLoadBalance){
+      EBIndexSpace::s_useMemoryLoadBalance = true;
+    }
+    else {
+      EBIndexSpace::s_useMemoryLoadBalance = false;
+    }
+  }  
   m_computationalGeometry->buildGeometries(m_amr->getFinestDomain(),
-					    m_amr->getProbLo(),
-					    m_amr->getFinestDx(),
-					    m_amr->getMaxEbisBoxSize());
+					   m_amr->getProbLo(),
+					   m_amr->getFinestDx(),
+					   m_amr->getMaxEbisBoxSize(),
+					   m_amr->getNumberOfEbGhostCells());
 
   this->getGeometryTags();       // Get geometric tags.
 
