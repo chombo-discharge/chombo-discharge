@@ -25,7 +25,6 @@
 #include <CD_MemoryReport.H>
 #include <CD_NamespaceHeader.H>
 
-//Real ComputationalGeometry::s_thresh;
 
 ComputationalGeometry::ComputationalGeometry(){
   CH_TIME("ComputationalGeometry::ComputationalGeometry()");
@@ -140,11 +139,12 @@ void ComputationalGeometry::buildGeometries(const ProblemDomain   a_finestDomain
   // through grown grid patches when it determines if a grid patch is irregular or not. 
   m_maxGhostEB = a_maxGhostEB;
   
-  // Build the geoservers. 
-  Vector<GeometryService*> geoservers(2, NULL);
+  // Build the geoservers. This creates the composite implicit functions and the GeometryService* objects which
+  // can be passed to Chombo. Note that the 
+  Vector<GeometryService*> geoServices(2, nullptr);
   
-  this->buildGasGeometry  (geoservers[phase::gas],   a_finestDomain, a_probLo, a_finestDx);
-  this->buildSolidGeometry(geoservers[phase::solid], a_finestDomain, a_probLo, a_finestDx);
+  this->buildGasGeometry  (geoServices[phase::gas],   a_finestDomain, a_probLo, a_finestDx);
+  this->buildSolidGeometry(geoServices[phase::solid], a_finestDomain, a_probLo, a_finestDx);
 
   // Define the multifluid index space.
   const bool useDistributedData = m_useScanShop;
@@ -152,23 +152,23 @@ void ComputationalGeometry::buildGeometries(const ProblemDomain   a_finestDomain
   m_multifluidIndexSpace->define(a_finestDomain.domainBox(), // Define MF
 				 a_probLo,
 				 a_finestDx,
-				 geoservers,
+				 geoServices,
 				 useDistributedData,
 				 a_nCellMax,
 				 a_maxCoarsen);
 
   // Delete temps. 
   for (int i = 0; i < 2; i++){
-    if(geoservers[i] != NULL){
-      delete geoservers[i];
+    if(geoServices[i] != nullptr){
+      delete geoServices[i];
     }
   }
 }
 
-void ComputationalGeometry::buildGasGeometry(GeometryService*&  a_geoserver,
-					    const ProblemDomain a_finestDomain,
-					    const RealVect      a_probLo,
-					    const Real          a_finestDx){
+void ComputationalGeometry::buildGasGeometry(GeometryService*&   a_geoserver,
+					     const ProblemDomain a_finestDomain,
+					     const RealVect      a_probLo,
+					     const Real          a_finestDx){
   CH_TIME("ComputationalGeometry::buildGasGeometry(GeometryService, ProblemDomain, RealVect, Real)");
   
   // The gas phase is the intersection of the region outside every object, so IntersectionIF is correct here. We build the
@@ -222,7 +222,7 @@ void ComputationalGeometry::buildSolidGeometry(GeometryService*&   a_geoserver,
 
   // Create EBIndexSpace. If there are no solid phases, return null
   if(dielectricParts.size() == 0){
-    a_geoserver = NULL;
+    a_geoserver = nullptr;
   }
   else {
     Vector<BaseIF*> parts;

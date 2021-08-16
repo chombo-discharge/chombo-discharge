@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_ComputationalGeometry.H
-  @brief  Declaration of base class for defining geometries.
+  @brief  Declaration of base class for defining geometries. 
   @author Robert Marskar
 */
 
@@ -28,12 +28,15 @@
 
 /*!
   @brief Abstract base class for geometries
+  @details This class encapsulates computational geometries in chombo-discharge. If you construct this object as-is, you will get a blank geometry. To include EBs one must
+  set the electrodes and dielectrics. This is not a pure function, so you can set those objects directly from a ComputationalGeometry object. However, in almost all cases
+  one will want to derive from ComputationalGeometry and create a parametrized geometry (that is what $DISCHARGE_HOME/Geometries is for!).
 */
 class ComputationalGeometry {
 public:
 
   /*!
-    @brief Constructor
+    @brief Constructor. Sets a blank geometry. 
   */
   ComputationalGeometry();
 
@@ -41,11 +44,6 @@ public:
     @brief Destructor
   */
   virtual ~ComputationalGeometry();
-
-  /*!
-    @brief Threshold for Vof computation
-  */
-  constexpr static Real s_thresh = 1.E-15;
   
   /*!
     @brief Get dielectrics
@@ -69,7 +67,7 @@ public:
     @brief Calls for ComputationalGeometry to use ScanShop rather than Chombo's default geometry generation tool.
     @param[in] a_startDomain Coarse domain where ScanShop begins the load balancing recursion process.
   */
-  void useScanShop(const ProblemDomain a_beginDomain);
+  void useScanShop(const ProblemDomain a_startDomain);
 
   /*!
     @brief Calls for ComputationalGeometry to use Chombo's geometry generation tool
@@ -116,7 +114,7 @@ public:
   const RefCountedPtr<BaseIF>& getImplicitFunction(const phase::which_phase a_phase) const;
 
   /*!
-    @brief Build MFIndexSpace
+    @brief Build geometries and the MFIndexSpace.
     @param[in] a_finestDomain Finest domain
     @param[in] a_probLo       Lower-left corner
     @param[in] a_finestDx     Finest grid resolution
@@ -129,11 +127,17 @@ public:
   virtual void buildGeometries(const ProblemDomain a_finestDomain,
 			       const RealVect      a_probLo,
 			       const Real          a_finestDx,
-			       const int           a_nCellMax = -1,
-			       const int           a_maxGhostEB = 4,
+			       const int           a_nCellMax,
+			       const int           a_maxGhostEB,
 			       const int           a_maxCoarsen = -1);
   
 protected:
+
+  
+  /*!
+    @brief Threshold for Vof computation
+  */
+  constexpr static Real s_thresh = 1.E-15;
 
   /*!
     @brief Multifluid index spaces
@@ -171,12 +175,12 @@ protected:
   Vector<Electrode> m_electrodes;
 
   /*!
-    @brief The gas-phase implicit function
+    @brief The gas-phase implicit function (i.e. outside electrodes and dielectrics). 
   */
   RefCountedPtr<BaseIF> m_implicitFunctionGas;
 
   /*!
-    @brief The solid-phase implicit function
+    @brief The solid-phase implicit function (i.e. the inside of the dielectrics). 
   */
   RefCountedPtr<BaseIF> m_implicitFunctionSolid;
 
@@ -187,10 +191,10 @@ protected:
     @param[in]    a_probLo        Lower-left corner of simulation domain.
     @param[in]    a_finestDx      Finest resolution which will be used.
   */
-  void buildGasGeometry(GeometryService*&  a_geoserver,
-		       const ProblemDomain a_finestDomain,
-		       const RealVect      a_probLo,
-		       const Real          a_finestDx);
+  void buildGasGeometry(GeometryService*&   a_geoserver,
+			const ProblemDomain a_finestDomain,
+			const RealVect      a_probLo,
+			const Real          a_finestDx);
 
   /*!
     @brief Set up the geometry generation tool for the solid phase, i.e. the part inside the dielectrics. 
@@ -199,10 +203,10 @@ protected:
     @param[in]    a_probLo        Lower-left corner of simulation domain.
     @param[in]    a_finestDx      Finest resolution which will be used.
   */
-  void buildSolidGeometry(GeometryService*&  a_geoserver,
-			 const ProblemDomain a_finestDomain,
-			 const RealVect      a_probLo,
-			 const Real          a_finestDx);
+  void buildSolidGeometry(GeometryService*&   a_geoserver,
+			  const ProblemDomain a_finestDomain,
+			  const RealVect      a_probLo,
+			  const Real          a_finestDx);
 
 };
 
