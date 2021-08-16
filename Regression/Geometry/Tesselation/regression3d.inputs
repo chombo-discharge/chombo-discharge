@@ -77,3 +77,4 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 # ====================================================================================================
 Tesselation.mesh_file    = sphere.ply
 Tesselation.partitioner  = overlap
+Tesselation.z_coord      = 0.0 

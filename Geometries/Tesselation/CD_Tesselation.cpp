@@ -39,10 +39,13 @@ Tesselation::Tesselation(){
   std::string filename;
   std::string partitioner;
 
+  Real zCoord;
+
   ParmParse pp("Tesselation");
 
   pp.get("mesh_file",   filename);
   pp.get("partitioner", partitioner);
+  pp.get("z_coord",     zCoord);
 
   // Build the dcel_mesh and the BVH
   auto m = std::make_shared<Mesh>();
@@ -71,7 +74,7 @@ Tesselation::Tesselation(){
   }
 
 
-  auto bif = RefCountedPtr<BvhSdf<precision, BV> > (new BvhSdf<precision, BV>(root,false));
+  auto bif = RefCountedPtr<BvhSdf<precision, BV> > (new BvhSdf<precision, BV>(root,false,zCoord));
 
   m_electrodes.push_back(Electrode(bif, true));
   
