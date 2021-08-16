@@ -69,7 +69,7 @@ const RefCountedPtr<BaseIF>& ComputationalGeometry::getImplicitFunction(const ph
   }
 }
 
-const Real& ComputationalGeometry::getGasPermittivity() const {
+Real ComputationalGeometry::getGasPermittivity() const {
   return m_eps0;
 }
 
@@ -113,29 +113,6 @@ void ComputationalGeometry::buildGeometries(const ProblemDomain   a_finestDomain
     }
   }
 }
-
-#ifdef CH_USE_HDF5
-void ComputationalGeometry::buildGeometriesFromFiles(const std::string&   a_gas_file,
-						     const std::string&   a_sol_file){
-
-  RefCountedPtr<EBIndexSpace>& ebis_gas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
-  RefCountedPtr<EBIndexSpace>& ebis_sol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
-
-  // Define gas phase
-  HDF5Handle gas_handle(a_gas_file.c_str(), HDF5Handle::OPEN_RDONLY);
-  ebis_gas->define(gas_handle);
-  gas_handle.close();
-
-  if(m_dielectrics.size() > 0){
-    HDF5Handle sol_handle(a_sol_file.c_str(), HDF5Handle::OPEN_RDONLY);
-    ebis_sol->define(sol_handle);
-    sol_handle.close();
-  }
-  else {
-    ebis_sol = RefCountedPtr<EBIndexSpace> (NULL);
-  }
-}
-#endif
 
 void ComputationalGeometry::buildGasGeoServ(GeometryService*&   a_geoserver,
 					    const ProblemDomain a_finestDomain,

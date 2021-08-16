@@ -62,36 +62,42 @@ public:
   
   /*!
     @brief Get dielectrics
+    @return Dielectrics (m_dielectrics)
   */
   virtual const Vector<Dielectric>& getDielectrics() const;
 
   /*!
-    @brief Get conductors
+    @brief Get electrodes
+    @return Electrodes (m_dielectrics)
   */
   virtual const Vector<Electrode>& getElectrodes() const;
 
   /*!
-    @brief Get the background permittivity
+    @brief Get the background gas permittivity
+    @return Background gas permittivity
   */
-  virtual const Real& getGasPermittivity() const;
+  virtual Real getGasPermittivity() const;
   
   /*!
-    @brief Set electrodes
+    @brief Set dielectrics
+    @param[in] a_dielectrics Dielectris
   */
   virtual void setDielectrics(Vector<Dielectric>& a_dielectrics);
 
   /*!
     @brief Set electrodes
+    @param[in] a_electrodes Electrodes
   */
   virtual void setElectrodes(Vector<Electrode>& a_electrodes);
 
   /*!
-    @brief Get the background permittivity
+    @brief Set the background permittivity
+    @param[in] a_eps0 Gas permittivity
   */
   virtual void setGasPermittivity(const Real a_eps0);
 
   /*!
-    @brief Get the EBIndexSpaces
+    @brief Get the multifluid index space
   */
   virtual const RefCountedPtr<MultiFluidIndexSpace>& getMfIndexSpace() const;
 
@@ -122,17 +128,10 @@ public:
 			       const int             a_maxCoarsen = -1);
 
   /*!
-    @brief Build geometries from files
-  */
-#ifdef CH_USE_HDF5
-  virtual void buildGeometriesFromFiles(const std::string&   a_gas_file,
-					const std::string&   a_sol_file);
-#endif
-
-  /*!
     @brief Compute curvature of the implicit function
     @param[in] a_pos    Position where we evaluate curvature
     @param[in] a_diffDx Value to use for finite-difference evaluations. 
+    @return Return principal curvatures. In 2D both entries are the same, in 3D the smallest curvature goes first. 
   */
   std::pair<Real, Real> getPrincipalCurvatures(const phase::which_phase a_phase, const RealVect pos, const Real a_diffDx) const;
   
