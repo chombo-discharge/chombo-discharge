@@ -74,7 +74,7 @@ void CdrGodunov::parseExtrapolateSourceTerm(){
   
   ParmParse pp(m_className.c_str());
 
-  pp.get("extrapolateSourceTerm", m_extrapolateSourceTerm);
+  pp.get("extrap_source", m_extrapolateSourceTerm);
 }
 
 void CdrGodunov::parseSlopeLimiter(){
