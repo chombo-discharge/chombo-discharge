@@ -41,7 +41,7 @@ Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeomet
 
   setComputationalGeometry(a_computationalGeometry); // Set computational geometry
   setTimeStepper(a_timeStepper);                     // Set time stepper
-  setAmr(a_amr);                                      // Set amr
+  setAmr(a_amr);                                     // Set amr
   setCellTagger(a_cellTagger);                       // Set cell tagger
   setGeoCoarsen(a_geoCoarsen);                       // Set geo coarsener
 

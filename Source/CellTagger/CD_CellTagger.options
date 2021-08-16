@@ -1,5 +1,5 @@
 # ====================================================================================================
-# CELL_TAGGER CLASS OPTIONS
+# CellTagger class options
 # ====================================================================================================
 CellTagger.num_boxes   = 0            # Number of allowed tag boxes (0 = tags allowe everywhere)
 CellTagger.box1_lo     = 0.0 0.0 0.0  # Only allow tags that fall between
