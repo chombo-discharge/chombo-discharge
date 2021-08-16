@@ -17,15 +17,12 @@
 // Our includes
 #include <CD_CdrGodunov.H>
 #include <CD_DataOps.H>
-
-ExtrapAdvectBCFactory s_physibc;
-
 #include "CD_NamespaceHeader.H"
 
 CdrGodunov::CdrGodunov() : CdrTGA() {
   CH_TIME("CdrGodunov::CdrGodunov()");
 
-  // Class name and name. 
+  // Class name and instantiation name. 
   m_className = "CdrGodunov";
   m_name      = "CdrGodunov";
 }
@@ -43,11 +40,11 @@ void CdrGodunov::parseOptions(){
   this->parseDomainBc();               // Parses domain BC options
   this->parseSlopeLimiter();           // Parses slope limiter settings
   this->parsePlotVariables();          // Parses plot variables
-  this->parsePlotMode();               // Parse plot mdoe
-  this->parseMultigridSettings();      // Parses solver parameters for geometric multigrid
-  this->parseExtrapolateSourceTerm();  // Parse source term extrapolation for time-centering advective comps
-  this->parseRngSeed();                // Get a seed
-  this->parseDivergenceComputation();  // Nonlinear divergence blending
+  this->parsePlotMode();               // Parses plot mode
+  this->parseMultigridSettings();      // Parses multigrid settings
+  this->parseExtrapolateSourceTerm();  // Parses source term extrapolation for Godunov time extrapolation. 
+  this->parseRngSeed();                // Creates a seed (if one runs with FHD). 
+  this->parseDivergenceComputation();  // Parses non-conservative divergence blending
 }
 
 void CdrGodunov::parseRuntimeOptions(){
@@ -56,13 +53,13 @@ void CdrGodunov::parseRuntimeOptions(){
     pout() << m_name + "::parseRuntimeOptions()" << endl;
   }
 
-  this->parseSlopeLimiter();
-  this->parsePlotVariables();
-  this->parsePlotMode();
-  this->parseMultigridSettings();
-  this->parseDomainBc();
-  this->parseExtrapolateSourceTerm();
-  this->parseDivergenceComputation();
+  this->parseSlopeLimiter();          // Parses slope limiter (on/off)
+  this->parsePlotVariables();         // Parses plot variables
+  this->parsePlotMode();              // Parses plot mode
+  this->parseMultigridSettings();     // Parses multigrid settings
+  this->parseDomainBc();              // Parses domain BCs
+  this->parseExtrapolateSourceTerm(); // Parses source term extrapolation
+  this->parseDivergenceComputation(); // Parses non-conservative divergence blending. 
 }
 
 
@@ -94,7 +91,7 @@ void CdrGodunov::allocateInternals(){
     pout() << m_name + "::allocateInternals()" << endl;
   }
 
-  // Call parent method. 
+  // CdrTGA allocates everything except storage needed for the advection object. 
   CdrTGA::allocateInternals();
 
 
@@ -178,10 +175,10 @@ void CdrGodunov::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_
 
       // These are settings for EBAdvectPatchIntegrator -- it's not a very pretty design but the object has settings
       // that permits it to run advection code (through setDoingVel(0)). 
-      ebpatchad.setVelocities(cellVel, faceVel); // Set cell/face velocities
-      ebpatchad.setDoingVel(0);                  // If setDoingVel(0) EBAdvectLevelIntegrator advects a scalar. 
-      ebpatchad.setEBPhysIBC(s_physibc);         // Set the BC object
-      ebpatchad.setCurComp(m_comp);              // Solving for m_comp = 0
+      ebpatchad.setVelocities(cellVel, faceVel);       // Set cell/face velocities
+      ebpatchad.setDoingVel(0);                        // If setDoingVel(0) EBAdvectLevelIntegrator advects a scalar. 
+      ebpatchad.setEBPhysIBC(ExtrapAdvectBCFactory()); // Set the BC object. It won't matter what we use here because CdrSolver runs its own BC routines. 
+      ebpatchad.setCurComp(m_comp);                    // Solving for m_comp = 0
 
       // Extrapolate to face-centers. The face-centered states are Godunov-style extrapolated in time to a_extrapDt. 
       ebpatchad.extrapolateBCG(facePhi, cellPhi, source, dit(), time, a_extrapDt);
