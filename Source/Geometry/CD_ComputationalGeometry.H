@@ -113,11 +113,17 @@ public:
 
   /*!
     @brief Get implicit function
+    @param[in] a_phase Phase
   */
   virtual const RefCountedPtr<BaseIF>& getImplicitFunction(const phase::which_phase a_phase) const;
 
   /*!
     @brief Build MFIndexSpace
+    @param[in] a_finestDomain Finest domain
+    @param[in] a_probLo       Lower-left corner
+    @param[in] a_finestDx     Finest grid resolution
+    @param[i] a_nCellMax      Max cells
+    @param[i] a_maxCoarsen    Max coarsenings
     @details This will build the gas and solid phase domain. The input is the finest-level stuff and you can control the division
     into boxes as well as the maximum number of coarsenings. The computed domain is (a_origin, a_origin + a_box*a_dx)
   */
