@@ -787,7 +787,7 @@ void CdrPlasmaGodunovStepper::advanceTransportEuler(const Real a_dt){
       EBAMRCellData& scratch2 = storage->getScratch2();
 
       // Compute hyperbolic term into scratch. Also include diffusion term if and only if we're using explicit diffusion
-      const Real extrap_dt = (m_extrap_advect && solver->extrapolateSourceTerm()) ? a_dt : 0.0;
+      const Real extrap_dt = (m_extrap_advect) ? a_dt : 0.0;
       if(!m_implicit_diffusion){
 	solver->computeDivJ(scratch, phi, extrap_dt, true, true); // For explicit diffusion, scratch is computed as div(v*phi - D*grad(phi))
       }
@@ -877,7 +877,7 @@ void CdrPlasmaGodunovStepper::advanceTransportRK2(const Real a_dt){
     DataOps::copy(k1, phi);
 
     // Compute hyperbolic term into scratch. Also include diffusion term if and only if we're using explicit diffusion
-    const Real extrap_dt = (m_extrap_advect && solver->extrapolateSourceTerm()) ? a_dt : 0.0;
+    const Real extrap_dt = (m_extrap_advect) ? a_dt : 0.0;
     if(!m_implicit_diffusion){
       solver->computeDivJ(scratch, phi, extrap_dt, true, true); // For explicit diffusion, scratch is computed as div(v*phi - D*grad(phi))
     }
@@ -1146,7 +1146,7 @@ void CdrPlasmaGodunovStepper::extrapolateSourceTerm(const Real a_dt){
     EBAMRCellData& extrap = storage->getExtrap();
 
     DataOps::copy(extrap, state);
-    if(m_extrap_advect && solver->extrapolateSourceTerm()) {
+    if(m_extrap_advect) {
       DataOps::incr(extrap, source, 0.5*a_dt);
     }
   }
