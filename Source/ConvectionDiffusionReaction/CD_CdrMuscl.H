@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_CdrMuscl.H
-  @brief  Declaration of a muscl class for the convection diffusion reaction equations
+  @brief  Declaration of a class which implements CdrTGA using MUSCL for advection. 
   @author Robert Marskar
 */
 
@@ -18,35 +18,31 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Class that uses MUSCL discretization for the advective term in the cdr equation
+  @brief Class that uses MUSCL discretization advection.
+  @details This class performs MUSCL-type 
 */
 class CdrMuscl : public CdrTGA {
 public:
 
   /*!
-    @brief Constructor
+    @brief Default constructor. 
   */
   CdrMuscl();
 
   /*!
-    @brief Destructor
+    @brief Destructor (does nothing)
   */
   virtual ~CdrMuscl();
 
   /*!
-    @brief Parse options
+    @brief Parse class options to put object in usable state. 
   */
   virtual void parseOptions() override;
 
   /*!
-    @brief Parse options
+    @brief Parse runtime options
   */
   virtual void parseRuntimeOptions() override;
-
-  /*!
-    @brief Pure advective advance. Calling this is an error - SG currently only works with MOL methods.
-  */
-  virtual void advance_advect(EBAMRCellData& a_phi, const Real a_dt);
 
   /*!
     @brief MUSCL advection to faces
@@ -61,19 +57,19 @@ public:
 protected:
 
   /*!
-    @brief
+    @brief If true, slopes are limited (always use limiting). 
   */
-  bool m_slopelim;
+  bool m_limitSlopes;
 
   /*!
-    @brief Compute slopes
+    @brief Compute slopes. 
   */
   virtual void computeSlopes(EBCellFAB&           a_deltaC,
-			      const EBCellFAB&     a_phi,
-			      const Box&           a_box,
-			      const ProblemDomain& a_domain,
-			      const int            a_level,
-			      const DataIndex&     a_dit);
+			     const EBCellFAB&     a_phi,
+			     const Box&           a_box,
+			     const ProblemDomain& a_domain,
+			     const int            a_level,
+			     const DataIndex&     a_dit);
 
   /*!
     @brief Compute outflow fluxes at the boundary

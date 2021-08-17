@@ -19,22 +19,30 @@
 #include <CD_NamespaceHeader.H>
 
 CdrMuscl::CdrMuscl(){
+  CH_TIME("CdrMuscl::CdrMuscl()");
+  
+  // Class and instantiatio name
   m_className = "CdrMuscl";
   m_name      = "CdrMuscl";
 }
 
 CdrMuscl::~CdrMuscl(){
-
+  CH_TIME("CdrMuscl::~CdrMuscl()");
 }
 
 void CdrMuscl::parseOptions(){
-  parseRngSeed();                // Parses RNG seed
-  parsePlotMode();               // Parses plot mode
-  parseDomainBc();               // Parses domain BC options
-  parseSlopeLimiter();           // Parses slope limiter settings
-  parsePlotVariables();          // Parses plot variables
-  parseMultigridSettings();      // Parses solver parameters for geometric multigrid
-  parseDivergenceComputation();  // Nonlinear divergence blending
+  CH_TIME("CdrGodunov::parseOptions()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parseOptions()" << endl;
+  }
+  
+  this->parseRngSeed();                // Parses RNG seed
+  this->parsePlotMode();               // Parses plot mode
+  this->parseDomainBc();               // Parses domain BC options
+  this->parseSlopeLimiter();           // Parses slope limiter settings
+  this->parsePlotVariables();          // Parses plot variables
+  this->parseMultigridSettings();      // Parses solver parameters for geometric multigrid
+  this->parseDivergenceComputation();  // Non-conservative divergence blending
 }
 
 void CdrMuscl::parseRuntimeOptions(){
@@ -56,16 +64,7 @@ void CdrMuscl::parseSlopeLimiter(){
 
   std::string str;
   pp.get("limit_slopes", str);
-  m_slopelim = (str == "true") ? true : false;
-}
-
-void CdrMuscl::advance_advect(EBAMRCellData& a_phi, const Real a_dt){
-  CH_TIME("CdrMuscl::advance_advect");
-  if(m_verbosity > 5){
-    pout() << m_name + "::advance_advect" << endl;
-  }
-
-  MayDay::Abort("CdrMuscl::advance_advect - not implemented (yet)");
+  m_limitSlopes = (str == "true") ? true : false;
 }
 
 void CdrMuscl::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt){
@@ -107,7 +106,7 @@ void CdrMuscl::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_ph
       grown_box.grow(1);
       EBCellFAB deltaC(ebisbox, grown_box, SpaceDim); // Cell-centered slopes
       deltaC.setVal(0.0);
-      if(m_slopelim){
+      if(m_limitSlopes){
 	this->computeSlopes(deltaC, state, box, domain, lvl, dit());
       }
       this->upwind(face_state, deltaC, state, velo, domain, box, lvl, dit());
