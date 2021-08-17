@@ -16,7 +16,11 @@ void FORTRAN_NAME( MUSCL_SLOPES ,muscl_slopes )(
       CHFp_FRA1(deltaC)
       ,CHFp_CONST_FRA1(state)
       ,CHFp_CONST_INT(dir)
-      ,CHFp_BOX(region) );
+      ,CHFp_CONST_INT(isBndryLo)
+      ,CHFp_CONST_INT(isBndryHi)
+      ,CHFp_BOX(region)
+      ,CHFp_BOX(loBox)
+      ,CHFp_BOX(hiBox) );
 
 #define FORT_MUSCL_SLOPES FORTRAN_NAME( inlineMUSCL_SLOPES, inlineMUSCL_SLOPES)
 #define FORTNT_MUSCL_SLOPES FORTRAN_NAME( MUSCL_SLOPES, muscl_slopes)
@@ -25,14 +29,22 @@ inline void FORTRAN_NAME(inlineMUSCL_SLOPES, inlineMUSCL_SLOPES)(
       CHFp_FRA1(deltaC)
       ,CHFp_CONST_FRA1(state)
       ,CHFp_CONST_INT(dir)
-      ,CHFp_BOX(region) )
+      ,CHFp_CONST_INT(isBndryLo)
+      ,CHFp_CONST_INT(isBndryHi)
+      ,CHFp_BOX(region)
+      ,CHFp_BOX(loBox)
+      ,CHFp_BOX(hiBox) )
 {
  CH_TIMELEAF("FORT_MUSCL_SLOPES");
  FORTRAN_NAME( MUSCL_SLOPES ,muscl_slopes )(
       CHFt_FRA1(deltaC)
       ,CHFt_CONST_FRA1(state)
       ,CHFt_CONST_INT(dir)
-      ,CHFt_BOX(region) );
+      ,CHFt_CONST_INT(isBndryLo)
+      ,CHFt_CONST_INT(isBndryHi)
+      ,CHFt_BOX(region)
+      ,CHFt_BOX(loBox)
+      ,CHFt_BOX(hiBox) );
 }
 #endif  // GUARDMUSCL_SLOPES 
 

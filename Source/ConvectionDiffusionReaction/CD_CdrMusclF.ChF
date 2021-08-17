@@ -2,7 +2,11 @@
      &     chf_fra1[deltaC],
      &     chf_const_fra1[state],
      &     chf_const_int[dir],
+     &     chf_const_int[isBndryLo],
+     &     chf_const_int[isBndryHi],
      &     chf_box[region],
+     &     chf_box[loBox],
+     &     chf_box[hiBox],          
      &)
 
 c     dwc is the central slope, dwl the left slope, dwr the right slope
@@ -32,6 +36,20 @@ c     and dqlim is the limited slope (which becomes the cell-centered slope delt
          deltaC(chf_ix[i;j;k]) = dqlim
 
       chf_enddo
+
+      if(isBndryLo .ne. 0) then
+         chf_multido[loBox; i; j; k]
+            dwr = state(chf_ix[i+ioff; j+joff; k+koff]) - state(chf_ix[i;j;k])
+            deltaC(chf_ix[i;j;k]) = dwr
+         chf_enddo
+      endif
+
+      if(isBndryHi .ne. 0) then
+         chf_multido[hiBox; i; j; k]
+            dwl = state(chf_ix[i;j;k]) - state(chf_ix[i-ioff; j-joff; k-koff])
+            deltaC(chf_ix[i;j;k]) = dwl
+         chf_enddo
+      endif
       
       return
       end

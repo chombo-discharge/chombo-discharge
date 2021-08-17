@@ -7,7 +7,6 @@
   @file   CD_CdrMuscl.cpp
   @brief  Implementation of CD_CdrMuscl.H
   @author Robert Marskar
-  @todo   computeSlopes is missing proper treatment of domain boundaries!
 */
 
 // Chombo includes
@@ -152,9 +151,7 @@ void CdrMuscl::computeSlopes(EBCellFAB&           a_deltaC,
   for (int dir = 0; dir < SpaceDim; dir++){
 
     // We don't want to compute slopes using data that lies outside the domain boundary -- that data can be bogus. So,
-    // compute the strip of cells and check if these cells are in a_cellBox. If they are, we must compute special slopes
-    // in those cells.
-    
+    // compute the strip of cells and check if these cells are in a_cellBox. 
     const Box bndryLo = bdryLo(domainBox, dir, 1); // Strip of cells on the low side in coordinate direction dir
     const Box bndryHi = bdryHi(domainBox, dir, 1); // Strip of cells on the high side in coordinate direction dir
 
@@ -167,16 +164,18 @@ void CdrMuscl::computeSlopes(EBCellFAB&           a_deltaC,
     const int isBndryLo = (loBox.isEmpty()) ? 0 : 1; // 1 if it is boundary box and 0 if it's not
     const int isBndryHi = (hiBox.isEmpty()) ? 0 : 1; // 1 if it is boundary box and 0 if it's not
 
-    // We need the slopes outside the grid patch so grow the box. This does not override
-    // the boundary stuff above. 
+    // We need the slopes outside the grid patch so grow the box by 1. 
     Box compBox = a_cellBox;
     compBox.grow(dir, 1);
     compBox &= a_domain;
-
     FORT_MUSCL_SLOPES(CHF_FRA1(slopesReg, dir),
     		      CHF_CONST_FRA1(phiReg, m_comp),
     		      CHF_CONST_INT(dir),
-    		      CHF_BOX(compBox));
+    		      CHF_CONST_INT(isBndryLo),
+    		      CHF_CONST_INT(isBndryHi),		      		      
+    		      CHF_BOX(compBox),
+    		      CHF_BOX(loBox),
+    		      CHF_BOX(hiBox));    
   }
 
   
