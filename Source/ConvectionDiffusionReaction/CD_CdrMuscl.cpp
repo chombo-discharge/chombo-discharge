@@ -23,8 +23,10 @@ CdrMuscl::CdrMuscl(){
   CH_TIME("CdrMuscl::CdrMuscl()");
   
   // Class and instantiatio name
-  m_className = "CdrMuscl";
-  m_name      = "CdrMuscl";
+  m_className   = "CdrMuscl";
+  m_name        = "CdrMuscl";
+
+  m_limitSlopes = true;
 }
 
 CdrMuscl::~CdrMuscl(){
@@ -231,7 +233,8 @@ void CdrMuscl::computeSlopes(EBCellFAB&           a_deltaC,
 	MayDay::Error("CdrMuscl::computeSlopes - dwc != dwc.");
       }
 
-      a_deltaC(vof, m_comp) = dwc;
+      //      a_deltaC(vof, m_comp) = dwc;
+      a_deltaC(vof, m_comp) = 0.0;
     }
   }
 }
