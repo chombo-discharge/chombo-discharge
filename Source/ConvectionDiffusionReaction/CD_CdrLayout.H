@@ -30,6 +30,7 @@ class CdrIterator;
   TimeStepper can keep an instance this class rather than e.g. a Vector<RefCountedPtr<CdrSolver> >, but fundamentally there is no difference between the two. 
   The CdrLayout can be constructed through a factory method, i.e. the user can do a quick-generation of a set of CdrSolvers by using the factory method for
   instantiating an arbitrary number of CdrSolvers. 
+  @note A separate use case for this is class is that it allows segregation between groups of CdrSolvers that live on different realms and phases. 
 */
 template <class T>
 class CdrLayout {
@@ -229,29 +230,29 @@ public:
 protected:
 
   /*!
-    @brief Realm
+    @brief Realm where solvers live. 
   */
   std::string m_realm;
 
   /*!
-    @brief Solvers
+    @brief Phase where solvers live. 
   */
-  Vector<RefCountedPtr<CdrSolver> > m_solvers;
-
-  /*!
-    @brief Species
-  */
-  Vector<RefCountedPtr<CdrSpecies> > m_species;
+  phase::which_phase m_phase;
 
   /*!
     @brief Verbosity
   */
-  int m_verbosity;
+  int m_verbosity;  
 
   /*!
-    @brief phase
+    @brief Solver instantiations. 
   */
-  phase::which_phase m_phase;
+  Vector<RefCountedPtr<CdrSolver> > m_solvers;
+
+  /*!
+    @brief Cdr species
+  */
+  Vector<RefCountedPtr<CdrSpecies> > m_species;
 };
 
 /*!
