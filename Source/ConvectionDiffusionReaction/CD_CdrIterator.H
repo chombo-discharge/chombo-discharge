@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_CdrIterator.H
-  @brief  Iterator class for CdrLayout
+  @brief  Declaration of an iterator class for CdrLayout (for iterating through subsets of solvers). 
   @author Robert Marskar
 */
 
