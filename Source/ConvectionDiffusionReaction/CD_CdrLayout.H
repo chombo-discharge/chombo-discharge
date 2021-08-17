@@ -28,6 +28,8 @@ class CdrIterator;
   @details This is primarily a utility class that just cuts down on typing when there are multiple species are being advected/diffused. This class
   simply stores a set of CdrSolvers, and it contains an "iterator" for iterating through them. This is simply meant to cut down on typing. Note that a 
   TimeStepper can keep an instance this class rather than e.g. a Vector<RefCountedPtr<CdrSolver> >, but fundamentally there is no difference between the two. 
+  The CdrLayout can be constructed through a factory method, i.e. the user can do a quick-generation of a set of CdrSolvers by using the factory method for
+  instantiating an arbitrary number of CdrSolvers. 
 */
 template <class T>
 class CdrLayout {
@@ -258,15 +260,29 @@ protected:
 };
 
 /*!
-  @brief Factory class for CdrLayout. 
-  @details Factory class is very simple; since we don't want to template CdrLayout2 we use a factory to instantiate solvers of 
-  any CdrSolver inherited class, and then return a layout with the casted classes. That's about it. 
+  @brief Factory class for CdrLayout. T is (usually) CdrSolver and S is the implementation class (e.g., CdrMuscl). 
+  @details Factory class is very simple; since we don't want to template CdrLayout further we use a factory to instantiate solvers of 
+  any CdrSolver inherited class, and then return a layout with the casted classes. That's about it. This is useful because it allows
+  the factory to act as a "casting-point" for switching between various solver implementation. 
 */
 template <class T, class S>
 class CdrFactory {
 public:
+  
+  /*!
+    @brief Default constructor (does nothing)
+  */
   CdrFactory();
+
+  /*!
+    @brief Default constructor (does nothing)
+  */  
   ~CdrFactory();
+
+  /*!
+    @brief Factory method, create a new CdrLayout
+    @details This creates a collection of CdrSolvers. Run-time errors will occur if the template S is not a derived class of T. 
+  */  
   RefCountedPtr<CdrLayout<T> > newLayout(const Vector<RefCountedPtr<CdrSpecies> >& a_species) const;
 };
 

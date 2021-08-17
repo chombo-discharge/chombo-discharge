@@ -35,6 +35,9 @@ CdrLayout<T>::~CdrLayout(){
 template <class T>
 phase::which_phase CdrLayout<T>::getPhase() const{
   CH_TIME("CdrLayout<T>::getPhase()");
+  if(m_verbosity > 6){
+    pout() << "CdrLayout<T>::getPhase()" << endl;
+  }      
   
   return m_phase;
 }
@@ -42,6 +45,9 @@ phase::which_phase CdrLayout<T>::getPhase() const{
 template <class T>
 CdrIterator<T> CdrLayout<T>::iterator() {
   CH_TIME("CdrLayout<T>::iterator()");
+  if(m_verbosity > 6){
+    pout() << "CdrLayout<T>::iterator()" << endl;
+  }        
   
   return CdrIterator<T>(*this);
 }
@@ -49,6 +55,9 @@ CdrIterator<T> CdrLayout<T>::iterator() {
 template <class T>
 std::string CdrLayout<T>::getRealm() const{
   CH_TIME("CdrLayout<T>::getRealm()");
+  if(m_verbosity > 6){
+    pout() << "CdrLayout<T>::getRealm()" << endl;
+  }    
   
   return m_realm;
 }
@@ -56,6 +65,9 @@ std::string CdrLayout<T>::getRealm() const{
 template <class T>
 void CdrLayout<T>::setRealm(const std::string a_realm){
   CH_TIME("CdrLayout<T>::setRealm()");
+  if(m_verbosity > 6){
+    pout() << "CdrLayout<T>::setRealm()" << endl;
+  }  
   
   m_realm = a_realm;
 
@@ -67,6 +79,9 @@ void CdrLayout<T>::setRealm(const std::string a_realm){
 template <class T>
 void CdrLayout<T>::addSolver(RefCountedPtr<T>& a_solver){
   CH_TIME("CdrLayout<T>::addSolver(RefCountedPtr<T>");
+  if(m_verbosity > 6){
+    pout() << "CdrLayout<T>::addSolver()" << endl;
+  }        
   
   m_solvers.push_back(a_solver);
 }
@@ -244,9 +259,9 @@ void CdrLayout<T>::writePlotFile(){
 
 template <class T>
 Real CdrLayout<T>::computeAdvectionDt(){
-  CH_TIME("CdrLayout<T>::computeAdvectionDt");
+  CH_TIME("CdrLayout<T>::computeAdvectionDt()");
   if(m_verbosity > 5){
-    pout() << "CdrLayout<T>::computeAdvectionDt" << endl;
+    pout() << "CdrLayout<T>::computeAdvectionDt()" << endl;
   }
 
   Real dt = std::numeric_limits<Real>::max();
@@ -298,11 +313,21 @@ Real CdrLayout<T>::computeAdvectionDiffusionDt(){
 
 template <class T>
 Vector<RefCountedPtr<T> >& CdrLayout<T>::getSolvers(){
+  CH_TIME("CdrLayout<T>::getSolvers()");
+  if(m_verbosity > 5){
+    pout() << "CdrLayout<T>::getSolvers()" << endl;
+  }  
+  
   return (m_solvers);
 }
 
 template <class T>
 Vector<RefCountedPtr<CdrSpecies> >& CdrLayout<T>::getSpecies(){
+  CH_TIME("CdrLayout<T>::getSpecies()");
+  if(m_verbosity > 5){
+    pout() << "CdrLayout<T>::getSpecies()" << endl;
+  }
+    
   return (m_species);
 }
 
@@ -404,9 +429,9 @@ Vector<EBAMRIVData*> CdrLayout<T>::getEbFlux(){
 
 template <class T>
 Vector<EBAMRIFData*> CdrLayout<T>::getDomainFlux(){
-  CH_TIME("CdrLayout<T>::getDomainFlux");
+  CH_TIME("CdrLayout<T>::getDomainFlux()");
   if(m_verbosity > 5){
-    pout() << "CdrLayout<T>::getDomainFlux" << endl;
+    pout() << "CdrLayout<T>::getDomainFlux()" << endl;
   }
 
   Vector<EBAMRIFData*> domainFlux;
@@ -421,25 +446,31 @@ Vector<EBAMRIFData*> CdrLayout<T>::getDomainFlux(){
 
 template <class T, class S>
 CdrFactory<T, S>::CdrFactory(){
+  CH_TIME("CdrFactory<T, S>::CdrFactory()");
 }
 
 template <class T, class S>
 CdrFactory<T, S>::~CdrFactory(){
+  CH_TIME("CdrFactory<T, S>::~CdrFactory()");  
 }
 
 
 template <class T, class S>
 RefCountedPtr<CdrLayout<T> > CdrFactory<T, S>::newLayout(const Vector<RefCountedPtr<CdrSpecies> >& a_species) const{
+  CH_TIME("CdrFactory<T, S>::newLayout(Vector<RefCountedPtr<CdrSpecies> >)");    
 
-  // Build cdr layout
+  // Instatiate the return CdrLayout object first. 
   auto cdr = RefCountedPtr<CdrLayout<T> > (new CdrLayout<T>(a_species));
 
   // Cast solvers and instantiate them
   for (int i = 0; i < a_species.size(); i++){
+    
     auto solver = RefCountedPtr<T> (static_cast<T*> (new S()));
+    
     solver->setSpecies(a_species[i]);
     solver->setPhase(phase::gas);
     solver->setVerbosity(-1);
+    
     cdr->addSolver(solver);
   }
 
