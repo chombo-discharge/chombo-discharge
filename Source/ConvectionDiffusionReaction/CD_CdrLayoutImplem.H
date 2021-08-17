@@ -22,8 +22,12 @@
 template <class T>
 CdrLayout<T>::CdrLayout(const Vector<RefCountedPtr<CdrSpecies> >& a_species){
   CH_TIME("CdrLayout<T>::CdrLayout()");
+
+  // Default settings. 
+  m_verbosity = -1;
+  m_species   = a_species;
+  m_realm     = Realm::Primal;
   
-  m_species = a_species;
   m_solvers.resize(0);
 }
 

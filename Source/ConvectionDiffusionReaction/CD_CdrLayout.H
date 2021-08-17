@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_CdrLayout.H
-  @brief  Declaration of a class that holds a set of CdrSolvers
+  @brief  Declaration of a class that holds a set of CdrSolvers (to cut down on typing). 
   @author Robert Marskar
 */
 
@@ -247,11 +247,6 @@ protected:
     @brief Verbosity
   */
   int m_verbosity;
-
-  /*!
-    @brief Mass redistribution for hyperbolic part
-  */
-  bool m_mass_redist;
 
   /*!
     @brief phase
