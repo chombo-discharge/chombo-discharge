@@ -110,7 +110,7 @@ RodDielectric.electrode.endpoint2       = 0 0.5         # Other endpoint
 RodDielectric.electrode.radius          = 0.05          # Electrode radius
 RodDielectric.electrode.live            = true          # Live or not
 
-RodDielectric.dielectric.on             = true          # Use dielectric or not
+RodDielectric.dielectric.on             = false         # Use dielectric or not
 RodDielectric.dielectric.shape          = sphere        # 'plane', 'box', 'perlin_box', 'sphere'.
 RodDielectric.dielectric.permittivity   = 4             # Dielectric permittivity
 
@@ -149,11 +149,11 @@ AdvectionDiffusion.realm          = primal  # Realm
 AdvectionDiffusion.blob_amplitude = 1.0     # Blob amplitude
 AdvectionDiffusion.blob_radius    = 0.05    # Blob radius
 AdvectionDiffusion.blob_center    = 0 0.25  # Blob center
-AdvectionDiffusion.diffusion      = true    # Turn on/off diffusion
+AdvectionDiffusion.diffusion      = false   # Turn on/off diffusion
 AdvectionDiffusion.advection      = true    # Turn on/off advection
 AdvectionDiffusion.fhd            = false   # Use FHD or not
 
-AdvectionDiffusion.integrator     = 1       # 0 = Heun's method. 1 = IMEX Euler
+AdvectionDiffusion.integrator     = 0       # 0 = Heun's method. 1 = IMEX Euler
 
 # Velocity, diffusion, and CFL
 # ----------------------------

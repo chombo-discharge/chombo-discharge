@@ -6,7 +6,7 @@
      &)
 
 c     dwc is the central slope, dwl the left slope, dwr the right slope
-c     and dqlim is the limited slope (which becomes deltaC)
+c     and dqlim is the limited slope (which becomes the cell-centered slope deltaC)
 
       real_t dwc, dwl, dwr, dqlim
       integer chf_ddecl[i;j;k]
@@ -18,21 +18,23 @@ c     and dqlim is the limited slope (which becomes deltaC)
       koff = chf_id(2, dir)]
 
       chf_multido[region; i; j; k]
-         dwl = state(chf_ix[i;      j;      k])      - state(chf_ix[i-ioff; j-joff; k-koff])
-         dwr = state(chf_ix[i+ioff; j+joff; k+koff]) - state(chf_ix[i;      j;     k])
+      
+         dwl = state(chf_ix[i;      j;      k     ]) - state(chf_ix[i-ioff; j-joff; k-koff])
+         dwr = state(chf_ix[i+ioff; j+joff; k+koff]) - state(chf_ix[i;      j;      k     ])
          dwc = half*(dwl + dwr)
+	 
          if(dwl*dwr .lt. zero) then
-            dqlim = 0.0
+            dqlim = zero
          else
-            dqlim = min(two*abs(dwl), two*abs(dwr))
-            dqlim = min(dqlim, abs(dwc))*sign(one, dwc)
+            dqlim = min( min(two*abs(dwl), two*abs(dwr)), abs(dwc)) * sign(one, dwc)
          endif
+	 
          deltaC(chf_ix[i;j;k]) = dqlim
+
       chf_enddo
       
       return
       end
-
 
       subroutine muscl_upwind(
      &     chf_fra1[face_states],
@@ -53,15 +55,15 @@ c     and dqlim is the limited slope (which becomes deltaC)
 
       chf_multido[face_box; i; j; k]
          prim_left = cell_states(chf_ix[i-ioff;j-joff; k-koff]) + half*cell_slopes(chf_ix[i-ioff; j-joff; k-koff])
-         prim_righ = cell_states(chf_ix[i;     j;      k])      - half*cell_slopes(chf_ix[i;      j;      k])
+         prim_righ = cell_states(chf_ix[i;     j;      k     ]) - half*cell_slopes(chf_ix[i;      j;      k     ])
          vel       = face_vel(chf_ix[i; j; k])
 
-         face_states(chf_ix[i;j;k]) = 0.5*(prim_left + prim_righ)
-         if(vel > 0.0) then
+         face_states(chf_ix[i;j;k]) = half*(prim_left + prim_righ)
+         if(vel > zero) then
             face_states(chf_ix[i;j;k]) = prim_left
-         else if(vel < 0.0) then
+         else if(vel < zero) then
             face_states(chf_ix[i;j;k]) = prim_righ
-         endif            
+         endif
       chf_enddo
       return
       end

@@ -79,12 +79,15 @@ void CdrMuscl::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_ce
     pout() << m_name + "::advectToFaces(EBAMRFluxData, EBAMRCellData, Real)" << endl;
   }
 
+  const int numberOfGhostCells = m_amr->getNumberOfGhostCells();
+
   CH_assert(a_facePhi[0]->nComp() == 1);
-  CH_assert(a_cellPhi[0]->nComp() == 1);  
+  CH_assert(a_cellPhi[0]->nComp() == 1);
+  CH_assert(numberOfGhostCells    >= 2);
 
   DataOps::setValue(a_facePhi, 0.0);
 
-  // Ghost cells need to be interpolated. We make a copy of a_cellPhi which we use for that. 
+  // Ghost cells need to be interpolated. We make a copy of a_cellPhi which we use for that. This requires
   EBAMRCellData phi; 
   m_amr->allocate(phi, m_realm, m_phase, m_nComp);
   DataOps::copy(phi, a_cellPhi);
@@ -105,7 +108,10 @@ void CdrMuscl::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_ce
       const Box        cellBox = dbl  [dit()];      
       const EBISBox&   ebisbox = ebisl[dit()];
 
-      // Limit slopes and solve Riemann problem (this is just the upwind state). 
+      // Limit slopes and solve Riemann problem (this is just the upwind state). Note that we need one ghost cell for
+      // the slopes because in order to extrapolate to the left/right sides of a face, we need the centered slope on both
+      // sides for the upwind. So, deltaC is bigger than cellBox (by one). Since the limited slope is computed using the
+      // left/right slopes, we end up needing two grid cells. There's probably a smarter way of doing this. 
       Box grownBox = cellBox;
       grownBox.grow(1);
       EBCellFAB deltaC(ebisbox, grownBox, SpaceDim); // Cell-centered slopes
@@ -134,23 +140,25 @@ void CdrMuscl::computeSlopes(EBCellFAB&           a_deltaC,
   CH_assert(a_deltaC. nComp() == SpaceDim);
   CH_assert(a_cellPhi.nComp() == 1);
 
-  const Box& domainBox      = a_domain.domainBox();
-  const EBISBox& ebisbox     = a_cellPhi.getEBISBox();
+  const Box&    domainBox = a_domain.domainBox();
+  const EBISBox& ebisbox  = a_cellPhi.getEBISBox();
 
   // Compute slopes in regular cells. 
-  BaseFab<Real>&       slopesReg = a_deltaC.getSingleValuedFAB();
+  BaseFab<Real>&       slopesReg = a_deltaC. getSingleValuedFAB();
   const BaseFab<Real>& phiReg    = a_cellPhi.getSingleValuedFAB();
 
-  // Compute slopes in regular grid cells. 
+  // Compute slopes in regular grid cells. Note that we need to grow the input box by one ghost cell in direction 'dir' because we need the
+  // centered slopes on both sides of the faces that we extrapolate to. 
   for (int dir = 0; dir < SpaceDim; dir++){
     Box compBox = a_cellBox;
-    compBox.grow(1);
+    compBox.grow(dir, 1);
     FORT_MUSCL_SLOPES(CHF_FRA1(slopesReg, dir),
-		      CHF_CONST_FRA1(phiReg, m_comp),
-		      CHF_CONST_INT(dir),
-		      CHF_BOX(compBox));
+    		      CHF_CONST_FRA1(phiReg, m_comp),
+    		      CHF_CONST_INT(dir),
+    		      CHF_BOX(compBox));
   }
 
+  
   // Same kernel, but in irregular cells. 
   for (int dir = 0; dir < SpaceDim; dir++){
 
@@ -233,8 +241,7 @@ void CdrMuscl::computeSlopes(EBCellFAB&           a_deltaC,
 	MayDay::Error("CdrMuscl::computeSlopes - dwc != dwc.");
       }
 
-      //      a_deltaC(vof, m_comp) = dwc;
-      a_deltaC(vof, m_comp) = 0.0;
+      a_deltaC(vof, m_comp) = dwc;
     }
   }
 }
@@ -261,23 +268,23 @@ void CdrMuscl::upwind(EBFluxFAB&           a_facePhi,
     EBFaceFAB& facePhi       = a_facePhi[dir];
     const EBFaceFAB& faceVel = a_faceVel[dir];
     
-    BaseFab<Real>&      regFacePhi = a_facePhi[dir].getSingleValuedFAB();
-    const BaseFab<Real>& regSlopes = a_slopes.      getSingleValuedFAB();
-    const BaseFab<Real>& regStates = a_cellPhi.     getSingleValuedFAB();
-    const BaseFab<Real>& regVelo   = a_faceVel[dir].getSingleValuedFAB();
+    BaseFab<Real>&       regFacePhi = a_facePhi[dir].getSingleValuedFAB();
+    const BaseFab<Real>& regSlopes  = a_slopes.      getSingleValuedFAB();
+    const BaseFab<Real>& regStates  = a_cellPhi.     getSingleValuedFAB();
+    const BaseFab<Real>& regVelo    = a_faceVel[dir].getSingleValuedFAB();
     
     // Fortran kernel. Computes the extrapolation of cell-centered states to the face centers and selects
     // the upwind side. 
-    Box facebox = a_cellBox;
-    facebox.surroundingNodes();
+    Box faceBox = a_cellBox;
+    faceBox.surroundingNodes(dir);
     regFacePhi.setVal(0.0);
     
-    FORT_MUSCL_UPWIND(CHF_FRA1(regFacePhi,   m_comp),
+    FORT_MUSCL_UPWIND(CHF_FRA1(regFacePhi, m_comp),
 		      CHF_CONST_FRA1(regSlopes, dir),
 		      CHF_CONST_FRA1(regStates, m_comp),
 		      CHF_CONST_FRA1(regVelo,   m_comp),
 		      CHF_CONST_INT(dir),
-		      CHF_BOX(facebox));
+		      CHF_BOX(faceBox));
 
     // Compute extrapolated primitives in for irregular faces and solve the Riemann problem (i.e., just upwind). Just
     // like the Fortran kernel, but for irregular grid faces.
