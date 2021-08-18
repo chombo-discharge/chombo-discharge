@@ -1,5 +1,5 @@
 # ====================================================================================================
-# DRIVER OPTIONS
+# Driver class options
 # ====================================================================================================
 Driver.verbosity                       = 2                # Engine verbosity
 Driver.geometry_generation             = chombo-discharge # Grid generation method, 'chombo-discharge' or 'chombo'

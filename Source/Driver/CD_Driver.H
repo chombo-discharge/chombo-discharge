@@ -5,7 +5,7 @@
 
 /*!
   @file   Driver.H
-  @brief  Declaration of the driver class for chombo-discharge
+  @brief  Declaration of the simulation driver class for chombo-discharge. 
   @author Robert Marskar
 */
 
@@ -29,8 +29,8 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Main class for time/space advancement of streamer equations. This class runs a timestepper and controls input/output, 
-  regrid intervals etc. 
+  @brief Main class for time/space advancement of streamer equations. 
+  @details This class runs a simulation and controls input/output, regrid intervals etc. 
 */
 class Driver {
 public:
@@ -50,12 +50,12 @@ public:
   */
   Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry,
 	 const RefCountedPtr<TimeStepper>&           a_timeStepper,
-	 const RefCountedPtr<AmrMesh>&                a_amr,
-	 const RefCountedPtr<CellTagger>&            a_cellTagger = RefCountedPtr<CellTagger>(NULL),
-	 const RefCountedPtr<GeoCoarsener>&          a_geoCoarsen = RefCountedPtr<GeoCoarsener>(NULL));
+	 const RefCountedPtr<AmrMesh>&               a_amr,
+	 const RefCountedPtr<CellTagger>&            a_cellTagger = RefCountedPtr<CellTagger>(nullptr),
+	 const RefCountedPtr<GeoCoarsener>&          a_geoCoarsen = RefCountedPtr<GeoCoarsener>(nullptr));
 
   /*!
-    @brief Constructor
+    @brief Destructor (does nothing)
   */
   ~Driver();
 
@@ -67,8 +67,8 @@ public:
   
   /*!
     @brief Run a simulation for a specific time, or until a maximum number of steps have been performed.
-    @param[in] a_startTime Starting time of simulation (seconds)
-    @param[in] a_endTime   Simulation end time (seconds)
+    @param[in] a_startTime Starting time of simulation
+    @param[in] a_endTime   Simulation end time
     @param[in] a_maxSteps  Maximum number of steps.
   */
   void run(const Real a_startTime, const Real a_endTime, const int a_maxSteps);
@@ -88,9 +88,9 @@ protected:
     @brief Enum for how to print memory to std::cout (or pout)
   */
   enum class MemoryReportMode {
-    overall,
-    unfreed,
-    allocated
+    Total,
+    Unfreed,
+    Allocated
   };
 
   /*!
@@ -275,7 +275,7 @@ protected:
   EBAMRTags m_tags;
 
   /*!
-    @brief Cached tags. Needed when we regrid and change box ownership.
+    @brief Cached tags. This is done so that when we regrid and change box ownership we can copy the tags around. 
   */
   EBAMRBool m_cachedTags;
 
@@ -431,19 +431,14 @@ protected:
   void createOutputDirectories();
 
   /*!
-    @brief Allocate internal storage for Driver
+    @brief Allocate internal storage for Driver. 
   */
   void allocateInternals();
   
   /*!
-    @brief Cache tags
+    @brief Cache tags. This is used
   */
   void cacheTags(const EBAMRTags& a_tags);
-
-  /*!
-    @brief Deallocate internal storage for Driver
-  */
-  void deallocateInternals();
 
   /*!
     @brief Write the geometry to file
@@ -452,6 +447,8 @@ protected:
 
   /*!
     @brief Get geometric tags
+    @details This fills m_geomTags with irregular cell tags, using information that was passed into Driver from the input script. This includes
+    adding tags that refine surfaces to a certain depth, or tags where the curvature of the surface exceeds a specified value. 
   */
   void getGeometryTags();
 
@@ -666,11 +663,12 @@ protected:
 
   /*!
     @brief Get number of plot variables
+    @return Returns the number of internal plot variables that Driver will write to file. 
   */
   int getNumberOfPlotVariables() const;
 
   /*!
-    @brief Get names for the plot variables
+    @brief Get the string identifiers for the internal plot variables from Driver
   */
   Vector<std::string> getPlotVariableNames() const;
 
