@@ -200,34 +200,14 @@ protected:
   int m_geometricTagsDepth;
 
   /*!
+    @brief Geometric tag depth for conductors
+  */
+  int m_conductorTagsDepth;  
+
+  /*!
     @brief Geometric tag depth for dielectrics
   */
   int m_dielectricTagsDepth;
-
-  /*!
-    @brief Geometric tag depth for conductors
-  */
-  int m_conductorTagsDepth;
-
-  /*!
-    @brief Geometric tag depth for gas-solid interfaces
-  */
-  int m_gasSolidInterfaceTagDepth;
-
-  /*!
-    @brief Geometry tag depth for solid-solid interfaces
-  */
-  int m_solidSolidInterfaceTagDepth;
-
-  /*!
-    @brief Geometric tag depth for gas-Dielectric interfaces
-  */
-  int m_gasDielectricInterfaceTagDepth;
-
-  /*!
-    @brief Geometric tag depth for gas-conductor interfaces
-  */
-  int m_gasConductorInterfaceTagDepth;
 
   /*!
     @brief Maximum number of steps
@@ -406,7 +386,8 @@ protected:
   void parseRuntimeOptions();
 
   /*!
-    @brief Parse geometrical refinement
+    @brief Parse geometrical refinement 
+    @details This parses settings for how deep to refine geometries, either based on curvature or a hard limit for electrodes/dielectrics. 
   */
   void parseGeometryRefinement();
 

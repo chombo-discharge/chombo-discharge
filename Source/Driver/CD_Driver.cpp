@@ -206,10 +206,6 @@ void Driver::getGeometryTags(){
 
     IntVectSet condTags;       // Irregular cells on electrodes
     IntVectSet dielTags;       // Irregular cells on dielectrics
-    IntVectSet gasTags;        // Irregular cells on the gas interface
-    IntVectSet solidTags;      // 
-    IntVectSet gasDielTags;
-    IntVectSet gasSolidTags;
 
     // Conductor cells
     if(m_conductorTagsDepth > lvl){ 
@@ -220,46 +216,10 @@ void Driver::getGeometryTags(){
       }
     }
 
-    // dielectric cells
+    // Dielectric cells
     if(m_dielectricTagsDepth > lvl){ 
       if(!ebisSol.isNull()){
 	dielTags = ebisSol->irregCells(curLevel);
-      }
-    }
-
-    // Gas-solid interface cells
-    if(m_gasSolidInterfaceTagDepth > lvl){ 
-      if(!ebisSol.isNull()){
-    	gasTags = ebisGas->irregCells(curLevel);
-      }
-    }
-
-    // Gas-Dielectric interface cells
-    if(m_gasDielectricInterfaceTagDepth > lvl){
-      if(!ebisSol.isNull()){
-    	gasDielTags = m_multifluidIndexSpace->interfaceRegion(curDomain);
-      }
-    }
-
-    // Gas-conductor interface cells
-    if(m_gasConductorInterfaceTagDepth > lvl){ 
-      gasSolidTags = ebisGas->irregCells(curLevel);
-      if(!ebisSol.isNull()){
-    	gasSolidTags -= m_multifluidIndexSpace->interfaceRegion(curDomain);
-      }
-    }
-
-    // Solid-solid interfaces
-    if(m_solidSolidInterfaceTagDepth > lvl){ 
-      if(!ebisSol.isNull()){
-    	solidTags = ebisSol->irregCells(curLevel);
-
-    	// Do the intersection with the conductor cells
-    	IntVectSet tmp = ebisGas->irregCells(curLevel);
-    	tmp |= ebisSol->irregCells(curLevel);
-    	tmp -= m_multifluidIndexSpace->interfaceRegion(curDomain);
-
-    	solidTags &= tmp;
       }
     }
 
@@ -268,11 +228,6 @@ void Driver::getGeometryTags(){
     // Things from depth specifications
     m_geomTags[lvl] |= dielTags;
     m_geomTags[lvl] |= condTags;
-    m_geomTags[lvl] |= gasDielTags;
-    m_geomTags[lvl] |= gasSolidTags;
-    m_geomTags[lvl] |= gasTags;
-    m_geomTags[lvl] |= solidTags;
-
 
     // Evaluate angles between cut-cells and refine based on that. 
     DisjointBoxLayout irregGrids = ebisGas->getIrregGrids(curDomain);
@@ -308,7 +263,9 @@ void Driver::getGeometryTags(){
 	    const Real theta         = acos(cosAngle)*degreesPerRadian;
 
 	    // Refine if angle exceeds threshold
-	    if(std::abs(theta) > m_refineAngle) m_geomTags[lvl] |= iv;
+	    if(std::abs(theta) > m_refineAngle) {
+	      m_geomTags[lvl] |= iv;
+	    }
 	  }
 	}
       }
@@ -1119,56 +1076,33 @@ void Driver::parseGeometryGeneration(){
 }
 
 void Driver::parseGeometryRefinement(){
-  CH_TIME("Driver::set_geom_refinement_depth");
+  CH_TIME("Driver::parseGeometryRefinement()");
   if(m_verbosity > 5){
-    pout() << "Driver::set_geom_refinement_depth" << endl;
+    pout() << "Driver::parseGeometryRefinement()" << endl;
   }
 
+  // We are allowing geometry refinement criteria to change as simulations progress (i.e. m_timeStep > 0) where we call this routine again. But we need
+  // something to tell us that we got new refinement criteria for geometric tags so we can avoid regrid if they didn't change. This is my clunky way of doing that.   
+
   ParmParse pp("Driver");
-
-  const int max_depth = m_amr->getMaxAmrDepth();
-
-  // These are special options. We are allowing geometry refinement criteria to change as simulations progress (i.e. m_timeStep > 0) where we call
-  // this routine again. But we need something to tell us that we got new refinement criteria for geometric tags so we can avoid regrid if they didn't change.
-  // This is my clunky way of doing that. 
   
   const auto c1 = m_refineAngle;
   const auto c2 = m_conductorTagsDepth;
   const auto c3 = m_dielectricTagsDepth;
-  const auto c4 = m_gasConductorInterfaceTagDepth;
-  const auto c5 = m_gasDielectricInterfaceTagDepth;
-  const auto c6 = m_gasSolidInterfaceTagDepth;
-  const auto c7 = m_solidSolidInterfaceTagDepth;
 
+  pp.get("refine_angles",      m_refineAngle);
+  pp.get("refine_electrodes",  m_conductorTagsDepth);
+  pp.get("refine_dielectrics", m_dielectricTagsDepth);
 
-  int depth0;
-
-  pp.get("refine_angles",                   m_refineAngle);
-  pp.get("refine_geometry",                 depth0);
-  pp.get("refine_electrodes",               m_conductorTagsDepth);
-  pp.get("refine_dielectrics",              m_dielectricTagsDepth);
-  pp.get("refine_electrode_gas_interface",  m_gasConductorInterfaceTagDepth);
-  pp.get("refine_dielectric_gas_interface", m_gasDielectricInterfaceTagDepth);
-  pp.get("refine_solid_gas_interface",      m_gasSolidInterfaceTagDepth);
-  pp.get("refine_solid_solid_interface",    m_solidSolidInterfaceTagDepth);
-
-  depth0                            = (depth0                           < 0) ? max_depth : depth0;
-  m_conductorTagsDepth              = (m_conductorTagsDepth             < 0) ? depth0 : m_conductorTagsDepth;
-  m_dielectricTagsDepth             = (m_dielectricTagsDepth            < 0) ? depth0 : m_dielectricTagsDepth;
-  m_gasConductorInterfaceTagDepth   = (m_gasConductorInterfaceTagDepth  < 0) ? depth0 : m_gasConductorInterfaceTagDepth;
-  m_gasDielectricInterfaceTagDepth  = (m_gasDielectricInterfaceTagDepth < 0) ? depth0 : m_gasDielectricInterfaceTagDepth;
-  m_gasSolidInterfaceTagDepth       = (m_gasSolidInterfaceTagDepth      < 0) ? depth0 : m_gasSolidInterfaceTagDepth;
-  m_solidSolidInterfaceTagDepth     = (m_solidSolidInterfaceTagDepth    < 0) ? depth0 : m_solidSolidInterfaceTagDepth;
+  if(m_conductorTagsDepth < 0){
+    m_conductorTagsDepth = m_amr->getMaxAmrDepth();
+  }
+  if(m_dielectricTagsDepth < 0){
+    m_dielectricTagsDepth = m_amr->getMaxAmrDepth();
+  }
 
   if(m_timeStep > 0){ // Simulation is already running, and we need to check if we need new geometric tags for regridding. 
-    if(c1 != m_refineAngle                    ||
-       c2 != m_conductorTagsDepth             ||
-       c3 != m_dielectricTagsDepth            ||
-       c4 != m_gasConductorInterfaceTagDepth  ||
-       c5 != m_gasDielectricInterfaceTagDepth ||
-       c6 != m_gasSolidInterfaceTagDepth      ||
-       c7 != m_solidSolidInterfaceTagDepth){
-      
+    if(c1 != m_refineAngle || c2 != m_conductorTagsDepth || c3 != m_dielectricTagsDepth){
       m_needsNewGeometricTags = true;
     }
   }
@@ -1178,14 +1112,15 @@ void Driver::parseGeometryRefinement(){
 }
 
 void Driver::createOutputDirectories(){
-  CH_TIME("Driver::createOutputDirectories");
+  CH_TIME("Driver::createOutputDirectories()");
   if(m_verbosity > 5){
-    pout() << "Driver::createOutputDirectories" << endl;
+    pout() << "Driver::createOutputDirectories()" << endl;
   }
 
   // If directory does not exist, create it
-  int success = 0;
   if(procID() == 0){
+    int success;
+    
     std::string cmd;
 
     cmd = "mkdir -p " + m_outputDirectory;
@@ -1248,12 +1183,10 @@ void Driver::createOutputDirectories(){
       std::cout << "Driver::set_outputDirectoryectory - master could not create crash directory" << std::endl;
     }    
   }
+  
 #ifdef CH_MPI  
   MPI_Barrier(Chombo_MPI::comm);
 #endif
-  if(success != 0){
-    MayDay::Abort("Driver::set_outputDirectoryectory - could not create directories for output");
-  }
 }
 
 
