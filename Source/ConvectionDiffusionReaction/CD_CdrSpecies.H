@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_CdrSpecies.H
-  @brief  Declaration of a CdrSpecies class that passes in names and initial data to the CdrSolver
+  @brief  Declaration of a class that passes information into CdrSolver (e.g., initial conditions). 
   @author Robert Marskar
 */
 
@@ -21,10 +21,14 @@
 #include <CD_NamespaceHeader.H>
   
 /*!
-  @brief Abstract class that describes an electron or CdrSpecies
+  @brief Abstract class that describes the scalar quantity that is advected in CdrSolver. 
+  @details Instantiations of CdrSpecies (i.e., derived classes thereof) can be passed into CdrSolver in order to provide run-time information
+  to the class. The user will typically set a name for the advected quantity, the chargeNumber (if there is one), and whether or not advection 
+  and diffusion is turned on or off. 
 */
 class CdrSpecies {
 public:
+  
   /*!
     @brief Weak constructor. 
   */
@@ -34,13 +38,13 @@ public:
     @brief Full constructor
     @param[in] a_name         Name of the species
     @param[in] a_chargeNumber Charge number
-    @param[in] a_mobile       Mobile or not
-    @param[in] a_diffusive    Diffusive or not
+    @param[in] a_isMbile      Mobile or not
+    @param[in] a_isDiffusive  Diffusive or not
   */
-  CdrSpecies(const std::string a_name, const int a_chargeNumber, const bool a_mobile, const bool a_diffusive);
+  CdrSpecies(const std::string a_name, const int a_chargeNumber, const bool a_isMobile, const bool a_isDiffusive);
 
   /*!
-    @brief Destructor
+    @brief Destructor (does nothing)
   */
   virtual ~CdrSpecies();
 
@@ -57,49 +61,24 @@ public:
   virtual std::string getName() const;
 
   /*!
-    @brief Return unit
-  */
-  virtual std::string get_unit() const;
-
-  /*!
     @brief Return charge
   */
   virtual int getChargeNumber() const;
     
   /*!
-    @brief Return diffusive or not
+    @brief Diffusive species or not
   */
   virtual bool isDiffusive() const;
 
   /*!
-    @brief Mobile CdrSpecies or not
+    @brief Mobile species or not
   */
   virtual bool isMobile() const;
 
   /*!
-    @brief Flag CdrSpecies for output to the plasma solver
-  */
-  virtual bool forceOutput() const;
-
-  /*!
-    @brief Init with particles or not
-  */
-  virtual bool initializeWithParticles() const;
-
-  /*!
-    @brief Init with function or not
-  */
-  virtual bool initializeWithFunction() const;
-
-  /*!
-    @brief Get deposition
-  */
-  virtual DepositionType getDeposition();
-
-  /*!
     @brief Get initial particles
   */
-  virtual List<Particle>& getInitialParticles();
+  virtual const List<Particle>& getInitialParticles() const;
 
 protected:
 
@@ -107,11 +86,6 @@ protected:
     @brief Cdr_Species name
   */
   std::string m_name;
-
-  /*!
-    @brief Unit
-  */
-  std::string m_unit;
   
   /*!
     @brief Charge
@@ -129,29 +103,9 @@ protected:
   bool m_isMobile;
 
   /*!
-    @brief Force output of CdrSpecies. This is relevant for plasma_engine only. 
-  */
-  bool m_forceOutput;
-
-  /*!
-    @brief Init with particles
-  */
-  bool m_initializeWithParticles;
-
-  /*!
-    @brief Init function values
-  */
-  bool m_initializeWithFunction;
-
-  /*!
     @brief Initial particles
   */
   List<Particle> m_initialParticles;
-
-  /*!
-    @brief Deposition type for initial particles
-  */
-  DepositionType m_deposition;
 };
 
 #include <CD_NamespaceFooter.H>

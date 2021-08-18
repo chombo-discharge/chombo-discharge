@@ -209,11 +209,11 @@ Real AdvectionDiffusionStepper::advance(const Real a_dt){
     m_amr->interpGhost(state, m_realm, m_phase);
   }
   else if(m_integrator == 1){
+    const bool addEbFlux     = true;
     const bool addDomainFlux = true;
     
-    m_solver->computeDivF(m_k1, state, a_dt, addDomainFlux);
+    m_solver->computeDivF(m_k1, state, a_dt, addEbFlux, addDomainFlux);
     DataOps::incr(state, m_k1, -a_dt);
-    m_amr->averageDown(state, m_realm, m_phase);
 
     if(m_solver->isDiffusive()){
       DataOps::copy(m_k2, state); // Now holds phiOld - dt*div(F)

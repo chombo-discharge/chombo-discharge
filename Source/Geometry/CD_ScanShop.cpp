@@ -138,7 +138,7 @@ void ScanShop::makeGrids(const ProblemDomain& a_domain,
 bool ScanShop::isRegular(const Box a_box, const RealVect a_probLo, const Real a_dx) const {
   CH_TIME("ScanShop::isRegular(Box, RealVect, Real)");
 
-  bool ret;
+  bool ret = true;
   
   for (BoxIterator bit(a_box); bit.ok(); ++bit){
     const IntVect iv = bit();

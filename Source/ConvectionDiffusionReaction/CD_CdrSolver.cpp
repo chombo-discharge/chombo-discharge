@@ -983,8 +983,7 @@ void CdrSolver::initialData(){
   // deposit particles (with an NGP scheme) on the mesh. This function does both -- first particles if we have them and
   // then we increment with the function. 
 
-  const bool depositFunction  = m_species->initializeWithFunction();
-  const bool depositParticles = m_species->initializeWithParticles();
+  const bool depositParticles = m_species->getInitialParticles().length() > 0;
 
   DataOps::setValue(m_phi, 0.0);
 
@@ -993,10 +992,9 @@ void CdrSolver::initialData(){
     this->initialDataParticles();
   }
 
-  // Increment with function values if this is also called for. 
-  if(depositFunction){
-    this->initialDataDistribution();
-  }
+  // Increment with function values if this is also called for. Note that this increments,
+  // why is why initialDataParticles is called first!
+  this->initialDataDistribution();
 
   m_amr->averageDown(m_phi, m_realm, m_phase);
   m_amr->interpGhost(m_phi, m_realm, m_phase);
@@ -2222,15 +2220,6 @@ Real CdrSolver::computeCharge(){
   return Q;
 }
 
-bool CdrSolver::extrapolateSourceTerm() const {
-  CH_TIME("CdrSolver::extrapolateSourceTerm()");
-  if(m_verbosity > 5){
-    pout() << m_name + "::extrapolateSourceTerm()" << endl;
-  }
-  
-  return m_extrapolateSourceTerm;
-}
-
 bool CdrSolver::isDiffusive(){
   CH_TIME("CdrSolver::isDiffusive()");
   if(m_verbosity > 5){
@@ -2400,18 +2389,6 @@ void CdrSolver::parseDomainBc(){
   }
 }
 
-void CdrSolver::parseExtrapolateSourceTerm(){
-  CH_TIME("CdrSolver::parseExtrapolateSourceTerm()");
-  if(m_verbosity > 5){
-    pout() << m_name + "::parseExtrapolateSourceTerm()" << endl;
-  }
-  
-  ParmParse pp(m_className.c_str());
-
-  std::string str;
-  pp.get("extrapolateSourceTerm", str);
-  m_extrapolateSourceTerm = (str == "true") ? true : false;
-}
 
 void CdrSolver::parseDivergenceComputation(){
   CH_TIME("CdrSolver::parseDivergenceComputation()");

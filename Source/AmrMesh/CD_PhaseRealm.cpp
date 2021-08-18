@@ -379,19 +379,14 @@ void PhaseRealm::defineFillPatch(const int a_lmin){
   
   if(doThisOperator){
     
-    const int comps     = SpaceDim;
-
-    // Should these be input somehow?
-    const int radius    = 1;
-    const IntVect ghost = m_numGhostCells*IntVect::Unit;
-
+    const int     comps  = SpaceDim;
+    const int     radius = m_numGhostCells;
+    const IntVect ghost  = m_numGhostCells*IntVect::Unit;
 
     for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++){
-
       const bool has_coar = lvl > 0;
 
       if(has_coar){
-	const LayoutData<IntVectSet>& cfivs = *m_eblg[lvl]->getCFIVS();
 	m_pwlFillPatch[lvl] = RefCountedPtr<AggEBPWLFillPatch> (new AggEBPWLFillPatch(m_grids[lvl],
 										       m_grids[lvl-1],
 										       m_ebisl[lvl],
