@@ -129,11 +129,6 @@ protected:
   TimeCode m_timeCode;
 
   /*!
-    @brief Memory report mode
-  */
-  MemoryReportMode m_memoryReportMode;
-
-  /*!
     @brief Input file
   */
   std::string m_inputFile;
@@ -481,11 +476,6 @@ protected:
   Vector<std::string> numberFmt(const Vector<long long> a_numbers, char a_sep = ',') const;
 
   /*!
-    @brief Memory report
-  */
-  void memoryReport(const MemoryReportMode a_mode);
-
-  /*!
     @brief Read checkpoint file
   */
 #ifdef CH_USE_HDF5  
@@ -501,8 +491,9 @@ protected:
 
   /*!
     @brief Do a regrid step. 
-    @param[in] a_lmin Coarsest level that is allowed to change during regrid
-    @param[in] a_lmax Finest level that can be generated during the regrid step. 
+    @param[in] a_lmin           Coarsest level that is allowed to change during regrid
+    @param[in] a_lmax           Finest level that can be generated during the regrid step. 
+    @param[in] a_useInitialData If true, fill solvers with initial data after making the new grids. 
   */
   void regrid(const int a_lmin, const int a_lmax, const bool a_useInitialData);
 

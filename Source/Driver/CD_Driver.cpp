@@ -422,46 +422,26 @@ void Driver::gridReport(){
 
   pout() << endl;
 
-  const int finestLevel                 = m_amr->getFinestLevel();
+  const int finestLevel                  = m_amr->getFinestLevel();
   const Vector<DisjointBoxLayout>& grids = m_amr->getGrids(m_realm);
   const Vector<ProblemDomain>& domains   = m_amr->getDomains();
   const Vector<Real> dx                  = m_amr->getDx();
 
   // Grid stuff goes into here
-  long long totPoints;
-  long long totPointsGhosts;
-  long long totBoxes;
-  long long myPoints;
-  long long myPointsGhosts;
-  long long myBoxes;
-  Vector<long long> my_level_boxes;
-  Vector<long long> total_level_boxes;
-  Vector<long long> my_level_points;
-  Vector<long long> total_level_points;
+  long long totalCells;
+  long long totalCellsGhosts;
+  long long totalBoxes;
+  long long localCells;
+  long long localCellsGhosts;
+  long long localBoxes;
+  
+  Vector<long long> localLevelBoxes;
+  Vector<long long> totalLevelBoxes;
+  Vector<long long> localLevelCells;
+  Vector<long long> totalLevelCells;
 
-  //
+  // Total number of grid points for a Cartesian grid covering entire finest domain. Used for "grid sparsity". 
   const long long uniformPoints = (domains[finestLevel].domainBox()).numPts();
-
-  // Track memory
-#ifdef CH_USE_MEMORY_TRACKING
-  int BytesPerMB = 1024*1024;
-  long long curMem;
-  long long peakMem;
-  overallMemoryUsage(curMem, peakMem);
-
-#ifdef CH_MPI
-  int unfreed_mem = curMem;
-  int peak_mem    = peakMem;
-
-  int max_unfreed_mem;
-  int max_peak_mem;
-
-  int result1 = MPI_Allreduce(&unfreed_mem, &max_unfreed_mem, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
-  int result2 = MPI_Allreduce(&peak_mem,    &max_peak_mem,    1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
-#endif
-
-  //  ReportUnfreedMemory(pout());
-#endif
 
   // Some stuff
   const ProblemDomain coarsest_domain = m_amr->getDomains()[0];
@@ -475,108 +455,106 @@ void Driver::gridReport(){
   }
 
   // Get boxes for each Realm
-  const std::vector<std::string> Realms = m_amr->getRealms();
-  for (auto str : Realms){
-    this->getCellsAndBoxes(myPoints,
-			   myPointsGhosts,
-			   myBoxes,
-			   totPoints,
-			   totPointsGhosts,
-			   totBoxes,
-			   my_level_boxes,
-			   total_level_boxes,
-			   my_level_points,
-			   total_level_points,
+  const std::vector<std::string> realms = m_amr->getRealms();
+  
+  for (const auto& str : realms){
+    this->getCellsAndBoxes(localCells,
+			   localCellsGhosts,
+			   localBoxes,
+			   totalCells,
+			   totalCellsGhosts,
+			   totalBoxes,
+			   localLevelBoxes,
+			   totalLevelBoxes,
+			   localLevelCells,
+			   totalLevelCells,
 			   finestLevel,
 			   m_amr->getGrids(str));
   }
 
   // Begin writing a report. 
   pout() << "-----------------------------------------------------------------------" << endl
-	 << "Driver::Grid report - timestep = " << m_timeStep << endl
+	 << "Driver::Grid report - timestep = "       << m_timeStep << endl
 	 << "\t\t\t        Finest level           = " << finestLevel << endl
-	 << "\t\t\t        Finest domain          = " << finestBox.size()[0] << " x " << finestBox.size()[1] <<
 #if CH_SPACEDIM==2
-    endl
+	 << "\t\t\t        Finest AMR domain      = " << finestBox.size()  [0] << " x " << finestBox.size()  [1] << endl
+	 << "\t\t\t        Coarsest AMR domain    = " << coarsestBox.size()[0] << " x " << coarsestBox.size()[1] << endl    
 #elif CH_SPACEDIM==3
-    " x " << finestBox.size()[2] << endl
+	 << "\t\t\t        Finest AMR domain      = " << finestBox.size()  [0] << " x " << finestBox.size()  [1] << " x " << finestBox.size()  [2] << endl
+	 << "\t\t\t        Coarsest AMR domain    = " << coarsestBox.size()[0] << " x " << coarsestBox.size()[1] << " x " << coarsestBox.size()[2] << endl
 #endif
-	 << "\t\t\t        Coarsest domain        = " << coarsestBox.size()[0] << " x " << coarsestBox.size()[1] <<
-#if CH_SPACEDIM==2
-    endl
-#elif CH_SPACEDIM==3
-    " x " << coarsestBox.size()[2] << endl
-#endif
-	 << "\t\t\t        Refinement ratios      = " << ref_rat << endl
-	 << "\t\t\t        Grid sparsity          = " << 1.0*totPoints/uniformPoints << endl
-	 << "\t\t\t        Finest dx              = " << dx[finestLevel] << endl
-	 << "\t\t\t        Total number boxes     = " << numberFmt(totBoxes) << endl
-	 << "\t\t\t        Number of valid cells  = " << numberFmt(totPoints) << endl
-	 << "\t\t\t        Including ghost cells  = " << numberFmt(totPointsGhosts)  << endl
-	 << "\t\t\t        Total # of boxes (lvl) = " << numberFmt(total_level_boxes) << endl
-	 << "\t\t\t        Total # of cells (lvl) = " << numberFmt(total_level_points) << endl;
+	 << "\t\t\t        Refinement ratios      = " << ref_rat                      << endl
+	 << "\t\t\t        Grid sparsity          = " << 1.0*totalCells/uniformPoints << endl
+	 << "\t\t\t        Finest dx              = " << dx[finestLevel]              << endl
+	 << "\t\t\t        Total number boxes     = " << numberFmt(totalBoxes)        << endl
+	 << "\t\t\t        Number of valid cells  = " << numberFmt(totalCells)        << endl
+	 << "\t\t\t        Including ghost cells  = " << numberFmt(totalCellsGhosts)  << endl
+	 << "\t\t\t        Total # of boxes (lvl) = " << numberFmt(totalLevelBoxes)   << endl
+	 << "\t\t\t        Total # of cells (lvl) = " << numberFmt(totalLevelCells)   << endl;
 
   // Do a local report for each Realm
-  for (auto str : Realms){
-    this->getCellsAndBoxes(myPoints,
-			   myPointsGhosts,
-			   myBoxes,
-			   totPoints,
-			   totPointsGhosts,
-			   totBoxes,
-			   my_level_boxes,
-			   total_level_boxes,
-			   my_level_points,
-			   total_level_points,
+  for (const auto& str : realms){
+    this->getCellsAndBoxes(localCells,
+			   localCellsGhosts,
+			   localBoxes,
+			   totalCells,
+			   totalCellsGhosts,
+			   totalBoxes,
+			   localLevelBoxes,
+			   totalLevelBoxes,
+			   localLevelCells,
+			   totalLevelCells,
 			   finestLevel,
 			   m_amr->getGrids(str));
-    pout() << "\t\t\t        Realm = " << str << endl
-	   << "\t\t\t\t        Proc. # of valid cells = " << numberFmt(myPoints) << endl
-	   << "\t\t\t\t        Including ghost cells  = " << numberFmt(myPointsGhosts) << endl
-	   << "\t\t\t\t        Proc. # of boxes       = " << numberFmt(myBoxes) << endl
-	   << "\t\t\t\t        Proc. # of boxes (lvl) = " << numberFmt(my_level_boxes) << endl
-	   << "\t\t\t\t        Proc. # of cells (lvl) = " << numberFmt(my_level_points) << endl;
+    
+    pout() << "\t\t\t        Realm = "                    << str                         << endl
+	   << "\t\t\t\t        Proc. # of valid cells = " << numberFmt(localCells)       << endl
+	   << "\t\t\t\t        Including ghost cells  = " << numberFmt(localCellsGhosts) << endl
+	   << "\t\t\t\t        Proc. # of boxes       = " << numberFmt(localBoxes)       << endl
+	   << "\t\t\t\t        Proc. # of boxes (lvl) = " << numberFmt(localLevelBoxes)  << endl
+	   << "\t\t\t\t        Proc. # of cells (lvl) = " << numberFmt(localLevelCells)  << endl;
   }
+    
+  // Write a memory report if Chombo was to compiled to use memory tracking. 
+#ifdef CH_USE_MEMORY_TRACKING
+  constexpr int BytesPerMB = 1024*1024;
+
+  long long localUnfreedMemory;
+  long long localPeakMemory;
   
-  pout()
-#ifdef CH_USE_MEMORY_TRACKING
-    << "\t\t\t        Unfreed memory        = " << curMem/BytesPerMB << " (MB)" << endl
-    << "\t\t\t        Peak memory usage     = " << peakMem/BytesPerMB << " (MB)" << endl
+  overallMemoryUsage(localUnfreedMemory, localPeakMemory);  
+
+  pout()  << "\t\t\t        Unfreed memory        = " << localUnfreedMemory/BytesPerMB << " (MB)" << endl
+	  << "\t\t\t        Peak memory usage     = " << localPeakMemory/BytesPerMB << " (MB)" << endl;
 #ifdef CH_MPI
-    << "\t\t\t        Max unfreed memory    = " << max_unfreed_mem/BytesPerMB << " (MB)" << endl
-    << "\t\t\t        Max peak memory       = " << max_peak_mem/BytesPerMB << " (MB)" << endl
+  
+  // If this is an MPI run we want to include the maximum consum memory in the report as well. We compute the
+  // smallest/largest memory consumptions.
+  int minUnfreedMemory;
+  int minPeakMemory;  
+  int maxUnfreedMemory;
+  int maxPeakMemory;
+
+  MPI_Allreduce(&localUnfreedMemory, &minUnfreedMemory, 1, MPI_INT, MPI_MIN, Chombo_MPI::comm);
+  MPI_Allreduce(&localPeakMemory,    &minPeakMemory,    1, MPI_INT, MPI_MIN, Chombo_MPI::comm);  
+  MPI_Allreduce(&localUnfreedMemory, &maxUnfreedMemory, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
+  MPI_Allreduce(&localPeakMemory,    &maxPeakMemory,    1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
+
+  pout()  << "\t\t\t        Min unfreed memory    = " << minUnfreedMemory/BytesPerMB << " (MB)" << endl
+	  << "\t\t\t        Min peak memory       = " << minPeakMemory/BytesPerMB    << " (MB)" << endl
+	  << "\t\t\t        Max unfreed memory    = " << maxUnfreedMemory/BytesPerMB << " (MB)" << endl
+	  << "\t\t\t        Max peak memory       = " << maxPeakMemory/BytesPerMB    << " (MB)" << endl;
 #endif
-    << "-----------------------------------------------------------------------" << endl
+  pout() << "-----------------------------------------------------------------------" << endl;
 #endif
-    << endl;
 
   pout() << endl;
-}
-
-void Driver::memoryReport(const MemoryReportMode a_mode){
-#ifdef CH_USE_MEMORY_TRACKING
-  CH_TIME("Driver::gridReport");
-  if(m_verbosity > 5){
-    pout() << "Driver::gridReport" << endl;
-  }
-
-  if(a_mode == MemoryReportMode::Total){
-    overallMemoryUsage();
-  }
-  else if(a_mode == MemoryReportMode::Unfreed){
-    ReportUnfreedMemory(pout());
-  }
-  else if(a_mode == MemoryReportMode::Allocated){
-    ReportAllocatedMemory(pout());
-  }
-  pout() << endl;
-#endif
 }
 
 void Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialData){
-  CH_TIME("Driver::regrid");
+  CH_TIME("Driver::regrid(int, int, bool)");
   if(m_verbosity > 2){
-    pout() << "Driver::regrid" << endl;
+    pout() << "Driver::regrid(int, int, bool)" << endl;
   }
 
   // We need to be careful with memory allocations here. Therefore we do:
@@ -596,18 +574,24 @@ void Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialD
   // 9.  Regrid the cell tagger. I'm not explicitly releasing storage from here since it's so small.
   // 10. Solve elliptic equations and fill solvers
 
+  // Use a timer here because I want to be able to put some diagnostics into this function. 
+  Timer timer("Driver::regrid(int, int, bool)");
 
-  Vector<IntVectSet> tags;
 
-  const Real start_time = Timer::wallClock();   // Timer
 
   // We are allowing geometric tags to change under the hood, but we need a method for detecting if they changed. If they did,
   // we certainly have to regrid.
+  timer.startEvent("Get geometry tags");
+  Vector<IntVectSet> tags;
+  
   if(m_needsNewGeometricTags){
     this->getGeometryTags();
   }
+  timer.stopEvent("Get geometry tags");  
 
+  timer.startEvent("Tag cells");
   const bool newCellTags = this->tagCells(tags, m_tags); // Tag cells using the cell tagger
+  timer.stopEvent("Tag cells");  
 
   if(!newCellTags && !m_needsNewGeometricTags){
     if(a_useInitialData){
@@ -626,17 +610,21 @@ void Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialD
   }
 
   // Store things that need to be regridded
+  timer.startEvent("Pre-regrid");
   this->cacheTags(m_tags);              // Cache m_tags because after regrid, ownership will change
   m_timeStepper->preRegrid(a_lmin, m_amr->getFinestLevel());
+  timer.stopEvent("Pre-regrid");  
   
-  const Real cell_tags = Timer::wallClock();    // Timer
 
-  // Regrid AMR. Only levels [lmin, lmax] are allowed to change. 
-  const int old_finestLevel = m_amr->getFinestLevel();
+  // Regrid AMR. Only levels [lmin, lmax] are allowed to change.
+  timer.startEvent("Regrid AmrMesh");
+  const int oldFinestLevel = m_amr->getFinestLevel();
   m_amr->regridAmr(tags, a_lmin, a_lmax);
-  const int new_finestLevel = m_amr->getFinestLevel();
+  const int newFinestLevel = m_amr->getFinestLevel();
+  timer.stopEvent("Regrid AmrMesh");  
 
   // Load balance and regrid the various Realms
+  timer.startEvent("Load balancing");
   const std::vector<std::string>& Realms = m_amr->getRealms();
   for (const auto& str : Realms){
     if(m_timeStepper->loadBalanceThisRealm(str)){
@@ -644,42 +632,45 @@ void Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialD
       Vector<Vector<int> > procs;
       Vector<Vector<Box> > boxes;
       
-      m_timeStepper->loadBalanceBoxes(procs, boxes, str, m_amr->getProxyGrids(), a_lmin, new_finestLevel);
+      m_timeStepper->loadBalanceBoxes(procs, boxes, str, m_amr->getProxyGrids(), a_lmin, newFinestLevel);
 
       m_amr->regridRealm(str, procs, boxes, a_lmin);
     }
   }
+  timer.stopEvent("Load balancing");  
 
 
   // Regrid the operators
+  timer.startEvent("Regrid operators");
   m_amr->regridOperators(a_lmin);
-  const Real base_regrid = Timer::wallClock(); // Base regrid time
+  timer.stopEvent("Regrid operators");  
 
   // Regrid Driver, timestepper, and celltagger
-  this->regridInternals(old_finestLevel, new_finestLevel);          // Regrid internals for Driver
-  m_timeStepper->regrid(a_lmin, old_finestLevel, new_finestLevel);   // Regrid solvers
+  timer.startEvent("Regrid timestepper");
+  this->regridInternals(oldFinestLevel, newFinestLevel);          // Regrid internals for Driver
+  m_timeStepper->regrid(a_lmin, oldFinestLevel, newFinestLevel);   // Regrid solvers
   if(a_useInitialData){
     m_timeStepper->initialData();
   }
+  timer.stopEvent("Regrid timestepper");    
 
   // Regrid cell tagger if we have one. 
   if(!m_cellTagger.isNull()){
-    m_cellTagger->regrid();             
+    timer.startEvent("Regrid celltagger");
+    m_cellTagger->regrid();
+    timer.stopEvent("Regrid celltagger");    
   }
 
-  // If it wants to, TimeStepper can do a postRegrid operation. 
+  // If it wants to, TimeStepper can do a postRegrid operation.
+  timer.startEvent("Post-regrid");
   m_timeStepper->postRegrid();
-
-  const Real solver_regrid = Timer::wallClock(); // Timer
-
-  if(m_verbosity > 1){
-    this->regridReport(solver_regrid - start_time,
-		       cell_tags - start_time,
-		       base_regrid - cell_tags,
-		       solver_regrid - base_regrid);
-  }
+  timer.stopEvent("Post-regrid");  
 
   m_needsNewGeometricTags = false;
+
+  if(m_verbosity > 1){
+    timer.eventReport();
+  }
 }
 
 void Driver::regridInternals(const int a_oldFinestLevel, const int a_newFinestLevel){
