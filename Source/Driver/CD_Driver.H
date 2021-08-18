@@ -434,35 +434,51 @@ protected:
   void getGeometryTags();
 
   /*!
-    @brief Get boxes and number of cells for everything
+    @brief Get statics about a DisjointBoxLaout. This will compute the number of grid cells and patches both locally and globally. 
+    @param[out] a_numLocalCells       Local number of grid cells, excluding ghost cells. 
+    @param[out] a_numLocalCellsGhosts Local number of grid cells, including ghost cells. 
+    @param[out] a_numLocalBox         Local number of grid patches (over all levels)
+    @param[out] a_numTotalCells       Total number of grid cells, excluding ghost cells. 
+    @param[out] a_numTotalCellsGhosts Total number of grid cells, including ghost cells. 
+    @param[out] a_numTotalBox         Total number of grid patches
+    @param[out] a_numLocalLevelBoxes  Local number of grid boxes (per level)
+    @param[out] a_numTotalLevelBoxes  Total number of grid boxes (per level)
+    @param[out] a_numLocalLevelCells  Local number of grid cells (per level)
+    @param[out] a_numTotalLevelCells  Total number of grid cells (per level)
+    @param[in]  a_finestLevel         Finest AMR level
+    @param[in]  a_grids               Input grids
   */
-  void getLoadsAndBoxes(long long& a_myPoints,
-			long long& a_myPointsGhosts,
-			long long& a_myBoxes,
-			long long& a_totalPoints,
-			long long& a_totalPointsGhosts,
-			long long& a_totalBoxes,
-			Vector<long long>& a_localLevelBoxes,
-			Vector<long long>& a_allLevelBoxes,
-			Vector<long long>& a_localLevelPoints,
-			Vector<long long>& a_totalLevelPoints,
-			const int&                       a_finestLevel,
+  void getCellsAndBoxes(long long&         a_numLocalCells,
+			long long&         a_numLocalCellsGhosts,
+			long long&         a_numLocalBoxes,
+			long long&         a_numTotalCells,
+			long long&         a_numTotalCellsGhosts,
+			long long&         a_numTotalBoxes,
+			Vector<long long>& a_numLocalLevelBoxes,
+			Vector<long long>& a_numTotalLevelBoxes,
+			Vector<long long>& a_numLocalLevelCells,
+			Vector<long long>& a_numTotalLevelCells,
+			const int&         a_finestLevel,
 			const Vector<DisjointBoxLayout>& a_grids);
 
   /*!
-    @brief Write a grid report
+    @brief Print regrid report. 
   */
   void gridReport();
 
   /*!
-    @brief Number formatting game. This just prints the number 123456 as 123,456
+    @brief Number formatting method -- writes big numbers using an input separator. E.g. the number 123456 is written as 123,456
+    @param[in] a_number Number to format as string with separator
+    @param[in] a_sep    Separator
   */
-  const std::string numberFmt(const long long a_number, char a_sep = ',') const;
+  std::string numberFmt(const long long a_number, char a_sep = ',') const;
 
   /*!
     @brief Number formatting game. This just prints the number 123456 as 123,456
+    @param[in] a_numbers Numbers to format as string with separator
+    @param[in] a_sep     Separator
   */
-  const Vector<std::string> numberFmt(const Vector<long long> a_number, char a_sep = ',') const;
+  Vector<std::string> numberFmt(const Vector<long long> a_numbers, char a_sep = ',') const;
 
   /*!
     @brief Memory report

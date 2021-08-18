@@ -204,8 +204,8 @@ void Driver::getGeometryTags(){
     const ProblemDomain& curDomain = m_amr->getDomains()[lvl];     // Domain we're looking at right now. 
     const int curLevel             = ebisGas->getLevel(curDomain); // Corresponding level index in EBIndexSpace. 
 
-    IntVectSet condTags;       // Irregular cells on electrodes
-    IntVectSet dielTags;       // Irregular cells on dielectrics
+    IntVectSet condTags; // Irregular cells on electrodes
+    IntVectSet dielTags; // Irregular cells on dielectrics
 
     // Conductor cells
     if(m_conductorTagsDepth > lvl){ 
@@ -232,7 +232,7 @@ void Driver::getGeometryTags(){
     // Evaluate angles between cut-cells and refine based on that. 
     DisjointBoxLayout irregGrids = ebisGas->getIrregGrids(curDomain);
     EBISLayout ebisl;
-    ebisGas->fillEBISLayout(ebisl, irregGrids, curDomain, 1); // Need one ghost cell because we fetch neighboring vofs. 
+    ebisGas->fillEBISLayout(ebisl, irregGrids, curDomain, 1); // Need one ghost cell because we fetch normal vectors from neighboring cut-cells. 
 
     const Real dx         = m_amr->getDx()[lvl];
     const RealVect probLo = m_amr->getProbLo();
@@ -272,8 +272,7 @@ void Driver::getGeometryTags(){
     }
   }
 
-  // Grow tags. This is an ad-hoc fix that prevents ugly grid near EBs (i.e. cases where only ghost cells are used
-  // for elliptic equations)
+  // Grow tags with specified factor. 
   for (int lvl = 0; lvl < maxAmrDepth; lvl++){
     m_geomTags[lvl].grow(m_irregTagGrowth);
   }
@@ -295,34 +294,34 @@ void Driver::getGeometryTags(){
 #endif
 }
 
-void Driver::getLoadsAndBoxes(long long& a_myPoints,
-			      long long& a_myPointsGhosts,
-			      long long& a_myBoxes,
-			      long long& a_totalPoints,
-			      long long& a_totalPointsGhosts,
-			      long long& a_totalBoxes,
-			      Vector<long long>& a_localLevelBoxes,
-			      Vector<long long>& a_allLevelBoxes,
-			      Vector<long long>& a_localLevelPoints,
-			      Vector<long long>& a_totalLevelPoints,
-			      const int& a_finestLevel,
+void Driver::getCellsAndBoxes(long long&         a_numLocalCells,
+			      long long&         a_numLocalCellsGhosts,
+			      long long&         a_numLocalBoxes,
+			      long long&         a_numTotalCells,
+			      long long&         a_numTotalCellsGhosts,
+			      long long&         a_numTotalBoxes,
+			      Vector<long long>& a_numLocalLevelBoxes,
+			      Vector<long long>& a_numTotalLevelBoxes,
+			      Vector<long long>& a_numLocalLevelCells,
+			      Vector<long long>& a_numTotalLevelCells,
+			      const int&         a_finestLevel,
 			      const Vector<DisjointBoxLayout>& a_grids){
-  CH_TIME("Driver::getLoadsAndBoxes");
+  CH_TIME("Driver::getCellsAndBoxes(long long x6, Vector<long long> x4, int, Vector<DisjointBoxLayout>)");
   if(m_verbosity > 5){
-    pout() << "Driver::getLoadsAndBoxes" << endl;
+    pout() << "Driver::getCellsAndBoxes(long long x6, Vector<long long> x4, int, Vector<DisjointBoxLayout>)" << endl;
   }
 
-  a_myPoints          = 0;
-  a_myPointsGhosts    = 0;
-  a_myBoxes           = 0;
-  a_totalPoints       = 0;
-  a_totalPointsGhosts = 0;
-  a_totalBoxes        = 0;
+  a_numLocalCells       = 0;
+  a_numLocalCellsGhosts = 0;
+  a_numLocalBoxes       = 0;
+  a_numTotalCells       = 0;
+  a_numTotalCellsGhosts = 0;
+  a_numTotalBoxes       = 0;
 
-  a_localLevelBoxes.resize(1 + a_finestLevel);
-  a_allLevelBoxes.resize(1 + a_finestLevel);
-  a_localLevelPoints.resize(1 + a_finestLevel);
-  a_totalLevelPoints.resize(1 + a_finestLevel);
+  a_numLocalLevelBoxes.resize(1 + a_finestLevel);
+  a_numTotalLevelBoxes.resize(1 + a_finestLevel);
+  a_numLocalLevelCells.resize(1 + a_finestLevel);
+  a_numTotalLevelCells.resize(1 + a_finestLevel);
 
   const int ghost = m_amr->getNumberOfGhostCells();
 
@@ -335,28 +334,32 @@ void Driver::getLoadsAndBoxes(long long& a_myPoints,
     long long pointsThisLevel       = 0;
     long long pointsThisLevelGhosts = 0;
     long long boxesThisLevel        = 0;
+    
     for (LayoutIterator lit = dbl.layoutIterator(); lit.ok(); ++lit){
       Box box      = dbl[lit()];
       Box grownBox = dbl[lit()];
+      
       grownBox.grow(ghost);
       
-      //
       pointsThisLevel       += box.numPts();
       pointsThisLevelGhosts += grownBox.numPts();
       boxesThisLevel        += 1;
     }
-    a_totalLevelPoints[lvl] = pointsThisLevel;
-    a_allLevelBoxes[lvl]  = boxesThisLevel;
+    
+    a_numTotalLevelCells[lvl] = pointsThisLevel;
+    a_numTotalLevelBoxes[lvl] = boxesThisLevel;
 
 
     // Find the total number of points and boxes that this processor owns
     long long myPointsLevel       = 0;
     long long myPointsLevelGhosts = 0;
     long long myBoxesLevel        = 0;
+    
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       Box box      = dbl[dit()];
       Box grownBox = dbl[dit()];
-      grownBox.grow(3);
+      
+      grownBox.grow(ghost);
       
       myPointsLevel       += box.numPts();
       myPointsLevelGhosts += grownBox.numPts();
@@ -365,20 +368,25 @@ void Driver::getLoadsAndBoxes(long long& a_myPoints,
 
 
     // Total for this level
-    a_totalPoints           += pointsThisLevel;
-    a_totalPointsGhosts     += pointsThisLevelGhosts;
-    a_totalBoxes            += boxesThisLevel;
-    a_myPoints              += myPointsLevel;
-    a_myPointsGhosts        += myPointsLevelGhosts;
-    a_myBoxes               += myBoxesLevel;
-    a_localLevelBoxes[lvl]    = myBoxesLevel;
-    a_allLevelBoxes[lvl] = boxesThisLevel;
-    a_localLevelPoints[lvl]   = myPointsLevel;
-    a_localLevelBoxes[lvl]    = myBoxesLevel;
+    a_numTotalCells           += pointsThisLevel;
+    a_numTotalCellsGhosts     += pointsThisLevelGhosts;
+    a_numTotalBoxes           += boxesThisLevel;
+    a_numLocalCells           += myPointsLevel;
+    a_numLocalCellsGhosts     += myPointsLevelGhosts;
+    a_numLocalBoxes           += myBoxesLevel;
+    a_numLocalLevelBoxes[lvl]  = myBoxesLevel;
+    a_numTotalLevelBoxes[lvl]  = boxesThisLevel;
+    a_numLocalLevelCells[lvl]  = myPointsLevel;
+    a_numLocalLevelBoxes[lvl]  = myBoxesLevel;
   }
 }
 
-const std::string Driver::numberFmt(const long long n, char sep) const {
+std::string Driver::numberFmt(const long long n, char sep) const {
+  CH_TIME("Driver::numberFmt(long long, char)");
+  if(m_verbosity > 5){
+    pout() << "Driver::numberFmt(long long, char)" << endl;
+  }
+  
   stringstream fmt;
   fmt << n;
   string s = fmt.str();
@@ -391,19 +399,25 @@ const std::string Driver::numberFmt(const long long n, char sep) const {
   return s;
 }
 
-const Vector<std::string> Driver::numberFmt(const Vector<long long> a_number, char a_sep) const{
-  Vector<std::string> ret(a_number.size());
-  for (int i = 0; i < a_number.size(); i++){
-    ret[i] = numberFmt(a_number[i], a_sep) + " ";
+Vector<std::string> Driver::numberFmt(const Vector<long long> a_numbers, char a_sep) const {
+  CH_TIME("Driver::numberFmt(Vector<long long>, char)");
+  if(m_verbosity > 5){
+    pout() << "Driver::numberFmt(Vector<long long>, char)" << endl;
+  }
+  
+  Vector<std::string> ret(a_numbers.size());
+  
+  for (int i = 0; i < a_numbers.size(); i++){
+    ret[i] = numberFmt(a_numbers[i], a_sep) + " ";
   }
 
   return ret;
 }
 
 void Driver::gridReport(){
-  CH_TIME("Driver::gridReport");
+  CH_TIME("Driver::gridReport()");
   if(m_verbosity > 5){
-    pout() << "Driver::gridReport" << endl;
+    pout() << "Driver::gridReport()" << endl;
   }
 
   pout() << endl;
@@ -463,7 +477,7 @@ void Driver::gridReport(){
   // Get boxes for each Realm
   const std::vector<std::string> Realms = m_amr->getRealms();
   for (auto str : Realms){
-    this->getLoadsAndBoxes(myPoints,
+    this->getCellsAndBoxes(myPoints,
 			   myPointsGhosts,
 			   myBoxes,
 			   totPoints,
@@ -504,7 +518,7 @@ void Driver::gridReport(){
 
   // Do a local report for each Realm
   for (auto str : Realms){
-    this->getLoadsAndBoxes(myPoints,
+    this->getCellsAndBoxes(myPoints,
 			   myPointsGhosts,
 			   myBoxes,
 			   totPoints,
@@ -1126,61 +1140,61 @@ void Driver::createOutputDirectories(){
     cmd = "mkdir -p " + m_outputDirectory;
     success = system(cmd.c_str());
     if(success != 0){
-      std::cout << "Driver::set_outputDirectoryectory - master could not create directory" << std::endl;
+      std::cout << "Driver::createOutputDirectories - master could not create directory" << std::endl;
     }
 
     cmd = "mkdir -p " + m_outputDirectory + "/plt";
     success = system(cmd.c_str());
     if(success != 0){
-      std::cout << "Driver::set_outputDirectoryectory - master could not create plot directory" << std::endl;
+      std::cout << "Driver::createOutputDirectories - master could not create plot directory" << std::endl;
     }
 
     cmd = "mkdir -p " + m_outputDirectory + "/geo";
     success = system(cmd.c_str());
     if(success != 0){
-      std::cout << "Driver::set_outputDirectoryectory - master could not create geo directory" << std::endl;
+      std::cout << "Driver::createOutputDirectories - master could not create geo directory" << std::endl;
     }
 
     cmd = "mkdir -p " + m_outputDirectory + "/chk";
     success = system(cmd.c_str());
     if(success != 0){
-      std::cout << "Driver::set_outputDirectoryectory - master could not create checkpoint directory" << std::endl;
+      std::cout << "Driver::createOutputDirectories - master could not create checkpoint directory" << std::endl;
     }
 
     cmd = "mkdir -p " + m_outputDirectory + "/mpi";
     success = system(cmd.c_str());
     if(success != 0){
-      std::cout << "Driver::set_outputDirectoryectory - master could not create mpi directory" << std::endl;
+      std::cout << "Driver::createOutputDirectories - master could not create mpi directory" << std::endl;
     }
 
     cmd = "mkdir -p " + m_outputDirectory + "/mpi/memory";
     success = system(cmd.c_str());
     if(success != 0){
-      std::cout << "Driver::set_outputDirectoryectory - master could not create mpi/memory directory" << std::endl;
+      std::cout << "Driver::createOutputDirectories - master could not create mpi/memory directory" << std::endl;
     }
 
     cmd = "mkdir -p " + m_outputDirectory + "/mpi/loads";
     success = system(cmd.c_str());
     if(success != 0){
-      std::cout << "Driver::set_outputDirectoryectory - master could not create mpi/loads directory" << std::endl;
+      std::cout << "Driver::createOutputDirectories - master could not create mpi/loads directory" << std::endl;
     }
 
     cmd = "mkdir -p " + m_outputDirectory + "/regrid";
     success = system(cmd.c_str());
     if(success != 0){
-      std::cout << "Driver::set_outputDirectoryectory - master could not create regrid directory" << std::endl;
+      std::cout << "Driver::createOutputDirectories - master could not create regrid directory" << std::endl;
     }
 
     cmd = "mkdir -p " + m_outputDirectory + "/restart";
     success = system(cmd.c_str());
     if(success != 0){
-      std::cout << "Driver::set_outputDirectoryectory - master could not create restart directory" << std::endl;
+      std::cout << "Driver::createOutputDirectories - master could not create restart directory" << std::endl;
     }
 
     cmd = "mkdir -p " + m_outputDirectory + "/crash";
     success = system(cmd.c_str());
     if(success != 0){
-      std::cout << "Driver::set_outputDirectoryectory - master could not create crash directory" << std::endl;
+      std::cout << "Driver::createOutputDirectories - master could not create crash directory" << std::endl;
     }    
   }
   
