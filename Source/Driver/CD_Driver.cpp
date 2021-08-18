@@ -577,8 +577,6 @@ void Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialD
   // Use a timer here because I want to be able to put some diagnostics into this function. 
   Timer timer("Driver::regrid(int, int, bool)");
 
-
-
   // We are allowing geometric tags to change under the hood, but we need a method for detecting if they changed. If they did,
   // we certainly have to regrid.
   timer.startEvent("Get geometry tags");
@@ -674,11 +672,15 @@ void Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialD
 }
 
 void Driver::regridInternals(const int a_oldFinestLevel, const int a_newFinestLevel){
-  CH_TIME("Driver::regridInternals");
+  CH_TIME("Driver::regridInternals(int, int)");
   if(m_verbosity > 2){
-    pout() << "Driver::regridInternals" << endl;
+    pout() << "Driver::regridInternals(int, int)" << endl;
   }
 
+  constexpr int comp  = 0;
+  constexpr int nComp = 1;
+
+  // Allocate internals -- this allocates m_tags
   this->allocateInternals();
 
   // Copy cached tags back over to m_tags
@@ -687,13 +689,15 @@ void Driver::regridInternals(const int a_oldFinestLevel, const int a_newFinestLe
     
     // Copy mask
     LevelData<BaseFab<bool> > tmp;
-    tmp.define(dbl, 1, IntVect::Zero);
+    tmp.define(dbl, nComp, IntVect::Zero);
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       tmp[dit()].setVal(false);
     }
 
     m_cachedTags[lvl]->copyTo(tmp);
-    
+
+    // m_cachedTags was allocated on the grids while tmp is allocated on the new. Look through
+    // the bools in tmp and reconstruct the tags.
     for(DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const BaseFab<bool>& tmpFab = tmp[dit()];
       const Box& box = dbl.get(dit());
@@ -702,7 +706,7 @@ void Driver::regridInternals(const int a_oldFinestLevel, const int a_newFinestLe
       
       for (BoxIterator bit(box); bit.ok(); ++bit){
 	const IntVect iv = bit();
-	if(tmpFab(iv,0)){
+	if(tmpFab(iv, comp)){
 	  tags |= iv;
 	}
       }
@@ -710,42 +714,13 @@ void Driver::regridInternals(const int a_oldFinestLevel, const int a_newFinestLe
   }
 }
 
-void Driver::regridReport(const Real a_totalTime,
-			  const Real a_tagTime,
-			  const Real a_baseRegridTime,
-			  const Real a_solverRegridTime){
-  CH_TIME("Driver::regridReport");
-  if(m_verbosity > 5){
-    pout() << "Driver::regridReport" << endl;
-  }
-
-  const Real elapsed    = a_totalTime;
-  const int elapsed_hrs = floor(elapsed/3600);
-  const int elapsed_min = floor((elapsed - 3600*elapsed_hrs)/60);
-  const int elapsed_sec = floor( elapsed - 3600*elapsed_hrs - 60*elapsed_min);
-  const int elapsed_ms  = floor((elapsed - 3600*elapsed_hrs - 60*elapsed_min - elapsed_sec)*1000.);
-
-  char metrics[30];
-  sprintf(metrics, "%3.3ih %2.2im %2.2is %3.3ims",
-	  elapsed_hrs, 
-	  elapsed_min, 
-	  elapsed_sec, 
-	  elapsed_ms);
-
-  pout() << "-----------------------------------------------------------------------" << endl
-	 << "Driver::regridReport breakdown - Time step #" << m_timeStep << endl
-	 << "\t\t\t" << "Total regrid time : " << metrics << endl
-	 << "\t\t\t" << "Cell tagging      : " << 100.*(a_tagTime/a_totalTime) << "%" << endl
-	 << "\t\t\t" << "Base regrid       : " << 100.*(a_baseRegridTime/a_totalTime) << "%" << endl
-	 << "\t\t\t" << "Solver regrid     : " << 100.*(a_solverRegridTime/a_totalTime) << "%" << endl
-	 << "-----------------------------------------------------------------------" << endl;
-}
-
 void Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSteps){
-  CH_TIME("Driver::run");
+  CH_TIME("Driver::run(Real, Real, int)");
   if(m_verbosity > 1){
-    pout() << "Driver::run" << endl;
+    pout() << "Driver::run(Real, Real, int)" << endl;
   }
+
+  constexpr Real abortThreshold = 1.E-5;
 
   if(m_verbosity > 0){
     pout() << "=================================" << endl;
@@ -759,41 +734,47 @@ void Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSt
 
   if(a_maxSteps > 0){
     if(!m_restart){
-      m_time = a_startTime;
+      m_time     = a_startTime;
       m_timeStep = 0;
     }
 
     m_timeStepper->computeDt(m_dt, m_timeCode);
     m_timeStepper->synchronizeSolverTimes(m_timeStep, m_time, m_dt);
 
-    bool last_step     = false;
-    bool first_step    = true;
-    const Real init_dt = m_dt;
+    bool isLastStep   = false;
+    bool isFirstStep  = true;
+
+    // Store the initial dt in case we have to abort (in case the time step became too small for some reason). 
+    const Real initDt = m_dt;
 
     if(m_verbosity > 0){
       this->gridReport();
     }
 
+    // Store the initial time before we starting stepping. This is used for giving an estimate
+    // for how long the simulation will run. 
     m_wallClockStart = Timer::wallClock();
 
-    while(m_time < a_endTime && m_timeStep < a_maxSteps && !last_step){
-      const int max_sim_depth = m_amr->getMaxSimulationDepth();
-      const int max_amr_depth = m_amr->getMaxAmrDepth();
+    while(m_time < a_endTime && m_timeStep < a_maxSteps && !isLastStep){
+      const int maxSimDepth = m_amr->getMaxSimulationDepth();
+      const int maxAmrDepth = m_amr->getMaxAmrDepth();
 
-      // This is the regrid test. We do some dummy tests first and then do the recursive/non-recursive stuff
-      // inside the loop. 
-      const bool can_regrid        = max_sim_depth > 0 && max_amr_depth > 0;
-      const bool check_step        = m_timeStep%m_regridInterval == 0 && m_regridInterval > 0;
-      const bool check_timeStepper = m_timeStepper->needToRegrid() && m_regridInterval > 0;
-      if(can_regrid && (check_step || check_timeStepper)){
-	if(!first_step){
+      // Check if we should regrid. This can be due to regular intervals, or the TimeStepper can call for it. 
+      const bool canRegrid         = maxSimDepth > 0 && maxAmrDepth > 0 && m_regridInterval > 0;
+      const bool regridStep        = m_timeStep%m_regridInterval == 0;
+      const bool regridTimeStepper = m_timeStepper->needToRegrid();
+      if(canRegrid && (regridStep || regridTimeStepper)){
+	if(!isFirstStep){
 
-	  // We'll regrid levels lmin through lmax. As always, new grids on level l are generated through tags
+	  // Regrid all levels, but restrict the addition to one at a time. As always, new grids on level l are generated through tags
 	  // on levels (l-1);
-	  const int lmin = 0;
+	  const int lmin = 0;                           // Coarsest grid level that can change. Base level can also change (due to run-time parameters or load balancing). 
 	  const int lmax = m_amr->getFinestLevel() + 1; // This means that if we refine, we can only add one level at a time. 
 
 	  this->regrid(lmin, lmax, false);
+
+	  // Write a grid report, displaying information about the new grids. Can also write
+	  // a regrid file if necessary. 
 	  if(m_verbosity > 0){
 	    this->gridReport();
 	  }
@@ -803,16 +784,16 @@ void Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSt
 	}
       }
 
-      if(!first_step){
+      // Compute a time step for the TimeStepper::advance(...) method. 
+      if(!isFirstStep){
 	m_timeStepper->computeDt(m_dt, m_timeCode);
       }
-
-      if(first_step){
-	first_step = false;
+      else{ // In this case we already had one. 
+	isFirstStep = false;
       }
 
-      // Did the time step become too small?
-      if(m_dt < 1.0E-5*init_dt){
+      // Abort if the time step became too small. 
+      if(m_dt < abortThreshold*initDt){
 	m_timeStep++;
 
 	if(m_writeMemory){
@@ -822,34 +803,35 @@ void Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSt
 	  this->writeComputationalLoads();
 	}
 	this->writeCrashFile();
-	//	this->writeCheckpointFile();
 
-	MayDay::Abort("Driver::run - the time step became too small");
+	MayDay::Error("Driver::run(Real, Real, int) - the time step became too small.");
       }
 
-      // Last time step can be smaller than m_dt so that we end on a_endTime
+      // Adjust last time step -- it can be smaller than the one we computed because we want to
+      // end the simulation at a_endTime. 
       if(m_time + m_dt > a_endTime){
 	m_dt = a_endTime - m_time;
-	last_step = true;
+	isLastStep = true;
       }
 
-
-      // Time stepper advances solutions
+      // Time stepper advances solutions. Note that the time stepper can choose to use a time step different
+      // from the one we computed (because some time-steppers use adaptive time-stepping). 
       m_wallClockOne = Timer::wallClock();
-      const Real actual_dt = m_timeStepper->advance(m_dt);
+      const Real actualDt = m_timeStepper->advance(m_dt);
       m_wallClockTwo = Timer::wallClock();
 
       // Synchronize times
-      m_dt    = actual_dt;
-      m_time += actual_dt;
+      m_dt        = actualDt;
+      m_time     += actualDt;
       m_timeStep += 1;
       m_timeStepper->synchronizeSolverTimes(m_timeStep, m_time, m_dt);
 
-      if(Abs(m_time - a_endTime) < m_dt*1.E-5){
-	last_step = true;
+      // Check if this was the last step. 
+      if(std::abs(m_time - a_endTime) < m_dt*1.E-5){
+	isLastStep = true;
       }
       if(m_timeStep == m_maxSteps){
-	last_step = true;
+	isLastStep = true;
       }
 
       // Print step report
@@ -858,6 +840,7 @@ void Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSt
       }
 
 #ifdef CH_USE_HDF5
+      // Write plot files, memory files, loads, checkpoint etc. 
       if(m_plotInterval > 0){
 
 	// Aux data
@@ -869,7 +852,7 @@ void Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSt
 	}
 	
 	// Plot file
-	if(m_timeStep%m_plotInterval == 0 || last_step == true){
+	if(m_timeStep%m_plotInterval == 0 || isLastStep == true){
 	  if(m_verbosity > 2){
 	    pout() << "Driver::run -- Writing plot file" << endl;
 	  }
@@ -879,7 +862,7 @@ void Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSt
       }
 
       // Write checkpoint file
-      if(m_timeStep % m_checkpointInterval == 0 && m_checkpointInterval > 0 || last_step == true && m_checkpointInterval > 0){
+      if(m_timeStep % m_checkpointInterval == 0 && m_checkpointInterval > 0 || isLastStep == true && m_checkpointInterval > 0){
 	if(m_verbosity > 2){
 	  pout() << "Driver::run -- Writing checkpoint file" << endl;
 	}
@@ -887,8 +870,9 @@ void Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSt
       }
 #endif
 
-      // Rebuild input parameters
+      // Rebuild the ParmParse table and read input parameters again. Some parameters are allowed to change during runtime. 
       this->rebuildParmParse();
+      
       this->parseRuntimeOptions();
       m_amr->parseRuntimeOptions();
       m_timeStepper->parseRuntimeOptions();
@@ -899,73 +883,81 @@ void Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSt
   }
 
   if(m_verbosity > 0){
-    this->gridReport();
-  }
-
-  if(m_verbosity > 0){
     pout() << "==================================" << endl;
-    pout() << "Driver::run -- ending run  " << endl;
+    pout() << "Driver::run -- ending run  "        << endl;
     pout() << "==================================" << endl;
   }
 }
 
 void Driver::setupAndRun(const std::string a_inputFile){
-  CH_TIME("Driver::setupAndRun");
+  CH_TIME("Driver::setupAndRun(std::string)");
   if(m_verbosity > 0){
-    pout() << "Driver::setupAndRun" << endl;
+    pout() << "Driver::setupAndRun(std::string)" << endl;
   }
+
+  // TLDR: Call setup(...), which will select among the various setup functions. 
 
   char iter_str[100];
   sprintf(iter_str, ".check%07d.%dd.hdf5", m_restartStep, SpaceDim);
-  const std::string restart_file = m_outputDirectory + "/chk/" + m_outputFileNames + std::string(iter_str);
+  const std::string restartFile = m_outputDirectory + "/chk/" + m_outputFileNames + std::string(iter_str);
 
-  this->setup(a_inputFile, m_initialRegrids, m_restart, restart_file);
+  this->setup(a_inputFile, m_initialRegrids, m_restart, restartFile);
 
+  // Run the simulation. 
   if(!m_geometryOnly){
     this->run(m_startTime, m_stopTime, m_maxSteps);
   }
 }
 
 void Driver::rebuildParmParse() const {
+  CH_TIME("Driver::rebuildParmParse()");
+  if(m_verbosity > 5){
+    pout() << "Driver::rebuildParmParse()" << endl;
+  }
+  
   ParmParse pp("Driver");
 
   pp.redefine(m_inputFile.c_str());
 }
 
 void Driver::setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry){
-  CH_TIME("Driver::setComputationalGeometry");
+  CH_TIME("Driver::setComputationalGeometry(RefCountedPtr<ComputationalGeometry>");
   if(m_verbosity > 5){
-    pout() << "Driver::setComputationalGeometry" << endl;
+    pout() << "Driver::setComputationalGeometry(RefCountedPtr<ComputationalGeometry>)" << endl;
   }
+  
   m_computationalGeometry = a_computationalGeometry;
-  m_multifluidIndexSpace     = a_computationalGeometry->getMfIndexSpace();
+  m_multifluidIndexSpace  = a_computationalGeometry->getMfIndexSpace();
 }
 
 void Driver::setTimeStepper(const RefCountedPtr<TimeStepper>& a_timeStepper){
-  CH_TIME("Driver::setTimeStepper");
+  CH_TIME("Driver::setTimeStepper(RefCountedPtr<TimeStepper>)");
   if(m_verbosity > 5){
-    pout() << "Driver::setTimeStepper" << endl;
+    pout() << "Driver::setTimeStepper(RefCountedPtr<TimeStepper>)" << endl;
   }
+  
   m_timeStepper = a_timeStepper;
 }
 
 void Driver::setCellTagger(const RefCountedPtr<CellTagger>& a_cellTagger){
-  CH_TIME("Driver::setCellTagger");
+  CH_TIME("Driver::setCellTagger(RefCountedPtr<CellTagger>)");
   if(m_verbosity > 5){
-    pout() << "Driver::setCellTagger" << endl;
+    pout() << "Driver::setCellTagger(RefCountedPtr<CellTagger>)" << endl;
   }
 
   m_cellTagger = a_cellTagger;
+  
   if(!a_cellTagger.isNull()){
     m_cellTagger->parseOptions();
   }
 }
 
 void Driver::setGeoCoarsen(const RefCountedPtr<GeoCoarsener>& a_geoCoarsen){
-  CH_TIME("Driver::setGeoCoarsen");
+  CH_TIME("Driver::setGeoCoarsen(RefCountedPtr<GeoCoarsener>)");
   if(m_verbosity > 5){
-    pout() << "Driver::setGeoCoarsen" << endl;
+    pout() << "Driver::setGeoCoarsen(RefCountedPtr<GeoCoarsener>)" << endl;
   }
+  
   m_geoCoarsen = a_geoCoarsen;
 }
 
@@ -1000,7 +992,7 @@ void Driver::parseOptions(){
   pp.get("max_plot_depth",           m_maxPlotDepth);
   pp.get("max_chk_depth",            m_maxCheckpointDepth);
 
-  m_restart   = (m_restartStep > 0) ? true : false;
+  m_restart = (m_restartStep > 0) ? true : false;
 
   // Stuff that's a little too verbose to include here directly. 
   this->parsePlotVariables();

@@ -499,34 +499,32 @@ protected:
 
   /*!
     @brief Regrid internal storage for this class
+    @param[in] a_oldFinestLevel Finest level before the regrid
+    @param[in] a_newFinestLevel Finest level before the regrid
   */
   void regridInternals(const int a_oldFinestLevel, const int a_newFinestLevel);
-
-  /*!
-    @brief Write a regrid report
-  */
-  void regridReport(const Real a_totalTime,
-		     const Real a_tagTime,
-		     const Real a_baseRegridTime,
-		     const Real a_solverRegridTime);
   
   /*!
     @brief Set the computational geometry
+    @param[in] a_computationalGeometry Computational geometry
   */
   void setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
 
   /*!
     @brief Set the time stepper
+    @param[in] a_timeStepper Time stepper
   */
   void setTimeStepper(const RefCountedPtr<TimeStepper>& a_timeStepper);
 
   /*!
     @brief Set the cell tagger
+    @param[in] a_cellTagger Cell tagger
   */
   void setCellTagger(const RefCountedPtr<CellTagger>& a_cellTagger);
 
   /*!
     @brief Set the geo coarsener
+    @param[in] a_geoCoarsen Coarsener for cut-cell tags. 
   */
   void setGeoCoarsen(const RefCountedPtr<GeoCoarsener>& a_geoCoarsen);
 
