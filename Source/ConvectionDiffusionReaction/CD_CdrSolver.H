@@ -29,7 +29,6 @@
   @brief Base class for solving convection-diffusion-reaction equations. 
   @details On embedded boundaries, users must always set the flux directly (but possibly via a function, if desired). 
   @details On domain edges/faces, the user can select between various ways of setting the domain boundary conditions (e.g. wall, data-based, function-based, outflow). 
-  @todo Domain BCs could be generalized to use independent data/wall/function/outflow on individual faces. Currently the same domain BC is used everywhere. 
 */
 class CdrSolver {
 public:
