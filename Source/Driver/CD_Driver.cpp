@@ -11,6 +11,7 @@
 
 // Std includes
 #include <fstream>
+#include <iostream>
 
 // Chombo includes
 #include <EBArith.H>
@@ -925,6 +926,8 @@ void Driver::setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>
   if(m_verbosity > 5){
     pout() << "Driver::setComputationalGeometry(RefCountedPtr<ComputationalGeometry>)" << endl;
   }
+
+  CH_assert(!a_computationalGeometry.isNull());
   
   m_computationalGeometry = a_computationalGeometry;
   m_multifluidIndexSpace  = a_computationalGeometry->getMfIndexSpace();
@@ -935,6 +938,8 @@ void Driver::setTimeStepper(const RefCountedPtr<TimeStepper>& a_timeStepper){
   if(m_verbosity > 5){
     pout() << "Driver::setTimeStepper(RefCountedPtr<TimeStepper>)" << endl;
   }
+
+  CH_assert(!a_timeStepper.isNull());
   
   m_timeStepper = a_timeStepper;
 }
@@ -957,18 +962,20 @@ void Driver::setGeoCoarsen(const RefCountedPtr<GeoCoarsener>& a_geoCoarsen){
   if(m_verbosity > 5){
     pout() << "Driver::setGeoCoarsen(RefCountedPtr<GeoCoarsener>)" << endl;
   }
+
+  CH_assert(!a_geoCoarsen.isNull());
   
   m_geoCoarsen = a_geoCoarsen;
 }
 
 void Driver::parseOptions(){
-  CH_TIME("Driver::parseOptions");
+  CH_TIME("Driver::parseOptions()");
 
   ParmParse pp("Driver");
 
   pp.get("verbosity",                m_verbosity);
   if(m_verbosity > 5){
-    pout() << "Driver::parseOptions" << endl;
+    pout() << "Driver::parseOptions()" << endl;
   }
   
   pp.get("regrid_interval",          m_regridInterval);
@@ -1002,13 +1009,13 @@ void Driver::parseOptions(){
 }
 
 void Driver::parseRuntimeOptions(){
-  CH_TIME("Driver::parseRuntimeOptions");
+  CH_TIME("Driver::parseRuntimeOptions()");
 
   ParmParse pp("Driver");
 
   pp.get("verbosity",                m_verbosity);
   if(m_verbosity > 5){
-    pout() << "Driver::parseRuntimeOptions" << endl;
+    pout() << "Driver::parseRuntimeOptions()" << endl;
   }
   pp.get("write_memory",             m_writeMemory);
   pp.get("write_loads",              m_writeLoads);
@@ -1028,14 +1035,22 @@ void Driver::parseRuntimeOptions(){
 }
 
 void Driver::parsePlotVariables(){
-  ParmParse pp("Driver");
-  const int num = pp.countval("plt_vars");
-  Vector<std::string> str(num);
-  pp.getarr("plt_vars", str, 0, num);
+  CH_TIME("Driver::parsePlotVariables()");
+  if(m_verbosity > 5){
+    pout() << "Driver::parsePlotVariables()" << endl;
+  }
 
+  // False by default. 
   m_plotTags     = false;
   m_plotRanks    = false;
   m_plotLevelset = false;
+
+  // Check input script to see which variables to include in plot files. 
+  ParmParse pp("Driver");
+  const int num = pp.countval("plt_vars");
+
+  Vector<std::string> str(num);
+  pp.getarr("plt_vars", str, 0, num);
   
   for (int i = 0; i < num; i++){
     if(     str[i] == "tags")     m_plotTags     = true;
@@ -1058,12 +1073,13 @@ void Driver::parseIrregTagGrowth(){
 }
 
 void Driver::parseGeometryGeneration(){
-  CH_TIME("Driver::parseGeometryGeneration");
+  CH_TIME("Driver::parseGeometryGeneration()");
   if(m_verbosity > 5){
-    pout() << "Driver::parseGeometryGeneration" << endl;
+    pout() << "Driver::parseGeometryGeneration()" << endl;
   }
 
   ParmParse pp("Driver");
+  
   pp.get("geometry_generation", m_geometryGeneration);
   pp.get("geometry_scan_level", m_geoScanLevel);
 
@@ -1078,9 +1094,9 @@ void Driver::parseGeometryRefinement(){
     pout() << "Driver::parseGeometryRefinement()" << endl;
   }
 
-  // We are allowing geometry refinement criteria to change as simulations progress (i.e. m_timeStep > 0) where we call this routine again. But we need
-  // something to tell us that we got new refinement criteria for geometric tags so we can avoid regrid if they didn't change. This is my clunky way of doing that.   
-
+  // This routine parses the default depth at which we refine EBs, and also the refinement angle. This is used for setting up grids where only flags on the
+  // EB are involved. 
+  //
   ParmParse pp("Driver");
   
   const auto c1 = m_refineAngle;
@@ -1098,6 +1114,8 @@ void Driver::parseGeometryRefinement(){
     m_dielectricTagsDepth = m_amr->getMaxAmrDepth();
   }
 
+  // We are also allowing geometry refinement criteria to change as simulations progress (i.e. m_timeStep > 0) where we call this routine again. But we need
+  // something to tell us that we got new refinement criteria for geometric tags so we can avoid regrid if they didn't change. This is my clunky way of doing that.     
   if(m_timeStep > 0){ // Simulation is already running, and we need to check if we need new geometric tags for regridding. 
     if(c1 != m_refineAngle || c2 != m_conductorTagsDepth || c3 != m_dielectricTagsDepth){
       m_needsNewGeometricTags = true;
@@ -1114,7 +1132,7 @@ void Driver::createOutputDirectories(){
     pout() << "Driver::createOutputDirectories()" << endl;
   }
 
-  // If directory does not exist, create it
+  // TLDR: Master rank creates the output directories for everyone. 
   if(procID() == 0){
     int success;
     
@@ -1187,24 +1205,27 @@ void Driver::createOutputDirectories(){
 }
 
 
-
-void Driver::setAmr(const RefCountedPtr<AmrMesh>& a_amr){
-  CH_TIME("Driver::setAmr");
+void Driver::setAmr(const RefCountedPtr<AmrMesh>& a_amrMesh){
+  CH_TIME("Driver::setAmr(RefCountedPtr<AmrMesh>)");
   if(m_verbosity > 5){
-    pout() << "Driver::setAmr" << endl;
+    pout() << "Driver::setAmr(RefCountedPtr<AmrMesh>)" << endl;
   }
 
-  m_amr = a_amr;
+  CH_assert(!a_amrMesh.isNull());
+
+  m_amr = a_amrMesh;
   m_amr->setMultifluidIndexSpace(m_computationalGeometry->getMfIndexSpace());
 
 }
 
 void Driver::setup(const std::string a_inputFile, const int a_initialRegrids, const bool a_restart, const std::string a_restartFile){
-  CH_TIME("Driver::setup");
+  CH_TIME("Driver::setup(string, int, bool, string)");
   if(m_verbosity > 5){
-    pout() << "Driver::setup" << endl;
+    pout() << "Driver::setup(string, int, bool, string)" << endl;
   }
 
+  // We store the input file because we want ParmParse to read parameters
+  // at every time step (for run-time configuration purposes). 
   m_inputFile = a_inputFile;
 
   this->createOutputDirectories();
@@ -1750,10 +1771,12 @@ bool Driver::tagCells(Vector<IntVectSet>& a_allTags, EBAMRTags& a_cellTags){
 }
 
 void Driver::writeMemoryUsage(){
-  CH_TIME("Driver::writeMemoryUsage");
+  CH_TIME("Driver::writeMemoryUsage()");
   if(m_verbosity > 3){
-    pout() << "Driver::writeMemoryUsage" << endl;
+    pout() << "Driver::writeMemoryUsage()" << endl;
   }
+
+  // TLDR: This 
 
   char file_char[1000];
   const std::string prefix = m_outputDirectory + "/mpi/memory/" + m_outputFileNames;
@@ -1761,8 +1784,9 @@ void Driver::writeMemoryUsage(){
   std::string fname(file_char);
 
   // Get memory stuff
-  Vector<Real> peak, unfreed;
-  MemoryReport::getMemoryUsage(peak, unfreed);
+  Vector<Real> peakMemory;
+  Vector<Real> unfreedMemory;
+  MemoryReport::getMemoryUsage(peakMemory, unfreedMemory);
   
   // Begin writing output
   if(procID() == 0){
@@ -1779,18 +1803,25 @@ void Driver::writeMemoryUsage(){
     // Write memory 
     for (int i = 0; i < numProc(); i++){
       f << std::left << std::setw(width) << i << "\t"
-	<< std::left << std::setw(width) << peak[i] << "\t"
-	<< std::left << std::setw(width) << unfreed[i] << "\t"
+	<< std::left << std::setw(width) << peakMemory[i] << "\t"
+	<< std::left << std::setw(width) << unfreedMemory[i] << "\t"
 	<< endl;
     }
   }
 }
 
 void Driver::writeComputationalLoads(){
-  CH_TIME("Driver::writeComputationalLoads");
+  CH_TIME("Driver::writeComputationalLoads()");
   if(m_verbosity > 3){
-    pout() << "Driver::writeComputationalLoads" << endl;
+    pout() << "Driver::writeComputationalLoads()" << endl;
   }
+
+  // TLDR: This routine writes loads to files. The file format is in the form
+  //
+  // rank realm1_loads realm2_loads
+  // 0       X             Y
+  // 1       XX            YY
+  
 
   const int nProc = numProc();
 
@@ -1800,11 +1831,13 @@ void Driver::writeComputationalLoads(){
   sprintf(file_char, "%s.loads.step%07d.%dd.dat", prefix.c_str(), m_timeStep, SpaceDim);
   std::string fname(file_char);
 
-  // Get sum of all loads on all Realms
-  std::map<std::string, Vector<long int> > RealmLoads;
+  // Get sum of all loads on all realms
+  std::map<std::string, Vector<long int> > realmLoads;
   for (const auto& r : m_amr->getRealms()){
 
-    // Compute total loads on each rank.
+    // Compute total loads on each rank. This does a call to m_timeStepper to fetch the loads
+    // on each realm, which we put in sumLoads, the loads for realm 'r'. Note that each rank
+    // only fills the sum of the loads for the patches the it own. 
     Vector<long int> sumLoads(nProc, 0L);
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
       const Vector<long int> boxLoads = m_timeStepper->getCheckpointLoads(r, lvl);
@@ -1815,17 +1848,17 @@ void Driver::writeComputationalLoads(){
       }
     }
 
-    // Reduce onto output rank.
+    // Reduce onto output rank. 
 #ifdef CH_MPI
     Vector<long int> tmp(nProc, 0L);
     MPI_Allreduce(&(sumLoads[0]), &(tmp[0]), nProc, MPI_LONG, MPI_SUM, Chombo_MPI::comm);
     sumLoads = tmp;
 #endif
 
-    RealmLoads.emplace(r, sumLoads);
+    realmLoads.emplace(r, sumLoads);
   }
 
-  // Write header
+  // When we're here we have a global view of all the loads for all the realms. 
   if(procID() == 0){
     const int width = 12;
     
@@ -1835,7 +1868,7 @@ void Driver::writeComputationalLoads(){
     // Write header
     std::stringstream ss;
     ss << std::left << std::setw(width) << "# Rank";
-    for (auto r : RealmLoads){
+    for (auto r : realmLoads){
       ss << std::left << std::setw(width) << r.first;
     }
     f << ss.str() << endl;
@@ -1845,7 +1878,7 @@ void Driver::writeComputationalLoads(){
       std::stringstream ds;
 
       ds << std::left << std::setw(width) << irank;
-      for (auto r : RealmLoads){
+      for (auto r : realmLoads){
 	ds << std::left << std::setw(width) << r.second[irank];
       }
       f << ds.str() << std::endl;
@@ -1857,10 +1890,13 @@ void Driver::writeComputationalLoads(){
 }
 
 void Driver::writeGeometry(){
-  CH_TIME("Driver::writeGeometry");
+  CH_TIME("Driver::writeGeometry()");
   if(m_verbosity > 3){
-    pout() << "Driver::writeGeometry" << endl;
+    pout() << "Driver::writeGeometry()" << endl;
   }
+
+  // This is a special routine that writes a plot file containing only the level-set function. Very useful when adjusting the
+  // geometry. 
 
   const int ncomp = 2;
 
@@ -1877,18 +1913,9 @@ void Driver::writeGeometry(){
   int icomp = 0;
   this->writeLevelset(output, icomp);
 
-  //
-  const int finestLevel                 = m_amr->getFinestLevel();
-  const Vector<DisjointBoxLayout>& grids = m_amr->getGrids(m_realm);
-  const Vector<ProblemDomain>& domains   = m_amr->getDomains();
-  const Vector<Real>& dx                 = m_amr->getDx();
-  const Vector<int>& ref_rat             = m_amr->getRefinementRatios();
-
-  Vector<LevelData<EBCellFAB>*> output_ptr(1 + finestLevel);
-  m_amr->alias(output_ptr, output);
-
-  bool replace_covered = false;
-  Vector<Real> covered_values;
+  // Use raw pointers because Chombo IO is not too smart. 
+  Vector<LevelData<EBCellFAB>*> outputPtr(1 + m_amr->getFinestLevel());
+  m_amr->alias(outputPtr, output);
 
   // Dummy file name
   char file_char[1000];
@@ -1898,26 +1925,28 @@ void Driver::writeGeometry(){
 
 #ifdef CH_USE_HDF5
   writeEBHDF5(fname, 
-	      grids,
-	      output_ptr,
+	      m_amr->getGrids(m_realm),
+	      outputPtr,
 	      names, 
-	      domains[0],
-	      dx[0], 
+	      m_amr->getDomains()[0],
+	      m_amr->getDx()[0], 
 	      m_dt,
 	      m_time,
-	      ref_rat,
-	      finestLevel + 1,
-	      replace_covered,
-	      covered_values,
+	      m_amr->getRefinementRatios(),
+	      1 + m_amr->getFinestLevel(),
+	      false,
+	      Vector<Real>(),
 	      m_numPlotGhost*IntVect::Unit);
 #endif
 }
 
 void Driver::writePlotFile(){
-  CH_TIME("Driver::writePlotFile");
+  CH_TIME("Driver::writePlotFile()");
   if(m_verbosity > 3){
-    pout() << "Driver::writePlotFile" << endl;
+    pout() << "Driver::writePlotFile()" << endl;
   }
+
+  // TLDR: This writes a plot file to the /plt/ folder
 
   // Filename
   char file_char[1000];
@@ -1925,14 +1954,14 @@ void Driver::writePlotFile(){
   sprintf(file_char, "%s.step%07d.%dd.hdf5", prefix.c_str(), m_timeStep, SpaceDim);
   string fname(file_char);
 
+  // Write.
   this->writePlotFile(fname);
-
 }
 
 void Driver::writeRegridFile(){
-  CH_TIME("Driver::writeRegridFile");
+  CH_TIME("Driver::writeRegridFile()");
   if(m_verbosity > 3){
-    pout() << "Driver::writeRegridFile" << endl;
+    pout() << "Driver::writeRegridFile()" << endl;
   }
 
   // Filename
@@ -1945,9 +1974,9 @@ void Driver::writeRegridFile(){
 }
 
 void Driver::writeRestartFile(){
-  CH_TIME("Driver::writeRestartFile");
+  CH_TIME("Driver::writeRestartFile()");
   if(m_verbosity > 3){
-    pout() << "Driver::writeRestartFile" << endl;
+    pout() << "Driver::writeRestartFile()" << endl;
   }
 
   // Filename
@@ -1960,9 +1989,9 @@ void Driver::writeRestartFile(){
 }
 
 void Driver::writeCrashFile(){
-  CH_TIME("Driver::writeCrashFile");
+  CH_TIME("Driver::writeCrashFile()");
   if(m_verbosity > 3){
-    pout() << "Driver::writeCrashFile" << endl;
+    pout() << "Driver::writeCrashFile()" << endl;
   }
 
   // Filename
@@ -1975,17 +2004,28 @@ void Driver::writeCrashFile(){
 }
 
 void Driver::writePlotFile(const std::string a_filename){
-  CH_TIME("Driver::writePlotFile");
+  CH_TIME("Driver::writePlotFile(string)");
   if(m_verbosity > 3){
-    pout() << "Driver::writePlotFile" << endl;
+    pout() << "Driver::writePlotFile(string)" << endl;
   }
+
+  // TLDR: This is the main routine for writing plot files. It consists of a bit of code with two essential components:
+  //
+  //       1. Copy data over from various solvers/celltaggers etc. and put them in a single EBAMRCellData with the
+  //          necessary amount of variables.
+  //
+  //       2. Write the big EBAMRCellData to file.
+  //
+  // For performance tracking, this routine can be timed. 
+
+  Timer timer("Driver::writePlotFile(string)");
 
   // Output file
   EBAMRCellData output;
   EBAMRCellData scratch;
 
   // Names for output variables  
-  Vector<std::string> names(0);
+  Vector<std::string> plotVariableNames(0);
 
   // Get total number of components for output
   int ncomp = m_timeStepper->getNumberOfPlotVariables();
@@ -2002,18 +2042,20 @@ void Driver::writePlotFile(const std::string a_filename){
 
   // Assemble data
   int icomp = 0;             // Used as reference for output components
-  Real t_assemble = -Timer::wallClock();
+
+  timer.startEvent("Assemble data");
   if(m_verbosity >= 3){
     pout() << "Driver::writePlotFile - assembling data..." << endl;
   }
   
   // Time stepper writes its data
-  m_timeStepper->writePlotData(output, names, icomp);
+  m_timeStepper->writePlotData(output, plotVariableNames, icomp);
 
   // Cell tagger writes data
   if(!m_cellTagger.isNull()){
-    m_cellTagger->writePlotData(output, names, icomp);
+    m_cellTagger->writePlotData(output, plotVariableNames, icomp);
   }
+
 									       
   // Data file aliasing, because Chombo IO wants dumb pointers. 
   Vector<LevelData<EBCellFAB>* > output_ptr(1 + m_amr->getFinestLevel());
@@ -2044,25 +2086,23 @@ void Driver::writePlotFile(const std::string a_filename){
     }
   }
 
-
   // Write internal data
-  names.append(this->getPlotVariableNames());
+  plotVariableNames.append(this->getPlotVariableNames());
   this->writePlotData(output, icomp);
-  t_assemble += Timer::wallClock();
+  timer.stopEvent("Assemble data");  
 
-
-  // Write HDF5 file
-  if(m_verbosity >= 3){
-    pout() << "Driver::writePlotFile - writing plot file..." << endl;
-  }
-  Real t_write = -Timer::wallClock();
 
   // Write.
 #ifdef CH_USE_HDF5
+  if(m_verbosity >= 3){
+    pout() << "Driver::writePlotFile - writing plot file..." << endl;
+  }
+  
+  timer.startEvent("Write data");
   writeEBHDF5(a_filename, 
 	      m_amr->getGrids(m_realm),
 	      output_ptr,
-	      names, 
+	      plotVariableNames, 
 	      m_amr->getDomains()[0],
 	      m_amr->getDx()[0], 
 	      m_dt,
@@ -2072,37 +2112,33 @@ void Driver::writePlotFile(const std::string a_filename){
 	      false,
 	      Vector<Real>(),
 	      m_numPlotGhost*IntVect::Unit);
-  t_write += Timer::wallClock();
-
-  const Real t_tot = t_write + t_assemble;
-  if(m_verbosity >= 3){
-    pout() << "Driver::writePlotFile - writing plot file... DONE!. " << endl
-	   << "\t Total time    = " << t_tot << " seconds" << endl
-	   << "\t Assemble data = " << 100.*t_assemble/t_tot << "%" << endl
-	   << "\t Write time    = " << 100.*t_write/t_tot << "%" << endl;
-  }
+  timer.stopEvent("Write data");
 #endif
+  
+  if(m_verbosity >= 3){
+    timer.eventReport();
+  }
 }
 
 void Driver::writePlotData(EBAMRCellData& a_output, int& a_comp){
-  CH_TIME("Driver::writePlotData");
+  CH_TIME("Driver::writePlotData(EBAMRCellData, int)");
   if(m_verbosity > 3){
-    pout() << "Driver::writePlotData" << endl;
+    pout() << "Driver::writePlotData(EBAMRCellData, int)" << endl;
   }
 
-  if(m_plotTags)     writeTags(a_output, a_comp);
-  if(m_plotRanks)    writeRanks(a_output, a_comp);
-  if(m_plotLevelset) writeLevelset(a_output, a_comp);
+  if(m_plotTags)     this->writeTags(a_output, a_comp);
+  if(m_plotRanks)    this->writeRanks(a_output, a_comp);
+  if(m_plotLevelset) this->writeLevelset(a_output, a_comp);
 }
 
 void Driver::writeTags(EBAMRCellData& a_output, int& a_comp){
-  CH_TIME("Driver::writeTags");
+  CH_TIME("Driver::writeTags(EBAMRCellData, int)");
   if(m_verbosity > 3){
-    pout() << "Driver::writeTags" << endl;
+    pout() << "Driver::writeTags(EBAMRCellData, int)" << endl;
   }
-
   
-  // Alloc some temporary storage
+  // Need some scratch storage for the tags because DenseIntVectSet can't be written to file. We just run through
+  // the cells and set data == 1 if a cell had been flagged for refinement. 
   EBAMRCellData tags;
   m_amr->allocate(tags, m_realm, phase::gas, 1);
   DataOps::setValue(tags, 0.0);
@@ -2112,37 +2148,38 @@ void Driver::writeTags(EBAMRCellData& a_output, int& a_comp){
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
     const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, phase::gas)[lvl];
     
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
       const DenseIntVectSet& ivs = (*m_tags[lvl])[dit()];
-      const Box box              = dbl.get(dit());
+      const Box cellBox              = dbl[dit()];
 
       // Do regular cells only.
-      BaseFab<Real>& tags_fab = (*tags[lvl])[dit()].getSingleValuedFAB();
-      for (BoxIterator bit(box); bit.ok(); ++bit){
+      BaseFab<Real>& regTags = (*tags[lvl])[dit()].getSingleValuedFAB();
+      for (BoxIterator bit(cellBox); bit.ok(); ++bit){
 	const IntVect iv = bit();
 	if(ivs[iv]){
-	  tags_fab(iv, 0) = 1.0;
+	  regTags(iv, 0) = 1.0;
 	}
       }
     }
   }
 
-  DataOps::setCoveredValue(tags, 0, 0.0);
-
-  const Interval src_interv(0, 0);
-  const Interval dst_interv(a_comp, a_comp);
+  // Copy 'tags' over to 'a_output', starting on component a_comp. 
+  const Interval srcInterv(0, 0);
+  const Interval dstInterv(a_comp, a_comp);
+  
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    tags[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
+    tags[lvl]->localCopyTo(srcInterv, *a_output[lvl], dstInterv);
   }
 
   a_comp++;
 }
 
 void Driver::writeRanks(EBAMRCellData& a_output, int& a_comp){
-  CH_TIME("Driver::writeRanks");
+  CH_TIME("Driver::writeRanks(EBAMRCellData, int)");
   if(m_verbosity > 3){
-    pout() << "Driver::writeRanks" << endl;
+    pout() << "Driver::writeRanks(EBAMRCellData, int)" << endl;
   }
+
 
   for (const auto& r : m_amr->getRealms()){
     EBAMRCellData scratch;
@@ -2150,10 +2187,10 @@ void Driver::writeRanks(EBAMRCellData& a_output, int& a_comp){
 
     DataOps::setValue(scratch, 1.0*procID());
 
-    const Interval src(0,0);
-    const Interval dst(a_comp, a_comp);
+    const Interval scrInterv(0,0);
+    const Interval dstInterv(a_comp, a_comp);
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-      scratch[lvl]->copyTo(src, *a_output[lvl], dst);
+      scratch[lvl]->copyTo(scrInterv, *a_output[lvl], dstInterv);
     }
 
     a_comp++;
@@ -2161,32 +2198,29 @@ void Driver::writeRanks(EBAMRCellData& a_output, int& a_comp){
 }
 
 void Driver::writeLevelset(EBAMRCellData& a_output, int& a_comp){
-  CH_TIME("Driver::writeLevelset");
+  CH_TIME("Driver::writeLevelset(EBAMRCellData, int)");
   if(m_verbosity > 3){
-    pout() << "Driver::writeLevelset" << endl;
+    pout() << "Driver::writeLevelset(EBAMRCellData, int)" << endl;
   }
 
   const RefCountedPtr<BaseIF>& lsf1 = m_computationalGeometry->getGasImplicitFunction();
   const RefCountedPtr<BaseIF>& lsf2 = m_computationalGeometry->getSolidImplicitFunction();
 
-  const RealVect prob_lo = m_amr->getProbLo();
-
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(a_output.getRealm())[lvl];
-    const Real dx = m_amr->getDx()[lvl];
+    const Real dx                = m_amr->getDx()[lvl];
+    const RealVect probLo        = m_amr->getProbLo();    
     
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       FArrayBox& fab = (*a_output[lvl])[dit()].getFArrayBox();
 
-      fab.setVal(0.0, a_comp);
+      fab.setVal(0.0, a_comp  );
       fab.setVal(0.0, a_comp+1);
 
-      const Box box          = fab.box();
-
-      for (BoxIterator bit(box); bit.ok(); ++bit){
+      for (BoxIterator bit(fab.box()); bit.ok(); ++bit){
 	const IntVect iv = bit();
 	
-	const RealVect pos = prob_lo + (RealVect(iv)+ 0.5*RealVect::Unit)*dx;
+	const RealVect pos = probLo + (RealVect(iv)+ 0.5*RealVect::Unit)*dx;
 
 	if(!lsf1.isNull()) fab(iv, a_comp  ) = lsf1->value(pos);
 	if(!lsf2.isNull()) fab(iv, a_comp+1) = lsf2->value(pos);
@@ -2199,67 +2233,66 @@ void Driver::writeLevelset(EBAMRCellData& a_output, int& a_comp){
 
 
 void Driver::writeCheckpointFile(){
-  CH_TIME("Driver::writeCheckpointFile");
+  CH_TIME("Driver::writeCheckpointFile()");
   if(m_verbosity > 3){
-    pout() << "Driver::writeCheckpointFile" << endl;
+    pout() << "Driver::writeCheckpointFile()" << endl;
   }
 
 #ifdef CH_USE_HDF5  
-  
   const int finestLevel = m_amr->getFinestLevel();
-  int finest_chk_level  = Min(m_maxCheckpointDepth, finestLevel);
+  int finestCheckLevel  = Min(m_maxCheckpointDepth, finestLevel);
   if(m_maxCheckpointDepth < 0){
-    finest_chk_level = finestLevel;
+    finestCheckLevel = finestLevel;
   }
 
-  // Write header. 
+  // Write header containing time step information, grid resolution, etc. 
   HDF5HeaderData header;
   header.m_real["coarsest_dx"] = m_amr->getDx()[0];
   header.m_real["time"]        = m_time;
   header.m_real["dt"]          = m_dt;
   header.m_int["step"]         = m_timeStep;
-  header.m_int["finestLevel"] = finestLevel;
+  header.m_int["finestLevel"]  = finestLevel;
 
-  // Write Realm names.
+  // Write realm names -- these are needed because we also write computational loads to checkpoint files
+  // so we can load balance on immediately restart, using the checkpointed loads. 
   for (auto r : m_amr->getRealms()){
     header.m_string[r] = r;
   }
 
-  // Output file name
+  // Create the output file name. 
   char str[100];
   const std::string prefix = m_outputDirectory + "/chk/" + m_outputFileNames;
   sprintf(str, "%s.check%07d.%dd.hdf5", prefix.c_str(), m_timeStep, SpaceDim);
 
   // Output file
-  HDF5Handle handle_out(str, HDF5Handle::CREATE);
-  header.writeToFile(handle_out);
+  HDF5Handle handleOut(str, HDF5Handle::CREATE);
+  header.writeToFile(handleOut);
 
-  // Write stuff level by level
-  const Real t0 = Timer::wallClock();
+  Timer timer("Driver::writeCheckpointFile");  
   if(m_verbosity >= 3){
     pout() << "Driver::writeCheckpointFile - writing checkpoint file..." << endl;
+    timer.startEvent("Write data");    
   }
-  
-  for (int lvl = 0; lvl <= finest_chk_level; lvl++){
-    handle_out.setGroupToLevel(lvl);
 
-    // write amr grids
-    write(handle_out, m_amr->getGrids(m_realm)[lvl]); // write AMR grids
+  for (int lvl = 0; lvl <= finestCheckLevel; lvl++){
+    handleOut.setGroupToLevel(lvl);
 
-    // time stepper checkpoints data
-    m_timeStepper->writeCheckpointData(handle_out, lvl); 
+    // Write amr grids
+    write(handleOut, m_amr->getGrids(m_realm)[lvl]); // write AMR grids
 
-    // Driver checkpoints internal data
-    this->writeCheckpointLevel(handle_out, lvl); 
+    // Time stepper checkpoints solver data. 
+    m_timeStepper->writeCheckpointData(handleOut, lvl); 
+
+    // Driver checkpoints internal data. This involves the cell tags and the computational loads on the various realms. 
+    this->writeCheckpointLevel(handleOut, lvl); 
   }
-  const Real t1 = Timer::wallClock();
 
   if(m_verbosity >= 3){
-    pout() << "Driver::writeCheckpointFile - writing checkpoint file... DONE! " << endl
-	   << "\t Total time    = " << t1 - t0 << " seconds" << endl;
+    timer.stopEvent("Write data");    
+    timer.eventReport();
   }
   
-  handle_out.close();
+  handleOut.close();
 #endif  
 }
 

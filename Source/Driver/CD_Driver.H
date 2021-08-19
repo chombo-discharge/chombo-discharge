@@ -12,10 +12,6 @@
 #ifndef CD_Driver_H
 #define CD_Driver_H
 
-// Std includes
-#include <iostream>
-#include <fstream>
-
 // Chombo includes
 #include <RefCountedPtr.H>
 
@@ -83,15 +79,6 @@ public:
   void setup(const std::string a_inputFile, const int a_initialRegrids, const bool a_restart, const std::string a_restartFile);
 
 protected:
-
-  /*!
-    @brief Enum for how to print memory to std::cout (or pout)
-  */
-  enum class MemoryReportMode {
-    Total,
-    Unfreed,
-    Allocated
-  };
 
   /*!
     @brief Index space
@@ -362,8 +349,9 @@ protected:
 
   /*!
     @brief Set amr
+    @param[in] a_amrMesh AmrMesh
   */
-  void setAmr(const RefCountedPtr<AmrMesh>& a_amr);
+  void setAmr(const RefCountedPtr<AmrMesh>& a_amrMesh);
 
   /*!
     @brief Sanity check
@@ -372,11 +360,13 @@ protected:
 
   /*!
     @brief Parse options
+    @details Called at the beginning of the simulation. 
   */
   void parseOptions();
 
   /*!
     @brief Parse runtime options
+    @details Called every time step. 
   */
   void parseRuntimeOptions();
 
@@ -392,12 +382,14 @@ protected:
   void parsePlotVariables();
 
   /*!
-    @brief Parse option for geometry generation
+    @brief Parse option for geometry generation. 
+    @details This sets the geometry-generation load balancing method to either use Chombo or chombo-discharge. 
   */
   void parseGeometryGeneration();
 
   /*!
     @brief Parse irregular tag growth
+    @details This parses m_irregTagGrowth, which is used to grow cut-cell tags. 
   */
   void parseIrregTagGrowth();
 
@@ -557,28 +549,33 @@ protected:
 
   /*!
     @brief Write a plot file
+    @param[in] a_file File name
+    @details This can write an arbitrary folder. E.g. filename = /crash/abc.hdf5
+  */
+  void writePlotFile(const std::string a_filename);    
+
+  /*!
+    @brief Write a plot file. This writes to plt/
   */
   void writePlotFile();
 
   /*!
-    @brief Write a regrid file
+    @brief Write a regrid file.
+    @details This writes a regular plot file /regrid
   */
   void writeRegridFile();
 
   /*!
     @brief Write a restart file
+    @details This writes a regular plot file to /restart
   */
   void writeRestartFile();
 
   /*!
     @brief Write a crash file
+    @details This writes a regular plot file to /crash
   */
   void writeCrashFile();
-
-  /*!
-    @brief Write a plot file
-  */
-  void writePlotFile(const std::string a_filename);
 
   /*!
     @brief Write the memory usage to file
@@ -660,21 +657,34 @@ protected:
 
   /*!
     @brief Write internal plot data
+    @param[inout] a_output Output data holder
+    @param[inout] a_comp   Starting component
+    @details This will copy Driver's plot data into a_output, starting on component a_comp. 
   */
   void writePlotData(EBAMRCellData& a_output, int& a_comp);
 
   /*!
     @brief Write cell tags to file
+    @param[inout] a_output Output data holder
+    @param[inout] a_comp   Starting component
+    @details This will write cell tags data into a_output, starting on component a_comp. 
   */
   void writeTags(EBAMRCellData& a_output, int& a_comp);
 
   /*!
     @brief Write MPI ranks to output
+    @param[inout] a_output Output data holder
+    @param[inout] a_comp   Starting component
+    @details This adds data to a_output where the data in each grid patch is the MPI rank. 
   */
   void writeRanks(EBAMRCellData& a_output, int& a_comp);
 
   /*!
     @brief Write level sets
+    @param[inout] a_output Output data holder
+    @param[inout] a_comp   Starting component
+    @details This adds data to a_output where the cell-centered data is the level-set value. 
+    @note This writes directly to a_output.
   */
   void writeLevelset(EBAMRCellData& a_output, int& a_comp);
 

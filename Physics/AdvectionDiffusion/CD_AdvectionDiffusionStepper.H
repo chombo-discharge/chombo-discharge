@@ -92,9 +92,6 @@ namespace Physics {
       // Integrator (yes, I'm too lazy to write an enum for holding this)
       int m_integrator;
 
-      // Verbosity
-      int m_verbosity;
-
       void setVelocity();
       void setVelocity(const int a_level);
 
