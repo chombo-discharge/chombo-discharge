@@ -2568,48 +2568,4 @@ void Driver::readCheckpointRealmLoads(Vector<long int>& a_loads, HDF5Handle& a_h
 }
 #endif
 
-#ifdef CH_USE_HDF5
-void Driver::writeVectorData(HDF5HeaderData&     a_header,
-			     const Vector<Real>& a_data,
-			     const std::string   a_name,
-			     const int           a_elements){
-  CH_TIME("Driver::writeVectorData(HDF5HeaderData, Vector<Real)");
-  if(m_verbosity > 3){
-    pout() << "Driver::writeVectorData" << endl;
-  }
-
-  char step[100];
-
-  const int last = a_data.size() < a_elements ? a_data.size() : a_elements;
-  for (int i = 0; i < last; i++){
-    sprintf(step, "%07d", i);
-
-    const std::string identifier = a_name + std::string(step);
-    a_header.m_real[identifier] = a_data[i];
-  }
-}
-#endif
-
-#ifdef CH_USE_HDF5
-void Driver::readVectorData(HDF5HeaderData& a_header,
-			    Vector<Real>&         a_data,
-			    const std::string     a_name,
-			    const int             a_elements){
-  CH_TIME("Driver::readVectorData");
-  if(m_verbosity > 3){
-    pout() << "Driver::readVectorData" << endl;
-  }
-
-  char step[100];
-
-  const int last = a_data.size() < a_elements ? a_data.size() : a_elements;
-  for (int i = 0; i < last; i++){
-    sprintf(step, "%07d", i);
-
-    const std::string identifier = a_name + std::string(step);
-    a_data[i] = a_header.m_real[identifier];
-  }
-}
-#endif
-
 #include <CD_NamespaceFooter.H>

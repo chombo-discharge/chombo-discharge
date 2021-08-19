@@ -478,13 +478,6 @@ protected:
 #endif
 
   /*!
-    @brief Read vector data up to and including a_step
-  */
-#ifdef CH_USE_HDF5  
-  void readVectorData(HDF5HeaderData& a_header, Vector<Real>& a_data, const std::string a_name, const int a_elements);
-#endif
-
-  /*!
     @brief Do a regrid step. 
     @param[in] a_lmin           Coarsest level that is allowed to change during regrid
     @param[in] a_lmax           Finest level that can be generated during the regrid step. 
@@ -635,13 +628,6 @@ protected:
   */
 #ifdef CH_USE_HDF5        
   void readCheckpointRealmLoads(Vector<long int>& a_loads, HDF5Handle& a_handle, const std::string a_realm, const int a_level);
-#endif
-
-  /*!
-    @brief Write vector data to a HDF5Header. This writes up to a_step
-  */
-#ifdef CH_USE_HDF5  
-  void writeVectorData(HDF5HeaderData& a_header, const Vector<Real>& a_data, const std::string a_name, const int a_elem);
 #endif
 
   /*!
