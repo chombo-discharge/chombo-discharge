@@ -2299,12 +2299,12 @@ void Driver::writeCheckpointFile(){
 
 #ifdef CH_USE_HDF5
 void Driver::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level){
-  CH_TIME("Driver::writeCheckpointLevel");
+  CH_TIME("Driver::writeCheckpointLevel(HDF5Handle, int)");
   if(m_verbosity > 5){
-    pout() << "Driver::writeCheckpointLevel" << endl;
+    pout() << "Driver::writeCheckpointLevel(HDF5Handle, int)" << endl;
   }
 
-  this->writeCheckpointTags(a_handle, a_level);
+  this->writeCheckpointTags      (a_handle, a_level);
   this->writeCheckpointRealmLoads(a_handle, a_level);
 
 }
@@ -2312,12 +2312,14 @@ void Driver::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level){
 
 #ifdef CH_USE_HDF5
 void Driver::writeCheckpointTags(HDF5Handle& a_handle, const int a_level){
-  CH_TIME("Driver::writeCheckpointTags");
+  CH_TIME("Driver::writeCheckpointTags(HDF5Handle, int)");
   if(m_verbosity > 5){
-    pout() << "Driver::writeCheckpointTags" << endl;
+    pout() << "Driver::writeCheckpointTags(HDF5Handle, int)" << endl;
   }
 
-  // Create some scratch data = 0 which can grok
+  // We have a set of tags in DenseIntVect that we want to checkpoint. Chombo doesn't do I/O of IntVect
+  // so we create some mesh data on level a_lvl which we fill with grid tags. Then just checkpoint that file instead. 
+  
   EBCellFactory fact(m_amr->getEBISLayout(m_realm, phase::gas)[a_level]);
   LevelData<EBCellFAB> scratch(m_amr->getGrids(m_realm)[a_level], 1, 3*IntVect::Unit, fact);
   DataOps::setValue(scratch, 0.0);
@@ -2326,15 +2328,16 @@ void Driver::writeCheckpointTags(HDF5Handle& a_handle, const int a_level){
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
   const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, phase::gas)[a_level];
     
-  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-    const Box box = dbl.get(dit());
+  for (DataIterator dit(dbl); dit.ok(); ++dit){
+    const Box box = dbl[dit()];
+    
     const DenseIntVectSet& tags = (*m_tags[a_level])[dit()];
 
-    BaseFab<Real>& scratch_fab = scratch[dit()].getSingleValuedFAB();
+    BaseFab<Real>& fab = scratch[dit()].getSingleValuedFAB();
     for (BoxIterator bit(box); bit.ok(); ++bit){
       const IntVect iv = bit();
       if(tags[iv]){
-	scratch_fab(iv, 0) = 1.0;
+	fab(iv, 0) = 1.0;
       }
     }
 
@@ -2348,16 +2351,17 @@ void Driver::writeCheckpointTags(HDF5Handle& a_handle, const int a_level){
 
 #ifdef CH_USE_HDF5
 void Driver::writeCheckpointRealmLoads(HDF5Handle& a_handle, const int a_level){
-  CH_TIME("Driver::writeCheckpointRealmLoads");
+  CH_TIME("Driver::writeCheckpointRealmLoads(HDF5Handle, int)");
   if(m_verbosity > 5){
-    pout() << "Driver::writeCheckpointRealmLoads" << endl;
+    pout() << "Driver::writeCheckpointRealmLoads(HDF5Handle, int)" << endl;
   }
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
   const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, phase::gas)[a_level];
 
-  // Make some storage. 
-  LevelData<FArrayBox> scratch(dbl, 1, 3*IntVect::Unit);
+  // Make some storage and set the computational load to be the same in every patch. Later when
+  // we read the file we can just fetch the computational load from one of the cells.
+  LevelData<FArrayBox> scratch(dbl, 1, IntVect::Zero);
 
   // Get loads. 
   for (auto r : m_amr->getRealms()){
@@ -2379,12 +2383,12 @@ void Driver::writeCheckpointRealmLoads(HDF5Handle& a_handle, const int a_level){
 
 #ifdef CH_USE_HDF5
 void Driver::readCheckpointFile(const std::string& a_restartFile){
-  CH_TIME("Driver::readCheckpointFile");
+  CH_TIME("Driver::readCheckpointFile(string)");
   if(m_verbosity > 3){
-    pout() << "Driver::readCheckpointFile" << endl;
+    pout() << "Driver::readCheckpointFile(string)" << endl;
   }
 
-  // Time stepper can register Realms immediately. 
+  // Time stepper can register realms immediately. 
   m_timeStepper->registerRealms();
 
   // Read the header that was written by new_readCheckpointFile
@@ -2394,39 +2398,41 @@ void Driver::readCheckpointFile(const std::string& a_restartFile){
 
   m_time        = header.m_real["time"];
   m_dt          = header.m_real["dt"];
-  m_timeStep        = header.m_int["step"];
+  m_timeStep    = header.m_int["step"];
 
-  const Real coarsest_dx = header.m_real["coarsest_dx"];
-  const int base_level   = 0;
-  const int finestLevel = header.m_int["finestLevel"];
+  const Real coarsestDx  = header.m_real["coarsest_dx"];
+  const int  baseLevel   = 0;
+  const int  finestLevel = header.m_int["finestLevel"];
 
-  // Get the names of the Realms that were checkpointed. This is a part of the HDF header. 
-  std::map<std::string, Vector<Vector<long int > > > chk_loads;
+  // Get the names of the realms that were checkpointed. This is a part of the HDF header. 
+  std::map<std::string, Vector<Vector<long int > > > checkpointedLoads;
   for (auto s : header.m_string){
-    chk_loads.emplace(s.second, Vector<Vector<long int> >());
+    checkpointedLoads.emplace(s.second, Vector<Vector<long int> >());
   }
 
-  // Get then names of the Realms that will be used for simulations.
-  std::map<std::string, Vector<Vector<long int > > > sim_loads;
+  // Get then names of the realms that will be used for simulations. These are not necessarily the same because users
+  // can restart with a different number of realms. If the user uses a new realm, the computational load is taken as
+  // the primal realm load, i.e. volume-based. 
+  std::map<std::string, Vector<Vector<long int > > > simulationLoads;
   for (const auto& iRealm : m_amr->getRealms()){
-    sim_loads.emplace(iRealm, Vector<Vector<long int> >());
+    simulationLoads.emplace(iRealm, Vector<Vector<long int> >());
   }
 
   // Print checkpointed Realm names. 
   if(m_verbosity > 2){
     pout() << "Driver::readCheckpointFile - checked Realms are: ";
-    for (auto r : chk_loads){
+    for (auto r : checkpointedLoads){
       pout() << '"' << r.first << '"' << "\t";
     }
     pout() << endl;
   }
 
   // Abort if base resolution has changed. 
-  if(!coarsest_dx == m_amr->getDx()[0]){
-    MayDay::Abort("Driver::readCheckpointFile - coarsest_dx != dx[0], did you change the base level resolution?!?");
+  if(!coarsestDx == m_amr->getDx()[0]){
+    MayDay::Error("Driver::readCheckpointFile - coarsestDx != dx[0], did you change the base level resolution when restarting?!?");
   }
 
-  // Read in grids. If the file has no grids we must abort. 
+  // Read in grids. If the file has no grids then something has gone wrong. 
   Vector<Vector<Box> > boxes(1 + finestLevel);
   for (int lvl = 0; lvl <= finestLevel; lvl++){
     handle_in.setGroupToLevel(lvl);
@@ -2439,57 +2445,46 @@ void Driver::readCheckpointFile(const std::string& a_restartFile){
   }
 
   // Read in the computational loads from the HDF5 file. 
-  for (auto& r : chk_loads){
-    const std::string& Realm_name = r.first;
-    Vector<Vector<long int> >& Realm_loads = r.second;
+  for (auto& r : checkpointedLoads){
+    const std::string&         realmName  = r.first;
+    Vector<Vector<long int> >& realmLoads = r.second;
 
-    Realm_loads.resize(1 + finestLevel);
+    realmLoads.resize(1 + finestLevel);
     for (int lvl = 0; lvl <= finestLevel; lvl++){
-      Realm_loads[lvl].resize(boxes[lvl].size(), 0L);
+      realmLoads[lvl].resize(boxes[lvl].size(), 0L);
 
-      this->readCheckpointRealmLoads(Realm_loads[lvl], handle_in, Realm_name, lvl);
+      this->readCheckpointRealmLoads(realmLoads[lvl], handle_in, realmName, lvl);
     }
   }
 
+  // In case we restart with more or fewer realms, we need to decide how to assign the computational loads. If the realm was a new realm we may
+  // not have the computational loads for that. in that case we take the computational loads from the primal realm which we know is always there. 
+  for (auto& s : simulationLoads){
 
-  // In case we restart with more or fewer Realms, we need to decide how to assign the computational loads. If the Realm was a new Realm we may
-  // not have the computational loads for that. In that case we take the computational loads from the primal Realm. 
-  for (auto& s : sim_loads){
+    const std::string&         curRealm = s.first;
+    Vector<Vector<long int> >& curLoads = s.second;
 
-    const std::string&         cur_Realm = s.first;
-    Vector<Vector<long int> >& cur_loads = s.second;
-
-#if 0 // Original code
-    for (const auto& c : chk_loads){
-      if(cur_Realm == c.first){
-	cur_loads = c.second;
-      }
-      else{
-	cur_loads = chk_loads.at(Realm::Primal);
-      }
-    }
-#else
-
-    bool found_checked_loads = false;
-    for (const auto& c : chk_loads){
-      if(cur_Realm == c.first){
-	found_checked_loads = true;
+    // For every realm in the restarted simulation, check if there was an equivalent checkpointed realm. If there was,
+    // fetch the loads from that realm. 
+    bool foundCheckedLoads = false;
+    for (const auto& c : checkpointedLoads){
+      if(curRealm == c.first){
+	foundCheckedLoads = true;
       }
     }
 
-    cur_loads = (found_checked_loads) ? chk_loads.at(cur_Realm) : chk_loads.at(Realm::Primal);
-#endif
+    curLoads = (foundCheckedLoads) ? checkpointedLoads.at(curRealm) : checkpointedLoads.at(Realm::Primal);
   }
 
   // Define AmrMesh and Realms. 
   m_amr->setFinestLevel(finestLevel); 
-  m_amr->setGrids(boxes, sim_loads);
+  m_amr->setGrids(boxes, simulationLoads);
   
   // Instantiate solvers and register operators
   m_timeStepper->setupSolvers();
   m_timeStepper->registerOperators();
   m_timeStepper->synchronizeSolverTimes(m_timeStep, m_time, m_dt);  
-  m_amr->regridOperators(base_level);
+  m_amr->regridOperators(baseLevel);
   m_timeStepper->allocate();
 
   // Allocate internal stuff (e.g. space for tags)
@@ -2499,7 +2494,7 @@ void Driver::readCheckpointFile(const std::string& a_restartFile){
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     handle_in.setGroupToLevel(lvl);
 
-    // time stepper reads in data
+    // Time stepper reads in data
     m_timeStepper->readCheckpointData(handle_in, lvl);
 
     // Read in internal data
@@ -2513,23 +2508,23 @@ void Driver::readCheckpointFile(const std::string& a_restartFile){
 
 #ifdef CH_USE_HDF5
 void Driver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
-  CH_TIME("Driver::readCheckpointLevel");
+  CH_TIME("Driver::readCheckpointLevel(HDF5Handle, int)");
   if(m_verbosity > 5){
-    pout() << "Driver::readCheckpointLevel" << endl;
+    pout() << "Driver::readCheckpointLevel(HDF5Handle, int)" << endl;
   }
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
   const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, phase::gas)[a_level];
 
   // Some scratch data we can use
-  EBCellFactory fact(ebisl);
-  LevelData<EBCellFAB> scratch(dbl, 1, 3*IntVect::Unit, fact);
+  LevelData<EBCellFAB> scratch(dbl, 1, IntVect::Zero, EBCellFactory(ebisl));
   DataOps::setValue(scratch, 0.0);
 
   // Read in tags
   read<EBCellFAB>(a_handle, scratch, "tagged_cells", dbl, Interval(0,0), false);
 
-  // Instantiate m_tags
+  // Instantiate m_tags. When we wrote the tags we put a floating point value of 0 where we didn't have tags
+  // and a floating point value of 1 where we had. 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     const Box box          = dbl.get(dit());
     const EBCellFAB& tmp   = scratch[dit()];
@@ -2537,13 +2532,13 @@ void Driver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
     const EBGraph& ebgraph = ebisbox.getEBGraph();
     const IntVectSet ivs(box);
 
-    DenseIntVectSet& tagged_cells = (*m_tags[a_level])[dit()];
+    DenseIntVectSet& taggedCells = (*m_tags[a_level])[dit()];
 
-    BaseFab<Real>& scratch_fab = scratch[dit()].getSingleValuedFAB();
+    BaseFab<Real>& fab = scratch[dit()].getSingleValuedFAB();
     for (BoxIterator bit(box); bit.ok(); ++bit){
       const IntVect iv = bit();
-      if(scratch_fab(iv, 0) > 0.9999){
-	tagged_cells |= iv;
+      if(fab(iv, 0) > 0.9999){
+	taggedCells |= iv;
       }
     }
   }
@@ -2552,12 +2547,15 @@ void Driver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
 
 #ifdef CH_USE_HDF5
 void Driver::readCheckpointRealmLoads(Vector<long int>& a_loads, HDF5Handle& a_handle, const std::string a_realm, const int a_level){
-  CH_TIME("Driver::readCheckpointRealmLoads(...)");
+  CH_TIME("Driver::readCheckpointRealmLoads(Vector<long int>, HDF5Handle, string, int)");
   if(m_verbosity > 5){
-    pout() << "Driver::readCheckpointRealmLoads(...)" << endl;
+    pout() << "Driver::readCheckpointRealmLoads((Vector<long int>, HDF5Handle, string, int))" << endl;
   }
 
-  // HDF identifier.
+  // This reads computational loads from a file. When we wrote them we set the load in each grid patch, so we can just fetch using
+  // FArrayBox::max() function for getting it. 
+
+  // Identifier in HDF5 file. 
   const std::string str = a_realm + "_loads";
 
   // Read into an FArrayBox.
@@ -2575,7 +2573,7 @@ void Driver::writeVectorData(HDF5HeaderData&     a_header,
 			     const Vector<Real>& a_data,
 			     const std::string   a_name,
 			     const int           a_elements){
-  CH_TIME("Driver::writeVectorData");
+  CH_TIME("Driver::writeVectorData(HDF5HeaderData, Vector<Real)");
   if(m_verbosity > 3){
     pout() << "Driver::writeVectorData" << endl;
   }

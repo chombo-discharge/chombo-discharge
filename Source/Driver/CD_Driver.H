@@ -467,10 +467,13 @@ protected:
   */
   Vector<std::string> numberFmt(const Vector<long long> a_numbers, char a_sep = ',') const;
 
+
+#ifdef CH_USE_HDF5
   /*!
     @brief Read checkpoint file
-  */
-#ifdef CH_USE_HDF5  
+    @details This will read grids and computational loads from an HDF5 file and restart the simulation from that. 
+    @param[in] a_restartFile Which file to read
+  */  
   void readCheckpointFile(const std::string& a_restartFile);
 #endif
 
@@ -591,25 +594,32 @@ protected:
     @brief Write a checkpoint file
   */
   void writeCheckpointFile();
-  
-  /*!
-    @brief Write checkpoint data
-  */
+
 #ifdef CH_USE_HDF5
+  /*!
+    @brief Write checkpoint data. 
+    @param[in] a_handle HDF5 file
+    @param[in] a_level  Grid level
+    @details This will call writeCheckpointTags and writeCheckpointRealmLoads
+  */  
   void writeCheckpointLevel(HDF5Handle& a_handle, const int a_level);
 #endif
   
+#ifdef CH_USE_HDF5
   /*!
-    @brief Write tags
-  */
-#ifdef CH_USE_HDF5  
+    @brief Write tags to checkpoint file
+    @param[in] a_handle HDF5 file
+    @param[in] a_level  Grid level
+  */  
   void writeCheckpointTags(HDF5Handle& a_handle, const int a_level);
 #endif
 
+#ifdef CH_USE_HDF5
   /*!
-    @brief Write checkpoint Realm loads
-  */
-#ifdef CH_USE_HDF5    
+    @brief Write computational loads to checkpoint file
+    @param[in] a_handle HDF5 file
+    @param[in] a_level  Grid level
+  */  
   void writeCheckpointRealmLoads(HDF5Handle& a_handle, const int a_level);
 #endif
 
