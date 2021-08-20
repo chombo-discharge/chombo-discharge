@@ -1,6 +1,6 @@
 # ====================================================================================================
-# CDR_GDNV SOLVER SETTINGS
-# ----------------------------------------------------------------------------------------------------
+# CdrGodunov solver settings
+# ====================================================================================================
 CdrGodunov.seed                  = -1                      # Seed. Random seed with seed < 0
 CdrGodunov.bc.x.lo               = wall                    # 'data', 'function', 'wall', or 'outflow'
 CdrGodunov.bc.x.hi               = wall                    # 'data', 'function', 'wall', or 'outflow'
@@ -10,7 +10,7 @@ CdrGodunov.bc.z.lo               = wall                    # 'data', 'function',
 CdrGodunov.bc.z.hi               = wall                    # 'data', 'function', 'wall', or 'outflow'
 CdrGodunov.limit_slopes          = true                    # Use slope-limiters for godunov
 CdrGodunov.plt_vars              = phi vel src dco ebflux  # Plot variables. Options are 'phi', 'vel', 'dco', 'src'
-CdrGodunov.extrapolateSourceTerm = true                    # Flag for including source term for time-extrapolation
+CdrGodunov.extrap_source         = false                   # Flag for including source term for time-extrapolation
 CdrGodunov.plot_mode             = density                 # Plot densities 'density' or particle numbers ('numbers')
 CdrGodunov.blend_conservation    = true                    # Turn on/off blending with nonconservative divergenceo
 CdrGodunov.redist_mass_weighted  = false                   # Mass weighted redistribution or not
@@ -24,6 +24,5 @@ CdrGodunov.gmg_exit_tol          = 1.E-8                   # Residue tolerance
 CdrGodunov.gmg_exit_hang         = 0.2                     # Solver hang
 CdrGodunov.gmg_min_cells         = 2                       # Bottom drop
 CdrGodunov.gmg_bottom_solver     = bicgstab                # Bottom solver type. Valid options are 'simple' and 'bicgstab'
-CdrGodunov.gmg_bottom_relax      = 8                       # Number of relaxations in bottom solve ('simple' solver only)
 CdrGodunov.gmg_cycle             = vcycle                  # Cycle type. Only 'vcycle' supported for now
 CdrGodunov.gmg_smoother          = red_black               # Relaxation type. 'jacobi', 'multi_color', or 'red_black'

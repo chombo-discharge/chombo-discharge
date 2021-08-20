@@ -25,122 +25,154 @@
 #include <CD_MemoryReport.H>
 #include <CD_NamespaceHeader.H>
 
-#if CH_USE_DOUBLE
-Real ComputationalGeometry::s_thresh = 1.E-15;
-#elif CH_USE_FLOAT
-Real ComputationalGeometry::s_thresh = 1.E-6;
-#endif
-
-bool          ComputationalGeometry::s_use_new_gshop = false;
-ProblemDomain ComputationalGeometry::s_ScanDomain = ProblemDomain(); // Needs to be set
 
 ComputationalGeometry::ComputationalGeometry(){
+  CH_TIME("ComputationalGeometry::ComputationalGeometry()");
+  
+  // Default parameters. 
   m_eps0 = 1.0;
-  m_electrodes.resize(0);
+  
+  m_electrodes. resize(0);
   m_dielectrics.resize(0);
+
+  m_useScanShop = false;
+  m_scanDomain  = ProblemDomain();
   
   m_multifluidIndexSpace = RefCountedPtr<MultiFluidIndexSpace> (new MultiFluidIndexSpace());
 }
 
-ComputationalGeometry::~ComputationalGeometry(){}
+ComputationalGeometry::~ComputationalGeometry(){
+  CH_TIME("ComputationalGeometry::~ComputationalGeometry()");
+}
+
+void ComputationalGeometry::useScanShop(const ProblemDomain a_beginDomain){
+  CH_TIME("ComputationalGeometry::useScanShop(ProblemDomain)");
+
+  // TLDR: If you called this function you signal that ComputationalGeometry will use ScanShop for geometry generation.
+  
+  m_useScanShop = true;
+  m_scanDomain  = a_beginDomain;
+}
+
+void ComputationalGeometry::useChomboShop(){
+  CH_TIME("ComputationalGeometry::useChomboShop()");
+
+  // TLDR: If you called this function you signal that ComputationalGeometry will use Chombo's GeometryShop for geometry generation.
+  m_useScanShop = false;
+  m_scanDomain  = ProblemDomain();
+}
 
 const Vector<Dielectric>& ComputationalGeometry::getDielectrics() const  {
-  return m_dielectrics;
+  CH_TIME("ComputationalGeometry::getDielectrics()");
+  
+  return (m_dielectrics);
 }
 
 const Vector<Electrode>& ComputationalGeometry::getElectrodes() const  {
-  return m_electrodes;
+  CH_TIME("ComputationalGeometry::getElectrodes()");
+  
+  return (m_electrodes);
 }
 
 const RefCountedPtr<BaseIF>& ComputationalGeometry::getGasImplicitFunction() const{
-  return m_gas_if;
+  CH_TIME("ComputationalGeometry::getGasImplicitFunction()");
+  
+  return (m_implicitFunctionGas);
 }
 
 const RefCountedPtr<BaseIF>& ComputationalGeometry::getSolidImplicitFunction() const{
-  return m_sol_if;
+  CH_TIME("ComputationalGeometry::getSolidImplicitFunction()");
+  
+  return (m_implicitFunctionSolid);
 }
 
 const RefCountedPtr<BaseIF>& ComputationalGeometry::getImplicitFunction(const phase::which_phase a_phase) const {
+  CH_TIME("ComputationalGeometry::getImplicitFunction(phase::which_phase)");
+
   if(a_phase == phase::gas){
-    return m_gas_if;
+    return m_implicitFunctionGas;
   }
   else if(a_phase == phase::solid){
-    return m_sol_if;
+    return m_implicitFunctionSolid;
   }
 }
 
-const Real& ComputationalGeometry::getGasPermittivity() const {
-  return m_eps0;
+Real ComputationalGeometry::getGasPermittivity() const {
+  CH_TIME("ComputationalGeometry::getGasPermittivity()");
+  
+  return (m_eps0);
 }
 
 const RefCountedPtr<MultiFluidIndexSpace>& ComputationalGeometry::getMfIndexSpace() const {
-  return m_multifluidIndexSpace;
+  CH_TIME("ComputationalGeometry::getMfIndexSpace()");
+  
+  return (m_multifluidIndexSpace);
 }
 
-void ComputationalGeometry::setDielectrics(Vector<Dielectric>& a_dielectrics){
+void ComputationalGeometry::setDielectrics(const Vector<Dielectric>& a_dielectrics){
+  CH_TIME("ComputationalGeometry::setDielectrics(Vector<Dielectric>)");
+  
   m_dielectrics = a_dielectrics;
 }
 
-void ComputationalGeometry::setElectrodes(Vector<Electrode>& a_electrodes){
+void ComputationalGeometry::setElectrodes(const Vector<Electrode>& a_electrodes){
+  CH_TIME("ComputationalGeometry::setElectrodes(Vector<Electrode>)");
+  
   m_electrodes = a_electrodes;
 }
 
 void ComputationalGeometry::setGasPermittivity(const Real a_eps0){
+  CH_TIME("ComputationalGeometry::setGasPermittivity(Real)");
+  
   m_eps0 = a_eps0;
 }
 
 void ComputationalGeometry::buildGeometries(const ProblemDomain   a_finestDomain,
-					    const RealVect        a_origin,
+					    const RealVect        a_probLo,
 					    const Real            a_finestDx,
 					    const int             a_nCellMax,
+					    const int             a_maxGhostEB,
 					    const int             a_maxCoarsen){
+  CH_TIME("ComputationalGeometry::buildGeometries(ProblemDomain, RealVect, Real, int, int, int)");  
 
-  // Build geoservers
-  Vector<GeometryService*> geoservers(2, NULL);
-  this->buildGasGeoServ(geoservers[phase::gas],     a_finestDomain, a_origin, a_finestDx);
-  this->buildSolidGeoServ(geoservers[phase::solid], a_finestDomain, a_origin, a_finestDx);
+  // Set the default maximum number of EB ghosts that we will ever use. This is needed because ScanShop will look
+  // through grown grid patches when it determines if a grid patch is irregular or not. 
+  m_maxGhostEB = a_maxGhostEB;
+  
+  // Build the geoservers. This creates the composite implicit functions and the GeometryService* objects which
+  // can be passed to Chombo. Note that the 
+  Vector<GeometryService*> geoServices(2, nullptr);
+  
+  this->buildGasGeometry  (geoServices[phase::gas],   a_finestDomain, a_probLo, a_finestDx);
+  this->buildSolidGeometry(geoServices[phase::solid], a_finestDomain, a_probLo, a_finestDx);
 
+  // Define the multifluid index space.
+  const bool useDistributedData = m_useScanShop;
+  
   m_multifluidIndexSpace->define(a_finestDomain.domainBox(), // Define MF
-				 a_origin,
+				 a_probLo,
 				 a_finestDx,
-				 geoservers,
+				 geoServices,
+				 useDistributedData,
 				 a_nCellMax,
 				 a_maxCoarsen);
 
+  // Delete temps. 
   for (int i = 0; i < 2; i++){
-    if(geoservers[i] != NULL){
-      delete geoservers[i];
+    if(geoServices[i] != nullptr){
+      delete geoServices[i];
     }
   }
 }
 
-void ComputationalGeometry::buildGeometriesFromFiles(const std::string&   a_gas_file,
-						     const std::string&   a_sol_file){
-
-  RefCountedPtr<EBIndexSpace>& ebis_gas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
-  RefCountedPtr<EBIndexSpace>& ebis_sol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
-
-  // Define gas phase
-  HDF5Handle gas_handle(a_gas_file.c_str(), HDF5Handle::OPEN_RDONLY);
-  ebis_gas->define(gas_handle);
-  gas_handle.close();
-
-  if(m_dielectrics.size() > 0){
-    HDF5Handle sol_handle(a_sol_file.c_str(), HDF5Handle::OPEN_RDONLY);
-    ebis_sol->define(sol_handle);
-    sol_handle.close();
-  }
-  else {
-    ebis_sol = RefCountedPtr<EBIndexSpace> (NULL);
-  }
-}
-
-void ComputationalGeometry::buildGasGeoServ(GeometryService*&   a_geoserver,
-					    const ProblemDomain a_finestDomain,
-					    const RealVect      a_origin,
-					    const Real          a_dx){
+void ComputationalGeometry::buildGasGeometry(GeometryService*&   a_geoserver,
+					     const ProblemDomain a_finestDomain,
+					     const RealVect      a_probLo,
+					     const Real          a_finestDx){
+  CH_TIME("ComputationalGeometry::buildGasGeometry(GeometryService, ProblemDomain, RealVect, Real)");
   
-  // The gas ebis is the intersection of electrodes and dielectrics
+  // The gas phase is the intersection of the region outside every object, so IntersectionIF is correct here. We build the
+  // various parts and then create the implicit function for the gas-phas using constructive solid geometry.
   Vector<BaseIF*> parts;
   for (int i = 0; i < m_dielectrics.size(); i++){
     parts.push_back(&(*(m_dielectrics[i].getImplicitFunction())));
@@ -149,165 +181,78 @@ void ComputationalGeometry::buildGasGeoServ(GeometryService*&   a_geoserver,
     parts.push_back(&(*(m_electrodes[i].getImplicitFunction())));
   }
 
-  // Create geoshop; either all regular or an intersection
-  // if(parts.size() == 0){ 
-  //   a_geoserver = new AllRegularService();
-  // }
-  // else {
-  m_gas_if = RefCountedPtr<BaseIF> (new IntersectionIF(parts));
-  if(s_use_new_gshop){
-    a_geoserver = static_cast<GeometryService*> (new ScanShop(*m_gas_if,
+  m_implicitFunctionGas = RefCountedPtr<BaseIF> (new IntersectionIF(parts));
+
+  // Build the EBIS geometry. Use either ScanShop or Chombo here. 
+  if(m_useScanShop){
+    a_geoserver = static_cast<GeometryService*> (new ScanShop(*m_implicitFunctionGas,
 							      0,
-							      a_dx,
-							      a_origin,
+							      a_finestDx,
+							      a_probLo,
 							      a_finestDomain,
-							      s_ScanDomain,
+							      m_scanDomain,
+							      m_maxGhostEB,
 							      s_thresh));
   }
   else{ // Chombo geometry generation
-    a_geoserver = static_cast<GeometryService*> (new GeometryShop(*m_gas_if, 0, a_dx*RealVect::Unit, s_thresh));
+    a_geoserver = static_cast<GeometryService*> (new GeometryShop(*m_implicitFunctionGas, 0, a_finestDx*RealVect::Unit, s_thresh));
   }
-  //  }
 }
 
-void ComputationalGeometry::buildSolidGeoServ(GeometryService*&   a_geoserver,
+void ComputationalGeometry::buildSolidGeometry(GeometryService*&   a_geoserver,
 					      const ProblemDomain a_finestDomain,
-					      const RealVect      a_origin,
-					      const Real          a_dx){
+					      const RealVect      a_probLo,
+					      const Real          a_finestDx){
+  CH_TIME("ComputationalGeometry::buildSolidGeometry(GeometryService, ProblemDomain, RealVect, Real)");  
+  
+  // The "solid phase", i.e. the part inside dielectrics is a bit more complicated to compute. We want to get the region
+  // outside the electrodes but inside the dielectrics. Fortunately there is a way to do this.
 
-  // The gas ebis is the intersection of dielectrics
-  Vector<BaseIF*> parts_dielectrics, parts_electrodes;
+  // Get all the parts (dielectrics/electrodes)
+  Vector<BaseIF*> dielectricParts;
+  Vector<BaseIF*> electrodeParts;
+  
   for (int i = 0; i < m_dielectrics.size(); i++){
-    parts_dielectrics.push_back(&(*m_dielectrics[i].getImplicitFunction()));
+    dielectricParts.push_back(&(*m_dielectrics[i].getImplicitFunction()));
   }
+  
   for (int i = 0; i < m_electrodes.size(); i++){
-    parts_electrodes.push_back(&(*m_electrodes[i].getImplicitFunction()));
+    electrodeParts.push_back(&(*m_electrodes[i].getImplicitFunction()));
   }
 
   // Create EBIndexSpace. If there are no solid phases, return null
-  if(parts_dielectrics.size() == 0){
-    a_geoserver = NULL;
+  if(dielectricParts.size() == 0){
+    a_geoserver = nullptr;
   }
   else {
     Vector<BaseIF*> parts;
 
-    RefCountedPtr<BaseIF> diel_baseif = RefCountedPtr<BaseIF> (new IntersectionIF(parts_dielectrics)); // Gas outside dielectric
-    RefCountedPtr<BaseIF> elec_baseif = RefCountedPtr<BaseIF> (new IntersectionIF(parts_electrodes));  // Gas outside electrodes
-    RefCountedPtr<BaseIF> diel_compif = RefCountedPtr<BaseIF> (new ComplementIF(*diel_baseif));        // Inside of dielectrics
+    RefCountedPtr<BaseIF> dielBaseIF = RefCountedPtr<BaseIF> (new IntersectionIF(dielectricParts)); // This gives the region outside the dielectrics. 
+    RefCountedPtr<BaseIF> elecBaseIF = RefCountedPtr<BaseIF> (new IntersectionIF(electrodeParts )); // This is the region outside the the electrodes. 
+    RefCountedPtr<BaseIF> dielCompIF = RefCountedPtr<BaseIF> (new ComplementIF  (*dielBaseIF   ));  // This is the region inside the dielectrics. 
 
-    parts.push_back(&(*diel_compif)); // Parts for intersection
-    parts.push_back(&(*elec_baseif)); // Parts for intersection
+    // We want the function which is the region inside the dielectrics and outside the electrodes, i.e. the intersection of the region "inside"
+    // dielectrics and outside the electrods. 
+    parts.push_back(&(*dielCompIF)); 
+    parts.push_back(&(*elecBaseIF)); 
     
-    m_sol_if = RefCountedPtr<BaseIF> (new IntersectionIF(parts)); 
+    m_implicitFunctionSolid = RefCountedPtr<BaseIF> (new IntersectionIF(parts)); 
 
-    if(s_use_new_gshop){
-      a_geoserver = static_cast<GeometryService*> (new ScanShop(*m_sol_if,
+    // Build the EBIS geometry. Use either ScanShop or Chombo here. 
+    if(m_useScanShop){
+      a_geoserver = static_cast<GeometryService*> (new ScanShop(*m_implicitFunctionSolid,
 								0,
-								a_dx,
-								a_origin,
+								a_finestDx,
+								a_probLo,
 								a_finestDomain,
-								s_ScanDomain,
+								m_scanDomain,
+								m_maxGhostEB,
 								s_thresh));
     }
     else{ // Chombo geometry generation
-      a_geoserver = static_cast<GeometryService*> (new GeometryShop(*m_sol_if, 0, a_dx*RealVect::Unit, s_thresh));
+      a_geoserver = static_cast<GeometryService*> (new GeometryShop(*m_implicitFunctionSolid, 0, a_finestDx*RealVect::Unit, s_thresh));
     }
   }
 }
-
-std::pair<Real, Real> ComputationalGeometry::getPrincipalCurvatures(const phase::which_phase a_phase, const RealVect a_pos, const Real a_dx) const {
-
-  const RefCountedPtr<BaseIF>& impFunc = (a_phase == phase::gas) ? m_gas_if : m_sol_if;
-
-  std::pair<Real, Real> ret;
-#if CH_SPACEDIM==2
-  const Real curv = this->curvature2D(impFunc, a_pos, a_dx);
-  ret = std::make_pair(curv, curv);
-#elif CH_SPACEDIM==3
-  ret = this->curvature3D(impFunc, a_pos, a_dx);
-#endif
-
-  return ret;
-}
-
-#if CH_SPACEDIM==2
-Real ComputationalGeometry::curvature2D(const RefCountedPtr<BaseIF>& a_F, const RealVect a_pos, const Real a_diffDx) const {
-  const Real dx      = a_diffDx;
-
-  // Points for centered differences
-  const RealVect x0  = a_pos;
-  const RealVect xLo = x0 - a_diffDx*BASISREALV(0);
-  const RealVect xHi = x0 + a_diffDx*BASISREALV(0);
-  const RealVect yLo = x0 - a_diffDx*BASISREALV(1);
-  const RealVect yHi = x0 + a_diffDx*BASISREALV(1);
-
-  // Points for mixed derivatives
-  const RealVect xll = x0 - a_diffDx*BASISREALV(0) - a_diffDx*BASISREALV(1);
-  const RealVect xhh = x0 + a_diffDx*BASISREALV(0) + a_diffDx*BASISREALV(1);
-  const RealVect xlh = x0 - a_diffDx*BASISREALV(0) + a_diffDx*BASISREALV(1);
-  const RealVect xhl = x0 + a_diffDx*BASISREALV(0) - a_diffDx*BASISREALV(1);
-
-  // Derivs to O(dx^2)
-  const Real Fx  = (a_F->value(xHi) - a_F->value(xLo))/(2*dx);
-  const Real Fy  = (a_F->value(yHi) - a_F->value(yLo))/(2*dx);
-
-  // Second derivs to O(dx^2)
-  const Real Fxx = (a_F->value(xHi) - 2*a_F->value(x0) + a_F->value(xLo))/(dx*dx);
-  const Real Fyy = (a_F->value(yHi) - 2*a_F->value(x0) + a_F->value(yLo))/(dx*dx);
-
-  // Mixed deriv to O(dx^2)
-  const Real Fxy = (a_F->value(xll) + a_F->value(xhh) - a_F->value(xlh) - a_F->value(xhl))/(4.*dx*dx);
-
-  const Real curv = (-Fy*Fy*Fxx + 2*Fx*Fy*Fxy - Fx*Fx*Fyy)/std::pow(Fx*Fx + Fy*Fy, 3./2.);
-
-  return curv;
-}
-#endif
-
-#if CH_SPACEDIM==3
-std::pair<Real, Real> ComputationalGeometry::curvature3D(const RefCountedPtr<BaseIF>& a_impFunc, const RealVect a_pos, const Real a_diffDx) const {
-
-  // Some shortcuts
-  auto phi = [a_impFunc](const RealVect x) -> Real {
-    return a_impFunc->value(x);
-  };
-
-  const Real d      = a_diffDx;
-  const RealVect  x = a_pos;
-  const RealVect dx = a_diffDx*BASISREALV(0);
-  const RealVect dy = a_diffDx*BASISREALV(1);
-  const RealVect dz = a_diffDx*BASISREALV(2);
-
-  // Gradient terms to O(dx^2)
-  const Real Fx = (phi(x + dx) - phi(x-dx))/(2*d);
-  const Real Fy = (phi(x + dy) - phi(x-dy))/(2*d);
-  const Real Fz = (phi(x + dz) - phi(x-dz))/(2*d);
-
-  // Second order derivs to O(dx^2)
-  const Real Fxx = (phi(x + dx) - 2*phi(x) + phi(x-dx))/(d*d);
-  const Real Fyy = (phi(x + dy) - 2*phi(x) + phi(x-dy))/(d*d);
-  const Real Fzz = (phi(x + dz) - 2*phi(x) + phi(x-dz))/(d*d);
-
-  // Mixed derivs
-  const Real Fxy = (phi(x+dx+dy) + phi(x-dx-dy) - phi(x+dx-dy) - phi(x-dx+dy))/(4.*d*d);
-  const Real Fxz = (phi(x+dx+dz) + phi(x-dx-dz) - phi(x+dx-dz) - phi(x-dx+dz))/(4.*d*d);
-  const Real Fyz = (phi(x+dy+dz) + phi(x-dy-dz) - phi(x+dy-dz) - phi(x-dy+dz))/(4.*d*d);
-
-  // Expressions taken from Albin et. al. "Computational assessment of curvatures and principaldirections of implicit surfaces from 3D scalar data"
-  const Real denomH = std::pow(Fx*Fx + Fy*Fy + Fz*Fz, 3./2.);
-  const Real denomK = std::pow(Fx*Fx + Fy*Fy + Fz*Fz, 2.0);
-  const Real kH = (1./(2.*denomH)) * (Fx*Fx*(Fyy + Fzz) + Fy*Fy*(Fxx + Fzz) + Fz*Fz*(Fxx + Fyy))
-    - (1./denomH)*(Fx*Fy*Fxy + Fx*Fz*Fxz + Fy*Fz*Fyz);
-  const Real kK = (2./denomK)*(Fx*Fy*(Fxz*Fyz - Fxy*Fzz) + Fx*Fz*(Fxy*Fyz - Fxz*Fyy) + Fy*Fz*(Fxy*Fxz - Fyz*Fxx))
-    + (1./denomK)*(Fx*Fx*(Fyy*Fzz - Fyz*Fyz) + Fy*Fy*(Fxx*Fzz - Fxz*Fxz) + Fzz*(Fxx*Fyy - Fxy*Fxy));
-  
-
-  // Mixed derives
-  const Real kmin = kH - sqrt(std::abs(kH*kH - kK));
-  const Real kmax = kH + sqrt(std::abs(kH*kH - kK));
-  
-  return std::make_pair(kmin, kmax);
-}
-#endif
 
 #include <CD_NamespaceFooter.H>

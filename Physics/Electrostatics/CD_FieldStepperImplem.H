@@ -179,10 +179,18 @@ namespace Physics {
       return 1.E99;
     }
 
+#ifdef CH_USE_HDF5    
+    template <class T>
+    void FieldStepper<T>::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const {
+    }
+#endif
+
+#ifdef CH_USE_HDF5    
     template <class T>
     void FieldStepper<T>::readCheckpointData(HDF5Handle& a_handle, const int a_lvl){
       MayDay::Abort("FieldStepper<T>::readCheckpointData - checkpointing not supported for this class");
     }
+#endif
 
     template <class T>
     int FieldStepper<T>::getNumberOfPlotVariables() const{

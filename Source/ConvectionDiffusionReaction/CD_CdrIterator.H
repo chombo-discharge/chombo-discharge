@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_CdrIterator.H
-  @brief  Iterator class for CdrLayout
+  @brief  Declaration of an iterator class for CdrLayout (for iterating through subsets of solvers). 
   @author Robert Marskar
 */
 
@@ -17,35 +17,40 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Iterator class for CdrLayout
+  @brief Iterator class for CdrLayout. This allows iteration through solvers (or subsets of solvers).
+  @details CdrLayout is a class for holding sets of CdrSolvers on a realm and a phase. In the simplest case it is used as a container for keeping
+  track of a single set of CdrSolvers, and it greatly cuts down on typing. This class allows iteration through one such layout. The user can specify
+  to only iterate through subsets of CdrSolvers, e.g. only for charged species or neutral species, etc. 
 */
 template <class T>
 class CdrIterator {
 public:
 
   /*!
-    @brief Silly enum for iterating through selected species
+    @brief Enum class for iterating through subsets of species. 
   */
   enum class SpeciesIteration{
-    all,
-    charged,
-    negative,
-    positive,
-    neutral
+    All,
+    Charged,
+    Negative,
+    Positive,
+    Neutral
   };
   
   /*!
-    @brief Empty constructor
+    @brief Disallowed weak construction. Always use the full constructor.
   */
-  CdrIterator();
+  CdrIterator() = delete;
 
   /*!
     @brief Full constructor
+    @param[in] a_layout CdrLayout to iterate through. 
+    @param[in] a_mode   Iteration mode. 
   */
-  CdrIterator(CdrLayout<T>& a_layout, const SpeciesIteration a_mode = SpeciesIteration::all);
+  CdrIterator(CdrLayout<T>& a_layout, const SpeciesIteration a_mode = SpeciesIteration::All);
 
   /*!
-    @brief Destructor
+    @brief Destructor (does nothing).
   */
   virtual ~CdrIterator();
 
@@ -55,7 +60,7 @@ public:
   virtual int getNumberOfSolvers();
 
   /*!
-    @brief Get current solver number
+    @brief Get current solver number (i.e. index in CdrLayouts solvers). 
   */
   virtual int index() const;
 
@@ -67,7 +72,7 @@ public:
   /*!
     @brief Ok or not
   */
-  virtual bool ok();
+  virtual bool ok() const;
   
   /*!
     @brief Increment. This is different for different iteration modes
@@ -75,12 +80,12 @@ public:
   virtual void operator++();
 
   /*!
-    @brief Get solver
+    @brief Return the current solver. 
   */
   virtual RefCountedPtr<T>& operator() ();
 
   /*!
-    @brief Get current ion
+    @brief Return the current species. 
   */
   virtual RefCountedPtr<CdrSpecies>& getSpecies();
   
@@ -99,20 +104,20 @@ protected:
   /*!
     @brief Number of solvers
   */
-  int m_num;;
+  int m_numSolvers;;
 
   /*!
     @brief Defined or not
   */
-  bool m_defined;
+  bool m_isDefined;
 
   /*!
-    @brief Ion solvers
+    @brief Cdr solvers
   */
   Vector<RefCountedPtr<T> > m_solvers;
 
   /*!
-    @brief Ions
+    @brief Cdr species. 
   */
   Vector<RefCountedPtr<CdrSpecies> > m_species;
 };

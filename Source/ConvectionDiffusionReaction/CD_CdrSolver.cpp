@@ -983,8 +983,7 @@ void CdrSolver::initialData(){
   // deposit particles (with an NGP scheme) on the mesh. This function does both -- first particles if we have them and
   // then we increment with the function. 
 
-  const bool depositFunction  = m_species->initializeWithFunction();
-  const bool depositParticles = m_species->initializeWithParticles();
+  const bool depositParticles = m_species->getInitialParticles().length() > 0;
 
   DataOps::setValue(m_phi, 0.0);
 
@@ -993,10 +992,9 @@ void CdrSolver::initialData(){
     this->initialDataParticles();
   }
 
-  // Increment with function values if this is also called for. 
-  if(depositFunction){
-    this->initialDataDistribution();
-  }
+  // Increment with function values if this is also called for. Note that this increments,
+  // why is why initialDataParticles is called first!
+  this->initialDataDistribution();
 
   m_amr->averageDown(m_phi, m_realm, m_phase);
   m_amr->interpGhost(m_phi, m_realm, m_phase);
@@ -1729,6 +1727,7 @@ void CdrSolver::writePlotFile(){
   Vector<LevelData<EBCellFAB>* > outputPtr;
   m_amr->alias(outputPtr, output);
 
+#ifdef CH_USE_HDF5
   writeEBHDF5(fname,
 	      m_amr->getGrids(m_realm),
 	      outputPtr,
@@ -1742,6 +1741,7 @@ void CdrSolver::writePlotFile(){
 	      false,
 	      Vector<Real>(numPlotVars, 0.0), //coveredValues,
 	      IntVect::Unit);
+#endif
 }
 
 void CdrSolver::writePlotData(EBAMRCellData& a_output, int& a_icomp){
@@ -1828,6 +1828,7 @@ void CdrSolver::writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellD
   a_comp += ncomp;
 }
 
+#ifdef CH_USE_HDF5
 void CdrSolver::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const {
   CH_TIME("CdrSolver::writeCheckpointLevel(HDF5Handle, int)");
   if(m_verbosity > 5){
@@ -1838,7 +1839,9 @@ void CdrSolver::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) co
   write(a_handle, *m_phi   [a_level], m_name       );
   write(a_handle, *m_source[a_level], m_name+"_src");
 }
+#endif
 
+#ifdef CH_USE_HDF5
 void CdrSolver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
   CH_TIME("CdrSolver::readCheckpointLevel(HDF5Handle, int)");
   if(m_verbosity > 5){
@@ -1850,6 +1853,7 @@ void CdrSolver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
   read<EBCellFAB>(a_handle, *m_phi   [a_level], m_name,        m_amr->getGrids(m_realm)[a_level], interv, false);
   read<EBCellFAB>(a_handle, *m_source[a_level], m_name+"_src", m_amr->getGrids(m_realm)[a_level], interv, false);
 }
+#endif
 
 Real CdrSolver::computeAdvectionDt(){
   CH_TIME("CdrSolver::computeAdvectionDt()");
@@ -2216,15 +2220,6 @@ Real CdrSolver::computeCharge(){
   return Q;
 }
 
-bool CdrSolver::extrapolateSourceTerm() const {
-  CH_TIME("CdrSolver::extrapolateSourceTerm()");
-  if(m_verbosity > 5){
-    pout() << m_name + "::extrapolateSourceTerm()" << endl;
-  }
-  
-  return m_extrapolateSourceTerm;
-}
-
 bool CdrSolver::isDiffusive(){
   CH_TIME("CdrSolver::isDiffusive()");
   if(m_verbosity > 5){
@@ -2394,18 +2389,6 @@ void CdrSolver::parseDomainBc(){
   }
 }
 
-void CdrSolver::parseExtrapolateSourceTerm(){
-  CH_TIME("CdrSolver::parseExtrapolateSourceTerm()");
-  if(m_verbosity > 5){
-    pout() << m_name + "::parseExtrapolateSourceTerm()" << endl;
-  }
-  
-  ParmParse pp(m_className.c_str());
-
-  std::string str;
-  pp.get("extrapolateSourceTerm", str);
-  m_extrapolateSourceTerm = (str == "true") ? true : false;
-}
 
 void CdrSolver::parseDivergenceComputation(){
   CH_TIME("CdrSolver::parseDivergenceComputation()");

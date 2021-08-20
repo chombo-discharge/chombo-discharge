@@ -4,7 +4,7 @@
  */
 /*!
   @file   CD_EBAMRTags.H
-  @brief  Simple declaration of tags
+  @brief  Contains an alias declaration of EBAMRTags.
   @author Robert Marskar
 */
 
@@ -16,6 +16,8 @@
 
 /*!
   @brief Declaration of cell tags
+  @details EBAMRTags is an AMR alias for storing a DenseIntVectSet in each grid patch. It is used to flag cells for refinement, but only within grid patches. 
+  @note DenseIntVectSet is sued for performance reasons. 
 */
 using EBAMRTags = Vector<RefCountedPtr<LayoutData<DenseIntVectSet> > >;
 

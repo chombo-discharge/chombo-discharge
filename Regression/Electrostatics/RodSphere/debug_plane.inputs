@@ -26,7 +26,6 @@ AmrMesh.centroid_sten   = linear      # Centroid interp stencils. 'pwl', 'linear
 AmrMesh.eb_sten         = pwl         # EB interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
 AmrMesh.redist_radius   = 1           # Redistribution radius for hyperbolic conservation laws
 AmrMesh.load_balance    = volume      # Load balancing algorithm. Valid options are 'volume' or 'elliptic'
-AmrMesh.ebcf            = true        # If you have EBCF crossing, this must be true. 
 
 # ====================================================================================================
 # DRIVER OPTIONS
@@ -57,13 +56,8 @@ Driver.restart                         = 0             # Restart step (less or e
 Driver.allow_coarsening                = true          # Allows removal of grid levels according to CellTagger
 Driver.grow_geo_tags                   = 2                # How much to grow tags when using geometry-based refinement. 
 Driver.refine_angles                   = 30.              # Refine cells if angle between elements exceed this value.
-Driver.refine_geometry                 = -1            # Refine geometry, -1 => Refine all the way down
 Driver.refine_electrodes               = -1            # Refine electrode surfaces. -1 => equal to refine_geometry
 Driver.refine_dielectrics              = -1            # Refine dielectric surfaces. -1 => equal to refine_geometry
-Driver.refine_electrode_gas_interface  = -1            # Refine electrode-gas interfaces. -1 => ----"-----
-Driver.refine_dielectric_gas_interface = -1            # Refine dielectric-gas interfaces. -1 => ----"-----
-Driver.refine_solid_gas_interface      = -1            # Refine solid-gas interfaces. -1 => ----"-----
-Driver.refine_solid_solid_interface    = -1            # Refine solid-solid interfaces. -1 => ----"-----
 
 
 # ====================================================================================================
@@ -90,7 +84,6 @@ FieldSolverMultigrid.gmg_bc_weight     = 2         # Boundary condition weights 
 FieldSolverMultigrid.gmg_jump_order    = 2         # Boundary condition order for jump conditions
 FieldSolverMultigrid.gmg_jump_weight   = 2         # Boundary condition weight for jump conditions (for least squares)
 FieldSolverMultigrid.gmg_bottom_solver = bicgstab  # Bottom solver type. 'simple', 'bicgstab', or 'gmres'
-FieldSolverMultigrid.gmg_bottom_relax  = 12        # Number of relaxations in bottom solve ('simple' solver only)
 FieldSolverMultigrid.gmg_cycle         = vcycle    # Cycle type. Only 'vcycle' supported for now
 FieldSolverMultigrid.gmg_smoother      = red_black # Relaxation type. 'jacobi', 'multi_color', or 'red_black'
 

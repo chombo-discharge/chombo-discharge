@@ -33,7 +33,7 @@ public:
   using Mesh = MeshT<T>;
 
   DcelSdf() = delete;
-  DcelSdf(const std::shared_ptr<Mesh>& a_mesh, const bool a_flipInside);
+  DcelSdf(const std::shared_ptr<Mesh>& a_mesh, const bool a_flipInside, const Real a_zCoord = 0.0);
   DcelSdf(const DcelSdf& a_object);
   ~DcelSdf();
 
@@ -42,6 +42,8 @@ public:
   BaseIF* newImplicitFunction() const override;
 
 protected:
+
+  Real m_zCoord;
 
   std::shared_ptr<Mesh> m_mesh;
   

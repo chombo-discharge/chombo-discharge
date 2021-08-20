@@ -14,7 +14,6 @@
 
 // Our includes
 #include <CD_MultiFluidIndexSpace.H>
-#include <CD_ComputationalGeometry.H>
 #include <CD_MemoryReport.H>
 #include <CD_NamespaceHeader.H>
 
@@ -29,21 +28,21 @@ MultiFluidIndexSpace::~MultiFluidIndexSpace(){
 }
 
 void MultiFluidIndexSpace::define(const Box                     & a_domain,
-		  const RealVect                & a_origin,
-		  const Real                    & a_dx,
-		  const Vector<GeometryService*>& a_geoservers,
-		  int                             a_nCellMax,
-		  int                             a_max_coar,
-		  bool                            a_fix_phase){
+				  const RealVect                & a_origin,
+				  const Real                    & a_dx,
+				  const Vector<GeometryService*>& a_geoservers,
+				  const bool                      a_distributedData,				  
+				  int                             a_nCellMax,
+				  int                             a_max_coar,
+				  bool                            a_fix_phase){
 
   // Define the gas geoserver
-  if(ComputationalGeometry::s_use_new_gshop){
+  if(a_distributedData){
     m_ebis[phase::gas]->setDistributedData();
   }
   m_ebis[phase::gas]->define(a_domain,   a_origin, a_dx, *a_geoservers[phase::gas],   a_nCellMax, a_max_coar);
-#if 1 // Debug
+
   MemoryReport::getMaxMinMemoryUsage();
-#endif
 
 
   // Define the solid state geoserver. This EBIS might not exist. 
@@ -51,13 +50,12 @@ void MultiFluidIndexSpace::define(const Box                     & a_domain,
     m_ebis[phase::solid] = RefCountedPtr<EBIndexSpace> (NULL);
   }
   else{
-    if(ComputationalGeometry::s_use_new_gshop){
+    if(a_distributedData){
       m_ebis[phase::solid]->setDistributedData();
     }
     m_ebis[phase::solid]->define(a_domain, a_origin, a_dx, *a_geoservers[phase::solid], a_nCellMax, a_max_coar);
-#if 1 // Debug
+
     MemoryReport::getMaxMinMemoryUsage();
-#endif
   }
 }
   

@@ -216,12 +216,16 @@ public:
   /*!
     @brief Write checkpoint data into handle
   */
+#ifdef CH_USE_HDF5
   virtual void writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const = 0;
+#endif
 
   /*!
     @brief Read checkpoint data from handle
   */
+#ifdef CH_USE_HDF5  
   virtual void readCheckpointLevel(HDF5Handle& a_handle, const int a_level) = 0;
+#endif
 
   /*!
     @brief Get number of output fields

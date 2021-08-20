@@ -53,8 +53,12 @@ namespace Physics {
       static Real s_constant_one(const RealVect a_pos);
 
       // New functions for new Driver interface
+#ifdef CH_USE_HDF5
       virtual void writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const;
+#endif
+#ifdef CH_USE_HDF5      
       virtual void readCheckpointData(HDF5Handle& a_handle, const int a_lvl);
+#endif
       virtual int getNumberOfPlotVariables() const;
       virtual void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const;
       virtual void writeJ(EBAMRCellData& a_output, int& a_comp) const;

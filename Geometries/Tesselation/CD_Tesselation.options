@@ -2,4 +2,5 @@
 # TESSELATION GEOMETRY CLASS
 # ====================================================================================================
 Tesselation.mesh_file   = myFile.ply    # Ply file
-Tesselation.partitioner = sah           # Partitioner. Valid options are 'default', 'overlap', 'sah'
+Tesselation.partitioner = overlap       # Partitioner. Valid options are 'default', 'overlap', 'sah'
+Tesselation.z_coord     = 0.0           # z-coordinate for 2D slicing this object

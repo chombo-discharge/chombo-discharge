@@ -24,6 +24,5 @@ FieldSolverMultigrid.gmg_bc_weight     = 2         # Boundary condition weights 
 FieldSolverMultigrid.gmg_jump_order    = 2         # Boundary condition order for jump conditions
 FieldSolverMultigrid.gmg_jump_weight   = 2         # Boundary condition weight for jump conditions (for least squares)
 FieldSolverMultigrid.gmg_bottom_solver = bicgstab  # Bottom solver type. 'simple', 'bicgstab', or 'gmres'
-FieldSolverMultigrid.gmg_bottom_relax  = 32        # Number of relaxations in bottom solve ('simple' solver only)
 FieldSolverMultigrid.gmg_cycle         = vcycle    # Cycle type. Only 'vcycle' supported for now. 
 FieldSolverMultigrid.gmg_smoother      = red_black # Relaxation type. 'jacobi', 'multi_color', or 'red_black'

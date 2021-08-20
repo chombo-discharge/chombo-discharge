@@ -135,13 +135,17 @@ void AdvectionDiffusionStepper::setVelocity(const int a_level){
 
 }
 
+#ifdef CH_USE_HDF5
 void AdvectionDiffusionStepper::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const {
   m_solver->writeCheckpointLevel(a_handle, a_lvl);
 }
+#endif
 
+#ifdef CH_USE_HDF5
 void AdvectionDiffusionStepper::readCheckpointData(HDF5Handle& a_handle, const int a_lvl){
   m_solver->readCheckpointLevel(a_handle, a_lvl);
 }
+#endif
 
 void AdvectionDiffusionStepper::postCheckpointSetup(){
   m_solver->setSource(0.0);
@@ -205,11 +209,11 @@ Real AdvectionDiffusionStepper::advance(const Real a_dt){
     m_amr->interpGhost(state, m_realm, m_phase);
   }
   else if(m_integrator == 1){
+    const bool addEbFlux     = true;
     const bool addDomainFlux = true;
     
-    m_solver->computeDivF(m_k1, state, a_dt, addDomainFlux);
+    m_solver->computeDivF(m_k1, state, a_dt, addEbFlux, addDomainFlux);
     DataOps::incr(state, m_k1, -a_dt);
-    m_amr->averageDown(state, m_realm, m_phase);
 
     if(m_solver->isDiffusive()){
       DataOps::copy(m_k2, state); // Now holds phiOld - dt*div(F)

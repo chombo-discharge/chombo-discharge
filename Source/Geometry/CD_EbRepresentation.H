@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_EbRepresentation.H
-  @brief  Enum for putting some logic into EB
+  @brief  Enum for putting some logic into EB intersection tests. 
   @author Robert Marskar
 */
 
@@ -15,7 +15,8 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Enum for putting some logic into how we thought about EBs
+  @brief Enum for putting some logic into how we think about EBs. This is just a simply supporting class for various solvers/algorithms that can distinguish
+  between ways of think about the EB: 
 */
 enum class EbRepresentation {
   ImplicitFunction,

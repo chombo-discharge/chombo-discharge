@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_CdrGodunov.H
-  @brief  Godunov advection interface to CdrSolver
+  @brief  Declaration of a class which implements CdrTGA using Godunov-type advection. 
   @author Robert Marskar
 */
 
@@ -21,6 +21,11 @@
 
 /*!
   @brief Godunov implementation for advection. 
+  @details The CdrGodunov class perform Godunov-type advection with time-extrapolated slope-limiting to faces. Note that this class implements CdrTGA which
+  is the base class that implements second order diffusion (either explicit or implicit). The rationale for doing time-extrapolation ala Godunov is that one can use
+  centered differencing phi^(k+1) = phi^k - dt*div[v^(k+1/2) * phi^(k+1/2)] for a second order accurate discretization in time. This class uses Chombo functionality
+  from EBAdvectLevelIntegrator which uses the Graves/Trebotich discretization in "An adaptive finite volume method for the incompressible Navier–Stokes equations 
+  in complex geometries" (DOI: 10.2140/camcos.2015.10.43). Note that if source terms are involved the extrapolation is more involved. 
 */
 class CdrGodunov : public CdrTGA {
 public:
@@ -31,56 +36,60 @@ public:
   CdrGodunov();
 
   /*!
-    @brief Destructor
+    @brief Destructor (does nothing)
   */
   virtual ~CdrGodunov();
 
   /*!
-    @brief Parse options
+    @brief Parse class options to put object in usable state. 
   */
   virtual void parseOptions() override;
 
   /*!
-    @brief Parse options
+    @brief Parse runtime options
   */
   virtual void parseRuntimeOptions() override;
 
   /*!
-    @brief Allocate internal stuff
+    @brief Allocate internal data holders in class object. 
   */
   virtual void allocateInternals() override;
-
-  /*!
-    @brief Average velocities to faces
-  */
-  virtual void averageVelocityToFaces() override;
-
-  /*!
-    @brief Call parent function: Then fix no influx
-  */
-  virtual void averageVelocityToFaces(EBAMRFluxData& a_faceVelocity, const EBAMRCellData& a_cellVelocity) override;
 
 protected:
 
   /*!
-    @brief Godunov face extrapolation method for advection
+    @brief Advection object -- this implements the Graves/Trebotich discretization. 
   */
-  virtual void advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt) override;
+  Vector<RefCountedPtr<EBAdvectLevelIntegrator> > m_levelAdvect;
 
   /*!
-    @brief Level advect integrator
+    @brief If true, slopes are limited (always use limiting). 
   */
-  Vector<RefCountedPtr<EBAdvectLevelIntegrator> > m_level_advect;
-
+  bool m_limitSlopes;
+  
   /*!
-    @brief Turn on/off slope limiting
+    @brief Turn on/off source terms when time-extrapolating
   */
-  bool m_slopelim;
+  bool m_extrapolateSourceTerm;  
 
   /*!
     @brief Parses slope limiter options
   */
-  virtual void parseSlopeLimiter();     // Parses slope limiter settings
+  virtual void parseSlopeLimiter();
+
+  /*!
+    ®brief Parse whether or not to include a source-term in the Godunov extrapolation.
+  */
+  virtual void parseExtrapolateSourceTerm();
+  
+  /*!
+    @brief Godunov face extrapolation method for advection
+    @param[out] a_facePhi  Phi on face centers
+    @param[in]  a_cellPhi  Phi on cell centers
+    @param[in]  a_extrapDt Time centering (i.e. extrapolation) of the face-centered states. 
+    @details This functions calls Chombo code which implements the Graves/Trebotich discretization. 
+  */
+  virtual void advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt) override;
 };
 
 #include <CD_NamespaceFooter.H>

@@ -996,6 +996,7 @@ void ItoSolver::allocateInternals(){
   }
 }
 
+#ifdef CH_USE_HDF5  
 void ItoSolver::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const {
   CH_TIME("ItoSolver::writeCheckpointLevel");
   if(m_verbosity > 5){
@@ -1013,7 +1014,9 @@ void ItoSolver::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) co
     this->writeCheckPointLevelFluid(a_handle, a_level);
   }
 }
+#endif
 
+#ifdef CH_USE_HDF5  
 void ItoSolver::writeCheckPointLevelParticles(HDF5Handle& a_handle, const int a_level) const {
   CH_TIME("ItoSolver::writeCheckPointLevelParticles");
   if(m_verbosity > 5){
@@ -1041,7 +1044,9 @@ void ItoSolver::writeCheckPointLevelParticles(HDF5Handle& a_handle, const int a_
 
   writeParticlesToHDF(a_handle, RealmParticles[a_level], str);
 }
+#endif
 
+#ifdef CH_USE_HDF5  
 void ItoSolver::writeCheckPointLevelFluid(HDF5Handle& a_handle, const int a_level) const {
   CH_TIME("ItoSolver::writeCheckPointLevelFluid");
   if(m_verbosity > 5){
@@ -1085,7 +1090,9 @@ void ItoSolver::writeCheckPointLevelFluid(HDF5Handle& a_handle, const int a_leve
 
   write(a_handle, particleNumbers, str);
 }
+#endif
 
+#ifdef CH_USE_HDF5  
 void ItoSolver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
   CH_TIME("ItoSolver::readCheckpointLevel");
   if(m_verbosity > 5){
@@ -1127,6 +1134,7 @@ void ItoSolver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
   }
     
 }
+#endif
 
 void ItoSolver::restartParticles(LevelData<EBCellFAB>& a_num_particles, const int a_level){
   CH_TIME("ItoSolver::restartParticles");

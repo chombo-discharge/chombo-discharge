@@ -217,66 +217,66 @@ Real euler_maruyama::advance(const Real a_dt){
   Real t_tot  = 0.0;
 
   Real t0, t1;
-  t0 = MPI_Wtime();
+  t0 = Timer::wallClock();
   t_tot  = -t0;
 
   // These calls are responsible for filling CDR and sigma solver boundary conditions
   // on the EB and on the domain walls
-  t0 = MPI_Wtime();
+  t0 = Timer::wallClock();
   euler_maruyama::compute_E_into_scratch();       // Compute the electric field
   euler_maruyama::computeCdrGradients();        // Extrapolate cell-centered stuff to EB centroids
-  t1 = MPI_Wtime();
+  t1 = Timer::wallClock();
   t_grad = t1 - t0;
 
-  t0 = MPI_Wtime();
+  t0 = Timer::wallClock();
   euler_maruyama::computeCdrEbStates();        // Extrapolate cell-centered stuff to EB centroids
   euler_maruyama::computeCdrEbFluxes();        // Extrapolate cell-centered fluxes to EB centroids
   euler_maruyama::computeCdrDomainStates();    // Extrapolate cell-centered states to domain edges
   euler_maruyama::computeCdrDomainFluxes();    // Extrapolate cell-centered fluxes to domain edges
   euler_maruyama::computeSigmaFlux();           // Update charge flux for sigma solver
-  t1 = MPI_Wtime();
+  t1 = Timer::wallClock();
   t_filBC = t1 - t0;
 
-  t0 = MPI_Wtime();
+  t0 = Timer::wallClock();
   euler_maruyama::computeReactionNetwork(a_dt); // Advance the reaction network
-  t1 = MPI_Wtime();
+  t1 = Timer::wallClock();
   t_reac = t1-t0;
 
-  t0 = MPI_Wtime();
+  t0 = Timer::wallClock();
   euler_maruyama::advance_cdr(a_dt);              // Update cdr equations
-  t1 = MPI_Wtime();
+  t1 = Timer::wallClock();
   t_cdr = t1 - t0;
 
-  t0 = MPI_Wtime();
+  t0 = Timer::wallClock();
   euler_maruyama::advance_rte(a_dt);              // Update RTE equations
-  t1 = MPI_Wtime();
+  t1 = Timer::wallClock();
   t_rte = t1-t0;
 
-  t0 = MPI_Wtime();
+  t0 = Timer::wallClock();
   euler_maruyama::advance_sigma(a_dt);            // Update sigma equation
-  t1 = MPI_Wtime();
+  t1 = Timer::wallClock();
   t_sig = t1 - t0;
   
-  t0 = MPI_Wtime();
+  t0 = Timer::wallClock();
   if((m_timeStep +1) % m_fast_poisson == 0){
     TimeStepper::solve_poisson();                  // Update the Poisson equation
   }
-  t1 = MPI_Wtime();
+  t1 = Timer::wallClock();
   t_pois = t1 - t0;
 
-  t0 = MPI_Wtime();
+  t0 = Timer::wallClock();
   euler_maruyama::compute_E_into_scratch();       // Update electric fields too
-  t1 = MPI_Wtime();
+  t1 = Timer::wallClock();
   t_filE = t1-t0;
 
   // Update velocities and diffusion coefficients. We don't do sources here.
-  t0 = MPI_Wtime();
+  t0 = Timer::wallClock();
   euler_maruyama::computeCdrVelo(m_time + a_dt);
-  t1 = MPI_Wtime();
+  t1 = Timer::wallClock();
   t_filV = t1 - t0;
-  t0 = MPI_Wtime();
+  t0 = Timer::wallClock();
   euler_maruyama::compute_cdr_diffco(m_time + a_dt);
-  t1 = MPI_Wtime();
+  t1 = Timer::wallClock();
   t_filD = t1 - t0;
   t_tot += t1;
 

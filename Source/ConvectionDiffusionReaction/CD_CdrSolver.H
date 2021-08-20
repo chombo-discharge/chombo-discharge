@@ -29,7 +29,6 @@
   @brief Base class for solving convection-diffusion-reaction equations. 
   @details On embedded boundaries, users must always set the flux directly (but possibly via a function, if desired). 
   @details On domain edges/faces, the user can select between various ways of setting the domain boundary conditions (e.g. wall, data-based, function-based, outflow). 
-  @todo Domain BCs could be generalized to use independent data/wall/function/outflow on individual faces. Currently the same domain BC is used everywhere. 
 */
 class CdrSolver {
 public:
@@ -390,14 +389,18 @@ public:
     @paramo[out] a_handle HDF5 file. 
     @param[in]   a_level Grid level
   */
+#ifdef CH_USE_HDF5
   virtual void writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const;
+#endif
 
   /*!
     @brief Read checkpoint data from HDF5 file. 
     @param[in] a_handle HDF5 handle.
     @param[in] const int a_level Grid level
   */
+#ifdef CH_USE_HDF5  
   virtual void readCheckpointLevel(HDF5Handle& a_handle, const int a_level);
+#endif
 
   /*!
     @brief Regrid this solver. 
@@ -489,13 +492,6 @@ public:
     @brief Return true if the solver is mobile and false otherwise
   */
   virtual bool isMobile();
-
-  /*!
-    @brief Check if we can extrapolate
-    @details Special flag for when we operate with Godunov methods that extrapolate to half time step. 
-    @todo Move to CdrGdnv since this only affects that implementation. 
-  */
-  virtual bool extrapolateSourceTerm() const;
   
   /*!
     @brief Get the cell-centered phi
@@ -750,11 +746,6 @@ protected:
     @brief Solve for advection/convection or not
   */
   bool m_isMobile;
-  
-  /*!
-    @brief Turn on/off source terms when time-extrapolating
-  */
-  bool m_extrapolateSourceTerm;
 
   /*!
     @brief If true, m_phi is added to plot files. 
@@ -1040,11 +1031,6 @@ protected:
     @brief Parse the conservation
   */
   virtual void parseDivergenceComputation();
-
-  /*!
-    ®brief Parse source term stuff
-  */
-  virtual void parseExtrapolateSourceTerm();
   
   /*!
     @brief Shortcut for making a boundary condition string. 

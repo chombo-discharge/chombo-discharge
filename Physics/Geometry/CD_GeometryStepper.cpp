@@ -33,8 +33,12 @@ void GeometryStepper::registerOperators(){
 }
 
 // IO routines
+#ifdef CH_USE_HDF5
 void GeometryStepper::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const {}
+#endif
+#ifdef CH_USE_HDF5
 void GeometryStepper::readCheckpointData(HDF5Handle& a_handle, const int a_lvl) {}
+#endif
 void GeometryStepper::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const {}
 int  GeometryStepper::getNumberOfPlotVariables() const {return 0;}
 

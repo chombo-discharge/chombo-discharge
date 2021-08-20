@@ -18,6 +18,7 @@
 #include <chrono>
 
 // Chombo includes
+#include <LoadBalance.H>
 #include <BoxLayout.H>
 
 // Our includes

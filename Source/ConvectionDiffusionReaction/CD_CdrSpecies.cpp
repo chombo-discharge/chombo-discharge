@@ -9,37 +9,30 @@
   @author Robert Marskar
 */
 
-
 // Our includes
 #include <CD_CdrSpecies.H>
 #include <CD_NamespaceHeader.H>
   
 CdrSpecies::CdrSpecies(){
-  m_name         = "default_CdrSpecies";
-  m_unit         = "default_unit";
-  m_chargeNumber       = 0;
-  m_isDiffusive    = true;
-  m_isMobile       = true;
-  m_forceOutput = false;
+  CH_TIME("CdrSpecies::CdrSpecies()");
 
-  m_initializeWithFunction  = true;
-  m_initializeWithParticles = true;
-  
-  m_deposition = DepositionType::NGP;
+  // Default settings
+  m_name         = "CdrSpecies";
+  m_chargeNumber = 0;
+  m_isDiffusive  = true;
+  m_isMobile     = true;
 
   m_initialParticles.clear();
 }
 
-CdrSpecies::CdrSpecies(const std::string a_name, const int a_chargeNumber, const bool a_mobile, const bool a_diffusive){
+CdrSpecies::CdrSpecies(const std::string a_name, const int a_chargeNumber, const bool a_isMobile, const bool a_isDiffusive){
+  CH_TIME("CdrSpecies::CdrSpecies(string, int, bool, bool)");
+  
   m_name         = a_name;
   m_chargeNumber = a_chargeNumber;
-  m_isMobile     = a_mobile;
-  m_isDiffusive  = a_diffusive;
+  m_isMobile     = a_isMobile;
+  m_isDiffusive  = a_isDiffusive;
 
-  m_initializeWithFunction  = true;
-  m_initializeWithParticles = true;
-  
-  m_deposition = DepositionType::NGP;
   m_initialParticles.clear();
 }
 
@@ -48,46 +41,38 @@ CdrSpecies::~CdrSpecies(){
 }
 
 Real CdrSpecies::initialData(const RealVect a_pos, const Real a_time) const{
+  CH_TIME("CdrSpecies::initialData(RealVect, Real)");
+  
   return 0.;
 }
 
 std::string CdrSpecies::getName() const {
+  CH_TIME("CdrSpecies::getName()");
+  
   return m_name;
 }
 
-std::string CdrSpecies::get_unit() const {
-  return m_unit;
-}
-
 int CdrSpecies::getChargeNumber() const {
+  CH_TIME("CdrSpecies::getChargeNumber()");
+  
   return m_chargeNumber;
 }
 
 bool CdrSpecies::isDiffusive() const {
+  CH_TIME("CdrSpecies::isDiffusive()");
+  
   return m_isDiffusive;
 }
 
 bool CdrSpecies::isMobile() const {
+  CH_TIME("CdrSpecies::isMobile()");
+  
   return m_isMobile;
 }
 
-bool CdrSpecies::forceOutput() const {
-  return m_forceOutput;
-}
-
-bool CdrSpecies::initializeWithParticles() const {
-  return m_initializeWithParticles;
-}
-
-bool CdrSpecies::initializeWithFunction() const{
-  return m_initializeWithFunction;
-}
-
-DepositionType CdrSpecies::getDeposition() {
-  return m_deposition;
-}
-
-List<Particle>& CdrSpecies::getInitialParticles() {
+const List<Particle>& CdrSpecies::getInitialParticles() const {
+  CH_TIME("CdrSpecies::getInitialParticles()");
+  
   return m_initialParticles;
 }
 
