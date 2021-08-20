@@ -23,60 +23,64 @@ TimeStepper::~TimeStepper(){
 }
 
 void TimeStepper::setAmr(const RefCountedPtr<AmrMesh>& a_amr){
-  CH_TIME("TimeStepper::setAmr");
+  CH_TIME("TimeStepper::setAmr(RefCountedPtr<AmrMesh>)");
   if(m_verbosity > 5){
-    pout() << "TimeStepper::setAmr" << endl;
+    pout() << "TimeStepper::setAmr(RefCountedPtr<AmrMesh>)" << endl;
   }
+
+  CH_assert(!a_amr.isNull());
 
   m_amr = a_amr;
 }
 
 void TimeStepper::setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry){
-  CH_TIME("TimeStepper::setComputationalGeometry");
+  CH_TIME("TimeStepper::setComputationalGeometry(RefCountedPtr<ComputationalGeometry>)");
   if(m_verbosity > 5){
-    pout() << "TimeStepper::setComputationalGeometry" << endl;
+    pout() << "TimeStepper::setComputationalGeometry(RefCountedPtr<ComputationalGeometry>)" << endl;
   }
+
+  CH_assert(!a_computationalGeometry.isNull());
 
   m_computationalGeometry = a_computationalGeometry;
 }
 
 bool TimeStepper::needToRegrid(){
-  CH_TIME("TimeStepper::needToRegrid");
+  CH_TIME("TimeStepper::needToRegrid()");
   if(m_verbosity > 5){
-    pout() << "TimeStepper::needToRegrid" << endl;
+    pout() << "TimeStepper::needToRegrid()" << endl;
   }
 
   return false;
 }
 
 void TimeStepper::parseRuntimeOptions() {
-  CH_TIME("TimeStepper::parseRuntimeOptions");
+  CH_TIME("TimeStepper::parseRuntimeOptions()");
   if(m_verbosity > 5){
-    pout() << "TimeStepper::parseRuntimeOptions" << endl;
+    pout() << "TimeStepper::parseRuntimeOptions()" << endl;
   }
 }
 
 Vector<long int> TimeStepper::getCheckpointLoads(const std::string a_realm, const int a_level) const {
-  CH_TIME("TimeStepper::getCheckpointLoads");
+  CH_TIME("TimeStepper::getCheckpointLoads(string, int)");
   if(m_verbosity > 5){
-    pout() << "TimeStepper::getCheckpointLoads" << endl;
+    pout() << "TimeStepper::getCheckpointLoads(string, int)" << endl;
   }
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(a_realm)[a_level];
-  const Vector<Box>& a_boxes = dbl.boxArray();
+  const Vector<Box>& boxArray  = dbl.boxArray();
 
-  Vector<long int> loads(a_boxes.size(), 0L);
-  for (int i = 0; i < a_boxes.size(); i++){
-    loads[i] = a_boxes[i].numPts();
+  Vector<long int> loads(boxArray.size(), 0L);
+  for (int i = 0; i < boxArray.size(); i++){
+    loads[i] = boxArray[i].numPts();
   }
 
   return loads;
 }
 
 bool TimeStepper::loadBalanceThisRealm(const std::string a_realm) const {
-  CH_TIME("TimeStepper::loadBalanceThisRealm");
+  CH_TIME("TimeStepper::loadBalanceThisRealm(string)");
   if(m_verbosity > 5){
-    pout() << "TimeStepper::loadBalanceThisRealm" << endl;
+    pout() << "TimeStepper::loadBalanceThisRealm(string)" << endl;
   }
 
   return false;
@@ -88,9 +92,9 @@ void TimeStepper::loadBalanceBoxes(Vector<Vector<int> >&             a_procs,
 				   const Vector<DisjointBoxLayout>&  a_grids,
 				   const int                         a_lmin,
 				   const int                         a_finestLevel){
-  CH_TIME("TimeStepper::loadBalanceBoxes");
+  CH_TIME("TimeStepper::loadBalanceBoxes(Vector<Vector<int> >, Vector<Vector<Box>, string, Vector<DisjointBoxLayout>, int, int)");
   if(m_verbosity > 5){
-    pout() << "TimeStepper::loadBalanceBoxes" << endl;
+    pout() << "TimeStepper::loadBalanceBoxes(Vector<Vector<int> >, Vector<Vector<Box>, string, Vector<DisjointBoxLayout>, int, int)" << endl;
   }
 
   a_procs.resize(1 + a_finestLevel);

@@ -49,7 +49,13 @@ public:
     @brief Default constructor. This creates a timer without any timer events and without a name. 
   */
   inline
-  Timer();
+  Timer() = delete;
+
+  /*!
+    @brief Default constructor. This creates a timer without any timer events and without a name. 
+  */
+  inline
+  Timer(const std::string a_process);  
 
   /*!
     @brief Destructor
@@ -98,29 +104,12 @@ public:
   void stopEvent(const std::string a_event) noexcept;
 
   /*!
-    @brief Reset all events. 
-    @note This clears out m_events. 
-  */
-  inline
-  void resetEvents();
-
-  /*!
-    @brief Reset/remove an event
-  */
-  inline
-  void resetEvents(const std::string a_event) noexcept;
-
-  /*!
     @brief Print all timed events to cout.
+    @details This routine prints a header, the timing report for the various event, and a tail. All events are included but unfinished ones
+    are not counted towards the elapsed time. 
   */
   inline
-  void reportEvents() const noexcept;
-
-  /*!
-    @brief Report a particular event
-  */
-  inline
-  void reportEvent(const std::string a_event) const noexcept;
+  void eventReport() const noexcept;
 
 protected:
 
@@ -134,9 +123,29 @@ protected:
   };
 
   /*!
+    @brief Process name. Used for input/output.
+  */
+  std::string m_processName;
+
+  /*!
     @brief Timer events. First entry is the name of the event, the second is the time.
   */
   std::map<std::string, std::tuple<bool, TimePoint, TimePoint> > m_events;
+
+  /*!
+    @brief Print report header
+  */
+  void printReportHeader() const noexcept;
+
+  /*!
+    @brief Print report tail
+  */
+  void printReportTail(const Real a_elapsedTime) const noexcept;
+
+  /*!
+    @brief Compute the total time for all finished events. 
+  */
+  Real computeTotalElapsedTime() const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>
