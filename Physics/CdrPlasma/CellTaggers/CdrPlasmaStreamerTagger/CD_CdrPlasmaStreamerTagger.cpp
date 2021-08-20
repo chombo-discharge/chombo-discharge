@@ -48,6 +48,10 @@ void CdrPlasmaStreamerTagger::parseOptions(){
   pp.get("max_coarsen_lvl",   m_max_coarsen_level);
 }
 
+void CdrPlasmaStreamerTagger::parseRuntimeOptions(){
+  this->parseOptions();
+}
+
 
 Vector<Real> CdrPlasmaStreamerTagger::tracer(const RealVect         a_pos,
 					     const Real             a_time,
