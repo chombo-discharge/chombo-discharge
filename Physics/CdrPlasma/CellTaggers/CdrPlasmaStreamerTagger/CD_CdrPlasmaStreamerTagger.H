@@ -46,7 +46,12 @@ namespace Physics {
       /*!
 	@brief Parse class options
       */
-      virtual void parseOptions();
+      virtual void parseOptions() override;
+
+      /*!
+	@brief Parse class options
+      */
+      virtual void parseRuntimeOptions() override;      
 
       /*!
 	@brief Return tracer field
