@@ -467,7 +467,6 @@ protected:
   */
   Vector<std::string> numberFmt(const Vector<long long> a_numbers, char a_sep = ',') const;
 
-
 #ifdef CH_USE_HDF5
   /*!
     @brief Read checkpoint file
