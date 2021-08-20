@@ -11,7 +11,7 @@ AmrMesh.lo_corner        =  0    0     # Low corner of problem domain
 AmrMesh.hi_corner        =  4E-2 4E-2  # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
 AmrMesh.coarsest_domain  = 64 64       # Number of cells on coarsest domain
-AmrMesh.max_amr_depth    = 5           # Maximum amr depth
+AmrMesh.max_amr_depth    = 7           # Maximum amr depth
 AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
@@ -46,8 +46,8 @@ Driver.write_regrid_files              = false            # Write regrid files o
 Driver.write_restart_files             = false            # Write restart files or not
 Driver.initial_regrids                 = 4                # Number of initial regrids
 Driver.start_time                      = 0                # Start time (fresh simulations only)
-Driver.stop_time                       = 1.0              # Stop time
-Driver.max_steps                       = 100              # Maximum number of steps
+Driver.stop_time                       = 100E-9           # Stop time
+Driver.max_steps                       = 20               # Maximum number of steps
 Driver.geometry_only                   = false            # Special option that ONLY plots the geometry
 Driver.write_memory                    = false            # Write MPI memory report
 Driver.write_loads                     = false            # Write (accumulated) computational loads
@@ -60,15 +60,9 @@ Driver.plt_vars                        = 0                # 'tags', 'mpi_rank', 
 Driver.restart                         = 0                # Restart step (less or equal to 0 implies fresh simulation)
 Driver.allow_coarsening                = true             # Allows removal of grid levels according to CellTagger
 Driver.grow_geo_tags                   = 4                # How much to grow tags when using geometry-based refinement.
-Driver.refine_angles                   = 50.              # Refine cells if angle between elements exceed this value.
-Driver.refine_geometry                 = 0                # Refine geometry, -1 => Refine all the way down
+Driver.refine_angles                   = 60.              # Refine cells if angle between elements exceed this value.
 Driver.refine_electrodes               = 1                # Refine electrode surfaces. -1 => equal to refine_geometry
 Driver.refine_dielectrics              = 2                # Refine dielectric surfaces. -1 => equal to refine_geometry
-Driver.refine_electrode_gas_interface  = -1               # Refine electrode-gas interfaces. -1 => ----"----- 
-Driver.refine_dielectric_gas_interface = -1               # Refine dielectric-gas interfaces. -1 => ----"-----
-Driver.refine_solid_gas_interface      = -1               # Refine solid-gas interfaces. -1 => ----"-----  
-Driver.refine_solid_solid_interface    = -1               # Refine solid-solid interfaces. -1 => ----"----- 
-
 
 # ====================================================================================================
 # FieldSolverMultigrid class options
@@ -99,33 +93,33 @@ FieldSolverMultigrid.gmg_cycle         = vcycle    # Cycle type. Only 'vcycle' s
 FieldSolverMultigrid.gmg_smoother      = red_black # Relaxation type. 'jacobi', 'multi_color', or 'red_black'
 
 # ====================================================================================================
-# CDR_MUSCL SOLVER SETTINGS
-# ----------------------------------------------------------------------------------------------------
-CdrMuscl.seed                 = -1                      # Seed. Random seed with seed < 0
-CdrMuscl.bc.x.lo              = wall                    # 'data', 'function', 'wall', or 'outflow'
-CdrMuscl.bc.x.hi              = data                    # 'data', 'function', 'wall', or 'outflow'
-CdrMuscl.bc.y.lo              = data                    # 'data', 'function', 'wall', or 'outflow'
-CdrMuscl.bc.y.hi              = data                    # 'data', 'function', 'wall', or 'outflow'
-CdrMuscl.limit_slopes         = true                    # Use slope-limiters or not
-CdrMuscl.plt_vars             = phi vel src dco ebflux  # Plot variables. Options are 'phi', 'vel', 'dco', 'src'
-CdrMuscl.plot_mode            = density                 # Plot densities 'density' or particle numbers ('numbers')
-CdrMuscl.blend_conservation   = true                    # Turn on/off blending with nonconservative divergenceo
-CdrMuscl.redist_mass_weighted = false                   # Mass weighted redistribution or not
-CdrMuscl.gmg_verbosity        = -1                      # GMG verbosity
-CdrMuscl.gmg_coarsen          = 4                       # Precoarsening of multigrid levels		
-CdrMuscl.gmg_pre_smooth       = 6                       # Number of relaxations in GMG downsweep
-CdrMuscl.gmg_post_smooth      = 6                       # Number of relaxations in upsweep
-CdrMuscl.gmg_bott_smooth      = 6                       # NUmber of relaxations before dropping to bottom solver
-CdrMuscl.gmg_min_iter         = 5                       # Minimum number of iterations
-CdrMuscl.gmg_max_iter         = 32                      # Maximum number of iterations
-CdrMuscl.gmg_exit_tol         = 1.E-8                   # Residue tolerance
-CdrMuscl.gmg_exit_hang        = 0.2                     # Solver hang
-CdrMuscl.gmg_min_cells        = 2                       # Bottom drop
-CdrMuscl.gmg_bottom_solver    = bicgstab                # Bottom solver type. Valid options are 'simple' and 'bicgstab'
-CdrMuscl.gmg_bottom_relax     = 8                       # Number of relaxations in bottom solve ('simple' solver only)
-CdrMuscl.gmg_cycle            = vcycle                  # Cycle type. Only 'vcycle' supported for now
-CdrMuscl.gmg_smoother         = red_black               # Relaxation type. 'jacobi', 'multi_color', or 'red_black'
-
+# CdrGodunov solver settings
+# ====================================================================================================
+CdrGodunov.seed                  = -1                      # Seed. Random seed with seed < 0
+CdrGodunov.bc.x.lo               = wall                    # 'data', 'function', 'wall', or 'outflow'
+CdrGodunov.bc.x.hi               = wall                    # 'data', 'function', 'wall', or 'outflow'
+CdrGodunov.bc.y.lo               = wall                    # 'data', 'function', 'wall', or 'outflow'
+CdrGodunov.bc.y.hi               = wall                    # 'data', 'function', 'wall', or 'outflow'
+CdrGodunov.bc.z.lo               = wall                    # 'data', 'function', 'wall', or 'outflow'
+CdrGodunov.bc.z.hi               = wall                    # 'data', 'function', 'wall', or 'outflow'
+CdrGodunov.limit_slopes          = true                    # Use slope-limiters for godunov
+CdrGodunov.plt_vars              = phi vel src dco ebflux  # Plot variables. Options are 'phi', 'vel', 'dco', 'src'
+CdrGodunov.extrap_source         = true                    # Flag for including source term for time-extrapolation
+CdrGodunov.plot_mode             = density                 # Plot densities 'density' or particle numbers ('numbers')
+CdrGodunov.blend_conservation    = true                    # Turn on/off blending with nonconservative divergenceo
+CdrGodunov.redist_mass_weighted  = false                   # Mass weighted redistribution or not
+CdrGodunov.gmg_verbosity         = -1                      # GMG verbosity
+CdrGodunov.gmg_pre_smooth        = 6                       # Number of relaxations in GMG downsweep
+CdrGodunov.gmg_post_smooth       = 6                       # Number of relaxations in upsweep
+CdrGodunov.gmg_bott_smooth       = 6                       # NUmber of relaxations before dropping to bottom solver
+CdrGodunov.gmg_min_iter          = 5                       # Minimum number of iterations
+CdrGodunov.gmg_max_iter          = 32                      # Maximum number of iterations
+CdrGodunov.gmg_exit_tol          = 1.E-8                   # Residue tolerance
+CdrGodunov.gmg_exit_hang         = 0.2                     # Solver hang
+CdrGodunov.gmg_min_cells         = 2                       # Bottom drop
+CdrGodunov.gmg_bottom_solver     = bicgstab                # Bottom solver type. Valid options are 'simple' and 'bicgstab'
+CdrGodunov.gmg_cycle             = vcycle                  # Cycle type. Only 'vcycle' supported for now
+CdrGodunov.gmg_smoother          = red_black               # Relaxation type. 'jacobi', 'multi_color', or 'red_black'
 
 # ====================================================================================================
 # EddingtonSP1 class options
@@ -223,7 +217,7 @@ RodPlaneProfile.square_height = 1E-3
 # ====================================================================================================
 CdrPlasmaImExSdcStepper.verbosity        = -1      # Class verbosity
 CdrPlasmaImExSdcStepper.solver_verbosity = -1      # Individual solver verbosities
-CdrPlasmaImExSdcStepper.fast_rte         = 1       # Solve RTE every this time steps
+CdrPlasmaImExSdcStepper.fast_rte         = 10      # Solve RTE every this time steps
 CdrPlasmaImExSdcStepper.fast_poisson     = 1       # Solve Poisson every this time steps	
 CdrPlasmaImExSdcStepper.min_dt           = 0.      # Minimum permitted time step
 CdrPlasmaImExSdcStepper.max_dt           = 1.E99   # Maximum permitted time step
@@ -237,7 +231,7 @@ CdrPlasmaImExSdcStepper.use_tga          = false   # 'false' = Euler diffusion. 
 # ------------------------------------
 CdrPlasmaImExSdcStepper.quad_nodes   = lobatto     # Nodes to be used for quadrature. 'lobatto', 'uniform', or 'chebyshev'
 CdrPlasmaImExSdcStepper.subintervals = 1           # Number of subintervals. This will be the maximum possible order.
-CdrPlasmaImExSdcStepper.corr_iter    = 1           # Number of iterations of the correction equation. Should be (subintervals-1)
+CdrPlasmaImExSdcStepper.corr_iter    = 0           # Number of iterations of the correction equation. Should be (subintervals-1)
                                                    # for maximum order
 
 # Adaptive time stepping
@@ -272,7 +266,7 @@ CdrPlasmaImExSdcStepper.profile_steps     = false  # Profile time steps with ord
 # -----------------------
 # Advection extrapolation
 # -----------------------
-CdrPlasmaImExSdcStepper.extrap_advect = false      # Time extrapolate with source and diffusion in advection step
+CdrPlasmaImExSdcStepper.extrap_advect = true      # Time extrapolate with source and diffusion in advection step
 
 
 # ====================================================================================================
@@ -323,7 +317,7 @@ CdrPlasmaStreamerTagger.verbosity         = -1           # Verbosity
 CdrPlasmaStreamerTagger.num_boxes         = 0            # Number of allowed tag boxes (0 = tags allowe everywhere)
 CdrPlasmaStreamerTagger.box1_lo           = 0.0 0.0 0.0  # Only allow tags that fall between
 CdrPlasmaStreamerTagger.box1_hi           = 0.0 0.0 0.0  # these two corners
-CdrPlasmaStreamerTagger.buffer            = 8            # Grow tagged cells
+CdrPlasmaStreamerTagger.buffer            = 4            # Grow tagged cells
 
 CdrPlasmaStreamerTagger.refine_curvature  = 10.0         # Curvature refinement
 CdrPlasmaStreamerTagger.coarsen_curvature = 10.0         # Curvature coarsening	

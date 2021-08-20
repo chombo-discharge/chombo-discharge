@@ -3,7 +3,7 @@
 #include <CD_FieldSolverFactory.H>
 #include <CD_FieldSolverMultigrid.H>
 #include <CD_CdrLayoutImplem.H>
-#include <CD_CdrMuscl.H>
+#include <CD_CdrGodunov.H>
 #include <CD_RtLayoutImplem.H>
 #include <CD_EddingtonSP1.H>
 #include <CD_CdrPlasmaAir3Bourdon.H>
@@ -52,7 +52,7 @@ int main(int argc, char* argv[]){
 
   // Create solver factories
   auto poi_fact = new FieldSolverFactory<FieldSolverMultigrid>();
-  auto cdr_fact = new CdrFactory<CdrSolver, CdrMuscl>();
+  auto cdr_fact = new CdrFactory<CdrSolver, CdrGodunov>();
   auto rte_fact = new RtFactory<RtSolver, EddingtonSP1>();
 
   // Instantiate solvers
