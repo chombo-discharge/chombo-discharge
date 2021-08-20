@@ -309,6 +309,7 @@ void SigmaSolver::setTime(const int a_step, const Real a_time, const Real a_dt){
   m_dt   = a_dt;
 }
 
+#ifdef CH_USE_HDF5
 void SigmaSolver::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const {
   CH_TIME("SigmaSolver::writeCheckpointLevel");
   if(m_verbosity > 5){
@@ -323,7 +324,9 @@ void SigmaSolver::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) 
   // Write state vector
   write(a_handle, scratch, "sigma");
 }
+#endif
 
+#ifdef CH_USE_HDF5
 void SigmaSolver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
   CH_TIME("SigmaSolver::readCheckpointLevel");
   if(m_verbosity > 5){
@@ -342,6 +345,7 @@ void SigmaSolver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
   DataOps::setValue(*m_phi[a_level], 0.0);
   DataOps::incr(*m_phi[a_level], scratch, 1.0);
 }
+#endif
 
 void SigmaSolver::writePlotData(EBAMRCellData& a_output, int& a_comp){
   CH_TIME("SigmaSolver::writePlotData");

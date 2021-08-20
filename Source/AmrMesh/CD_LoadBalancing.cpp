@@ -38,7 +38,7 @@ void LoadBalancing::sort(Vector<Box>& a_boxes, const BoxSorting a_which){
 }
 
 void LoadBalancing::gatherBoxes(Vector<Box>& a_boxes){
-
+#ifdef CH_MPI
   // TLDR: This code does a gather operation on the loads and boxes. They are gather globally in this way:
   //       (BoxesForMPIRank=0, BoxesForMPIRank=1, BoxesForMPIRank=2, ....)
 
@@ -100,11 +100,11 @@ void LoadBalancing::gatherBoxes(Vector<Box>& a_boxes){
 
   delete recv_buffer;
   delete send_buffer;
-
+#endif
 }
 
 void LoadBalancing::gatherLoads(Vector<Real>& a_loads){
-
+#ifdef CH_MPI
   // TLDR: This code does a gather operation on the loads. They are gather globally in this way:
   //       (LoadsForRank=0, LoadsForRank=1, LoadsForRank2=2, ....)
 
@@ -145,10 +145,11 @@ void LoadBalancing::gatherLoads(Vector<Real>& a_loads){
 
   delete recv_buffer;
   delete send_buffer;
+#endif
 }
 
 void LoadBalancing::gatherLoads(Vector<int>& a_loads){
-
+#ifdef CH_MPI
   // TLDR: This code does a gather operation on the loads. They are gather globally in this way:
   //       (LoadsForRank=0, LoadsForRank=1, LoadsForRank2=2, ....)
 
@@ -189,11 +190,14 @@ void LoadBalancing::gatherLoads(Vector<int>& a_loads){
 
   delete recv_buffer;
   delete send_buffer;
+#endif
 }
 
 void LoadBalancing::gatherBoxes_and_loads(Vector<Box>& a_boxes, Vector<int>& a_loads){
+#ifdef CH_MPI
   LoadBalancing::gatherBoxes(a_boxes);
   LoadBalancing::gatherLoads(a_loads);
+#endif
 }
 
 int LoadBalancing::maxBits(std::vector<Box>::iterator a_first, std::vector<Box>::iterator a_last){

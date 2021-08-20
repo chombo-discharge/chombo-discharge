@@ -31,30 +31,37 @@ BvhSdf<T, BV>::BvhSdf(){
 }
 
 template <class T, class BV>
-BvhSdf<T, BV>::BvhSdf(const std::shared_ptr<Node>& a_root, const bool a_flipInside) : BvhSdf() {
+BvhSdf<T, BV>::BvhSdf(const std::shared_ptr<Node>& a_root, const bool a_flipInside, const Real a_zCoord) : BvhSdf() {
   m_root       = a_root;
+  m_zCoord     = a_zCoord;
   m_flipInside = a_flipInside;
 }
 
 template <class T, class BV>
 BvhSdf<T, BV>::BvhSdf(const BvhSdf& a_primitive) : BvhSdf() {
   m_root       = a_primitive.m_root;
+  m_zCoord     = a_primitive.m_zCoord;  
   m_flipInside = a_primitive.m_flipInside;
 }
 
 template <class T, class BV>
 BvhSdf<T, BV>::~BvhSdf(){
   if(m_numCalled > 0L){
-    std::cout << "On destructor: Calls: " << m_numCalled << "\t Tot: " << m_timespan.count() << "\t Avg./Call = " << m_timespan.count()/(1.0*m_numCalled) << std::endl;
+    std::cout << "In file CD_BvhSdfImplem: BvhSdf::~BvhSdf() On destructor: Calls: " << m_numCalled << "\t Tot: " << m_timespan.count() << "\t Avg./Call = " << m_timespan.count()/(1.0*m_numCalled) << std::endl;
   }
 }
 
 template <class T, class BV>
 Real BvhSdf<T, BV>::value(const RealVect& a_point) const {
   high_resolution_clock::time_point t1 = high_resolution_clock::now();
-  Vec3 p(a_point[0], a_point[1], a_point[2]); 
 
-  auto d = m_root->pruneOrdered2(p);
+#if CH_SPACEDIM==2
+  Vec3 p(a_point[0], a_point[1], m_zCoord);
+#else
+  Vec3 p(a_point[0], a_point[1], a_point[2]);
+#endif
+
+  auto d = m_root->pruneTree(p);
 
   high_resolution_clock::time_point t2 = high_resolution_clock::now();
   duration<double> time_span = duration_cast<duration<double>>(t2 - t1);

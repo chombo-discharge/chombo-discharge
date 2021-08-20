@@ -187,7 +187,7 @@ namespace Dcel {
 
   template <class T>
   inline
-  void MeshT<T>::setInsideOutsideAlgorithm(const InsideOutsideAlgorithm a_algorithm) noexcept {
+  void MeshT<T>::setInsideOutsideAlgorithm(typename Dcel::Polygon2D<T>::InsideOutsideAlgorithm a_algorithm) noexcept {
     for (auto& f : m_faces){
       f->setInsideOutsideAlgorithm(a_algorithm);
     }
@@ -195,7 +195,7 @@ namespace Dcel {
 
   template <class T>
   inline
-  void MeshT<T>::reconcile(VertexNormalWeight a_weight) noexcept {
+  void MeshT<T>::reconcile(typename Dcel::MeshT<T>::VertexNormalWeight a_weight) noexcept {
     this->reconcileFaces();
     this->reconcileEdges();
     this->reconcileVertices(a_weight);
@@ -219,7 +219,7 @@ namespace Dcel {
 
   template <class T>
   inline
-  void MeshT<T>::reconcileVertices(VertexNormalWeight a_weight) noexcept {
+  void MeshT<T>::reconcileVertices(typename Dcel::MeshT<T>::VertexNormalWeight a_weight) noexcept {
     for (auto& v : m_vertices){
       switch(a_weight) {
       case VertexNormalWeight::None:

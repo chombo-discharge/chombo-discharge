@@ -69,8 +69,12 @@ namespace Physics {
       void setupSigma();
   
       // IO routines
+#ifdef CH_USE_HDF5
       void writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const override;
+#endif      
+#ifdef CH_USE_HDF5      
       void readCheckpointData(HDF5Handle& a_handle, const int a_lvl) override;
+#endif
       virtual void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const override;
       void writeJ(EBAMRCellData& a_output, int& a_icomp) const;
       void writeNumParticlesPerPatch(EBAMRCellData& a_output, int& a_icomp) const;

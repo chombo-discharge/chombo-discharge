@@ -49,6 +49,7 @@
 #include <CD_MFHelmholtzOpFactory.H>
 #include <CD_MFQuadCFInterp.H>
 #include <CD_MFLevelGrid.H>
+#include <CD_Timer.H>
 #include <CD_MFFluxReg.H>
 #include <CD_MFCoarAve.H>
 #include <CD_Units.H>
@@ -75,7 +76,7 @@ bool ProxyFieldSolver::solve(MFAMRCellData&       a_potential,
   std::string str;
   pp.get("solver", str);
 
-  Real t1 = -MPI_Wtime();
+  Real t1 = -Timer::wallClock();
   if(str == "ebcond"){
     this->solveEBCond(   gasData, gasResi);
   }
@@ -88,7 +89,7 @@ bool ProxyFieldSolver::solve(MFAMRCellData&       a_potential,
   else{
     MayDay::Error("ProxyFieldSolver::solve - bad argument to ProxyFieldSolver.solver");
   }
-  t1 += MPI_Wtime();
+  t1 += Timer::wallClock();
   if(procID() == 0) std::cout << "solve time = " << t1 << "\n";
 
   m_amr->averageDown(a_potential, m_realm);
@@ -563,9 +564,9 @@ void ProxyFieldSolver::solveHelmholtz(EBAMRCellData& a_phi, EBAMRCellData& a_res
   multigridSolver.m_verbosity=10;
   multigridSolver.init(phi, rhs, finestLevel, 0);
   multigridSolver.m_convergenceMetric = multigridSolver.computeAMRResidual(zer, rhs, finestLevel, baseLevel);
-  Real t1 = -MPI_Wtime();
+  Real t1 = -Timer::wallClock();
   multigridSolver.solveNoInit(phi, rhs, finestLevel, baseLevel, false);
-  t1 += MPI_Wtime();
+  t1 += Timer::wallClock();
   if(procID() == 0) std::cout << "Multigrid solve time for Helm = " << t1 << std::endl;
 }
 
@@ -834,9 +835,9 @@ void ProxyFieldSolver::solveMF(MFAMRCellData&       a_potential,
 
   multigridSolver.m_verbosity = 10;
   multigridSolver.init(phi, rhs, finestLevel, baseLevel);
-  Real t1 = -MPI_Wtime();
+  Real t1 = -Timer::wallClock();
   multigridSolver.solveNoInit(phi, rhs, finestLevel, baseLevel, false);
-  t1 += MPI_Wtime();
+  t1 += Timer::wallClock();
   if(procID() == 0) std::cout << "Multigrid solve time for MFHelm = " << t1 << std::endl;
 }
 

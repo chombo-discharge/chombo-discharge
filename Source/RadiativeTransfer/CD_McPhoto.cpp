@@ -583,6 +583,7 @@ void McPhoto::writePlotFile(){
   MayDay::Error("McPhoto::writePlotFile - not implemented for McPhoto (yet)");
 }
 
+#ifdef CH_USE_HDF5
 void McPhoto::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const {
   CH_TIME("McPhoto::writeCheckpointLevel");
   if(m_verbosity > 5){
@@ -596,7 +597,9 @@ void McPhoto::writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) cons
   std::string str = m_name + "_particles";
   writeParticlesToHDF(a_handle, m_photons[a_level], str);
 }
+#endif
 
+#ifdef CH_USE_HDF5
 void McPhoto::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
   CH_TIME("McPhoto::readCheckpointLevel");
   if(m_verbosity > 5){
@@ -610,6 +613,7 @@ void McPhoto::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
   std::string str = m_name + "_particles";
   readParticlesFromHDF(a_handle, m_photons[a_level], str);
 }
+#endif
 
 Vector<std::string> McPhoto::getPlotVariableNames() const {
   CH_TIME("McPhoto::getPlotVariableNames");

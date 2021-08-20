@@ -4,19 +4,19 @@
  */
 
 /*!
-  @file   CD_DcelPolyImplem.H
-  @brief  Implementation of CD_DcelPoly.H
+  @file   CD_DcelPolygon2DImplem.H
+  @brief  Implementation of CD_DcelPolygon.H
   @author Robert Marskar
 */
 
-#ifndef CD_DcelPolyImplem_H
-#define CD_DcelPolyImplem_H
+#ifndef CD_DcelPolygon2DImplem_H
+#define CD_DcelPolygon2DImplem_H
 
 // Std includes
 #include <iostream>
 
 // Our includes
-#include <CD_DcelPoly.H>
+#include <CD_DcelPolygon2D.H>
 #include <CD_NamespaceHeader.H>
 
 namespace Dcel {
@@ -43,7 +43,7 @@ namespace Dcel {
       ret = this->isPointInsidePolygonWindingNumber(a_point);
       break;
     default:
-      std::cerr << "In file 'CD_DcelPolyImplem.H' function Dcel::Polygon2D<T>::isPointInside - unsupported algorithm requested.\n";
+      std::cerr << "In file 'CD_DcelPolygon2DImplem.H' function Dcel::Polygon2D<T>::isPointInside - unsupported algorithm requested.\n";
     }
 
     return ret;

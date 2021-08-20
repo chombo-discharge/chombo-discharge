@@ -77,15 +77,19 @@ template <typename T>
 void RtPhysicsStepper<T>::postInitialize(){
 }
 
+#ifdef CH_USE_HDF5      
 template <typename T>
 void RtPhysicsStepper<T>::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const {
   m_solver->writeCheckpointLevel(a_handle, a_lvl);
 }
+#endif
 
+#ifdef CH_USE_HDF5      
 template <typename T>
 void RtPhysicsStepper<T>::readCheckpointData(HDF5Handle& a_handle, const int a_lvl){
   m_solver->readCheckpointLevel(a_handle, a_lvl);
 }
+#endif
 
 template <typename T>
 void RtPhysicsStepper<T>::postCheckpointSetup() {

@@ -212,7 +212,9 @@ public:
     @param[in]   a_level Grid level
     @details This writes m_potential[a_level] to the checkpoint file. 
   */
+#ifdef CH_USE_HDF5
   virtual void writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const;
+#endif
 
   /*!
     @brief Read checkpoint data onto a level
@@ -220,7 +222,9 @@ public:
     @param[in] const int a_level Grid level
     @details This fills m_potential[a_level] with data from a_handle. 
   */
+#ifdef CH_USE_HDF5  
   virtual void readCheckpointLevel(HDF5Handle& a_handle, const int a_level);
+#endif
 
   /*!
     @brief Post checkpoint method. 

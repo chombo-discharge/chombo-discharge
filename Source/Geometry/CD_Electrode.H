@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_Electrode.H
-  @brief  Declaring electrod
+  @brief  Declaration of an electrode class
   @author Robert marskar
 */
 
@@ -20,51 +20,77 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief electrode class. Simple tuple.
+  @brief Electrode class for encapsulating the concept of an electrical conductor. 
 */
 class Electrode {
 public:
 
-  //
+  /*!
+    @brief Default constructor. Must subsequently call define()
+  */
   Electrode();
   
   /*!
-    @brief Constructor. Calls define
+    @brief Constructor. 
+    @param[in] a_baseIF          Implicit function for the electrode
+    @param[in] a_live            Live electrode or not
+    @param[in] a_voltageFraction Fraction of live voltage (if live)
+    @note Calls the define function
   */
-  Electrode(RefCountedPtr<BaseIF> a_baseif, bool a_live, Real a_fraction = 1.0);
+  Electrode(const RefCountedPtr<BaseIF>& a_baseIF, const bool a_live, const Real a_voltageFraction = 1.0);
 
   /*!
-    @brief 
+    @brief Destructor (does nothing)
   */
   virtual ~Electrode();
 
   /*!
     @brief Define function
+    @param[in] a_baseIF          Implicit function for the electrode
+    @param[in] a_live            Live electrode or not
+    @param[in] a_voltageFraction Fraction of live voltage (if live)
   */
-  virtual void define(RefCountedPtr<BaseIF> a_baseif, bool a_live, Real a_fraction = 1.0);
+  virtual void define(const RefCountedPtr<BaseIF>& a_baseIF, const bool a_live, const Real a_voltageFraction = 1.0);
 
   /*!
     @brief Get implicit function
+    @return Returns m_baseIF
   */
   virtual const RefCountedPtr<BaseIF>& getImplicitFunction() const;
 
   /*!
-    @brief Get implicit function
+    @brief Get live or not. 
+    @return Returns m_isLive
   */
   virtual const bool& isLive() const;
 
   /*!
-    @brief Get fraction
+    @brief Get fraction of live voltage. 
+    @return m_voltageFraction
   */
   virtual const Real& getFraction() const;
 
 protected:
-  std::pair<RefCountedPtr<BaseIF>, bool> m_tuple;
+
+  /*!
+    @brief Implicit function
+  */
+  RefCountedPtr<BaseIF> m_baseIF;
+
+  /*!
+    @brief Live or not
+  */
+  bool m_isLive;
+
+  /*!
+    @brief Is defined or not
+  */
+  bool m_isDefined;
 
   /*!
     @brief Fraction of the live potential
   */
-  Real m_fraction;
+  Real m_voltageFraction;
 };
 
 #include <CD_NamespaceFooter.H>

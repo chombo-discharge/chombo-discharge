@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_CdrMuscl.H
-  @brief  Declaration of a muscl class for the convection diffusion reaction equations
+  @brief  Declaration of a class which implements CdrTGA using MUSCL for advection. 
   @author Robert Marskar
 */
 
@@ -18,81 +18,88 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Class that uses MUSCL discretization for the advective term in the cdr equation
+  @brief Class that uses MUSCL discretization advection.
+  @details This class performs MUSCL-type advection using a van Leer limiter for obtaining the face-centered states. 
 */
 class CdrMuscl : public CdrTGA {
 public:
 
   /*!
-    @brief Constructor
+    @brief Default constructor. 
   */
   CdrMuscl();
 
   /*!
-    @brief Destructor
+    @brief Destructor (does nothing)
   */
   virtual ~CdrMuscl();
 
   /*!
-    @brief Parse options
+    @brief Parse class options to put object in usable state. 
   */
   virtual void parseOptions() override;
 
   /*!
-    @brief Parse options
+    @brief Parse runtime options
   */
   virtual void parseRuntimeOptions() override;
 
   /*!
-    @brief Pure advective advance. Calling this is an error - SG currently only works with MOL methods.
-  */
-  virtual void advance_advect(EBAMRCellData& a_phi, const Real a_dt);
-
-  /*!
     @brief MUSCL advection to faces
+    @param[out] a_facePhi  Phi on face centers
+    @param[in]  a_cellPhi  Phi on cell centers
+    @param[in]  a_extrapDt Time centering (i.e. extrapolation) of the face-centered states. 
+    @details This compute the face-centered states using van Leer limiting. It calls computeSlopes(...) and upwind(...). 
   */
-  virtual void advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt) override;
-
-  /*!
-    @brief Allocate internal stuff
-  */
-  virtual void allocateInternals() override;
+  virtual void advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_cellPhi, const Real a_extrapDt) override;
 
 protected:
 
   /*!
-    @brief
+    @brief If true, slopes are limited (always use limiting). 
   */
-  bool m_slopelim;
+  bool m_limitSlopes;
 
   /*!
-    @brief Compute slopes
+    @brief Compute slopes. 
+    @param[out] a_deltaC  Cell slopes. Must have SpaceDim components (for slopes in each direction). 
+    @param[in]  a_cellPhi Cell-centered states
+    @param[in]  a_cellBox Cell-centered box identifying the cells where we compute the slopes. 
+    @param[in]  a_domain  Domain on grid level
+    @param[in]  a_level   AMR level
+    @param[in]  a_dit     Grid index
   */
   virtual void computeSlopes(EBCellFAB&           a_deltaC,
-			      const EBCellFAB&     a_phi,
-			      const Box&           a_box,
-			      const ProblemDomain& a_domain,
-			      const int            a_level,
-			      const DataIndex&     a_dit);
+			     const EBCellFAB&     a_cellPhi,
+			     const Box&           a_cellBox,
+			     const ProblemDomain& a_domain,
+			     const int            a_level,
+			     const DataIndex&     a_dit);
 
   /*!
-    @brief Compute outflow fluxes at the boundary
-  */
-  virtual void computeBoundaryOutflow(LevelData<EBFluxFAB>& a_flux, const int a_lvl);
-
-  /*!
-    @brief Riemann solve (just choose the upwind side)
+    @brief Upwind/Riemann solve. This extrapolates the cell-centered data to the (inside) face centers and chooses the upwind side. 
+    @param[out] a_facePhi Face-centered states.
+    @param[in]  a_slopes  Cell slopes
+    @param[in]  a_cellPhi Cell-centered states
+    @param[in]  a_faceVel Face-centered velocities.
+    @param[in]  a_domain  Domain on grid level.
+    @param[in]  a_cellBox Grid box/patch
+    @param[in]  a_level   AMR level
+    @param[in]  a_dit     Grid index. 
   */
   virtual void upwind(EBFluxFAB&           a_facePhi,
 		      const EBCellFAB&     a_slopes,
-		      const EBCellFAB&     a_phi,
-		      const EBFluxFAB&     a_velo,
+		      const EBCellFAB&     a_cellPhi,
+		      const EBFluxFAB&     a_faceVel,
 		      const ProblemDomain& a_domain,
-		      const Box&           a_box,
+		      const Box&           a_cellBox,
 		      const int&           a_level,
 		      const DataIndex&     a_dit);
 
-  virtual void parseSlopeLimiter();     // Parses slope limiter settings
+  /*!
+    @brief Parse slope limiting on/off
+  */
+  virtual void parseSlopeLimiter();
 };
 
 #include <CD_NamespaceFooter.H>

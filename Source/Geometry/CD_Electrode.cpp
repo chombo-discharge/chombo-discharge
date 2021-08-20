@@ -14,37 +14,56 @@
 #include <CD_NamespaceHeader.H>
 
 Electrode::Electrode(){
+  CH_TIME("Electrode::Electrode()");
+
+  m_isDefined = false;
 }
   
-Electrode::Electrode(RefCountedPtr<BaseIF> a_baseif, bool a_live, Real a_fraction){
-  this->define(a_baseif, a_live, a_fraction);
+Electrode::Electrode(const RefCountedPtr<BaseIF>& a_baseIF, const bool a_live, const Real a_voltageFraction) : Electrode() {
+  CH_TIME("Electrode::Electrode(RefCountedPtr<BaseIF>, bool, Real");
+
+  CH_assert(!a_baseIF.isNull());
+  
+  this->define(a_baseIF, a_live, a_voltageFraction);
 }
 
 Electrode::~Electrode(){
 
 }
 
-void Electrode::define(RefCountedPtr<BaseIF> a_baseif, bool a_live, Real a_fraction){
-  m_tuple    = std::pair<RefCountedPtr<BaseIF>, bool>(a_baseif, a_live);
+void Electrode::define(const RefCountedPtr<BaseIF>& a_baseIF, const bool a_live, const Real a_voltageFraction) {
+  CH_TIME("Electrode::define(RefCountedPtr<BaseIF>, bool, Real");
 
-  if(a_live){
-    m_fraction = a_fraction;
-  }
-  else{
-    m_fraction = 0.0;
-  }
+  CH_assert(!a_baseIF.isNull());
+  
+  m_baseIF          = a_baseIF;
+  m_isLive          = a_live;
+  m_voltageFraction = a_voltageFraction;
+  m_isDefined       = true;
 }
 
 const RefCountedPtr<BaseIF>& Electrode::getImplicitFunction() const {
-  return m_tuple.first;
+  CH_TIME("Electrode::getImplicitFunction()");
+
+  CH_assert(m_isDefined);
+  
+  return (m_baseIF);
 }
   
 const bool& Electrode::isLive() const {
-  return m_tuple.second;
+  CH_TIME("Electrode::isLive()");
+
+  CH_assert(m_isDefined);
+  
+  return (m_isLive);
 }
 
 const Real& Electrode::getFraction() const {
-  return m_fraction;
+  CH_TIME("Electrode::getFraction()");
+
+  CH_assert(m_isDefined);  
+  
+  return (m_voltageFraction);
 }
 
 #include <CD_NamespaceFooter.H>

@@ -42,8 +42,12 @@ namespace Physics {
       void allocate() override;
 
       // IO routines
-      void writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const override{}
+#ifdef CH_USE_HDF5
+      void writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const override;
+#endif
+#ifdef CH_USE_HDF5      
       void readCheckpointData(HDF5Handle& a_handle, const int a_lvl) override;
+#endif
       void postCheckpointSetup() override {}
       int getNumberOfPlotVariables() const override;
       void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const override;

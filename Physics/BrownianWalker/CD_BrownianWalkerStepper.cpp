@@ -219,6 +219,7 @@ void BrownianWalkerStepper::setVelocity(const int a_level){
   }
 }
 
+#ifdef CH_USE_HDF5
 void BrownianWalkerStepper::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const{
   CH_TIME("BrownianWalkerStepper::writeCheckpointData");
   if(m_verbosity > 5){
@@ -227,7 +228,9 @@ void BrownianWalkerStepper::writeCheckpointData(HDF5Handle& a_handle, const int 
 
   m_solver->writeCheckpointLevel(a_handle, a_lvl);
 }
+#endif
 
+#ifdef CH_USE_HDF5
 void BrownianWalkerStepper::readCheckpointData(HDF5Handle& a_handle, const int a_lvl) {
   CH_TIME("BrownianWalkerStepper::readCheckpointData");
   if(m_verbosity > 5){
@@ -236,6 +239,7 @@ void BrownianWalkerStepper::readCheckpointData(HDF5Handle& a_handle, const int a
   
   m_solver->readCheckpointLevel(a_handle, a_lvl);
 }
+#endif
 
 void BrownianWalkerStepper::postCheckpointSetup() {
   CH_TIME("BrownianWalkerStepper::postCheckpointSetup");

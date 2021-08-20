@@ -5,35 +5,47 @@
 
 /*!
   @file   CD_CdrLayout.H
-  @brief  Declaration of a class that holds a set of CdrSolvers
+  @brief  Declaration of a class that holds a set of CdrSolvers (to cut down on typing). 
   @author Robert Marskar
 */
 
 #ifndef CD_CdrLayout_H
 #define CD_CdrLayout_H
 
-
 // Our includes
 #include <CD_CdrSolver.H>
 #include <CD_NamespaceHeader.H>
 
-// Needs forward declaration.
+/*!
+  @brief Forward declare iterator
+  @see CD_CdrIterator.H
+*/
 template <class T>
 class CdrIterator;
 
 /*!
   @brief Class for holding a set of CdrSolvers. 
+  @details This is primarily a utility class that just cuts down on typing when there are multiple species are being advected/diffused. This class
+  simply stores a set of CdrSolvers, and it contains an "iterator" for iterating through them. This is simply meant to cut down on typing. Note that a 
+  TimeStepper can keep an instance this class rather than e.g. a Vector<RefCountedPtr<CdrSolver> >, but fundamentally there is no difference between the two. 
+  The CdrLayout can be constructed through a factory method, i.e. the user can do a quick-generation of a set of CdrSolvers by using the factory method for
+  instantiating an arbitrary number of CdrSolvers. 
+  @note A separate use case for this is class is that it allows segregation between groups of CdrSolvers that live on different realms and phases. 
 */
 template <class T>
 class CdrLayout {
 public:
 
-  CdrLayout();
+  /*!
+    @brief Disallowed weak constructor. Use the full constructor. 
+  */
+  CdrLayout() = delete;
 
   /*!
-    @brief Full constructor
+    @brief Full constructor, setting the number of solvers to be instantiated. 
+    @param[in] a_species List of species that defines this solver. 
   */
-  CdrLayout(const Vector<RefCountedPtr<CdrSpecies> >& a_plaskin);
+  CdrLayout(const Vector<RefCountedPtr<CdrSpecies> >& a_species);
 
   /*!
     @brief Destructor
@@ -42,21 +54,24 @@ public:
 
   /*!
     @brief Get phase
+    @return Return the phase on which all CdrSolvers are allocated. 
   */
   virtual phase::which_phase getPhase() const;
 
   /*!
-    @brief Get the iterator
+    @brief Get an iterator which can iterate through the various Cdr solvers. 
   */
   virtual CdrIterator<T> iterator();
 
   /*!
-    @brief Get the Realm
+    @brief Get the realm where the Cdr solvers live. 
+    @return Return realm name. 
   */
-  virtual const std::string getRealm() const;
+  virtual std::string getRealm() const;
 
   /*!
-    @brief Set
+    @brief Set realm for all CdrSolvers
+    @param[in] a_realm Realm name
   */
   virtual void setRealm(const std::string a_realm);
 
@@ -71,9 +86,10 @@ public:
   virtual void parseRuntimeOptions();
 
   /*!
-    @brief Add solver
+    @brief Add solver. This appends a_solver to m_solvers
+    @param[in] a_solver Solver to add to the layout. 
   */
-  virtual void addSolver(RefCountedPtr<T> a_solver);
+  virtual void addSolver(RefCountedPtr<T>& a_solver);
 
   /*!
     @brief Allocate internal storage for solvers
@@ -86,17 +102,22 @@ public:
   virtual void deallocateInternals();
 
   /*!
-    @brief Cache states before regrid step
+    @brief Call preRegrid(...) method for all the CdrSolvers
+    @param[in] a_lbase          Coarsest level which changes during regrid
+    @param[in] a_oldFinestLevel Finest level before the regrid (i.e., the current finest level)
   */
-  virtual void preRegrid(const int a_lbase, const int a_finestLevel);
+  virtual void preRegrid(const int a_lbase, const int a_oldFinestLevel);
 
   /*!
-    @brief Initial data
+    @brief Initial data. Fill all solvers with initial data.
   */
   virtual void initialData();
 
   /*!
-    @brief Regrid method. 
+    @brief Regrid method. Calls regrid(...) for every CdrSolver
+    @param[in] a_lmin           Coarsest level that changed during the regrid. 
+    @param[in] a_oldFinestLevel Finest level before the regrid
+    @param[in] a_newFinestLevel Finest level after the regrid
   */
   virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel);
 
@@ -106,118 +127,63 @@ public:
   virtual void registerOperators();
 
   /*!
-    @brief Set amr
+    @brief Set AmrMesh for all CdrSolvers
+    @param[in] a_amrMesh AmrMesh
   */
-  virtual void setAmr(const RefCountedPtr<AmrMesh>& a_amr);
+  virtual void setAmr(const RefCountedPtr<AmrMesh>& a_amrMesh);
 
   /*!
-    @brief Set the computational geometry
+    @brief Set the computational geometry for all CdrSolvers
+    @param[in] a_computationalGeometry Computational geometry
   */
   virtual void setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
 
   /*!
     @brief Set phase
-    @details This must be done BEFORE callilng setComputationalGeometry
+    @param[i] a_phase Phase
   */
-  virtual void setPhase(phase::which_phase a_phase = phase::gas);
+  virtual void setPhase(const phase::which_phase a_phase = phase::gas);
 
   /*!
-    @brief Set verbosity.
+    @brief Set verbosity for all CdrSolvers
+    @param[in] a_verbosity Verbosity
   */
   virtual void setVerbosity(const int a_verbosity);
 
   /*!
     @brief Set time
+    @param[in] a_step Time step
+    @param[in] a_time Time
+    @param[in] a_dt   Time increment
   */
   virtual void setTime(const int a_step, const Real a_time, const Real a_dt);
 
   /*!
-    @brief Convenience function. Set velocity for all species. Mostly used for debugging.
-  */
-  virtual void setVelocity(const EBAMRCellData& a_velo);
-
-  /*!
-    @brief Convenience function. Set constant velocity for all species. Mostly used for debugging. 
-  */
-  virtual void setVelocity(const RealVect a_velo);
-
-  /*!
-    @brief Convenience function. Set diffusion coefficients for all species. Mostly used for debugging. 
-  */
-  virtual void setDiffusionCoefficient(const EBAMRFluxData& a_diffusionCoefficient, const EBAMRIVData& a_ebDiffusionCoefficient);
-
-  /*!
-    @brief Convenience function. Set constant diffusion coefficients for all species. Mostly used for debugging. 
-  */
-  virtual void setDiffusionCoefficient(const Real a_diffusionCoefficient);
-
-  /*!
-    @brief Convenience function. Set source terms for all species. Mostly used for debugging. 
-  */
-  virtual void setSource(const EBAMRCellData& a_source);
-
-  /*!
-    @brief Convenience function. Set constant source terms for all species. Mostly used for debugging. 
-  */
-  virtual void setSource(const Real a_source);
-
-  /*!
-    @brief Convenience function. Set the EB flux for all species. Mostly used for debugging. 
-  */
-  virtual void setEbFlux(const EBAMRIVData& a_ebFlux);
-
-  /*!
-    @brief Convenience function.Set the EB flux for all species. Mostly used for debugging. 
-  */
-  virtual void setEbFlux(const Real a_ebFlux);
-
-  /*!
-    @brief Convenience function. All solvers write plot files
+    @brief Convenience function. All solvers write plot files (for debugging purposes)
   */
   virtual void writePlotFile();
 
   /*!
-    @brief Get largest possible time step for advection part
+    @brief Get CFL time for advection
+    @return Returns the smallest explicit advective time step (minimized over solvers)
   */
   virtual Real computeAdvectionDt();
 
   /*!
-    @brief Get largest possible time step for diffusion part
+    @brief Get time step for explicit diffusion
+    @return Returns the smallest explicit diffusion time step (minimized over solvers)
   */
   virtual Real computeDiffusionDt();
 
   /*!
-    @brief Get largest possible time step for diffusion part
+    @brief Get the time step for explicit advection-diffusion
+    @return Returns the smallest explicit advection-diffusion time step (minimized over solvers)
   */
   virtual Real computeAdvectionDiffusionDt();
 
   /*!
-    @brief Get largest possible time step for source term
-  */
-  virtual Real computeSourceDt(const Real a_tolerance, const bool a_elec_only);
-
-  /*!
-    @brief Compute total charge in computational region
-  */
-  virtual Real computeTotalCharge();
-
-  /*!
-    @brief Compute mass for every species
-  */
-  virtual Vector<Real> computeMass();
-
-  /*!
-    @brief Compute charge for each species
-  */
-  virtual Vector<Real> computeCharge();
-
-  /*!
-    @brief Get all names
-  */
-  virtual Vector<std::string> getNames();
-
-  /*!
     @brief Get solvers
+    @return Returns all CdrSolvers in this layout. 
   */
   virtual Vector<RefCountedPtr<T> >& getSolvers();
 
@@ -232,84 +198,88 @@ public:
   virtual Vector<EBAMRCellData*> getSources();
 
   /*!
-    @brief Get all states
+    @brief Get all cell-centered states. 
   */
   virtual Vector<EBAMRCellData*> getPhis();
 
   /*!
-    @brief Get all velocities
+    @brief Get all cell-centered velocities. 
   */
   virtual Vector<EBAMRCellData*> getVelocities();
 
   /*!
-    @brief Get all diffusion coefficients
+    @brief Get all face-centered diffusion coefficients. 
   */
   virtual Vector<EBAMRFluxData*> getFaceCenteredDiffusionCoefficient();
 
   /*!
-    @brief Get all diffusion coefficients
+    @brief Get all EB-centered diffusion coefficients
   */
   virtual Vector<EBAMRIVData*> getEbCenteredDiffusionCoefficient();
 
   /*!
-    @brief Get the EB flux
+    @brief Get all EB flux data holders. 
   */
   virtual Vector<EBAMRIVData*> getEbFlux();
 
   /*!
-    @brief Get domain fluxes
+    @brief Get domain flux data holders. 
   */
   virtual Vector<EBAMRIFData*> getDomainFlux();
-
-  /*!
-    @brief Get mass redistribution
-  */
-  virtual bool getMassRedist();
 
 protected:
 
   /*!
-    @brief Realm
+    @brief Realm where solvers live. 
   */
   std::string m_realm;
 
   /*!
-    @brief Solvers
+    @brief Phase where solvers live. 
   */
-  Vector<RefCountedPtr<CdrSolver> > m_solvers;
-
-  /*!
-    @brief Species
-  */
-  Vector<RefCountedPtr<CdrSpecies> > m_species;
+  phase::which_phase m_phase;
 
   /*!
     @brief Verbosity
   */
-  int m_verbosity;
+  int m_verbosity;  
 
   /*!
-    @brief Mass redistribution for hyperbolic part
+    @brief Solver instantiations. 
   */
-  bool m_mass_redist;
+  Vector<RefCountedPtr<CdrSolver> > m_solvers;
 
   /*!
-    @brief phase
+    @brief Cdr species
   */
-  phase::which_phase m_phase;
+  Vector<RefCountedPtr<CdrSpecies> > m_species;
 };
 
 /*!
-  @brief Factory class for CdrLayout. 
-  @details Factory class is very simple; since we don't want to template CdrLayout2 we use a factory to instantiate solvers of 
-  any CdrSolver inherited class, and then return a layout with the casted classes. That's about it. 
+  @brief Factory class for CdrLayout. T is (usually) CdrSolver and S is the implementation class (e.g., CdrMuscl). 
+  @details Factory class is very simple; since we don't want to template CdrLayout further we use a factory to instantiate solvers of 
+  any CdrSolver inherited class, and then return a layout with the casted classes. That's about it. This is useful because it allows
+  the factory to act as a "casting-point" for switching between various solver implementation. 
 */
 template <class T, class S>
 class CdrFactory {
 public:
+  
+  /*!
+    @brief Default constructor (does nothing)
+  */
   CdrFactory();
+
+  /*!
+    @brief Default constructor (does nothing)
+  */  
   ~CdrFactory();
-  RefCountedPtr<CdrLayout<T> > newLayout(const Vector<RefCountedPtr<CdrSpecies> > a_species) const;
+
+  /*!
+    @brief Factory method, create a new CdrLayout
+    @details This creates a collection of CdrSolvers. Run-time errors will occur if the template S is not a derived class of T. 
+  */  
+  RefCountedPtr<CdrLayout<T> > newLayout(const Vector<RefCountedPtr<CdrSpecies> >& a_species) const;
 };
 
 #include <CD_NamespaceFooter.H>

@@ -21,7 +21,8 @@
 #include <CD_NamespaceHeader.H>
 
 CdrTGA::CdrTGA() : CdrSolver() {
-
+  CH_TIME("CdrTGA::CdrTGA()");
+  
   // Default settings
   m_name         = "CdrTGA";
   m_className    = "CdrTGA";
@@ -32,9 +33,9 @@ CdrTGA::~CdrTGA(){
 }
 
 void CdrTGA::registerOperators() {
-  CH_TIME("CdrTGA::registerOperators");
+  CH_TIME("CdrTGA::registerOperators()");
   if(m_verbosity > 5){
-    pout() << m_name + "::registerOperators" << endl;
+    pout() << m_name + "::registerOperators()" << endl;
   }
   
   // Need to register everything that the base class registered, plus the amr interpolator
@@ -44,9 +45,9 @@ void CdrTGA::registerOperators() {
 }
 
 void CdrTGA::allocateInternals() {
-  CH_TIME("CdrTGA::allocateInternals");
+  CH_TIME("CdrTGA::allocateInternals()");
   if(m_verbosity > 5){
-    pout() << m_name + "::allocateInternals" << endl;
+    pout() << m_name + "::allocateInternals()" << endl;
   }
 
   CdrSolver::allocateInternals();
@@ -62,13 +63,13 @@ void CdrTGA::advanceEuler(EBAMRCellData&       a_newPhi,
 			  const EBAMRCellData& a_oldPhi,
 			  const EBAMRCellData& a_source,
 			  const Real           a_dt){
-  CH_TIME("CdrTGA::advanceEuler");
+  CH_TIME("CdrTGA::advanceEuler(EBAMRCellData, EBAMRCellData, EBAMRCellData, Real)");
   if(m_verbosity > 5){
-    pout() << m_name + "::advanceEuler" << endl;
+    pout() << m_name + "::advanceEuler(EBAMRCellData, EBAMRCellData, EBAMRCellData, Real)" << endl;
   }
   
   if(m_isDiffusive){
-    this->setupDiffusionSolver(); // Set up gmg again since diffusion coefficients might change 
+    this->setupDiffusionSolver(); // Set up gmg again since diffusion coefficients might between time steps. 
     
     bool converged = false;
 
@@ -124,13 +125,13 @@ void CdrTGA::advanceTGA(EBAMRCellData&       a_newPhi,
 			const EBAMRCellData& a_oldPhi,
 			const EBAMRCellData& a_source,
 			const Real           a_dt){
-  CH_TIME("CdrTGA::advanceTGA(full)");
+  CH_TIME("CdrTGA::advanceTGA(EBAMRCellData, EBAMRCellData, EBAMRCellData, Real)");
   if(m_verbosity > 5){
-    pout() << m_name + "::advanceTGA(full)" << endl;
+    pout() << m_name + "::advanceTGA(EBAMRCellData, EBAMRCellData, EBAMRCellData, Real)" << endl;
   }
   
   if(m_isDiffusive){
-    this->setupDiffusionSolver(); // Set up gmg again since diffusion coefficients might change
+    this->setupDiffusionSolver(); // Set up gmg again since diffusion coefficients might change between time steps. 
     
     bool converged = false;
 
@@ -147,7 +148,7 @@ void CdrTGA::advanceTGA(EBAMRCellData&       a_newPhi,
     m_amr->alias(oldPhi, a_oldPhi);
     m_amr->alias(source,    a_source);
 
-    // Now do the TGA solve
+    // Do the TGA solve. 
     m_tgaSolver->oneStep(newPhi, oldPhi, source, a_dt, 0, finestLevel, false);
 
     const int status = m_multigridSolver->m_exitStatus;  // 1 => Initial norm sufficiently reduced
@@ -161,11 +162,12 @@ void CdrTGA::advanceTGA(EBAMRCellData&       a_newPhi,
 }
 
 void CdrTGA::setupDiffusionSolver(){
-  CH_TIME("CdrTGA::setupDiffusionSolver");
+  CH_TIME("CdrTGA::setupDiffusionSolver()");
   if(m_verbosity > 5){
-    pout() << m_name + "::setupDiffusionSolver" << endl;
+    pout() << m_name + "::setupDiffusionSolver()" << endl;
   }
 
+  // This sets up the multigrid Helmholtz solver and the TGA/Euler solvers. The TGA/Euler stuff is Chombo code.
   this->setupHelmholtzFactory();
   this->setupMultigrid();
   this->setupTGA();
@@ -173,9 +175,9 @@ void CdrTGA::setupDiffusionSolver(){
 }
 
 void CdrTGA::setupHelmholtzFactory(){
-  CH_TIME("CdrTGA::setupHelmholtzFactory");
+  CH_TIME("CdrTGA::setupHelmholtzFactory()");
   if(m_verbosity > 5){
-    pout() << m_name + "::setupHelmholtzFactory" << endl;
+    pout() << m_name + "::setupHelmholtzFactory()" << endl;
   }
   
   const int finestLevel = m_amr->getFinestLevel();
@@ -237,9 +239,9 @@ void CdrTGA::setupHelmholtzFactory(){
 }
 
 void CdrTGA::setupMultigrid(){
-  CH_TIME("CdrTGA::setupMultigrid");
+  CH_TIME("CdrTGA::setupMultigrid()");
   if(m_verbosity > 5){
-    pout() << m_name + "::setupMultigrid" << endl;
+    pout() << m_name + "::setupMultigrid()" << endl;
   }
 
   // Select the bottom solver
@@ -255,7 +257,7 @@ void CdrTGA::setupMultigrid(){
     botsolver = &m_gmres;
     m_gmres.m_verbosity = 0; // Shut up. 
   default:
-    MayDay::Error("CdrTGA::setupMultigrid - logic bust in bottom solver setup");
+    MayDay::Error("CdrTGA::setupMultigrid() - logic bust in bottom solver setup");
     break;
   }
 
@@ -269,7 +271,7 @@ void CdrTGA::setupMultigrid(){
     gmgType = 2;
     break;
   default:
-    MayDay::Error("CdrTGA::setupMultigrid -- logic bust in multigrid type selection");
+    MayDay::Error("CdrTGA::setupMultigrid() -- logic bust in multigrid type selection");
   }
 
   const int finestLevel              = m_amr->getFinestLevel();
@@ -312,17 +314,17 @@ void CdrTGA::setupMultigrid(){
 }
 
 void CdrTGA::setupTGA(){
-  CH_TIME("CdrTGA::setupTGA");
+  CH_TIME("CdrTGA::setupTGA()");
   if(m_verbosity > 5){
-    pout() << m_name + "::setupTGA" << endl;
+    pout() << m_name + "::setupTGA()" << endl;
   }
   
-  const int finestLevel       = m_amr->getFinestLevel();
-  const ProblemDomain coar_dom = m_amr->getDomains()[0];
-  const Vector<int> ref_rat    = m_amr->getRefinementRatios();
+  const int finestLevel              = m_amr->getFinestLevel();
+  const ProblemDomain coarsestDomain = m_amr->getDomains()[0];
+  const Vector<int> refinementRatios = m_amr->getRefinementRatios();
 
   m_tgaSolver = RefCountedPtr<AMRTGA<LevelData<EBCellFAB> > >
-    (new AMRTGA<LevelData<EBCellFAB> > (m_multigridSolver, *m_helmholtzOpFactory, coar_dom, ref_rat, 1 + finestLevel, m_multigridSolver->m_verbosity));
+    (new AMRTGA<LevelData<EBCellFAB> > (m_multigridSolver, *m_helmholtzOpFactory, coarsestDomain, refinementRatios, 1 + finestLevel, m_multigridSolver->m_verbosity));
 }
 
 void CdrTGA::setupEuler(){
@@ -331,22 +333,19 @@ void CdrTGA::setupEuler(){
     pout() << m_name + "::setupEuler" << endl;
   }
 
-  const int finestLevel       = m_amr->getFinestLevel();
-  const ProblemDomain coar_dom = m_amr->getDomains()[0];
-  const Vector<int> ref_rat    = m_amr->getRefinementRatios();
+  const int finestLevel              = m_amr->getFinestLevel();
+  const ProblemDomain coarsestDomain = m_amr->getDomains()[0];
+  const Vector<int> refinementRatios = m_amr->getRefinementRatios();
 
   m_eulerSolver = RefCountedPtr<EBBackwardEuler> 
-    (new EBBackwardEuler (m_multigridSolver, *m_helmholtzOpFactory, coar_dom, ref_rat, 1 + finestLevel, m_multigridSolver->m_verbosity));
+    (new EBBackwardEuler (m_multigridSolver, *m_helmholtzOpFactory, coarsestDomain, refinementRatios, 1 + finestLevel, m_multigridSolver->m_verbosity));
 }
 
 void CdrTGA::computeDivJ(EBAMRCellData& a_divJ, EBAMRCellData& a_phi, const Real a_extrapDt, const bool a_ebFlux, const bool a_domainFlux){
-  CH_TIME("CdrTGA::computeDivJ(divF, state)");
+  CH_TIME("CdrTGA::computeDivJ(EBAMRCellData, EBAMRCelLData, Real, bool, bool)");
   if(m_verbosity > 5){
-    pout() << m_name + "::computeDivJ(divF, state)" << endl;
+    pout() << m_name + "::computeDivJ(EBAMRCellData, EBAMRCelLData, Real, bool, bool)" << endl;
   }
-
-  const int comp  = 0;
-  const int ncomp = 1;
 
   // Fill ghost cells
   m_amr->interpGhostPwl(a_phi, m_realm, m_phase);
@@ -400,9 +399,9 @@ void CdrTGA::computeDivJ(EBAMRCellData& a_divJ, EBAMRCellData& a_phi, const Real
 }
 
 void CdrTGA::computeDivF(EBAMRCellData& a_divF, EBAMRCellData& a_phi, const Real a_extrapDt, const bool a_ebFlux, const bool a_domainFlux){
-  CH_TIME("CdrTGA::computeDivF(divF, state)");
+  CH_TIME("CdrTGA::computeDivF(EBAMRCellData, EBAMRCellData, Real, bool, bool)");
   if(m_verbosity > 5){
-    pout() << m_name + "::computeDivF(divF, state)" << endl;
+    pout() << m_name + "::computeDivF(EBAMRCellData, EBAMRCellData, Real, bool, bool)" << endl;
   }
 
   if(m_isMobile){
@@ -430,24 +429,15 @@ void CdrTGA::computeDivF(EBAMRCellData& a_divF, EBAMRCellData& a_phi, const Real
   else{
     DataOps::setValue(a_divF, 0.0);
   }
-
-#if 0 // Debug
-  Real volume;
-  const Real sum = EBLevelDataOps::noKappaSumLevel(volume, *a_divF[0], 0, m_amr->getDomains()[0]);
-
-  std::cout << sum << std::endl;
-#endif
-
 }
 
 void CdrTGA::computeDivD(EBAMRCellData& a_divD, EBAMRCellData& a_phi, const bool a_ebFlux, const bool a_domainFlux){
-  CH_TIME("CdrTGA::computeDivD");
+  CH_TIME("CdrTGA::computeDivD(EBAMRCellData, EBAMRCellData, bool, bool)");
   if(m_verbosity > 5){
-    pout() << m_name + "::computeDivD" << endl;
+    pout() << m_name + "::computeDivD(EBAMRCellData, EBAMRCellData, bool, bool)" << endl;
   }
 
   if(m_isDiffusive){
-    const int ncomp = 1;
 
     // Fill ghost cells
     m_amr->interpGhostPwl(a_phi, m_realm, m_phase);
@@ -476,6 +466,11 @@ void CdrTGA::computeDivD(EBAMRCellData& a_divD, EBAMRCellData& a_phi, const bool
 }
 
 void CdrTGA::parseMultigridSettings(){
+  CH_TIME("CdrTGA::parseMultigridSettings()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parseMultigridSettings()" << endl;
+  }
+  
   ParmParse pp(m_className.c_str());
 
   std::string str;
@@ -552,9 +547,9 @@ void CdrTGA::parseMultigridSettings(){
 }
 
 void CdrTGA::writePlotData(EBAMRCellData& a_output, int& a_comp){
-  CH_TIME("CdrTGA::writePlotData");
+  CH_TIME("CdrTGA::writePlotData(EBAMRCellData, int)");
   if(m_verbosity > 5){
-    pout() << m_name + "::writePlotData" << endl;
+    pout() << m_name + "::writePlotData(EBAMRCellData, int)" << endl;
   }
 
   if(m_plotPhi) {

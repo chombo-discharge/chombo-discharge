@@ -22,6 +22,7 @@
 #include <CD_CdrPlasmaImExSdcStorage.H>
 #include <CD_DataOps.H>
 #include <CD_Units.H>
+#include <CD_Timer.H>
 #include <CD_CdrGodunov.H>
 #include "CD_LaPackUtils.H"
 #include <CD_NamespaceHeader.H>
@@ -684,32 +685,32 @@ void CdrPlasmaImExSdcStepper::integrate(const Real a_dt, const Real a_time, cons
     // which is what we need to do at the start of the time step. In principle, these things do not change
     // and so we could probably store them somewhere for increased performance. 
     if(m == 0 && !a_lagged_terms){ // This updates the CDR boundary conditions; since these are used to compute the slopes,
-      t0 = MPI_Wtime();            // and the m=0 hyperbolic slopes do not change, we only need to do this for the predictor. 
+      t0 = Timer::wallClock();            // and the m=0 hyperbolic slopes do not change, we only need to do this for the predictor. 
       CdrPlasmaImExSdcStepper::computeCdrEbStates();
       CdrPlasmaImExSdcStepper::computeCdrFluxes(a_time);
       CdrPlasmaImExSdcStepper::computeCdrDomainStates();
       CdrPlasmaImExSdcStepper::computeCdrDomainFluxes(a_time);
       CdrPlasmaImExSdcStepper::computeSigmaFlux();
-      t1 = MPI_Wtime();
+      t1 = Timer::wallClock();
 
       total_time = -t0;
       setup_time = t1-t0;
     }
     
     // This does the transient rte advance. Source terms were uåpdated in the computeReactionNetwork routine above. 
-    t0 = MPI_Wtime();
+    t0 = Timer::wallClock();
     if(!(m_rte->isStationary())) CdrPlasmaImExSdcStepper::integrateRtTransient(a_dt);
 
     // This computes phi_(m+1) = phi_m + dtm*FAR_m(phi_m) + lagged quadrature and lagged advection-reaction
-    t0 = MPI_Wtime();
+    t0 = Timer::wallClock();
     CdrPlasmaImExSdcStepper::integrateAdvectionReaction(a_dt, m, a_lagged_terms);
-    t1 = MPI_Wtime();
+    t1 = Timer::wallClock();
     advect_time += t1-t0;
 
     // This does the diffusion advance. It also adds in the remaining lagged diffusion terms before the implicit diffusion solve
-    t0 = MPI_Wtime();
+    t0 = Timer::wallClock();
     CdrPlasmaImExSdcStepper::integrateDiffusion(a_dt, m, a_lagged_terms);
-    t1 = MPI_Wtime();
+    t1 = Timer::wallClock();
     diffusive_time += t1-t0;
 
     // After the diffusion step we update the Poisson and *stationary* RTE equations
@@ -745,7 +746,7 @@ void CdrPlasmaImExSdcStepper::integrate(const Real a_dt, const Real a_time, cons
 
     time += m_dtm[m];
   }
-  t1 = MPI_Wtime();
+  t1 = Timer::wallClock();
 
   total_time += t1;
 
@@ -770,11 +771,11 @@ void CdrPlasmaImExSdcStepper::integrateAdvectionReaction(const Real a_dt, const 
   // if m=0 and a_lagged_terms=true, we can increment directly with the precomputed advection-reaction. This means that
   // we can skip the advective advance. The sigma advance is accordingly also skipped.
   const bool skip = (a_m == 0 && a_lagged_terms);
-  const Real t0 = MPI_Wtime();
+  const Real t0 = Timer::wallClock();
   if(!skip){
     CdrPlasmaImExSdcStepper::integrateAdvection(a_dt, a_m, a_lagged_terms);
   }
-  const Real t1 = MPI_Wtime();
+  const Real t1 = Timer::wallClock();
 
   // Add in the reaction term and then compute the new operator slopes.
   // If this is the corrector and m=0, we skipped the advection advance because we can use the precomputed
@@ -832,7 +833,7 @@ void CdrPlasmaImExSdcStepper::integrateAdvectionReaction(const Real a_dt, const 
       DataOps::incr(phi_m1, scratch, 0.5*a_dt);    // phi_(m+1)^(k+1) = phi_m^(k+1) + dtm*(FAR_m^(k+1) - FAR_m^k) + I_m^(m+1)
     }
   }
-  const Real t2 = MPI_Wtime();
+  const Real t2 = Timer::wallClock();
 
   // Add in the lagged terms for sigma. As above, m=0 and corrector is a special case where we just use the old slopes.
   EBAMRIVData& sigma_m1      = m_sigma_scratch->getSigmaSolver()[a_m+1];
@@ -843,7 +844,7 @@ void CdrPlasmaImExSdcStepper::integrateAdvectionReaction(const Real a_dt, const 
     DataOps::incr(sigma_m1, Fsig_m, m_dtm[a_m]);
   }
 
-  const Real t3 = MPI_Wtime();
+  const Real t3 = Timer::wallClock();
   if(a_lagged_terms){ // Add in the lagged terms. When we make it here, sigma_(m+1) = sigma_m + dtm*Fsig_m. 
     EBAMRIVData& Fsig_lag = m_sigma_scratch->getFold()[a_m];
     DataOps::incr(sigma_m1, Fsig_lag, -m_dtm[a_m]);
@@ -853,7 +854,7 @@ void CdrPlasmaImExSdcStepper::integrateAdvectionReaction(const Real a_dt, const 
     CdrPlasmaImExSdcStepper::quad(scratch, m_sigma_scratch->getFold(), a_m);
     DataOps::incr(sigma_m1, scratch, 0.5*a_dt); // Mult by 0.5*a_dt due to scaling on [-1,1] for quadrature
   }
-  const Real t4 = MPI_Wtime();
+  const Real t4 = Timer::wallClock();
 
 #if 0
   pout() << "integrateAdvectionReaction::" << endl;

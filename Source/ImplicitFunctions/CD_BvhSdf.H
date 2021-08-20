@@ -38,7 +38,7 @@ public:
 
   //  BvhSdf() = delete;
   BvhSdf();
-  BvhSdf(const std::shared_ptr<Node>& a_root, const bool a_flipInside);
+  BvhSdf(const std::shared_ptr<Node>& a_root, const bool a_flipInside, const Real a_zCoord = 0.0);
   BvhSdf(const BvhSdf& a_object);
   ~BvhSdf();
 
@@ -47,6 +47,9 @@ public:
   BaseIF* newImplicitFunction() const override;
 
 protected:
+
+  Real m_zCoord;
+  
   std::shared_ptr<Node> m_root;
 
   mutable long m_numCalled;
