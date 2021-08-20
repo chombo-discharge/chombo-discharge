@@ -67,9 +67,11 @@ void Timer::stopEvent(const std::string a_event) noexcept {
 
 inline
 void Timer::printReportHeader() const noexcept {
-  pout() << "| ---------------------------------------------------------------------------------------------------------|" << endl
-	 << "| " + m_processName + " kernel report: "                                                                      << endl
-         << "| ---------------------------------------------------------------------------------------------------------|" << endl   
+
+  std::stringstream header;
+  header << "| ---------------------------------------------------------------------------------------------------------|" << "\n"
+	 << "| " + m_processName + " kernel report: "                                                                      << "\n"
+         << "| ---------------------------------------------------------------------------------------------------------|" << "\n"
 	 << "| " << std::left << std::setw(25) << "Event"
 	 << "| " << std::right << std::setw(8) << "Loc."
 	 << "| " << std::right << std::setw(8) << "%"    
@@ -80,21 +82,26 @@ void Timer::printReportHeader() const noexcept {
 	 << "| " << std::right << std::setw(8) << "Dev."
 	 << "| " << std::right << std::setw(8) << "Min rank"
 	 << "| " << std::right << std::setw(8) << "Max rank"
-	 << "| " << endl
+	 << "| " << "\n"
 #endif
-         << "| ---------------------------------------------------------------------------------------------------------|" << endl;      
+         << "| ---------------------------------------------------------------------------------------------------------|" << "\n";
+
+  pout() << header.str();
 }
 
 inline
 void Timer::printReportTail(const Real a_elapsedTime) const noexcept {
-  pout() << "| ---------------------------------------------------------------------------------------------------------|" << endl
-	 << "| Total elapsed time = " << std::fixed << std::setprecision(2) << a_elapsedTime << " seconds"                 << endl
-	 << "| ---------------------------------------------------------------------------------------------------------|" << endl;
+  std::stringstream tail;
+  
+  tail << "| ---------------------------------------------------------------------------------------------------------|" << "\n"
+       << "| Total elapsed time = " << std::fixed << std::setprecision(2) << a_elapsedTime << " seconds"                 << "\n"
+       << "| ---------------------------------------------------------------------------------------------------------|" << "\n";
+
+  pout() << tail.str();
 }
 
 inline
 void Timer::eventReport() const noexcept{
-  
   // This routine prints a header, the timing report for the various event, and a tail. All events are included
   // but unfinished ones are not counted towards the elapsed time. 
   
@@ -168,6 +175,8 @@ void Timer::eventReport() const noexcept{
       broadcast(sigma,   srcRank);
       broadcast(maxTime, srcRank);
       broadcast(minTime, srcRank);
+      broadcast(minRank, srcRank);
+      broadcast(maxRank, srcRank);      
 
       ssMinDuration << std::fixed << std::setprecision(2) << minTime;
       ssMaxDuration << std::fixed << std::setprecision(2) << maxTime;            
@@ -175,7 +184,6 @@ void Timer::eventReport() const noexcept{
       ssDevDuration << std::fixed << std::setprecision(2) << sigma;
       ssMinRank     << std::fixed << std::setprecision(2) << minRank;
       ssMaxRank     << std::fixed << std::setprecision(2) << maxRank;
-
 #endif
     }
     else{
@@ -188,22 +196,25 @@ void Timer::eventReport() const noexcept{
       ssMinRank        << " - ";
       ssMaxRank        << " - ";    
     }
-	
 
+    std::stringstream outputString;
 
     // Now print to pout
-    pout() << "| " << std::left << std::setw(25) << eventName
-	   << "| " << std::right << std::setw(8) << ssLocalDuration.str()
-	   << "| " << std::right << std::setw(8) << ssPercentage.str()
+    outputString << "| " << std::left << std::setw(25) << eventName
+		 << "| " << std::right << std::setw(8) << ssLocalDuration.str()
+		 << "| " << std::right << std::setw(8) << ssPercentage.str()
 #ifdef CH_MPI
-	   << "| " << std::right << std::setw(8) << ssMinDuration.str()
-	   << "| " << std::right << std::setw(8) << ssMaxDuration.str()
-	   << "| " << std::right << std::setw(8) << ssAvgDuration.str()
-	   << "| " << std::right << std::setw(8) << ssDevDuration.str()
-	   << "| " << std::right << std::setw(8) << ssMinRank.str()
-	   << "| " << std::right << std::setw(8) << ssMaxRank.str()
+		 << "| " << std::right << std::setw(8) << ssMinDuration.str()
+		 << "| " << std::right << std::setw(8) << ssMaxDuration.str()
+		 << "| " << std::right << std::setw(8) << ssAvgDuration.str()
+		 << "| " << std::right << std::setw(8) << ssDevDuration.str()
+		 << "| " << std::right << std::setw(8) << ssMinRank.str()
+		 << "| " << std::right << std::setw(8) << ssMaxRank.str()
 #endif
-	   << "| " << endl;
+		 << "| "
+		 << "\n";
+
+    pout() << outputString.str();
   }
 
   this->printReportTail(totalTime);  
