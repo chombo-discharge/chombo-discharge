@@ -7,11 +7,11 @@ PositiveStreamerProfiledSurface.basename  = pout
 # ====================================================================================================
 # AMR_MESH OPTIONS
 # ====================================================================================================
-AmrMesh.lo_corner        =  0    0     # Low corner of problem domain
+AmrMesh.lo_corner        =  -4E-2    0     # Low corner of problem domain
 AmrMesh.hi_corner        =  4E-2 4E-2  # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
-AmrMesh.coarsest_domain  = 64 64       # Number of cells on coarsest domain
-AmrMesh.max_amr_depth    = 10           # Maximum amr depth
+AmrMesh.coarsest_domain  = 128 64       # Number of cells on coarsest domain
+AmrMesh.max_amr_depth    = 9           # Maximum amr depth
 AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
@@ -41,7 +41,7 @@ Driver.geometry_scan_level             = 0                # Geometry scan level 
 Driver.ebis_memory_load_balance        = false            # If using Chombo geo-gen, use memory as loads for EBIS generation  
 Driver.plot_interval                   = 10               # Plot interval
 Driver.checkpoint_interval             = 10               # Checkpoint interval
-Driver.regrid_interval                 = 5               # Regrid interval
+Driver.regrid_interval                 = 10               # Regrid interval
 Driver.write_regrid_files              = false            # Write regrid files or not.
 Driver.write_restart_files             = false            # Write restart files or not
 Driver.initial_regrids                 = 4                # Number of initial regrids
@@ -67,7 +67,7 @@ Driver.refine_dielectrics              = 2                # Refine dielectric su
 # ====================================================================================================
 # FieldSolverMultigrid class options
 # ====================================================================================================
-FieldSolverMultigrid.bc.x.lo      = neumann   0.0     # Bc type (see docs)
+FieldSolverMultigrid.bc.x.lo      = dirichlet 0.0     # Bc type (see docs)
 FieldSolverMultigrid.bc.x.hi      = dirichlet 0.0     # Bc type (see docs)
 FieldSolverMultigrid.bc.y.lo      = dirichlet 0.0     # Bc type (see docs)
 FieldSolverMultigrid.bc.y.hi      = neumann   0.0     # Bc type (see docs)
@@ -96,12 +96,12 @@ FieldSolverMultigrid.gmg_smoother      = red_black # Relaxation type. 'jacobi', 
 # CdrGodunov solver settings
 # ====================================================================================================
 CdrGodunov.seed                  = -1                      # Seed. Random seed with seed < 0
-CdrGodunov.bc.x.lo               = wall                    # 'data', 'function', 'wall', or 'outflow'
-CdrGodunov.bc.x.hi               = wall                    # 'data', 'function', 'wall', or 'outflow'
-CdrGodunov.bc.y.lo               = wall                    # 'data', 'function', 'wall', or 'outflow'
-CdrGodunov.bc.y.hi               = wall                    # 'data', 'function', 'wall', or 'outflow'
-CdrGodunov.bc.z.lo               = wall                    # 'data', 'function', 'wall', or 'outflow'
-CdrGodunov.bc.z.hi               = wall                    # 'data', 'function', 'wall', or 'outflow'
+CdrGodunov.bc.x.lo               = data                    # 'data', 'function', 'wall', or 'outflow'
+CdrGodunov.bc.x.hi               = data                    # 'data', 'function', 'wall', or 'outflow'
+CdrGodunov.bc.y.lo               = data                    # 'data', 'function', 'wall', or 'outflow'
+CdrGodunov.bc.y.hi               = data                    # 'data', 'function', 'wall', or 'outflow'
+CdrGodunov.bc.z.lo               = data                    # 'data', 'function', 'wall', or 'outflow'
+CdrGodunov.bc.z.hi               = data                    # 'data', 'function', 'wall', or 'outflow'
 CdrGodunov.limit_slopes          = true                    # Use slope-limiters for godunov
 CdrGodunov.plt_vars              = phi vel src dco ebflux  # Plot variables. Options are 'phi', 'vel', 'dco', 'src'
 CdrGodunov.extrap_source         = false                   # Flag for including source term for time-extrapolation
@@ -109,14 +109,14 @@ CdrGodunov.plot_mode             = density                 # Plot densities 'den
 CdrGodunov.blend_conservation    = true                    # Turn on/off blending with nonconservative divergenceo
 CdrGodunov.redist_mass_weighted  = false                   # Mass weighted redistribution or not
 CdrGodunov.gmg_verbosity         = -1                      # GMG verbosity
-CdrGodunov.gmg_pre_smooth        = 6                       # Number of relaxations in GMG downsweep
-CdrGodunov.gmg_post_smooth       = 6                       # Number of relaxations in upsweep
-CdrGodunov.gmg_bott_smooth       = 6                       # NUmber of relaxations before dropping to bottom solver
+CdrGodunov.gmg_pre_smooth        = 12                      # Number of relaxations in GMG downsweep
+CdrGodunov.gmg_post_smooth       = 12                      # Number of relaxations in upsweep
+CdrGodunov.gmg_bott_smooth       = 12                      # NUmber of relaxations before dropping to bottom solver
 CdrGodunov.gmg_min_iter          = 5                       # Minimum number of iterations
 CdrGodunov.gmg_max_iter          = 32                      # Maximum number of iterations
 CdrGodunov.gmg_exit_tol          = 1.E-8                   # Residue tolerance
 CdrGodunov.gmg_exit_hang         = 0.2                     # Solver hang
-CdrGodunov.gmg_min_cells         = 2                       # Bottom drop
+CdrGodunov.gmg_min_cells         = 16                      # Bottom drop
 CdrGodunov.gmg_bottom_solver     = bicgstab                # Bottom solver type. Valid options are 'simple' and 'bicgstab'
 CdrGodunov.gmg_cycle             = vcycle                  # Cycle type. Only 'vcycle' supported for now
 CdrGodunov.gmg_smoother          = red_black               # Relaxation type. 'jacobi', 'multi_color', or 'red_black'
@@ -131,7 +131,7 @@ EddingtonSP1.kappa_scale         = false        # Kappa scale source or not (dep
 EddingtonSP1.plt_vars            = phi src      # Plot variables. Available are 'phi' and 'src'
 
 EddingtonSP1.ebbc                = larsen 0.0   # Bc on embedded boundaries
-EddingtonSP1.bc.x.lo             = neumann 0.0   # Bc on domain side. 'dirichlet', 'neuman', or 'larsen'
+EddingtonSP1.bc.x.lo             = larsen 0.0   # Bc on domain side. 'dirichlet', 'neuman', or 'larsen'
 EddingtonSP1.bc.x.hi             = larsen 0.0   # Bc on domain side. 'dirichlet', 'neuman', or 'larsen'
 EddingtonSP1.bc.y.lo             = larsen 0.0   # Bc on domain side. 'dirichlet', 'neuman', or 'larsen'
 EddingtonSP1.bc.y.hi             = larsen 0.0   # Bc on domain side. 'dirichlet', 'neuman', or 'larsen'
@@ -147,7 +147,7 @@ EddingtonSP1.gmg_min_iter        = 5            # Minimum number of iterations
 EddingtonSP1.gmg_max_iter        = 32           # Maximum number of iterations
 EddingtonSP1.gmg_exit_tol        = 1.E-6        # Residue tolerance
 EddingtonSP1.gmg_exit_hang       = 0.2          # Solver hang
-EddingtonSP1.gmg_min_cells       = 2            # Bottom drop
+EddingtonSP1.gmg_min_cells       = 16           # Bottom drop
 EddingtonSP1.gmg_bottom_solver   = bicgstab     # Bottom solver type. Valid options are 'simple <number>' and 'bicgstab'
 EddingtonSP1.gmg_bottom_relax    = 8            # Number of relaxations in bottom solve ('simple' solver only)
 EddingtonSP1.gmg_cycle           = vcycle       # Cycle type. Only 'vcycle' supported for now
@@ -229,14 +229,14 @@ CdrPlasmaAir3Bourdon.transport_file      = transport_data.txt              # Tra
 CdrPlasmaAir3Bourdon.uniform_tables      = 500    	                   #  Converted # of points in transport file
 CdrPlasmaAir3Bourdon.pressure            = 1.                              # Gas pressure
 CdrPlasmaAir3Bourdon.temperature         = 300                             # Gas temperature
-CdrPlasmaAir3Bourdon.use_alpha_corr      = false                           # Soloviev alpha correction	
+CdrPlasmaAir3Bourdon.use_alpha_corr      = true                            # Soloviev alpha correction	
 CdrPlasmaAir3Bourdon.mobile_electrons    = true                            # Mobile Electrons or not
 CdrPlasmaAir3Bourdon.diffusive_electrons = true                            # Diffusive Electrons or not
 CdrPlasmaAir3Bourdon.mobile_ions         = false                           # Mobile ions or not
 CdrPlasmaAir3Bourdon.diffusive_ions      = false                           # Diffusive ions or not
 CdrPlasmaAir3Bourdon.ion_mobility        = 2.E-4                           # Ion mobility
 
-CdrPlasmaAir3Bourdon.uniform_density       = 1.E4                          # Uniform density
+CdrPlasmaAir3Bourdon.uniform_density       = 1.E10                         # Uniform density
 CdrPlasmaAir3Bourdon.seed_density          = 1.E17                         # Gaussian seed density
 CdrPlasmaAir3Bourdon.seed_radius           = 100E-6                        # Gaussian seed radius
 CdrPlasmaAir3Bourdon.seed_position         = 0.0 1E-2                      # Gaussian seed position
