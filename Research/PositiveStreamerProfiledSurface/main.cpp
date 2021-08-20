@@ -8,7 +8,7 @@
 #include <CD_EddingtonSP1.H>
 #include <CD_CdrPlasmaAir3Bourdon.H>
 #include <CD_RodPlaneProfile.H>
-#include <CD_CdrPlasmaImExSdcStepper.H>
+#include <CD_CdrPlasmaGodunovStepper.H>
 #include <CD_CdrPlasmaStreamerTagger.H>
 #include "ParmParse.H"
 
@@ -47,7 +47,7 @@ int main(int argc, char* argv[]){
 
   // Set up physics 
   RefCountedPtr<CdrPlasmaPhysics> physics      = RefCountedPtr<CdrPlasmaPhysics> (new CdrPlasmaAir3Bourdon());
-  RefCountedPtr<CdrPlasmaStepper> timestepper  = RefCountedPtr<CdrPlasmaStepper> (new CdrPlasmaImExSdcStepper(physics));
+  RefCountedPtr<CdrPlasmaStepper> timestepper  = RefCountedPtr<CdrPlasmaStepper> (new CdrPlasmaGodunovStepper(physics));
   RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (new CdrPlasmaStreamerTagger(physics, timestepper, amr, compgeom));
 
   // Create solver factories
