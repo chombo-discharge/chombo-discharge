@@ -544,8 +544,8 @@ void EBHelmholtzOp::AMRRestrict(LevelData<EBCellFAB>&       a_residualCoarse,
   LevelData<EBCellFAB> resThisLevel;
   this->create(resThisLevel, a_residual);
 
-  const bool homogeneousPhysBC = true;
-  const bool homogeneousCFBC   = false;
+  constexpr bool homogeneousPhysBC = true;
+  constexpr bool homogeneousCFBC   = false;
 
   // We should average a_residual - L(correction, coarCorrection).
   this->applyOp(resThisLevel, a_correction, &a_coarseCorrection, homogeneousPhysBC, homogeneousCFBC);
@@ -563,8 +563,8 @@ void EBHelmholtzOp::AMRUpdateResidual(LevelData<EBCellFAB>&       a_residual,
 				      const LevelData<EBCellFAB>& a_correction,
 				      const LevelData<EBCellFAB>& a_coarseCorrection) {
 
-  const bool homogeneousPhysBC = true;
-  const bool homogeneousCFBC   = false;
+  constexpr bool homogeneousPhysBC = true;
+  constexpr bool homogeneousCFBC   = false;
   
   LevelData<EBCellFAB> lcorr;
   this->create(lcorr, a_correction);

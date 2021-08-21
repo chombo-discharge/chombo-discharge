@@ -9,7 +9,6 @@
   @author Robert Marskar
   @todo   Preconditioner needs work!
   @todo   The interpolateCF functions should be in MFMultigridInterpolator
-  @todo   In relax, why does it help to end with a BC update?
 */
 
 // Chombo includes
@@ -399,8 +398,10 @@ void MFHelmholtzOp::preCond(LevelData<MFCellFAB>& a_corr, const LevelData<MFCell
 
 void MFHelmholtzOp::applyOp(LevelData<MFCellFAB>& a_Lphi, const LevelData<MFCellFAB>& a_phi, bool a_homogeneousPhysBC) {
   CH_TIME("MFHelmholtzOp::applyOp(small)");
+
+  constexpr bool homogeneousCFBC = true;
   
-  this->applyOp(a_Lphi, a_phi, nullptr, a_homogeneousPhysBC, true);
+  this->applyOp(a_Lphi, a_phi, nullptr, a_homogeneousPhysBC, homogeneousCFBC);
 }
 
 void MFHelmholtzOp::computeOperatorLoads(LevelData<MFCellFAB>& a_phi, TimedDataIterator& a_timeDit) {
@@ -420,7 +421,7 @@ void MFHelmholtzOp::computeOperatorLoads(LevelData<MFCellFAB>& a_phi, TimedDataI
 
 	EBCellFAB& phi = (EBCellFAB&) a_phi[a_timeDit()].getPhase(iphase);
 	  
-	phaseInterpolator->coarseFineInterpH(phi, Interval(0,0), a_timeDit());
+	phaseInterpolator->coarseFineInterpH(phi, Interval(m_comp, m_comp), a_timeDit());
       }
     }
 
@@ -483,7 +484,7 @@ void MFHelmholtzOp::interpolateCF(const LevelData<MFCellFAB>& a_phi, const Level
 
 	  EBCellFAB& phi = (EBCellFAB&) a_phi[dit()].getPhase(iphase);
 	  
-	  phaseInterpolator->coarseFineInterpH(phi, Interval(0,0), dit());
+	  phaseInterpolator->coarseFineInterpH(phi, Interval(m_comp, m_comp), dit());
 	}
       }
     }
@@ -504,7 +505,7 @@ void MFHelmholtzOp::interpolateCF(const LevelData<MFCellFAB>& a_phi, const Level
 
 void MFHelmholtzOp::residual(LevelData<MFCellFAB>& a_residual, const LevelData<MFCellFAB>& a_phi, const LevelData<MFCellFAB>& a_rhs, const bool a_homogeneousPhysBC){
   CH_TIME("MFHelmholtzOp::residual");
-
+  
   // Compute a_residual = rhs - L(phi)
   this->applyOp(a_residual, a_phi, a_homogeneousPhysBC);
   this->scale(a_residual, -1.0);
@@ -552,8 +553,6 @@ void MFHelmholtzOp::relax(LevelData<MFCellFAB>& a_correction, const LevelData<MF
   default:
     MayDay::Error("MFHelmholtzOp::relax - bogus relaxation method requested");
   };
-
-  this->updateJumpBC(a_correction, true); // Why does this matter...?
 }
 
 void MFHelmholtzOp::relaxPointJacobi(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_residual, const int a_iterations) {
@@ -562,11 +561,14 @@ void MFHelmholtzOp::relaxPointJacobi(LevelData<MFCellFAB>& a_correction, const L
 
   const DisjointBoxLayout& dbl = m_mflg.getGrids();
 
+  constexpr bool homogeneousCFBC   = true;
+  constexpr bool homogeneousPhysBC = true;  
+
   for (int i = 0; i < a_iterations; i++){
     
     // Interpolate ghost cells and match the BC.
-    this->interpolateCF(a_correction, nullptr, true);
-    this->updateJumpBC(a_correction,  true);    
+    this->interpolateCF(a_correction, nullptr, homogeneousCFBC);
+    this->updateJumpBC(a_correction,  homogeneousPhysBC);    
 
     // Do relaxation on each patch. 
     for (DataIterator dit(dbl); dit.ok(); ++dit){
@@ -591,12 +593,15 @@ void MFHelmholtzOp::relaxGSRedBlack(LevelData<MFCellFAB>& a_correction, const Le
 
   const DisjointBoxLayout& dbl = m_mflg.getGrids();
 
+  constexpr bool homogeneousCFBC   = true;
+  constexpr bool homogeneousPhysBC = true;  
+
   for (int i = 0; i < a_iterations; i++){
 
     // Interpolate ghost cells and match the BC.
     for (int redBlack=0;redBlack<=1; redBlack++){
-      this->interpolateCF(a_correction, nullptr, true);
-      this->updateJumpBC(a_correction, true);
+      this->interpolateCF(a_correction, nullptr, homogeneousCFBC);
+      this->updateJumpBC(a_correction, homogeneousPhysBC);
       
       // Do relaxation on each patch.
       for (DataIterator dit(dbl); dit.ok(); ++dit){
@@ -622,12 +627,15 @@ void MFHelmholtzOp::relaxGSMultiColor(LevelData<MFCellFAB>& a_correction, const 
 
   const DisjointBoxLayout& dbl = m_mflg.getGrids();
 
+  constexpr bool homogeneousCFBC   = true;
+  constexpr bool homogeneousPhysBC = true;  
+
   for (int i = 0; i < a_iterations; i++){
 
     // Interpolate ghost cells and match the BC.
     for (int icolor = 0; icolor < m_colors.size(); icolor++){
-      this->interpolateCF(a_correction, nullptr, true);
-      this->updateJumpBC(a_correction, true);
+      this->interpolateCF(a_correction, nullptr, homogeneousCFBC);
+      this->updateJumpBC(a_correction, homogeneousPhysBC);
 
       // Do relaxation on each patch
       for (DataIterator dit(dbl); dit.ok(); ++dit){
@@ -650,6 +658,12 @@ void MFHelmholtzOp::relaxGSMultiColor(LevelData<MFCellFAB>& a_correction, const 
 void MFHelmholtzOp::restrictResidual(LevelData<MFCellFAB>& a_resCoar, LevelData<MFCellFAB>& a_phi, const LevelData<MFCellFAB>& a_rhs) {
   CH_TIME("MFHelmholtzOp::restrictResidual");
 
+  constexpr bool homogeneousPhysBC = true;
+
+  // EBHelmholtzOp::restrictResidual will call applyOp so we need to update the boundary condition
+  // on multiphase cells first.
+  this->updateJumpBC(a_phi, homogeneousPhysBC);
+  
   for (auto& op : m_helmOps){
     LevelData<EBCellFAB> resCoar;
     LevelData<EBCellFAB> phi;
@@ -682,8 +696,12 @@ void MFHelmholtzOp::AMRUpdateResidual(LevelData<MFCellFAB>&       a_residual,
 				      const LevelData<MFCellFAB>& a_coarseCorrection){
   CH_TIME("MFHelmholtzOp::AMRUpdateResidual");
 
+  constexpr bool homogeneousCFBC   = false;
+  constexpr bool homogeneousPhysBC = true;  
+
   // Need to update BC first!
-  this->updateJumpBC(a_correction, true);
+  this->interpolateCF((LevelData<MFCellFAB>&) a_correction, &a_coarseCorrection, homogeneousCFBC);
+  this->updateJumpBC(a_correction, homogeneousPhysBC);
 
   for (auto& op : m_helmOps){
     LevelData<EBCellFAB> residual;
@@ -694,7 +712,9 @@ void MFHelmholtzOp::AMRUpdateResidual(LevelData<MFCellFAB>&       a_residual,
     MultifluidAlias::aliasMF(correction,       op.first, a_correction);
     MultifluidAlias::aliasMF(coarseCorrection, op.first, a_coarseCorrection);
 
+    //    op.second->turnOffBCs(); // Don't need to interpolate ghost cells again.    
     op.second->AMRUpdateResidual(residual, correction, coarseCorrection);
+    //    op.second->turnOnBCs(); 
   }
 }
 
@@ -704,6 +724,12 @@ void MFHelmholtzOp::AMRRestrict(LevelData<MFCellFAB>&       a_residualCoarse,
 				const LevelData<MFCellFAB>& a_coarseCorrection,
 				bool                        a_skip_res) {
   CH_TIME("MFHelmholtzOp::AMRRestrict");
+
+  constexpr bool homogeneousCFBC   = false;  
+  constexpr bool homogeneousPhysBC = true;
+
+  this->interpolateCF((LevelData<MFCellFAB>&) a_correction, &a_coarseCorrection, homogeneousCFBC);
+  this->updateJumpBC(a_correction, homogeneousPhysBC);  
 
   for (auto& op : m_helmOps){
     LevelData<EBCellFAB> residualCoarse;
@@ -784,9 +810,11 @@ void MFHelmholtzOp::AMROperatorNF(LevelData<MFCellFAB>&       a_Lphi,
 				  bool                        a_homogeneousPhysBC) {
   CH_TIME("MFHelmholtzOp::AMROperatorNF");
 
+  constexpr bool homogeneousCFBC = false;
+
   // Update ghost cells and jump conditions first. Doing an exchange is not sufficient here because
   // the jump stencils might reach over CFs. 
-  this->interpolateCF(a_phi, &a_phiCoar, false);
+  this->interpolateCF(a_phi, &a_phiCoar, homogeneousCFBC);
   this->updateJumpBC(a_phi, a_homogeneousPhysBC);
 
   for (auto& op : m_helmOps){
@@ -851,6 +879,8 @@ void MFHelmholtzOp::AMROperator(LevelData<MFCellFAB>&              a_Lphi,
 				AMRLevelOp<LevelData<MFCellFAB> >* a_finerOp) {
   CH_TIME("MFHelmholtzOp::AMROperator");
 
+  constexpr bool homogeneousCFBC = false;
+
   if(m_hasFine){
     MFHelmholtzOp* finerOp = (MFHelmholtzOp*) a_finerOp;
 
@@ -867,11 +897,11 @@ void MFHelmholtzOp::AMROperator(LevelData<MFCellFAB>&              a_Lphi,
  
   // Update ghost cells and jump conditions first. Doing an exchange is not sufficient here because
   // the jump stencils might reach over CFs. 
-  this->interpolateCF(a_phi, &a_phiCoar, false);
+  this->interpolateCF(a_phi, &a_phiCoar, homogeneousCFBC);
   this->updateJumpBC(a_phi, a_homogeneousPhysBC);
 
-  // Note: This could by optimized by calling the kernel functions directly on each patch. I don't think this will
-  //       be a lifesaver, but could potentially squeeze out ~10% more performance. 
+  // Note: This could by optimized by calling the kernel functions directly on each patch, but I don't think
+  //       we would get noticably more performance out of it. 
   for (auto& op : m_helmOps){
     LevelData<EBCellFAB> Lphi;
     LevelData<EBCellFAB> phiFine;
