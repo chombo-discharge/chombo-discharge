@@ -826,9 +826,9 @@ void MFHelmholtzOp::AMROperatorNF(LevelData<MFCellFAB>&       a_Lphi,
     MultifluidAlias::aliasMF(phi,     op.first, a_phi);
     MultifluidAlias::aliasMF(phiCoar, op.first, a_phiCoar);
 
-    //    op.second->turnOffBCs(); // Don't need to interpolate ghost cells again. 
+    op.second->turnOffBCs(); // Don't need to interpolate ghost cells again. 
     op.second->AMROperatorNF(Lphi, phi, phiCoar, a_homogeneousPhysBC);
-    //    op.second->turnOnBCs(); 
+    op.second->turnOnBCs(); 
   }
 }
 
@@ -915,9 +915,9 @@ void MFHelmholtzOp::AMROperator(LevelData<MFCellFAB>&              a_Lphi,
 
     MFHelmholtzOp* finerOp = (MFHelmholtzOp*) (a_finerOp);
 
-    //    op.second->turnOffBCs(); // Don't need to interpolate ghost cells again.
+    op.second->turnOffBCs(); // Don't need to interpolate ghost cells again.
     op.second->AMROperator(Lphi, phiFine, phi, phiCoar, a_homogeneousPhysBC, (finerOp->m_helmOps).at(op.first));
-    //    op.second->turnOnBCs();
+    op.second->turnOnBCs();
   }
 }
 
