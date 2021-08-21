@@ -1,25 +1,25 @@
 # ====================================================================================================
 # AMR_MESH OPTIONS
 # ====================================================================================================
-AmrMesh.lo_corner       =    0.0   0.
+AmrMesh.lo_corner       =    0.00  0.
 AmrMesh.hi_corner       =    0.04  0.02
 AmrMesh.verbosity       = -1          # Controls verbosity. 
 AmrMesh.coarsest_domain = 128 64 128  # Number of cells on coarsest domain
-AmrMesh.max_amr_depth   = 3           # Maximum amr depth
+AmrMesh.max_amr_depth   = 4           # Maximum amr depth
 AmrMesh.max_sim_depth   = -1          # Maximum simulation depth
 AmrMesh.fill_ratio      = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size     = 2           # Number of cells between grid levels
 AmrMesh.grid_algorithm  = br          # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
 AmrMesh.box_sorting     = morton      # 'none', 'standardSort', 'shuffle', or 'morton'
-AmrMesh.blocking_factor = 8           # Default blocking factor (16 in 3D)
+AmrMesh.blocking_factor = 16          # Default blocking factor (16 in 3D)
 AmrMesh.max_box_size    = 16          # Maximum allowed box size
 AmrMesh.max_ebis_box    = 16          # Maximum allowed box size
 AmrMesh.ref_rat         = 2 2 2 2 2 2 # Refinement ratios
-AmrMesh.num_ghost       = 3           # Number of ghost cells. Default is 3
+AmrMesh.num_ghost       = 2           # Number of ghost cells. Default is 3
 AmrMesh.lsf_ghost       = 3           # Number of ghost cells when writing level-set to grid
 AmrMesh.eb_ghost        = 4           # Set number of of ghost cells for EB stuff
 AmrMesh.mg_interp_order  = 2           # Multigrid interpolation order
-AmrMesh.mg_interp_radius = 3           # Multigrid interpolation radius
+AmrMesh.mg_interp_radius = 2           # Multigrid interpolation radius
 AmrMesh.mg_interp_weight = 2           # Multigrid interpolation weight (for least squares)
 AmrMesh.centroid_sten   = linear      # Centroid interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
 AmrMesh.eb_sten         = pwl         # EB interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
@@ -48,14 +48,14 @@ Driver.output_directory                = ./            # Output directory
 Driver.output_names                    = simulation    # Simulation output names
 Driver.max_plot_depth                  = -1            # Restrict maximum plot depth (-1 => finest simulation level)
 Driver.max_chk_depth                   = -1            # Restrict chechkpoint depth (-1 => finest simulation level)	
-Driver.num_plot_ghost                  = 1             # Number of ghost cells to include in plots
+Driver.num_plot_ghost                  = 0             # Number of ghost cells to include in plots
 Driver.plt_vars                        = levelset mpi_rank             # 'tags', 'mpi_rank'
 Driver.restart                         = 0             # Restart step (less or equal to 0 implies fresh simulation)
 Driver.allow_coarsening                = true          # Allows removal of grid levels according to CellTagger
 Driver.grow_geo_tags                   = 4             # How much to grow tags when using geometry-based refinement. 
 Driver.refine_angles                   = 15.           # Refine cells if angle between elements exceed this value.
-Driver.refine_electrodes               = -1            # Refine electrode surfaces. -1 => equal to refine_geometry
-Driver.refine_dielectrics              = -1            # Refine dielectric surfaces. -1 => equal to refine_geometry
+Driver.refine_electrodes               = 0            # Refine electrode surfaces. -1 => equal to refine_geometry
+Driver.refine_dielectrics              = 0            # Refine dielectric surfaces. -1 => equal to refine_geometry
 
 
 # ====================================================================================================
@@ -143,7 +143,7 @@ FieldStepper.verbosity    = -1              # Verbosity
 FieldStepper.realm        = primal          # Primal Realm
 FieldStepper.load_balance = false           # Load balance or not.
 FieldStepper.box_sorting  = morton          # If you load balance you can redo the box sorting. 
-FieldStepper.init_rho     = 0.0             # Space charge density
+FieldStepper.init_rho     = 1.E-5           # Space charge density
 FieldStepper.init_sigma   = 0.0             # Surface charge density
-FieldStepper.rho_center   = 0 0 0           # Space charge blob center
-FieldStepper.rho_radius   = 1.0             # Space charge blob radius
+FieldStepper.rho_center   = 0 5E-3          # Space charge blob center
+FieldStepper.rho_radius   = 1.E-3           # Space charge blob radius
