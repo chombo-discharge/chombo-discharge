@@ -14,5 +14,5 @@ To compile it and run it, type
 To run it, type
 > mpirun -np <num_proc> main3d.*.ex armadillo3d.inputs
 
-<img src="ElectricField.png" alt="Electric field" width="200"/>
+<img src="ElectricField.png" alt="Electric field" width="400"/>
 
