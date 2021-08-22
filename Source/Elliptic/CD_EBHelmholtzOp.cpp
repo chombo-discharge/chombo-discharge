@@ -705,8 +705,8 @@ void EBHelmholtzOp::applyOpIrregular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, 
   VoFIterator& vofit = m_vofIterStenc[a_dit];
   for (vofit.reset(); vofit.ok(); ++vofit){
     const VolIndex& vof     = vofit();
-    const VoFStencil& stenc = m_opStencils[a_dit](vof, m_comp);      // = Finite volume stencil representation of Int[B*grad(phi)]dA
-    const Real& alphaDiag   = m_alphaDiagWeight[a_dit](vof, m_comp); // = kappa * alpha * aco
+    const VoFStencil& stenc = m_opStencils[a_dit](vof, m_comp);                // = Finite volume stencil representation of Int[B*grad(phi)]dA
+    const Real& alphaDiag   = m_alpha * m_alphaDiagWeight[a_dit](vof, m_comp); // = kappa * alpha * aco (m_alphaDiagWeight holds kappa* aco)
     
     a_Lphi(vof, m_comp) = alphaDiag * a_phi(vof, m_comp);
     
