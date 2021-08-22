@@ -162,8 +162,6 @@ bool FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
     pout() << "FieldSolverMultigrid::solve(mfamrcell, mfamrcell)" << endl;
   }
 
-  this->writePlotFile();
-
   // TLDR: The operator factory was set up as kappa*L(phi) = -kappa*div(eps*grad(phi)) which we use to solve the Poisson equation
   //       div(eps*grad(phi)) = -rho/eps0. 
   //
