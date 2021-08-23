@@ -17,8 +17,8 @@
 MFHelmholtzElectrostaticEBBCFactory::MFHelmholtzElectrostaticEBBCFactory(const int a_order, const int a_weight, const ElectrostaticEbBc& a_electrostaticBCs){
   CH_TIME("MFHelmholtzElectrostaticEBBCFactory::MFHelmholtzElectrostaticEBBCFactory(int, int, ElectrostaticEbBc)");
 
-  CH_assert(m_order  >  0);
-  CH_assert(m_weight >= 0);
+  CH_assert(a_order  >  0);
+  CH_assert(a_weight >= 0);
   
   m_order            = a_order;
   m_weight           = a_weight;  
