@@ -358,7 +358,7 @@ bool MFHelmholtzOpFactory::getCoarserLayout(MFLevelGrid& a_coarMflg, const MFLev
 
       hasCoarser = true;
     }
-    else if(false){// { // Check if we can use box aggregation 
+    else{// if(false){// { // Check if we can use box aggregation 
       if(isFullyCovered(a_fineMflg)){
 	Vector<Box> boxes;
 	Vector<int> procs;
