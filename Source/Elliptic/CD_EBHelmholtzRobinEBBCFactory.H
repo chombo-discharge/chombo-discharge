@@ -97,7 +97,8 @@ public:
 		       const std::function<Real(const RealVect& a_pos) >& a_C);
 
   /*!
-    @brief Factory method
+    @brief Factory method. 
+    @return An EBHelmholtzRobinEBBC object with specified order and coefficients. 
   */
   RefCountedPtr<EBHelmholtzEBBC> create() override;
 
