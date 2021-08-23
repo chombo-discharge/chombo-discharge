@@ -61,6 +61,7 @@ Driver.refine_dielectrics              = 0            # Refine dielectric surfac
 # ====================================================================================================
 # FIELD_SOLVER_MULTIGRID_GMG CLASS OPTIONS (MULTIFLUID GMG SOLVER SETTINGS)
 # ====================================================================================================
+FieldSolverMultigrid.verbosity         = -1                # Class verbosity
 FieldSolverMultigrid.bc.x.lo      = neumann 0.0 # Bc type.
 FieldSolverMultigrid.bc.x.hi      = dirichlet 0.0       # Bc type.
 FieldSolverMultigrid.bc.y.lo      = dirichlet 0.0     # Bc type.

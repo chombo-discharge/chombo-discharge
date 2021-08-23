@@ -30,25 +30,6 @@
   domain and EB boundary conditions that fit in the EBHelmholtzOp/MFHelmholtzOp constructs. 
 */
 class FieldSolverMultigrid : public FieldSolver {
-protected:
-
-  /*!
-    @brief Enum class for supported bottom solvers in multigrid.
-  */
-  enum class BottomSolverType {
-    Simple,
-    BiCGStab,
-    GMRES
-  };
-
-  /*!
-    @brief Enum for multigrid cycle types. 
-  */
-  enum class MultigridType{
-    VCycle,
-    WCycle,
-  };
-  
 public:
 
   /*!
@@ -113,9 +94,9 @@ public:
   /*!
     @brief Regrid method. 
     @details This calls the parent regrid function first. We only need the overwrite because we have to signal that multigrid must be set up again. 
-    @param[in] a_lmin           Coarsest level where grids did not change. 
-    @param[in] a_oldFinestLevel Previous finest AMR level
-    @param[in] a_newFinestLevel New finest AMR level. 
+    @param[in] a_lmin           Coarsest level allowed to change. 
+    @param[in] a_oldFinestLevel Finest AMR level before the regrid. 
+    @param[in] a_newFinestLevel Finest AMR level before the regrid. 
     @details This linearly interpolates (with limiters) m_potential to the new grids and recomputes the electric field (from the interpolated potential). 
   */
   virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
@@ -137,6 +118,9 @@ public:
 
   /*!
     @brief Compute grid loads
+    @param[in] a_dbl   Grids on input level
+    @param[in] a_level Grid level
+    @return Returns a vector of estimated loads. The indices in the vector correspond to the indices in DisjointBoxLayout::boxArray()
   */
   virtual Vector<long long> computeLoads(const DisjointBoxLayout& a_dbl, const int a_level) override;
   
@@ -151,6 +135,23 @@ protected:
     @brief Beta-coefficient (for Helmholtz operator)
   */
   static constexpr Real m_beta  = -1.0;
+  
+  /*!
+    @brief Enum class for supported bottom solvers in multigrid.
+  */
+  enum class BottomSolverType {
+    Simple,
+    BiCGStab,
+    GMRES
+  };
+
+  /*!
+    @brief Enum for multigrid cycle types. 
+  */
+  enum class MultigridType{
+    VCycle,
+    WCycle,
+  };  
 
   /*!
     @brief Relaxation type for gmg
@@ -241,11 +242,6 @@ protected:
     @brief Set bc jump weight (used for weighted least squares)
   */
   int m_multigridJumpWeight;
-
-  /*!
-    @brief Solver residue. If the residue is greater than this, we have a problematic cell. 
-  */
-  Real m_convergedResidue;
 
   /*!
     @brief Exit tolerance for multigrid. 

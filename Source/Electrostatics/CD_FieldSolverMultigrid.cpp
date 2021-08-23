@@ -31,7 +31,7 @@ FieldSolverMultigrid::FieldSolverMultigrid() : FieldSolver() {
   
   // Default settings
   m_isSolverSetup            = false;
-  m_className                = "FieldSolverMultigrid";
+  m_className                = "FieldSolverMultigrid"; // Do not change this since it is used in all ParmParse code in FieldSolverMultigrid
 }
 
 FieldSolverMultigrid::~FieldSolverMultigrid(){
@@ -40,7 +40,11 @@ FieldSolverMultigrid::~FieldSolverMultigrid(){
 
 void FieldSolverMultigrid::parseOptions(){
   CH_TIME("FieldSolverMultigrid::parseOptions()");
-  
+  if(m_verbosity > 5){
+    pout() << "FieldSolverMultigrid::parseOptions()" << endl;
+  }
+
+  this->parseVerbosity();
   this->parseDomainBc();
   this->parsePlotVariables();
   this->parseMultigridSettings();
@@ -48,12 +52,23 @@ void FieldSolverMultigrid::parseOptions(){
 }
 
 void FieldSolverMultigrid::parseRuntimeOptions(){
+  CH_TIME("FieldSolverMultigrid::parseRuntimeOptions()");
+  if(m_verbosity > 5){
+    pout() << "FieldSolverMultigrid::parseRuntimeOptions()" << endl;
+  }
+  
+  this->parseVerbosity();  
   this->parseMultigridSettings();
   this->parseKappaSource();
   this->parsePlotVariables();
 }
 
 void FieldSolverMultigrid::parseKappaSource(){
+  CH_TIME("FieldSolverMultigrid::parseKappaSource()");
+  if(m_verbosity > 5){
+    pout() << "FieldSolverMultigrid::parseKappaSource()" << endl;
+  }
+  
   ParmParse pp(m_className.c_str());
 
   std::string str;
@@ -61,6 +76,11 @@ void FieldSolverMultigrid::parseKappaSource(){
 }
 
 void FieldSolverMultigrid::parseMultigridSettings(){
+  CH_TIME("FieldSolverMultigrid::parseMultigridSettings()");
+  if(m_verbosity > 5){
+    pout() << "FieldSolverMultigrid::parseMultigridSettings()" << endl;
+  }
+  
   ParmParse pp(m_className.c_str());
 
   std::string str;
@@ -90,7 +110,7 @@ void FieldSolverMultigrid::parseMultigridSettings(){
       m_bottomSolverType = BottomSolverType::GMRES;
     }
     else{
-      MayDay::Error("FieldSolverMultigrid::parseMultigridSettings - logic bust, you've specified one parameter and I expected either 'bicgstab' or 'gmres'");
+      MayDay::Error("FieldSolverMultigrid::parseMultigridSettings() - logic bust, you've specified one parameter and I expected either 'bicgstab' or 'gmres'");
     }
   }
   else if(num == 2){
@@ -102,14 +122,14 @@ void FieldSolverMultigrid::parseMultigridSettings(){
       m_mfsolver.setNumSmooths(numSmooth);
     }
     else{
-      MayDay::Error("FieldSolverMultigrid::parseMultigridSettings - logic bust, you've specified two parameters and I expected 'simple <number>'");
+      MayDay::Error("FieldSolverMultigrid::parseMultigridSettings() - logic bust, you've specified two parameters and I expected 'simple <number>'");
     }
   }
   else{
-    MayDay::Error("FieldSolverMultigrid::parseMultigridSettings - logic bust in bottom solver. You must specify ' = bicgstab', ' = gmres', or ' = simple <number>'");
+    MayDay::Error("FieldSolverMultigrid::parseMultigridSettings() - logic bust in bottom solver. You must specify ' = bicgstab', ' = gmres', or ' = simple <number>'");
   }
 
-  // Set the multigrid relaxation type. 
+  // Get a string for the multigrid smoother. This must either be "jacobi", "red_black", or "multi_color". 
   pp.get("gmg_smoother", str);
   if(str == "jacobi"){
     m_multigridRelaxMethod = MFHelmholtzOp::Smoother::PointJacobi;
@@ -121,7 +141,7 @@ void FieldSolverMultigrid::parseMultigridSettings(){
     m_multigridRelaxMethod = MFHelmholtzOp::Smoother::GauSaiMultiColor;
   }
   else{
-    MayDay::Abort("FieldSolverMultigrid::parseMultigridSettings - unsupported relaxation method requested");
+    MayDay::Error("FieldSolverMultigrid::parseMultigridSettings() - unsupported relaxation method requested");
   }
 
   // Cycle type
@@ -130,19 +150,29 @@ void FieldSolverMultigrid::parseMultigridSettings(){
     m_multigridType = MultigridType::VCycle;
   }
   else{
-    MayDay::Abort("FieldSolverMultigrid::parseMultigridSettings - unsupported multigrid cycle type requested. Only vcycle supported for now. ");
+    MayDay::Error("FieldSolverMultigrid::parseMultigridSettings - unsupported multigrid cycle type requested. Only vcycle supported for now. ");
   }
 
   // No lower than 2. 
   if(m_minCellsBottom < 2){
     m_minCellsBottom = 2;
   }
+
+  // Things won't run unless this is fulfilled. 
+  CH_assert(m_minCellsBottom        >= 2);
+  CH_assert(m_multigridPreSmooth    >= 0);
+  CH_assert(m_multigridPostSmooth   >= 0);
+  CH_assert(m_multigridBottomSmooth >= 0);
+  CH_assert(m_multigridBcOrder      >  0);
+  CH_assert(m_multigridBcWeight     >= 0);  
+  CH_assert(m_multigridJumpOrder    >  0);
+  CH_assert(m_multigridJumpWeight   >= 0);        
 }
 
 void FieldSolverMultigrid::allocateInternals(){
-  CH_TIME("FieldSolverMultigrid::allocateInternals");
+  CH_TIME("FieldSolverMultigrid::allocateInternals()");
   if(m_verbosity > 5){
-    pout() << "FieldSolverMultigrid::allocateInternals" << endl;
+    pout() << "FieldSolverMultigrid::allocateInternals()" << endl;
   }
 
   FieldSolver::allocateInternals();
@@ -160,22 +190,30 @@ bool FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
 				 const MFAMRCellData& a_rho,
 				 const EBAMRIVData&   a_sigma,
 				 const bool           a_zeroPhi){
-  CH_TIME("FieldSolverMultigrid::solve(mfamrcell, mfamrcell");
+  CH_TIME("FieldSolverMultigrid::solve(MFAMRCellData, MFAMRCellData, EBAMRIVData, bool)");
   if(m_verbosity > 5){
-    pout() << "FieldSolverMultigrid::solve(mfamrcell, mfamrcell)" << endl;
+    pout() << "FieldSolverMultigrid::solve(MFAMRCellData, MFAMRCellData, EBAMRIVData, bool)" << endl;
   }
 
-  // TLDR: The operator factory was set up as kappa*L(phi) = -kappa*div(eps*grad(phi)) which we use to solve the Poisson equation
-  //       div(eps*grad(phi)) = -rho/eps0. 
+  // TLDR: This is the main solve routine. The operator factory was set up as kappa*L(phi) = -kappa*div(eps*grad(phi))
+  //       which we use to solve the Poisson equation div(eps*grad(phi)) = -rho/eps0. 
   //
-  //       So, we must scale rho (which is defined on centroids) by kappa and divide by eps0. The minus-sign is in the operator. 
-  bool converged = false;
+  //       So, we must scale rho (which is defined on centroids) by kappa and divide by eps0. The minus-sign provided in the operator
+  //       through the b-coefficient. (So really, we're actually solving kappa*[-div(eps*grad(phi))] = kappa*(rho/eps0)
+
+
+  CH_assert(m_isVoltageSet);
+  CH_assert(a_phi  [0]->nComp() == 1);
+  CH_assert(a_rho  [0]->nComp() == 1);
+  CH_assert(a_sigma[0]->nComp() == 1);    
+
+  bool converged = false;    
 
   if(!m_isSolverSetup){
     this->setupSolver(); // This does everything, allocates coefficients, gets bc stuff and so on
   }
 
-  // Do the scaled space charge density
+  // Do the scaled space charge density. 
   DataOps::copy (m_kappaRhoByEps0, a_rho);
   DataOps::scale(m_kappaRhoByEps0, 1./(Units::eps0));
 
@@ -185,44 +223,49 @@ bool FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
     DataOps::kappaScale(m_kappaRhoByEps0);
   }
 
-  m_amr->averageDown(a_phi, m_realm);
+  m_amr->averageDown(a_phi,            m_realm);
+  m_amr->interpGhost(a_phi,            m_realm);
   m_amr->averageDown(m_kappaRhoByEps0, m_realm);
   m_amr->interpGhost(m_kappaRhoByEps0, m_realm);
-  m_amr->interpGhost(a_phi, m_realm);
   
   // Do the scaled surface charge
   DataOps::copy (m_sigmaByEps0, a_sigma);
   DataOps::scale(m_sigmaByEps0, 1./(Units::eps0));
 
-  // Factory needs knowledge of the new surface charge. 
+  // Factory needs knowledge of the new surface charge -- it passes this data by reference to the multigrid operators (MFHelmholtzOps). 
   m_helmholtzOpFactory->setJump(m_sigmaByEps0, 1.0);
 
-  // Aliasing
-  Vector<LevelData<MFCellFAB>* > phi, cpy, rhs, res, zero;
-  m_amr->alias(phi,     a_phi);
-  m_amr->alias(rhs,     m_kappaRhoByEps0);
-  m_amr->alias(res,     m_residue);
-  m_amr->alias(zero,    m_zero);
+  // Aliasing, because Chombo is not too smart about smart pointers. 
+  Vector<LevelData<MFCellFAB>* > phi;   // Raw pointers of a_phi
+  Vector<LevelData<MFCellFAB>* > rhs;   // Raw pointers of m_kappaRhoByEps0
+  Vector<LevelData<MFCellFAB>* > res;   // Raw pointers of m_residue
+  Vector<LevelData<MFCellFAB>* > zero;  // Raw pointers of m_zero
 
-  // GMG solve. Use phi = zero as initial metric. Want to reduce this by m_multigridExitTolerance
-  const int finestLevel = m_amr->getFinestLevel();
+  m_amr->alias(phi,  a_phi);
+  m_amr->alias(rhs,  m_kappaRhoByEps0);
+  m_amr->alias(res,  m_residue);
+  m_amr->alias(zero, m_zero);
+
+  // GMG solve. Use phi = zero as initial metric. We want to reduce this by m_multigridExitTolerance, in which case
+  // multigrid has "converged".
+  const int coarsestLevel = 0;
+  const int finestLevel   = m_amr->getFinestLevel();
   
-  const Real phi_resid  = m_multigridSolver.computeAMRResidual(phi,  rhs, finestLevel, 0);
-  const Real zero_resid = m_multigridSolver.computeAMRResidual(zero, rhs, finestLevel, 0);
+  const Real phiResid       = m_multigridSolver.computeAMRResidual(phi,  rhs, finestLevel, 0); // This is the residue rho - L(phi)
+  const Real zeroResid      = m_multigridSolver.computeAMRResidual(zero, rhs, finestLevel, 0); // This is the residue rho - L(phi=0)
+  const Real convergedResid = zeroResid*m_multigridExitTolerance;                              // Convergence criterion. 
 
-  m_convergedResidue = zero_resid*m_multigridExitTolerance;
-
-  // Do a multigrid solve if the residual is too large
-  if(phi_resid > m_convergedResidue){ 
-    m_multigridSolver.m_convergenceMetric = zero_resid;
-    m_multigridSolver.solveNoInitResid(phi, res, rhs, finestLevel, 0, a_zeroPhi);
+  // If the residue rho - L(phi) is too large then we must get a new solution. 
+  if(phiResid > convergedResid){ 
+    m_multigridSolver.m_convergenceMetric = zeroResid;
+    m_multigridSolver.solveNoInitResid(phi, res, rhs, finestLevel, coarsestLevel, a_zeroPhi);
 
     const int status = m_multigridSolver.m_exitStatus;   // 1 => Initial norm sufficiently reduced
     if(status == 1 || status == 8){                      // 8 => Norm sufficiently small
       converged = true;
     }
   }
-  else{ // Solution is already converged
+  else{ 
     converged = true;
   }
 
@@ -237,9 +280,9 @@ bool FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
 }
 
 void FieldSolverMultigrid::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel){
-  CH_TIME("FieldSolverMultigrid::regrid");
+  CH_TIME("FieldSolverMultigrid::regrid(int, int, int)");
   if(m_verbosity > 5){
-    pout() << "FieldSolverMultigrid::regrid" << endl;
+    pout() << "FieldSolverMultigrid::regrid(int, int, int)" << endl;
   }
   
   FieldSolver::regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
@@ -248,28 +291,25 @@ void FieldSolverMultigrid::regrid(const int a_lmin, const int a_oldFinestLevel, 
 }
 
 void FieldSolverMultigrid::registerOperators(){
-  CH_TIME("FieldSolverMultigrid::registerOperators");
+  CH_TIME("FieldSolverMultigrid::registerOperators()");
   if(m_verbosity > 5){
-    pout() << "FieldSolverMultigrid::registerOperators" << endl;
+    pout() << "FieldSolverMultigrid::registerOperators()" << endl;
   }
 
-  if(m_amr.isNull()){
-    MayDay::Abort("FieldSolverMultigrid::registerOperators - need to set AmrMesh!");
-  }
-  else{
-    m_amr->registerOperator(s_eb_coar_ave,     m_realm, phase::gas  );
-    m_amr->registerOperator(s_eb_coar_ave,     m_realm, phase::solid);
-    m_amr->registerOperator(s_eb_fill_patch,   m_realm, phase::gas  );
-    m_amr->registerOperator(s_eb_fill_patch,   m_realm, phase::solid);
-    m_amr->registerOperator(s_eb_pwl_interp,   m_realm, phase::gas  );
-    m_amr->registerOperator(s_eb_pwl_interp,   m_realm, phase::solid);
-    m_amr->registerOperator(s_eb_irreg_interp, m_realm, phase::gas  );
-    m_amr->registerOperator(s_eb_irreg_interp, m_realm, phase::solid);
-    m_amr->registerOperator(s_eb_flux_reg,     m_realm, phase::gas  );
-    m_amr->registerOperator(s_eb_flux_reg,     m_realm, phase::solid);
-    m_amr->registerOperator(s_eb_multigrid,    m_realm, phase::gas  );
-    m_amr->registerOperator(s_eb_multigrid,    m_realm, phase::solid);    
-  }
+  CH_assert(!m_amr.isNull());
+
+  m_amr->registerOperator(s_eb_coar_ave,     m_realm, phase::gas  );
+  m_amr->registerOperator(s_eb_coar_ave,     m_realm, phase::solid);
+  m_amr->registerOperator(s_eb_fill_patch,   m_realm, phase::gas  );
+  m_amr->registerOperator(s_eb_fill_patch,   m_realm, phase::solid);
+  m_amr->registerOperator(s_eb_pwl_interp,   m_realm, phase::gas  );
+  m_amr->registerOperator(s_eb_pwl_interp,   m_realm, phase::solid);
+  m_amr->registerOperator(s_eb_irreg_interp, m_realm, phase::gas  );
+  m_amr->registerOperator(s_eb_irreg_interp, m_realm, phase::solid);
+  m_amr->registerOperator(s_eb_flux_reg,     m_realm, phase::gas  );
+  m_amr->registerOperator(s_eb_flux_reg,     m_realm, phase::solid);
+  m_amr->registerOperator(s_eb_multigrid,    m_realm, phase::gas  );
+  m_amr->registerOperator(s_eb_multigrid,    m_realm, phase::solid);    
 }
 
 void FieldSolverMultigrid::setupSolver(){
@@ -285,15 +325,19 @@ void FieldSolverMultigrid::setupSolver(){
 }
 
 void FieldSolverMultigrid::setupHelmholtzFactory(){
-  CH_TIME("FieldSolverMultigrid::setupHelmholtzFactory");
+  CH_TIME("FieldSolverMultigrid::setupHelmholtzFactory()");
   if(m_verbosity > 5){
-    pout() << "FieldSolverMultigrid::setupHelmholtzFactory" << endl;
+    pout() << "FieldSolverMultigrid::setupHelmholtzFactory()" << endl;
   }
+
+  // TLDR: This routine sets up a Helmholtz factory for creating MFHelmholtzOps which are used by Chombo's AMRMultiGrid. We
+  //       should already have registered the operators when we come to this routine. 
 
   const RefCountedPtr<EBIndexSpace>& ebisGas = m_multifluidIndexSpace->getEBIndexSpace(phase::gas);
   const RefCountedPtr<EBIndexSpace>& ebisSol = m_multifluidIndexSpace->getEBIndexSpace(phase::solid);
 
-  // Need to set up multifluid wrappers
+  // First, set up multifluid wrappers. These wrappers are just code-saving constructs for multifluid problems -- they
+  // are essentially just a size-two vector containing the operators for each phase. 
   const int finestLevel = m_amr->getFinestLevel();
   const int numPhases   = m_multifluidIndexSpace->numPhases();
   
@@ -326,21 +370,26 @@ void FieldSolverMultigrid::setupHelmholtzFactory(){
     mfCoarAve[lvl].define(avePhases);
   }
 
-  // Coarsest domain used for multigrid. The user specifies the minimum number of cells in any
-  // coordinate direction, and we coarsen until we have a domain which satisfies that constraint. 
+  // Find the coarsest domain used for multigrid. The user will have specified the minimum number of cells in any
+  // coordinate direction (m_minCellsBottom), and we coarsen until we have a domain which satisfies that constraint.
+  // MFHelmholtzOpFactory will not generate multigrid operators below that depth. 
   ProblemDomain bottomDomain = m_amr->getDomains()[0];
   while(bottomDomain.domainBox().shortside() >= 2*m_minCellsBottom){
     bottomDomain.coarsen(2);
   }
 
-  // Number of ghost cells in data holders. 
+  // Number of ghost cells in data holders. This is needed because EBHelmholtzOp uses restriction/prolongation objects from Chombo, and they
+  // need to know explicit object size to optimize irregular access. 
   const IntVect ghostPhi = m_amr->getNumberOfGhostCells()*IntVect::Unit;
   const IntVect ghostRhs = m_amr->getNumberOfGhostCells()*IntVect::Unit;
 
-  // BC factories. 
+  // BC factories. Fortunately, MFHelmholtzOp/EBHelmholtzOp have sane interfaces which allowed us to code up
+  // boundary condition objects and factories.
   auto ebbcFactory     = RefCountedPtr<MFHelmholtzEBBCFactory>     (new MFHelmholtzElectrostaticEBBCFactory(m_multigridBcOrder, m_multigridBcWeight, m_ebBc));
   auto domainBcFactory = RefCountedPtr<MFHelmholtzDomainBCFactory> (new MFHelmholtzElectrostaticDomainBCFactory(m_domainBc));
-  
+
+  // Create the factory. Note that we pass m_permittivityCell in through the a-coefficient, but we also set alpha to zero
+  // so there is no diagonal term in the operator after all. 
   m_helmholtzOpFactory = RefCountedPtr<MFHelmholtzOpFactory>(new MFHelmholtzOpFactory(m_multifluidIndexSpace,
 										      m_dataLocation,
 										      m_alpha,
@@ -364,17 +413,19 @@ void FieldSolverMultigrid::setupHelmholtzFactory(){
 										      m_multigridJumpOrder,
 										      m_multigridJumpWeight,
 										      m_amr->getMaxBoxSize()));
-
 }
 
 void FieldSolverMultigrid::setupMultigrid(){
-  CH_TIME("FieldSolverMultigrid::setupMultigrid");
+  CH_TIME("FieldSolverMultigrid::setupMultigrid()");
   if(m_verbosity > 5){
-    pout() << "FieldSolverMultigrid::setupMultigrid" << endl;
+    pout() << "FieldSolverMultigrid::setupMultigrid()" << endl;
   }
 
-  // Select bottom solver
-  LinearSolver<LevelData<MFCellFAB> >* bottomSolver = NULL;
+  // This routine sets up a standard Chombo multigrid solver using the AMRMultiGrid template. Fortunately, MFHelmholtzOp implements
+  // the required functions and we have already set up the factory. 
+
+  // Select the bottom solver -- the user will have specified this when parseMultigridSettings() was called. 
+  LinearSolver<LevelData<MFCellFAB> >* bottomSolver = nullptr;
   switch(m_bottomSolverType){
   case BottomSolverType::Simple:
     bottomSolver = &m_mfsolver;
@@ -390,7 +441,7 @@ void FieldSolverMultigrid::setupMultigrid(){
     break;
   }
 
-  // Select the multigrid type
+  // Select the multigrid type. Again, the user will have specified this when parseMultigridSettings was called. 
   int gmgType;
   switch(m_multigridType){
   case MultigridType::VCycle:
@@ -403,6 +454,7 @@ void FieldSolverMultigrid::setupMultigrid(){
     MayDay::Error("FieldSolverMultigrid::setupMultigrid - logic bust in multigrid type selection");
   }
 
+  // AMRMultiGrid requires the finest level and the coarsest domain. 
   const int finestLevel              = m_amr->getFinestLevel();
   const ProblemDomain coarsestDomain = m_amr->getDomains()[0];
 
@@ -415,13 +467,14 @@ void FieldSolverMultigrid::setupMultigrid(){
 					m_multigridMaxIterations,
 					m_multigridExitTolerance,
 					m_multigridExitHang,
-					1.E-99); // Norm thresh will be set via eps
+					1.E-99); // This is the termination criterion for the absolute. We disregard since we use a relative tolerance. 
   
-  m_multigridSolver.m_imin      = m_multigridMinIterations;
-  m_multigridSolver.m_verbosity = m_multigridVerbosity;
+  m_multigridSolver.m_imin      = m_multigridMinIterations; // Minimum number of iterations. 
+  m_multigridSolver.m_verbosity = m_multigridVerbosity;     // Multigrid verbosity, in case user wants to see convergence rates etc. 
 
 
-  // Create some dummy storage for multigrid initialization. 
+  // Create some dummy storage for multigrid initialization. This is needed because
+  // AMRMultiGrid must allocate the operators. 
   MFAMRCellData dummy1;
   MFAMRCellData dummy2;
   
@@ -443,13 +496,20 @@ void FieldSolverMultigrid::setupMultigrid(){
 }
 
 Vector<long long> FieldSolverMultigrid::computeLoads(const DisjointBoxLayout& a_dbl, const int a_level) {
-  CH_TIME("FieldSolverMultigrid::computeLoads");
+  CH_TIME("FieldSolverMultigrid::computeLoads(DisjointBoxLayout, int)");
   if(m_verbosity > 5){
-    pout() << "FieldSolverMultigrid::computeLoads" << endl;
+    pout() << "FieldSolverMultigrid::computeLoads(DisjointBoxLayout, int)" << endl;
   }
+
+  // This routine estimates the computational loads on a grid level. It does that by creating an operator (which we later delete)
+  // on the grid level corresponding to a_level. It then uses a TimedDataIterator in the input DisjointBoxLayout to estimate the
+  // compute time spent when visiting each patch during a typical smoothing step. This step is defined in MFHelmholtzOp::computeOperatorLoads
+  // and consists of coarse-fine interpolation, updating BCs, and calling the smoothing kernel (e.g. red-black Gauss-seidel). Fortunately
+  // this will provide this class with the opportunity to use introspective load balancing. 
 
   constexpr int numApply = 50;
 
+  // Set up the multigrid solver if that has not already been done. 
   if(!m_isSolverSetup){
     this->setupSolver();
   }
@@ -459,11 +519,11 @@ Vector<long long> FieldSolverMultigrid::computeLoads(const DisjointBoxLayout& a_
   dit.clearTime();
   dit.enableTime();
 
-  // Do some relaxations on each level. This includes BCs.
+  // Allocate a dummy storage that we can operate on.
   MFAMRCellData dummy;
-
   m_amr->allocate(dummy, m_realm, m_nComp);
 
+  // Create the operator and run a couple of kernels that involve coarse-fine interpolation, BC updates, and smoothing kernels. 
   auto oper = (MFHelmholtzOp*) m_helmholtzOpFactory->MGnewOp(m_amr->getDomains()[a_level], 0, false);
   for (int k = 0; k < numApply; k++){
     oper->computeOperatorLoads(*dummy[a_level], dit);
@@ -473,7 +533,8 @@ Vector<long long> FieldSolverMultigrid::computeLoads(const DisjointBoxLayout& a_
   dit.disableTime();
   dit.mergeTime();
 
-  // Now do the load balancing. When we do this, the boxes are standard-sorted! I.e. the new mesh ignores the desired sorting from AmrMesh
+  // Now do the load balancing. When we do this, the boxes do not follow AmrMesh sorting. I.e., the
+  // vector indices correspond to the indices in DisjointBoxLayout::getBoxArray(). 
   Vector<unsigned long long> loads = dit.getTime();
 
   Vector<long long> ret(loads.size());
