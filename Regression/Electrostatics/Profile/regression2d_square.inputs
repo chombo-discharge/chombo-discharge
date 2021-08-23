@@ -5,7 +5,7 @@ AmrMesh.lo_corner       =    0.0   0.
 AmrMesh.hi_corner       =    0.04  0.02
 AmrMesh.verbosity       = -1          # Controls verbosity. 
 AmrMesh.coarsest_domain = 128 64      # Number of cells on coarsest domain
-AmrMesh.max_amr_depth   = 3           # Maximum amr depth
+AmrMesh.max_amr_depth   = 5           # Maximum amr depth
 AmrMesh.max_sim_depth   = -1          # Maximum simulation depth
 AmrMesh.fill_ratio      = 0.5         # Fill ratio for grid generation
 AmrMesh.buffer_size     = 2           # Number of cells between grid levels
@@ -52,21 +52,21 @@ Driver.num_plot_ghost                  = 1             # Number of ghost cells t
 Driver.plt_vars                        = levelset      # 'tags', 'mpi_rank'
 Driver.restart                         = 0             # Restart step (less or equal to 0 implies fresh simulation)
 Driver.allow_coarsening                = true          # Allows removal of grid levels according to CellTagger
-Driver.grow_geo_tags                   = 2                # How much to grow tags when using geometry-based refinement. 
-Driver.refine_angles                   = 30.              # Refine cells if angle between elements exceed this value.
-Driver.refine_electrodes               = -1            # Refine electrode surfaces. -1 => equal to refine_geometry
-Driver.refine_dielectrics              = -1            # Refine dielectric surfaces. -1 => equal to refine_geometry
+Driver.grow_geo_tags                   = 4             # How much to grow tags when using geometry-based refinement. 
+Driver.refine_angles                   = 15.           # Refine cells if angle between elements exceed this value.
+Driver.refine_electrodes               = 0            # Refine electrode surfaces. -1 => equal to refine_geometry
+Driver.refine_dielectrics              = 0            # Refine dielectric surfaces. -1 => equal to refine_geometry
 
 
 # ====================================================================================================
 # FIELD_SOLVER_MULTIGRID_GMG CLASS OPTIONS (MULTIFLUID GMG SOLVER SETTINGS)
 # ====================================================================================================
-FieldSolverMultigrid.bc.x.lo      = neumann 0.0 # Bc type.
-FieldSolverMultigrid.bc.x.hi      = dirichlet 0.0       # Bc type.
+FieldSolverMultigrid.bc.x.lo      = neumann   0.0     # Bc type.
+FieldSolverMultigrid.bc.x.hi      = dirichlet 0.0     # Bc type.
 FieldSolverMultigrid.bc.y.lo      = dirichlet 0.0     # Bc type.
-FieldSolverMultigrid.bc.y.hi      = neumann 0.0          # Bc type.
-FieldSolverMultigrid.bc.z.lo      = neumann 0.0          # Bc type.
-FieldSolverMultigrid.bc.z.hi      = neumann 0.0          # Bc type.
+FieldSolverMultigrid.bc.y.hi      = neumann   0.0     # Bc type.
+FieldSolverMultigrid.bc.z.lo      = neumann   0.0     # Bc type.
+FieldSolverMultigrid.bc.z.hi      = neumann   0.0     # Bc type.
 FieldSolverMultigrid.plt_vars     = phi rho E res     # Plot variables. Possible vars are 'phi', 'rho', 'E', 'res'
 FieldSolverMultigrid.kappa_source = true              # Volume weighted space charge density or not (depends on algorithm)
 

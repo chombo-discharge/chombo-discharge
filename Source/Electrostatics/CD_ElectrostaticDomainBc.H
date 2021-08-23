@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_ElectrostaticDomainBc.H
-  @brief  Simple data holder for holding domain boundary condition types for FieldSolver
+  @brief  Declaration of a class for holding function-based boundary conditions on domain edges. 
   @author Robert Marskar
 */
 
@@ -25,14 +25,15 @@
 
 /*!
   @brief Class which maps boundary condition types to a side and direction. 
-  @details This class is simply meant to hold boundary conditions for use in various FieldSolver code. It provides no functionality otherwise,
-  and has no dependencies, other than standard C++14. 
+  @details This class is simply meant to hold functions that will be used as boundary conditions for use in various FieldSolver code. The user
+  will construct this object, after which he can associate a polymorphic function with a domain side and a boundary condition type. Currently,
+  only Dirichlet and Neumann are supported. 
 */
 class ElectrostaticDomainBc {
 public:
 
   /*!
-    @brief Boundary condition type
+    @brief Supported boundary condition types.
   */
   enum class BcType {
     Dirichlet,
@@ -41,6 +42,8 @@ public:
 
   /*!
     @brief Function which maps f(R^3,t) : R. Used for setting the associated value and boundary condition type. 
+    @param[in] a_position Physical coordinates
+    @param[in] a_time     Time
   */
   using BcFunction = std::function<Real(const RealVect a_position, const Real a_time) >;
 
@@ -55,7 +58,7 @@ public:
   using Bc = std::pair<BcType, BcFunction>;
   
   /*!
-    @brief Initializing constructor. Populates with zero data.
+    @brief Initializing constructor. This populates the BC functions with homogeneous Neumann boundary conditions. 
   */
   ElectrostaticDomainBc();
 

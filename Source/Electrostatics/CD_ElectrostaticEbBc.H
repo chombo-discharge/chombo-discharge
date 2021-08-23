@@ -25,8 +25,9 @@
 
 /*!
   @brief Class which maps boundary condition types to a side and direction. 
-  @details This class is meant to hold boundary conditions for use in various FieldSolver code. It provides no functionality otherwise,
-  and has no dependencies, other than standard C++14. 
+  @details This class is simply meant to hold functions that will be used as boundary conditions for use in various FieldSolver code. The user
+  will construct this object, after which he can associate a polymorphic function with an electrode, which is used for setting the voltage on
+  the electrode (in time and space). 
 */
 class ElectrostaticEbBc {
 public:
@@ -37,12 +38,12 @@ public:
   using BcFunction = std::function<Real(const RealVect a_position, const Real a_time)>;
   
   /*!
-    @brief Initializing constructor. This does nothing. 
+    @brief Initializing constructor (does nothing)
   */
   ElectrostaticEbBc();
 
   /*!
-    @brief Destructor. This does nothing. 
+    @brief Destructor (does nothing)
   */
   virtual ~ElectrostaticEbBc();
 
