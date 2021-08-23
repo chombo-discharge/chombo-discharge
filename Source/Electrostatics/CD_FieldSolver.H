@@ -578,8 +578,7 @@ protected:
     @note This routine is used for computing the permittivity inside dielectrics. 
   */
   inline
-  Real getDielectricPermittivity(const RealVect& a_pos);
-
+  Real getDielectricPermittivity(const RealVect& a_pos) const;
 
   /*!
     @brief Set cell-centered permittivities
