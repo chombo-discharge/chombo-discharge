@@ -17,7 +17,7 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Factory class for making Dirichlet BCs in EBHelmholtzEBBCFactory
+  @brief Factory class for making Dirichlet BCs on EBs in EBHelmholtzOp
 */
 class EBHelmholtzDirichletEBBCFactory : public EBHelmholtzEBBCFactory {
 public:
