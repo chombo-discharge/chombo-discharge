@@ -20,7 +20,7 @@
 
 EBHelmholtzRobinEBBC::EBHelmholtzRobinEBBC(){
   m_order       = 1;
-  m_radius      = 1;
+  m_radius      = 2;
   m_weight      = 0;   // Can't use weighted least squares when starting vof is included
   
   m_useConstant = false;
@@ -78,7 +78,7 @@ VoFStencil EBHelmholtzRobinEBBC::getMonoPathStencil(const VolIndex& a_vof, const
   const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
 
   const bool useStartVof = true;
-
+#if 1
   const VoFStencil stencil = LeastSquares::getInterpolationStencil(Location::Cell::Boundary,
 								   m_dataLocation,
 								   LeastSquares::Connectivity::MonotonePath,
@@ -89,6 +89,19 @@ VoFStencil EBHelmholtzRobinEBBC::getMonoPathStencil(const VolIndex& a_vof, const
 								   m_radius,
 								   m_order,
 								   useStartVof);
+#else
+  const VoFStencil bndryGradSten = LeastSquares::getBndryGradSten(a_vof,
+								  LeastSquares::Neighborhood::Quadrant,
+								  Location::Cell::Center,
+								  ebisbox,
+								  m_dx,
+								  1,
+								  0,
+								  1,
+								  false);
+
+  
+#endif
 
 
   return stencil;
