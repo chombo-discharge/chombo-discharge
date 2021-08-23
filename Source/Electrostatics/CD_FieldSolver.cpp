@@ -527,6 +527,17 @@ std::string FieldSolver::getRealm() const{
   return m_realm;
 }
 
+void FieldSolver::parseVerbosity(){
+  CH_TIME("FieldSolver::parseVerbosity()");
+  if(m_verbosity > 5){
+    pout() << "FieldSolver::parseVerbosity()" << endl;
+  }
+
+  ParmParse pp(m_className.c_str());
+
+  pp.get("verbosity", m_verbosity);
+}
+
 void FieldSolver::parsePlotVariables(){
   CH_TIME("FieldSolver::parsePlotVariables()");
   if(m_verbosity > 5){

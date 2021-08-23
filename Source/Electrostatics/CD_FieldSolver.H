@@ -552,6 +552,11 @@ protected:
   std::function<Real(const Real a_time)> m_voltage;
 
   /*!
+    @brief Parse solver class verbosity
+  */
+  virtual void parseVerbosity();
+
+  /*!
     @brief Function which parses which plot variables to write to plot files
   */
   virtual void parsePlotVariables();

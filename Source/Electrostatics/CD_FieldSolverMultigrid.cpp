@@ -27,17 +27,20 @@ constexpr Real FieldSolverMultigrid::m_alpha;
 constexpr Real FieldSolverMultigrid::m_beta;
 
 FieldSolverMultigrid::FieldSolverMultigrid() : FieldSolver() {
-
+  CH_TIME("FieldSolverMultigrid::FieldSolverMultigrid()");
+  
   // Default settings
   m_isSolverSetup            = false;
   m_className                = "FieldSolverMultigrid";
 }
 
 FieldSolverMultigrid::~FieldSolverMultigrid(){
-
+  CH_TIME("FieldSolverMultigrid::~FieldSolverMultigrid()");
 }
 
 void FieldSolverMultigrid::parseOptions(){
+  CH_TIME("FieldSolverMultigrid::parseOptions()");
+  
   this->parseDomainBc();
   this->parsePlotVariables();
   this->parseMultigridSettings();

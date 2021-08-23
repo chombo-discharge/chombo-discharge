@@ -25,6 +25,9 @@
 
 /*!
   @brief Implementation of FieldSolver which uses multigrid. 
+  @details This class uses MFHelmholtzOp for discretizing the Poisson equation to second order. Although MFHelmholtzOp solves the Helmholtz equation
+  alpha*a(x)*phi(x) + beta*div[b(x)*grad(phi)] = rho, we just set alpha to zero and eat the performance penalty. This class runs with electrostatic
+  domain and EB boundary conditions that fit in the EBHelmholtzOp/MFHelmholtzOp constructs. 
 */
 class FieldSolverMultigrid : public FieldSolver {
 protected:
@@ -49,36 +52,37 @@ protected:
 public:
 
   /*!
-    @brief Weak constructor. Sets basic parameters. 
+    @brief Weak constructor. 
+    @details This sets default options. 
   */
   FieldSolverMultigrid();
 
   /*!
-    @brief Disallowed copy constructor
+    @brief Disallowed copy constructor. 
     @param[in] a_other Other solver
   */
   FieldSolverMultigrid(const FieldSolverMultigrid& a_other) = delete;
 
   /*!
-    @brief Disallowed move constructor
+    @brief Disallowed move constructor.
     @param[in] a_other Other solver
   */
   FieldSolverMultigrid(const FieldSolverMultigrid&& a_other) = delete;
 
   /*!
-    @brief Disallowed copy assignment operator
+    @brief Disallowed copy assignment operator.
     @param[in] a_other Other solver
   */
   FieldSolverMultigrid& operator=(const FieldSolverMultigrid& a_other) = delete;
 
   /*!
-    @brief Disallowed move assignment operator
+    @brief Disallowed move assignment operator.
     @param[in] a_other Other solver
   */
   FieldSolverMultigrid& operator=(const FieldSolverMultigrid&& a_other) = delete;
 
   /*!
-    @brief Constructor
+    @brief Constructor (does nothing)
   */
   virtual ~FieldSolverMultigrid();
 
@@ -94,7 +98,7 @@ public:
   virtual bool solve(MFAMRCellData&       a_potential,
 		     const MFAMRCellData& a_rho,
 		     const EBAMRIVData&   a_sigma,
-		     const bool           a_zerophi = false) override;
+		     const bool           a_zeroPhi = false) override;
 
   /*!
     @brief Parse all class options from command-line or input script. 
