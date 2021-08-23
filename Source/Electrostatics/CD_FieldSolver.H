@@ -24,19 +24,12 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Abstract electrostatic field solver class. This class contains an interface to a solve routine, data holders, and interface to boundary conditions.
+  @brief Base class for electrostatic solvers. 
+  @details This class contains an interface to a solve routine, data holders, and interface to boundary conditions. Solver routines are
+  supposed to be implemented by derived classes. 
 */
 class FieldSolver {
 public:
-
-  /*!
-    @brief Default function for space-time dependence of domain boundary conditions. 
-    @details This is a utility function 
-    @param[in] a_position Position in space
-    @param[in] a_time     Time
-    @return This returns one (1.0)
-  */
-  static Real s_defaultDomainBcFunction(const RealVect a_position, const Real a_time);
 
   /*!
     @brief Constructor
@@ -158,9 +151,9 @@ public:
 
   /*!
     @brief Regrid method. 
-    @param[in] a_lmin           Coarsest level where grids did not change. 
-    @param[in] a_oldFinestLevel Previous finest AMR level
-    @param[in] a_newFinestLevel New finest AMR level. 
+    @param[in] a_lmin           Coarsest level allowed to change. 
+    @param[in] a_oldFinestLevel Finest level before the regrid. 
+    @param[in] a_newFinestLevel Finest level after the regrid. 
     @details This linearly interpolates (with limiters) m_potential to the new grids and recomputes the electric field (from the interpolated potential). 
   */
   virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel);
@@ -559,6 +552,11 @@ protected:
   std::function<Real(const Real a_time)> m_voltage;
 
   /*!
+    @brief Parse solver class verbosity
+  */
+  virtual void parseVerbosity();
+
+  /*!
     @brief Function which parses which plot variables to write to plot files
   */
   virtual void parsePlotVariables();
@@ -585,8 +583,7 @@ protected:
     @note This routine is used for computing the permittivity inside dielectrics. 
   */
   inline
-  Real getDielectricPermittivity(const RealVect& a_pos);
-
+  Real getDielectricPermittivity(const RealVect& a_pos) const;
 
   /*!
     @brief Set cell-centered permittivities

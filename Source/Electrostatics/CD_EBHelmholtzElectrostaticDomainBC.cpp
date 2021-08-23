@@ -16,6 +16,8 @@
 #include <CD_NamespaceHeader.H>
 
 EBHelmholtzElectrostaticDomainBC::EBHelmholtzElectrostaticDomainBC(const ElectrostaticDomainBc& a_electrostaticBCs){
+  CH_TIME("EBHelmholtzElectrostaticDomainBC::EBHelmholtzElectrostaticDomainBC()");
+  
   m_electrostaticBCs = a_electrostaticBCs;
   
   for (int dir = 0; dir < SpaceDim; dir++){
@@ -33,7 +35,7 @@ EBHelmholtzElectrostaticDomainBC::EBHelmholtzElectrostaticDomainBC(const Electro
       // This might seem clunky, but I can't see any other way of doing it properly without changing EBHelmholtzOp to a time-dependent operator (which
       // I really don't want to do). 
       auto func = [domainSide, &BC = this->m_electrostaticBCs](const RealVect& a_position) -> Real {
-	const Real dummyDt = 0.0;
+	constexpr Real dummyDt = 0.0;
 
 	const ElectrostaticDomainBc::BcFunction& bcFunction = BC.getBc(domainSide).second; // This is a function Real(const RealVect, const Real)
 	
@@ -56,7 +58,7 @@ EBHelmholtzElectrostaticDomainBC::EBHelmholtzElectrostaticDomainBC(const Electro
 }
 
 EBHelmholtzElectrostaticDomainBC::~EBHelmholtzElectrostaticDomainBC(){
-
+  CH_TIME("EBHelmholtzElectrostaticDomainBC::~EBHelmholtzElectrostaticDomainBC()");
 }
 
 void EBHelmholtzElectrostaticDomainBC::define(const Location::Cell                        a_dataLocation,
@@ -64,6 +66,12 @@ void EBHelmholtzElectrostaticDomainBC::define(const Location::Cell              
 					      const RefCountedPtr<LevelData<EBFluxFAB> >& a_Bcoef,
 					      const RealVect&                             a_probLo,
 					      const Real                                  a_dx) {
+  CH_TIME("EBHelmholtzElectrostaticDomainBC::define(Location::Cell, EBLevelGrid, RefCountedPtr<LD<EBFluxFAB> >, RealVect, Real)");
+
+  // This function is called by EBHelmholtzOp and is used for defining the boudnary condition object (it needs stencils and all that). Since
+  // this class is just a wrapper for Dirichlet/Neumann BCs, we've allocated the BC objects already (one for each side). But they have not
+  // been defined yet, so we do that here. 
+  
   for (int dir = 0; dir < SpaceDim; dir++){
     for (SideIterator sit; sit.ok(); ++sit){
       auto& bcPtr = m_bcObjects.at(std::make_pair(dir, sit()));
@@ -79,6 +87,11 @@ void EBHelmholtzElectrostaticDomainBC::getFaceFlux(BaseFab<Real>&        a_faceF
 						   const Side::LoHiSide& a_side,
 						   const DataIndex&      a_dit,
 						   const bool            a_useHomogeneous) const {
+  CH_TIME("EBHelmholtzElectrostaticDomainBC::getFaceFlux(BaseFab<Real>, BaseFab<Real>, int, Side::LoHiSide, DataIndex, bool)");
+  
+  // We know that we've defined one BC object that is either Dirichlet or Neumann on the each domain side. We just fetch
+  // that object and use it to compute the flux.  
+  
   const auto& bcPtr = m_bcObjects.at(std::make_pair(a_dir, a_side));
 
   bcPtr->getFaceFlux(a_faceFlux,
@@ -95,6 +108,10 @@ Real EBHelmholtzElectrostaticDomainBC::getFaceFlux(const VolIndex&       a_vof,
 						   const Side::LoHiSide& a_side,
 						   const DataIndex&      a_dit,
 						   const bool            a_useHomogeneous) const {
+
+  // We know that we've defined one BC object that is either Dirichlet or Neumann on the each domain side. We just fetch
+  // that object and use it to compute the flux.
+  
   const auto& bcPtr = m_bcObjects.at(std::make_pair(a_dir, a_side));
 
   return bcPtr->getFaceFlux(a_vof, a_phi, a_dir, a_side, a_dit, a_useHomogeneous);

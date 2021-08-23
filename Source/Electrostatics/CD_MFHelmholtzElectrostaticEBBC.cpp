@@ -16,6 +16,7 @@
 
 MFHelmholtzElectrostaticEBBC::MFHelmholtzElectrostaticEBBC(const int a_phase, const ElectrostaticEbBc& a_electrostaticBCs, const RefCountedPtr<JumpBC>& a_jumpBC)
   : MFHelmholtzEBBC(a_phase, a_jumpBC) {
+  CH_TIME("MFHelmholtzElectrostaticEBBC::MFHelmholtzElectrostaticEBBC");
 
   m_order  = -1;
   m_weight = -1;
@@ -24,19 +25,26 @@ MFHelmholtzElectrostaticEBBC::MFHelmholtzElectrostaticEBBC(const int a_phase, co
 }
 
 void MFHelmholtzElectrostaticEBBC::setOrder(const int a_order){
+  CH_TIME("MFHelmholtzElectrostaticEBBC::setOrder(int)");
+  
   CH_assert(m_order > 0);
 
   m_order = a_order;
 }
 
 void MFHelmholtzElectrostaticEBBC::setWeight(const int a_weight){
+  CH_TIME("MFHelmholtzElectrostaticEBBC::setWeight(int)");
+  
   CH_assert(m_weight >= 0);
 
   m_weight = a_weight;
 }
 
 void MFHelmholtzElectrostaticEBBC::defineSinglePhase() {
-  if(m_order <= 0 || m_weight < 0) MayDay::Error("MFHelmholtzElectrostaticEBBC - must have order > 0 and weight >= 0");
+  CH_TIME("MFHelmholtzElectrostaticEBBC::defineSinglePhase()");
+
+  CH_assert(m_order  >  0);
+  CH_assert(m_weight >= 0);  
 
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
   const ProblemDomain& domain  = m_eblg.getDomain();
@@ -110,6 +118,8 @@ void MFHelmholtzElectrostaticEBBC::applyEBFluxSinglePhase(VoFIterator&       a_s
 							  const DataIndex&   a_dit,
 							  const Real&        a_beta,
 							  const bool&        a_homogeneousPhysBC) const {
+  CH_TIME("MFHelmholtzElectrostaticEBBC::applyEBFluxSinglePhase(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
+  
   // Apply the stencil for computing the contribution to kappaDivF. Note divF is sum(faces) B*grad(Phi)/dx and that this
   // is the contribution from the EB face. B/dx is already included in the stencils and boundary weights, but beta is not.
 

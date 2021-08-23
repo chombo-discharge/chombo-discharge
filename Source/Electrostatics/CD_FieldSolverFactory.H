@@ -20,21 +20,21 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Factory class for poisson solvers. Used to instantiate any FieldSolver-derived class. 
-  @details This class is mostly used for easily making FieldSolvers of any type into a FieldSolver (i.e. casting to smart pointer), but also provides a factory
-  method for generating any number of field solvers. 
+  @brief Factory class for poisson solvers. Used to instantiate any FieldSolver-derived classes with automatic casting to the base class. 
+  @details This class is mostly used for easily making FieldSolvers of any type into a FieldSolver (i.e. casting to smart pointer), but as a side-effect
+  it also provides a factory method for generating any number of field solvers. 
 */
 template <class T>
 class FieldSolverFactory {
 public:
 
   /*!
-    @brief Constructor. Does nothing. 
+    @brief Constructor (does nothing)
   */
   FieldSolverFactory();
 
   /*!
-    @brief Constructor. Does nothing. 
+    @brief Constructor (does nothing)
   */
   ~FieldSolverFactory();
 

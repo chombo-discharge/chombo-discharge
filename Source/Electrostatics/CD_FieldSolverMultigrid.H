@@ -25,60 +25,45 @@
 
 /*!
   @brief Implementation of FieldSolver which uses multigrid. 
+  @details This class uses MFHelmholtzOp for discretizing the Poisson equation to second order. Although MFHelmholtzOp solves the Helmholtz equation
+  alpha*a(x)*phi(x) + beta*div[b(x)*grad(phi)] = rho, we just set alpha to zero and eat the performance penalty. This class runs with electrostatic
+  domain and EB boundary conditions that fit in the EBHelmholtzOp/MFHelmholtzOp constructs. 
 */
 class FieldSolverMultigrid : public FieldSolver {
-protected:
-
-  /*!
-    @brief Enum class for supported bottom solvers in multigrid.
-  */
-  enum class BottomSolverType {
-    Simple,
-    BiCGStab,
-    GMRES
-  };
-
-  /*!
-    @brief Enum for multigrid cycle types. 
-  */
-  enum class MultigridType{
-    VCycle,
-    WCycle,
-  };
-  
 public:
 
   /*!
-    @brief Weak constructor. Sets basic parameters. 
+    @brief Weak constructor. 
+    @details This sets default options. 
   */
   FieldSolverMultigrid();
 
   /*!
-    @brief Disallowed copy constructor
+    @brief Disallowed copy constructor. 
     @param[in] a_other Other solver
   */
   FieldSolverMultigrid(const FieldSolverMultigrid& a_other) = delete;
 
   /*!
-    @brief Disallowed move constructor
+    @brief Disallowed move constructor.
     @param[in] a_other Other solver
   */
   FieldSolverMultigrid(const FieldSolverMultigrid&& a_other) = delete;
 
   /*!
-    @brief Disallowed copy assignment operator
+    @brief Disallowed copy assignment operator.
     @param[in] a_other Other solver
   */
   FieldSolverMultigrid& operator=(const FieldSolverMultigrid& a_other) = delete;
 
   /*!
-    @brief Disallowed move assignment operator
+    @brief Disallowed move assignment operator.
     @param[in] a_other Other solver
   */
   FieldSolverMultigrid& operator=(const FieldSolverMultigrid&& a_other) = delete;
 
   /*!
-    @brief Constructor
+    @brief Constructor (does nothing)
   */
   virtual ~FieldSolverMultigrid();
 
@@ -94,7 +79,7 @@ public:
   virtual bool solve(MFAMRCellData&       a_potential,
 		     const MFAMRCellData& a_rho,
 		     const EBAMRIVData&   a_sigma,
-		     const bool           a_zerophi = false) override;
+		     const bool           a_zeroPhi = false) override;
 
   /*!
     @brief Parse all class options from command-line or input script. 
@@ -109,9 +94,9 @@ public:
   /*!
     @brief Regrid method. 
     @details This calls the parent regrid function first. We only need the overwrite because we have to signal that multigrid must be set up again. 
-    @param[in] a_lmin           Coarsest level where grids did not change. 
-    @param[in] a_oldFinestLevel Previous finest AMR level
-    @param[in] a_newFinestLevel New finest AMR level. 
+    @param[in] a_lmin           Coarsest level allowed to change. 
+    @param[in] a_oldFinestLevel Finest AMR level before the regrid. 
+    @param[in] a_newFinestLevel Finest AMR level before the regrid. 
     @details This linearly interpolates (with limiters) m_potential to the new grids and recomputes the electric field (from the interpolated potential). 
   */
   virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
@@ -133,6 +118,9 @@ public:
 
   /*!
     @brief Compute grid loads
+    @param[in] a_dbl   Grids on input level
+    @param[in] a_level Grid level
+    @return Returns a vector of estimated loads. The indices in the vector correspond to the indices in DisjointBoxLayout::boxArray()
   */
   virtual Vector<long long> computeLoads(const DisjointBoxLayout& a_dbl, const int a_level) override;
   
@@ -147,6 +135,23 @@ protected:
     @brief Beta-coefficient (for Helmholtz operator)
   */
   static constexpr Real m_beta  = -1.0;
+  
+  /*!
+    @brief Enum class for supported bottom solvers in multigrid.
+  */
+  enum class BottomSolverType {
+    Simple,
+    BiCGStab,
+    GMRES
+  };
+
+  /*!
+    @brief Enum for multigrid cycle types. 
+  */
+  enum class MultigridType{
+    VCycle,
+    WCycle,
+  };  
 
   /*!
     @brief Relaxation type for gmg
@@ -237,11 +242,6 @@ protected:
     @brief Set bc jump weight (used for weighted least squares)
   */
   int m_multigridJumpWeight;
-
-  /*!
-    @brief Solver residue. If the residue is greater than this, we have a problematic cell. 
-  */
-  Real m_convergedResidue;
 
   /*!
     @brief Exit tolerance for multigrid. 

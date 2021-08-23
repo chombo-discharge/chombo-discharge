@@ -4,8 +4,8 @@
  */
 
 /*!
-  @file   FieldSolverFactoryI.H
-  @brief  Implementation of FieldSolverFactory.H
+  @file   CD_FieldSolverFactoryImplem.H
+  @brief  Implementation of CD_FieldSolverFactory.H
   @author Robert Marskar
 */
 
@@ -18,15 +18,19 @@
 
 template <class T>
 FieldSolverFactory<T>::FieldSolverFactory(){
+  CH_TIME("FieldSolverFactory<T>::FieldSolverFactory()");
 }
 
 
 template <class T>
 FieldSolverFactory<T>::~FieldSolverFactory(){
+  CH_TIME("FieldSolverFactory<T>::~FieldSolverFactory()");  
 }
 
 template <class T>
 RefCountedPtr<FieldSolver> FieldSolverFactory<T>::newSolver() const {
+  CH_TIME("FieldSolverFactory<T>::newSolver()");
+  
   return RefCountedPtr<FieldSolver> (new T);
 }
 

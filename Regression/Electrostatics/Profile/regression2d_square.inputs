@@ -52,21 +52,22 @@ Driver.num_plot_ghost                  = 1             # Number of ghost cells t
 Driver.plt_vars                        = levelset      # 'tags', 'mpi_rank'
 Driver.restart                         = 0             # Restart step (less or equal to 0 implies fresh simulation)
 Driver.allow_coarsening                = true          # Allows removal of grid levels according to CellTagger
-Driver.grow_geo_tags                   = 2                # How much to grow tags when using geometry-based refinement. 
-Driver.refine_angles                   = 30.              # Refine cells if angle between elements exceed this value.
-Driver.refine_electrodes               = -1            # Refine electrode surfaces. -1 => equal to refine_geometry
-Driver.refine_dielectrics              = -1            # Refine dielectric surfaces. -1 => equal to refine_geometry
+Driver.grow_geo_tags                   = 4             # How much to grow tags when using geometry-based refinement. 
+Driver.refine_angles                   = 15.           # Refine cells if angle between elements exceed this value.
+Driver.refine_electrodes               = 0            # Refine electrode surfaces. -1 => equal to refine_geometry
+Driver.refine_dielectrics              = 0            # Refine dielectric surfaces. -1 => equal to refine_geometry
 
 
 # ====================================================================================================
 # FIELD_SOLVER_MULTIGRID_GMG CLASS OPTIONS (MULTIFLUID GMG SOLVER SETTINGS)
 # ====================================================================================================
-FieldSolverMultigrid.bc.x.lo      = neumann 0.0 # Bc type.
-FieldSolverMultigrid.bc.x.hi      = dirichlet 0.0       # Bc type.
+FieldSolverMultigrid.verbosity         = -1                # Class verbosity
+FieldSolverMultigrid.bc.x.lo      = neumann   0.0     # Bc type.
+FieldSolverMultigrid.bc.x.hi      = dirichlet 0.0     # Bc type.
 FieldSolverMultigrid.bc.y.lo      = dirichlet 0.0     # Bc type.
-FieldSolverMultigrid.bc.y.hi      = neumann 0.0          # Bc type.
-FieldSolverMultigrid.bc.z.lo      = neumann 0.0          # Bc type.
-FieldSolverMultigrid.bc.z.hi      = neumann 0.0          # Bc type.
+FieldSolverMultigrid.bc.y.hi      = neumann   0.0     # Bc type.
+FieldSolverMultigrid.bc.z.lo      = neumann   0.0     # Bc type.
+FieldSolverMultigrid.bc.z.hi      = neumann   0.0     # Bc type.
 FieldSolverMultigrid.plt_vars     = phi rho E res     # Plot variables. Possible vars are 'phi', 'rho', 'E', 'res'
 FieldSolverMultigrid.kappa_source = true              # Volume weighted space charge density or not (depends on algorithm)
 

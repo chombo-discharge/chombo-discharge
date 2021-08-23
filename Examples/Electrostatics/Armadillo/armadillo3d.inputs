@@ -62,6 +62,7 @@ Driver.refine_dielectrics              = 0                # Refine dielectric su
 # ====================================================================================================
 # FieldSolverMultigrid class options
 # ====================================================================================================
+FieldSolverMultigrid.verbosity         = -1                # Class verbosity
 FieldSolverMultigrid.bc.x.lo      = dirichlet 0.0     # Bc type (see docs)
 FieldSolverMultigrid.bc.x.hi      = dirichlet 0.0     # Bc type (see docs)
 FieldSolverMultigrid.bc.y.lo      = dirichlet 0.0     # Bc type (see docs)
