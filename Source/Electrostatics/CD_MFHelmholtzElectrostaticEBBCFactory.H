@@ -18,7 +18,10 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Class for making electrostatic boundary conditions in an MFHelmholtzOp context
+  @brief Class for making electrostatic boundary conditions on EBs in an MFHelmholtzOp context. 
+  @details Users will pass an object of this class to MFHelmholtzOpFactory. The input arguments in the constructor will set the 
+  stencil order and weights for the least squares reconstruction that is used in EBHelmholtzEBBC. The actual BC values are passed
+  in through the a_electrostaticBCs argument in the constructor. 
 */
 class MFHelmholtzElectrostaticEBBCFactory : public MFHelmholtzEBBCFactory {
 public:
@@ -30,37 +33,45 @@ public:
 
   /*!
     @brief Full constructor
-    @param[in] a_electrostaticBCs Electrostatic boundary conditions
+    @param[in] a_order            Stencil order for least squares reconstruction
+    @param[in] a_weight           Equation weights for least squares reconstruction
+    @param[in] a_electrostaticBCs Electrostatic boundary conditions. 
+    @note EBHelmholtzEBBC will use a stencil radius equal to the order -- do not use a stencil order higher than your number of ghost cells. 
   */
   MFHelmholtzElectrostaticEBBCFactory(const int a_order, const int a_weight, const ElectrostaticEbBc& a_electrostaticBCs);
 
   /*!
     @brief No copy construction
+    @param[in] a_other Other factory
   */
   MFHelmholtzElectrostaticEBBCFactory(MFHelmholtzElectrostaticEBBCFactory& a_other) = delete;
 
   /*!
     @brief No move construction
+    @param[in] a_other Other factory
   */
   MFHelmholtzElectrostaticEBBCFactory(MFHelmholtzElectrostaticEBBCFactory&& a_other) = delete;
 
   /*!
-    @brief No copy assignemnt
+    @brief No copy assignment
+    @param[in] a_other Other factory
   */
   MFHelmholtzElectrostaticEBBCFactory& operator=(const MFHelmholtzElectrostaticEBBCFactory&) = delete;
 
   /*!
-    @brief No move assignement
+    @brief No move assignment
+    @param[in] a_other Other factory
   */
   MFHelmholtzElectrostaticEBBCFactory& operator=(const MFHelmholtzElectrostaticEBBCFactory&&) = delete;
 
   /*!
-    @brief Default constructor
+    @brief Default constructor (does nothing)
   */
   ~MFHelmholtzElectrostaticEBBCFactory();
   
   /*!
     @brief Factory method
+    @param[in] a_iphase Phase (0=gas and 1=solid). 
     @param[in] a_jumpBC Jump bc object. 
   */
   RefCountedPtr<EBHelmholtzEBBC> create(const int a_iphase, const RefCountedPtr<JumpBC>& a_jumpBC) const override;

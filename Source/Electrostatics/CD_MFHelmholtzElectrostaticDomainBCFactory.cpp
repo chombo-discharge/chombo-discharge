@@ -15,14 +15,18 @@
 #include <CD_NamespaceHeader.H>
 
 MFHelmholtzElectrostaticDomainBCFactory::MFHelmholtzElectrostaticDomainBCFactory(const ElectrostaticDomainBc& a_electrostaticBCs){
+  CH_TIME("MFHelmholtzElectrostaticDomainBCFactory::MFHelmholtzElectrostaticDomainBCFactory()");
+  
   m_electrostaticBCs = a_electrostaticBCs;
 }
 
 MFHelmholtzElectrostaticDomainBCFactory::~MFHelmholtzElectrostaticDomainBCFactory(){
-
+  CH_TIME("MFHelmholtzElectrostaticDomainBCFactory::~MFHelmholtzElectrostaticDomainBCFactory()");
 }
 
 RefCountedPtr<EBHelmholtzDomainBC> MFHelmholtzElectrostaticDomainBCFactory::create(const int a_iphase) const {
+  CH_TIME("MFHelmholtzElectrostaticDomainBCFactory::create(int)");
+  
   return RefCountedPtr<EBHelmholtzDomainBC> (new EBHelmholtzElectrostaticDomainBC(m_electrostaticBCs));
 }
 

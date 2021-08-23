@@ -18,7 +18,9 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Class for passing electrostatic boundary conditions into MFHelmholtzOp
+  @brief Class for passing electrostatic boundary conditions into MFHelmholtzOp.
+  @details This class implements MFHelmholtzDomainBCFactory and must thus return an EBHelmholtzDomainBC object for encapsulating domain boundary conditions
+  in EBHelmholtzOp. This is simply a multifluid wrapper. 
 */
 class MFHelmholtzElectrostaticDomainBCFactory : public MFHelmholtzDomainBCFactory{
 public:
@@ -36,41 +38,36 @@ public:
 
   /*!
     @brief Disallowed copy constructor
+    @param[in] a_other Other factory
   */
   MFHelmholtzElectrostaticDomainBCFactory(MFHelmholtzElectrostaticDomainBCFactory& a_other) = delete;
 
   /*!
     @brief Disallowed move constructor
+    @param[in] a_other Other factory
   */
   MFHelmholtzElectrostaticDomainBCFactory(MFHelmholtzElectrostaticDomainBCFactory&& a_other) = delete;
 
   /*!
     @brief Disallowed copy assignment
+    @param[in] a_other Other factory
   */
   MFHelmholtzElectrostaticDomainBCFactory& operator=(MFHelmholtzElectrostaticDomainBCFactory& a_other) = delete;
 
   /*!
     @brief Disallowed move assignment
+    @param[in] a_other Other factory
   */
   MFHelmholtzElectrostaticDomainBCFactory& operator=(MFHelmholtzElectrostaticDomainBCFactory&& a_other) = delete;
 
   /*!
-    @brief Destructor
+    @brief Destructor (does nothing)
   */
   ~MFHelmholtzElectrostaticDomainBCFactory();
 
   /*!
-    @brief Disallowed -- don't see why you would need it.
-  */
-  MFHelmholtzElectrostaticDomainBCFactory(const MFHelmholtzElectrostaticDomainBCFactory& a_other) = delete;
-
-  /*!
-    @brief Disallowed - don't see why you would need it.
-  */
-  MFHelmholtzElectrostaticDomainBCFactory& operator=(const MFHelmholtzElectrostaticDomainBCFactory& a_other) = delete;
-
-  /*!
     @brief Factory method
+    @param[in] a_iphase Phase
   */
   RefCountedPtr<EBHelmholtzDomainBC> create(const int a_iphase) const override final;
 
