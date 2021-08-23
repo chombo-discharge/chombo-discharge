@@ -14,10 +14,14 @@
 #include <CD_EBHelmholtzRobinEBBC.H>
 #include <CD_NamespaceHeader.H>
 
-EBHelmholtzLarsenEBBCFactory::EBHelmholtzLarsenEBBCFactory(const RefCountedPtr<RtSpecies>& a_species,
+EBHelmholtzLarsenEBBCFactory::EBHelmholtzLarsenEBBCFactory(const int                       a_order,
+							   const int                       a_weight,
+							   const RefCountedPtr<RtSpecies>& a_species,
 							   const Real                      a_r1,
 							   const Real                      a_r2,
 							   const Real                      a_source){
+  m_order   = a_order;
+  m_weight  = a_weight;  
   m_species = a_species;
   m_r1      = a_r1;
   m_r2      = a_r2;

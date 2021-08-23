@@ -7,6 +7,7 @@
   @file   CD_EddingtonSP1.cpp
   @brief  Implementation of CD_EddingtonSP1.H
   @author Robert Marskar
+  @todo   Stencil weights and order need to be input parameters!
 */
 
 // Std includes
@@ -740,9 +741,12 @@ void EddingtonSP1::setupHelmholtzFactory(){
   case EBBCType::Neumann:
     ebbcFactory = RefCountedPtr<EBHelmholtzEBBCFactory> (new EBHelmholtzNeumannEBBCFactory(m_ebbc.second));
     break;
-  case EBBCType::Larsen: 
-    ebbcFactory = RefCountedPtr<EBHelmholtzEBBCFactory> (new EBHelmholtzLarsenEBBCFactory (m_RtSpecies, m_reflectCoefOne, m_reflectCoefTwo, m_ebbc.second));
+  case EBBCType::Larsen:{
+    constexpr int order  = 1; // Need to become input parameters
+    constexpr int weight = 0;
+    ebbcFactory = RefCountedPtr<EBHelmholtzEBBCFactory> (new EBHelmholtzLarsenEBBCFactory (order, weight, m_RtSpecies, m_reflectCoefOne, m_reflectCoefTwo, m_ebbc.second));
     break;
+  }
   default:
     MayDay::Error("EddingtonSP1::setupHelmholtzFactory - logic bust in EB BC factory");
     break;

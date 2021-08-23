@@ -16,6 +16,7 @@
 #include <functional>
 
 // Our includes
+#include <CD_VofUtils.H>
 #include <CD_EBHelmholtzEBBC.H>
 #include <CD_NamespaceHeader.H>
 
@@ -34,20 +35,30 @@ public:
   EBHelmholtzRobinEBBC();
 
   /*!
-    @brief Full constructor. 
-    @param[in] a_A Constant A-coefficient
-    @param[in] a_B Constant B-coefficient
-    @param[in] a_C Constant C-coefficient
+    @brief Full constructor which sets constant coefficients
+    @param[in] a_order  Stencil order. Must be > 0
+    @param[in] a_weight Equation weights. Must be >=0
+    @param[in] a_A      Robin A-coefficient
+    @param[in] a_B      Robin B-coefficient
+    @param[in] a_C      Robin C-coefficient
   */
-  EBHelmholtzRobinEBBC(const Real a_A, const Real a_B, const Real a_C);
+  EBHelmholtzRobinEBBC(const int  a_order,
+		       const int  a_weight,
+		       const Real a_A,
+		       const Real a_B,
+		       const Real a_C);
 
   /*!
-    @brief Full constructor
-    @param[in] a_A Spatially dependent A-coefficient
-    @param[in] a_B Spatially dependent B-coefficient
-    @param[in] a_C Spatially dependent C-coefficient
+    @brief Full constructor which sets variable coefficients
+    @param[in] a_order  Stencil order. Must be > 0
+    @param[in] a_weight Equation weights. Must be >=0
+    @param[in] a_A      Robin A-coefficient
+    @param[in] a_B      Robin B-coefficient
+    @param[in] a_C      Robin C-coefficient
   */
-  EBHelmholtzRobinEBBC(const std::function<Real(const RealVect& a_pos) >& a_A,
+  EBHelmholtzRobinEBBC(const int                                          a_order,
+		       const int                                          a_weight,
+		       const std::function<Real(const RealVect& a_pos) >& a_A,
 		       const std::function<Real(const RealVect& a_pos) >& a_B,
 		       const std::function<Real(const RealVect& a_pos) >& a_C);
 
@@ -55,6 +66,18 @@ public:
     @brief Destructor
   */
   ~EBHelmholtzRobinEBBC();
+
+  /*!
+    @brief Set BC order
+    @param[in] a_order Order
+  */
+  void setOrder(const int a_order);
+
+  /*!
+    @brief Set equation weights for least squares reconstruction. 
+    @param[in] a_weight Weights
+  */
+  void setWeight(const int a_weight);    
   
   /*!
     @brief Set constant coefficients
@@ -94,21 +117,6 @@ public:
 protected:
 
   /*!
-    @brief Stencil order
-  */
-  int m_order;
-
-  /*!
-    @brief Stencil radius
-  */
-  int m_radius;
-
-  /*!
-    @brief Stencil weight
-  */
-  int m_weight;  
-
-  /*!
     @brief Use constant for BC
   */
   bool m_useConstant;
@@ -117,6 +125,16 @@ protected:
     @brief Use function for BC value
   */
   bool m_useFunction;
+
+  /*!
+    @brief Stencil order
+  */
+  int m_order;
+
+  /*!
+    @brief Stencil weight (for weighting equations in least squares reconstruction)
+  */
+  int m_weight;    
 
   /*!
     @brief Constant A-coefficient
@@ -154,26 +172,14 @@ protected:
   virtual void define() override;
 
   /*!
-    @brief Get an interpolation stencil 
-    @param[in] a_vof Grid cell
-    @param[in] a_dit Data index. 
+    @brief Get a least-squares baed interpolation stencil 
+    @param[in] a_vof          Grid cell
+    @param[in] a_dit          Data index. 
+    @param[in] a_neighborhood Vof neighborhood (either quadrant-based or radius)
+    @param[in] a_order        Stencil order
     @note This extrapolates from cell-centers to the EB using a first order expression. 
   */
-  VoFStencil getInterpolationStencil(const VolIndex& a_vof, const DataIndex& a_dit) const;
-
-  /*!
-    @brief Get an interpolation stencil using all vofs in a monotone path (avoids reaching over EBs)
-    @param[in] a_vof Grid cell
-    @param[in] a_dit Data index. 
-  */
-  VoFStencil getMonoPathStencil(const VolIndex& a_vof, const DataIndex& a_dit) const;
-
-  /*!
-    @brief Get an interpolation stencil using Taylor extrapolation. 
-    @param[in] a_vof Grid cell
-    @param[in] a_dit Data index. 
-  */
-  VoFStencil getTaylorStencil(const VolIndex& a_vof, const DataIndex& a_dit) const;
+  VoFStencil getInterpolationStencil(const VolIndex& a_vof, const DataIndex& a_dit, const VofUtils::Neighborhood a_neighborhood, const int a_order) const;
 };
 
 #include <CD_NamespaceFooter.H>
