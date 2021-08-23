@@ -171,11 +171,11 @@ void CdrPlasmaMorrowBourdon::advanceReactionNetwork(Vector<Real>&          a_par
   Sp = alpha*Ne*Ve - beta*Np*Nn  - beta*Ne*Np + Sph;
   Sn = eta*Ne*Ve   - beta*Np*Nn;
 
-  const Real tmp = Max(0.0, alpha*Ne*Ve*m_exc_eff*(m_pq/(m_pq + m_p)));
+  const Real tmp = std::max(0.0, alpha*Ne*Ve*m_exc_eff*(m_pq/(m_pq + m_p)));
+
   a_Photon_sources[m_Photon1_idx] = tmp;
   a_Photon_sources[m_Photon2_idx] = tmp;
   a_Photon_sources[m_Photon3_idx] = tmp;
- 
 }
 
 Vector<RealVect> CdrPlasmaMorrowBourdon::computeCdrDriftVelocities(const Real         a_time,
@@ -523,7 +523,6 @@ CdrPlasmaMorrowBourdon::Electron::Electron(){
   m_chargeNumber    = -1;
   m_isDiffusive = true;
   m_isMobile    = true;
-  m_unit      = "m-3";
 
 
   ParmParse pp("CdrPlasmaMorrowBourdon");
@@ -558,7 +557,6 @@ CdrPlasmaMorrowBourdon::PositiveSpecies::PositiveSpecies(){
   m_chargeNumber    = 1;
   m_isDiffusive = false;
   m_isMobile    = true;
-  m_unit      = "m-3";
 
   Vector<Real> pos(SpaceDim);
   std::string str;
@@ -587,7 +585,6 @@ CdrPlasmaMorrowBourdon::negative_species::negative_species(){
   m_chargeNumber    = -1;
   m_isDiffusive = false;
   m_isMobile    = true;
-  m_unit      = "m-3";
 
   ParmParse pp("CdrPlasmaMorrowBourdon");
     
