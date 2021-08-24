@@ -5,7 +5,7 @@
 
 /*
   @file   CD_EBHelmholtzNeumannEBBCFactory.H
-  @brief  Declaration of a factory class for EBHelmholtzNeumannEBBCFactory
+  @brief  Declaration of a factory class for making Neumann BCs in an EBHelmholtzOp context
   @author Robert Marskar
 */
 
@@ -17,7 +17,7 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Class for passing Neumann BCs into EBHelmholtzOp
+  @brief Factory class which generates EBHelmholtzNeumannEBBC. 
 */
 class EBHelmholtzNeumannEBBCFactory : public EBHelmholtzEBBCFactory {
 public:
@@ -47,7 +47,7 @@ public:
     @param[in] a_DphiDn Value of dphi/dn. 
     @note A positive values gives a flux INTO the domain. 
   */
-  void setDphiDn(const int a_DphiDn);
+  void setDphiDn(const Real a_DphiDn);
 
   /*!
     @brief Set spatially dependent value of dphi/dn on the EB. 
@@ -61,7 +61,7 @@ public:
     @param[in] a_BxDphiDn Value of B*dphi/dn. 
     @note A positive values gives a flux INTO the domain. 
   */
-  void setBxDphiDn(const int a_BxDphiDn);
+  void setBxDphiDn(const Real a_BxDphiDn);
 
   /*!
     @brief Set the spatially dependent value of B*dphi/dn on the EB.

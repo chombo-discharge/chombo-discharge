@@ -9,22 +9,30 @@
   @author Robert Marskar
 */
 
+// Chombo includes
+#include <CH_Timer.H>
+
 // Our includes
 #include <CD_EBHelmholtzNeumannEBBC.H>
 #include <CD_NamespaceHeader.H>
 
 EBHelmholtzNeumannEBBC::EBHelmholtzNeumannEBBC(){
+  CH_TIME("EBHelmholtzNeumannEBBC::EBHelmholtzNeumannEBBC()");
+  
   m_multByBco   = true;
   m_useConstant = false;
   m_useFunction = false;
 }
 
 EBHelmholtzNeumannEBBC::~EBHelmholtzNeumannEBBC(){
-
+  CH_TIME("EBHelmholtzNeumannEBBC::~EBHelmholtzNeumannEBBC()");
 }
 
-void EBHelmholtzNeumannEBBC::setDphiDn(const int a_DphiDn){
+void EBHelmholtzNeumannEBBC::setDphiDn(const Real a_DphiDn){
+  CH_TIME("EBHelmholtzNeumannEBBC::setDphiDn(Real)");    
+  
   m_multByBco   = true;
+  
   m_useConstant = true;
   m_useFunction = false;
   
@@ -32,27 +40,41 @@ void EBHelmholtzNeumannEBBC::setDphiDn(const int a_DphiDn){
 }
 
 void EBHelmholtzNeumannEBBC::setDphiDn(const std::function<Real(const RealVect& a_pos)>& a_DphiDn){
+  CH_TIME("EBHelmholtzNeumannEBBC::setDphiDn(std::function<Real(RealVect)>)");
+  
   m_multByBco   = true;
+  
   m_useConstant = false;
   m_useFunction = true;
   
   m_functionDphiDn = a_DphiDn;
 }
 
-void EBHelmholtzNeumannEBBC::setBxDphiDn(const int a_BxDphiDn){
+void EBHelmholtzNeumannEBBC::setBxDphiDn(const Real a_BxDphiDn){
+  CH_TIME("EBHelmholtzNeumannEBBC::setBxDphiDn(Real)");
+  
   this->setDphiDn(a_BxDphiDn);
 
   m_multByBco = false;
 }
 
 void EBHelmholtzNeumannEBBC::setBxDphiDn(const std::function<Real(const RealVect& a_pos)>& a_BxDphiDn){
+  CH_TIME("EBHelmholtzNeumannEBBC::setBxDphiDn(std::function<Real(RealVect)>)");
+  
   this->setDphiDn(a_BxDphiDn);
 
   m_multByBco = false;
 }
   
 void EBHelmholtzNeumannEBBC::define() {
-  if(!(m_useConstant || m_useFunction)) MayDay::Error("EBHelmholtzNeumannEBBC::define - logic bist");
+  CH_TIME("EBHelmholtzNeumannEBBC::define()");
+
+  CH_assert(m_useConstant || m_useFunction);
+
+  // Also issue a run-time error outside of debugging mode. 
+  if(!(m_useConstant || m_useFunction)) {
+    MayDay::Error("EBHelmholtzNeumannEBBC::define - logic bust, not using constant or function.");
+  }
   
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
 
@@ -80,7 +102,10 @@ void EBHelmholtzNeumannEBBC::applyEBFlux(VoFIterator&       a_vofit,
 					 const DataIndex&   a_dit,
 					 const Real&        a_beta,
 					 const bool&        a_homogeneousPhysBC) const {
+  CH_TIME("EBHelmholtzNeumannEBBC::applyEBFlux(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
 
+  CH_assert(m_useConstant || m_useFunction);
+  
   // TLDR: For Neumann, we want to add the flux beta*bco*area*(dphi/dn)/dx where the
   //       dx comes from the fact that the term we are computing will be added to kappa*div(F)
   if(!a_homogeneousPhysBC){

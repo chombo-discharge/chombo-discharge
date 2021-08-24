@@ -9,31 +9,44 @@
   @author Robert Marskar
 */
 
+// Chombo includes
+#include <CH_Timer.H>
+
 // Our includes
 #include <CD_EBHelmholtzNeumannEBBC.H>
 #include <CD_EBHelmholtzNeumannEBBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
 EBHelmholtzNeumannEBBCFactory::EBHelmholtzNeumannEBBCFactory(){
+  CH_TIME("EBHelmholtzNeumannEBBCFactory::EBHelmholtzNeumannEBBCFactory()");
+  
   m_multByBco   = true;
+  
   m_useConstant = false;
   m_useFunction = false;
 }
 
 EBHelmholtzNeumannEBBCFactory::EBHelmholtzNeumannEBBCFactory(const Real a_DphiDn){
+  CH_TIME("EBHelmholtzNeumannEBBCFactory::EBHelmholtzNeumannEBBCFactory(Real)");
+  
   this->setDphiDn(a_DphiDn);
 }
 
 EBHelmholtzNeumannEBBCFactory::EBHelmholtzNeumannEBBCFactory(const std::function<Real(const RealVect& a_pos)>& a_DphiDn){
+  CH_TIME("EBHelmholtzNeumannEBBCFactory::EBHelmholtzNeumannEBBCFactory(std::function<Real(RealVect)>)");
+  
   this->setDphiDn(a_DphiDn);
 }
 
 EBHelmholtzNeumannEBBCFactory::~EBHelmholtzNeumannEBBCFactory(){
-
+  CH_TIME("EBHelmholtzNeumannEBBCFactory::~EBHelmholtzNeumannEBBCFactory()");
 }
 
-void EBHelmholtzNeumannEBBCFactory::setDphiDn(const int a_DphiDn){
-  m_multByBco   = false;
+void EBHelmholtzNeumannEBBCFactory::setDphiDn(const Real a_DphiDn){
+  CH_TIME("EBHelmholtzNeumannEBBCFactory::setDphiDn(Real)");
+  
+  m_multByBco   = true;
+  
   m_useConstant = true;
   m_useFunction = false;
   
@@ -41,24 +54,36 @@ void EBHelmholtzNeumannEBBCFactory::setDphiDn(const int a_DphiDn){
 }
 
 void EBHelmholtzNeumannEBBCFactory::setDphiDn(const std::function<Real(const RealVect& a_pos)>& a_DphiDn){
-  m_multByBco   = false;
+  CH_TIME("EBHelmholtzNeumannEBBCFactory::setDphiDn(std::function<Real(RealVect)>)");
+  
+  m_multByBco   = true;
+  
   m_useConstant = false;
   m_useFunction = true;
   
   m_functionDphiDn = a_DphiDn;
 }
 
-void EBHelmholtzNeumannEBBCFactory::setBxDphiDn(const int a_BxDphiDn){
+void EBHelmholtzNeumannEBBCFactory::setBxDphiDn(const Real a_BxDphiDn){
+  CH_TIME("EBHelmholtzNeumannEBBCFactory::setBxDphiDn(Real)");
+  
   this->setDphiDn(a_BxDphiDn);
+  
   m_multByBco = false;
 }
 
 void EBHelmholtzNeumannEBBCFactory::setBxDphiDn(const std::function<Real(const RealVect& a_pos)>& a_BxDphiDn){
+  CH_TIME("EBHelmholtzNeumannEBBCFactory::setBxDphiDn(std::function<Real(RealVect)>)");
+  
   this->setDphiDn(a_BxDphiDn);
+  
   m_multByBco = false;
 }
 
 RefCountedPtr<EBHelmholtzEBBC> EBHelmholtzNeumannEBBCFactory::create() {
+  CH_TIME("EBHelmholtzNeumannEBBCFactory::create()");
+
+  CH_assert(m_useConstant || m_useFunction);
   
   auto bc = new EBHelmholtzNeumannEBBC();
 

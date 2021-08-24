@@ -11,6 +11,7 @@
 
 // Chombo includes
 #include <EBArith.H>
+#include <CH_Timer.H>
 
 // Our includes
 #include <CD_EBHelmholtzOpF_F.H>
@@ -18,15 +19,19 @@
 #include <CD_NamespaceHeader.H>
 
 EBHelmholtzRobinDomainBC::EBHelmholtzRobinDomainBC(){
+  CH_TIME("EBHelmholtzRobinDomainBC::EBHelmholtzRobinDomainBC()");
+  
   m_useConstant = false;
   m_useFunction = false;
 }
 
 EBHelmholtzRobinDomainBC::~EBHelmholtzRobinDomainBC(){
-
+  CH_TIME("EBHelmholtzRobinDomainBC::~EBHelmholtzRobinDomainBC()");
 }
 
 void EBHelmholtzRobinDomainBC::setCoefficients(const Real a_A, const Real a_B, const Real a_C){
+  CH_TIME("EBHelmholtzRobinDomainBC::setCoefficients(Real, Real, Real)");
+  
   m_constantA = a_A;
   m_constantB = a_B;
   m_constantC = a_C;
@@ -39,6 +44,8 @@ void EBHelmholtzRobinDomainBC::setCoefficients(const Real a_A, const Real a_B, c
 void EBHelmholtzRobinDomainBC::setCoefficients(const std::function<Real(const RealVect& a_pos) >& a_A,
 					       const std::function<Real(const RealVect& a_pos) >& a_B,
 					       const std::function<Real(const RealVect& a_pos) >& a_C){
+  CH_TIME("EBHelmholtzRobinDomainBC::setCoefficients(3x std::function<Real(RealVect)>)");
+  
   m_functionA = a_A;
   m_functionB = a_B;
   m_functionC = a_C;
@@ -53,7 +60,8 @@ void EBHelmholtzRobinDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
 					   const Side::LoHiSide& a_side,
 					   const DataIndex&      a_dit,
 					   const bool            a_useHomogeneous) const {
-
+  CH_TIME("EBHelmholtzRobinDomainBC::getFaceFlux(BaseFab<Real>, BaseFab<Real>, int, Side::LoHiSide, DataIndex, bool)");
+  
   const Box cellbox = a_faceFlux.box();
   const int isign   = (a_side == Side::Lo) ? -1 : 1;
   
@@ -113,6 +121,8 @@ Real EBHelmholtzRobinDomainBC::getFaceFlux(const VolIndex&       a_vof,
 					   const Side::LoHiSide& a_side,
 					   const DataIndex&      a_dit,
 					   const bool            a_useHomogeneous) const {
+  CH_TIME("EBHelmholtzRobinDomainBC::getFaceFlux(VolIndex, EBCellFAB, int, Side::LoHiSide, DataIndex, bool)");
+  
   const int isign             = (a_side == Side::Lo) ? -1 : 1;
   const Real ihdx             = 2.0/m_dx;
   const IntVect iv            = a_vof.gridIndex();
