@@ -23,7 +23,9 @@ class MFHelmholtzDirichletEBBC : public MFHelmholtzEBBC {
 public:
 
   /*!
-    @brief Full constructor
+    @brief Constructor. Must subsequently set value, order, and weight. 
+    @param[in] a_phase  Phase
+    @param[in] a_jumpBC Jump BC object
   */
   MFHelmholtzDirichletEBBC(const int a_phase, const RefCountedPtr<JumpBC>& a_jumpBC);
 
@@ -36,7 +38,7 @@ public:
     @brief Set the value on the EB. 
     @param[in] a_value Constant value on EB
   */
-  virtual void setValue(const int a_value);
+  virtual void setValue(const Real a_value);
 
   /*!
     @brief Set the value on the EB. 
@@ -46,11 +48,13 @@ public:
 
   /*!
     @brief Set stencil order
+    @param[in] a_order Stencil order. Must be > 0
   */
   void setOrder(const int a_order);
 
   /*!
     @brief Set stencil weight
+    @param[in] a_order Stencil weight. Must be >= 0
   */
   void setWeight(const int a_weight);
 

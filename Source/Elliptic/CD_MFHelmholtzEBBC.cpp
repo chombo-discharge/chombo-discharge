@@ -9,6 +9,9 @@
   @author Robert Marskar
 */
 
+// Chombo includes
+#include <CH_Timer.H>
+
 // Our includes
 #include <CD_MFHelmholtzEBBC.H>
 #include <CD_LeastSquares.H>
@@ -16,20 +19,36 @@
 
 
 MFHelmholtzEBBC::MFHelmholtzEBBC(const int a_phase, const RefCountedPtr<JumpBC>& a_jumpBC){
+  CH_TIME("MFHelmholtzEBBC::MFHelmholtzEBBC(int, RefCountedPtr<JumpBC>)");
+
+  CH_assert(!a_jumpBC.isNull());
+  
   m_jumpBC = a_jumpBC;
   m_phase  = a_phase;
 }
 
 MFHelmholtzEBBC::~MFHelmholtzEBBC(){
-
+  CH_TIME("MFHelmholtzEBBC::~MFHelmholtzEBBC()");
 }
 
 void MFHelmholtzEBBC::define(){
-  this->defineMultiPhase();
-  this->defineSinglePhase();
+  CH_TIME("MFHelmholtzEBBC::define()");
+  
+  this->defineMultiPhase();  // Define multi-phase fluxes. 
+  this->defineSinglePhase(); // Define single-phase fluxes. 
 }
 
 void MFHelmholtzEBBC::defineMultiPhase(){
+  CH_TIME("MFHelmholtzEBBC::defineMultiPhase()");
+
+  CH_assert(!m_jumpBc.isNull());
+  CH_assert(m_jumpBC->getOrder()  > 0);
+  CH_assert(m_jumpBC->getWeight() >= 0);
+
+  // TLDR: We happen to have an object m_jumpBC which will hold phi on the cut-cells separating the two phases. This is an "almost-Dirichlet" type of boundary condition
+  //       where we need to use that value to compute the flux into the cut-cell. The below code computes stencils for that flux, using the value on the boundary as
+  //       a known term in the expansion. 
+  
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
   const ProblemDomain& domain  = m_eblg.getDomain();
 
@@ -114,6 +133,9 @@ void MFHelmholtzEBBC::applyEBFlux(VoFIterator&       a_vofit,
 				  const DataIndex&   a_dit,
 				  const Real&        a_beta,
 				  const bool&        a_homogeneousPhysBC) const {
+  CH_TIME("MFHelmholtzEBBC::applyEBFlux(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
+
+  // TLDR: This is the function that is called by EBHelmholtzOp. We first do the single-phase cells and then the multi-phase cells.
   
   VoFIterator& singlePhaseVofs = m_jumpBC->getSinglePhaseVofs(m_phase, a_dit);
   VoFIterator& multiPhaseVofs  = m_jumpBC->getMultiPhaseVofs (m_phase, a_dit);
@@ -128,6 +150,8 @@ void MFHelmholtzEBBC::applyEBFluxMultiPhase(VoFIterator&       a_multiPhaseVofs,
 					    const DataIndex&   a_dit,
 					    const Real&        a_beta,
 					    const bool&        a_homogeneousPhysBC) const {
+  CH_TIME("MFHelmholtzEBBC::applyEBFluxMultiPhase(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
+  
   // Apply the stencil for computing the contribution to kappaDivF. Note divF is sum(faces) B*grad(Phi)/dx and that this
   // is the contribution from the EB face. B/dx is already included in the stencils and boundary weights, but beta is not.
   for(a_multiPhaseVofs.reset(); a_multiPhaseVofs.ok(); ++a_multiPhaseVofs){
@@ -147,6 +171,14 @@ bool MFHelmholtzEBBC::getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFSten
 							 const DataIndex&             a_dit,
 							 const int                    a_order,
 							 const int                    a_weight) const {
+  CH_TIME("MFHelmholtzEBBC::getLeastSquaresBoundaryGradStencil(...)");
+
+  CH_assert(a_order  >  0);
+  CH_assert(a_weight >= 0);
+
+  // TLDR: This function computes a stencil for dphi/dn = wb*phiB + sum(wi * phi(i)). The order and weight inputs
+  //       represent the stencil order and weighting used in the least squares reconstruction.
+  
   bool foundStencil = false;
   
   const bool addStartVof = false;
