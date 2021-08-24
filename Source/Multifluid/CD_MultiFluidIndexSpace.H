@@ -34,7 +34,8 @@ namespace phase {
 };
 
 /*!
-  @brief Two-fluid index space
+  @brief Two-fluid index space. 
+  @details This is basically a wrapper for using two Chombo EBIndexSpaces in the simulation. It calls Chombo for building the EBIS'. 
 */
 class MultiFluidIndexSpace {
 public:
@@ -52,6 +53,14 @@ public:
 
   /*!
     @brief Define function
+    @param[in] a_domain          Finest domain
+    @param[in] a_origin          Lower-left corner 
+    @param[in] a_dx              Finest resolution
+    @param[in] a_geoservers      Generators for cut-cells
+    @param[in] a_distributedData Special flag for Chombo (passing grid generation to the geometryservice)
+    @param[in] a_nCellMax        Minimum number of cells in the coarsening
+    @param[in] a_maxCoarsenings  Maximum number of coarsenings. 
+    @param[in] a_fixOnlyFirstPhaseRegNextToMultiValued Special flag for Chombo. 
   */
   virtual void define(const Box                     & a_domain,
 		      const RealVect                & a_origin,
@@ -63,28 +72,33 @@ public:
 		      bool                            a_fixOnlyFirstPhaseRegNextToMultiValued = false);
 
   /*!
-    @brief Get a particular ebis
+    @brief Get a particular EBIndexSpace
+    @param[in] a_phase Phase
   */
   const RefCountedPtr<EBIndexSpace>& getEBIndexSpace(const phase::which_phase a_phase) const;
 
   /*!
     @brief Get a particular ebis
+    @param[in] a_phase Phase
   */
   const RefCountedPtr<EBIndexSpace>& getEBIndexSpace(const int a_phase) const;
 
   /*!
     @brief Get a particular ebis
+    @param[in] a_phase Phase
   */
   RefCountedPtr<EBIndexSpace>& getEBIndexSpace(const phase::which_phase a_phase);
 
   /*!
     @brief Get ebis
+    @param[in] a_phase Phase
   */
   RefCountedPtr<EBIndexSpace>& getEBIndexSpace(const int a_phase);
 
   /*!
     @brief Get the interface region. This is defined as the intersection between the irregular cells of the 
     gas phase and the other phases. 
+    @param[in] a_domain Domain
   */
   IntVectSet interfaceRegion(const ProblemDomain& a_domain) const;
 

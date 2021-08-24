@@ -21,30 +21,41 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Class for aliasing multifluid things
+  @brief Class with static public interface for aliasing multifluid data into single-phase data. 
+  @details To use this class, the user will call aliasMF to fetch pointers from multifluid data and have them
+  point to their single-fluid counterpart. 
 */
 class MultifluidAlias {
 public:
 
   /*!
     @brief Alias MFCellFABs
+    @param[out] a_alias Single-phase data
+    @param[in]  a_phase Phase
+    @param[in]  a_input Multi-phase data
   */
   static void aliasMF(LevelData<EBCellFAB>& a_alias, const int a_phase, const LevelData<MFCellFAB>& a_input);
 
   /*!
     @brief Alias MFFluxFABs
+    @param[out] a_alias Single-phase data
+    @param[in]  a_phase Phase
+    @param[in]  a_input Multi-phase data
   */
   static void aliasMF(LevelData<EBFluxFAB>& a_alias, const int a_phase, const LevelData<MFFluxFAB>& a_input);
 
   /*!
     @brief Alias MFBaseIVFABs
+    @param[out] a_alias Single-phase data
+    @param[in]  a_phase Phase
+    @param[in]  a_input Multi-phase data
   */
   static void aliasMF(LevelData<BaseIVFAB<Real> >& a_alias, const int a_phase, const LevelData<MFBaseIVFAB>& a_input);
 
 private:
   
   /*!
-    @brief Class for aliasing 
+    @brief Class for aliasing. This is used under the hood in MultifluidAlias::aliasMF
   */
   class MfCellAliasFactory : public DataFactory<EBCellFAB> {
   public:
@@ -83,7 +94,7 @@ private:
   };
   
   /*!
-    @brief Class for aliasing 
+    @brief Class for aliasing. This is used under the hood in MultifluidAlias::aliasMF
   */
   class MfFluxAliasFactory : public DataFactory<EBFluxFAB> {
   public:
@@ -122,7 +133,7 @@ private:
   };
 
   /*!
-    @brief Class for aliasing 
+    @brief Class for aliasing. This is used under the hood in MultifluidAlias::aliasMF
   */
   class MfIVAliasFactory : public DataFactory<BaseIVFAB<Real> > {
   public:
