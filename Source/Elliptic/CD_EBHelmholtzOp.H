@@ -33,7 +33,8 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Factory class for making variable-coefficient Helmholtz operators. This is meant to be used with LevelTGA so the operator can be used for TGA time stepping. 
+  @brief Helmholtz operator for equations like alpha*a(x)*phi(x) + beta*div(b(x)*grad(phi(x))) = rho. 
+  @details This can be used with TGA time stepping. 
 */
 class EBHelmholtzOp : public LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB> {
 public:
@@ -564,14 +565,9 @@ public:
 	       Real                        a_scale) override final;
 
   /*!
-    @brief Returns m_flux
+    @brief Returns m_flux. This is used in refluxing routines. 
   */
-  LevelData<EBFluxFAB>& getFlux();
-
-  /*!
-    @brief Returns relaxation weights
-  */
-  LevelData<EBCellFAB>& getRelaxationWeights();
+  LevelData<EBFluxFAB>& getFlux() const;
 
 protected:
 
@@ -758,7 +754,7 @@ protected:
   /*!
     @brief For holding fluxes
   */
-  LevelData<EBFluxFAB> m_flux;
+  mutable LevelData<EBFluxFAB> m_flux;
 
   /*!
     @brief Interpolant for when we want centroid fluxes
