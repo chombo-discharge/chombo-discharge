@@ -61,7 +61,7 @@ public:
   /*!
     @brief Define function
     @param[in] a_eblg   Level grids
-    @param[in] a_Bcoef  B-coefficient for Helmholtz equation
+    @param[in] a_Bcoef  B-coefficient in the Helmholtz equation
     @param[in] a_probLo Lower-left corner of computational domain
     @param[in] a_dx     Grid resolution
     @note This sets the internals for the BC object. This is called by EBHelmholtzOp when it defines stencils. 
@@ -118,7 +118,7 @@ protected:
   constexpr static int m_nComp = 1;
 
   /*!
-    @brief Assumed data centering
+    @brief Data centering. 
   */
   Location::Cell m_dataLocation;
 
@@ -148,9 +148,12 @@ protected:
     @param[in] a_dir  Face coordinate direction
     @param[in] a_side Lo/Hi side
   */
+  inline
   RealVect getBoundaryPosition(const IntVect& a_iv, const int& a_dir, const Side::LoHiSide& a_side) const;
 };
 
 #include <CD_NamespaceFooter.H>
+
+#include <CD_EBHelmholtzDomainBCImplem.H>
 
 #endif

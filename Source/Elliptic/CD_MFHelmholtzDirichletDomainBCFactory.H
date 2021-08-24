@@ -88,7 +88,6 @@ protected:
     @brief Value on the EB. 
   */
   std::function<Real(const RealVect& a_pos) > m_functionValue;
-  
 };
 
 #include <CD_NamespaceFooter.H>

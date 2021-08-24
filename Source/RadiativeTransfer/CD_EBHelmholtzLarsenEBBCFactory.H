@@ -30,13 +30,17 @@ public:
 
   /*!
     @brief Constructor. Source term is set to zero. 
+    @param[in] a_order   Stencil order
+    @param[in] a_weight  Equation weights (in least squares)
     @param[in] a_species Radiative transfer species
     @param[in] a_r1      "First reflection coefficient"
     @param[in] a_r2      "Second reflection coefficient"
     @param[in] a_source  "Source term
     @details Larsen coefficients (in Robin format) are set based on kappa and reflection coefficients. 
   */
-  EBHelmholtzLarsenEBBCFactory(const RefCountedPtr<RtSpecies>& a_species,
+  EBHelmholtzLarsenEBBCFactory(const int                       a_order,
+			       const int                       a_weight,			       
+			       const RefCountedPtr<RtSpecies>& a_species,
 			       const Real                      a_r1,
 			       const Real                      a_r2,
 			       const Real                      a_source);

@@ -19,9 +19,9 @@
 #include <CD_MFMultigridInterpolator.H>
 #include <CD_MFHelmholtzElectrostaticDomainBCFactory.H>
 #include <CD_MFHelmholtzElectrostaticEBBCFactory.H>
+#include <CD_MFHelmholtzRobinEBBCFactory.H>
 #include <CD_Units.H>
 #include <CD_NamespaceHeader.H>
-
 
 constexpr Real FieldSolverMultigrid::m_alpha;
 constexpr Real FieldSolverMultigrid::m_beta;

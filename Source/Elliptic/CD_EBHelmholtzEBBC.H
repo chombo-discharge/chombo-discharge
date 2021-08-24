@@ -5,9 +5,8 @@
 
 /*
   @file   CD_EBHelmholtzEBBC.H
-  @brief  Declaration of a boundary condition class for EBHelmholtzOp
+  @brief  Declaration of a base boundary condition class for EB boundary conditions in EBHelmholtzOp
   @author Robert Marskar
-  @todo   The kappaDivF stencils can probably be removed as they are only really used with EBHelmholtzOps fast multicolor-scheme (relaxation done in-place). 
 */
 
 #ifndef CD_EBHelmholtzEBBC_H
@@ -57,15 +56,13 @@ public:
     @param[in] a_probLo       Lower-left corner of computational domain. Required if BC objects needs physical position. 
     @param[in] a_dx           Grid resolution. 
     @param[in] a_ghostCF      Number of ghost cells that are filled across CF interface. 
-    @param[in] a_refRat       Refinement factor to finer level. 
   */
   void define(const Location::Cell                               a_dataLocation,
 	      const EBLevelGrid&                                 a_eblg,
 	      const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_Bcoef,
 	      const RealVect&                                    a_probLo,
 	      const Real&                                        a_dx,
-	      const int                                          a_ghostCF,
-	      const int                                          a_refRat = 1);
+	      const int                                          a_ghostCF);
 
   /*!
     @brief Apply the EB flux. This is the version that is called by EBHelmholtzOp.
@@ -82,11 +79,6 @@ public:
 			   const DataIndex&   a_dit,
 			   const Real&        a_beta,
 			   const bool&        a_homogeneousPhysBC) const = 0;
-  
-  /*!
-    @brief Copy data to fine buffer
-  */
-  void copyFineDataToBuffer(const LevelData<EBCellFAB>& a_fineData) const;
 
   /*!
     @brief Get the stencil for computing the finite-volume approximation to kappa*Div(F). 
@@ -115,16 +107,6 @@ protected:
   Location::Cell m_dataLocation;
 
   /*!
-    @brief If there is a fine level
-  */
-  bool m_hasFine;
-
-  /*!
-    @brief Refinement ratio between this level and the finer level
-  */
-  int m_refRat;
-
-  /*!
     @brief Number of ghost cells that were filled across CF interface
   */
   int m_ghostCF;
@@ -143,16 +125,6 @@ protected:
     @brief Level grid
   */
   EBLevelGrid m_eblg;
-
-  /*!
-    @brief Refined version of m_eblg. 
-  */
-  EBLevelGrid m_eblgFine;
-
-  /*!
-    @brief Buffer for fine data. Uses the coarse-data layout. 
-  */
-  mutable LevelData<EBCellFAB> m_fineData;
 
   /*!
     @brief B-coefficent. 
@@ -181,6 +153,7 @@ protected:
   /*!
     @brief Returns physical position at the boundary
   */
+  inline
   RealVect getBoundaryPosition(const VolIndex& a_vof, const DataIndex& a_dit) const;
 
   /*!

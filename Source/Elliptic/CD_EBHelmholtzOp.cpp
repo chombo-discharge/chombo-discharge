@@ -7,13 +7,12 @@
   @file   CD_EBHelmholtzOp.cpp
   @brief  Implementation of CD_EBHelmholtzOp.H
   @author Robert Marskar
-  @todo   See if we can incorporate EBBCs into the centroid stencils!
-  @todo   The domain BC classes are wrong when using centroid discretization, and they need to be fixed. 
 */
 
 // Chombo includes
 #include <EBLevelDataOps.H>
 #include <EBCellFactory.H>
+#include <CH_Timer.H>
 
 // Our includes
 #include <CD_EBHelmholtzOp.H>
@@ -78,6 +77,16 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                               
   m_ghostRhs(a_ghostRhs),
   m_smoother(a_smoother) {
 
+  CH_TIME("EBHelmholtzOp::EBHelmholtzOp(...)");
+
+  CH_assert(!a_Acoef.     isNull());
+  CH_assert(!a_Bcoef.     isNull());
+  CH_assert(!a_BcoefIrreg.isNull());
+
+  CH_assert(a_Acoef     ->nComp() == 1);
+  CH_assert(a_Bcoef     ->nComp() == 1);
+  CH_assert(a_BcoefIrreg->nComp() == 1);
+
   // Default settings. Always solve for comp = 0. If you want something different, copy your
   // input two different data holders before you use AMRMultiGrid. 
   m_turnOffBCs = false;
@@ -87,10 +96,13 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                               
     m_eblgFine = a_eblgFine;
   }
 
-  // Issue a warning if there are
+  // If we are using a centroid discretization we must interpolate three ghost cells in the general case. Issue a warning if the
+  // interpolator doesn't fill enough ghost cells. 
   if(m_dataLocation == Location::Cell::Centroid && m_hasCoar){
     const int numFill = m_interpolator->getGhostCF();
-    if(numFill < 3) MayDay::Warning("EBHelmholtzOp::EBHelmholtzOp - interpolator is not filling enough ghost cells. Your discretization may be incorrect!");
+    if(numFill < 3) {
+      MayDay::Warning("EBHelmholtzOp::EBHelmholtzOp() - interpolator is not filling enough ghost cells. Your discretization may be incorrect!");
+    }
   }
 
   if(m_hasCoar){
@@ -121,32 +133,36 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                               
   }
 
 EBHelmholtzOp::~EBHelmholtzOp(){
-
+  CH_TIME("EBHelmholtzOp::~EBHelmholtzOp()");
 }
 
 void EBHelmholtzOp::turnOffBCs(){
+  CH_TIME("EBHelmholtzOp::turnOffBCs()");
+  
   m_turnOffBCs = true;
 }
 
 void EBHelmholtzOp::turnOnBCs(){
+  CH_TIME("EBHelmholtzOp::turnOnBCs()");
+  
   m_turnOffBCs = false;
 }
 
-LevelData<EBFluxFAB>& EBHelmholtzOp::getFlux(){
+LevelData<EBFluxFAB>& EBHelmholtzOp::getFlux() const{
+  CH_TIME("EBHelmholtzOp::getFlux()");
+  
   return m_flux;
 }
 
-LevelData<EBCellFAB>& EBHelmholtzOp::getRelaxationWeights(){
-  return m_relCoef;
-}
-
 void EBHelmholtzOp::defineStencils(){
+  CH_TIME("EBHelmholtzOp::getFlux()");
+  
   // Basic defines. 
   EBCellFactory cellFact(m_eblg.getEBISL());
   EBFluxFactory fluxFact(m_eblg.getEBISL());
   
   m_relCoef.define(m_eblg.getDBL(), m_nComp, IntVect::Zero, cellFact); // Don't need ghost cells for this one. 
-  m_flux.define(   m_eblg.getDBL(), m_nComp, IntVect::Unit, fluxFact); // One ghost cell needed for face center to face centroid interpolation. 
+  m_flux.define(   m_eblg.getDBL(), m_nComp, IntVect::Zero, fluxFact); // Don't need ghost cells here either. 
 
   m_vofIterIrreg.   define(m_eblg.getDBL());
   m_vofIterMulti.   define(m_eblg.getDBL());
@@ -354,6 +370,8 @@ void EBHelmholtzOp::defineStencils(){
 }
 
 void EBHelmholtzOp::setAlphaAndBeta(const Real& a_alpha, const Real& a_beta) {
+  CH_TIME("EBHelmholtzOp::setAlphaAndBeta(Real, Real)");
+  
   m_alpha = a_alpha;
   m_beta  = a_beta;
 
@@ -363,27 +381,37 @@ void EBHelmholtzOp::setAlphaAndBeta(const Real& a_alpha, const Real& a_beta) {
 }
 
 void EBHelmholtzOp::residual(LevelData<EBCellFAB>& a_residual, const LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_rhs, bool a_homogeneousPhysBC) {
+  CH_TIME("EBHelmholtzOp::residual(LD<EBCellFAB>, LD<EBCellFAB>, LD<EBCellFAB>, bool)");
+
+  // Compute the residual = rhs - L(phi). 
   this->applyOp(a_residual, a_phi, nullptr, a_homogeneousPhysBC, true); // residual = L(phi)
   this->axby(a_residual, a_residual, a_rhs, -1.0, 1.0);                 // residual = rhs - L(phi). 
 }
 
 void EBHelmholtzOp::preCond(LevelData<EBCellFAB>& a_corr, const LevelData<EBCellFAB>& a_residual) {
+  CH_TIME("EBHelmholtzOp::preCond(LD<EBCellFAB>, LD<EBCellFAB>)");
+  
   EBLevelDataOps::assign(a_corr, a_residual);
-  EBLevelDataOps::scale(a_corr,  m_relCoef);
+  EBLevelDataOps::scale( a_corr, m_relCoef);
 
   this->relax(a_corr, a_residual, 40);
 }
 
 void EBHelmholtzOp::create(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) {
-  EBCellFactory fact(m_eblg.getEBISL());
-  a_lhs.define(m_eblg.getDBL(), a_rhs.nComp(), a_rhs.ghostVect(), fact);
+  CH_TIME("EBHelmholtzOp::create(LD<EBCellFAB>, LD<EBCellFAB>)");
+  
+  a_lhs.define(m_eblg.getDBL(), a_rhs.nComp(), a_rhs.ghostVect(), EBCellFactory(m_eblg.getEBISL()));
 }
 
 void EBHelmholtzOp::assign(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) {
+  CH_TIME("EBHelmholtzOp::assign(LD<EBCellFAB>, LD<EBCellFAB>)");
+  
   a_rhs.copyTo(a_lhs);
 }
 
 Real EBHelmholtzOp::dotProduct(const LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs) {
+  CH_TIME("EBHelmholtzOp::dotProduct(LD<EBCellFAB>, LD<EBCellFAB>)");
+  
   ProblemDomain domain;
   Real volume;
 
@@ -391,18 +419,28 @@ Real EBHelmholtzOp::dotProduct(const LevelData<EBCellFAB>& a_lhs, const LevelDat
 }
 
 void EBHelmholtzOp::incr(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const Real a_scale) {
+  CH_TIME("EBHelmholtzOp::incr(LD<EBCellFAB>, LD<EBCellFAB>, Real)");
+  
   EBLevelDataOps::incr(a_lhs, a_rhs, a_scale);
 }
 
 void EBHelmholtzOp::axby(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_x, const LevelData<EBCellFAB>& a_y, const Real a_a, const Real a_b) {
+  CH_TIME("EBHelmholtzOp::axby(LD<EBCellFAB>, LD<EBCellFAB>, LD<EBCellFAB>, Real, Real)");
+  
   EBLevelDataOps::axby(a_lhs, a_x, a_y, a_a, a_b);
 }
 
 void EBHelmholtzOp::scale(LevelData<EBCellFAB>& a_lhs, const Real& a_scale) {
+  CH_TIME("EBHelmholtzOp::axby(LD<EBCellFAB>, Real)");
+  
   EBLevelDataOps::scale(a_lhs, a_scale);
 }
 
 Real EBHelmholtzOp::norm(const LevelData<EBCellFAB>& a_rhs, const int a_order) {
+  CH_TIME("EBHelmholtzOp::axby(LD<EBCellFAB>, int)");
+
+  // TLDR: This computes the Linf norm. 
+  
   Real globalNorm = 0.0;
   Real localNorm  = 0.0;
   
@@ -414,13 +452,14 @@ Real EBHelmholtzOp::norm(const LevelData<EBCellFAB>& a_rhs, const int a_order) {
     const Box box              = a_rhs.disjointBoxLayout()[dit()];
     const IntVectSet& irregIVS = ebisbox.getIrregIVS(box);
 
-    // Can replace with Fortran kernel if we need to.
+    // Do the regular cells. We can replace this with a Fortran kernel if we have to, but this won't be performance-critical, I think. 
     for (BoxIterator bit(box); bit.ok(); ++bit){
       const IntVect iv = bit();
       if(ebisbox.isRegular(iv)) localNorm = std::max(localNorm, std::abs(regRhs(iv, m_comp)));
     }
 
-    for (VoFIterator vofit(irregIVS, ebgraph); vofit.ok(); ++vofit){
+    VoFIterator& vofit = m_vofIterIrreg[dit()];
+    for (vofit.reset(); vofit.ok(); ++vofit){
       localNorm = std::max(localNorm, std::abs(rhs(vofit(), m_comp)));
     }
   }
@@ -435,22 +474,31 @@ Real EBHelmholtzOp::norm(const LevelData<EBCellFAB>& a_rhs, const int a_order) {
 }
 
 void EBHelmholtzOp::setToZero(LevelData<EBCellFAB>& a_lhs) {
+  CH_TIME("EBHelmholtzOp::setToZero(LD<EBCellFAB>)");
+  
   EBLevelDataOps::setToZero(a_lhs);
 }
 
 void EBHelmholtzOp::createCoarser(LevelData<EBCellFAB>& a_coarse, const LevelData<EBCellFAB>& a_fine, bool a_ghosted) {
+  CH_TIME("EBHelmholtzOp::createCoarser(LD<EBCellFAB>, LD<EBCellFAB>, bool)");
+  
   EBCellFactory factCoar(m_eblgCoarMG.getEBISL());
+  
   a_coarse.define(m_eblgCoarMG.getDBL(), a_fine.nComp(), a_fine.ghostVect(), factCoar);
 }
 
 void EBHelmholtzOp::createCoarsened(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const int& a_refRat) {
+  CH_TIME("EBHelmholtzOp::createCoarsened(LD<EBCellFAB>, LD<EBCellFAB>, bool)");
+  
   CH_assert(m_hasCoar);
 
   EBCellFactory factCoFi(m_eblgCoFi.getEBISL());
+  
   a_lhs.define(m_eblgCoFi.getDBL(), a_rhs.nComp(), a_rhs.ghostVect(), factCoFi);
 }
 
 void EBHelmholtzOp::restrictResidual(LevelData<EBCellFAB>& a_resCoar, LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_rhs) {
+  CH_TIME("EBHelmholtzOp::restrictResidual(LD<EBCellFAB>, LD<EBCellFAB>, LD<EBCellFAB>)");  
 
   // Compute the residual on this level first. Make a temporary for that.
   LevelData<EBCellFAB> res;
@@ -458,10 +506,13 @@ void EBHelmholtzOp::restrictResidual(LevelData<EBCellFAB>& a_resCoar, LevelData<
   this->setToZero(res);
   this->residual(res, a_phi, a_rhs, true);
 
+  // Restrict it onto the coarse level. 
   m_ebAverageMG.average(a_resCoar, res, m_interval);
 }
 
 void EBHelmholtzOp::prolongIncrement(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_correctCoarse) {
+  CH_TIME("EBHelmholtzOp::prolongIncrement(LD<EBCellFAB>, LD<EBCellFAB>)");
+  
   m_ebInterpMG.pwcInterp(a_phi, a_correctCoarse, m_interval);
 }
 
@@ -475,6 +526,11 @@ void EBHelmholtzOp::AMROperator(LevelData<EBCellFAB>&              a_Lphi,
 				const LevelData<EBCellFAB>&        a_phiCoar,
 				const bool                         a_homogeneousPhysBC,
 				AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp){
+  CH_TIME("EBHelmholtzOp::AMROperator(4xLD<EBCellFAB>, bool, AMRLevelOp<LD<EBCellFAB> >*)");
+
+  // If we have a finer level, there is a chance that the stencils from the EB will reach under it, in which case
+  // it might fetch potentially bogus data. A clunky way of handling this is to coarsen the data on the fine level
+  // first. The best solution would probably be to have the EB flux stencil reach directly into the fine level. 
   if(m_hasFine){
     EBHelmholtzOp* fineOp = (EBHelmholtzOp*) a_finerOp;
     fineOp->coarsen((LevelData<EBCellFAB>&) a_phi, a_phiFine);
@@ -491,6 +547,8 @@ void EBHelmholtzOp::AMROperatorNF(LevelData<EBCellFAB>&       a_Lphi,
 				  const LevelData<EBCellFAB>& a_phi,
 				  const LevelData<EBCellFAB>& a_phiCoar,
 				  bool                        a_homogeneousPhysBC) {
+  CH_TIME("EBHelmholtzOp::AMROperatorNF(3xLD<EBCellFAB>, bool)");
+  
   this->applyOp(a_Lphi, a_phi, &a_phiCoar, a_homogeneousPhysBC, false);
 }
 
@@ -499,6 +557,8 @@ void EBHelmholtzOp::AMROperatorNC(LevelData<EBCellFAB>&              a_Lphi,
 				  const LevelData<EBCellFAB>&        a_phi,
 				  bool                               a_homogeneousPhysBC,
 				  AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp) {
+  CH_TIME("EBHelmholtzOp::AMROperatorNC(3xLD<EBCellFAB>, bool, AMRLevelOp<LD<EBCellFAB> >)");
+  
   LevelData<EBCellFAB> phiCoar; // Should be safe on the bottom AMR level because only multigrid levels exist below. 
   this->AMROperator(a_Lphi, a_phiFine, a_phi, phiCoar, a_homogeneousPhysBC, a_finerOp); 
 }
@@ -510,6 +570,11 @@ void EBHelmholtzOp::AMRResidual(LevelData<EBCellFAB>&              a_residual,
 				const LevelData<EBCellFAB>&        a_rhs,
 				bool                               a_homogeneousPhysBC,
 				AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp) {
+  CH_TIME("EBHelmholtzOp::AMRResidual(5xLD<EBCellFAB>, bool, AMRLevelOp<LD<EBCellFAB> >)");
+
+  // We are computing the residual res = rhs - L(phi). This should include refluxing and all that, and possibly
+  // also accounting for EB flux stencils that reach under the fine level (handled in AMROperator). 
+  
   this->AMROperator(a_residual, a_phiFine, a_phi, a_phiCoar, a_homogeneousPhysBC, a_finerOp); // a_residual =  L(phi) 
   this->axby(a_residual, a_rhs, a_residual, 1., -1.);                                         // a_residual = rhs - -L(phi)
 }
@@ -519,8 +584,10 @@ void EBHelmholtzOp::AMRResidualNF(LevelData<EBCellFAB>&              a_residual,
 				  const LevelData<EBCellFAB>&        a_phiCoar,
 				  const LevelData<EBCellFAB>&        a_rhs,
 				  bool                               a_homogeneousPhysBC) {
+  CH_TIME("EBHelmholtzOp::AMRResidualNF(3xLD<EBCellFAB>, bool)");
 
-  // Simple, because we don't need to reflux. 
+  // In this case we want to compute the residual on the finest level, knowing that there are no finer levels with which
+  // we have to reflux. 
   this->AMROperatorNF(a_residual, a_phi, a_phiCoar, a_homogeneousPhysBC); // a_residual = L(phi)
   this->axby(a_residual, a_rhs, a_residual, 1., -1.);                     // a_residual = rhs - L(phi)
 }
@@ -531,6 +598,11 @@ void EBHelmholtzOp::AMRResidualNC(LevelData<EBCellFAB>&              a_residual,
 				  const LevelData<EBCellFAB>&        a_rhs,
 				  bool                               a_homogeneousPhysBC,
 				  AMRLevelOp<LevelData<EBCellFAB> >* a_finerOp) {
+  CH_TIME("EBHelmholtzOp::AMRResidual(4xLD<EBCellFAB>, bool, AMRLevelOp<LD<EBCellFAB> >)");
+
+  // We are computing the residual res = rhs - L(phi). We know that there are no coarser levels so we don't have to worry
+  // about coarse-fine interpolation, but we still have to reflux. 
+  
   this->AMROperatorNC(a_residual, a_phiFine, a_phi, a_homogeneousPhysBC, a_finerOp); // a_residual = L(phi)
   this->axby(a_residual, a_rhs, a_residual, 1., -1.);                                // a_residual = rhs - L(phi)
 }
@@ -540,7 +612,12 @@ void EBHelmholtzOp::AMRRestrict(LevelData<EBCellFAB>&       a_residualCoarse,
 				const LevelData<EBCellFAB>& a_correction,
 				const LevelData<EBCellFAB>& a_coarseCorrection,
 				bool                        a_skip_res) {
+  CH_TIME("EBHelmholtzOp::AMRRestrict(4xLD<EBCellFAB>, bool)");
 
+  // TLDR: We want to restrict the residual onto the coarser level. So we just compute it on this level
+  //       and have our restriction operator do the rest. Note that we DO have to worry about coarse-fine
+  //       interpolation here (done in applyOp).
+  
   LevelData<EBCellFAB> resThisLevel;
   this->create(resThisLevel, a_residual);
 
@@ -556,13 +633,16 @@ void EBHelmholtzOp::AMRRestrict(LevelData<EBCellFAB>&       a_residualCoarse,
 }
 
 void EBHelmholtzOp::AMRProlong(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_coarseCorrection) {
+  CH_TIME("EBHelmholtzOp::AMRProlong(LD<EBCellFAB>, LD<EBCellFAB>)");
+  
   m_ebInterp.pwcInterp(a_correction, a_coarseCorrection, m_interval);
 }
 
 void EBHelmholtzOp::AMRUpdateResidual(LevelData<EBCellFAB>&       a_residual,
 				      const LevelData<EBCellFAB>& a_correction,
 				      const LevelData<EBCellFAB>& a_coarseCorrection) {
-
+  CH_TIME("EBHelmholtzOp::AMRUpdateResidual(LD<EBCellFAB>, LD<EBCellFAB>, LD<EBCellFAB>)");
+  
   constexpr bool homogeneousPhysBC = true;
   constexpr bool homogeneousCFBC   = false;
   
@@ -573,6 +653,8 @@ void EBHelmholtzOp::AMRUpdateResidual(LevelData<EBCellFAB>&       a_residual,
 }
 
 void EBHelmholtzOp::applyOp(LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_phi, bool a_homogeneousPhysBC) {
+  CH_TIME("EBHelmholtzOp::applyOp(LD<EBCellFAB>, LD<EBCellFAB>, bool)");
+  
   this->applyOp(a_Lphi, a_phi, nullptr, a_homogeneousPhysBC, true);
 }
 
@@ -581,7 +663,13 @@ void EBHelmholtzOp::applyOp(LevelData<EBCellFAB>&             a_Lphi,
 			    const LevelData<EBCellFAB>* const a_phiCoar,
 			    const bool                        a_homogeneousPhysBC,
 			    const bool                        a_homogeneousCFBC){
+  CH_TIME("EBHelmholtzOp::applyOp(LD<EBCellFAB>, LD<EBCellFAB>, LD<EBCellFAB>, bool, bool)");
 
+  // TLDR: We are computing L(phi) on a level, and there's possibly a coarser level here as well. If there is,
+  //       we need to recompute the ghost cells. 
+
+  // Nasty cast, but there's no guarantee that a_phi came in with valid ghost cells. We could
+  // do a local copy, but that can end up being expensive since this is called on every relaxation.
   LevelData<EBCellFAB>& phi = (LevelData<EBCellFAB>& ) a_phi;
 
   if(m_hasCoar && !m_turnOffBCs){
@@ -589,16 +677,19 @@ void EBHelmholtzOp::applyOp(LevelData<EBCellFAB>&             a_Lphi,
   }
   
   phi.exchange();
-  
+
+  // Apply operator in each kernel. 
   const DisjointBoxLayout& dbl = a_Lphi.disjointBoxLayout();
   for (DataIterator dit(dbl); dit.ok(); ++dit){
-    const Box cellBox = dbl[dit()];
-
-    this->applyOp(a_Lphi[dit()], phi[dit()], cellBox, dit(), a_homogeneousPhysBC);
+    this->applyOp(a_Lphi[dit()], phi[dit()], dbl[dit()], dit(), a_homogeneousPhysBC);
   }
 }
 
 void EBHelmholtzOp::applyOp(EBCellFAB& a_Lphi, EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBC){
+  CH_TIME("EBHelmholtzOp::applyOp(EBCellFAB, EBCellFAB, Box, DataIndex, bool)");
+
+  // TLDR: This is the kernel version of applyOp. It first applies the operator in the regular cells using the standard
+  //       5/7 point stencil. Once those are done we apply the operator in the cut-cells. 
   const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
 
   if(!ebisbox.isAllCovered()){
@@ -608,12 +699,18 @@ void EBHelmholtzOp::applyOp(EBCellFAB& a_Lphi, EBCellFAB& a_phi, const Box& a_ce
 }
 
 void EBHelmholtzOp::applyOpRegular(EBCellFAB& a_Lphi, EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBC){
+  CH_TIME("EBHelmholtzOp::applyOpRegular(EBCellFAB, EBCellFAB, Box, DataIndex, bool)");
+
+  // TLDR: This is the regular kernel which computes L(phi) using the standard 5/7 point stencil. Since we want a simple kernel,
+  //       we first fill the ghost cells on the domain boundary so that the flux through the boundary is consistent with the flux
+  //       from the BC object. 
+  
   // Fill a_phi such that centered differences pushes in the domain flux. 
   this->applyDomainFlux(a_phi, a_cellBox, a_dit, a_homogeneousPhysBC);
 
-  BaseFab<Real>& Lphi      = a_Lphi.getSingleValuedFAB();
-  const BaseFab<Real>& phi = a_phi.getSingleValuedFAB();
-  const BaseFab<Real>& aco = (*m_Acoef)[a_dit].getSingleValuedFAB();
+  BaseFab<Real>&       Lphi = a_Lphi.getSingleValuedFAB();
+  const BaseFab<Real>& phi  = a_phi.getSingleValuedFAB();
+  const BaseFab<Real>& aco  = (*m_Acoef)[a_dit].getSingleValuedFAB();
 
   // It's an older code, sir, but it checks out.
   const BaseFab<Real> dummy(Box(IntVect::Zero, IntVect::Zero), 1);
@@ -642,8 +739,11 @@ void EBHelmholtzOp::applyOpRegular(EBCellFAB& a_Lphi, EBCellFAB& a_phi, const Bo
 }
 
 void EBHelmholtzOp::applyDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBC){
+  CH_TIME("EBHelmholtzOp::applyDomainFlux(EBCellFAB, Box, DataIndex, bool)");
+  
   // TLDR: We compute the flux on the domain edges and store it in a cell-centered box. We then monkey with the ghost cells
-  //       so that centered differences on the edge cells inject said flux.
+  //       so that centered differences on the edge cells inject said flux. This is a simple trick for enforcing the flux
+  //       on the domain edges. 
   
   for (int dir = 0; dir < SpaceDim; dir++){
 
@@ -701,7 +801,13 @@ void EBHelmholtzOp::applyDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, cons
 }
 
 void EBHelmholtzOp::applyOpIrregular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBC){
-  // Apply the operator in all cells where we needed an explicit stencil. 
+  CH_TIME("EBHelmholtzOp::applyOpIrregular(EBCellFAB, EBCellFAB, Box, DataIndex, bool)");
+
+  // This routine computes L(phi) in a grid patch. This includes the cut-cell itself. Note that such cells can include cells that have both
+  // an EB face and a domain face. This routine handles both.
+  
+  // Apply the operator in all cells where we needed an explicit stencil. Note that the operator does NOT include stencils for fluxes
+  // through the domain faces. That is handled below. 
   VoFIterator& vofit = m_vofIterStenc[a_dit];
   for (vofit.reset(); vofit.ok(); ++vofit){
     const VolIndex& vof     = vofit();
@@ -709,7 +815,8 @@ void EBHelmholtzOp::applyOpIrregular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, 
     const Real& alphaDiag   = m_alpha * m_alphaDiagWeight[a_dit](vof, m_comp); // = kappa * alpha * aco (m_alphaDiagWeight holds kappa* aco)
     
     a_Lphi(vof, m_comp) = alphaDiag * a_phi(vof, m_comp);
-    
+
+    // Add the term corresponding to kappa*div(b*grad(phi)), excluding contributions from domain faces. 
     for (int i = 0; i < stenc.size(); i++){
       const VolIndex& ivof = stenc.vof(i);
       const Real& iweight  = stenc.weight(i);
@@ -720,7 +827,7 @@ void EBHelmholtzOp::applyOpIrregular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, 
   
   m_ebBc->applyEBFlux(m_vofIterIrreg[a_dit], a_Lphi, a_phi, a_dit, m_beta, a_homogeneousPhysBC);
 
-  // Do irregular faces on domain sides. m_domainBc should give the centroid-centered flux so we don't do interpolations here. 
+  // Do irregular faces on domain sides. This was not included in the stencils above. m_domainBc should give the centroid-centered flux so we don't do interpolations here. 
   for (int dir = 0; dir < SpaceDim; dir++){
     // Lo side.
     VoFIterator& vofitLo = m_vofIterDomLo[dir][a_dit];    
@@ -745,9 +852,12 @@ void EBHelmholtzOp::applyOpIrregular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, 
 }
 
 void EBHelmholtzOp::diagonalScale(LevelData<EBCellFAB> & a_rhs, bool a_kappaWeighted){
-
+  CH_TIME("EBHelmholtzOp::diagonalScale(LD<EBCellFAB>, bool)");
+  
   // Scale by volume fraction if asked. 
-  if(a_kappaWeighted) EBLevelDataOps::kappaWeight(a_rhs);
+  if(a_kappaWeighted) {
+    EBLevelDataOps::kappaWeight(a_rhs);
+  }
 
   // Scale by a-coefficient and alpha, too.
   for (DataIterator dit(a_rhs.dataIterator()); dit.ok(); ++dit){
@@ -756,18 +866,24 @@ void EBHelmholtzOp::diagonalScale(LevelData<EBCellFAB> & a_rhs, bool a_kappaWeig
 }
 
 void EBHelmholtzOp::divideByIdentityCoef(LevelData<EBCellFAB>& a_rhs) {
+  CH_TIME("EBHelmholtzOp::divideByIdentityCoef(LD<EBCellFAB>)");
+  
   for (DataIterator dit(a_rhs.disjointBoxLayout()); dit.ok(); ++dit){
     a_rhs[dit()] /= (*m_Acoef)[dit()];
   }
 }
 
 void EBHelmholtzOp::applyOpNoBoundary(LevelData<EBCellFAB>& a_Lphi, const LevelData<EBCellFAB>& a_phi) {
+  CH_TIME("EBHelmholtzOp::applyOpNoBounary(LD<EBCellFAB>, LD<EBCellFAB>)");
+  
   m_turnOffBCs = true;
   this->applyOp(a_Lphi, a_phi, true);
   m_turnOffBCs = false;
 }
 
 void EBHelmholtzOp::fillGrad(const LevelData<EBCellFAB>& a_phi){
+  CH_TIME("EBHelmholtzOp::fillGrad(LD<EBCellFAB>, LD)");
+  
   MayDay::Warning("EBHelmholtzOp::fillGrad - not implemented (yet)");
 }
 
@@ -776,30 +892,59 @@ void EBHelmholtzOp::getFlux(EBFluxFAB&                  a_flux,
 			    const Box&                  a_grid,
 			    const DataIndex&            a_dit,
 			    Real                        a_scale) {
+  CH_TIME("EBHelmholtzOp::getFlux(EBFluxFAB, LD<EBCellFAB>, Box, DataIndex, Real)");
+  
   MayDay::Warning("EBHelmholtzOp::getFlux - not implemented (yet)");
 }
 
 void EBHelmholtzOp::homogeneousCFInterp(LevelData<EBCellFAB>& a_phi){
-  if(m_hasCoar) m_interpolator->coarseFineInterpH(a_phi, m_interval);
+  CH_TIME("EBHelmholtzOp::homogeneousCFInterp(LD<EBCellFAB>)");
+
+  // This routine interpolates ghost cells in a_phi, assuming that the coarse-level data is zero. 
+  
+  if(m_hasCoar) {
+    m_interpolator->coarseFineInterpH(a_phi, m_interval);
+  }
 }
 
 void EBHelmholtzOp::inhomogeneousCFInterp(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar){
-  if(m_hasCoar) m_interpolator->coarseFineInterp(a_phiFine, a_phiCoar, m_interval);
+  CH_TIME("EBHelmholtzOp::inhomogeneousCFInterp(LD<EBCellFAB>, LD<EBCellFAB>)");
+
+  // This routine interpolates ghost cells in a_phi. Responsibility for this is passed to the input interpolator. 
+  
+  if(m_hasCoar) {
+    m_interpolator->coarseFineInterp(a_phiFine, a_phiCoar, m_interval);
+  }
 }
 
 void EBHelmholtzOp::interpolateCF(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>* a_phiCoar, const bool a_homogeneousCFBC){
+  CH_TIME("EBHelmholtzOp::interpolateCF(LD<EBCellFAB>, LD<EBCellFAB>, bool)");
+
+  // This routine is just a wrapper for the two types of ghost cell interpolation. If a_phiCoar is nullptr then we are always
+  // doing homogeneous interpolation. The flag a_homogeneousCFBC should specify this. 
+  
   if(m_hasCoar){
     if(a_homogeneousCFBC){
       this->homogeneousCFInterp(a_phiFine);
     }
     else{
-      if(a_phiCoar == nullptr) MayDay::Error("EBHelmholtzOp::interpolateCF -- calling inhomogeneousCFInterp with nullptr coarse is an error.");
+
+      // I will call this an error because the user has probably unintentionally called for inhomogeneous interpolation when he/she meant
+      // homogeneous interpolation. 
+      if(a_phiCoar == nullptr) {
+	MayDay::Error("EBHelmholtzOp::interpolateCF -- calling inhomogeneousCFInterp with nullptr coarse is an error.");
+      }
+
       this->inhomogeneousCFInterp(a_phiFine, *a_phiCoar);
     }
   }
 }
 
 void EBHelmholtzOp::relax(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, int a_iterations){
+  CH_TIME("EBHelmholtzOp::relax(LD<EBCellFAB>, LD<EBCellFAB>, int)");
+
+  // This function performs relaxation steps on the correction. User can switch between different kernels.
+  
   switch(m_smoother){
   case Smoother::NoRelax: // Don't know why you would do this. 
     break;
@@ -818,6 +963,11 @@ void EBHelmholtzOp::relax(LevelData<EBCellFAB>& a_correction, const LevelData<EB
 }
 
 void EBHelmholtzOp::relaxPointJacobi(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations){
+  CH_TIME("EBHelmholtzOp::relaxPointJacobi(LD<EBCellFAB>, LD<EBCellFAB>, int)");
+
+  // TLDR: This function performs point Jacobi relaxation in the form phi^(k+1) = phi^k - (res - L(phi))/|diag(L)|. Here, diag(L) is captured
+  //       in m_relCoef. For performance integration with MFHelmholtzOp this routine passed that routine to a separate kernel call. 
+  
   LevelData<EBCellFAB> Lcorr;
   this->create(Lcorr, a_residual);
 
@@ -829,13 +979,16 @@ void EBHelmholtzOp::relaxPointJacobi(LevelData<EBCellFAB>& a_correction, const L
     this->homogeneousCFInterp(a_correction);
 
     for (DataIterator dit(dbl); dit.ok(); ++dit){
-      const Box cellBox = dbl[dit()];
-      this->pointJacobiKernel(Lcorr[dit()], a_correction[dit()], a_residual[dit()], cellBox, dit());
+      this->pointJacobiKernel(Lcorr[dit()], a_correction[dit()], a_residual[dit()], dbl[dit()], dit());
     }
   }
 }
 
 void EBHelmholtzOp::pointJacobiKernel(EBCellFAB& a_Lcorr, EBCellFAB& a_correction, const EBCellFAB& a_residual, const Box& a_cellBox, const DataIndex& a_dit) {
+  CH_TIME("EBHelmholtzOp::pointJacobiKernel(EBCellFAB, EBCellFAB, EBCellFAB, Box, DataIndex)");
+
+  // TLDR: This just computes correction = correction - (res - L(phi))/diag(L). Note that we use under-relaxation (with a factor of 0.5) for stability. 
+  
   const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
 
   if(!ebisbox.isAllCovered()){
@@ -849,27 +1002,38 @@ void EBHelmholtzOp::pointJacobiKernel(EBCellFAB& a_Lcorr, EBCellFAB& a_correctio
 }
 
 void EBHelmholtzOp::relaxGSRedBlack(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations){
+  CH_TIME("EBHelmholtzOp::relaxGSRedBlack(LD<EBCellFAB>, LD<EBCellFAB>, int)");
+
+  // TLDR: This function performs red-black Gauss-Seidel relaxation. As always, this occurs in the form phi^(k+1) = phi^k - (res - L(phi))/|diag(L)| but
+  //       for a red-black update pattern:
+  //
+  //       For performance integration with MFHelmholtzOp this routine passed that routine to a separate kernel call.
+  
   LevelData<EBCellFAB> Lcorr;
   this->create(Lcorr, a_residual);
 
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
 
   for (int iter = 0; iter < a_iterations; iter++){
+
+    // First do "red" cells, then "black" cells. Note that ghost cell interpolation and exchanges are required between the colors. 
     for (int redBlack = 0; redBlack <= 1; redBlack++){
       a_correction.exchange();
       
       this->homogeneousCFInterp(a_correction);
       
       for (DataIterator dit(dbl); dit.ok(); ++dit){
-	const Box cellBox = dbl[dit()];
-	
-	this->gauSaiRedBlackKernel(Lcorr[dit()], a_correction[dit()], a_residual[dit()], cellBox, dit(), redBlack);
+	this->gauSaiRedBlackKernel(Lcorr[dit()], a_correction[dit()], a_residual[dit()], dbl[dit()], dit(), redBlack);
       }
     }
   }
 }
 
 void EBHelmholtzOp::gauSaiRedBlackKernel(EBCellFAB& a_Lcorr, EBCellFAB& a_corr, const EBCellFAB& a_resid, const Box& a_cellBox, const DataIndex& a_dit, const int& a_redBlack){
+  CH_TIME("EBHelmholtzOp::gauSaiRedBlackkernel(EBCellFAB, EBCellFAB, EBCellFAB, Box, DataIndex, int)");
+
+  // This is the kernel for computing phi^(k+1) = phi^k - (res - L(phi))/|diag(L)| with a red-black pattern. Here, "red" cells are encoded by a_redBlack=0.
+  
   const EBISBox& ebisbox   = m_eblg.getEBISL()[a_dit];
   const EBCellFAB& relCoef = m_relCoef[a_dit];
   
@@ -911,6 +1075,14 @@ void EBHelmholtzOp::gauSaiRedBlackKernel(EBCellFAB& a_Lcorr, EBCellFAB& a_corr, 
 }
 
 void EBHelmholtzOp::relaxGSMultiColor(LevelData<EBCellFAB>& a_correction, const LevelData<EBCellFAB>& a_residual, const int a_iterations){
+  CH_TIME("EBHelmholtzOp::relaxGSMultiColor(LD<EBCellFAB>, LD<EBCellFAB>, int)");
+
+  // TLDR: This function performs multi-colored Gauss-Seidel relaxation. As always, this occurs in the form phi^(k+1) = phi^k - (res - L(phi))/|diag(L)| but
+  //       using more colors than just red-black. The update pattern here cycles through quadrants/octants in 2D/3D. This is just like red-black except that
+  //       we have four/eight colors in 2D/3D. 
+  //
+  //       For performance integration with MFHelmholtzOp this routine passed that routine to a separate kernel call.
+  
   LevelData<EBCellFAB> Lcorr;
   this->create(Lcorr, a_residual);
 
@@ -923,9 +1095,7 @@ void EBHelmholtzOp::relaxGSMultiColor(LevelData<EBCellFAB>& a_correction, const 
       this->homogeneousCFInterp(a_correction);
       
       for (DataIterator dit(dbl); dit.ok(); ++dit){
-	const Box cellBox = dbl[dit()];
-
-	this->gauSaiMultiColorKernel(Lcorr[dit()], a_correction[dit()], a_residual[dit()], cellBox, dit(), m_colors[icolor]);
+	this->gauSaiMultiColorKernel(Lcorr[dit()], a_correction[dit()], a_residual[dit()], dbl[dit()], dit(), m_colors[icolor]);
       }
     }
   }
@@ -937,6 +1107,11 @@ void EBHelmholtzOp::gauSaiMultiColorKernel(EBCellFAB&       a_Lcorr,
 					   const Box&       a_cellBox,
 					   const DataIndex& a_dit,
 					   const IntVect&   a_color){
+  CH_TIME("EBHelmholtzOp::gauSaiRedBlackkernel(EBCellFAB, EBCellFAB, EBCellFAB, Box, DataIndex, int)");
+
+  // This is the kernel for computing phi^(k+1) = phi^k - (res - L(phi))/|diag(L)| with a "multi-colored" pattern. As with red-black, we follow a pattern, but
+  // the pattern in this case uses more "colors". 
+  
   const EBISBox& ebisbox   = m_eblg.getEBISL()[a_dit];
   const EBCellFAB& relCoef = m_relCoef[a_dit];
   
@@ -990,6 +1165,9 @@ void EBHelmholtzOp::gauSaiMultiColorKernel(EBCellFAB&       a_Lcorr,
 }
 
 void EBHelmholtzOp::computeAlphaWeight(){
+  CH_TIME("EBHelmholtzOp::computeAlphaWeight()");
+
+  // Compute the diagonal term in the kappa-weighted operator. We put the result into m_alphaDiagWeight = kappa * A;
   for (DataIterator dit(m_eblg.getDBL().dataIterator()); dit.ok(); ++dit){
     VoFIterator& vofit = m_vofIterStenc[dit()];
     for (vofit.reset(); vofit.ok(); ++vofit){
@@ -1004,15 +1182,20 @@ void EBHelmholtzOp::computeAlphaWeight(){
 }
 
 void EBHelmholtzOp::computeRelaxationCoefficient(){
+  CH_TIME("EBHelmholtzOp::computeRelaxationCoefficient()");
+
+  // TLDR: Compute the relaxation coefficient in the operator. This is just the inverted diagonal of kappa*L(phi). It is inverted
+  //       for performance reasons.
+
   for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit){
     const Box cellBox = m_eblg.getDBL()[dit()];
 
-    // Set relaxation coefficient = aco*alpha
+    // Add the diagonal term alpha * A
     m_relCoef[dit()].setVal(0.0);
     m_relCoef[dit()] += (*m_Acoef)[dit()];
     m_relCoef[dit()] *= m_alpha;
 
-    // Add in the diagonal term for the variable-coefficient Laplacian operator
+    // Add in the diagonal term for the variable-coefficient Laplacian 
     BaseFab<Real>& regRel = m_relCoef[dit()].getSingleValuedFAB();
     for (int dir = 0; dir < SpaceDim; dir++){
 
@@ -1026,7 +1209,7 @@ void EBHelmholtzOp::computeRelaxationCoefficient(){
 				  CHF_BOX(cellBox));
     }
 
-    // Invert the relaxation coefficient (in the irregular cells)
+    // Invert the relaxation coefficient so we have relCoef = 1/diag(kappa*L). 
     FORT_INVERTRELAXATIONCOEFFICIENT(CHF_FRA1(regRel, m_comp),
 				     CHF_BOX(cellBox));
 
@@ -1035,8 +1218,8 @@ void EBHelmholtzOp::computeRelaxationCoefficient(){
     for (vofit.reset(); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
 
-      const Real alphaWeight = m_alpha * m_alphaDiagWeight[dit()](vof, m_comp);
-      const Real  betaWeight = m_beta  * m_betaDiagWeight [dit()](vof, m_comp);
+      const Real alphaWeight = m_alpha * m_alphaDiagWeight[dit()](vof, m_comp); // Recall, m_alphaDiagWeight holds kappa * A
+      const Real  betaWeight = m_beta  * m_betaDiagWeight [dit()](vof, m_comp); // Recall, m_betaWeight holds the diagonal part of kappa*div(b*grad(phi)) in the cut-cells. 
 
       m_relCoef[dit()](vof, m_comp) = 1./(alphaWeight + betaWeight);
     }
@@ -1044,6 +1227,10 @@ void EBHelmholtzOp::computeRelaxationCoefficient(){
 }
 
 VoFStencil EBHelmholtzOp::getFaceCenterFluxStencil(const FaceIndex& a_face, const DataIndex& a_dit) const {
+  CH_TIME("EBHelmholtzOp::getFaceCenterFluxStencil(FaceIndex, DataIndex)");
+
+  // TLDR: This routine computes a regular finite difference stencil for getting a second-order accurate approximation to the face-centered flux (presuming
+  //       that the data is cell-centered). 
   VoFStencil fluxStencil;
   
   if(!a_face.isBoundary()){ // BC handles the boundary fluxes. 
@@ -1056,6 +1243,12 @@ VoFStencil EBHelmholtzOp::getFaceCenterFluxStencil(const FaceIndex& a_face, cons
 }
 
 VoFStencil EBHelmholtzOp::getFaceCentroidFluxStencil(const FaceIndex& a_face, const DataIndex& a_dit) const {
+  CH_TIME("EBHelmholtzOp::getFaceCentroidFluxStencil(FaceIndex, DataIndex)");
+
+  // TLDR: This routine computes a second order accurate approximation to the flux on a cut-cell centroid. How this is done differs between discretizations. For
+  //       cell-centered discretizations we get the face-centered fluxes and interpolate them to the face centroid. For centroid-based discretizations we have to
+  //       compute the stencil directly, using least squares reconstruction. This is much more involved. 
+  
   VoFStencil fluxStencil;
 
   if(!a_face.isBoundary()){ // Domain BC classes handle domain faces. 
@@ -1071,7 +1264,9 @@ VoFStencil EBHelmholtzOp::getFaceCentroidFluxStencil(const FaceIndex& a_face, co
       fluxStencil = this->getFaceCenterFluxStencil(a_face, a_dit); 
     }
     else {
-      if(m_dataLocation == Location::Cell::Center){ // Irregular face, but using cell-centered data. Get face-centered stencils and interpolate them to centroids
+
+      // Irregular face, but using cell-centered data. Get face-centered stencils and interpolate them to centroids.       
+      if(m_dataLocation == Location::Cell::Center){ 
 	const FaceStencil interpolationStencil = EBArith::getInterpStencil(a_face, IntVectSet(), ebisbox, m_eblg.getDomain());
 
 	for (int i = 0; i < interpolationStencil.size(); i++){
@@ -1086,7 +1281,9 @@ VoFStencil EBHelmholtzOp::getFaceCentroidFluxStencil(const FaceIndex& a_face, co
 	  fluxStencil += fluxCenterStencil;
 	}
       }
-      else{ // Irregular face, but with centroid-centered data. In this case we reconstruct the gradient using a least squares reconstruction of the solution.
+
+      // Irregular face, but with centroid-centered data. In this case we reconstruct the gradient using a least squares reconstruction of the solution.      
+      if(m_dataLocation == Location::Cell::Centroid){
 	constexpr int stencilWeight = 2;
 	constexpr int stencilRadius = 2;
 	constexpr int stencilOrder  = 2;
@@ -1120,8 +1317,14 @@ void EBHelmholtzOp::getFaceCentroidFlux(EBFaceFAB&       a_fluxCentroid,
 					const Box&       a_cellBox,
 					const DataIndex& a_dit,
 					const int        a_dir){
-  this->computeFaceCenteredFlux(a_fluxCentroid, a_phi, a_cellBox, a_dit, a_dir);
-  this->computeFaceCentroidFlux(a_fluxCentroid, a_phi, a_cellBox, a_dit, a_dir);
+  CH_TIME("EBHelmholtzOp::getFaceCentroidFlux(EBFaceFAB, EBCellFAB, Box, DataIndex, int)");
+
+  // TLDR: This routine computes the face centroid flux on all regular and irregular faces in the input box. 
+
+  // First do the regular faces and then the irregular faces. Not that when a centroid discretization is used, some faces can be irregular but nonetheless require
+  // an explicit stencil. 
+  this->computeFaceCenteredFlux(a_fluxCentroid, a_phi, a_cellBox, a_dit, a_dir); 
+  this->computeFaceCentroidFlux(a_fluxCentroid, a_phi, a_cellBox, a_dit, a_dir); 
 
   a_fluxCentroid *= m_beta;
 }
@@ -1131,7 +1334,8 @@ void EBHelmholtzOp::computeFaceCenteredFlux(EBFaceFAB&       a_fluxCenter,
 					    const Box&       a_cellBox,
 					    const DataIndex& a_dit,
 					    const int        a_dir){
-
+  CH_TIME("EBHelmholtzOp::computeFaceCenteredFlux(EBFaceFAB, EBCellFAB, Box, DataIndex, int)");
+  
   const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
   const EBGraph& ebgraph = ebisbox.getEBGraph();
     
@@ -1153,6 +1357,7 @@ void EBHelmholtzOp::computeFaceCenteredFlux(EBFaceFAB&       a_fluxCenter,
   const BaseFab<Real>& regPhi  = a_phi.getSingleValuedFAB();
   const BaseFab<Real>& regBco  = (*m_Bcoef)[a_dit][a_dir].getSingleValuedFAB();
 
+  // This kernel does centered differencing, setting the face flux to flux = B*(phi(high) - phi(lo))/dx. 
   FORT_GETINTERIORREGFLUX(CHF_FRA1(regFlux, m_comp),
 			  CHF_CONST_FRA1(regPhi, m_comp),
 			  CHF_CONST_FRA1(regBco, m_comp),
@@ -1166,7 +1371,11 @@ void EBHelmholtzOp::computeFaceCentroidFlux(EBFaceFAB&       a_flux,
 					    const Box&       a_cellBox,
 					    const DataIndex& a_dit,
 					    const int        a_dir){
+  CH_TIME("EBHelmholtzOp::computeFaceCentroidFlux(EBFaceFAB, EBCellFAB, Box, DataIndex, int)");
 
+  // This routine computes the face centroid fluxes using precomputed stencils (in defineStencils). This is needed because
+  // cut-cell faces require more than centered differencing. 
+  
   const BaseIFFAB<VoFStencil>& fluxStencils = m_centroidFluxStencil[a_dir][a_dit];
   const EBGraph& ebgraph                    = fluxStencils.getEBGraph();
   IntVectSet ivs                            = fluxStencils.getIVS();
@@ -1188,7 +1397,11 @@ void EBHelmholtzOp::computeFaceCentroidFlux(EBFaceFAB&       a_flux,
 }
 
 void EBHelmholtzOp::incrementFRCoar(const LevelData<EBCellFAB>& a_phi){
+  CH_TIME("EBHelmholtzOp::incrementFRCoar(LD<EBCellFAB>)");
+  
   CH_assert(m_hasFine);
+
+  // TLDR: We want to compute the flux on this level so we can later set it to the sum of the fluxes through the fine-grid faces.
 
   const Real scale = 1.0;
 
@@ -1214,9 +1427,14 @@ void EBHelmholtzOp::incrementFRCoar(const LevelData<EBCellFAB>& a_phi){
 }
 
 void EBHelmholtzOp::incrementFRFine(const LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phi, AMRLevelOp<LevelData<EBCellFAB> >& a_finerOp){
-  CH_assert(m_hasFine);
+  CH_TIME("EBHelmholtzOp::incrementFRFine(LD<EBCellFAB>, LD<EBCellFAB>, AMRLevelOp<LevelData<EBCellFAB>)");
   
-  // Doing the nasty here -- phiFine needs new ghost cells.
+  CH_assert(m_hasFine);
+
+  // TLDR: We want to compute the fluxes on the fine grid so that we can later use these fluxes in the reflux step. This just means
+  //       that we must compute the fine-grid fluxes along the refinement bounary and add those fluxes to the flux register. 
+  
+  // Doing the nasty here -- there's no guarantee that a_phiFine has the ghost cells it needs. 
   LevelData<EBCellFAB>& phiFine = (LevelData<EBCellFAB>&) a_phiFine;
   EBHelmholtzOp& finerOp        = (EBHelmholtzOp&)       (a_finerOp);
   finerOp.inhomogeneousCFInterp(phiFine, a_phi);
@@ -1252,6 +1470,11 @@ void EBHelmholtzOp::reflux(LevelData<EBCellFAB>&              a_Lphi,
 			   const LevelData<EBCellFAB>&        a_phiFine,
 			   const LevelData<EBCellFAB>&        a_phi,
 			   AMRLevelOp<LevelData<EBCellFAB> >& a_finerOp) {
+  CH_TIME("EBHelmholtzOp::reflux(LD<EBCellFAB>, LD<EBCellFAB>, LD<EBCellFAB>, AMRLevelOp<LevelData<EBCellFAB>)");
+
+  // This routine computes the fluxes on the coarse and fine-side of the boundary and does a refluxing operation where
+  // we subtract the contribution from the coarse grid fluxes in a_Lphi and add in the contribution from the fine grid fluxes. 
+  
   m_fluxReg->setToZero();
   
   this->incrementFRCoar(a_phi);
@@ -1261,6 +1484,8 @@ void EBHelmholtzOp::reflux(LevelData<EBCellFAB>&              a_Lphi,
 }
 
 void EBHelmholtzOp::coarsen(LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_phiFine) {
+  CH_TIME("EBHelmholtzOp::coarsen(LD<EBCellFAB>, LD<EBCellFAB>)");
+  
   m_coarAve->average(a_phi, a_phiFine, m_interval);
 }
 

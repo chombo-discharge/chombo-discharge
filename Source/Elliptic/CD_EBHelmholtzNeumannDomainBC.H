@@ -21,6 +21,7 @@
 
 /*!
   @brief Boundary condition class for passing Neumann domain boundary conditions into EBHelmholtzOp
+  @details This class can set either dphi/dn or B*dphi/dn on the boundary. 
 */
 class EBHelmholtzNeumannDomainBC : public EBHelmholtzDomainBC {
 public:
@@ -54,7 +55,7 @@ public:
     @param[in] a_DphiDn Value of dphi/dn. 
     @note A positive values gives a flux INTO the domain. 
   */
-  void setDphiDn(const int a_DphiDn);
+  void setDphiDn(const Real a_DphiDn);
 
   /*!
     @brief Set spatially dependent value of dphi/dn on the EB. 
@@ -68,7 +69,7 @@ public:
     @param[in] a_BxDphiDn Value of B*dphi/dn. 
     @note A positive values gives a flux INTO the domain. 
   */
-  void setBxDphiDn(const int a_BxDphiDn);
+  void setBxDphiDn(const Real a_BxDphiDn);
 
   /*!
     @brief Set the spatially dependent value of B*dphi/dn on the EB.
@@ -113,7 +114,7 @@ public:
 protected:
 
   /*!
-    @brief Multiply by b-coefficient or not
+    @brief Hook for multiplying by b-coefficient or not
   */
   bool m_multByBco;
 
@@ -128,12 +129,12 @@ protected:
   bool m_useFunction;
 
   /*!
-    @brief Value on EB
+    @brief Value on the domain side. 
   */
   Real m_constantDphiDn;
 
   /*!
-    @brief Value on the EB. 
+    @brief Value on the domain side. 
   */
   std::function<Real(const RealVect& a_pos) > m_functionDphiDn;
 };

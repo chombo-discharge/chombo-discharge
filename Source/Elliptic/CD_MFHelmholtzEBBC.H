@@ -20,6 +20,8 @@
 
 /*!
   @brief Class for making boundary conditions on the EB in a multifluid context. 
+  @details This class is almost like EBHelmholtzEBBC, except that it enforces matching on multiphase cells. The user can inherit from this
+  layer if he needs additional BCs in a multiphase context. 
 */
 class MFHelmholtzEBBC : public EBHelmholtzEBBC {
 public:
@@ -45,7 +47,8 @@ public:
   ~MFHelmholtzEBBC();
   
   /*!
-    @brief Apply the EB flux. This is the version that is called by EBHelmholtzOp.
+    @brief Apply the EB flux. This is the version that is called by EBHelmholtzOp. 
+    @details Users get a new interface to the subset of cells that are not multi-phase cells. 
     @param[inout] a_vofit             Iterator for cut-cells
     @param[inout] a_Lphi              Operator kappa*L(phi)
     @param[in]    a_phi               Phi, cell-centered. 

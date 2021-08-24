@@ -9,21 +9,29 @@
   @author Robert Marskar
 */
 
+// Chombo includes
+#include <CH_Timer.H>
+
 // Our includes
 #include <CD_MFHelmholtzNeumannEBBC.H>
 #include <CD_NamespaceHeader.H>
 
 MFHelmholtzNeumannEBBC::MFHelmholtzNeumannEBBC(const int a_phase, const RefCountedPtr<JumpBC>& a_jumpBC) : MFHelmholtzEBBC(a_phase, a_jumpBC) {
+  CH_TIME("MFHelmholtzNeumannEBBC::MFHelmholtzNeumannEBBC(int, RefCountedPtr<JumpBC>)");
+  
   m_useConstant = false;
   m_useFunction = false;
 }
 
 MFHelmholtzNeumannEBBC::~MFHelmholtzNeumannEBBC(){
-
+  CH_TIME("MFHelmholtzNeumannEBBC::~MFHelmholtzNeumannEBBC()");
 }
 
-void MFHelmholtzNeumannEBBC::setDphiDn(const int a_DphiDn){
+void MFHelmholtzNeumannEBBC::setDphiDn(const Real a_DphiDn){
+  CH_TIME("MFHelmholtzNeumannEBBC::setDphiDn(Real)");
+  
   m_multByBco   = true;
+  
   m_useConstant = true;
   m_useFunction = false;
   
@@ -31,27 +39,39 @@ void MFHelmholtzNeumannEBBC::setDphiDn(const int a_DphiDn){
 }
 
 void MFHelmholtzNeumannEBBC::setDphiDn(const std::function<Real(const RealVect& a_pos)>& a_DphiDn){
+  CH_TIME("MFHelmholtzNeumannEBBC::setDphiDn(std::function<Real(RealVect)>)");
+  
   m_multByBco   = true;
+  
   m_useConstant = false;
   m_useFunction = true;
   
   m_functionDphiDn = a_DphiDn;
 }
 
-void MFHelmholtzNeumannEBBC::setBxDphiDn(const int a_BxDphiDn){
+void MFHelmholtzNeumannEBBC::setBxDphiDn(const Real a_BxDphiDn){
+  CH_TIME("MFHelmholtzNeumannEBBC::setBxDphiDn(Real)");
+  
   this->setDphiDn(a_BxDphiDn);
 
   m_multByBco = false;
 }
 
 void MFHelmholtzNeumannEBBC::setBxDphiDn(const std::function<Real(const RealVect& a_pos)>& a_BxDphiDn){
+  CH_TIME("MFHelmholtzNeumannEBBC::setBxDphiDn(std::function<Real(RealVect)>)");
+  
   this->setDphiDn(a_BxDphiDn);
 
   m_multByBco = false;
 }
   
 void MFHelmholtzNeumannEBBC::defineSinglePhase() {
-  if(!(m_useConstant || m_useFunction)) MayDay::Error("MFHelmholtzNeumannEBBC - not using constant or function!");
+  CH_TIME("MFHelmholtzNeumannEBBC::defineSinglePhase()");
+  
+  // No stencils to define here, but we must use constant or function-based BCs. 
+  if(!(m_useConstant || m_useFunction)) {
+    MayDay::Error("MFHelmholtzNeumannEBBC::defineSinglePhase - not using constant or function!");
+  }
 }
 
 void MFHelmholtzNeumannEBBC::applyEBFluxSinglePhase(VoFIterator&       a_singlePhaseVofs,
@@ -60,7 +80,8 @@ void MFHelmholtzNeumannEBBC::applyEBFluxSinglePhase(VoFIterator&       a_singleP
 						    const DataIndex&   a_dit,
 						    const Real&        a_beta,
 						    const bool&        a_homogeneousPhysBC) const {
-
+  CH_TIME("MFHelmholtzNeumannEBBC::applyEBFluxSinglePhase(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
+  
   // TLDR: For Neumann, we want to add the flux beta*bco*area*(dphi/dn)/dx where the
   //       dx comes from the fact that the term we are computing will be added to kappa*div(F)
   if(!a_homogeneousPhysBC){  

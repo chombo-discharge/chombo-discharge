@@ -20,7 +20,7 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Base class for passing domain boundary conditions into MFHelmholtzOp. 
+  @brief Base class for creating domain boundary condition objects in MFHelmholtzOp. 
 */
 class MFHelmholtzDomainBCFactory {
 public:

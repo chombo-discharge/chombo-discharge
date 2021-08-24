@@ -91,7 +91,7 @@ public:
 
 protected:
 
-    /*!
+  /*!
     @brief Use constant for BC
   */
   bool m_useConstant;

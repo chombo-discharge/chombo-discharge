@@ -11,6 +11,7 @@
 
 // Chombo includes
 #include <EBArith.H>
+#include <CH_Timer.H>
 #include <NeighborIterator.H>
 
 // Our includes
@@ -19,27 +20,37 @@
 #include <CD_NamespaceHeader.H>
 
 EBHelmholtzDirichletEBBC::EBHelmholtzDirichletEBBC(){
+  CH_TIME("EBHelmholtzDirichletEBBC::EBHelmholtzDirichletEBBC()");
+  
   m_order       = -1;
   m_weight      = -1;
+  
   m_useConstant = false;
   m_useFunction = false;
 }
 
 EBHelmholtzDirichletEBBC::~EBHelmholtzDirichletEBBC(){
-
+  CH_TIME("EBHelmholtzDirichletEBBC::~EBHelmholtzDirichletEBBC()");
 }
 
 void EBHelmholtzDirichletEBBC::setOrder(const int a_order){
+  CH_TIME("EBHelmholtzDirichletEBBC::setOrder(int)");
+  
   CH_assert(a_order > 0);
   m_order = a_order;
 }
 
 void EBHelmholtzDirichletEBBC::setWeight(const int a_weight){
+  CH_TIME("EBHelmholtzDirichletEBBC::setWeight(int)");
+  
   CH_assert(a_weight >= 0);
+  
   m_weight = a_weight;
 }
 
 void EBHelmholtzDirichletEBBC::setValue(const int a_value){
+  CH_TIME("EBHelmholtzDirichletEBBC::setValue(int)");
+  
   m_useConstant = true;
   m_useFunction = false;
   
@@ -47,6 +58,8 @@ void EBHelmholtzDirichletEBBC::setValue(const int a_value){
 }
 
 void EBHelmholtzDirichletEBBC::setValue(const std::function<Real(const RealVect& a_pos)>& a_value){
+  CH_TIME("EBHelmholtzDirichletEBBC::setValue(std::function<Real(RealVect)>)");
+  
   m_useConstant = false;
   m_useFunction = true;
   
@@ -54,13 +67,19 @@ void EBHelmholtzDirichletEBBC::setValue(const std::function<Real(const RealVect&
 }
   
 void EBHelmholtzDirichletEBBC::define() {
+  CH_TIME("EBHelmholtzDirichletEBBC::define()");
+
+  CH_assert(m_order  >  0);
+  CH_assert(m_weight >= 0);  
+
+  // Also issue runtime error. 
   if(  m_order <= 0  || m_weight < 0  ) MayDay::Error("EBHelmholtzDirichletEBBC - must have order > 0 and weight >= 0");
   if(!(m_useConstant || m_useFunction)) MayDay::Error("EBHelmholtzDirichletEBBC - not using constant or function!");
 
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
   const ProblemDomain& domain  = m_eblg.getDomain();
   
-  m_boundaryWeights.define(dbl);
+  m_boundaryWeights.  define(dbl);
   m_kappaDivFStencils.define(dbl);
 
   for (DataIterator dit(dbl); dit.ok(); ++dit){
@@ -133,10 +152,13 @@ void EBHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&       a_vofit,
 					   const DataIndex&   a_dit,
 					   const Real&        a_beta,
 					   const bool&        a_homogeneousPhysBC) const {
+  CH_TIME("EBHelmholtzDirichletEBBC::applyEBFlux(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
+  
+  CH_assert(m_useConstant || m_useFunction);
+  
   if(!a_homogeneousPhysBC){  
     for (a_vofit.reset(); a_vofit.ok(); ++a_vofit){
       const VolIndex& vof = a_vofit();
-    
 
       Real value;
     
@@ -162,6 +184,11 @@ bool EBHelmholtzDirichletEBBC::getLeastSquaresStencil(std::pair<Real, VoFStencil
 						      const VofUtils::Neighborhood a_neighborhood,
 						      const DataIndex&             a_dit,
 						      const int                    a_order) const {
+  CH_TIME("EBHelmholtzDirichletEBBC::getLeastSquaresStencil(std::pair<Real, VoFStencil>, VolIndex, VofUtils::Neighborhood, DataIndex, int)");
+
+  CH_assert(m_order  >  0);
+  CH_assert(m_weight >= 0);
+  
   bool foundStencil = false;
   
   const bool addStartVof  = false;
@@ -193,7 +220,14 @@ bool EBHelmholtzDirichletEBBC::getLeastSquaresStencil(std::pair<Real, VoFStencil
 }
 
 bool EBHelmholtzDirichletEBBC::getJohansenStencil(std::pair<Real, VoFStencil>& a_stencil, const VolIndex& a_vof, const DataIndex& a_dit, const int a_order) const {
-  if(!(a_order == 1 || a_order == 2)) MayDay::Abort("EBHelmholtzDirichletEBBC::getJohansenStencil - only order 1 and 2 is supported!");
+  CH_TIME("EBHelmholtzDirichletEBBC::getJohansenStencil(std::pair<Real, VoFStencil>, VolIndex, DataIndex, int)");
+
+  CH_assert(a_order == 1 || m_order==2);
+
+  // Also issue run-time error if the assertions break. 
+  if(!(a_order == 1 || a_order == 2)) {
+    MayDay::Error("EBHelmholtzDirichletEBBC::getJohansenStencil - only order 1 and 2 is supported!");
+  }
   
   bool foundStencil = false;
 

@@ -19,30 +19,68 @@
 #include <CD_NamespaceHeader.H>
 
 EBHelmholtzRobinEBBC::EBHelmholtzRobinEBBC(){
-  m_order       = 1;
-  m_radius      = 1;
-  m_weight      = 0;   // Can't use weighted least squares when starting vof is included
+  CH_TIME("EBHelmholtzRobinEBBC::EBHelmholtzRobinEBBC()");
+
+  m_order       = -1;
+  m_weight      = -1;
   
   m_useConstant = false;
   m_useFunction = false;
 }
 
-EBHelmholtzRobinEBBC::EBHelmholtzRobinEBBC(const Real a_A, const Real a_B, const Real a_C) : EBHelmholtzRobinEBBC() {
+EBHelmholtzRobinEBBC::EBHelmholtzRobinEBBC(const int  a_order,
+					   const int  a_weight,
+					   const Real a_A,
+					   const Real a_B,
+					   const Real a_C) : EBHelmholtzRobinEBBC() {
+  CH_TIME("EBHelmholtzRobinEBBC::EBHelmholtzRobinEBBC(int, int, Real, Real, Real)");
+
+  CH_assert(a_order  >  0);
+  CH_assert(a_weight >= 0);
+  
+  this->setOrder(a_order);
+  this->setWeight(a_weight);  
   this->setCoefficients(a_A, a_B, a_C);
 }
 
-
-EBHelmholtzRobinEBBC::EBHelmholtzRobinEBBC(const std::function<Real(const RealVect& a_pos) >& a_A,
+EBHelmholtzRobinEBBC::EBHelmholtzRobinEBBC(const int                                          a_order,
+					   const int                                          a_weight,
+					   const std::function<Real(const RealVect& a_pos) >& a_A,
 					   const std::function<Real(const RealVect& a_pos) >& a_B,
 					   const std::function<Real(const RealVect& a_pos) >& a_C) : EBHelmholtzRobinEBBC() {
+  CH_TIME("EBHelmholtzRobinEBBC::setOrder(int, int, 3xstd::function<Real(RealVect)>)");
+
+  CH_assert(a_order  >  0);
+  CH_assert(a_weight >= 0);
+  
+  this->setOrder(a_order);
+  this->setWeight(a_weight);    
   this->setCoefficients(a_A, a_B, a_C);
 }
 
 EBHelmholtzRobinEBBC::~EBHelmholtzRobinEBBC(){
+  CH_TIME("EBHelmholtzRobinEBBC::~EBHelmholtzRobinEBBC()");
+}
 
+void EBHelmholtzRobinEBBC::setOrder(const int a_order){
+  CH_TIME("EBHelmholtzRobinEBBC::setOrder(int)");
+
+  CH_assert(a_order > 0);
+  
+  m_order = a_order;
+}
+
+void EBHelmholtzRobinEBBC::setWeight(const int a_weight){
+  CH_TIME("EBHelmholtzRobinEBBC::setWeight(int)");
+
+  CH_assert(a_weight > 0);
+  
+  m_weight = a_weight;
 }
   
 void EBHelmholtzRobinEBBC::setCoefficients(const Real a_A, const Real a_B, const Real a_C){
+  CH_TIME("EBHelmholtzRobinEBBC::setCoefficients(Real, Real, Real)");
+  
   m_constantA = a_A;
   m_constantB = a_B;
   m_constantC = a_C;
@@ -54,6 +92,8 @@ void EBHelmholtzRobinEBBC::setCoefficients(const Real a_A, const Real a_B, const
 void EBHelmholtzRobinEBBC::setCoefficients(const std::function<Real(const RealVect& a_pos) >& a_A,
 					   const std::function<Real(const RealVect& a_pos) >& a_B,
 					   const std::function<Real(const RealVect& a_pos) >& a_C){
+  CH_TIME("EBHelmholtzRobinEBBC::setCoefficients(3xstd::function<Real(RealVect)>)");
+  
   m_functionA = a_A;
   m_functionB = a_B;
   m_functionC = a_C;
@@ -62,52 +102,17 @@ void EBHelmholtzRobinEBBC::setCoefficients(const std::function<Real(const RealVe
   m_useFunction = true;
 }
 
-VoFStencil EBHelmholtzRobinEBBC::getInterpolationStencil(const VolIndex& a_vof, const DataIndex& a_dit) const {
-  VoFStencil stencil;
-
-  // First, try direct interpolation using least squares. Then, try Chombo taylor extrapolation. 
-  // I don't think it should be necessary to check if the stencils reach across the CF interface because
-  // EBHelmholtzOp always interpolates at least one ghost cell, and these stencils should really have a width of 1. 
-  if(stencil.size() == 0) stencil = this->getMonoPathStencil(a_vof, a_dit);
-  if(stencil.size() == 0) stencil = this->getTaylorStencil  (a_vof, a_dit);
-  
-  return stencil;
-}
-
-VoFStencil EBHelmholtzRobinEBBC::getMonoPathStencil(const VolIndex& a_vof, const DataIndex& a_dit) const {
-  const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
-
-  const bool useStartVof = true;
-
-  const VoFStencil stencil = LeastSquares::getInterpolationStencil(Location::Cell::Boundary,
-								   m_dataLocation,
-								   LeastSquares::Connectivity::MonotonePath,
-								   a_vof,
-								   ebisbox,
-								   m_dx,
-								   m_weight,
-								   m_radius,
-								   m_order,
-								   useStartVof);
-
-
-  return stencil;
-}
-
-VoFStencil EBHelmholtzRobinEBBC::getTaylorStencil(const VolIndex& a_vof, const DataIndex& a_dit) const {
-  VoFStencil stencil;
-  
-  const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
-  const RealVect dist    = ebisbox.bndryCentroid(a_vof)*m_dx;
-  IntVectSet ivs = IntVectSet();
-
-  EBArith::getFirstOrderExtrapolationStencil(stencil, dist, m_dx*RealVect::Unit, a_vof, ebisbox, -1, &ivs, m_comp);
-
-  return stencil;
-}
-
 void EBHelmholtzRobinEBBC::define() {
-  if(!(m_useConstant || m_useFunction)) MayDay::Error("EBHelmholtzRobinEBBC::define - not using constant or function!");
+  CH_TIME("EBHelmholtzRobinEBBC::define()");
+
+  CH_assert(m_order  >  0);
+  CH_assert(m_weight >= 0);
+  CH_assert(m_useConstant || m_useFunction);
+
+  // Also issue a run-time error because these errors will break everything. 
+  if(!(m_useConstant || m_useFunction)) {
+    MayDay::Error("EBHelmholtzRobinEBBC::define() - not using constant or function!");
+  }
 
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
 
@@ -128,27 +133,62 @@ void EBHelmholtzRobinEBBC::define() {
       const Real areaFrac = ebisbox.bndryArea(vof);
       const Real helmBco  = (*m_Bcoef)[dit()](vof, m_comp);
 
-      stencils(vof, m_comp) = this->getInterpolationStencil(vof, dit());
+      VoFStencil& fluxStencil = stencils(vof, m_comp);
 
-      Real A;
-      Real B;
-      if(m_useConstant){
-	A = m_constantA;
-	B = m_constantB;
-      }
-      else if(m_useFunction){
-	const RealVect pos = this->getBoundaryPosition(vof, dit());
-	A = m_functionA(pos);
-	B = m_functionB(pos);
+      int order;
+      bool foundStencil = false;
+
+      // Try to find a stencil which uses quadrant-based interpolation, using only the vofs
+      // that fall within the quadrant that the cut-cell normal points into. 
+      order = m_order;
+      while(!foundStencil && order > 0){
+	fluxStencil = this->getInterpolationStencil(vof, dit(), VofUtils::Neighborhood::Quadrant, order);
+	order --;
+
+	// Check that the stencil doesn't reach into ghost cells it shouldn't!
+	if(foundStencil){
+	  foundStencil = this->isStencilValidCF(fluxStencil, dit());
+	}
       }
 
-      // The normal derivative is dphi/dn = (A*phi - C)/B and the (stencil) flux is
-      // kappaDivF = area*b*dphidn/Delta x. Scale accordingly.
-      if(std::abs(B) > 0.0){
-	stencils(vof, m_comp) *= A*areaFrac*helmBco/(B*m_dx);
+      // If the above failed we try a larger neighborhood
+      order = m_order;
+      while(!foundStencil && order > 0){
+	fluxStencil = this->getInterpolationStencil(vof, dit(), VofUtils::Neighborhood::Radius, order);
+	order --;
+
+	// Check that the stencil doesn't reach into ghost cells it shouldn't!
+	if(foundStencil){
+	  foundStencil = this->isStencilValidCF(fluxStencil, dit());
+	}
+      }      
+
+      // The above stencil is a stencil for interpolating to the cut-cell centroid. We must have the stencil in flux form, using
+      // the expression A*phi + B*dphi/dn = C. Set Robin BC constants and scale stencil accordingly.
+      if(foundStencil){
+	Real A;
+	Real B;
+	if(m_useConstant){
+	  A = m_constantA;
+	  B = m_constantB;
+	}
+	else if(m_useFunction){
+	  const RealVect pos = this->getBoundaryPosition(vof, dit());
+	  A = m_functionA(pos);
+	  B = m_functionB(pos);
+	}
+
+	// The normal derivative is dphi/dn = (A*phi - C)/B and the (stencil) flux is
+	// kappaDivF = area*b*dphidn/Delta x. Scale accordingly.
+	if(std::abs(B) > 0.0){
+	  fluxStencil *= A*areaFrac*helmBco/(B*m_dx);
+	}
+	else{
+	  fluxStencil.clear();
+	}
       }
-      else{
-	stencils(vof, m_comp).clear();
+      else{ // Dead cell
+	fluxStencil.clear();
       }
     }
   }
@@ -160,13 +200,15 @@ void EBHelmholtzRobinEBBC::applyEBFlux(VoFIterator&       a_vofit,
 				       const DataIndex&   a_dit,
 				       const Real&        a_beta,
 				       const bool&        a_homogeneousPhysBC) const {
+  CH_TIME("EBHelmholtzRobinEBBC::applyEBFlux(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
 
+  CH_assert(m_useFunction || m_useConstant);
+  
   // Recall that the "flux" is kappaDivF = area*dphi/dn/DeltaX where dphi/dn = (A*phi - C)/B. We already have the phi
   // term in the stencil so only need to add -C/B.
   if(!a_homogeneousPhysBC){  
     for (a_vofit.reset(); a_vofit.ok(); ++a_vofit){
       const VolIndex& vof = a_vofit();
-    
 
       Real B;
       Real C;
@@ -190,6 +232,49 @@ void EBHelmholtzRobinEBBC::applyEBFlux(VoFIterator&       a_vofit,
       }
     }
   }
+}
+
+VoFStencil EBHelmholtzRobinEBBC::getInterpolationStencil(const VolIndex& a_vof, const DataIndex& a_dit, const VofUtils::Neighborhood a_neighborhood, const int a_order) const {
+  CH_TIME("EBHelmholtzRobinEBBC::getInterpolationStencil(VolIndex, DataIndex, VofUtils::Neighborhood, int)");
+
+  CH_assert(a_order > 0);
+
+  // TLDR: This routine will compute a stencil for interpolating the mesh data to the embedded boundary centroid using least squares reconstruction
+  //       of the solution. The user will input the desired neighborhood and order of that interpolation. By default, the radius of the stencil is
+  //       the same as the order.
+  
+  const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];  
+  const bool useStartVof = !(m_weight > 0); // If we use unweighted least squares we can, in fact, include the cut-cell itself in the interpolation. 
+  const int radius       = a_order;
+
+  // Get the vofs around the cut-cell. Note that if m_weight = 0 we enable the cut-cell itself in the interpolation. 
+  Vector<VolIndex> vofs;  
+  switch(a_neighborhood){
+  case VofUtils::Neighborhood::Quadrant:
+    vofs = VofUtils::getVofsInQuadrant(a_vof, ebisbox, ebisbox.normal(a_vof), radius, VofUtils::Connectivity::MonotonePath, useStartVof);
+    break;
+  case VofUtils::Neighborhood::Radius:
+    vofs = VofUtils::getVofsInRadius(a_vof, ebisbox, radius, VofUtils::Connectivity::MonotonePath, useStartVof);
+    break;
+  default:
+    MayDay::Error("EBHelmholtzRobinEBBC::getInterpolationStencil(VolIndex, DataIndex, VofUtils::Neighborhood) -- logic bust");
+  }
+
+  // Build displacements vector, i.e. distances from cell centers/centroids to the cut-cell EB centroid. 
+  const Vector<RealVect> displacements = LeastSquares::getDisplacements(Location::Cell::Boundary, m_dataLocation, a_vof, vofs, ebisbox, m_dx);
+
+  // M = Number of unknowns in Taylor expansion of order a_order.
+  // K = Number of equations (displacements)
+  const int M = LeastSquares::getTaylorExpansionSize(a_order);
+  const int K = displacements.size();
+
+  // If we have enough equations we can get an interpolation stencil. 
+  VoFStencil interpStencil;
+  if(K > M){
+    interpStencil = LeastSquares::computeInterpolationStencil(vofs, displacements, m_weight, a_order);
+  }
+
+  return interpStencil;
 }
 
 #include <CD_NamespaceFooter.H>

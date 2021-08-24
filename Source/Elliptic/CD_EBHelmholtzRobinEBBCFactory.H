@@ -35,26 +35,48 @@ public:
 
   /*!
     @brief Full constructor which sets constant coefficients
-    @param[in] a_A A-coefficient
-    @param[in] a_B B-coefficient
-    @param[in] a_C C-coefficient
+    @param[in] a_order  Stencil order. Must be > 0
+    @param[in] a_weight Equation weights. Must be >=0
+    @param[in] a_A      Robin A-coefficient
+    @param[in] a_B      Robin B-coefficient
+    @param[in] a_C      Robin C-coefficient
   */
-  EBHelmholtzRobinEBBCFactory(const Real a_A, const Real a_B, const Real a_C);
+  EBHelmholtzRobinEBBCFactory(const int  a_order,
+			      const int  a_weight,
+			      const Real a_A,
+			      const Real a_B,
+			      const Real a_C);
 
   /*!
     @brief Full constructor which sets variable coefficients
-    @param[in] a_A A-coefficient
-    @param[in] a_B B-coefficient
-    @param[in] a_C C-coefficient
+    @param[in] a_order  Stencil order. Must be > 0
+    @param[in] a_weight Equation weights. Must be >=0
+    @param[in] a_A      Robin A-coefficient
+    @param[in] a_B      Robin B-coefficient
+    @param[in] a_C      Robin C-coefficient
   */
-  EBHelmholtzRobinEBBCFactory(const std::function<Real(const RealVect& a_pos) >& a_A,
+  EBHelmholtzRobinEBBCFactory(const int                                          a_order,
+			      const int                                          a_weight,
+			      const std::function<Real(const RealVect& a_pos) >& a_A,
 			      const std::function<Real(const RealVect& a_pos) >& a_B,
 			      const std::function<Real(const RealVect& a_pos) >& a_C);
 
   /*!
-    @brief Destructor
+    @brief Destructor (does nothing). 
   */
   ~EBHelmholtzRobinEBBCFactory();
+
+  /*!
+    @brief Set BC order
+    @param[in] a_order Order
+  */
+  void setOrder(const int a_order);
+
+  /*!
+    @brief Set equation weights for least squares reconstruction. 
+    @param[in] a_weight Weights
+  */
+  void setWeight(const int a_weight);  
 
   /*!
     @brief Set constant coefficients
@@ -75,7 +97,8 @@ public:
 		       const std::function<Real(const RealVect& a_pos) >& a_C);
 
   /*!
-    @brief Factory method
+    @brief Factory method. 
+    @return An EBHelmholtzRobinEBBC object with specified order and coefficients. 
   */
   RefCountedPtr<EBHelmholtzEBBC> create() override;
 
@@ -90,6 +113,16 @@ protected:
     @brief Use function for BC value
   */
   bool m_useFunction;
+
+  /*!
+    @brief (Attempted) stencil order
+  */
+  int m_order;
+
+  /*!
+    @brief Weight for least squares gradient reconstruction. 
+  */
+  int m_weight;  
 
   /*!
     @brief Constant A-coefficient

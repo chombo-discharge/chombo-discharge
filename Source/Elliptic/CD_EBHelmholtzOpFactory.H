@@ -41,6 +41,7 @@
 class EBHelmholtzOpFactory : public AMRLevelOpFactory<LevelData<EBCellFAB> > {
 public:
 
+  // Various alias for cutting down on typing. 
   using Smoother        = EBHelmholtzOp::Smoother;
 
   using AmrLevelGrids    = Vector<RefCountedPtr<EBLevelGrid> >;
@@ -157,58 +158,150 @@ public:
 
 protected:
 
-  // Data location
+  /*!
+    @brief Component number that is solved for
+  */
+  static constexpr int m_comp = 0;
+
+  /*!
+    @brief Number of components that we solve for
+  */
+  static constexpr int m_nComp = 1;  
+
+  /*!
+    @brief Data location
+  */
   Location::Cell m_dataLocation;
 
-  // Relaxation method
+  /*!
+    @brief Smoother
+  */
   Smoother m_smoother;
 
-  // Number of AMR levels
+  /*!
+    @brief Number of AMR levels
+  */
   int m_numAmrLevels;
 
-  // Ghost cells
+  /*!
+    @brief Number of ghost cells that are used. Need because of Chombo prolongation objects. 
+  */
   IntVect m_ghostPhi;
+
+  /*!
+    @brief Number of ghost cells that are used. Need because of Chombo prolongation objects. 
+  */  
   IntVect m_ghostRhs;
 
-  // Alpha, beta. 
+  /*!
+    @brief Operator alpha
+  */
   Real m_alpha;
+
+  /*!
+    @brief Operator beta
+  */  
   Real m_beta;
 
-  // Lower-left corner of domain
+  /*!
+    @brief Lower-left corner of computational domain
+  */
   RealVect m_probLo;
 
-  // Things that pertain to AMR levels. The first entry corresponds to the coarsest AMR level. 
+  // Things that pertain to AMR levels. The first entry corresponds to the coarsest AMR level.
+  /*!
+    @brief AMR grids
+  */
   AmrLevelGrids    m_amrLevelGrids;
+
+  /*!
+    @brief Ghost cell interpolations
+  */  
   AmrInterpolators m_amrInterpolators;
+
+  /*!
+    @brief Flux registers
+  */    
   AmrFluxRegisters m_amrFluxRegisters;
+
+  /*!
+    @brief Data coarseners
+  */      
   AmrCoarseners    m_amrCoarseners;
+
+  /*!
+    @brief Refinement ratios
+  */        
   AmrRefRatios     m_amrRefRatios;
+
+  /*!
+    @brief Resolutions one each level
+  */          
   AmrResolutions   m_amrResolutions;
 
+  /*!
+    @brief Helmholtz A-coefficient
+  */            
   AmrCellData      m_amrAcoef;
+
+  /*!
+    @brief Helmholtz B-coefficient
+  */              
   AmrFluxData      m_amrBcoef;
+
+  /*!
+    @brief Helmholtz B-coefficient (on EB faces. 
+  */                
   AmrIrreData      m_amrBcoefIrreg;
 
-  // BC factories
+  /*!
+    @brief Domain BC factory
+  */                
   DomainBCFactory m_domainBcFactory;
+
+  /*!
+    @brief EB BC factory. 
+  */                  
   EBBCFactory     m_ebBcFactory;
 
-  // Bottom drop domain
+  /*!
+    @brief Bottom domain, i.e. the coarsest domain which will be used in multigrid
+  */
   ProblemDomain m_bottomDomain;
 
-  // Blocking factor for when we create intermediate and deep multigrid levels
+  /*!
+    @brief Blocking factor for when we create intermediate and deep multigrid levels
+  */
   int m_mgBlockingFactor;
 
-  // This is for using pre-defined grids for the deeper multigrid levels, i.e. for the levels that are coarsenings of m_amrLevelGrids[0]
+  /*!
+    @brief This is for using pre-defined grids for the deeper multigrid levels, i.e. for the levels that are coarsenings of m_amrLevelGrids[0]
+  */
   AmrLevelGrids    m_deeperLevelGrids;
 
-  // For checking if an AMR levels has multigrid levels
+  /*!
+    @brief For checking if an AMR level has multigrid levels
+  */
   std::vector<bool>  m_hasMgLevels;
 
-  // MG operator things. Always weird to write this but e.g. m_mgLevelGrids[0] corresponds to the the multigrid levels below amr level 0. 
+  /*!
+    @brief Deeper grids. Always weird to write this but e.g. m_mgLevelGrids[0] corresponds to the the multigrid levels below amr level 0. 
+  */
   Vector<AmrLevelGrids> m_mgLevelGrids;
+
+  /*!
+    @brief A-coefficient on deeper grids. Always weird to write this but e.g. m_mgLevelGrids[0] corresponds to the the multigrid levels below amr level 0. 
+  */  
   Vector<AmrCellData>   m_mgAcoef;
+
+  /*!
+    @brief B-coefficient on deeper grids. Always weird to write this but e.g. m_mgLevelGrids[0] corresponds to the the multigrid levels below amr level 0. 
+  */    
   Vector<AmrFluxData>   m_mgBcoef;
+
+  /*!
+    @brief B-coefficient on deeper grids. Always weird to write this but e.g. m_mgLevelGrids[0] corresponds to the the multigrid levels below amr level 0. 
+  */      
   Vector<AmrIrreData>   m_mgBcoefIrreg;
 
   /*!

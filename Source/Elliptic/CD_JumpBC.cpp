@@ -28,6 +28,10 @@ JumpBC::JumpBC(const Location::Cell a_dataLocation,
 	       const int            a_ghostCF){
   CH_TIME("JumpBC::JumpBC");
 
+  CH_assert(a_order   >  0);
+  CH_assert(a_weight  >= 0);
+  CH_assert(a_ghostCF >  0);
+  
   m_dataLocation = a_dataLocation;
   m_mflg         = a_mflg;
   m_Bcoef        = a_Bcoef;
@@ -38,13 +42,13 @@ JumpBC::JumpBC(const Location::Cell a_dataLocation,
   m_ghostCF      = a_ghostCF;
   m_numPhases    = m_mflg.numPhases();
   m_multiPhase   = m_numPhases > 1;
-
+	    
   this->defineIterators();
   this->defineStencils();
 }
 
 JumpBC::~JumpBC(){
-
+  CH_TIME("JumpBC::~JumpBC()");
 }
 
 int JumpBC::getOrder() const {
@@ -72,6 +76,14 @@ VoFIterator& JumpBC::getMultiPhaseVofs(const int a_phase, const DataIndex& a_dit
 }
 
 void JumpBC::defineStencils(){
+  CH_TIME("JumpBC::defineStencils()");
+  
+  CH_assert(m_order  >  0);
+  CH_assert(m_weight >= 0);
+
+  // TLDR: This routine computes the stencils for approximating dphi/dn on each side of the boundary. If we have multi-valued cells we use an average formulation. These
+  //       stencils can later be used to compute the bounadry value on the interface.
+  
   if(m_multiPhase) { // JumpBC internals should never be called unless it's a multiphase problem.
     const DisjointBoxLayout& dbl = m_mflg.getGrids();
 
@@ -217,6 +229,8 @@ void JumpBC::defineStencils(){
 }
 
 void JumpBC::defineIterators(){
+  CH_TIME("JumpBC::defineIterators()");
+  
   // TLDR: This function defines iterators for iterating over regular cut-cells and over multi-fluid cut-cells. The iterators
   //       must exist for both single-phase and multi-phase vofs. This is true even if we're not actually solving a multiphase
   //       problem because the boundary conditions classes will still need the iterators.
@@ -266,6 +280,11 @@ bool JumpBC::getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFStencil>& a_s
 						const EBISBox&               a_ebisbox,
 						const VofUtils::Neighborhood a_neighborhood,
 						const int                    a_order) const {
+  CH_TIME("JumpBC::getLeastSquarseBoundaryGradStencil(...)");
+
+  // TLDR: This routine computes a stencil for approximating dphi/dn using least squares gradient reconstruction on the EB centroid. We assume that the value
+  //       is a "known term" in the expansion. 
+  
   bool foundStencil = false;
   const bool addStartVof  = false;
   
@@ -295,6 +314,8 @@ bool JumpBC::getLeastSquaresBoundaryGradStencil(std::pair<Real, VoFStencil>& a_s
 }
 
 void JumpBC::resetBC() const {
+  CH_TIME("JumpBC::resetBC()");
+  
   for (DataIterator dit = m_boundaryPhi.dataIterator(); dit.ok(); ++dit){
     for (int iphase = 0; iphase < m_numPhases; iphase++){
       BaseIVFAB<Real>& bndryPhi = m_boundaryPhi[dit()].getIVFAB(iphase);
@@ -306,6 +327,8 @@ void JumpBC::resetBC() const {
 void JumpBC::matchBC(const LevelData<MFCellFAB>&        a_phi,
 		     const LevelData<BaseIVFAB<Real> >& a_jump,
 		     const bool                         a_homogeneousPhysBC) const {
+  CH_TIME("JumpBC::matchBC(LD<MFCellFAB>, LD<BaseIVFAB<Real>, bool)");
+  
   if(m_multiPhase){
     for (DataIterator dit = a_phi.dataIterator(); dit.ok(); ++dit){
       this->matchBC(a_phi[dit()], a_jump[dit()], a_homogeneousPhysBC, dit());

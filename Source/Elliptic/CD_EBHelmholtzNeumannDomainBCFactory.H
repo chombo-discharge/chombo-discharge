@@ -57,7 +57,7 @@ public:
     @param[in] a_DphiDn Value of dphi/dn. 
     @note A positive values gives a flux INTO the domain. 
   */
-  void setDphiDn(const int a_DphiDn);
+  void setDphiDn(const Real a_DphiDn);
 
   /*!
     @brief Set spatially dependent value of dphi/dn on the EB. 
@@ -71,7 +71,7 @@ public:
     @param[in] a_BxDphiDn Value of B*dphi/dn. 
     @note A positive values gives a flux INTO the domain. 
   */
-  void setBxDphiDn(const int a_BxDphiDn);
+  void setBxDphiDn(const Real a_BxDphiDn);
 
   /*!
     @brief Set the spatially dependent value of B*dphi/dn on the EB.

@@ -11,6 +11,7 @@
 
 // Chombo includes
 #include <EBArith.H>
+#include <CH_Timer.H>
 
 // Our includes
 #include <CD_EBHelmholtzOpF_F.H>
@@ -18,23 +19,31 @@
 #include <CD_NamespaceHeader.H>
 
 EBHelmholtzDirichletDomainBC::EBHelmholtzDirichletDomainBC(){
+  CH_TIME("EBHelmholtzDirichletDomainBC::EBHelmholtzDirichletDomainBC()");
+  
   m_useConstant = false;
   m_useFunction = false;
 }
 
 EBHelmholtzDirichletDomainBC::EBHelmholtzDirichletDomainBC(const Real a_value){
+  CH_TIME("EBHelmholtzDirichletDomainBC::EBHelmholtzDirichletDomainBC(Real)");
+  
   this->setValue(a_value);
 }
 
 EBHelmholtzDirichletDomainBC::EBHelmholtzDirichletDomainBC(const std::function<Real(const RealVect& a_pos)>& a_value){
+  CH_TIME("EBHelmholtzDirichletDomainBC::EBHelmholtzDirichletDomainBC(std::function<(const RealVect a_pos)>)");
+  
   this->setValue(a_value);
 }
 
 EBHelmholtzDirichletDomainBC::~EBHelmholtzDirichletDomainBC(){
-
+  CH_TIME("EBHelmholtzDirichletDomainBC::~EBHelmholtzDirichletDomainBC()");
 }
 
 void EBHelmholtzDirichletDomainBC::setValue(const Real a_value){
+  CH_TIME("EBHelmholtzDirichletDomainBC::setValue(Real)");
+  
   m_useConstant = true;
   m_useFunction = false;
   
@@ -42,6 +51,8 @@ void EBHelmholtzDirichletDomainBC::setValue(const Real a_value){
 }
 
 void EBHelmholtzDirichletDomainBC::setValue(const std::function<Real(const RealVect& a_pos)>& a_value){
+  CH_TIME("EBHelmholtzDirichletDomainBC::setValue(std::function<Real(const RealVect)>)");
+  
   m_useConstant = false;
   m_useFunction = true;
   
@@ -54,7 +65,11 @@ void EBHelmholtzDirichletDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
 					       const Side::LoHiSide& a_side,
 					       const DataIndex&      a_dit,
 					       const bool            a_useHomogeneous) const {
-  const Box cellbox        = a_faceFlux.box();
+  CH_TIME("EBHelmholtzDirichletDomainBC::getFaceFlux(BaseFab<Real>, BaseFab<Real>, int, Side::LoHiSide, DataIndex, bool)");
+
+  CH_assert(m_useConstant || m_useFunction);
+  
+  const Box cellBox        = a_faceFlux.box();
   const BaseFab<Real>& Bco = (*m_Bcoef)[a_dit][a_dir].getSingleValuedFAB();
   const int isign          = (a_side == Side::Lo) ? -1 : 1;
 
@@ -68,7 +83,7 @@ void EBHelmholtzDirichletDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
 				CHF_CONST_REAL(m_dx),				  
 				CHF_CONST_INT(a_dir),
 				CHF_CONST_INT(isign),
-				CHF_BOX(cellbox));
+				CHF_BOX(cellBox));
   }
   else{
     if(m_useConstant){
@@ -80,11 +95,11 @@ void EBHelmholtzDirichletDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
 				  CHF_CONST_REAL(m_dx),				    
 				  CHF_CONST_INT(a_dir),
 				  CHF_CONST_INT(isign),
-				  CHF_BOX(cellbox));
+				  CHF_BOX(cellBox));
     }
     else if(m_useFunction){
       const Real ihdx = 2.0/m_dx;
-      for (BoxIterator bit(cellbox); bit.ok(); ++bit){
+      for (BoxIterator bit(cellBox); bit.ok(); ++bit){
 	const IntVect iv = bit();
 
 	const RealVect pos = this->getBoundaryPosition(iv, a_dir, a_side);
@@ -94,7 +109,7 @@ void EBHelmholtzDirichletDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
       }
     }
     else{
-      MayDay::Abort("EBHelmholtzDirichletDomainBC::getFaceFlux -- logic bust");
+      MayDay::Error("EBHelmholtzDirichletDomainBC::getFaceFlux -- logic bust");
     }
   }
 
@@ -103,7 +118,7 @@ void EBHelmholtzDirichletDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
 			      CHF_CONST_FRA1(Bco, m_comp),
 			      CHF_CONST_INT(a_dir),
 			      CHF_CONST_INT(isign),
-			      CHF_BOX(cellbox));      
+			      CHF_BOX(cellBox));      
 }
 
 Real EBHelmholtzDirichletDomainBC::getFaceFlux(const VolIndex&       a_vof,
@@ -112,7 +127,10 @@ Real EBHelmholtzDirichletDomainBC::getFaceFlux(const VolIndex&       a_vof,
 					       const Side::LoHiSide& a_side,
 					       const DataIndex&      a_dit,
 					       const bool            a_useHomogeneous) const {
-
+  CH_TIME("EBHelmholtzDirichletDomainBC::getFaceFlux(VolIndex, EBCellFAB, int, Side::LoHiSide, DataIndex, bool)");
+  
+  CH_assert(m_useConstant || m_useFunction);
+  
   const int isign             = (a_side == Side::Lo) ? -1 : 1;
   const Real ihdx             = 2.0/m_dx;
   const IntVect iv            = a_vof.gridIndex();
@@ -148,7 +166,7 @@ Real EBHelmholtzDirichletDomainBC::getFaceFlux(const VolIndex&       a_vof,
 	    value = m_functionValue(this->getBoundaryPosition(curIV, a_dir, a_side));
 	  }
 	  else{
-	    MayDay::Abort("EBHelmholtzDirichletDomainBC::getFaceFlux - logic bust");
+	    MayDay::Error("EBHelmholtzDirichletDomainBC::getFaceFlux - logic bust");
 	  }
 	}
 

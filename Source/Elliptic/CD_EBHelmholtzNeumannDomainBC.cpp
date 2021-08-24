@@ -11,6 +11,7 @@
 
 // Chombo includes
 #include <EBArith.H>
+#include <CH_Timer.H>
 
 // Our includes
 #include <CD_EBHelmholtzOpF_F.H>
@@ -18,25 +19,35 @@
 #include <CD_NamespaceHeader.H>
 
 EBHelmholtzNeumannDomainBC::EBHelmholtzNeumannDomainBC(){
+  CH_TIME("EBHelmholtzNeumannDomainBC::EBHelmholtzNeumannDomainBC()");
+  
   m_multByBco   = true;
+  
   m_useConstant = false;
   m_useFunction = false;
 }
 
 EBHelmholtzNeumannDomainBC::EBHelmholtzNeumannDomainBC(const Real a_DphiDn){
+  CH_TIME("EBHelmholtzNeumannDomainBC::EBHelmholtzNeumannDomainBC(Real)");
+  
   this->setDphiDn(a_DphiDn);
 }
 
 EBHelmholtzNeumannDomainBC::EBHelmholtzNeumannDomainBC(const std::function<Real(const RealVect& a_pos)>& a_DphiDn){
+  CH_TIME("EBHelmholtzNeumannDomainBC::EBHelmholtzNeumannDomainBC(std::function<Real(RealVect)>)");
+  
   this->setDphiDn(a_DphiDn);
 }
 
 EBHelmholtzNeumannDomainBC::~EBHelmholtzNeumannDomainBC(){
-
+  CH_TIME("EBHelmholtzNeumannDomainBC::~EBHelmholtzNeumannDomainBC()");
 }
 
-void EBHelmholtzNeumannDomainBC::setDphiDn(const int a_DphiDn){
-  m_multByBco   = false;
+void EBHelmholtzNeumannDomainBC::setDphiDn(const Real a_DphiDn){
+  CH_TIME("EBHelmholtzNeumannDomainBC::setDphiDn(Real)");
+  
+  m_multByBco   = true;
+  
   m_useConstant = true;
   m_useFunction = false;
   
@@ -44,20 +55,29 @@ void EBHelmholtzNeumannDomainBC::setDphiDn(const int a_DphiDn){
 }
 
 void EBHelmholtzNeumannDomainBC::setDphiDn(const std::function<Real(const RealVect& a_pos)>& a_DphiDn){
-  m_multByBco   = false;
+  CH_TIME("EBHelmholtzNeumannDomainBC::setDphiDn(std::function<Real(RealVect)>)");
+  
+  m_multByBco   = true;
+  
   m_useConstant = false;
   m_useFunction = true;
   
   m_functionDphiDn = a_DphiDn;
 }
 
-void EBHelmholtzNeumannDomainBC::setBxDphiDn(const int a_BxDphiDn){
+void EBHelmholtzNeumannDomainBC::setBxDphiDn(const Real a_BxDphiDn){
+  CH_TIME("EBHelmholtzNeumannDomainBC::setBxDphiDn(Real)");
+  
   this->setDphiDn(a_BxDphiDn);
+  
   m_multByBco = false;
 }
 
 void EBHelmholtzNeumannDomainBC::setBxDphiDn(const std::function<Real(const RealVect& a_pos)>& a_BxDphiDn){
+  CH_TIME("EBHelmholtzNeumannDomainBC::setBxDphiDn(std::function<Real(RealVect)>)");
+  
   this->setDphiDn(a_BxDphiDn);
+  
   m_multByBco = false;
 }
 
@@ -67,7 +87,8 @@ void EBHelmholtzNeumannDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
 					     const Side::LoHiSide& a_side,
 					     const DataIndex&      a_dit,
 					     const bool            a_useHomogeneous) const {
-
+  CH_TIME("EBHelmholtzNeumannDomainBC::getFaceFlux(BaseFab<Real>, BaseFab<Real>, int, DataIndex, bool)");
+  
   const Box cellbox        = a_faceFlux.box();
   const BaseFab<Real>& Bco = (*m_Bcoef)[a_dit][a_dir].getSingleValuedFAB();
   const int isign          = (a_side == Side::Lo) ? -1 : 1;
@@ -109,13 +130,14 @@ Real EBHelmholtzNeumannDomainBC::getFaceFlux(const VolIndex&       a_vof,
 					     const Side::LoHiSide& a_side,
 					     const DataIndex&      a_dit,
 					     const bool            a_useHomogeneous) const {
-  Real centroidFlux;
+  CH_TIME("EBHelmholtzNeumannDomainBC::getFaceFlux(VolIndex, EBCellFAB, int, Side::LoHiSide, DataIndex, bool)");
+  
+  Real centroidFlux = 0.0;
 
   if(a_useHomogeneous){
     centroidFlux = 0.0;
   }
   else{
-
     const int isign             = (a_side == Side::Lo) ? -1 : 1;
     const Real ihdx             = 2.0/m_dx;
     const IntVect iv            = a_vof.gridIndex();
@@ -153,10 +175,11 @@ Real EBHelmholtzNeumannDomainBC::getFaceFlux(const VolIndex&       a_vof,
 	centroidFlux *= -isign * area * Bco;
       }
       else{
-	MayDay::Error("EBHelmholtzNeumannDomainBC -- boundary face is multivalued and EBHelmholtzNeumannDomainBC does not supportd that (yet)");
+	// If this triggers then the cell edge has multiple phases. It should be possible to handle this somehow. 
+	MayDay::Error("EBHelmholtzNeumannDomainBC -- boundary face is multivalued and EBHelmholtzNeumannDomainBC does not support that (yet)");
       }
     }
-  }    
+  }
 
   return centroidFlux;
 }

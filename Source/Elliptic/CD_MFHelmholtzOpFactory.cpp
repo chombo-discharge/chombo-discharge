@@ -13,6 +13,7 @@
 #include <ParmParse.H>
 #include <BRMeshRefine.H>
 #include <LoadBalance.H>
+#include <CH_Timer.H>
 
 // Our includes
 #include <CD_MFHelmholtzOpFactory.H>
@@ -49,6 +50,8 @@ MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&             a_mfis,
 					   const int&              a_jumpWeight,
 					   const int&              a_blockingFactor,
 					   const AmrLevelGrids&    a_deeperLevelGrids){
+  CH_TIME("MFHelmholtzOpFactory::MFHelmholtzOpFactory()");
+  
   m_mfis         = a_mfis;
   m_dataLocation = a_dataLocation;
   
@@ -97,10 +100,15 @@ MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&             a_mfis,
 }
 
 MFHelmholtzOpFactory::~MFHelmholtzOpFactory(){
-
+  CH_TIME("MFHelmholtzOpFactory::~MFHelmholtzOpFactory()");
 }
 
 void MFHelmholtzOpFactory::setJump(const EBAMRIVData& a_sigma, const Real& a_scale){
+  CH_TIME("MFHelmholtzOpFactory::setJump(EBAMRIVData, Real)");
+
+  // TLDR: This routine sets the jump coefficient on each level. Data on deeper levels
+  //       are coarsened from finer ones.
+  
   const Interval interv(m_comp, m_comp);
   
   for (int lvl = 0; lvl < m_numAmrLevels; lvl++){
@@ -141,6 +149,9 @@ void MFHelmholtzOpFactory::setJump(const EBAMRIVData& a_sigma, const Real& a_sca
 }
 
 void MFHelmholtzOpFactory::setJump(const Real& a_sigma, const Real& a_scale){
+  CH_TIME("MFHelmholtzOpFactory::setJump(Real, Real)");
+
+  // TLDR: This setse the jump coefficient on each level. 
   DataOps::setValue(m_amrJump, a_sigma*a_scale);
   
   for (int i = 0; i < m_mgJump.size(); i++){
@@ -149,6 +160,8 @@ void MFHelmholtzOpFactory::setJump(const Real& a_sigma, const Real& a_scale){
 }
 
 void MFHelmholtzOpFactory::defineJump(){
+  CH_TIME("MFHelmholtzOpFactory::defineJump()");
+  
   // TLDR: This defines m_amrJump on the first phase (gas phase). This is irregular data intended to be interfaced into the 
   //       boundary condition class. When we match the BC we get the data from here (the gas phase). Note that we define
   //       m_amrJump on all irregular cells, but the operators will do matching on a subset of them. 
@@ -174,6 +187,12 @@ void MFHelmholtzOpFactory::defineJump(){
 }
 
 void MFHelmholtzOpFactory::defineMultigridLevels(){
+  CH_TIME("MFHelmholtzOpFactory::defineMultigridLevels()");
+
+  // TLDR: This routine defines what is needed for making the multigrid levels. This includes the intermediate
+  // levels (if you run with refinement factor 4) as well as the deeper multigrid levels that are coarsenings of the base AMR level. Recall that
+  // in Chombo-speak a multigrid level is a grid level completely covered by another grid level.   
+  
   m_mgLevelGrids.resize(m_numAmrLevels);
   m_mgAcoef.     resize(m_numAmrLevels);
   m_mgBcoef.     resize(m_numAmrLevels);
@@ -328,6 +347,14 @@ void MFHelmholtzOpFactory::defineMultigridLevels(){
 }
 
 bool MFHelmholtzOpFactory::getCoarserLayout(MFLevelGrid& a_coarMflg, const MFLevelGrid& a_fineMflg, const int a_refRat, const int a_blockingFactor) const {
+  CH_TIME("MFHelmholtzOpFactory::getCoarserLayout(MFLevelGrid, MFLevelGrid, int, int)");
+  
+  // TLDR: This creates a coarsening of a_fineGrid with refinement factor 2. The strategy is to first coarsen directly, leaving the box-to-rank array intact
+  //       but where the boxes are coarsened by a factor of two. If that does not work we will try domain decomposition with the blocking factor.
+  //
+  //       This returns true if the fine grid fully covers the domain. The nature of this makes it
+  //       always true for the "deeper" multigridlevels,  but not so for the intermediate levels.
+  
   bool hasCoarser = false;
 
   // This returns true if the fine grid fully covers the domain. The nature of this makes it
@@ -358,7 +385,7 @@ bool MFHelmholtzOpFactory::getCoarserLayout(MFLevelGrid& a_coarMflg, const MFLev
 
       hasCoarser = true;
     }
-    else if(false){// { // Check if we can use box aggregation 
+    else{// if(false){// { // Check if we can use box aggregation 
       if(isFullyCovered(a_fineMflg)){
 	Vector<Box> boxes;
 	Vector<int> procs;
@@ -387,8 +414,11 @@ bool MFHelmholtzOpFactory::getCoarserLayout(MFLevelGrid& a_coarMflg, const MFLev
 }
 
 MFHelmholtzOp* MFHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, int a_depth, bool a_homogeneousOnly) {
-  MFHelmholtzOp* mgOp = nullptr;
+  CH_TIME("EBHelmholtzOpFactory::MGnewOp(ProblemDomain, int, bool)");
   
+  MFHelmholtzOp* mgOp = nullptr;
+
+  // First, check if multigrid should be turned off completely. 
   ParmParse pp;
   bool turnOffMG = false;
   pp.query("turn_off_multigrid", turnOffMG);
@@ -519,6 +549,8 @@ MFHelmholtzOp* MFHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, 
 }
 
 MFHelmholtzOp* MFHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
+  CH_TIME("MFHelmholtzOpFactory::AMRnewOp(ProblemDomain)");
+  
   const int amrLevel = this->findAmrLevel(a_domain);
 
   const bool hasFine = amrLevel < m_numAmrLevels - 1;
@@ -596,14 +628,20 @@ MFHelmholtzOp* MFHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
 }
 
 bool MFHelmholtzOpFactory::isCoarser(const ProblemDomain& A, const ProblemDomain& B) const{
+  CH_TIME("MFHelmholtzOpFactory::isCoarser(ProblemDomain, ProblemDomain)");
+  
   return A.domainBox().numPts() < B.domainBox().numPts();
 }
 
 bool MFHelmholtzOpFactory::isFiner(const ProblemDomain& A, const ProblemDomain& B) const{
+  CH_TIME("MFHelmholtzOpFactory::isFiner(ProblemDomain, ProblemDomain)");
+  
   return A.domainBox().numPts() > B.domainBox().numPts();
 }
 
 int MFHelmholtzOpFactory::refToFiner(const ProblemDomain& a_domain) const {
+  CH_TIME("MFHelmholtzOpFactory::refToFiner(ProblemDomain)");
+  
   int ref    = -1;
   bool found = false;
 
@@ -618,6 +656,8 @@ int MFHelmholtzOpFactory::refToFiner(const ProblemDomain& a_domain) const {
 }
 
 int MFHelmholtzOpFactory::findAmrLevel(const ProblemDomain& a_domain) const {
+  CH_TIME("MFHelmholtzOpFactory::findAmrLevel(ProblemDomain)");
+  
   int amrLevel = -1;
   for (int lvl = 0; lvl < m_amrLevelGrids.size(); lvl++){
     if(m_amrLevelGrids[lvl].getDomain() == a_domain){
@@ -626,7 +666,9 @@ int MFHelmholtzOpFactory::findAmrLevel(const ProblemDomain& a_domain) const {
     }
   }
 
-  if(amrLevel < 0) MayDay::Abort("MFHelmholtzOpFactory::findAmrLevel - no corresponding amr level found!");
+  if(amrLevel < 0) {
+    MayDay::Error("MFHelmholtzOpFactory::findAmrLevel - no corresponding amr level found!");
+  }
 
   return amrLevel;
 }
@@ -640,6 +682,7 @@ void MFHelmholtzOpFactory::coarsenCoefficients(LevelData<MFCellFAB>&         a_c
 					       const MFLevelGrid&            a_mflgCoar,
 					       const MFLevelGrid&            a_mflgFine,
 					       const int                     a_refRat){
+  CH_TIME("MFHelmholtzOpFactory::coarsenCoefficients(...)");
 
   const Interval interv(m_comp, m_comp);
   

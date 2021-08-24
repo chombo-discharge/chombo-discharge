@@ -9,23 +9,32 @@
   @author Robert Marskar
 */
 
+// Chombo includes
+#include <CH_Timer.H>
+
 // Our includes
 #include <CD_MFHelmholtzDirichletEBBC.H>
 #include <CD_LeastSquares.H>
 #include <CD_NamespaceHeader.H>
 
 MFHelmholtzDirichletEBBC::MFHelmholtzDirichletEBBC(const int a_phase, const RefCountedPtr<JumpBC>& a_jumpBC) : MFHelmholtzEBBC(a_phase, a_jumpBC) {
+  CH_TIME("MFHelmholtzDirichletEBBC::MFHelmholtzDirichletEBBC(int, RefCountedPtr<JumpBC>)");
+
+  // Default settings. 
   m_order       = -1;
   m_weight      = -1;
+  
   m_useConstant = false;
   m_useFunction = false;
 }
 
 MFHelmholtzDirichletEBBC::~MFHelmholtzDirichletEBBC(){
-
+  CH_TIME("MFHelmholtzDirichletEBBC::~MFHelmholtzDirichletEBBC()");
 }
 
-void MFHelmholtzDirichletEBBC::setValue(const int a_value){
+void MFHelmholtzDirichletEBBC::setValue(const Real a_value){
+  CH_TIME("MFHelmholtzDirichletEBBC::setValue(Real)");
+  
   m_useConstant = true;
   m_useFunction = false;
   
@@ -33,6 +42,8 @@ void MFHelmholtzDirichletEBBC::setValue(const int a_value){
 }
 
 void MFHelmholtzDirichletEBBC::setValue(const std::function<Real(const RealVect& a_pos)>& a_value){
+  CH_TIME("MFHelmholtzDirichletEBBC::setValue(std:function<Real(RealVect)>)");
+  
   m_useConstant = false;
   m_useFunction = true;
   
@@ -40,20 +51,37 @@ void MFHelmholtzDirichletEBBC::setValue(const std::function<Real(const RealVect&
 }
 
 void MFHelmholtzDirichletEBBC::setOrder(const int a_order){
+  CH_TIME("MFHelmholtzDirichletEBBC::setOrder(int)");
+  
   CH_assert(a_order > 0);
 
   m_order = a_order;
 }
 
 void MFHelmholtzDirichletEBBC::setWeight(const int a_weight){
+  CH_TIME("MFHelmholtzDirichletEBBC::setWeight(int)");
+  
   CH_assert(a_weight >= 0);
 
   m_weight = a_weight;
 }
 
 void MFHelmholtzDirichletEBBC::defineSinglePhase() {
-  if(  m_order <= 0  || m_weight <  0 ) MayDay::Error("MFHelmholtzDirichletEBBC - must have order > 0 and weight >= 0");
-  if(!(m_useConstant || m_useFunction)) MayDay::Error("MFHelmholtzDirichletEBBC - not using constant or function!");
+  CH_TIME("MFHelmholtzDirichletEBBC::defineSinglePhase()");
+
+  CH_assert(m_order  >  0);
+  CH_assert(m_weight >= 0);
+  CH_assert(m_useConstant || m_useFunction);
+
+  // Also issue run-time errors because those errors can break everything. But I don't see how you would get in a position where that happens. 
+  if(  m_order <= 0  || m_weight <  0 ) {
+    MayDay::Error("MFHelmholtzDirichletEBBC - must have order > 0 and weight >= 0");
+  }
+  if(!(m_useConstant || m_useFunction)) {
+    MayDay::Error("MFHelmholtzDirichletEBBC - not using constant or function!");
+  }
+
+  // TLDR: We compute the stencil for reconstructing dphi/dn on the boundary. This is done with least squares reconstruction. 
 
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
   const ProblemDomain& domain  = m_eblg.getDomain();
@@ -127,6 +155,8 @@ void MFHelmholtzDirichletEBBC::applyEBFluxSinglePhase(VoFIterator&     a_singleP
 						      const DataIndex& a_dit,
 						      const Real&      a_beta,
 						      const bool&      a_homogeneousPhysBC) const {
+  CH_TIME("MFHelmholtzDirichletEBBC::applyEBFluxSinglePhase(VoFIterator, EBCellFAB, EBCellFAB, DataIndex, Real, bool)");
+  
   // Apply the stencil for computing the contribution to kappaDivF. Note divF is sum(faces) B*grad(Phi)/dx and that this
   // is the contribution from the EB face. B/dx is already included in the stencils and boundary weights, but beta is not.
 

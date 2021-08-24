@@ -18,7 +18,6 @@
 
 /*!
   @brief Class for making Dirichlet boundary conditions on the EB in a multifluid context. 
-  @note This class reuses EBHelmholtzDirichletEBBCFactory, but adjusts these on a subset of cells (the "matching" cells). 
 */
 class MFHelmholtzDirichletEBBCFactory : public MFHelmholtzEBBCFactory {
 public:

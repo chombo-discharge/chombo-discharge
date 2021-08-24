@@ -27,7 +27,7 @@ MFHelmholtzElectrostaticEBBC::MFHelmholtzElectrostaticEBBC(const int a_phase, co
 void MFHelmholtzElectrostaticEBBC::setOrder(const int a_order){
   CH_TIME("MFHelmholtzElectrostaticEBBC::setOrder(int)");
   
-  CH_assert(m_order > 0);
+  CH_assert(a_order > 0);
 
   m_order = a_order;
 }
@@ -35,7 +35,7 @@ void MFHelmholtzElectrostaticEBBC::setOrder(const int a_order){
 void MFHelmholtzElectrostaticEBBC::setWeight(const int a_weight){
   CH_TIME("MFHelmholtzElectrostaticEBBC::setWeight(int)");
   
-  CH_assert(m_weight >= 0);
+  CH_assert(a_weight >= 0);
 
   m_weight = a_weight;
 }

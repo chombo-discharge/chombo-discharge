@@ -9,16 +9,19 @@
   @author Robert Marskar
 */
 
+// Chombo includes
+#include <CH_Timer.H>
+
 // Our includes
 #include <CD_MFHelmholtzDomainBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
 MFHelmholtzDomainBCFactory::MFHelmholtzDomainBCFactory(){
-
+  CH_TIME("MFHelmholtzDomainBCFactory::MFHelmholtzDomainBCFactory()");
 }
 
 MFHelmholtzDomainBCFactory::~MFHelmholtzDomainBCFactory(){
-
+  CH_TIME("MFHelmholtzDomainBCFactory::~MFHelmholtzDomainBCFactory()");
 }
 
 #include <CD_NamespaceFooter.H>

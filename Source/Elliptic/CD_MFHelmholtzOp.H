@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_MFHelmholtzOp.H
-  @brief  Declaration of a factory class for making multifluid Helmholtz operators for multigrid. 
+  @brief  Declaration of a class for solving multiphase Helmholtz equations. 
   @author Robert Marskar
 */
 
@@ -59,8 +59,6 @@ public:
   */
   MFHelmholtzOp(const MFHelmholtzOp&& a_op) = delete;
 
-  /*!
-    @brief Full constructor
   /*!
     @brief Full constructor
     @param[in] a_dataLocation  Data location, either cell center or cell centroid
