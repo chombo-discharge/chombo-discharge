@@ -28,10 +28,15 @@
 
 /*!
   @brief  Class for computing "jump interface" boundary conditions for multifluid code. 
+  @details This class creates stencils for approximating the normal derivative on each side. It uses those stencil to compute a value on the boundary which fulfills
+  the discrete version of dphi/dn1 + dphi/dn2 = sigma. This value is used by MFHelmholtzEBBC to compute the fluxes into the cut-cells on each side. 
 */
 class JumpBC {
 public:
 
+  /*!
+    @brief Alias to cut down on typing
+  */
   using BcoefPtr = RefCountedPtr<LevelData<MFBaseIVFAB> >;
 
   /*!

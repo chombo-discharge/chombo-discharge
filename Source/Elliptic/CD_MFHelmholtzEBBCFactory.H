@@ -18,8 +18,7 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Class for making  boundary conditions on the EB in a multifluid context. 
-  @note This class reuses EBHelmholtzEBBCFactory, but adjusts these on a subset of cells (the "matching" cells). 
+  @brief Base class for making boundary conditions on the EB in a multifluid context. 
 */
 class MFHelmholtzEBBCFactory {
 public:
