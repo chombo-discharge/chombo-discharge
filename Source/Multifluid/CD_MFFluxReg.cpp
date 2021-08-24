@@ -16,28 +16,28 @@
 MFFluxReg::MFFluxReg(){
 }
 
-MFFluxReg::MFFluxReg(const Vector<RefCountedPtr<EBFluxRegister> >& a_fastfr){
-  this->define(a_fastfr);
+MFFluxReg::MFFluxReg(const Vector<RefCountedPtr<EBFluxRegister> >& a_fluxRegs){
+  this->define(a_fluxRegs);
 }
 
 MFFluxReg::~MFFluxReg(){
 
 }
 
-void MFFluxReg::define(const Vector<RefCountedPtr<EBFluxRegister> >& a_fastfr){
-  m_fastfr = a_fastfr;
+void MFFluxReg::define(const Vector<RefCountedPtr<EBFluxRegister> >& a_fluxRegs){
+  m_fluxRegs = a_fluxRegs;
 }
 
 const RefCountedPtr<EBFluxRegister>& MFFluxReg::getFluxRegPointer(const int a_phase) const {
-  return m_fastfr[a_phase];
+  return m_fluxRegs[a_phase];
 }
 
 EBFluxRegister& MFFluxReg::getFluxReg(const int a_phase) {
-  return *m_fastfr[a_phase];
+  return *m_fluxRegs[a_phase];
 }
 
 const EBFluxRegister& MFFluxReg::getFluxReg(const int a_phase) const {
-  return *m_fastfr[a_phase];
+  return *m_fluxRegs[a_phase];
 }
 
 #include <CD_NamespaceFooter.H>

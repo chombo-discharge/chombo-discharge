@@ -37,6 +37,7 @@ public:
 
   /*!
     @brief Defining constructor.
+    @param[in] a_interpolators Interpolators on each phase. 
   */
   MFMultigridInterpolator(const Vector<RefCountedPtr<EBMultigridInterpolator> >& a_interpolators);
   
@@ -47,16 +48,19 @@ public:
 
   /*!
     @brief Copy assignment
+    @param[in] a_other Other interpolator
   */
   MFMultigridInterpolator& operator=(const MFMultigridInterpolator& a_other);
 
   /*!
     @brief Define function
+    @param[in] a_interpolators Interpolators on each phase. 
   */
   void define(const Vector<RefCountedPtr<EBMultigridInterpolator> >& a_interpolators);
 
   /*!
-    @brief Get interpolator for phase
+    @brief Get interpolator for specified phase
+    @param[in] a_phase
   */
   RefCountedPtr<EBMultigridInterpolator>& getInterpolator(const int a_phase) const;
 
