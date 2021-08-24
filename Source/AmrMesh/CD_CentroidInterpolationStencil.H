@@ -4,7 +4,7 @@
  */
 
 /*!
-  @file   CentroidInterpolationStencil.H
+  @file   CD_CentroidInterpolationStencil.H
   @brief  Implementation of IrregStencil that interpolates from cell centers to cell centroids
   @author Robert Marskar
 */
@@ -34,7 +34,7 @@ public:
     @param[in] a_domain Problem domain
     @param[in] a_dx     Resolutions
     @param[in] a_order  Interpolation order
-    @param[in] a_radius Radius for least squares
+    @param[in] a_radius Maximum stencil radius
     @param[in] a_type   Stencil type
   */
   CentroidInterpolationStencil(const DisjointBoxLayout&        a_dbl,

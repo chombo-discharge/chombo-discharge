@@ -26,7 +26,6 @@
 
 /*!
   @brief Multigrid interpolator class. 
-  @note Currently just a shell of EBQuadCFInterp (so we have something to work with). 
 */
 class EBMultigridInterpolator : public QuadCFInterp {
 public:

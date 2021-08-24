@@ -4,8 +4,8 @@
  */
 
 /*!
-  @file   CentroidInterpolationStencil.cpp
-  @brief  Implementation of CentroidInterpolationStencil.H
+  @file   CD_CentroidInterpolationStencil.cpp
+  @brief  Implementation of CD_CentroidInterpolationStencil.H
   @author Robert Marskar
 */
 
@@ -18,7 +18,7 @@
 #include <CD_LeastSquares.H>
 #include <CD_NamespaceHeader.H>
 
-#define DEBUG_CENTROID_INTERP 1
+#define DEBUG_CENTROID_INTERP 0
 
 CentroidInterpolationStencil::CentroidInterpolationStencil(const DisjointBoxLayout&        a_dbl,
 							   const EBISLayout&               a_ebisl,
