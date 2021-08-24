@@ -17,18 +17,19 @@ MFBaseIVFAB::MFBaseIVFAB(){
 }
 
 MFBaseIVFAB::MFBaseIVFAB(const Vector<IntVectSet>& a_regions,
-			 const Vector<EBGraph>&    a_phase_graphs,
-			 const Vector<int>&        a_ncomp){
+			 const Vector<EBGraph>&    a_phaseGraphs,
+			 const Vector<int>&        a_nComp){
   CH_TIME("MFBaseIVFAB::MFBaseIVFAB");
 
   const int numPhases = a_regions.size();
     
-  CH_assert(a_phase_graphs.size() == numPhases);
-  CH_assert(a_ncomp.size() == numPhases);
+  CH_assert(a_phaseGraphs.size() == numPhases);
+  CH_assert(a_nComp.      size() == numPhases);
     
-  m_phase.resize(numPhases, NULL);
+  m_phase.resize(numPhases, nullptr);
+  
   for (int i = 0; i < numPhases; i++){
-    m_phase[i] = new BaseIVFAB<Real>(a_regions[i], a_phase_graphs[i], a_ncomp[i]);
+    m_phase[i] = new BaseIVFAB<Real>(a_regions[i], a_phaseGraphs[i], a_nComp[i]);
   }
 }
 
@@ -61,13 +62,13 @@ void MFBaseIVFAB::setVal(Real a_value){
   }
 }
 
-void MFBaseIVFAB::copy(const Box& a_from_box,
+void MFBaseIVFAB::copy(const Box& a_fromBox,
 		       const Interval& a_dst_interv,
-		       const Box& a_to_box,
+		       const Box& a_toBox,
 		       const MFBaseIVFAB& a_src,
-		       const Interval& a_src_interv){
+		       const Interval& a_srcInterv){
   for (int i = 0; i < m_phase.size(); i++){
-    m_phase[i]->copy(a_from_box, a_dst_interv, a_to_box, *(a_src.m_phase[i]), a_src_interv);
+    m_phase[i]->copy(a_fromBox, a_dst_interv, a_toBox, *(a_src.m_phase[i]), a_srcInterv);
   }
 }
 
@@ -114,20 +115,20 @@ void MFBaseIVFAB::linearIn(void* buf, const Box& R, const Interval& comps){
   }
 }
 
-MFBaseIVFABFactory::MFBaseIVFABFactory(Vector<EBISLayout>& a_ebisl, const Vector<int>& a_ncomp){
+MFBaseIVFABFactory::MFBaseIVFABFactory(Vector<EBISLayout>& a_ebisl, const Vector<int>& a_nComp){
   CH_TIME("MFBaseIVFABFactory::MFBaseIVFABFactory");
-  this->define(a_ebisl, a_ncomp);
+  this->define(a_ebisl, a_nComp);
 }
 
 MFBaseIVFABFactory::~MFBaseIVFABFactory(){
   CH_TIME("MFBaseIVFABFactory::~MFBaseIVFABFactory");
 }
 
-void MFBaseIVFABFactory::define(Vector<EBISLayout>& a_ebisl, const Vector<int>& a_ncomp){
+void MFBaseIVFABFactory::define(Vector<EBISLayout>& a_ebisl, const Vector<int>& a_nComp){
   CH_TIME("MFBaseIVFABFactory::define");
-  CH_assert(a_ebisl.size() == a_ncomp.size());
+  CH_assert(a_ebisl.size() == a_nComp.size());
   m_ebisl = a_ebisl;
-  m_ncomp = a_ncomp;
+  m_nComp = a_nComp;
 }
 
 MFBaseIVFAB* MFBaseIVFABFactory::create(const Box& a_box, int a_ignored_argument, const DataIndex& a_dit) const {
@@ -135,7 +136,7 @@ MFBaseIVFAB* MFBaseIVFABFactory::create(const Box& a_box, int a_ignored_argument
 
   const int numPhases = m_ebisl.size();
     
-  Vector<IntVectSet> ivs(numPhases);
+  Vector<IntVectSet> ivs (numPhases);
   Vector<EBGraph> ebgraph(numPhases);
 
   for (int i = 0; i < numPhases; ++i){
@@ -143,7 +144,7 @@ MFBaseIVFAB* MFBaseIVFABFactory::create(const Box& a_box, int a_ignored_argument
     ebgraph[i] = m_ebisl[i][a_dit].getEBGraph();
   }
 
-  return new MFBaseIVFAB(ivs, ebgraph, m_ncomp);
+  return new MFBaseIVFAB(ivs, ebgraph, m_nComp);
 }
 
 #include <CD_NamespaceFooter.H>

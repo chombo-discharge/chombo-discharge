@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_MFFluxReg.H
-  @brief  Wrapper class for holding multifluid EBFastFluxReg
+  @brief  Declaration of a class for refluxing in a multiphase context. 
   @author Robert Marskar
 */
 
@@ -20,52 +20,57 @@
 #include <CD_NamespaceHeader.H>
   
 /*!
-  @brief Class for filling ghost cells alà EBFasterFR for multiphase
+  @brief Class which wraps EBFluxRegisters in multiphase. 
 */
 class MFFluxReg {
 public:
 
   /*!
-    @brief Constructor
+    @brief Weak constructor. Must subsequently call define. 
   */
   MFFluxReg();
   
   /*!
     @brief Full constructor. Calls define
+    @param[in] a_fluxRegs Flux registers on each phase
   */
-  MFFluxReg(const Vector<RefCountedPtr<EBFluxRegister> >& a_fastfr);
+  MFFluxReg(const Vector<RefCountedPtr<EBFluxRegister> >& a_fluxRegs);
 
   /*!
-    @brief Destructor
+    @brief Destructor (does nothing)
   */
   ~MFFluxReg();
 
   /*!
     @brief Define function
+    @param[in] a_fluxRegs Flux registers on each phase
   */
-  void define(const Vector<RefCountedPtr<EBFluxRegister> >& a_fastfr);
+  void define(const Vector<RefCountedPtr<EBFluxRegister> >& a_fluxRegs);
 
   /*!
-    @brief Get interpolation utility
+    @brief Get flux register for specified phase
+    @param[in] a_phase Phase
   */
   const RefCountedPtr<EBFluxRegister>& getFluxRegPointer(const int a_phase) const;
 
   /*!
-    @brief get interpolation utility for phase
+    @brief Get flux register for specified phase
+    @param[in] a_phase Phase
   */
   EBFluxRegister& getFluxReg(const int a_phase);
 
   /*!
-    @brief get interpolation utility for phase
+    @brief Get flux register for specified phase
+    @param[in] a_phase Phase
   */
   const EBFluxRegister& getFluxReg(const int a_phase) const;
   
 protected:
 
   /*!
-    @brief Interpolation for each phase. 
+    @brief Flux register for each phase. 
   */
-  Vector<RefCountedPtr<EBFluxRegister> > m_fastfr;
+  Vector<RefCountedPtr<EBFluxRegister> > m_fluxRegs;
   
 };
 

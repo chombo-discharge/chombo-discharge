@@ -20,33 +20,36 @@
 #include <CD_NamespaceHeader.H>
   
 /*!
-  @brief Class for filling ghost cells alà EbCoarAve for multiphase
+  @brief Class for coarsening data in a multifluid context. 
 */
 class MFCoarAve {
 public:
 
   /*!
-    @brief Constructor
+    @brief Constructor. Must subsequently call defined. 
   */
   MFCoarAve();
 
   /*!
-    @brief Destructor
+    @brief Destructor (does nothing). 
   */
   ~MFCoarAve();
 
   /*!
     @brief Full constructor. Calls define
+    @param[in] aveOps Averaging operators on each phase. 
   */
   MFCoarAve(const Vector<RefCountedPtr<EbCoarAve> >& a_aveOps);
 
   /*!
     @brief Define function
+    @param[in] aveOps Averaging operators on each phase. 
   */
   void define(const Vector<RefCountedPtr<EbCoarAve> >& a_aveOps);
 
   /*!
-    @brief get interpolation utility for phase
+    @brief Get coarsening utility for specified phase.
+    @param[in] a_phase Phase
   */
   const RefCountedPtr<EbCoarAve>& getAveOp(const int a_phase) const;
   

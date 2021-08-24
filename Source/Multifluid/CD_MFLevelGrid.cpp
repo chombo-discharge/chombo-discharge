@@ -100,6 +100,7 @@ IntVectSet MFLevelGrid::interfaceRegion(const Box&       a_box,
   return ret;
 }
 
+#if 0
 bool MFLevelGrid::interfacePair(IntVect&             a_iv,
 				 const IntVect&       a_iv_in,
 				 const Box&           a_box,
@@ -142,5 +143,6 @@ bool MFLevelGrid::interfacePair(IntVect&             a_iv,
 
   return found_iv;
 }
+#endif
 
 #include <CD_NamespaceFooter.H>
