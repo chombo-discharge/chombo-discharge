@@ -21,11 +21,11 @@
 #include <CD_NamespaceHeader.H>
 
 HollowCylinderIF::HollowCylinderIF(const RealVect a_center1,
-				       const RealVect a_center2,
-				       const Real     a_majorRadius,
-				       const Real     a_minorRadius,
-				       const Real     a_curv,
-				       const bool     a_fluidInside){
+				   const RealVect a_center2,
+				   const Real     a_majorRadius,
+				   const Real     a_minorRadius,
+				   const Real     a_curv,
+				   const bool     a_fluidInside){
 
   // Make the SmoothUnion of this stuff. 
   Vector<BaseIF*> parts;
@@ -43,15 +43,15 @@ HollowCylinderIF::HollowCylinderIF(const RealVect a_center1,
   parts.push_back(smallCylinder);
   
   // Make union
-  m_baseif = RefCountedPtr<BaseIF> (new SmoothUnion(parts, 2*a_curv));
+  m_baseIF = RefCountedPtr<BaseIF> (new SmoothUnion(parts, 2*a_curv));
 }
 
 HollowCylinderIF::HollowCylinderIF(const HollowCylinderIF& a_inputIF){
-  m_baseif = a_inputIF.m_baseif;
+  m_baseIF = a_inputIF.m_baseIF;
 }
 
 Real HollowCylinderIF::value(const RealVect& a_point) const{
-  return m_baseif->value(a_point);
+  return m_baseIF->value(a_point);
 }
 
 BaseIF* HollowCylinderIF::newImplicitFunction() const{

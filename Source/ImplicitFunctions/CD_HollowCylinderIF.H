@@ -22,18 +22,24 @@
 #include <CD_NamespaceHeader.H>
   
 /*!
-  @brief This class is used to generate a hollow cylinder. The edges on the base of the cylinder are rounded, while the edges on the cylinder top are sharp. 
+  @brief This class is used to generate a hollow cylinder with rounded edges. 
 */
 class HollowCylinderIF: public BaseIF {
 public:
 
   /*!
-    @brief Oh no you dont!
+    @brief Disallowed weak construction. 
   */
   HollowCylinderIF() = delete;
 
   /*!
-    @brief ctor
+    @brief Full constructor
+    @param[in] a_center1     One cylinder end
+    @param[in] a_center2     Other cylinder end
+    @param[in] a_majorRadius Outer cylinder radius
+    @param[in] a_minorRadius Inner radius
+    @param[in] a_curv        Corner curvatures
+    @param[in] a_fluidInside Fluid inside or not
   */
   HollowCylinderIF(const RealVect a_center1,
 		   const RealVect a_center2,
@@ -64,7 +70,7 @@ protected:
   /*!
     @brief 3D object rotated and translated to its specified position
   */
-  RefCountedPtr<BaseIF> m_baseif;
+  RefCountedPtr<BaseIF> m_baseIF;
 
 };
 
