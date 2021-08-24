@@ -24,8 +24,6 @@ RodIF::RodIF(const RealVect& a_center1,
 	     const RealVect& a_center2,
 	     const Real&     a_radius,
 	     const bool&     a_fluidInside){
-  
-
   const RealVect axis    = (a_center2 - a_center1);
   const RealVect axisVec = axis/axis.vectorLength();
 

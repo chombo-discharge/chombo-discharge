@@ -4,8 +4,8 @@
  */
 
 /*!
-  @file  CD_RodIF.H
-  @brief Declaration of a cylinder with spheres at both ends
+  @file   CD_RodIF.H
+  @brief  Declaration of a cylinder with spheres at both ends
   @author Robert marskar
 */
 
@@ -20,7 +20,7 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Declaration of a cylinder with rounded caps
+  @brief Cylinder with rounded caps at its ends. 
 */
 class RodIF : public BaseIF{
 public:
@@ -32,7 +32,6 @@ public:
     @param[in] a_radius  Cylinder and sphere radius
     @param[in] a_fluidInside Domain on inside or outside
   */
-
   RodIF(const RealVect& a_center1, const RealVect& a_center2, const Real& a_radius, const bool& a_fluidInside);
 
   /*!
@@ -43,7 +42,7 @@ public:
   RodIF(const RodIF& a_inputIF);
 
   /*!
-    @brief Test whether inside or not
+    @brief Value function. Returns distance to objcet. 
     @param[in] a_point Physical position. 
   */
   virtual Real value(const RealVect& a_point) const; 

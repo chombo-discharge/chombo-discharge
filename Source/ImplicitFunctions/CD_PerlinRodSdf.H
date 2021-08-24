@@ -22,26 +22,43 @@
 
 /*!
   @brief PerlinRodSdf function
+  @details This is just like a rod, but one of its end-caps is rounded and includes Perlin noise. 
 */
 class PerlinRodSdf : public PerlinSphereSdf {
-public:  
+public:
+
+  /*!
+    @brief No weak construction
+  */
+  PerlinRodSdf() = delete;
+  
   /*!
     @brief Constructor
+    @param[in] a_rad         Rod radius
+    @param[in] a_center1     One end of the rod
+    @param[in] a_center2     Other end of the rod. 
+    @param[in] a_inside      Inside or outside
+    @param[in] a_noiseAmp    Noise amplitude
+    @param[in] a_noiseFreq   Noise frequency
+    @param[in] a_persistence Factor for noise octaves. 
+    @param[in] a_octaves     Number of octaves
+    @param[in] a_reseed      If true, reseed the RNG. Otherwise, the the original Perlin hash table. 
+    @note The persistence argument indicates how we add octaves. With 0.5 we use half the amplitude and twice the frequency for the next octave. 
   */
   PerlinRodSdf(const Real&     a_rad,
-		const RealVect& a_center1,
-		const RealVect& a_center2,
-		const bool&     a_inside,
-		const Real&     a_noiseAmp,
-		const RealVect& a_noiseFreq,
-		const Real&     a_persistence,
-		const int&      a_octaves,
-		const bool&     a_reseed = false);
+	       const RealVect& a_center1,
+	       const RealVect& a_center2,
+	       const bool&     a_inside,
+	       const Real&     a_noiseAmp,
+	       const RealVect& a_noiseFreq,
+	       const Real&     a_persistence,
+	       const int&      a_octaves,
+	       const bool&     a_reseed = false);
 
   /*!
     @brief Copy constructor
+    @param[in] a_inputIF Other object
   */
-
   PerlinRodSdf(const PerlinRodSdf& a_inputIF);
 
   /*!
@@ -51,6 +68,7 @@ public:
 
   /*!
     @brief Value function
+    @param[in] a_pos Position
   */
   virtual Real value(const RealVect& a_pos) const;
 

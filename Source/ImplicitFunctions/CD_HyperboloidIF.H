@@ -5,7 +5,7 @@
 
 /*!
   @file  CD_HyperboloidIF.H
-  @brief Hyperboloid implicit function
+  @brief Declaration of a hyperboloid implicit function
   @author Robert Marskar
 */
 

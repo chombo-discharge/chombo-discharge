@@ -14,8 +14,8 @@
 #include <CD_NamespaceHeader.H>
 
 HyperboloidOneIF::HyperboloidOneIF(const RealVect& a_radii,
-				       const RealVect& a_center,
-				       const bool&     a_inside){
+				   const RealVect& a_center,
+				   const bool&     a_inside){
   m_radii  = a_radii;
   m_center = a_center;
   m_inside = a_inside;

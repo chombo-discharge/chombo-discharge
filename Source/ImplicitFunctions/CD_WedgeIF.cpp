@@ -71,12 +71,12 @@ WedgeIF::WedgeIF(const int      a_dir,
   if(a_dir == 0) rot_wedge->rotate(RealVect(BASISV(1)), RealVect(BASISV(0)), point);
   if(a_dir == 2) rot_wedge->rotate(RealVect(BASISV(1)), RealVect(BASISV(2)), point);
   
-  m_baseif = RefCountedPtr<BaseIF> (static_cast<BaseIF*> (rot_wedge));
+  m_baseIF = RefCountedPtr<BaseIF> (static_cast<BaseIF*> (rot_wedge));
 }
     
 WedgeIF::WedgeIF(const WedgeIF& a_inputIF){
-  CH_assert(!a_inputIF.m_baseif.isNull());
-  m_baseif = a_inputIF.m_baseif;
+  CH_assert(!a_inputIF.m_baseIF.isNull());
+  m_baseIF = a_inputIF.m_baseIF;
 }
 
 WedgeIF::~WedgeIF(){
@@ -84,7 +84,7 @@ WedgeIF::~WedgeIF(){
 }
 
 Real WedgeIF::value(const RealVect& a_pos) const {
-  return m_baseif->value(a_pos);
+  return m_baseIF->value(a_pos);
 }
 
 BaseIF* WedgeIF::newImplicitFunction() const {

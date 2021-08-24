@@ -30,9 +30,7 @@ PerlinRodSdf::PerlinRodSdf(const Real&     a_rad,
 
   // Fix up center2
   const RealVect axis    = a_center2 - a_center1;
-  //const RealVect center2 = a_center2  - axis*a_rad/axis.vectorLeng;
   const RealVect center2 = a_center2 - axis*a_rad/axis.vectorLength();
-
 
   // Cylinder and graded noise sphere
   BaseIF* cyl = static_cast<BaseIF*> (new CylinderSdf(a_center1, center2, a_rad, a_inside));

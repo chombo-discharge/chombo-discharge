@@ -19,19 +19,20 @@
 #include <CD_NamespaceHeader.H>
   
 /*!
-  @brief Implicit function class describing a hexagonal rod
+  @brief Implicit function class describing a rod with a polygonal cross scetion. 
+  @note  This is a 3D object only!
 */
 class PolygonRodIF: public BaseIF {
 public:
 
   /*!
     @brief Base constructor
-    @param[in] a_endPoint1  One endpoint
-    @param[in] a_endPoint2  Other endpoint
-    @param[in] a_length     Rod length
-    @param[in] a_cornerCurv Rounding radius on corners
-    @param[in] a_numSides   Number of sides
-    @param[in] a_inside Domain on inside (true) or outside (false)
+    @param[in] a_center1     One endpoint
+    @param[in] a_center2     Other endpoint
+    @param[in] a_radius      Outer radius
+    @param[in] a_cornerCurv  Rounding radius on corners
+    @param[in] a_numSides    Number of sides
+    @param[in] a_fluidInside Fluid on inside or not
   */
   PolygonRodIF(const RealVect a_center1,
 	       const RealVect a_center2,
@@ -53,12 +54,12 @@ public:
   virtual ~PolygonRodIF();
 
   /*!
-    @brief Test if object is on inside or outside
+    @brief Value function. Returns distance to object (ish).
   */
   virtual Real value(const RealVect& a_pos) const;
 
   /*!
-    @brief IF Factory method
+    @brief Factory method
   */
   virtual BaseIF* newImplicitFunction() const;
 

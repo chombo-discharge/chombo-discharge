@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_WedgeIF.H
-  @brief  Wedge implicit function
+  @brief  Declaration of an implicit function for a wedge
   @author Robert Marskar
 */
 
@@ -19,23 +19,24 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Implicit function class describing a hexagonal rod
+  @brief Implicit function for a wedge. 
 */
 class WedgeIF: public BaseIF {
 public:
 
   /*!
     @brief Base constructor
-    @param[in] a_dir Direction, 0=x,1=y,2=z
-    @param[in] a_angle Opening angle
-    @param[in] a_curv Corner curvature
-    @param[in] a_point Center of circle used for curvature
+    @param[in] a_dir    Direction, 0=x,1=y,2=z
+    @param[in] a_angle  Opening angle
+    @param[in] a_curv   Corner curvature
+    @param[in] a_point  Center of circle used for curvature
+    @param[in] a_inside Fluid on inside or not
   */
   WedgeIF(const int      a_dir,
-	   const Real     a_angle,
-	   const Real     a_curv,
-	   const RealVect a_point,
-	   const bool     a_inside);
+	  const Real     a_angle,
+	  const Real     a_curv,
+	  const RealVect a_point,
+	  const bool     a_inside);
     
   /*!
     @brief Copy constructor
@@ -49,12 +50,13 @@ public:
   virtual ~WedgeIF();
 
   /*!
-    @brief Test if object is on inside or outside
+    @brief Get distance to object
+    @param[in] a_pos Position
   */
   virtual Real value(const RealVect& a_pos) const;
 
   /*!
-    @brief IF Factory method
+    @brief Factory method.
   */
   virtual BaseIF* newImplicitFunction() const;
 
@@ -63,7 +65,7 @@ protected:
   /*!
     @brief Base function
   */
-  RefCountedPtr<BaseIF> m_baseif;
+  RefCountedPtr<BaseIF> m_baseIF;
   
 };
 

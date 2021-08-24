@@ -19,18 +19,18 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Declaration of a cylinder IF class
+  @brief Cylinder object with rounded edges (no endcaps)
 */
 class RoundedCylinderIF : public BaseIF {
 public:
 
   /*!
     @brief Constructor
-    @param[in] a_center1 Cylinder center
-    @param[in] a_center2 Cylinder center
-    @param[in] a_radius  Cylinder radius
-    @param[in] a_curv    Radius of curvature
-    @param[in] a_inside  Domain on inside or outside
+    @param[in] a_center1     Cylinder endpoint
+    @param[in] a_center2     Other cylinder endpoint
+    @param[in] a_radius      Cylinder radius
+    @param[in] a_curv        Radius of curvature
+    @param[in] a_fluidInside Domain on inside or outside
   */
   RoundedCylinderIF(const RealVect a_center1, const RealVect a_center2, const Real a_radius, const Real a_curv, const bool a_fluidInside);
 
@@ -41,7 +41,7 @@ public:
   RoundedCylinderIF(const RoundedCylinderIF& a_inputIF);
 
   /*!
-    @brief Test whether inside or not
+    @brief Get distance to object. 
     @param[in] a_point Physical position. 
   */
   virtual Real value(const RealVect& a_point) const override; 
@@ -86,7 +86,7 @@ protected:
   /*!
     @brief Implicit function
   */
-  RefCountedPtr<BaseIF> m_baseif;
+  RefCountedPtr<BaseIF> m_baseIF;
 
   /*!
     @brief Make the implicit function
