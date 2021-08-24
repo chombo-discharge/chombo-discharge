@@ -18,11 +18,22 @@
 
 /*!
   @brief GradedPerlinSphereSdf function
+  @details This class is a sphere with graded noise -- there is only noise on one side of the sphere. 
 */
 class GradedPerlinSphereSdf : public PerlinSphereSdf {
-public:  
+public:
+  
   /*!
-    @brief Constructor
+    @brief Full constructor
+    @param[in] a_rad         Sphere radius
+    @param[in] a_center      Sphere center
+    @param[in] a_inside      Inside or outside
+    @param[in] a_noiseAmp    Noise amplitude
+    @param[in] a_noiseFreq   Noise frequency
+    @param[in] a_persistence Factor for noise octaves. 
+    @param[in] a_octaves     Number of octaves
+    @param[in] a_reseed      If true, reseed the RNG. Otherwise, the the original Perlin hash table. 
+    @note The persistence argument indicates how we add octaves. With 0.5 we use half the amplitude and twice the frequency for the next octave. 
   */
   GradedPerlinSphereSdf(const Real&     a_rad,
 			const RealVect& a_center,
@@ -36,7 +47,6 @@ public:
   /*!
     @brief Copy constructor
   */
-
   GradedPerlinSphereSdf(const GradedPerlinSphereSdf& a_inputIF);
 
   /*!

@@ -42,9 +42,9 @@ template <class T>
 Real DcelSdf<T>::value(const RealVect& a_point) const {
 
 #if CH_SPACEDIM==2
-  Vec3 p(a_point[0], a_point[1], m_zCoord);
+  Vec3T<T> p(a_point[0], a_point[1], m_zCoord);
 #else
-  Vec3 p(a_point[0], a_point[1], a_point[2]);
+  Vec3T<T> p(a_point[0], a_point[1], a_point[2]);
 #endif
 
   T retval = m_mesh->signedDistance(p); // Note that Dcel::mesh can return either positive or negative for outside, depending on the orientation of the input normals. 
