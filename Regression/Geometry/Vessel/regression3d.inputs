@@ -11,15 +11,15 @@ AmrMesh.fill_ratio      = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size     = 2           # Number of cells between grid levels
 AmrMesh.grid_algorithm  = br          # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
 AmrMesh.box_sorting     = morton      # 'none', 'shuffle', 'morton'
-AmrMesh.blocking_factor = 4           # Default blocking factor (16 in 3D)
+AmrMesh.blocking_factor = 8           # Default blocking factor (16 in 3D)
 AmrMesh.max_box_size    = 16          # Maximum allowed box size
 AmrMesh.max_ebis_box    = 16          # Maximum allowed box size
 AmrMesh.ref_rat         = 2 2 2 2 2 2 # Refinement ratios
-AmrMesh.num_ghost       = 3           # Number of ghost cells. Default is 3
+AmrMesh.num_ghost       = 2           # Number of ghost cells. Default is 3
 AmrMesh.lsf_ghost       = 3           # Number of ghost cells when writing level-set to grid
 AmrMesh.eb_ghost        = 4           # Set number of of ghost cells for EB stuff
 AmrMesh.mg_interp_order  = 2           # Multigrid interpolation order
-AmrMesh.mg_interp_radius = 3           # Multigrid interpolation radius
+AmrMesh.mg_interp_radius = 2           # Multigrid interpolation radius
 AmrMesh.mg_interp_weight = 2           # Multigrid interpolation weight (for least squares)
 AmrMesh.centroid_sten   = linear      # Centroid interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
 AmrMesh.eb_sten         = pwl         # EB interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
@@ -52,10 +52,10 @@ Driver.num_plot_ghost                  = 1             # Number of ghost cells t
 Driver.plt_vars                        = mpi_rank levelset             # 'tags', 'mpi_rank', 'levelset'
 Driver.restart                         = 0             # Restart step (less or equal to 0 implies fresh simulation)
 Driver.allow_coarsening                = true          # Allows removal of grid levels according to CellTagger
-Driver.grow_geo_tags                   = 2                # How much to grow tags when using geometry-based refinement. 
-Driver.refine_angles                   = 30.              # Refine cells if angle between elements exceed this value.
-Driver.refine_electrodes               = -1            # Refine electrode surfaces. -1 => equal to refine_geometry
-Driver.refine_dielectrics              = -1            # Refine dielectric surfaces. -1 => equal to refine_geometry
+Driver.grow_geo_tags                   = 2             # How much to grow tags when using geometry-based refinement. 
+Driver.refine_angles                   = 15.           # Refine cells if angle between elements exceed this value.
+Driver.refine_electrodes               = 0             # Refine electrode surfaces. -1 => equal to refine_geometry
+Driver.refine_dielectrics              = 0             # Refine dielectric surfaces. -1 => equal to refine_geometry
 
 
 # ====================================================================================================
@@ -77,13 +77,13 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 Vessel.use_rod       = true           # Turn on/off rod
 Vessel.use_shroom    = true           # Turn on/off plate
 
-Vessel.rod_point     = 0. 0. 0.5      # Rod center point
-Vessel.rod_radius    = 0.2            # Rod radius
+Vessel.rod_point     = 0. 0. 0.25     # Rod center point
+Vessel.rod_radius    = 0.025          # Rod radius
 
-Vessel.shroom_point  = 0. 0. -0.5     # Mushroom center point
+Vessel.shroom_point  = 0. 0. -0.25    # Mushroom center point
 Vessel.shroom_R      = 0.5            # Mushroom head radius
-Vessel.shroom_r      = 0.2            # Mushroom stem radius
-Vessel.shroom_d      = 0.2            # Mushroom head thickness
+Vessel.shroom_r      = 0.05           # Mushroom stem radius
+Vessel.shroom_d      = 0.1            # Mushroom head thickness
 Vessel.shroom_curv   = 0.05           # Mushroom corner curvatures
 
 Vessel.live_rod      = true           # Rod is live or not

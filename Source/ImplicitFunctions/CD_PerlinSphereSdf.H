@@ -29,9 +29,19 @@ public:
   /*!
     @brief No weak construction
   */
-  PerlinSphereSdf(){}
+  PerlinSphereSdf() = delete;
+  
   /*!
     @brief Constructor
+    @param[in] a_rad         Sphere radius
+    @param[in] a_center      Sphere center
+    @param[in] a_inside      Inside or outside
+    @param[in] a_noiseAmp    Noise amplitude
+    @param[in] a_noiseFreq   Noise frequency
+    @param[in] a_persistence Factor for noise octaves. 
+    @param[in] a_octaves     Number of octaves
+    @param[in] a_reseed      If true, reseed the RNG. Otherwise, the the original Perlin hash table. 
+    @note The persistence argument indicates how we add octaves. With 0.5 we use half the amplitude and twice the frequency for the next octave. 
   */
   PerlinSphereSdf(const Real&     a_rad,
 		  const RealVect& a_center,
@@ -44,16 +54,18 @@ public:
 
   /*!
     @brief Copy constructor
+    @param[in] a_inputIF Other perlin sphere
   */
   PerlinSphereSdf(const PerlinSphereSdf& a_inputIF);
 
   /*!
-    @brief Destructor
+    @brief Destructor (does nothing)
   */
   virtual ~PerlinSphereSdf();
 
   /*!
-    @brief Value function
+    @brief Value function. Returns distance to object
+    @param[in] a_pos Position
   */
   virtual Real value(const RealVect& a_pos) const;
 

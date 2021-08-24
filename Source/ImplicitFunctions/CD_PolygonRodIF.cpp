@@ -30,7 +30,7 @@ PolygonRodIF::PolygonRodIF(const RealVect a_endPoint1,
 			   const int      a_numSides,
 			   const bool     a_fluidInside){
   if(SpaceDim != 3){
-    MayDay::Abort("PolygonRodIF::PolygonRodIF - this is a 3D object!");
+    MayDay::Error("PolygonRodIF::PolygonRodIF - this is a 3D object!");
   }
 
   const Real length = (a_endPoint2 - a_endPoint1).vectorLength();

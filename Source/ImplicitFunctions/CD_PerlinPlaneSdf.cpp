@@ -26,15 +26,14 @@ PerlinPlaneSdf::PerlinPlaneSdf(const RealVect a_normal,
 			       const Real     a_persistence,
 			       const int      a_octaves,
 			       const bool     a_reseed){
-  
-  // This is the maximum noise the Perlin will spit out
+  // This is the maximum noise the Perlin will spit out. 
   Real amp = 0.0;
   for (int i = 0; i < a_octaves; i++){
     amp += a_noiseAmp*pow(a_persistence, i);
   }
 
   // Adjust point so noise amplitude does not affect the average position of the plane
-  m_point  = a_point - 0.5*a_normal*amp; // Perlin noise is on [0,1] so do this scaling
+  m_point  = a_point - 0.5*a_normal*amp; // Perlin noise is on [0,1] but we want the scaling on [-0.5, 0.5]
   m_normal = a_normal;
 
   m_plane  = RefCountedPtr<BaseIF> (new PlaneIF(m_normal, m_point, a_inside));
@@ -53,7 +52,8 @@ PerlinPlaneSdf::~PerlinPlaneSdf(){
 }
 
 Real PerlinPlaneSdf::value(const RealVect& a_pos) const {
-
+  // TLDR: To elevate the noise we displace the value along the normal (by an amount given by the Perlin noise function). 
+  
   const RealVect x0 = m_point;
   const RealVect x1 = a_pos;
   const RealVect xp = x1 - PolyGeom::dot((x1-x0), m_normal)*m_normal;
