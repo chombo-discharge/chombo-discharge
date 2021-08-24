@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_SphereSdf.H
-  @brief  Signed distance function for sphere
+  @brief  Declaration of a signed distance function for sphere
   @author Robert Marskar
 */
 
@@ -28,7 +28,7 @@ public:
     @brief Constructor
     @param[in] a_center      Sphere center
     @param[in] a_radius      Sphere radius
-    @param[in] a_fluidInside Fluid on inside of sphere
+    @param[in] a_fluidInside Fluid on inside or not. 
   */
   SphereSdf(const RealVect& a_center, const Real& a_radius, const bool& a_fluidInside);
 
@@ -36,7 +36,6 @@ public:
     @brief Copy constructor
     @param[in] a_inputIF Input cylinder
   */
-  
   SphereSdf(const SphereSdf& a_inputIF);
 
   /*!
@@ -45,7 +44,7 @@ public:
   virtual ~SphereSdf();
 
   /*!
-    @brief Test whether inside or not
+    @brief Get distance to sphere. 
     @param[in] a_point Physical position. 
   */
   virtual Real value(const RealVect& a_point) const; 

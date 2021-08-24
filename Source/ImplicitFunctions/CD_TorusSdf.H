@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_TorusSdf.H
-  @brief  Torus function which is signed distance
+  @brief  Declaration of a signed distance function for a torus
   @author Robert Marskar
 */
 
@@ -19,11 +19,14 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Declaration of a torus signed distance function. The orientation is along z
+  @brief Signed distance function for a torus (oriented along z).
 */
 class TorusSdf : public BaseIF {
 public:
 
+  /*!
+    @brief No weak construction (yet)
+  */
   TorusSdf() = delete;
 
   /*!

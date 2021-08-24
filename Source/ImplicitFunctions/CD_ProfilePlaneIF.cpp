@@ -37,7 +37,7 @@ ProfilePlaneIF::ProfilePlaneIF(const RealVect  a_point,
 			       const Real      a_curv,
 			       const bool      a_fluidInside){
   if(SpaceDim==3){
-    MayDay::Abort("ProfilePlaneIF - only 2D is currently supported");
+    MayDay::Error("ProfilePlaneIF(...) - only 2D is currently supported");
   }
   
   m_fluidInside = a_fluidInside;

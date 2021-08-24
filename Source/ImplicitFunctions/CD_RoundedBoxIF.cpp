@@ -47,12 +47,12 @@ RoundedBoxIF::RoundedBoxIF(const RealVect a_loCorner,
   tif->translate(a_loCorner + 0.5*xyz);
 
   // Done;
-  m_baseif = RefCountedPtr<BaseIF> (tif);
+  m_baseIF = RefCountedPtr<BaseIF> (tif);
 }
 
 RoundedBoxIF::RoundedBoxIF(const RoundedBoxIF& a_inputIF){
   m_fluidInside = a_inputIF.m_fluidInside;
-  m_baseif      = a_inputIF.m_baseif;
+  m_baseIF      = a_inputIF.m_baseIF;
 }
 
 RoundedBoxIF::~RoundedBoxIF(){
@@ -60,8 +60,8 @@ RoundedBoxIF::~RoundedBoxIF(){
 
 Real RoundedBoxIF::value(const RealVect& a_point) const{
 
-  // TLDR: m_baseif designed so that f < 0 outside the box. This means that the fluid is outside. Revert if inside. 
-  Real retval = m_baseif->value(a_point);
+  // TLDR: m_baseIF designed so that f < 0 outside the box. This means that the fluid is outside. Revert if inside. 
+  Real retval = m_baseIF->value(a_point);
 
   if(m_fluidInside){
     retval = -retval;

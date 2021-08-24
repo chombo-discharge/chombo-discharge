@@ -29,7 +29,7 @@ public:
   /*!
     @brief No weak construction
   */
-  PerlinSphereSdf() = delete;
+  PerlinSphereSdf(){}
   
   /*!
     @brief Constructor

@@ -82,8 +82,8 @@ ProfileCylinderIF::ProfileCylinderIF(const RealVect  a_endPoint1,
     transif->translate(a_endPoint2);
   }
 
-  // Ok, we're done. Set m_baseif and clear up memory.
-  m_baseif = RefCountedPtr<BaseIF> (transif);
+  // Ok, we're done. Set m_baseIF and clear up memory.
+  m_baseIF = RefCountedPtr<BaseIF> (transif);
 
   for (int i = 0; i < parts.size(); i++){
     delete parts[i];
@@ -92,7 +92,7 @@ ProfileCylinderIF::ProfileCylinderIF(const RealVect  a_endPoint1,
 }
 
 ProfileCylinderIF::ProfileCylinderIF(const ProfileCylinderIF& a_inputIF){
-  m_baseif = a_inputIF.m_baseif;
+  m_baseIF = a_inputIF.m_baseIF;
 }
   
 ProfileCylinderIF::~ProfileCylinderIF(){
@@ -100,7 +100,7 @@ ProfileCylinderIF::~ProfileCylinderIF(){
 }
 
 Real ProfileCylinderIF::value(const RealVect& a_pos) const{
-  return m_baseif->value(a_pos);
+  return m_baseIF->value(a_pos);
 }
 
 BaseIF* ProfileCylinderIF::newImplicitFunction() const{

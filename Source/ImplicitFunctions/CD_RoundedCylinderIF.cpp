@@ -39,11 +39,11 @@ RoundedCylinderIF::RoundedCylinderIF(const RealVect a_center1, const RealVect a_
 
 RoundedCylinderIF::RoundedCylinderIF(const RoundedCylinderIF& a_inputIF){
   m_fluidInside = a_inputIF.m_fluidInside;
-  m_baseif      = a_inputIF.m_baseif;
+  m_baseIF      = a_inputIF.m_baseIF;
 }
 
 Real RoundedCylinderIF::value(const RealVect& a_point) const {
-  Real retval = m_baseif->value(a_point);
+  Real retval = m_baseIF->value(a_point);
 
   if(m_fluidInside){
     retval = -retval;
@@ -77,7 +77,7 @@ void RoundedCylinderIF::makeBaseIF(){
     transif->translate(m_center2);
   }
 
-  m_baseif = RefCountedPtr<BaseIF> (transif);
+  m_baseIF = RefCountedPtr<BaseIF> (transif);
 }
 
 #if CH_SPACEDIM==2
@@ -92,7 +92,7 @@ BaseIF* RoundedCylinderIF::makeBaseIF2D(){
 #if CH_SPACEDIM==3
 BaseIF* RoundedCylinderIF::makeBaseIF3D(){
 
-  // TLDR: Construct m_baseif from a main cylinderk.  on each we put a torus and then a smaller cylinder between everything. Default orientation
+  // TLDR: Construct m_baseIF from a main cylinderk.  on each we put a torus and then a smaller cylinder between everything. Default orientation
   //       is along +z.
 
   const RealVect up = BASISREALV(SpaceDim-1);

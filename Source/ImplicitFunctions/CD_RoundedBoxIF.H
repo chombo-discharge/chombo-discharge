@@ -25,14 +25,17 @@
 class RoundedBoxIF : public BaseIF {
 public:
 
+  /*!
+    @brief Disallowed weak construction
+  */
   RoundedBoxIF() = delete;
   
   /*!
     @brief Constructor
-    @param[in] a_loCorner            Upper right corner of the object
-    @param[in] a_hiCorner            Lower left corner of the object
-    @param[in] a_curvature           Radius of curvature on edges and corners
-    @param[in] a_fluidInside         Fluid on inside (true) or outside (false)
+    @param[in] a_loCorner    Upper right corner of the object
+    @param[in] a_hiCorner    Lower left corner of the object
+    @param[in] a_curvature   Radius of curvature on edges and corners
+    @param[in] a_fluidInside Fluid on inside (true) or outside (false)
   */
   RoundedBoxIF(const RealVect a_loCorner,
 	       const RealVect a_hiCorner,
@@ -42,6 +45,7 @@ public:
 
   /*!
     @brief Copy constructor
+    @param[in] a_inputIF Other box
   */
   RoundedBoxIF(const RoundedBoxIF& a_inputIF);
 
@@ -51,20 +55,27 @@ public:
   virtual ~RoundedBoxIF();
 
   /*!
-    @brief Test whether inside or not
+    @brief Get distance to object. 
     @param[in] a_point Physical position. 
   */
-  virtual Real value(const RealVect& a_point) const;
+  virtual Real value(const RealVect& a_point) const override;
 
   /*!
     @brief IF factory method
   */
-  virtual BaseIF* newImplicitFunction() const;
+  virtual BaseIF* newImplicitFunction() const override;
   
 protected:
 
+  /*!
+    @brief Fluid on inside or not
+  */
   bool m_fluidInside;
-  RefCountedPtr<BaseIF> m_baseif;
+
+  /*!
+    @brief Implicit function (which is union between planes)
+  */
+  RefCountedPtr<BaseIF> m_baseIF;
 };
 
 #include <CD_NamespaceFooter.H>

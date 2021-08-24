@@ -26,6 +26,11 @@
 */
 class PerlinRodSdf : public PerlinSphereSdf {
 public:
+
+  /*!
+    @brief No weak construction
+  */
+  PerlinRodSdf() = delete;
   
   /*!
     @brief Constructor
