@@ -280,7 +280,7 @@ protected:
   AmrLevelGrids    m_deeperLevelGrids;
 
   /*!
-    @brief For checking if an AMR levels has multigrid levels
+    @brief For checking if an AMR level has multigrid levels
   */
   std::vector<bool>  m_hasMgLevels;
 

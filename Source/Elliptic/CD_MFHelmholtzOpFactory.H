@@ -31,10 +31,14 @@
 
 /*!
   @brief Factory class for making MFHelmholtzOp. 
+  @note  This factory is designed for coupling EBHelmholtzOps across EBIS levels
+  @note  This factory is designed without time-dependence in BCs. Time-dependent BCs are still doable by letting the boundary condition classes carry a reference to 
+         an externally updated time. If you need new coefficients you will have to set up multigrid again. 
 */
 class MFHelmholtzOpFactory : public AMRLevelOpFactory<LevelData<MFCellFAB> > {
 public:
 
+  // Various alias for cutting down on typing. 
   using MFIS             = RefCountedPtr<MultiFluidIndexSpace>;
   using AmrLevelGrids    = Vector<MFLevelGrid>;
   using AmrInterpolators = Vector<MFMultigridInterpolator>;
@@ -64,6 +68,27 @@ public:
 
   /*!
     @brief Full constructor
+    @param[in] a_mfis             Multi-fluid index space
+    @param[in] a_dataLocation     Assumed data centering
+    @param[in] a_alpha            alpha-coefficient in Helmholtz operator.
+    @param[in] a_beta             beta-coefficient in Helmholtz operator.
+    @param[in] a_probLo           Lower-left corner of domain
+    @param[in] a_amrInterpolators Interpolator objects between AMR levels. 
+    @param[in] a_amrCoarseners    Conservative coarseners between AMR levels. 
+    @param[in] a_amrFluxRegisters Flux registers between AMR levels. 
+    @param[in] a_amrResolutions   Grid resolutions for AMR levels. 
+    @param[in] a_amrAcoef         A-coefficient in Helmholtz operator. 
+    @param[in] a_amrBcoef         B-coefficient in Helmholtz operator. 
+    @param[in] a_amrBcoefIrreg    B-coefficient in Helmholtz operator. This one is defined on EB faces. 
+    @param[in] a_domainBCFactory  Factory class for making domain BC objects. 
+    @param[in] a_ebbcFactory      Factory class for making BC objects for EB boundary conditions. 
+    @param[in] a_ghostPhi         Number of ghost cells in solution vector. 
+    @param[in] a_ghostRhs         Number of ghost cells in right-hand side. 
+    @param[in] a_jumpOrder        Stencil order in multiphase cells
+    @param[in] a_jumpWeight       Equation weighting in multiphase cells
+    @param[in] a_relaxationMethod Relaxation method. 
+    @param[in] a_bottomDomain     Coarsest domain on which we run multigrid. Must be a coarsening of the AMR problem domains. 
+    @param[in] a_deeperLevelGrids Optional object in case you want to pre-define the deeper multigrid levels. 
   */
   MFHelmholtzOpFactory(const MFIS&             a_mfis,
 		       const Location::Cell    a_dataLocation,
@@ -96,12 +121,15 @@ public:
   ~MFHelmholtzOpFactory();
 
   /*!
-    @brief Set jump condition
+    @brief Set jump condition. This is passed to the operators by reference. 
+    @param[in] a_sigma Jump (must be defined on gas phase)
+    @param[in] a_scale Scaling factor
   */
   void setJump(const EBAMRIVData& a_sigma, const Real& a_scale);
 
-    /*!
-    @brief Set jump condition
+  /*!
+    @param[in] a_sigma Jump
+    @param[in] a_scale Scaling factor
   */
   void setJump(const Real& a_sigma, const Real& a_scale);
 
@@ -147,69 +175,164 @@ protected:
   */
   MFIS m_mfis;
 
-  // Location
+  /*!
+    @brief Data centering
+  */
   Location::Cell m_dataLocation;
 
-  // Relaxation method
+  /*!
+    @brief Smoother
+  */
   Smoother m_smoother;
 
-  // Number of AMR levels
+  /*!
+    @brief Number of AMR levels
+  */
   int m_numAmrLevels;
 
-  // Ghost cells
+  /*!
+    @brief Number of ghost cells that are used. Need because of Chombo prolongation objects. 
+  */
   IntVect m_ghostPhi;
+
+  /*!
+    @brief Number of ghost cells that are used. Need because of Chombo prolongation objects. 
+  */  
   IntVect m_ghostRhs;
 
-  // Alpha, beta. 
+  /*!
+    @brief Operator alpha
+  */
   Real m_alpha;
+
+  /*!
+    @brief Operator beta
+  */  
   Real m_beta;
 
-  // Lower-left corner of domain
+  /*!
+    @brief Lower-left corner of computational domain
+  */
   RealVect m_probLo;
 
-  // Things that pertain to AMR levels. The first entry corresponds to the coarsest AMR level. 
+  /*!
+    @brief AMR grids
+  */
   AmrLevelGrids    m_amrLevelGrids;
+
+  /*!
+    @brief Multigrid interpolators
+  */  
   AmrInterpolators m_amrInterpolators;
+
+  /*!
+    @brief Flux registers
+  */    
   AmrFluxRegisters m_amrFluxRegisters;
+
+  /*!
+    @brief Data coarseners
+  */      
   AmrCoarseners    m_amrCoarseners;
+
+  /*!
+    @brief Refinement ratios
+  */        
   AmrRefRatios     m_amrRefRatios;
+
+  /*!
+    @brief Grid resolutions
+  */          
   AmrResolutions   m_amrResolutions;
 
+  /*!
+    @brief Operator A-coefficient
+  */
   AmrCellData      m_amrAcoef;
+
+  /*!
+    @brief Operator B-coefficient
+  */  
   AmrFluxData      m_amrBcoef;
+
+  /*!
+    @brief Operator B-coefficient
+  */    
   AmrIrreData      m_amrBcoefIrreg;
 
-  // BC factories
+  /*!
+    @brief Domain BC factory
+  */
   DomainBCFactory m_domainBcFactory;
+
+  /*!
+    @brief EB BC factory
+  */  
   EBBCFactory     m_ebBcFactory;
 
-  // Jump
+  /*!
+    @brief Jump on multiphase cells. 
+  */
   EBAMRIVData m_amrJump;
 
-  // Bottom drop domain
+  /*!
+    @brief Coarsest level where we run multigrid
+  */
   ProblemDomain m_bottomDomain;
 
-  // Blocking factor for when we create intermediate and deep multigrid levels
+  /*!
+    @brief Blocking factor for grid aggregration
+  */
   int m_mgBlockingFactor;
 
-  // Order for jump BCs.
+  /*!
+    @brief Stencil order in jump cells
+  */
   int m_jumpOrder;
+
+  /*!
+    @brief Weighting for least squares reconstruction in jump cells
+  */
   int m_jumpWeight;
 
-  // This is for using pre-defined grids for the deeper multigrid levels, i.e. for the levels that are coarsenings of m_amrLevelGrids[0]
+  /*!
+    @brief Deeper grids
+  */
   AmrLevelGrids    m_deeperLevelGrids;
 
-  // For checking if an AMR levels has multigrid levels
+  /*!
+    @brief For checking if an AMR level has multigrid levels
+  */
   std::vector<bool>  m_hasMgLevels;
 
-  // MG operator things. Always weird to write this but e.g. m_mgLevelGrids[0] corresponds to the the multigrid levels below amr level 0. 
+  /*!
+    @brief Deeper grids. Always weird to write this but e.g. m_mgLevelGrids[0] corresponds to the the multigrid levels below amr level 0. 
+  */
   Vector<AmrLevelGrids> m_mgLevelGrids;
+
+  /*!
+    @brief A-coefficient on deeper grids. Always weird to write this but e.g. m_mgLevelGrids[0] corresponds to the the multigrid levels below amr level 0. 
+  */    
   Vector<AmrCellData>   m_mgAcoef;
+
+  /*!
+    @brief B-coefficient on deeper grids. Always weird to write this but e.g. m_mgLevelGrids[0] corresponds to the the multigrid levels below amr level 0. 
+  */      
   Vector<AmrFluxData>   m_mgBcoef;
+
+  /*!
+    @brief B-coefficient on deeper grids. Always weird to write this but e.g. m_mgLevelGrids[0] corresponds to the the multigrid levels below amr level 0. 
+  */        
   Vector<AmrIrreData>   m_mgBcoefIrreg;
 
-  // Jump stuff on multigrid levels. Since the jump is only defined on one phase, so is the averaging operator. 
+  /*!
+    @brief Jump coefficient on deeper grids
+  */
   Vector<EBAMRIVData>   m_mgJump;
+
+  /*!
+    @brief Coarsneing operator on deeper grids (used for coarsening jump)
+  */
   Vector<Vector<RefCountedPtr<EbCoarAve> > > m_mgAveOp;
 
   /*!
