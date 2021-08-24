@@ -172,7 +172,7 @@ protected:
   virtual void define() override;
 
   /*!
-    @brief Get a least-squares baed interpolation stencil 
+    @brief Get a least-squares based interpolation stencil 
     @param[in] a_vof          Grid cell
     @param[in] a_dit          Data index. 
     @param[in] a_neighborhood Vof neighborhood (either quadrant-based or radius)

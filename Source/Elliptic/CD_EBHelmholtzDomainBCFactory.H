@@ -5,7 +5,7 @@
 
 /*
   @file   CD_EBHelmholtzDomainBCFactory.H
-  @brief  Declaration of a factory class for making boundary condition objects for EBHelmholtzOp
+  @brief  Declaration of a factory class for making domain boundary condition objects for EBHelmholtzOp
   @author Robert Marskar
 */
 
@@ -47,7 +47,7 @@ public:
   EBHelmholtzDomainBCFactory& operator=(const EBHelmholtzDomainBCFactory& a_other) = delete;
 
   /*!
-    @brief Factory method
+    @brief Factory method. Implementations must override this. 
   */
   virtual RefCountedPtr<EBHelmholtzDomainBC> create() const = 0;
 

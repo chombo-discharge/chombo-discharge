@@ -21,47 +21,62 @@
 
 /*!
   @brief Class for making Robin boundary conditions on the EB in a multifluid context. 
-  @note This class reuses EBHelmholtzRobinEBBCFactory, but adjusts these on a subset of cells (the "matching" cells). 
 */
 class MFHelmholtzRobinEBBCFactory : public MFHelmholtzEBBCFactory {
 public:
 
   /*!
-    @brief Weak constructor. Must subsequently set order, weight, and value. 
+    @brief Disallowed weak construction. Use the full constructors. 
   */
   MFHelmholtzRobinEBBCFactory() = delete;
 
   /*!
-    @brief Full constructor which sets order and value on EB. 
-    @param[in] a_A      Constant A-coefficient
-    @param[in] a_B      Constant B-coefficient
-    @param[in] a_C      Constant C-coefficient
-    @note The order is also the attempted radius of the stencil. 
+    @brief Full constructor which sets constant coefficients
+    @param[in] a_order  Stencil order. Must be > 0
+    @param[in] a_weight Equation weights. Must be >=0
+    @param[in] a_A      Robin A-coefficient
+    @param[in] a_B      Robin B-coefficient
+    @param[in] a_C      Robin C-coefficient
   */
-  MFHelmholtzRobinEBBCFactory(const Real a_A,
+  MFHelmholtzRobinEBBCFactory(const int  a_order,
+			      const int  a_weight,
+			      const Real a_A,
 			      const Real a_B,
 			      const Real a_C);
 
   /*!
-    @brief Full constructor which sets order and spatially varying value on EBs
-    @param[in] a_order  Approximation order
-    @param[in] a_weight Weighting factor for stencils
-    @param[in] a_A      Spatially varying A-coefficient
-    @param[in] a_B      Spatially varying B-coefficient
-    @param[in] a_C      Spatially avrying C-coefficient
-
+    @brief Full constructor which sets variable coefficients
+    @param[in] a_order  Stencil order. Must be > 0
+    @param[in] a_weight Equation weights. Must be >=0
+    @param[in] a_A      Robin A-coefficient
+    @param[in] a_B      Robin B-coefficient
+    @param[in] a_C      Robin C-coefficient
   */
-  MFHelmholtzRobinEBBCFactory(const std::function<Real(const RealVect& a_pos)>& a_A,
-			      const std::function<Real(const RealVect& a_pos)>& a_B,
-			      const std::function<Real(const RealVect& a_pos)>& a_C);
+  MFHelmholtzRobinEBBCFactory(const int                                          a_order,
+			      const int                                          a_weight,
+			      const std::function<Real(const RealVect& a_pos) >& a_A,
+			      const std::function<Real(const RealVect& a_pos) >& a_B,
+			      const std::function<Real(const RealVect& a_pos) >& a_C);
 
   /*!
-    @brief Default constructor
+    @brief Default constructor (does nothing)
   */
   ~MFHelmholtzRobinEBBCFactory();
 
   /*!
-    @brief Set constant coefficients
+    @brief Set BC order
+    @param[in] a_order Order. Must be > 0
+  */
+  void setOrder(const int a_order);
+
+  /*!
+    @brief Set equation weights for least squares reconstruction. 
+    @param[in] a_weight Weights. Must be >= 0
+  */
+  void setWeight(const int a_weight);    
+
+  /*!
+    @brief Set constant Robin BC coefficients
     @param[in] a_A A-coefficient
     @param[in] a_B B-coefficient
     @param[in] a_C C-coefficient
@@ -69,7 +84,7 @@ public:
   void setCoefficients(const Real a_A, const Real a_B, const Real a_C);
 
   /*!
-    @brief Set variable coefficients
+    @brief Set variable Robin BC coefficients
     @param[in] a_A A-coefficient
     @param[in] a_B B-coefficient
     @param[in] a_C C-coefficient
@@ -87,14 +102,24 @@ public:
 protected:
 
   /*
-    @brief Use constant for BC
+    @brief Hook when using constant coefficients on the EB
   */
   bool m_useConstant;
 
   /*!
-    @brief Use function for BC value
+    @brief Hook when using variable coefficients on the EB
   */
   bool m_useFunction;
+
+  /*!
+    @brief Stencil order
+  */
+  int m_order;
+
+  /*!
+    @brief Equation weighting (in least squares reconstruction)
+  */
+  int m_weight;
 
   /*!
     @brief Constant A-coefficient

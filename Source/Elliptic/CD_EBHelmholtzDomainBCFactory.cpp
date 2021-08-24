@@ -5,7 +5,7 @@
 
 /*
   @file   CD_EBHelmholtzDomainBCFactory.cpp
-  @brief  Declaration of a factory class for EBHelmholtzDomainBCFactory
+  @brief  Implementation of CD_EBHelmholtzDomainBC.H
   @author Robert Marskar
 */
 

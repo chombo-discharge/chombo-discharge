@@ -9,27 +9,68 @@
   @author Robert Marskar
 */
 
+// Chombo inculdes
+#include <CH_Timer.H>
+
 // Our includes
 #include <CD_MFHelmholtzRobinEBBCFactory.H>
 #include <CD_MFHelmholtzRobinEBBC.H>
 #include <CD_NamespaceHeader.H>
 
-MFHelmholtzRobinEBBCFactory::MFHelmholtzRobinEBBCFactory(const Real a_A,
+MFHelmholtzRobinEBBCFactory::MFHelmholtzRobinEBBCFactory(const int  a_order,
+							 const int  a_weight,
+							 const Real a_A,
 							 const Real a_B,
 							 const Real a_C){
-  this->setCoefficients(a_A, a_B, a_C);
+  CH_TIME("MFHelmholtzRobinEBBCFactory::MFHelmholtzRobinEBBCFactory(int, int, Real, Real, Real)");
+
+  CH_assert(a_order  >  0);
+  CH_assert(a_weight >= 0);
+  
+  this->setOrder(a_order);
+  this->setWeight(a_weight);  
+  this->setCoefficients(a_A, a_B, a_C);  
 }
 
-MFHelmholtzRobinEBBCFactory::MFHelmholtzRobinEBBCFactory(const std::function<Real(const RealVect& a_pos)>& a_A,
+MFHelmholtzRobinEBBCFactory::MFHelmholtzRobinEBBCFactory(const int                                         a_order,
+							 const int                                         a_weight,
+							 const std::function<Real(const RealVect& a_pos)>& a_A,
 							 const std::function<Real(const RealVect& a_pos)>& a_B,
 							 const std::function<Real(const RealVect& a_pos)>& a_C){
-  this->setCoefficients(a_A, a_B, a_C);
+  CH_TIME("MFHelmholtzRobinEBBCFactory::MFHelmholtzRobinEBBCFactory(int, int, Real, Real, Real)");
+
+  CH_assert(a_order  >  0);
+  CH_assert(a_weight >= 0);
+  
+  this->setOrder(a_order);
+  this->setWeight(a_weight);  
+  this->setCoefficients(a_A, a_B, a_C);    
 }
 
 MFHelmholtzRobinEBBCFactory::~MFHelmholtzRobinEBBCFactory(){
+  CH_TIME("MFHelmholtzRobinEBBCFactory::~MFHelmholtzRobinEBBCFactory()");
+}
+
+void MFHelmholtzRobinEBBCFactory::setOrder(const int a_order){
+  CH_TIME("MFHelmholtzRobinEBBCFactory::setOrder(int)");
+
+  CH_assert(a_order > 0);
+  
+  m_order = a_order;
+}
+
+
+void MFHelmholtzRobinEBBCFactory::setWeight(const int a_weight){
+  CH_TIME("MFHelmholtzRobinEBBCFactory::setWeight(int)");
+
+  CH_assert(a_weight > 0);
+  
+  m_weight = a_weight;
 }
 
 void MFHelmholtzRobinEBBCFactory::setCoefficients(const Real a_A, const Real a_B, const Real a_C){
+  CH_TIME("MFHelmholtzRobinEBBCFactory::setCoefficients(Real, Real, Real)");
+  
   m_constantA = a_A;
   m_constantB = a_B;
   m_constantC = a_C;
@@ -41,6 +82,8 @@ void MFHelmholtzRobinEBBCFactory::setCoefficients(const Real a_A, const Real a_B
 void MFHelmholtzRobinEBBCFactory::setCoefficients(const std::function<Real(const RealVect& a_pos) >& a_A,
 						  const std::function<Real(const RealVect& a_pos) >& a_B,
 						  const std::function<Real(const RealVect& a_pos) >& a_C){
+  CH_TIME("MFHelmholtzRobinEBBCFactory::setCoefficients(3xstd::function<Real(RealVect)>)");
+  
   m_functionA = a_A;
   m_functionB = a_B;
   m_functionC = a_C;
@@ -50,8 +93,15 @@ void MFHelmholtzRobinEBBCFactory::setCoefficients(const std::function<Real(const
 }
 
 RefCountedPtr<EBHelmholtzEBBC> MFHelmholtzRobinEBBCFactory::create(const int a_iphase, const RefCountedPtr<JumpBC>& a_jumpBC) const {
+  CH_TIME("EBHelmholtzRobinEBBCFactory::create()");
+
+  CH_assert(m_order  >  0);
+  CH_assert(m_weight >= 0);
+  
   auto bc = new MFHelmholtzRobinEBBC(a_iphase, a_jumpBC);
 
+  bc->setOrder(m_order);
+  bc->setWeight(m_weight);
   if(m_useConstant){
     bc->setCoefficients(m_constantA, m_constantB, m_constantC);
   }

@@ -9,31 +9,43 @@
   @author Robert Marskar
 */
 
+// Chombo includes
+#include <CH_Timer.H>
+
 // Our includes
 #include <CD_EBHelmholtzNeumannDomainBC.H>
 #include <CD_EBHelmholtzNeumannDomainBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
 EBHelmholtzNeumannDomainBCFactory::EBHelmholtzNeumannDomainBCFactory(){
+  CH_TIME("EBHelmholtzNeumannDomainBCFactory::EBHelmholtzNeumannDomainBCFactory()");
+  
   m_multByBco   = true;
   m_useConstant = false;
   m_useFunction = false;
 }
 
 EBHelmholtzNeumannDomainBCFactory::EBHelmholtzNeumannDomainBCFactory(const Real a_DphiDn){
+  CH_TIME("EBHelmholtzNeumannDomainBCFactory::EBHelmholtzNeumannDomainBCFactory(Real)");
+  
   this->setDphiDn(a_DphiDn);
 }
 
 EBHelmholtzNeumannDomainBCFactory::EBHelmholtzNeumannDomainBCFactory(const std::function<Real(const RealVect& a_pos)>& a_DphiDn){
+  CH_TIME("EBHelmholtzNeumannDomainBCFactory::EBHelmholtzNeumannDomainBCFactory(std::function<Real(RealVect)>)");
+  
   this->setDphiDn(a_DphiDn);
 }
 
 EBHelmholtzNeumannDomainBCFactory::~EBHelmholtzNeumannDomainBCFactory(){
-
+  CH_TIME("EBHelmholtzNeumannDomainBCFactory::~EBHelmholtzNeumannDomainBCFactory()");
 }
 
-void EBHelmholtzNeumannDomainBCFactory::setDphiDn(const int a_DphiDn){
-  m_multByBco   = false;
+void EBHelmholtzNeumannDomainBCFactory::setDphiDn(const Real a_DphiDn){
+  CH_TIME("EBHelmholtzNeumannDomainBCFactory::setDphiDn(Real)");
+  
+  m_multByBco   = true;
+  
   m_useConstant = true;
   m_useFunction = false;
   
@@ -41,25 +53,37 @@ void EBHelmholtzNeumannDomainBCFactory::setDphiDn(const int a_DphiDn){
 }
 
 void EBHelmholtzNeumannDomainBCFactory::setDphiDn(const std::function<Real(const RealVect& a_pos)>& a_DphiDn){
-  m_multByBco   = false;
+  CH_TIME("EBHelmholtzNeumannDomainBCFactory::setDphiDn(std::function<Real(RealVect)>)");
+  
+  m_multByBco   = true;
+  
   m_useConstant = false;
   m_useFunction = true;
   
   m_functionDphiDn = a_DphiDn;
 }
 
-void EBHelmholtzNeumannDomainBCFactory::setBxDphiDn(const int a_BxDphiDn){
+void EBHelmholtzNeumannDomainBCFactory::setBxDphiDn(const Real a_BxDphiDn){
+  CH_TIME("EBHelmholtzNeumannDomainBCFactory::setBxDphiDn(Real)");
+  
   this->setDphiDn(a_BxDphiDn);
+  
   m_multByBco = false;
 }
 
 void EBHelmholtzNeumannDomainBCFactory::setBxDphiDn(const std::function<Real(const RealVect& a_pos)>& a_BxDphiDn){
+  CH_TIME("EBHelmholtzNeumannDomainBCFactory::setBxDphiDn(std::function<Real(RealVect)>)");
+  
   this->setDphiDn(a_BxDphiDn);
+  
   m_multByBco = false;
 }
 
 RefCountedPtr<EBHelmholtzDomainBC> EBHelmholtzNeumannDomainBCFactory::create() const {
+  CH_TIME("EBHelmholtzNeumannDomainBCFactory::create()");
 
+  CH_assert(m_useConstant || m_useFunction);
+  
   auto bc = new EBHelmholtzNeumannDomainBC();
 
   if(m_multByBco){
@@ -70,7 +94,7 @@ RefCountedPtr<EBHelmholtzDomainBC> EBHelmholtzNeumannDomainBCFactory::create() c
       bc->setDphiDn(m_functionDphiDn);
     }
     else{
-      MayDay::Error("EBHelmholtzEBBC::create - logic bust");
+      MayDay::Error("EBHelmholtzEBBCNeumannDomainBCFactory::create - logic bust");
     }
   }
   else{
@@ -81,8 +105,8 @@ RefCountedPtr<EBHelmholtzDomainBC> EBHelmholtzNeumannDomainBCFactory::create() c
       bc->setBxDphiDn(m_functionDphiDn);
     }
     else{
-      MayDay::Error("EBHelmholtzEBBC::create - logic bust");
-    }
+      MayDay::Error("EBHelmholtzEBBCNeumannDomainBCFactory::create - logic bust");
+    }    
   }
 
   return RefCountedPtr<EBHelmholtzNeumannDomainBC>(bc);

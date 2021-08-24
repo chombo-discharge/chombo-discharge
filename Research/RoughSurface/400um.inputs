@@ -1,7 +1,7 @@
 # ====================================================================================================
 # POTENTIAL CURVE
 # ====================================================================================================
-RoughSurface.potential = 30E3
+RoughSurface.potential = 25E3
 RoughSurface.basename  = pout
 
 # ====================================================================================================
@@ -234,7 +234,7 @@ CdrPlasmaMorrowBourdon.gas_pressure                  = 1.0                   # G
 CdrPlasmaMorrowBourdon.gas_quenching_pressure        = 0.03947               # Quenching pressure for photo-emission (atm)
 
 CdrPlasmaMorrowBourdon.Electron_diffusion            = true                  # Electron diffusion on/off	     
-CdrPlasmaMorrowBourdon.mobile_ions                   = false                 # Turn off ion mobility (true/false)
+CdrPlasmaMorrowBourdon.mobile_ions                   = true                  # Turn off ion mobility (true/false)
 CdrPlasmaMorrowBourdon.PositiveSpecies_mobility      = 2.E-4                 # Positive species mobility
 CdrPlasmaMorrowBourdon.negative_species_mobility     = 2.E-4                 # Negative species mobility
 
