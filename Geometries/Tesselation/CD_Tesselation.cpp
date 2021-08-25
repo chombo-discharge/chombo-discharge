@@ -52,29 +52,37 @@ Tesselation::Tesselation(){
   Parser::PLY<precision>::readASCII(*m, filename);
   m->reconcile(Dcel::MeshT<precision>::VertexNormalWeight::Angle);
 
-  auto root = std::make_shared<NodeT<precision, Face, BV> >(m->getFaces());
+  constexpr int K = 2;
+  
+  auto root = std::make_shared<NodeT<precision, Face, BV, K> >(m->getFaces());
 
+#if 1 // Debug code
+  root->topDownSortAndPartitionPrimitives(defaultStopFunction<precision, BV, K>,
+					  defaultPartitioner<precision, K>,
+					  defaultBVConstructor<precision, BV>);
+#endif
+  MayDay::Abort("stop here");
   if(partitioner == "default"){
-    root->topDownSortAndPartitionPrimitives(defaultStopFunction<precision, BV>,
+    root->topDownSortAndPartitionPrimitives(defaultStopFunction<precision, BV, K>,
 					    defaultPartitionFunction<precision>,
 					    defaultBVConstructor<precision, BV>);
   }
-  else if(partitioner == "overlap"){
-    root->topDownSortAndPartitionPrimitives(defaultStopFunction<precision, BV>,
-					    partitionMinimumOverlap<precision, BV>,
-					    defaultBVConstructor<precision, BV>);
-  }
-  else if(partitioner == "sah"){
-    root->topDownSortAndPartitionPrimitives(defaultStopFunction<precision, BV>,
-					    partitionSAH<precision, BV>,
-					    defaultBVConstructor<precision, BV>);
-  }
+  // else if(partitioner == "overlap"){
+  //   root->topDownSortAndPartitionPrimitives(defaultStopFunction<precision, BV>,
+  // 					    partitionMinimumOverlap<precision, BV>,
+  // 					    defaultBVConstructor<precision, BV>);
+  // }
+  // else if(partitioner == "sah"){
+  //   root->topDownSortAndPartitionPrimitives(defaultStopFunction<precision, BV>,
+  // 					    partitionSAH<precision, BV>,
+  // 					    defaultBVConstructor<precision, BV>);
+  // }
   else{
     MayDay::Abort("Tesselation::Tesselation() -- unknown partitioner requested");
   }
 
 
-  auto bif = RefCountedPtr<BvhSdf<precision, BV> > (new BvhSdf<precision, BV>(root,false,zCoord));
+  auto bif = RefCountedPtr<BvhSdf<precision, BV, 2> > (new BvhSdf<precision, BV, 2>(root,false,zCoord));
 
   m_electrodes.push_back(Electrode(bif, true));
   
