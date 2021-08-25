@@ -132,16 +132,15 @@ namespace BVH {
 
     const bool stopRecursiveSplitting = a_stopCrit(*this);
 
+    // Compute the bounding volume for this node. 
+    m_bv = a_bvConstructor(m_primitives);    
+
     if(!stopRecursiveSplitting){
 
       // Divide primitives into new partitions
-      const auto& newPartitions = a_partitioner(m_primitives);
-
-      // Insert new nodes
-      this->insertNodes(newPartitions);
-
-      // Set this node to a regular node
-      this->setToRegularNode();
+      const auto& newPartitions = a_partitioner(m_primitives); // Divide this node's primitives into K new sub-volume primitives
+      this->insertNodes(newPartitions);                        // Insert the K new nodes into the tree. 
+      this->setToRegularNode();                                // This node is no longer a leaf node!
 
       // Partition children nodes further
       for (auto& c : m_children){
@@ -169,25 +168,12 @@ namespace BVH {
       this->insertNode(m_left,  leftPrims);
       this->insertNode(m_right, rightPrims);
 
-      // New code
-#if 0
-      this->insertNodes(partitions);
-      for (auto& c : m_children){
-	//	c->topDownSortAndPartitionPrimitives(a_stopFunc, a_partFunc, a_bvFunc);
-      }
-#endif
-
       // Set this node to a regular node.
       this->setToRegularNode();      
 
       // Recurse the process. 
       m_left ->topDownSortAndPartitionPrimitives(a_stopFunc, a_partFunc, a_bvFunc);
       m_right->topDownSortAndPartitionPrimitives(a_stopFunc, a_partFunc, a_bvFunc);
-
-
-
-
-
     }
   }
 

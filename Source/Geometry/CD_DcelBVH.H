@@ -116,7 +116,7 @@ namespace Dcel {
     std::array<int, K> endIndices;
 
     startIndices[0]   = 0;
-    endIndices  [K-1] = numPrimitives-1;
+    endIndices  [K-1] = numPrimitives;
     
     for (int i = 1; i < K; i++){
       startIndices[i] = startIndices[i-1] + almostEqualChunkSize;
@@ -127,22 +127,31 @@ namespace Dcel {
       }
     }
     for (int i = 0; i < K-1; i++){
-      endIndices[i] = startIndices[i+1] - 1;
+      endIndices[i] = startIndices[i+1];// - 1;
     }
 
+#if 0
     for (int i = 0; i < K; i++){
       std::cout << startIndices[i] << "\t" << endIndices[i] << "\t" << numPrimitives << "\n";
     }
     std::cout << "\n";
+#endif
 
     // Put the primitives in separate lists.
     std::array<PrimitiveList<T>, K> subVolumePrimitives;
-    for (int i = 0; i < K-1; i++){
+    for (int i = 0; i < K; i++){
       typename PrimitiveList<T>::const_iterator first = sortedPrimitives.begin() + startIndices[i];
       typename PrimitiveList<T>::const_iterator last  = sortedPrimitives.begin() + endIndices  [i];
       
       subVolumePrimitives[i] = PrimitiveList<T>(first, last);
     }
+
+#if 0
+    std::cout << "sizes:" << "\t" << " numPrims = " << sortedPrimitives.size() << "\n";
+    for (int i = 0; i < K; i++){
+      std::cout << "\t" << i << "\t" << subVolumePrimitives[i].size() << std::endl;
+    }
+#endif
     
 
     // Return as we must.
