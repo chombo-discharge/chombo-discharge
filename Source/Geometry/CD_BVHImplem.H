@@ -261,6 +261,7 @@ namespace BVH {
 	if(std::abs(primDist) < std::abs(a_shortestDistanceSoFar)){ 
 	  a_shortestDistanceSoFar = primDist;
 	}
+	break;
       }
     case NodeType::Regular: 
       {
@@ -284,13 +285,14 @@ namespace BVH {
 	  const std::pair<T, NodePtr>& curChildNode = distancesAndNodes[i];
 	  
 	  // a_shortestDistanceSoFar is the SIGNED distance, so we need the absolute value here. 
-	  if(std::abs(curChildNode.first) < std::abs(a_shortestDistanceSoFar)){ 
+	  if(std::abs(curChildNode.first) <= std::abs(a_shortestDistanceSoFar)){ 
 	    curChildNode.second->pruneOrdered(a_shortestDistanceSoFar, a_point);
 	  }
 	  else{ // Prune the rest of the children nodes. 
 	    break;
 	  }
 	}
+	break;
       }
     }
   }
@@ -359,13 +361,14 @@ namespace BVH {
 	for (int i = 0; i < K; i++){
 	  const std::pair<T, NodePtr>& node = distancesAndNodes[i];
 
-	  if(node.first < a_shortestSquareDistanceSoFar2){
+	  if(node.first <= a_shortestSquareDistanceSoFar2){
 	    node.second->pruneOrdered2(a_shortestSquareDistanceSoFar2, a_closestPrimitiveSoFar, a_point);
 	  }
 	  else{ // Prune the other subtrees. 
 	    break;
 	  }
 	}
+	break;
       }
     }
   }
