@@ -26,7 +26,6 @@
 #include <CD_DcelFace.H>
 #include <CD_NamespaceHeader.H>
 
-  
 namespace Dcel {
 
   /*!
@@ -127,17 +126,11 @@ namespace Dcel {
       }
     }
     for (int i = 0; i < K-1; i++){
-      endIndices[i] = startIndices[i+1];// - 1;
+      endIndices[i] = startIndices[i+1];
     }
 
-#if 0
-    for (int i = 0; i < K; i++){
-      std::cout << startIndices[i] << "\t" << endIndices[i] << "\t" << numPrimitives << "\n";
-    }
-    std::cout << "\n";
-#endif
 
-    // Put the primitives in separate lists.
+    // Put the primitives in separate lists and return them back to the BVH node. 
     std::array<PrimitiveList<T>, K> subVolumePrimitives;
     for (int i = 0; i < K; i++){
       typename PrimitiveList<T>::const_iterator first = sortedPrimitives.begin() + startIndices[i];
@@ -146,52 +139,8 @@ namespace Dcel {
       subVolumePrimitives[i] = PrimitiveList<T>(first, last);
     }
 
-#if 0
-    std::cout << "sizes:" << "\t" << " numPrims = " << sortedPrimitives.size() << "\n";
-    for (int i = 0; i < K; i++){
-      std::cout << "\t" << i << "\t" << subVolumePrimitives[i].size() << std::endl;
-    }
-#endif
-    
-
     // Return as we must.
     return subVolumePrimitives;
-  };
-  
-  /*!
-    @brief Default partitioning function. 
-    @param[in] a_primitives List of primitives. 
-    @details Computes the coordinate direction with the longest extend, and then sorts the input primitives along that coordinate and divides them into two equal chunks. 
-    @return Returns a pair of primitives. The first/second entry in the pair is the primitives contain in the left/right sub-bounding volumes
-  */
-  template <class T>
-  BVH::PartitionFunctionT<FaceT<T> > defaultPartitionFunction = [](const PrimitiveList<T>& a_primitives){
-
-    // Compute the coordinate direction with the longest extent. 
-    auto lo = Vec3T<T>::max();
-    auto hi = Vec3T<T>::min();
-    for (const auto& p : a_primitives){
-      lo = min(lo, p->getCentroid());
-      hi = max(hi, p->getCentroid());
-    }
-    const auto delta   = (hi-lo);
-    const int splitDir = delta.maxDir(true);
-
-    // Sort the primitives along the above coordinate direction. 
-    PrimitiveList<T> sortedPrimitives(a_primitives);
-    
-    std::sort(sortedPrimitives.begin(), sortedPrimitives.end(),
-	      [=](const std::shared_ptr<const FaceT<T> >& f1, const std::shared_ptr<const FaceT<T> >& f2) -> bool {
-		return f1->getCentroid(splitDir) < f2->getCentroid(splitDir);
-	      });
-
-    // Split the primitives into two equal-ish sized chunks and return them. 
-    const int splitIndex = (sortedPrimitives.size()-1)/2;
-
-    PrimitiveList<T> lPrims(sortedPrimitives.begin(), sortedPrimitives.begin() + splitIndex+1);
-    PrimitiveList<T> rPrims(sortedPrimitives.begin() + splitIndex + 1, sortedPrimitives.end());
-  
-    return std::make_pair(lPrims, rPrims);
   };
 
   /*!

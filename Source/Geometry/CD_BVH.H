@@ -46,14 +46,6 @@ namespace BVH {
   using StopFunctionT = std::function<bool(const NodeT<T, P, BV, K>& a_node)>;
 
   /*!
-    @brief Partitioning function for determining how a list of primitives should be divided into two new nodes in the BVH tree.
-    @param[in] a_primitives List of primitives in the parent node. 
-    @return Returns a std::pair<>, representing the primitives in the left/right sub-volumes. 
-  */
-  template <class P>
-  using PartitionFunctionT = std::function<std::pair<PrimitiveListT<P>, PrimitiveListT<P> >(const PrimitiveListT<P>& a_primitives)>;
-
-  /*!
     @brief Polymorphic partitioner for splitting a list of primitives into K new lists of primitives
   */
   template <class P, int K>
@@ -117,18 +109,13 @@ namespace BVH {
 
     /*!
       @brief Alias for cutting down on typing. 
-    */        
-    using PartitionFunction = PartitionFunctionT<P>;
+    */            
+    using StopFunction = StopFunctionT<T, P, BV, K>;
 
     /*!
       @brief Alias for cutting down on typing
     */
-    using Partitioner = PartitionerT<P, K>;
-
-    /*!
-      @brief Alias for cutting down on typing. 
-    */            
-    using StopFunction = StopFunctionT<T, P, BV, K>;
+    using Partitioner = PartitionerT<P, K>;    
 
     /*!
       @brief Alias for cutting down on typing. 
@@ -180,20 +167,7 @@ namespace BVH {
     void topDownSortAndPartitionPrimitives(const StopFunction&  a_stopCrit,
 					   const Partitioner&   a_partitioner,
 					   const BVConstructor& a_bvConstructor) noexcept;
-					   
 
-    /*!
-      @brief Function for using top-down construction of the bounding volume hierarchy. 
-      @param[in] a_stopFunc Termination function which tells us when to stop the recursion. 
-      @param[in] a_partFunc Partitioning function. This is a polymorphic function which divides a set of primitives into two lists. 
-      @param[in] a_bvFunc   Polymorphic function which builds a bounding volume from a set of primitives. 
-      @details The rules for terminating the hierarchy construction, how to partition sets of primitives, and how to enclose them by bounding volumes are
-      given in the input arguments (a_stopFunc, a_partFunc, a_bvFunc)
-    */
-    inline
-    void topDownSortAndPartitionPrimitives(const StopFunction&      a_stopFunc,
-					   const PartitionFunction& a_partFunc,
-					   const BVConstructor&     a_bvFunc) noexcept;
 
     /*!
       @brief Get the depth of the current node
@@ -306,16 +280,6 @@ namespace BVH {
     NodePtr m_parent;
 
     /*!
-      @brief Pointer to left sub-tree node
-    */    
-    NodePtr m_left;
-
-    /*!
-      @brief Pointer to right sub-tree node
-    */        
-    NodePtr m_right;
-
-    /*!
       @brief Set node type to leaf or regular
       @param[in] a_nodeType Node type
     */
@@ -341,7 +305,7 @@ namespace BVH {
       @brief Insert nodes with primitives
     */
     inline
-    void insertNodes(const std::array<PrimitiveList, 2>& a_primitives) noexcept;
+    void insertNodes(const std::array<PrimitiveList, K>& a_primitives) noexcept;
 
     /*!
       @brief Set to regular node

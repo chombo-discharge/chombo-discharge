@@ -70,6 +70,7 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 # ====================================================================================================
 # TESSELATION GEOMETRY CLASS
 # ====================================================================================================
-Tesselation.mesh_file    = sphere.ply
-Tesselation.partitioner  = overlap
-Tesselation.z_coord      = 0.0 
+Tesselation.mesh_file   = sphere.ply    # Ply file
+Tesselation.partitioner = default       # Partitioner. Valid options are 'default' and 'overlap'
+Tesselation.z_coord     = 0.0           # z-coordinate for 2D slicing this object
+

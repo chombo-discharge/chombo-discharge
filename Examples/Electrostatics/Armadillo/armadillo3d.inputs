@@ -103,9 +103,8 @@ GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 # TESSELATION GEOMETRY CLASS
 # ====================================================================================================
 Tesselation.mesh_file   = armadillo.ply # Ply file
-Tesselation.partitioner = overlap       # Partitioner. Valid options are 'default', 'overlap', 'sah'
+Tesselation.partitioner = default       # Partitioner. Valid options are 'default', 'overlap', 'sah'
 Tesselation.z_coord     = 0.0           # z-coordinate for 2D slicing this object
-
 
 # ====================================================================================================
 # FIELD_STEPPER CLASS OPTIONS
