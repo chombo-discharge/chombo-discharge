@@ -61,7 +61,12 @@ Tesselation::Tesselation(){
   // Build the BVH
   if(partitioner == "default"){
     root->topDownSortAndPartitionPrimitives(defaultStopFunction<precision, BV, K>,
-					    defaultPartitioner<precision, K>,
+					    spatialSplitPartitioner<precision, K>,
+					    defaultBVConstructor<precision, BV>);
+  }
+  else if(partitioner == "binary"){
+    root->topDownSortAndPartitionPrimitives(defaultStopFunction<precision, BV, K>,
+					    spatialSplitBinaryPartitioner<precision, K>,
 					    defaultBVConstructor<precision, BV>);
   }
   else

@@ -31,29 +31,13 @@ namespace Dcel {
   /*!
     @brief This is the lowest number of a primitives that a BVH node is allowed to enclose. 
   */
-  constexpr int primitivesPerLeafNode = 2;
+  constexpr int primitivesPerLeafNode = 1;
 
   /*!
     @brief Alias for which primitives are used in the BVH. For DCEL meshes the primitive is a polygon face.  
   */
   template <class T>
   using PrimitiveList = std::vector<std::shared_ptr<const Dcel::FaceT<T> > >;
-
-  /*!
-    @brief Default stop function. This function terminates the division process if a BVH node has only one primitive. 
-    @details In this function, BVH::NodeT<T, FaceT<T>, BVH > is a BVH node. The interpretation of the parameters are: T is the precision, FaceT<T> is the primitive type
-    in the BVH tree, and BV is the bounding volume type. 
-    @param[in] a_node Bounding volume hierarchy node. 
-    @return Returns true if the bounding volume shouldn't be split more and false otherwise. 
-  */
-  template <class T, class BV, int K> 
-  BVH::StopFunctionT<T, FaceT<T>, BV, K> defaultStopFunction = [=](const BVH::NodeT<T, FaceT<T>, BV, K>& a_node){
-    const auto& primitives = a_node.getPrimitives();
-    const int depth        = a_node.getDepth();
-    const int numPrims     = primitives.size();
-    
-    return numPrims <= primitivesPerLeafNode || numPrims < K;
-  };
 
   /*!
     @brief Bounding volume constructor for a primitive list. 
@@ -72,6 +56,22 @@ namespace Dcel {
     }
 
     return BV(coordinates);
+  };  
+
+  /*!
+    @brief Default stop function. This function terminates the division process if a BVH node has only one primitive. 
+    @details In this function, BVH::NodeT<T, FaceT<T>, BVH > is a BVH node. The interpretation of the parameters are: T is the precision, FaceT<T> is the primitive type
+    in the BVH tree, and BV is the bounding volume type. 
+    @param[in] a_node Bounding volume hierarchy node. 
+    @return Returns true if the bounding volume shouldn't be split more and false otherwise. 
+  */
+  template <class T, class BV, int K> 
+  BVH::StopFunctionT<T, FaceT<T>, BV, K> defaultStopFunction = [=](const BVH::NodeT<T, FaceT<T>, BV, K>& a_node){
+    const auto& primitives = a_node.getPrimitives();
+    const int depth        = a_node.getDepth();
+    const int numPrims     = primitives.size();
+    
+    return numPrims <= primitivesPerLeafNode || numPrims < K;
   };
 
   /*!
@@ -80,12 +80,12 @@ namespace Dcel {
     @details This is a very stupid partitioner which splits into equal chunks along the longest coordinate. 
   */
   template <class T, int K>
-  BVH::PartitionerT<FaceT<T>, K> defaultPartitioner = [](const PrimitiveList<T>& a_primitives){
+  BVH::PartitionerT<FaceT<T>, K> spatialSplitPartitioner = [](const PrimitiveList<T>& a_primitives){
 
     const int numPrimitives = a_primitives.size();
     
     if(numPrimitives < K){
-      std::cerr << "In file CD_DcelBVH.H function BVH::PartitionerT<FaceT<T>, K>::defaultPartitioner -- not enough primitives to subdivide into subvolumes\n";
+      std::cerr << "In file CD_DcelBVH.H function BVH::PartitionerT<FaceT<T>, K>::spatialSplitPartitioner -- not enough primitives to subdivide into subvolumes\n";
     }
     
     // Compute the coordinate direction with the longest extent. This will be our splitting direction.  
@@ -140,6 +140,54 @@ namespace Dcel {
     }
 
     // Return as we must.
+    return subVolumePrimitives;
+  };
+
+  /*!
+    @brief Binary partitioner based on spatial splits. 
+    @param[in] a_primitives List of primitives to partition into sub-bounding volumes
+    @details This is a partitioner that calls the spatialSplitPartitioner in order to recursively subdivided volumes into 2^K subvolumes. 
+  */  
+  template <class T, int K>
+  BVH::PartitionerT<FaceT<T>, K> spatialSplitBinaryPartitioner = [](const PrimitiveList<T>& a_primitives){
+    const int numPrimitives = a_primitives.size();
+    
+    if(numPrimitives < K){
+      std::cerr << "In file CD_DcelBVH.H function BVH::PartitionerT<FaceT<T>, K>::spatialSplitBinaryPartitioner -- not enough primitives to subdivide into subvolumes\n";
+    }
+
+    // Error -- this is a binary partitioner!
+    constexpr bool isPowerOfTwo = (K > 0) && ((K & (K-1)) == 0);
+    if(!isPowerOfTwo){
+      std::cerr << "In file CD_DcelBVH.H function BVH::PartitionerT<FaceT<T>, K>::spatialSplitBinaryPartitioner -- template parameter K is not a factor of 2!!!";
+    }
+
+    // Initialize the list of subvolumes. 
+    std::vector<PrimitiveList<T> > subVolumeList(1);
+    subVolumeList[0] = a_primitives;
+
+    int numSubVolumes = 1;
+    while (numSubVolumes < K){
+
+      std::vector<PrimitiveList<T> > newSubVolumeList(0);
+      for (const auto& subVolume : subVolumeList){
+	const std::array<PrimitiveList<T>, 2>& binarySplit = spatialSplitPartitioner<T, 2>(subVolume);
+
+	newSubVolumeList.push_back(binarySplit[0]);
+	newSubVolumeList.push_back(binarySplit[1]);	
+      }
+
+      subVolumeList = newSubVolumeList;
+      
+      numSubVolumes *= 2;
+    }
+
+    // We have a vector but need an array:
+    std::array<PrimitiveList<T>, K> subVolumePrimitives;
+    for (int i = 0; i < K; i++){
+      subVolumePrimitives[i] = subVolumeList[i];
+    }
+
     return subVolumePrimitives;
   };
 

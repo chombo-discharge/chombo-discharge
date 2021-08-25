@@ -47,6 +47,8 @@ namespace BVH {
 
   /*!
     @brief Polymorphic partitioner for splitting a list of primitives into K new lists of primitives
+    @param[in] a_primitives List of primitives to be subdivided into sub-bounding volumes. 
+    @return Returns a list (std::array) of new primitives which make up the new bounding volumes. 
   */
   template <class P, int K>
   using PartitionerT = std::function<std::array<PrimitiveListT<P>, K>(const PrimitiveListT<P>& a_primitives)>;
@@ -184,6 +186,12 @@ namespace BVH {
     const PrimitiveList& getPrimitives() const noexcept;
 
     /*!
+      @brief Get bounding volume
+    */
+    inline
+    const BV& getBoundingVolume() const noexcept;
+
+    /*!
       @brief Function which computes the signed distance
       @param[in] a_point 3D point in space
       @param[in] a_whichPruning Pruning algorithm
@@ -223,9 +231,9 @@ namespace BVH {
       @param[in] a_point 3D point in space
       @return Signed distance to the input point
       @details This routine computes the distance to a_point using unordered pruning. We begin at the top (root node of the tree) and descend downwards. This routine
-      first the left sub-tree and then the right sub-tree. Once we hit leaf node we update the shortest distance 'd' found so far.
+      visits nodes in the order they were created. Once we hit leaf node we update the shortest distance 'd' found so far.
       As we investigate more branches, they can be pruned if the distance 'd' is shorter than the distance to the node's bounding volume.
-      @note The difference between this and pruneOrdered(a_point) is that this routine always does the left subtree first and then the right. In almost all cases
+      @note The difference between this and pruneOrdered(a_point) is that this routine always does the nodes in the order they were created. In almost all cases
       this is more inefficient than pruneOrdered(a_point). 
       @return Returns the signed distance from a_point to the primitives. 
     */
@@ -237,10 +245,10 @@ namespace BVH {
       @param[in] a_point 3D point in space
       @return Signed distance to the input point
       @details This routine computes the distance to a_point using unordered pruning. We begin at the top (root node of the tree) and descend downwards. This routine
-      first the left sub-tree and then the right sub-tree. Once we hit leaf node we update the shortest distance 'd' found so far.
+      visits nodes in the order they were created. Once we hit leaf node we update the shortest distance 'd' found so far.
       As we investigate more branches, they can be pruned if the distance 'd' is shorter than the distance to the node's bounding volume. The only difference between
       this routine and pruneUnordered(a_point) is that this routine prunes based on the unsigned square distance first, and only computes the signed distance at the end.
-      @note The difference between this and pruneOrdered2(a_point) is that this routine always does the left subtree first and then the right. In almost all cases
+      @note The difference between this and pruneOrdered2(a_point) is that this routine always does nodes in the order they were created. In almost all cases
       this is more inefficient than pruneOrdered2(a_point). 
       @return Returns the signed distance from a_point to the primitives.     
     */
@@ -252,7 +260,7 @@ namespace BVH {
     /*!
       @brief Bounding volume object
     */
-    BV m_bv;
+    BV m_boundingVolume;
 
     /*!
       @brief Node type (leaf or regular)

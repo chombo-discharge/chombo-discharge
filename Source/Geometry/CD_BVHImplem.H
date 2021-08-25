@@ -114,6 +114,12 @@ namespace BVH {
     return (m_primitives);
   }
 
+  template <class T, class P, class BV, int K>  
+  inline
+  const BV& NodeT<T, P, BV, K>::getBoundingVolume() const noexcept {
+    return (m_boundingVolume);
+  }
+
   template <class T, class P, class BV, int K>
   inline
   const PrimitiveListT<P>& NodeT<T, P, BV, K>::getPrimitives() const noexcept {
@@ -127,7 +133,7 @@ namespace BVH {
 							     const BVConstructor& a_bvConstructor) noexcept{
 
     // Compute the bounding volume for this node. 
-    m_bv = a_bvConstructor(m_primitives);
+    m_boundingVolume = a_bvConstructor(m_primitives);
 
     // Check if we can split this node into sub-bounding volumes. 
     const bool stopRecursiveSplitting = a_stopCrit(*this);
@@ -174,13 +180,13 @@ namespace BVH {
   template <class T, class P, class BV, int K>
   inline
   T NodeT<T, P, BV, K>::getDistanceToBoundingVolume(const Vec3& a_point) const noexcept{
-    return m_bv.getDistance(a_point);
+    return m_boundingVolume.getDistance(a_point);
   }
 
   template <class T, class P, class BV, int K>
   inline
   T NodeT<T, P, BV, K>::getDistanceToBoundingVolume2(const Vec3& a_point) const noexcept{
-    return m_bv.getDistance2(a_point);
+    return m_boundingVolume.getDistance2(a_point);
   }
 
   template <class T, class P, class BV, int K>
@@ -311,7 +317,7 @@ namespace BVH {
   template <class T, class P, class BV, int K>
   inline
   void NodeT<T, P, BV, K>::pruneOrdered2(T& a_shortestSquareDistanceSoFar2, std::shared_ptr<const P>& a_closestPrimitiveSoFar, const Vec3& a_point) const noexcept  {
-    // TLDR: Beginning at some node, this routine descends the left/right branches in the tree. It always descends the branch with the shortest distance
+    // TLDR: Beginning at some node, this routine descends  branches in the tree. It always descends the branch with the shortest distance
     //       to the bounding volume first. The other branches are investigated only after the full sub-tree beneath the first branch has completed. Since the shortest
     //       distance to primitives is updated underway, there is a decent chance that the other subtrees can be pruned. Hence why this routine is more efficient
     //       than prunedUnordered. 
@@ -353,7 +359,7 @@ namespace BVH {
 	for (int i = 0; i < K; i++){
 	  const std::pair<T, NodePtr>& node = distancesAndNodes[i];
 
-	  if(node.first <= a_shortestSquareDistanceSoFar2){
+	  if(node.first < a_shortestSquareDistanceSoFar2){
 	    node.second->pruneOrdered2(a_shortestSquareDistanceSoFar2, a_closestPrimitiveSoFar, a_point);
 	  }
 	  else{ // Prune the other subtrees. 
