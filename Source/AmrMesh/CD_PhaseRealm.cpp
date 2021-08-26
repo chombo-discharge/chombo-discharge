@@ -102,9 +102,24 @@ void PhaseRealm::regridBase(const int a_lmin){
   }
 
   if(m_isDefined){
+
+    Timer timer("PhaseRealm::regridBase(int)");
+
+    timer.startEvent("Define EBLevelGrid");
     this->defineEBLevelGrid(a_lmin);
+    timer.stopEvent("Define EBLevelGrid");
+
+    timer.startEvent("Define neighbors");    
     this->defineNeighbors(a_lmin);
+    timer.stopEvent("Define neighbors");        
+
+    timer.startEvent("Define VoFIterators");        
     this->defineVofIterator(a_lmin);
+    timer.stopEvent("Define VoFIterators");
+
+    if(m_verbosity > 0){
+      timer.eventReport();
+    }
   }
 }
 
