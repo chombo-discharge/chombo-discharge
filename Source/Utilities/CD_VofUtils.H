@@ -123,6 +123,14 @@ public:
   static void includeCells(Vector<VolIndex>& a_vofs, const IntVectSet& a_includeIVS);
 
   /*!
+    @brief Modifies a_vofs so it only includes cells in a box
+    @param[in] a_vofs       List of vofs to be modified
+    @param[in] a_includeIVS List of cells to be included
+    @return Modifed list of vofs which are guaranteed to lie in specified grid cells
+  */
+  static void includeCells(Vector<VolIndex>& a_vofs, const DenseIntVectSet& a_includeIVS);  
+
+  /*!
     @brief Discard duplicates
     @param[inout] a_vofs List of Vofs
     @return Returns the same vofs with discarded duplicates. 

@@ -26,14 +26,16 @@
 
 PhaseRealm::PhaseRealm(){
   // Default settings
-  m_isDefined   = false;
+  m_isDefined = false;
   m_verbosity = -1;
+  m_profile   = false;
 
   this->registerOperator(s_eb_gradient);
   this->registerOperator(s_eb_irreg_interp);
 
   // Adding this for debugging purposes. 
   ParmParse pp("PhaseRealm");
+  pp.query("profile",   m_profile);
   pp.query("verbosity", m_verbosity);
 }
 
@@ -117,7 +119,7 @@ void PhaseRealm::regridBase(const int a_lmin){
     this->defineVofIterator(a_lmin);
     timer.stopEvent("Define VoFIterators");
 
-    if(m_verbosity > 0){
+    if(m_profile){
       timer.eventReport();
     }
   }
@@ -185,7 +187,7 @@ void PhaseRealm::regridOperators(const int a_lmin){
     this->defineEBMultigrid(a_lmin);
     timer.stopEvent("Multigrid interpolator");
 
-    if(m_verbosity > 0){
+    if(m_profile){
       timer.eventReport();
     }
   }

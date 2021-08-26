@@ -171,6 +171,19 @@ void VofUtils::includeCells(Vector<VolIndex>& a_vofs, const IntVectSet& a_includ
   a_vofs = newVofs;
 }
 
+void VofUtils::includeCells(Vector<VolIndex>& a_vofs, const DenseIntVectSet& a_includeIVS){
+  Vector<VolIndex> newVofs;
+
+  for (auto& ivof : a_vofs.stdVector()){
+    const IntVect iv = ivof.gridIndex();
+    if(a_includeIVS[iv]){
+      newVofs.push_back(ivof);
+    }
+  }
+
+  a_vofs = newVofs;
+}
+
 void VofUtils::onlyUnique(Vector<VolIndex>& a_vofs){
   std::set<VolIndex> setVofs;
   for (int i = 0; i < a_vofs.size(); i++){

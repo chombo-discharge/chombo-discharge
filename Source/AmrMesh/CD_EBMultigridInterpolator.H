@@ -144,22 +144,22 @@ protected:
   /*!
     @brief Grown box layout on the fine level
   */
-  BoxLayout m_fineBoxes;
+  BoxLayout m_grownFineBoxesLayout;
 
   /*!
     @brief Grown box layout on the coarse level
   */
-  BoxLayout m_coarBoxes;
+  BoxLayout m_grownCoarBoxesLayout;
 
   /*!
     @brief Fine data. Contains a lot of ghost storage
   */
-  mutable BoxLayoutData<EBCellFAB> m_fineData;
+  mutable BoxLayoutData<EBCellFAB> m_grownFineData;
 
   /*!
     @brief Coarsened data
   */
-  mutable BoxLayoutData<EBCellFAB> m_coarData;
+  mutable BoxLayoutData<EBCellFAB> m_grownCoarData;
 
   /*!
     @brief Minimum number of ghost cells in input
@@ -234,19 +234,19 @@ protected:
   /*!
     @brief Build an interpolation stencil
   */
-  bool getStencil(VoFStencil&         a_stencilFine,
-		  VoFStencil&         a_stencilCoar,
-		  const CellLocation& a_cellLocation,
-		  const VolIndex&     a_ghostVofFine,
-		  const VolIndex&     a_ghostVofCoar,
-		  const EBISBox&      a_ebisboxFine,
-		  const EBISBox&      a_ebisboxCoar,
-		  const IntVectSet&   a_validFineCells,
-		  const IntVectSet&   a_validCoarCells,
-		  const Real&         a_dxFine,
-		  const Real&         a_dxCoar,
-		  const int&          a_order,
-		  const int&          a_weight);
+  bool getStencil(VoFStencil&            a_stencilFine,
+		  VoFStencil&            a_stencilCoar,
+		  const CellLocation&    a_cellLocation,
+		  const VolIndex&        a_ghostVofFine,
+		  const VolIndex&        a_ghostVofCoar,
+		  const EBISBox&         a_ebisboxFine,
+		  const EBISBox&         a_ebisboxCoar,
+		  const DenseIntVectSet& a_validFineCells,
+		  const DenseIntVectSet& a_validCoarCells,
+		  const Real&            a_dxFine,
+		  const Real&            a_dxCoar,
+		  const int&             a_order,
+		  const int&             a_weight);
 };
 
 #include <CD_NamespaceFooter.H>

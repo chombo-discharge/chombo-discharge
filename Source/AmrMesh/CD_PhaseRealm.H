@@ -329,6 +329,11 @@ protected:
   bool m_hasEbCf;
 
   /*!
+    @brief Profile or not
+  */
+  bool m_profile;
+
+  /*!
     @brief Finest grid level
   */
   int m_finestLevel;
