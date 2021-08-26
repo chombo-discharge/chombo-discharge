@@ -190,9 +190,9 @@ namespace BoundingVolumes {
   template <class T>
   inline
   T BoundingSphereT<T>::getDistance2(const Vec3& a_x0) const noexcept {
-    constexpr T zero = 0.0;
-    
-    return std::max(zero, (a_x0-m_center).length2() - m_radius*m_radius);
+    const T d = this->getDistance(a_x0);
+
+    return d*d;
   }
 
   template <class T>

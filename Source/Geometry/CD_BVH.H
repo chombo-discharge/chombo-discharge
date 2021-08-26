@@ -28,7 +28,7 @@ namespace BVH {
     @brief Forward declare the BVH node since it is needed for the polymorphic lambdas. 
     @details T is the precision used in the BVH computations, P is the enclosing primitive and BV is the bounding volume used in the BVH. 
   */
-  template <class T, class P, class BV>
+  template <class T, class P, class BV, int K>
   class NodeT;
 
   /*!
@@ -42,16 +42,16 @@ namespace BVH {
     @param[in] a_node BVH node
     @return True if the node can't be divided into subvolumes and false otherwise. 
   */
-  template <class T, class P, class BV>
-  using StopFunctionT = std::function<bool(const NodeT<T, P, BV>& a_node)>;
+  template <class T, class P, class BV, int K>
+  using StopFunctionT = std::function<bool(const NodeT<T, P, BV, K>& a_node)>;
 
   /*!
-    @brief Partitioning function for determining how a list of primitives should be divided into two new nodes in the BVH tree.
-    @param[in] a_primitives List of primitives in the parent node. 
-    @return Returns a std::pair<>, representing the primitives in the left/right sub-volumes. 
+    @brief Polymorphic partitioner for splitting a list of primitives into K new lists of primitives
+    @param[in] a_primitives List of primitives to be subdivided into sub-bounding volumes. 
+    @return Returns a list (std::array) of new primitives which make up the new bounding volumes. 
   */
-  template <class P>
-  using PartitionFunctionT = std::function<std::pair<PrimitiveListT<P>, PrimitiveListT<P> >(const PrimitiveListT<P>& a_primitives)>;
+  template <class P, int K>
+  using PartitionerT = std::function<std::array<PrimitiveListT<P>, K>(const PrimitiveListT<P>& a_primitives)>;
 
   /*!
     @brief Constructor method for creating bounding volumes from a list of primitives
@@ -84,7 +84,7 @@ namespace BVH {
     @details T is the precision for Vec3, P is the primitive type you want to enclose, BV is the bounding volume you use for it. 
     @note P must supply a function signedDistance(...) and BV must supply a function getDistance (had this been C++20, we would have use concepts to enforce this). 
   */
-  template <class T, class P, class BV>
+  template <class T, class P, class BV, int K>
   class NodeT {
   public:
 
@@ -102,7 +102,7 @@ namespace BVH {
       @brief Alias for cutting down on typing. 
       @details In the below, 'Node' is a class which uses precision T for computations and encloses primitives P using a bounding volume BV. 
     */    
-    using Node = NodeT<T, P, BV>;
+    using Node = NodeT<T, P, BV, K>;
 
     /*!
       @brief Alias for cutting down on typing. 
@@ -111,13 +111,13 @@ namespace BVH {
 
     /*!
       @brief Alias for cutting down on typing. 
-    */        
-    using PartitionFunction = PartitionFunctionT<P>;
+    */            
+    using StopFunction = StopFunctionT<T, P, BV, K>;
 
     /*!
-      @brief Alias for cutting down on typing. 
-    */            
-    using StopFunction = StopFunctionT<T, P, BV>;
+      @brief Alias for cutting down on typing
+    */
+    using Partitioner = PartitionerT<P, K>;    
 
     /*!
       @brief Alias for cutting down on typing. 
@@ -166,9 +166,10 @@ namespace BVH {
       given in the input arguments (a_stopFunc, a_partFunc, a_bvFunc)
     */
     inline
-    void topDownSortAndPartitionPrimitives(const StopFunction&      a_stopFunc,
-					   const PartitionFunction& a_partFunc,
-					   const BVConstructor&     a_bvFunc) noexcept;
+    void topDownSortAndPartitionPrimitives(const StopFunction&  a_stopCrit,
+					   const Partitioner&   a_partitioner,
+					   const BVConstructor& a_bvConstructor) noexcept;
+
 
     /*!
       @brief Get the depth of the current node
@@ -183,6 +184,12 @@ namespace BVH {
     */
     inline
     const PrimitiveList& getPrimitives() const noexcept;
+
+    /*!
+      @brief Get bounding volume
+    */
+    inline
+    const BV& getBoundingVolume() const noexcept;
 
     /*!
       @brief Function which computes the signed distance
@@ -224,9 +231,9 @@ namespace BVH {
       @param[in] a_point 3D point in space
       @return Signed distance to the input point
       @details This routine computes the distance to a_point using unordered pruning. We begin at the top (root node of the tree) and descend downwards. This routine
-      first the left sub-tree and then the right sub-tree. Once we hit leaf node we update the shortest distance 'd' found so far.
+      visits nodes in the order they were created. Once we hit leaf node we update the shortest distance 'd' found so far.
       As we investigate more branches, they can be pruned if the distance 'd' is shorter than the distance to the node's bounding volume.
-      @note The difference between this and pruneOrdered(a_point) is that this routine always does the left subtree first and then the right. In almost all cases
+      @note The difference between this and pruneOrdered(a_point) is that this routine always does the nodes in the order they were created. In almost all cases
       this is more inefficient than pruneOrdered(a_point). 
       @return Returns the signed distance from a_point to the primitives. 
     */
@@ -238,10 +245,10 @@ namespace BVH {
       @param[in] a_point 3D point in space
       @return Signed distance to the input point
       @details This routine computes the distance to a_point using unordered pruning. We begin at the top (root node of the tree) and descend downwards. This routine
-      first the left sub-tree and then the right sub-tree. Once we hit leaf node we update the shortest distance 'd' found so far.
+      visits nodes in the order they were created. Once we hit leaf node we update the shortest distance 'd' found so far.
       As we investigate more branches, they can be pruned if the distance 'd' is shorter than the distance to the node's bounding volume. The only difference between
       this routine and pruneUnordered(a_point) is that this routine prunes based on the unsigned square distance first, and only computes the signed distance at the end.
-      @note The difference between this and pruneOrdered2(a_point) is that this routine always does the left subtree first and then the right. In almost all cases
+      @note The difference between this and pruneOrdered2(a_point) is that this routine always does nodes in the order they were created. In almost all cases
       this is more inefficient than pruneOrdered2(a_point). 
       @return Returns the signed distance from a_point to the primitives.     
     */
@@ -253,7 +260,7 @@ namespace BVH {
     /*!
       @brief Bounding volume object
     */
-    BV m_bv;
+    BV m_boundingVolume;
 
     /*!
       @brief Node type (leaf or regular)
@@ -271,19 +278,14 @@ namespace BVH {
     PrimitiveList m_primitives;
 
     /*!
+      @brief Children nodes
+    */
+    std::array<NodePtr, K> m_children;
+
+    /*!
       @brief Pointer to parent node
     */
     NodePtr m_parent;
-
-    /*!
-      @brief Pointer to left sub-tree node
-    */    
-    NodePtr m_left;
-
-    /*!
-      @brief Pointer to right sub-tree node
-    */        
-    NodePtr m_right;
 
     /*!
       @brief Set node type to leaf or regular
@@ -308,6 +310,12 @@ namespace BVH {
     void insertNode(NodePtr& a_node, const PrimitiveList& a_primitives) noexcept;
 
     /*!
+      @brief Insert nodes with primitives
+    */
+    inline
+    void insertNodes(const std::array<PrimitiveList, K>& a_primitives) noexcept;
+
+    /*!
       @brief Set to regular node
       @note This sets m_nodeType to regular and clears the primitives list
     */
@@ -320,18 +328,6 @@ namespace BVH {
     */
     inline
     void setPrimitives(const PrimitiveList& a_primitives) noexcept;
-
-    /*!
-      @brief Get modifiable bounding volume for this node
-    */
-    inline
-    BV& getBoundingVolume() noexcept;
-
-    /*!
-      @brief Get immutable bounding volume for this node
-    */    
-    inline
-    const BV& getBoundingVolume() const noexcept;
 
     /*!
       @brief Get the distance from a 3D point to the bounding volume 
@@ -358,48 +354,6 @@ namespace BVH {
     T getDistanceToPrimitives(const Vec3& a_point) const noexcept;
 
     /*!
-      @brief Get modifiable parent node
-      @return Parent node
-    */
-    inline
-    Node& getParent() noexcept;
-
-    /*!
-      @brief Get immutable parent node
-      @return Parent node
-    */
-    inline
-    const Node& getParent() const noexcept;
-
-    /*!
-      @brief Get modifiable left sub-tree node
-      @return Left node
-    */
-    inline
-    Node& getLeft() noexcept;
-
-    /*!
-      @brief Get immutable left sub-tree node
-      @return Left node
-    */    
-    inline
-    const Node& getLeft() const noexcept;
-
-    /*!
-      @brief Get modifiable right sub-tree node
-      @return Left node
-    */            
-    inline
-    Node& getRight() noexcept;
-
-    /*!
-      @brief Get immutable right sub-tree node
-      @return Left node
-    */        
-    inline
-    const Node& getRight() const noexcept;
-
-    /*!
       @brief Get the node type
       @return Node type
     */
@@ -419,20 +373,6 @@ namespace BVH {
     */
     inline
     void setParent(const NodePtr& a_parent) noexcept;
-
-    /*!
-      @brief Set left sub-tree node
-      @param[in] a_left Left sub-tree node
-    */    
-    inline
-    void setLeft(const NodePtr& a_left) noexcept;
-
-    /*!
-      @brief Set right sub-tree node
-      @param[in] a_right Right sub-tree node
-    */        
-    inline
-    void setRight(const NodePtr& a_right) noexcept;
 
     /*!
       @brief Implementation function for pruneOrdered (it requires a different signature). 

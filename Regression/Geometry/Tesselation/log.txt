@@ -1,0 +1,191 @@
+/home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/mk/Make.defs:35: warning: overriding recipe for target '.SUFFIXES'
+/home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/mk/Make.defs:35: warning: ignoring old recipe for target '.SUFFIXES'
+Depending /home/robertm/Projects/chombo-discharge/chombo-discharge/Geometries/Tesselation/CD_Tesselation.cpp ...
+/home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/mk/Make.defs:35: warning: overriding recipe for target '.SUFFIXES'
+/home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/mk/Make.defs:35: warning: ignoring old recipe for target '.SUFFIXES'
+/home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/mk/Make.defs:35: warning: overriding recipe for target '.SUFFIXES'
+/home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/mk/Make.defs:35: warning: ignoring old recipe for target '.SUFFIXES'
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/Geometries/Tesselation/CD_Tesselation.cpp:22:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/Geometry/CD_DcelBVH.H:51:37: error: wrong number of template arguments (3, should be 4)
+   BVH::StopFunctionT<T, FaceT<T>, BV> defaultStopFunction = [=](const BVH::NodeT<T, FaceT<T>, BV>& a_node){
+                                     ^
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/Geometries/Tesselation/CD_Tesselation.cpp:18:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/Geometry/CD_BVH.H:46:78: note: provided for ‘template<class T, class P, class BV, int K> using StopFunctionT = std::function<bool(const ChomboDischarge::BVH::NodeT<T, P, BV, K>&)>’
+   using StopFunctionT = std::function<bool(const NodeT<T, P, BV, K>& a_node)>;
+                                                                              ^
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/Geometries/Tesselation/CD_Tesselation.cpp:22:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/Geometry/CD_DcelBVH.H:51:97: error: wrong number of template arguments (3, should be 4)
+   BVH::StopFunctionT<T, FaceT<T>, BV> defaultStopFunction = [=](const BVH::NodeT<T, FaceT<T>, BV>& a_node){
+                                                                                                 ^
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/Geometries/Tesselation/CD_Tesselation.cpp:18:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/Geometry/CD_BVH.H:32:9: note: provided for ‘template<class T, class P, class BV, int K> class ChomboDischarge::BVH::NodeT’
+   class NodeT;
+         ^~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/Geometries/Tesselation/CD_Tesselation.cpp:22:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/Geometry/CD_DcelBVH.H: In lambda function:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/Geometry/CD_DcelBVH.H:52:37: error: request for member ‘getPrimitives’ in ‘a_node’, which is of non-class type ‘const int’
+     const auto& primitives = a_node.getPrimitives();
+                                     ^~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/Geometry/CD_DcelBVH.H:53:37: error: request for member ‘getDepth’ in ‘a_node’, which is of non-class type ‘const int’
+     const int depth        = a_node.getDepth();
+                                     ^~~~~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdf.H:118:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/Geometries/Tesselation/CD_Tesselation.cpp:23:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdfImplem.H: At global scope:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdfImplem.H:28:13: error: wrong number of template arguments (2, should be 3)
+ BvhSdf<T, BV>::BvhSdf(const std::shared_ptr<Node>& a_root, const bool a_flipInside, const Real a_zCoord) {
+             ^
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/Geometries/Tesselation/CD_Tesselation.cpp:23:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdf.H:36:7: note: provided for ‘template<class T, class BV, int K> class ChomboDischarge::BvhSdf’
+ class BvhSdf : public BaseIF {
+       ^~~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdf.H:118:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/Geometries/Tesselation/CD_Tesselation.cpp:23:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdfImplem.H:28:45: error: ‘Node’ was not declared in this scope
+ BvhSdf<T, BV>::BvhSdf(const std::shared_ptr<Node>& a_root, const bool a_flipInside, const Real a_zCoord) {
+                                             ^~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdfImplem.H:28:45: note: suggested alternative: ‘Side’
+ BvhSdf<T, BV>::BvhSdf(const std::shared_ptr<Node>& a_root, const bool a_flipInside, const Real a_zCoord) {
+                                             ^~~~
+                                             Side
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdfImplem.H:28:49: error: template argument 1 is invalid
+ BvhSdf<T, BV>::BvhSdf(const std::shared_ptr<Node>& a_root, const bool a_flipInside, const Real a_zCoord) {
+                                                 ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdfImplem.H:28:16: error: conflicting declaration of template ‘template<class T, class BV, int K> int ChomboDischarge::BvhSdf(const int&, bool, Real)’
+ BvhSdf<T, BV>::BvhSdf(const std::shared_ptr<Node>& a_root, const bool a_flipInside, const Real a_zCoord) {
+                ^~~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/Geometries/Tesselation/CD_Tesselation.cpp:23:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdf.H:36:7: note: previous declaration ‘template<class T, class BV, int K> class ChomboDischarge::BvhSdf’
+ class BvhSdf : public BaseIF {
+       ^~~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdf.H:118:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/Geometries/Tesselation/CD_Tesselation.cpp:23:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdfImplem.H:38:13: error: wrong number of template arguments (2, should be 3)
+ BvhSdf<T, BV>::BvhSdf(const BvhSdf& a_primitive) {
+             ^
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/Geometries/Tesselation/CD_Tesselation.cpp:23:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdf.H:36:7: note: provided for ‘template<class T, class BV, int K> class ChomboDischarge::BvhSdf’
+ class BvhSdf : public BaseIF {
+       ^~~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdf.H:118:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/Geometries/Tesselation/CD_Tesselation.cpp:23:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdfImplem.H:38:29: error: invalid use of template-name ‘ChomboDischarge::BvhSdf’ without an argument list
+ BvhSdf<T, BV>::BvhSdf(const BvhSdf& a_primitive) {
+                             ^~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdfImplem.H:38:29: note: class template argument deduction is only available with -std=c++1z or -std=gnu++1z
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/Geometries/Tesselation/CD_Tesselation.cpp:23:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdf.H:36:7: note: ‘template<class T, class BV, int K> class ChomboDischarge::BvhSdf’ declared here
+ class BvhSdf : public BaseIF {
+       ^~~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdf.H:118:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/Geometries/Tesselation/CD_Tesselation.cpp:23:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdfImplem.H:38:16: error: conflicting declaration of template ‘template<class T, class BV, int K> int ChomboDischarge::BvhSdf(const int&)’
+ BvhSdf<T, BV>::BvhSdf(const BvhSdf& a_primitive) {
+                ^~~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/Geometries/Tesselation/CD_Tesselation.cpp:23:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdf.H:36:7: note: previous declaration ‘template<class T, class BV, int K> class ChomboDischarge::BvhSdf’
+ class BvhSdf : public BaseIF {
+       ^~~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdf.H:118:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/Geometries/Tesselation/CD_Tesselation.cpp:23:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdfImplem.H:48:13: error: wrong number of template arguments (2, should be 3)
+ BvhSdf<T, BV>::~BvhSdf(){
+             ^
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/Geometries/Tesselation/CD_Tesselation.cpp:23:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdf.H:36:7: note: provided for ‘template<class T, class BV, int K> class ChomboDischarge::BvhSdf’
+ class BvhSdf : public BaseIF {
+       ^~~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdf.H:118:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/Geometries/Tesselation/CD_Tesselation.cpp:23:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdfImplem.H:55:18: error: wrong number of template arguments (2, should be 3)
+ Real BvhSdf<T, BV>::value(const RealVect& a_point) const {
+                  ^
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/Geometries/Tesselation/CD_Tesselation.cpp:23:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdf.H:36:7: note: provided for ‘template<class T, class BV, int K> class ChomboDischarge::BvhSdf’
+ class BvhSdf : public BaseIF {
+       ^~~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdf.H:118:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/Geometries/Tesselation/CD_Tesselation.cpp:23:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdfImplem.H:55:52: error: non-member function ‘Real ChomboDischarge::value(const RealVect&)’ cannot have cv-qualifier
+ Real BvhSdf<T, BV>::value(const RealVect& a_point) const {
+                                                    ^~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdfImplem.H: In function ‘Real ChomboDischarge::value(const RealVect&)’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdfImplem.H:61:3: error: ‘Vec3’ was not declared in this scope
+   Vec3 p(a_point[0], a_point[1], a_point[2]);
+   ^~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdfImplem.H:61:3: note: suggested alternative: ‘Vec3T’
+   Vec3 p(a_point[0], a_point[1], a_point[2]);
+   ^~~~
+   Vec3T
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdfImplem.H:65:12: error: ‘m_root’ was not declared in this scope
+   auto d = m_root->pruneTree(p);
+            ^~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdfImplem.H:65:12: note: suggested alternative: ‘__rint’
+   auto d = m_root->pruneTree(p);
+            ^~~~~~
+            __rint
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdfImplem.H:65:30: error: ‘p’ was not declared in this scope
+   auto d = m_root->pruneTree(p);
+                              ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdfImplem.H:69:6: error: ‘m_flipInside’ was not declared in this scope
+   if(m_flipInside){
+      ^~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdfImplem.H:69:6: note: suggested alternative: ‘__finite’
+   if(m_flipInside){
+      ^~~~~~~~~~~~
+      __finite
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdfImplem.H:73:3: error: ‘m_timespan’ was not declared in this scope
+   m_timespan += time_span;
+   ^~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdfImplem.H:73:3: note: suggested alternative: ‘time_span’
+   m_timespan += time_span;
+   ^~~~~~~~~~
+   time_span
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdfImplem.H:74:3: error: ‘m_numCalled’ was not declared in this scope
+   m_numCalled++;
+   ^~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdfImplem.H: At global scope:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdfImplem.H:80:21: error: wrong number of template arguments (2, should be 3)
+ BaseIF* BvhSdf<T, BV>::newImplicitFunction() const {
+                     ^
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/Geometries/Tesselation/CD_Tesselation.cpp:23:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdf.H:36:7: note: provided for ‘template<class T, class BV, int K> class ChomboDischarge::BvhSdf’
+ class BvhSdf : public BaseIF {
+       ^~~~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdf.H:118:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/Geometries/Tesselation/CD_Tesselation.cpp:23:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdfImplem.H:80:46: error: non-member function ‘BaseIF* ChomboDischarge::newImplicitFunction()’ cannot have cv-qualifier
+ BaseIF* BvhSdf<T, BV>::newImplicitFunction() const {
+                                              ^~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdfImplem.H: In function ‘BaseIF* ChomboDischarge::newImplicitFunction()’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdfImplem.H:81:36: error: expected type-specifier before ‘BvhSdf’
+   return static_cast<BaseIF*> (new BvhSdf(*this));
+                                    ^~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdfImplem.H:81:36: error: expected ‘)’ before ‘BvhSdf’
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdfImplem.H:81:36: error: expected ‘;’ before ‘BvhSdf’
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdfImplem.H:81:42: error: missing template arguments before ‘(’ token
+   return static_cast<BaseIF*> (new BvhSdf(*this));
+                                          ^
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/ImplicitFunctions/CD_BvhSdfImplem.H:81:44: error: invalid use of ‘this’ in non-member function
+   return static_cast<BaseIF*> (new BvhSdf(*this));
+                                            ^~~~
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/Geometries/Tesselation/CD_Tesselation.cpp:22:0:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/Geometry/CD_DcelBVH.H: In instantiation of ‘int ChomboDischarge::Dcel::defaultStopFunction<float, ChomboDischarge::BoundingVolumes::AABBT<float> >’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Geometries/Tesselation/CD_Tesselation.cpp:58:45:   required from here
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/Geometry/CD_DcelBVH.H:51:39: error: cannot convert ‘ChomboDischarge::Dcel::<lambda(const int&)>’ to ‘int’ in initialization
+   BVH::StopFunctionT<T, FaceT<T>, BV> defaultStopFunction = [=](const BVH::NodeT<T, FaceT<T>, BV>& a_node){
+                                       ^~~~~~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Geometries/Tesselation/CD_Tesselation.cpp: In constructor ‘ChomboDischarge::Tesselation::Tesselation()’:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Geometries/Tesselation/CD_Tesselation.cpp:60:45: error: no matching function for call to ‘ChomboDischarge::BVH::NodeT<float, ChomboDischarge::Dcel::FaceT<float>, ChomboDischarge::BoundingVolumes::AABBT<float>, 2>::topDownSortAndPartitionPrimitives(int&, ChomboDischarge::BVH::PartitionFunctionT<ChomboDischarge::Dcel::FaceT<float> >&, ChomboDischarge::BVH::BVConstructorT<ChomboDischarge::Dcel::FaceT<float>, ChomboDischarge::BoundingVolumes::AABBT<float> >&)’
+          defaultBVConstructor<precision, BV>);
+                                             ^
+In file included from /home/robertm/Projects/chombo-discharge/chombo-discharge/Source/Geometry/CD_BVH.H:424:0,
+                 from /home/robertm/Projects/chombo-discharge/chombo-discharge/Geometries/Tesselation/CD_Tesselation.cpp:18:
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/Geometry/CD_BVHImplem.H:129:8: note: candidate: void ChomboDischarge::BVH::NodeT<T, P, BV, K>::topDownSortAndPartitionPrimitives(const StopFunction&, const PartitionFunction&, const BVConstructor&) [with T = float; P = ChomboDischarge::Dcel::FaceT<float>; BV = ChomboDischarge::BoundingVolumes::AABBT<float>; int K = 2; ChomboDischarge::BVH::NodeT<T, P, BV, K>::StopFunction = std::function<bool(const ChomboDischarge::BVH::NodeT<float, ChomboDischarge::Dcel::FaceT<float>, ChomboDischarge::BoundingVolumes::AABBT<float>, 2>&)>; ChomboDischarge::BVH::NodeT<T, P, BV, K>::PartitionFunction = std::function<std::pair<std::vector<std::shared_ptr<const ChomboDischarge::Dcel::FaceT<float> >, std::allocator<std::shared_ptr<const ChomboDischarge::Dcel::FaceT<float> > > >, std::vector<std::shared_ptr<const ChomboDischarge::Dcel::FaceT<float> >, std::allocator<std::shared_ptr<const ChomboDischarge::Dcel::FaceT<float> > > > >(const std::vector<std::shared_ptr<const ChomboDischarge::Dcel::FaceT<float> >, std::allocator<std::shared_ptr<const ChomboDischarge::Dcel::FaceT<float> > > >&)>; ChomboDischarge::BVH::NodeT<T, P, BV, K>::BVConstructor = std::function<ChomboDischarge::BoundingVolumes::AABBT<float>(const std::vector<std::shared_ptr<const ChomboDischarge::Dcel::FaceT<float> >, std::allocator<std::shared_ptr<const ChomboDischarge::Dcel::FaceT<float> > > >&)>]
+   void NodeT<T, P, BV, K>::topDownSortAndPartitionPrimitives(const StopFunction&      a_stopFunc,
+        ^~~~~~~~~~~~~~~~~~
+/home/robertm/Projects/chombo-discharge/chombo-discharge/Source/Geometry/CD_BVHImplem.H:129:8: note:   no known conversion for argument 1 from ‘int’ to ‘const StopFunction& {aka const std::function<bool(const ChomboDischarge::BVH::NodeT<float, ChomboDischarge::Dcel::FaceT<float>, ChomboDischarge::BoundingVolumes::AABBT<float>, 2>&)>&}’
+/home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/mk/Make.rules:517: recipe for target 'o/3d.Linux.64.mpicxx.gfortran.OPTHIGH.MPI/CD_Tesselation.o' failed
+make[1]: *** [o/3d.Linux.64.mpicxx.gfortran.OPTHIGH.MPI/CD_Tesselation.o] Error 1
+/home/robertm/Projects/chombo-discharge/Chombo-3.3/lib/mk/Make.rules:425: recipe for target 'main' failed
+make: *** [main] Error 2

@@ -39,6 +39,8 @@ Tesselation::Tesselation(){
   std::string filename;
   std::string partitioner;
 
+  // Binary tree
+
   Real zCoord;
 
   ParmParse pp("Tesselation");
@@ -52,29 +54,25 @@ Tesselation::Tesselation(){
   Parser::PLY<precision>::readASCII(*m, filename);
   m->reconcile(Dcel::MeshT<precision>::VertexNormalWeight::Angle);
 
-  auto root = std::make_shared<NodeT<precision, Face, BV> >(m->getFaces());
+  constexpr int K = 2;  
+  
+  auto root = std::make_shared<NodeT<precision, Face, BV, K> >(m->getFaces());
 
+  // Build the BVH
   if(partitioner == "default"){
-    root->topDownSortAndPartitionPrimitives(defaultStopFunction<precision, BV>,
-					    defaultPartitionFunction<precision>,
+    root->topDownSortAndPartitionPrimitives(defaultStopFunction<precision, BV, K>,
+					    spatialSplitPartitioner<precision, K>,
 					    defaultBVConstructor<precision, BV>);
   }
-  else if(partitioner == "overlap"){
-    root->topDownSortAndPartitionPrimitives(defaultStopFunction<precision, BV>,
-					    partitionMinimumOverlap<precision, BV>,
+  else if(partitioner == "binary"){
+    root->topDownSortAndPartitionPrimitives(defaultStopFunction<precision, BV, K>,
+					    spatialSplitBinaryPartitioner<precision, K>,
 					    defaultBVConstructor<precision, BV>);
   }
-  else if(partitioner == "sah"){
-    root->topDownSortAndPartitionPrimitives(defaultStopFunction<precision, BV>,
-					    partitionSAH<precision, BV>,
-					    defaultBVConstructor<precision, BV>);
-  }
-  else{
-    MayDay::Abort("Tesselation::Tesselation() -- unknown partitioner requested");
-  }
+  else
+    MayDay::Error("Tesselation::Tesselation() -- badx partitioner requested");
 
-
-  auto bif = RefCountedPtr<BvhSdf<precision, BV> > (new BvhSdf<precision, BV>(root,false,zCoord));
+  auto bif = RefCountedPtr<BvhSdf<precision, BV, K> > (new BvhSdf<precision, BV, K>(root,false,zCoord));
 
   m_electrodes.push_back(Electrode(bif, true));
   
