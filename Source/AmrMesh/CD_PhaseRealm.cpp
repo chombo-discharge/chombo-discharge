@@ -15,6 +15,7 @@
 
 // Our includes
 #include <CD_PhaseRealm.H>
+#include <CD_Timer.H>
 #include <CD_LoadBalancing.H>
 #include <CD_EbFastFineToCoarRedist.H>
 #include <CD_EbFastCoarToFineRedist.H>
@@ -114,19 +115,64 @@ void PhaseRealm::regridOperators(const int a_lmin){
   }
 
   if(m_isDefined){
-    this->defineEbCoarAve(a_lmin);                   
-    this->defineFillPatch(a_lmin);                   
-    this->defineEBPWLInterp(a_lmin);                 
-    this->defineMultigridInjection(a_lmin);          
-    this->defineFluxReg(a_lmin, 1);                  
-    this->defineRedistOper(a_lmin, 1);               
-    this->defineGradSten(a_lmin);                    
-    this->defineIrregSten();                         
-    this->defineNonConsDivSten();                    
-    this->defineCopier(a_lmin);                      
-    this->defineGhostCloud(a_lmin);                  
+
+    Timer timer("PhaseRealm::regridOperators(int)");
+
+    timer.startEvent("EbCoarAve");
+    this->defineEbCoarAve(a_lmin);
+    timer.stopEvent("EbCoarAve");
+
+    timer.startEvent("Ghost interp");
+    this->defineFillPatch(a_lmin);
+    timer.stopEvent("Ghost interp");
+
+    timer.startEvent("PWL interp");
+    this->defineEBPWLInterp(a_lmin);
+    timer.stopEvent("PWL interp");
+
+    timer.startEvent("MG injection");    
+    this->defineMultigridInjection(a_lmin);
+    timer.stopEvent("MG injection");
+
+    timer.startEvent("Flux register");        
+    this->defineFluxReg(a_lmin, 1);
+    timer.stopEvent("Flux register");
+
+    timer.startEvent("Redistribution");            
+    this->defineRedistOper(a_lmin, 1);
+    timer.stopEvent("Redistribution");
+
+    timer.startEvent("Gradient stencil");
+    this->defineGradSten(a_lmin);
+    timer.stopEvent("Gradient stencil");
+
+    timer.startEvent("Irreg stencil");    
+    this->defineIrregSten();
+    timer.stopEvent("Irreg stencil");
+
+    timer.startEvent("Non-conservative stencil");        
+    this->defineNonConsDivSten();
+    timer.stopEvent("Non-conservative stencil");
+
+    timer.startEvent("Copier");            
+    this->defineCopier(a_lmin);
+    timer.stopEvent("Copier");
+
+    timer.startEvent("Ghost cloud");                
+    this->defineGhostCloud(a_lmin);
+    timer.stopEvent("Ghost cloud");
+
+    timer.startEvent("Levelset");                    
     this->defineLevelSet(a_lmin, m_numLsfGhostCells);
-    this->defineEBMultigrid(a_lmin);                 
+    timer.stopEvent("Levelset");
+
+    timer.startEvent("Multigrid interpolator");                        
+    this->defineEBMultigrid(a_lmin);
+    timer.stopEvent("Multigrid interpolator");
+
+    if(m_verbosity > 0){
+      timer.eventReport();
+    }
   }
 }
 

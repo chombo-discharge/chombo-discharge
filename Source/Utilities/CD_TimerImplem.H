@@ -12,7 +12,8 @@
 #ifndef CD_TimerImplem_H
 #define CD_TimerImplem_H
 
-// Chombo include
+// Std includes
+#include <sstream>
 
 // Our includes
 #include <CD_Timer.H>
