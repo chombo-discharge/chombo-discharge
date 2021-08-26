@@ -116,9 +116,9 @@ OPT            = HIGH
 #PROFILE       =
 CXX            = g++
 FC             = gfortran
-#MPI           = 
+MPI            = TRUE
 ## Note: don't set the MPICXX variable if you don't have MPI installed
-#MPICXX        = 
+MPICXX         = mpicxx
 #OBJMODEL      =
 #XTRACONFIG    =
 ## Optional features

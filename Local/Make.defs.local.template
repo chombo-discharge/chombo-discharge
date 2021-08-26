@@ -109,23 +109,23 @@ makefiles+=Make.defs.local
 ## Override the default values here
 
 ## Configuration variables
-DIM            = 3
-DEBUG          = FALSE
-OPT            = HIGH
+#DIM           =
+#DEBUG         =
+#OPT           =
 #PRECISION     =
 #PROFILE       =
-CXX            = g++
-FC             = gfortran
-#MPI           = 
+#CXX           =
+#FC            =
+#MPI           =
 ## Note: don't set the MPICXX variable if you don't have MPI installed
-#MPICXX        = 
+#MPICXX        =
 #OBJMODEL      =
 #XTRACONFIG    =
 ## Optional features
-CXXSTD         = 14
+#CXXSTD        = 11
 #USE_64        =
 #USE_COMPLEX   =
-USE_EB         = TRUE
+#USE_EB        =
 #USE_CCSE      =
 #USE_HDF       =
 #HDFINCFLAGS   = -I<hdf_serial_dir>/include
@@ -133,7 +133,7 @@ USE_EB         = TRUE
 ## Note: don't set the HDFMPI* variables if you don't have parallel HDF installed
 #HDFMPIINCFLAGS= -I<hdf_parallel_dir>/include
 #HDFMPILIBFLAGS= -L<hdf_parallel_dir>/lib -lhdf5 -lz
-USE_MF         = TRUE
+#USE_MF        =
 #USE_MT        =
 #USE_SETVAL    =
 #CH_AR         =
@@ -156,16 +156,16 @@ USE_MF         = TRUE
 #cppoptflags   =
 #cxxcppflags   =
 #cxxdbgflags   =
-cxxoptflags    = -O3
+#cxxoptflags   =
 #cxxprofflags  =
 #fcppflags     =
 #fdbgflags     =
-foptflags      = -O3
+#foptflags     =
 #fprofflags    =
 #flibflags     =
 #lddbgflags    =
 #ldoptflags    =
 #ldprofflags   =
-syslibflags    = -lopenblas
+#syslibflags   =
 
 #end  -- dont change this line
