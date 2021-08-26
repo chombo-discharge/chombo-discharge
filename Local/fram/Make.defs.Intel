@@ -37,11 +37,16 @@ makefiles+=Make.defs.local
 #  MPI          :(TRUE,FALSE) compile for parallel if TRUE, else serial
 #  OPENMPCC     : TRUE for threading with OpenMP, FALSE without OpenMP
 #  MPICXX       : command to compile/link C++ code in parallel
+#  ROSE         : (TRUE,FALSE) preprocess with Rose-based translator
+#  GPU          : (TRUE,FALSE) compile CUDA kernels
 #  OBJMODEL     : special config for non-default compiler mode
 #  XTRACONFIG   : user-defined special config
 
 # Variables for optional features that don't affect filenames:
 
+#  CXXSTD          : Chombo default is C++11.  Set to 14 for C++14, etc.  This
+#                    should not be changed unless you want to experiment with
+#                    different C++ standards.  Only the default is supported.
 #  USE_64          : if TRUE, use 64bit pointers on systems where 32bits is the default
 #  USE_COMPLEX     : if TRUE, enable the 'Complex' type
 #                    (default is TRUE, disable only if compiler doesn't allow it)
@@ -104,30 +109,32 @@ makefiles+=Make.defs.local
 ## Override the default values here
 
 ## Configuration variables
-DIM           = 2
-DEBUG         = FALSE
-OPT           = HIGH
+DIM            = 3
+DEBUG          = FALSE
+OPT            = HIGH
 #PRECISION     =
 #PROFILE       =
-CXX           = icpc
-FC            = ifort
-MPI           = TRUE
+CXX            = icpc
+FC             = ifort
+#MPI           =
 ## Note: don't set the MPICXX variable if you don't have MPI installed
-MPICXX        = mpiicpc
+#MPICXX        =
 #OBJMODEL      =
 #XTRACONFIG    =
 ## Optional features
+CXXSTD         = 14
 #USE_64        =
 #USE_COMPLEX   =
-USE_EB        = TRUE
+USE_EB         = TRUE
 #USE_CCSE      =
-USE_HDF       = TRUE
-HDFINCFLAGS   = -I/cluster/software/HDF5/1.8.18-intel-2017a/include
-HDFLIBFLAGS   = -L/cluster/software/HDF5/1.8.18-intel-2017a/lib -lhdf5 -lz
+USE_HDF        = TRUE
+#USE_HDF       =
+#HDFINCFLAGS   = -I<hdf_serial_dir>/include
+#HDFLIBFLAGS   = -L<hdf_serial_dir>/lib -lhdf5 -lz
 ## Note: don't set the HDFMPI* variables if you don't have parallel HDF installed
-HDFMPIINCFLAGS= -I/cluster/software/HDF5/1.8.18-intel-2017a/include
-HDFMPILIBFLAGS= -L/cluster/software/HDF5/1.8.18-intel-2017a/lib -lhdf5 -lz
-USE_MF        = TRUE
+#HDFMPIINCFLAGS= -I<hdf_parallel_dir>/include
+#HDFMPILIBFLAGS= -L<hdf_parallel_dir>/lib -lhdf5 -lz
+USE_MF         = TRUE
 #USE_MT        =
 #USE_SETVAL    =
 #CH_AR         =
@@ -136,20 +143,30 @@ USE_MF        = TRUE
 #LD            =
 #PERL          =
 #RANLIB        =
+#ROSE          =
+#ROSECC        =
+#ROSEINCFLAGS  =
+#ROSELIBFLAGS  =
+## Note: don't set the CUDA variables if you are not using a CUDA GPU
+#GPU           =
+#NVCC          =
+#NVCCFLAGS     =
+#PTXASFLAGS    =
+#CUBIN         =
 #cppdbgflags   =
 #cppoptflags   =
 #cxxcppflags   =
 #cxxdbgflags   =
-cxxoptflags   = -Ofast -xCORE-AVX2 -march=native
+cxxoptflags    = -Ofast -xCORE-AVX2 -march=native
 #cxxprofflags  =
 #fcppflags     =
 #fdbgflags     =
-foptflags     = -Ofast -xCORE-AVX2
+foptflags      = -Ofast -xCORE-AVX2
 #fprofflags    =
-flibflags     = -mkl=sequential
+flibflags      = -mkl=sequential
 #lddbgflags    =
 #ldoptflags    =
 #ldprofflags   =
-syslibflags   = -ldl -lm -lz
+syslibflags    = -ldl -lm -lz
 
 #end  -- dont change this line
