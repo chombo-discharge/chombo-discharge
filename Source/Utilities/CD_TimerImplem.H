@@ -95,7 +95,7 @@ void Timer::printReportTail(const Real a_elapsedTime) const noexcept {
   std::stringstream tail;
   
   tail << "| ---------------------------------------------------------------------------------------------------------|" << "\n"
-       << "| Total elapsed time = " << std::fixed << std::setprecision(2) << a_elapsedTime << " seconds"                 << "\n"
+       << "| Total elapsed time = " << std::fixed << std::setprecision(3) << a_elapsedTime << " seconds"                 << "\n"
        << "| ---------------------------------------------------------------------------------------------------------|" << "\n";
 
   pout() << tail.str();
@@ -131,8 +131,8 @@ void Timer::eventReport() const noexcept{
       const std::chrono::duration<Real> localDuration = std::get<StopClock>(e.second) - std::get<StartClock>(e.second);
       const Real localDurationInSeconds = localDuration.count();
 
-      ssLocalDuration << std::fixed << std::setprecision(2) << localDurationInSeconds;
-      ssPercentage    << std::fixed << std::setprecision(2) << 100.*localDurationInSeconds/totalTime;
+      ssLocalDuration << std::fixed << std::setprecision(3) << localDurationInSeconds;
+      ssPercentage    << std::fixed << std::setprecision(3) << 100.*localDurationInSeconds/totalTime;
 
 #ifdef CH_MPI
       Vector<Real> allDurations(numRank);
@@ -179,12 +179,12 @@ void Timer::eventReport() const noexcept{
       broadcast(minRank, srcRank);
       broadcast(maxRank, srcRank);      
 
-      ssMinDuration << std::fixed << std::setprecision(2) << minTime;
-      ssMaxDuration << std::fixed << std::setprecision(2) << maxTime;            
-      ssAvgDuration << std::fixed << std::setprecision(2) << average;
-      ssDevDuration << std::fixed << std::setprecision(2) << sigma;
-      ssMinRank     << std::fixed << std::setprecision(2) << minRank;
-      ssMaxRank     << std::fixed << std::setprecision(2) << maxRank;
+      ssMinDuration << std::fixed << std::setprecision(3) << minTime;
+      ssMaxDuration << std::fixed << std::setprecision(3) << maxTime;            
+      ssAvgDuration << std::fixed << std::setprecision(3) << average;
+      ssDevDuration << std::fixed << std::setprecision(3) << sigma;
+      ssMinRank     << std::fixed << std::setprecision(3) << minRank;
+      ssMaxRank     << std::fixed << std::setprecision(3) << maxRank;
 #endif
     }
     else{
