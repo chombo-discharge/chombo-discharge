@@ -42,24 +42,40 @@ Timer::~Timer() {
 
 inline
 void Timer::startEvent(const std::string a_event) noexcept {
-
-  // Only start an event if it has not already been started. 
-  if (m_events.find(a_event) == m_events.end() ) {
-    const TimePoint start = Clock::now();
+  if (m_events.find(a_event) == m_events.end() ) { // Create a new event. 
+    const TimePoint startTime   = Clock::now();
+    const Duration  elapsedTime = Duration(0.0);
     
-    m_events.emplace(a_event, std::make_tuple(false, start, start));
+    m_events.emplace(a_event, std::make_tuple(false, startTime, elapsedTime));
+  }
+  else{ // If the event is not new, we just leave the elapsed time intact. 
+    //    const TimePoint startTime = Clock::now();
+
+    tuple<bool, TimePoint, Duration>& event = m_events.at(a_event);
+
+    const bool alreadyRunning = std::get<StoppedEvent>(event);
+
+    if(!alreadyRunning){ // Only start the event if it is not already running. 
+      const TimePoint startTime          = Clock::now();
+      const Duration previousElapsedTime = std::get<ElapsedTime>(event);
+
+      event = std::make_tuple(false, startTime, previousElapsedTime);
+    }
   }
 }
 
 inline
 void Timer::stopEvent(const std::string a_event) noexcept {
   if (m_events.find(a_event) != m_events.end()) {
-    tuple<bool, TimePoint, TimePoint>& event = m_events.at(a_event);
+    tuple<bool, TimePoint, Duration>& event = m_events.at(a_event);
 
-    const TimePoint start = std::get<StartClock>(event);
-    const TimePoint stop  = Clock::now();
+    const TimePoint startTime           = std::get<StartClock>(event);
+    const TimePoint stopTime            = Clock::now();
+    const Duration  curElapsedTime      = stopTime - startTime;
+    const Duration  previousElapsedTime = std::get<ElapsedTime>(event);
+    const Duration  totalElapsedTime    = previousElapsedTime + curElapsedTime;
 
-    event = std::make_tuple(true, start, stop);
+    event = std::make_tuple(true, startTime, totalElapsedTime);
   }
   else{
     std::cerr << "Timer::stopEvent -- event '" + a_event + "' has not been started\n";
@@ -131,7 +147,7 @@ void Timer::eventReport() const noexcept{
     std::stringstream ssMaxRank;    
 
     if(finishedEvent){
-      const std::chrono::duration<Real> localDuration = std::get<StopClock>(e.second) - std::get<StartClock>(e.second);
+      const Duration localDuration      = std::get<ElapsedTime>(e.second);
       const Real localDurationInSeconds = localDuration.count();
 
       ssLocalDuration << std::fixed << std::setprecision(3) << localDurationInSeconds;
@@ -234,8 +250,8 @@ std::pair<Real, Real> Timer::computeTotalElapsedTime() const noexcept {
     const bool finishedEvent = std::get<StoppedEvent>(e.second);
 
     if(finishedEvent){
-      const std::chrono::duration<Real> localDuration = std::get<StopClock>(e.second) - std::get<StartClock>(e.second);
-      const Real localDurationInSeconds = localDuration.count();
+      const Duration elapsedTime        = std::get<ElapsedTime>(e.second);
+      const Real localDurationInSeconds = elapsedTime.count();
 
       elapsedTimeLocal += localDurationInSeconds;
     }

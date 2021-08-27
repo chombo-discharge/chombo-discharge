@@ -40,6 +40,11 @@ public:
   using TimePoint = std::chrono::steady_clock::time_point;
 
   /*!
+    @brief Duration in seconds
+  */
+  using Duration = std::chrono::duration<Real>;
+
+  /*!
     @brief Static function which returns the time (in seconds) between now and an arbitrary time in the past
   */
   inline
@@ -119,7 +124,7 @@ protected:
   enum EventFields {
     StoppedEvent = 0,
     StartClock   = 1,
-    StopClock    = 2
+    ElapsedTime  = 2
   };
 
   /*!
@@ -128,9 +133,10 @@ protected:
   std::string m_processName;
 
   /*!
-    @brief Timer events. First entry is the name of the event, the second is the time.
+    @brief Timer events. First entry is the name of the event. 
+    @details The second is the identifier for the event
   */
-  std::map<std::string, std::tuple<bool, TimePoint, TimePoint> > m_events;
+  std::map<std::string, std::tuple<bool, TimePoint, Duration> > m_events;
 
   /*!
     @brief Print report header
