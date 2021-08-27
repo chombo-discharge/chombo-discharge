@@ -140,12 +140,13 @@ protected:
   /*!
     @brief Print report tail
   */
-  void printReportTail(const Real a_elapsedTime) const noexcept;
+  void printReportTail(const std::pair<Real, Real> a_elapsedTime) const noexcept;
 
   /*!
     @brief Compute the total time for all finished events. 
+    @return First entry is the local time. Second entry is the global time. 
   */
-  Real computeTotalElapsedTime() const noexcept;
+  std::pair<Real, Real> computeTotalElapsedTime() const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

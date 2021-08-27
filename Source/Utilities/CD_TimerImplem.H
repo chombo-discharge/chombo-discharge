@@ -74,13 +74,13 @@ void Timer::printReportHeader() const noexcept {
 	 << "| " + m_processName + " kernel report: "                                                                      << "\n"
          << "| ---------------------------------------------------------------------------------------------------------|" << "\n"
 	 << "| " << std::left << std::setw(25) << "Event"
-	 << "| " << std::right << std::setw(8) << "Loc."
-	 << "| " << std::right << std::setw(8) << "%"    
+	 << "| " << std::right << std::setw(8) << "Loc. (s)"
+	 << "| " << std::right << std::setw(8) << "Loc. (%)"    
 #ifdef CH_MPI
-	 << "| " << std::right << std::setw(8) << "Min."
-	 << "| " << std::right << std::setw(8) << "Max."
-	 << "| " << std::right << std::setw(8) << "Avg." 
-	 << "| " << std::right << std::setw(8) << "Dev."
+	 << "| " << std::right << std::setw(8) << "Min. (%)"
+	 << "| " << std::right << std::setw(8) << "Max. (%)"
+	 << "| " << std::right << std::setw(8) << "Avg. (%)" 
+	 << "| " << std::right << std::setw(8) << "Dev. (%)"
 	 << "| " << std::right << std::setw(8) << "Min rank"
 	 << "| " << std::right << std::setw(8) << "Max rank"
 	 << "| " << "\n"
@@ -91,11 +91,12 @@ void Timer::printReportHeader() const noexcept {
 }
 
 inline
-void Timer::printReportTail(const Real a_elapsedTime) const noexcept {
+void Timer::printReportTail(const std::pair<Real, Real> a_elapsedTime) const noexcept {
   std::stringstream tail;
   
   tail << "| ---------------------------------------------------------------------------------------------------------|" << "\n"
-       << "| Total elapsed time = " << std::fixed << std::setprecision(3) << a_elapsedTime << " seconds"                 << "\n"
+       << "| Local elapsed time  = " << std::fixed << std::setprecision(3) << a_elapsedTime.first  << " seconds"         << "\n"    
+       << "| Global elapsed time = " << std::fixed << std::setprecision(3) << a_elapsedTime.second << " seconds"         << "\n"
        << "| ---------------------------------------------------------------------------------------------------------|" << "\n";
 
   pout() << tail.str();
@@ -108,7 +109,9 @@ void Timer::eventReport() const noexcept{
   
   this->printReportHeader();
 
-  const Real totalTime = this->computeTotalElapsedTime();
+  const std::pair<Real, Real> totalTime = this->computeTotalElapsedTime();
+  const Real totalTimeLocal  = totalTime.first;
+  const Real totalTimeGlobal = totalTime.second;  
     
   for (const auto& e : m_events){
 
@@ -132,7 +135,7 @@ void Timer::eventReport() const noexcept{
       const Real localDurationInSeconds = localDuration.count();
 
       ssLocalDuration << std::fixed << std::setprecision(3) << localDurationInSeconds;
-      ssPercentage    << std::fixed << std::setprecision(3) << 100.*localDurationInSeconds/totalTime;
+      ssPercentage    << std::fixed << std::setprecision(3) << 100.*localDurationInSeconds/totalTimeLocal;
 
 #ifdef CH_MPI
       Vector<Real> allDurations(numRank);
@@ -179,10 +182,10 @@ void Timer::eventReport() const noexcept{
       broadcast(minRank, srcRank);
       broadcast(maxRank, srcRank);      
 
-      ssMinDuration << std::fixed << std::setprecision(3) << minTime;
-      ssMaxDuration << std::fixed << std::setprecision(3) << maxTime;            
-      ssAvgDuration << std::fixed << std::setprecision(3) << average;
-      ssDevDuration << std::fixed << std::setprecision(3) << sigma;
+      ssMinDuration << std::fixed << std::setprecision(3) << 100.*minTime/totalTimeGlobal;
+      ssMaxDuration << std::fixed << std::setprecision(3) << 100.*maxTime/totalTimeGlobal;            
+      ssAvgDuration << std::fixed << std::setprecision(3) << 100.*average/totalTimeGlobal;
+      ssDevDuration << std::fixed << std::setprecision(3) << 100.*sigma/totalTimeGlobal;
       ssMinRank     << std::fixed << std::setprecision(3) << minRank;
       ssMaxRank     << std::fixed << std::setprecision(3) << maxRank;
 #endif
@@ -222,10 +225,11 @@ void Timer::eventReport() const noexcept{
 }
 
 inline
-Real Timer::computeTotalElapsedTime() const noexcept {
+std::pair<Real, Real> Timer::computeTotalElapsedTime() const noexcept {
 
-  Real totalTime = 0.0;
-
+  Real elapsedTimeLocal  = 0.0;
+  Real elapsedTimeGlobal = 0.0;
+  
   for (const auto& e : m_events){
     const bool finishedEvent = std::get<StoppedEvent>(e.second);
 
@@ -233,11 +237,17 @@ Real Timer::computeTotalElapsedTime() const noexcept {
       const std::chrono::duration<Real> localDuration = std::get<StopClock>(e.second) - std::get<StartClock>(e.second);
       const Real localDurationInSeconds = localDuration.count();
 
-      totalTime += localDurationInSeconds;
+      elapsedTimeLocal += localDurationInSeconds;
     }
   }
 
-  return totalTime;
+#ifdef CH_MPI
+  MPI_Allreduce(&elapsedTimeLocal, &elapsedTimeGlobal, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
+#else
+  elapsedTimeGlobal = elapsedTimeLocal;
+#endif
+
+  return std::make_pair(elapsedTimeLocal, elapsedTimeGlobal);
 }
  
 #include <CD_NamespaceFooter.H>
