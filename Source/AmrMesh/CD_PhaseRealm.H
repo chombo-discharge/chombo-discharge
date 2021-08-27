@@ -599,6 +599,24 @@ protected:
   void defineRedistOper(const int a_lmin, const int a_regsize);
 
   /*!
+    @brief Define operator redistribution utility
+    @param[in] a_lmin Coarsest grid level that changes
+  */  
+  void defineFineToCoarRedistOper(const int a_lmin, const int a_regsize);
+
+  /*!
+    @brief Define operator redistribution utility
+    @param[in] a_lmin Coarsest grid level that changes
+  */  
+  void defineCoarToFineRedistOper(const int a_lmin, const int a_regsize);
+
+  /*!
+    @brief Define operator redistribution utility
+    @param[in] a_lmin Coarsest grid level that changes
+  */  
+  void defineCoarToCoarRedistOper(const int a_lmin, const int a_regsize);      
+
+  /*!
     @brief Define gradient stencils
     @param[in] a_lmin Coarsest grid level that changes
   */  

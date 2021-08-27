@@ -155,9 +155,21 @@ void PhaseRealm::regridOperators(const int a_lmin){
     this->defineFluxReg(a_lmin, 1);
     timer.stopEvent("Flux register");
 
-    timer.startEvent("Redistribution");            
+    timer.startEvent("Level redist");            
     this->defineRedistOper(a_lmin, 1);
-    timer.stopEvent("Redistribution");
+    timer.stopEvent("Level redist");
+
+    timer.startEvent("Fine-to-coar redist");            
+    this->defineFineToCoarRedistOper(a_lmin, 1);
+    timer.stopEvent("Fine-to-coar redist");
+
+    timer.startEvent("Coar-to-fine redist");            
+    this->defineFineToCoarRedistOper(a_lmin, 1);
+    timer.stopEvent("Coar-to-fine redist");
+    
+    timer.startEvent("Coar-to-coar redist");            
+    this->defineCoarToCoarRedistOper(a_lmin, 1);
+    timer.stopEvent("Coar-to-coar redist");            
 
     timer.startEvent("Gradient stencil");
     this->defineGradSten(a_lmin);
@@ -604,9 +616,6 @@ void PhaseRealm::defineRedistOper(const int a_lmin, const int a_regsize){
   const bool doThisOperator = this->queryOperator(s_eb_redist);
 
   m_levelRedist.resize(1 + m_finestLevel);
-  m_fineToCoarRedist.resize(1 + m_finestLevel);
-  m_coarToCoarRedist.resize(1 + m_finestLevel);
-  m_coarToFineRedist.resize(1 + m_finestLevel);
 
   if(doThisOperator){
     
@@ -625,7 +634,36 @@ void PhaseRealm::defineRedistOper(const int a_lmin, const int a_regsize){
 									      comps,
 									      m_redistributionRadius));
       }
+    }
+  }
+}
 
+void PhaseRealm::defineFineToCoarRedistOper(const int a_lmin, const int a_regsize){
+  CH_TIME("PhaseRealm::defineFineToCoarRedistOper");
+  if(m_verbosity > 2){
+    pout() << "PhaseRealm::defineFineToCoarRedistOper" << endl;
+  }
+
+  // TLDR: All these operators either do stuff on an AMR level, or between a coarse and a fine level. The entries
+  //       live on these levels:
+  //
+  //       Oper                        Level
+  //       EBFineToCoar [l,  l-1]    l
+  //       EBCoarToFine [l-1,l  ] 
+  //       when level a_lmin changed we need to update fine-to-coar
+
+  const bool doThisOperator = this->queryOperator(s_eb_redist);
+
+  m_fineToCoarRedist.resize(1 + m_finestLevel);
+
+  if(doThisOperator){
+    
+    const int comps = a_regsize;
+
+    for (int lvl = Max(0, a_lmin-1); lvl <= m_finestLevel; lvl++){
+
+      const bool has_coar = lvl > 0;
+      const bool has_fine = lvl < m_finestLevel;
     
       if(m_hasEbCf){
 	if(has_coar){
@@ -647,6 +685,39 @@ void PhaseRealm::defineRedistOper(const int a_lmin, const int a_regsize){
 	    
 	  }
 	}
+      }
+    }
+  }
+}
+
+void PhaseRealm::defineCoarToFineRedistOper(const int a_lmin, const int a_regsize){
+  CH_TIME("PhaseRealm::defineCoarToFineRedistOper");
+  if(m_verbosity > 2){
+    pout() << "PhaseRealm::defineCoarToFineRedistOper" << endl;
+  }
+
+  // TLDR: All these operators either do stuff on an AMR level, or between a coarse and a fine level. The entries
+  //       live on these levels:
+  //
+  //       Oper                        Level
+  //       EBFineToCoar [l,  l-1]    l
+  //       EBCoarToFine [l-1,l  ] 
+  //       when level a_lmin changed we need to update fine-to-coar
+
+  const bool doThisOperator = this->queryOperator(s_eb_redist);
+  
+  m_coarToFineRedist.resize(1 + m_finestLevel);
+
+  if(doThisOperator){
+    
+    const int comps = a_regsize;
+
+    for (int lvl = Max(0, a_lmin-1); lvl <= m_finestLevel; lvl++){
+
+      const bool has_coar = lvl > 0;
+      const bool has_fine = lvl < m_finestLevel;
+    
+      if(m_hasEbCf){
 
 	if(has_fine){
 	  // TLDR: The coar-to-fine redistribution operator transfers from the coarse level and to the fine level and
@@ -663,8 +734,46 @@ void PhaseRealm::defineRedistOper(const int a_lmin, const int a_regsize){
 			       comps,
 			       m_redistributionRadius);
 	    m_coarToFineRedist[lvl] = RefCountedPtr<EBCoarToFineRedist> (c2f_redist);
+	  }
+	}
+      }
+    }
+  }
+}
 
+void PhaseRealm::defineCoarToCoarRedistOper(const int a_lmin, const int a_regsize){
+  CH_TIME("PhaseRealm::defineCoarToCoarRedistOper");
+  if(m_verbosity > 2){
+    pout() << "PhaseRealm::defineCoarToCoarRedistOper" << endl;
+  }
 
+  // TLDR: All these operators either do stuff on an AMR level, or between a coarse and a fine level. The entries
+  //       live on these levels:
+  //
+  //       Oper                        Level
+  //       EBFineToCoar [l,  l-1]    l
+  //       EBCoarToFine [l-1,l  ] 
+  //       when level a_lmin changed we need to update fine-to-coar
+
+  const bool doThisOperator = this->queryOperator(s_eb_redist);
+
+  m_coarToCoarRedist.resize(1 + m_finestLevel);
+
+  if(doThisOperator){
+    
+    const int comps = a_regsize;
+
+    for (int lvl = Max(0, a_lmin-1); lvl <= m_finestLevel; lvl++){
+
+      const bool has_coar = lvl > 0;
+      const bool has_fine = lvl < m_finestLevel;
+    
+      if(m_hasEbCf){
+	if(has_fine){
+	  // TLDR: The coar-to-fine redistribution operator transfers from the coarse level and to the fine level and
+	  //       therefore lives on the coarse level. Since a_lmin is the coarsest level that changed, we need to update
+	  //       if lvl >= a_lmin-1
+	  if(lvl >= a_lmin-1){
 	    auto c2c_redist = RefCountedPtr<EbFastCoarToCoarRedist> (new EbFastCoarToCoarRedist());
 	    c2c_redist->define(*m_eblg[lvl+1],
 			       *m_eblg[lvl],
