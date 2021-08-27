@@ -14,8 +14,11 @@
 #include <EBLevelDataOps.H>
 #include <NeighborIterator.H>
 #include <EBAlias.H>
+#include <CH_Timer.H>
+#include <ParmParse.H>
 
 // Our includes
+#include <CD_Timer.H>
 #include <CD_EBMultigridInterpolator.H>
 #include <CD_EBMultigridInterpolatorF_F.H>
 #include <CD_VofUtils.H>
@@ -23,18 +26,20 @@
 #include <CD_NamespaceHeader.H>
 
 constexpr int EBMultigridInterpolator::m_stenComp;
-constexpr int EBMultigridInterpolator::m_nStenComp;
+constexpr int EBMultigridInterpolator::m_numStenComp;
 constexpr int EBMultigridInterpolator::m_comp;
 
 EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
 						 const EBLevelGrid& a_eblgCoar,
-						 const CellLocation a_cellLocation,
-						 const IntVect&     a_minGhost,
+						 const CellLocation a_dataLocation,
+						 const IntVect&     a_ghostVector,
 						 const int          a_refRat,
 						 const int          a_nVar,
 						 const int          a_ghostCF,
 						 const int          a_order,
 						 const int          a_weighting){
+  CH_TIME("EBMultigridInterpolator::EBMultigridInterpolator");
+
   CH_assert(a_ghostCF   > 0);
   CH_assert(a_nVar      > 0);
   CH_assert(a_refRat%2 == 0);
@@ -42,23 +47,50 @@ EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
   const DisjointBoxLayout& gridsFine = a_eblgFine.getDBL();
   const DisjointBoxLayout& gridsCoar = a_eblgCoar.getDBL();
 
-  QuadCFInterp::define(gridsFine, &gridsCoar, 1.0, a_refRat, a_nVar, a_eblgFine.getDomain());
-  
+  // Build the regular stencil objects for regular-grid interpolation. For now, we use QuadCFInterp for this. I also leave
+  // a timer in place until performance and scalability has been investigated. To check performance, add
+  // EBMultigridInterpolator.profile=true to your input script. 
+  Timer timer("EBMultigridInterpolator::EBMultigridInterpolator");
+
   m_refRat        = a_refRat;
   m_nComp         = a_nVar;
   m_ghostCF       = a_ghostCF;
   m_order         = a_order;
-  m_minGhost      = a_minGhost;
-  m_cellLocation  = a_cellLocation;
-  m_weight        = a_weighting;
+  m_ghostVector   = a_ghostVector;
+  m_dataLocation  = a_dataLocation;
+  m_weight        = a_weighting;    
 
+  timer.startEvent("Define QuadCFInterp");
+  QuadCFInterp::define(gridsFine, &gridsCoar, 1.0, a_refRat, a_nVar, a_eblgFine.getDomain());
+  timer.stopEvent("Define QuadCFInterp");  
+
+  timer.startEvent("Define grids");  
   this->defineGrids(a_eblgFine, a_eblgCoar);
-  this->defineGhostRegions();
-  this->defineBuffers();
-  this->defineStencils();
+  timer.stopEvent("Define grids");    
 
+  timer.startEvent("Define ghost regions");    
+  this->defineGhostRegions();
+  timer.stopEvent("Define ghost regions");      
+
+  timer.startEvent("Define buffers");      
+  this->defineBuffers();
+  timer.stopEvent("Define buffers");        
+
+  timer.startEvent("Define stencils");        
+  this->defineStencilsEBCF();
+  timer.stopEvent("Define stencils");          
+
+  timer.startEvent("Set coarsening ratio");          
   if(m_eblgFine.getMaxCoarseningRatio() < m_refRat){
     m_eblgFine.setMaxCoarseningRatio(m_refRat, m_eblgFine.getEBIS());
+  }
+  timer.stopEvent("Set coarsening ratio");            
+
+  ParmParse pp("EBMultigridInterpolator");
+  bool profile = false;
+  pp.query("profile", profile);
+  if(profile){
+    timer.eventReport();
   }
 
   m_isDefined = true;
@@ -72,12 +104,15 @@ EBMultigridInterpolator::~EBMultigridInterpolator(){
 
 }
 
-void EBMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar, const Interval a_variables){
+void EBMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar, const Interval a_variables) {
+  CH_TIME("EBMultigridInterpolator::interp");
+  
   CH_assert(m_ghostCF <= a_phiFine.ghostVect().max());
   CH_assert(m_ghostCF <= a_phiCoar.ghostVect().max());
 
-  CH_TIME("EBMultigridInterpolator::interp");
+  // TLDR: This routine does the inhomogeneous coarse-fine interpolation, i.e. without the coarse data set to zero. It does it component-by-component. 
 
+  // Do the regular interpolation -- let QuadCFInterp take care of that. 
   LevelData<FArrayBox> fineAlias;
   LevelData<FArrayBox> coarAlias;
 
@@ -86,21 +121,24 @@ void EBMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>& a_phiFine, 
 
   QuadCFInterp::coarseFineInterp(fineAlias, coarAlias);
 
-  // Do corrections near the EBCF.
+  // Interpolate all variables near the EB. m_grownCoarData holds the data on the coarse level, and this data can include additional
+  // ghost cells that were not a part of the input data layouts. 
   for (int icomp = a_variables.begin(); icomp <= a_variables.end(); icomp++){
 
-    // Copy data to scratch data holders.
+    // Copy data to scratch data holders. We need the coarse-data to be accessible by the fine data (through the same iterators), so we can't
+    // get away from a copy here (I think). 
     const Interval srcInterv = Interval(icomp,   icomp);
     const Interval dstInterv = Interval(m_comp,  m_comp);
     
-    // Need coarse data to be accesible by fine data, so I always have to copy here. 
-    a_phiCoar.copyTo(srcInterv, m_coarData, dstInterv);
+    a_phiCoar.copyTo(srcInterv, m_grownCoarData, dstInterv);
 
+    // Go through each grid patch and the to-be-interpolated ghost cells across the refinement boundary. We simply
+    // apply the stencils here. 
     for (DataIterator dit = a_phiFine.dataIterator(); dit.ok(); ++dit){
       EBCellFAB& dstFine       = a_phiFine[dit()];
 
       const EBCellFAB& srcFine = a_phiFine[dit()];
-      const EBCellFAB& srcCoar = m_coarData[dit()];
+      const EBCellFAB& srcCoar = m_grownCoarData[dit()];
 
       const BaseIVFAB<VoFStencil>& fineStencils = m_fineStencils[dit()];
       const BaseIVFAB<VoFStencil>& coarStencils = m_coarStencils[dit()];
@@ -128,14 +166,25 @@ void EBMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>& a_phiFine, 
   }
 }
 
-void EBMultigridInterpolator::coarseFineInterpH(LevelData<EBCellFAB>& a_phiFine, const Interval a_variables){
+void EBMultigridInterpolator::coarseFineInterpH(LevelData<EBCellFAB>& a_phiFine, const Interval a_variables) const{
+  CH_TIME("EBMultigridInterpolator::coarseFineInterpH(LevelData<EBCellFAB>, Interval)");
+  
   CH_assert(m_ghostCF <= a_phiFine.ghostVect().max());
+
+  // TLDR: This routine does the coarse-fine interpolation with the coarse-grid data set to zero. 
+  
   for (DataIterator dit(m_eblgFine.getDBL()); dit.ok(); ++dit){
     this->coarseFineInterpH(a_phiFine[dit()], a_variables, dit());
   }
 }
 
-void EBMultigridInterpolator::coarseFineInterpH(EBCellFAB& a_phi, const Interval a_variables, const DataIndex& a_dit){
+void EBMultigridInterpolator::coarseFineInterpH(EBCellFAB& a_phi, const Interval a_variables, const DataIndex& a_dit) const{
+  CH_TIME("EBMultigridInterpolator::coarseFineInterpH(LevelData<EBCellFAB>, Interval, DataIndex)");
+
+  // TLDR: This routine does the coarse-fine interpolation with the coarse-grid data set to zero. This is the kernel version,
+  //       operating on a grid patch. It first does a direct kernel for regular data, and then does the interpolation near the
+  //       EB after that. 
+  
   const Real dxFine = 1.0;
   const Real dxCoar = 1.0 * m_refRat;
   
@@ -165,8 +214,9 @@ void EBMultigridInterpolator::coarseFineInterpH(EBCellFAB& a_phi, const Interval
     // the refinment boundary, whereas the stencil only reaches into cells on the finel level. So, we are not
     // writing to data that we will later fetch.
     const BaseIVFAB<VoFStencil>& fineStencils = m_fineStencils[a_dit];
-    
-    for (VoFIterator vofit(fineStencils.getIVS(), fineStencils.getEBGraph()); vofit.ok(); ++vofit){
+
+    VoFIterator& vofit = m_vofIterFine[a_dit];
+    for (vofit.reset(); vofit.ok(); ++vofit){
       const VolIndex& ghostVoF   = vofit();
       const VoFStencil& fineSten = fineStencils(ghostVoF, m_stenComp);
       
@@ -181,6 +231,8 @@ void EBMultigridInterpolator::coarseFineInterpH(EBCellFAB& a_phi, const Interval
 }
 
 void EBMultigridInterpolator::defineGhostRegions(){
+  CH_TIME("EBMultigridInterpolator::defineGhostRegions");
+  
   const DisjointBoxLayout& dbl = m_eblgFine.getDBL();
   const ProblemDomain& domain  = m_eblgFine.getDomain();
   const EBISLayout& ebisl      = m_eblgFine.getEBISL();
@@ -211,7 +263,9 @@ void EBMultigridInterpolator::defineGhostRegions(){
     }
   }
 
-  // Define ghost cells to be interpolated near the EB. 
+  // This hook is for the interpolation over the coarse-fine boundary near the EB. In this case we may
+  // require more ghost cells to be interpolated (defined by m_ghostCF). This routine computes those
+  // cells, including all ghost cells that are within range m_ghostCF from the cut-cell. 
   m_ghostCells.define(dbl);
   for (DataIterator dit(dbl); dit.ok(); ++dit){
     const Box cellBox      = dbl[dit()];
@@ -243,19 +297,20 @@ void EBMultigridInterpolator::defineGhostRegions(){
 }
 
 void EBMultigridInterpolator::defineGrids(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoar){
-  // Define the fine level grids. Use a shallow copy if we can.
-  const int ghostReq  = m_ghostCF + m_order;
-  const int ghostFine = a_eblgFine.getGhost();
+  CH_TIME("EBMultigridInterpolator::defineGrids");
+  
+  // Define the fine level grids. Use a shallow copy if we can. Otherwise, if the user has asked for too many ghost cells to be filled
+  // then we need to fill in the data again. 
+  const int ebisGhostFine = a_eblgFine.getGhost();
 
-  if(ghostFine >= ghostReq){ 
+  if(ebisGhostFine >= m_ghostVector.max()){// Not enough ghost cells in input eblg. I don't know why anyone would do that, but here's a hook for safety. 
     m_eblgFine = a_eblgFine;
   }
   else{ // Need to define from scratch
-    m_eblgFine = EBLevelGrid(a_eblgFine.getDBL(), a_eblgFine.getDomain(), ghostReq, a_eblgFine.getEBIS());
+    m_eblgFine = EBLevelGrid(a_eblgFine.getDBL(), a_eblgFine.getDomain(), m_ghostVector.max(), a_eblgFine.getEBIS());
   }
 
   // Coarse is just a copy.
-  
   m_eblgCoar = a_eblgCoar;
 
   // Define the coarsened fine grids -- needs same number of ghost cells as m_eblgFine.
@@ -264,6 +319,12 @@ void EBMultigridInterpolator::defineGrids(const EBLevelGrid& a_eblgFine, const E
 }
 
 void EBMultigridInterpolator::defineBuffers(){
+  CH_TIME("EBMultigridInterpolator::defineBuffers()");
+  
+  // TLDR: On both the fine and the coarse level we want to have a BoxLayout which is just like the DisjointBoxLayout except that
+  //       the boxes should be grown on each level.
+
+  // This is the number of ghost cells that we will place on the coarse grid. We use it to ensure that we have enough equations. 
   const int ghostReq = m_ghostCF + m_order;
   
   const DisjointBoxLayout& fineGrids = m_eblgFine.getDBL();
@@ -275,26 +336,29 @@ void EBMultigridInterpolator::defineBuffers(){
   const ProblemDomain& fineDomain    = m_eblgFine.getDomain();
   const ProblemDomain& coarDomain    = m_eblgCoFi.getDomain();
 
-  // Coarsen the fine-grid boxes and make a coarse layout, grown by a pretty big number of ghost cells...
-  LayoutData<Box> grownFineBoxes(fineGrids);
-  LayoutData<Box> grownCoarBoxes(coFiGrids);
-  
-  for (DataIterator dit(coFiGrids); dit.ok(); ++dit){
-    Box coarBox = grow(coFiGrids[dit()], ghostReq);
-    Box fineBox = grow(fineGrids[dit()], ghostReq);
+  Vector<Box> fineBoxes = fineGrids.boxArray();
+  Vector<Box> coarBoxes = coFiGrids.boxArray();
 
-    grownCoarBoxes[dit()] = coarBox & coarDomain;
-    grownFineBoxes[dit()] = fineBox & fineDomain;
+  for (LayoutIterator lit = coFiGrids.layoutIterator(); lit.ok(); ++lit){
+    fineBoxes[lit().intCode()].grow(ghostReq);
+    coarBoxes[lit().intCode()].grow(ghostReq);
+
+    fineBoxes[lit().intCode()] &= fineDomain;
+    coarBoxes[lit().intCode()] &= coarDomain;    
   }
 
-  m_fineBoxes.define(grownFineBoxes);
-  m_coarBoxes.define(grownCoarBoxes);
+  //  m_grownFineBoxesLayout.define(fineBoxes, fineGrids.procIDs());
+  m_grownCoarBoxesLayout.define(coarBoxes, coFiGrids.procIDs());
 
-  m_fineData.define(m_fineBoxes, m_nComp, EBCellFactory(fineEBISL));
-  m_coarData.define(m_coarBoxes, m_nComp, EBCellFactory(coFiEBISL));
+  //  m_grownFineData.define(m_grownFineBoxesLayout, m_nComp, EBCellFactory(fineEBISL));
+  m_grownCoarData.define(m_grownCoarBoxesLayout, m_nComp, EBCellFactory(coFiEBISL));
 }
 
-void EBMultigridInterpolator::defineStencils(){
+void EBMultigridInterpolator::defineStencilsEBCF(){
+  CH_TIME("EBMultigridInterpolator::defineStencilsEBCF");
+
+  // This routine defines stencils for all the ghost cells we need to fill across the EBCF boundary. 
+  
   const int comp  = 0;
   const int nComp = 1;
 
@@ -312,59 +376,60 @@ void EBMultigridInterpolator::defineStencils(){
 
   m_fineStencils.define(dblFine);
   m_coarStencils.define(dblFine);
+  m_vofIterFine. define(dblFine);
 
   for (DataIterator dit(dblFine); dit.ok(); ++dit){
     const Box origFineBox    = dblFine[dit()];
-    const Box ghostedFineBox = grow(origFineBox, m_minGhost);
-    const Box grownFineBox   = m_fineBoxes[dit()];
-    const Box grownCoarBox   = m_coarBoxes[dit()];
+    const Box ghostedFineBox = grow(origFineBox, m_ghostVector);
+    const Box grownCoarBox   = m_grownCoarBoxesLayout[dit()];
 
     // Define the valid regions such that the interpolation does not include coarse grid cells that fall beneath the fine level,
     // and no fine cells outside the CF.
-    IntVectSet validFineCells = IntVectSet();
-    IntVectSet validCoarCells = IntVectSet(grownCoarBox);
+    DenseIntVectSet validFineCells(origFineBox,  true); // Original patch. We will this patch's ghost cells if those ghost cells overlap with other patches on this level. 
+    DenseIntVectSet validCoarCells(grownCoarBox, true); // 
 
-    // Coar mask is false everywhere under the fine grid box, and opposite for the fine mask. 
-    for (BoxIterator bit(origFineBox); bit.ok(); ++bit){
-      const IntVect fineIV = bit();
-      const IntVect coarIV = coarsen(fineIV, m_refRat);
-
-      validFineCells |= fineIV;
-      validCoarCells -= coarIV;
-    }
+    // Subtract the coarse cells under the fine box. 
+    Box coarsenedFineBox = origFineBox;
+    coarsenedFineBox.coarsen(m_refRat);
+    validCoarCells -= coarsenedFineBox;
 
     // Same for parts of the current (grown) patch that overlaps with neighboring boxes.
     NeighborIterator nit(dblFine);
     for (nit.begin(dit()); nit.ok(); ++nit){
-      const Box overlap  = grownFineBox & dblFine[nit()];
+      const Box neighborBoxFine = dblFine[nit()]; // = neighboring grid patch on the fine level. Use it's cells if they are also ghost cells in the current patch
+
+      // Overlapping region between the ghosted box and a neighboring patch (with only valid cells). We are
+      // allowed to use these cells. 
+      const Box fineOverlap  = ghostedFineBox & neighborBoxFine;
+      validFineCells |= DenseIntVectSet(fineOverlap, true);
+
+      // validCoarCells are NOT allowed to use the region the fine box.
+      Box neighborBoxCoar = neighborBoxFine;
+      neighborBoxCoar.coarsen(m_refRat);
+      neighborBoxCoar &= grownCoarBox;
       
-      for (BoxIterator bit(overlap); bit.ok(); ++bit){
-	const IntVect fineIV = bit();
-	validFineCells |= fineIV;
-      }
-
-      validCoarCells -= dblCoar[nit()];
+      //      validCoarCells -= DenseIntVectSet(neighborBoxCoar, true);
+      validCoarCells -= neighborBoxCoar;
     }
-
-    // Restrict to the ghosted input box
-    validFineCells &= ghostedFineBox;
 
     // Restrict to domain
     validFineCells &= domFine;
     validCoarCells &= domCoar;
     
     // Now go through each ghost cell and get an interpolation stencil to specified order.
-
     const EBISBox& ebisboxFine = m_eblgFine.getEBISL()[dit()];
     const EBISBox& ebisboxCoar = m_eblgCoFi.getEBISL()[dit()];
 
     const EBGraph& fineGraph   = ebisboxFine.getEBGraph();
     const EBGraph& coarGraph   = ebisboxCoar.getEBGraph();
 
-    m_fineStencils[dit()].define(m_ghostCells[dit()], fineGraph, nComp);
-    m_coarStencils[dit()].define(m_ghostCells[dit()], fineGraph, nComp);
+    m_fineStencils[dit()].define(m_ghostCells[dit()], fineGraph, m_numStenComp);
+    m_coarStencils[dit()].define(m_ghostCells[dit()], fineGraph, m_numStenComp);
+    m_vofIterFine [dit()].define(m_ghostCells[dit()], fineGraph);
 
-    for (VoFIterator vofit(m_ghostCells[dit()], fineGraph); vofit.ok(); ++vofit){
+    // Build stencils.
+    VoFIterator& vofit = m_vofIterFine[dit()];
+    for (vofit.reset(); vofit.ok(); ++vofit){
       const VolIndex& ghostVofFine = vofit();
       const VolIndex& ghostVofCoar = ebislFine.coarsen(ghostVofFine, m_refRat, dit());
       
@@ -373,11 +438,12 @@ void EBMultigridInterpolator::defineStencils(){
 
       int order         = m_order;
       bool foundStencil = false;
-						       
+
+      // Try to fine a two-level stencil for this ghost cell. Drop order if we can't find it (and print a warning). 
       while(order > 0 && !foundStencil){
 	foundStencil = this->getStencil(fineSten,
 					coarSten,
-					m_cellLocation,
+					m_dataLocation,
 					ghostVofFine,
 					ghostVofCoar,
 					ebisboxFine,
@@ -403,27 +469,31 @@ void EBMultigridInterpolator::defineStencils(){
 	
 	coarSten.add(ghostVofCoar, 1.0);
 	
-	MayDay::Warning("EBMultigridInterpolator::defineStencils -- could not find stencil and dropping to order 0");
+	pout() << "EBMultigridInterpolator::defineStencilsEBCF -- could not find stencil and dropping to order 0" << endl;
       }
-
     }
-
   }
 }
 
-bool EBMultigridInterpolator::getStencil(VoFStencil&         a_stencilFine,
-					 VoFStencil&         a_stencilCoar,
-					 const CellLocation& a_cellLocation,
-					 const VolIndex&     a_ghostVofFine,
-					 const VolIndex&     a_ghostVofCoar,
-					 const EBISBox&      a_ebisboxFine,
-					 const EBISBox&      a_ebisboxCoar,
-					 const IntVectSet&   a_validFineCells,
-					 const IntVectSet&   a_validCoarCells,
-					 const Real&         a_dxFine,
-					 const Real&         a_dxCoar,
-					 const int&          a_order,
-					 const int&          a_weight){
+bool EBMultigridInterpolator::getStencil(VoFStencil&            a_stencilFine,
+					 VoFStencil&            a_stencilCoar,
+					 const CellLocation&    a_dataLocation,
+					 const VolIndex&        a_ghostVofFine,
+					 const VolIndex&        a_ghostVofCoar,
+					 const EBISBox&         a_ebisboxFine,
+					 const EBISBox&         a_ebisboxCoar,
+					 const DenseIntVectSet& a_validFineCells,
+					 const DenseIntVectSet& a_validCoarCells,
+					 const Real&            a_dxFine,
+					 const Real&            a_dxCoar,
+					 const int&             a_order,
+					 const int&             a_weight){
+  CH_TIME("EBMultigridInterpolator::getStencil");
+
+  // On input, we know which ghost cell we want to interpolate to, and we happen to have a map of valid cells in a_validFineCells and a_validCoarCells. We use
+  // that information to build an overdetermined linear system of equations that interpolate to a_ghostVofFine to order a_order. If we don't have enough equations,
+  // this routine will return false, and will not create stencils.
+  
   bool foundStencil = true;
   
   const int fineRadius = a_order;
@@ -432,8 +502,7 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&         a_stencilFine,
   Vector<VolIndex> fineVofs;
   Vector<VolIndex> coarVofs;
 
-
-  // Get all Vofs in specified radii. Don't use cells that are not in a_validFineCells.
+  // Get all Vofs in specified radii. Don't use cells that are not in a_validFineCells or in a_validCoarCells. 
   fineVofs = VofUtils::getVofsInRadius(a_ghostVofFine, a_ebisboxFine, fineRadius, VofUtils::Connectivity::MonotonePath, false);
   coarVofs = VofUtils::getVofsInRadius(a_ghostVofCoar, a_ebisboxCoar, coarRadius, VofUtils::Connectivity::MonotonePath, true );
   
@@ -453,11 +522,11 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&         a_stencilFine,
     Vector<RealVect> coarDisplacements;
 
     for (const auto& fineVof : fineVofs.stdVector()){
-      fineDisplacements.push_back(LeastSquares::displacement(a_cellLocation, a_cellLocation, a_ghostVofFine, fineVof, a_ebisboxFine, a_dxFine));
+      fineDisplacements.push_back(LeastSquares::displacement(a_dataLocation, a_dataLocation, a_ghostVofFine, fineVof, a_ebisboxFine, a_dxFine));
     }
 
     for (const auto& coarVof : coarVofs.stdVector()){
-      coarDisplacements.push_back(LeastSquares::displacement(a_cellLocation, a_cellLocation, a_ghostVofFine, coarVof, a_ebisboxFine, a_ebisboxCoar, a_dxFine, a_dxCoar));
+      coarDisplacements.push_back(LeastSquares::displacement(a_dataLocation, a_dataLocation, a_ghostVofFine, coarVof, a_ebisboxFine, a_ebisboxCoar, a_dxFine, a_dxCoar));
     }
 
     // LeastSquares computes all unknown terms in a Taylor expansion up to specified order. We want the 0th order term, i.e. the interpolated value,

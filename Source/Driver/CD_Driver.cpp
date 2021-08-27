@@ -385,7 +385,7 @@ void Driver::getCellsAndBoxes(long long&         a_numLocalCells,
 std::string Driver::numberFmt(const long long n, char sep) const {
   CH_TIME("Driver::numberFmt(long long, char)");
   if(m_verbosity > 5){
-    pout() << "Driver::numberFmt(long long, char)" << endl;
+    //    pout() << "Driver::numberFmt(long long, char)" << endl;
   }
   
   stringstream fmt;
@@ -403,7 +403,7 @@ std::string Driver::numberFmt(const long long n, char sep) const {
 Vector<std::string> Driver::numberFmt(const Vector<long long> a_numbers, char a_sep) const {
   CH_TIME("Driver::numberFmt(Vector<long long>, char)");
   if(m_verbosity > 5){
-    pout() << "Driver::numberFmt(Vector<long long>, char)" << endl;
+    //    pout() << "Driver::numberFmt(Vector<long long>, char)" << endl;
   }
   
   Vector<std::string> ret(a_numbers.size());
