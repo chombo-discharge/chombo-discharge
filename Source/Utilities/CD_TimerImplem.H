@@ -50,14 +50,12 @@ void Timer::startEvent(const std::string a_event) noexcept {
   }
   else{ // If the event is not new, we just leave the elapsed time intact. 
     //    const TimePoint startTime = Clock::now();
-
     tuple<bool, TimePoint, Duration>& event = m_events.at(a_event);
-
     const bool alreadyRunning = std::get<StoppedEvent>(event);
 
     if(!alreadyRunning){ // Only start the event if it is not already running. 
-      const TimePoint startTime          = Clock::now();
-      const Duration previousElapsedTime = std::get<ElapsedTime>(event);
+      const TimePoint  startTime          = Clock::now();
+      const Duration& previousElapsedTime = std::get<ElapsedTime>(event);
 
       event = std::make_tuple(false, startTime, previousElapsedTime);
     }
@@ -93,10 +91,10 @@ void Timer::printReportHeader() const noexcept {
 	 << "| " << std::right << std::setw(8) << "Loc. (s)"
 	 << "| " << std::right << std::setw(8) << "Loc. (%)"    
 #ifdef CH_MPI
-	 << "| " << std::right << std::setw(8) << "Min. (%)"
-	 << "| " << std::right << std::setw(8) << "Max. (%)"
-	 << "| " << std::right << std::setw(8) << "Avg. (%)" 
-	 << "| " << std::right << std::setw(8) << "Dev. (%)"
+	 << "| " << std::right << std::setw(8) << "Min. (s)"
+	 << "| " << std::right << std::setw(8) << "Max. (s)"
+	 << "| " << std::right << std::setw(8) << "Avg. (s)" 
+	 << "| " << std::right << std::setw(8) << "Dev. (s)"
 	 << "| " << std::right << std::setw(8) << "Min rank"
 	 << "| " << std::right << std::setw(8) << "Max rank"
 	 << "| " << "\n"
@@ -198,10 +196,10 @@ void Timer::eventReport() const noexcept{
       broadcast(minRank, srcRank);
       broadcast(maxRank, srcRank);      
 
-      ssMinDuration << std::fixed << std::setprecision(3) << 100.*minTime/totalTimeGlobal;
-      ssMaxDuration << std::fixed << std::setprecision(3) << 100.*maxTime/totalTimeGlobal;            
-      ssAvgDuration << std::fixed << std::setprecision(3) << 100.*average/totalTimeGlobal;
-      ssDevDuration << std::fixed << std::setprecision(3) << 100.*sigma/totalTimeGlobal;
+      ssMinDuration << std::fixed << std::setprecision(3) << minTime;
+      ssMaxDuration << std::fixed << std::setprecision(3) << maxTime;
+      ssAvgDuration << std::fixed << std::setprecision(3) << average;
+      ssDevDuration << std::fixed << std::setprecision(3) << sigma;
       ssMinRank     << std::fixed << std::setprecision(3) << minRank;
       ssMaxRank     << std::fixed << std::setprecision(3) << maxRank;
 #endif
@@ -220,16 +218,16 @@ void Timer::eventReport() const noexcept{
     std::stringstream outputString;
 
     // Now print to pout
-    outputString << "| " << std::left << std::setw(25) << eventName
-		 << "| " << std::right << std::setw(8) << ssLocalDuration.str()
-		 << "| " << std::right << std::setw(8) << ssPercentage.str()
+    outputString << "| " << std::left  << std::setw(25) << eventName
+		 << "| " << std::right << std::setw(8)  << ssLocalDuration.str()
+		 << "| " << std::right << std::setw(8)  << ssPercentage.str()
 #ifdef CH_MPI
-		 << "| " << std::right << std::setw(8) << ssMinDuration.str()
-		 << "| " << std::right << std::setw(8) << ssMaxDuration.str()
-		 << "| " << std::right << std::setw(8) << ssAvgDuration.str()
-		 << "| " << std::right << std::setw(8) << ssDevDuration.str()
-		 << "| " << std::right << std::setw(8) << ssMinRank.str()
-		 << "| " << std::right << std::setw(8) << ssMaxRank.str()
+		 << "| " << std::right << std::setw(8)  << ssMinDuration.str()
+		 << "| " << std::right << std::setw(8)  << ssMaxDuration.str()
+		 << "| " << std::right << std::setw(8)  << ssAvgDuration.str()
+		 << "| " << std::right << std::setw(8)  << ssDevDuration.str()
+		 << "| " << std::right << std::setw(8)  << ssMinRank.str()
+		 << "| " << std::right << std::setw(8)  << ssMaxRank.str()
 #endif
 		 << "| "
 		 << "\n";
@@ -254,14 +252,16 @@ std::pair<Real, Real> Timer::computeTotalElapsedTime() const noexcept {
       const Real localDurationInSeconds = elapsedTime.count();
 
       elapsedTimeLocal += localDurationInSeconds;
+
+
     }
   }
 
 #ifdef CH_MPI
-  MPI_Allreduce(&elapsedTimeLocal, &elapsedTimeGlobal, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
+      MPI_Allreduce(&elapsedTimeLocal, &elapsedTimeGlobal, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
 #else
-  elapsedTimeGlobal = elapsedTimeLocal;
-#endif
+      elapsedTimeGlobal = elapsedTimeLocal;
+#endif        
 
   return std::make_pair(elapsedTimeLocal, elapsedTimeGlobal);
 }
