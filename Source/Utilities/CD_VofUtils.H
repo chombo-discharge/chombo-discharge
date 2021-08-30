@@ -181,21 +181,6 @@ protected:
   static Vector<VolIndex> getVofsInMonotonePath(const VolIndex& a_startVof, const EBISBox& a_ebisbox, const int a_radius, const bool a_addStartVof);
 
   /*!
-    @brief Get all VoFs that can be found with a monotone path with specified radius
-    @param[in] a_startVof    Starting Vof. 
-    @param[in] a_ebisbox     EBISBox.
-    @param[in] a_radius      Radius.
-    @πaram[in] a_validCells  Valid cells to be included
-    @param[in] a_addStartVof If false, a_startVof will not be included in the list. 
-    @return Returns list of VoFs that can be found with a monotone path of radius <= a_radius. 
-  */
-  static Vector<VolIndex> getVofsInMonotonePath(const VolIndex&        a_startVof,
-						const EBISBox&         a_ebisbox,
-						const int              a_radius,
-						const DenseIntVectSet& a_validCells,
-						const bool             a_addStartVof);  
-
-  /*!
     @brief Get all connected Vofs in radius which can be reached without crossing a covered face or reaching into a domain boundary. 
     @param[in] a_startVof    Starting Vof
     @param[in] a_ebisbox     EBISBox
@@ -271,8 +256,7 @@ protected:
 				    const VolIndex&        a_startVof,
 				    const EBISBox&         a_ebisbox,
 				    const Box&             a_validBox,
-				    const DenseIntVectSet& a_validCells,
-				    const int              a_radius,
+				    const int&             a_radius,
 				    const IntVect&         a_timesMoved,
 				    const IntVect&         a_pathSign);  
 };
