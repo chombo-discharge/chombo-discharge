@@ -358,8 +358,10 @@ void VofUtils::getVofsInMonotonePath(Vector<VolIndex>& a_vofList,
       if(a_vofList[ivof] == a_startVof) haveStartVof = true;
     }
 
-    if(!haveStartVof) a_vofList.push_back(a_startVof);
-
+    if(!haveStartVof) {
+      a_vofList.push_back(a_startVof);
+    }
+    
     for (int dir = 0; dir < SpaceDim; dir++){
       if(a_timesMoved[dir] < a_radius){
 	const IntVect newTimesMoved = a_timesMoved + BASISV(dir);
