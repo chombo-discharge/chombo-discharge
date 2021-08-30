@@ -505,16 +505,16 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&            a_stencilFine,
 
   // I think these radii are good -- but there's no hard limit here. Increase the radii if you
   // see that the stencil drops order. 
-  const int fineRadius = std::max(100, a_order);
-  const int coarRadius = std::max(100, fineRadius/m_refRat);
+  const int fineRadius = std::max(2, a_order);
+  const int coarRadius = std::max(2, fineRadius/m_refRat);
 
   Vector<VolIndex> fineVofs;
   Vector<VolIndex> coarVofs;
 
   // Get all Vofs in specified radii. Don't use cells that are not in a_validFineCells or in a_validCoarCells.
   timer.startEvent("Get Vofs");
-  fineVofs = VofUtils::getVofsInRadius(a_ghostVofFine, a_ebisboxFine, fineRadius, VofUtils::Connectivity::MonotonePath, false);
-  coarVofs = VofUtils::getVofsInRadius(a_ghostVofCoar, a_ebisboxCoar, coarRadius, VofUtils::Connectivity::MonotonePath, true );
+  fineVofs = VofUtils::getVofsInRadius(a_ghostVofFine, a_ebisboxFine, fineRadius, VofUtils::Connectivity::All, false);
+  coarVofs = VofUtils::getVofsInRadius(a_ghostVofCoar, a_ebisboxCoar, coarRadius, VofUtils::Connectivity::All, true );
   timer.stopEvent("Get Vofs");  
 
   timer.startEvent("include cells");
@@ -522,10 +522,10 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&            a_stencilFine,
   VofUtils::includeCells(coarVofs, a_validCoarCells);
   timer.stopEvent("include cells");  
 
-  timer.startEvent("unique");
-  VofUtils::onlyUnique(fineVofs);
-  VofUtils::onlyUnique(coarVofs);
-  timer.stopEvent("unique");
+  // timer.startEvent("unique");
+  //  VofUtils::onlyUnique(fineVofs);
+  //  VofUtils::onlyUnique(coarVofs);
+  // timer.stopEvent("unique");
 
   const int numEquations = coarVofs.size() + fineVofs.size();
   const int numUnknowns  = LeastSquares::getTaylorExpansionSize(a_order);

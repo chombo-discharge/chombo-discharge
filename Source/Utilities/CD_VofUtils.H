@@ -225,6 +225,23 @@ protected:
 				    const int         a_radius,
 				    const IntVect&    a_timesMoved,
 				    const IntVect&    a_pathSign);
+
+  /*!
+    @brief Get all Vofs in a monotone path. Does not move more than a_radius in any direction. 
+    @param[inout] a_vofList    List of vofs that were within the monotone path
+    @param[in]    a_startVof   Starting vof. 
+    @param[in]    a_ebisbox    EBISBox.
+    @param[in]    a_radius     Maximum radius. 
+    @param[in]    a_timesMoved Number of times moved in any direction
+    @param[in]    a_pathSign   Path sign. 
+  */
+  static void getVofsInMonotonePath(std::set<VolIndex>& a_vofList,
+				    const VolIndex&     a_startVof,
+				    const EBISBox&      a_ebisbox,
+				    const Box&          a_validBox,
+				    const int           a_radius,
+				    const IntVect&      a_timesMoved,
+				    const IntVect&      a_pathSign);  
 };
 
 #include <CD_NamespaceFooter.H>
