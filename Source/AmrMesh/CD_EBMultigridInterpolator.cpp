@@ -513,14 +513,19 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&            a_stencilFine,
 
   // Get all Vofs in specified radii. Don't use cells that are not in a_validFineCells or in a_validCoarCells.
   timer.startEvent("Get Vofs");
-  fineVofs = VofUtils::getVofsInRadius(a_ghostVofFine, a_ebisboxFine, fineRadius, VofUtils::Connectivity::All, false);
-  coarVofs = VofUtils::getVofsInRadius(a_ghostVofCoar, a_ebisboxCoar, coarRadius, VofUtils::Connectivity::All, true );
+  fineVofs = VofUtils::getVofsInRadius(a_ghostVofFine, a_ebisboxFine, fineRadius, a_validFineCells, VofUtils::Connectivity::All, false);
+  coarVofs = VofUtils::getVofsInRadius(a_ghostVofCoar, a_ebisboxCoar, coarRadius, a_validCoarCells, VofUtils::Connectivity::All, true );
   timer.stopEvent("Get Vofs");  
 
+  const int sizeBefore = fineVofs.size();
   timer.startEvent("include cells");
   VofUtils::includeCells(fineVofs, a_validFineCells);
   VofUtils::includeCells(coarVofs, a_validCoarCells);
-  timer.stopEvent("include cells");  
+  timer.stopEvent("include cells");
+
+  const int sizeAfter = fineVofs.size();
+
+  //  std::cout << sizeBefore << "\t" << sizeAfter << std::endl;
 
   // timer.startEvent("unique");
   //  VofUtils::onlyUnique(fineVofs);

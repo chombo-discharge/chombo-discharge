@@ -20,6 +20,7 @@
 #include <ProblemDomain.H>
 #include <VolIndex.H>
 #include <LoHiSide.H>
+#include <DenseIntVectSet.H>
 
 // Our includes
 #include <CD_NamespaceHeader.H>
@@ -70,6 +71,22 @@ public:
 					  const int          a_radius,
 					  const Connectivity a_connectivity,
 					  const bool         a_addStartVof);
+
+  /*!
+    @brief Fetch vofs in a specified radius and with a specified connectivitiy between them.
+    @param[in] a_startVof     Starting Vof. 
+    @param[in] a_ebisbox      EBISBox.
+    @param[in] a_radius       Radius.
+    @param[in] a_validCells   Valid cells to include
+    @param[in] a_connectivity Connectivity specification (e.g. monotone path or simplyconnected)
+    @param[in] a_addStartVof  If false, a_startVof will not be included in the list. 
+  */
+  static Vector<VolIndex> getVofsInRadius(const VolIndex&        a_startVof,
+					  const EBISBox&         a_ebisbox,
+					  const int              a_radius,
+					  const DenseIntVectSet& a_validCells,
+					  const Connectivity     a_connectivity,
+					  const bool             a_addStartVof);  
 
   /*!
     @brief Fetch vofs in a quadrant, using a specified radius and with a specified connectivitiy between them.
@@ -164,6 +181,21 @@ protected:
   static Vector<VolIndex> getVofsInMonotonePath(const VolIndex& a_startVof, const EBISBox& a_ebisbox, const int a_radius, const bool a_addStartVof);
 
   /*!
+    @brief Get all VoFs that can be found with a monotone path with specified radius
+    @param[in] a_startVof    Starting Vof. 
+    @param[in] a_ebisbox     EBISBox.
+    @param[in] a_radius      Radius.
+    @πaram[in] a_validCells  Valid cells to be included
+    @param[in] a_addStartVof If false, a_startVof will not be included in the list. 
+    @return Returns list of VoFs that can be found with a monotone path of radius <= a_radius. 
+  */
+  static Vector<VolIndex> getVofsInMonotonePath(const VolIndex&        a_startVof,
+						const EBISBox&         a_ebisbox,
+						const int              a_radius,
+						const DenseIntVectSet& a_validCells,
+						const bool             a_addStartVof);  
+
+  /*!
     @brief Get all connected Vofs in radius which can be reached without crossing a covered face or reaching into a domain boundary. 
     @param[in] a_startVof    Starting Vof
     @param[in] a_ebisbox     EBISBox
@@ -235,13 +267,14 @@ protected:
     @param[in]    a_timesMoved Number of times moved in any direction
     @param[in]    a_pathSign   Path sign. 
   */
-  static void getVofsInMonotonePath(std::set<VolIndex>& a_vofList,
-				    const VolIndex&     a_startVof,
-				    const EBISBox&      a_ebisbox,
-				    const Box&          a_validBox,
-				    const int           a_radius,
-				    const IntVect&      a_timesMoved,
-				    const IntVect&      a_pathSign);  
+  static void getVofsInMonotonePath(std::set<VolIndex>&    a_vofList,
+				    const VolIndex&        a_startVof,
+				    const EBISBox&         a_ebisbox,
+				    const Box&             a_validBox,
+				    const DenseIntVectSet& a_validCells,
+				    const int              a_radius,
+				    const IntVect&         a_timesMoved,
+				    const IntVect&         a_pathSign);  
 };
 
 #include <CD_NamespaceFooter.H>

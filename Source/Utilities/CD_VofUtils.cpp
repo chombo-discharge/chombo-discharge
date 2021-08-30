@@ -33,6 +33,37 @@ Vector<VolIndex> VofUtils::getVofsInRadius(const VolIndex&    a_startVof,
   return vofs;
 }
 
+Vector<VolIndex> VofUtils::getVofsInRadius(const VolIndex&        a_startVof,
+					   const EBISBox&         a_ebisbox,
+					   const int              a_radius,
+					   const DenseIntVectSet& a_validCells,
+					   const Connectivity     a_connectivity,
+					   const bool             a_addStartVof){
+		
+  Vector<VolIndex> vofs;
+  switch(a_connectivity){
+  case VofUtils::Connectivity::MonotonePath:
+    {
+      vofs = VofUtils::getVofsInMonotonePath(a_startVof, a_ebisbox, a_radius, a_validCells, a_addStartVof);
+      break;
+    }
+  case VofUtils::Connectivity::SimplyConnected:
+    {
+      vofs = VofUtils::getConnectedVofsInRadius(a_startVof, a_ebisbox, a_radius, a_addStartVof);
+      VofUtils::includeCells(vofs, a_validCells);
+	break;
+    }
+  case VofUtils::Connectivity::All:
+    {
+      vofs = VofUtils::getAllVofsInRadius(a_startVof, a_ebisbox, a_radius, a_addStartVof);
+      VofUtils::includeCells(vofs, a_validCells);
+      break;
+    }    
+  }
+
+  return vofs;
+}
+
 Vector<VolIndex> VofUtils::getVofsInQuadrant(const VolIndex&    a_startVof,
 					     const EBISBox&     a_ebisbox,
 					     const RealVect&    a_normal,
@@ -63,7 +94,10 @@ Vector<VolIndex> VofUtils::getVofsInQuadrant(const VolIndex&    a_startVof,
   return vofs;
 }
 
-Vector<VolIndex> VofUtils::getVofsInMonotonePath(const VolIndex& a_startVoF, const EBISBox& a_ebisbox, const int a_radius, const bool a_addStartVof){
+Vector<VolIndex> VofUtils::getVofsInMonotonePath(const VolIndex& a_startVoF,
+						 const EBISBox&  a_ebisbox,
+						 const int       a_radius,
+						 const bool      a_addStartVof){
   IntVect timesMoved = IntVect::Zero;
   IntVect pathSign   = IntVect::Zero;
 
@@ -71,13 +105,11 @@ Vector<VolIndex> VofUtils::getVofsInMonotonePath(const VolIndex& a_startVoF, con
   const Box& region           = a_ebisbox.getRegion();
   const Box validBox          = domain & region;
 
-#if 0// Old way
-  Vector<VolIndex> ret;
   Vector<VolIndex> vofList;
-  
   VofUtils::getVofsInMonotonePath(vofList, a_startVoF, a_ebisbox, a_radius, timesMoved, pathSign);
 
-  if(!a_addStartVoF){
+  Vector<VolIndex> ret;  
+  if(!a_addStartVof){
     for (int i = 0; i < vofList.size(); i++){
       if(vofList[i] != a_startVoF) ret.push_back(vofList[i]);
     }
@@ -87,12 +119,27 @@ Vector<VolIndex> VofUtils::getVofsInMonotonePath(const VolIndex& a_startVoF, con
   }
 
   return ret;
-  
-#else // new way
-  Vector<VolIndex> ret;
-  std::set<VolIndex> vofSet;
-  VofUtils::getVofsInMonotonePath(vofSet, a_startVoF, a_ebisbox, validBox, a_radius, timesMoved, pathSign);
+}
 
+Vector<VolIndex> VofUtils::getVofsInMonotonePath(const VolIndex&        a_startVoF,
+						 const EBISBox&         a_ebisbox,
+						 const int              a_radius,
+						 const DenseIntVectSet& a_validCells,
+						 const bool             a_addStartVof){
+
+  IntVect timesMoved = IntVect::Zero;
+  IntVect pathSign   = IntVect::Zero;
+
+  const ProblemDomain& domain = a_ebisbox.getDomain();
+  const Box& region           = a_ebisbox.getRegion();
+  const Box validBox          = domain & region;  
+
+  // Get the Vofs in the monotone path
+  std::set<VolIndex> vofSet;
+  VofUtils::getVofsInMonotonePath(vofSet, a_startVoF, a_ebisbox, validBox, a_validCells, a_radius, timesMoved, pathSign);
+
+  // Build the return vector. 
+  Vector<VolIndex> ret;  
   for (const auto& vof : vofSet){
     if(vof != a_startVoF){
       ret.push_back(vof);
@@ -103,7 +150,6 @@ Vector<VolIndex> VofUtils::getVofsInMonotonePath(const VolIndex& a_startVoF, con
   }
 
   return ret;
-#endif
 }
 
 Vector<VolIndex> VofUtils::getConnectedVofsInRadius(const VolIndex& a_startVof, const EBISBox& a_ebisbox, const int a_radius, const bool a_addStartVof){
@@ -424,17 +470,18 @@ void VofUtils::getVofsInMonotonePath(Vector<VolIndex>& a_vofList,
   }
 }
 
-void VofUtils::getVofsInMonotonePath(std::set<VolIndex>& a_vofSet,
-				     const VolIndex&     a_startVof,
-				     const EBISBox&      a_ebisbox,
-				     const Box&          a_validBox,
-				     const int           a_radius,
-				     const IntVect&      a_timesMoved,
-				     const IntVect&      a_pathSign){
+void VofUtils::getVofsInMonotonePath(std::set<VolIndex>&    a_vofSet,
+				     const VolIndex&        a_startVof,
+				     const EBISBox&         a_ebisbox,
+				     const Box&             a_validBox,
+				     const DenseIntVectSet& a_validCells,
+				     const int              a_radius,
+				     const IntVect&         a_timesMoved,
+				     const IntVect&         a_pathSign){
   
   const IntVect iv = a_startVof.gridIndex();
   
-  if(a_validBox.contains(iv)){
+  if(a_validBox.contains(iv) && a_validCells[iv]){
 
     // Add if not already added
     bool haveStartVof = false;
@@ -460,7 +507,14 @@ void VofUtils::getVofsInMonotonePath(std::set<VolIndex>& a_vofSet,
 	    for (const auto& f : faces.stdVector()){
 	      const VolIndex& newStartVof = f.getVoF(Side::Lo);
 
-	      VofUtils::getVofsInMonotonePath(a_vofSet, newStartVof, a_ebisbox, a_validBox, a_radius, newTimesMoved, newPathSign);
+	      VofUtils::getVofsInMonotonePath(a_vofSet,
+					      newStartVof,
+					      a_ebisbox,
+					      a_validBox,
+					      a_validCells,
+					      a_radius,
+					      newTimesMoved,
+					      newPathSign);
 	    }
 	  }
 
@@ -473,7 +527,14 @@ void VofUtils::getVofsInMonotonePath(std::set<VolIndex>& a_vofSet,
 	    for (const auto& f : faces.stdVector()){
 	      const VolIndex& newStartVof = f.getVoF(Side::Hi);	    
 
-	      VofUtils::getVofsInMonotonePath(a_vofSet, newStartVof, a_ebisbox, a_validBox, a_radius, newTimesMoved, newPathSign);
+	      VofUtils::getVofsInMonotonePath(a_vofSet,
+					      newStartVof,
+					      a_ebisbox,
+					      a_validBox,
+					      a_validCells,
+					      a_radius,
+					      newTimesMoved,
+					      newPathSign);
 	    }
 	  }
 	}
