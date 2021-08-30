@@ -360,40 +360,43 @@ void VofUtils::getVofsInMonotonePath(Vector<VolIndex>& a_vofList,
 
     if(!haveStartVof) {
       a_vofList.push_back(a_startVof);
-    }
     
-    for (int dir = 0; dir < SpaceDim; dir++){
-      if(a_timesMoved[dir] < a_radius){
-	const IntVect newTimesMoved = a_timesMoved + BASISV(dir);
+      for (int dir = 0; dir < SpaceDim; dir++){
+	if(a_timesMoved[dir] < a_radius){
+	  const IntVect newTimesMoved = a_timesMoved + BASISV(dir);
 
-	Side::LoHiSide whichSide;
+	  Side::LoHiSide whichSide;
 	
-	// Move in the low direction. If we have already moved in the high direction we are not allowed to "turn back".
-	if(a_pathSign[dir] == -1 || a_pathSign[dir] == 0){
-	  IntVect newPathSign = a_pathSign;
-	  newPathSign[dir] = -1;
+	  // Move in the low direction. If we have already moved in the high direction we are not allowed to "turn back".
+	  if(a_pathSign[dir] == -1 || a_pathSign[dir] == 0){
+	    IntVect newPathSign = a_pathSign;
+	    newPathSign[dir] = -1;
 
-	  Vector<FaceIndex> faces = a_ebisbox.getFaces(a_startVof, dir, Side::Lo);
-	  for (const auto& f : faces.stdVector()){
-	    const VolIndex& newStartVof = f.getVoF(Side::Lo);
+	    Vector<FaceIndex> faces = a_ebisbox.getFaces(a_startVof, dir, Side::Lo);
+	    for (const auto& f : faces.stdVector()){
+	      const VolIndex& newStartVof = f.getVoF(Side::Lo);
 
-	    VofUtils::getVofsInMonotonePath(a_vofList, newStartVof, a_ebisbox, a_radius, newTimesMoved, newPathSign);
+	      VofUtils::getVofsInMonotonePath(a_vofList, newStartVof, a_ebisbox, a_radius, newTimesMoved, newPathSign);
+	    }
 	  }
-	}
 
-	// Move in the high direction. If we have already moved in the low direction we are not allowed to "turn back".
-	if(a_pathSign[dir] == 0 || a_pathSign[dir] == 1){
-	  IntVect newPathSign = a_pathSign;
-	  newPathSign[dir] = 1;
+	  // Move in the high direction. If we have already moved in the low direction we are not allowed to "turn back".
+	  if(a_pathSign[dir] == 0 || a_pathSign[dir] == 1){
+	    IntVect newPathSign = a_pathSign;
+	    newPathSign[dir] = 1;
 
-	  Vector<FaceIndex> faces = a_ebisbox.getFaces(a_startVof, dir, Side::Hi);
-	  for (const auto& f : faces.stdVector()){
-	    const VolIndex& newStartVof = f.getVoF(Side::Hi);	    
+	    Vector<FaceIndex> faces = a_ebisbox.getFaces(a_startVof, dir, Side::Hi);
+	    for (const auto& f : faces.stdVector()){
+	      const VolIndex& newStartVof = f.getVoF(Side::Hi);	    
 
-	    VofUtils::getVofsInMonotonePath(a_vofList, newStartVof, a_ebisbox, a_radius, newTimesMoved, newPathSign);
+	      VofUtils::getVofsInMonotonePath(a_vofList, newStartVof, a_ebisbox, a_radius, newTimesMoved, newPathSign);
+	    }
 	  }
 	}
       }
+    }
+    else{ // Another path has already visited this vof. 
+      return;
     }
   }
 }

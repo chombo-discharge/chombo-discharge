@@ -504,7 +504,8 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&            a_stencilFine,
   
   bool foundStencil = true;
 
-  // I think these radii are good -- but there's no hard limit here. 
+  // I think these radii are good -- but there's no hard limit here. Increase the radii if you
+  // see that the stencil drops order. 
   const int fineRadius = a_order;
   const int coarRadius = std::max(2, fineRadius/m_refRat);
 
