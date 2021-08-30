@@ -353,10 +353,8 @@ void EBMultigridInterpolator::defineBuffers(){
     coarBoxes[lit().intCode()] &= coarDomain;    
   }
 
-  //  m_grownFineBoxesLayout.define(fineBoxes, fineGrids.procIDs());
   m_grownCoarBoxesLayout.define(coarBoxes, coFiGrids.procIDs());
 
-  //  m_grownFineData.define(m_grownFineBoxesLayout, m_nComp, EBCellFactory(fineEBISL));
   m_grownCoarData.define(m_grownCoarBoxesLayout, m_nComp, EBCellFactory(coFiEBISL));
 }
 
@@ -506,7 +504,7 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&            a_stencilFine,
 
   // I think these radii are good -- but there's no hard limit here. Increase the radii if you
   // see that the stencil drops order. 
-  const int fineRadius = a_order;
+  const int fineRadius = std::max(2, a_order);
   const int coarRadius = std::max(2, fineRadius/m_refRat);
 
   Vector<VolIndex> fineVofs;
@@ -573,8 +571,8 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&            a_stencilFine,
     const int curFineSize = fineVofsTrimmedSize.size();
     const int curCoarSize = coarVofsTrimmedSize.size();
     
-    fineVofsTrimmedSize.resize(std::min(numUnknowns, curFineSize));
-    coarVofsTrimmedSize.resize(std::min(numUnknowns, curCoarSize));
+    fineVofsTrimmedSize.resize(std::min(2*numUnknowns, curFineSize));
+    coarVofsTrimmedSize.resize(std::min(2*numUnknowns, curCoarSize));
     
     // Build displacement vectors
     Vector<RealVect> fineDisplacements;

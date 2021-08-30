@@ -156,19 +156,9 @@ protected:
   EBLevelGrid m_eblgCoFi;
 
   /*!
-    @brief Grown box layout on the fine level
-  */
-  BoxLayout m_grownFineBoxesLayout;
-
-  /*!
     @brief Grown box layout on the coarse level
   */
   BoxLayout m_grownCoarBoxesLayout;
-
-  /*!
-    @brief Fine data. Contains a lot of ghost storage
-  */
-  //  mutable BoxLayoutData<EBCellFAB> m_grownFineData;
 
   /*!
     @brief Coarsened data
