@@ -293,11 +293,6 @@ void EBMultigridInterpolator::defineGhostRegions(){
       IntVectSet irreg = ebisbox.getIrregIVS(cellBox);
       irreg.grow(m_ebStenRad);
       m_ghostCells[dit()] &= irreg;
-
-      const int numGhost = m_ghostCells[dit()].numPts();
-      if(numGhost > 100){
-	//	std::cout << numGhost << std::endl;
-      }
     }
   }
 }
@@ -622,7 +617,6 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&            a_stencilFine,
     foundStencil = true;
   }
   else{
-    std::cout << "/b/" << numEquations << "/" << numUnknowns << "/e/\n";    
     foundStencil = false;
   }
 
