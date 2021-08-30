@@ -499,7 +499,7 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&            a_stencilFine,
   // that information to build an overdetermined linear system of equations that interpolate to a_ghostVofFine to order a_order. If we don't have enough equations,
   // this routine will return false, and will not create stencils.
 
-  Timer timer("EBMultigridInterpolator::getStencil");
+  //Timer timer("EBMultigridInterpolator::getStencil");
   
   bool foundStencil = true;
 
@@ -512,18 +512,18 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&            a_stencilFine,
   Vector<VolIndex> coarVofs;
 
   // Get all Vofs in specified radii. Don't use cells that are not in a_validFineCells or in a_validCoarCells.
-  timer.startEvent("Get Vofs");
+  //timer.startEvent("Get Vofs");
   fineVofs = VofUtils::getVofsInRadius(a_ghostVofFine, a_ebisboxFine, fineRadius, VofUtils::Connectivity::MonotonePath, false);
   coarVofs = VofUtils::getVofsInRadius(a_ghostVofCoar, a_ebisboxCoar, coarRadius, VofUtils::Connectivity::MonotonePath, true );
-  timer.stopEvent("Get Vofs");  
+  //timer.stopEvent("Get Vofs");  
 
-  const int sizeBefore = fineVofs.size();
-  timer.startEvent("include cells");
+  //  const int sizeBefore = fineVofs.size();
+  //timer.startEvent("include cells");
   VofUtils::includeCells(fineVofs, a_validFineCells);
   VofUtils::includeCells(coarVofs, a_validCoarCells);
-  timer.stopEvent("include cells");
+  //timer.stopEvent("include cells");
 
-  const int sizeAfter = fineVofs.size();
+  //  const int sizeAfter = fineVofs.size();
 
   //  std::cout << sizeBefore << "\t" << sizeAfter << std::endl;
 
@@ -532,7 +532,7 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&            a_stencilFine,
 
 
   if(numEquations >= numUnknowns) { // We have enough equations to get a stencil.
-    timer.startEvent("sort");
+    //timer.startEvent("sort");
     // In many cases we will have WAY too many equations for the specified order. This is particularly true in 3D
     // because the number of coar vofs included in a radius r from the ghost vof can be (1 + 2*r)^3. So for r = 2
     // this = 125 cells, not counting the fine cells. Since singular value decomposition scales like O(n^3), the
@@ -581,13 +581,13 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&            a_stencilFine,
     
     fineVofsTrimmedSize.resize(std::min(2*numUnknowns, curFineSize));
     coarVofsTrimmedSize.resize(std::min(2*numUnknowns, curCoarSize));
-    timer.stopEvent("sort");    
+    //timer.stopEvent("sort");    
     
     // Build displacement vectors
     Vector<RealVect> fineDisplacements;
     Vector<RealVect> coarDisplacements;
 
-    timer.startEvent("dist");
+    //timer.startEvent("dist");
     for (const auto& fineVof : fineVofs.stdVector()){
       fineDisplacements.push_back(LeastSquares::displacement(a_dataLocation, a_dataLocation, a_ghostVofFine, fineVof, a_ebisboxFine, a_dxFine));
     }
@@ -595,7 +595,7 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&            a_stencilFine,
     for (const auto& coarVof : coarVofs.stdVector()){
       coarDisplacements.push_back(LeastSquares::displacement(a_dataLocation, a_dataLocation, a_ghostVofFine, coarVof, a_ebisboxFine, a_ebisboxCoar, a_dxFine, a_dxCoar));
     }
-    timer.stopEvent("dist");    
+    //timer.stopEvent("dist");    
 
     // LeastSquares computes all unknown terms in a Taylor expansion up to specified order. We want the 0th order term, i.e. the interpolated value,
     // which in multi-index notation is the term (0,0), i.e. IntVect::Zero. The format of the two-level least squares routine is such that the
@@ -604,7 +604,7 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&            a_stencilFine,
     IntVectSet derivs       = IntVectSet(interpStenIndex);
     IntVectSet knownTerms   = IntVectSet();
 
-    timer.startEvent("stencil");
+    //timer.startEvent("stencil");
     std::map<IntVect, std::pair<VoFStencil, VoFStencil> > stencils
       = LeastSquares::computeDualLevelStencils<float>(derivs,
 						      knownTerms,
@@ -617,7 +617,7 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&            a_stencilFine,
 
     a_stencilFine = stencils.at(interpStenIndex).first;
     a_stencilCoar = stencils.at(interpStenIndex).second;
-    timer.stopEvent("stencil");    
+    //timer.stopEvent("stencil");    
 
     foundStencil = true;
   }
@@ -626,7 +626,7 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&            a_stencilFine,
     foundStencil = false;
   }
 
-  timer.eventReport(true);
+  //timer.eventReport(true);
 
   return foundStencil;
 }

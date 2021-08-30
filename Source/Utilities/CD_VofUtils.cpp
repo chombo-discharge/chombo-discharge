@@ -451,12 +451,11 @@ void VofUtils::getVofsInMonotonePath(std::set<VolIndex>&    a_vofSet,
     
       for (int dir = 0; dir < SpaceDim; dir++){
 	if(a_timesMoved[dir] < a_radius){
-	  const IntVect newTimesMoved = a_timesMoved + BASISV(dir);
-
-	  Side::LoHiSide whichSide;
+	  IntVect newTimesMoved = a_timesMoved;
+	  newTimesMoved[dir] += 1;
 	
 	  // Move in the low direction. If we have already moved in the high direction we are not allowed to "turn back".
-	  if(a_pathSign[dir] == -1 || a_pathSign[dir] == 0){
+	  if(a_pathSign[dir] <= 0){
 	    IntVect newPathSign = a_pathSign;
 	    newPathSign[dir] = -1;
 
@@ -469,7 +468,7 @@ void VofUtils::getVofsInMonotonePath(std::set<VolIndex>&    a_vofSet,
 	  }
 
 	  // Move in the high direction. If we have already moved in the low direction we are not allowed to "turn back".
-	  if(a_pathSign[dir] == 0 || a_pathSign[dir] == 1){
+	  if(a_pathSign[dir] >= 0){
 	    IntVect newPathSign = a_pathSign;
 	    newPathSign[dir] = 1;
 
