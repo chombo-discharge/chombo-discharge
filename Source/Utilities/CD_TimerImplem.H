@@ -14,6 +14,7 @@
 
 // Std includes
 #include <sstream>
+#include <iostream>
 
 // Our includes
 #include <CD_Timer.H>
@@ -117,13 +118,13 @@ void Timer::printReportTail(const std::pair<Real, Real> a_elapsedTime) const noe
 }
 
 inline
-void Timer::eventReport() const noexcept{
+void Timer::eventReport(const bool a_localReportOnly) const noexcept{
   // This routine prints a header, the timing report for the various event, and a tail. All events are included
   // but unfinished ones are not counted towards the elapsed time. 
   
   this->printReportHeader();
 
-  const std::pair<Real, Real> totalTime = this->computeTotalElapsedTime();
+  const std::pair<Real, Real> totalTime = this->computeTotalElapsedTime(a_localReportOnly);
   const Real totalTimeLocal  = totalTime.first;
   const Real totalTimeGlobal = totalTime.second;  
     
@@ -131,9 +132,6 @@ void Timer::eventReport() const noexcept{
 
     const std::string& eventName     = e.first;
     const bool         finishedEvent = std::get<StoppedEvent> (e.second);
-
-    const int srcRank = 0;
-    const int numRank = numProc();
 
     std::stringstream ssLocalDuration; 
     std::stringstream ssPercentage;    
@@ -152,56 +150,70 @@ void Timer::eventReport() const noexcept{
       ssPercentage    << std::fixed << std::setprecision(3) << 100.*localDurationInSeconds/totalTimeLocal;
 
 #ifdef CH_MPI
-      Vector<Real> allDurations(numRank);
-      gather(allDurations, localDurationInSeconds, srcRank);
+      if(!a_localReportOnly){
 
-      // Compute average time and standard deviation
-      Real average;
-      Real sigma;
-      
-      Real maxTime = std::numeric_limits<Real>::min();
-      Real minTime = std::numeric_limits<Real>::max();
+	const int srcRank = 0;
+	const int numRank = numProc();
+    
+	Vector<Real> allDurations(numRank);
+	gather(allDurations, localDurationInSeconds, srcRank);
 
-      int minRank;
-      int maxRank;
+	// Compute average time and standard deviation
+	Real average;
+	Real sigma;
       
-      if(procID() == 0){
+	Real maxTime = std::numeric_limits<Real>::min();
+	Real minTime = std::numeric_limits<Real>::max();
+
+	int minRank;
+	int maxRank;
+      
+	if(procID() == 0){
 	
-	average = 0.0;
-	for (int i = 0; i < allDurations.size(); i++){
-	  average += allDurations[i];
+	  average = 0.0;
+	  for (int i = 0; i < allDurations.size(); i++){
+	    average += allDurations[i];
 
-	  if(allDurations[i] < minTime){
-	    minRank = i;
-	    minTime = allDurations[i];
+	    if(allDurations[i] < minTime){
+	      minRank = i;
+	      minTime = allDurations[i];
+	    }
+	    if(allDurations[i] > maxTime){
+	      maxRank = i;
+	      maxTime = allDurations[i];
+	    }	  	  
 	  }
-	  if(allDurations[i] > maxTime){
-	    maxRank = i;
-	    maxTime = allDurations[i];
-	  }	  	  
-	}
-	average *= 1./numRank;
+	  average *= 1./numRank;
 
-	sigma = 0.0;
-	for (int i = 0; i < allDurations.size(); i++){
-	  sigma += std::pow(allDurations[i]-average, 2);
+	  sigma = 0.0;
+	  for (int i = 0; i < allDurations.size(); i++){
+	    sigma += std::pow(allDurations[i]-average, 2);
+	  }
+	  sigma *= 1./numRank;
 	}
-	sigma *= 1./numRank;
+
+	broadcast(average, srcRank);
+	broadcast(sigma,   srcRank);
+	broadcast(maxTime, srcRank);
+	broadcast(minTime, srcRank);
+	broadcast(minRank, srcRank);
+	broadcast(maxRank, srcRank);      
+
+	ssMinDuration << std::fixed << std::setprecision(3) << minTime;
+	ssMaxDuration << std::fixed << std::setprecision(3) << maxTime;
+	ssAvgDuration << std::fixed << std::setprecision(3) << average;
+	ssDevDuration << std::fixed << std::setprecision(3) << sigma;
+	ssMinRank     << std::fixed << std::setprecision(3) << minRank;
+	ssMaxRank     << std::fixed << std::setprecision(3) << maxRank;
       }
-
-      broadcast(average, srcRank);
-      broadcast(sigma,   srcRank);
-      broadcast(maxTime, srcRank);
-      broadcast(minTime, srcRank);
-      broadcast(minRank, srcRank);
-      broadcast(maxRank, srcRank);      
-
-      ssMinDuration << std::fixed << std::setprecision(3) << minTime;
-      ssMaxDuration << std::fixed << std::setprecision(3) << maxTime;
-      ssAvgDuration << std::fixed << std::setprecision(3) << average;
-      ssDevDuration << std::fixed << std::setprecision(3) << sigma;
-      ssMinRank     << std::fixed << std::setprecision(3) << minRank;
-      ssMaxRank     << std::fixed << std::setprecision(3) << maxRank;
+      else{
+	ssMinDuration    << " N/A ";
+	ssMaxDuration    << " N/A ";
+	ssAvgDuration    << " N/A ";
+	ssDevDuration    << " N/A ";
+	ssMinRank        << " N/A ";
+	ssMaxRank        << " N/A ";    
+      }
 #endif
     }
     else{
@@ -239,7 +251,7 @@ void Timer::eventReport() const noexcept{
 }
 
 inline
-std::pair<Real, Real> Timer::computeTotalElapsedTime() const noexcept {
+std::pair<Real, Real> Timer::computeTotalElapsedTime(const bool a_localReportOnly) const noexcept {
 
   Real elapsedTimeLocal  = 0.0;
   Real elapsedTimeGlobal = 0.0;
@@ -252,15 +264,18 @@ std::pair<Real, Real> Timer::computeTotalElapsedTime() const noexcept {
       const Real localDurationInSeconds = elapsedTime.count();
 
       elapsedTimeLocal += localDurationInSeconds;
-
-
     }
   }
 
 #ifdef CH_MPI
-      MPI_Allreduce(&elapsedTimeLocal, &elapsedTimeGlobal, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
+  if(!a_localReportOnly){
+    MPI_Allreduce(&elapsedTimeLocal, &elapsedTimeGlobal, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
+  }
+  else{
+    elapsedTimeGlobal = elapsedTimeLocal;
+  }
 #else
-      elapsedTimeGlobal = elapsedTimeLocal;
+  elapsedTimeGlobal = elapsedTimeLocal;
 #endif        
 
   return std::make_pair(elapsedTimeLocal, elapsedTimeGlobal);

@@ -362,7 +362,6 @@ void EBMultigridInterpolator::defineStencilsEBCF(){
   CH_TIME("EBMultigridInterpolator::defineStencilsEBCF");
 
   // This routine defines stencils for all the ghost cells we need to fill across the EBCF boundary.
-  
   const int comp  = 0;
   const int nComp = 1;
 
@@ -499,30 +498,39 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&            a_stencilFine,
   // On input, we know which ghost cell we want to interpolate to, and we happen to have a map of valid cells in a_validFineCells and a_validCoarCells. We use
   // that information to build an overdetermined linear system of equations that interpolate to a_ghostVofFine to order a_order. If we don't have enough equations,
   // this routine will return false, and will not create stencils.
+
+  Timer timer("EBMultigridInterpolator::getStencil");
   
   bool foundStencil = true;
 
   // I think these radii are good -- but there's no hard limit here. Increase the radii if you
   // see that the stencil drops order. 
-  const int fineRadius = std::max(2, a_order);
-  const int coarRadius = std::max(2, fineRadius/m_refRat);
+  const int fineRadius = std::max(100, a_order);
+  const int coarRadius = std::max(100, fineRadius/m_refRat);
 
   Vector<VolIndex> fineVofs;
   Vector<VolIndex> coarVofs;
 
-  // Get all Vofs in specified radii. Don't use cells that are not in a_validFineCells or in a_validCoarCells. 
+  // Get all Vofs in specified radii. Don't use cells that are not in a_validFineCells or in a_validCoarCells.
+  timer.startEvent("Get Vofs");
   fineVofs = VofUtils::getVofsInRadius(a_ghostVofFine, a_ebisboxFine, fineRadius, VofUtils::Connectivity::MonotonePath, false);
   coarVofs = VofUtils::getVofsInRadius(a_ghostVofCoar, a_ebisboxCoar, coarRadius, VofUtils::Connectivity::MonotonePath, true );
-  
+  timer.stopEvent("Get Vofs");  
+
+  timer.startEvent("include cells");
   VofUtils::includeCells(fineVofs, a_validFineCells);
   VofUtils::includeCells(coarVofs, a_validCoarCells);
-  
+  timer.stopEvent("include cells");  
+
+  timer.startEvent("unique");
   VofUtils::onlyUnique(fineVofs);
   VofUtils::onlyUnique(coarVofs);
+  timer.stopEvent("unique");
 
   const int numEquations = coarVofs.size() + fineVofs.size();
   const int numUnknowns  = LeastSquares::getTaylorExpansionSize(a_order);
 
+  timer.startEvent("lsq solve");
   if(numEquations >= numUnknowns) { // We have enough equations to get a stencil.
 
     // In many cases we will have WAY too many equations for the specified order. This is particularly true in 3D
@@ -611,6 +619,9 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&            a_stencilFine,
     std::cout << "/b/" << numEquations << "/" << numUnknowns << "/e/\n";    
     foundStencil = false;
   }
+  timer.stopEvent("lsq solve");
+
+  timer.eventReport(true);
 
   return foundStencil;
 }
