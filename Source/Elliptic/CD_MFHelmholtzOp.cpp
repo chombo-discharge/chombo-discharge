@@ -462,24 +462,15 @@ void MFHelmholtzOp::applyOp(LevelData<MFCellFAB>&             a_Lphi,
 			    const bool                        a_homogeneousPhysBC,
 			    const bool                        a_homogeneousCFBC){
   CH_TIME("MFHelmholtzOp::applyOp(LD<MFCellFAB>, LD<MFCellFAB>, LD<MFCellFAB>, bool, bool)");
-
-  Timer timer("MFHelmholtzOp::applyOp");
   
-  // We need updated ghost cells in the CF before applying the matching conditions.
-  timer.startEvent("exchange");
+  // We need updated ghost cells since both the operator stencil and the "jump" stencil
+  // reach into ghost regions. 
   this->exchangeGhost(a_phi);
-  timer.stopEvent("exchange");
-  timer.startEvent("interpolate");
   this->interpolateCF(a_phi, a_phiCoar, a_homogeneousCFBC);
-  timer.stopEvent("interpolate");
-  timer.startEvent("update jump");    
   this->updateJumpBC(a_phi, a_homogeneousPhysBC);
-  timer.stopEvent("update jump");      
 
-  // Apply the operator on each patch.
-  timer.startEvent("applyop");
+  // Now apply the operator on each patch.
   const DisjointBoxLayout& dbl = m_mflg.getGrids();
-  
   for (DataIterator dit(dbl); dit.ok(); ++dit){
     const Box cellBox = dbl[dit()];
 
@@ -493,9 +484,6 @@ void MFHelmholtzOp::applyOp(LevelData<MFCellFAB>&             a_Lphi,
       op.second->applyOp(Lph, phi, cellBox, dit(), a_homogeneousPhysBC);
     }
   }
-  timer.stopEvent("applyop");
-
-  //  timer.eventReport(pout(), false);
 }
 
 void MFHelmholtzOp::interpolateCF(const LevelData<MFCellFAB>& a_phi, const LevelData<MFCellFAB>* a_phiCoar, const bool a_homogeneousCF){
@@ -612,7 +600,7 @@ void MFHelmholtzOp::relaxPointJacobi(LevelData<MFCellFAB>& a_correction, const L
 
   for (int i = 0; i < a_iterations; i++){
     
-    // Interpolate ghost cells and match the BC.
+    // Fill/interpolate ghost cells and match the BC.
     this->exchangeGhost(a_correction);
     this->interpolateCF(a_correction, nullptr, homogeneousCFBC);
     this->updateJumpBC(a_correction,  homogeneousPhysBC);    
@@ -651,9 +639,9 @@ void MFHelmholtzOp::relaxGSRedBlack(LevelData<MFCellFAB>& a_correction, const Le
   constexpr bool homogeneousPhysBC = true;  
 
   for (int i = 0; i < a_iterations; i++){
-
-    // Interpolate ghost cells and match the BC.
     for (int redBlack=0;redBlack<=1; redBlack++){
+
+      // Fill/interpolate ghost cells and match the BC.
       this->exchangeGhost(a_correction);
       this->interpolateCF(a_correction, nullptr, homogeneousCFBC);
       this->updateJumpBC(a_correction, homogeneousPhysBC);
@@ -695,8 +683,9 @@ void MFHelmholtzOp::relaxGSMultiColor(LevelData<MFCellFAB>& a_correction, const 
 
   for (int i = 0; i < a_iterations; i++){
 
-    // Interpolate ghost cells and match the BC.
     for (int icolor = 0; icolor < m_colors.size(); icolor++){
+
+      // Fill/interpolate ghost cells and match the BC.      
       this->exchangeGhost(a_correction);      
       this->interpolateCF(a_correction, nullptr, homogeneousCFBC);
       this->updateJumpBC(a_correction, homogeneousPhysBC);
