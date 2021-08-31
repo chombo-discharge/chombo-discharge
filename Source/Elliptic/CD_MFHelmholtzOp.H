@@ -571,6 +571,12 @@ protected:
   void updateJumpBC(const LevelData<MFCellFAB>& a_phi, const bool a_homogeneousPhysBC);
 
   /*!
+    @brief Perform an exchange operation, event if the data is const.
+    @param[in] a_phi Data 
+  */
+  void exchangeGhost(const LevelData<MFCellFAB>& a_phi) const;
+
+  /*!
     @brief Do coarse-fine interpolation
     @param[inout] a_phi Fine-level data
     @param[in]    a_phiCoar Coarse-level data
