@@ -90,7 +90,7 @@ EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
   bool profile = false;
   pp.query("profile", profile);
   if(profile){
-    timer.eventReport();
+    timer.eventReport(pout());
   }
 
   m_isDefined = true;

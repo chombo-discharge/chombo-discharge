@@ -120,7 +120,7 @@ void PhaseRealm::regridBase(const int a_lmin){
     timer.stopEvent("Define VoFIterators");
 
     if(m_profile){
-      timer.eventReport();
+      timer.eventReport(pout());
     }
   }
 }
@@ -200,7 +200,7 @@ void PhaseRealm::regridOperators(const int a_lmin){
     timer.stopEvent("Multigrid interpolator");
 
     if(m_profile){
-      timer.eventReport();
+      timer.eventReport(pout());
     }
   }
 }

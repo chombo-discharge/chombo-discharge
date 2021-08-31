@@ -82,7 +82,7 @@ void Timer::stopEvent(const std::string a_event) noexcept {
 }
 
 inline
-void Timer::printReportHeader() const noexcept {
+void Timer::printReportHeader(std::ostream& a_outputStream) const noexcept {
 
   std::stringstream header;
   header << "| ---------------------------------------------------------------------------------------------------------|" << "\n"
@@ -102,11 +102,11 @@ void Timer::printReportHeader() const noexcept {
 #endif
          << "| ---------------------------------------------------------------------------------------------------------|" << "\n";
 
-  pout() << header.str();
+  a_outputStream << header.str();
 }
 
 inline
-void Timer::printReportTail(const std::pair<Real, Real> a_elapsedTime) const noexcept {
+void Timer::printReportTail(std::ostream& a_outputStream, const std::pair<Real, Real> a_elapsedTime) const noexcept {
   std::stringstream tail;
   
   tail << "| ---------------------------------------------------------------------------------------------------------|" << "\n"
@@ -114,15 +114,15 @@ void Timer::printReportTail(const std::pair<Real, Real> a_elapsedTime) const noe
        << "| Global elapsed time = " << std::fixed << std::setprecision(5) << a_elapsedTime.second << " seconds"         << "\n"
        << "| ---------------------------------------------------------------------------------------------------------|" << "\n";
 
-  pout() << tail.str();
+  a_outputStream << tail.str();
 }
 
 inline
-void Timer::eventReport(const bool a_localReportOnly) const noexcept{
+void Timer::eventReport(std::ostream& a_outputStream, const bool a_localReportOnly) const noexcept{
   // This routine prints a header, the timing report for the various event, and a tail. All events are included
   // but unfinished ones are not counted towards the elapsed time. 
   
-  this->printReportHeader();
+  this->printReportHeader(a_outputStream);
 
   const std::pair<Real, Real> totalTime = this->computeTotalElapsedTime(a_localReportOnly);
   const Real totalTimeLocal  = totalTime.first;
@@ -244,10 +244,10 @@ void Timer::eventReport(const bool a_localReportOnly) const noexcept{
 		 << "| "
 		 << "\n";
 
-    pout() << outputString.str();
+    a_outputStream << outputString.str();
   }
 
-  this->printReportTail(totalTime);  
+  this->printReportTail(a_outputStream, totalTime);  
 }
 
 inline

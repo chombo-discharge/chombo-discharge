@@ -668,7 +668,7 @@ void Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialD
   m_needsNewGeometricTags = false;
 
   if(m_verbosity > 1){
-    timer.eventReport();
+    timer.eventReport(pout());
   }
 }
 
@@ -2116,7 +2116,7 @@ void Driver::writePlotFile(const std::string a_filename){
 #endif
   
   if(m_verbosity >= 3){
-    timer.eventReport();
+    timer.eventReport(pout());
   }
 }
 
@@ -2289,7 +2289,7 @@ void Driver::writeCheckpointFile(){
 
   if(m_verbosity >= 3){
     timer.stopEvent("Write data");    
-    timer.eventReport();
+    timer.eventReport(pout());
   }
   
   handleOut.close();
