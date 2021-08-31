@@ -112,9 +112,10 @@ public:
     @brief Print all timed events to cout.
     @details This routine prints a header, the timing report for the various event, and a tail. All events are included but unfinished ones
     are not counted towards the elapsed time. 
+    @param[in] a_localReportOnly If true, no reduction over mpi
   */
   inline
-  void eventReport() const noexcept;
+  void eventReport(const bool a_localReportOnly = false) const noexcept;
 
 protected:
 
@@ -152,7 +153,7 @@ protected:
     @brief Compute the total time for all finished events. 
     @return First entry is the local time. Second entry is the global time. 
   */
-  std::pair<Real, Real> computeTotalElapsedTime() const noexcept;
+  std::pair<Real, Real> computeTotalElapsedTime(const bool a_localReportOnly) const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

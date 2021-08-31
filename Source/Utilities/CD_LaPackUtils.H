@@ -21,6 +21,7 @@
 
 /*!
   @brief This is an interface to LAPACK for solving least squares problems using singular-value decomposition
+  @note Double precision version. 
 */
 extern "C" void dgelss_(int*    a_M, 
 			int*    a_N, 
@@ -38,6 +39,7 @@ extern "C" void dgelss_(int*    a_M,
 
 /*!
   @brief Interface to LaPack for computing the singular value decomposition of a matrix. 
+  @note This is the double-precision version. 
 */
 extern "C" void dgesdd_(char*   a_JOBZ,
 			int*    a_M,
@@ -50,6 +52,25 @@ extern "C" void dgesdd_(char*   a_JOBZ,
 			double* a_VT,
 			int*    a_LDVT,
 			double* a_WORK,
+			int*    a_LWORK,
+			int*    a_IWORK,
+			int*    a_INFO);
+
+/*!
+  @brief Interface to LaPack for computing the singular value decomposition of a matrix. 
+  @note This is the single-precision version. 
+*/
+extern "C" void sgesdd_(char*   a_JOBZ,
+			int*    a_M,
+			int*    a_N,
+			float*  a_A,
+			int*    a_LDA, 
+			float*  a_S, 
+			float*  a_U,
+			int*    a_LDU,
+			float*  a_VT,
+			int*    a_LDVT,
+			float*  a_WORK,
 			int*    a_LWORK,
 			int*    a_IWORK,
 			int*    a_INFO);
@@ -72,6 +93,24 @@ extern "C" void dgemm_(char*   a_TRANSA,
 		       int*    a_LDC);
 
 /*!
+  @brief Interface to LaPack for matrix multiplication
+  @note Single-precision version.
+*/
+extern "C" void sgemm_(char*   a_TRANSA,
+		       char*   a_TRANSB,
+		       int*    a_M,
+		       int*    a_N,
+		       int*    a_K,
+		       float*  a_ALPHA,
+		       float*  a_A,
+		       int*    a_LDA,
+		       float*  a_B,
+		       int*    a_LDB,
+		       float*  a_BETA,
+		       float*  a_C,
+		       int*    a_LDC);
+
+/*!
   @brief Interface to LaPack for computing solution to Ax=b
 */
 extern "C" void dgesv_(int*    N,
@@ -83,8 +122,9 @@ extern "C" void dgesv_(int*    N,
 		       int*    LDB,
 		       int*    INFO);
 
-
-
+/*!
+  @brief Namespace containing various useful linear algebra routines using LaPACK. 
+*/
 namespace LaPackUtils {
 
   /*!
@@ -118,6 +158,27 @@ namespace LaPackUtils {
 		  const int&                 a_N);
 
   /*!
+    @brief Compute the singular value decomposition of a matrix. 
+    @param[out] a_linU \f$U\f$-matrix. Linearized in column major Fortran order. 
+    @param[out] a_linSigma \f$\Sigma\f$-matrix. Linearized in column major Fortran order. 
+    @param[out] a_linVtran \f$V^\intercal\f$-matrix. Linearized in column major Fortran order. 
+    @param[in]  a_linA \f$A\f$-matrix. Stored in column-major Fortran form
+    @param[in]  a_M Number of rows in A
+    @param[in]  a_N Number of columns in A
+    @details This routine will compute the singular value decomposition of the input matrix \f$A\f$ in the form
+    \f[
+    A = U\Sigma V^\intercal.
+    \f]
+    The input and output matrices are assumed to be stored column-major so that a_A[0] is the first column of \f$A\f$. 
+  */
+  bool computeSVD(std::vector<float>&       a_linU,
+		  std::vector<float>&       a_linSigma,
+		  std::vector<float>&       a_linVtran,
+		  const std::vector<float>& a_linA,
+		  const int&                 a_M,
+		  const int&                 a_N);  
+
+  /*!
     @brief Compute the pseudoinverse of matrix through singular value decomposition
     @param[out] a_linAplus Pseudoinverse in column major Fortran order. 
     @param[in]  a_linA Input matrix in column major Fortran order
@@ -128,6 +189,19 @@ namespace LaPackUtils {
 			    const std::vector<double>& a_linA,
 			    const int&                 a_M,
 			    const int&                 a_N);
+
+  /*!
+    @brief Compute the pseudoinverse of matrix through singular value decomposition
+    @param[out] a_linAplus Pseudoinverse in column major Fortran order. 
+    @param[in]  a_linA Input matrix in column major Fortran order
+    @param[in]  a_M Number of rows in A
+    @param[in]  a_N Number of colums in A
+  */
+  bool computePseudoInverse(std::vector<float>&       a_linAplus,
+			    const std::vector<float>& a_linA,
+			    const int&                a_M,
+			    const int&                a_N);
+  
   /*!
     @brief Linearize a matrix to column major Fortran form by assuming row or major colum format of the input matrix. 
     @param[out] a_linA Linearized matrix

@@ -35,12 +35,12 @@ EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
 						 const IntVect&     a_ghostVector,
 						 const int          a_refRat,
 						 const int          a_nVar,
-						 const int          a_ghostCF,
+						 const int          a_ebStenRad,
 						 const int          a_order,
 						 const int          a_weighting){
   CH_TIME("EBMultigridInterpolator::EBMultigridInterpolator");
 
-  CH_assert(a_ghostCF   > 0);
+  CH_assert(a_ebStenRad > 0);
   CH_assert(a_nVar      > 0);
   CH_assert(a_refRat%2 == 0);
 
@@ -54,7 +54,7 @@ EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
 
   m_refRat        = a_refRat;
   m_nComp         = a_nVar;
-  m_ghostCF       = a_ghostCF;
+  m_ebStenRad     = a_ebStenRad;
   m_order         = a_order;
   m_ghostVector   = a_ghostVector;
   m_dataLocation  = a_dataLocation;
@@ -97,7 +97,7 @@ EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
 }
 
 int EBMultigridInterpolator::getGhostCF() const{
-  return m_ghostCF;
+  return m_ebStenRad;
 }
 
 EBMultigridInterpolator::~EBMultigridInterpolator(){
@@ -107,8 +107,8 @@ EBMultigridInterpolator::~EBMultigridInterpolator(){
 void EBMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar, const Interval a_variables) {
   CH_TIME("EBMultigridInterpolator::interp");
   
-  CH_assert(m_ghostCF <= a_phiFine.ghostVect().max());
-  CH_assert(m_ghostCF <= a_phiCoar.ghostVect().max());
+  CH_assert(m_ebStenRad <= a_phiFine.ghostVect().max());
+  CH_assert(m_ebStenRad <= a_phiCoar.ghostVect().max());
 
   // TLDR: This routine does the inhomogeneous coarse-fine interpolation, i.e. without the coarse data set to zero. It does it component-by-component. 
 
@@ -169,7 +169,7 @@ void EBMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>& a_phiFine, 
 void EBMultigridInterpolator::coarseFineInterpH(LevelData<EBCellFAB>& a_phiFine, const Interval a_variables) const{
   CH_TIME("EBMultigridInterpolator::coarseFineInterpH(LevelData<EBCellFAB>, Interval)");
   
-  CH_assert(m_ghostCF <= a_phiFine.ghostVect().max());
+  CH_assert(m_ebStenRad <= a_phiFine.ghostVect().max());
 
   // TLDR: This routine does the coarse-fine interpolation with the coarse-grid data set to zero. 
   
@@ -264,20 +264,21 @@ void EBMultigridInterpolator::defineGhostRegions(){
   }
 
   // This hook is for the interpolation over the coarse-fine boundary near the EB. In this case we may
-  // require more ghost cells to be interpolated (defined by m_ghostCF). This routine computes those
-  // cells, including all ghost cells that are within range m_ghostCF from the cut-cell. 
+  // require more ghost cells to be interpolated (defined by m_ebStenRad). This routine computes those
+  // cells, including all ghost cells that are within range m_ebStenRad from the cut-cell. 
   m_ghostCells.define(dbl);
   for (DataIterator dit(dbl); dit.ok(); ++dit){
     const Box cellBox      = dbl[dit()];
     const EBISBox& ebisbox = ebisl[dit()];
-
+    const EBGraph& ebgraph = ebisbox.getEBGraph();
     if(ebisbox.isAllRegular() || ebisbox.isAllCovered()){
       m_ghostCells[dit()] = IntVectSet();
     }
     else{
 
+
       // 1. Define the width of the ghost layer region around current (irregular grid) patch
-      Box grownBox = grow(cellBox, m_ghostCF);
+      Box grownBox = grow(cellBox, m_ebStenRad);
       grownBox &= domain;
 
       m_ghostCells[dit()] = IntVectSet(grownBox);
@@ -288,9 +289,9 @@ void EBMultigridInterpolator::defineGhostRegions(){
       }
       m_ghostCells[dit()] -= cellBox;
 
-      // 2. Only include ghost cells that are within range m_ghostCF of an irregular grid cell
+      // 2. Only include ghost cells that are within range m_ebStenRad of an irregular grid cell
       IntVectSet irreg = ebisbox.getIrregIVS(cellBox);
-      irreg.grow(m_ghostCF);
+      irreg.grow(m_ebStenRad);
       m_ghostCells[dit()] &= irreg;
     }
   }
@@ -325,7 +326,7 @@ void EBMultigridInterpolator::defineBuffers(){
   //       the boxes should be grown on each level.
 
   // This is the number of ghost cells that we will place on the coarse grid. We use it to ensure that we have enough equations. 
-  const int ghostReq = m_ghostCF + m_order;
+  const int ghostReq = m_ebStenRad + m_order;
   
   const DisjointBoxLayout& fineGrids = m_eblgFine.getDBL();
   const DisjointBoxLayout& coFiGrids = m_eblgCoFi.getDBL();
@@ -347,18 +348,15 @@ void EBMultigridInterpolator::defineBuffers(){
     coarBoxes[lit().intCode()] &= coarDomain;    
   }
 
-  //  m_grownFineBoxesLayout.define(fineBoxes, fineGrids.procIDs());
   m_grownCoarBoxesLayout.define(coarBoxes, coFiGrids.procIDs());
 
-  //  m_grownFineData.define(m_grownFineBoxesLayout, m_nComp, EBCellFactory(fineEBISL));
   m_grownCoarData.define(m_grownCoarBoxesLayout, m_nComp, EBCellFactory(coFiEBISL));
 }
 
 void EBMultigridInterpolator::defineStencilsEBCF(){
   CH_TIME("EBMultigridInterpolator::defineStencilsEBCF");
 
-  // This routine defines stencils for all the ghost cells we need to fill across the EBCF boundary. 
-  
+  // This routine defines stencils for all the ghost cells we need to fill across the EBCF boundary.
   const int comp  = 0;
   const int nComp = 1;
 
@@ -441,6 +439,7 @@ void EBMultigridInterpolator::defineStencilsEBCF(){
 
       // Try to fine a two-level stencil for this ghost cell. Drop order if we can't find it (and print a warning). 
       while(order > 0 && !foundStencil){
+
 	foundStencil = this->getStencil(fineSten,
 					coarSten,
 					m_dataLocation,
@@ -454,6 +453,7 @@ void EBMultigridInterpolator::defineStencilsEBCF(){
 					dxCoar,
 					order,
 					m_weight);
+
 	
 	order--;
 
@@ -493,34 +493,96 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&            a_stencilFine,
   // On input, we know which ghost cell we want to interpolate to, and we happen to have a map of valid cells in a_validFineCells and a_validCoarCells. We use
   // that information to build an overdetermined linear system of equations that interpolate to a_ghostVofFine to order a_order. If we don't have enough equations,
   // this routine will return false, and will not create stencils.
+
+  //Timer timer("EBMultigridInterpolator::getStencil");
   
   bool foundStencil = true;
-  
-  const int fineRadius = a_order;
+
+  // I think these radii are good -- but there's no hard limit here. Increase the radii if you
+  // see that the stencil drops order. 
+  const int fineRadius = std::max(2, a_order);
   const int coarRadius = std::max(2, fineRadius/m_refRat);
 
   Vector<VolIndex> fineVofs;
   Vector<VolIndex> coarVofs;
 
-  // Get all Vofs in specified radii. Don't use cells that are not in a_validFineCells or in a_validCoarCells. 
+  // Get all Vofs in specified radii. Don't use cells that are not in a_validFineCells or in a_validCoarCells.
+  //timer.startEvent("Get Vofs");
   fineVofs = VofUtils::getVofsInRadius(a_ghostVofFine, a_ebisboxFine, fineRadius, VofUtils::Connectivity::MonotonePath, false);
   coarVofs = VofUtils::getVofsInRadius(a_ghostVofCoar, a_ebisboxCoar, coarRadius, VofUtils::Connectivity::MonotonePath, true );
-  
+  //timer.stopEvent("Get Vofs");  
+
+  //  const int sizeBefore = fineVofs.size();
+  //timer.startEvent("include cells");
   VofUtils::includeCells(fineVofs, a_validFineCells);
   VofUtils::includeCells(coarVofs, a_validCoarCells);
-  
-  VofUtils::onlyUnique(fineVofs);
-  VofUtils::onlyUnique(coarVofs);
+  //timer.stopEvent("include cells");
+
+  //  const int sizeAfter = fineVofs.size();
+
+  //  std::cout << sizeBefore << "\t" << sizeAfter << std::endl;
 
   const int numEquations = coarVofs.size() + fineVofs.size();
   const int numUnknowns  = LeastSquares::getTaylorExpansionSize(a_order);
 
-  if(numEquations >= numUnknowns) { // We have enough equations to get a stencil
 
+  if(numEquations >= numUnknowns) { // We have enough equations to get a stencil.
+    //timer.startEvent("sort");
+    // In many cases we will have WAY too many equations for the specified order. This is particularly true in 3D
+    // because the number of coar vofs included in a radius r from the ghost vof can be (1 + 2*r)^3. So for r = 2
+    // this = 125 cells, not counting the fine cells. Since singular value decomposition scales like O(n^3), the
+    // penalty for including too may equations can be quite severe. 
+    std::vector<VolIndex>& fineVofsTrimmedSize = fineVofs.stdVector();
+    std::vector<VolIndex>& coarVofsTrimmedSize = coarVofs.stdVector();
+
+    // Coordinates of the ghost vof that we will interpolate to (excluding lower-left corner because of the subtraction
+    // in the comparators). 
+    const RealVect x0 = Location::position(a_dataLocation, a_ghostVofFine, a_ebisboxFine, a_dxFine);
+
+    // For sorting fine vofs, based on distance to the ghost vof. Shortest distance goes first. 
+    auto comparatorFine = [&loc     = a_dataLocation,
+			   &p       = x0,
+			   &ebisbox = a_ebisboxFine,
+			   &dx      = a_dxFine](const VolIndex& v1, const VolIndex& v2) -> bool {
+      const RealVect d1 = Location::position(loc, v1, ebisbox, dx) - p;
+      const RealVect d2 = Location::position(loc, v2, ebisbox, dx) - p;
+
+      const Real l1 = d1.vectorLength();
+      const Real l2 = d2.vectorLength();
+      
+      return l1 < l2;
+    };
+
+    // For sorting coar vofs, based on distance to the ghost vof. Shortest distance goes first. 
+    auto comparatorCoar = [&loc     = a_dataLocation,
+			   &p       = x0,
+			   &ebisbox = a_ebisboxCoar,
+			   &dx      = a_dxCoar](const VolIndex& v1, const VolIndex& v2) -> bool {
+      const RealVect d1 = Location::position(loc, v1, ebisbox, dx) - p;
+      const RealVect d2 = Location::position(loc, v2, ebisbox, dx) - p;
+
+      const Real l1 = d1.vectorLength();
+      const Real l2 = d2.vectorLength();
+      
+      return l1 < l2;
+    };    
+
+    // Sort and trim the system size. 
+    std::sort(fineVofsTrimmedSize.begin(), fineVofsTrimmedSize.end(), comparatorFine);
+    std::sort(coarVofsTrimmedSize.begin(), coarVofsTrimmedSize.end(), comparatorCoar);
+
+    const int curFineSize = fineVofsTrimmedSize.size();
+    const int curCoarSize = coarVofsTrimmedSize.size();
+    
+    fineVofsTrimmedSize.resize(std::min(2*numUnknowns, curFineSize));
+    coarVofsTrimmedSize.resize(std::min(2*numUnknowns, curCoarSize));
+    //timer.stopEvent("sort");    
+    
     // Build displacement vectors
     Vector<RealVect> fineDisplacements;
     Vector<RealVect> coarDisplacements;
 
+    //timer.startEvent("dist");
     for (const auto& fineVof : fineVofs.stdVector()){
       fineDisplacements.push_back(LeastSquares::displacement(a_dataLocation, a_dataLocation, a_ghostVofFine, fineVof, a_ebisboxFine, a_dxFine));
     }
@@ -528,6 +590,7 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&            a_stencilFine,
     for (const auto& coarVof : coarVofs.stdVector()){
       coarDisplacements.push_back(LeastSquares::displacement(a_dataLocation, a_dataLocation, a_ghostVofFine, coarVof, a_ebisboxFine, a_ebisboxCoar, a_dxFine, a_dxCoar));
     }
+    //timer.stopEvent("dist");    
 
     // LeastSquares computes all unknown terms in a Taylor expansion up to specified order. We want the 0th order term, i.e. the interpolated value,
     // which in multi-index notation is the term (0,0), i.e. IntVect::Zero. The format of the two-level least squares routine is such that the
@@ -536,23 +599,28 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&            a_stencilFine,
     IntVectSet derivs       = IntVectSet(interpStenIndex);
     IntVectSet knownTerms   = IntVectSet();
 
-    std::map<IntVect, std::pair<VoFStencil, VoFStencil> > stencils = LeastSquares::computeDualLevelStencils(derivs,
-													    knownTerms,
-													    fineVofs,
-													    coarVofs,
-													    fineDisplacements,
-													    coarDisplacements,
-													    a_weight,
-													    a_order);
+    //timer.startEvent("stencil");
+    std::map<IntVect, std::pair<VoFStencil, VoFStencil> > stencils
+      = LeastSquares::computeDualLevelStencils<float>(derivs,
+						      knownTerms,
+						      fineVofs,
+						      coarVofs,
+						      fineDisplacements,
+						      coarDisplacements,
+						      a_weight,
+						      a_order);
 
     a_stencilFine = stencils.at(interpStenIndex).first;
     a_stencilCoar = stencils.at(interpStenIndex).second;
+    //timer.stopEvent("stencil");    
 
     foundStencil = true;
   }
   else{
     foundStencil = false;
   }
+
+  //timer.eventReport(true);
 
   return foundStencil;
 }

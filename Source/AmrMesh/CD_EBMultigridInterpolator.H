@@ -67,7 +67,7 @@ public:
     @param[in] a_ghostVector  (Minimum) number of ghost cells in input/output data. 
     @param[in] a_refRat       Refinement ratio
     @param[in] a_nVar         Number of variables which will be interpolated. 
-    @param[in] a_ghostCF      Width of the ghost region to be filled. Only relevant near the EBCF. 
+    @param[in] a_ebStenRad      Width of the ghost region to be filled. Only relevant near the EBCF. 
     @param[in] a_order        Interpolation order
     @param[in] a_weighting    Weighting factor least squares. 
   */
@@ -77,7 +77,7 @@ public:
 			  const IntVect&     a_ghostVector,
 			  const int          a_refRat,
 			  const int          a_nVar,
-			  const int          a_ghostCF,
+			  const int          a_ebStenRad,
 			  const int          a_order,
 			  const int          a_weighting = 0);
 			  
@@ -156,19 +156,9 @@ protected:
   EBLevelGrid m_eblgCoFi;
 
   /*!
-    @brief Grown box layout on the fine level
-  */
-  BoxLayout m_grownFineBoxesLayout;
-
-  /*!
     @brief Grown box layout on the coarse level
   */
   BoxLayout m_grownCoarBoxesLayout;
-
-  /*!
-    @brief Fine data. Contains a lot of ghost storage
-  */
-  //  mutable BoxLayoutData<EBCellFAB> m_grownFineData;
 
   /*!
     @brief Coarsened data
@@ -193,7 +183,7 @@ protected:
   /*!
     @brief Number of ghost cells to fill across coarse-fine interface. 
   */
-  int m_ghostCF;
+  int m_ebStenRad;
 
   /*!
     @brief Order of the interpolation
@@ -231,7 +221,7 @@ protected:
   void defineCFIVS();
 
   /*!
-    @brief Define ghost cells to be filled in range m_ghostCF from each cut-cell
+    @brief Define ghost cells to be filled in range m_ebStenRad from each cut-cell
   */
   void defineGhostRegions();
 
