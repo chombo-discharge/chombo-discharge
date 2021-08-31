@@ -164,7 +164,7 @@ void PhaseRealm::regridOperators(const int a_lmin){
     timer.stopEvent("Fine-to-coar redist");
 
     timer.startEvent("Coar-to-fine redist");            
-    this->defineFineToCoarRedistOper(a_lmin, 1);
+    this->defineCoarToFineRedistOper(a_lmin, 1);
     timer.stopEvent("Coar-to-fine redist");
     
     timer.startEvent("Coar-to-coar redist");            

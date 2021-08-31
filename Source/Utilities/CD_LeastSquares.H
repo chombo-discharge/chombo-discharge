@@ -255,6 +255,7 @@ public:
     @param[in] a_displacements Displacement vectors, i.e. (x1-x0,x2-x0, x3-x0,...,(xN-x0)^T. 
     @param[in] a_power Power factor for weights.
   */
+  inline
   static Vector<Real> makeDiagWeights(const Vector<RealVect>& a_displacements, const int a_pow);
 
   /*!
@@ -398,7 +399,9 @@ public:
     and the second entry contains the coar vofs. 
     @note This will throw an error if you don't have enough equations for obtaining the specified order. 
     @note The return map is always initialized with empty stencils. If computing the pseudoinverse fails, the returned stencils are all empty. 
+    @note T is the precision used by LAPACK
   */
+  template<typename T>
   static std::map<IntVect, std::pair<VoFStencil, VoFStencil> > computeDualLevelStencils(const IntVectSet&       a_derivs,
 											const IntVectSet&       a_knownTerms,
 											const Vector<VolIndex>& a_fineVofs,
@@ -430,7 +433,9 @@ public:
     and the second entry contains the coar vofs. 
     @note This will throw an error if you don't have enough equations for obtaining the specified order. 
     @note The return map is always initialized with empty stencils. If computing the pseudoinverse fails, the returned stencils are all empty. 
+    @note T is the precision used by LAPACK
   */
+  template <typename T>
   static std::map<IntVect, std::pair<VoFStencil, VoFStencil> > computeDualLevelStencils(const IntVectSet&       a_derivs,
 											const IntVectSet&       a_knownTerms,
 											const Vector<VolIndex>& a_fineVofs,
@@ -445,5 +450,7 @@ public:
 };
 
 #include <CD_NamespaceFooter.H>
+
+#include <CD_LeastSquaresImplem.H>
 
 #endif
