@@ -1247,7 +1247,8 @@ void EBHelmholtzOp::computeAggStencil(){
   m_aggStencil.define(m_eblg.getDBL());
 
   for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit){
-    Vector<VolIndex>&  vofVec = (Vector<VolIndex>&) (m_vofIterStenc[dit()].getVector());
+    const Vector<VolIndex>& constVofVec = m_vofIterStenc[dit()].getVector();
+    Vector<VolIndex>&            vofVec = const_cast<Vector<VolIndex>&> (constVofVec);
     
     Vector<VoFStencil>                  stenVec       (vofVec.size());
     Vector<RefCountedPtr<BaseIndex> >   dstBaseIndex  (vofVec.size());
