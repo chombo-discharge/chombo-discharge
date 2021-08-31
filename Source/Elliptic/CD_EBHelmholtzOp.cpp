@@ -363,10 +363,13 @@ void EBHelmholtzOp::defineStencils(){
       m_betaDiagWeight[dit()](vof, m_comp) = betaWeight;
     }
   }
+
+
     
   // Compute the alpha-weight and relaxation coefficient. 
   this->computeAlphaWeight();
   this->computeRelaxationCoefficient();
+  this->computeAggStencil();
 }
 
 void EBHelmholtzOp::setAlphaAndBeta(const Real& a_alpha, const Real& a_beta) {
@@ -378,6 +381,7 @@ void EBHelmholtzOp::setAlphaAndBeta(const Real& a_alpha, const Real& a_beta) {
   // When we change alpha and beta we need to recompute relaxation coefficients...
   this->computeAlphaWeight(); 
   this->computeRelaxationCoefficient();
+  this->computeAggStencil();
 }
 
 void EBHelmholtzOp::residual(LevelData<EBCellFAB>& a_residual, const LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_rhs, bool a_homogeneousPhysBC) {
@@ -806,8 +810,9 @@ void EBHelmholtzOp::applyOpIrregular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, 
   // This routine computes L(phi) in a grid patch. This includes the cut-cell itself. Note that such cells can include cells that have both
   // an EB face and a domain face. This routine handles both.
   
-  // Apply the operator in all cells where we needed an explicit stencil. Note that the operator does NOT include stencils for fluxes
-  // through the domain faces. That is handled below. 
+  // Apply the operator in all cells where we needed an explicit stencil. Note that the operator stencils do NOT include stencils for fluxes
+  // through the domain faces. That is handled below.
+#if 0 // Original code that does not use AggStencil. Leaving this in place for backwards compatibility and debugging. 
   VoFIterator& vofit = m_vofIterStenc[a_dit];
   for (vofit.reset(); vofit.ok(); ++vofit){
     const VolIndex& vof     = vofit();
@@ -824,8 +829,14 @@ void EBHelmholtzOp::applyOpIrregular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, 
       a_Lphi(vof, m_comp) += m_beta * iweight * a_phi(ivof, m_comp); // Note that bco is a part of the stencil weight. 
     }
   }
+  m_ebBc->applyEBFlux(m_vofIterIrreg[a_dit], a_Lphi, a_phi, a_dit, m_beta, a_homogeneousPhysBC);  
+#else // New code that uses AggStencil.
+  constexpr bool incrementOnly = false;
   
-  m_ebBc->applyEBFlux(m_vofIterIrreg[a_dit], a_Lphi, a_phi, a_dit, m_beta, a_homogeneousPhysBC);
+  m_aggStencil[a_dit]->apply(a_Lphi, a_phi, m_alphaDiagWeight[a_dit], m_alpha, m_beta, m_comp, incrementOnly);
+  m_ebBc->applyEBFlux(m_vofIterIrreg[a_dit], a_Lphi, a_phi, a_dit, m_beta, a_homogeneousPhysBC);    
+#endif
+
 
   // Do irregular faces on domain sides. This was not included in the stencils above. m_domainBc should give the centroid-centered flux so we don't do interpolations here. 
   for (int dir = 0; dir < SpaceDim; dir++){
@@ -1058,7 +1069,6 @@ void EBHelmholtzOp::gauSaiRedBlackKernel(EBCellFAB& a_Lcorr, EBCellFAB& a_corr, 
       const VolIndex& vof = vofit();
       const IntVect&  iv  = vof.gridIndex();
 
-
       const bool doThisCell = std::abs((iv.sum() + a_redBlack)%2) == 0;
 
       if(doThisCell){
@@ -1223,6 +1233,46 @@ void EBHelmholtzOp::computeRelaxationCoefficient(){
 
       m_relCoef[dit()](vof, m_comp) = 1./(alphaWeight + betaWeight);
     }
+  }
+}
+
+void EBHelmholtzOp::computeAggStencil(){
+  CH_TIME("EBHelmholtzOp::computeAggStencil()");
+  
+  // These are proxies for when we compute L(phi). The number of ghost cells is important because
+  // VCAggStencil will use these proxies for computing offsets in the data.
+  LevelData<EBCellFAB> phiProxy(m_eblg.getDBL(), m_nComp, m_ghostPhi, EBCellFactory(m_eblg.getEBISL()));
+  LevelData<EBCellFAB> rhsProxy(m_eblg.getDBL(), m_nComp, m_ghostRhs, EBCellFactory(m_eblg.getEBISL()));
+
+  m_aggStencil.define(m_eblg.getDBL());
+
+  for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit){
+    Vector<VolIndex>&  vofVec = (Vector<VolIndex>&) (m_vofIterStenc[dit()].getVector());
+    
+    Vector<VoFStencil>                  stenVec       (vofVec.size());
+    Vector<RefCountedPtr<BaseIndex> >   dstBaseIndex  (vofVec.size());
+    Vector<RefCountedPtr<BaseStencil> > dstBaseStencil(vofVec.size());;    
+
+    for (int ivec = 0; ivec < vofVec.size(); ivec++){
+      const VolIndex& vof = vofVec[ivec];      
+      stenVec[ivec]       = m_opStencils[dit()](vof, m_comp);
+
+      // Cast the VoF and corresponding stencil to BaseIndex and BaseStencil, because that
+      // is what the API requires. 
+      dstBaseIndex[ivec]   = RefCountedPtr<BaseIndex>   (static_cast<BaseIndex*  > (&vofVec [ivec]));
+      dstBaseStencil[ivec] = RefCountedPtr<BaseStencil> (static_cast<BaseStencil*> (&stenVec[ivec]));
+
+      dstBaseIndex[ivec].  neverDelete();
+      dstBaseStencil[ivec].neverDelete();      
+    }
+ 
+    m_aggStencil[dit()] = RefCountedPtr<VCAggStencil> (new VCAggStencil(dstBaseIndex,
+									dstBaseStencil,
+									phiProxy         [dit()],
+									rhsProxy         [dit()],
+									m_relCoef        [dit()],
+									m_alphaDiagWeight[dit()],
+									m_nComp));
   }
 }
 
