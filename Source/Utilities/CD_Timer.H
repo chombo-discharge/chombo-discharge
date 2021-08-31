@@ -115,7 +115,7 @@ public:
     @param[in] a_localReportOnly If true, no reduction over mpi
   */
   inline
-  void eventReport(const bool a_localReportOnly = false) const noexcept;
+  void eventReport(std::ostream& a_outputStream, const bool a_localReportOnly = false) const noexcept;
 
 protected:
 
@@ -142,12 +142,12 @@ protected:
   /*!
     @brief Print report header
   */
-  void printReportHeader() const noexcept;
+  void printReportHeader(std::ostream& a_outputStream) const noexcept;
 
   /*!
     @brief Print report tail
   */
-  void printReportTail(const std::pair<Real, Real> a_elapsedTime) const noexcept;
+  void printReportTail(std::ostream& a_outputStream, const std::pair<Real, Real> a_elapsedTime) const noexcept;
 
   /*!
     @brief Compute the total time for all finished events. 
