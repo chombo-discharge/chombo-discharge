@@ -7,6 +7,7 @@
   @file   CD_EBHelmholtzOp.cpp
   @brief  Implementation of CD_EBHelmholtzOp.H
   @author Robert Marskar
+  @todo   Once performance and stability has settled down, remove the debug code in applyOpIrregular
 */
 
 // Chombo includes
@@ -369,7 +370,7 @@ void EBHelmholtzOp::defineStencils(){
   // Compute the alpha-weight and relaxation coefficient. 
   this->computeAlphaWeight();
   this->computeRelaxationCoefficient();
-  this->computeAggStencil();
+  this->makeAggStencil();
 }
 
 void EBHelmholtzOp::setAlphaAndBeta(const Real& a_alpha, const Real& a_beta) {
@@ -381,7 +382,7 @@ void EBHelmholtzOp::setAlphaAndBeta(const Real& a_alpha, const Real& a_beta) {
   // When we change alpha and beta we need to recompute relaxation coefficients...
   this->computeAlphaWeight(); 
   this->computeRelaxationCoefficient();
-  this->computeAggStencil();
+  this->makeAggStencil();
 }
 
 void EBHelmholtzOp::residual(LevelData<EBCellFAB>& a_residual, const LevelData<EBCellFAB>& a_phi, const LevelData<EBCellFAB>& a_rhs, bool a_homogeneousPhysBC) {
@@ -812,7 +813,7 @@ void EBHelmholtzOp::applyOpIrregular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, 
   
   // Apply the operator in all cells where we needed an explicit stencil. Note that the operator stencils do NOT include stencils for fluxes
   // through the domain faces. That is handled below.
-#if 0 // Original code that does not use AggStencil. Leaving this in place for backwards compatibility and debugging. 
+#if 0 // Original code that does not use AggStencil. Leaving this in place for backwards compatibility and debugging, in case this should ever break. 
   VoFIterator& vofit = m_vofIterStenc[a_dit];
   for (vofit.reset(); vofit.ok(); ++vofit){
     const VolIndex& vof     = vofit();
@@ -1236,8 +1237,8 @@ void EBHelmholtzOp::computeRelaxationCoefficient(){
   }
 }
 
-void EBHelmholtzOp::computeAggStencil(){
-  CH_TIME("EBHelmholtzOp::computeAggStencil()");
+void EBHelmholtzOp::makeAggStencil(){
+  CH_TIME("EBHelmholtzOp::makeAggStencil()");
   
   // These are proxies for when we compute L(phi). The number of ghost cells is important because
   // VCAggStencil will use these proxies for computing offsets in the data.
@@ -1247,24 +1248,18 @@ void EBHelmholtzOp::computeAggStencil(){
   m_aggStencil.define(m_eblg.getDBL());
 
   for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit){
-    const Vector<VolIndex>& constVofVec = m_vofIterStenc[dit()].getVector();
-    Vector<VolIndex>&            vofVec = const_cast<Vector<VolIndex>&> (constVofVec);
     
-    Vector<VoFStencil>                  stenVec       (vofVec.size());
-    Vector<RefCountedPtr<BaseIndex> >   dstBaseIndex  (vofVec.size());
-    Vector<RefCountedPtr<BaseStencil> > dstBaseStencil(vofVec.size());;    
+    Vector<RefCountedPtr<BaseIndex> >   dstBaseIndex;
+    Vector<RefCountedPtr<BaseStencil> > dstBaseStencil;
 
-    for (int ivec = 0; ivec < vofVec.size(); ivec++){
-      const VolIndex& vof = vofVec[ivec];      
-      stenVec[ivec]       = m_opStencils[dit()](vof, m_comp);
+    VoFIterator& vofit = m_vofIterStenc[dit()];
 
-      // Cast the VoF and corresponding stencil to BaseIndex and BaseStencil, because that
-      // is what the API requires. 
-      dstBaseIndex[ivec]   = RefCountedPtr<BaseIndex>   (static_cast<BaseIndex*  > (&vofVec [ivec]));
-      dstBaseStencil[ivec] = RefCountedPtr<BaseStencil> (static_cast<BaseStencil*> (&stenVec[ivec]));
+    for(vofit.reset(); vofit.ok(); ++vofit){
+      const VolIndex& vof     = vofit();
+      const VoFStencil opSten = m_opStencils[dit()](vof, m_comp);
 
-      dstBaseIndex[ivec].  neverDelete();
-      dstBaseStencil[ivec].neverDelete();      
+      dstBaseIndex.  push_back(RefCountedPtr<BaseIndex>   (new VolIndex  (vof   )));
+      dstBaseStencil.push_back(RefCountedPtr<BaseStencil> (new VoFStencil(opSten)));
     }
  
     m_aggStencil[dit()] = RefCountedPtr<VCAggStencil> (new VCAggStencil(dstBaseIndex,
