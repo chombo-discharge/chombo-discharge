@@ -867,7 +867,7 @@ protected:
   /*!
     @brief Compute aggregated stencils
   */
-  void computeAggStencil();
+  void makeAggStencil();
 
   /*!
     @brief Define stencils
