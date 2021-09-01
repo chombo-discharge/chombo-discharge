@@ -18,6 +18,7 @@
 // Chombo includes
 #include <EBLevelGrid.H>
 #include <QuadCFInterp.H>
+#include <AggStencil.H>
 
 // Our includes
 #include <CD_Location.H>
@@ -213,6 +214,11 @@ protected:
   LayoutData<BaseIVFAB<VoFStencil> > m_coarStencils;
 
   /*!
+    @brief Fine grid interpolation stencils. Faster version. 
+  */
+  LayoutData<RefCountedPtr<AggStencil<EBCellFAB, EBCellFAB> > > m_aggFineStencils;
+
+  /*!
     @brief Regular coarse-fine interface boxes. 
     @note This is a map to the "regular" ghost cells that will be interpolated using a standard
     multigrid interpolation stencil (away from the EB). 
@@ -245,6 +251,11 @@ protected:
     @brief Define stencils for interpolation across the EBCF refinement boundary. 
   */
   void defineStencilsEBCF();
+
+  /*!
+    @brief Build the AggStencil objects for faster stencil aggregation
+  */
+  void makeAggStencils();
 
   /*!
     @brief Build an interpolation stencil
