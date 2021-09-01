@@ -67,7 +67,7 @@ public:
     @param[in] a_ghostVector  (Minimum) number of ghost cells in input/output data. 
     @param[in] a_refRat       Refinement ratio
     @param[in] a_nVar         Number of variables which will be interpolated. 
-    @param[in] a_ebStenRad      Width of the ghost region to be filled. Only relevant near the EBCF. 
+    @param[in] a_ghostCF      Width of the ghost region to be filled. Only relevant near the EBCF. 
     @param[in] a_order        Interpolation order
     @param[in] a_weighting    Weighting factor least squares. 
   */
@@ -77,7 +77,7 @@ public:
 			  const IntVect&     a_ghostVector,
 			  const int          a_refRat,
 			  const int          a_nVar,
-			  const int          a_ebStenRad,
+			  const int          a_ghostCF,
 			  const int          a_order,
 			  const int          a_weighting = 0);
 			  
@@ -108,13 +108,13 @@ public:
   void coarseFineInterpH(LevelData<EBCellFAB>& a_phiFine, const Interval a_variables) const;
 
   /*!
-    @brief Do coarse-fine interpolation on a grid patch
+    @brief Do homogeneous coarse-fine interpolation on a grid patch
     @param[in] a_phiFine   Fine-level data
     @param[in] a_variables Variables to be interpolated
     @param[in] a_dit       Data index
     @note This is the kernel version. The constructor guarantees that the fine-grid stencil will not out of the ghost region defined by a_ghostVector. However, this is
-    the direct kernel version which is public because multigrid operators might need it for performance reasons. It does NOT warn against input data that are not large
-    enough. 
+    the direct kernel version which is public because multigrid operators might need it for performance reasons. This routine does NOT warn against input data that do not
+    contain enough ghost cells. 
   */
   void coarseFineInterpH(EBCellFAB& a_phiFine, const Interval a_variables, const DataIndex& a_dit) const;
 
@@ -136,7 +136,7 @@ protected:
   static constexpr int m_comp = 0;
 
   /*!
-    @brief How to interpret cell location
+    @brief How to interpret data locations. 
   */
   CellLocation m_dataLocation;
 
@@ -171,22 +171,23 @@ protected:
   mutable LayoutData<VoFIterator> m_vofIterFine;
 
   /*!
-    @brief Minimum number of ghost cells in input
+    @brief Minimum number of ghost cells in input data. 
   */
   IntVect m_ghostVector;
 
   /*!
-    @brief Refinement factor
+    @brief Refinement factor between fine and coarse level. 
   */
   int m_refRat;
 
   /*!
     @brief Number of ghost cells to fill across coarse-fine interface. 
+    @note Only applies the the cut-cells. 
   */
-  int m_ebStenRad;
+  int m_ghostCF;
 
   /*!
-    @brief Order of the interpolation
+    @brief Interpolation order. 
   */
   int m_order;
 
@@ -196,37 +197,42 @@ protected:
   int m_weight;
 
   /*!
-    @brief Ghost cells that may require interpolation. 
+    @brief Ghost cells that will be interpolated near the cut-cells. 
+    @note This does not include the ghost cells on the refinement boundary away from the cut-cells. 
   */
   LayoutData<IntVectSet> m_ghostCells;
 
   /*!
-    @brief Fine stencils
+    @brief Fine-grid interpolation stencils.
   */
   LayoutData<BaseIVFAB<VoFStencil> > m_fineStencils;
 
   /*!
-    @brief Fine stencils
+    @brief Coarse-grid interpolation stencils.
   */
   LayoutData<BaseIVFAB<VoFStencil> > m_coarStencils;
 
   /*!
-    @brief Regular coarse-fine interface boxes
+    @brief Regular coarse-fine interface boxes. 
+    @note This is a map to the "regular" ghost cells that will be interpolated using a standard
+    multigrid interpolation stencil (away from the EB). 
   */
   LayoutData<std::map<std::pair<int, Side::LoHiSide>, Box> > m_cfivs;
 
   /*!
-    @brief Defines the CFIVS
+    @brief Defines the CFIVS. 
   */
   void defineCFIVS();
 
   /*!
-    @brief Define ghost cells to be filled in range m_ebStenRad from each cut-cell
+    @brief Define ghost cells to be filled in range m_ghostCF from each cut-cell. 
   */
   void defineGhostRegions();
 
   /*!
     @brief Define grids
+    @param[in] a_eblgFine Fine grid
+    @param[in] a_eblgCoar Coarse grid
   */
   void defineGrids(const EBLevelGrid& a_eblgFine, const EBLevelGrid& a_eblgCoar);
 
