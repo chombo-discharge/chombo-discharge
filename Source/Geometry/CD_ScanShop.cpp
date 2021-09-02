@@ -534,8 +534,10 @@ void ScanShop::gatherBoxesParallel(Vector<Box>& a_boxes) const {
   }
   receiveBuffer = recv_buf2;
 
-  delete receiveBuffer;
-  delete sendBuffer;
+  delete[] sendCounts;
+  delete[] offsets;
+  delete[] receiveBuffer;
+  delete[] sendBuffer;
 #endif
 }
 
