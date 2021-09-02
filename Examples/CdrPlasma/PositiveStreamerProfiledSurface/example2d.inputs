@@ -120,7 +120,7 @@ CdrGodunov.gmg_exit_hang         = 0.2                     # Solver hang
 CdrGodunov.gmg_min_cells         = 8                       # Bottom drop
 CdrGodunov.gmg_bottom_solver     = bicgstab                # Bottom solver type. Valid options are 'simple' and 'bicgstab'
 CdrGodunov.gmg_cycle             = vcycle                  # Cycle type. Only 'vcycle' supported for now
-CdrGodunov.gmg_smoother          = jacobi               # Relaxation type. 'jacobi', 'multi_color', or 'red_black'
+CdrGodunov.gmg_smoother          = red_black               # Relaxation type. 'jacobi', 'multi_color', or 'red_black'
 
 # ====================================================================================================
 # EddingtonSP1 class options
