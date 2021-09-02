@@ -21,17 +21,22 @@
 #include <CD_DataOpsF_F.H>
 #include <CD_NamespaceHeader.H>
 
-void DataOps::averageCellToFace(EBAMRFluxData&               a_facedata,
-				const EBAMRCellData&         a_celldata,
-				const Vector<ProblemDomain>& a_domains){
+void DataOps::averageCellVectorToFaceScalar(EBAMRFluxData&               a_facedata,
+					    const EBAMRCellData&         a_celldata,
+					    const Vector<ProblemDomain>& a_domains){
+
   for (int lvl = 0; lvl < a_facedata.size(); lvl++){
-    DataOps::averageCellToFace(*a_facedata[lvl], *a_celldata[lvl], a_domains[lvl]);
+
+    CH_assert(a_facedata[lvl]->nComp() == 1       );
+    CH_assert(a_celldata[lvl]->nComp() == SpaceDim);
+    
+    DataOps::averageCellVectorToFaceScalar(*a_facedata[lvl], *a_celldata[lvl], a_domains[lvl]);
   }
 }
 
-void DataOps::averageCellToFace(LevelData<EBFluxFAB>&       a_facedata,
-				const LevelData<EBCellFAB>& a_celldata,
-				const ProblemDomain&        a_domain){
+void DataOps::averageCellVectorToFaceScalar(LevelData<EBFluxFAB>&       a_facedata,
+					    const LevelData<EBCellFAB>& a_celldata,
+					    const ProblemDomain&        a_domain){
 
   CH_assert(a_facedata.nComp() == 1);
   CH_assert(a_celldata.nComp() == SpaceDim);
@@ -49,21 +54,20 @@ void DataOps::averageCellToFace(LevelData<EBFluxFAB>&       a_facedata,
   }
 }
 
-void DataOps::averageCellToFaceAllComps(EBAMRFluxData& a_face_data,
-					const EBAMRCellData& a_cell_data,
-					const Vector<ProblemDomain>& a_domains){
+void DataOps::averageCellToFace(EBAMRFluxData& a_face_data,
+				const EBAMRCellData& a_cell_data,
+				const Vector<ProblemDomain>& a_domains){
   for (int lvl = 0; lvl < a_face_data.size(); lvl++){
-    DataOps::averageCellToFaceAllComps(*a_face_data[lvl], *a_cell_data[lvl], a_domains[lvl]);
+    DataOps::averageCellToFace(*a_face_data[lvl], *a_cell_data[lvl], a_domains[lvl]);
   }
 }
 
-void DataOps::averageCellToFaceAllComps(LevelData<EBFluxFAB>&       a_facedata,
-					const LevelData<EBCellFAB>& a_celldata,
-					const ProblemDomain&        a_domain){
+void DataOps::averageCellToFace(LevelData<EBFluxFAB>&       a_facedata,
+				const LevelData<EBCellFAB>& a_celldata,
+				const ProblemDomain&        a_domain){
 
   CH_assert(a_facedata.nComp() == a_celldata.nComp());
 
-#if 1 // New code, should perform 5x faster than the crap below. 
   const int ncomp = a_facedata.nComp();
   for (DataIterator dit = a_facedata.dataIterator(); dit.ok(); ++dit){
     const EBCellFAB& celldata = a_celldata[dit()];
@@ -77,7 +81,7 @@ void DataOps::averageCellToFaceAllComps(LevelData<EBFluxFAB>&       a_facedata,
 					  celldata,
 					  ebgraph,
 					  box,
-					  1,
+					  0,
 					  dir,
 					  a_domain,
 					  icomp,
@@ -85,52 +89,6 @@ void DataOps::averageCellToFaceAllComps(LevelData<EBFluxFAB>&       a_facedata,
       }
     }
   }
-
-#else // Original, non-performant code
-  const int ncomp = a_facedata.nComp();
-
-  for (DataIterator dit = a_facedata.dataIterator(); dit.ok(); ++dit){
-    EBFluxFAB& facedata       = a_facedata[dit()];
-    const EBCellFAB& celldata = a_celldata[dit()];
-    const EBISBox& ebisbox    = celldata.getEBISBox();
-    const EBGraph& ebgraph    = ebisbox.getEBGraph();
-    const Box& box            = a_celldata.disjointBoxLayout().get(dit());
-    const IntVectSet ivs(box);
-
-    // Interior faces
-    FaceStop::WhichFaces stop_crit;
-    for (int dir = 0; dir < SpaceDim; dir++){
-
-      stop_crit = FaceStop::SurroundingWithBoundary;
-      for (FaceIterator faceit(ivs, ebgraph, dir, stop_crit); faceit.ok(); ++faceit){
-	const FaceIndex& face  = faceit();
-	const VolIndex& vof_lo = face.getVoF(Side::Lo);
-	const VolIndex& vof_hi = face.getVoF(Side::Hi);
-
-	if(!face.isBoundary()){
-	  for (int comp = 0; comp < ncomp; comp++){
-	    facedata[dir](face, comp) = 0.5*(celldata(vof_lo, comp) + celldata(vof_hi, comp));
-	  }
-	}
-	else{
-	  VolIndex vof;
-	  if(a_domain.contains(face.gridIndex(Side::Lo))){
-	    vof = face.getVoF(Side::Lo);
-	  }
-	  else if(a_domain.contains(face.gridIndex(Side::Hi))){
-	    vof = face.getVoF(Side::Hi);
-	  }
-	  else{
-	    MayDay::Error("DataOps::averageCellToFace - logic bust in average cells to faces");
-	  }
-	  for (int comp = 0; comp < ncomp; comp++){
-	    facedata[dir](face, comp) = celldata(vof, comp);
-	  }
-	}
-      }
-    }
-  }
-#endif
 }
 
 void DataOps::averageFaceToCell(EBAMRCellData&               a_celldata,

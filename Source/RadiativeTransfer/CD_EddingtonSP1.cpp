@@ -651,10 +651,9 @@ void EddingtonSP1::setHelmholtzCoefficients(){
     m_amr->averageDown(m_helmAco, m_realm, m_phase);
     m_amr->interpGhost(m_helmAco, m_realm, m_phase);
     
-    DataOps::averageCellToFaceAllComps(m_helmBco, m_helmAco, m_amr->getDomains()); // Average aco onto face
-    DataOps::invert(m_helmBco);                                                    // Make m_helmBco = 1./kappa
+    DataOps::averageCellToFace(m_helmBco, m_helmAco, m_amr->getDomains()); // Average aco onto face
+    DataOps::invert(m_helmBco);                                            // Make m_helmBco = 1./kappa
   }
-
 
   DataOps::scale(m_helmAco,      1.0);       // m_helmAco      = kappa
   DataOps::scale(m_helmBco,      1.0/(3.0)); // m_helmBco      = 1/(3*kappa)

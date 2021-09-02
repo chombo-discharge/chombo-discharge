@@ -31,21 +31,21 @@ public:
   template <typename T>
   static int sgn(const T a_value);
 
-  static void averageCellToFace(EBAMRFluxData&               a_facedata,
-				const EBAMRCellData&         a_celldata,
+  static void averageCellVectorToFaceScalar(EBAMRFluxData&               a_facedata,
+					    const EBAMRCellData&         a_celldata,
+					    const Vector<ProblemDomain>& a_domains);
+
+  static void averageCellVectorToFaceScalar(LevelData<EBFluxFAB>&       a_facedata,
+					    const LevelData<EBCellFAB>& a_celldata,
+					    const ProblemDomain&        a_domain);
+
+  static void averageCellToFace(EBAMRFluxData& a_face_data,
+				const EBAMRCellData& a_cell_data,
 				const Vector<ProblemDomain>& a_domains);
 
   static void averageCellToFace(LevelData<EBFluxFAB>&       a_facedata,
 				const LevelData<EBCellFAB>& a_celldata,
 				const ProblemDomain&        a_domain);
-
-  static void averageCellToFaceAllComps(EBAMRFluxData& a_face_data,
-					const EBAMRCellData& a_cell_data,
-					const Vector<ProblemDomain>& a_domains);
-
-  static void averageCellToFaceAllComps(LevelData<EBFluxFAB>&       a_facedata,
-					const LevelData<EBCellFAB>& a_celldata,
-					const ProblemDomain&        a_domain);
 
   static void averageFaceToCell(EBAMRCellData&               a_celldata,
 				const EBAMRFluxData&         a_fluxdata,
