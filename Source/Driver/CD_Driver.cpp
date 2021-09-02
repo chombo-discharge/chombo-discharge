@@ -40,6 +40,8 @@ Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeomet
 	       const RefCountedPtr<GeoCoarsener>&          a_geoCoarsen){
   CH_TIME("Driver::Driver(RefCPtr<ComputationalGeometry>, RefCPtr<TimeStepper>, RefCPtr<AmrMesh>, RefCPtr<CellTagger>, RefCPtr<GeoCoarsener>)");
 
+  m_verbosity = -1;
+  
   this->setComputationalGeometry(a_computationalGeometry); // Set computational geometry
   this->setTimeStepper(a_timeStepper);                     // Set time stepper
   this->setAmr(a_amr);                                     // Set amr
