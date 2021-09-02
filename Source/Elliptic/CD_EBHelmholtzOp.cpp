@@ -364,8 +364,6 @@ void EBHelmholtzOp::defineStencils(){
       m_betaDiagWeight[dit()](vof, m_comp) = betaWeight;
     }
   }
-
-
     
   // Compute the alpha-weight and relaxation coefficient. 
   this->computeAlphaWeight();
@@ -677,11 +675,11 @@ void EBHelmholtzOp::applyOp(LevelData<EBCellFAB>&             a_Lphi,
   // do a local copy, but that can end up being expensive since this is called on every relaxation.
   LevelData<EBCellFAB>& phi = (LevelData<EBCellFAB>& ) a_phi;
 
+  phi.exchange();  
+
   if(m_hasCoar && !m_turnOffBCs){
     this->interpolateCF(phi, a_phiCoar, a_homogeneousCFBC);
   }
-  
-  phi.exchange();
 
   // Apply operator in each kernel. 
   const DisjointBoxLayout& dbl = a_Lphi.disjointBoxLayout();
@@ -1482,9 +1480,10 @@ void EBHelmholtzOp::incrementFRFine(const LevelData<EBCellFAB>& a_phiFine, const
   
   // Doing the nasty here -- there's no guarantee that a_phiFine has the ghost cells it needs. 
   LevelData<EBCellFAB>& phiFine = (LevelData<EBCellFAB>&) a_phiFine;
+  phiFine.exchange();
+  
   EBHelmholtzOp& finerOp        = (EBHelmholtzOp&)       (a_finerOp);
   finerOp.inhomogeneousCFInterp(phiFine, a_phi);
-  phiFine.exchange();
 
   LevelData<EBFluxFAB>& fineFlux = finerOp.getFlux();
   const Real scale = 1.0; 
