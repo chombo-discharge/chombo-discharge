@@ -777,13 +777,13 @@ protected:
     @details This stencil is => sum(fluxes)/dx, not including boundary faces or EB faces. I.e. this is the same as
     kappa*div(F) with the exclusion of faces where we have boundary conditions. 
   */
-  LayoutData<BaseIVFAB<VoFStencil> > m_opStencils;
+  LayoutData<BaseIVFAB<VoFStencil> > m_relaxStencils;
 
   /*!
     @brief For making irregular stencil applications go faster.
-    @details This wraps m_opStencils in VCAggStencil (which computes explicit stencil offsets)
+    @details This wraps m_relaxStencils in VCAggStencil (which computes explicit stencil offsets)
   */
-  LayoutData<RefCountedPtr<VCAggStencil> > m_aggStencil;
+  LayoutData<RefCountedPtr<VCAggStencil> > m_aggRelaxStencil;
 
   /*!
     @brief Weights of diagonal alpha terms
