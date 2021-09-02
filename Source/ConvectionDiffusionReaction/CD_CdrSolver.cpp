@@ -311,7 +311,7 @@ void CdrSolver::averageVelocityToFaces(EBAMRFluxData& a_faceVelocity, const EBAM
   CH_assert(a_cellVelocity[0]->nComp() == SpaceDim);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    DataOps::averageCellToFace(*a_faceVelocity[lvl], *a_cellVelocity[lvl], m_amr->getDomains()[lvl]);
+    DataOps::averageCellVectorToFaceScalar(*a_faceVelocity[lvl], *a_cellVelocity[lvl], m_amr->getDomains()[lvl]);
     
     a_faceVelocity[lvl]->exchange();
   }
