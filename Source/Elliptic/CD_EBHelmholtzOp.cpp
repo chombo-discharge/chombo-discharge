@@ -170,7 +170,7 @@ void EBHelmholtzOp::defineStencils(){
   m_vofIterStenc.   define(m_eblg.getDBL()); 
   m_alphaDiagWeight.define(m_eblg.getDBL());
   m_betaDiagWeight. define(m_eblg.getDBL());
-  m_opStencils.     define(m_eblg.getDBL());
+  m_relaxStencils.  define(m_eblg.getDBL());
 
   for (int dir = 0; dir < SpaceDim; dir++){
     m_vofIterDomLo       [dir].define(m_eblg.getDBL());
@@ -250,7 +250,7 @@ void EBHelmholtzOp::defineStencils(){
     }
 
     // Define data holders. 
-    m_opStencils     [dit()].define(stencIVS, ebgraph, m_nComp);
+    m_relaxStencils  [dit()].define(stencIVS, ebgraph, m_nComp);
     m_alphaDiagWeight[dit()].define(stencIVS, ebgraph, m_nComp);
     m_betaDiagWeight [dit()].define(stencIVS, ebgraph, m_nComp);
 
@@ -292,9 +292,9 @@ void EBHelmholtzOp::defineStencils(){
     // Referring to the sketch above, we iterate through cells A, B, D, E and compute the face centroid fluxes for all these cells. This includes
     // e.g. the face connecting E and F. However, since F only has regular faces we don't store the stencil explicitly for that cell.
     //
-    BaseIVFAB<VoFStencil>& opStencil = m_opStencils  [dit()];
-    VoFIterator& vofitStenc          = m_vofIterStenc[dit()];
-    VoFIterator& vofitIrreg          = m_vofIterIrreg[dit()];
+    BaseIVFAB<VoFStencil>& opStencil = m_relaxStencils[dit()];
+    VoFIterator& vofitStenc          = m_vofIterStenc   [dit()];
+    VoFIterator& vofitIrreg          = m_vofIterIrreg   [dit()];
 
     for (vofitStenc.reset(); vofitStenc.ok(); ++vofitStenc){
       opStencil(vofitStenc(), m_comp).clear(); 
@@ -815,7 +815,7 @@ void EBHelmholtzOp::applyOpIrregular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, 
   VoFIterator& vofit = m_vofIterStenc[a_dit];
   for (vofit.reset(); vofit.ok(); ++vofit){
     const VolIndex& vof     = vofit();
-    const VoFStencil& stenc = m_opStencils[a_dit](vof, m_comp);                // = Finite volume stencil representation of Int[B*grad(phi)]dA
+    const VoFStencil& stenc = m_relaxStencils[a_dit](vof, m_comp);                // = Finite volume stencil representation of Int[B*grad(phi)]dA
     const Real& alphaDiag   = m_alpha * m_alphaDiagWeight[a_dit](vof, m_comp); // = kappa * alpha * aco (m_alphaDiagWeight holds kappa* aco)
     
     a_Lphi(vof, m_comp) = alphaDiag * a_phi(vof, m_comp);
@@ -832,7 +832,7 @@ void EBHelmholtzOp::applyOpIrregular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, 
 #else // New code that uses AggStencil.
   constexpr bool incrementOnly = false;
   
-  m_aggStencil[a_dit]->apply(a_Lphi, a_phi, m_alphaDiagWeight[a_dit], m_alpha, m_beta, m_comp, incrementOnly);
+  m_aggRelaxStencil[a_dit]->apply(a_Lphi, a_phi, m_alphaDiagWeight[a_dit], m_alpha, m_beta, m_comp, incrementOnly);
   m_ebBc->applyEBFlux(m_vofIterIrreg[a_dit], a_Lphi, a_phi, a_dit, m_beta, a_homogeneousPhysBC);    
 #endif
 
@@ -1243,7 +1243,7 @@ void EBHelmholtzOp::makeAggStencil(){
   LevelData<EBCellFAB> phiProxy(m_eblg.getDBL(), m_nComp, m_ghostPhi, EBCellFactory(m_eblg.getEBISL()));
   LevelData<EBCellFAB> rhsProxy(m_eblg.getDBL(), m_nComp, m_ghostRhs, EBCellFactory(m_eblg.getEBISL()));
 
-  m_aggStencil.define(m_eblg.getDBL());
+  m_aggRelaxStencil.define(m_eblg.getDBL());
 
   for (DataIterator dit(m_eblg.getDBL()); dit.ok(); ++dit){
     
@@ -1254,19 +1254,19 @@ void EBHelmholtzOp::makeAggStencil(){
 
     for(vofit.reset(); vofit.ok(); ++vofit){
       const VolIndex& vof     = vofit();
-      const VoFStencil opSten = m_opStencils[dit()](vof, m_comp);
+      const VoFStencil opSten = m_relaxStencils[dit()](vof, m_comp);
 
       dstBaseIndex.  push_back(RefCountedPtr<BaseIndex>   (new VolIndex  (vof   )));
       dstBaseStencil.push_back(RefCountedPtr<BaseStencil> (new VoFStencil(opSten)));
     }
  
-    m_aggStencil[dit()] = RefCountedPtr<VCAggStencil> (new VCAggStencil(dstBaseIndex,
-									dstBaseStencil,
-									phiProxy         [dit()],
-									rhsProxy         [dit()],
-									m_relCoef        [dit()],
-									m_alphaDiagWeight[dit()],
-									m_nComp));
+    m_aggRelaxStencil[dit()] = RefCountedPtr<VCAggStencil> (new VCAggStencil(dstBaseIndex,
+									     dstBaseStencil,
+									     phiProxy         [dit()],
+									     rhsProxy         [dit()],
+									     m_relCoef        [dit()],
+									     m_alphaDiagWeight[dit()],
+									     m_nComp));
   }
 }
 
