@@ -40,6 +40,8 @@ Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeomet
 	       const RefCountedPtr<GeoCoarsener>&          a_geoCoarsen){
   CH_TIME("Driver::Driver(RefCPtr<ComputationalGeometry>, RefCPtr<TimeStepper>, RefCPtr<AmrMesh>, RefCPtr<CellTagger>, RefCPtr<GeoCoarsener>)");
 
+  m_verbosity = -1;
+  
   this->setComputationalGeometry(a_computationalGeometry); // Set computational geometry
   this->setTimeStepper(a_timeStepper);                     // Set time stepper
   this->setAmr(a_amr);                                     // Set amr
@@ -863,11 +865,13 @@ void Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSt
       }
 
       // Write checkpoint file
-      if(m_timeStep % m_checkpointInterval == 0 && m_checkpointInterval > 0 || isLastStep == true && m_checkpointInterval > 0){
-	if(m_verbosity > 2){
-	  pout() << "Driver::run -- Writing checkpoint file" << endl;
+      if(m_checkpointInterval > 0){
+	if(m_timeStep % m_checkpointInterval || isLastStep == true){
+	  if(m_verbosity > 2){
+	    pout() << "Driver::run -- Writing checkpoint file" << endl;
+	  }
+	  this->writeCheckpointFile();
 	}
-	this->writeCheckpointFile();
       }
 #endif
 

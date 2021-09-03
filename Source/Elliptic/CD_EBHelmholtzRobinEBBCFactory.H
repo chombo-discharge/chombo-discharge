@@ -64,7 +64,7 @@ public:
   /*!
     @brief Destructor (does nothing). 
   */
-  ~EBHelmholtzRobinEBBCFactory();
+  virtual ~EBHelmholtzRobinEBBCFactory();
 
   /*!
     @brief Set BC order

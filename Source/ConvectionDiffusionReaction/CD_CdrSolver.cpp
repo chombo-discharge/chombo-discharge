@@ -28,11 +28,12 @@ constexpr int CdrSolver::m_nComp;
 
 CdrSolver::CdrSolver(){
 
-  // Default options. 
+  // Default options.
+  m_verbosity  = -1;
   m_name       = "CdrSolver";
   m_className  = "CdrSolver";
 
-  this->setRealm(Realm::Primal); // Always primal as default.
+  this->setRealm(Realm::Primal);
   this->setDefaultDomainBC();    // Set default domain BCs (wall)
 }
 
@@ -106,7 +107,7 @@ void CdrSolver::setRealm(const std::string a_realm) {
     pout() << m_name + "::setRealm(std::string)" << endl;
   }
   
-  m_realm = a_realm;
+  m_realm.assign(a_realm);
 }
 
 Vector<std::string> CdrSolver::getPlotVariableNames() const {
@@ -1489,7 +1490,7 @@ void CdrSolver::registerOperators(){
   m_amr->registerOperator(s_noncons_div,     m_realm, m_phase);
 }
 
-void CdrSolver::setComputationalGeometry(const RefCountedPtr<ComputationalGeometry> a_computationalGeometry){
+void CdrSolver::setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry){
   CH_TIME("CdrSolver::setComputationalGeometry(RefCountedPtr<ComputationalGeometry>)");
   if(m_verbosity > 5){
     pout() << m_name + "::setComputationalGeometry(RefCountedPtr<ComputationalGeometry>)" << endl;
@@ -1575,7 +1576,7 @@ void CdrSolver::setEbIndexSpace(const RefCountedPtr<EBIndexSpace>& a_ebis){
   m_ebis = a_ebis;
 }
 
-void CdrSolver::setSpecies(const RefCountedPtr<CdrSpecies> a_species){
+void CdrSolver::setSpecies(const RefCountedPtr<CdrSpecies>& a_species){
   CH_TIME("CdrSolver::setSpecies(RefCountedPtr<CdrSpecies>)");
   if(m_verbosity > 5){
     pout() << m_name + "::setSpecies(RefCountedPtr<CdrSpecies>)" << endl;

@@ -72,6 +72,10 @@ int main(int argc, char* argv[]){
   RefCountedPtr<Driver> engine = RefCountedPtr<Driver> (new Driver(compgeom, timestepper, amr, tagger, geocoarsen));
   engine->setupAndRun(input_file);
 
+  delete poi_fact;
+  delete cdr_fact;
+  delete rte_fact;
+
 #ifdef CH_MPI
   CH_TIMER_REPORT();
   MPI_Finalize();

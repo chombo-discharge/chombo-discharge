@@ -70,7 +70,7 @@ public:
   /*!
     @brief Default constructor
   */
-  ~EBHelmholtzLarsenDomainBCFactory();
+  virtual ~EBHelmholtzLarsenDomainBCFactory();
 
   /*!
     @brief No copy assignment

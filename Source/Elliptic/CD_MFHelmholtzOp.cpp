@@ -175,16 +175,19 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
 											ebHelmRelax));
 
 
-    m_helmOps.emplace(iphase, oper);
+    m_helmOps.insert({iphase, oper});
   }
 }
 
 MFHelmholtzOp::~MFHelmholtzOp(){
   CH_TIME("MFHelmholtzOp()::~MFHelmholtzOp()");
+
+  m_helmOps.clear();
 }
 
 void MFHelmholtzOp::setJump(const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_jump){
   CH_TIME("MFHelmholtzOp::setJump(RefCountedPtr<BaseIVFAB<Real> >)");
+  
   m_jump = a_jump;
 }
 
