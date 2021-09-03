@@ -34,7 +34,7 @@ public:
   /*!
     @brief Destructor
   */
-  ~EBHelmholtzDirichletEBBC();
+  virtual ~EBHelmholtzDirichletEBBC();
 
   /*!
     @brief Set BC order. 

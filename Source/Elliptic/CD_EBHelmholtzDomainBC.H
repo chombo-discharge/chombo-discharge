@@ -36,7 +36,7 @@ public:
   /*!
     @brief Destructor
   */
-  ~EBHelmholtzDomainBC();
+  virtual ~EBHelmholtzDomainBC();
 
   /*!
     @brief Disallowed -- don't see why you would need it.

@@ -35,7 +35,7 @@ public:
   /*!
     @brief Destructor
   */
-  ~MFHelmholtzNeumannEBBC();
+  virtual ~MFHelmholtzNeumannEBBC();
 
   /*!
     @brief Set value of dphi/dn on the MF. 

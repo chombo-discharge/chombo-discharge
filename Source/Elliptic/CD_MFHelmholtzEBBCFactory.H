@@ -31,7 +31,7 @@ public:
   /*!
     @brief Default constructor
   */
-  ~MFHelmholtzEBBCFactory();
+  virtual ~MFHelmholtzEBBCFactory();
 
   /*!
     @brief Factory method for 

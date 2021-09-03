@@ -24,6 +24,10 @@ MFHelmholtzElectrostaticEBBC::MFHelmholtzElectrostaticEBBC(const int a_phase, co
   m_electrostaticBCs = a_electrostaticBCs;
 }
 
+MFHelmholtzElectrostaticEBBC::~MFHelmholtzElectrostaticEBBC(){
+  CH_TIME("MFHelmholtzElectrostaticEBBC::~MFHelmholtzElectrostaticEBBC");
+}
+
 void MFHelmholtzElectrostaticEBBC::setOrder(const int a_order){
   CH_TIME("MFHelmholtzElectrostaticEBBC::setOrder(int)");
   

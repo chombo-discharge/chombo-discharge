@@ -32,7 +32,7 @@ public:
   /*!
     @brief Default constructor
   */
-  ~MFHelmholtzDirichletEBBC();
+  virtual ~MFHelmholtzDirichletEBBC();
 
   /*!
     @brief Set the value on the EB. 
