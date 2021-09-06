@@ -60,10 +60,10 @@ Driver.num_plot_ghost                  = 1             # Number of ghost cells t
 Driver.plt_vars                        = 0             # 'tags', 'mpi_rank'
 Driver.restart                         = 0             # Restart step (less or equal to 0 implies fresh simulation)
 Driver.allow_coarsening                = true          # Allows removal of grid levels according to CellTagger
-Driver.grow_geo_tags                   = 2                # How much to grow tags when using geometry-based refinement. 
-Driver.refine_angles                   = 30.              # Refine cells if angle between elements exceed this value.
-Driver.refine_electrodes               = -1            # Refine electrode surfaces. -1 => equal to refine_geometry
-Driver.refine_dielectrics              = -1            # Refine dielectric surfaces. -1 => equal to refine_geometry
+Driver.grow_geo_tags                   = 2             # How much to grow tags when using geometry-based refinement. 
+Driver.refine_angles                   = 30.           # Refine cells if angle between elements exceed this value.
+Driver.refine_electrodes               = 0             # Refine electrode surfaces. -1 => equal to refine_geometry
+Driver.refine_dielectrics              = 0             # Refine dielectric surfaces. -1 => equal to refine_geometry
 
 
 # ====================================================================================================
@@ -162,20 +162,6 @@ GeoCoarsener.box1_lo     = -1 500E-6    # Remove irregular cell tags
 GeoCoarsener.box1_hi     =  1 1         # between these two corners
 GeoCoarsener.box1_lvl    = 3            # up to this level
 GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
-
-# ====================================================================================================
-# ROD_SPHERE CLASS OPTIONS
-# ====================================================================================================
-rod_sphere.eps0                      = 1                # Background permittivity
-rod_sphere.turn_off_electrode        = false            # Turn on/off electrode
-rod_sphere.turn_off_dielectric       = true             # Turn on/off dielectric
-rod_sphere.electrode_live            = true             # Live electrode or not
-rod_sphere.electrode_radius          = 250.E-6          # Electrode inner radius
-rod_sphere.electrode_center1         = 0 0              # Center 1
-rod_sphere.electrode_center2         = 0 1              # Center 2. 
-rod_sphere.dielectric_permittivity   = 4.0              # Dielectric permittivity
-rod_sphere.dielectric_center         = 0.0 0.0 0.0      # Dielectric center
-rod_sphere.dielectric_radius         = 1.0              # Dielectric radius
 
 # ====================================================================================================
 # ROD_DIELECTRIC CLASS OPTIONS

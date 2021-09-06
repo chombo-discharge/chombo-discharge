@@ -32,3 +32,4 @@
 pout.*
 time.table.*
 Research
+slurm*.out

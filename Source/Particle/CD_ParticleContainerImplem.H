@@ -645,12 +645,14 @@ void ParticleContainer<P>::regrid(const Vector<DisjointBoxLayout>& a_grids,
   }
   
   for (int lvl = 0; lvl <= a_newFinestLevel; lvl++){
-    //  for (int lvl = 0; lvl <= oldFinestLevel; lvl++){
     List<P>& outcast = m_particles[lvl]->outcast();
 
-    outcast.catenate(m_cacheParticles[lvl]);
-    m_cacheParticles[lvl].clear();
-
+    // Add particles from cache 
+    if(lvl <= oldFinestLevel){
+      outcast.catenate(m_cacheParticles[lvl]);
+      m_cacheParticles[lvl].clear();
+    }
+    
     m_particles[lvl]->remapOutcast();
   }
   

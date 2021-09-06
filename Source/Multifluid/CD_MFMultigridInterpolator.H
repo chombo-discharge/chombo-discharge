@@ -31,11 +31,6 @@ public:
   MFMultigridInterpolator();
 
   /*!
-    @brief Disallowed copy constructor. 
-  */
-  MFMultigridInterpolator(const MFMultigridInterpolator& a_other) = default;
-
-  /*!
     @brief Defining constructor.
     @param[in] a_interpolators Interpolators on each phase. 
   */
