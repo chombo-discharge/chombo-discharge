@@ -35,7 +35,7 @@ public:
   /*!
     @brief Destructor
   */
-  ~EBHelmholtzNeumannEBBC();
+  virtual ~EBHelmholtzNeumannEBBC();
 
   /*!
     @brief Set value of dphi/dn on the EB. 

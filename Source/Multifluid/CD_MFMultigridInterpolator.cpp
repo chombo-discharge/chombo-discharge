@@ -27,6 +27,8 @@ MFMultigridInterpolator::~MFMultigridInterpolator(){
 
 MFMultigridInterpolator& MFMultigridInterpolator::operator=(const MFMultigridInterpolator& a_other){
   m_interpolators = a_other.m_interpolators;
+
+  return *this;
 }
 
 void MFMultigridInterpolator::define(const Vector<RefCountedPtr<EBMultigridInterpolator> >& a_interpolators){

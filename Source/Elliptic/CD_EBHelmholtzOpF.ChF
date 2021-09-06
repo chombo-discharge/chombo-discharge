@@ -211,21 +211,35 @@
       integer chf_ddecl[ioff;joff;koff]
 
       real_t scaledflux
+      real_t B
+      real_t tol
 
       chf_dterm[
         ioff = chf_id(0,dir);
         joff = chf_id(1, dir);
         koff = chf_id(2, dir)]
 
+      tol = 1.0d-15
+
 c flux and phi are cell-centered but bco is face-centered. 
       if(side .eq. -1) then
-         chf_multido[ghostbox; i;j;k]	       
-            scaledflux         = flux(chf_ix[i+ioff; j+joff; k+koff])/bco(chf_ix[i+ioff; j+joff; k+koff]) 	 
+         chf_multido[ghostbox; i;j;k]
+            B = bco(chf_ix[i+ioff; j+joff; k+koff])
+            if(abs(B) > tol) then
+               scaledflux  = flux(chf_ix[i+ioff; j+joff; k+koff])/B
+            else
+                scaledflux = 0.0
+            endif
             phi(chf_ix[i;j;k]) = phi( chf_ix[i+ioff; j+joff; k+koff]) - scaledflux*dx	 
          chf_enddo      
       else
-         chf_multido[ghostbox; i;j;k]	 
-            scaledflux         = flux(chf_ix[i-ioff; j-joff; k-koff])/bco(chf_ix[i; j; k]) 	 
+         chf_multido[ghostbox; i;j;k]
+            B = bco(chf_ix[i; j; k])
+            if(abs(B) > tol) then
+               scaledflux  = flux(chf_ix[i-ioff; j-joff; k-koff])/B
+            else
+                scaledflux = 0.0
+            endif
             phi(chf_ix[i;j;k]) = phi (chf_ix[i-ioff; j-joff; k-koff]) + scaledflux*dx
          chf_enddo
       endif	 

@@ -20,6 +20,7 @@
 #include <ProblemDomain.H>
 #include <VolIndex.H>
 #include <LoHiSide.H>
+#include <DenseIntVectSet.H>
 
 // Our includes
 #include <CD_NamespaceHeader.H>
@@ -72,6 +73,22 @@ public:
 					  const bool         a_addStartVof);
 
   /*!
+    @brief Fetch vofs in a specified radius and with a specified connectivitiy between them.
+    @param[in] a_startVof     Starting Vof. 
+    @param[in] a_ebisbox      EBISBox.
+    @param[in] a_radius       Radius.
+    @param[in] a_validCells   Valid cells to include
+    @param[in] a_connectivity Connectivity specification (e.g. monotone path or simplyconnected)
+    @param[in] a_addStartVof  If false, a_startVof will not be included in the list. 
+  */
+  static Vector<VolIndex> getVofsInRadius(const VolIndex&        a_startVof,
+					  const EBISBox&         a_ebisbox,
+					  const int              a_radius,
+					  const DenseIntVectSet& a_validCells,
+					  const Connectivity     a_connectivity,
+					  const bool             a_addStartVof);  
+
+  /*!
     @brief Fetch vofs in a quadrant, using a specified radius and with a specified connectivitiy between them.
     @param[in] a_startVof     Starting Vof. 
     @param[in] a_ebisbox      EBISBox.
@@ -121,6 +138,14 @@ public:
     @return Modifed list of vofs which are guaranteed to lie in specified grid cells
   */
   static void includeCells(Vector<VolIndex>& a_vofs, const IntVectSet& a_includeIVS);
+
+  /*!
+    @brief Modifies a_vofs so it only includes cells in a box
+    @param[in] a_vofs       List of vofs to be modified
+    @param[in] a_includeIVS List of cells to be included
+    @return Modifed list of vofs which are guaranteed to lie in specified grid cells
+  */
+  static void includeCells(Vector<VolIndex>& a_vofs, const DenseIntVectSet& a_includeIVS);  
 
   /*!
     @brief Discard duplicates
@@ -217,6 +242,23 @@ protected:
 				    const int         a_radius,
 				    const IntVect&    a_timesMoved,
 				    const IntVect&    a_pathSign);
+
+  /*!
+    @brief Get all Vofs in a monotone path. Does not move more than a_radius in any direction. 
+    @param[inout] a_vofList    List of vofs that were within the monotone path
+    @param[in]    a_startVof   Starting vof. 
+    @param[in]    a_ebisbox    EBISBox.
+    @param[in]    a_radius     Maximum radius. 
+    @param[in]    a_timesMoved Number of times moved in any direction
+    @param[in]    a_pathSign   Path sign. 
+  */
+  static void getVofsInMonotonePath(std::set<VolIndex>&    a_vofList,
+				    const VolIndex&        a_startVof,
+				    const EBISBox&         a_ebisbox,
+				    const Box&             a_validBox,
+				    const int&             a_radius,
+				    const IntVect&         a_timesMoved,
+				    const IntVect&         a_pathSign);  
 };
 
 #include <CD_NamespaceFooter.H>

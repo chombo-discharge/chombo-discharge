@@ -32,7 +32,7 @@ using namespace BVH;
   @details Template parameters are the precision and the bounding volume type. To use this class, the user must first create the DCEL mesh and then create
   the bounding volume hierarchy. 
 */
-template <class T, class BV>
+template <class T, class BV, int K>
 class BvhSdf : public BaseIF {
 public:
 
@@ -49,8 +49,7 @@ public:
   /*!
     @brief Alias for BVH node with precision T, enclosing DCEL face with a bounding volume type V
   */
-  using Node  = NodeT<T, Face, BV>;
-  
+  using Node  = NodeT<T, Face, BV, K>;
 
   /*!
     @brief Disallowed weak construction

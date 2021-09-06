@@ -22,6 +22,7 @@
 #include <EBMGInterp.H>
 #include <LevelTGA.H>
 #include <BaseIVFAB.H>
+#include <VCAggStencil.H>
 #include <EBFluxRegister.H>
 
 // Our includes
@@ -772,9 +773,17 @@ protected:
   LayoutData<BaseIFFAB<VoFStencil> > m_centroidFluxStencil[SpaceDim];
 
   /*!
-    @brief Operator stencils in irregular cells (and ones that border irregular cells if using a centroid discretization)
+    @brief Operator stencils in irregular cells (and ones that border irregular cells if using a centroid discretization).
+    @details This stencil is => sum(fluxes)/dx, not including boundary faces or EB faces. I.e. this is the same as
+    kappa*div(F) with the exclusion of faces where we have boundary conditions. 
   */
-  LayoutData<BaseIVFAB<VoFStencil> > m_opStencils;
+  LayoutData<BaseIVFAB<VoFStencil> > m_relaxStencils;
+
+  /*!
+    @brief For making irregular stencil applications go faster.
+    @details This wraps m_relaxStencils in VCAggStencil (which computes explicit stencil offsets)
+  */
+  LayoutData<RefCountedPtr<VCAggStencil> > m_aggRelaxStencil;
 
   /*!
     @brief Weights of diagonal alpha terms
@@ -854,6 +863,11 @@ protected:
     @brief Calculate relaxation coefficient
   */
   void computeRelaxationCoefficient();
+
+  /*!
+    @brief Compute aggregated stencils
+  */
+  void makeAggStencil();
 
   /*!
     @brief Define stencils

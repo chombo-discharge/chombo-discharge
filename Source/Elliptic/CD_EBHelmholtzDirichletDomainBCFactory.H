@@ -48,7 +48,7 @@ public:
   /*!
     @brief Destructor
   */
-  ~EBHelmholtzDirichletDomainBCFactory();
+  virtual ~EBHelmholtzDirichletDomainBCFactory();
 
   /*!
     @brief Set the constant value on the domain side. 

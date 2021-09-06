@@ -40,6 +40,8 @@ Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeomet
 	       const RefCountedPtr<GeoCoarsener>&          a_geoCoarsen){
   CH_TIME("Driver::Driver(RefCPtr<ComputationalGeometry>, RefCPtr<TimeStepper>, RefCPtr<AmrMesh>, RefCPtr<CellTagger>, RefCPtr<GeoCoarsener>)");
 
+  m_verbosity = -1;
+  
   this->setComputationalGeometry(a_computationalGeometry); // Set computational geometry
   this->setTimeStepper(a_timeStepper);                     // Set time stepper
   this->setAmr(a_amr);                                     // Set amr
@@ -385,7 +387,7 @@ void Driver::getCellsAndBoxes(long long&         a_numLocalCells,
 std::string Driver::numberFmt(const long long n, char sep) const {
   CH_TIME("Driver::numberFmt(long long, char)");
   if(m_verbosity > 5){
-    pout() << "Driver::numberFmt(long long, char)" << endl;
+    //    pout() << "Driver::numberFmt(long long, char)" << endl;
   }
   
   stringstream fmt;
@@ -403,7 +405,7 @@ std::string Driver::numberFmt(const long long n, char sep) const {
 Vector<std::string> Driver::numberFmt(const Vector<long long> a_numbers, char a_sep) const {
   CH_TIME("Driver::numberFmt(Vector<long long>, char)");
   if(m_verbosity > 5){
-    pout() << "Driver::numberFmt(Vector<long long>, char)" << endl;
+    //    pout() << "Driver::numberFmt(Vector<long long>, char)" << endl;
   }
   
   Vector<std::string> ret(a_numbers.size());
@@ -668,7 +670,7 @@ void Driver::regrid(const int a_lmin, const int a_lmax, const bool a_useInitialD
   m_needsNewGeometricTags = false;
 
   if(m_verbosity > 1){
-    timer.eventReport();
+    timer.eventReport(pout());
   }
 }
 
@@ -863,11 +865,13 @@ void Driver::run(const Real a_startTime, const Real a_endTime, const int a_maxSt
       }
 
       // Write checkpoint file
-      if(m_timeStep % m_checkpointInterval == 0 && m_checkpointInterval > 0 || isLastStep == true && m_checkpointInterval > 0){
-	if(m_verbosity > 2){
-	  pout() << "Driver::run -- Writing checkpoint file" << endl;
+      if(m_checkpointInterval > 0){
+	if(m_timeStep % m_checkpointInterval == 0 || isLastStep == true){
+	  if(m_verbosity > 2){
+	    pout() << "Driver::run -- Writing checkpoint file" << endl;
+	  }
+	  this->writeCheckpointFile();
 	}
-	this->writeCheckpointFile();
       }
 #endif
 
@@ -2116,7 +2120,7 @@ void Driver::writePlotFile(const std::string a_filename){
 #endif
   
   if(m_verbosity >= 3){
-    timer.eventReport();
+    timer.eventReport(pout());
   }
 }
 
@@ -2289,7 +2293,7 @@ void Driver::writeCheckpointFile(){
 
   if(m_verbosity >= 3){
     timer.stopEvent("Write data");    
-    timer.eventReport();
+    timer.eventReport(pout());
   }
   
   handleOut.close();

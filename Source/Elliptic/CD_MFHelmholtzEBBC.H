@@ -44,7 +44,7 @@ public:
   /*!
     @brief Default constructor
   */
-  ~MFHelmholtzEBBC();
+  virtual ~MFHelmholtzEBBC();
   
   /*!
     @brief Apply the EB flux. This is the version that is called by EBHelmholtzOp. 

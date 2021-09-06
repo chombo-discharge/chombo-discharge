@@ -244,13 +244,13 @@ public:
     @brief Set species
     @param[in] a_species Species (where this solver gets its name, charge, initial conditions etc). 
   */
-  virtual void setSpecies(const RefCountedPtr<CdrSpecies> a_species);
+  virtual void setSpecies(const RefCountedPtr<CdrSpecies>& a_species);
   
   /*!
     @brief Set computational geometry
     @param[in] a_computationalGeometry The computational geometry.
   */
-  virtual void setComputationalGeometry(const RefCountedPtr<ComputationalGeometry> a_computationalGeometry);
+  virtual void setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
 
   /*!
     @brief Set the amr object

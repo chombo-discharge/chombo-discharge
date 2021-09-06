@@ -67,7 +67,7 @@ public:
   /*!
     @brief Default constructor (does nothing)
   */
-  ~MFHelmholtzElectrostaticEBBCFactory();
+  virtual ~MFHelmholtzElectrostaticEBBCFactory();
   
   /*!
     @brief Factory method

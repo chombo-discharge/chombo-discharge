@@ -15,6 +15,7 @@
 
 // Our includes
 #include <CD_PhaseRealm.H>
+#include <CD_Timer.H>
 #include <CD_LoadBalancing.H>
 #include <CD_EbFastFineToCoarRedist.H>
 #include <CD_EbFastCoarToFineRedist.H>
@@ -25,14 +26,16 @@
 
 PhaseRealm::PhaseRealm(){
   // Default settings
-  m_isDefined   = false;
+  m_isDefined = false;
   m_verbosity = -1;
+  m_profile   = false;
 
   this->registerOperator(s_eb_gradient);
   this->registerOperator(s_eb_irreg_interp);
 
   // Adding this for debugging purposes. 
   ParmParse pp("PhaseRealm");
+  pp.query("profile",   m_profile);
   pp.query("verbosity", m_verbosity);
 }
 
@@ -101,9 +104,24 @@ void PhaseRealm::regridBase(const int a_lmin){
   }
 
   if(m_isDefined){
+
+    Timer timer("PhaseRealm::regridBase(int)");
+
+    timer.startEvent("Define EBLevelGrid");
     this->defineEBLevelGrid(a_lmin);
+    timer.stopEvent("Define EBLevelGrid");
+
+    timer.startEvent("Define neighbors");    
     this->defineNeighbors(a_lmin);
+    timer.stopEvent("Define neighbors");        
+
+    timer.startEvent("Define VoFIterators");        
     this->defineVofIterator(a_lmin);
+    timer.stopEvent("Define VoFIterators");
+
+    if(m_profile){
+      timer.eventReport(pout());
+    }
   }
 }
 
@@ -114,19 +132,76 @@ void PhaseRealm::regridOperators(const int a_lmin){
   }
 
   if(m_isDefined){
-    this->defineEbCoarAve(a_lmin);                   
-    this->defineFillPatch(a_lmin);                   
-    this->defineEBPWLInterp(a_lmin);                 
-    this->defineMultigridInjection(a_lmin);          
-    this->defineFluxReg(a_lmin, 1);                  
-    this->defineRedistOper(a_lmin, 1);               
-    this->defineGradSten(a_lmin);                    
-    this->defineIrregSten();                         
-    this->defineNonConsDivSten();                    
-    this->defineCopier(a_lmin);                      
-    this->defineGhostCloud(a_lmin);                  
+
+    Timer timer("PhaseRealm::regridOperators(int)");
+
+    timer.startEvent("EbCoarAve");
+    this->defineEbCoarAve(a_lmin);
+    timer.stopEvent("EbCoarAve");
+
+    timer.startEvent("Ghost interp");
+    this->defineFillPatch(a_lmin);
+    timer.stopEvent("Ghost interp");
+
+    timer.startEvent("PWL interp");
+    this->defineEBPWLInterp(a_lmin);
+    timer.stopEvent("PWL interp");
+
+    timer.startEvent("MG injection");    
+    this->defineMultigridInjection(a_lmin);
+    timer.stopEvent("MG injection");
+
+    timer.startEvent("Flux register");        
+    this->defineFluxReg(a_lmin, 1);
+    timer.stopEvent("Flux register");
+
+    timer.startEvent("Level redist");            
+    this->defineRedistOper(a_lmin, 1);
+    timer.stopEvent("Level redist");
+
+    timer.startEvent("Fine-to-coar redist");            
+    this->defineFineToCoarRedistOper(a_lmin, 1);
+    timer.stopEvent("Fine-to-coar redist");
+
+    timer.startEvent("Coar-to-fine redist");            
+    this->defineCoarToFineRedistOper(a_lmin, 1);
+    timer.stopEvent("Coar-to-fine redist");
+    
+    timer.startEvent("Coar-to-coar redist");            
+    this->defineCoarToCoarRedistOper(a_lmin, 1);
+    timer.stopEvent("Coar-to-coar redist");            
+
+    timer.startEvent("Gradient stencil");
+    this->defineGradSten(a_lmin);
+    timer.stopEvent("Gradient stencil");
+
+    timer.startEvent("Irreg stencil");    
+    this->defineIrregSten();
+    timer.stopEvent("Irreg stencil");
+
+    timer.startEvent("Non-conservative stencil");        
+    this->defineNonConsDivSten();
+    timer.stopEvent("Non-conservative stencil");
+
+    timer.startEvent("Copier");            
+    this->defineCopier(a_lmin);
+    timer.stopEvent("Copier");
+
+    timer.startEvent("Ghost cloud");                
+    this->defineGhostCloud(a_lmin);
+    timer.stopEvent("Ghost cloud");
+
+    timer.startEvent("Levelset");                    
     this->defineLevelSet(a_lmin, m_numLsfGhostCells);
-    this->defineEBMultigrid(a_lmin);                 
+    timer.stopEvent("Levelset");
+
+    timer.startEvent("Multigrid interpolator");                        
+    this->defineEBMultigrid(a_lmin);
+    timer.stopEvent("Multigrid interpolator");
+
+    if(m_profile){
+      timer.eventReport(pout());
+    }
   }
 }
 
@@ -541,9 +616,6 @@ void PhaseRealm::defineRedistOper(const int a_lmin, const int a_regsize){
   const bool doThisOperator = this->queryOperator(s_eb_redist);
 
   m_levelRedist.resize(1 + m_finestLevel);
-  m_fineToCoarRedist.resize(1 + m_finestLevel);
-  m_coarToCoarRedist.resize(1 + m_finestLevel);
-  m_coarToFineRedist.resize(1 + m_finestLevel);
 
   if(doThisOperator){
     
@@ -562,7 +634,36 @@ void PhaseRealm::defineRedistOper(const int a_lmin, const int a_regsize){
 									      comps,
 									      m_redistributionRadius));
       }
+    }
+  }
+}
 
+void PhaseRealm::defineFineToCoarRedistOper(const int a_lmin, const int a_regsize){
+  CH_TIME("PhaseRealm::defineFineToCoarRedistOper");
+  if(m_verbosity > 2){
+    pout() << "PhaseRealm::defineFineToCoarRedistOper" << endl;
+  }
+
+  // TLDR: All these operators either do stuff on an AMR level, or between a coarse and a fine level. The entries
+  //       live on these levels:
+  //
+  //       Oper                        Level
+  //       EBFineToCoar [l,  l-1]    l
+  //       EBCoarToFine [l-1,l  ] 
+  //       when level a_lmin changed we need to update fine-to-coar
+
+  const bool doThisOperator = this->queryOperator(s_eb_redist);
+
+  m_fineToCoarRedist.resize(1 + m_finestLevel);
+
+  if(doThisOperator){
+    
+    const int comps = a_regsize;
+
+    for (int lvl = Max(0, a_lmin-1); lvl <= m_finestLevel; lvl++){
+
+      const bool has_coar = lvl > 0;
+      const bool has_fine = lvl < m_finestLevel;
     
       if(m_hasEbCf){
 	if(has_coar){
@@ -584,6 +685,39 @@ void PhaseRealm::defineRedistOper(const int a_lmin, const int a_regsize){
 	    
 	  }
 	}
+      }
+    }
+  }
+}
+
+void PhaseRealm::defineCoarToFineRedistOper(const int a_lmin, const int a_regsize){
+  CH_TIME("PhaseRealm::defineCoarToFineRedistOper");
+  if(m_verbosity > 2){
+    pout() << "PhaseRealm::defineCoarToFineRedistOper" << endl;
+  }
+
+  // TLDR: All these operators either do stuff on an AMR level, or between a coarse and a fine level. The entries
+  //       live on these levels:
+  //
+  //       Oper                        Level
+  //       EBFineToCoar [l,  l-1]    l
+  //       EBCoarToFine [l-1,l  ] 
+  //       when level a_lmin changed we need to update fine-to-coar
+
+  const bool doThisOperator = this->queryOperator(s_eb_redist);
+  
+  m_coarToFineRedist.resize(1 + m_finestLevel);
+
+  if(doThisOperator){
+    
+    const int comps = a_regsize;
+
+    for (int lvl = Max(0, a_lmin-1); lvl <= m_finestLevel; lvl++){
+
+      const bool has_coar = lvl > 0;
+      const bool has_fine = lvl < m_finestLevel;
+    
+      if(m_hasEbCf){
 
 	if(has_fine){
 	  // TLDR: The coar-to-fine redistribution operator transfers from the coarse level and to the fine level and
@@ -600,8 +734,46 @@ void PhaseRealm::defineRedistOper(const int a_lmin, const int a_regsize){
 			       comps,
 			       m_redistributionRadius);
 	    m_coarToFineRedist[lvl] = RefCountedPtr<EBCoarToFineRedist> (c2f_redist);
+	  }
+	}
+      }
+    }
+  }
+}
 
+void PhaseRealm::defineCoarToCoarRedistOper(const int a_lmin, const int a_regsize){
+  CH_TIME("PhaseRealm::defineCoarToCoarRedistOper");
+  if(m_verbosity > 2){
+    pout() << "PhaseRealm::defineCoarToCoarRedistOper" << endl;
+  }
 
+  // TLDR: All these operators either do stuff on an AMR level, or between a coarse and a fine level. The entries
+  //       live on these levels:
+  //
+  //       Oper                        Level
+  //       EBFineToCoar [l,  l-1]    l
+  //       EBCoarToFine [l-1,l  ] 
+  //       when level a_lmin changed we need to update fine-to-coar
+
+  const bool doThisOperator = this->queryOperator(s_eb_redist);
+
+  m_coarToCoarRedist.resize(1 + m_finestLevel);
+
+  if(doThisOperator){
+    
+    const int comps = a_regsize;
+
+    for (int lvl = Max(0, a_lmin-1); lvl <= m_finestLevel; lvl++){
+
+      const bool has_coar = lvl > 0;
+      const bool has_fine = lvl < m_finestLevel;
+    
+      if(m_hasEbCf){
+	if(has_fine){
+	  // TLDR: The coar-to-fine redistribution operator transfers from the coarse level and to the fine level and
+	  //       therefore lives on the coarse level. Since a_lmin is the coarsest level that changed, we need to update
+	  //       if lvl >= a_lmin-1
+	  if(lvl >= a_lmin-1){
 	    auto c2c_redist = RefCountedPtr<EbFastCoarToCoarRedist> (new EbFastCoarToCoarRedist());
 	    c2c_redist->define(*m_eblg[lvl+1],
 			       *m_eblg[lvl],

@@ -18,6 +18,7 @@
 #include <CD_EBHelmholtzDirichletDomainBC.H>
 
 // Our includes
+#include <CD_Timer.H>
 #include <CD_MFHelmholtzOp.H>
 #include <CD_MultifluidAlias.H>
 #include <CD_NamespaceHeader.H>
@@ -174,16 +175,19 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
 											ebHelmRelax));
 
 
-    m_helmOps.emplace(iphase, oper);
+    m_helmOps.insert({iphase, oper});
   }
 }
 
 MFHelmholtzOp::~MFHelmholtzOp(){
   CH_TIME("MFHelmholtzOp()::~MFHelmholtzOp()");
+
+  m_helmOps.clear();
 }
 
 void MFHelmholtzOp::setJump(const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_jump){
   CH_TIME("MFHelmholtzOp::setJump(RefCountedPtr<BaseIVFAB<Real> >)");
+  
   m_jump = a_jump;
 }
 
@@ -462,13 +466,14 @@ void MFHelmholtzOp::applyOp(LevelData<MFCellFAB>&             a_Lphi,
 			    const bool                        a_homogeneousCFBC){
   CH_TIME("MFHelmholtzOp::applyOp(LD<MFCellFAB>, LD<MFCellFAB>, LD<MFCellFAB>, bool, bool)");
   
-  // We need updated ghost cells in the CF before applying the matching conditions. 
+  // We need updated ghost cells since both the operator stencil and the "jump" stencil
+  // reach into ghost regions. 
+  this->exchangeGhost(a_phi);
   this->interpolateCF(a_phi, a_phiCoar, a_homogeneousCFBC);
   this->updateJumpBC(a_phi, a_homogeneousPhysBC);
 
-  // Apply the operator on each patch. 
+  // Now apply the operator on each patch.
   const DisjointBoxLayout& dbl = m_mflg.getGrids();
-  
   for (DataIterator dit(dbl); dit.ok(); ++dit){
     const Box cellBox = dbl[dit()];
 
@@ -550,11 +555,16 @@ void MFHelmholtzOp::axby(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>
 
 void MFHelmholtzOp::updateJumpBC(const LevelData<MFCellFAB>& a_phi, const bool a_homogeneousPhysBC){
   CH_TIME("MFHelmholtzOp::updateJumpBC(LD<MFCellFAB>, bool)");
-
-  LevelData<MFCellFAB>& phi = (LevelData<MFCellFAB>&) a_phi;
-  phi.exchange();
   
   m_jumpBC->matchBC(a_phi, *m_jump, a_homogeneousPhysBC);
+}
+
+void MFHelmholtzOp::exchangeGhost(const LevelData<MFCellFAB>& a_phi) const{
+  CH_TIME("MFHelmholtzOp::exchangeGhost(LD<MFCellFAB>)");
+
+  LevelData<MFCellFAB>& phi = (LevelData<MFCellFAB>&) a_phi;
+
+  phi.exchange();
 }
 
 void MFHelmholtzOp::relax(LevelData<MFCellFAB>& a_correction, const LevelData<MFCellFAB>& a_residual, int a_iterations) {
@@ -593,7 +603,8 @@ void MFHelmholtzOp::relaxPointJacobi(LevelData<MFCellFAB>& a_correction, const L
 
   for (int i = 0; i < a_iterations; i++){
     
-    // Interpolate ghost cells and match the BC.
+    // Fill/interpolate ghost cells and match the BC.
+    this->exchangeGhost(a_correction);
     this->interpolateCF(a_correction, nullptr, homogeneousCFBC);
     this->updateJumpBC(a_correction,  homogeneousPhysBC);    
 
@@ -631,9 +642,10 @@ void MFHelmholtzOp::relaxGSRedBlack(LevelData<MFCellFAB>& a_correction, const Le
   constexpr bool homogeneousPhysBC = true;  
 
   for (int i = 0; i < a_iterations; i++){
-
-    // Interpolate ghost cells and match the BC.
     for (int redBlack=0;redBlack<=1; redBlack++){
+
+      // Fill/interpolate ghost cells and match the BC.
+      this->exchangeGhost(a_correction);
       this->interpolateCF(a_correction, nullptr, homogeneousCFBC);
       this->updateJumpBC(a_correction, homogeneousPhysBC);
       
@@ -674,8 +686,10 @@ void MFHelmholtzOp::relaxGSMultiColor(LevelData<MFCellFAB>& a_correction, const 
 
   for (int i = 0; i < a_iterations; i++){
 
-    // Interpolate ghost cells and match the BC.
     for (int icolor = 0; icolor < m_colors.size(); icolor++){
+
+      // Fill/interpolate ghost cells and match the BC.      
+      this->exchangeGhost(a_correction);      
       this->interpolateCF(a_correction, nullptr, homogeneousCFBC);
       this->updateJumpBC(a_correction, homogeneousPhysBC);
 
@@ -704,6 +718,7 @@ void MFHelmholtzOp::restrictResidual(LevelData<MFCellFAB>& a_resCoar, LevelData<
 
   // EBHelmholtzOp::restrictResidual will call applyOp so we need to update the boundary condition
   // on multiphase cells first.
+  this->exchangeGhost(a_phi);
   this->updateJumpBC(a_phi, homogeneousPhysBC);
   
   for (auto& op : m_helmOps){
@@ -742,6 +757,7 @@ void MFHelmholtzOp::AMRUpdateResidual(LevelData<MFCellFAB>&       a_residual,
   constexpr bool homogeneousPhysBC = true;  
 
   // Need to update BC first!
+  this->exchangeGhost(a_correction);
   this->interpolateCF((LevelData<MFCellFAB>&) a_correction, &a_coarseCorrection, homogeneousCFBC);
   this->updateJumpBC(a_correction, homogeneousPhysBC);
 
@@ -770,6 +786,7 @@ void MFHelmholtzOp::AMRRestrict(LevelData<MFCellFAB>&       a_residualCoarse,
   constexpr bool homogeneousCFBC   = false;  
   constexpr bool homogeneousPhysBC = true;
 
+  this->exchangeGhost(a_correction);
   this->interpolateCF((LevelData<MFCellFAB>&) a_correction, &a_coarseCorrection, homogeneousCFBC);
   this->updateJumpBC(a_correction, homogeneousPhysBC);  
 
@@ -855,7 +872,8 @@ void MFHelmholtzOp::AMROperatorNF(LevelData<MFCellFAB>&       a_Lphi,
   constexpr bool homogeneousCFBC = false;
 
   // Update ghost cells and jump conditions first. Doing an exchange is not sufficient here because
-  // the jump stencils might reach over CFs. 
+  // the jump stencils might reach over CFs.
+  this->exchangeGhost(a_phi);
   this->interpolateCF(a_phi, &a_phiCoar, homogeneousCFBC);
   this->updateJumpBC(a_phi, a_homogeneousPhysBC);
 
@@ -896,6 +914,7 @@ void MFHelmholtzOp::AMROperatorNC(LevelData<MFCellFAB>&              a_Lphi,
   }
 
   // Must update the jump BC first. Don't have coarser here so no need for CF interpolation.
+  this->exchangeGhost(a_phi);
   this->updateJumpBC(a_phi, a_homogeneousPhysBC);
 
   for (auto& op : m_helmOps){
@@ -938,7 +957,8 @@ void MFHelmholtzOp::AMROperator(LevelData<MFCellFAB>&              a_Lphi,
   }
  
   // Update ghost cells and jump conditions first. Doing an exchange is not sufficient here because
-  // the jump stencils might reach over CFs. 
+  // the jump stencils might reach over CFs.
+  this->exchangeGhost(a_phi);
   this->interpolateCF(a_phi, &a_phiCoar, homogeneousCFBC);
   this->updateJumpBC(a_phi, a_homogeneousPhysBC);
 

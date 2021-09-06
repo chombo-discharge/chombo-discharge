@@ -67,7 +67,7 @@ public:
   /*!
     @brief Destructor
   */
-  ~EBHelmholtzLarsenDomainBC();
+  virtual ~EBHelmholtzLarsenDomainBC();
 
 protected:
 

@@ -34,10 +34,10 @@ int main(int argc, char* argv[]){
   // Get potential from input script 
   std::string basename; 
   {
-     ParmParse pp("PositiveStreamerProfiledSurface");
-     pp.get("potential", g_potential);
-     pp.get("basename",  basename);
-     setPoutBaseName(basename);
+    ParmParse pp("PositiveStreamerProfiledSurface");
+    pp.get("potential", g_potential);
+    pp.get("basename",  basename);
+    setPoutBaseName(basename);
   }
 
   // Set geometry and AMR 
@@ -66,11 +66,15 @@ int main(int argc, char* argv[]){
   timestepper->setRadiativeTransferSolvers(rte);
 
   // Set potential 
-timestepper->setVoltage(potential_curve);
+  timestepper->setVoltage(potential_curve);
 
   // Set up the Driver and run it
   RefCountedPtr<Driver> engine = RefCountedPtr<Driver> (new Driver(compgeom, timestepper, amr, tagger, geocoarsen));
   engine->setupAndRun(input_file);
+
+  delete poi_fact;
+  delete cdr_fact;
+  delete rte_fact;  
 
 #ifdef CH_MPI
   CH_TIMER_REPORT();

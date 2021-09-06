@@ -40,6 +40,11 @@ public:
   using TimePoint = std::chrono::steady_clock::time_point;
 
   /*!
+    @brief Duration in seconds
+  */
+  using Duration = std::chrono::duration<Real>;
+
+  /*!
     @brief Static function which returns the time (in seconds) between now and an arbitrary time in the past
   */
   inline
@@ -107,9 +112,10 @@ public:
     @brief Print all timed events to cout.
     @details This routine prints a header, the timing report for the various event, and a tail. All events are included but unfinished ones
     are not counted towards the elapsed time. 
+    @param[in] a_localReportOnly If true, no reduction over mpi
   */
   inline
-  void eventReport() const noexcept;
+  void eventReport(std::ostream& a_outputStream, const bool a_localReportOnly = false) const noexcept;
 
 protected:
 
@@ -119,7 +125,7 @@ protected:
   enum EventFields {
     StoppedEvent = 0,
     StartClock   = 1,
-    StopClock    = 2
+    ElapsedTime  = 2
   };
 
   /*!
@@ -128,24 +134,26 @@ protected:
   std::string m_processName;
 
   /*!
-    @brief Timer events. First entry is the name of the event, the second is the time.
+    @brief Timer events. First entry is the name of the event. 
+    @details The second is the identifier for the event
   */
-  std::map<std::string, std::tuple<bool, TimePoint, TimePoint> > m_events;
+  std::map<std::string, std::tuple<bool, TimePoint, Duration> > m_events;
 
   /*!
     @brief Print report header
   */
-  void printReportHeader() const noexcept;
+  void printReportHeader(std::ostream& a_outputStream) const noexcept;
 
   /*!
     @brief Print report tail
   */
-  void printReportTail(const Real a_elapsedTime) const noexcept;
+  void printReportTail(std::ostream& a_outputStream, const std::pair<Real, Real> a_elapsedTime) const noexcept;
 
   /*!
     @brief Compute the total time for all finished events. 
+    @return First entry is the local time. Second entry is the global time. 
   */
-  Real computeTotalElapsedTime() const noexcept;
+  std::pair<Real, Real> computeTotalElapsedTime(const bool a_localReportOnly) const noexcept;
 };
 
 #include <CD_NamespaceFooter.H>

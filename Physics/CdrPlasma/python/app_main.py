@@ -117,6 +117,12 @@ def write_template(args):
     mainf.write("  engine->setupAndRun(input_file);\n");
     mainf.write("\n")
 
+    mainf.write("  // Clean up memory\n")
+    mainf.write("  delete poi_fact;\n")
+    mainf.write("  delete cdr_fact;\n")
+    mainf.write("  delete rte_fact;\n")
+    mainf.write("\n")    
+
     if args.use_mpi:
         mainf.write("#ifdef CH_MPI\n")
         mainf.write("  CH_TIMER_REPORT();\n")

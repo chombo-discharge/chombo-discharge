@@ -1124,11 +1124,11 @@ void CdrPlasmaStepper::computeCdrDiffusionFace(Vector<EBAMRFluxData*>&       a_d
     const int idx = solver_it.index();
 
     if(solver->isDiffusive()){ // Only need to do this for diffusive things
-      DataOps::setValue(*a_diffusionCoefficient_face[idx], 1.0);
+      DataOps::setValue(*a_diffusionCoefficient_face[idx], 0.0);
       m_amr->averageDown(diffco[idx], m_realm, m_cdr->getPhase());
       m_amr->interpGhost(diffco[idx], m_realm, m_cdr->getPhase()); 
 
-      DataOps::averageCellToFaceAllComps(*a_diffusionCoefficient_face[idx], diffco[idx], m_amr->getDomains());
+      DataOps::averageCellToFace(*a_diffusionCoefficient_face[idx], diffco[idx], m_amr->getDomains());
     }
   }
 }
@@ -2614,7 +2614,7 @@ void CdrPlasmaStepper::computeElectricField(EBAMRFluxData& a_E_face, const phase
       }
 
     }
-    //    DataOps::averageCellToFaceAllComps(*a_E_face[lvl], *a_E_cell[lvl], m_amr->getDomains()[lvl]);
+    //    DataOps::averageCellToFace(*a_E_face[lvl], *a_E_cell[lvl], m_amr->getDomains()[lvl]);
     a_E_face[lvl]->exchange();
   }
 }

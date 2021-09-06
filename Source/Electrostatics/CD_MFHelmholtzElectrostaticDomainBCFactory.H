@@ -63,7 +63,7 @@ public:
   /*!
     @brief Destructor (does nothing)
   */
-  ~MFHelmholtzElectrostaticDomainBCFactory();
+  virtual ~MFHelmholtzElectrostaticDomainBCFactory();
 
   /*!
     @brief Factory method

@@ -61,7 +61,7 @@ public:
   /*!
     @brief Destructor
   */
-  ~EBHelmholtzEddingtonSP1DomainBCFactory();
+  virtual ~EBHelmholtzEddingtonSP1DomainBCFactory();
 
   /*!
     @brief Disallowed -- don't see why you would need it.

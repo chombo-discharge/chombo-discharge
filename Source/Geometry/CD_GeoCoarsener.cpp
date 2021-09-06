@@ -41,13 +41,11 @@ GeoCoarsener::GeoCoarsener(){
 
     // Read string in type format GeoCoarsener.box1_lo and GeoCoarsener.box2_hi etc. 
     for (int ibox = 0; ibox < num_boxes; ibox++){
-      char* cstr = new char[ndigits];
-      sprintf(cstr, "%d", 1+ibox);
-
-      const std::string str1 = "box" + std::string(cstr) + "_lo";
-      const std::string str2 = "box" + std::string(cstr) + "_hi";
-      const std::string str3 = "box" + std::string(cstr) + "_lvl";
-      const std::string str4 = "box" + std::string(cstr) + "_inv";
+      const std::string boxNum = std::to_string(1+ibox);
+      const std::string str1   = std::string("box") + boxNum + std::string("_lo");
+      const std::string str2   = std::string("box") + boxNum + std::string("_hi");
+      const std::string str3   = std::string("box") + boxNum + std::string("_lvl");
+      const std::string str4   = std::string("box") + boxNum + std::string("_inv");
 
       Vector<Real> loCorner(SpaceDim);
       Vector<Real> hiCorner(SpaceDim);
@@ -65,18 +63,16 @@ GeoCoarsener::GeoCoarsener(){
       m_coarsenBoxes [ibox] = RealBox(c1,c2);
       m_coarsenLevels[ibox] = finestBoxLvl;
       m_inverse      [ibox] = inverse;
-	
-      delete cstr;
     }
   }
 }
 
 GeoCoarsener::~GeoCoarsener(){
-  CH_TIME("GeoCoarsener::~GeoCoarsener()");
+  CH_TIME("GeoCoarsener::~GeoCoarsener");
 }
 
 void GeoCoarsener::coarsenTags(Vector<IntVectSet>& a_tags, const Vector<Real>& a_dx, const RealVect& a_probLo) const {
-  CH_TIME("GeoCoarsener::coarsenTags(Vector<IntVectSet>, Vector<Real>, RealVect");
+  CH_TIME("GeoCoarsener::coarsenTags");
   
   if(!(m_coarsenBoxes.size() == m_coarsenLevels.size())){
     pout() << "GeoCoarsener::coarsenTags - m_geoCoarsen is not well defined. Skipping the coarsening step" << endl;
@@ -84,53 +80,52 @@ void GeoCoarsener::coarsenTags(Vector<IntVectSet>& a_tags, const Vector<Real>& a
   else{
     if(m_coarsenBoxes.size() > 0){
       for (int lvl = 0; lvl < a_tags.size(); lvl++){
-	const int num_coarsen = m_coarsenBoxes.size();
+	const int numCoarsen = m_coarsenBoxes.size();
 	const IntVectSet tmp = a_tags[lvl];
+	
 	for (IVSIterator it(tmp); it.ok(); ++it){
 	  const IntVect iv   = it();
 	  const RealVect pos = a_probLo + RealVect(iv)*a_dx[lvl] + 0.5*a_dx[lvl]*RealVect::Unit;
 
-	  bool remove_tag = false;
-
-	  bool inside_coarsen_box  = false;
-	  bool inside_inverse_box  = false;
-	  bool outside_inverse_box = false;
+	  bool insideCoarsenBox  = false;
+	  bool insideInverseBox  = false;
+	  bool outsideInverseBox = false;
 
 	  // Check the regular box
-	  for (int ibox = 0; ibox < num_coarsen; ibox++){
+	  for (int ibox = 0; ibox < numCoarsen; ibox++){
 	    const RealVect lo = m_coarsenBoxes[ibox].getLo();
 	    const RealVect hi = m_coarsenBoxes[ibox].getHi();
 
-	    const bool inverse     = (m_inverse[ibox] == 1);
-	    const bool inside_box  = (pos > lo) && (pos < hi);
-	    const bool coarsen_lvl = lvl >= m_coarsenLevels[ibox];
+	    const bool inverse    = (m_inverse[ibox] == 1);
+	    const bool insideBox  = (pos > lo) && (pos < hi);
+	    const bool coarsenLvl = lvl >= m_coarsenLevels[ibox];
 
-	    if(inside_box && !inverse && coarsen_lvl){
-	      inside_coarsen_box = true;
+	    if(insideBox && !inverse && coarsenLvl){
+	      insideCoarsenBox = true;
 	    }
 	  }
 
 	  // Check the inverse boxes
-	  for (int ibox = 0; ibox < num_coarsen; ibox++){
+	  for (int ibox = 0; ibox < numCoarsen; ibox++){
 	    const RealVect lo = m_coarsenBoxes[ibox].getLo();
 	    const RealVect hi = m_coarsenBoxes[ibox].getHi();
 
-	    const bool inverse     = (m_inverse[ibox] == 1);
-	    const bool inside_box  = pos > lo && pos < hi;
-	    const bool coarsen_lvl = lvl >= m_coarsenLevels[ibox];
+	    const bool inverse    = (m_inverse[ibox] == 1);
+	    const bool insideBox  = pos > lo && pos < hi;
+	    const bool coarsenLvl = lvl >= m_coarsenLevels[ibox];
 
-	    if(inside_box && inverse && coarsen_lvl){ // Protect tag
-	      inside_inverse_box = true;
+	    if(insideBox && inverse && coarsenLvl){ // Protect tag
+	      insideInverseBox = true;
 	    }
-	    else if(!inside_box && inverse && coarsen_lvl){ // Remove tag
-	      outside_inverse_box = true;
+	    else if(!insideBox && inverse && coarsenLvl){ // Remove tag
+	      outsideInverseBox = true;
 	    }
 	  }
 
-	  if(inside_coarsen_box && !inside_inverse_box){
+	  if(insideCoarsenBox && !insideInverseBox){
 	    a_tags[lvl] -= iv;
 	  }
-	  if(!inside_inverse_box && outside_inverse_box){
+	  if(!insideInverseBox && outsideInverseBox){
 	    a_tags[lvl] -= iv;
 	  }
 	}

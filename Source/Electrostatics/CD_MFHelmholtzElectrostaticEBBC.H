@@ -53,7 +53,7 @@ public:
   /*!
     @brief Default constructor (does nothing). 
   */
-  ~MFHelmholtzElectrostaticEBBC();
+  virtual ~MFHelmholtzElectrostaticEBBC();
 
   /*!
     @brief No copy assignment

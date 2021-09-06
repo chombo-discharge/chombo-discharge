@@ -39,7 +39,7 @@ void EBHelmholtzLarsenEBBCFactory::setRobinCoefficients(){
   //       the "Larsen coefficients". 
 
   // Using our formulation of the Helmholtz operator, The A-coefficient is 1.5*kappa*kappa*(1+3*r2)/(1-2*r1)
-  m_functionA = [&species=this->m_species, r1=this->m_r1, r2=this->m_r2](const RealVect& a_position){
+  m_functionA = [&species=this->m_species, r1=this->m_r1, r2=this->m_r2](const RealVect& a_position) -> Real {
     Real val = species->getKappa(a_position);
 
     val *= val;
@@ -49,7 +49,7 @@ void EBHelmholtzLarsenEBBCFactory::setRobinCoefficients(){
     return val;
   };
 
-  m_functionB = [species=this->m_species](const RealVect& a_position){
+  m_functionB = [&species=this->m_species](const RealVect& a_position){
     return -species->getKappa(a_position);
   };
 
@@ -59,8 +59,8 @@ void EBHelmholtzLarsenEBBCFactory::setRobinCoefficients(){
     return source;
   };
 
-  // Call parent function
-  this->setCoefficients(m_functionA, m_functionB, m_functionC);
+  m_useConstant = false;
+  m_useFunction = true;
 }
 
 #include <CD_NamespaceFooter.H>

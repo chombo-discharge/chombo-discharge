@@ -50,7 +50,7 @@ public:
   /*!
     @brief Destructor
   */
-  ~EBHelmholtzNeumannDomainBCFactory();
+  virtual ~EBHelmholtzNeumannDomainBCFactory();
 
   /*!
     @brief Set value of dphi/dn on the EB. 

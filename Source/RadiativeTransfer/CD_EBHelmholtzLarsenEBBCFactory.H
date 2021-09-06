@@ -58,7 +58,7 @@ public:
   /*!
     @brief Default constructor
   */
-  ~EBHelmholtzLarsenEBBCFactory();
+  virtual ~EBHelmholtzLarsenEBBCFactory();
 
   /*!
     @brief No copy assignment
