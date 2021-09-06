@@ -125,7 +125,7 @@ CdrGodunov.gmg_smoother          = red_black               # Relaxation type. 'j
 # ====================================================================================================
 # EddingtonSP1 class options
 # ====================================================================================================
-<EddingtonSP1.stationary          = true         # Stationary solver
+EddingtonSP1.stationary          = true         # Stationary solver
 EddingtonSP1.reflectivity        = 0.           # Reflectivity
 EddingtonSP1.use_tga             = false        # Use TGA for integration
 EddingtonSP1.kappa_scale         = false        # Kappa scale source or not (depends on algorithm)
@@ -183,7 +183,7 @@ RodPlaneProfile.rod_live          = true          # Live electrode or not
 RodPlaneProfile.rod_radius        = 500.E-6       # Electrode inner radius
 RodPlaneProfile.rod_center1       = 0.0 1E-2      # Center 1
 RodPlaneProfile.rod_center2       = 0.0 1.0       # Center 2
-RodPlaneProfile.plane_width       = 7.2E-2        # Plane width	
+RodPlaneProfile.plane_width       = 7.200123E-2   # Plane width	
 RodPlaneProfile.plane_normal      = 0.0 1.0       # Plane normal. Not used, oriented along +y only 
 RodPlaneProfile.plane_point       = 0.0 5E-3      # Center point on plane
 RodPlaneProfile.plane_eps         = 4.0           # Plane permittivity
