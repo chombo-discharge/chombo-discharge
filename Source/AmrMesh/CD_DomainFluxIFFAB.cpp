@@ -9,69 +9,111 @@
   @author Robert Marskar
 */
 
+// Chombo includes
+#include <CH_Timer.H>
+
 // Our includes
 #include <CD_DomainFluxIFFAB.H>
 #include <CD_NamespaceHeader.H>
   
 DomainFluxIFFAB::DomainFluxIFFAB(){
-  setDefaultValues();
+  CH_TIME("DomainFluxIFFAB::DomainFluxIFFAB");
+  
+  this->setDefaultValues();
 }
 
-DomainFluxIFFAB::DomainFluxIFFAB(const ProblemDomain& a_domain, const EBISBox& a_ebisbox, const Box& a_box, const int a_ncomp){
-  setDefaultValues();
-  define(a_domain, a_ebisbox, a_box, a_ncomp);
+DomainFluxIFFAB::DomainFluxIFFAB(const ProblemDomain& a_domain, const EBISBox& a_ebisbox, const Box& a_box, const int a_nComp){
+  CH_TIME("DomainFluxIFFAB::DomainFluxIFFAB(ProblemDomain, EBISBox, Box, int)");
+  
+  this->setDefaultValues();
+  this->define(a_domain, a_ebisbox, a_box, a_nComp);
 }
 
 DomainFluxIFFAB::~DomainFluxIFFAB(){
+  CH_TIME("DomainFluxIFFAB::~DomainFluxIFFAB");
+  
   for (int dir = 0; dir < SpaceDim; dir++){
-    if(m_flux_lo[dir] != NULL) delete m_flux_lo[dir];
-    if(m_flux_hi[dir] != NULL) delete m_flux_hi[dir];
+    if(m_fluxLo[dir] != nullptr) delete m_fluxLo[dir];
+    if(m_fluxHi[dir] != nullptr) delete m_fluxHi[dir];
   }
 }
 
+const Box& DomainFluxIFFAB::box() const {
+  return m_box;
+}
+
+int DomainFluxIFFAB::nComp() const {
+  return m_nComp;
+}
+
+const ProblemDomain& DomainFluxIFFAB::getDomain() const {
+  return m_domain;
+}
+
+const EBISBox& DomainFluxIFFAB::getEBISBox() const {
+  return m_ebisbox;
+}
+
+void DomainFluxIFFAB::define(const DomainFluxIFFAB& a_copy){
+  CH_TIME("DomainFluxIFFAB::define(DomainFluxIFFAB)");
+  
+  this->define(a_copy.getDomain(), a_copy.getEBISBox(), a_copy.box(), a_copy.nComp());
+}
+
 int DomainFluxIFFAB::size(const Box& R, const Interval& comps) const{
+  CH_TIME("DomainFluxIFFAB::size");
+  
   int retval = 0;
   for (int dir = 0; dir < SpaceDim; dir++){
-    retval += m_flux_lo[dir]->size(R, comps);
-    retval += m_flux_hi[dir]->size(R, comps);
+    retval += m_fluxLo[dir]->size(R, comps);
+    retval += m_fluxHi[dir]->size(R, comps);
   }
+  
   return retval;
 }
 
 void DomainFluxIFFAB::linearOut(void* buf, const Box& R, const Interval& comps) const {
+  CH_TIME("DomainFluxIFFAB::linearOut");
+  
   unsigned char* charbuf = (unsigned char*) buf;
+  
   for (int dir = 0; dir < SpaceDim; dir++){
-    m_flux_lo[dir]->linearOut(charbuf, R, comps);
-    int dirsize = m_flux_lo[dir]->size(R, comps);
+    m_fluxLo[dir]->linearOut(charbuf, R, comps);
+    int dirsize = m_fluxLo[dir]->size(R, comps);
     charbuf += dirsize;
   }
 
   for (int dir = 0; dir < SpaceDim; dir++){
-    m_flux_hi[dir]->linearOut(charbuf, R, comps);
-    int dirsize = m_flux_hi[dir]->size(R, comps);
+    m_fluxHi[dir]->linearOut(charbuf, R, comps);
+    int dirsize = m_fluxHi[dir]->size(R, comps);
     charbuf += dirsize;
   }
 }
 
 void DomainFluxIFFAB::linearIn(void* buf, const Box& R, const Interval& comps){
+  CH_TIME("DomainFluxIFFAB::linearIn");
+  
   unsigned char* charbuf = (unsigned char*) buf;
+  
   for (int dir = 0; dir < SpaceDim; dir++){
-    m_flux_lo[dir]->linearIn(charbuf, R, comps);
-    int dirsize = m_flux_lo[dir]->size(R, comps);
+    m_fluxLo[dir]->linearIn(charbuf, R, comps);
+    int dirsize = m_fluxLo[dir]->size(R, comps);
     charbuf += dirsize;
   }
 
   for (int dir = 0; dir < SpaceDim; dir++){
-    m_flux_hi[dir]->linearIn(charbuf, R, comps);
-    int dirsize = m_flux_hi[dir]->size(R, comps);
+    m_fluxHi[dir]->linearIn(charbuf, R, comps);
+    int dirsize = m_fluxHi[dir]->size(R, comps);
     charbuf += dirsize;
   }
 }
 
-void DomainFluxIFFAB::define(const ProblemDomain& a_domain, const EBISBox& a_ebisbox, const Box& a_box, const int a_ncomp){
+void DomainFluxIFFAB::define(const ProblemDomain& a_domain, const EBISBox& a_ebisbox, const Box& a_box, const int a_nComp){
+  CH_TIME("DomainFluxIFFAB::define");
+  
   m_domain    = a_domain;
   m_ebisbox   = a_ebisbox;
-  m_nComp     = a_ncomp;
+  m_nComp     = a_nComp;
   m_isDefined = true;
   
   for (int dir = 0; dir < SpaceDim; dir++){
@@ -89,59 +131,61 @@ void DomainFluxIFFAB::define(const ProblemDomain& a_domain, const EBISBox& a_ebi
     lobox &= a_domain;
     hibox &= a_domain;
 
-    if(m_flux_lo[dir] != NULL) {
-      delete m_flux_lo[dir];
-      m_flux_lo[dir] = NULL;
+    if(m_fluxLo[dir] != nullptr) {
+      delete m_fluxLo[dir];
+      m_fluxLo[dir] = nullptr;
     }
-    if(m_flux_hi[dir] != NULL) {
-      delete m_flux_hi[dir];
-      m_flux_hi[dir] = NULL;
+    if(m_fluxHi[dir] != nullptr) {
+      delete m_fluxHi[dir];
+      m_fluxHi[dir] = nullptr;
     }
 
-    // ivs_lo and ivs_hi MAY CONTAIN COVERED CELLS!
-    const IntVectSet ivs_lo(lobox);
-    const IntVectSet ivs_hi(hibox);
+    // ivsLo and ivsHi MAY CONTAIN COVERED CELLS!
+    const IntVectSet ivsLo(lobox);
+    const IntVectSet ivsHi(hibox);
 
 #if 0
     // Get covered cells
     IntVectSet covered_lo = IntVectSet();
     IntVectSet covered_hi = IntVectSet();
 
-    for (IVSIterator iter(ivs_lo); iter.ok(); ++iter){
+    for (IVSIterator iter(ivsLo); iter.ok(); ++iter){
       const IntVect iv = iter();
       if(a_ebisbox.isCovered(iv)) covered_lo |= iv;
     }
-    for (IVSIterator iter(ivs_hi); iter.ok(); ++iter){
+    for (IVSIterator iter(ivsHi); iter.ok(); ++iter){
       const IntVect iv = iter();
       if(a_ebisbox.isCovered(iv)) covered_hi |= iv;
     }
 
-    IntVectSet lo = ivs_lo - covered_lo;
-    IntVectSet hi = ivs_hi - covered_hi;
+    IntVectSet lo = ivsLo - covered_lo;
+    IntVectSet hi = ivsHi - covered_hi;
 #endif
     
 #if 0
-    if(!ivs_lo.isEmpty()){
-      std::cout << ivs_lo << std::endl;
+    if(!ivsLo.isEmpty()){
+      std::cout << ivsLo << std::endl;
     }
 
-    for (IVSIterator iter(ivs_lo); iter.ok(); ++iter){
+    for (IVSIterator iter(ivsLo); iter.ok(); ++iter){
       if(a_ebisbox.isCovered(iter())){
 	MayDay::Abort("stop");
       }
     }
 #endif
 
-    m_flux_lo[dir] = new BaseIFFAB<Real>(ivs_lo, a_ebisbox.getEBGraph(), dir, a_ncomp);
-    m_flux_hi[dir] = new BaseIFFAB<Real>(ivs_hi, a_ebisbox.getEBGraph(), dir, a_ncomp);
+    m_fluxLo[dir] = new BaseIFFAB<Real>(ivsLo, a_ebisbox.getEBGraph(), dir, a_nComp);
+    m_fluxHi[dir] = new BaseIFFAB<Real>(ivsHi, a_ebisbox.getEBGraph(), dir, a_nComp);
   }
 }
 
 void DomainFluxIFFAB::setDefaultValues(){
+  CH_TIME("DomainFluxIFFAB::setDefaultValues");
+  
   m_isDefined = false;
   for (int dir = 0; dir < SpaceDim; dir++){
-    m_flux_lo[dir] = NULL;
-    m_flux_hi[dir] = NULL;
+    m_fluxLo[dir] = nullptr;
+    m_fluxHi[dir] = nullptr;
   }
 
   m_box    = Box();
@@ -150,31 +194,35 @@ void DomainFluxIFFAB::setDefaultValues(){
 }
 
 void DomainFluxIFFAB::clear(){
+  CH_TIME("DomainFluxIFFAB::clear");
+  
   for (int dir = 0; dir < SpaceDim; dir++){
-    if(m_flux_lo[dir] != NULL){
-      delete m_flux_lo[dir];
-      m_flux_lo[dir] = NULL;
+    if(m_fluxLo[dir] != nullptr){
+      delete m_fluxLo[dir];
+      m_fluxLo[dir] = nullptr;
     }
-    if(m_flux_hi[dir] != NULL){
-      delete m_flux_hi[dir];
-      m_flux_hi[dir] = NULL;
+    if(m_fluxHi[dir] != nullptr){
+      delete m_fluxHi[dir];
+      m_fluxHi[dir] = nullptr;
     }
   }
 
-  setDefaultValues();
+  this->setDefaultValues();
 }
 
-void DomainFluxIFFAB::copy(const Box& Rfrom,
-			   const Interval& Cdest,
-			   const Box& Rto,
+void DomainFluxIFFAB::copy(const Box&             Rfrom,
+			   const Interval&        Cdest,
+			   const Box&             Rto,
 			   const DomainFluxIFFAB& src,
-			   const Interval& Csrc){
+			   const Interval&        Csrc){
+  CH_TIME("DomainFluxIFFAB::copy");
+  
   for (int dir = 0; dir < SpaceDim; dir++){
     const BaseIFFAB<Real>& src_lo = src(dir, Side::Lo);
     const BaseIFFAB<Real>& src_hi = src(dir, Side::Hi);
 
-    m_flux_lo[dir]->copy(Rfrom, Cdest, Rto, src_lo, Csrc);
-    m_flux_hi[dir]->copy(Rfrom, Cdest, Rto, src_hi, Csrc);
+    m_fluxLo[dir]->copy(Rfrom, Cdest, Rto, src_lo, Csrc);
+    m_fluxHi[dir]->copy(Rfrom, Cdest, Rto, src_hi, Csrc);
   }
 }
 
@@ -183,10 +231,10 @@ BaseIFFAB<Real>& DomainFluxIFFAB::operator()(const int a_dir, const Side::LoHiSi
 
   BaseIFFAB<Real>* ptr;
   if(a_side == Side::Lo){
-    ptr = m_flux_lo[a_dir];
+    ptr = m_fluxLo[a_dir];
   }
   else if(a_side == Side::Hi){
-    ptr = m_flux_hi[a_dir];
+    ptr = m_fluxHi[a_dir];
   }
 
   return *ptr;
@@ -197,10 +245,10 @@ const BaseIFFAB<Real>& DomainFluxIFFAB::operator()(const int a_dir, const Side::
 
   BaseIFFAB<Real>* ptr;
   if(a_side == Side::Lo){
-    ptr = m_flux_lo[a_dir];
+    ptr = m_fluxLo[a_dir];
   }
   else if(a_side == Side::Hi){
-    ptr = m_flux_hi[a_dir];
+    ptr = m_fluxHi[a_dir];
   }
 
   return *ptr;

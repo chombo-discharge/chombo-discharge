@@ -110,8 +110,8 @@ void Timer::printReportTail(std::ostream& a_outputStream, const std::pair<Real, 
   std::stringstream tail;
   
   tail << "| ---------------------------------------------------------------------------------------------------------|" << "\n"
-       << "| Local elapsed time  = " << std::fixed << std::setprecision(5) << a_elapsedTime.first  << " seconds"         << "\n"    
-       << "| Global elapsed time = " << std::fixed << std::setprecision(5) << a_elapsedTime.second << " seconds"         << "\n"
+       << "| Local elapsed time  = " << std::fixed << std::setprecision(4) << a_elapsedTime.first  << " seconds"         << "\n"    
+       << "| Global elapsed time = " << std::fixed << std::setprecision(4) << a_elapsedTime.second << " seconds"         << "\n"
        << "| ---------------------------------------------------------------------------------------------------------|" << "\n";
 
   a_outputStream << tail.str();
@@ -146,8 +146,8 @@ void Timer::eventReport(std::ostream& a_outputStream, const bool a_localReportOn
       const Duration localDuration      = std::get<ElapsedTime>(e.second);
       const Real localDurationInSeconds = localDuration.count();
 
-      ssLocalDuration << std::fixed << std::setprecision(5) << localDurationInSeconds;
-      ssPercentage    << std::fixed << std::setprecision(5) << 100.*localDurationInSeconds/totalTimeLocal;
+      ssLocalDuration << std::fixed << std::setprecision(4) << localDurationInSeconds;
+      ssPercentage    << std::fixed << std::setprecision(4) << 100.*localDurationInSeconds/totalTimeLocal;
 
 #ifdef CH_MPI
       if(!a_localReportOnly){
@@ -199,12 +199,12 @@ void Timer::eventReport(std::ostream& a_outputStream, const bool a_localReportOn
 	broadcast(minRank, srcRank);
 	broadcast(maxRank, srcRank);      
 
-	ssMinDuration << std::fixed << std::setprecision(5) << minTime;
-	ssMaxDuration << std::fixed << std::setprecision(5) << maxTime;
-	ssAvgDuration << std::fixed << std::setprecision(5) << average;
-	ssDevDuration << std::fixed << std::setprecision(5) << sigma;
-	ssMinRank     << std::fixed << std::setprecision(5) << minRank;
-	ssMaxRank     << std::fixed << std::setprecision(5) << maxRank;
+	ssMinDuration << std::fixed << std::setprecision(4) << minTime;
+	ssMaxDuration << std::fixed << std::setprecision(4) << maxTime;
+	ssAvgDuration << std::fixed << std::setprecision(4) << average;
+	ssDevDuration << std::fixed << std::setprecision(4) << sigma;
+	ssMinRank     << std::fixed << std::setprecision(4) << minRank;
+	ssMaxRank     << std::fixed << std::setprecision(4) << maxRank;
       }
       else{
 	ssMinDuration    << " N/A ";
