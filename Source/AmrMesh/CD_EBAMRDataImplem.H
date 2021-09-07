@@ -45,12 +45,7 @@ void EBAMRData<T>::resize(const int a_size){
 }
 
 template <typename T>
-int EBAMRData<T>::size() {
-  return m_data.size();
-}
-
-template <typename T>
-const int EBAMRData<T>::size() const {
+int EBAMRData<T>::size() const {
   return m_data.size();
 }
 
