@@ -5,11 +5,15 @@
 
 /*!
   @file   CD_EbFastCoarToFineRedist.cpp
-  @brief  Implementation of EbFastCoarToFineRedist.H
+  @brief  Implementation of CD_EbFastCoarToFineRedist.H
   @author Robert Marskar
 */
 
+// Chombo includes
+#include <ParmParse.H>
+
 // Our includes
+#include <CD_Timer.H>
 #include <CD_EbFastCoarToFineRedist.H>
 #include <CD_NamespaceHeader.H>
 
@@ -23,70 +27,93 @@ EbFastCoarToFineRedist::~EbFastCoarToFineRedist(){
 
 }
 
-void EbFastCoarToFineRedist::define(const EBLevelGrid&                      a_eblgFine,
-				    const EBLevelGrid&                      a_eblgCoar,
-				    const LayoutData<Vector<LayoutIndex> >& a_neighborsFine,
-				    const LayoutData<Vector<LayoutIndex> >& a_neighborsCoar,
-				    const int&                              a_nRef,
-				    const int&                              a_nVar,
-				    const int&                              a_redistRad){
-  CH_TIME("EbFastCoarToFineRedist::define");
+void EbFastCoarToFineRedist::fastDefine(const EBLevelGrid&                      a_eblgFine,
+					const EBLevelGrid&                      a_eblgCoar,
+					const LayoutData<Vector<LayoutIndex> >& a_neighborsFine,
+					const LayoutData<Vector<LayoutIndex> >& a_neighborsCoar,
+					const int&                              a_nRef,
+					const int&                              a_nVar,
+					const int&                              a_redistRad){
+  CH_TIME("EbFastCoarToFineRedist::fastDefine");
 
-  //from here we can assume the redistRad == 1
+  const EBIndexSpace* const ebisPtr = a_eblgFine.getEBIS();
+  
+  CH_assert(ebisPtr->isDefined());
+
+  Timer timer("EbFastCoarToFineRedist::fastDefine");
+
+  // Regular stuff for base class. From here we can assume the redistRad == 1
   m_isDefined  = true;
   m_nComp      = a_nVar;
   m_refRat     = a_nRef;
   m_domainCoar = a_eblgCoar.getDomain().domainBox();
   m_gridsFine  = a_eblgFine.getDBL();
   m_gridsCoar  = a_eblgCoar.getDBL();
-
   m_ebislCoar  = a_eblgCoar.getEBISL();
   m_redistRad  = a_redistRad;
 
-  //created the coarsened fine layout
-  m_gridsCedFine = DisjointBoxLayout();
+  // First, create the coarsened fine layout.
+  // Comment, RM: Why does chombo need a buffer with 3*m_redistRad ghost cells in the EBISBoxes? That seems awfully big. 
+  //  m_gridsCedFine = DisjointBoxLayout();
+  timer.startEvent("Make coarsened grids");
   coarsen(m_gridsCedFine, m_gridsFine, m_refRat);
-  const EBIndexSpace* const ebisPtr = a_eblgFine.getEBIS();
-  CH_assert(ebisPtr->isDefined());
-  int nghost = 3*m_redistRad;
-  ebisPtr->fillEBISLayout(m_ebislCedFine, m_gridsCedFine, m_domainCoar, nghost);
+  ebisPtr->fillEBISLayout(m_ebislCedFine, m_gridsCedFine, m_domainCoar, 3*m_redistRad);
   m_ebislCedFine.setMaxRefinementRatio(m_refRat, ebisPtr);
+  timer.stopEvent("Make coarsened grids");  
 
-  //define the intvectsets over which the objects live
-  m_setsCoar.define(m_gridsCoar);
+  // Define the sets over which the objects live.
+  timer.startEvent("Define sets");
+  m_setsCoar.   define(m_gridsCoar);
   m_setsCedFine.define(m_gridsCedFine);
+  timer.stopEvent("Define sets");  
 
-  // Make sets
+  // Make sets.
+  timer.startEvent("Make sets");  
   IntVectSet globalCFIVS;
   this->makeCedFineSets(globalCFIVS, a_neighborsFine);
   this->makeCoarSets(   globalCFIVS, a_neighborsCoar);
+  timer.stopEvent("Make sets");    
 
   // Define data holders and reset buffers
+  timer.startEvent("Define data");
   this->defineDataHolders();
   this->setToZero();
+  timer.stopEvent("Define data");
 
-#if EBFASTFC2F_DEBUG // This debugging hook calls the original function and checks that the sets completely overlap. 
-  IntVectSet newCedFineSet, oldCedFineSet;
-  IntVectSet newCoarSet,    oldCoarSet;
+  ParmParse pp("EbFastCoarToFineRedist");
+  bool profile = false;
+  bool debug   = false;
+  pp.query("debug",   debug);
+  pp.query("profile", profile);
+
+  if(profile){
+    timer.eventReport(pout(), false);
+  }
+
+  if(debug){
+    IntVectSet newCedFineSet, oldCedFineSet;
+    IntVectSet newCoarSet,    oldCoarSet;
   
-  this->gatherSetsCedFine(newCedFineSet);
-  this->gatherSetsCoar(   newCoarSet);
+    this->gatherSetsCedFine(newCedFineSet);
+    this->gatherSetsCoar(   newCoarSet);
 
-  // Call old define
-  EBCoarToFineRedist::define(a_eblgFine, a_eblgCoar, a_nRef, a_nVar, a_redistRad);
-  this->gatherSetsCedFine(oldCedFineSet);
-  this->gatherSetsCoar(   oldCoarSet);
+    // Call old define
+    EBCoarToFineRedist::define(a_eblgFine, a_eblgCoar, a_nRef, a_nVar, a_redistRad);
+    this->gatherSetsCedFine(oldCedFineSet);
+    this->gatherSetsCoar(   oldCoarSet);
 
-  const IntVectSet diffSet1 = newCedFineSet - oldCedFineSet;
-  const IntVectSet diffSet2 = oldCedFineSet - newCedFineSet;
-  const IntVectSet diffSet3 = newCoarSet    - oldCoarSet;
-  const IntVectSet diffSet4 = oldCoarSet    - newCoarSet;
+    const IntVectSet diffSet1 = newCedFineSet - oldCedFineSet;
+    const IntVectSet diffSet2 = oldCedFineSet - newCedFineSet;
+    const IntVectSet diffSet3 = newCoarSet    - oldCoarSet;
+    const IntVectSet diffSet4 = oldCoarSet    - newCoarSet;
 
-  if(diffSet1.numPts() != 0) MayDay::Abort("EbFastCoarToFineRedist::define - diffSet1 not empty");
-  if(diffSet2.numPts() != 0) MayDay::Abort("EbFastCoarToFineRedist::define - diffSet2 not empty");
-  if(diffSet3.numPts() != 0) MayDay::Abort("EbFastCoarToFineRedist::define - diffSet3 not empty");
-  if(diffSet4.numPts() != 0) MayDay::Abort("EbFastCoarToFineRedist::define - diffSet4 not empty");
-#endif
+    if(procID() == uniqueProc(SerialTask::compute)){
+      if(diffSet1.numPts() != 0) MayDay::Abort("EbFastCoarToFineRedist::define - diffSet1 not empty");
+      if(diffSet2.numPts() != 0) MayDay::Abort("EbFastCoarToFineRedist::define - diffSet2 not empty");
+      if(diffSet3.numPts() != 0) MayDay::Abort("EbFastCoarToFineRedist::define - diffSet3 not empty");
+      if(diffSet4.numPts() != 0) MayDay::Abort("EbFastCoarToFineRedist::define - diffSet4 not empty");
+    }
+  }
 }
 
 void EbFastCoarToFineRedist::makeCedFineSets(IntVectSet& a_cfivs, const LayoutData<Vector<LayoutIndex> >& a_neighborsFine){
@@ -116,7 +143,8 @@ void EbFastCoarToFineRedist::makeCedFineSets(IntVectSet& a_cfivs, const LayoutDa
 
     a_cfivs |= boxCFIVS;
   }
-  gatherBroadcast(a_cfivs);
+  
+  this->gatherBroadcast(a_cfivs);
 }
 
 
@@ -164,6 +192,7 @@ void EbFastCoarToFineRedist::gatherSetsCoar(IntVectSet& a_setsCoar){
   for (DataIterator dit = m_gridsCoar.dataIterator(); dit.ok(); ++dit){
     a_setsCoar |= m_setsCoar[dit()];
   }
+  
   this->gatherBroadcast(a_setsCoar);
 }
 

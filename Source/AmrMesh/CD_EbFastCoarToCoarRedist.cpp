@@ -17,8 +17,6 @@
 #include <CD_EbFastCoarToCoarRedist.H>
 #include <CD_NamespaceHeader.H>
 
-#define EBFASTC2C_DEBUG 0
-
 EbFastCoarToCoarRedist::EbFastCoarToCoarRedist() : EBCoarToCoarRedist(){
 
 }

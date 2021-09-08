@@ -21,7 +21,8 @@
 /*!
   @brief EBFineToCoarRedist with faster define function.
   @details This is just like Chombo's EBCoarToCoarRedist except that it is much faster to define. 
-  @note To use run-time debugging, use EbFastCoarToCoarRedist.debug=true. 
+  @note To use run-time debugging and profiling, use EbFastCoarToCoarRedist.debug=true and
+  EbFastCoarToCoarRedist.profile=true
 */
 class EbFastCoarToCoarRedist : public EBCoarToCoarRedist {
 public:
