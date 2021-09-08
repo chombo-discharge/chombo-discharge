@@ -20,6 +20,9 @@
   
 /*!
   @brief EBFineToCoarRedist with faster define function
+  @details This is just like Chombo's EBFineToCoarRedist except that it is much faster to define. 
+  @note To use run-time debugging and profiling, use EbFastFineToCoarRedist.debug=true and
+  EbFastFineToCoarRedist.profile=true
 */
 class EbFastFineToCoarRedist : public EBFineToCoarRedist {
 public:
@@ -44,22 +47,19 @@ public:
     @param[in] a_nVar          Number of variables
     @param[in] a_redistRad     Redistribution radius
   */
-  void define(const EBLevelGrid&                      a_eblgFine,
-	      const EBLevelGrid&                      a_eblgCoar,
-	      const LayoutData<Vector<LayoutIndex> >& a_neighborsFine,
-	      const LayoutData<Vector<LayoutIndex> >& a_neighborsCoar,
-	      const int&                              a_nRef,
-	      const int&                              a_nVar,
-	      const int&                              a_redistRad);
+  void fastDefine(const EBLevelGrid&                      a_eblgFine,
+		  const EBLevelGrid&                      a_eblgCoar,
+		  const int&                              a_nRef,
+		  const int&                              a_nVar,
+		  const int&                              a_redistRad);
 
 protected:
 
   /*!
     @brief Make a mask which holds true for cells within the specified radius on the inside of the refinement boundary.
-    @param[in] a_fineShellMask Fine grid shell mask, holding the cells. 
-    @param[in] a_neighborsFine Neighbors on the fine grid level. 
+    @param[out] a_fineShellMask Fine grid shell mask, holding the cells. 
   */
-  void makeFineMask(LevelData<BaseFab<bool> >& a_fineShellMask, const LayoutData<Vector<LayoutIndex> >& a_neighborsFine);
+  void makeFineMask(LevelData<BaseFab<bool> >& a_fineShellMask);
 
   /*!
     @brief Fine sets, as per EBFineToCoarRedist.
@@ -74,9 +74,22 @@ protected:
   */
   void makeCoarSets(const LevelData<BaseFab<bool> >& a_refCoarMask);
 
-  // These are debugging functions, these are never called unless you activate debugging in the .cpp file
+  /*!
+    @brief Debugging function. Gathers and broadcasts a set
+    @param[inout] a_set Set to gather and broadcast
+  */  
   void gatherBroadcast(  IntVectSet& a_set);
-  void gatherSetsFine(   IntVectSet& a_setsFine);   
+
+  /*!
+    @brief Debugging function. Gathers and broadcasts m_setsCedFine onto a_setsCedFine
+    @param[inout] a_setsCedFine Fine set
+  */    
+  void gatherSetsFine(   IntVectSet& a_setsFine);
+
+  /*!
+    @brief Debugging function. Gathers and broadcasts m_setsCoar onto a_setsCoar. 
+    @param[inout] a_setsCoar Fine set
+  */    
   void gatherSetsRefCoar(IntVectSet& a_setsRefCoar);
 };
 
