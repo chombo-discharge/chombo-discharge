@@ -58,6 +58,7 @@ void IrregStencil::define(const DisjointBoxLayout&         a_dbl,
   EBArith::defineCFIVS(cfivs, a_dbl, a_domain);
 
   m_stencils.define(m_dbl);
+  m_vofIter. define(m_dbl);
   for (DataIterator dit = m_dbl.dataIterator(); dit.ok(); ++dit){
     const Box&     box     = m_dbl.get(dit());
     const EBISBox& ebisbox = m_ebisl[dit()];
@@ -66,7 +67,11 @@ void IrregStencil::define(const DisjointBoxLayout&         a_dbl,
 
     m_stencils[dit()] = RefCountedPtr<BaseIVFAB<VoFStencil> > (new BaseIVFAB<VoFStencil>(ivs, ebgraph, ncomp));
 
-    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+
+    VoFIterator& vofit = m_vofIter[dit()];
+    vofit.define(ivs, ebgraph);
+    
+    for (vofit.reset(); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
       VoFStencil& stencil = (*m_stencils[dit()])(vof, 0);
       this->buildStencil(stencil, vof, m_dbl, m_domain, ebisbox, box, m_dx, cfivs[dit()]);

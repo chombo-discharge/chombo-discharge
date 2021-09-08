@@ -4,8 +4,8 @@
  */
 
 /*!
-  @file   IrregAmrStencilImplem.H
-  @brief  Implementation of IrregAmrStencil.H
+  @file   CD_IrregAmrStencilImplem.H
+  @brief  Implementation of CD_IrregAmrStencil.H
   @author Robert Marskar
 */
 
@@ -17,9 +17,12 @@
 #include <CD_NamespaceHeader.H>
 
 template <class IrregSten>
+constexpr int IrregAmrStencil<IrregSten>::stenComp;
+
+template <class IrregSten>
 IrregAmrStencil<IrregSten>::IrregAmrStencil(){
   CH_TIME("IrregAmrStencil::IrregAmrStencil");
-  m_defined = false;
+  m_isDefined = false;
 }
 
 template<class IrregSten>
@@ -62,32 +65,29 @@ void IrregAmrStencil<IrregSten>::define(const Vector<DisjointBoxLayout>& a_grids
 					const IrregStencil::StencilType  a_type){
   CH_TIME("IrregAmrStencil::define");
 
+  // Store input arguments. 
+  m_grids       = a_grids;
+  m_ebisl       = a_ebisl;  
+  m_domains     = a_domains;
+  m_dx          = a_dx;
   m_finestLevel = a_finestLevel;
-  m_radius       = a_radius;
-  m_order        = a_order;
-  m_stencilType = a_type;
+  m_order       = a_order;
+  m_radius      = a_radius;  
+  m_stencilType = a_type;  
 
-  m_grids.resize(m_finestLevel + 1);
-  m_ebisl.resize(m_finestLevel + 1);
-  m_domains.resize(m_finestLevel + 1);
-  m_dx.resize(m_finestLevel + 1);
-  m_stencils.resize(m_finestLevel + 1);
-
+  // Define stencils on each level
+  m_stencils.resize(1 + m_finestLevel);
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
-    m_grids[lvl]    = a_grids[lvl];
-    m_ebisl[lvl]    = a_ebisl[lvl];
-    m_domains[lvl]  = a_domains[lvl];
-    m_dx[lvl]       = a_dx[lvl];
-    m_stencils[lvl] = RefCountedPtr<IrregStencil>(new IrregSten(m_grids[lvl],
-								m_ebisl[lvl],
+    m_stencils[lvl] = RefCountedPtr<IrregStencil>(new IrregSten(m_grids  [lvl],
+								m_ebisl  [lvl],
 								m_domains[lvl],
-								m_dx[lvl],
+								m_dx     [lvl],
 								m_order,
 								m_radius,
 								m_stencilType));
   }
   
-  m_defined = true;
+  m_isDefined = true;
 }
 
 template<class IrregSten>
@@ -96,38 +96,33 @@ void IrregAmrStencil<IrregSten>::apply(      LevelData<EBCellFAB>& a_dst,
 				       const int                   a_lvl) const {
   CH_TIME("IrregAmrStencil::apply");
 
-  const DisjointBoxLayout& dbl  = m_grids[a_lvl];
-  const EBISLayout& ebisl       = m_ebisl[a_lvl];
-  const IrregStencil& irr_sten = *m_stencils[a_lvl];
-  const int nComp               = a_dst.nComp();
+  CH_assert(m_isDefined);
 
-  DataIterator dit = dbl.dataIterator();
-  const int nbox = dit.size();
+  const DisjointBoxLayout& dbl     =  m_grids   [a_lvl];
+  const EBISLayout&        ebisl   =  m_ebisl   [a_lvl];
+  const IrregStencil&      irrSten = *m_stencils[a_lvl];
+  const int                nComp   =  a_dst.nComp();
   
-  for (int ibox = 0; ibox < nbox; ibox++){
-    const BaseIVFAB<VoFStencil>& stencils = irr_sten[dit[ibox]];
-    
-    const Box& box          = dbl.get(dit[ibox]);
-    const EBISBox& ebisbox  = ebisl[dit[ibox]];
-    const EBGraph& ebgraph  = ebisbox.getEBGraph();
-    const IntVectSet& ivs   = stencils.getIVS();
+  for (DataIterator dit(dbl); dit.ok(); ++dit){
+    const BaseIVFAB<VoFStencil>& stencils = irrSten[dit()];    
 
-    EBCellFAB& dst_fab       = a_dst[dit[ibox]];
-    const EBCellFAB& src_fab = a_src[dit[ibox]];
+    EBCellFAB& dst       = a_dst[dit()];
+    const EBCellFAB& src = a_src[dit()];
 
-    dst_fab.copy(src_fab);
-
-    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+    // Apply stencil in each cut-cell. 
+    VoFIterator& vofit = irrSten.getVofIterator(dit());
+    for (vofit.reset(); vofit.ok(); ++vofit){    
       const VolIndex& vof       = vofit();
-      const VoFStencil& vofSten = stencils(vof, 0);
+      const VoFStencil& vofSten = stencils(vof, stenComp);
 
       for (int comp = 0; comp < nComp; comp++){
-	dst_fab(vof, comp) = 0.;
+	dst(vof, comp) = 0.;
 
 	for (int i = 0; i < vofSten.size(); i++){
-	  const VolIndex& ivof = vofSten.vof(i);
-	  const Real& iweight  = vofSten.weight(i);
-	  dst_fab(vof,comp) += src_fab(ivof, comp)*iweight;
+	  const VolIndex& ivof    = vofSten.vof(i);
+	  const Real&     iweight = vofSten.weight(i);
+	  
+	  dst(vof,comp) += iweight * src(ivof, comp);
 	}
       }
     }
@@ -139,39 +134,38 @@ void IrregAmrStencil<IrregSten>::apply(LevelData<EBCellFAB>& a_data,
 				       const int             a_lvl) const {
   CH_TIME("IrregAmrStencil::apply");
 
-  const DisjointBoxLayout& dbl = m_grids[a_lvl];
-  const EBISLayout& ebisl      = m_ebisl[a_lvl];
-  const IrregStencil& irrSten  = *m_stencils[a_lvl];
-  const int nComp              = a_data.nComp();
+  CH_assert(m_isDefined);  
 
-  DataIterator dit = dbl.dataIterator();
-  const int nbox = dit.size();
+  const DisjointBoxLayout& dbl     =  m_grids   [a_lvl];
+  const EBISLayout&        ebisl   =  m_ebisl   [a_lvl];
+  const IrregStencil&      irrSten = *m_stencils[a_lvl];
+  const int                nComp   =  a_data.nComp();
   
-  for (int ibox = 0; ibox < nbox; ibox++){
-    const Box& box         = dbl.get(dit[ibox]);
-    const EBISBox& ebisbox = ebisl[dit[ibox]];
-    const EBGraph& ebgraph = ebisbox.getEBGraph();
-    const BaseIVFAB<VoFStencil>& stencils = irrSten[dit[ibox]];
-    const IntVectSet& ivs  = stencils.getIVS();
+  for (DataIterator dit(dbl); dit.ok(); ++dit){
+    const BaseIVFAB<VoFStencil>& stencils = irrSten[dit()];
 
-    EBCellFAB& data = a_data[dit[ibox]];
+    EBCellFAB& data = a_data[dit()];
     EBCellFAB  cpy;
 
-    cpy.clone(data); // Clone data
-    cpy.setVal(0.0); // Copy
-    cpy += data;     // data
+    // Need a clone to avoid race condition. 
+    cpy.clone(data);
+    cpy.setVal(0.0);
+    cpy += data;    
 
-    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+    // Apply stencil in each cut-cell. 
+    VoFIterator& vofit = irrSten.getVofIterator(dit());
+    for (vofit.reset(); vofit.ok(); ++vofit){
       const VolIndex& vof       = vofit();
-      const VoFStencil& vofSten = stencils(vof, 0);
+      const VoFStencil& vofSten = stencils(vof, stenComp);
 
       for (int comp = 0; comp < nComp; comp++){
 	data(vof, comp) = 0.;
 
 	for (int i = 0; i < vofSten.size(); i++){
-	  const VolIndex& ivof = vofSten.vof(i);
-	  const Real& iweight  = vofSten.weight(i);
-	  data(vof,comp) += cpy(ivof, comp)*iweight;
+	  const VolIndex& ivof    = vofSten.vof(i);
+	  const Real&     iweight = vofSten.weight(i);
+	  
+	  data(vof,comp) += iweight * cpy(ivof, comp);
 	}
       }
     }
@@ -184,37 +178,33 @@ void IrregAmrStencil<IrregSten>::apply(LevelData<BaseIVFAB<Real> >& a_dst,
 				       const int                    a_lvl) const {
   CH_TIME("IrregAmrStencil::apply");
 
-  const DisjointBoxLayout& dbl = m_grids[a_lvl];
-  const EBISLayout& ebisl      = m_ebisl[a_lvl];
-  const IrregStencil& irrSten  = *m_stencils[a_lvl];
-  const int nComp              = a_dst.nComp();
+  CH_assert(m_isDefined);
 
-  DataIterator dit = dbl.dataIterator();
-  const int nbox = dit.size();
-  
-  for (int ibox = 0; ibox < nbox; ibox++){
-    const Box& box          = dbl.get(dit[ibox]);
-    const EBISBox& ebisbox  = ebisl[dit[ibox]];
-    const EBGraph& ebgraph  = ebisbox.getEBGraph();
-    const BaseIVFAB<VoFStencil>& stencils = irrSten[dit[ibox]];
-    const IntVectSet& ivs   = stencils.getIVS();
-    const EBCellFAB& src    = a_src[dit[ibox]];
+  const DisjointBoxLayout& dbl     =  m_grids   [a_lvl];
+  const EBISLayout&        ebisl   =  m_ebisl   [a_lvl];
+  const IrregStencil&      irrSten = *m_stencils[a_lvl];
+  const int                nComp   =  a_dst.nComp();  
 
-    BaseIVFAB<Real>& dst    = a_dst[dit[ibox]];
+  for (DataIterator dit(dbl); dit.ok(); ++dit){
+    const BaseIVFAB<VoFStencil>& stencils = irrSten[dit()];
+    
+    const EBCellFAB& src = a_src[dit()];
+    BaseIVFAB<Real>& dst = a_dst[dit()];
 
-      
-    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+    // Apply stencil in each cut-cell. 
+    VoFIterator& vofit = irrSten.getVofIterator(dit());
+    for (vofit.reset(); vofit.ok(); ++vofit){          
       const VolIndex& vof       = vofit();
-      const VoFStencil& vofSten = stencils(vof, 0);
+      const VoFStencil& vofSten = stencils(vof, stenComp);
 
-      //
       for (int comp = 0; comp < nComp; comp++){
 	dst(vof, comp) = 0.0;
 
 	for (int i = 0; i < vofSten.size(); i++){
-	  const VolIndex& ivof = vofSten.vof(i);
-	  const Real& iweight  = vofSten.weight(i);
-	  dst(vof,comp) += src(ivof, comp)*iweight;
+	  const VolIndex& ivof    = vofSten.vof(i);
+	  const Real&     iweight = vofSten.weight(i);
+	  
+	  dst(vof,comp) += iweight * src(ivof, comp);
 	}
       }
     }
@@ -225,15 +215,19 @@ template<class IrregSten>
 void IrregAmrStencil<IrregSten>::apply(EBAMRCellData& a_data) const {
   CH_TIME("IrregAmrStencil::apply");
 
+  CH_assert(m_isDefined);    
+
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
     this->apply(*a_data[lvl], lvl);
   }
 }
 
 template<class IrregSten>
-void IrregAmrStencil<IrregSten>::apply(EBAMRCellData&       a_dst,
+void IrregAmrStencil<IrregSten>::apply(      EBAMRCellData& a_dst,
 				       const EBAMRCellData& a_src) const {
   CH_TIME("IrregAmrStencil::apply");
+
+  CH_assert(m_isDefined);    
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
     this->apply(*a_dst[lvl], *a_src[lvl], lvl);
@@ -241,9 +235,11 @@ void IrregAmrStencil<IrregSten>::apply(EBAMRCellData&       a_dst,
 }
 
 template<class IrregSten>
-void IrregAmrStencil<IrregSten>::apply(EBAMRIVData&         a_dst,
+void IrregAmrStencil<IrregSten>::apply(      EBAMRIVData&   a_dst,
 				       const EBAMRCellData& a_src) const {
   CH_TIME("IrregAmrStencil::apply");
+
+  CH_assert(m_isDefined);    
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
     this->apply(*a_dst[lvl], *a_src[lvl], lvl);
@@ -254,9 +250,11 @@ template<class IrregSten>
 void IrregAmrStencil<IrregSten>::apply(      Vector<EBAMRIVData*>&   a_dst,
 				       const Vector<EBAMRCellData*>& a_src) const {
   CH_TIME("IrregAmrStencil::apply");
-
+  
   const int dstSize = a_dst.size();
   const int srcSize = a_src.size();
+
+  CH_assert(m_isDefined);      
   CH_assert(dstSize == srcSize);
 
   for (int i = 0; i < dstSize; i++){
@@ -270,6 +268,8 @@ void IrregAmrStencil<IrregSten>::apply(      Vector<EBAMRIVData*>&   a_dst,
 template<class IrregSten>
 void IrregAmrStencil<IrregSten>::apply(Vector<EBAMRCellData*>& a_data) const {
   CH_TIME("IrregAmrStencil::apply");
+
+  CH_assert(m_isDefined);        
 
   const int dstSize = a_data.size();
 
@@ -285,6 +285,8 @@ void IrregAmrStencil<IrregSten>::apply(      Vector<EBAMRCellData*>& a_dst,
 
   const int dstSize = a_dst.size();
   const int srcSize = a_src.size();
+
+  CH_assert(m_isDefined);          
   CH_assert(dstSize == srcSize);
 
   for (int i = 0; i < dstSize; i++){

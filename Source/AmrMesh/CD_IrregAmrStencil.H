@@ -171,6 +171,11 @@ public:
 protected:
 
   /*!
+    @brief Stencil component
+  */
+  static constexpr int stenComp = 0;
+
+  /*!
     @brief AMR grids
   */
   Vector<DisjointBoxLayout> m_grids;
@@ -198,7 +203,7 @@ protected:
   /*!
     @brief Stencils defined or not
   */
-  bool m_defined;
+  bool m_isDefined;
 
   /*!
     @brief Order

@@ -19,6 +19,7 @@
 #include <RefCountedPtr.H>
 #include <Stencils.H>
 #include <LayoutData.H>
+#include <VoFIterator.H>
 
 // Our includes
 #include <CD_NamespaceHeader.H>
@@ -84,9 +85,24 @@ public:
     return *m_stencils[a_dit];
   }
 
+  /*!
+    @brief Get the VoFIterator
+  */
+  VoFIterator& getVofIterator(const DataIndex& a_dit) const {
+    return m_vofIter[a_dit];
+  }
+
 protected:
 
+  /*!
+    @brief Stencil
+  */
   LayoutData<RefCountedPtr<BaseIVFAB<VoFStencil> > > m_stencils;
+
+  /*!
+    @brief VoFIterators
+  */
+  mutable LayoutData<VoFIterator> m_vofIter;
 
   /*!
     @brief Stencils defined or not
