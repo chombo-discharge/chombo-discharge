@@ -9,34 +9,14 @@
   @author Robert Marskar
 */
 
-// Std includes
-#include <iostream>
-#include <iomanip>
-
 // Chombo includes
 #include <ParmParse.H>
-#include <EBArith.H>
-#include <LayoutIterator.H>
-#include <BaseIVFactory.H>
-#include <EBCoarToCoarRedist.H>
-#include <EBCoarToFineRedist.H>
-#include <VoFIterator.H>
-#include <FaceIterator.H>
-#include <EBIndexSpace.H>
-#include <parstream.H>
-#include <EBLevelDataOps.H>
-#include <CH_Timer.H>
 #include <NeighborIterator.H>
 
 // Our includes
 #include <CD_Timer.H>
 #include <CD_EbFastFluxRegister.H>
 #include <CD_NamespaceHeader.H>
-
-using std::cout;
-using std::cin;
-using std::cerr;
-using std::endl;
 
 EbFastFluxRegister::EbFastFluxRegister(){
   CH_TIME("EbFastFluxRegister::EbFastFluxRegister");
@@ -173,6 +153,10 @@ void EbFastFluxRegister::define(const EBLevelGrid&       a_eblgFine,
 
 void EbFastFluxRegister::fastDefineSetsAndIterators(){
   CH_TIME("EBFsatFluxRegister::fastDefineSetsAndIterators");
+
+  // TLDR: The code for the CoFi things is essentially the same as that in Chombo. I've left that intact because
+  //       it hasn't shown up as a bottleneck (yet). For the coarse stuff we've redone the define functions, avoiding
+  //       the heinous call to getCFIVSSubset. 
   
   for (int idir = 0; idir < SpaceDim; idir++){
     for (SideIterator sit; sit.ok(); ++sit){
@@ -203,6 +187,7 @@ void EbFastFluxRegister::fastDefineSetsAndIterators(){
       m_setsCoar[iindex].define(m_eblgCoar.getDBL());
       m_vofiCoar[iindex].define(m_eblgCoar.getDBL());
 
+      // We make some changes here, and we identify the CFIVS using the mask. The coarse sets in EBFluxRegister are a bit silly, but they work. 
       for (DataIterator dit = m_eblgCoar.getDBL().dataIterator(); dit.ok(); ++dit){
 	const Box& boxCoar        = m_eblgCoar.getDBL()[dit()];
 	const IntVectSet irregIVS = m_eblgCoar.getEBISL()[dit()].getIrregIVS(boxCoar);
