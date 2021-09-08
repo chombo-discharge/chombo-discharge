@@ -14,6 +14,7 @@
 #include <iomanip>
 
 // Chombo includes
+#include <ParmParse.H>
 #include <EBArith.H>
 #include <LayoutIterator.H>
 #include <BaseIVFactory.H>
@@ -48,12 +49,11 @@ EbFastFluxRegister::EbFastFluxRegister(const DisjointBoxLayout& a_dblFine,
 				       const Box&               a_domainCoar,
 				       const int&               a_nref,
 				       const int&               a_nvar,
-				       const EBIndexSpace*      ebisPtr,
+				       const EBIndexSpace*      a_ebisPtr,
 				       const bool               a_forceNoEBCF){
   CH_TIME("EbFastFluxRegister::EbFastFluxRegister");
   
-  this->define(a_dblFine, a_dblCoar, a_ebislFine, a_ebislCoar,
-	       a_domainCoar, a_nref, a_nvar, ebisPtr, a_forceNoEBCF);
+  this->define(a_dblFine, a_dblCoar, a_ebislFine, a_ebislCoar, a_domainCoar, a_nref, a_nvar, a_ebisPtr, a_forceNoEBCF);
 }
 
 EbFastFluxRegister::EbFastFluxRegister(const EBLevelGrid& a_eblgFine,
@@ -78,7 +78,7 @@ void EbFastFluxRegister::define(const DisjointBoxLayout& a_gridsFine,
 				const ProblemDomain&     a_domainCoar,
 				const int&               a_nref,
 				const int&               a_nvar,
-				const EBIndexSpace*      ebisPtr,
+				const EBIndexSpace*      a_ebisPtr,
 				const bool               a_forceNoEBCF){
   CH_TIME("EbFastFluxRegister::define");
   
@@ -97,8 +97,11 @@ void EbFastFluxRegister::define(const EBLevelGrid&       a_eblgFine,
 				const bool               a_forceNoEBCF){
   CH_TIME("EbFastFluxRegister::define");
 
+  Timer timer("EbFastFluxRegister::define");
+  
   // Regular Chombo stuff
   this->clear();
+  
   m_refRat   = a_refRat;
   m_nComp    = a_nvar;
   m_eblgFine = a_eblgFine;
@@ -107,36 +110,65 @@ void EbFastFluxRegister::define(const EBLevelGrid&       a_eblgFine,
     MayDay::Error("EbFastFluxRegister::define: dbl not coarsenable by refrat");
   }
 
+  // Compute the coarsened fine grids. 
+  timer.startEvent("Define coarsened grids");
   coarsen(m_eblgCoFi, a_eblgFine, a_refRat);
   m_eblgCoFi.getEBISL().setMaxRefinementRatio(a_refRat, m_eblgCoFi.getEBIS());
   m_reverseCopier.ghostDefine(m_eblgCoFi.getDBL(), m_eblgCoar.getDBL(),m_eblgCoar.getDomain(),IntVect::Unit);
+  timer.stopEvent("Define coarsened grids");  
 
   m_nrefdmo = pow(m_refRat, SpaceDim-1);;
 
+  // Define the regular flux register. 
+  timer.startEvent("Define LevelFluxRegister");
   m_levelFluxReg = new LevelFluxRegister();
-
-  //  pout() << "before regular define" << endl;
   m_levelFluxReg->define(a_eblgFine.getDBL(),
 			 a_eblgCoar.getDBL(),
 			 a_eblgFine.getDomain(),
 			 a_refRat, a_nvar);
+  timer.stopEvent("Define LevelFluxRegister");
+
+  // Compute the existence of a coarse-fine boundary
   if (a_forceNoEBCF){
     m_hasEBCF = false;
   }
   else{
-    m_hasEBCF = computeHasEBCF();
+    timer.startEvent("Compute EBCF");
+    m_hasEBCF = this->computeHasEBCF();
+    timer.stopEvent("Compute EBCF");    
   }
 
-  //if no EBCF--nothing happens here but calls to level flux register
+  // If no EBCF then nothing happens. Otherwise we need to define
+  // a bunch of temporaries that help us bookkeep fluxes over the
+  // EBCF interface. 
   if(m_hasEBCF){
+    timer.startEvent("Define masks");
     this->defineMasks();
+    timer.stopEvent("Define masks");
+
+    timer.startEvent("Define sets");
     this->fastDefineSetsAndIterators();
+    timer.stopEvent("Define sets");
+
+    timer.startEvent("Define buffers");
     this->defineBuffers();
+    timer.stopEvent("Define buffers");    
   }
   
   //set all registers to zero to start.
+  timer.startEvent("Set to zero");
   this->setToZero();
+  timer.stopEvent("Set to zero");
+  
   m_isDefined = true;
+
+  ParmParse pp("EbFastFluxRegister");
+  bool profile = false;
+  pp.query("profile", profile);
+
+  if(profile){
+    timer.eventReport(pout(), false);
+  }
 }
 
 void EbFastFluxRegister::fastDefineSetsAndIterators(){
@@ -240,13 +272,13 @@ void EbFastFluxRegister::defineMasks(){
       coarCFIVS.define(gridsCoar);
 
       // Coar mask is 0, we will copy from the coFiMask and into this one. 
-      for (DataIterator dit = gridsCoar.dataIterator(); dit.ok(); ++dit){
+      for (DataIterator dit(gridsCoar); dit.ok(); ++dit){
       	coarMask[dit()].setVal(zero);
       }
       
       // Set the coarsened fine mask to zero everywhere except immediately outside the coarsened fine grids. 
-      for (DataIterator dit = gridsCoFi.dataIterator(); dit.ok(); ++dit){
-      	const Box cellBoxCoFi  = gridsCoFi[dit()];
+      for (DataIterator dit(gridsCoFi); dit.ok(); ++dit){
+      	const Box cellBoxCoFi  = gridsCoFi    [dit()];
 	const Box grownBoxCoFi = grownCoFiGrid[dit()];
 
       	// Get CF cells outside the CoFi box. Subtract the ungrown (i.e., valid region) neighbor boxes because they might overlap with

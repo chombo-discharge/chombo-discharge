@@ -116,8 +116,8 @@ void EbFastFineToCoarRedist::fastDefine(const EBLevelGrid& a_eblgFine,
   bool profile = false;
   bool debug   = false;
 
-  pp.get("profile", profile);
-  pp.get("debug",   debug);  
+  pp.query("profile", profile);
+  pp.query("debug",   debug);  
 
   if(profile){
     timer.eventReport(pout(), false);
