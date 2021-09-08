@@ -166,8 +166,6 @@ public:
   virtual void apply(      Vector<EBAMRIVData*>&   a_dst,
 		     const Vector<EBAMRCellData*>& a_src) const;
 
-
-
 protected:
 
   /*!

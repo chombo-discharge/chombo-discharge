@@ -258,10 +258,7 @@ void IrregAmrStencil<IrregSten>::apply(      Vector<EBAMRIVData*>&   a_dst,
   CH_assert(dstSize == srcSize);
 
   for (int i = 0; i < dstSize; i++){
-    EBAMRIVData& dst = *a_dst[i];
-    const EBAMRCellData& src = *(const_cast<const EBAMRCellData*> (a_src[i]));
-
-    this->apply(dst, src);
+    this->apply(*a_dst[i], (const EBAMRCellData&) *a_src[i]);
   }
 }
 
@@ -290,10 +287,7 @@ void IrregAmrStencil<IrregSten>::apply(      Vector<EBAMRCellData*>& a_dst,
   CH_assert(dstSize == srcSize);
 
   for (int i = 0; i < dstSize; i++){
-    EBAMRCellData& dst = *a_dst[i];
-    const EBAMRCellData& src = *(const_cast<const EBAMRCellData*> (a_src[i]));
-
-    this->apply(dst, src);
+    this->apply(*a_dst[i], (const EBAMRCellData&) *a_src[i]);    
   }
 }
 
