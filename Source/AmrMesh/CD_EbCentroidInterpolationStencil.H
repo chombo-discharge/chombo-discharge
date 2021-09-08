@@ -4,7 +4,7 @@
  */
 
 /*!
-  @file   EbCentroidInterpolationStencil.H
+  @file   CD_EbCentroidInterpolationStencil.H
   @brief  Declaration of IrregStencil-derived class that can from cell centers to embedded boundary centroids. 
   @author Robert Marskar
 */
@@ -28,7 +28,7 @@ public:
   EbCentroidInterpolationStencil() = delete;
 
   /*!
-    @brief Full constructor. Subsequently calls define
+    @brief Full constructor. 
     @param[in] a_dbl    Grids
     @param[in] a_ebisl  EBIS layout
     @param[in] a_domain Problem domain
@@ -46,7 +46,7 @@ public:
 				 const IrregStencil::StencilType a_type);
 
   /*!
-    @brief Destructor
+    @brief Destructor (does nothing)
   */
   ~EbCentroidInterpolationStencil();
 
@@ -72,11 +72,9 @@ protected:
 			    const Box&               a_box,
 			    const Real&              a_dx,
 			    const IntVectSet&        a_cfivs) override;
-
-private:
   
   /*!
-    @brief Build the interpolation stencils using Taylor series. 
+    @brief Build the interpolation stencils using a Taylor series expansion. 
     @param[out] a_sten    Returned stencil
     @param[in]  a_vof     VolIndex where stencil is defined
     @param[in]  a_grids   Grids
