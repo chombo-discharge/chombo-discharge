@@ -4,7 +4,7 @@
  */
 
 /*!
-  @file   IrregAmrStencil.H
+  @file   CD_IrregAmrStencil.H
   @brief  Class for holding stencils on irregular over an entire AMR hierarchy
   @author Robert Marskar
 */
@@ -18,10 +18,15 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Class for holding stencils on irregular cells over an entire AMR hierarchy
-  @note This class holds a single stencil on each irregular cells. When you apply the stencil to a data holder, the same stencil will be applied to all the components of that holder. 
+  @brief Class for holding VoFStencils on irregular cells over an entire AMR hierarchy. The template
+  parameter must inherit from IrregStencil. The stencil can only be applied to EBCellFABs. 
+  @details This class holds a single stencil on each irregular cells. When you apply 
+  the stencil to a data holder, is will be applie to all the components of that data
+  holder. 
+  @note This does not use aggregate stencil functionality. Do not use this class inside multigrid!
 */
-template <class T> class IrregAmrStencil {
+template <class IrregSten>
+class IrregAmrStencil {
 public:
 
   /*!
@@ -32,7 +37,7 @@ public:
   /*!
     @brief Full constructor. Subsequently calls define
     @param[in] a_grids       AMR grids
-    @param[in] a_ebis        EBIS layouts on each level
+    @param[in] a_ebisl       EBIS layouts on each level
     @param[in] a_domains     Domains on each level
     @param[in] a_dx          Resolutions on each level
     @param[in] a_finestLevel Finest AMR level
@@ -55,9 +60,21 @@ public:
   virtual ~IrregAmrStencil();
 
   /*!
+    @brief Get the stencils over an AMR level
+    @param[in] a_lvl AMR level
+  */
+  const IrregStencil& operator[](const int& a_lvl) const;
+
+  /*!
+    @brief Get the stencils over an AMR level
+    @param[in] a_lvl AMR level
+  */
+  IrregStencil& operator[](const int& a_lvl);
+
+  /*!
     @brief Define function
     @param[in] a_grids       AMR grids
-    @param[in] a_ebis        EBIS layouts on each level
+    @param[in] a_ebisl       EBIS layouts on each level
     @param[in] a_domains     Domains on each level
     @param[in] a_dx          Resolutions on each level
     @param[in] a_finestLevel Finest AMR level
@@ -167,21 +184,7 @@ public:
 		     const Vector<EBAMRCellData*>& a_src,
 		     const bool                  a_limit = false) const;
 
-  /*!
-    @brief Get the stencils over an AMR level
-    @param[in] a_lvl AMR level
-  */
-  const IrregStencil& operator[](const int& a_lvl) const {
-    return *m_stencils[a_lvl];
-  }
 
-  /*!
-    @brief Get the stencils over an AMR level
-    @param[in] a_lvl AMR level
-  */
-  IrregStencil& operator[](const int& a_lvl) {
-    return *m_stencils[a_lvl];
-  }
 
 protected:
 
@@ -206,7 +209,7 @@ protected:
   Vector<Real> m_dx;
   
   /*!
-    @brief Stencils
+    @brief Stencils. 
   */
   Vector<RefCountedPtr<IrregStencil> > m_stencils;
 
