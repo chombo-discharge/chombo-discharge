@@ -49,27 +49,21 @@ public:
   */
   void fastDefine(const EBLevelGrid&                      a_eblgFine,
 		  const EBLevelGrid&                      a_eblgCoar,
-		  const LayoutData<Vector<LayoutIndex> >& a_neighborsFine,
-		  const LayoutData<Vector<LayoutIndex> >& a_neighborsCoar,
 		  const int&                              a_nRef,
 		  const int&                              a_nVar,
 		  const int&                              a_redistRad);
 
 protected:
+  
+  /*!
+    @brief Make the coarsened fine sets
+  */
+  void makeCedFineSets();
 
   /*!
-    @brief Create a global view of the intersection of the irregular cells on the coarse side of the refinement boundary. 
-    @param[out] a_cfivs Set
-    @param[in]  a_neighborsCoar Coarse grid neighboring boxes. 
-  */
-  void makeCedFineSets(IntVectSet& a_cfivs, const LayoutData<Vector<LayoutIndex> >& a_neighborsCoar);
-
-  /*!
-    @brief Make coarse sets, as per EBCoarToFineRedist
-    @param[in] a_cfivs Set
-    @param[in] a_neighborsFine Neighbors on fine level.
-  */
-  void makeCoarSets(const IntVectSet& a_cfivs, const LayoutData<Vector<LayoutIndex> >& a_neighborsFine);
+    @brief Make the coarse set
+  */  
+  void makeCoarSets();
 
   /*!
     @brief Debugging function. Gathers and broadcasts a set

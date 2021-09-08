@@ -728,8 +728,6 @@ void PhaseRealm::defineCoarToFineRedistOper(const int a_lmin, const int a_regsiz
 	    auto c2f_redist = RefCountedPtr<EbFastCoarToFineRedist> (new EbFastCoarToFineRedist());
 	    c2f_redist->fastDefine(*m_eblg[lvl+1],
 				   *m_eblg[lvl],
-				   *m_neighbors[lvl+1],
-				   *m_neighbors[lvl],
 				   m_refinementRatios[lvl],
 				   comps,
 				   m_redistributionRadius);
