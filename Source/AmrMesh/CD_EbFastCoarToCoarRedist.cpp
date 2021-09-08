@@ -70,7 +70,7 @@ void EbFastCoarToCoarRedist::fastDefine(const EBLevelGrid& a_eblgFine,
   coFiMask.copyTo(coarMask);
   coarMask.exchange();
 
-  // Make sets
+  // Make sets. Recall that m_setsCoar are essentially the cut-cells on the coarse level that are covered by a finer level. 
   m_setsCoar.define(m_gridsCoar);
   for (DataIterator dit = m_gridsCoar.dataIterator(); dit.ok(); ++dit){
     Box gridBox = m_gridsCoar.get(dit());
@@ -79,15 +79,15 @@ void EbFastCoarToCoarRedist::fastDefine(const EBLevelGrid& a_eblgFine,
 
     // coarMask holds a local view of the fine level grid, including ghost cells. Make that view into
     // something that IntVectSet can use
-    IntVectSet coveringIVS;
+    DenseIntVectSet coveredIVS(gridBox, false);
     const BaseFab<bool>& mask = coarMask[dit()];
     for (BoxIterator bit(mask.box()); bit.ok(); ++bit){
       const IntVect iv = bit();
-      if(mask(iv, maskComp)) coveringIVS |= iv;
+      if(mask(iv, maskComp)) coveredIVS |= iv;
     }
     
     m_setsCoar[dit()]  = m_ebislCoar[dit()].getIrregIVS(gridBox);
-    m_setsCoar[dit()] &= coveringIVS;
+    m_setsCoar[dit()] &= IntVectSet(coveredIVS);    
   }
 
   // Define data
