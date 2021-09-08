@@ -101,16 +101,17 @@ void EbCoarAve::conservativeAverageFAB(BaseIVFAB<Real>&       a_coar,
 				       const Interval&        a_variables) const{
   CH_assert(isDefined());
 
-  const EBISBox& ebisBoxCoar = m_eblgCoFi.getEBISL()[a_datInd];
-  const EBISBox& ebisBoxFine = m_eblgFine.getEBISL()[a_datInd];
+  const EBISBox& ebisBoxCoar     = m_eblgCoFi.getEBISL()[a_datInd];
+  const EBISBox& ebisBoxFine     = m_eblgFine.getEBISL()[a_datInd];
+  
   const IntVectSet& coarIrregIVS = a_coar.getIVS();
   const IntVectSet& fineIrregIVS = a_fine.getIVS();
 
-  const int nref2 = pow(m_refRat, SpaceDim-1);
+  const int nref2 = std::pow(m_refRat, SpaceDim-1);
 
   // This loop computes phiCoar = sum(phiFine*areaFine)/areaCoar. If areaCoar == 0
   // then we use a safety factor here. 
-  for (VoFIterator vofitCoar(coarIrregIVS, ebisBoxCoar.getEBGraph()); vofitCoar.ok(); ++vofitCoar){
+  for (VoFIterator vofitCoar(coarIrregIVS, ebisBoxCoar.getEBGraph()); vofitCoar.ok(); ++vofitCoar) {
     const VolIndex& coarVoF         = vofitCoar();
     const Vector<VolIndex> fineVoFs = m_eblgCoFi.getEBISL().refine(coarVoF, m_refRat, a_datInd);
 
@@ -121,6 +122,7 @@ void EbCoarAve::conservativeAverageFAB(BaseIVFAB<Real>&       a_coar,
 	
       for (int ifine = 0; ifine < fineVoFs.size(); ifine++){
 	const VolIndex& fineVoF = fineVoFs[ifine];
+	
 	if (fineIrregIVS.contains(fineVoF.gridIndex())){
 	  Real bndryArea = ebisBoxFine.bndryArea(fineVoF);
 	  if (bndryArea > 0){
@@ -130,7 +132,9 @@ void EbCoarAve::conservativeAverageFAB(BaseIVFAB<Real>&       a_coar,
 	  }
 	}
       }
-      const Real safety = 1.E-8;
+      
+      constexpr Real safety = 1.E-8;
+      
       a_coar(coarVoF, ivar) = dataVal/(nref2*(safety + ebisBoxCoar.bndryArea(coarVoF)));
     }
   }
