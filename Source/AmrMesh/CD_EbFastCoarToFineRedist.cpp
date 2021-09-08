@@ -25,11 +25,11 @@ EbFastCoarToFineRedist::~EbFastCoarToFineRedist(){
 
 }
 
-void EbFastCoarToFineRedist::fastDefine(const EBLevelGrid&                      a_eblgFine,
-					const EBLevelGrid&                      a_eblgCoar,
-					const int&                              a_nRef,
-					const int&                              a_nVar,
-					const int&                              a_redistRad){
+void EbFastCoarToFineRedist::fastDefine(const EBLevelGrid& a_eblgFine,
+					const EBLevelGrid& a_eblgCoar,
+					const int&         a_refRat,
+					const int&         a_nComp,
+					const int&         a_redistRad){
   CH_TIME("EbFastCoarToFineRedist::fastDefine");
 
   const EBIndexSpace* const ebisPtr = a_eblgFine.getEBIS();
@@ -40,8 +40,8 @@ void EbFastCoarToFineRedist::fastDefine(const EBLevelGrid&                      
 
   // Regular stuff for base class. From here we can assume the redistRad == 1
   m_isDefined  = true;
-  m_nComp      = a_nVar;
-  m_refRat     = a_nRef;
+  m_nComp      = a_nComp;
+  m_refRat     = a_refRat;
   m_domainCoar = a_eblgCoar.getDomain().domainBox();
   m_gridsFine  = a_eblgFine.getDBL();
   m_gridsCoar  = a_eblgCoar.getDBL();
@@ -95,7 +95,7 @@ void EbFastCoarToFineRedist::fastDefine(const EBLevelGrid&                      
     this->gatherSetsCoar(   newCoarSet);
 
     // Call the old define function. 
-    EBCoarToFineRedist::define(a_eblgFine, a_eblgCoar, a_nRef, a_nVar, a_redistRad);
+    EBCoarToFineRedist::define(a_eblgFine, a_eblgCoar, a_refRat, a_nComp, a_redistRad);
     this->gatherSetsCedFine(oldCedFineSet);
     this->gatherSetsCoar(   oldCoarSet);
 

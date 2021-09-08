@@ -40,18 +40,16 @@ public:
     /*!
     @brief New define function for EBFastCoarToFine
     @param[in] a_eblgFine      Fine level EBLevelGrid
-    @param[in] a_eblg          Coarse level EBLevelGrid
-    @param[in] a_neighborsFine Neigbor boxes on the fine grid
-    @param[in] a_neighborsFine Neigbor boxes on the coarse grid
-    @param[in] a_nRef          Refinement ratio between levels
-    @param[in] a_nVar          Number of variables
+    @param[in] a_eblgCoar      Coarse level EBLevelGrid
+    @param[in] a_refRat        Refinement ratio between levels
+    @param[in] a_nComp         Number of variables
     @param[in] a_redistRad     Redistribution radius
   */
-  void fastDefine(const EBLevelGrid&                      a_eblgFine,
-		  const EBLevelGrid&                      a_eblgCoar,
-		  const int&                              a_nRef,
-		  const int&                              a_nVar,
-		  const int&                              a_redistRad);
+  void fastDefine(const EBLevelGrid& a_eblgFine,
+		  const EBLevelGrid& a_eblgCoar,
+		  const int&         a_refRat,
+		  const int&         a_nComp,
+		  const int&         a_redistRad);
 
 protected:
 
@@ -78,13 +76,13 @@ protected:
     @brief Debugging function. Gathers and broadcasts a set
     @param[inout] a_set Set to gather and broadcast
   */  
-  void gatherBroadcast(  IntVectSet& a_set);
+  void gatherBroadcast(IntVectSet& a_set);
 
   /*!
     @brief Debugging function. Gathers and broadcasts m_setsCedFine onto a_setsCedFine
     @param[inout] a_setsCedFine Fine set
   */    
-  void gatherSetsFine(   IntVectSet& a_setsFine);
+  void gatherSetsFine(IntVectSet& a_setsFine);
 
   /*!
     @brief Debugging function. Gathers and broadcasts m_setsCoar onto a_setsCoar. 

@@ -40,9 +40,7 @@ public:
   /*!
     @brief New define function for EBFastCoarToCoar
     @param[in] a_eblgFine      Fine level EBLevelGrid
-    @param[in] a_eblg          Coarse level EBLevelGrid
-    @param[in] a_neighborsFine Neigbor boxes on the fine grid
-    @param[in] a_neighborsFine Neigbor boxes on the coarse grid
+    @param[in] a_eblgCoar      Coarse level EBLevelGrid
     @param[in] a_refRat        Refinement ratio between levels
     @param[in] a_nComp         Number of variables
     @param[in] a_redistRad     Redistribution radius

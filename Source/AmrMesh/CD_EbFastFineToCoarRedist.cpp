@@ -18,7 +18,9 @@
 #include <CD_EbFastFineToCoarRedist.H>
 #include <CD_NamespaceHeader.H>
 
-#define EBFASTF2C_DEBUG 0
+// This flag is for switching between algorithms (I don't know which one is faster). See makeCoarSets for an explanation of the
+// two ways of doing this. 
+#define EbFastFineToCoarRedistUseMask 1
 
 EbFastFineToCoarRedist::EbFastFineToCoarRedist() : EBFineToCoarRedist(){
 
@@ -28,11 +30,11 @@ EbFastFineToCoarRedist::~EbFastFineToCoarRedist(){
 
 }
 
-void EbFastFineToCoarRedist::fastDefine(const EBLevelGrid&                      a_eblgFine,
-					const EBLevelGrid&                      a_eblgCoar,
-					const int&                              a_nRef,
-					const int&                              a_nVar,
-					const int&                              a_redistRad){
+void EbFastFineToCoarRedist::fastDefine(const EBLevelGrid& a_eblgFine,
+					const EBLevelGrid& a_eblgCoar,
+					const int&         a_refRat,
+					const int&         a_nComp,
+					const int&         a_redistRad){
   CH_TIME("EbFastFineToCoarRedist::define");
 
   const EBIndexSpace* ebisPtr = a_eblgFine.getEBIS();
@@ -41,8 +43,8 @@ void EbFastFineToCoarRedist::fastDefine(const EBLevelGrid&                      
   Timer timer("EbFastFineToCoarRedist");
   
   m_isDefined = true;
-  m_nComp     = a_nVar;
-  m_refRat    = a_nRef;
+  m_nComp     = a_nComp;
+  m_refRat    = a_refRat;
   m_redistRad = a_redistRad;
   m_domainCoar= a_eblgCoar.getDomain().domainBox();
   m_gridsFine = a_eblgFine.getDBL();
@@ -69,27 +71,33 @@ void EbFastFineToCoarRedist::fastDefine(const EBLevelGrid&                      
   // The new define function creates a local view of the inside CFIVS in each fine box, and then
   // copies that mask to the refined coarse grids. The refCoar mask also holds updated ghost cells
   // so there is no need for extra communications beyond the mask copy and exchange
-  timer.startEvent("Define masks");
   constexpr int numMaskComp = 1;
-  
+
+  timer.startEvent("Define masks");
   LevelData<BaseFab<bool> > fineShellMask;
   LevelData<BaseFab<bool> > refCoarShellMask;
-  
-  fineShellMask.   define(m_gridsFine,    numMaskComp,             IntVect::Zero);
+
+  fineShellMask.   define(m_gridsFine,    numMaskComp,             IntVect::Zero);    
   refCoarShellMask.define(m_gridsRefCoar, numMaskComp, m_redistRad*IntVect::Unit);
   timer.stopEvent("Define masks");  
-
-  // Make the fine mask and copy it to the mask on the refined coarse grids
+  
+  // Make the fine mask. 
   timer.startEvent("Make fine mask");
   this->makeFineMask(fineShellMask);
   timer.stopEvent("Make fine mask");
-  timer.startEvent("Make coar mask");
-  for (DataIterator dit = m_gridsRefCoar.dataIterator(); dit.ok(); ++dit){
+#if EbFastFineToCoarRedistUseMask
+
+  // Copy the fine mask onto the refined coarse grid. 
+  timer.startEvent("Make coar mask");    
+  for (DataIterator dit(m_gridsRefCoar); dit.ok(); ++dit){
     refCoarShellMask[dit()].setVal(false);
   }
+  timer.stopEvent("Make coar mask");
+  timer.startEvent("Copy and exchange mask");        
   fineShellMask.copyTo(refCoarShellMask);
   refCoarShellMask.exchange();
-  timer.stopEvent("Make coar mask");    
+  timer.stopEvent("Copy and exchange mask");    
+#endif
 
   timer.startEvent("Define fine set");
   this->makeFineSets(fineShellMask);
@@ -123,7 +131,7 @@ void EbFastFineToCoarRedist::fastDefine(const EBLevelGrid&                      
     this->gatherSetsRefCoar(newRefCoarSet);
 
     // Call old define
-    EBFineToCoarRedist::define(a_eblgFine, a_eblgCoar, a_nRef, a_nVar, a_redistRad);
+    EBFineToCoarRedist::define(a_eblgFine, a_eblgCoar, a_refRat, a_nComp, a_redistRad);
     this->gatherSetsFine(oldFineSet);
     this->gatherSetsRefCoar(oldRefCoarSet);
 
@@ -147,36 +155,33 @@ void EbFastFineToCoarRedist::makeFineMask(LevelData<BaseFab<bool> >& a_fineShell
   //       the cells
   constexpr int maskComp = 0;
   
-  for (DataIterator dit = m_gridsFine.dataIterator(); dit.ok(); ++dit){
+  for (DataIterator dit(m_gridsFine); dit.ok(); ++dit){
     const Box& fineBox = m_gridsFine.get(dit());
     
-    // Make the coarse-fine interface. I think it's safe to use a NeighborIterator here because we are only dealing with valid cells.
+    // Make the outside coarse-fine interface. I think it's safe to use a NeighborIterator here because we are only dealing with valid cells.
     Box grownBox = grow(fineBox, 1);
     grownBox &= m_ebislFine.getDomain();
     
-    IntVectSet coarseFineInterface(grownBox);
+    DenseIntVectSet coarseFineInterface(grownBox);
     coarseFineInterface -= fineBox;
 
     NeighborIterator nit(m_gridsFine);
     for (nit.begin(dit()); nit.ok(); ++nit){
       coarseFineInterface -= m_gridsFine[nit()];
     }
-    
-    // Make the local shell on the inside of each box by growing the CFISV and then restricting to the fine-grid box. 
-    IntVectSet fineShell;
-    for (IVSIterator ivsIt(coarseFineInterface); ivsIt.ok(); ++ivsIt){
-      const IntVect iv = ivsIt();
-      Box b(iv,iv);
-      b.grow(m_redistRad);
-      fineShell |= IntVectSet(b);
-    }
-    fineShell &= fineBox;
 
+    // Grow and restrict to fineBox. After this, coarseFineInterface consists of a layer of cells of width m_redistRad on the INSIDE
+    // of the current grid box. These cells are also within range m_redistRad of the refinement bounary. 
+    coarseFineInterface.grow(m_redistRad);
+    coarseFineInterface &= fineBox;
 
-    a_fineShellMask[dit()].setVal(false);
-    for (IVSIterator ivsIt(fineShell); ivsIt.ok(); ++ivsIt){
-      const IntVect iv = ivsIt();
-      a_fineShellMask[dit()](iv, maskComp) = true;
+    // Now set the mask. 
+    a_fineShellMask[dit()].setVal(false);    
+    for (BoxIterator bit(fineBox); bit.ok(); ++bit){
+      const IntVect iv = bit();
+      if(coarseFineInterface[iv]){
+	a_fineShellMask[dit()](iv, maskComp) = true;
+      }
     }
   }
 }
@@ -217,10 +222,20 @@ void EbFastFineToCoarRedist::makeFineSets(const LevelData<BaseFab<bool> >& a_fin
 void EbFastFineToCoarRedist::makeCoarSets(const LevelData<BaseFab<bool> >& a_refCoarMask){
   CH_TIME("EbFastFineToCoarRedist::makeCoarSets");
 
+
+  // TLDR: m_setsRefCoar is the set of cells on the fine level that can redistribute to the coarse level. However, this set
+  //       is viewed from the coarse grid, which is slightly more complicated than than viewing them from the fine level. There are
+  //       two choices that I can think of. We refine the coarse grid and use a mask for indicating which fine cells can redistribute
+  //       to the coarse level. The downside of that is this can lead to a huge number of grid cells in 3D. E.g. with refinement factor 4
+  //       each coarse-grid cell will split into 64 new grid cells, so even if we use a boolean mask we actually take up quite a bit of
+  //       memory and communication. The other alternative, which is used below, is simply to collect the sets of fine cells from m_setsFine
+  //       globally, and compute the intersection of that with the refined coarse grids. Since I'm not sure which approach is worse, I'm leaving
+  //       code for both of them intact. 
   constexpr int maskComp = 0;
 
   const Box domainFine = refine(m_domainCoar, m_refRat);
-
+  
+#if EbFastFineToCoarRedistUseMask
   for (DataIterator dit(m_gridsRefCoar); dit.ok(); ++dit){
     const Box&           coarBox  = m_gridsRefCoar[dit()];
     const EBISBox&       ebisBox  = m_ebislRefCoar[dit()];
@@ -246,6 +261,24 @@ void EbFastFineToCoarRedist::makeCoarSets(const LevelData<BaseFab<bool> >& a_ref
       }
     }
   }
+#else // This is the version that reduces the sets on each rank, and we then do a local intersection with each grid.
+
+  // Reduce onto each rank. 
+  IntVectSet globalSet;
+  for (DataIterator dit(m_gridsFine); dit.ok(); ++dit){
+    globalSet |= m_setsFine[dit()];
+  }
+  
+  this->gatherBroadcast(globalSet);
+
+  // Compute local intersection. 
+  for (DataIterator dit(m_gridsRefCoar); dit.ok(); ++dit){
+    Box cellBox = m_gridsRefCoar[dit()];
+    cellBox.grow(m_redistRad);
+    cellBox &= domainFine;
+    m_setsRefCoar[dit()] = globalSet & m_ebislRefCoar[dit()].getIrregIVS(cellBox);
+  }
+#endif
 }
 
 void EbFastFineToCoarRedist::gatherBroadcast(IntVectSet& a_set){
@@ -268,7 +301,7 @@ void EbFastFineToCoarRedist::gatherSetsFine(IntVectSet& a_setsFine){
   CH_TIME("EbFastFineToCoarRedist::gatherSetsFine");
 
   a_setsFine.makeEmpty();
-  for (DataIterator dit = m_gridsFine.dataIterator(); dit.ok(); ++dit){
+  for (DataIterator dit(m_gridsFine); dit.ok(); ++dit){
     a_setsFine |= m_setsFine[dit()];
   }
   
@@ -279,7 +312,7 @@ void EbFastFineToCoarRedist::gatherSetsRefCoar(IntVectSet& a_setsRefCoar){
   CH_TIME("EbFastFineToCoarRedist::gatherSetsRefCoar");
 
   a_setsRefCoar.makeEmpty();
-  for (DataIterator dit = m_gridsRefCoar.dataIterator(); dit.ok(); ++dit){
+  for (DataIterator dit(m_gridsRefCoar); dit.ok(); ++dit){
     a_setsRefCoar |= m_setsRefCoar[dit()];
   }
   
