@@ -775,13 +775,11 @@ void PhaseRealm::defineCoarToCoarRedistOper(const int a_lmin, const int a_regsiz
 	  //       if lvl >= a_lmin-1
 	  if(lvl >= a_lmin-1){
 	    auto c2c_redist = RefCountedPtr<EbFastCoarToCoarRedist> (new EbFastCoarToCoarRedist());
-	    c2c_redist->define(*m_eblg[lvl+1],
-			       *m_eblg[lvl],
-			       *m_neighbors[lvl+1],
-			       *m_neighbors[lvl],
-			       m_refinementRatios[lvl],
-			       comps,
-			       m_redistributionRadius);
+	    c2c_redist->fastDefine(*m_eblg[lvl+1],
+				   *m_eblg[lvl],
+				   m_refinementRatios[lvl],
+				   comps,
+				   m_redistributionRadius);
 	    m_coarToCoarRedist[lvl] = RefCountedPtr<EBCoarToCoarRedist> (c2c_redist);
 	  }
 	}

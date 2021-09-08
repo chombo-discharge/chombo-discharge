@@ -19,18 +19,20 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief EBFineToCoarRedist with faster define function
+  @brief EBFineToCoarRedist with faster define function.
+  @details This is just like Chombo's EBCoarToCoarRedist except that it is much faster to define. 
+  @note To use run-time debugging, use EbFastCoarToCoarRedist.debug=true. 
 */
 class EbFastCoarToCoarRedist : public EBCoarToCoarRedist {
 public:
 
   /*!
-    @brief Weak constructor
+    @brief Weak constructor. Must subsequently call the define function. 
   */
   EbFastCoarToCoarRedist();
 
   /*!
-    @brief Destructor
+    @brief Destructor (does nothing).
   */
   ~EbFastCoarToCoarRedist();
 
@@ -40,23 +42,30 @@ public:
     @param[in] a_eblg          Coarse level EBLevelGrid
     @param[in] a_neighborsFine Neigbor boxes on the fine grid
     @param[in] a_neighborsFine Neigbor boxes on the coarse grid
-    @param[in] a_nRef          Refinement ratio between levels
-    @param[in] a_nVar          Number of variables
+    @param[in] a_refRat        Refinement ratio between levels
+    @param[in] a_nComp         Number of variables
     @param[in] a_redistRad     Redistribution radius
   */
-  void define(const EBLevelGrid&                      a_eblgFine,
-	      const EBLevelGrid&                      a_eblgCoar,
-	      const LayoutData<Vector<LayoutIndex> >& a_neighborsFine,
-	      const LayoutData<Vector<LayoutIndex> >& a_neighborsCoar,
-	      const int&                              a_nRef,
-	      const int&                              a_nVar,
-	      const int&                              a_redistRad);
+  void fastDefine(const EBLevelGrid& a_eblgFine,
+		  const EBLevelGrid& a_eblgCoar,
+		  const int&         a_refRat,
+		  const int&         a_nComp,
+		  const int&         a_redistRad);
 
 protected:
 
-  // Debugging functions
+  /*!
+    @brief Debugging function. Used when we want to ensure that this class and EbCoarToCoarRedist produce the same sets
+    @param[inout] a_set Set to gather and broadcast. 
+  */
   void gatherBroadcast(IntVectSet& a_set);
-  void gatherCoarSet(IntVectSet& coarSet); // Debugging function
+
+  /*!
+    @brief Debugging function. Used when we want to ensure that this class and EbCoarToCoarRedist produce the same sets.
+    @param[inout] a_coarSet Coarse set.
+    @details This gathers m_setsCoar over all ranks. 
+  */  
+  void gatherCoarSet(IntVectSet& coarSet); 
 };
 
 #include <CD_NamespaceFooter.H>
