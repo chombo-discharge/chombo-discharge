@@ -28,6 +28,7 @@
 #include <NeighborIterator.H>
 
 // Our includes
+#include <CD_Timer.H>
 #include <CD_EbFastFluxRegister.H>
 #include <CD_NamespaceHeader.H>
 
@@ -37,7 +38,7 @@ using std::cerr;
 using std::endl;
 
 EbFastFluxRegister::EbFastFluxRegister(){
-
+  CH_TIME("EbFastFluxRegister::EbFastFluxRegister");
 }
 
 EbFastFluxRegister::EbFastFluxRegister(const DisjointBoxLayout& a_dblFine,
@@ -49,6 +50,8 @@ EbFastFluxRegister::EbFastFluxRegister(const DisjointBoxLayout& a_dblFine,
 				       const int&               a_nvar,
 				       const EBIndexSpace*      ebisPtr,
 				       const bool               a_forceNoEBCF){
+  CH_TIME("EbFastFluxRegister::EbFastFluxRegister");
+  
   this->define(a_dblFine, a_dblCoar, a_ebislFine, a_ebislCoar,
 	       a_domainCoar, a_nref, a_nvar, ebisPtr, a_forceNoEBCF);
 }
@@ -58,12 +61,14 @@ EbFastFluxRegister::EbFastFluxRegister(const EBLevelGrid& a_eblgFine,
 				       const int&         a_nref,
 				       const int&         a_nvar,
 				       const bool         a_forceNoEBCF){
+  CH_TIME("EbFastFluxRegister::EbFastFluxRegister");
+  
   this->define(a_eblgFine, a_eblgCoar, a_nref, a_nvar, a_forceNoEBCF);
 }
 
 
 EbFastFluxRegister::~EbFastFluxRegister(){
-
+  CH_TIME("EbFastFluxRegister::~EbFastFluxRegister");  
 }
 
 void EbFastFluxRegister::define(const DisjointBoxLayout& a_gridsFine,
@@ -75,6 +80,8 @@ void EbFastFluxRegister::define(const DisjointBoxLayout& a_gridsFine,
 				const int&               a_nvar,
 				const EBIndexSpace*      ebisPtr,
 				const bool               a_forceNoEBCF){
+  CH_TIME("EbFastFluxRegister::define");
+  
   ProblemDomain domainFine = refine(a_domainCoar, a_nref);
   EBLevelGrid eblgCoar(a_gridsCoar, a_ebislCoar, a_domainCoar);
   EBLevelGrid eblgFine(a_gridsFine, a_ebislFine,   domainFine);
@@ -89,8 +96,9 @@ void EbFastFluxRegister::define(const EBLevelGrid&       a_eblgFine,
 				const int&               a_nvar,
 				const bool               a_forceNoEBCF){
   CH_TIME("EbFastFluxRegister::define");
-  
-  clear();
+
+  // Regular Chombo stuff
+  this->clear();
   m_refRat   = a_refRat;
   m_nComp    = a_nvar;
   m_eblgFine = a_eblgFine;
@@ -199,30 +207,28 @@ void EbFastFluxRegister::defineMasks(){
   //       mask on the coarse grid to 0, and then add the CoFi BoxLayout to the coarse grid. What we end up with is
   //       a LevelData<FArrayBox> which is 0 on all cells except the cells that are on the coarse side of the CFIVS. 
 
-  const int icomp = 0;
-  const int ncomp = 1;
+  constexpr int      iComp  = 0;
+  constexpr int      nComp  = 1;
+  constexpr Real     zero   = 0.0;
+  constexpr Real     one    = 1.0;
+  const     Interval interv = Interval(iComp, iComp);
 
-  const DisjointBoxLayout& gridsCoar = m_eblgCoar.getDBL();
-  const DisjointBoxLayout& gridsCoFi = m_eblgCoFi.getDBL();
-
-  const ProblemDomain& coarDomain = m_eblgCoar.getDomain();
+  const DisjointBoxLayout& gridsCoar  = m_eblgCoar.getDBL();
+  const DisjointBoxLayout& gridsCoFi  = m_eblgCoFi.getDBL();
+  const ProblemDomain&     coarDomain = m_eblgCoar.getDomain();
 
   // Make a BoxLayoutData<FArrayBox> on gridsCoFi but where each box is grown by one cell.
-  const int ghostCoFi = 1;
+  // We will be able to use DataIterator(gridsCoFi) to iterate through this construct. 
   LayoutData<Box> grownBoxes(gridsCoFi);
   for (DataIterator dit(gridsCoFi); dit.ok(); ++dit){
-    Box bx = gridsCoFi[dit()];
-    bx.grow(ghostCoFi);
-    //    bx &= coarDomain; // This line broke if the CFIVS was on the boundary. 
-    
-    grownBoxes[dit()] = bx;
+    grownBoxes[dit()] = grow(gridsCoFi[dit()], 1);
   }
 
   const BoxLayout grownCoFiGrid(grownBoxes);
-  BoxLayoutData<FArrayBox> coFiMask(grownCoFiGrid, ncomp);  // Should be able to use DataIterator(gridsCoFi) to iterate through this. 
+  BoxLayoutData<FArrayBox> coFiMask(grownCoFiGrid, nComp); 
   
   // Go through and set ghost cells on the outside of the gridsCoFi to 1,
-  // all valid cells and ghost cells "inside" the grid are set to zero
+  // all valid cells and ghost cells "inside" the grid are set to zero. 
   for (int idir = 0; idir < SpaceDim; idir++){
     for (SideIterator sit; sit.ok(); ++sit){
       const int iindex = index(idir, sit());
@@ -230,46 +236,55 @@ void EbFastFluxRegister::defineMasks(){
       // Define the coar mask in this direction.
       LevelData<FArrayBox> coarMask;
       LayoutData<IntVectSet>& coarCFIVS = m_coarCFIVS[iindex];
-      coarMask.define(gridsCoar, ncomp, IntVect::Zero);
+      coarMask.define(gridsCoar, nComp, IntVect::Zero);
       coarCFIVS.define(gridsCoar);
 
       // Coar mask is 0, we will copy from the coFiMask and into this one. 
       for (DataIterator dit = gridsCoar.dataIterator(); dit.ok(); ++dit){
-      	coarMask[dit()].setVal(0.0);
+      	coarMask[dit()].setVal(zero);
       }
       
-      // Fine mask is also 0, except on the CF region. 
-      NeighborIterator nit(gridsCoFi);
+      // Set the coarsened fine mask to zero everywhere except immediately outside the coarsened fine grids. 
       for (DataIterator dit = gridsCoFi.dataIterator(); dit.ok(); ++dit){
-      	const Box boxCoFi = gridsCoFi[dit()];
+      	const Box cellBoxCoFi  = gridsCoFi[dit()];
+	const Box grownBoxCoFi = grownCoFiGrid[dit()];
 
-      	// Get CF cells outside the CoFi box. Subtract the (ungrown) neighbor boxes. 
-      	Box cfBoxCoFi = adjCellBox(boxCoFi, idir, sit(), 1);
-      	IntVectSet cfIvsCoFi(cfBoxCoFi);
+      	// Get CF cells outside the CoFi box. Subtract the ungrown (i.e., valid region) neighbor boxes because they might overlap with
+	// the outside of this box. 
+      	const Box coarseFineInterfaceBox = adjCellBox(cellBoxCoFi, idir, sit(), 1);
+      	DenseIntVectSet cfIvsCoFi(coarseFineInterfaceBox, true);
+
+	NeighborIterator nit(gridsCoFi);	
       	for (nit.begin(dit()); nit.ok(); ++nit){
       	  const Box neighborBox = gridsCoFi[nit()];
+	  const Box overlapBox  = cellBoxCoFi & neighborBox;
 
-      	  cfIvsCoFi -= neighborBox;
+	  if(!overlapBox.isEmpty()){
+	    cfIvsCoFi -= neighborBox;
+	  }
       	}
 
-      	// Set the CoFi mask. This also sets the ghost cells.
-	coFiMask[dit()].setVal(0.0);
-	for (IVSIterator ivsIt(cfIvsCoFi); ivsIt.ok(); ++ivsIt){
-	  coFiMask[dit()](ivsIt(), icomp) = 1.0;
+      	// Set the coarase-fine mask. This also sets the ghost cells.
+	coFiMask[dit()].setVal(zero);
+	for (DenseIntVectSetIterator ivsIt(cfIvsCoFi); ivsIt.ok(); ++ivsIt){
+	  coFiMask[dit()](ivsIt(), iComp) = one;
 	}
       }
 
-      // Copy CoFi mask to coarse level. But this only copies valid cells, *sigh*
+      // Add the coarsened fine mask to the coarse mask. This means that we add the contents in the "ghost regions" on the coarsened fine mask
+      // onto the valid region in the coarse mask, leaving us with a view of which valid cells in the coarse grid abut the fine-grid boundary. 
       coFiMask.addTo(Interval(0,0), coarMask, Interval(0,0), m_eblgCoar.getDomain());
 
-      // Go through the mask and set the CFIVS
+      // Go through the mask and set the CFIVS accordingly. 
       for (DataIterator dit = gridsCoar.dataIterator(); dit.ok(); ++dit){
       	const Box coarBox = gridsCoar[dit()];
       	IntVectSet& cfivs = coarCFIVS[dit()];
 
       	cfivs.makeEmpty();
       	for (BoxIterator bit(coarBox); bit.ok(); ++bit){
-      	  if(coarMask[dit()](bit(), icomp) > 0.0) cfivs |= bit();
+      	  if(coarMask[dit()](bit(), iComp) > zero) {
+	    cfivs |= bit();
+	  }
       	}
       }
     }

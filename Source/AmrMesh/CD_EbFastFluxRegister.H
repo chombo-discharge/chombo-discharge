@@ -20,10 +20,12 @@
   
 /*!
   @brief Version of EBFluxRegister with faster define function. 
+  @details This is just like EBFluxRegister except it has a much faster define function. This class exists solely because the original
+  Chombo definition has crazy nested LayoutIterators, which break when are many boxes. 
+  @note To use run-time and profiling, use EbFastFluxRegister.profile=true
 */
 class EbFastFluxRegister : public EBFluxRegister { 
 public:
-
   
   /*!
     @brief Default constructor. Leaves object in undefined state.
@@ -65,11 +67,11 @@ public:
 		     const Box&               a_domainCoar,
 		     const int&               a_nRef,
 		     const int&               a_nVar,
-		     const EBIndexSpace*      ebisPtr,
+		     const EBIndexSpace*      a_ebisPtr,
 		     const bool               a_forceNoEBCF = false);
 
   /*!
-    @brief Dtor
+    @brief (Does nothing)
   */
   virtual ~EbFastFluxRegister();
 
@@ -92,7 +94,7 @@ public:
 	      const ProblemDomain&     a_domainCoar,
 	      const int&               a_nRef,
 	      const int&               a_nVar,
-	      const EBIndexSpace*      ebisPtr,
+	      const EBIndexSpace*      a_ebisPtr,
 	      const bool               a_forceNoEBCF = false);
 
   /*!
@@ -130,11 +132,13 @@ private:
 
   /*!
     @brief Assignment operator - disallowed for all the usual reasons
+    @param[in] a_out Other flux register
   */
   void operator=(const EbFastFluxRegister& out) = delete;
 
   /*!
     @brief Copy constructor is not allowed.
+    @param[in] a_out Other flux register
   */
   EbFastFluxRegister(const EbFastFluxRegister& out) = delete;
 };

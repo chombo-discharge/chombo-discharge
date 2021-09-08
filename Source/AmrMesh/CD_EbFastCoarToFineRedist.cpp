@@ -247,7 +247,7 @@ void EbFastCoarToFineRedist::makeCoarSets(){
       for (IVSIterator ivsIt(irregIVS); ivsIt.ok(); ++ivsIt){
 	const IntVect iv = ivsIt();
 
-	if(mask(iv, 0) > zero){
+	if(mask(iv, comp) > zero){
 	  m_setsCoar[dit()] |= iv;
 	}
       }
