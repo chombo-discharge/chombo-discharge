@@ -97,22 +97,18 @@ public:
     @param[out] a_dst Destination data. 
     @param[in]  a_src Source data
     @param[in]  a_lvl Level
-    @param[in]  a_limit Limiter. This disallows sign changes in the interpolation (floored to zero)
   */
-  virtual void apply(LevelData<EBCellFAB>&       a_dst,
+  virtual void apply(      LevelData<EBCellFAB>& a_dst,
 		     const LevelData<EBCellFAB>& a_src,
-		     const int                   a_lvl,
-		     const bool                  a_limit = false) const;
+		     const int                   a_lvl) const;
 
   /*!
     @brief Apply stencils to data holder. This replaces original data
     @param[inout] a_data Transformed data
     @param[in]    a_lvl Level
-    @param[in]    a_limit Limiter. This disallows sign changes in the interpolation (floored to zero)
   */
   virtual void apply(LevelData<EBCellFAB>& a_data,
-		     const int             a_lvl,
-		     const bool            a_limit = false) const;
+		     const int             a_lvl) const;
 
   /*!
     @brief Apply the stencils to an existing data holder. 
@@ -120,69 +116,55 @@ public:
     @param[out] a_dst Destination data. 
     @param[in]  a_src Source data
     @param[in]  a_lvl Level
-    @param[in]  a_limit Limiter. This disallows sign changes in the interpolation (floored to zero)
   */
   virtual void apply(LevelData<BaseIVFAB<Real> >& a_dst,
 		     const LevelData<EBCellFAB>&  a_src,
-		     const int                    a_lvl,
-		     const bool                   a_limit = false) const;
+		     const int                    a_lvl) const;
   
   /*!
     @brief Apply the stencils to an existing data holder. 
     @details This routine will perform a copy of all regular cells, and apply stencils to irregular cells only. 
     @param[out] a_dst Destination data. 
     @param[in]  a_src Source data
-    @param[in]  a_limit Limiter. This disallows sign changes in the interpolation (floored to zero)
   */
-  virtual void apply(EBAMRCellData&       a_dst,
-		     const EBAMRCellData& a_src,
-		     const bool         a_limit = false) const;
+  virtual void apply(      EBAMRCellData& a_dst,
+		     const EBAMRCellData& a_src) const;
 
   /*!
     @brief Apply the stencils to an existing data holder. This replaces original data.
     @param[inout] a_dst Data
-    @param[in]  a_limit Limiter. This disallows sign changes in the interpolation (floored to zero)
   */
-  virtual void apply(EBAMRCellData& a_dst,
-		     const bool   a_limit = false) const;
+  virtual void apply(EBAMRCellData& a_dst) const;
 
   /*!
     @brief Apply the stencils to an existing data holder
     @param[out] a_dst Destination data. 
     @param[in]  a_src Source data
-    @param[in]  a_limit Limiter. This disallows sign changes in the interpolation (floored to zero)
   */
-  virtual void apply(EBAMRIVData&         a_dst,
-		     const EBAMRCellData& a_src,
-		     const bool         a_limit = false) const;
+  virtual void apply(      EBAMRIVData&   a_dst,
+		     const EBAMRCellData& a_src) const;
 
   /*!
     @brief Apply stencils to an existing data holders. This replaces original data
     @param[inout] a_data
-    @param[in]  a_limit Limiter. This disallows sign changes in the interpolation (floored to zero)
   */
-  virtual void apply(Vector<EBAMRCellData*>& a_data,
-		     const bool            a_limit = false) const;
+  virtual void apply(Vector<EBAMRCellData*>& a_data) const;
 
   /*!
     @brief Apply stencils to existing data holders
     @param[out] a_dst Destination data holders. 
     @param[in]  a_src Source data holders
-    @param[in]  a_limit Limiter. This disallows sign changes in the interpolation (floored to zero)
   */
-  virtual void apply(Vector<EBAMRCellData*>&       a_dst,
-		     const Vector<EBAMRCellData*>& a_src,
-		     const bool                  a_limit = false) const;
+  virtual void apply(      Vector<EBAMRCellData*>& a_dst,
+		     const Vector<EBAMRCellData*>& a_src) const;
 
   /*!
     @brief Apply stencils to existing data holders
     @param[out] a_dst Destination data holders. 
     @param[in]  a_src Source data holders
-    @param[in]  a_limit Limiter. This disallows sign changes in the interpolation (floored to zero)
   */
-  virtual void apply(Vector<EBAMRIVData*>&         a_dst,
-		     const Vector<EBAMRCellData*>& a_src,
-		     const bool                  a_limit = false) const;
+  virtual void apply(      Vector<EBAMRIVData*>&   a_dst,
+		     const Vector<EBAMRCellData*>& a_src) const;
 
 
 
