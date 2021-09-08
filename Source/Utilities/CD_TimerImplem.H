@@ -16,6 +16,11 @@
 #include <sstream>
 #include <iostream>
 
+// Chombo includes
+#ifdef CH_MPI
+#include <SPMD.H>
+#endif
+
 // Our includes
 #include <CD_Timer.H>
 #include <CD_NamespaceHeader.H>
@@ -51,7 +56,7 @@ void Timer::startEvent(const std::string a_event) noexcept {
   }
   else{ // If the event is not new, we just leave the elapsed time intact. 
     //    const TimePoint startTime = Clock::now();
-    tuple<bool, TimePoint, Duration>& event = m_events.at(a_event);
+    std::tuple<bool, TimePoint, Duration>& event = m_events.at(a_event);
     const bool alreadyRunning = std::get<StoppedEvent>(event);
 
     if(!alreadyRunning){ // Only start the event if it is not already running. 
@@ -66,7 +71,7 @@ void Timer::startEvent(const std::string a_event) noexcept {
 inline
 void Timer::stopEvent(const std::string a_event) noexcept {
   if (m_events.find(a_event) != m_events.end()) {
-    tuple<bool, TimePoint, Duration>& event = m_events.at(a_event);
+    std::tuple<bool, TimePoint, Duration>& event = m_events.at(a_event);
 
     const TimePoint startTime           = std::get<StartClock>(event);
     const TimePoint stopTime            = Clock::now();

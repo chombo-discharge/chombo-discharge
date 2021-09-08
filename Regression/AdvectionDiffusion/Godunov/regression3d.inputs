@@ -11,7 +11,7 @@ AmrMesh.fill_ratio      = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size     = 2           # Number of cells between grid levels
 AmrMesh.grid_algorithm  = tiled       # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
 AmrMesh.box_sorting     = morton      # Box sorting
-AmrMesh.blocking_factor = 8           # Default blocking factor (16 in 3D)
+AmrMesh.blocking_factor = 16          # Default blocking factor (16 in 3D)
 AmrMesh.max_box_size    = 16          # Maximum allowed box size
 AmrMesh.max_ebis_box    = 16          # Maximum allowed box size
 AmrMesh.ref_rat         = 4 2 4 2 2 2 # Refinement ratios
@@ -29,7 +29,7 @@ AmrMesh.load_balance    = volume      # Load balancing algorithm. Valid options 
 # ====================================================================================================
 # DRIVER OPTIONS
 # ====================================================================================================
-Driver.verbosity                       = 3             # Engine verbosity
+Driver.verbosity                       = 1             # Engine verbosity
 Driver.geometry_generation             = chombo-discharge       # Grid generation method, 'chombo-discharge' or 'chombo'
 Driver.geometry_scan_level             = 0             # Geometry scan level for chombo-discharge geometry generator
 Driver.plot_interval                   = 5             # Plot interval
@@ -54,9 +54,9 @@ Driver.plt_vars                        = 0             # 'tags', 'mpi_rank'
 Driver.restart                         = 0             # Restart step (less or equal to 0 implies fresh simulation)
 Driver.allow_coarsening                = false         # Allows removal of grid levels according to CellTagger
 Driver.grow_geo_tags                   = 2             # How much to grow tags when using geometry-based refinement. 
-Driver.refine_angles                   = 30.           # Refine cells if angle between elements exceed this value.
-Driver.refine_electrodes               = -1            # Refine electrode surfaces. -1 => equal to refine_geometry
-Driver.refine_dielectrics              = -1            # Refine dielectric surfaces. -1 => equal to refine_geometry
+Driver.refine_angles                   = 200.          # Refine cells if angle between elements exceed this value.
+Driver.refine_electrodes               = 0             # Refine electrode surfaces. -1 => equal to refine_geometry
+Driver.refine_dielectrics              = 0             # Refine dielectric surfaces. -1 => equal to refine_geometry
 
 
 # ====================================================================================================
@@ -178,4 +178,4 @@ AdvectionDiffusion.cfl            = 0.8     # CFL number
 # ------------------
 AdvectionDiffusion.refine_curv = 0.1          # Refine if curvature exceeds this
 AdvectionDiffusion.refine_magn = 1E-2         # Only tag if magnitude eceeds this
-AdvectionDiffusion.buffer      = 0            # Grow tagged cells     
+AdvectionDiffusion.buffer      = 0            # Grow tagged cells
