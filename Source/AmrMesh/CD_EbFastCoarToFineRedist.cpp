@@ -178,8 +178,10 @@ void EbFastCoarToFineRedist::makeCoarSets(){
   // the mask to 1 in the refinement boundary and use addTo to increment the mask on the coarse level.
   //
   // NOTE: We could, alternatively, simply gather m_setsCedFine globally and compute the intersection of that sets with the irregular cells
-  //       in each coarse-grid box. But I prefer this way to avoid a global reduction of something whose size is unknown. 
+  //       in each coarse-grid box. But I prefer this way to avoid a global reduction of something whose size is unknown. Nonetheless, I'm leaving
+  //       the alternative method in place, should we ever see that the default method becomes a bottleneck. 
 
+#if 1 // Default method
   constexpr Real     zero   = 0.0;
   constexpr Real     one    = 1.0;    
   constexpr int      comp   = 0;
@@ -251,6 +253,19 @@ void EbFastCoarToFineRedist::makeCoarSets(){
       }
     }
   }
+#else
+  IntVectSet globalIVS;
+
+  for (DataIterator dit(m_gridsCedFine); dit.ok(); ++dit){
+    globalIVS |= m_setsCedFine[dit()];
+  }
+
+  this->gatherBroadcast(globalIVS);
+
+  for (DataIterator dit(m_gridsCoar); dit.ok(); ++dit){
+    m_setsCoar[dit()] = globalIVS & m_ebislCoar[dit()].getIrregIVS(m_gridsCoar[dit()]);
+  }
+#endif
 }
 
 void EbFastCoarToFineRedist::gatherBroadcast(IntVectSet& a_set){
