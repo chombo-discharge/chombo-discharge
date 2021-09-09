@@ -17,35 +17,43 @@
 #include <CD_NamespaceHeader.H>
 
 constexpr int IrregStencil::m_defaultStenComp;
+constexpr int IrregStencil::m_defaultNumSten;
 
 IrregStencil::IrregStencil(){
-  CH_TIME("IrregStencil::IrregStencil");
-  m_defined = false;
+
 }
 
 IrregStencil::~IrregStencil(){
 
 }
 
-IrregStencil::IrregStencil(const DisjointBoxLayout&          a_dbl,
-			     const EBISLayout&               a_ebisl,
-			     const ProblemDomain&            a_domain,
-			     const Real&                     a_dx,
-			     const int                       a_order,
-			     const int                       a_radius,
-			     const IrregStencil::StencilType a_type){
-
-  this->define(a_dbl, a_ebisl, a_domain, a_dx, a_order, a_radius, a_type);
-}
-
-
-void IrregStencil::define(const DisjointBoxLayout&         a_dbl,
+IrregStencil::IrregStencil(const DisjointBoxLayout&        a_dbl,
 			   const EBISLayout&               a_ebisl,
 			   const ProblemDomain&            a_domain,
 			   const Real&                     a_dx,
 			   const int                       a_order,
 			   const int                       a_radius,
 			   const IrregStencil::StencilType a_type){
+
+  this->define(a_dbl, a_ebisl, a_domain, a_dx, a_order, a_radius, a_type);
+}
+
+const BaseIVFAB<VoFStencil>& IrregStencil::operator[](const DataIndex& a_dit) const {
+  return *m_stencils[a_dit];
+}
+  
+
+BaseIVFAB<VoFStencil>& IrregStencil::operator[](const DataIndex& a_dit) {
+  return *m_stencils[a_dit];
+}
+
+void IrregStencil::define(const DisjointBoxLayout&        a_dbl,
+			  const EBISLayout&               a_ebisl,
+			  const ProblemDomain&            a_domain,
+			  const Real&                     a_dx,
+			  const int                       a_order,
+			  const int                       a_radius,
+			  const IrregStencil::StencilType a_type){
 
   m_dbl          = a_dbl;
   m_ebisl        = a_ebisl;
@@ -54,20 +62,19 @@ void IrregStencil::define(const DisjointBoxLayout&         a_dbl,
   m_order        = a_order;
   m_stencilType = a_type;
   
-  const int ncomp = 1;
-
   LayoutData<IntVectSet> cfivs;
   EBArith::defineCFIVS(cfivs, a_dbl, a_domain);
 
   m_stencils.define(m_dbl);
   m_vofIter. define(m_dbl);
+  
   for (DataIterator dit = m_dbl.dataIterator(); dit.ok(); ++dit){
-    const Box&     box     = m_dbl.get(dit());
-    const EBISBox& ebisbox = m_ebisl[dit()];
-    const EBGraph& ebgraph = ebisbox.getEBGraph();
-    const IntVectSet& ivs  = ebisbox.getIrregIVS(box);
+    const Box&        box     = m_dbl[dit()];
+    const EBISBox&    ebisbox = m_ebisl[dit()];
+    const EBGraph&    ebgraph = ebisbox.getEBGraph();
+    const IntVectSet& ivs     = ebisbox.getIrregIVS(box);
 
-    m_stencils[dit()] = RefCountedPtr<BaseIVFAB<VoFStencil> > (new BaseIVFAB<VoFStencil>(ivs, ebgraph, ncomp));
+    m_stencils[dit()] = RefCountedPtr<BaseIVFAB<VoFStencil> > (new BaseIVFAB<VoFStencil>(ivs, ebgraph, m_defaultNumSten));
 
 
     VoFIterator& vofit = m_vofIter[dit()];
@@ -91,7 +98,6 @@ void IrregStencil::define(const DisjointBoxLayout&         a_dbl,
 #endif
     }
   }  
-
 }
 
 void IrregStencil::apply(EBCellFAB& a_dst, const EBCellFAB& a_src, const DataIndex& a_dit) const {
