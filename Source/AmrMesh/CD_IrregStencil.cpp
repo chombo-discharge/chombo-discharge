@@ -16,6 +16,8 @@
 #include <CD_IrregStencil.H>
 #include <CD_NamespaceHeader.H>
 
+constexpr int IrregStencil::m_defaultStenComp;
+
 IrregStencil::IrregStencil(){
   CH_TIME("IrregStencil::IrregStencil");
   m_defined = false;
@@ -90,6 +92,56 @@ void IrregStencil::define(const DisjointBoxLayout&         a_dbl,
     }
   }  
 
+}
+
+void IrregStencil::apply(EBCellFAB& a_dst, const EBCellFAB& a_src, const DataIndex& a_dit) const {
+  CH_TIME("IrregStencil::apply");
+
+  const BaseIVFAB<VoFStencil>& stencils = *m_stencils[a_dit];
+
+  VoFIterator& vofit = m_vofIter[a_dit];
+  
+  for (vofit.reset(); vofit.ok(); ++vofit){
+    const VolIndex&   vof     = vofit();
+    const VoFStencil& stencil = stencils(vof, m_defaultStenComp);
+
+    for (int comp = 0; comp < a_dst.nComp(); comp++){
+
+      a_dst(vof, comp) = 0.0;
+      
+      for (int i = 0; i < stencil.size(); i++){
+	const VolIndex& ivof    = stencil.vof(i);
+	const Real&     iweight = stencil.weight(i);
+
+	a_dst(vof, comp) += iweight * a_src(ivof, comp);
+      }
+    }
+  }
+}
+
+void IrregStencil::apply(BaseIVFAB<Real>& a_dst, const EBCellFAB& a_src, const DataIndex& a_dit) const {
+  CH_TIME("IrregStencil::apply");
+
+  const BaseIVFAB<VoFStencil>& stencils = *m_stencils[a_dit];
+
+  VoFIterator& vofit = m_vofIter[a_dit];
+  
+  for (vofit.reset(); vofit.ok(); ++vofit){
+    const VolIndex&   vof     = vofit();
+    const VoFStencil& stencil = stencils(vof, m_defaultStenComp);
+
+    for (int comp = 0; comp < a_dst.nComp(); comp++){
+
+      a_dst(vof, comp) = 0.0;
+      
+      for (int i = 0; i < stencil.size(); i++){
+	const VolIndex& ivof    = stencil.vof(i);
+	const Real&     iweight = stencil.weight(i);
+
+	a_dst(vof, comp) += iweight * a_src(ivof, comp);
+      }
+    }
+  }  
 }
 
 #include <CD_NamespaceFooter.H>

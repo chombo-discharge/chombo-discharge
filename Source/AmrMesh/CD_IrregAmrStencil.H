@@ -20,9 +20,8 @@
 /*!
   @brief Class for holding VoFStencils on irregular cells over an entire AMR hierarchy. The template
   parameter must inherit from IrregStencil. The stencil can only be applied to EBCellFABs. 
-  @details This class holds a single stencil on each irregular cells. When you apply 
-  the stencil to a data holder, is will be applie to all the components of that data
-  holder. 
+  @details This class is simply an AMR wrapper for IrregStencil, which represents the cut-cell stencils 
+  on a single AMR level. 
   @note This does not use aggregate stencil functionality. Do not use this class inside multigrid!
 */
 template <class IrregSten>
@@ -167,11 +166,6 @@ public:
 		     const Vector<EBAMRCellData*>& a_src) const;
 
 protected:
-
-  /*!
-    @brief Stencil component
-  */
-  static constexpr int stenComp = 0;
 
   /*!
     @brief AMR grids

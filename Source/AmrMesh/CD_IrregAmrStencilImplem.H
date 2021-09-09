@@ -17,9 +17,6 @@
 #include <CD_NamespaceHeader.H>
 
 template <class IrregSten>
-constexpr int IrregAmrStencil<IrregSten>::stenComp;
-
-template <class IrregSten>
 IrregAmrStencil<IrregSten>::IrregAmrStencil(){
   CH_TIME("IrregAmrStencil::IrregAmrStencil");
   m_isDefined = false;
@@ -97,35 +94,9 @@ void IrregAmrStencil<IrregSten>::apply(      LevelData<EBCellFAB>& a_dst,
   CH_TIME("IrregAmrStencil::apply");
 
   CH_assert(m_isDefined);
-
-  const DisjointBoxLayout& dbl     =  m_grids   [a_lvl];
-  const EBISLayout&        ebisl   =  m_ebisl   [a_lvl];
-  const IrregStencil&      irrSten = *m_stencils[a_lvl];
-  const int                nComp   =  a_dst.nComp();
   
-  for (DataIterator dit(dbl); dit.ok(); ++dit){
-    const BaseIVFAB<VoFStencil>& stencils = irrSten[dit()];    
-
-    EBCellFAB& dst       = a_dst[dit()];
-    const EBCellFAB& src = a_src[dit()];
-
-    // Apply stencil in each cut-cell. 
-    VoFIterator& vofit = irrSten.getVofIterator(dit());
-    for (vofit.reset(); vofit.ok(); ++vofit){    
-      const VolIndex& vof       = vofit();
-      const VoFStencil& vofSten = stencils(vof, stenComp);
-
-      for (int comp = 0; comp < nComp; comp++){
-	dst(vof, comp) = 0.;
-
-	for (int i = 0; i < vofSten.size(); i++){
-	  const VolIndex& ivof    = vofSten.vof(i);
-	  const Real&     iweight = vofSten.weight(i);
-	  
-	  dst(vof,comp) += iweight * src(ivof, comp);
-	}
-      }
-    }
+  for (DataIterator dit(m_grids[a_lvl]); dit.ok(); ++dit){
+    m_stencils[a_lvl]->apply(a_dst[dit()], a_src[dit()], dit());
   }
 }
 
@@ -136,39 +107,16 @@ void IrregAmrStencil<IrregSten>::apply(LevelData<EBCellFAB>& a_data,
 
   CH_assert(m_isDefined);  
 
-  const DisjointBoxLayout& dbl     =  m_grids   [a_lvl];
-  const EBISLayout&        ebisl   =  m_ebisl   [a_lvl];
-  const IrregStencil&      irrSten = *m_stencils[a_lvl];
-  const int                nComp   =  a_data.nComp();
-  
-  for (DataIterator dit(dbl); dit.ok(); ++dit){
-    const BaseIVFAB<VoFStencil>& stencils = irrSten[dit()];
-
+  for (DataIterator dit(m_grids[a_lvl]); dit.ok(); ++dit){
     EBCellFAB& data = a_data[dit()];
     EBCellFAB  cpy;
 
     // Need a clone to avoid race condition. 
     cpy.clone(data);
     cpy.setVal(0.0);
-    cpy += data;    
+    cpy += data;
 
-    // Apply stencil in each cut-cell. 
-    VoFIterator& vofit = irrSten.getVofIterator(dit());
-    for (vofit.reset(); vofit.ok(); ++vofit){
-      const VolIndex& vof       = vofit();
-      const VoFStencil& vofSten = stencils(vof, stenComp);
-
-      for (int comp = 0; comp < nComp; comp++){
-	data(vof, comp) = 0.;
-
-	for (int i = 0; i < vofSten.size(); i++){
-	  const VolIndex& ivof    = vofSten.vof(i);
-	  const Real&     iweight = vofSten.weight(i);
-	  
-	  data(vof,comp) += iweight * cpy(ivof, comp);
-	}
-      }
-    }
+    m_stencils[a_lvl]->apply(data, cpy, dit());    
   }
 }
 
@@ -180,34 +128,8 @@ void IrregAmrStencil<IrregSten>::apply(LevelData<BaseIVFAB<Real> >& a_dst,
 
   CH_assert(m_isDefined);
 
-  const DisjointBoxLayout& dbl     =  m_grids   [a_lvl];
-  const EBISLayout&        ebisl   =  m_ebisl   [a_lvl];
-  const IrregStencil&      irrSten = *m_stencils[a_lvl];
-  const int                nComp   =  a_dst.nComp();  
-
-  for (DataIterator dit(dbl); dit.ok(); ++dit){
-    const BaseIVFAB<VoFStencil>& stencils = irrSten[dit()];
-    
-    const EBCellFAB& src = a_src[dit()];
-    BaseIVFAB<Real>& dst = a_dst[dit()];
-
-    // Apply stencil in each cut-cell. 
-    VoFIterator& vofit = irrSten.getVofIterator(dit());
-    for (vofit.reset(); vofit.ok(); ++vofit){          
-      const VolIndex& vof       = vofit();
-      const VoFStencil& vofSten = stencils(vof, stenComp);
-
-      for (int comp = 0; comp < nComp; comp++){
-	dst(vof, comp) = 0.0;
-
-	for (int i = 0; i < vofSten.size(); i++){
-	  const VolIndex& ivof    = vofSten.vof(i);
-	  const Real&     iweight = vofSten.weight(i);
-	  
-	  dst(vof,comp) += iweight * src(ivof, comp);
-	}
-      }
-    }
+  for (DataIterator dit(m_grids[a_lvl]); dit.ok(); ++dit){
+    m_stencils[a_lvl]->apply(a_dst[dit()], a_src[dit()], dit());
   }
 }
 

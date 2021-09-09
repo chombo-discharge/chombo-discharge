@@ -92,7 +92,22 @@ public:
     return m_vofIter[a_dit];
   }
 
+  /*!
+    @brief Apply the stencil
+  */
+  virtual void apply(EBCellFAB& a_dst, const EBCellFAB& a_src, const DataIndex& a_dit) const;
+
+  /*!
+    @brief Apply the stencil
+  */
+  virtual void apply(BaseIVFAB<Real>& a_dst, const EBCellFAB& a_src, const DataIndex& a_dit) const;  
+
 protected:
+
+  /*!
+    @brief Default stencil component
+  */
+  static constexpr int m_defaultStenComp = 0;
 
   /*!
     @brief Stencil
