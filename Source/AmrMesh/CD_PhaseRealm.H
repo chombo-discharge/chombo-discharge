@@ -528,12 +528,12 @@ protected:
   /*!
     @brief Data recentering utility (center to centroid)
   */
-  RefCountedPtr<IrregAmrStencil<CentroidInterpolationStencil> > m_CentroidInterpolationStencil;
+  RefCountedPtr<IrregAmrStencil<CentroidInterpolationStencil> > m_centroidInterpolationStencil;
 
   /*!
     @brief Data recentering utility (center to eb centroid)
   */
-  RefCountedPtr<IrregAmrStencil<EbCentroidInterpolationStencil> > m_EbCentroidInterpolationStencil;
+  RefCountedPtr<IrregAmrStencil<EbCentroidInterpolationStencil> > m_ebCentroidInterpolationStencil;
 
   /*!
     @brief Stencils for non-conservative divergences
@@ -543,7 +543,7 @@ protected:
   /*!
     @brief Gradient stencils
   */
-  Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > > m_gradsten;
+  Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > > m_gradSten;
 
   /*!
     @brief Define EBLevelGrids

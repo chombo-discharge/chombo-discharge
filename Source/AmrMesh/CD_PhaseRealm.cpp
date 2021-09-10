@@ -769,7 +769,7 @@ void PhaseRealm::defineGradSten(const int a_lmin){
 
   const bool doThisOperator = this->queryOperator(s_eb_gradient);
 
-  m_gradsten.resize(1 + m_finestLevel);
+  m_gradSten.resize(1 + m_finestLevel);
 
   if(doThisOperator){
     
@@ -778,7 +778,7 @@ void PhaseRealm::defineGradSten(const int a_lmin){
       const ProblemDomain& domain  = m_domains[lvl];
       const Real dx                = m_dx     [lvl];
     
-      m_gradsten[lvl] = RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > (new LayoutData<BaseIVFAB<VoFStencil> >(dbl));
+      m_gradSten[lvl] = RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > (new LayoutData<BaseIVFAB<VoFStencil> >(dbl));
 
       const EBISLayout& ebisl = m_ebisl[lvl];
 
@@ -788,23 +788,27 @@ void PhaseRealm::defineGradSten(const int a_lmin){
 	const Box      box     = dbl  [dit()];
 	const EBISBox& ebisbox = ebisl[dit()];
 	const EBGraph& ebgraph = ebisbox.getEBGraph();
-	
+
+	// The set of cells where we need explicit stencils are the irregular cells AND the cells on the domain boundary. 
 	IntVectSet ivs = ebisbox.getIrregIVS(box);
 	for (int dir = 0; dir < SpaceDim; dir++){
-	  Box lo_box, hi_box;
-	  int has_lo, has_hi;
+	  Box loBox;
+	  Box hiBox;
+	  int hasLo;
+	  int hasHi;
 	
-	  EBArith::loHi(lo_box, has_lo, hi_box, has_hi, domain, box, dir);
+	  EBArith::loHi(loBox, hasLo, hiBox, hasHi, domain, box, dir);
 	
-	  if(has_lo){
-	    ivs |= IntVectSet(lo_box);
+	  if(hasLo){
+	    ivs |= IntVectSet(loBox);
 	  }
-	  if(has_hi){
-	    ivs |= IntVectSet(hi_box);
+	  if(hasHi){
+	    ivs |= IntVectSet(hiBox);
 	  }
 	}
 
-	BaseIVFAB<VoFStencil>& vofstencils = (*m_gradsten[lvl])[dit()];
+	// Define data holder for the gradient stencils. 
+	BaseIVFAB<VoFStencil>& vofstencils = (*m_gradSten[lvl])[dit()];
 	vofstencils.define(ivs, ebgraph, 1);
 
 	for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
@@ -812,11 +816,11 @@ void PhaseRealm::defineGradSten(const int a_lmin){
 
 	  VoFStencil& sten = vofstencils(vof, 0);
 	  sten.clear();
+
+	  // Add stencils for each Cartesian direction. 
 	  for (int dir = 0; dir < SpaceDim; dir++){
 	    VoFStencil dirsten;
-	    //	    EBArith::getFirstDerivStencil(dirsten, vof, ebisbox, dir, dx, &cfivs[dit()], dir);
-	    EBArith::getFirstDerivStencilWidthOne(dirsten, vof, ebisbox, dir, dx, NULL, dir);
-	    //	    EBArith::getFirstDerivStencil(dirsten, vof, ebisbox, dir, dx, NULL, dir);
+	    EBArith::getFirstDerivStencilWidthOne(dirsten, vof, ebisbox, dir, dx, nullptr, dir);
 	    sten += dirsten;
 	  }
 	}
@@ -833,23 +837,23 @@ void PhaseRealm::defineCopier(const int a_lmin){
 
   const bool doThisOperator = this->queryOperator(s_eb_copier);
 
-  m_copier.resize(1 + m_finestLevel);
+  m_copier.       resize(1 + m_finestLevel);
   m_reverseCopier.resize(1 + m_finestLevel);
 
   if(doThisOperator){
     
     for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++){
-      m_copier[lvl] = RefCountedPtr<Copier> (new Copier(m_grids[lvl],
-							m_grids[lvl],
+      m_copier[lvl] = RefCountedPtr<Copier> (new Copier(m_grids  [lvl],
+							m_grids  [lvl],
 							m_domains[lvl],
 							m_numGhostCells*IntVect::Unit,
 							true));
       
-      m_reverseCopier[lvl] = RefCountedPtr<Copier> (new Copier(m_grids[lvl],
-								m_grids[lvl],
-								m_domains[lvl],
-								m_numGhostCells*IntVect::Unit,
-								true));
+      m_reverseCopier[lvl] = RefCountedPtr<Copier> (new Copier(m_grids  [lvl],
+							       m_grids  [lvl],
+							       m_domains[lvl],
+							       m_numGhostCells*IntVect::Unit,
+							       true));
       m_reverseCopier[lvl]->reverse();
     }
   }
@@ -871,12 +875,12 @@ void PhaseRealm::defineGhostCloud(const int a_lmin){
       const bool hasCoar = lvl > 0;
 
       if(hasCoar){
-	m_ghostclouds[lvl] = RefCountedPtr<EbGhostCloud> (new EbGhostCloud(m_grids[lvl-1],
-									   m_grids[lvl],
-									   *m_eblg[lvl-1],
-									   *m_eblg[lvl],
+	m_ghostclouds[lvl] = RefCountedPtr<EbGhostCloud> (new EbGhostCloud(m_grids  [lvl-1],
+									   m_grids  [lvl  ],
+									   *m_eblg  [lvl-1],
+									   *m_eblg  [lvl  ],
 									   m_domains[lvl-1],
-									   m_domains[lvl],
+									   m_domains[lvl  ],
 									   m_refinementRatios[lvl-1],
 									   1,
 									   m_numGhostCells));
@@ -895,11 +899,14 @@ void PhaseRealm::defineIrregSten(){
   const bool doThisOperator = this->queryOperator(s_eb_irreg_interp);
 
   if(doThisOperator){
-    
-    const int order = 1;
-    const int rad   = 1;
 
-    m_CentroidInterpolationStencil = RefCountedPtr<IrregAmrStencil<CentroidInterpolationStencil> >
+    // I don't want these to be have a large radius or high order. The reason for that is simple: Only first-order stencils
+    // can be guaranteed to have non-negative interpolation weights.
+    
+    constexpr int order = 1;
+    constexpr int rad   = 1;
+
+    m_centroidInterpolationStencil = RefCountedPtr<IrregAmrStencil<CentroidInterpolationStencil> >
       (new IrregAmrStencil<CentroidInterpolationStencil>(m_grids,
 							 m_ebisl,
 							 m_domains,
@@ -909,7 +916,7 @@ void PhaseRealm::defineIrregSten(){
 							 rad,
 							 m_centroidStencilType));
       
-    m_EbCentroidInterpolationStencil = RefCountedPtr<IrregAmrStencil<EbCentroidInterpolationStencil> >
+    m_ebCentroidInterpolationStencil = RefCountedPtr<IrregAmrStencil<EbCentroidInterpolationStencil> >
       (new IrregAmrStencil<EbCentroidInterpolationStencil>(m_grids,
 							   m_ebisl,
 							   m_domains,
@@ -932,7 +939,6 @@ void PhaseRealm::defineNonConsDivSten(){
   if(doThisOperator){
     const int order = 1; // Dummy argument
     const int rad   = m_redistributionRadius;
-
     
     m_NonConservativeDivergenceStencil = RefCountedPtr<IrregAmrStencil<NonConservativeDivergenceStencil> >
       (new IrregAmrStencil<NonConservativeDivergenceStencil>(m_grids,
@@ -940,9 +946,9 @@ void PhaseRealm::defineNonConsDivSten(){
 							     m_domains,
 							     m_dx,
 							     m_finestLevel,
-							     order,                 // Dummy argument
+							     order,                   // Dummy argument
 							     m_redistributionRadius,
-							     m_centroidStencilType));  // Dummy argumement
+							     m_centroidStencilType)); // Dummy argument, just use centroidStencilType. 
   }
 }
 
@@ -982,105 +988,137 @@ Vector<RefCountedPtr<LayoutData<VoFIterator> > >& PhaseRealm::getVofIterator() c
 }
 
 const IrregAmrStencil<CentroidInterpolationStencil>& PhaseRealm::getCentroidInterpolationStencils() const {
-  return *m_CentroidInterpolationStencil;
+  return *m_centroidInterpolationStencil;
 }
 
 const IrregAmrStencil<EbCentroidInterpolationStencil>& PhaseRealm::getEbCentroidInterpolationStencilStencils() const {
-  return *m_EbCentroidInterpolationStencil;
+  return *m_ebCentroidInterpolationStencil;
 }
 
 const Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& PhaseRealm::getGradientStencils() const {
-  if(!this->queryOperator(s_eb_gradient)) MayDay::Error("PhaseRealm::getGradientStencils - operator not registered!");
+  if(!this->queryOperator(s_eb_gradient)) {
+    MayDay::Error("PhaseRealm::getGradientStencils - operator not registered!");
+  }
   
-  return m_gradsten;
+  return m_gradSten;
 }
 
 const IrregAmrStencil<NonConservativeDivergenceStencil>& PhaseRealm::getNonConservativeDivergenceStencils() const {
-  if(!this->queryOperator(s_noncons_div)) MayDay::Error("PhaseRealm::get_non_cons_div_stencils - operator not registered!");
+  if(!this->queryOperator(s_noncons_div)) {
+    MayDay::Error("PhaseRealm::getNonConservativeDivergenceStencils - operator not registered!");
+  }
   
   return *m_NonConservativeDivergenceStencil;
 }
 
 Vector<RefCountedPtr<EbCoarAve> >& PhaseRealm::getCoarseAverage() const {
-  if(!this->queryOperator(s_eb_coar_ave)) MayDay::Error("PhaseRealm::getCoarseAverage - operator not registered!");
+  if(!this->queryOperator(s_eb_coar_ave)) {
+    MayDay::Error("PhaseRealm::getCoarseAverage - operator not registered!");
+  }
   
   return m_coarAve;
 }
 
 Vector<RefCountedPtr<EbGhostCloud> >& PhaseRealm::getGhostCloud() const {
-  if(!this->queryOperator(s_eb_ghostcloud)) MayDay::Error("PhaseRealm::getGhostCloud - operator not registered!");
+  if(!this->queryOperator(s_eb_ghostcloud)) {
+    MayDay::Error("PhaseRealm::getGhostCloud - operator not registered!");
+  }
   
   return m_ghostclouds;
 }
 
 Vector<RefCountedPtr<EBMultigridInterpolator> >& PhaseRealm::getMultigridInterpolator() const {
-  if(!this->queryOperator(s_eb_multigrid)) MayDay::Error("PhaseRealm::getEBMultigridInterpolator - operator not registered!");
+  if(!this->queryOperator(s_eb_multigrid)) {
+    MayDay::Error("PhaseRealm::getEBMultigridInterpolator - operator not registered!");
+  }
   
   return m_multigridInterpolator;
 }
 
 Vector<RefCountedPtr<AggEBPWLFillPatch> >& PhaseRealm::getFillPatch() const {
-  if(!this->queryOperator(s_eb_fill_patch)) MayDay::Error("PhaseRealm::getFillPatch - operator not registered!");
+  if(!this->queryOperator(s_eb_fill_patch)) {
+    MayDay::Error("PhaseRealm::getFillPatch - operator not registered!");
+  }
   
   return m_pwlFillPatch;
 }
 
 Vector<RefCountedPtr<EBPWLFineInterp> >& PhaseRealm::getPwlInterpolator() const {
-  if(!this->queryOperator(s_eb_pwl_interp)) MayDay::Error("PhaseRealm::getPwlInterpolator - operator not registered!");
+  if(!this->queryOperator(s_eb_pwl_interp)) {
+    MayDay::Error("PhaseRealm::getPwlInterpolator - operator not registered!");
+  }
   
   return m_pwlInterpGhosts;
 }
 
 Vector<RefCountedPtr<EBMGInterp> >& PhaseRealm::getEBMGInterp() const {
-  if(!this->queryOperator(s_eb_mg_interp)) MayDay::Error("PhaseRealm::getEBMGInterp - operator not registered!");
+  if(!this->queryOperator(s_eb_mg_interp)) {
+    MayDay::Error("PhaseRealm::getEBMGInterp - operator not registered!");
+  }
   
   return m_mgInjection;
 }
 
 Vector<RefCountedPtr<EBFluxRegister> >&  PhaseRealm::getFluxRegister() const {
-  if(!this->queryOperator(s_eb_flux_reg)) MayDay::Error("PhaseRealm::getFluxRegister - operator not registered!");
+  if(!this->queryOperator(s_eb_flux_reg)) {
+    MayDay::Error("PhaseRealm::getFluxRegister - operator not registered!");
+  }
 
   return m_fluxReg;
 }
 
 Vector<RefCountedPtr<EBLevelRedist> >&  PhaseRealm::getLevelRedist() const {
-  if(!this->queryOperator(s_eb_redist)) MayDay::Error("PhaseRealm::getLevelRedist - operator not registered!");
+  if(!this->queryOperator(s_eb_redist)) {
+    MayDay::Error("PhaseRealm::getLevelRedist - operator not registered!");
+  }
 
   return m_levelRedist;
 }
 
 Vector<RefCountedPtr<EBCoarToFineRedist> >&  PhaseRealm::getCoarToFineRedist() const {
-  if(!this->queryOperator(s_eb_redist)) MayDay::Error("PhaseRealm::getCoarToFineRedist - operator not registered!");
+  if(!this->queryOperator(s_eb_redist)) {
+    MayDay::Error("PhaseRealm::getCoarToFineRedist - operator not registered!");
+  }
 
   return m_coarToFineRedist;
 }
 
 Vector<RefCountedPtr<EBCoarToCoarRedist> >&  PhaseRealm::getCoarToCoarRedist() const {
-  if(!this->queryOperator(s_eb_redist)) MayDay::Error("PhaseRealm::get_coar_to_coar - operator not registered!");
+  if(!this->queryOperator(s_eb_redist)) {
+    MayDay::Error("PhaseRealm::get_coar_to_coar - operator not registered!");
+  }
 
   return m_coarToCoarRedist;
 }
 
 Vector<RefCountedPtr<EBFineToCoarRedist> >&  PhaseRealm::getFineToCoarRedist() const {
-  if(!this->queryOperator(s_eb_redist)) MayDay::Error("PhaseRealm::getFineToCoarRedist - operator not registered!");
+  if(!this->queryOperator(s_eb_redist)) {
+    MayDay::Error("PhaseRealm::getFineToCoarRedist - operator not registered!");
+  }
 
   return m_fineToCoarRedist;
 }
 
 Vector<RefCountedPtr<Copier> >& PhaseRealm::getCopier() const {
-  if(!this->queryOperator(s_eb_copier)) MayDay::Error("PhaseRealm::getCopier - operator not registered!");
+  if(!this->queryOperator(s_eb_copier)) {
+    MayDay::Error("PhaseRealm::getCopier - operator not registered!");
+  }
 
   return m_copier;
 }
 
 Vector<RefCountedPtr<Copier> >& PhaseRealm::getReverseCopier() const {
-  if(!this->queryOperator(s_eb_copier)) MayDay::Error("PhaseRealm::getReverseCopier - operator not registered!");
+  if(!this->queryOperator(s_eb_copier)) {
+    MayDay::Error("PhaseRealm::getReverseCopier - operator not registered!");
+  }
   
   return m_reverseCopier;
 }
 
 const EBAMRFAB& PhaseRealm::getLevelset() const {
-  if(!this->queryOperator(s_levelset)) MayDay::Error("PhaseRealm::getLevelset - operator not registered!");
+  if(!this->queryOperator(s_levelset)) {
+    MayDay::Error("PhaseRealm::getLevelset - operator not registered!");
+  }
 
   return m_levelset;
 }
