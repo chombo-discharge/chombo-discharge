@@ -543,7 +543,7 @@ protected:
   /*!
     @brief Gradient stencils
   */
-  Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > > m_gradSten;
+  Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > > m_gradientStencils;
 
   /*!
     @brief Define EBLevelGrids

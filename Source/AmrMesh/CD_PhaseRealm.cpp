@@ -769,7 +769,7 @@ void PhaseRealm::defineGradSten(const int a_lmin){
 
   const bool doThisOperator = this->queryOperator(s_eb_gradient);
 
-  m_gradSten.resize(1 + m_finestLevel);
+  m_gradientStencils.resize(1 + m_finestLevel);
 
   if(doThisOperator){
     
@@ -778,7 +778,7 @@ void PhaseRealm::defineGradSten(const int a_lmin){
       const ProblemDomain& domain  = m_domains[lvl];
       const Real dx                = m_dx     [lvl];
     
-      m_gradSten[lvl] = RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > (new LayoutData<BaseIVFAB<VoFStencil> >(dbl));
+      m_gradientStencils[lvl] = RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > (new LayoutData<BaseIVFAB<VoFStencil> >(dbl));
 
       const EBISLayout& ebisl = m_ebisl[lvl];
 
@@ -808,7 +808,7 @@ void PhaseRealm::defineGradSten(const int a_lmin){
 	}
 
 	// Define data holder for the gradient stencils. 
-	BaseIVFAB<VoFStencil>& vofstencils = (*m_gradSten[lvl])[dit()];
+	BaseIVFAB<VoFStencil>& vofstencils = (*m_gradientStencils[lvl])[dit()];
 	vofstencils.define(ivs, ebgraph, 1);
 
 	for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
@@ -1000,7 +1000,7 @@ const Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& PhaseRealm::g
     MayDay::Error("PhaseRealm::getGradientStencils - operator not registered!");
   }
   
-  return m_gradSten;
+  return m_gradientStencils;
 }
 
 const IrregAmrStencil<NonConservativeDivergenceStencil>& PhaseRealm::getNonConservativeDivergenceStencils() const {

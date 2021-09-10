@@ -309,23 +309,7 @@ public:
     @return A single-phase alias of the multifluid data, having the same size as the input data. 
   */
   EBAMRIVData alias(const phase::which_phase a_phase, const MFAMRIVData& a_mfdata) const;
-
-  /*!
-    @brief Compute cell-centered gradient for a grid level.
-    @param[out] a_gradient Cell centered gradient. 
-    @param[in]  a_phi      The scalar for which the gradient is computed. 
-    @param[in]  a_realm    Name of the realm where the data lives. 
-    @param[in]  a_phase    Phase on which the data lives. 
-    @param[in]  a_lvl      Grid level where the data lives. 
-    @note This routine will reach into ghost cells and across refinement boundaries. The user must make sure that 
-    ghost cells updated before using this routine. 
-  */
-  void computeGradient(LevelData<EBCellFAB>&       a_gradient,
-		       const LevelData<EBCellFAB>& a_phi,
-		       const std::string           a_realm,
-		       const phase::which_phase    a_phase,
-		       const int                   a_lvl) const;
-
+  
   /*!
     @brief Compute cell-centered gradient over an AMR hierarchy. 
     @param[out] a_gradient Cell centered gradient. 
@@ -1284,6 +1268,22 @@ protected:
     @brief Parse EB interpolation (or extrapolation) stencils
   */
   void parseEbCentroidStencils();
+
+  /*!
+    @brief Compute cell-centered gradient for a grid level.
+    @param[out] a_gradient Cell centered gradient. 
+    @param[in]  a_phi      The scalar for which the gradient is computed. 
+    @param[in]  a_realm    Name of the realm where the data lives. 
+    @param[in]  a_phase    Phase on which the data lives. 
+    @param[in]  a_lvl      Grid level where the data lives. 
+    @note This routine will reach into ghost cells and across refinement boundaries. The user must make sure that 
+    ghost cells updated before using this routine. 
+  */
+  void computeGradient(LevelData<EBCellFAB>&       a_gradient,
+		       const LevelData<EBCellFAB>& a_phi,
+		       const std::string           a_realm,
+		       const phase::which_phase    a_phase,
+		       const int                   a_lvl) const;  
 };
 
 #include <CD_NamespaceFooter.H>
