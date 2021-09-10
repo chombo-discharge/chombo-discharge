@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_PhaseRealm.H
-  @brief  Declaration of the PhaseRealm class
+  @brief  Declaration of the PhaseRealm class. 
   @author Robert Marskar
 */
 
@@ -61,6 +61,13 @@ static const std::string s_levelset        = "levelset"       ;  // For putting 
 
 /*!
   @brief Class that holds important things for doing AMR over a specific phase and processor distribution. 
+  @details This class is essentially an EBAMR core-grid class, containing the usually EBAMR stuff within
+  a single EBIndexSpace. In thus contains a set of grids (DisjointBoxLayout) and the usual EB stuff
+  (EBLevelGrid, EBISLayout). In addition, it contains a bunch of operators that can be registered by the
+  user (through the user interface AmrMesh). These operators live in this class, and they can be fetched
+  e.g. by AmrMesh. 
+  @note This class is a book-keeping class used by AmrMesh -- it is not meant for direct interaction. 
+  @note To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.verbose=true
 */
 class PhaseRealm {
 public:
@@ -334,14 +341,14 @@ protected:
   bool m_profile;
 
   /*!
+    @brief Verbose or not
+  */
+  bool m_verbose;
+
+  /*!
     @brief Finest grid level
   */
   int m_finestLevel;
-
-  /*!
-    @brief Realm verbosity (used for debugging)
-  */
-  int m_verbosity;
 
   /*!
     @brief Number of ghost cells in data holders
