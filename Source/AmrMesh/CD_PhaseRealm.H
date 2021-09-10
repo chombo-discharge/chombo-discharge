@@ -473,7 +473,7 @@ protected:
   /*!
     @brief Coarsening operator
   */
-  mutable Vector<RefCountedPtr<EbCoarAve> > m_coarave;
+  mutable Vector<RefCountedPtr<EbCoarAve> > m_coarAve;
 
   /*!
     @brief Operator for hanging particle deposition clouds
