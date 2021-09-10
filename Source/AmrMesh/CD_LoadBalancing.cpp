@@ -9,9 +9,6 @@
   @author  Robert Marskar
 */
 
-// Chombo includes
-//#include <EBEllipticLoadBalance.H>
-
 // Our includes
 #include <CD_LoadBalancing.H>
 #include <CD_NamespaceHeader.H>
