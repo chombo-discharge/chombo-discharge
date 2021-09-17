@@ -270,11 +270,6 @@ protected:
   LayoutData<std::map<std::pair<int, Side::LoHiSide>, Box> > m_cfivs;
 
   /*!
-    @brief Defines the CFIVS. 
-  */
-  void defineCFIVS();
-
-  /*!
     @brief Define ghost cells to be filled in range m_ghostCF from each cut-cell. 
   */
   void defineGhostRegions();

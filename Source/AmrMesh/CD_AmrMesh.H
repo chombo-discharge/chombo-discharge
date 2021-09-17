@@ -592,7 +592,35 @@ public:
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
   */
+  void interpGhostPwl(MFAMRCellData& a_data, const std::string a_realm) const;  
+
+  /*!
+    @brief Interpolate ghost cells over a realm and phase. This uses piecewise linear interpolation (with limiters)
+    @param[inout] a_data  Data to be interpolated
+    @param[in]    a_realm Realm name
+    @param[in]    a_phase Phase (gas or solid)
+  */
   void interpGhostPwl(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+
+  /*!
+    @brief Interpolate ghost cells over a realm and phase. 
+    @details This routine uses the multigrid interpolator, which does not reach into invalid regions. I.e., all
+    ghost cells are interpolated using valid data only. 
+    @param[inout] a_data  Data to be interpolated
+    @param[in]    a_realm Realm name
+    @param[in]    a_phase Phase (gas or solid)
+  */
+  void interpGhostMG(MFAMRCellData& a_data, const std::string a_realm) const;    
+
+  /*!
+    @brief Interpolate ghost cells over a realm and phase. 
+    @details This routine uses the multigrid interpolator, which does not reach into invalid regions. I.e., all
+    ghost cells are interpolated using valid data only. 
+    @param[inout] a_data  Data to be interpolated
+    @param[in]    a_realm Realm name
+    @param[in]    a_phase Phase (gas or solid)
+  */
+  void interpGhostMG(EBAMRCellData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;  
 
   /*!
     @brief Interpolate data to centroids on realm and phase
@@ -615,8 +643,6 @@ public:
     @param[in] a_baseIF The level-set function describing the phase. 
   */
   void setBaseImplicitFunction(const phase::which_phase a_phase, const RefCountedPtr<BaseIF>& a_baseIF);
-
-
 
   /*!
     @brief Regrid function. Generate new grids and operators.

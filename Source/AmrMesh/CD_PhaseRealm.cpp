@@ -769,62 +769,41 @@ void PhaseRealm::defineGradSten(const int a_lmin){
 
   const bool doThisOperator = this->queryOperator(s_eb_gradient);
 
-  m_gradientStencils.resize(1 + m_finestLevel);
+  m_gradientOp.      resize(1 + m_finestLevel);
 
   if(doThisOperator){
-    
-    for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++){
-      const DisjointBoxLayout& dbl = m_grids  [lvl];
-      const ProblemDomain& domain  = m_domains[lvl];
-      const Real dx                = m_dx     [lvl];
-    
-      m_gradientStencils[lvl] = RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > (new LayoutData<BaseIVFAB<VoFStencil> >(dbl));
 
-      const EBISLayout& ebisl = m_ebisl[lvl];
+    // Define gradient operator. 
+    for (int lvl = 0; lvl <= m_finestLevel; lvl++){
 
-      LayoutData<IntVectSet>& cfivs = *m_eblg[lvl]->getCFIVS();
+      const bool hasCoar = lvl > 0;
+      const bool hasFine = lvl < m_finestLevel;
+
+      EBLevelGrid eblg;
+      EBLevelGrid eblgFine;
+
+      int refRat;
       
-      for (DataIterator dit(dbl); dit.ok(); ++dit){
-	const Box      box     = dbl  [dit()];
-	const EBISBox& ebisbox = ebisl[dit()];
-	const EBGraph& ebgraph = ebisbox.getEBGraph();
-
-	// The set of cells where we need explicit stencils are the irregular cells AND the cells on the domain boundary. 
-	IntVectSet ivs = ebisbox.getIrregIVS(box);
-	for (int dir = 0; dir < SpaceDim; dir++){
-	  Box loBox;
-	  Box hiBox;
-	  int hasLo;
-	  int hasHi;
-	
-	  EBArith::loHi(loBox, hasLo, hiBox, hasHi, domain, box, dir);
-	
-	  if(hasLo){
-	    ivs |= IntVectSet(loBox);
-	  }
-	  if(hasHi){
-	    ivs |= IntVectSet(hiBox);
-	  }
-	}
-
-	// Define data holder for the gradient stencils. 
-	BaseIVFAB<VoFStencil>& vofstencils = (*m_gradientStencils[lvl])[dit()];
-	vofstencils.define(ivs, ebgraph, 1);
-
-	for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	  const VolIndex& vof = vofit();
-
-	  VoFStencil& sten = vofstencils(vof, 0);
-	  sten.clear();
-
-	  // Add stencils for each Cartesian direction. 
-	  for (int dir = 0; dir < SpaceDim; dir++){
-	    VoFStencil dirsten;
-	    EBArith::getFirstDerivStencilWidthOne(dirsten, vof, ebisbox, dir, dx, nullptr, dir);
-	    sten += dirsten;
-	  }
-	}
+      eblg = *m_eblg[lvl];
+      if(hasFine){
+	refRat   = m_refinementRatios[lvl];
+	eblgFine = *m_eblg[lvl+1];
       }
+      else{
+	refRat   = 1;
+	eblgFine = EBLevelGrid();
+      }
+
+      const int order  = 2;
+      const int weight = 2;      
+
+      m_gradientOp[lvl] = RefCountedPtr<EBGradient> (new EBGradient(eblg,
+								    eblgFine,
+								    Location::Cell::Center,
+								    m_dx[lvl],
+								    refRat,
+								    order,
+								    weight));
     }
   }
 }
@@ -995,12 +974,12 @@ const IrregAmrStencil<EbCentroidInterpolationStencil>& PhaseRealm::getEbCentroid
   return *m_ebCentroidInterpolationStencil;
 }
 
-const Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& PhaseRealm::getGradientStencils() const {
+const Vector<RefCountedPtr<EBGradient> >& PhaseRealm::getGradientOp() const {
   if(!this->queryOperator(s_eb_gradient)) {
-    MayDay::Error("PhaseRealm::getGradientStencils - operator not registered!");
+    MayDay::Error("PhaseRealm::getGradientOp - operator not registered!");
   }
   
-  return m_gradientStencils;
+  return m_gradientOp;
 }
 
 const IrregAmrStencil<NonConservativeDivergenceStencil>& PhaseRealm::getNonConservativeDivergenceStencils() const {
