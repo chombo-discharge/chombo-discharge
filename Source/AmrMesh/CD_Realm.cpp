@@ -17,6 +17,7 @@
 #include <CD_NamespaceHeader.H>
 
 const std::string Realm::Primal = "primal";
+const std::string Realm::primal = "primal";
 
 Realm::Realm(){
   m_isDefined = false;

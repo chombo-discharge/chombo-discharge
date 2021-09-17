@@ -21,7 +21,7 @@
 /*!
   @brief Identifier for particle halo masks
 */
-static const std::string s_particle_halo         = "particle_halo";
+static const std::string s_particle_halo = "particle_halo";
 
 /*!
   @brief Identifier for particle valid region. 
@@ -43,6 +43,11 @@ public:
     @brief Identifier for perimal realm
   */
   const static std::string Primal;
+
+  /*!
+    @brief Identifier for perimal realm
+  */
+  const static std::string primal;  
 
   /*!
     @brief Default constructor. Must subsequently call define

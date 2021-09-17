@@ -9,12 +9,16 @@
   @author Robert Marskar
 */
 
+// Chombo includes
+#include <CH_Timer.H>
+
 // Our includes
 #include <CD_TiledMeshRefine.H>
 #include <CD_NamespaceHeader.H>
 
 TiledMeshRefine::TiledMeshRefine(const ProblemDomain& a_coarsestDomain, const Vector<int>& a_refRatios, const IntVect& a_tileSize){
-
+  CH_TIME("TiledMeshRefine::TiledMeshRefine");
+  
   m_refRatios      = a_refRatios;
   m_tileSize       = a_tileSize;
 
@@ -27,11 +31,11 @@ TiledMeshRefine::TiledMeshRefine(const ProblemDomain& a_coarsestDomain, const Ve
     m_vectDomains.push_back(domain);
   }
 
-  sanityCheck();
+  this->sanityCheck();
 }
   
 TiledMeshRefine::~TiledMeshRefine(){
-
+  CH_TIME("TiledMeshRefine::~TiledMeshRefine");
 }
 
 void TiledMeshRefine::sanityCheck() const {
@@ -56,73 +60,76 @@ int TiledMeshRefine::regrid(Vector<Vector<Box> >&       a_newGrids,
 			    const int                   a_baseLevel,
 			    const int                   a_topLevel,
 			    const Vector<Vector<Box> >& a_oldGrids) const {
+  CH_TIME("TiledMeshRefine::regrid");
+  
+  // CH_assert(a_topLevel >= 0 );
+  // CH_assert(a_baseLevel < (a_topLevel+1) && a_baseLevel >= 0 );
+  // CH_assert(a_OldGrids.size() >= a_topLevel + 1 );
+  // CH_assert(m_vectDomains.size() >= a_topLevel + 1 );
+  // CH_assert(m_nRefVect.size() >= a_topLevel + 1 );
+  // CH_assert(a_tags.size() >= a_topLevel+1 );
+  // CH_assert(a_topLevel >= 0 );
+  // CH_assert(a_baseLevel < (a_topLevel+1) && a_baseLevel >= 0 );
 
-  // Validate data
-  // CH_assert( a_topLevel >= 0 );
-  // CH_assert( a_baseLevel < (a_topLevel+1) && a_baseLevel >= 0 );
-  // CH_assert( a_OldGrids.size() >= a_topLevel + 1 );
-  // CH_assert( m_vectDomains.size() >= a_topLevel + 1 );
-  // CH_assert( m_nRefVect.size() >= a_topLevel + 1 );
-  // CH_assert( a_tags.size() >= a_topLevel+1 );
-  // CH_assert (a_topLevel >= 0 );
-  // CH_assert ( a_baseLevel < (a_topLevel+1) && a_baseLevel >= 0 );
+  if(a_baseLevel > 0) {
+    MayDay::Error("TiledMeshRefine::regrid - a_baseLevel>0 not yet supported");
+  }
 
-  if(a_baseLevel > 0) MayDay::Abort("TiledMeshRefine::regrid - a_baseLevel>0 not yet supported");
-
-  // set the top level to be the finest level which actually has tags
+  // Set the top level to be the finest level which actually has tags. Ranks may disagree on what is the "top level". 
   int myTopLevel=-1;
-  int topLevel;
+
   int isize = a_tags.size();
-  for (int lvl = 0; lvl <= Min(a_topLevel, isize-1); lvl++){
+  for (int lvl = 0; lvl <= std::min(a_topLevel, isize-1); lvl++){
     if(!a_tags[lvl].isEmpty()){
       myTopLevel = lvl;
     }
   }
+
+  int topLevel;
 #ifdef CH_MPI
   MPI_Allreduce(&myTopLevel, &topLevel, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
+#else
+  topLevel = a_topLevel;
 #endif
-  //  pout() << "done with allreduce, top level = " << topLevel << endl;
 
-  int new_finestLevel;
+  int newFinestLevel;
   if(topLevel >= a_baseLevel){   // We have something that can change
-    new_finestLevel = 1 + topLevel;
+    newFinestLevel = 1 + topLevel;
 
     // Extra level of empty tiles so we can use makeLevelTiles for all levels
-    Vector<IntVectSet> tiles(2+new_finestLevel, IntVectSet()); 
+    Vector<IntVectSet> tiles(2+newFinestLevel, IntVectSet()); 
 
     // Make tiles on all levels above a_baseLevel
-    for (int lvl = new_finestLevel; lvl > a_baseLevel; lvl--){
+    for (int lvl = newFinestLevel; lvl > a_baseLevel; lvl--){
       //      pout() << "making tiles on level = " << lvl << endl;
-      makeLevelTiles(tiles[lvl], tiles[lvl+1], a_tags[lvl-1], m_vectDomains[lvl], m_refRatios[lvl], m_refRatios[lvl-1]);
+      this->makeLevelTiles(tiles[lvl], tiles[lvl+1], a_tags[lvl-1], m_vectDomains[lvl], m_refRatios[lvl], m_refRatios[lvl-1]);
     }
 
     // Make tiles into boxes
-    a_newGrids.resize(1+new_finestLevel);
+    a_newGrids.resize(1+newFinestLevel);
     for (int lvl = 0; lvl <= a_baseLevel; lvl++){
       //      pout() << "copying old grids on level = " << lvl << endl;
       a_newGrids[lvl] = a_oldGrids[lvl];
     }
 
-    for (int lvl = a_baseLevel+1; lvl <= new_finestLevel; lvl++){
+    for (int lvl = a_baseLevel+1; lvl <= newFinestLevel; lvl++){
       //      pout() << "making boxes from tiles on level = " << lvl << endl;
-      makeBoxesFromTiles(a_newGrids[lvl], tiles[lvl], m_vectDomains[lvl]);
+      this->makeBoxesFromTiles(a_newGrids[lvl], tiles[lvl], m_vectDomains[lvl]);
     }
 
-    //    std::cout << new_finestLevel << std::endl;
+    //    std::cout << newFinestLevel << std::endl;
   }
   else{ // If we don't have any tags, just return the old boxes
-    new_finestLevel = a_baseLevel;
+    newFinestLevel = a_baseLevel;
     a_newGrids.resize(a_oldGrids.size());
     for (int lvl = 0; lvl <= a_baseLevel; lvl++){
       a_newGrids[lvl] = a_oldGrids[lvl];
     }
   }
-  
-
 
   //  MayDay::Abort("TiledMeshRefine::regrid - not implemented");
   //  pout() << "TiledMeshRefine::regrid - done" << endl;
-  return new_finestLevel;
+  return newFinestLevel;
 }
 
 
