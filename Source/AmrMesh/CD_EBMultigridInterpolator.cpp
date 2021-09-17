@@ -44,6 +44,10 @@ EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
   CH_assert(a_nVar      > 0);
   CH_assert(a_refRat%2 == 0);
 
+  if(a_nVar != 1){
+    MayDay::Error("EBMultigridInterpolator::EBMultigridInterpolator -- only a single component is supported for now (due to dependency on QuadCFInterp)");
+  }
+
   const DisjointBoxLayout& gridsFine = a_eblgFine.getDBL();
   const DisjointBoxLayout& gridsCoar = a_eblgCoar.getDBL();
 
@@ -108,7 +112,7 @@ void EBMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>&       a_phi
 					       const LevelData<EBCellFAB>& a_phiCoar,
 					       const Interval              a_variables) {
   CH_TIME("EBMultigridInterpolator::coarseFineInterp");
-  
+
   CH_assert(m_ghostCF == a_phiFine.ghostVect());
 
   if(a_phiFine.ghostVect() != m_ghostVector){

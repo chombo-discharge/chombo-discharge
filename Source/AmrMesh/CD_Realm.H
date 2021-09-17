@@ -21,7 +21,7 @@
 /*!
   @brief Identifier for particle halo masks
 */
-static const std::string s_particle_halo         = "particle_halo";
+static const std::string s_particle_halo = "particle_halo";
 
 /*!
   @brief Identifier for particle valid region. 
@@ -43,6 +43,11 @@ public:
     @brief Identifier for perimal realm
   */
   const static std::string Primal;
+
+  /*!
+    @brief Identifier for perimal realm
+  */
+  const static std::string primal;  
 
   /*!
     @brief Default constructor. Must subsequently call define
@@ -247,12 +252,6 @@ public:
   const IrregAmrStencil<NonConservativeDivergenceStencil>& getNonConservativeDivergenceStencils(const phase::which_phase a_phase) const;
 
   /*!
-    @brief Get stencils for computing gradients of cell-centered data
-    @param[in] a_phase Phase
-  */
-  const Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& getGradientStencils(const phase::which_phase a_phase) const;
-
-  /*!
     @brief Get data coarsening utility
     @param[in] a_phase Phase
   */
@@ -269,6 +268,12 @@ public:
     @param[in] a_phase Phase
   */
   Vector<RefCountedPtr<EBMultigridInterpolator> >& getMultigridInterpolator(const phase::which_phase a_phase);
+
+  /*!
+    @brief Get gradient operator
+    @param[in] a_phase Phase
+  */
+  const Vector<RefCountedPtr<EBGradient> >& getGradientOp(const phase::which_phase a_phase) const;
 
   /*!
     @brief Get piecewise linear regrid utility

@@ -1274,8 +1274,28 @@ void Driver::setupGeometryOnly(){
 
   // Need to activate some flags that trigger Chombo or chombo-discharge geo-generation method.
   if(m_geometryGeneration == "chombo-discharge"){
+
+    // We will run with ScanShop, which builds the EBIndexSpace map using recursive pruning of
+    // regions that don't contain cut-cells. The user asks for a coarsening/refinement of the
+    // base AMR level, which we make here. 
+    ProblemDomain scanDomain;
+    if(m_geoScanLevel < 0){
+      // Make a coarsening of the base AMR level, but don't coarsen beyond 2x2 domains.
+      scanDomain = m_amr->getDomains()[0];
+      int numCoar = 0;
+      while(scanDomain.domainBox().shortside() >= 4 && numCoar < std::abs(m_geoScanLevel)){
+	scanDomain.coarsen(2);
+	numCoar++;
+      }
+    }
+    else{
+      const int amrLevel = std::min(m_geoScanLevel, m_amr->getMaxAmrDepth());
+      scanDomain = m_amr->getDomains()[amrLevel];
+    }
+    
     EBISLevel::s_distributedData = true;
-    m_computationalGeometry->useScanShop(m_amr->getDomains()[m_geoScanLevel]);
+    
+    m_computationalGeometry->useScanShop(scanDomain);
   }
   else if(m_geometryGeneration == "chombo"){
     m_computationalGeometry->useChomboShop();
@@ -1332,8 +1352,27 @@ void Driver::setupFresh(const int a_initialRegrids){
 
   // Need to specify geometry generation method. 
   if(m_geometryGeneration == "chombo-discharge"){
+    // We will run with ScanShop, which builds the EBIndexSpace map using recursive pruning of
+    // regions that don't contain cut-cells. The user asks for a coarsening/refinement of the
+    // base AMR level, which we make here. 
+    ProblemDomain scanDomain;
+    if(m_geoScanLevel < 0){
+      // Make a coarsening of the base AMR level, but don't coarsen beyond 2x2 domains.
+      scanDomain = m_amr->getDomains()[0];
+      int numCoar = 0;
+      while(scanDomain.domainBox().shortside() >= 4 && numCoar < std::abs(m_geoScanLevel)){
+	scanDomain.coarsen(2);
+	numCoar++;
+      }
+    }
+    else{
+      const int amrLevel = std::min(m_geoScanLevel, m_amr->getMaxAmrDepth());
+      scanDomain = m_amr->getDomains()[amrLevel];
+    }
+
     EBISLevel::s_distributedData = true;
-    m_computationalGeometry->useScanShop(m_amr->getDomains()[m_geoScanLevel]);
+    
+    m_computationalGeometry->useScanShop(scanDomain);    
   }
   else if(m_geometryGeneration == "chombo"){
     if(m_ebisMemoryLoadBalance){

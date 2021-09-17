@@ -9,19 +9,19 @@
   @author  Robert Marskar
 */
 
-// Chombo includes
-#include <EBEllipticLoadBalance.H>
-
 // Our includes
 #include <CD_LoadBalancing.H>
 #include <CD_NamespaceHeader.H>
 
 void LoadBalancing::makeBalance(Vector<int>& a_ranks, const Vector<Box>& a_boxes){
+  CH_TIME("LoadBalancing::makeBalance");
+  
   LoadBalance(a_ranks, a_boxes);
 }
 
 void LoadBalancing::roundRobin(Vector<int>& a_ranks, const Vector<Box>& a_boxes){
-
+  CH_TIME("LoadBalancing::roundRobin");
+  
   const int nProcs = numProc();
   const int nBoxes = a_boxes.size();
 
@@ -32,12 +32,17 @@ void LoadBalancing::roundRobin(Vector<int>& a_ranks, const Vector<Box>& a_boxes)
 }
 
 void LoadBalancing::sort(Vector<Box>& a_boxes, const BoxSorting a_which){
+  CH_TIME("LoadBalancing::sort");
+
+  // The LoadBalancing::sort routines takes pairs of boxes/loads. Just use dummy loads here.
   Vector<int> dummy(a_boxes.size(), 0);
 
   LoadBalancing::sort(a_boxes, dummy, a_which);
 }
 
 void LoadBalancing::gatherBoxes(Vector<Box>& a_boxes){
+  CH_TIME("LoadBalancing::gatherBoxes");
+  
 #ifdef CH_MPI
   // TLDR: This code does a gather operation on the loads and boxes. They are gather globally in this way:
   //       (BoxesForMPIRank=0, BoxesForMPIRank=1, BoxesForMPIRank=2, ....)
@@ -104,6 +109,8 @@ void LoadBalancing::gatherBoxes(Vector<Box>& a_boxes){
 }
 
 void LoadBalancing::gatherLoads(Vector<Real>& a_loads){
+  CH_TIME("LoadBalancing::gatherLoads");
+  
 #ifdef CH_MPI
   // TLDR: This code does a gather operation on the loads. They are gather globally in this way:
   //       (LoadsForRank=0, LoadsForRank=1, LoadsForRank2=2, ....)
@@ -149,6 +156,8 @@ void LoadBalancing::gatherLoads(Vector<Real>& a_loads){
 }
 
 void LoadBalancing::gatherLoads(Vector<int>& a_loads){
+  CH_TIME("LoadBalancing::gatherLoads");
+  
 #ifdef CH_MPI
   // TLDR: This code does a gather operation on the loads. They are gather globally in this way:
   //       (LoadsForRank=0, LoadsForRank=1, LoadsForRank2=2, ....)
@@ -193,7 +202,8 @@ void LoadBalancing::gatherLoads(Vector<int>& a_loads){
 #endif
 }
 
-void LoadBalancing::gatherBoxes_and_loads(Vector<Box>& a_boxes, Vector<int>& a_loads){
+void LoadBalancing::gatherBoxesAndLoads(Vector<Box>& a_boxes, Vector<int>& a_loads){
+  CH_TIME("LoadBalancing::gatherBoxesAndLoads");  
 #ifdef CH_MPI
   LoadBalancing::gatherBoxes(a_boxes);
   LoadBalancing::gatherLoads(a_loads);
@@ -201,16 +211,18 @@ void LoadBalancing::gatherBoxes_and_loads(Vector<Box>& a_boxes, Vector<int>& a_l
 }
 
 int LoadBalancing::maxBits(std::vector<Box>::iterator a_first, std::vector<Box>::iterator a_last){
+  CH_TIME("LoadBalancing::maxBits");
+  
   int maxSize = 0;
   for (std::vector<Box>::iterator p= a_first; p<a_last; ++p)
     {
       IntVect small = p->smallEnd();
-      D_EXPR6( maxSize = Max(maxSize, Abs(small[0])),
-	       maxSize = Max(maxSize, Abs(small[1])),
-	       maxSize = Max(maxSize, Abs(small[2])),
-	       maxSize = Max(maxSize, Abs(small[3])),
-	       maxSize = Max(maxSize, Abs(small[4])),
-	       maxSize = Max(maxSize, Abs(small[5])));
+      D_EXPR6( maxSize = Max(maxSize, std::abs(small[0])),
+	       maxSize = Max(maxSize, std::abs(small[1])),
+	       maxSize = Max(maxSize, std::abs(small[2])),
+	       maxSize = Max(maxSize, std::abs(small[3])),
+	       maxSize = Max(maxSize, std::abs(small[4])),
+	       maxSize = Max(maxSize, std::abs(small[5])));
     }
   int bits;
   for (bits=8*sizeof(int)-2; bits>0; bits--)

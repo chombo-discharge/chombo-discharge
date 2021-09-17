@@ -16,6 +16,7 @@
 // Our includes
 #include <CD_FieldSolverMultigrid.H>
 #include <CD_DataOps.H>
+#include <CD_MultifluidAlias.H>
 #include <CD_MFMultigridInterpolator.H>
 #include <CD_MFHelmholtzElectrostaticDomainBCFactory.H>
 #include <CD_MFHelmholtzElectrostaticEBBCFactory.H>
@@ -271,10 +272,10 @@ bool FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
 
   m_multigridSolver.revert(phi, rhs, finestLevel, 0);
 
-  m_amr->averageDown(a_phi, m_realm);
-  m_amr->interpGhost(a_phi, m_realm);
+  m_amr->averageDown  (a_phi, m_realm);
+  m_amr->interpGhostMG(a_phi, m_realm);
 
-  this->computeElectricField();
+  this->computeElectricField(m_electricField, a_phi);
 
   return converged;
 }
@@ -298,6 +299,8 @@ void FieldSolverMultigrid::registerOperators(){
 
   CH_assert(!m_amr.isNull());
 
+  m_amr->registerOperator(s_eb_gradient,     m_realm, phase::gas  );
+  m_amr->registerOperator(s_eb_gradient,     m_realm, phase::solid);  
   m_amr->registerOperator(s_eb_coar_ave,     m_realm, phase::gas  );
   m_amr->registerOperator(s_eb_coar_ave,     m_realm, phase::solid);
   m_amr->registerOperator(s_eb_fill_patch,   m_realm, phase::gas  );
@@ -545,6 +548,32 @@ Vector<long long> FieldSolverMultigrid::computeLoads(const DisjointBoxLayout& a_
   delete oper;
 
   return ret;
+}
+
+void FieldSolverMultigrid::computeElectricField(MFAMRCellData& a_electricField, const MFAMRCellData& a_potential) {
+  CH_TIME("FieldSolverMultigrid::computeElectricField(MFAMRCellData, MFAMRCellData)");
+  if(m_verbosity > 5){
+    pout() << "FieldSolverMultigrid::computeElectricField(MFAMRCellData, MFAMRCellData)" << endl;
+  }
+
+  CH_assert(a_electricField[0]->nComp() == SpaceDim);
+  CH_assert(a_potential    [0]->nComp() == 1       );
+
+  // Update ghost cells. Use scratch storage for this. Also, we use the multigrid interpolator to do this
+  // because that is what is consistent with the Helmholtz discretization. Hence the call to interpGhostMG rather
+  // than interpGhostPwl or interpGhost here. 
+  MFAMRCellData scratch;
+  m_amr->allocate(scratch, m_realm, m_nComp);
+  scratch.copy(a_potential);
+  m_amr->interpGhostMG(scratch, m_realm);
+  
+  // Compute the cell-centered gradient everywhere. 
+  m_amr->computeGradient(a_electricField, scratch, m_realm);
+  DataOps::scale(a_electricField, -1.0);
+
+  // Coarsen solution and update ghost cells. 
+  m_amr->averageDown(a_electricField, m_realm);
+  m_amr->interpGhost(a_electricField, m_realm);
 }
 
 #include <CD_NamespaceFooter.H>

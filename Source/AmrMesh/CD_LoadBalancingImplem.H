@@ -20,6 +20,7 @@
 // Chombo includes
 #include <LoadBalance.H>
 #include <BoxLayout.H>
+#include <CH_Timer.H>
 
 // Our includes
 #include <CD_LoadBalancing.H>
@@ -27,6 +28,8 @@
 
 template <class T>
 void LoadBalancing::makeBalance(Vector<int>& a_ranks, const Vector<T>& a_loads, const Vector<Box>& a_boxes) {
+  CH_TIME("LoadBalancing::makeBalance");
+  
   LoadBalance(a_ranks, a_loads, a_boxes);
 }
 
@@ -34,7 +37,8 @@ template <class T>
 void LoadBalancing::balanceLevelByLevel(Vector<Vector<int> >&       a_procs,
 					const Vector<Vector<T> >&   a_loads,
 					const Vector<Vector<Box> >& a_boxes){
-
+  CH_TIME("LoadBalancing::balanceLevelByLevel");
+  
   const int nlevels = a_boxes.size();
 
   for (int lvl = 0; lvl < nlevels; lvl++){
@@ -43,10 +47,11 @@ void LoadBalancing::balanceLevelByLevel(Vector<Vector<int> >&       a_procs,
 }
 
 template <class T>
-void LoadBalancing::hierarchy(Vector<Vector<int> >&       a_procs,
-			      const Vector<Vector<T> >&   a_loads,
-			      const Vector<Vector<Box> >& a_boxes){
-
+void LoadBalancing::balanceHierarchy(Vector<Vector<int> >&       a_procs,
+				     const Vector<Vector<T> >&   a_loads,
+				     const Vector<Vector<Box> >& a_boxes){
+  CH_TIME("LoadBalancing::balanceHierarchy");
+  
   const int nlevels = a_procs.size();
   
   std::map<std::pair<int, int>, int> boxmap;
@@ -93,6 +98,7 @@ void LoadBalancing::hierarchy(Vector<Vector<int> >&       a_procs,
 
 template <class T>
 std::vector<std::pair<Box, T> > LoadBalancing::packPairs(const Vector<Box>& a_boxes, const Vector<T>& a_loads){
+  CH_TIME("LoadBalancing::packPairs");
   
   std::vector<std::pair<Box, T> > vec;
   for (int i = 0; i < a_boxes.size(); i++){
@@ -104,10 +110,12 @@ std::vector<std::pair<Box, T> > LoadBalancing::packPairs(const Vector<Box>& a_bo
 
 template <class T>
 void LoadBalancing::unpackPairs(Vector<Box>& a_boxes, Vector<T>& a_loads, const std::vector<std::pair<Box, T> >& a_pairs){
-
+  CH_TIME("LoadBalancing::unpackPairs");
+  
   // Reconstruct boxes and loads
   a_boxes.resize(0);
   a_loads.resize(0);
+  
   for (const auto& v : a_pairs){
     a_boxes.push_back(v.first);
     a_loads.push_back(v.second);
@@ -116,6 +124,8 @@ void LoadBalancing::unpackPairs(Vector<Box>& a_boxes, Vector<T>& a_loads, const 
 
 template <typename T>
 void LoadBalancing::sort(Vector<Vector<Box> >& a_boxes, Vector<Vector<T> >& a_loads, const BoxSorting a_which){
+  CH_TIME("LoadBalancing::sort");
+  
   for (int lvl = 0; lvl < a_boxes.size(); lvl++){
     LoadBalancing::sort(a_boxes[lvl], a_loads[lvl], a_which);
   }
@@ -123,7 +133,8 @@ void LoadBalancing::sort(Vector<Vector<Box> >& a_boxes, Vector<Vector<T> >& a_lo
 
 template <typename T>
 void LoadBalancing::sort(Vector<Box>& a_boxes, Vector<T>& a_loads, const BoxSorting a_which){
-
+  CH_TIME("LoadBalancing::sort");
+  
   switch(a_which){
   case BoxSorting::None:
     break;
@@ -144,6 +155,8 @@ void LoadBalancing::sort(Vector<Box>& a_boxes, Vector<T>& a_loads, const BoxSort
 
 template <class T>
 void LoadBalancing::standardSort(Vector<Box>& a_boxes, Vector<T>& a_loads){
+  CH_TIME("LoadBalancing::standardSort");
+  
   std::vector<std::pair<Box, T> > vec = packPairs(a_boxes, a_loads);
 
   // Call std::sort, using box1 < box2 lambda as sorting criterion. 
@@ -160,6 +173,8 @@ void LoadBalancing::standardSort(Vector<Box>& a_boxes, Vector<T>& a_loads){
 
 template <class T>
 void LoadBalancing::shuffleSort(Vector<Box>& a_boxes, Vector<T>& a_loads){
+  CH_TIME("LoadBalancing::shuffleSort");
+  
   auto vec = packPairs(a_boxes, a_loads);
 
   // Set up RNG
@@ -179,6 +194,8 @@ void LoadBalancing::shuffleSort(Vector<Box>& a_boxes, Vector<T>& a_loads){
 
 template <class T>
 void LoadBalancing::mortonSort(Vector<Box>& a_boxes, Vector<T>& a_loads){
+  CH_TIME("LoadBalancing::mortonSort");
+  
   auto vec = packPairs(a_boxes, a_loads);
   
   // Get max bits
@@ -200,6 +217,7 @@ void LoadBalancing::mortonSort(Vector<Box>& a_boxes, Vector<T>& a_loads){
 
 template <class T>
 bool LoadBalancing::mortonComparator(const int a_maxBits, const std::pair<Box,T>& a_lhs, const std::pair<Box, T>& a_rhs){
+  CH_TIME("LoadBalancing::mortonComparator");
   
   const Box& lbox = a_lhs.first;
   const Box& rbox = a_rhs.first;

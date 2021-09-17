@@ -4,8 +4,8 @@
  */
 
 /*!
-  @file   NonConservativeDivergenceStencil.cpp
-  @brief  Implementation of NonConservativeDivergenceStencil.H
+  @file   CD_NonConservativeDivergenceStencil.cpp
+  @brief  Implementation of CD_NonConservativeDivergenceStencil.H
   @author Robert Marskar
 */
 
@@ -47,22 +47,20 @@ void NonConservativeDivergenceStencil::buildStencil(VoFStencil&              a_s
   
   a_sten.clear();
 
-  Real norm = 0.;
+  Real sumKappa = 0.;
 
-  //const Vector<VolIndex> vofs = VofUtils::getAllConnectedVofsInRadius(a_vof, a_ebisbox, m_radius, IntVectSet());
-  const Vector<VolIndex> vofs = VofUtils::getVofsInRadius(a_vof, a_ebisbox, m_radius, VofUtils::Connectivity::MonotonePath, false);
+  const Vector<VolIndex> vofs = VofUtils::getVofsInRadius(a_vof, a_ebisbox, m_radius, VofUtils::Connectivity::MonotonePath, true);
   
   for (int i = 0; i < vofs.size(); i++){
-    if(vofs[i] != a_vof){
-      const VolIndex& ivof = vofs[i];
-      const Real iweight   = a_ebisbox.volFrac(ivof);
+    const VolIndex& ivof  = vofs[i];
+    const Real&     kappa = a_ebisbox.volFrac(ivof);
 
-      norm += iweight;
-      a_sten.add(ivof, iweight);
-    }
+    sumKappa += kappa;
+    
+    a_sten.add(ivof, kappa);
   }
 
-  a_sten *= 1./norm;
+  a_sten *= 1./sumKappa;
 }
 
 #include <CD_NamespaceFooter.H>

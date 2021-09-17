@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_BoxSorting.H
-  @brief  Declaration of various load-balancing routines
+  @brief  Declaration of an enum for identifying various ways of sorting grid patches. 
   @author Robert Marskar
 */
 

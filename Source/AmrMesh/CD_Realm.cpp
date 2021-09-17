@@ -17,6 +17,7 @@
 #include <CD_NamespaceHeader.H>
 
 const std::string Realm::Primal = "primal";
+const std::string Realm::primal = "primal";
 
 Realm::Realm(){
   m_isDefined = false;
@@ -435,10 +436,6 @@ const IrregAmrStencil<NonConservativeDivergenceStencil>& Realm::getNonConservati
   return m_realms[a_phase]->getNonConservativeDivergenceStencils();
 }
 
-const Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& Realm::getGradientStencils(const phase::which_phase a_phase) const{
-  return m_realms[a_phase]->getGradientStencils();
-}
-
 Vector<RefCountedPtr<EbCoarAve> >& Realm::getCoarseAverage(const phase::which_phase a_phase){
   return m_realms[a_phase]->getCoarseAverage();
 }
@@ -449,6 +446,10 @@ Vector<RefCountedPtr<EbGhostCloud> >& Realm::getGhostCloud(const phase::which_ph
 
 Vector<RefCountedPtr<EBMultigridInterpolator> >& Realm::getMultigridInterpolator(const phase::which_phase a_phase){
   return m_realms[a_phase]->getMultigridInterpolator();
+}
+
+const Vector<RefCountedPtr<EBGradient> >& Realm::getGradientOp(const phase::which_phase a_phase) const {
+  return m_realms[a_phase]->getGradientOp();
 }
 
 Vector<RefCountedPtr<AggEBPWLFillPatch> >& Realm::getFillPatch(const phase::which_phase a_phase){

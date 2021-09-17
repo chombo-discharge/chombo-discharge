@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_PhaseRealm.H
-  @brief  Declaration of the PhaseRealm class
+  @brief  Declaration of the PhaseRealm class. 
   @author Robert Marskar
 */
 
@@ -38,6 +38,7 @@
 #include <CD_ParticleContainer.H>
 #include <CD_EbGhostCloud.H>
 #include <CD_EBMultigridInterpolator.H>
+#include <CD_EBGradient.H>
 #include <CD_NonConservativeDivergenceStencil.H>
 #include <CD_EbCentroidInterpolationStencil.H>
 #include <CD_CentroidInterpolationStencil.H>
@@ -61,6 +62,13 @@ static const std::string s_levelset        = "levelset"       ;  // For putting 
 
 /*!
   @brief Class that holds important things for doing AMR over a specific phase and processor distribution. 
+  @details This class is essentially an EBAMR core-grid class, containing the usually EBAMR stuff within
+  a single EBIndexSpace. In thus contains a set of grids (DisjointBoxLayout) and the usual EB stuff
+  (EBLevelGrid, EBISLayout). In addition, it contains a bunch of operators that can be registered by the
+  user (through the user interface AmrMesh). These operators live in this class, and they can be fetched
+  e.g. by AmrMesh. 
+  @note This class is a book-keeping class used by AmrMesh -- it is not meant for direct interaction. 
+  @note To use run-time profiling/debugging, use PhaseRealm.profile=true or PhaseRealm.verbose=true
 */
 class PhaseRealm {
 public:
@@ -242,9 +250,9 @@ public:
   const IrregAmrStencil<NonConservativeDivergenceStencil>& getNonConservativeDivergenceStencils() const;
 
   /*!
-    @brief Get stencils for computing gradients of cell-centered data
+    @brief Get gradient object
   */
-  const Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > >& getGradientStencils() const;
+  const Vector<RefCountedPtr<EBGradient> >& getGradientOp() const;
 
   /*!
     @brief Get coarsening operators
@@ -334,14 +342,14 @@ protected:
   bool m_profile;
 
   /*!
+    @brief Verbose or not
+  */
+  bool m_verbose;
+
+  /*!
     @brief Finest grid level
   */
   int m_finestLevel;
-
-  /*!
-    @brief Realm verbosity (used for debugging)
-  */
-  int m_verbosity;
 
   /*!
     @brief Number of ghost cells in data holders
@@ -466,7 +474,7 @@ protected:
   /*!
     @brief Coarsening operator
   */
-  mutable Vector<RefCountedPtr<EbCoarAve> > m_coarave;
+  mutable Vector<RefCountedPtr<EbCoarAve> > m_coarAve;
 
   /*!
     @brief Operator for hanging particle deposition clouds
@@ -519,24 +527,24 @@ protected:
   mutable Vector<RefCountedPtr<EBFineToCoarRedist> > m_fineToCoarRedist;
 
   /*!
+    @brief Gradient operator
+  */
+  mutable Vector<RefCountedPtr<EBGradient> > m_gradientOp;  
+
+  /*!
     @brief Data recentering utility (center to centroid)
   */
-  RefCountedPtr<IrregAmrStencil<CentroidInterpolationStencil> > m_CentroidInterpolationStencil;
+  RefCountedPtr<IrregAmrStencil<CentroidInterpolationStencil> > m_centroidInterpolationStencil;
 
   /*!
     @brief Data recentering utility (center to eb centroid)
   */
-  RefCountedPtr<IrregAmrStencil<EbCentroidInterpolationStencil> > m_EbCentroidInterpolationStencil;
+  RefCountedPtr<IrregAmrStencil<EbCentroidInterpolationStencil> > m_ebCentroidInterpolationStencil;
 
   /*!
     @brief Stencils for non-conservative divergences
   */
   RefCountedPtr<IrregAmrStencil<NonConservativeDivergenceStencil> > m_NonConservativeDivergenceStencil;
-
-  /*!
-    @brief Gradient stencils
-  */
-  Vector<RefCountedPtr<LayoutData<BaseIVFAB<VoFStencil> > > > m_gradsten;
 
   /*!
     @brief Define EBLevelGrids

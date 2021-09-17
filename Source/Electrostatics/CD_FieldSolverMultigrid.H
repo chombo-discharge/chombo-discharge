@@ -92,6 +92,13 @@ public:
   virtual void parseRuntimeOptions() override;
 
   /*!
+    @brief Compute the cell-centered electric field. 
+    @param[out] a_electricField Cell-centered electric field
+    @param[in]  a_potential     Cell-centered potential
+  */
+  virtual void computeElectricField(MFAMRCellData& a_E, const MFAMRCellData& a_potential) override;
+
+  /*!
     @brief Regrid method. 
     @details This calls the parent regrid function first. We only need the overwrite because we have to signal that multigrid must be set up again. 
     @param[in] a_lmin           Coarsest level allowed to change. 

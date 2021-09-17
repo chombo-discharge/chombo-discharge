@@ -5,8 +5,9 @@
 
 /*!
   @file   CD_LinearStencil.cpp
-  @brief  Implementation of cd_LinearStencil.H
+  @brief  Implementation of CD_LinearStencil.H
   @author Robert Marskar
+  @todo   Code-review needed. Multi-cell support in 2D/3D is not great. 
 */
 
 // Our includes
@@ -15,91 +16,98 @@
 
 #define DEBUG_LINEARSTENCIL 1
 
-
-  
-Real LinearStencil::tolerance = 1.E-6;
-
-
+constexpr Real LinearStencil::tolerance;
 
 bool LinearStencil::getLinearInterpStencil(VoFStencil&          a_stencil, 
-					   const RealVect&      a_centroid,
+					   const RealVect&      a_pos,
 					   const VolIndex&      a_vof,
 					   const ProblemDomain& a_domain,
 					   const EBISBox&       a_ebisbox){
-  bool do_interp     = true;
-  bool found_stencil = false;
+  bool doInterp     = true;
+  bool foundStencil = false;
 
-  if(a_centroid.vectorLength() < LinearStencil::tolerance){
-    do_interp = false;
+  // Check if we are sufficiently close to the centroid -- if we are then we ignore the 
+  if(a_pos.vectorLength() < LinearStencil::tolerance){
+    doInterp = false;
   }
 
-  if(do_interp){
+  if(doInterp){
 #if CH_SPACEDIM == 2
-    found_stencil = LinearStencil::computeInterpStencil2D(a_stencil, a_centroid, a_vof, a_domain, a_ebisbox, 99);
+    foundStencil = LinearStencil::computeInterpStencil2D(a_stencil, a_pos, a_vof, a_domain, a_ebisbox, 99);
 #elif CH_SPACEDIM == 3
-    found_stencil = LinearStencil::computeInterpStencil3D(a_stencil, a_centroid, a_vof, a_domain, a_ebisbox);
+    foundStencil = LinearStencil::computeInterpStencil3D(a_stencil, a_pos, a_vof, a_domain, a_ebisbox);
 #endif
   }
   else{ 
-    found_stencil = true;
+    foundStencil = true;
     a_stencil.clear();
     a_stencil.add(a_vof, 1.0);
   }
   
-  return found_stencil;
+  return foundStencil;
 }
 
 bool LinearStencil::computeInterpStencil1D(VoFStencil&          a_stencil,
-					   const RealVect&      a_centroid,
+					   const RealVect&      a_pos,
 					   const VolIndex&      a_vof, 
 					   const ProblemDomain& a_domain,
 					   const EBISBox&       a_ebisbox,
-					   const int            a_interp_dir){
+					   const int            a_interpDir){
   CH_TIME("LinearStencil::computeInterpStencil1D");
 
-  bool found_stencil = false;
-  
-  // Switch coordinate direction in order to cover both Hi/Lo interpolation
-  const int HiLoInterp = a_centroid[a_interp_dir] > 0. ? 1 : -1;
-  const Real x         = a_centroid[a_interp_dir]*HiLoInterp;   // Interpolation distance always positive
+  // We are doing interpolation to a_pos from a_vof. This is done as a 1D interpolation along a_interpDir, ignoring the other coordinates.
+  // This is pretty straightforward since y(x) = yLo + (yHi-yHi)*(x - xLo) in dimensionless units. We simply determine if the input point
+  // falls on the hi/low side of the cell center and select the two cells accordingly. If the other cell is a multi-valued cell, we fetch
+  // use the average of the cut-cell fragments as a basis for interpolation. Note that a_pos is the relative displacement from the cell
+  // center. 
 
-  a_stencil.clear();
-  const bool really1D = (x > LinearStencil::tolerance) ? true : false;
+  bool foundStencil = false;
+  
+  const bool really1D = (std::abs(a_pos[a_interpDir]) > LinearStencil::tolerance) ? true : false;
 
   if(really1D){
-    // Check if vof1 is available
+    a_stencil.clear();
+    
+    // Determine side of the interpolation. If the input point is to the right of the
+    // cell center then the other interpolation cell is the one to the right. Likewise
+    // if the point is to the left. We set the interpolation distance from a_vof to a_pos
+    // to positive since we always interpolate as y(x) = y0 + (y1-y0)*x = y0 * (1-x) + y1*x,
+    // and simply switch where we swap y1 for left/right side. 
     Side::LoHiSide side;
-    if(HiLoInterp == 1){
+    if(a_pos[a_interpDir] > 0){
       side = Side::Hi;
     }
-    else if (HiLoInterp == -1){
+    else if (a_pos[a_interpDir] < 0){
       side = Side::Lo;
     }
 
-    // Get all Vofs to the correct side
-    const Vector<VolIndex> otherVoFs = a_ebisbox.getVoFs(a_vof, a_interp_dir, side, 1);
-    const int numOtherVoFs = otherVoFs.size();
+    const Real x = std::abs(a_pos[a_interpDir]);
+
+    // Get all Vofs to the correct side. 
+    const Vector<VolIndex> otherVoFs    = a_ebisbox.getVoFs(a_vof, a_interpDir, side, 1);
+    const int              numOtherVoFs = otherVoFs.size();
+    
     if(numOtherVoFs > 0){ // We can find a stencil
-      found_stencil = true;
+      foundStencil = true;
       a_stencil.clear();
       a_stencil.add(a_vof, 1-x);
 
-      // Average over the other VoFs (other cell might be multivalued)
+      // Average over the other VoFs, as the other cell might be multivalued. 
       for (int i = 0; i < numOtherVoFs; i++){
 	a_stencil.add(otherVoFs[i], x/numOtherVoFs);
       }
     }
-    else{ // Can't do deriv and can't find stencil
+    else{ // There's no other side so we can't find a stencil. 
       a_stencil.clear();
       a_stencil.add(a_vof, 1.0);
 
-      found_stencil = false;
+      foundStencil = false;
     }
   }
-  else{
+  else{ // Don't need to interpolate since the input point is already at the cell center. 
     a_stencil.clear();
     a_stencil.add(a_vof, 1.0);
-    found_stencil = true;
+    foundStencil = true;
   }
 
 #if DEBUG_LINEARSTENCIL // Debug hho. Check for negative weights and that the sum equals 1
@@ -112,16 +120,16 @@ bool LinearStencil::computeInterpStencil1D(VoFStencil&          a_stencil,
   if(Abs((sumweights - 1.0)) > 1.E-5) MayDay::Warning("LinearStencil::computeInterpStencil1d - sum of weights are not 1");
 #endif
 
-  return found_stencil;
+  return foundStencil;
 }
 
 
 bool LinearStencil::computeInterpStencil2D(VoFStencil&          a_stencil,
-					   const RealVect&      a_centroid,
+					   const RealVect&      a_pos,
 					   const VolIndex&      a_vof,
 					   const ProblemDomain& a_domain,
 					   const EBISBox&       a_ebisbox,
-					   const int            a_nointerp_dir){
+					   const int            a_noInterpDir){
   CH_TIME("LinearStencil::computeInterpStencil2D");
   CH_assert(SpaceDim == 2 || SpaceDim == 3);
 
@@ -146,11 +154,11 @@ bool LinearStencil::computeInterpStencil2D(VoFStencil&          a_stencil,
   // we are able to obtain a reasonable bilinear stencil that also account for multi-valued cells. There is the rare case that
   // we can find A-B and A-D, but not CD or BC. In those cases we _could_ take the interpolation stencil as the average of
   // AB and AD, but that can potentially give negative weights in 3D application so instead we default to the one of the stencil
-  // AB or AD; we take the 1D interpolation along the coordinate axis where a_centroid is displaced furthest. If there are several
+  // AB or AD; we take the 1D interpolation along the coordinate axis where a_pos is displaced furthest. If there are several
   // multivalued cells we should be able to handle those too. For example, if D is a multivalued cell then we obtain a list
   // of VoFs in D and compute the average interpolation stencil CD. 
 
-  bool found_stencil = false;
+  bool foundStencil = false;
 
   // Interpolation directions, in 2D it is always 0 (x) and 1 (y)
   int dir0 = 0;
@@ -159,29 +167,28 @@ bool LinearStencil::computeInterpStencil2D(VoFStencil&          a_stencil,
   // In 3D we may specify which direction we will interpolate in. No interpolation in z means bilinear interpolation in x,y
   // and no interpolation in x means bilinear interpolation in y,z and so on. 
 #if CH_SPACEDIM == 3
-  if(a_nointerp_dir == 2){
+  if(a_noInterpDir == 2){
     dir0 = 0;
     dir1 = 1;
   }
-  else if(a_nointerp_dir == 0){
+  else if(a_noInterpDir == 0){
     dir0 = 1;
     dir1 = 2;
   }
-  else if(a_nointerp_dir == 1){
+  else if(a_noInterpDir == 1){
     dir0 = 0;
     dir1 = 2;
   }
 #endif
 
   bool really2D = true;
-  if(Abs(a_centroid[dir0]) <= LinearStencil::tolerance || Abs(a_centroid[dir1]) < LinearStencil::tolerance){
+  if(std::abs(a_pos[dir0]) < LinearStencil::tolerance || std::abs(a_pos[dir1]) < LinearStencil::tolerance){
     really2D = false;
   }
 
-
   if(really2D){
-    const int HiLoDir0 = a_centroid[dir0] >= 0. ? 1 : -1;
-    const int HiLoDir1 = a_centroid[dir1] >= 0. ? 1 : -1;
+    const int HiLoDir0 = a_pos[dir0] >= 0. ? 1 : -1;
+    const int HiLoDir1 = a_pos[dir1] >= 0. ? 1 : -1;
 
     const Side::LoHiSide side0 = (HiLoDir0 == 1) ? Side::Hi : Side::Lo;
     const Side::LoHiSide side1 = (HiLoDir1 == 1) ? Side::Hi : Side::Lo;
@@ -199,21 +206,21 @@ bool LinearStencil::computeInterpStencil2D(VoFStencil&          a_stencil,
       a_stencil.clear();
       a_stencil.add(a_vof, 1.0);
 
-      found_stencil = false;
+      foundStencil = false;
     }
-    else if(canInterpDir0 && !canInterpDir1){
-      found_stencil = LinearStencil::computeInterpStencil1D(a_stencil, a_centroid, a_vof, a_domain, a_ebisbox, dir0);
+    else if( canInterpDir0 && !canInterpDir1){
+      foundStencil = LinearStencil::computeInterpStencil1D(a_stencil, a_pos, a_vof, a_domain, a_ebisbox, dir0);
     }
     else if(!canInterpDir0 &&  canInterpDir1){
-      found_stencil = LinearStencil::computeInterpStencil1D(a_stencil, a_centroid, a_vof, a_domain, a_ebisbox, dir1);
+      foundStencil = LinearStencil::computeInterpStencil1D(a_stencil, a_pos, a_vof, a_domain, a_ebisbox, dir1);
     }
     else{ // OK, we know we can interpolate in both directions from a_vof. Let's check if we can find a bilinear stencil now
     
       // 1. First, starting on a_vof, compute the linear interpolation stencil in 1D along dir0 and dir1
       VoFStencil curStenDir0;
       VoFStencil curStenDir1;
-      const bool foundFirstStencil0 = LinearStencil::computeInterpStencil1D(curStenDir0,a_centroid,a_vof,a_domain,a_ebisbox,dir0);
-      const bool foundFirstStencil1 = LinearStencil::computeInterpStencil1D(curStenDir1,a_centroid,a_vof,a_domain,a_ebisbox,dir1);
+      const bool foundFirstStencil0 = LinearStencil::computeInterpStencil1D(curStenDir0,a_pos,a_vof,a_domain,a_ebisbox,dir0);
+      const bool foundFirstStencil1 = LinearStencil::computeInterpStencil1D(curStenDir1,a_pos,a_vof,a_domain,a_ebisbox,dir1);
 
 #if LINEARSTENCIL_DEBUG
       if(!foundFirstStencil0 || !foundFirstStencil1){ // If we made it into this loop, this shouldn't happen
@@ -234,7 +241,7 @@ bool LinearStencil::computeInterpStencil2D(VoFStencil&          a_stencil,
     
       for (int i = 0; i<otherVoFsInDir1.size(); i++){
 	VoFStencil sten;
-	const bool found = LinearStencil::computeInterpStencil1D(sten,a_centroid,otherVoFsInDir1[i],a_domain,a_ebisbox,dir0);
+	const bool found = LinearStencil::computeInterpStencil1D(sten,a_pos,otherVoFsInDir1[i],a_domain,a_ebisbox,dir0);
       
 	if(found){
 	  foundSecondStencil0 = true;
@@ -244,7 +251,7 @@ bool LinearStencil::computeInterpStencil2D(VoFStencil&          a_stencil,
       }
       for (int i = 0; i<otherVoFsInDir0.size(); i++){
 	VoFStencil sten;
-	const bool found = LinearStencil::computeInterpStencil1D(sten,a_centroid,otherVoFsInDir0[i],a_domain,a_ebisbox,dir1);
+	const bool found = LinearStencil::computeInterpStencil1D(sten,a_pos,otherVoFsInDir0[i],a_domain,a_ebisbox,dir1);
       
 	if(found){
 	  foundSecondStencil1 = true;
@@ -299,21 +306,21 @@ bool LinearStencil::computeInterpStencil2D(VoFStencil&          a_stencil,
 	MayDay::Warning("LinearStencil::computeInterpStencil2D - logic bust, foundFirstStencil0 && !foundFirstStencil1");
 #endif
 	a_stencil += curStenDir0;
-	found_stencil = true;
+	foundStencil = true;
       }
       else if(!foundFirstStencil0 && foundFirstStencil1){ // It shouldn't be possible for this to happen
 #if DEBUG_LINEARSTENCIL
 	MayDay::Warning("LinearStencil::computeInterpStencil2D - logic bust, !foundFirstStencil0 && foundFirstStencil1");
 #endif
 	a_stencil += curStenDir1;
-	found_stencil = true;
+	foundStencil = true;
       }
       else if(!foundFirstStencil0 && !foundFirstStencil1){ // Might already have covered this case but not sure
 #if DEBUG_LINEARSTENCIL
 	MayDay::Warning("LinearStencil::computeInterpStencil2D - logic bust, thought this case was covered");
 #endif
 	a_stencil.add(a_vof, 1.0);
-	found_stencil = false;
+	foundStencil = false;
       }
       else if(foundFirstStencil0 && foundFirstStencil1 && !(foundSecondStencil0 || foundSecondStencil1)){
 #if DEBUG_LINEARSTENCIL
@@ -321,13 +328,13 @@ bool LinearStencil::computeInterpStencil2D(VoFStencil&          a_stencil,
 #endif
 	// Here, we could find stencil AB and AD but not BC or CD. This shouldn't happen but if it does, we default to 1D
 	// interpolation along the axis with the largest displacement. 
-	if(Abs(a_centroid[dir0]) > Abs(a_centroid[dir1])){ // 1D interpolation in the longest direction
+	if(Abs(a_pos[dir0]) > Abs(a_pos[dir1])){ // 1D interpolation in the longest direction
 	  a_stencil += curStenDir0;
 	}
 	else{
 	  a_stencil += curStenDir1;
 	}
-	found_stencil = true;
+	foundStencil = true;
       }
       else{ // Full bilinear interpolation. We should be able to do any combination we like (right?... RIGHT????)
 
@@ -335,7 +342,7 @@ bool LinearStencil::computeInterpStencil2D(VoFStencil&          a_stencil,
 	// but because the neighboring cells might be multi-valued and we do an averaging over possible 1D interpolation stencils
 	// that may or may not be averages over multi-valued cells, the direction might actually matter. These pathological cases 
 	// will be extremely rare, and I don't think they will ever be a problem. But if they do, please check this code. 
-	const Real d = a_centroid[dir1]*HiLoDir1;
+	const Real d = a_pos[dir1]*HiLoDir1;
 
 	const Real w0 = (1-d);
 	const Real w1 = d;
@@ -346,24 +353,24 @@ bool LinearStencil::computeInterpStencil2D(VoFStencil&          a_stencil,
 	a_stencil += curStenDir0;
 	a_stencil += otherVoFsInterpStencilDir0;
 
-	found_stencil = true;
+	foundStencil = true;
       }
     }
   }
   else{ // Not really 2D code
-    const bool interpDir0 = (Abs(a_centroid[dir0]) > LinearStencil::tolerance) ? true : false;
-    const bool interpDir1 = (Abs(a_centroid[dir1]) > LinearStencil::tolerance) ? true : false;
+    const bool interpDir0 = (Abs(a_pos[dir0]) > LinearStencil::tolerance) ? true : false;
+    const bool interpDir1 = (Abs(a_pos[dir1]) > LinearStencil::tolerance) ? true : false;
 
     a_stencil.clear();
     if(!interpDir0){// Interp along dir1.
-      found_stencil = LinearStencil::computeInterpStencil1D(a_stencil,a_centroid,a_vof,a_domain,a_ebisbox,dir1); 
+      foundStencil = LinearStencil::computeInterpStencil1D(a_stencil,a_pos,a_vof,a_domain,a_ebisbox,dir1); 
     }
     else if(!interpDir1){
-      found_stencil = LinearStencil::computeInterpStencil1D(a_stencil,a_centroid,a_vof,a_domain,a_ebisbox,dir0); 
+      foundStencil = LinearStencil::computeInterpStencil1D(a_stencil,a_pos,a_vof,a_domain,a_ebisbox,dir0); 
     }
     else if(!interpDir0 && !interpDir1){
       a_stencil.add(a_vof, 1.0);
-      found_stencil = true;
+      foundStencil = true;
     }
     else{
       MayDay::Warning("LinearStencil::computeInterpStencil2d - logic bust");
@@ -380,11 +387,12 @@ bool LinearStencil::computeInterpStencil2D(VoFStencil&          a_stencil,
   if(Abs((sumweights - 1.0)) > 1.E-5) MayDay::Warning("LinearStencil::computeInterpStencil2D - weights do not sum to 1");
 #endif
 
-  return found_stencil;
+  return foundStencil;
 }
 
+#if CH_SPACEDIM==3
 bool LinearStencil::computeInterpStencil3D(VoFStencil&          a_stencil,
-					   const RealVect&      a_centroid,
+					   const RealVect&      a_pos,
 					   const VolIndex&      a_vof,
 					   const ProblemDomain& a_domain,
 					   const EBISBox&       a_ebisbox){
@@ -392,7 +400,7 @@ bool LinearStencil::computeInterpStencil3D(VoFStencil&          a_stencil,
   CH_assert(SpaceDim == 3);
   
   
-  bool found_stencil = false;
+  bool foundStencil = false;
 
   const int interpDir3D = 2;
 
@@ -400,7 +408,7 @@ bool LinearStencil::computeInterpStencil3D(VoFStencil&          a_stencil,
   // Check if centroid lies in one of the coordinate planes connecting cell centers
   const Real tol = LinearStencil::tolerance;
   bool really3D = true;
-  if(Abs(a_centroid[0]) <= tol || Abs(a_centroid[1]) <= tol || Abs(a_centroid[2]) <= tol){
+  if(Abs(a_pos[0]) <= tol || Abs(a_pos[1]) <= tol || Abs(a_pos[2]) <= tol){
     really3D = false;
   }
 
@@ -410,8 +418,8 @@ bool LinearStencil::computeInterpStencil3D(VoFStencil&          a_stencil,
   if(really3D){
 
     //    MayDay::Warning("LinearStencil::computeInterpStencil3D - fix this code");
-    const int HiLoInterpDir   = a_centroid[interpDir3D] > 0. ? 1 : -1;
-    const Side::LoHiSide side = (a_centroid[interpDir3D] > 0.) ? Side::Hi : Side::Lo;
+    const int hiLoInterpDir   = a_pos[interpDir3D] > 0. ? 1 : -1;
+    const Side::LoHiSide side = (a_pos[interpDir3D] > 0.) ? Side::Hi : Side::Lo;
 
     // Compute bilinear stencils for two rows of VoFs. stenThisPlane is the bilinear stencil in the plane of this VoF,
     // and stenOtherPlane is the bilinear stencil in the plane of the neighboring vof
@@ -427,7 +435,7 @@ bool LinearStencil::computeInterpStencil3D(VoFStencil&          a_stencil,
     // of how we handle pathological cases for 2D
     VoFStencil stenThisPlane;
     const bool foundFirstStencil  = LinearStencil::computeInterpStencil2D(stenThisPlane,
-									  a_centroid,
+									  a_pos,
 									  a_vof,
 									  a_domain,
 									  a_ebisbox,
@@ -444,7 +452,7 @@ bool LinearStencil::computeInterpStencil3D(VoFStencil&          a_stencil,
     for (int ivof = 0; ivof < otherVoFs.size(); ivof++){
       VoFStencil otherStencil;
       const bool foundOtherStencil = LinearStencil::computeInterpStencil2D(otherStencil,
-									   a_centroid,
+									   a_pos,
 									   otherVoFs[ivof],
 									   a_domain,
 									   a_ebisbox,
@@ -463,12 +471,12 @@ bool LinearStencil::computeInterpStencil3D(VoFStencil&          a_stencil,
 
     // First hook: If we got both stencils we can interpolate them safely. If this fails, we have to do bilinear interpolation
     if(foundFirstStencil && foundSecondStencil){
-      found_stencil = true;
+      foundStencil = true;
       a_stencil.clear();
 
       // If we made it here, we have bilinear interpolation stencils in both planes and we can
       // do linear interpolation of those two in order to get the 3D stencil
-      const Real z  = a_centroid[2]*sign(side);//HiLoDir2;
+      const Real z  = a_pos[2]*sign(side);//HiLoDir2;
       const Real w0 = (1 - z);
       const Real w1 = z;
 
@@ -499,10 +507,10 @@ bool LinearStencil::computeInterpStencil3D(VoFStencil&          a_stencil,
     else if(foundFirstStencil && !foundSecondStencil){ // This does bilinear interpolation instead of trilinear interpolation
       a_stencil.clear();
       a_stencil += stenThisPlane;
-      found_stencil = true;
+      foundStencil = true;
     }
     else if(!foundFirstStencil && !foundSecondStencil){ // Could not find any stencils
-      found_stencil = false;
+      foundStencil = false;
     }
     else{
       MayDay::Warning("LinearStencil::computeInterpStencil3d - logic bust");
@@ -512,19 +520,19 @@ bool LinearStencil::computeInterpStencil3D(VoFStencil&          a_stencil,
     // directions but that is taken care of in the 2D computation. 
     int noInterpDir = 0;
     for (int dir = 0; dir < SpaceDim; dir++){
-      noInterpDir = Abs(a_centroid[dir]) <= tol ? dir : noInterpDir;
+      noInterpDir = Abs(a_pos[dir]) <= tol ? dir : noInterpDir;
     }
-    found_stencil = computeInterpStencil2D(a_stencil, a_centroid, a_vof, a_domain, a_ebisbox, noInterpDir);
+    foundStencil = computeInterpStencil2D(a_stencil, a_pos, a_vof, a_domain, a_ebisbox, noInterpDir);
   }
 
   // This can happen if the EB cuts a domain "corner" and the normal points outwards. This will cause the above code
   // to try to reach out of the domain, but those cells are covered and we don't want to reach into them anyways since they can
   // contain bogus data. 
-  if(!found_stencil){
+  if(!foundStencil){
     a_stencil.clear();
     a_stencil.add(a_vof, 1.0);
 
-    found_stencil = false;
+    foundStencil = false;
   }
 
 #if DEBUG_LINEARSTENCIL
@@ -537,7 +545,8 @@ bool LinearStencil::computeInterpStencil3D(VoFStencil&          a_stencil,
   if(Abs((sumweights - 1.0)) > 1.E-5) MayDay::Warning("LinearStencil::computeInterpStencil3d - sum of weights not equal to one");
 #endif
   
-  return found_stencil;
+  return foundStencil;
 }
+#endif
 
 #include <CD_NamespaceFooter.H>

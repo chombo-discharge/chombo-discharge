@@ -4,8 +4,8 @@
  */
 
 /*!
-  @file   EbCentroidInterpolationStencil.cpp
-  @brief  Implementation of EbCentroidInterpolationStencil.H
+  @file   CD_EbCentroidInterpolationStencil.cpp
+  @brief  Implementation of CD_EbCentroidInterpolationStencil.H
   @author Robert Marskar
 */
 
@@ -25,7 +25,6 @@ EbCentroidInterpolationStencil::EbCentroidInterpolationStencil(const DisjointBox
 							       const int                       a_order,
 							       const int                       a_radius,
 							       const IrregStencil::StencilType a_type) : IrregStencil() {
-
   CH_TIME("EbCentroidInterpolationStencil::EbCentroidInterpolationStencil");
 
   this->define(a_dbl, a_ebisl, a_domain, a_dx, a_order, a_radius, a_type);
@@ -51,27 +50,32 @@ void EbCentroidInterpolationStencil::buildStencil(VoFStencil&              a_ste
 
   // Try to build the preferred stencil.
   switch (m_stencilType) {
-  case IrregStencil::StencilType::Linear: {
-    const RealVect centroid = a_ebisbox.bndryCentroid(a_vof);
-    foundStencil = LinearStencil::getLinearInterpStencil(a_sten, centroid, a_vof, a_domain, a_ebisbox);
-    break;
-  }
-  case IrregStencil::StencilType::TaylorExtrapolation: {
-    foundStencil = this->getTaylorExtrapolationStencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, noCFIVS);
-    break;
-  }
-  case IrregStencil::StencilType::LeastSquares: {
-    foundStencil = this->getLeastSquaresInterpolationStencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, noCFIVS);
-    break;
-  }
-  case IrregStencil::StencilType::PiecewiseLinear: {
-    foundStencil = this->getPiecewiseLinearStencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, noCFIVS);
-    break;
-  }
-  default: {
-    MayDay::Abort("EbCentroidInterpolationStencil::buildStencil - Unsupported stencil type");
-    break;
-  }
+  case IrregStencil::StencilType::Linear:
+    {
+      const RealVect centroid = a_ebisbox.bndryCentroid(a_vof);
+      foundStencil = LinearStencil::getLinearInterpStencil(a_sten, centroid, a_vof, a_domain, a_ebisbox);
+      break;
+    }
+  case IrregStencil::StencilType::TaylorExtrapolation:
+    {
+      foundStencil = this->getTaylorExtrapolationStencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, noCFIVS);
+      break;
+    }
+  case IrregStencil::StencilType::LeastSquares:
+    {
+      foundStencil = this->getLeastSquaresInterpolationStencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, noCFIVS);
+      break;
+    }
+  case IrregStencil::StencilType::PiecewiseLinear:
+    {
+      foundStencil = this->getPiecewiseLinearStencil(a_sten, a_vof, a_dbl, a_domain, a_ebisbox, a_box, a_dx, noCFIVS);
+      break;
+    }
+  default:
+    {
+      MayDay::Error("EbCentroidInterpolationStencil::buildStencil - Unsupported stencil type");
+      break;
+    }
   }
 
   // If we couldn't find a stencil, try other types in this order
@@ -113,7 +117,7 @@ bool EbCentroidInterpolationStencil::getTaylorExtrapolationStencil(VoFStencil&  
     EBArith::getExtrapolationStencil(a_sten, centroid*a_dx, a_dx*RealVect::Unit, a_vof, a_ebisbox, -1, cfivs, comp);
   }
   else {
-    MayDay::Abort("EbCentroidInterpolationStencil::getTaylorExtrapolationStencil - bad order requested. Only first and second order is supported");
+    MayDay::Error("EbCentroidInterpolationStencil::getTaylorExtrapolationStencil - bad order requested. Only first and second order is supported");
   }
 
   return a_sten.size() > 0;
@@ -129,9 +133,11 @@ bool EbCentroidInterpolationStencil::getLeastSquaresInterpolationStencil(VoFSten
 									 const IntVectSet&        a_cfivs){
   CH_TIME("EbCentroidInterpolationStencil::getLeastSquaresInterpolationStencil");
 
-  const int weightingPower = 0;
-  const bool useStartVof   = true;
-  
+  const int  weightingPower = 0;
+  const bool useStartVof    = true;
+
+  // Have LeastSquares compute an interpolation stencil to specified order. This will compute the pseudo-inverse
+  // (using the Moore-Penrose). If this routine returns a stencil with size 0, it failed to find a stencil.
   a_sten = LeastSquares::getInterpolationStencil(Location::Cell::Boundary,
 						 Location::Cell::Center,
 						 LeastSquares::Connectivity::MonotonePath,
@@ -180,7 +186,8 @@ bool EbCentroidInterpolationStencil::getPiecewiseLinearStencil(VoFStencil&      
     }
   }
 
-  return a_sten.size() > 1;
+  // We will always be able to find this stencil. 
+  return true;
 }
 
 #include <CD_NamespaceFooter.H>

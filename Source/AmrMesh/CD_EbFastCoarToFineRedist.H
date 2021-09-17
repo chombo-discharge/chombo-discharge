@@ -19,13 +19,16 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief EBFineToCoarRedist with faster define function
+  @brief EBFineToCoarRedist with faster define function.
+  @details This is just like Chombo's EBCoarToFineRedist except that it is much faster to define. 
+  @note To use run-time debugging and profiling, use EbFastCoarToFineRedist.debug=true and
+  EbFastCoarToFineRedist.profile=true
 */
 class EbFastCoarToFineRedist : public EBCoarToFineRedist {
 public:
 
   /*!
-    @brief Weak constructor
+    @brief Weak constructor. Must subsequently call the define function. 
   */
   EbFastCoarToFineRedist();
 
@@ -37,41 +40,46 @@ public:
   /*!
     @brief New define function for EBFastCoarToFine
     @param[in] a_eblgFine      Fine level EBLevelGrid
-    @param[in] a_eblg          Coarse level EBLevelGrid
-    @param[in] a_neighborsFine Neigbor boxes on the fine grid
-    @param[in] a_neighborsFine Neigbor boxes on the coarse grid
-    @param[in] a_nRef          Refinement ratio between levels
-    @param[in] a_nVar          Number of variables
+    @param[in] a_eblgCoar      Coarse level EBLevelGrid
+    @param[in] a_refRat        Refinement ratio between levels
+    @param[in] a_nComp         Number of variables
     @param[in] a_redistRad     Redistribution radius
   */
-  void define(const EBLevelGrid&                      a_eblgFine,
-	      const EBLevelGrid&                      a_eblgCoar,
-	      const LayoutData<Vector<LayoutIndex> >& a_neighborsFine,
-	      const LayoutData<Vector<LayoutIndex> >& a_neighborsCoar,
-	      const int&                              a_nRef,
-	      const int&                              a_nVar,
-	      const int&                              a_redistRad);
+  void fastDefine(const EBLevelGrid& a_eblgFine,
+		  const EBLevelGrid& a_eblgCoar,
+		  const int&         a_refRat,
+		  const int&         a_nComp,
+		  const int&         a_redistRad);
 
 protected:
+  
+  /*!
+    @brief Make the coarsened fine sets
+  */
+  void makeCedFineSets();
 
   /*!
-    @brief Create a global view of the intersection of the irregular cells on the coarse side of the refinement boundary. 
-    @param[out] a_cfivs Set
-    @param[in]  a_neighborsCoar Coarse grid neighboring boxes. 
-  */
-  void makeCedFineSets(   IntVectSet& a_cfivs, const LayoutData<Vector<LayoutIndex> >& a_neighborsCoar);
+    @brief Make the coarse set
+  */  
+  void makeCoarSets();
 
   /*!
-    @brief Make coarse sets, as per EBCoarToFineRedist
-    @param[in] a_cfivs Set
-    @param[in] a_neighborsFine Neighbors on fine level.
+    @brief Debugging function. Gathers and broadcasts a set
+    @param[inout] a_set Set to gather and broadcast
   */
-  void makeCoarSets(const IntVectSet& a_cfivs, const LayoutData<Vector<LayoutIndex> >& a_neighborsFine);
+  void gatherBroadcast(IntVectSet& a_set);
 
-  // Debugging functions
-  void gatherBroadcast(  IntVectSet& a_set);
+  /*!
+    @brief Debugging function. Gathers and broadcasts m_setsCedFine onto a_setsCedFine
+    @param[inout] a_setsCedFine Fine set
+  */  
   void gatherSetsCedFine(IntVectSet& a_setsCedFine);
-  void gatherSetsCoar(   IntVectSet& a_setsCoar);
+
+  /*!
+    @brief Debugging function. Gathers and broadcasts m_setsCoar onto a_setsCoar. 
+    @param[inout] a_setsCoar Fine set
+  */  
+  void gatherSetsCoar(IntVectSet& a_setsCoar);
 };
 
 #include <CD_NamespaceFooter.H>

@@ -22,7 +22,8 @@
 
 /*!
   @brief Class for generation AMR boxes using a tiling algorithm. 
-  @details This class provides a scalable method for grid generation where the grids are generated in a pre-set tile pattern.
+  @details This class provides a scalable method for grid generation where the grids are generated in a pre-set tile pattern. This 
+  work by decomposing the grid into a tiled pattern, and then flagging tiles rather than cells for refinement. 
 */
 class TiledMeshRefine {
 public:
@@ -41,7 +42,7 @@ public:
   TiledMeshRefine(const ProblemDomain& a_coarsestDomain, const Vector<int>& a_refRatios, const IntVect& a_tileSize);
 
   /*!
-    @brief Destructor
+    @brief Destructor (does nothing)
   */
   ~TiledMeshRefine();
 
@@ -51,7 +52,8 @@ public:
     @param[in]  a_tagsLevel Grid tags on each level
     @param[in]  a_baseLevel Coarsest level which does not change
     @param[in]  a_topLevel  Finest level which has tags
-    @para[in]   a_oldBoxes  Previous grid boxes
+    @param[in]  a_oldBoxes  Previous grid boxes
+    @return Returns the new finest grid level. 
   */
   int regrid(Vector<Vector<Box> >&       a_newBoxes,
 	     const Vector<IntVectSet>&   a_tagsLevel,

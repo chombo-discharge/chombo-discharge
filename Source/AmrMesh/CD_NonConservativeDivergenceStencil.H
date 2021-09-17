@@ -4,7 +4,7 @@
  */
 
 /*!
-  @file   NonConservativeDivergenceStencil.H
+  @file   CD_NonConservativeDivergenceStencil.H
   @brief  Implementation of IrregStencil that can perform the nonconservative divergence averaging
   @author Robert Marskar
 */
@@ -17,7 +17,9 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Class for holding stencils on irregular cells over a single AMR level
+  @brief Stencil class for computing non-conservative divergences using neighborhood algorithms. 
+  @details This class will compute a stencil s(phi) = sum(kappa * phi)/sum(kappa) where
+  the stencil points consist of cells that can be reached through a monotone path. 
 */
 class NonConservativeDivergenceStencil : public IrregStencil {
 public:
@@ -33,9 +35,9 @@ public:
     @param[in] a_ebisl  EBIS layout
     @param[in] a_domain Problem domain
     @param[in] a_dx     Resolutions
-    @param[in] a_order  Interpolation order
-    @param[in] a_radius Radius for least squares
-    @param[in] a_type   Stencil type
+    @param[in] a_order  Stencil order (dummy argument)
+    @param[in] a_radius Stencil radius
+    @param[in] a_type   Stencil type (dummy argument)
   */
   NonConservativeDivergenceStencil(const DisjointBoxLayout&        a_dbl,
 				   const EBISLayout&               a_ebisl,
@@ -56,7 +58,7 @@ protected:
     @brief Build the interpolation stencils
     @param[out] a_sten    Returned stencil
     @param[in]  a_vof     VolIndex where stencil is defined
-    @param[in]  a_grids   Grids
+    @param[in]  a_dbl     Grids
     @param[in]  a_domain  Problem domain
     @param[in]  a_ebisbox EBISBox
     @param[in]  a_box     Box currently being evaluated
@@ -71,7 +73,7 @@ protected:
 			    const EBISBox&           a_ebisbox,
 			    const Box&               a_box,
 			    const Real&              a_dx,
-			    const IntVectSet&        a_cfivs);
+			    const IntVectSet&        a_cfivs) override;
   
 };
   

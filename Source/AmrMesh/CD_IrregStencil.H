@@ -4,8 +4,8 @@
  */
 
 /*!
-  @file   IrregStencil.H
-  @brief  Abstract class for building stencils on cut-cells. 
+  @file   CD_IrregStencil.H
+  @brief  Abstract class for holding cut-cell stencils on an AMR level. 
   @author Robert Marskar
 */
 
@@ -19,12 +19,19 @@
 #include <RefCountedPtr.H>
 #include <Stencils.H>
 #include <LayoutData.H>
+#include <VoFIterator.H>
 
 // Our includes
 #include <CD_NamespaceHeader.H>
 
 /*!
   @brief Class for holding stencils on irregular cells over a single AMR level
+  @details Users can use this class for holding VoFStencils on an AMR level, and to embed it in an AMR context
+  through IrregAmrStencil. Applications functions do not use stencil aggregration, so do not use this class
+  in performance-critical stencil code (like multigrid). To use this class, override the buildStencil function
+  which will build the stencil in each cut-cell. 
+  @note By default, a single stencil is allocated in the cut-cells. If you need more, override the define and
+  apply functions. 
 */
 class IrregStencil {
 public:
@@ -41,7 +48,7 @@ public:
   };
 
   /*!
-    @brief Constructor, but weak construction is not allowed. 
+    @brief Weak constructor (does nothing)
   */
   IrregStencil();
 
@@ -68,30 +75,47 @@ public:
   */
   ~IrregStencil();
 
-
-
   /*!
     @brief Get the stencils over a single box
   */
-  const BaseIVFAB<VoFStencil>& operator[](const DataIndex& a_dit) const {
-    return *m_stencils[a_dit];
-  }
+  const BaseIVFAB<VoFStencil>& operator[](const DataIndex& a_dit) const;
   
   /*!
     @brief Get the stencils over a single box
   */
-  BaseIVFAB<VoFStencil>& operator[](const DataIndex& a_dit) {
-    return *m_stencils[a_dit];
-  }
+  BaseIVFAB<VoFStencil>& operator[](const DataIndex& a_dit);
+
+  /*!
+    @brief Apply the stencil
+  */
+  virtual void apply(EBCellFAB& a_dst, const EBCellFAB& a_src, const DataIndex& a_dit) const;
+
+  /*!
+    @brief Apply the stencil
+  */
+  virtual void apply(BaseIVFAB<Real>& a_dst, const EBCellFAB& a_src, const DataIndex& a_dit) const;  
 
 protected:
 
+  /*!
+    @brief Default stencil component
+  */
+  static constexpr int m_defaultStenComp = 0;
+
+  /*!
+    @brief Default stencil component
+  */
+  static constexpr int m_defaultNumSten = 1;  
+
+  /*!
+    @brief Stencil
+  */
   LayoutData<RefCountedPtr<BaseIVFAB<VoFStencil> > > m_stencils;
 
   /*!
-    @brief Stencils defined or not
+    @brief VoFIterators
   */
-  bool m_defined;;
+  mutable LayoutData<VoFIterator> m_vofIter;
 
   /*!
     @brief Grids

@@ -4,7 +4,7 @@
  */
 
 /*!
-  @file   LoadBalancing.H
+  @file   CD_LoadBalancing.H
   @brief  Declaration of a static class for various load balancing operations.
   @author Robert Marskar
 */
@@ -18,13 +18,13 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Namespace containing various load balancing routines.
+  @brief Static class which contains various load balancing routines. 
 */
 class LoadBalancing {
 public:
   
   /*!
-    @brief Load balancing assigning ranks to boxes. 
+    @brief Load balancing, assigning ranks to boxes. 
     @param[out] a_ranks Vector containing processor IDs corresponding to boxes (and loads)
     @param[in]  a_loads Computational loads
     @param[in]  a_boxes Grid boxes
@@ -50,9 +50,9 @@ public:
     @param[in]  a_boxes Grid boxes
   */
   template <class T>
-  static void hierarchy(Vector<Vector<int> >&       a_procs,
-			const Vector<Vector<T> >&   a_loads,
-			const Vector<Vector<Box> >& a_boxes);
+  static void balanceHierarchy(Vector<Vector<int> >&       a_procs,
+			       const Vector<Vector<T> >&   a_loads,
+			       const Vector<Vector<Box> >& a_boxes);
 
   /*!
     @brief Sorts boxes and loads over a hierarchy according to some sorting criterion.
@@ -121,7 +121,7 @@ public:
     @param[inout] a_loads Computational loads
     @return On output, a_boxes and a_loads have been globally gathered from all ranks. 
   */
-  static void gatherBoxes_and_loads(Vector<Box>& a_boxes, Vector<int>& a_loads);
+  static void gatherBoxesAndLoads(Vector<Box>& a_boxes, Vector<int>& a_loads);
 
 protected:
 
@@ -134,29 +134,37 @@ protected:
   static std::vector<std::pair<Box, T> > packPairs(const Vector<Box>& a_boxes, const Vector<T>& a_loads);
 
   /*!
-    @brief Splits vector pair
+    @brief Splits vector pair into separate boxes and loads. 
+    @param[out] a_boxes Boxes.
+    @param[out] a_loads Loads.
+    @param[out] a_pairs Boxes and loads, stored as a pair. 
   */
   template <class T>
   static void unpackPairs(Vector<Box>& a_boxes, Vector<T>& a_loads, const std::vector<std::pair<Box, T> >& a_pairs);
 
   /*!
     @brief Standard box sorting, calls C++ std::sort
+    @param[inout] a_boxes Boxes to be sorted. 
+    @param[inout] a_loads Loads to be sorted. 
+    @details This uses lexicographical indexing of boxes. On output, the boxes/loads are sorted with this ordering. 
   */
   template <class T>
   static void standardSort(Vector<Box>& a_boxes, Vector<T>& a_loads);
 
   /*!
     @brief Randomly shuffles boxes and loads.
-    @param[inout] a_boxes Grid boxes
-    @param[inout] a_loads Computational loads
+    @param[inout] a_boxes Grid boxes to be shuffled. 
+    @param[inout] a_loads Computational loads to be shuffled. 
+    @details This shuffles the boxes and loads so that the box distribution is random. 
   */
   template <class T>
   static void shuffleSort(Vector<Box>& a_boxes, Vector<T>& a_loads);
 
   /*!
     @brief Sort boxes using Morton code.
-    @param[inout] a_boxes Grid boxes
-    @param[inout] a_loads Computational loads
+    @param[inout] a_boxes Grid boxes to be sorted. 
+    @param[inout] a_loads Computational loads to be sorted.
+    @details On output, a_boxes and a_loads are Morton sorted. 
   */
   template <class T>
   static void mortonSort(Vector<Box>& a_boxes, Vector<T>& a_loads);
@@ -166,7 +174,7 @@ protected:
     @param[in] a_maxBits Maximum bits
     @param[in] a_lhs     Left hand side
     @param[in] a_rhs     Right hand side
-    @return Returns true if a_lhs has a lower Morton index than a_rhs
+    @return Returns true if a_lhs.first has a lower Morton index than a_rhs.first. 
   */
   template <class T>
   static bool mortonComparator(const int a_maxBits, const std::pair<Box,T>& a_lhs, const std::pair<Box, T>& a_rhs);
