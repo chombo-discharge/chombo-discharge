@@ -2543,8 +2543,7 @@ void CdrPlasmaStepper::computeElectricField(MFAMRCellData& a_E, const MFAMRCellD
     pout() << "CdrPlasmaStepper::computeElectricField(mfamrcell, mfamrcell)" << endl;
   }
 
-  m_amr->computeGradient(a_E, a_potential, m_realm);
-  DataOps::scale(a_E, -1.0);
+  m_fieldSolver->computeElectricField(a_E, a_potential);
 
   m_amr->averageDown(a_E, m_realm);
   m_amr->interpGhost(a_E, m_realm);
@@ -2565,12 +2564,7 @@ void CdrPlasmaStepper::computeElectricField(EBAMRCellData& a_E, const phase::whi
     pout() << "CdrPlasmaStepper::computeElectricField(ebamrcell, phase, mfamrcell)" << endl;
   }
 
-  EBAMRCellData pot_gas;
-  m_amr->allocatePointer(pot_gas);
-  m_amr->alias(pot_gas, a_phase, a_potential);
-
-  m_amr->computeGradient(a_E, pot_gas, m_realm, a_phase);
-  DataOps::scale(a_E, -1.0);
+  m_fieldSolver->computeElectricField(a_E, a_phase, a_potential);
 
   m_amr->averageDown(a_E, m_realm, a_phase);
   m_amr->interpGhost(a_E, m_realm, a_phase);

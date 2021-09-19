@@ -133,6 +133,32 @@ void FieldSolver::computeElectricField(MFAMRCellData& a_electricField, const MFA
   m_amr->interpGhost(a_electricField, m_realm);
 }
 
+void FieldSolver::computeElectricField(EBAMRCellData& a_E, const phase::which_phase a_phase, const MFAMRCellData& a_potential){
+  CH_TIME("FieldSolver::computeElectricField(EBAMRCellData, phase, MFAMRCellData)");
+  if(m_verbosity > 5){
+    pout() << "FieldSolver::computeElectricField(EBAMRCellData, phase, MFAMRCellData)" << endl;
+  }
+
+  CH_assert(a_electricField[0]->nComp() == SpaceDim);
+  CH_assert(a_potential    [0]->nComp() == 1       );
+
+  EBAMRCellData potentialPhase;
+  EBAMRCellData scratch;
+  m_amr->allocate(scratch, m_realm, a_phase, m_nComp);
+  m_amr->alias(potentialPhase, a_phase, a_potential);
+  
+  scratch.copy(potentialPhase);
+
+  m_amr->averageDown(scratch, m_realm, a_phase);
+  m_amr->interpGhost(scratch, m_realm, a_phase);
+
+  m_amr->computeGradient(a_E, scratch, m_realm, a_phase);
+  DataOps::scale(a_E, -1.0);
+
+  m_amr->averageDown(a_E, m_realm, a_phase);
+  m_amr->interpGhost(a_E, m_realm, a_phase);
+}
+
 void FieldSolver::allocateInternals(){
   CH_TIME("FieldSolver::allocateInternals()");
   if(m_verbosity > 5){
