@@ -108,57 +108,6 @@ void FieldSolver::computeElectricField(){
   this->computeElectricField(m_electricField, m_potential);
 }
 
-void FieldSolver::computeElectricField(MFAMRCellData& a_electricField, const MFAMRCellData& a_potential){
-  CH_TIME("FieldSolver::computeElectricField(MFAMRCellData, MFAMRCellData)");
-  if(m_verbosity > 5){
-    pout() << "FieldSolver::computeElectricField(MFAMRCellData, MFAMRCellData)" << endl;
-  }
-
-  CH_assert(a_electricField[0]->nComp() == SpaceDim);
-  CH_assert(a_potential    [0]->nComp() == 1       );
-
-  // Update ghost cells. Use scratch storage for this. 
-  MFAMRCellData scratch;
-  m_amr->allocate(scratch, m_realm, m_nComp);
-  scratch.copy(a_potential);
-  m_amr->averageDown(scratch, m_realm);
-  m_amr->interpGhost(scratch, m_realm);
-
-  // Compute the cell-centered gradient everywhere. 
-  m_amr->computeGradient(a_electricField, scratch, m_realm);
-  DataOps::scale(a_electricField, -1.0);
-
-  // Coarsen solution and update ghost cells. 
-  m_amr->averageDown(a_electricField, m_realm);
-  m_amr->interpGhost(a_electricField, m_realm);
-}
-
-void FieldSolver::computeElectricField(EBAMRCellData& a_E, const phase::which_phase a_phase, const MFAMRCellData& a_potential){
-  CH_TIME("FieldSolver::computeElectricField(EBAMRCellData, phase, MFAMRCellData)");
-  if(m_verbosity > 5){
-    pout() << "FieldSolver::computeElectricField(EBAMRCellData, phase, MFAMRCellData)" << endl;
-  }
-
-  CH_assert(a_electricField[0]->nComp() == SpaceDim);
-  CH_assert(a_potential    [0]->nComp() == 1       );
-
-  EBAMRCellData potentialPhase;
-  EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_realm, a_phase, m_nComp);
-  m_amr->alias(potentialPhase, a_phase, a_potential);
-  
-  scratch.copy(potentialPhase);
-
-  m_amr->averageDown(scratch, m_realm, a_phase);
-  m_amr->interpGhost(scratch, m_realm, a_phase);
-
-  m_amr->computeGradient(a_E, scratch, m_realm, a_phase);
-  DataOps::scale(a_E, -1.0);
-
-  m_amr->averageDown(a_E, m_realm, a_phase);
-  m_amr->interpGhost(a_E, m_realm, a_phase);
-}
-
 void FieldSolver::allocateInternals(){
   CH_TIME("FieldSolver::allocateInternals()");
   if(m_verbosity > 5){

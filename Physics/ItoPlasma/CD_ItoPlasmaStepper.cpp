@@ -909,12 +909,10 @@ void ItoPlasmaStepper::computeElectricField(MFAMRCellData& a_E, const MFAMRCellD
     pout() << "ItoPlasmaStepper::computeElectricField(mfamrcell, mfamrcell" << endl;
   }
 
-  m_amr->computeGradient(a_E, a_potential, m_fluid_Realm);
-  DataOps::scale(a_E, -1.0);
+  m_fieldSolver->computeElectricField(a_E, a_potential);
 
   m_amr->averageDown(a_E, m_fluid_Realm);
   m_amr->interpGhost(a_E, m_fluid_Realm);
-
 }
 
 void ItoPlasmaStepper::computeElectricField(EBAMRCellData& a_E, const phase::which_phase a_phase){
@@ -931,16 +929,11 @@ void ItoPlasmaStepper::computeElectricField(EBAMRCellData& a_E, const phase::whi
   if(m_verbosity > 5){
     pout() << "ItoPlasmaStepper::computeElectricField(ebamrcell, phase mfamrcell" << endl;
   }
-  
-  EBAMRCellData pot_gas;
-  m_amr->allocatePointer(pot_gas);
-  m_amr->alias(pot_gas, a_phase, a_potential);
 
-  m_amr->computeGradient(a_E, pot_gas, m_fluid_Realm, a_phase);
-  DataOps::scale(a_E, -1.0);
+  m_fieldSolver->computeElectricField(a_E, a_phase, a_potential);
 
   m_amr->averageDown(a_E, m_fluid_Realm, a_phase);
-  m_amr->interpGhost(a_E, m_fluid_Realm, a_phase);
+  m_amr->interpGhost(a_E, m_fluid_Realm, a_phase);  
 }
 
 void ItoPlasmaStepper::computeElectricField(EBAMRFluxData& a_E_face, const phase::which_phase a_phase, const EBAMRCellData& a_E_cell){

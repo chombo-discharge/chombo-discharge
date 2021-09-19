@@ -112,7 +112,7 @@ public:
     @param[out] a_electricField Cell-centered electric field
     @param[in]  a_potential     Cell-centered potential
   */
-  virtual void computeElectricField(MFAMRCellData& a_E, const MFAMRCellData& a_potential);
+  virtual void computeElectricField(MFAMRCellData& a_E, const MFAMRCellData& a_potential) = 0;
 
   /*!
     @brief Compute the cell-centered electric field on a specific phase. 
@@ -120,7 +120,7 @@ public:
     @param[in]  a_phase         Phase
     @param[in]  a_potential     Cell-centered potential
   */
-  virtual void computeElectricField(EBAMRCellData& a_E, const phase::which_phase a_phase, const MFAMRCellData& a_potential);  
+  virtual void computeElectricField(EBAMRCellData& a_E, const phase::which_phase a_phase, const MFAMRCellData& a_potential) = 0;  
   
   /*!
     @brief Parse options (for derived class)
