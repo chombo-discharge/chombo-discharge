@@ -909,12 +909,10 @@ void ItoPlasmaStepper::computeElectricField(MFAMRCellData& a_E, const MFAMRCellD
     pout() << "ItoPlasmaStepper::computeElectricField(mfamrcell, mfamrcell" << endl;
   }
 
-  m_amr->computeGradient(a_E, a_potential, m_fluid_Realm);
-  DataOps::scale(a_E, -1.0);
+  m_fieldSolver->computeElectricField(a_E, a_potential);
 
   m_amr->averageDown(a_E, m_fluid_Realm);
   m_amr->interpGhost(a_E, m_fluid_Realm);
-
 }
 
 void ItoPlasmaStepper::computeElectricField(EBAMRCellData& a_E, const phase::which_phase a_phase){
@@ -931,16 +929,11 @@ void ItoPlasmaStepper::computeElectricField(EBAMRCellData& a_E, const phase::whi
   if(m_verbosity > 5){
     pout() << "ItoPlasmaStepper::computeElectricField(ebamrcell, phase mfamrcell" << endl;
   }
-  
-  EBAMRCellData pot_gas;
-  m_amr->allocatePointer(pot_gas);
-  m_amr->alias(pot_gas, a_phase, a_potential);
 
-  m_amr->computeGradient(a_E, pot_gas, m_fluid_Realm, a_phase);
-  DataOps::scale(a_E, -1.0);
+  m_fieldSolver->computeElectricField(a_E, a_phase, a_potential);
 
   m_amr->averageDown(a_E, m_fluid_Realm, a_phase);
-  m_amr->interpGhost(a_E, m_fluid_Realm, a_phase);
+  m_amr->interpGhost(a_E, m_fluid_Realm, a_phase);  
 }
 
 void ItoPlasmaStepper::computeElectricField(EBAMRFluxData& a_E_face, const phase::which_phase a_phase, const EBAMRCellData& a_E_cell){
@@ -3198,6 +3191,7 @@ void ItoPlasmaStepper::computeEdotJSource(){
 
       // Compute the negative gradient of the diffusion term
       solver->depositDiffusivity(m_particle_scratch1, solver->getParticles(ItoSolver::WhichContainer::bulk));
+      m_amr->interpGhostMG(m_particle_scratch1, m_particleRealm, m_phase);
       m_amr->computeGradient(m_particle_scratchD, m_particle_scratch1, m_particleRealm, m_phase);
       DataOps::scale(m_particle_scratchD, -1.0); // scratchD = -grad(D*n)
       
@@ -3244,6 +3238,7 @@ void ItoPlasmaStepper::computeEdotJSourceNWO(){
     if(q != 0 && solver->isDiffusive()){
       solver->depositDiffusivity(m_particle_scratch1, solver->getParticles(ItoSolver::WhichContainer::bulk));            // Deposit D*n
       m_fluid_scratch1.copy(m_particle_scratch1);                                           // Copy D*n to fluid Realm
+      m_amr->interpGhostMG(m_fluid_scratch1, m_fluid_Realm, m_phase);      
       m_amr->computeGradient(m_fluid_scratchD, m_fluid_scratch1, m_fluid_Realm, m_phase);  // scratchD = grad(D*n)
       DataOps::scale(m_fluid_scratchD, -1.0);                                              // scratchD = -grad(D*n)
       DataOps::dotProduct(m_fluid_scratch1,  m_fluid_scratchD, m_fluid_E);                   // scratch1 = -E.dot.grad(D*n)

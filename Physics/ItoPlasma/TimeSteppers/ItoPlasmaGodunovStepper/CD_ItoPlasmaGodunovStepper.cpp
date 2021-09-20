@@ -989,7 +989,7 @@ void ItoPlasmaGodunovStepper::compute_face_conductivity(){
   DataOps::setValue(m_conduct_eb,   0.0);
 
   // This code does averaging from cell to face. 
-  DataOps::averageCellToFaceAllComps(m_conduct_face, m_conduct_cell, m_amr->getDomains());
+  DataOps::averageCellToFace(m_conduct_face, m_conduct_cell, m_amr->getDomains());
 
   // This code extrapolates the conductivity to the EB. This should actually be the EB centroid but since the stencils
   // for EB extrapolation can be a bit nasty (e.g. Negative weights), we do the centroid instead and take that as an approximation.

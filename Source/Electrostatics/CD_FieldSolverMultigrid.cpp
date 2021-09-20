@@ -576,4 +576,35 @@ void FieldSolverMultigrid::computeElectricField(MFAMRCellData& a_electricField, 
   m_amr->interpGhost(a_electricField, m_realm);
 }
 
+void FieldSolverMultigrid::computeElectricField(EBAMRCellData& a_electricField, const phase::which_phase a_phase, const MFAMRCellData& a_potential){
+  CH_TIME("FieldSolverMultigrid::computeElectricField(MFAMRCellData, phase, MFAMRCellData)");
+  if(m_verbosity > 5){
+    pout() << "FieldSolverMultigrid::computeElectricField(MFAMRCellData, phase, MFAMRCellData)" << endl;
+  }
+
+  CH_assert(a_electricField[0]->nComp() == SpaceDim);
+  CH_assert(a_potential    [0]->nComp() == 1       );
+
+  // Update ghost cells. Use scratch storage for this. Also, we use the multigrid interpolator to do this
+  // because that is what is consistent with the Helmholtz discretization. Hence the call to interpGhostMG rather
+  // than interpGhostPwl or interpGhost here.   
+  EBAMRCellData scratch;
+  EBAMRCellData potentialPhase;
+
+  m_amr->allocatePointer(potentialPhase);
+  m_amr->allocate(scratch, m_realm, a_phase, m_nComp);
+  m_amr->alias(potentialPhase, a_phase, a_potential);
+  
+  scratch.copy(potentialPhase);
+  m_amr->interpGhostMG(scratch, m_realm, a_phase);
+
+  // Use EBGradient for computing the gradient. 
+  m_amr->computeGradient(a_electricField, scratch, m_realm, a_phase);
+  DataOps::scale(a_electricField, -1.0);
+
+  // Coarsen solution and update ghost cells. 
+  m_amr->averageDown(a_electricField, m_realm, a_phase);
+  m_amr->interpGhost(a_electricField, m_realm, a_phase);  
+}
+
 #include <CD_NamespaceFooter.H>
