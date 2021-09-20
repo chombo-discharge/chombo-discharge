@@ -20,11 +20,10 @@
 using namespace Physics::CdrPlasma;
 
 CdrPlasmaAir9EedBourdon::eed::eed(){
-  m_name      = "eed";
-  m_unit      = "eVm-3";
-  m_chargeNumber    = 0;
-  m_isDiffusive = true;
-  m_isMobile    = true;
+  m_name         = "eed";
+  m_chargeNumber = 0;
+  m_isDiffusive  = true;
+  m_isMobile     = true;
 
   // Get gas parameters
   Real Tg, p, N, O2frac, N2frac;
@@ -37,7 +36,6 @@ CdrPlasmaAir9EedBourdon::eed::~eed(){
 
 CdrPlasmaAir9EedBourdon::Electron::Electron(){
   m_name   = "Electron";
-  m_unit   = "m-3";
   m_chargeNumber = -1;
   m_isDiffusive = true;
   m_isMobile = true;
@@ -54,7 +52,6 @@ CdrPlasmaAir9EedBourdon::Electron::~Electron(){
 
 CdrPlasmaAir9EedBourdon::N2plus::N2plus() {
   m_name   = "N2plus";
-  m_unit   = "m-3";
   m_chargeNumber = 1;
   m_isDiffusive = false;
   m_isMobile = true;
@@ -83,7 +80,6 @@ CdrPlasmaAir9EedBourdon::N2plus::~N2plus(){
 
 CdrPlasmaAir9EedBourdon::N4plus::N4plus(){
   m_name   = "N4plus";
-  m_unit   = "m-3";
   m_chargeNumber = 1;
   m_isDiffusive = false;
   m_isMobile = true;
@@ -107,7 +103,6 @@ CdrPlasmaAir9EedBourdon::N4plus::~N4plus(){
 
 CdrPlasmaAir9EedBourdon::O2plus::O2plus(){
   m_name   = "O2plus";
-  m_unit   = "m-3";
   m_chargeNumber = 1;
   m_isDiffusive = false;
   m_isMobile = true;
@@ -136,7 +131,6 @@ CdrPlasmaAir9EedBourdon::O2plus::~O2plus(){
 
 CdrPlasmaAir9EedBourdon::O4plus::O4plus(){
   m_name   = "O4plus";
-  m_unit   = "m-3";
   m_chargeNumber = 1;
   m_isDiffusive = false;
   m_isMobile = true;
@@ -160,7 +154,6 @@ CdrPlasmaAir9EedBourdon::O4plus::~O4plus(){
 
 CdrPlasmaAir9EedBourdon::O2plusN2::O2plusN2() {
   m_name   = "O2plusN2";
-  m_unit   = "m-3";
   m_chargeNumber = 1;
   m_isDiffusive = false;
   m_isMobile = true;
@@ -184,7 +177,6 @@ CdrPlasmaAir9EedBourdon::O2plusN2::~O2plusN2(){
 
 CdrPlasmaAir9EedBourdon::O2minus::O2minus(){
   m_name   = "O2minus";
-  m_unit   = "m-3";
   m_chargeNumber = -1;
   m_isDiffusive = false;
   m_isMobile = true;
@@ -208,7 +200,6 @@ CdrPlasmaAir9EedBourdon::O2minus::~O2minus(){
 
 CdrPlasmaAir9EedBourdon::Ominus::Ominus(){
   m_name   = "Ominus";
-  m_unit   = "m-3";
   m_chargeNumber = -1;
   m_isDiffusive = false;
   m_isMobile = true;
