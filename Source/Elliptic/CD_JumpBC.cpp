@@ -211,8 +211,8 @@ void JumpBC::defineStencils(){
 	const Real& weightPhase0 = m_avgWeights[dit()].getIVFAB(firstPhase) (vof0, vofComp);
 	const Real& weightPhase1 = m_avgWeights[dit()].getIVFAB(secondPhase)(vof0, vofComp);
 
-	Real& denomPhase0 = m_denom[dit()].getIVFAB(firstPhase)(vof0, vofComp);
-	Real& denomPhase1 = m_denom[dit()].getIVFAB(firstPhase)(vof0, vofComp);
+	Real& denomPhase0 = m_denom[dit()].getIVFAB(firstPhase) (vof0, vofComp);
+	Real& denomPhase1 = m_denom[dit()].getIVFAB(secondPhase)(vof0, vofComp);
 
 	const Real denom = 1./(weightPhase0 + weightPhase1);
 	

@@ -146,6 +146,7 @@ namespace Physics {
       DataOps::setValue(sigma, initSigma);
       m_fieldSolver->setRho(rhoFunc);
       m_fieldSolver->setPermittivities();
+      m_sigma->resetCells(sigma);
     }
 
     template <class T>

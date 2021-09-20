@@ -515,6 +515,11 @@ protected:
   bool m_plotResidue;
 
   /*!
+    @brief If true, m_sigma will be added to plot files. 
+  */
+  bool m_plotSigma;
+
+  /*!
     @brief Verbosity for this calss. 
   */
   int m_verbosity;

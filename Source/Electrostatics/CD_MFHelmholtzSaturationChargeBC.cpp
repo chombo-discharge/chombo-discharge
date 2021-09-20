@@ -94,12 +94,12 @@ void MFHelmholtzSaturationChargeBC::matchBC(BaseIVFAB<Real>& a_jump,
     Real phiBndry = 0.0;
     Real jump     = 0.0;
     if(m_phase == phase::gas){
-      phiBndry  =  contribPhase0/(denomPhase0); // Divide because we multiplied the stencil by bq/(wq*bq + wp*bp)
+      phiBndry  =  contribPhase0/denomPhase0; // Divide because we multiplied the stencil by bq/(wq*bq + wp*bp)
       phiBndry *= -1./weightPhase0;             // Divide by boundary weight, which is actually bq*wq.
 
       // BC is b*dphi/dn = sigma so compute the jump from that. Recall that the stencil is denominator-weighted so divide that out. 
       jump     += weightPhase1*phiBndry;
-      jump     += contribPhase1/denomPhase1;
+      jump     += contribPhase1/denomPhase0;
     }
     else{
       phiBndry  =  contribPhase1/(denomPhase1); // Divide because we multiplied the stencil by bq/(wq*bq + wp*bp)

@@ -523,6 +523,7 @@ void FieldSolver::parsePlotVariables(){
   m_plotRho           = false;
   m_plotElectricField = false;
   m_plotResidue       = false;
+  m_plotSigma         = false;  
 
   ParmParse pp(m_className.c_str());
   const int num = pp.countval("plt_vars");
@@ -536,6 +537,7 @@ void FieldSolver::parsePlotVariables(){
       else if(str[i] == "rho")   m_plotRho           = true;
       else if(str[i] == "resid") m_plotResidue       = true;
       else if(str[i] == "E")     m_plotElectricField = true;
+      else if(str[i] == "sigma") m_plotSigma         = true;      
     }
   }
 }

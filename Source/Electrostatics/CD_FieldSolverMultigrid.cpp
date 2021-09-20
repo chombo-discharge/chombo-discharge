@@ -303,6 +303,13 @@ bool FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
 
   this->computeElectricField(m_electricField, a_phi);
 
+  // If we are also solving for the saturation charge we get that solution from the factory (it can be a free parameter in the Helmholtz solve). 
+  if(m_jumpBcType == JumpBCType::SaturationCharge){
+    const EBAMRIVData& factorySigma = m_helmholtzOpFactory->getSigma();
+    DataOps::copy (m_sigma, factorySigma);
+    DataOps::scale(m_sigma, Units::eps0);
+  }
+
   return converged;
 }
 
