@@ -175,6 +175,9 @@ void CdrPlasmaStepper::advanceReactionNetwork(Vector<EBAMRCellData*>&       a_pa
     pout() << "CdrPlasmaStepper::advanceReactionNetwork(nograd)" << endl;
   }
 
+  EBAMRCellData scratch;
+  m_amr->allocate(scratch, m_realm, m_cdr->getPhase(), 1);
+
   const int num_species = m_physics->getNumCdrSpecies();
 
   Vector<EBAMRCellData*> grad_cdr(num_species); // Holders for grad(cdr)
@@ -183,7 +186,10 @@ void CdrPlasmaStepper::advanceReactionNetwork(Vector<EBAMRCellData*>&       a_pa
     grad_cdr[idx] = new EBAMRCellData();                            // This storage must be deleted
     m_amr->allocate(*grad_cdr[idx], m_realm, m_cdr->getPhase(), SpaceDim);  // Allocate
 
-    m_amr->computeGradient(*grad_cdr[idx], *a_particle_densities[idx], m_realm, phase::gas); // Compute grad()
+    DataOps::copy(scratch, *a_particle_densities[idx]);
+    m_amr->interpGhostMG(scratch, m_realm, m_cdr->getPhase());
+
+    m_amr->computeGradient(*grad_cdr[idx], scratch, m_realm, phase::gas); // Compute grad()
     m_amr->averageDown(*grad_cdr[idx], m_realm, m_cdr->getPhase());        // Average down
     m_amr->interpGhost(*grad_cdr[idx], m_realm, m_cdr->getPhase());        // Interpolate ghost cells
   }
@@ -1943,10 +1949,13 @@ void CdrPlasmaStepper::computeGradientsAtEb(Vector<EBAMRIVData*>&         a_grad
 
   CH_assert(a_grad.size() == a_phi.size());
 
+  
   EBAMRIVData   eb_gradient;
   EBAMRCellData gradient;
+  EBAMRCellData scratch;  
   m_amr->allocate(eb_gradient, m_realm, a_phase, SpaceDim);
   m_amr->allocate(gradient,    m_realm, a_phase, SpaceDim);
+  m_amr->allocate(scratch,     m_realm, a_phase, 1       );  
 
   for (int i = 0; i < a_phi.size(); i++){
     EBAMRIVData& grad_density    = *a_grad[i];
@@ -1954,8 +1963,11 @@ void CdrPlasmaStepper::computeGradientsAtEb(Vector<EBAMRIVData*>&         a_grad
 
     CH_assert(grad_density[0]->nComp() == 1);
     CH_assert(density[0]->nComp()      == 1);
+
+    DataOps::copy(scratch, density);
+    m_amr->interpGhostMG(scratch, m_realm, a_phase);
     
-    m_amr->computeGradient(gradient, density, m_realm, a_phase);       // Compute cell-centered gradient
+    m_amr->computeGradient(gradient, scratch, m_realm, a_phase);       // Compute cell-centered gradient
     m_amr->averageDown(gradient, m_realm, a_phase);                    // Average down - shouldn't be necesasry
     m_amr->interpGhost(gradient, m_realm, a_phase);                    // Interpolate ghost cells (have to do this before interp)
     this->extrapolateToEb(eb_gradient, a_phase, gradient);            // Extrapolate to EB
@@ -1975,8 +1987,10 @@ void CdrPlasmaStepper::computeGradientsAtDomainFaces(Vector<EBAMRIFData*>&      
 
   EBAMRIFData   domain_gradient;
   EBAMRCellData gradient;
+  EBAMRCellData scratch;
   m_amr->allocate(domain_gradient, m_realm, a_phase, SpaceDim);
   m_amr->allocate(gradient,        m_realm, a_phase, SpaceDim);
+  m_amr->allocate(scratch,         m_realm, a_phase, 1       );  
 
   for (int i = 0; i < a_phi.size(); i++){
     EBAMRIFData& grad_density    = *a_grad[i];
@@ -1984,8 +1998,10 @@ void CdrPlasmaStepper::computeGradientsAtDomainFaces(Vector<EBAMRIFData*>&      
 
     CH_assert(grad_density[0]->nComp() == 1);
     CH_assert(density[0]->nComp()      == 1);
-    
-    m_amr->computeGradient(gradient, density, m_realm, a_phase);                         
+
+    DataOps::copy(scratch, density);
+    m_amr->interpGhostMG(scratch, m_realm, a_phase);
+    m_amr->computeGradient(gradient, scratch, m_realm, a_phase);                         
     m_amr->averageDown(gradient, m_realm, a_phase);                             
     m_amr->interpGhost(gradient, m_realm, a_phase);                             
     

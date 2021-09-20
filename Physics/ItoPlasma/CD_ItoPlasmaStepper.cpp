@@ -3191,6 +3191,7 @@ void ItoPlasmaStepper::computeEdotJSource(){
 
       // Compute the negative gradient of the diffusion term
       solver->depositDiffusivity(m_particle_scratch1, solver->getParticles(ItoSolver::WhichContainer::bulk));
+      m_amr->interpGhostMG(m_particle_scratch1, m_particleRealm, m_phase);
       m_amr->computeGradient(m_particle_scratchD, m_particle_scratch1, m_particleRealm, m_phase);
       DataOps::scale(m_particle_scratchD, -1.0); // scratchD = -grad(D*n)
       
@@ -3237,6 +3238,7 @@ void ItoPlasmaStepper::computeEdotJSourceNWO(){
     if(q != 0 && solver->isDiffusive()){
       solver->depositDiffusivity(m_particle_scratch1, solver->getParticles(ItoSolver::WhichContainer::bulk));            // Deposit D*n
       m_fluid_scratch1.copy(m_particle_scratch1);                                           // Copy D*n to fluid Realm
+      m_amr->interpGhostMG(m_fluid_scratch1, m_fluid_Realm, m_phase);      
       m_amr->computeGradient(m_fluid_scratchD, m_fluid_scratch1, m_fluid_Realm, m_phase);  // scratchD = grad(D*n)
       DataOps::scale(m_fluid_scratchD, -1.0);                                              // scratchD = -grad(D*n)
       DataOps::dotProduct(m_fluid_scratch1,  m_fluid_scratchD, m_fluid_E);                   // scratch1 = -E.dot.grad(D*n)

@@ -966,6 +966,11 @@ void EddingtonSP1::computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi
   // We happen that our discretization uses Aco = kappa, so we just divide by it rather than computing
   // it on the mesh again.
 
+  EBAMRCellData scratch;
+  m_amr->allocate(scratch, m_realm, m_phase, m_nComp);
+
+  DataOps::copy(scratch, a_phi);
+  m_amr->interpGhostMG(scratch, m_realm, m_phase);
   m_amr->computeGradient(a_flux, a_phi, m_realm, m_phase);   // flux = grad(phi)
   
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
