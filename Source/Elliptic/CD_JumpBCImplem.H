@@ -74,8 +74,8 @@ Real JumpBC::applyStencil(const VoFStencil& a_stencil, const EBCellFAB& a_phi) c
 }
 
 inline
-void JumpBC::matchBC(const MFCellFAB&       a_phi,
-		     const BaseIVFAB<Real>& a_jump,
+void JumpBC::matchBC(      BaseIVFAB<Real>& a_jump,
+		     const MFCellFAB&       a_phi,
 		     const bool             a_homogeneousPhysBC,
 		     const DataIndex&       a_dit) const {
   CH_assert(m_multiPhase);

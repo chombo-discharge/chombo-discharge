@@ -134,6 +134,11 @@ public:
   void setJump(const Real& a_sigma, const Real& a_scale);
 
   /*!
+    @brief Get the BC jump factor. 
+  */
+  const EBAMRIVData& getSigma() const;
+
+  /*!
     @brief Create multigrid operator
     @param[in] a_fineDomain      Domain
     @param[in] a_depth           Depth. This specifies that the operator will be created at depth coarsen(a_fineDomain, 2^a_depth);

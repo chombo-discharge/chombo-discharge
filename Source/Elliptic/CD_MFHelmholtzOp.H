@@ -139,7 +139,7 @@ public:
   /*!
     @brief Set the jump boundary condition
   */
-  void setJump(const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_jump);
+  void setJump(RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_jump);
 
   /*!
     @brief Get Helmholtz operator

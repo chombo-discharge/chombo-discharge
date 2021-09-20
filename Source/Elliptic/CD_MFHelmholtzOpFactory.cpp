@@ -159,6 +159,12 @@ void MFHelmholtzOpFactory::setJump(const Real& a_sigma, const Real& a_scale){
   }
 }
 
+const EBAMRIVData& MFHelmholtzOpFactory::getSigma() const {
+  CH_TIME("MFHelmholtzOpFactory::getSigma()");
+
+  return m_amrJump;
+}
+
 void MFHelmholtzOpFactory::defineJump(){
   CH_TIME("MFHelmholtzOpFactory::defineJump()");
   

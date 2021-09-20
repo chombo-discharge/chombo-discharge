@@ -324,14 +324,14 @@ void JumpBC::resetBC() const {
   }
 }
 
-void JumpBC::matchBC(const LevelData<MFCellFAB>&        a_phi,
-		     const LevelData<BaseIVFAB<Real> >& a_jump,
+void JumpBC::matchBC(      LevelData<BaseIVFAB<Real> >& a_jump,
+		     const LevelData<MFCellFAB>&        a_phi,
 		     const bool                         a_homogeneousPhysBC) const {
   CH_TIME("JumpBC::matchBC(LD<MFCellFAB>, LD<BaseIVFAB<Real>, bool)");
   
   if(m_multiPhase){
     for (DataIterator dit = a_phi.dataIterator(); dit.ok(); ++dit){
-      this->matchBC(a_phi[dit()], a_jump[dit()], a_homogeneousPhysBC, dit());
+      this->matchBC(a_jump[dit()], a_phi[dit()], a_homogeneousPhysBC, dit());
     }
   }
 }

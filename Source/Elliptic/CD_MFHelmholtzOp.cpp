@@ -185,7 +185,7 @@ MFHelmholtzOp::~MFHelmholtzOp(){
   m_helmOps.clear();
 }
 
-void MFHelmholtzOp::setJump(const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_jump){
+void MFHelmholtzOp::setJump(RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_jump){
   CH_TIME("MFHelmholtzOp::setJump(RefCountedPtr<BaseIVFAB<Real> >)");
   
   m_jump = a_jump;
@@ -443,7 +443,7 @@ void MFHelmholtzOp::computeOperatorLoads(LevelData<MFCellFAB>& a_phi, TimedDataI
     }
 
     // Matching time
-    m_jumpBC->matchBC(a_phi[a_timeDit()], (*m_jump)[a_timeDit()], true, a_timeDit());
+    m_jumpBC->matchBC((*m_jump)[a_timeDit()], a_phi[a_timeDit()], true, a_timeDit());
 
     // Apply operator application
     for (auto& op : m_helmOps){
@@ -556,7 +556,7 @@ void MFHelmholtzOp::axby(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>
 void MFHelmholtzOp::updateJumpBC(const LevelData<MFCellFAB>& a_phi, const bool a_homogeneousPhysBC){
   CH_TIME("MFHelmholtzOp::updateJumpBC(LD<MFCellFAB>, bool)");
   
-  m_jumpBC->matchBC(a_phi, *m_jump, a_homogeneousPhysBC);
+  m_jumpBC->matchBC(*m_jump, a_phi, a_homogeneousPhysBC);
 }
 
 void MFHelmholtzOp::exchangeGhost(const LevelData<MFCellFAB>& a_phi) const{

@@ -100,8 +100,8 @@ public:
     @param[in] a_jump              Jump data, i.e. right-hand side of dphi/dn + dphi/m = jump
     @param[in] a_homogeneousPhysBC Homogeneous BC or not
   */
-  void matchBC(const LevelData<MFCellFAB>&        a_phi,
-	       const LevelData<BaseIVFAB<Real> >& a_jump,
+  void matchBC(      LevelData<BaseIVFAB<Real> >& a_jump,
+	       const LevelData<MFCellFAB>&        a_phi,
 	       const bool                         a_homogeneousPhysBC) const;
 
   /*!
@@ -111,8 +111,8 @@ public:
     @param[in] a_homogeneousPhysBC Homogeneous BC or not
   */
   inline
-  void matchBC(const MFCellFAB&       a_phi,
-	       const BaseIVFAB<Real>& a_jump,
+  void matchBC(      BaseIVFAB<Real>& a_jump,
+	       const MFCellFAB&       a_phi,
 	       const bool             a_homogeneousPhysBC,
 	       const DataIndex&       a_dit) const;
 
