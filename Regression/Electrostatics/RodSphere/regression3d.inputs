@@ -65,14 +65,13 @@ Driver.refine_dielectrics              = -1            # Refine dielectric surfa
 # ====================================================================================================
 FieldSolverMultigrid.verbosity         = -1                # Class verbosity
 FieldSolverMultigrid.jump_bc           = natural           # Jump BC type ('natural' or 'saturation_charge')
-FieldSolverMultigrid.jump_bc           = natural     0     # Jump BC type ('natural' or 'saturation_charge')
 FieldSolverMultigrid.bc.x.lo   = neumann 0.0          # Bc type.
 FieldSolverMultigrid.bc.x.hi   = neumann 0.0          # Bc type.
 FieldSolverMultigrid.bc.y.lo   = neumann 0.0          # Bc type.
 FieldSolverMultigrid.bc.y.hi   = neumann 0.0          # Bc type.
 FieldSolverMultigrid.bc.z.lo   = dirichlet 0.0     # Bc type.
 FieldSolverMultigrid.bc.z.hi   = dirichlet 1.0     # Bc type.
-FieldSolverMultigrid.plt_vars  = phi rho E res     # Plot variables. Possible vars are 'phi', 'rho', 'E', 'res'
+FieldSolverMultigrid.plt_vars  = phi rho E sigma     # Plot variables. Possible vars are 'phi', 'rho', 'E', 'res'
 FieldSolverMultigrid.kappa_source = true              # Volume weighted space charge density or not (depends on algorithm)	
 
 FieldSolverMultigrid.gmg_verbosity     = 10        # GMG verbosity
@@ -83,7 +82,7 @@ FieldSolverMultigrid.gmg_min_iter      = 5         # Minimum number of iteration
 FieldSolverMultigrid.gmg_max_iter      = 32        # Maximum number of iterations
 FieldSolverMultigrid.gmg_exit_tol      = 1.E-10    # Residue tolerance
 FieldSolverMultigrid.gmg_exit_hang     = 0.2       # Solver hang
-FieldSolverMultigrid.gmg_min_cells     = 4         # Bottom drop
+FieldSolverMultigrid.gmg_min_cells     = 16        # Bottom drop
 FieldSolverMultigrid.gmg_bc_order      = 2         # Boundary condition order for multigrid
 FieldSolverMultigrid.gmg_bc_weight     = 2         # Boundary condition weights (for least squares)
 FieldSolverMultigrid.gmg_jump_order    = 2         # Boundary condition order for jump conditions

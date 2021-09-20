@@ -308,6 +308,8 @@ bool FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
     const EBAMRIVData& factorySigma = m_helmholtzOpFactory->getSigma();
     DataOps::copy (m_sigma, factorySigma);
     DataOps::scale(m_sigma, Units::eps0);
+
+    m_amr->conservativeAverage(m_sigma, m_realm, phase::gas);
   }
 
   return converged;
