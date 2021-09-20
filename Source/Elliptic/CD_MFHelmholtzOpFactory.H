@@ -27,6 +27,7 @@
 #include <CD_MFLevelGrid.H>
 #include <CD_MFBaseIVFAB.H>
 #include <CD_MFHelmholtzEBBCFactory.H>
+#include <CD_MFHelmholtzJumpBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -53,6 +54,7 @@ public:
 
   using DomainBCFactory = RefCountedPtr<MFHelmholtzDomainBCFactory>;
   using EBBCFactory     = RefCountedPtr<MFHelmholtzEBBCFactory>;
+  using JumpBCFactory   = RefCountedPtr<MFHelmholtzJumpBCFactory>;
 
   using Smoother       = MFHelmholtzOp::Smoother;
 

@@ -68,7 +68,7 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
   m_hasMGObjects = a_hasMGObjects;
   m_refToCoar    = a_refToCoar;
   m_refToCoar    = a_refToFine;
-  m_smoother    = a_relaxType;
+  m_smoother     = a_relaxType;
   m_hasCoar      = a_hasCoar;
   m_hasFine      = a_hasFine;
 
