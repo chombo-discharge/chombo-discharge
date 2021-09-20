@@ -988,6 +988,7 @@ void FieldSolver::writePlotData(EBAMRCellData& a_output, int& a_comp, const bool
   // Add phi to output
   if(m_plotPotential)     this->writeMultifluidData(a_output, a_comp, m_potential,     doInterp); // Possibly on cell center, so-recenter to centroid if needed
   if(m_plotRho)           this->writeMultifluidData(a_output, a_comp, m_rho,           false);    // Always centroid
+  if(m_plotSigma)         this->writeSurfaceData   (a_output, a_comp, m_sigma               );
   if(m_plotResidue)       this->writeMultifluidData(a_output, a_comp, m_residue,       false);    // Always centroid
   if(m_plotElectricField) this->writeMultifluidData(a_output, a_comp, m_electricField, doInterp); // Possibly on cell center, so-recenter to centroid if needed
 }
@@ -1084,6 +1085,32 @@ void FieldSolver::writeMultifluidData(EBAMRCellData& a_output, int& a_comp, cons
   a_comp += numComp;
 }
 
+void FieldSolver::writeSurfaceData(EBAMRCellData& a_output, int& a_comp, const EBAMRIVData& a_data){
+  CH_TIME("FieldSolver::writeSurfaceData(EBAMRCellData, int, EBAMRIVData)");
+  if(m_verbosity > 5){
+    pout() << "FieldSolver::writeSurfaceData(EBAMRCellData, int, EBAMRIVData)" << endl;
+  }
+
+  // Put a_data in volume format. 
+  EBAMRCellData scratch;
+  m_amr->allocate(scratch, m_realm, phase::gas, 1);
+
+  DataOps::setValue(scratch, 0.0);
+  DataOps::incr(scratch, a_data, 1.0);
+
+  // COpy to a_output
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+    if(m_realm == a_output.getRealm()){
+      scratch[lvl]->localCopyTo(Interval(0,0), *a_output[lvl], Interval(a_comp, a_comp));
+    }
+    else{
+      scratch[lvl]->copyTo(Interval(0,0), *a_output[lvl], Interval(a_comp, a_comp));
+    }
+  }
+  
+  a_comp++;    
+}
+
 int FieldSolver::getNumberOfPlotVariables() const {
   CH_TIME("FieldSolver::getNumberOfPlotVariables()");
   if(m_verbosity > 5){
@@ -1094,6 +1121,7 @@ int FieldSolver::getNumberOfPlotVariables() const {
 
   if(m_plotPotential)     numPltVars = numPltVars + 1;
   if(m_plotRho)           numPltVars = numPltVars + 1;
+  if(m_plotSigma)         numPltVars = numPltVars + 1;  
   if(m_plotResidue)       numPltVars = numPltVars + 1;
   if(m_plotElectricField) numPltVars = numPltVars + SpaceDim;
 
@@ -1110,6 +1138,7 @@ Vector<std::string> FieldSolver::getPlotVariableNames() const {
   
   if(m_plotPotential) pltVarNames.push_back("Electrostatic potential");
   if(m_plotRho)       pltVarNames.push_back("Space charge density");
+  if(m_plotSigma)     pltVarNames.push_back("Electrostatic sigma");    
   if(m_plotResidue)   pltVarNames.push_back("Electrostatic potential_residue");
   
   if(m_plotElectricField){

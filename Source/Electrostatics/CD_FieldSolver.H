@@ -649,6 +649,16 @@ protected:
     @param[in]    a_interp Special flag which, if true, tells AmrMesh to interpolate the data to centroids (in irregular cells). 
   */
   virtual void writeMultifluidData(EBAMRCellData& a_output, int& a_comp, const MFAMRCellData& a_data, const bool a_interp);
+  
+  /*!
+    @brief Write surface data to volume data holder. 
+    @details This takes the valid data from each phase and writes it to a_output. 
+    @param[inout] a_output Output data holder
+    @param[inout] a_comp   Current component in a_output. 
+    @param[in]    a_data   Surface data. 
+    @param[in]    a_interp Special flag which, if true, tells AmrMesh to interpolate the data to centroids (in irregular cells). 
+  */
+  virtual void writeSurfaceData(EBAMRCellData& a_output, int& a_comp, const EBAMRIVData& a_data);
 
   /*!
     @brief Returns BC type based on string.
