@@ -166,7 +166,15 @@ protected:
   enum class MultigridType{
     VCycle,
     WCycle,
-  };  
+  };
+
+  /*!
+    @brief Jump BC type
+  */
+  enum class JumpBCType {
+    Natural,
+    SaturationCharge,
+  };
 
   /*!
     @brief Relaxation type for gmg
@@ -182,6 +190,11 @@ protected:
     @brief Bottom solver type
   */
   BottomSolverType m_bottomSolverType;
+
+  /*!
+    @brief JumpBC type
+  */
+  JumpBCType m_jumpBcType;
 
   /*!
     @brief Scale by kappa or not
@@ -319,6 +332,11 @@ protected:
     @brief Parse m_kappaSource
   */
   virtual void parseKappaSource();
+
+  /*!
+    @brief Parse JumpBC type
+  */
+  virtual void parseJumpBC();
 
   /*!
     @brief Set up the multigrid operator factory

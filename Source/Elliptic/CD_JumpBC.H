@@ -100,9 +100,9 @@ public:
     @param[in] a_jump              Jump data, i.e. right-hand side of dphi/dn + dphi/m = jump
     @param[in] a_homogeneousPhysBC Homogeneous BC or not
   */
-  void matchBC(      LevelData<BaseIVFAB<Real> >& a_jump,
-	       const LevelData<MFCellFAB>&        a_phi,
-	       const bool                         a_homogeneousPhysBC) const;
+  virtual void matchBC(LevelData<BaseIVFAB<Real> >& a_jump,
+		       const LevelData<MFCellFAB>&  a_phi,
+		       const bool                   a_homogeneousPhysBC) const;
 
   /*!
     @brief Match the BC
@@ -110,11 +110,10 @@ public:
     @param[in] a_jump              Jump data, i.e. right-hand side of dphi/dn + dphi/m = jump
     @param[in] a_homogeneousPhysBC Homogeneous BC or not
   */
-  inline
-  void matchBC(      BaseIVFAB<Real>& a_jump,
-	       const MFCellFAB&       a_phi,
-	       const bool             a_homogeneousPhysBC,
-	       const DataIndex&       a_dit) const;
+  virtual void matchBC(BaseIVFAB<Real>& a_jump,
+		       const MFCellFAB& a_phi,
+		       const bool       a_homogeneousPhysBC,
+		       const DataIndex& a_dit) const;
 
   /*!
     @brief Get phi on the boundary. 

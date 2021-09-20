@@ -84,6 +84,7 @@ public:
     @param[in] a_amrBcoefIrreg    B-coefficient in Helmholtz operator. This one is defined on EB faces. 
     @param[in] a_domainBCFactory  Factory class for making domain BC objects. 
     @param[in] a_ebbcFactory      Factory class for making BC objects for EB boundary conditions. 
+    @param[in] a_jumpBCFactory    Factory class for making jump BC objects. 
     @param[in] a_ghostPhi         Number of ghost cells in solution vector. 
     @param[in] a_ghostRhs         Number of ghost cells in right-hand side. 
     @param[in] a_jumpOrder        Stencil order in multiphase cells
@@ -108,6 +109,7 @@ public:
 		       const AmrIrreData&      a_amrBcoefIrreg,
 		       const DomainBCFactory&  a_domainBcFactory,
 		       const EBBCFactory&      a_ebBcFactory,
+		       const JumpBCFactory&    a_jumpBcFactory,		       
 		       const IntVect&          a_ghostPhi,
 		       const IntVect&          a_ghostRhs,
 		       const Smoother&         a_smoother,
@@ -240,32 +242,32 @@ protected:
   /*!
     @brief Data coarseners
   */      
-  AmrCoarseners    m_amrCoarseners;
+  AmrCoarseners m_amrCoarseners;
 
   /*!
     @brief Refinement ratios
   */        
-  AmrRefRatios     m_amrRefRatios;
+  AmrRefRatios m_amrRefRatios;
 
   /*!
     @brief Grid resolutions
   */          
-  AmrResolutions   m_amrResolutions;
+  AmrResolutions m_amrResolutions;
 
   /*!
     @brief Operator A-coefficient
   */
-  AmrCellData      m_amrAcoef;
+  AmrCellData m_amrAcoef;
 
   /*!
     @brief Operator B-coefficient
   */  
-  AmrFluxData      m_amrBcoef;
+  AmrFluxData m_amrBcoef;
 
   /*!
     @brief Operator B-coefficient
   */    
-  AmrIrreData      m_amrBcoefIrreg;
+  AmrIrreData m_amrBcoefIrreg;
 
   /*!
     @brief Domain BC factory
@@ -275,7 +277,12 @@ protected:
   /*!
     @brief EB BC factory
   */  
-  EBBCFactory     m_ebBcFactory;
+  EBBCFactory m_ebBcFactory;
+
+  /*!
+    @brief Jump BC factory
+  */  
+  JumpBCFactory m_jumpBcFactory;  
 
   /*!
     @brief Jump on multiphase cells. 

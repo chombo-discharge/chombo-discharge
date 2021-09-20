@@ -13,10 +13,6 @@
 #include <ParmParse.H>
 #include <CH_Timer.H>
 
-// Dev includes
-#include <CD_EBHelmholtzDirichletEBBC.H>
-#include <CD_EBHelmholtzDirichletDomainBC.H>
-
 // Our includes
 #include <CD_Timer.H>
 #include <CD_MFHelmholtzOp.H>
@@ -36,7 +32,8 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
 			     const MFFluxReg&                                 a_fluxReg,
 			     const MFCoarAve&                                 a_coarAve,
 			     const RefCountedPtr<MFHelmholtzDomainBCFactory>& a_domainBcFactory,
-			     const RefCountedPtr<MFHelmholtzEBBCFactory>&     a_ebBcFactory,			     
+			     const RefCountedPtr<MFHelmholtzEBBCFactory>&     a_ebBcFactory,
+			     const RefCountedPtr<MFHelmholtzJumpBCFactory>&   a_jumpBcFactory,			     
 			     const RealVect&                                  a_probLo,
 			     const Real&                                      a_dx,
 			     const int&                                       a_refToFine,			     
@@ -91,7 +88,11 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
 
   // Instantiate jump bc object.
   const int ghostCF = a_hasCoar ? a_interpolator.getGhostCF() : 1;
+#if 0 // Original code
   m_jumpBC = RefCountedPtr<JumpBC> (new JumpBC(m_dataLocation, m_mflg, a_BcoefIrreg, a_dx, a_jumpOrder, a_jumpWeight, a_jumpOrder, ghostCF));
+#else
+  m_jumpBC = a_jumpBcFactory->create(m_dataLocation, m_mflg, a_BcoefIrreg, a_dx, a_jumpOrder, a_jumpWeight, a_jumpOrder, ghostCF);
+#endif
 
   // Make the operators on eachphase.
   for (int iphase = 0; iphase < m_numPhases; iphase++){
