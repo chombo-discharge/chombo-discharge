@@ -82,7 +82,7 @@ bool CdrPlasmaStreamerTagger::coarsenCell(const RealVect         a_pos,
   bool coarsen = false;
 
   if(a_lvl >= m_max_coarsen_level){
-    coarsen = a_grad_tracer[0].vectorLength()*a_dx/a_tracer[0] < m_coar_curv || a_tracer[1]*a_dx < m_coar_alpha;
+    coarsen = a_grad_tracer[0].vectorLength()*a_dx/a_tracer[0] < m_coar_curv && a_tracer[1]*a_dx < m_coar_alpha;
   }
   else{
     coarsen = false;
