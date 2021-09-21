@@ -642,7 +642,7 @@ protected:
 
   /*!
     @brief Write multifluid data to single-fluid data holders. 
-    @details This takes the valid data a_data and puts in onto a_output. 
+    @details This takes the valid data from each phase and writes it to a_output. 
     @param[inout] a_output Output data holder
     @param[inout] a_comp   Current component in a_output. 
     @param[in]    a_data   Multifluid data holder
@@ -652,7 +652,7 @@ protected:
   
   /*!
     @brief Write surface data to volume data holder. 
-    @details This takes the valid data from each phase and writes it to a_output. 
+    @details This takes the valid data from a_data and puts in onto a_output. 
     @param[inout] a_output Output data holder
     @param[inout] a_comp   Current component in a_output. 
     @param[in]    a_data   Surface data. 
