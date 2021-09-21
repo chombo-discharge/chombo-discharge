@@ -14,7 +14,7 @@
 
 // Our includes
 #include <CD_EBHelmholtzEBBC.H>
-#include <CD_JumpBC.H>
+#include <CD_MFHelmholtzJumpBC.H>
 #include <CD_VofUtils.H>
 #include <CD_NamespaceHeader.H>
 
@@ -39,7 +39,7 @@ public:
   /*!
     @brief Full constructor
   */
-  MFHelmholtzEBBC(const int a_phase, const RefCountedPtr<JumpBC>& a_jumpBC);
+  MFHelmholtzEBBC(const int a_phase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC);
 
   /*!
     @brief Default constructor
@@ -68,7 +68,7 @@ protected:
   /*!
     @brief Jump bc object
   */
-  RefCountedPtr<JumpBC> m_jumpBC;
+  RefCountedPtr<MFHelmholtzJumpBC> m_jumpBC;
 
   /*!
     @brief Phase

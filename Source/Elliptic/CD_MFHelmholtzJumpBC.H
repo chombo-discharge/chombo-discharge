@@ -4,13 +4,13 @@
  */
 
 /*!
-  @file   CD_JumpBC.H
+  @file   CD_MFHelmholtzJumpBC.H
   @brief  Declaration of class for computing "jump interface" boundary conditions for multifluid Helmholtz code. 
   @author Robert Marskar
 */
 
-#ifndef CD_JumpBC_H
-#define CD_JumpBC_H
+#ifndef CD_MFHelmholtzJumpBC_H
+#define CD_MFHelmholtzJumpBC_H
 
 // Chombo includes
 #include <MFCellFAB.H>
@@ -31,7 +31,7 @@
   @details This class creates stencils for approximating the normal derivative on each side. It uses those stencil to compute a value on the boundary which fulfills
   the discrete version of dphi/dn1 + dphi/dn2 = sigma. This value is used by MFHelmholtzEBBC to compute the fluxes into the cut-cells on each side. 
 */
-class JumpBC {
+class MFHelmholtzJumpBC {
 public:
 
   /*!
@@ -42,7 +42,7 @@ public:
   /*!
     @brief Disallowed weak construction
   */
-  JumpBC() = delete;
+  MFHelmholtzJumpBC() = delete;
 
   /*!
     @brief Defining constructo
@@ -55,29 +55,29 @@ public:
     @param[in] a_radius       Stencil radius
     @param[in] a_ghostCF      Number of grid cells that were filled across the CF. 
   */
-  JumpBC(const Location::Cell a_dataLocation,
-	 const MFLevelGrid&   a_mflg,
-	 const BcoefPtr&      a_Bcoef,
-	 const Real           a_dx,
-	 const int            a_order,
-	 const int            a_weight,
-	 const int            a_radius,
-	 const int            a_ghostCF);
+  MFHelmholtzJumpBC(const Location::Cell a_dataLocation,
+		    const MFLevelGrid&   a_mflg,
+		    const BcoefPtr&      a_Bcoef,
+		    const Real           a_dx,
+		    const int            a_order,
+		    const int            a_weight,
+		    const int            a_radius,
+		    const int            a_ghostCF);
 
   /*!
     @brief Disallowed copy constructor
   */
-  JumpBC(const JumpBC& a_other) = delete;
+  MFHelmholtzJumpBC(const MFHelmholtzJumpBC& a_other) = delete;
 
   /*!
     @brief Destructor. Does nothing.
   */
-  ~JumpBC();
+  ~MFHelmholtzJumpBC();
 
   /*!
     @brief Disallowed assignment constructor
   */
-  JumpBC& operator=(const JumpBC& a_other) = delete;
+  MFHelmholtzJumpBC& operator=(const MFHelmholtzJumpBC& a_other) = delete;
   
   /*!
     @brief Return stencil order
@@ -285,6 +285,6 @@ protected:
 
 #include <CD_NamespaceFooter.H>
 
-#include <CD_JumpBCImplem.H>
+#include <CD_MFHelmholtzJumpBCImplem.H>
 
 #endif

@@ -4,45 +4,45 @@
  */
 
 /*!
-  @file   CD_MFHelmholtzSaturationChargeBC.cpp
-  @brief  Implementation of CD_MFHelmholtzSaturationChargeBC.H
+  @file   CD_MFHelmholtzSaturationChargeJumpBC.cpp
+  @brief  Implementation of CD_MFHelmholtzSaturationChargeJumpBC.H
   @author Robert Marskar
 */
 
 // Our includes
-#include <CD_MFHelmholtzSaturationChargeBC.H>
+#include <CD_MFHelmholtzSaturationChargeJumpBC.H>
 #include <CD_NamespaceHeader.H>
 
-MFHelmholtzSaturationChargeBC::MFHelmholtzSaturationChargeBC(const phase::which_phase a_phase,
-							     const Location::Cell     a_dataLocation,
-							     const MFLevelGrid&       a_mflg,
-							     const BcoefPtr&          a_Bcoef,
-							     const Real               a_dx,
-							     const int                a_order,
-							     const int                a_weight,
-							     const int                a_radius,
-							     const int                a_ghostCF) : JumpBC(a_dataLocation,
-													  a_mflg,
-													  a_Bcoef,
-													  a_dx,
-													  a_order,
-													  a_weight,
-													  a_radius,
-													  a_ghostCF){
-  CH_TIME("MFHelmholtzSaturationChargeBC::MFHelmholtzSaturationChargeBC");
+MFHelmholtzSaturationChargeJumpBC::MFHelmholtzSaturationChargeJumpBC(const phase::which_phase a_phase,
+								     const Location::Cell     a_dataLocation,
+								     const MFLevelGrid&       a_mflg,
+								     const BcoefPtr&          a_Bcoef,
+								     const Real               a_dx,
+								     const int                a_order,
+								     const int                a_weight,
+								     const int                a_radius,
+								     const int                a_ghostCF) : MFHelmholtzJumpBC(a_dataLocation,
+															     a_mflg,
+															     a_Bcoef,
+															     a_dx,
+															     a_order,
+															     a_weight,
+															     a_radius,
+															     a_ghostCF){
+  CH_TIME("MFHelmholtzSaturationChargeJumpBC::MFHelmholtzSaturationChargeJumpBC");
   
   m_phase = a_phase;
 }
   
-MFHelmholtzSaturationChargeBC::~MFHelmholtzSaturationChargeBC(){
-  CH_TIME("MFHelmholtzSaturationChargeBC::~MFHelmholtzSaturationChargeBC");
+MFHelmholtzSaturationChargeJumpBC::~MFHelmholtzSaturationChargeJumpBC(){
+  CH_TIME("MFHelmholtzSaturationChargeJumpBC::~MFHelmholtzSaturationChargeJumpBC");
 }
 
 
-void MFHelmholtzSaturationChargeBC::matchBC(BaseIVFAB<Real>& a_jump,
-					    const MFCellFAB& a_phi,
-					    const bool       a_homogeneousPhysBC,
-					    const DataIndex& a_dit) const {
+void MFHelmholtzSaturationChargeJumpBC::matchBC(BaseIVFAB<Real>& a_jump,
+						const MFCellFAB& a_phi,
+						const bool       a_homogeneousPhysBC,
+						const DataIndex& a_dit) const {
   CH_assert(m_multiPhase);
 
   // TLDR: Normally, the boundary potential would be computed from dphi/dn1 + dphi/dn2 = sigma and since dphi/dn can be represented as

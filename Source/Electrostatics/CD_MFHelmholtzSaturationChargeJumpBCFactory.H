@@ -4,13 +4,13 @@
  */
 
 /*!
-  @file   CD_MFHelmholtzSaturationChargeBCFactory.H
+  @file   CD_MFHelmholtzSaturationChargeJumpBCFactory.H
   @brief  Declaration of a factory class for making SaturationCharge objects for multifluid Helmholtz. 
   @author Robert Marskar
 */
 
-#ifndef CD_MFHelmholtzSaturationChargeBCFactory_H
-#define CD_MFHelmholtzSaturationChargeBCFactory_H
+#ifndef CD_MFHelmholtzSaturationChargeJumpBCFactory_H
+#define CD_MFHelmholtzSaturationChargeJumpBCFactory_H
 
 // Our includes
 #include <CD_MFHelmholtzJumpBCFactory.H>
@@ -19,7 +19,7 @@
 /*!
   @brief Factory class for making jump boundary condition objects in multifluid Helmholtz. 
 */
-class MFHelmholtzSaturationChargeBCFactory : public MFHelmholtzJumpBCFactory {
+class MFHelmholtzSaturationChargeJumpBCFactory : public MFHelmholtzJumpBCFactory {
 public:
 
   /*!
@@ -31,12 +31,12 @@ public:
     @brief Full constructor
     @param[in] a_phase Which phase the saturation charge BC is applied on.
   */
-  MFHelmholtzSaturationChargeBCFactory(const phase::which_phase a_phase);
+  MFHelmholtzSaturationChargeJumpBCFactory(const phase::which_phase a_phase);
 
   /*!
     @brief Default constructor
   */
-  virtual ~MFHelmholtzSaturationChargeBCFactory();
+  virtual ~MFHelmholtzSaturationChargeJumpBCFactory();
 
   /*!
     @brief Factory method for creating SaturationCharge object. 
@@ -49,14 +49,14 @@ public:
     @param[in] a_radius       Stencil radius
     @param[in] a_ghostCF      Number of grid cells that were filled across the CF. 
   */
-  virtual RefCountedPtr<JumpBC> create(const Location::Cell a_dataLocation,
-				       const MFLevelGrid&   a_mflg,
-				       const BcoefPtr&      a_Bcoef,
-				       const Real           a_dx,
-				       const int            a_order,
-				       const int            a_weight,
-				       const int            a_radius,
-				       const int            a_ghostCF) override;
+  virtual RefCountedPtr<MFHelmholtzJumpBC> create(const Location::Cell a_dataLocation,
+						  const MFLevelGrid&   a_mflg,
+						  const BcoefPtr&      a_Bcoef,
+						  const Real           a_dx,
+						  const int            a_order,
+						  const int            a_weight,
+						  const int            a_radius,
+						  const int            a_ghostCF) override;
 
 protected:
 

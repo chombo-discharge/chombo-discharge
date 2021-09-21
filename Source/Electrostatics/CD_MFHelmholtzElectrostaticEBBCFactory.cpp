@@ -29,8 +29,8 @@ MFHelmholtzElectrostaticEBBCFactory::~MFHelmholtzElectrostaticEBBCFactory(){
   CH_TIME("MFHelmholtzElectrostaticEBBCFactory::~MFHelmholtzElectrostaticEBBCFactory()");
 }
   
-RefCountedPtr<EBHelmholtzEBBC> MFHelmholtzElectrostaticEBBCFactory::create(const int a_iphase, const RefCountedPtr<JumpBC>& a_jumpBC) const {
-  CH_TIME("MFHelmholtzElectrostaticEBBCFactory::create(int, RefCountedPtr<JumpBC>)");
+RefCountedPtr<EBHelmholtzEBBC> MFHelmholtzElectrostaticEBBCFactory::create(const int a_iphase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC) const {
+  CH_TIME("MFHelmholtzElectrostaticEBBCFactory::create(int, RefCountedPtr<MFHelmholtzJumpBC>)");
   
   CH_assert(m_order  >  0);
   CH_assert(m_weight >= 0);

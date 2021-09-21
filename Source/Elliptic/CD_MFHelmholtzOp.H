@@ -26,7 +26,7 @@
 #include <CD_MFFluxReg.H>
 #include <CD_MFLevelGrid.H>
 #include <CD_MFBaseIVFAB.H>
-#include <CD_JumpBC.H>
+#include <CD_MFHelmholtzJumpBC.H>
 #include <CD_EBHelmholtzOp.H>
 #include <CD_MFHelmholtzDomainBCFactory.H>
 #include <CD_MFHelmholtzEBBCFactory.H>
@@ -485,7 +485,7 @@ protected:
   /*!
     @brief BC jump object. This is the one that has the stencils and can compute derivatives. 
   */
-  RefCountedPtr<JumpBC> m_jumpBC;
+  RefCountedPtr<MFHelmholtzJumpBC> m_jumpBC;
 
   /*!
     @brief Actual BC jump in data-based format. This is the right-hand side of dphi/dn1 + dphi/dn2 = jump
@@ -569,7 +569,8 @@ protected:
 
   /*!
     @brief Update the jump condition. 
-    @note Note sure how to do this function just yet. 
+    @param[in] a_phi Data
+    @param[in] a_homogeneousPhysBC homogeneous physical BC or not
   */
   void updateJumpBC(const LevelData<MFCellFAB>& a_phi, const bool a_homogeneousPhysBC);
 

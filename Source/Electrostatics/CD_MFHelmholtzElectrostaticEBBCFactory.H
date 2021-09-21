@@ -74,7 +74,7 @@ public:
     @param[in] a_iphase Phase (0=gas and 1=solid). 
     @param[in] a_jumpBC Jump bc object. 
   */
-  RefCountedPtr<EBHelmholtzEBBC> create(const int a_iphase, const RefCountedPtr<JumpBC>& a_jumpBC) const override;
+  RefCountedPtr<EBHelmholtzEBBC> create(const int a_iphase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC) const override;
 
 protected:
 

@@ -18,8 +18,8 @@
 #include <CD_NamespaceHeader.H>
 
 
-MFHelmholtzEBBC::MFHelmholtzEBBC(const int a_phase, const RefCountedPtr<JumpBC>& a_jumpBC){
-  CH_TIME("MFHelmholtzEBBC::MFHelmholtzEBBC(int, RefCountedPtr<JumpBC>)");
+MFHelmholtzEBBC::MFHelmholtzEBBC(const int a_phase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC){
+  CH_TIME("MFHelmholtzEBBC::MFHelmholtzEBBC(int, RefCountedPtr<MFHelmholtzJumpBC>)");
 
   CH_assert(!a_jumpBC.isNull());
   

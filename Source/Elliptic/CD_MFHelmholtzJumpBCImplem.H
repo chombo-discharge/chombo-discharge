@@ -4,23 +4,23 @@
  */
 
 /*
-  @file   CD_JumpBCImplem.H
-  @brief  Implementation of CD_JumpBC.H
+  @file   CD_MFHelmholtzJumpBCImplem.H
+  @brief  Implementation of CD_MFHelmholtzJumpBC.H
   @author Robert Marskar
 */
 
-#ifndef CD_JumpBCImplem_H
-#define CD_JumpBCImplem_H
+#ifndef CD_MFHelmholtzJumpBCImplem_H
+#define CD_MFHelmholtzJumpBCImplem_H
 
 // Chombo includes
 #include <NeighborIterator.H>
 
 // Our includes
-#include <CD_JumpBC.H>
+#include <CD_MFHelmholtzJumpBC.H>
 #include <CD_NamespaceHeader.H>
 
 inline
-bool JumpBC::isStencilValidCF(const VoFStencil& a_stencil, const DataIndex& a_dit) const {
+bool MFHelmholtzJumpBC::isStencilValidCF(const VoFStencil& a_stencil, const DataIndex& a_dit) const {
   const DisjointBoxLayout& dbl = m_mflg.getGrids();
   const ProblemDomain& domain  = m_mflg.getDomain();
 
@@ -64,7 +64,7 @@ bool JumpBC::isStencilValidCF(const VoFStencil& a_stencil, const DataIndex& a_di
 }
 
 inline
-Real JumpBC::applyStencil(const VoFStencil& a_stencil, const EBCellFAB& a_phi) const {
+Real MFHelmholtzJumpBC::applyStencil(const VoFStencil& a_stencil, const EBCellFAB& a_phi) const {
   Real contrib = 0.0;
   for (int i = 0; i < a_stencil.size(); i++){
     contrib += a_stencil.weight(i)*a_phi(a_stencil.vof(i), m_comp);

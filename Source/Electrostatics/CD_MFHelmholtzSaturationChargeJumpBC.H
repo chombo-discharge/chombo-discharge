@@ -4,28 +4,28 @@
  */
 
 /*!
-  @file   CD_MFHelmholtzSaturationChargeBC.H
+  @file   CD_MFHelmholtzSaturationChargeJumpBC.H
   @brief  Declaration of a jump BC which implements the saturation charge boundary condition. 
   @author Robert Marskar
 */
 
-#ifndef CD_MFHelmholtzSaturationChargeBC_H
-#define CD_MFHelmholtzSaturationChargeBC_H
+#ifndef CD_MFHelmholtzSaturationChargeJumpBC_H
+#define CD_MFHelmholtzSaturationChargeJumpBC_H
 
 // Our includes
-#include <CD_JumpBC.H>
+#include <CD_MFHelmholtzJumpBC.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
   @brief Class for computing matching the saturation charge boundary condition in an MFHelmholtzOp context
 */
-class MFHelmholtzSaturationChargeBC : public JumpBC {
+class MFHelmholtzSaturationChargeJumpBC : public MFHelmholtzJumpBC {
 public:
 
   /*!
     @brief Default constructor
   */
-  MFHelmholtzSaturationChargeBC() = delete;
+  MFHelmholtzSaturationChargeJumpBC() = delete;
 
   /*!
     @brief Full constructor. 
@@ -38,20 +38,20 @@ public:
     @param[in] a_radius       Stencil radius
     @param[in] a_ghostCF      Number of grid cells that were filled across the CF. 
   */
-  MFHelmholtzSaturationChargeBC(const phase::which_phase a_phase,
-		     const Location::Cell     a_dataLocation,
-		     const MFLevelGrid&       a_mflg,
-		     const BcoefPtr&          a_Bcoef,
-		     const Real               a_dx,
-		     const int                a_order,
-		     const int                a_weight,
-		     const int                a_radius,
-		     const int                a_ghostCF);
+  MFHelmholtzSaturationChargeJumpBC(const phase::which_phase a_phase,
+				    const Location::Cell     a_dataLocation,
+				    const MFLevelGrid&       a_mflg,
+				    const BcoefPtr&          a_Bcoef,
+				    const Real               a_dx,
+				    const int                a_order,
+				    const int                a_weight,
+				    const int                a_radius,
+				    const int                a_ghostCF);
   
   /*!
     @brief Destructor (does nothing)
   */
-  ~MFHelmholtzSaturationChargeBC();
+  ~MFHelmholtzSaturationChargeJumpBC();
 
   /*!
     @brief Match the BC. 

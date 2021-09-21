@@ -21,7 +21,7 @@
 #include <CD_MFHelmholtzElectrostaticDomainBCFactory.H>
 #include <CD_MFHelmholtzElectrostaticEBBCFactory.H>
 #include <CD_MFHelmholtzJumpBCFactory.H>
-#include <CD_MFHelmholtzSaturationChargeBCFactory.H>
+#include <CD_MFHelmholtzSaturationChargeJumpBCFactory.H>
 #include <CD_Units.H>
 #include <CD_NamespaceHeader.H>
 
@@ -433,7 +433,7 @@ void FieldSolverMultigrid::setupHelmholtzFactory(){
     jumpBcFactory = RefCountedPtr<MFHelmholtzJumpBCFactory>(new MFHelmholtzJumpBCFactory());
     break;
   case JumpBCType::SaturationCharge:
-    jumpBcFactory = RefCountedPtr<MFHelmholtzJumpBCFactory>(new MFHelmholtzSaturationChargeBCFactory(phase::gas));
+    jumpBcFactory = RefCountedPtr<MFHelmholtzJumpBCFactory>(new MFHelmholtzSaturationChargeJumpBCFactory(phase::gas));
     break;    
   }
 

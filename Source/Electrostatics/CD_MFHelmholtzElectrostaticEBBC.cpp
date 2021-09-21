@@ -14,7 +14,7 @@
 #include <CD_LeastSquares.H>
 #include <CD_NamespaceHeader.H>
 
-MFHelmholtzElectrostaticEBBC::MFHelmholtzElectrostaticEBBC(const int a_phase, const ElectrostaticEbBc& a_electrostaticBCs, const RefCountedPtr<JumpBC>& a_jumpBC)
+MFHelmholtzElectrostaticEBBC::MFHelmholtzElectrostaticEBBC(const int a_phase, const ElectrostaticEbBc& a_electrostaticBCs, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC)
   : MFHelmholtzEBBC(a_phase, a_jumpBC) {
   CH_TIME("MFHelmholtzElectrostaticEBBC::MFHelmholtzElectrostaticEBBC");
 

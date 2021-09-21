@@ -27,7 +27,7 @@ public:
     @param[in] a_phase  Phase
     @param[in] a_jumpBC Jump BC object
   */
-  MFHelmholtzDirichletEBBC(const int a_phase, const RefCountedPtr<JumpBC>& a_jumpBC);
+  MFHelmholtzDirichletEBBC(const int a_phase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC);
 
   /*!
     @brief Default constructor

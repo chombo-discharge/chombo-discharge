@@ -92,7 +92,7 @@ void MFHelmholtzRobinEBBCFactory::setCoefficients(const std::function<Real(const
   m_useFunction = true;
 }
 
-RefCountedPtr<EBHelmholtzEBBC> MFHelmholtzRobinEBBCFactory::create(const int a_iphase, const RefCountedPtr<JumpBC>& a_jumpBC) const {
+RefCountedPtr<EBHelmholtzEBBC> MFHelmholtzRobinEBBCFactory::create(const int a_iphase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC) const {
   CH_TIME("EBHelmholtzRobinEBBCFactory::create()");
 
   CH_assert(m_order  >  0);
