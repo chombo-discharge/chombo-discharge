@@ -96,9 +96,9 @@ public:
 
   /*!
     @brief Match the BC
-    @param[in] a_phi               Cell-centered data
-    @param[in] a_jump              Jump data, i.e. right-hand side of dphi/dn + dphi/m = jump
-    @param[in] a_homogeneousPhysBC Homogeneous BC or not
+    @param[inout] a_jump              Jump data, i.e. right-hand side of dphi/dn + dphi/m = jump
+    @param[in]    a_phi               Cell-centered data
+    @param[in]    a_homogeneousPhysBC Homogeneous BC or not
   */
   virtual void matchBC(LevelData<BaseIVFAB<Real> >& a_jump,
 		       const LevelData<MFCellFAB>&  a_phi,
@@ -106,9 +106,10 @@ public:
 
   /*!
     @brief Match the BC
-    @param[in] a_phi               Cell-centered data
-    @param[in] a_jump              Jump data, i.e. right-hand side of dphi/dn + dphi/m = jump
-    @param[in] a_homogeneousPhysBC Homogeneous BC or not
+    @param[inout] a_jump              Jump data, i.e. right-hand side of dphi/dn + dphi/m = jump
+    @param[in]    a_phi               Cell-centered data
+    @param[in]    a_homogeneousPhysBC Homogeneous BC or not
+    @param[in]    a_dit               Grid index
   */
   virtual void matchBC(BaseIVFAB<Real>& a_jump,
 		       const MFCellFAB& a_phi,

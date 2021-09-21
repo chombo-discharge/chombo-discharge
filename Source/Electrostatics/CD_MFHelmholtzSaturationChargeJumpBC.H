@@ -55,8 +55,8 @@ public:
 
   /*!
     @brief Match the BC. 
-    @details MFhelmholtzJumpBC uses a_jump as the natural parameter, computing the fluxes from the boundary potential and surface source.
-    This function, however, specifies a zero flux into one of the phases and uses a_jump as a free parameter (it is computed from the fluxes). 
+    @details MFhelmholtzJumpBC uses a_jump as the *fixed* parameter, computing the fluxes from the boundary potential and surface source.
+    This function, however, specifies a zero flux into one of the phases and uses a_jump as a *free* parameter (it is computed from the fluxes). 
     @param[out] a_jump              Jump data, i.e. right-hand side of dphi/dn + dphi/m = jump. Set equal to jump = b*dphi/dm. 
     @param[in]  a_phi               Cell-centered data
     @param[in]  a_homogeneousPhysBC Homogeneous BC or not

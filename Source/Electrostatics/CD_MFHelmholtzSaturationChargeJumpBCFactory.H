@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_MFHelmholtzSaturationChargeJumpBCFactory.H
-  @brief  Declaration of a factory class for making SaturationCharge objects for multifluid Helmholtz. 
+  @brief  Declaration of a factory class for making MFHelmholtzSaturationChargeJumpBC objects for multifluid Helmholtz. 
   @author Robert Marskar
 */
 
@@ -17,7 +17,7 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Factory class for making jump boundary condition objects in multifluid Helmholtz. 
+  @brief Factory class for making saturation charge jump boundary condition objects in multifluid Helmholtz context. 
 */
 class MFHelmholtzSaturationChargeJumpBCFactory : public MFHelmholtzJumpBCFactory {
 public:
@@ -39,7 +39,7 @@ public:
   virtual ~MFHelmholtzSaturationChargeJumpBCFactory();
 
   /*!
-    @brief Factory method for creating SaturationCharge object. 
+    @brief Factory method for creating MFHelmholtzSaturationChargeJumpBC objects. 
     @param[in] a_dataLocation Data centering
     @param[in] a_mflg         Grids
     @param[in] a_Bcoef        Helmholtz B-coefficient
@@ -48,6 +48,7 @@ public:
     @param[in] a_weight       Weighting factor for least squares
     @param[in] a_radius       Stencil radius
     @param[in] a_ghostCF      Number of grid cells that were filled across the CF. 
+    @return Returns an MFHelmholtzJumpBC for encapsulating boundary conditions on multiphase cells. 
   */
   virtual RefCountedPtr<MFHelmholtzJumpBC> create(const Location::Cell a_dataLocation,
 						  const MFLevelGrid&   a_mflg,

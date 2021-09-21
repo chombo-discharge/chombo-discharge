@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_MFHelmholtzJumpBCFactory.H
-  @brief  Declaration of a factory class for making JumpBC objects for multifluid Helmholtz. 
+  @brief  Declaration of a factory class for making MFHelmholtzJumpBC objects for use in a multifluid MFHelmholtzOp context. 
   @author Robert Marskar
 */
 
@@ -17,7 +17,7 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Factory class for making jump boundary condition objects in multifluid Helmholtz. 
+  @brief Factory class for making jump boundary condition objects in a multifluid MFHelmholtzOp context. 
 */
 class MFHelmholtzJumpBCFactory {
 public:
@@ -38,7 +38,7 @@ public:
   virtual ~MFHelmholtzJumpBCFactory();
 
   /*!
-    @brief Factory method for creating JumpBC object. 
+    @brief Factory method for creating MFHelmholtzJumpBC objects. 
     @param[in] a_dataLocation Data centering
     @param[in] a_mflg         Grids
     @param[in] a_Bcoef        Helmholtz B-coefficient
