@@ -470,6 +470,14 @@ public:
     @todo An old routine which we could (probably) remove. 
   */
   virtual Real computeSourceDt(const Real a_max, const Real a_tolerance);
+
+  /*!
+    @brief Compute an upwind-weighted version of phi
+    @details This is equal to sum(alpha * v * phi)/sum(alpha * v) where alpha is the face aperture and v is the face velocity. phi is
+    taken as the upwind value. 
+    @param[out] a_weightedUpwindPhi Weighted upwind phi
+  */
+  virtual void weightedUpwind(EBAMRCellData& a_weightedUpwindPhi);
   
   /*!
     @brief Compute the "physical mass" in m_phi

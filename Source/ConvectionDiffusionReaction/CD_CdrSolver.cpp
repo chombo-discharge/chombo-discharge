@@ -2188,6 +2188,82 @@ Real CdrSolver::computeSourceDt(const Real a_max, const Real a_tolerance){
   return minDt;
 }
 
+void CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi) {
+  CH_TIME("CdrSolver::weightedUpwind()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::weightedUpwind()" << endl;
+  }
+
+
+  if(m_isMobile){
+
+    m_amr->averageDown(m_cellVelocity, m_realm, m_phase);
+    m_amr->interpGhost(m_cellVelocity, m_realm, m_phase);
+    
+    m_amr->averageDown(m_phi, m_realm, m_phase);
+    m_amr->interpGhost(m_phi, m_realm, m_phase);        
+
+    // Compute velocity on faces and EBs
+    this->averageVelocityToFaces(m_faceVelocity, m_cellVelocity);
+
+    DataOps::setValue(m_scratch, 0.0); // Used to store sum(alpha*v)
+
+    // Grid loop. 
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+
+      const DisjointBoxLayout& dbl   = m_amr->getGrids     (m_realm         )[lvl];
+      const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+      const Real&              dx    = m_amr->getDx()[lvl];
+
+      const Real faceArea = 1.0;
+
+      for (DataIterator dit(dbl); dit.ok(); ++dit){
+	const Box&     cellBox = dbl  [dit()];
+	const EBISBox& ebisBox = ebisl[dit()];
+	
+	EBCellFAB&       sumPhi    = (*a_weightedUpwindPhi[lvl])[dit()];
+	EBCellFAB&       sumWeight = (*m_scratch          [lvl])[dit()];
+	const EBCellFAB& cellPhi   = (*m_phi              [lvl])[dit()];
+	const EBFluxFAB& faceVel   = (*m_faceVelocity     [lvl])[dit()];
+
+	sumPhi.   setVal(0.0);
+	sumWeight.setVal(0.0);
+
+	// Regular cells
+	for (int dir = 0; dir < SpaceDim; dir++){
+	  BaseFab<Real>&       regSumPhi    = sumPhi.   getSingleValuedFAB();
+	  BaseFab<Real>&       regSumWeight = sumWeight.getSingleValuedFAB();
+
+	  const BaseFab<Real>& regCellPhi   = cellPhi.    getSingleValuedFAB();
+	  const BaseFab<Real>& regFaceVel   = faceVel[dir].getSingleValuedFAB();
+
+	  FORT_WEIGHTED_UPWIND(CHF_FRA1      (regSumPhi,    0),
+			       CHF_FRA1      (regSumWeight, 0),
+			       CHF_CONST_FRA1(regCellPhi,   0),
+			       CHF_CONST_FRA1(regFaceVel,   0),
+			       CHF_CONST_INT (dir),
+			       CHF_CONST_REAL(faceArea),
+			       CHF_BOX       (cellBox));
+	}
+
+	// Irregular cells. 
+	VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+	for (vofit.reset(); vofit.ok(); ++vofit){
+	  const VolIndex& vof = vofit();
+	  sumPhi(vof, m_comp) = 0.0;
+	}
+      }
+
+
+      //      DataOps::copy(a_weightedUpwindPhi, m_scratch);
+    }
+    DataOps::divide(a_weightedUpwindPhi, m_scratch, 0, 0);    
+  }
+  else{
+    DataOps::copy(a_weightedUpwindPhi, m_phi);
+  }  
+}
+
 Real CdrSolver::computeMass(){
   CH_TIME("CdrSolver::computeMass()");
   if(m_verbosity > 5){
