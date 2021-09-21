@@ -20,7 +20,8 @@
 #include <CD_MFMultigridInterpolator.H>
 #include <CD_MFHelmholtzElectrostaticDomainBCFactory.H>
 #include <CD_MFHelmholtzElectrostaticEBBCFactory.H>
-#include <CD_MFHelmholtzRobinEBBCFactory.H>
+#include <CD_MFHelmholtzJumpBCFactory.H>
+#include <CD_MFHelmholtzSaturationChargeJumpBCFactory.H>
 #include <CD_Units.H>
 #include <CD_NamespaceHeader.H>
 
@@ -50,6 +51,7 @@ void FieldSolverMultigrid::parseOptions(){
   this->parsePlotVariables();
   this->parseMultigridSettings();
   this->parseKappaSource();
+  this->parseJumpBC();
 }
 
 void FieldSolverMultigrid::parseRuntimeOptions(){
@@ -170,6 +172,30 @@ void FieldSolverMultigrid::parseMultigridSettings(){
   CH_assert(m_multigridJumpWeight   >= 0);        
 }
 
+void FieldSolverMultigrid::parseJumpBC(){
+  CH_TIME("FieldSolverMultigrid::parseJumpBC()");
+  if(m_verbosity > 5){
+    pout() << "FieldSolverMultigrid::parseJumpBC()" << endl;
+  }
+
+  ParmParse pp(m_className.c_str());
+
+  std::string str;
+
+  pp.get("jump_bc", str);
+
+  if(str == "natural"){
+    m_jumpBcType = JumpBCType::Natural;
+  }
+  else if(str == "saturation_charge"){
+    m_jumpBcType = JumpBCType::SaturationCharge;
+  }
+  else{
+    const std::string errorString = "FieldSolverMultigrid::parseJumpBC -- error, argument '" + str + "' not recognized";
+    MayDay::Error(errorString.c_str());
+  }
+}
+
 void FieldSolverMultigrid::allocateInternals(){
   CH_TIME("FieldSolverMultigrid::allocateInternals()");
   if(m_verbosity > 5){
@@ -276,6 +302,15 @@ bool FieldSolverMultigrid::solve(MFAMRCellData&       a_phi,
   m_amr->interpGhostMG(a_phi, m_realm);
 
   this->computeElectricField(m_electricField, a_phi);
+
+  // If we are also solving for the saturation charge we get that solution from the factory (it can be a free parameter in the Helmholtz solve). 
+  if(m_jumpBcType == JumpBCType::SaturationCharge){
+    const EBAMRIVData& factorySigma = m_helmholtzOpFactory->getSigma();
+    DataOps::copy (m_sigma, factorySigma);
+    DataOps::scale(m_sigma, Units::eps0);
+
+    m_amr->conservativeAverage(m_sigma, m_realm, phase::gas);
+  }
 
   return converged;
 }
@@ -391,6 +426,17 @@ void FieldSolverMultigrid::setupHelmholtzFactory(){
   auto ebbcFactory     = RefCountedPtr<MFHelmholtzEBBCFactory>     (new MFHelmholtzElectrostaticEBBCFactory(m_multigridBcOrder, m_multigridBcWeight, m_ebBc));
   auto domainBcFactory = RefCountedPtr<MFHelmholtzDomainBCFactory> (new MFHelmholtzElectrostaticDomainBCFactory(m_domainBc));
 
+  // Set the BC jump factory. This is either the "natural" factory or the saturation charge BC. 
+  RefCountedPtr<MFHelmholtzJumpBCFactory> jumpBcFactory;
+  switch(m_jumpBcType){
+  case JumpBCType::Natural:
+    jumpBcFactory = RefCountedPtr<MFHelmholtzJumpBCFactory>(new MFHelmholtzJumpBCFactory());
+    break;
+  case JumpBCType::SaturationCharge:
+    jumpBcFactory = RefCountedPtr<MFHelmholtzJumpBCFactory>(new MFHelmholtzSaturationChargeJumpBCFactory(phase::gas));
+    break;    
+  }
+
   // Create the factory. Note that we pass m_permittivityCell in through the a-coefficient, but we also set alpha to zero
   // so there is no diagonal term in the operator after all. 
   m_helmholtzOpFactory = RefCountedPtr<MFHelmholtzOpFactory>(new MFHelmholtzOpFactory(m_multifluidIndexSpace,
@@ -409,6 +455,7 @@ void FieldSolverMultigrid::setupHelmholtzFactory(){
 										      m_permittivityEB.getData(),
 										      domainBcFactory,
 										      ebbcFactory,
+										      jumpBcFactory,
 										      ghostPhi,
 										      ghostRhs,
 										      m_multigridRelaxMethod,

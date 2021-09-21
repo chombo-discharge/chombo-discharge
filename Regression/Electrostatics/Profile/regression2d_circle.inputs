@@ -62,13 +62,14 @@ Driver.refine_dielectrics              = 0            # Refine dielectric surfac
 # FIELD_SOLVER_MULTIGRID_GMG CLASS OPTIONS (MULTIFLUID GMG SOLVER SETTINGS)
 # ====================================================================================================
 FieldSolverMultigrid.verbosity         = -1                # Class verbosity
+FieldSolverMultigrid.jump_bc           = natural           # Jump BC type ('natural' or 'saturation_charge')
 FieldSolverMultigrid.bc.x.lo      = neumann 0.0 # Bc type.
 FieldSolverMultigrid.bc.x.hi      = dirichlet 0.0       # Bc type.
 FieldSolverMultigrid.bc.y.lo      = dirichlet 0.0     # Bc type.
 FieldSolverMultigrid.bc.y.hi      = neumann 0.0          # Bc type.
 FieldSolverMultigrid.bc.z.lo      = neumann 0.0          # Bc type.
 FieldSolverMultigrid.bc.z.hi      = neumann 0.0          # Bc type.
-FieldSolverMultigrid.plt_vars     = phi rho E res     # Plot variables. Possible vars are 'phi', 'rho', 'E', 'res'
+FieldSolverMultigrid.plt_vars     = phi rho E sigma   # Plot variables. Possible vars are 'phi', 'rho', 'E', 'res'
 FieldSolverMultigrid.kappa_source = true              # Volume weighted space charge density or not (depends on algorithm)
 
 FieldSolverMultigrid.gmg_verbosity     = 10        # GMG verbosity

@@ -30,7 +30,7 @@ public:
   /*!
     @brief Full constructor
   */
-  MFHelmholtzNeumannEBBC(const int a_phase, const RefCountedPtr<JumpBC>& a_jumpBC);
+  MFHelmholtzNeumannEBBC(const int a_phase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC);
 
   /*!
     @brief Destructor

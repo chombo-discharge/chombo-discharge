@@ -2,13 +2,14 @@
 # FieldSolverMultigrid class options
 # ====================================================================================================
 FieldSolverMultigrid.verbosity         = -1                # Class verbosity
+FieldSolverMultigrid.jump_bc           = natural           # Jump BC type ('natural' or 'saturation_charge')
 FieldSolverMultigrid.bc.x.lo           = dirichlet 0.0     # Bc type (see docs)
 FieldSolverMultigrid.bc.x.hi           = dirichlet 0.0     # Bc type (see docs)
 FieldSolverMultigrid.bc.y.lo           = dirichlet 0.0     # Bc type (see docs)
 FieldSolverMultigrid.bc.y.hi           = dirichlet 0.0     # Bc type (see docs)
 FieldSolverMultigrid.bc.z.lo           = dirichlet 0.0     # Bc type (see docs)
 FieldSolverMultigrid.bc.z.hi           = dirichlet 0.0     # Bc type (see docs)
-FieldSolverMultigrid.plt_vars          = phi rho E         # Plot variables. Possible vars are 'phi', 'rho', 'E', 'res'
+FieldSolverMultigrid.plt_vars          = phi rho E         # Plot variables. Possible vars are 'phi', 'rho', 'E', 'res', 'sigma'
 FieldSolverMultigrid.kappa_source      = true              # Volume weighted space charge density or not (depends on algorithm)
 
 FieldSolverMultigrid.gmg_verbosity     = -1                # GMG verbosity

@@ -78,8 +78,8 @@ void MFHelmholtzNeumannEBBCFactory::setBxDphiDn(const std::function<Real(const R
   m_multByBco = false;
 }
 
-RefCountedPtr<EBHelmholtzEBBC> MFHelmholtzNeumannEBBCFactory::create(const int a_iphase, const RefCountedPtr<JumpBC>& a_jumpBC) const {
-  CH_TIME("MFHelmholtzNeumannEBBCFactory::create(int, RefCountedPtr<JumpBC>)");
+RefCountedPtr<EBHelmholtzEBBC> MFHelmholtzNeumannEBBCFactory::create(const int a_iphase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC) const {
+  CH_TIME("MFHelmholtzNeumannEBBCFactory::create(int, RefCountedPtr<MFHelmholtzJumpBC>)");
 
   CH_assert(m_useFunction || m_useConstant);
   

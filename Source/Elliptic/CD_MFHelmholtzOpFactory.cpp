@@ -41,7 +41,8 @@ MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&             a_mfis,
 					   const AmrFluxData&      a_amrBcoef,
 					   const AmrIrreData&      a_amrBcoefIrreg,
 					   const DomainBCFactory&  a_domainBcFactory,
-					   const EBBCFactory&      a_ebBcFactory,					   
+					   const EBBCFactory&      a_ebBcFactory,
+					   const JumpBCFactory&    a_jumpBcFactory,					   					   
 					   const IntVect&          a_ghostPhi,
 					   const IntVect&          a_ghostRhs,
 					   const Smoother&         a_smoother,
@@ -72,6 +73,7 @@ MFHelmholtzOpFactory::MFHelmholtzOpFactory(const MFIS&             a_mfis,
 
   m_domainBcFactory = a_domainBcFactory;
   m_ebBcFactory     = a_ebBcFactory;
+  m_jumpBcFactory   = a_jumpBcFactory;  
 
   m_ghostPhi = a_ghostPhi;
   m_ghostRhs = a_ghostRhs;
@@ -157,6 +159,12 @@ void MFHelmholtzOpFactory::setJump(const Real& a_sigma, const Real& a_scale){
   for (int i = 0; i < m_mgJump.size(); i++){
     DataOps::setValue(m_mgJump[i], a_sigma*a_scale);
   }
+}
+
+const EBAMRIVData& MFHelmholtzOpFactory::getSigma() const {
+  CH_TIME("MFHelmholtzOpFactory::getSigma()");
+
+  return m_amrJump;
 }
 
 void MFHelmholtzOpFactory::defineJump(){
@@ -523,6 +531,7 @@ MFHelmholtzOp* MFHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, 
 			     coarsener,
 			     m_domainBcFactory,
 			     m_ebBcFactory,
+			     m_jumpBcFactory,
 			     m_probLo,
 			     dx,
 			     1,
@@ -602,6 +611,7 @@ MFHelmholtzOp* MFHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
 					m_amrCoarseners[amrLevel],
 					m_domainBcFactory,
 					m_ebBcFactory,
+					m_jumpBcFactory,					
 					m_probLo,
 					dx,
 					refToFine,

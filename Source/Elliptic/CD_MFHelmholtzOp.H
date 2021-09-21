@@ -26,10 +26,11 @@
 #include <CD_MFFluxReg.H>
 #include <CD_MFLevelGrid.H>
 #include <CD_MFBaseIVFAB.H>
-#include <CD_JumpBC.H>
+#include <CD_MFHelmholtzJumpBC.H>
 #include <CD_EBHelmholtzOp.H>
 #include <CD_MFHelmholtzDomainBCFactory.H>
 #include <CD_MFHelmholtzEBBCFactory.H>
+#include <CD_MFHelmholtzJumpBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
 class MFHelmholtzOp : public LevelTGAHelmOp<LevelData<MFCellFAB>, MFFluxFAB> {
@@ -72,6 +73,7 @@ public:
     @param[in] a_coarAve       Coarsener
     @param[in] a_domainBC      Domain BC
     @param[in] a_ebBC          Boundary conditions on EBs
+    @param[in] a_jumpBcFactory Factory class for making jump BCs
     @param[in] a_probLo        Lower-left corner of computational domain
     @param[in] a_dx            Grid resolution
     @param[in] a_refToFine     Refinement ratio to fine level
@@ -102,6 +104,7 @@ public:
 		const MFCoarAve&                                 a_coarAve,
 		const RefCountedPtr<MFHelmholtzDomainBCFactory>& a_domainBC,
 		const RefCountedPtr<MFHelmholtzEBBCFactory>&     a_ebBC,
+		const RefCountedPtr<MFHelmholtzJumpBCFactory>&   a_jumpBcFactory,
 		const RealVect&                                  a_probLo,
 		const Real&                                      a_dx,
 		const int&                                       a_refToFine,
@@ -139,7 +142,7 @@ public:
   /*!
     @brief Set the jump boundary condition
   */
-  void setJump(const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_jump);
+  void setJump(RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_jump);
 
   /*!
     @brief Get Helmholtz operator
@@ -482,7 +485,7 @@ protected:
   /*!
     @brief BC jump object. This is the one that has the stencils and can compute derivatives. 
   */
-  RefCountedPtr<JumpBC> m_jumpBC;
+  RefCountedPtr<MFHelmholtzJumpBC> m_jumpBC;
 
   /*!
     @brief Actual BC jump in data-based format. This is the right-hand side of dphi/dn1 + dphi/dn2 = jump
@@ -566,7 +569,8 @@ protected:
 
   /*!
     @brief Update the jump condition. 
-    @note Note sure how to do this function just yet. 
+    @param[in] a_phi Data
+    @param[in] a_homogeneousPhysBC homogeneous physical BC or not
   */
   void updateJumpBC(const LevelData<MFCellFAB>& a_phi, const bool a_homogeneousPhysBC);
 

@@ -31,7 +31,7 @@ public:
   /*!
     @brief Full constructor. Must subsequently set the order and weight for stencils. 
   */
-  MFHelmholtzRobinEBBC(const int a_phase, const RefCountedPtr<JumpBC>& a_jumpBC);
+  MFHelmholtzRobinEBBC(const int a_phase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC);
 
   /*!
     @brief Destructor

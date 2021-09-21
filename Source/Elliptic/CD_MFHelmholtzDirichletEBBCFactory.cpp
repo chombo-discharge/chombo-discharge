@@ -63,8 +63,8 @@ void MFHelmholtzDirichletEBBCFactory::setValue(const std::function<Real(const Re
   m_functionValue = a_value;
 }
 
-RefCountedPtr<EBHelmholtzEBBC> MFHelmholtzDirichletEBBCFactory::create(const int a_iphase, const RefCountedPtr<JumpBC>& a_jumpBC) const {
-  CH_TIME("MFHelmholtzDirichletEBBCFactory::create(int, RefCountedPtr<JumpBC>)");
+RefCountedPtr<EBHelmholtzEBBC> MFHelmholtzDirichletEBBCFactory::create(const int a_iphase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC) const {
+  CH_TIME("MFHelmholtzDirichletEBBCFactory::create(int, RefCountedPtr<MFHelmholtzJumpBC>)");
 
   CH_assert(m_order  >  0);
   CH_assert(m_weight >= 0);

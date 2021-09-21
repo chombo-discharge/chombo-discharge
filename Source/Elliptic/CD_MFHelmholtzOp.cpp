@@ -13,10 +13,6 @@
 #include <ParmParse.H>
 #include <CH_Timer.H>
 
-// Dev includes
-#include <CD_EBHelmholtzDirichletEBBC.H>
-#include <CD_EBHelmholtzDirichletDomainBC.H>
-
 // Our includes
 #include <CD_Timer.H>
 #include <CD_MFHelmholtzOp.H>
@@ -36,7 +32,8 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
 			     const MFFluxReg&                                 a_fluxReg,
 			     const MFCoarAve&                                 a_coarAve,
 			     const RefCountedPtr<MFHelmholtzDomainBCFactory>& a_domainBcFactory,
-			     const RefCountedPtr<MFHelmholtzEBBCFactory>&     a_ebBcFactory,			     
+			     const RefCountedPtr<MFHelmholtzEBBCFactory>&     a_ebBcFactory,
+			     const RefCountedPtr<MFHelmholtzJumpBCFactory>&   a_jumpBcFactory,			     
 			     const RealVect&                                  a_probLo,
 			     const Real&                                      a_dx,
 			     const int&                                       a_refToFine,			     
@@ -68,7 +65,7 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
   m_hasMGObjects = a_hasMGObjects;
   m_refToCoar    = a_refToCoar;
   m_refToCoar    = a_refToFine;
-  m_smoother    = a_relaxType;
+  m_smoother     = a_relaxType;
   m_hasCoar      = a_hasCoar;
   m_hasFine      = a_hasFine;
 
@@ -91,7 +88,7 @@ MFHelmholtzOp::MFHelmholtzOp(const Location::Cell                             a_
 
   // Instantiate jump bc object.
   const int ghostCF = a_hasCoar ? a_interpolator.getGhostCF() : 1;
-  m_jumpBC = RefCountedPtr<JumpBC> (new JumpBC(m_dataLocation, m_mflg, a_BcoefIrreg, a_dx, a_jumpOrder, a_jumpWeight, a_jumpOrder, ghostCF));
+  m_jumpBC = a_jumpBcFactory->create(m_dataLocation, m_mflg, a_BcoefIrreg, a_dx, a_jumpOrder, a_jumpWeight, a_jumpOrder, ghostCF);
 
   // Make the operators on eachphase.
   for (int iphase = 0; iphase < m_numPhases; iphase++){
@@ -185,7 +182,7 @@ MFHelmholtzOp::~MFHelmholtzOp(){
   m_helmOps.clear();
 }
 
-void MFHelmholtzOp::setJump(const RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_jump){
+void MFHelmholtzOp::setJump(RefCountedPtr<LevelData<BaseIVFAB<Real> > >& a_jump){
   CH_TIME("MFHelmholtzOp::setJump(RefCountedPtr<BaseIVFAB<Real> >)");
   
   m_jump = a_jump;
@@ -443,7 +440,7 @@ void MFHelmholtzOp::computeOperatorLoads(LevelData<MFCellFAB>& a_phi, TimedDataI
     }
 
     // Matching time
-    m_jumpBC->matchBC(a_phi[a_timeDit()], (*m_jump)[a_timeDit()], true, a_timeDit());
+    m_jumpBC->matchBC((*m_jump)[a_timeDit()], a_phi[a_timeDit()], true, a_timeDit());
 
     // Apply operator application
     for (auto& op : m_helmOps){
@@ -556,7 +553,7 @@ void MFHelmholtzOp::axby(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>
 void MFHelmholtzOp::updateJumpBC(const LevelData<MFCellFAB>& a_phi, const bool a_homogeneousPhysBC){
   CH_TIME("MFHelmholtzOp::updateJumpBC(LD<MFCellFAB>, bool)");
   
-  m_jumpBC->matchBC(a_phi, *m_jump, a_homogeneousPhysBC);
+  m_jumpBC->matchBC(*m_jump, a_phi, a_homogeneousPhysBC);
 }
 
 void MFHelmholtzOp::exchangeGhost(const LevelData<MFCellFAB>& a_phi) const{

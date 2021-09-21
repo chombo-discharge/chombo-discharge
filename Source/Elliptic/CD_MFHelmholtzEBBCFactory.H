@@ -14,7 +14,7 @@
 
 // Our includes
 #include <CD_EBHelmholtzEBBC.H>
-#include <CD_JumpBC.H>
+#include <CD_MFHelmholtzJumpBC.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -36,7 +36,7 @@ public:
   /*!
     @brief Factory method for 
   */
-  virtual RefCountedPtr<EBHelmholtzEBBC> create(const int a_iphase, const RefCountedPtr<JumpBC>& a_jumpBC) const = 0;
+  virtual RefCountedPtr<EBHelmholtzEBBC> create(const int a_iphase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC) const = 0;
 };
 
 #include <CD_NamespaceFooter.H>

@@ -31,7 +31,7 @@ public:
     @param[in] a_electrostaticBCs Electrostatic boundary conditions on EBs
     @param[in] a_jumpBC           Jumpc BC object. 
   */
-  MFHelmholtzElectrostaticEBBC(const int a_phase, const ElectrostaticEbBc& a_electrostaticBCs, const RefCountedPtr<JumpBC>& a_jumpBC);
+  MFHelmholtzElectrostaticEBBC(const int a_phase, const ElectrostaticEbBc& a_electrostaticBCs, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC);
 
   /*!
     @brief No weak construction.
