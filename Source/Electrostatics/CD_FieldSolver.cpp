@@ -988,7 +988,7 @@ void FieldSolver::writePlotData(EBAMRCellData& a_output, int& a_comp, const bool
   // Add phi to output
   if(m_plotPotential)     this->writeMultifluidData(a_output, a_comp, m_potential,     doInterp); // Possibly on cell center, so-recenter to centroid if needed
   if(m_plotRho)           this->writeMultifluidData(a_output, a_comp, m_rho,           false);    // Always centroid
-  if(m_plotSigma)         this->writeSurfaceData   (a_output, a_comp, m_sigma               );
+  if(m_plotSigma)         this->writeSurfaceData   (a_output, a_comp, m_sigma               );    // m_sigma is EB-centered
   if(m_plotResidue)       this->writeMultifluidData(a_output, a_comp, m_residue,       false);    // Always centroid
   if(m_plotElectricField) this->writeMultifluidData(a_output, a_comp, m_electricField, doInterp); // Possibly on cell center, so-recenter to centroid if needed
 }
@@ -1098,7 +1098,7 @@ void FieldSolver::writeSurfaceData(EBAMRCellData& a_output, int& a_comp, const E
   DataOps::setValue(scratch, 0.0);
   DataOps::incr(scratch, a_data, 1.0);
 
-  // COpy to a_output
+  // Copy to a_output
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     if(m_realm == a_output.getRealm()){
       scratch[lvl]->localCopyTo(Interval(0,0), *a_output[lvl], Interval(a_comp, a_comp));
