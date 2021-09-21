@@ -58,8 +58,9 @@ void MFHelmholtzSaturationChargeJumpBC::matchBC(BaseIVFAB<Real>& a_jump,
   //           phiB = -sum[wi * phi(i)]/wb.
   //
   //       We happen to know that the stencils were stored in "flux-form" by multiplying by the b-coefficient AND the denominator
-  //       1/(wq*bq + wp*bp). Both the weight and the stencil were multiplied by the b-coefficient so when we divide out we only need to multiply
-  //       the "denominator" term back in. 
+  //       1/(wq*bq + wp*bp). So, what we have stored in the weights are actually b*wB and for the stencils we have stored b*wi/(bq*wq + bp*wp).
+  //       So, both the weight and the stencil were multiplied by the b-coefficient so we don't have to worry about the coefficient when we divide
+  //       that out. But, the term (bq*wq + bp*wp) has been multiplied into the stencil weights so we need to divide that back out. 
   
   constexpr int vofComp     = 0;
   constexpr int firstPhase  = 0;

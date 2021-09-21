@@ -342,6 +342,18 @@ void MFHelmholtzJumpBC::matchBC(BaseIVFAB<Real>& a_jump,
 				const bool       a_homogeneousPhysBC,
 				const DataIndex& a_dit) const {
   CH_assert(m_multiPhase);
+
+  // TLDR: This routine computes the boundary value of phi from an expression b1*dphi/dn1 + b2*dphi/dn2 = sigma, where dphi/dn can be represented as
+  //
+  //          dphi/dn = wB*phiB + sum[w(i) * phi(i)]
+  //
+  //       This yields an equation which can be solved for phiB. The solution to that is
+  //
+  //           phiB = sigma/(b1*w1 + b2*w2) - b1*sum[w1(i) * phi1(i)]/(b1*w1 + b2*w2) - b2*sum[w2(i) * phi2(i)]/(b1*w1 + b2*w2). 
+  //
+  //       Because I'm not crazy, I have stored the term 1/(b1*w1 + b2*w2) in m_denom so we can just multiply it in when we need it. Moreover,
+  //       this term has already been multiplied into the stencil weights, which is the reason why we only do applyStencil below (without dividing
+  //       by the above factor). 
   
   constexpr int vofComp     = 0;
   constexpr int firstPhase  = 0;
