@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_MFHelmholtzSaturationChargeJumpBC.H
-  @brief  Declaration of a jump BC which implements the saturation charge boundary condition. 
+  @brief  Declaration of an MFHelmholtzJumpBC class which implements the saturation charge boundary condition. 
   @author Robert Marskar
 */
 
@@ -23,7 +23,7 @@ class MFHelmholtzSaturationChargeJumpBC : public MFHelmholtzJumpBC {
 public:
 
   /*!
-    @brief Default constructor
+    @brief Disallowe weak construction. 
   */
   MFHelmholtzSaturationChargeJumpBC() = delete;
 
@@ -55,10 +55,12 @@ public:
 
   /*!
     @brief Match the BC. 
-    @details Unlike JumpBC which uses a_jump as the natural parameter, a_jump 
-    @param[in] a_phi               Cell-centered data
-    @param[in] a_jump              Jump data, i.e. right-hand side of dphi/dn + dphi/m = jump
-    @param[in] a_homogeneousPhysBC Homogeneous BC or not
+    @details MFhelmholtzJumpBC uses a_jump as the natural parameter, computing the fluxes from the boundary potential and surface source.
+    This function, however, specifies a zero flux into one of the phases and uses a_jump as a free parameter (it is computed from the fluxes). 
+    @param[out] a_jump              Jump data, i.e. right-hand side of dphi/dn + dphi/m = jump. Set equal to jump = b*dphi/dm. 
+    @param[in]  a_phi               Cell-centered data
+    @param[in]  a_homogeneousPhysBC Homogeneous BC or not
+    @param[in]  a_dit               Grid index
   */
   virtual void matchBC(BaseIVFAB<Real>& a_jump,
 		       const MFCellFAB& a_phi,

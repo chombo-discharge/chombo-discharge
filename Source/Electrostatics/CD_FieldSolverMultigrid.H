@@ -163,7 +163,7 @@ protected:
   /*!
     @brief Enum for multigrid cycle types. 
   */
-  enum class MultigridType{
+  enum class MultigridType {
     VCycle,
     WCycle,
   };
