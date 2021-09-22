@@ -374,6 +374,34 @@ inline void FORTRAN_NAME(inlineWEIGHTED_UPWIND, inlineWEIGHTED_UPWIND)(
 }
 #endif  // GUARDWEIGHTED_UPWIND 
 
+#ifndef GUARDFILLGHOSTBOUNDARY 
+#define GUARDFILLGHOSTBOUNDARY 
+// Prototype for Fortran procedure fillghostboundary ...
+//
+void FORTRAN_NAME( FILLGHOSTBOUNDARY ,fillghostboundary )(
+      CHFp_FRA1(phi)
+      ,CHFp_CONST_INT(side)
+      ,CHFp_CONST_INT(dir)
+      ,CHFp_BOX(ghostbox) );
+
+#define FORT_FILLGHOSTBOUNDARY FORTRAN_NAME( inlineFILLGHOSTBOUNDARY, inlineFILLGHOSTBOUNDARY)
+#define FORTNT_FILLGHOSTBOUNDARY FORTRAN_NAME( FILLGHOSTBOUNDARY, fillghostboundary)
+
+inline void FORTRAN_NAME(inlineFILLGHOSTBOUNDARY, inlineFILLGHOSTBOUNDARY)(
+      CHFp_FRA1(phi)
+      ,CHFp_CONST_INT(side)
+      ,CHFp_CONST_INT(dir)
+      ,CHFp_BOX(ghostbox) )
+{
+ CH_TIMELEAF("FORT_FILLGHOSTBOUNDARY");
+ FORTRAN_NAME( FILLGHOSTBOUNDARY ,fillghostboundary )(
+      CHFt_FRA1(phi)
+      ,CHFt_CONST_INT(side)
+      ,CHFt_CONST_INT(dir)
+      ,CHFt_BOX(ghostbox) );
+}
+#endif  // GUARDFILLGHOSTBOUNDARY 
+
 }
 
 #endif

@@ -2194,9 +2194,7 @@ void CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi) {
     pout() << m_name + "::weightedUpwind()" << endl;
   }
 
-
   if(m_isMobile){
-
     m_amr->averageDown(m_cellVelocity, m_realm, m_phase);
     m_amr->interpGhost(m_cellVelocity, m_realm, m_phase);
     
@@ -2211,9 +2209,10 @@ void CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi) {
     // Grid loop. 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
 
-      const DisjointBoxLayout& dbl   = m_amr->getGrids     (m_realm         )[lvl];
-      const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-      const Real&              dx    = m_amr->getDx()[lvl];
+      const DisjointBoxLayout& dbl    = m_amr->getGrids     (m_realm         )[lvl];
+      const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+      const ProblemDomain&     domain = m_amr->getDomains()[lvl];
+      const Real&              dx     = m_amr->getDx()[lvl];
 
       const Real faceArea = 1.0;
 
@@ -2229,12 +2228,54 @@ void CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi) {
 	sumPhi.   setVal(0.0);
 	sumWeight.setVal(0.0);
 
-	// Regular cells
-	for (int dir = 0; dir < SpaceDim; dir++){
-	  BaseFab<Real>&       regSumPhi    = sumPhi.   getSingleValuedFAB();
-	  BaseFab<Real>&       regSumWeight = sumWeight.getSingleValuedFAB();
+	// Make a clone -- doing this because we will fill ghost cells outside the domain so we don't have to monkey directly
+	// with m_phi. I REALLY want a const signature in this routine. 
+	Box grownBox = grow(cellBox, 1);
+	EBCellFAB clonePhi(ebisBox, grownBox, 1);
+	clonePhi.copy(grownBox, Interval(0,0), grownBox, cellPhi, Interval(0,0));
 
-	  const BaseFab<Real>& regCellPhi   = cellPhi.    getSingleValuedFAB();
+	// Monkey with the ghost cells outside the domain boundary. I know that makes m_state non-const in this routine but we're making a silent promise that we don't
+	// touch data inside the domain. 
+	BaseFab<Real>& regSumPhi    = sumPhi.   getSingleValuedFAB();
+	BaseFab<Real>& regSumWeight = sumWeight.getSingleValuedFAB();
+	BaseFab<Real>& regCellPhi   = clonePhi. getSingleValuedFAB();
+
+	for (int dir = 0; dir < SpaceDim; dir++){
+	  // TLDR: Compute the strip of cells immediately outside the domain boundary and fill the ghost cells there.
+	  Box loBox;
+	  Box hiBox;
+	  int hasLo;
+	  int hasHi;
+	  EBArith::loHi(loBox, hasLo, hiBox, hasHi, domain, cellBox, dir);
+
+	  constexpr int loSide = -1;
+	  constexpr int hiSide =  1;	  
+
+	  if(hasLo){
+	    Box ghostBox = loBox;
+	    ghostBox.shift(dir, -1);
+	    
+	    FORT_FILLGHOSTBOUNDARY(CHF_FRA1(regCellPhi, 0),
+				   CHF_CONST_INT(loSide),
+				   CHF_CONST_INT(dir),
+				   CHF_BOX(ghostBox));
+	  }
+	  
+	  if(hasHi){
+	    Box ghostBox = hiBox;
+	    ghostBox.shift(dir, 1);
+	    
+	    FORT_FILLGHOSTBOUNDARY(CHF_FRA1(regCellPhi, 0),
+				   CHF_CONST_INT(hiSide),
+				   CHF_CONST_INT(dir),
+				   CHF_BOX(ghostBox));
+	  }
+	}
+
+	// Regular cells. Note that in the WEIGHTED_UPWIND Fortran kernel we compute the weighted sum of the upwinded value of phi. This means that the kernel
+	// will reach out of the domain boundary. We fill the first ghost layer outside the domain boundary with the value in the valid cell immediately inside
+	// the domain so that the kernel does, in fact, use the correct math. 
+	for (int dir = 0; dir < SpaceDim; dir++){
 	  const BaseFab<Real>& regFaceVel   = faceVel[dir].getSingleValuedFAB();
 
 	  FORT_WEIGHTED_UPWIND(CHF_FRA1      (regSumPhi,    0),
@@ -2246,17 +2287,64 @@ void CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi) {
 			       CHF_BOX       (cellBox));
 	}
 
-	// Irregular cells. 
+	// Irregular cells. This is a bit more involved, but we use still use the upwinded side(s), including the EB face (in which case we extrapolate from the EB). 
 	VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
 	for (vofit.reset(); vofit.ok(); ++vofit){
 	  const VolIndex& vof = vofit();
-	  sumPhi(vof, m_comp) = 0.0;
+
+	  sumPhi   (vof, m_comp) = 0.0;
+	  sumWeight(vof, m_comp) = 0.0;
+
+	  for (int dir = 0; dir < SpaceDim; dir++){
+	    const Vector<VolIndex>  vofsLo  = ebisBox.getVoFs(vof, dir, Side::Lo, 1);
+	    const Vector<VolIndex>  vofsHi  = ebisBox.getVoFs(vof, dir, Side::Hi, 1);
+
+	    const Vector<FaceIndex> facesLo = ebisBox.getFaces(vof, dir, Side::Lo);
+	    const Vector<FaceIndex> facesHi = ebisBox.getFaces(vof, dir, Side::Hi);	    
+
+	    // Add contribution from cut-cell faces in the low side. Observe that if the upwind value of phi is outside the domain
+	    // then the "upwinded" value is just the cell-centered value. 
+	    for (int iface = 0; iface < facesLo.size(); iface++){
+	      const FaceIndex& faceLo = facesLo[iface];
+	      const VolIndex&  vofLo  = faceLo.getVoF(Side::Lo);
+
+	      const Real phiLo        = faceLo.isBoundary() ? cellPhi(vof, m_comp) : cellPhi(vofLo, m_comp);
+	      const Real velLo        = faceVel[dir](faceLo, m_comp);
+	      const Real areaFrac     = ebisBox.areaFrac(faceLo);
+
+	      if(velLo > 0.0){
+		sumWeight(vof, m_comp) += std::abs(velLo) * areaFrac;
+		sumPhi   (vof, m_comp) += std::abs(velLo) * areaFrac * phiLo;
+	      }
+	    }
+
+	    // Add contribution from cut-cell faces in the low side. 
+	    for (int iface = 0; iface < facesHi.size(); iface++){
+	      const FaceIndex& faceHi = facesHi[iface];
+	      const VolIndex&  vofHi  = faceHi.getVoF(Side::Hi);
+
+	      const Real phiHi        = faceHi.isBoundary() ? cellPhi(vof, m_comp) : cellPhi(vofHi, m_comp);
+	      const Real velHi        = faceVel[dir](faceHi, m_comp);
+	      const Real areaFrac     = ebisBox.areaFrac(faceHi);
+
+	      if(velHi < 0.0){
+		sumWeight(vof, m_comp) += std::abs(velHi) * areaFrac;
+		sumPhi   (vof, m_comp) += std::abs(velHi) * areaFrac * phiHi;
+	      }
+	    }
+	  }
+
+	  // If there's no inflow face we set the cell-centered value. 
+	  if(!(sumWeight(vof, m_comp) > 0.0)){
+	    sumPhi   (vof, m_comp) = cellPhi(vof, m_comp);
+	    sumWeight(vof, m_comp) = 1.0;
+	  }
 	}
       }
-
-
-      //      DataOps::copy(a_weightedUpwindPhi, m_scratch);
     }
+
+    // Need a better weighting function which safeguards against zero weights -- So, a separate kernel.
+    MayDay::Warning("Need better kernel!");
     DataOps::divide(a_weightedUpwindPhi, m_scratch, 0, 0);    
   }
   else{
