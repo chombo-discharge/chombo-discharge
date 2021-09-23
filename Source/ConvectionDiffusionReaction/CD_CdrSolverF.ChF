@@ -293,10 +293,10 @@
       subroutine weighted_upwind(
      &     chf_fra1[sum_phi],
      &     chf_fra1[sum_weight],
-     &     chf_const_fra1[cell_phi],
+     &     chf_const_fra1[face_phi],
      &     chf_const_fra1[face_vel],
      &     chf_const_int[dir],
-     &     chf_const_real[faceArea],     
+     &     chf_const_int[p],     
      &     chf_box[cell_box])
 
       integer chf_ddecl[i;j;k]
@@ -309,8 +309,8 @@
       koff = chf_id(2, dir)]
 
       chf_multido[cell_box; i; j; k]
-         phiLo = cell_phi(chf_ix[i-ioff;j-joff; k-koff])
-         phiHi = cell_phi(chf_ix[i+ioff;j+joff; k+koff])
+         phiLo = face_phi(chf_ix[i     ;j     ; k     ])
+         phiHi = face_phi(chf_ix[i+ioff;j+joff; k+koff])
 	 
          velLo = face_vel(chf_ix[i     ; j     ; k     ])
          velHi = face_vel(chf_ix[i+ioff; j+joff; k+koff])
@@ -319,13 +319,13 @@
          contribWeight = 0.0
          	 
          if(velLo > 0.0) then
-           contribWeight = contribWeight + abs(velLo)*faceArea
-           contribPhi    = contribPhi    + abs(velLo)*faceArea*phiLo
+           contribWeight = contribWeight + abs(velLo**p)
+           contribPhi    = contribPhi    + abs(velLo**p) * phiLo
          endif
          
          if(velHi < 0.0) then
-           contribWeight = contribWeight + abs(velHi)*faceArea
-           contribPhi    = contribPhi    + abs(velHi)*faceArea*phiHi
+           contribWeight = contribWeight + abs(velHi**p)
+           contribPhi    = contribPhi    + abs(velHi**p) * phiHi
          endif
 
          sum_phi   (chf_ix[i;j;k]) = sum_phi   (chf_ix[i;j;k]) + contribPhi

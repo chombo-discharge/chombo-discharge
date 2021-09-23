@@ -344,10 +344,10 @@ inline void FORTRAN_NAME(inlineDFLUX_REG, inlineDFLUX_REG)(
 void FORTRAN_NAME( WEIGHTED_UPWIND ,weighted_upwind )(
       CHFp_FRA1(sum_phi)
       ,CHFp_FRA1(sum_weight)
-      ,CHFp_CONST_FRA1(cell_phi)
+      ,CHFp_CONST_FRA1(face_phi)
       ,CHFp_CONST_FRA1(face_vel)
       ,CHFp_CONST_INT(dir)
-      ,CHFp_CONST_REAL(faceArea)
+      ,CHFp_CONST_INT(p)
       ,CHFp_BOX(cell_box) );
 
 #define FORT_WEIGHTED_UPWIND FORTRAN_NAME( inlineWEIGHTED_UPWIND, inlineWEIGHTED_UPWIND)
@@ -356,20 +356,20 @@ void FORTRAN_NAME( WEIGHTED_UPWIND ,weighted_upwind )(
 inline void FORTRAN_NAME(inlineWEIGHTED_UPWIND, inlineWEIGHTED_UPWIND)(
       CHFp_FRA1(sum_phi)
       ,CHFp_FRA1(sum_weight)
-      ,CHFp_CONST_FRA1(cell_phi)
+      ,CHFp_CONST_FRA1(face_phi)
       ,CHFp_CONST_FRA1(face_vel)
       ,CHFp_CONST_INT(dir)
-      ,CHFp_CONST_REAL(faceArea)
+      ,CHFp_CONST_INT(p)
       ,CHFp_BOX(cell_box) )
 {
  CH_TIMELEAF("FORT_WEIGHTED_UPWIND");
  FORTRAN_NAME( WEIGHTED_UPWIND ,weighted_upwind )(
       CHFt_FRA1(sum_phi)
       ,CHFt_FRA1(sum_weight)
-      ,CHFt_CONST_FRA1(cell_phi)
+      ,CHFt_CONST_FRA1(face_phi)
       ,CHFt_CONST_FRA1(face_vel)
       ,CHFt_CONST_INT(dir)
-      ,CHFt_CONST_REAL(faceArea)
+      ,CHFt_CONST_INT(p)
       ,CHFt_BOX(cell_box) );
 }
 #endif  // GUARDWEIGHTED_UPWIND 
