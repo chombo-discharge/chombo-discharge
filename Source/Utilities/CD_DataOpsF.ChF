@@ -340,3 +340,22 @@ c Compute the Laplacian in the numerator (including cross-derivatives)
       return
 
       end
+
+      subroutine divide_fallback(
+     &     chf_fra1[numerator],
+     &     chf_const_fra1[denominator],
+     &     chf_const_fra1[fallback],		                    
+     &     chf_box[cellbox])
+
+      integer chf_ddecl[i;j;k]
+      real denom      
+
+      chf_multido[cellbox; i;j;k]
+         denom = denominator(chf_ix[i;j;k])
+         if(abs(denom) > 0.0) then	 
+            numerator(chf_ix[i;j;k]) = numerator(chf_ix[i; j; k])/denominator(chf_ix[i; j; k])
+         else
+            numerator(chf_ix[i;j;k]) = fallback(chf_ix[i; j; k])
+         endif
+      chf_enddo
+      end

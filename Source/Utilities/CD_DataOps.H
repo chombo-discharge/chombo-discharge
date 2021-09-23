@@ -113,6 +113,22 @@ public:
   
   static void divideByScalar(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs);
 
+  /*!
+    @brief Divide data. If the denominator is zero, set the value to a fallback option
+    @param[inout] a_numerator   Numerator
+    @param[in]    a_denominator Denominator
+    @param[in]    a_fallback
+  */
+  static void divideFallback(EBAMRCellData& a_numerator, const EBAMRCellData& a_denominator, const EBAMRCellData& a_fallback);
+
+  /*!
+    @brief Divide data. If the denominator is zero, set the value to a fallback option
+    @param[inout] a_numerator   Numerator
+    @param[in]    a_denominator Denominator
+    @param[in]    a_fallback
+  */
+  static void divideFallback(LevelData<EBCellFAB>& a_numerator, const LevelData<EBCellFAB>& a_denominator, const LevelData<EBCellFAB>& a_fallback);  
+
   static void exponentiate(EBAMRCellData& a_lhs, const Real a_factor);
 
   static void exponentiate(LevelData<EBCellFAB>& a_lhs, const Real a_factor);

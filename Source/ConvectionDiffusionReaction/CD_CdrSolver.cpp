@@ -2333,7 +2333,6 @@ void CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi) {
 	      }
 	    }
 	  }
-
 	  // If there's no inflow face we set the cell-centered value. 
 	  if(!(sumWeight(vof, m_comp) > 0.0)){
 	    sumPhi   (vof, m_comp) = cellPhi(vof, m_comp);
@@ -2343,9 +2342,8 @@ void CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi) {
       }
     }
 
-    // Need a better weighting function which safeguards against zero weights -- So, a separate kernel.
-    MayDay::Warning("Need better kernel!");
-    DataOps::divide(a_weightedUpwindPhi, m_scratch, 0, 0);    
+    // Divide. Use m_phi as a fallback option in case there were no inflow faces.
+    DataOps::divideFallback(a_weightedUpwindPhi, m_scratch, m_phi);
   }
   else{
     DataOps::copy(a_weightedUpwindPhi, m_phi);
