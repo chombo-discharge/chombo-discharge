@@ -2290,6 +2290,12 @@ void CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_p
 	      }
 	    }
 	  }
+
+	  // If we don't have an inflow face set the upwind stuff to zero. 
+	  if(!(sumWeight(vof, m_comp) > 0.0)) {
+	    sumPhi(vof, m_comp)    = 0.0;
+	    sumWeight(vof, m_comp) = 1.0;
+	  }
 	}
       }
     }
