@@ -231,8 +231,6 @@ Real AdvectionDiffusionStepper::advance(const Real a_dt){
   else{
     MayDay::Abort("AdvectionDiffusionStepper - unknown integrator requested");
   }
-
-  m_solver->weightedUpwind(m_solver->getSource());
   
   return a_dt;
 }
