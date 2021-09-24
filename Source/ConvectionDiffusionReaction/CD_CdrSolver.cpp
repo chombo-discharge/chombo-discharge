@@ -2197,7 +2197,7 @@ void CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_p
   if(m_isMobile){
     m_amr->averageDown(m_cellVelocity, m_realm, m_phase);
     m_amr->interpGhost(m_cellVelocity, m_realm, m_phase);
-    
+
     m_amr->averageDown(m_phi, m_realm, m_phase);
     m_amr->interpGhost(m_phi, m_realm, m_phase);        
 
@@ -2227,16 +2227,15 @@ void CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_p
 	sumPhi.   setVal(0.0);
 	sumWeight.setVal(0.0);
 
-	// Monkey with the ghost cells outside the domain boundary. I know that makes m_state non-const in this routine but we're making a silent promise that we don't
-	// touch data inside the domain. 
-	BaseFab<Real>&       regSumPhi    = sumPhi.      getSingleValuedFAB();
-	BaseFab<Real>&       regSumWeight = sumWeight.   getSingleValuedFAB();
 
 	// Regular cells. Note that in the WEIGHTED_UPWIND Fortran kernel we compute the weighted sum of the upwinded value of phi. This means that the kernel
 	// will reach out of the domain boundary. We fill the first ghost layer outside the domain boundary with the value in the valid cell immediately inside
-	// the domain so that the kernel does, in fact, use the correct math. 
+	// the domain so that the kernel does, in fact, use the correct math.
+	BaseFab<Real>& regSumPhi    = sumPhi.   getSingleValuedFAB();
+	BaseFab<Real>& regSumWeight = sumWeight.getSingleValuedFAB();
+	
 	for (int dir = 0; dir < SpaceDim; dir++){
-	  const BaseFab<Real>& regFacePhi = facePhi[dir].getSingleValuedFAB();	  
+	  const BaseFab<Real>& regFacePhi = facePhi[dir].getSingleValuedFAB();
 	  const BaseFab<Real>& regFaceVel = faceVel[dir].getSingleValuedFAB();
 
 	  FORT_WEIGHTED_UPWIND(CHF_FRA1      (regSumPhi,    0),
@@ -2248,7 +2247,7 @@ void CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_p
 			       CHF_BOX       (cellBox));
 	}
 
-	// Irregular cells. This is a bit more involved, but we use still use the upwinded side(s), including the EB face (in which case we extrapolate from the EB). 
+	// Irregular cells. This is a bit more involved because we might also have multi-valued cells. 
 	VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
 	for (vofit.reset(); vofit.ok(); ++vofit){
 	  const VolIndex& vof = vofit();
