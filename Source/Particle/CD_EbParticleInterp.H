@@ -58,6 +58,95 @@ public:
   void define(const Box& a_region, const EBISBox&  a_ebisbox, const RealVect& a_dx, const RealVect& a_probLo, const bool a_forceIrregNGP);                     
 
   /*!
+    @brief Deposit particle onto the mesh using a standard cloud width. 
+    @details This is just like regular particle-mesh deposition. The mesh field should have exactly one component and the quantity to be deposited
+    is fetched from the specified template parameter 'a_particleScalarField' This should be a pointer to a member function with signature 
+    const Real& P::function() const. E.g. if we are depositing mass through a function const Real& P::mass() const we will specifiy
+    
+        interpolate<Particle, &Particle::mass>(a_particleList, a_rho, a_interpType)
+	
+    To deposit a different quantity, simply change the function pointer in the input parameter. 
+    @param[in]    a_particleList   Particles to be deposited
+    @param[inout] a_rho            Mesh data
+    @param[in]    a_depositionType Deposition method
+    @note This routine will INCREMENT a_rho. 
+  */
+  template <class P, const Real&(P::*particleScalarField)() const>
+  void deposit(const List<P>& a_particleList, FArrayBox& a_rho, const DepositionType a_depositionType) const;
+
+  /*!
+    @brief Deposit particle onto the mesh using twice the standard cloud width. 
+    @details This is just like regular particle-mesh deposition. The mesh field should have exactly one component and the quantity to be deposited
+    is fetched from the specified template parameter 'a_particleScalarField' This should be a pointer to a member function with signature 
+    const Real& P::function() const. E.g. if we are depositing mass through a function const Real& P::mass() const we will specifiy
+    
+        interpolate<Particle, &Particle::mass>(a_particleList, a_rho, a_interpType)
+	
+    To deposit a different quantity, simply change the function pointer in the input parameter. 
+    @param[in]    a_particleList   Particles to be deposited
+    @param[inout] a_rho            Mesh data
+    @param[in]    a_depositionType Deposition method
+    @note This routine will INCREMENT a_rho. 
+  */
+  template <class P, const Real&(P::*particleScalarField)() const>
+  void deposit2(const List<P>& a_particleList, FArrayBox& a_rho, const DepositionType a_depositionType) const;
+
+  /*!
+    @brief Deposit particle onto the mesh using 4x the standard cloud width. 
+    @details This is just like regular particle-mesh deposition. The mesh field should have exactly one component and the quantity to be deposited
+    is fetched from the specified template parameter 'a_particleScalarField' This should be a pointer to a member function with signature 
+    const Real& P::a_particleScalarField. E.g. if we are depositing mass through a function const Real& P::mass() we will specifiy
+    
+        interpolate<Particle, &Particle::mass>(a_particleList, a_rho, a_interpType)
+	
+    To deposit a different quantity, simply change the function pointer in the input parameter. 
+    @param[in]    a_particleList   Particles to be deposited
+    @param[inout] a_rho            Mesh data
+    @param[in]    a_depositionType Deposition method
+    @note This routine will INCREMENT a_rho. 
+  */
+  template <class P, const Real&(P::*particleScalarField)() const>
+  void deposit4(const List<P>& a_particleList, FArrayBox& a_rho, const DepositionType a_depositionType) const;
+
+  /*!
+    @brief Interpolate a vector field onto the particle position. 
+    @details This is just like regular particle-mesh interpolation. The input field should have exactly one component and the
+    the field will be interpolated onto the template parameter's input field. The template parameter 'particleScalar' should be a pointer
+    to a member function which will set the particle field. E.g. the function must have a signature Real& P::particleScalarField(). A valid
+    expression is e.g.
+    
+        interpolate<Particle, &Particle::mass>(a_particleList, a_meshScalarField, a_interpType)
+	
+    To interpolate onto a different field, e.g. the acceleration field, use interpolate<Particle, &Particle::acceleration>, etc.
+    @param[inout] a_particleList    Particles to be interpolated. 
+    @param[in]    a_meshScalarField Scalar field on the mesh 
+    @param[in]    a_interpType      Interpolation type. 
+  */
+  template <class P, Real&(P::*particleScalarField)()>
+  void interpolate(List<P>&             a_particleList,
+		   const FArrayBox&     a_meshScalarField,
+		   const DepositionType a_interpType);  
+
+  /*!
+    @brief Interpolate a vector field onto the particle position. 
+    @details This is just like regular particle-mesh interpolation. The input field should have SpaceDim components and the
+    the field will be interpolated onto the template parameter's input field. The template parameter 'particleVectorField' should be a pointer
+    to a member function which will set the particle field. E.g. the function must have a signature RealVect& P::particleVectorField(). A valid 
+    expression is e.g.
+    
+        interpolate<Particle, &Particle::velocity>(a_particleList, a_meshVectorField, a_interpType)
+	
+    To interpolate onto a different field, e.g. the acceleration field, use interpolate<Particle, &Particle::acceleration>, etc.
+    @param[inout] a_particleList    Particles to be interpolated. 
+    @param[in]    a_meshVectorField Vector field on the mesh
+    @param[in]    a_interpType      Interpolation type. 
+  */
+  template <class P, RealVect&(P::*particleVectorField)()>
+  void interpolate(List<P>&             a_particleList,
+		   const FArrayBox&     a_meshVectorField,
+		   const DepositionType a_interpType);  
+  
+  /*!
     @brief Deposit particle mass onto the mesh using a standard cloud width. 
     @details This reqires that P has a member function mass()
     @param[in]    a_particleList Particles to be deposited
@@ -142,43 +231,7 @@ public:
 			       const FArrayBox&     a_accelerationField,
 			       const DepositionType a_interpType) const;
 
-  /*!
-    @brief Interpolate a vector field onto the particle position. 
-    @details This is just like regular particle-mesh interpolation. The input field should have exactly one component and the
-    the field will be interpolated onto the template parameter's input field. The template parameter 'particleScalar' should be a pointer
-    to a member function which will set the particle field. E.g. the function must have a signature Real& P::particleScalarField(). A valid
-    expression is e.g.
-    
-        interpolate<Particle, &Particle::mass>(a_particleList, a_meshScalarField, a_interpType)
-	
-    To interpolate onto a different field, e.g. the acceleration field, use interpolate<Particle, &Particle::acceleration>, etc.
-    @param[inout] a_particleList    Particles to be interpolated. 
-    @param[in]    a_meshScalarField Scalar field on the mesh 
-    @param[in]    a_interpType      Interpolation type. 
-  */
-  template <class P, Real&(P::*particleScalarField)()>
-  void interpolate(List<P>&             a_particleList,
-		   const FArrayBox&     a_meshScalarField,
-		   const DepositionType a_interpType);  
 
-  /*!
-    @brief Interpolate a vector field onto the particle position. 
-    @details This is just like regular particle-mesh interpolation. The input field should have SpaceDim components and the
-    the field will be interpolated onto the template parameter's input field. The template parameter 'particleVectorField' should be a pointer
-    to a member function which will set the particle field. E.g. the function must have a signature RealVect& P::particleVectorField(). A valid 
-    expression is e.g.
-    
-        interpolate<Particle, &Particle::velocity>(a_particleList, a_meshVectorField, a_interpType)
-	
-    To interpolate onto a different field, e.g. the acceleration field, use interpolate<Particle, &Particle::acceleration>, etc.
-    @param[inout] a_particleList    Particles to be interpolated. 
-    @param[in]    a_meshVectorField Vector field on the mesh
-    @param[in]    a_interpType      Interpolation type. 
-  */
-  template <class P, RealVect&(P::*particleVectorField)()>
-  void interpolate(List<P>&             a_particleList,
-		   const FArrayBox&     a_meshVectorField,
-		   const DepositionType a_interpType);
 protected:
 
   /*!

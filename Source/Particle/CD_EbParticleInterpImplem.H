@@ -308,59 +308,59 @@ void EbParticleInterp::interpolateParticle(RealVect&            a_particleField,
     }
   }
 }
-  
-template <class P>
-void EbParticleInterp::deposit(const List<P>& a_particleList, FArrayBox& a_rho, const DepositionType a_interpType) const {
+
+template <class P, const Real&(P::*particleScalarField)() const>
+void EbParticleInterp::deposit(const List<P>& a_particleList, FArrayBox& a_rho, const DepositionType a_depositionType) const {
   CH_TIME("EbParticleInterp::deposit");
-  
+
   for (ListIterator<P> lit(a_particleList); lit; ++lit){
     const P&        curParticle = lit();
     const RealVect& curPosition = curParticle.position();
-    const Real&     curMass     = curParticle.mass();
+    const Real&     curStrength = (curParticle.*particleScalarField)();    
     
     this->depositParticle(a_rho, 
 			  m_probLo, 
 			  m_dx, 
 			  curPosition, 
-			  curMass, 
-			  a_interpType);
-  }
+			  curStrength, 
+			  a_depositionType);
+  }  
 }
 
-template <class P>
-void EbParticleInterp::deposit2(const List<P>& a_particleList, FArrayBox& a_rho, const DepositionType a_interpType) const {
-  CH_TIME("EbParticleInterp::deposit2");
-  
+template <class P, const Real&(P::*particleScalarField)() const>
+void EbParticleInterp::deposit2(const List<P>& a_particleList, FArrayBox& a_rho, const DepositionType a_depositionType) const {
+  CH_TIME("EbParticleInterp::deposit");
+
   for (ListIterator<P> lit(a_particleList); lit; ++lit){
     const P&        curParticle = lit();
     const RealVect& curPosition = curParticle.position();
-    const Real&     curMass     = curParticle.mass();
-    
+    const Real&     curStrength = (curParticle.*particleScalarField)();    
+
     this->depositParticle2(a_rho, 
 			   m_probLo, 
 			   m_dx, 
 			   curPosition, 
-			   curMass, 
-			   a_interpType);
-  }
+			   curStrength, 
+			   a_depositionType);
+  }  
 }
 
-template <class P>
-void EbParticleInterp::deposit4(const List<P>& a_particleList, FArrayBox& a_rho, const DepositionType a_interpType) const {
-  CH_TIME("EbParticleInterp::deposit4");
-  
+template <class P, const Real&(P::*particleScalarField)() const>
+void EbParticleInterp::deposit4(const List<P>& a_particleList, FArrayBox& a_rho, const DepositionType a_depositionType) const {
+  CH_TIME("EbParticleInterp::deposit");
+
   for (ListIterator<P> lit(a_particleList); lit; ++lit){
     const P&        curParticle = lit();
     const RealVect& curPosition = curParticle.position();
-    const Real&     curMass     = curParticle.mass();
+    const Real&     curStrength = (curParticle.*particleScalarField)();    
     
     this->depositParticle4(a_rho, 
 			   m_probLo, 
 			   m_dx, 
 			   curPosition, 
-			   curMass, 
-			   a_interpType);
-  }
+			   curStrength, 
+			   a_depositionType);
+  }  
 }
 
 template <class P, Real&(P::*particleScalarField)()>
@@ -410,6 +410,62 @@ void EbParticleInterp::interpolate(List<P>&             a_particleList,
 			      a_interpType);
   }
 }
+  
+template <class P>
+void EbParticleInterp::deposit(const List<P>& a_particleList, FArrayBox& a_rho, const DepositionType a_depositionType) const {
+  CH_TIME("EbParticleInterp::deposit");
+  
+  for (ListIterator<P> lit(a_particleList); lit; ++lit){
+    const P&        curParticle = lit();
+    const RealVect& curPosition = curParticle.position();
+    const Real&     curMass     = curParticle.mass();
+    
+    this->depositParticle(a_rho, 
+			  m_probLo, 
+			  m_dx, 
+			  curPosition, 
+			  curMass, 
+			  a_depositionType);
+  }
+}
+
+template <class P>
+void EbParticleInterp::deposit2(const List<P>& a_particleList, FArrayBox& a_rho, const DepositionType a_depositionType) const {
+  CH_TIME("EbParticleInterp::deposit2");
+  
+  for (ListIterator<P> lit(a_particleList); lit; ++lit){
+    const P&        curParticle = lit();
+    const RealVect& curPosition = curParticle.position();
+    const Real&     curMass     = curParticle.mass();
+    
+    this->depositParticle2(a_rho, 
+			   m_probLo, 
+			   m_dx, 
+			   curPosition, 
+			   curMass, 
+			   a_depositionType);
+  }
+}
+
+template <class P>
+void EbParticleInterp::deposit4(const List<P>& a_particleList, FArrayBox& a_rho, const DepositionType a_depositionType) const {
+  CH_TIME("EbParticleInterp::deposit4");
+  
+  for (ListIterator<P> lit(a_particleList); lit; ++lit){
+    const P&        curParticle = lit();
+    const RealVect& curPosition = curParticle.position();
+    const Real&     curMass     = curParticle.mass();
+    
+    this->depositParticle4(a_rho, 
+			   m_probLo, 
+			   m_dx, 
+			   curPosition, 
+			   curMass, 
+			   a_depositionType);
+  }
+}
+
+
 
 template <class P>
 void EbParticleInterp::interpolateDiffusion(List<P>&             a_particleList,
