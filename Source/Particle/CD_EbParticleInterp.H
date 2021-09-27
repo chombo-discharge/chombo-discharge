@@ -93,7 +93,7 @@ public:
   /*!
     @brief Interpolate a field onto the particle position. 
     @details This is just like regular particle-mesh interpolation except that it requires that the particle type P 
-    has a member function setDiffusion() and that a_diffusionField has exactly one component. 
+    has a member function Real& P::diffusion(). The field a_diffusionField must have exactly one component. 
     @param[inout] a_particleList   Particles to be interpolated. 
     @param[in]    a_diffusionField Diffusion "field". I.e. mesh data. 
     @param[in]    a_interpType     Interpolation type. 
@@ -106,7 +106,7 @@ public:
   /*!
     @brief Interpolate a field onto the particle position. 
     @details This is just like regular particle-mesh interpolation except that it requires that the particle type P 
-    has a member function setMobility() and that a_mobilityField has exactly one component. 
+    has a member function Real& P::mobility(). The field a_mobilityField must have exact one component. 
     @param[inout] a_particleList   Particles to be interpolated. 
     @param[in]    a_mobilityField  Mobility "field". I.e. mesh data. 
     @param[in]    a_interpType     Interpolation type. 
@@ -119,7 +119,7 @@ public:
   /*!
     @brief Interpolate a field onto the particle position. 
     @details This is just like regular particle-mesh interpolation except that it requires that the particle type P 
-    has a member function setVelocity() and that a_velocityField has SpaceDim components. 
+    has a member function RealVect& P::velocity(). The field a_velocityField must have exactly SpaceDim components. 
     @param[inout] a_particleList   Particles to be interpolated. 
     @param[in]    a_velocityField  Velocity field
     @param[in]    a_interpType     Interpolation type. 
@@ -132,7 +132,7 @@ public:
   /*!
     @brief Interpolate a field onto the particle position. 
     @details This is just like regular particle-mesh interpolation except that it requires that the particle type P 
-    has a member function setAcceleration() and that a_accelerationField has SpaceDim components. 
+    has a member function RealVect& P::acceleration(). The field a_accelerationField must have exact SpaceDim components. 
     @param[inout] a_particleList      Particles to be interpolated. 
     @param[in]    a_accelerationField Acceleration field
     @param[in]    a_interpType        Interpolation type. 
@@ -153,6 +153,7 @@ protected:
     @param[in]    a_strength       Mass (or similar quantity) to be deposited. 
     @param[in]    a_depositionType Deposition type
   */
+  inline
   void depositParticle(FArrayBox&           a_rho,
 		       const RealVect&      a_probLo,
 		       const RealVect&      a_dx,
@@ -168,7 +169,8 @@ protected:
     @param[in]    a_position       Particle position
     @param[in]    a_strength       Mass (or similar quantity) to be deposited. 
     @param[in]    a_depositionType Deposition type
-  */  
+  */
+  inline
   void depositParticle2(FArrayBox&           a_rho,
 			const RealVect&      a_probLo,
 			const RealVect&      a_dx,
@@ -184,7 +186,8 @@ protected:
     @param[in]    a_position       Particle position
     @param[in]    a_strength       Mass (or similar quantity) to be deposited. 
     @param[in]    a_depositionType Deposition type
-  */    
+  */
+  inline
   void depositParticle4(FArrayBox&           a_rho,
 			const RealVect&      a_probLo,
 			const RealVect&      a_dx,
