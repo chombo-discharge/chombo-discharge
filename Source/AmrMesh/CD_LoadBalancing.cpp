@@ -103,8 +103,10 @@ void LoadBalancing::gatherBoxes(Vector<Box>& a_boxes){
   }
   recv_buffer = recv_buf2;
 
-  delete recv_buffer;
-  delete send_buffer;
+  delete[] send_buffer;
+  delete[] send_counts;
+  delete[] offsets;
+  delete[] recv_buffer;
 #endif
 }
 
