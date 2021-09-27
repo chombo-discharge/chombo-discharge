@@ -854,12 +854,8 @@ void PhaseRealm::defineGhostCloud(const int a_lmin){
       const bool hasCoar = lvl > 0;
 
       if(hasCoar){
-	m_ghostclouds[lvl] = RefCountedPtr<EbGhostCloud> (new EbGhostCloud(m_grids  [lvl-1],
-									   m_grids  [lvl  ],
-									   *m_eblg  [lvl-1],
+	m_ghostclouds[lvl] = RefCountedPtr<EbGhostCloud> (new EbGhostCloud(*m_eblg  [lvl-1],
 									   *m_eblg  [lvl  ],
-									   m_domains[lvl-1],
-									   m_domains[lvl  ],
 									   m_refinementRatios[lvl-1],
 									   1,
 									   m_numGhostCells));

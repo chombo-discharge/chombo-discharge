@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_EbGhostCloud.H
-  @brief  A class for adding ghost cells from the fine level to the coarse level
+  @brief  A class for handling particle deposition clouds near refinement boundaries. 
   @author Robert Marskar
 */
 
@@ -21,52 +21,71 @@
 // Our includes
 #include <CD_NamespaceHeader.H>
 
+/*!
+  @brief A class for handling particle deposition clouds that hang over refinement boundaries. This class is not guaranteed to work with multi-cells. 
+  @details To use this class, the user can directly call addFineGhostsToCoarse to add the contribution of the fine level's particles to the coarse level. This
+  will add the part of the particle clouds that hang over the refinement boundary to the coarse level. Likewise, the user can get a buffer (getFiCoBuffer) for
+  getting a temporary data holder on which he can use special deposition procedures.
+  @todo This class currently does not work with multi-valued cells (like most of our particle code). Moreover, we actually refine the entire coarse level so that
+  users can deposit particles without moving them around. This allocates a lot of mesh data and we might want to reconsider the design of this class. Indeed, there
+  are other ways of doing this kind of deposition. 
+  @note This class does deposit correctly with multi-valued cells (all the mass will go into one of the VoFs). If your geometry has such cells -- you might want to refine them. 
+*/
 class EbGhostCloud {
 public:
 
   /*!
-    @brief Default constructor. Needs to call define
+    @brief Default constructor. Leaves object in undefined state and subsequently requires a call to define. 
   */
   EbGhostCloud();
 
   /*!
     @brief Full constructor. Calls define. 
+    @param[in] a_eblgCoar   Coarse grids
+    @param[in] a_eblgFine   Fine grids
+    @param[in] a_refRat     Refinement factory between levels
+    @param[in] a_nComp      Number of components allocated in buffer data holders. 
+    @param[in] a_ghost      Number of ghost cells in mesh data holders. 
   */
-  EbGhostCloud(const DisjointBoxLayout& a_gridsCoar,
-	       const DisjointBoxLayout& a_gridsFine,
-	       const EBLevelGrid&       a_eblgCoar,
+  EbGhostCloud(const EBLevelGrid&       a_eblgCoar,
 	       const EBLevelGrid&       a_eblgFine,
-	       const ProblemDomain&     a_domainCoar,
-	       const ProblemDomain&     a_domainFine,
-	       const int                a_ref_rat,
+	       const int                a_refRat,
 	       const int                a_nComp,
 	       const int                a_ghost);
 
   /*!
-    @brief Dtor
+    @brief Destructor (does nothing)
   */
   ~EbGhostCloud();
 
   /*!
     @brief Define function
+    @param[in] a_eblgCoar   Coarse grids
+    @param[in] a_eblgFine   Fine grids
+    @param[in] a_refRat     Refinement factory between levels
+    @param[in] a_nComp      Number of components allocated in buffer data holders. 
+    @param[in] a_ghost      Number of ghost cells in mesh data holders. 
   */
-  void define(const DisjointBoxLayout& a_gridsCoar,
-	      const DisjointBoxLayout& a_gridsFine,
-	      const EBLevelGrid&       a_eblgCoar,
+  void define(const EBLevelGrid&       a_eblgCoar,
 	      const EBLevelGrid&       a_eblgFine,
-	      const ProblemDomain&     a_domainCoar,
-	      const ProblemDomain&     a_domainFine,
-	      const int                a_ref_rat,
+	      const int                a_refRat,
 	      const int                a_nComp,
 	      const int                a_ghost);
 
   /*!
     @brief Coarsen the fine-level ghost cells and add them to the coarse level
+    @details On output, the contests in the ghost cells on the refinement boundary are added from the fine level to the coarse level. 
+    @param[inout] a_coarData Coarse mesh data. 
+    @param[in]    a_fineData Fine mesh data. 
   */
   void addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coarData, const LevelData<EBCellFAB>& a_fineData);
 
   /*!
     @brief Add the ghost cells on the refined coarse level to the fine level. 
+    @details During this procedure the user will have deposited the coarse-level particles onto a_fiCoData, which is the refined coarse data holder. This routine
+    will add the contents in that data holder onto the fine level. 
+    @param[inout] a_fineData Fine mesh data
+    @param[in]    a_fiCoData Refined coarse data buffer. Users will have deposited the mesh data onto this 
   */
   void addFiCoDataToFine(LevelData<EBCellFAB>& a_fineData, const BoxLayoutData<FArrayBox>& a_fiCoData);
 
