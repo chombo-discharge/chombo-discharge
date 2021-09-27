@@ -66,7 +66,7 @@ public:
     @note This routine will increment a_rho. 
   */
   template <class P>
-  void deposit(const List<P>& a_particleList, FArrayBox& a_rho, const DepositionType a_depositionType);
+  void deposit(const List<P>& a_particleList, FArrayBox& a_rho, const DepositionType a_depositionType) const;
 
   /*!
     @brief Deposit particle mass onto the mesh using twice the cloud width. 
@@ -77,7 +77,7 @@ public:
     @note This routine will increment a_rho. 
   */
   template <class P>
-  void deposit2(const List<P>& a_particleList, FArrayBox& a_rho, const DepositionType a_depositionType);
+  void deposit2(const List<P>& a_particleList, FArrayBox& a_rho, const DepositionType a_depositionType) const;
 
   /*!
     @brief Deposit particle mass onto the mesh using 4x the cloud width. 
@@ -88,7 +88,7 @@ public:
     @note This routine will increment a_rho. 
   */
   template <class P>
-  void deposit4(const List<P>& a_particleList, FArrayBox& a_rho, const DepositionType a_depositionType);
+  void deposit4(const List<P>& a_particleList, FArrayBox& a_rho, const DepositionType a_depositionType) const;
 
   /*!
     @brief Interpolate a field onto the particle position. 
@@ -101,7 +101,7 @@ public:
   template <class P>
   void interpolateDiffusion(List<P>&             a_particleList,
 			    const FArrayBox&     a_diffusionField,
-			    const DepositionType a_interpType);
+			    const DepositionType a_interpType) const;
 
   /*!
     @brief Interpolate a field onto the particle position. 
@@ -114,7 +114,7 @@ public:
   template <class P>
   void interpolateMobility(List<P>&             a_particleList,
 			   const FArrayBox&     a_mobilityField,
-			   const DepositionType a_interpType);
+			   const DepositionType a_interpType) const;
   
   /*!
     @brief Interpolate a field onto the particle position. 
@@ -127,7 +127,7 @@ public:
   template <class P>
   void interpolateVelocity(List<P>&             a_particleList,
 			   const FArrayBox&     a_velocityField,
-			   const DepositionType a_interpType);
+			   const DepositionType a_interpType) const;
 
   /*!
     @brief Interpolate a field onto the particle position. 
@@ -140,8 +140,45 @@ public:
   template <class P>
   void interpolateAcceleration(List<P>&             a_particleList,
 			       const FArrayBox&     a_accelerationField,
-			       const DepositionType a_interpType);
+			       const DepositionType a_interpType) const;
+
+  /*!
+    @brief Interpolate a vector field onto the particle position. 
+    @details This is just like regular particle-mesh interpolation. The input field should have exactly one component and the
+    the field will be interpolated onto the template parameter's input field. The template parameter 'particleScalar' should be a pointer
+    to a member function which will set the particle field. E.g. the function must have a signature Real& P::particleScalarField(). A valid
+    expression is e.g.
     
+        interpolate<Particle, &Particle::mass>(a_particleList, a_meshScalarField, a_interpType)
+	
+    To interpolate onto a different field, e.g. the acceleration field, use interpolate<Particle, &Particle::acceleration>, etc.
+    @param[inout] a_particleList    Particles to be interpolated. 
+    @param[in]    a_meshScalarField Scalar field on the mesh 
+    @param[in]    a_interpType      Interpolation type. 
+  */
+  template <class P, Real&(P::*particleScalarField)()>
+  void interpolate(List<P>&             a_particleList,
+		   const FArrayBox&     a_meshScalarField,
+		   const DepositionType a_interpType);  
+
+  /*!
+    @brief Interpolate a vector field onto the particle position. 
+    @details This is just like regular particle-mesh interpolation. The input field should have SpaceDim components and the
+    the field will be interpolated onto the template parameter's input field. The template parameter 'particleVectorField' should be a pointer
+    to a member function which will set the particle field. E.g. the function must have a signature RealVect& P::particleVectorField(). A valid 
+    expression is e.g.
+    
+        interpolate<Particle, &Particle::velocity>(a_particleList, a_meshVectorField, a_interpType)
+	
+    To interpolate onto a different field, e.g. the acceleration field, use interpolate<Particle, &Particle::acceleration>, etc.
+    @param[inout] a_particleList    Particles to be interpolated. 
+    @param[in]    a_meshVectorField Vector field on the mesh
+    @param[in]    a_interpType      Interpolation type. 
+  */
+  template <class P, RealVect&(P::*particleVectorField)()>
+  void interpolate(List<P>&             a_particleList,
+		   const FArrayBox&     a_meshVectorField,
+		   const DepositionType a_interpType);
 protected:
 
   /*!
@@ -159,7 +196,7 @@ protected:
 		       const RealVect&      a_dx,
 		       const RealVect&      a_position,
 		       const Real&          a_strength,
-		       const DepositionType a_depositionType);
+		       const DepositionType a_depositionType) const;
 
   /*!
     @brief Wrapper function for depositing a single particle which has twice the usual cloud width. 
@@ -176,7 +213,7 @@ protected:
 			const RealVect&      a_dx,
 			const RealVect&      a_position,
 			const Real&          a_strength,
-			const DepositionType a_interpType);
+			const DepositionType a_interpType) const;
 
   /*!
     @brief Wrapper function for depositing a single particle which has four times the usual cloud width.
@@ -193,7 +230,7 @@ protected:
 			const RealVect&      a_dx,
 			const RealVect&      a_position,
 			const Real&          a_strength,
-			const DepositionType a_interpType);
+			const DepositionType a_interpType) const;
   
   /*!
     @brief Wrapper function that interpolates a scalar field onto the particle position
@@ -204,12 +241,13 @@ protected:
     @param[in]  a_position       Particle position
     @param[in]  a_interpType     Interpolation type. 
   */
+  inline
   void interpolateParticle(Real&                a_particleField,
 			   const FArrayBox&     a_field,
 			   const RealVect&      a_probLo,
 			   const RealVect&      a_dx,
 			   const RealVect&      a_position,
-			   const DepositionType a_interpType);
+			   const DepositionType a_interpType) const;
 
   /*!
     @brief Wrapper function that interpolates a vector field onto the particle position
@@ -220,12 +258,13 @@ protected:
     @param[in]  a_position       Particle position
     @param[in]  a_interpType     Interpolation type. 
   */
+  inline
   void interpolateParticle(RealVect&            a_particleField,
 			   const FArrayBox&     a_field,
 			   const RealVect&      a_probLo,
 			   const RealVect&      a_dx,
 			   const RealVect&      a_position,
-			   const DepositionType a_interpType);
+			   const DepositionType a_interpType) const;
 
   /*!
     @brief Cell-centered box, i.e. valid region. 
