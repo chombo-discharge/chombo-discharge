@@ -783,6 +783,60 @@ void DataOps::divideByScalar(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCell
   }
 }
 
+void DataOps::divideFallback(EBAMRCellData& a_numerator, const EBAMRCellData& a_denominator, const EBAMRCellData& a_fallback) {
+  for (int lvl = 0; lvl < a_numerator.size(); lvl++){
+    DataOps::divideFallback(*a_numerator[lvl], *a_denominator[lvl], *a_fallback[lvl]);
+  }
+}
+
+void DataOps::divideFallback(LevelData<EBCellFAB>& a_numerator, const LevelData<EBCellFAB>& a_denominator, const LevelData<EBCellFAB>& a_fallback) {
+  CH_assert(a_numerator.nComp() == a_denominator.nComp());
+  CH_assert(a_numerator.nComp() == a_fallback.   nComp());
+  
+  for (DataIterator dit = a_numerator.dataIterator(); dit.ok(); ++dit){
+    EBCellFAB&       numerator   = a_numerator  [dit()];
+    const EBCellFAB& denominator = a_denominator[dit()];
+    const EBCellFAB& fallback    = a_fallback   [dit()];
+
+    BaseFab<Real>&       regNumerator   = numerator.  getSingleValuedFAB();
+    const BaseFab<Real>& regDenominator = denominator.getSingleValuedFAB();
+    const BaseFab<Real>& regFallback    = fallback.   getSingleValuedFAB();
+
+    const Box cellBox = a_numerator.disjointBoxLayout()[dit()];
+
+    // I need to clone the input data because the regular kernel will screw with it. 
+    EBCellFAB cloneNumerator;
+    cloneNumerator.clone(numerator);
+
+    // Regular cells    
+    for (int comp = 0; comp < a_numerator.nComp(); comp++){
+      FORT_DIVIDE_FALLBACK(CHF_FRA1      (regNumerator,   comp),
+			   CHF_CONST_FRA1(regDenominator, comp),
+			   CHF_CONST_FRA1(regFallback,    comp),
+			   CHF_BOX(cellBox));
+
+    }
+    
+    // Irregular cells
+    const EBISBox&   ebisBox  = numerator.getEBISBox();
+    const EBGraph&   ebGraph  = ebisBox.getEBGraph();
+    const IntVectSet irregIVS = ebisBox.getIrregIVS(cellBox);
+    for (VoFIterator vofit(irregIVS, ebGraph); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+
+      for (int comp = 0; comp < a_numerator.nComp(); comp++){
+	const Real denom = denominator(vof, comp);
+	if(std::abs(denom) > 0.0){
+	  numerator(vof, comp) = cloneNumerator(vof, comp)/denom;
+	}
+	else{
+	  numerator(vof, comp) = fallback(vof, comp);
+	}
+      }
+    }
+  }
+}
+
 void DataOps::floor(EBAMRCellData& a_lhs, const Real a_value){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
     DataOps::floor(*a_lhs[lvl], a_value);
