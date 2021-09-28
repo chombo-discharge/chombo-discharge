@@ -462,7 +462,7 @@ EBHelmholtzOp* EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, 
     const Real dx     = m_amrResolutions[amrLevel]*std::pow(mgRefRat, a_depth); // 
 
     auto domBC = m_domainBcFactory->create();
-    auto ebBC  = m_ebBcFactory->create();
+    auto ebBC  = m_ebBcFactory    ->create();
     
     mgOp = new EBHelmholtzOp(m_dataLocation,
 			     EBLevelGrid(), // Multigrid operator, so no fine. 
@@ -542,6 +542,9 @@ EBHelmholtzOp* EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
     CH_assert(eblgCoFi.isDefined());
   }
 
+  auto domainBC = m_domainBcFactory->create();
+  auto ebBC     = m_ebBcFactory    ->create();  
+
   op = new EBHelmholtzOp(m_dataLocation,
 			 eblgFine,
 			 eblg,
@@ -551,8 +554,8 @@ EBHelmholtzOp* EBHelmholtzOpFactory::AMRnewOp(const ProblemDomain& a_domain) {
 			 m_amrInterpolators[amrLevel],
 			 m_amrFluxRegisters[amrLevel],
 			 m_amrCoarseners[amrLevel],
-			 m_domainBcFactory->create(),
-			 m_ebBcFactory->create(),
+			 domainBC, 
+			 ebBC,
 			 m_probLo,			 
 			 dx,
 			 refToFine,
