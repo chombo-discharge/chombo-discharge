@@ -13,87 +13,102 @@
 #include <EBLevelDataOps.H>
 #include <memtrack.H>
 #include <memusage.H>
+#include <CH_Timer.H>
 
 // Our includes
 #include <CD_MemoryReport.H>
 #include <CD_NamespaceHeader.H>
 
 void MemoryReport::getMaxMinMemoryUsage(){
-  Real max_peak, min_peak, min_unfreed, max_unfreed;
+  CH_TIME("MemoryReport::getMaxMinMemoryUsage");
+  
+  Real maxPeak;
+  Real minPeak;
+  Real maxUnfreed;
+  Real minUnfreed;  
 
-  MemoryReport::getMaxMinMemoryUsage(max_peak, min_peak, min_unfreed, max_unfreed);
+  MemoryReport::getMaxMinMemoryUsage(maxPeak, minPeak, maxUnfreed, minUnfreed);
 
   pout() << "MemoryReport::getMaxMinMemoryUsage:" 
-	 << "\t max peak = "       << 1.0*max_peak
-	 << "\t min peak = "    << 1.0*min_peak
-	 << "\t max unfreed = " << 1.0*max_unfreed
-	 << "\t min unfreed = " << 1.0*min_unfreed << endl;
+	 << "\t Max peak = "    << 1.0*maxPeak
+	 << "\t Min peak = "    << 1.0*minPeak
+	 << "\t Max unfreed = " << 1.0*maxUnfreed
+	 << "\t Min unfreed = " << 1.0*minUnfreed << endl;
 }
 
-void MemoryReport::getMaxMinMemoryUsage(Real& a_max_peak, Real& a_min_peak, Real& a_min_unfreed, Real& a_max_unfreed){
-  int BytesPerMB = 1024*1024;
-  long long curMem;
-  long long peakMem;
-  overallMemoryUsage(curMem, peakMem);
+void MemoryReport::getMaxMinMemoryUsage(Real& a_maxPeak, Real& a_minPeak, Real& a_maxUnfreed, Real& a_minUnfreed){
+  CH_TIME("MemoryReport::getMaxMinMemoryUsage");
+  
+  constexpr int BytesPerMB = 1024*1024;
 
-  int unfreed_mem = curMem;
-  int peak_mem    = peakMem;
+  // Gets usage in bytes. 
+  long long curMemLL;
+  long long peakMemLL;
+  overallMemoryUsage(curMemLL, peakMemLL);
 
-  int max_unfreed_mem;
-  int max_peak_mem;
-  int min_unfreed_mem;
-  int min_peak_mem;
+  const int unfreedMem = int(curMemLL);
+  const int peakMem    = int(peakMemLL);
 
-#ifdef CH_USE_MPI
-  int result1 = MPI_Allreduce(&unfreed_mem, &max_unfreed_mem, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
-  int result2 = MPI_Allreduce(&peak_mem,    &max_peak_mem,    1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
-  int result3 = MPI_Allreduce(&unfreed_mem, &min_unfreed_mem, 1, MPI_INT, MPI_MIN, Chombo_MPI::comm);
-  int result4 = MPI_Allreduce(&peak_mem,    &min_peak_mem,    1, MPI_INT, MPI_MIN, Chombo_MPI::comm);
+  int maxPeakMem;
+  int minPeakMem;  
+  int maxUnfreedMem;  
+  int minUnfreedMem;
+
+  // Find maximum/minimum usage. 
+#ifdef CH_MPI
+  MPI_Allreduce(&peakMem,    &maxPeakMem,    1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
+  MPI_Allreduce(&peakMem,    &minPeakMem,    1, MPI_INT, MPI_MIN, Chombo_MPI::comm);  
+  MPI_Allreduce(&unfreedMem, &maxUnfreedMem, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
+  MPI_Allreduce(&unfreedMem, &minUnfreedMem, 1, MPI_INT, MPI_MIN, Chombo_MPI::comm);
 #else
-
-  max_unfreed_mem = unfreed_mem;
-  max_peak_mem    = peak_mem;
-  max_unfreed_mem = unfreed_mem;
-  min_peak_mem    = peak_mem;
+  maxUnfreedMem = unfreedMem;
+  maxPeakMem    = peakMem;
+  maxUnfreedMem = unfreedMem;
+  minPeakMem    = peakMem;
 #endif
 
-  a_max_peak    = 1.0*max_peak_mem/BytesPerMB;
-  a_min_peak    = 1.0*min_peak_mem/BytesPerMB;
-  a_max_unfreed = 1.0*max_unfreed_mem/BytesPerMB;
-  a_min_unfreed = 1.0*min_unfreed_mem/BytesPerMB;
+  // Convert to real. 
+  a_maxPeak    = 1.0*maxPeakMem   /BytesPerMB;
+  a_minPeak    = 1.0*minPeakMem   /BytesPerMB;
+  a_maxUnfreed = 1.0*maxUnfreedMem/BytesPerMB;
+  a_minUnfreed = 1.0*minUnfreedMem/BytesPerMB;
 }
 
 void MemoryReport::getMemoryUsage(Vector<Real>& a_peak, Vector<Real>& a_unfreed){
-  const int BytesPerMB = 1024*1024;
+  CH_TIME("MemoryReport::getMemoryUsage");
+  
+  constexpr int BytesPerMB = 1024*1024;
 
-  long long curMem, peakMem;
-  overallMemoryUsage(curMem, peakMem);
+  long long curMemLL;
+  long long peakMemLL;
+  overallMemoryUsage(curMemLL, peakMemLL);
 
-  int unfreed_mem = curMem;
-  int peak_mem    = peakMem;
+  const int unfreedMem = int(curMemLL);
+  const int peakMem    = int(peakMemLL);
 
 #ifdef CH_MPI
   int* unfreed = (int*) malloc(numProc()*sizeof(int));//new int[numProc()];
   int* peak    = (int*) malloc(numProc()*sizeof(int));//new int[numProc()];
 
-  MPI_Allgather(&peak_mem,    1, MPI_INT, peak,    1, MPI_INT, Chombo_MPI::comm);
-  MPI_Allgather(&unfreed_mem, 1, MPI_INT, unfreed, 1, MPI_INT, Chombo_MPI::comm);
+  MPI_Allgather(&peakMem,    1, MPI_INT, peak,    1, MPI_INT, Chombo_MPI::comm);
+  MPI_Allgather(&unfreedMem, 1, MPI_INT, unfreed, 1, MPI_INT, Chombo_MPI::comm);
 
-  a_peak.resize(numProc());
+  a_peak.   resize(numProc());
   a_unfreed.resize(numProc());
+  
   for (int i = 0; i < numProc(); i++){
-    a_peak[i]    = 1.0*peak[i]/BytesPerMB;
+    a_peak[i]    = 1.0*peak   [i]/BytesPerMB;
     a_unfreed[i] = 1.0*unfreed[i]/BytesPerMB;
   }
 
   delete unfreed;
   delete peak;
 #else
-  a_peak.resize(1);
+  a_peak.   resize(1);
   a_unfreed.resize(1);
 
-  a_peak[0] = peak_mem;
-  a_unfreed[0] = unfreed_mem;
+  a_peak   [0] = peakMem;
+  a_unfreed[0] = unfreedMem;
 #endif
 }
 
