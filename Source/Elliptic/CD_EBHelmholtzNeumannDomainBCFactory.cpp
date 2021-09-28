@@ -109,7 +109,7 @@ RefCountedPtr<EBHelmholtzDomainBC> EBHelmholtzNeumannDomainBCFactory::create() c
     }    
   }
 
-  return RefCountedPtr<EBHelmholtzNeumannDomainBC>(bc);
+  return RefCountedPtr<EBHelmholtzDomainBC>(bc);
 }
 
 #include <CD_NamespaceFooter.H>
