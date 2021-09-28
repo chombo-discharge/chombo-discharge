@@ -48,6 +48,16 @@ namespace Physics {
     public:
 
       /*!
+	@brief Enum for switching between source term computations. 'Interpolated' interpolates the cell-centered data
+	to cell centroids. Kappa-weighted assumes centroid-centered data, and Upwind uses the upwind formulation in Villa et. al. 
+      */
+      enum class SourceTermComputation {
+	Interpolated,
+	CellAverage,
+	Upwind
+      };
+
+      /*!
 	@brief Default function that is passed to mapped boundary conditions
       */
       static Real s_constant_one(const RealVect a_pos);
@@ -242,52 +252,71 @@ namespace Physics {
       /*!
 	@brief Compute reaction network sources. Irregular patch version.
       */
-      virtual void advanceReactionNetworkRegularCellsFastIrreg(Vector<EBCellFAB*>&          a_particle_sources,
-							       Vector<EBCellFAB*>&          a_Photon_sources,
-							       const Vector<EBCellFAB*>&    a_particle_densities,
-							       const Vector<EBCellFAB*>&    a_particle_gradients,
-							       const Vector<EBCellFAB*>&    a_particle_velocities,
-							       const Vector<EBCellFAB*>&    a_Photon_densities,
-							       const BaseIVFAB<VoFStencil>& a_interp_stencils,
-							       const EBCellFAB&             a_E,
-							       const Real&                  a_time,
-							       const Real&                  a_dt,
-							       const Real&                  a_dx,
-							       const Box&                   a_box,
-							       const int                    a_lvl,
-							       const DataIndex&             a_dit);
+      virtual void advanceReactionNetworkIrreg(Vector<EBCellFAB*>&          a_particle_sources,
+					       Vector<EBCellFAB*>&          a_Photon_sources,
+					       const Vector<EBCellFAB*>&    a_particle_densities,
+					       const Vector<EBCellFAB*>&    a_particle_gradients,
+					       const Vector<EBCellFAB*>&    a_particle_velocities,
+					       const Vector<EBCellFAB*>&    a_Photon_densities,
+					       const BaseIVFAB<VoFStencil>& a_interp_stencils,
+					       const EBCellFAB&             a_E,
+					       const Real&                  a_time,
+					       const Real&                  a_dt,
+					       const Real&                  a_dx,
+					       const Box&                   a_box,
+					       const int                    a_lvl,
+					       const DataIndex&             a_dit);
 
       /*!
 	@brief Compute reaction network sources. Irregular patch version.
       */
-      virtual void advanceReactionNetworkRegularCellsIrregInterp(Vector<EBCellFAB*>&          a_particle_sources,
-								 Vector<EBCellFAB*>&          a_Photon_sources,
-								 const Vector<EBCellFAB*>&    a_particle_densities,
-								 const Vector<EBCellFAB*>&    a_particle_gradients,
-								 const Vector<EBCellFAB*>&    a_particle_velocities,
-								 const Vector<EBCellFAB*>&    a_Photon_densities,
-								 const BaseIVFAB<VoFStencil>& a_interp_stencils,
-								 const EBCellFAB&             a_E,
-								 const Real&                  a_time,
-								 const Real&                  a_dt,
-								 const Real&                  a_dx,
-								 const Box&                   a_box,
-								 const int                    a_lvl,
-								 const DataIndex&             a_dit);
+      virtual void advanceReactionNetworkIrregInterp(Vector<EBCellFAB*>&          a_particle_sources,
+						     Vector<EBCellFAB*>&          a_Photon_sources,
+						     const Vector<EBCellFAB*>&    a_particle_densities,
+						     const Vector<EBCellFAB*>&    a_particle_gradients,
+						     const Vector<EBCellFAB*>&    a_particle_velocities,
+						     const Vector<EBCellFAB*>&    a_Photon_densities,
+						     const BaseIVFAB<VoFStencil>& a_interp_stencils,
+						     const EBCellFAB&             a_E,
+						     const Real&                  a_time,
+						     const Real&                  a_dt,
+						     const Real&                  a_dx,
+						     const Box&                   a_box,
+						     const int                    a_lvl,
+						     const DataIndex&             a_dit);
 
-      virtual void advanceReactionNetworkRegularCellsIrregKappa(Vector<EBCellFAB*>&          a_particle_sources,
-								Vector<EBCellFAB*>&          a_Photon_sources,
-								const Vector<EBCellFAB*>&    a_particle_densities,
-								const Vector<EBCellFAB*>&    a_particle_gradients,
-								const Vector<EBCellFAB*>&    a_Photon_densities,
-								const BaseIVFAB<VoFStencil>& a_interp_stencils,
-								const EBCellFAB&             a_E,
-								const Real&                  a_time,
-								const Real&                  a_dt,
-								const Real&                  a_dx,
-								const Box&                   a_box,
-								const int                    a_lvl,
-								const DataIndex&             a_dit);
+      virtual void advanceReactionNetworkIrregKappa(Vector<EBCellFAB*>&          a_particle_sources,
+						    Vector<EBCellFAB*>&          a_Photon_sources,
+						    const Vector<EBCellFAB*>&    a_particle_densities,
+						    const Vector<EBCellFAB*>&    a_particle_gradients,
+						    const Vector<EBCellFAB*>&    a_Photon_densities,
+						    const BaseIVFAB<VoFStencil>& a_interp_stencils,
+						    const EBCellFAB&             a_E,
+						    const Real&                  a_time,
+						    const Real&                  a_dt,
+						    const Real&                  a_dx,
+						    const Box&                   a_box,
+						    const int                    a_lvl,
+						    const DataIndex&             a_dit);
+      
+
+      /*!
+	@brief Compute reaction network sources. Uses upwinding of reaction terms. 
+      */
+      virtual void advanceReactionNetworkIrregUpwind(Vector<EBCellFAB*>&          a_particle_sources,
+						     Vector<EBCellFAB*>&          a_Photon_sources,
+						     const Vector<EBCellFAB*>&    a_particle_densities,
+						     const Vector<EBCellFAB*>&    a_particle_gradients,
+						     const Vector<EBCellFAB*>&    a_particle_velocities,
+						     const Vector<EBCellFAB*>&    a_Photon_densities,
+						     const BaseIVFAB<VoFStencil>& a_interp_stencils,
+						     const EBCellFAB&             a_E,
+						     const Real&                  a_time,
+						     const Real&                  a_dt,
+						     const Real&                  a_dx,
+						     const Box&                   a_box,
+						     const int                    a_lvl,
+						     const DataIndex&             a_dit);      
 
 
       /*!
@@ -755,11 +784,6 @@ namespace Physics {
       virtual void setFastPoisson(const int a_fast_poisson);
 
       /*!
-	@brief Set type of source term computation
-      */
-      virtual void setSourceComputation();
-
-      /*!
 	@brief Set hardcap on the time step
       */
       virtual void setMinDt(const Real a_min_dt);
@@ -1076,9 +1100,15 @@ namespace Physics {
       bool m_src_elec_only;
 
       /*!
-	@brief Interpolate source to centroids (or use volume-weighted in-cell stuff)
+	@brief Which source term computation
       */
-      bool m_interp_sources;
+      SourceTermComputation m_whichSourceTermComputation;
+
+      /*!
+	@brief Upwind factor
+      */
+      int m_upwindFactor;
+
 
       /*!
 	@brief Check if solver does subcyling. If it does, we need to tell AmrMesh to make some extra storage for us
