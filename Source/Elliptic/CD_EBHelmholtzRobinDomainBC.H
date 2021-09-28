@@ -36,7 +36,7 @@ public:
   /*!
     @brief Destructor
   */
-  ~EBHelmholtzRobinDomainBC();
+  virtual ~EBHelmholtzRobinDomainBC();
 
   /*!
     @brief Set constant coefficients
