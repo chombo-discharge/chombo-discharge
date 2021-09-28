@@ -167,8 +167,8 @@ void CdrTGA::setupDiffusionSolver(){
   // This is storage which is needed if we are doing an implicit diffusion solve. I know that not all
   // diffusion solves are implicit, but this is really the easiest way of 
   if(m_isDiffusive){
-    m_amr->allocate(m_zero, m_realm, m_phase, m_nComp);
-    m_amr->allocate(m_helmAcoef, m_realm, m_phase, 1);
+    m_amr->allocate(m_zero,      m_realm, m_phase, m_nComp);
+    m_amr->allocate(m_helmAcoef, m_realm, m_phase, m_nComp);
     
     DataOps::setValue(m_zero,      0.0);
     DataOps::setValue(m_helmAcoef, 1.0);
