@@ -954,6 +954,7 @@ void CdrPlasmaStepper::advanceReactionNetworkIrregInterp(Vector<EBCellFAB*>&    
     const Real        kappa   = ebisbox.volFrac(vof);
     const VoFStencil& stencil = a_interpStencils(vof, comp);
     const RealVect    pos     = m_amr->getProbLo() + Location::position(Location::Cell::Centroid, vof, ebisbox, a_dx);
+    const RealVect    normal  = ebisbox.normal(vof);
 
     // I assume that the electric field is on the cell center (which is what FieldSolverMultigrid currently does), but we do want the field on the centroid.
     E = RealVect::Zero;
@@ -983,12 +984,25 @@ void CdrPlasmaStepper::advanceReactionNetworkIrregInterp(Vector<EBCellFAB*>&    
     for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
       const int idx = solverIt.index();
 
-      cdrDensities[idx] = zero;
-      for (int i = 0; i < stencil.size(); i++){
-	cdrDensities[idx] += stencil.weight(i) * (*a_cdrDensities[idx])(stencil.vof(i), comp);
-      }
-      cdrDensities[idx] = std::max(cdrDensities[idx], zero);
 
+
+      cdrDensities[idx] = zero;
+      if(solverIt()->isMobile()){
+	const RealVect vel = RealVect(D_DECL((*a_cdrVelocities[idx])(vof, 0), (*a_cdrVelocities[idx])(vof, 1), (*a_cdrVelocities[idx])(vof, 2)));
+	
+	if(vel.dotProduct(normal) <= 0.0) { // Flow is out of phase and onto EB face (normal points into phase). 
+	  for (int i = 0; i < stencil.size(); i++){
+	    cdrDensities[idx] += stencil.weight(i) * (*a_cdrDensities[idx])(stencil.vof(i), comp);
+	  }
+	  cdrDensities[idx] = std::max(cdrDensities[idx], zero);
+	}
+      }
+      else{
+	for (int i = 0; i < stencil.size(); i++){
+	  cdrDensities[idx] += stencil.weight(i) * (*a_cdrDensities[idx])(stencil.vof(i), comp);
+	}
+	cdrDensities[idx] = std::max(cdrDensities[idx], zero);
+      }
 
 
       // Interpolate gradients to centroids.
