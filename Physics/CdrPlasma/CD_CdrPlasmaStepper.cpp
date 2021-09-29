@@ -281,6 +281,14 @@ void CdrPlasmaStepper::advanceReactionNetwork(Vector<EBAMRCellData*>&       a_pa
 			   lvl);
   }
 
+  // Release the extra allocated memory
+  if(m_whichSourceTermComputation == SourceTermComputation::Upwind){
+    for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+      const int idx = solverIt.index();
+      delete states[idx];
+    }
+  }  
+
 #if 0 // R.M. May/2020: This is not a good place to do this kind of averaging and interpolating. If need it, do it elsewhere.
   // Average down species
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
