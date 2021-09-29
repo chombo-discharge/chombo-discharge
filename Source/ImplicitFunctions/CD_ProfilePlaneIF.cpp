@@ -54,8 +54,6 @@ ProfilePlaneIF::ProfilePlaneIF(const RealVect  a_point,
   BaseIF* box = (BaseIF*) (new RoundedBoxIF(lo, hi, a_curv, false)); // Construct base box with fluid outside. 
   parts.push_back(box);
 
-
-
   // Left profile holes
   for (int ileft = 0; ileft < a_num_left; ileft++){
     TransformIF* transIF = new TransformIF(*a_impFunc);
@@ -76,7 +74,7 @@ ProfilePlaneIF::ProfilePlaneIF(const RealVect  a_point,
     parts.push_back(transIF);
   }
 
-  m_baseif = RefCountedPtr<BaseIF> (new SmoothUnion(parts, 2*a_curv));
+  m_baseif = RefCountedPtr<BaseIF> (new SmoothUnion(parts, a_curv));
 }
 
 ProfilePlaneIF::ProfilePlaneIF(const ProfilePlaneIF& a_inputIF){
