@@ -1197,7 +1197,13 @@ void CdrPlasmaStepper::advanceReactionNetworkIrregUpwind(Vector<EBCellFAB*>&    
       bool inflow = false;
       if(solverIt()->isMobile()){
 	const EBCellFAB& velo = *a_cdrVelocities[idx];
-	const RealVect v = RealVect(D_DECL(velo(vof,0), velo(vof,1), velo(vof,2)));
+
+	RealVect v = RealVect::Zero;
+	for (int i = 0; i < stencil.size(); i++){
+	  for (int dir = 0; dir < SpaceDim; dir++){
+	    v[dir] += stencil.weight(i) * velo(stencil.vof(i), dir);
+	  }
+	}
 	if(PolyGeom::dot(v,ebisbox.normal(vof)) > 0.0){ // Flow away from the boundary.
 	  inflow = true;
 	}
@@ -1211,8 +1217,6 @@ void CdrPlasmaStepper::advanceReactionNetworkIrregUpwind(Vector<EBCellFAB*>&    
 	}
 	cdrDensities[idx] = std::max(cdrDensities[idx], zero);
       }
-
-
 
       // Interpolate gradients to centroids.
       for (int i = 0; i < stencil.size(); i++){
