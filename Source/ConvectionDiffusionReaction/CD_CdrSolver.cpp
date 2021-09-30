@@ -2203,9 +2203,13 @@ void CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_p
 
     // Compute velocity on faces and EBs
     this->averageVelocityToFaces(m_faceVelocity, m_cellVelocity);
-    this->advectToFaces(m_faceStates, m_phi, 0.0);
+    this->advectToFaces(m_faceStates, m_phi, 0.0); // These are face centroid centered. 
 
     DataOps::setValue(m_scratch, 0.0); // Used to store sum(alpha*v)
+
+    EBAMRCellData zero;
+    m_amr->allocate(zero, m_realm, m_phase, m_nComp);
+    DataOps::setValue(zero, 0.0);
 
     // Grid loop. 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
@@ -2301,7 +2305,7 @@ void CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_p
     }
 
     // Divide. Use m_phi as a fallback option in case there were no inflow faces.
-    DataOps::divideFallback(a_weightedUpwindPhi, m_scratch, m_phi);
+    DataOps::divideFallback(a_weightedUpwindPhi, m_scratch, zero);
   }
   else{
     DataOps::copy(a_weightedUpwindPhi, m_phi);
