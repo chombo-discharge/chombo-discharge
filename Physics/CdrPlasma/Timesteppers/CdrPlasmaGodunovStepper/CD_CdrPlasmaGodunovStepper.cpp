@@ -733,7 +733,7 @@ void CdrPlasmaGodunovStepper::computeReactionNetwork(const Real a_dt){
       DataOps::floor(phi, 0.0);
     }
 
-#if 0
+#if 1
     if(m_floor){ // Should we floor or not? Usually a good idea, and you can monitor the (hopefully negligible) injected mass
       if(m_debug){
 	const Real mass_before = solver->computeMass();

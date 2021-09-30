@@ -2201,9 +2201,9 @@ void CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_p
     m_amr->averageDown(m_phi, m_realm, m_phase);
     m_amr->interpGhost(m_phi, m_realm, m_phase);        
 
-    // Compute velocity on faces and EBs
+    // Compute velocity on faces and EBs. The data is currently face-centered.
     this->averageVelocityToFaces(m_faceVelocity, m_cellVelocity);
-    this->advectToFaces(m_faceStates, m_phi, 0.0);
+    this->advectToFaces(m_faceStates, m_phi, 0.0); 
 
     DataOps::setValue(m_scratch, 0.0); // Used to store sum(alpha*v)
 
@@ -2247,7 +2247,8 @@ void CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_p
 			       CHF_BOX       (cellBox));
 	}
 
-	// Irregular cells. This is a bit more involved because we might also have multi-valued cells. 
+	// Irregular cells. This is a bit more involved. Note that we do want to compute everything at face centroids since
+	// that is the flux that makes its way into the cells anyways when we advect. 
 	VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
 	for (vofit.reset(); vofit.ok(); ++vofit){
 	  const VolIndex& vof = vofit();
@@ -2262,31 +2263,51 @@ void CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_p
 	    // Add contribution from cut-cell faces in the low side. Observe that if the upwind value of phi is outside the domain
 	    // then the "upwinded" value is just the cell-centered value. 
 	    for (int iface = 0; iface < facesLo.size(); iface++){
-	      const FaceIndex& faceLo = facesLo[iface];
-	      const VolIndex&  vofLo  = faceLo.getVoF(Side::Lo);
+	      const FaceIndex& faceLo   = facesLo[iface];
+	      const VolIndex&  vofLo    = faceLo.getVoF(Side::Lo);
+	      const Real       areaFrac = ebisBox.areaFrac(faceLo);
 
-	      const Real phiLo        = facePhi[dir](faceLo, m_comp);
-	      const Real velLo        = faceVel[dir](faceLo, m_comp);
-	      const Real areaFrac     = ebisBox.areaFrac(faceLo);
+	      const FaceStencil& interpSten = (*m_interpStencils[dir][lvl])[dit()](faceLo, m_comp);
+
+	      Real phiLo = 0.0;
+	      Real velLo = 0.0;
+
+	      for (int i = 0; i < interpSten.size(); i++){
+		const FaceIndex& interpFace   = interpSten.face(i);
+		const Real&      interpWeight = interpSten.weight(i);
+
+		phiLo += interpWeight * facePhi[dir](interpFace, m_comp);
+		velLo += interpWeight * faceVel[dir](interpFace, m_comp);		
+	      }
 
 	      if(velLo > 0.0){
-		sumWeight(vof, m_comp) += std::abs(std::pow(velLo, a_pow)) * areaFrac;
-		sumPhi   (vof, m_comp) += std::abs(std::pow(velLo, a_pow)) * areaFrac * phiLo;
+		sumWeight(vof, m_comp) += areaFrac * std::abs(std::pow(velLo, a_pow))        ;
+		sumPhi   (vof, m_comp) += areaFrac * std::abs(std::pow(velLo, a_pow)) * phiLo;
 	      }
 	    }
 
 	    // Add contribution from cut-cell faces on the high side. 
 	    for (int iface = 0; iface < facesHi.size(); iface++){
-	      const FaceIndex& faceHi = facesHi[iface];
-	      const VolIndex&  vofHi  = faceHi.getVoF(Side::Hi);
+	      const FaceIndex& faceHi   = facesHi[iface];
+	      const VolIndex&  vofHi    = faceHi.getVoF(Side::Hi);
+	      const Real       areaFrac = ebisBox.areaFrac(faceHi);
+	      
+	      const FaceStencil& interpSten = (*m_interpStencils[dir][lvl])[dit()](faceHi, m_comp);
 
-	      const Real phiHi        = facePhi[dir](faceHi, m_comp);	      
-	      const Real velHi        = faceVel[dir](faceHi, m_comp);
-	      const Real areaFrac     = ebisBox.areaFrac(faceHi);
+	      Real phiHi = 0.0;
+	      Real velHi = 0.0;
+
+	      for (int i = 0; i < interpSten.size(); i++){
+		const FaceIndex& interpFace   = interpSten.face(i);
+		const Real&      interpWeight = interpSten.weight(i);
+
+		phiHi += interpWeight * facePhi[dir](interpFace, m_comp);
+		velHi += interpWeight * faceVel[dir](interpFace, m_comp);		
+	      }
 
 	      if(velHi < 0.0){
-		sumWeight(vof, m_comp) += std::abs(std::pow(velHi, a_pow)) * areaFrac;
-		sumPhi   (vof, m_comp) += std::abs(std::pow(velHi, a_pow)) * areaFrac * phiHi;
+		sumWeight(vof, m_comp) += areaFrac * std::abs(std::pow(velHi, a_pow))        ;
+		sumPhi   (vof, m_comp) += areaFrac * std::abs(std::pow(velHi, a_pow)) * phiHi;
 	      }
 	    }
 	  }
@@ -2300,8 +2321,12 @@ void CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_p
       }
     }
 
-    // Divide. Use m_phi as a fallback option in case there were no inflow faces.
-    DataOps::divideFallback(a_weightedUpwindPhi, m_scratch, m_phi);
+    // Divide. Set to zero if there are no inflow faces. 
+    EBAMRCellData zero;
+    m_amr->allocate(zero, m_realm, m_phase, m_nComp);
+    DataOps::setValue(zero, 0.0);
+    
+    DataOps::divideFallback(a_weightedUpwindPhi, m_scratch, zero);
   }
   else{
     DataOps::copy(a_weightedUpwindPhi, m_phi);

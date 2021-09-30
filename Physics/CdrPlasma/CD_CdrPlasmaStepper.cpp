@@ -977,33 +977,15 @@ void CdrPlasmaStepper::advanceReactionNetworkIrregInterp(Vector<EBCellFAB*>&    
       rteIsotropicTerm[idx] = std::max(tmp, zero);
     }
 
-    // Compute cdr_densities and their gradients on centroids. Note that since we upwind, we check if the
-    // flow is into or away from the boundary. If the flow is away from the boundary we don't really have an upwind
-    // side so we set the density to zero in that case. This is not really captured by CdrSolver::weightedUpwind because
-    // the fallback option is to use the cell-centered value (this is correct, from a DataOps point of view). We fix that here. 
+    // Compute cdr_densities and their gradients on centroids.
     for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
       const int idx = solverIt.index();
 
-
-
       cdrDensities[idx] = zero;
-      if(solverIt()->isMobile()){
-	const RealVect vel = RealVect(D_DECL((*a_cdrVelocities[idx])(vof, 0), (*a_cdrVelocities[idx])(vof, 1), (*a_cdrVelocities[idx])(vof, 2)));
-	
-	if(vel.dotProduct(normal) <= 0.0) { // Flow is out of phase and onto EB face (normal points into phase). 
-	  for (int i = 0; i < stencil.size(); i++){
-	    cdrDensities[idx] += stencil.weight(i) * (*a_cdrDensities[idx])(stencil.vof(i), comp);
-	  }
-	  cdrDensities[idx] = std::max(cdrDensities[idx], zero);
-	}
+      for (int i = 0; i < stencil.size(); i++){
+	cdrDensities[idx] += stencil.weight(i) * (*a_cdrDensities[idx])(stencil.vof(i), comp);
       }
-      else{
-	for (int i = 0; i < stencil.size(); i++){
-	  cdrDensities[idx] += stencil.weight(i) * (*a_cdrDensities[idx])(stencil.vof(i), comp);
-	}
-	cdrDensities[idx] = std::max(cdrDensities[idx], zero);
-      }
-
+      cdrDensities[idx] = std::max(cdrDensities[idx], zero);
 
       // Interpolate gradients to centroids.
       for (int i = 0; i < stencil.size(); i++){
@@ -1215,7 +1197,13 @@ void CdrPlasmaStepper::advanceReactionNetworkIrregUpwind(Vector<EBCellFAB*>&    
       bool inflow = false;
       if(solverIt()->isMobile()){
 	const EBCellFAB& velo = *a_cdrVelocities[idx];
-	const RealVect v = RealVect(D_DECL(velo(vof,0), velo(vof,1), velo(vof,2)));
+
+	RealVect v = RealVect::Zero;
+	for (int i = 0; i < stencil.size(); i++){
+	  for (int dir = 0; dir < SpaceDim; dir++){
+	    v[dir] += stencil.weight(i) * velo(stencil.vof(i), dir);
+	  }
+	}
 	if(PolyGeom::dot(v,ebisbox.normal(vof)) > 0.0){ // Flow away from the boundary.
 	  inflow = true;
 	}
@@ -1229,8 +1217,6 @@ void CdrPlasmaStepper::advanceReactionNetworkIrregUpwind(Vector<EBCellFAB*>&    
 	}
 	cdrDensities[idx] = std::max(cdrDensities[idx], zero);
       }
-
-
 
       // Interpolate gradients to centroids.
       for (int i = 0; i < stencil.size(); i++){

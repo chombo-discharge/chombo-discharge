@@ -1,0 +1,21 @@
+      subroutine compute_relaxation_time(
+     &     chf_fra1[relax_time],
+     &     chf_const_fra1[electric_field],
+     &     chf_const_fra1[current_density],
+     &     chf_const_real[eps0],
+     &     chf_const_real[safety],     
+     &     chf_box[cell_box])
+
+      integer chf_ddecl[i;j;k]
+      real_t curDt
+
+      chf_multido[cell_box; i; j; k]
+         curDt = eps0 *  electric_field(chf_ix[i;j;k]) / (current_density(chf_ix[i;j;k]) + safety)
+         curDt = abs(curDt)	 
+
+         if(curDt < relax_time(chf_ix[i;j;k])) then
+            relax_time(chf_ix[i;j;k]) = curDt
+         endif
+      chf_enddo
+      return
+      end
