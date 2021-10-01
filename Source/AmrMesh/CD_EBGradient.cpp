@@ -19,7 +19,7 @@
 // Our includes
 #include <CD_Timer.H>
 #include <CD_EBGradient.H>
-#include <CD_gradientF_F.H>
+#include <CD_EBGradientF_F.H>
 #include <CD_LeastSquares.H>
 #include <CD_VofUtils.H>
 #include <CD_LoadBalancing.H>
@@ -70,6 +70,7 @@ EBGradient::EBGradient(const EBLevelGrid& a_eblg,
   // Define the level stencils. These are regular finite-difference stencils. 
   timer.startEvent("Define level stencils");
   this->defineLevelStencils();
+  this->defineFaceStencils();  
   timer.stopEvent("Define level stencils");
 
   // If there's finer level there might also be an EBCF crossing. Those can be tricky to deal with because
@@ -176,6 +177,42 @@ void EBGradient::computeLevelGradient(LevelData<EBCellFAB>&       a_gradient,
   }
 }
 
+void EBGradient::computeLevelGradient(LevelData<EBFluxFAB>&       a_gradient,
+				      const LevelData<EBCellFAB>& a_phi) const {
+  CH_TIME("EBGradient::computeLevelGradient");
+
+
+  CH_assert(a_gradient.nComp() == SpaceDim);
+  CH_assert(a_phi.     nComp() == 1       );
+
+  // TLDR: This routine computes the level gradient, i.e. using finite difference stencils isolated to this level.
+  
+  const DisjointBoxLayout& dbl   = m_eblg.getDBL();
+  const EBISLayout&        ebisl = m_eblg.getEBISL();
+
+  for (DataIterator dit(dbl); dit.ok(); ++dit){
+    const EBCellFAB& phi     = a_phi     [dit()];
+    const EBISBox&   ebisBox = ebisl     [dit()];        
+    const Box        cellBox = dbl       [dit()];
+
+    for (int dir = 0; dir < SpaceDim; dir++){
+      EBFaceFAB& grad = a_gradient[dit()][dir];
+
+      Box faceBox = cellBox;
+      faceBox.surroundingNodes(dir);
+
+      BaseFab<Real>&       regGradient = grad.getSingleValuedFAB();
+      const BaseFab<Real>& regPhi      = phi. getSingleValuedFAB();
+
+      FORT_FACEGRADIENT(CHF_FRA(regGradient),
+			CHF_CONST_FRA1(regPhi, m_comp),
+			CHF_CONST_INT(dir),
+			CHF_CONST_REAL(m_dx),
+			CHF_BOX(faceBox));
+    }
+  }
+}
+
 void EBGradient::computeAMRGradient(LevelData<EBCellFAB>&       a_gradient,
 				    const LevelData<EBCellFAB>& a_phi,
 				    const LevelData<EBCellFAB>& a_phiFine) const {
@@ -265,13 +302,15 @@ void EBGradient::defineLevelStencils(){
   const ProblemDomain&     domain = m_eblg.getDomain();
 
   m_levelStencils.define(dbl);
-  m_levelIterator.define(dbl);  
+  m_levelIterator.define(dbl);
 
   for (DataIterator dit(dbl); dit.ok(); ++dit){
     const Box      cellBox  = dbl  [dit()];
     const EBISBox& ebisbox  = ebisl[dit()];
     const EBGraph& ebgraph  = ebisbox.getEBGraph();
 
+
+    // Define the stencils for computing the 
     IntVectSet bndryIVS = ebisbox.getIrregIVS(cellBox);
     for (int dir = 0; dir < SpaceDim; dir++){
       Box loBox;
@@ -306,6 +345,153 @@ void EBGradient::defineLevelStencils(){
 	VoFStencil derivDirStencil;
 	EBArith::getFirstDerivStencilWidthOne(derivDirStencil, vof, ebisbox, dir, m_dx, nullptr, dir);
 	stencil += derivDirStencil;	
+      }
+    }
+  }
+}
+
+void EBGradient::defineFaceStencils(){
+  CH_TIME("EBGradient::defineFaceStencils");
+
+  // TLDR: This just defines finite-difference stencils for cut-cell faces. These are required because
+  //       the regular six-point stencil might not be available so we might need to drop order. 
+
+  const DisjointBoxLayout& dbl    = m_eblg.getDBL();
+  const EBISLayout&        ebisl  = m_eblg.getEBISL();
+  const ProblemDomain&     domain = m_eblg.getDomain();
+
+  for (int dir = 0; dir < SpaceDim; dir++){
+    LayoutData<BaseIFFAB<VoFStencil> >& faceStencils = m_faceStencils[dir];
+    LayoutData<FaceIterator>&           faceIterator = m_faceIterator[dir];
+
+    faceStencils.define(dbl);
+    faceIterator.define(dbl);    
+  }
+
+  for (DataIterator dit(dbl); dit.ok(); ++dit){
+    const Box      cellBox  = dbl  [dit()];
+    const EBISBox& ebisbox  = ebisl[dit()];
+    const EBGraph& ebgraph  = ebisbox.getEBGraph();
+      
+    // Define the stencils for computing the 
+    const IntVectSet irregIVS = ebisbox.getIrregIVS(cellBox);
+
+    for (int dir = 0; dir < SpaceDim; dir++){
+      FaceIterator&          faceIterator = m_faceIterator[dir][dit()];
+      BaseIFFAB<VoFStencil>& faceStencils = m_faceStencils[dir][dit()];
+      
+      faceIterator.define(irregIVS, ebgraph, dir, FaceStop::SurroundingNoBoundary);
+      faceStencils.define(irregIVS, ebgraph, dir, m_nComp);
+
+      for (faceIterator.reset(); faceIterator.ok(); ++faceIterator){
+	const FaceIndex& face = faceIterator();
+
+	VoFStencil& gradStencil = faceStencils(face, m_comp);
+	gradStencil.clear();
+
+	const VolIndex& vofHi = face.getVoF(Side::Hi);
+	const VolIndex& vofLo = face.getVoF(Side::Lo);
+
+	// Do the centered derivative directly on the face. This is the "normal" derivative which is just centered differencing.
+	gradStencil.add(vofHi,  1./m_dx, dir);
+	gradStencil.add(vofLo, -1./m_dx, dir);
+
+	// Do the tangential direction(s). This is a bit more complicated because while we know that a face will have vofs on each side, we don't necessarily
+	// have the corner cells available for computing the derivatives that are tangential to the face. So, we need to check if we can do centered differencing
+	// and, if we can't we drop order using forward/backward differencing. The first loop here is because I don't want to rewrite the code for 3D. We just go through
+	// all spatial directions and find a tangential dir which is not equal to the face normal.
+	for (int tanDir = 0; tanDir < SpaceDim; tanDir++){
+	  if(tanDir != dir){
+
+	    VoFStencil tanDerivHi;
+	    VoFStencil tanDerivLo;
+	    VoFStencil tanDeriv;
+
+	    // Formulate an approximation for the "tangential" derivative, i.e. derivative in direction tanDir, centered on vofHi and vofLo.
+	    const std::vector<VolIndex> vofsHiLo = ebisbox.getVoFs(vofHi, tanDir, Side::Lo, 1).stdVector();
+	    const std::vector<VolIndex> vofsHiHi = ebisbox.getVoFs(vofHi, tanDir, Side::Hi, 1).stdVector();
+
+	    const std::vector<VolIndex> vofsLoLo = ebisbox.getVoFs(vofLo, tanDir, Side::Lo, 1).stdVector();
+	    const std::vector<VolIndex> vofsLoHi = ebisbox.getVoFs(vofLo, tanDir, Side::Hi, 1).stdVector();
+	
+	    const int numHiLo = vofsHiLo.size();
+	    const int numHiHi = vofsHiHi.size();
+
+	    const int numLoLo = vofsLoLo.size();
+	    const int numLoHi = vofsLoHi.size();
+	    
+	    // Compute a finite differencing approximation to the derivative in direction tanDir, centering on vofHi.
+	    bool hasTanDerivHi = true;
+	    if(numHiLo > 0 && numHiHi > 0) {// Centered differencing. Have cells on both sides of vofHi. 
+	      for (const auto& v : vofsHiHi){
+		tanDerivHi.add(v,  1./(2.0*numHiHi*m_dx), tanDir);
+	      }
+	      for (const auto& v : vofsHiLo){
+		tanDerivHi.add(v, -1./(2.0*numHiLo*m_dx), tanDir);
+	      }	  
+	    }
+	    else if(numHiHi > 0){ // Forward differencing -- don't have VoFs on the low side of vofHi. 
+	      for (const auto& v : vofsHiHi){
+		tanDerivHi.add(v, 1./(numHiHi*m_dx), tanDir);
+	      }	  
+	      tanDerivHi.add(vofHi, -1./m_dx, tanDir);
+	    }
+	    else if(numHiLo > 0){ // Backward differencing -- don't have VoFs on the high side of vofLo. 
+	      tanDerivHi.add(vofHi, 1./m_dx, tanDir);	  
+	      for (const auto& v : vofsHiLo){
+		tanDerivHi.add(v, 1./(numHiLo*m_dx), tanDir);
+	      }
+	    }
+	    else{ // Can't compute a stencil. 
+	      hasTanDerivHi = false;
+	    }
+
+	    // Compute a finite differencing approximation to the derivative in direction tanDir, centering on vofLo.
+
+	    bool hasTanDerivLo = true;
+	    if(numLoHi > 0 && numLoLo > 0) {// Centered differencing. Have cells on both sides of vofLo.
+	      for (const auto& v : vofsLoHi){
+		tanDerivLo.add(v,  1./(2.0*numLoHi*m_dx), tanDir);
+	      }
+	      for (const auto& v : vofsHiLo){
+		tanDerivLo.add(v, -1./(2.0*numLoLo*m_dx), tanDir);
+	      }	  
+	    }
+	    else if(numLoHi > 0){ // Forward differencing -- don't have VoFs on the low side of vofLo but we have on high side. 
+	      for (const auto& v : vofsLoHi){
+		tanDerivLo.add(v, 1./(numLoHi*m_dx), tanDir);
+	      }	  
+	      tanDerivLo.add(vofLo, -1./m_dx, tanDir);
+	    }
+	    else if(numLoLo > 0){ // Backward differencing -- don't have VoFs on the high side of vofLo but we have on the low side. 
+	      tanDerivLo.add(vofLo, 1./m_dx, tanDir);
+	      for (const auto& v : vofsLoLo){
+		tanDerivLo.add(v, 1./(numLoLo*m_dx), tanDir);
+	      }
+	    }
+	    else{ // Can't compute a stencil. 
+	      hasTanDerivLo = false;
+	    }
+
+	    // Now compute the stencil for the tangential derivative, averaging the two stencils if we can or dropping to just one of the sides if we can't.
+	    if(hasTanDerivHi && hasTanDerivLo){
+	      tanDeriv += tanDerivHi;
+	      tanDeriv += tanDerivLo;
+	      tanDeriv *= 0.5;
+	    }
+	    else if(hasTanDerivHi){
+	      tanDeriv += tanDerivHi;
+	    }
+	    else if(hasTanDerivLo){
+	      tanDeriv += tanDerivLo;
+	    }
+	    else{ // No stencil on either side so we can't compute the derivative. 
+	      tanDeriv.clear(); 
+	    }
+
+	    gradStencil += tanDeriv;
+	  }
+	}
       }
     }
   }

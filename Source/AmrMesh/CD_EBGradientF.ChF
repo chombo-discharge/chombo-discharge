@@ -1,0 +1,97 @@
+#include "CONSTANTS.H"
+
+      subroutine gradient(
+     &     chf_fra[grad],
+     &     chf_const_fra1[phi],
+     &     chf_const_real[dx],
+     &     chf_box[region])
+
+
+      integer chf_ddecl[i;j;k]
+      real_t inv_2dx
+      integer spacedim, idir	
+
+      spacedim = CH_SPACEDIM
+
+      inv_2dx = 1.0/(2.0*dx)
+
+#if CH_SPACEDIM==3
+      do k=CHF_LBOUND[region;2], CHF_UBOUND[region;2]
+#endif
+        do j=CHF_LBOUND[region;1], CHF_UBOUND[region;1]
+           do i=CHF_LBOUND[region;0], CHF_UBOUND[region;0]
+               grad(chf_ix[i;j;k],0) = (phi(chf_ix[i+1;j  ;k  ]) - phi(chf_ix[i-1;j  ;k]  ))*inv_2dx
+               grad(chf_ix[i;j;k],1) = (phi(chf_ix[  i;j+1;k  ]) - phi(chf_ix[i  ;j-1;k  ]))*inv_2dx
+#if CH_SPACEDIM==3
+               grad(chf_ix[i;j;k],2) = (phi(chf_ix[i  ;j  ;k+1]) - phi(chf_ix[i  ;j  ;k-1]))*inv_2dx
+#endif
+           enddo
+      enddo
+#if CH_SPACEDIM==3
+      enddo
+#endif
+      
+      return
+      end
+
+      subroutine facegradient(
+     &     chf_fra[grad],
+     &     chf_const_fra1[phi],
+     &     chf_const_int[dir],     
+     &     chf_const_real[dx],
+     &     chf_box[facebox])
+
+
+      integer chf_ddecl[i;j;k]
+      integer chf_ddecl[ioff ; joff ; koff ]
+      integer chf_ddecl[ioff1; joff1; koff1]
+      integer chf_ddecl[ioff2; joff2; koff2]      
+      real_t inv_dx, inv_4dx, phiLo, phiHi
+      integer tanDir1, tanDir2
+
+c TLDR: This routine computes the face gradient using a 6-point stencil in 2D. On faces that are normal to the face direction
+c       we use centered differencing using the two cells on the opposite sides of the faces. For components that are tangential
+c       to the face direction we compute the tangential derivative on the two cell centers that connect the face. We then average
+c       those derivatives to obtain the value on the face. 
+
+c Offsets for face direction. 
+      chf_dterm[
+         ioff=chf_id(0, dir);
+         joff=chf_id(1, dir);
+         koff=chf_id(1, dir)]
+
+c Offsets for tangential directions
+      tanDir1 = mod(dir + 1, CH_SPACEDIM)
+      chf_dterm[
+         ioff1=chf_id(0, tanDir1);
+         joff1=chf_id(1, tanDir1);
+         koff1=chf_id(1, tanDir1)]
+	 
+#if CH_SPACEDIM==3
+      tanDir2 = mod(dir + 2, CH_SPACEDIM)
+      chf_dterm[
+         ioff2=chf_id(0, tanDir2);
+         joff2=chf_id(1, tanDir2);
+         koff2=chf_id(1, tanDir2)]      
+#endif	
+
+      inv_dx  = 1.0/dx
+      inv_4dx = 1.0/(4.0*dx)
+
+      chf_multido[facebox; i;j;k]
+         grad(chf_ix[i;j;k], dir) = inv_dx  * (phi(chf_ix[i;j;k]) - phi(chf_ix[i-ioff;j-joff;k-koff]))
+
+         phiHi = phi(chf_ix[i+ioff1     ; j+joff1     ; k+koff1     ]) + phi(chf_ix[i-ioff1     ; j-joff1     ; k-koff1     ])
+         phiLo = phi(chf_ix[i+ioff1-ioff; j+joff1-joff; k+koff1-koff]) + phi(chf_ix[i-ioff1-ioff; j-joff1-joff; k-koff1-koff])	 
+
+         grad(chf_ix[i;j;k], tanDir1) = inv_4dx * (phiHi - phiLo)
+
+#if CH_SPACEDIM==3
+         phiHi = phi(chf_ix[i+ioff2     ; j+joff2     ; k+koff2     ]) + phi(chf_ix[i-ioff2     ; j-joff2     ; k-koff2     ])
+         phiLo = phi(chf_ix[i+ioff2-ioff; j+joff2-joff; k+koff2-koff]) + phi(chf_ix[i-ioff2-ioff; j-joff2-joff; k-koff2-koff])	 
+
+         grad(chf_ix[i;j;k], tanDir2) = inv_4dx * (phiHi - phiLo)
+#endif
+      chf_enddo
+      return
+      end

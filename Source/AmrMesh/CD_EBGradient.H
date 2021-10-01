@@ -83,7 +83,15 @@ public:
     @param[in]  a_phi      Input scalar
   */
   void computeLevelGradient(LevelData<EBCellFAB>&       a_gradient,
-			    const LevelData<EBCellFAB>& a_phi) const;  
+			    const LevelData<EBCellFAB>& a_phi) const;
+
+  /*!
+    @brief Compute gradient using data on the input level only. 
+    @param[out] a_gradient Gradient of input scalar
+    @param[in]  a_phi      Input scalar
+  */
+  void computeLevelGradient(LevelData<EBFluxFAB>&       a_gradient,
+			    const LevelData<EBCellFAB>& a_phi) const;    
 
   /*!
     @brief Compute gradient using two-level stencils (matching at EBCF). 
@@ -189,6 +197,12 @@ protected:
   LayoutData<BaseIVFAB<VoFStencil> > m_levelStencils;
 
   /*!
+    @brief Stencils for cut-cell faces
+    @note Lives on the coarse layout.
+  */
+  LayoutData<BaseIFFAB<VoFStencil> > m_faceStencils[SpaceDim];
+
+  /*!
     @brief Part of EBCF gradient stencil which reaches into the coarse level. 
     @note Lives on the buffer layout. 
   */
@@ -205,6 +219,12 @@ protected:
     @note Lives on the coarse layout. 
   */
   mutable LayoutData<VoFIterator> m_levelIterator;
+
+  /*!
+    @brief Iterator for cut-cell faces. 
+    @note Lives on the coarse layout. 
+  */
+  mutable LayoutData<FaceIterator> m_faceIterator[SpaceDim];  
 
   /*!
     @brief Iterator for EBCF cells. 
@@ -245,6 +265,11 @@ protected:
     @brief Define level stencils. 
   */
   void defineLevelStencils();
+
+  /*!
+    @brief Define face stencils
+  */
+  void defineFaceStencils();  
 
   /*!
     @brief Make masks
