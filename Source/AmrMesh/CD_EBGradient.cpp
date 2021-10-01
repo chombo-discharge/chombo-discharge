@@ -170,10 +170,13 @@ void EBGradient::computeLevelGradient(LevelData<EBCellFAB>&       a_gradient,
       }
     }
     else{
-      for (int dir = 0; dir < SpaceDim; dir++){
-	grad.setCoveredCellVal(0.0, dir);
-      }
+      grad.setVal(0.0);
     }
+
+    // Covered data is bogus. 
+    for (int dir = 0; dir < SpaceDim; dir++){
+      a_gradient[dit()].setCoveredCellVal(0.0, dir);
+    }    
   }
 }
 
@@ -340,6 +343,8 @@ void EBGradient::computeAMRGradient(LevelData<EBCellFAB>&       a_gradient,
       }
     }
   }
+
+
 }
 
 void EBGradient::defineLevelStencils(){
