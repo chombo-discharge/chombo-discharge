@@ -224,7 +224,14 @@ protected:
     @brief Iterator for cut-cell faces. 
     @note Lives on the coarse layout. 
   */
-  mutable LayoutData<FaceIterator> m_faceIterator[SpaceDim];  
+    mutable LayoutData<FaceIterator> m_faceIterator[SpaceDim];
+  //  mutable std::map<int, LayoutData<FaceIterator> > m_faceIterator;
+
+  /*!
+    @brief Iterator for boundary faces
+    @note Lives on the coarse layout. 
+  */
+  mutable std::map<std::pair<int, Side::LoHiSide>, std::shared_ptr<LayoutData<FaceIterator> > > m_boundaryIterator;
 
   /*!
     @brief Iterator for EBCF cells. 

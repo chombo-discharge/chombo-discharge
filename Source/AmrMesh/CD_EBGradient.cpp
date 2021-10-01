@@ -187,8 +187,9 @@ void EBGradient::computeLevelGradient(LevelData<EBFluxFAB>&       a_gradient,
 
   // TLDR: This routine computes the level gradient, i.e. using finite difference stencils isolated to this level.
   
-  const DisjointBoxLayout& dbl   = m_eblg.getDBL();
-  const EBISLayout&        ebisl = m_eblg.getEBISL();
+  const DisjointBoxLayout& dbl    = m_eblg.getDBL();
+  const EBISLayout&        ebisl  = m_eblg.getEBISL();
+  const ProblemDomain&     domain = m_eblg.getDomain();
 
   for (DataIterator dit(dbl); dit.ok(); ++dit){
     const EBCellFAB& phi     = a_phi     [dit()];
@@ -198,17 +199,42 @@ void EBGradient::computeLevelGradient(LevelData<EBFluxFAB>&       a_gradient,
     for (int dir = 0; dir < SpaceDim; dir++){
       EBFaceFAB& grad = a_gradient[dit()][dir];
 
-      Box faceBox = cellBox;
-      faceBox.surroundingNodes(dir);
-
       BaseFab<Real>&       regGradient = grad.getSingleValuedFAB();
       const BaseFab<Real>& regPhi      = phi. getSingleValuedFAB();
+
+      regGradient.setVal(0.0);
+
+      // Do interior faces.
+      Box interiorFaces = cellBox;
+      interiorFaces.grow(dir, 1);
+      interiorFaces &= domain;
+      interiorFaces.grow(dir,-1);
+      interiorFaces.surroundingNodes(dir);
 
       FORT_FACEGRADIENT(CHF_FRA(regGradient),
 			CHF_CONST_FRA1(regPhi, m_comp),
 			CHF_CONST_INT(dir),
 			CHF_CONST_REAL(m_dx),
-			CHF_BOX(faceBox));
+			CHF_BOX(interiorFaces));
+
+      // Do interior cut-cell faces.
+      FaceIterator& faceIterator = m_faceIterator[dir][dit()];
+      for (faceIterator.reset(); faceIterator.ok(); ++faceIterator){
+	const FaceIndex&  face        = faceIterator();
+	const VoFStencil& gradStencil = m_faceStencils[dir][dit()](face, m_comp);
+
+	// Apply the stencil
+	grad(face, dir) = 0.0;
+	for (int i = 0; i < gradStencil.size(); i++){
+	  const VolIndex ivof    = gradStencil.vof(i);
+	  const Real     iweight = gradStencil.weight(i);
+	  const Real     ivar    = gradStencil.variable(i);
+
+	  if(ivar == dir){
+	    grad(face, dir) += iweight * phi(ivof, m_comp);
+	  }
+	}
+      }
     }
   }
 }
@@ -365,7 +391,10 @@ void EBGradient::defineFaceStencils(){
     LayoutData<FaceIterator>&           faceIterator = m_faceIterator[dir];
 
     faceStencils.define(dbl);
-    faceIterator.define(dbl);    
+    faceIterator.define(dbl);
+
+    m_boundaryIterator.emplace(std::make_pair(dir, Side::Lo), std::make_shared<LayoutData<FaceIterator> >(dbl));
+    m_boundaryIterator.emplace(std::make_pair(dir, Side::Hi), std::make_shared<LayoutData<FaceIterator> >(dbl));    
   }
 
   for (DataIterator dit(dbl); dit.ok(); ++dit){
@@ -386,6 +415,9 @@ void EBGradient::defineFaceStencils(){
       for (faceIterator.reset(); faceIterator.ok(); ++faceIterator){
 	const FaceIndex& face = faceIterator();
 
+	// Define stencils for faces. On interior faces we use a 6/10 point stencil where we use centered differencing on the face
+	// for the component that is normal to the face. The "tangential" directions are averaged. If the face is a boundary face
+	// then we use the value of the gradient in the cell abutting the domain.
 	VoFStencil& gradStencil = faceStencils(face, m_comp);
 	gradStencil.clear();
 
