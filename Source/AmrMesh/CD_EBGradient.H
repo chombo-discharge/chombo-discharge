@@ -107,6 +107,18 @@ public:
 			  const LevelData<EBCellFAB>& a_phiFine) const;
 
   /*!
+    @brief Compute gradient on face centers. 
+    @etails This routine will compute the gradient on both levels, and then coarsen the result onto the coarse level. 
+    @param[out] a_gradient Face-centered gradient of input scalar
+    @param[in]  a_phi      Input scalar
+    @param[in]  a_phiFine  Input scalar on finer level. 
+    @note This routine exists because the usual stencils on the coarse level might reach into data that has been inappropriately coarsened. 
+  */
+  void computeAMRGradient(LevelData<EBFluxFAB>&       a_gradient,
+			  const LevelData<EBCellFAB>& a_phi,
+			  const LevelData<EBCellFAB>& a_phiFine) const;  
+
+  /*!
     @brief Destructor (does nothing)
   */
   virtual ~EBGradient();
@@ -181,7 +193,12 @@ protected:
   /*!
     @brief Fine-grid buffers
   */
-  DisjointBoxLayout m_bufferDblFine;  
+  DisjointBoxLayout m_bufferDblFine;
+
+  /*!
+    @brief Coarsening of the fine grids
+  */
+  DisjointBoxLayout m_dblCoFi;
 
   /*!
     @brief Coarse EBISLayout buffer
@@ -192,6 +209,11 @@ protected:
     @brief Fine EBISLayout buffer
   */
   EBISLayout m_bufferEBISLFine;
+
+  /*!
+    @brief Coarsening of the fine grids
+  */
+  EBISLayout m_ebislCoFi;
 
   /*!
     @brief Stencils for boundaries and cut-cells
@@ -256,7 +278,17 @@ protected:
     @brief Buffer for putting fine-grid data on the buffer layout.
     @note Lives on the buffer layout. 
   */
-  mutable BoxLayoutData<EBCellFAB> m_bufferFine;  
+  mutable BoxLayoutData<EBCellFAB> m_bufferFine;
+
+  /*!
+    @brief Storage for computing the gradient on the fine level
+  */
+  mutable LevelData<EBFluxFAB> m_gradientFine;
+
+  /*!
+    @brief Storage for computing the gradient on the coarsened fine level
+  */
+  mutable LevelData<EBFluxFAB> m_gradientCoFi;  
 
   /*!
     @brief Storage for corrected gradient. 
@@ -278,7 +310,12 @@ protected:
   /*!
     @brief Define face stencils
   */
-  void defineFaceStencils();  
+  void defineFaceStencils();
+
+  /*!
+    @brief Define the coarsened fine grids and buffers
+  */
+  void defineCoFiGrids();
 
   /*!
     @brief Make masks
@@ -313,6 +350,10 @@ protected:
     @param[in] a_bufferCoarMaskInvalid Map of coarse cells that are covered by finer cells. 
   */
   void defineStencilsEBCF(const BoxLayoutData<FArrayBox>& a_bufferCoarMaskInvalid);
+
+  /*!
+    @brief Coarsen gradient from fine-faces onto coarse faces
+  */
 
   /*!
     @brief Get a finite difference stencil, assuming that the data is cell-centered

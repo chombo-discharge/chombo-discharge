@@ -998,6 +998,21 @@ void AmrMesh::computeGradient(LevelData<EBCellFAB>&       a_gradient,
   gradientOp->computeLevelGradient(a_gradient, a_phi);
 }
 
+void AmrMesh::computeGradient(LevelData<EBFluxFAB>&       a_gradient,
+			      const LevelData<EBCellFAB>& a_phi,
+			      const std::string           a_realm,
+			      const phase::which_phase    a_phase,
+			      const int                   a_lvl) const {
+  CH_TIME("AmrMesh::computeGradient(LD<EBFluxFAB>, LD<EBCellFAB>, string, phase::which_phase,int)");
+  if(m_verbosity > 5){
+    pout() << "AmrMesh::computeGradient(LD<EBFluxFAB>, LD<EBCellFAB>, string, phase::which_phase,int)" << endl;
+  }
+  
+  const RefCountedPtr<EBGradient>& gradientOp = m_realms[a_realm]->getGradientOp(a_phase)[a_lvl];
+  
+  gradientOp->computeLevelGradient(a_gradient, a_phi);
+}
+
 void AmrMesh::computeGradient(EBAMRCellData&           a_gradient,
 			      const EBAMRCellData&     a_phi,
 			      const std::string        a_realm,  
@@ -1005,6 +1020,33 @@ void AmrMesh::computeGradient(EBAMRCellData&           a_gradient,
   CH_TIME("AmrMesh::computeGradient(EBAMRCellData, EBAMRCellData, string, phase::which_phase)");
   if(m_verbosity > 5){
     pout() << "AmrMesh::computeGradient(EBAMRCellData, EBAMRCellData, string, phase::which_phase)" << endl;
+  }
+
+  CH_assert(a_gradient[0]->nComp() == SpaceDim);
+  CH_assert(a_phi     [0]->nComp() == 1       );
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++){
+
+    const RefCountedPtr<EBGradient>& gradientOp = m_realms[a_realm]->getGradientOp(a_phase)[lvl];
+
+    const bool hasFine = lvl < m_finestLevel;
+
+    if(hasFine){
+      gradientOp->computeAMRGradient(*a_gradient[lvl], *a_phi[lvl], *a_phi[lvl+1]);
+    }
+    else{
+      gradientOp->computeLevelGradient(*a_gradient[lvl], *a_phi[lvl]);
+    }
+  }
+}
+
+void AmrMesh::computeGradient(EBAMRFluxData&           a_gradient,
+			      const EBAMRCellData&     a_phi,
+			      const std::string        a_realm,  
+			      const phase::which_phase a_phase) const {
+  CH_TIME("AmrMesh::computeGradient(EBAMRFluxData, EBAMRCellData, string, phase::which_phase)");
+  if(m_verbosity > 5){
+    pout() << "AmrMesh::computeGradient(EBAMRFluxData, EBAMRCellData, string, phase::which_phase)" << endl;
   }
 
   CH_assert(a_gradient[0]->nComp() == SpaceDim);
@@ -1037,6 +1079,36 @@ void AmrMesh::computeGradient(MFAMRCellData& a_gradient, const MFAMRCellData& a_
 
     for (int lvl = 0; lvl <= m_finestLevel; lvl++){
       aliasGrad[lvl] = RefCountedPtr<LevelData<EBCellFAB> > (new LevelData<EBCellFAB>());
+      aliasPhi[lvl]  = RefCountedPtr<LevelData<EBCellFAB> > (new LevelData<EBCellFAB>());
+      
+      MultifluidAlias::aliasMF(*aliasGrad[lvl], iphase, *a_gradient[lvl]);
+      MultifluidAlias::aliasMF(*aliasPhi [lvl], iphase, *a_phi     [lvl]);
+
+      CH_assert(aliasGrad[lvl]->nComp() == SpaceDim);
+      CH_assert(aliasPhi [lvl]->nComp() == 1       );
+    }
+
+    if(iphase == 0){
+      this->computeGradient(aliasGrad, aliasPhi, a_realm, phase::gas);
+    }
+    else if(iphase == 1){
+      this->computeGradient(aliasGrad, aliasPhi, a_realm, phase::solid);
+    }
+  }
+}
+
+void AmrMesh::computeGradient(MFAMRFluxData& a_gradient, const MFAMRCellData& a_phi, const std::string a_realm) const {
+  CH_TIME("AmrMesh::computeGradient(MFAMRFluxData, MFAMRCellData, string)");
+  if(m_verbosity > 5){
+    pout() << "AmrMesh::computeGradient(MFAMRFluxData, MFAMRCellData, string)" << endl;
+  }
+
+  for (int iphase = 0; iphase < m_multifluidIndexSpace->numPhases(); iphase++){
+    EBAMRFluxData aliasGrad(1 + m_finestLevel);
+    EBAMRCellData aliasPhi (1 + m_finestLevel);
+
+    for (int lvl = 0; lvl <= m_finestLevel; lvl++){
+      aliasGrad[lvl] = RefCountedPtr<LevelData<EBFluxFAB> > (new LevelData<EBFluxFAB>());
       aliasPhi[lvl]  = RefCountedPtr<LevelData<EBCellFAB> > (new LevelData<EBCellFAB>());
       
       MultifluidAlias::aliasMF(*aliasGrad[lvl], iphase, *a_gradient[lvl]);

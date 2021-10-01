@@ -716,6 +716,24 @@ void DataOps::scale(LevelData<MFCellFAB>& a_lhs, const Real& a_scale){
   MFLevelDataOps::scale(a_lhs, a_scale);
 }
 
+void DataOps::scale(MFAMRFluxData& a_lhs, const Real& a_scale){
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++){
+    DataOps::scale(*a_lhs[lvl], a_scale);
+  }
+}
+
+void DataOps::scale(LevelData<MFFluxFAB>& a_lhs, const Real& a_scale) {
+  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
+    for (int iphase = 0; iphase < a_lhs[dit()].numPhases(); iphase++){
+      for (int dir = 0; dir < SpaceDim; dir++){
+	EBFaceFAB& lhs = a_lhs[dit()].getPhase(iphase)[dir];
+
+	lhs *= a_scale;
+      }
+    }
+  }
+}
+
 void DataOps::scale(EBAMRIVData& a_lhs, const Real& a_scale){
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
     DataOps::scale(*a_lhs[lvl], a_scale);

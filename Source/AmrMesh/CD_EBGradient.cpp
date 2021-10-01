@@ -11,8 +11,9 @@
 
 // Chombo includes
 #include <ParmParse.H>
-#include <EBCellFactory.H>
 #include <EBArith.H>
+#include <EBCellFactory.H>
+#include <EBFluxFactory.H>
 #include <BaseIVFactory.H>
 #include <CH_Timer.H>
 
@@ -107,6 +108,10 @@ EBGradient::EBGradient(const EBLevelGrid& a_eblg,
       timer.startEvent("EBCF stencils");
       this->defineStencilsEBCF(bufferCoarMaskInvalid);
       timer.stopEvent("EBCF stencils");
+
+      timer.startEvent("Define coarsened");
+      this->defineCoFiGrids();      
+      timer.stopEvent("Define coarsened");      
     }
   }
 
@@ -343,8 +348,27 @@ void EBGradient::computeAMRGradient(LevelData<EBCellFAB>&       a_gradient,
       }
     }
   }
+}
 
+void EBGradient::computeAMRGradient(LevelData<EBFluxFAB>&       a_gradient,
+				    const LevelData<EBCellFAB>& a_phi,
+				    const LevelData<EBCellFAB>& a_phiFine) const {
+  CH_TIME("EBGradient::computeAMRGradient(no finer)");
 
+  this->computeLevelGradient(a_gradient, a_phi);
+
+  // Do corrections near the EBCF. 
+  if(m_hasFine && m_hasEBCF){
+
+    // Compute the gradient on the fine level also, and then coarsen the result to the coarse-level faces
+    this->computeLevelGradient(m_gradientFine, a_phiFine);
+
+    // Coarsen the result onto the buffer
+    // this->coarsenBLABLABAL
+
+    // Copy the result to the input data holder
+    m_gradientCoFi.copyTo(a_gradient);
+  }
 }
 
 void EBGradient::defineLevelStencils(){
@@ -984,6 +1008,23 @@ void EBGradient::defineStencilsEBCF(const BoxLayoutData<FArrayBox>& a_bufferCoar
       }
     }
   }
+}
+
+void EBGradient::defineCoFiGrids(){
+  CH_TIME("EBGradient::defineCoFiGrids");
+
+  // Coarsen the grids and the EBIS. These buffers are for computing the gradient on the fine level and then coarsening the result
+  // to the coarse level. Because of that, we only need one ghost cell. 
+  const EBIndexSpace* const ebisPtr = m_eblg.getEBIS();  
+  coarsen(m_dblCoFi, m_eblgFine.getDBL(), m_refRat);
+  ebisPtr->fillEBISLayout(m_ebislCoFi, m_dblCoFi, m_eblg.getDomain(),  1);
+
+  // Create storage for the face-centered gradient on the fine level and the coarsened fine level
+  EBFluxFactory factoryFine(m_eblgFine.getEBISL());
+  EBFluxFactory factoryCoFi(m_ebislCoFi);
+
+  m_gradientFine.define(m_eblgFine.getDBL(), SpaceDim, IntVect::Unit, factoryFine);
+  m_gradientCoFi.define(m_dblCoFi          , SpaceDim, IntVect::Unit, factoryCoFi);  
 }
 
 bool EBGradient::getFiniteDifferenceStencil(VoFStencil&            a_stencil,
