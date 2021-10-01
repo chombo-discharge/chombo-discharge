@@ -37,6 +37,9 @@
   i.e., the gradient is a two-level stencil.
 
   Near the domain boundaries this routine switches to first order stencils. 
+  @details This class can compute a second order approximation to the gradient on face centers. In that case the gradient component which is parallel to the face
+  normal is computed using centered differencing. The tangential components are done using centered/forward/backward differencing on the adjacent cell centers, 
+  which are then interpolated to the face center. 
   @note If there is no finer level, this class will compute regular second-order stencils away from the EB and switch to compact width-one stencils if
   there are not enough cells available near the EB. 
   @note This class requires at least one ghost cell. 
@@ -200,7 +203,7 @@ protected:
     @brief Stencils for cut-cell faces
     @note Lives on the coarse layout.
   */
-  LayoutData<BaseIFFAB<VoFStencil> > m_faceStencils[SpaceDim];
+  std::map<int, std::shared_ptr<LayoutData<BaseIFFAB<VoFStencil> > > > m_faceStencils;
 
   /*!
     @brief Part of EBCF gradient stencil which reaches into the coarse level. 
@@ -224,8 +227,7 @@ protected:
     @brief Iterator for cut-cell faces. 
     @note Lives on the coarse layout. 
   */
-    mutable LayoutData<FaceIterator> m_faceIterator[SpaceDim];
-  //  mutable std::map<int, LayoutData<FaceIterator> > m_faceIterator;
+  mutable std::map<int, std::shared_ptr<LayoutData<FaceIterator> > > m_faceIterator;
 
   /*!
     @brief Iterator for boundary faces

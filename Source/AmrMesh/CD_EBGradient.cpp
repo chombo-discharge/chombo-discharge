@@ -218,10 +218,10 @@ void EBGradient::computeLevelGradient(LevelData<EBFluxFAB>&       a_gradient,
 			CHF_BOX(interiorFaces));
 
       // Do interior cut-cell faces.
-      FaceIterator& faceIterator = m_faceIterator[dir][dit()];
+      FaceIterator& faceIterator = (*m_faceIterator.at(dir))[dit()];
       for (faceIterator.reset(); faceIterator.ok(); ++faceIterator){
 	const FaceIndex&  face        = faceIterator();
-	const VoFStencil& gradStencil = m_faceStencils[dir][dit()](face, m_comp);
+	const VoFStencil& gradStencil = (*m_faceStencils.at(dir))[dit()](face, m_comp);
 
 	// Apply the stencil
 	grad(face, dir) = 0.0;
@@ -232,6 +232,31 @@ void EBGradient::computeLevelGradient(LevelData<EBFluxFAB>&       a_gradient,
 
 	  if(ivar == dir){
 	    grad(face, dir) += iweight * phi(ivof, m_comp);
+	  }
+	}
+      }
+
+      // Now do the boundary faces. On the boundary faces we fetch the stencil in the grid cell
+      // next to the boundary and compute the gradient component from thhere. 
+      for (SideIterator sit; sit.ok(); ++sit){
+	FaceIterator& bndryIterator = (*m_boundaryIterator.at(std::make_pair(dir, sit())))[dit()];
+
+	for (bndryIterator.reset(); bndryIterator.ok(); ++bndryIterator){
+	  const FaceIndex& face = bndryIterator();
+	  const VolIndex&  vof  = face.getVoF(sit());
+
+	  const VoFStencil& gradStencil = m_levelStencils[dit()](vof, m_comp);
+
+	  grad(face, dir) = 0.0;
+
+	  for (int i = 0; i < gradStencil.size(); i++){
+	    const VolIndex ivof    = gradStencil.vof(i);
+	    const Real     iweight = gradStencil.weight(i);
+	    const Real     ivar    = gradStencil.variable(i);
+	    
+	    if(ivar == dir){
+	      grad(face, dir) += iweight * phi(ivof, m_comp);
+	    }
 	  }
 	}
       }
@@ -387,14 +412,11 @@ void EBGradient::defineFaceStencils(){
   const ProblemDomain&     domain = m_eblg.getDomain();
 
   for (int dir = 0; dir < SpaceDim; dir++){
-    LayoutData<BaseIFFAB<VoFStencil> >& faceStencils = m_faceStencils[dir];
-    LayoutData<FaceIterator>&           faceIterator = m_faceIterator[dir];
-
-    faceStencils.define(dbl);
-    faceIterator.define(dbl);
-
+    m_faceStencils.    emplace(dir, std::make_shared<LayoutData<BaseIFFAB<VoFStencil> > >(dbl));
+    m_faceIterator.    emplace(dir, std::make_shared<LayoutData<FaceIterator>           >(dbl));
+    
     m_boundaryIterator.emplace(std::make_pair(dir, Side::Lo), std::make_shared<LayoutData<FaceIterator> >(dbl));
-    m_boundaryIterator.emplace(std::make_pair(dir, Side::Hi), std::make_shared<LayoutData<FaceIterator> >(dbl));    
+    m_boundaryIterator.emplace(std::make_pair(dir, Side::Hi), std::make_shared<LayoutData<FaceIterator> >(dbl));
   }
 
   for (DataIterator dit(dbl); dit.ok(); ++dit){
@@ -404,13 +426,20 @@ void EBGradient::defineFaceStencils(){
       
     // Define the stencils for computing the 
     const IntVectSet irregIVS = ebisbox.getIrregIVS(cellBox);
+    const IntVectSet allIVS   = IntVectSet         (cellBox);    
 
     for (int dir = 0; dir < SpaceDim; dir++){
-      FaceIterator&          faceIterator = m_faceIterator[dir][dit()];
-      BaseIFFAB<VoFStencil>& faceStencils = m_faceStencils[dir][dit()];
+      FaceIterator&          faceIterator     = (*m_faceIterator.    at(dir))[dit()];
+      BaseIFFAB<VoFStencil>& faceStencils     = (*m_faceStencils.    at(dir))[dit()];
       
+      FaceIterator&          bndryIteratorLo  = (*m_boundaryIterator.at(std::make_pair(dir, Side::Lo)))[dit()];
+      FaceIterator&          bndryIteratorHi  = (*m_boundaryIterator.at(std::make_pair(dir, Side::Hi)))[dit()];            						 
+
       faceIterator.define(irregIVS, ebgraph, dir, FaceStop::SurroundingNoBoundary);
       faceStencils.define(irregIVS, ebgraph, dir, m_nComp);
+
+      bndryIteratorLo.define(allIVS,   ebgraph, dir, FaceStop::LoBoundaryOnly);
+      bndryIteratorHi.define(allIVS,   ebgraph, dir, FaceStop::HiBoundaryOnly);            						       
 
       for (faceIterator.reset(); faceIterator.ok(); ++faceIterator){
 	const FaceIndex& face = faceIterator();
