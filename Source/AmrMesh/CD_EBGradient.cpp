@@ -13,7 +13,6 @@
 #include <ParmParse.H>
 #include <EBArith.H>
 #include <EBCellFactory.H>
-#include <EBFluxFactory.H>
 #include <BaseIVFactory.H>
 #include <CH_Timer.H>
 
@@ -335,8 +334,7 @@ void EBGradient::defineLevelStencils(){
     const EBISBox& ebisbox  = ebisl[dit()];
     const EBGraph& ebgraph  = ebisbox.getEBGraph();
 
-
-    // Define the stencils for computing the 
+    // Find cells where we need explicit stencils. 
     IntVectSet bndryIVS = ebisbox.getIrregIVS(cellBox);
     for (int dir = 0; dir < SpaceDim; dir++){
       Box loBox;
