@@ -99,6 +99,7 @@ public:
     @param[inout] a_coarData  Coarse data
     @param[in]    a_fineData  Fine data
     @param[in]    a_variables Variables to coarsen
+    @note Input data holders should be defined over the input grids. 
   */
   void averageFaceData(LevelData<EBFluxFAB>&       a_coarData,
 		       const LevelData<EBFluxFAB>& a_fineData,
@@ -122,7 +123,9 @@ protected:
 
 
   /*!
-    @brief Do an arithmetic average of face-centered data when coarsening
+    @brief Do an arithmetic average of face-centered data when coarsening. 
+    @details a_coarData will be replaced by an arithmetic average of a_fineData in regions where the 
+    fine grid covers the coarse grid. 
     @param[inout] a_coarData Coarse data
     @param[in] a_fineData    Fine data
     @param[in] a_datInd      Grid index
