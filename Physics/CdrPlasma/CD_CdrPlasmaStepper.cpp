@@ -1209,7 +1209,6 @@ void CdrPlasmaStepper::advanceReactionNetworkIrregUpwind(Vector<EBCellFAB*>&    
 	}
       }
 
-
       cdrDensities[idx] = zero;
       if(!inflow){
 	for (int i = 0; i < stencil.size(); i++){
@@ -2234,7 +2233,7 @@ void CdrPlasmaStepper::computeCdrDriftVelocities(Vector<EBAMRCellData*>&       a
   EBAMRCellData E;
   m_amr->allocate(E, m_realm, phase::gas, SpaceDim);
   DataOps::copy(E, a_E);
-  m_amr->interpToCentroids(E, m_realm, phase::gas);
+  //  m_amr->interpToCentroids(E, m_realm, phase::gas);
 
   for (int lvl = 0; lvl <= finest_level; lvl++){
 
@@ -2255,7 +2254,7 @@ void CdrPlasmaStepper::computeCdrDriftVelocities(Vector<EBAMRCellData*>&       a
     const int idx = solver_it.index();
     if(solver_it()->isMobile()){
       m_amr->averageDown(*a_velocities[idx], m_realm, m_cdr->getPhase()); 
-      m_amr->interpGhost(*a_velocities[idx], m_realm, m_cdr->getPhase()); 
+      m_amr->interpGhost(*a_velocities[idx], m_realm, m_cdr->getPhase());
     }
   }
 }

@@ -63,7 +63,6 @@ public:
     @brief Full constructor, assumes that there is a finer level. 
     @param[in] a_eblg         Grids
     @param[in] a_eblgFine     Fine grids
-    @param[in] a_dataLocation Interpration of data centering. 
     @param[in] a_dx           Resolution
     @param[in] a_refRat       Refinement ratio
     @param[in] a_order        Interpolation order for modified gradients. 
@@ -71,7 +70,6 @@ public:
   */
   EBGradient(const EBLevelGrid& a_eblg,
 	     const EBLevelGrid& a_eblgFine,
-	     const CellLocation a_dataLocation,
 	     const Real         a_dx,
 	     const int          a_refRat,
 	     const int          a_order,
@@ -83,7 +81,18 @@ public:
     @param[in]  a_phi      Input scalar
   */
   void computeLevelGradient(LevelData<EBCellFAB>&       a_gradient,
-			    const LevelData<EBCellFAB>& a_phi) const;  
+			    const LevelData<EBCellFAB>& a_phi) const;
+
+  /*!
+    @brief Compute the gradient component which is normal to the face, using centered differencing. 
+    @details If the face is oriented along dir, this computes the dir-component of the gradient using
+    centered differences on the face. This routine is useful after e.g. averaging a cell-centered gradient
+    to faces (in order to shrink the stencil). 
+    @param[inout] a_gradient Gradient of input scalar
+    @param[in]    a_phi      Input scalar
+  */
+  void computeNormalDerivative(LevelData<EBFluxFAB>& a_gradient,
+			       const LevelData<EBCellFAB>& a_phi) const;
 
   /*!
     @brief Compute gradient using two-level stencils (matching at EBCF). 
@@ -170,7 +179,7 @@ protected:
   /*!
     @brief Fine-grid buffers
   */
-  DisjointBoxLayout m_bufferDblFine;  
+  DisjointBoxLayout m_bufferDblFine;
 
   /*!
     @brief Coarse EBISLayout buffer
@@ -187,7 +196,7 @@ protected:
     @note Lives on the coarse layout. 
   */
   LayoutData<BaseIVFAB<VoFStencil> > m_levelStencils;
-
+  
   /*!
     @brief Part of EBCF gradient stencil which reaches into the coarse level. 
     @note Lives on the buffer layout. 
@@ -227,7 +236,7 @@ protected:
     @brief Buffer for putting fine-grid data on the buffer layout.
     @note Lives on the buffer layout. 
   */
-  mutable BoxLayoutData<EBCellFAB> m_bufferFine;  
+  mutable BoxLayoutData<EBCellFAB> m_bufferFine;
 
   /*!
     @brief Storage for corrected gradient. 

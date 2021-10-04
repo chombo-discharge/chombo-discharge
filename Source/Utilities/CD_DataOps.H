@@ -213,6 +213,10 @@ public:
 
   static void scale(LevelData<MFCellFAB>& a_lhs, const Real& a_scale);
 
+  static void scale(MFAMRFluxData& a_lhs, const Real& a_scale);
+
+  static void scale(LevelData<MFFluxFAB>& a_lhs, const Real& a_scale);  
+
   static void scale(EBAMRIVData& a_lhs, const Real& a_scale);
 
   static void scale(EBAMRCellData& a_lhs, const Real a_scale);

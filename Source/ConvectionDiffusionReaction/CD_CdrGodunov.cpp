@@ -141,17 +141,13 @@ void CdrGodunov::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_
   CH_assert(a_cellPhi[0]->nComp() == 1);
 
     // If we are extrapolating in time the source term will yield different states on the face centers. The source term is the source
-    // S^k + Div(D*Grad(Phi)), which we add to the solver below. It is stored on m_scratch (which won't be used elsewhere, I think). 
+    // S^k + Div(D*Grad(Phi)), which we add to the solver below. It is stored on m_scratch (which won't be used elsewhere, I think).
+  DataOps::setValue(m_scratch, 0.0);
   if(m_extrapolateSourceTerm && a_extrapDt > 0.0){
-    this->computeDivD(m_scratch, (EBAMRCellData&) a_cellPhi, false, false); // This will touch ghost cells in a_cellPhi, but those should be linearly interpolated anyways. 
-
     DataOps::incr(m_scratch, m_source, 1.0);
     
     m_amr->averageDown(m_scratch, m_realm, m_phase);
     m_amr->interpGhost(m_scratch, m_realm, m_phase);
-  }
-  else{
-    DataOps::setValue(m_scratch, 0.0);
   }
 
   // This code extrapolates the cell-centered state to face centers on every grid level, in both space and time. 

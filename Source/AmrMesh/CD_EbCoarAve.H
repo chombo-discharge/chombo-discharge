@@ -92,6 +92,19 @@ public:
 			   const LevelData<BaseIVFAB<Real> >& a_fineData,
 			   const Interval&                    a_variables);
 
+  /*!
+    @brief Do an arithmetic average of face data. 
+    @details a_coarData will be replaced by an arithmetic average of a_fineData in regions where the 
+    fine grid covers the coarse grid. 
+    @param[inout] a_coarData  Coarse data
+    @param[in]    a_fineData  Fine data
+    @param[in]    a_variables Variables to coarsen
+    @note Input data holders should be defined over the input grids. 
+  */
+  void averageFaceData(LevelData<EBFluxFAB>&       a_coarData,
+		       const LevelData<EBFluxFAB>& a_fineData,
+		       const Interval&             a_variables);  
+
 protected:
 
   /*!
@@ -109,7 +122,23 @@ protected:
 			      const Interval&        a_variables) const;
 
 
-
+  /*!
+    @brief Do an arithmetic average of face-centered data when coarsening. 
+    @details a_coarData will be replaced by an arithmetic average of a_fineData in regions where the 
+    fine grid covers the coarse grid. 
+    @param[inout] a_coarData Coarse data
+    @param[in] a_fineData    Fine data
+    @param[in] a_datInd      Grid index
+    @param[in] a_fineInterv  Fine interval
+    @param[in] a_coarInterv  Coarse interval
+    @param[in] a_dir         Face direction
+  */
+  void averageFaces(EBFaceFAB&       a_coarData,
+		    const EBFaceFAB& a_fineData,
+		    const DataIndex& a_datInd,
+		    const Interval&  a_fineInterv,
+		    const Interval&  a_coarInterv,
+		    const int&       a_dir);
 };
 
 #include <CD_NamespaceFooter.H>
