@@ -317,7 +317,7 @@ public:
     @param[in]  a_realm    Name of the realm where the data lives. 
     @param[in]  a_phase    Phase on which the data lives. 
     @note This routine will reach into ghost cells and across refinement boundaries. The user must make sure that 
-    ghost cells updated before using this routine. 
+    ghost cells are updated before using this routine. 
   */
   void computeGradient(EBAMRCellData&           a_gradient,
 		       const EBAMRCellData&     a_phi,
@@ -331,7 +331,7 @@ public:
     @param[in]  a_realm    Name of the realm where the data lives. 
     @param[in]  a_phase    Phase on which the data lives. 
     @note This routine will reach into ghost cells and across refinement boundaries. The user must make sure that 
-    ghost cells updated before using this routine. 
+    ghost cells are updated before using this routine. 
   */
   void computeGradient(EBAMRFluxData&           a_gradient,
 		       const EBAMRCellData&     a_phi,
@@ -344,7 +344,7 @@ public:
     @param[in]  a_phi      The scalar for which the gradient is computed. 
     @param[in]  a_realm    Name of the Realm where the data lives. 
     @note This routine will reach into ghost cells and across refinement boundaries. The user must make sure that 
-    ghost cells updated before using this routine. 
+    ghost cells are updated before using this routine. 
   */
   void computeGradient(MFAMRCellData& a_gradient, const MFAMRCellData& a_phi, const std::string a_realm) const;  
 
@@ -354,7 +354,7 @@ public:
     @param[in]  a_phi      The scalar for which the gradient is computed. 
     @param[in]  a_realm    Name of the Realm where the data lives. 
     @note This routine will reach into ghost cells and across refinement boundaries. The user must make sure that 
-    ghost cells updated before using this routine. 
+    ghost cells are updated before using this routine. 
   */
   void computeGradient(MFAMRFluxData& a_gradient, const MFAMRCellData& a_phi, const std::string a_realm) const;  
 
@@ -541,7 +541,7 @@ public:
 
   /*!
     @brief Average multifluid data over a realm. 
-    @details This computes an aarithmetic average. 
+    @details This computes an arithmetic average of the face data. Data on coarse faces is replaced by the arithmetic average of the fine face data. 
     @param[inout] a_data  Data to be coarsened.
     @param[in]    a_realm Realm name
   */
@@ -575,7 +575,7 @@ public:
 
   /*!
     @brief Average down on specific realm and phase. 
-    @details This computes an arithmetic average, i.e. a non-conservative average
+    @details This computes an arithmetic average of the face data. Data on coarse faces is replaced by the arithmetic average of the fine face data. 
     @param[inout] a_data  Data to be average.
     @param[in]    a_realm Realm name
     @param[in]    a_phase Phase (gas or solid)
