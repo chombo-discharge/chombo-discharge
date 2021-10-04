@@ -1334,22 +1334,6 @@ protected:
 		       const std::string           a_realm,
 		       const phase::which_phase    a_phase,
 		       const int                   a_lvl) const;
-
-  /*!
-    @brief Compute face-centered gradient for a grid level.
-    @param[out] a_gradient Face centered gradient. 
-    @param[in]  a_phi      The scalar for which the gradient is computed. 
-    @param[in]  a_realm    Name of the realm where the data lives. 
-    @param[in]  a_phase    Phase on which the data lives. 
-    @param[in]  a_lvl      Grid level where the data lives. 
-    @note This routine will reach into ghost cells and across refinement boundaries. The user must make sure that 
-    ghost cells updated before using this routine. 
-  */
-  void computeGradient(LevelData<EBFluxFAB>&       a_gradient,
-		       const LevelData<EBCellFAB>& a_phi,
-		       const std::string           a_realm,
-		       const phase::which_phase    a_phase,
-		       const int                   a_lvl) const;    
 };
 
 #include <CD_NamespaceFooter.H>

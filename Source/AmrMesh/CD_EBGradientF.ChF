@@ -149,3 +149,28 @@ c will be a 1D loop (over the refRat number of fine faces).
          gradCoar(chf_ix[icc; jcc; kcc]) = coarSum * refScale
       chf_enddo
       end
+
+      subroutine facenormalderivative(
+     &     chf_fra1[grad],
+     &     chf_const_fra1[phi],
+     &     chf_const_int[dir],     
+     &     chf_const_real[dx],
+     &     chf_box[interiorFaces])
+
+      integer chf_ddecl[i;   j;   k   ]
+      integer chf_ddecl[ioff;joff;koff]
+      real_t invDx
+
+      invDx = one/dx
+
+      CHF_DTERM[
+         ioff = chf_id(dir, 0);
+         joff = chf_id(dir, 1);
+         koff = chf_id(dir, 2)]    
+
+      chf_multido[interiorFaces; i; j; k]
+         grad(chf_ix[i;j;k]) = invDx * (phi(chf_ix[i;j;k]) - phi(chf_ix[i-ioff;j-joff;k-koff]))
+      chf_enddo
+      
+      return
+      end

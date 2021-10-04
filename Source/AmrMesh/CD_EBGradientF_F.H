@@ -98,6 +98,37 @@ inline void FORTRAN_NAME(inlineCOARSENFACEGRADIENT, inlineCOARSENFACEGRADIENT)(
 }
 #endif  // GUARDCOARSENFACEGRADIENT 
 
+#ifndef GUARDFACENORMALDERIVATIVE 
+#define GUARDFACENORMALDERIVATIVE 
+// Prototype for Fortran procedure facenormalderivative ...
+//
+void FORTRAN_NAME( FACENORMALDERIVATIVE ,facenormalderivative )(
+      CHFp_FRA1(grad)
+      ,CHFp_CONST_FRA1(phi)
+      ,CHFp_CONST_INT(dir)
+      ,CHFp_CONST_REAL(dx)
+      ,CHFp_BOX(interiorFaces) );
+
+#define FORT_FACENORMALDERIVATIVE FORTRAN_NAME( inlineFACENORMALDERIVATIVE, inlineFACENORMALDERIVATIVE)
+#define FORTNT_FACENORMALDERIVATIVE FORTRAN_NAME( FACENORMALDERIVATIVE, facenormalderivative)
+
+inline void FORTRAN_NAME(inlineFACENORMALDERIVATIVE, inlineFACENORMALDERIVATIVE)(
+      CHFp_FRA1(grad)
+      ,CHFp_CONST_FRA1(phi)
+      ,CHFp_CONST_INT(dir)
+      ,CHFp_CONST_REAL(dx)
+      ,CHFp_BOX(interiorFaces) )
+{
+ CH_TIMELEAF("FORT_FACENORMALDERIVATIVE");
+ FORTRAN_NAME( FACENORMALDERIVATIVE ,facenormalderivative )(
+      CHFt_FRA1(grad)
+      ,CHFt_CONST_FRA1(phi)
+      ,CHFt_CONST_INT(dir)
+      ,CHFt_CONST_REAL(dx)
+      ,CHFt_BOX(interiorFaces) );
+}
+#endif  // GUARDFACENORMALDERIVATIVE 
+
 }
 
 #endif

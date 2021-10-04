@@ -25,6 +25,7 @@
 #include <CD_Timer.H>
 #include <CD_DomainFluxIFFABFactory.H>
 #include <CD_TiledMeshRefine.H>
+#include <CD_DataOps.H>
 #include <CD_NamespaceHeader.H>
 
 AmrMesh::AmrMesh(){
@@ -998,21 +999,6 @@ void AmrMesh::computeGradient(LevelData<EBCellFAB>&       a_gradient,
   gradientOp->computeLevelGradient(a_gradient, a_phi);
 }
 
-void AmrMesh::computeGradient(LevelData<EBFluxFAB>&       a_gradient,
-			      const LevelData<EBCellFAB>& a_phi,
-			      const std::string           a_realm,
-			      const phase::which_phase    a_phase,
-			      const int                   a_lvl) const {
-  CH_TIME("AmrMesh::computeGradient(LD<EBFluxFAB>, LD<EBCellFAB>, string, phase::which_phase,int)");
-  if(m_verbosity > 5){
-    pout() << "AmrMesh::computeGradient(LD<EBFluxFAB>, LD<EBCellFAB>, string, phase::which_phase,int)" << endl;
-  }
-  
-  const RefCountedPtr<EBGradient>& gradientOp = m_realms[a_realm]->getGradientOp(a_phase)[a_lvl];
-  
-  gradientOp->computeLevelGradient(a_gradient, a_phi);
-}
-
 void AmrMesh::computeGradient(EBAMRCellData&           a_gradient,
 			      const EBAMRCellData&     a_phi,
 			      const std::string        a_realm,  
@@ -1052,18 +1038,19 @@ void AmrMesh::computeGradient(EBAMRFluxData&           a_gradient,
   CH_assert(a_gradient[0]->nComp() == SpaceDim);
   CH_assert(a_phi     [0]->nComp() == 1       );
 
+  EBAMRCellData scratch;
+  this->allocate(scratch, a_realm, a_phase, SpaceDim);
+  this->computeGradient(scratch, a_phi, a_realm, a_phase);
+
+  this->averageDown(scratch, a_realm, a_phase);
+  this->interpGhost(scratch, a_realm, a_phase);
+
+  DataOps::averageCellToFace(a_gradient, scratch, this->getDomains());
+
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
-
     const RefCountedPtr<EBGradient>& gradientOp = m_realms[a_realm]->getGradientOp(a_phase)[lvl];
-
-    const bool hasFine = lvl < m_finestLevel;
-
-    if(hasFine){
-      gradientOp->computeAMRGradient(*a_gradient[lvl], *a_phi[lvl], *a_phi[lvl+1]);
-    }
-    else{
-      gradientOp->computeLevelGradient(*a_gradient[lvl], *a_phi[lvl]);
-    }
+    
+    gradientOp->computeNormalDerivative(*a_gradient[lvl], *a_phi[lvl]);
   }
 }
 

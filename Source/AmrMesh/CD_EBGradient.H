@@ -87,12 +87,15 @@ public:
 			    const LevelData<EBCellFAB>& a_phi) const;
 
   /*!
-    @brief Compute gradient using data on the input level only. 
-    @param[out] a_gradient Gradient of input scalar
-    @param[in]  a_phi      Input scalar
+    @brief Compute the gradient component which is normal to the face.
+    @details If the face is oriented along dir, this computes the dir-component of the gradient using
+    centered differences on the face. This routine is useful after e.g. averaging a cell-centered gradient
+    to faces. 
+    @param[inout] a_gradient Gradient of input scalar
+    @param[in]    a_phi      Input scalar
   */
-  void computeLevelGradient(LevelData<EBFluxFAB>&       a_gradient,
-			    const LevelData<EBCellFAB>& a_phi) const;    
+  void computeNormalDerivative(LevelData<EBFluxFAB>& a_gradient,
+			       const LevelData<EBCellFAB>& a_phi) const;
 
   /*!
     @brief Compute gradient using two-level stencils (matching at EBCF). 
@@ -103,18 +106,6 @@ public:
   void computeAMRGradient(LevelData<EBCellFAB>&       a_gradient,
 			  const LevelData<EBCellFAB>& a_phi,
 			  const LevelData<EBCellFAB>& a_phiFine) const;
-
-  /*!
-    @brief Compute gradient on face centers. 
-    @etails This routine will compute the gradient on both levels, and then coarsen the result onto the coarse level. 
-    @param[out] a_gradient Face-centered gradient of input scalar
-    @param[in]  a_phi      Input scalar
-    @param[in]  a_phiFine  Input scalar on finer level. 
-    @note This routine exists because the usual stencils on the coarse level might reach into data that has been inappropriately coarsened. 
-  */
-  void computeAMRGradient(LevelData<EBFluxFAB>&       a_gradient,
-			  const LevelData<EBCellFAB>& a_phi,
-			  const LevelData<EBCellFAB>& a_phiFine) const;  
 
   /*!
     @brief Destructor (does nothing)
@@ -194,11 +185,6 @@ protected:
   DisjointBoxLayout m_bufferDblFine;
 
   /*!
-    @brief Coarsening of the fine grids
-  */
-  DisjointBoxLayout m_dblCoFi;
-
-  /*!
     @brief Coarse EBISLayout buffer
   */
   EBISLayout m_bufferEBISLCoar;
@@ -209,22 +195,11 @@ protected:
   EBISLayout m_bufferEBISLFine;
 
   /*!
-    @brief Coarsening of the fine grids
-  */
-  EBISLayout m_ebislCoFi;
-
-  /*!
     @brief Stencils for boundaries and cut-cells
     @note Lives on the coarse layout. 
   */
   LayoutData<BaseIVFAB<VoFStencil> > m_levelStencils;
-
-  /*!
-    @brief Stencils for cut-cell faces
-    @note Lives on the coarse layout.
-  */
-  std::map<int, std::shared_ptr<LayoutData<BaseIFFAB<VoFStencil> > > > m_faceStencils;
-
+  
   /*!
     @brief Part of EBCF gradient stencil which reaches into the coarse level. 
     @note Lives on the buffer layout. 
@@ -279,16 +254,6 @@ protected:
   mutable BoxLayoutData<EBCellFAB> m_bufferFine;
 
   /*!
-    @brief Storage for computing the gradient on the fine level
-  */
-  mutable LevelData<EBFluxFAB> m_gradientFine;
-
-  /*!
-    @brief Storage for computing the gradient on the coarsened fine level
-  */
-  mutable LevelData<EBFluxFAB> m_gradientCoFi;  
-
-  /*!
     @brief Storage for corrected gradient. 
     @note Lives on the coarse layout. 
   */
@@ -309,11 +274,6 @@ protected:
     @brief Define face stencils
   */
   void defineFaceStencils();
-
-  /*!
-    @brief Define the coarsened fine grids and buffers
-  */
-  void defineCoFiGrids();
 
   /*!
     @brief Make masks

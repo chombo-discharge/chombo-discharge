@@ -70,7 +70,6 @@ EBGradient::EBGradient(const EBLevelGrid& a_eblg,
   // Define the level stencils. These are regular finite-difference stencils. 
   timer.startEvent("Define level stencils");
   this->defineLevelStencils();
-  this->defineFaceStencils();  
   timer.stopEvent("Define level stencils");
 
   // If there's finer level there might also be an EBCF crossing. Those can be tricky to deal with because
@@ -107,10 +106,6 @@ EBGradient::EBGradient(const EBLevelGrid& a_eblg,
       timer.startEvent("EBCF stencils");
       this->defineStencilsEBCF(bufferCoarMaskInvalid);
       timer.stopEvent("EBCF stencils");
-
-      timer.startEvent("Define coarsened");
-      this->defineCoFiGrids();      
-      timer.stopEvent("Define coarsened");      
     }
   }
 
@@ -184,88 +179,61 @@ void EBGradient::computeLevelGradient(LevelData<EBCellFAB>&       a_gradient,
   }
 }
 
-void EBGradient::computeLevelGradient(LevelData<EBFluxFAB>&       a_gradient,
-				      const LevelData<EBCellFAB>& a_phi) const {
-  CH_TIME("EBGradient::computeLevelGradient");
-
+void EBGradient::computeNormalDerivative(LevelData<EBFluxFAB>& a_gradient,
+					 const LevelData<EBCellFAB>& a_phi) const {
+  CH_TIME("EBGradient::computeNormalDerivative");
 
   CH_assert(a_gradient.nComp() == SpaceDim);
   CH_assert(a_phi.     nComp() == 1       );
 
-  // TLDR: This routine computes the level gradient, i.e. using finite difference stencils isolated to this level.
-  
+
+  // TLDR: This routine computes the level gradient, i.e. using finite difference stencils isolated to this level. It only does this for interior
+  // faces, and it only computes the component of the gradient that is normal to the face. 
   const DisjointBoxLayout& dbl    = m_eblg.getDBL();
   const EBISLayout&        ebisl  = m_eblg.getEBISL();
   const ProblemDomain&     domain = m_eblg.getDomain();
 
   for (DataIterator dit(dbl); dit.ok(); ++dit){
-    const EBCellFAB& phi     = a_phi     [dit()];
-    const EBISBox&   ebisBox = ebisl     [dit()];        
-    const Box        cellBox = dbl       [dit()];
+    const EBCellFAB& phi     = a_phi[dit()];
+    const EBISBox&   ebisBox = ebisl[dit()];
+    const Box        cellBox = dbl  [dit()];
+
+    const EBGraph&   ebgraph = ebisBox.getEBGraph();
 
     for (int dir = 0; dir < SpaceDim; dir++){
       EBFaceFAB& grad = a_gradient[dit()][dir];
-
+      
       BaseFab<Real>&       regGradient = grad.getSingleValuedFAB();
       const BaseFab<Real>& regPhi      = phi. getSingleValuedFAB();
 
-      regGradient.setVal(0.0);
-
-      // Do interior faces.
+      // Do interior faces. This computes the gradient using a standard two-point stencil reaching across the face. 
       Box interiorFaces = cellBox;
       interiorFaces.grow(dir, 1);
       interiorFaces &= domain;
-      interiorFaces.grow(dir,-1);
+      interiorFaces.grow(dir, -1);
       interiorFaces.surroundingNodes(dir);
 
-      FORT_FACEGRADIENT(CHF_FRA(regGradient),
-			CHF_CONST_FRA1(regPhi, m_comp),
-			CHF_CONST_INT(dir),
-			CHF_CONST_REAL(m_dx),
-			CHF_BOX(interiorFaces));
+      FORT_FACENORMALDERIVATIVE(CHF_FRA1(regGradient, dir),
+				CHF_CONST_FRA1(regPhi, m_comp),
+				CHF_CONST_INT(dir),
+				CHF_CONST_REAL(m_dx),
+				CHF_BOX(interiorFaces));
 
-      // Do interior cut-cell faces.
-      FaceIterator& faceIterator = (*m_faceIterator.at(dir))[dit()];
-      for (faceIterator.reset(); faceIterator.ok(); ++faceIterator){
-	const FaceIndex&  face        = faceIterator();
-	const VoFStencil& gradStencil = (*m_faceStencils.at(dir))[dit()](face, m_comp);
+      // Do the same for all interior faces.
+      Box interiorCells = cellBox;
+      interiorCells.grow(dir, 1);
+      interiorCells &= domain;
+      interiorCells.grow(dir, -1);
 
-	// Apply the stencil
-	grad(face, dir) = 0.0;
-	for (int i = 0; i < gradStencil.size(); i++){
-	  const VolIndex ivof    = gradStencil.vof(i);
-	  const Real     iweight = gradStencil.weight(i);
-	  const Real     ivar    = gradStencil.variable(i);
+      const IntVectSet irregIVS = ebisBox.getIrregIVS(interiorCells);
+      
+      for (FaceIterator faceIt(irregIVS, ebgraph, dir, FaceStop::SurroundingNoBoundary); faceIt.ok(); ++faceIt){
+	const FaceIndex& face = faceIt();
 
-	  if(ivar == dir){
-	    grad(face, dir) += iweight * phi(ivof, m_comp);
-	  }
-	}
-      }
+	const VolIndex& vofHi = face.getVoF(Side::Hi);
+	const VolIndex& vofLo = face.getVoF(Side::Lo);	
 
-      // Now do the boundary faces. On the boundary faces we fetch the stencil in the grid cell
-      // next to the boundary and compute the gradient component from thhere. 
-      for (SideIterator sit; sit.ok(); ++sit){
-	FaceIterator& bndryIterator = (*m_boundaryIterator.at(std::make_pair(dir, sit())))[dit()];
-
-	for (bndryIterator.reset(); bndryIterator.ok(); ++bndryIterator){
-	  const FaceIndex& face = bndryIterator();
-	  const VolIndex&  vof  = face.getVoF(sit());
-
-	  const VoFStencil& gradStencil = m_levelStencils[dit()](vof, m_comp);
-
-	  grad(face, dir) = 0.0;
-
-	  for (int i = 0; i < gradStencil.size(); i++){
-	    const VolIndex ivof    = gradStencil.vof(i);
-	    const Real     iweight = gradStencil.weight(i);
-	    const Real     ivar    = gradStencil.variable(i);
-	    
-	    if(ivar == dir){
-	      grad(face, dir) += iweight * phi(ivof, m_comp);
-	    }
-	  }
-	}
+	grad(face, dir) = (phi(vofHi, m_comp) - phi(vofLo, m_comp))/m_dx;
       }
     }
   }
@@ -349,25 +317,6 @@ void EBGradient::computeAMRGradient(LevelData<EBCellFAB>&       a_gradient,
   }
 }
 
-void EBGradient::computeAMRGradient(LevelData<EBFluxFAB>&       a_gradient,
-				    const LevelData<EBCellFAB>& a_phi,
-				    const LevelData<EBCellFAB>& a_phiFine) const {
-  CH_TIME("EBGradient::computeAMRGradient(no finer)");
-
-  this->computeLevelGradient(a_gradient, a_phi);
-
-  // Do corrections near the EBCF. 
-  if(m_hasFine && m_hasEBCF){
-
-    // Compute the gradient on the fine level also, and then coarsen the result to the coarse-level faces
-    this->computeLevelGradient(m_gradientFine, a_phiFine);
-
-    // Coarsen the result onto the buffer and copy to the input data holder. 
-    this->coarsenFaces(m_gradientCoFi, m_gradientFine);
-    m_gradientCoFi.copyTo(a_gradient);
-  }
-}
-
 void EBGradient::defineLevelStencils(){
   CH_TIME("EBGradient::defineLevelStencils");
 
@@ -422,163 +371,6 @@ void EBGradient::defineLevelStencils(){
 	VoFStencil derivDirStencil;
 	EBArith::getFirstDerivStencilWidthOne(derivDirStencil, vof, ebisbox, dir, m_dx, nullptr, dir);
 	stencil += derivDirStencil;	
-      }
-    }
-  }
-}
-
-void EBGradient::defineFaceStencils(){
-  CH_TIME("EBGradient::defineFaceStencils");
-
-  // TLDR: This just defines finite-difference stencils for cut-cell faces. These are required because
-  //       the regular six-point stencil might not be available so we might need to drop order. 
-
-  const DisjointBoxLayout& dbl    = m_eblg.getDBL();
-  const EBISLayout&        ebisl  = m_eblg.getEBISL();
-  const ProblemDomain&     domain = m_eblg.getDomain();
-
-  for (int dir = 0; dir < SpaceDim; dir++){
-    m_faceStencils.    emplace(dir, std::make_shared<LayoutData<BaseIFFAB<VoFStencil> > >(dbl));
-    m_faceIterator.    emplace(dir, std::make_shared<LayoutData<FaceIterator>           >(dbl));
-    
-    m_boundaryIterator.emplace(std::make_pair(dir, Side::Lo), std::make_shared<LayoutData<FaceIterator> >(dbl));
-    m_boundaryIterator.emplace(std::make_pair(dir, Side::Hi), std::make_shared<LayoutData<FaceIterator> >(dbl));
-  }
-
-  for (DataIterator dit(dbl); dit.ok(); ++dit){
-    const Box      cellBox  = dbl  [dit()];
-    const EBISBox& ebisbox  = ebisl[dit()];
-    const EBGraph& ebgraph  = ebisbox.getEBGraph();
-      
-    // Define the stencils for computing the 
-    const IntVectSet irregIVS = ebisbox.getIrregIVS(cellBox);
-    const IntVectSet allIVS   = IntVectSet         (cellBox);    
-
-    for (int dir = 0; dir < SpaceDim; dir++){
-      FaceIterator&          faceIterator     = (*m_faceIterator.    at(dir))[dit()];
-      BaseIFFAB<VoFStencil>& faceStencils     = (*m_faceStencils.    at(dir))[dit()];
-      
-      FaceIterator&          bndryIteratorLo  = (*m_boundaryIterator.at(std::make_pair(dir, Side::Lo)))[dit()];
-      FaceIterator&          bndryIteratorHi  = (*m_boundaryIterator.at(std::make_pair(dir, Side::Hi)))[dit()];            						 
-
-      faceIterator.define(irregIVS, ebgraph, dir, FaceStop::SurroundingNoBoundary);
-      faceStencils.define(irregIVS, ebgraph, dir, m_nComp);
-
-      bndryIteratorLo.define(allIVS,   ebgraph, dir, FaceStop::LoBoundaryOnly);
-      bndryIteratorHi.define(allIVS,   ebgraph, dir, FaceStop::HiBoundaryOnly);            						       
-
-      for (faceIterator.reset(); faceIterator.ok(); ++faceIterator){
-	const FaceIndex& face = faceIterator();
-
-	// Define stencils for faces. On interior faces we use a 6/10 point stencil where we use centered differencing on the face
-	// for the component that is normal to the face. The "tangential" directions are averaged. If the face is a boundary face
-	// then we use the value of the gradient in the cell abutting the domain.
-	VoFStencil& gradStencil = faceStencils(face, m_comp);
-	gradStencil.clear();
-
-	const VolIndex& vofHi = face.getVoF(Side::Hi);
-	const VolIndex& vofLo = face.getVoF(Side::Lo);
-
-	// Do the centered derivative directly on the face. This is the "normal" derivative which is just centered differencing.
-	gradStencil.add(vofHi,  1./m_dx, dir);
-	gradStencil.add(vofLo, -1./m_dx, dir);
-
-	// Do the tangential direction(s). This is a bit more complicated because while we know that a face will have vofs on each side, we don't necessarily
-	// have the corner cells available for computing the derivatives that are tangential to the face. So, we need to check if we can do centered differencing
-	// and, if we can't we drop order using forward/backward differencing. The first loop here is because I don't want to rewrite the code for 3D. We just go through
-	// all spatial directions and find a tangential dir which is not equal to the face normal.
-	for (int tanDir = 0; tanDir < SpaceDim; tanDir++){
-	  if(tanDir != dir){
-
-	    VoFStencil tanDerivHi;
-	    VoFStencil tanDerivLo;
-	    VoFStencil tanDeriv;
-
-	    // Formulate an approximation for the "tangential" derivative, i.e. derivative in direction tanDir, centered on vofHi and vofLo.
-	    const std::vector<VolIndex> vofsHiLo = ebisbox.getVoFs(vofHi, tanDir, Side::Lo, 1).stdVector();
-	    const std::vector<VolIndex> vofsHiHi = ebisbox.getVoFs(vofHi, tanDir, Side::Hi, 1).stdVector();
-
-	    const std::vector<VolIndex> vofsLoLo = ebisbox.getVoFs(vofLo, tanDir, Side::Lo, 1).stdVector();
-	    const std::vector<VolIndex> vofsLoHi = ebisbox.getVoFs(vofLo, tanDir, Side::Hi, 1).stdVector();
-	
-	    const int numHiLo = vofsHiLo.size();
-	    const int numHiHi = vofsHiHi.size();
-
-	    const int numLoLo = vofsLoLo.size();
-	    const int numLoHi = vofsLoHi.size();
-	    
-	    // Compute a finite differencing approximation to the derivative in direction tanDir, centering on vofHi.
-	    bool hasTanDerivHi = true;
-	    if(numHiLo > 0 && numHiHi > 0) {// Centered differencing. Have cells on both sides of vofHi. 
-	      for (const auto& v : vofsHiHi){
-		tanDerivHi.add(v,  1./(2.0*numHiHi*m_dx), tanDir);
-	      }
-	      for (const auto& v : vofsHiLo){
-		tanDerivHi.add(v, -1./(2.0*numHiLo*m_dx), tanDir);
-	      }	  
-	    }
-	    else if(numHiHi > 0){ // Forward differencing -- don't have VoFs on the low side of vofHi. 
-	      for (const auto& v : vofsHiHi){
-		tanDerivHi.add(v, 1./(numHiHi*m_dx), tanDir);
-	      }	  
-	      tanDerivHi.add(vofHi, -1./m_dx, tanDir);
-	    }
-	    else if(numHiLo > 0){ // Backward differencing -- don't have VoFs on the high side of vofLo. 
-	      tanDerivHi.add(vofHi, 1./m_dx, tanDir);	  
-	      for (const auto& v : vofsHiLo){
-		tanDerivHi.add(v, 1./(numHiLo*m_dx), tanDir);
-	      }
-	    }
-	    else{ // Can't compute a stencil. 
-	      hasTanDerivHi = false;
-	    }
-
-	    // Compute a finite differencing approximation to the derivative in direction tanDir, centering on vofLo.
-
-	    bool hasTanDerivLo = true;
-	    if(numLoHi > 0 && numLoLo > 0) {// Centered differencing. Have cells on both sides of vofLo.
-	      for (const auto& v : vofsLoHi){
-		tanDerivLo.add(v,  1./(2.0*numLoHi*m_dx), tanDir);
-	      }
-	      for (const auto& v : vofsHiLo){
-		tanDerivLo.add(v, -1./(2.0*numLoLo*m_dx), tanDir);
-	      }	  
-	    }
-	    else if(numLoHi > 0){ // Forward differencing -- don't have VoFs on the low side of vofLo but we have on high side. 
-	      for (const auto& v : vofsLoHi){
-		tanDerivLo.add(v, 1./(numLoHi*m_dx), tanDir);
-	      }	  
-	      tanDerivLo.add(vofLo, -1./m_dx, tanDir);
-	    }
-	    else if(numLoLo > 0){ // Backward differencing -- don't have VoFs on the high side of vofLo but we have on the low side. 
-	      tanDerivLo.add(vofLo, 1./m_dx, tanDir);
-	      for (const auto& v : vofsLoLo){
-		tanDerivLo.add(v, 1./(numLoLo*m_dx), tanDir);
-	      }
-	    }
-	    else{ // Can't compute a stencil. 
-	      hasTanDerivLo = false;
-	    }
-
-	    // Now compute the stencil for the tangential derivative, averaging the two stencils if we can or dropping to just one of the sides if we can't.
-	    if(hasTanDerivHi && hasTanDerivLo){
-	      tanDeriv += tanDerivHi;
-	      tanDeriv += tanDerivLo;
-	      tanDeriv *= 0.5;
-	    }
-	    else if(hasTanDerivHi){
-	      tanDeriv += tanDerivHi;
-	    }
-	    else if(hasTanDerivLo){
-	      tanDeriv += tanDerivLo;
-	    }
-	    else{ // No stencil on either side so we can't compute the derivative. 
-	      tanDeriv.clear(); 
-	    }
-
-	    gradStencil += tanDeriv;
-	  }
-	}
       }
     }
   }
@@ -1002,97 +794,6 @@ void EBGradient::defineStencilsEBCF(const BoxLayoutData<FArrayBox>& a_bufferCoar
 	this->getFiniteDifferenceStencil(coarStencil, vof, ebisBox, DenseIntVectSet(cellBox, true), m_dx);
 
 	MayDay::Warning("CD_EBGradient::defineStencilsEBCF -- could not find stencil!");
-      }
-    }
-  }
-}
-
-void EBGradient::defineCoFiGrids(){
-  CH_TIME("EBGradient::defineCoFiGrids");
-
-  // Coarsen the grids and the EBIS. These buffers are for computing the gradient on the fine level and then coarsening the result
-  // to the coarse level. Because of that, we only need one ghost cell. 
-  const EBIndexSpace* const ebisPtr = m_eblg.getEBIS();  
-  coarsen(m_dblCoFi, m_eblgFine.getDBL(), m_refRat);
-  ebisPtr->fillEBISLayout(m_ebislCoFi, m_dblCoFi, m_eblg.getDomain(),  1);
-
-  // Create storage for the face-centered gradient on the fine level and the coarsened fine level
-  EBFluxFactory factoryFine(m_eblgFine.getEBISL());
-  EBFluxFactory factoryCoFi(m_ebislCoFi);
-
-  m_gradientFine.define(m_eblgFine.getDBL(), SpaceDim, IntVect::Unit, factoryFine);
-  m_gradientCoFi.define(m_dblCoFi          , SpaceDim, IntVect::Unit, factoryCoFi);  
-}
-
-void EBGradient::coarsenFaces(LevelData<EBFluxFAB>& a_coarData, const LevelData<EBFluxFAB>& a_fineData) const {
-  CH_TIME("EBGradient::getFiniteDifferenceStencil");
-
-  CH_assert(a_coarData.nComp() == SpaceDim);
-  CH_assert(a_fineData.nComp() == SpaceDim);
-
-  const DisjointBoxLayout& dblFine    = m_eblgFine.getDBL();
-  const EBISLayout&        ebislFine  = m_eblgFine.getEBISL();
-  const ProblemDomain&     domainFine = m_eblgFine.getDomain();
-
-  const DisjointBoxLayout& dblCoar    = m_dblCoFi;
-  const EBISLayout&        ebislCoar  = m_ebislCoFi;
-  const ProblemDomain&     domainCoar = m_eblg.getDomain();
-  
-  for (DataIterator dit(dblFine); dit.ok(); ++dit){
-    const Box      fineCellBox = dblFine  [dit()];
-    const Box      coarCellBox = dblCoar  [dit()];
-    
-    const EBISBox& fineEbisBox = ebislFine[dit()];
-    const EBISBox& coarEbisBox = ebislCoar[dit()];
-
-    const EBGraph& fineEbGraph = fineEbisBox.getEBGraph();
-    const EBGraph& coarEbGraph = coarEbisBox.getEBGraph();
-
-    const IntVectSet coarIrregIVS = coarEbisBox.getIrregIVS(coarCellBox);
-
-    // Set coars data to zero
-    for (int dir = 0; dir < SpaceDim; dir++){
-      Box fineFaceBox = fineCellBox;
-      Box coarFaceBox = coarCellBox;
-
-      fineFaceBox.surroundingNodes(dir);
-      coarFaceBox.surroundingNodes(dir);      
-      
-      EBFaceFAB&       coarData = a_coarData[dit()][dir];
-      const EBFaceFAB& fineData = a_fineData[dit()][dir];
-
-      // Do regular cells
-      BaseFab<Real>&       regCoarData = coarData.getSingleValuedFAB();
-      const BaseFab<Real>& regFineData = fineData.getSingleValuedFAB();
-
-      Box refBox(IntVect::Zero, (m_refRat-1)*IntVect::Unit);
-      refBox.surroundingNodes(dir);
-      
-      for (int comp = 0; comp < SpaceDim; comp++){
-	FORT_COARSENFACEGRADIENT(CHF_FRA1(regCoarData, comp),
-				 CHF_CONST_FRA1(regFineData, comp),
-				 CHF_CONST_INT(dir),
-				 CHF_CONST_INT(m_refRat),
-				 CHF_BOX(coarFaceBox));
-      }
-
-      // Now do the irregular faces. 
-      for (FaceIterator faceItCoar(coarIrregIVS, coarEbGraph, dir, FaceStop::SurroundingWithBoundary); faceItCoar.ok(); ++faceItCoar){
-	const FaceIndex& coarFace = faceItCoar();
-
-	const std::vector<FaceIndex> fineFaces = ebislFine.refine(coarFace, m_refRat, dit()).stdVector();
-	const int numFineFaces = fineFaces.size();
-	
-	for (int comp = 0; comp < SpaceDim; comp++){
-	  coarData(coarFace, comp) = 0.0;
-
-	  if(numFineFaces > 0){
-	    for (const auto& fineFace : fineFaces){
-	      coarData(coarFace, comp) += fineData(fineFace, comp);
-	    }
-	    coarData(coarFace, comp) *= 1./numFineFaces;
-	  }
-	}
       }
     }
   }
