@@ -37,9 +37,6 @@
   i.e., the gradient is a two-level stencil.
 
   Near the domain boundaries this routine switches to first order stencils. 
-  @details This class can compute a second order approximation to the gradient on face centers. In that case the gradient component which is parallel to the face
-  normal is computed using centered differencing. The tangential components are done using centered/forward/backward differencing on the adjacent cell centers, 
-  which are then interpolated to the face center. 
   @note If there is no finer level, this class will compute regular second-order stencils away from the EB and switch to compact width-one stencils if
   there are not enough cells available near the EB. 
   @note This class requires at least one ghost cell. 
@@ -87,10 +84,10 @@ public:
 			    const LevelData<EBCellFAB>& a_phi) const;
 
   /*!
-    @brief Compute the gradient component which is normal to the face.
+    @brief Compute the gradient component which is normal to the face, using centered differencing. 
     @details If the face is oriented along dir, this computes the dir-component of the gradient using
     centered differences on the face. This routine is useful after e.g. averaging a cell-centered gradient
-    to faces. 
+    to faces (in order to shrink the stencil). 
     @param[inout] a_gradient Gradient of input scalar
     @param[in]    a_phi      Input scalar
   */
@@ -219,18 +216,6 @@ protected:
   mutable LayoutData<VoFIterator> m_levelIterator;
 
   /*!
-    @brief Iterator for cut-cell faces. 
-    @note Lives on the coarse layout. 
-  */
-  mutable std::map<int, std::shared_ptr<LayoutData<FaceIterator> > > m_faceIterator;
-
-  /*!
-    @brief Iterator for boundary faces
-    @note Lives on the coarse layout. 
-  */
-  mutable std::map<std::pair<int, Side::LoHiSide>, std::shared_ptr<LayoutData<FaceIterator> > > m_boundaryIterator;
-
-  /*!
     @brief Iterator for EBCF cells. 
     @note Lives on the coarse layout. 
   */
@@ -271,11 +256,6 @@ protected:
   void defineLevelStencils();
 
   /*!
-    @brief Define face stencils
-  */
-  void defineFaceStencils();
-
-  /*!
     @brief Make masks
     @param[out] a_coarMaskCF      Mask holding a value of 1 in coarse cells that live on the refinement boundary. 
     @param[out] a_coarMaskInvalid Mask holding a value of 1 in coarse cells that are covered by a finer grid level. 
@@ -308,14 +288,6 @@ protected:
     @param[in] a_bufferCoarMaskInvalid Map of coarse cells that are covered by finer cells. 
   */
   void defineStencilsEBCF(const BoxLayoutData<FArrayBox>& a_bufferCoarMaskInvalid);
-
-  /*!
-    @brief Coarsen gradient from fine-faces onto coarse faces.
-    @details If this is face-centered data the result will be an arithmetic average. Otherwise it will be an area-weighted average.
-    @param[out] a_coarData Coarse data
-    @param[in]  a_fineData Fine data
-  */
-  void coarsenFaces(LevelData<EBFluxFAB>& a_coarData, const LevelData<EBFluxFAB>& a_fineData) const;
 
   /*!
     @brief Get a finite difference stencil, assuming that the data is cell-centered
