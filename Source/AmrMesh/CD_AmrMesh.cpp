@@ -1045,7 +1045,11 @@ void AmrMesh::computeGradient(EBAMRFluxData&           a_gradient,
   this->averageDown(scratch, a_realm, a_phase);
   this->interpGhost(scratch, a_realm, a_phase);
 
+  // Average the cells to face. 
   DataOps::averageCellToFace(a_gradient, scratch, this->getDomains());
+
+  // Must now coarsen the faces if we are to have coarse faces make any sense. 
+  this->averageDown(a_gradient, a_realm, a_phase);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
     const RefCountedPtr<EBGradient>& gradientOp = m_realms[a_realm]->getGradientOp(a_phase)[lvl];
