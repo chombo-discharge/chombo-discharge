@@ -540,6 +540,14 @@ public:
   void averageDown(MFAMRFluxData& a_data, const std::string a_realm) const;
 
   /*!
+    @brief Average multifluid data over a realm. 
+    @details This computes an aarithmetic average. 
+    @param[inout] a_data  Data to be coarsened.
+    @param[in]    a_realm Realm name
+  */
+  void averageFaces(MFAMRFluxData& a_data, const std::string a_realm) const;  
+
+  /*!
     @brief Average down on specific realm and phase. 
     @param[inout] a_data  Data to be coarsened.
     @param[in]    a_realm Realm name
@@ -564,6 +572,15 @@ public:
     @param[in]    a_phase Phase (gas or solid)
   */
   void averageDown(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;
+
+  /*!
+    @brief Average down on specific realm and phase. 
+    @details This computes an arithmetic average, i.e. a non-conservative average
+    @param[inout] a_data  Data to be average.
+    @param[in]    a_realm Realm name
+    @param[in]    a_phase Phase (gas or solid)
+  */
+  void averageFaces(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase) const;  
 
   /*!
     @brief Average down on specific realm and phase. 

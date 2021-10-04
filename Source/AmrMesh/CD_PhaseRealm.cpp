@@ -443,7 +443,6 @@ void PhaseRealm::defineEBMultigrid(const int a_lmin){
 													  Location::Cell::Center,
 													  m_numGhostCells*IntVect::Unit,
 													  m_refinementRatios[lvl-1],
-													  1,
 													  m_multigridInterpolationRadius,
 													  m_multigridInterpolationOrder,
 													  m_multigridInterpolationWeight));
