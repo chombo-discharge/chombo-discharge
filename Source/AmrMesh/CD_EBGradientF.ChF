@@ -46,7 +46,7 @@
       integer chf_ddecl[ioff ; joff ; koff ]
       integer chf_ddecl[ioff1; joff1; koff1]
       integer chf_ddecl[ioff2; joff2; koff2]      
-      real_t inv_dx, inv_4dx, phiLo, phiHi
+      real_t inv_dx, inv_2dx, tanDerivLo, tanDerivHi
       integer tanDir1, tanDir2
 
 c TLDR: This routine computes the face gradient using a 6-point stencil in 2D. On faces that are normal to the face direction
@@ -76,21 +76,21 @@ c Offsets for tangential directions
 #endif	
 
       inv_dx  = 1.0/dx
-      inv_4dx = 1.0/(4.0*dx)
+      inv_2dx = 1.0/(2.0*dx)
 
       chf_multido[facebox; i;j;k]
          grad(chf_ix[i;j;k], dir) = inv_dx  * (phi(chf_ix[i;j;k]) - phi(chf_ix[i-ioff;j-joff;k-koff]))
 
-         phiHi = phi(chf_ix[i+ioff1     ; j+joff1     ; k+koff1     ]) + phi(chf_ix[i-ioff1     ; j-joff1     ; k-koff1     ])
-         phiLo = phi(chf_ix[i+ioff1-ioff; j+joff1-joff; k+koff1-koff]) + phi(chf_ix[i-ioff1-ioff; j-joff1-joff; k-koff1-koff])	 
+         tanDerivHi = inv_2dx * (phi(chf_ix[i+ioff1     ; j+joff1     ; k+koff1     ]) - phi(chf_ix[i-ioff1     ; j-joff1     ; k-koff1     ]))
+         tanDerivLo = inv_2dx * (phi(chf_ix[i+ioff1-ioff; j+joff1-joff; k+koff1-koff]) - phi(chf_ix[i-ioff1-ioff; j-joff1-joff; k-koff1-koff])) 
 
-         grad(chf_ix[i;j;k], tanDir1) = inv_4dx * (phiHi - phiLo)
+         grad(chf_ix[i;j;k], tanDir1) = half * (tanDerivHi + tanDerivLo)
 
 #if CH_SPACEDIM==3
-         phiHi = phi(chf_ix[i+ioff2     ; j+joff2     ; k+koff2     ]) + phi(chf_ix[i-ioff2     ; j-joff2     ; k-koff2     ])
-         phiLo = phi(chf_ix[i+ioff2-ioff; j+joff2-joff; k+koff2-koff]) + phi(chf_ix[i-ioff2-ioff; j-joff2-joff; k-koff2-koff])	 
+         tanDerivHi = inv_2dx * (phi(chf_ix[i+ioff2     ; j+joff2     ; k+koff2     ]) + phi(chf_ix[i-ioff2     ; j-joff2     ; k-koff2     ]))
+         tanDerivLo = inv_2dx * (phi(chf_ix[i+ioff2-ioff; j+joff2-joff; k+koff2-koff]) + phi(chf_ix[i-ioff2-ioff; j-joff2-joff; k-koff2-koff]))
 
-         grad(chf_ix[i;j;k], tanDir2) = inv_4dx * (phiHi - phiLo)
+         grad(chf_ix[i;j;k], tanDir2) = half * (tanDerivHi - tanDerivLo)
 #endif
       chf_enddo
       return
