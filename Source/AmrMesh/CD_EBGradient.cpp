@@ -31,7 +31,6 @@ constexpr int EBGradient::m_nComp;
 
 EBGradient::EBGradient(const EBLevelGrid& a_eblg,
 		       const EBLevelGrid& a_eblgFine,
-		       const CellLocation a_dataLocation,
 		       const Real         a_dx,
 		       const int          a_refRat,
 		       const int          a_order,
@@ -44,7 +43,7 @@ EBGradient::EBGradient(const EBLevelGrid& a_eblg,
 
   m_eblg         = a_eblg;
   m_eblgFine     = a_eblgFine;
-  m_dataLocation = a_dataLocation;
+  m_dataLocation = Location::Cell::Center;
   m_dx           = a_dx;
   m_refRat       = a_refRat;
   m_order        = a_order;
@@ -363,10 +362,8 @@ void EBGradient::computeAMRGradient(LevelData<EBFluxFAB>&       a_gradient,
     // Compute the gradient on the fine level also, and then coarsen the result to the coarse-level faces
     this->computeLevelGradient(m_gradientFine, a_phiFine);
 
-    // Coarsen the result onto the buffer
-    // this->coarsenBLABLABAL
-
-    // Copy the result to the input data holder
+    // Coarsen the result onto the buffer and copy to the input data holder. 
+    this->coarsenFaces(m_gradientCoFi, m_gradientFine);
     m_gradientCoFi.copyTo(a_gradient);
   }
 }
@@ -1025,6 +1022,80 @@ void EBGradient::defineCoFiGrids(){
 
   m_gradientFine.define(m_eblgFine.getDBL(), SpaceDim, IntVect::Unit, factoryFine);
   m_gradientCoFi.define(m_dblCoFi          , SpaceDim, IntVect::Unit, factoryCoFi);  
+}
+
+void EBGradient::coarsenFaces(LevelData<EBFluxFAB>& a_coarData, const LevelData<EBFluxFAB>& a_fineData) const {
+  CH_TIME("EBGradient::getFiniteDifferenceStencil");
+
+  CH_assert(a_coarData.nComp() == SpaceDim);
+  CH_assert(a_fineData.nComp() == SpaceDim);
+
+  const DisjointBoxLayout& dblFine    = m_eblgFine.getDBL();
+  const EBISLayout&        ebislFine  = m_eblgFine.getEBISL();
+  const ProblemDomain&     domainFine = m_eblgFine.getDomain();
+
+  const DisjointBoxLayout& dblCoar    = m_dblCoFi;
+  const EBISLayout&        ebislCoar  = m_ebislCoFi;
+  const ProblemDomain&     domainCoar = m_eblg.getDomain();
+  
+  for (DataIterator dit(dblFine); dit.ok(); ++dit){
+    const Box      fineCellBox = dblFine  [dit()];
+    const Box      coarCellBox = dblCoar  [dit()];
+    
+    const EBISBox& fineEbisBox = ebislFine[dit()];
+    const EBISBox& coarEbisBox = ebislCoar[dit()];
+
+    const EBGraph& fineEbGraph = fineEbisBox.getEBGraph();
+    const EBGraph& coarEbGraph = coarEbisBox.getEBGraph();
+
+    const IntVectSet coarIrregIVS = coarEbisBox.getIrregIVS(coarCellBox);
+
+    // Set coars data to zero
+    for (int dir = 0; dir < SpaceDim; dir++){
+      Box fineFaceBox = fineCellBox;
+      Box coarFaceBox = coarCellBox;
+
+      fineFaceBox.surroundingNodes(dir);
+      coarFaceBox.surroundingNodes(dir);      
+      
+      EBFaceFAB&       coarData = a_coarData[dit()][dir];
+      const EBFaceFAB& fineData = a_fineData[dit()][dir];
+
+      // Do regular cells
+      BaseFab<Real>&       regCoarData = coarData.getSingleValuedFAB();
+      const BaseFab<Real>& regFineData = fineData.getSingleValuedFAB();
+
+      Box refBox(IntVect::Zero, (m_refRat-1)*IntVect::Unit);
+      refBox.surroundingNodes(dir);
+      
+      for (int comp = 0; comp < SpaceDim; comp++){
+	FORT_COARSENFACEGRADIENT(CHF_FRA1(regCoarData, comp),
+				 CHF_CONST_FRA1(regFineData, comp),
+				 CHF_CONST_INT(dir),
+				 CHF_CONST_INT(m_refRat),
+				 CHF_BOX(coarFaceBox));
+      }
+
+      // Now do the irregular faces. 
+      for (FaceIterator faceItCoar(coarIrregIVS, coarEbGraph, dir, FaceStop::SurroundingWithBoundary); faceItCoar.ok(); ++faceItCoar){
+	const FaceIndex& coarFace = faceItCoar();
+
+	const std::vector<FaceIndex> fineFaces = ebislFine.refine(coarFace, m_refRat, dit()).stdVector();
+	const int numFineFaces = fineFaces.size();
+	
+	for (int comp = 0; comp < SpaceDim; comp++){
+	  coarData(coarFace, comp) = 0.0;
+
+	  if(numFineFaces > 0){
+	    for (const auto& fineFace : fineFaces){
+	      coarData(coarFace, comp) += fineData(fineFace, comp);
+	    }
+	    coarData(coarFace, comp) *= 1./numFineFaces;
+	  }
+	}
+      }
+    }
+  }
 }
 
 bool EBGradient::getFiniteDifferenceStencil(VoFStencil&            a_stencil,

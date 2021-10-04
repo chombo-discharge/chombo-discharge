@@ -67,6 +67,37 @@ inline void FORTRAN_NAME(inlineFACEGRADIENT, inlineFACEGRADIENT)(
 }
 #endif  // GUARDFACEGRADIENT 
 
+#ifndef GUARDCOARSENFACEGRADIENT 
+#define GUARDCOARSENFACEGRADIENT 
+// Prototype for Fortran procedure coarsenfacegradient ...
+//
+void FORTRAN_NAME( COARSENFACEGRADIENT ,coarsenfacegradient )(
+      CHFp_FRA1(gradCoar)
+      ,CHFp_CONST_FRA1(gradFine)
+      ,CHFp_CONST_INT(dir)
+      ,CHFp_CONST_INT(refRat)
+      ,CHFp_BOX(coarFaceBox) );
+
+#define FORT_COARSENFACEGRADIENT FORTRAN_NAME( inlineCOARSENFACEGRADIENT, inlineCOARSENFACEGRADIENT)
+#define FORTNT_COARSENFACEGRADIENT FORTRAN_NAME( COARSENFACEGRADIENT, coarsenfacegradient)
+
+inline void FORTRAN_NAME(inlineCOARSENFACEGRADIENT, inlineCOARSENFACEGRADIENT)(
+      CHFp_FRA1(gradCoar)
+      ,CHFp_CONST_FRA1(gradFine)
+      ,CHFp_CONST_INT(dir)
+      ,CHFp_CONST_INT(refRat)
+      ,CHFp_BOX(coarFaceBox) )
+{
+ CH_TIMELEAF("FORT_COARSENFACEGRADIENT");
+ FORTRAN_NAME( COARSENFACEGRADIENT ,coarsenfacegradient )(
+      CHFt_FRA1(gradCoar)
+      ,CHFt_CONST_FRA1(gradFine)
+      ,CHFt_CONST_INT(dir)
+      ,CHFt_CONST_INT(refRat)
+      ,CHFt_BOX(coarFaceBox) );
+}
+#endif  // GUARDCOARSENFACEGRADIENT 
+
 }
 
 #endif

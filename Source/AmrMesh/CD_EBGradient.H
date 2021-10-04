@@ -66,7 +66,6 @@ public:
     @brief Full constructor, assumes that there is a finer level. 
     @param[in] a_eblg         Grids
     @param[in] a_eblgFine     Fine grids
-    @param[in] a_dataLocation Interpration of data centering. 
     @param[in] a_dx           Resolution
     @param[in] a_refRat       Refinement ratio
     @param[in] a_order        Interpolation order for modified gradients. 
@@ -74,7 +73,6 @@ public:
   */
   EBGradient(const EBLevelGrid& a_eblg,
 	     const EBLevelGrid& a_eblgFine,
-	     const CellLocation a_dataLocation,
 	     const Real         a_dx,
 	     const int          a_refRat,
 	     const int          a_order,
@@ -352,8 +350,12 @@ protected:
   void defineStencilsEBCF(const BoxLayoutData<FArrayBox>& a_bufferCoarMaskInvalid);
 
   /*!
-    @brief Coarsen gradient from fine-faces onto coarse faces
+    @brief Coarsen gradient from fine-faces onto coarse faces.
+    @details If this is face-centered data the result will be an arithmetic average. Otherwise it will be an area-weighted average.
+    @param[out] a_coarData Coarse data
+    @param[in]  a_fineData Fine data
   */
+  void coarsenFaces(LevelData<EBFluxFAB>& a_coarData, const LevelData<EBFluxFAB>& a_fineData) const;
 
   /*!
     @brief Get a finite difference stencil, assuming that the data is cell-centered

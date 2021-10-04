@@ -799,7 +799,6 @@ void PhaseRealm::defineGradSten(const int a_lmin){
 
       m_gradientOp[lvl] = RefCountedPtr<EBGradient> (new EBGradient(eblg,
 								    eblgFine,
-								    Location::Cell::Center,
 								    m_dx[lvl],
 								    refRat,
 								    order,

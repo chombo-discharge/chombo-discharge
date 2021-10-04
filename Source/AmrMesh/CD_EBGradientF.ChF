@@ -95,3 +95,57 @@ c Offsets for tangential directions
       chf_enddo
       return
       end
+
+      subroutine coarsenfacegradient(
+     &     chf_fra1[gradCoar],
+     &     chf_const_fra1[gradFine],
+     &     chf_const_int[dir],
+     &     chf_const_int[refRat],     
+     &     chf_box[coarFaceBox])
+
+      integer chf_ddecl[ido; jdo; kdo]
+      integer chf_ddecl[icc; jcc; kcc]
+      integer chf_ddecl[iff; jff; kff]
+      integer chf_ddecl[i;   j;   k  ]
+
+      real_t refScale, coarSum
+
+c Compute the scaling factor for coarsening. This is inverse of the number of faces that we iterate over.
+      refScale = one
+      do i=1, (CH_SPACEDIM-1)
+         refScale = refScale/(one*refRat)
+      enddo
+
+c Trick for ensuring that we ignore one of the coordinates when iterating over the fine faces that are refinements of the coarse face.
+c So, for a coarse face with direction dir, we only want to iterate over the fine faces that are also oriented along dir and that are
+c refinements of the coarse face. 
+      CHF_DTERM[
+         ido = 1 - chf_id(dir, 0);
+         jdo = 1 - chf_id(dir, 0);
+         kdo = 1 - chf_id(dir, 0)]
+
+c Iterate over all coarse cell faces. 
+      chf_multido[coarFaceBox; icc; jcc; kcc]
+         coarSum = zero
+
+c Iterate over the corresponding fine cell faces. In 3D this will be a 2D loop (over the refRat^2 number of fine faces) while in 2D this
+c will be a 1D loop (over the refRat number of fine faces).
+#if CH_SPACEDIM==3
+         do k=0,(refRat-1)*kdo
+#endif
+            do j=0,(refRat-1)*jdo
+               do i=0,(refRat-1)*ido
+                  chf_dterm[
+                     iff = icc*refRat + i;
+                     jff = jcc*refRat + j;
+                     kff = kcc*refRat + k]
+
+                  coarSum = coarSum + gradFine(chf_ix[iff; jff; kff])
+               enddo	       
+            enddo
+#if CH_SPACEDIM==3
+         enddo
+#endif
+         gradCoar(chf_ix[icc; jcc; kcc]) = coarSum * refScale
+      chf_enddo
+      end
