@@ -34,7 +34,7 @@ int main(int argc, char* argv[]){
   // Get potential from input script 
   std::string basename; 
   {
-    ParmParse pp("PositiveStreamerProfiledSurface");
+    ParmParse pp("StreamerProfiledSurface");
     pp.get("potential", g_potential);
     pp.get("basename",  basename);
     setPoutBaseName(basename);
