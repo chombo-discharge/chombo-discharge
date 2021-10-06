@@ -213,7 +213,7 @@ CdrPlasmaGodunovStepper.solver_verbosity = -1        # Individual solver verbosi
 CdrPlasmaGodunovStepper.min_dt           = 0.        # Minimum permitted time step
 CdrPlasmaGodunovStepper.max_dt           = 1.E99     # Maximum permitted time step
 CdrPlasmaGodunovStepper.cfl              = 0.9       # CFL number
-CdrPlasmaGodunovStepper.diffusion        = implicit  # Diffusion. 'explicit', 'implicit', or 'auto'
+CdrPlasmaGodunovStepper.diffusion        = explicit  # Diffusion. 'explicit', 'implicit', or 'auto'
 CdrPlasmaGodunovStepper.transport        = euler     # Transport algorithm. 'euler' or 'rk2'
 CdrPlasmaGodunovStepper.relax_time       = 0.5       # Relaxation time constant
 CdrPlasmaGodunovStepper.fast_poisson     = 1         # Solve Poisson every this time steps. Mostly for debugging.
@@ -276,7 +276,7 @@ CdrPlasmaStreamerTagger.buffer            = 8            # Grow tagged cells
 
 CdrPlasmaStreamerTagger.refine_curvature  = 10000.0      # Curvature refinement
 CdrPlasmaStreamerTagger.coarsen_curvature = 10000.0      # Curvature coarsening	
-CdrPlasmaStreamerTagger.refine_alpha      = 1.0          # Set alpha refinement. Lower  => More mesh
+CdrPlasmaStreamerTagger.refine_alpha      = 1.5          # Set alpha refinement. Lower  => More mesh
 CdrPlasmaStreamerTagger.coarsen_alpha     = 0.25         # Set alpha coarsening. Higher => Less mesh
-CdrPlasmaStreamerTagger.max_coarsen_lvl   = 4            # Set max coarsening depth
+CdrPlasmaStreamerTagger.max_coarsen_lvl   = 2            # Set max coarsening depth
 
