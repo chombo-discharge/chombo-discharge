@@ -52,7 +52,7 @@ Driver.geometry_only                   = false            # Special option that 
 Driver.write_memory                    = false            # Write MPI memory report
 Driver.write_loads                     = false            # Write (accumulated) computational loads
 Driver.output_directory                = ./               # Output directory
-Driver.output_names                    = positive_circle  # Simulation output names
+Driver.output_names                    = positive_flat    # Simulation output names
 Driver.max_plot_depth                  = -1               # Restrict maximum plot depth (-1 => finest simulation level)
 Driver.max_chk_depth                   = -1               # Restrict chechkpoint depth (-1 => finest simulation level)	
 Driver.num_plot_ghost                  = 0                # Number of ghost cells to include in plots
@@ -188,8 +188,8 @@ RodPlaneProfile.plane_width       = 7.200123E-2   # Plane width
 RodPlaneProfile.plane_normal      = 0.0 1.0       # Plane normal. Not used, oriented along +y only 
 RodPlaneProfile.plane_point       = 0.0 5E-3      # Center point on plane
 RodPlaneProfile.plane_eps         = 4.0           # Plane permittivity
-RodPlaneProfile.profile_num_left  = 19            # Number of holes to the left
-RodPlaneProfile.profile_num_right = 19            # Number of holes to the left
+RodPlaneProfile.profile_num_left  = 0             # Number of holes to the left
+RodPlaneProfile.profile_num_right = 0             # Number of holes to the left
 RodPlaneProfile.profile_dist      = 2.06E-3       # Distance between each hole
 RodPlaneProfile.profile_xshift    = 0.0           # Horizontal offset
 RodPlaneProfile.profile_yshift    = 500E-6        # Vertical offset
