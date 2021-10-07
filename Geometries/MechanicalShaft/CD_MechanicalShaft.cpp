@@ -77,18 +77,30 @@ void MechanicalShaft::defineElectrode(){
 
   Vector<Real> vec(SpaceDim);
   bool live;
-  Real innerRadius, outerRadius, curvature;
-  RealVect c1, c2;
+  Real innerRadius;
+  Real outerRadius;
+  Real innerCurv;
+  Real outerCurv;
+  
+  RealVect center1, center2;
 
   pp.get("live",         live);
-  pp.get("outer_radius", outerRadius);
-  pp.get("inner_radius", innerRadius);
-  pp.get("curvature",    curvature);
 
-  pp.getarr("endpoint1", vec, 0, SpaceDim); c1 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
-  pp.getarr("endpoint2", vec, 0, SpaceDim); c2 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
+  pp.get("inner_radius",    innerRadius);
+  pp.get("outer_radius",    outerRadius);  
+  pp.get("inner_curvature", innerCurv);
+  pp.get("outer_curvature", outerCurv);  
 
-  RefCountedPtr<BaseIF> elec = RefCountedPtr<BaseIF> (new HollowCylinderIF(c1, c2, outerRadius, innerRadius, curvature, false));
+  pp.getarr("endpoint1", vec, 0, SpaceDim); center1 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
+  pp.getarr("endpoint2", vec, 0, SpaceDim); center2 = RealVect(D_DECL(vec[0], vec[1], vec[2]));
+
+  RefCountedPtr<BaseIF> elec = RefCountedPtr<BaseIF> (new HollowCylinderIF(center1,
+									   center2,
+									   outerRadius,
+									   innerRadius,
+									   outerCurv,
+									   innerCurv,
+									   false));
 
   m_electrodes.resize(1);
   m_electrodes[0].define(elec, live);

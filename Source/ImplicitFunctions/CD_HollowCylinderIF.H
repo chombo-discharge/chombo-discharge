@@ -34,18 +34,20 @@ public:
 
   /*!
     @brief Full constructor
-    @param[in] a_center1     One cylinder end
-    @param[in] a_center2     Other cylinder end
-    @param[in] a_majorRadius Outer cylinder radius
-    @param[in] a_minorRadius Inner radius
-    @param[in] a_curv        Corner curvatures
+    @param[in] a_center1        One cylinder end
+    @param[in] a_center2        Other cylinder end
+    @param[in] a_majorRadius    Outer cylinder radius
+    @param[in] a_minorRadius    Inner radius
+    @param[in] a_outerCurvature Outer curvature
+    @param[in] a_innerCurvature Inner curvature
     @param[in] a_fluidInside Fluid inside or not
   */
   HollowCylinderIF(const RealVect a_center1,
 		   const RealVect a_center2,
 		   const Real     a_majorRadius,
 		   const Real     a_minorRadius,
-		   const Real     a_curv,
+		   const Real     a_outerCurvature,
+		   const Real     a_innerCurvature,		   
 		   const bool     a_fluidInside);
   
   /*!
