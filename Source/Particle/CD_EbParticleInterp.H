@@ -13,10 +13,8 @@
 #define CD_EbParticleInterp_H
 
 // CHombo includes
-#include <Box.H>
 #include <EBISBox.H>
-#include <FArrayBox.H>
-#include <REAL.H>
+#include <EBCellFAB.H>
 #include <Vector.H>
 #include <RealVect.H>
 
@@ -75,7 +73,7 @@ public:
     @note This routine will INCREMENT a_rho. 
   */
   template <class P, const Real&(P::*particleScalarField)() const>
-  void deposit(const List<P>& a_particleList, FArrayBox& a_rho, const DepositionType a_depositionType, const bool a_forceIrregNGP = false) const;
+  void deposit(const List<P>& a_particleList, EBCellFAB& a_rho, const DepositionType a_depositionType, const bool a_forceIrregNGP = false) const;
 
   /*!
     @brief Deposit particle onto the mesh using twice the standard cloud width. 
@@ -93,7 +91,7 @@ public:
     @note This routine will INCREMENT a_rho. 
   */
   template <class P, const Real&(P::*particleScalarField)() const>
-  void deposit2(const List<P>& a_particleList, FArrayBox& a_rho, const DepositionType a_depositionType, const bool a_forceIrregNGP = false) const;
+  void deposit2(const List<P>& a_particleList, EBCellFAB& a_rho, const DepositionType a_depositionType, const bool a_forceIrregNGP = false) const;
 
   /*!
     @brief Deposit particle onto the mesh using 4x the standard cloud width. 
@@ -111,7 +109,7 @@ public:
     @note This routine will INCREMENT a_rho. 
   */
   template <class P, const Real&(P::*particleScalarField)() const>
-  void deposit4(const List<P>& a_particleList, FArrayBox& a_rho, const DepositionType a_depositionType, const bool a_forceIrregNGP = false) const;
+  void deposit4(const List<P>& a_particleList, EBCellFAB& a_rho, const DepositionType a_depositionType, const bool a_forceIrregNGP = false) const;
 
   /*!
     @brief Interpolate a vector field onto the particle position. 
@@ -129,7 +127,7 @@ public:
   */
   template <class P, Real&(P::*particleScalarField)()>
   void interpolate(List<P>&             a_particleList,
-		   const FArrayBox&     a_meshScalarField,
+		   const EBCellFAB&     a_meshScalarField,
 		   const DepositionType a_interpType,
 		   const bool           a_forceIrregNGP = false) const;  
 
@@ -149,7 +147,7 @@ public:
   */
   template <class P, RealVect&(P::*particleVectorField)()>
   void interpolate(List<P>&             a_particleList,
-		   const FArrayBox&     a_meshVectorField,
+		   const EBCellFAB&     a_meshVectorField,
 		   const DepositionType a_interpType,
 		   const bool           a_forceIrregNGP = false) const;
 
@@ -167,7 +165,7 @@ protected:
     @param[in]    a_forceIrregNGP  Force NGP in cut-cells
   */
   inline
-  void depositParticle(FArrayBox&           a_rho,
+  void depositParticle(EBCellFAB&           a_rho,
 		       const RealVect&      a_probLo,
 		       const RealVect&      a_dx,
 		       const RealVect&      a_position,
@@ -186,7 +184,7 @@ protected:
     @param[in]    a_forceIrregNGP  Force NGP in cut-cells
   */
   inline
-  void depositParticle2(FArrayBox&           a_rho,
+  void depositParticle2(EBCellFAB&           a_rho,
 			const RealVect&      a_probLo,
 			const RealVect&      a_dx,
 			const RealVect&      a_position,
@@ -205,7 +203,7 @@ protected:
     @param[in]    a_forceIrregNGP  Force NGP in cut-cells
   */
   inline
-  void depositParticle4(FArrayBox&           a_rho,
+  void depositParticle4(EBCellFAB&           a_rho,
 			const RealVect&      a_probLo,
 			const RealVect&      a_dx,
 			const RealVect&      a_position,
@@ -225,7 +223,7 @@ protected:
   */
   inline
   void interpolateParticle(Real&                a_particleField,
-			   const FArrayBox&     a_field,
+			   const EBCellFAB&     a_field,
 			   const RealVect&      a_probLo,
 			   const RealVect&      a_dx,
 			   const RealVect&      a_position,
@@ -244,7 +242,7 @@ protected:
   */
   inline
   void interpolateParticle(RealVect&            a_particleField,
-			   const FArrayBox&     a_field,
+			   const EBCellFAB&     a_field,
 			   const RealVect&      a_probLo,
 			   const RealVect&      a_dx,
 			   const RealVect&      a_position,

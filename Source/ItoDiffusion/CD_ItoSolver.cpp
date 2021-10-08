@@ -2076,7 +2076,6 @@ void ItoSolver::interpolateVelocities(const int a_lvl, const DataIndex& a_dit){
   if(m_isMobile){
     const EBCellFAB& velo_func = (*m_velo_func[a_lvl])[a_dit];
     const EBISBox& ebisbox     = velo_func.getEBISBox();
-    const FArrayBox& vel_fab   = velo_func.getFArrayBox();
     const RealVect dx          = m_amr->getDx()[a_lvl]*RealVect::Unit;
     const RealVect origin      = m_amr->getProbLo();
     const Box box              = m_amr->getGrids(m_realm)[a_lvl][a_dit];
@@ -2085,7 +2084,7 @@ void ItoSolver::interpolateVelocities(const int a_lvl, const DataIndex& a_dit){
 
     // This interpolates the velocity function on to the particle velocities
     EbParticleInterp meshInterp(box, ebisbox, dx, origin);
-    meshInterp.interpolate<ItoParticle, &ItoParticle::velocity>(particleList, vel_fab, m_deposition, m_irreg_ngp_interpolation);
+    meshInterp.interpolate<ItoParticle, &ItoParticle::velocity>(particleList, velo_func, m_deposition, m_irreg_ngp_interpolation);
 
     // Go through the particles and set their velocities to velo_func*mobility
     for (ListIterator<ItoParticle> lit(particleList); lit.ok(); ++lit){
@@ -2146,7 +2145,6 @@ void ItoSolver::interpolateMobilitiesMu(const int a_lvl, const DataIndex& a_dit)
   if(m_isMobile){
     const EBCellFAB& mob_func  = (*m_mobility_func[a_lvl])[a_dit];
     const EBISBox& ebisbox     = mob_func.getEBISBox();
-    const FArrayBox& mob_fab   = mob_func.getFArrayBox();
     const RealVect dx          = m_amr->getDx()[a_lvl]*RealVect::Unit;
     const RealVect origin      = m_amr->getProbLo();
     const Box box              = m_amr->getGrids(m_realm)[a_lvl][a_dit];
@@ -2154,7 +2152,7 @@ void ItoSolver::interpolateMobilitiesMu(const int a_lvl, const DataIndex& a_dit)
     List<ItoParticle>& particleList = particles[a_lvl][a_dit].listItems();
     EbParticleInterp meshInterp(box, ebisbox, dx, origin);
     
-    meshInterp.interpolate<ItoParticle, &ItoParticle::mobility>(particleList, mob_fab, m_deposition, m_irreg_ngp_interpolation);
+    meshInterp.interpolate<ItoParticle, &ItoParticle::mobility>(particleList, mob_func, m_deposition, m_irreg_ngp_interpolation);
   }
 }
 
@@ -2174,7 +2172,7 @@ void ItoSolver::interpolateMobilitiesVel(const int a_lvl, const DataIndex& a_dit
     const RealVect origin      = m_amr->getProbLo();
     const Box box              = m_amr->getGrids(m_realm)[a_lvl][a_dit];
 
-    FArrayBox& scratch = (*m_scratch[a_lvl])[a_dit].getFArrayBox();
+    EBCellFAB& scratch = (*m_scratch[a_lvl])[a_dit];
 
     List<ItoParticle>& particleList = particles[a_lvl][a_dit].listItems();
     EbParticleInterp meshInterp(box, ebisbox, dx, origin);
@@ -2189,7 +2187,7 @@ void ItoSolver::interpolateMobilitiesVel(const int a_lvl, const DataIndex& a_dit
     }
 
     // This interpolates mu*|E| to the particle position and stores it on the mobility. After that, we compute mu_p = (mu*E)/E
-    scratch *= mob_fab;
+    scratch *= mob_func;
     meshInterp.interpolate<ItoParticle, &ItoParticle::mobility>(particleList, scratch, m_deposition, m_irreg_ngp_interpolation);    
     for (ListIterator<ItoParticle> lit(particleList); lit.ok(); ++lit){
       ItoParticle& p = lit();
@@ -2261,7 +2259,6 @@ void ItoSolver::interpolateDiffusion(const int a_lvl, const DataIndex& a_dit){
   if(m_isDiffusive){
     const EBCellFAB& dco_cell  = (*m_faceCenteredDiffusionCoefficient_cell[a_lvl])[a_dit];
     const EBISBox& ebisbox     = dco_cell.getEBISBox();
-    const FArrayBox& dco_fab   = dco_cell.getFArrayBox();
     const RealVect dx          = m_amr->getDx()[a_lvl]*RealVect::Unit;
     const RealVect origin      = m_amr->getProbLo();
     const Box box              = m_amr->getGrids(m_realm)[a_lvl][a_dit];
@@ -2269,7 +2266,7 @@ void ItoSolver::interpolateDiffusion(const int a_lvl, const DataIndex& a_dit){
     List<ItoParticle>& particleList = particles[a_lvl][a_dit].listItems();
 
     EbParticleInterp meshInterp(box, ebisbox,dx, origin);
-    meshInterp.interpolate<ItoParticle, &ItoParticle::diffusion>(particleList, dco_fab, m_deposition, m_irreg_ngp_interpolation);    
+    meshInterp.interpolate<ItoParticle, &ItoParticle::diffusion>(particleList, dco_cell, m_deposition, m_irreg_ngp_interpolation);    
   }
 }
 
