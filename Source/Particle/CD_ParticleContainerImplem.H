@@ -703,7 +703,7 @@ void ParticleContainer<P>::remap(){
   //          1. Check if particles on the coarse level (lvl-1) fits on the current level's PVR. If they do, transfer the particles from the coarse level
   //             to this level.
   //
-  //          2. If there is a f
+  //          2. Check if any of the particles on this level do not belong on this level's PVR. If they don't, try to transfer them to the coarser level. 
   //
   //       The above steps are completely sufficient if particles were originally mapped to a correct levels and did not move entirely out of the grids. I.e. it
   //       will be sufficient if the particles that live on level lvl move into the PVR on level lvl-1. If it moves all the way to lvl-2 (or even coarser) then
@@ -1078,20 +1078,24 @@ size_t ParticleContainer<P>::getNumberOfMaskParticesGlobal() const {
 }
 
 template <class P>
-void ParticleContainer<P>::copyMaskParticles(const Vector<RefCountedPtr<LevelData<BaseFab<bool> > > >& a_halo) const{
+void ParticleContainer<P>::copyMaskParticles(const Vector<RefCountedPtr<LevelData<BaseFab<bool> > > >& a_mask) const{
+  CH_TIME("ParticleContainer<P>::copyMaskParticles(amr)");
+
+  CH_assert(m_isDefined);
+  
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
-    if(lvl < m_finestLevel){
-      this->copyMaskParticles(lvl, *a_halo[lvl]);
-    }
+    this->copyMaskParticles(lvl, *a_mask[lvl]);
   }
 }
 
 template <class P>
-void ParticleContainer<P>::copyNonMaskParticles(const Vector<RefCountedPtr<LevelData<BaseFab<bool> > > >& a_halo) const{
+void ParticleContainer<P>::copyNonMaskParticles(const Vector<RefCountedPtr<LevelData<BaseFab<bool> > > >& a_mask) const{
+  CH_TIME("ParticleContainer<P>::copyNonMaskParticles(amr)");
+
+  CH_assert(m_isDefined);
+  
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
-    if(lvl < m_finestLevel){
-      this->copyNonMaskParticles(lvl, *a_halo[lvl]);
-    }
+    this->copyNonMaskParticles(lvl, *a_mask[lvl]);
   }
 }
 

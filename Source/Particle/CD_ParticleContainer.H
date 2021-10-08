@@ -24,15 +24,23 @@
 
 // Our includes
 #include <CD_NamespaceHeader.H>
-  
-template <class P>
-using AMRParticles     = Vector<RefCountedPtr<ParticleData<P> > >;
 
+/*!
+  @brief Alias for ParticleData on each AMR level.
+*/
+template <class P>
+using AMRParticles = Vector<RefCountedPtr<ParticleData<P> > >;
+
+/*!
+  @brief Alias for cell-sorted particles on each AMR level.
+*/
 template <class P>
 using AMRCellParticles = Vector<RefCountedPtr<LayoutData<BinFab<P> > > >;
 
-using AMRPVR           = Vector<RefCountedPtr<ParticleValidRegion> >;
-
+/*!
+  @brief Alias for ParticleValidRegion in an AMR context. 
+*/
+using AMRPVR = Vector<RefCountedPtr<ParticleValidRegion> >;
 
 /*!
   @brief Templated class for holding particles on an AMR hierarchy with particle remapping. 
@@ -51,7 +59,15 @@ public:
 
   /*!
     @brief Full constructor
-    @note It is extremely important that a_grids uses only square blocks for the grids. 
+    @param[in] a_grids          AMR grids
+    @param[in] a_domains        AMR domains
+    @param[in] a_dx             Grid resolutions
+    @param[in] a_refRat         Refinement ratios
+    @param[in] a_probLo         Lower-left corner of the physical domain
+    @param[in] a_blockingFactor Grid blocking factor
+    @param[in] a_finestLevel    Finest grid level
+    @param[in] a_pvrBuffer      Buffer region on the fine-side of the refinment boundary where particles can't live. 
+    @param[in] a_realm          Realm where these particles live. 
   */
   ParticleContainer(const Vector<DisjointBoxLayout>& a_grids,
 		    const Vector<ProblemDomain>&     a_domains,
@@ -64,12 +80,21 @@ public:
 		    const std::string                a_realm);
 
   /*!
-    @brief Destructor
+    @brief Destructor ( does nothing)
   */
   ~ParticleContainer();
 
   /*!
     @brief Define the container. This will do a clear-out of all particles. 
+    @param[in] a_grids          AMR grids
+    @param[in] a_domains        AMR domains
+    @param[in] a_dx             Grid resolutions
+    @param[in] a_refRat         Refinement ratios
+    @param[in] a_probLo         Lower-left corner of the physical domain
+    @param[in] a_blockingFactor Grid blocking factor
+    @param[in] a_finestLevel    Finest grid level
+    @param[in] a_pvrBuffer      Buffer region on the fine-side of the refinment boundary where particles can't live. 
+    @param[in] a_realm          Realm where these particles live. 
   */
   void define(const Vector<DisjointBoxLayout>& a_grids,
 	      const Vector<ProblemDomain>&     a_domains,
@@ -82,7 +107,13 @@ public:
 	      const std::string                a_realm);
 
   /*!
-    @brief Regrid function. a_base is the coarsest grid level which did NOT change
+    @brief Regrid function. a_base is the coarsest grid level which did not change
+    @param[in] a_grids          AMR grids
+    @param[in] a_domains        AMR domains
+    @param[in] a_dx             Grid resolutions
+    @param[in] a_refRat         Refinement ratios
+    @param[in] a_base           Coarsest grid level that did not change. 
+    @param[in] a_newFinestLevel New finest grid level
   */
   void regrid(const Vector<DisjointBoxLayout>& a_grids,
 	      const Vector<ProblemDomain>&     a_domains,
@@ -92,19 +123,23 @@ public:
 	      const int                        a_newFinestLevel);
 
   /*!
-    @brief Cache particles in a pre-regrid form. a_base is the coarsest grid level which will NOT change
+    @brief Cache particles before calling regrid. 
+    @param[in] a_base Coarsest grid level which will not change. 
   */
   void preRegrid(const int a_base);
 
   /*!
-    @brief Copy particles to halo
+    @brief Copy particles to mask particle data holder.
+    @param[in] a_mask Mask
   */
-  void copyMaskParticles(const Vector<RefCountedPtr<LevelData<BaseFab<bool> > > >& a_halo) const;
+  void copyMaskParticles(const Vector<RefCountedPtr<LevelData<BaseFab<bool> > > >& a_mask) const;
 
   /*!
-    @brief Copy non-halo particles to non-halo storage
+    @brief Copy particles to non-masked data holder. 
+    @details This is the "inverse" of copyMaskParticles. 
+    @param[in] a_mask Mask
   */
-  void copyNonMaskParticles(const Vector<RefCountedPtr<LevelData<BaseFab<bool> > > >& a_halo) const;
+  void copyNonMaskParticles(const Vector<RefCountedPtr<LevelData<BaseFab<bool> > > >& a_mask) const;
 
   /*!
     @brief Copy particles to halo. a_level is the coarse level. 
