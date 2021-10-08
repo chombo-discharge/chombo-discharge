@@ -1002,6 +1002,7 @@ void Driver::parseOptions(){
   pp.get("stop_time",                m_stopTime);
   pp.get("max_plot_depth",           m_maxPlotDepth);
   pp.get("max_chk_depth",            m_maxCheckpointDepth);
+  pp.get("do_init_load_balance",     m_doInitLoadBalancing);
 
   m_restart = (m_restartStep > 0) ? true : false;
 
@@ -1420,39 +1421,43 @@ void Driver::setupFresh(const int a_initialRegrids){
   this->allocateInternals();
 
   // Provide TimeStepper with geometry in case it needs it. 
-  m_timeStepper->setComputationalGeometry(m_computationalGeometry);       // Set computational geometry
+  m_timeStepper->setComputationalGeometry(m_computationalGeometry); 
 
-  // TimeStepper setup
-  m_timeStepper->setupSolvers();                                 // Instantiate solvers
-  m_timeStepper->synchronizeSolverTimes(m_timeStep, m_time, m_dt);  // Sync solver times
+  // TimeStepper setup. This instantiatse solvers (but does not necessarily fill them with data). 
+  m_timeStepper->setupSolvers();                  
+  m_timeStepper->synchronizeSolverTimes(m_timeStep, m_time, m_dt);
+
+  // Set up the AMR operators
   m_timeStepper->registerOperators();
   m_amr->regridOperators(lmin);
-  m_timeStepper->allocate();
 
   // Fill solves with initial data
-  m_timeStepper->initialData();                                  // Fill solvers with initial data
+  m_timeStepper->allocate();  
+  m_timeStepper->initialData();        
 
-  // We now load balance and define operators and stuff like that. 
-  this->cacheTags(m_tags);
-  m_timeStepper->preRegrid(lmin, lmax);
-  for (const auto& str : m_amr->getRealms()){
-    if(m_timeStepper->loadBalanceThisRealm(str)){
+  // If called for -- we can perform a 
+  if(m_doInitLoadBalancing){
+    this->cacheTags(m_tags);
+    m_timeStepper->preRegrid(lmin, lmax);
+    for (const auto& str : m_amr->getRealms()){
+      if(m_timeStepper->loadBalanceThisRealm(str)){
       
-      Vector<Vector<int> > procs;
-      Vector<Vector<Box> > boxes;
+	Vector<Vector<int> > procs;
+	Vector<Vector<Box> > boxes;
 
-      const int lmin   = 0;
-      const int lmax = m_amr->getFinestLevel(); 
+	const int lmin   = 0;
+	const int lmax = m_amr->getFinestLevel(); 
       
-      m_timeStepper->loadBalanceBoxes(procs, boxes, str, m_amr->getProxyGrids(), lmin, lmax);
+	m_timeStepper->loadBalanceBoxes(procs, boxes, str, m_amr->getProxyGrids(), lmin, lmax);
 
-      m_amr->regridRealm(str, procs, boxes, lmin);
+	m_amr->regridRealm(str, procs, boxes, lmin);
+      }
     }
+    m_amr->regridOperators(lmin);             // Regrid operators again.
+    this->regridInternals(lmax, lmax);        // Regrid internals for Driver.
+    m_timeStepper->regrid(lmin, lmax, lmax);  // Regrid solvers.
+    m_timeStepper->initialData();             // Need to fill with initial data again.
   }
-  m_amr->regridOperators(lmin);             // Regrid operators again.
-  this->regridInternals(lmax, lmax);        // Regrid internals for Driver.
-  m_timeStepper->regrid(lmin, lmax, lmax);  // Regrid solvers.
-  m_timeStepper->initialData();             // Need to fill with initial data again. 
   
   // Do post initialize stuff
   m_timeStepper->postInitialize();
