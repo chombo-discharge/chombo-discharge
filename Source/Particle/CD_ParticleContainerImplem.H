@@ -198,6 +198,11 @@ void ParticleContainer<P>::setupParticleData(const int a_base, const int a_fines
 }
 
 template <class P>
+bool ParticleContainer<P>::isCellSorted() const {
+  return m_isCellSorted;
+}
+
+template <class P>
 int ParticleContainer<P>::getFinestLevel() const {
   CH_assert(m_isDefined);
   
@@ -679,7 +684,16 @@ void ParticleContainer<P>::transferParticles(ParticleContainer<P>& a_otherContai
   if(m_isCellSorted) {
     MayDay::Error("ParticleContainer<P>::transferParticles(ParticleContainer<P>) - particles are sorted by cell!");
   }
-  
+
+  if(a_otherContainer.isCellSorted()){
+    MayDay::Error("ParticleContainer<P>::transferParticles(ParticleContainer<P>) - other particles are sorted by cell!");
+  }
+
+  if(a_otherContainer.getRealm() != m_realm){
+    MayDay::Error("ParticleContainer<P>::transferParticles(ParticleContainer<P>) - other container defined over a different realm");
+  }
+
+  // Ok, transfer the particles. 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
     collectValidParticles( a_otherContainer[lvl],
 			  *m_particles     [lvl],
@@ -1084,7 +1098,9 @@ void ParticleContainer<P>::copyMaskParticles(const Vector<RefCountedPtr<LevelDat
   CH_assert(m_isDefined);
   
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
-    this->copyMaskParticles(lvl, *a_mask[lvl]);
+    if(!a_mask[lvl].isNull()){
+      this->copyMaskParticles(lvl, *a_mask[lvl]);
+    }
   }
 }
 
@@ -1095,22 +1111,28 @@ void ParticleContainer<P>::copyNonMaskParticles(const Vector<RefCountedPtr<Level
   CH_assert(m_isDefined);
   
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
-    this->copyNonMaskParticles(lvl, *a_mask[lvl]);
+    if(!a_mask[lvl].isNull()){      
+      this->copyNonMaskParticles(lvl, *a_mask[lvl]);
+    }
   }
 }
 
 template <class P>
-void ParticleContainer<P>::copyMaskParticles(const int a_level, const LevelData<BaseFab<bool> >& a_halo) const {
+void ParticleContainer<P>::copyMaskParticles(const int a_level, const LevelData<BaseFab<bool> >& a_mask) const {
+  CH_TIME("ParticleContainer<P>::copyMaskParticles(level)");
+
+  CH_assert(m_isDefined);  
   
   m_maskParticles[a_level]->clear();
 
   const RealVect dx = m_dx[a_level];
 
-  // 1. Copy particles from m_particles to m_maskParticles if they lie in the halo mask.
-  for (DataIterator dit = m_grids[a_level].dataIterator(); dit.ok(); ++dit){
-    const BaseFab<bool>& mask = a_halo[dit()];
-    const List<P>& particles  = (*m_particles[a_level])[dit()].listItems();
-    List<P>& halo_particles   = (*m_maskParticles[a_level])[dit()].listItems();
+  // 1. Copy particles from m_particles to m_maskParticles if they lie in the input mask. 
+  for (DataIterator dit(m_grids[a_level]); dit.ok(); ++dit){
+    const BaseFab<bool>& mask = a_mask[dit()];
+
+    List<P>&       maskParticles  = (*m_maskParticles[a_level])[dit()].listItems();
+    const List<P>& particles      = (*m_particles    [a_level])[dit()].listItems();    
     
     for (ListIterator<P> lit(particles); lit.ok(); ++lit){
       const RealVect x = lit().position();
@@ -1118,13 +1140,18 @@ void ParticleContainer<P>::copyMaskParticles(const int a_level, const LevelData<
 			      (int)floor((x[1] - m_probLo[1])/dx[1]),
 			      (int)floor((x[2] - m_probLo[2])/dx[2])));
 	
-      if(mask(iv)) halo_particles.add(lit());
+      if(mask(iv)) {
+	maskParticles.add(lit());
+      }
     }
   }
 }
 
 template <class P>
 void ParticleContainer<P>::copyNonMaskParticles(const int a_level, const LevelData<BaseFab<bool> >& a_halo) const {
+  CH_TIME("ParticleContainer<P>::copyNonMaskParticles(level)");
+
+  CH_assert(m_isDefined);    
   
   m_nonMaskParticles[a_level]->clear();
 
@@ -1149,27 +1176,36 @@ void ParticleContainer<P>::copyNonMaskParticles(const int a_level, const LevelDa
 
 template <class P>
 void ParticleContainer<P>::clearParticles() {
-  for (int lvl = 0; lvl <= m_finestLevel; lvl++){
-    m_particles[lvl]->clear();
-  }
+  CH_assert(m_isDefined);
+
+  this->clear(m_particles);
+}
+
+template <class P>
+void ParticleContainer<P>::clearBufferParticles() const {
+  CH_assert(m_isDefined);
+
+  this->clear(m_bufferParticles);  
 }
 
 template <class P>
 void ParticleContainer<P>::clearMaskParticles() const {
-  for (int lvl = 0; lvl <= m_finestLevel; lvl++){
-    m_maskParticles[lvl]->clear();
-  }
+  CH_assert(m_isDefined);
+
+  this->clear(m_maskParticles);    
 }
 
 template <class P>
 void ParticleContainer<P>::clearNonMaskParticles() const {
-  for (int lvl = 0; lvl <= m_finestLevel; lvl++){
-    m_nonMaskParticles[lvl]->clear();
-  }
+  CH_assert(m_isDefined);
+
+  this->clear(m_nonMaskParticles);      
 }
 
 template <class P>
-void ParticleContainer<P>::clear(AMRParticles<P>& a_particles) {
+void ParticleContainer<P>::clear(AMRParticles<P>& a_particles) const {
+  CH_assert(m_isDefined);
+  
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
     a_particles[lvl]->clear();
   }
