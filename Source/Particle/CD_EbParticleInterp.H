@@ -28,6 +28,9 @@
   @brief A class for depositing and interpolating particles. Contains various useful routines for interpolation of different fields in the
   base particle class (e.g., mass, "mobility"). This class also contains functions for depositing particles with 2/4 times the usual particle width,
   which is included because we want to support deposition of particles over refinement boundaries. 
+  @details Currently, this class is cheap to construct and thus does not need to stored for each box during regrids. 
+  @note If the user sets the object to force ngp deposition in cut-cells, the result is not kappa-weighted in any form, i.e. the cut-cell will contain
+  the full deposited mass (without multiplying or dividing by kappa). Likewise, it will force NGP interpolation in cut-cells. 
 */
 class EbParticleInterp{
 public:
@@ -43,7 +46,7 @@ public:
     @param[in] a_ebisbox       EBIS box 
     @param[in] a_dx            Resolution
     @param[in] a_probLo        Lower-left corner of computational domain
-    @param[in] a_forceIrregNGP If true, forces NGP deposition in cut-cells. 
+    @param[in] a_forceIrregNGP If true, forces NGP deposition and interpolation in cut-cells. 
   */
   EbParticleInterp(const Box& a_region, const EBISBox& a_ebisbox, const RealVect& a_dx, const RealVect& a_probLo, const bool a_forceIrregNGP);
 
@@ -53,7 +56,7 @@ public:
     @param[in] a_ebisbox       EBIS box 
     @param[in] a_dx            Resolution
     @param[in] a_probLo        Lower-left corner of computational domain
-    @param[in] a_forceIrregNGP If true, forces NGP deposition in cut-cells. 
+    @param[in] a_forceIrregNGP If true, forces NGP deposition and interpolation in cut-cells. 
   */
   void define(const Box& a_region, const EBISBox&  a_ebisbox, const RealVect& a_dx, const RealVect& a_probLo, const bool a_forceIrregNGP);                     
 
@@ -63,16 +66,17 @@ public:
     is fetched from the specified template parameter 'a_particleScalarField' This should be a pointer to a member function with signature 
     const Real& P::function() const. E.g. if we are depositing mass through a function const Real& P::mass() const we will specifiy
     
-        interpolate<Particle, &Particle::mass>(a_particleList, a_rho, a_interpType)
+        deposit<Particle, &Particle::mass>(a_particleList, a_rho, a_depositionType, a_forceIrregNGP)
 	
     To deposit a different quantity, simply change the function pointer in the input parameter. 
     @param[in]    a_particleList   Particles to be deposited
     @param[inout] a_rho            Mesh data
     @param[in]    a_depositionType Deposition method
+    @param[in]    a_forceIrregNGP  If true, force NGP in cut-cells
     @note This routine will INCREMENT a_rho. 
   */
   template <class P, const Real&(P::*particleScalarField)() const>
-  void deposit(const List<P>& a_particleList, FArrayBox& a_rho, const DepositionType a_depositionType) const;
+  void deposit(const List<P>& a_particleList, FArrayBox& a_rho, const DepositionType a_depositionType, const bool a_forceIrregNGP) const;
 
   /*!
     @brief Deposit particle onto the mesh using twice the standard cloud width. 
@@ -86,10 +90,11 @@ public:
     @param[in]    a_particleList   Particles to be deposited
     @param[inout] a_rho            Mesh data
     @param[in]    a_depositionType Deposition method
+    @param[in]    a_forceIrregNGP  If true, force NGP in cut-cells
     @note This routine will INCREMENT a_rho. 
   */
   template <class P, const Real&(P::*particleScalarField)() const>
-  void deposit2(const List<P>& a_particleList, FArrayBox& a_rho, const DepositionType a_depositionType) const;
+  void deposit2(const List<P>& a_particleList, FArrayBox& a_rho, const DepositionType a_depositionType, const bool a_forceIrregNGP) const;
 
   /*!
     @brief Deposit particle onto the mesh using 4x the standard cloud width. 
@@ -103,10 +108,11 @@ public:
     @param[in]    a_particleList   Particles to be deposited
     @param[inout] a_rho            Mesh data
     @param[in]    a_depositionType Deposition method
+    @param[in]    a_forceIrregNGP  If true, force NGP in cut-cells
     @note This routine will INCREMENT a_rho. 
   */
   template <class P, const Real&(P::*particleScalarField)() const>
-  void deposit4(const List<P>& a_particleList, FArrayBox& a_rho, const DepositionType a_depositionType) const;
+  void deposit4(const List<P>& a_particleList, FArrayBox& a_rho, const DepositionType a_depositionType, const bool a_forceIrregNGP) const;
 
   /*!
     @brief Interpolate a vector field onto the particle position. 
@@ -125,7 +131,8 @@ public:
   template <class P, Real&(P::*particleScalarField)()>
   void interpolate(List<P>&             a_particleList,
 		   const FArrayBox&     a_meshScalarField,
-		   const DepositionType a_interpType);  
+		   const DepositionType a_interpType,
+		   const bool           a_forceIrregNGP) const;  
 
   /*!
     @brief Interpolate a vector field onto the particle position. 
@@ -144,7 +151,10 @@ public:
   template <class P, RealVect&(P::*particleVectorField)()>
   void interpolate(List<P>&             a_particleList,
 		   const FArrayBox&     a_meshVectorField,
-		   const DepositionType a_interpType);  
+		   const DepositionType a_interpType,
+		   const bool           a_forceIrregNGP) const;
+
+// FUNCTIONS BELOW HERE SHOULD BE REMOVED AFTER ALL PARTICLE CODE USE THE NEW DEPOSITION/INTERPOLATION SIGNATURES.   
   
   /*!
     @brief Deposit particle mass onto the mesh using a standard cloud width. 
@@ -230,7 +240,7 @@ public:
   void interpolateAcceleration(List<P>&             a_particleList,
 			       const FArrayBox&     a_accelerationField,
 			       const DepositionType a_interpType) const;
-
+// FUNCTIONS TO BE REMOVED STOP HERE
 
 protected:
 
@@ -242,6 +252,7 @@ protected:
     @param[in]    a_position       Particle position
     @param[in]    a_strength       Mass (or similar quantity) to be deposited. 
     @param[in]    a_depositionType Deposition type
+    @param[in]    a_forceIrregNGP  Force NGP in cut-cells
   */
   inline
   void depositParticle(FArrayBox&           a_rho,
@@ -249,7 +260,8 @@ protected:
 		       const RealVect&      a_dx,
 		       const RealVect&      a_position,
 		       const Real&          a_strength,
-		       const DepositionType a_depositionType) const;
+		       const DepositionType a_depositionType,
+		       const bool           a_forceIrregNGP) const;
 
   /*!
     @brief Wrapper function for depositing a single particle which has twice the usual cloud width. 
@@ -259,6 +271,7 @@ protected:
     @param[in]    a_position       Particle position
     @param[in]    a_strength       Mass (or similar quantity) to be deposited. 
     @param[in]    a_depositionType Deposition type
+    @param[in]    a_forceIrregNGP  Force NGP in cut-cells
   */
   inline
   void depositParticle2(FArrayBox&           a_rho,
@@ -266,7 +279,8 @@ protected:
 			const RealVect&      a_dx,
 			const RealVect&      a_position,
 			const Real&          a_strength,
-			const DepositionType a_interpType) const;
+			const DepositionType a_depositionType,						
+			const bool           a_forceIrregNGP) const;
 
   /*!
     @brief Wrapper function for depositing a single particle which has four times the usual cloud width.
@@ -276,6 +290,7 @@ protected:
     @param[in]    a_position       Particle position
     @param[in]    a_strength       Mass (or similar quantity) to be deposited. 
     @param[in]    a_depositionType Deposition type
+    @param[in]    a_forceIrregNGP  Force NGP in cut-cells
   */
   inline
   void depositParticle4(FArrayBox&           a_rho,
@@ -283,7 +298,8 @@ protected:
 			const RealVect&      a_dx,
 			const RealVect&      a_position,
 			const Real&          a_strength,
-			const DepositionType a_interpType) const;
+			const DepositionType a_depositionType,			
+			const bool           a_forceIrregNGP) const;			
   
   /*!
     @brief Wrapper function that interpolates a scalar field onto the particle position
@@ -293,6 +309,7 @@ protected:
     @param[in]  a_dx             Grid resolution
     @param[in]  a_position       Particle position
     @param[in]  a_interpType     Interpolation type. 
+    @param[in]  a_forceIrregNGP  Force NGP in cut-cells
   */
   inline
   void interpolateParticle(Real&                a_particleField,
@@ -300,7 +317,8 @@ protected:
 			   const RealVect&      a_probLo,
 			   const RealVect&      a_dx,
 			   const RealVect&      a_position,
-			   const DepositionType a_interpType) const;
+			   const DepositionType a_interpType,
+			   const bool           a_forceIrregNGP) const;			  
 
   /*!
     @brief Wrapper function that interpolates a vector field onto the particle position
@@ -310,6 +328,7 @@ protected:
     @param[in]  a_dx             Grid resolution
     @param[in]  a_position       Particle position
     @param[in]  a_interpType     Interpolation type. 
+    @param[in]  a_forceIrregNGP  Force NGP in cut-cells
   */
   inline
   void interpolateParticle(RealVect&            a_particleField,
@@ -317,8 +336,9 @@ protected:
 			   const RealVect&      a_probLo,
 			   const RealVect&      a_dx,
 			   const RealVect&      a_position,
-			   const DepositionType a_interpType) const;
-
+			   const DepositionType a_interpType,
+			   const bool           a_forceIrregNGP) const;
+  
   /*!
     @brief Cell-centered box, i.e. valid region. 
   */
