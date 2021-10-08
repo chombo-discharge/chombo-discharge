@@ -1088,9 +1088,9 @@ void CdrSolver::initialDataParticles(){
 
 	// Make the deposition object and put the particles on the grid. 
 	const bool forceIrregNGP = true;
-	EbParticleInterp interp(cellBox, ebisbox, dx, probLo, forceIrregNGP);
+	EbParticleInterp interp(cellBox, ebisbox, dx, probLo);
 	
-	interp.deposit(particles[lvl][dit()].listItems(), (*m_phi[lvl])[dit()].getFArrayBox(), DepositionType::NGP);
+	interp.deposit<Particle, &Particle::mass>(particles[lvl][dit()].listItems(), (*m_phi[lvl])[dit()].getFArrayBox(), DepositionType::NGP, true);
       }
 
 #if CH_SPACEDIM==2 // Scale for 2D Cartesian. We do this because the 2D deposition object will normalize by 1/(dx*dx), but we want 1/(dx*dx*dx) in both 2D and 3D

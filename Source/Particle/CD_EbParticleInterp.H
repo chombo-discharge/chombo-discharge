@@ -46,9 +46,8 @@ public:
     @param[in] a_ebisbox       EBIS box 
     @param[in] a_dx            Resolution
     @param[in] a_probLo        Lower-left corner of computational domain
-    @param[in] a_forceIrregNGP If true, forces NGP deposition and interpolation in cut-cells. 
   */
-  EbParticleInterp(const Box& a_region, const EBISBox& a_ebisbox, const RealVect& a_dx, const RealVect& a_probLo, const bool a_forceIrregNGP);
+  EbParticleInterp(const Box& a_region, const EBISBox& a_ebisbox, const RealVect& a_dx, const RealVect& a_probLo);
 
   /*!
     @brief Define function
@@ -58,7 +57,7 @@ public:
     @param[in] a_probLo        Lower-left corner of computational domain
     @param[in] a_forceIrregNGP If true, forces NGP deposition and interpolation in cut-cells. 
   */
-  void define(const Box& a_region, const EBISBox&  a_ebisbox, const RealVect& a_dx, const RealVect& a_probLo, const bool a_forceIrregNGP);                     
+  void define(const Box& a_region, const EBISBox&  a_ebisbox, const RealVect& a_dx, const RealVect& a_probLo);
 
   /*!
     @brief Deposit particle onto the mesh using a standard cloud width. 
@@ -76,7 +75,7 @@ public:
     @note This routine will INCREMENT a_rho. 
   */
   template <class P, const Real&(P::*particleScalarField)() const>
-  void deposit(const List<P>& a_particleList, FArrayBox& a_rho, const DepositionType a_depositionType, const bool a_forceIrregNGP) const;
+  void deposit(const List<P>& a_particleList, FArrayBox& a_rho, const DepositionType a_depositionType, const bool a_forceIrregNGP = false) const;
 
   /*!
     @brief Deposit particle onto the mesh using twice the standard cloud width. 
@@ -94,7 +93,7 @@ public:
     @note This routine will INCREMENT a_rho. 
   */
   template <class P, const Real&(P::*particleScalarField)() const>
-  void deposit2(const List<P>& a_particleList, FArrayBox& a_rho, const DepositionType a_depositionType, const bool a_forceIrregNGP) const;
+  void deposit2(const List<P>& a_particleList, FArrayBox& a_rho, const DepositionType a_depositionType, const bool a_forceIrregNGP = false) const;
 
   /*!
     @brief Deposit particle onto the mesh using 4x the standard cloud width. 
@@ -112,7 +111,7 @@ public:
     @note This routine will INCREMENT a_rho. 
   */
   template <class P, const Real&(P::*particleScalarField)() const>
-  void deposit4(const List<P>& a_particleList, FArrayBox& a_rho, const DepositionType a_depositionType, const bool a_forceIrregNGP) const;
+  void deposit4(const List<P>& a_particleList, FArrayBox& a_rho, const DepositionType a_depositionType, const bool a_forceIrregNGP = false) const;
 
   /*!
     @brief Interpolate a vector field onto the particle position. 
@@ -132,7 +131,7 @@ public:
   void interpolate(List<P>&             a_particleList,
 		   const FArrayBox&     a_meshScalarField,
 		   const DepositionType a_interpType,
-		   const bool           a_forceIrregNGP) const;  
+		   const bool           a_forceIrregNGP = false) const;  
 
   /*!
     @brief Interpolate a vector field onto the particle position. 
@@ -152,95 +151,8 @@ public:
   void interpolate(List<P>&             a_particleList,
 		   const FArrayBox&     a_meshVectorField,
 		   const DepositionType a_interpType,
-		   const bool           a_forceIrregNGP) const;
+		   const bool           a_forceIrregNGP = false) const;
 
-// FUNCTIONS BELOW HERE SHOULD BE REMOVED AFTER ALL PARTICLE CODE USE THE NEW DEPOSITION/INTERPOLATION SIGNATURES.   
-  
-  /*!
-    @brief Deposit particle mass onto the mesh using a standard cloud width. 
-    @details This reqires that P has a member function mass()
-    @param[in]    a_particleList Particles to be deposited
-    @param[inout] a_rho          Mesh data
-    @param[in]    a_depositionType   Deposition method
-    @note This routine will increment a_rho. 
-  */
-  template <class P>
-  void deposit(const List<P>& a_particleList, FArrayBox& a_rho, const DepositionType a_depositionType) const;
-
-  /*!
-    @brief Deposit particle mass onto the mesh using twice the cloud width. 
-    @details This reqires that P has a member function mass()
-    @param[in]    a_particleList Particles to be deposited
-    @param[inout] a_rho          Mesh data
-    @param[in]    a_depositionType   Deposition method
-    @note This routine will increment a_rho. 
-  */
-  template <class P>
-  void deposit2(const List<P>& a_particleList, FArrayBox& a_rho, const DepositionType a_depositionType) const;
-
-  /*!
-    @brief Deposit particle mass onto the mesh using 4x the cloud width. 
-    @details This reqires that P has a member function mass()
-    @param[in]    a_particleList Particles to be deposited
-    @param[inout] a_rho          Mesh data
-    @param[in]    a_depositionType   Deposition method
-    @note This routine will increment a_rho. 
-  */
-  template <class P>
-  void deposit4(const List<P>& a_particleList, FArrayBox& a_rho, const DepositionType a_depositionType) const;
-
-  /*!
-    @brief Interpolate a field onto the particle position. 
-    @details This is just like regular particle-mesh interpolation except that it requires that the particle type P 
-    has a member function Real& P::diffusion(). The field a_diffusionField must have exactly one component. 
-    @param[inout] a_particleList   Particles to be interpolated. 
-    @param[in]    a_diffusionField Diffusion "field". I.e. mesh data. 
-    @param[in]    a_interpType     Interpolation type. 
-  */
-  template <class P>
-  void interpolateDiffusion(List<P>&             a_particleList,
-			    const FArrayBox&     a_diffusionField,
-			    const DepositionType a_interpType) const;
-
-  /*!
-    @brief Interpolate a field onto the particle position. 
-    @details This is just like regular particle-mesh interpolation except that it requires that the particle type P 
-    has a member function Real& P::mobility(). The field a_mobilityField must have exact one component. 
-    @param[inout] a_particleList   Particles to be interpolated. 
-    @param[in]    a_mobilityField  Mobility "field". I.e. mesh data. 
-    @param[in]    a_interpType     Interpolation type. 
-  */
-  template <class P>
-  void interpolateMobility(List<P>&             a_particleList,
-			   const FArrayBox&     a_mobilityField,
-			   const DepositionType a_interpType) const;
-  
-  /*!
-    @brief Interpolate a field onto the particle position. 
-    @details This is just like regular particle-mesh interpolation except that it requires that the particle type P 
-    has a member function RealVect& P::velocity(). The field a_velocityField must have exactly SpaceDim components. 
-    @param[inout] a_particleList   Particles to be interpolated. 
-    @param[in]    a_velocityField  Velocity field
-    @param[in]    a_interpType     Interpolation type. 
-  */
-  template <class P>
-  void interpolateVelocity(List<P>&             a_particleList,
-			   const FArrayBox&     a_velocityField,
-			   const DepositionType a_interpType) const;
-
-  /*!
-    @brief Interpolate a field onto the particle position. 
-    @details This is just like regular particle-mesh interpolation except that it requires that the particle type P 
-    has a member function RealVect& P::acceleration(). The field a_accelerationField must have exact SpaceDim components. 
-    @param[inout] a_particleList      Particles to be interpolated. 
-    @param[in]    a_accelerationField Acceleration field
-    @param[in]    a_interpType        Interpolation type. 
-  */
-  template <class P>
-  void interpolateAcceleration(List<P>&             a_particleList,
-			       const FArrayBox&     a_accelerationField,
-			       const DepositionType a_interpType) const;
-// FUNCTIONS TO BE REMOVED STOP HERE
 
 protected:
 
@@ -358,11 +270,6 @@ protected:
     @brief Lower-left corner of computational domain.
   */
   RealVect m_probLo;
-
-  /*!
-    @brief Special flag which (if true) forces NGP deposition in cut cells.
-  */
-  bool m_forceIrregNGP;
 };
 
 #include <CD_NamespaceFooter.H>

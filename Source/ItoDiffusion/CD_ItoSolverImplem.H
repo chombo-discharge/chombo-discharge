@@ -186,8 +186,7 @@ void ItoSolver::depositKappaConservativeWithPVR(EBAMRCellData&               a_p
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box box          = dbl.get(dit());
       const EBISBox& ebisbox = ebisl[dit()];
-      EbParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin, m_irreg_ngp_deposition);
-      //      interp.deposit((*particles[lvl])[dit()].listItems(), (*a_phi[lvl])[dit()].getFArrayBox(), m_deposition);
+      EbParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin);
       interp.deposit<ItoParticle, &ItoParticle::mass>((*particles[lvl])[dit()].listItems(), (*a_phi[lvl])[dit()].getFArrayBox(), m_deposition, m_irreg_ngp_deposition);      
     }
 
@@ -244,8 +243,7 @@ void ItoSolver::depositKappaConservativeNoPVR_native(EBAMRCellData&             
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box box          = dbl.get(dit());
       const EBISBox& ebisbox = ebisl[dit()];
-      EbParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin, m_irreg_ngp_deposition);
-      //      interp.deposit((*particles[lvl])[dit()].listItems(), (*a_phi[lvl])[dit()].getFArrayBox(), m_deposition);
+      EbParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin);
       interp.deposit<ItoParticle, &ItoParticle::mass>((*particles[lvl])[dit()].listItems(), (*a_phi[lvl])[dit()].getFArrayBox(), m_deposition, m_irreg_ngp_deposition);      
     }
 
@@ -277,13 +275,13 @@ void ItoSolver::depositKappaConservativeNoPVR_native(EBAMRCellData&             
 	const EBISBox& ebisbox = eblgFiCo.getEBISL()[dit()];
 
 	buffer[dit()].setVal(0.0);
-	EbParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin, m_irreg_ngp_deposition);
+	EbParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin);
 
 	if(refRat == 2){
-	  interp.deposit2((*halo_particles[lvl-1])[dit()].listItems(), buffer[dit()], m_deposition);
+	  interp.deposit2<ItoParticle, &ItoParticle::mass>((*halo_particles[lvl-1])[dit()].listItems(), buffer[dit()], m_deposition, m_irreg_ngp_deposition);
 	}
 	else if (refRat == 4){
-	  interp.deposit4((*halo_particles[lvl-1])[dit()].listItems(), buffer[dit()], m_deposition);
+	  interp.deposit4<ItoParticle, &ItoParticle::mass>((*halo_particles[lvl-1])[dit()].listItems(), buffer[dit()], m_deposition, m_irreg_ngp_deposition);	  
 	}
 	else{
 	  MayDay::Abort("ItoSolverI::depositKappaConservativeNoPVR - logic bust");
@@ -338,8 +336,7 @@ void ItoSolver::depositKappaConservativeNoPVR_NGP(EBAMRCellData&               a
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box box          = dbl.get(dit());
       const EBISBox& ebisbox = ebisl[dit()];
-      EbParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin, m_irreg_ngp_deposition);
-      //      interp.deposit((*non_halo_particles[lvl])[dit()].listItems(), (*a_phi[lvl])[dit()].getFArrayBox(), m_deposition);
+      EbParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin);
       interp.deposit<ItoParticle, &ItoParticle::mass>((*non_halo_particles[lvl])[dit()].listItems(), (*a_phi[lvl])[dit()].getFArrayBox(), m_deposition, m_irreg_ngp_deposition);    }
 
     // 2. Deposition into ghost cells across the fine boundary should end up on the coarse level. 
@@ -359,8 +356,7 @@ void ItoSolver::depositKappaConservativeNoPVR_NGP(EBAMRCellData&               a
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box box          = dbl.get(dit());
       const EBISBox& ebisbox = ebisl[dit()];
-      EbParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin, m_irreg_ngp_deposition);
-      //      interp.deposit((*halo_particles[lvl])[dit()].listItems(), (*a_phi[lvl])[dit()].getFArrayBox(), DepositionType::NGP);
+      EbParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin);
       interp.deposit<ItoParticle, &ItoParticle::mass>((*halo_particles[lvl])[dit()].listItems(), (*a_phi[lvl])[dit()].getFArrayBox(), DepositionType::NGP, m_irreg_ngp_deposition);      
     }    
   }

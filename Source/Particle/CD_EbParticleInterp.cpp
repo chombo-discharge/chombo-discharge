@@ -24,25 +24,22 @@ EbParticleInterp::EbParticleInterp(){
 EbParticleInterp::EbParticleInterp(const Box&      a_region,
 				   const EBISBox&  a_ebisbox,
 				   const RealVect& a_dx,
-				   const RealVect& a_probLo,
-				   const bool      a_forceIrregNGP){
+				   const RealVect& a_probLo) {
   CH_TIME("EbParticleInterp::EbParticleInterp");
   
-  this->define(a_region, a_ebisbox, a_dx, a_probLo, a_forceIrregNGP);
+  this->define(a_region, a_ebisbox, a_dx, a_probLo);
 }
 
 void EbParticleInterp::define(const Box&      a_region,
 			      const EBISBox&  a_ebisbox,
 			      const RealVect& a_dx,
-			      const RealVect& a_probLo,
-			      const bool      a_forceIrregNGP){
+			      const RealVect& a_probLo) {
   CH_TIME("EbParticleInterp::define");
   
   m_region        = a_region;
   m_ebisbox       = a_ebisbox;
   m_probLo        = a_probLo;
   m_dx            = a_dx;
-  m_forceIrregNGP = a_forceIrregNGP;
 }
 
 #include <CD_NamespaceFooter.H>

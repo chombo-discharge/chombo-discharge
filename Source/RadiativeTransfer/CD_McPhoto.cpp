@@ -978,8 +978,9 @@ void McPhoto::depositKappaConservative(EBAMRCellData&              a_phi,
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box box          = dbl.get(dit());
       const EBISBox& ebisbox = ebisl[dit()];
-      EbParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin, true);
-      interp.deposit((*a_photons[lvl])[dit()].listItems(), (*a_phi[lvl])[dit()].getFArrayBox(), m_deposition);
+      EbParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin);
+
+      interp.deposit<Photon, &Photon::mass>((*a_photons[lvl])[dit()].listItems(), (*a_phi[lvl])[dit()].getFArrayBox(), m_deposition, false);      
     }
 
     // This code adds contributions from ghost cells into the valid region
