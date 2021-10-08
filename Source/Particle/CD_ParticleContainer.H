@@ -54,11 +54,11 @@ public:
   ParticleContainer(const Vector<DisjointBoxLayout>& a_grids,
 		    const Vector<ProblemDomain>&     a_domains,
 		    const Vector<Real>&              a_dx,
-		    const Vector<int>&               a_ref_rat,
+		    const Vector<int>&               a_refRat,
 		    const RealVect&                  a_probLo,
-		    const int                        a_blocking_factor,
+		    const int                        a_blockingFactor,
 		    const int                        a_finestLevel,
-		    const int                        a_pvr_buffer,
+		    const int                        a_pvrBuffer,
 		    const std::string                a_realm);
 
   /*!
@@ -72,11 +72,11 @@ public:
   void define(const Vector<DisjointBoxLayout>& a_grids,
 	      const Vector<ProblemDomain>&     a_domains,
 	      const Vector<Real>&              a_dx,
-	      const Vector<int>&               a_ref_rat,
+	      const Vector<int>&               a_refRat,
 	      const RealVect&                  a_probLo,
-	      const int                        a_blocking_factor,
+	      const int                        a_blockingFactor,
 	      const int                        a_finestLevel,
-	      const int                        a_pvr_buffer,
+	      const int                        a_pvrBuffer,
 	      const std::string                a_realm);
 
   /*!
@@ -85,7 +85,7 @@ public:
   void regrid(const Vector<DisjointBoxLayout>& a_grids,
 	      const Vector<ProblemDomain>&     a_domains,
 	      const Vector<Real>&              a_dx,
-	      const Vector<int>&               a_ref_rat,
+	      const Vector<int>&               a_refRat,
 	      const int                        a_base,
 	      const int                        a_newFinestLevel);
 
@@ -148,6 +148,16 @@ public:
     @brief Get all particles on a level
   */
   const AMRParticles<P>& getParticles() const;
+
+  /*!
+    @brief Get buffer particles on all levels
+  */
+  AMRParticles<P>& getBufferParticles();
+
+  /*!
+    @brief Get buffer particles on all levels
+  */
+  const AMRParticles<P>& getBufferParticles() const;  
 
   /*!
     @brief Get the "ghosted" coarse particles. I.e. particles that lie on the coarse side of the CF interface. 
@@ -360,7 +370,7 @@ protected:
   /*!
     @brief PVR buffer - to be deprecated...
   */
-  int m_buffer;
+  int m_pvrBuffer;
 
   /*!
     @brief Finest grid level
@@ -375,12 +385,12 @@ protected:
   /*!
     @brief Check if particle container is defined
   */
-  bool m_is_defined;
+  bool m_isDefined;
 
   /*!
     @brief Check if particle container is "cell sorted"
   */
-  bool m_cell_sorted;
+  bool m_isCellSorted;
 
   /*!
     @brief AMR grids
@@ -393,6 +403,11 @@ protected:
   Vector<ProblemDomain> m_domains;
 
   /*!
+    @brief Grown layouts
+  */
+  Vector<BoxLayout> m_grownGrids;
+
+  /*!
     @brief Resolutions on each grid level
   */
   Vector<RealVect> m_dx;
@@ -400,7 +415,7 @@ protected:
   /*!
     @brief Refinement ratios. Entry at index 'l' is the refinement between level 'l' and level 'l+1'
   */
-  Vector<int> m_ref_rat;
+  Vector<int> m_refRat;
 
   /*!
     @brief Cache particles. Use during pre-regrid operations, and for transferring particles between coarse and fine before
@@ -414,16 +429,30 @@ protected:
   AMRParticles<P> m_particles;
 
   /*!
-    @brief Special data holder that holds copies of particles on the coarse level that are within a specified range of the
-    refinement boundary. Used for deposition of coarse-level particle clouds across refinement boundaries. 
+    @brief Special data holder that holds particles on a grown grid layout. 
+    @details This particle data holder uses grids that exceed the DisjointBoxLayout on each level (boxes are grown by m_refRat). This
+    means that this particle data holder can store particles that are out the DisjointBoxLayout by m_refRat cells. This is very useful
+    when one wants to deposit particles on the fine level, but where the particles live on the coarse level. In such cases one will typically
+    copy some (or all) particles from the coarse level to this data holder and deposit from this data holder onto the fine level. 
   */
-  mutable AMRParticles<P> m_halo_particles;
+  mutable AMRParticles<P> m_bufferParticles;
 
   /*!
     @brief Special data holder that holds copies of particles on the coarse level that are within a specified range of the
     refinement boundary. Used for deposition of coarse-level particle clouds across refinement boundaries. 
   */
-  mutable AMRParticles<P> m_non_halo_particles;
+  mutable AMRParticles<P> m_maskParticles;
+
+  /*!
+    @brief Special data holder that holds copies of particles on the coarse level that are within a specified range of the
+    refinement boundary. Used for deposition of coarse-level particle clouds across refinement boundaries. 
+  */
+  mutable AMRParticles<P> m_nonMaskParticles;
+
+  /*!
+    @brief Cell particles. 
+  */
+  AMRCellParticles<P> m_cellSortedParticles;  
 
   /*!
     @brief Valid region for each AMR level
@@ -431,9 +460,9 @@ protected:
   AMRPVR m_pvr;
 
   /*!
-    @brief Cell particles. 
+    @brief Set up grown grids
   */
-  AMRCellParticles<P> m_cell_particles;
+  void setupGrownGrids(const int a_base, const int a_finestLevel);
 
   /*!
     @brief Setup function for the particle valid region
@@ -441,7 +470,7 @@ protected:
   void setupPVR(const int a_base, const int a_finestLevel);
 
   /*!
-    @brief Setup function for the particle data (m_particles and m_halo_particles)
+    @brief Setup function for the particle data (m_particles and m_maskParticles)
   */
   void setupParticleData(const int a_base, const int a_finestLevel);
 
