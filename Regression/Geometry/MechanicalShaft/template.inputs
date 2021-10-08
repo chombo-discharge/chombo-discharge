@@ -4,8 +4,8 @@
 AmrMesh.lo_corner       = -1 -1 -1    # Low corner of problem domain
 AmrMesh.hi_corner       =  1  1  1    # High corner of problem domain
 AmrMesh.verbosity       = -1          # Controls verbosity. 
-AmrMesh.coarsest_domain = 64 64 64    # Number of cells on coarsest domain
-AmrMesh.max_amr_depth   = 1           # Maximum amr depth
+AmrMesh.coarsest_domain = 128 128 128 # Number of cells on coarsest domain
+AmrMesh.max_amr_depth   = 0           # Maximum amr depth
 AmrMesh.max_sim_depth   = -1          # Maximum simulation depth
 AmrMesh.fill_ratio      = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size     = 2           # Number of cells between grid levels
@@ -40,7 +40,7 @@ Driver.initial_regrids                 = 0             # Number of initial regri
 Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0             # Start time (fresh simulations only)
 Driver.stop_time                       = 1.0           # Stop time
-Driver.max_steps                       = 0             # Maximum number of steps
+Driver.max_steps                       = 100           # Maximum number of steps
 Driver.geometry_only                   = false         # Special option that ONLY plots the geometry
 Driver.ebis_memory_load_balance        = false         # Use memory as loads for EBIS generation
 Driver.write_memory                    = false         # Write MPI memory report
@@ -50,7 +50,7 @@ Driver.output_names                    = simulation    # Simulation output names
 Driver.max_plot_depth                  = -1            # Restrict maximum plot depth (-1 => finest simulation level)
 Driver.max_chk_depth                   = -1            # Restrict chechkpoint depth (-1 => finest simulation level)	
 Driver.num_plot_ghost                  = 1             # Number of ghost cells to include in plots
-Driver.plt_vars                        = mpi_rank levelset             # 'tags', 'mpi_rank', 'levelset'
+Driver.plt_vars                        = 0             # 'tags', 'mpi_rank', 'levelset'
 Driver.restart                         = 0             # Restart step (less or equal to 0 implies fresh simulation)
 Driver.allow_coarsening                = true          # Allows removal of grid levels according to CellTagger
 Driver.grow_geo_tags                   = 2                # How much to grow tags when using geometry-based refinement. 
@@ -69,38 +69,52 @@ GeoCoarsener.box1_lvl    = 0            # up to this level
 GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 
 # ====================================================================================================
-# ROD_DIELECTRIC CLASS OPTIONS
+# MECHANICAL_SHAFT CLASS OPTIONS
 # ====================================================================================================
-RodDielectric.electrode.on              = true          # Use electrode or not
-RodDielectric.electrode.endpoint1       = 0 0 2         # One endpoint
-RodDielectric.electrode.endpoint2       = 0 0 0.5       # Other endpoint
-RodDielectric.electrode.radius          = 0.1           # Electrode radius
-RodDielectric.electrode.live            = true          # Live or not
+MechanicalShaft.eps0                      = 1               # Background permittivity
+MechanicalShaft.turn_on_electrode         = true            # Turn on/off electrode
+MechanicalShaft.turn_on_dielectric        = true            # Turn on/off dielectric
 
-RodDielectric.dielectric.on             = true          # Use dielectric or not
-RodDielectric.dielectric.shape          = sphere        # 'plane', 'box', 'perlin_box', 'sphere'.
-RodDielectric.dielectric.permittivity   = 4             # Dielectric permittivity
+# Electrode settings
+--------------------
+MechanicalShaft.electrode.live            = true            # Live electrode or not
+MechanicalShaft.electrode.endpoint1       = 0E-3  0  3E-2   # First center
+MechanicalShaft.electrode.endpoint2       = 0E-3  0  5E-2   # Other end point
+MechanicalShaft.electrode.inner_radius    = 7.E-3           # Electrode inner radius
+MechanicalShaft.electrode.outer_radius    = 1.E-2           # Electrode outer radius
+MechanicalShaft.electrode.curvature       = 1E-3            # Curvature
 
-# Subsettings for 'plane'
-RodDielectric.plane.point               = 0 0 -0.5      # Plane point
-RodDielectric.plane.normal              = 0 0 1         # Plane normal vector (outward)
+# Mechshaft settings
+--------------------
+MechanicalShaft.dielectric.shaft_shape    = polygon         # 'polygon', 'cylinder', or 'cyl_profile'
+MechanicalShaft.dielectric.permittivity   = 4.0             # Dielectric permittivity
 
-# Subsettings for 'box'
-RodDielectric.box.lo_corner             = -.75 -.75 -.75 # Lo box corner
-RodDielectric.box.hi_corner             =  .75  .75 -.25 # High box corner
-RodDielectric.box.curvature             = 0.2
+# Subsettings for polygonal cross section
+-----------------------------------------
+MechanicalShaft.dielectric.polygon.endpoint1  = 0. 0. -1E-2    # Endpoint 1
+MechanicalShaft.dielectric.polygon.endpoint2  = 0. 0.  5E-2    # Endpoint 2
+MechanicalShaft.dielectric.polygon.num_sides  = 6              # Number of sides for polygon shape. 
+MechanicalShaft.dielectric.polygon.radius     = 5E-3           # Dielectric rod radius
+MechanicalShaft.dielectric.polygon.curvature  = 100E-6         # Rounding radius
+MechanicalShaft.dielectric.polygon.length     = 1.0            # Dielectric rod length. Should be deprecated
 
-# Subsettings for 'perlin_box'
-RodDielectric.perlin_box.point          = 0  0 -0.5     # Slab center-point (side with roughness)
-RodDielectric.perlin_box.normal         = 0  0  1       # Slab normal
-RodDielectric.perlin_box.curvature      = 0.5           # Slab rounding radius
-RodDielectric.perlin_box.dimensions     = 1  1  10      # Slab dimensions
-RodDielectric.perlin_box.noise_amp      = 0.1           # Noise amplitude
-RodDielectric.perlin_box.noise_octaves  = 1             # Noise octaves
-RodDielectric.perlin_box.noise_persist  = 0.5           # Octave persistence
-RodDielectric.perlin_box.noise_freq     = 5 5 5         # Noise frequency
-RodDielectric.perlin_box.noise_reseed   = false         # Reseed noise or not
+# Subsettings for 'cylinder'
+----------------------------
+MechanicalShaft.dielectric.cylinder.endpoint1  = 0. 0. 1E-2    # Endpoint 1
+MechanicalShaft.dielectric.cylinder.endpoint2  = 0. 0. 3E-2    # Endpoint 2
+MechanicalShaft.dielectric.cylinder.radius     = 5E-3          # Cylinder radius
+MechanicalShaft.dielectric.cylinder.curvature  = 1E-3          # Rounding radius
 
-# Subsettings for sphere
-RodDielectric.sphere.center             = 0 0 -0.5      # Low corner
-RodDielectric.sphere.radius             = 0.25          # Radius
+# Subsettings for 'cyl_profile'
+-------------------------------
+MechanicalShaft.dielectric.cyl_profile.endpoint1       = 0 0 -1E-2  # Endpoint 1
+MechanicalShaft.dielectric.cyl_profile.endpoint2       = 0 0  5E-2  # Endpoint 2
+MechanicalShaft.dielectric.cyl_profile.cylinder_radius = 5E-3       # Cylinder radius
+MechanicalShaft.dielectric.cyl_profile.torus_major     = 5E-3       # Major torus radius
+MechanicalShaft.dielectric.cyl_profile.torus_minor     = 500E-6     # Minor torus radius
+MechanicalShaft.dielectric.cyl_profile.torus_distance  = 2E-3       # Distance between each torus
+MechanicalShaft.dielectric.cyl_profile.nleft           = 15         # Number of toroids to the left of center
+MechanicalShaft.dielectric.cyl_profile.nright          = 15         # Number of toroids to the right of center
+MechanicalShaft.dielectric.cyl_profile.shift           = 0.0        # Toroid shift from center
+MechanicalShaft.dielectric.cyl_profile.curvature       = 500E-6     # Curvature
+
