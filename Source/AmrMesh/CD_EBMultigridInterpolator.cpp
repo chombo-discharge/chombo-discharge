@@ -34,19 +34,13 @@ EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
 						 const CellLocation a_dataLocation,
 						 const IntVect&     a_ghostVector,
 						 const int          a_refRat,
-						 const int          a_nVar,
 						 const int          a_ghostCF,
 						 const int          a_order,
 						 const int          a_weighting){
   CH_TIME("EBMultigridInterpolator::EBMultigridInterpolator");
 
   CH_assert(a_ghostCF   > 0);
-  CH_assert(a_nVar      > 0);
   CH_assert(a_refRat%2 == 0);
-
-  if(a_nVar != 1){
-    MayDay::Error("EBMultigridInterpolator::EBMultigridInterpolator -- only a single component is supported for now (due to dependency on QuadCFInterp)");
-  }
 
   const DisjointBoxLayout& gridsFine = a_eblgFine.getDBL();
   const DisjointBoxLayout& gridsCoar = a_eblgCoar.getDBL();
@@ -57,7 +51,6 @@ EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
   Timer timer("EBMultigridInterpolator::EBMultigridInterpolator");
 
   m_refRat        = a_refRat;
-  m_nComp         = a_nVar;
   m_ghostCF       = a_ghostCF;
   m_order         = a_order;
   m_ghostVector   = a_ghostVector;
@@ -65,7 +58,9 @@ EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
   m_weight        = a_weighting;    
 
   timer.startEvent("Define QuadCFInterp");
-  QuadCFInterp::define(gridsFine, &gridsCoar, 1.0, a_refRat, a_nVar, a_eblgFine.getDomain());
+  //  QuadCFInterp::define(gridsFine, &gridsCoar, 1.0, a_refRat, 1, a_eblgFine.getDomain());
+  m_scalarInterpolator = RefCountedPtr<QuadCFInterp> (new QuadCFInterp(gridsFine, &gridsCoar, 1.0, a_refRat, 1,        a_eblgFine.getDomain()));
+  m_vectorInterpolator = RefCountedPtr<QuadCFInterp> (new QuadCFInterp(gridsFine, &gridsCoar, 1.0, a_refRat, SpaceDim, a_eblgFine.getDomain()));  
   timer.stopEvent("Define QuadCFInterp");  
 
   timer.startEvent("Define grids");  
@@ -97,7 +92,7 @@ EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
     timer.eventReport(pout());
   }
 
-  m_isDefined = true;
+  //  m_isDefined = true;
 }
 
 int EBMultigridInterpolator::getGhostCF() const{
@@ -128,10 +123,18 @@ void EBMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>&       a_phi
   aliasEB(fineAlias, (LevelData<EBCellFAB>&) a_phiFine);
   aliasEB(coarAlias, (LevelData<EBCellFAB>&) a_phiCoar);
 
-  QuadCFInterp::coarseFineInterp(fineAlias, coarAlias);
+  //  QuadCFInterp::coarseFineInterp(fineAlias, coarAlias);
+  RefCountedPtr<QuadCFInterp> interpolator;
+  if(a_variables == Interval(0, 0)){
+    interpolator = m_scalarInterpolator;
+  }
+  else if(a_variables == Interval(0, SpaceDim-1)){
+    interpolator = m_vectorInterpolator;
+  }
+  interpolator->coarseFineInterp(fineAlias, coarAlias);  
 
   // Interpolate all variables near the EB. We will copy a_phiCoar to m_grownCoarData which holds the data on the coarse grid cells around each fine-grid
-  // patch. Note that m_grownCoarData provides a LOCAL view of the coarse grid around each fine-level patch, so we can apply the stencils directly. 
+  // patch. Note that m_grownCoarData provides a LOCAL view of the coarse grid around each fine-level patch, so we can apply the stencils directly.
   for (int icomp = a_variables.begin(); icomp <= a_variables.end(); icomp++){
 
     // Copy data to scratch data holders. We need the coarse-data to be accessible by the fine data (through the same iterators), so we can't
@@ -225,7 +228,15 @@ void EBMultigridInterpolator::slowCoarseFineInterp(LevelData<EBCellFAB>&       a
   aliasEB(fineAlias, (LevelData<EBCellFAB>&) a_phiFine);
   aliasEB(coarAlias, (LevelData<EBCellFAB>&) a_phiCoar);
 
-  QuadCFInterp::coarseFineInterp(fineAlias, coarAlias);
+  //  QuadCFInterp::coarseFineInterp(fineAlias, coarAlias);
+  RefCountedPtr<QuadCFInterp> interpolator;
+  if(a_variables == Interval(0, 0)){
+    interpolator = m_scalarInterpolator;
+  }
+  else if(a_variables == Interval(0, SpaceDim-1)){
+    interpolator = m_vectorInterpolator;
+  }
+  interpolator->coarseFineInterp(fineAlias, coarAlias);    
 
   // Interpolate all variables near the EB. We will copy a_phiCoar to m_grownCoarData which holds the data on the coarse grid cells around each fine-grid
   // patch. Note that m_grownCoarData provides a LOCAL view of the coarse grid around each fine-level patch, so we can apply the stencils directly. 
@@ -448,7 +459,7 @@ void EBMultigridInterpolator::defineBuffers(){
 
   m_grownCoarBoxesLayout.define(coarBoxes, coFiGrids.procIDs());
 
-  m_grownCoarData.define(m_grownCoarBoxesLayout, m_nComp, EBCellFactory(coFiEBISL));
+  m_grownCoarData.define(m_grownCoarBoxesLayout, 1, EBCellFactory(coFiEBISL));
 }
 
 void EBMultigridInterpolator::defineStencilsEBCF(){
@@ -731,7 +742,7 @@ void EBMultigridInterpolator::makeAggStencils(){
   CH_TIME("EBMultigridInterpolator::makeAggStencils");
 
   // Make some proxies. 
-  LevelData<EBCellFAB> phiProxy(m_eblgFine.getDBL(), m_nComp, m_ghostVector, EBCellFactory(m_eblgFine.getEBISL()));
+  LevelData<EBCellFAB> phiProxy(m_eblgFine.getDBL(), 1, m_ghostVector, EBCellFactory(m_eblgFine.getEBISL()));
 
   // Define the fine-grid stencils.
   m_aggFineStencils.define(m_eblgFine.getDBL());

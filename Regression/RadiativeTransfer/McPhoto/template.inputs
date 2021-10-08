@@ -36,6 +36,7 @@ Driver.plot_interval                   = 10            # Plot interval
 Driver.regrid_interval                 = 10            # Regrid interval
 Driver.checkpoint_interval             = 10            # Checkpoint interval
 Driver.initial_regrids                 = 0             # Number of initial regrids
+Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0             # Start time (fresh simulations only)
 Driver.stop_time                       = 1.0           # Stop time
 Driver.max_steps                       = 100           # Maximum number of steps

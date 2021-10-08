@@ -23,9 +23,9 @@
 #include <CD_MultifluidAlias.H>
 #include <CD_LoadBalancing.H>
 #include <CD_Timer.H>
-#include <CD_gradientF_F.H>
 #include <CD_DomainFluxIFFABFactory.H>
 #include <CD_TiledMeshRefine.H>
+#include <CD_DataOps.H>
 #include <CD_NamespaceHeader.H>
 
 AmrMesh::AmrMesh(){
@@ -1026,6 +1026,46 @@ void AmrMesh::computeGradient(EBAMRCellData&           a_gradient,
   }
 }
 
+void AmrMesh::computeGradient(EBAMRFluxData&           a_gradient,
+			      const EBAMRCellData&     a_phi,
+			      const std::string        a_realm,  
+			      const phase::which_phase a_phase) const {
+  CH_TIME("AmrMesh::computeGradient(EBAMRFluxData, EBAMRCellData, string, phase::which_phase)");
+  if(m_verbosity > 5){
+    pout() << "AmrMesh::computeGradient(EBAMRFluxData, EBAMRCellData, string, phase::which_phase)" << endl;
+  }
+
+  // TLDR: This routine first computes the cell-centered gradient and it averages that to faces. For regular cells this will yield
+  //       an 8-point stencil in 2D. We want to reduce that to a six-point stencil in 2D so that the normal derivative does not reach
+  //       over a differencing distance of 2*dx (which the tangential derivatives do). So, after averaging the cell-centered gradient to
+  //       faces we replace the component normal to the face with its tighter stencil variant.
+  //
+  //       Finally, we set the coarse-face gradients to be the arithmetic average of the fine faces. We do this to avoid having stencils
+  //       that reach under the embedded boundary (where bogus data could be found). 
+
+  CH_assert(a_gradient[0]->nComp() == SpaceDim);
+  CH_assert(a_phi     [0]->nComp() == 1       );
+
+  // Make some scratch data. 
+  EBAMRCellData scratch;
+  this->allocate(scratch, a_realm, a_phase, SpaceDim);
+  this->computeGradient(scratch, a_phi, a_realm, a_phase);
+
+  this->averageDown(scratch, a_realm, a_phase);
+  this->interpGhost(scratch, a_realm, a_phase);
+
+  // Average the cells to face and replace the normal derivative with a tighter stencil. 
+  DataOps::averageCellToFace(a_gradient, scratch, this->getDomains());
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++){
+    const RefCountedPtr<EBGradient>& gradientOp = m_realms[a_realm]->getGradientOp(a_phase)[lvl];
+    
+    gradientOp->computeNormalDerivative(*a_gradient[lvl], *a_phi[lvl]);
+  }
+
+  // Coarsen the faces. 
+  this->averageFaces(a_gradient, a_realm, a_phase);  
+}
+
 void AmrMesh::computeGradient(MFAMRCellData& a_gradient, const MFAMRCellData& a_phi, const std::string a_realm) const {
   CH_TIME("AmrMesh::computeGradient(MFAMRCellData, MFAMRCellData, string)");
   if(m_verbosity > 5){
@@ -1038,6 +1078,36 @@ void AmrMesh::computeGradient(MFAMRCellData& a_gradient, const MFAMRCellData& a_
 
     for (int lvl = 0; lvl <= m_finestLevel; lvl++){
       aliasGrad[lvl] = RefCountedPtr<LevelData<EBCellFAB> > (new LevelData<EBCellFAB>());
+      aliasPhi[lvl]  = RefCountedPtr<LevelData<EBCellFAB> > (new LevelData<EBCellFAB>());
+      
+      MultifluidAlias::aliasMF(*aliasGrad[lvl], iphase, *a_gradient[lvl]);
+      MultifluidAlias::aliasMF(*aliasPhi [lvl], iphase, *a_phi     [lvl]);
+
+      CH_assert(aliasGrad[lvl]->nComp() == SpaceDim);
+      CH_assert(aliasPhi [lvl]->nComp() == 1       );
+    }
+
+    if(iphase == 0){
+      this->computeGradient(aliasGrad, aliasPhi, a_realm, phase::gas);
+    }
+    else if(iphase == 1){
+      this->computeGradient(aliasGrad, aliasPhi, a_realm, phase::solid);
+    }
+  }
+}
+
+void AmrMesh::computeGradient(MFAMRFluxData& a_gradient, const MFAMRCellData& a_phi, const std::string a_realm) const {
+  CH_TIME("AmrMesh::computeGradient(MFAMRFluxData, MFAMRCellData, string)");
+  if(m_verbosity > 5){
+    pout() << "AmrMesh::computeGradient(MFAMRFluxData, MFAMRCellData, string)" << endl;
+  }
+
+  for (int iphase = 0; iphase < m_multifluidIndexSpace->numPhases(); iphase++){
+    EBAMRFluxData aliasGrad(1 + m_finestLevel);
+    EBAMRCellData aliasPhi (1 + m_finestLevel);
+
+    for (int lvl = 0; lvl <= m_finestLevel; lvl++){
+      aliasGrad[lvl] = RefCountedPtr<LevelData<EBFluxFAB> > (new LevelData<EBFluxFAB>());
       aliasPhi[lvl]  = RefCountedPtr<LevelData<EBCellFAB> > (new LevelData<EBCellFAB>());
       
       MultifluidAlias::aliasMF(*aliasGrad[lvl], iphase, *a_gradient[lvl]);
@@ -1084,6 +1154,36 @@ void AmrMesh::averageDown(MFAMRFluxData& a_data, const std::string a_realm) cons
 
   if(!ebisGas.isNull()) this->averageDown(aliasGas, a_realm, phase::gas);
   if(!ebisSol.isNull()) this->averageDown(aliasSol, a_realm, phase::solid);
+}
+
+void AmrMesh::averageFaces(MFAMRFluxData& a_data, const std::string a_realm) const {
+  CH_TIME("AmrMesh::averageFaces(MFAMRFluxData, string)");
+  if(m_verbosity > 3){
+    pout() << "AmrMesh::averageFaces(MFAMRFluxData, string)" << endl;
+  }
+
+  if(!this->queryRealm(a_realm)) {
+    std::string str = "AmrMesh::averageDown(MFAMRFluxData, string) - could not find realm '" + a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  const RefCountedPtr<EBIndexSpace>& ebisGas = m_realms[a_realm]->getEBIndexSpace(phase::gas);
+  const RefCountedPtr<EBIndexSpace>& ebisSol = m_realms[a_realm]->getEBIndexSpace(phase::solid);
+
+  // Alias the data to regular EBFluxFABs
+  EBAMRFluxData aliasGas(1 + m_finestLevel);
+  EBAMRFluxData aliasSol(1 + m_finestLevel);
+    
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++){
+    aliasGas[lvl] = RefCountedPtr<LevelData<EBFluxFAB> > (new LevelData<EBFluxFAB>());
+    aliasSol[lvl] = RefCountedPtr<LevelData<EBFluxFAB> > (new LevelData<EBFluxFAB>());
+      
+    if(!ebisGas.isNull()) MultifluidAlias::aliasMF(*aliasGas[lvl], phase::gas,   *a_data[lvl]);
+    if(!ebisSol.isNull()) MultifluidAlias::aliasMF(*aliasSol[lvl], phase::solid, *a_data[lvl]);
+  }
+
+  if(!ebisGas.isNull()) this->averageFaces(aliasGas, a_realm, phase::gas);
+  if(!ebisSol.isNull()) this->averageFaces(aliasSol, a_realm, phase::solid);
 }
 
 void AmrMesh::averageDown(MFAMRCellData& a_data, const std::string a_realm) const {
@@ -1174,6 +1274,30 @@ void AmrMesh::averageDown(EBAMRFluxData& a_data, const std::string a_realm, cons
 
     EbCoarAve& aveOp = *m_realms[a_realm]->getCoarseAverage(a_phase)[lvl];
     aveOp.average(*a_data[lvl-1], *a_data[lvl], interv);
+  }
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++){
+    a_data[lvl]->exchange();
+  }
+}
+
+void AmrMesh::averageFaces(EBAMRFluxData& a_data, const std::string a_realm, const phase::which_phase a_phase) const {
+  CH_TIME("AmrMesh::averageFaces(EBAMRFluxData, string, phase::which_phase");
+  if(m_verbosity > 3){
+    pout() << "AmrMesh::averageFaces(EBAMRFluxData, string, phase::which_phase)" << endl;
+  }
+
+  if(!this->queryRealm(a_realm)) {
+    std::string str = "AmrMesh::averageFaces(EBAMRFluxData, string, phase::which_phase) - could not find realm '" + a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  for (int lvl = m_finestLevel; lvl > 0; lvl--){
+    const int nComps = a_data[lvl]->nComp();
+    const Interval interv (0, nComps-1);
+
+    EbCoarAve& aveOp = *m_realms[a_realm]->getCoarseAverage(a_phase)[lvl];
+    aveOp.averageFaceData(*a_data[lvl-1], *a_data[lvl], interv);
   }
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
@@ -1395,7 +1519,6 @@ void AmrMesh::interpGhostMG(EBAMRCellData& a_data, const std::string a_realm, co
     std::string str = "AmrMesh::interpGhostPwl(ebamrcell, Realm, phase) - could not find realm '" + a_realm + "'";
     MayDay::Abort(str.c_str());
   }
-
 
   for (int lvl = 1; lvl <= m_finestLevel; lvl++){
     const int nComps = a_data[lvl]->nComp();

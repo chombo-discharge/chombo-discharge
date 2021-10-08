@@ -2188,6 +2188,151 @@ Real CdrSolver::computeSourceDt(const Real a_max, const Real a_tolerance){
   return minDt;
 }
 
+void CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_pow) {
+  CH_TIME("CdrSolver::weightedUpwind()");
+  if(m_verbosity > 5){
+    pout() << m_name + "::weightedUpwind()" << endl;
+  }
+
+  if(m_isMobile){
+    m_amr->averageDown(m_cellVelocity, m_realm, m_phase);
+    m_amr->interpGhost(m_cellVelocity, m_realm, m_phase);
+
+    m_amr->averageDown(m_phi, m_realm, m_phase);
+    m_amr->interpGhost(m_phi, m_realm, m_phase);        
+
+    // Compute velocity on faces and EBs. The data is currently face-centered.
+    this->averageVelocityToFaces(m_faceVelocity, m_cellVelocity);
+    this->advectToFaces(m_faceStates, m_phi, 0.0); 
+
+    DataOps::setValue(m_scratch, 0.0); // Used to store sum(alpha*v)
+
+    // Grid loop. 
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+
+      const DisjointBoxLayout& dbl    = m_amr->getGrids     (m_realm         )[lvl];
+      const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+      const ProblemDomain&     domain = m_amr->getDomains()[lvl];
+      const Real&              dx     = m_amr->getDx()[lvl];
+
+      for (DataIterator dit(dbl); dit.ok(); ++dit){
+	const Box&     cellBox = dbl  [dit()];
+	const EBISBox& ebisBox = ebisl[dit()];
+	
+	EBCellFAB&       sumPhi    = (*a_weightedUpwindPhi[lvl])[dit()];
+	EBCellFAB&       sumWeight = (*m_scratch          [lvl])[dit()];
+	const EBFluxFAB& facePhi   = (*m_faceStates       [lvl])[dit()];
+	const EBFluxFAB& faceVel   = (*m_faceVelocity     [lvl])[dit()];
+
+	sumPhi.   setVal(0.0);
+	sumWeight.setVal(0.0);
+
+
+	// Regular cells. Note that in the WEIGHTED_UPWIND Fortran kernel we compute the weighted sum of the upwinded value of phi. This means that the kernel
+	// will reach out of the domain boundary. We fill the first ghost layer outside the domain boundary with the value in the valid cell immediately inside
+	// the domain so that the kernel does, in fact, use the correct math.
+	BaseFab<Real>& regSumPhi    = sumPhi.   getSingleValuedFAB();
+	BaseFab<Real>& regSumWeight = sumWeight.getSingleValuedFAB();
+	
+	for (int dir = 0; dir < SpaceDim; dir++){
+	  const BaseFab<Real>& regFacePhi = facePhi[dir].getSingleValuedFAB();
+	  const BaseFab<Real>& regFaceVel = faceVel[dir].getSingleValuedFAB();
+
+	  FORT_WEIGHTED_UPWIND(CHF_FRA1      (regSumPhi,    0),
+			       CHF_FRA1      (regSumWeight, 0),
+			       CHF_CONST_FRA1(regFacePhi,   0),
+			       CHF_CONST_FRA1(regFaceVel,   0),
+			       CHF_CONST_INT (dir),
+			       CHF_CONST_INT (a_pow),
+			       CHF_BOX       (cellBox));
+	}
+
+	// Irregular cells. This is a bit more involved. Note that we do want to compute everything at face centroids since
+	// that is the flux that makes its way into the cells anyways when we advect. 
+	VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+	for (vofit.reset(); vofit.ok(); ++vofit){
+	  const VolIndex& vof = vofit();
+
+	  sumPhi   (vof, m_comp) = 0.0;
+	  sumWeight(vof, m_comp) = 0.0;
+
+	  for (int dir = 0; dir < SpaceDim; dir++){
+	    const Vector<FaceIndex> facesLo = ebisBox.getFaces(vof, dir, Side::Lo);
+	    const Vector<FaceIndex> facesHi = ebisBox.getFaces(vof, dir, Side::Hi);	    
+
+	    // Add contribution from cut-cell faces in the low side. Observe that if the upwind value of phi is outside the domain
+	    // then the "upwinded" value is just the cell-centered value. 
+	    for (int iface = 0; iface < facesLo.size(); iface++){
+	      const FaceIndex& faceLo   = facesLo[iface];
+	      const VolIndex&  vofLo    = faceLo.getVoF(Side::Lo);
+	      const Real       areaFrac = ebisBox.areaFrac(faceLo);
+
+	      const FaceStencil& interpSten = (*m_interpStencils[dir][lvl])[dit()](faceLo, m_comp);
+
+	      Real phiLo = 0.0;
+	      Real velLo = 0.0;
+
+	      for (int i = 0; i < interpSten.size(); i++){
+		const FaceIndex& interpFace   = interpSten.face(i);
+		const Real&      interpWeight = interpSten.weight(i);
+
+		phiLo += interpWeight * facePhi[dir](interpFace, m_comp);
+		velLo += interpWeight * faceVel[dir](interpFace, m_comp);		
+	      }
+
+	      if(velLo > 0.0){
+		sumWeight(vof, m_comp) += areaFrac * std::abs(std::pow(velLo, a_pow))        ;
+		sumPhi   (vof, m_comp) += areaFrac * std::abs(std::pow(velLo, a_pow)) * phiLo;
+	      }
+	    }
+
+	    // Add contribution from cut-cell faces on the high side. 
+	    for (int iface = 0; iface < facesHi.size(); iface++){
+	      const FaceIndex& faceHi   = facesHi[iface];
+	      const VolIndex&  vofHi    = faceHi.getVoF(Side::Hi);
+	      const Real       areaFrac = ebisBox.areaFrac(faceHi);
+	      
+	      const FaceStencil& interpSten = (*m_interpStencils[dir][lvl])[dit()](faceHi, m_comp);
+
+	      Real phiHi = 0.0;
+	      Real velHi = 0.0;
+
+	      for (int i = 0; i < interpSten.size(); i++){
+		const FaceIndex& interpFace   = interpSten.face(i);
+		const Real&      interpWeight = interpSten.weight(i);
+
+		phiHi += interpWeight * facePhi[dir](interpFace, m_comp);
+		velHi += interpWeight * faceVel[dir](interpFace, m_comp);		
+	      }
+
+	      if(velHi < 0.0){
+		sumWeight(vof, m_comp) += areaFrac * std::abs(std::pow(velHi, a_pow))        ;
+		sumPhi   (vof, m_comp) += areaFrac * std::abs(std::pow(velHi, a_pow)) * phiHi;
+	      }
+	    }
+	  }
+
+	  // If we don't have an inflow face set the upwind stuff to zero. 
+	  if(!(sumWeight(vof, m_comp) > 0.0)) {
+	    sumPhi(vof, m_comp)    = 0.0;
+	    sumWeight(vof, m_comp) = 1.0;
+	  }
+	}
+      }
+    }
+
+    // Divide. Set to zero if there are no inflow faces. 
+    EBAMRCellData zero;
+    m_amr->allocate(zero, m_realm, m_phase, m_nComp);
+    DataOps::setValue(zero, 0.0);
+    
+    DataOps::divideFallback(a_weightedUpwindPhi, m_scratch, zero);
+  }
+  else{
+    DataOps::copy(a_weightedUpwindPhi, m_phi);
+  }  
+}
+
 Real CdrSolver::computeMass(){
   CH_TIME("CdrSolver::computeMass()");
   if(m_verbosity > 5){

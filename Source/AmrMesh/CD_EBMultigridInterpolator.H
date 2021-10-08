@@ -42,8 +42,9 @@
   
   will have a coarse and and a fine grid stencil, but the fine stencil does not reach out of the ghosted fine-grid patch. The fine-grid part of the stencil is thus
   allowed to use the ghost cells in the patch that are filled from neighboring patches. 
+  @note This class should work with data holders have exactly one component or SpaceDim components. 
 */
-class EBMultigridInterpolator : public QuadCFInterp {
+class EBMultigridInterpolator {
 public:
 
   /*!
@@ -68,7 +69,6 @@ public:
     @param[in] a_dataLocation Interpration of data centering. Either on the cell center or the cell centroid. 
     @param[in] a_ghostVector  (Minimum) number of ghost cells in input/output data. 
     @param[in] a_refRat       Refinement ratio
-    @param[in] a_nVar         Number of variables which will be interpolated. 
     @param[in] a_ghostCF      Width of the ghost region to be filled. Only relevant near the EBCF. 
     @param[in] a_order        Interpolation order
     @param[in] a_weighting    Weighting factor least squares. 
@@ -78,7 +78,6 @@ public:
 			  const CellLocation a_dataLocation,
 			  const IntVect&     a_ghostVector,
 			  const int          a_refRat,
-			  const int          a_nVar,
 			  const int          a_ghostCF,
 			  const int          a_order,
 			  const int          a_weighting = 0);
@@ -169,6 +168,16 @@ protected:
     @brief Component number. Used for setting interval when data is copied into EBMultigridInterpolator's buffers. 
   */
   static constexpr int m_comp = 0;
+
+  /*!
+    @brief For regular interpolation of scalar quantities
+  */
+  RefCountedPtr<QuadCFInterp> m_scalarInterpolator;
+
+  /*!
+    @brief For regular interpolation of vector quantities
+  */  
+  RefCountedPtr<QuadCFInterp> m_vectorInterpolator;    
 
   /*!
     @brief How to interpret data locations. 

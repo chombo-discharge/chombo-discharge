@@ -470,6 +470,15 @@ public:
     @todo An old routine which we could (probably) remove. 
   */
   virtual Real computeSourceDt(const Real a_max, const Real a_tolerance);
+
+  /*!
+    @brief Compute an upwind-weighted version of phi
+    @details This is equal to sum(alpha * v^p * phi)/sum(alpha * v^p) where alpha is the face aperture and v is the face velocity. phi is
+    taken as the upwind value. 
+    @param[out] a_weightedUpwindPhi Weighted upwind phi
+    @param[in]  a_pow               Weighting factor
+  */
+  virtual void weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_pow);
   
   /*!
     @brief Compute the "physical mass" in m_phi
@@ -795,6 +804,14 @@ protected:
     @note Virtual because some solvers might want to do this differently. 
   */
   virtual void averageVelocityToFaces(EBAMRFluxData& a_faceVelocity, const EBAMRCellData& a_cellVelocity);
+
+  /*!
+    @brief Advection-only extrapolation to faces.
+    @param[out] a_facePhi  Phi on faces
+    @param[in]  a_phi      Phi on cell center
+    @param[in]  a_extrapDt Time centering/extrapolation (if the advective integrator can do it)
+  */
+  virtual void advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_phi, const Real a_extrapDt) = 0;  
 
   /*!
     @brief Set up face-centered advection flux.

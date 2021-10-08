@@ -308,6 +308,11 @@ protected:
   bool m_allowCoarsening;
 
   /*!
+    @brief Do init load balancing.
+  */
+  bool m_doInitLoadBalancing;
+
+  /*!
     @brief Write memory report
   */
   bool m_writeMemory;

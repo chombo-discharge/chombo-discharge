@@ -72,7 +72,7 @@ public:
   /*!
     @brief Destructor. Does nothing.
   */
-  ~MFHelmholtzJumpBC();
+  virtual ~MFHelmholtzJumpBC();
 
   /*!
     @brief Disallowed assignment constructor

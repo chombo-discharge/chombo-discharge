@@ -11,15 +11,15 @@
 
 // Chombo includes
 #include <ParmParse.H>
-#include <EBCellFactory.H>
 #include <EBArith.H>
+#include <EBCellFactory.H>
 #include <BaseIVFactory.H>
 #include <CH_Timer.H>
 
 // Our includes
 #include <CD_Timer.H>
 #include <CD_EBGradient.H>
-#include <CD_gradientF_F.H>
+#include <CD_EBGradientF_F.H>
 #include <CD_LeastSquares.H>
 #include <CD_VofUtils.H>
 #include <CD_LoadBalancing.H>
@@ -30,7 +30,6 @@ constexpr int EBGradient::m_nComp;
 
 EBGradient::EBGradient(const EBLevelGrid& a_eblg,
 		       const EBLevelGrid& a_eblgFine,
-		       const CellLocation a_dataLocation,
 		       const Real         a_dx,
 		       const int          a_refRat,
 		       const int          a_order,
@@ -43,7 +42,7 @@ EBGradient::EBGradient(const EBLevelGrid& a_eblg,
 
   m_eblg         = a_eblg;
   m_eblgFine     = a_eblgFine;
-  m_dataLocation = a_dataLocation;
+  m_dataLocation = Location::Cell::Center;
   m_dx           = a_dx;
   m_refRat       = a_refRat;
   m_order        = a_order;
@@ -169,8 +168,71 @@ void EBGradient::computeLevelGradient(LevelData<EBCellFAB>&       a_gradient,
       }
     }
     else{
-      for (int dir = 0; dir < SpaceDim; dir++){
-	grad.setCoveredCellVal(0.0, dir);
+      grad.setVal(0.0);
+    }
+
+    // Covered data is bogus. 
+    for (int dir = 0; dir < SpaceDim; dir++){
+      a_gradient[dit()].setCoveredCellVal(0.0, dir);
+    }    
+  }
+}
+
+void EBGradient::computeNormalDerivative(LevelData<EBFluxFAB>& a_gradient,
+					 const LevelData<EBCellFAB>& a_phi) const {
+  CH_TIME("EBGradient::computeNormalDerivative");
+
+  CH_assert(a_gradient.nComp() == SpaceDim);
+  CH_assert(a_phi.     nComp() == 1       );
+
+
+  // TLDR: This routine computes the level gradient, i.e. using finite difference stencils isolated to this level. It only does this for interior
+  // faces, and it only computes the component of the gradient that is normal to the face. 
+  const DisjointBoxLayout& dbl    = m_eblg.getDBL();
+  const EBISLayout&        ebisl  = m_eblg.getEBISL();
+  const ProblemDomain&     domain = m_eblg.getDomain();
+
+  for (DataIterator dit(dbl); dit.ok(); ++dit){
+    const EBCellFAB& phi     = a_phi[dit()];
+    const EBISBox&   ebisBox = ebisl[dit()];
+    const Box        cellBox = dbl  [dit()];
+
+    const EBGraph&   ebgraph = ebisBox.getEBGraph();
+
+    for (int dir = 0; dir < SpaceDim; dir++){
+      EBFaceFAB& grad = a_gradient[dit()][dir];
+      
+      BaseFab<Real>&       regGradient = grad.getSingleValuedFAB();
+      const BaseFab<Real>& regPhi      = phi. getSingleValuedFAB();
+
+      // Do interior faces. This computes the gradient using a standard two-point stencil reaching across the face. 
+      Box interiorFaces = cellBox;
+      interiorFaces.grow(dir, 1);
+      interiorFaces &= domain;
+      interiorFaces.grow(dir, -1);
+      interiorFaces.surroundingNodes(dir);
+
+      FORT_FACENORMALDERIVATIVE(CHF_FRA1(regGradient, dir),
+				CHF_CONST_FRA1(regPhi, m_comp),
+				CHF_CONST_INT(dir),
+				CHF_CONST_REAL(m_dx),
+				CHF_BOX(interiorFaces));
+
+      // Do the same for all interior faces.
+      Box interiorCells = cellBox;
+      interiorCells.grow(dir, 1);
+      interiorCells &= domain;
+      interiorCells.grow(dir, -1);
+
+      const IntVectSet irregIVS = ebisBox.getIrregIVS(interiorCells);
+      
+      for (FaceIterator faceIt(irregIVS, ebgraph, dir, FaceStop::SurroundingNoBoundary); faceIt.ok(); ++faceIt){
+	const FaceIndex& face = faceIt();
+
+	const VolIndex& vofHi = face.getVoF(Side::Hi);
+	const VolIndex& vofLo = face.getVoF(Side::Lo);	
+
+	grad(face, dir) = (phi(vofHi, m_comp) - phi(vofLo, m_comp))/m_dx;
       }
     }
   }
@@ -265,13 +327,14 @@ void EBGradient::defineLevelStencils(){
   const ProblemDomain&     domain = m_eblg.getDomain();
 
   m_levelStencils.define(dbl);
-  m_levelIterator.define(dbl);  
+  m_levelIterator.define(dbl);
 
   for (DataIterator dit(dbl); dit.ok(); ++dit){
     const Box      cellBox  = dbl  [dit()];
     const EBISBox& ebisbox  = ebisl[dit()];
     const EBGraph& ebgraph  = ebisbox.getEBGraph();
 
+    // Find cells where we need explicit stencils. 
     IntVectSet bndryIVS = ebisbox.getIrregIVS(cellBox);
     for (int dir = 0; dir < SpaceDim; dir++){
       Box loBox;

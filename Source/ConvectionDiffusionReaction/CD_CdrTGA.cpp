@@ -17,6 +17,7 @@
 #include <CD_CdrTGA.H>
 #include <CD_DataOps.H>
 #include <CD_EBHelmholtzNeumannDomainBCFactory.H>
+#include <CD_EBHelmholtzDirichletDomainBCFactory.H>
 #include <CD_EBHelmholtzNeumannEBBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
@@ -52,11 +53,7 @@ void CdrTGA::allocateInternals() {
 
   CdrSolver::allocateInternals();
 
-  if(m_isDiffusive){
-    m_amr->allocate(m_zero, m_realm, m_phase, m_nComp);
 
-    DataOps::setValue(m_zero, 0.0);
-  }
 }
 
 void CdrTGA::advanceEuler(EBAMRCellData&       a_newPhi,
@@ -167,6 +164,16 @@ void CdrTGA::setupDiffusionSolver(){
     pout() << m_name + "::setupDiffusionSolver()" << endl;
   }
 
+  // This is storage which is needed if we are doing an implicit diffusion solve. I know that not all
+  // diffusion solves are implicit, but this is really the easiest way of 
+  if(m_isDiffusive){
+    m_amr->allocate(m_zero,      m_realm, m_phase, m_nComp);
+    m_amr->allocate(m_helmAcoef, m_realm, m_phase, m_nComp);
+    
+    DataOps::setValue(m_zero,      0.0);
+    DataOps::setValue(m_helmAcoef, 1.0);
+  }  
+
   // This sets up the multigrid Helmholtz solver and the TGA/Euler solvers. The TGA/Euler stuff is Chombo code.
   this->setupHelmholtzFactory();
   this->setupMultigrid();
@@ -199,8 +206,8 @@ void CdrTGA::setupHelmholtzFactory(){
   const IntVect ghostRhs   = m_amr->getNumberOfGhostCells()*IntVect::Unit;
 
   // Handle to boundary condition factories for domain and EB in an EBHelmholtzOp context.
-  auto domainBcFactory = RefCountedPtr<EBHelmholtzNeumannDomainBCFactory> (new EBHelmholtzNeumannDomainBCFactory(0.0));
-  auto ebbcFactory     = RefCountedPtr<EBHelmholtzNeumannEBBCFactory>     (new EBHelmholtzNeumannEBBCFactory    (0.0));
+  auto domainBcFactory = RefCountedPtr<EBHelmholtzDomainBCFactory> (new EBHelmholtzNeumannDomainBCFactory(0.0));
+  auto ebbcFactory     = RefCountedPtr<EBHelmholtzEBBCFactory>     (new EBHelmholtzNeumannEBBCFactory    (0.0));
 
   // Temp alpha and beta. Diffusion solvers will reset these later. 
   const Real alpha = 1.0;
@@ -210,9 +217,9 @@ void CdrTGA::setupHelmholtzFactory(){
   //
   //    phi^(k+1) - dt*Div(D*Grad(phi^(k+1)) = phi^k + dt*rho
   //
-  // and in that case we have alpha * A = 1 and beta = -dt. EBHelmholtzOpFactory shouldn't be doing any
-  EBAMRCellData m_helmAcoef;
-  m_amr->allocate(m_helmAcoef, m_realm, m_phase, 1);
+  // and in that case we have alpha * A = 1 and beta = -dt. EBHelmholtzOpFactory shouldn't be doing anything
+  // with this data but TGA/Euler solvers might change the alpha and beta under us. A-coefficient should be one
+  // anyways. 
   DataOps::setValue(m_helmAcoef, 1.0);
 
   // Set up the operator
