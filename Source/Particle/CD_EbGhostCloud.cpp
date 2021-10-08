@@ -107,9 +107,8 @@ void EbGhostCloud::makeFiCoStuff(){
 
   // Define the grids and the data holder
   m_gridsFiCo.define(fiCoBoxes, fiCoProcs);
-  m_dataFiCo. define(m_gridsFiCo, m_nComp);
-
-  m_eblgFiCo.define(dblFiCo, m_domainFine, ghostFiCo, m_eblgFine.getEBIS());
+  m_eblgFiCo.define(dblFiCo, m_domainFine, ghostFiCo, m_eblgFine.getEBIS());  
+  m_dataFiCo. define(m_gridsFiCo, m_nComp, EBCellFactory(m_eblgFiCo.getEBISL()));
 }
 
 void EbGhostCloud::addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coarData, const LevelData<EBCellFAB>& a_fineData){
@@ -167,8 +166,12 @@ void EbGhostCloud::addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coarData, const
   m_dataCoFi.addTo(interv, coarAlias, interv, m_domainCoar.domainBox());
 }
 
-void EbGhostCloud::addFiCoDataToFine(LevelData<EBCellFAB>& a_fineData, const BoxLayoutData<FArrayBox>& a_fiCoData){
+void EbGhostCloud::addFiCoDataToFine(LevelData<EBCellFAB>& a_fineData, const BoxLayoutData<EBCellFAB>& a_fiCoData){
   CH_TIME("EbGhostCloud::addFiCoDataToFine");
+
+#if 1 
+  MayDay::Warning("EbGhostCloud::addFiCoDataToFine -- routine is disabled while we redesign coarse-to-fine deposition");
+#else // Code code. Will be deprecated
 
   // This is really simple because the user will already have used the buffer to deposit particles onto the "fine level". We simply add the data directly here. Again,
   // there might be better ways of doing this because a_fiCoData actually contains a lot of mesh!
@@ -177,15 +180,16 @@ void EbGhostCloud::addFiCoDataToFine(LevelData<EBCellFAB>& a_fineData, const Box
   LevelData<FArrayBox> fineAlias;
   aliasEB(fineAlias, a_fineData);
   a_fiCoData.addTo(interv, fineAlias, interv, m_domainFine.domainBox());
+#endif
 }
 
-const BoxLayoutData<FArrayBox>& EbGhostCloud::getFiCoBuffer() const {
+const BoxLayoutData<EBCellFAB>& EbGhostCloud::getFiCoBuffer() const {
   CH_TIME("EbGhostCloud::getFiCoBuffer");
   
   return m_dataFiCo;
 }
 
-BoxLayoutData<FArrayBox>& EbGhostCloud::getFiCoBuffer() {
+BoxLayoutData<EBCellFAB>& EbGhostCloud::getFiCoBuffer() {
   CH_TIME("EbGhostCloud::getFiCoBuffer");
   
   return m_dataFiCo;

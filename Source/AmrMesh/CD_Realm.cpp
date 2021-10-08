@@ -11,6 +11,7 @@
 
 // Chombo includes
 #include <ParmParse.H>
+#include <NeighborIterator.H>
 
 // Our includes
 #include <CD_Realm.H>

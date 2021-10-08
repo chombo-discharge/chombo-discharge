@@ -13,7 +13,7 @@
 #define CD_ParticleContainerImplem_H
 
 // Chombo includes
-#include <NeighborIterator.H>
+#include <CH_Timer.H>
 
 // Our includes
 #include <CD_ParticleContainer.H>
@@ -101,6 +101,8 @@ void ParticleContainer<P>::setupPVR(const int a_base, const int a_finestLevel){
 
 template <class P>
 void ParticleContainer<P>::setupParticleData(const int a_base, const int a_finestLevel){
+  CH_TIME("ParticleContainer<P>::setupParticleData");
+  
   m_particles.resize(1 + a_finestLevel);
   m_halo_particles.resize(1 + a_finestLevel);
   m_non_halo_particles.resize(1 + a_finestLevel);

@@ -87,17 +87,17 @@ public:
     @param[inout] a_fineData Fine mesh data
     @param[in]    a_fiCoData Refined coarse data buffer. Users will have deposited the mesh data onto this 
   */
-  void addFiCoDataToFine(LevelData<EBCellFAB>& a_fineData, const BoxLayoutData<FArrayBox>& a_fiCoData);
+  void addFiCoDataToFine(LevelData<EBCellFAB>& a_fineData, const BoxLayoutData<EBCellFAB>& a_fiCoData);
 
   /*!
     @brief Get the refined coarse buffer
   */
-  BoxLayoutData<FArrayBox>& getFiCoBuffer();
+  BoxLayoutData<EBCellFAB>& getFiCoBuffer();
 
   /*!
     @brief Get the refined coarse buffer
   */
-  const BoxLayoutData<FArrayBox>& getFiCoBuffer() const;
+  const BoxLayoutData<EBCellFAB>& getFiCoBuffer() const;
 
   /*!
     @brief Get the refined version of the coarse eblevelgrid
@@ -164,7 +164,7 @@ protected:
   /*!
     @brief Data defined on the refined coarse grid
   */
-  BoxLayoutData<FArrayBox> m_dataFiCo;
+  BoxLayoutData<EBCellFAB> m_dataFiCo;
 
   /*!
     @brief Scratch storage for fine grid data
