@@ -35,15 +35,17 @@ using AMRPVR           = Vector<RefCountedPtr<ParticleValidRegion> >;
 
 
 /*!
-  @brief Templated class for holding particles on an AMR hierarchy with particle remapping
-  template <class P>
+  @brief Templated class for holding particles on an AMR hierarchy with particle remapping. 
+  @details The template parameter P should derive from Chombo's BinItem. 
+  @note ParticleContainers are, because of Chombo, restricted to square-block grids. This means
+  that the blocking factor and maximum box size must be the same. 
 */
 template <class P>
 class ParticleContainer {
 public:
 
   /*!
-    @brief No need for weak construction
+    @brief Default constructor. Leaves object in undefined state. 
   */
   ParticleContainer();
 
@@ -130,6 +132,12 @@ public:
   void clearParticles();
 
   /*!
+    @brief Clear particles on input data holder
+    @param[inout] a_particles
+  */
+  void clear(AMRParticles<P>& a_particles);
+
+  /*!
     @brief Get finest level
   */
   int getFinestLevel() const;
@@ -178,16 +186,6 @@ public:
     @brief Get the "ghosted" coarse particles. I.e. particles that lie on the coarse side of the CF interface. 
   */
   const AMRParticles<P>& getNonMaskParticles() const;
-
-  /*!
-    @brief Get cache particles
-  */
-  Vector<List<P> >& getCacheParticles() ;
-
-  /*!
-    @brief Get cache particles
-  */
-  const Vector<List<P> >& getCacheParticles() const;
 
   /*!
     @brief Get PVR
@@ -308,7 +306,7 @@ public:
     @brief Move the particles to a different container. 
     @note  The grids MUST be the same for both containers
   */
-  void cacheParticles(ParticleContainer<P>& a_otherContainer);
+  void transferParticles(ParticleContainer<P>& a_otherContainer);
 
   /*!
     @brief Discard particles that are under a PVR level
@@ -344,16 +342,6 @@ public:
     @brief Get the number particles in the halo cells. 
   */
   size_t getNumberOfMaskParticesGlobal() const;
-
-  /*!
-    @brief Get the total weight of all particles. Local version. 
-  */
-  Real getWeightValidLocal() const;
-
-  /*!
-    @brief Get the total weight of all particles. Global version
-  */
-  Real getWeightValidGlobal() const;
 
 protected:
 
