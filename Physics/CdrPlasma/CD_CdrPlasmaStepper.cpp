@@ -1190,21 +1190,17 @@ void CdrPlasmaStepper::advanceReactionNetworkIrregUpwind(Vector<EBCellFAB*>&    
     // Compute cdr_densities and their gradients on centroids. Note that since we upwind, we check if the
     // flow is into or away from the boundary. If the flow is away from the boundary we don't really have an upwind
     // side so we set the density to zero in that case. This is not really captured by CdrSolver::weightedUpwind because
-    // the fallback option is to use the cell-centered value (this is correct, from a DataOps point of view). We fix that here. 
+    // the fallback option is to use the cell-centered value (that is the correct design, when we don't have reactive plasmas). We fix
+    // that here.
+    const Real EdotN = PolyGeom::dot(E, ebisbox.normal(vof));
     for (CdrIterator<CdrSolver> solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
       const int idx = solverIt.index();
-
+      const RefCountedPtr<CdrSpecies> species = solverIt.getSpecies();
+      const int Z = species->getChargeNumber();
+      
       bool inflow = false;
       if(solverIt()->isMobile()){
-	const EBCellFAB& velo = *a_cdrVelocities[idx];
-
-	RealVect v = RealVect::Zero;
-	for (int i = 0; i < stencil.size(); i++){
-	  for (int dir = 0; dir < SpaceDim; dir++){
-	    v[dir] += stencil.weight(i) * velo(stencil.vof(i), dir);
-	  }
-	}
-	if(PolyGeom::dot(v,ebisbox.normal(vof)) > 0.0){ // Flow away from the boundary.
+	if(Real(Z) * EdotN >= 0.0){
 	  inflow = true;
 	}
       }
