@@ -436,19 +436,22 @@ void CdrSolver::computeDivG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const EBA
   //       divergence is smooshed back in through Chombo's redistribution registers. 
 
   DataOps::setValue(a_divG, 0.0);
+
+  // Interpolate fluxes to centroids and then coarsen them so we have consistent fluxes. 
+  this->interpolateFluxToFaceCentroids(a_G);
+  m_amr->averageDown(a_G, m_realm, m_phase);
   
   this->conservativeDivergenceNoKappaDivision(a_divG, a_G, a_ebFlux);      // Make the conservative divergence without kappa-division.
   this->nonConservativeDivergence(m_nonConservativeDivG, a_divG);          // Compute the non-conservative divergence
   this->hybridDivergence(a_divG, m_massDifference, m_nonConservativeDivG); // a_divG becomes hybrid divergence. Mass diff computed. 
-  this->incrementFluxRegister(a_G);                                        // Increment flux register
-  this->incrementRedist(m_massDifference);                                 // Increment level redistribution register
 
-  // Redistribution and reflux magic. 
-  this->coarseFineIncrement(m_massDifference); // Compute C2F, F2C, and C2C mass transfers
-  this->incrementRedistFlux();                 // Tell flux register about whats going on on refinement boundaries. 
+  // Increment redistribution registers with the mass difference.
+  this->incrementRedist    (m_massDifference);
+  this->coarseFineIncrement(m_massDifference);
+
+  // Redistribute mass on the level and across the coarse-fine boundaries.
   this->hyperbolicRedistribution(a_divG);      // Level redistribution. 
-  this->coarseFineRedistribution(a_divG);      // Do the coarse-fine redistribution
-  this->reflux(a_divG);                        // Reflux
+  this->coarseFineRedistribution(a_divG);      // Coarse-fine redistribution
 }
 
 void CdrSolver::computeAdvectionFlux(EBAMRFluxData&       a_flux,
@@ -740,17 +743,28 @@ void CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const int a_level) 
 	    flux(face, m_comp) = 0.0;
 	    
 	    // Get the next interior face(s) and extrapolate from these. 
-	    VolIndex interiorVof = face.getVoF(flip(sit()));
-	    Vector<FaceIndex> neighborFaces = ebisbox.getFaces(interiorVof, dir, flip(sit()));
+	    const VolIndex interiorVof = face.getVoF(flip(sit()));
+	    
+	    const std::vector<FaceIndex> neighborFaces = ebisbox.getFaces(interiorVof, dir, flip(sit())).stdVector();
 
 	    if(neighborFaces.size() > 0){
-	      for (const auto& f : neighborFaces.stdVector()){
-		flux(face, m_comp) += flux(f, m_comp);
+	      Real sumArea = 0.0;
+	      
+	      for (const auto& f : neighborFaces){
+		const Real areaFrac = ebisbox.areaFrac(f);
+		
+		sumArea            += areaFrac;
+		flux(face, m_comp) += areaFrac * flux(f, m_comp);
+		
 	      }
-	      flux(face, m_comp) = std::max(0.0, sign(sit())*flux(face, m_comp))/neighborFaces.size();
+	      
+	      flux(face, m_comp) = sign(sit()) * std::max(0.0, sign(sit())*flux(face, m_comp))/sumArea;
 	    }
 	    
 	    break;
+	  }
+	  case CdrDomainBC::BcType::Solver:{ // Don't do anything.
+	    break; 
 	  }
 	  default:
 	    MayDay::Error("CdrSolver::fillDomainFlux(LD<EBFluxFAB>, int) - trying to fill unsupported domain bc flux type");
@@ -786,7 +800,6 @@ void CdrSolver::conservativeDivergenceNoKappaDivision(EBAMRCellData& a_conservat
     const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
 
     this->conservativeDivergenceRegular(*a_conservativeDivergence[lvl], *a_flux[lvl], lvl);              // Compute kappa*div(F) in regular cells
-    this->interpolateFluxToFaceCentroids(*a_flux[lvl], lvl);                                             // Interpolate fluxes to centroids. 
     this->computeDivergenceIrregular(*a_conservativeDivergence[lvl], *a_flux[lvl], *a_ebFlux[lvl], lvl); // Recompute divergence on irregular cells
 
     a_conservativeDivergence[lvl]->exchange();
@@ -1219,6 +1232,19 @@ void CdrSolver::hyperbolicRedistribution(EBAMRCellData& a_divF){
     
     levelRedist.redistribute(*a_divF[lvl], interv);
     levelRedist.setToZero();
+  }
+}
+
+void CdrSolver::interpolateFluxToFaceCentroids(EBAMRFluxData& a_flux){
+  CH_TIME("CdrSolver::interpolateFluxToFaceCentroids(EBAMRFluxData)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::interpolateFluxToFaceCentroids(EBAMRFluxData)" << endl;
+  }
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+    a_flux[lvl]->exchange();
+
+    this->interpolateFluxToFaceCentroids(*a_flux[lvl], lvl);;
   }
 }
 
@@ -2526,6 +2552,9 @@ void CdrSolver::parseDomainBc(){
       }
       else if (str == "outflow"){
 	this->setDomainBcType(domainSide, CdrDomainBC::BcType::Outflow);
+      }
+      else if (str == "solver"){
+	this->setDomainBcType(domainSide, CdrDomainBC::BcType::Solver);
       }
       else{
 	const std::string errorString = "CdrSolver::parseDomain BC - bad argument '" + bcString + "'";
