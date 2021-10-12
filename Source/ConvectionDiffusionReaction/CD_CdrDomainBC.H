@@ -38,6 +38,7 @@ public:
     Wall,
     Function,
     Outflow,
+    Solver,
   };
 
   /*!
