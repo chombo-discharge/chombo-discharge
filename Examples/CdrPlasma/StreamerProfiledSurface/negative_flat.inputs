@@ -1,8 +1,8 @@
 # ====================================================================================================
 # POTENTIAL CURVE
 # ====================================================================================================
-StreamerProfiledSurface.potential = -25E3
-StreamerProfiledSurface.basename  = pout
+StreamerProfiledSurface.peak_voltage = -35E3    # Lightning impulse voltage peak
+StreamerProfiledSurface.pulse_start  = 225E-9   # Where to start on lightning impuse
 
 # ====================================================================================================
 # AMR_MESH OPTIONS
@@ -12,7 +12,7 @@ AmrMesh.hi_corner        =  4E-2 4E-2  # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
 AmrMesh.coarsest_domain  = 80 80       # Number of cells on coarsest domain
 AmrMesh.max_amr_depth    = 5           # Maximum amr depth
-AmrMesh.max_sim_depth    = -1          # Maximum simulation depth
+AmrMesh.max_sim_depth    = 4           # Maximum simulation depth
 AmrMesh.fill_ratio       = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size      = 2           # Number of cells between grid levels
 AmrMesh.grid_algorithm   = tiled       # Berger-Rigoustous 'br' or 'tiled' for the tiled algorithm
@@ -45,6 +45,7 @@ Driver.regrid_interval                 = 10               # Regrid interval
 Driver.write_regrid_files              = true             # Write regrid files or not.
 Driver.write_restart_files             = false            # Write restart files or not
 Driver.initial_regrids                 = 4                # Number of initial regrids
+Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0                # Start time (fresh simulations only)
 Driver.stop_time                       = 100E-9           # Stop time
 Driver.max_steps                       = 15000            # Maximum number of steps
@@ -182,7 +183,7 @@ RodPlaneProfile.turn_on_rod       = true          # Turn on/off electrode
 RodPlaneProfile.turn_on_plane     = true          # Turn on/off dielectric
 RodPlaneProfile.rod_live          = true          # Live electrode or not
 RodPlaneProfile.rod_radius        = 500.E-6       # Electrode inner radius
-RodPlaneProfile.rod_center1       = 0.0 1E-2      # Center 1
+RodPlaneProfile.rod_center1       = 0.0 7.5E-3    # Center 1
 RodPlaneProfile.rod_center2       = 0.0 1.0       # Center 2
 RodPlaneProfile.plane_width       = 7.200123E-2   # Plane width	
 RodPlaneProfile.plane_normal      = 0.0 1.0       # Plane normal. Not used, oriented along +y only 
@@ -239,13 +240,13 @@ CdrPlasmaAir3Bourdon.diffusive_ions      = true                            # Dif
 CdrPlasmaAir3Bourdon.ion_mobility        = 2.E-4                           # Ion mobility
 
 CdrPlasmaAir3Bourdon.uniform_density       = 1.E10                         # Uniform density
-CdrPlasmaAir3Bourdon.seed_density          = 1.E17                         # Gaussian seed density
+CdrPlasmaAir3Bourdon.seed_density          = 0.E17                         # Gaussian seed density
 CdrPlasmaAir3Bourdon.seed_radius           = 100E-6                        # Gaussian seed radius
 CdrPlasmaAir3Bourdon.seed_position         = 0.0 1E-2                      # Gaussian seed position
 
-CdrPlasmaAir3Bourdon.electrode_townsend2           = 1.E-6                 # SEE on electrodes
+CdrPlasmaAir3Bourdon.electrode_townsend2           = 1.E-3                 # SEE on electrodes
 CdrPlasmaAir3Bourdon.dielectric_townsend2          = 1.E-6                 # SEE on dielectrics
-CdrPlasmaAir3Bourdon.electrode_quantum_efficiency  = 1.E-6                 # SEE on electrodes
+CdrPlasmaAir3Bourdon.electrode_quantum_efficiency  = 1.E-3                 # SEE on electrodes
 CdrPlasmaAir3Bourdon.dielectric_quantum_efficiency = 1.E-6                 # SEE on dielectrics
 
 CdrPlasmaAir3Bourdon.quenching_pressure            = 0.03947               # Quenching pressure for photo-emission (atm)

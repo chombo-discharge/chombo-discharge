@@ -12,10 +12,16 @@
 #include <CD_CdrPlasmaStreamerTagger.H>
 #include "ParmParse.H"
 
-// This is the potential curve (constant in this case). Modify it if you want to.
-Real g_potential;
+// This is the potential curve. It is (approximately) a 1.2/50 lightning impulse starting at some specified time. 
+Real pulseStart  = 0.0;
+Real peakVoltage = 0.0;
+
+constexpr Real tau1 =  0.42E-6;
+constexpr Real tau2 = 50.00E-6;
+constexpr Real tauf = tau2/(tau2-tau1);
+constexpr Real eta  = 1./0.96;
 Real potential_curve(const Real a_time){
-  return g_potential;
+  return peakVoltage * eta * tauf * (exp(-(a_time+pulseStart)/tau2) - exp(-(a_time+pulseStart)/tau1));
 }
 
 using namespace ChomboDischarge;
@@ -35,9 +41,8 @@ int main(int argc, char* argv[]){
   std::string basename; 
   {
     ParmParse pp("StreamerProfiledSurface");
-    pp.get("potential", g_potential);
-    pp.get("basename",  basename);
-    setPoutBaseName(basename);
+    pp.get("peak_voltage", peakVoltage);
+    pp.get("pulse_start",  pulseStart);    
   }
 
   // Set geometry and AMR 
@@ -48,7 +53,7 @@ int main(int argc, char* argv[]){
   // Set up physics 
   RefCountedPtr<CdrPlasmaPhysics> physics      = RefCountedPtr<CdrPlasmaPhysics> (new CdrPlasmaAir3Bourdon());
   RefCountedPtr<CdrPlasmaStepper> timestepper  = RefCountedPtr<CdrPlasmaStepper> (new CdrPlasmaGodunovStepper(physics));
-  RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (new CdrPlasmaStreamerTagger(physics, timestepper, amr, compgeom));
+  RefCountedPtr<CellTagger> tagger             = RefCountedPtr<CellTagger> (new CdrPlasmaStreamerTagger(physics, timestepper, amr, compgeom));
 
   // Create solver factories
   auto poi_fact = new FieldSolverFactory<FieldSolverMultigrid>();

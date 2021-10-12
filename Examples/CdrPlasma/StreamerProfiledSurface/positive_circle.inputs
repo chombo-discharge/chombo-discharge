@@ -1,8 +1,8 @@
 # ====================================================================================================
 # POTENTIAL CURVE
 # ====================================================================================================
-StreamerProfiledSurface.potential = 25E3
-StreamerProfiledSurface.basename  = pout
+StreamerProfiledSurface.peak_voltage = 35E3     # Lightning impulse voltage peak
+StreamerProfiledSurface.pulse_start  = 225E-9   # Where to start on lightning impuse
 
 # ====================================================================================================
 # AMR_MESH OPTIONS
@@ -183,7 +183,7 @@ RodPlaneProfile.turn_on_rod       = true          # Turn on/off electrode
 RodPlaneProfile.turn_on_plane     = true          # Turn on/off dielectric
 RodPlaneProfile.rod_live          = true          # Live electrode or not
 RodPlaneProfile.rod_radius        = 500.E-6       # Electrode inner radius
-RodPlaneProfile.rod_center1       = 0.0 1E-2      # Center 1
+RodPlaneProfile.rod_center1       = 0.0 7.5E-3    # Center 1
 RodPlaneProfile.rod_center2       = 0.0 1.0       # Center 2
 RodPlaneProfile.plane_width       = 7.200123E-2   # Plane width	
 RodPlaneProfile.plane_normal      = 0.0 1.0       # Plane normal. Not used, oriented along +y only 

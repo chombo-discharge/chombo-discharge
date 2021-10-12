@@ -779,7 +779,8 @@ void AmrMesh::parseRuntimeOptions(){
   if(m_verbosity > 5){
     pout() << "AmrMesh::parseRuntimeOptions()" << endl;
   }
-  
+
+  this->parseMaxSimulationDepth();  
   this->parseVerbosity();
   this->parseBlockingFactor();
   this->parseMaxBoxSize();

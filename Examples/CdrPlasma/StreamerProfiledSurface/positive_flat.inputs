@@ -1,8 +1,8 @@
 # ====================================================================================================
 # POTENTIAL CURVE
 # ====================================================================================================
-StreamerProfiledSurface.potential = 25E3
-StreamerProfiledSurface.basename  = pout
+StreamerProfiledSurface.peak_voltage = 35E3     # Lightning impulse voltage peak
+StreamerProfiledSurface.pulse_start  = 225E-9   # Where to start on lightning impuse
 
 # ====================================================================================================
 # AMR_MESH OPTIONS
@@ -45,6 +45,7 @@ Driver.regrid_interval                 = 10               # Regrid interval
 Driver.write_regrid_files              = true             # Write regrid files or not.
 Driver.write_restart_files             = false            # Write restart files or not
 Driver.initial_regrids                 = 4                # Number of initial regrids
+Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0                # Start time (fresh simulations only)
 Driver.stop_time                       = 100E-9           # Stop time
 Driver.max_steps                       = 15000            # Maximum number of steps
@@ -182,7 +183,7 @@ RodPlaneProfile.turn_on_rod       = true          # Turn on/off electrode
 RodPlaneProfile.turn_on_plane     = true          # Turn on/off dielectric
 RodPlaneProfile.rod_live          = true          # Live electrode or not
 RodPlaneProfile.rod_radius        = 500.E-6       # Electrode inner radius
-RodPlaneProfile.rod_center1       = 0.0 1E-2      # Center 1
+RodPlaneProfile.rod_center1       = 0.0 7.5E-3    # Center 1
 RodPlaneProfile.rod_center2       = 0.0 1.0       # Center 2
 RodPlaneProfile.plane_width       = 7.200123E-2   # Plane width	
 RodPlaneProfile.plane_normal      = 0.0 1.0       # Plane normal. Not used, oriented along +y only 
@@ -219,7 +220,7 @@ CdrPlasmaGodunovStepper.relax_time       = 0.5       # Relaxation time constant
 CdrPlasmaGodunovStepper.fast_poisson     = 1         # Solve Poisson every this time steps. Mostly for debugging.
 CdrPlasmaGodunovStepper.fast_rte         = 1         # Solve RTE every this time steps. Mostly for debugging.
 CdrPlasmaGodunovStepper.fhd              = false     # Set to true if you want to add a stochastic diffusion flux
-CdrPlasmaGodunovStepper.source_comp      = upwind 2  # Interpolated 'interp' or cell-average 'cell_ave' for source computations
+CdrPlasmaGodunovStepper.source_comp      = upwind 4  # Interpolated 'interp' or cell-average 'cell_ave' for source computations
 CdrPlasmaGodunovStepper.extrap_advect    = true      # Use time-extrapolation capabilities (if they exist) in the CdrSolver
 CdrPlasmaGodunovStepper.floor_cdr        = true      # Floor CDR solvers to avoid negative densities
 CdrPlasmaGodunovStepper.debug            = true      # Turn on debugging messages. Also monitors mass if it was injected into the system. 
