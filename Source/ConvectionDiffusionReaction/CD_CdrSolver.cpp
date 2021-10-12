@@ -743,14 +743,22 @@ void CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const int a_level) 
 	    flux(face, m_comp) = 0.0;
 	    
 	    // Get the next interior face(s) and extrapolate from these. 
-	    VolIndex interiorVof = face.getVoF(flip(sit()));
-	    Vector<FaceIndex> neighborFaces = ebisbox.getFaces(interiorVof, dir, flip(sit()));
+	    const VolIndex interiorVof = face.getVoF(flip(sit()));
+	    
+	    const std::vector<FaceIndex> neighborFaces = ebisbox.getFaces(interiorVof, dir, flip(sit())).stdVector();
 
 	    if(neighborFaces.size() > 0){
-	      for (const auto& f : neighborFaces.stdVector()){
-		flux(face, m_comp) += flux(f, m_comp);
+	      Real sumArea = 0.0;
+	      
+	      for (const auto& f : neighborFaces){
+		const Real areaFrac = ebisbox.areaFrac(f);
+		
+		sumArea            += areaFrac;
+		flux(face, m_comp) += areaFrac * flux(f, m_comp);
+		
 	      }
-	      flux(face, m_comp) = std::max(0.0, sign(sit())*flux(face, m_comp))/neighborFaces.size();
+	      
+	      flux(face, m_comp) = sign(sit()) * std::max(0.0, sign(sit())*flux(face, m_comp))/sumArea;
 	    }
 	    
 	    break;
