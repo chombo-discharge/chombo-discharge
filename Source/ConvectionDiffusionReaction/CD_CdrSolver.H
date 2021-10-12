@@ -930,9 +930,16 @@ protected:
 
   /*!
     @brief Interpolate flux to centroids
-    @param[out] a_flux Centroid fluxes
-    @param[in]  a_lvl  Grid level
-    @details This interpolates face fluxes to centroids and puts the result in a_flux and m_interpolant. 
+    @param[inout] a_flux On input, contains centered fluxes. Output contains centroid fluxes
+    @details This interpolates face fluxes to centroids. 
+  */
+  virtual void interpolateFluxToFaceCentroids(EBAMRFluxData& a_flux);
+
+  /*!
+    @brief Interpolate flux to centroids
+    @param[inout] a_flux On input, contains centered fluxes. Output contains centroid fluxes
+    @param[in]    a_lvl  Grid level
+    @details This interpolates face fluxes to centroids. 
   */
   virtual void interpolateFluxToFaceCentroids(LevelData<EBFluxFAB>& a_flux, const int a_lvl);
 
