@@ -20,7 +20,8 @@ LookupTable::LookupTable(){
   m_y.resize(m_numEntries);
 }
 
-LookupTable::~LookupTable(){}
+LookupTable::~LookupTable(){
+}
 
 LookupTable::LookupTable(const LookupTable& a_table){
   m_dx = a_table.m_dx;
