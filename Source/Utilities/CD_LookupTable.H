@@ -12,8 +12,12 @@
 #ifndef CD_LookupTable_H
 #define CD_LookupTable_H
 
+// Std includes
+#include <iostream>
+#include <vector>
+
 // Chombo includes
-#include <RealVect.H>
+#include <REAL.H>
 
 // Our includes
 #include <CD_NamespaceHeader.H>
@@ -25,7 +29,7 @@ class LookupTable {
 public:
 
   /*!
-    @brief Constructor
+    @brief Default constructor. Creates a table without any entries. 
   */
   LookupTable();
 
@@ -56,6 +60,21 @@ public:
   */
   inline
   void scaleY(const Real& a_scale);
+
+  /*!
+    @brief Restrict x-values to maximum and minimum. Data outside these ranges are discarded. 
+    @param[in] a_xMin Minimum x-value in the table. 
+    @param[in] a_xMax Maximum x-value in the table. 
+  */
+  inline
+  void setRange(const Real a_xMin, const Real a_xMax);
+
+  /*!
+    @brief Sort the table. Useful if the input data was not already sorted. 
+    @details On output, the data in the table is sorted -- smallest x goes first. 
+  */
+  inline
+  void sort();
   
   /*!
     @brief Add entry
@@ -73,7 +92,7 @@ public:
     @brief Dump table to pout()
   */
   inline
-  void dumpTable() const ;
+  void dumpTable(std::ostream& a_outputStream = std::cout) const ;
 
   /*!
     @brief Get entry

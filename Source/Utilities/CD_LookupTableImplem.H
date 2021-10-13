@@ -14,10 +14,33 @@
 
 // Std includes
 #include <iostream>
+#include <algorithm>
+#include <math.h>
 
 // Our includes
 #include <CD_LookupTable.H>
 #include <CD_NamespaceHeader.H>
+
+inline
+LookupTable::LookupTable(){
+
+  m_numEntries = 0;
+  m_x.resize(m_numEntries);
+  m_y.resize(m_numEntries);
+}
+
+inline
+LookupTable::~LookupTable(){
+  
+}
+
+inline
+LookupTable::LookupTable(const LookupTable& a_table){
+  m_dx = a_table.m_dx;
+  m_numEntries = a_table.m_numEntries;
+  m_x = a_table.m_x;
+  m_y = a_table.m_y;
+}
 
 inline
 void LookupTable::addEntry(const Real& a_x, const Real& a_y){
@@ -41,6 +64,29 @@ void LookupTable::addTable(const LookupTable& a_otherTable, const Real a_scale){
 }
 
 inline
+void LookupTable::sort(){
+
+  std::vector<std::pair<Real, Real> > data;
+  for (int i = 0; i < m_numEntries; i++){
+    data.emplace_back(std::make_pair(m_x[i], m_y[i]));
+  }
+
+  auto comparator = [](const std::pair<Real, Real>& a, const std::pair<Real, Real>& b) -> bool {
+    return a.first < b.first;
+  };
+  
+  std::sort(data.begin(), data.end(), comparator);
+
+  m_x.resize(0);
+  m_y.resize(0);
+  
+  for (const auto& d : data){
+    m_x.emplace_back(d.first);
+    m_y.emplace_back(d.second);
+  }
+}
+
+inline
 void LookupTable::scaleX(const Real& a_scale){
   for (int i = 0; i < m_x.size(); i++){
     m_x[i] *= a_scale;
@@ -57,9 +103,28 @@ void LookupTable::scaleY(const Real& a_scale){
 }
 
 inline
-void LookupTable::dumpTable() const{
+void LookupTable::setRange(const Real a_xMin, const Real a_xMax){
+  std::vector<Real> newX;
+  std::vector<Real> newY;
+
+  for (int i = 0; i < m_numEntries; i++){
+    if(m_x[i] >= a_xMin && m_x[i] <= a_xMax){
+      newX.push_back(m_x[i]);
+      newY.push_back(m_y[i]);      
+    }
+  }
+
+  m_x = newX;
+  m_y = newY;
+
+  m_numEntries = m_x.size();
+}
+
+inline
+void LookupTable::dumpTable(std::ostream& a_outputStream) const{
   for (int i = 0; i < m_y.size(); i++){
-    std::cout << m_x[i] << "\t" << m_y[i] << std::endl;
+    //    std::cout << m_x[i] << "\t" << m_y[i] << std::endl;
+    a_outputStream << m_x[i] << "\t" << m_y[i] << "\n";
   }
 }
 
@@ -109,7 +174,7 @@ Real LookupTable::getEntry(const Real a_x) const {
 
     // Find entry. We will linear interpolate between i and i+1
     // where i: 
-    const int i = floor((a_x - m_x[0])/m_dx);
+    const int i = std::floor((a_x - m_x[0])/m_dx);
 
     if(i < 0){
       value = m_y[0];
