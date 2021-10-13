@@ -2,7 +2,7 @@
 # POTENTIAL CURVE
 # ====================================================================================================
 StreamerProfiledSurface.peak_voltage = 35E3     # Lightning impulse voltage peak
-StreamerProfiledSurface.pulse_start  = 225E-9   # Where to start on lightning impuse
+StreamerProfiledSurface.pulse_start  = 125E-9   # Where to start on lightning impuse
 
 # ====================================================================================================
 # AMR_MESH OPTIONS
@@ -218,7 +218,7 @@ CdrPlasmaGodunovStepper.diffusion        = explicit  # Diffusion. 'explicit', 'i
 CdrPlasmaGodunovStepper.transport        = euler     # Transport algorithm. 'euler' or 'rk2'
 CdrPlasmaGodunovStepper.relax_time       = 0.5       # Relaxation time constant
 CdrPlasmaGodunovStepper.fast_poisson     = 1         # Solve Poisson every this time steps. Mostly for debugging.
-CdrPlasmaGodunovStepper.fast_rte         = 1         # Solve RTE every this time steps. Mostly for debugging.
+CdrPlasmaGodunovStepper.fast_rte         = 10         # Solve RTE every this time steps. Mostly for debugging.
 CdrPlasmaGodunovStepper.fhd              = false     # Set to true if you want to add a stochastic diffusion flux
 CdrPlasmaGodunovStepper.source_comp      = upwind 2  # Interpolated 'interp' or cell-average 'cell_ave' for source computations
 CdrPlasmaGodunovStepper.extrap_advect    = true      # Use time-extrapolation capabilities (if they exist) in the CdrSolver
@@ -232,7 +232,7 @@ CdrPlasmaAir3Bourdon.transport_file      = transport_data.txt              # Tra
 CdrPlasmaAir3Bourdon.uniform_tables      = 500    	                   #  Converted # of points in transport file
 CdrPlasmaAir3Bourdon.pressure            = 1.                              # Gas pressure
 CdrPlasmaAir3Bourdon.temperature         = 300                             # Gas temperature
-CdrPlasmaAir3Bourdon.use_alpha_corr      = false                           # Soloviev alpha correction	
+CdrPlasmaAir3Bourdon.use_alpha_corr      = true                            # Soloviev alpha correction	
 CdrPlasmaAir3Bourdon.mobile_electrons    = true                            # Mobile Electrons or not
 CdrPlasmaAir3Bourdon.diffusive_electrons = true                            # Diffusive Electrons or not
 CdrPlasmaAir3Bourdon.mobile_ions         = true                            # Mobile ions or not
@@ -240,9 +240,9 @@ CdrPlasmaAir3Bourdon.diffusive_ions      = true                            # Dif
 CdrPlasmaAir3Bourdon.ion_mobility        = 2.E-4                           # Ion mobility
 
 CdrPlasmaAir3Bourdon.uniform_density       = 1.E10                         # Uniform density
-CdrPlasmaAir3Bourdon.seed_density          = 1.E17                         # Gaussian seed density
+CdrPlasmaAir3Bourdon.seed_density          = 1.E16                         # Gaussian seed density
 CdrPlasmaAir3Bourdon.seed_radius           = 100E-6                        # Gaussian seed radius
-CdrPlasmaAir3Bourdon.seed_position         = 0.0 1E-2                      # Gaussian seed position
+CdrPlasmaAir3Bourdon.seed_position         = 0.0 7.5E-2                    # Gaussian seed position
 
 CdrPlasmaAir3Bourdon.electrode_townsend2           = 1.E-6                 # SEE on electrodes
 CdrPlasmaAir3Bourdon.dielectric_townsend2          = 1.E-6                 # SEE on dielectrics

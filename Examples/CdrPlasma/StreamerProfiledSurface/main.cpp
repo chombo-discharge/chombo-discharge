@@ -16,10 +16,10 @@
 Real pulseStart  = 0.0;
 Real peakVoltage = 0.0;
 
-constexpr Real tau1 =  0.42E-6;
-constexpr Real tau2 = 50.00E-6;
+constexpr Real tau1 =  0.15E-6;
+constexpr Real tau2 = 75.00E-6;
 constexpr Real tauf = tau2/(tau2-tau1);
-constexpr Real eta  = 1./0.96;
+constexpr Real eta  = 1.0;
 Real potential_curve(const Real a_time){
   return peakVoltage * eta * tauf * (exp(-(a_time+pulseStart)/tau2) - exp(-(a_time+pulseStart)/tau1));
 }
