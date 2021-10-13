@@ -32,7 +32,7 @@ namespace DataParser {
     @param[in] a_ignoreChars Characters indicating comments in the file. Lines starting with these characters are ignored. 
     @note xColumn = 0 is the FIRST column, xColumn=1 is the SECOND column and so on. 
   */
-  static LookupTable simpleFileReadASCII(const std::string       a_fileName,
+  static LookupTable<2> simpleFileReadASCII(const std::string       a_fileName,
 					 const int               a_xColumn    = 0,
 					 const int               a_yColumn    = 1,
 					 const std::vector<char> a_ignoreChars = {'#'});

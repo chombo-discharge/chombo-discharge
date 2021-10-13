@@ -23,12 +23,12 @@
 #include <CD_DataParser.H>
 #include <CD_NamespaceHeader.H>
 
-LookupTable DataParser::simpleFileReadASCII(const std::string       a_fileName,
+LookupTable<2> DataParser::simpleFileReadASCII(const std::string       a_fileName,
 					    const int               a_xColumn,
 					    const int               a_yColumn,
 					    const std::vector<char> a_ignoreChars) {
   // This is the return table. It will be populated as we read the file. 
-  LookupTable returnTable = LookupTable();
+  LookupTable<2> returnTable = LookupTable<2>();
 
   // Open an input file stream and start reading lines. 
   std::ifstream inputFile(a_fileName);
