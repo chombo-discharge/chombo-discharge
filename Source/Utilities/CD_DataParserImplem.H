@@ -99,7 +99,7 @@ LookupTable<2> DataParser::fractionalFileReadASCII(const std::string       a_fil
     if(line == a_startRead){
       parseLine = true;
     }
-    else if(line == "" && parseLine){
+    else if(line == a_stopRead && parseLine){
       break;
     }
 
