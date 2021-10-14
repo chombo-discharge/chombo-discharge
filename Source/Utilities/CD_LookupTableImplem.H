@@ -14,178 +14,237 @@
 
 // Std includes
 #include <iostream>
+#include <algorithm>
+#include <math.h>
 
 // Our includes
 #include <CD_LookupTable.H>
 #include <CD_NamespaceHeader.H>
 
+template <int N>
 inline
-void LookupTable::addEntry(const Real& a_x, const Real& a_y){
-  m_x.push_back(a_x);
-  m_y.push_back(a_y);
-  m_numEntries++;
+LookupTable<N>::LookupTable(){
+  m_state     = std::make_tuple(-1, false, false);
+}
 
-  if(m_numEntries == 1){
-    m_dx    = 0.;
+template <int N>
+inline
+LookupTable<N>::~LookupTable(){
+  
+}
+
+template <int N>
+inline
+LookupTable<N>::LookupTable(const LookupTable& a_table){
+  m_data      = a_table.m_data;
+  m_state     = a_table.m_state;
+  m_delta     = a_table.m_delta;  
+}
+
+template <int N>
+template <typename... Ts>
+inline
+void LookupTable<N>::addEntry(const Ts&... x){
+  std::array<Real, sizeof...(Ts)> arr = {x...};
+  m_data.emplace_back(arr);
+
+  std::get<Sorted> (m_state) = false;
+  std::get<Uniform>(m_state) = false;  
+}
+
+template <int N>
+inline
+void LookupTable<N>::sort(const int a_whichColumn){
+
+  auto comparator = [idx = a_whichColumn](const std::array<Real, N>& a, const std::array<Real, N>& b) -> bool {
+    return a[idx] < b[idx];
+  };
+  
+  std::sort(m_data.begin(), m_data.end(), comparator);
+
+  std::get<Column>(m_state) = a_whichColumn;
+  std::get<Sorted>(m_state) = true;
+}
+
+template <int N>
+template <int K>
+inline
+void LookupTable<N>::scale(const Real a_scale){
+  for (auto& r : m_data){
+    r[K] *= a_scale;
   }
-  else if(m_numEntries >= 2){
-    m_dx    = m_x[1] - m_x[0];
+
+  if(K == std::get<Column>(m_state)){
+    m_delta *= a_scale;
   }
 }
 
+template <int N>
 inline
-void LookupTable::addTable(const LookupTable& a_otherTable, const Real a_scale){
-  for (int i = 0; i < m_x.size(); i++){
-    m_y[i] += a_scale*a_otherTable.getEntry(m_x[i]);
-  }
-}
+void LookupTable<N>::swap(const int a_column1, const int a_column2){
+  for (auto& r : m_data){
+    const Real tmp = r[a_column1];
 
-inline
-void LookupTable::scaleX(const Real& a_scale){
-  for (int i = 0; i < m_x.size(); i++){
-    m_x[i] *= a_scale;
+    r[a_column1] = r[a_column2];
+    r[a_column2] = tmp;
   }
 
-  m_dx *= a_scale;
-}
-
-inline
-void LookupTable::scaleY(const Real& a_scale){
-  for (int i = 0; i < m_y.size(); i++){
-    m_y[i] *= a_scale;
-  }
-}
-
-inline
-void LookupTable::dumpTable() const{
-  for (int i = 0; i < m_y.size(); i++){
-    std::cout << m_x[i] << "\t" << m_y[i] << std::endl;
-  }
-}
-
-inline
-void LookupTable::swapXY(){
-  std::vector<Real> tmp = m_x;
-  m_x = m_y;
-  m_y = tmp;
-
-  if(m_numEntries == 1){
-    m_dx    = 0.;
-  }
-  else if(m_numEntries >= 2){
-    m_dx    = m_x[1] - m_x[0];
-  }
-}
-
-inline
-void LookupTable::operator+=(const LookupTable& a_table){
-  for (int i = 0; i < m_y.size(); i++){
-    m_y[i] += a_table.m_y[i];
-  }
-}
-
-inline
-void LookupTable::operator-=(const LookupTable& a_table){
-  for (int i = 0; i < m_y.size(); i++){
-    m_y[i] -= a_table.m_y[i];
-  }
-}
-
-inline
-void LookupTable::operator=(const LookupTable& a_table){
-  m_numEntries = a_table.m_numEntries;
-  m_dx = a_table.m_dx;
-  m_x = a_table.m_x;
-  m_y = a_table.m_y;
-}
-
-inline
-Real LookupTable::getEntry(const Real a_x) const {
-  Real value;
-  if(m_numEntries == 1){
-    value = m_y[0];
-  }
-  else {
-
-    // Find entry. We will linear interpolate between i and i+1
-    // where i: 
-    const int i = floor((a_x - m_x[0])/m_dx);
-
-    if(i < 0){
-      value = m_y[0];
+  if(std::get<Sorted>(m_state)){
+    
+    if(a_column1 == std::get<Column>(m_state)){
+      std::get<Column> (m_state) = a_column1;
     }
-    else if(i >= m_numEntries - 1){
-      value = m_y[m_numEntries - 1];
+    else if(a_column2 == std::get<Column>(m_state)){
+      std::get<Column> (m_state) = a_column2;
     }
-    else {
+  }
+}
 
-      const Real x0  = m_x[i];
-      const Real x1  = m_x[i+1];
-      const Real y0  = m_y[i];
-      const Real y1  = m_y[i+1];
+template <int N>
+inline
+void LookupTable<N>::clear() {
+  m_data.resize(0);
+}
 
-      const Real dydx = (y1-y0)/(x1-x0);
-      value = y0 + (dydx)*(a_x - x0);
+template <int N>
+inline
+void LookupTable<N>::setRange(const Real a_min, const Real a_max, const int a_colRange){
+
+  // Do a backup of the data and reset data holder. 
+  const std::vector<std::array<Real, N> > oldData = m_data;
+  this->clear();
+  
+  for (const auto& d : oldData){
+    if(d[a_colRange] >= a_min && d[a_colRange] <= a_max){
+      m_data.emplace_back(d);
     }
   }
 
-  return value;
+  std::get<Sorted> (m_state) = false;
+  std::get<Uniform>(m_state) = false;      
 }
 
+template <int N>
 inline
-Real LookupTable::directLookup(const Real a_x) const {
-  Real value;
-  if(a_x <= m_x[0]){
-    value = m_y[0];
+void LookupTable<N>::dumpTable(std::ostream& a_outputStream) const{
+  for (const auto& r : m_data){
+    for (const auto& c : r){
+      a_outputStream << c << "\t";
+    }
+    a_outputStream << "\n";
   }
-  else if(a_x >= m_x[m_numEntries - 1]){
-    value = m_y[m_numEntries - 1];
+}
+
+template <int N>
+template <int K>
+inline
+Real LookupTable<N>::getEntry(const Real a_x) const {
+  Real ret;
+  
+  if(m_data.size() == 1){
+    ret = m_data.front()[K];
   }
   else{
-    for (int i = 0; i <= m_x.size()-2; i++){
-      if(a_x >= m_x[i] && a_x <= m_x[i+1]){
-	const Real x0  = m_x[i];
-	const Real x1  = m_x[i+1];
-	const Real y0  = m_y[i];
-	const Real y1  = m_y[i+1];
+    const int whichColumn = std::get<Column>(m_state);
 
-	const Real dydx  = (y1-y0)/(x1-x0);
-	value = y0 + dydx*(a_x-x0);
+    const int idx = std::floor( (a_x - m_data.front()[whichColumn])/m_delta);
+    if (idx < 0){
+      ret = m_data.front()[K];
+    }
+    else if (idx >= m_data.size() ){
+      ret = m_data.back()[K];
+    }
+    else{
+      const Real t = (a_x - m_data[idx][whichColumn])/m_delta;
 
-	break;
+      ret = m_data[idx][K] + t*(m_data[idx+1][K] - m_data[idx][K]);
+    }
+  }
+
+  return ret;
+}
+
+template <int N>
+inline
+std::array<Real, N> LookupTable<N>::directLookup(const Real a_x) const {
+
+  std::array<Real, N> ret;
+  if(!std::get<Sorted>(m_state)){
+    std::cerr << "LookupTable<N>::directLookup -- logic bust. Data must be sorted along the input column!\n";
+  }
+  else{
+    const int column = std::get<Column>(m_state);
+      
+    if(a_x <= m_data.front()[column]){
+      ret = m_data.front();
+    }
+    else if(a_x >= m_data.back()[column]){
+      ret = m_data.back();
+    }
+    else{ // Do liner interpolation. We look through the rows and find two entries that bracket a_x. We then linearly interpolate between those entries. 
+      for (int irow = 0; irow < m_data.size()-2; irow++){
+	const std::array<Real, N>& row1 = m_data[irow  ];
+	const std::array<Real, N>& row2 = m_data[irow+1];
+
+	const Real x1 = row1[column];
+	const Real x2 = row2[column];
+	
+	if(a_x >= x1 && a_x <= x2){
+	  const Real t = (a_x - x1)/(x2-x1);
+
+	  // Now interpolate data in each column. 
+	  for (int j = 0; j < N; j++){
+	    ret[j] = row1[j] + t * (row2[j] - row1[j]);
+	  }
+	}
       }
     }
   }
 
-  return value;
+  return ret;
 }
 
+template <int N>
 inline
-void LookupTable::makeUniform(const int a_num_entries){
+void LookupTable<N>::makeUniform(const int a_numRows){
 
-  std::vector<Real> new_x(a_num_entries, 0.0);
-  std::vector<Real> new_y(a_num_entries, 0.0);
+  if(std::get<Sorted>(m_state)){
+    const int whichColumn = std::get<Column>(m_state);
 
-  const Real xmin = m_x[0];
-  const Real xmax = m_x[m_numEntries-1];
-  const Real dx   = (xmax - xmin)/(a_num_entries - 1);
+    if(a_numRows > 1){
 
-  // Build x
-  for (int i = 0; i < new_x.size(); i++){
-    new_x[i] = xmin + i*dx;
+      // Find maximum value and spacing. 
+      Real maxVal = std::numeric_limits<Real>::min();
+      Real minVal = std::numeric_limits<Real>::max();
+
+      for (const auto& r : m_data){
+	maxVal = std::max(maxVal, r[whichColumn]);
+	minVal = std::min(minVal, r[whichColumn]);
+      }
+
+      m_delta = (maxVal - minVal)/(a_numRows - 1);
+
+      // Do direct lookup of the data. 
+      std::vector<std::array<Real, N> > newData;
+
+      for (int i = 0; i < a_numRows; i++){
+	const Real x = minVal + i*m_delta;
+
+	newData.emplace_back(this->directLookup(x));
+      }
+
+      m_data = newData;
+
+      std::get<Uniform>(m_state) = true;
+    }
+    else{
+      std::cerr << "LookupTable<N>::makeUniform -- must have at least two rows!\n";
+    }
+  }
+  else{
+    std::cerr << "LookupTable<N>::makeUniform -- must sort the column along one of the coordinates first!\n";
   }
 
-  // Build y
-  for (int i = 0; i < new_y.size(); i++){
-    new_y[i] = directLookup(new_x[i]);
-  }
-
-
-  // Copy to internal data
-  m_dx = dx;
-  m_x  = new_x;
-  m_y  = new_y;
-  m_numEntries = a_num_entries;
 }
 
 #include <CD_NamespaceFooter.H>

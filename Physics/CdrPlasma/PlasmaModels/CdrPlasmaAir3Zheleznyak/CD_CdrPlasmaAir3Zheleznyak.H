@@ -115,12 +115,12 @@ namespace Physics {
       ChemistryAlgorithm m_ChemistryAlgorithm;
 
       // Tables built from BOLSIG+
-      LookupTable m_e_mobility;
-      LookupTable m_e_diffco;
-      LookupTable m_e_alpha;
-      LookupTable m_e_eta;
-      LookupTable m_b1_exc;
-      LookupTable m_c4_exc;
+      LookupTable<2> m_e_mobility;
+      LookupTable<2> m_e_diffco;
+      LookupTable<2> m_e_alpha;
+      LookupTable<2> m_e_eta;
+      LookupTable<2> m_b1_exc;
+      LookupTable<2> m_c4_exc;
 
       Vector<int> m_wallBc; // Wall boundary conditions
 
@@ -178,7 +178,6 @@ namespace Physics {
 
       int poissonReaction(const Real a_propensity, const Real a_dt) const;
 
-      void readFileEntries(LookupTable& a_table, const std::string a_string);
       void parseTransportFile();
       void parseTransport();
       void parseGasParameters();
