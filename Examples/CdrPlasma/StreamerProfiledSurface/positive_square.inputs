@@ -7,8 +7,8 @@ StreamerProfiledSurface.curve_start   = 225E-9     # Where to start on the volta
 # ====================================================================================================
 # AMR_MESH OPTIONS
 # ====================================================================================================
-AmrMesh.lo_corner        =  0    0     # Low corner of problem domain
-AmrMesh.hi_corner        =  4E-2 4E-2  # High corner of problem domain
+AmrMesh.lo_corner        = 0    0      # Low corner of problem domain
+AmrMesh.hi_corner        = 4E-2 4E-2   # High corner of problem domain
 AmrMesh.verbosity        = -1          # Controls verbosity. 
 AmrMesh.coarsest_domain  = 80 80       # Number of cells on coarsest domain
 AmrMesh.max_amr_depth    = 5           # Maximum amr depth
@@ -25,7 +25,7 @@ AmrMesh.num_ghost        = 2           # Number of ghost cells. Default is 3
 AmrMesh.lsf_ghost        = 2           # Number of ghost cells when writing level-set to grid
 AmrMesh.eb_ghost         = 4           # Set number of of ghost cells for EB stuff
 AmrMesh.mg_interp_order  = 2           # Multigrid interpolation order
-AmrMesh.mg_interp_radius = 2           # Multigrid interpolation radius
+AmrMesh.mg_interp_radius = 1           # Multigrid interpolation radius
 AmrMesh.mg_interp_weight = 2           # Multigrid interpolation weight (for least squares)
 AmrMesh.centroid_sten    = linear      # Centroid interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
 AmrMesh.eb_sten          = pwl         # EB interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
@@ -189,10 +189,10 @@ RodPlaneProfile.plane_width       = 7.200123E-2   # Plane width
 RodPlaneProfile.plane_normal      = 0.0 1.0       # Plane normal. Not used, oriented along +y only 
 RodPlaneProfile.plane_point       = 0.0 5.001E-3      # Center point on plane
 RodPlaneProfile.plane_eps         = 4.0           # Plane permittivity
-RodPlaneProfile.profile_num_left  = 35            # Number of holes to the left
+RodPlaneProfile.profile_num_left  = 36            # Number of holes to the left
 RodPlaneProfile.profile_num_right = 35            # Number of holes to the left
 RodPlaneProfile.profile_dist      = 1015E-6       # Distance between each hole
-RodPlaneProfile.profile_xshift    = 0.0           # Horizontal offset
+RodPlaneProfile.profile_xshift    = 507.5E-6           # Horizontal offset
 RodPlaneProfile.profile_yshift    = 0.0           # Vertical offset
 RodPlaneProfile.profile_curv      = 250E-6        # Rounding radius
 

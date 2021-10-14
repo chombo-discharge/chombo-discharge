@@ -189,12 +189,12 @@ RodPlaneProfile.plane_width       = 7.200123E-2   # Plane width
 RodPlaneProfile.plane_normal      = 0.0 1.0       # Plane normal. Not used, oriented along +y only 
 RodPlaneProfile.plane_point       = 0.0 5E-3      # Center point on plane
 RodPlaneProfile.plane_eps         = 4.0           # Plane permittivity
-RodPlaneProfile.profile_num_left  = 19            # Number of holes to the left
-RodPlaneProfile.profile_num_right = 19            # Number of holes to the left
+RodPlaneProfile.profile_num_left  = 18            # Number of holes to the left
+RodPlaneProfile.profile_num_right = 17            # Number of holes to the left
 RodPlaneProfile.profile_dist      = 2.06E-3       # Distance between each hole
-RodPlaneProfile.profile_xshift    = 0.0           # Horizontal offset
-RodPlaneProfile.profile_yshift    = 500E-6        # Vertical offset
-RodPlaneProfile.profile_curv      = 50E-6         # Rounding radius
+RodPlaneProfile.profile_xshift    = 1.03E-3       # Horizontal offset
+RodPlaneProfile.profile_yshift    = 514E-6        # Vertical offset
+RodPlaneProfile.profile_curv      = 100E-6        # Rounding radius
 
 # Shape set. Can use 'circle' or 'square'
 RodPlaneProfile.profile       = circle
