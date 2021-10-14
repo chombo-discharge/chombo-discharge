@@ -3,6 +3,7 @@
 # ====================================================================================================
 StreamerProfiledSurface.voltage_curve = 35kv.curve # Which voltage curve to read
 StreamerProfiledSurface.curve_start   = 225E-9     # Where to start on the voltage curve. This is about 20kV
+StreamerProfiledSurface.polarity      = negative   # Which polarity
 
 # ====================================================================================================
 # AMR_MESH OPTIONS

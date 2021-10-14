@@ -3,6 +3,7 @@
 # ====================================================================================================
 StreamerProfiledSurface.voltage_curve = 35kv.curve # Which voltage curve to read
 StreamerProfiledSurface.curve_start   = 225E-9     # Where to start on the voltage curve. This is about 20kV
+StreamerProfiledSurface.polarity      = negative   # Which polarity
 
 # ====================================================================================================
 # AMR_MESH OPTIONS
@@ -47,8 +48,8 @@ Driver.write_restart_files             = false            # Write restart files 
 Driver.initial_regrids                 = 4                # Number of initial regrids
 Driver.do_init_load_balance            = false            # If true, load balance the first step in a fresh simulation.
 Driver.start_time                      = 0                # Start time (fresh simulations only)
-Driver.stop_time                       = 100E-9           # Stop time
-Driver.max_steps                       = 15000            # Maximum number of steps
+Driver.stop_time                       = 500E-9           # Stop time
+Driver.max_steps                       = 150000           # Maximum number of steps
 Driver.geometry_only                   = false            # Special option that ONLY plots the geometry
 Driver.write_memory                    = false            # Write MPI memory report
 Driver.write_loads                     = false            # Write (accumulated) computational loads
