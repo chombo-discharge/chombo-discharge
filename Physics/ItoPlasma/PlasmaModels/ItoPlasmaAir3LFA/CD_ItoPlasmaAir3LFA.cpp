@@ -143,21 +143,21 @@ void ItoPlasmaAir3LFA::readTables(){
   this->addTable("Te",       "energy.dat");
 
   // Need to scale tables. First column is in Td and second in /N
-  m_tables["mobility"].scaleX(m_N*Units::Td);
-  m_tables["mobility"].scaleY(1./m_N);
+  m_tables["mobility"].scale<0>(m_N*Units::Td);
+  m_tables["mobility"].scale<1>(1./m_N);
 
-  m_tables["diffco"].scaleX(m_N*Units::Td);
-  m_tables["diffco"].scaleY(1./m_N);
+  m_tables["diffco"].scale<0>(m_N*Units::Td);
+  m_tables["diffco"].scale<1>(1./m_N);
 
-  m_tables["alpha"].scaleX(m_N*Units::Td);
-  m_tables["alpha"].scaleY(m_N);
+  m_tables["alpha"].scale<0>(m_N*Units::Td);
+  m_tables["alpha"].scale<1>(m_N);
 
-  m_tables["eta"].scaleX(m_N*Units::Td);
-  m_tables["eta"].scaleY(m_N);
+  m_tables["eta"].scale<0>(m_N*Units::Td);
+  m_tables["eta"].scale<1>(m_N);
 
-  m_tables["Te"].swapXY();
-  m_tables["Te"].scaleX(m_N*Units::Td);
-  m_tables["Te"].scaleY(2.0*Units::Qe/(3.0*Units::kb));
+  m_tables["Te"].swap(0,1);
+  m_tables["Te"].scale<0>(m_N*Units::Td);
+  m_tables["Te"].scale<1>(2.0*Units::Qe/(3.0*Units::kb));
 }
 
 Real ItoPlasmaAir3LFA::computeDt(const RealVect a_E, const RealVect a_pos, const Vector<Real> a_cdr_densities) const {
@@ -172,18 +172,18 @@ Real ItoPlasmaAir3LFA::computeDt(const RealVect a_E, const RealVect a_pos, const
 Real ItoPlasmaAir3LFA::computeAlpha(const RealVect a_E) const {
   const Real E = a_E.vectorLength();
 
-  return m_tables.at("alpha").getEntry(E);
+  return m_tables.at("alpha").getEntry<1>(E);
 }
 
 Vector<Real> ItoPlasmaAir3LFA::computeItoMobilitiesLFA(const Real a_time, const RealVect a_pos, const RealVect a_E) const {
   Vector<Real> mobilities(m_num_ItoSpecies, m_ion_mu);
-  mobilities[m_ElectronIdx] = m_tables.at("mobility").getEntry(a_E.vectorLength());
+  mobilities[m_ElectronIdx] = m_tables.at("mobility").getEntry<1>(a_E.vectorLength());
 
   return mobilities;
 }
 
 RealVect ItoPlasmaAir3LFA::computeElectronDriftVelocity(const RealVect a_E) const {
-  return -m_tables.at("mobility").getEntry(a_E.vectorLength())*a_E;
+  return -m_tables.at("mobility").getEntry<1>(a_E.vectorLength())*a_E;
 }
 
 Vector<Real> ItoPlasmaAir3LFA::computeItoDiffusionLFA(const Real         a_time,
@@ -191,7 +191,7 @@ Vector<Real> ItoPlasmaAir3LFA::computeItoDiffusionLFA(const Real         a_time,
 						      const RealVect     a_E,
 						      const Vector<Real> a_cdr_densities) const {
   Vector<Real> D(m_num_ItoSpecies, m_ion_D);
-  D[m_ElectronIdx] = m_tables.at("diffco").getEntry(a_E.vectorLength());
+  D[m_ElectronIdx] = m_tables.at("diffco").getEntry<1>(a_E.vectorLength());
   
   return D;
 }
@@ -201,9 +201,9 @@ void ItoPlasmaAir3LFA::updateReactionRatesLFA(const RealVect a_E, const Real a_d
   // Compute the reaction rates.
   const Real dV      = pow(a_dx, SpaceDim);//*a_kappa;
   const Real E       = a_E.vectorLength();
-  const Real alpha   = m_tables.at("alpha").getEntry(E);
-  const Real eta     = m_tables.at("eta").getEntry(E);
-  const Real Te      = m_tables.at("Te").getEntry(E);
+  const Real alpha   = m_tables.at("alpha").getEntry<1>(E);
+  const Real eta     = m_tables.at("eta").getEntry<1>(E);
+  const Real Te      = m_tables.at("Te").getEntry<1>(E);
   const Real velo    = this->computeElectronDriftVelocity(a_E).vectorLength();
   const Real xfactor = (m_pq/(m_p + m_pq))*excitationRates(E)*sergeyFactor(m_O2frac)*m_photoi_factor;
   const Real bpn     = 2E-13*sqrt(300/m_T)/dV;

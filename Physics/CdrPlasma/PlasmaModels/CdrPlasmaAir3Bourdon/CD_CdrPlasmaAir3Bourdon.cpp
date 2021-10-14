@@ -23,7 +23,8 @@
 #include <CD_CdrPlasmaAir3Bourdon.H>
 #include <CD_CdrPlasmaAir3BourdonSpecies.H>
 #include <CD_DataOps.H>
-#include <CD_Units.H> 
+#include <CD_Units.H>
+#include <CD_DataParser.H>
 #include <CD_NamespaceHeader.H>
 
 using namespace Physics::CdrPlasma;
@@ -73,25 +74,34 @@ CdrPlasmaAir3Bourdon::CdrPlasmaAir3Bourdon() {
   if(infile.good()){
     infile.close();
 
-    readFileEntries(m_e_mobility, CdrPlasmaAir3Bourdon::s_bolsig_mobility);
-    readFileEntries(m_e_diffco,   CdrPlasmaAir3Bourdon::s_bolsig_diffco);
-    readFileEntries(m_e_alpha,    CdrPlasmaAir3Bourdon::s_bolsig_alpha);
-    readFileEntries(m_e_eta,      CdrPlasmaAir3Bourdon::s_bolsig_eta);
-    
-    m_e_mobility.scaleX(m_N*Units::Td);
-    m_e_diffco.scaleX(m_N*Units::Td);
-    m_e_alpha.scaleX(m_N*Units::Td);
-    m_e_eta.scaleX(m_N*Units::Td);
-    
-    m_e_mobility.scaleY(1./m_N); 
-    m_e_diffco.scaleY(1./m_N); 
-    m_e_alpha.scaleY(m_N); 
-    m_e_eta.scaleY(m_N);
+    // Read data into LookupTables with 2 columns. After reading, we call LookupTable::sort which is a kind of requirement
+    // that ensures that we can make the table uniform and used constant spacing. Note that the input electric field is
+    // in Td so we also need to scale by N * 1.E-21. Likewise, transport coefficients are mu*N while ionization and
+    // attachment coefficients are alpha/N. So, scale that out as well. 
+    m_e_mobility = DataParser::fractionalFileReadASCII(m_transport_file, CdrPlasmaAir3Bourdon::s_bolsig_mobility, "");
+    m_e_diffco   = DataParser::fractionalFileReadASCII(m_transport_file, CdrPlasmaAir3Bourdon::s_bolsig_diffco,   "");
+    m_e_alpha    = DataParser::fractionalFileReadASCII(m_transport_file, CdrPlasmaAir3Bourdon::s_bolsig_alpha,    "");
+    m_e_eta      = DataParser::fractionalFileReadASCII(m_transport_file, CdrPlasmaAir3Bourdon::s_bolsig_eta,      "");
 
-    m_e_diffco.makeUniform(m_uniform_entries);
+    m_e_mobility.sort();
+    m_e_diffco.  sort();
+    m_e_alpha.   sort();
+    m_e_eta.     sort();
+    
+    m_e_mobility.scale<0>(m_N*Units::Td);
+    m_e_diffco.  scale<0>(m_N*Units::Td);
+    m_e_alpha.   scale<0>(m_N*Units::Td);
+    m_e_eta.     scale<0>(m_N*Units::Td);
+    
+    m_e_mobility.scale<1>(1./m_N); 
+    m_e_diffco.  scale<1>(1./m_N); 
+    m_e_alpha.   scale<1>(   m_N); 
+    m_e_eta.     scale<1>(   m_N);
+
+    m_e_diffco.  makeUniform(m_uniform_entries);
     m_e_mobility.makeUniform(m_uniform_entries);
-    m_e_alpha.makeUniform(m_uniform_entries);
-    m_e_eta.makeUniform(m_uniform_entries);
+    m_e_alpha.   makeUniform(m_uniform_entries);
+    m_e_eta.     makeUniform(m_uniform_entries);
 
   }
   else{
@@ -108,35 +118,6 @@ CdrPlasmaAir3Bourdon::CdrPlasmaAir3Bourdon() {
 
 CdrPlasmaAir3Bourdon::~CdrPlasmaAir3Bourdon() {
 
-}
-
-void CdrPlasmaAir3Bourdon::readFileEntries(LookupTable& a_table, const std::string a_string){
-  Real x, y;
-  bool read_line = false;
-  std::ifstream infile(m_transport_file);
-  std::string line;
-
-  while (std::getline(infile, line)){
-
-    // Right trim string
-    line.erase(line.find_last_not_of(" \n\r\t")+1);
-
-    if(line == a_string){ // Begin reading
-      read_line = true;
-    }
-    else if(line == "" & read_line){ // Stop reading
-      read_line = false;
-    }
-
-    if(read_line){
-      std::istringstream iss(line);
-      if (!(iss >> x >> y)) {
-	continue;
-      }
-      a_table.addEntry(x, y);
-    }
-  }
-  infile.close();
 }
 
 void CdrPlasmaAir3Bourdon::initSpecies(){
@@ -221,16 +202,16 @@ void CdrPlasmaAir3Bourdon::advanceReactionNetwork(Vector<Real>&          a_parti
 						  const Real             a_time,
 						  const Real             a_kappa) const {
   const Real E      = a_E.vectorLength();
-  const Real ve     = E*m_e_mobility.getEntry(E);
+  const Real ve     = E*m_e_mobility.getEntry<MU>(E);
   
   // Ionization and attachment coefficients
-  Real alpha  = m_e_alpha.getEntry(E);
-  Real eta    = m_e_eta.getEntry(E);
+  Real alpha  = m_e_alpha.getEntry<ALPHA>(E);
+  Real eta    = m_e_eta.getEntry<ETA>(E);
 
   // Modify alpha
   if(m_alpha_corr){
     const RealVect Eunit = a_E/a_E.vectorLength();
-    const Real De        = m_e_diffco.getEntry(E);
+    const Real De        = m_e_diffco.getEntry<DIFFCO>(E);
     const RealVect gNe   = a_particle_gradients[m_elec_idx];
 
     Real fcorr = 1.0;
@@ -287,7 +268,7 @@ Vector<Real> CdrPlasmaAir3Bourdon::computeCdrDiffusionCoefficients(const Real   
 								   const Vector<Real> a_cdr_densities) const {
 
   Vector<Real> dco(m_numCdrSpecies, 0.0);
-  dco[m_elec_idx] = m_e_diffco.getEntry(a_E.vectorLength());
+  dco[m_elec_idx] = m_e_diffco.getEntry<DIFFCO>(a_E.vectorLength());
   dco[m_plus_idx] = m_ion_diffusion;
   dco[m_minu_idx] = m_ion_diffusion;
   
@@ -300,7 +281,7 @@ Vector<RealVect> CdrPlasmaAir3Bourdon::computeCdrDriftVelocities(const Real     
 								 const Vector<Real> a_cdr_densities) const{
   Vector<RealVect> vel(m_numCdrSpecies, RealVect::Zero);
 
-  vel[m_elec_idx] = -a_E*m_e_mobility.getEntry(a_E.vectorLength());
+  vel[m_elec_idx] = -a_E*m_e_mobility.getEntry<DIFFCO>(a_E.vectorLength());
   vel[m_plus_idx] =  a_E*m_ion_mobility;
   vel[m_minu_idx] = -a_E*m_ion_mobility;
   
@@ -414,7 +395,7 @@ Real CdrPlasmaAir3Bourdon::initialSigma(const Real a_time, const RealVect a_pos)
 
 Real CdrPlasmaAir3Bourdon::computeAlpha(const RealVect a_E) const{
   const Real E     = a_E.vectorLength();
-  const Real alpha = m_e_alpha.getEntry(E);
+  const Real alpha = m_e_alpha.getEntry<ALPHA>(E);
 
   return alpha;
 }
