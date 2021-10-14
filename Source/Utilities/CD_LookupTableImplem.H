@@ -82,7 +82,7 @@ void LookupTable<N>::scale(const Real a_scale){
 template <int N>
 inline
 void LookupTable<N>::swap(const int a_column1, const int a_column2){
-  for (const auto& r : m_data){
+  for (auto& r : m_data){
     const Real tmp = r[a_column1];
 
     r[a_column1] = r[a_column2];

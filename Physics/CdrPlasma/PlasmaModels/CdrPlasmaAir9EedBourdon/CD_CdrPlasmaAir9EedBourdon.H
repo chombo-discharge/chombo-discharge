@@ -184,16 +184,16 @@ namespace Physics {
       Real m_excitation_efficiency;          // Excitation efficiency
 
       // Tables built from BOLSIG+
-      LookupTable m_initEed;
-      LookupTable m_e_mobility;
-      LookupTable m_e_N2_alpha;
-      LookupTable m_e_O2_alpha;
-      LookupTable m_e_O2_to_e_2O_c1;
-      LookupTable m_e_O2_to_e_2O_c2;
-      LookupTable m_e_O2_to_Ominus_O;
-      LookupTable m_e_N2_to_e_N2;
-      LookupTable m_e_O2_to_e_O2;
-      LookupTable m_alpha_townsend;
+      LookupTable<2> m_initEed;
+      LookupTable<2> m_e_mobility;
+      LookupTable<2> m_e_N2_alpha;
+      LookupTable<2> m_e_O2_alpha;
+      LookupTable<2> m_e_O2_to_e_2O_c1;
+      LookupTable<2> m_e_O2_to_e_2O_c2;
+      LookupTable<2> m_e_O2_to_Ominus_O;
+      LookupTable<2> m_e_N2_to_e_N2;
+      LookupTable<2> m_e_O2_to_e_O2;
+      LookupTable<2> m_alpha_townsend;
 
       void parseTransportFile();
       void parsePhotoi();
@@ -263,7 +263,6 @@ namespace Physics {
 
       Real initEed(const RealVect a_pos, const Real a_time, const RealVect a_E);
 
-      void readFileEntries(LookupTable& a_table, const std::string a_string);
       void read_Electron_mobility();
       void read_initEed();
       void read_e_N2_alpha();
