@@ -22,8 +22,10 @@
 // Our includes
 #include <CD_CdrPlasmaAir7Stephens.H>
 #include <CD_CdrPlasmaAir7StephensSpecies.H>
+#include <CD_DataParser.H>
 #include <CD_DataOps.H>
-#include <CD_Units.H> 
+#include <CD_Units.H>
+#include <CD_DataParser.H>
 #include <CD_NamespaceHeader.H>
 
 using namespace Physics::CdrPlasma;
@@ -59,35 +61,6 @@ CdrPlasmaAir7Stephens::CdrPlasmaAir7Stephens() {
 
 CdrPlasmaAir7Stephens::~CdrPlasmaAir7Stephens() {
 
-}
-
-void CdrPlasmaAir7Stephens::readFileEntries(LookupTable& a_table, const std::string a_string){
-  Real x, y;
-  bool read_line = false;
-  std::ifstream infile(m_transport_file);
-  std::string line;
-
-  while (std::getline(infile, line)){
-
-    // Right trim string
-    line.erase(line.find_last_not_of(" \n\r\t")+1);
-
-    if(line == a_string){ // Begin reading
-      read_line = true;
-    }
-    else if(line == "" & read_line){ // Stop reading
-      read_line = false;
-    }
-
-    if(read_line){
-      std::istringstream iss(line);
-      if (!(iss >> x >> y)) {
-	continue;
-      }
-      a_table.addEntry(x, y);
-    }
-  }
-  infile.close();
 }
 
 void CdrPlasmaAir7Stephens::parseChemistry(){
@@ -155,36 +128,38 @@ void CdrPlasmaAir7Stephens::parseGasParameters(){
 }
 
 void CdrPlasmaAir7Stephens::parseElectronMobility(){
-  ParmParse pp("CdrPlasmaAir7Stephens");
-
-  readFileEntries(m_e_mobility, CdrPlasmaAir7Stephens::s_bolsig_mobility);
-  m_e_mobility.scaleX(m_N*Units::Td);
-  m_e_mobility.scaleY(1./m_N); 
+  m_e_mobility = DataParser::fractionalFileReadASCII(m_transport_file, CdrPlasmaAir7Stephens::s_bolsig_mobility, "");
+  m_e_mobility.sort();
+  m_e_mobility.scale<0>(m_N*Units::Td);
+  m_e_mobility.scale<1>(1./m_N); 
   m_e_mobility.makeUniform(m_uniform_entries);
 }
 
 void CdrPlasmaAir7Stephens::parseElectronDiffusionCoefficient(){
-  ParmParse pp("CdrPlasmaAir7Stephens");
-  
-  readFileEntries(m_e_diffco, CdrPlasmaAir7Stephens::s_bolsig_diffco);
-  m_e_diffco.scaleX(m_N*Units::Td);
-  m_e_diffco.scaleY(1./m_N); 
+  m_e_diffco = DataParser::fractionalFileReadASCII(m_transport_file, CdrPlasmaAir7Stephens::s_bolsig_diffco, "");
+  m_e_diffco.sort();
+  m_e_diffco.scale<0>(m_N*Units::Td);
+  m_e_diffco.scale<1>(1./m_N); 
   m_e_diffco.makeUniform(m_uniform_entries);
 }
 
 void CdrPlasmaAir7Stephens::parseAlpha(){
   ParmParse pp("CdrPlasmaAir7Stephens");
-  readFileEntries(m_e_alpha,   CdrPlasmaAir7Stephens::s_bolsig_alpha);
-  readFileEntries(m_e_alphaN2, CdrPlasmaAir7Stephens::s_bolsig_alphaN2);
-  readFileEntries(m_e_alphaO2, CdrPlasmaAir7Stephens::s_bolsig_alphaO2);
+  m_e_alpha   = DataParser::fractionalFileReadASCII(m_transport_file, CdrPlasmaAir7Stephens::s_bolsig_alpha,   "");
+  m_e_alphaN2 = DataParser::fractionalFileReadASCII(m_transport_file, CdrPlasmaAir7Stephens::s_bolsig_alphaN2, "");
+  m_e_alphaO2 = DataParser::fractionalFileReadASCII(m_transport_file, CdrPlasmaAir7Stephens::s_bolsig_alphaO2, "");
+
+  m_e_alpha.  sort();
+  m_e_alphaN2.sort();
+  m_e_alphaO2.sort();    
   
-  m_e_alpha.scaleX(m_N*Units::Td);
-  m_e_alphaN2.scaleX(m_N*Units::Td);
-  m_e_alphaO2.scaleX(m_N*Units::Td);
+  m_e_alpha.scale<0>(m_N*Units::Td);
+  m_e_alphaN2.scale<0>(m_N*Units::Td);
+  m_e_alphaO2.scale<0>(m_N*Units::Td);
   
-  m_e_alpha.scaleY(m_N);
-  m_e_alphaN2.scaleY(m_N*m_N2frac);
-  m_e_alphaO2.scaleY(m_N*m_O2frac);
+  m_e_alpha.scale<1>(m_N);
+  m_e_alphaN2.scale<1>(m_N*m_N2frac);
+  m_e_alphaO2.scale<1>(m_N*m_O2frac);
   
   m_e_alpha.makeUniform(m_uniform_entries);
   m_e_alphaN2.makeUniform(m_uniform_entries);
@@ -192,36 +167,34 @@ void CdrPlasmaAir7Stephens::parseAlpha(){
 }
 
 void CdrPlasmaAir7Stephens::parseEta(){
-  ParmParse pp("CdrPlasmaAir7Stephens");
-  readFileEntries(m_e_eta, CdrPlasmaAir7Stephens::s_bolsig_eta);
-  m_e_eta.scaleX(m_N*Units::Td);
-  m_e_eta.scaleY(m_N);
+  m_e_eta = DataParser::fractionalFileReadASCII(m_transport_file, CdrPlasmaAir7Stephens::s_bolsig_eta, "");
+  m_e_eta.sort();
+  m_e_eta.scale<0>(m_N*Units::Td);
+  m_e_eta.scale<1>(m_N);
   m_e_eta.makeUniform(m_uniform_entries);
 }
 
 void CdrPlasmaAir7Stephens::parseTemperature(){
-  ParmParse pp("CdrPlasmaAir7Stephens");
-  readFileEntries(m_e_temperature, CdrPlasmaAir7Stephens::s_bolsig_energy);
-
-  //  m_e_temperature.dumpTable();
-  m_e_temperature.scaleX(m_N*Units::Td);
-  m_e_temperature.scaleY(2.0*Units::Qe/(3.0*Units::kb));
+  m_e_temperature = DataParser::fractionalFileReadASCII(m_transport_file, CdrPlasmaAir7Stephens::s_bolsig_energy, "");
+  m_e_temperature.sort();
+  m_e_temperature.scale<0>(m_N*Units::Td);
+  m_e_temperature.scale<1>(2.0*Units::Qe/(3.0*Units::kb));
   m_e_temperature.makeUniform(m_uniform_entries);
 }
 
 void CdrPlasmaAir7Stephens::parseExcitations(){
   ParmParse pp("air7_mc8");
   
-  readFileEntries(m_b1_exc, CdrPlasmaAir7Stephens::s_bolsig_b1_exc);
-  m_b1_exc.scaleX(m_N*Units::Td);
-  m_b1_exc.scaleY(m_N); 
+  m_b1_exc = DataParser::fractionalFileReadASCII(m_transport_file, CdrPlasmaAir7Stephens::s_bolsig_b1_exc, "");
+  m_b1_exc.sort();
+  m_b1_exc.scale<0>(m_N*Units::Td);
+  m_b1_exc.scale<1>(m_N); 
   m_b1_exc.makeUniform(m_uniform_entries);
 
-  readFileEntries(m_c4_exc, CdrPlasmaAir7Stephens::s_bolsig_c4_exc);
-
-  m_c4_exc.scaleX(m_N*Units::Td);
-  m_c4_exc.scaleY(m_N);
-
+  m_c4_exc = DataParser::fractionalFileReadASCII(m_transport_file, CdrPlasmaAir7Stephens::s_bolsig_c4_exc, "");
+  m_c4_exc.sort();
+  m_c4_exc.scale<0>(m_N*Units::Td);
+  m_c4_exc.scale<1>(m_N);
   m_c4_exc.makeUniform(m_uniform_entries);
 }
 
@@ -520,8 +493,8 @@ void CdrPlasmaAir7Stephens::advanceChemistryEuler(Vector<Real>&          a_parti
 						  const Real             a_kappa) const{
   const Real volume = pow(a_dx, SpaceDim);
   const Real E      = a_E.vectorLength();
-  const Real ve     = E*m_e_mobility.getEntry(E);
-  const Real Te     = Max(m_e_temperature.getEntry(E), 300.);
+  const Real ve     = E*m_e_mobility.getEntry<1>(E);
+  const Real Te     = Max(m_e_temperature.getEntry<1>(E), 300.);
 
   const Real Ne    = a_particle_densities[m_elec_idx];
   const Real N2p   = a_particle_densities[m_N2plus_idx];
@@ -554,7 +527,7 @@ void CdrPlasmaAir7Stephens::advanceChemistryEuler(Vector<Real>&          a_parti
   Real fcorr = 1.0;
   if(m_alpha_corr){
     const RealVect Eunit = a_E/a_E.vectorLength();
-    const Real De        = m_e_diffco.getEntry(E);
+    const Real De        = m_e_diffco.getEntry<1>(E);
     const RealVect gNe   = a_particle_gradients[m_elec_idx];
 
     fcorr = 1.0 + PolyGeom::dot(Eunit, De*gNe)/(1.0+a_particle_densities[m_elec_idx]*ve);
@@ -562,8 +535,8 @@ void CdrPlasmaAir7Stephens::advanceChemistryEuler(Vector<Real>&          a_parti
     fcorr = Max(0.0, fcorr);
   }
 
-  const Real R1  = fcorr*m_e_alphaN2.getEntry(E)*Ne;
-  const Real R2  = fcorr*m_e_alphaO2.getEntry(E)*Ne;
+  const Real R1  = fcorr*m_e_alphaN2.getEntry<1>(E)*Ne;
+  const Real R2  = fcorr*m_e_alphaO2.getEntry<1>(E)*Ne;
   const Real R3  = (5.E-41)*N2p*N2*M;
   const Real R4  = 2.5E-16*N4p*O2;
   const Real R5  = 6E-17*N2p*O2;
@@ -645,8 +618,8 @@ void CdrPlasmaAir7Stephens::advanceChemistryEuler(Vector<Real>&          a_parti
   }
 
   // Photoionization code below
-  const Real Rb1    = m_b1_exc.getEntry(E)*a_particle_densities[m_elec_idx];  // Excitation rate for b1
-  const Real Rc4    = m_c4_exc.getEntry(E)*a_particle_densities[m_elec_idx];  // Excitation rate for c4
+  const Real Rb1    = m_b1_exc.getEntry<1>(E)*a_particle_densities[m_elec_idx];  // Excitation rate for b1
+  const Real Rc4    = m_c4_exc.getEntry<1>(E)*a_particle_densities[m_elec_idx];  // Excitation rate for c4
 
 #if 0 // Original code, not performant. 
   const int num_exc_c4v0 = poisson_reaction(m_photoi_factor*Rc4*volume*m_c4v0_exc_rep, a_dt);
@@ -747,7 +720,7 @@ Vector<Real> CdrPlasmaAir7Stephens::computeCdrDiffusionCoefficients(const Real  
 								    const Vector<Real> a_cdr_densities) const {
 
   Vector<Real> dco(m_numCdrSpecies, 0.0);
-  dco[m_elec_idx] = m_e_diffco.getEntry(a_E.vectorLength());
+  dco[m_elec_idx] = m_e_diffco.getEntry<1>(a_E.vectorLength());
   if(m_isDiffusive_ions){
     dco[m_N2plus_idx]   = m_ion_diffusion;
     dco[m_O2plus_idx]   = m_ion_diffusion;
@@ -767,7 +740,7 @@ Vector<RealVect> CdrPlasmaAir7Stephens::computeCdrDriftVelocities(const Real    
 								  const Vector<Real> a_cdr_densities) const{
   Vector<RealVect> vel(m_numCdrSpecies, RealVect::Zero);
 
-  vel[m_elec_idx] = -a_E*m_e_mobility.getEntry(a_E.vectorLength());
+  vel[m_elec_idx] = -a_E*m_e_mobility.getEntry<1>(a_E.vectorLength());
   if(m_isMobile_ions){
     vel[m_N2plus_idx]   =  a_E*m_ion_mobility;
     vel[m_O2plus_idx]   =  a_E*m_ion_mobility;
@@ -887,8 +860,8 @@ Real CdrPlasmaAir7Stephens::initialSigma(const Real a_time, const RealVect a_pos
 
 Real CdrPlasmaAir7Stephens::computeAlpha(const RealVect a_E) const{
   const Real E     = a_E.vectorLength();
-  const Real alpha = m_e_alpha.getEntry(E);
-  const Real eta   = m_e_eta.getEntry(E);
+  const Real alpha = m_e_alpha.getEntry<1>(E);
+  const Real eta   = m_e_eta.getEntry<1>(E);
 
   return alpha;
 }
