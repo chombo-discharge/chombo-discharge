@@ -10,18 +10,16 @@
 #include <CD_RodPlaneProfile.H>
 #include <CD_CdrPlasmaGodunovStepper.H>
 #include <CD_CdrPlasmaStreamerTagger.H>
+#include <CD_DataParser.H>
+#include <CD_LookupTable.H>
 #include "ParmParse.H"
 
-// This is the potential curve. It is (approximately) a 1.2/50 lightning impulse starting at some specified time. 
-Real pulseStart  = 0.0;
-Real peakVoltage = 0.0;
+// This is the potential curve. It is (approximately) a 1.2/50 lightning impulse starting at some specified time.
+ChomboDischarge::LookupTable<2> voltageCurve;
+Real curveStart  = 0.0;
 
-constexpr Real tau1 =  0.15E-6;
-constexpr Real tau2 = 75.00E-6;
-constexpr Real tauf = tau2/(tau2-tau1);
-constexpr Real eta  = 1.0;
 Real potential_curve(const Real a_time){
-  return peakVoltage * eta * tauf * (exp(-(a_time+pulseStart)/tau2) - exp(-(a_time+pulseStart)/tau1));
+  return voltageCurve.getEntry<1>(a_time + curveStart);
 }
 
 using namespace ChomboDischarge;
@@ -38,11 +36,17 @@ int main(int argc, char* argv[]){
   ParmParse pp(argc-2, argv+2, NULL, input_file.c_str());
 
   // Get potential from input script 
-  std::string basename; 
   {
     ParmParse pp("StreamerProfiledSurface");
-    pp.get("peak_voltage", peakVoltage);
-    pp.get("pulse_start",  pulseStart);    
+
+    std::string voltageCurveFile;
+    pp.get("voltage_curve", voltageCurveFile);
+    pp.get("curve_start",   curveStart);
+
+    voltageCurve = DataParser::simpleFileReadASCII(voltageCurveFile);
+    voltageCurve.setRange(0, 1E-6);
+    voltageCurve.sort();    
+    voltageCurve.makeUniform(1000);
   }
 
   // Set geometry and AMR 
@@ -79,7 +83,7 @@ int main(int argc, char* argv[]){
 
   delete poi_fact;
   delete cdr_fact;
-  delete rte_fact;  
+  delete rte_fact;
 
 #ifdef CH_MPI
   CH_TIMER_REPORT();

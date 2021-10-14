@@ -1,8 +1,8 @@
 # ====================================================================================================
 # POTENTIAL CURVE
 # ====================================================================================================
-StreamerProfiledSurface.peak_voltage = 35E3     # Lightning impulse voltage peak
-StreamerProfiledSurface.pulse_start  = 225E-9   # Where to start on lightning impuse
+StreamerProfiledSurface.voltage_curve = 35kv.curve # Which voltage curve to read
+StreamerProfiledSurface.curve_start   = 225E-9     # Where to start on the voltage curve. This is about 20kV
 
 # ====================================================================================================
 # AMR_MESH OPTIONS
