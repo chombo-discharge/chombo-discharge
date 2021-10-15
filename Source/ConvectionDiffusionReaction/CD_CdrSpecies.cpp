@@ -76,4 +76,10 @@ const List<Particle>& CdrSpecies::getInitialParticles() const {
   return m_initialParticles;
 }
 
+List<Particle>& CdrSpecies::getInitialParticles() {
+  CH_TIME("CdrSpecies::getInitialParticles()");
+  
+  return m_initialParticles;
+}
+
 #include <CD_NamespaceFooter.H>
