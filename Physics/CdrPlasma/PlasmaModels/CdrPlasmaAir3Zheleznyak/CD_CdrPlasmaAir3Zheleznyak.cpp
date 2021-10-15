@@ -125,7 +125,7 @@ void CdrPlasmaAir3Zheleznyak::parseGasParameters(){
 }
 
 void CdrPlasmaAir3Zheleznyak::parseElectronMobility(){
-  m_e_mobility = DataParser::fractionalFileReadASCII(m_transport_file, CdrPlasmaAir3Zheleznyak::s_bolsig_mobility);
+  m_e_mobility = DataParser::fractionalFileReadASCII(m_transport_file, CdrPlasmaAir3Zheleznyak::s_bolsig_mobility, "");
   m_e_mobility.sort();
   m_e_mobility.scale<0>(m_N*Units::Td);
   m_e_mobility.scale<1>(1./m_N); 
@@ -133,7 +133,7 @@ void CdrPlasmaAir3Zheleznyak::parseElectronMobility(){
 }
 
 void CdrPlasmaAir3Zheleznyak::parseElectronDiffusionCoefficient(){
-  m_e_diffco = DataParser::fractionalFileReadASCII(m_e_transport_file, CdrPlasmaAir3Zheleznyak::s_bolsig_diffco);
+  m_e_diffco = DataParser::fractionalFileReadASCII(m_transport_file, CdrPlasmaAir3Zheleznyak::s_bolsig_diffco, "");
   m_e_diffco.sort();
   m_e_diffco.scale<0>(m_N*Units::Td);
   m_e_diffco.scale<1>(1./m_N); 
@@ -141,15 +141,15 @@ void CdrPlasmaAir3Zheleznyak::parseElectronDiffusionCoefficient(){
 }
 
 void CdrPlasmaAir3Zheleznyak::parseAlpha(){
-  m_e_alpha = DataParser::fractionalFileReadASCII(m_transport_file, CdrPlasmaAir3Zheleznyak::s_bolsig_alpha);
-  m_e_elpha.sort();
+  m_e_alpha = DataParser::fractionalFileReadASCII(m_transport_file, CdrPlasmaAir3Zheleznyak::s_bolsig_alpha, "");
+  m_e_alpha.sort();
   m_e_alpha.scale<0>(m_N*Units::Td);
   m_e_alpha.scale<1>(m_N); 
   m_e_alpha.makeUniform(m_uniform_entries);
 }
 
 void CdrPlasmaAir3Zheleznyak::parseEta(){
-  m_e_eta = DataParser::fractionalFileRead(m_transport_file, CdrPlasmaAir3Zheleznyak::s_bolsig_eta);
+  m_e_eta = DataParser::fractionalFileReadASCII(m_transport_file, CdrPlasmaAir3Zheleznyak::s_bolsig_eta, "");
   m_e_eta.sort();
   m_e_eta.scale<0>(m_N*Units::Td);
   m_e_eta.scale<1>(m_N);
@@ -219,28 +219,27 @@ void CdrPlasmaAir3Zheleznyak::parse_initial_particles(){
   addGaussianParticles(Electron_ion_pairs, round(gaussian_pairs),   weight, rad_pairs,   center_pairs);
   
   // Set initial particles
-  m_CdrSpecies[m_elec_idx]->getInitialParticles() = Electron_ion_pairs;
-  m_CdrSpecies[m_plus_idx]->getInitialParticles() = Electron_ion_pairs;
+  auto& initialElectrons = m_CdrSpecies[m_elec_idx]->getInitialParticles();
+  auto& initialIons      = m_CdrSpecies[m_elec_idx]->getInitialParticles();
+
+  initialElectrons = Electron_ion_pairs;
+  initialIons      = Electron_ion_pairs;  
 
   // Set the deposition scheme
   std::string str;
-  InterpType deposition;
+  DepositionType deposition;
   pp.get("particle_deposition", str);
   if(str == "cic"){
-    deposition = InterpType::CIC;
+    deposition = DepositionType::CIC;
   }
   else if(str == "ngp"){
-    deposition = InterpType::NGP;
+    deposition = DepositionType::NGP;
   }
   else if(str == "tsc"){
-    deposition = InterpType::TSC;
+    deposition = DepositionType::TSC;
   }
   else{
     MayDay::Abort("CdrPlasmaAir3Zheleznyak::parse_initial_particles - unknown deposition type requested");
-  }
-  
-  for (int i = 0; i < m_numCdrSpecies; i++){
-    m_CdrSpecies[i]->getDeposition() = deposition;
   }
 }
 
@@ -249,7 +248,7 @@ void CdrPlasmaAir3Zheleznyak::addUniformParticles(List<Particle>& a_particles, c
   // Get Lo/Hi sides of domain
   RealVect lo, hi;
   Vector<Real> vec(SpaceDim);
-  ParmParse pp("physical_domain");
+  ParmParse pp("AmrMesh");
   pp.getarr("lo_corner", vec, 0, SpaceDim); lo = RealVect(D_DECL(vec[0], vec[1], vec[2]));
   pp.getarr("hi_corner", vec, 0, SpaceDim); hi = RealVect(D_DECL(vec[0], vec[1], vec[2]));
 
