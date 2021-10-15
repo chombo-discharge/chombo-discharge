@@ -1210,6 +1210,7 @@ void CdrPlasmaStepper::advanceReactionNetworkIrregUpwind(Vector<EBCellFAB*>&    
 	for (int i = 0; i < stencil.size(); i++){
 	  cdrDensities[idx] += stencil.weight(i) * (*a_cdrDensities[idx])(stencil.vof(i), comp);
 	}
+	cdrDensities[idx] = (*a_cdrDensities[idx])(vof, comp);
 	cdrDensities[idx] = std::max(cdrDensities[idx], zero);
       }
 
