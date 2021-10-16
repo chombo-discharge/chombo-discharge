@@ -55,11 +55,12 @@ void ScanShop::makeDomains(const Real          a_dx,
 
   m_probLo = a_probLo;
   
-  m_dx.resize(0);
+  m_dx.     resize(0);
   m_domains.resize(0);
-  
+
+  m_dx.     push_back(a_dx);  
   m_domains.push_back(a_finestDomain);
-  m_dx.push_back(a_dx);
+
   
   const int ref = 2;
   for (int lvl=0; ; lvl++){
@@ -74,7 +75,7 @@ void ScanShop::makeDomains(const Real          a_dx,
       domain.coarsen(ref);
       dx *= ref;
       
-      m_dx.push_back(dx);
+      m_dx.     push_back(dx);
       m_domains.push_back(domain);
     }
     else{
@@ -83,8 +84,8 @@ void ScanShop::makeDomains(const Real          a_dx,
   }
 
   // These will be built when they are needed. 
-  m_grids.resize(m_domains.size());
-  m_boxMaps.resize(m_domains.size());
+  m_grids.       resize(m_domains.size());
+  m_boxMaps.     resize(m_domains.size());
   m_hasThisLevel.resize(m_domains.size(), 0);
 }
 
@@ -123,12 +124,14 @@ void ScanShop::makeGrids(const ProblemDomain& a_domain,
     a_grids = m_grids[whichLevel];
   }
   else{
-
     // Development code. Break up a_domnain in a_maxGridSize chunks, load balance trivially and return the dbl
+    
+    MayDay::Warning("ScanShop::makeGrids -- decomposing by breaking up the domain into maxGridSize chunks. This should not happen!");
+
     Vector<Box> boxes;
     Vector<int> procs;
   
-    domainSplit(a_domain, boxes, a_maxGridSize, 1);
+    domainSplit(a_domain, boxes, a_maxGridSize);
     LoadBalancing::sort(boxes, BoxSorting::Morton);
     LoadBalancing::makeBalance(procs, boxes);
 
@@ -144,7 +147,7 @@ bool ScanShop::isRegular(const Box a_box, const RealVect a_probLo, const Real a_
   for (BoxIterator bit(a_box); bit.ok(); ++bit){
     const IntVect iv = bit();
     const RealVect a_point = a_probLo + a_dx*(0.5*RealVect::Unit + RealVect(iv));
-    if(m_baseIF->value(a_point) > -0.5*a_dx){
+    if(m_baseIF->value(a_point) >= -0.5*a_dx){
       ret = false;
       break;
     }
@@ -161,7 +164,7 @@ bool ScanShop::isCovered(const Box a_box, const RealVect a_probLo, const Real a_
   for (BoxIterator bit(a_box); bit.ok(); ++bit){
     const IntVect iv = bit();
     const RealVect a_point = a_probLo + a_dx*(0.5*RealVect::Unit + RealVect(iv));
-    if(m_baseIF->value(a_point) < 0.5*a_dx) {
+    if(m_baseIF->value(a_point) <= 0.5*a_dx) {
       ret = false;
       break;
     }
@@ -184,7 +187,7 @@ void ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize){
   // 1. 
   Vector<Box> boxes;
   Vector<int> procs;
-  domainSplit(m_domains[a_level], boxes, a_maxGridSize, 1);
+  domainSplit(m_domains[a_level], boxes, a_maxGridSize);
   LoadBalancing::makeBalance(procs, boxes);
 
   // 2. 
@@ -192,8 +195,8 @@ void ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize){
   LevelData<BoxType> map(dbl, 1, IntVect::Zero, BoxTypeFactory());
   Vector<Box> CutCellBoxes;
   Vector<Box> ReguCovBoxes;
-  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-    const Box box = dbl.get(dit());
+  for (DataIterator dit(dbl); dit.ok(); ++dit){
+    const Box box = dbl[dit()];
     
     Box grownBox = box;
     grownBox.grow(m_maxGhostEB);
@@ -215,13 +218,15 @@ void ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize){
       CutCellBoxes.push_back(box);
     }
     else{
-      MayDay::Abort("ScanShop::buildCoarseLevel - logic bust");
+      MayDay::Error("ScanShop::buildCoarseLevel - logic bust");
     }
   }
 
 #if DEBUG_ScanShop // Debug first map
-  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-    if(map[dit()].m_which == -1) MayDay::Abort("ScanShop::buildCoarseLevel - initial map shouldn't get -1");
+  for (DataIterator dit(dbl); dit.ok(); ++dit){
+    if(map[dit()].m_which == -1) {
+      MayDay::Error("ScanShop::buildCoarseLevel - initial map shouldn't get -1");
+    }
   }
 #endif
 
@@ -235,8 +240,11 @@ void ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize){
   Vector<int> CutCellProcs;
   Vector<int> ReguCovProcs;
 
-  LoadBalancing::makeBalance(CutCellProcs, CutCellBoxes);
-  LoadBalancing::makeBalance(ReguCovProcs, ReguCovBoxes);
+  const Vector<long long> CutCellLoads(CutCellBoxes.size(), 1LL);
+  const Vector<long long> ReguCovLoads(ReguCovBoxes.size(), 1LL);  
+
+  LoadBalancing::makeBalance(CutCellProcs, CutCellLoads, CutCellBoxes);
+  LoadBalancing::makeBalance(ReguCovProcs, ReguCovLoads, ReguCovBoxes);
 
   Vector<Box> allBoxes;
   Vector<int> allProcs;
@@ -248,16 +256,17 @@ void ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize){
   allProcs.append(ReguCovProcs);
 
   // 4. Define the grids on this level
-  m_grids[a_level] = DisjointBoxLayout(allBoxes, allProcs, m_domains[a_level]);
-  m_boxMaps[a_level] = RefCountedPtr<LevelData<BoxType> >
-    (new LevelData<BoxType>(m_grids[a_level], 1, IntVect::Zero, BoxTypeFactory()));
+  m_grids  [a_level] = DisjointBoxLayout(allBoxes, allProcs, m_domains[a_level]);
+  m_boxMaps[a_level] = RefCountedPtr<LevelData<BoxType> > (new LevelData<BoxType>(m_grids[a_level], 1, IntVect::Zero, BoxTypeFactory()));
 
   // 5. Finally, copy the map
   map.copyTo(*m_boxMaps[a_level]);
 
 #if DEBUG_ScanShop // Debug first map
-  for (DataIterator dit = m_grids[a_level].dataIterator(); dit.ok(); ++dit){
-    if((*m_boxMaps[a_level])[dit()].m_which == -1) MayDay::Abort("ScanShop::buildCoarseLevel - final map shouldn't get -1");
+  for (DataIterator dit(m_grids[a_level]); dit.ok(); ++dit){
+    if((*m_boxMaps[a_level])[dit()].m_which == -1) {
+      MayDay::Error("ScanShop::buildCoarseLevel - final map shouldn't get -1");
+    }
   }
 #endif
 
@@ -289,12 +298,12 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
     LevelData<BoxType> mapFineCoar(dblFineCoar, 1, IntVect::Zero, BoxTypeFactory());
 
     // Break up cut cell boxes
-    for (DataIterator dit = dblFineCoar.dataIterator(); dit.ok(); ++dit){
+    for (DataIterator dit(dblFineCoar); dit.ok(); ++dit){
       mapFineCoar[dit()] = mapCoar[dit()];
-      const Box box = dblFineCoar.get(dit());
+      const Box box = dblFineCoar[dit()];
       if(mapFineCoar[dit()].isCutCell()){
 	Vector<Box> boxes;
-	domainSplit(box, boxes, a_maxGridSize, 1);
+	domainSplit(box, boxes, a_maxGridSize);
 	CutCellBoxes.append(boxes);
       }
       else{
@@ -311,8 +320,8 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
 
     // Redo the cut cell boxes
     CutCellBoxes.resize(0);
-    for (DataIterator dit = CutCellDBL.dataIterator(); dit.ok(); ++dit){
-      const Box box = CutCellDBL.get(dit());
+    for (DataIterator dit(CutCellDBL); dit.ok(); ++dit){
+      const Box box = CutCellDBL[dit()];
       
       Box grownBox = box;
       grownBox.grow(m_maxGhostEB);
@@ -334,45 +343,24 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
 	CutCellBoxes.push_back(box);
       }
       else{
-	MayDay::Abort("ScanShop::buildFinerLevels - logic bust!");
+	MayDay::Error("ScanShop::buildFinerLevels - logic bust!");
       }
     }
 
-
     
-    // Gather boxes with cut cells and the ones don't contain cut cells
+    // Gather boxes with cut cells and the ones don't contain cut cells. The computational loads for these are set to 1 (for all boxes). I know
+    // patches can contain a different amount of cut-cells and thus there's load imbalance, but I'm softly assuming that these things don't matter. If they
+    // do, this would be a good place to introduce a finer granularity (computing the number of cut-cells for each patch is a good start!). But even that
+    // might not matter because, in the case of having polygonal surfaces, the cost of the evaluating the implicit function is different in different regions
+    // of space, and there's a limit to how fine granularity we will need. As of now, that limit is a constant load for each cut-cell patch. 
     LoadBalancing::gatherBoxes(CutCellBoxes);
     LoadBalancing::gatherBoxes(ReguCovBoxes);
 
-    LoadBalancing::sort(CutCellBoxes, BoxSorting::Shuffle);
-    LoadBalancing::sort(ReguCovBoxes, BoxSorting::Shuffle);
+    LoadBalancing::sort(CutCellBoxes, BoxSorting::Morton);
+    LoadBalancing::sort(ReguCovBoxes, BoxSorting::Morton);
 
-    Vector<long long> CutCellLoads(CutCellBoxes.size(), 1LL);
-    Vector<long long> ReguCovLoads(ReguCovBoxes.size(), 1LL);
-
-#if 0
-    for (int i = 0; i < CutCellBoxes.size(); i++){
-      long long curLoad = 0LL;
-
-      const Box curBox = CutCellBoxes[i];
-
-      Box grownBox = curBox;
-      grownBox.grow(m_maxGhostEB);
-      grownBox &= m_domains[fineLvl];
-
-  
-      for (BoxIterator bit(grownBox); bit.ok(); ++bit){
-	const IntVect iv = bit();
-	const Real dx = m_dx[fineLvl];
-	const RealVect a_point = m_probLo + dx*(0.5*RealVect::Unit + RealVect(iv));
-	if(std::abs(m_baseIF->value(a_point)) < 0.5*dx){
-	  curLoad += 1LL;
-	}
-      }
-
-      CutCellLoads[i] = curLoad;
-    }
-#endif
+    const Vector<long long> CutCellLoads(CutCellBoxes.size(), 1LL);
+    const Vector<long long> ReguCovLoads(ReguCovBoxes.size(), 1LL);
     
     LoadBalancing::makeBalance(CutCellProcs, CutCellLoads, CutCellBoxes);
     LoadBalancing::makeBalance(ReguCovProcs, ReguCovLoads, ReguCovBoxes);
@@ -386,25 +374,29 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
     allProcs.append(CutCellProcs);
     allProcs.append(ReguCovProcs);
 
-
     // Define the grids and copy the maps over. First copy the refine coarse map, then update with the
     // cut cell map
-    m_grids[fineLvl] = DisjointBoxLayout(allBoxes, allProcs, m_domains[fineLvl]);
-    m_boxMaps[fineLvl] = RefCountedPtr<LevelData<BoxType> >
-      (new LevelData<BoxType>(m_grids[fineLvl], 1, IntVect::Zero, BoxTypeFactory()));
+    m_grids  [fineLvl] = DisjointBoxLayout(allBoxes, allProcs, m_domains[fineLvl]);
+    m_boxMaps[fineLvl] = RefCountedPtr<LevelData<BoxType> > (new LevelData<BoxType>(m_grids[fineLvl], 1, IntVect::Zero, BoxTypeFactory()));
 
     mapFineCoar.copyTo(*m_boxMaps[fineLvl]);
-    CutCellMap.copyTo(*m_boxMaps[fineLvl]);
+    CutCellMap. copyTo(*m_boxMaps[fineLvl]);
 
 #if DEBUG_ScanShop // Dummy check the box maps
-    for (DataIterator dit = CutCellDBL.dataIterator(); dit.ok(); ++dit){
-      if(CutCellMap[dit()].m_which == -1) MayDay::Abort("ScanShop::buildFinerLevels - CutCellMap shouldn't get -1");
+    for (DataIterator dit(CutCellDBL); dit.ok(); ++dit){
+      if(CutCellMap[dit()].m_which == -1) {
+	MayDay::Error("ScanShop::buildFinerLevels - CutCellMap shouldn't get -1");
+      }
     }
-    for (DataIterator dit = dblFineCoar.dataIterator(); dit.ok(); ++dit){
-      if(mapFineCoar[dit()].m_which == -1) MayDay::Abort("ScanShop::buildFinerLevels - mapFineCoar shouldn't get -1");
+    for (DataIterator dit(dblFineCoar); dit.ok(); ++dit){
+      if(mapFineCoar[dit()].m_which == -1) {
+	MayDay::Error("ScanShop::buildFinerLevels - mapFineCoar shouldn't get -1");
+      }
     }
-    for (DataIterator dit = m_grids[fineLvl].dataIterator(); dit.ok(); ++dit){
-      if((*m_boxMaps[fineLvl])[dit()].m_which == -1){ MayDay::Abort("ScanShop::buildFinerLevels - final map shouldn't get -1");}
+    for (DataIterator dit(m_grids[fineLvl]); dit.ok(); ++dit){
+      if((*m_boxMaps[fineLvl])[dit()].m_which == -1){
+	MayDay::Error("ScanShop::buildFinerLevels - final map shouldn't get -1");
+      }
     }
 #endif
     
@@ -439,7 +431,7 @@ GeometryService::InOut ScanShop::InsideOutside(const Box&           a_region,
   if(a_dx < m_dx[whichLevel] && whichLevel > 0){
     domain = m_domains[whichLevel-1];
 
-    MayDay::Abort("ScanShop::InsideOutside - shouldn't happen...");
+    MayDay::Error("ScanShop::InsideOutside - logic bust 1");
   }
 
   GeometryService::InOut ret;
@@ -456,11 +448,11 @@ GeometryService::InOut ScanShop::InsideOutside(const Box&           a_region,
     }
     else{
       ret= GeometryService::Irregular;
-      //      return GeometryService::InsideOutside(a_region, domain, a_probLo, a_dx, a_dit);
     }
   }
   else{
-    MayDay::Abort("really shouldn't happen!");
+    MayDay::Error("ScanShop::InsideOutSide -- logic bust 2");
+    
     ret = GeometryService::InsideOutside(a_region, domain, a_probLo, a_dx, a_dit);
   }
 
@@ -477,7 +469,7 @@ void ScanShop::printNumBoxesLevel(const int a_level) const {
   int myNumCovered = 0;
   int myNumCutCell = 0;
   
-  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+  for (DataIterator dit(dbl); dit.ok(); ++dit){
     const BoxType& bType = boxMap[dit()];
 
     if(bType.isRegular()){
