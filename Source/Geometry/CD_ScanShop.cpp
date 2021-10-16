@@ -17,6 +17,7 @@
 
 // Our includes
 #include <CD_ScanShop.H>
+#include <CD_LoadBalancing.H>
 #include <CD_NamespaceHeader.H>
 
 #define DEBUG_ScanShop 0
@@ -128,8 +129,8 @@ void ScanShop::makeGrids(const ProblemDomain& a_domain,
     Vector<int> procs;
   
     domainSplit(a_domain, boxes, a_maxGridSize, 1);
-    mortonOrdering(boxes);
-    LoadBalance(procs, boxes);
+    LoadBalancing::sort(boxes, BoxSorting::Morton);
+    LoadBalancing::makeBalance(procs, boxes);
 
     a_grids.define(boxes, procs, a_domain);
   }
@@ -184,7 +185,7 @@ void ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize){
   Vector<Box> boxes;
   Vector<int> procs;
   domainSplit(m_domains[a_level], boxes, a_maxGridSize, 1);
-  LoadBalance(procs, boxes);
+  LoadBalancing::makeBalance(procs, boxes);
 
   // 2. 
   DisjointBoxLayout dbl(boxes, procs, m_domains[a_level]);
@@ -228,14 +229,14 @@ void ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize){
   ScanShop::gatherBoxesParallel(CutCellBoxes);
   ScanShop::gatherBoxesParallel(ReguCovBoxes);
 
-  mortonOrdering(CutCellBoxes);
-  mortonOrdering(ReguCovBoxes);
+  LoadBalancing::sort(CutCellBoxes, BoxSorting::Morton);
+  LoadBalancing::sort(ReguCovBoxes, BoxSorting::Morton);
 
   Vector<int> CutCellProcs;
   Vector<int> ReguCovProcs;
 
-  LoadBalance(CutCellProcs, CutCellBoxes);
-  LoadBalance(ReguCovProcs, ReguCovBoxes);
+  LoadBalancing::makeBalance(CutCellProcs, CutCellBoxes);
+  LoadBalancing::makeBalance(ReguCovProcs, ReguCovBoxes);
 
   Vector<Box> allBoxes;
   Vector<int> allProcs;
@@ -304,8 +305,8 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
 
     // Make a DBL out of the cut-cell boxes and again check if they actually contain cut cells
     gatherBoxesParallel(CutCellBoxes);
-    mortonOrdering(CutCellBoxes);
-    LoadBalance(CutCellProcs, CutCellBoxes);
+    LoadBalancing::sort(CutCellBoxes, BoxSorting::Morton);
+    LoadBalancing::makeBalance(CutCellProcs, CutCellBoxes);
     DisjointBoxLayout  CutCellDBL(CutCellBoxes, CutCellProcs, m_domains[fineLvl]);
     LevelData<BoxType> CutCellMap(CutCellDBL, 1, IntVect::Zero, BoxTypeFactory());
 
@@ -342,11 +343,11 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
     ScanShop::gatherBoxesParallel(CutCellBoxes);
     ScanShop::gatherBoxesParallel(ReguCovBoxes);
 
-    mortonOrdering(CutCellBoxes);
-    mortonOrdering(ReguCovBoxes);
+    LoadBalancing::sort(CutCellBoxes, BoxSorting::Morton);
+    LoadBalancing::sort(ReguCovBoxes, BoxSorting::Morton);
     
-    LoadBalance(CutCellProcs, CutCellBoxes);
-    LoadBalance(ReguCovProcs, ReguCovBoxes);
+    LoadBalancing::makeBalance(CutCellProcs, CutCellBoxes);
+    LoadBalancing::makeBalance(ReguCovProcs, ReguCovBoxes);
     
     Vector<Box> allBoxes;
     Vector<int> allProcs;
