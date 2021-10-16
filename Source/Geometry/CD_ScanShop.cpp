@@ -337,16 +337,45 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
 	MayDay::Abort("ScanShop::buildFinerLevels - logic bust!");
       }
     }
+
+
     
     // Gather boxes with cut cells and the ones don't contain cut cells
     LoadBalancing::gatherBoxes(CutCellBoxes);
     LoadBalancing::gatherBoxes(ReguCovBoxes);
 
-    LoadBalancing::sort(CutCellBoxes, BoxSorting::Morton);
-    LoadBalancing::sort(ReguCovBoxes, BoxSorting::Morton);
+    LoadBalancing::sort(CutCellBoxes, BoxSorting::Shuffle);
+    LoadBalancing::sort(ReguCovBoxes, BoxSorting::Shuffle);
+
+    Vector<long long> CutCellLoads(CutCellBoxes.size(), 1LL);
+    Vector<long long> ReguCovLoads(ReguCovBoxes.size(), 1LL);
+
+#if 0
+    for (int i = 0; i < CutCellBoxes.size(); i++){
+      long long curLoad = 0LL;
+
+      const Box curBox = CutCellBoxes[i];
+
+      Box grownBox = curBox;
+      grownBox.grow(m_maxGhostEB);
+      grownBox &= m_domains[fineLvl];
+
+  
+      for (BoxIterator bit(grownBox); bit.ok(); ++bit){
+	const IntVect iv = bit();
+	const Real dx = m_dx[fineLvl];
+	const RealVect a_point = m_probLo + dx*(0.5*RealVect::Unit + RealVect(iv));
+	if(std::abs(m_baseIF->value(a_point)) < 0.5*dx){
+	  curLoad += 1LL;
+	}
+      }
+
+      CutCellLoads[i] = curLoad;
+    }
+#endif
     
-    LoadBalancing::makeBalance(CutCellProcs, CutCellBoxes);
-    LoadBalancing::makeBalance(ReguCovProcs, ReguCovBoxes);
+    LoadBalancing::makeBalance(CutCellProcs, CutCellLoads, CutCellBoxes);
+    LoadBalancing::makeBalance(ReguCovProcs, ReguCovLoads, ReguCovBoxes);
     
     Vector<Box> allBoxes;
     Vector<int> allProcs;
@@ -431,6 +460,7 @@ GeometryService::InOut ScanShop::InsideOutside(const Box&           a_region,
     }
   }
   else{
+    MayDay::Abort("really shouldn't happen!");
     ret = GeometryService::InsideOutside(a_region, domain, a_probLo, a_dx, a_dit);
   }
 
