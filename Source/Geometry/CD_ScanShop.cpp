@@ -226,8 +226,8 @@ void ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize){
 #endif
 
   // 3. Gather the uncut boxes and the cut boxes separately
-  ScanShop::gatherBoxesParallel(CutCellBoxes);
-  ScanShop::gatherBoxesParallel(ReguCovBoxes);
+  LoadBalancing::gatherBoxes(CutCellBoxes);
+  LoadBalancing::gatherBoxes(ReguCovBoxes);
 
   LoadBalancing::sort(CutCellBoxes, BoxSorting::Morton);
   LoadBalancing::sort(ReguCovBoxes, BoxSorting::Morton);
@@ -277,7 +277,6 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
     const DisjointBoxLayout& dblCoar  = m_grids[coarLvl];
     const LevelData<BoxType>& mapCoar = *m_boxMaps[coarLvl];
 
-
     Vector<Box> CutCellBoxes;
     Vector<Box> ReguCovBoxes;
 
@@ -304,7 +303,7 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
     }
 
     // Make a DBL out of the cut-cell boxes and again check if they actually contain cut cells
-    gatherBoxesParallel(CutCellBoxes);
+    LoadBalancing::gatherBoxes(CutCellBoxes);
     LoadBalancing::sort(CutCellBoxes, BoxSorting::Morton);
     LoadBalancing::makeBalance(CutCellProcs, CutCellBoxes);
     DisjointBoxLayout  CutCellDBL(CutCellBoxes, CutCellProcs, m_domains[fineLvl]);
@@ -340,8 +339,8 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
     }
     
     // Gather boxes with cut cells and the ones don't contain cut cells
-    ScanShop::gatherBoxesParallel(CutCellBoxes);
-    ScanShop::gatherBoxesParallel(ReguCovBoxes);
+    LoadBalancing::gatherBoxes(CutCellBoxes);
+    LoadBalancing::gatherBoxes(ReguCovBoxes);
 
     LoadBalancing::sort(CutCellBoxes, BoxSorting::Morton);
     LoadBalancing::sort(ReguCovBoxes, BoxSorting::Morton);
@@ -473,73 +472,6 @@ void ScanShop::printNumBoxesLevel(const int a_level) const {
 	      << "\t CutCell boxes = " << numCutCell << "\n"
 	      << std::endl;
   }
-}
-
-void ScanShop::gatherBoxesParallel(Vector<Box>& a_boxes) const {
-  CH_TIME("ScanShop::gatherBoxesParallel(Vector<Box>)");
-  
-#ifdef CH_MPI
-  // 1. Linearize local boxes
-  int sendSize     = 2*CH_SPACEDIM;                 // Message size for one box
-  int sendCount    = a_boxes.size()*sendSize;      // Number of elements sent from this rank
-  int* sendBuffer  = new int[sendCount]; // Send buffer for this rank
-  int* sendBuffer2 = sendBuffer;                   // Backup address. Going to monkey with pointer increments on send buffer
-
-  // Linearize a_boxes onto sendBuffer
-  for (int i = 0; i < a_boxes.size(); i++, sendBuffer+=sendSize){
-    const Box& b = a_boxes[i];
-    D_TERM6(sendBuffer[0] =b.smallEnd(0); sendBuffer[1] =b.bigEnd(0);,
-	    sendBuffer[2] =b.smallEnd(1); sendBuffer[3] =b.bigEnd(1);,
-	    sendBuffer[4] =b.smallEnd(2); sendBuffer[5] =b.bigEnd(2);,
-	    sendBuffer[6] =b.smallEnd(3); sendBuffer[7] =b.bigEnd(3);,
-	    sendBuffer[8] =b.smallEnd(4); sendBuffer[9] =b.bigEnd(4);,
-	    sendBuffer[10]=b.smallEnd(5); sendBuffer[11]=b.bigEnd(5););
-  }
-  sendBuffer = sendBuffer2; // Revert point to start of array
-
-
-  // 2. Get the number of elements sent from each rank
-  int* sendCounts = new int[numProc()];
-  MPI_Allgather(&sendCount, 1, MPI_INT, sendCounts, 1, MPI_INT, Chombo_MPI::comm);
-
-  // 3. Compute offsets
-  int* offsets = new int[numProc()];
-  offsets[0] = 0;
-  for (int i = 0; i < numProc()-1; i++){
-    offsets[i+1] = offsets[i] + sendCounts[i];
-  }
-
-  // 4. Allocate storage for total buffer size
-  int totalCount = 0;
-  for (int i = 0; i < numProc(); i++){
-    totalCount += sendCounts[i];
-  }
-  int* receiveBuffer = new int[totalCount];
-
-  // 5. MPI send
-  MPI_Allgatherv(sendBuffer, sendCount, MPI_INT, receiveBuffer, sendCounts, offsets, MPI_INT, Chombo_MPI::comm);
-
-  // 6. Delinearize buffer, make it into boxes
-  a_boxes.resize(0);
-  int* recv_buf2 = receiveBuffer; // Going to monkey with pointer increments again
-  for (int i = 0; i < totalCount/sendSize; i++, receiveBuffer+=sendSize){
-    IntVect lo, hi;
-    D_TERM6(lo[0] = receiveBuffer[0];  hi[0] = receiveBuffer[1];,
-	    lo[1] = receiveBuffer[2];  hi[1] = receiveBuffer[3];,
-	    lo[2] = receiveBuffer[4];  hi[2] = receiveBuffer[5];,
-	    lo[3] = receiveBuffer[6];  hi[3] = receiveBuffer[7];,
-	    lo[4] = receiveBuffer[8];  hi[4] = receiveBuffer[9];,
-	    lo[5] = receiveBuffer[10]; hi[5] = receiveBuffer[11];);
-
-    a_boxes.push_back(Box(lo, hi));
-  }
-  receiveBuffer = recv_buf2;
-
-  delete[] sendCounts;
-  delete[] offsets;
-  delete[] receiveBuffer;
-  delete[] sendBuffer;
-#endif
 }
 
 #include <CD_NamespaceFooter.H>
