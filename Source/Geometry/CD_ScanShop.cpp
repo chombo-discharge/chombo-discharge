@@ -24,7 +24,8 @@
 #include <CD_LoadBalancing.H>
 #include <CD_NamespaceHeader.H>
 
-#define DEBUG_ScanShop 0
+#define ScanShop_Debug 0
+#define ScanShop_IntrospectiveLoadBalance 0
 
 ScanShop::ScanShop(const BaseIF&       a_localGeom,
 		   const int           a_verbosity,
@@ -106,7 +107,7 @@ void ScanShop::makeGrids(const ProblemDomain& a_domain,
     }
     ScanShop::buildFinerLevels(m_scanLevel, a_maxGridSize);   // Traverse towards finer levels
 
-#if DEBUG_ScanShop
+#if ScanShop_Debug
     for (int lvl = 0; lvl < m_domains.size(); lvl++){
       ScanShop::printNumBoxesLevel(lvl);
     }
@@ -231,23 +232,29 @@ void ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize){
 
       // If this is truly a cut-cell box then we want to find out how much work we have to deal with when computing the cut-cell moments. This
       // is (roughly) equal to the time it takes to evaluate the implicit function times the volume of the box. But since the cost of the implicit
-      // function can vary in space (especially when we BVHs and stuff like that), we just time this directly. We compute the load in nanoseconds. 
+      // function can vary in space (especially when we BVHs and stuff like that), we CAN time this directly if we want. This is the code that is commented
+      // out. 
+
+#if ScanShop_IntrospectiveLoadBalance
       Real durationInSeconds = -Timer::wallClock();	
       for (BoxIterator bit(grownBox); bit.ok(); ++bit){
-	const RealVect point = m_probLo + m_dx[a_level]*(0.5*RealVect::Unit + RealVect(bit()));
-	const Real distance  = m_baseIF->value(point);
+      	const RealVect point = m_probLo + m_dx[a_level]*(0.5*RealVect::Unit + RealVect(bit()));
+      	const Real distance  = m_baseIF->value(point);
       }
       durationInSeconds += Timer::wallClock();
 
       constexpr Real nsPerSec = 1.E9;
-      CutCellLoads.push_back(lround(durationInSeconds*nsPerSec));      
+      CutCellLoads.push_back(lround(durationInSeconds*nsPerSec));
+#else
+      CutCellLoads.push_back(1L);
+#endif
     }
     else{
       MayDay::Error("ScanShop::buildCoarseLevel - logic bust");
     }
   }
 
-#if DEBUG_ScanShop // Debug first map
+#if ScanShop_Debug // Debug first map
   for (DataIterator dit(dbl); dit.ok(); ++dit){
     if(map[dit()].m_which == -1) {
       MayDay::Error("ScanShop::buildCoarseLevel - initial map shouldn't get -1");
@@ -284,7 +291,7 @@ void ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize){
   // 5. Finally, copy the map
   map.copyTo(*m_boxMaps[a_level]);
 
-#if DEBUG_ScanShop // Debug first map
+#if ScanShop_Debug // Debug first map
   for (DataIterator dit(m_grids[a_level]); dit.ok(); ++dit){
     if((*m_boxMaps[a_level])[dit()].m_which == -1) {
       MayDay::Error("ScanShop::buildCoarseLevel - final map shouldn't get -1");
@@ -373,7 +380,8 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
 
 	// If this is truly a cut-cell box then we want to find out how much work we have to deal with when computing the cut-cell moments. This
 	// is (roughly) equal to the time it takes to evaluate the implicit function times the volume of the box. But since the cost of the implicit
-	// function can vary in space (especially when we BVHs and stuff like that), we just time this directly. We compute the load in nanoseconds. 
+	// function can vary in space (especially when we BVHs and stuff like that), we just time this directly. We compute the load in nanoseconds.
+#if ScanShop_IntrospectiveLoadBalance	
 	Real durationInSeconds = -Timer::wallClock();	
 	for (BoxIterator bit(grownBox); bit.ok(); ++bit){
 	  const RealVect point = m_probLo + m_dx[fineLvl]*(0.5*RealVect::Unit + RealVect(bit()));
@@ -382,7 +390,9 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
 	durationInSeconds += Timer::wallClock();
 
 	constexpr Real nsPerSec = 1.E9;
-	CutCellLoads.push_back(lround(durationInSeconds*nsPerSec));
+#else
+	CutCellLoads.push_back(1L);
+#endif
       }
       else{
 	MayDay::Error("ScanShop::buildFinerLevels - logic bust!");
@@ -423,7 +433,7 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
     mapFineCoar.copyTo(*m_boxMaps[fineLvl]);
     CutCellMap. copyTo(*m_boxMaps[fineLvl]);
 
-#if DEBUG_ScanShop // Dummy check the box maps
+#if ScanShop_Debug // Dummy check the box maps
     for (DataIterator dit(CutCellDBL); dit.ok(); ++dit){
       if(CutCellMap[dit()].m_which == -1) {
 	MayDay::Error("ScanShop::buildFinerLevels - CutCellMap shouldn't get -1");
