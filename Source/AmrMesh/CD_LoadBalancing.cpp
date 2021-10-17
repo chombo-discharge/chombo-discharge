@@ -157,6 +157,53 @@ void LoadBalancing::gatherLoads(Vector<Real>& a_loads){
 #endif
 }
 
+void LoadBalancing::gatherLoads(Vector<long>& a_loads){
+  CH_TIME("LoadBalancing::gatherLoads");
+  
+#ifdef CH_MPI
+  // TLDR: This code does a gather operation on the loads. They are gather globally in this way:
+  //       (LoadsForRank=0, LoadsForRank=1, LoadsForRank2=2, ....)
+
+  // 1. Linearize local boxes onto appropriate memory structure
+  int send_size     = 1;                             // Message size for one element. Just one long. 
+  int mySendCount    = a_loads.size()*send_size;      // Number of elements sent from this rank
+  long* send_buffer = new long[mySendCount];         // Send buffer for this MPI rank
+  for (int i = 0; i < a_loads.size(); i++){
+    send_buffer[i] = a_loads[i];
+  }
+
+  // 2. Get the number of elements sent from each rank
+  int* allSendCount = new int[numProc()];
+  MPI_Allgather(&mySendCount, 1, MPI_INT, allSendCount, 1, MPI_INT, Chombo_MPI::comm);
+
+  // 3. Compute offsets
+  int* offsets = new int[numProc()];
+  offsets[0] = 0;
+  for (int i = 0; i < numProc()-1; i++){
+    offsets[i+1] = offsets[i] + allSendCount[i];
+  }
+
+  // 4. Allocate storage for total buffer size
+  int total_count = 0;
+  for (int i = 0; i < numProc(); i++){
+    total_count += allSendCount[i];
+  }
+  long* recv_buffer = new long[total_count];
+
+  // 5. MPI send
+  MPI_Allgatherv(send_buffer, mySendCount, MPI_LONG, recv_buffer, allSendCount, offsets, MPI_LONG, Chombo_MPI::comm);
+
+  // 6. Delinearize buffer, make it into boxes
+  a_loads.resize(total_count);
+  for (int i = 0; i < total_count; i++){
+    a_loads[i] = recv_buffer[i];
+  }
+
+  delete recv_buffer;
+  delete send_buffer;
+#endif
+}
+
 void LoadBalancing::gatherLoads(Vector<int>& a_loads){
   CH_TIME("LoadBalancing::gatherLoads");
   
@@ -203,6 +250,8 @@ void LoadBalancing::gatherLoads(Vector<int>& a_loads){
   delete send_buffer;
 #endif
 }
+
+
 
 void LoadBalancing::gatherBoxesAndLoads(Vector<Box>& a_boxes, Vector<int>& a_loads){
   CH_TIME("LoadBalancing::gatherBoxesAndLoads");  
