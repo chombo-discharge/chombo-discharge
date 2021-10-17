@@ -199,7 +199,12 @@ void ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize){
   LevelData<BoxType> map(dbl, 1, IntVect::Zero, BoxTypeFactory());
   Vector<Box> CutCellBoxes;
   Vector<Box> ReguCovBoxes;
+  
+  Vector<int> CutCellProcs;
+  Vector<int> ReguCovProcs;  
 
+  Vector<long> CutCellLoads(0);
+  Vector<long> ReguCovLoads(0);  
   for (DataIterator dit(dbl); dit.ok(); ++dit){
     const Box box = dbl[dit()];
     
@@ -213,14 +218,29 @@ void ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize){
     if(isRegular && !isCovered){
       map[dit()].setRegular();
       ReguCovBoxes.push_back(box);
+      ReguCovLoads.push_back(1L);
     }
     else if(isCovered && !isRegular){
       map[dit()].setCovered();
       ReguCovBoxes.push_back(box);
+      ReguCovLoads.push_back(1L);      
     }
     else if(!isRegular && !isCovered){
       map[dit()].setCutCell();
       CutCellBoxes.push_back(box);
+
+      // If this is truly a cut-cell box then we want to find out how much work we have to deal with when computing the cut-cell moments. This
+      // is (roughly) equal to the time it takes to evaluate the implicit function times the volume of the box. But since the cost of the implicit
+      // function can vary in space (especially when we BVHs and stuff like that), we just time this directly. We compute the load in nanoseconds. 
+      Real durationInSeconds = -Timer::wallClock();	
+      for (BoxIterator bit(grownBox); bit.ok(); ++bit){
+	const RealVect point = m_probLo + m_dx[a_level]*(0.5*RealVect::Unit + RealVect(bit()));
+	const Real distance  = m_baseIF->value(point);
+      }
+      durationInSeconds += Timer::wallClock();
+
+      constexpr Real nsPerSec = 1.E9;
+      CutCellLoads.push_back(lround(durationInSeconds*nsPerSec));      
     }
     else{
       MayDay::Error("ScanShop::buildCoarseLevel - logic bust");
@@ -239,14 +259,11 @@ void ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize){
   LoadBalancing::gatherBoxes(CutCellBoxes);
   LoadBalancing::gatherBoxes(ReguCovBoxes);
 
-  LoadBalancing::sort(CutCellBoxes, BoxSorting::Morton);
-  LoadBalancing::sort(ReguCovBoxes, BoxSorting::Morton);
+  LoadBalancing::gatherLoads(CutCellLoads);
+  LoadBalancing::gatherLoads(ReguCovLoads);  
 
-  Vector<int> CutCellProcs;
-  Vector<int> ReguCovProcs;
-
-  const Vector<long long> CutCellLoads(CutCellBoxes.size(), 1LL);
-  const Vector<long long> ReguCovLoads(ReguCovBoxes.size(), 1LL);  
+  LoadBalancing::sort(CutCellBoxes, CutCellLoads, BoxSorting::Morton);
+  LoadBalancing::sort(ReguCovBoxes, ReguCovLoads, BoxSorting::Morton);
 
   LoadBalancing::makeBalance(CutCellProcs, CutCellLoads, CutCellBoxes);
   LoadBalancing::makeBalance(ReguCovProcs, ReguCovLoads, ReguCovBoxes);
