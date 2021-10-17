@@ -9,6 +9,9 @@
   @author Robert Marskar
 */
 
+// Std includes
+#include <chrono>
+
 // Chombo includes
 #include <BRMeshRefine.H>
 #include <LoadBalance.H>
@@ -17,6 +20,7 @@
 
 // Our includes
 #include <CD_ScanShop.H>
+#include <CD_Timer.H>
 #include <CD_LoadBalancing.H>
 #include <CD_NamespaceHeader.H>
 
@@ -195,6 +199,7 @@ void ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize){
   LevelData<BoxType> map(dbl, 1, IntVect::Zero, BoxTypeFactory());
   Vector<Box> CutCellBoxes;
   Vector<Box> ReguCovBoxes;
+
   for (DataIterator dit(dbl); dit.ok(); ++dit){
     const Box box = dbl[dit()];
     
@@ -319,6 +324,8 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
     LevelData<BoxType> CutCellMap(CutCellDBL, 1, IntVect::Zero, BoxTypeFactory());
 
     // Redo the cut cell boxes
+    Vector<long> CutCellLoads(0);
+    Vector<long> ReguCovLoads(ReguCovBoxes.size(), 1L);
     CutCellBoxes.resize(0);
     for (DataIterator dit(CutCellDBL); dit.ok(); ++dit){
       const Box box = CutCellDBL[dit()];
@@ -330,41 +337,58 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
       const bool isRegular = ScanShop::isRegular(grownBox, m_probLo, m_dx[fineLvl]);
       const bool isCovered = ScanShop::isCovered(grownBox, m_probLo, m_dx[fineLvl]);
 
+      // Designate boxes and regular/covered or irregular. For regular covered boxes we use a constant load = 1 and for the cut-cell boxes
+      // we compute the load introspectively. We do this because patches can contain a different amount of cut-cells and thus there's inherent
+      // load imbalance. Worse, the cost of the implicit function can vary in space and thus we time these things introspectively. 
       if(isRegular){
 	CutCellMap[dit()].setRegular();
 	ReguCovBoxes.push_back(box);
+	ReguCovLoads.push_back(1L);	
       }
       else if(isCovered){
 	CutCellMap[dit()].setCovered();
 	ReguCovBoxes.push_back(box);
+	ReguCovLoads.push_back(1L);
       }
       else if(!isRegular && !isCovered){
 	CutCellMap[dit()].setCutCell();
 	CutCellBoxes.push_back(box);
+
+	// If this is truly a cut-cell box then we want to find out how much work we have to deal with when computing the cut-cell moments. This
+	// is (roughly) equal to the time it takes to evaluate the implicit function times the volume of the box. But since the cost of the implicit
+	// function can vary in space (especially when we BVHs and stuff like that), we just time this directly. We compute the load in nanoseconds. 
+	Real durationInSeconds = -Timer::wallClock();	
+	for (BoxIterator bit(grownBox); bit.ok(); ++bit){
+	  const RealVect point = m_probLo + m_dx[fineLvl]*(0.5*RealVect::Unit + RealVect(bit()));
+	  const Real distance  = m_baseIF->value(point);
+	}
+	durationInSeconds += Timer::wallClock();
+
+	constexpr Real nsPerSec = 1.E9;
+	CutCellLoads.push_back(lround(durationInSeconds*nsPerSec));
       }
       else{
 	MayDay::Error("ScanShop::buildFinerLevels - logic bust!");
       }
     }
-
     
-    // Gather boxes with cut cells and the ones don't contain cut cells. The computational loads for these are set to 1 (for all boxes). I know
-    // patches can contain a different amount of cut-cells and thus there's load imbalance, but I'm softly assuming that these things don't matter. If they
-    // do, this would be a good place to introduce a finer granularity (computing the number of cut-cells for each patch is a good start!). But even that
-    // might not matter because, in the case of having polygonal surfaces, the cost of the evaluating the implicit function is different in different regions
-    // of space, and there's a limit to how fine granularity we will need. As of now, that limit is a constant load for each cut-cell patch. 
+    // Gather boxes and loads for regular/covered and cut-cell regions. 
     LoadBalancing::gatherBoxes(CutCellBoxes);
     LoadBalancing::gatherBoxes(ReguCovBoxes);
-
-    LoadBalancing::sort(CutCellBoxes, BoxSorting::Morton);
-    LoadBalancing::sort(ReguCovBoxes, BoxSorting::Morton);
-
-    const Vector<long long> CutCellLoads(CutCellBoxes.size(), 1LL);
-    const Vector<long long> ReguCovLoads(ReguCovBoxes.size(), 1LL);
     
+    LoadBalancing::gatherLoads(CutCellLoads);
+    LoadBalancing::gatherLoads(ReguCovLoads);    
+
+    LoadBalancing::sort(CutCellBoxes, CutCellLoads, BoxSorting::Morton);
+    LoadBalancing::sort(ReguCovBoxes, ReguCovLoads, BoxSorting::Morton);
+
+    // Load balance the boxes. Recall that we use constant loads for regular/covered boxes but use introspective load balancing
+    // for the cut-cell boxes. 
     LoadBalancing::makeBalance(CutCellProcs, CutCellLoads, CutCellBoxes);
     LoadBalancing::makeBalance(ReguCovProcs, ReguCovLoads, ReguCovBoxes);
-    
+
+    // We load balanced the regular/covered and cut-cell regions independently, but now we need to create a box-to-rank map
+    // that is usable by Chombo's DisjointBoxLayout. 
     Vector<Box> allBoxes;
     Vector<int> allProcs;
     
