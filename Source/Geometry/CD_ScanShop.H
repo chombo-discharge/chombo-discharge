@@ -173,13 +173,6 @@ protected:
   void printNumBoxesLevel(const int a_level) const;
 
   /*!
-    @brief Gather boxes in parallel.
-    @param[inout] a_boxes Boxes to gather. 
-    @details On input, a_boxes contains the local boxes. On output, boxes have been gather on every rank
-  */
-  void gatherBoxesParallel(Vector<Box>& a_boxes) const;
-
-  /*!
     @brief Check if every point in input box is regular
     @param[in] a_box    Cell-centered box
     @param[in] a_probLo Lower-left corner of simulation domain
