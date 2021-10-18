@@ -559,6 +559,15 @@ public:
 protected:
 
   /*!
+    @brief Redistribution method
+  */
+  enum class Redistribution {
+    VolumeWeighted,
+    MassWeighted,
+    None
+  };
+
+  /*!
     @brief Component number in data holder
   */
   static constexpr int m_comp = 0;
@@ -737,9 +746,9 @@ protected:
   Real m_dt;
 
   /*!
-    @brief Flag for mass-weighted redistribution
+    @brief Which type of redistribution to use
   */
-  bool m_useMassWeightedRedistribution;
+  Redistribution m_whichRedistribution;
 
   /*!
     @brief Flag for blending the hybrid divergence
