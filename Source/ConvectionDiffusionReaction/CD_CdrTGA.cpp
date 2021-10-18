@@ -359,7 +359,7 @@ void CdrTGA::computeDivJ(EBAMRCellData& a_divJ, EBAMRCellData& a_phi, const Real
 
   if(m_isMobile || m_isDiffusive){
 
-    if(m_useMassWeightedRedistribution){
+    if(m_whichRedistribution == Redistribution::MassWeighted){
       this->setRedistWeights(a_phi);
     }
 
@@ -417,7 +417,7 @@ void CdrTGA::computeDivF(EBAMRCellData& a_divF, EBAMRCellData& a_phi, const Real
     m_amr->interpGhostPwl(a_phi,     m_realm, m_phase);
     m_amr->interpGhostPwl(m_cellVelocity, m_realm, m_phase);
 
-    if(m_useMassWeightedRedistribution){
+    if(m_whichRedistribution == Redistribution::MassWeighted){
       this->setRedistWeights(a_phi);
     }
     this->averageVelocityToFaces();                                                           // Cell-centered velocities become face-centered velocities. 
@@ -449,7 +449,7 @@ void CdrTGA::computeDivD(EBAMRCellData& a_divD, EBAMRCellData& a_phi, const bool
     // Fill ghost cells
     m_amr->interpGhostPwl(a_phi, m_realm, m_phase);
 
-    if(m_useMassWeightedRedistribution){
+    if(m_whichRedistribution == Redistribution::MassWeighted){
       this->setRedistWeights(a_phi);
     }
 
