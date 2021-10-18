@@ -445,13 +445,15 @@ void CdrSolver::computeDivG(EBAMRCellData& a_divG, EBAMRFluxData& a_G, const EBA
   this->nonConservativeDivergence(m_nonConservativeDivG, a_divG);          // Compute the non-conservative divergence
   this->hybridDivergence(a_divG, m_massDifference, m_nonConservativeDivG); // a_divG becomes hybrid divergence. Mass diff computed. 
 
-  // Increment redistribution registers with the mass difference.
-  this->incrementRedist    (m_massDifference);
-  this->coarseFineIncrement(m_massDifference);
+  if(m_whichRedistribution != Redistribution::None){
+    // Increment redistribution registers with the mass difference.
+    this->incrementRedist    (m_massDifference);
+    this->coarseFineIncrement(m_massDifference);
 
-  // Redistribute mass on the level and across the coarse-fine boundaries.
-  this->hyperbolicRedistribution(a_divG);      // Level redistribution. 
-  this->coarseFineRedistribution(a_divG);      // Coarse-fine redistribution
+    // Redistribute mass on the level and across the coarse-fine boundaries.
+    this->hyperbolicRedistribution(a_divG);      // Level redistribution. 
+    this->coarseFineRedistribution(a_divG);      // Coarse-fine redistribution
+  }
 }
 
 void CdrSolver::computeAdvectionFlux(EBAMRFluxData&       a_flux,
@@ -2573,7 +2575,24 @@ void CdrSolver::parseDivergenceComputation(){
 
   ParmParse pp(m_className.c_str());
 
-  pp.get("redist_mass_weighted", m_useMassWeightedRedistribution);
+  std::string str;
+
+  // Get redistribution type. 
+  pp.get("which_redistribution", str);
+  if(str == "volume"){
+    m_whichRedistribution = Redistribution::VolumeWeighted;
+  }
+  else if(str == "mass"){
+    m_whichRedistribution = Redistribution::MassWeighted;
+  }
+  else if(str == "none"){
+    m_whichRedistribution = Redistribution::None;
+  }
+  else{
+    MayDay::Error("CdrSolver::parseDivergenceComputation -- logic bust. Must specify 'volume', 'mass', or 'none'");
+  }
+
+  // Blend conservation or not. 
   pp.get("blend_conservation",   m_blendConservation);
 }
 
