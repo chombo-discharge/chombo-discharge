@@ -87,6 +87,11 @@ void PhaseRealm::define(const Vector<DisjointBoxLayout>&   a_grids,
   }
 
   m_hasEbCf = true;
+
+  // Adding this for debugging purposes. 
+  ParmParse pp("PhaseRealm");
+  pp.query("profile",   m_profile);
+  pp.query("verbosity", m_verbose);  
 }
 
 void PhaseRealm::setGrids(const Vector<DisjointBoxLayout>& a_grids, const int a_finestLevel){
