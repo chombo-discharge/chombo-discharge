@@ -86,6 +86,126 @@ bool CdrPlasmaStepper::stationary_rte(){
   return m_rte->isStationary();
 }
 
+
+void CdrPlasmaStepper::computeCellConductivity(EBAMRCellData& a_cellConductivity) const {
+  CH_TIME("CdrPlasmaStepper::computeCellConductivity");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaStepper::computeCellConductivity" << endl;
+  }
+
+  const EBAMRCellData cellCenteredElectricField = m_amr->alias(phase::gas, m_fieldSolver->getElectricField());
+
+  // Allocate some storage
+  EBAMRCellData fieldMagnitude;      // Holds electric field magnitude
+  EBAMRCellData speciesConductivity; // Holds bulk conductivity for one species
+
+  m_amr->allocate(fieldMagnitude,      m_realm, phase::gas, 1);
+  m_amr->allocate(speciesConductivity, m_realm, phase::gas, 1);
+
+  // Compute the electric field magnitude
+  DataOps::vectorLength(fieldMagnitude, cellCenteredElectricField);
+
+  // Compute the cell-centered conductivity.
+  DataOps::setValue(a_cellConductivity, 0.0);
+
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    const RefCountedPtr<CdrSolver>&  solver  = solverIt();
+    const RefCountedPtr<CdrSpecies>& species = solverIt.getSpecies();
+
+    // Compute the conductivity for this species. This is just Z*mu*n.
+    if(solver->isMobile()){
+      const EBAMRCellData& cellVel = solver->getCellCenteredVelocity();
+      const EBAMRCellData& phi     = solver->getPhi();
+
+      const int Z = species->getChargeNumber();
+
+      // Let f = speciesConductivity, this does as follows:
+      DataOps::vectorLength  (speciesConductivity, cellVel       ); // Compute f = |v|
+      DataOps::divideByScalar(speciesConductivity, fieldMagnitude); // Compute f = |v|/|E| = |mu|
+      DataOps::multiply      (speciesConductivity, phi           ); // Compute f = mu*n
+
+      // Add to total conductivity contribution.
+      DataOps::incr(a_cellConductivity, speciesConductivity, Z);
+    }
+  }
+
+  DataOps::scale(a_cellConductivity, Units::Qe); // Scale by electron charge.
+}
+
+void CdrPlasmaStepper::computeFaceConductivity(EBAMRFluxData&       a_conductivityFace,
+					       EBAMRIVData&         a_conductivityEB,
+					       const EBAMRCellData& a_conductivityCell) const {
+  CH_TIME("CdrPlasmaStepper::computeFaceConductivity");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaStepper::computeFaceConductivity" << endl;
+  }
+
+  DataOps::setValue(a_conductivityFace, 0.0);
+  DataOps::setValue(a_conductivityEB,   0.0);
+
+  DataOps::averageCellToFace(a_conductivityFace, a_conductivityCell, m_amr->getDomains());
+
+  // Now compute the conductivity onthe EB.
+#if 0
+  const auto& interpStencil = m_amr->getCentroidInterpolationStencils(m_realm, phase::gas);
+  interpStencil.apply(a_conductivityEB, a_conductivityCell);
+#else
+  DataOps::incr(a_conductivityEB, a_conductivityCell, 1.0);
+#endif
+}
+
+void CdrPlasmaStepper::setupSemiImplicitPoisson(const Real a_dt){
+  CH_TIME("CdrPlasmaStepper::setupSemiImplicitPoisson");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaStepper::setupSemiImplicitPoisson" << endl;
+  }
+
+  // Compute the required conductivities.
+  EBAMRCellData conductivityCell;
+  EBAMRFluxData conductivityFace;
+  EBAMRIVData   conductivityEB;
+
+  m_amr->allocate(conductivityCell, m_realm, phase::gas, 1);
+  m_amr->allocate(conductivityFace, m_realm, phase::gas, 1);
+  m_amr->allocate(conductivityEB,   m_realm, phase::gas, 1);
+
+  this->computeCellConductivity(conductivityCell);
+  this->computeFaceConductivity(conductivityFace, conductivityEB, conductivityCell);
+
+  // Ok, we must now set up the semi implicit Poisson equation.
+  this->setupSemiImplicitPoisson(conductivityFace, conductivityEB, a_dt);
+}
+
+void CdrPlasmaStepper::setupSemiImplicitPoisson(const EBAMRFluxData& a_conductivityFace,
+						const EBAMRIVData&   a_conductivityEB,
+						const Real           a_dt) {
+  CH_TIME("CdrPlasmaStepper::setupSemiImpliciPoisson");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaStepper::setupSemiImplicitPoisson" << endl;
+  }
+
+  // First, the field solver must set the permittivities as usual. The "permittivities" that we are after are
+  // eps = epsr + dt*sigma/eps0 (but we only have plasma on the gas phase).
+  m_fieldSolver->setPermittivities();
+
+  // Get the permittivities on the faces.
+  MFAMRFluxData& permFace = m_fieldSolver->getPermittivityFace();
+  MFAMRIVData&   permEB   = m_fieldSolver->getPermittivityEB();
+
+  EBAMRFluxData permFaceGas = m_amr->alias(phase::gas, permFace);
+  EBAMRIVData   permEBGas   = m_amr->alias(phase::gas, permEB  );
+
+  if(a_dt > 0.0){
+    const Real factor = a_dt/Units::eps0;
+
+    DataOps::incr(permFaceGas, a_conductivityFace, factor);
+    DataOps::incr(permEBGas,   a_conductivityEB,   factor);
+  }
+
+  // Now set up the solver with the new permittivities.
+  m_fieldSolver->setupSolver();
+}
+
 bool CdrPlasmaStepper::solvePoisson(){
   CH_TIME("CdrPlasmaStepper::solvePoisson");
   if(m_verbosity > 5){

@@ -146,6 +146,32 @@ namespace Physics {
       }
 
       /*!
+	@brief Compute the cell-centered conductivity
+      */
+      virtual void computeCellConductivity(EBAMRCellData& a_cellConductivity) const;
+
+      /*!
+	@brief Compute the face-centered conductivity from a cell-centered conductivity.
+      */
+      virtual void computeFaceConductivity(EBAMRFluxData&       a_conductivityFace,
+					   EBAMRIVData&         a_conductivityEB,
+					   const EBAMRCellData& a_conductivityCell) const;
+
+      /*!
+	@brief Set up a semi-implicit Poisson solver.
+	@details This is the version that computes the conductivity first.
+      */
+      virtual void setupSemiImplicitPoisson(const Real a_dt);
+
+      /*!
+	@brief Set up a semi-implicit Poisson solver.
+	@details This is the version that uses pre-existing conductivities.
+      */
+      virtual void setupSemiImplicitPoisson(const EBAMRFluxData& a_conductivityFace,
+					    const EBAMRIVData&   a_conductivityEB,
+					    const Real           a_dt);
+
+      /*!
 	@brief Solve the poisson equation. This calls computeSpaceChargeDensity() 
 	@details This assumes that the data contain in CdrLayout is cell-centered
       */
