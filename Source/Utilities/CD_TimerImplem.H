@@ -15,6 +15,7 @@
 // Std includes
 #include <sstream>
 #include <iostream>
+#include <fstream>
 
 // Chombo includes
 #ifdef CH_MPI
@@ -284,6 +285,63 @@ std::pair<Real, Real> Timer::computeTotalElapsedTime(const bool a_localReportOnl
 #endif        
 
   return std::make_pair(elapsedTimeLocal, elapsedTimeGlobal);
+}
+
+inline
+void Timer::writeReportToFile(const std::string a_fileName) const noexcept {
+
+  // First, go through all events and gather the times on the master rank.
+  std::vector<std::string> headerRow;
+  headerRow.emplace_back("# MPI rank");
+
+  // These are all the times for the finished events. We organize this is a 2D vector which is M x numRank long. Here,
+  // finishedEvents[0] contains the elapsed times for one of the events. The length of finishedEvents[0] is exactly
+  // numRank long
+  std::vector<std::vector<Real> > finishedEvents;
+
+  for (const auto& e : m_events){
+    const std::string&                           eventName = e.first;
+    const std::tuple<bool, TimePoint, Duration>& eventData = e.second;
+
+    const bool finishedEvent = std::get<StoppedEvent>(eventData);
+
+    // If we had an event that finished, we gather all the data on the master rank.
+    if(finishedEvent){
+
+      const Real localEventDuration = std::get<ElapsedTime>(eventData).count();
+      Vector<Real> allTimes(numProc(), 0.0);
+#ifdef CH_MPI
+      constexpr int srcRank = 0;
+      gather(allTimes, localEventDuration, srcRank);
+#else
+      allTimes[0] = localEventDuration;
+#endif
+
+      finishedEvents.emplace_back(allTimes.stdVector());
+      headerRow.     emplace_back(eventName);
+    }
+  }
+
+  // Open a file and start writing.
+  std::ofstream f;
+  f.open(a_fileName, std::ios_base::trunc);
+
+  const int width = 12;
+  for (int col = 0; col < headerRow.size(); col++){
+    f << std::left << std::setw(width) << headerRow[col] << "\t";
+  }
+  f << "\n";
+
+  // Write the data for rank = 0 etc
+  for (int irank = 0; irank < numProc(); irank++){
+    f << std::left << std::setw(width) << irank << "\t";
+    for (int event = 0; event < finishedEvents.size(); event++){
+      f << std::left << std::setw(width) << finishedEvents[event][irank] << "\t";
+    }
+    f << "\n";
+  }
+
+  f.close();
 }
  
 #include <CD_NamespaceFooter.H>

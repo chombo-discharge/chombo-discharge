@@ -106,6 +106,14 @@ public:
   inline
   void eventReport(std::ostream& a_outputStream, const bool a_localReportOnly = false) const noexcept;
 
+  /*!
+    @brief Print all timed events to a file.
+    @details This routine prints a header row consisting of the event names. The remaining rows are the timings for the various ranks.
+    @param[in] a_localReportOnly If true, no reduction over mpi
+  */
+  inline
+  void writeReportToFile(const std::string a_fileName) const noexcept;
+
 protected:
 
   /*!
