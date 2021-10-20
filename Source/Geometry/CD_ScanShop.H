@@ -18,6 +18,7 @@
 
 // Our includes
 #include <CD_BoxType.H>
+#include <CD_Timer.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -58,6 +59,11 @@ public:
   ~ScanShop();
 
   /*!
+    @brief If doing profiling, set the output name.
+  */
+  void setProfileFileName(const std::string a_fileName);
+
+  /*!
     @brief This grid generation method is called by EBISLevel when using distributed data. 
     @param[in] a_domain Problem domain on level
     @param[out] a_grids Load-balanced grids. 
@@ -86,8 +92,44 @@ public:
 				       const Real&          a_dx,
 				       const DataIndex&     a_dit) const override;
 
+  /*!
+    @brief Override of GeometryShop's fillGraph.
+    @details This just wraps a timer around the base version to spot load imbalance.
+    @param[inout] a_regIrregCovered Regular/Covered/Irregular cells
+    @param[inout] a_nodes           Nodes
+    @param[in]    a_validRegion     Grid region
+    @param[in]    a_ghostRegion     Grid region, including ghost cells
+    @param[in]    a_domain          Domain
+    @param[in]    a_probLo          Lower-left corner of computational domain
+    @param[in]    a_dx              Grid resolution
+    @param[in]    a_di              Grid index
+  */
+  virtual void fillGraph(BaseFab<int>&        a_regIrregCovered,
+                         Vector<IrregNode>&   a_nodes,
+                         const Box&           a_validRegion,
+                         const Box&           a_ghostRegion,
+                         const ProblemDomain& a_domain,
+                         const RealVect&      a_probLo,
+                         const Real&          a_dx,
+                         const DataIndex&     a_di) const override;
+
 
 protected:
+
+  /*!
+    @brief Set output file name (if doing profiling)
+  */
+  std::string m_fileName;
+
+  /*!
+    @brief Timer for when we use run-time profiling
+  */
+  mutable Timer m_timer;
+
+  /*!
+    @brief Bool for run-time profiling of ScanShop
+  */
+  bool m_profile;
 
   /*!
     @brief Scan level where we first begin to break up boxes. This is relative the EBIS level. 
