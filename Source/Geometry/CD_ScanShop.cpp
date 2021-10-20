@@ -43,7 +43,7 @@ ScanShop::ScanShop(const BaseIF&       a_localGeom,
   m_hasScanLevel = false;
   m_profile      = false;
   m_loadBalance  = false;
-  m_maxGhostEB   = a_maxGhostEB;
+  m_maxGhostEB   = 1;//a_maxGhostEB;
   m_fileName     = "ScanShopReport.dat";
   m_boxSorting   = BoxSorting::Morton;
 
@@ -236,7 +236,7 @@ void ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize){
   //    of cut-cell boxes for each rank
   // 5. Copy the map created over the initial DisjointBoxLayout onto the final grid
   
-  // 1. 
+  // 1.
   Vector<Box> boxes;
   Vector<int> procs;
   domainSplit(m_domains[a_level], boxes, a_maxGridSize);
@@ -365,7 +365,7 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
     const int fineLvl = coarLvl - 1;
 
     // Coar stuff
-    const DisjointBoxLayout& dblCoar  = m_grids[coarLvl];
+    const DisjointBoxLayout& dblCoar  =  m_grids  [coarLvl];
     const LevelData<BoxType>& mapCoar = *m_boxMaps[coarLvl];
 
     Vector<Box> CutCellBoxes;
@@ -375,11 +375,14 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
     Vector<int> ReguCovProcs;
 
     // Refined coarse stuff.
+    m_timer.startEvent("Refine coar");
     DisjointBoxLayout dblFineCoar;
     refine(dblFineCoar, dblCoar, 2);
     LevelData<BoxType> mapFineCoar(dblFineCoar, 1, IntVect::Zero, BoxTypeFactory());
+    m_timer.stopEvent("Refine coar");    
 
     // Break up cut cell boxes
+    m_timer.startEvent("Break up boxes");
     for (DataIterator dit(dblFineCoar); dit.ok(); ++dit){
       mapFineCoar[dit()] = mapCoar[dit()];
       const Box box = dblFineCoar[dit()];
@@ -392,15 +395,25 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
 	ReguCovBoxes.push_back(box);
       }
     }
+    m_timer.stopEvent("Break up boxes");    
 
     // Make a DBL out of the cut-cell boxes and again check if they actually contain cut cells
+    m_timer.startEvent("Gather boxes 1");
     LoadBalancing::gatherBoxes(CutCellBoxes);
+    m_timer.stopEvent("Gather boxes 1");
+    m_timer.startEvent("Sort 1");
     LoadBalancing::sort(CutCellBoxes, BoxSorting::Morton);
+    m_timer.stopEvent("Sort 1");
+    m_timer.startEvent("Make balance 1");
     LoadBalancing::makeBalance(CutCellProcs, CutCellBoxes);
+    m_timer.stopEvent("Make balance 1");
+    m_timer.startEvent("Define maps 1");
     DisjointBoxLayout  CutCellDBL(CutCellBoxes, CutCellProcs, m_domains[fineLvl]);
     LevelData<BoxType> CutCellMap(CutCellDBL, 1, IntVect::Zero, BoxTypeFactory());
+    m_timer.stopEvent("Define maps 1");    
 
     // Redo the cut cell boxes
+    m_timer.startEvent("Patch comp");
     Vector<long> CutCellLoads(0);
     Vector<long> ReguCovLoads(ReguCovBoxes.size(), 1L);
     CutCellBoxes.resize(0);
@@ -458,24 +471,42 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
 	MayDay::Error("ScanShop::buildFinerLevels - logic bust!");
       }
     }
+    m_timer.stopEvent("Patch comp");    
     
-    // Gather boxes and loads for regular/covered and cut-cell regions. 
+    // Gather boxes and loads for regular/covered and cut-cell regions.
+    m_timer.startEvent("Gather boxes 2");
     LoadBalancing::gatherBoxes(CutCellBoxes);
+    m_timer.stopEvent("Gather boxes 2");
+    m_timer.startEvent("Gather boxes 3");    
     LoadBalancing::gatherBoxes(ReguCovBoxes);
-    
-    LoadBalancing::gatherLoads(CutCellLoads);
-    LoadBalancing::gatherLoads(ReguCovLoads);    
+    m_timer.stopEvent("Gather boxes 3");    
 
+    m_timer.startEvent("Gather loads 1");
+    LoadBalancing::gatherLoads(CutCellLoads);
+    m_timer.stopEvent("Gather loads 1");
+    m_timer.startEvent("Gather loads 2");    
+    LoadBalancing::gatherLoads(ReguCovLoads);
+    m_timer.stopEvent("Gather loads 2");        
+
+    m_timer.startEvent("Sort 2");
     LoadBalancing::sort(CutCellBoxes, CutCellLoads, BoxSorting::Morton);
+    m_timer.stopEvent("Sort 2");    
+    m_timer.startEvent("Sort 3");    
     LoadBalancing::sort(ReguCovBoxes, ReguCovLoads, BoxSorting::Morton);
+    m_timer.stopEvent("Sort 3");        
 
     // Load balance the boxes. Recall that we use constant loads for regular/covered boxes but use introspective load balancing
-    // for the cut-cell boxes. 
+    // for the cut-cell boxes
+    m_timer.startEvent("Make balance 2");
     LoadBalancing::makeBalance(CutCellProcs, CutCellLoads, CutCellBoxes);
+    m_timer.stopEvent("Make balance 2");
+    m_timer.startEvent("Make balance 3");
     LoadBalancing::makeBalance(ReguCovProcs, ReguCovLoads, ReguCovBoxes);
+    m_timer.stopEvent("Make balance 3");
 
     // We load balanced the regular/covered and cut-cell regions independently, but now we need to create a box-to-rank map
-    // that is usable by Chombo's DisjointBoxLayout. 
+    // that is usable by Chombo's DisjointBoxLayout.
+    m_timer.startEvent("Append boxes");
     Vector<Box> allBoxes;
     Vector<int> allProcs;
     
@@ -484,14 +515,21 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
     
     allProcs.append(CutCellProcs);
     allProcs.append(ReguCovProcs);
+    m_timer.stopEvent("Append boxes");    
 
     // Define the grids and copy the maps over. First copy the refine coarse map, then update with the
     // cut cell map
+    m_timer.startEvent("Define grids 1");
     m_grids  [fineLvl] = DisjointBoxLayout(allBoxes, allProcs, m_domains[fineLvl]);
+    m_timer.stopEvent("Define grids 1");
+    m_timer.startEvent("Define maps 2");        
     m_boxMaps[fineLvl] = RefCountedPtr<LevelData<BoxType> > (new LevelData<BoxType>(m_grids[fineLvl], 1, IntVect::Zero, BoxTypeFactory()));
+    m_timer.stopEvent("Define maps 2");    
 
+    m_timer.startEvent("Map copy");
     mapFineCoar.copyTo(*m_boxMaps[fineLvl]);
     CutCellMap. copyTo(*m_boxMaps[fineLvl]);
+    m_timer.stopEvent("Map copy");    
 
 #if ScanShop_Debug // Dummy check the box maps
     for (DataIterator dit(CutCellDBL); dit.ok(); ++dit){
@@ -516,6 +554,10 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
     // This does the next level, we stop when level 0 has been built
     ScanShop::buildFinerLevels(fineLvl, a_maxGridSize);
   }
+#if 1
+  m_timer.eventReport(pout(), false);
+  MayDay::Abort("stop here");
+#endif
 }
 
 GeometryService::InOut ScanShop::InsideOutside(const Box&           a_region,
