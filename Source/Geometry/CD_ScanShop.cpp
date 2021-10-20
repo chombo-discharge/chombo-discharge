@@ -24,7 +24,6 @@
 #include <CD_NamespaceHeader.H>
 
 #define ScanShop_Debug 0
-#define ScanShop_IntrospectiveLoadBalance 0
 
 ScanShop::ScanShop(const BaseIF&       a_localGeom,
 		   const int           a_verbosity,
@@ -41,6 +40,7 @@ ScanShop::ScanShop(const BaseIF&       a_localGeom,
   m_baseIF       = &a_localGeom;
   m_hasScanLevel = false;
   m_profile      = false;
+  m_loadBalance  = false;
   m_maxGhostEB   = a_maxGhostEB;
   m_fileName     = "ScanShopReport.dat";
 
@@ -49,7 +49,8 @@ ScanShop::ScanShop(const BaseIF&       a_localGeom,
   ScanShop::makeDomains(a_dx, a_probLo, a_finestDomain, a_scanLevel);
 
   ParmParse pp("ScanShop");
-  pp.query("profile", m_profile);
+  pp.query("profile",      m_profile);
+  pp.query("load_balance", m_loadBalance);
 
   m_timer = Timer("ScanShop");
 }
@@ -252,19 +253,20 @@ void ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize){
       // function can vary in space (especially when we BVHs and stuff like that), we CAN time this directly if we want. This is the code that is commented
       // out. 
 
-#if ScanShop_IntrospectiveLoadBalance
-      Real durationInSeconds = -Timer::wallClock();	
-      for (BoxIterator bit(grownBox); bit.ok(); ++bit){
-      	const RealVect point = m_probLo + m_dx[a_level]*(0.5*RealVect::Unit + RealVect(bit()));
-      	const Real distance  = m_baseIF->value(point);
-      }
-      durationInSeconds += Timer::wallClock();
+      if(m_loadBalance){
+	Real durationInSeconds = -Timer::wallClock();	
+	for (BoxIterator bit(grownBox); bit.ok(); ++bit){
+	  const RealVect point = m_probLo + m_dx[a_level]*(0.5*RealVect::Unit + RealVect(bit()));
+	  const Real distance  = m_baseIF->value(point);
+	}
+	durationInSeconds += Timer::wallClock();
 
-      constexpr Real nsPerSec = 1.E9;
-      CutCellLoads.push_back(lround(durationInSeconds*nsPerSec));
-#else
-      CutCellLoads.push_back(1L);
-#endif
+	constexpr Real nsPerSec = 1.E9;
+	CutCellLoads.push_back(lround(durationInSeconds*nsPerSec));
+      }
+      else{
+	CutCellLoads.push_back(1L);
+      }
     }
     else{
       MayDay::Error("ScanShop::buildCoarseLevel - logic bust");
@@ -398,19 +400,20 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
 	// If this is truly a cut-cell box then we want to find out how much work we have to deal with when computing the cut-cell moments. This
 	// is (roughly) equal to the time it takes to evaluate the implicit function times the volume of the box. But since the cost of the implicit
 	// function can vary in space (especially when we BVHs and stuff like that), we just time this directly. We compute the load in nanoseconds.
-#if ScanShop_IntrospectiveLoadBalance	
-	Real durationInSeconds = -Timer::wallClock();	
-	for (BoxIterator bit(grownBox); bit.ok(); ++bit){
-	  const RealVect point = m_probLo + m_dx[fineLvl]*(0.5*RealVect::Unit + RealVect(bit()));
-	  const Real distance  = m_baseIF->value(point);
-	}
-	durationInSeconds += Timer::wallClock();
+	if(m_loadBalance){
+	  Real durationInSeconds = -Timer::wallClock();	
+	  for (BoxIterator bit(grownBox); bit.ok(); ++bit){
+	    const RealVect point = m_probLo + m_dx[fineLvl]*(0.5*RealVect::Unit + RealVect(bit()));
+	    const Real distance  = m_baseIF->value(point);
+	  }
+	  durationInSeconds += Timer::wallClock();
 
-	constexpr Real nsPerSec = 1.E9;
-	CutCellLoads.push_back(lround(durationInSeconds*nsPerSec));
-#else
-	CutCellLoads.push_back(1L);
-#endif
+	  constexpr Real nsPerSec = 1.E9;
+	  CutCellLoads.push_back(lround(durationInSeconds*nsPerSec));
+	}
+	else{
+	  CutCellLoads.push_back(1L);
+	}
       }
       else{
 	MayDay::Error("ScanShop::buildFinerLevels - logic bust!");

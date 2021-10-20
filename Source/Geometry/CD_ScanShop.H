@@ -132,6 +132,11 @@ protected:
   bool m_profile;
 
   /*!
+    @brief Use introspective load balancing or not
+  */
+  bool m_loadBalance;
+
+  /*!
     @brief Scan level where we first begin to break up boxes. This is relative the EBIS level. 
   */
   int m_scanLevel;
