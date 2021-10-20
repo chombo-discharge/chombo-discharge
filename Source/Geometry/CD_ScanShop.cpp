@@ -20,7 +20,6 @@
 
 // Our includes
 #include <CD_ScanShop.H>
-#include <CD_Timer.H>
 #include <CD_LoadBalancing.H>
 #include <CD_NamespaceHeader.H>
 
@@ -41,15 +40,33 @@ ScanShop::ScanShop(const BaseIF&       a_localGeom,
 
   m_baseIF       = &a_localGeom;
   m_hasScanLevel = false;
+  m_profile      = false;
   m_maxGhostEB   = a_maxGhostEB;
+  m_fileName     = "ScanShopReport.dat";
 
   // EBISLevel doesn't give resolution, origin, and problem domains through makeGrids, so we
   // need to construct these here, and then extract the proper resolution when we actually call makeGrids
   ScanShop::makeDomains(a_dx, a_probLo, a_finestDomain, a_scanLevel);
+
+  ParmParse pp("ScanShop");
+  pp.query("profile", m_profile);
+
+  m_timer = Timer("ScanShop");
 }
 
 ScanShop::~ScanShop(){
+  CH_TIME("ScanShop::~ScanShop()");
 
+  if(m_profile){
+    m_timer.writeReportToFile(m_fileName);
+    m_timer.eventReport(pout(), false);
+  }
+}
+
+void ScanShop::setProfileFileName(const std::string a_fileName){
+  m_fileName = a_fileName;
+
+  m_timer = Timer(m_fileName);
 }
 
 void ScanShop::makeDomains(const Real          a_dx,
@@ -390,6 +407,7 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
 	durationInSeconds += Timer::wallClock();
 
 	constexpr Real nsPerSec = 1.E9;
+	CutCellLoads.push_back(lround(durationInSeconds*nsPerSec));
 #else
 	CutCellLoads.push_back(1L);
 #endif
@@ -508,6 +526,27 @@ GeometryService::InOut ScanShop::InsideOutside(const Box&           a_region,
   }
 
   return ret;
+}
+
+void ScanShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
+                         Vector<IrregNode>&   a_nodes,
+                         const Box&           a_validRegion,
+                         const Box&           a_ghostRegion,
+                         const ProblemDomain& a_domain,
+                         const RealVect&      a_probLo,
+                         const Real&          a_dx,
+                         const DataIndex&     a_di) const {
+  CH_TIME("ScanShop::fillGraph");
+
+  if(m_profile){
+    m_timer.startEvent("fill graph");
+  }
+
+  GeometryShop::fillGraph(a_regIrregCovered, a_nodes, a_validRegion, a_ghostRegion, a_domain, a_probLo, a_dx, a_di);
+
+  if(m_profile){
+    m_timer.stopEvent("fill graph");
+  }
 }
 
 void ScanShop::printNumBoxesLevel(const int a_level) const {
