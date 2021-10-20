@@ -57,9 +57,9 @@ void Timer::startEvent(const std::string a_event) noexcept {
   else{ // If the event is not new, we just leave the elapsed time intact. 
     //    const TimePoint startTime = Clock::now();
     std::tuple<bool, TimePoint, Duration>& event = m_events.at(a_event);
-    const bool alreadyRunning = std::get<StoppedEvent>(event);
+    const bool stoppedEvent = std::get<StoppedEvent>(event);
 
-    if(!alreadyRunning){ // Only start the event if it is not already running. 
+    if(stoppedEvent){ // Only start the event if it is not already running.
       const TimePoint  startTime          = Clock::now();
       const Duration& previousElapsedTime = std::get<ElapsedTime>(event);
 
