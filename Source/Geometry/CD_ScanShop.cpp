@@ -25,6 +25,8 @@
 
 #define ScanShop_Debug 0
 
+constexpr long relativeCutCellLoad = 1L;
+
 ScanShop::ScanShop(const BaseIF&       a_localGeom,
 		   const int           a_verbosity,
 		   const Real          a_dx,
@@ -43,14 +45,32 @@ ScanShop::ScanShop(const BaseIF&       a_localGeom,
   m_loadBalance  = false;
   m_maxGhostEB   = a_maxGhostEB;
   m_fileName     = "ScanShopReport.dat";
+  m_boxSorting   = BoxSorting::Morton;
 
   // EBISLevel doesn't give resolution, origin, and problem domains through makeGrids, so we
   // need to construct these here, and then extract the proper resolution when we actually call makeGrids
   ScanShop::makeDomains(a_dx, a_probLo, a_finestDomain, a_scanLevel);
 
+  // These are settings that I want to hide from the user.
   ParmParse pp("ScanShop");
+
+  std::string str;
   pp.query("profile",      m_profile);
   pp.query("load_balance", m_loadBalance);
+  pp.query("box_sorting",  str);
+
+  if(str == "none"){
+    m_boxSorting = BoxSorting::None;
+  }
+  else if(str == "std"){
+    m_boxSorting = BoxSorting::Std;
+  }
+  else if(str == "morton"){
+    m_boxSorting = BoxSorting::Morton;
+  }
+  else if(str == "shuffle"){
+    m_boxSorting = BoxSorting::Shuffle;
+  }
 
   m_timer = Timer("ScanShop");
 }
@@ -116,7 +136,11 @@ void ScanShop::makeGrids(const ProblemDomain& a_domain,
 			 DisjointBoxLayout&   a_grids,
 			 const int&           a_maxGridSize,
 			 const int&           a_maxIrregGridSize){
-  CH_TIME("ScanShop::makeDomains(ProblemDomain, DisjointBoxLayout, int, int)");  
+  CH_TIME("ScanShop::makeGrids(ProblemDomain, DisjointBoxLayout, int, int)");  
+  pout() << "scanshop making grids" << endl;
+  if(m_profile){
+    m_timer.startEvent("Make grids");
+  }
 
   // Build the scan level first
   if(!m_hasScanLevel){
@@ -125,13 +149,13 @@ void ScanShop::makeGrids(const ProblemDomain& a_domain,
     }
     ScanShop::buildFinerLevels(m_scanLevel, a_maxGridSize);   // Traverse towards finer levels
 
-#if ScanShop_Debug
+    m_hasScanLevel = true;
+
+#if ScanShop_DEBUG
     for (int lvl = 0; lvl < m_domains.size(); lvl++){
       ScanShop::printNumBoxesLevel(lvl);
     }
 #endif
-
-    m_hasScanLevel = true;
   }
 
   // Find the level corresponding to a_domain
@@ -160,6 +184,11 @@ void ScanShop::makeGrids(const ProblemDomain& a_domain,
 
     a_grids.define(boxes, procs, a_domain);
   }
+
+  if(m_profile){
+    m_timer.stopEvent("Make grids");
+  }
+  pout() << "scanshop done making grids" << endl;
 }
 
 bool ScanShop::isRegular(const Box a_box, const RealVect a_probLo, const Real a_dx) const {
@@ -254,15 +283,20 @@ void ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize){
       // out. 
 
       if(m_loadBalance){
-	Real durationInSeconds = -Timer::wallClock();	
+	long curLoad = 0L;
 	for (BoxIterator bit(grownBox); bit.ok(); ++bit){
 	  const RealVect point = m_probLo + m_dx[a_level]*(0.5*RealVect::Unit + RealVect(bit()));
 	  const Real distance  = m_baseIF->value(point);
-	}
-	durationInSeconds += Timer::wallClock();
 
-	constexpr Real nsPerSec = 1.E9;
-	CutCellLoads.push_back(lround(durationInSeconds*nsPerSec));
+	  if(std::abs(distance) < 0.5*m_dx[a_level]){
+	    curLoad += relativeCutCellLoad;
+	  }
+	  else {
+	    curLoad += 1L;
+	  }
+	}
+
+	CutCellLoads.push_back(curLoad);
       }
       else{
 	CutCellLoads.push_back(1L);
@@ -401,15 +435,20 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
 	// is (roughly) equal to the time it takes to evaluate the implicit function times the volume of the box. But since the cost of the implicit
 	// function can vary in space (especially when we BVHs and stuff like that), we just time this directly. We compute the load in nanoseconds.
 	if(m_loadBalance){
-	  Real durationInSeconds = -Timer::wallClock();	
+	  long curLoad = 0L;
 	  for (BoxIterator bit(grownBox); bit.ok(); ++bit){
 	    const RealVect point = m_probLo + m_dx[fineLvl]*(0.5*RealVect::Unit + RealVect(bit()));
 	    const Real distance  = m_baseIF->value(point);
-	  }
-	  durationInSeconds += Timer::wallClock();
 
-	  constexpr Real nsPerSec = 1.E9;
-	  CutCellLoads.push_back(lround(durationInSeconds*nsPerSec));
+	    if(std::abs(distance) < 0.5*m_dx[fineLvl]){
+	      curLoad += relativeCutCellLoad;
+	    }
+	    else {
+	      curLoad += 1L;
+	    }
+	  }
+
+	  CutCellLoads.push_back(curLoad);
 	}
 	else{
 	  CutCellLoads.push_back(1L);
@@ -542,13 +581,13 @@ void ScanShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
   CH_TIME("ScanShop::fillGraph");
 
   if(m_profile){
-    m_timer.startEvent("fill graph");
+    m_timer.startEvent("Fill graph");
   }
 
   GeometryShop::fillGraph(a_regIrregCovered, a_nodes, a_validRegion, a_ghostRegion, a_domain, a_probLo, a_dx, a_di);
 
   if(m_profile){
-    m_timer.stopEvent("fill graph");
+    m_timer.stopEvent("Fill graph");
   }
 }
 

@@ -19,6 +19,7 @@
 // Our includes
 #include <CD_BoxType.H>
 #include <CD_Timer.H>
+#include <CD_BoxSorting.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -120,6 +121,11 @@ protected:
     @brief Set output file name (if doing profiling)
   */
   std::string m_fileName;
+
+  /*!
+    @brief For arranging boxes in space when we load balance
+  */
+  BoxSorting m_boxSorting;
 
   /*!
     @brief Timer for when we use run-time profiling
