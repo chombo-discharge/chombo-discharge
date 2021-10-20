@@ -39,26 +39,16 @@ int main(int argc, char* argv[]){
   {
     ParmParse pp("StreamerProfiledSurface");
 
-    std::string polarity;
     std::string voltageCurveFile;
     pp.get("voltage_curve", voltageCurveFile);
     pp.get("curve_start",   curveStart);
-    pp.get("polarity",      polarity);    
+    pp.get("polarity",      p);    
 
     voltageCurve = DataParser::simpleFileReadASCII(voltageCurveFile);
     voltageCurve.setRange(0, 1E-6);
     voltageCurve.sort();
     voltageCurve.makeUniform(1000);
 
-    if(polarity == "positive"){
-      p = 1.0;
-    }
-    else if(polarity == "negative"){
-      p = -1.0;
-    }
-    else{
-      MayDay::Error("main.cpp -- unknown polarity. Must be 'positive' or 'negative'");
-    }
   }
 
   // Set geometry and AMR 
