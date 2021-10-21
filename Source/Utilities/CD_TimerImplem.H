@@ -193,9 +193,9 @@ void Timer::eventReport(std::ostream& a_outputStream, const bool a_localReportOn
 
 	  sigma = 0.0;
 	  for (int i = 0; i < allDurations.size(); i++){
-	    sigma += std::pow(allDurations[i]-average, 2);
+	    sigma += sqrt(std::pow(allDurations[i]-average, 2));
 	  }
-	  sigma *= 1./numRank;
+	  sigma = sqrt(sigma/numRank);
 	}
 
 	broadcast(average, srcRank);
