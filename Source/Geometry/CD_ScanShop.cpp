@@ -23,8 +23,6 @@
 #include <CD_LoadBalancing.H>
 #include <CD_NamespaceHeader.H>
 
-#define ScanShop_Debug 0
-
 ScanShop::ScanShop(const BaseIF&       a_localGeom,
 		   const int           a_verbosity,
 		   const Real          a_dx,
@@ -126,15 +124,15 @@ void ScanShop::makeDomains(const Real          a_dx,
   // These will be built when they are needed. 
   m_grids.       resize(m_domains.size());
   m_boxMap.      resize(m_domains.size());  
-  m_hasThisLevel.resize(m_domains.size(), 0);
+  m_hasThisLevel.resize(m_domains.size(), false);
 }
 
 void ScanShop::makeGrids(const ProblemDomain& a_domain,
 			 DisjointBoxLayout&   a_grids,
 			 const int&           a_maxGridSize,
 			 const int&           a_maxIrregGridSize){
-  CH_TIME("ScanShop::makeGrids(ProblemDomain, DisjointBoxLayout, int, int)");  
-
+  //  CH_TIME("ScanShop::makeGrids(ProblemDomain, DisjointBoxLayout, int, int)");
+  pout() << "make grids begin" << endl;
   m_timer.startEvent("Make grids");
 
   // Build the scan level first
@@ -156,7 +154,7 @@ void ScanShop::makeGrids(const ProblemDomain& a_domain,
     }
   }
 
-  if(m_hasThisLevel[whichLevel] != 0){
+  if(m_hasThisLevel[whichLevel]){
     a_grids = m_grids[whichLevel];
   }
   else{
@@ -175,6 +173,8 @@ void ScanShop::makeGrids(const ProblemDomain& a_domain,
   }
 
   m_timer.stopEvent("Make grids");
+
+  pout() << "make grids end" << endl;
 }
 
 bool ScanShop::isRegular(const Box a_box, const RealVect a_probLo, const Real a_dx) const {
@@ -261,7 +261,7 @@ void ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize){
 
   this->defineLevel(coveredBoxes, regularBoxes, cutCellBoxes, a_level);
 
-  m_hasThisLevel[a_level] = 1;
+  m_hasThisLevel[a_level] = true;
 }
 
 void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSize){
@@ -334,7 +334,7 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
 
     this->defineLevel(coveredBoxes, regularBoxes, cutCellBoxes, fineLvl);
     
-    m_hasThisLevel[fineLvl] = 1;
+    m_hasThisLevel[fineLvl] = true;
 
     // Now recurse into finer levels. 
     ScanShop::buildFinerLevels(fineLvl, a_maxGridSize);

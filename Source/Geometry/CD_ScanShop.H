@@ -190,7 +190,7 @@ protected:
   /*!
     @brief Check if level has been scanned. 0 = false, != 0 implies true
   */
-  Vector<int> m_hasThisLevel;
+  std::vector<bool> m_hasThisLevel;
 
   /*!
     @brief Create the problem domain and resolutions
