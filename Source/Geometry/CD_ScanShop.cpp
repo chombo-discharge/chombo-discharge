@@ -348,30 +348,37 @@ void ScanShop::defineLevel(Vector<Box>& a_coveredBoxes,
   LoadBalancing::gatherBoxes(a_coveredBoxes);        
   LoadBalancing::gatherBoxes(a_regularBoxes);    
   LoadBalancing::gatherBoxes(a_cutCellBoxes);
-  m_timer.stopEvent("Gather boxes");  
+  m_timer.stopEvent("Gather boxes");
 
-  m_timer.startEvent("Sort boxes");
-  LoadBalancing::sort(a_coveredBoxes, m_boxSorting);
-  LoadBalancing::sort(a_regularBoxes, m_boxSorting);
-  LoadBalancing::sort(a_cutCellBoxes, m_boxSorting);
-  m_timer.stopEvent("Sort boxes");  
-
+  // This is needed because when we join the regular and covered boxes onto the same "load" when we sort them, but we need to have
+  // the indexing correctly. For the cut-cell boxes we load balance them independently.
+  m_timer.startEvent("Sort boxes");  
   const Vector<int> coveredTypes(a_coveredBoxes.size(), 0);
   const Vector<int> regularTypes(a_regularBoxes.size(), 1);
-  const Vector<int> cutCellTypes(a_cutCellBoxes.size(), 2);    
+  const Vector<int> cutCellTypes(a_cutCellBoxes.size(), 2);
 
-  // Load balance the boxes. 
-  const Vector<long> coveredLoads(a_coveredBoxes.size(), 1L);
-  const Vector<long> regularLoads(a_regularBoxes.size(), 1L);
+  Vector<Box> reguCovBoxes;
+  Vector<int> reguCovTypes;
+  
+  reguCovBoxes.append(a_coveredBoxes);
+  reguCovBoxes.append(a_regularBoxes);
+
+  reguCovTypes.append(coveredTypes);
+  reguCovTypes.append(regularTypes);
+  
+  LoadBalancing::sort(  reguCovBoxes, reguCovTypes, m_boxSorting);
+  LoadBalancing::sort(a_cutCellBoxes,               m_boxSorting); // We don't need to track the "type" for cut-cell boxes because this call only sorts one type of box. 
+  m_timer.stopEvent("Sort boxes");  
+
+  // Load balance the boxes.
+  m_timer.startEvent("Make balance");  
+  const Vector<long> reguCovLoads(  reguCovBoxes.size(), 1L);
   const Vector<long> cutCellLoads(a_cutCellBoxes.size(), 1L);
 
-  Vector<int> coveredProcs;
-  Vector<int> regularProcs;    
+  Vector<int> reguCovProcs;
   Vector<int> cutCellProcs;    
 
-  m_timer.startEvent("Make balance");
-  LoadBalancing::makeBalance(coveredProcs, coveredLoads, a_coveredBoxes);
-  LoadBalancing::makeBalance(regularProcs, regularLoads, a_regularBoxes);
+  LoadBalancing::makeBalance(reguCovProcs, reguCovLoads,   reguCovBoxes);
   LoadBalancing::makeBalance(cutCellProcs, cutCellLoads, a_cutCellBoxes);
   m_timer.stopEvent("Make balance");  
 
@@ -382,16 +389,13 @@ void ScanShop::defineLevel(Vector<Box>& a_coveredBoxes,
   Vector<int> allProcs;
   Vector<int> allTypes;    
     
-  allBoxes.append(a_coveredBoxes);
-  allBoxes.append(a_regularBoxes);
+  allBoxes.append(  reguCovBoxes);
   allBoxes.append(a_cutCellBoxes);
     
-  allProcs.append(coveredProcs);
-  allProcs.append(regularProcs);
+  allProcs.append(reguCovProcs);
   allProcs.append(cutCellProcs);
 
-  allTypes.append(coveredTypes);
-  allTypes.append(regularTypes);
+  allTypes.append(reguCovTypes);
   allTypes.append(cutCellTypes);
   m_timer.stopEvent("Vector append");  
 
@@ -405,8 +409,10 @@ void ScanShop::defineLevel(Vector<Box>& a_coveredBoxes,
   // Define shit.
   m_timer.startEvent("Define grids");
   m_grids [a_level] = DisjointBoxLayout(allBoxes, allProcs, m_domains[a_level]);
-  m_boxMap[a_level] = RefCountedPtr<LayoutData<GeometryService::InOut> > (new LayoutData<GeometryService::InOut>(m_grids[a_level]));
   m_timer.stopEvent("Define grids");
+  m_timer.startEvent("Define map");  
+  m_boxMap[a_level] = RefCountedPtr<LayoutData<GeometryService::InOut> > (new LayoutData<GeometryService::InOut>(m_grids[a_level]));
+  m_timer.stopEvent("Define map");
 
   m_timer.startEvent("Set box types");
   for (DataIterator dit(m_grids[a_level]); dit.ok(); ++dit){
