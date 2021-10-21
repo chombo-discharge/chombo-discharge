@@ -1707,7 +1707,7 @@ void AmrMesh::parseMaxEbisBoxSize(){
   ParmParse pp("AmrMesh");
   int boxSize;
   pp.get("max_ebis_box", boxSize);
-  if(boxSize >= 8 && boxSize % 2 == 0){
+  if(boxSize >= 4 && boxSize % 2 == 0){
     m_maxEbisBoxSize = boxSize;
   }
   else{

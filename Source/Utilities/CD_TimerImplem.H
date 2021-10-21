@@ -299,6 +299,8 @@ void Timer::writeReportToFile(const std::string a_fileName) const noexcept {
   // numRank long
   std::vector<std::vector<Real> > finishedEvents;
 
+  constexpr int srcRank = 0;  
+
   for (const auto& e : m_events){
     const std::string&                           eventName = e.first;
     const std::tuple<bool, TimePoint, Duration>& eventData = e.second;
@@ -311,7 +313,7 @@ void Timer::writeReportToFile(const std::string a_fileName) const noexcept {
       const Real localEventDuration = std::get<ElapsedTime>(eventData).count();
       Vector<Real> allTimes(numProc(), 0.0);
 #ifdef CH_MPI
-      constexpr int srcRank = 0;
+
       gather(allTimes, localEventDuration, srcRank);
 #else
       allTimes[0] = localEventDuration;
@@ -323,25 +325,27 @@ void Timer::writeReportToFile(const std::string a_fileName) const noexcept {
   }
 
   // Open a file and start writing.
-  std::ofstream f;
-  f.open(a_fileName, std::ios_base::trunc);
+  if(procID() == srcRank){
+    std::ofstream f;
+    f.open(a_fileName, std::ios_base::trunc);
 
-  const int width = 12;
-  for (int col = 0; col < headerRow.size(); col++){
-    f << std::left << std::setw(width) << headerRow[col] << "\t";
-  }
-  f << "\n";
-
-  // Write the data for rank = 0 etc
-  for (int irank = 0; irank < numProc(); irank++){
-    f << std::left << std::setw(width) << irank << "\t";
-    for (int event = 0; event < finishedEvents.size(); event++){
-      f << std::left << std::setw(width) << finishedEvents[event][irank] << "\t";
+    const int width = 12;
+    for (int col = 0; col < headerRow.size(); col++){
+      f << std::left << std::setw(width) << headerRow[col] << "\t";
     }
     f << "\n";
-  }
 
-  f.close();
+    // Write the data for rank = 0 etc
+    for (int irank = 0; irank < numProc(); irank++){
+      f << std::left << std::setw(width) << irank << "\t";
+      for (int event = 0; event < finishedEvents.size(); event++){
+	f << std::left << std::setw(width) << finishedEvents[event][irank] << "\t";
+      }
+      f << "\n";
+    }
+
+    f.close();
+  }
 }
  
 #include <CD_NamespaceFooter.H>

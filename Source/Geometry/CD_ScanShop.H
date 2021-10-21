@@ -17,8 +17,8 @@
 #include <GeometryService.H>
 
 // Our includes
-#include <CD_BoxType.H>
 #include <CD_Timer.H>
+#include <CD_BoxSorting.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -43,6 +43,7 @@ public:
     @param[in] a_finestDomain  Finest grid level
     @param[in] a_scanLevel     Scan level, i.e. on which level to initiate the load balancing sequence. 
     @param[in] a_thsdhVoF      Threshold for GeometryShop
+    @note a_maxGhostEB is a dead parameter. 
   */
   ScanShop(const BaseIF&       a_geometry,
 	   const int           a_verbosity,
@@ -122,6 +123,11 @@ protected:
   std::string m_fileName;
 
   /*!
+    @brief For arranging boxes in space when we load balance
+  */
+  BoxSorting m_boxSorting;
+
+  /*!
     @brief Timer for when we use run-time profiling
   */
   mutable Timer m_timer;
@@ -175,12 +181,12 @@ protected:
     @brief Box maps. 
     @details BoxType is a essentially just an integer on each patch which is =0,1,2 depending on whether or not the box is covered/regular/cut. 
   */
-  Vector<RefCountedPtr<LevelData<BoxType> > > m_boxMaps;
+  Vector<RefCountedPtr<LayoutData<GeometryService::InOut> > > m_boxMap;  
 
   /*!
     @brief Check if level has been scanned. 0 = false, != 0 implies true
   */
-  Vector<int> m_hasThisLevel;
+  std::vector<bool> m_hasThisLevel;
 
   /*!
     @brief Create the problem domain and resolutions
@@ -208,13 +214,6 @@ protected:
   void buildCoarseLevel(const int a_finerLevel, const int a_maxGridSize);
 
   /*!
-    @brief Prints number of boxes of each type on this level
-    @param[in] a_level Grid level
-    @details This will print (to std::cout) the number of regular/covered/cutcell boxes on each grid level
-  */
-  void printNumBoxesLevel(const int a_level) const;
-
-  /*!
     @brief Check if every point in input box is regular
     @param[in] a_box    Cell-centered box
     @param[in] a_probLo Lower-left corner of simulation domain
@@ -229,6 +228,20 @@ protected:
     @param[in] a_dx     Grid resolution
   */
   bool isCovered(const Box a_box, const RealVect a_probLo, const Real a_dx) const;
+
+  /*!
+    @brief Sort boxes lexicographically. 
+    @details A strange but true thing that is necessary because DisjointBoxlayout sorts the boxes under the hood
+  */
+  std::vector<std::pair<Box, int> > getSortedBoxesAndTypes(const Vector<Box>& a_boxes, const Vector<int>& a_types) const;
+
+  /*!
+    @brief Define the "box map" on a specified level
+  */
+  void defineLevel(Vector<Box>& coveredBoxes,
+		   Vector<Box>& regularBoxes,
+		   Vector<Box>& cutCellBoxes,
+		   const int    a_level);
 };
 
 #include <CD_NamespaceFooter.H>
