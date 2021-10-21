@@ -43,6 +43,7 @@ public:
     @param[in] a_finestDomain  Finest grid level
     @param[in] a_scanLevel     Scan level, i.e. on which level to initiate the load balancing sequence. 
     @param[in] a_thsdhVoF      Threshold for GeometryShop
+    @note a_maxGhostEB is a dead parameter. 
   */
   ScanShop(const BaseIF&       a_geometry,
 	   const int           a_verbosity,
@@ -135,11 +136,6 @@ protected:
     @brief Bool for run-time profiling of ScanShop
   */
   bool m_profile;
-
-  /*!
-    @brief Use introspective load balancing or not
-  */
-  bool m_loadBalance;
 
   /*!
     @brief Scan level where we first begin to break up boxes. This is relative the EBIS level. 

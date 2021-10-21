@@ -38,7 +38,6 @@ ScanShop::ScanShop(const BaseIF&       a_localGeom,
   m_baseIF       = &a_localGeom;
   m_hasScanLevel = false;
   m_profile      = false;
-  m_loadBalance  = false;
   m_maxGhostEB   = 1;//a_maxGhostEB;
   m_fileName     = "ScanShopReport.dat";
   m_boxSorting   = BoxSorting::Morton;
@@ -131,8 +130,7 @@ void ScanShop::makeGrids(const ProblemDomain& a_domain,
 			 DisjointBoxLayout&   a_grids,
 			 const int&           a_maxGridSize,
 			 const int&           a_maxIrregGridSize){
-  //  CH_TIME("ScanShop::makeGrids(ProblemDomain, DisjointBoxLayout, int, int)");
-  pout() << "make grids begin" << endl;
+  CH_TIME("ScanShop::makeGrids(ProblemDomain, DisjointBoxLayout, int, int)");
   m_timer.startEvent("Make grids");
 
   // Build the scan level first
@@ -173,8 +171,6 @@ void ScanShop::makeGrids(const ProblemDomain& a_domain,
   }
 
   m_timer.stopEvent("Make grids");
-
-  pout() << "make grids end" << endl;
 }
 
 bool ScanShop::isRegular(const Box a_box, const RealVect a_probLo, const Real a_dx) const {
