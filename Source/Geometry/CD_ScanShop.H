@@ -189,6 +189,12 @@ protected:
   Vector<RefCountedPtr<LevelData<BoxType> > > m_boxMaps;
 
   /*!
+    @brief Box maps. 
+    @details BoxType is a essentially just an integer on each patch which is =0,1,2 depending on whether or not the box is covered/regular/cut. 
+  */
+  Vector<RefCountedPtr<LayoutData<BoxType> > > m_boxMap;  
+
+  /*!
     @brief Check if level has been scanned. 0 = false, != 0 implies true
   */
   Vector<int> m_hasThisLevel;
