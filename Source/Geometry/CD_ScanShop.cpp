@@ -318,9 +318,6 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
       const bool isRegular = ScanShop::isRegular(grownBox, m_probLo, m_dx[fineLvl]);
       const bool isCovered = ScanShop::isCovered(grownBox, m_probLo, m_dx[fineLvl]);
 
-      // Designate boxes and regular/covered or irregular. For regular covered boxes we use a constant load = 1 and for the cut-cell boxes
-      // we compute the load introspectively. We do this because patches can contain a different amount of cut-cells and thus there's inherent
-      // load imbalance. Worse, the cost of the implicit function can vary in space and thus we time these things introspectively.
       if(isCovered){
 	coveredBoxes.push_back(box);
       }      
@@ -351,13 +348,17 @@ void ScanShop::defineLevel(Vector<Box>& a_coveredBoxes,
   CH_TIME("ScanShop::defineLevel");
 
   // Gather boxes and loads for regular/covered and cut-cell regions.
+  m_timer.startEvent("Gather boxes");
   LoadBalancing::gatherBoxes(a_coveredBoxes);        
   LoadBalancing::gatherBoxes(a_regularBoxes);    
   LoadBalancing::gatherBoxes(a_cutCellBoxes);
+  m_timer.stopEvent("Gather boxes");  
 
+  m_timer.startEvent("Sort boxes");
   LoadBalancing::sort(a_coveredBoxes, m_boxSorting);
   LoadBalancing::sort(a_regularBoxes, m_boxSorting);
   LoadBalancing::sort(a_cutCellBoxes, m_boxSorting);
+  m_timer.stopEvent("Sort boxes");  
 
   const Vector<int> coveredTypes(a_coveredBoxes.size(), 0);
   const Vector<int> regularTypes(a_regularBoxes.size(), 1);
@@ -371,13 +372,16 @@ void ScanShop::defineLevel(Vector<Box>& a_coveredBoxes,
   Vector<int> coveredProcs;
   Vector<int> regularProcs;    
   Vector<int> cutCellProcs;    
-    
+
+  m_timer.startEvent("Make balance");
   LoadBalancing::makeBalance(coveredProcs, coveredLoads, a_coveredBoxes);
   LoadBalancing::makeBalance(regularProcs, regularLoads, a_regularBoxes);
-  LoadBalancing::makeBalance(cutCellProcs, cutCellLoads, a_cutCellBoxes);    
+  LoadBalancing::makeBalance(cutCellProcs, cutCellLoads, a_cutCellBoxes);
+  m_timer.stopEvent("Make balance");  
 
   // We load balanced the regular/covered and cut-cell regions independently, but now we need to create a box-to-rank map
   // that is usable by Chombo's DisjointBoxLayout.
+  m_timer.startEvent("Vector append");
   Vector<Box> allBoxes;
   Vector<int> allProcs;
   Vector<int> allTypes;    
@@ -393,16 +397,22 @@ void ScanShop::defineLevel(Vector<Box>& a_coveredBoxes,
   allTypes.append(coveredTypes);
   allTypes.append(regularTypes);
   allTypes.append(cutCellTypes);
+  m_timer.stopEvent("Vector append");  
 
   // This is something that I fucking HATE, but DisjointBoxLayout sorts the boxes using lexicographical sorting, and we must do the same if
   // we want to be able to globally index correctly into the box types. So, create a view of the boxes and box types that is consistent with
-  // what we will have in the DataIterator. This means that we must lexicographically sort the boxes. 
+  // what we will have in the DataIterator. This means that we must lexicographically sort the boxes.
+  m_timer.startEvent("Lexi-sort");
   const std::vector<std::pair<Box, int> > sortedBoxesAndTypes = this->getSortedBoxesAndTypes(allBoxes, allTypes);
+  m_timer.stopEvent("Lexi-sort");  
 
-  // Define shit. 
+  // Define shit.
+  m_timer.startEvent("Define grids and map");
   m_grids [a_level] = DisjointBoxLayout(allBoxes, allProcs, m_domains[a_level]);
-  m_boxMap[a_level] = RefCountedPtr<LayoutData<GeometryService::InOut> > (new LayoutData<GeometryService::InOut>(m_grids[a_level]));    
+  m_boxMap[a_level] = RefCountedPtr<LayoutData<GeometryService::InOut> > (new LayoutData<GeometryService::InOut>(m_grids[a_level]));
+  m_timer.stopEvent("Define grids and map");  
 
+  m_timer.startEvent("Set box types");
   for (DataIterator dit(m_grids[a_level]); dit.ok(); ++dit){
     const Box  box  = sortedBoxesAndTypes[dit().intCode()].first;    
     const long type = sortedBoxesAndTypes[dit().intCode()].second;
@@ -422,7 +432,8 @@ void ScanShop::defineLevel(Vector<Box>& a_coveredBoxes,
     else if(type == 2L){
       (*m_boxMap[a_level])[dit()] = GeometryService::Irregular;
     }
-  }  
+  }
+  m_timer.stopEvent("Set box types");  
 }
 
 GeometryService::InOut ScanShop::InsideOutside(const Box&           a_region,
