@@ -384,7 +384,7 @@ void ScanShop::defineLevel(Vector<Box>& a_coveredBoxes,
     
   allBoxes.append(a_coveredBoxes);
   allBoxes.append(a_regularBoxes);
-  allBoxes.append(a_cutCellBoxes);    
+  allBoxes.append(a_cutCellBoxes);
     
   allProcs.append(coveredProcs);
   allProcs.append(regularProcs);
@@ -403,10 +403,10 @@ void ScanShop::defineLevel(Vector<Box>& a_coveredBoxes,
   m_timer.stopEvent("Lexi-sort");  
 
   // Define shit.
-  m_timer.startEvent("Define grids and map");
+  m_timer.startEvent("Define grids");
   m_grids [a_level] = DisjointBoxLayout(allBoxes, allProcs, m_domains[a_level]);
   m_boxMap[a_level] = RefCountedPtr<LayoutData<GeometryService::InOut> > (new LayoutData<GeometryService::InOut>(m_grids[a_level]));
-  m_timer.stopEvent("Define grids and map");  
+  m_timer.stopEvent("Define grids");
 
   m_timer.startEvent("Set box types");
   for (DataIterator dit(m_grids[a_level]); dit.ok(); ++dit){
@@ -429,6 +429,7 @@ void ScanShop::defineLevel(Vector<Box>& a_coveredBoxes,
       (*m_boxMap[a_level])[dit()] = GeometryService::Irregular;
     }
   }
+
   m_timer.stopEvent("Set box types");  
 }
 
