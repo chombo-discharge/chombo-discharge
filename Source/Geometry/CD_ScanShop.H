@@ -238,6 +238,14 @@ protected:
     @details A strange but true thing that is necessary because DisjointBoxlayout sorts the boxes under the hood
   */
   std::vector<std::pair<Box, int> > getSortedBoxesAndTypes(const Vector<Box>& a_boxes, const Vector<int>& a_types) const;
+
+  /*!
+    @brief Define the "box map" on a specified level
+  */
+  void defineLevel(Vector<Box>& coveredBoxes,
+		   Vector<Box>& regularBoxes,
+		   Vector<Box>& cutCellBoxes,
+		   const int    a_level);
 };
 
 #include <CD_NamespaceFooter.H>
