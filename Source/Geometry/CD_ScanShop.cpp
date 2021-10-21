@@ -25,7 +25,6 @@
 
 #define ScanShop_Debug 0
 
-constexpr long relativeCutCellLoad = 1L;
 
 ScanShop::ScanShop(const BaseIF&       a_localGeom,
 		   const int           a_verbosity,
@@ -56,7 +55,6 @@ ScanShop::ScanShop(const BaseIF&       a_localGeom,
 
   std::string str;
   pp.query("profile",      m_profile);
-  pp.query("load_balance", m_loadBalance);
   pp.query("box_sorting",  str);
 
   if(str == "none"){
@@ -128,7 +126,6 @@ void ScanShop::makeDomains(const Real          a_dx,
 
   // These will be built when they are needed. 
   m_grids.       resize(m_domains.size());
-  m_boxMaps.     resize(m_domains.size());
   m_boxMap.      resize(m_domains.size());  
   m_hasThisLevel.resize(m_domains.size(), 0);
 }
@@ -149,12 +146,6 @@ void ScanShop::makeGrids(const ProblemDomain& a_domain,
     ScanShop::buildFinerLevels(m_scanLevel, a_maxGridSize);   // Traverse towards finer levels
 
     m_hasScanLevel = true;
-
-#if ScanShop_DEBUG
-    for (int lvl = 0; lvl < m_domains.size(); lvl++){
-      ScanShop::printNumBoxesLevel(lvl);
-    }
-#endif
   }
 
   // Find the level corresponding to a_domain
@@ -178,7 +169,7 @@ void ScanShop::makeGrids(const ProblemDomain& a_domain,
     Vector<int> procs;
   
     domainSplit(a_domain, boxes, a_maxGridSize);
-    LoadBalancing::sort(boxes, BoxSorting::Morton);
+    LoadBalancing::sort(boxes, m_boxSorting);
     LoadBalancing::makeBalance(procs, boxes);
 
     a_grids.define(boxes, procs, a_domain);
@@ -226,7 +217,7 @@ void ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize){
 
   // This function does the following:
   // 1. Break up the domain into chunks of max size a_maxGridSize and load balance them trivially
-  // 2. Search through all the boxes and label them as regular/covered/irregular. Store the result in a LevelData map
+  // 2. Search through all the boxes and label them as regular/covered/irregular. 
   // 3. Gather cut-cell and regular/covered boxes separately and load balance them separately
   // 4. Create a new DBL with the newly load-balanced boxes; there should be approximately the same amount
   //    of cut-cell boxes for each rank
@@ -240,15 +231,14 @@ void ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize){
 
   // 2. 
   DisjointBoxLayout dbl(boxes, procs, m_domains[a_level]);
-  LevelData<BoxType> map(dbl, 1, IntVect::Zero, BoxTypeFactory());
   
   Vector<Box> CutCellBoxes;
   Vector<Box> RegularBoxes;
   Vector<Box> CoveredBoxes;
 
-  Vector<long> CoveredTypes;
-  Vector<long> RegularTypes;
-  Vector<long> CutCellTypes;    
+  Vector<int> CoveredTypes;
+  Vector<int> RegularTypes;
+  Vector<int> CutCellTypes;    
   
   Vector<int> CutCellProcs;
   Vector<int> RegularProcs;
@@ -265,19 +255,16 @@ void ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize){
     const bool isCovered = ScanShop::isCovered(grownBox, m_probLo, m_dx[a_level]);
 
     if(isCovered && !isRegular){
-      map[dit()].setCovered();
       CoveredBoxes.push_back(box);
-      CoveredTypes.push_back(0L);
+      CoveredTypes.push_back(0);
     }    
     else if(isRegular && !isCovered){
-      map[dit()].setRegular();
       RegularBoxes.push_back(box);
-      RegularTypes.push_back(1L);
+      RegularTypes.push_back(1);
     }
     else if(!isRegular && !isCovered){
-      map[dit()].setCutCell();
       CutCellBoxes.push_back(box);
-      CutCellTypes.push_back(2L);
+      CutCellTypes.push_back(2);
     }
     else{
       MayDay::Error("ScanShop::buildCoarseLevel - logic bust");
@@ -301,9 +288,9 @@ void ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize){
   LoadBalancing::gatherLoads(RegularTypes);
   LoadBalancing::gatherLoads(CutCellTypes);    
   
-  LoadBalancing::sort(CoveredBoxes, CoveredTypes, BoxSorting::Morton);
-  LoadBalancing::sort(RegularBoxes, RegularTypes, BoxSorting::Morton);
-  LoadBalancing::sort(CutCellBoxes, CutCellTypes, BoxSorting::Morton);  
+  LoadBalancing::sort(CoveredBoxes, m_boxSorting);
+  LoadBalancing::sort(RegularBoxes, m_boxSorting);
+  LoadBalancing::sort(CutCellBoxes, m_boxSorting);
 
   const Vector<long> CoveredLoads(CoveredBoxes.size(), 1L);      
   const Vector<long> RegularLoads(RegularBoxes.size(), 1L);    
@@ -313,9 +300,9 @@ void ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize){
   LoadBalancing::makeBalance(RegularProcs, RegularLoads, RegularBoxes);
   LoadBalancing::makeBalance(CutCellProcs, CutCellLoads, CutCellBoxes);  
 
-  Vector<Box>  allBoxes;
-  Vector<int>  allProcs;
-  Vector<long> allTypes;  
+  Vector<Box> allBoxes;
+  Vector<int> allProcs;
+  Vector<int> allTypes;  
 
   allBoxes.append(CoveredBoxes);
   allBoxes.append(RegularBoxes);
@@ -332,31 +319,15 @@ void ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize){
   // This is something that I fucking HATE, but DisjointBoxLayout sorts the boxes using lexicographical sorting, and we must do the same if
   // we want to be able to globally index correctly into the box types. So, create a view of the boxes and box types that is consistent with
   // what we will have in the DataIterator. This means that we must lexicographically sort the boxes. 
-  std::vector<std::pair<Box, long> > sortedBoxesAndTypes;
-  for (int i = 0; i < allBoxes.size(); i++){
-    sortedBoxesAndTypes.emplace_back(std::make_pair(allBoxes[i], allTypes[i]));
-  }
-
-
-  auto comparator = [](const std::pair<Box, long>& a, const std::pair<Box, long>& b) -> bool {
-    return a.first < b.first;
-  };
-  
-  std::sort(sortedBoxesAndTypes.begin(), sortedBoxesAndTypes.end(), comparator);
-
+  const std::vector<std::pair<Box, int> > sortedBoxesAndTypes = this->getSortedBoxesAndTypes(allBoxes, allTypes);
 
   // 4. Define the grids and map on this level. 
-  m_grids  [a_level] = DisjointBoxLayout(allBoxes, allProcs, m_domains[a_level]);
-  m_boxMap [a_level] = RefCountedPtr<LayoutData<BoxType> >(new LayoutData<BoxType>(m_grids[a_level]));
-
-  // Go through the boxes and set the grid type. 
-
-  // This is development code -- if we don't sort the boxes we should be able to iterate through them and set the box type from that!. 
-  m_boxMaps[a_level] = RefCountedPtr<LevelData<BoxType> > (new LevelData<BoxType>(m_grids[a_level], 1, IntVect::Zero, BoxTypeFactory()));
+  m_grids [a_level] = DisjointBoxLayout(allBoxes, allProcs, m_domains[a_level]);
+  m_boxMap[a_level] = RefCountedPtr<LayoutData<GeometryService::InOut> >(new LayoutData<GeometryService::InOut>(m_grids[a_level]));
 
   for (DataIterator dit(m_grids[a_level]); dit.ok(); ++dit){
-    const Box  box  = sortedBoxesAndTypes[dit().intCode()].first;    
-    const long type = sortedBoxesAndTypes[dit().intCode()].second;
+    const Box box  = sortedBoxesAndTypes[dit().intCode()].first;    
+    const int type = sortedBoxesAndTypes[dit().intCode()].second;
 
     // This is an error.
     if(box != m_grids[a_level][dit()]){
@@ -364,30 +335,20 @@ void ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize){
     }
     
     // Otherwise we are fine, set the map to what it should be. 
-    if(type == 0L){
-      (*m_boxMap[a_level])[dit()].setCovered();
+    if(type == 0){
+      (*m_boxMap[a_level])[dit()] = GeometryService::Covered;
     }
-    else if(type == 1L){
-      (*m_boxMap[a_level])[dit()].setRegular();
+    else if(type == 1){
+      (*m_boxMap[a_level])[dit()] = GeometryService::Regular;
     }
-    else if(type == 2L){
-      (*m_boxMap[a_level])[dit()].setCutCell();
+    else if(type == 2){
+      (*m_boxMap[a_level])[dit()] = GeometryService::Irregular;
     }
-
-    if(type == 0L){
-      (*m_boxMaps[a_level])[dit()].setCovered();
-    }
-    else if(type == 1L){
-      (*m_boxMaps[a_level])[dit()].setRegular();
-    }
-    else if(type == 2L){
-      (*m_boxMaps[a_level])[dit()].setCutCell();
-    }        
   }
 
 #if ScanShop_Debug // Debug first map
   for (DataIterator dit(m_grids[a_level]); dit.ok(); ++dit){
-    if((*m_boxMaps[a_level])[dit()].m_which == -1) {
+    if((*m_boxMap[a_level])[dit()].m_which == -1) {
       MayDay::Error("ScanShop::buildCoarseLevel - final map shouldn't get -1");
     }
   }
@@ -406,46 +367,51 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
     const int fineLvl = coarLvl - 1;
 
     // Coar stuff
-    const DisjointBoxLayout&   dblCoar    =  m_grids  [coarLvl];
-    const LevelData<BoxType>&  mapCoar    = *m_boxMaps[coarLvl];
-    const LayoutData<BoxType>& newMapCoar = *m_boxMap [coarLvl];
-
+    Vector<Box> CoveredBoxes;
+    Vector<Box> RegularBoxes;    
     Vector<Box> CutCellBoxes;
-    Vector<Box> ReguCovBoxes;
 
+    Vector<int> CoveredProcs;
+    Vector<int> RegularProcs;    
     Vector<int> CutCellProcs;
-    Vector<int> ReguCovProcs;
 
-    // Refined coarse stuff.
-    DisjointBoxLayout dblFineCoar;
-    refine(dblFineCoar, dblCoar, 2);
-    LevelData<BoxType> mapFineCoar(dblFineCoar, 1, IntVect::Zero, BoxTypeFactory());
+    Vector<int> CoveredTypes;
+    Vector<int> RegularTypes;
+    Vector<int> CutCellTypes;
 
-    // Break up cut cell boxes
-    for (DataIterator dit(dblFineCoar); dit.ok(); ++dit){
-      mapFineCoar[dit()] = mapCoar[dit()];
-      const Box box = dblFineCoar[dit()];
-      if(newMapCoar[dit()].isCutCell()){
-	Vector<Box> boxes;
-	domainSplit(box, boxes, a_maxGridSize);
-	CutCellBoxes.append(boxes);
+    // Find out which boxes were covered/regular/cut on the coarse level. Every box that had cut-cells
+    // is split up into new boxes. We will redo these boxes later. 
+    const DisjointBoxLayout& dblCoar =  m_grids[coarLvl];        
+    for (DataIterator dit(dblCoar); dit.ok(); ++dit){
+      const Box coarBox = dblCoar[dit()];
+      const Box fineBox = refine(coarBox, 2);
+
+      const GeometryService::InOut& boxType = (*m_boxMap[coarLvl])[dit()];
+
+      if(boxType == GeometryService::Covered){
+	CoveredBoxes.push_back(fineBox);
+	CoveredTypes.push_back(0);
+      }            
+      else if(boxType == GeometryService::Regular){
+	RegularBoxes.push_back(fineBox);
+	RegularTypes.push_back(1);
       }
-      else{
-	ReguCovBoxes.push_back(box);
+      else if(boxType == GeometryService::Irregular){
+	Vector<Box> boxes;
+	domainSplit(fineBox, boxes, a_maxGridSize);
+	CutCellBoxes.append(boxes);
       }
     }
 
-    // Make a DBL out of the cut-cell boxes and again check if they actually contain cut cells
+    // Make a DBL out of the cut-cell boxes. We distribute these boxes equally among the available ranks so we can efficiently iterate through them again. 
     LoadBalancing::gatherBoxes(CutCellBoxes);
-    LoadBalancing::sort(CutCellBoxes, BoxSorting::Morton);
+    LoadBalancing::sort(CutCellBoxes, m_boxSorting);
     LoadBalancing::makeBalance(CutCellProcs, CutCellBoxes);
-    DisjointBoxLayout  CutCellDBL(CutCellBoxes, CutCellProcs, m_domains[fineLvl]);
-    LevelData<BoxType> CutCellMap(CutCellDBL, 1, IntVect::Zero, BoxTypeFactory());
+    DisjointBoxLayout CutCellDBL(CutCellBoxes, CutCellProcs, m_domains[fineLvl]);
 
     // Redo the cut cell boxes
-    Vector<long> CutCellLoads(0);
-    Vector<long> ReguCovLoads(ReguCovBoxes.size(), 1L);
     CutCellBoxes.resize(0);
+    CutCellTypes.resize(0);    
     for (DataIterator dit(CutCellDBL); dit.ok(); ++dit){
       const Box box = CutCellDBL[dit()];
       
@@ -458,43 +424,18 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
 
       // Designate boxes and regular/covered or irregular. For regular covered boxes we use a constant load = 1 and for the cut-cell boxes
       // we compute the load introspectively. We do this because patches can contain a different amount of cut-cells and thus there's inherent
-      // load imbalance. Worse, the cost of the implicit function can vary in space and thus we time these things introspectively. 
-      if(isRegular){
-	CutCellMap[dit()].setRegular();
-	ReguCovBoxes.push_back(box);
-	ReguCovLoads.push_back(1L);	
-      }
-      else if(isCovered){
-	CutCellMap[dit()].setCovered();
-	ReguCovBoxes.push_back(box);
-	ReguCovLoads.push_back(1L);
+      // load imbalance. Worse, the cost of the implicit function can vary in space and thus we time these things introspectively.
+      if(isCovered){
+	CoveredBoxes.push_back(box);
+	CoveredTypes.push_back(0);
+      }      
+      else if(isRegular){
+	RegularBoxes.push_back(box);
+	RegularTypes.push_back(1);	
       }
       else if(!isRegular && !isCovered){
-	CutCellMap[dit()].setCutCell();
 	CutCellBoxes.push_back(box);
-
-	// If this is truly a cut-cell box then we want to find out how much work we have to deal with when computing the cut-cell moments. This
-	// is (roughly) equal to the time it takes to evaluate the implicit function times the volume of the box. But since the cost of the implicit
-	// function can vary in space (especially when we BVHs and stuff like that), we just time this directly. We compute the load in nanoseconds.
-	if(m_loadBalance){
-	  long curLoad = 0L;
-	  for (BoxIterator bit(grownBox); bit.ok(); ++bit){
-	    const RealVect point = m_probLo + m_dx[fineLvl]*(0.5*RealVect::Unit + RealVect(bit()));
-	    const Real distance  = m_baseIF->value(point);
-
-	    if(std::abs(distance) < 0.5*m_dx[fineLvl]){
-	      curLoad += relativeCutCellLoad;
-	    }
-	    else {
-	      curLoad += 1L;
-	    }
-	  }
-
-	  CutCellLoads.push_back(curLoad);
-	}
-	else{
-	  CutCellLoads.push_back(1L);
-	}
+	CutCellTypes.push_back(2);	
       }
       else{
 	MayDay::Error("ScanShop::buildFinerLevels - logic bust!");
@@ -502,62 +443,74 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
     }
     
     // Gather boxes and loads for regular/covered and cut-cell regions.
+    LoadBalancing::gatherBoxes(CoveredBoxes);        
+    LoadBalancing::gatherBoxes(RegularBoxes);    
     LoadBalancing::gatherBoxes(CutCellBoxes);
-    LoadBalancing::gatherBoxes(ReguCovBoxes);
 
-    LoadBalancing::gatherLoads(CutCellLoads);
-    LoadBalancing::gatherLoads(ReguCovLoads);
+    LoadBalancing::gatherLoads(CoveredTypes);
+    LoadBalancing::gatherLoads(RegularTypes);
+    LoadBalancing::gatherLoads(CutCellTypes);
 
-    LoadBalancing::sort(CutCellBoxes, CutCellLoads, BoxSorting::Morton);
-    LoadBalancing::sort(ReguCovBoxes, ReguCovLoads, BoxSorting::Morton);
+    LoadBalancing::sort(CoveredBoxes, m_boxSorting);
+    LoadBalancing::sort(RegularBoxes, m_boxSorting);
+    LoadBalancing::sort(CutCellBoxes, m_boxSorting);
 
-    // Load balance the boxes. Recall that we use constant loads for regular/covered boxes but use introspective load balancing
-    // for the cut-cell boxes
-    LoadBalancing::makeBalance(CutCellProcs, CutCellLoads, CutCellBoxes);
-    LoadBalancing::makeBalance(ReguCovProcs, ReguCovLoads, ReguCovBoxes);
+    // Load balance the boxes. 
+    const Vector<long> CoveredLoads(CoveredBoxes.size(), 1L);
+    const Vector<long> RegularLoads(RegularBoxes.size(), 1L);
+    const Vector<long> CutCellLoads(CutCellBoxes.size(), 1L);
+    
+    LoadBalancing::makeBalance(CoveredProcs, CoveredLoads, CoveredBoxes);
+    LoadBalancing::makeBalance(RegularProcs, RegularLoads, RegularBoxes);
+    LoadBalancing::makeBalance(CutCellProcs, CutCellLoads, CutCellBoxes);    
 
     // We load balanced the regular/covered and cut-cell regions independently, but now we need to create a box-to-rank map
     // that is usable by Chombo's DisjointBoxLayout.
     Vector<Box> allBoxes;
     Vector<int> allProcs;
+    Vector<int> allTypes;    
     
-    allBoxes.append(CutCellBoxes);
-    allBoxes.append(ReguCovBoxes);
+    allBoxes.append(CoveredBoxes);
+    allBoxes.append(RegularBoxes);
+    allBoxes.append(CutCellBoxes);    
     
+    allProcs.append(CoveredProcs);
+    allProcs.append(RegularProcs);
     allProcs.append(CutCellProcs);
-    allProcs.append(ReguCovProcs);
 
+    allTypes.append(CoveredTypes);
+    allTypes.append(RegularTypes);
+    allTypes.append(CutCellTypes);
 
-    // Define the grids and copy the maps over. First copy the refine coarse map, then update with the
-    // cut cell map
-    m_grids  [fineLvl] = DisjointBoxLayout(allBoxes, allProcs, m_domains[fineLvl]);
-    m_boxMaps[fineLvl] = RefCountedPtr<LevelData<BoxType> >  (new LevelData<BoxType>(m_grids[fineLvl], 1, IntVect::Zero, BoxTypeFactory()));
-    m_boxMap [fineLvl] = RefCountedPtr<LayoutData<BoxType> > (new LayoutData<BoxType>(m_grids[fineLvl]));
+    // This is something that I fucking HATE, but DisjointBoxLayout sorts the boxes using lexicographical sorting, and we must do the same if
+    // we want to be able to globally index correctly into the box types. So, create a view of the boxes and box types that is consistent with
+    // what we will have in the DataIterator. This means that we must lexicographically sort the boxes. 
+    const std::vector<std::pair<Box, int> > sortedBoxesAndTypes = this->getSortedBoxesAndTypes(allBoxes, allTypes);
 
-    mapFineCoar.copyTo(*m_boxMaps[fineLvl]);
-    CutCellMap. copyTo(*m_boxMaps[fineLvl]);
+    // Define shit. 
+    m_grids [fineLvl] = DisjointBoxLayout(allBoxes, allProcs, m_domains[fineLvl]);
+    m_boxMap[fineLvl] = RefCountedPtr<LayoutData<GeometryService::InOut> > (new LayoutData<GeometryService::InOut>(m_grids[fineLvl]));    
 
     for (DataIterator dit(m_grids[fineLvl]); dit.ok(); ++dit){
-      (*m_boxMap[fineLvl])[dit()] = (*m_boxMaps[fineLvl])[dit()];
-    }
+      const Box  box  = sortedBoxesAndTypes[dit().intCode()].first;    
+      const long type = sortedBoxesAndTypes[dit().intCode()].second;
 
-#if ScanShop_Debug // Dummy check the box maps
-    for (DataIterator dit(CutCellDBL); dit.ok(); ++dit){
-      if(CutCellMap[dit()].m_which == -1) {
-	MayDay::Error("ScanShop::buildFinerLevels - CutCellMap shouldn't get -1");
+      // This is an error.
+      if(box != m_grids[fineLvl][dit()]){
+	MayDay::Error("ScanShop::buildCoarseLevel -- logic bust");
+      }
+    
+      // Otherwise we are fine, set the map to what it should be. 
+      if(type == 0L){
+	(*m_boxMap[fineLvl])[dit()] = GeometryService::Covered;
+      }
+      else if(type == 1L){
+	(*m_boxMap[fineLvl])[dit()] = GeometryService::Regular;
+      }
+      else if(type == 2L){
+	(*m_boxMap[fineLvl])[dit()] = GeometryService::Irregular;
       }
     }
-    for (DataIterator dit(dblFineCoar); dit.ok(); ++dit){
-      if(mapFineCoar[dit()].m_which == -1) {
-	MayDay::Error("ScanShop::buildFinerLevels - mapFineCoar shouldn't get -1");
-      }
-    }
-    for (DataIterator dit(m_grids[fineLvl]); dit.ok(); ++dit){
-      if((*m_boxMaps[fineLvl])[dit()].m_which == -1){
-	MayDay::Error("ScanShop::buildFinerLevels - final map shouldn't get -1");
-      }
-    }
-#endif
     
     m_hasThisLevel[fineLvl] = 1;
 
@@ -596,18 +549,7 @@ GeometryService::InOut ScanShop::InsideOutside(const Box&           a_region,
   GeometryService::InOut ret;
 
   if(foundLevel && m_hasThisLevel[whichLevel]){
-    const LayoutData<BoxType>& map = (*m_boxMaps[whichLevel]);
-    const BoxType& boxType         = map[a_dit];
-    
-    if(boxType.isRegular()){
-      ret = GeometryService::Regular;
-    }
-    else if(boxType.isCovered()){
-      ret = GeometryService::Covered;
-    }
-    else{
-      ret= GeometryService::Irregular;
-    }
+    ret = (*m_boxMap[whichLevel])[a_dit];
   }
   else{
     MayDay::Error("ScanShop::InsideOutSide -- logic bust 2");
@@ -639,41 +581,22 @@ void ScanShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
   }
 }
 
-void ScanShop::printNumBoxesLevel(const int a_level) const {
-  CH_TIME("ScanShop::printNumBoxesLevel(int)");
+std::vector<std::pair<Box, int> > ScanShop::getSortedBoxesAndTypes(const Vector<Box>& a_boxes, const Vector<int>& a_types) const {
 
-  const DisjointBoxLayout&     dbl = m_grids[a_level];
-  const LevelData<BoxType>& boxMap = *m_boxMaps[a_level];
-
-  int myNumRegular = 0;
-  int myNumCovered = 0;
-  int myNumCutCell = 0;
+  std::vector<std::pair<Box, int> > sortedBoxesAndTypes;
   
-  for (DataIterator dit(dbl); dit.ok(); ++dit){
-    const BoxType& bType = boxMap[dit()];
-
-    if(bType.isRegular()){
-      myNumRegular++;
-    }
-    else if(bType.isCovered()){
-      myNumCovered++;
-    }
-    else if(bType.isCutCell()){
-      myNumCutCell++;
-    }
+  for (int i = 0; i < a_boxes.size(); i++){
+    sortedBoxesAndTypes.emplace_back(std::make_pair(a_boxes[i], a_types[i]));
   }
 
-  const int numRegular = EBLevelDataOps::parallelSum(myNumRegular);
-  const int numCovered = EBLevelDataOps::parallelSum(myNumCovered);
-  const int numCutCell = EBLevelDataOps::parallelSum(myNumCutCell);
 
-  if(procID() == 0){
-    std::cout << "ScanShop::printNumBoxesLevel on domain = " << m_domains[a_level] << "\n"
-	      << "\t Regular boxes = " << numRegular << "\n"
-	      << "\t Covered boxes = " << numCovered << "\n"
-	      << "\t CutCell boxes = " << numCutCell << "\n"
-	      << std::endl;
-  }
+  auto comparator = [](const std::pair<Box, int>& a, const std::pair<Box, int>& b) -> bool {
+    return a.first < b.first;
+  };
+  
+  std::sort(sortedBoxesAndTypes.begin(), sortedBoxesAndTypes.end(), comparator);
+
+  return sortedBoxesAndTypes;
 }
 
 #include <CD_NamespaceFooter.H>
