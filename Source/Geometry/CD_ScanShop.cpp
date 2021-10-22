@@ -135,10 +135,14 @@ void ScanShop::makeGrids(const ProblemDomain& a_domain,
 
   // Build the scan level first
   if(!m_hasScanLevel){
+    m_timer.startEvent("Build coarse");
     for (int lvl = m_domains.size()-1; lvl >= m_scanLevel; lvl--){
       ScanShop::buildCoarseLevel(lvl, a_maxGridSize); // Coarser levels built in the same way as the scan level
     }
+    m_timer.stopEvent("Build coarse");
+    m_timer.startEvent("Build fine");
     ScanShop::buildFinerLevels(m_scanLevel, a_maxGridSize);   // Traverse towards finer levels
+    m_timer.stopEvent("Build fine");    
 
     m_hasScanLevel = true;
   }
@@ -157,7 +161,7 @@ void ScanShop::makeGrids(const ProblemDomain& a_domain,
   }
   else{
     // Development code. Break up a_domnain in a_maxGridSize chunks, load balance trivially and return the dbl
-    
+
     MayDay::Warning("ScanShop::makeGrids -- decomposing by breaking up the domain into maxGridSize chunks. This should not happen!");
 
     Vector<Box> boxes;
@@ -290,7 +294,7 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
       }
       else if(boxType == GeometryService::Irregular){
 	Vector<Box> boxes;
-	domainSplit(fineBox, boxes, a_maxGridSize);
+	domainSplit(fineBox, boxes, a_maxGridSize, a_maxGridSize);
 	cutCellBoxes.append(boxes);
       }
     }
@@ -434,6 +438,14 @@ void ScanShop::defineLevel(Vector<Box>& a_coveredBoxes,
     else if(type == 2L){
       (*m_boxMap[a_level])[dit()] = GeometryService::Irregular;
     }
+  }
+
+  if(m_profile){
+    pout() << "ScanShop::defineLevel  domain = " << m_domains[a_level] << ":" << endl
+	   << "\t Covered  boxes = " << a_coveredBoxes.size()   << endl
+	   << "\t Regular  boxes = " << a_regularBoxes.size()   << endl
+	   << "\t Cut-cell boxes = " << a_cutCellBoxes.size()   << endl
+	   << endl;
   }
 
   m_timer.stopEvent("Set box types");  
