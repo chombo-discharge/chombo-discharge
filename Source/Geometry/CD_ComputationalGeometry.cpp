@@ -191,7 +191,6 @@ void ComputationalGeometry::buildGasGeometry(GeometryService*&   a_geoserver,
 				      a_probLo,
 				      a_finestDomain,
 				      m_scanDomain,
-				      m_maxGhostEB,
 				      s_thresh);
 
     scanShop->setProfileFileName("ScanShopReportGasPhase.dat");
@@ -250,7 +249,6 @@ void ComputationalGeometry::buildSolidGeometry(GeometryService*&   a_geoserver,
 					a_probLo,
 					a_finestDomain,
 					m_scanDomain,
-					m_maxGhostEB,
 					s_thresh);
 
       scanShop->setProfileFileName("ScanShopReportSolidPhase.dat");

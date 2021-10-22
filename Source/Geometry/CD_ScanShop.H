@@ -43,7 +43,6 @@ public:
     @param[in] a_finestDomain  Finest grid level
     @param[in] a_scanLevel     Scan level, i.e. on which level to initiate the load balancing sequence. 
     @param[in] a_thsdhVoF      Threshold for GeometryShop
-    @note a_maxGhostEB is a dead parameter. 
   */
   ScanShop(const BaseIF&       a_geometry,
 	   const int           a_verbosity,
@@ -51,7 +50,6 @@ public:
 	   const RealVect      a_probLo,
 	   const ProblemDomain a_finestDomain,
 	   const ProblemDomain a_scanLevel,
-	   const int           a_maxGhostEB = 4,
 	   const Real          a_thrshdVoF = 1.0e-16);
 
   /*!
@@ -145,7 +143,7 @@ protected:
   /*!
     @brief Maximum number of ghost cells near the EB
   */
-  int m_maxGhostEB;
+  int m_ebGhost;
 
   /*!
     @brief Lower-left corner of simulation domain. 
@@ -219,6 +217,7 @@ protected:
     @param[in] a_probLo Lower-left corner of simulation domain
     @param[in] a_dx     Grid resolution
   */
+  inline
   bool isRegular(const Box a_box, const RealVect a_probLo, const Real a_dx) const;
 
   /*!
@@ -227,12 +226,14 @@ protected:
     @param[in] a_probLo Lower-left corner of simulation domain
     @param[in] a_dx     Grid resolution
   */
+  inline
   bool isCovered(const Box a_box, const RealVect a_probLo, const Real a_dx) const;
 
   /*!
     @brief Sort boxes lexicographically. 
     @details A strange but true thing that is necessary because DisjointBoxlayout sorts the boxes under the hood
   */
+  inline
   std::vector<std::pair<Box, int> > getSortedBoxesAndTypes(const Vector<Box>& a_boxes, const Vector<int>& a_types) const;
 
   /*!
@@ -245,5 +246,7 @@ protected:
 };
 
 #include <CD_NamespaceFooter.H>
+
+#include <CD_ScanShopImplem.H>
 
 #endif
