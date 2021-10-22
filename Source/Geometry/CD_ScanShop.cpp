@@ -295,40 +295,30 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
       else if(boxType == GeometryService::Irregular){
 	Vector<Box> boxes;
 	domainSplit(fineBox, boxes, a_maxGridSize, a_maxGridSize);
-	cutCellBoxes.append(boxes);
-      }
-    }
 
-    // Make a DBL out of the cut-cell boxes. We distribute these boxes equally among the available ranks so we can efficiently iterate through them again.
-    Vector<int> procs;
-    LoadBalancing::gatherBoxes(cutCellBoxes);
-    LoadBalancing::sort(cutCellBoxes, m_boxSorting);
-    LoadBalancing::makeBalance(procs, cutCellBoxes);
-    DisjointBoxLayout CutCellDBL(cutCellBoxes, procs, m_domains[fineLvl]);
+	for (int i = 0; i < boxes.size(); i++){
+	  const Box box = boxes[i];
 
-    // Redo the cut cell boxes
-    cutCellBoxes.resize(0);
-    for (DataIterator dit(CutCellDBL); dit.ok(); ++dit){
-      const Box box = CutCellDBL[dit()];
-      
-      Box grownBox = box;
-      grownBox.grow(m_maxGhostEB);
-      grownBox &= m_domains[fineLvl];
+	  Box grownBox = box;
+	  grownBox.grow(m_maxGhostEB);
+	  grownBox &= m_domains[fineLvl];
 
-      const bool isRegular = ScanShop::isRegular(grownBox, m_probLo, m_dx[fineLvl]);
-      const bool isCovered = ScanShop::isCovered(grownBox, m_probLo, m_dx[fineLvl]);
+	  const bool isRegular = ScanShop::isRegular(grownBox, m_probLo, m_dx[fineLvl]);
+	  const bool isCovered = ScanShop::isCovered(grownBox, m_probLo, m_dx[fineLvl]);
 
-      if(isCovered){
-	coveredBoxes.push_back(box);
-      }      
-      else if(isRegular){
-	regularBoxes.push_back(box);
-      }
-      else if(!isRegular && !isCovered){
-	cutCellBoxes.push_back(box);
-      }
-      else{
-	MayDay::Error("ScanShop::buildFinerLevels - logic bust!");
+	  if(isCovered){
+	    coveredBoxes.push_back(box);
+	  }      
+	  else if(isRegular){
+	    regularBoxes.push_back(box);
+	  }
+	  else if(!isRegular && !isCovered){
+	    cutCellBoxes.push_back(box);
+	  }
+	  else{
+	    MayDay::Error("ScanShop::buildFinerLevels - logic bust!");
+	  }
+	}
       }
     }
 
