@@ -29,7 +29,6 @@ ScanShop::ScanShop(const BaseIF&       a_localGeom,
 		   const RealVect      a_probLo,
 		   const ProblemDomain a_finestDomain,
 		   const ProblemDomain a_scanLevel,
-		   const int           a_maxGhostEB,
 		   const Real          a_thrshdVoF)
   : GeometryShop(a_localGeom, a_verbosity, a_dx*RealVect::Unit, a_thrshdVoF) {
 
@@ -38,7 +37,7 @@ ScanShop::ScanShop(const BaseIF&       a_localGeom,
   m_baseIF       = &a_localGeom;
   m_hasScanLevel = false;
   m_profile      = false;
-  m_maxGhostEB   = 1;//a_maxGhostEB;
+  m_ebGhost      = 1;
   m_fileName     = "ScanShopReport.dat";
   m_boxSorting   = BoxSorting::Morton;
 
@@ -177,52 +176,14 @@ void ScanShop::makeGrids(const ProblemDomain& a_domain,
   m_timer.stopEvent("Make grids");
 }
 
-bool ScanShop::isRegular(const Box a_box, const RealVect a_probLo, const Real a_dx) const {
-  CH_TIME("ScanShop::isRegular(Box, RealVect, Real)");
-
-  bool ret = true;
-  
-  for (BoxIterator bit(a_box); bit.ok(); ++bit){
-    const IntVect iv = bit();
-    const RealVect a_point = a_probLo + a_dx*(0.5*RealVect::Unit + RealVect(iv));
-    if(m_baseIF->value(a_point) >= -0.5*a_dx){
-      ret = false;
-      break;
-    }
-  }
-
-  return ret;
-}
-
-bool ScanShop::isCovered(const Box a_box, const RealVect a_probLo, const Real a_dx) const {
-  CH_TIME("ScanShop::isCovered(Box, RealVect, Real)");
-
-  bool ret = true;
-  
-  for (BoxIterator bit(a_box); bit.ok(); ++bit){
-    const IntVect iv = bit();
-    const RealVect a_point = a_probLo + a_dx*(0.5*RealVect::Unit + RealVect(iv));
-    if(m_baseIF->value(a_point) <= 0.5*a_dx) {
-      ret = false;
-      break;
-    }
-  }
-
-  return ret;
-}
-
 void ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize){
   CH_TIME("ScanShop::buildCoarseLevel(int, int)");
 
   // This function does the following:
-  // 1. Break up the domain into chunks of max size a_maxGridSize and load balance them trivially
-  // 2. Search through all the boxes and label them as regular/covered/irregular. 
-  // 3. Gather cut-cell and regular/covered boxes separately and load balance them separately
-  // 4. Create a new DBL with the newly load-balanced boxes; there should be approximately the same amount
-  //    of cut-cell boxes for each rank
-  // 5. Copy the map created over the initial DisjointBoxLayout onto the final grid
+  // 1. Break up the domain into chunks of max size a_maxGridSize and load balance them based on their volumes. 
+  // 2. Search through all the boxes and label them as regular/covered/irregular.
+  // 3. Call defineLevel which creates a "map" of the grid boxes. 
   
-  // 1.
   Vector<Box> boxes;
   Vector<int> procs;
   domainSplit(m_domains[a_level], boxes, a_maxGridSize);
@@ -236,11 +197,8 @@ void ScanShop::buildCoarseLevel(const int a_level, const int a_maxGridSize){
   Vector<Box> regularBoxes;  
 
   for (DataIterator dit(dbl); dit.ok(); ++dit){
-    const Box box = dbl[dit()];
-    
-    Box grownBox = box;
-    grownBox.grow(m_maxGhostEB);
-    grownBox &= m_domains[a_level];
+    const Box box      = dbl[dit()];
+    const Box grownBox = grow(box, m_ebGhost) & m_domains[a_level];
 
     const bool isRegular = ScanShop::isRegular(grownBox, m_probLo, m_dx[a_level]);
     const bool isCovered = ScanShop::isCovered(grownBox, m_probLo, m_dx[a_level]);
@@ -269,6 +227,7 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
 
   if(a_coarserLevel > 0){
 
+    m_timer.startEvent("Fine from coar");
     const int coarLvl = a_coarserLevel;
     const int fineLvl = coarLvl - 1;
 
@@ -296,12 +255,8 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
 	Vector<Box> boxes;
 	domainSplit(fineBox, boxes, a_maxGridSize, a_maxGridSize);
 
-	for (int i = 0; i < boxes.size(); i++){
-	  const Box box = boxes[i];
-
-	  Box grownBox = box;
-	  grownBox.grow(m_maxGhostEB);
-	  grownBox &= m_domains[fineLvl];
+	for (const auto& box : boxes.stdVector()){
+	  const Box grownBox = grow(box, m_ebGhost) & m_domains[fineLvl];
 
 	  const bool isRegular = ScanShop::isRegular(grownBox, m_probLo, m_dx[fineLvl]);
 	  const bool isCovered = ScanShop::isCovered(grownBox, m_probLo, m_dx[fineLvl]);
@@ -321,6 +276,7 @@ void ScanShop::buildFinerLevels(const int a_coarserLevel, const int a_maxGridSiz
 	}
       }
     }
+    m_timer.stopEvent("Fine from coar");    
 
     this->defineLevel(coveredBoxes, regularBoxes, cutCellBoxes, fineLvl);
     
@@ -360,8 +316,8 @@ void ScanShop::defineLevel(Vector<Box>& a_coveredBoxes,
   reguCovTypes.append(coveredTypes);
   reguCovTypes.append(regularTypes);
   
-  LoadBalancing::sort(  reguCovBoxes, reguCovTypes, m_boxSorting);
-  LoadBalancing::sort(a_cutCellBoxes,               m_boxSorting); // We don't need to track the "type" for cut-cell boxes because this call only sorts one type of box. 
+  //   LoadBalancing::sort(  reguCovBoxes, reguCovTypes, m_boxSorting); Don't need to sort these, I think. 
+  LoadBalancing::sort(a_cutCellBoxes, m_boxSorting); // We don't need to track the "type" for cut-cell boxes because this call only sorts one type of box. 
   m_timer.stopEvent("Sort boxes");  
 
   // Load balance the boxes.
@@ -501,24 +457,6 @@ void ScanShop::fillGraph(BaseFab<int>&        a_regIrregCovered,
   if(m_profile){
     m_timer.stopEvent("Fill graph");
   }
-}
-
-std::vector<std::pair<Box, int> > ScanShop::getSortedBoxesAndTypes(const Vector<Box>& a_boxes, const Vector<int>& a_types) const {
-
-  std::vector<std::pair<Box, int> > sortedBoxesAndTypes;
-  
-  for (int i = 0; i < a_boxes.size(); i++){
-    sortedBoxesAndTypes.emplace_back(std::make_pair(a_boxes[i], a_types[i]));
-  }
-
-
-  auto comparator = [](const std::pair<Box, int>& a, const std::pair<Box, int>& b) -> bool {
-    return a.first < b.first;
-  };
-  
-  std::sort(sortedBoxesAndTypes.begin(), sortedBoxesAndTypes.end(), comparator);
-
-  return sortedBoxesAndTypes;
 }
 
 #include <CD_NamespaceFooter.H>
