@@ -1299,12 +1299,16 @@ void McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhoto
 	    switch(m_intersectionEB) {
 	    case IntersectionEB::Raycast:
 	      contactEB  = ParticleOps::ebIntersectionRaycast(impFunc, oldPos, newPos, 1.E-3*dx, sEB);
+	      break;
 	    case IntersectionEB::Bisection:
 	      contactEB = ParticleOps::ebIntersectionBisect(impFunc, oldPos, newPos, pathLen, m_bisectStep, sEB);
+	      break;
 	    case IntersectionEB::LSF:
 	      MayDay::Error("McPhoto::advancePhotonsInstantenous -- LSF not implement (yet)");
+	      break;
 	    default:
 	      MayDay::Error("McPhoto::advancePhotonsInstantenous -- logic bust in eb intersection");
+	      break;
 	    }
 	  }
 
@@ -1467,12 +1471,16 @@ void McPhoto::advancePhotonsTransient(ParticleContainer<Photon>& a_bulkPhotons,
 	  switch(m_intersectionEB) {
 	  case IntersectionEB::Raycast:
 	    absorbedEB  = ParticleOps::ebIntersectionRaycast(impFunc, oldPos, newPos, 1.E-3*dx, sEB);
+	    break;
 	  case IntersectionEB::Bisection:
 	    absorbedEB = ParticleOps::ebIntersectionBisect(impFunc, oldPos, newPos, pathLen, m_bisectStep, sEB);
+	    break;
 	  case IntersectionEB::LSF:
 	    MayDay::Error("McPhoto::advancePhotonsTransient -- LSF not implement (yet)");
+	    break;
 	  default:
 	    MayDay::Error("McPhoto::advancePhotonsTransient -- logic bust in eb intersection");
+	    break;
 	  }
 	}		
 
