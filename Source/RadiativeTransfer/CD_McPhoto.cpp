@@ -97,6 +97,7 @@ void McPhoto::parseOptions(){
   this->parseSourceType();
   this->parseDeposition();
   this->parseBuffer();
+  this->parseIntersectionEB();
   this->parsePlotVariables();
   this->parseInstantaneous();
   this->parseDivergenceComputation();
@@ -113,6 +114,7 @@ void McPhoto::parseRuntimeOptions(){
   this->parseSourceType();
   this->parseDeposition();
   this->parseBuffer();
+  this->parseIntersectionEB();
   this->parsePlotVariables();
   this->parseInstantaneous();
   this->parseDivergenceComputation();
@@ -220,6 +222,34 @@ void McPhoto::parseSourceType(){
   }
   else{
     MayDay::Error("McPhoto::setSourceType - unknown source type requested");
+  }
+}
+
+void McPhoto::parseIntersectionEB(){
+  CH_TIME("McPhoto::parseIntersectionEB");
+  if(m_verbosity > 5){
+    pout() << m_name + "::parseIntersectionEB" << endl;
+  }
+
+  ParmParse pp(m_className.c_str());
+
+  std::string str;
+
+  pp.get("intersection_alg", str);
+
+  if(str == "raycast"){
+    m_intersectionEB = IntersectionEB::Raycast;
+  }
+  else if(str == "bisection"){
+    m_intersectionEB = IntersectionEB::Bisection;
+
+    pp.get("bisect_step", m_bisectStep);
+  }
+  else if(str == "lsf"){
+    MayDay::Error("McPhoto::parseIntersectionEB -- 'lsf' not supported (yet)");
+  }
+  else{
+    MayDay::Error("McPhoto::parseIntersectionEB -- logic bust");
   }
 }
 
@@ -1262,8 +1292,25 @@ void McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhoto
 
 	  // Do intersection tests. These return true/false if the path crossed an object. If it returned true, the s-parameter
 	  // will have been defined as well. 
-	  if(checkDom) contactDomain = ParticleOps::domainIntersection(oldPos, newPos, path, probLo, probHi, sDom);
-	  if(checkEB)  contactEB     = ParticleOps::ebIntersectionRaycast(impFunc, oldPos, newPos, 1.E-10*dx, sEB);
+	  if(checkDom) {
+	    contactDomain = ParticleOps::domainIntersection(oldPos, newPos, path, probLo, probHi, sDom);
+	  }
+	  if(checkEB) {
+	    switch(m_intersectionEB) {
+	    case IntersectionEB::Raycast:
+	      contactEB  = ParticleOps::ebIntersectionRaycast(impFunc, oldPos, newPos, 1.E-3*dx, sEB);
+	      break;
+	    case IntersectionEB::Bisection:
+	      contactEB = ParticleOps::ebIntersectionBisect(impFunc, oldPos, newPos, pathLen, m_bisectStep, sEB);
+	      break;
+	    case IntersectionEB::LSF:
+	      MayDay::Error("McPhoto::advancePhotonsInstantenous -- LSF not implement (yet)");
+	      break;
+	    default:
+	      MayDay::Error("McPhoto::advancePhotonsInstantenous -- logic bust in eb intersection");
+	      break;
+	    }
+	  }
 
 	  // Move the Photon to the data holder where it belongs. 
 	  if(!contactEB && !contactDomain){
@@ -1415,13 +1462,27 @@ void McPhoto::advancePhotonsTransient(ParticleContainer<Photon>& a_bulkPhotons,
 	}
 
 	// Check absorption on EBs and domain
-	if(checkEB){
-	  absorbedEB = ParticleOps::ebIntersectionRaycast(impFunc, oldPos, newPos, 1.E-10*dx, sEB); // 
-	}
 	if(checkDom){
 	  absorbedDomain = ParticleOps::domainIntersection(oldPos, newPos, path, probLo, probHi, sDomain);
 	  sDomain = (absorbedDomain) ? Max(0.0, sDomain - SAFETY) : sDomain;
 	}
+
+	if(checkEB) {
+	  switch(m_intersectionEB) {
+	  case IntersectionEB::Raycast:
+	    absorbedEB  = ParticleOps::ebIntersectionRaycast(impFunc, oldPos, newPos, 1.E-3*dx, sEB);
+	    break;
+	  case IntersectionEB::Bisection:
+	    absorbedEB = ParticleOps::ebIntersectionBisect(impFunc, oldPos, newPos, pathLen, m_bisectStep, sEB);
+	    break;
+	  case IntersectionEB::LSF:
+	    MayDay::Error("McPhoto::advancePhotonsTransient -- LSF not implement (yet)");
+	    break;
+	  default:
+	    MayDay::Error("McPhoto::advancePhotonsTransient -- logic bust in eb intersection");
+	    break;
+	  }
+	}		
 
 	const bool absorb = absorbedBulk || absorbedEB || absorbedDomain; // True if the photon was absorbed (on anything) and false otherwise. 
 
