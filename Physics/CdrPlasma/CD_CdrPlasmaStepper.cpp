@@ -4277,80 +4277,30 @@ Real CdrPlasmaStepper::computeRelaxationTime(){
     pout() << "CdrPlasmaStepper::computeRelaxationTime" << endl;
   }
 
-  const int comp         = 0;
-  const int finest_level = 0;
-  const Real SAFETY      = 1.E-20;
+  // TLDR: This computes the relaxation time as t = eps0/conductivity. Simple as that. 
 
-  Real t1 = Timer::wallClock();
-  EBAMRCellData E, J, dt;
-  m_amr->allocate(E,  m_realm, m_cdr->getPhase(), SpaceDim);
-  m_amr->allocate(J,  m_realm, m_cdr->getPhase(), SpaceDim);
-  m_amr->allocate(dt, m_realm, m_cdr->getPhase(), 1);
+  EBAMRCellData relaxTime;
+  EBAMRCellData conductivity;
 
-  DataOps::setValue(dt, 1.234567E89);
+  m_amr->allocate(relaxTime,    m_realm, phase::gas, 1);
+  m_amr->allocate(conductivity, m_realm, phase::gas, 1);
 
-  this->computeElectricField(E, m_cdr->getPhase(), m_fieldSolver->getPotential());
-  this->computeJ(J);
+  this->computeCellConductivity(conductivity);
 
-  // Find the largest electric field in each direction
-  Vector<Real> max_E(SpaceDim);
-  for (int dir = 0; dir < SpaceDim; dir++){
-
-    Real max, min;
-    DataOps::getMaxMin(max, min, E, dir);
-    max_E[dir] = Max(Abs(max), Abs(min));
-  }
-
-  const int finest_relax_level = finest_level;
+  m_amr->averageDown(conductivity, m_realm, phase::gas);
+  m_amr->interpGhost(conductivity, m_realm, phase::gas);
   
-  for (int lvl = 0; lvl <= finest_relax_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_cdr->getPhase())[lvl];
+  m_amr->interpToCentroids(conductivity, m_realm, phase::gas);  
 
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const Box& box         = dbl.get(dit());
-      const EBISBox& ebisbox = ebisl[dit()];
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
-      const IntVectSet ivs(box);
-      
-      EBCellFAB& dt_fab  = (*dt[lvl])[dit()];
-      const EBCellFAB& e = (*E[lvl])[dit()];
-      const EBCellFAB& j = (*J[lvl])[dit()];
+  DataOps::setValue(relaxTime, Units::eps0);
+  DataOps::divideByScalar(relaxTime, conductivity);
 
-      EBCellFAB e_magnitude(ebisbox, box, 1);
-      EBCellFAB j_magnitude(ebisbox, box, 1);
+  Real maxVal;
+  Real minVal;
 
-      // Compute magnitudes, increment with safety factor to avoid division by zero
-      e_magnitude.setVal(0.0);
-      j_magnitude.setVal(0.0);
-      
-      DataOps::vectorLength(e_magnitude, e, box);
-      DataOps::vectorLength(j_magnitude, j, box);
-      j_magnitude += SAFETY;      
-
-      dt_fab.setVal(Units::eps0);
-      dt_fab *= e_magnitude;
-      dt_fab /= j_magnitude;
-
-      // Now do the irregular cells
-      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
-      for (vofit.reset(); vofit.ok(); ++vofit){
-	const VolIndex& vof = vofit();
-	const RealVect ee = RealVect(D_DECL(e(vof, 0), e(vof, 1), e(vof, 2)));
-	const RealVect jj = RealVect(D_DECL(j(vof, 0), j(vof, 1), j(vof, 2)));
-
-	dt_fab(vof, comp) = Abs(Units::eps0*ee.vectorLength()/(1.E-20 + jj.vectorLength()));
-      }
-    }
-  }
-
-  // Find the smallest dt
-  Real min_dt = 1.E99;
-  Real max, min;
-  DataOps::getMaxMin(max, min, dt, comp);
-  min_dt = Min(min_dt, min);
-
-  return min_dt;
+  DataOps::getMaxMinNorm(maxVal, minVal, relaxTime);
+  
+  return minVal;
 }
 
 Real CdrPlasmaStepper::getTime(){
