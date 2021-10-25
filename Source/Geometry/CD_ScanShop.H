@@ -17,7 +17,8 @@
 #include <GeometryService.H>
 
 // Our includes
-#include <CD_BoxType.H>
+#include <CD_Timer.H>
+#include <CD_BoxSorting.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
@@ -49,13 +50,17 @@ public:
 	   const RealVect      a_probLo,
 	   const ProblemDomain a_finestDomain,
 	   const ProblemDomain a_scanLevel,
-	   const int           a_maxGhostEB = 4,
 	   const Real          a_thrshdVoF = 1.0e-16);
 
   /*!
     @brief Destructor (does nothing)
   */
   ~ScanShop();
+
+  /*!
+    @brief If doing profiling, set the output name.
+  */
+  void setProfileFileName(const std::string a_fileName);
 
   /*!
     @brief This grid generation method is called by EBISLevel when using distributed data. 
@@ -86,8 +91,49 @@ public:
 				       const Real&          a_dx,
 				       const DataIndex&     a_dit) const override;
 
+  /*!
+    @brief Override of GeometryShop's fillGraph.
+    @details This just wraps a timer around the base version to spot load imbalance.
+    @param[inout] a_regIrregCovered Regular/Covered/Irregular cells
+    @param[inout] a_nodes           Nodes
+    @param[in]    a_validRegion     Grid region
+    @param[in]    a_ghostRegion     Grid region, including ghost cells
+    @param[in]    a_domain          Domain
+    @param[in]    a_probLo          Lower-left corner of computational domain
+    @param[in]    a_dx              Grid resolution
+    @param[in]    a_di              Grid index
+  */
+  virtual void fillGraph(BaseFab<int>&        a_regIrregCovered,
+                         Vector<IrregNode>&   a_nodes,
+                         const Box&           a_validRegion,
+                         const Box&           a_ghostRegion,
+                         const ProblemDomain& a_domain,
+                         const RealVect&      a_probLo,
+                         const Real&          a_dx,
+                         const DataIndex&     a_di) const override;
+
 
 protected:
+
+  /*!
+    @brief Set output file name (if doing profiling)
+  */
+  std::string m_fileName;
+
+  /*!
+    @brief For arranging boxes in space when we load balance
+  */
+  BoxSorting m_boxSorting;
+
+  /*!
+    @brief Timer for when we use run-time profiling
+  */
+  mutable Timer m_timer;
+
+  /*!
+    @brief Bool for run-time profiling of ScanShop
+  */
+  bool m_profile;
 
   /*!
     @brief Scan level where we first begin to break up boxes. This is relative the EBIS level. 
@@ -97,7 +143,7 @@ protected:
   /*!
     @brief Maximum number of ghost cells near the EB
   */
-  int m_maxGhostEB;
+  int m_ebGhost;
 
   /*!
     @brief Lower-left corner of simulation domain. 
@@ -133,12 +179,12 @@ protected:
     @brief Box maps. 
     @details BoxType is a essentially just an integer on each patch which is =0,1,2 depending on whether or not the box is covered/regular/cut. 
   */
-  Vector<RefCountedPtr<LevelData<BoxType> > > m_boxMaps;
+  Vector<RefCountedPtr<LayoutData<GeometryService::InOut> > > m_boxMap;  
 
   /*!
     @brief Check if level has been scanned. 0 = false, != 0 implies true
   */
-  Vector<int> m_hasThisLevel;
+  std::vector<bool> m_hasThisLevel;
 
   /*!
     @brief Create the problem domain and resolutions
@@ -166,18 +212,12 @@ protected:
   void buildCoarseLevel(const int a_finerLevel, const int a_maxGridSize);
 
   /*!
-    @brief Prints number of boxes of each type on this level
-    @param[in] a_level Grid level
-    @details This will print (to std::cout) the number of regular/covered/cutcell boxes on each grid level
-  */
-  void printNumBoxesLevel(const int a_level) const;
-
-  /*!
     @brief Check if every point in input box is regular
     @param[in] a_box    Cell-centered box
     @param[in] a_probLo Lower-left corner of simulation domain
     @param[in] a_dx     Grid resolution
   */
+  inline
   bool isRegular(const Box a_box, const RealVect a_probLo, const Real a_dx) const;
 
   /*!
@@ -186,9 +226,27 @@ protected:
     @param[in] a_probLo Lower-left corner of simulation domain
     @param[in] a_dx     Grid resolution
   */
+  inline
   bool isCovered(const Box a_box, const RealVect a_probLo, const Real a_dx) const;
+
+  /*!
+    @brief Sort boxes lexicographically. 
+    @details A strange but true thing that is necessary because DisjointBoxlayout sorts the boxes under the hood
+  */
+  inline
+  std::vector<std::pair<Box, int> > getSortedBoxesAndTypes(const Vector<Box>& a_boxes, const Vector<int>& a_types) const;
+
+  /*!
+    @brief Define the "box map" on a specified level
+  */
+  void defineLevel(Vector<Box>& coveredBoxes,
+		   Vector<Box>& regularBoxes,
+		   Vector<Box>& cutCellBoxes,
+		   const int    a_level);
 };
 
 #include <CD_NamespaceFooter.H>
+
+#include <CD_ScanShopImplem.H>
 
 #endif

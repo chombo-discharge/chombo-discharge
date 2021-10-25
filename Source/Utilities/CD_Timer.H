@@ -55,7 +55,7 @@ public:
     @brief Default constructor. This creates a timer without any timer events and without a name. 
   */
   inline
-  Timer() = delete;
+  Timer() = default;
 
   /*!
     @brief Default constructor. This creates a timer without any timer events and without a name. 
@@ -70,28 +70,16 @@ public:
   ~Timer();
 
   /*!
-    @brief Disallowed copy construction
+    @brief Copy construction
     @param[in] a_other Other Timer
   */
-  Timer(const Timer& a_other) = delete;
+  Timer(const Timer& a_other) = default;
 
   /*!
-    @brief Disallowed move construction
+    @brief Copy assignement
     @param[in] a_other Other Timer
   */
-  Timer(const Timer&& a_other) = delete;
-
-  /*!
-    @brief Disallowed copy assignement
-    @param[in] a_other Other Timer
-  */
-  Timer& operator=(const Timer& a_other) = delete;
-
-  /*!
-    @brief Disallowed move assignement
-    @param[in] a_other Other Timer
-  */
-  Timer& operator=(const Timer&& a_other) = delete;
+  Timer& operator=(const Timer& a_other) = default;
 
   /*!
     @brief Start an event
@@ -117,6 +105,14 @@ public:
   */
   inline
   void eventReport(std::ostream& a_outputStream, const bool a_localReportOnly = false) const noexcept;
+
+  /*!
+    @brief Print all timed events to a file.
+    @details This routine prints a header row consisting of the event names. The remaining rows are the timings for the various ranks.
+    @param[in] a_localReportOnly If true, no reduction over mpi
+  */
+  inline
+  void writeReportToFile(const std::string a_fileName) const noexcept;
 
 protected:
 
