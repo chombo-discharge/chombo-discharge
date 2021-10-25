@@ -261,7 +261,7 @@ namespace Physics {
       mutable std::map<std::string, ItoPlasmaPhotoReaction> m_photoReactions;
 
       // Lookup tables if you need them. 
-      std::map<std::string, LookupTable> m_tables;
+      std::map<std::string, LookupTable<2> > m_tables;
 
       /*!
 	@brief Add a table
@@ -271,7 +271,7 @@ namespace Physics {
       /*!
 	@brief Read a file and put it in a lookup table
       */
-      void readFile(LookupTable& a_table, const std::string a_file);
+      void readFile(LookupTable<2>& a_table, const std::string a_file);
 
       /*!
 	@brief Draw a valid random position somewhere in a cell

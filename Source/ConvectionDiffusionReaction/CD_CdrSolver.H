@@ -559,6 +559,15 @@ public:
 protected:
 
   /*!
+    @brief Redistribution method
+  */
+  enum class Redistribution {
+    VolumeWeighted,
+    MassWeighted,
+    None
+  };
+
+  /*!
     @brief Component number in data holder
   */
   static constexpr int m_comp = 0;
@@ -737,9 +746,9 @@ protected:
   Real m_dt;
 
   /*!
-    @brief Flag for mass-weighted redistribution
+    @brief Which type of redistribution to use
   */
-  bool m_useMassWeightedRedistribution;
+  Redistribution m_whichRedistribution;
 
   /*!
     @brief Flag for blending the hybrid divergence
@@ -930,9 +939,16 @@ protected:
 
   /*!
     @brief Interpolate flux to centroids
-    @param[out] a_flux Centroid fluxes
-    @param[in]  a_lvl  Grid level
-    @details This interpolates face fluxes to centroids and puts the result in a_flux and m_interpolant. 
+    @param[inout] a_flux On input, contains centered fluxes. Output contains centroid fluxes
+    @details This interpolates face fluxes to centroids. 
+  */
+  virtual void interpolateFluxToFaceCentroids(EBAMRFluxData& a_flux);
+
+  /*!
+    @brief Interpolate flux to centroids
+    @param[inout] a_flux On input, contains centered fluxes. Output contains centroid fluxes
+    @param[in]    a_lvl  Grid level
+    @details This interpolates face fluxes to centroids. 
   */
   virtual void interpolateFluxToFaceCentroids(LevelData<EBFluxFAB>& a_flux, const int a_lvl);
 

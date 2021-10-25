@@ -48,6 +48,17 @@ public:
   };
 
   /*!
+    @brief An enum for switching between various types of EB intersection algorithms when intersecting photons with the EB
+    @details Raycast means ray-casting algorithm. Bisection means that the traveled path is divided into intervals and we apply a bisection algorithm
+    for computing the intersection point. LSF is just ray-casting, but it uses the implicit function on the mesh rather than calling it directly. 
+  */
+  enum class IntersectionEB {
+    Raycast,
+    Bisection,
+    LSF
+  };
+
+  /*!
     @brief Constructor
   */
   McPhoto();
@@ -486,6 +497,11 @@ protected:
   int m_haloBuffer;
 
   /*!
+    @brief Bisection step for when we use the bisection intersection algorithm
+  */
+  Real m_bisectStep;
+
+  /*!
     @brief Photon generation type
   */
   PhotonGeneration m_photoGenerationMethod;
@@ -494,6 +510,11 @@ protected:
     @brief Source type
   */
   SourceType m_sourceType;
+
+  /*!
+    @brief
+  */
+  IntersectionEB m_intersectionEB;
 
   /*!
     @brief RNG engine
@@ -680,6 +701,11 @@ protected:
     @brief Parse source term type
   */
   void parseSourceType();
+
+  /*!
+    @brief Parse EB intersection algorithm
+  */
+  void parseIntersectionEB();
 
   /*!
     @brief Parse deposition method

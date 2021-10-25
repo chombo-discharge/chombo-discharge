@@ -116,6 +116,13 @@ public:
   static void gatherLoads(Vector<int>& a_loads);
 
   /*!
+    @brief Gather compute loads
+    @param[inout] a_loads Computational loads
+    @return On output, a_loads contains the loads from all ranks. 
+  */
+  static void gatherLoads(Vector<long>& a_loads);  
+
+  /*!
     @brief Gather boxes and loads
     @param[inout] a_boxes Grid boxes
     @param[inout] a_loads Computational loads

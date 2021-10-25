@@ -98,6 +98,13 @@ namespace Physics {
 
     protected:
 
+      enum {
+	ALPHA   = 1,
+	ETA     = 1,
+	DIFFCO  = 1,
+	MU      = 1
+      };
+
       static std::string s_bolsig_mobility;
       static std::string s_bolsig_diffco;
       static std::string s_bolsig_alpha;
@@ -106,10 +113,10 @@ namespace Physics {
       std::string m_transport_file;
 
       // Tables built from BOLSIG+
-      LookupTable m_e_mobility;
-      LookupTable m_e_diffco;
-      LookupTable m_e_alpha;
-      LookupTable m_e_eta;
+      LookupTable<2> m_e_mobility;
+      LookupTable<2> m_e_diffco;
+      LookupTable<2> m_e_alpha;
+      LookupTable<2> m_e_eta;
 
       Vector<int> m_wallBc; // Wall boundary conditions
 
@@ -148,11 +155,8 @@ namespace Physics {
       Real m_photoexc_eff; // Photoexcitation efficiency
       Real m_photoi_eff;    // Photoionizationn efficiency
 
-
-      void readFileEntries(LookupTable& a_table, const std::string a_string);
       void parseDomainBc();
       void initSpecies();
-
 
       Vector<Real> computeCdrFluxes(const Real         a_time,
 				    const RealVect     a_pos,

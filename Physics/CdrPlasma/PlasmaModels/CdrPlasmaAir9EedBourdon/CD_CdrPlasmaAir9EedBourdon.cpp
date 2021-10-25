@@ -22,6 +22,7 @@
 // Our includes
 #include <CD_CdrPlasmaAir9EedBourdon.H>
 #include <CD_CdrPlasmaAir9EedBourdonSpecies.H>
+#include <CD_DataParser.H>
 #include <CD_Units.H>
 #include <CD_DataOps.H>
 #include <CD_NamespaceHeader.H>
@@ -157,84 +158,59 @@ void CdrPlasmaAir9EedBourdon::initSpecies(){
   m_RtSpecies[m_Photon3_idx] = RefCountedPtr<RtSpecies> (new CdrPlasmaAir9EedBourdon::PhotonThree());
 }
 
-void CdrPlasmaAir9EedBourdon::readFileEntries(LookupTable& a_table, const std::string a_string){
-  Real x, y;
-  bool read_line = false;
-  std::ifstream infile(m_transport_file);
-  std::string line;
-  while (std::getline(infile, line)){
-
-    // Right trim string
-    line.erase(line.find_last_not_of(" \n\r\t")+1);
-
-    if(line == a_string){ // Begin reading
-      read_line = true;
-    }
-    else if(line == "" & read_line){ // Stop reading
-      read_line = false;
-    }
-
-    if(read_line){
-      std::istringstream iss(line);
-      if (!(iss >> x >> y)) {
-	continue;
-      }
-      a_table.addEntry(x, y);
-    }
-  }
-  infile.close();
-}
-
 void CdrPlasmaAir9EedBourdon::read_e_N2_alpha(){
 
   // Read file entries
-  readFileEntries(m_e_N2_alpha, CdrPlasmaAir9EedBourdon::s_bolsig_N2_alpha);
-
+  m_e_N2_alpha = DataParser::fractionalFileReadASCII(m_transport_file, CdrPlasmaAir9EedBourdon::s_bolsig_N2_alpha, "");
+  m_e_N2_alpha.sort();
   m_e_N2_alpha.makeUniform(m_uniform_tables);
 }
 
 void CdrPlasmaAir9EedBourdon::read_e_O2_alpha(){
 
   // Read file entries
-  readFileEntries(m_e_O2_alpha, CdrPlasmaAir9EedBourdon::s_bolsig_O2_alpha);
-
+  m_e_O2_alpha = DataParser::fractionalFileReadASCII(m_transport_file, CdrPlasmaAir9EedBourdon::s_bolsig_O2_alpha, "");
+  m_e_O2_alpha.sort();
   m_e_O2_alpha.makeUniform(m_uniform_tables);
 }
 
 void CdrPlasmaAir9EedBourdon::read_Electron_mobility(){
 
   // Read file entries
-  readFileEntries(m_e_mobility, CdrPlasmaAir9EedBourdon::s_bolsig_mobility);
-
+  m_e_mobility = DataParser::fractionalFileReadASCII(m_transport_file, CdrPlasmaAir9EedBourdon::s_bolsig_mobility, "");
+  m_e_mobility.sort();
+  
   // Scale with density and make a uniform table (there's no guarantee that BOLSIG output is uniform!)
-  m_e_mobility.scaleY(1./m_N); 
+  m_e_mobility.scale<1>(1./m_N); 
   m_e_mobility.makeUniform(m_uniform_tables);
 }
 
 void CdrPlasmaAir9EedBourdon::read_townsend(){
   
   // Read file entries
-  readFileEntries(m_alpha_townsend, CdrPlasmaAir9EedBourdon::s_bolsig_townsend);
+  m_alpha_townsend = DataParser::fractionalFileReadASCII(m_transport_file, CdrPlasmaAir9EedBourdon::s_bolsig_townsend, "");
+  m_alpha_townsend.sort();
 
   // Scale with density and make a uniform table (there's no guarantee that BOLSIG output is uniform!)
   m_alpha_townsend.makeUniform(m_uniform_tables);
-  m_alpha_townsend.scaleY(m_N);
+  m_alpha_townsend.scale<1>(m_N);
 
   //  m_alpha_townsend.dumpTable();
 }
 
 void CdrPlasmaAir9EedBourdon::read_initEed(){
-  readFileEntries(m_initEed, CdrPlasmaAir9EedBourdon::s_bolsig_energy_E);
+  m_initEed = DataParser::fractionalFileReadASCII(m_transport_file, CdrPlasmaAir9EedBourdon::s_bolsig_energy_E, "");
 
   // Input table is in reverse order. Then make it uniform. 
-  m_initEed.swapXY();
+  m_initEed.swap(0,1);
+  m_initEed.sort();  
   m_initEed.makeUniform(m_uniform_tables);
 }
 
 Real CdrPlasmaAir9EedBourdon::computeAlpha(const RealVect a_E) const{
   const Real EbyN    = a_E.vectorLength()/(m_N*Units::Td);
-  const Real energy  = m_initEed.getEntry(EbyN);
-  const Real alpha = m_alpha_townsend.getEntry(energy);
+  const Real energy  = m_initEed.getEntry<1>(EbyN);
+  const Real alpha = m_alpha_townsend.getEntry<1>(energy);
   
   return alpha;
 }
@@ -559,7 +535,7 @@ Real CdrPlasmaAir9EedBourdon::Electron_energy(const Real a_energy, const Real a_
 }
 
 Real CdrPlasmaAir9EedBourdon::compute_eed_mobility(const Real a_energy)    const {return (5.0/3.0)*compute_e_mobility(a_energy);}
-Real CdrPlasmaAir9EedBourdon::compute_e_mobility(const Real a_energy)      const {return m_e_mobility.getEntry(a_energy);}
+Real CdrPlasmaAir9EedBourdon::compute_e_mobility(const Real a_energy)      const {return m_e_mobility.getEntry<1>(a_energy);}
 Real CdrPlasmaAir9EedBourdon::compute_N2plus_mobility(const Real a_EbyN)   const {return m_ion_mobility;}
 Real CdrPlasmaAir9EedBourdon::compute_N4plus_mobility(const Real a_EbyN)   const {return m_ion_mobility;}
 Real CdrPlasmaAir9EedBourdon::compute_O2plus_mobility(const Real a_EbyN)   const {return m_ion_mobility;}
@@ -578,8 +554,8 @@ Real CdrPlasmaAir9EedBourdon::compute_O2plusN2_diffco()               const {ret
 Real CdrPlasmaAir9EedBourdon::compute_O2minus_diffco()                const {return m_ion_diffusion;}
 Real CdrPlasmaAir9EedBourdon::compute_Ominus_diffco()                 const {return m_ion_diffusion;}
 
-Real CdrPlasmaAir9EedBourdon::compute_Electron_N2_alpha(const Real a_energy)     const {return m_e_N2_alpha.getEntry(a_energy);}
-Real CdrPlasmaAir9EedBourdon::compute_Electron_O2_alpha(const Real a_energy)     const {return m_e_O2_alpha.getEntry(a_energy);}
+Real CdrPlasmaAir9EedBourdon::compute_Electron_N2_alpha(const Real a_energy)     const {return m_e_N2_alpha.getEntry<1>(a_energy);}
+Real CdrPlasmaAir9EedBourdon::compute_Electron_O2_alpha(const Real a_energy)     const {return m_e_O2_alpha.getEntry<1>(a_energy);}
 Real CdrPlasmaAir9EedBourdon::compute_N2plus_N2_M_to_N4plus_M()                  const {return 5.E-41;}
 Real CdrPlasmaAir9EedBourdon::compute_N4plus_O2_to_O2_2N2()                      const {return 2.5E-16;}
 Real CdrPlasmaAir9EedBourdon::compute_N2plus_O2_to_O2plus_N2(const Real a_Tg)    const {return 1.05E-15/sqrt(a_Tg);}
@@ -743,7 +719,7 @@ Real CdrPlasmaAir9EedBourdon::compute_e_N2_scattering_loss()              const 
 
 Real CdrPlasmaAir9EedBourdon::initEed(const RealVect a_pos, const Real a_time, const RealVect a_E){
   const Real EbyN = (a_E/(m_N*Units::Td)).vectorLength();
-  return m_initEed.getEntry(EbyN)*m_CdrSpecies[m_Electron_idx]->initialData(a_pos, a_time);
+  return m_initEed.getEntry<1>(EbyN)*m_CdrSpecies[m_Electron_idx]->initialData(a_pos, a_time);
 }
 
 Vector<Real> CdrPlasmaAir9EedBourdon::computeCdrFluxes(const Real         a_time,

@@ -31,9 +31,9 @@ Real MFHelmholtzElectrostaticEBBC::getElectrodePotential(const RealVect& a_pos) 
   for (int i = 0; i < electrodeBCs.size(); i++){
     const RefCountedPtr<BaseIF>& impFunc = electrodeBCs[i].first.getImplicitFunction();
 
-    const Real curDist = impFunc->value(a_pos);
+    const Real curDist = std::abs(impFunc->value(a_pos));
 
-    if(std::abs(curDist) < minDist){
+    if(curDist < minDist){
       closestElectrode = i;
       minDist          = curDist;
     }

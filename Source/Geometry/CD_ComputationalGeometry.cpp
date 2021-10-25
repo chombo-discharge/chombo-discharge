@@ -185,14 +185,17 @@ void ComputationalGeometry::buildGasGeometry(GeometryService*&   a_geoserver,
 
   // Build the EBIS geometry. Use either ScanShop or Chombo here. 
   if(m_useScanShop){
-    a_geoserver = static_cast<GeometryService*> (new ScanShop(*m_implicitFunctionGas,
-							      0,
-							      a_finestDx,
-							      a_probLo,
-							      a_finestDomain,
-							      m_scanDomain,
-							      m_maxGhostEB,
-							      s_thresh));
+    ScanShop* scanShop = new ScanShop(*m_implicitFunctionGas,
+				      0,
+				      a_finestDx,
+				      a_probLo,
+				      a_finestDomain,
+				      m_scanDomain,
+				      s_thresh);
+
+    scanShop->setProfileFileName("ScanShopReportGasPhase.dat");
+
+    a_geoserver = static_cast<GeometryService*> (scanShop);
   }
   else{ // Chombo geometry generation
     a_geoserver = static_cast<GeometryService*> (new GeometryShop(*m_implicitFunctionGas, 0, a_finestDx*RealVect::Unit, s_thresh));
@@ -240,14 +243,17 @@ void ComputationalGeometry::buildSolidGeometry(GeometryService*&   a_geoserver,
 
     // Build the EBIS geometry. Use either ScanShop or Chombo here. 
     if(m_useScanShop){
-      a_geoserver = static_cast<GeometryService*> (new ScanShop(*m_implicitFunctionSolid,
-								0,
-								a_finestDx,
-								a_probLo,
-								a_finestDomain,
-								m_scanDomain,
-								m_maxGhostEB,
-								s_thresh));
+      ScanShop* scanShop = new ScanShop(*m_implicitFunctionSolid,
+					0,
+					a_finestDx,
+					a_probLo,
+					a_finestDomain,
+					m_scanDomain,
+					s_thresh);
+
+      scanShop->setProfileFileName("ScanShopReportSolidPhase.dat");
+
+      a_geoserver = static_cast<GeometryService*> (scanShop);
     }
     else{ // Chombo geometry generation
       a_geoserver = static_cast<GeometryService*> (new GeometryShop(*m_implicitFunctionSolid, 0, a_finestDx*RealVect::Unit, s_thresh));

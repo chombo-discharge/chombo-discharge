@@ -78,14 +78,15 @@ Real ItoPlasmaPhysics::initialSigma(const Real a_time, const RealVect a_pos) con
 
 void ItoPlasmaPhysics::addTable(const std::string a_table_name, const std::string a_file){
 
-  LookupTable table;
+  LookupTable<2> table;
 
   this->readFile(table, a_file);        // Read file
+  table.sort();
   table.makeUniform(m_table_entries);   // Make table into a unifom table
   m_tables.emplace(a_table_name, table); // Add table
 }
 
-void ItoPlasmaPhysics::readFile(LookupTable& a_table, const std::string a_file){
+void ItoPlasmaPhysics::readFile(LookupTable<2>& a_table, const std::string a_file){
 
   Real x, y;
   
