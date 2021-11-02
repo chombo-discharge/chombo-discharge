@@ -247,111 +247,56 @@ Real CdrPlasmaGodunovStepper::advance(const Real a_dt){
   }
 
   // INFO: When we enter here, the CdrSolver have updated ghost cells (either linear or quadratic) and should have been
-  // filled with velocities and diffusion coefficients.
-  // 
-  // We must still do:
-  // 1. Compute E
-  // 2. Extrapolate everything to the EB
-  // 3. Compute fluxes at the EB and domain
-  // 4. Advance the reaction network. This provides source terms for CDR and RTE equations
-  // 5. Compute the hyperbolic terms
-  // 6. Solve the semi-implicit discretization
-  // 7. Advance the RTE equations
-  // 8. Update the Poisson equation
-  // 9. Recompute solver velocities and diffusion coefficients
+  // filled with velocities and diffusion coefficients. The steps are:
+  //
+  // 1. Advance transport
+  // 2. Solve the Poisson equation (special option for semi-implicit transport)
+  // 3. 
 
-  Real t_grad = 0.0;
-  Real t_filBC= 0.0;
-  Real t_reac = 0.0;
-  Real t_tran = 0.0;
-  Real t_rte  = 0.0;
-  Real t_pois = 0.0;
-  Real t_filE = 0.0;
-  Real t_filV = 0.0;
-  Real t_filD = 0.0;
-  Real t_post = 0.0;
-  Real t_tot  = 0.0;
+  Timer timer("GodunovStepper::advance");
 
-  Real t0, t1;
-  t0 = Timer::wallClock();
-  t_tot  = -t0;
-
-  // These calls are responsible for filling CDR and sigma solver boundary conditions
-  // on the EB and on the domain walls
-  t0 = Timer::wallClock();
-  CdrPlasmaGodunovStepper::computeElectricFieldIntoScratch();       // Compute the electric field
-  CdrPlasmaGodunovStepper::computeCdrGradients();        // Compute cdr gradients
-  CdrPlasmaGodunovStepper::extrapolateSourceTerm(a_dt);            // If we used advective extrapolation, BCs are more work. 
-  CdrPlasmaGodunovStepper::computeCdrEbStates();        // Extrapolate cell-centered stuff to EB centroids
-  CdrPlasmaGodunovStepper::computeCdrEbFluxes();        // Extrapolate cell-centered fluxes to EB centroids
-  CdrPlasmaGodunovStepper::computeCdrDomainStates();    // Extrapolate cell-centered states to domain edges
-  CdrPlasmaGodunovStepper::computeCdrDomainFluxes();    // Extrapolate cell-centered fluxes to domain edges
-  CdrPlasmaGodunovStepper::computeSigmaFlux();           // Update charge flux for sigma solver
-  t1 = Timer::wallClock();
-  t_filBC = t1 - t0;
-  
-  t0 = Timer::wallClock();
+  // Transport
+  timer.startEvent("Transport");
   CdrPlasmaGodunovStepper::advanceTransport(a_dt);
-  t1 = Timer::wallClock();
-  t_tran = t1 - t0;
-  
-  t0 = Timer::wallClock();
+  timer.stopEvent("Transport");  
+
+  // Compute electric field.
+  timer.startEvent("Poisson");
   if((m_timeStep +1) % m_fast_poisson == 0){
-    CdrPlasmaStepper::solvePoisson();         // Update the Poisson equation
+    CdrPlasmaStepper::solvePoisson();
   }
-  t1 = Timer::wallClock();
-  t_pois = t1 - t0;
+  CdrPlasmaGodunovStepper::computeElectricFieldIntoScratch();
+  timer.stopEvent("Poisson");    
 
-  t0 = Timer::wallClock();
-  CdrPlasmaGodunovStepper::computeElectricFieldIntoScratch();       // Update electric fields too
-  t1 = Timer::wallClock();
-  t_filE = t1-t0;
+  // Advance the reaction network
+  timer.startEvent("Reactions");
+  CdrPlasmaGodunovStepper::computeCdrGradients();        
+  CdrPlasmaGodunovStepper::computeReactionNetwork(a_dt); 
+  timer.stopEvent("Reactions");  
 
-  t0 = Timer::wallClock();
-  //  CdrPlasmaGodunovStepper::computeCdrGradients();        // I'm not doing this. Gradients don't change that much. 
-  CdrPlasmaGodunovStepper::computeReactionNetwork(a_dt); // Advance the reaction network. Put the result in solvers
-  t1 = Timer::wallClock();
-  t_reac = t1-t0;
-
-  // Move Photons
-  t0 = Timer::wallClock();
+  // Radiative transfer. 
+  timer.startEvent("Photons");
   if((m_timeStep +1) % m_fast_rte == 0){
     CdrPlasmaGodunovStepper::advanceRadiativeTransfer(a_dt);              // Update RTE equations
   }
-  t1 = Timer::wallClock();
-  t_rte = t1-t0;
+  timer.stopEvent("Photons");  
 
   // Post step
-  t0 = Timer::wallClock();
+  timer.startEvent("Post-step");
   CdrPlasmaGodunovStepper::postStep();
-  t1 = Timer::wallClock();
-  t_post = t1 - t0;
+  timer.stopEvent("Post-step");  
   
   // Update velocities and diffusion coefficients. We don't do sources here.
-  t0 = Timer::wallClock();
+  timer.startEvent("Velocities");
   CdrPlasmaGodunovStepper::computeCdrDriftVelocities(m_time + a_dt);
-  t1 = Timer::wallClock();
-  t_filV = t1 - t0;
-  t0 = Timer::wallClock();
+  timer.stopEvent("Velocities");
+
+  timer.startEvent("Diffu-coeffs");
   CdrPlasmaGodunovStepper::computeCdrDiffusionCoefficients(m_time + a_dt);
-  t1 = Timer::wallClock();
-  t_filD = t1 - t0;
-  t_tot += t1;
+  timer.stopEvent("Diffu-coeffs");  
 
   if(m_debug){
-    pout() << endl;
-    pout() << "CdrPlasmaGodunovStepper::advance breakdown:" << endl
-	   << "BC fill   = " << 100.0*t_filBC/t_tot << "%" << endl
-	   << "Reactions = " << 100.*t_reac/t_tot << "%" << endl
-	   << "Transport = " << 100.*t_tran/t_tot << "%" << endl
-	   << "RTE adv.  = " << 100.*t_rte/t_tot << "%" << endl
-	   << "Poisson   = " << 100.*t_pois/t_tot << "%" << endl
-	   << "Ecomp     = " << 100.*t_filE/t_tot << "%" << endl
-	   << "post      = " << 100.*t_post/t_tot << "%" << endl
-	   << "Vel       = " << 100.*t_filV/t_tot << "%" << endl
-	   << "Dco       = " << 100.*t_filD/t_tot << "%" << endl
-	   << "TOTAL = " << t_tot << "seconds" << endl;
-    pout() << endl;
+    timer.eventReport(pout(), false);
   }
   
   return a_dt;
@@ -757,6 +702,18 @@ void CdrPlasmaGodunovStepper::advanceTransport(const Real a_dt){
   if(m_verbosity > 5){
     pout() << "CdrPlasmaGodunovStepper::advanceTransport" << endl;
   }
+  
+  // These calls are responsible for filling CDR and sigma solver boundary conditions
+  // on the EB and on the domain walls
+  // Some regular stuff. 
+  CdrPlasmaGodunovStepper::computeElectricFieldIntoScratch();   // Compute the electric field
+  CdrPlasmaGodunovStepper::computeCdrGradients();               // Compute cdr gradients
+  CdrPlasmaGodunovStepper::extrapolateSourceTerm(a_dt);         // If we used advective extrapolation, BCs are more work. 
+  CdrPlasmaGodunovStepper::computeCdrEbStates();                // Extrapolate cell-centered stuff to EB centroids
+  CdrPlasmaGodunovStepper::computeCdrEbFluxes();                // Extrapolate cell-centered fluxes to EB centroids
+  CdrPlasmaGodunovStepper::computeCdrDomainStates();            // Extrapolate cell-centered states to domain edges
+  CdrPlasmaGodunovStepper::computeCdrDomainFluxes();            // Extrapolate cell-centered fluxes to domain edges
+  CdrPlasmaGodunovStepper::computeSigmaFlux();                  // Update charge flux for sigma solver  
 
   // Transport algorithm
   if(m_WhichTransportAlgorithm == WhichTransportAlgorithm::Euler){

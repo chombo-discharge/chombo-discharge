@@ -51,22 +51,30 @@ namespace Physics {
 
     protected:
 
-      enum WhichTransportAlgorithm{
-	Euler = 0,
-	RK2   = 1,
+      enum class WhichTransportAlgorithm {
+	SemiImplicit,
+	Euler,
+	RK2,
       };
 
-      enum WhichDiffusionAlgorithm{
-	Explicit  = 0,
-	Implicit  = 1,
-	Automatic = 2
+      enum class WhichDiffusionAlgorithm{
+	Explicit,
+	Implicit,
+	Automatic,
       };
 
       // Scratch storage
       Vector<RefCountedPtr<CdrStorage> > m_cdr_scratch;
-      Vector<RefCountedPtr<RtStorage> > m_rte_scratch;
-      RefCountedPtr<FieldStorage>      m_fieldSolver_scratch;
+      Vector<RefCountedPtr<RtStorage> >  m_rte_scratch;
+      RefCountedPtr<FieldStorage>        m_fieldSolver_scratch;
       RefCountedPtr<SigmaStorage>        m_sigma_scratch;
+
+      // Extra scratch storage when using semi-implicti scheme.
+      EBAMRCellData m_conductivityCell;    // Used for holding the cell-centered conductivity.
+      EBAMRFluxData m_conductivityFace;    // Used for holding the face-centered conductivity.
+      EBAMRIVData   m_conductivityEB;      // Used for holding the EB-centered conductivity.
+
+      EBAMRCellData m_scratchConductivity; // Scratch storage for holding the conductivity during regrids. 
 
       bool m_extrap_advect;
       bool m_debug;
