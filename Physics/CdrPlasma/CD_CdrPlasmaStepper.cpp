@@ -125,7 +125,7 @@ void CdrPlasmaStepper::computeCellConductivity(EBAMRCellData& a_cellConductivity
       DataOps::multiply      (speciesConductivity, phi           ); // Compute f = mu*n
 
       // Add to total conductivity contribution.
-      DataOps::incr(a_cellConductivity, speciesConductivity, Z);
+      DataOps::incr(a_cellConductivity, speciesConductivity, 1.0*Z);
     }
   }
 
@@ -146,7 +146,7 @@ void CdrPlasmaStepper::computeFaceConductivity(EBAMRFluxData&       a_conductivi
   DataOps::averageCellToFace(a_conductivityFace, a_conductivityCell, m_amr->getDomains());
 
   // Now compute the conductivity onthe EB.
-#if 0
+#if 1
   const auto& interpStencil = m_amr->getCentroidInterpolationStencils(m_realm, phase::gas);
   interpStencil.apply(a_conductivityEB, a_conductivityCell);
 #else
@@ -2768,7 +2768,7 @@ void CdrPlasmaStepper::computeCdrDiffusion(){
     cdr_extrap[idx] = new EBAMRIVData();  // This must be deleted
     m_amr->allocate(*cdr_extrap[idx], m_realm, m_cdr->getPhase(), ncomp);
 
-    const IrregAmrStencil<EbCentroidInterpolationStencil>& stencil = m_amr->getEbCentroidInterpolationStencilStencils(m_realm, m_cdr->getPhase());
+    const IrregAmrStencil<EbCentroidInterpolationStencil>& stencil = m_amr->getEbCentroidInterpolationStencils(m_realm, m_cdr->getPhase());
     stencil.apply(*cdr_extrap[idx], *cdr_states[idx]);
   }
   
@@ -2803,7 +2803,7 @@ void CdrPlasmaStepper::computeCdrDiffusion(const EBAMRCellData& a_E_cell, const 
     cdr_extrap[idx] = new EBAMRIVData();  // This must be deleted
     m_amr->allocate(*cdr_extrap[idx], m_realm, m_cdr->getPhase(), ncomp);
 
-    const IrregAmrStencil<EbCentroidInterpolationStencil>& stencil = m_amr->getEbCentroidInterpolationStencilStencils(m_realm, m_cdr->getPhase());
+    const IrregAmrStencil<EbCentroidInterpolationStencil>& stencil = m_amr->getEbCentroidInterpolationStencils(m_realm, m_cdr->getPhase());
     stencil.apply(*cdr_extrap[idx], *cdr_states[idx]);
   }
   
@@ -2905,7 +2905,7 @@ void CdrPlasmaStepper::computeElectricField(EBAMRIVData& a_E_eb, const phase::wh
   CH_assert(a_E_eb[0]->nComp()   == SpaceDim);
   CH_assert(a_E_cell[0]->nComp() == SpaceDim);
 
-  const IrregAmrStencil<EbCentroidInterpolationStencil>& interp_stencil = m_amr->getEbCentroidInterpolationStencilStencils(m_realm, a_phase);
+  const IrregAmrStencil<EbCentroidInterpolationStencil>& interp_stencil = m_amr->getEbCentroidInterpolationStencils(m_realm, a_phase);
   interp_stencil.apply(a_E_eb, a_E_cell);
 }
 
@@ -2985,7 +2985,7 @@ void CdrPlasmaStepper::computeExtrapolatedFluxes(Vector<EBAMRIVData*>&        a_
   m_amr->allocate(eb_vel, m_realm, a_phase, SpaceDim);
   m_amr->allocate(eb_phi, m_realm, a_phase, 1);
 
-  const IrregAmrStencil<EbCentroidInterpolationStencil>& interp_stencils = m_amr->getEbCentroidInterpolationStencilStencils(m_realm, a_phase);
+  const IrregAmrStencil<EbCentroidInterpolationStencil>& interp_stencils = m_amr->getEbCentroidInterpolationStencils(m_realm, a_phase);
 
   //  for (int i = 0; i < a_fluxes.size(); i++){
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
@@ -3290,7 +3290,7 @@ void CdrPlasmaStepper::extrapolateToEb(EBAMRIVData& a_extrap, const phase::which
     pout() << "CdrPlasmaStepper::extrapolateToEb" << endl;
   }
 
-  const IrregAmrStencil<EbCentroidInterpolationStencil>& stencils = m_amr->getEbCentroidInterpolationStencilStencils(m_realm, a_phase);
+  const IrregAmrStencil<EbCentroidInterpolationStencil>& stencils = m_amr->getEbCentroidInterpolationStencils(m_realm, a_phase);
   
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     extrapolateToEb(*a_extrap[lvl], a_phase, *a_data[lvl], lvl);
@@ -3306,7 +3306,7 @@ void CdrPlasmaStepper::extrapolateToEb(LevelData<BaseIVFAB<Real> >& a_extrap,
     pout() << "CdrPlasmaStepper::extrapolateToEb(level)" << endl;
   }
 
-  const IrregAmrStencil<EbCentroidInterpolationStencil>& stencils = m_amr->getEbCentroidInterpolationStencilStencils(m_realm, a_phase);
+  const IrregAmrStencil<EbCentroidInterpolationStencil>& stencils = m_amr->getEbCentroidInterpolationStencils(m_realm, a_phase);
   stencils.apply(a_extrap, a_data, a_lvl);
 }
 

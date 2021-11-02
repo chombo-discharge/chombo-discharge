@@ -281,7 +281,7 @@ Vector<RealVect> CdrPlasmaAir3Bourdon::computeCdrDriftVelocities(const Real     
 								 const Vector<Real> a_cdr_densities) const{
   Vector<RealVect> vel(m_numCdrSpecies, RealVect::Zero);
 
-  vel[m_elec_idx] = -a_E*m_e_mobility.getEntry<DIFFCO>(a_E.vectorLength());
+  vel[m_elec_idx] = -a_E*m_e_mobility.getEntry<MU>(a_E.vectorLength());
   vel[m_plus_idx] =  a_E*m_ion_mobility;
   vel[m_minu_idx] = -a_E*m_ion_mobility;
   
