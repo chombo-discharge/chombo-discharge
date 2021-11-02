@@ -41,7 +41,6 @@ void CdrPlasmaGodunovStepper::CdrStorage::allocateStorage(){
   m_amr->allocate(m_scratch3,    m_realm, m_phase, m_ncomp);
   m_amr->allocate(m_cellExtr,    m_realm, m_phase, m_ncomp);
   m_amr->allocate(m_gradient,    m_realm, m_phase, SpaceDim);
-  m_amr->allocate(m_divDgradPhi, m_realm, m_phase, SpaceDim);  
 
   m_amr->allocate(m_scratchIVs, m_realm, m_phase, m_ncomp);
   m_amr->allocate(m_scratchIVD, m_realm, m_phase, SpaceDim);
@@ -63,7 +62,6 @@ void CdrPlasmaGodunovStepper::CdrStorage::deallocateStorage(){
   m_amr->deallocate(m_scratch3   );
   m_amr->deallocate(m_cellExtr   );
   m_amr->deallocate(m_gradient   );
-  m_amr->deallocate(m_divDgradPhi);  
 
   m_amr->deallocate(m_scratchIVs);
   m_amr->deallocate(m_scratchIVD);

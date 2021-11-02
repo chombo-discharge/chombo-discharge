@@ -166,10 +166,11 @@ namespace Physics {
       /*!
 	@brief Set up a semi-implicit Poisson solver.
 	@details This is the version that uses pre-existing conductivities.
+	@param[in] a_factor Factor to multiply conductivities with (they could be pre-scaled by dt/eps0 in which case a_factor = 1).
       */
       virtual void setupSemiImplicitPoisson(const EBAMRFluxData& a_conductivityFace,
 					    const EBAMRIVData&   a_conductivityEB,
-					    const Real           a_dt);
+					    const Real           a_factor);
 
       /*!
 	@brief Solve the poisson equation. This calls computeSpaceChargeDensity() 

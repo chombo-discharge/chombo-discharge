@@ -173,12 +173,12 @@ void CdrPlasmaStepper::setupSemiImplicitPoisson(const Real a_dt){
   this->computeFaceConductivity(conductivityFace, conductivityEB, conductivityCell);
 
   // Ok, we must now set up the semi implicit Poisson equation.
-  this->setupSemiImplicitPoisson(conductivityFace, conductivityEB, a_dt);
+  this->setupSemiImplicitPoisson(conductivityFace, conductivityEB, a_dt/Units::eps0);
 }
 
 void CdrPlasmaStepper::setupSemiImplicitPoisson(const EBAMRFluxData& a_conductivityFace,
 						const EBAMRIVData&   a_conductivityEB,
-						const Real           a_dt) {
+						const Real           a_factor) {
   CH_TIME("CdrPlasmaStepper::setupSemiImpliciPoisson");
   if(m_verbosity > 5){
     pout() << "CdrPlasmaStepper::setupSemiImplicitPoisson" << endl;
@@ -195,12 +195,8 @@ void CdrPlasmaStepper::setupSemiImplicitPoisson(const EBAMRFluxData& a_conductiv
   EBAMRFluxData permFaceGas = m_amr->alias(phase::gas, permFace);
   EBAMRIVData   permEBGas   = m_amr->alias(phase::gas, permEB  );
 
-  if(a_dt > 0.0){
-    const Real factor = a_dt/Units::eps0;
-
-    DataOps::incr(permFaceGas, a_conductivityFace, factor);
-    DataOps::incr(permEBGas,   a_conductivityEB,   factor);
-  }
+  DataOps::incr(permFaceGas, a_conductivityFace, a_factor);
+  DataOps::incr(permEBGas,   a_conductivityEB,   a_factor);
 
   // Now set up the solver with the new permittivities.
   m_fieldSolver->setupSolver();
