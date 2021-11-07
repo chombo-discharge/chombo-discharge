@@ -984,8 +984,8 @@ public:
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
   */
-  const IrregAmrStencil<EbCentroidInterpolationStencil>& getEbCentroidInterpolationStencilStencils(const std::string        a_realm,
-										  const phase::which_phase a_phase) const;
+  const IrregAmrStencil<EbCentroidInterpolationStencil>& getEbCentroidInterpolationStencils(const std::string        a_realm,
+											    const phase::which_phase a_phase) const;
 
   /*!
     @brief Get the nonconservative divergence stencils

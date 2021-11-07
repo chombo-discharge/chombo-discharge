@@ -42,7 +42,8 @@ namespace Physics {
       Real advance(const Real a_dt) override;
       void parseOptions() override;
       void parseRuntimeOptions() override;
-      void init();
+      void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
+      void preRegrid(const int a_lbase, const int a_finestLevel) override;
       void regridInternals(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
       void allocateInternals() override;
       void deallocateInternals() override;
@@ -51,22 +52,32 @@ namespace Physics {
 
     protected:
 
-      enum WhichTransportAlgorithm{
-	Euler = 0,
-	RK2   = 1,
+      enum class TransportAlgorithm {
+	SemiImplicit,
+	Euler,
+	RK2,
       };
 
-      enum WhichDiffusionAlgorithm{
-	Explicit  = 0,
-	Implicit  = 1,
-	Automatic = 2
+      enum class WhichDiffusionAlgorithm{
+	Explicit,
+	Implicit,
+	Automatic,
       };
 
       // Scratch storage
       Vector<RefCountedPtr<CdrStorage> > m_cdr_scratch;
-      Vector<RefCountedPtr<RtStorage> > m_rte_scratch;
-      RefCountedPtr<FieldStorage>      m_fieldSolver_scratch;
+      Vector<RefCountedPtr<RtStorage> >  m_rte_scratch;
+      RefCountedPtr<FieldStorage>        m_fieldSolver_scratch;
       RefCountedPtr<SigmaStorage>        m_sigma_scratch;
+
+      // Extra scratch storage when using semi-implicti scheme.
+      EBAMRCellData m_semiImplicitRho;     // Used for holding the "space charge" for semi-implicit formulations
+      EBAMRCellData m_conductivityFactor;    // Used for holding the cell-centered conductivity.
+      EBAMRFluxData m_conductivityFace;    // Used for holding the face-centered conductivity.
+      EBAMRIVData   m_conductivityEB;      // Used for holding the EB-centered conductivity.
+
+      EBAMRCellData m_scratchSemiImplicitRho;  // Scratch storage for holding the conductivity during regrids. 
+      EBAMRCellData m_scratchConductivity;     // Scratch storage for holding the conductivity during regrids.
 
       bool m_extrap_advect;
       bool m_debug;
@@ -75,7 +86,7 @@ namespace Physics {
       bool m_implicit_diffusion;
 
       WhichDiffusionAlgorithm m_WhichDiffusionAlgorithm;
-      WhichTransportAlgorithm m_WhichTransportAlgorithm;
+      TransportAlgorithm m_transportAlgorithm;
 
       // Get functions for storage
       RefCountedPtr<CdrStorage>& getCdrStorage(const CdrIterator<CdrSolver>& a_solverit);
@@ -96,6 +107,7 @@ namespace Physics {
       void advanceTransport(const Real a_dt);
       void advanceTransportEuler(const Real a_dt);
       void advanceTransportRK2(const Real a_dt);
+      void advanceTransportSemiImplicit(const Real a_dt);
       void advanceRadiativeTransfer(const Real a_dt);
       void postStep();
       void extrapolateSourceTerm(const Real a_dt);
@@ -110,6 +122,17 @@ namespace Physics {
       void parseFloor();
       void parseDebug();
       void parseFHD();
+
+      // Routine for semi-implicit Poisson solve.
+      bool solveSemiImplicitPoisson();
+
+      // Need to override these because the semi-implicit scheme dump the conductivity to disk. 
+#ifdef CH_USE_HDF5
+      virtual void writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const override;
+#endif
+#ifdef CH_USE_HDF5      
+      virtual void readCheckpointData(HDF5Handle& a_handle, const int a_lvl) override;
+#endif      
     };
   }
 }

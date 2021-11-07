@@ -24,9 +24,9 @@
 #include <CD_NamespaceHeader.H>
 
 // C-style VLA methods can have occasional memory issues. Use them at your own peril. 
-#define USE_FAST_REACTIONS  1
+#define USE_FAST_REACTIONS  0
 #define USE_FAST_VELOCITIES 0
-#define USE_FAST_DIFFUSION  1
+#define USE_FAST_DIFFUSION  0
 
 using namespace Physics::CdrPlasma;
 
@@ -84,6 +84,122 @@ bool CdrPlasmaStepper::stationary_rte(){
   }
 
   return m_rte->isStationary();
+}
+
+
+void CdrPlasmaStepper::computeCellConductivity(EBAMRCellData& a_cellConductivity) const {
+  CH_TIME("CdrPlasmaStepper::computeCellConductivity");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaStepper::computeCellConductivity" << endl;
+  }
+
+  const EBAMRCellData cellCenteredElectricField = m_amr->alias(phase::gas, m_fieldSolver->getElectricField());
+
+  // Allocate some storage
+  EBAMRCellData fieldMagnitude;      // Holds electric field magnitude
+  EBAMRCellData speciesConductivity; // Holds bulk conductivity for one species
+
+  m_amr->allocate(fieldMagnitude,      m_realm, phase::gas, 1);
+  m_amr->allocate(speciesConductivity, m_realm, phase::gas, 1);
+
+  // Compute the electric field magnitude
+  DataOps::vectorLength(fieldMagnitude, cellCenteredElectricField);
+
+  // Compute the cell-centered conductivity.
+  DataOps::setValue(a_cellConductivity, 0.0);
+
+  for (auto solverIt = m_cdr->iterator(); solverIt.ok(); ++solverIt){
+    const RefCountedPtr<CdrSolver>&  solver  = solverIt();
+    const RefCountedPtr<CdrSpecies>& species = solverIt.getSpecies();
+
+    // Compute the conductivity for this species. This is just Z*mu*n.
+    if(solver->isMobile()){
+      const EBAMRCellData& cellVel = solver->getCellCenteredVelocity();
+      const EBAMRCellData& phi     = solver->getPhi();
+
+      const int Z = species->getChargeNumber();
+
+      // Let f = speciesConductivity, this does as follows:
+      DataOps::vectorLength  (speciesConductivity, cellVel       ); // Compute f = |v|
+      DataOps::divideByScalar(speciesConductivity, fieldMagnitude); // Compute f = |v|/|E| = |mu|
+      DataOps::multiply      (speciesConductivity, phi           ); // Compute f = mu*n
+
+      // Add to total conductivity contribution.
+      DataOps::incr(a_cellConductivity, speciesConductivity, 1.0*Z);
+    }
+  }
+
+  DataOps::scale(a_cellConductivity, Units::Qe); // Scale by electron charge.
+}
+
+void CdrPlasmaStepper::computeFaceConductivity(EBAMRFluxData&       a_conductivityFace,
+					       EBAMRIVData&         a_conductivityEB,
+					       const EBAMRCellData& a_conductivityCell) const {
+  CH_TIME("CdrPlasmaStepper::computeFaceConductivity");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaStepper::computeFaceConductivity" << endl;
+  }
+
+  DataOps::setValue(a_conductivityFace, 0.0);
+  DataOps::setValue(a_conductivityEB,   0.0);
+
+  DataOps::averageCellToFace(a_conductivityFace, a_conductivityCell, m_amr->getDomains());
+
+  // Now compute the conductivity onthe EB.
+#if 1
+  const auto& interpStencil = m_amr->getCentroidInterpolationStencils(m_realm, phase::gas);
+  interpStencil.apply(a_conductivityEB, a_conductivityCell);
+#else
+  DataOps::incr(a_conductivityEB, a_conductivityCell, 1.0);
+#endif
+}
+
+void CdrPlasmaStepper::setupSemiImplicitPoisson(const Real a_dt){
+  CH_TIME("CdrPlasmaStepper::setupSemiImplicitPoisson");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaStepper::setupSemiImplicitPoisson" << endl;
+  }
+
+  // Compute the required conductivities.
+  EBAMRCellData conductivityCell;
+  EBAMRFluxData conductivityFace;
+  EBAMRIVData   conductivityEB;
+
+  m_amr->allocate(conductivityCell, m_realm, phase::gas, 1);
+  m_amr->allocate(conductivityFace, m_realm, phase::gas, 1);
+  m_amr->allocate(conductivityEB,   m_realm, phase::gas, 1);
+
+  this->computeCellConductivity(conductivityCell);
+  this->computeFaceConductivity(conductivityFace, conductivityEB, conductivityCell);
+
+  // Ok, we must now set up the semi implicit Poisson equation.
+  this->setupSemiImplicitPoisson(conductivityFace, conductivityEB, a_dt/Units::eps0);
+}
+
+void CdrPlasmaStepper::setupSemiImplicitPoisson(const EBAMRFluxData& a_conductivityFace,
+						const EBAMRIVData&   a_conductivityEB,
+						const Real           a_factor) {
+  CH_TIME("CdrPlasmaStepper::setupSemiImpliciPoisson");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaStepper::setupSemiImplicitPoisson" << endl;
+  }
+
+  // First, the field solver must set the permittivities as usual. The "permittivities" that we are after are
+  // eps = epsr + dt*sigma/eps0 (but we only have plasma on the gas phase).
+  m_fieldSolver->setPermittivities();
+
+  // Get the permittivities on the faces.
+  MFAMRFluxData& permFace = m_fieldSolver->getPermittivityFace();
+  MFAMRIVData&   permEB   = m_fieldSolver->getPermittivityEB();
+
+  EBAMRFluxData permFaceGas = m_amr->alias(phase::gas, permFace);
+  EBAMRIVData   permEBGas   = m_amr->alias(phase::gas, permEB  );
+
+  DataOps::incr(permFaceGas, a_conductivityFace, a_factor);
+  DataOps::incr(permEBGas,   a_conductivityEB,   a_factor);
+
+  // Now set up the solver with the new permittivities.
+  m_fieldSolver->setupSolver();
 }
 
 bool CdrPlasmaStepper::solvePoisson(){
@@ -870,7 +986,6 @@ void CdrPlasmaStepper::advanceReactionNetworkIrreg(Vector<EBCellFAB*>&          
 					      a_lvl,
 					      a_dit);
       break;
-      std::cout << "did itnerp" << std::endl;
     }
   case SourceTermComputation::CellAverage:
     {
@@ -988,6 +1103,7 @@ void CdrPlasmaStepper::advanceReactionNetworkIrregInterp(Vector<EBCellFAB*>&    
       cdrDensities[idx] = std::max(cdrDensities[idx], zero);
 
       // Interpolate gradients to centroids.
+      cdrGradients[idx] = RealVect::Zero;
       for (int i = 0; i < stencil.size(); i++){
 	for (int dir = 0; dir < SpaceDim; dir++){
 	  cdrGradients[idx][dir] += stencil.weight(i) * (*a_cdrGradients[idx])(stencil.vof(i), dir);
@@ -1215,6 +1331,7 @@ void CdrPlasmaStepper::advanceReactionNetworkIrregUpwind(Vector<EBCellFAB*>&    
       }
 
       // Interpolate gradients to centroids.
+      cdrGradients[idx] = RealVect::Zero;      
       for (int i = 0; i < stencil.size(); i++){
 	for (int dir = 0; dir < SpaceDim; dir++){
 	  cdrGradients[idx][dir] += stencil.weight(i) * (*a_cdrGradients[idx])(stencil.vof(i), dir);
@@ -2652,7 +2769,7 @@ void CdrPlasmaStepper::computeCdrDiffusion(){
     cdr_extrap[idx] = new EBAMRIVData();  // This must be deleted
     m_amr->allocate(*cdr_extrap[idx], m_realm, m_cdr->getPhase(), ncomp);
 
-    const IrregAmrStencil<EbCentroidInterpolationStencil>& stencil = m_amr->getEbCentroidInterpolationStencilStencils(m_realm, m_cdr->getPhase());
+    const IrregAmrStencil<EbCentroidInterpolationStencil>& stencil = m_amr->getEbCentroidInterpolationStencils(m_realm, m_cdr->getPhase());
     stencil.apply(*cdr_extrap[idx], *cdr_states[idx]);
   }
   
@@ -2687,7 +2804,7 @@ void CdrPlasmaStepper::computeCdrDiffusion(const EBAMRCellData& a_E_cell, const 
     cdr_extrap[idx] = new EBAMRIVData();  // This must be deleted
     m_amr->allocate(*cdr_extrap[idx], m_realm, m_cdr->getPhase(), ncomp);
 
-    const IrregAmrStencil<EbCentroidInterpolationStencil>& stencil = m_amr->getEbCentroidInterpolationStencilStencils(m_realm, m_cdr->getPhase());
+    const IrregAmrStencil<EbCentroidInterpolationStencil>& stencil = m_amr->getEbCentroidInterpolationStencils(m_realm, m_cdr->getPhase());
     stencil.apply(*cdr_extrap[idx], *cdr_states[idx]);
   }
   
@@ -2789,7 +2906,7 @@ void CdrPlasmaStepper::computeElectricField(EBAMRIVData& a_E_eb, const phase::wh
   CH_assert(a_E_eb[0]->nComp()   == SpaceDim);
   CH_assert(a_E_cell[0]->nComp() == SpaceDim);
 
-  const IrregAmrStencil<EbCentroidInterpolationStencil>& interp_stencil = m_amr->getEbCentroidInterpolationStencilStencils(m_realm, a_phase);
+  const IrregAmrStencil<EbCentroidInterpolationStencil>& interp_stencil = m_amr->getEbCentroidInterpolationStencils(m_realm, a_phase);
   interp_stencil.apply(a_E_eb, a_E_cell);
 }
 
@@ -2869,7 +2986,7 @@ void CdrPlasmaStepper::computeExtrapolatedFluxes(Vector<EBAMRIVData*>&        a_
   m_amr->allocate(eb_vel, m_realm, a_phase, SpaceDim);
   m_amr->allocate(eb_phi, m_realm, a_phase, 1);
 
-  const IrregAmrStencil<EbCentroidInterpolationStencil>& interp_stencils = m_amr->getEbCentroidInterpolationStencilStencils(m_realm, a_phase);
+  const IrregAmrStencil<EbCentroidInterpolationStencil>& interp_stencils = m_amr->getEbCentroidInterpolationStencils(m_realm, a_phase);
 
   //  for (int i = 0; i < a_fluxes.size(); i++){
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
@@ -3100,6 +3217,8 @@ void CdrPlasmaStepper::computeSpaceChargeDensity(EBAMRCellData& a_rho, const pha
 
   m_amr->averageDown(a_rho, m_realm, a_phase);
   m_amr->interpGhost(a_rho, m_realm, a_phase);
+
+  DataOps::setCoveredValue(a_rho, 0, 0.0);
 }
 
 void CdrPlasmaStepper::computeSpaceChargeDensity(MFAMRCellData&                 a_rho,
@@ -3174,7 +3293,7 @@ void CdrPlasmaStepper::extrapolateToEb(EBAMRIVData& a_extrap, const phase::which
     pout() << "CdrPlasmaStepper::extrapolateToEb" << endl;
   }
 
-  const IrregAmrStencil<EbCentroidInterpolationStencil>& stencils = m_amr->getEbCentroidInterpolationStencilStencils(m_realm, a_phase);
+  const IrregAmrStencil<EbCentroidInterpolationStencil>& stencils = m_amr->getEbCentroidInterpolationStencils(m_realm, a_phase);
   
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     extrapolateToEb(*a_extrap[lvl], a_phase, *a_data[lvl], lvl);
@@ -3190,7 +3309,7 @@ void CdrPlasmaStepper::extrapolateToEb(LevelData<BaseIVFAB<Real> >& a_extrap,
     pout() << "CdrPlasmaStepper::extrapolateToEb(level)" << endl;
   }
 
-  const IrregAmrStencil<EbCentroidInterpolationStencil>& stencils = m_amr->getEbCentroidInterpolationStencilStencils(m_realm, a_phase);
+  const IrregAmrStencil<EbCentroidInterpolationStencil>& stencils = m_amr->getEbCentroidInterpolationStencils(m_realm, a_phase);
   stencils.apply(a_extrap, a_data, a_lvl);
 }
 
@@ -4157,80 +4276,30 @@ Real CdrPlasmaStepper::computeRelaxationTime(){
     pout() << "CdrPlasmaStepper::computeRelaxationTime" << endl;
   }
 
-  const int comp         = 0;
-  const int finest_level = 0;
-  const Real SAFETY      = 1.E-20;
+  // TLDR: This computes the relaxation time as t = eps0/conductivity. Simple as that. 
 
-  Real t1 = Timer::wallClock();
-  EBAMRCellData E, J, dt;
-  m_amr->allocate(E,  m_realm, m_cdr->getPhase(), SpaceDim);
-  m_amr->allocate(J,  m_realm, m_cdr->getPhase(), SpaceDim);
-  m_amr->allocate(dt, m_realm, m_cdr->getPhase(), 1);
+  EBAMRCellData relaxTime;
+  EBAMRCellData conductivity;
 
-  DataOps::setValue(dt, 1.234567E89);
+  m_amr->allocate(relaxTime,    m_realm, phase::gas, 1);
+  m_amr->allocate(conductivity, m_realm, phase::gas, 1);
 
-  this->computeElectricField(E, m_cdr->getPhase(), m_fieldSolver->getPotential());
-  this->computeJ(J);
+  this->computeCellConductivity(conductivity);
 
-  // Find the largest electric field in each direction
-  Vector<Real> max_E(SpaceDim);
-  for (int dir = 0; dir < SpaceDim; dir++){
-
-    Real max, min;
-    DataOps::getMaxMin(max, min, E, dir);
-    max_E[dir] = Max(Abs(max), Abs(min));
-  }
-
-  const int finest_relax_level = finest_level;
+  m_amr->averageDown(conductivity, m_realm, phase::gas);
+  m_amr->interpGhost(conductivity, m_realm, phase::gas);
   
-  for (int lvl = 0; lvl <= finest_relax_level; lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_cdr->getPhase())[lvl];
+  m_amr->interpToCentroids(conductivity, m_realm, phase::gas);  
 
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const Box& box         = dbl.get(dit());
-      const EBISBox& ebisbox = ebisl[dit()];
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
-      const IntVectSet ivs(box);
-      
-      EBCellFAB& dt_fab  = (*dt[lvl])[dit()];
-      const EBCellFAB& e = (*E[lvl])[dit()];
-      const EBCellFAB& j = (*J[lvl])[dit()];
+  DataOps::setValue(relaxTime, Units::eps0);
+  DataOps::divideByScalar(relaxTime, conductivity);
 
-      EBCellFAB e_magnitude(ebisbox, box, 1);
-      EBCellFAB j_magnitude(ebisbox, box, 1);
+  Real maxVal;
+  Real minVal;
 
-      // Compute magnitudes, increment with safety factor to avoid division by zero
-      e_magnitude.setVal(0.0);
-      j_magnitude.setVal(0.0);
-      
-      DataOps::vectorLength(e_magnitude, e, box);
-      DataOps::vectorLength(j_magnitude, j, box);
-      j_magnitude += SAFETY;      
-
-      dt_fab.setVal(Units::eps0);
-      dt_fab *= e_magnitude;
-      dt_fab /= j_magnitude;
-
-      // Now do the irregular cells
-      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
-      for (vofit.reset(); vofit.ok(); ++vofit){
-	const VolIndex& vof = vofit();
-	const RealVect ee = RealVect(D_DECL(e(vof, 0), e(vof, 1), e(vof, 2)));
-	const RealVect jj = RealVect(D_DECL(j(vof, 0), j(vof, 1), j(vof, 2)));
-
-	dt_fab(vof, comp) = Abs(Units::eps0*ee.vectorLength()/(1.E-20 + jj.vectorLength()));
-      }
-    }
-  }
-
-  // Find the smallest dt
-  Real min_dt = 1.E99;
-  Real max, min;
-  DataOps::getMaxMin(max, min, dt, comp);
-  min_dt = Min(min_dt, min);
-
-  return min_dt;
+  DataOps::getMaxMinNorm(maxVal, minVal, relaxTime);
+  
+  return minVal;
 }
 
 Real CdrPlasmaStepper::getTime(){
