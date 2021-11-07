@@ -12,6 +12,7 @@
 // Std includes
 #include <fstream>
 #include <iostream>
+#include <sstream>
 
 // Chombo includes
 #include <EBArith.H>

@@ -3636,7 +3636,7 @@ void CdrPlasmaStepper::regrid(const int a_lmin, const int a_old_finest, const in
   // If we don't converge, try new Poisson solver settings
   if(!converged){ 
     if(m_verbosity > 0){
-      pout() << "Driver::regrid - Poisson solver failed to converge." << endl;
+      pout() << "CdrPlasmaStepper::regrid - Poisson solver failed to converge." << endl;
     }
   }
 
@@ -4332,9 +4332,9 @@ RefCountedPtr<SigmaSolver>& CdrPlasmaStepper::getSigmaSolver(){
 
 #ifdef CH_USE_HDF5
 void CdrPlasmaStepper::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const{
-  CH_TIME("Driver::writeCheckpointData");
+  CH_TIME("CdrPlasmaStepper::writeCheckpointData");
   if(m_verbosity > 3){
-    pout() << "Driver::writeCheckpointData" << endl;
+    pout() << "CdrPlasmaStepper::writeCheckpointData" << endl;
   }
 
   // CDR solvers checkpoint their data
@@ -4356,9 +4356,9 @@ void CdrPlasmaStepper::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl
 
 #ifdef CH_USE_HDF5
 void CdrPlasmaStepper::readCheckpointData(HDF5Handle& a_handle, const int a_lvl){
-  CH_TIME("Driver::readCheckpointData");
+  CH_TIME("CdrPlasmaStepper::readCheckpointData");
   if(m_verbosity > 3){
-    pout() << "Driver::readCheckpointData" << endl;
+    pout() << "CdrPlasmaStepper::readCheckpointData" << endl;
   }
 
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
@@ -4506,7 +4506,7 @@ void CdrPlasmaStepper::printStepReport(){
     str = " (Restricted by diffusion)";
   }
   else if(m_timeCode == TimeCode::Source){
-    MayDay::Abort("Driver::stepReport - shouldn't happen, source term has been taken out of the design");
+    MayDay::Error("CdrPlasmaStepper::stepReport - shouldn't happen, source term has been taken out of the design");
     str = " (Restricted by source term)";
   }
   else if(m_timeCode == TimeCode::RelaxationTime){

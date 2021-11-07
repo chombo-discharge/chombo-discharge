@@ -9,6 +9,9 @@
   @author Robert Marskar
 */
 
+// Std includes
+#include <sstream>
+
 // Chombo includes
 #include <EBCellFactory.H>
 #include <EBLevelDataOps.H>
