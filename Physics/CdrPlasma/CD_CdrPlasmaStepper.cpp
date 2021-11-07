@@ -119,13 +119,15 @@ void CdrPlasmaStepper::computeCellConductivity(EBAMRCellData& a_cellConductivity
 
       const int Z = species->getChargeNumber();
 
-      // Let f = speciesConductivity, this does as follows:
-      DataOps::vectorLength  (speciesConductivity, cellVel       ); // Compute f = |v|
-      DataOps::divideByScalar(speciesConductivity, fieldMagnitude); // Compute f = |v|/|E| = |mu|
-      DataOps::multiply      (speciesConductivity, phi           ); // Compute f = mu*n
+      // In the below comments, f = speciesConductivity
+      if(Z != 0){
+	DataOps::vectorLength  (speciesConductivity, cellVel       ); // Compute f = |v|
+	DataOps::divideByScalar(speciesConductivity, fieldMagnitude); // Compute f = |v|/|E| = |mu|
+	DataOps::multiply      (speciesConductivity, phi           ); // Compute f = mu*n
 
-      // Add to total conductivity contribution.
-      DataOps::incr(a_cellConductivity, speciesConductivity, 1.0*Z);
+	// Add to total conductivity. 
+	DataOps::incr(a_cellConductivity, speciesConductivity, 1.0*std::abs(Z));
+      }
     }
   }
 
