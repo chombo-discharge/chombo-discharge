@@ -535,10 +535,18 @@ void CdrPlasmaGodunovStepper::computeCdrGradients(){
     RefCountedPtr<CdrSolver>& solver = solver_it();
     RefCountedPtr<CdrStorage>& storage = CdrPlasmaGodunovStepper::getCdrStorage(solver_it);
 
-    EBAMRCellData& grad = storage->getGradient();
-    m_amr->computeGradient(grad, solver->getPhi(), m_realm, phase::gas);
-    m_amr->averageDown(grad, m_realm, m_cdr->getPhase());
-    m_amr->interpGhost(grad, m_realm, m_cdr->getPhase());
+    EBAMRCellData& scratch = storage->getScratch();
+    EBAMRCellData& grad    = storage->getGradient();
+
+    scratch.copy(solver->getPhi());
+
+    m_amr->averageDown  (scratch, m_realm, m_phase);
+    m_amr->interpGhostMG(scratch, m_realm, m_phase);
+    
+    m_amr->computeGradient(grad, scratch, m_realm, phase::gas);
+    
+    m_amr->averageDown  (grad, m_realm, m_cdr->getPhase());
+    m_amr->interpGhostMG(grad, m_realm, m_cdr->getPhase());
   }
 }
 

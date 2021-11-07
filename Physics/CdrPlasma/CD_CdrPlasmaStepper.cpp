@@ -24,9 +24,9 @@
 #include <CD_NamespaceHeader.H>
 
 // C-style VLA methods can have occasional memory issues. Use them at your own peril. 
-#define USE_FAST_REACTIONS  1
+#define USE_FAST_REACTIONS  0
 #define USE_FAST_VELOCITIES 0
-#define USE_FAST_DIFFUSION  1
+#define USE_FAST_DIFFUSION  0
 
 using namespace Physics::CdrPlasma;
 
@@ -986,7 +986,6 @@ void CdrPlasmaStepper::advanceReactionNetworkIrreg(Vector<EBCellFAB*>&          
 					      a_lvl,
 					      a_dit);
       break;
-      std::cout << "did itnerp" << std::endl;
     }
   case SourceTermComputation::CellAverage:
     {
@@ -1104,6 +1103,7 @@ void CdrPlasmaStepper::advanceReactionNetworkIrregInterp(Vector<EBCellFAB*>&    
       cdrDensities[idx] = std::max(cdrDensities[idx], zero);
 
       // Interpolate gradients to centroids.
+      cdrGradients[idx] = RealVect::Zero;
       for (int i = 0; i < stencil.size(); i++){
 	for (int dir = 0; dir < SpaceDim; dir++){
 	  cdrGradients[idx][dir] += stencil.weight(i) * (*a_cdrGradients[idx])(stencil.vof(i), dir);
@@ -1331,6 +1331,7 @@ void CdrPlasmaStepper::advanceReactionNetworkIrregUpwind(Vector<EBCellFAB*>&    
       }
 
       // Interpolate gradients to centroids.
+      cdrGradients[idx] = RealVect::Zero;      
       for (int i = 0; i < stencil.size(); i++){
 	for (int dir = 0; dir < SpaceDim; dir++){
 	  cdrGradients[idx][dir] += stencil.weight(i) * (*a_cdrGradients[idx])(stencil.vof(i), dir);
@@ -3216,6 +3217,8 @@ void CdrPlasmaStepper::computeSpaceChargeDensity(EBAMRCellData& a_rho, const pha
 
   m_amr->averageDown(a_rho, m_realm, a_phase);
   m_amr->interpGhost(a_rho, m_realm, a_phase);
+
+  DataOps::setCoveredValue(a_rho, 0, 0.0);
 }
 
 void CdrPlasmaStepper::computeSpaceChargeDensity(MFAMRCellData&                 a_rho,
