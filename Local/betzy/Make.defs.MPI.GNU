@@ -118,7 +118,7 @@ CXX            = g++
 FC             = gfortran
 MPI            = TRUE
 ## Note: don't set the MPICXX variable if you don't have MPI installed
-MPICXX         = mpicxx
+MPICXX         = mpic++
 #OBJMODEL      =
 #XTRACONFIG    =
 ## Optional features
