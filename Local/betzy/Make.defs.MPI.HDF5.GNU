@@ -118,7 +118,7 @@ CXX            = g++
 FC             = gfortran
 MPI            = TRUE
 ## Note: don't set the MPICXX variable if you don't have MPI installed
-MPICXX         = mpicxx
+MPICXX         = mpic++
 #OBJMODEL      =
 #XTRACONFIG    =
 ## Optional features
@@ -128,11 +128,11 @@ CXXSTD         = 14
 USE_EB         = TRUE
 #USE_CCSE      =
 USE_HDF        = TRUE
-HDFINCFLAGS    = -I/cluster/software/HDF5/1.10.6-gompi-2020a/include
-HDFLIBFLAGS    = -L/cluster/software/HDF5/1.10.6-gompi-2020a/lib -lhdf5 -lz
+HDFINCFLAGS    = -I/cluster/software/HDF5/1.10.7-gompi-2021a/include
+HDFLIBFLAGS    = -L/cluster/software/HDF5/1.10.7-gompi-2021a/lib -lhdf5 -lz
 ## Note: don't set the HDFMPI* variables if you don't have parallel HDF installed
-HDFMPIINCFLAGS = -I/cluster/software/HDF5/1.10.6-gompi-2020a/include
-HDFMPILIBFLAGS = -L/cluster/software/HDF5/1.10.6-gompi-2020a/lib -lhdf5 -lz
+HDFMPIINCFLAGS = -I/cluster/software/HDF5/1.10.7-gompi-2021a/include
+HDFMPILIBFLAGS = -L/cluster/software/HDF5/1.10.7-gompi-2021a/lib -lhdf5 -lz
 USE_MF         = TRUE
 #USE_MT        =
 #USE_SETVAL    =
