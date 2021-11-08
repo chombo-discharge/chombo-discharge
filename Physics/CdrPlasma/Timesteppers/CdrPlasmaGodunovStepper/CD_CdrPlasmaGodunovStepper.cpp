@@ -361,11 +361,11 @@ void CdrPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLeve
       }
     }
 
-    m_amr->averageDown(m_conductivityFactor, m_realm, m_phase);
-    m_amr->interpGhost(m_conductivityFactor, m_realm, m_phase);
+    m_amr->averageDown  (m_conductivityFactor, m_realm, m_phase);
+    m_amr->interpGhostMG(m_conductivityFactor, m_realm, m_phase);
 
-    m_amr->averageDown(m_semiImplicitRho, m_realm, m_phase);
-    m_amr->interpGhost(m_semiImplicitRho, m_realm, m_phase);        
+    m_amr->averageDown  (m_semiImplicitRho, m_realm, m_phase);
+    m_amr->interpGhostMG(m_semiImplicitRho, m_realm, m_phase);
 
     // preRegrid will have been called before this routine, so use the conductivities from that. Note that we store m_conductivityFactor as sigma^k*dt/eps0
     // but the semi-implicit routine will take dt as an argument and 
@@ -418,7 +418,7 @@ bool CdrPlasmaGodunovStepper::solveSemiImplicitPoisson(){
   EBAMRCellData  rhoPhase = m_amr->alias(m_phase, rho);
   
   DataOps::setValue(rho, 0.0);
-  DataOps::incr(rhoPhase, m_semiImplicitRho, 1.0);
+  DataOps::copy(rhoPhase, m_semiImplicitRho);
 
   m_amr->averageDown(rho, m_realm);
   m_amr->interpGhost(rho, m_realm);
@@ -1387,7 +1387,7 @@ void CdrPlasmaGodunovStepper::readCheckpointData(HDF5Handle& a_handle, const int
 
   CdrPlasmaStepper::readCheckpointData(a_handle, a_lvl);
 
-  read(a_handle, *m_semiImplicitRho   [a_lvl], "semiImplicitRho",  m_amr->getGrids(m_realm)[a_lvl], interv, false);
+  read(a_handle, *m_semiImplicitRho   [a_lvl], "semiImplicitRho",    m_amr->getGrids(m_realm)[a_lvl], interv, false);
   read(a_handle, *m_conductivityFactor[a_lvl], "conductivityFactor", m_amr->getGrids(m_realm)[a_lvl], interv, false);  
 }
 #endif      
