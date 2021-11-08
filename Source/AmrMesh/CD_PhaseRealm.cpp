@@ -23,7 +23,6 @@
 #include <CD_EbFastFluxRegister.H>
 #include <CD_EBMultigridInterpolator.H>
 #include <CD_EBLeastSquaresMultigridInterpolator.H>
-#include <CD_EBChomboMultigridInterpolator.H>
 #include <CD_NamespaceHeader.H>
 
 PhaseRealm::PhaseRealm(){
