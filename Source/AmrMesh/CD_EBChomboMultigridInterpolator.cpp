@@ -33,7 +33,6 @@ int EBChomboMultigridInterpolator::getGhostCF() const {
   return 1;
 }
 
-
 void EBChomboMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar, const Interval a_variables) {
   CH_TIME("EBChomboMultigridInterpolator::coarseFineInterp");
 

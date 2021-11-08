@@ -21,6 +21,9 @@
 
 /*!
   @brief Interpolator class which uses the Chombo EB interpolator for multigrid. 
+  @details This class fills only a single layer of ghost cells. The user must make sure that the cut-cell stencils only has a radius of one if there's an EBCF situation. If
+  this class is used together with EBHelmholtzOp, EBHelmholtzOp will call getGhostCF which signals how many ghost cells were filled and automatically adjust the stencils
+  from that. 
 */
 class EBChomboMultigridInterpolator : public EBMultigridInterpolator {
 public:
