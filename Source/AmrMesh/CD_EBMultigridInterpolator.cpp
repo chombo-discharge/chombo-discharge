@@ -9,6 +9,9 @@
   @author Robert Marskar
 */
 
+// Chombo includes
+#include <CH_Timer.H>
+
 // Our includes
 #include <CD_EBMultigridInterpolator.H>
 #include <CD_NamespaceHeader.H>

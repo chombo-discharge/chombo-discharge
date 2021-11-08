@@ -33,13 +33,13 @@ constexpr int EBLeastSquaresMultigridInterpolator::m_numStenComp;
 constexpr int EBLeastSquaresMultigridInterpolator::m_comp;
 
 EBLeastSquaresMultigridInterpolator::EBLeastSquaresMultigridInterpolator(const EBLevelGrid& a_eblgFine,
-						 const EBLevelGrid& a_eblgCoar,
-						 const CellLocation a_dataLocation,
-						 const IntVect&     a_ghostVector,
-						 const int          a_refRat,
-						 const int          a_ghostCF,
-						 const int          a_order,
-						 const int          a_weighting){
+									 const EBLevelGrid& a_eblgCoar,
+									 const CellLocation a_dataLocation,
+									 const IntVect&     a_ghostVector,
+									 const int          a_refRat,
+									 const int          a_ghostCF,
+									 const int          a_order,
+									 const int          a_weighting){
   CH_TIME("EBLeastSquaresMultigridInterpolator::EBLeastSquaresMultigridInterpolator");
 
   CH_assert(a_ghostCF   > 0);
@@ -105,8 +105,8 @@ EBLeastSquaresMultigridInterpolator::~EBLeastSquaresMultigridInterpolator(){
 }
 
 void EBLeastSquaresMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>&       a_phiFine,
-					       const LevelData<EBCellFAB>& a_phiCoar,
-					       const Interval              a_variables) {
+							   const LevelData<EBCellFAB>& a_phiCoar,
+							   const Interval              a_variables) {
   CH_TIME("EBLeastSquaresMultigridInterpolator::coarseFineInterp");
 
   CH_assert(m_ghostCF == a_phiFine.ghostVect());
@@ -214,8 +214,8 @@ void EBLeastSquaresMultigridInterpolator::coarseFineInterpH(EBCellFAB& a_phi, co
 }
 
 void EBLeastSquaresMultigridInterpolator::slowCoarseFineInterp(LevelData<EBCellFAB>&       a_phiFine,
-						   const LevelData<EBCellFAB>& a_phiCoar,
-						   const Interval              a_variables){
+							       const LevelData<EBCellFAB>& a_phiCoar,
+							       const Interval              a_variables){
   CH_TIME("EBLeastSquaresMultigridInterpolator::slowCoarseFineInterp");
   
   CH_assert(m_ghostCF <= a_phiFine.ghostVect());
@@ -590,18 +590,18 @@ void EBLeastSquaresMultigridInterpolator::defineStencilsEBCF(){
 }
 
 bool EBLeastSquaresMultigridInterpolator::getStencil(VoFStencil&            a_stencilFine,
-					 VoFStencil&            a_stencilCoar,
-					 const CellLocation&    a_dataLocation,
-					 const VolIndex&        a_ghostVofFine,
-					 const VolIndex&        a_ghostVofCoar,
-					 const EBISBox&         a_ebisboxFine,
-					 const EBISBox&         a_ebisboxCoar,
-					 const DenseIntVectSet& a_validFineCells,
-					 const DenseIntVectSet& a_validCoarCells,
-					 const Real&            a_dxFine,
-					 const Real&            a_dxCoar,
-					 const int&             a_order,
-					 const int&             a_weight){
+						     VoFStencil&            a_stencilCoar,
+						     const CellLocation&    a_dataLocation,
+						     const VolIndex&        a_ghostVofFine,
+						     const VolIndex&        a_ghostVofCoar,
+						     const EBISBox&         a_ebisboxFine,
+						     const EBISBox&         a_ebisboxCoar,
+						     const DenseIntVectSet& a_validFineCells,
+						     const DenseIntVectSet& a_validCoarCells,
+						     const Real&            a_dxFine,
+						     const Real&            a_dxCoar,
+						     const int&             a_order,
+						     const int&             a_weight){
   CH_TIME("EBLeastSquaresMultigridInterpolator::getStencil");
 
   // On input, we know which ghost cell we want to interpolate to, and we happen to have a map of valid cells in a_validFineCells and a_validCoarCells. We use
