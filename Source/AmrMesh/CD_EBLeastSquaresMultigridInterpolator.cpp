@@ -410,7 +410,7 @@ void EBLeastSquaresMultigridInterpolator::defineGhostRegions(){
 
       // 2. Only include ghost cells that are within range m_ghostCF of an irregular grid cell
       IntVectSet irreg = ebisbox.getIrregIVS(cellBox);
-      irreg.grow(m_ghostCF);
+      irreg.grow(2*m_refRat);
       m_ghostCells[dit()] &= irreg;
     }
   }
