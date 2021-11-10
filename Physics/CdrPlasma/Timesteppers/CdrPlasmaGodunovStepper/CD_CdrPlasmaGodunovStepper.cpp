@@ -377,9 +377,7 @@ void CdrPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLeve
 
     // If we don't converge, try new Poisson solver settings
     if(!converged){ 
-      if(m_verbosity > 0){
-	pout() << "CdrPlasmaGodunovStepper::regrid - Poisson solver failed to converge during semi-implicit regrid." << endl;
-      }
+      pout() << "CdrPlasmaGodunovStepper::regrid - Poisson solver failed to converge during semi-implicit regrid." << endl;
     }
 
     // Compute stuff that is important for the CDR solvers. 
@@ -397,6 +395,41 @@ void CdrPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLeve
   }
 }
 
+void CdrPlasmaGodunovStepper::postCheckpointSetup(){
+  CH_TIME("CdrPlasmaGodunovStepper::postCheckpointSetup");
+  if(m_verbosity > 5){
+    pout() << "CdrPlasmaGodunovStepper::postCheckpointSetup" << endl;
+  }
+
+  if(m_transportAlgorithm == TransportAlgorithm::SemiImplicit){
+    
+    // When we enter this routine we will already have called read the checkpoint data into the conductivityFactor and semiimplicit space charge. We need
+    // to set up the field solver with those quantities rather than the regular space charge. 
+    this->computeFaceConductivity (m_conductivityFace, m_conductivityEB, m_conductivityFactor);
+    this->setupSemiImplicitPoisson(m_conductivityFace, m_conductivityEB, 1.0);
+  
+    // Now solve for the field on the new grids.
+    const bool converged = this->solveSemiImplicitPoisson();
+    if(!converged){
+      pout() << "CdrPlasmaGodunovStepper::regrid - Poisson solver failed to converge during restart." << endl;
+    }
+  
+    // Now compute the drift and diffusion velocities and update the source terms. 
+    CdrPlasmaStepper::computeCdrDriftVelocities();
+    CdrPlasmaStepper::computeCdrDiffusion();
+
+    if(this->stationary_rte()){     // Solve RTE equations by using data that exists inside solvers
+      const Real dummy_dt = 1.0;
+
+      // Need new source terms for RTE equations
+      this->advanceReactionNetwork(m_time, dummy_dt);
+      this->solveRadiativeTransfer(dummy_dt);    // Argument does not matter, it's a stationary solver.
+    }
+  }
+  else{
+    CdrPlasmaStepper::postCheckpointSetup();
+  }
+}
 
 void CdrPlasmaGodunovStepper::regridInternals(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel){
   CH_TIME("CdrPlasmaGodunovStepper::regridInternals");

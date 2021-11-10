@@ -48,6 +48,7 @@ namespace Physics {
       void allocateInternals() override;
       void deallocateInternals() override;
       void computeDt(Real& a_dt, TimeCode& a_timeCode) override;
+      void postCheckpointSetup() override;
       bool needToRegrid() override;
 
     protected:
