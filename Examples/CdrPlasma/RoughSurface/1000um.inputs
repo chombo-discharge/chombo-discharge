@@ -185,9 +185,9 @@ RodDielectric.dielectric.permittivity   = 4             # Dielectric permittivit
 # Subsettings for 'perlin_box'
 RodDielectric.perlin_box.point          = 0. 1.001E-2   # Slab center-point (side with roughness)
 RodDielectric.perlin_box.normal         = 0  1          # Slab normal
-RodDielectric.perlin_box.curvature      = 500E-6        # Slab rounding radius
+RodDielectric.perlin_box.curvature      = 1E-3          # Slab rounding radius
 RodDielectric.perlin_box.dimensions     = 7.001E-2 2E-2 # Slab dimensions
-RodDielectric.perlin_box.noise_amp      = 1E-3          # Noise amplitude
+RodDielectric.perlin_box.noise_amp      = 1000E-6       # Noise amplitude
 RodDielectric.perlin_box.noise_octaves  = 5             # Noise octaves
 RodDielectric.perlin_box.noise_persist  = 0.5           # Octave persistence
 RodDielectric.perlin_box.noise_freq     = 1E3 1E3       # Noise frequency
