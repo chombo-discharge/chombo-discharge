@@ -989,6 +989,24 @@ void CdrPlasmaStepper::advanceReactionNetworkIrreg(Vector<EBCellFAB*>&          
 					      a_dit);
       break;
     }
+  case SourceTermComputation::InterpolatedStable:
+    {
+      this->advanceReactionNetworkIrregUpwind(a_particle_sources,
+					      a_Photon_sources,
+					      a_particle_densities,
+					      a_particle_gradients,
+					      a_particle_velocities,					      
+					      a_Photon_densities,
+					      a_interp_stencils,
+					      a_E,
+					      a_time,
+					      a_dt,
+					      a_dx,
+					      a_box,
+					      a_lvl,
+					      a_dit);      
+      break;	
+    }
   case SourceTermComputation::CellAverage:
     {
       this->advanceReactionNetworkIrregKappa(a_particle_sources,
@@ -3832,6 +3850,9 @@ void CdrPlasmaStepper::parseSourceComputation(){
 
     if(str == "interp"){
       m_whichSourceTermComputation = SourceTermComputation::Interpolated;
+    }
+    else if (str == "interp2"){
+      m_whichSourceTermComputation = SourceTermComputation::InterpolatedStable;
     }
     else if(str == "cell_ave"){
       m_whichSourceTermComputation = SourceTermComputation::CellAverage;

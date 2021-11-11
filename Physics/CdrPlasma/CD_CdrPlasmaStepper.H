@@ -53,6 +53,7 @@ namespace Physics {
       */
       enum class SourceTermComputation {
 	Interpolated,
+	InterpolatedStable,	
 	CellAverage,
 	Upwind
       };
