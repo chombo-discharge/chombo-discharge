@@ -53,7 +53,7 @@ Driver.geometry_only                   = false            # Special option that 
 Driver.write_memory                    = false            # Write MPI memory report
 Driver.write_loads                     = false            # Write (accumulated) computational loads
 Driver.output_directory                = ./               # Output directory
-Driver.output_names                    = 1000um           # Simulation output names
+Driver.output_names                    = 200um            # Simulation output names
 Driver.max_plot_depth                  = -1               # Restrict maximum plot depth (-1 => finest simulation level)
 Driver.max_chk_depth                   = -1               # Restrict chechkpoint depth (-1 => finest simulation level)	
 Driver.num_plot_ghost                  = 1                # Number of ghost cells to include in plots
@@ -187,7 +187,7 @@ RodDielectric.perlin_box.point          = 0. 1.001E-2   # Slab center-point (sid
 RodDielectric.perlin_box.normal         = 0  1          # Slab normal
 RodDielectric.perlin_box.curvature      = 1E-3          # Slab rounding radius
 RodDielectric.perlin_box.dimensions     = 7.001E-2 2E-2 # Slab dimensions
-RodDielectric.perlin_box.noise_amp      = 1000E-6       # Noise amplitude
+RodDielectric.perlin_box.noise_amp      = 200E-6        # Noise amplitude
 RodDielectric.perlin_box.noise_octaves  = 3             # Noise octaves
 RodDielectric.perlin_box.noise_persist  = 0.5           # Octave persistence
 RodDielectric.perlin_box.noise_freq     = 2E3 2E3       # Noise frequency
