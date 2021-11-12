@@ -158,32 +158,32 @@ void SigmaSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int
 
     // Loop through coarse grid and interpolate to fine grid
     for (DataIterator dit = coarGrid.dataIterator(); dit.ok(); ++dit){
-      BaseIVFAB<Real>& fine_state       = (*m_phi[lvl])[dit()];
-      const BaseIVFAB<Real>& coar_state = coFiData     [dit()];
-      const EBISBox& coar_ebisbox       = coarEBISL    [dit()];
-      const EBISBox& fine_ebisbox       = fineEBISL    [dit()];
+      BaseIVFAB<Real>& fineState       = (*m_phi[lvl])[dit()];
+      const BaseIVFAB<Real>& coarState = coFiData     [dit()];
+      const EBISBox& coarEBISBox       = coarEBISL    [dit()];
+      const EBISBox& fineEBISBox       = fineEBISL    [dit()];
 
-      const IntVectSet ivs   = fine_state.getIVS();
-      const EBGraph& ebgraph = fine_state.getEBGraph();
+      const IntVectSet ivs   = fineState.getIVS();
+      const EBGraph& ebgraph = fineState.getEBGraph();
 
       for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	const VolIndex& fine_vof = vofit();
-	const VolIndex  coar_vof = fineEBISL.coarsen(fine_vof, nref, dit());
-	const Real coarArea      = coar_ebisbox.bndryArea(coar_vof);
+	const VolIndex& fineVof = vofit();
+	const VolIndex  coarVof = fineEBISL.coarsen(fineVof, nref, dit());
+	const Real coarArea     = coarEBISBox.bndryArea(coarVof);
 	
-	// Same sigma for all refined cells such that charge is conserved. 
-	const Vector<VolIndex> refined_vofs = coarEBISL.refine(coar_vof, nref, dit());
+	// Same sigma for all refined cells such that charge is conserved. This is equivalent to constant interpolation.
+	const Vector<VolIndex> refinedVofs = coarEBISL.refine(coarVof, nref, dit());
 	Real fineArea = 0.0;
-	for (int i = 0; i < refined_vofs.size(); i++){
-	  fineArea += fine_ebisbox.bndryArea(refined_vofs[i]);
+	for (int i = 0; i < refinedVofs.size(); i++){
+	  fineArea += fineEBISBox.bndryArea(refinedVofs[i]);
 	}
 
 	// Initialize conserved charge. If there is no real area just set the state to zero. 
 	if(fineArea > 0.0 && coarArea > 0.0){
-	  fine_state(fine_vof, m_comp) = coar_state(coar_vof, m_comp)*nref*coarArea/fineArea;
+	  fineState(fineVof, m_comp) = coarState(coarVof, m_comp)*nref*coarArea/fineArea;
 	}
 	else{
-	  fine_state(fine_vof, m_comp) = 0.0;
+	  fineState(fineVof, m_comp) = 0.0;
 	}
       }
     }
