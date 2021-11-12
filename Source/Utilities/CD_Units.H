@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_Units.H
-  @brief  Declaration of various use units
+  @brief  Declaration of various useful units
   @author Robert Marskar
 */
 

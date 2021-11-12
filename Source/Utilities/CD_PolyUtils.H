@@ -23,6 +23,14 @@
   @brief Agglomeration class for various useful polynomial routines
 */
 namespace PolyUtils {
+
+  /*!
+    @brief Compute the root of a function between two points. This is a 1D problem along the line
+    @param[in] a_impFunc Implicit function
+    @param[in] a_point1  First end-point
+    @param[in] a_point2  Other end-point
+    @note The root MUST be bracketed, i.e. f(x1)*f(x2) < 0.0. Anything else is an error.
+  */
   RealVect brentRootFinder(const RefCountedPtr<BaseIF>& a_impFunc, const RealVect& a_point1, const RealVect& a_point2);
 };
 
