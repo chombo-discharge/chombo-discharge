@@ -26,38 +26,67 @@ Photon::Photon(const RealVect& a_position, const RealVect& a_velocity, const Rea
 }
 
 void Photon::define(const RealVect& a_position, const RealVect& a_velocity, const Real& a_kappa, const Real a_mass){
-  setPosition(a_position);
-  setVelocity(a_velocity);
-  setKappa(a_kappa);
-  setMass(a_mass);
+  this->setPosition(a_position);
+  this->setVelocity(a_velocity);
+  this->setKappa(a_kappa);
+  this->setMass(a_mass);
 }
 
-// Set get functions
-void Photon::setKappa(const Real a_kappa)           { m_kappa    = a_kappa;    }
-void Photon::setMass(const Real a_mass)             { m_mass   = a_mass;   }
-void Photon::setVelocity(const RealVect& a_velocity){ m_velocity = a_velocity; }
+void Photon::setKappa(const Real a_kappa) {
+  m_kappa    = a_kappa;
+}
 
-Real&     Photon::mass()    { return m_mass;   }
-Real&     Photon::kappa()   { return m_kappa;    }
-RealVect& Photon::velocity(){ return m_velocity; }
+void Photon::setMass(const Real a_mass) {
+  m_mass   = a_mass;
+}
 
-const Real&     Photon::kappa()    const{ return m_kappa;    }
-const Real&     Photon::mass()     const{ return m_mass;   }
-const RealVect& Photon::velocity() const{ return m_velocity; }
+void Photon::setVelocity(const RealVect& a_velocity){
+  m_velocity = a_velocity;
+}
 
-// Comparison functions
-bool Photon::operator == (const Photon* a_p) const{ return (*this == *a_p); }
-bool Photon::operator != (const Photon& a_p) const{ return !(*this == a_p); }
+Real& Photon::mass() {
+  return m_mass;
+}
+Real& Photon::kappa() {
+  return m_kappa;
+}
+
+RealVect& Photon::velocity() {
+  return m_velocity;
+}
+
+const Real& Photon::kappa() const {
+  return m_kappa;
+}
+
+const Real& Photon::mass() const {
+  return m_mass;
+}
+
+const RealVect& Photon::velocity() const {
+  return m_velocity;
+}
+
+bool Photon::operator == (const Photon* a_p) const{
+  return (*this == *a_p);
+}
+
+bool Photon::operator != (const Photon& a_p) const{
+  return !(*this == a_p);
+}
+
 bool Photon::operator == (const Photon& a_p) const {
   return ( m_position  == a_p.m_position &&
 	   m_velocity  == a_p.m_velocity &&
-	   m_kappa     == a_p.m_kappa &&
-	   m_mass    == a_p.m_mass);
+	   m_kappa     == a_p.m_kappa    &&
+	   m_mass      == a_p.m_mass       );
 }
 
-int Photon::size() const{ return ( BinItem::size() + sizeof(m_velocity) + sizeof(m_kappa) + sizeof(m_mass)); }
+int Photon::size() const{
+  return ( BinItem::size() + sizeof(m_velocity) + sizeof(m_kappa) + sizeof(m_mass));
+}
 
-void Photon::linearOut(void* buf) const{
+void Photon::linearOut(void* buf) const {
   Real* buffer = (Real*)buf;
   D_TERM6( *buffer++ = m_position[0];,
 	   *buffer++ = m_position[1];,

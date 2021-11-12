@@ -41,7 +41,7 @@ public:
   }
 
   /*!
-    @brief Destructor
+    @brief Destructor (does nothing)
   */
   virtual ~RtIterator(){
 
