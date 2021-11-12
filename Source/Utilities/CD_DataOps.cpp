@@ -23,53 +23,66 @@
 #include <CD_DataOpsF_F.H>
 #include <CD_NamespaceHeader.H>
 
-void DataOps::averageCellVectorToFaceScalar(EBAMRFluxData&               a_facedata,
-					    const EBAMRCellData&         a_celldata,
+void DataOps::averageCellVectorToFaceScalar(EBAMRFluxData&               a_faceData,
+					    const EBAMRCellData&         a_cellData,
 					    const Vector<ProblemDomain>& a_domains){
+  CH_TIME("DataOps::averageCellVectorToFaceScalar(EBAMRFluxData)");
+  
+  for (int lvl = 0; lvl < a_faceData.size(); lvl++){
 
-  for (int lvl = 0; lvl < a_facedata.size(); lvl++){
-
-    CH_assert(a_facedata[lvl]->nComp() == 1       );
-    CH_assert(a_celldata[lvl]->nComp() == SpaceDim);
+    CH_assert(a_faceData[lvl]->nComp() == 1       );
+    CH_assert(a_cellData[lvl]->nComp() == SpaceDim);
     
-    DataOps::averageCellVectorToFaceScalar(*a_facedata[lvl], *a_celldata[lvl], a_domains[lvl]);
+    DataOps::averageCellVectorToFaceScalar(*a_faceData[lvl], *a_cellData[lvl], a_domains[lvl]);
   }
 }
 
-void DataOps::averageCellVectorToFaceScalar(LevelData<EBFluxFAB>&       a_facedata,
-					    const LevelData<EBCellFAB>& a_celldata,
+void DataOps::averageCellVectorToFaceScalar(LevelData<EBFluxFAB>&       a_faceData,
+					    const LevelData<EBCellFAB>& a_cellData,
 					    const ProblemDomain&        a_domain){
-
-  CH_assert(a_facedata.nComp() == 1);
-  CH_assert(a_celldata.nComp() == SpaceDim);
+  CH_TIME("DataOps::averageCellVectorToFaceScalar");
   
-  for (DataIterator dit = a_facedata.dataIterator(); dit.ok(); ++dit){
-    EBFluxFAB& flux_vel       = a_facedata[dit()];
-    const EBCellFAB& cell_vel = a_celldata[dit()];
-    const EBISBox& ebisbox    = cell_vel.getEBISBox();
+  CH_assert(a_faceData.nComp() == 1);
+  CH_assert(a_cellData.nComp() == SpaceDim);
+
+  // TLDR: This computes the face-centered data from averages of the cell-centered data. Note that a single layer of
+  //       ghost faces are filled (the ones that are "tangential" to the box). 
+  
+  for (DataIterator dit = a_faceData.dataIterator(); dit.ok(); ++dit){
+    EBFluxFAB& fluxData       = a_faceData[dit()];
+    const EBCellFAB& cellData = a_cellData[dit()];
+    const EBISBox& ebisbox    = cellData.getEBISBox();
     const EBGraph& ebgraph    = ebisbox.getEBGraph();
-    const Box& box            = a_celldata.disjointBoxLayout().get(dit());
+    const Box& box            = a_cellData.disjointBoxLayout().get(dit());
+
+    constexpr int numTanGhost = 1;
     
     for (int dir = 0; dir < SpaceDim; dir++){
-      EBLevelDataOps::averageCellToFace(flux_vel[dir], cell_vel, ebgraph, box, 1, dir, a_domain, dir, 0);
+      const int faceDir  = dir;
+      const int cellComp = dir;
+      const int faceComp = 0;
+      
+      EBLevelDataOps::averageCellToFace(fluxData[dir], cellData, ebgraph, box, numTanGhost, faceDir, a_domain, cellComp, faceComp);
     }
   }
 }
 
-void DataOps::averageCellToFace(EBAMRFluxData& a_face_data,
-				const EBAMRCellData& a_cell_data,
+void DataOps::averageCellToFace(EBAMRFluxData&               a_faceData,
+				const EBAMRCellData&         a_cellData,
 				const Vector<ProblemDomain>& a_domains){
-  for (int lvl = 0; lvl < a_face_data.size(); lvl++){
-    DataOps::averageCellToFace(*a_face_data[lvl], *a_cell_data[lvl], a_domains[lvl]);
+  CH_TIME("DataOps::averageCellToFace(EBAMRFluxData");
+  
+  for (int lvl = 0; lvl < a_faceData.size(); lvl++){
+    DataOps::averageCellToFace(*a_faceData[lvl], *a_cellData[lvl], a_domains[lvl]);
   }
 }
 
 void DataOps::averageCellToFace(LevelData<EBFluxFAB>&       a_faceData,
 				const LevelData<EBCellFAB>& a_cellData,
 				const ProblemDomain&        a_domain){
-  CH_TIME("DataOps::averageCellToFace");
+  CH_TIME("DataOps::averageCellToFace(LD<EBFluxFAB)");
   
-  CH_assert(a_facedata.nComp() == a_celldata.nComp());
+  CH_assert(a_faceData.nComp() == a_cellData.nComp());
 
   // TLDR: This routine computes face-centered data as an arithmetic average of cell-centered data, including cut-cell faces. The kernels are simple arithmetic averages,
   //       only modified on domain boundaries. If a domain face is covered, we just set the covered value to the value in the covered cell just inside the domain. Otherwise,
@@ -185,39 +198,40 @@ void DataOps::averageCellToFace(LevelData<EBFluxFAB>&       a_faceData,
   }
 }
 
-void DataOps::averageFaceToCell(EBAMRCellData&               a_celldata,
-				const EBAMRFluxData&         a_facedata,
+void DataOps::averageFaceToCell(EBAMRCellData&               a_cellData,
+				const EBAMRFluxData&         a_faceData,
 				const Vector<ProblemDomain>& a_domains){
-  for (int lvl = 0; lvl < a_facedata.size(); lvl++){
-    DataOps::averageFaceToCell(*a_celldata[lvl], *a_facedata[lvl], a_domains[lvl]);
+  for (int lvl = 0; lvl < a_faceData.size(); lvl++){
+    DataOps::averageFaceToCell(*a_cellData[lvl], *a_faceData[lvl], a_domains[lvl]);
   }
 }
 
-void DataOps::averageFaceToCell(LevelData<EBCellFAB>&       a_celldata,
-				const LevelData<EBFluxFAB>& a_fluxdata,
+void DataOps::averageFaceToCell(LevelData<EBCellFAB>&       a_cellData,
+				const LevelData<EBFluxFAB>& a_fluxData,
 				const ProblemDomain&        a_domain){
+  CH_TIME("DataOps::averageFaceToCell");
+  
+  const int nc = a_cellData.nComp();
+  CH_assert(a_fluxData.nComp() == nc);
 
-  const int nc = a_celldata.nComp();
-  CH_assert(a_fluxdata.nComp() == nc);
-
-  for (DataIterator dit = a_celldata.dataIterator(); dit.ok(); ++dit){
-    EBCellFAB& celldata       = a_celldata[dit()];
-    const EBFluxFAB& fluxdata = a_fluxdata[dit()];
-    const Box& box            = a_celldata.disjointBoxLayout().get(dit());
+  for (DataIterator dit = a_cellData.dataIterator(); dit.ok(); ++dit){
+    EBCellFAB& cellData       = a_cellData[dit()];
+    const EBFluxFAB& fluxData = a_fluxData[dit()];
+    const Box& box            = a_cellData.disjointBoxLayout().get(dit());
 
     // Irregular cells
-    const EBISBox& ebisbox = celldata.getEBISBox();
+    const EBISBox& ebisbox = cellData.getEBISBox();
     const EBGraph& ebgraph = ebisbox.getEBGraph();
     const IntVectSet& ivs  = ebisbox.getIrregIVS(box);
 
     // Reset
-    celldata.setVal(0.0);
+    cellData.setVal(0.0);
 
     // Do regular cells; all components in each direction
     for (int dir = 0; dir < SpaceDim; dir++){
-      BaseFab<Real>& cellreg       = celldata.getSingleValuedFAB();
-      //      const BaseFab<Real>& facereg = fluxdata[dir].getSingleValuedFAB();
-      auto& facereg = fluxdata[dir].getSingleValuedFAB();
+      BaseFab<Real>& cellreg       = cellData.getSingleValuedFAB();
+      //      const BaseFab<Real>& facereg = fluxData[dir].getSingleValuedFAB();
+      auto& facereg = fluxData[dir].getSingleValuedFAB();
       FORT_AVERAGE_FACE_TO_CELL(CHF_FRA(cellreg),
 				CHF_CONST_FRA(facereg),
 				CHF_CONST_INT(dir),
@@ -229,7 +243,7 @@ void DataOps::averageFaceToCell(LevelData<EBCellFAB>&       a_celldata,
     for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
       for (int ic = 0; ic < nc; ic++){
-	celldata(vof, ic) = 0.0;
+	cellData(vof, ic) = 0.0;
       }
 
       int nfaces = 0;
@@ -241,103 +255,94 @@ void DataOps::averageFaceToCell(LevelData<EBCellFAB>&       a_celldata,
 
 	  for (int iface = 0; iface < faces.size(); iface++){
 	    for (int ic = 0; ic < nc; ic++){
-	      celldata(vof, ic) += fluxdata[dir](faces[iface],ic);
+	      cellData(vof, ic) += fluxData[dir](faces[iface],ic);
 	    }
 	  }
 	}
       }
       for (int ic = 0; ic < nc; ic++){
-	celldata(vof,ic) *= 1./(nfaces);
+	cellData(vof,ic) *= 1./(nfaces);
       }
     }
   }
 }
 
 void DataOps::dotProduct(MFAMRCellData& a_result, const MFAMRCellData& a_data1, const MFAMRCellData& a_data2){
+  CH_TIME("DataOps::dotProduct(mfamrcell)");
+  
   for (int lvl = 0; lvl < a_result.size(); lvl++){
     DataOps::dotProduct(*a_result[lvl], *a_data1[lvl], *a_data2[lvl]);
   }
 }
 
 void DataOps::dotProduct(LevelData<MFCellFAB>& a_result, const LevelData<MFCellFAB>& a_data1, const LevelData<MFCellFAB>& a_data2){
-  const int nc = a_data1.nComp();
+  CH_TIME("DataOps::dotProduct(LD<MFCellFAB>)");
 
-  CH_assert(a_data2.nComp() == nc);
-  CH_assert(a_result.nComp() == 1);
+  CH_assert(a_data2. nComp() == a_data1.nComp());
+  CH_assert(a_result.nComp() == 1              );
 
   for (DataIterator dit = a_result.dataIterator(); dit.ok(); ++dit){
-    MFCellFAB& result      = a_result[dit()];
-    const MFCellFAB& data1 = a_data1[dit()];
-    const MFCellFAB& data2 = a_data2[dit()];
-    const Box& box = a_result.disjointBoxLayout().get(dit());
+    MFCellFAB&       result = a_result[dit()];
+    const MFCellFAB& data1  = a_data1 [dit()];
+    const MFCellFAB& data2  = a_data2 [dit()];
+    const Box&       box    = a_result.disjointBoxLayout().get(dit());
 
     for (int i = 0; i < result.numPhases(); i++){
-      EBCellFAB& result_phase      = result.getPhase(i);
-      const EBCellFAB& data1_phase = data1.getPhase(i);
-      const EBCellFAB& data2_phase = data2.getPhase(i);
+      EBCellFAB&       resultPhase = result.getPhase(i);
+      const EBCellFAB& data1Phase  = data1. getPhase(i);
+      const EBCellFAB& data2Phase  = data2. getPhase(i);
 
-      DataOps::dotProduct(result_phase, data1_phase, data2_phase, box);
+      DataOps::dotProduct(resultPhase, data1Phase, data2Phase, box);
     }
   }
 }
 
 void DataOps::dotProduct(EBAMRCellData& a_result, const EBAMRCellData& a_data1, const EBAMRCellData& a_data2){
+  CH_TIME("DataOps::dotProduct(EBAMRCellData)");
+
+  CH_assert(a_data1[0]->nComp()  == a_data2[0]->nComp());
+  CH_assert(a_result[0]->nComp() == 1                  );
+  
   for (int lvl = 0; lvl < a_result.size(); lvl++){
     DataOps::dotProduct(*a_result[lvl], *a_data1[lvl], *a_data2[lvl]);
   }
 }
 
-void DataOps::dotProduct(LevelData<EBCellFAB>& a_result,
+void DataOps::dotProduct(LevelData<EBCellFAB>&       a_result,
 			 const LevelData<EBCellFAB>& a_data1,
-			 const LevelData<EBCellFAB>& a_data2){
-  const int nc = a_data1.nComp();
+			 const LevelData<EBCellFAB>& a_data2) {
+  CH_TIME("DataOps::dotProduct(LD<EBCellFAB>)");
 
-  CH_assert(a_data2.nComp() == nc);
-  CH_assert(a_result.nComp() == 1);
+  CH_assert(a_data1. nComp() == a_data2.nComp());
+  CH_assert(a_result.nComp() == 1              );
 
   for (DataIterator dit = a_result.dataIterator(); dit.ok(); ++dit){
-    EBCellFAB& result      = a_result[dit()];
-    const EBCellFAB& data1 = a_data1[dit()];
-    const EBCellFAB& data2 = a_data2[dit()];
-    const Box& box         = a_result.disjointBoxLayout().get(dit());
-    DataOps::dotProduct(result, data1, data2, box);
-
-#if 0
-    // Regular cells
-    BaseFab<Real>& result_reg      = result.getSingleValuedFAB();
-    const BaseFab<Real>& data1_reg = data1.getSingleValuedFAB();
-    const BaseFab<Real>& data2_reg = data2.getSingleValuedFAB();
-    FORT_DOT_PRODUCT(CHF_FRA1(result_reg, 0),
-		     CHF_CONST_FRA(data1_reg),
-		     CHF_CONST_FRA(data2_reg),
-		     CHF_CONST_INT(nc),
-		     CHF_BOX(box));
+    EBCellFAB&       result = a_result[dit()];
+    const EBCellFAB& data1  = a_data1 [dit()];
+    const EBCellFAB& data2  = a_data2 [dit()];
+    const Box&       box    = a_result.disjointBoxLayout().get(dit());
     
-
-    // Irregular cells
-    const EBISBox& ebisbox = result.getEBISBox();
-    const EBGraph& ebgraph = ebisbox.getEBGraph();
-    const IntVectSet& ivs  = ebisbox.getIrregIVS(box);
-    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
-      result(vof, 0) = 0.0;
-      for (int comp = 0; comp < nc; comp++){
-	result(vof, 0) += data1(vof, comp)*data2(vof,comp);
-      }
-    }
-#endif
+    DataOps::dotProduct(result, data1, data2, box);
   }
 }
 
 void DataOps::dotProduct(EBCellFAB& a_result, const EBCellFAB& a_data1, const EBCellFAB& a_data2, const Box& a_box){
-  const int nc = a_data1.nComp();
-  BaseFab<Real>& result_reg      = a_result.getSingleValuedFAB();
-  const BaseFab<Real>& data1_reg = a_data1.getSingleValuedFAB();
-  const BaseFab<Real>& data2_reg = a_data2.getSingleValuedFAB();
-  FORT_DOT_PRODUCT(CHF_FRA1(result_reg, 0),
-		   CHF_CONST_FRA(data1_reg),
-		   CHF_CONST_FRA(data2_reg),
-		   CHF_CONST_INT(nc),
+  CH_TIME("DataOps::dotProduct(EBCellFAB)");
+
+  CH_assert(a_data1. nComp() == a_data2.nComp());
+  CH_assert(a_result.nComp() == 1              );
+
+  const int dstComp = 0;
+  const int numComp = a_data1.nComp();
+
+  // Regular cells
+  BaseFab<Real>&       resultReg = a_result.getSingleValuedFAB();
+  const BaseFab<Real>& data1Reg  = a_data1. getSingleValuedFAB();
+  const BaseFab<Real>& data2Reg  = a_data2. getSingleValuedFAB();
+  FORT_DOT_PRODUCT(CHF_FRA1     (resultReg, dstComp),
+		   CHF_CONST_FRA(data1Reg),
+		   CHF_CONST_FRA(data2Reg),
+		   CHF_CONST_INT(numComp),
 		   CHF_BOX(a_box));
     
 
@@ -347,40 +352,61 @@ void DataOps::dotProduct(EBCellFAB& a_result, const EBCellFAB& a_data1, const EB
   const IntVectSet& ivs  = ebisbox.getIrregIVS(a_box);
   for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
     const VolIndex& vof = vofit();
-    a_result(vof, 0) = 0.0;
-    for (int comp = 0; comp < nc; comp++){
-      a_result(vof, 0) += a_data1(vof, comp)*a_data2(vof,comp);
+    
+    a_result(vof, dstComp) = 0.0;
+    for (int comp = 0; comp < numComp; comp++){
+      a_result(vof, dstComp) += a_data1(vof, comp)*a_data2(vof,comp);
     }
   }
 }
 
 void DataOps::incr(MFAMRCellData& a_lhs, const MFAMRCellData& a_rhs, const Real a_scale){
+  CH_TIME("DataOps::incr(MFAMRCellData)");
+
+  CH_assert(a_lhs[0]->nComp() == a_rhs[0]->nComp());
+  
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
     DataOps::incr(*a_lhs[lvl], *a_rhs[lvl], a_scale);
   }
 }
   
 void DataOps::incr(LevelData<MFCellFAB>& a_lhs, const LevelData<MFCellFAB>& a_rhs, const Real a_scale){
+  CH_TIME("DataOps::incr(LD<MFCellFAB)");
+
+  CH_assert(a_lhs.nComp() == a_rhs.nComp());
+  
   MFLevelDataOps::incr(a_lhs, a_rhs, a_scale);
 }
 
 void DataOps::incr(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const Real& a_scale){
+  CH_TIME("DataOps::incr(EBAMRCellData)");
+
+  CH_assert(a_lhs[0]->nComp() == a_rhs[0]->nComp());
+  
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
     DataOps::incr(*a_lhs[lvl], *a_rhs[lvl], a_scale);
   }
 }
 
 void DataOps::incr(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const Real& a_scale){
+  CH_TIME("DataOps::incr(LD<EBCellFAB)");
+
+  CH_assert(a_lhs.nComp() == a_rhs.nComp());
+  
   EBLevelDataOps::incr(a_lhs, a_rhs, a_scale);
 }
 
 void DataOps::plus(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const int a_srcComp, const int a_dstComp, const int a_numComp){
+  CH_TIME("DataOps::plus(EBAMRCellData)");
+  
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
     DataOps::plus(*a_lhs[lvl], *a_rhs[lvl], a_srcComp, a_dstComp, a_numComp);
   }
 }
 
 void DataOps::plus(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const int a_srcComp, const int a_dstComp, const int a_numComp){
+  CH_TIME("DataOps::plus(LD<EBCellFAB>)");
+  
   for (DataIterator dit = a_lhs.disjointBoxLayout().dataIterator(); dit.ok(); ++dit){
     EBCellFAB& lhs       = a_lhs[dit()];
     const EBCellFAB& rhs = a_rhs[dit()];
@@ -390,24 +416,33 @@ void DataOps::plus(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rh
 }
 
 void DataOps::incr(EBAMRFluxData& a_lhs, const EBAMRFluxData& a_rhs, const Real& a_scale){
+  CH_TIME("DataOps::incr(EBAMRFluxData)");
+  
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
     DataOps::incr(*a_lhs[lvl], *a_rhs[lvl], a_scale);
   }
 }
 
 void DataOps::incr(LevelData<EBFluxFAB>& a_lhs, const LevelData<EBFluxFAB>& a_rhs, const Real& a_scale){
+  CH_TIME("DataOps::incr(LD<EBFluxData>)");
+
+  CH_assert(a_lhs.nComp() == a_rhs.nComp());
+  
   for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
     DataOps::incr(a_lhs[dit()], a_rhs[dit()], a_scale);
   }
 }
 
 void DataOps::incr(EBFluxFAB& a_lhs, const EBFluxFAB& a_rhs, const Real& a_scale){
+  CH_TIME("DataOps::incr(EBFluxData)");
 
+  CH_assert(a_lhs.nComp() == a_rhs.nComp());  
+  
   EBFluxFAB rhsClone;
   rhsClone.clone(a_rhs);
   
   for (int dir = 0; dir < SpaceDim; dir++){
-    EBFaceFAB& lhs       = a_lhs[dir];
+    EBFaceFAB& lhs = a_lhs[dir];
     
     rhsClone[dir] *= a_scale;
     lhs += rhsClone[dir];
@@ -415,16 +450,19 @@ void DataOps::incr(EBFluxFAB& a_lhs, const EBFluxFAB& a_rhs, const Real& a_scale
 }
 
 void DataOps::incr(EBAMRIVData& a_lhs, const EBAMRIVData& a_rhs, const Real& a_scale){
-
+  CH_TIME("DataOps::incr(EBAMRIVData)");
+  
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
     DataOps::incr(*a_lhs[lvl], *a_rhs[lvl], a_scale);
   }
 }
 
 void DataOps::incr(LevelData<BaseIVFAB<Real> >& a_lhs, const LevelData<BaseIVFAB<Real> >& a_rhs, const Real& a_scale){
+  CH_TIME("DataOps::incr(LD<BaseIVFAB>)");
+  
   CH_assert(a_lhs.nComp() == a_rhs.nComp());
 
-  const int ncomp = a_lhs.nComp();
+  const int numComp = a_lhs.nComp();
   
   for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
     BaseIVFAB<Real>& lhs       = a_lhs[dit()];
@@ -433,7 +471,7 @@ void DataOps::incr(LevelData<BaseIVFAB<Real> >& a_lhs, const LevelData<BaseIVFAB
     for (VoFIterator vofit(lhs.getIVS(), lhs.getEBGraph()); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
 
-      for (int comp = 0; comp < ncomp; comp++){
+      for (int comp = 0; comp < numComp; comp++){
 	lhs(vof, comp) += rhs(vof, comp)*a_scale;
       }
     }
@@ -441,77 +479,89 @@ void DataOps::incr(LevelData<BaseIVFAB<Real> >& a_lhs, const LevelData<BaseIVFAB
 }
 
 void DataOps::incr(EBAMRIFData& a_lhs, const EBAMRIFData& a_rhs, const Real& a_scale){
+  CH_TIME("DataOps::incr(EBAMRIFData)");
+  
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
     DataOps::incr(*a_lhs[lvl], *a_rhs[lvl], a_scale);
   }
 }
 
 void DataOps::incr(LevelData<DomainFluxIFFAB>& a_lhs, const LevelData<DomainFluxIFFAB>& a_rhs, const Real& a_scale){
+  CH_TIME("DataOps::incr(LD<DomainFluxIFFAB>)");
+  
   CH_assert(a_lhs.nComp() == a_rhs.nComp());
 
-  const int ncomp = a_lhs.nComp();
+  const int numComp = a_lhs.nComp();
   
   for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
-    DomainFluxIFFAB& lhs       = a_lhs[dit()];
+    DomainFluxIFFAB&       lhs = a_lhs[dit()];
     const DomainFluxIFFAB& rhs = a_rhs[dit()];
 
     for (int dir = 0; dir < SpaceDim; dir++){
       for (SideIterator sit; sit.ok(); ++sit){
-	BaseIFFAB<Real>& cur_lhs       = lhs(dir, sit());
-	const BaseIFFAB<Real>& cur_rhs = rhs(dir, sit());
+	BaseIFFAB<Real>&       curLHS = lhs(dir, sit());
+	const BaseIFFAB<Real>& curRHS = rhs(dir, sit());
 
-	const IntVectSet& ivs  = cur_lhs.getIVS();
-	const EBGraph& ebgraph = cur_lhs.getEBGraph();
-	const FaceStop::WhichFaces stop_crit = FaceStop::SurroundingWithBoundary;
+	const IntVectSet& ivs  = curLHS.getIVS();
+	const EBGraph& ebgraph = curLHS.getEBGraph();
 
-	for (FaceIterator faceit(ivs, ebgraph, dir, stop_crit); faceit.ok(); ++faceit){
+	for (FaceIterator faceit(ivs, ebgraph, dir, FaceStop::SurroundingWithBoundary); faceit.ok(); ++faceit){
 	  const FaceIndex& face = faceit();
 
-	  for (int comp = 0; comp < ncomp; comp++){
-	    cur_lhs(face, comp) += cur_rhs(face, comp)*a_scale;
+	  for (int comp = 0; comp < numComp; comp++){
+	    curLHS(face, comp) += curRHS(face, comp) * a_scale;
 	  }
 	}
-	
       }
     }
   }
 }
 
 void DataOps::incr(EBAMRCellData& a_lhs, const EBAMRIVData& a_rhs, const Real a_scale){
+  CH_TIME("DataOps::incr(EBAMRCellData, EBAMRIVData)");
+  
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
     DataOps::incr(*a_lhs[lvl], *a_rhs[lvl], a_scale);
   }
 }
 
 void DataOps::incr(LevelData<EBCellFAB>& a_lhs, const LevelData<BaseIVFAB<Real> >& a_rhs, const Real a_scale){
+  CH_TIME("DataOps::incr(LD<EBCellFAB>, LD<BaseIVFAB>)");
+  
   CH_assert(a_lhs.nComp() == a_rhs.nComp());
 
-  const int ncomp = a_lhs.nComp();
+  const int numComp = a_lhs.nComp();
 
   for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
-    EBCellFAB& lhs = a_lhs[dit()];
-    const BaseIVFAB<Real>& rhs = a_rhs[dit()];
-    const EBGraph& ebgraph     = rhs.getEBGraph();
-    const IntVectSet& ivs      = rhs.getIVS();
+    EBCellFAB&             lhs     = a_lhs[dit()];
+    const BaseIVFAB<Real>& rhs     = a_rhs[dit()];
+    const EBGraph&         ebgraph = rhs.getEBGraph();
+    const IntVectSet&      ivs     = rhs.getIVS();
 
     for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
 
-      for (int comp = 0; comp < ncomp; comp++){
-	lhs(vof, comp) += rhs(vof, comp)*a_scale;
+      for (int comp = 0; comp < numComp; comp++){
+	lhs(vof, comp) += rhs(vof, comp) * a_scale;
       }
     }
   }
 }
 
 void DataOps::incr(EBAMRIVData& a_lhs, const EBAMRCellData& a_rhs, const Real a_scale){
+  CH_TIME("DataOps::incr(EBAMRIVData, EBAMRCellData)");
+  
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
     DataOps::incr(*a_lhs[lvl], *a_rhs[lvl], a_scale);
   }
 }
 
 void DataOps::incr(LevelData<BaseIVFAB<Real> >& a_lhs, const LevelData<EBCellFAB>& a_rhs, const Real a_scale){
-  const int ncomp = a_lhs.nComp();
+  CH_TIME("DataOps::incr(LD<BaseIVFAB>, LD<EBCellFAB>)");
+  
+  CH_assert(a_lhs.nComp() == a_rhs.nComp());
+  
+  const int numComp = a_lhs.nComp();
   
   for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
     BaseIVFAB<Real>& lhs = a_lhs[dit()];
@@ -520,7 +570,7 @@ void DataOps::incr(LevelData<BaseIVFAB<Real> >& a_lhs, const LevelData<EBCellFAB
     for (VoFIterator vofit(lhs.getIVS(), lhs.getEBGraph()); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
 
-      for (int comp = 0; comp < ncomp; comp++){
+      for (int comp = 0; comp < numComp; comp++){
 	lhs(vof, comp) += rhs(vof, comp)*a_scale;
       }
     }
@@ -528,123 +578,291 @@ void DataOps::incr(LevelData<BaseIVFAB<Real> >& a_lhs, const LevelData<EBCellFAB
 }
 
 void DataOps::copy(MFAMRCellData& a_dst, const MFAMRCellData& a_src){
+  CH_TIME("DataOps::copy(MFAMRCellData)");
+
   for (int lvl = 0; lvl < a_dst.size(); lvl++){
-    if(a_src[lvl] != NULL && a_dst[lvl] != NULL){
+    CH_assert(a_dst[lvl]->nComp() == a_src[lvl]->nComp());
+    
+    if(a_src[lvl] != nullptr && a_dst[lvl] != nullptr){
       a_src[lvl]->localCopyTo(*a_dst[lvl]);
     }
   }
 }
 
 void DataOps::copy(EBAMRCellData& a_dst, const EBAMRCellData& a_src){
+  CH_TIME("DataOps::copy(EBAMRCellData)");
+  
   for (int lvl = 0; lvl < a_dst.size(); lvl++){
-    if(a_src[lvl] != NULL && a_dst[lvl] != NULL){
+    CH_assert(a_dst[lvl]->nComp() == a_src[lvl]->nComp());
+    
+    if(a_src[lvl] != nullptr && a_dst[lvl] != nullptr){
       a_src[lvl]->localCopyTo(*a_dst[lvl]);
     }
   }
 }
 
 void DataOps::copy(EBAMRIVData& a_dst, const EBAMRIVData& a_src){
+  CH_TIME("DataOps::copy(EBAMRIVData)");
+  
   for (int lvl = 0; lvl < a_dst.size(); lvl++){
-    if(a_src[lvl] != NULL && a_dst[lvl] != NULL){
+    CH_assert(a_dst[lvl]->nComp() == a_src[lvl]->nComp());
+    
+    if(a_src[lvl] != nullptr && a_dst[lvl] != nullptr){
       a_src[lvl]->localCopyTo(*a_dst[lvl]);
     }
   }
 }
 
-void DataOps::exponentiate(EBAMRCellData& a_lhs, const Real a_factor){
+void DataOps::divide(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const int a_lhsComp, const int a_rhsComp){
+  CH_TIME("DataOps::divide(EBAMRCellData)");
+  
   for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    DataOps::exponentiate(*a_lhs[lvl], a_factor);
+    DataOps::divide(*a_lhs[lvl], *a_rhs[lvl], a_lhsComp, a_rhsComp);
   }
 }
 
-void DataOps::exponentiate(LevelData<EBCellFAB>& a_lhs, const Real a_factor){
-  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
-    EBCellFAB& lhs         = a_lhs[dit()];
-    const Box box          = a_lhs.disjointBoxLayout().get(dit());
-    const EBISBox& ebisbox = lhs.getEBISBox();
-    const EBGraph& ebgraph = ebisbox.getEBGraph();
-    const IntVectSet ivs(box);
+void DataOps::divide(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const int a_lhsComp, const int a_rhsComp){
+  CH_TIME("DataOps::divide(EBAMRCellData)");
 
+  CH_assert(a_lhs.nComp() > a_lhsComp);
+  CH_assert(a_rhs.nComp() > a_rhsComp);  
+  
+  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
+    EBCellFAB& lhs       = a_lhs[dit()];
+    const EBCellFAB& rhs = a_rhs[dit()];
+
+    lhs.divide(rhs, a_rhsComp, a_lhsComp, 1);
+  }
+}
+
+void DataOps::divideByScalar(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs){
+  CH_TIME("DataOps::divideByScalar(EBAMRCellData)");
+  
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++){
+    DataOps::divideByScalar(*a_lhs[lvl], *a_rhs[lvl]);
+  }
+}
+
+void DataOps::divideByScalar(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs){
+  CH_TIME("DataOps::divideByScalar(LD<EBCellFAB>)");
+  
+  const int numCompsLHS = a_lhs.nComp();
+  const int numCompsRHS = a_rhs.nComp();
+  
+  CH_assert(a_rhs.nComp() == 1);
+  CH_assert(a_lhs.nComp() >= 1);
+
+  constexpr int rhsComp = 0;
+
+  for (int lhsComp = 0; lhsComp < numCompsLHS; lhsComp++){
+    DataOps::divide(a_lhs, a_rhs, lhsComp, rhsComp);
+  }
+}
+
+void DataOps::divideFallback(EBAMRCellData& a_numerator, const EBAMRCellData& a_denominator, const EBAMRCellData& a_fallback) {
+  CH_TIME("DataOps::divideFallback(EBAMRCellData)");
+  
+  for (int lvl = 0; lvl < a_numerator.size(); lvl++){
+    DataOps::divideFallback(*a_numerator[lvl], *a_denominator[lvl], *a_fallback[lvl]);
+  }
+}
+
+void DataOps::divideFallback(LevelData<EBCellFAB>& a_numerator, const LevelData<EBCellFAB>& a_denominator, const LevelData<EBCellFAB>& a_fallback) {
+  CH_TIME("DataOps::LD<EBCellFAB>)");
+  
+  CH_assert(a_numerator.nComp() == a_denominator.nComp());
+  CH_assert(a_numerator.nComp() == a_fallback.   nComp());
+  
+  for (DataIterator dit = a_numerator.dataIterator(); dit.ok(); ++dit){
+    EBCellFAB&       numerator   = a_numerator  [dit()];
+    const EBCellFAB& denominator = a_denominator[dit()];
+    const EBCellFAB& fallback    = a_fallback   [dit()];
+
+    BaseFab<Real>&       regNumerator   = numerator.  getSingleValuedFAB();
+    const BaseFab<Real>& regDenominator = denominator.getSingleValuedFAB();
+    const BaseFab<Real>& regFallback    = fallback.   getSingleValuedFAB();
+
+    const Box cellBox = a_numerator.disjointBoxLayout()[dit()];
+
+    // I need to clone the input data because the regular kernel will screw with it. 
+    EBCellFAB cloneNumerator;
+    cloneNumerator.clone(numerator);
+
+    // Regular cells    
+    for (int comp = 0; comp < a_numerator.nComp(); comp++){
+      FORT_DIVIDE_FALLBACK(CHF_FRA1      (regNumerator,   comp),
+			   CHF_CONST_FRA1(regDenominator, comp),
+			   CHF_CONST_FRA1(regFallback,    comp),
+			   CHF_BOX(cellBox));
+
+    }
     
-    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+    // Irregular cells
+    const EBISBox&   ebisBox  = numerator.getEBISBox();
+    const EBGraph&   ebGraph  = ebisBox.getEBGraph();
+    const IntVectSet irregIVS = ebisBox.getIrregIVS(cellBox);
+    for (VoFIterator vofit(irregIVS, ebGraph); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
-      for (int comp = 0; comp < lhs.nComp(); comp++){
-	const Real value = lhs(vof, comp);
-	lhs(vof,comp) = exp(a_factor*value);
+
+      for (int comp = 0; comp < a_numerator.nComp(); comp++){
+	const Real denom = denominator(vof, comp);
+	if(std::abs(denom) > 0.0){
+	  numerator(vof, comp) = cloneNumerator(vof, comp)/denom;
+	}
+	else{
+	  numerator(vof, comp) = fallback(vof, comp);
+	}
       }
     }
   }
 }
 
-void DataOps::getMaxMin(Real& a_max, Real& a_min, EBAMRCellData& a_E, const int a_comp){
-  a_max = -1.E99;
-  a_min =  1.E99;
-  for (int lvl = 0; lvl < a_E.size(); lvl++){
-    Real lvl_max = -1.E99;
-    Real lvl_min =  1.E99;
-    DataOps::getMaxMin(lvl_max, lvl_min, *a_E[lvl], a_comp);
-
-    a_max = Max(a_max, lvl_max);
-    a_min = Min(a_min, lvl_min);
+void DataOps::floor(EBAMRCellData& a_lhs, const Real a_value){
+  CH_TIME("DataOps::floor(EBAMRCellData)");
+  
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++){
+    DataOps::floor(*a_lhs[lvl], a_value);
   }
 }
 
-void DataOps::getMaxMin(Real& a_max, Real& a_min, LevelData<EBCellFAB>& a_E, const int a_comp){
-  EBLevelDataOps::getMaxMin(a_max, a_min, a_E, a_comp);
+void DataOps::floor(LevelData<EBCellFAB>& a_lhs, const Real a_value){
+  CH_TIME("DataOps::floor(LD<EBCelLFAB>)");
+  
+  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
+    EBCellFAB&     lhs     = a_lhs[dit()];
+    const Box      box     = lhs.getRegion(); // Note:: All cells are floored (ghosts also)
+    const EBISBox& ebisbox = lhs.getEBISBox();
+    const EBGraph& ebgraph = ebisbox.getEBGraph();
+    const int      numComp = a_lhs.nComp();
+
+      // Regular cells. This also does ghost cells
+    BaseFab<Real>& lhs_reg = lhs.getSingleValuedFAB();
+    FORT_FLOOR(CHF_FRA(lhs_reg),
+	       CHF_CONST_INT(numComp),
+	       CHF_CONST_REAL(a_value),
+	       CHF_BOX(box));
+
+    // Irregular and multivalued cells
+    for (VoFIterator vofit(ebisbox.getIrregIVS(box), ebgraph); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+      for (int comp = 0; comp < numComp; comp++){
+	const Real value = lhs(vof, comp);
+	lhs(vof, comp) = std::max(value, a_value);
+      }
+    }
+  }
+}
+
+void DataOps::floor(EBAMRIVData& a_lhs, const Real a_value){
+  CH_TIME("DataOps::floor(EBAMRIVData)");
+  
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++){
+    DataOps::floor(*a_lhs[lvl], a_value);
+  }
+}
+
+void DataOps::floor(LevelData<BaseIVFAB<Real> >& a_lhs, const Real a_value){
+  CH_TIME("DataOps::floor(LD<BaseIVFAB<Real> >)");
+  
+  const int numComp = a_lhs.nComp();
+  
+  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
+    BaseIVFAB<Real>& lhs = a_lhs[dit()];
+    
+    for (VoFIterator vofit(lhs.getIVS(), lhs.getEBGraph()); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+      for (int comp = 0; comp < numComp; comp++){
+	const Real value = lhs(vof, comp);
+	lhs(vof, comp) = std::max(value, a_value);
+      }
+    }
+  }
+}
+
+void DataOps::getMaxMin(Real& a_max, Real& a_min, EBAMRCellData& a_data, const int a_comp){
+  CH_TIME("DataOps::getMaxMin(EBAMRCellData)");
+  
+  a_max = -std::numeric_limits<Real>::max();
+  a_min =  std::numeric_limits<Real>::max();
+  
+  for (int lvl = 0; lvl < a_data.size(); lvl++){
+    Real lvlMax = -std::numeric_limits<Real>::max();
+    Real lvlMin =  std::numeric_limits<Real>::max();
+    
+    DataOps::getMaxMin(lvlMax, lvlMin, *a_data[lvl], a_comp);
+
+    a_max = std::max(a_max, lvlMax);
+    a_min = std::min(a_min, lvlMin);
+  }
+}
+
+void DataOps::getMaxMin(Real& a_max, Real& a_min, LevelData<EBCellFAB>& a_data, const int a_comp){
+  CH_TIME("DataOps::getMaxMin(LD<EBCellFAB>)");
+  
+  EBLevelDataOps::getMaxMin(a_max, a_min, a_data, a_comp);
 }
 
 void DataOps::getMaxMin(Vector<Real>& a_max, Vector<Real>& a_min, Vector<EBAMRCellData>& a_data){
-  a_max.resize(a_data.size(), -1.234567E89);
-  a_min.resize(a_data.size(),  1.234567E89);
+  CH_TIME("DataOps::getMaxMin(Vector<EBAMRCellData>)");
+  
+  a_max.resize(a_data.size(), -std::numeric_limits<Real>::max());
+  a_min.resize(a_data.size(),  std::numeric_limits<Real>::max());
 
-  const int comp  = 0;
-  const int ncomp = 1;
+  constexpr int comp    = 0;
+  constexpr int numComp = 1;
   
   for (int i = 0; i < a_data.size(); i++){
-    CH_assert(a_data[i][0]->nComp() == ncomp);
+    CH_assert(a_data[i][0]->nComp() == numComp);
+    
     DataOps::getMaxMin(a_max[i], a_min[i], a_data[i], comp);
   }
 }
 
 void DataOps::getMaxMinNorm(Real& a_max, Real& a_min, EBAMRCellData& a_data){
-  a_max = -1.234567E89;
-  a_min =  1.234567E89;
+  CH_TIME("DataOps::getMaxMinNorm(EBAMRCellData)");
+  
+  a_max = -std::numeric_limits<Real>::max();
+  a_min =  std::numeric_limits<Real>::max();
+  
   for (int lvl = 0; lvl < a_data.size(); lvl++){
-    Real max, min;
-    DataOps::getMaxMinNorm(max, min, *a_data[lvl]);
+    Real lvlMax;
+    Real lvlMin;
+    
+    DataOps::getMaxMinNorm(lvlMax, lvlMin, *a_data[lvl]);
 
-    a_max = Max(a_max, max);
-    a_min = Min(a_min, min);
+    a_max = std::max(a_max, lvlMax);
+    a_min = std::min(a_min, lvlMin);
   }
 }
 
 void DataOps::getMaxMinNorm(Real& a_max, Real& a_min, LevelData<EBCellFAB>& a_data){
-  a_max = -1.234567E89;
-  a_min =  1.234567E89;
+  CH_TIME("DataOps::LD<EBCelLFAB>");
+  
+  a_max = -std::numeric_limits<Real>::max();
+  a_min =  std::numeric_limits<Real>::max();
 
-  const int ncomp = a_data.nComp();
+  const int maskComp = 0;
+  const int numComp  = a_data.nComp();
   
   for (DataIterator dit = a_data.dataIterator(); dit.ok(); ++dit){
     const Box& box         = a_data.disjointBoxLayout().get(dit());
     const EBCellFAB& data  = a_data[dit()];
     const EBISBox& ebisbox = data.getEBISBox();
     const EBGraph& ebgraph = ebisbox.getEBGraph();
-    const IntVectSet ivs(box);
 
-#if 1 // Optimized code
-    EBCellFAB covered_mask(ebisbox, box, 1);
-    covered_mask.setVal(1.0);
-    covered_mask.setCoveredCellVal(-1.0, 0);
+    // Use a mask for ignoring covered data (which can be bogus).
+    EBCellFAB coveredMask(ebisbox, box, 1);
+    coveredMask.setVal(1.0);
+    coveredMask.setCoveredCellVal(-1.0, 0);
 
-    const BaseFab<Real>& mask = covered_mask.getSingleValuedFAB();
+    const BaseFab<Real>& mask = coveredMask.getSingleValuedFAB();
     
-    // Maybe this breaks because we should pass a covered flag into the routine
-    const BaseFab<Real>& data_reg = data.getSingleValuedFAB();
+    const BaseFab<Real>& dataReg = data.getSingleValuedFAB();
     FORT_MAX_MIN_NORM(CHF_REAL(a_max),
 		      CHF_REAL(a_min),
-		      CHF_CONST_FRA(data_reg),
-		      CHF_CONST_FRA1(mask, 0),
-		      CHF_CONST_INT(ncomp),
+		      CHF_CONST_FRA(dataReg),
+		      CHF_CONST_FRA1(mask, maskComp),
+		      CHF_CONST_INT(numComp),
 		      CHF_BOX(box));
 
     // Irregular and multivalued cells
@@ -652,29 +870,14 @@ void DataOps::getMaxMinNorm(Real& a_max, Real& a_min, LevelData<EBCellFAB>& a_da
       const VolIndex& vof = vofit();
 
       Real cur = 0.0;
-      for (int comp = 0; comp < ncomp; comp++){
-	cur += data(vof, comp)*data(vof, comp);
+      for (int comp = 0; comp < numComp; comp++){
+	cur += data(vof, comp) * data(vof, comp);
       }
       cur = sqrt(cur);
 
-      a_max = Max(a_max, cur);
-      a_min = Min(a_min, cur);
+      a_max = std::max(a_max, cur);
+      a_min = std::min(a_min, cur);
     }
-    
-#else // Original code
-    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
-
-      Real cur = 0.0;
-      for (int comp = 0; comp < ncomp; comp++){
-	cur += data(vof, comp)*data(vof, comp);
-      }
-      cur = sqrt(cur);
-
-      a_max = Max(a_max, cur);
-      a_min = Min(a_min, cur);
-    }
-#endif
   }
 
   // Communicate result
@@ -697,40 +900,46 @@ void DataOps::getMaxMinNorm(Real& a_max, Real& a_min, LevelData<EBCellFAB>& a_da
 }
 
 void DataOps::getMaxMinNorm(Real& a_max, Real& a_min, EBAMRIVData& a_data){
-  a_max = -1.234567E89;
-  a_min =  1.234567E89;
+  CH_TIME("DataOps::getMaxMinNorm(EBAMRIVData)");
+  
+  a_max = -std::numeric_limits<Real>::max();
+  a_min =  std::numeric_limits<Real>::min();
+  
   for (int lvl = 0; lvl < a_data.size(); lvl++){
-    Real max, min;
-    DataOps::getMaxMinNorm(max, min, *a_data[lvl]);
+    Real lvlMax;
+    Real lvlMin;
+    
+    DataOps::getMaxMinNorm(lvlMax, lvlMin, *a_data[lvl]);
 
-    a_max = Max(a_max, max);
-    a_min = Min(a_min, min);
+    a_max = std::max(a_max, lvlMax);
+    a_min = std::min(a_min, lvlMin);
   }
 }
 
 void DataOps::getMaxMinNorm(Real& a_max, Real& a_min, LevelData<BaseIVFAB<Real> >& a_data){
-  a_max = -1.234567E89;
-  a_min =  1.234567E89;
+  CH_TIME("DataOps::getMaxMinNorm(LD<BaseIVFAB>)");
+  
+  a_max = -std::numeric_limits<Real>::max();
+  a_min =  std::numeric_limits<Real>::max();
 
-  const int ncomp = a_data.nComp();
+  const int numComp = a_data.nComp();
   
   for (DataIterator dit = a_data.dataIterator(); dit.ok(); ++dit){
     const Box& box              = a_data.disjointBoxLayout().get(dit());
     const BaseIVFAB<Real>& data = a_data[dit()];
-    const IntVectSet ivs(box);
 
     // Irregular and multivalued cells
     for (VoFIterator vofit(data.getIVS(), data.getEBGraph()); vofit.ok(); ++vofit){
       const VolIndex& vof = vofit();
 
       Real cur = 0.0;
-      for (int comp = 0; comp < ncomp; comp++){
+      for (int comp = 0; comp < numComp; comp++){
 	cur += data(vof, comp)*data(vof, comp);
       }
       cur = sqrt(cur);
 
-      a_max = Max(a_max, cur);
-      a_min = Min(a_min, cur);
+      a_max = std::max(a_max, cur);
+      a_min = std::min(a_min, cur);
     }
   }
 
@@ -754,18 +963,21 @@ void DataOps::getMaxMinNorm(Real& a_max, Real& a_min, LevelData<BaseIVFAB<Real> 
 }
 
 void DataOps::invert(EBAMRFluxData& a_data){
+  CH_TIME("DataOps::invert(EBAMRFluxData)");
+  
   for (int lvl = 0; lvl < a_data.size(); lvl++){
     DataOps::invert(*a_data[lvl]);
   }
 }
 
 void DataOps::invert(LevelData<EBFluxFAB>& a_data){
+  CH_TIME("DataOps::invert(LD<EBFluxFAB>)");
   
-  const int ncomp = a_data.nComp();
+  const int numComp = a_data.nComp();
 
   for (DataIterator dit = a_data.dataIterator(); dit.ok(); ++dit){
-    EBFluxFAB& fluxfab = a_data[dit()];
-    const EBISBox& ebisbox = fluxfab.getEBISBox();
+    EBFluxFAB&     data    = a_data[dit()];
+    const EBISBox& ebisbox = data.getEBISBox();
     const EBGraph& ebgraph = ebisbox.getEBGraph();
     const Box box          = a_data.disjointBoxLayout().get(dit());
     const IntVectSet irreg = ebisbox.getIrregIVS(box);
@@ -775,7 +987,7 @@ void DataOps::invert(LevelData<EBFluxFAB>& a_data){
       EBFaceFAB& data = a_data[dit()][dir];
 
       // Need a copy because regular Fortran loop inverts irregular face cells
-      EBFaceFAB cpy(ebisbox, box, dir, ncomp);
+      EBFaceFAB cpy(ebisbox, box, dir, numComp);
       cpy.setVal(0.0);
       cpy += data;
       
@@ -784,20 +996,75 @@ void DataOps::invert(LevelData<EBFluxFAB>& a_data){
       facebox.surroundingNodes(dir);
       BaseFab<Real>& data_fab = data.getSingleValuedFAB();
       FORT_INVERT(CHF_FRA(data_fab),
-		  CHF_CONST_INT(ncomp),
+		  CHF_CONST_INT(numComp),
 		  CHF_BOX(facebox));
       
 
-      // Irregular cells
-      FaceStop::WhichFaces stop_crit = FaceStop::SurroundingWithBoundary;
-      for (FaceIterator faceit(irreg, ebgraph, dir, stop_crit); faceit.ok(); ++faceit){
+      // Irregular cells.
+      for (FaceIterator faceit(irreg, ebgraph, dir, FaceStop::SurroundingWithBoundary); faceit.ok(); ++faceit){
 	const FaceIndex& face  = faceit();
-	for (int comp = 0; comp < ncomp; comp++){
+	for (int comp = 0; comp < numComp; comp++){
 	  data(face, comp) = 1./cpy(face, comp);
 	}
       }
     }
   }
+}
+
+void DataOps::kappaSum(Real& a_mass, const LevelData<EBCellFAB>& a_lhs){
+  CH_TIME("DataOps::kappaSum");
+
+  CH_assert(a_lhs.nComp() == 1);
+
+  Real mass = 0.;  
+  
+  constexpr int comp  = 0;
+  
+  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
+    const Box box          = a_lhs.disjointBoxLayout().get(dit());
+    const EBCellFAB& lhs   = a_lhs[dit()];
+    const EBISBox& ebisbox = lhs.getEBISBox();
+
+    // This is crazy -- we should have a Fortran loop here. This could become a bottleneck for people.
+    const EBGraph& ebgraph = ebisbox.getEBGraph();
+    const IntVectSet ivs(box);
+    
+    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+      const VolIndex& vof = vofit();
+
+      mass += ebisbox.volFrac(vof) * lhs(vof, comp);
+    }
+  }
+
+  a_mass = EBLevelDataOps::parallelSum(mass);
+}
+
+void DataOps::kappaScale(EBAMRCellData& a_data){
+  CH_TIME("DataOps::kappaScale(EBAMRCellData");
+  
+  for (int lvl = 0; lvl < a_data.size(); lvl++){
+    DataOps::kappaScale(*a_data[lvl]);
+  }
+}
+
+void DataOps::kappaScale(LevelData<EBCellFAB>& a_data){
+  CH_TIME("DataOps::kappaScale(LD<EBCellFAB>");
+  
+  EBLevelDataOps::kappaWeight(a_data);
+}
+
+void DataOps::kappaScale(MFAMRCellData& a_data){
+  CH_TIME("DataOps::kappaScale(MFAMRCellData");
+  
+  for (int lvl = 0; lvl < a_data.size(); lvl++){
+    DataOps::kappaScale(*a_data[lvl]);
+  }
+}
+
+void DataOps::kappaScale(LevelData<MFCellFAB>& a_data){
+  CH_TIME("DataOps::kappaScale(LD<MFCellFAB>");
+  
+  MFLevelDataOps::kappaWeight(a_data);
 }
 
 void DataOps::scale(MFAMRCellData& a_lhs, const Real& a_scale){
@@ -862,205 +1129,15 @@ void DataOps::scale(LevelData<BaseIVFAB<Real> >& a_lhs, const Real& a_scale){
   }
 }
 
-void DataOps::divide(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const int a_lcomp, const int a_rcomp){
-  for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    DataOps::divide(*a_lhs[lvl], *a_rhs[lvl], a_lcomp, a_rcomp);
-  }
-}
-
-void DataOps::divide(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const int a_lcomp, const int a_rcomp){
-  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
-    EBCellFAB& lhs       = a_lhs[dit()];
-    const EBCellFAB& rhs = a_rhs[dit()];
-
-    lhs.divide(rhs, a_rcomp, a_lcomp, 1);
-  }
-}
-
-void DataOps::divideByScalar(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs){
-  for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    DataOps::divideByScalar(*a_lhs[lvl], *a_rhs[lvl]);
-  }
-}
-
-void DataOps::divideByScalar(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs){
-  const int lcomps = a_lhs.nComp();
-  const int rcomps = a_rhs.nComp();
-  
-  CH_assert(a_rhs.nComp() == 1);
-  CH_assert(a_lhs.nComp() >= 1);
-
-  for (int comp = 0; comp < lcomps; comp++){
-    DataOps::divide(a_lhs, a_rhs, comp, 0);
-  }
-}
-
-void DataOps::divideFallback(EBAMRCellData& a_numerator, const EBAMRCellData& a_denominator, const EBAMRCellData& a_fallback) {
-  for (int lvl = 0; lvl < a_numerator.size(); lvl++){
-    DataOps::divideFallback(*a_numerator[lvl], *a_denominator[lvl], *a_fallback[lvl]);
-  }
-}
-
-void DataOps::divideFallback(LevelData<EBCellFAB>& a_numerator, const LevelData<EBCellFAB>& a_denominator, const LevelData<EBCellFAB>& a_fallback) {
-  CH_assert(a_numerator.nComp() == a_denominator.nComp());
-  CH_assert(a_numerator.nComp() == a_fallback.   nComp());
-  
-  for (DataIterator dit = a_numerator.dataIterator(); dit.ok(); ++dit){
-    EBCellFAB&       numerator   = a_numerator  [dit()];
-    const EBCellFAB& denominator = a_denominator[dit()];
-    const EBCellFAB& fallback    = a_fallback   [dit()];
-
-    BaseFab<Real>&       regNumerator   = numerator.  getSingleValuedFAB();
-    const BaseFab<Real>& regDenominator = denominator.getSingleValuedFAB();
-    const BaseFab<Real>& regFallback    = fallback.   getSingleValuedFAB();
-
-    const Box cellBox = a_numerator.disjointBoxLayout()[dit()];
-
-    // I need to clone the input data because the regular kernel will screw with it. 
-    EBCellFAB cloneNumerator;
-    cloneNumerator.clone(numerator);
-
-    // Regular cells    
-    for (int comp = 0; comp < a_numerator.nComp(); comp++){
-      FORT_DIVIDE_FALLBACK(CHF_FRA1      (regNumerator,   comp),
-			   CHF_CONST_FRA1(regDenominator, comp),
-			   CHF_CONST_FRA1(regFallback,    comp),
-			   CHF_BOX(cellBox));
-
-    }
-    
-    // Irregular cells
-    const EBISBox&   ebisBox  = numerator.getEBISBox();
-    const EBGraph&   ebGraph  = ebisBox.getEBGraph();
-    const IntVectSet irregIVS = ebisBox.getIrregIVS(cellBox);
-    for (VoFIterator vofit(irregIVS, ebGraph); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
-
-      for (int comp = 0; comp < a_numerator.nComp(); comp++){
-	const Real denom = denominator(vof, comp);
-	if(std::abs(denom) > 0.0){
-	  numerator(vof, comp) = cloneNumerator(vof, comp)/denom;
-	}
-	else{
-	  numerator(vof, comp) = fallback(vof, comp);
-	}
-      }
-    }
-  }
-}
-
-void DataOps::floor(EBAMRCellData& a_lhs, const Real a_value){
-  for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    DataOps::floor(*a_lhs[lvl], a_value);
-  }
-}
-
-void DataOps::floor(LevelData<EBCellFAB>& a_lhs, const Real a_value){
-  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
-    EBCellFAB& lhs = a_lhs[dit()];
-    const Box box = lhs.getRegion();
-    const EBISBox& ebisbox = lhs.getEBISBox();
-    const EBGraph& ebgraph = ebisbox.getEBGraph();
-    const IntVectSet ivs(lhs.getRegion());
-
-    const int ncomp = a_lhs.nComp();
-
-#if 1 // Optimized code. 
-      // Regular cells. This also does ghost cells
-    BaseFab<Real>& lhs_reg = lhs.getSingleValuedFAB();
-    FORT_FLOOR(CHF_FRA(lhs_reg),
-	       CHF_CONST_INT(ncomp),
-	       CHF_CONST_REAL(a_value),
-	       CHF_BOX(box));
-
-    // Irregular and multivalued cells
-    for (VoFIterator vofit(ebisbox.getIrregIVS(box), ebgraph); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
-      for (int comp = 0; comp < a_lhs.nComp(); comp++){
-	const Real value = lhs(vof, comp);
-	lhs(vof, comp) = Max(value, a_value);
-      }
-    }
-#else // Other code
-      // Irregular and multivalued cells
-    for (VoFIterator vofit(IntVectSet(box), ebgraph); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
-      for (int comp = 0; comp < a_lhs.nComp(); comp++){
-	const Real value = lhs(vof, comp);
-	lhs(vof, comp) = Max(value, a_value);
-      }
-    }
-#endif
-  }
-}
-
-void DataOps::floor(EBAMRIVData& a_lhs, const Real a_value){
-  for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    DataOps::floor(*a_lhs[lvl], a_value);
-  }
-}
-
-void DataOps::floor(LevelData<BaseIVFAB<Real> >& a_lhs, const Real a_value){
-  const int ncomp = a_lhs.nComp();
-  
-  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
-    BaseIVFAB<Real>& lhs   = a_lhs[dit()];
-    for (VoFIterator vofit(lhs.getIVS(), lhs.getEBGraph()); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
-      for (int comp = 0; comp < a_lhs.nComp(); comp++){
-	const Real value = lhs(vof, comp);
-	lhs(vof, comp) = Max(value, a_value);
-      }
-    }
-  }
-}
-
-void DataOps::kappaSum(Real& a_mass, const LevelData<EBCellFAB>& a_lhs){
 
 
-  Real mass = 0.;
 
-  CH_assert(a_lhs.nComp() == 1);
-  
-  const int comp  = 0;
-  const int ncomp = 1;
-  
-  for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
-    const Box box          = a_lhs.disjointBoxLayout().get(dit());
-    const EBCellFAB& lhs   = a_lhs[dit()];
-    const EBISBox& ebisbox = lhs.getEBISBox();
-    const EBGraph& ebgraph = ebisbox.getEBGraph();
-    const IntVectSet ivs(box);
-    
-    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
 
-      mass += ebisbox.volFrac(vof)*lhs(vof, comp);
-    }
-  }
 
-  a_mass = EBLevelDataOps::parallelSum(mass);
-}
 
-void DataOps::kappaScale(EBAMRCellData& a_data){
-  for (int lvl = 0; lvl < a_data.size(); lvl++){
-    DataOps::kappaScale(*a_data[lvl]);
-  }
-}
 
-void DataOps::kappaScale(LevelData<EBCellFAB>& a_data){
-  EBLevelDataOps::kappaWeight(a_data);
-}
 
-void DataOps::kappaScale(MFAMRCellData& a_data){
-  for (int lvl = 0; lvl < a_data.size(); lvl++){
-    DataOps::kappaScale(*a_data[lvl]);
-  }
-}
 
-void DataOps::kappaScale(LevelData<MFCellFAB>& a_data){
-  MFLevelDataOps::kappaWeight(a_data);
-}
 
 void DataOps::laplacian(EBAMRCellData& a_lapl, const EBAMRCellData& a_data){
   for (int lvl = 0; lvl < a_data.size(); lvl++){
