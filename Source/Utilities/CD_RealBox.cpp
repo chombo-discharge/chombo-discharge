@@ -9,6 +9,9 @@
   @author Robert Marskar
 */
 
+// Chombo includes
+#include <CH_Timer.H>
+
 // Our includes
 #include <CD_RealBox.H>
 #include <CD_NamespaceHeader.H>
@@ -17,7 +20,6 @@ RealBox::RealBox(){
   m_lo = RealVect::Zero;
   m_hi = RealVect::Zero;
 }
-
 
 RealBox::RealBox(const RealVect a_lo, const RealVect a_hi){
   m_lo = a_lo;
@@ -88,7 +90,6 @@ bool RealBox::intersect(const RealBox& a_box) const {
   else{
     return false;
   }
-      
     
   // const Vector<RealVect> corners = a_box.getCorners();
   

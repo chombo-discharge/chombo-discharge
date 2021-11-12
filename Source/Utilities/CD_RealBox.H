@@ -20,15 +20,35 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Rectangular box
+  @brief Rectangular box in real space. 
 */
 class RealBox{
 public:
 
+  /*!
+    @brief Default constructor. Must subsequently set the corners. 
+  */
   RealBox();
+
+  /*!
+    @brief Full constructor. Sets corners from input arguments
+    @param[in] a_lo Low corner
+    @param[in] a_hi High corners
+  */  
   RealBox(const RealVect a_lo, const RealVect a_hi);
-  RealBox(const Box a_box, const RealVect a_origin, const Real a_dx);
-  
+
+  /*!
+    @brief Full constructor. Sets corners from input box
+    @param[in] a_box    IntVect-box
+    @param[in] a_probLo Lower-left corner of physical domain
+    @param[in] a_dx     Grid resolution.
+    @details This sets the low corner as a_probLo + a_box.lowEnd()*a_dx
+  */    
+  RealBox(const Box a_box, const RealVect a_probLo, const Real a_dx);
+
+  /*!
+    @brief Destructor (does nothing)
+  */
   ~RealBox();
 
   /*!
@@ -48,23 +68,33 @@ public:
 
   /*!
     @brief Check if a_box intersects this box. This is done by checking if 
+    @param[in] a_box Other box
   */
   bool intersect(const RealBox& a_box) const;
 
   /*!
     @brief Check if a_point is inside this box
+    @param[in] a_point Input point
   */
   bool isPointInside(const RealVect a_point) const;
 
   /*!
     @brief Check if a_box is completely inside this box. For this to be true, all the corners of a_box must be 
     completely inside this box
+    @param[in] a_box Other box.
   */
   bool isBoxInside(const RealBox& a_box) const;
   
 protected:
 
+  /*!
+    @brief Low corner
+  */
   RealVect m_lo;
+
+  /*!
+    @brief High corner.
+  */  
   RealVect m_hi;
 
 };
