@@ -10,6 +10,7 @@
 */
 
 // Chombo includes
+#include <CH_Timer.H> 
 #include <ParmParse.H>
 
 // Our includes
@@ -21,12 +22,15 @@ constexpr int RtSolver::m_comp;
 constexpr int RtSolver::m_nComp;
 
 RtSolver::RtSolver(){
+  CH_TIME("RtSolver::RtSolver");
+  
+  // Default settings
   m_name      = "RtSolver";
   m_className = "RtSolver";
 }
 
 RtSolver::~RtSolver(){
-  
+  CH_TIME("RtSolver::~RtSolver");  
 }
 
 std::string RtSolver::getName(){
@@ -45,7 +49,7 @@ Vector<std::string> RtSolver::getPlotVariableNames() const {
   
   Vector<std::string> names(0);
   
-  if(m_plotPhi) names.push_back(m_name + " phi");
+  if(m_plotPhi   ) names.push_back(m_name + " phi"   );
   if(m_plotSource) names.push_back(m_name + " source");
 
   return names;
@@ -55,24 +59,24 @@ bool RtSolver::isStationary(){
   return m_stationary;
 }
 
-bool RtSolver::advance(const Real a_dt, const bool a_zerophi){
+bool RtSolver::advance(const Real a_dt, const bool a_zeroPhi){
   CH_TIME("RtSolver::advance(dt)");
   if(m_verbosity > 5){
     pout() << m_name + "::advance(dt)" << endl;
   }
 
-  const bool converged = this->advance(a_dt, m_phi, a_zerophi);
+  const bool converged = this->advance(a_dt, m_phi, a_zeroPhi);
 
   return converged;
 }
 
-bool RtSolver::advance(const Real a_dt, EBAMRCellData& a_phi, const bool a_zerophi){
-  CH_TIME("RtSolver::advance(dt, state)");
+bool RtSolver::advance(const Real a_dt, EBAMRCellData& a_phi, const bool a_zeroPhi){
+  CH_TIME("RtSolver::advance(dt, phi, bool )");
   if(m_verbosity > 5){
-    pout() << m_name + "::advance(dt, state)" << endl;
+    pout() << m_name + "::advance(dt, phi, bool)" << endl;
   }
 
-  const bool converged = this->advance(a_dt, a_phi, m_source, a_zerophi);
+  const bool converged = this->advance(a_dt, a_phi, m_source, a_zeroPhi);
 
   return converged;
 }
@@ -86,14 +90,14 @@ void RtSolver::setRealm(const std::string a_realm){
   m_realm = a_realm;
 }
 
-void RtSolver::setRtSpecies(const RefCountedPtr<RtSpecies> a_RtSpecies){
+void RtSolver::setRtSpecies(const RefCountedPtr<RtSpecies>& a_RtSpecies){
   CH_TIME("RtSolver::setRtSpecies");
   if(m_verbosity > 5){
     pout() << m_name + "::setRtSpecies" << endl;
   }
 
   m_RtSpecies = a_RtSpecies;
-  m_name = m_RtSpecies->getName();
+  m_name      = m_RtSpecies->getName();
 }
 
 void RtSolver::setPhase(const phase::which_phase a_phase){
@@ -112,9 +116,9 @@ void RtSolver::sanityCheck(){
   }
 
   CH_assert(!m_computationalGeometry.isNull());
-  CH_assert(!m_amr.isNull());
-  CH_assert(!m_RtSpecies.isNull());
-  CH_assert(!m_ebis.isNull());
+  CH_assert(!m_amr.                  isNull());
+  CH_assert(!m_RtSpecies.            isNull());
+  CH_assert(!m_ebis.                 isNull());
 }
 
 void RtSolver::setComputationalGeometry(const RefCountedPtr<ComputationalGeometry> a_computationalGeometry){
@@ -155,8 +159,8 @@ void RtSolver::setTime(const int a_step, const Real a_time, const Real a_dt) {
   }
 
   m_timeStep = a_step;
-  m_time = a_time;
-  m_dt   = a_dt;
+  m_time     = a_time;
+  m_dt       = a_dt;
 }
 
 void RtSolver::setStationary(const bool a_stationary) {
@@ -183,9 +187,9 @@ void RtSolver::setSource(const EBAMRCellData& a_source){
     pout() << m_name + "::setSource(ebamrcell)" << endl;
   }
 
-  const int finest_level = m_amr->getFinestLevel();
+  const int finestLevel = m_amr->getFinestLevel();
 
-  for (int lvl = 0; lvl <= finest_level; lvl++){
+  for (int lvl = 0; lvl <= finestLevel; lvl++){
     a_source[lvl]->localCopyTo(*m_source[lvl]);
   }
 
@@ -199,7 +203,9 @@ void RtSolver::setSource(const std::function<Real(const RealVect a_pos)> a_sourc
     pout() << m_name + "::setSource(function)" << endl;
   }
 
-  DataOps::setValue(m_source, a_source, m_amr->getProbLo(), m_amr->getDx(), 0);
+  constexpr int defaultComponent = 0;
+
+  DataOps::setValue(m_source, a_source, m_amr->getProbLo(), m_amr->getDx(), defaultComponent);
 }
 
 void RtSolver::setSource(const Real a_source){
@@ -208,7 +214,7 @@ void RtSolver::setSource(const Real a_source){
     pout() << m_name + "::setSource(constant)" << endl;
   }
 
-  const int finest_level = m_amr->getFinestLevel();
+  const int finestLevel = m_amr->getFinestLevel();
 
   DataOps::setValue(m_source, a_source);
 
@@ -222,12 +228,12 @@ int RtSolver::getNumberOfPlotVariables() const {
     pout() << m_name + "::getNumberOfPlotVariables" << endl;
   }
 
-  int num_output = 0;
+  int numPlotVars = 0;
 
-  if(m_plotPhi) num_output = num_output + 1;
-  if(m_plotSource) num_output = num_output + 1;
+  if(m_plotPhi   ) numPlotVars = numPlotVars + 1;
+  if(m_plotSource) numPlotVars = numPlotVars + 1;
 
-  return num_output;
+  return numPlotVars;
 }
 
 void RtSolver::initialData() {
@@ -255,15 +261,19 @@ void RtSolver::writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellDa
     pout() << m_name + "::writeData" << endl;
   }
 
-  const int comp = 0;
-  const int ncomp = a_data[0]->nComp();
+  // TLDR: This routine takes the data-to-be-plotted in a_data and puts it in a_output. Normally we could just do
+  //       a copy but in the case where we want to have the solution on the centroids then we need to interpolate,
+  //       and so we copy to a scratch data holder first. 
 
-  const Interval src_interv(0, ncomp-1);
-  const Interval dst_interv(a_comp, a_comp + ncomp - 1);
+  const int comp    = 0;
+  const int numComp = a_data[0]->nComp();
+
+  const Interval srcInterval(0, numComp-1);
+  const Interval dstInterval(a_comp, a_comp + numComp - 1);
 
   // Copy data onto scratch
   EBAMRCellData scratch;
-  m_amr->allocate(scratch, m_realm, m_phase, ncomp);
+  m_amr->allocate(scratch, m_realm, m_phase, numComp);
   DataOps::copy(scratch, a_data);
 
   // Interp if we should
@@ -276,16 +286,16 @@ void RtSolver::writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellDa
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     if(a_output.getRealm() == m_realm){
-      scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
+      scratch[lvl]->localCopyTo(srcInterval, *a_output[lvl], dstInterval);
     }
     else{
-      scratch[lvl]->copyTo(src_interv, *a_output[lvl], dst_interv);
+      scratch[lvl]->copyTo(srcInterval, *a_output[lvl], dstInterval);
     }
   }
 
   DataOps::setCoveredValue(a_output, a_comp, 0.0);
 
-  a_comp += ncomp;
+  a_comp += numComp;
 }
 
 Real RtSolver::getTime() const{
@@ -319,7 +329,7 @@ EBAMRFluxData& RtSolver::getKappa(){
 }
 
 EBAMRIVData& RtSolver::getKappaEb(){
-  return m_kappa_eb;
+  return m_kappaEB;
 }
 
 RefCountedPtr<RtSpecies>& RtSolver::getSpecies(){

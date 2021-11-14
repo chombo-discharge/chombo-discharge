@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_McPhoto.H
-  @brief  Declaration of a monte carlo class for doing radiative transfer
+  @brief  Declaration of a radiative transfer solver which uses Monte Carlo sampling of computational or real photons.
   @author Robert Marskar
 */
 

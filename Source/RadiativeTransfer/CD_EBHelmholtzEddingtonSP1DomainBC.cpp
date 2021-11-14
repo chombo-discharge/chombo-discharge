@@ -9,6 +9,9 @@
   @author Robert Marskar
 */
 
+// Chombo includes
+#include <CH_Timer.H>
+
 // Our includes
 #include <CD_EBHelmholtzEddingtonSP1DomainBC.H>
 #include <CD_EBHelmholtzDirichletDomainBC.H>
@@ -20,6 +23,8 @@ EBHelmholtzEddingtonSP1DomainBC::EBHelmholtzEddingtonSP1DomainBC(const Eddington
 								 const RefCountedPtr<RtSpecies>& a_species,
 								 const Real                      a_r1,
 								 const Real                      a_r2){
+  CH_TIME("EBHelmholtzEddingtonSP1DomainBC::EBHelmholtzEddingtonSP1DomainBC");
+  
   m_eddingtonBCs = a_eddingtonBCs;
   m_species      = a_species;
   m_r1           = a_r1;
@@ -66,7 +71,7 @@ EBHelmholtzEddingtonSP1DomainBC::EBHelmholtzEddingtonSP1DomainBC(const Eddington
 }
 
 EBHelmholtzEddingtonSP1DomainBC::~EBHelmholtzEddingtonSP1DomainBC(){
-
+  CH_TIME("EBHelmholtzEddingtonSP1DomainBC::~EBHelmholtzEddingtonSP1DomainBC");
 }
 
 void EBHelmholtzEddingtonSP1DomainBC::define(const Location::Cell                        a_dataLocation,
@@ -74,6 +79,8 @@ void EBHelmholtzEddingtonSP1DomainBC::define(const Location::Cell               
 					     const RefCountedPtr<LevelData<EBFluxFAB> >& a_Bcoef,
 					     const RealVect&                             a_probLo,
 					     const Real                                  a_dx) {
+  CH_TIME("EBHelmholtzEddingtonSP1DomainBC::define");
+  
   for (int dir = 0; dir < SpaceDim; dir++){
     for (SideIterator sit; sit.ok(); ++sit){
       auto& bcPtr = m_bcObjects.at(std::make_pair(dir, sit()));
@@ -89,6 +96,8 @@ void EBHelmholtzEddingtonSP1DomainBC::getFaceFlux(BaseFab<Real>&        a_faceFl
 						  const Side::LoHiSide& a_side,
 						  const DataIndex&      a_dit,
 						  const bool            a_useHomogeneous) const {
+  CH_TIME("EBHelmholtzEddingtonSP1DomainBC::getFaceFlux(regular)");
+  
   const auto& bcPtr = m_bcObjects.at(std::make_pair(a_dir, a_side));
 
   bcPtr->getFaceFlux(a_faceFlux,
@@ -105,6 +114,8 @@ Real EBHelmholtzEddingtonSP1DomainBC::getFaceFlux(const VolIndex&       a_vof,
 						  const Side::LoHiSide& a_side,
 						  const DataIndex&      a_dit,
 						  const bool            a_useHomogeneous) const {
+  CH_TIME("EBHelmholtzEddingtonSP1DomainBC::getFaceFlux(irreg)");
+  
   const auto& bcPtr = m_bcObjects.at(std::make_pair(a_dir, a_side));
 
   return bcPtr->getFaceFlux(a_vof, a_phi, a_dir, a_side, a_dit, a_useHomogeneous);
