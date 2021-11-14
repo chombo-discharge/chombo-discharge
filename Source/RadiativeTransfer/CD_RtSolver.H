@@ -23,7 +23,8 @@
 #include <CD_NamespaceHeader.H>
   
 /*!
-  @brief Abstract RTE solver class. This is essentially just an interface. 
+  @brief Abstract RTE solver class for doing various kinds of radiative transfer equations. This class
+  is a pure class and it is basically just an interface.
 */
 class RtSolver {
 public:
@@ -34,7 +35,7 @@ public:
   RtSolver();
 
   /*!
-    @brief Constructor
+    @brief Constructor (does nothing)
   */
   virtual ~RtSolver();
 
@@ -54,7 +55,7 @@ public:
   virtual void parseOptions() = 0;
 
   /*!
-    @brief Parse options
+    @brief Parse runtime options
   */
   virtual void parseRuntimeOptions() = 0;
 
@@ -65,57 +66,77 @@ public:
   
   /*!
     @brief Advance equation one time step
+    @param[in] a_dt      Time step
+    @param[in] a_zeroPhi An optional argument for e.g. elliptic solves which can start from previous solution or zero.
   */
-  virtual bool advance(const Real a_dt, const bool a_zerophi = false);
+  virtual bool advance(const Real a_dt, const bool a_zeroPhi = false);
 
   /*!
-    @brief Advance method
+    @brief Advance method. Advances one time step.
+    @param[in] a_dt      Time step
+    @param[in] a_phi     Mesh solution
+    @param[in] a_zeroPhi An optional argument for e.g. elliptic solves which can start from previous solution or zero.
   */
-  virtual bool advance(const Real a_dt, EBAMRCellData& a_phi, const bool a_zerophi = false);
+  virtual bool advance(const Real a_dt, EBAMRCellData& a_phi, const bool a_zeroPhi = false);
 
   /*!
-    @brief Advance RTE onto isotropic state a_phi
+    @brief Advance method. Advances one time step.
+    @param[in] a_dt      Time step
+    @param[in] a_phi     Mesh solution
+    @param[in] a_source  Source term
+    @param[in] a_zeroPhi An optional argument for e.g. elliptic solves which can start from previous solution or zero.
   */
-  virtual bool advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_source, const bool a_zerophi = false) = 0;
+  virtual bool advance(const Real a_dt, EBAMRCellData& a_phi, const EBAMRCellData& a_source, const bool a_zeroPhi = false) = 0;
 
   /*!
-    @brief Set Realm
+    @brief Set realm where this solver lives.
+    @param[in] a_realm Realm
   */
   virtual void setRealm(const std::string a_realm);
 
   /*!
-    @brief Set the Photon group
+    @brief Set the radiative transfer species (RtSpecies)
+    @param[in] a_species Species (see RtSpecies.H)
   */
-  virtual void setRtSpecies(const RefCountedPtr<RtSpecies> a_RtSpecies);
+  virtual void setRtSpecies(const RefCountedPtr<RtSpecies>& a_species);
 
   /*!
     @brief Set computational geometry
+    @param[in] a_computationalGeometry Computational geometry
   */
   virtual void setComputationalGeometry(const RefCountedPtr<ComputationalGeometry> a_computationalGeometry);
 
   /*!
     @brief Set the amr object
+    @param[in] a_amr AmrMesh object.
   */
   virtual void setAmr(const RefCountedPtr<AmrMesh>& a_amr);
 
   /*!
     @brief Set phase
+    @param[in] a_phase Phase (gas/solid) where the solver lives.
     @details This must be done BEFORE callilng setComputationalGeometry
   */
   virtual void setPhase(phase::which_phase a_phase = phase::gas);
 
   /*!
     @brief Set verbosity.
+    @param[in] a_verbosity Verbosity level.
   */
   virtual void setVerbosity(const int a_verbosity);
 
   /*!
-    @brief Get current time
+    @brief Set the time for this solver. 
+    @param[in] a_step Time step number
+    @param[in] a_time Time (in seconds)
+    @param[in] a_dt   Time step increment
+    @note This sets m_step=a_step, m_time=a_time, m_dt=a_dt
   */
   virtual void setTime(const int a_step, const Real a_time, const Real a_dt);
 
   /*!
     @brief Set stationary solver or not
+    @param[in] a_stationary If true, the solver is set to stationary mode.
   */
   virtual void setStationary(const bool a_stationary);
 
@@ -131,23 +152,31 @@ public:
 
   /*!
     @brief Compute the boundary flux given a state (a_phi will be different for different RTE approximations)
+    @param[inout] a_ebFlux The flux on the EB
+    @param[in]    a_phi    Cell-centered solution for the RTE state (e.g. for Eddington this is just the isotropic part).
   */
   virtual void computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellData& a_phi) = 0;
 
   /*!
     @brief Compute the domain flux given a state (a_phi will be different for different RTE approximations)
+    @param[inout] a_domainFlux The flux on the domain wall
+    @param[in]    a_phi        Cell-centered solution for the RTE state (e.g. for Eddington this is just the isotropic part).
   */
   virtual void computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellData& a_phi) = 0;
 
   /*!
     @brief Compute the flux
+    @param[inout] a_flux The RTE flux on the domain wall
+    @param[in]    a_phi  Cell-centered solution for the RTE state (e.g. for Eddington this is just the isotropic part).
     @details For diffusive models, the flux will be something like grad(a_phi). For higher-order models, the flux 
-    will be contained in a_phi (somehow);
+    will be contained in a_phi (somehow).
   */
   virtual void computeFlux(EBAMRCellData& a_flux, const EBAMRCellData& a_phi) = 0;
 
   /*!
     @brief Get isotropic part. 
+    @param[inout] a_isotropic Isotropic part of the RTE solution
+    @param[in]    a_phi       Full RTE solution.
     @details This is normally just a copy, but I need the function signature in order to have a clear plasma-coupling interface
   */
   virtual void computeDensity(EBAMRCellData& a_isotropic, const EBAMRCellData& a_phi) = 0;
@@ -163,12 +192,17 @@ public:
   virtual void deallocateInternals() = 0;
 
   /*!
-    @brief Pre regrid
+    @brief Perform pre-regrid operations. 
+    @param[in] a_lbase          Coarsest level that changed during regrid. 
+    @param[in] a_oldFinestLevel Finest grid level before the regrid operation. 
   */
   virtual void preRegrid(const int a_lbase, const int a_oldFinestLevel) = 0;
 
   /*!
-    @brief Regrid function
+    @brief Regrid this solver. 
+    @param[in] a_lmin           Coarsest level where grids did not change. 
+    @param[in] a_oldFinestLevel Finest AMR level before the regrid. 
+    @param[in] a_newFinestLevel Finest AMR level after the regrid. 
   */
   virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) = 0;
 
@@ -179,22 +213,25 @@ public:
 
   /*!
     @brief Fill solver with initial data. By default, this sets internal data to zero. 
-    @details Only relevant for non-stationary solvers
+    @details Default implementation sets to zero -- override if you want to have different initial conditions. 
   */
   virtual void initialData();
 
   /*!
     @brief Set source term
+    @param[in] a_source Source term
   */
   virtual void setSource(const EBAMRCellData& a_source);
 
   /*!
     @brief Set source
+    @param[in] a_source Source term
   */
   virtual void setSource(const Real a_source);
 
     /*!
     @brief Set source
+    @param[in] a_source Source term (varies in space)
   */
   virtual void setSource(const std::function<Real(const RealVect a_pos)> a_source);
 
@@ -205,60 +242,78 @@ public:
 
   /*!
     @brief Write output data to a_output
+    @param[inout] a_output Output data holder.
+    @param[inout] a_icomp  Starting component where this solver begins writing the output. 
+    @note This routine writes m_phi on centroids (and not cell-centers). 
   */
   virtual void writePlotData(EBAMRCellData& a_output, int& a_comp);
 
   /*!
     @brief Write data to output. Convenience function. 
+    @param[inout] a_output Output data holder.
+    @param[inout] a_icomp  Starting component where this solver begins writing the output. 
+    @param[in]    a_data   Data to write. 
+    @param[in]    a_interp If true, a_data will be interpolated to cell centroids before writing to a_output. 
   */
   virtual void writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp);
 
-  /*!
-    @brief Write checkpoint data into handle
-  */
 #ifdef CH_USE_HDF5
+  /*!
+    @brief Write checkpoint data into HDF5 file. 
+    @paramo[out] a_handle HDF5 file. 
+    @param[in]   a_level Grid level
+  */  
   virtual void writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const = 0;
 #endif
 
+#ifdef CH_USE_HDF5
   /*!
-    @brief Read checkpoint data from handle
-  */
-#ifdef CH_USE_HDF5  
+    @brief Read checkpoint data from HDF5 file. 
+    @param[in] a_handle HDF5 handle.
+    @param[in] const int a_level Grid level
+  */  
   virtual void readCheckpointLevel(HDF5Handle& a_handle, const int a_level) = 0;
 #endif
 
   /*!
     @brief Get number of output fields
+    @return Returns number of variables that will be plotted to file. 
   */
   virtual int getNumberOfPlotVariables() const;
 
   /*!
-    @brief Get time
+    @brief Get current time
+    @return Returns m_time
   */
   virtual Real getTime() const;
 
   /*!
     @brief Get the RTE phase
+    @return Returns m_phase
   */
   virtual phase::which_phase getPhase();
 
   /*!
-    @brief Get multifluid state
+    @brief Get solver state.
+    @return Returns m_phi. For diffusive solves this will have a single component. 
   */
   virtual EBAMRCellData& getPhi();
 
   /*!
     @brief Get multifluid source
+    @return Returns m_source. For diffusive solves this will have a single component. 
   */
   virtual EBAMRCellData& getSource();
 
   /*!
-    @brief Set the absorption coefficient
+    @brief Get the absorption length.
+    @return m_kappa
   */
   virtual EBAMRFluxData& getKappa();
 
   /*!
-    @brief Set the absorption coefficient on irregular EB faces
+    @brief Get the absorption coefficient on irregular EB faces
+    @return m_kappaEB
   */
   virtual EBAMRIVData& getKappaEb();
 
@@ -270,12 +325,12 @@ public:
 protected:
 
   /*!
-    @brief Component we solve for
+    @brief Default component that we solve for
   */
   static constexpr int m_comp = 0;
 
     /*!
-    @brief Number of components
+    @brief Default number of components
   */
   static constexpr int m_nComp = 1;
 
@@ -285,17 +340,17 @@ protected:
   Location::Cell m_dataLocation;
 
   /*!
-    @brief Realm
+    @brief Realm where this solver lives.
   */
   std::string m_realm;
 
   /*!
-    @brief Phase 
+    @brief EBIndexSpace for this solver.
   */
   RefCountedPtr<EBIndexSpace> m_ebis;
 
   /*!
-    @brief Photon group
+    @brief Radiative transfer species (contains meta-information like initial conditions)
   */
   RefCountedPtr<RtSpecies> m_RtSpecies;
 
@@ -315,12 +370,12 @@ protected:
   phase::which_phase m_phase;
 
   /*!
-    @brief Name
+    @brief Name for this solver. 
   */
   std::string m_name;
 
   /*!
-    @brief Class name
+    @brief Class name -- needed because inherited classes will be named different. 
   */
   std::string m_className;
 
@@ -351,7 +406,7 @@ protected:
   /*!
     @brief Absorption coefficient on EB faces. 
   */
-  EBAMRIVData m_kappa_eb;
+  EBAMRIVData m_kappaEB;
 
   /*!
     @brief Time

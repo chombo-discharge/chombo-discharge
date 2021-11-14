@@ -30,79 +30,52 @@ public:
   /*!
     @brief Full constructor
   */
-  RtIterator(RtLayout<T>& a_layout){
-    CH_TIME("RtIterator::RtIterator");
-    
-    m_solvers  = a_layout.getSolvers();
-    m_species  = a_layout.getSpecies();
-    m_num      = m_solvers.size();
-
-    reset();
-  }
+  RtIterator(RtLayout<T>& a_layout);
 
   /*!
-    @brief Destructor
+    @brief Destructor (does nothing)
   */
-  virtual ~RtIterator(){
-
-  }
+  virtual ~RtIterator();
 
   /*!
     @brief Get number of solvers
   */
-  virtual int getNumberOfSolvers(){
-    return m_num;
-  }
+  virtual int getNumberOfSolvers();
 
   /*!
-    @brief Get current solver number
+    @brief Get current solver number/index
   */
-  virtual int index() const {
-    return m_isolver;
-  }
+  virtual int index() const;
 
   /*!
-    @brief Reset iterator
+    @brief Reset iterator to first solver.
   */
-  virtual void reset(){
-    m_isolver = 0;
-  }
-
+  virtual void reset();
 
   /*!
-    @brief Ok or not
+    @brief Check if we can cycle further through the solvers. 
   */
-  virtual bool ok(){
-    return (m_isolver < m_num);
-  }
+  virtual bool ok();
 
   /*!
-    @brief Increment
+    @brief Incrementation operator. Cycles to next solver.
   */
-  virtual void operator++(){
-    m_isolver++;
-  }
+  virtual void operator++();
 
   /*!
-    @brief Get solver
+    @brief Get the solver pointed to by the iterator.
   */
-  virtual RefCountedPtr<T>& operator() () {
-   CH_assert(m_isolver < m_num);
-    return m_solvers[m_isolver];
-  }
+  virtual RefCountedPtr<T>& operator() ();
 
   /*!
-    @brief Get current ion
+    @brief Get current species pointed to by the iterator.
   */
-  virtual RefCountedPtr<RtSpecies>& getSpecies() {
-    CH_assert(m_isolver < m_num);
-    return m_species[m_isolver];
-  }
+  virtual RefCountedPtr<RtSpecies>& getSpecies();
   
 protected:
   
   /*!
-    @brief 
+    @brief Solver currently pointed to.
   */
   int m_isolver;
 
@@ -125,4 +98,5 @@ protected:
 
 #include <CD_NamespaceFooter.H>
 
+#include <CD_RtIteratorImplem.H>
 #endif

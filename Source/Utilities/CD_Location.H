@@ -22,15 +22,23 @@
   Enums for specying where cell/face data is located
 */
 namespace Location {
+
+  /*!
+    @brief Enum for distinguishing between cell locations
+  */
   enum class Cell{
     Center,
     Centroid,
     Boundary
   };
 
+  /*!
+    @brief Enum for distinguishing between face locations
+  */  
   enum class Face {
     Center,
-    Centroid
+    Centroid,
+    Boundary
   };
 
   /*!
