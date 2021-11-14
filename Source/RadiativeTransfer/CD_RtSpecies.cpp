@@ -14,7 +14,9 @@
 #include <CD_NamespaceHeader.H>
   
 RtSpecies::RtSpecies(){
-  this->define("default_Photon", 1.0);
+  
+  // Default settings
+  this->define("DefaultRtSpecies", 1.0);
 
   m_scatter = 0.0;
   m_kappa   = 0.0;
@@ -24,21 +26,19 @@ RtSpecies::RtSpecies(const std::string a_name, const Real a_kappa){
   this->define(a_name, a_kappa);
 }
 
-RtSpecies::RtSpecies(const std::string a_name, Real (*a_kappa) (const RealVect a_pos)){
+RtSpecies::RtSpecies(const std::string a_name, const std::function<Real(const RealVect a_pos)>& a_kappa) {
   this->define(a_name, a_kappa);
 }
 
 void RtSpecies::define(const std::string a_name, const Real a_kappa){
-  m_name  = a_name;
-  m_kappa = a_kappa;
-
+  m_name     = a_name;
+  m_kappa    = a_kappa;
   m_constant = true;
 }
 
-void RtSpecies::define(const std::string a_name, Real (*a_kappa)(const RealVect a_pos)){
+void RtSpecies::define(const std::string a_name, const std::function<Real(const RealVect a_pos)>& a_kappa) {
   m_name     = a_name;
-  m_varkappa = a_kappa;
-
+  m_varKappa = a_kappa;
   m_constant = false;
 }
 
@@ -55,7 +55,7 @@ Real RtSpecies::getKappa(const RealVect a_pos) const{
     return m_kappa;
   }
   else{
-    return m_varkappa(a_pos);
+    return m_varKappa(a_pos);
   }
 }
 
@@ -64,7 +64,7 @@ Real RtSpecies::getScatteringCoefficient(const RealVect a_pos) const{
     return m_scatter;
   }
   else{
-    return m_varscatter(a_pos);
+    return m_varScatter(a_pos);
   }
 }
 

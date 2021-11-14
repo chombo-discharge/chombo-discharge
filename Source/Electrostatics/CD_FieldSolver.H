@@ -530,6 +530,11 @@ protected:
   bool m_plotResidue;
 
   /*!
+    @brief If true, the permittivity will be added to plot files. 
+  */
+  bool m_plotPermittivity;  
+
+  /*!
     @brief If true, m_sigma will be added to plot files. 
   */
   bool m_plotSigma;

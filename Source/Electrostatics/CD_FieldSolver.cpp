@@ -523,6 +523,7 @@ void FieldSolver::parsePlotVariables(){
   m_plotRho           = false;
   m_plotElectricField = false;
   m_plotResidue       = false;
+  m_plotPermittivity  = false;  
   m_plotSigma         = false;  
 
   ParmParse pp(m_className.c_str());
@@ -537,7 +538,8 @@ void FieldSolver::parsePlotVariables(){
       else if(str[i] == "rho")   m_plotRho           = true;
       else if(str[i] == "resid") m_plotResidue       = true;
       else if(str[i] == "E")     m_plotElectricField = true;
-      else if(str[i] == "sigma") m_plotSigma         = true;      
+      else if(str[i] == "sigma") m_plotSigma         = true;
+      else if(str[i] == "perm")  m_plotPermittivity  = true;            
     }
   }
 }
@@ -986,11 +988,12 @@ void FieldSolver::writePlotData(EBAMRCellData& a_output, int& a_comp, const bool
   const bool doInterp = (m_dataLocation == Location::Cell::Center) && !a_forceNoInterp;
 
   // Add phi to output
-  if(m_plotPotential)     this->writeMultifluidData(a_output, a_comp, m_potential,     doInterp); // Possibly on cell center, so-recenter to centroid if needed
-  if(m_plotRho)           this->writeMultifluidData(a_output, a_comp, m_rho,           false);    // Always centroid
-  if(m_plotSigma)         this->writeSurfaceData   (a_output, a_comp, m_sigma               );    // m_sigma is EB-centered
-  if(m_plotResidue)       this->writeMultifluidData(a_output, a_comp, m_residue,       false);    // Always centroid
-  if(m_plotElectricField) this->writeMultifluidData(a_output, a_comp, m_electricField, doInterp); // Possibly on cell center, so-recenter to centroid if needed
+  if(m_plotPotential)     this->writeMultifluidData(a_output, a_comp, m_potential,        doInterp); // Possibly on cell center, so-recenter to centroid if needed
+  if(m_plotRho)           this->writeMultifluidData(a_output, a_comp, m_rho,              false   ); // Always centroid
+  if(m_plotSigma)         this->writeSurfaceData   (a_output, a_comp, m_sigma                     ); // m_sigma is EB-centered
+  if(m_plotResidue)       this->writeMultifluidData(a_output, a_comp, m_residue,          false   ); // Always centroid
+  if(m_plotPermittivity)  this->writeMultifluidData(a_output, a_comp, m_permittivityCell, false   ); // Always centroid  
+  if(m_plotElectricField) this->writeMultifluidData(a_output, a_comp, m_electricField,    doInterp); // Possibly on cell center, so-recenter to centroid if needed
 }
 
 void FieldSolver::writeMultifluidData(EBAMRCellData& a_output, int& a_comp, const MFAMRCellData& a_data, const bool a_interp){
@@ -1123,6 +1126,7 @@ int FieldSolver::getNumberOfPlotVariables() const {
   if(m_plotRho)           numPltVars = numPltVars + 1;
   if(m_plotSigma)         numPltVars = numPltVars + 1;  
   if(m_plotResidue)       numPltVars = numPltVars + 1;
+  if(m_plotPermittivity)  numPltVars = numPltVars + 1;  
   if(m_plotElectricField) numPltVars = numPltVars + SpaceDim;
 
   return numPltVars;
@@ -1136,10 +1140,11 @@ Vector<std::string> FieldSolver::getPlotVariableNames() const {
   
   Vector<std::string> pltVarNames(0);
   
-  if(m_plotPotential) pltVarNames.push_back("Electrostatic potential");
-  if(m_plotRho)       pltVarNames.push_back("Space charge density");
-  if(m_plotSigma)     pltVarNames.push_back("Electrostatic sigma");    
-  if(m_plotResidue)   pltVarNames.push_back("Electrostatic potential_residue");
+  if(m_plotPotential)    pltVarNames.push_back("Electrostatic potential");
+  if(m_plotRho)          pltVarNames.push_back("Space charge density");
+  if(m_plotSigma)        pltVarNames.push_back("Electrostatic sigma");    
+  if(m_plotResidue)      pltVarNames.push_back("Electrostatic potential_residue");
+  if(m_plotPermittivity) pltVarNames.push_back("Electrostatic permittivity");  
   
   if(m_plotElectricField){
     pltVarNames.push_back("x-Electric field"); 

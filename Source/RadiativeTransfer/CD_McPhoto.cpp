@@ -790,6 +790,7 @@ void McPhoto::generatePhotons(ParticleContainer<Photon>& a_photons, const EBAMRC
   if(m_verbosity > 5){
     pout() << m_name + "::generatePhotons" << endl;
   }
+  
   CH_assert(a_source[0]->nComp() == 1);
 
   constexpr int srcComp = 0; // We assume that a_source only has one component and that the source term is found on component zero. 

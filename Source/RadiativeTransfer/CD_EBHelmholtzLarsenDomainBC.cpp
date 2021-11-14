@@ -9,6 +9,9 @@
   @author Robert Marskar
 */
 
+// Chombo includes
+#include <CH_Timer.H>
+
 // Our includes
 #include <CD_EBHelmholtzLarsenDomainBC.H>
 #include <CD_EBHelmholtzRobinDomainBC.H>
@@ -18,6 +21,8 @@ EBHelmholtzLarsenDomainBC::EBHelmholtzLarsenDomainBC(const RefCountedPtr<RtSpeci
 						     const Real                      a_r1,
 						     const Real                      a_r2,
 						     const SourceFunction            a_source){
+  CH_TIME("EBHelmholtzLarsenDomainBC::EBHelmholtzLarsenDomainBC");
+  
   m_species = a_species;
   m_r1      = a_r1;
   m_r2      = a_r2;
@@ -29,6 +34,8 @@ EBHelmholtzLarsenDomainBC::EBHelmholtzLarsenDomainBC(const RefCountedPtr<RtSpeci
 EBHelmholtzLarsenDomainBC::EBHelmholtzLarsenDomainBC(const RefCountedPtr<RtSpecies>& a_species,
 						     const Real                      a_r1,
 						     const Real                      a_r2){
+  CH_TIME("EBHelmholtzLarsenDomainBC::EBHelmholtzLarsenDomainBC");
+  
   m_species = a_species;
   m_r1      = a_r1;
   m_r2      = a_r2;
@@ -41,10 +48,12 @@ EBHelmholtzLarsenDomainBC::EBHelmholtzLarsenDomainBC(const RefCountedPtr<RtSpeci
 }
 
 EBHelmholtzLarsenDomainBC::~EBHelmholtzLarsenDomainBC(){
-
+  CH_TIME("EBHelmholtzLarsenDomainBC::~EBHelmholtzLarsenDomainBC");
 }
 
 void EBHelmholtzLarsenDomainBC::setRobinFunctions(){
+  CH_TIME("EBHelmholtzLarsenDomainBC::setRobinFunction");
+  
   // TLDR: We are creating functions for boundary conditions of the Robin type A*phi + B*dphi/dn = C, but using
   //       the "Larsen coefficients". 
 
