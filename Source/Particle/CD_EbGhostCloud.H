@@ -22,14 +22,14 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief A class for handling particle deposition clouds that hang over refinement boundaries. This class is not guaranteed to work with multi-cells. 
+  @brief A class for handling particle deposition clouds that hang over refinement boundaries. This class does not include any deposition functionality but provides
+  buffers for moving mass between two levels. 
   @details To use this class, the user can directly call addFineGhostsToCoarse to add the contribution of the fine level's particles to the coarse level. This
   will add the part of the particle clouds that hang over the refinement boundary to the coarse level. Likewise, the user can get a buffer (getFiCoBuffer) for
   getting a temporary data holder on which he can use special deposition procedures.
   @todo This class currently does not work with multi-valued cells (like most of our particle code). Moreover, we actually refine the entire coarse level so that
   users can deposit particles without moving them around. This allocates a lot of mesh data and we might want to reconsider the design of this class. Indeed, there
   are other ways of doing this kind of deposition. 
-  @note This class does deposit correctly with multi-valued cells (all the mass will go into one of the VoFs). If your geometry has such cells -- you might want to refine them. 
 */
 class EbGhostCloud {
 public:
@@ -73,8 +73,10 @@ public:
 	      const int                a_ghost);
 
   /*!
-    @brief Coarsen the fine-level ghost cells and add them to the coarse level
-    @details On output, the contests in the ghost cells on the refinement boundary are added from the fine level to the coarse level. 
+    @brief Coarsen the fine-level ghost cells and add them to the coarse level. 
+    @details On output, the contests in the ghost cells on the refinement boundary are added from the fine level to the coarse level. This routine
+    is used when the fine-level particles have particle clouds that deposit into the ghost cells outside the fine level. This routine coarsens that
+    data and adds the mass to the coarse level. 
     @param[inout] a_coarData Coarse mesh data. 
     @param[in]    a_fineData Fine mesh data. 
   */
