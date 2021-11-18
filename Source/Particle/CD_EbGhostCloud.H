@@ -78,7 +78,7 @@ public:
     @param[inout] a_coarData Coarse mesh data. 
     @param[in]    a_fineData Fine mesh data. 
   */
-  void addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coarData, const LevelData<EBCellFAB>& a_fineData);
+  void addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coarData, const LevelData<EBCellFAB>& a_fineData) const;
 
   /*!
     @brief Add the ghost cells on the refined coarse level to the fine level. 
@@ -87,17 +87,12 @@ public:
     @param[inout] a_fineData Fine mesh data
     @param[in]    a_fiCoData Refined coarse data buffer. Users will have deposited the mesh data onto this 
   */
-  void addFiCoDataToFine(LevelData<EBCellFAB>& a_fineData, const BoxLayoutData<EBCellFAB>& a_fiCoData);
+  void addFiCoDataToFine(LevelData<EBCellFAB>& a_fineData, const LevelData<EBCellFAB>& a_fiCoData) const;
 
   /*!
     @brief Get the refined coarse buffer
   */
-  BoxLayoutData<EBCellFAB>& getFiCoBuffer();
-
-  /*!
-    @brief Get the refined coarse buffer
-  */
-  const BoxLayoutData<EBCellFAB>& getFiCoBuffer() const;
+  LevelData<EBCellFAB>& getFiCoBuffer() const;
 
   /*!
     @brief Get the refined version of the coarse eblevelgrid
@@ -110,16 +105,6 @@ protected:
     @brief Is defined or not
   */
   bool m_isDefined;
-
-  /*!
-    @brief Coarse grids
-  */
-  DisjointBoxLayout m_gridsCoar;
-
-  /*!
-    @brief Fine grids
-  */
-  DisjointBoxLayout m_gridsFine;
 
   /*!
     @brief Coarse EBLevelGrid
@@ -137,39 +122,45 @@ protected:
   EBLevelGrid m_eblgFiCo;
 
   /*!
-    @brief Coarse domain
+    @brief Coarsening of m_eblgFine
   */
-  ProblemDomain m_domainCoar;
+  EBLevelGrid m_eblgCoFi;
 
   /*!
-    @brief Fine domain
+    @brief Copier for copying data from the refined coarse level to the fine level.
   */
-  ProblemDomain m_domainFine;
+  Copier m_copierFiCoToFine;
 
   /*!
-    @brief Coarsened grids, grown by the required amount of ghost cells. 
+    @brief Copier for copying data from the coarsened fine level to the coarse level.
   */
-  BoxLayout m_gridsCoFi;
-
-  /*!
-    @brief Refined coarse grids.
-  */
-  BoxLayout m_gridsFiCo;
+  Copier m_copierCoFiToCoar;
 
   /*!
     @brief Data defined on the coarsened fine grid
   */
-  BoxLayoutData<FArrayBox> m_dataCoFi;
+  mutable LevelData<EBCellFAB> m_bufferCoFi;
 
   /*!
     @brief Data defined on the refined coarse grid
   */
-  BoxLayoutData<EBCellFAB> m_dataFiCo;
+  mutable LevelData<EBCellFAB> m_bufferFiCo;
 
   /*!
     @brief Scratch storage for fine grid data
   */
-  LevelData<EBCellFAB> m_scratchFine;
+  mutable LevelData<EBCellFAB> m_bufferFine;
+
+  /*!
+    @brief VoFIterator for fine-grid irregular ghost cells. 
+  */
+  mutable LayoutData<VoFIterator> m_vofIterFineGhosts;
+
+  /*!
+    @brief VoFIterator for coarse grid cells that are coarsenings of fine-grid ghost irregular cells.
+    @details Essentially a coarsening of m_vofIterFineGhosts.
+  */
+  mutable LayoutData<VoFIterator> m_vofIterCoFiGhosts;  
 
   /*!
     @brief Refinement ratio between the two levels
@@ -187,14 +178,9 @@ protected:
   int m_ghost;
 
   /*!
-    @brief Make the coarsened fine grids and data
+    @brief Define the vof iterators
   */
-  void makeCoFiStuff();
-
-  /*!
-    @brief Make the refined coarse grids and data
-  */
-  void makeFiCoStuff();
+  void defineVoFIterators();
 };
 
 #include <CD_NamespaceFooter.H>

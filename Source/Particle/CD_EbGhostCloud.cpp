@@ -18,6 +18,7 @@
 // Our includes
 #include <CD_EbGhostCloud.H>
 #include <CD_EbGhostCloudF_F.H>
+#include <CD_EBAddOp.H>
 #include <CD_NamespaceHeader.H>
   
 EbGhostCloud::EbGhostCloud(){
@@ -26,11 +27,11 @@ EbGhostCloud::EbGhostCloud(){
   m_isDefined = false;
 }
 
-EbGhostCloud::EbGhostCloud(const EBLevelGrid&       a_eblgCoar,
-			   const EBLevelGrid&       a_eblgFine,
-			   const int                a_refRat,
-			   const int                a_nComp,
-			   const int                a_ghostFine){
+EbGhostCloud::EbGhostCloud(const EBLevelGrid& a_eblgCoar,
+			   const EBLevelGrid& a_eblgFine,
+			   const int          a_refRat,
+			   const int          a_nComp,
+			   const int          a_ghostFine){
   CH_TIME("EbGhostCloud::EbGhostCloud");
   
   this->define(a_eblgCoar, a_eblgFine, a_refRat, a_nComp, a_ghostFine);
@@ -40,11 +41,11 @@ EbGhostCloud::~EbGhostCloud(){
   CH_TIME("EbGhostCloud::~EbGhostCloud");
 }
 
-void EbGhostCloud::define(const EBLevelGrid&       a_eblgCoar,
-			  const EBLevelGrid&       a_eblgFine,
-			  const int                a_refRat,
-			  const int                a_nComp,
-			  const int                a_ghostFine){
+void EbGhostCloud::define(const EBLevelGrid& a_eblgCoar,
+			  const EBLevelGrid& a_eblgFine,
+			  const int          a_refRat,
+			  const int          a_nComp,
+			  const int          a_ghostFine) {
   CH_TIME("EbGhostCloud::define");
   
   m_refRat     = a_refRat;
@@ -54,145 +55,156 @@ void EbGhostCloud::define(const EBLevelGrid&       a_eblgCoar,
   m_eblgCoar   = a_eblgCoar;
   m_eblgFine   = a_eblgFine;
 
-  m_gridsCoar  = m_eblgCoar.getDBL();
-  m_gridsFine  = m_eblgFine.getDBL();
+  // Make the coarsened and refine grids.
+  coarsen(m_eblgCoFi, m_eblgFine, m_refRat);  
+  refine (m_eblgFiCo, m_eblgCoar, m_refRat);
   
-  m_domainCoar = m_eblgCoar.getDomain();
-  m_domainFine = m_eblgFine.getDomain();
+  // Create various buffers. The fine data should just be a raw copy.
+  m_bufferCoFi.define(m_eblgCoFi.getDBL(), m_nComp, m_ghost*IntVect::Unit, EBCellFactory(m_eblgCoFi.getEBISL()));
+  m_bufferFiCo.define(m_eblgFiCo.getDBL(), m_nComp, m_ghost*IntVect::Unit, EBCellFactory(m_eblgFiCo.getEBISL()));  
+  m_bufferFine.define(m_eblgFine.getDBL(), m_nComp, m_ghost*IntVect::Unit, EBCellFactory(m_eblgFine.getEBISL()));
 
-  // Make coarsened/refined stuff
-  this->makeCoFiStuff();
-  this->makeFiCoStuff();
+  // Define Copiers
+  m_copierFiCoToFine.ghostDefine(m_eblgFiCo.getDBL(), m_eblgFine.getDBL(), m_eblgFine.getDomain(), m_ghost*IntVect::Unit);
+  m_copierCoFiToCoar.ghostDefine(m_eblgCoFi.getDBL(), m_eblgCoar.getDBL(), m_eblgCoar.getDomain(), m_ghost*IntVect::Unit);
 
-  // Create fine scratch data. The fine data should just be a raw copy. 
-  m_scratchFine.define(m_gridsFine, m_nComp, m_ghost*IntVect::Unit, EBCellFactory(m_eblgFine.getEBISL()));
+  // Define VoF iterators
+  this->defineVoFIterators();
 
   m_isDefined = true;
 }
 
-void EbGhostCloud::makeCoFiStuff(){
-  CH_TIME("EbGhostCloud::makeCoFiStuff");
-  
-  // TLDR: Coarsen the grids and make a BoxLayout data
-  
-  DisjointBoxLayout dblCoFi;
-  coarsen(dblCoFi, m_gridsFine, m_refRat);
-  
-  Vector<Box> coFiBoxes = dblCoFi.boxArray();
-  Vector<int> coFiProcs = dblCoFi.procIDs();
+void EbGhostCloud::defineVoFIterators(){
+  CH_TIME("EbGhostCloud::defineVoFIterators");
 
-  const int ghostCoFi = (m_ghost + m_refRat - 1)/m_refRat; // Rounds upwards. 
-  for (int i = 0; i < coFiBoxes.size(); i++){
-    coFiBoxes[i].grow(ghostCoFi);
-    coFiBoxes[i] &= m_domainCoar;
-  }
+  const DisjointBoxLayout& dblFine    = m_eblgFine.getDBL   ();
+  const ProblemDomain&     domainFine = m_eblgFine.getDomain();
+  const EBISLayout&        ebislFine  = m_eblgFine.getEBISL ();
+
+  const DisjointBoxLayout& dblCoFi    = m_eblgCoFi.getDBL   ();
+  const ProblemDomain&     domainCoFi = m_eblgCoFi.getDomain();
+  const EBISLayout&        ebislCoFi  = m_eblgCoFi.getEBISL ();  
+
+  m_vofIterFineGhosts.define(dblFine);
+  m_vofIterCoFiGhosts.define(dblCoFi);  
   
-  m_gridsCoFi.define(coFiBoxes, coFiProcs);
-  m_dataCoFi. define(m_gridsCoFi, m_nComp);
+  for (DataIterator dit(dblFine); dit.ok(); ++dit){
+    const Box&     cellBoxFine = dblFine  [dit()];    
+    const EBISBox& ebisBoxFine = ebislFine[dit()];
+    const EBGraph& ebgraphFine = ebisBoxFine.getEBGraph();
+
+    const Box&     cellBoxCoFi = dblCoFi  [dit()];    
+    const EBISBox& ebisBoxCoFi = ebislCoFi[dit()];
+    const EBGraph& ebgraphCoFi = ebisBoxCoFi.getEBGraph();    
+    
+    Box grownBoxFine = grow(cellBoxFine, m_ghost);
+    grownBoxFine &= domainFine;
+
+    // On the fine grid I only want the ghost cells that are irregular. 
+    IntVectSet irregIVSFine = ebisBoxFine.getIrregIVS(grownBoxFine);
+    irregIVSFine -= cellBoxFine;
+    m_vofIterFineGhosts[dit()].define(irregIVSFine, ebgraphFine);
+
+    // On the coarse grid I want coarsenings of the irregular ghost cells on the fine level.
+    IntVectSet ivsCoFi = coarsen(irregIVSFine, m_refRat);
+    m_vofIterCoFiGhosts[dit()].define(ivsCoFi, ebgraphCoFi);
+  }
 }
 
-void EbGhostCloud::makeFiCoStuff(){
-  CH_TIME("EbGhostCloud::makeFiCoStuff");
-  
-  DisjointBoxLayout dblFiCo;
-  refine(dblFiCo, m_gridsCoar, m_refRat);
-
-  Vector<Box> fiCoBoxes = dblFiCo.boxArray();
-  Vector<int> fiCoProcs = dblFiCo.procIDs();
-
-  const int ghostFiCo = m_ghost;
-  for (int i = 0; i < fiCoBoxes.size(); i++){
-    fiCoBoxes[i].grow(ghostFiCo);
-  }
-
-  // Define the grids and the data holder
-  m_gridsFiCo.define(fiCoBoxes, fiCoProcs);
-  m_eblgFiCo.define(dblFiCo, m_domainFine, ghostFiCo, m_eblgFine.getEBIS());  
-  m_dataFiCo. define(m_gridsFiCo, m_nComp, EBCellFactory(m_eblgFiCo.getEBISL()));
-}
-
-void EbGhostCloud::addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coarData, const LevelData<EBCellFAB>& a_fineData){
+void EbGhostCloud::addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coarData, const LevelData<EBCellFAB>& a_fineData) const {
   CH_TIME("EbGhostCloud::addFineGhostsToCoarse");
   
   CH_assert(m_isDefined);
 
   // TLDR: This routine will take the ghost cells that are in a_fineData and add them to the coarse level. We use buffers for this,
-  //       copying the data from a_fineData to our nifty m_scratchFine buffer holder. The ghost cells in that scratch data are
-  //       coarsened onto yet another buffer (m_dataCoFi). Finally, we add the contents in that buffer to the coarse data. 
+  //       copying the data from a_fineData to our nifty m_bufferFine buffer holder. The ghost cells in that scratch data are
+  //       coarsened onto yet another buffer (m_bufferCoFi). Finally, we add the contents in that buffer to the coarse data.
+
+  const DisjointBoxLayout& dblFine    = m_eblgFine.getDBL   ();
+  const ProblemDomain&     domainFine = m_eblgFine.getDomain();
+  const EBISLayout&        ebislFine  = m_eblgFine.getEBISL ();
+
+  const DisjointBoxLayout& dblCoFi    = m_eblgCoFi.getDBL   ();
+  const ProblemDomain&     domainCoFi = m_eblgCoFi.getDomain();
+  const EBISLayout&        ebislCoFi  = m_eblgCoFi.getEBISL ();  
   
   // Copy the fine data to scratch and reset the interior cells. We do this by copying everything to the fine scratch data,
   // and then set all the valid data in each box to zero. The exchange() operation will then take care of ghost cells that. 
-  // overlap with valid regions in different boxes (we could use a NeighborIterator to achieve the same). 
-  a_fineData.localCopyTo(m_scratchFine);
-  for (DataIterator dit(m_gridsFine); dit.ok(); ++dit){
-    const Box& box = m_gridsFine[dit()];
-    m_scratchFine[dit()].setVal(0.0, box, 0, m_nComp);
+  // overlap with valid regions in different boxes (we could use a NeighborIterator to achieve the same). Note that this is critical
+  // for the result because we essentially end up setting all valid data to zero so we don't accidentally add mass to invalid region
+  // of the coarse grid (i.e., the region underneath the fine grid).
+  a_fineData.localCopyTo(m_bufferFine);
+  for (DataIterator dit(dblFine); dit.ok(); ++dit){
+    const Box& box = dblFine[dit()];
+    m_bufferFine[dit()].setVal(0.0, box, 0, m_nComp);
   }
-  m_scratchFine.exchange();
+  m_bufferFine.exchange();
 
 
   // Coarsen the fine grid data. We do this by AVERAGING the fine-grid data onto the coarse grid. This actually involves entire patches
   // and not just individual ghost cells regions, but that's ok because the rest of the data (in the valid fine regions) are set to zero above,
   // so the coarse data underneath those regions will be zero, also. 
   const Real factor = 1./pow(m_refRat, SpaceDim);  
-  for (DataIterator dit = m_gridsFine.dataIterator(); dit.ok(); ++dit){
+  for (DataIterator dit(dblFine); dit.ok(); ++dit){
+    const EBISBox&   ebisBoxFine = ebislFine   [dit()];
+    const EBISBox&   ebisBoxCoFi = ebislCoFi   [dit()];    
+    EBCellFAB&       coFiData    = m_bufferCoFi[dit()];
+    const EBCellFAB& fineData    = m_bufferFine[dit()];
+
+
+    coFiData.setVal(0.0);
+
+    // Do all the regular cells. 
+    FArrayBox&       coFiDataReg = coFiData.getFArrayBox();
+    const FArrayBox& fineDataReg = fineData.getFArrayBox();
     
-    FArrayBox& coFiFab        = m_dataCoFi[dit()];//.getFArrayBox();
-    const FArrayBox& fineData = m_scratchFine[dit()].getFArrayBox();
-
-    const Box coarBox         = m_gridsCoFi[dit()];
-    const Box fineBox         = fineData.box() & m_domainFine;
-
-    const Box refbox(IntVect::Zero, (m_refRat-1)*IntVect::Unit);
-
-    coFiFab.setVal(0.0);
-    
-    // Do all the regular cells. This also does irregular cells, but not multi-valued ones.
-    // This will not work if you have a refinement boundary that also crosses a multi-valued cell, but I really don't know how to
-    // handle deposition in that case. 
+    const Box fineBox = fineDataReg.box() & domainFine;    
     for (int comp = 0; comp < m_nComp; comp++){
-      FORT_AVERAGE_GHOSTS(CHF_FRA1(coFiFab, comp),
-			  CHF_CONST_FRA1(fineData, comp),
+      FORT_AVERAGE_GHOSTS(CHF_FRA1(coFiDataReg, comp),
+			  CHF_CONST_FRA1(fineDataReg, comp),
 			  CHF_BOX(fineBox),
 			  CHF_CONST_INT(m_refRat),
 			  CHF_CONST_REAL(factor));
     }
+
+    // Now do the irregular cells. First reset the coarse cell values and then increment with the fine-grid values.
+    VoFIterator& vofitCoar = m_vofIterCoFiGhosts[dit()];
+
+    for (vofitCoar.reset(); vofitCoar.ok(); ++vofitCoar){
+      const VolIndex&        coarVof  = vofitCoar();
+      const Vector<VolIndex> fineVofs = ebislCoFi.refine(coarVof, m_refRat, dit());
+
+      // Take the average of the fine-vof values. 
+      for (int comp = 0; comp < m_nComp; comp++){
+	coFiData(coarVof, comp) = 0.0;
+
+	for (int ivof = 0; ivof < fineVofs.size(); ivof++){
+	  coFiData(coarVof, comp) += fineData(fineVofs[ivof], comp);
+	}
+
+	coFiData(coarVof, comp) *= factor;
+      }
+    }
   }
 
-  // Add the data from teh buffer to the coarse data. Again, this will only do single-valued cells!
+  // At this point we have coarsened the data in the ghost regions around the fine grid onto m_bufferCoFi. We should be table to take that data and add
+  // it directly to 
   const Interval interv(0, m_nComp-1);
-  LevelData<FArrayBox> coarAlias;
-  aliasEB(coarAlias, a_coarData);
-  m_dataCoFi.addTo(interv, coarAlias, interv, m_domainCoar.domainBox());
+  
+  m_bufferCoFi.copyTo(interv, a_coarData, interv, m_copierCoFiToCoar, EBAddOp());
 }
 
-void EbGhostCloud::addFiCoDataToFine(LevelData<EBCellFAB>& a_fineData, const BoxLayoutData<EBCellFAB>& a_fiCoData){
+void EbGhostCloud::addFiCoDataToFine(LevelData<EBCellFAB>& a_fineData, const LevelData<EBCellFAB>& a_fiCoData) const {
   CH_TIME("EbGhostCloud::addFiCoDataToFine");
 
-#if 1 
-  MayDay::Warning("EbGhostCloud::addFiCoDataToFine -- routine is disabled while we redesign coarse-to-fine deposition");
-#else // Code code. Will be deprecated
-
-  // This is really simple because the user will already have used the buffer to deposit particles onto the "fine level". We simply add the data directly here. Again,
-  // there might be better ways of doing this because a_fiCoData actually contains a lot of mesh!
-  
   const Interval interv(0, m_nComp-1);
-  LevelData<FArrayBox> fineAlias;
-  aliasEB(fineAlias, a_fineData);
-  a_fiCoData.addTo(interv, fineAlias, interv, m_domainFine.domainBox());
-#endif
+  a_fiCoData.copyTo(interv, a_fineData, interv, m_copierFiCoToFine, EBAddOp());
 }
 
-const BoxLayoutData<EBCellFAB>& EbGhostCloud::getFiCoBuffer() const {
+LevelData<EBCellFAB>& EbGhostCloud::getFiCoBuffer() const {
   CH_TIME("EbGhostCloud::getFiCoBuffer");
   
-  return m_dataFiCo;
-}
-
-BoxLayoutData<EBCellFAB>& EbGhostCloud::getFiCoBuffer() {
-  CH_TIME("EbGhostCloud::getFiCoBuffer");
-  
-  return m_dataFiCo;
+  return m_bufferFiCo;
 }
 
 const EBLevelGrid& EbGhostCloud::getEblgFiCo() const {

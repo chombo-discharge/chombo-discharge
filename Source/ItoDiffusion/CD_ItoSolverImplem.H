@@ -267,7 +267,7 @@ void ItoSolver::depositKappaConservativeNoPVR_native(EBAMRCellData&             
     if(has_coar){
       const int refRat = m_amr->getRefinementRatios()[lvl-1];
       EbGhostCloud& ghostcloud         = *(m_amr->getGhostCloud(m_realm, m_phase)[lvl]);
-      BoxLayoutData<EBCellFAB>& buffer = ghostcloud.getFiCoBuffer();
+      LevelData<EBCellFAB>& buffer = ghostcloud.getFiCoBuffer();
       const EBLevelGrid& eblgFiCo      = ghostcloud.getEblgFiCo();
       
       for (DataIterator dit = buffer.dataIterator(); dit.ok(); ++dit){
