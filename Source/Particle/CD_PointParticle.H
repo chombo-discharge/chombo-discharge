@@ -25,33 +25,38 @@
 #include <CD_NamespaceHeader.H>
   
 /*!
-  @brief A particle class for use with Ito diffusion, i.e. drift-diffusion brownian walkers
+  @brief A particle class that only has a position and a mass.
 */
 class PointParticle : public BinItem {
 public:
 
   /*!
-    @brief Default constructor
+    @brief Default constructor. Sets mass and position to zero.
   */
   PointParticle();
 
   /*!
     @brief Constructor. Subsequently calls define
+    @param[in] a_position Position (in physical space)
+    @param[in] a_mass     Particle mass
   */
   PointParticle(const RealVect a_position, const Real a_mass);
 
   /*!
-    @brief Default dtor
+    @brief Dtor - does nothing.
   */
   virtual ~PointParticle();
 
   /*!
-    @brief For non-default ctor
+    @brief Full define function
+    @param[in] a_position Position (in physical space)
+    @param[in] a_mass     Particle mass
   */
   void define(const RealVect a_position, const Real a_mass);
 
   /*!
     @brief Set particle mass
+    @param[in] a_mass Particle mass
   */
   void setMass(const Real a_mass);
 
@@ -72,19 +77,22 @@ public:
 
   /*!
     @brief Write a linear binary representation of the internal data. Assumes that
-    sufficient memory for the buffer has already been allocated by
-    the caller.
+    sufficient memory for the buffer has already been allocated by the caller
+    @param[out] buf Particle 
   */
   virtual void linearOut(void* buf) const;
 
   /*!
-    @brief Read a linear binary representation of the internal data.
-    Assumes that the buffer has the correct data.
+    @brief Read a linear binary representation of the internal data. Assumes that the buffer has the correct data.
+    @param[in] buf Other particle.
   */
   virtual void linearIn(void* buf);
 
 protected:
-  
+
+  /*!
+    @brief Computational particle mass
+  */
   Real m_mass;
 };
 
