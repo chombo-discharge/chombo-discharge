@@ -44,14 +44,12 @@ public:
     @param[in] a_eblgCoar   Coarse grids
     @param[in] a_eblgFine   Fine grids
     @param[in] a_refRat     Refinement factory between levels
-    @param[in] a_nComp      Number of components allocated in buffer data holders. 
     @param[in] a_ghost      Number of ghost cells in mesh data holders. 
   */
   EBCoarseFineParticleMesh(const EBLevelGrid& a_eblgCoar,
 			   const EBLevelGrid& a_eblgFine,
 			   const int          a_refRat,
-			   const int          a_nComp,
-			   const int          a_ghost);
+			   const IntVect      a_ghost);
 
   /*!
     @brief Destructor (does nothing)
@@ -63,14 +61,12 @@ public:
     @param[in] a_eblgCoar   Coarse grids
     @param[in] a_eblgFine   Fine grids
     @param[in] a_refRat     Refinement factory between levels
-    @param[in] a_nComp      Number of components allocated in buffer data holders. 
     @param[in] a_ghost      Number of ghost cells in mesh data holders. 
   */
   void define(const EBLevelGrid& a_eblgCoar,
 	      const EBLevelGrid& a_eblgFine,
 	      const int          a_refRat,
-	      const int          a_nComp,
-	      const int          a_ghost);
+	      const IntVect      a_ghost);
 
   /*!
     @brief Coarsen the fine-level ghost cells and add them to the coarse level. 
@@ -83,13 +79,21 @@ public:
   void addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coarData, const LevelData<EBCellFAB>& a_fineData) const;
 
   /*!
-    @brief Add the ghost cells on the refined coarse level to the fine level. 
-    @details During this procedure the user will have deposited the coarse-level particles onto a_fiCoData, which is the refined coarse data holder. This routine
-    will add the contents in that data holder onto the fine level. 
+    @brief Add the valid+ghost cells on the refined coarse level to valid+ghost cells on the fine level.
+    @details This routine is used when the user have deposited coarse-level particles into a_fiCoData (which is a refinement of the coarse level). This 
+    routine then adds that data to the fine level. The motion plan defines the computation region as valid+ghost -> valid+ghost, which is what we want.
+    However, note that a_fiCo data should only contain the mass from the so-called "halo" particles.
     @param[inout] a_fineData Fine mesh data
     @param[in]    a_fiCoData Refined coarse data buffer. Users will have deposited the mesh data onto this 
   */
   void addFiCoDataToFine(LevelData<EBCellFAB>& a_fineData, const LevelData<EBCellFAB>& a_fiCoData) const;
+
+  /*!
+    @brief Function which piecewise interpolates the data underneath the fine grid and adds it to the fine grid.
+    @param[inout] a_fineData Fine-level data.
+    @param[in]    a_coarData Coarse-level data.
+  */
+  void addInvalidCoarseToFine(LevelData<EBCellFAB>& a_fineData, const LevelData<EBCellFAB>& a_coarData) const;
 
   /*!
     @brief Get the refined coarse buffer
@@ -102,6 +106,16 @@ public:
   const EBLevelGrid& getEblgFiCo() const;
 
 protected:
+
+  /*!
+    @brief Default component
+  */
+  static constexpr int m_comp = 0;
+
+  /*!
+    @brief Maximum number of components
+  */
+  static constexpr int m_nComp = 1;  
 
   /*!
     @brief Is defined or not
@@ -130,13 +144,21 @@ protected:
 
   /*!
     @brief Copier for copying data from the refined coarse level to the fine level.
+    @note This copier moves from valid+ghost in the source to valid+ghost in the destination.
   */
-  Copier m_copierFiCoToFine;
+  Copier m_copierFiCoToFineIncludeGhosts;
 
   /*!
     @brief Copier for copying data from the coarsened fine level to the coarse level.
+    @note This copier moves from valid+ghost in the source to valid+ghost in the destination.
   */
-  Copier m_copierCoFiToCoar;
+  Copier m_copierCoFiToCoarIncludeGhosts;
+
+  /*!
+    @brief Copier for copying data from the refined coarse level to the fine level.
+    @details This copier moves from valid+ghost in the source to valid in the destination (as opposed to m_copierCOFiToCoarIncludeGhosts which adds mass into the ghost cells).
+  */
+  Copier m_copierFiCoToFineNoGhosts;
 
   /*!
     @brief Data defined on the coarsened fine grid
@@ -170,14 +192,9 @@ protected:
   int m_refRat;
 
   /*!
-    @brief Maximum number of components
+    @brief Number of ghost cells in data holders.
   */
-  int m_nComp;
-
-  /*!
-    @brief Required number of ghost cells
-  */
-  int m_ghost;
+  IntVect m_ghost;
 
   /*!
     @brief Define the vof iterators

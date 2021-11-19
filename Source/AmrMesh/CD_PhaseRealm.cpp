@@ -858,10 +858,9 @@ void PhaseRealm::defineGhostCloud(const int a_lmin){
 
       if(hasCoar){
 	m_ebCoarseFineParticleMesh[lvl] = RefCountedPtr<EBCoarseFineParticleMesh> (new EBCoarseFineParticleMesh(*m_eblg  [lvl-1],
-									   *m_eblg  [lvl  ],
-									   m_refinementRatios[lvl-1],
-									   1,
-									   m_numGhostCells));
+														*m_eblg  [lvl  ],
+														m_refinementRatios[lvl-1],
+														m_numGhostCells*IntVect::Unit));
       }
     }
   }

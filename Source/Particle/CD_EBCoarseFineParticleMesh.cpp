@@ -20,6 +20,9 @@
 #include <CD_EBCoarseFineParticleMeshF_F.H>
 #include <CD_EBAddOp.H>
 #include <CD_NamespaceHeader.H>
+
+constexpr int EBCoarseFineParticleMesh::m_comp;
+constexpr int EBCoarseFineParticleMesh::m_nComp;
   
 EBCoarseFineParticleMesh::EBCoarseFineParticleMesh(){
   CH_TIME("EBCoarseFineParticleMesh::EBCoarseFineParticleMesh");
@@ -30,11 +33,10 @@ EBCoarseFineParticleMesh::EBCoarseFineParticleMesh(){
 EBCoarseFineParticleMesh::EBCoarseFineParticleMesh(const EBLevelGrid& a_eblgCoar,
 						   const EBLevelGrid& a_eblgFine,
 						   const int          a_refRat,
-						   const int          a_nComp,
-						   const int          a_ghostFine){
+						   const IntVect      a_ghost){
   CH_TIME("EBCoarseFineParticleMesh::EBCoarseFineParticleMesh");
   
-  this->define(a_eblgCoar, a_eblgFine, a_refRat, a_nComp, a_ghostFine);
+  this->define(a_eblgCoar, a_eblgFine, a_refRat, a_ghost);
 }
 
 EBCoarseFineParticleMesh::~EBCoarseFineParticleMesh(){
@@ -44,29 +46,31 @@ EBCoarseFineParticleMesh::~EBCoarseFineParticleMesh(){
 void EBCoarseFineParticleMesh::define(const EBLevelGrid& a_eblgCoar,
 				      const EBLevelGrid& a_eblgFine,
 				      const int          a_refRat,
-				      const int          a_nComp,
-				      const int          a_ghostFine) {
+				      const IntVect      a_ghost) {
   CH_TIME("EBCoarseFineParticleMesh::define");
-  
-  m_refRat     = a_refRat;
-  m_nComp      = a_nComp;
-  m_ghost      = a_ghostFine;
 
   m_eblgCoar   = a_eblgCoar;
   m_eblgFine   = a_eblgFine;
+  m_refRat     = a_refRat;
+  m_ghost      = a_ghost;  
 
   // Make the coarsened and refine grids.
   coarsen(m_eblgCoFi, m_eblgFine, m_refRat);  
   refine (m_eblgFiCo, m_eblgCoar, m_refRat);
   
   // Create various buffers. The fine data should just be a raw copy.
-  m_bufferCoFi.define(m_eblgCoFi.getDBL(), m_nComp, m_ghost*IntVect::Unit, EBCellFactory(m_eblgCoFi.getEBISL()));
-  m_bufferFiCo.define(m_eblgFiCo.getDBL(), m_nComp, m_ghost*IntVect::Unit, EBCellFactory(m_eblgFiCo.getEBISL()));  
-  m_bufferFine.define(m_eblgFine.getDBL(), m_nComp, m_ghost*IntVect::Unit, EBCellFactory(m_eblgFine.getEBISL()));
+  m_bufferCoFi.define(m_eblgCoFi.getDBL(), m_nComp, m_ghost, EBCellFactory(m_eblgCoFi.getEBISL()));
+  m_bufferFiCo.define(m_eblgFiCo.getDBL(), m_nComp, m_ghost, EBCellFactory(m_eblgFiCo.getEBISL()));  
+  m_bufferFine.define(m_eblgFine.getDBL(), m_nComp, m_ghost, EBCellFactory(m_eblgFine.getEBISL()));
 
-  // Define Copiers
-  m_copierFiCoToFine.ghostDefine(m_eblgFiCo.getDBL(), m_eblgFine.getDBL(), m_eblgFine.getDomain(), m_ghost*IntVect::Unit);
-  m_copierCoFiToCoar.ghostDefine(m_eblgCoFi.getDBL(), m_eblgCoar.getDBL(), m_eblgCoar.getDomain(), m_ghost*IntVect::Unit);
+  // Define Copiers. Note that when we call ghostDefine we are actually adding from ghost+valid cells in the source to valid+ghost cells
+  // in the destination.
+  //
+  // On the other hand, when we call define we are adding from the valid region in source to valid+ghost in the destination. These things
+  // matter.
+  m_copierFiCoToFineIncludeGhosts.ghostDefine(m_eblgFiCo.getDBL(), m_eblgFine.getDBL(), m_eblgFine.getDomain(), m_ghost); // valid+ghost -> valid+ghost
+  m_copierCoFiToCoarIncludeGhosts.ghostDefine(m_eblgCoFi.getDBL(), m_eblgCoar.getDBL(), m_eblgCoar.getDomain(), m_ghost); // valid+ghost -> valid+ghost
+  m_copierFiCoToFineNoGhosts     .define     (m_eblgFiCo.getDBL(), m_eblgFine.getDBL(), m_eblgFine.getDomain(), m_ghost); // valid+ghost -> valid
 
   // Define VoF iterators
   this->defineVoFIterators();
@@ -111,10 +115,14 @@ void EBCoarseFineParticleMesh::defineVoFIterators(){
   }
 }
 
+
+
 void EBCoarseFineParticleMesh::addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coarData, const LevelData<EBCellFAB>& a_fineData) const {
   CH_TIME("EBCoarseFineParticleMesh::addFineGhostsToCoarse");
   
-  CH_assert(m_isDefined);
+  CH_assert(m_isDefined            );
+  CH_assert(a_coarData.nComp() == 1);
+  CH_assert(a_fineData.nComp() == 1);  
 
   // TLDR: This routine will take the ghost cells that are in a_fineData and add them to the coarse level. We use buffers for this,
   //       copying the data from a_fineData to our nifty m_bufferFine buffer holder. The ghost cells in that scratch data are
@@ -191,14 +199,28 @@ void EBCoarseFineParticleMesh::addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coa
   // it directly to 
   const Interval interv(0, m_nComp-1);
   
-  m_bufferCoFi.copyTo(interv, a_coarData, interv, m_copierCoFiToCoar, EBAddOp());
+  m_bufferCoFi.copyTo(interv, a_coarData, interv, m_copierCoFiToCoarIncludeGhosts, EBAddOp());
 }
 
 void EBCoarseFineParticleMesh::addFiCoDataToFine(LevelData<EBCellFAB>& a_fineData, const LevelData<EBCellFAB>& a_fiCoData) const {
   CH_TIME("EBCoarseFineParticleMesh::addFiCoDataToFine");
 
+  CH_assert(m_isDefined            );  
+  CH_assert(a_fineData.nComp() == 1);
+  CH_assert(a_fiCoData.nComp() == 1);  
+  
   const Interval interv(0, m_nComp-1);
-  a_fiCoData.copyTo(interv, a_fineData, interv, m_copierFiCoToFine, EBAddOp());
+  a_fiCoData.copyTo(interv, a_fineData, interv, m_copierFiCoToFineIncludeGhosts, EBAddOp());
+}
+
+void EBCoarseFineParticleMesh::addInvalidCoarseToFine(LevelData<EBCellFAB>& a_fineData, const LevelData<EBCellFAB>& a_coarData) const {
+  CH_TIME("EBCoarseFineParticleMesh::addInvalidCoarseToFine");
+
+  CH_assert(m_isDefined            );
+  CH_assert(a_fineData.nComp() == 1);
+  CH_assert(a_coarData.nComp() == 1);    
+  
+  // TLDR: This routine performs a piecewise constant interpolation of the coarse data to the fine grid. We do this by
 }
 
 LevelData<EBCellFAB>& EBCoarseFineParticleMesh::getFiCoBuffer() const {
