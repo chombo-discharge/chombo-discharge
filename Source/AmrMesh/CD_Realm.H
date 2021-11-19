@@ -261,7 +261,7 @@ public:
     @brief Get deposition operator (for hanging clouds functionality)
     @param[in] a_phase Phase
   */
-  Vector<RefCountedPtr<EbGhostCloud> >& getGhostCloud(const phase::which_phase a_phase);
+  Vector<RefCountedPtr<EBCoarseFineParticleMesh> >& getEBCoarseFineParticleMesh(const phase::which_phase a_phase);
 
   /*!
     @brief Get the multigrid interpolator

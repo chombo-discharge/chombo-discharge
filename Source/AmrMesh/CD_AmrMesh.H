@@ -36,7 +36,7 @@
 #include <CD_DomainFluxIFFAB.H>
 #include <CD_DomainFluxIFFABFactory.H>
 #include <CD_ParticleContainer.H>
-#include <CD_EbGhostCloud.H>
+#include <CD_EBCoarseFineParticleMesh.H>
 #include <CD_NonConservativeDivergenceStencil.H>
 #include <CD_Realm.H>
 #include <CD_LoadBalancing.H>
@@ -907,7 +907,7 @@ public:
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
   */
-  Vector<RefCountedPtr<EbGhostCloud> >& getGhostCloud(const std::string a_realm, const phase::which_phase a_phase) const;
+  Vector<RefCountedPtr<EBCoarseFineParticleMesh> >& getEBCoarseFineParticleMesh(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get multigrid interpolation utility

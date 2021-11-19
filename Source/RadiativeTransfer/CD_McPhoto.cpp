@@ -1027,7 +1027,7 @@ void McPhoto::depositKappaConservative(EBAMRCellData&              a_phi,
       a_phi[lvl]->localCopyTo(*m_scratch[lvl]);
     }
     else if(m_pvrBuffer <= 0 && hasCoar){
-      EbGhostCloud& ghostcloud = *(m_amr->getGhostCloud(m_realm, m_phase)[lvl]);
+      EBCoarseFineParticleMesh& ghostcloud = *(m_amr->getEBCoarseFineParticleMesh(m_realm, m_phase)[lvl]);
       ghostcloud.addFineGhostsToCoarse(*a_phi[lvl-1], *a_phi[lvl]);
     }
   }

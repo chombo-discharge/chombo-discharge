@@ -36,7 +36,7 @@
 #include <CD_DomainFluxIFFAB.H>
 #include <CD_DomainFluxIFFABFactory.H>
 #include <CD_ParticleContainer.H>
-#include <CD_EbGhostCloud.H>
+#include <CD_EBCoarseFineParticleMesh.H>
 #include <CD_EBMultigridInterpolator.H>
 #include <CD_EBGradient.H>
 #include <CD_NonConservativeDivergenceStencil.H>
@@ -262,7 +262,7 @@ public:
   /*!
     @brief Get deposition operator
   */
-  Vector<RefCountedPtr<EbGhostCloud> >& getGhostCloud() const;
+  Vector<RefCountedPtr<EBCoarseFineParticleMesh> >& getEBCoarseFineParticleMesh() const;
 
   /*!
     @brief Get multigrid interpolator
@@ -479,7 +479,7 @@ protected:
   /*!
     @brief Operator for hanging particle deposition clouds
   */
-  mutable Vector<RefCountedPtr<EbGhostCloud> > m_ghostclouds;
+  mutable Vector<RefCountedPtr<EBCoarseFineParticleMesh> > m_ebCoarseFineParticleMesh;
 
   /*!
     @brief Multigrid interpolation utility

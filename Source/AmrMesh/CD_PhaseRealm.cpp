@@ -850,14 +850,14 @@ void PhaseRealm::defineGhostCloud(const int a_lmin){
 
   const bool doThisOperator = this->queryOperator(s_eb_copier);
 
-  m_ghostclouds.resize(1 + m_finestLevel);
+  m_ebCoarseFineParticleMesh.resize(1 + m_finestLevel);
 
   if(doThisOperator){
     for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++){
       const bool hasCoar = lvl > 0;
 
       if(hasCoar){
-	m_ghostclouds[lvl] = RefCountedPtr<EbGhostCloud> (new EbGhostCloud(*m_eblg  [lvl-1],
+	m_ebCoarseFineParticleMesh[lvl] = RefCountedPtr<EBCoarseFineParticleMesh> (new EBCoarseFineParticleMesh(*m_eblg  [lvl-1],
 									   *m_eblg  [lvl  ],
 									   m_refinementRatios[lvl-1],
 									   1,
@@ -997,12 +997,12 @@ Vector<RefCountedPtr<EbCoarAve> >& PhaseRealm::getCoarseAverage() const {
   return m_coarAve;
 }
 
-Vector<RefCountedPtr<EbGhostCloud> >& PhaseRealm::getGhostCloud() const {
+Vector<RefCountedPtr<EBCoarseFineParticleMesh> >& PhaseRealm::getEBCoarseFineParticleMesh() const {
   if(!this->queryOperator(s_eb_ghostcloud)) {
-    MayDay::Error("PhaseRealm::getGhostCloud - operator not registered!");
+    MayDay::Error("PhaseRealm::getEBCoarseFineParticleMesh - operator not registered!");
   }
   
-  return m_ghostclouds;
+  return m_ebCoarseFineParticleMesh;
 }
 
 Vector<RefCountedPtr<EBMultigridInterpolator> >& PhaseRealm::getMultigridInterpolator() const {

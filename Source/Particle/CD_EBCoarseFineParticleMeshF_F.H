@@ -4,13 +4,13 @@
  */
 
 /*!
-  @file   CD_EbGhostCloudF_F.H
-  @brief  Fortran headers for EbGhostCloud
+  @file   CD_EBCoarseFineParticleMeshF_F.H
+  @brief  Fortran headers for EBCoarseFineParticleMesh
   @author Robert Marskar
 */
 
-#ifndef CD_EbGhostCloudF_F_H
-#define CD_EbGhostCloudF_F_H
+#ifndef CD_EBCoarseFineParticleMeshF_F_H
+#define CD_EBCoarseFineParticleMeshF_F_H
 
 // Chombo includes
 #include <FORT_PROTO.H>

@@ -20,7 +20,7 @@
 #include <CD_DepositionType.H>
 #include <CD_EBAMRData.H>
 #include <CD_CoarseFineDeposition.H>
-#include <CD_EbGhostCloud.H>
+#include <CD_EBCoarseFineParticleMesh.H>
 #include <CD_EbParticleInterp.H>
 #include <CD_ParticleContainer.H>
 #include <CD_NamespaceHeader.H>
@@ -99,7 +99,7 @@ public:
     @brief Get buffers for handling deposition over refinement boundaries.
     @return The buffer for handling mass transfer between level lvl and level lvl+1 lives on lvl+1. 
   */
-  Vector<RefCountedPtr<EbGhostCloud> >& getEBGhostCloudBuffers() const;
+  Vector<RefCountedPtr<EBCoarseFineParticleMesh> >& getEBCoarseFineParticleMesh() const;
 
 protected:
 
@@ -137,7 +137,7 @@ protected:
     @brief Buffers for handling arithmetic for mass moving from coarse to fine level and vice versa. 
     @note The buffer for handling mass transfer between level lvl and level lvl+1 lives on lvl+1. 
   */
-  mutable Vector<RefCountedPtr<EbGhostCloud> > m_ghostClouds;
+  mutable Vector<RefCountedPtr<EBCoarseFineParticleMesh> > m_coarseFineParticleMesh;
 
   /*!
     @brief Just like the deposit function, but forced to use the "PVR" algorithm for handling refinement boundaries. 

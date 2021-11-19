@@ -441,8 +441,8 @@ Vector<RefCountedPtr<EbCoarAve> >& Realm::getCoarseAverage(const phase::which_ph
   return m_realms[a_phase]->getCoarseAverage();
 }
 
-Vector<RefCountedPtr<EbGhostCloud> >& Realm::getGhostCloud(const phase::which_phase a_phase){
-  return m_realms[a_phase]->getGhostCloud();
+Vector<RefCountedPtr<EBCoarseFineParticleMesh> >& Realm::getEBCoarseFineParticleMesh(const phase::which_phase a_phase){
+  return m_realms[a_phase]->getEBCoarseFineParticleMesh();
 }
 
 Vector<RefCountedPtr<EBMultigridInterpolator> >& Realm::getMultigridInterpolator(const phase::which_phase a_phase){

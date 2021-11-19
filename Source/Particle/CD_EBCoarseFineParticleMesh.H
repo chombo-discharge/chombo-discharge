@@ -4,13 +4,13 @@
  */
 
 /*!
-  @file   CD_EbGhostCloud.H
+  @file   CD_EBCoarseFineParticleMesh.H
   @brief  A class for handling particle deposition clouds near refinement boundaries. 
   @author Robert Marskar
 */
 
-#ifndef CD_EbGhostCloud_H
-#define CD_EbGhostCloud_H
+#ifndef CD_EBCoarseFineParticleMesh_H
+#define CD_EBCoarseFineParticleMesh_H
 
 // Chombo includes
 #include <DisjointBoxLayout.H>
@@ -31,13 +31,13 @@
   users can deposit particles without moving them around. This allocates a lot of mesh data and we might want to reconsider the design of this class. Indeed, there
   are other ways of doing this kind of deposition. 
 */
-class EbGhostCloud {
+class EBCoarseFineParticleMesh {
 public:
 
   /*!
     @brief Default constructor. Leaves object in undefined state and subsequently requires a call to define. 
   */
-  EbGhostCloud();
+  EBCoarseFineParticleMesh();
 
   /*!
     @brief Full constructor. Calls define. 
@@ -47,16 +47,16 @@ public:
     @param[in] a_nComp      Number of components allocated in buffer data holders. 
     @param[in] a_ghost      Number of ghost cells in mesh data holders. 
   */
-  EbGhostCloud(const EBLevelGrid& a_eblgCoar,
-	       const EBLevelGrid& a_eblgFine,
-	       const int          a_refRat,
-	       const int          a_nComp,
-	       const int          a_ghost);
+  EBCoarseFineParticleMesh(const EBLevelGrid& a_eblgCoar,
+			   const EBLevelGrid& a_eblgFine,
+			   const int          a_refRat,
+			   const int          a_nComp,
+			   const int          a_ghost);
 
   /*!
     @brief Destructor (does nothing)
   */
-  ~EbGhostCloud();
+  ~EBCoarseFineParticleMesh();
 
   /*!
     @brief Define function

@@ -4,8 +4,8 @@
  */
 
 /*!
-  @file   CD_EbGhostCloud.cpp
-  @brief  Implementation of CD_EbGhostCloud.H
+  @file   CD_EBCoarseFineParticleMesh.cpp
+  @brief  Implementation of CD_EBCoarseFineParticleMesh.H
   @author Robert Marskar
 */
 
@@ -16,37 +16,37 @@
 #include <EBAlias.H>
 
 // Our includes
-#include <CD_EbGhostCloud.H>
-#include <CD_EbGhostCloudF_F.H>
+#include <CD_EBCoarseFineParticleMesh.H>
+#include <CD_EBCoarseFineParticleMeshF_F.H>
 #include <CD_EBAddOp.H>
 #include <CD_NamespaceHeader.H>
   
-EbGhostCloud::EbGhostCloud(){
-  CH_TIME("EbGhostCloud::EbGhostCloud");
+EBCoarseFineParticleMesh::EBCoarseFineParticleMesh(){
+  CH_TIME("EBCoarseFineParticleMesh::EBCoarseFineParticleMesh");
   
   m_isDefined = false;
 }
 
-EbGhostCloud::EbGhostCloud(const EBLevelGrid& a_eblgCoar,
-			   const EBLevelGrid& a_eblgFine,
-			   const int          a_refRat,
-			   const int          a_nComp,
-			   const int          a_ghostFine){
-  CH_TIME("EbGhostCloud::EbGhostCloud");
+EBCoarseFineParticleMesh::EBCoarseFineParticleMesh(const EBLevelGrid& a_eblgCoar,
+						   const EBLevelGrid& a_eblgFine,
+						   const int          a_refRat,
+						   const int          a_nComp,
+						   const int          a_ghostFine){
+  CH_TIME("EBCoarseFineParticleMesh::EBCoarseFineParticleMesh");
   
   this->define(a_eblgCoar, a_eblgFine, a_refRat, a_nComp, a_ghostFine);
 }
 
-EbGhostCloud::~EbGhostCloud(){
-  CH_TIME("EbGhostCloud::~EbGhostCloud");
+EBCoarseFineParticleMesh::~EBCoarseFineParticleMesh(){
+  CH_TIME("EBCoarseFineParticleMesh::~EBCoarseFineParticleMesh");
 }
 
-void EbGhostCloud::define(const EBLevelGrid& a_eblgCoar,
-			  const EBLevelGrid& a_eblgFine,
-			  const int          a_refRat,
-			  const int          a_nComp,
-			  const int          a_ghostFine) {
-  CH_TIME("EbGhostCloud::define");
+void EBCoarseFineParticleMesh::define(const EBLevelGrid& a_eblgCoar,
+				      const EBLevelGrid& a_eblgFine,
+				      const int          a_refRat,
+				      const int          a_nComp,
+				      const int          a_ghostFine) {
+  CH_TIME("EBCoarseFineParticleMesh::define");
   
   m_refRat     = a_refRat;
   m_nComp      = a_nComp;
@@ -74,8 +74,8 @@ void EbGhostCloud::define(const EBLevelGrid& a_eblgCoar,
   m_isDefined = true;
 }
 
-void EbGhostCloud::defineVoFIterators(){
-  CH_TIME("EbGhostCloud::defineVoFIterators");
+void EBCoarseFineParticleMesh::defineVoFIterators(){
+  CH_TIME("EBCoarseFineParticleMesh::defineVoFIterators");
 
   const DisjointBoxLayout& dblFine    = m_eblgFine.getDBL   ();
   const ProblemDomain&     domainFine = m_eblgFine.getDomain();
@@ -111,8 +111,8 @@ void EbGhostCloud::defineVoFIterators(){
   }
 }
 
-void EbGhostCloud::addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coarData, const LevelData<EBCellFAB>& a_fineData) const {
-  CH_TIME("EbGhostCloud::addFineGhostsToCoarse");
+void EBCoarseFineParticleMesh::addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coarData, const LevelData<EBCellFAB>& a_fineData) const {
+  CH_TIME("EBCoarseFineParticleMesh::addFineGhostsToCoarse");
   
   CH_assert(m_isDefined);
 
@@ -194,21 +194,21 @@ void EbGhostCloud::addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coarData, const
   m_bufferCoFi.copyTo(interv, a_coarData, interv, m_copierCoFiToCoar, EBAddOp());
 }
 
-void EbGhostCloud::addFiCoDataToFine(LevelData<EBCellFAB>& a_fineData, const LevelData<EBCellFAB>& a_fiCoData) const {
-  CH_TIME("EbGhostCloud::addFiCoDataToFine");
+void EBCoarseFineParticleMesh::addFiCoDataToFine(LevelData<EBCellFAB>& a_fineData, const LevelData<EBCellFAB>& a_fiCoData) const {
+  CH_TIME("EBCoarseFineParticleMesh::addFiCoDataToFine");
 
   const Interval interv(0, m_nComp-1);
   a_fiCoData.copyTo(interv, a_fineData, interv, m_copierFiCoToFine, EBAddOp());
 }
 
-LevelData<EBCellFAB>& EbGhostCloud::getFiCoBuffer() const {
-  CH_TIME("EbGhostCloud::getFiCoBuffer");
+LevelData<EBCellFAB>& EBCoarseFineParticleMesh::getFiCoBuffer() const {
+  CH_TIME("EBCoarseFineParticleMesh::getFiCoBuffer");
   
   return m_bufferFiCo;
 }
 
-const EBLevelGrid& EbGhostCloud::getEblgFiCo() const {
-  CH_TIME("EbGhostCloud::getEblgFiCo");
+const EBLevelGrid& EBCoarseFineParticleMesh::getEblgFiCo() const {
+  CH_TIME("EBCoarseFineParticleMesh::getEblgFiCo");
   
   return m_eblgFiCo;
 }
