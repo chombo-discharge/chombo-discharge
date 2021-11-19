@@ -9,11 +9,15 @@
   @author Robert Marskar
 */
 
+#ifndef CD_DepositionType_H
+#define CD_DepositionType_H
+
 // Our includes
 #include <CD_NamespaceHeader.H>
 
 /*!
   @brief Deposition types. 
+  @details NGP = Nearest grid point, CIC = Cloud-in-cell, TSC = Triangle-shaped cloud, W4=Fourth order. 
 */
 enum class DepositionType {
   NGP,
@@ -23,3 +27,5 @@ enum class DepositionType {
 };
 
 #include <CD_NamespaceFooter.H>
+
+#endif

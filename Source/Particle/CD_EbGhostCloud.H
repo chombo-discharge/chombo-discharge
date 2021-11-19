@@ -47,11 +47,11 @@ public:
     @param[in] a_nComp      Number of components allocated in buffer data holders. 
     @param[in] a_ghost      Number of ghost cells in mesh data holders. 
   */
-  EbGhostCloud(const EBLevelGrid&       a_eblgCoar,
-	       const EBLevelGrid&       a_eblgFine,
-	       const int                a_refRat,
-	       const int                a_nComp,
-	       const int                a_ghost);
+  EbGhostCloud(const EBLevelGrid& a_eblgCoar,
+	       const EBLevelGrid& a_eblgFine,
+	       const int          a_refRat,
+	       const int          a_nComp,
+	       const int          a_ghost);
 
   /*!
     @brief Destructor (does nothing)
@@ -66,11 +66,11 @@ public:
     @param[in] a_nComp      Number of components allocated in buffer data holders. 
     @param[in] a_ghost      Number of ghost cells in mesh data holders. 
   */
-  void define(const EBLevelGrid&       a_eblgCoar,
-	      const EBLevelGrid&       a_eblgFine,
-	      const int                a_refRat,
-	      const int                a_nComp,
-	      const int                a_ghost);
+  void define(const EBLevelGrid& a_eblgCoar,
+	      const EBLevelGrid& a_eblgFine,
+	      const int          a_refRat,
+	      const int          a_nComp,
+	      const int          a_ghost);
 
   /*!
     @brief Coarsen the fine-level ghost cells and add them to the coarse level. 
