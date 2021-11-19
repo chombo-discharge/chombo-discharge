@@ -221,14 +221,40 @@ void EBCoarseFineParticleMesh::addInvalidCoarseToFine(LevelData<EBCellFAB>& a_fi
   // TLDR: This routine performs a piecewise constant interpolation of the coarse data to the fine grid. We do this by going through the coarse-grid data
   //       and piecewise interpolating the result to the fine grid (using a buffer). After that, we add the contents in the buffer to the fine level.
   //
-  //       The data-motion plan for this is to add the valid+ghost cells in the interpolated fine-grid data to the valid region on the fine grid. 
-  
-  const DisjointBoxLayout& dblCoar = m_eblgCoar.getDBL();
+  //       The data-motion plan for this is to add the valid+ghost cells in the interpolated fine-grid data to the valid region on the fine grid. Note that
+  //       the function signature indicates that we only add invalid coarse data, we do run kernels over all data. The addition is done only at the end in
+  //       copyTo.
+
+  const ProblemDomain&     domainCoar = m_eblgCoar.getDomain();    
+  const DisjointBoxLayout& dblCoar    = m_eblgCoar.getDBL();
+  const EBISLayout&        ebislCoar  = m_eblgCoar.getEBISL();  
+
 
   for (DataIterator dit(dblCoar); dit.ok(); ++dit){
-    EBCellFAB&       fiCoData = a_bufferFiCo[dit()];
-    const EBCellFAB& coarData = a_coarData  [dit()];
+    EBCellFAB&       fiCoData   = m_bufferFiCo[dit()];
+    const EBCellFAB& coarData   = a_coarData  [dit()];
+    const Box        computeBox = coarData.getRegion() & domainCoar;
+    const Box        refinedBox = Box(IntVect::Zero, m_refRat*IntVect::Unit);
+
+    fiCoData.setVal(0.0);
+
+    // Regular cells.
+    BaseFab<Real>&       fiCoDataReg = fiCoData.getSingleValuedFAB();
+    const BaseFab<Real>& coarDataReg = coarData.getSingleValuedFAB();
+
+    FORT_PIECEWISE_CONSTANT_INTERP(CHF_FRA1      (fiCoDataReg, m_comp),
+				   CHF_CONST_FRA1(coarDataReg, m_comp),
+				   CHF_CONST_INT (m_refRat),
+				   CHF_BOX       (refinedBox),
+				   CHF_BOX       (computeBox));
+
+
+    // Now do the irregular cells. Here, we loop over all the coarse cells (including ghosts) and add the data to the fine level. 
   }
+
+  // Finally, add the data to the valid region on the fine grid.
+  const Interval interv(0, m_nComp-1);
+  m_bufferFiCo.copyTo(interv, a_fineData, interv, m_copierFiCoToFineIncludeGhosts, EBAddOp());  
 }
 
 LevelData<EBCellFAB>& EBCoarseFineParticleMesh::getFiCoBuffer() const {
