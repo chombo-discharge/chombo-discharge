@@ -14,6 +14,7 @@
 
 // Chombo includes
 #include <RefCountedPtr.H>
+#include <Copier.H>
 #include <EBLevelGrid.H>
 
 // Our includes
@@ -60,12 +61,14 @@ public:
     @param[in] a_eblgs            Grids
     @param[in] a_refRat           Refinement factory between levels
     @param[in] a_dx               Grid resolutions.
+    @param[in] a_ghost            Ghost cells in data holders.
     @param[in] a_maxParticleWidth Maximum particle width that will be encountered.
     @param[in] a_finestLevel      Finest grid level
   */
   void define(const Vector<RefCountedPtr<EBLevelGrid> >& a_eblgs,
 	      const Vector<int>&                         a_refRat,
 	      const Vector<Real>&                        a_dx,
+	      const IntVect&                             a_ghost,	      
 	      const int                                  a_maxParticleWidth,
 	      const int                                  a_finestLevel);
 
@@ -109,6 +112,11 @@ protected:
   bool m_isDefined;
 
   /*!
+    @brief Number of ghost cells
+  */
+  IntVect m_ghost;
+
+  /*!
     @brief Maximum particle width that will ever be used. 
   */
   int m_maxParticleWidth;
@@ -138,6 +146,18 @@ protected:
     @note The buffer for handling mass transfer between level lvl and level lvl+1 lives on lvl+1. 
   */
   mutable Vector<RefCountedPtr<EBCoarseFineParticleMesh> > m_coarseFineParticleMesh;
+
+  /*!
+    @brief Copier for moving data from valid+ghost to valid on each AMR level.
+    @note After depositing on a level, this is used in order to add data from the ghost cells to the valid region. 
+  */
+  mutable Vector<Copier> m_levelCopiers;  
+
+  /*!
+    @brief Define level copiers
+    @note This defines the Copiers we need to move data from valid+ghost to valid on each level.
+  */
+  void defineLevelCopiers();
 
   /*!
     @brief Just like the deposit function, but forced to use the "PVR" algorithm for handling refinement boundaries. 
