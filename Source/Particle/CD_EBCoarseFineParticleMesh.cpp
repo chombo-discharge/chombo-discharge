@@ -68,9 +68,9 @@ void EBCoarseFineParticleMesh::define(const EBLevelGrid& a_eblgCoar,
   //
   // On the other hand, when we call define we are adding from the valid region in source to valid+ghost in the destination. These things
   // matter.
-  m_copierFiCoToFineIncludeGhosts.ghostDefine(m_eblgFiCo.getDBL(), m_eblgFine.getDBL(), m_eblgFine.getDomain(), m_ghost); // valid+ghost -> valid+ghost
-  m_copierCoFiToCoarIncludeGhosts.ghostDefine(m_eblgCoFi.getDBL(), m_eblgCoar.getDBL(), m_eblgCoar.getDomain(), m_ghost); // valid+ghost -> valid+ghost
-  m_copierFiCoToFineNoGhosts     .define     (m_eblgFiCo.getDBL(), m_eblgFine.getDBL(), m_eblgFine.getDomain(), m_ghost); // valid+ghost -> valid
+  m_copierFiCoToFineIncludeGhosts.ghostDefine(m_eblgFiCo.getDBL(), m_eblgFine.getDBL(), m_eblgFine.getDomain(), m_ghost); // valid+ghost -> valid
+  m_copierCoFiToCoarIncludeGhosts.ghostDefine(m_eblgCoFi.getDBL(), m_eblgCoar.getDBL(), m_eblgCoar.getDomain(), m_ghost); // valid+ghost -> valid
+  m_copierFiCoToFineNoGhosts     .define     (m_eblgFiCo.getDBL(), m_eblgFine.getDBL(), m_eblgFine.getDomain(), m_ghost); // valid       -> valid+ghost
 
   // Define VoF iterators
   this->defineVoFIterators();
@@ -114,8 +114,6 @@ void EBCoarseFineParticleMesh::defineVoFIterators(){
     m_vofIterCoFiGhosts[dit()].define(ivsCoFi, ebgraphCoFi);
   }
 }
-
-
 
 void EBCoarseFineParticleMesh::addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coarData, const LevelData<EBCellFAB>& a_fineData) const {
   CH_TIME("EBCoarseFineParticleMesh::addFineGhostsToCoarse");
@@ -220,7 +218,17 @@ void EBCoarseFineParticleMesh::addInvalidCoarseToFine(LevelData<EBCellFAB>& a_fi
   CH_assert(a_fineData.nComp() == 1);
   CH_assert(a_coarData.nComp() == 1);    
   
-  // TLDR: This routine performs a piecewise constant interpolation of the coarse data to the fine grid. We do this by
+  // TLDR: This routine performs a piecewise constant interpolation of the coarse data to the fine grid. We do this by going through the coarse-grid data
+  //       and piecewise interpolating the result to the fine grid (using a buffer). After that, we add the contents in the buffer to the fine level.
+  //
+  //       The data-motion plan for this is to add the valid+ghost cells in the interpolated fine-grid data to the valid region on the fine grid. 
+  
+  const DisjointBoxLayout& dblCoar = m_eblgCoar.getDBL();
+
+  for (DataIterator dit(dblCoar); dit.ok(); ++dit){
+    EBCellFAB&       fiCoData = a_bufferFiCo[dit()];
+    const EBCellFAB& coarData = a_coarData  [dit()];
+  }
 }
 
 LevelData<EBCellFAB>& EBCoarseFineParticleMesh::getFiCoBuffer() const {

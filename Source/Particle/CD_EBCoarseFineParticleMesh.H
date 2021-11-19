@@ -70,18 +70,18 @@ public:
 
   /*!
     @brief Coarsen the fine-level ghost cells and add them to the coarse level. 
-    @details On output, the contests in the ghost cells on the refinement boundary are added from the fine level to the coarse level. This routine
-    is used when the fine-level particles have particle clouds that deposit into the ghost cells outside the fine level. This routine coarsens that
-    data and adds the mass to the coarse level. 
+    @details On output, the contents in the ghost cells on the refinement boundary are added from the fine level to the coarse level. This routine
+    is used when the fine-level particles have particle clouds that deposit into the ghost cells outside the fine level, i.e. over the refinement
+    boundary. This routine coarsens that data and adds the mass to the coarse level. 
     @param[inout] a_coarData Coarse mesh data. 
     @param[in]    a_fineData Fine mesh data. 
   */
   void addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coarData, const LevelData<EBCellFAB>& a_fineData) const;
 
   /*!
-    @brief Add the valid+ghost cells on the refined coarse level to valid+ghost cells on the fine level.
+    @brief Add the valid+ghost cells on the refined coarse level to the valid cells on the fine level.
     @details This routine is used when the user have deposited coarse-level particles into a_fiCoData (which is a refinement of the coarse level). This 
-    routine then adds that data to the fine level. The motion plan defines the computation region as valid+ghost -> valid+ghost, which is what we want.
+    routine then adds that data to the fine level. The motion plan defines the computation region as valid+ghost -> valid, which is what we want.
     However, note that a_fiCo data should only contain the mass from the so-called "halo" particles.
     @param[inout] a_fineData Fine mesh data
     @param[in]    a_fiCoData Refined coarse data buffer. Users will have deposited the mesh data onto this 
@@ -89,7 +89,8 @@ public:
   void addFiCoDataToFine(LevelData<EBCellFAB>& a_fineData, const LevelData<EBCellFAB>& a_fiCoData) const;
 
   /*!
-    @brief Function which piecewise interpolates the data underneath the fine grid and adds it to the fine grid.
+    @brief Function which piecewise interpolates the data underneath the fine grid and adds it to the fine grid. The data-motion plan is to
+    use the valid+ghost cells on the coarse level and add it into the valid region on the fine level. 
     @param[inout] a_fineData Fine-level data.
     @param[in]    a_coarData Coarse-level data.
   */

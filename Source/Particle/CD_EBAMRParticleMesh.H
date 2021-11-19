@@ -145,7 +145,7 @@ protected:
     @brief Buffers for handling arithmetic for mass moving from coarse to fine level and vice versa. 
     @note The buffer for handling mass transfer between level lvl and level lvl+1 lives on lvl+1. 
   */
-  mutable Vector<RefCountedPtr<EBCoarseFineParticleMesh> > m_coarseFineParticleMesh;
+  mutable Vector<RefCountedPtr<EBCoarseFineParticleMesh> > m_coarseFinePM;
 
   /*!
     @brief Copier for moving data from valid+ghost to valid on each AMR level.
@@ -157,7 +157,13 @@ protected:
     @brief Define level copiers
     @note This defines the Copiers we need to move data from valid+ghost to valid on each level.
   */
-  void defineLevelCopiers();
+  void defineLevelMotion();
+
+  /*!
+    @brief Define coarse-fine data motion operators
+    @details This defines the necessary constructors for 
+  */
+  void defineCoarseFineMotion();
 
   /*!
     @brief Just like the deposit function, but forced to use the "PVR" algorithm for handling refinement boundaries. 

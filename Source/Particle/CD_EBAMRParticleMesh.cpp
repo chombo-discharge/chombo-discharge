@@ -41,13 +41,14 @@ void EBAMRParticleMesh::define(const Vector<RefCountedPtr<EBLevelGrid> >& a_eblg
   m_maxParticleWidth = a_maxParticleWidth;
   m_finestLevel      = a_finestLevel;
 
-  this->defineLevelCopiers();
+  this->defineLevelMotion     ();
+  this->defineCoarseFineMotion();
   
   m_isDefined = true;
 }
 
-void EBAMRParticleMesh::defineLevelCopiers(){
-  CH_TIME("EBAMRParticleMesh::defineLevelCopiers");
+void EBAMRParticleMesh::defineLevelMotion(){
+  CH_TIME("EBAMRParticleMesh::defineLevelMotion");
 
 
   // TLDR: Define level Copiers. These are defined such that we can move data from valid+ghost -> valid. We need this because when we deposit particles
@@ -65,7 +66,27 @@ void EBAMRParticleMesh::defineLevelCopiers(){
     m_levelCopiers[lvl].define(dbl, dbl, domain, m_ghost, doExchange); // Define Copier as going from valid       -> valid+ghost.
     m_levelCopiers[lvl].reverse();                                     // Define Copier as going from valid+ghost -> valid.
   }
-  
+}
+
+void EBAMRParticleMesh::defineCoarseFineMotion(){
+  CH_TIME("EBAMRParticleMesh::defineCoarseFineMotion");
+
+  m_coarseFinePM.resize(1 + m_finestLevel);
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++){
+
+    const bool hasCoar = (lvl > 0);
+
+    if(hasCoar){
+      m_coarseFinePM[lvl] = RefCountedPtr<EBCoarseFineParticleMesh>(new EBCoarseFineParticleMesh(*m_eblgs [lvl-1],
+												 *m_eblgs [lvl  ],
+												  m_refRat[lvl-1],
+												  m_ghost));
+    }
+    else{
+      m_coarseFinePM[lvl] = RefCountedPtr<EBCoarseFineParticleMesh> (nullptr);
+    }
+  }
 }
 
 #include <CD_NamespaceFooter.H>
