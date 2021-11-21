@@ -111,7 +111,6 @@ public:
     @param[in]  a_forceIrregNGP        Force NGP deposition in irregular cells or not. 
   */
   template <class T, const Real&(T::*particleScalarField)() const>
-  static  
   void deposit(EBAMRCellData&              a_meshData,
 	       const ParticleContainer<T>& a_particles,
 	       const DepositionType        a_depositionType,
@@ -200,7 +199,6 @@ protected:
     @param[in]  a_forceIrregNGP  Force NGP deposition in irregular cells or not. 
   */
   template <class T, const Real&(T::*particleScalarField)() const>
-  static  
   void depositPVR(EBAMRCellData&              a_meshData,
 		  const ParticleContainer<T>& a_particles,
 		  const DepositionType        a_depositionType,
@@ -217,7 +215,6 @@ protected:
     @param[in]  a_forceIrregNGP  Force NGP deposition in irregular cells or not. 
   */
   template <class T, const Real&(T::*particleScalarField)() const>
-  static  
   void depositHalo(EBAMRCellData&              a_meshData,
 		   const ParticleContainer<T>& a_particles,
 		   const DepositionType        a_depositionType,

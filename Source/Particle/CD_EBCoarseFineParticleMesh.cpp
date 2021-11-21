@@ -121,10 +121,9 @@ void EBCoarseFineParticleMesh::defineVoFIterators(){
 
   for (DataIterator dit(dblCoar); dit.ok(); ++dit){
     const Box&       cellBoxCoar  = dblCoar[dit()];
-    const Box        grownBoxCoar = grow(cellBoxCoar, m_ghost) & domainCoar;
     const EBISBox&   ebisBoxCoar  = ebislCoar[dit()];
     const EBGraph&   ebGraphCoar  = ebisBoxCoar.getEBGraph();
-    const IntVectSet irregIVSCoar = ebisBoxCoar.getIrregIVS(grownBoxCoar);
+    const IntVectSet irregIVSCoar = ebisBoxCoar.getIrregIVS(cellBoxCoar);
 
     m_vofIterCoar[dit()].define(irregIVSCoar, ebGraphCoar);
   }
@@ -251,7 +250,7 @@ void EBCoarseFineParticleMesh::addInvalidCoarseToFine(LevelData<EBCellFAB>& a_fi
   for (DataIterator dit(dblCoar); dit.ok(); ++dit){
     EBCellFAB&       fiCoData   = m_bufferFiCo[dit()];
     const EBCellFAB& coarData   = a_coarData  [dit()];
-    const Box        computeBox = coarData.getRegion() & domainCoar;
+    const Box        computeBox = dblCoar     [dit()];
     const Box        refinedBox = Box(IntVect::Zero, m_refRat*IntVect::Unit);
 
     fiCoData.setVal(0.0);

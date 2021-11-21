@@ -90,8 +90,9 @@ public:
   void addFiCoDataToFine(LevelData<EBCellFAB>& a_fineData, const LevelData<EBCellFAB>& a_fiCoData) const;
 
   /*!
-    @brief Function which piecewise interpolates the data underneath the fine grid and adds it to the fine grid. The data-motion plan is to
-    use the valid+ghost cells on the coarse level and add it into the valid region on the fine level. 
+    @brief Function which piecewise interpolates the data underneath the fine grid and adds it to the fine grid. 
+    @details The data-motion plan is to use the valid+ghost cells on the coarse level and add it into the valid region on the fine level. However, the 
+    buffers' ghost regions are set to zero so this should only add non-ghosted data between the levels.
     @param[inout] a_fineData Fine-level data.
     @param[in]    a_coarData Coarse-level data.
   */
