@@ -52,6 +52,24 @@ public:
   EBAMRParticleMesh();
 
   /*!
+    @brief Full constructor. Calls the define function
+    @param[in] a_eblgs            Grids
+    @param[in] a_refRat           Refinement factory between levels
+    @param[in] a_dx               Grid resolutions.
+    @πaram[in] a_probLo           Lower-left corner of physical domain.
+    @param[in] a_ghost            Ghost cells in data holders.
+    @param[in] a_maxParticleWidth Maximum particle width that will be encountered.
+    @param[in] a_finestLevel      Finest grid level
+  */
+  EBAMRParticleMesh(const Vector<RefCountedPtr<EBLevelGrid> >& a_eblgs,
+		    const Vector<int>&                         a_refRat,
+		    const Vector<Real>&                        a_dx,
+		    const RealVect&                            a_probLo,
+		    const IntVect&                             a_ghost,	      
+		    const int                                  a_maxParticleWidth,
+		    const int                                  a_finestLevel);
+
+  /*!
     @brief Destructor (does nothing)
   */
   ~EBAMRParticleMesh();
@@ -61,6 +79,7 @@ public:
     @param[in] a_eblgs            Grids
     @param[in] a_refRat           Refinement factory between levels
     @param[in] a_dx               Grid resolutions.
+    @πaram[in] a_probLo           Lower-left corner of physical domain.
     @param[in] a_ghost            Ghost cells in data holders.
     @param[in] a_maxParticleWidth Maximum particle width that will be encountered.
     @param[in] a_finestLevel      Finest grid level
@@ -68,6 +87,7 @@ public:
   void define(const Vector<RefCountedPtr<EBLevelGrid> >& a_eblgs,
 	      const Vector<int>&                         a_refRat,
 	      const Vector<Real>&                        a_dx,
+	      const RealVect&                            a_probLo,
 	      const IntVect&                             a_ghost,	      
 	      const int                                  a_maxParticleWidth,
 	      const int                                  a_finestLevel);
@@ -110,6 +130,11 @@ protected:
     @brief Is defined or not
   */
   bool m_isDefined;
+
+  /*!
+    @brief Lower-left corner of physical domain
+  */
+  RealVect m_probLo;
 
   /*!
     @brief Number of ghost cells
