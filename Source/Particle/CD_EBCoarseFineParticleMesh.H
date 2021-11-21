@@ -185,7 +185,12 @@ protected:
     @brief VoFIterator for coarse grid cells that are coarsenings of fine-grid ghost irregular cells.
     @details Essentially a coarsening of m_vofIterFineGhosts.
   */
-  mutable LayoutData<VoFIterator> m_vofIterCoFiGhosts;  
+  mutable LayoutData<VoFIterator> m_vofIterCoFiGhosts;
+
+  /*!
+    @brief VoFIterator for coarse cells, including ghost cells
+  */
+  mutable LayoutData<VoFIterator> m_vofIterCoar;
 
   /*!
     @brief Refinement ratio between the two levels

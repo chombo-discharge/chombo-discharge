@@ -81,6 +81,10 @@ void EBCoarseFineParticleMesh::define(const EBLevelGrid& a_eblgCoar,
 void EBCoarseFineParticleMesh::defineVoFIterators(){
   CH_TIME("EBCoarseFineParticleMesh::defineVoFIterators");
 
+  const DisjointBoxLayout& dblCoar    = m_eblgCoar.getDBL   ();
+  const ProblemDomain&     domainCoar = m_eblgCoar.getDomain();
+  const EBISLayout&        ebislCoar  = m_eblgCoar.getEBISL ();  
+
   const DisjointBoxLayout& dblFine    = m_eblgFine.getDBL   ();
   const ProblemDomain&     domainFine = m_eblgFine.getDomain();
   const EBISLayout&        ebislFine  = m_eblgFine.getEBISL ();
@@ -90,7 +94,8 @@ void EBCoarseFineParticleMesh::defineVoFIterators(){
   const EBISLayout&        ebislCoFi  = m_eblgCoFi.getEBISL ();  
 
   m_vofIterFineGhosts.define(dblFine);
-  m_vofIterCoFiGhosts.define(dblCoFi);  
+  m_vofIterCoFiGhosts.define(dblCoFi);
+  m_vofIterCoar.      define(dblCoar);
   
   for (DataIterator dit(dblFine); dit.ok(); ++dit){
     const Box&     cellBoxFine = dblFine  [dit()];    
@@ -112,6 +117,16 @@ void EBCoarseFineParticleMesh::defineVoFIterators(){
     // On the coarse grid I want coarsenings of the irregular ghost cells on the fine level.
     IntVectSet ivsCoFi = coarsen(irregIVSFine, m_refRat);
     m_vofIterCoFiGhosts[dit()].define(ivsCoFi, ebgraphCoFi);
+  }
+
+  for (DataIterator dit(dblCoar); dit.ok(); ++dit){
+    const Box&       cellBoxCoar  = dblCoar[dit()];
+    const Box        grownBoxCoar = grow(cellBoxCoar, m_ghost) & domainCoar;
+    const EBISBox&   ebisBoxCoar  = ebislCoar[dit()];
+    const EBGraph&   ebGraphCoar  = ebisBoxCoar.getEBGraph();
+    const IntVectSet irregIVSCoar = ebisBoxCoar.getIrregIVS(grownBoxCoar);
+
+    m_vofIterCoar[dit()].define(irregIVSCoar, ebGraphCoar);
   }
 }
 
@@ -227,8 +242,11 @@ void EBCoarseFineParticleMesh::addInvalidCoarseToFine(LevelData<EBCellFAB>& a_fi
 
   const ProblemDomain&     domainCoar = m_eblgCoar.getDomain();    
   const DisjointBoxLayout& dblCoar    = m_eblgCoar.getDBL();
-  const EBISLayout&        ebislCoar  = m_eblgCoar.getEBISL();  
+  const EBISLayout&        ebislCoar  = m_eblgCoar.getEBISL();
 
+  const ProblemDomain&     domainFiCo = m_eblgFiCo.getDomain();    
+  const DisjointBoxLayout& dblFiCo    = m_eblgFiCo.getDBL();
+  const EBISLayout&        ebislFiCo  = m_eblgFiCo.getEBISL();    
 
   for (DataIterator dit(dblCoar); dit.ok(); ++dit){
     EBCellFAB&       fiCoData   = m_bufferFiCo[dit()];
@@ -249,7 +267,19 @@ void EBCoarseFineParticleMesh::addInvalidCoarseToFine(LevelData<EBCellFAB>& a_fi
 				   CHF_BOX       (computeBox));
 
 
-    // Now do the irregular cells. Here, we loop over all the coarse cells (including ghosts) and add the data to the fine level. 
+    // Now do the irregular cells. Here, we loop over all the coarse cells (including ghosts) and set the value in the
+    // fine cells to be the same as the value in the underlying coarse cell. 
+    VoFIterator& vofit = m_vofIterCoar[dit()];
+    for (vofit.reset(); vofit.ok(); ++vofit){
+      const VolIndex& coarVoF = vofit();
+
+      const Vector<VolIndex>& fineVoFs = ebislCoar.refine(coarVoF, m_refRat, dit());
+
+      for (int ivof = 0; ivof < fineVoFs.size(); ivof++){
+	const VolIndex& fineVoF = fineVoFs[ivof];
+	fiCoData(fineVoF, m_comp) = coarData(coarVoF, m_comp);
+      }
+    }
   }
 
   // Finally, add the data to the valid region on the fine grid.
