@@ -81,7 +81,7 @@ public:
     deposited is fetched from the specified template parameter 'a_particleScalarField'. This should be a pointer to a member function with signature 
     const Real& P::function() const. E.g. if we are depositing mass through a function const Real& P::mass() const we will specifiy
     
-        interpolate<Particle, &Particle::mass>(a_particleList, a_rho, a_interpType)
+    interpolate<Particle, &Particle::mass>(a_particleList, a_rho, a_interpType)
 	
     To deposit a different quantity, simply change the function pointer in the input parameter. 
     @param[out] a_meshData             Mesh data. Must have exactly one compnent. 
@@ -194,9 +194,9 @@ protected:
   template <class T, const Real&(T::*particleScalarField)() const>
   static  
   void depositHalo(EBAMRCellData&              a_meshData,
-		  const ParticleContainer<T>& a_particles,
-		  const DepositionType        a_depositionType,
-		  const bool                  a_forceIrregNGP = false);
+		   const ParticleContainer<T>& a_particles,
+		   const DepositionType        a_depositionType,
+		   const bool                  a_forceIrregNGP = false);
 };
 
 #include <CD_NamespaceFooter.H>
