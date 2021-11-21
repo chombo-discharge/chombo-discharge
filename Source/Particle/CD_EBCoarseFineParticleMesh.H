@@ -24,12 +24,13 @@
 /*!
   @brief A class for handling particle deposition clouds that hang over refinement boundaries. This class does not include any deposition functionality but provides
   buffers for moving mass between two levels. 
-  @details To use this class, the user can directly call addFineGhostsToCoarse to add the contribution of the fine level's particles to the coarse level. This
-  will add the part of the particle clouds that hang over the refinement boundary to the coarse level. Likewise, the user can get a buffer (getFiCoBuffer) for
-  getting a temporary data holder on which he can use special deposition procedures.
-  @todo This class currently does not work with multi-valued cells (like most of our particle code). Moreover, we actually refine the entire coarse level so that
-  users can deposit particles without moving them around. This allocates a lot of mesh data and we might want to reconsider the design of this class. Indeed, there
-  are other ways of doing this kind of deposition. 
+  @details To use this class, the user can directly call three functions:
+     1. addFineGhostsToCoarse which adds the contribution of the fine level's particles to the coarse level. This
+        will add the part of the particle clouds that hang over the refinement boundary to the coarse level. Likewise, the user can get a buffer (getFiCoBuffer) for
+        getting a temporary data holder on which he can use special deposition procedures.
+     2. addFiCoDataToFine where the user will have deposited coarse-level particles on a fine-grid buffer, and he/she wants to add the result back to the fine grid.
+     3. addInvalidCoarseToFine where the coarse-grid deposition clouds are interpolated to the fine grid. This is the case when e.g. the coarse-grid clouds
+        deposit underneath the fine level but the mass should end up on the fine level.
 */
 class EBCoarseFineParticleMesh {
 public:
