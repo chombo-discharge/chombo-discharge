@@ -21,30 +21,46 @@
 #include <CD_DataOps.H>
 #include <CD_NamespaceHeader.H>
 
-template <class T, const Real&(T::*particleScalarField)() const>
+template <class P, const Real&(P::*particleScalarField)() const>
 void EBAMRParticleMesh::deposit(EBAMRCellData&              a_meshData,
-				const ParticleContainer<T>& a_particles,
+				const ParticleContainer<P>& a_particles,
 				const DepositionType        a_depositionType,
 				const CoarseFineDeposition  a_coarseFineDeposition,
 				const bool                  a_forceIrregNGP) {
-  CH_TIME("EBAMRParticleMesh::deposit");
+  CH_TIME("EBAMRParticleMesh::deposit(scalar)");
+
+  CH_assert(a_meshData[0]->nComp() == 1);
 
   switch(a_coarseFineDeposition){
   case CoarseFineDeposition::PVR:
-    EBAMRParticleMesh::depositPVR<T, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
+    EBAMRParticleMesh::depositPVR<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
     break;
   case CoarseFineDeposition::Halo:
-    EBAMRParticleMesh::depositHalo<T, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);    
+    EBAMRParticleMesh::depositHalo<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);    
     break;    
   default:
-    MayDay::Error("EBAMRParticleMesh::deposit - logic bust");
+    MayDay::Error("EBAMRParticleMesh::deposit(scalar) - logic bust");
     break;
   }
 }
 
-template <class T, const Real&(T::*particleScalarField)() const>
+template <class P, const RealVect&(P::*particleVectorField)() const>
+void EBAMRParticleMesh::deposit(EBAMRCellData&              a_meshData,
+				const ParticleContainer<P>& a_particles,
+				const DepositionType        a_depositionType,
+				const CoarseFineDeposition  a_coarseFineDeposition,
+				const bool                  a_forceIrregNGP){
+
+  CH_TIME("EBAMRParticleMesh::deposit(vector)");
+
+  CH_assert(a_meshData[0]->nComp() == SpaceDim);
+
+  MayDay::Error("EBAMRParticleMesh::deposit(RealVect) - not implemented yet.");
+}
+
+template <class P, const Real&(P::*particleScalarField)() const>
 void EBAMRParticleMesh::depositPVR(EBAMRCellData&              a_meshData,
-				   const ParticleContainer<T>& a_particles,
+				   const ParticleContainer<P>& a_particles,
 				   const DepositionType        a_depositionType,
 				   const bool                  a_forceIrregNGP){
   CH_TIME("EBAMRParticleMesh::depositPVR");
@@ -63,7 +79,7 @@ void EBAMRParticleMesh::depositPVR(EBAMRCellData&              a_meshData,
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
     
-    const ParticleData<T>&   particles = *a_particles[lvl];
+    const ParticleData<P>&   particles = *a_particles[lvl];
     const DisjointBoxLayout& dbl       = m_eblgs[lvl]->getDBL   ();
     const EBISLayout&        ebisl     = m_eblgs[lvl]->getEBISL ();
     const ProblemDomain&     domain    = m_eblgs[lvl]->getDomain();
@@ -76,14 +92,13 @@ void EBAMRParticleMesh::depositPVR(EBAMRCellData&              a_meshData,
       const EBISBox& ebisBox = ebisl[dit()];
 
       EBCellFAB&        meshData     = (*a_meshData [lvl])[dit()];
-      const ListBox<T>& boxParticles = (*a_particles[lvl])[dit()];
+      const ListBox<P>& boxParticles = (*a_particles[lvl])[dit()];
 
       // Note: EbParticleInterp construction is cheap.
       EbParticleInterp interp(cellBox, ebisBox, m_dx[lvl]*RealVect::Unit, m_probLo);
 
-      interp.deposit<T, particleScalarField> (boxParticles.listItems(), meshData, a_depositionType, a_forceIrregNGP);
+      interp.deposit<P, particleScalarField> (boxParticles.listItems(), meshData, a_depositionType, a_forceIrregNGP);
     }
-
 
     // 2. Exchange ghost data on this level. After this, all the mass should be on the current level. 
     a_meshData[lvl]->exchange(interv, m_levelCopiers[lvl], EBAddOp());
@@ -101,9 +116,9 @@ void EBAMRParticleMesh::depositPVR(EBAMRCellData&              a_meshData,
   }
 }
 
-template <class T, const Real&(T::*particleScalarField)() const>
+template <class P, const Real&(P::*particleScalarField)() const>
 void EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
-				    const ParticleContainer<T>& a_particles,
+				    const ParticleContainer<P>& a_particles,
 				    const DepositionType        a_depositionType,
 				    const bool                  a_forceIrregNGP){
   CH_TIME("EBAMRParticleMesh::depositHalo");
@@ -122,7 +137,7 @@ void EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
   const Interval interv(0,0);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
-    const ParticleData<T>&   particles = *a_particles[lvl];
+    const ParticleData<P>&   particles = *a_particles[lvl];
     const DisjointBoxLayout& dbl       = m_eblgs[lvl]->getDBL   ();
     const EBISLayout&        ebisl     = m_eblgs[lvl]->getEBISL ();
     const ProblemDomain&     domain    = m_eblgs[lvl]->getDomain();
@@ -135,12 +150,12 @@ void EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       const EBISBox& ebisBox = ebisl[dit()];
 
       EBCellFAB&        meshData     = (*a_meshData [lvl])[dit()];
-      const ListBox<T>& boxParticles = (*a_particles[lvl])[dit()];
+      const ListBox<P>& boxParticles = (*a_particles[lvl])[dit()];
 
       // Note: EbParticleInterp construction is cheap.
       EbParticleInterp interp(cellBox, ebisBox, m_dx[lvl]*RealVect::Unit, m_probLo);
 
-      interp.deposit<T, particleScalarField> (boxParticles.listItems(), meshData, a_depositionType, a_forceIrregNGP);
+      interp.deposit<P, particleScalarField> (boxParticles.listItems(), meshData, a_depositionType, a_forceIrregNGP);
     }
 
     // 2. Exchange ghost data on this level. 
@@ -153,7 +168,7 @@ void EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
 
     // 4. The particles on the other side of the refinement bounadry should deposit into this level.
     if(hasCoar){
-      const ParticleData<T>&   coarHaloParticles = *a_particles.getMaskParticles()[lvl-1];  // These are the particles that live "around" the refinement boundary.
+      const ParticleData<P>&   coarHaloParticles = *a_particles.getMaskParticles()[lvl-1];  // These are the particles that live "around" the refinement boundary.
       const int                refRat            =  m_refRat[lvl-1];                        // Refinement between coarse level and this level.
       const EBLevelGrid&       eblgFiCo          =  m_coarseFinePM[lvl]->getEblgFiCo();     // This is the refinement of the coarse grid.
       const DisjointBoxLayout& dblFiCo           =  eblgFiCo.getDBL();                      // Refinement of coarse grid
@@ -164,7 +179,7 @@ void EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
 
       for (DataIterator dit(dbl); dit.ok(); ++dit){
 	EBCellFAB&      dataFiCo       = bufferFiCo       [dit()];
-	const ListBox<T> haloParticles = coarHaloParticles[dit()];
+	const ListBox<P> haloParticles = coarHaloParticles[dit()];
 	const Box        cellBox       = dblFiCo          [dit()];
 	const EBISBox&   ebisBox       = ebislFiCo        [dit()];
 	
@@ -174,10 +189,10 @@ void EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
 
 	switch(refRat){
 	case 2:
-	  interp.deposit2<T, particleScalarField> (haloParticles.listItems(), dataFiCo, a_depositionType, a_forceIrregNGP);
+	  interp.deposit2<P, particleScalarField> (haloParticles.listItems(), dataFiCo, a_depositionType, a_forceIrregNGP);
 	  break;
 	case 4:
-	  interp.deposit4<T, particleScalarField> (haloParticles.listItems(), dataFiCo, a_depositionType, a_forceIrregNGP);
+	  interp.deposit4<P, particleScalarField> (haloParticles.listItems(), dataFiCo, a_depositionType, a_forceIrregNGP);
 	  break;
 	default:
 	  MayDay::Error("CD_EBAMRParticleMeshImplem.H - logic bust in EBAMRParticleMesh::depositHalo");
@@ -189,6 +204,74 @@ void EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       m_coarseFinePM[lvl]->addFiCoDataToFine(*a_meshData[lvl-1], bufferFiCo);
     }
   }
+}
+
+template <class P, Real&(P::*particleScalarField)()>
+void EBAMRParticleMesh::interpolate(ParticleContainer<P>& a_particles,
+				    const EBAMRCellData&  a_meshScalarField,
+				    const DepositionType  a_interpType,
+				    const bool            a_forceIrregNGP) const {
+  CH_TIME("EBAMRParticleMesh::interpolate(scalar)");
+
+  CH_assert(m_isDefined);
+
+  // TLDR: Run through each patch and interpolate to the particle positions.   
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++){
+    const EBLevelGrid&       eblg   = *m_eblgs[lvl];
+    const DisjointBoxLayout& dbl    =  eblg.getDBL   ();
+    const ProblemDomain&     domain =  eblg.getDomain();
+    const EBISLayout&        ebisl  =  eblg.getEBISL ();
+    const Real&              dx     =  m_dx[lvl];
+
+    CH_assert(a_meshScalarField[lvl]->nComp() == 1);    
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      const Box        cellBox = dbl  [dit()];
+      const EBISBox&   ebisBox = ebisl[dit()];
+      const EBCellFAB& data    = (*a_meshScalarField[lvl])[dit()];
+	
+      List<P>& particles = (*a_particles[lvl])[dit()].listItems();
+      
+      EbParticleInterp interp(cellBox, ebisBox, dx*RealVect::Unit, m_probLo);
+
+      interp.interpolate<P, particleScalarField>(particles, data, a_interpType, a_forceIrregNGP);
+    }
+  }
+}
+
+template <class P, RealVect&(P::*particleVectorField)()>
+void EBAMRParticleMesh::interpolate(ParticleContainer<P>& a_particles,
+				    const EBAMRCellData&  a_meshVectorField,
+				    const DepositionType  a_interpType,
+				    const bool            a_forceIrregNGP) const {
+  CH_TIME("EBAMRParticleMesh::interpolate(vector)");
+
+  CH_assert(m_isDefined);
+
+  // TLDR: Run through each patch and interpolate to the particle positions. 
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++){
+    const EBLevelGrid&       eblg   = *m_eblgs[lvl];
+    const DisjointBoxLayout& dbl    =  eblg.getDBL   ();
+    const ProblemDomain&     domain =  eblg.getDomain();
+    const EBISLayout&        ebisl  =  eblg.getEBISL ();
+    const Real&              dx     =  m_dx[lvl];
+
+    CH_assert(a_meshVectorField[lvl]->nComp() == SpaceDim);
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      const Box        cellBox = dbl  [dit()];
+      const EBISBox&   ebisBox = ebisl[dit()];
+      const EBCellFAB& data    = (*a_meshVectorField[lvl])[dit()];
+	
+      List<P>& particles = (*a_particles[lvl])[dit()].listItems();
+      
+      EbParticleInterp interp(cellBox, ebisBox, dx*RealVect::Unit, m_probLo);
+
+      interp.interpolate<P, particleVectorField>(particles, data, a_interpType, a_forceIrregNGP);
+    }
+  }  
 }
 
 #include <CD_NamespaceFooter.H>

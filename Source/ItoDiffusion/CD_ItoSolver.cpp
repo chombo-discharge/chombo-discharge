@@ -449,10 +449,15 @@ void ItoSolver::registerOperators(){
   else{
     m_amr->registerOperator(s_eb_coar_ave,     m_realm, m_phase);
     m_amr->registerOperator(s_eb_fill_patch,   m_realm, m_phase);
+    m_amr->registerOperator(s_noncons_div,     m_realm, m_phase);
+    m_amr->registerOperator(s_particle_mesh,   m_realm, m_phase);
+
+#if 1 // Should be able to remove this shit!
     m_amr->registerOperator(s_eb_mg_interp,    m_realm, m_phase);
     m_amr->registerOperator(s_eb_copier,       m_realm, m_phase);
     m_amr->registerOperator(s_eb_ghostcloud,   m_realm, m_phase);
-    m_amr->registerOperator(s_noncons_div,  m_realm, m_phase);
+#endif
+
     
     if(m_redistribute)    m_amr->registerOperator(s_eb_redist,  m_realm, m_phase);
     if(m_halo_buffer > 0) m_amr->registerMask(s_particle_halo, m_halo_buffer, m_realm);

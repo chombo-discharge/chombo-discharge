@@ -192,6 +192,10 @@ void PhaseRealm::regridOperators(const int a_lmin){
     this->defineNonConsDivSten();
     timer.stopEvent("Non-conservative stencil");
 
+    timer.startEvent("Particle-mesh");
+    this->defineParticleMesh();
+    timer.stopEvent("Particle-mesh");    
+
     timer.startEvent("Copier");            
     this->defineCopier(a_lmin);
     timer.stopEvent("Copier");
@@ -230,6 +234,7 @@ void PhaseRealm::registerOperator(const std::string a_operator){
        a_operator.compare(s_eb_copier)       == 0 ||
        a_operator.compare(s_eb_ghostcloud)   == 0 ||
        a_operator.compare(s_eb_gradient)     == 0 ||
+       a_operator.compare(s_particle_mesh)   == 0 ||       
        a_operator.compare(s_eb_irreg_interp) == 0 ||
        a_operator.compare(s_eb_mg_interp)    == 0 ||
        a_operator.compare(s_eb_multigrid)    == 0 ||
@@ -765,6 +770,15 @@ void PhaseRealm::defineCoarToCoarRedistOper(const int a_lmin, const int a_regsiz
   }
 }
 
+void PhaseRealm::defineParticleMesh(){
+  CH_TIME("PhaseRealm::defineParticleMesh");
+  if(m_verbose){
+    pout() << "PhaseRealm::defineParticleMesh" << endl;
+  }
+
+  m_particleMesh.define(m_eblg, m_refinementRatios, m_dx, m_probLo, m_numGhostCells*IntVect::Unit, 99, m_finestLevel);
+}
+
 void PhaseRealm::defineGradSten(const int a_lmin){
   CH_TIME("PhaseRealm::defineGradSten");
   if(m_verbose){
@@ -1091,6 +1105,15 @@ Vector<RefCountedPtr<Copier> >& PhaseRealm::getReverseCopier() const {
   
   return m_reverseCopier;
 }
+
+EBAMRParticleMesh& PhaseRealm::getParticleMesh() const {
+  if(!this->queryOperator(s_particle_mesh)) {
+    MayDay::Error("PhaseRealm::getParticleMesh - operator not registered!");
+  }
+
+  return m_particleMesh;
+}
+
 
 const EBAMRFAB& PhaseRealm::getLevelset() const {
   if(!this->queryOperator(s_levelset)) {

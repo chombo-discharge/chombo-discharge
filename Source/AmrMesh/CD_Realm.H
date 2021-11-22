@@ -14,6 +14,7 @@
 
 // Our includes
 #include <CD_PhaseRealm.H>
+#include <CD_EBAMRParticleMesh.H>
 #include <CD_MultiFluidIndexSpace.H>
 #include <CD_MFLevelGrid.H>
 #include <CD_NamespaceHeader.H>
@@ -268,6 +269,12 @@ public:
     @param[in] a_phase Phase
   */
   Vector<RefCountedPtr<EBMultigridInterpolator> >& getMultigridInterpolator(const phase::which_phase a_phase);
+
+  /*!
+    @brief Get the particle mesh operator
+    @param[in] a_phase Which phase
+  */
+  EBAMRParticleMesh& getParticleMesh(const phase::which_phase a_phase);
 
   /*!
     @brief Get gradient operator

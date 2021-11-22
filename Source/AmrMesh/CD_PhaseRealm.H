@@ -39,6 +39,7 @@
 #include <CD_EBCoarseFineParticleMesh.H>
 #include <CD_EBMultigridInterpolator.H>
 #include <CD_EBGradient.H>
+#include <CD_EBAMRParticleMesh.H>
 #include <CD_NonConservativeDivergenceStencil.H>
 #include <CD_EbCentroidInterpolationStencil.H>
 #include <CD_CentroidInterpolationStencil.H>
@@ -59,6 +60,7 @@ static const std::string s_eb_ghostcloud   = "eb_ghostcloud"  ;  // For "hanging
 static const std::string s_noncons_div     = "eb_non_cons_div";  // For computing non-conservative divergences
 static const std::string s_eb_multigrid    = "eb_multigrid"   ;  // For multigrid interpolation
 static const std::string s_levelset        = "levelset"       ;  // For putting level-set on mesh
+static const std::string s_particle_mesh   = "particle_mesh"  ;  // For doing particle-mesh operations.
 
 /*!
   @brief Class that holds important things for doing AMR over a specific phase and processor distribution. 
@@ -253,6 +255,11 @@ public:
     @brief Get gradient object
   */
   const Vector<RefCountedPtr<EBGradient> >& getGradientOp() const;
+
+  /*!
+    @brief Get particle-mesh operator
+  */
+  EBAMRParticleMesh& getParticleMesh() const;
 
   /*!
     @brief Get coarsening operators
@@ -529,7 +536,12 @@ protected:
   /*!
     @brief Gradient operator
   */
-  mutable Vector<RefCountedPtr<EBGradient> > m_gradientOp;  
+  mutable Vector<RefCountedPtr<EBGradient> > m_gradientOp;
+
+  /*!
+    @brief For doing particle-mesh operations
+  */
+  mutable EBAMRParticleMesh m_particleMesh;
 
   /*!
     @brief Data recentering utility (center to centroid)
@@ -622,7 +634,12 @@ protected:
     @brief Define operator redistribution utility
     @param[in] a_lmin Coarsest grid level that changes
   */  
-  void defineCoarToCoarRedistOper(const int a_lmin, const int a_regsize);      
+  void defineCoarToCoarRedistOper(const int a_lmin, const int a_regsize);
+
+  /*!
+    @brief Define particle mesh operator. 
+  */    
+  void defineParticleMesh();
 
   /*!
     @brief Define gradient stencils

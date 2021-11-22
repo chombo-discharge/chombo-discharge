@@ -445,6 +445,10 @@ Vector<RefCountedPtr<EBCoarseFineParticleMesh> >& Realm::getEBCoarseFineParticle
   return m_realms[a_phase]->getEBCoarseFineParticleMesh();
 }
 
+EBAMRParticleMesh& Realm::getParticleMesh(const phase::which_phase a_phase){
+  return m_realms[a_phase]->getParticleMesh();
+}
+
 Vector<RefCountedPtr<EBMultigridInterpolator> >& Realm::getMultigridInterpolator(const phase::which_phase a_phase){
   return m_realms[a_phase]->getMultigridInterpolator();
 }

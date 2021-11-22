@@ -112,7 +112,7 @@ public:
   void deposit4(const List<P>& a_particleList, EBCellFAB& a_rho, const DepositionType a_depositionType, const bool a_forceIrregNGP = false) const;
 
   /*!
-    @brief Interpolate a vector field onto the particle position. 
+    @brief Interpolate a scalar field onto the particle position. 
     @details This is just like regular particle-mesh interpolation. The input field should have exactly one component and the
     the field will be interpolated onto the template parameter's input field. The template parameter 'particleScalar' should be a pointer
     to a member function which will set the particle field. E.g. the function must have a signature Real& P::particleScalarField(). A valid
