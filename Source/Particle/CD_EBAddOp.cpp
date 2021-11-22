@@ -52,12 +52,16 @@ void EBAddOp::op(EBCellFAB&       a_dst,
   CH_TIME("EBAddOp::op");
   
   CH_assert(a_dstVars.size() == a_srcVars.size());
+
+  // I think restricting the addition to a_regionTo is correct -- we are only trying to add into valid region
+  // and excluding adding into ghost cells. 
   
   const int isrc = a_srcVars.begin();
   const int idst = a_dstVars.begin();
   const int inco = a_dstVars.size ();
   
-  a_dst.plus(a_src, isrc, idst, inco);
+  //  a_dst.plus(a_src, isrc, idst, inco);
+  a_dst.plus(a_src, a_regionTo, isrc, idst, inco);
 }
 
 #include <CD_NamespaceFooter.H>

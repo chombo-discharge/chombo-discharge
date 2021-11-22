@@ -213,6 +213,14 @@ void ItoSolver::depositKappaConservativeNoPVR_native(EBAMRCellData&             
   if(m_verbosity > 5){
     pout() << m_name + "::depositKappaConservativeNoPVR_native" << endl;
   }
+#if 1
+  const AMRMask& mask = m_amr->getMask(s_particle_halo, m_halo_buffer, m_realm);
+  a_particles.copyMaskParticles(mask);
+  
+  m_amr->depositParticles<ItoParticle, &ItoParticle::mass>(a_phi, m_realm, m_phase, a_particles, a_deposition, CoarseFineDeposition::Halo, m_irreg_ngp_deposition);
+
+  a_particles.clearMaskParticles();  
+#else
 
   const int comp = 0;
   const Interval interv(comp, comp);
@@ -295,6 +303,7 @@ void ItoSolver::depositKappaConservativeNoPVR_native(EBAMRCellData&             
 
   // Clear halo and non-halo particles
   a_particles.clearMaskParticles();
+#endif
 }
 
 template <class T>

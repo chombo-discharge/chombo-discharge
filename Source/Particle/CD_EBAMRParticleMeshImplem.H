@@ -14,6 +14,7 @@
 
 // Chombo includes
 #include <CH_Timer.H>
+#include <EBAlias.H>
 
 // Our includes
 #include <CD_EBAMRParticleMesh.H>
@@ -78,8 +79,6 @@ void EBAMRParticleMesh::depositPVR(EBAMRCellData&              a_meshData,
   const Interval interv(0,0);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
-    
-    const ParticleData<P>&   particles = *a_particles[lvl];
     const DisjointBoxLayout& dbl       = m_eblgs[lvl]->getDBL   ();
     const EBISLayout&        ebisl     = m_eblgs[lvl]->getEBISL ();
     const ProblemDomain&     domain    = m_eblgs[lvl]->getDomain();
@@ -91,8 +90,8 @@ void EBAMRParticleMesh::depositPVR(EBAMRCellData&              a_meshData,
       const Box      cellBox = dbl  [dit()];
       const EBISBox& ebisBox = ebisl[dit()];
 
-      EBCellFAB&        meshData     = (*a_meshData [lvl])[dit()];
-      const ListBox<P>& boxParticles = (*a_particles[lvl])[dit()];
+      EBCellFAB&        meshData     = (*a_meshData[lvl])[dit()];
+      const ListBox<P>& boxParticles =  a_particles[lvl] [dit()];
 
       // Note: EbParticleInterp construction is cheap.
       EbParticleInterp interp(cellBox, ebisBox, m_dx[lvl]*RealVect::Unit, m_probLo);
@@ -137,7 +136,6 @@ void EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
   const Interval interv(0,0);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
-    const ParticleData<P>&   particles = *a_particles[lvl];
     const DisjointBoxLayout& dbl       = m_eblgs[lvl]->getDBL   ();
     const EBISLayout&        ebisl     = m_eblgs[lvl]->getEBISL ();
     const ProblemDomain&     domain    = m_eblgs[lvl]->getDomain();
@@ -150,7 +148,7 @@ void EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       const EBISBox& ebisBox = ebisl[dit()];
 
       EBCellFAB&        meshData     = (*a_meshData [lvl])[dit()];
-      const ListBox<P>& boxParticles = (*a_particles[lvl])[dit()];
+      const ListBox<P>& boxParticles =   a_particles[lvl] [dit()];
 
       // Note: EbParticleInterp construction is cheap.
       EbParticleInterp interp(cellBox, ebisBox, m_dx[lvl]*RealVect::Unit, m_probLo);
@@ -158,9 +156,9 @@ void EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       interp.deposit<P, particleScalarField> (boxParticles.listItems(), meshData, a_depositionType, a_forceIrregNGP);
     }
 
-    // 2. Exchange ghost data on this level. 
+    // 2. Exchange ghost data on this level.
     a_meshData[lvl]->exchange(interv, m_levelCopiers[lvl], EBAddOp());
-
+    
     // 3. Deposition into ghost cells across the refinement boundary should end up to the coarse level. Add that mass right now.
     if(hasCoar){
       m_coarseFinePM[lvl]->addFineGhostsToCoarse(*a_meshData[lvl-1], *a_meshData[lvl]);
@@ -177,16 +175,16 @@ void EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       
       LevelData<EBCellFAB>&  bufferFiCo          = m_coarseFinePM[lvl]->getFiCoBuffer();   // Data that is a refinement of the coarse level.
 
-      for (DataIterator dit(dbl); dit.ok(); ++dit){
-	EBCellFAB&      dataFiCo       = bufferFiCo       [dit()];
-	const ListBox<P> haloParticles = coarHaloParticles[dit()];
-	const Box        cellBox       = dblFiCo          [dit()];
-	const EBISBox&   ebisBox       = ebislFiCo        [dit()];
+      for (DataIterator dit(dblFiCo); dit.ok(); ++dit){
+	EBCellFAB&        dataFiCo      = bufferFiCo       [dit()];
+	const ListBox<P>& haloParticles = coarHaloParticles[dit()];
+	const Box         cellBox       = dblFiCo          [dit()];
+	const EBISBox&    ebisBox       = ebislFiCo        [dit()];
 	
 	dataFiCo.setVal(0.0);
 
-	EbParticleInterp interp(cellBox, ebisBox, m_dx[lvl-1]*RealVect::Unit, m_probLo);
-
+	EbParticleInterp interp(cellBox, ebisBox, m_dx[lvl]*RealVect::Unit, m_probLo);
+	
 	switch(refRat){
 	case 2:
 	  interp.deposit2<P, particleScalarField> (haloParticles.listItems(), dataFiCo, a_depositionType, a_forceIrregNGP);
@@ -201,7 +199,7 @@ void EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       }
 
       // Add the result of the buffer deposition to this level.
-      m_coarseFinePM[lvl]->addFiCoDataToFine(*a_meshData[lvl-1], bufferFiCo);
+      m_coarseFinePM[lvl]->addFiCoDataToFine(*a_meshData[lvl], bufferFiCo);
     }
   }
 }
