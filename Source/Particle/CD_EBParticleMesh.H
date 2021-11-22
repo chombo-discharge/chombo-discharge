@@ -63,7 +63,7 @@ public:
     is fetched from the specified template parameter 'a_particleScalarField' This should be a pointer to a member function with signature 
     const Real& P::function() const. E.g. if we are depositing mass through a function const Real& P::mass() const we will specifiy
     
-        deposit<Particle, &Particle::mass>(a_particleList, a_rho, a_depositionType, a_forceIrregNGP)
+    deposit<Particle, &Particle::mass>(a_particleList, a_rho, a_depositionType, a_forceIrregNGP)
 	
     To deposit a different quantity, simply change the function pointer in the input parameter. 
     @param[in]    a_particleList   Particles to be deposited
@@ -81,7 +81,7 @@ public:
     is fetched from the specified template parameter 'a_particleScalarField' This should be a pointer to a member function with signature 
     const Real& P::function() const. E.g. if we are depositing mass through a function const Real& P::mass() const we will specifiy
     
-        interpolate<Particle, &Particle::mass>(a_particleList, a_rho, a_interpType)
+    interpolate<Particle, &Particle::mass>(a_particleList, a_rho, a_interpType)
 	
     To deposit a different quantity, simply change the function pointer in the input parameter. 
     @param[in]    a_particleList   Particles to be deposited
@@ -99,7 +99,7 @@ public:
     is fetched from the specified template parameter 'a_particleScalarField' This should be a pointer to a member function with signature 
     const Real& P::a_particleScalarField. E.g. if we are depositing mass through a function const Real& P::mass() we will specifiy
     
-        interpolate<Particle, &Particle::mass>(a_particleList, a_rho, a_interpType)
+    interpolate<Particle, &Particle::mass>(a_particleList, a_rho, a_interpType)
 	
     To deposit a different quantity, simply change the function pointer in the input parameter. 
     @param[in]    a_particleList   Particles to be deposited
@@ -118,7 +118,7 @@ public:
     to a member function which will set the particle field. E.g. the function must have a signature Real& P::particleScalarField(). A valid
     expression is e.g.
     
-        interpolate<Particle, &Particle::mass>(a_particleList, a_meshScalarField, a_interpType)
+    interpolate<Particle, &Particle::mass>(a_particleList, a_meshScalarField, a_interpType)
 	
     To interpolate onto a different field, e.g. the acceleration field, use interpolate<Particle, &Particle::acceleration>, etc.
     @param[inout] a_particleList    Particles to be interpolated. 
@@ -138,7 +138,7 @@ public:
     to a member function which will set the particle field. E.g. the function must have a signature RealVect& P::particleVectorField(). A valid 
     expression is e.g.
     
-        interpolate<Particle, &Particle::velocity>(a_particleList, a_meshVectorField, a_interpType)
+    interpolate<Particle, &Particle::velocity>(a_particleList, a_meshVectorField, a_interpType)
 	
     To interpolate onto a different field, e.g. the acceleration field, use interpolate<Particle, &Particle::acceleration>, etc.
     @param[inout] a_particleList    Particles to be interpolated. 

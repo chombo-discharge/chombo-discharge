@@ -99,7 +99,7 @@ void EBAMRParticleMesh::depositPVR(EBAMRCellData&              a_meshData,
       interp.deposit<P, particleScalarField> (boxParticles.listItems(), meshData, a_depositionType, a_forceIrregNGP);
     }
 
-    // 2. Exchange ghost data on this level. After this, all the mass should be on the current level. 
+    // 2. Exchange ghost data on this level. After this, all the mass should be on the current level.
     a_meshData[lvl]->exchange(interv, m_levelCopiers[lvl], EBAddOp());
 
     // 3. If the particles deposited over the coarse-fine boundary, add the mass to the coarse level.
@@ -110,7 +110,7 @@ void EBAMRParticleMesh::depositPVR(EBAMRCellData&              a_meshData,
     // 4. The mass on the part of the coarse level underneath this grid should be added to this level. Fortunately,
     //    EBCoarseFineParticleMesh has buffers and functions that handle that type of interpolation. 
     if(hasCoar){
-      m_coarseFinePM[lvl]->addInvalidCoarseToFine(*a_meshData[lvl-1], *a_meshData[lvl]);
+      m_coarseFinePM[lvl]->addInvalidCoarseToFine(*a_meshData[lvl], *a_meshData[lvl-1]);
     }
   }
 }

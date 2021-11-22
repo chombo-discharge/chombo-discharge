@@ -19,6 +19,7 @@
 #include <CD_EBCoarseFineParticleMesh.H>
 #include <CD_EBCoarseFineParticleMeshF_F.H>
 #include <CD_EBAddOp.H>
+#include <CD_DataOps.H>
 #include <CD_NamespaceHeader.H>
 
 constexpr int EBCoarseFineParticleMesh::m_comp;
@@ -171,7 +172,6 @@ void EBCoarseFineParticleMesh::addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coa
     EBCellFAB&       coFiData    = m_bufferCoFi[dit()];
     const EBCellFAB& fineData    = m_bufferFine[dit()];
 
-
     coFiData.setVal(0.0);
 
     // Do all the regular cells. 
@@ -283,7 +283,7 @@ void EBCoarseFineParticleMesh::addInvalidCoarseToFine(LevelData<EBCellFAB>& a_fi
 
   // Finally, add the data to the valid region on the fine grid.
   const Interval interv(0, m_nComp-1);
-  m_bufferFiCo.copyTo(interv, a_fineData, interv, m_copierFiCoToFineIncludeGhosts, EBAddOp());  
+  m_bufferFiCo.copyTo(interv, a_fineData, interv, m_copierFiCoToFineNoGhosts, EBAddOp());
 }
 
 LevelData<EBCellFAB>& EBCoarseFineParticleMesh::getFiCoBuffer() const {

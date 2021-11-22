@@ -88,9 +88,9 @@ void EBParticleMesh::deposit4(const List<P>& a_particleList, EBCellFAB& a_rho, c
 
 template <class P, Real&(P::*particleScalarField)()>
 void EBParticleMesh::interpolate(List<P>&             a_particleList,
-				   const EBCellFAB&     a_meshScalarField,
-				   const DepositionType a_interpType,
-				   const bool           a_forceIrregNGP) const {
+				 const EBCellFAB&     a_meshScalarField,
+				 const DepositionType a_interpType,
+				 const bool           a_forceIrregNGP) const {
 
   CH_assert(a_meshScalarField.nComp() == 1);
 
@@ -117,9 +117,9 @@ void EBParticleMesh::interpolate(List<P>&             a_particleList,
 
 template <class P, RealVect&(P::*particleVectorField)()>
 void EBParticleMesh::interpolate(List<P>&             a_particleList,
-				   const EBCellFAB&     a_meshVectorField,
-				   const DepositionType a_interpType,
-				   const bool           a_forceIrregNGP) const {
+				 const EBCellFAB&     a_meshVectorField,
+				 const DepositionType a_interpType,
+				 const bool           a_forceIrregNGP) const {
 
   CH_assert(a_meshVectorField.nComp() == SpaceDim);
 
@@ -146,12 +146,12 @@ void EBParticleMesh::interpolate(List<P>&             a_particleList,
 
 inline
 void EBParticleMesh::depositParticle(EBCellFAB&           a_rho,
-				       const RealVect&      a_probLo,
-				       const RealVect&      a_dx,
-				       const RealVect&      a_position,
-				       const Real&          a_mass,
-				       const DepositionType a_depositionType,
-				       const bool           a_forceIrregNGP) const {
+				     const RealVect&      a_probLo,
+				     const RealVect&      a_dx,
+				     const RealVect&      a_position,
+				     const Real&          a_mass,
+				     const DepositionType a_depositionType,
+				     const bool           a_forceIrregNGP) const {
   CH_assert(a_rho.nComp() == 0);
   
   // TLDR: This performs regular deposition as if the particle lives on regular mesh data. If the cell is irregular we can use a class option
@@ -222,12 +222,12 @@ void EBParticleMesh::depositParticle(EBCellFAB&           a_rho,
 
 inline
 void EBParticleMesh::depositParticle2(EBCellFAB&           a_rho,
-					const RealVect&      a_probLo,
-					const RealVect&      a_dx,
-					const RealVect&      a_position,
-					const Real&          a_mass,
-					const DepositionType a_depositionType,
-					const bool           a_forceIrregNGP) const {
+				      const RealVect&      a_probLo,
+				      const RealVect&      a_dx,
+				      const RealVect&      a_position,
+				      const Real&          a_mass,
+				      const DepositionType a_depositionType,
+				      const bool           a_forceIrregNGP) const {
   CH_assert(a_rho.nComp() == 0);
   
   // TLDR: This performs regular deposition as if the particle lives on regular mesh data. If the cell is irregular we can use a class option
@@ -282,12 +282,12 @@ void EBParticleMesh::depositParticle2(EBCellFAB&           a_rho,
 
 inline
 void EBParticleMesh::depositParticle4(EBCellFAB&           a_rho,
-					const RealVect&      a_probLo,
-					const RealVect&      a_dx,
-					const RealVect&      a_position,
-					const Real&          a_mass,
-					const DepositionType a_depositionType,
-					const bool           a_forceIrregNGP) const {
+				      const RealVect&      a_probLo,
+				      const RealVect&      a_dx,
+				      const RealVect&      a_position,
+				      const Real&          a_mass,
+				      const DepositionType a_depositionType,
+				      const bool           a_forceIrregNGP) const {
   
   CH_assert(a_rho.nComp() == 0);  
 
@@ -343,12 +343,12 @@ void EBParticleMesh::depositParticle4(EBCellFAB&           a_rho,
 
 inline
 void EBParticleMesh::interpolateParticle(Real&                a_particleField,
-					   const EBCellFAB&     a_meshField,
-					   const RealVect&      a_probLo,
-					   const RealVect&      a_dx,
-					   const RealVect&      a_position,
-					   const DepositionType a_interpType,
-					   const bool           a_forceIrregNGP) const {
+					 const EBCellFAB&     a_meshField,
+					 const RealVect&      a_probLo,
+					 const RealVect&      a_dx,
+					 const RealVect&      a_position,
+					 const DepositionType a_interpType,
+					 const bool           a_forceIrregNGP) const {
   CH_assert(a_meshField.nComp() == 1);
 
   // TLDR: This routine is just like usual particle-mesh interpolation. 
@@ -407,12 +407,12 @@ void EBParticleMesh::interpolateParticle(Real&                a_particleField,
 
 inline
 void EBParticleMesh::interpolateParticle(RealVect&            a_particleField,
-					   const EBCellFAB&     a_meshField,
-					   const RealVect&      a_probLo,
-					   const RealVect&      a_dx,
-					   const RealVect&      a_position,
-					   const DepositionType a_interpType,
-					   const bool           a_forceIrregNGP) const {
+					 const EBCellFAB&     a_meshField,
+					 const RealVect&      a_probLo,
+					 const RealVect&      a_dx,
+					 const RealVect&      a_position,
+					 const DepositionType a_interpType,
+					 const bool           a_forceIrregNGP) const {
   CH_assert(a_meshField.nComp() == SpaceDim);
 
   // TLDR: This routine is just like usual particle-mesh interpolation. 

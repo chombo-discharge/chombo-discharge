@@ -149,7 +149,7 @@ public:
     to a member function which will set the particle field. E.g. the function must have a signature Real& P::particleScalarField(). A valid
     expression is e.g.
     
-        interpolate<P, &P::mass> (...)
+    interpolate<P, &P::mass> (...)
 	
     To interpolate onto a different field, replace ::mass by the other scalar field.
 

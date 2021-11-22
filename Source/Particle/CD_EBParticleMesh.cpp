@@ -22,18 +22,18 @@ EBParticleMesh::EBParticleMesh(){
 }
 
 EBParticleMesh::EBParticleMesh(const Box&      a_region,
-				   const EBISBox&  a_ebisbox,
-				   const RealVect& a_dx,
-				   const RealVect& a_probLo) {
+			       const EBISBox&  a_ebisbox,
+			       const RealVect& a_dx,
+			       const RealVect& a_probLo) {
   CH_TIME("EBParticleMesh::EBParticleMesh");
   
   this->define(a_region, a_ebisbox, a_dx, a_probLo);
 }
 
 void EBParticleMesh::define(const Box&      a_region,
-			      const EBISBox&  a_ebisbox,
-			      const RealVect& a_dx,
-			      const RealVect& a_probLo) {
+			    const EBISBox&  a_ebisbox,
+			    const RealVect& a_dx,
+			    const RealVect& a_probLo) {
   CH_TIME("EBParticleMesh::define");
   
   m_region        = a_region;

@@ -152,7 +152,10 @@ void ItoSolver::depositKappaConservativeWithPVR(EBAMRCellData&               a_p
   if(m_verbosity > 5){
     pout() << m_name + "::depositKappaConservativeWithPVR" << endl;
   }
-  
+
+#if 1 // new code
+  m_amr->depositParticles<ItoParticle, &ItoParticle::mass>(a_phi, m_realm, m_phase, a_particles, a_deposition, CoarseFineDeposition::PVR, m_irreg_ngp_deposition);
+#else
   const int comp = 0;
   const Interval interv(comp, comp);
 
@@ -203,6 +206,8 @@ void ItoSolver::depositKappaConservativeWithPVR(EBAMRCellData&               a_p
       a_phi[lvl]->localCopyTo(*m_scratch[lvl]);
     }
   }
+
+#endif
 }
 
 template <class T>
