@@ -93,8 +93,8 @@ void EBAMRParticleMesh::depositPVR(EBAMRCellData&              a_meshData,
       EBCellFAB&        meshData     = (*a_meshData[lvl])[dit()];
       const ListBox<P>& boxParticles =  a_particles[lvl] [dit()];
 
-      // Note: EbParticleInterp construction is cheap.
-      EbParticleInterp interp(cellBox, ebisBox, m_dx[lvl]*RealVect::Unit, m_probLo);
+      // Note: EBParticleMesh construction is cheap.
+      EBParticleMesh interp(cellBox, ebisBox, m_dx[lvl]*RealVect::Unit, m_probLo);
 
       interp.deposit<P, particleScalarField> (boxParticles.listItems(), meshData, a_depositionType, a_forceIrregNGP);
     }
@@ -150,8 +150,8 @@ void EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       EBCellFAB&        meshData     = (*a_meshData [lvl])[dit()];
       const ListBox<P>& boxParticles =   a_particles[lvl] [dit()];
 
-      // Note: EbParticleInterp construction is cheap.
-      EbParticleInterp interp(cellBox, ebisBox, m_dx[lvl]*RealVect::Unit, m_probLo);
+      // Note: EBParticleMesh construction is cheap.
+      EBParticleMesh interp(cellBox, ebisBox, m_dx[lvl]*RealVect::Unit, m_probLo);
 
       interp.deposit<P, particleScalarField> (boxParticles.listItems(), meshData, a_depositionType, a_forceIrregNGP);
     }
@@ -183,7 +183,7 @@ void EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
 	
 	dataFiCo.setVal(0.0);
 
-	EbParticleInterp interp(cellBox, ebisBox, m_dx[lvl]*RealVect::Unit, m_probLo);
+	EBParticleMesh interp(cellBox, ebisBox, m_dx[lvl]*RealVect::Unit, m_probLo);
 	
 	switch(refRat){
 	case 2:
@@ -231,7 +231,7 @@ void EBAMRParticleMesh::interpolate(ParticleContainer<P>& a_particles,
 	
       List<P>& particles = (*a_particles[lvl])[dit()].listItems();
       
-      EbParticleInterp interp(cellBox, ebisBox, dx*RealVect::Unit, m_probLo);
+      EBParticleMesh interp(cellBox, ebisBox, dx*RealVect::Unit, m_probLo);
 
       interp.interpolate<P, particleScalarField>(particles, data, a_interpType, a_forceIrregNGP);
     }
@@ -265,7 +265,7 @@ void EBAMRParticleMesh::interpolate(ParticleContainer<P>& a_particles,
 	
       List<P>& particles = (*a_particles[lvl])[dit()].listItems();
       
-      EbParticleInterp interp(cellBox, ebisBox, dx*RealVect::Unit, m_probLo);
+      EBParticleMesh interp(cellBox, ebisBox, dx*RealVect::Unit, m_probLo);
 
       interp.interpolate<P, particleVectorField>(particles, data, a_interpType, a_forceIrregNGP);
     }

@@ -22,7 +22,7 @@
 #include <CD_EBAMRData.H>
 #include <CD_CoarseFineDeposition.H>
 #include <CD_EBCoarseFineParticleMesh.H>
-#include <CD_EbParticleInterp.H>
+#include <CD_EBParticleMesh.H>
 #include <CD_ParticleContainer.H>
 #include <CD_NamespaceHeader.H>
 

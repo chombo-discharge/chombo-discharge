@@ -1009,7 +1009,7 @@ void McPhoto::depositKappaConservative(EBAMRCellData&              a_phi,
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box box          = dbl.get(dit());
       const EBISBox& ebisbox = ebisl[dit()];
-      EbParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin);
+      EBParticleMesh interp(box, ebisbox, dx*RealVect::Unit, origin);
 
       interp.deposit<Photon, &Photon::mass>((*a_photons[lvl])[dit()].listItems(), (*a_phi[lvl])[dit()], m_deposition, false);      
     }

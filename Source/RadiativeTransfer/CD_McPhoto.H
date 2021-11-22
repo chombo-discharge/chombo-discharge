@@ -22,7 +22,7 @@
 
 // Our includes
 #include <CD_RtSolver.H>
-#include <CD_EbParticleInterp.H>
+#include <CD_EBParticleMesh.H>
 #include <CD_ParticleContainer.H>
 #include <CD_Photon.H>
 #include <CD_NamespaceHeader.H>

@@ -4,8 +4,8 @@
  */
 
 /*!
-  @file   CD_EbParticleInterp.cpp
-  @brief  Implementationof CD_EbParticleInterp.H
+  @file   CD_EBParticleMesh.cpp
+  @brief  Implementationof CD_EBParticleMesh.H
   @author Robert Marskar
 */
 
@@ -13,28 +13,28 @@
 #include <CH_Timer.H>
 
 // Our includes
-#include <CD_EbParticleInterp.H>
-#include <CD_EbParticleInterpF_F.H>
+#include <CD_EBParticleMesh.H>
+#include <CD_EBParticleMeshF_F.H>
 #include <CD_NamespaceHeader.H>
 
-EbParticleInterp::EbParticleInterp(){
-  CH_TIME("EbParticleInterp::EbParticleInterp");
+EBParticleMesh::EBParticleMesh(){
+  CH_TIME("EBParticleMesh::EBParticleMesh");
 }
 
-EbParticleInterp::EbParticleInterp(const Box&      a_region,
+EBParticleMesh::EBParticleMesh(const Box&      a_region,
 				   const EBISBox&  a_ebisbox,
 				   const RealVect& a_dx,
 				   const RealVect& a_probLo) {
-  CH_TIME("EbParticleInterp::EbParticleInterp");
+  CH_TIME("EBParticleMesh::EBParticleMesh");
   
   this->define(a_region, a_ebisbox, a_dx, a_probLo);
 }
 
-void EbParticleInterp::define(const Box&      a_region,
+void EBParticleMesh::define(const Box&      a_region,
 			      const EBISBox&  a_ebisbox,
 			      const RealVect& a_dx,
 			      const RealVect& a_probLo) {
-  CH_TIME("EbParticleInterp::define");
+  CH_TIME("EBParticleMesh::define");
   
   m_region        = a_region;
   m_ebisbox       = a_ebisbox;

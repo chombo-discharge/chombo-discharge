@@ -4,25 +4,25 @@
  */
 
 /*!
-  @file   CD_EbParticleInterpImplem.H
-  @brief  Implementatoin of CD_EbParticleInterp.H
+  @file   CD_EBParticleMeshImplem.H
+  @brief  Implementatoin of CD_EBParticleMesh.H
   @author Robert Marskar
 */
 
-#ifndef CD_EbParticleInterpImplem_H
-#define CD_EbParticleInterpImplem_H
+#ifndef CD_EBParticleMeshImplem_H
+#define CD_EBParticleMeshImplem_H
 
 // Chombo includes
 #include <CH_Timer.H>
 
 // Our includes
-#include <CD_EbParticleInterp.H>
-#include <CD_EbParticleInterpF_F.H>
+#include <CD_EBParticleMesh.H>
+#include <CD_EBParticleMeshF_F.H>
 #include <CD_NamespaceHeader.H>
 
 template <class P, const Real&(P::*particleScalarField)() const>
-void EbParticleInterp::deposit(const List<P>& a_particleList, EBCellFAB& a_rho, const DepositionType a_depositionType, const bool a_forceIrregNGP) const {
-  CH_TIME("EbParticleInterp::deposit");
+void EBParticleMesh::deposit(const List<P>& a_particleList, EBCellFAB& a_rho, const DepositionType a_depositionType, const bool a_forceIrregNGP) const {
+  CH_TIME("EBParticleMesh::deposit");
 
   // TLDR: This is a jack-of-all-trades deposition function. The user will use this function to supply a pointer to the field that will be
   //       deposited. As per API, this function must be of the type 'const Real& myParticleClass::myDepositionField() const'
@@ -43,8 +43,8 @@ void EbParticleInterp::deposit(const List<P>& a_particleList, EBCellFAB& a_rho, 
 }
 
 template <class P, const Real&(P::*particleScalarField)() const>
-void EbParticleInterp::deposit2(const List<P>& a_particleList, EBCellFAB& a_rho, const DepositionType a_depositionType, const bool a_forceIrregNGP) const {
-  CH_TIME("EbParticleInterp::deposit2");
+void EBParticleMesh::deposit2(const List<P>& a_particleList, EBCellFAB& a_rho, const DepositionType a_depositionType, const bool a_forceIrregNGP) const {
+  CH_TIME("EBParticleMesh::deposit2");
 
   // TLDR: This is a jack-of-all-trades deposition function. The user will use this function to supply a pointer to the field that will be
   //       deposited. As per API, this function must be of the type 'const Real& myParticleClass::myDepositionField() const'  
@@ -65,8 +65,8 @@ void EbParticleInterp::deposit2(const List<P>& a_particleList, EBCellFAB& a_rho,
 }
 
 template <class P, const Real&(P::*particleScalarField)() const>
-void EbParticleInterp::deposit4(const List<P>& a_particleList, EBCellFAB& a_rho, const DepositionType a_depositionType, const bool a_forceIrregNGP) const {
-  CH_TIME("EbParticleInterp::deposit4");
+void EBParticleMesh::deposit4(const List<P>& a_particleList, EBCellFAB& a_rho, const DepositionType a_depositionType, const bool a_forceIrregNGP) const {
+  CH_TIME("EBParticleMesh::deposit4");
 
   // TLDR: This is a jack-of-all-trades deposition function. The user will use this function to supply a pointer to the field that will be
   //       deposited. As per API, this function must be of the type 'const Real& myParticleClass::myDepositionField() const'    
@@ -87,7 +87,7 @@ void EbParticleInterp::deposit4(const List<P>& a_particleList, EBCellFAB& a_rho,
 }
 
 template <class P, Real&(P::*particleScalarField)()>
-void EbParticleInterp::interpolate(List<P>&             a_particleList,
+void EBParticleMesh::interpolate(List<P>&             a_particleList,
 				   const EBCellFAB&     a_meshScalarField,
 				   const DepositionType a_interpType,
 				   const bool           a_forceIrregNGP) const {
@@ -116,7 +116,7 @@ void EbParticleInterp::interpolate(List<P>&             a_particleList,
 }
 
 template <class P, RealVect&(P::*particleVectorField)()>
-void EbParticleInterp::interpolate(List<P>&             a_particleList,
+void EBParticleMesh::interpolate(List<P>&             a_particleList,
 				   const EBCellFAB&     a_meshVectorField,
 				   const DepositionType a_interpType,
 				   const bool           a_forceIrregNGP) const {
@@ -145,7 +145,7 @@ void EbParticleInterp::interpolate(List<P>&             a_particleList,
 }
 
 inline
-void EbParticleInterp::depositParticle(EBCellFAB&           a_rho,
+void EBParticleMesh::depositParticle(EBCellFAB&           a_rho,
 				       const RealVect&      a_probLo,
 				       const RealVect&      a_dx,
 				       const RealVect&      a_position,
@@ -213,7 +213,7 @@ void EbParticleInterp::depositParticle(EBCellFAB&           a_rho,
       }
     default:
       {
-	MayDay::Error("EbParticleInterp::depositParticle - logic bust, unknown particle deposition.");
+	MayDay::Error("EBParticleMesh::depositParticle - logic bust, unknown particle deposition.");
 	break;
       }
     }
@@ -221,7 +221,7 @@ void EbParticleInterp::depositParticle(EBCellFAB&           a_rho,
 }
 
 inline
-void EbParticleInterp::depositParticle2(EBCellFAB&           a_rho,
+void EBParticleMesh::depositParticle2(EBCellFAB&           a_rho,
 					const RealVect&      a_probLo,
 					const RealVect&      a_dx,
 					const RealVect&      a_position,
@@ -273,7 +273,7 @@ void EbParticleInterp::depositParticle2(EBCellFAB&           a_rho,
       }
     default:
       {
-	MayDay::Error("EbParticleInterp::depositParticle2 - Invalid deposition type - only NGP and CIC supported for this deposition method.");
+	MayDay::Error("EBParticleMesh::depositParticle2 - Invalid deposition type - only NGP and CIC supported for this deposition method.");
 	break;
       }
     }
@@ -281,7 +281,7 @@ void EbParticleInterp::depositParticle2(EBCellFAB&           a_rho,
 }
 
 inline
-void EbParticleInterp::depositParticle4(EBCellFAB&           a_rho,
+void EBParticleMesh::depositParticle4(EBCellFAB&           a_rho,
 					const RealVect&      a_probLo,
 					const RealVect&      a_dx,
 					const RealVect&      a_position,
@@ -334,7 +334,7 @@ void EbParticleInterp::depositParticle4(EBCellFAB&           a_rho,
       }
     default:
       {
-	MayDay::Error("EbParticleInterp::depositParticle4 - Invalid deposition type - only NGP and CIC supported for this deposition method.");
+	MayDay::Error("EBParticleMesh::depositParticle4 - Invalid deposition type - only NGP and CIC supported for this deposition method.");
 	break;
       }
     }
@@ -342,7 +342,7 @@ void EbParticleInterp::depositParticle4(EBCellFAB&           a_rho,
 }
 
 inline
-void EbParticleInterp::interpolateParticle(Real&                a_particleField,
+void EBParticleMesh::interpolateParticle(Real&                a_particleField,
 					   const EBCellFAB&     a_meshField,
 					   const RealVect&      a_probLo,
 					   const RealVect&      a_dx,
@@ -400,13 +400,13 @@ void EbParticleInterp::interpolateParticle(Real&                a_particleField,
 				 CHF_CONST_REALVECT(a_position));
       break;
     default:
-      MayDay::Error("EbParticleInterp::interpolateParticle(Real) - Invalid interpolation type requested.");
+      MayDay::Error("EBParticleMesh::interpolateParticle(Real) - Invalid interpolation type requested.");
     }
   }
 }
 
 inline
-void EbParticleInterp::interpolateParticle(RealVect&            a_particleField,
+void EBParticleMesh::interpolateParticle(RealVect&            a_particleField,
 					   const EBCellFAB&     a_meshField,
 					   const RealVect&      a_probLo,
 					   const RealVect&      a_dx,
@@ -464,7 +464,7 @@ void EbParticleInterp::interpolateParticle(RealVect&            a_particleField,
 				 CHF_CONST_REALVECT(a_position));
       break;
     default:
-      MayDay::Error("EbParticleInterp::interpolateParticle(RealVect) - invalid interpolation type requested.");
+      MayDay::Error("EBParticleMesh::interpolateParticle(RealVect) - invalid interpolation type requested.");
     }
   }
 }

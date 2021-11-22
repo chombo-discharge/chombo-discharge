@@ -2088,7 +2088,7 @@ void ItoSolver::interpolateVelocities(const int a_lvl, const DataIndex& a_dit){
     List<ItoParticle>& particleList = particles[a_lvl][a_dit].listItems();
 
     // This interpolates the velocity function on to the particle velocities
-    EbParticleInterp meshInterp(box, ebisbox, dx, origin);
+    EBParticleMesh meshInterp(box, ebisbox, dx, origin);
     meshInterp.interpolate<ItoParticle, &ItoParticle::velocity>(particleList, velo_func, m_deposition, m_irreg_ngp_interpolation);
 
     // Go through the particles and set their velocities to velo_func*mobility
@@ -2155,7 +2155,7 @@ void ItoSolver::interpolateMobilitiesMu(const int a_lvl, const DataIndex& a_dit)
     const Box box              = m_amr->getGrids(m_realm)[a_lvl][a_dit];
 
     List<ItoParticle>& particleList = particles[a_lvl][a_dit].listItems();
-    EbParticleInterp meshInterp(box, ebisbox, dx, origin);
+    EBParticleMesh meshInterp(box, ebisbox, dx, origin);
     
     meshInterp.interpolate<ItoParticle, &ItoParticle::mobility>(particleList, mob_func, m_deposition, m_irreg_ngp_interpolation);
   }
@@ -2180,7 +2180,7 @@ void ItoSolver::interpolateMobilitiesVel(const int a_lvl, const DataIndex& a_dit
     EBCellFAB& scratch = (*m_scratch[a_lvl])[a_dit];
 
     List<ItoParticle>& particleList = particles[a_lvl][a_dit].listItems();
-    EbParticleInterp meshInterp(box, ebisbox, dx, origin);
+    EBParticleMesh meshInterp(box, ebisbox, dx, origin);
     
     // First, interpolate |E| to the particle position, it will be stored on m_tmp. 
     meshInterp.interpolate<ItoParticle, &ItoParticle::mobility>(particleList, scratch, m_deposition, m_irreg_ngp_interpolation);    
@@ -2270,7 +2270,7 @@ void ItoSolver::interpolateDiffusion(const int a_lvl, const DataIndex& a_dit){
 
     List<ItoParticle>& particleList = particles[a_lvl][a_dit].listItems();
 
-    EbParticleInterp meshInterp(box, ebisbox,dx, origin);
+    EBParticleMesh meshInterp(box, ebisbox,dx, origin);
     meshInterp.interpolate<ItoParticle, &ItoParticle::diffusion>(particleList, dco_cell, m_deposition, m_irreg_ngp_interpolation);    
   }
 }

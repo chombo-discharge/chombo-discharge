@@ -4,13 +4,13 @@
  */
 
 /*!
-  @file   CD_EbParticleInterp.H
+  @file   CD_EBParticleMesh.H
   @brief  Declaration of a class for handling particle-mesh interpolation and deposition. 
   @author Robert Marskar
 */
 
-#ifndef CD_EbParticleInterp_H
-#define CD_EbParticleInterp_H
+#ifndef CD_EBParticleMesh_H
+#define CD_EBParticleMesh_H
 
 // CHombo includes
 #include <EBISBox.H>
@@ -30,13 +30,13 @@
   @note If the user sets the object to force ngp deposition in cut-cells, the result is not kappa-weighted in any form, i.e. the cut-cell will contain
   the full deposited mass (without multiplying or dividing by kappa). Likewise, it will force NGP interpolation in cut-cells. 
 */
-class EbParticleInterp{
+class EBParticleMesh{
 public:
 
   /*!
     @brief Default constructor. Must subsequently call define. 
   */
-  EbParticleInterp();
+  EBParticleMesh();
 
   /*!
     @brief Full constructor
@@ -45,7 +45,7 @@ public:
     @param[in] a_dx            Resolution
     @param[in] a_probLo        Lower-left corner of computational domain
   */
-  EbParticleInterp(const Box& a_region, const EBISBox& a_ebisbox, const RealVect& a_dx, const RealVect& a_probLo);
+  EBParticleMesh(const Box& a_region, const EBISBox& a_ebisbox, const RealVect& a_dx, const RealVect& a_probLo);
 
   /*!
     @brief Define function
@@ -272,6 +272,6 @@ protected:
 
 #include <CD_NamespaceFooter.H>
 
-#include <CD_EbParticleInterpImplem.H>
+#include <CD_EBParticleMeshImplem.H>
 
 #endif

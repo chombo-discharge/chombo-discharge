@@ -1103,7 +1103,7 @@ void CdrSolver::initialDataParticles(){
 
 	// Make the deposition object and put the particles on the grid. 
 	const bool forceIrregNGP = true;
-	EbParticleInterp interp(cellBox, ebisbox, dx, probLo);
+	EBParticleMesh interp(cellBox, ebisbox, dx, probLo);
 	
 	interp.deposit<Particle, &Particle::mass>(particles[lvl][dit()].listItems(), (*m_phi[lvl])[dit()], DepositionType::NGP, true);
       }

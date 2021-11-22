@@ -3291,7 +3291,7 @@ void ItoPlasmaStepper::computeEdotJSourceNWO2(const Real a_dt){
 	  List<ItoParticle>& particleList = particles[lvl][dit()].listItems();
 
 	  // This interpolates the velocity function on to the particle velocities
-	  EbParticleInterp meshInterp(box, ebisbox, dx, origin, true);
+	  EBParticleMesh meshInterp(box, ebisbox, dx, origin, true);
 	  meshInterp.interpolateVelocity(particleList, Efab, deposition);
 
 	  // Go through the particles and set their mass to E.dot(X^new - X^old)
