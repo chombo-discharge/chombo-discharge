@@ -38,7 +38,6 @@ EBGradient::EBGradient(const EBLevelGrid& a_eblg,
 
   CH_assert(a_order       >  0);
   CH_assert(a_weighting   >= 0);  
-  CH_assert(a_refRat%2    == 0);
 
   m_eblg         = a_eblg;
   m_eblgFine     = a_eblgFine;
