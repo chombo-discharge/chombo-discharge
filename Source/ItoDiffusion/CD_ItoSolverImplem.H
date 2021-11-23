@@ -154,7 +154,8 @@ void ItoSolver::depositKappaConservativeWithPVR(EBAMRCellData&               a_p
   }
 
 #if 1 // new code
-  m_amr->depositParticles<ItoParticle, &ItoParticle::mass>(a_phi, m_realm, m_phase, a_particles, a_deposition, CoarseFineDeposition::PVR, m_irreg_ngp_deposition);
+  //  m_amr->depositParticles<ItoParticle, &ItoParticle::mass>(a_phi, m_realm, m_phase, a_particles, a_deposition, CoarseFineDeposition::PVR, m_irreg_ngp_deposition);
+  m_amr->depositParticles<T, &T::mass>(a_phi, m_realm, m_phase, a_particles, a_deposition, CoarseFineDeposition::PVR, m_irreg_ngp_deposition);  
 #else
   const int comp = 0;
   const Interval interv(comp, comp);
@@ -222,7 +223,7 @@ void ItoSolver::depositKappaConservativeNoPVR_native(EBAMRCellData&             
   const AMRMask& mask = m_amr->getMask(s_particle_halo, m_halo_buffer, m_realm);
   a_particles.copyMaskParticles(mask);
   
-  m_amr->depositParticles<ItoParticle, &ItoParticle::mass>(a_phi, m_realm, m_phase, a_particles, a_deposition, CoarseFineDeposition::Halo, m_irreg_ngp_deposition);
+  m_amr->depositParticles<T, &T::mass>(a_phi, m_realm, m_phase, a_particles, a_deposition, CoarseFineDeposition::Halo, m_irreg_ngp_deposition);
 
   a_particles.clearMaskParticles();  
 #else
@@ -320,6 +321,17 @@ void ItoSolver::depositKappaConservativeNoPVR_NGP(EBAMRCellData&               a
     pout() << m_name + "::depositKappaConservativeNoPVR_NGP" << endl;
   }
 
+#if 1
+  const AMRMask& mask = m_amr->getMask(s_particle_halo, m_halo_buffer, m_realm);
+
+  a_particles.copyMaskParticles(mask);
+  a_particles.copyNonMaskParticles(mask);
+
+  m_amr->depositParticles<T, &T::mass>(a_phi, m_realm, m_phase, a_particles, a_deposition, CoarseFineDeposition::HaloNGP, m_irreg_ngp_deposition);  
+  
+  a_particles.clearMaskParticles();
+  a_particles.clearNonMaskParticles();  
+#else
   const int comp = 0;
   const Interval interv(comp, comp);
 
@@ -378,6 +390,7 @@ void ItoSolver::depositKappaConservativeNoPVR_NGP(EBAMRCellData&               a
   // Clear halo and non-halo particles
   a_particles.clearMaskParticles();
   a_particles.clearNonMaskParticles();
+#endif
 }
 
 #include <CD_NamespaceFooter.H>
