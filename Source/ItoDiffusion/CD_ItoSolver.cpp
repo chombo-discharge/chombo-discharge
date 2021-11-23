@@ -866,9 +866,9 @@ void ItoSolver::intersectParticlesIF(ParticleContainer<ItoParticle>& a_particles
 	  bool contact_domain = false;
 	  bool contact_eb     = false;
 	      
-	  if(checkDom) contact_domain = ParticleOps::domainIntersection(oldPos, newPos, path, prob_lo, prob_hi, dom_s);
+	  if(checkDom) contact_domain = ParticleOps::domainIntersection(oldPos, newPos, prob_lo, prob_hi, dom_s);
 #if 0
-	  if(checkEB)  contact_eb     = ParticleOps::ebIntersectionBisect(impfunc, oldPos, newPos, pathLen, dx, eb_s);
+	  if(checkEB)  contact_eb     = ParticleOps::ebIntersectionBisect(impfunc, oldPos, newPos, dx, eb_s);
 #else
 	  if(checkEB)  contact_eb     = ParticleOps::ebIntersectionRaycast(impfunc, oldPos, newPos, 1.E-10*dx, eb_s);
 #endif

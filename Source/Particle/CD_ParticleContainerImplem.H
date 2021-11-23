@@ -164,7 +164,6 @@ void ParticleContainer<P>::setupParticleData(const int a_base, const int a_fines
   m_bufferParticles.    resize(1 + a_finestLevel);  
   m_maskParticles.      resize(1 + a_finestLevel);
   m_nonMaskParticles.   resize(1 + a_finestLevel);
-
   m_cellSortedParticles.resize(1 + a_finestLevel);
   
   for (int lvl = a_base; lvl <= a_finestLevel; lvl++){

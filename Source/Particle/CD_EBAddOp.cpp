@@ -16,11 +16,9 @@
 #include <CD_EBAddOp.H>
 #include <CD_NamespaceHeader.H>
 
-
 EBAddOp::EBAddOp(){
   CH_TIME("EBAddOp::EBAddOp");
 }
-
 
 EBAddOp::~EBAddOp(){
   CH_TIME("EBAddOp::~EBAddOp");    

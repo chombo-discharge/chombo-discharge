@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_EBAddOp.H
-  @brief  A Copier class for making copying between BoxLayoutData<EBCellFAB> easier.
+  @brief  Declaration of a Copier class for making incrementation between LevelData<EBCellFAB> easier.
   @author Robert Marskar
 */
 

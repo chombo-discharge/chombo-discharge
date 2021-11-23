@@ -1244,7 +1244,7 @@ void McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhoto
 	  // Do intersection tests. These return true/false if the path crossed an object. If it returned true, the s-parameter
 	  // will have been defined as well. 
 	  if(checkDom) {
-	    contactDomain = ParticleOps::domainIntersection(oldPos, newPos, path, probLo, probHi, sDom);
+	    contactDomain = ParticleOps::domainIntersection(oldPos, newPos, probLo, probHi, sDom);
 	  }
 	  if(checkEB) {
 	    switch(m_intersectionEB) {
@@ -1252,7 +1252,7 @@ void McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhoto
 	      contactEB  = ParticleOps::ebIntersectionRaycast(impFunc, oldPos, newPos, 1.E-3*dx, sEB);
 	      break;
 	    case IntersectionEB::Bisection:
-	      contactEB = ParticleOps::ebIntersectionBisect(impFunc, oldPos, newPos, pathLen, m_bisectStep, sEB);
+	      contactEB = ParticleOps::ebIntersectionBisect(impFunc, oldPos, newPos, m_bisectStep, sEB);
 	      break;
 	    case IntersectionEB::LSF:
 	      MayDay::Error("McPhoto::advancePhotonsInstantenous -- LSF not implement (yet)");
@@ -1414,7 +1414,7 @@ void McPhoto::advancePhotonsTransient(ParticleContainer<Photon>& a_bulkPhotons,
 
 	// Check absorption on EBs and domain
 	if(checkDom){
-	  absorbedDomain = ParticleOps::domainIntersection(oldPos, newPos, path, probLo, probHi, sDomain);
+	  absorbedDomain = ParticleOps::domainIntersection(oldPos, newPos, probLo, probHi, sDomain);
 	  sDomain = (absorbedDomain) ? Max(0.0, sDomain - SAFETY) : sDomain;
 	}
 
@@ -1424,7 +1424,7 @@ void McPhoto::advancePhotonsTransient(ParticleContainer<Photon>& a_bulkPhotons,
 	    absorbedEB  = ParticleOps::ebIntersectionRaycast(impFunc, oldPos, newPos, 1.E-3*dx, sEB);
 	    break;
 	  case IntersectionEB::Bisection:
-	    absorbedEB = ParticleOps::ebIntersectionBisect(impFunc, oldPos, newPos, pathLen, m_bisectStep, sEB);
+	    absorbedEB = ParticleOps::ebIntersectionBisect(impFunc, oldPos, newPos, m_bisectStep, sEB);
 	    break;
 	  case IntersectionEB::LSF:
 	    MayDay::Error("McPhoto::advancePhotonsTransient -- LSF not implement (yet)");

@@ -5,8 +5,9 @@
 
 /*!
   @file   CD_ParticleOps.H
-  @brief  Declaration of some common useful particle routines that would otherwise be replicated across classes. 
+  @brief  Declaration of a static class containing some common useful particle routines that would otherwise be replicated across classes. 
   @author Robert Marskar
+  @todo   In ebIntersectionRaycast we should check if the path is tangential to the EB. 
 */
 
 #ifndef CD_ParticleOps_H
@@ -14,30 +15,67 @@
 
 // Our includes
 #include <CD_NamespaceHeader.H>
-  
+
+/*!
+  @brief A shallow static class for doing various kinds of particle-related operations.
+*/
 class ParticleOps {
 public:
 
+  /*!
+    @brief Compute the intersection point between a particle path and a domain side.
+    @details If the particle crossed the domain side, the output argument a_s determines the intersection point by x(s) = x0 + s*(x1-x0) where
+    x0 is the starting position (a_oldPos), x1 is the end position (a_newPos), and x(s) is the intersection point with the boundary. 
+    @param[in]  a_oldPos Particle starting position
+    @param[in]  a_newPos Particle end position
+    @param[in]  a_probLo Lower-left corner in physical coordinates
+    @param[in]  a_probHi Upper-right corner in physical coordinates
+    @param[out] a_s      Relative length along the path 
+    @return Returns true if the particle crossed the domain boundary.
+  */
   static
   inline bool domainIntersection(const RealVect& a_oldPos,
 				 const RealVect& a_newPos,
-				 const RealVect& a_path,
 				 const RealVect& a_probLo,
-				 const RealVect& a_prob_hi,
+				 const RealVect& a_probHi,
 				 Real&           a_s);
 
+  /*!
+    @brief Compute the intersection point between a particle path and an implicit function using a bisection algorithm. 
+    @details This routine will bisect the particle path into intervals of length a_bisectStep. Each interval is examined for a crossing with the implicit function
+    and if the particle crossed the into the EB, the output argument a_s determines the intersection point by x(s) = x0 + s*(x1-x0) where x0 is the starting
+    position (a_oldPos), x1 is the end position (a_newPos), and x(s) is the intersection point with the geometry. 
+    @param[in]  a_impFunc    Implicit function. 
+    @param[in]  a_oldPos     Particle starting position
+    @param[in]  a_newPos     Particle end position
+    @param[in]  a_bisectStep Bisection step length
+    @param[out] a_s          Relative length along the path 
+    @return Returns true if the particle crossed into the EB. 
+  */  
   static
-  inline bool ebIntersectionBisect(const RefCountedPtr<BaseIF>& a_impfunc,
+  inline bool ebIntersectionBisect(const RefCountedPtr<BaseIF>& a_impFunc,
 				   const RealVect&              a_oldPos,
 				   const RealVect&              a_newPos,
-				   const Real&                  a_pathLen,
 				   const Real&                  a_bisectStep,
 				   Real&                        a_s);
 
+  /*!
+    @brief Compute the intersection point between a particle path and an implicit function using a ray-casting algorithm.
+    @details This routine will assume that a_impcFunc is an approximation to the signed distance function and compute the intersection point using ray-marching. Starting
+    on the starting position we compute the distance to the EB and move the particle the compute distance along the particle trajectory. If the particle comes too close
+    to the EB (within a_tolerance) we consider it to be absorbed. In that case the output argument a_s determines the intersection point by x(s) = x0 + s*(x1-x0) where 
+    x0 is the starting position (a_oldPos), x1 is the end position (a_newPos), and x(s) is the intersection point with the geometry. 
+    @param[in]  a_impFunc    Implicit function. 
+    @param[in]  a_oldPos     Particle starting position
+    @param[in]  a_newPos     Particle end position
+    @param[in]  a_tolerace   Tolerance for intersectinon method. If the distance to the EB is less than this, the particle is absorbed. 
+    @param[out] a_s          Relative length along the path 
+    @return Returns true if the particle crossed into the EB.
+  */    
   static
-  inline bool ebIntersectionRaycast(const RefCountedPtr<BaseIF>& a_impfunc,
-				    const RealVect&              a_x0,
-				    const RealVect&              a_x1,
+  inline bool ebIntersectionRaycast(const RefCountedPtr<BaseIF>& a_impFunc,
+				    const RealVect&              a_oldPos,
+				    const RealVect&              a_newPos,
 				    const Real&                  a_tolerance,
 				    Real&                        a_s);
   
