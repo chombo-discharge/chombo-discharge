@@ -230,13 +230,13 @@ protected:
     @brief Buffer for putting coarse-grid data on the buffer layout. 
     @note Lives on the buffer layout. 
   */
-  mutable BoxLayoutData<EBCellFAB> m_bufferCoar;
+  mutable LevelData<EBCellFAB> m_bufferCoar;
 
   /*!
     @brief Buffer for putting fine-grid data on the buffer layout.
     @note Lives on the buffer layout. 
   */
-  mutable BoxLayoutData<EBCellFAB> m_bufferFine;
+  mutable LevelData<EBCellFAB> m_bufferFine;
 
   /*!
     @brief Storage for corrected gradient. 
@@ -260,7 +260,7 @@ protected:
     @param[out] a_coarMaskCF      Mask holding a value of 1 in coarse cells that live on the refinement boundary. 
     @param[out] a_coarMaskInvalid Mask holding a value of 1 in coarse cells that are covered by a finer grid level. 
   */
-  void defineMasks(BoxLayoutData<FArrayBox>& a_coarMaskCF, BoxLayoutData<FArrayBox>& a_coarMaskInvalid);
+  void defineMasks(LevelData<FArrayBox>& a_coarMaskCF, LevelData<FArrayBox>& a_coarMaskInvalid);
 
   /*!
     @brief Define buffers. 
@@ -271,23 +271,23 @@ protected:
     @param[in]  a_coarMaskCF            Mask for CF region on the coarse layout. 
     @param[in]  a_coarMaskInvalid       Mask for invalid regions on the coarse layout. 
   */
-  void defineBuffers(BoxLayoutData<FArrayBox>&       a_bufferCoarMaskCF,
-		     BoxLayoutData<FArrayBox>&       a_bufferCoarMaskInvalid,
-		     const BoxLayoutData<FArrayBox>& a_coarMaskCF,
-		     const BoxLayoutData<FArrayBox>& a_coarMaskInvalid);
+  void defineBuffers(LevelData<FArrayBox>&       a_bufferCoarMaskCF,
+		     LevelData<FArrayBox>&       a_bufferCoarMaskInvalid,
+		     const LevelData<FArrayBox>& a_coarMaskCF,
+		     const LevelData<FArrayBox>& a_coarMaskInvalid);
 
   /*!
     @brief Define iterators and cells that need modified stencils
     @param[in]  a_coarMaskCF            Mask for CF region on the coarse layout. 
     @param[in]  a_coarMaskInvalid       Mask for invalid regions on the coarse layout. 
   */
-  void defineIteratorsEBCF(const BoxLayoutData<FArrayBox>& a_coarMaskCF, const BoxLayoutData<FArrayBox>& a_coarMaskInvalid);
+  void defineIteratorsEBCF(const LevelData<FArrayBox>& a_coarMaskCF, const LevelData<FArrayBox>& a_coarMaskInvalid);
 
   /*!
     @brief Define stencils for interpolation across the EBCF refinement boundary. 
     @param[in] a_bufferCoarMaskInvalid Map of coarse cells that are covered by finer cells. 
   */
-  void defineStencilsEBCF(const BoxLayoutData<FArrayBox>& a_bufferCoarMaskInvalid);
+  void defineStencilsEBCF(const LevelData<FArrayBox>& a_bufferCoarMaskInvalid);
 
   /*!
     @brief Get a finite difference stencil, assuming that the data is cell-centered

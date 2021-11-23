@@ -1,4 +1,4 @@
-/* chombo-discharge
+/* chombubo-discharge
  * Copyright © 2021 SINTEF Energy Research.
  * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
  */
@@ -14,6 +14,7 @@
 #include <EBArith.H>
 #include <EBCellFactory.H>
 #include <BaseIVFactory.H>
+#include <NeighborIterator.H>
 #include <CH_Timer.H>
 
 // Our includes
@@ -80,31 +81,38 @@ EBGradient::EBGradient(const EBLevelGrid& a_eblg,
   if(m_hasFine && !forceNoEBCF) {
 
     // Masks with transient lifetimes. 
-    BoxLayoutData<FArrayBox> coarMaskCF;
-    BoxLayoutData<FArrayBox> coarMaskInvalid;
-
-    BoxLayoutData<FArrayBox> bufferCoarMaskCF;
-    BoxLayoutData<FArrayBox> bufferCoarMaskInvalid;        
+    LevelData<FArrayBox> coarMaskCF;
+    LevelData<FArrayBox> coarMaskInvalid;
 
     // Define masks on the input grids. 
     timer.startEvent("EBCF masks");
+    pout() << "starting masks 1" << endl;
     this->defineMasks(coarMaskCF, coarMaskInvalid);
+    pout() << "done mask def 1" << endl;
     timer.stopEvent("EBCF masks");
 
     // Define iterators for the input grid AND define the simplified buffer grids. 
     timer.startEvent("EBCF Iterators");
     this->defineIteratorsEBCF(coarMaskCF, coarMaskInvalid);
+    pout() << "done iterators" << endl;    
     timer.stopEvent("EBCF Iterators");
 
     if(m_hasEBCF){
+
+      LevelData<FArrayBox> bufferCoarMaskCF;
+      LevelData<FArrayBox> bufferCoarMaskInvalid;
+    
       timer.startEvent("EBCF buffers");
       this->defineBuffers(bufferCoarMaskCF, bufferCoarMaskInvalid, coarMaskCF, coarMaskInvalid);
+      pout() << "done buffers" << endl;          
       timer.stopEvent("EBCF buffers");            
 
       timer.startEvent("EBCF stencils");
       this->defineStencilsEBCF(bufferCoarMaskInvalid);
+      pout() << "done stencils EBCF" << endl;                
       timer.stopEvent("EBCF stencils");
     }
+
   }
 
   if(profile){
@@ -253,8 +261,9 @@ void EBGradient::computeAMRGradient(LevelData<EBCellFAB>&       a_gradient,
 
     // Copy input data to buffers. 
     const Interval interv(m_comp, m_comp);    
+
     a_phi.    copyTo(interv, m_bufferCoar, interv);
-    a_phiFine.copyTo(interv, m_bufferFine, interv);
+    a_phiFine.copyTo(interv, m_bufferFine, interv);    
 
     // Go through data buffers and compute the gradient (on the buffer grids). 
     for (DataIterator dit(m_bufferDblCoar); dit.ok(); ++dit){
@@ -373,7 +382,7 @@ void EBGradient::defineLevelStencils(){
   }
 }
 
-void EBGradient::defineMasks(BoxLayoutData<FArrayBox>& a_coarMaskCF, BoxLayoutData<FArrayBox>& a_coarMaskInvalid){
+void EBGradient::defineMasks(LevelData<FArrayBox>& a_coarMaskCF, LevelData<FArrayBox>& a_coarMaskInvalid){
   CH_TIME("EBGradient::defineMasks");
 
   CH_assert(m_hasFine);
@@ -389,82 +398,68 @@ void EBGradient::defineMasks(BoxLayoutData<FArrayBox>& a_coarMaskCF, BoxLayoutDa
   const     Interval interv = Interval(m_comp, m_comp);
 
   // Handle to computational grids. 
-  const DisjointBoxLayout& dbl        = m_eblg.    getDBL();
+  const DisjointBoxLayout& dblCoar    = m_eblg.    getDBL();
   const DisjointBoxLayout& dblFine    = m_eblgFine.getDBL();
   
-  const EBISLayout&        ebisl      = m_eblg.    getEBISL();
-  const EBISLayout&        ebislFine  = m_eblgFine.getEBISL();
-  
-  const ProblemDomain&     domain     = m_eblg.    getDomain();
+  const ProblemDomain&     domainCoar = m_eblg.    getDomain();
   const ProblemDomain&     domainFine = m_eblgFine.getDomain();
 
-  // Create some temporary storage. We coarsen the fine grid and create a BoxLayoutData<FArrayBox> object where each
+  // Create some temporary storage. We coarsen the fine grid and create a Level<FArrayBox> object where each
   // Box is grown by one. We do this because we want to put some data in the ghost cells outside the valid region
   // of the fine level. 
   DisjointBoxLayout dblCoFi;
   coarsen(dblCoFi, dblFine, m_refRat);
 
-  Vector<int> coFiRanks      = dblCoFi.procIDs();  
-  Vector<Box> coFiBoxes      = dblCoFi.boxArray();
-  Vector<Box> grownCoFiBoxes = dblCoFi.boxArray();
-  for(int i = 0; i < coFiBoxes.size(); i++){
-    grownCoFiBoxes[i].grow(1);
-  }
-
-  BoxLayout coFiLayout     (     coFiBoxes, coFiRanks);
-  BoxLayout grownCoFiLayout(grownCoFiBoxes, coFiRanks);
-  
-  BoxLayoutData<FArrayBox> coFiMaskCF     (grownCoFiLayout, m_nComp); 
-  BoxLayoutData<FArrayBox> coFiMaskInvalid(     coFiLayout, m_nComp); 
+  LevelData<FArrayBox> coFiMaskCF     (dblCoFi, m_nComp, IntVect::Unit);
+  LevelData<FArrayBox> coFiMaskInvalid(dblCoFi, m_nComp, IntVect::Zero);  
 
   // Build the mask regions. 
-  for (DataIterator dit(coFiLayout); dit.ok(); ++dit){
-    const Box cellBox  =      coFiLayout[dit()];
-    const Box grownBox = grownCoFiLayout[dit()];
+  for (DataIterator dit(dblCoFi); dit.ok(); ++dit){
+    FArrayBox& maskCF      = coFiMaskCF     [dit()];
+    FArrayBox& maskInvalid = coFiMaskInvalid[dit()];
+    const Box  cellBox     = dblCoFi        [dit()];
+    const Box  ghostedBox  = maskCF.box();
 
     // Set the "coarse-fine" mask. It is set to 1 in cells that are not valid cells. We do this by setting the FArrayBox data to one
     // in the entire patch, and then we iterate through the parts of the patch that overlap with valid grid boxes. That part of the
     // data is set to zero. We end up with a bunch of grid patches which hold a value of 1 in ghost cells that do not overlap with
     // the valid region of the grid. 
-    coFiMaskCF[dit()].setVal(one);
-    coFiMaskCF[dit()].setVal(zero, cellBox, m_comp, m_nComp);
-    for (LayoutIterator lit = dblCoFi.layoutIterator(); lit.ok(); ++lit){
-      const Box neighborBox = dblCoFi[lit()];
-      const Box overlapBox  = neighborBox & grownBox;
+    maskCF.setVal(one);
+    maskCF.setVal(zero, cellBox, m_comp, m_nComp);
+
+    NeighborIterator nit(dblCoFi);
+    for (nit.begin(dit()); nit.ok(); ++nit){
+      const Box overlapBox = dblCoFi[nit()] & ghostedBox;
 
       if(!overlapBox.isEmpty()){
-	coFiMaskCF[dit()].setVal(zero, overlapBox, m_comp, m_nComp);
+	maskCF.setVal(zero, overlapBox, m_comp, m_nComp);
       }
     }
-
+	
     // Set the invalid cell mask on the coarsened fine grids. We set it to 1 everywhere on the fine grid and 0 elsewhere. When we add this to the coarse
     // level we will add 1 into every cell that is covered by a finer level. 
-    coFiMaskInvalid[dit()].setVal(one, cellBox, m_comp, m_nComp);
+    maskInvalid.setVal(one, cellBox, m_comp, m_nComp);
   }
 
   // Define the input masks. After this, coarMaskCF will have a value of 1 in all cells that abut the fine level. Likewise, coarMaskInvalid
   // will have a value of 1 in all cells that are covered by a finer level.
-  Vector<int>      coarRanks = dbl.procIDs();
-  Vector<Box>      coarBoxes = dbl.boxArray();
-  Vector<Box> grownCoarBoxes = dbl.boxArray();
+  a_coarMaskCF.     define(dblCoar, m_nComp, IntVect::Zero); // Does not need ghost cells
+  a_coarMaskInvalid.define(dblCoar, m_nComp, IntVect::Unit); // Needs one ghost cell. 
 
-  for (int i = 0; i < grownCoarBoxes.size(); i++){
-    grownCoarBoxes[i].grow(1);
-  }
-
-  BoxLayout      coarLayout(     coarBoxes, coarRanks);
-  BoxLayout grownCoarLayout(grownCoarBoxes, coarRanks);
-  
-  a_coarMaskCF     .define(     coarLayout, m_nComp); 
-  a_coarMaskInvalid.define(grownCoarLayout, m_nComp);
-
-  for (DataIterator dit(dbl); dit.ok(); ++dit){
+  for (DataIterator dit(dblCoar); dit.ok(); ++dit){
     a_coarMaskCF     [dit()].setVal(zero);
     a_coarMaskInvalid[dit()].setVal(zero);
   }
 
-  coFiMaskCF.     addTo(interv, a_coarMaskCF,      interv, ebisl.getDomain()); // Contains > 0 in coarse cells that abut the refinement bounary. 
-  coFiMaskInvalid.addTo(interv, a_coarMaskInvalid, interv, ebisl.getDomain()); // Contains > 0 in coarse cells that are covered by a finer level.
+  // Ned to copy from the buffer masks to this mask.
+  Copier copierCF;     
+  Copier copierInvalid;
+
+  copierCF.     ghostDefine(dblCoFi, dblCoar, domainCoar, IntVect::Unit);
+  copierInvalid.ghostDefine(dblCoFi, dblCoar, domainCoar, IntVect::Zero);
+
+  coFiMaskCF.     copyTo(interv, a_coarMaskCF,      interv, copierCF,      LDaddOp<FArrayBox>());
+  coFiMaskInvalid.copyTo(interv, a_coarMaskInvalid, interv, copierInvalid, LDaddOp<FArrayBox>());  
 }
 
 bool EBGradient::isFiniteDifferenceStencilValid(const IntVect&   a_ivCoar,
@@ -509,7 +504,7 @@ bool EBGradient::isFiniteDifferenceStencilValid(const IntVect&   a_ivCoar,
   return validStencil;
 }
 
-void EBGradient::defineIteratorsEBCF(const BoxLayoutData<FArrayBox>& a_coarMaskCF, const BoxLayoutData<FArrayBox>& a_coarMaskInvalid){
+void EBGradient::defineIteratorsEBCF(const LevelData<FArrayBox>& a_coarMaskCF, const LevelData<FArrayBox>& a_coarMaskInvalid){
   CH_TIME("EBGradient::defineIteratorsEBCF");
 
   // TLDR: This defines which cells need explicit two-level stencils. We move along the refinement boundary on the coarse
@@ -593,7 +588,7 @@ void EBGradient::defineIteratorsEBCF(const BoxLayoutData<FArrayBox>& a_coarMaskC
     m_bufferDblCoar.define(ebcfBoxes, ebcfRanks);
     refine(m_bufferDblFine, m_bufferDblCoar, m_refRat);
 
-    ebisPtr->fillEBISLayout(m_bufferEBISLCoar, m_bufferDblCoar, domain,  1);
+    ebisPtr->fillEBISLayout(m_bufferEBISLCoar, m_bufferDblCoar, domain,     m_refRat);
     ebisPtr->fillEBISLayout(m_bufferEBISLFine, m_bufferDblFine, domainFine, m_refRat);
 
     m_bufferEBISLCoar.setMaxRefinementRatio(m_refRat, ebisPtr);
@@ -603,76 +598,73 @@ void EBGradient::defineIteratorsEBCF(const BoxLayoutData<FArrayBox>& a_coarMaskC
   }
 }
 
-void EBGradient::defineBuffers(BoxLayoutData<FArrayBox>&       a_bufferCoarMaskCF,
-			       BoxLayoutData<FArrayBox>&       a_bufferCoarMaskInvalid,
-			       const BoxLayoutData<FArrayBox>& a_coarMaskCF,
-			       const BoxLayoutData<FArrayBox>& a_coarMaskInvalid){
+void EBGradient::defineBuffers(LevelData<FArrayBox>&       a_bufferCoarMaskCF,
+			       LevelData<FArrayBox>&       a_bufferCoarMaskInvalid,
+			       const LevelData<FArrayBox>& a_coarMaskCF,
+			       const LevelData<FArrayBox>& a_coarMaskInvalid){
   CH_TIME("EBGradient::defineBuffers");
 
   // TLDR: This routine defines the required buffers for holding data for dual level stencils. We use the input masks for determining
   //       which cells need a least squares stencil. Much of this code simply consists of creating masks that are viewable from the
-  //       buffer grids (rather than m_eblg). 
+  //       buffer grids (rather than m_eblg).
+  const EBIndexSpace* const ebisPtr = m_eblg.getEBIS();  
 
   constexpr Real zero   = 0.0;
   constexpr Real one    = 1.0;
   
   const Interval interv = Interval(m_comp, m_comp);
 
-  const DisjointBoxLayout& dbl        = m_bufferDblCoar;
+  const DisjointBoxLayout& dblCoar    = m_bufferDblCoar;
   const DisjointBoxLayout& dblFine    = m_bufferDblFine;
   
-  const EBISLayout&        ebisl      = m_bufferEBISLCoar;
+  const EBISLayout&        ebislCoar  = m_bufferEBISLCoar;
   const EBISLayout&        ebislFine  = m_bufferEBISLFine;
   
-  const ProblemDomain&     domain     = m_eblg.    getDomain();
+  const ProblemDomain&     domainCoar = m_eblg.    getDomain();
   const ProblemDomain&     domainFine = m_eblgFine.getDomain();
 
-  // We need buffers on this layout
-  Vector<int>      coarRanks = dbl.procIDs();
-  Vector<Box>      coarBoxes = dbl.boxArray();
-  Vector<Box> grownFineBoxes = dbl.boxArray();  
-  Vector<Box> grownCoarBoxes = dbl.boxArray();
-  for (auto& bx : grownCoarBoxes.stdVector()){
-    bx.grow(1);
-  }
+  // Fill a refinement of dblCoar. 
+  DisjointBoxLayout dblFiCo;
+  EBISLayout        ebislFiCo;
 
-  for (auto& bx : grownFineBoxes.stdVector()){
-    bx.grow(1);
-    bx.refine(m_refRat);
-  }  
+  refine(dblFiCo, dblCoar, m_refRat);
+  ebisPtr->fillEBISLayout(ebislFiCo, dblFiCo, domainFine, m_refRat);
 
-  BoxLayout      coarLayout(     coarBoxes, coarRanks);
-  BoxLayout grownCoarLayout(grownCoarBoxes, coarRanks);
-  BoxLayout grownFineLayout(grownFineBoxes, coarRanks);  
+  // Define the buffers and reset them. 
+  a_bufferCoarMaskCF.     define(dblCoar, m_nComp, IntVect::Zero);
+  a_bufferCoarMaskInvalid.define(dblCoar, m_nComp, IntVect::Unit);
 
-  a_bufferCoarMaskCF.     define(     coarLayout, m_nComp);
-  a_bufferCoarMaskInvalid.define(grownCoarLayout, m_nComp);
+  m_bufferCoar.define(dblCoar, m_nComp,          IntVect::Unit, EBCellFactory(ebislCoar));
+  m_bufferFine.define(dblFiCo, m_nComp, m_refRat*IntVect::Unit, EBCellFactory(ebislFiCo));
 
-  m_bufferCoar.define(grownCoarLayout, m_nComp, EBCellFactory(ebisl    ));
-  m_bufferFine.define(grownFineLayout, m_nComp, EBCellFactory(ebislFine));    
-
-  for (DataIterator dit(dbl); dit.ok(); ++dit){
+  for (DataIterator dit(dblCoar); dit.ok(); ++dit){
     a_bufferCoarMaskCF     [dit()].setVal(zero);
     a_bufferCoarMaskInvalid[dit()].setVal(zero);
 
     m_bufferCoar[dit()].setVal(zero);
-    m_bufferFine[dit()].setVal(zero);
+    m_bufferFine[dit()].setVal(zero);    
   }
 
-  // Transfer the masks to the reduced grids.
-  a_coarMaskCF.     addTo(interv, a_bufferCoarMaskCF,      interv, domain);
-  a_coarMaskInvalid.addTo(interv, a_bufferCoarMaskInvalid, interv, domain);
+  // Transfer the masks to the buffer grids.
+  Copier copierCF;     
+  Copier copierInvalid;
 
-  // Define the necessary data on the buffer grids
-  m_bufferIterator.    define(dbl);  
-  m_bufferStencilsFine.define(dbl);  
-  m_bufferStencilsCoar.define(dbl);
+  copierCF.     ghostDefine(m_eblg.getDBL(), dblCoar, m_eblg.getDomain(), a_coarMaskCF.     ghostVect());
+  copierInvalid.ghostDefine(m_eblg.getDBL(), dblCoar, m_eblg.getDomain(), a_coarMaskInvalid.ghostVect());
+  
+  a_coarMaskCF.     copyTo(interv, a_bufferCoarMaskCF,      interv, copierCF, LDaddOp<FArrayBox>());
+  a_coarMaskInvalid.copyTo(interv, a_bufferCoarMaskInvalid, interv, copierCF, LDaddOp<FArrayBox>());
+
+  // Now define storage for iterators and stencils on the buffer grids. 
+  m_bufferIterator.    define(dblCoar);  
+  m_bufferStencilsFine.define(dblCoar);  
+  m_bufferStencilsCoar.define(dblCoar);
 
   // Go through the "buffer" grids and define all cells where we need better stencils.
-  LayoutData<IntVectSet> sets(dbl);
-  for (DataIterator dit(dbl); dit.ok(); ++dit){
-    const Box      cellBox = dbl  [dit()];
-    const EBISBox& ebisBox = ebisl[dit()];
+  LayoutData<IntVectSet> sets(dblCoar);
+  for (DataIterator dit(dblCoar); dit.ok(); ++dit){
+    const Box      cellBox = dblCoar  [dit()];
+    const EBISBox& ebisBox = ebislCoar[dit()];
     const EBGraph& ebgraph = ebisBox.getEBGraph();
 
     IntVectSet& ebcfIVS = sets[dit()];
@@ -698,10 +690,10 @@ void EBGradient::defineBuffers(BoxLayoutData<FArrayBox>&       a_bufferCoarMaskC
   }
 
   // Define storage for gradient
-  m_bufferGradient.define(dbl, SpaceDim, IntVect::Zero, BaseIVFactory<Real>(ebisl, sets));
+  m_bufferGradient.define(dblCoar, SpaceDim, IntVect::Zero, BaseIVFactory<Real>(ebislCoar, sets));
 }
 
-void EBGradient::defineStencilsEBCF(const BoxLayoutData<FArrayBox>& a_bufferCoarMaskInvalid){
+void EBGradient::defineStencilsEBCF(const LevelData<FArrayBox>& a_bufferCoarMaskInvalid){
   CH_TIME("EBGradient::defineStencilsEBCF");
 
   // TLDR: This code iterates through the buffer grids and defines least squares stencils in the
