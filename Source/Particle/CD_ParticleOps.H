@@ -7,7 +7,7 @@
   @file   CD_ParticleOps.H
   @brief  Declaration of a static class containing some common useful particle routines that would otherwise be replicated across classes. 
   @author Robert Marskar
-  @todo   In ebIntersectionRaycast we should check if the path is tangential to the EB. 
+  @todo   In ebIntersectionRaycast we should check if the path is tangential to the EB since that can consume a lot of resources. 
 */
 
 #ifndef CD_ParticleOps_H
