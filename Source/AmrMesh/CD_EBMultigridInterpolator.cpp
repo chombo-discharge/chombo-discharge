@@ -108,7 +108,7 @@ void EBMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>&       a_phi
 					       const Interval              a_variables) {
   CH_TIME("EBMultigridInterpolator::coarseFineInterp");
 
-  CH_assert(m_ghostCF == a_phiFine.ghostVect());
+  CH_assert(m_ghostCF*IntVect::Unit == a_phiFine.ghostVect());
 
   if(a_phiFine.ghostVect() != m_ghostVector){
     MayDay::Error("EBMultigridInterpolator::coarseFineInterp -- number of ghost cells do not match!");
@@ -161,7 +161,7 @@ void EBMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>&       a_phi
 void EBMultigridInterpolator::coarseFineInterpH(LevelData<EBCellFAB>& a_phiFine, const Interval a_variables) const{
   CH_TIME("EBMultigridInterpolator::coarseFineInterpH(LD<EBCellFAB>, Interval)");
 
-  CH_assert(m_ghostCF == a_phiFine.ghostVect());
+  CH_assert(m_ghostCF*IntVect::Unit == a_phiFine.ghostVect());
 
   if(a_phiFine.ghostVect() != m_ghostVector){
     MayDay::Error("EBMultigridInterpolator::coarseFineInterp -- number of ghost cells do not match!");
@@ -217,7 +217,7 @@ void EBMultigridInterpolator::slowCoarseFineInterp(LevelData<EBCellFAB>&       a
 						   const Interval              a_variables){
   CH_TIME("EBMultigridInterpolator::slowCoarseFineInterp");
   
-  CH_assert(m_ghostCF <= a_phiFine.ghostVect());
+  CH_assert(m_ghostCF*IntVect::Unit <= a_phiFine.ghostVect());
 
   // TLDR: This routine does the inhomogeneous coarse-fine interpolation, i.e. the coarse data is not set to zero. 
 
@@ -285,7 +285,7 @@ void EBMultigridInterpolator::slowCoarseFineInterp(LevelData<EBCellFAB>&       a
 void EBMultigridInterpolator::slowCoarseFineInterpH(LevelData<EBCellFAB>& a_phiFine, const Interval a_variables) const{
   CH_TIME("EBMultigridInterpolator::slowCoarseFineInterpH(LD<EBCellFAB>, Interval)");
 
-  CH_assert(m_ghostCF <= a_phiFine.ghostVect());  
+  CH_assert(m_ghostCF*IntVect::Unit <= a_phiFine.ghostVect());  
 
   // TLDR: This routine does the coarse-fine interpolation with the coarse-grid data set to zero. 
   for (DataIterator dit(m_eblgFine.getDBL()); dit.ok(); ++dit){

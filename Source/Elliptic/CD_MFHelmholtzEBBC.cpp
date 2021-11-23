@@ -41,7 +41,7 @@ void MFHelmholtzEBBC::define(){
 void MFHelmholtzEBBC::defineMultiPhase(){
   CH_TIME("MFHelmholtzEBBC::defineMultiPhase()");
 
-  CH_assert(!m_jumpBc.isNull());
+  CH_assert(!m_jumpBC.isNull());
   CH_assert(m_jumpBC->getOrder()  > 0);
   CH_assert(m_jumpBC->getWeight() >= 0);
 

@@ -36,9 +36,9 @@ EBGradient::EBGradient(const EBLevelGrid& a_eblg,
 		       const int          a_weighting){
   CH_TIME("EBGradient::EBGradient");
 
-  CH_assert(a_order    >  0);
-  CH_assert(a_weight   >= 0);  
-  CH_assert(a_refRat%2 == 0);
+  CH_assert(a_order       >  0);
+  CH_assert(a_weighting   >= 0);  
+  CH_assert(a_refRat%2    == 0);
 
   m_eblg         = a_eblg;
   m_eblgFine     = a_eblgFine;
