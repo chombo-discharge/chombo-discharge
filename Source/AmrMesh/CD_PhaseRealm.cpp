@@ -156,10 +156,6 @@ void PhaseRealm::regridOperators(const int a_lmin){
     this->defineEBPWLInterp(a_lmin);
     timer.stopEvent("PWL interp");
 
-    timer.startEvent("MG injection");    
-    this->defineMultigridInjection(a_lmin);
-    timer.stopEvent("MG injection");
-
     timer.startEvent("Flux register");        
     this->defineFluxReg(a_lmin, 1);
     timer.stopEvent("Flux register");
@@ -195,14 +191,6 @@ void PhaseRealm::regridOperators(const int a_lmin){
     timer.startEvent("Particle-mesh");
     this->defineParticleMesh();
     timer.stopEvent("Particle-mesh");    
-
-    timer.startEvent("Copier");            
-    this->defineCopier(a_lmin);
-    timer.stopEvent("Copier");
-
-    timer.startEvent("Ghost cloud");                
-    this->defineGhostCloud(a_lmin);
-    timer.stopEvent("Ghost cloud");
 
     timer.startEvent("Levelset");                    
     this->defineLevelSet(a_lmin, m_numLsfGhostCells);
@@ -531,38 +519,6 @@ void PhaseRealm::defineEBPWLInterp(const int a_lmin){
   }
 }
 
-void PhaseRealm::defineMultigridInjection(const int a_lmin){
-  CH_TIME("PhaseRealm::defineMultigridInjection");
-  if(m_verbose){
-    pout() << "PhaseRealm::defineMultigridInjection" << endl;
-  }
-
-  const bool doThisOperator = this->queryOperator(s_eb_mg_interp);
-
-  m_mgInjection.resize(1 + m_finestLevel);
-
-  if(doThisOperator){
-
-    for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++){
-
-      const bool hasCoar = lvl > 0;
-
-      // Operator for injecting into level l from level l-1 lives on level l
-      if(hasCoar){
-	m_mgInjection[lvl] = RefCountedPtr<EBMGInterp> (new EBMGInterp(m_grids  [lvl  ],
-								       m_grids  [lvl-1],
-								       m_ebisl  [lvl  ],
-								       m_ebisl  [lvl-1],
-								       m_domains[lvl-1],
-								       m_refinementRatios[lvl-1],
-								       SpaceDim,
-								       &(*m_ebis),
-								       m_numGhostCells*IntVect::Unit));
-      }
-    }
-  }
-}
-
 void PhaseRealm::defineFluxReg(const int a_lmin, const int a_regsize){
   CH_TIME("PhaseRealm::defineFluxReg");
   if(m_verbose){
@@ -825,62 +781,6 @@ void PhaseRealm::defineGradSten(const int a_lmin){
   }
 }
 
-void PhaseRealm::defineCopier(const int a_lmin){
-  CH_TIME("PhaseRealm::defineCopier");
-  if(m_verbose){
-    pout() << "PhaseRealm::defineCopier" << endl;
-  }
-
-  const bool doThisOperator = this->queryOperator(s_eb_copier);
-
-  m_copier.       resize(1 + m_finestLevel);
-  m_reverseCopier.resize(1 + m_finestLevel);
-
-  if(doThisOperator){
-    
-    for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++){
-      m_copier[lvl] = RefCountedPtr<Copier> (new Copier(m_grids  [lvl],
-							m_grids  [lvl],
-							m_domains[lvl],
-							m_numGhostCells*IntVect::Unit,
-							true));
-      
-      m_reverseCopier[lvl] = RefCountedPtr<Copier> (new Copier(m_grids  [lvl],
-							       m_grids  [lvl],
-							       m_domains[lvl],
-							       m_numGhostCells*IntVect::Unit,
-							       true));
-      m_reverseCopier[lvl]->reverse();
-    }
-  }
-}
-
-
-void PhaseRealm::defineGhostCloud(const int a_lmin){
-  CH_TIME("PhaseRealm::defineGhostCloud");
-  if(m_verbose){
-    pout() << "PhaseRealm::defineGhostCloud" << endl;
-  }
-
-  const bool doThisOperator = this->queryOperator(s_eb_copier);
-
-  m_ebCoarseFineParticleMesh.resize(1 + m_finestLevel);
-
-  if(doThisOperator){
-    for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++){
-      const bool hasCoar = lvl > 0;
-
-      if(hasCoar){
-	m_ebCoarseFineParticleMesh[lvl] = RefCountedPtr<EBCoarseFineParticleMesh> (new EBCoarseFineParticleMesh(*m_eblg  [lvl-1],
-														*m_eblg  [lvl  ],
-														m_refinementRatios[lvl-1],
-														m_numGhostCells*IntVect::Unit));
-      }
-    }
-  }
-}
-
-
 void PhaseRealm::defineIrregSten(){
   CH_TIME("PhaseRealm::defineIrregSten");
   if(m_verbose){
@@ -1010,14 +910,6 @@ Vector<RefCountedPtr<EbCoarAve> >& PhaseRealm::getCoarseAverage() const {
   return m_coarAve;
 }
 
-Vector<RefCountedPtr<EBCoarseFineParticleMesh> >& PhaseRealm::getEBCoarseFineParticleMesh() const {
-  if(!this->queryOperator(s_eb_ghostcloud)) {
-    MayDay::Error("PhaseRealm::getEBCoarseFineParticleMesh - operator not registered!");
-  }
-  
-  return m_ebCoarseFineParticleMesh;
-}
-
 Vector<RefCountedPtr<EBMultigridInterpolator> >& PhaseRealm::getMultigridInterpolator() const {
   if(!this->queryOperator(s_eb_multigrid)) {
     MayDay::Error("PhaseRealm::getEBMultigridInterpolator - operator not registered!");
@@ -1040,14 +932,6 @@ Vector<RefCountedPtr<EBPWLFineInterp> >& PhaseRealm::getPwlInterpolator() const 
   }
   
   return m_pwlInterpGhosts;
-}
-
-Vector<RefCountedPtr<EBMGInterp> >& PhaseRealm::getEBMGInterp() const {
-  if(!this->queryOperator(s_eb_mg_interp)) {
-    MayDay::Error("PhaseRealm::getEBMGInterp - operator not registered!");
-  }
-  
-  return m_mgInjection;
 }
 
 Vector<RefCountedPtr<EBFluxRegister> >&  PhaseRealm::getFluxRegister() const {
@@ -1088,22 +972,6 @@ Vector<RefCountedPtr<EBFineToCoarRedist> >&  PhaseRealm::getFineToCoarRedist() c
   }
 
   return m_fineToCoarRedist;
-}
-
-Vector<RefCountedPtr<Copier> >& PhaseRealm::getCopier() const {
-  if(!this->queryOperator(s_eb_copier)) {
-    MayDay::Error("PhaseRealm::getCopier - operator not registered!");
-  }
-
-  return m_copier;
-}
-
-Vector<RefCountedPtr<Copier> >& PhaseRealm::getReverseCopier() const {
-  if(!this->queryOperator(s_eb_copier)) {
-    MayDay::Error("PhaseRealm::getReverseCopier - operator not registered!");
-  }
-  
-  return m_reverseCopier;
 }
 
 EBAMRParticleMesh& PhaseRealm::getParticleMesh() const {

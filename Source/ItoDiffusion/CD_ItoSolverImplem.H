@@ -140,7 +140,6 @@ void ItoSolver::depositKappaConservative(EBAMRCellData&               a_phi,
     else{
       this->depositKappaConservativeNoPVR_native(a_phi, a_particles, a_deposition);
     }
-
   }
 }
 
@@ -153,62 +152,7 @@ void ItoSolver::depositKappaConservativeWithPVR(EBAMRCellData&               a_p
     pout() << m_name + "::depositKappaConservativeWithPVR" << endl;
   }
 
-#if 1 // new code
-  //  m_amr->depositParticles<ItoParticle, &ItoParticle::mass>(a_phi, m_realm, m_phase, a_particles, a_deposition, CoarseFineDeposition::PVR, m_irreg_ngp_deposition);
   m_amr->depositParticles<T, &T::mass>(a_phi, m_realm, m_phase, a_particles, a_deposition, CoarseFineDeposition::PVR, m_irreg_ngp_deposition);  
-#else
-  const int comp = 0;
-  const Interval interv(comp, comp);
-
-  const RealVect origin  = m_amr->getProbLo();
-  const int finest_level = m_amr->getFinestLevel();
-
-  DataOps::setValue(a_phi,    0.0);
-  DataOps::setValue(m_scratch,  0.0);
-
-  const AMRParticles<T>& particles      = a_particles.getParticles();
-  const AMRParticles<T>& halo_particles = a_particles.getMaskParticles();
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    const Real dx                = m_amr->getDx()[lvl];
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    const ProblemDomain& dom     = m_amr->getDomains()[lvl];
-    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-    const RefCountedPtr<EBLevelGrid>& eblg = m_amr->getEBLevelGrid(m_realm, m_phase)[lvl];
-
-    const bool has_coar = (lvl > 0);
-    const bool has_fine = (lvl < finest_level);
-
-    // 1. If we have a coarser level whose cloud extends beneath this level, interpolate that result here first. 
-    if(has_coar){
-      RefCountedPtr<EBMGInterp>& interp = m_amr->getEBMGInterp(m_realm, m_phase)[lvl];
-      interp->pwcInterp(*a_phi[lvl], *m_scratch[lvl-1], interv);
-    }
-
-    // 2. Deposit this levels particles. Note that this will deposit into ghost cells, which must later
-    //    be added to neighboring patches
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const Box box          = dbl.get(dit());
-      const EBISBox& ebisbox = ebisl[dit()];
-      EBParticleMesh interp(box, ebisbox, dx*RealVect::Unit, origin);
-      interp.deposit<ItoParticle, &ItoParticle::mass>((*particles[lvl])[dit()].listItems(), (*a_phi[lvl])[dit()], m_deposition, m_irreg_ngp_deposition);      
-    }
-
-    // This code adds contributions from ghost cells into the valid region
-    const RefCountedPtr<Copier>& reversecopier = m_amr->getReverseCopier(m_realm, m_phase)[lvl];
-    LDaddOp<FArrayBox> addOp;
-    LevelData<FArrayBox> aliasFAB;
-    aliasEB(aliasFAB, *a_phi[lvl]);
-    aliasFAB.exchange(Interval(0,0), *reversecopier, addOp);
-
-    // 3. If we have a finer level, copy contributions from this level to the temporary holder that is used for
-    //    interpolation of "hanging clouds"
-    if(has_fine){
-      a_phi[lvl]->localCopyTo(*m_scratch[lvl]);
-    }
-  }
-
-#endif
 }
 
 template <class T>
@@ -219,97 +163,13 @@ void ItoSolver::depositKappaConservativeNoPVR_native(EBAMRCellData&             
   if(m_verbosity > 5){
     pout() << m_name + "::depositKappaConservativeNoPVR_native" << endl;
   }
-#if 1
+
   const AMRMask& mask = m_amr->getMask(s_particle_halo, m_halo_buffer, m_realm);
   a_particles.copyMaskParticles(mask);
   
   m_amr->depositParticles<T, &T::mass>(a_phi, m_realm, m_phase, a_particles, a_deposition, CoarseFineDeposition::Halo, m_irreg_ngp_deposition);
 
   a_particles.clearMaskParticles();  
-#else
-
-  const int comp = 0;
-  const Interval interv(comp, comp);
-
-  const RealVect origin  = m_amr->getProbLo();
-  const int finest_level = m_amr->getFinestLevel();
-
-  DataOps::setValue(a_phi,    0.0);
-
-  //  const EBAMRBool& mask = m_amr->getMask(s_particle_halo, m_halo_buffer, m_realm);
-  const AMRMask& mask = m_amr->getMask(s_particle_halo, m_halo_buffer, m_realm);
-  a_particles.copyMaskParticles(mask);
-    
-  const AMRParticles<T>& particles          = a_particles.getParticles();
-  const AMRParticles<T>& halo_particles     = a_particles.getMaskParticles();
-  const AMRParticles<T>& non_halo_particles = a_particles.getNonMaskParticles();
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    const Real dx                = m_amr->getDx()[lvl];
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    const ProblemDomain& dom     = m_amr->getDomains()[lvl];
-    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-
-    const bool has_coar = (lvl > 0);
-    const bool has_fine = (lvl < finest_level);
-
-    // 1. Deposit this levels particles. Note that this will deposit into ghost cells. 
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const Box box          = dbl.get(dit());
-      const EBISBox& ebisbox = ebisl[dit()];
-      EBParticleMesh interp(box, ebisbox, dx*RealVect::Unit, origin);
-      interp.deposit<ItoParticle, &ItoParticle::mass>((*particles[lvl])[dit()].listItems(), (*a_phi[lvl])[dit()], m_deposition, m_irreg_ngp_deposition);      
-    }
-
-    // 2. Exchange ghost cells on this level. 
-    const RefCountedPtr<Copier>& reversecopier = m_amr->getReverseCopier(m_realm, m_phase)[lvl];
-    LDaddOp<FArrayBox> addOp;
-    LevelData<FArrayBox> aliasFAB;
-    aliasEB(aliasFAB, *a_phi[lvl]);
-    aliasFAB.exchange(Interval(0,0), *reversecopier, addOp);
-
-    // 3. Deposition into ghost cells across the fine boundary should end up on the coarse level. Add that
-    //    mass to the coarse level right now. 
-    if(has_coar) {
-      EBCoarseFineParticleMesh& ghostcloud = *(m_amr->getEBCoarseFineParticleMesh(m_realm, m_phase)[lvl]);
-      ghostcloud.addFineGhostsToCoarse(*a_phi[lvl-1], *a_phi[lvl]);
-    }
-
-    // 4. The particles on the coarse side of the refinement boundary should deposit onto this level.
-    //    The halo particles have been copied, and we run a special deposition procedure here to ensure
-    //    that the mass ends up on the fine level. 
-    if(has_coar){
-      const int refRat = m_amr->getRefinementRatios()[lvl-1];
-      EBCoarseFineParticleMesh& ghostcloud         = *(m_amr->getEBCoarseFineParticleMesh(m_realm, m_phase)[lvl]);
-      LevelData<EBCellFAB>& buffer = ghostcloud.getFiCoBuffer();
-      const EBLevelGrid& eblgFiCo      = ghostcloud.getEblgFiCo();
-      
-      for (DataIterator dit = buffer.dataIterator(); dit.ok(); ++dit){
-	const Box box = buffer.box(dit());
-	const EBISBox& ebisbox = eblgFiCo.getEBISL()[dit()];
-
-	buffer[dit()].setVal(0.0);
-	EBParticleMesh interp(box, ebisbox, dx*RealVect::Unit, origin);
-
-	if(refRat == 2){
-	  interp.deposit2<ItoParticle, &ItoParticle::mass>((*halo_particles[lvl-1])[dit()].listItems(), buffer[dit()], m_deposition, m_irreg_ngp_deposition);
-	}
-	else if (refRat == 4){
-	  interp.deposit4<ItoParticle, &ItoParticle::mass>((*halo_particles[lvl-1])[dit()].listItems(), buffer[dit()], m_deposition, m_irreg_ngp_deposition);	  
-	}
-	else{
-	  MayDay::Abort("ItoSolverI::depositKappaConservativeNoPVR - logic bust");
-	}
-      }
-
-      // Add the result of halo particle depositions to the fine level. 
-      ghostcloud.addFiCoDataToFine(*a_phi[lvl], buffer);
-    }
-  }
-
-  // Clear halo and non-halo particles
-  a_particles.clearMaskParticles();
-#endif
 }
 
 template <class T>
@@ -321,7 +181,6 @@ void ItoSolver::depositKappaConservativeNoPVR_NGP(EBAMRCellData&               a
     pout() << m_name + "::depositKappaConservativeNoPVR_NGP" << endl;
   }
 
-#if 1
   const AMRMask& mask = m_amr->getMask(s_particle_halo, m_halo_buffer, m_realm);
 
   a_particles.copyMaskParticles(mask);
@@ -331,66 +190,6 @@ void ItoSolver::depositKappaConservativeNoPVR_NGP(EBAMRCellData&               a
   
   a_particles.clearMaskParticles();
   a_particles.clearNonMaskParticles();  
-#else
-  const int comp = 0;
-  const Interval interv(comp, comp);
-
-  const RealVect origin  = m_amr->getProbLo();
-  const int finest_level = m_amr->getFinestLevel();
-
-  DataOps::setValue(a_phi,    0.0);
-
-  const AMRMask& mask = m_amr->getMask(s_particle_halo, m_halo_buffer, m_realm);
-
-  a_particles.copyMaskParticles(mask);
-  a_particles.copyNonMaskParticles(mask);
-    
-  const AMRParticles<T>& particles          = a_particles.getParticles();
-  const AMRParticles<T>& halo_particles     = a_particles.getMaskParticles();
-  const AMRParticles<T>& non_halo_particles = a_particles.getNonMaskParticles(); 
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    const Real dx                = m_amr->getDx()[lvl];
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    const ProblemDomain& dom     = m_amr->getDomains()[lvl];
-    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-
-    const bool has_coar = (lvl > 0);
-    const bool has_fine = (lvl < finest_level);
-
-    // 1. Deposit "internal particles" with the desired deposition scheme. 
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const Box box          = dbl.get(dit());
-      const EBISBox& ebisbox = ebisl[dit()];
-      EBParticleMesh interp(box, ebisbox, dx*RealVect::Unit, origin);
-      interp.deposit<ItoParticle, &ItoParticle::mass>((*non_halo_particles[lvl])[dit()].listItems(), (*a_phi[lvl])[dit()], m_deposition, m_irreg_ngp_deposition);    }
-
-    // 2. Deposition into ghost cells across the fine boundary should end up on the coarse level. 
-    if(has_coar) {
-      EBCoarseFineParticleMesh& ghostcloud = *(m_amr->getEBCoarseFineParticleMesh(m_realm, m_phase)[lvl]);
-      ghostcloud.addFineGhostsToCoarse(*a_phi[lvl-1], *a_phi[lvl]);
-    }
-
-    // 3. Exchange ghost cells on this level. 
-    const RefCountedPtr<Copier>& reversecopier = m_amr->getReverseCopier(m_realm, m_phase)[lvl];
-    LDaddOp<FArrayBox> addOp;
-    LevelData<FArrayBox> aliasFAB;
-    aliasEB(aliasFAB, *a_phi[lvl]);
-    aliasFAB.exchange(Interval(0,0), *reversecopier, addOp);
-
-    // 4. Deposit particles in the halo with an NGP method
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const Box box          = dbl.get(dit());
-      const EBISBox& ebisbox = ebisl[dit()];
-      EBParticleMesh interp(box, ebisbox, dx*RealVect::Unit, origin);
-      interp.deposit<ItoParticle, &ItoParticle::mass>((*halo_particles[lvl])[dit()].listItems(), (*a_phi[lvl])[dit()], DepositionType::NGP, m_irreg_ngp_deposition);      
-    }    
-  }
-
-  // Clear halo and non-halo particles
-  a_particles.clearMaskParticles();
-  a_particles.clearNonMaskParticles();
-#endif
 }
 
 #include <CD_NamespaceFooter.H>

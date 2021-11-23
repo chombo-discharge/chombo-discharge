@@ -259,12 +259,6 @@ public:
   Vector<RefCountedPtr<EbCoarAve> >& getCoarseAverage(const phase::which_phase a_phase);
 
   /*!
-    @brief Get deposition operator (for hanging clouds functionality)
-    @param[in] a_phase Phase
-  */
-  Vector<RefCountedPtr<EBCoarseFineParticleMesh> >& getEBCoarseFineParticleMesh(const phase::which_phase a_phase);
-
-  /*!
     @brief Get the multigrid interpolator
     @param[in] a_phase Phase
   */
@@ -295,12 +289,6 @@ public:
   Vector<RefCountedPtr<EBPWLFineInterp> >& getPwlInterpolator(const phase::which_phase a_phase);
 
   /*!
-    @brief Get multigrid injection utility
-    @param[in] a_phase Phase
-  */
-  Vector<RefCountedPtr<EBMGInterp> >& getEBMGInterp(const phase::which_phase a_phase);
-
-  /*!
     @brief Get flux register utility
     @param[in] a_phase Phase
   */
@@ -329,18 +317,6 @@ public:
     @param[in] a_phase Phase
   */
   Vector<RefCountedPtr<EBFineToCoarRedist> >&  getFineToCoarRedist(const phase::which_phase a_phase);
-
-  /*!
-    @brief Get copier
-    @param[in] a_phase Phase
-  */
-  Vector<RefCountedPtr<Copier> >& getCopier(const phase::which_phase a_phase);
-
-  /*!
-    @brief Get reverse copier
-    @param[in] a_phase Phase
-  */
-  Vector<RefCountedPtr<Copier> >& getReverseCopier(const phase::which_phase a_phase);
 
   /*!
     @brief Get level-set function

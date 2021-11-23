@@ -36,7 +36,6 @@
 #include <CD_DomainFluxIFFAB.H>
 #include <CD_DomainFluxIFFABFactory.H>
 #include <CD_ParticleContainer.H>
-#include <CD_EBCoarseFineParticleMesh.H>
 #include <CD_EBMultigridInterpolator.H>
 #include <CD_EBGradient.H>
 #include <CD_EBAMRParticleMesh.H>
@@ -287,11 +286,6 @@ public:
   Vector<RefCountedPtr<EBPWLFineInterp> >& getPwlInterpolator() const;
 
   /*!
-    @brief Get multigrid injection utility
-  */
-  Vector<RefCountedPtr<EBMGInterp> >& getEBMGInterp() const;
-
-  /*!
     @brief Get flux register utility
   */
   Vector<RefCountedPtr<EBFluxRegister> >&  getFluxRegister() const;
@@ -315,16 +309,6 @@ public:
     @brief Get fine-to-coarse redistribution utility
   */
   Vector<RefCountedPtr<EBFineToCoarRedist> >&  getFineToCoarRedist() const;
-
-  /*!
-    @brief Get copier
-  */
-  Vector<RefCountedPtr<Copier> >& getCopier() const;
-
-  /*!
-    @brieg Get reverse copier
-  */
-  Vector<RefCountedPtr<Copier> >& getReverseCopier() const;
 
   /*!
     @brief Get level-set function
@@ -468,25 +452,10 @@ protected:
   */
   mutable Vector<RefCountedPtr<LayoutData<VoFIterator> > > m_vofIter;
 
-  /*! 
-    @brief Copier
-  */
-  mutable Vector<RefCountedPtr<Copier> > m_copier;
-
-  /*! 
-    @brief Reverse copier
-  */
-  mutable Vector<RefCountedPtr<Copier> > m_reverseCopier;
-
   /*!
     @brief Coarsening operator
   */
   mutable Vector<RefCountedPtr<EbCoarAve> > m_coarAve;
-
-  /*!
-    @brief Operator for hanging particle deposition clouds
-  */
-  mutable Vector<RefCountedPtr<EBCoarseFineParticleMesh> > m_ebCoarseFineParticleMesh;
 
   /*!
     @brief Multigrid interpolation utility
@@ -502,11 +471,6 @@ protected:
     @brief Ghost cell interpolation utility
   */
   mutable Vector<RefCountedPtr<EBPWLFineInterp> > m_pwlInterpGhosts;
-
-  /*!
-    @brief Multigrid injection utility
-  */
-  mutable Vector<RefCountedPtr<EBMGInterp> > m_mgInjection;
 
   /*!
     @brief Flux register utility
@@ -646,18 +610,6 @@ protected:
     @param[in] a_lmin Coarsest grid level that changes
   */  
   void defineGradSten(const int a_lmin);
-
-  /*!
-    @brief Define copier
-    @param[in] a_lmin Coarsest grid level that changes
-  */  
-  void defineCopier(const int a_lmin);
-
-  /*!
-    @brief Define particle deposition "hanging clouds" utility
-    @param[in] a_lmin Coarsest grid level that changes
-  */  
-  void defineGhostCloud(const int a_lmin);
 
   /*!
     @brief Define data recentering stencils

@@ -441,10 +441,6 @@ Vector<RefCountedPtr<EbCoarAve> >& Realm::getCoarseAverage(const phase::which_ph
   return m_realms[a_phase]->getCoarseAverage();
 }
 
-Vector<RefCountedPtr<EBCoarseFineParticleMesh> >& Realm::getEBCoarseFineParticleMesh(const phase::which_phase a_phase){
-  return m_realms[a_phase]->getEBCoarseFineParticleMesh();
-}
-
 EBAMRParticleMesh& Realm::getParticleMesh(const phase::which_phase a_phase){
   return m_realms[a_phase]->getParticleMesh();
 }
@@ -465,10 +461,6 @@ Vector<RefCountedPtr<EBPWLFineInterp> >& Realm::getPwlInterpolator(const phase::
   return m_realms[a_phase]->getPwlInterpolator();
 }
 
-Vector<RefCountedPtr<EBMGInterp> >& Realm::getEBMGInterp(const phase::which_phase a_phase){
-  return m_realms[a_phase]->getEBMGInterp();
-}
-
 Vector<RefCountedPtr<EBFluxRegister> >&  Realm::getFluxRegister(const phase::which_phase a_phase){
   return m_realms[a_phase]->getFluxRegister();
 }
@@ -487,14 +479,6 @@ Vector<RefCountedPtr<EBCoarToCoarRedist> >&  Realm::getCoarToCoarRedist(const ph
 
 Vector<RefCountedPtr<EBFineToCoarRedist> >&  Realm::getFineToCoarRedist(const phase::which_phase a_phase){
   return m_realms[a_phase]->getFineToCoarRedist();
-}
-
-Vector<RefCountedPtr<Copier> >& Realm::getCopier(const phase::which_phase a_phase){
-  return m_realms[a_phase]->getCopier();
-}
-
-Vector<RefCountedPtr<Copier> >& Realm::getReverseCopier(const phase::which_phase a_phase){
-  return m_realms[a_phase]->getReverseCopier();
 }
 
 const EBAMRFAB& Realm::getLevelset(const phase::which_phase a_phase) const {

@@ -36,7 +36,6 @@
 #include <CD_DomainFluxIFFAB.H>
 #include <CD_DomainFluxIFFABFactory.H>
 #include <CD_ParticleContainer.H>
-#include <CD_EBCoarseFineParticleMesh.H>
 #include <CD_NonConservativeDivergenceStencil.H>
 #include <CD_Realm.H>
 #include <CD_LoadBalancing.H>
@@ -1015,13 +1014,6 @@ public:
   Vector<RefCountedPtr<EbCoarAve> >& getCoarseAverage(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
-    @brief Get the ghost cloud particle magic
-    @param[in] a_realm Realm name
-    @param[in] a_phase Phase (gas or solid)
-  */
-  Vector<RefCountedPtr<EBCoarseFineParticleMesh> >& getEBCoarseFineParticleMesh(const std::string a_realm, const phase::which_phase a_phase) const;
-
-  /*!
     @brief Get multigrid interpolation utility
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
@@ -1041,13 +1033,6 @@ public:
     @param[in] a_phase Phase (gas or solid)
   */
   Vector<RefCountedPtr<EBPWLFineInterp> >& getPwlInterpolator(const std::string a_realm, const phase::which_phase a_phase) const;
-
-  /*!
-    @brief Get interpolator 
-    @param[in] a_realm Realm name
-    @param[in] a_phase Phase (gas or solid)
-  */
-  Vector<RefCountedPtr<EBMGInterp> >& getEBMGInterp(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get flux register
@@ -1105,20 +1090,6 @@ public:
     @param[in] a_phase Phase (gas or solid)
   */
   const IrregAmrStencil<NonConservativeDivergenceStencil>& getNonConservativeDivergenceStencils(const std::string a_realm, const phase::which_phase a_phase) const;
-
-  /*!
-    @brief Get copier
-    @param[in] a_realm Realm name
-    @param[in] a_phase Phase (gas or solid)
-  */
-  Vector<RefCountedPtr<Copier> >& getCopier(const std::string a_realm, const phase::which_phase a_phase) const;
-
-  /*!
-    @brief Get reverse copier
-    @param[in] a_realm Realm name
-    @param[in] a_phase Phase (gas or solid)
-  */
-  Vector<RefCountedPtr<Copier> >& getReverseCopier(const std::string a_realm, const phase::which_phase a_phase) const;
 
   /*!
     @brief Get the name of all Realms
