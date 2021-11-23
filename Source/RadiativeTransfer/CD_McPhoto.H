@@ -172,21 +172,10 @@ public:
     @param[out] a_phi        Deposited mesh density
     @param[in]  a_photons    Computational photons to be deposited
     @param[in]  a_deposition Deposition method
-    @note Calls the other version
   */
   virtual void depositPhotons(EBAMRCellData&                   a_phi,
 			      const ParticleContainer<Photon>& a_particles,
 			      const DepositionType&            a_deposition);
-
-  /*!
-    @brief Deposit on the mesh. 
-    @param[out] a_phi        Deposited mesh density
-    @param[in]  a_photons    Computational photons to be deposited
-    @param[in]  a_deposition Deposition method
-  */
-  virtual void depositPhotons(EBAMRCellData&               a_phi,
-			      const AMRParticles<Photon>&  a_photons,
-			      const DepositionType&        a_deposition);
 
   /*!
     @brief Sort container by cell
@@ -439,7 +428,7 @@ protected:
   /*!
     @brief If true, the NUMBER of of Photons will be deposited in each cell
   */
-  bool m_depositNumberse;
+  bool m_depositNumber;
 
   /*!
     @brief Switch for plotting numbers or densities
@@ -629,9 +618,9 @@ protected:
     @param[in] a_particles  Particles to be deposited
     @param[in] a_deposition Deposition method
   */
-  void depositKappaConservative(EBAMRCellData&              a_phi,
-				const AMRParticles<Photon>& a_particles,
-				const DepositionType        a_deposition);
+  void depositKappaConservative(EBAMRCellData&                   a_phi,
+				const ParticleContainer<Photon>& a_particles,
+				const DepositionType             a_deposition);
 
   /*!
     @brief Make the "non-conservative" kappa deposition
