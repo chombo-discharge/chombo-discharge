@@ -1114,6 +1114,18 @@ void ParticleContainer<P>::copyNonMaskParticles(const Vector<RefCountedPtr<Level
     if(!a_mask[lvl].isNull()){      
       this->copyNonMaskParticles(lvl, *a_mask[lvl]);
     }
+    else{ // Copy all the particles if the input mask had nullptr. 
+      m_nonMaskParticles[lvl]->clear();
+
+      for (DataIterator dit(m_grids[lvl]); dit.ok(); ++dit){
+	const List<P>& particles        = (*m_particles       [lvl])[dit()].listItems(); // These are all particles.
+	List<P>&       nonMaskParticles = (*m_nonMaskParticles[lvl])[dit()].listItems(); // Particle data holder we want to copy into.
+	
+	for (ListIterator<P> lit(particles); lit.ok(); ++lit){
+	  nonMaskParticles.add(lit());
+	}
+      }
+    }
   }
 }
 

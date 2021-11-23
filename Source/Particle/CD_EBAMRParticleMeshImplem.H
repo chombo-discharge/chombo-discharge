@@ -38,6 +38,9 @@ void EBAMRParticleMesh::deposit(EBAMRCellData&              a_meshData,
     break;
   case CoarseFineDeposition::Halo:
     EBAMRParticleMesh::depositHalo<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);    
+    break;
+  case CoarseFineDeposition::HaloNGP:
+    EBAMRParticleMesh::depositHaloNGP<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);    
     break;    
   default:
     MayDay::Error("EBAMRParticleMesh::deposit(scalar) - logic bust");
@@ -202,6 +205,61 @@ void EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       m_coarseFinePM[lvl]->addFiCoDataToFine(*a_meshData[lvl], bufferFiCo);
     }
   }
+}
+
+template <class P, const Real&(P::*particleScalarField)() const>
+void EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
+				       const ParticleContainer<P>& a_particles,
+				       const DepositionType        a_depositionType,
+				       const bool                  a_forceIrregNGP) {
+  CH_TIME("EBAMRParticleMesh::depositHaloNGP");
+
+  CH_assert(a_meshData[0]->nComp() == 1);
+
+  // TLDR: On each level the particles are deposited as usual. This routine permits particles to live right next to the refinement boundary
+  //       so both the coarse-level and fine-level particles have clouds that hang into the fine/coarse level. The way we handle this is as follows:
+  //       The fine-level particles will have deposited into ghost cells that lie around the refinement boundary. This mass is put on the coarse grid.
+  //       On the coarse level the particles have clouds that extend beneath the fine grid. Instead of interpolating this mass to the fine grid we
+  //       run a special deposition procedure which allows us to deposit directly on the fine grid using 2x or 4x the particle width (depending on the
+  //       refinement ratio).
+
+  DataOps::setValue(a_meshData, 0.0);
+  
+  const Interval interv(0,0);
+
+  const AMRParticles<P>& nonHaloParticles = a_particles.getNonMaskParticles(); // These will get deposited with the 'a_depositionType' scheme
+  const AMRParticles<P>&    haloParticles = a_particles.getMaskParticles   (); // These will get deposited with an NGP scheme
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++){
+    const DisjointBoxLayout& dbl   = m_eblgs[lvl]->getDBL   ();
+    const EBISLayout&        ebisl = m_eblgs[lvl]->getEBISL ();
+
+    const bool hasCoar = (lvl > 0);
+
+    // 1. Deposit particles on this level.
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      const Box      cellBox = dbl  [dit()];
+      const EBISBox& ebisBox = ebisl[dit()];
+
+      EBCellFAB&        meshData       = (*a_meshData      [lvl])[dit()];
+      const ListBox<P>& particlesCloud = (*nonHaloParticles[lvl])[dit()];
+      const ListBox<P>& particlesNGP   = (*   haloParticles[lvl])[dit()];      
+
+      // Note: EBParticleMesh construction is cheap.
+      EBParticleMesh interp(cellBox, ebisBox, m_dx[lvl]*RealVect::Unit, m_probLo);
+
+      interp.deposit<P, particleScalarField> (particlesCloud.listItems(), meshData, a_depositionType,    a_forceIrregNGP);
+      interp.deposit<P, particleScalarField> (particlesNGP.  listItems(), meshData, DepositionType::NGP, a_forceIrregNGP);      
+    }
+
+    // 2. Exchange ghost data on this level.
+    a_meshData[lvl]->exchange(interv, m_levelCopiers[lvl], EBAddOp());
+    
+    // 3. Deposition into ghost cells across the refinement boundary should end up to the coarse level. Add that mass right now.
+    if(hasCoar){
+      m_coarseFinePM[lvl]->addFineGhostsToCoarse(*a_meshData[lvl-1], *a_meshData[lvl]);
+    }
+  }  
 }
 
 template <class P, Real&(P::*particleScalarField)()>
