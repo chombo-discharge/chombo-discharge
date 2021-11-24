@@ -72,12 +72,12 @@ EBGradient::EBGradient(const EBLevelGrid& a_eblg,
   timer.stopEvent("Define level stencils");
 
   // If there's finer level there might also be an EBCF crossing. Those can be tricky to deal with because
-  // the stencil on this level might reach underneath the finer level and obtain bogus data. This loop defines
-  // a few masks for figuring out which cells lie on the CF region, and which cells can't be used for finite
-  // differencing. Once those masks have been defined, we iterate through them and see if there are cells
+  // the stencil on this level (i.e., the coarse level) might reach underneath the finer level and obtain bogus data.
+  // This loop defines a few masks for figuring out which cells lie on the CF region, and which cells can't be used
+  // for finite differencing. Once those masks have been defined, we iterate through them and see if there are cells
   // where we can't find good stencils. If we do find such cells, we trigger m_hasEBCF which will define
   // a new set of grids where we run a least squares procedure. THOSE stencils are "dual-level" stencils
-  // that only reach into valid regions (i.e., not covered by a finer grid level). 
+  // that ONLY reach into valid regions (i.e., not covered by a finer grid level). 
   if(m_hasFine && !forceNoEBCF) {
 
     // Masks with transient lifetimes. 
@@ -86,33 +86,26 @@ EBGradient::EBGradient(const EBLevelGrid& a_eblg,
 
     // Define masks on the input grids. 
     timer.startEvent("EBCF masks");
-    pout() << "starting masks 1" << endl;
     this->defineMasks(coarMaskCF, coarMaskInvalid);
-    pout() << "done mask def 1" << endl;
     timer.stopEvent("EBCF masks");
 
     // Define iterators for the input grid AND define the simplified buffer grids. 
     timer.startEvent("EBCF Iterators");
     this->defineIteratorsEBCF(coarMaskCF, coarMaskInvalid);
-    pout() << "done iterators" << endl;    
     timer.stopEvent("EBCF Iterators");
 
     if(m_hasEBCF){
-
       LevelData<FArrayBox> bufferCoarMaskCF;
       LevelData<FArrayBox> bufferCoarMaskInvalid;
     
       timer.startEvent("EBCF buffers");
       this->defineBuffers(bufferCoarMaskCF, bufferCoarMaskInvalid, coarMaskCF, coarMaskInvalid);
-      pout() << "done buffers" << endl;          
       timer.stopEvent("EBCF buffers");            
 
       timer.startEvent("EBCF stencils");
       this->defineStencilsEBCF(bufferCoarMaskInvalid);
-      pout() << "done stencils EBCF" << endl;                
       timer.stopEvent("EBCF stencils");
     }
-
   }
 
   if(profile){
@@ -468,7 +461,8 @@ bool EBGradient::isFiniteDifferenceStencilValid(const IntVect&   a_ivCoar,
   CH_TIME("EBGradient::isFiniteDifferenceStencilValid");
 
   // TLDR: Routine which checks if a finite difference stencil is "valid" in the sense that
-  //       it does not reach into cut-cells in invalid regions. 
+  //       it does not reach into cut-cells in invalid regions. That is, the stencil is not allowed to reach
+  //       into coarse-grid cut-cells that lie underneath the fine grid. 
 
   constexpr Real zero = 0.0;
 
