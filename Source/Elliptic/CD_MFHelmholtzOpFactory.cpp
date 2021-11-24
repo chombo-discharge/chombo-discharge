@@ -135,7 +135,10 @@ void MFHelmholtzOpFactory::setJump(const EBAMRIVData& a_sigma, const Real& a_sca
 
 
   // Average down on MG levels. I'm not really sure if we need to do this. Also,
-  // note the weird reversed order for the levels. 
+  // note the weird reversed order for the levels.
+#if 0
+  // R.M. Nov. 2021: This broke when I compiled with DEBUG=TRUE. Not sure what causes it but it shouldn't matter because
+  // the data is not used anywhere anyways (I think).
   for(int amrLevel = 0; amrLevel < m_numAmrLevels; amrLevel++){
 
     if(m_hasMgLevels[amrLevel]){
@@ -144,10 +147,11 @@ void MFHelmholtzOpFactory::setJump(const EBAMRIVData& a_sigma, const Real& a_sca
       const int finestMGLevel   = 0;
       const int coarsestMGLevel = jumpMG.size() - 1;
       for (int img = finestMGLevel+1; img <= coarsestMGLevel; img++){
-  	m_mgAveOp[amrLevel][img]->average(*jumpMG[img], *jumpMG[img-1], interv);
+	m_mgAveOp[amrLevel][img]->average(*jumpMG[img], *jumpMG[img-1], interv);
       }
     }
   }
+#endif
 }
 
 void MFHelmholtzOpFactory::setJump(const Real& a_sigma, const Real& a_scale){

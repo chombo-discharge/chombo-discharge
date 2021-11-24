@@ -91,8 +91,6 @@ EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
   if(profile){
     timer.eventReport(pout());
   }
-
-  //  m_isDefined = true;
 }
 
 int EBMultigridInterpolator::getGhostCF() const{
@@ -631,7 +629,7 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&            a_stencilFine,
   const int numUnknowns  = LeastSquares::getTaylorExpansionSize(a_order);
 
 
-  if(numEquations >= numUnknowns) { // We have enough equations to get a stencil.
+  if(numEquations > numUnknowns) { // We have enough equations to get a stencil.
     //timer.startEvent("sort");
     // In many cases we will have WAY too many equations for the specified order. This is particularly true in 3D
     // because the number of coar vofs included in a radius r from the ghost vof can be (1 + 2*r)^3. So for r = 2
