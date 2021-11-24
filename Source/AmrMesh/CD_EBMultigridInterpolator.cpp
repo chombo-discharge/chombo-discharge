@@ -451,15 +451,7 @@ void EBMultigridInterpolator::defineBuffers(){
   const EBISLayout&        coFiEBISL  = m_eblgCoFi.getEBISL();
   const ProblemDomain&     coarDomain = m_eblgCoFi.getDomain();
 
-  Vector<Box> coarBoxes = coFiGrids.boxArray();
-
-  for (int i = 0; i < coarBoxes.size(); i++){
-    coarBoxes[i].grow(coarRadius);
-  }
-
-  m_grownCoarBoxesLayout.define(coarBoxes, coFiGrids.procIDs());
-
-  m_grownCoarData.define(m_grownCoarBoxesLayout, 1, EBCellFactory(coFiEBISL));
+  m_grownCoarData.define(coFiGrids, 1, coarRadius*IntVect::Unit, EBCellFactory(coFiEBISL));
 }
 
 void EBMultigridInterpolator::defineStencilsEBCF(){
@@ -488,7 +480,7 @@ void EBMultigridInterpolator::defineStencilsEBCF(){
   for (DataIterator dit(dblFine); dit.ok(); ++dit){
     const Box origFineBox    = dblFine[dit()];
     const Box ghostedFineBox = grow(origFineBox, m_ghostVector);
-    const Box grownCoarBox   = m_grownCoarBoxesLayout[dit()];
+    const Box grownCoarBox = m_grownCoarData[dit()].box();
 
     // Define the valid regions such that the interpolation does not include coarse grid cells that fall beneath the fine level,
     // and no fine cells outside the CF.
