@@ -88,6 +88,12 @@ public:
     @brief Get initial particles -- this is called by ItoSolver when filling the solver with initial particles. 
     @return Returns m_initialParticles
   */
+  List<ItoParticle>& getInitialParticles();  
+
+  /*!
+    @brief Get initial particles -- this is called by ItoSolver when filling the solver with initial particles. 
+    @return Returns m_initialParticles
+  */
   const List<ItoParticle>& getInitialParticles() const;
 
 protected:

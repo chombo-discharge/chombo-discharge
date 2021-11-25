@@ -12,15 +12,13 @@
 #ifndef CD_ItoLayoutImplem_H
 #define CD_ItoLayoutImplem_H
 
+// Chombo includes
+#include <CH_Timer.H>
+
 // Our includes
 #include <CD_ItoLayout.H>
 #include <CD_ItoIterator.H>
 #include <CD_NamespaceHeader.H>
-
-template <class T>
-ItoLayout<T>::ItoLayout(){
-  m_isDefined = false;
-}
 
 template <class T>
 ItoLayout<T>::ItoLayout(const Vector<RefCountedPtr<ItoSpecies> >& a_species){
@@ -72,16 +70,16 @@ void ItoLayout<T>::parseRuntimeOptions(){
 }
 
 template <class T>
-void ItoLayout<T>::setPVRBuffer(const int a_buffer){
+void ItoLayout<T>::setPVRBuffer(const int a_pvrBuffer){
   for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    iter()->setPVRBuffer(a_buffer);
+    iter()->setPVRBuffer(a_pvrBuffer);
   }
 }
 
 template <class T>
-void ItoLayout<T>::setHalobuffer(const int a_buffer){
+void ItoLayout<T>::setHalobuffer(const int a_haloBuffer){
   for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    iter()->setHalobuffer(a_buffer);
+    iter()->setHalobuffer(a_haloBuffer);
   }
 }
 
@@ -93,7 +91,7 @@ void ItoLayout<T>::allocateInternals(){
 }
 
 template <class T>
-void ItoLayout<T>::addSolver(RefCountedPtr<T> a_solver){
+void ItoLayout<T>::addSolver(RefCountedPtr<T>& a_solver){
   m_solvers.push_back(a_solver);
 }
 
@@ -133,9 +131,9 @@ void ItoLayout<T>::registerOperators(){
 }
 
 template <class T>
-void ItoLayout<T>::setAmr(const RefCountedPtr<AmrMesh>& a_amr){
+void ItoLayout<T>::setAmr(const RefCountedPtr<AmrMesh>& a_amrMesh){
   for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    iter()->setAmr(a_amr);
+    iter()->setAmr(a_amrMesh);
   }
 }
 
@@ -168,23 +166,23 @@ void ItoLayout<T>::setTime(const int a_step, const Real a_time, const Real a_dt)
 }
 
 template <class T>
-void ItoLayout<T>::sortParticlesByCell(const ItoSolver::WhichContainer a_container){
+void ItoLayout<T>::sortParticlesByCell(const ItoSolver::WhichContainer a_whichContainer){
   for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    iter()->sortParticlesByCell(a_container);
+    iter()->sortParticlesByCell(a_whichContainer);
   }
 }
 
 template <class T>
-void ItoLayout<T>::sortParticlesByPatch(const ItoSolver::WhichContainer a_container){
+void ItoLayout<T>::sortParticlesByPatch(const ItoSolver::WhichContainer a_whichContainer){
   for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    iter()->sortParticlesByPatch(a_container);
+    iter()->sortParticlesByPatch(a_whichContainer);
   }
 }
 
 template <class T>
-void ItoLayout<T>::makeSuperparticles(const ItoSolver::WhichContainer a_container, const int a_ppc){
+void ItoLayout<T>::makeSuperparticles(const ItoSolver::WhichContainer a_whichContainer, const int a_ppc){
   for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    iter()->makeSuperparticles(a_container, a_ppc);
+    iter()->makeSuperparticles(a_whichContainer, a_ppc);
   }
 }
 
@@ -194,9 +192,9 @@ void ItoLayout<T>::depositParticles(){
 }
 
 template <class T>
-void ItoLayout<T>::depositParticles(const ItoSolver::WhichContainer a_container){
+void ItoLayout<T>::depositParticles(const ItoSolver::WhichContainer a_whichContainer){
   for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    iter()->depositParticles(a_container);
+    iter()->depositParticles(a_whichContainer);
   }
 }
 
@@ -206,17 +204,17 @@ void ItoLayout<T>::remap(){
 }
 
 template <class T>
-void ItoLayout<T>::remap(const ItoSolver::WhichContainer a_container){
+void ItoLayout<T>::remap(const ItoSolver::WhichContainer a_whichContainer){
   for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    iter()->remap(a_container);
+    iter()->remap(a_whichContainer);
   }
 }
 
 template <class T>
-size_t ItoLayout<T>::getNumParticles(const ItoSolver::WhichContainer a_container, const bool a_local) {
+size_t ItoLayout<T>::getNumParticles(const ItoSolver::WhichContainer a_whichContainer, const bool a_localOnly) {
   size_t ret = 0;
   for (auto iter = this->iterator(); iter.ok(); ++iter){
-    ret += iter()->getNumParticles(a_container, a_local);
+    ret += iter()->getNumParticles(a_whichContainer, a_localOnly);
   }
 
   return ret;
@@ -224,11 +222,11 @@ size_t ItoLayout<T>::getNumParticles(const ItoSolver::WhichContainer a_container
 
 template <class T>
 Real ItoLayout<T>::computeDt(){
-  Real minDt = 1.E99;
+  Real minDt = std::numeric_limits<Real>::max();
 
   for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter){
     const Real thisDt = iter()->computeDt();
-    minDt = Min(minDt, thisDt);
+    minDt = std::min(minDt, thisDt);
   }
   
   return minDt;
@@ -236,11 +234,11 @@ Real ItoLayout<T>::computeDt(){
 
 template <class T>
 Real ItoLayout<T>::computeAdvectiveDt(){
-  Real minDt = 1.E99;
+  Real minDt = std::numeric_limits<Real>::max();
 
   for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter){
     const Real thisDt = iter()->computeAdvectiveDt();
-    minDt = Min(minDt, thisDt);
+    minDt = std::min(minDt, thisDt);
   }
   
   return minDt;
@@ -248,11 +246,11 @@ Real ItoLayout<T>::computeAdvectiveDt(){
 
 template <class T>
 Real ItoLayout<T>::computeMinDt(const Real a_maxCellsToMove){
-  Real minDt = 1.E99;
+  Real minDt = std::numeric_limits<Real>::max();
 
   for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter){
     const Real thisDt = iter()->computeMinDt(a_maxCellsToMove);
-    minDt = Min(minDt, thisDt);
+    minDt = std::min(minDt, thisDt);
   }
   
   return minDt;
@@ -260,11 +258,11 @@ Real ItoLayout<T>::computeMinDt(const Real a_maxCellsToMove){
 
 template <class T>
 Real ItoLayout<T>::computeMinDriftDt(const Real a_maxCellsToMove){
-  Real minDt = 1.E99;
+  Real minDt = std::numeric_limits<Real>::max();
 
   for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter){
     const Real thisDt = iter()->computeMinDriftDt(a_maxCellsToMove);
-    minDt = Min(minDt, thisDt);
+    minDt = std::min(minDt, thisDt);
   }
   
   return minDt;
@@ -272,11 +270,11 @@ Real ItoLayout<T>::computeMinDriftDt(const Real a_maxCellsToMove){
 
 template <class T>
 Real ItoLayout<T>::computeMinDiffusionDt(const Real a_maxCellsToMove){
-  Real minDt = 1.E99;
+  Real minDt = std::numeric_limits<Real>::max();
 
   for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter){
     const Real thisDt = iter()->computeMinDiffusionDt(a_maxCellsToMove);
-    minDt = Min(minDt, thisDt);
+    minDt = std::min(minDt, thisDt);
   }
   
   return minDt;
@@ -284,11 +282,11 @@ Real ItoLayout<T>::computeMinDiffusionDt(const Real a_maxCellsToMove){
 
 template <class T>
 Real ItoLayout<T>::computeDiffusiveDt() {
-  Real minDt = 1.E99;
+  Real minDt = std::numeric_limits<Real>::max();
 
   for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter){
     const Real thisDt = iter()->computeDiffusiveDt();
-    minDt = Min(minDt, thisDt);
+    minDt = std::min(minDt, thisDt);
   }
   
   return minDt;
@@ -380,7 +378,7 @@ itoFactory<T, S>::~itoFactory(){
 }
 
 template <class T, class S>
-RefCountedPtr<ItoLayout<T> > itoFactory<T, S>::newLayout(const Vector<RefCountedPtr<ItoSpecies> > a_species) const{
+RefCountedPtr<ItoLayout<T> > itoFactory<T, S>::newLayout(const Vector<RefCountedPtr<ItoSpecies> >& a_species) const{
 
   auto ito = RefCountedPtr<ItoLayout<T> > (new ItoLayout<T>(a_species));
 

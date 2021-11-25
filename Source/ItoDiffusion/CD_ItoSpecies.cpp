@@ -43,9 +43,12 @@ bool ItoSpecies::isDiffusive() const{
   return m_isDiffusive;
 }
 
-
 bool ItoSpecies::isMobile() const {
   return m_isMobile;
+}
+
+List<ItoParticle>& ItoSpecies::getInitialParticles() {
+  return m_initialParticles;
 }
 
 const List<ItoParticle>& ItoSpecies::getInitialParticles() const {
