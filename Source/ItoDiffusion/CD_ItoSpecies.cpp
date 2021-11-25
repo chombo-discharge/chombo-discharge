@@ -7,7 +7,6 @@
   @file   CD_ItoSpecies.cpp
   @brief  Implementation of CD_ItoSpecies.H
   @author Robert Marskar
-  @date   March 2020
 */
 
 // Our includes
@@ -21,11 +20,11 @@ ItoSpecies::ItoSpecies(){
   m_chargeNumber = 0;
 }
 
-ItoSpecies::ItoSpecies(const std::string a_name, const int a_charge, const bool a_mobile, const bool a_diffusive){
-  m_name      = a_name;
-  m_chargeNumber    = a_charge;
-  m_isMobile    = a_mobile;
-  m_isDiffusive = a_diffusive;
+ItoSpecies::ItoSpecies(const std::string a_name, const int a_chargeNumber, const bool a_mobile, const bool a_diffusive){
+  m_name         = a_name;
+  m_chargeNumber = a_chargeNumber;
+  m_isMobile     = a_mobile;
+  m_isDiffusive  = a_diffusive;
 }
 
 ItoSpecies::~ItoSpecies(){
@@ -49,7 +48,7 @@ bool ItoSpecies::isMobile() const {
   return m_isMobile;
 }
 
-List<ItoParticle>& ItoSpecies::getInitialParticles() {
+const List<ItoParticle>& ItoSpecies::getInitialParticles() const {
   return m_initialParticles;
 }
 

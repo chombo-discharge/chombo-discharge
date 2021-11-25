@@ -13,44 +13,48 @@
 #define CD_ItoSpecies_H
 
 // Chombo includes
-#include <RealVect.H>
-#include <Particle.H>
-#include <BinItem.H>
-#include <MeshInterp.H>
+#include <List.H>
 
 // Our includes
 #include <CD_ItoParticle.H>
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Metadata class that parses for ItoSolver
-  @details The ItoSolver takes it's information from this class, e.g. mobile/diffusive, charge, name, initial particles etc. 
+  @brief Class that acts as user interface for parsing initial data and mobility/diffusion kernels into ItoSolver. 
+  @details This class is used for passing initial data and information into an ItoSolver. This class is required because the ItoSolver may not know about
+  whether or not it will use advect/diffusion, and it is also does not know about initial conditions. All of that is supplied by this class. 
 */
 class ItoSpecies {
 public:
 
   /*!
-    @brief Weak constructor. 
+    @brief Default constructor, but user should set the name, charge/mobility/diffusivity etc. 
   */
   ItoSpecies();
 
   /*!
     @brief Full constructor
+    @param[in] a_name         Species name
+    @param[in] a_chargeNumber Charge number
+    @param[in] a_mobile       Mobile species or not
+    @param[in] a_diffusive    Diffusive species or not
   */
-  ItoSpecies(const std::string a_name, const int a_charge, const bool a_mobile, const bool a_diffusive);
+  ItoSpecies(const std::string a_name, const int a_chargeNumber, const bool a_mobile, const bool a_diffusive);
 
   /*!
-    @brief Destructor
+    @brief Destructor (does nothing):
   */
-  ~ItoSpecies();
+  virtual ~ItoSpecies();
 
   /*!
     @brief Return name
+    @return Returns m_name
   */
   std::string getName() const;
 
   /*!
     @brief Return charge
+    @return Returns m_chargeNumber
   */
   int getChargeNumber() const;
     
@@ -65,19 +69,26 @@ public:
   bool isMobile() const;
 
   /*!
-    @brief Compute the mobility. This is mostly used for the LEA. 
+    @brief Compute the mobility as a function of energy.
+    @details This is mostly used for the LEA-type models where the particle mobility has a parametric dependence on the energy. 
+    @param[in] a_energy Particle energy
+    @note Default implementation returns 0.0
   */
   virtual Real mobility(const Real a_energy) const;
 
   /*!
-    @brief Compute the mobility. This is mostly used for the LEA.  
+    @brief Compute the diffusion coefficient.
+    @details This is mostly used for the LEA-type models where the particle diffusivity has a parametric dependence on the energy. 
+    @param[in] a_energy Particle energy
+    @note Default implementation returns 0.0
   */
   virtual Real diffusion(const Real a_energy) const;
 
   /*!
-    @brief Get initial particles
+    @brief Get initial particles -- this is called by ItoSolver when filling the solver with initial particles. 
+    @return Returns m_initialParticles
   */
-  List<ItoParticle>& getInitialParticles();
+  const List<ItoParticle>& getInitialParticles() const;
 
 protected:
 
