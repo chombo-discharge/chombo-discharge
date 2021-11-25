@@ -142,7 +142,7 @@ void Realm::regridOperators(const int a_lmin){
   for (auto& r : m_realms){
     r.second->regridOperators(a_lmin);
   }
-  pout() << "done with operators" << endl;
+
   this->defineMasks(a_lmin);
 }
 
