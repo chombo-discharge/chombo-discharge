@@ -24,105 +24,136 @@
 
 // Our includes
 #include <CD_NamespaceHeader.H>
-  
-template <class P>
-using AMRParticles     = Vector<RefCountedPtr<ParticleData<P> > >;
 
+/*!
+  @brief Alias for ParticleData on each AMR level.
+*/
+template <class P>
+using AMRParticles = Vector<RefCountedPtr<ParticleData<P> > >;
+
+/*!
+  @brief Alias for cell-sorted particles on each AMR level.
+*/
 template <class P>
 using AMRCellParticles = Vector<RefCountedPtr<LayoutData<BinFab<P> > > >;
 
-using AMRPVR           = Vector<RefCountedPtr<ParticleValidRegion> >;
-
+/*!
+  @brief Alias for ParticleValidRegion in an AMR context. 
+*/
+using AMRPVR = Vector<RefCountedPtr<ParticleValidRegion> >;
 
 /*!
-  @brief Templated class for holding particles on an AMR hierarchy with particle remapping
-  template <class P>
+  @brief Templated class for holding particles on an AMR hierarchy with particle remapping. 
+  @details The template parameter P should derive from Chombo's BinItem. 
+  @note ParticleContainers are, because of Chombo, restricted to square-block grids. This means
+  that the blocking factor and maximum box size must be the same. 
 */
 template <class P>
 class ParticleContainer {
 public:
 
   /*!
-    @brief No need for weak construction
+    @brief Default constructor. Leaves object in undefined state. 
   */
   ParticleContainer();
 
   /*!
     @brief Full constructor
-    @note It is extremely important that a_grids uses only square blocks for the grids. 
+    @param[in] a_grids          AMR grids
+    @param[in] a_domains        AMR domains
+    @param[in] a_dx             Grid resolutions
+    @param[in] a_refRat         Refinement ratios
+    @param[in] a_probLo         Lower-left corner of the physical domain
+    @param[in] a_blockingFactor Grid blocking factor
+    @param[in] a_finestLevel    Finest grid level
+    @param[in] a_pvrBuffer      Buffer region on the fine-side of the refinment boundary where particles can't live. 
+    @param[in] a_realm          Realm where these particles live. 
   */
   ParticleContainer(const Vector<DisjointBoxLayout>& a_grids,
 		    const Vector<ProblemDomain>&     a_domains,
 		    const Vector<Real>&              a_dx,
-		    const Vector<int>&               a_ref_rat,
+		    const Vector<int>&               a_refRat,
 		    const RealVect&                  a_probLo,
-		    const int                        a_blocking_factor,
+		    const int                        a_blockingFactor,
 		    const int                        a_finestLevel,
-		    const int                        a_pvr_buffer,
+		    const int                        a_pvrBuffer,
 		    const std::string                a_realm);
 
   /*!
-    @brief Destructor
+    @brief Destructor ( does nothing)
   */
   ~ParticleContainer();
 
   /*!
     @brief Define the container. This will do a clear-out of all particles. 
+    @param[in] a_grids          AMR grids
+    @param[in] a_domains        AMR domains
+    @param[in] a_dx             Grid resolutions
+    @param[in] a_refRat         Refinement ratios
+    @param[in] a_probLo         Lower-left corner of the physical domain
+    @param[in] a_blockingFactor Grid blocking factor
+    @param[in] a_finestLevel    Finest grid level
+    @param[in] a_pvrBuffer      Buffer region on the fine-side of the refinment boundary where particles can't live. 
+    @param[in] a_realm          Realm where these particles live. 
   */
   void define(const Vector<DisjointBoxLayout>& a_grids,
 	      const Vector<ProblemDomain>&     a_domains,
 	      const Vector<Real>&              a_dx,
-	      const Vector<int>&               a_ref_rat,
+	      const Vector<int>&               a_refRat,
 	      const RealVect&                  a_probLo,
-	      const int                        a_blocking_factor,
+	      const int                        a_blockingFactor,
 	      const int                        a_finestLevel,
-	      const int                        a_pvr_buffer,
+	      const int                        a_pvrBuffer,
 	      const std::string                a_realm);
 
   /*!
-    @brief Regrid function. a_base is the coarsest grid level which did NOT change
+    @brief Regrid function. a_base is the coarsest grid level which did not change
+    @param[in] a_grids          AMR grids
+    @param[in] a_domains        AMR domains
+    @param[in] a_dx             Grid resolutions
+    @param[in] a_refRat         Refinement ratios
+    @param[in] a_base           Coarsest grid level that did not change. 
+    @param[in] a_newFinestLevel New finest grid level
   */
   void regrid(const Vector<DisjointBoxLayout>& a_grids,
 	      const Vector<ProblemDomain>&     a_domains,
 	      const Vector<Real>&              a_dx,
-	      const Vector<int>&               a_ref_rat,
+	      const Vector<int>&               a_refRat,
 	      const int                        a_base,
 	      const int                        a_newFinestLevel);
 
   /*!
-    @brief Cache particles in a pre-regrid form. a_base is the coarsest grid level which will NOT change
+    @brief Cache particles before calling regrid. 
+    @param[in] a_base Coarsest grid level which will not change. 
   */
   void preRegrid(const int a_base);
 
   /*!
-    @brief Copy particles to halo
+    @brief Copy particles to mask particle data holder.
+    @param[in] a_mask Mask
+    @note If the mask is nullptr on any of the levels, those levels will be ignored. 
   */
-  void copyMaskParticles(const Vector<RefCountedPtr<LevelData<BaseFab<bool> > > >& a_halo) const;
+  void copyMaskParticles(const Vector<RefCountedPtr<LevelData<BaseFab<bool> > > >& a_mask) const;
 
   /*!
-    @brief Copy non-halo particles to non-halo storage
+    @brief Copy particles to non-masked data holder. 
+    @details This is the "inverse" of copyMaskParticles. 
+    @param[in] a_mask Mask
+    @note If the mask is nullptr on any of the levels, those levels will be ignored. 
   */
-  void copyNonMaskParticles(const Vector<RefCountedPtr<LevelData<BaseFab<bool> > > >& a_halo) const;
+  void copyNonMaskParticles(const Vector<RefCountedPtr<LevelData<BaseFab<bool> > > >& a_mask) const;
 
   /*!
-    @brief Copy particles to halo. a_level is the coarse level. 
+    @brief Copy particles to masked particle data holder. 
+    @param[in] a_mask Mask
   */
-  void copyMaskParticles(const int a_level, const LevelData<BaseFab<bool> >& a_halo) const;
+  void copyMaskParticles(const int a_level, const LevelData<BaseFab<bool> >& a_mask) const;
 
   /*!
-    @brief Copy non-particles to non-halo data storage. a_level is the coarse level. 
+    @brief Copy particles that do NOT live in the input mask to the non-masked data holder. 
+    @param[in] a_mask Mask
   */
-  void copyNonMaskParticles(const int a_level, const LevelData<BaseFab<bool> >& a_halo) const;
-
-  /*!
-    @brief Frees up halo particles
-  */
-  void clearMaskParticles() const;
-
-  /*!
-    @brief Frees up halo particles
-  */
-  void clearNonMaskParticles() const;
+  void copyNonMaskParticles(const int a_level, const LevelData<BaseFab<bool> >& a_mask) const;
 
   /*!
     @brief Clear all particles
@@ -130,152 +161,220 @@ public:
   void clearParticles();
 
   /*!
-    @brief Get finest level
+    @brief Clear the buffer particles. 
+  */
+  void clearBufferParticles() const;    
+
+  /*!
+    @brief Clear the "mask" particles. 
+  */
+  void clearMaskParticles() const;
+
+  /*!
+    @brief Clear the "non-mask" particles. 
+  */
+  void clearNonMaskParticles() const;
+
+  /*!
+    @brief Clear particles on input data holder
+    @param[inout] a_particles
+  */
+  void clear(AMRParticles<P>& a_particles) const;
+
+  /*!
+    @brief Is cell-sorted or not
+  */
+  bool isCellSorted() const;
+
+  /*!
+    @brief Get finest AMR level
   */
   int getFinestLevel() const;
 
   /*!
-    @brief Get the Realm
+    @brief Get the realm where this ParticleContainer lives. 
   */
   const std::string getRealm() const;
 
   /*!
     @brief Get all particles on all levels
+    @return m_particles
   */
   AMRParticles<P>& getParticles();
 
   /*!
-    @brief Get all particles on a level
+    @brief Get all particles on a level. Const version.
+    @return m_particles
   */
   const AMRParticles<P>& getParticles() const;
 
   /*!
-    @brief Get the "ghosted" coarse particles. I.e. particles that lie on the coarse side of the CF interface. 
+    @brief Get buffer particles on all levels
+    @return m_bufferParticles
+  */
+  AMRParticles<P>& getBufferParticles();
+
+  /*!
+    @brief Get buffer particles on all levels. Const version. 
+    @return m_bufferParticles
+  */
+  const AMRParticles<P>& getBufferParticles() const;  
+
+  /*!
+    @brief Get the mask particles. 
+    @return m_maskParticles
   */
   AMRParticles<P>& getMaskParticles();
 
   /*!
-    @brief Get the "ghosted" coarse particles. I.e. particles that lie on the coarse side of the CF interface. 
+    @brief Get the mask particles. Const version. 
+    @return m_maskParticles
   */
   const AMRParticles<P>& getMaskParticles() const;
 
   /*!
-    @brief Get the "ghosted" coarse particles. I.e. particles that lie on the coarse side of the CF interface. 
+    @brief Get the non-masked particles. 
+    @return m_nonMaskParticles
   */
   AMRParticles<P>& getNonMaskParticles();
 
   /*!
-    @brief Get the "ghosted" coarse particles. I.e. particles that lie on the coarse side of the CF interface. 
+    @brief Get the non-masked particles. Const version. 
+    @return m_nonMaskParticles
   */
   const AMRParticles<P>& getNonMaskParticles() const;
 
   /*!
-    @brief Get cache particles
-  */
-  Vector<List<P> >& getCacheParticles() ;
-
-  /*!
-    @brief Get cache particles
-  */
-  const Vector<List<P> >& getCacheParticles() const;
-
-  /*!
-    @brief Get PVR
+    @brief Get PVR region. 
   */
   const AMRPVR& getPVR() const;
 
   /*!
-    @brief Get grids
+    @brief Get the AMR grids
   */
   const Vector<DisjointBoxLayout>& getGrids() const;
 
   /*!
-    @brief Get data on a level
+    @brief Get particle data on a level
+    @param[in] a_level AMR level
   */
   ParticleData<P>& operator[](const int a_level);
 
   /*!
-    @brief Get data on a level
+    @brief Get data on a level. Const version. 
+    @param[in] a_level AMR level
   */
   const ParticleData<P>& operator[](const int a_level) const;
 
   /*!
-    @brief Get cell particles
+    @brief Get all cell particles. 
+    @note This will issue an error if the particles are not sorted by cell. 
   */
   AMRCellParticles<P>& getCellParticles();
 
   /*!
     @brief Get cell particles, const version. 
+    @note This will issue an error if the particles are not sorted by cell. 
   */
   const AMRCellParticles<P>& getCellParticles() const;
   
   /*!
     @brief Get cell particles
+    @param[in] a_level Grid level
+    @note This will issue an error if the particles are not sorted by cell. 
   */
   LayoutData<BinFab<P> >& getCellParticles(const int a_level);
 
   /*!
     @brief Get cell particles, const version. 
+    @param[in] a_level Grid level
+    @note This will issue an error if the particles are not sorted by cell. 
   */
   const LayoutData<BinFab<P> >& getCellParticles(const int a_level) const;
 
   /*!
-    @brief Get cell particles
+    @brief Get cell particles on a specific level and grid inex. 
+    @param[in] a_level Grid level
+    @param[in] a_dit   Grid index
+    @note This will issue an error if the particles are not sorted by cell. 
   */
   BinFab<P>& getCellParticles(const int a_level, const DataIndex a_dit);
 
   /*!
     @brief Get cell particles, const version. 
+    @param[in] a_level Grid level
+    @param[in] a_dit   Grid index
+    @note This will issue an error if the particles are not sorted by cell. 
   */
   const BinFab<P>& getCellParticles(const int a_level, const DataIndex a_dit) const;
 
   /*!
-    @brief Get particles and sort them by cell
+    @brief Fill a cell-sorted particle data holder with all the particles in the grid patch. 
+    @param[out] a_cellParticles Particles in the input grid patch, sorted by cell. 
+    @param[in]  a_level Grid level
+    @param[in]  a_dit   Grid index
+    @note This will define a_cellParticles over the DisjointBoxLayout grid box and fill it with the particles in the patch. 
   */
   void getCellParticles(BinFab<P>& a_cellParticles, const int a_lvl, const DataIndex a_dit) const;
 
   /*!
-    @brief Get particles and sort them by cell
+    @brief Fill a cell-sorted particle data holder with all the particles in the grid patch. The original particles are destroyed. 
+    @param[out] a_cellParticles Particles in the input grid patch, sorted by cell. 
+    @param[in]  a_level Grid level
+    @param[in]  a_dit   Grid index
+    @note This will define a_cellParticles over the DisjointBoxLayout grid box and fill it with the particles in the patch. 
   */
   void getCellParticlesDestructive(BinFab<P>& a_cellParticles, const int a_lvl, const DataIndex a_dit);
 
   /*!
     @brief Sort particles by cell
+    @details This will fill m_cellSortedParticles and destroy the patch-sorted particles. 
   */
   void sortParticlesByCell();
 
   /*!
     @brief Sort particles by cell
+    @details This will fill m_particles from m_cellSortedParticles and destroy the cell-sorted particles. 
   */
   void sortParticlesByPatch();
 
   /*!
     @brief Add particles to container
+    @param[in] a_particles particles to add to this container. 
   */
   void addParticles(const List<P>& a_particles);
 
   /*!
-    @brief Add particles to container destructively
+    @brief Add particles to container. The input particles are destroyed by this routine. 
+    @param[in] a_particles particles to add to this container. . 
   */
   void addParticlesDestructive(List<P>& a_particles);
 
   /*!
-    @brief Add particles to a certain level and patch
+    @brief Add particles to a certain level and patch. The input particles are cell-sorted. 
+    @param[in] a_particles Input particles (cell-sorted)
+    @param[in] a_lvl       Grid level
+    @param[in] a_dit       Grid index
   */
   void addParticles(const BinFab<P>& a_particles, const int a_lvl, const DataIndex a_dit);
 
   /*!
-    @brief Add particles to a certain level and patch
+    @brief Add particles to a certain level and patch. The input particles are cell-sorted (and destroyed on output). 
+    @param[inout] a_particles Input particles (cell-sorted). Destroyed on exit. 
+    @param[in]    a_lvl       Grid level
+    @param[in]    a_dit       Grid index
   */
   void addParticlesDestructive(BinFab<P>& a_particles, const int a_lvl, const DataIndex a_dit);
 
   /*!
     @brief Add particles from other container to this one
+    @param[in] a_otherContainer Other particle container. 
   */
   void addParticles(const ParticleContainer<P>& a_otherContainer);
 
   /*!
     @brief Add particles from other container to this one. This destroys the particles in the other container. 
+    @param[inout] a_otherContainer Other particle container (destroyed on output). 
   */
   void addParticlesDestructive(ParticleContainer<P>& a_otherContainer);
 
@@ -285,20 +384,22 @@ public:
   void remap();
 
   /*!
-    @brief Only do level remaps
+    @brief Do level remaps. This ignores particles moving between levels and moving out of PVRs. 
   */
   void levelRemap();
 
   /*!
-    @brief Do a level remap
+    @brief Do a level remap. This ignores particles moving between levels and moving out of PVRs. 
+    @param[in] a_level Grid level
   */
   void levelRemap(const int a_level);
 
   /*!
     @brief Move the particles to a different container. 
-    @note  The grids MUST be the same for both containers
+    @param[inout] a_otherContainer Other particle container. 
+    @note  The grids MUST be the same for both containers. That is, the containers MUST be defined over the same realm. 
   */
-  void cacheParticles(ParticleContainer<P>& a_otherContainer);
+  void transferParticles(ParticleContainer<P>& a_otherContainer);
 
   /*!
     @brief Discard particles that are under a PVR level
@@ -335,16 +436,6 @@ public:
   */
   size_t getNumberOfMaskParticesGlobal() const;
 
-  /*!
-    @brief Get the total weight of all particles. Local version. 
-  */
-  Real getWeightValidLocal() const;
-
-  /*!
-    @brief Get the total weight of all particles. Global version
-  */
-  Real getWeightValidGlobal() const;
-
 protected:
 
   /*!
@@ -355,12 +446,12 @@ protected:
   /*!
     @brief Blocking factor, aka grid size. 
   */
-  int m_blockingFactor;  // Blocking facto
+  int m_blockingFactor; 
 
   /*!
-    @brief PVR buffer - to be deprecated...
+    @brief PVR buffer. 
   */
-  int m_buffer;
+  int m_pvrBuffer;
 
   /*!
     @brief Finest grid level
@@ -368,19 +459,19 @@ protected:
   int m_finestLevel;
 
   /*!
-    @brief Lower left corner of the problem domain (aka the "origin")
+    @brief Lower left corner of the physical domain. 
   */
   RealVect m_probLo;
 
   /*!
-    @brief Check if particle container is defined
+    @brief Check if particle container is defined.
   */
-  bool m_is_defined;
+  bool m_isDefined;
 
   /*!
-    @brief Check if particle container is "cell sorted"
+    @brief Check if particle container is "cell sorted". 
   */
-  bool m_cell_sorted;
+  bool m_isCellSorted;
 
   /*!
     @brief AMR grids
@@ -393,6 +484,11 @@ protected:
   Vector<ProblemDomain> m_domains;
 
   /*!
+    @brief Grown layouts
+  */
+  Vector<BoxLayout> m_grownGrids;
+
+  /*!
     @brief Resolutions on each grid level
   */
   Vector<RealVect> m_dx;
@@ -400,7 +496,7 @@ protected:
   /*!
     @brief Refinement ratios. Entry at index 'l' is the refinement between level 'l' and level 'l+1'
   */
-  Vector<int> m_ref_rat;
+  Vector<int> m_refRat;
 
   /*!
     @brief Cache particles. Use during pre-regrid operations, and for transferring particles between coarse and fine before
@@ -414,16 +510,30 @@ protected:
   AMRParticles<P> m_particles;
 
   /*!
-    @brief Special data holder that holds copies of particles on the coarse level that are within a specified range of the
-    refinement boundary. Used for deposition of coarse-level particle clouds across refinement boundaries. 
+    @brief Special data holder that holds particles on a grown grid layout. 
+    @details This particle data holder uses grids that exceed the DisjointBoxLayout on each level (boxes are grown by m_refRat). This
+    means that this particle data holder can store particles that are out the DisjointBoxLayout by m_refRat cells. This is very useful
+    when one wants to deposit particles on the fine level, but where the particles live on the coarse level. In such cases one will typically
+    copy some (or all) particles from the coarse level to this data holder and deposit from this data holder onto the fine level. 
   */
-  mutable AMRParticles<P> m_halo_particles;
+  mutable AMRParticles<P> m_bufferParticles;
 
   /*!
     @brief Special data holder that holds copies of particles on the coarse level that are within a specified range of the
     refinement boundary. Used for deposition of coarse-level particle clouds across refinement boundaries. 
   */
-  mutable AMRParticles<P> m_non_halo_particles;
+  mutable AMRParticles<P> m_maskParticles;
+
+  /*!
+    @brief Special data holder that holds copies of particles on the coarse level that are within a specified range of the
+    refinement boundary. Used for deposition of coarse-level particle clouds across refinement boundaries. 
+  */
+  mutable AMRParticles<P> m_nonMaskParticles;
+
+  /*!
+    @brief Cell particles. 
+  */
+  AMRCellParticles<P> m_cellSortedParticles;  
 
   /*!
     @brief Valid region for each AMR level
@@ -431,17 +541,23 @@ protected:
   AMRPVR m_pvr;
 
   /*!
-    @brief Cell particles. 
+    @brief Set up grown grids
+    @param[in] a_base        Base level
+    @param[in] a_finestLevel Finest AMR level
   */
-  AMRCellParticles<P> m_cell_particles;
+  void setupGrownGrids(const int a_base, const int a_finestLevel);
 
   /*!
     @brief Setup function for the particle valid region
+    @param[in] a_base        Base level
+    @param[in] a_finestLevel Finest AMR level
   */
   void setupPVR(const int a_base, const int a_finestLevel);
 
   /*!
-    @brief Setup function for the particle data (m_particles and m_halo_particles)
+    @brief Setup function for the particle data (m_particles and m_maskParticles)
+    @param[in] a_base        Base level
+    @param[in] a_finestLevel Finest AMR level
   */
   void setupParticleData(const int a_base, const int a_finestLevel);
 

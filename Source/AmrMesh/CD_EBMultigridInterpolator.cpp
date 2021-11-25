@@ -91,8 +91,6 @@ EBMultigridInterpolator::EBMultigridInterpolator(const EBLevelGrid& a_eblgFine,
   if(profile){
     timer.eventReport(pout());
   }
-
-  //  m_isDefined = true;
 }
 
 int EBMultigridInterpolator::getGhostCF() const{
@@ -108,7 +106,7 @@ void EBMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>&       a_phi
 					       const Interval              a_variables) {
   CH_TIME("EBMultigridInterpolator::coarseFineInterp");
 
-  CH_assert(m_ghostCF == a_phiFine.ghostVect());
+  CH_assert(m_ghostCF*IntVect::Unit == a_phiFine.ghostVect());
 
   if(a_phiFine.ghostVect() != m_ghostVector){
     MayDay::Error("EBMultigridInterpolator::coarseFineInterp -- number of ghost cells do not match!");
@@ -161,7 +159,7 @@ void EBMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>&       a_phi
 void EBMultigridInterpolator::coarseFineInterpH(LevelData<EBCellFAB>& a_phiFine, const Interval a_variables) const{
   CH_TIME("EBMultigridInterpolator::coarseFineInterpH(LD<EBCellFAB>, Interval)");
 
-  CH_assert(m_ghostCF == a_phiFine.ghostVect());
+  CH_assert(m_ghostCF*IntVect::Unit == a_phiFine.ghostVect());
 
   if(a_phiFine.ghostVect() != m_ghostVector){
     MayDay::Error("EBMultigridInterpolator::coarseFineInterp -- number of ghost cells do not match!");
@@ -217,7 +215,7 @@ void EBMultigridInterpolator::slowCoarseFineInterp(LevelData<EBCellFAB>&       a
 						   const Interval              a_variables){
   CH_TIME("EBMultigridInterpolator::slowCoarseFineInterp");
   
-  CH_assert(m_ghostCF <= a_phiFine.ghostVect());
+  CH_assert(m_ghostCF*IntVect::Unit <= a_phiFine.ghostVect());
 
   // TLDR: This routine does the inhomogeneous coarse-fine interpolation, i.e. the coarse data is not set to zero. 
 
@@ -285,7 +283,7 @@ void EBMultigridInterpolator::slowCoarseFineInterp(LevelData<EBCellFAB>&       a
 void EBMultigridInterpolator::slowCoarseFineInterpH(LevelData<EBCellFAB>& a_phiFine, const Interval a_variables) const{
   CH_TIME("EBMultigridInterpolator::slowCoarseFineInterpH(LD<EBCellFAB>, Interval)");
 
-  CH_assert(m_ghostCF <= a_phiFine.ghostVect());  
+  CH_assert(m_ghostCF*IntVect::Unit <= a_phiFine.ghostVect());  
 
   // TLDR: This routine does the coarse-fine interpolation with the coarse-grid data set to zero. 
   for (DataIterator dit(m_eblgFine.getDBL()); dit.ok(); ++dit){
@@ -451,15 +449,7 @@ void EBMultigridInterpolator::defineBuffers(){
   const EBISLayout&        coFiEBISL  = m_eblgCoFi.getEBISL();
   const ProblemDomain&     coarDomain = m_eblgCoFi.getDomain();
 
-  Vector<Box> coarBoxes = coFiGrids.boxArray();
-
-  for (int i = 0; i < coarBoxes.size(); i++){
-    coarBoxes[i].grow(coarRadius);
-  }
-
-  m_grownCoarBoxesLayout.define(coarBoxes, coFiGrids.procIDs());
-
-  m_grownCoarData.define(m_grownCoarBoxesLayout, 1, EBCellFactory(coFiEBISL));
+  m_grownCoarData.define(coFiGrids, 1, coarRadius*IntVect::Unit, EBCellFactory(coFiEBISL));
 }
 
 void EBMultigridInterpolator::defineStencilsEBCF(){
@@ -488,7 +478,7 @@ void EBMultigridInterpolator::defineStencilsEBCF(){
   for (DataIterator dit(dblFine); dit.ok(); ++dit){
     const Box origFineBox    = dblFine[dit()];
     const Box ghostedFineBox = grow(origFineBox, m_ghostVector);
-    const Box grownCoarBox   = m_grownCoarBoxesLayout[dit()];
+    const Box grownCoarBox = m_grownCoarData[dit()].box();
 
     // Define the valid regions such that the interpolation does not include coarse grid cells that fall beneath the fine level,
     // and no fine cells outside the CF.
@@ -639,7 +629,7 @@ bool EBMultigridInterpolator::getStencil(VoFStencil&            a_stencilFine,
   const int numUnknowns  = LeastSquares::getTaylorExpansionSize(a_order);
 
 
-  if(numEquations >= numUnknowns) { // We have enough equations to get a stencil.
+  if(numEquations > numUnknowns) { // We have enough equations to get a stencil.
     //timer.startEvent("sort");
     // In many cases we will have WAY too many equations for the specified order. This is particularly true in 3D
     // because the number of coar vofs included in a radius r from the ghost vof can be (1 + 2*r)^3. So for r = 2

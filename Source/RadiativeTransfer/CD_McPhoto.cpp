@@ -264,10 +264,10 @@ void McPhoto::parseDeposition(){
   std::string str;
   pp.get("deposition", str);
 
-  m_depositNumberse = false;
+  m_depositNumber = false;
   if(str == "num"){
     m_deposition = DepositionType::NGP;
-    m_depositNumberse = true;
+    m_depositNumber = true;
   }
   else if(str == "ngp"){
     m_deposition = DepositionType::NGP;
@@ -552,14 +552,9 @@ void McPhoto::registerOperators(){
   else{
     m_amr->registerOperator(s_eb_coar_ave,   m_realm, m_phase);
     m_amr->registerOperator(s_eb_fill_patch, m_realm, m_phase);
-    m_amr->registerOperator(s_eb_mg_interp,  m_realm, m_phase);
     m_amr->registerOperator(s_eb_redist,     m_realm, m_phase);
-    m_amr->registerOperator(s_noncons_div,   m_realm, m_phase);
-    m_amr->registerOperator(s_eb_copier,     m_realm, m_phase);
+    m_amr->registerOperator(s_particle_mesh, m_realm, m_phase);
     
-    if(m_pvrBuffer <= 0){
-      m_amr->registerOperator(s_eb_ghostcloud, m_realm, m_phase);
-    }
     if(m_haloBuffer > 0){
       m_amr->registerMask(s_particle_halo, m_haloBuffer, m_realm);
     }
@@ -945,17 +940,6 @@ void McPhoto::depositPhotons(EBAMRCellData&                   a_phi,
   if(m_verbosity > 5){
     pout() << m_name + "::depositPhotons(ParticleContainer)" << endl;
   }
-
-  this->depositPhotons(a_phi, a_photons.getParticles(), a_deposition);
-}
-
-void McPhoto::depositPhotons(EBAMRCellData&              a_phi,
-			     const AMRParticles<Photon>& a_photons,
-			     const DepositionType&       a_deposition){
-  CH_TIME("McPhoto::depositPhotons(AMRParticles)");
-  if(m_verbosity > 5){
-    pout() << m_name + "::depositPhotons(AMRParticles)" << endl;
-  }
            
   this->depositKappaConservative(a_phi, a_photons, a_deposition); // a_phi contains only weights, i.e. not divided by kappa
   this->depositNonConservative(m_depositionNC, a_phi);            // Compute m_depositionNC = sum(kappa*Wc)/sum(kappa)
@@ -972,63 +956,26 @@ void McPhoto::depositPhotons(EBAMRCellData&              a_phi,
   m_amr->interpGhost(a_phi, m_realm, m_phase);
 }
 
-void McPhoto::depositKappaConservative(EBAMRCellData&              a_phi,
-				       const AMRParticles<Photon>& a_photons,
-				       const DepositionType        a_deposition){
+void McPhoto::depositKappaConservative(EBAMRCellData&                   a_phi,
+				       const ParticleContainer<Photon>& a_photons,
+				       const DepositionType             a_deposition){
   CH_TIME("McPhoto::depositKappaConservative");
   if(m_verbosity > 5){
     pout() << m_name + "::depositKappaConservative" << endl;
   }
 
-  const Interval interv(m_comp, m_comp);
-
-  const RealVect origin  = m_amr->getProbLo();
-  const int finest_level = m_amr->getFinestLevel();
-
-  DataOps::setValue(a_phi,    0.0);
-  DataOps::setValue(m_scratch,  0.0);
-
-  for (int lvl = 0; lvl <= finest_level; lvl++){
-    const Real dx                = m_amr->getDx()[lvl];
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    const ProblemDomain& dom     = m_amr->getDomains()[lvl];
-    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-    const RefCountedPtr<EBLevelGrid>& eblg = m_amr->getEBLevelGrid(m_realm, m_phase)[lvl];
-
-    const bool hasCoar = (lvl > 0);
-    const bool hasFine = (lvl < finest_level);
-
-    // 1. If we have a coarser level whose cloud extends beneath this level, interpolate that result here first. 
-    if(hasCoar && m_pvrBuffer > 0){
-      RefCountedPtr<EBMGInterp>& interp = m_amr->getEBMGInterp(m_realm, m_phase)[lvl];
-      interp->pwcInterp(*a_phi[lvl], *m_scratch[lvl-1], interv);
-    }
+  if(m_pvrBuffer > 0 && m_haloBuffer == 0){
+    m_amr->depositParticles<Photon, &Photon::mass>(a_phi, m_realm, m_phase, a_photons, a_deposition, CoarseFineDeposition::PVR, false);
+  }
+  else if(m_pvrBuffer == 0 && m_haloBuffer > 0){
+    const AMRMask& mask = m_amr->getMask(s_particle_halo, m_haloBuffer, m_realm);
     
-    // 2. Deposit this levels Photons. Note that this will deposit into ghost cells, which must later
-    //    be added to neighboring patches
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const Box box          = dbl.get(dit());
-      const EBISBox& ebisbox = ebisl[dit()];
-      EbParticleInterp interp(box, ebisbox, dx*RealVect::Unit, origin, true);
-      interp.deposit((*a_photons[lvl])[dit()].listItems(), (*a_phi[lvl])[dit()].getFArrayBox(), m_deposition);
-    }
-
-    // This code adds contributions from ghost cells into the valid region
-    const RefCountedPtr<Copier>& reversecopier = m_amr->getReverseCopier(m_realm, m_phase)[lvl];
-    LDaddOp<FArrayBox> addOp;
-    LevelData<FArrayBox> aliasFAB;
-    aliasEB(aliasFAB, *a_phi[lvl]);
-    aliasFAB.exchange(Interval(0,0), *reversecopier, addOp);
-
-    // 3. If we have a finer level, copy contributions from this level to the temporary holder that is used for
-    //    interpolation of "hanging clouds"
-    if(hasFine){
-      a_phi[lvl]->localCopyTo(*m_scratch[lvl]);
-    }
-    else if(m_pvrBuffer <= 0 && hasCoar){
-      EbGhostCloud& ghostcloud = *(m_amr->getGhostCloud(m_realm, m_phase)[lvl]);
-      ghostcloud.addFineGhostsToCoarse(*a_phi[lvl-1], *a_phi[lvl]);
-    }
+    a_photons.copyMaskParticles(mask);
+    m_amr->depositParticles<Photon, &Photon::mass>(a_phi, m_realm, m_phase, a_photons, a_deposition, CoarseFineDeposition::Halo, false);
+    a_photons.clearMaskParticles();      
+  }
+  else{
+    MayDay::Error("McPhoto::depositKappaConservative -- logic bust, must have either McPhoto.pvr_buffer = 0 or McPhoto.halo_buffer = 0 (this controls deposition)");
   }
 }
 
@@ -1294,7 +1241,7 @@ void McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhoto
 	  // Do intersection tests. These return true/false if the path crossed an object. If it returned true, the s-parameter
 	  // will have been defined as well. 
 	  if(checkDom) {
-	    contactDomain = ParticleOps::domainIntersection(oldPos, newPos, path, probLo, probHi, sDom);
+	    contactDomain = ParticleOps::domainIntersection(oldPos, newPos, probLo, probHi, sDom);
 	  }
 	  if(checkEB) {
 	    switch(m_intersectionEB) {
@@ -1302,7 +1249,7 @@ void McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhoto
 	      contactEB  = ParticleOps::ebIntersectionRaycast(impFunc, oldPos, newPos, 1.E-3*dx, sEB);
 	      break;
 	    case IntersectionEB::Bisection:
-	      contactEB = ParticleOps::ebIntersectionBisect(impFunc, oldPos, newPos, pathLen, m_bisectStep, sEB);
+	      contactEB = ParticleOps::ebIntersectionBisect(impFunc, oldPos, newPos, m_bisectStep, sEB);
 	      break;
 	    case IntersectionEB::LSF:
 	      MayDay::Error("McPhoto::advancePhotonsInstantenous -- LSF not implement (yet)");
@@ -1464,7 +1411,7 @@ void McPhoto::advancePhotonsTransient(ParticleContainer<Photon>& a_bulkPhotons,
 
 	// Check absorption on EBs and domain
 	if(checkDom){
-	  absorbedDomain = ParticleOps::domainIntersection(oldPos, newPos, path, probLo, probHi, sDomain);
+	  absorbedDomain = ParticleOps::domainIntersection(oldPos, newPos, probLo, probHi, sDomain);
 	  sDomain = (absorbedDomain) ? Max(0.0, sDomain - SAFETY) : sDomain;
 	}
 
@@ -1474,7 +1421,7 @@ void McPhoto::advancePhotonsTransient(ParticleContainer<Photon>& a_bulkPhotons,
 	    absorbedEB  = ParticleOps::ebIntersectionRaycast(impFunc, oldPos, newPos, 1.E-3*dx, sEB);
 	    break;
 	  case IntersectionEB::Bisection:
-	    absorbedEB = ParticleOps::ebIntersectionBisect(impFunc, oldPos, newPos, pathLen, m_bisectStep, sEB);
+	    absorbedEB = ParticleOps::ebIntersectionBisect(impFunc, oldPos, newPos, m_bisectStep, sEB);
 	    break;
 	  case IntersectionEB::LSF:
 	    MayDay::Error("McPhoto::advancePhotonsTransient -- LSF not implement (yet)");
@@ -1596,23 +1543,23 @@ void McPhoto::writePlotData(EBAMRCellData& a_output, int& a_comp){
     this->writeData(a_output, a_comp, m_source, false);
   }
   if(m_plotPhotons){
-    this->depositPhotons(m_scratch, m_photons.getParticles(), m_plotDeposition);
+    this->depositPhotons(m_scratch, m_photons, m_plotDeposition);
     this->writeData(a_output, a_comp, m_scratch,  false);
   }
   if(m_plotBulkPhotons){
-    this->depositPhotons(m_scratch, m_bulkPhotons.getParticles(), m_plotDeposition);
+    this->depositPhotons(m_scratch, m_bulkPhotons, m_plotDeposition);
     this->writeData(a_output, a_comp, m_scratch,  false);
   }
   if(m_plotEBPhotons){
-    this->depositPhotons(m_scratch, m_ebPhotons.getParticles(), m_plotDeposition);
+    this->depositPhotons(m_scratch, m_ebPhotons, m_plotDeposition);
     this->writeData(a_output, a_comp, m_scratch,  false);
   }
   if(m_plotDomainPhotons){
-    this->depositPhotons(m_scratch, m_domainPhotons.getParticles(), m_plotDeposition);
+    this->depositPhotons(m_scratch, m_domainPhotons, m_plotDeposition);
     this->writeData(a_output, a_comp, m_scratch,  false);
   }
   if(m_plotSourcePhotons){
-    this->depositPhotons(m_scratch, m_sourcePhotons.getParticles(), m_plotDeposition);
+    this->depositPhotons(m_scratch, m_sourcePhotons, m_plotDeposition);
     this->writeData(a_output, a_comp, m_scratch,  false);
   }
 }

@@ -2246,20 +2246,6 @@ Vector<RefCountedPtr<EbCoarAve> >& AmrMesh::getCoarseAverage(const std::string a
   return m_realms[a_realm]->getCoarseAverage(a_phase);
 }
 
-Vector<RefCountedPtr<EbGhostCloud> >& AmrMesh::getGhostCloud(const std::string a_realm, const phase::which_phase a_phase) const {
-  CH_TIME("AmrMesh::getGhostCloud(string, phase::which_phase)");
-  if(m_verbosity > 1){
-    pout() << "AmrMesh::getGhostCloud(string, phase::which_phase)" << endl;
-  }
-
-  if(!this->queryRealm(a_realm)) {
-    const std::string str = "AmrMesh::getGhostCloud(string, phase::which_phase) - could not find realm '" + a_realm + "'";
-    MayDay::Abort(str.c_str());
-  }
-  
-  return m_realms[a_realm]->getGhostCloud(a_phase);
-}
-
 Vector<RefCountedPtr<EBMultigridInterpolator> >& AmrMesh::getMultigridInterpolator(const std::string a_realm, const phase::which_phase a_phase) const{
   CH_TIME("AmrMesh::getMultigridInterpolator(string, phase::which_phase)");
   if(m_verbosity > 1){
@@ -2300,20 +2286,6 @@ Vector<RefCountedPtr<EBPWLFineInterp> >& AmrMesh::getPwlInterpolator(const std::
   }
   
   return m_realms[a_realm]->getPwlInterpolator(a_phase);
-}
-
-Vector<RefCountedPtr<EBMGInterp> >& AmrMesh::getEBMGInterp(const std::string a_realm, const phase::which_phase a_phase) const {
-  CH_TIME("AmrMesh::getEBMGInterp(string, phase::which_phase)");
-  if(m_verbosity > 1){
-    pout() << "AmrMesh::getEBMGInterp(string, phase::which_phase)" << endl;
-  }
-
-  if(!this->queryRealm(a_realm)) {
-    const std::string str = "AmrMesh::getEBMGInterp(string, phase::which_phase) - could not find realm '" + a_realm + "'";
-    MayDay::Abort(str.c_str());
-  }
-  
-  return m_realms[a_realm]->getEBMGInterp(a_phase);
 }
 
 Vector<RefCountedPtr<EBFluxRegister> >&  AmrMesh::getFluxRegister(const std::string a_realm, const phase::which_phase a_phase) const {
@@ -2428,34 +2400,6 @@ const IrregAmrStencil<NonConservativeDivergenceStencil>& AmrMesh::getNonConserva
   }
   
   return m_realms[a_realm]->getNonConservativeDivergenceStencils(a_phase);
-}
-
-Vector<RefCountedPtr<Copier> >& AmrMesh::getCopier(const std::string a_realm, const phase::which_phase a_phase) const {
-  CH_TIME("AmrMesh::getCopier(string, phase::which_phase)");
-  if(m_verbosity > 1){
-    pout() << "AmrMesh::getCopier(string, phase::which_phase)" << endl;
-  }
-
-  if(!this->queryRealm(a_realm)) {
-    const std::string str = "AmrMesh::getCopier(string, phase::which_phase) - could not find realm '" + a_realm + "'";
-    MayDay::Abort(str.c_str());
-  }
-  
-  return m_realms[a_realm]->getCopier(a_phase);
-}
-
-Vector<RefCountedPtr<Copier> >& AmrMesh::getReverseCopier(const std::string a_realm, const phase::which_phase a_phase) const {
-  CH_TIME("AmrMesh::getReverseCopier(string, phase::which_phase)");
-  if(m_verbosity > 1){
-    pout() << "AmrMesh::getReverseCopier(string, phase::which_phase)" << endl;
-  }
-
-  if(!this->queryRealm(a_realm)) {
-    const std::string str = "AmrMesh::getReverseCopier(string, phase::which_phase) - could not find realm '" + a_realm + "'";
-    MayDay::Abort(str.c_str());
-  }
-  
-  return m_realms[a_realm]->getReverseCopier(a_phase);
 }
 
 bool AmrMesh::queryRealm(const std::string a_realm) const {

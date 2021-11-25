@@ -4,9 +4,9 @@
 AmrMesh.lo_corner       = -1 -1
 AmrMesh.hi_corner       =  1 1 
 AmrMesh.verbosity       = -1          # Controls verbosity. 
-AmrMesh.coarsest_domain = 128 128     # Number of cells on coarsest domain
-AmrMesh.max_amr_depth   = 0           # Maximum amr depth
-AmrMesh.max_sim_depth   = 0           # Maximum simulation depth
+AmrMesh.coarsest_domain = 64 64       # Number of cells on coarsest domain
+AmrMesh.max_amr_depth   = 1           # Maximum amr depth
+AmrMesh.max_sim_depth   = -1          # Maximum simulation depth
 AmrMesh.mg_coarsen      = 4           # Pre-coarsening of MG levels, useful for deeper bottom solves 
 AmrMesh.fill_ratio      = 1.0         # Fill ratio for grid generation
 AmrMesh.buffer_size     = 2           # Number of cells between grid levels
@@ -141,7 +141,7 @@ BrownianWalker.blob_radius    = 0.15    # Blob radius
 BrownianWalker.blob_center    = 0 0.25  # Blob center
 BrownianWalker.seed           = 0       # RNG seed
 BrownianWalker.num_particles  = 100000  # Number of initial particles
-BrownianWalker.max_cells_hop  = 2.0     # Maximum cells to move in one time step
+BrownianWalker.max_cells_hop  = 1.0     # Maximum cells to move in one time step
 BrownianWalker.ppc            = 32      # Target particles per cell
 BrownianWalker.load_balance   = false   # Turn on/off particle load balancing	
 

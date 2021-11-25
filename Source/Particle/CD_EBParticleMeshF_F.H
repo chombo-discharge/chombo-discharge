@@ -6,13 +6,13 @@
 
 
 /*!
-  @file   CD_EbParticleInterpF_F.H
-  @brief  Fortran headers for CD_EbParticleInterp.H
+  @file   CD_EBParticleMeshF_F.H
+  @brief  Fortran headers for CD_EBParticleMesh.H
   @author Robert Marskar
 */
 
-#ifndef CD_EbParticleInterpF_F_H
-#define CD_EbParticleInterpF_F_H
+#ifndef CD_EBParticleMeshF_F_H
+#define CD_EBParticleMeshF_F_H
 
 // Chombo includes
 #include <FORT_PROTO.H>
