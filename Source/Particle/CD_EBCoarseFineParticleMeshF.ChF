@@ -9,7 +9,7 @@
       integer chf_ddecl[iff; jff; kff]
       integer chf_ddecl[ii; jj; kk]
 
-c     Beware - the fine to coarse grid mapping only makes sense if fine-box indicates are non-negative.
+c     Beware - the fine to coarse grid mapping only makes sense if fine-box indices are non-negative.
 c
       chf_multido[finebox; iff; jff; kff ]
          chf_dterm[icc = iff/refrat;
