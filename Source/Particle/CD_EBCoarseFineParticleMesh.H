@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_EBCoarseFineParticleMesh.H
-  @brief  A class for handling particle deposition clouds near refinement boundaries. 
+  @brief  Declaration of a class for handling particle deposition arithmetics near refinement boundaries.
   @author Robert Marskar
 */
 

@@ -50,6 +50,9 @@ void EBCoarseFineParticleMesh::define(const EBLevelGrid& a_eblgCoar,
 				      const IntVect      a_ghost) {
   CH_TIME("EBCoarseFineParticleMesh::define");
 
+  CH_assert(a_refRat%2 == 0);
+  CH_assert(a_refRat   >= 2);
+
   m_eblgCoar   = a_eblgCoar;
   m_eblgFine   = a_eblgFine;
   m_refRat     = a_refRat;
@@ -69,8 +72,8 @@ void EBCoarseFineParticleMesh::define(const EBLevelGrid& a_eblgCoar,
   //
   // On the other hand, when we call define we are adding from the valid region in source to valid+ghost in the destination. These things
   // matter.
-  m_copierFiCoToFineIncludeGhosts.ghostDefine(m_eblgFiCo.getDBL(), m_eblgFine.getDBL(), m_eblgFine.getDomain(), m_ghost); // valid+ghost -> valid
   m_copierCoFiToCoarIncludeGhosts.ghostDefine(m_eblgCoFi.getDBL(), m_eblgCoar.getDBL(), m_eblgCoar.getDomain(), m_ghost); // valid+ghost -> valid
+  m_copierFiCoToFineIncludeGhosts.ghostDefine(m_eblgFiCo.getDBL(), m_eblgFine.getDBL(), m_eblgFine.getDomain(), m_ghost); // valid+ghost -> valid  
   m_copierFiCoToFineNoGhosts     .define     (m_eblgFiCo.getDBL(), m_eblgFine.getDBL(), m_eblgFine.getDomain(), m_ghost); // valid       -> valid+ghost
 
   // Define VoF iterators
@@ -113,10 +116,12 @@ void EBCoarseFineParticleMesh::defineVoFIterators(){
     // On the fine grid I only want the ghost cells that are irregular. 
     IntVectSet irregIVSFine = ebisBoxFine.getIrregIVS(grownBoxFine);
     irregIVSFine -= cellBoxFine;
+    irregIVSFine &= domainFine;
     m_vofIterFineGhosts[dit()].define(irregIVSFine, ebgraphFine);
 
     // On the coarse grid I want coarsenings of the irregular ghost cells on the fine level.
     IntVectSet ivsCoFi = coarsen(irregIVSFine, m_refRat);
+    ivsCoFi &= domainCoar;
     m_vofIterCoFiGhosts[dit()].define(ivsCoFi, ebgraphCoFi);
   }
 
@@ -133,9 +138,12 @@ void EBCoarseFineParticleMesh::defineVoFIterators(){
 void EBCoarseFineParticleMesh::addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coarData, const LevelData<EBCellFAB>& a_fineData) const {
   CH_TIME("EBCoarseFineParticleMesh::addFineGhostsToCoarse");
   
-  CH_assert(m_isDefined            );
-  CH_assert(a_coarData.nComp() == 1);
-  CH_assert(a_fineData.nComp() == 1);  
+  CH_assert(m_isDefined                      );
+  CH_assert(a_coarData.nComp()     == 1      );
+  CH_assert(a_fineData.nComp()     == 1      );
+  CH_assert(m_refRat%2             == 0      );
+  CH_assert(a_coarData.ghostVect() == m_ghost);
+  CH_assert(a_fineData.ghostVect() == m_ghost);
 
   // TLDR: This routine will take the ghost cells that are in a_fineData and add them to the coarse level. We use buffers for this,
   //       copying the data from a_fineData to our nifty m_bufferFine buffer holder. The ghost cells in that scratch data are
@@ -147,7 +155,7 @@ void EBCoarseFineParticleMesh::addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coa
 
   const DisjointBoxLayout& dblCoFi    = m_eblgCoFi.getDBL   ();
   const ProblemDomain&     domainCoFi = m_eblgCoFi.getDomain();
-  const EBISLayout&        ebislCoFi  = m_eblgCoFi.getEBISL ();  
+  const EBISLayout&        ebislCoFi  = m_eblgCoFi.getEBISL ();
   
   // Copy the fine data to scratch and reset the interior cells. We do this by copying everything to the fine scratch data,
   // and then set all the valid data in each box to zero. The exchange() operation will then take care of ghost cells that. 
@@ -160,7 +168,6 @@ void EBCoarseFineParticleMesh::addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coa
     m_bufferFine[dit()].setVal(0.0, box, 0, m_nComp);
   }
   m_bufferFine.exchange();
-
 
   // Coarsen the fine grid data. We do this by AVERAGING the fine-grid data onto the coarse grid. This actually involves entire patches
   // and not just individual ghost cells regions, but that's ok because the rest of the data (in the valid fine regions) are set to zero above,
@@ -178,7 +185,7 @@ void EBCoarseFineParticleMesh::addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coa
     FArrayBox&       coFiDataReg = coFiData.getFArrayBox();
     const FArrayBox& fineDataReg = fineData.getFArrayBox();
     
-    const Box fineBox = fineDataReg.box() & domainFine;    
+    const Box fineBox = fineDataReg.box() & domainFine;
     for (int comp = 0; comp < m_nComp; comp++){
       FORT_AVERAGE_GHOSTS(CHF_FRA1(coFiDataReg, comp),
 			  CHF_CONST_FRA1(fineDataReg, comp),
@@ -189,20 +196,35 @@ void EBCoarseFineParticleMesh::addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coa
 
     // Now do the irregular cells. First reset the coarse cell values and then increment with the fine-grid values.
     VoFIterator& vofitCoar = m_vofIterCoFiGhosts[dit()];
+    VoFIterator& vofitFine = m_vofIterFineGhosts[dit()];
 
+    // Set the value in the coarse cell.
+    for (vofitFine.reset(); vofitFine.ok(); ++vofitFine){
+      const VolIndex fineVof = vofitFine();
+      const VolIndex coarVof = ebislFine.coarsen(fineVof, m_refRat, dit());
+
+      for (int comp = 0; comp < m_nComp; comp++){
+	coFiData(coarVof, comp) = 0.0;
+      }
+    }
+
+    // Add mass from the fine vof to the coarse vof.
+    for (vofitFine.reset(); vofitFine.ok(); ++vofitFine){
+      const VolIndex& fineVof = vofitFine();
+      const VolIndex& coarVof = ebislFine.coarsen(fineVof, m_refRat, dit());
+
+      for (int comp = 0; comp < m_nComp; comp++){
+	coFiData(coarVof, comp) += fineData(fineVof, comp);
+      }
+    }
+
+    // Scale the value in the coarse cell.
     for (vofitCoar.reset(); vofitCoar.ok(); ++vofitCoar){
       const VolIndex&        coarVof  = vofitCoar();
       const Vector<VolIndex> fineVofs = ebislCoFi.refine(coarVof, m_refRat, dit());
 
-      // Take the average of the fine-vof values. 
       for (int comp = 0; comp < m_nComp; comp++){
-	coFiData(coarVof, comp) = 0.0;
-
-	for (int ivof = 0; ivof < fineVofs.size(); ivof++){
-	  coFiData(coarVof, comp) += fineData(fineVofs[ivof], comp);
-	}
-
-	coFiData(coarVof, comp) *= factor;
+	coFiData(coarVof, comp) *= 1./fineVofs.size();
       }
     }
   }
@@ -217,20 +239,25 @@ void EBCoarseFineParticleMesh::addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coa
 void EBCoarseFineParticleMesh::addFiCoDataToFine(LevelData<EBCellFAB>& a_fineData, const LevelData<EBCellFAB>& a_fiCoData) const {
   CH_TIME("EBCoarseFineParticleMesh::addFiCoDataToFine");
 
-  CH_assert(m_isDefined            );  
-  CH_assert(a_fineData.nComp() == 1);
-  CH_assert(a_fiCoData.nComp() == 1);  
+  CH_assert(m_isDefined                      );
+  CH_assert(a_fineData.nComp()     == 1      );
+  CH_assert(a_fiCoData.nComp()     == 1      );
+  CH_assert(a_fineData.ghostVect() == m_ghost);
+  CH_assert(a_fiCoData.ghostVect() == m_ghost);
   
   const Interval interv(0, m_nComp-1);
+
   a_fiCoData.copyTo(interv, a_fineData, interv, m_copierFiCoToFineIncludeGhosts, EBAddOp());
 }
 
 void EBCoarseFineParticleMesh::addInvalidCoarseToFine(LevelData<EBCellFAB>& a_fineData, const LevelData<EBCellFAB>& a_coarData) const {
   CH_TIME("EBCoarseFineParticleMesh::addInvalidCoarseToFine");
 
-  CH_assert(m_isDefined            );
-  CH_assert(a_fineData.nComp() == 1);
-  CH_assert(a_coarData.nComp() == 1);    
+  CH_assert(m_isDefined                      );
+  CH_assert(a_fineData.nComp()     == 1      );
+  CH_assert(a_coarData.nComp()     == 1      );
+  CH_assert(a_fineData.ghostVect() == m_ghost);
+  CH_assert(a_coarData.ghostVect() == m_ghost);
   
   // TLDR: This routine performs a piecewise constant interpolation of the coarse data to the fine grid. We do this by going through the coarse-grid data
   //       and piecewise interpolating the result to the fine grid (using a buffer). After that, we add the contents in the buffer to the fine level.

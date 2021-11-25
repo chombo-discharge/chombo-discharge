@@ -152,7 +152,7 @@ void EBParticleMesh::depositParticle(EBCellFAB&           a_rho,
 				     const Real&          a_mass,
 				     const DepositionType a_depositionType,
 				     const bool           a_forceIrregNGP) const {
-  CH_assert(a_rho.nComp() == 0);
+  CH_assert(a_rho.nComp() == 1);
   
   // TLDR: This performs regular deposition as if the particle lives on regular mesh data. If the cell is irregular we can use a class option
   //       to enforce NGP deposition in those cells. If the particle lives in a multi-valued cell I have no idea how to handle deposition.
