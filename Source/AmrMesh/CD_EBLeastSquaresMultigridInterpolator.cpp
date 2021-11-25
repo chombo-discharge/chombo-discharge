@@ -109,7 +109,7 @@ void EBLeastSquaresMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>&
 							   const Interval              a_variables) {
   CH_TIME("EBLeastSquaresMultigridInterpolator::coarseFineInterp");
 
-  CH_assert(m_ghostCF == a_phiFine.ghostVect());
+  CH_assert(m_ghostCF*IntVect::Unit == a_phiFine.ghostVect());
 
   if(a_phiFine.ghostVect() != m_ghostVector){
     MayDay::Error("EBLeastSquaresMultigridInterpolator::coarseFineInterp -- number of ghost cells do not match!");
@@ -162,7 +162,7 @@ void EBLeastSquaresMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>&
 void EBLeastSquaresMultigridInterpolator::coarseFineInterpH(LevelData<EBCellFAB>& a_phiFine, const Interval a_variables) const{
   CH_TIME("EBLeastSquaresMultigridInterpolator::coarseFineInterpH(LD<EBCellFAB>, Interval)");
 
-  CH_assert(m_ghostCF == a_phiFine.ghostVect());
+  CH_assert(m_ghostCF*IntVect::Unit == a_phiFine.ghostVect());
 
   if(a_phiFine.ghostVect() != m_ghostVector){
     MayDay::Error("EBLeastSquaresMultigridInterpolator::coarseFineInterp -- number of ghost cells do not match!");
@@ -218,7 +218,7 @@ void EBLeastSquaresMultigridInterpolator::slowCoarseFineInterp(LevelData<EBCellF
 							       const Interval              a_variables){
   CH_TIME("EBLeastSquaresMultigridInterpolator::slowCoarseFineInterp");
   
-  CH_assert(m_ghostCF <= a_phiFine.ghostVect());
+  CH_assert(m_ghostCF*IntVect::Unit <= a_phiFine.ghostVect());
 
   // TLDR: This routine does the inhomogeneous coarse-fine interpolation, i.e. the coarse data is not set to zero. 
 
@@ -286,7 +286,7 @@ void EBLeastSquaresMultigridInterpolator::slowCoarseFineInterp(LevelData<EBCellF
 void EBLeastSquaresMultigridInterpolator::slowCoarseFineInterpH(LevelData<EBCellFAB>& a_phiFine, const Interval a_variables) const{
   CH_TIME("EBLeastSquaresMultigridInterpolator::slowCoarseFineInterpH(LD<EBCellFAB>, Interval)");
 
-  CH_assert(m_ghostCF <= a_phiFine.ghostVect());  
+  CH_assert(m_ghostCF*IntVect::Unit <= a_phiFine.ghostVect());  
 
   // TLDR: This routine does the coarse-fine interpolation with the coarse-grid data set to zero. 
   for (DataIterator dit(m_eblgFine.getDBL()); dit.ok(); ++dit){
@@ -452,15 +452,7 @@ void EBLeastSquaresMultigridInterpolator::defineBuffers(){
   const EBISLayout&        coFiEBISL  = m_eblgCoFi.getEBISL();
   const ProblemDomain&     coarDomain = m_eblgCoFi.getDomain();
 
-  Vector<Box> coarBoxes = coFiGrids.boxArray();
-
-  for (int i = 0; i < coarBoxes.size(); i++){
-    coarBoxes[i].grow(coarRadius);
-  }
-
-  m_grownCoarBoxesLayout.define(coarBoxes, coFiGrids.procIDs());
-
-  m_grownCoarData.define(m_grownCoarBoxesLayout, 1, EBCellFactory(coFiEBISL));
+  m_grownCoarData.define(coFiGrids, 1, coarRadius*IntVect::Unit, EBCellFactory(coFiEBISL));
 }
 
 void EBLeastSquaresMultigridInterpolator::defineStencilsEBCF(){
@@ -489,7 +481,7 @@ void EBLeastSquaresMultigridInterpolator::defineStencilsEBCF(){
   for (DataIterator dit(dblFine); dit.ok(); ++dit){
     const Box origFineBox    = dblFine[dit()];
     const Box ghostedFineBox = grow(origFineBox, m_ghostVector);
-    const Box grownCoarBox   = m_grownCoarBoxesLayout[dit()];
+    const Box grownCoarBox   = m_grownCoarData[dit()].box();
 
     // Define the valid regions such that the interpolation does not include coarse grid cells that fall beneath the fine level,
     // and no fine cells outside the CF.

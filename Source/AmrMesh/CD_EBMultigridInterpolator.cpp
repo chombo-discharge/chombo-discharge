@@ -18,6 +18,7 @@
 
 EBMultigridInterpolator::EBMultigridInterpolator(){
 
+
 }
 
 EBMultigridInterpolator::~EBMultigridInterpolator(){

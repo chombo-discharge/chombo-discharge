@@ -11,6 +11,7 @@
 
 // Chombo includes
 #include <ParmParse.H>
+#include <NeighborIterator.H>
 
 // Our includes
 #include <CD_Realm.H>
@@ -23,7 +24,7 @@ Realm::Realm(){
   m_isDefined = false;
   m_verbosity = -1;
 
-  ParmParse pp("PhaseRealm");
+  ParmParse pp("Realm");
 
   pp.query("verbosity", m_verbosity);
 
@@ -141,6 +142,7 @@ void Realm::regridOperators(const int a_lmin){
   for (auto& r : m_realms){
     r.second->regridOperators(a_lmin);
   }
+
   this->defineMasks(a_lmin);
 }
 
@@ -210,31 +212,33 @@ void Realm::defineHaloMasks(const int a_lmin){
 	mask[lvl] = RefCountedPtr<LevelData<BaseFab<bool> > >(new LevelData<BaseFab<bool> >(gridsCoar, ncomp, IntVect::Zero));
 
 	this->defineHaloMask(*mask[lvl],
-			       domainCoar,
-			       domainFine,
-			       gridsCoar,
-			       gridsFine,
-			       buffer,
-			       m_refinementRatios[lvl]);
+			     domainCoar,
+			     domainFine,
+			     gridsCoar,
+			     gridsFine,
+			     buffer,
+			     m_refinementRatios[lvl]);
       }
     }
   }
 }
 
 void Realm::defineHaloMask(LevelData<BaseFab<bool> >& a_coarMask,
-			     const ProblemDomain&       a_domainCoar,
-			     const ProblemDomain&       a_domainFine,
-			     const DisjointBoxLayout&   a_gridsCoar,
-			     const DisjointBoxLayout&   a_gridsFine,
-			     const int                  a_buffer,
-			     const int                  a_refRat){
+			   const ProblemDomain&       a_domainCoar,
+			   const ProblemDomain&       a_domainFine,
+			   const DisjointBoxLayout&   a_gridsCoar,
+			   const DisjointBoxLayout&   a_gridsFine,
+			   const int                  a_buffer,
+			   const int                  a_refRat){
   CH_TIME("Realm::defineHaloMasks");
   if(m_verbosity > 5){
     pout() << "Realm::defineHaloMasks" << endl;
   }
 
-  // TLDR: This function creates a GLOBAL view of the CFIVS, a_buffer cells wide on the coarse side of the refinement boundary. If this is not performant,
-  //       there are probably better ways to do this. 
+  // TLDR: This routine defines a "mask" of valid coarse-grid cells (i.e., not covered by a finer level) around a fine grid. The mask is a_buffer wide. It is
+  //       created by first fetching the cells around on the fine grid. This is a local operation where we get all the cells around each patch and then subtract
+  //       cells that overlap with other boxes. This set of cells is then put on a LevelData<FArrayBox> mask so we can copy the result to the coarse grid and
+  //       set the mask. 
   
   const int comp  = 0;
   const int ncomp = 1;
@@ -248,15 +252,14 @@ void Realm::defineHaloMask(LevelData<BaseFab<bool> >& a_coarMask,
   if(a_buffer > 0){
 
     // Coarsen the fine grid and make a mask on the coarsened fine grid
-    DisjointBoxLayout gridsCoFi;
-    coarsen(gridsCoFi, a_gridsFine, a_refRat);
+    DisjointBoxLayout dblCoFi;
+    coarsen(dblCoFi, a_gridsFine, a_refRat);
 
-    IntVectSet halo;                 // Global CFIVS - should find a better way to do this.
-    NeighborIterator nit(gridsCoFi); // Neighbor iterator
-
+    IntVectSet halo;
+    
     // Go through the cofi grid and set the halo to true
-    for (DataIterator dit(gridsCoFi); dit.ok(); ++dit){
-      const Box coFiBox = gridsCoFi[dit()];
+    for (DataIterator dit(dblCoFi); dit.ok(); ++dit){
+      const Box coFiBox = dblCoFi[dit()];
 
       // Make IntVect set consisting of only ghost cells (a_buffer) for each box. 
       Box grownBox = grow(coFiBox, a_buffer);
@@ -266,9 +269,10 @@ void Realm::defineHaloMask(LevelData<BaseFab<bool> >& a_coarMask,
       IntVectSet myHalo(grownBox);
       myHalo -= coFiBox;
 
-      // Subtract non-ghosted neighboring boxes. 
+      // Subtract non-ghosted neighboring boxes.
+      NeighborIterator nit(dblCoFi); // Neighbor iterator      
       for (nit.begin(dit()); nit.ok(); ++nit){
-	const Box neighborBox = gridsCoFi[nit()];
+	const Box neighborBox = dblCoFi[nit()];
 	myHalo -= neighborBox;
       }
 
@@ -279,29 +283,11 @@ void Realm::defineHaloMask(LevelData<BaseFab<bool> >& a_coarMask,
     // TLDR: In the above, we found the coarse-grid cells surrounding the fine level, viewed from the fine grids.
     //       Below, we create that view from the coarse grid. We use a BoxLayoutData<FArrayBox> on the coarsened fine grid,
     //       whose "ghost cells" can added to the _actual_ coarse grid. We then loop through those cells and set the mask. 
-
-    // Get some box definitions. 
-    Vector<Box> coFiBoxes = gridsCoFi.boxArray();
-    Vector<int> coFiProcs = gridsCoFi.procIDs();
-
-    Vector<Box> coarBoxes = a_gridsCoar.boxArray();
-    Vector<Box> coarPrioc = a_gridsCoar.boxArray();
-
-    // Grow the coarsened fine boxes
-    for (int i = 0; i < coFiBoxes.size(); i++){
-      coFiBoxes[i].grow(a_buffer);
-      coFiBoxes[i] &= a_domainCoar;
-    }
-
-    // Define boxlayouts
-    BoxLayout blCoFi(coFiBoxes, coFiProcs);
-    BoxLayout blCoar(a_gridsCoar.boxArray(), a_gridsCoar.procIDs());
-
-    BoxLayoutData<FArrayBox> coFiMask(blCoFi, ncomp);
-    BoxLayoutData<FArrayBox> coarMask(blCoar, ncomp);
+    LevelData<FArrayBox> coFiMask(dblCoFi,     ncomp, a_buffer*IntVect::Unit);
+    LevelData<FArrayBox> coarMask(a_gridsCoar, ncomp,          IntVect::Zero);    
   
     // Reset masks
-    for (DataIterator dit(blCoFi); dit.ok(); ++dit){
+    for (DataIterator dit(dblCoFi); dit.ok(); ++dit){
       coFiMask[dit()].setVal(0.0);
     }
     for (DataIterator dit(a_gridsCoar); dit.ok(); ++dit){
@@ -309,16 +295,18 @@ void Realm::defineHaloMask(LevelData<BaseFab<bool> >& a_coarMask,
     }
 
     // Run through the halo and set the halo cells to 1 on the coarsened fine grids (these are essentially "ghost cells")
-    for (DataIterator dit(blCoFi); dit.ok(); ++dit){
-      IntVectSet curHalo = halo & blCoFi[dit()];
+    for (DataIterator dit(dblCoFi); dit.ok(); ++dit){
+      IntVectSet curHalo = halo & dblCoFi[dit()];
       for (IVSIterator ivsit(curHalo); ivsit.ok(); ++ivsit){
 	coFiMask[dit()](ivsit(), comp) = 1.0;
       }
     }
 
-    // Add the result to the coarse grid. 
+    // Add the result to the coarse grid.
+    Copier copier;
+    copier.ghostDefine(dblCoFi, a_gridsCoar, a_domainCoar, a_buffer*IntVect::Unit);
     const Interval interv(0,0);
-    coFiMask.addTo(interv, coarMask, interv, a_domainCoar.domainBox());
+    coFiMask.copyTo(interv, coarMask, interv, copier, LDaddOp<FArrayBox>());
 
     // Run through the grids and make the boolean mask
     for (DataIterator dit(a_gridsCoar); dit.ok(); ++dit){
@@ -440,8 +428,8 @@ Vector<RefCountedPtr<EbCoarAve> >& Realm::getCoarseAverage(const phase::which_ph
   return m_realms[a_phase]->getCoarseAverage();
 }
 
-Vector<RefCountedPtr<EbGhostCloud> >& Realm::getGhostCloud(const phase::which_phase a_phase){
-  return m_realms[a_phase]->getGhostCloud();
+EBAMRParticleMesh& Realm::getParticleMesh(const phase::which_phase a_phase){
+  return m_realms[a_phase]->getParticleMesh();
 }
 
 Vector<RefCountedPtr<EBMultigridInterpolator> >& Realm::getMultigridInterpolator(const phase::which_phase a_phase){
@@ -458,10 +446,6 @@ Vector<RefCountedPtr<AggEBPWLFillPatch> >& Realm::getFillPatch(const phase::whic
 
 Vector<RefCountedPtr<EBPWLFineInterp> >& Realm::getPwlInterpolator(const phase::which_phase a_phase){
   return m_realms[a_phase]->getPwlInterpolator();
-}
-
-Vector<RefCountedPtr<EBMGInterp> >& Realm::getEBMGInterp(const phase::which_phase a_phase){
-  return m_realms[a_phase]->getEBMGInterp();
 }
 
 Vector<RefCountedPtr<EBFluxRegister> >&  Realm::getFluxRegister(const phase::which_phase a_phase){
@@ -482,14 +466,6 @@ Vector<RefCountedPtr<EBCoarToCoarRedist> >&  Realm::getCoarToCoarRedist(const ph
 
 Vector<RefCountedPtr<EBFineToCoarRedist> >&  Realm::getFineToCoarRedist(const phase::which_phase a_phase){
   return m_realms[a_phase]->getFineToCoarRedist();
-}
-
-Vector<RefCountedPtr<Copier> >& Realm::getCopier(const phase::which_phase a_phase){
-  return m_realms[a_phase]->getCopier();
-}
-
-Vector<RefCountedPtr<Copier> >& Realm::getReverseCopier(const phase::which_phase a_phase){
-  return m_realms[a_phase]->getReverseCopier();
 }
 
 const EBAMRFAB& Realm::getLevelset(const phase::which_phase a_phase) const {

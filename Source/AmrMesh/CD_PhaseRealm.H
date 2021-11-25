@@ -36,9 +36,9 @@
 #include <CD_DomainFluxIFFAB.H>
 #include <CD_DomainFluxIFFABFactory.H>
 #include <CD_ParticleContainer.H>
-#include <CD_EbGhostCloud.H>
 #include <CD_EBMultigridInterpolator.H>
 #include <CD_EBGradient.H>
+#include <CD_EBAMRParticleMesh.H>
 #include <CD_NonConservativeDivergenceStencil.H>
 #include <CD_EbCentroidInterpolationStencil.H>
 #include <CD_CentroidInterpolationStencil.H>
@@ -51,14 +51,12 @@ static const std::string s_eb_irreg_interp = "eb_irreg_interp";  // For data rec
 static const std::string s_eb_coar_ave     = "eb_coar_ave"    ;  // For coarsening
 static const std::string s_eb_fill_patch   = "eb_fill_patch"  ;  // For regridding data
 static const std::string s_eb_pwl_interp   = "eb_pwl_interp"  ;  // For linearly filling ghost cells
-static const std::string s_eb_mg_interp    = "eb_mg_interp"   ;  // For multigrid injection
 static const std::string s_eb_flux_reg     = "eb_flux_reg"    ;  // For flux registeration
 static const std::string s_eb_redist       = "eb_redist"      ;  // For redistribution
-static const std::string s_eb_copier       = "eb_copier"      ;  // For copying
-static const std::string s_eb_ghostcloud   = "eb_ghostcloud"  ;  // For "hanging" particle clouds
 static const std::string s_noncons_div     = "eb_non_cons_div";  // For computing non-conservative divergences
 static const std::string s_eb_multigrid    = "eb_multigrid"   ;  // For multigrid interpolation
 static const std::string s_levelset        = "levelset"       ;  // For putting level-set on mesh
+static const std::string s_particle_mesh   = "particle_mesh"  ;  // For doing particle-mesh operations.
 
 /*!
   @brief Class that holds important things for doing AMR over a specific phase and processor distribution. 
@@ -255,6 +253,11 @@ public:
   const Vector<RefCountedPtr<EBGradient> >& getGradientOp() const;
 
   /*!
+    @brief Get particle-mesh operator
+  */
+  EBAMRParticleMesh& getParticleMesh() const;
+
+  /*!
     @brief Get coarsening operators
   */
   Vector<RefCountedPtr<EbCoarAve> >& getCoarseAverage() const;
@@ -262,7 +265,7 @@ public:
   /*!
     @brief Get deposition operator
   */
-  Vector<RefCountedPtr<EbGhostCloud> >& getGhostCloud() const;
+  Vector<RefCountedPtr<EBCoarseFineParticleMesh> >& getEBCoarseFineParticleMesh() const;
 
   /*!
     @brief Get multigrid interpolator
@@ -278,11 +281,6 @@ public:
     @brief Get piecewise linear ghost cell interpolation utility
   */
   Vector<RefCountedPtr<EBPWLFineInterp> >& getPwlInterpolator() const;
-
-  /*!
-    @brief Get multigrid injection utility
-  */
-  Vector<RefCountedPtr<EBMGInterp> >& getEBMGInterp() const;
 
   /*!
     @brief Get flux register utility
@@ -308,16 +306,6 @@ public:
     @brief Get fine-to-coarse redistribution utility
   */
   Vector<RefCountedPtr<EBFineToCoarRedist> >&  getFineToCoarRedist() const;
-
-  /*!
-    @brief Get copier
-  */
-  Vector<RefCountedPtr<Copier> >& getCopier() const;
-
-  /*!
-    @brieg Get reverse copier
-  */
-  Vector<RefCountedPtr<Copier> >& getReverseCopier() const;
 
   /*!
     @brief Get level-set function
@@ -461,25 +449,10 @@ protected:
   */
   mutable Vector<RefCountedPtr<LayoutData<VoFIterator> > > m_vofIter;
 
-  /*! 
-    @brief Copier
-  */
-  mutable Vector<RefCountedPtr<Copier> > m_copier;
-
-  /*! 
-    @brief Reverse copier
-  */
-  mutable Vector<RefCountedPtr<Copier> > m_reverseCopier;
-
   /*!
     @brief Coarsening operator
   */
   mutable Vector<RefCountedPtr<EbCoarAve> > m_coarAve;
-
-  /*!
-    @brief Operator for hanging particle deposition clouds
-  */
-  mutable Vector<RefCountedPtr<EbGhostCloud> > m_ghostclouds;
 
   /*!
     @brief Multigrid interpolation utility
@@ -495,11 +468,6 @@ protected:
     @brief Ghost cell interpolation utility
   */
   mutable Vector<RefCountedPtr<EBPWLFineInterp> > m_pwlInterpGhosts;
-
-  /*!
-    @brief Multigrid injection utility
-  */
-  mutable Vector<RefCountedPtr<EBMGInterp> > m_mgInjection;
 
   /*!
     @brief Flux register utility
@@ -529,7 +497,12 @@ protected:
   /*!
     @brief Gradient operator
   */
-  mutable Vector<RefCountedPtr<EBGradient> > m_gradientOp;  
+  mutable Vector<RefCountedPtr<EBGradient> > m_gradientOp;
+
+  /*!
+    @brief For doing particle-mesh operations
+  */
+  mutable EBAMRParticleMesh m_particleMesh;
 
   /*!
     @brief Data recentering utility (center to centroid)
@@ -622,25 +595,18 @@ protected:
     @brief Define operator redistribution utility
     @param[in] a_lmin Coarsest grid level that changes
   */  
-  void defineCoarToCoarRedistOper(const int a_lmin, const int a_regsize);      
+  void defineCoarToCoarRedistOper(const int a_lmin, const int a_regsize);
+
+  /*!
+    @brief Define particle mesh operator. 
+  */    
+  void defineParticleMesh();
 
   /*!
     @brief Define gradient stencils
     @param[in] a_lmin Coarsest grid level that changes
   */  
   void defineGradSten(const int a_lmin);
-
-  /*!
-    @brief Define copier
-    @param[in] a_lmin Coarsest grid level that changes
-  */  
-  void defineCopier(const int a_lmin);
-
-  /*!
-    @brief Define particle deposition "hanging clouds" utility
-    @param[in] a_lmin Coarsest grid level that changes
-  */  
-  void defineGhostCloud(const int a_lmin);
 
   /*!
     @brief Define data recentering stencils

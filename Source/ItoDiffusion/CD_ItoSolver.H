@@ -25,7 +25,7 @@
 #include <CD_ComputationalGeometry.H>
 #include <CD_ItoSpecies.H>
 #include <CD_ItoParticle.H>
-#include <CD_EbParticleInterp.H>
+#include <CD_EBParticleMesh.H>
 #include <CD_ParticleContainer.H>
 #include <CD_ItoMerge.H>
 #include <CD_PointMass.H>

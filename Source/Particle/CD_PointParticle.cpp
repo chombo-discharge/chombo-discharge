@@ -14,6 +14,8 @@
 #include <CD_NamespaceHeader.H>
   
 PointParticle::PointParticle() : BinItem(){
+  m_mass     = 0.0;
+  m_position = RealVect::Zero;
 }
 
 
@@ -27,8 +29,8 @@ PointParticle::~PointParticle(){
 }
 
 void PointParticle::define(const RealVect a_position, const Real a_mass){
-  setMass(a_mass);
-  setPosition(a_position);
+  this->setMass    (a_mass    );
+  this->setPosition(a_position);
 }
 
 void PointParticle::setMass(const Real a_mass){
@@ -44,7 +46,7 @@ const Real& PointParticle::mass() const{
 }
 
 int PointParticle::size() const{
-  return ( BinItem::size() + sizeof(m_mass));
+  return (BinItem::size() + sizeof(m_mass));
 }
 
 void PointParticle::linearOut(void* buf) const{

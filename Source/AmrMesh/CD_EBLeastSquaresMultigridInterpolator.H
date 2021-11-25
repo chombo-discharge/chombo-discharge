@@ -201,14 +201,9 @@ protected:
   EBLevelGrid m_eblgCoFi;
 
   /*!
-    @brief Grown box layout on the coarse level
-  */
-  BoxLayout m_grownCoarBoxesLayout;
-
-  /*!
     @brief Coarsened data
   */
-  mutable BoxLayoutData<EBCellFAB> m_grownCoarData;
+  mutable LevelData<EBCellFAB> m_grownCoarData;
 
   /*!
     @brief Iterator over ghost cells

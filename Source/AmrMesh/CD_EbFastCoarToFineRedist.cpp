@@ -10,6 +10,8 @@
 */
 
 // Chombo includes
+#include <CH_Timer.H>
+#include <NeighborIterator.H>
 #include <ParmParse.H>
 
 // Our includes
@@ -188,46 +190,41 @@ void EbFastCoarToFineRedist::makeCoarSets(){
   constexpr int      nComp  = 1;
   const     Interval interv = Interval(comp, comp);
 
-  // Initialize the coarse mask and set it to zero everywhere.
-  BoxLayout                coarLayout(m_gridsCoar.boxArray(), m_gridsCoar.procIDs());
-  BoxLayoutData<FArrayBox> coarMask  (coarLayout, nComp);
+  const IntVect dstGhost =             IntVect::Zero;
+  const IntVect srcGhost = m_redistRad*IntVect::Unit;
+  
+  LevelData<FArrayBox> coarMask(m_gridsCoar,    nComp, dstGhost);
+  LevelData<FArrayBox> coFiMask(m_gridsCedFine, nComp, srcGhost);
+
+  // Set the coarse mask to be zero everywhere. 
   for (DataIterator dit(m_gridsCoar); dit.ok(); ++dit){
     coarMask[dit()].setVal(zero);
   }
-  
-  // Initialize the fine mask. We need cells up to m_redistRad away from the refinement boundary. 
-  Vector<Box> coFiBoxes = m_gridsCedFine.boxArray();
-  for (int i = 0; i < coFiBoxes.size(); i++){
-    coFiBoxes[i].grow(m_redistRad);
-  }
 
-  BoxLayout                coFiLayout(coFiBoxes, m_gridsCedFine.procIDs());
-  BoxLayoutData<FArrayBox> coFiMask  (coFiLayout, nComp);
-
-  // Set the fine mask = 1 everywhere. After that, go through the valid regions (both this box and neighbor boxes)
-  // and set the mask to 0 in those regions. 
+  // On the coarsened fine mask we iterate through all the cells and set the mask to be = 1 outside the refinement boundary (up to m_redistRad away).
   for (DataIterator dit(m_gridsCedFine); dit.ok(); ++dit){
-    const Box cellBox  = m_gridsCedFine[dit()];
-    const Box grownBox = coFiLayout[dit()];
-    
-    coFiMask[dit()].setVal(one);
+    FArrayBox& mask       = coFiMask[dit()];
+    const Box& cellBox    = m_gridsCedFine[dit()]; // This is the unghosted box.
+    const Box& ghostedBox = mask.box();            // This is the ghosted box, i.e. cellBox but grown by srcGhost.
 
-    // Set = 0 in valid regions
-    coFiMask[dit()].setVal(zero, cellBox, comp, nComp);
+    mask.setVal(one);
+    mask.setVal(zero, cellBox, comp, nComp);
 
-    for (LayoutIterator lit = m_gridsCedFine.layoutIterator(); lit.ok(); ++lit){
-      const Box neighborBox = m_gridsCedFine[lit()];
-      const Box overlapBox  = neighborBox & grownBox;
+    // This will 
+    NeighborIterator nit(m_gridsCedFine);
+    for (nit.begin(dit()); nit.ok(); ++nit){
+      const Box overlapBox  = m_gridsCedFine[nit()] & ghostedBox;
 
       if(!overlapBox.isEmpty()){
-	coFiMask[dit()].setVal(zero, overlapBox, comp, nComp);
+	mask.setVal(zero, overlapBox, comp, nComp);
       }
     }
   }
 
-  // Add the coarsened fine mask to the coarse level. After this we will have coarMask = 1 in cells that lie in the refinement bounary (grown by m_redistRad)
-  // and 0 everywhere else. 
-  coFiMask.addTo(interv, coarMask, interv, m_ebislCoar.getDomain());
+  // Add the result to the coarse grid. This should add from ghost cells and into the valid region.
+  Copier copier;
+  copier.ghostDefine(m_gridsCedFine, m_gridsCoar, m_domainCoar, srcGhost);
+  coFiMask.copyTo(interv, coarMask, interv, copier, LDaddOp<FArrayBox>());
 
   // Create the sets. 
   for (DataIterator dit(m_gridsCoar); dit.ok(); ++dit){
@@ -241,6 +238,9 @@ void EbFastCoarToFineRedist::makeCoarSets(){
     
     m_setsCoar[dit()].makeEmpty();
 
+    // Recall: The mask has a value > 0 in all cells that are a distance m_redistRad cells from the refinement boundary. This includes regular
+    //         cells but those don't redistribute. So, here we fetch all the valid coarse-grid cells that redistribute over the refinement boundary
+    //         and into the fine grid.
     if(isIrregular){
       const IntVectSet irregIVS = ebisBox.getIrregIVS(cellBox);
 
@@ -252,7 +252,7 @@ void EbFastCoarToFineRedist::makeCoarSets(){
 	}
       }
     }
-  }
+  }  
 #else
   IntVectSet globalIVS;
 
