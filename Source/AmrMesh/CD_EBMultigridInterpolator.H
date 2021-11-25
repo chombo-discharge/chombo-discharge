@@ -202,7 +202,7 @@ protected:
   /*!
     @brief Coarsened data
   */
-  mutable LevelData<EBCellFAB> m_grownCoarData;  
+  mutable LevelData<EBCellFAB> m_grownCoarData;
 
   /*!
     @brief Iterator over ghost cells

@@ -555,9 +555,6 @@ void McPhoto::registerOperators(){
     m_amr->registerOperator(s_eb_redist,     m_realm, m_phase);
     m_amr->registerOperator(s_particle_mesh, m_realm, m_phase);
     
-    if(m_pvrBuffer <= 0){
-      m_amr->registerOperator(s_eb_ghostcloud, m_realm, m_phase);
-    }
     if(m_haloBuffer > 0){
       m_amr->registerMask(s_particle_halo, m_haloBuffer, m_realm);
     }
