@@ -92,8 +92,8 @@ void EBAMRParticleMesh::defineCoarseFineMotion(){
     const bool hasCoar = (lvl > 0);
 
     if(hasCoar){
-      m_coarseFinePM[lvl] = RefCountedPtr<EBCoarseFineParticleMesh>(new EBCoarseFineParticleMesh(*m_eblgs [lvl-1],
-												 *m_eblgs [lvl  ],
+      m_coarseFinePM[lvl] = RefCountedPtr<EBCoarseFineParticleMesh>(new EBCoarseFineParticleMesh(*m_eblgs[lvl-1],
+												 *m_eblgs[lvl  ],
 												 m_refRat[lvl-1],
 												 m_ghost));
     }
