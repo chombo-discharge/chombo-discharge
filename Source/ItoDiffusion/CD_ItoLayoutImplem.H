@@ -368,29 +368,29 @@ phase::which_phase ItoLayout<T>::getPhase() const {
 }
 
 template <class T, class S>
-itoFactory<T, S>::itoFactory(){
+ItoFactory<T, S>::ItoFactory(){
 
 }
 
 template <class T, class S>
-itoFactory<T, S>::~itoFactory(){
+ItoFactory<T, S>::~ItoFactory(){
 
 }
 
 template <class T, class S>
-RefCountedPtr<ItoLayout<T> > itoFactory<T, S>::newLayout(const Vector<RefCountedPtr<ItoSpecies> >& a_species) const{
+RefCountedPtr<ItoLayout<T> > ItoFactory<T, S>::newLayout(const Vector<RefCountedPtr<ItoSpecies> >& a_species) const{
 
-  auto ito = RefCountedPtr<ItoLayout<T> > (new ItoLayout<T>(a_species));
+  auto itoLayout = RefCountedPtr<ItoLayout<T> > (new ItoLayout<T>(a_species));
 
   // Cast solvers and instantiate them
   for (int i = 0; i < a_species.size(); i++){
     RefCountedPtr<T> solver = RefCountedPtr<T> (static_cast<T*> (new S()));
     solver->setSpecies(a_species[i]);
     solver->setVerbosity(-1);
-    ito->addSolver(solver);
+    itoLayout->addSolver(solver);
   }
 
-  return ito;
+  return itoLayout;
 }
 
 #include <CD_NamespaceFooter.H>

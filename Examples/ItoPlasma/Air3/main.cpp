@@ -53,7 +53,7 @@ int main(int argc, char* argv[]){
 
   // Create solver factories
   auto poi_fact = new FieldSolverFactory<FieldSolverMultigrid>();
-  auto ito_fact = new itoFactory<ItoSolver, ItoSolver>();
+  auto ito_fact = new ItoFactory<ItoSolver, ItoSolver>();
   auto rte_fact = new RtFactory<McPhoto, McPhoto>();
 
   // Instantiate solvers

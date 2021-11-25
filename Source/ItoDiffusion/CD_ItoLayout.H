@@ -353,18 +353,18 @@ protected:
   an ItoLayout<S>, or it can automatically cast to an ItoLayout<T>. 
 */
 template <class T, class S>
-class itoFactory {
+class ItoFactory {
 public:
 
   /*!
     @brief Constructor.
   */
-  itoFactory();
+  ItoFactory();
 
   /*!
     @brief Destructor (does nothing).
   */  
-  ~itoFactory();
+  ~ItoFactory();
 
   /*!
     @brief Factory method which creates a new layout from a set of species. This can do automated casting between the template parameters (in case there are classes
