@@ -434,6 +434,15 @@ namespace ItoMerge {
       splitDir = (splitDir + 1) % SpaceDim;       
     }
   }
+
+  /*!
+    @brief Default partitioning functino for splitting a node. 
+  */
+  template <class T>
+  NodePartitioner<T> NodePartitionEqualMass = [](std::shared_ptr<Node<T> >& a_node, const int a_dir) -> void {
+    return a_node->split(a_dir);
+  };
+  
 }
 
 #include <CD_NamespaceFooter.H>

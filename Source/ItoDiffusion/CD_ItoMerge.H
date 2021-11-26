@@ -264,6 +264,13 @@ namespace ItoMerge {
     */
     std::vector<std::shared_ptr<Node<T> > > m_leaves;
   };
+
+  /*!
+    @brief Declaration of a node partitioner function. 
+  */
+  template <class T>
+  using NodePartitioner = std::function<void>(std::shared_ptr<Node<T> >& a_node, const int a_dir);
+  
 }
 
 #include <CD_NamespaceFooter.H>
