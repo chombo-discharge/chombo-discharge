@@ -248,9 +248,10 @@ namespace ItoMerge {
       @brief Build tree with desired number of leaves. This will recursively partition the primitives.
       @param[in] a_firstDir        Coordinate of the first splitting direction (i.e. the first plane that we split along). Subsequent planes are cycled x->y->z->x->y->z etc.
       @param[in] a_numTargetLeaves Desired number of leaves when building the tree.
+      @param[in] a_partitioner     Partitioning function. 
     */
     inline
-    void buildTree(const int a_firstDir, const int a_numTargetLeaves, const NodePartitioner<T>& partitioner = NodePartitionEqualMass<T>); 
+    void buildTree(const int a_firstDir, const int a_numTargetLeaves, const NodePartitioner<T>& a_partitioner = ItoMerge::NodePartitionEqualMass<T>); 
 
     /*!
       @brief Get the leaf nodes
@@ -283,9 +284,6 @@ namespace ItoMerge {
     */
     std::vector<std::shared_ptr<Node<T> > > m_leaves;
   };
-
-
-  
 }
 
 #include <CD_NamespaceFooter.H>

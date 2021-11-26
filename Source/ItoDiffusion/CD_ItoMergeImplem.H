@@ -13,15 +13,12 @@
 #ifndef CD_ItoMergeImplem_H
 #define CD_ItoMergeImplem_H
 
-// Std includes
-#include <chrono>
-#include <ctime>
-#include <ratio>
-
 // Chombo includes
 #include <CH_Timer.H>
 
 // Our includes
+#include <CD_ItoMerge.H>
+#include <CD_ItoMergePartitioners.H>
 #include <CD_NamespaceHeader.H>
 
 #define ITOMERGE_VECTOR_CAPACITY 2048
@@ -402,11 +399,10 @@ namespace ItoMerge {
 
 	// If we needed a new leaf AND we could split this node, split it and go further. This will give us two leaf nodes
 	// in the "new" list of leaf nodes.
-	if(m_leaves[i]->canSplit() && leavesNeeded > 0){ 
-	  //	  m_leaves[i]->split(splitDir);
+	if(m_leaves[i]->canSplit() && leavesNeeded > 0){
 	  a_partitioner(m_leaves[i], splitDir);
 	
-	  newLeaves[N]   = m_leaves[i]->getLeft (); 
+	  newLeaves[N  ] = m_leaves[i]->getLeft (); 
 	  newLeaves[N+1] = m_leaves[i]->getRight();
 
 	  N += 2;
@@ -435,15 +431,6 @@ namespace ItoMerge {
       splitDir = (splitDir + 1) % SpaceDim;       
     }
   }
-
-  /*!
-    @brief Default partitioning functino for splitting a node. 
-  */
-  template <class T>
-  NodePartitioner<T> NodePartitionEqualMass = [](std::shared_ptr<Node<T> >& a_node, const int a_dir) -> void {
-    return a_node->split(a_dir);
-  };
-  
 }
 
 #include <CD_NamespaceFooter.H>
