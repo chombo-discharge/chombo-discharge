@@ -58,6 +58,26 @@ namespace ItoMerge {
     bool canSplit() const;
 
     /*!
+      @brief Check if node is a leaf node
+      @details This returns true if this node does not have children nodes. 
+    */
+    inline
+    bool isLeafNode() const;
+
+    /*!
+      @brief Check if node is a regular node -- i.e. not a leaf node.
+    */
+    inline
+    bool isRegularNode() const;
+
+    /*!
+      @brief Check if node is a root node. 
+      @details Returns true if this node does not have a parent node. 
+    */
+    inline
+    bool isRootNode() const;        
+
+    /*!
       @brief Set parent node
       @param[in] a_parent Pointer to parent node
     */

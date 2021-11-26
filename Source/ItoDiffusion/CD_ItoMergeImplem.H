@@ -24,8 +24,7 @@
 // Our includes
 #include <CD_NamespaceHeader.H>
 
-#define BVH_RESERVE_SIZE 2048
-#define BVH_DEBUG 1
+#define ITOMERGE_VECTOR_CAPACITY 2048
 
 namespace ItoMerge {
 
@@ -35,7 +34,7 @@ namespace ItoMerge {
     m_left   = nullptr;
     m_right  = nullptr;
     
-    m_data.reserve(BVH_RESERVE_SIZE);
+    m_data.reserve(ITOMERGE_VECTOR_CAPACITY);
   }
 
   template <class T>
@@ -50,15 +49,21 @@ namespace ItoMerge {
 
   template <class T>
   inline
-  void Node<T>::setToLeafNode(){
-    m_isLeafNode = true;
+  bool Node<T>::isLeafNode() const {
+    return m_left == nullptr && m_right == nullptr;
   }
 
   template <class T>
   inline
-  void Node<T>::setToRegularNode(){
-    m_isLeafNode = false;
+  bool Node<T>::isRegularNode() const {
+    return !(this->isLeafNode());
   }
+
+  template <class T>
+  inline
+  bool Node<T>::isRootNode() const {
+    return m_parent == nullptr;
+  }    
 
   template <class T>
   inline
@@ -144,162 +149,148 @@ namespace ItoMerge {
   template <class T>
   inline
   void Node<T>::split(const int a_dir){
-#if BVH_DEBUG
-    for (const auto& d : m_data){
-      if(d.mass() < 1.0) {
-	std::cout << d.mass() << std::endl;
-	MayDay::Warning("Node<T>::split - how did mass be come <= 1??");
-      }
-    }
-#endif
+    CH_TIME("ItoMerge::Node<T>::split");
 
-    // 0. If we made it in here, we KNOW that we can split.
-#if BVH_DEBUG // Debugging flag to see if we're doing something bad. 
-    if(m_mass <= 1.1){
-      std::cout << m_mass << std::endl;
-      MayDay::Warning("Node::split - m_mass <= 1.0, splitting should not be called");
-    }
-#endif
+    // Some basic assertions -- the loop should evaluate to an empty loop when DEBUG=TRUE.
+    CH_assert(m_data.size() > 0  );
+    CH_assert(m_mass        > 1.0);
+    
+    for (const auto& n : m_data){
+      CH_assert(n.mass() >= 1.0);
+    }    
 
-    const int data_size = m_data.size();
+    // TLDR: This function splits the primitives in the node into two subvolumes. A splitting plane is made along the input coordinate and it is positioned
+    //       such that the total mass on the left/right side of the splitting plane differ by at most one computational particle. The guts of the code mainly
+    //       consists of tests for how to divide the "median" particle -- there are various cases that we need to cover here (such as the median particle being
+    //       a physical particle or a superparticle). 
   
-    // 1. Sort data. Use a lambda for comparing. God I love C++11.
+    // 1. Sort data along the input coordinate. We need this because we need to have something sensible to iterate through
+    //    when we place the splitting plane. 
     std::sort(std::begin(m_data), std::end(m_data), [a_dir](const T& p1, const T& p2){return p1[a_dir] < p2[a_dir];});
 
-    // Init median on i = 0. mass_left and mass_right are the masses on each side of the median mass. 
-    int splitIndex  = 0;
-    Real mass_left  = 0.0;
-    Real mass_right = m_mass - m_data[0].mass();
+    // 2. Figure out where to place the splitting plane -- this is not the physical coordinate but index in m_data (the list of primitives). We are
+    //    actually looking for the particle on some median where the masses between the two half-planes can be made approximately the same. We begin
+    //    by setting the median on i = 0 in the primitives vector (m_data). We then go through the primitives and check if adding the median particle
+    //    ends up placing MORE mass in the left node than the right node. Once that happens we have the inflection point where we need to split. The median
+    //    particle will be assigned later because it may be a superparticle and we can equilibriate the masses even further. 
+    //
+    //
+    // In all of the below. massLeft and massRight are the masses on each side of the median particle. As remarked above, the median particle could be split
+    // later. 
+    int  medianParticleIndex = 0;
+    Real massLeft            = 0.0;                                         // Zero mass, as it should be. 
+    Real massRight           = m_mass - m_data[medianParticleIndex].mass(); // So, entire mass minus the median particle mass. 
 
-    for (int i = 1; i < data_size; i++){
-      const Real& m1 = m_data[splitIndex].mass(); // This is the previous median. 
-      const Real& m2 = m_data[splitIndex+1].mass();   // This is, maybe, our new median.
+    for (int i = 1; i < m_data.size(); i++){
+      const Real& medianParticleMass = m_data[medianParticleIndex].mass(); // This is the current median particle mass. 
 
-      if(mass_left + m1 < mass_right){ // This is equivalent to shifting the median. 
-	mass_left  += m1;              
-	mass_right = m_mass - mass_left - m2; // Total mass - left mass - median mass
-      
-	splitIndex++;
+      // If adding the median particle to the mass in the left node still yields a lower mass than the right now, we just shift the median particle index. So, the previous
+      // "median particle" goes to the left node but we then have a new median particle. 
+      if(massLeft + medianParticleMass < massRight){
+	massLeft += medianParticleMass;
+	
+	medianParticleIndex = i;
+
+	massRight = m_mass - massLeft - m_data[medianParticleIndex].mass(); // Right mass = Total mass - left mass - median particle mass
       }
       else{
 	break;
       }
     }
 
-    // 2. Make leaves and get hooks for data
-    if(!m_left)  m_left  = std::make_shared<Node<T> >();
-    if(!m_right) m_right = std::make_shared<Node<T> >();
+    // 2. Make the two leaves and push data into them. Currently, we know that all particles to the left of the "median" particle go into the left half-plane
+    //    and all particles to the right of the "median" particle go into the right half-plane. We do not yet know how to place the median particle -- it could
+    //    go into either the left node or the right node, or it could be split into and placed into either node. 
+    m_left  = std::make_shared<Node<T> >();
+    m_right = std::make_shared<Node<T> >();
 
-    std::vector<T>& leftData  = m_left->getData();
+    std::vector<T>& leftData  = m_left ->getData();
     std::vector<T>& rightData = m_right->getData();
 
-    leftData.assign(m_data.begin(), m_data.begin() + splitIndex);
-    rightData.assign(m_data.begin() + splitIndex + 1, m_data.end());
+    leftData. assign(m_data.begin()                          , m_data.begin() + medianParticleIndex);
+    rightData.assign(m_data.begin() + medianParticleIndex + 1, m_data.end()                        );
   
-    // If we can split up the median point into several ones, we do it. This would be the case if the median point
-    // is a superparticle; in this case we divide the weights as best we can and then assign them to the left/right halves
-    const T& splitMass = m_data[splitIndex];
+    // 3. We next need to assign the median particle. If we can split up the median point into several ones, we do it. This would be the case if the median point
+    //    is a superparticle; in this case we divide the weights as best we can and then assign them to the left/right halves. If we can't then we just assign the
+    //    particle to whichever left/right child node has the lowest mass. 
+    const T& medianParticle = m_data[medianParticleIndex];
 
-#if 0 // Print direction and position
-    std::cout << splitMass.pos()[0] << "\t" << splitMass.pos()[1] << "\t" << a_dir << std::endl;
-#endif
-    if(splitMass.canSplit()){
-      const RealVect& p   = splitMass.pos();
-      const Real& mass    = splitMass.mass();         // Always positive
-      const Real& energy  = splitMass.energy();       // Total energy of split mass particle
-      const Real massDiff = mass_right - mass_left;   // Not necessarily positive
+    if(medianParticle.canSplit()){
+      const RealVect& medianPos      = medianParticle.pos   ();
+      const Real&     medianMass     = medianParticle.mass  (); // Always positive
+      const Real&     medianEnergy   = medianParticle.energy(); // Note: This is average energy so it remain the same for subparticles. 
+      const Real      massDiff = massRight - massLeft;          // Not necessarily positive.
 
-
-      // This hook is for when we don't have enough mass to distribute to the two parts. 
-      if(mass <= Abs(massDiff)){ 
-	if(massDiff > 0){ // Goes into left
-	  mass_left += mass; 
-	  leftData.emplace_back(T(p, mass, energy));
+      // This hook is for when all mass goes into one part. 
+      if(medianMass < std::abs(massDiff)){
+	if(massDiff > 0){ // Right mass is bigger than left so put entire particle in left mass. 
+	  massLeft += medianMass; 
+	  leftData.emplace_back(T(medianPos, medianMass, medianEnergy));
 	}
-	else{
-	  mass_right += mass; // Goes into right
-	  rightData.emplace_back(T(p, mass, energy));
+	else{ // Left mass is bigger than right so put everything into the right node. 
+	  massRight += medianMass; // Goes into right
+	  rightData.emplace_back(T(medianPos, medianMass, medianEnergy));
 	}
       }
       else {
-	// Distribute mass as best we can. This might seem weird because we can have mass_left > mass_right in which
+	// Distribute mass as best we can. This might seem weird because we can have massLeft > massRight in which
 	// case massDiff < 0. This still works since we are simply subtracting the difference from the left leaf first and
 	// then divide a larger total mass between the two leaves. Essentially, we are subtracting the part of the median
-	// particle that gives mass_left > mass_right from the left particle first, and then we reassign a larger total mass.
-	Real massLeft  = massDiff;
-	Real massRight = 0.0;
-	Real massRem   = mass - massDiff;
+	// particle that gives massLeft > massRight from the left particle first, and then we reassign a larger total mass.
+	Real tmpMassLeft  = massDiff;
+	Real tmpMassRight = 0.0;
+	Real tmpMassRem   = medianMass - massDiff;
 
-	const long long N  = llround(massRem);//*(1.0 + 1.E-6));
+	const long long N  = llround(tmpMassRem);
 	if(N > 0LL){ 
 	  const long long NR = N/2;
 	  const long long NL = N - NR;
 
-	  massLeft  += (massRem/N)*NL;
-	  massRight += (massRem/N)*NR;
+	  tmpMassLeft  += (tmpMassRem/N)*NL;
+	  tmpMassRight += (tmpMassRem/N)*NR;
 	}
 
-	if(massLeft > 0.0){
-	  leftData.emplace_back(T(p, massLeft, energy));
-	  mass_left  += massLeft;
+	if(tmpMassLeft > 0.0){
+	  leftData.emplace_back(T(medianPos, tmpMassLeft, medianEnergy));
+	  massLeft  += tmpMassLeft;
 	}
 
-	if(massRight > 0.0){
-	  rightData.emplace_back(T(p, massRight, energy));
-	  mass_right += massRight;
+	if(tmpMassRight > 0.0){
+	  rightData.emplace_back(T(medianPos, tmpMassRight, medianEnergy));
+	  massRight += tmpMassRight;
 	}
       }
     }
-    else{
-      //    We should be able to simplify this since it always goes into the left mass(?)
-      if(mass_left <= mass_right){
-	leftData.emplace_back(splitMass);
-	mass_left += splitMass.mass();
+    else{ 
+      // Not a computational particle -- put the particle in the child node with the lowest mass. 
+      if(massLeft <= massRight){
+	leftData.emplace_back(medianParticle);
+	massLeft += medianParticle.mass();
       }
       else{
-	rightData.emplace_back(splitMass);
-	mass_right += splitMass.mass();
+	rightData.emplace_back(medianParticle);
+	massRight += medianParticle.mass();
       }
     }
 
-#if BVH_DEBUG // Make sure we don't break mass
-    if(Abs(m_mass - (mass_left + mass_right)) > 1.E-6) MayDay::Abort("Node::split - broke mass");
-    if(mass_left <= 0.1) {
-      std::cout << m_mass << "\t" << mass_left << "\t" << mass_right << std::endl;
-      MayDay::Abort("Node::split - got zero left mass");
-    }
-    if(mass_right <= 0.1) {
-      std::cout << m_mass << "\t" << mass_left << "\t" << mass_right << std::endl;
-      MayDay::Abort("Node::split - got zero right mass");
-    }
-#endif
+    m_left ->setMass(massLeft );
+    m_right->setMass(massRight);
 
-#if BVH_DEBUG
+    m_data.resize(0);        
+
+    // Some assertions in case this code every breaks.
+    CH_assert((std::abs(m_mass - (massLeft + massRight)) <= 1.E-12                         ));
+    CH_assert(massLeft                                   >= std::numeric_limits<Real>::min());
+    CH_assert(massRight                                  >= std::numeric_limits<Real>::min());
+
+    // These should be evaluated to empty loopps by the compiler if DEBUG=FALSE.
     for (const auto& l : leftData){
-      if(l.mass() <= 0.0){
-	MayDay::Abort("Node::split - left data got a zero mass particle... :(");
-      }
+      CH_assert(l.mass() >= std::numeric_limits<Real>::min());
     }
-    for (const auto& l : rightData){
-      if(l.mass() <= 0.0){
-	MayDay::Abort("Node::split - right data got a zero mass particle... :(");
-      }
-    }
-#endif
 
-    m_left->setMass(mass_left);
-    m_right->setMass(mass_right);
-
-#if 0 // This breaks. Don't know why. 
-    left->setParent(this->shared_from_this());
-    righ->setParent(this->shared_from_this());
-#endif
-
-    // Update who is leaf
-    m_left->setToLeafNode();
-    m_right->setToLeafNode();
-    this->setToRegularNode();
-  
+    for (const auto& r : rightData){
+      CH_assert(r.mass() >= std::numeric_limits<Real>::min());
+    }    
   }
 
   template <class T>
@@ -326,7 +317,6 @@ namespace ItoMerge {
       m_root = std::make_shared<Node<T> >();
     }
 
-    m_root->setToLeafNode();
     m_root->setData(a_data, a_mass);
 
     m_leaves.resize(1);
@@ -361,11 +351,13 @@ namespace ItoMerge {
     CH_assert(a_firstDir        >= 0         );
     CH_assert(a_firstDir        <= SpaceDim-1);    
   
-#if BVH_DEBUG
+    // Should evaluate to an empty loop and be purged by the compiler if DEBUG=FALSE
     for (const auto& d : m_root->getData()){
-      if(d.mass() < 1.0) MayDay::Abort("Node<T>::buildTree - how did mass become <= 0??");
+      CH_assert(d.mass() >= 1.0);
     }
-#endif
+
+    // TLDR: This function splits the primitives recursively until we either have a_numTargetLeaves leaf nodes OR none of the leaf nodes can be
+    //       partitioned further. 
 
     std::vector<std::shared_ptr<Node<T> > > newLeaves;
 
@@ -387,8 +379,7 @@ namespace ItoMerge {
       // leaf nodes could be split OR if we didn't need more leaf nodes (i.e. the tree has finished building). 
       bool canSplit = false; 
 
-
-#if 0
+#if 0 // I'm not sure this matters so I'm commenting it out. R.M. Nov. 2021. 
       // Sort the leaves by their mass(?). We will split the ones with the largest masses.      
       std::sort(m_leaves.begin(), m_leaves.begin() + numCurrentLeaves,
 		[](const std::shared_ptr<Node<T> >& n1,
@@ -396,7 +387,6 @@ namespace ItoMerge {
 		  return n1->mass() < n2->mass();
 		});
 #endif
-
 
       // These are the number of leaves that we need in order to reach a_numTargetLeaves. 
       int leavesNeeded = a_numTargetLeaves - numCurrentLeaves;
