@@ -31,7 +31,7 @@ namespace ItoMerge {
     @details The template class must have functions RealVect T::pos(), Real T::mass() and Real T::energy(). We could probably design this class a bit better...
   */
   template <class T>
-  class Node {// : public std::enable_shared_from_this<Node<T> > {
+  class Node {
   public:
 
     /*!
@@ -56,18 +56,6 @@ namespace ItoMerge {
     */
     inline
     bool canSplit() const;
-
-    /*!
-      @brief Set this node to leaf node
-    */
-    inline
-    void setToLeafNode();
-
-    /*!
-      @brief Set node to regular node
-    */
-    inline
-    void setToRegularNode();
 
     /*!
       @brief Set parent node
@@ -156,11 +144,6 @@ namespace ItoMerge {
     std::shared_ptr<Node<T> >& getRight();
 
   protected:
-
-    /*!
-      @brief True if this node is a leaf node
-    */
-    bool m_isLeafNode;    
 
     /*!
       @brief Pointer to parent node (can be nullptr if this node is the root node)
