@@ -202,15 +202,18 @@ namespace ItoMerge {
     @brief Partitioner function which splits a Node<T> into left/right child nodes with masses differing by at most one physical particle
     @param[inout] a_node Node to be split
     @param[in]    a_dir  Coordinate to split along
+    @note Implemented in CD_ItoMergeImplem.H
   */
   template <class T>
-  NodePartitioner<T> NodePartitionEqualMass;// = [](std::shared_ptr<Node<T> >& a_node, const int a_dir);
+  NodePartitioner<T> NodePartitionEqualMass;
 
   /*!
     @brief Class for making a tree structure with ItoMerge::Node<T> in it. 
     @details This is the main function that is used for partitioning particles ala ItoSolver -- it uses the ItoMerge::Node<T> structure to recursively 
     partition a list of primitives into a new list of primitives. 
-    @note This class should work with any Node<T> -- refer to ItoMerge::Node<T> for requirements on the template parameters. 
+    @note This class should work with any Node<T> -- refer to ItoMerge::Node<T> for requirements on the template parameters. To build the tree the user
+    will just call buildTree() which selects the first splitting plane and number of leaves in the tree. The user can also input his own partitioning function
+    which determines how leaf nodes are split. 
   */
   template <class T>
   class Tree {
