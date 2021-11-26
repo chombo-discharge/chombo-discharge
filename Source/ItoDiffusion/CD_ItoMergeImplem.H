@@ -349,7 +349,7 @@ namespace ItoMerge {
 
   template <class T>
   inline
-  void Tree<T>::buildTree(const int a_firstDir, const int a_numTargetLeaves){
+  void Tree<T>::buildTree(const int a_firstDir, const int a_numTargetLeaves, const NodePartitioner<T>& a_partitioner){
     CH_TIME("ItoMerge::Tree<T>::buildTree");
 
     CH_assert(m_isDefined                    );
@@ -403,7 +403,8 @@ namespace ItoMerge {
 	// If we needed a new leaf AND we could split this node, split it and go further. This will give us two leaf nodes
 	// in the "new" list of leaf nodes.
 	if(m_leaves[i]->canSplit() && leavesNeeded > 0){ 
-	  m_leaves[i]->split(splitDir);
+	  //	  m_leaves[i]->split(splitDir);
+	  a_partitioner(m_leaves[i], splitDir);
 	
 	  newLeaves[N]   = m_leaves[i]->getLeft (); 
 	  newLeaves[N+1] = m_leaves[i]->getRight();
