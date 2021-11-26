@@ -9,7 +9,6 @@
   @author Robert Marskar
   @todo Node<T>::split should take a polymorphic lambda for the node splitting.
 */
-  
 
 #ifndef CD_ItoMerge_H
 #define CD_ItoMerge_H
@@ -31,7 +30,7 @@ namespace ItoMerge {
     @details The template class must have functions RealVect T::pos(), Real T::mass() and Real T::energy(). We could probably design this class a bit better...
   */
   template <class T>
-  class Node {
+  class Node : public std::enable_shared_from_this<Node<T> > {
   public:
 
     /*!

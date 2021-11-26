@@ -273,8 +273,14 @@ namespace ItoMerge {
       }
     }
 
+    // Update the tree structure. 
+    auto thisPtr = this->shared_from_this();
+    
     m_left ->setMass(massLeft );
     m_right->setMass(massRight);
+    
+    m_left ->setParent(thisPtr);
+    m_right->setParent(thisPtr);    
 
     m_data.resize(0);        
 
