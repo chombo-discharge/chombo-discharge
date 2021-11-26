@@ -1,5 +1,5 @@
 # ====================================================================================================
-# ITO_SOLVER CLASS OPTIONS
+# ItoSolver class options
 # ====================================================================================================
 ItoSolver.pvr_buffer          = 0             # Buffer for PVR.
 ItoSolver.halo_buffer         = 1             # Size of define halo region for particles
