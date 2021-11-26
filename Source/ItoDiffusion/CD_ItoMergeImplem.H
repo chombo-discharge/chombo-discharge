@@ -18,17 +18,23 @@
 #include <ctime>
 #include <ratio>
 
-using namespace std::chrono;
+// Chombo includes
+#include <CH_Timer.H>
+
+// Our includes
+#include <CD_NamespaceHeader.H>
 
 #define BVH_RESERVE_SIZE 2048
-#define BVH_DEBUG 0
-
-#include <CD_NamespaceHeader.H>
+#define BVH_DEBUG 1
 
 namespace ItoMerge {
 
   template <class T>
   Node<T>::Node(){
+    m_parent = nullptr;
+    m_left   = nullptr;
+    m_right  = nullptr;
+    
     m_data.reserve(BVH_RESERVE_SIZE);
   }
 
@@ -38,75 +44,86 @@ namespace ItoMerge {
   }
 
   template <class T>
-  Node<T>::Node(std::shared_ptr<Node<T> >& a_parent){
+  Node<T>::Node(std::shared_ptr<Node<T> >& a_parent) : Node<T>(){
     this->setParent(a_parent);
   }
 
   template <class T>
-  inline bool Node<T>::isLeaf() const{
-    return m_leaf;
+  inline
+  void Node<T>::setToLeafNode(){
+    m_isLeafNode = true;
   }
 
   template <class T>
-  inline void Node<T>::setLeaf(const bool a_leaf){
-    m_leaf = a_leaf;
+  inline
+  void Node<T>::setToRegularNode(){
+    m_isLeafNode = false;
   }
 
   template <class T>
-  inline void Node<T>::setParent(std::shared_ptr<Node<T> >& a_parent){
+  inline
+  void Node<T>::setParent(std::shared_ptr<Node<T> >& a_parent){
     m_parent = a_parent;
   }
 
   template <class T>
-  inline void Node<T>::setLeft(std::shared_ptr<Node<T> >& a_left){
+  inline
+  void Node<T>::setLeft(std::shared_ptr<Node<T> >& a_left){
     m_left = a_left;
   }
 
   template <class T>
-  inline void Node<T>::setRight(std::shared_ptr<Node<T> >& a_right){
+  inline
+  void Node<T>::setRight(std::shared_ptr<Node<T> >& a_right){
     m_right = a_right;
   }
 
   template <class T>
-  inline void Node<T>::setData(const std::vector<T>& a_data, const Real a_mass){
+  inline
+  void Node<T>::setData(const std::vector<T>& a_data, const Real a_mass){
     m_data = a_data;
     m_mass = a_mass;
   }
 
   template <class T>
-  inline void Node<T>::setMass(const Real a_mass){
+  inline
+  void Node<T>::setMass(const Real a_mass){
     m_mass = a_mass;
   }
 
   template <class T>
-  inline std::shared_ptr<Node<T> >& Node<T>::getLeft(){
+  inline
+  std::shared_ptr<Node<T> >& Node<T>::getLeft(){
     return m_left;
   }
 
   template <class T>
-  inline std::shared_ptr<Node<T> >& Node<T>::getRight(){
+  inline
+  std::shared_ptr<Node<T> >& Node<T>::getRight(){
     return m_right;
   }
 
-
   template <class T>
-  inline std::shared_ptr<Node<T> >& Node<T>::getParent(){
+  inline
+  std::shared_ptr<Node<T> >& Node<T>::getParent(){
     return m_parent;
   }
 
-
   template <class T>
-  inline std::vector<T>& Node<T>::getData(){
+  inline
+  std::vector<T>& Node<T>::getData(){
     return m_data;
   }
 
   template <class T>
-  inline const std::vector<T>& Node<T>::getData() const{
+  inline
+  const std::vector<T>& Node<T>::getData() const{
     return m_data;
   }
 
   template <class T>
-  inline bool Node<T>::canSplit() const {
+  inline
+  bool Node<T>::canSplit() const {
     bool ret = false;
     if(m_data.size() > 0){
       if(m_data.size() > 1 || m_data[0].canSplit()){
@@ -114,18 +131,19 @@ namespace ItoMerge {
       }
     }
 
-    //  return m_mass >= 2.0;
     return m_mass >= 2.0;
     return ret;
   }
 
   template <class T>
-  inline Real Node<T>::mass() const {
+  inline
+  Real Node<T>::mass() const {
     return m_mass;
   }
 
   template <class T>
-  inline void Node<T>::split(const int a_dir){
+  inline
+  void Node<T>::split(const int a_dir){
 #if BVH_DEBUG
     for (const auto& d : m_data){
       if(d.mass() < 1.0) {
@@ -278,20 +296,19 @@ namespace ItoMerge {
 #endif
 
     // Update who is leaf
-    m_left->setLeaf(true);
-    m_right->setLeaf(true);
-    this->setLeaf(false);
+    m_left->setToLeafNode();
+    m_right->setToLeafNode();
+    this->setToRegularNode();
   
   }
 
   template <class T>
   Tree<T>::Tree(){
-    m_leaves.reserve(BVH_RESERVE_SIZE);
-    m_new_leaves.reserve(BVH_RESERVE_SIZE);
+    m_isDefined = false;
   }
 
   template <class T>
-  Tree<T>::Tree(std::vector<T>& a_data, const Real a_mass) : Tree() {
+  Tree<T>::Tree(const std::vector<T>& a_data, const Real a_mass) : Tree() {
     this->define(a_data, a_mass);
   }
 
@@ -301,25 +318,48 @@ namespace ItoMerge {
   }
 
   template <class T>
-  inline void Tree<T>::define(std::vector<T>& a_data, const Real a_mass){
+  inline
+  void Tree<T>::define(const std::vector<T>& a_data, const Real a_mass){
 
-    // Make the root node
-    if(!m_root) m_root = std::make_shared<Node<T> >();
+    // Make the root node if we don't have it. 
+    if(!m_root) {
+      m_root = std::make_shared<Node<T> >();
+    }
 
-    m_root->setLeaf(true);
+    m_root->setToLeafNode();
     m_root->setData(a_data, a_mass);
 
     m_leaves.resize(1);
     m_leaves[0] = m_root;
+
+    m_isDefined = true;
   }
 
   template <class T>
-  inline std::vector<std::shared_ptr<Node<T> > >& Tree<T>::getLeaves(){
+  inline
+  std::vector<std::shared_ptr<Node<T> > >& Tree<T>::getLeaves(){
+    CH_assert(m_isDefined);
+    
     return m_leaves;
   }
 
   template <class T>
-  inline void Tree<T>::buildTree(const int a_firstDir, const int a_numLeaves){
+  inline  
+  const std::vector<std::shared_ptr<Node<T> > >& Tree<T>::getLeaves() const {
+    CH_assert(m_isDefined);
+    
+    return m_leaves;
+  }  
+
+  template <class T>
+  inline
+  void Tree<T>::buildTree(const int a_firstDir, const int a_numTargetLeaves){
+    CH_TIME("ItoMerge::Tree<T>::buildTree");
+
+    CH_assert(m_isDefined                    );
+    CH_assert(a_numTargetLeaves >= 1         );
+    CH_assert(a_firstDir        >= 0         );
+    CH_assert(a_firstDir        <= SpaceDim-1);    
   
 #if BVH_DEBUG
     for (const auto& d : m_root->getData()){
@@ -327,61 +367,77 @@ namespace ItoMerge {
     }
 #endif
 
-    bool keepSplitting = a_numLeaves > 1;
+    std::vector<std::shared_ptr<Node<T> > > newLeaves;
 
-    // Reset leaves and root
-    m_leaves.resize(a_numLeaves, nullptr);
-    m_new_leaves.resize(a_numLeaves, nullptr);
+    // Reset leaves and root. I'm just resizing here so I get the capacity
+    // and avoid vector resizing during the splitting process.
+    m_leaves. resize(a_numTargetLeaves, nullptr);
+    newLeaves.resize(a_numTargetLeaves, nullptr);
     m_leaves[0] = m_root;
 
-    bool canSplit;
-    int leavesNeeded;
-    int cur_size = 1;
-    int splitDir = a_firstDir;
-    int N;
-  
+    // We always begin with one leaf node. 
+    int numCurrentLeaves = 1;
+
+    int  splitDir      = a_firstDir;    
+    bool keepSplitting = (a_numTargetLeaves > 1);
+    
     while(keepSplitting){
-      canSplit = false;
 
-      // Sort the leaves by their mass(?). We will split the ones with the largest masses.
-      // std::sort(m_leaves.begin(), m_leaves.begin() + cur_size,
-      // 	      [](const std::shared_ptr<Node<T> >& n1,
-      // 		 const std::shared_ptr<Node<T> >& n2){
-      // 		return n1->mass() < n2->mass();
-      // 	      });
+      // Flag which determines if we can split any of the nodes further. This will remain false if none of the
+      // leaf nodes could be split OR if we didn't need more leaf nodes (i.e. the tree has finished building). 
+      bool canSplit = false; 
 
-      N = 0;
-      leavesNeeded = a_numLeaves - cur_size;
-      for (int i = 0; i < cur_size; i++){
-      
-	if(m_leaves[i]->canSplit() && leavesNeeded > 0){ // Only split if we actually need more leaves. 
-	  canSplit = true;
 
+#if 0
+      // Sort the leaves by their mass(?). We will split the ones with the largest masses.      
+      std::sort(m_leaves.begin(), m_leaves.begin() + numCurrentLeaves,
+		[](const std::shared_ptr<Node<T> >& n1,
+		   const std::shared_ptr<Node<T> >& n2){
+		  return n1->mass() < n2->mass();
+		});
+#endif
+
+
+      // These are the number of leaves that we need in order to reach a_numTargetLeaves. 
+      int leavesNeeded = a_numTargetLeaves - numCurrentLeaves;
+
+      int N = 0;      
+      for (int i = 0; i < numCurrentLeaves; i++){
+
+	// If we needed a new leaf AND we could split this node, split it and go further. This will give us two leaf nodes
+	// in the "new" list of leaf nodes.
+	if(m_leaves[i]->canSplit() && leavesNeeded > 0){ 
 	  m_leaves[i]->split(splitDir);
 	
-	  m_new_leaves[N]   = m_leaves[i]->getLeft(); 
-	  m_new_leaves[N+1] = m_leaves[i]->getRight();
+	  newLeaves[N]   = m_leaves[i]->getLeft (); 
+	  newLeaves[N+1] = m_leaves[i]->getRight();
 
 	  N += 2;
 
-	  leavesNeeded -= 1; // We only get one extra leaf when we split. 
+	  leavesNeeded--;
+
+	  canSplit = true;
 	}
-	else{
-	  m_new_leaves[N] = m_leaves[i]; N++;
+	else{ // We did not split the leaf node so just append the current leaf to the list of "new" leaves.
+	  newLeaves[N] = m_leaves[i];
+	  
+	  N++;
 	}
       }
 
-      splitDir = (splitDir + 1) % SpaceDim; // New splitting coordinate
+      // Assign new leaf nodes. 
+      m_leaves.assign(newLeaves.begin(), newLeaves.begin() + N);
 
-      m_leaves.assign(m_new_leaves.begin(), m_new_leaves.begin() + N);
+      // Update the current number of leaf nodes. 
+      numCurrentLeaves = N;
 
-      cur_size = N;
+      // Did the tree finish building or are all the nodes unsplittable leaf nodes? If so, exit. 
+      keepSplitting = (N < a_numTargetLeaves) && canSplit;
 
-      // Did we end up in a convergent situation? OK -- then exit.
-      keepSplitting = N < a_numLeaves && canSplit;
+      // Update the splitting coordinate -- the next leaves are split along a different coordinate.
+      splitDir = (splitDir + 1) % SpaceDim;       
     }
   }
-
 }
 
 #include <CD_NamespaceFooter.H>
