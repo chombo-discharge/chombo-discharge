@@ -299,7 +299,13 @@ void Timer::writeReportToFile(const std::string a_fileName) const noexcept {
   // numRank long
   std::vector<std::vector<Real> > finishedEvents;
 
-  constexpr int srcRank = 0;  
+  constexpr int srcRank = 0;
+
+#if CH_MPI
+  const int numRanks = numProc();
+#else
+  const int numRanks = 1;
+#endif
 
   for (const auto& e : m_events){
     const std::string&                           eventName = e.first;
@@ -311,7 +317,7 @@ void Timer::writeReportToFile(const std::string a_fileName) const noexcept {
     if(finishedEvent){
 
       const Real localEventDuration = std::get<ElapsedTime>(eventData).count();
-      Vector<Real> allTimes(numProc(), 0.0);
+      Vector<Real> allTimes(numRanks, 0.0);
 #ifdef CH_MPI
 
       gather(allTimes, localEventDuration, srcRank);
@@ -325,7 +331,9 @@ void Timer::writeReportToFile(const std::string a_fileName) const noexcept {
   }
 
   // Open a file and start writing.
+#if CH_MPI
   if(procID() == srcRank){
+#endif
     std::ofstream f;
     f.open(a_fileName, std::ios_base::trunc);
 
@@ -336,7 +344,7 @@ void Timer::writeReportToFile(const std::string a_fileName) const noexcept {
     f << "\n";
 
     // Write the data for rank = 0 etc
-    for (int irank = 0; irank < numProc(); irank++){
+    for (int irank = 0; irank < numRanks; irank++){
       f << std::left << std::setw(width) << irank << "\t";
       for (int event = 0; event < finishedEvents.size(); event++){
 	f << std::left << std::setw(width) << finishedEvents[event][irank] << "\t";
@@ -345,7 +353,9 @@ void Timer::writeReportToFile(const std::string a_fileName) const noexcept {
     }
 
     f.close();
+#if CH_MPI
   }
+#endif
 }
  
 #include <CD_NamespaceFooter.H>
