@@ -190,7 +190,7 @@ void ItoParticle::linearIn(void* buf){
 	     m_runtimeVectors[i][5] = *buffer++;);
   }
 
-  m_averageEnergy    = *buffer;
+  m_averageEnergy = *buffer;
 }
 
 std::ostream & operator<<(std::ostream& ostr, const ItoParticle& p){
