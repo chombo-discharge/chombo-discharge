@@ -12,6 +12,9 @@
 #ifndef CD_ItoMergePartitioners_H
 #define CD_ItoMergePartitioners_H
 
+// Std includes
+#include <limits>
+
 // Chombo includes
 #include <CH_Timer.H>
 

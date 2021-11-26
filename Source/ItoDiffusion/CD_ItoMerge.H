@@ -13,21 +13,26 @@
 #ifndef CD_ItoMerge_H
 #define CD_ItoMerge_H
 
+// Std includes
+#include <memory>
+#include <vector>
+
 // Chombo includes
 #include <RealVect.H>
-#include <memory>
 
 // Our includes
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Namespace for various merging utilities for ItoSolver.
+  @brief Namespace for various merging utilities for ItoSolver. 
+  @details This namespace is just a collection of various utils. In general we tend to use the ItoMerge::Tree for making a hierarchical view of the particles
+  in a particular grid cell. The user can use that tree structure together with the default (or specified) partitioning function for partitioning the particles
+  into a tree structure. Currently, this tree structure is a kd-tree. 
 */
 namespace ItoMerge {
   
   /*!
-    @brief Class for describing a single kd-tree node. This is used together with ItoMerge::Tree for particle handling. 
-    @details The template class must have functions RealVect T::pos(), Real T::mass() and Real T::energy(). We could probably design this class a bit better...
+    @brief Class for describing a single node with two children and one parent. This is used together with ItoMerge::Tree for particle handling. 
   */
   template <class T>
   class Node : public std::enable_shared_from_this<Node<T> > {
