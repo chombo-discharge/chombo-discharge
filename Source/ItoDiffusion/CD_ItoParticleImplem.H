@@ -21,13 +21,13 @@ void ItoParticle::define(const Real      a_mass,
 			 const RealVect& a_velocity,
 			 const Real      a_diffusion,
 			 const Real      a_mobility,
-			 const Real      a_energy){
-  this->setMass     (a_mass     );
-  this->setPosition (a_position );
-  this->setVelocity (a_velocity );
-  this->setDiffusion(a_diffusion);
-  this->setMobility (a_mobility );
-  this->setEnergy   (a_energy   );
+			 const Real      a_averageEnergy){
+  this->setMass     (a_mass         );
+  this->setPosition (a_position     );
+  this->setVelocity (a_velocity     );
+  this->setDiffusion(a_diffusion    );
+  this->setMobility (a_mobility     );
+  this->setEnergy   (a_averageEnergy);
 }
 
 Real& ItoParticle::mass(){
@@ -114,16 +114,16 @@ const Real& ItoParticle::tmp() const{
   return m_tmp;
 }
 
-void ItoParticle::setEnergy(const Real a_energy){
-  m_energy = a_energy;
+void ItoParticle::setEnergy(const Real a_averageEnergy){
+  m_averageEnergy = a_averageEnergy;
 }
 
 Real& ItoParticle::energy(){
-  return m_energy;
+  return m_averageEnergy;
 }
 
 const Real& ItoParticle::energy() const{
-  return m_energy;
+  return m_averageEnergy;
 }
 
 Real& ItoParticle::runtimeScalar(const int a_num){

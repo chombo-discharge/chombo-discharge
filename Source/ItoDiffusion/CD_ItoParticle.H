@@ -59,7 +59,7 @@ public:
     @param[in] a_velocity  Particle velocity
     @param[in] a_diffusion Particle diffusion coefficient
     @param[in] a_mobility  Particle mobility coefficient
-    @param[in] a_energy    Particle average energy
+    @param[in] a_averageEnergy    Particle average energy
     @note If the user has called setNumRuntimeScalars/Vectors then  will allocate runtime buffers
   */
   ItoParticle(const Real      a_mass,
@@ -67,7 +67,7 @@ public:
 	      const RealVect& a_velocity  = RealVect::Zero,
 	      const Real      a_diffusion = 0.0,
 	      const Real      a_mobility  = 1.0,
-	      const Real      a_energy    = 0.0);
+	      const Real      a_averageEnergy    = 0.0);
 
   /*!
     @brief Copy constructor. Copies all fields.
@@ -76,26 +76,26 @@ public:
   ItoParticle(const ItoParticle& a_other);
 
   /*!
-    @brief Destructor -- this will deallocate memory so make sure you don't call setRuntimeScalars/setRuntimeVectors between particle creation and destruction. 
+    @brief Destructor (deallocates runtime memory storage)
   */
   virtual ~ItoParticle();
 
   /*!
     @brief Full define function. 
-    @param[in] a_mass      Particle mass (i.e., computational weight)
-    @param[in] a_position  Particle position
-    @param[in] a_velocity  Particle velocity
-    @param[in] a_diffusion Particle diffusion coefficient
-    @param[in] a_mobility  Particle mobility coefficient
-    @param[in] a_energy    Particle average energy
+    @param[in] a_mass          Particle mass (i.e., computational weight)
+    @param[in] a_position      Particle position
+    @param[in] a_velocity      Particle velocity
+    @param[in] a_diffusion     Particle diffusion coefficient
+    @param[in] a_mobility      Particle mobility coefficient
+    @param[in] a_averageEnergy Particle average energy
   */
   inline
   void define(const Real      a_mass,
 	      const RealVect& a_position,
-	      const RealVect& a_velocity  = RealVect::Zero,
-	      const Real      a_diffusion = 0.0,
-	      const Real      a_mobility  = 1.0,
-	      const Real      a_energy    = 0.0);
+	      const RealVect& a_velocity      = RealVect::Zero,
+	      const Real      a_diffusion     = 0.0,
+	      const Real      a_mobility      = 1.0,
+	      const Real      a_averageEnergy = 0.0);
 
   /*!
     @brief Set the old position
@@ -142,36 +142,42 @@ public:
 
   /*!
     @brief Set particle diffusion coefficient
+    @param[in] a_diffusion Diffusion coefficient
   */
   inline
   void setDiffusion(const Real a_diffusion);
 
   /*!
-    @brief Get diffusion
+    @brief Get particle diffusion coefficient
+    @return m_diffusion
   */
   inline
   Real& diffusion();
 
   /*! 
-    @brief Const retrieve diffusion
+    @brief Get particle diffusion coefficient
+    @return m_diffusion
   */
   inline
   const Real& diffusion() const;
 
   /*!
     @brief Set particle mobility
+    @param[in] a_mobility Mobility coefficient
   */
   inline
   void setMobility(const Real a_mobility);
 
   /*!
-    @brief Get mobility
+    @brief Get mobility coefficient
+    @return m_mobility
   */
   inline
   Real& mobility();
 
   /*! 
-    @brief Const retrieve mobility
+    @brief Get mobility coefficient
+    @return m_mobility
   */
   inline
   const Real& mobility() const;
@@ -191,126 +197,149 @@ public:
   Real diffusivity() const;  
 
   /*!
-    @brief Set particle energy
+    @brief Set average particle energy
+    @param[in] a_averageEnergy Average particle energy.
   */
   inline
-  void setEnergy(const Real a_energy);
+  void setEnergy(const Real a_averageEnergy);
 
   /*!
-    @brief Get energy
+    @brief Get average particle energy
+    @return m_averageEnergy
   */
   inline
   Real& energy();
 
   /*! 
-    @brief Const retrieve energy
+    @brief Get average particle energy
+    @return m_averageEnergy
   */
   inline
   const Real& energy() const;
 
   /*!
-    @brief Set the velocity
+    @brief Set the particle velocity
+    @param[in] a_velocity Particle velocity
   */
   inline
   void setVelocity(const RealVect& a_velocity);
 
   /*!
-    @brief Set the velocity
+    @brief Set the velocity in particular direction
+    @param[in] a_velocity Velocity component
+    @param[in] a_dir      Coordinate direction
   */
   inline
   void setVelocity(const Real& a_velocity, const int a_dir);
 
   /*!
-    @brief Get reference velocity field
+    @brief Get the particle velocity
+    @return m_velocity
   */
   inline
   RealVect& velocity();
 
   /*!
-    @brief Get reference velocity field. Const version. 
+    @brief Get the particle velocity
+    @return m_velocity
   */
   inline
   const RealVect& velocity() const;
 
   /*!
-    @brief Get reference velocity field. Const version for one component only. 
+    @brief Get the particle velocity in a particular coordinate direction
+    @param[in] a_dir Coordinate direction
+    @return m_velocity[a_dir]
   */
   inline
   Real velocity(const int a_dir) const;
 
   /*!
-    @brief Get temporary
+    @brief Get temporary storage
+    @return m_tmp
   */
   inline
   Real& tmp();
 
   /*! 
-    @brief Const retrieve temporary
+    @brief Get temporary storage
+    @return m_tmp
   */
   inline
   const Real& tmp() const;
 
   /*!
-    @brief Get a runtime-defined variable
+    @brief Get one of the runtime-defined scalar variable
+    @param[in] a_which Which run-time scalar to obtain
   */
   inline
-  Real& runtimeScalar(const int a_num);
+  Real& runtimeScalar(const int a_which);
 
   /*!
-    @brief Get a runtime-defined variable
+    @brief Get one of the runtime-defined scalar variable
+    @param[in] a_which Which run-time scalar to obtain
   */
   inline
-  const Real& runtimeScalar(const int a_num) const;
+  const Real& runtimeScalar(const int a_which) const;
 
   /*!
-    @brief Get a runtime-defined vector
+    @brief Get one of the runtime-defined vector variable
+    @param[in] a_which Which run-time vector to obtain
   */
   inline
-  RealVect& runtimeVector(const int a_num);
+  RealVect& runtimeVector(const int a_which);
 
   /*!
-    @brief Get a runtime-defined vector
+    @brief Get one of the runtime-defined vector variable
+    @param[in] a_which Which run-time vector to obtain
   */
   inline
-  const RealVect& runtimeVector(const int a_num) const;
+  const RealVect& runtimeVector(const int a_which) const;
 
   /*!
-    @brief Comparison operator
+    @brief Comparison operator with other particle
+    @param[in] a_other Other particle
   */
-  bool operator==(const ItoParticle& a_p) const;
+  bool operator==(const ItoParticle& a_other) const;
 
   /*!
-    @brief Comparison operator
+    @brief Comparison operator with other particle
+    @param[in] a_other Other particle
   */
-  bool operator==(const ItoParticle* a_p) const;
+  bool operator==(const ItoParticle* a_other) const;
 
   /*!
-    @brief Comparison operator
+    @brief Comparison operator with other particle
+    @param[in] a_other Other particle
   */
-  bool operator!=(const ItoParticle& a_p) const;
+  bool operator!=(const ItoParticle& a_other) const;
 
   /*!
     @brief Returns the size, in number of bytes, of a flat representation of the data in this object.
   */
-  virtual int size() const;
+  virtual int size() const override;
 
   /*!
     @brief Write a linear binary representation of the internal data. Assumes that
     sufficient memory for the buffer has already been allocated by
     the caller.
+    @param[in] a_buf Pointer to memory block
   */
-  virtual void linearOut(void* buf) const;
+  virtual void linearOut(void* buf) const override;
 
   /*!
     @brief Read a linear binary representation of the internal data.
     Assumes that the buffer has the correct data.
+    @param[in] a_buf Pointer to memory block
   */
-  virtual void linearIn(void* buf);
+  virtual void linearIn(void* a_buf);
 
   /*!
-    @brief For outputting particle
+    @brief Friend function for letting ostream print the particle.
+    @param[in] ostr       Output stream
+    @param[in] a_particle Particle to output
   */
-  friend std::ostream & operator<<(std::ostream& ostr,const ItoParticle& p);
+  friend std::ostream & operator<<(std::ostream& ostr, const ItoParticle& a_particle);
 
 protected:
 
@@ -323,24 +352,63 @@ protected:
     @brief Static for defining the number of runtime RealVect components
   */
   static int s_numRuntimeVectors;
-  
-  Real     m_tmp; // Not communicated!
-  Real     m_mass;
-  Real     m_diffusion;
-  Real     m_energy;
-  Real     m_mobility;
+
+  /*!
+    @brief Temporary memory -- this is not communicated
+  */
+  Real m_tmp;
+
+  /*!
+    @brief Particle mass (i.e., computational weight)
+  */
+  Real m_mass;
+
+  /*!
+    @brief Particle diffusion coefficient
+  */
+  Real m_diffusion;
+
+  /*!
+    @brief Particle average energy
+  */  
+  Real m_averageEnergy;
+
+  /*!
+    @brief Particle mobility coefficient
+  */
+  Real m_mobility;
+
+  /*!
+    @brief Particle velocity
+  */
   RealVect m_velocity;
+
+  /*!
+    @brief Previous particle position
+  */  
   RealVect m_oldPosition;
 
-  Real*     m_runtimeScalars;
+  /*!
+    @brief Pointer to run-time Real memory allocations
+  */
+  Real* m_runtimeScalars;
+
+  /*!
+    @brief Pointer to run-time RealVect memory allocations
+  */  
   RealVect* m_runtimeVectors;
 
   /*!
-    @brief Set the run-time components
+    @brief Allocate run-time memory blocks. 
   */
   void allocateRuntimeBuffers();
 };
 
+/*!
+  @brief Particle printing function
+  @param[in] ostr       Output stream
+  @param[in] a_particle Particle to output
+*/
 std::ostream & operator<<(std::ostream& ostr, const ItoParticle& p);
 
 #include <CD_NamespaceFooter.H>
