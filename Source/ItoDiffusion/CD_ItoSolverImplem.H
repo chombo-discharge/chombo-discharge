@@ -136,8 +136,8 @@ void ItoSolver::depositParticles(EBAMRCellData& a_phi, const ParticleContainer<T
 
 template <class T>
 void ItoSolver::depositParticles(EBAMRCellData&               a_phi,
-				   const ParticleContainer<T>& a_particles,
-				   const DepositionType  a_deposition){
+				 const ParticleContainer<T>& a_particles,
+				 const DepositionType  a_deposition){
   CH_TIME("ItoSolver::depositParticles");
   if(m_verbosity > 5){
     pout() << m_name + "::depositParticles" << endl;
@@ -166,79 +166,76 @@ void ItoSolver::depositParticles(EBAMRCellData&               a_phi,
   m_amr->interpGhost(a_phi, m_realm, m_phase);
 }
 
-template <class T>
+template <class P>
 void ItoSolver::depositKappaConservative(EBAMRCellData&               a_phi,
-					   const ParticleContainer<T>& a_particles,
+					   const ParticleContainer<P>& a_particles,
 					   const DepositionType  a_deposition){
   CH_TIME("ItoSolver::depositKappaConservative");
   if(m_verbosity > 5){
     pout() << m_name + "::depositKappaConservative" << endl;
   }
 
-  if(m_haloBuffer > 0 && m_pvrBuffer > 0){
-    MayDay::Abort("ItoSolver::depositKappaConservative - conflicting inputs, halo/pvr buffers both > 0");
-  }
+  CH_assert(m_haloBuffer == 0 || m_pvrBuffer == 0);
 
+  if(m_haloBuffer > 0 && m_pvrBuffer > 0){
+    MayDay::Error("ItoSolver::depositKappaConservative - conflicting inputs, halo/pvr buffers both > 0 but one of them must be 0");
+  }  
+
+
+
+  // Figure out how to handle the coarse-fine deposition.
+  CoarseFineDeposition coarseFineDeposition;  
   if(m_pvrBuffer > 0){
-    this->depositKappaConservativeWithPVR(a_phi, a_particles, a_deposition);
+    coarseFineDeposition = CoarseFineDeposition::PVR;
   }
-  else{
-    if(m_forceHaloNGP || a_deposition == DepositionType::NGP){
-      this->depositKappaConservativeNoPVR_NGP(a_phi, a_particles, a_deposition);
+  else if(m_haloBuffer > 0){
+    if(m_forceHaloNGP){
+      coarseFineDeposition = CoarseFineDeposition::HaloNGP;
     }
     else{
-      this->depositKappaConservativeNoPVR_native(a_phi, a_particles, a_deposition);
+      coarseFineDeposition = CoarseFineDeposition::Halo;
     }
   }
-}
-
-template <class T>
-void ItoSolver::depositKappaConservativeWithPVR(EBAMRCellData&               a_phi,
-						  const ParticleContainer<T>& a_particles,
-						  const DepositionType  a_deposition){
-  CH_TIME("ItoSolver::depositKappaConservativeWithPVR");
-  if(m_verbosity > 5){
-    pout() << m_name + "::depositKappaConservativeWithPVR" << endl;
+  else{
+    MayDay::Error("ItoSolver::depositKappaConservative -- logic bust");
   }
 
-  m_amr->depositParticles<T, &T::mass>(a_phi, m_realm, m_phase, a_particles, a_deposition, CoarseFineDeposition::PVR, m_forceIrregDepositionNGP);  
-}
 
-template <class T>
-void ItoSolver::depositKappaConservativeNoPVR_native(EBAMRCellData&               a_phi,
-						       const ParticleContainer<T>& a_particles,
-						       const DepositionType  a_deposition){
-  CH_TIME("ItoSolver::depositKappaConservativeNoPVR_native");
-  if(m_verbosity > 5){
-    pout() << m_name + "::depositKappaConservativeNoPVR_native" << endl;
-  }
-
-  const AMRMask& mask = m_amr->getMask(s_particle_halo, m_haloBuffer, m_realm);
-  a_particles.copyMaskParticles(mask);
+  // Now do the deposition. Recall that when we deposit with "halos", we need to fetch the subset of coarse-level particles that surround the
+  // refinement boundary. 
+  switch(coarseFineDeposition){
+  case CoarseFineDeposition::PVR:
+    m_amr->depositParticles<P, &P::mass>(a_phi, m_realm, m_phase, a_particles, a_deposition, coarseFineDeposition, m_forceIrregDepositionNGP);
+    break;
+  case CoarseFineDeposition::Halo:
+    {
+      const AMRMask& mask = m_amr->getMask(s_particle_halo, m_haloBuffer, m_realm);
+      a_particles.copyMaskParticles(mask);
   
-  m_amr->depositParticles<T, &T::mass>(a_phi, m_realm, m_phase, a_particles, a_deposition, CoarseFineDeposition::Halo, m_forceIrregDepositionNGP);
+      m_amr->depositParticles<P, &P::mass>(a_phi, m_realm, m_phase, a_particles, a_deposition, CoarseFineDeposition::Halo, m_forceIrregDepositionNGP);
 
-  a_particles.clearMaskParticles();  
-}
+      a_particles.clearMaskParticles();
+      
+      break;
+    }
+  case CoarseFineDeposition::HaloNGP:
+    {
+      const AMRMask& mask = m_amr->getMask(s_particle_halo, m_haloBuffer, m_realm);
 
-template <class T>
-void ItoSolver::depositKappaConservativeNoPVR_NGP(EBAMRCellData&               a_phi,
-						    const ParticleContainer<T>& a_particles,
-						    const DepositionType  a_deposition){
-  CH_TIME("ItoSolver::depositKappaConservativeNoPVR_NGP");
-  if(m_verbosity > 5){
-    pout() << m_name + "::depositKappaConservativeNoPVR_NGP" << endl;
-  }
+      a_particles.copyMaskParticles(mask);
+      a_particles.copyNonMaskParticles(mask);
 
-  const AMRMask& mask = m_amr->getMask(s_particle_halo, m_haloBuffer, m_realm);
-
-  a_particles.copyMaskParticles(mask);
-  a_particles.copyNonMaskParticles(mask);
-
-  m_amr->depositParticles<T, &T::mass>(a_phi, m_realm, m_phase, a_particles, a_deposition, CoarseFineDeposition::HaloNGP, m_forceIrregDepositionNGP);  
+      m_amr->depositParticles<P, &P::mass>(a_phi, m_realm, m_phase, a_particles, a_deposition, CoarseFineDeposition::HaloNGP, m_forceIrregDepositionNGP);  
   
-  a_particles.clearMaskParticles();
-  a_particles.clearNonMaskParticles();  
+      a_particles.clearMaskParticles();
+      a_particles.clearNonMaskParticles();
+
+      break;
+    }
+  default:
+    MayDay::Error("ItoSolverImplem.H in function ItoSolver::depositKappaConservative -- logic bust!");
+    break;
+  }
 }
 
 #include <CD_NamespaceFooter.H>

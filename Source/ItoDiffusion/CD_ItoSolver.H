@@ -1073,37 +1073,10 @@ protected:
   /*!
     @brief This computes the "conservative" deposition, multiplied by kappa
   */
-  template <class T>
+  template <class P>
   void depositKappaConservative(EBAMRCellData&              a_phi,
-				const ParticleContainer<T>& a_particles,
+				const ParticleContainer<P>& a_particles,
 				const DepositionType        a_deposition);
-
-  /*!
-    @brief Just as depositKappaConservative, but using a PVR buffer where particle clouds on coarse levels are
-    interpolated to fine levels. 
-  */
-  template <class T>
-  void depositKappaConservativeWithPVR(EBAMRCellData&              a_phi,
-				       const ParticleContainer<T>& a_particles,
-				       const DepositionType        a_deposition);
-
-  /*!
-    @brief Just as depositKappaConservative, but using halo particles when depositing particles from coarse levels to fine
-    levels
-  */
-  template <class T>
-  void depositKappaConservativeNoPVR_native(EBAMRCellData&              a_phi,
-					    const ParticleContainer<T>& a_particles,
-					    const DepositionType        a_deposition);
-
-  /*!
-    @brief Just as depositKappaConservative, but using halo particles when depositing particles from coarse levels to fine
-    levels
-  */
-  template <class T>
-  void depositKappaConservativeNoPVR_NGP(EBAMRCellData&              a_phi,
-					 const ParticleContainer<T>& a_particles,
-					 const DepositionType        a_deposition);
 
   /*!
     @brief Make the "non-conservative" kappa deposition
