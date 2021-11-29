@@ -1593,7 +1593,6 @@ void ItoSolver::depositEnergyDensity(EBAMRCellData& a_phi, ParticleContainer<Ito
   this->unsetMassToEnergy(a_particles);                     // Make mass = mass/E
 }
 
-
 void ItoSolver::computeAverageMobility(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles){
   CH_TIME("ItoSolver::computeAverageMobility(state, particles)");
   if(m_verbosity > 5){
@@ -1924,7 +1923,7 @@ void ItoSolver::coarseFineRedistribution(EBAMRCellData& a_phi){
   }
 }
 
-void ItoSolver::depositWeights(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles){
+void ItoSolver::depositWeights(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles) {
   CH_TIME("ItoSolver::depositWeights");
   if(m_verbosity > 5){
     pout() << m_name + "::depositWeights" << endl;

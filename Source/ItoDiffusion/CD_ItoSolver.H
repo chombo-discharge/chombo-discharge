@@ -235,7 +235,6 @@ public:
 
   /*!
     @brief Compute average mobility. Must sort the particles by cell first. 
-    
   */
   virtual void computeAverageMobility(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles);
 
@@ -260,19 +259,32 @@ public:
   virtual void depositParticles(const WhichContainer a_container);
 
   /*!
-    @brief Deposit the particles onto a_phi. The result is put on the a_comp compoennt
+    @brief Deposit the particles onto a_phi. 
+    @details The template parameters indicate the particle type and quantity to be deposited. The second template parameter must be a pointer to a member function in 
+    the particle class with signature 'const Real& P::function() const'. E.g. 'const Real& P::mass() const' which is the default quantity to be deposited. 
+    @param[out] a_phi       Mesh data -- must have exactly one component. 
+    @param[in]  a_particles Particles to be deposited
+    @note This will call the other version with a_deposition = m_deposition.
   */
-  template <class T>
-  void depositParticles(EBAMRCellData& a_phi, const ParticleContainer<T>& a_particles);
+  template <class P, const Real&(P::*particleScalarField)() const = &P::mass>    
+  void depositParticles(EBAMRCellData& a_phi, const ParticleContainer<P>& a_particles);
 
   /*!
-    @brief Deposit the particles onto a_phi. The result is put on the a_comp compoennt
+    @brief Deposit the particles onto a_phi. 
+    @details The template parameters indicate the particle type and quantity to be deposited. The second template parameter must be a pointer to a member function in 
+    the particle class with signature 'const Real& P::function() const'. E.g. 'const Real& P::mass() const' which is the default quantity to be deposited. 
+    @param[out] a_phi        Mesh data -- must have exactly one component. 
+    @param[in]  a_particles  Particles to be deposited
+    @param[in]  a_deposition Deposition method
   */
-  template <class T>
-  void depositParticles(EBAMRCellData& a_phi, const ParticleContainer<T>& a_particles, const DepositionType  a_deposition);
+  template <class P, const Real&(P::*particleScalarField)() const = &P::mass>    
+  void depositParticles(EBAMRCellData& a_phi, const ParticleContainer<P>& a_particles, const DepositionType a_deposition);
 
   /*!
-    @brief Deposit the total weight of the particles in the grid cells
+    @brief Deposit the total weight of the particles in the grid cells. 
+    @details This will deposit with an NGP scheme into the mesh data holder. 
+    @param[out] a_weights   The total particle weight in a grid cell -- this is equivalent to 
+    @param[in]  a_particles Particles to be deposited. 
   */
   virtual void depositWeights(EBAMRCellData& a_weights, const ParticleContainer<ItoParticle>& a_particles);
 
@@ -1071,9 +1083,15 @@ protected:
   void parseCheckpointing();
 
   /*!
-    @brief This computes the "conservative" deposition, multiplied by kappa
+    @brief Compute the cell-centered deposition -- this is the main deposition function.
+    @details The template parameters indicate the particle type and quantity to be deposited. The second template parameter must be a pointer to a member function in 
+    the particle class with signature 'const Real& P::function() const'. E.g. 'const Real& P::mass() const' which is the default quantity to be deposited. 
+    @param[out] a_phi        Cell-centered mesh data. Must have exactly one component. 
+    @param[in]  a_particles  Particles to be deposited. 
+    @param[in]  a_deposition Deposition type
+    @note The coarse-fine deposition is handled internally in this routine (through parameters m_pvrBuffer and m_haloBuffer)
   */
-  template <class P>
+  template <class P, const Real&(P::*particleScalarField)() const = &P::mass>
   void depositKappaConservative(EBAMRCellData&              a_phi,
 				const ParticleContainer<P>& a_particles,
 				const DepositionType        a_deposition);
