@@ -1529,10 +1529,14 @@ void ItoSolver::depositConductivity(EBAMRCellData& a_phi, ParticleContainer<ItoP
   if(m_verbosity > 5){
     pout() << m_name + "::depositConductivity(state, particles, deposition_type)" << endl;
   }
-
+#if 0
   this->setMassToConductivity(a_particles);                 // Make mass = mass*mu
   this->depositParticles(a_phi, a_particles, a_deposition); // Deposit mass*mu
   this->unsetMassToConductivity(a_particles);               // Make mass = mass/mu
+
+#else
+  this->depositParticles<ItoParticle, &ItoParticle::conductivity>(a_phi, a_particles, a_deposition);
+#endif
 }
 
 void ItoSolver::depositDiffusivity(){
@@ -1735,6 +1739,30 @@ void ItoSolver::depositParticles(const WhichContainer a_container){
   }
 
   this->depositParticles(m_phi, m_particleContainers.at(a_container), m_deposition);
+}
+
+void ItoSolver::redistributeAMR(EBAMRCellData& a_phi){
+  CH_TIME("ItoSolver::redistributeAMR");
+  if(m_verbosity > 5){
+    pout() << m_name + "::redistributeAMR" << endl;
+  }
+
+  if(m_useRedistribution){
+    this->depositNonConservative(m_depositionNC, a_phi);              // Compute m_depositionNC = sum(kappa*Wc)/sum(kappa)
+    this->depositHybrid(a_phi, m_massDiff, m_depositionNC);           // Compute hybrid deposition, including mass differnce
+    this->incrementRedist(m_massDiff);                                  // Increment level redistribution register
+
+    // Do the redistribution magic
+    const bool ebcf = m_amr->getEbCf();
+    if(ebcf){ // Mucho stuff to do here...
+      this->coarseFineIncrement(m_massDiff);       // Compute C2F, F2C, and C2C mass transfers
+      this->levelRedist(a_phi);           // Level redistribution. Weights is a dummy parameter
+      this->coarseFineRedistribution(a_phi);     // Do the coarse-fine redistribution
+    }
+    else{ // Very simple, redistribute this level.
+      this->levelRedist(a_phi);
+    }
+  }
 }
 
 void ItoSolver::depositNonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellData& a_depositionKappaC){

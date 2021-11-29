@@ -281,6 +281,17 @@ public:
   void depositParticles(EBAMRCellData& a_phi, const ParticleContainer<P>& a_particles, const DepositionType a_deposition);
 
   /*!
+    @brief Deposit the particles onto a_phi. 
+    @details The template parameters indicate the particle type and quantity to be deposited. The second template parameter must be a pointer to a member function in 
+    the particle class with signature 'const Real& P::function() const'. E.g. 'const Real& P::mass() const' which is the default quantity to be deposited. 
+    @param[out] a_phi        Mesh data -- must have exactly one component. 
+    @param[in]  a_particles  Particles to be deposited
+    @param[in]  a_deposition Deposition method
+  */
+  template <class P, Real(P::*particleScalarField)() const>
+  void depositParticles(EBAMRCellData& a_phi, const ParticleContainer<P>& a_particles, const DepositionType a_deposition);  
+
+  /*!
     @brief Deposit the total weight of the particles in the grid cells. 
     @details This will deposit with an NGP scheme into the mesh data holder. 
     @param[out] a_weights   The total particle weight in a grid cell -- this is equivalent to 
@@ -1091,10 +1102,28 @@ protected:
     @param[in]  a_deposition Deposition type
     @note The coarse-fine deposition is handled internally in this routine (through parameters m_pvrBuffer and m_haloBuffer)
   */
-  template <class P, const Real&(P::*particleScalarField)() const = &P::mass>
+  template <class P,  const Real&(P::*particleScalarField)() const = &P::mass>
   void depositKappaConservative(EBAMRCellData&              a_phi,
 				const ParticleContainer<P>& a_particles,
 				const DepositionType        a_deposition);
+
+  /*!
+    @brief Compute the cell-centered deposition -- this is the main deposition function.
+    @details Just like the version above except that the function signature is Real P::particleScalarField() const.
+    @param[out] a_phi        Cell-centered mesh data. Must have exactly one component. 
+    @param[in]  a_particles  Particles to be deposited. 
+    @param[in]  a_deposition Deposition type
+    @note The coarse-fine deposition is handled internally in this routine (through parameters m_pvrBuffer and m_haloBuffer)
+  */
+  template <class P,  Real(P::*particleScalarField)() const>
+  void depositKappaConservative(EBAMRCellData&              a_phi,
+				const ParticleContainer<P>& a_particles,
+				const DepositionType        a_deposition);  
+
+  /*!
+    @brief Redistribution method
+  */
+  void redistributeAMR(EBAMRCellData& a_phi);
 
   /*!
     @brief Make the "non-conservative" kappa deposition

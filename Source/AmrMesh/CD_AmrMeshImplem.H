@@ -205,6 +205,21 @@ void AmrMesh::depositParticles(EBAMRCellData&              a_meshData,
   particleMesh.deposit<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_coarseFineDeposition, a_forceIrregNGP);
 }
 
+template <class P, Real(P::*particleScalarField)() const>
+void AmrMesh::depositParticles(EBAMRCellData&              a_meshData,
+			       const std::string&          a_realm,
+			       const phase::which_phase&   a_phase,	       
+			       const ParticleContainer<P>& a_particles,
+			       const DepositionType        a_depositionType,
+			       const CoarseFineDeposition  a_coarseFineDeposition,
+			       const bool                  a_forceIrregNGP){
+  CH_TIME("AmrMesh::depositParticles");
+
+  EBAMRParticleMesh& particleMesh = m_realms[a_realm]->getParticleMesh(a_phase);
+
+  particleMesh.deposit<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_coarseFineDeposition, a_forceIrregNGP);
+}
+
 template <class P, const RealVect&(P::*particleVectorField)() const>
 void AmrMesh::depositParticles(EBAMRCellData&              a_meshData,
 			       const std::string&          a_realm,
