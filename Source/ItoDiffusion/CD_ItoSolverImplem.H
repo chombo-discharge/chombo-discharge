@@ -18,12 +18,11 @@
 
 // Chombo includes
 #include <EBAlias.H>
+#include <PolyGeom.H>
 
 // Our includes
 #include <CD_ItoSolver.H>
 #include <CD_DataOps.H>
-#include <CD_EBParticleMesh.H>
-#include <CD_EBCoarseFineParticleMesh.H>
 #include <CD_NamespaceHeader.H>
 
 inline
@@ -36,8 +35,8 @@ RealVect ItoSolver::randomGaussian() {
 
   RealVect r = RealVect::Zero;
   for (int i = 0; i < SpaceDim; i++){
-    r[i] = m_gauss01(m_rng);
-    r[i] = sign(r[i])*Min(Abs(r[i]), m_normal_max);
+    r[i] = m_normalDistribution01(m_rng);
+    r[i] = sign(r[i])*Min(Abs(r[i]), m_normalDistributionTruncation);
   }
 
   return r;
@@ -45,14 +44,14 @@ RealVect ItoSolver::randomGaussian() {
 
 inline
 RealVect ItoSolver::randomDirection(){
-  const Real EPS = 1.E-8;
+  constexpr Real EPS = 1.E-8;
 #if CH_SPACEDIM==2
   Real x1 = 2.0;
   Real x2 = 2.0;
   Real r  = x1*x1 + x2*x2;
   while(r >= 1.0 || r < EPS){
-    x1 = m_udist11(m_rng);
-    x2 = m_udist11(m_rng);
+    x1 = m_uniformDistribution11(m_rng);
+    x2 = m_uniformDistribution11(m_rng);
     r  = x1*x1 + x2*x2;
   }
 
@@ -62,8 +61,8 @@ RealVect ItoSolver::randomDirection(){
   Real x2 = 2.0;
   Real r  = x1*x1 + x2*x2;
   while(r >= 1.0 || r < EPS){
-    x1 = m_udist11(m_rng);
-    x2 = m_udist11(m_rng);
+    x1 = m_uniformDistribution11(m_rng);
+    x2 = m_uniformDistribution11(m_rng);
     r  = x1*x1 + x2*x2;
   }
 
@@ -73,6 +72,56 @@ RealVect ItoSolver::randomDirection(){
 
   return RealVect(x,y,z);
 #endif
+}
+
+inline
+RealVect ItoSolver::randomPosition(const RealVect a_pos,
+				   const RealVect a_lo,
+				   const RealVect a_hi,
+				   const RealVect a_bndryCentroid,
+				   const RealVect a_bndryNormal,
+				   const Real     a_dx,
+				   const Real     a_kappa) const {
+
+  RealVect pos;
+  if(a_kappa < 1.0){ // Rejection sampling. 
+    pos = this->randomPosition(a_lo, a_hi, a_bndryCentroid, a_bndryNormal);
+  }
+  else{ // Regular cell. Get a position. 
+    pos = this->randomPosition(a_lo, a_hi);
+  }
+
+  pos = a_pos + pos*a_dx;
+
+  return pos;
+}
+
+inline
+RealVect ItoSolver::randomPosition(const RealVect a_lo,
+				   const RealVect a_hi,
+				   const RealVect a_bndryCentroid,
+				   const RealVect a_bndryNormal) const {
+  RealVect pos = this->randomPosition(a_lo, a_hi);
+  bool valid   = PolyGeom::dot(pos-a_bndryCentroid, a_bndryNormal) >= 0.0;
+
+  while(!valid){
+    pos    = this->randomPosition(a_lo, a_hi);
+    valid = PolyGeom::dot(pos-a_bndryCentroid, a_bndryNormal) >= 0.0;
+  }
+
+  return pos;
+}
+
+inline
+RealVect ItoSolver::randomPosition(const RealVect a_lo, const RealVect a_hi) const {
+
+  RealVect pos = RealVect::Unit;
+
+  for (int dir = 0; dir < SpaceDim; dir++){
+    pos[dir] = a_lo[dir] + 0.5*(1.0 + m_uniformDistribution11(m_rng))*(a_hi[dir] - a_lo[dir]);
+  }
+
+  return pos;
 }
 
 template <class T>
@@ -95,7 +144,7 @@ void ItoSolver::depositParticles(EBAMRCellData&               a_phi,
   }
            
   this->depositKappaConservative(a_phi, a_particles, a_deposition); // a_phi contains only weights, i.e. not divided by kappa
-  if(m_redistribute){
+  if(m_useRedistribution){
     this->depositNonConservative(m_depositionNC, a_phi);              // Compute m_depositionNC = sum(kappa*Wc)/sum(kappa)
     this->depositHybrid(a_phi, m_massDiff, m_depositionNC);           // Compute hybrid deposition, including mass differnce
     this->incrementRedist(m_massDiff);                                  // Increment level redistribution register
@@ -126,15 +175,15 @@ void ItoSolver::depositKappaConservative(EBAMRCellData&               a_phi,
     pout() << m_name + "::depositKappaConservative" << endl;
   }
 
-  if(m_halo_buffer > 0 && m_pvr_buffer > 0){
+  if(m_haloBuffer > 0 && m_pvrBuffer > 0){
     MayDay::Abort("ItoSolver::depositKappaConservative - conflicting inputs, halo/pvr buffers both > 0");
   }
 
-  if(m_pvr_buffer > 0){
+  if(m_pvrBuffer > 0){
     this->depositKappaConservativeWithPVR(a_phi, a_particles, a_deposition);
   }
   else{
-    if(m_ngp_halo || a_deposition == DepositionType::NGP){
+    if(m_forceHaloNGP || a_deposition == DepositionType::NGP){
       this->depositKappaConservativeNoPVR_NGP(a_phi, a_particles, a_deposition);
     }
     else{
@@ -152,7 +201,7 @@ void ItoSolver::depositKappaConservativeWithPVR(EBAMRCellData&               a_p
     pout() << m_name + "::depositKappaConservativeWithPVR" << endl;
   }
 
-  m_amr->depositParticles<T, &T::mass>(a_phi, m_realm, m_phase, a_particles, a_deposition, CoarseFineDeposition::PVR, m_irreg_ngp_deposition);  
+  m_amr->depositParticles<T, &T::mass>(a_phi, m_realm, m_phase, a_particles, a_deposition, CoarseFineDeposition::PVR, m_forceIrregDepositionNGP);  
 }
 
 template <class T>
@@ -164,10 +213,10 @@ void ItoSolver::depositKappaConservativeNoPVR_native(EBAMRCellData&             
     pout() << m_name + "::depositKappaConservativeNoPVR_native" << endl;
   }
 
-  const AMRMask& mask = m_amr->getMask(s_particle_halo, m_halo_buffer, m_realm);
+  const AMRMask& mask = m_amr->getMask(s_particle_halo, m_haloBuffer, m_realm);
   a_particles.copyMaskParticles(mask);
   
-  m_amr->depositParticles<T, &T::mass>(a_phi, m_realm, m_phase, a_particles, a_deposition, CoarseFineDeposition::Halo, m_irreg_ngp_deposition);
+  m_amr->depositParticles<T, &T::mass>(a_phi, m_realm, m_phase, a_particles, a_deposition, CoarseFineDeposition::Halo, m_forceIrregDepositionNGP);
 
   a_particles.clearMaskParticles();  
 }
@@ -181,12 +230,12 @@ void ItoSolver::depositKappaConservativeNoPVR_NGP(EBAMRCellData&               a
     pout() << m_name + "::depositKappaConservativeNoPVR_NGP" << endl;
   }
 
-  const AMRMask& mask = m_amr->getMask(s_particle_halo, m_halo_buffer, m_realm);
+  const AMRMask& mask = m_amr->getMask(s_particle_halo, m_haloBuffer, m_realm);
 
   a_particles.copyMaskParticles(mask);
   a_particles.copyNonMaskParticles(mask);
 
-  m_amr->depositParticles<T, &T::mass>(a_phi, m_realm, m_phase, a_particles, a_deposition, CoarseFineDeposition::HaloNGP, m_irreg_ngp_deposition);  
+  m_amr->depositParticles<T, &T::mass>(a_phi, m_realm, m_phase, a_particles, a_deposition, CoarseFineDeposition::HaloNGP, m_forceIrregDepositionNGP);  
   
   a_particles.clearMaskParticles();
   a_particles.clearNonMaskParticles();  

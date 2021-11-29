@@ -32,82 +32,91 @@
 #include <CD_EbRepresentation.H>
 #include <CD_NamespaceHeader.H>
 
-#define BOOST_RANDOM 0
-
-#if BOOST_RANDOM
-#include <boost/random.hpp>
-namespace RAN = boost::random;
-#else
-namespace RAN = std;
-#endif
   
 /*!
-  @brief Base class for Ito diffusion particle models
-  @details This is a particle class for solving Ito diffusion problems dX = vdt + Z*D*t over an AMR hierarchy. The diffusion
-  coefficient is related to the hydrodynamic diffusion coefficient by D(fluid = sqrt(2*D(Ito))
+  @brief Base class for Ito diffusion particle models.
+  @details This is a particle class for solving Ito diffusion problems dX = v*dt + sqrt(2*D)*dW_t (dW_t is a Wiener process over dt) over an AMR hierarchy. The diffusion
+  coefficient is related to the hydrodynamic diffusion coefficient by D(fluid) = sqrt(2*D(Ito)).
+  @note To use this class, the user must add a species and set the realm and phase where the solver will live. 
 */
 class ItoSolver {
 public:
 
   /*!
-    @brief Enum class for interfacing into individual containers. 
+    @brief Enum class for distinguishing various types of particle containers.
+    @details This exists because the ItoSolver can partition particles into various containers, which is very useful when one wants to add particles from
+    a source term, remove particles that fall inside the EB, or parse boundary conditions on the EB and domain faces. Here,
+    Bulk    = "Active" particles,
+    EB      = Particles on the EBs ,
+    Domain  = Particles on the domain sides,
+    Source  = Source particles -- used to e.g. add new particles to the bulk particles,
+    Covered = Particles inside the EB,
+    Scratch = Scratch particles
   */
   enum class WhichContainer {
-    bulk,
-    eb,
-    domain,
-    source,
-    covered,
-    scratch
+    Bulk,
+    EB,
+    Domain,
+    Source,
+    Covered,
+    Scratch
   };
 
   /*!
-    @brief Default ctor
+    @brief Constructor -- user must subsequently set the realm and, parse class options, set the species etc. 
   */
   ItoSolver();
 
   /*!
-    @Default dtor
+    @brief Destructor (does nothing).
   */
   virtual ~ItoSolver();
 
   /*!
-    @brief Get solver name
+    @brief Get this solver's name 
+    @return Returns m_name
   */
-  virtual std::string getName();
+  virtual std::string getName() const;
 
   /*!
-    @brief Get Realm
+    @brief Get the realm where this solver is registered.
+    @return m_realm
   */
   virtual const std::string getRealm() const;
 
   /*!
-    @brief Set Realm
+    @brief Set the realm where this solver will live
+    @param[in] a_realm Realm name. 
   */
   virtual void setRealm(const std::string a_realm);
 
   /*!
-    @brief Parse options
+    @brief Parse class options
   */
   virtual void parseOptions();
 
   /*!
-    @brief Parse options
+    @brief Parse class runtime configurable options.
   */
   virtual void parseRuntimeOptions();
 
   /*!
     @brief Get output plot names
+    @return Returns a string of all variables that this solver can add to plot files. 
   */
   virtual Vector<std::string> getPlotVariableNames() const;
 
   /*!
     @brief Set the initial data
+    @details This will add the initial particles and deposit them. 
   */
   virtual void initialData();
 
   /*!
-    @brief Regrid solver
+    @brief Regrid this solver. 
+    @param[in] a_lmin           Coarsest level where grids did not change. 
+    @param[in] a_oldFinestLevel Finest AMR level before the regrid. 
+    @param[in] a_newFinestLevel Finest AMR level after the regrid. 
   */
   virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel);
 
@@ -117,17 +126,20 @@ public:
   virtual void allocateInternals();
 
   /*!
-    @brief Clear a particle container
+    @brief Clear a particle container -- this will delete all the particles in the input container. 
+    @param[in] a_whichContainer Particle container to be cleared.
   */
   virtual void clear(const WhichContainer a_container);
 
   /*!
-    @brief Empty particle container
+    @brief Clear a particle container -- this will delete all the particles in the input container. 
+    @param[in] a_particles Particle container to be emptied. 
   */
   virtual void clear(ParticleContainer<ItoParticle>& a_particles);
 
   /*!
-    @brief Empty particle container
+    @brief Clear particles -- this will deleted all the particles in the input container. 
+    @param[in] a_particles Particle container to be emptied. 
   */
   virtual void clear(AMRParticles<ItoParticle>& a_particles);
 
@@ -333,6 +345,7 @@ public:
 
   /*!
     @brief Get number of plot variables
+    @return Returns the number of plot variables (Note: Scalars-> one variable and vectors -> SpaceDim variables).
   */
   virtual int getNumberOfPlotVariables() const;
 
@@ -574,17 +587,26 @@ public:
   virtual void sortParticlesByPatch(const WhichContainer a_container);
   
   /*!
-    @brief Make superparticles
+    @brief Make superparticles for a full container -- this is the AMR version that users will usually call. 
+    @param[in] a_container        Which container to repartition into new superparticles
+    @param[in] a_particlesPerCell Target number of particles per cell
   */
-  virtual void makeSuperparticles(const WhichContainer a_container, const int a_particlesPerPatch);
+  virtual void makeSuperparticles(const WhichContainer a_container, const int a_particlesPerCell);
 
   /*!
-    @brief Make superparticles on specified level
+    @brief Make superparticles for a particle container -- this is used for a specified grid level. 
+    @param[in] a_container        Which container to repartition into new superparticles
+    @param[in] a_particlesPerCell Target number of particles per cell
+    @param[in] a_level            Grid level
   */
-  virtual void makeSuperparticles(const WhichContainer a_container, const int a_particlesPerPatch, const int a_level);
+  virtual void makeSuperparticles(const WhichContainer a_container, const int a_particlesPerCell, const int a_level);
 
   /*!
-    @brief Make superparticles on specified level and patch
+    @brief Make superparticles for a particle container -- this is used for a specified grid level and patch
+    @param[in] a_container        Which container to repartition into new superparticles
+    @param[in] a_particlesPerCell Target number of particles per cell
+    @param[in] a_level            Grid level
+    @param[in] a_dit              Grid index
   */
   virtual void makeSuperparticles(const WhichContainer a_container, const int a_particlesPerPatch, const int a_level, const DataIndex a_dit);
 
@@ -741,12 +763,12 @@ protected:
   /*!
     @brief Get number of particles used for restarting
   */
-  int m_ppc_restart;
+  int m_restartPPC;
 
   /*!
     @brief Splitting direction
   */
-  int m_kd_direction;
+  int m_directionKD;
 
   /*!
     @brief Realm
@@ -754,15 +776,9 @@ protected:
   std::string m_realm;
 
   /*!
-    @brief Fluid Realm
-    @note This is for later, in case we want to move redistribution and averaging/ghost cell interpolating onto a different Realm. 
-  */
-  std::string m_fluid_Realm;
-
-  /*!
     @brief Boundary volume hierarchy merging tree
   */
-  ItoMerge::Tree<PointMass> m_tree;
+  ItoMerge::Tree<PointMass> m_mergeTree;
 
   /*!
     @brief Computational geometry. 
@@ -795,45 +811,44 @@ protected:
   std::string m_className;
 
   /*!
-    @brief RNG engine
+    @brief Random number generator engine.
   */
-  //  std::mt19937_64 m_rng;
-  RAN::mt19937_64 m_rng;
+  mutable std::mt19937_64 m_rng;
 
   /*!
     @brief Uniform real distribution on [0,1]
   */
-  RAN::uniform_real_distribution<Real> m_udist01; 
+  mutable std::uniform_real_distribution<Real> m_uniformDistribution01; 
 
   /*!
     @brief Uniform real distribution on [-1,1]
   */
-  RAN::uniform_real_distribution<Real> m_udist11;
+  mutable std::uniform_real_distribution<Real> m_uniformDistribution11;
 
   /*!
     @brief Gaussian distribution centered on 0, std=1
   */
-  RAN::normal_distribution<Real> m_gauss01;
+  mutable std::normal_distribution<Real> m_normalDistribution01;
 
   /*!
     @brief Uniform integer distribution between [0,SpaceDim-1]
   */
-  RAN::uniform_int_distribution<int> m_udist0d;
+  mutable std::uniform_int_distribution<int> m_uniformDistribution0d;
 
   /*!
     @brief Maximum exponential
   */
-  Real m_normal_max;
+  Real m_normalDistributionTruncation;
 
   /*!
-    @brief Initial seed for RNG
+    @brief Random number generator seed.
   */
-  Real m_seed_rng;
+  Real m_rngSeed;
 
   /*!
     @brief Bisection step for particle trajectories
   */
-  Real m_bisect_step;
+  Real m_bisectionStep;
 
   /*!
     @brief Verbosity
@@ -848,12 +863,12 @@ protected:
   /*!
     @brief Buffer for PVR
   */
-  int m_pvr_buffer;
+  int m_pvrBuffer;
 
   /*!
     @brief Size of refinement boundary halo
   */
-  int m_halo_buffer;
+  int m_haloBuffer;
 
   /*!
     @brief Current time
@@ -868,37 +883,27 @@ protected:
   /*!
     @brief Length of maximum diffusion hop relative to the cell size
   */
-  Real m_max_diffusion_hop;
-
-  /*!
-    @brief Maximum probability that a diffusion hop is m_max_diffusion_hop long
-  */
-  Real m_max_hop_probability;
-
-  /*!
-    @brief Epsilon-parameter for diffusion hopping
-  */
-  Real m_hop_eps;
+  Real m_maxDiffusionHop;
 
   /*!
     @brief NGP deposition in cut cells or not
   */
-  bool m_irreg_ngp_deposition;
+  bool m_forceIrregDepositionNGP;
 
   /*!
     @brief NGP interpolation in cut cells or not
   */
-  bool m_irreg_ngp_interpolation;
+  bool m_forceIrregInterpolationNGP;
 
   /*!
     @brief Use ngp when depositing halo particles or not
   */
-  bool m_ngp_halo;
+  bool m_forceHaloNGP;
 
   /*!
     @brief Redistribute or not
   */
-  bool m_redistribute;
+  bool m_useRedistribution;
 
   /*!
     @brief Flag for blending the deposition clouds with the nonconservative divergence
@@ -928,42 +933,42 @@ protected:
   /*!
     @brief Output state
   */
-  bool m_plotDiffusionCoefficient;
+  bool m_plotDiffCo;
 
   /*!
     @brief Plot particles
   */
-  bool m_plot_particles;
+  bool m_plotParticles;
 
   /*!
     @brief Plot EB particles
   */
-  bool m_plot_eb_particles;
+  bool m_plotParticlesEB;
 
   /*!
     @brief Plot domain particles
   */
-  bool m_plot_domain_particles;
+  bool m_plotParticlesDomain;
 
   /*!
     @brief Plot source particles
   */
-  bool m_plot_source_particles;
+  bool m_plotParticlesSource;
 
   /*!
     @brief Plot covered particles
   */
-  bool m_plot_covered_particles;
+  bool m_plotParticlesCovered;
 
   /*!
     @brief Plot energy density
   */
-  bool m_plot_energy_density;
+  bool m_plotEnergyDensity;
 
   /*!
     @brief Plot average energy or not. 
   */
-  bool m_plot_average_energy;
+  bool m_plotAverageEnergy;
 
   /*!
     @brief Mass/charge deposition type
@@ -973,7 +978,7 @@ protected:
   /*!
     @brief Plot deposition type
   */
-  DepositionType m_plot_deposition; 
+  DepositionType m_plotDeposition; 
 
   /*!
     @brief Deposited particles
@@ -988,17 +993,17 @@ protected:
   /*!
     @brief Mobility function
   */
-  EBAMRCellData m_mobility_func;
+  EBAMRCellData m_mobilityFunction;
 
   /*!
     @brief Cell-centered field used for interpolating velocities
   */
-  EBAMRCellData m_velo_func;
+  EBAMRCellData m_velocityFunction;
 
   /*!
     @brief Diffusion-centerer field used for interpolating diffusion coefficients
   */
-  EBAMRCellData m_faceCenteredDiffusionCoefficient_cell;
+  EBAMRCellData m_diffusionFunction;
 
   /*!
     @brief Scratch storage for holding the non-conservative deposition
@@ -1013,7 +1018,7 @@ protected:
   /*!
     @brief Various particle containers with identifiers. 
   */
-  std::map<WhichContainer, ParticleContainer<ItoParticle> > m_ParticleContainers;
+  std::map<WhichContainer, ParticleContainer<ItoParticle> > m_particleContainers;
 
   /*!
     @brief Parse superparticles
@@ -1194,20 +1199,22 @@ protected:
 			  const RealVect a_bndryCentroid,
 			  const RealVect a_normal,
 			  const Real     a_dx,
-			  const Real     a_kappa);
+			  const Real     a_kappa) const;
 
   /*!
     @brief Draw a random position somewhere in a cell
   */
+  inline
   RealVect randomPosition(const RealVect a_lo,
 			  const RealVect a_hi,
 			  const RealVect a_bndryCentroid,
-			  const RealVect a_normal);
+			  const RealVect a_normal) const;
 
   /*!
     @brief Return a random position in the cube (a_lo, a_hi);
   */
-  RealVect randomPosition(const RealVect a_lo, const RealVect a_hi);
+  inline
+  RealVect randomPosition(const RealVect a_lo, const RealVect a_hi) const;
 };
 
 #include <CD_NamespaceFooter.H>

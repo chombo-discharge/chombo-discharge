@@ -188,7 +188,7 @@ void ItoLayout<T>::makeSuperparticles(const ItoSolver::WhichContainer a_whichCon
 
 template <class T>
 void ItoLayout<T>::depositParticles(){
-  this->depositParticles(ItoSolver::WhichContainer::bulk);
+  this->depositParticles(ItoSolver::WhichContainer::Bulk);
 }
 
 template <class T>
@@ -200,7 +200,7 @@ void ItoLayout<T>::depositParticles(const ItoSolver::WhichContainer a_whichConta
 
 template <class T>
 void ItoLayout<T>::remap(){
-  this->remap(ItoSolver::WhichContainer::bulk);
+  this->remap(ItoSolver::WhichContainer::Bulk);
 }
 
 template <class T>

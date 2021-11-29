@@ -13,6 +13,7 @@
 #include <chrono>
 
 // Chombo includes
+#include <CH_Timer.H>
 #include <ParmParse.H>
 #include <ParticleIO.H>
 
@@ -26,8 +27,14 @@
 #define ITO_DEBUG 0
 
 ItoSolver::ItoSolver(){
-  m_name      = "ItoSolver";
-  m_className = "ItoSolver";
+  CH_TIME("ItoSolver::ItoSolver");
+
+  // Default settings
+  m_verbosity = -1           ;
+  m_name      = "ItoSolver"  ;
+  m_className = "ItoSolver"  ;
+  m_realm     = Realm::primal;
+  m_phase     = phase::gas   ;
 
   m_WhichMobilityInterpolation = WhichMobilityInterpolation::mobility;
 }
@@ -36,22 +43,29 @@ ItoSolver::~ItoSolver(){
 
 }
 
-std::string ItoSolver::getName(){
+std::string ItoSolver::getName() const {
+  CH_TIME("ItoSolver::getName");
+  
   return m_name;
 }
 
-const std::string ItoSolver::getRealm() const{
+const std::string ItoSolver::getRealm() const {
+  CH_TIME("ItoSolver::getRealm");
+  
   return m_realm;
 }
 
-void ItoSolver::setRealm(const std::string a_realm){
+void ItoSolver::setRealm(const std::string a_realm) {
+  CH_TIME("ItoSolver::setRealm");
+  
   m_realm = a_realm;
-
-  // This is for later, in case we want to move averaging/interpolating onto a different Realm. 
-  m_fluid_Realm = m_realm;
 }
 
 RefCountedPtr<ItoSpecies>& ItoSolver::getSpecies(){
+  CH_TIME("ItoSolver::getSpecies");
+
+  CH_assert(!m_species.isNull());
+  
   return m_species;
 }
 
@@ -61,7 +75,7 @@ void ItoSolver::parseOptions(){
     pout() << m_name + "::parseOptions" << endl;
   }
 
-  this->parseSuperParticles();
+  this->parseSuperParticles();        
   this->parseRng();
   this->parsePlotVariables();
   this->parseDeposition();
@@ -98,9 +112,9 @@ void ItoSolver::parseSuperParticles(){
 
   // Seed the RNG
   ParmParse pp(m_className.c_str());
-  pp.get("kd_direction", m_kd_direction);
+  pp.get("kd_direction", m_directionKD);
 
-  m_kd_direction = min(m_kd_direction, SpaceDim-1);
+  m_directionKD = min(m_directionKD, SpaceDim-1);
 }
 
 void ItoSolver::parseRng(){
@@ -111,17 +125,17 @@ void ItoSolver::parseRng(){
 
   // Seed the RNG
   ParmParse pp(m_className.c_str());
-  pp.get("seed",       m_seed_rng);
-  pp.get("normal_max", m_normal_max);
-  if(m_seed_rng < 0) { // Random seed if input < 0
-    m_seed_rng = std::chrono::system_clock::now().time_since_epoch().count();
+  pp.get("seed",       m_rngSeed);
+  pp.get("normal_max", m_normalDistributionTruncation);
+  if(m_rngSeed < 0) { // Random seed if input < 0
+    m_rngSeed = std::chrono::system_clock::now().time_since_epoch().count();
   }
   
-  m_rng     = RAN::mt19937_64(m_seed_rng);
-  m_udist01 = RAN::uniform_real_distribution<Real>( 0.0, 1.0);
-  m_udist11 = RAN::uniform_real_distribution<Real>(-1.0, 1.0);
-  m_gauss01 = RAN::normal_distribution<Real>(0.0, 1.0);
-  m_udist0d = RAN::uniform_int_distribution<int>(0, SpaceDim-1);
+  m_rng     = std::mt19937_64(m_rngSeed);
+  m_uniformDistribution01 = std::uniform_real_distribution<Real>( 0.0, 1.0);
+  m_uniformDistribution11 = std::uniform_real_distribution<Real>(-1.0, 1.0);
+  m_normalDistribution01 = std::normal_distribution<Real>(0.0, 1.0);
+  m_uniformDistribution0d = std::uniform_int_distribution<int>(0, SpaceDim-1);
 }
 
 void ItoSolver::parsePlotVariables(){
@@ -132,13 +146,13 @@ void ItoSolver::parsePlotVariables(){
 
   m_plotPhi = false;
   m_plotVelocity = false;
-  m_plotDiffusionCoefficient = false;
-  m_plot_particles        = false;
-  m_plot_eb_particles     = false;
-  m_plot_domain_particles = false;
-  m_plot_source_particles = false;
-  m_plot_energy_density   = false;
-  m_plot_average_energy   = false;
+  m_plotDiffCo = false;
+  m_plotParticles        = false;
+  m_plotParticlesEB     = false;
+  m_plotParticlesDomain = false;
+  m_plotParticlesSource = false;
+  m_plotEnergyDensity   = false;
+  m_plotAverageEnergy   = false;
 
   ParmParse pp(m_className.c_str());
   const int num = pp.countval("plt_vars");
@@ -148,13 +162,13 @@ void ItoSolver::parsePlotVariables(){
   for (int i = 0; i < num; i++){
     if(     str[i] == "phi")            m_plotPhi              = true;
     else if(str[i] == "vel")            m_plotVelocity              = true;
-    else if(str[i] == "dco")            m_plotDiffusionCoefficient              = true;
-    else if(str[i] == "part")           m_plot_particles        = true;
-    else if(str[i] == "eb_part")        m_plot_eb_particles     = true;
-    else if(str[i] == "dom_part")       m_plot_domain_particles = true;
-    else if(str[i] == "src_part")       m_plot_source_particles = true;
-    else if(str[i] == "energy_density") m_plot_energy_density   = true;
-    else if(str[i] == "average_energy") m_plot_average_energy   = true;
+    else if(str[i] == "dco")            m_plotDiffCo              = true;
+    else if(str[i] == "part")           m_plotParticles        = true;
+    else if(str[i] == "eb_part")        m_plotParticlesEB     = true;
+    else if(str[i] == "dom_part")       m_plotParticlesDomain = true;
+    else if(str[i] == "src_part")       m_plotParticlesSource = true;
+    else if(str[i] == "energy_density") m_plotEnergyDensity   = true;
+    else if(str[i] == "average_energy") m_plotAverageEnergy   = true;
   }
 }
 
@@ -189,16 +203,16 @@ void ItoSolver::parseDeposition(){
   pp.get("plot_deposition", str);
 
   if(str == "ngp"){
-    m_plot_deposition = DepositionType::NGP;
+    m_plotDeposition = DepositionType::NGP;
   }
   else if(str == "cic"){
-    m_plot_deposition = DepositionType::CIC;
+    m_plotDeposition = DepositionType::CIC;
   }
   else if(str == "tsc"){
-    m_plot_deposition = DepositionType::TSC;
+    m_plotDeposition = DepositionType::TSC;
   }
   else if(str == "w4"){
-    m_plot_deposition = DepositionType::W4;
+    m_plotDeposition = DepositionType::W4;
   }
   else{
     MayDay::Abort("ItoSolver::parseDeposition - unknown interpolant requested");
@@ -217,8 +231,8 @@ void ItoSolver::parseDeposition(){
     MayDay::Abort("ItoSolver::parseDeposition - unknown interpolation method for mobility");
   }
 
-  pp.get("irr_ngp_deposition", m_irreg_ngp_deposition);
-  pp.get("irr_ngp_interp",     m_irreg_ngp_interpolation);
+  pp.get("irr_ngp_deposition", m_forceIrregDepositionNGP);
+  pp.get("irr_ngp_interp",     m_forceIrregInterpolationNGP);
 }
 
 void ItoSolver::parseBisectStep(){
@@ -228,7 +242,7 @@ void ItoSolver::parseBisectStep(){
   }
 
   ParmParse pp(m_className.c_str());
-  pp.get("bisect_step", m_bisect_step);
+  pp.get("bisect_step", m_bisectionStep);
 }
 
 void ItoSolver::parsePvrBuffer(){
@@ -238,16 +252,16 @@ void ItoSolver::parsePvrBuffer(){
   }
 
   ParmParse pp(m_className.c_str());
-  pp.get("pvr_buffer",  m_pvr_buffer);
-  pp.get("halo_buffer", m_halo_buffer);
+  pp.get("pvr_buffer",  m_pvrBuffer);
+  pp.get("halo_buffer", m_haloBuffer);
 
   std::string str;
   pp.get("halo_deposition", str);
   if(str == "ngp"){
-    m_ngp_halo = true;
+    m_forceHaloNGP = true;
   }
   else if(str == "native"){
-    m_ngp_halo = false;
+    m_forceHaloNGP = false;
   }
   else{
     MayDay::Abort("ItoSolver::parsePvrBuffer - unknown argument to 'halo_deposition'");
@@ -262,7 +276,7 @@ void ItoSolver::parseDiffusionHop(){
 
   ParmParse pp(m_className.c_str());
 
-  pp.get("max_diffusion_hop", m_max_diffusion_hop);
+  pp.get("max_diffusion_hop", m_maxDiffusionHop);
 }
 
 void ItoSolver::parseRedistribution(){
@@ -273,7 +287,7 @@ void ItoSolver::parseRedistribution(){
 
   ParmParse pp(m_className.c_str());
 
-  pp.get("redistribute", m_redistribute);
+  pp.get("redistribute", m_useRedistribution);
 }
 
 void ItoSolver::parseDivergenceComputation(){
@@ -297,7 +311,7 @@ void ItoSolver::parseCheckpointing(){
 
   std::string str;
   pp.get("checkpointing", str);
-  pp.get("ppc_restart", m_ppc_restart);
+  pp.get("ppc_restart", m_restartPPC);
   if(str == "particles"){
     m_checkpointing = WhichCheckpoint::particles;
   }
@@ -316,10 +330,11 @@ Vector<std::string> ItoSolver::getPlotVariableNames() const {
   }
 
   Vector<std::string> names(0);
+  
   if(m_plotPhi) {
     names.push_back(m_name + " phi");
   }
-  if(m_plotDiffusionCoefficient && m_isDiffusive){
+  if(m_plotDiffCo && m_isDiffusive){
     names.push_back(m_name + " diffusion_coefficient");
   }
   if(m_plotVelocity && m_isMobile){
@@ -329,13 +344,13 @@ Vector<std::string> ItoSolver::getPlotVariableNames() const {
       names.push_back("z-Velocity " + m_name);
     }
   }
-  if(m_plot_particles)         names.push_back(m_name + " particles");
-  if(m_plot_eb_particles)      names.push_back(m_name + " eb_particles");
-  if(m_plot_domain_particles)  names.push_back(m_name + " domain_particles");
-  if(m_plot_source_particles)  names.push_back(m_name + " source_particles");
-  if(m_plot_covered_particles) names.push_back(m_name + " covered_particles");
-  if(m_plot_energy_density)    names.push_back(m_name + " energy * phi");
-  if(m_plot_average_energy)    names.push_back(m_name + " average_energy");
+  if(m_plotParticles)         names.push_back(m_name + " particles");
+  if(m_plotParticlesEB)      names.push_back(m_name + " eb_particles");
+  if(m_plotParticlesDomain)  names.push_back(m_name + " domain_particles");
+  if(m_plotParticlesSource)  names.push_back(m_name + " source_particles");
+  if(m_plotParticlesCovered) names.push_back(m_name + " covered_particles");
+  if(m_plotEnergyDensity)    names.push_back(m_name + " energy * phi");
+  if(m_plotAverageEnergy)    names.push_back(m_name + " average_energy");
 
   return names;
 }
@@ -346,20 +361,20 @@ int ItoSolver::getNumberOfPlotVariables() const {
     pout() << m_name + "::getNumberOfPlotVariables" << endl;
   }
 
-  int num_plotvars = 0;
+  int numPlotVars = 0;
   
-  if(m_plotPhi)                num_plotvars += 1;
-  if(m_plotDiffusionCoefficient && m_isDiffusive) num_plotvars += 1;
-  if(m_plotVelocity && m_isMobile)    num_plotvars += SpaceDim;
-  if(m_plot_particles)          num_plotvars = num_plotvars + 1;
-  if(m_plot_eb_particles)       num_plotvars = num_plotvars + 1;
-  if(m_plot_domain_particles)   num_plotvars = num_plotvars + 1;
-  if(m_plot_source_particles)   num_plotvars = num_plotvars + 1;
-  if(m_plot_covered_particles)  num_plotvars = num_plotvars + 1;
-  if(m_plot_energy_density)     num_plotvars += 1;
-  if(m_plot_average_energy)     num_plotvars += 1;
+  if(m_plotPhi)                                   numPlotVars += 1       ;
+  if(m_plotDiffCo && m_isDiffusive) numPlotVars += 1       ;
+  if(m_plotVelocity             && m_isMobile   ) numPlotVars += SpaceDim;
+  if(m_plotParticles)                            numPlotVars += 1       ;
+  if(m_plotParticlesEB)                         numPlotVars += 1       ;
+  if(m_plotParticlesDomain)                     numPlotVars += 1       ;
+  if(m_plotParticlesSource)                     numPlotVars += 1       ;
+  if(m_plotParticlesCovered)                    numPlotVars += 1       ;
+  if(m_plotEnergyDensity)                       numPlotVars += 1       ;
+  if(m_plotAverageEnergy)                       numPlotVars += 1       ;
 
-  return num_plotvars;
+  return numPlotVars;
 }
 
 int ItoSolver::getPVRBuffer() const {
@@ -368,7 +383,7 @@ int ItoSolver::getPVRBuffer() const {
     pout() << m_name + "::getPVRBuffer" << endl;
   }
 
-  return m_pvr_buffer;
+  return m_pvrBuffer;
 }
 
 int ItoSolver::getHaloBuffer() const {
@@ -377,7 +392,7 @@ int ItoSolver::getHaloBuffer() const {
     pout() << m_name + "::getHaloBuffer" << endl;
   }
 
-  return m_halo_buffer;
+  return m_haloBuffer;
 }
 
 void ItoSolver::setPVRBuffer(const int a_buffer) {
@@ -386,7 +401,7 @@ void ItoSolver::setPVRBuffer(const int a_buffer) {
     pout() << m_name + "::setPVRBuffer" << endl;
   }
 
-  m_pvr_buffer = a_buffer;
+  m_pvrBuffer = a_buffer;
 }
 
 void ItoSolver::setHalobuffer(const int a_buffer)  {
@@ -395,7 +410,7 @@ void ItoSolver::setHalobuffer(const int a_buffer)  {
     pout() << m_name + "::setHalobuffer" << endl;
   }
 
-  m_halo_buffer = a_buffer;
+  m_haloBuffer = a_buffer;
 }
 
 
@@ -407,7 +422,7 @@ size_t ItoSolver::getNumParticles(const WhichContainer a_container, const bool a
 
   size_t N;
 
-  const ParticleContainer<ItoParticle>& particles = m_ParticleContainers.at(a_container);
+  const ParticleContainer<ItoParticle>& particles = m_particleContainers.at(a_container);
 
   if(a_local){
     N = particles.getNumberOfValidParticesLocal();
@@ -452,8 +467,8 @@ void ItoSolver::registerOperators(){
     m_amr->registerOperator(s_noncons_div,     m_realm, m_phase);
     m_amr->registerOperator(s_particle_mesh,   m_realm, m_phase);
     
-    if(m_redistribute)    m_amr->registerOperator(s_eb_redist,  m_realm, m_phase);
-    if(m_halo_buffer > 0) m_amr->registerMask(s_particle_halo, m_halo_buffer, m_realm);
+    if(m_useRedistribution)    m_amr->registerOperator(s_eb_redist,  m_realm, m_phase);
+    if(m_haloBuffer > 0) m_amr->registerMask(s_particle_halo, m_haloBuffer, m_realm);
   }
 }
 
@@ -491,14 +506,21 @@ void ItoSolver::initialData(){
     pout() << m_name + "::initialData" << endl;
   }
 
-  ParticleContainer<ItoParticle>& particles = m_ParticleContainers.at(WhichContainer::bulk);
+  CH_assert(!m_species.isNull());
 
-  particles.clearParticles();
+  // TLDR: This function will fetch the initial particles from the species and deposit them on the mesh. In most cases the various MPI ranks
+  //       will have drawn a different set of initial particles (the only sane way to do it) and so those particles are put directly in
+  //       the 'bulk' particle container. After that we remove the particles that fell inside the EB and deposit the particles on the mesh. 
+
+  ParticleContainer<ItoParticle>& bulkParticles = m_particleContainers.at(WhichContainer::Bulk);
+  bulkParticles.clearParticles();
+  bulkParticles.addParticles(m_species->getInitialParticles());
+
+  constexpr Real tolerance = 0.0;
 
   // Add particles, remove the ones that are inside the EB, and then depsit
-  particles.addParticles(m_species->getInitialParticles());
-  this->removeCoveredParticles(particles, EbRepresentation::ImplicitFunction, 0.0);
-  this->depositParticles(m_phi, particles, m_deposition);
+  this->removeCoveredParticles(bulkParticles, EbRepresentation::ImplicitFunction, tolerance); // Remove particles that are less than tolerance away from the EB
+  this->depositParticles(m_phi, bulkParticles, m_deposition);                                 // Deposit particles on the mesh. 
 }
 
 void ItoSolver::computeLoads(Vector<long int>& a_loads, const DisjointBoxLayout& a_dbl, const int a_level){
@@ -507,7 +529,7 @@ void ItoSolver::computeLoads(Vector<long int>& a_loads, const DisjointBoxLayout&
     pout() << m_name + "::computeLoads" << endl;
   }
 
-  const ParticleContainer<ItoParticle>& particles = m_ParticleContainers.at(WhichContainer::bulk);
+  const ParticleContainer<ItoParticle>& particles = m_particleContainers.at(WhichContainer::Bulk);
 
   a_loads.resize(a_dbl.size(),0);
   
@@ -531,7 +553,7 @@ void ItoSolver::removeCoveredParticles(const EbRepresentation a_representation, 
     pout() << m_name + "::removeCoveredParticles(EbRepresentation, tolerance)" << endl;
   }
 
-  this->removeCoveredParticles(WhichContainer::bulk, a_representation, a_tol);
+  this->removeCoveredParticles(WhichContainer::Bulk, a_representation, a_tol);
 }
 
 
@@ -728,7 +750,7 @@ void ItoSolver::transferCoveredParticles(const EbRepresentation a_representation
     pout() << m_name + "::transferCoveredParticles(EbRepresentation, tol)" << endl;
   }
 
-  this->transferCoveredParticles(WhichContainer::bulk, WhichContainer::covered, a_representation, a_tol);
+  this->transferCoveredParticles(WhichContainer::Bulk, WhichContainer::Covered, a_representation, a_tol);
 }
 
 void ItoSolver::transferCoveredParticles(const WhichContainer a_containerFrom, const WhichContainer a_containerTo, const EbRepresentation a_representation, const Real a_tol){
@@ -767,7 +789,7 @@ void ItoSolver::intersectParticles(const EbRepresentation a_representation, cons
     pout() << m_name + "::intersectParticles(EbRepresentation, bool)" << endl;
   }
 
-  this->intersectParticles(WhichContainer::bulk, WhichContainer::eb, WhichContainer::domain, a_representation, a_delete);
+  this->intersectParticles(WhichContainer::Bulk, WhichContainer::EB, WhichContainer::Domain, a_representation, a_delete);
 }
 
 void ItoSolver::intersectParticles(const WhichContainer       a_particles,
@@ -905,38 +927,44 @@ void ItoSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a
     pout() << m_name + "::regrid" << endl;
   }
 
-  // Reallocate mesh data
-  m_amr->reallocate(m_phi,         m_phase, a_lmin);
-  m_amr->reallocate(m_scratch,       m_phase, a_lmin);
-  m_amr->reallocate(m_mobility_func, m_phase, a_lmin);
-  m_amr->reallocate(m_depositionNC,  m_phase, a_lmin);
-  m_amr->reallocate(m_massDiff,      m_phase, a_lmin);
-  
-  // Only allocate memory if we actually have a mobile solver
-  if(m_isMobile){
-    m_amr->reallocate(m_velo_func, m_phase, a_lmin);
-  }
-  else{ 
-    m_amr->allocatePointer(m_velo_func);
-  }
+  CH_assert(a_lmin           >= 0);
+  CH_assert(a_oldFinestLevel >= 0);
+  CH_assert(a_newFinestLevel >= 0);    
 
-  // Only allocate memory if we actually a diffusion solver
-  if(m_isDiffusive){
-    m_amr->reallocate(m_faceCenteredDiffusionCoefficient_cell, m_phase, a_lmin);
+  // Reallocate mesh data. 
+  m_amr->reallocate(m_phi,              m_phase, a_lmin);
+  m_amr->reallocate(m_scratch,          m_phase, a_lmin);
+  m_amr->reallocate(m_depositionNC,     m_phase, a_lmin);
+  m_amr->reallocate(m_massDiff,         m_phase, a_lmin);
+  
+  // Only allocate memory if we have advection. 
+  if(m_isMobile){
+    m_amr->reallocate(m_mobilityFunction, m_phase, a_lmin);    
+    m_amr->reallocate(m_velocityFunction, m_phase, a_lmin);
   }
   else{
-    m_amr->allocatePointer(m_faceCenteredDiffusionCoefficient_cell);
+    m_amr->allocatePointer(m_mobilityFunction);    
+    m_amr->allocatePointer(m_velocityFunction);
   }
 
-  // Particle data regrids
-  const Vector<DisjointBoxLayout>& grids = m_amr->getGrids(m_realm);
-  const Vector<ProblemDomain>& domains   = m_amr->getDomains();
-  const Vector<Real>& dx                 = m_amr->getDx();
-  const Vector<int>& ref_rat             = m_amr->getRefinementRatios();
+  // Only allocate memory if we have diffusion.
+  if(m_isDiffusive){
+    m_amr->reallocate(m_diffusionFunction, m_phase, a_lmin);
+  }
+  else{
+    m_amr->allocatePointer(m_diffusionFunction);
+  }
 
-  for (auto& container : m_ParticleContainers){
+  // Regrid particle containers. 
+  const Vector<DisjointBoxLayout>& grids   = m_amr->getGrids(m_realm);
+  const Vector<ProblemDomain>&     domains = m_amr->getDomains();
+  const Vector<Real>&              dx      = m_amr->getDx();
+  const Vector<int>&               refRat  = m_amr->getRefinementRatios();
+
+  for (auto& container : m_particleContainers){
     ParticleContainer<ItoParticle>& particles = container.second;
-    particles.regrid(grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
+    
+    particles.regrid(grids, domains, dx, refRat, a_lmin, a_newFinestLevel);
   }
 }
 
@@ -960,37 +988,38 @@ void ItoSolver::allocateInternals(){
   
   const int ncomp = 1;
 
-  m_amr->allocate(m_phi,         m_realm, m_phase, ncomp);
-  m_amr->allocate(m_scratch,       m_realm, m_phase, ncomp);
-  m_amr->allocate(m_mobility_func, m_realm, m_phase, ncomp);
-  m_amr->allocate(m_depositionNC,  m_realm, m_phase, ncomp);
-  m_amr->allocate(m_massDiff,      m_realm, m_phase, ncomp);
+  m_amr->allocate(m_phi,              m_realm, m_phase, ncomp); // Mesh data -- always allocate it. 
+  m_amr->allocate(m_scratch,          m_realm, m_phase, ncomp); // Scratch data -- needed because of IO when we deposit particles (should always allocate it). 
+  m_amr->allocate(m_depositionNC,     m_realm, m_phase, ncomp); // This is BaseIVFAB data so it has a low memory overhead. It doesn't hurt to allocate it. 
+  m_amr->allocate(m_massDiff,         m_realm, m_phase, ncomp); // This is BaseIVFAB data so it has a low memory overhead. It doesn't hurt to allocate it. 
 
   // Only allocate memory for velocity if we actually have a mobile solver
   if(m_isMobile){
-    m_amr->allocate(m_velo_func, m_realm, m_phase, SpaceDim);
+    m_amr->allocate(m_mobilityFunction, m_realm, m_phase, ncomp); //     
+    m_amr->allocate(m_velocityFunction, m_realm, m_phase, SpaceDim);
   }
-  else{ 
-    m_amr->allocatePointer(m_velo_func);
+  else{
+    m_amr->allocatePointer(m_mobilityFunction);
+    m_amr->allocatePointer(m_velocityFunction);
   }
 
   // Only allocate memory if we actually have a diffusion solver
   if(m_isDiffusive){
-    m_amr->allocate(m_faceCenteredDiffusionCoefficient_cell, m_realm, m_phase, 1);
+    m_amr->allocate(m_diffusionFunction, m_realm, m_phase, 1);
   }
   else{
-    m_amr->allocatePointer(m_faceCenteredDiffusionCoefficient_cell);
+    m_amr->allocatePointer(m_diffusionFunction);
   }
 
-  m_ParticleContainers.emplace(WhichContainer::bulk,    ParticleContainer<ItoParticle>());
-  m_ParticleContainers.emplace(WhichContainer::eb,      ParticleContainer<ItoParticle>());
-  m_ParticleContainers.emplace(WhichContainer::domain,  ParticleContainer<ItoParticle>());
-  m_ParticleContainers.emplace(WhichContainer::source,  ParticleContainer<ItoParticle>());
-  m_ParticleContainers.emplace(WhichContainer::covered, ParticleContainer<ItoParticle>());
-  m_ParticleContainers.emplace(WhichContainer::scratch, ParticleContainer<ItoParticle>());
+  m_particleContainers.emplace(WhichContainer::Bulk,    ParticleContainer<ItoParticle>());
+  m_particleContainers.emplace(WhichContainer::EB,      ParticleContainer<ItoParticle>());
+  m_particleContainers.emplace(WhichContainer::Domain,  ParticleContainer<ItoParticle>());
+  m_particleContainers.emplace(WhichContainer::Source,  ParticleContainer<ItoParticle>());
+  m_particleContainers.emplace(WhichContainer::Covered, ParticleContainer<ItoParticle>());
+  m_particleContainers.emplace(WhichContainer::Scratch, ParticleContainer<ItoParticle>());
 
-  for (auto& container : m_ParticleContainers){
-    m_amr->allocate(container.second, m_pvr_buffer, m_realm);
+  for (auto& container : m_particleContainers){
+    m_amr->allocate(container.second, m_pvrBuffer, m_realm);
   }
 }
 
@@ -1025,9 +1054,9 @@ void ItoSolver::writeCheckPointLevelParticles(HDF5Handle& a_handle, const int a_
   const std::string str = m_name + "_particles";
 
   ParticleContainer<SimpleItoParticle> RealmParticles;
-  m_amr->allocate(RealmParticles,  m_pvr_buffer, m_realm);
+  m_amr->allocate(RealmParticles,  m_pvrBuffer, m_realm);
 
-  const ParticleContainer<ItoParticle>& myParticles = this->getParticles(WhichContainer::bulk);
+  const ParticleContainer<ItoParticle>& myParticles = this->getParticles(WhichContainer::Bulk);
 
   // Make ItoParticle into SimpleItoParticle. This saves a shitload of disk space. 
   for (DataIterator dit(m_amr->getGrids(m_realm)[a_level]); dit.ok(); ++dit){
@@ -1063,7 +1092,7 @@ void ItoSolver::writeCheckPointLevelFluid(HDF5Handle& a_handle, const int a_leve
   const IntVect ghos = IntVect::Zero;
 
   // Relevant container
-  const ParticleContainer<ItoParticle>& particles = m_ParticleContainers.at(WhichContainer::bulk);
+  const ParticleContainer<ItoParticle>& particles = m_particleContainers.at(WhichContainer::Bulk);
 
   // Make something that can hold the particle numbers (stored as a Real)
   EBCellFactory fact(ebisl);
@@ -1109,7 +1138,7 @@ void ItoSolver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
     m_amr->allocate(simpleParticles, m_realm);
     readParticlesFromHDF(a_handle, *simpleParticles[a_level], str);
 
-    ParticleContainer<ItoParticle>& particles = m_ParticleContainers.at(WhichContainer::bulk);
+    ParticleContainer<ItoParticle>& particles = m_particleContainers.at(WhichContainer::Bulk);
 
     // Make SimpleItoParticles into ito_ particles
     for (DataIterator dit(m_amr->getGrids(m_realm)[a_level]); dit.ok(); ++dit){
@@ -1145,7 +1174,7 @@ void ItoSolver::restartParticles(LevelData<EBCellFAB>& a_num_particles, const in
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
 
-  ParticleContainer<ItoParticle>& particles = m_ParticleContainers.at(WhichContainer::bulk);
+  ParticleContainer<ItoParticle>& particles = m_particleContainers.at(WhichContainer::Bulk);
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     const Box& box           = dbl.get(dit());
@@ -1163,7 +1192,7 @@ void ItoSolver::restartParticles(LevelData<EBCellFAB>& a_num_particles, const in
 	// Compute weights and remainder
 	const unsigned long long numParticles = (unsigned long long) llround(ppc(bit()));
 	unsigned long long w, N, r;
-	DataOps::computeParticleWeights(w, N, r, numParticles, m_ppc_restart);
+	DataOps::computeParticleWeights(w, N, r, numParticles, m_restartPPC);
 
 	const RealVect minLo = -0.5*RealVect::Unit;
 	const RealVect minHi =  0.5*RealVect::Unit;
@@ -1211,7 +1240,7 @@ void ItoSolver::restartParticles(LevelData<EBCellFAB>& a_num_particles, const in
       // Compute weights and remainder
       const unsigned long long numParticles = (unsigned long long) llround(ppc(iv));
       unsigned long long w, N, r;
-      DataOps::computeParticleWeights(w, N, r, numParticles, m_ppc_restart);
+      DataOps::computeParticleWeights(w, N, r, numParticles, m_restartPPC);
 
       // Now add N partices. If r > 0 we add another one with weight w + r
       for (unsigned long long i = 0; i < N; i++){
@@ -1255,16 +1284,16 @@ void ItoSolver::writePlotData(EBAMRCellData& a_output, int& a_comp){
   }
 
   // Plot diffusion coefficient
-  if(m_plotDiffusionCoefficient && m_isDiffusive){
+  if(m_plotDiffCo && m_isDiffusive){
     const Interval src(0, 0);
     const Interval dst(a_comp, a_comp);
     
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
       if(m_realm == a_output.getRealm()){
-	m_faceCenteredDiffusionCoefficient_cell[lvl]->localCopyTo(src, *a_output[lvl], dst);
+	m_diffusionFunction[lvl]->localCopyTo(src, *a_output[lvl], dst);
       }
       else{
-	m_faceCenteredDiffusionCoefficient_cell[lvl]->copyTo(src, *a_output[lvl], dst);
+	m_diffusionFunction[lvl]->copyTo(src, *a_output[lvl], dst);
       }
     }
     DataOps::setCoveredValue(a_output, a_comp, 0.0);
@@ -1279,10 +1308,10 @@ void ItoSolver::writePlotData(EBAMRCellData& a_output, int& a_comp){
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
       if(m_realm == a_output.getRealm()){
-	m_velo_func[lvl]->localCopyTo(src, *a_output[lvl], dst);
+	m_velocityFunction[lvl]->localCopyTo(src, *a_output[lvl], dst);
       }
       else{
-	m_velo_func[lvl]->copyTo(src, *a_output[lvl], dst);
+	m_velocityFunction[lvl]->copyTo(src, *a_output[lvl], dst);
       }
     }
 
@@ -1293,31 +1322,31 @@ void ItoSolver::writePlotData(EBAMRCellData& a_output, int& a_comp){
     a_comp += ncomp;
   }
 
-  if(m_plot_particles){
-    this->depositParticles(m_scratch, m_ParticleContainers.at(WhichContainer::bulk), m_plot_deposition);
+  if(m_plotParticles){
+    this->depositParticles(m_scratch, m_particleContainers.at(WhichContainer::Bulk), m_plotDeposition);
     this->writeData(a_output, a_comp, m_scratch,  false);
   }
-  if(m_plot_eb_particles){
-    this->depositParticles(m_scratch, m_ParticleContainers.at(WhichContainer::eb), m_plot_deposition);
+  if(m_plotParticlesEB){
+    this->depositParticles(m_scratch, m_particleContainers.at(WhichContainer::EB), m_plotDeposition);
     this->writeData(a_output, a_comp, m_scratch,  false);
   }
-  if(m_plot_domain_particles){
-    this->depositParticles(m_scratch, m_ParticleContainers.at(WhichContainer::domain), m_plot_deposition);
+  if(m_plotParticlesDomain){
+    this->depositParticles(m_scratch, m_particleContainers.at(WhichContainer::Domain), m_plotDeposition);
     this->writeData(a_output, a_comp, m_scratch,  false);
   }
-  if(m_plot_source_particles){
-    this->depositParticles(m_scratch, m_ParticleContainers.at(WhichContainer::source), m_plot_deposition);
+  if(m_plotParticlesSource){
+    this->depositParticles(m_scratch, m_particleContainers.at(WhichContainer::Source), m_plotDeposition);
     this->writeData(a_output, a_comp, m_scratch,  false);
   }
-  if(m_plot_energy_density){
-    this->depositEnergyDensity(m_scratch, m_ParticleContainers.at(WhichContainer::bulk), m_plot_deposition);
+  if(m_plotEnergyDensity){
+    this->depositEnergyDensity(m_scratch, m_particleContainers.at(WhichContainer::Bulk), m_plotDeposition);
     this->writeData(a_output, a_comp, m_scratch,  false);
   }
-  if(m_plot_average_energy){
-    this->sortParticlesByCell(WhichContainer::bulk);
-    this->computeAverageEnergy(m_scratch, m_ParticleContainers.at(WhichContainer::bulk));
+  if(m_plotAverageEnergy){
+    this->sortParticlesByCell(WhichContainer::Bulk);
+    this->computeAverageEnergy(m_scratch, m_particleContainers.at(WhichContainer::Bulk));
     this->writeData(a_output, a_comp, m_scratch,  false);
-    this->sortParticlesByPatch(WhichContainer::bulk);
+    this->sortParticlesByPatch(WhichContainer::Bulk);
   }
 }
 
@@ -1483,7 +1512,7 @@ void ItoSolver::depositConductivity(){
     pout() << m_name + "::depositConductivity()" << endl;
   }
 
-  this->depositConductivity(m_phi, m_ParticleContainers.at(WhichContainer::bulk));
+  this->depositConductivity(m_phi, m_particleContainers.at(WhichContainer::Bulk));
 }
 
 void ItoSolver::depositConductivity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles){
@@ -1512,7 +1541,7 @@ void ItoSolver::depositDiffusivity(){
     pout() << m_name + "::depositDiffusivity()" << endl;
   }
 
-  this->depositDiffusivity(m_phi, m_ParticleContainers.at(WhichContainer::bulk));
+  this->depositDiffusivity(m_phi, m_particleContainers.at(WhichContainer::Bulk));
 }
 
 void ItoSolver::depositDiffusivity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles){
@@ -1541,7 +1570,7 @@ void ItoSolver::depositEnergyDensity(){
     pout() << m_name + "::depositEnergyDensity()" << endl;
   }
 
-  this->depositEnergyDensity(m_phi, m_ParticleContainers.at(WhichContainer::bulk));
+  this->depositEnergyDensity(m_phi, m_particleContainers.at(WhichContainer::Bulk));
 }
 
 void ItoSolver::depositEnergyDensity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles){
@@ -1697,7 +1726,7 @@ void ItoSolver::depositParticles(){
     pout() << m_name + "::depositParticles" << endl;
   }
 
-  this->depositParticles(WhichContainer::bulk);
+  this->depositParticles(WhichContainer::Bulk);
 }
 
 void ItoSolver::depositParticles(const WhichContainer a_container){
@@ -1706,7 +1735,7 @@ void ItoSolver::depositParticles(const WhichContainer a_container){
     pout() << m_name + "::depositParticles(container)" << endl;
   }
 
-  this->depositParticles(m_phi, m_ParticleContainers.at(a_container), m_deposition);
+  this->depositParticles(m_phi, m_particleContainers.at(a_container), m_deposition);
 }
 
 void ItoSolver::depositNonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellData& a_depositionKappaC){
@@ -1901,7 +1930,7 @@ void ItoSolver::depositWeights(EBAMRCellData& a_phi, const ParticleContainer<Ito
     pout() << m_name + "::depositWeights" << endl;
   }
 
-  this->depositParticles(a_phi, m_ParticleContainers.at(WhichContainer::bulk), DepositionType::NGP);
+  this->depositParticles(a_phi, m_particleContainers.at(WhichContainer::Bulk), DepositionType::NGP);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     DataOps::scale(*a_phi[lvl], pow(m_amr->getDx()[lvl], SpaceDim));
@@ -1914,7 +1943,7 @@ void ItoSolver::addParticles(ListBox<ItoParticle>& a_part, const int a_lvl, cons
     pout() << m_name + "::addParticles(lvl, dit)" << endl;
   }
 
-  ParticleContainer<ItoParticle>& particles = m_ParticleContainers.at(WhichContainer::bulk);
+  ParticleContainer<ItoParticle>& particles = m_particleContainers.at(WhichContainer::Bulk);
 
   ListBox<ItoParticle>& my_particles = particles[a_lvl][a_dit];
 
@@ -1945,7 +1974,7 @@ void ItoSolver::preRegrid(const int a_base, const int a_oldFinestLevel){
     pout() << m_name + "::preRegrid" << endl;
   }
 
-  for (auto& container : m_ParticleContainers){
+  for (auto& container : m_particleContainers){
     ParticleContainer<ItoParticle>& particles = container.second;
 
     particles.preRegrid(a_base);
@@ -1953,11 +1982,11 @@ void ItoSolver::preRegrid(const int a_base, const int a_oldFinestLevel){
 }
 
 ParticleContainer<ItoParticle>& ItoSolver::getParticles(const WhichContainer a_container){
-  return m_ParticleContainers.at(a_container);
+  return m_particleContainers.at(a_container);
 }
 
 const ParticleContainer<ItoParticle>& ItoSolver::getParticles(const WhichContainer a_container) const {
-  return m_ParticleContainers.at(a_container);
+  return m_particleContainers.at(a_container);
 }
 
 EBAMRCellData& ItoSolver::getPhi(){
@@ -1975,7 +2004,7 @@ EBAMRCellData& ItoSolver::getVelocityFunction(){
     pout() << m_name + "::getVelocityFunction" << endl;
   }
 
-  return m_velo_func;
+  return m_velocityFunction;
 }
 
 EBAMRCellData& ItoSolver::getDiffusionFunction(){
@@ -1984,7 +2013,7 @@ EBAMRCellData& ItoSolver::getDiffusionFunction(){
     pout() << m_name + "::getDiffusionFunction" << endl;
   }
 
-  return m_faceCenteredDiffusionCoefficient_cell;
+  return m_diffusionFunction;
 }
 
 EBAMRCellData& ItoSolver::getScratch(){
@@ -2002,7 +2031,7 @@ EBAMRCellData& ItoSolver::getMobilityFunction(){
     pout() << m_name + "::getMobilityFunction" << endl;
   }
 
-  return m_mobility_func;
+  return m_mobilityFunction;
 }
 
 void ItoSolver::setDiffusionFunction(const Real a_diffusionCoefficient){
@@ -2011,7 +2040,7 @@ void ItoSolver::setDiffusionFunction(const Real a_diffusionCoefficient){
     pout() << m_name + "::setDiffusionFunction" << endl;
   }
 
-  DataOps::setValue(m_faceCenteredDiffusionCoefficient_cell, a_diffusionCoefficient);
+  DataOps::setValue(m_diffusionFunction, a_diffusionCoefficient);
 }
 
 void ItoSolver::setVelocityFunction(const RealVect a_vel){
@@ -2021,7 +2050,7 @@ void ItoSolver::setVelocityFunction(const RealVect a_vel){
   }
 
   for (int comp = 0; comp < SpaceDim; comp++){
-    DataOps::setValue(m_velo_func, a_vel[comp], comp);
+    DataOps::setValue(m_velocityFunction, a_vel[comp], comp);
   }
 }
 
@@ -2031,7 +2060,7 @@ void ItoSolver::set_mobility(const Real a_mobility){
     pout() << m_name + "::set_mobility" << endl;
   }
 
-  ParticleContainer<ItoParticle>& particles = this->getParticles(WhichContainer::bulk);
+  ParticleContainer<ItoParticle>& particles = this->getParticles(WhichContainer::Bulk);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
@@ -2069,10 +2098,10 @@ void ItoSolver::interpolateVelocities(const int a_lvl, const DataIndex& a_dit){
     pout() << m_name + "::interpolateVelocities" << endl;
   }
 
-  ParticleContainer<ItoParticle>& particles = m_ParticleContainers.at(WhichContainer::bulk);
+  ParticleContainer<ItoParticle>& particles = m_particleContainers.at(WhichContainer::Bulk);
 
   if(m_isMobile){
-    const EBCellFAB& velo_func = (*m_velo_func[a_lvl])[a_dit];
+    const EBCellFAB& velo_func = (*m_velocityFunction[a_lvl])[a_dit];
     const EBISBox& ebisbox     = velo_func.getEBISBox();
     const RealVect dx          = m_amr->getDx()[a_lvl]*RealVect::Unit;
     const RealVect origin      = m_amr->getProbLo();
@@ -2082,7 +2111,7 @@ void ItoSolver::interpolateVelocities(const int a_lvl, const DataIndex& a_dit){
 
     // This interpolates the velocity function on to the particle velocities
     EBParticleMesh meshInterp(box, ebisbox, dx, origin);
-    meshInterp.interpolate<ItoParticle, &ItoParticle::velocity>(particleList, velo_func, m_deposition, m_irreg_ngp_interpolation);
+    meshInterp.interpolate<ItoParticle, &ItoParticle::velocity>(particleList, velo_func, m_deposition, m_forceIrregInterpolationNGP);
 
     // Go through the particles and set their velocities to velo_func*mobility
     for (ListIterator<ItoParticle> lit(particleList); lit.ok(); ++lit){
@@ -2101,7 +2130,7 @@ void ItoSolver::interpolateMobilities(){
   if(m_isMobile){
 
     if(m_WhichMobilityInterpolation == WhichMobilityInterpolation::velocity){
-      DataOps::vectorLength(m_scratch, m_velo_func); // Compute |E| (or whatever other function you've decided to provide).
+      DataOps::vectorLength(m_scratch, m_velocityFunction); // Compute |E| (or whatever other function you've decided to provide).
       m_amr->averageDown(m_scratch, m_realm, m_phase);
       m_amr->interpGhost(m_scratch, m_realm, m_phase);
     }
@@ -2138,10 +2167,10 @@ void ItoSolver::interpolateMobilitiesMu(const int a_lvl, const DataIndex& a_dit)
     pout() << m_name + "::interpolateMobilitiesMu(lvl, dit)" << endl;
   }
 
-  ParticleContainer<ItoParticle>& particles = m_ParticleContainers.at(WhichContainer::bulk);
+  ParticleContainer<ItoParticle>& particles = m_particleContainers.at(WhichContainer::Bulk);
 
   if(m_isMobile){
-    const EBCellFAB& mob_func  = (*m_mobility_func[a_lvl])[a_dit];
+    const EBCellFAB& mob_func  = (*m_mobilityFunction[a_lvl])[a_dit];
     const EBISBox& ebisbox     = mob_func.getEBISBox();
     const RealVect dx          = m_amr->getDx()[a_lvl]*RealVect::Unit;
     const RealVect origin      = m_amr->getProbLo();
@@ -2150,7 +2179,7 @@ void ItoSolver::interpolateMobilitiesMu(const int a_lvl, const DataIndex& a_dit)
     List<ItoParticle>& particleList = particles[a_lvl][a_dit].listItems();
     EBParticleMesh meshInterp(box, ebisbox, dx, origin);
     
-    meshInterp.interpolate<ItoParticle, &ItoParticle::mobility>(particleList, mob_func, m_deposition, m_irreg_ngp_interpolation);
+    meshInterp.interpolate<ItoParticle, &ItoParticle::mobility>(particleList, mob_func, m_deposition, m_forceIrregInterpolationNGP);
   }
 }
 
@@ -2160,10 +2189,10 @@ void ItoSolver::interpolateMobilitiesVel(const int a_lvl, const DataIndex& a_dit
     pout() << m_name + "::interpolateMobilitiesVel(lvl, dit)" << endl;
   }
 
-  ParticleContainer<ItoParticle>& particles = m_ParticleContainers.at(WhichContainer::bulk);
+  ParticleContainer<ItoParticle>& particles = m_particleContainers.at(WhichContainer::Bulk);
 
   if(m_isMobile){
-    const EBCellFAB& mob_func  = (*m_mobility_func[a_lvl])[a_dit];
+    const EBCellFAB& mob_func  = (*m_mobilityFunction[a_lvl])[a_dit];
     const EBISBox& ebisbox     = mob_func.getEBISBox();
     const FArrayBox& mob_fab   = mob_func.getFArrayBox();
     const RealVect dx          = m_amr->getDx()[a_lvl]*RealVect::Unit;
@@ -2176,7 +2205,7 @@ void ItoSolver::interpolateMobilitiesVel(const int a_lvl, const DataIndex& a_dit
     EBParticleMesh meshInterp(box, ebisbox, dx, origin);
     
     // First, interpolate |E| to the particle position, it will be stored on m_tmp. 
-    meshInterp.interpolate<ItoParticle, &ItoParticle::mobility>(particleList, scratch, m_deposition, m_irreg_ngp_interpolation);    
+    meshInterp.interpolate<ItoParticle, &ItoParticle::mobility>(particleList, scratch, m_deposition, m_forceIrregInterpolationNGP);    
 
     for (ListIterator<ItoParticle> lit(particleList); lit.ok(); ++lit){
       ItoParticle& p = lit();
@@ -2186,7 +2215,7 @@ void ItoSolver::interpolateMobilitiesVel(const int a_lvl, const DataIndex& a_dit
 
     // This interpolates mu*|E| to the particle position and stores it on the mobility. After that, we compute mu_p = (mu*E)/E
     scratch *= mob_func;
-    meshInterp.interpolate<ItoParticle, &ItoParticle::mobility>(particleList, scratch, m_deposition, m_irreg_ngp_interpolation);    
+    meshInterp.interpolate<ItoParticle, &ItoParticle::mobility>(particleList, scratch, m_deposition, m_forceIrregInterpolationNGP);    
     for (ListIterator<ItoParticle> lit(particleList); lit.ok(); ++lit){
       ItoParticle& p = lit();
 
@@ -2216,7 +2245,7 @@ void ItoSolver::updateMobilities(const int a_level, const DataIndex a_dit){
     pout() << m_name + "::updateMobilities(lvl, dit)" << endl;
   }
 
-  ParticleContainer<ItoParticle>& particles = m_ParticleContainers.at(WhichContainer::bulk);
+  ParticleContainer<ItoParticle>& particles = m_particleContainers.at(WhichContainer::Bulk);
 
   if(m_isMobile){
     List<ItoParticle>& particleList = particles[a_level][a_dit].listItems();
@@ -2252,10 +2281,10 @@ void ItoSolver::interpolateDiffusion(const int a_lvl, const DataIndex& a_dit){
     pout() << m_name + "::interpolateDiffusion" << endl;
   }
 
-  ParticleContainer<ItoParticle>& particles = m_ParticleContainers.at(WhichContainer::bulk);
+  ParticleContainer<ItoParticle>& particles = m_particleContainers.at(WhichContainer::Bulk);
 
   if(m_isDiffusive){
-    const EBCellFAB& dco_cell  = (*m_faceCenteredDiffusionCoefficient_cell[a_lvl])[a_dit];
+    const EBCellFAB& dco_cell  = (*m_diffusionFunction[a_lvl])[a_dit];
     const EBISBox& ebisbox     = dco_cell.getEBISBox();
     const RealVect dx          = m_amr->getDx()[a_lvl]*RealVect::Unit;
     const RealVect origin      = m_amr->getProbLo();
@@ -2264,7 +2293,7 @@ void ItoSolver::interpolateDiffusion(const int a_lvl, const DataIndex& a_dit){
     List<ItoParticle>& particleList = particles[a_lvl][a_dit].listItems();
 
     EBParticleMesh meshInterp(box, ebisbox,dx, origin);
-    meshInterp.interpolate<ItoParticle, &ItoParticle::diffusion>(particleList, dco_cell, m_deposition, m_irreg_ngp_interpolation);    
+    meshInterp.interpolate<ItoParticle, &ItoParticle::diffusion>(particleList, dco_cell, m_deposition, m_forceIrregInterpolationNGP);    
   }
 }
 
@@ -2289,7 +2318,7 @@ void ItoSolver::updateDiffusion(const int a_level, const DataIndex a_dit){
     pout() << m_name + "::updateDiffusion(lvl, dit)" << endl;
   }
 
-  ParticleContainer<ItoParticle>& particles = this->getParticles(WhichContainer::bulk);
+  ParticleContainer<ItoParticle>& particles = this->getParticles(WhichContainer::Bulk);
 
   if(m_isDiffusive){
     List<ItoParticle>& particleList = particles[a_level][a_dit].listItems();
@@ -2356,7 +2385,7 @@ Real ItoSolver::computeDt(const int a_lvl, const DataIndex a_dit, const Real a_d
 
   Real dt = 1.E99;
 
-  const ParticleContainer<ItoParticle>& particles = this->getParticles(WhichContainer::bulk);
+  const ParticleContainer<ItoParticle>& particles = this->getParticles(WhichContainer::Bulk);
 
   const List<ItoParticle>& particleList = particles[a_lvl][a_dit].listItems();
   
@@ -2455,12 +2484,12 @@ Real ItoSolver::computeMinDt(const Real a_maxCellsToMove, const int a_lvl, const
 
   Real dt = 1.E99;
 
-  const ParticleContainer<ItoParticle>& particles = this->getParticles(WhichContainer::bulk);
+  const ParticleContainer<ItoParticle>& particles = this->getParticles(WhichContainer::Bulk);
 
   const Real dMax  = a_maxCellsToMove*a_dx;
   const Real dMax2 = dMax*dMax;
-  const Real W0    = m_normal_max;
-  const Real W02   = m_normal_max*m_normal_max;
+  const Real W0    = m_normalDistributionTruncation;
+  const Real W02   = m_normalDistributionTruncation*m_normalDistributionTruncation;
 
   const List<ItoParticle>& particleList = particles[a_lvl][a_dit].listItems();
   
@@ -2617,7 +2646,7 @@ Real ItoSolver::computeDriftDt(const int a_lvl, const DataIndex& a_dit, const Re
     pout() << m_name + "::computeDriftDt(level, dataindex, dx)" << endl;
   }
 
-  const ParticleContainer<ItoParticle>& particles = m_ParticleContainers.at(WhichContainer::bulk);
+  const ParticleContainer<ItoParticle>& particles = m_particleContainers.at(WhichContainer::Bulk);
 
   constexpr Real safety = 1.E-10;
 
@@ -2660,7 +2689,7 @@ Vector<Real> ItoSolver::computeDiffusionDt(const Real a_maxCellsToHop) const{
     pout() << m_name + "::computeMinDiffusionDt(maxCellsToHop)" << endl;
   }
 
-  const Real factor  = a_maxCellsToHop/m_normal_max;
+  const Real factor  = a_maxCellsToHop/m_normalDistributionTruncation;
   const Real factor2 = factor*factor;
   
   Vector<Real> dt = this->computeDiffusionDt();
@@ -2739,7 +2768,7 @@ Real ItoSolver::computeDiffusionDt(const int a_lvl, const DataIndex& a_dit, cons
     pout() << m_name + "::computeDiffusionDt(level, dataindex, dx)" << endl;
   }
 
-  const ParticleContainer<ItoParticle>& particles = this->getParticles(WhichContainer::bulk);
+  const ParticleContainer<ItoParticle>& particles = this->getParticles(WhichContainer::Bulk);
   
   const List<ItoParticle>& particleList = particles[a_lvl][a_dit].listItems();
 
@@ -2764,7 +2793,7 @@ void ItoSolver::remap(){
     pout() << m_name + "::remap" << endl;
   }
 
-  this->remap(WhichContainer::bulk);
+  this->remap(WhichContainer::Bulk);
 
 }
 
@@ -2828,11 +2857,9 @@ void ItoSolver::makeSuperparticles(const WhichContainer a_container, const int a
     pout() << m_name + "::makeSuperparticles(int, level)" << endl;
   }
 
-  ParticleContainer<ItoParticle>& particles = this->getParticles(WhichContainer::bulk);
-
-  const DisjointBoxLayout& dbl = particles.getGrids()[a_level];
-
-  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
+  
+  for (DataIterator dit(dbl); dit.ok(); ++dit){
     this->makeSuperparticles(a_container, a_particlesPerPatch, a_level, dit());
   }
 }
@@ -2843,18 +2870,15 @@ void ItoSolver::makeSuperparticles(const WhichContainer a_container, const int a
     pout() << m_name + "::makeSuperparticles(int, level, patch)" << endl;
   }
 
-  ParticleContainer<ItoParticle>& particles = this->getParticles(a_container);
-  
-  const int comp = 0;
-  //  const Box box  = m_amr->getGrids(m_realm)[a_level].get(a_dit);
+  constexpr int comp = 0;  
 
-  const Box box  = particles.getGrids()[a_level][a_dit];
-
-  // This are the particles in the box we're currently looking at. 
-  BinFab<ItoParticle>& cellParticles = particles.getCellParticles(a_level, a_dit);
+  // This are the particles in the box we're currently looking at.
+  ParticleContainer<ItoParticle>& particles     = this->getParticles(a_container);  
+  BinFab<ItoParticle>&            cellParticles = particles.getCellParticles(a_level, a_dit);
 
   // Iterate over particles
-  for (BoxIterator bit(box); bit.ok(); ++bit){
+  const Box cellBox  = m_amr->getGrids(m_realm)[a_level].get(a_dit);  
+  for (BoxIterator bit(cellBox); bit.ok(); ++bit){
     const IntVect iv = bit();
   
     List<ItoParticle>& particles = cellParticles(iv, comp);
@@ -2902,10 +2926,10 @@ void ItoSolver::mergeBVH(List<ItoParticle>& a_particles, const int a_particlesPe
 #endif
   
   // 2. Build the BVH tree and get the leaves of the tree
-  const int dir = (m_kd_direction < 0) ? m_udist0d(m_rng) : m_kd_direction;
-  m_tree.define(pointMasses, mass);
-  m_tree.buildTree(dir, a_particlesPerCell);
-  const std::vector<std::shared_ptr<ItoMerge::Node<PointMass> > >& leaves = m_tree.getLeaves();
+  const int dir = (m_directionKD < 0) ? m_uniformDistribution0d(m_rng) : m_directionKD;
+  m_mergeTree.define(pointMasses, mass);
+  m_mergeTree.buildTree(dir, a_particlesPerCell);
+  const std::vector<std::shared_ptr<ItoMerge::Node<PointMass> > >& leaves = m_mergeTree.getLeaves();
 
   // 3. Clear particles in this cell and add new ones.
   a_particles.clear();
@@ -2963,53 +2987,6 @@ void ItoSolver::clear(AMRParticles<ItoParticle>& a_particles){
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     a_particles[lvl]->clear();
   }
-}
-
-RealVect ItoSolver::randomPosition(const RealVect a_pos,
-				   const RealVect a_lo,
-				   const RealVect a_hi,
-				   const RealVect a_bndryCentroid,
-				   const RealVect a_bndryNormal,
-				   const Real     a_dx,
-				   const Real     a_kappa) {
-
-  RealVect pos;
-  if(a_kappa < 1.0){ // Rejection sampling. 
-    pos = this->randomPosition(a_lo, a_hi, a_bndryCentroid, a_bndryNormal);
-  }
-  else{ // Regular cell. Get a position. 
-    pos = this->randomPosition(a_lo, a_hi);
-  }
-
-  pos = a_pos + pos*a_dx;
-
-  return pos;
-}
-
-RealVect ItoSolver::randomPosition(const RealVect a_lo,
-				   const RealVect a_hi,
-				   const RealVect a_bndryCentroid,
-				   const RealVect a_bndryNormal) {
-  RealVect pos = this->randomPosition(a_lo, a_hi);
-  bool valid   = PolyGeom::dot(pos-a_bndryCentroid, a_bndryNormal) >= 0.0;
-
-  while(!valid){
-    pos    = this->randomPosition(a_lo, a_hi);
-    valid = PolyGeom::dot(pos-a_bndryCentroid, a_bndryNormal) >= 0.0;
-  }
-
-  return pos;
-}
-
-RealVect ItoSolver::randomPosition(const RealVect a_lo, const RealVect a_hi) {
-
-  RealVect pos = RealVect::Unit;
-
-  for (int dir = 0; dir < SpaceDim; dir++){
-    pos[dir] = a_lo[dir] + 0.5*(1.0 + m_udist11(m_rng))*(a_hi[dir] - a_lo[dir]);
-  }
-
-  return pos;
 }
 
 #include <CD_NamespaceFooter.H>
