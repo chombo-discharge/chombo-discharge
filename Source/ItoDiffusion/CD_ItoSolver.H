@@ -262,14 +262,6 @@ public:
   void depositParticles(EBAMRCellData& a_phi, const ParticleContainer<P>& a_particles, const DepositionType a_deposition) const;
 
   /*!
-    @brief Deposit the total weight of the particles in the grid cells. 
-    @details This will deposit with an NGP scheme into the mesh data holder. 
-    @param[out] a_weights   The total particle weight in a grid cell -- this is equivalent to 
-    @param[in]  a_particles Particles to be deposited. 
-  */
-  virtual void depositWeights(EBAMRCellData& a_weights, const ParticleContainer<ItoParticle>& a_particles);
-
-  /*!
     @brief Remove particles that are inside the EB
     @details Calls the other version with m_particles
   */

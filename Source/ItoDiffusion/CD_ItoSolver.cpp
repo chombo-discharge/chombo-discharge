@@ -1355,10 +1355,8 @@ void ItoSolver::writePlotData(EBAMRCellData& a_output, int& a_comp){
     this->writeData(a_output, a_comp, m_scratch,  false);
   }
   if(m_plotAverageEnergy){
-    this->sortParticlesByCell(WhichContainer::Bulk);
     this->computeAverageEnergy(m_scratch, m_particleContainers.at(WhichContainer::Bulk));
     this->writeData(a_output, a_comp, m_scratch,  false);
-    this->sortParticlesByPatch(WhichContainer::Bulk);
   }
 }
 
@@ -1490,16 +1488,19 @@ void ItoSolver::computeAverageMobility(EBAMRCellData& a_phi, const ParticleConta
   // TLDR: We compute the average mobility as the average mobility of all particles (mass-weighted). We do this by depositing the particle conductivity and then
   //       dividing by the mass. 
   DataOps::setValue(a_phi,     0.0);
-  DataOps::setValue(m_scratch, 0.0);  
-  
-  this->depositParticles<ItoParticle, &ItoParticle::conductivity>(a_phi,     a_particles, m_deposition);  // Deposit mass*mu
-  this->depositParticles<ItoParticle, &ItoParticle::mass>        (m_scratch, a_particles, m_deposition);  // Deposit mass
+  DataOps::setValue(m_scratch, 0.0);
 
+  // Need scratch storage to deposit into (can't use m_scratch)
+  EBAMRCellData mass;
+  m_amr->allocate(mass, m_realm, m_phase, m_nComp);
+  
+  this->depositParticles<ItoParticle, &ItoParticle::conductivity>(a_phi, a_particles, m_deposition);  // Deposit mass*mu
+  this->depositParticles<ItoParticle, &ItoParticle::mass>        (mass,  a_particles, m_deposition);  // Deposit mass
 
   // Make averageMobility = mass*mu/mass. If there is no mass then set the value to zero. 
   constexpr Real zero = 0.0;
   
-  DataOps::divideFallback(a_phi, m_scratch, zero);
+  DataOps::divideFallback(a_phi, mass, zero);
 }
 
 void ItoSolver::computeAverageDiffusion(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles) const {
@@ -1514,16 +1515,20 @@ void ItoSolver::computeAverageDiffusion(EBAMRCellData& a_phi, const ParticleCont
   // TLDR: We compute the average mobility as the average mobility of all particles (mass-weighted). We do this by depositing the particle conductivity and then
   //       dividing by the mass. 
   DataOps::setValue(a_phi,     0.0);
-  DataOps::setValue(m_scratch, 0.0);  
+  DataOps::setValue(m_scratch, 0.0);
+
+  // Need scratch storage to deposit into (can't use m_scratch)
+  EBAMRCellData mass;
+  m_amr->allocate(mass, m_realm, m_phase, m_nComp);
   
-  this->depositParticles<ItoParticle, &ItoParticle::diffusivity>(a_phi,     a_particles, m_deposition);  // Deposit mass*D
-  this->depositParticles<ItoParticle, &ItoParticle::mass>       (m_scratch, a_particles, m_deposition);  // Deposit mass
+  this->depositParticles<ItoParticle, &ItoParticle::diffusivity>(a_phi, a_particles, m_deposition);  // Deposit mass*D
+  this->depositParticles<ItoParticle, &ItoParticle::mass>       (mass,  a_particles, m_deposition);  // Deposit mass
 
 
   // Make averageMobility = mass*mu/mass. If there is no mass then set the value to zero. 
   constexpr Real zero = 0.0;
   
-  DataOps::divideFallback(a_phi, m_scratch, zero);  
+  DataOps::divideFallback(a_phi, mass, zero);  
 }
 
 void ItoSolver::computeAverageEnergy(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles) const {
@@ -1538,15 +1543,19 @@ void ItoSolver::computeAverageEnergy(EBAMRCellData& a_phi, const ParticleContain
   // TLDR: We compute the average mobility as the average mobility of all particles (mass-weighted). We do this by depositing the particle conductivity and then
   //       dividing by the mass. 
   DataOps::setValue(a_phi,     0.0);
-  DataOps::setValue(m_scratch, 0.0);  
+  DataOps::setValue(m_scratch, 0.0);
+
+  // Need scratch storage to deposit into (can't use m_scratch)
+  EBAMRCellData mass;
+  m_amr->allocate(mass, m_realm, m_phase, m_nComp);  
   
-  this->depositParticles<ItoParticle, &ItoParticle::totalEnergy>(a_phi,     a_particles, m_deposition);  // Deposit mass*energy
-  this->depositParticles<ItoParticle, &ItoParticle::mass>       (m_scratch, a_particles, m_deposition);  // Deposit mass
+  this->depositParticles<ItoParticle, &ItoParticle::totalEnergy>(a_phi, a_particles, m_deposition);  // Deposit mass*energy
+  this->depositParticles<ItoParticle, &ItoParticle::mass>       (mass,  a_particles, m_deposition);  // Deposit mass
 
   // Make averageMobility = mass*mu/mass. If there is no mass then set the value to zero. 
   constexpr Real zero = 0.0;
   
-  DataOps::divideFallback(a_phi, m_scratch, zero);    
+  DataOps::divideFallback(a_phi, mass, zero);    
 }
 
 void ItoSolver::depositParticles() {
@@ -1773,19 +1782,6 @@ void ItoSolver::coarseFineRedistribution(EBAMRCellData& a_phi) const {
       coar2fine_redist->setToZero();
       coar2coar_redist->setToZero();
     }
-  }
-}
-
-void ItoSolver::depositWeights(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles) {
-  CH_TIME("ItoSolver::depositWeights");
-  if(m_verbosity > 5){
-    pout() << m_name + "::depositWeights" << endl;
-  }
-
-  this->depositParticles<ItoParticle, &ItoParticle::mass>(a_phi, m_particleContainers.at(WhichContainer::Bulk), DepositionType::NGP);
-
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    DataOps::scale(*a_phi[lvl], pow(m_amr->getDx()[lvl], SpaceDim));
   }
 }
 
