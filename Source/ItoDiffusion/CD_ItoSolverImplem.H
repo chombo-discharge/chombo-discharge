@@ -125,26 +125,36 @@ RealVect ItoSolver::randomPosition(const RealVect a_lo, const RealVect a_hi) con
 }
 
 template <class P, const Real&(P::*particleScalarField)() const>
-void ItoSolver::depositParticles(EBAMRCellData& a_phi, const ParticleContainer<P>& a_particles){
+void ItoSolver::depositParticles(EBAMRCellData& a_phi, const ParticleContainer<P>& a_particles) const {
   CH_TIME("ItoSolver::depositParticles");
   if(m_verbosity > 5){
     pout() << m_name + "::depositParticles" << endl;
   }
 
-  this->depositParticles(a_phi, a_particles, m_deposition);
+  this->depositParticles<P, particleScalarField>(a_phi, a_particles, m_deposition);
+}
+
+template <class P, Real(P::*particleScalarField)() const>
+void ItoSolver::depositParticles(EBAMRCellData& a_phi, const ParticleContainer<P>& a_particles) const {
+  CH_TIME("ItoSolver::depositParticles");
+  if(m_verbosity > 5){
+    pout() << m_name + "::depositParticles" << endl;
+  }
+
+  this->depositParticles<P, particleScalarField>(a_phi, a_particles, m_deposition);
 }
 
 template <class P, const Real&(P::*particleScalarField)() const>
 void ItoSolver::depositParticles(EBAMRCellData&              a_phi,
 				 const ParticleContainer<P>& a_particles,
-				 const DepositionType        a_deposition){
+				 const DepositionType        a_deposition) const {
   CH_TIME("ItoSolver::depositParticles");
   if(m_verbosity > 5){
     pout() << m_name + "::depositParticles" << endl;
   }
            
-  this->depositKappaConservative(a_phi, a_particles, a_deposition); // a_phi contains only weights, i.e. not divided by kappa
-  this->redistributeAMR(a_phi);                                     // Redistribution magic. 
+  this->depositKappaConservative<P, particleScalarField>(a_phi, a_particles, a_deposition); // a_phi contains only weights, i.e. not divided by kappa
+  this->redistributeAMR(a_phi);                                                             // Redistribution magic, if you want it.
 
   // Average down and interpolate
   m_amr->averageDown(a_phi, m_realm, m_phase);
@@ -154,14 +164,14 @@ void ItoSolver::depositParticles(EBAMRCellData&              a_phi,
 template <class P, Real(P::*particleScalarField)() const>
 void ItoSolver::depositParticles(EBAMRCellData&              a_phi,
 				 const ParticleContainer<P>& a_particles,
-				 const DepositionType        a_deposition){
+				 const DepositionType        a_deposition) const {
   CH_TIME("ItoSolver::depositParticles");
   if(m_verbosity > 5){
     pout() << m_name + "::depositParticles" << endl;
   }
            
-  this->depositKappaConservative(a_phi, a_particles, a_deposition); // a_phi contains only weights, i.e. not divided by kappa
-  this->redistributeAMR(a_phi);                                     // Redistribution magic. 
+  this->depositKappaConservative<P, particleScalarField>(a_phi, a_particles, a_deposition); // a_phi contains only weights, i.e. not divided by kappa
+  this->redistributeAMR(a_phi);                                                             // Redistribution magic, if you want it. 
 
   // Average down and interpolate
   m_amr->averageDown(a_phi, m_realm, m_phase);
@@ -169,9 +179,9 @@ void ItoSolver::depositParticles(EBAMRCellData&              a_phi,
 }
 
 template <class P, const Real&(P::*particleScalarField)() const>
-void ItoSolver::depositKappaConservative(EBAMRCellData&               a_phi,
-					   const ParticleContainer<P>& a_particles,
-					   const DepositionType  a_deposition){
+void ItoSolver::depositKappaConservative(EBAMRCellData&              a_phi,
+					 const ParticleContainer<P>& a_particles,
+					 const DepositionType        a_deposition) const {
   CH_TIME("ItoSolver::depositKappaConservative");
   if(m_verbosity > 5){
     pout() << m_name + "::depositKappaConservative" << endl;
@@ -238,9 +248,9 @@ void ItoSolver::depositKappaConservative(EBAMRCellData&               a_phi,
   }
 }
 template <class P,  Real(P::*particleScalarField)() const>
-void ItoSolver::depositKappaConservative(EBAMRCellData&               a_phi,
-					   const ParticleContainer<P>& a_particles,
-					   const DepositionType  a_deposition){
+void ItoSolver::depositKappaConservative(EBAMRCellData&              a_phi,
+					 const ParticleContainer<P>& a_particles,
+					 const DepositionType        a_deposition) const {
   CH_TIME("ItoSolver::depositKappaConservative");
   if(m_verbosity > 5){
     pout() << m_name + "::depositKappaConservative" << endl;

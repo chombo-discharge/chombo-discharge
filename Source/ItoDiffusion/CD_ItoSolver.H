@@ -137,20 +137,13 @@ public:
     @brief Clear a particle container -- this will delete all the particles in the input container. 
     @param[in] a_particles Particle container to be emptied. 
   */
-  virtual void clear(ParticleContainer<ItoParticle>& a_particles);
+  virtual void clear(ParticleContainer<ItoParticle>& a_particles) const;
 
   /*!
     @brief Clear particles -- this will deleted all the particles in the input container. 
     @param[in] a_particles Particle container to be emptied. 
   */
-  virtual void clear(AMRParticles<ItoParticle>& a_particles);
-
-  /*!
-    @brief Deposit conductivities (i.e. mass*mobility / volume)
-    @details This deposits mass*mobility (not multiplied by charge)
-    @note Calls the other versions with a_phi = m_phi, a_particles = m_particles.at(bulk), a_deposition = m_deposition
-  */
-  virtual void depositConductivity();
+  virtual void clear(AMRParticles<ItoParticle>& a_particles) const;
 
   /*!
     @brief Deposit conductivities (i.e. mass*mobility / volume)
@@ -159,7 +152,7 @@ public:
     @param[in]  a_particles Particle data
     @note Calls the other versions with a_deposition = m_deposition
   */
-  virtual void depositConductivity(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles);
+  virtual void depositConductivity(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles) const;
 
   /*!
     @brief Deposit conductivities (i.e. mass*mobility / volume)
@@ -168,14 +161,7 @@ public:
     @param[in]  a_particles  Particle data
     @param[in]  a_deposition Deposition method
   */
-  virtual void depositConductivity(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles, const DepositionType a_deposition);
-
-  /*!
-    @brief Deposit diffusivity (i.e., mass*D/volume)
-    @details This deposits mass*diffusion (not multiplied by charge)
-    @note Calls the other versions with a_phi = m_phi, a_particles = m_particles.at(bulk), a_deposition = m_deposition
-  */  
-  virtual void depositDiffusivity();
+  virtual void depositConductivity(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles, const DepositionType a_deposition) const;
 
   /*!
     @brief Deposit diffusivity (i.e. mass*D/volume)
@@ -184,7 +170,7 @@ public:
     @param[in]  a_particles Particle data
     @note Calls the other versions with a_deposition = m_deposition
   */
-  virtual void depositDiffusivity(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles);
+  virtual void depositDiffusivity(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles) const;
 
   /*!
     @brief Deposit diffusivity (i.e. mass*D/volume)
@@ -193,14 +179,7 @@ public:
     @param[in]  a_particles  Particle data
     @param[in]  a_deposition Deposition method
   */
-  virtual void depositDiffusivity(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles, const DepositionType a_deposition);
-
-  /*!
-    @brief Deposit energy densities (i.e. mass*energy/volume => total energy per unit volume)
-    @details This deposits mass*energy
-    @note Calls the other versions with a_phi = m_phi, a_particles = m_particles.at(bulk), a_deposition = m_deposition
-  */
-  virtual void depositEnergyDensity();
+  virtual void depositDiffusivity(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles, const DepositionType a_deposition) const;
 
   /*!
     @brief Deposit energy densities (i.e. mass*energy/volume => total energy per unit volume)
@@ -209,7 +188,7 @@ public:
     @param[in]  a_particles Particle data
     @note Calls the other versions with a_deposition = m_deposition
   */
-  virtual void depositEnergyDensity(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles);
+  virtual void depositEnergyDensity(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles) const;
 
   /*!
     @brief Deposit energy densities (i.e. mass*energy/volume => total energy per unit volume)
@@ -218,7 +197,7 @@ public:
     @param[in]  a_particles  Particle data
     @param[in]  a_deposition Deposition method
   */
-  virtual void depositEnergyDensity(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles, const DepositionType a_deposition);
+  virtual void depositEnergyDensity(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles, const DepositionType a_deposition) const;
 
   /*!
     @brief Compute average mobility. 
@@ -258,7 +237,17 @@ public:
     @note This will call the other version with a_deposition = m_deposition.
   */
   template <class P, const Real&(P::*particleScalarField)() const>    
-  void depositParticles(EBAMRCellData& a_phi, const ParticleContainer<P>& a_particles);
+  void depositParticles(EBAMRCellData& a_phi, const ParticleContainer<P>& a_particles) const;
+
+  /*!
+    @brief Deposit the particles onto a_phi. 
+    @details Just like the above version but with a different function signature. 
+    @param[out] a_phi       Mesh data -- must have exactly one component. 
+    @param[in]  a_particles Particles to be deposited
+    @note This will call the other version with a_deposition = m_deposition.
+  */
+  template <class P, Real(P::*particleScalarField)() const>    
+  void depositParticles(EBAMRCellData& a_phi, const ParticleContainer<P>& a_particles) const;  
 
   /*!
     @brief Deposit the particles onto a_phi. 
@@ -269,18 +258,17 @@ public:
     @param[in]  a_deposition Deposition method
   */
   template <class P, const Real&(P::*particleScalarField)() const>    
-  void depositParticles(EBAMRCellData& a_phi, const ParticleContainer<P>& a_particles, const DepositionType a_deposition);
+  void depositParticles(EBAMRCellData& a_phi, const ParticleContainer<P>& a_particles, const DepositionType a_deposition) const;
 
   /*!
     @brief Deposit the particles onto a_phi. 
-    @details The template parameters indicate the particle type and quantity to be deposited. The second template parameter must be a pointer to a member function in 
-    the particle class with signature 'const Real& P::function() const'. E.g. 'const Real& P::mass() const' which is the default quantity to be deposited. 
+    @details Just like the version above, but with a different function signature.
     @param[out] a_phi        Mesh data -- must have exactly one component. 
     @param[in]  a_particles  Particles to be deposited
     @param[in]  a_deposition Deposition method
   */
   template <class P, Real(P::*particleScalarField)() const>
-  void depositParticles(EBAMRCellData& a_phi, const ParticleContainer<P>& a_particles, const DepositionType a_deposition);  
+  void depositParticles(EBAMRCellData& a_phi, const ParticleContainer<P>& a_particles, const DepositionType a_deposition) const;
 
   /*!
     @brief Deposit the total weight of the particles in the grid cells. 
@@ -1032,12 +1020,12 @@ protected:
   /*!
     @brief Scratch storage for holding the non-conservative deposition
   */
-  EBAMRIVData m_depositionNC;
+  mutable EBAMRIVData m_depositionNC;
 
   /*!
     @brief Scratch storage for holding the mass difference when using hybrid deposition
   */
-  EBAMRIVData m_massDiff;
+  mutable EBAMRIVData m_massDiff;
 
   /*!
     @brief Various particle containers with identifiers. 
@@ -1103,10 +1091,10 @@ protected:
     @param[in]  a_deposition Deposition type
     @note The coarse-fine deposition is handled internally in this routine (through parameters m_pvrBuffer and m_haloBuffer)
   */
-  template <class P,  const Real&(P::*particleScalarField)() const = &P::mass>
+  template <class P,  const Real&(P::*particleScalarField)() const>
   void depositKappaConservative(EBAMRCellData&              a_phi,
 				const ParticleContainer<P>& a_particles,
-				const DepositionType        a_deposition);
+				const DepositionType        a_deposition) const;
 
   /*!
     @brief Compute the cell-centered deposition -- this is the main deposition function.
@@ -1119,42 +1107,42 @@ protected:
   template <class P,  Real(P::*particleScalarField)() const>
   void depositKappaConservative(EBAMRCellData&              a_phi,
 				const ParticleContainer<P>& a_particles,
-				const DepositionType        a_deposition);  
+				const DepositionType        a_deposition) const;  
 
   /*!
     @brief Redistribution method
   */
-  void redistributeAMR(EBAMRCellData& a_phi);
+  void redistributeAMR(EBAMRCellData& a_phi) const;
 
   /*!
     @brief Make the "non-conservative" kappa deposition
   */
-  void depositNonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellData& a_depositionKappaC);
+  void depositNonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellData& a_depositionKappaC) const;
 
   /*!
     @brief Make the hybrid deposition. Also compute the mass difference
   */
-  void depositHybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massDifference, const EBAMRIVData& a_depositionNC);
+  void depositHybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massDifference, const EBAMRIVData& a_depositionNC) const;
 
   /*!
     @brief Increment redistribution objects with mass to be redistributed
   */
-  void incrementRedist(const EBAMRIVData& a_massDifference);
+  void incrementRedist(const EBAMRIVData& a_massDifference) const;
 
   /*!
     @brief Do redistribution on all levels, no coarse-fine stuff
   */
-  void levelRedist(EBAMRCellData& a_phi);
+  void levelRedist(EBAMRCellData& a_phi) const;
 
   /*!
     @brief Increment the coarse-fine redist with mass difference (only for EB x CF)
   */
-  void coarseFineIncrement(const EBAMRIVData& m_massDifference);
+  void coarseFineIncrement(const EBAMRIVData& m_massDifference) const;
 
   /*!
     @brief Do coarse-fine redistribution
   */
-  void coarseFineRedistribution(EBAMRCellData& a_phi);
+  void coarseFineRedistribution(EBAMRCellData& a_phi) const;
 
   /*!
     @brief Superparticle merging with BVH trees
