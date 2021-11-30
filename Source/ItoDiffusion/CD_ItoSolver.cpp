@@ -519,8 +519,8 @@ void ItoSolver::initialData(){
   constexpr Real tolerance = 0.0;
 
   // Add particles, remove the ones that are inside the EB, and then depsit
-  this->removeCoveredParticles(bulkParticles, EbRepresentation::ImplicitFunction, tolerance); // Remove particles that are less than tolerance away from the EB
-  this->depositParticles(m_phi, bulkParticles, m_deposition);                                 // Deposit particles on the mesh. 
+  this->removeCoveredParticles(bulkParticles, EbRepresentation::ImplicitFunction, tolerance);  // Remove particles that are less than tolerance away from the EB
+  this->depositParticles<ItoParticle, &ItoParticle::mass>(m_phi, bulkParticles, m_deposition); // Deposit particles on the mesh. 
 }
 
 void ItoSolver::computeLoads(Vector<long int>& a_loads, const DisjointBoxLayout& a_dbl, const int a_level){
@@ -1323,19 +1323,19 @@ void ItoSolver::writePlotData(EBAMRCellData& a_output, int& a_comp){
   }
 
   if(m_plotParticles){
-    this->depositParticles(m_scratch, m_particleContainers.at(WhichContainer::Bulk), m_plotDeposition);
+    this->depositParticles<ItoParticle, &ItoParticle::mass>(m_scratch, m_particleContainers.at(WhichContainer::Bulk), m_plotDeposition);
     this->writeData(a_output, a_comp, m_scratch,  false);
   }
   if(m_plotParticlesEB){
-    this->depositParticles(m_scratch, m_particleContainers.at(WhichContainer::EB), m_plotDeposition);
+    this->depositParticles<ItoParticle, &ItoParticle::mass>(m_scratch, m_particleContainers.at(WhichContainer::EB), m_plotDeposition);
     this->writeData(a_output, a_comp, m_scratch,  false);
   }
   if(m_plotParticlesDomain){
-    this->depositParticles(m_scratch, m_particleContainers.at(WhichContainer::Domain), m_plotDeposition);
+    this->depositParticles<ItoParticle, &ItoParticle::mass>(m_scratch, m_particleContainers.at(WhichContainer::Domain), m_plotDeposition);
     this->writeData(a_output, a_comp, m_scratch,  false);
   }
   if(m_plotParticlesSource){
-    this->depositParticles(m_scratch, m_particleContainers.at(WhichContainer::Source), m_plotDeposition);
+    this->depositParticles<ItoParticle, &ItoParticle::mass>(m_scratch, m_particleContainers.at(WhichContainer::Source), m_plotDeposition);
     this->writeData(a_output, a_comp, m_scratch,  false);
   }
   if(m_plotEnergyDensity){
@@ -1389,123 +1389,6 @@ void ItoSolver::writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellD
   a_comp += ncomp;
 }
 
-void ItoSolver::setMassToConductivity(ParticleContainer<ItoParticle>& a_particles){
-  CH_TIME("ItoSolver::unsetMassToConductivity");
-  if(m_verbosity > 5){
-    pout() << m_name + "::unsetMassToConductivity" << endl;
-  }
-
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      List<ItoParticle>& particles = a_particles[lvl][dit()].listItems();
-
-      for (ListIterator<ItoParticle> lit(particles); lit.ok(); ++lit){
-	ItoParticle& p = lit();
-	p.tmp()   = p.mass();
-	p.mass() *= p.mobility();
-      }
-    }
-  }
-}
-
-void ItoSolver::unsetMassToConductivity(ParticleContainer<ItoParticle>& a_particles){
-  CH_TIME("ItoSolver::unsetMassToConductivity");
-  if(m_verbosity > 5){
-    pout() << m_name + "::unsetMassToConductivity" << endl;
-  }
-
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      List<ItoParticle>& particles = a_particles[lvl][dit()].listItems();
-
-      for (ListIterator<ItoParticle> lit(particles); lit.ok(); ++lit){
-	ItoParticle& p = lit();
-	p.mass() = p.tmp();
-      }
-    }
-  }
-}
-
-void ItoSolver::setMassToDiffusivity(ParticleContainer<ItoParticle>& a_particles){
-  CH_TIME("ItoSolver::unsetMassToDiffusivity");
-  if(m_verbosity > 5){
-    pout() << m_name + "::unsetMassToDiffusivity" << endl;
-  }
-
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      List<ItoParticle>& particles = a_particles[lvl][dit()].listItems();
-
-      for (ListIterator<ItoParticle> lit(particles); lit.ok(); ++lit){
-	ItoParticle& p = lit();
-	p.tmp()   = p.mass();
-	p.mass() *= p.diffusion();
-      }
-    }
-  }
-}
-
-void ItoSolver::unsetMassToDiffusivity(ParticleContainer<ItoParticle>& a_particles){
-  CH_TIME("ItoSolver::unsetMassToDiffusivity");
-  if(m_verbosity > 5){
-    pout() << m_name + "::unsetMassToDiffusivity" << endl;
-  }
-
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      List<ItoParticle>& particles = a_particles[lvl][dit()].listItems();
-
-      for (ListIterator<ItoParticle> lit(particles); lit.ok(); ++lit){
-	ItoParticle& p = lit();
-	p.mass() = p.tmp();
-      }
-    }
-  }
-}
-
-void ItoSolver::setMassToEnergy(ParticleContainer<ItoParticle>& a_particles){
-  CH_TIME("ItoSolver::setMassToEnergy");
-  if(m_verbosity > 5){
-    pout() << m_name + "::setMassToEnergy" << endl;
-  }
-
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      List<ItoParticle>& particles = a_particles[lvl][dit()].listItems();
-
-      for (ListIterator<ItoParticle> lit(particles); lit.ok(); ++lit){
-	ItoParticle& p = lit();
-	p.tmp()   = p.mass();
-	p.mass() *= p.energy();
-      }
-    }
-  }
-}
-
-void ItoSolver::unsetMassToEnergy(ParticleContainer<ItoParticle>& a_particles){
-  CH_TIME("ItoSolver::unsetMassToEnergy");
-  if(m_verbosity > 5){
-    pout() << m_name + "::unsetMassToEnergy" << endl;
-  }
-
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      List<ItoParticle>& particles = a_particles[lvl][dit()].listItems();
-
-      for (ListIterator<ItoParticle> lit(particles); lit.ok(); ++lit){
-	ItoParticle& p = lit();
-	p.mass() = p.tmp();
-      }
-    }
-  }
-}
-
 void ItoSolver::depositConductivity(){
   CH_TIME("ItoSolver::depositConductivity()");
   if(m_verbosity > 5){
@@ -1529,14 +1412,8 @@ void ItoSolver::depositConductivity(EBAMRCellData& a_phi, ParticleContainer<ItoP
   if(m_verbosity > 5){
     pout() << m_name + "::depositConductivity(state, particles, deposition_type)" << endl;
   }
-#if 0
-  this->setMassToConductivity(a_particles);                 // Make mass = mass*mu
-  this->depositParticles(a_phi, a_particles, a_deposition); // Deposit mass*mu
-  this->unsetMassToConductivity(a_particles);               // Make mass = mass/mu
 
-#else
   this->depositParticles<ItoParticle, &ItoParticle::conductivity>(a_phi, a_particles, a_deposition);
-#endif
 }
 
 void ItoSolver::depositDiffusivity(){
@@ -1563,9 +1440,7 @@ void ItoSolver::depositDiffusivity(EBAMRCellData& a_phi, ParticleContainer<ItoPa
     pout() << m_name + "::depositDiffusivity(state, particles, deposition_type)" << endl;
   }
 
-  this->setMassToDiffusivity(a_particles);                                  // Make mass = mass*D
-  this->depositParticles(a_phi, a_particles, a_deposition); // Deposit mass*D
-  this->unsetMassToDiffusivity(a_particles);                                // Make mass = mass/D
+  this->depositParticles<ItoParticle, &ItoParticle::diffusivity>(a_phi, a_particles, a_deposition);
 }
 
 void ItoSolver::depositEnergyDensity(){
@@ -1592,9 +1467,7 @@ void ItoSolver::depositEnergyDensity(EBAMRCellData& a_phi, ParticleContainer<Ito
     pout() << m_name + "::depositEnergyDensity(state, particles, deposition_type)" << endl;
   }
 
-  this->setMassToEnergy(a_particles);                       // Make mass = mass*E
-  this->depositParticles(a_phi, a_particles, a_deposition); // Deposit mass*E
-  this->unsetMassToEnergy(a_particles);                     // Make mass = mass/E
+  this->depositParticles<ItoParticle, &ItoParticle::totalEnergy>(a_phi, a_particles, a_deposition);
 }
 
 void ItoSolver::computeAverageMobility(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles){
@@ -1738,7 +1611,7 @@ void ItoSolver::depositParticles(const WhichContainer a_container){
     pout() << m_name + "::depositParticles(container)" << endl;
   }
 
-  this->depositParticles(m_phi, m_particleContainers.at(a_container), m_deposition);
+  this->depositParticles<ItoParticle, &ItoParticle::mass>(m_phi, m_particleContainers.at(a_container), m_deposition);
 }
 
 void ItoSolver::redistributeAMR(EBAMRCellData& a_phi){
@@ -1957,7 +1830,7 @@ void ItoSolver::depositWeights(EBAMRCellData& a_phi, const ParticleContainer<Ito
     pout() << m_name + "::depositWeights" << endl;
   }
 
-  this->depositParticles(a_phi, m_particleContainers.at(WhichContainer::Bulk), DepositionType::NGP);
+  this->depositParticles<ItoParticle, &ItoParticle::mass>(a_phi, m_particleContainers.at(WhichContainer::Bulk), DepositionType::NGP);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     DataOps::scale(*a_phi[lvl], pow(m_amr->getDx()[lvl], SpaceDim));

@@ -218,6 +218,13 @@ public:
   const Real& energy() const;
 
   /*!
+    @brief Get the total energy
+    @return Returns m_energy*m_mass
+  */
+  inline
+  Real totalEnergy() const;
+
+  /*!
     @brief Set the particle velocity
     @param[in] a_velocity Particle velocity
   */

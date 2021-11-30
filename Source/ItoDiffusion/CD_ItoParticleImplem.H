@@ -126,6 +126,10 @@ const Real& ItoParticle::energy() const{
   return m_averageEnergy;
 }
 
+Real ItoParticle::totalEnergy() const {
+  return m_mass*m_averageEnergy;
+}
+
 Real& ItoParticle::runtimeScalar(const int a_num){
   return m_runtimeScalars[a_num];
 }

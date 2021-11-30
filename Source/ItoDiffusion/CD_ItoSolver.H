@@ -144,42 +144,6 @@ public:
   virtual void clear(AMRParticles<ItoParticle>& a_particles);
 
   /*!
-    @brief Set mass to conductivity
-    @details This sets mass = mass*mobility
-  */
-  virtual void setMassToConductivity(ParticleContainer<ItoParticle>& a_particles);
-
-  /*!
-    @brief Unset mass to conductivity
-    @details This sets mass = mass/mobility
-  */
-  virtual void unsetMassToConductivity(ParticleContainer<ItoParticle>& a_particles);
-
-  /*!
-    @brief Set mass to diffusivity
-    @details This sets mass = mass*diffusion_coefficient
-  */
-  virtual void setMassToDiffusivity(ParticleContainer<ItoParticle>& a_particles);
-
-  /*!
-    @brief Unset mass to diffusivity
-    @details This sets mass = mass/diffusion_coefficient
-  */
-  virtual void unsetMassToDiffusivity(ParticleContainer<ItoParticle>& a_particles);
-
-  /*!
-    @brief Set mass to energy
-    @details This sets mass = mass*particle_energy
-  */
-  virtual void setMassToEnergy(ParticleContainer<ItoParticle>& a_particles);
-
-  /*!
-    @brief Unset mass to energy
-    @details This sets mass = mass/particle_energy
-  */
-  virtual void unsetMassToEnergy(ParticleContainer<ItoParticle>& a_particles);
-
-  /*!
     @brief Deposit conductivities
     @details This deposits weight*mobility (not multiplied by charge)
   */
@@ -266,7 +230,7 @@ public:
     @param[in]  a_particles Particles to be deposited
     @note This will call the other version with a_deposition = m_deposition.
   */
-  template <class P, const Real&(P::*particleScalarField)() const = &P::mass>    
+  template <class P, const Real&(P::*particleScalarField)() const>    
   void depositParticles(EBAMRCellData& a_phi, const ParticleContainer<P>& a_particles);
 
   /*!
@@ -277,7 +241,7 @@ public:
     @param[in]  a_particles  Particles to be deposited
     @param[in]  a_deposition Deposition method
   */
-  template <class P, const Real&(P::*particleScalarField)() const = &P::mass>    
+  template <class P, const Real&(P::*particleScalarField)() const>    
   void depositParticles(EBAMRCellData& a_phi, const ParticleContainer<P>& a_particles, const DepositionType a_deposition);
 
   /*!
