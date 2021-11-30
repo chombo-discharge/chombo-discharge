@@ -748,6 +748,49 @@ public:
 			    const EBAMRCellData&       a_meshVectorField,
 			    const DepositionType       a_interpType,
 			    const bool                 a_forceIrregNGP = false) const;
+
+  /*!
+    @brief Function which removes particles from the domain if they fall inside the EB.
+    @details The template parameter indicate the particle type -- it must have a const RealVect& P::position() function. 
+    @details This version uses the implicit function to evaluate whether or not the particles are inside the EB. The particles will be removed from
+    the container if f(x) > a_tolerance*dx. 
+    @param[inout] a_particles Particle data
+    @param[in]    a_phase     Phase where the particles live. 
+    @param[in]    a_tolerance Tolerance. 
+    @note Because the implicit functions are global, this function will work even if the particles aren't mapped to the correct EBISBox.
+  */
+  template <class P>
+  void removeCoveredParticlesIF(ParticleContainer<P>&     a_particles,
+				const phase::which_phase& a_phase,
+				const Real                a_tolerance = 0.0) const;
+
+  /*!
+    @brief Function which removes particles from the domain if they fall inside the EB.
+    @details The template parameter indicate the particle type -- it must have a const RealVect& P::position() function. 
+    @details This version uses the discrete information to evaluate whether or not the particles are inside the EB. The particles will be removed from
+    the container if they lie within a covered cell OR if they lie in an irregular cell but on the "wrong" side of the EB face (to within precision tolerance*dx)
+    @param[inout] a_particles Particle data
+    @param[in]    a_phase     Phase where the particles live. 
+    @param[in]    a_tolerance Tolerance when to remove particles
+    @note This function will only work if the particles are mapped to the correct EBISBox. 
+  */
+  template <class P>
+  void removeCoveredParticlesDiscrete(ParticleContainer<P>&     a_particles,
+				      const phase::which_phase& a_phase,
+				      const Real                a_tolerance = 0.0) const;
+
+  /*!
+    @brief Function which removes particles from the domain if they fall inside the EB.
+    @details The template parameter indicate the particle type -- it must have a const RealVect& P::position() function. 
+    @details This version uses removes all particles that live in covered cells.
+    @param[inout] a_particles Particle data
+    @param[in]    a_phase     Phase where the particles live. 
+    @note This function will only work if the particles are mapped to the correct EBISBox. 
+  */
+  template <class P>
+  void removeCoveredParticlesVoxels(ParticleContainer<P>&     a_particles,
+				    const phase::which_phase& a_phase) const;
+
   
   /*!
     @brief Interpolate ghost vectors over a realm, using the default ghost cell interpolation method. 

@@ -586,10 +586,11 @@ void ItoSolver::removeCoveredParticles(ParticleContainer<ItoParticle>& a_particl
 
   switch(a_representation){
   case EbRepresentation::ImplicitFunction:
-    this->removeCoveredParticles_if(a_particles, a_tol);
+    m_amr->removeCoveredParticlesIF(a_particles, m_phase, a_tol);
     break;
   case EbRepresentation::Discrete:
-    this->removeCoveredParticles_discrete(a_particles);
+    m_amr->removeCoveredParticlesDiscrete(a_particles, m_phase, a_tol);     //    this->removeCoveredParticles_discrete(a_particles);
+
     break;
   case EbRepresentation::Voxel:
     this->removeCoveredParticles_voxels(a_particles);
@@ -599,10 +600,10 @@ void ItoSolver::removeCoveredParticles(ParticleContainer<ItoParticle>& a_particl
   }
 }
 
-void ItoSolver::removeCoveredParticles_if(ParticleContainer<ItoParticle>& a_particles, const Real a_tol){
-  CH_TIME("ItoSolver::removeCoveredParticles_if(particles)");
+void ItoSolver::removeCoveredParticlesIF(ParticleContainer<ItoParticle>& a_particles, const Real a_tol){
+  CH_TIME("ItoSolver::removeCoveredParticlesIF(particles)");
   if(m_verbosity > 5){
-    pout() << m_name + "::removeCoveredParticles_if(particles)" << endl;
+    pout() << m_name + "::removeCoveredParticlesIF(particles)" << endl;
   }
 
   const RefCountedPtr<BaseIF>& func = (m_phase == phase::gas) ? m_computationalGeometry->getGasImplicitFunction() : m_computationalGeometry->getSolidImplicitFunction();

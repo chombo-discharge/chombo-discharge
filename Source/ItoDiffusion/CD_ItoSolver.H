@@ -1140,7 +1140,7 @@ protected:
   /*!
     @brief Remove particles that are inside the EB using the implicit function
   */
-  void removeCoveredParticles_if(ParticleContainer<ItoParticle>& a_particles, const Real a_tol);
+  void removeCoveredParticlesIF(ParticleContainer<ItoParticle>& a_particles, const Real a_tol);
 
   /*!
     @brief Remove particles that are inside the EB using the discrete information
