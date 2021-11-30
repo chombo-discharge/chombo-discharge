@@ -36,7 +36,7 @@
 /*!
   @brief Base class for Ito diffusion particle models.
   @details This is a particle class for solving Ito diffusion problems dX = v*dt + sqrt(2*D)*dW_t (dW_t is a Wiener process over dt) over an AMR hierarchy. The diffusion
-  coefficient is related to the hydrodynamic diffusion coefficient by D(fluid) = sqrt(2*D(Ito)).
+  coefficient is related to the hydrodynamic diffusion coefficient by D(fluid) = sqrt(2*D(Ito)). 
   @note To use this class, the user must add a species and set the realm and phase where the solver will live. 
 */
 class ItoSolver {
@@ -122,6 +122,8 @@ public:
 
   /*!
     @brief Allocate internal storage
+    @details This will allocate the required mesh data as well as all the particle data holders. 
+    @note Storage for diffusion and advection fields are only allocate if the species is diffusive/mobile. 
   */
   virtual void allocateInternals();
 
@@ -720,6 +722,16 @@ public:
   phase::which_phase getPhase() const;
   
 protected:
+
+  /*!
+    @brief Default component in data holders (do not touch). 
+  */
+  static constexpr int m_comp = 0;
+
+  /*!
+    @brief Default number of component in data holders (do not touch).
+  */
+  static constexpr int m_nComp = 1;  
 
   /*! 
     @brief How to checkpoint files

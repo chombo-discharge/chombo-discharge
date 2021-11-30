@@ -26,6 +26,9 @@
 
 #define ITO_DEBUG 0
 
+constexpr int ItoSolver::m_comp;
+constexpr int ItoSolver::m_nComp;
+
 ItoSolver::ItoSolver(){
   CH_TIME("ItoSolver::ItoSolver");
 
@@ -127,15 +130,21 @@ void ItoSolver::parseRng(){
   ParmParse pp(m_className.c_str());
   pp.get("seed",       m_rngSeed);
   pp.get("normal_max", m_normalDistributionTruncation);
-  if(m_rngSeed < 0) { // Random seed if input < 0
+
+  // Use a random seed if the input was < 0.
+  if(m_rngSeed < 0) { 
     m_rngSeed = std::chrono::system_clock::now().time_since_epoch().count();
   }
+
+  // Initialize random number generator and distributions
+  constexpr Real zero = 0.0;
+  constexpr Real one  = 1.0;
   
-  m_rng     = std::mt19937_64(m_rngSeed);
-  m_uniformDistribution01 = std::uniform_real_distribution<Real>( 0.0, 1.0);
-  m_uniformDistribution11 = std::uniform_real_distribution<Real>(-1.0, 1.0);
-  m_normalDistribution01 = std::normal_distribution<Real>(0.0, 1.0);
-  m_uniformDistribution0d = std::uniform_int_distribution<int>(0, SpaceDim-1);
+  m_rng                   = std::mt19937_64(m_rngSeed);
+  m_uniformDistribution01 = std::uniform_real_distribution<Real>( zero, one       ); // <- Uniform real distribution from [ 0   1]
+  m_uniformDistribution11 = std::uniform_real_distribution<Real>(-one , one       ); // <- Uniform real distribution from [-1, -1]
+  m_uniformDistribution0d = std::uniform_int_distribution<int>  ( 0   , SpaceDim-1); // <- Uniform integer distribution from [0, SpaceDim-1]
+  m_normalDistribution01  = std::normal_distribution<Real>      ( zero, one       ); // <- Normal distribution with mean value of zero and standard deviation of one. 
 }
 
 void ItoSolver::parsePlotVariables(){
@@ -144,10 +153,10 @@ void ItoSolver::parsePlotVariables(){
     pout() << m_name + "::parsePlotVariables" << endl;
   }
 
-  m_plotPhi = false;
-  m_plotVelocity = false;
-  m_plotDiffCo = false;
-  m_plotParticles        = false;
+  m_plotPhi             = false;
+  m_plotVelocity        = false;
+  m_plotDiffCo          = false;
+  m_plotParticles       = false;
   m_plotParticlesEB     = false;
   m_plotParticlesDomain = false;
   m_plotParticlesSource = false;
@@ -155,15 +164,16 @@ void ItoSolver::parsePlotVariables(){
   m_plotAverageEnergy   = false;
 
   ParmParse pp(m_className.c_str());
+  
   const int num = pp.countval("plt_vars");
   Vector<std::string> str(num);
   pp.getarr("plt_vars", str, 0, num);
 
   for (int i = 0; i < num; i++){
-    if(     str[i] == "phi")            m_plotPhi              = true;
-    else if(str[i] == "vel")            m_plotVelocity              = true;
-    else if(str[i] == "dco")            m_plotDiffCo              = true;
-    else if(str[i] == "part")           m_plotParticles        = true;
+    if(     str[i] == "phi")            m_plotPhi             = true;
+    else if(str[i] == "vel")            m_plotVelocity        = true;
+    else if(str[i] == "dco")            m_plotDiffCo          = true;
+    else if(str[i] == "part")           m_plotParticles       = true;
     else if(str[i] == "eb_part")        m_plotParticlesEB     = true;
     else if(str[i] == "dom_part")       m_plotParticlesDomain = true;
     else if(str[i] == "src_part")       m_plotParticlesSource = true;
@@ -985,6 +995,8 @@ void ItoSolver::allocateInternals(){
   if(m_verbosity > 5){
     pout() << m_name + "::allocateInternals" << endl;
   }
+
+  CH_assert(!m_species.isNull());
   
   const int ncomp = 1;
 
