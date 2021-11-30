@@ -629,40 +629,6 @@ void ItoSolver::removeCoveredParticles_if(ParticleContainer<ItoParticle>& a_part
   }
 }
 
-
-void ItoSolver::transferCoveredParticles_if(ParticleContainer<ItoParticle>& a_src, ParticleContainer<ItoParticle>& a_dst, const Real a_tol){
-  CH_TIME("ItoSolver::transferCoveredParticles_if(container, container, tolerance)");
-  if(m_verbosity > 5){
-    pout() << m_name + "::transferCoveredParticles_if(container, container, tolerance)" << endl;
-  }
-
-  const RefCountedPtr<BaseIF>& func = (m_phase == phase::gas) ? m_computationalGeometry->getGasImplicitFunction() : m_computationalGeometry->getSolidImplicitFunction();
-
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-    const Real dx                = m_amr->getDx()[lvl];
-    const Real tol               = a_tol*dx;
-
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const EBISBox& ebisbox = ebisl[dit()];
-      
-      List<ItoParticle>& src = a_src[lvl][dit()].listItems();
-      List<ItoParticle>& dst = a_dst[lvl][dit()].listItems();
-
-      // Check if particles are outside the implicit function. 
-      for (ListIterator<ItoParticle> lit(src); lit.ok(); ++lit){
-	ItoParticle& p = lit();
-
-	const Real f = func->value(p.position());
-	if(f > tol) {
-	  dst.transfer(lit);
-	}
-      }
-    }
-  }
-}
-
 void ItoSolver::removeCoveredParticles_discrete(ParticleContainer<ItoParticle>& a_particles){
   CH_TIME("ItoSolver::removeCoveredParticles_discrete(particles)");
   if(m_verbosity > 5){
@@ -748,6 +714,39 @@ void ItoSolver::removeCoveredParticles_voxels(ParticleContainer<ItoParticle>& a_
 	  if(ebisbox.isCovered(iv)){
 	    particles.remove(lit);
 	  }
+	}
+      }
+    }
+  }
+}
+
+void ItoSolver::transferCoveredParticles_if(ParticleContainer<ItoParticle>& a_src, ParticleContainer<ItoParticle>& a_dst, const Real a_tol){
+  CH_TIME("ItoSolver::transferCoveredParticles_if(container, container, tolerance)");
+  if(m_verbosity > 5){
+    pout() << m_name + "::transferCoveredParticles_if(container, container, tolerance)" << endl;
+  }
+
+  const RefCountedPtr<BaseIF>& func = (m_phase == phase::gas) ? m_computationalGeometry->getGasImplicitFunction() : m_computationalGeometry->getSolidImplicitFunction();
+
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const Real dx                = m_amr->getDx()[lvl];
+    const Real tol               = a_tol*dx;
+
+    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
+      const EBISBox& ebisbox = ebisl[dit()];
+      
+      List<ItoParticle>& src = a_src[lvl][dit()].listItems();
+      List<ItoParticle>& dst = a_dst[lvl][dit()].listItems();
+
+      // Check if particles are outside the implicit function. 
+      for (ListIterator<ItoParticle> lit(src); lit.ok(); ++lit){
+	ItoParticle& p = lit();
+
+	const Real f = func->value(p.position());
+	if(f > tol) {
+	  dst.transfer(lit);
 	}
       }
     }
