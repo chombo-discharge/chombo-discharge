@@ -262,20 +262,29 @@ public:
   void depositParticles(EBAMRCellData& a_phi, const ParticleContainer<P>& a_particles, const DepositionType a_deposition) const;
 
   /*!
-    @brief Remove particles that are inside the EB
-    @details Calls the other version with m_particles
+    @brief Remove particles that are inside the EB. 
+    @param[in] a_ebRepresentation EB representation (e.g. implicit function, discrete, voxel)
+    @param[in] a_tol              Tolerance -- removes particles if they are less than a_tol*dx away from the boundary. 
+    @details Calls the other version with m_particles.
   */
   virtual void removeCoveredParticles(const EbRepresentation a_representation, const Real a_tol);
 
   /*!
-    @brief Which particles to remove
+    @brief Remove particles that are inside the EB. 
+    @param[in] a_container        Which particle container to remove particles from
+    @param[in] a_ebRepresentation EB representation (e.g. implicit function, discrete, voxel)
+    @param[in] a_tol              Tolerance -- removes particles if they are less than a_tol*dx away from the boundary. 
+    @note Calls the other version with ParticleContainer = m_particles.at(a_container)
   */
   virtual void removeCoveredParticles(const WhichContainer a_container, const EbRepresentation a_representation, const Real a_tol);
 
   /*!
     @brief Remove particles that are inside the EB
+    @param[in] a_particles        Particles to remove. 
+    @param[in] a_ebRepresentation EB representation (e.g. implicit function, discrete, voxel)
+    @param[in] a_tol              Tolerance -- removes particles if they are less than a_tol*dx away from the boundary. 
   */
-  virtual void removeCoveredParticles(ParticleContainer<ItoParticle>& a_particles, const EbRepresentation a_representation, const Real a_tol);
+  virtual void removeCoveredParticles(ParticleContainer<ItoParticle>& a_particles, const EbRepresentation a_representation, const Real a_tol) const;
 
   /*!
     @brief Transfer particles that are covered (within a_tol distance from EB) to another container. 
@@ -1136,21 +1145,6 @@ protected:
     @brief Restart particles
   */
   void restartParticles(LevelData<EBCellFAB>& a_num_particles, const int a_level);
-
-  /*!
-    @brief Remove particles that are inside the EB using the implicit function
-  */
-  void removeCoveredParticlesIF(ParticleContainer<ItoParticle>& a_particles, const Real a_tol);
-
-  /*!
-    @brief Remove particles that are inside the EB using the discrete information
-  */
-  void removeCoveredParticles_discrete(ParticleContainer<ItoParticle>& a_particles);
-  
-  /*!
-    @brief Remove particles only in covered cells. 
-  */
-  void removeCoveredParticles_voxels(ParticleContainer<ItoParticle>& a_particles);
 
   /*!
     @brief Transfer particles that are inside the EB
