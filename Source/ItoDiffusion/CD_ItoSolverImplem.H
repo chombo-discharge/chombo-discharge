@@ -125,26 +125,6 @@ RealVect ItoSolver::randomPosition(const RealVect a_lo, const RealVect a_hi) con
 }
 
 template <class P, const Real&(P::*particleScalarField)() const>
-void ItoSolver::depositParticles(EBAMRCellData& a_phi, const ParticleContainer<P>& a_particles) const {
-  CH_TIME("ItoSolver::depositParticles");
-  if(m_verbosity > 5){
-    pout() << m_name + "::depositParticles" << endl;
-  }
-
-  this->depositParticles<P, particleScalarField>(a_phi, a_particles, m_deposition);
-}
-
-template <class P, Real(P::*particleScalarField)() const>
-void ItoSolver::depositParticles(EBAMRCellData& a_phi, const ParticleContainer<P>& a_particles) const {
-  CH_TIME("ItoSolver::depositParticles");
-  if(m_verbosity > 5){
-    pout() << m_name + "::depositParticles" << endl;
-  }
-
-  this->depositParticles<P, particleScalarField>(a_phi, a_particles, m_deposition);
-}
-
-template <class P, const Real&(P::*particleScalarField)() const>
 void ItoSolver::depositParticles(EBAMRCellData&              a_phi,
 				 const ParticleContainer<P>& a_particles,
 				 const DepositionType        a_deposition) const {
@@ -152,6 +132,12 @@ void ItoSolver::depositParticles(EBAMRCellData&              a_phi,
   if(m_verbosity > 5){
     pout() << m_name + "::depositParticles" << endl;
   }
+
+  CH_assert( a_phi[0]->nComp() == 1    );
+  CH_assert(!a_particles.isCellSorted());
+
+  // TLDR: First, deposit onto the mesh as usual (as if the EB wasn't there). If the user asks for it, he can redistribute mass in order to
+  //       conserve total mass (if that is important). But the corresponding scheme will be O(1) accurate. 
            
   this->depositKappaConservative<P, particleScalarField>(a_phi, a_particles, a_deposition); // a_phi contains only weights, i.e. not divided by kappa
   this->redistributeAMR(a_phi);                                                             // Redistribution magic, if you want it.
@@ -169,6 +155,12 @@ void ItoSolver::depositParticles(EBAMRCellData&              a_phi,
   if(m_verbosity > 5){
     pout() << m_name + "::depositParticles" << endl;
   }
+
+  CH_assert( a_phi[0]->nComp() == 1    );
+  CH_assert(!a_particles.isCellSorted());
+
+  // TLDR: First, deposit onto the mesh as usual (as if the EB wasn't there). If the user asks for it, he can redistribute mass in order to
+  //       conserve total mass (if that is important). But the corresponding scheme will be O(1) accurate.   
            
   this->depositKappaConservative<P, particleScalarField>(a_phi, a_particles, a_deposition); // a_phi contains only weights, i.e. not divided by kappa
   this->redistributeAMR(a_phi);                                                             // Redistribution magic, if you want it. 

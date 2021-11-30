@@ -201,71 +201,62 @@ public:
 
   /*!
     @brief Compute average mobility. 
-    @details This computes, in each cell, the average mobility as mu_avg = sum(mass*mu)/sum(mass).
+    @details This computes the average mobility as mu_avg = sum(mass*mu)/sum(mass) by depositing on the mesh. 
     @param[out] a_phi       Mesh data
     @param[in]  a_particles Particle data
-    @note User must sort the particles by cell first. 
   */
   virtual void computeAverageMobility(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles) const;
 
   /*!
-    @brief Compute average diffusion. Must sort the particles by cell first. 
+    @brief Compute average diffusion coefficient. 
+    @details This computes the average diffusion coefficient as D_avg = sum(mass*D)/sum(mass) by depositing on the mesh. 
+    @param[out] a_phi       Mesh data
+    @param[in]  a_particles Particle data
   */
-  virtual void computeAverageDiffusion(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles);
+  virtual void computeAverageDiffusion(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles) const;
 
   /*!
-    @brief Compute average energy. Must sort the particles by cell first. 
+    @brief Compute average particle energy.. 
+    @details This computes the average energy as E_avg = sum(mass*energy)/sum(mass) by depositing on the mesh. 
+    @param[out] a_phi       Mesh data
+    @param[in]  a_particles Particle data
   */
-  virtual void computeAverageEnergy(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles);
+  virtual void computeAverageEnergy(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles) const;
 
   /*!
-    @brief Deposit particles
+    @brief Deposit particles onto mesh. 
+    @details This will deposit the mass (i.e., computational weight) "bulk" particles into m_phi. 
+    @note Cells the other version with a_container = WhichContainer::Bulk
   */
   virtual void depositParticles();
 
   /*!
-    @brief Deposit particles
+    @brief Deposit particles on to mesh. 
+    @param[in] a_container Which container to deposit.
+    @details This will deposit mass (i.e., computational weight) of the the input particle container particles onto the classes member 'm_phi'. 
+    @note Calls the general version with arguments: m_phi, m_particles.at(a_container), m_deposition.
   */
   virtual void depositParticles(const WhichContainer a_container);
 
   /*!
-    @brief Deposit the particles onto a_phi. 
-    @details The template parameters indicate the particle type and quantity to be deposited. The second template parameter must be a pointer to a member function in 
-    the particle class with signature 'const Real& P::function() const'. E.g. 'const Real& P::mass() const' which is the default quantity to be deposited. 
-    @param[out] a_phi       Mesh data -- must have exactly one component. 
-    @param[in]  a_particles Particles to be deposited
-    @note This will call the other version with a_deposition = m_deposition.
-  */
-  template <class P, const Real&(P::*particleScalarField)() const>    
-  void depositParticles(EBAMRCellData& a_phi, const ParticleContainer<P>& a_particles) const;
-
-  /*!
-    @brief Deposit the particles onto a_phi. 
-    @details Just like the above version but with a different function signature. 
-    @param[out] a_phi       Mesh data -- must have exactly one component. 
-    @param[in]  a_particles Particles to be deposited
-    @note This will call the other version with a_deposition = m_deposition.
-  */
-  template <class P, Real(P::*particleScalarField)() const>    
-  void depositParticles(EBAMRCellData& a_phi, const ParticleContainer<P>& a_particles) const;  
-
-  /*!
-    @brief Deposit the particles onto a_phi. 
+    @brief Generic deposition function which deposits a particle field onto the mesh using a specified deposition method. 
     @details The template parameters indicate the particle type and quantity to be deposited. The second template parameter must be a pointer to a member function in 
     the particle class with signature 'const Real& P::function() const'. E.g. 'const Real& P::mass() const' which is the default quantity to be deposited. 
     @param[out] a_phi        Mesh data -- must have exactly one component. 
     @param[in]  a_particles  Particles to be deposited
     @param[in]  a_deposition Deposition method
+    @note The coarse-fine deposition handling is defined by the input parameters in m_pvrBuffer, m_haloBuffer, and m_forceIrregHaloNGP (see the class documentation).
   */
   template <class P, const Real&(P::*particleScalarField)() const>    
   void depositParticles(EBAMRCellData& a_phi, const ParticleContainer<P>& a_particles, const DepositionType a_deposition) const;
 
   /*!
-    @brief Deposit the particles onto a_phi. 
+    @brief Generic deposition function which deposits a particle field onto the mesh using a specified deposition method. 
     @details Just like the version above, but with a different function signature.
     @param[out] a_phi        Mesh data -- must have exactly one component. 
     @param[in]  a_particles  Particles to be deposited
     @param[in]  a_deposition Deposition method
+    @note The coarse-fine deposition handling is defined by the input parameters in m_pvrBuffer, m_haloBuffer, and m_forceIrregHaloNGP (see the class documentation).
   */
   template <class P, Real(P::*particleScalarField)() const>
   void depositParticles(EBAMRCellData& a_phi, const ParticleContainer<P>& a_particles, const DepositionType a_deposition) const;
@@ -998,11 +989,6 @@ protected:
   EBAMRCellData m_phi;
 
   /*!
-    @brief Scratch data
-  */
-  EBAMRCellData m_scratch;
-
-  /*!
     @brief Mobility function
   */
   EBAMRCellData m_mobilityFunction;
@@ -1016,6 +1002,11 @@ protected:
     @brief Diffusion-centerer field used for interpolating diffusion coefficients
   */
   EBAMRCellData m_diffusionFunction;
+  
+  /*!
+    @brief Scratch data
+  */
+  mutable EBAMRCellData m_scratch;  
 
   /*!
     @brief Scratch storage for holding the non-conservative deposition

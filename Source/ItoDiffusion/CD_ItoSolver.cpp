@@ -1479,135 +1479,77 @@ void ItoSolver::depositEnergyDensity(EBAMRCellData& a_phi, const ParticleContain
 }
 
 void ItoSolver::computeAverageMobility(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles) const {
-  CH_TIME("ItoSolver::computeAverageMobility(state, particles)");
+  CH_TIME("ItoSolver::computeAverageMobility(EBAMRCellData, ParticleContainer)");
   if(m_verbosity > 5){
-    pout() << m_name + "::computeAverageMobility(state, particles)" << endl;
+    pout() << m_name + "::computeAverageMobility(EBAMRCellData, ParticleContainer)" << endl;
   }
 
-  CH_assert(a_phi[0]->nComp() == 1);
-  CH_assert(a_particles.isCellSorted());
+  CH_assert( a_phi[0]->nComp() == 1    );
+  CH_assert(!a_particles.isCellSorted());
 
-  constexpr int comp = 0;
+  // TLDR: We compute the average mobility as the average mobility of all particles (mass-weighted). We do this by depositing the particle conductivity and then
+  //       dividing by the mass. 
+  DataOps::setValue(a_phi,     0.0);
+  DataOps::setValue(m_scratch, 0.0);  
+  
+  this->depositParticles<ItoParticle, &ItoParticle::conductivity>(a_phi,     a_particles, m_deposition);  // Deposit mass*mu
+  this->depositParticles<ItoParticle, &ItoParticle::mass>        (m_scratch, a_particles, m_deposition);  // Deposit mass
 
-  DataOps::setValue(a_phi, 0.0);
 
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const BinFab<ItoParticle>& particles = a_particles.getCellParticles(lvl, dit());
-
-      BaseFab<Real>& state = (*a_phi[lvl])[dit()].getSingleValuedFAB();
-
-      for (BoxIterator bit(dbl[dit()]); bit.ok(); ++bit){
-	const IntVect iv = bit();
-
-	const List<ItoParticle>& listParticles = particles(iv, m_comp);
-
-	if(listParticles.length() > 0){
-	  Real M  = 0.0;
-	  Real MU = 0.0;
-	  for (ListIterator<ItoParticle> lit(listParticles); lit.ok(); ++lit){
-	    const ItoParticle& p = lit();
-	    const Real m  = p.mass();
-	    const Real mu = p.mobility();
-
-	    M  += m;
-	    MU += m*mu;
-	  }
-
-	  state(iv, m_comp) = MU/M;
-	}
-      }
-    }
-  }
+  // Make averageMobility = mass*mu/mass. If there is no mass then set the value to zero. 
+  constexpr Real zero = 0.0;
+  
+  DataOps::divideFallback(a_phi, m_scratch, zero);
 }
 
-void ItoSolver::computeAverageDiffusion(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles){
-  CH_TIME("ItoSolver::computeAverageDiffusion(state, particles)");
+void ItoSolver::computeAverageDiffusion(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles) const {
+  CH_TIME("ItoSolver::computeAverageDiffusion(EBAMRCellData, ParticleContainer)");
   if(m_verbosity > 5){
-    pout() << m_name + "::computeAverageDiffusion(state, particles)" << endl;
+    pout() << m_name + "::computeAverageDiffusion(EBAMRCellData, ParticleContainer)" << endl;
   }
 
-  constexpr int comp = 0;
+  CH_assert( a_phi[0]->nComp() == 1    );
+  CH_assert(!a_particles.isCellSorted());
 
-  DataOps::setValue(a_phi, 0.0);
+  // TLDR: We compute the average mobility as the average mobility of all particles (mass-weighted). We do this by depositing the particle conductivity and then
+  //       dividing by the mass. 
+  DataOps::setValue(a_phi,     0.0);
+  DataOps::setValue(m_scratch, 0.0);  
+  
+  this->depositParticles<ItoParticle, &ItoParticle::diffusivity>(a_phi,     a_particles, m_deposition);  // Deposit mass*D
+  this->depositParticles<ItoParticle, &ItoParticle::mass>       (m_scratch, a_particles, m_deposition);  // Deposit mass
 
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
 
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const BinFab<ItoParticle>& particles = a_particles.getCellParticles(lvl, dit());
-
-      BaseFab<Real>& state = (*a_phi[lvl])[dit()].getSingleValuedFAB();
-
-      for (BoxIterator bit(dbl[dit()]); bit.ok(); ++bit){
-	const IntVect iv = bit();
-
-	const List<ItoParticle>& listParticles = particles(iv, comp);
-
-	if(listParticles.length() > 0){
-	  Real M = 0.0;
-	  Real D = 0.0;
-	  for (ListIterator<ItoParticle> lit(listParticles); lit.ok(); ++lit){
-	    const ItoParticle& p = lit();
-	    const Real m = p.mass();
-	    const Real d = p.diffusion();
-
-	    M += m;
-	    D += m*d;
-	  }
-
-	  state(iv, comp) = D/M;
-	}
-      }
-    }
-  }
+  // Make averageMobility = mass*mu/mass. If there is no mass then set the value to zero. 
+  constexpr Real zero = 0.0;
+  
+  DataOps::divideFallback(a_phi, m_scratch, zero);  
 }
 
-void ItoSolver::computeAverageEnergy(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles){
-  CH_TIME("ItoSolver::computeAverageEnergy(state, particles)");
+void ItoSolver::computeAverageEnergy(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles) const {
+  CH_TIME("ItoSolver::computeAverageEnergy(EBAMRCellData, ParticleContainer)");
   if(m_verbosity > 5){
-    pout() << m_name + "::computeAverageEnergy(state, particles)" << endl;
+    pout() << m_name + "::computeAverageEnergy(EBAMRCellData, ParticleContainer)" << endl;
   }
 
-  constexpr int comp = 0;
+  CH_assert( a_phi[0]->nComp() == 1    );
+  CH_assert(!a_particles.isCellSorted());
 
-  DataOps::setValue(a_phi, 0.0);
+  // TLDR: We compute the average mobility as the average mobility of all particles (mass-weighted). We do this by depositing the particle conductivity and then
+  //       dividing by the mass. 
+  DataOps::setValue(a_phi,     0.0);
+  DataOps::setValue(m_scratch, 0.0);  
+  
+  this->depositParticles<ItoParticle, &ItoParticle::totalEnergy>(a_phi,     a_particles, m_deposition);  // Deposit mass*energy
+  this->depositParticles<ItoParticle, &ItoParticle::mass>       (m_scratch, a_particles, m_deposition);  // Deposit mass
 
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const BinFab<ItoParticle>& particles = a_particles.getCellParticles(lvl, dit());
-
-      BaseFab<Real>& state = (*a_phi[lvl])[dit()].getSingleValuedFAB();
-
-      for (BoxIterator bit(dbl[dit()]); bit.ok(); ++bit){
-	const IntVect iv = bit();
-
-	const List<ItoParticle>& listParticles = particles(iv, comp);
-
-	if(listParticles.length() > 0){
-	  Real M = 0.0;
-	  Real E = 0.0;
-	  for (ListIterator<ItoParticle> lit(listParticles); lit.ok(); ++lit){
-	    const ItoParticle& p = lit();
-	    const Real m = p.mass();
-	    const Real e = p.energy();
-
-	    M += m;
-	    E += m*e;
-	  }
-
-	  state(iv, comp) = E/M;
-	}
-      }
-    }
-  }
+  // Make averageMobility = mass*mu/mass. If there is no mass then set the value to zero. 
+  constexpr Real zero = 0.0;
+  
+  DataOps::divideFallback(a_phi, m_scratch, zero);    
 }
 
-void ItoSolver::depositParticles(){
+void ItoSolver::depositParticles() {
   CH_TIME("ItoSolver::depositParticles");
   if(m_verbosity > 5){
     pout() << m_name + "::depositParticles" << endl;

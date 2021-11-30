@@ -359,6 +359,23 @@ public:
     @param[in]    a_denominator Divisor
     @param[in]    a_fallback    Fallback data
   */
+  static void divideFallback(EBAMRCellData& a_numerator, const EBAMRCellData& a_denominator, const Real a_fallback);
+
+  /*!
+    @brief Divide data. If the denominator is zero, set the value to a fallback option
+    @param[inout] a_numerator   Dividend
+    @param[in]    a_denominator Divisor
+    @param[in]    a_fallback    Fallback data
+    @note Does all components. 
+  */
+  static void divideFallback(LevelData<EBCellFAB>& a_numerator, const LevelData<EBCellFAB>& a_denominator, const Real a_fallback);
+
+  /*!
+    @brief Divide data. If the denominator is zero, set the value to a fallback option
+    @param[inout] a_numerator   Dividend
+    @param[in]    a_denominator Divisor
+    @param[in]    a_fallback    Fallback data
+  */
   static void divideFallback(EBAMRCellData& a_numerator, const EBAMRCellData& a_denominator, const EBAMRCellData& a_fallback);
 
   /*!
