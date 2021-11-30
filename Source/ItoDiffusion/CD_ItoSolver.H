@@ -146,63 +146,88 @@ public:
   virtual void clear(AMRParticles<ItoParticle>& a_particles);
 
   /*!
-    @brief Deposit conductivities
-    @details This deposits weight*mobility (not multiplied by charge)
+    @brief Deposit conductivities (i.e. mass*mobility / volume)
+    @details This deposits mass*mobility (not multiplied by charge)
+    @note Calls the other versions with a_phi = m_phi, a_particles = m_particles.at(bulk), a_deposition = m_deposition
   */
   virtual void depositConductivity();
 
   /*!
-    @brief Deposit conductivities
-    @details This deposits weight*mobility (not multiplied by charge)
+    @brief Deposit conductivities (i.e. mass*mobility / volume)
+    @details This deposits mass*mobility (not multiplied by charge)
+    @param[out] a_phi       Mesh data
+    @param[in]  a_particles Particle data
+    @note Calls the other versions with a_deposition = m_deposition
   */
-  virtual void depositConductivity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles);
+  virtual void depositConductivity(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles);
 
   /*!
-    @brief Deposit conductivities
-    @details This deposits weight*mobility (not multiplied by charge)
+    @brief Deposit conductivities (i.e. mass*mobility / volume)
+    @details This deposits mass*mobility (not multiplied by charge)
+    @param[out] a_phi        Mesh data
+    @param[in]  a_particles  Particle data
+    @param[in]  a_deposition Deposition method
   */
-  virtual void depositConductivity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles, const DepositionType a_deposition);
+  virtual void depositConductivity(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles, const DepositionType a_deposition);
 
   /*!
-    @brief Deposit diffusivity
-    @details This deposits weight*D (not multiplied by charge)
-  */
+    @brief Deposit diffusivity (i.e., mass*D/volume)
+    @details This deposits mass*diffusion (not multiplied by charge)
+    @note Calls the other versions with a_phi = m_phi, a_particles = m_particles.at(bulk), a_deposition = m_deposition
+  */  
   virtual void depositDiffusivity();
 
   /*!
-    @brief Deposit diffusivities
-    @details This deposits weight*D (not multiplied by charge)
+    @brief Deposit diffusivity (i.e. mass*D/volume)
+    @details This deposits mass*diffusion (not multiplied by charge)
+    @param[out] a_phi       Mesh data
+    @param[in]  a_particles Particle data
+    @note Calls the other versions with a_deposition = m_deposition
   */
-  virtual void depositDiffusivity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles);
+  virtual void depositDiffusivity(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles);
 
   /*!
-    @brief Deposit diffusivity
-    @details This deposits weight*D (not multiplied by charge)
+    @brief Deposit diffusivity (i.e. mass*D/volume)
+    @details This deposits mass*mobility (not multiplied by charge)
+    @param[out] a_phi        Mesh data
+    @param[in]  a_particles  Particle data
+    @param[in]  a_deposition Deposition method
   */
-  virtual void depositDiffusivity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles, const DepositionType a_deposition);
+  virtual void depositDiffusivity(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles, const DepositionType a_deposition);
 
   /*!
-    @brief Deposit diffusivity
-    @details This deposits weight*energy
+    @brief Deposit energy densities (i.e. mass*energy/volume => total energy per unit volume)
+    @details This deposits mass*energy
+    @note Calls the other versions with a_phi = m_phi, a_particles = m_particles.at(bulk), a_deposition = m_deposition
   */
   virtual void depositEnergyDensity();
 
   /*!
-    @brief Deposit energy
-    @details This deposits weight*energy
+    @brief Deposit energy densities (i.e. mass*energy/volume => total energy per unit volume)
+    @details This deposits mass*energy
+    @param[out] a_phi       Mesh data
+    @param[in]  a_particles Particle data
+    @note Calls the other versions with a_deposition = m_deposition
   */
-  virtual void depositEnergyDensity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles);
+  virtual void depositEnergyDensity(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles);
 
   /*!
-    @brief Deposit energy
-    @details This deposits weight*energy
+    @brief Deposit energy densities (i.e. mass*energy/volume => total energy per unit volume)
+    @details This deposits mass*energy
+    @param[out] a_phi        Mesh data
+    @param[in]  a_particles  Particle data
+    @param[in]  a_deposition Deposition method
   */
-  virtual void depositEnergyDensity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles, const DepositionType a_deposition);
+  virtual void depositEnergyDensity(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles, const DepositionType a_deposition);
 
   /*!
-    @brief Compute average mobility. Must sort the particles by cell first. 
+    @brief Compute average mobility. 
+    @details This computes, in each cell, the average mobility as mu_avg = sum(mass*mu)/sum(mass).
+    @param[out] a_phi       Mesh data
+    @param[in]  a_particles Particle data
+    @note User must sort the particles by cell first. 
   */
-  virtual void computeAverageMobility(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles);
+  virtual void computeAverageMobility(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles) const;
 
   /*!
     @brief Compute average diffusion. Must sort the particles by cell first. 

@@ -1402,30 +1402,35 @@ void ItoSolver::writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellD
 }
 
 void ItoSolver::depositConductivity(){
-  CH_TIME("ItoSolver::depositConductivity()");
+  CH_TIME("ItoSolver::depositConductivity");
   if(m_verbosity > 5){
-    pout() << m_name + "::depositConductivity()" << endl;
+    pout() << m_name + "::depositConductivity" << endl;
   }
 
   this->depositConductivity(m_phi, m_particleContainers.at(WhichContainer::Bulk));
 }
 
-void ItoSolver::depositConductivity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles){
-  CH_TIME("ItoSolver::depositConductivity(state, particles)");
+void ItoSolver::depositConductivity(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles){
+  CH_TIME("ItoSolver::depositConductivity(EBAMRCellData, ParticleContainer)");
   if(m_verbosity > 5){
-    pout() << m_name + "::depositConductivity(state, particles)" << endl;
+    pout() << m_name + "::depositConductivity(EBAMRCellData, ParticleContainer)" << endl;
   }
 
   this->depositConductivity(a_phi, a_particles, m_deposition);
 }
 
-void ItoSolver::depositConductivity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles, const DepositionType a_deposition){
-  CH_TIME("ItoSolver::depositConductivity(state, particles, deposition_type)");
+void ItoSolver::depositConductivity(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles, const DepositionType a_deposition){
+  CH_TIME("ItoSolver::depositConductivity(EBAMRCellData, ParticleContainer, DepositionType)");
   if(m_verbosity > 5){
-    pout() << m_name + "::depositConductivity(state, particles, deposition_type)" << endl;
-  }
+    pout() << m_name + "::depositConductivity(EBAMRCellData, ParticleContainer, DepositionType)" << endl;
+  }  
 
-  this->depositParticles<ItoParticle, &ItoParticle::conductivity>(a_phi, a_particles, a_deposition);
+  if(m_isMobile){
+    this->depositParticles<ItoParticle, &ItoParticle::conductivity>(a_phi, a_particles, a_deposition);
+  }
+  else{
+    DataOps::setValue(a_phi, 0.0);
+  }
 }
 
 void ItoSolver::depositDiffusivity(){
@@ -1437,7 +1442,7 @@ void ItoSolver::depositDiffusivity(){
   this->depositDiffusivity(m_phi, m_particleContainers.at(WhichContainer::Bulk));
 }
 
-void ItoSolver::depositDiffusivity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles){
+void ItoSolver::depositDiffusivity(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles){
   CH_TIME("ItoSolver::depositDiffusivity(state, particles)");
   if(m_verbosity > 5){
     pout() << m_name + "::depositDiffusivity(state, particles)" << endl;
@@ -1446,7 +1451,7 @@ void ItoSolver::depositDiffusivity(EBAMRCellData& a_phi, ParticleContainer<ItoPa
   this->depositDiffusivity(a_phi, a_particles, m_deposition);
 }
 
-void ItoSolver::depositDiffusivity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles, const DepositionType a_deposition){
+void ItoSolver::depositDiffusivity(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles, const DepositionType a_deposition){
   CH_TIME("ItoSolver::depositDiffusivity(state, particles, deposition_type)");
   if(m_verbosity > 5){
     pout() << m_name + "::depositDiffusivity(state, particles, deposition_type)" << endl;
@@ -1464,29 +1469,36 @@ void ItoSolver::depositEnergyDensity(){
   this->depositEnergyDensity(m_phi, m_particleContainers.at(WhichContainer::Bulk));
 }
 
-void ItoSolver::depositEnergyDensity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles){
+void ItoSolver::depositEnergyDensity(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles){
   CH_TIME("ItoSolver::depositEnergyDensity(state, particles)");
   if(m_verbosity > 5){
     pout() << m_name + "::depositEnergyDensity(state, particles)" << endl;
   }
 
+  CH_assert(a_phi[0]->nComp() == 1);    
+
   this->depositEnergyDensity(a_phi, a_particles, m_deposition);
 }
 
-void ItoSolver::depositEnergyDensity(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles, const DepositionType a_deposition){
+void ItoSolver::depositEnergyDensity(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles, const DepositionType a_deposition){
   CH_TIME("ItoSolver::depositEnergyDensity(state, particles, deposition_type)");
   if(m_verbosity > 5){
     pout() << m_name + "::depositEnergyDensity(state, particles, deposition_type)" << endl;
   }
 
+  CH_assert(a_phi[0]->nComp() == 1);  
+
   this->depositParticles<ItoParticle, &ItoParticle::totalEnergy>(a_phi, a_particles, a_deposition);
 }
 
-void ItoSolver::computeAverageMobility(EBAMRCellData& a_phi, ParticleContainer<ItoParticle>& a_particles){
+void ItoSolver::computeAverageMobility(EBAMRCellData& a_phi, const ParticleContainer<ItoParticle>& a_particles) const {
   CH_TIME("ItoSolver::computeAverageMobility(state, particles)");
   if(m_verbosity > 5){
     pout() << m_name + "::computeAverageMobility(state, particles)" << endl;
   }
+
+  CH_assert(a_phi[0]->nComp() == 1);
+  CH_assert(a_particles.isCellSorted());
 
   constexpr int comp = 0;
 
@@ -1503,7 +1515,7 @@ void ItoSolver::computeAverageMobility(EBAMRCellData& a_phi, ParticleContainer<I
       for (BoxIterator bit(dbl[dit()]); bit.ok(); ++bit){
 	const IntVect iv = bit();
 
-	const List<ItoParticle>& listParticles = particles(iv, comp);
+	const List<ItoParticle>& listParticles = particles(iv, m_comp);
 
 	if(listParticles.length() > 0){
 	  Real M  = 0.0;
@@ -1517,7 +1529,7 @@ void ItoSolver::computeAverageMobility(EBAMRCellData& a_phi, ParticleContainer<I
 	    MU += m*mu;
 	  }
 
-	  state(iv, comp) = MU/M;
+	  state(iv, m_comp) = MU/M;
 	}
       }
     }
