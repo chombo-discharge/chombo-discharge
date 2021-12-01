@@ -481,87 +481,138 @@ public:
   virtual void setSpecies(const RefCountedPtr<ItoSpecies>& a_species);
 
   /*!
-    @brief Cache the particles
+    @brief Perform pre-regrid operations. 
+    @param[in] a_lbase          Coarsest level that changed during regrid. 
+    @param[in] a_oldFinestLevel Finest grid level before the regrid operation. 
+    @note This caches the bulk particles. 
   */
-  virtual void preRegrid(const int a_base, const int a_oldFinestLevel);
+  virtual void preRegrid(const int a_lbase, const int a_oldFinestLevel);
 
   /*!
-    @brief Add particles. Level and patch version. 
+    @brief Add particles to a contain. This adds into a specific grid level and patch. The user can delete the input particles. 
+    @param[inout] a_inputParticles Input particles -- can be destroyed if a_destructive=true
+    @param[in]    a_lvl            Grid level
+    @param[in]    a_dit            Grid index
+    @param[in]    a_destructive    If true, delete the input particles. 
   */
-  virtual void addParticles(ListBox<ItoParticle>& a_part, const int a_lvl, const DataIndex a_dit, const bool a_destructive);
+  template <ItoSolver::WhichContainer C = WhichContainer::Bulk>
+  void addParticles(ListBox<ItoParticle>& a_inputParticles, const int a_lvl, const DataIndex a_dit, const bool a_destructive);
 
   /*!
     @brief Check if solver is mobile
+    @return Returns m_isMobile
   */
   virtual bool isMobile() const;
   
   /*!
     @brief Check if solver is diffusive
+    @return Returns m_isDiffusive
   */
   virtual bool isDiffusive() const;
 
   /*!
     @brief Get a general particle container
+    @param[in] a_container Which container to fetch.
   */
   virtual ParticleContainer<ItoParticle>& getParticles(const WhichContainer a_container);
 
   /*!
     @brief Get a general particle container
+    @param[in] a_container Which container to fetch.
   */
   virtual const ParticleContainer<ItoParticle>& getParticles(const WhichContainer a_container) const;
 
   /*!
     @brief Get the species
+    @return Returns m_species
   */
-  virtual RefCountedPtr<ItoSpecies>& getSpecies();
+  virtual const RefCountedPtr<ItoSpecies>& getSpecies() const;
 
   /*!
-    @brief Get state
+    @brief Get the mesh data.
+    @return Returns m_phi
   */
   virtual EBAMRCellData& getPhi();
 
   /*!
-    @brief Get cell-centered velocity
+    @brief Get cell-centered velocity mesh data
+    @return m_velocityFunction
   */
   virtual EBAMRCellData& getVelocityFunction();
 
   /*!
-    @brief Get cell-centered velocity
+    @brief Get cell-centered velocity mesh data
+    @return m_velocityFunction
+  */
+  virtual const EBAMRCellData& getVelocityFunction() const; 
+
+  /*!
+    @brief Get the diffusion function
+    @return m_diffusionFunction
   */
   virtual EBAMRCellData& getDiffusionFunction();
 
   /*!
+    @brief Get the diffusion function
+    @return m_diffusionFunction
+  */
+  virtual const EBAMRCellData& getDiffusionFunction() const;
+
+  /*!
     @brief Get scratch storage
+    @return Returns m_scratch
   */
   virtual EBAMRCellData& getScratch();
 
   /*!
+    @brief Get scratch storage
+    @return Returns m_scratch
+  */
+  virtual const EBAMRCellData& getScratch() const;  
+
+  /*!
     @brief Get mobility function
+    @return m_mobilityFunction
   */
   virtual EBAMRCellData& getMobilityFunction();
 
   /*!
-    @brief Set diffusion coefficient
+    @brief Get mobility function
+    @return m_mobilityFunction
+  */
+  virtual const EBAMRCellData& getMobilityFunction() const;  
+
+  /*!
+    @brief Utility function -- set a constant diffusion coefficient
+    @param[in] a_diffusionCoefficient Diffusion coefficient
   */
   virtual void setDiffusionFunction(const Real a_diffusionCoefficient);
 
   /*!
-    @brief Set velocity
+    @brief Utility function -- set a constant velocity
+    @param[in] a_velocity Velocity
   */
-  virtual void setVelocityFunction(const RealVect a_vel);
+  virtual void setVelocityFunction(const RealVect a_velocity);
 
   /*!
     @brief Sets constant mobility for all particles
+    @param[in] a_mobility Particle mobility
   */
-  virtual void set_mobility(const Real a_mobility);
+  virtual void setParticleMobility(const Real a_mobility);
 
   /*!
-    @brief Interpolate velocities
+    @brief Interpolate the particle velocities.
+    @details This will compute the particle velocities as v = mu * V(Xp) where mu is the particle mobility and V(Xp) is the interpolation of m_velocityFunction
+    to the particle position. 
   */
   virtual void interpolateVelocities();
 
   /*!
-    @brief Interpolate velocities
+    @brief Interpolate the particle velocities.
+    @details This will compute the particle velocities as v = mu * V(Xp) where mu is the particle mobility and V(Xp) is the interpolation of m_velocityFunction
+    to the particle position. 
+    @param[in] a_level Grid level
+    @param[in] a_dit   Grid index
   */
   virtual void interpolateVelocities(const int a_level, const DataIndex& a_dit);
 

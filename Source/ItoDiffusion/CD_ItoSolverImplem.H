@@ -124,6 +124,24 @@ RealVect ItoSolver::randomPosition(const RealVect a_lo, const RealVect a_hi) con
   return pos;
 }
 
+template <ItoSolver::WhichContainer C>
+void ItoSolver::addParticles(ListBox<ItoParticle>& a_inputParticles, const int a_lvl, const DataIndex a_dit, const bool a_destructive) {
+  CH_TIME("ItoSolver::addParticles");
+  if(m_verbosity > 5) {
+    pout() << m_name + "::addParticles" << endl;
+  }
+
+  ParticleContainer<ItoParticle>& particles = m_particleContainers.at(C);
+
+  ListBox<ItoParticle>& my_particles = particles[a_lvl][a_dit];
+  if(a_destructive) {
+    my_particles.addItemsDestructive(a_inputParticles.listItems());
+  }
+  else{
+    my_particles.addItems(a_inputParticles.listItems());
+  }
+}
+
 template <class P, const Real&(P::*particleScalarField)() const>
 void ItoSolver::depositParticles(EBAMRCellData&              a_phi,
 				 const ParticleContainer<P>& a_particles,
