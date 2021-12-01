@@ -453,7 +453,6 @@ public:
   */
   virtual void writePlotData(EBAMRCellData& a_output, int& a_comp) const;
 
-
 #ifdef CH_USE_HDF5
   /*!
     @brief Write checkpoint data into HDF5 file. 
@@ -477,8 +476,9 @@ public:
 
   /*!
     @brief Set the species
+    @param[in] a_species Species to be solved for. 
   */
-  virtual void setSpecies(RefCountedPtr<ItoSpecies> a_species);
+  virtual void setSpecies(const RefCountedPtr<ItoSpecies>& a_species);
 
   /*!
     @brief Cache the particles
@@ -1161,8 +1161,9 @@ protected:
     @details This will instantiate the bulk particles by randomly drawing new particles in each grid cell. 
     @param[in] a_particlesPerCell Mesh data showing how many particles are in each cell. 
     @param[in] a_level            Grid level. 
+    @param[in] a_newPPC           Desired number of computational particles per cell
   */
-  void drawNewParticles(const LevelData<EBCellFAB>& a_particlesPerCell, const int a_level);  
+  void drawNewParticles(const LevelData<EBCellFAB>& a_particlesPerCell, const int a_level, const int a_newPPC);  
 
   /*!
     @brief Compute the cell-centered deposition -- this is the main deposition function.

@@ -849,14 +849,14 @@ void ItoSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int a
   }
 }
 
-void ItoSolver::setSpecies(RefCountedPtr<ItoSpecies> a_species) {
+void ItoSolver::setSpecies(const RefCountedPtr<ItoSpecies>& a_species) {
   CH_TIME("ItoSolver::setSpecies");
   if(m_verbosity > 5) {
     pout() << m_name + "::setSpecies" << endl;
   }
   
-  m_species   = a_species;
-  m_name      = a_species->getName();
+  m_species     = a_species;
+  m_name        = a_species->getName();
   m_isDiffusive = m_species->isDiffusive();
   m_isMobile    = m_species->isMobile();
 }
@@ -1038,38 +1038,17 @@ void ItoSolver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level) {
   // Read state vector
   read<EBCellFAB>(a_handle, *m_phi[a_level], m_name, m_amr->getGrids(m_realm)[a_level], Interval(0,0), false);
 
-  // Read particles.
-
-  if(m_checkpointing == WhichCheckpoint::Particles) {
-    const std::string str = m_name + "_particlesP";
-    
-    // Get SimpleItoParticles from data file
-    Vector<RefCountedPtr<ParticleData<SimpleItoParticle> > > simpleParticles;
-    m_amr->allocate(simpleParticles, m_realm);
-    readParticlesFromHDF(a_handle, *simpleParticles[a_level], str);
-
-    ParticleContainer<ItoParticle>& particles = m_particleContainers.at(WhichContainer::Bulk);
-
-    // Make SimpleItoParticles into ito_ particles
-    for (DataIterator dit(m_amr->getGrids(m_realm)[a_level]); dit.ok(); ++dit) {
-      List<ItoParticle>& particlesDit = particles[a_level][dit()].listItems();
-      
-      for (ListIterator<SimpleItoParticle> lit((*simpleParticles[a_level])[dit()].listItems()); lit.ok(); ++lit) {
-	particlesDit.append(ItoParticle(lit().mass(), lit().position(), RealVect::Zero, 0.0, 0.0, lit().energy()));
-      }
-    }
+  // Instantiate the particles
+  switch(m_checkpointing){
+  case WhichCheckpoint::Particles:
+    this->readCheckpointLevelParticles(a_handle, a_level);
+    break;
+  case WhichCheckpoint::Numbers:
+    this->readCheckpointLevelFluid(a_handle, a_level);
+    break;
+  default:
+    MayDay::Error("ItoSolver::readCheckpointLevel -- logic bust");
   }
-  else{
-    const std::string str = m_name + "_particlesF";
-    // Read particles per cell
-    EBAMRCellData ppc;
-    m_amr->allocate(ppc, m_realm, m_phase, 1, 0);
-    read<EBCellFAB>(a_handle, *ppc[a_level], str, m_amr->getGrids(m_realm)[a_level], Interval(0,0), false);
-    
-    // Restart particles
-    this->drawNewParticles(*ppc[a_level], a_level);
-  }
-    
 }
 #endif
 
@@ -1142,102 +1121,121 @@ void ItoSolver::readCheckpointLevelFluid(HDF5Handle& a_handle, const int a_level
   read<EBCellFAB>(a_handle, *particlesPerCell[a_level], str, m_amr->getGrids(m_realm)[a_level], interv, false);
     
   // particlesPerCell holds the number of particles per cell -- call the other version which instantiates new particles from that. 
-  this->drawNewParticles(*particlesPerCell[a_level], a_level);  
+  this->drawNewParticles(*particlesPerCell[a_level], a_level, m_restartPPC);  
 }
 #endif
 
-void ItoSolver::drawNewParticles(const LevelData<EBCellFAB>& a_particlesPerCell, const int a_level) {
+void ItoSolver::drawNewParticles(const LevelData<EBCellFAB>& a_particlesPerCell, const int a_level, const int a_newPPC) {
   CH_TIME("ItoSolver::drawNewParticles");
   if(m_verbosity > 5) {
     pout() << m_name + "::drawNewParticles" << endl;
   }
 
-  const Real dx          = m_amr->getDx()[a_level];
-  const RealVect prob_lo = m_amr->getProbLo();
+  // Handle to grid information. 
+  const RealVect           probLo = m_amr->getProbLo();
+  const Real               dx     = m_amr->getDx()[a_level];    
+  const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[a_level];
+  const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[a_level];
 
-  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
-
+  // Particle container that we will fill. 
   ParticleContainer<ItoParticle>& particles = m_particleContainers.at(WhichContainer::Bulk);
 
-  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-    const Box& box           = dbl.get(dit());
-    const EBISBox& ebisbox   = m_amr->getEBISLayout(m_realm, m_phase)[a_level][dit()];
-    const BaseFab<Real>& ppc = a_particlesPerCell[dit()].getSingleValuedFAB();
+  // Go through each patch and instantiate new particles. 
+  for (DataIterator dit(dbl); dit.ok(); ++dit) {
+    const Box&           cellBox = dbl  [dit()];
+    const EBISBox&       ebisbox = ebisl[dit()];
+    const BaseFab<Real>& ppc     = a_particlesPerCell[dit()].getSingleValuedFAB();
 
-    // Clear just to be safe
+    // This should draw new particles rather than append -- so clear out any old particles. 
     List<ItoParticle>& myParticles = particles[a_level][dit()].listItems();
     myParticles.clear();
 
     // Do regular cells
-    for (BoxIterator bit(box); bit.ok(); ++bit) {
-      if(ebisbox.isRegular(bit())) {
+    for (BoxIterator bit(cellBox); bit.ok(); ++bit) {
+      const IntVect iv = bit();
 
-	// Compute weights and remainder
-	const unsigned long long numParticles = (unsigned long long) llround(ppc(bit()));
-	unsigned long long w, N, r;
-	DataOps::computeParticleWeights(w, N, r, numParticles, m_restartPPC);
+      // Do regular cells -- in these cells we only need to draw a random position somewhere inside the cubic cell. Easy.
+      if(ebisbox.isRegular(iv)) {
 
+	// Compute weights and remainder. This bit of code will take the number of physical particles and divide them into a_newPPC particles with
+	// approximately equal weights. It is possible that one of the particles will have a larger particle weight than the others. 
+	const unsigned long long numPhysicalParticles = (unsigned long long) llround(ppc(iv));
+
+	unsigned long long computationalParticleWeight;
+	unsigned long long computationalParticleNum;
+	unsigned long long computationalParticleRemainder;
+	DataOps::computeParticleWeights(computationalParticleWeight, computationalParticleNum, computationalParticleRemainder, numPhysicalParticles, a_newPPC);
+
+	// Settings for drawing new particles. 
 	const RealVect minLo = -0.5*RealVect::Unit;
 	const RealVect minHi =  0.5*RealVect::Unit;
-	const RealVect norma = RealVect::Zero;
-	const RealVect centr = RealVect::Zero;
-	const RealVect pos   = prob_lo + (RealVect(bit()) + 0.5*RealVect::Unit)*dx;
+	const RealVect norma =      RealVect::Zero;
+	const RealVect centr =      RealVect::Zero;
+	const RealVect pos   = probLo + (RealVect(iv) + 0.5*RealVect::Unit)*dx;
 	const Real kappa     = 1.0;
 
-
-	// Now add N partices. If r > 0 we add another one with weight w + r
-	for (unsigned long long i = 0; i < N; i++) {
+	// Now add the partices. If the remainder was > 0 we add another one with weight w + r
+	for (unsigned long long i = 0; i < computationalParticleNum; i++) {
 	  const RealVect particlePosition = this->randomPosition(pos, minLo, minHi, centr, norma, dx, kappa);
-	  const Real particleWeight       = (Real) w;
+	  const Real     particleWeight   = (Real) computationalParticleWeight;
 	  
 	  myParticles.add(ItoParticle(particleWeight, particlePosition));
 	}
 
-	if(r > 0) {
+	// Add the "remainder" particle. 
+	if(computationalParticleRemainder > 0ULL) {
 	  const RealVect particlePosition = this->randomPosition(pos, minLo, minHi, centr, norma, dx, kappa);
-	  const Real particleWeight       = (Real) (w+r);
+	  const Real     particleWeight   = (Real) (computationalParticleWeight + computationalParticleRemainder);
 
 	  myParticles.add(ItoParticle(particleWeight, particlePosition));
 	}
       }
     }
 
-    // Do irregular cells
+    // Do the same for irregular cells. This differs from the regular-cell case only in that the positions 
     VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_level])[dit()];
     for (vofit.reset(); vofit.ok(); ++vofit) {
-      const VolIndex& vof = vofit();
-      const IntVect iv    = vof.gridIndex();
-      const RealVect cent = ebisbox.bndryCentroid(vof);
-      const RealVect norm = ebisbox.normal(vof);
-      const RealVect pos  = prob_lo + dx*(RealVect(iv) + 0.5*RealVect::Unit);
-      const Real kappa    = ebisbox.volFrac(vof);
+      const VolIndex& vof   = vofit();
+      const IntVect   iv    = vof.gridIndex();
+      const RealVect  cent  = ebisbox.bndryCentroid(vof);
+      const RealVect  norm  = ebisbox.normal(vof);
+      const RealVect  pos   = probLo + dx*(RealVect(iv) + 0.5*RealVect::Unit);
+      const Real      kappa = ebisbox.volFrac(vof);
 
+      const unsigned long long numPhysicalParticles = (unsigned long long) llround(ppc(iv));
 
-      // Compute a small box that encloses the cut-cell volume
-      RealVect minLo = -0.5*RealVect::Unit;
-      RealVect minHi =  0.5*RealVect::Unit;
-      if(kappa < 1.0) {
-	DataOps::computeMinValidBox(minLo, minHi, norm, cent);
-      }
+      if(numPhysicalParticles > 0ULL){
 
-      // Compute weights and remainder
-      const unsigned long long numParticles = (unsigned long long) llround(ppc(iv));
-      unsigned long long w, N, r;
-      DataOps::computeParticleWeights(w, N, r, numParticles, m_restartPPC);
+	// No multi-valued cells please -- I don't know how to handle them. 
+	CH_assert(!ebisbox.isMultiValued(iv));	
+	
+	// Compute a small box that encloses the cut-cell volume
+	RealVect minLo = -0.5*RealVect::Unit;
+	RealVect minHi =  0.5*RealVect::Unit;
+	if(kappa < 1.0) {
+	  DataOps::computeMinValidBox(minLo, minHi, norm, cent);
+	}
 
-      // Now add N partices. If r > 0 we add another one with weight w + r
-      for (unsigned long long i = 0; i < N; i++) {
-	const RealVect particlePosition = this->randomPosition(pos, minLo, minHi, cent, norm, dx, kappa);
-	const Real particleWeight       = (Real) w;
+	// Compute weights and remainder
+	unsigned long long computationalParticleWeight;
+	unsigned long long computationalParticleNum;
+	unsigned long long computationalParticleRemainder;
+	DataOps::computeParticleWeights(computationalParticleWeight, computationalParticleNum, computationalParticleRemainder, numPhysicalParticles, a_newPPC);
+
+	// Now add the partices. If r > 0 we add another one with weight w + r
+	for (unsigned long long i = 0; i < computationalParticleNum; i++) {
+	  const RealVect particlePosition = this->randomPosition(pos, minLo, minHi, cent, norm, dx, kappa);
+	  const Real particleWeight       = (Real) computationalParticleWeight;
 	  
-	myParticles.add(ItoParticle(particleWeight, particlePosition));
-      }
+	  myParticles.add(ItoParticle(particleWeight, particlePosition));
+	}
 
-      if(r > 0) {
-	const RealVect particlePosition = this->randomPosition(pos, minLo, minHi, cent, norm, dx, kappa);
-	const Real particleWeight       = (Real) (w+r);
+	if(computationalParticleRemainder > 0ULL) {
+	  const RealVect particlePosition = this->randomPosition(pos, minLo, minHi, cent, norm, dx, kappa);
+	  const Real particleWeight       = (Real) (computationalParticleWeight + computationalParticleRemainder);
 
-	myParticles.add(ItoParticle(particleWeight, particlePosition));
+	  myParticles.add(ItoParticle(particleWeight, particlePosition));
+	}
       }
     }
   }
