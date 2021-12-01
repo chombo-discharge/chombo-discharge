@@ -92,7 +92,7 @@ public:
     @brief Set the halo buffer
     @param[in] a_buffer Width of the halo buffer region (see ParticleContainer for documentatino)
   */
-  virtual void setHalobuffer(const int a_haloBuffer);
+  virtual void setHaloBuffer(const int a_haloBuffer);
 
   /*!
     @brief Allocate internals for all solvers

@@ -316,34 +316,56 @@ public:
   virtual void transferCoveredParticles(ParticleContainer<ItoParticle>& a_particlesFrom,
 					ParticleContainer<ItoParticle>& a_particlesTo,
 					const EbRepresentation          a_representation,
-					const Real                      a_tol) const ;
+					const Real                      a_tol) const;
 					    
-
   /*!
-    @brief Do boundary intersection tests
+    @brief Do boundary intersection tests.
+    @details This will intersect the particles in the "bulk" particles data holder with the domain faces and EBs. If a particle crossed the EB it will
+    be put into the "EB" particle data holder and likewise for the particles that crossed the domain side. 
+    @param[in] a_ebRepresentation Enum for switching between various types of intersection tests. 
+    @param[in] a_deleteParticles  If true, the origin particle will also be removed from the bulk particle data holder.
+    @note This will call the other version with WhichContainer::Bulk, WhichContainer::EB, and WhichContainer::Domain.
   */
-  virtual void intersectParticles(const EbRepresentation a_representation, const bool a_delete);
+  virtual void intersectParticles(const EbRepresentation a_ebRepresentation, const bool a_deleteParticles);
 
   /*!
     @brief Do boundary intersection tests.
+    @details This will intersect the particles in the a_particles data holder with the domain faces and EBs. If a particle crossed the EB it will
+    be put into the a_eb_particles particle data holder and likewise for the particles that crossed the domain side. 
+    @param[in] a_particles        Which particle container to use for the "active" particles
+    @param[in] a_ebParticles      Which particle container to put the EB particles
+    @param[in] a_domainParticles  Which particle container to put the domain particles
+    @param[in] a_ebRepresentation Enum for switching between various types of intersection tests. 
+    @param[in] a_deleteParticles  If true, the origin particle will also be removed from the bulk particle data holder.
+    @note This will look up the ParticleContainer and call the other version.
   */
-  virtual void intersectParticles(const WhichContainer       a_particles,
-				  const WhichContainer       a_eb_particles,
-				  const WhichContainer       a_dom_particles,
-				  const EbRepresentation a_representation,				   
-				  const bool              a_delete);
+  virtual void intersectParticles(const WhichContainer   a_particles,
+				  const WhichContainer   a_ebParticles,
+				  const WhichContainer   a_domainParticles,
+				  const EbRepresentation a_ebRepresentation,				   
+				  const bool             a_deleteParticles);
 
   /*!
     @brief Do boundary intersection tests.
+    @details This will intersect the particles in the a_particles data holder with the domain faces and EBs. If a particle crossed the EB it will
+    be put into the a_eb_particles particle data holder and likewise for the particles that crossed the domain side. 
+    @param[in] a_particles        Which particle container to use for the "active" particles
+    @param[in] a_ebParticles      Which particle container to put the EB particles
+    @param[in] a_domainParticles  Which particle container to put the domain particles
+    @param[in] a_ebRepresentation Enum for switching between various types of intersection tests. 
+    @param[in] a_deleteParticles  If true, the origin particle will also be removed from the bulk particle data holder. 
   */
   virtual void intersectParticles(ParticleContainer<ItoParticle>& a_particles,
-				  ParticleContainer<ItoParticle>& a_eb_particles,
-				  ParticleContainer<ItoParticle>& a_dom_particles,
-				  const EbRepresentation           a_representation,
-				  const bool                        a_delete);
+				  ParticleContainer<ItoParticle>& a_ebParticles,
+				  ParticleContainer<ItoParticle>& a_domainParticles,
+				  const EbRepresentation          a_ebRepresentation,
+				  const bool                      a_deleteParticles);
 
   /*!
-    @brief Compute particle load on specific levle
+    @brief Compute particle load on a specific grid level -- this will compute the number of particles in each box in the input grids. 
+    @param[out] a_loads Loads on each grid patch. This follows the order from a_dbl.boxArray()
+    @param[in]  a_dbl   Grids
+    @param[in]  a_level Grid level
   */
   virtual void computeLoads(Vector<long int>& a_loads, const DisjointBoxLayout& a_dbl, const int a_level);
 
@@ -355,28 +377,34 @@ public:
 
   /*!
     @brief Get PVR buffer
+    @return Returns m_pvrBuffer
   */
   virtual int getPVRBuffer() const;
 
   /*!
     @brief Get the halo buffer
+    @return Returns m_haloBuffer
   */
   virtual int getHaloBuffer() const;
 
   /*!
     @brief Set the PVR buffer
+    @param[in] a_pvrBuffer PVR buffer size
   */
-  virtual void setPVRBuffer(const int a_buffer);
+  virtual void setPVRBuffer(const int a_pvrBuffer);
 
   /*!
     @brief Set the halo buffer
+    @param[in] a_haloBuffer Halo buffer size
   */
-  virtual void setHalobuffer(const int a_buffer);
+  virtual void setHaloBuffer(const int a_haloBuffer);
 
   /*!
-    @brief Get number of particles in a container
+    @brief Get number of particles in a specified particle container
+    @param[in] a_whichContainer Which container to count particles in. 
+    @param[in] a_localOnly      Only report local particles (i.e. not reduced over MPI ranks)
   */
-  virtual size_t getNumParticles(const WhichContainer a_container, const bool a_local) const;
+  virtual size_t getNumParticles(const WhichContainer a_container, const bool a_localOnly) const;
 
   /*!
     @brief Register operators

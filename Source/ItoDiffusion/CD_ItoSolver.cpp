@@ -373,16 +373,16 @@ int ItoSolver::getNumberOfPlotVariables() const {
 
   int numPlotVars = 0;
   
-  if(m_plotPhi)                                   numPlotVars += 1       ;
-  if(m_plotDiffCo && m_isDiffusive) numPlotVars += 1       ;
-  if(m_plotVelocity             && m_isMobile   ) numPlotVars += SpaceDim;
-  if(m_plotParticles)                            numPlotVars += 1       ;
-  if(m_plotParticlesEB)                         numPlotVars += 1       ;
-  if(m_plotParticlesDomain)                     numPlotVars += 1       ;
-  if(m_plotParticlesSource)                     numPlotVars += 1       ;
-  if(m_plotParticlesCovered)                    numPlotVars += 1       ;
-  if(m_plotEnergyDensity)                       numPlotVars += 1       ;
-  if(m_plotAverageEnergy)                       numPlotVars += 1       ;
+  if(m_plotPhi                      ) numPlotVars += 1       ;
+  if(m_plotDiffCo   && m_isDiffusive) numPlotVars += 1       ;
+  if(m_plotVelocity && m_isMobile   ) numPlotVars += SpaceDim;
+  if(m_plotParticles                ) numPlotVars += 1       ;
+  if(m_plotParticlesEB              ) numPlotVars += 1       ;
+  if(m_plotParticlesDomain          ) numPlotVars += 1       ;
+  if(m_plotParticlesSource          ) numPlotVars += 1       ;
+  if(m_plotParticlesCovered         ) numPlotVars += 1       ;
+  if(m_plotEnergyDensity            ) numPlotVars += 1       ;
+  if(m_plotAverageEnergy            ) numPlotVars += 1       ;
 
   return numPlotVars;
 }
@@ -405,36 +405,39 @@ int ItoSolver::getHaloBuffer() const {
   return m_haloBuffer;
 }
 
-void ItoSolver::setPVRBuffer(const int a_buffer) {
+void ItoSolver::setPVRBuffer(const int a_pvrBuffer) {
   CH_TIME("ItoSolver::setPVRBuffer");
   if(m_verbosity > 5){
     pout() << m_name + "::setPVRBuffer" << endl;
   }
 
-  m_pvrBuffer = a_buffer;
+  CH_assert(a_pvrBuffer >= 0);
+
+  m_pvrBuffer = a_pvrBuffer;
 }
 
-void ItoSolver::setHalobuffer(const int a_buffer)  {
-  CH_TIME("ItoSolver::setHalobuffer");
+void ItoSolver::setHaloBuffer(const int a_haloBuffer)  {
+  CH_TIME("ItoSolver::setHaloBuffer");
   if(m_verbosity > 5){
-    pout() << m_name + "::setHalobuffer" << endl;
+    pout() << m_name + "::setHaloBuffer" << endl;
   }
 
-  m_haloBuffer = a_buffer;
+  CH_assert(a_haloBuffer >= 0);
+
+  m_haloBuffer = a_haloBuffer;
 }
 
 
-size_t ItoSolver::getNumParticles(const WhichContainer a_container, const bool a_local) const{
-  CH_TIME("ItoSolver::getNumParticles(string, bool)");
+size_t ItoSolver::getNumParticles(const WhichContainer a_whichContainer, const bool a_localOnly) const {
+  CH_TIME("ItoSolver::getNumParticles(WhichContainer, bool)");
   if(m_verbosity > 5){
-    pout() << m_name + "::getNumParticles(string, bool)" << endl;
+    pout() << m_name + "::getNumParticles(WhichContainer, bool)" << endl;
   }
 
-  size_t N;
+  const ParticleContainer<ItoParticle>& particles = m_particleContainers.at(a_whichContainer);
 
-  const ParticleContainer<ItoParticle>& particles = m_particleContainers.at(a_container);
-
-  if(a_local){
+  size_t N;  
+  if(a_localOnly){
     N = particles.getNumberOfValidParticesLocal();
   }
   else{
@@ -541,14 +544,12 @@ void ItoSolver::computeLoads(Vector<long int>& a_loads, const DisjointBoxLayout&
 
   const ParticleContainer<ItoParticle>& particles = m_particleContainers.at(WhichContainer::Bulk);
 
-  a_loads.resize(a_dbl.size(),0);
-  
-  for (DataIterator dit = a_dbl.dataIterator(); dit.ok(); ++dit){
-    const int numPart = particles[a_level][dit()].numItems();
-    a_loads[dit().intCode()] = numPart;
+  a_loads.resize(a_dbl.size(), 0L);
+  for (DataIterator dit(a_dbl); dit.ok(); ++dit){
+    a_loads[dit().intCode()] = particles[a_level][dit()].numItems();
   }
 
-  // Gather loads globally
+  // If using MPI, we must gather the loads. 
 #ifdef CH_MPI
   int count = a_loads.size();
   Vector<long int> tmp(count);
@@ -643,49 +644,53 @@ void ItoSolver::transferCoveredParticles(ParticleContainer<ItoParticle>& a_parti
   }
 }
 
-void ItoSolver::intersectParticles(const EbRepresentation a_representation, const bool a_delete){
+void ItoSolver::intersectParticles(const EbRepresentation a_ebRepresentation, const bool a_deleteParticles){
   CH_TIME("ItoSolver::intersectParticles(EbRepresentation, bool)");
   if(m_verbosity > 5){
     pout() << m_name + "::intersectParticles(EbRepresentation, bool)" << endl;
   }
 
-  this->intersectParticles(WhichContainer::Bulk, WhichContainer::EB, WhichContainer::Domain, a_representation, a_delete);
+  this->intersectParticles(WhichContainer::Bulk, WhichContainer::EB, WhichContainer::Domain, a_ebRepresentation, a_deleteParticles);
 }
 
-void ItoSolver::intersectParticles(const WhichContainer       a_particles,
-				   const WhichContainer       a_eb_particles,
-				   const WhichContainer       a_dom_particles,
-				   const EbRepresentation a_representation,				     
-				   const bool              a_delete){
-  CH_TIME("ItoSolver::intersectParticles(string, string, string, bool, EbRepresentation)");
+void ItoSolver::intersectParticles(const WhichContainer   a_particles,
+				   const WhichContainer   a_ebParticles,
+				   const WhichContainer   a_domainParticles,
+				   const EbRepresentation a_ebRepresentation,				     
+				   const bool             a_deleteParticles){
+  CH_TIME("ItoSolver::intersectParticles(WhichContainerx3, EbRepresentation, bool)");
   if(m_verbosity > 5){
-    pout() << m_name + "::intersectParticles(string, string, string, bool, EbRepresentation)" << endl;
+    pout() << m_name + "::intersectParticles(WhichContainerx3, EbRepresentation, bool)" << endl;
   }
 
-  ParticleContainer<ItoParticle>& particles     = this->getParticles(a_particles);
-  ParticleContainer<ItoParticle>& eb_particles  = this->getParticles(a_eb_particles);
-  ParticleContainer<ItoParticle>& dom_particles = this->getParticles(a_dom_particles);
+  ParticleContainer<ItoParticle>& particles       = this->getParticles(a_particles);
+  ParticleContainer<ItoParticle>& ebParticles     = this->getParticles(a_ebParticles);
+  ParticleContainer<ItoParticle>& domainParticles = this->getParticles(a_domainParticles);
 
-  this->intersectParticles(particles, eb_particles, dom_particles, a_representation, a_delete);
+  this->intersectParticles(particles, ebParticles, domainParticles, a_ebRepresentation, a_deleteParticles);
 }
 
 
 void ItoSolver::intersectParticles(ParticleContainer<ItoParticle>& a_particles,
-				   ParticleContainer<ItoParticle>& a_eb_particles,
-				   ParticleContainer<ItoParticle>& a_dom_particles,
-				   const EbRepresentation           a_representation,
-				   const bool                        a_delete){
-  CH_TIME("ItoSolver::intersectParticles(container, container, container, EbRepresentation, bool)");
+				   ParticleContainer<ItoParticle>& a_ebParticles,
+				   ParticleContainer<ItoParticle>& a_domainParticles,
+				   const EbRepresentation          a_ebRepresentation,
+				   const bool                      a_deleteParticles){
+  CH_TIME("ItoSolver::intersectParticles(ParticleContainerx3, EbRepresentation, bool)");
   if(m_verbosity > 5){
-    pout() << m_name + "::intersectParticles(container, container, container, EbRepresentation, bool)" << endl;
+    pout() << m_name + "::intersectParticles(ParticleContainerx3, EbRepresentation, bool)" << endl;
   }
 
-  switch(a_representation){
+  CH_assert(!a_particles.      isCellSorted());
+  CH_assert(!a_ebParticles.    isCellSorted());
+  CH_assert(!a_domainParticles.isCellSorted());  
+
+  switch(a_ebRepresentation){
   case EbRepresentation::ImplicitFunction:
-    this->intersectParticlesIF(a_particles, a_eb_particles, a_dom_particles, a_delete);
+    this->intersectParticlesIF(a_particles, a_ebParticles, a_domainParticles, a_deleteParticles);
     break;
   default:
-    MayDay::Abort("ItoSolver::intersectParticles - unsupported EB representation requested");
+    MayDay::Error("ItoSolver::intersectParticles - unsupported EB representation requested");
   }
 }
 

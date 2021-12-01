@@ -77,9 +77,9 @@ void ItoLayout<T>::setPVRBuffer(const int a_pvrBuffer){
 }
 
 template <class T>
-void ItoLayout<T>::setHalobuffer(const int a_haloBuffer){
+void ItoLayout<T>::setHaloBuffer(const int a_haloBuffer){
   for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    iter()->setHalobuffer(a_haloBuffer);
+    iter()->setHaloBuffer(a_haloBuffer);
   }
 }
 
