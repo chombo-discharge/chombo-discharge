@@ -618,11 +618,14 @@ public:
 
   /*!
     @brief Interpolate mobilities
+    @details This will switch between the two ways of computing the particle mobility.
   */
   virtual void interpolateMobilities();
 
   /*!
-    @brief Interpolate mobilities
+    @brief Interpolate mobilities -- this will switch between the two ways of computing the particle mobility.
+    @param[in] a_level Grid level
+    @param[in] a_dit   Grid index
   */
   virtual void interpolateMobilities(const int a_level, const DataIndex& a_dit);
 
@@ -830,6 +833,7 @@ protected:
 
   /*! 
     @brief How to checkpoint files
+    @details Particles => Write particles to HDF5. Numbers => Write particle numbers to HDF5 (and lose information)
   */
   enum class WhichCheckpoint {
     Particles,
@@ -837,11 +841,13 @@ protected:
   };
 
   /*!
-    @brief Enum for deciding how to interpolate mobilities. 
+    @brief Enum for deciding how to interpolate particle mobilities. 
+    @details Direct => Interpolate particle mobilities from the mesh. Velocity => Set particle mobilitys by computing mu = |v|/|V| where v is the particle velocity and
+    V is the "velocity field". 
   */
   enum class WhichMobilityInterpolation {
-    mobility,
-    velocity
+    Direct,
+    Velocity
   };
 
   /*!
@@ -852,7 +858,7 @@ protected:
   /*!
     @brief Switch for deciding how to interpolate mobilities, i.e. interpolating either mu*E or just mu (to the particle position)
   */
-  WhichMobilityInterpolation m_WhichMobilityInterpolation;
+  WhichMobilityInterpolation m_mobilityInterpolation;
 
   /*!
     @brief Get number of particles used for restarting

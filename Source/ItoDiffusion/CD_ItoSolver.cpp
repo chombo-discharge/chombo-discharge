@@ -40,7 +40,7 @@ ItoSolver::ItoSolver() {
   m_phase         = phase::gas   ;
   m_checkpointing = WhichCheckpoint::Particles;
 
-  m_WhichMobilityInterpolation = WhichMobilityInterpolation::mobility;
+  m_mobilityInterpolation = WhichMobilityInterpolation::Direct;
 }
 
 ItoSolver::~ItoSolver() {
@@ -236,10 +236,10 @@ void ItoSolver::parseDeposition() {
   pp.get("WhichMobilityInterpolation",str);
 
   if(str == "mobility") {
-    m_WhichMobilityInterpolation = WhichMobilityInterpolation::mobility;
+    m_mobilityInterpolation = WhichMobilityInterpolation::Direct;
   }
   else if(str == "velocity") {
-    m_WhichMobilityInterpolation = WhichMobilityInterpolation::velocity;
+    m_mobilityInterpolation = WhichMobilityInterpolation::Velocity;
   }
   else{
     MayDay::Abort("ItoSolver::parseDeposition - unknown interpolation method for mobility");
@@ -1996,16 +1996,22 @@ void ItoSolver::interpolateMobilities() {
 
   if(m_isMobile) {
 
-    if(m_WhichMobilityInterpolation == WhichMobilityInterpolation::velocity) {
-      DataOps::vectorLength(m_scratch, m_velocityFunction); // Compute |E| (or whatever other function you've decided to provide).
-      m_amr->averageDown(m_scratch, m_realm, m_phase);
-      m_amr->interpGhost(m_scratch, m_realm, m_phase);
+    switch(m_mobilityInterpolation){
+    case WhichMobilityInterpolation::Velocity:
+      {
+	DataOps::vectorLength(m_scratch, m_velocityFunction); // Compute |E| (or whatever other function you've decided to provide).
+	m_amr->averageDown(m_scratch, m_realm, m_phase);
+	m_amr->interpGhost(m_scratch, m_realm, m_phase);
+      }
+    default: // Do nothing
+      break;
     }
-      
+
+    // Call the level version.
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
       const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
       
-      for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
+      for (DataIterator dit(dbl); dit.ok(); ++dit) {
 	this->interpolateMobilities(lvl, dit());
       }
     }
@@ -2018,75 +2024,83 @@ void ItoSolver::interpolateMobilities(const int a_lvl, const DataIndex& a_dit) {
     pout() << m_name + "::interpolateMobilities(lvl, dit)" << endl;
   }
 
+  CH_assert(m_isMobile);
 
-  if(m_WhichMobilityInterpolation == WhichMobilityInterpolation::mobility) {
+  switch(m_mobilityInterpolation){
+  case WhichMobilityInterpolation::Direct:
     this->interpolateMobilitiesMu(a_lvl, a_dit);
-  }
-  else if (m_WhichMobilityInterpolation == WhichMobilityInterpolation::velocity) {
+    break;
+  case WhichMobilityInterpolation::Velocity:
     this->interpolateMobilitiesVel(a_lvl, a_dit);
+    break;
+  default:
+    MayDay::Error("ItoSolver::interpolateMobilities(int, DataIndex) - logic bust");
   }
 }
 
 void ItoSolver::interpolateMobilitiesMu(const int a_lvl, const DataIndex& a_dit) {
-  CH_TIME("ItoSolver::interpolateMobilitiesMu(lvl, dit)");
+  CH_TIME("ItoSolver::interpolateMobilitiesMu");
   if(m_verbosity > 5) {
-    pout() << m_name + "::interpolateMobilitiesMu(lvl, dit)" << endl;
+    pout() << m_name + "::interpolateMobilitiesMu" << endl;
   }
+
+  CH_assert(m_isMobile);
+  CH_assert(m_mobilityInterpolation == WhichMobilityInterpolation::Direct);
+
+  // TLDR: This will compute the particle mobility by interpolating a scalar mobility field (stored on the mesh) to the particle positions.
 
   ParticleContainer<ItoParticle>& particles = m_particleContainers.at(WhichContainer::Bulk);
 
-  if(m_isMobile) {
-    const EBCellFAB& mob_func  = (*m_mobilityFunction[a_lvl])[a_dit];
-    const EBISBox& ebisbox     = mob_func.getEBISBox();
-    const RealVect dx          = m_amr->getDx()[a_lvl]*RealVect::Unit;
-    const RealVect origin      = m_amr->getProbLo();
-    const Box box              = m_amr->getGrids(m_realm)[a_lvl][a_dit];
+  const EBCellFAB& mobilityFunction = (*m_mobilityFunction[a_lvl])[a_dit];
+  const EBISBox&   ebisbox          = mobilityFunction.getEBISBox();
+  const RealVect   dx               = m_amr->getDx()[a_lvl]*RealVect::Unit;
+  const RealVect   probLo           = m_amr->getProbLo();
+  const Box        box              = m_amr->getGrids(m_realm)[a_lvl][a_dit];
 
-    List<ItoParticle>& particleList = particles[a_lvl][a_dit].listItems();
-    EBParticleMesh meshInterp(box, ebisbox, dx, origin);
-    
-    meshInterp.interpolate<ItoParticle, &ItoParticle::mobility>(particleList, mob_func, m_deposition, m_forceIrregInterpolationNGP);
-  }
+  List<ItoParticle>& particleList = particles[a_lvl][a_dit].listItems();
+
+  // Interpolate onto the mobility field
+  EBParticleMesh meshInterp(box, ebisbox, dx, probLo);
+  meshInterp.interpolate<ItoParticle, &ItoParticle::mobility>(particleList, mobilityFunction, m_deposition, m_forceIrregInterpolationNGP);
 }
 
 void ItoSolver::interpolateMobilitiesVel(const int a_lvl, const DataIndex& a_dit) {
-  CH_TIME("ItoSolver::interpolateMobilitiesVel(lvl, dit)");
+  CH_TIME("ItoSolver::interpolateMobilitiesVel");
   if(m_verbosity > 5) {
-    pout() << m_name + "::interpolateMobilitiesVel(lvl, dit)" << endl;
+    pout() << m_name + "::interpolateMobilitiesVel" << endl;
   }
+
+  CH_assert(m_isMobile);
+  CH_assert(m_mobilityInterpolation == WhichMobilityInterpolation::Velocity);
+
+  // TLDR: This function computes the particle mobilities by interpolating mu*V to the particle position and then setting
+  //       the mobility as mu = [mu*V(Xp)]/V(Xp). We happen to know that |V| is already stored in m_scratch. 
 
   ParticleContainer<ItoParticle>& particles = m_particleContainers.at(WhichContainer::Bulk);
 
-  if(m_isMobile) {
-    const EBCellFAB& mob_func  = (*m_mobilityFunction[a_lvl])[a_dit];
-    const EBISBox& ebisbox     = mob_func.getEBISBox();
-    const FArrayBox& mob_fab   = mob_func.getFArrayBox();
-    const RealVect dx          = m_amr->getDx()[a_lvl]*RealVect::Unit;
-    const RealVect origin      = m_amr->getProbLo();
-    const Box box              = m_amr->getGrids(m_realm)[a_lvl][a_dit];
+  const EBCellFAB& mobilityFunction = (*m_mobilityFunction[a_lvl])[a_dit];
+  const EBISBox&   ebisbox          = mobilityFunction.getEBISBox();
+  const RealVect   dx               = m_amr->getDx()[a_lvl]*RealVect::Unit;
+  const RealVect   probLo           = m_amr->getProbLo();
+  const Box        box              = m_amr->getGrids(m_realm)[a_lvl][a_dit];
 
-    EBCellFAB& scratch = (*m_scratch[a_lvl])[a_dit];
+  EBCellFAB& scratch = (*m_scratch[a_lvl])[a_dit];
 
-    List<ItoParticle>& particleList = particles[a_lvl][a_dit].listItems();
-    EBParticleMesh meshInterp(box, ebisbox, dx, origin);
+  List<ItoParticle>& particleList = particles[a_lvl][a_dit].listItems();
+  EBParticleMesh meshInterp(box, ebisbox, dx, probLo);
     
-    // First, interpolate |E| to the particle position, it will be stored on m_tmp. 
-    meshInterp.interpolate<ItoParticle, &ItoParticle::mobility>(particleList, scratch, m_deposition, m_forceIrregInterpolationNGP);    
+  // First, interpolate |V| to the particle position, it will be stored on m_tmp. 
+  meshInterp.interpolate<ItoParticle, &ItoParticle::tmp>(particleList, scratch, m_deposition, m_forceIrregInterpolationNGP);    
 
-    for (ListIterator<ItoParticle> lit(particleList); lit.ok(); ++lit) {
-      ItoParticle& p = lit();
-      
-      p.tmp() = p.mobility();
-    }
+  // Secondly, let m_scratch hold mu*|V| and interpolate that to the particle mobility field. 
+  scratch *= mobilityFunction;
+  meshInterp.interpolate<ItoParticle, &ItoParticle::mobility>(particleList, scratch, m_deposition, m_forceIrregInterpolationNGP);
 
-    // This interpolates mu*|E| to the particle position and stores it on the mobility. After that, we compute mu_p = (mu*E)/E
-    scratch *= mob_func;
-    meshInterp.interpolate<ItoParticle, &ItoParticle::mobility>(particleList, scratch, m_deposition, m_forceIrregInterpolationNGP);    
-    for (ListIterator<ItoParticle> lit(particleList); lit.ok(); ++lit) {
-      ItoParticle& p = lit();
+  // We now have ItoParticle::tmp = |V(Xp)| and ItoParticle::mobility = |mu*V|(Xp). Now let the mobility be mu(Xp) = |mu*V|(Xp)/|V|(Xp)
+  for (ListIterator<ItoParticle> lit(particleList); lit.ok(); ++lit) {
+    ItoParticle& p = lit();
 
-      p.mobility() *= 1./p.tmp();
-    }
+    p.mobility() *= 1./p.tmp();
   }
 }
 
