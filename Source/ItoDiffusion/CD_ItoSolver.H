@@ -408,69 +408,70 @@ public:
 
   /*!
     @brief Register operators
+    @details This will register the required operators for running this class. 
   */
-  virtual void registerOperators();
+  virtual void registerOperators() const;
 
   /*!
     @brief Set computational geometry
+    @param[in] a_computationalGeometry Computational geometry. 
   */
-  virtual void setComputationalGeometry(const RefCountedPtr<ComputationalGeometry> a_computationalGeometry);
+  virtual void setComputationalGeometry(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry);
 
   /*!
-    @brief Set the amr object
+    @brief Set the AmrMesh object
+    @param[in] a_amr AmrMesh object. 
   */
   virtual void setAmr(const RefCountedPtr<AmrMesh>& a_amr);
 
   /*!
-    @brief Set phase
+    @brief Set phase where the particles will live.
+    @param[in] a_phase Phase
   */
-  virtual void setPhase(phase::which_phase a_phase);
+  virtual void setPhase(const phase::which_phase a_phase);
 
   /*!
-    @brief Set verbosity.
+    @brief Set verbosity level for this solver. 
+    @param[in] a_verbosity Verbosity level.
   */
   virtual void setVerbosity(const int a_verbosity);
 
   /*!
-    @brief Get current time
+    @brief Set the time for this solver. 
+    @param[in] a_step Time step number
+    @param[in] a_time Time (in seconds)
+    @param[in] a_dt   Time step increment
+    @note This sets m_step=a_step, m_time=a_time, m_dt=a_dt
   */
   virtual void setTime(const int a_step, const Real a_time, const Real a_dt);
 
   /*!
     @brief Write plot data
+    @param[inout] a_output Output data holder.
+    @param[inout] a_icomp  Starting component where this solver begins writing the output. 
+    @note This will write the plot data in this solver to a_output, starting on a_comp
   */
-  virtual void writePlotData(EBAMRCellData& a_output, int& a_comp);
+  virtual void writePlotData(EBAMRCellData& a_output, int& a_comp) const;
 
-  /*!
-    @brief Write data to output. Convenience function. 
-  */
-  virtual void writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interp);
 
-  /*!
-    @brief Write checkpoint data into handle
-  */
 #ifdef CH_USE_HDF5
+  /*!
+    @brief Write checkpoint data into HDF5 file. 
+    @details This will call one of the other two functions writeCheckpointLevelParticles or writeCheckpointLevelFluid, depending on how the user wants to 
+    checkpoint the data. In most cases the user will (and should) checkpoint the particles.
+    @param[out] a_handle HDF5 file. 
+    @param[in]  a_level Grid level
+  */  
   virtual void writeCheckpointLevel(HDF5Handle& a_handle, const int a_level) const;
 #endif
 
+#ifdef CH_USE_HDF5
   /*!
-    @brief Checkpoint particles
-  */
-#ifdef CH_USE_HDF5  
-  virtual void writeCheckPointLevelParticles(HDF5Handle& a_handle, const int a_level) const;
-#endif
-
-  /*!
-    @brief Checkpoint particles
-  */
-#ifdef CH_USE_HDF5  
-  virtual void writeCheckPointLevelFluid(HDF5Handle& a_handle, const int a_level) const;
-#endif
-
-  /*!
-    @brief Read checkpoint data from handle
-  */
-#ifdef CH_USE_HDF5  
+    @brief Read checkpointed data from an HDF5 file.
+    @details This will call one of the functions readCheckPointLevelParticle or readCheckponitLevelFluid, depending on how the checkpointing was made. 
+    @param[out] a_handle HDF5 file. 
+    @param[in]  a_level Grid level
+  */  
   virtual void readCheckpointLevel(HDF5Handle& a_handle, const int a_level);
 #endif
 
@@ -780,8 +781,8 @@ protected:
     @brief How to checkpoint files
   */
   enum class WhichCheckpoint {
-    particles,
-    numbers
+    Particles,
+    Numbers
   };
 
   /*!
@@ -1112,6 +1113,57 @@ protected:
   */
   void parseCheckpointing();
 
+#ifdef CH_USE_HDF5
+  /*!
+    @brief Write checkpoint data into HDF5 file -- this version dumps that particles to the HDF5 file.. 
+    @details This will not write the full Ito partilces -- in order to trim memory and checkpoint file sizes this function writse
+    the particle data to HDF5 as SimpleItoParticle which only stores position, mass, and energy. Things like mobility, diffusion coefficient, velocity etc.
+    are parametrically dependent and are thus not stored. 
+    @param[out] a_handle HDF5 file. 
+    @param[in]  a_level Grid level
+  */    
+  virtual void writeCheckPointLevelParticles(HDF5Handle& a_handle, const int a_level) const;
+#endif
+
+#ifdef CH_USE_HDF5
+  /*!
+    @brief Write checkpoint data into HDF5 file -- this version writes the number of particles per cell rather than the particles.
+    @details This will write the number of particles in each grid cell -- this yields very-low-memory HDF5 files but when the simulation is restarted
+    from this state then the particle distribution as well as the particle energy in each cell is lost. Use with caution!
+    @param[out] a_handle HDF5 file. 
+    @param[in]  a_level Grid level
+  */      
+  virtual void writeCheckPointLevelFluid(HDF5Handle& a_handle, const int a_level) const;
+#endif
+
+#ifdef CH_USE_HDF5
+  /*!
+    @brief Read checkpointed particles from  an HDF5 file.
+    @details This will read particles from the HDF5 file ala writeCheckPointLevelParticles. 
+    @param[out] a_handle HDF5 file. 
+    @param[in]  a_level Grid level
+  */  
+  virtual void readCheckpointLevelParticles(HDF5Handle& a_handle, const int a_level);
+#endif
+
+#ifdef CH_USE_HDF5
+  /*!
+    @brief Read checkpointed particle numberse from  an HDF5 file and instantiate the particles from that. 
+    @details This will read particle numbers in each cell ala writeCheckPointLevelFluid and instantiate the particles from that. 
+    @param[out] a_handle HDF5 file. 
+    @param[in]  a_level Grid level
+  */  
+  virtual void readCheckpointLevelFluid(HDF5Handle& a_handle, const int a_level);
+#endif
+
+  /*!
+    @brief Restart particles from a specified number of particles in the grid cell. 
+    @details This will instantiate the bulk particles by randomly drawing new particles in each grid cell. 
+    @param[in] a_particlesPerCell Mesh data showing how many particles are in each cell. 
+    @param[in] a_level            Grid level. 
+  */
+  void drawNewParticles(const LevelData<EBCellFAB>& a_particlesPerCell, const int a_level);  
+
   /*!
     @brief Compute the cell-centered deposition -- this is the main deposition function.
     @details The template parameters indicate the particle type and quantity to be deposited. The second template parameter must be a pointer to a member function in 
@@ -1179,10 +1231,7 @@ protected:
   */
   void mergeBVH(List<ItoParticle>& a_particles, const int a_particlesPerCell);
 
-  /*!
-    @brief Restart particles
-  */
-  void restartParticles(LevelData<EBCellFAB>& a_num_particles, const int a_level);
+
 
   /*!
     @brief Do boundary intersection tests with an implicit function
@@ -1191,6 +1240,16 @@ protected:
 			    ParticleContainer<ItoParticle>& a_eb_particles,
 			    ParticleContainer<ItoParticle>& a_domain_particles,
 			    const bool                        a_delete);
+
+
+  /*!
+    @brief Write data to output. Convenience function which just copies data from one data holder to the output data holder. 
+    @param[inout] a_output            Output data holder.
+    @param[inout] a_icomp             Starting component where this solver begins writing the output. 
+    @param[in]    a_data              Data to write. 
+    @param[in]    a_interpToCentroids If true, a_data will be interpolated to cell centroids before writing to a_output. 
+  */
+  virtual void writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interpToCentroids) const;  
 
   /*!
     @brief Interpolate mobilities
