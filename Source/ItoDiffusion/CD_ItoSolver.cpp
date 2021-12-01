@@ -598,75 +598,48 @@ void ItoSolver::removeCoveredParticles(ParticleContainer<ItoParticle>& a_particl
   }
 }
 
-void ItoSolver::transferCoveredParticles_if(ParticleContainer<ItoParticle>& a_src, ParticleContainer<ItoParticle>& a_dst, const Real a_tol){
-  CH_TIME("ItoSolver::transferCoveredParticles_if(container, container, tolerance)");
-  if(m_verbosity > 5){
-    pout() << m_name + "::transferCoveredParticles_if(container, container, tolerance)" << endl;
-  }
-
-  const RefCountedPtr<BaseIF>& func = (m_phase == phase::gas) ? m_computationalGeometry->getGasImplicitFunction() : m_computationalGeometry->getSolidImplicitFunction();
-
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-    const Real dx                = m_amr->getDx()[lvl];
-    const Real tol               = a_tol*dx;
-
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      const EBISBox& ebisbox = ebisl[dit()];
-      
-      List<ItoParticle>& src = a_src[lvl][dit()].listItems();
-      List<ItoParticle>& dst = a_dst[lvl][dit()].listItems();
-
-      // Check if particles are outside the implicit function. 
-      for (ListIterator<ItoParticle> lit(src); lit.ok(); ++lit){
-	ItoParticle& p = lit();
-
-	const Real f = func->value(p.position());
-	if(f > tol) {
-	  dst.transfer(lit);
-	}
-      }
-    }
-  }
-}
-
 void ItoSolver::transferCoveredParticles(const EbRepresentation a_representation, const Real a_tol){
-  CH_TIME("ItoSolver::transferCoveredParticles(EbRepresentation, tol)");
+  CH_TIME("ItoSolver::transferCoveredParticles(EbRepresentation, Real)");
   if(m_verbosity > 5){
-    pout() << m_name + "::transferCoveredParticles(EbRepresentation, tol)" << endl;
+    pout() << m_name + "::transferCoveredParticles(EbRepresentation, Real)" << endl;
   }
 
   this->transferCoveredParticles(WhichContainer::Bulk, WhichContainer::Covered, a_representation, a_tol);
 }
 
 void ItoSolver::transferCoveredParticles(const WhichContainer a_containerFrom, const WhichContainer a_containerTo, const EbRepresentation a_representation, const Real a_tol){
-  CH_TIME("ItoSolver::transferCoveredParticles(EbRepresentation, string, string, tol)");
+  CH_TIME("ItoSolver::transferCoveredParticles(WhichContainer, WhichContainer, EbRepresentation, Real)");
   if(m_verbosity > 5){
-    pout() << m_name + "::transferCoveredParticles(EbRepresentation, string, string, tol)" << endl;
+    pout() << m_name + "::transferCoveredParticles(WhichContainer, WhichContainer, EbRepresentation, Real)" << endl;
   }
 
-  ParticleContainer<ItoParticle>& src = this->getParticles(a_containerFrom);
-  ParticleContainer<ItoParticle>& dst = this->getParticles(a_containerTo);
+  ParticleContainer<ItoParticle>& particlesFrom = this->getParticles(a_containerFrom);
+  ParticleContainer<ItoParticle>& particlesTo   = this->getParticles(a_containerTo);
 
-  this->transferCoveredParticles(src, dst, a_representation, a_tol);
+  this->transferCoveredParticles(particlesFrom, particlesTo, a_representation, a_tol);
 }
 
-void ItoSolver::transferCoveredParticles(ParticleContainer<ItoParticle>& a_containerFrom,
-					 ParticleContainer<ItoParticle>& a_containerTo,
-					 const EbRepresentation           a_representation,
-					 const Real                        a_tol){
-  CH_TIME("ItoSolver::transferCoveredParticles(EbRepresentation, container, container, tol)");
+void ItoSolver::transferCoveredParticles(ParticleContainer<ItoParticle>& a_particlesFrom,
+					 ParticleContainer<ItoParticle>& a_particlesTo,
+					 const EbRepresentation          a_representation,
+					 const Real                      a_tol) const {
+  CH_TIME("ItoSolver::transferCoveredParticles(ParticleContainer, ParticleContainer, EbRepresentation, Real)");
   if(m_verbosity > 5){
-    pout() << m_name + "::transferCoveredParticles(EbRepresentation, container, container, tol)" << endl;
+    pout() << m_name + "::transferCoveredParticles(ParticleContainer, ParticleContainer, EbRepresentation, Real)" << endl;
   }
 
   switch(a_representation){
   case EbRepresentation::ImplicitFunction:
-    this->transferCoveredParticles_if(a_containerFrom, a_containerTo, a_tol);
+    m_amr->transferCoveredParticlesIF(a_particlesFrom, a_particlesTo, m_phase, a_tol);
     break;
+  case EbRepresentation::Discrete:
+    m_amr->transferCoveredParticlesDiscrete(a_particlesFrom, a_particlesTo, m_phase, a_tol);    
+    break;
+  case EbRepresentation::Voxel:
+    m_amr->transferCoveredParticlesVoxels(a_particlesFrom, a_particlesTo, m_phase);
+    break;        
   default:
-    MayDay::Abort("ItoSolver::intersectParticles - unsupported EB representation requested");
+    MayDay::Error("ItoSolver::transferCoveredParticles -- logic bust");
   }
 }
 

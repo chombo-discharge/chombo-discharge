@@ -288,25 +288,35 @@ public:
 
   /*!
     @brief Transfer particles that are covered (within a_tol distance from EB) to another container. 
-    @details This is the default version which moves particles from m_particles to m_covered_particles
+    @details Calls the other version with m_particles and m_coveredParticles
+    @param[in] a_ebRepresentation EB representation (e.g. implicit function, discrete, voxel)
+    @param[in] a_tol              Tolerance -- removes particles if they are less than a_tol*dx away from the boundary. 
   */
   virtual void transferCoveredParticles(const EbRepresentation a_representation, const Real a_tol);
 
   /*!
-    @brief Which particles to remove
+    @brief Transfer particles that are covered (within a_tol distance from EB) to another container. 
+    @param[in] a_containerFrom    Which particle container to transfer particles from
+    @param[in] a_containerFrom    Which particle container to move particles into
+    @param[in] a_ebRepresentation EB representation (e.g. implicit function, discrete, voxel)
+    @param[in] a_tol              Tolerance -- removes particles if they are less than a_tol*dx away from the boundary. 
   */
   virtual void transferCoveredParticles(const WhichContainer   a_containerFrom,
 					const WhichContainer   a_containerTo,
 					const EbRepresentation a_representation,
-					const Real              a_tol);
+					const Real             a_tol);
 
   /*!
     @brief Transfer particles that are inside the EB to another container. 
+    @param[in] a_particlesFrom    Which particle container to transfer particles from
+    @param[in] a_particlesTo      Which particle container to move particles into
+    @param[in] a_ebRepresentation EB representation (e.g. implicit function, discrete, voxel)
+    @param[in] a_tol              Tolerance -- removes particles if they are less than a_tol*dx away from the boundary. 
   */
-  virtual void transferCoveredParticles(ParticleContainer<ItoParticle>& a_containerFrom,
-					ParticleContainer<ItoParticle>& a_containerTo,
-					const EbRepresentation           a_representation,
-					const Real                        a_tol);
+  virtual void transferCoveredParticles(ParticleContainer<ItoParticle>& a_particlesFrom,
+					ParticleContainer<ItoParticle>& a_particlesTo,
+					const EbRepresentation          a_representation,
+					const Real                      a_tol) const ;
 					    
 
   /*!
@@ -1145,11 +1155,6 @@ protected:
     @brief Restart particles
   */
   void restartParticles(LevelData<EBCellFAB>& a_num_particles, const int a_level);
-
-  /*!
-    @brief Transfer particles that are inside the EB
-  */
-  void transferCoveredParticles_if(ParticleContainer<ItoParticle>& a_src, ParticleContainer<ItoParticle>& a_dst, const Real a_tol);
 
   /*!
     @brief Do boundary intersection tests with an implicit function

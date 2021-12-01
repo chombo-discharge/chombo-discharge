@@ -522,7 +522,7 @@ void AmrMesh::transferCoveredParticlesDiscrete(ParticleContainer<P>&     a_parti
       List<P>& particlesTo   = a_particlesTo  [lvl][dit()].listItems();      
 
       if(isCovered){
-	particlesTo.addItemsDestructive(particlesFrom);
+	particlesTo.catenate(particlesFrom);
       }
       else if(isIrregular){
 	for (ListIterator<P> lit(particlesFrom); lit.ok(); ++lit){
@@ -565,7 +565,6 @@ void AmrMesh::transferCoveredParticlesDiscrete(ParticleContainer<P>&     a_parti
       }
     }
   }  
-
 }
 
 template <class P>
@@ -600,7 +599,7 @@ void AmrMesh::transferCoveredParticlesVoxels(ParticleContainer<P>&     a_particl
       List<P>& particlesTo   = a_particlesTo  [lvl][dit()].listItems();      
 
       if(isCovered){
-	particlesTo.addItemsDestructive(particlesFrom);
+	particlesTo.catenate(particlesFrom);
       }
       else if(isIrregular){
 	for (ListIterator<P> lit(particlesFrom); lit.ok(); ++lit){

@@ -751,7 +751,7 @@ public:
 
   /*!
     @brief Function which removes particles from the domain if they fall inside the EB.
-    @details The template parameter indicate the particle type -- it must have a const RealVect& P::position() function. 
+    @details The template parameter indicate the particle type -- it MUST have a const RealVect& P::position() const function. 
     @details This version uses the implicit function to evaluate whether or not the particles are inside the EB. The particles will be removed from
     the container if f(x) > a_tolerance*dx. 
     @param[inout] a_particles Particle data
@@ -766,7 +766,7 @@ public:
 
   /*!
     @brief Function which removes particles from the domain if they fall inside the EB.
-    @details The template parameter indicate the particle type -- it must have a const RealVect& P::position() function. 
+    @details The template parameter indicate the particle type -- it MUST have a const RealVect& P::position() const function. 
     @details This version uses the discrete information to evaluate whether or not the particles are inside the EB. The particles will be removed from
     the container if they lie within a covered cell OR if they lie in an irregular cell but on the "wrong" side of the EB face (to within precision tolerance*dx)
     @param[inout] a_particles Particle data
@@ -793,14 +793,14 @@ public:
 
   /*!
     @brief Function which transferse particles from one particle container to another if they fall inside the EB.
-    @details The template parameter indicate the particle type -- it must have a const RealVect& P::position() function. 
+    @details The template parameter indicate the particle type -- it MUST have a const RealVect& P::position() const function. 
     @details This version uses the implicit function to evaluate whether or not the particles are inside the EB. The particles will be transferred from
-    the container if f(x) > a_tolerance*dx. 
+    the container if f(x) > a_tolerance*dx.
     @param[inout] a_particlesFrom Container to transfer from
     @param[inout] a_particlesTo   Container to transfer to
     @param[in]    a_phase         Phase where the particles live. 
-    @param[in]    a_tolerance     Tolerance. 
-    @note Because the implicit functions are global, this function will work even if the particles aren't mapped to the correct EBISBox.
+    @param[in]    a_tolerance     Tolerance (Note: relative to grid resolution)
+    @note Because the implicit functions are global, this function will work even if the particles aren't mapped to the correct boxes (but remapping will be necessary)
   */
   template <class P>
   void transferCoveredParticlesIF(ParticleContainer<P>&     a_particlesFrom,
@@ -810,7 +810,7 @@ public:
 
   /*!
     @brief Function which transferse particles from one particle container to another if they fall inside the EB.
-    @details The template parameter indicate the particle type -- it must have a const RealVect& P::position() function. 
+    @details The template parameter indicate the particle type -- it MUST have a const RealVect& P::position() const function. 
     @details This version uses the discrete information to evaluate whether or not the particles are inside the EB. The particles will be transferred from
     the container if they lie within a covered cell OR if they lie in an irregular cell but on the "wrong" side of the EB face (to within precision tolerance*dx)
     @param[inout] a_particlesFrom Container to transfer from
@@ -827,7 +827,7 @@ public:
 
   /*!
     @brief Function which transferse particles from one particle container to another if they fall inside the EB.
-    @details The template parameter indicate the particle type -- it must have a const RealVect& P::position() function. 
+    @details The template parameter indicate the particle type -- it MUST have a const RealVect& P::position() const function. 
     @details This version transfers all particles that live in covered cells.
     @param[inout] a_particlesFrom Container to transfer from
     @param[inout] a_particlesTo   Container to transfer to
