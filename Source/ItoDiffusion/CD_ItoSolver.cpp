@@ -2113,16 +2113,16 @@ void ItoSolver::updateMobilities() {
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
 
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
       this->updateMobilities(lvl, dit());
     }
   }
 }
 
 void ItoSolver::updateMobilities(const int a_level, const DataIndex a_dit) {
-  CH_TIME("ItoSolver::updateMobilities(lvl, dit)");
+  CH_TIME("ItoSolver::updateMobilities(int, DataIndex)");
   if(m_verbosity > 5) {
-    pout() << m_name + "::updateMobilities(lvl, dit)" << endl;
+    pout() << m_name + "::updateMobilities(int, DataIndex)" << endl;
   }
 
   ParticleContainer<ItoParticle>& particles = m_particleContainers.at(WhichContainer::Bulk);

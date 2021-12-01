@@ -630,14 +630,16 @@ public:
   virtual void interpolateMobilities(const int a_level, const DataIndex& a_dit);
 
   /*!
-    @brief Update mobilities
-    @details This calls the mobility function implemented by ItoSpecies
+    @brief Update mobilities parametrically from the particle energy. 
+    @details This calls the mobility function implemented by ItoSpecies. The particle mobility is set mu = f(p.energy()) where f is the mobility function in ItoSpecies
   */
   virtual void updateMobilities();
 
   /*!
-    @brief Update mobilities
-    @details This calls the mobility function implemented by ItoSpecies
+    @brief Update mobilities parametrically from the particle energy.
+    @details This calls the mobility function implemented by ItoSpecies. The particle mobility is set mu = f(p.energy()) where f is the mobility function in ItoSpecies
+    @param[in] a_level Grid level
+    @param[in] a_dit   Grid index
   */
   virtual void updateMobilities(const int a_level, const DataIndex a_dit);
 
