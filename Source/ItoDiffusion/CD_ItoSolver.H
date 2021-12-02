@@ -1200,12 +1200,12 @@ protected:
   void parseDiffusionHop();
 
   /*!
-    @brief Parse the conservation
+    @brief Parse whether or not to use redistribution. 
   */
   void parseRedistribution();
 
   /*!
-    @brief Parse the conservation
+    @brief Parse whether or not to compute a "non-conservative" divergence when redistributing mass.
   */
   void parseDivergenceComputation();
 
@@ -1294,7 +1294,12 @@ protected:
 				const DepositionType        a_deposition) const;  
 
   /*!
-    @brief Redistribution method
+    @brief Redistribute mass in an AMR context. 
+    @details We will have deposited particles into each cell, i.e. phi_i = m_i/dx^3. To obtain the true density in an EB context we need to divide by kappa such that 
+    phi_i = m_i/(kappa_i*dx^3). Unfortunately, this is numerically unstable because kappa_i can be arbitrarily small. We can set the density as phi_i = m_i/dx^3 but
+    we will be missing a mass m_i*(1-kappa_i) from the cell. This mass can be smooshed into neighboring cells such as to make the total scheme conservative. As an option,
+    we can also use a "non-conservative" divergence but the scheme will not be non-negative. 
+    @param[inout] a_phi Quantity to be redistributed. 
   */
   void redistributeAMR(EBAMRCellData& a_phi) const;
 

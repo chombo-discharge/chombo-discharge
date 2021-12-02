@@ -1569,10 +1569,18 @@ void ItoSolver::redistributeAMR(EBAMRCellData& a_phi) const {
     pout() << m_name + "::redistributeAMR" << endl;
   }
 
+  // TLDR: When we entered this routine we had a_phi = m_i/dV but we actually want to have phi = m_i/(kappa*dV) so as to have
+  //       meaningful densities. Thus, we can either run with a_phi just as it is, in which case it must be interpreted as an extended
+  //       state into the EB. That is perfectly fine. But we can also use O(1) accurate redistribution in order to make the scheme
+  //       completely conservative, if that is important. 
+  //
+  //       If we use redistribution then we compute a hybrid update phiH = kappa*phi = a_phi in each cell. But we are then "missing"
+  //       a mass kappa*phi - kappa*phiH = a_phi(1 - kappa). This mass can be smooshed into the neighboring grid cells. 
+
   if(m_useRedistribution) {
     this->depositNonConservative(m_depositionNC, a_phi);              // Compute m_depositionNC = sum(kappa*Wc)/sum(kappa)
     this->depositHybrid(a_phi, m_massDiff, m_depositionNC);           // Compute hybrid deposition, including mass differnce
-    this->incrementRedist(m_massDiff);                                  // Increment level redistribution register
+    this->incrementRedist(m_massDiff);                                // Increment level redistribution register
 
     // Do the redistribution magic
     const bool ebcf = m_amr->getEbCf();
