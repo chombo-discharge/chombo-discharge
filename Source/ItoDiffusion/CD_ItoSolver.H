@@ -1372,14 +1372,14 @@ protected:
     @param[in] a_level Grid level.
     @param[in] a_dit   Grid index.
   */
-  virtual void interpolateMobilitiesMu(const int a_level, const DataIndex& a_dit);
+  virtual void interpolateMobilitiesDirect(const int a_level, const DataIndex& a_dit);
 
   /*!
     @brief Interpolate mobilities through the velocity. Interpolates for all particles in the specified grid patch. 
     @param[in] a_level Grid level.
     @param[in] a_dit   Grid index.
   */
-  virtual void interpolateMobilitiesVel(const int a_level, const DataIndex& a_dit);
+  virtual void interpolateMobilitiesVelocity(const int a_level, const DataIndex& a_dit);
 
   /*!
     @brief Sign function
@@ -1389,10 +1389,19 @@ protected:
   Real sign(const Real& a) const;
 
   /*!
-    @brief Draw a valid random position somewhere in a cell
+    @brief Draw a random position physical somewhere in a grid cell.
+    @details This is the version that respects cut-cells -- it will draw a position (through rejection sampling) such that the particle ends up 
+    on the correct side of the EB. 
+    @param[in] a_cellPos       Cell-center position.
+    @param[in] a_lo            Lower-left corner of volume that encloses the cut-cell. This is relative to the unit cell. 
+    @param[in] a_hi            Upper-right corner of volume that encloses the cut-cell. This is relative to the unit cell. 
+    @param[in] a_bndryCentroid EB centroid position
+    @param[in] a_normal        EB normal (points into the fluid region)
+    @param[in] a_dx            Grid resolution
+    @param[in] a_kappa         Cell volume
   */
   inline
-  RealVect randomPosition(const RealVect a_pos,
+  RealVect randomPosition(const RealVect a_cellPos,
 			  const RealVect a_lo,
 			  const RealVect a_hi,
 			  const RealVect a_bndryCentroid,
@@ -1401,7 +1410,12 @@ protected:
 			  const Real     a_kappa) const;
 
   /*!
-    @brief Draw a random position somewhere in a cell
+    @brief Draw a random position somewhere in a cut-cell
+    @param[in] a_lo            Lower-left corner of volume that encloses the cut-cell. This is relative to the unit cell. 
+    @param[in] a_hi            Upper-right corner of volume that encloses the cut-cell. This is relative to the unit cell. 
+    @param[in] a_bndryCentroid EB centroid position
+    @param[in] a_normal        EB normal (points into the fluid region)
+    @return Returns a position inside the cut-cell and on the correct side of the EB. 
   */
   inline
   RealVect randomPosition(const RealVect a_lo,
@@ -1411,6 +1425,8 @@ protected:
 
   /*!
     @brief Return a random position in the cube (a_lo, a_hi);
+    @param[in] a_lo Lower-left corner 
+    @param[in] a_hi Upper-right corner 
   */
   inline
   RealVect randomPosition(const RealVect a_lo, const RealVect a_hi) const;

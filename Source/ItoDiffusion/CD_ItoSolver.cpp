@@ -2016,20 +2016,20 @@ void ItoSolver::interpolateMobilities(const int a_lvl, const DataIndex& a_dit) {
 
   switch(m_mobilityInterpolation){
   case WhichMobilityInterpolation::Direct:
-    this->interpolateMobilitiesMu(a_lvl, a_dit);
+    this->interpolateMobilitiesDirect(a_lvl, a_dit);
     break;
   case WhichMobilityInterpolation::Velocity:
-    this->interpolateMobilitiesVel(a_lvl, a_dit);
+    this->interpolateMobilitiesVelocity(a_lvl, a_dit);
     break;
   default:
     MayDay::Error("ItoSolver::interpolateMobilities(int, DataIndex) - logic bust");
   }
 }
 
-void ItoSolver::interpolateMobilitiesMu(const int a_lvl, const DataIndex& a_dit) {
-  CH_TIME("ItoSolver::interpolateMobilitiesMu");
+void ItoSolver::interpolateMobilitiesDirect(const int a_lvl, const DataIndex& a_dit) {
+  CH_TIME("ItoSolver::interpolateMobilitiesDirect");
   if(m_verbosity > 5) {
-    pout() << m_name + "::interpolateMobilitiesMu" << endl;
+    pout() << m_name + "::interpolateMobilitiesDirect" << endl;
   }
 
   CH_assert(m_isMobile);
@@ -2052,10 +2052,10 @@ void ItoSolver::interpolateMobilitiesMu(const int a_lvl, const DataIndex& a_dit)
   meshInterp.interpolate<ItoParticle, &ItoParticle::mobility>(particleList, mobilityFunction, m_deposition, m_forceIrregInterpolationNGP);
 }
 
-void ItoSolver::interpolateMobilitiesVel(const int a_lvl, const DataIndex& a_dit) {
-  CH_TIME("ItoSolver::interpolateMobilitiesVel");
+void ItoSolver::interpolateMobilitiesVelocity(const int a_lvl, const DataIndex& a_dit) {
+  CH_TIME("ItoSolver::interpolateMobilitiesVelocity");
   if(m_verbosity > 5) {
-    pout() << m_name + "::interpolateMobilitiesVel" << endl;
+    pout() << m_name + "::interpolateMobilitiesVelocity" << endl;
   }
 
   CH_assert(m_isMobile);
