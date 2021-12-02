@@ -31,21 +31,22 @@ Real ItoSolver::sign(const Real& a) const{
 }
 
 inline
-RealVect ItoSolver::randomGaussian() {
-
+RealVect ItoSolver::randomGaussian() const {
+  // TLDR: We draw a random number from a Gaussian distribution for each coordinate, and truncate the distribution at m_normalDistributionTruncation.
+  
   RealVect r = RealVect::Zero;
   for (int i = 0; i < SpaceDim; i++){
     r[i] = m_normalDistribution01(m_rng);
-    r[i] = sign(r[i])*Min(Abs(r[i]), m_normalDistributionTruncation);
+    r[i] = sign(r[i])*std::min(std::abs(r[i]), m_normalDistributionTruncation);
   }
 
   return r;
 }
 
 inline
-RealVect ItoSolver::randomDirection(){
+RealVect ItoSolver::randomDirection() const {
   constexpr Real EPS = 1.E-8;
-#if CH_SPACEDIM==2
+#if CH_SPACEDIM==2 // 2D version -- not that this is just picking a point on a circle.
   Real x1 = 2.0;
   Real x2 = 2.0;
   Real r  = x1*x1 + x2*x2;
@@ -56,7 +57,7 @@ RealVect ItoSolver::randomDirection(){
   }
 
   return RealVect(x1,x2)/sqrt(r);
-#elif CH_SPACEDIM==3
+#elif CH_SPACEDIM==3 // Marsaglia 1972 algorithm.
   Real x1 = 2.0;
   Real x2 = 2.0;
   Real r  = x1*x1 + x2*x2;

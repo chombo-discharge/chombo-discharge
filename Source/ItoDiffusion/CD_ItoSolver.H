@@ -644,34 +644,42 @@ public:
   virtual void updateMobilities(const int a_level, const DataIndex a_dit);
 
   /*!
-    @brief Interpolate diffusion
+    @brief Interpolate the diffusion field to the particle positions. 
+    @details This computes D_p = Df(X_p) where Df is the diffusion field on the mesh. 
   */
   virtual void interpolateDiffusion();
 
   /*!
-    @brief Interpolate velocities
+    @brief Interpolate the diffusion field to the particle positions. 
+    @details This computes D_p = Df(X_p) where Df is the diffusion field on the mesh. 
+    @param[in] a_level Grid level
+    @param[in] a_dit   Grid index
   */
   virtual void interpolateDiffusion(const int a_level, const DataIndex& a_dit);
 
   /*!
-    @brief Update diffusion coefficients
-    @details This calls the diffusion function implemented by ItoSpecies
+    @brief Update mobilities parametrically from the particle energy. 
+    @details This calls the diffusion function implemented by ItoSpecies. The particle diffusion is set D = f(p.energy()) where f is the diffusion function in ItoSpecies
   */
   virtual void updateDiffusion();
 
   /*!
-    @brief Update diffusion coefficients
-    @details This calls the diffusion function implemented by ItoSpecies
+    @brief Update mobilities parametrically from the particle energy. 
+    @details This calls the diffusion function implemented by ItoSpecies. The particle diffusion is set D = f(p.energy()) where f is the diffusion function in ItoSpecies
+    @param[in] a_level Grid level
+    @param[in] a_dit   Grid index    
   */
   virtual void updateDiffusion(const int a_level, const DataIndex a_dit);
 
   /*!
-    @brief Sort the m_particles container by cell
+    @brief Sort the input particle container by cell.
+    @param[in] a_container Container to be sorted. 
   */
   virtual void sortParticlesByCell(const WhichContainer a_container);
 
   /*!
-    @brief Sort the m_particles container by cell
+    @brief Sort the input particle container by patch.
+    @param[in] a_container Container to be sorted. 
   */
   virtual void sortParticlesByPatch(const WhichContainer a_container);
   
@@ -700,56 +708,109 @@ public:
   virtual void makeSuperparticles(const WhichContainer a_container, const int a_particlesPerPatch, const int a_level, const DataIndex a_dit);
 
   /*!
-    @brief Remap all particles
+    @brief Remap the bulk particle container.
   */
   void remap();
 
   /*!
-    @brief Remap all particles
+    @brief Remap all particles in the input container
+    @param[in] a_container Particle container
   */
   void remap(const WhichContainer a_container);
 
   /*!
-    @brief Random Gaussian
+    @brief Remap all particle containers
   */
-  inline
-  RealVect randomGaussian();
+  void remapAll();
 
   /*!
-    @brief Random direction
+    @brief Draw a random N-dimensional Gaussian number from a normal distribution with zero with and unit standard deviation.
+    @note The distribution is truncated at m_normalDistributionTruncation -- values above that threshold will be replaced by m_normalDistributionTruncation.
   */
   inline
-  RealVect randomDirection();
+  RealVect randomGaussian() const;
 
   /*!
-    @brief Compute min dt
+    @brief Draw a random direction in N-dimensional space. 
+    @details We use the algorithm by Marsaglia (1972).
+  */
+  inline
+  RealVect randomDirection() const;
+
+  /*!
+    @brief Compute a time step for the advance -- this calls the level function. 
+    @details This computes the time step differently whether or not diffusion and advection are active. The Ito particle model does not have a fundamental 
+    time step limitation, so these limits "replicate" the time step selections in a 1D fluid model. 
+    If we only use advection advection the time step is computed as dt = dx/Vmax = dtA, where Vmax is the largest velocity component along any of the directions. 
+    If only diffusion is active the time step is computed as dt = (dx*dx)/(2*D) = dtD. 
+    If both advection and diffusion are active the time step is computed as dt = 1/(1/dtA + 1/dtD). 
   */
   Real computeDt() const;
 
   /*!
-    @brief Compute drift dt. This returns the minimum of (dx/dt)*a_maxCellsToMove over all levels. 
+    @brief Compute a time step for the advance -- this returns the maximum permitted time step on the input grid level.
+    @details This computes the time step differently whether or not diffusion and advection are active. The Ito particle model does not have a fundamental 
+    time step limitation, so these limits "replicate" the time step selections in a 1D fluid model. 
+    If we only use advection advection the time step is computed as dt = dx/Vmax = dtA, where Vmax is the largest velocity component along any of the directions. 
+    If only diffusion is active the time step is computed as dt = (dx*dx)/(2*D) = dtD. 
+    If both advection and diffusion are active the time step is computed as dt = 1/(1/dtA + 1/dtD). 
+    @param[in] a_lvl Grid level
   */
   Real computeDt(const int a_lvl) const;
 
   /*!
-    @brief Compute drift dt. This returns the minimum of (dx/dt)*a_maxCellsToMove over all levels. 
+    @brief Compute a time step for the advance -- this returns the maximum permitted time step on the input grid patch.
+    @details This computes the time step differently whether or not diffusion and advection are active. The Ito particle model does not have a fundamental 
+    time step limitation, so these limits "replicate" the time step selections in a 1D fluid model. 
+    If we only use advection advection the time step is computed as dt = dx/Vmax = dtA, where Vmax is the largest velocity component along any of the directions. 
+    If only diffusion is active the time step is computed as dt = (dx*dx)/(2*D) = dtD. 
+    If both advection and diffusion are active the time step is computed as dt = 1/(1/dtA + 1/dtD). 
+    @param[in] a_lvl Grid level
+    @param[in] a_dit Grid index
   */
-  Real computeDt(const int a_lvl, const DataIndex a_dit, const Real a_dx) const;
+  Real computeDt(const int a_lvl, const DataIndex& a_dit) const;
 
   /*!
-    @brief Compute drift dt. This returns the minimum of (dx/dt)*a_maxCellsToMove over all levels. 
+    @brief Compute the largest possible time step such that the particles does not move more than a specified number of grid cells on any grid level.
+    @details This computes the time step differently whether or not diffusion and advection are active. The Ito particle model does not a fundamental
+    time step limitation, so this function does its best at computing a time step such that the particles do not move more than the specified amount of grid cells.
+    If only advection is active the time step is computed as dt = a_maxCellsToMove * dx/vMax where vMax is the largest velocity component. 
+    If only diffusion is active the usual kernel is dX = dWt which yields a "hop" of length L_d = sqrt(2*D*dt)*N0 where N0 is the diffusion hop in one of the coordinates.
+    We do not need to worry about SpaceDim-related corrections because the hops in each direction are independent, so solving for dt we find dtD = L_d^2/(2*D*N0^2). 
+    If both advectino and diffusion are active then we can move up to L_d = v_d*dt + sqrt(2*D*dt)*N0 in any one coordinate direction (this is the usual Ito kernel). This
+    requires a solution to a quadratic equation. Fortunately, this is easy to solve for. 
+    @param[in] a_maxCellsToMove
   */
   Real computeMinDt(const Real a_maxCellsToMove) const;
 
   /*!
-    @brief Compute drift dt. This returns the minimum of (dx/dt)*a_maxCellsToMove over all levels. 
+    @brief Compute the largest possible time step such that the particles does not move more than a specified number of grid cells on the input grid level.
+    @details This computes the time step differently whether or not diffusion and advection are active. The Ito particle model does not a fundamental
+    time step limitation, so this function does its best at computing a time step such that the particles do not move more than the specified amount of grid cells.
+    If only advection is active the time step is computed as dt = a_maxCellsToMove * dx/vMax where vMax is the largest velocity component. 
+    If only diffusion is active the usual kernel is dX = dWt which yields a "hop" of length L_d = sqrt(2*D*dt)*N0 where N0 is the diffusion hop in one of the coordinates.
+    We do not need to worry about SpaceDim-related corrections because the hops in each direction are independent, so solving for dt we find dtD = L_d^2/(2*D*N0^2). 
+    If both advectino and diffusion are active then we can move up to L_d = v_d*dt + sqrt(2*D*dt)*N0 in any one coordinate direction (this is the usual Ito kernel). This
+    requires a solution to a quadratic equation. Fortunately, this is easy to solve for. 
+    @param[in] a_maxCellsToMove Maximum number of cells to move with a standard Ito kernel dX = v*dt + sqrt(2*D*dt)*N
+    @param[in] a_lvl            Grid level
   */
   Real computeMinDt(const Real a_maxCellsToMove, const int a_lvl) const;
 
   /*!
-    @brief Compute drift dt. This returns the minimum of (dx/dt)*a_maxCellsToMove over all levels. 
+    @brief Compute the largest possible time step such that the particles does not move more than a specified number of grid cells on the input grid level.
+    @details This computes the time step differently whether or not diffusion and advection are active. The Ito particle model does not a fundamental
+    time step limitation, so this function does its best at computing a time step such that the particles do not move more than the specified amount of grid cells.
+    If only advection is active the time step is computed as dt = a_maxCellsToMove * dx/vMax where vMax is the largest velocity component. 
+    If only diffusion is active the usual kernel is dX = dWt which yields a "hop" of length L_d = sqrt(2*D*dt)*N0 where N0 is the diffusion hop in one of the coordinates.
+    We do not need to worry about SpaceDim-related corrections because the hops in each direction are independent, so solving for dt we find dtD = L_d^2/(2*D*N0^2). 
+    If both advectino and diffusion are active then we can move up to L_d = v_d*dt + sqrt(2*D*dt)*N0 in any one coordinate direction (this is the usual Ito kernel). This
+    requires a solution to a quadratic equation. Fortunately, this is easy to solve for. 
+    @param[in] a_maxCellsToMove Maximum number of cells to move with a standard Ito kernel dX = v*dt + sqrt(2*D*dt)*N
+    @param[in] a_lvl            Grid level
+    @param[in] a_dit            Grid index
   */
-  Real computeMinDt(const Real a_maxCellsToMove, const int a_lvl, const DataIndex a_dit, const Real a_dx) const;
+  Real computeMinDt(const Real a_maxCellsToMove, const int a_lvl, const DataIndex& a_dit) const;
 
   /*!
     @brief Compute drift dt. This returns the minimum of (dx/dt)*a_maxCellsToMove over all levels. 
@@ -1290,8 +1351,6 @@ protected:
     @brief Superparticle merging with BVH trees
   */
   void mergeBVH(List<ItoParticle>& a_particles, const int a_particlesPerCell);
-
-
 
   /*!
     @brief Do boundary intersection tests with an implicit function
