@@ -900,7 +900,7 @@ protected:
   /*!
     @brief Switch for deciding how to interpolate mobilities, i.e. interpolating either mu*E or just mu (to the particle position)
   */
-  WhichMobilityInterpolation m_mobilityInterpolation;
+  WhichMobilityInterpolation m_mobilityInterp;
 
   /*!
     @brief Number of particles used when restarting a simulation -- this is relevant only when restarting from a "fluid" checkpoint file. 

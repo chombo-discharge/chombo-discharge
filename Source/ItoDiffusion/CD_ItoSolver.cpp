@@ -33,14 +33,13 @@ ItoSolver::ItoSolver() {
   CH_TIME("ItoSolver::ItoSolver");
 
   // Default settings
-  m_verbosity      = -1           ;
-  m_name          = "ItoSolver"  ;
-  m_className     = "ItoSolver"  ;
-  m_realm         = Realm::primal;
-  m_phase         = phase::gas   ;
-  m_checkpointing = WhichCheckpoint::Particles;
-
-  m_mobilityInterpolation = WhichMobilityInterpolation::Direct;
+  m_verbosity      = -1;
+  m_name           = "ItoSolver";
+  m_className      = "ItoSolver";
+  m_realm          = Realm::primal;
+  m_phase          = phase::gas;
+  m_checkpointing  = WhichCheckpoint::Particles;
+  m_mobilityInterp = WhichMobilityInterpolation::Direct;
 }
 
 ItoSolver::~ItoSolver() {
@@ -249,10 +248,10 @@ void ItoSolver::parseDeposition() {
   // Mobility interpolation.
   pp.get("mobility_interp",str);
   if(str == "direct") {
-    m_mobilityInterpolation = WhichMobilityInterpolation::Direct;
+    m_mobilityInterp = WhichMobilityInterpolation::Direct;
   }
   else if(str == "velocity") {
-    m_mobilityInterpolation = WhichMobilityInterpolation::Velocity;
+    m_mobilityInterp = WhichMobilityInterpolation::Velocity;
   }
   else{
     MayDay::Abort("ItoSolver::parseDeposition - unknown interpolation method for mobility");
@@ -1984,7 +1983,7 @@ void ItoSolver::interpolateMobilities() {
 
   if(m_isMobile) {
 
-    switch(m_mobilityInterpolation){
+    switch(m_mobilityInterp){
     case WhichMobilityInterpolation::Velocity:
       {
 	DataOps::vectorLength(m_scratch, m_velocityFunction); // Compute |E| (or whatever other function you've decided to provide).
@@ -2014,7 +2013,7 @@ void ItoSolver::interpolateMobilities(const int a_lvl, const DataIndex& a_dit) {
 
   CH_assert(m_isMobile);
 
-  switch(m_mobilityInterpolation){
+  switch(m_mobilityInterp){
   case WhichMobilityInterpolation::Direct:
     this->interpolateMobilitiesDirect(a_lvl, a_dit);
     break;
@@ -2033,7 +2032,7 @@ void ItoSolver::interpolateMobilitiesDirect(const int a_lvl, const DataIndex& a_
   }
 
   CH_assert(m_isMobile);
-  CH_assert(m_mobilityInterpolation == WhichMobilityInterpolation::Direct);
+  CH_assert(m_mobilityInterp == WhichMobilityInterpolation::Direct);
 
   // TLDR: This will compute the particle mobility by interpolating a scalar mobility field (stored on the mesh) to the particle positions.
 
@@ -2059,7 +2058,7 @@ void ItoSolver::interpolateMobilitiesVelocity(const int a_lvl, const DataIndex& 
   }
 
   CH_assert(m_isMobile);
-  CH_assert(m_mobilityInterpolation == WhichMobilityInterpolation::Velocity);
+  CH_assert(m_mobilityInterp == WhichMobilityInterpolation::Velocity);
 
   // TLDR: This function computes the particle mobilities by interpolating mu*V to the particle position and then setting
   //       the mobility as mu = [mu*V(Xp)]/V(Xp). We happen to know that |V| is already stored in m_scratch. 
