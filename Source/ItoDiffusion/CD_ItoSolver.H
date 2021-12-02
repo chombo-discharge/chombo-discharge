@@ -813,64 +813,37 @@ public:
   Real computeHopDt(const Real a_maxCellsToMove, const int a_lvl, const DataIndex& a_dit) const;
 
   /*!
-    @brief Compute drift dt. This returns the minimum of (dx/dt)*a_maxCellsToMove over all levels. 
-  */
-  Real computeMinDriftDt(const Real a_maxCellsToMove) const;
-
-  /*!
-    @brief Compute advection time step
+    @brief Compute advection time step dt = dx/vMax where vMax is the largest velocity component of the particle. 
   */
   Real computeAdvectiveDt() const;
 
   /*!
-    @brief Compute the drift dt. This returns (dx/dt)*a_maxCellsToMove
+    @brief Compute the drift dt. This computes the minimum dt = dx/vMax on the input level. 
+    @param[in] a_lvl Grid level
   */
-  Vector<Real> computeDriftDt(const Real a_maxCellsToMove) const;
+  Real computeAdvectiveDt(const int a_lvl) const;
 
   /*!
-    @brief Compute the drift dt. This computes the minimum dt = dx/v on every level
+    @brief Compute the drift dt. This computes the minimum dt = dx/vMax on one level and one box. 
+    @param[in] a_lvl Grid level
+    @param[in] a_dit Grid index
   */
-  Vector<Real> computeDriftDt() const;
-
-  /*!
-    @brief Compute the drift dt. This computes the minimum dt = dx/v on one level
-  */
-  Real computeDriftDt(const int a_lvl) const;
-
-  /*!
-    @brief Compute the drift dt. This computes the minimum dt = dx/v on one level and one box. 
-  */
-  Real computeDriftDt(const int a_lvl, const DataIndex& a_dit, const RealVect a_dx) const;
-
-  /*!
-    @brief Compute diffusion dt
-  */
-  Real computeMinDiffusionDt(const Real a_maxCellsToMove) const;
-
-  /*!
-    @brief Compute diffusion dt as dx*maxCellsToMove/(sqrt(2D)*eps) on all levels
-  */
-  Vector<Real> computeDiffusionDt(const Real a_maxCellsToMove) const;
+  Real computeAdvectiveDt(const int a_lvl, const DataIndex& a_dit) const;  
 
   /*!
     @brief Compute the diffusive dt
   */
   Real computeDiffusiveDt() const;
-  
-  /*!
-    @brief Compute diffusion dt as dx/(sqrt(2D)*eps) on all levels
-  */
-  Vector<Real> computeDiffusionDt() const;
 
   /*!
     @brief Compute diffusion dt as dx/(sqrt(2D)*eps) on one level
   */
-  Real computeDiffusionDt(const int a_lvl) const;
+  Real computeDiffusiveDt(const int a_lvl) const;
 
   /*!
     @brief Compute diffusion dt as dx/(sqrt(2D)*eps) on one level and one patch
   */
-  Real computeDiffusionDt(const int a_lvl, const DataIndex& a_dit, const RealVect a_dx) const;
+  Real computeDiffusiveDt(const int a_lvl, const DataIndex& a_dit) const;
 
   /*!
     @brief Get deposition method

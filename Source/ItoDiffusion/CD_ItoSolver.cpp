@@ -2284,7 +2284,7 @@ Real ItoSolver::computeDt(const int a_lvl, const DataIndex& a_dit) const{
   // Handle different cases differently. 
   if(m_isMobile && !m_isDiffusive) { // Advection but no diffusion - set the time step as dt = dx/vMax where vMax is the largest velocity component. 
     for (lit.rewind(); lit.ok(); ++lit) {
-      const ItoParticle& p = particleList[lit];
+      const ItoParticle& p = lit();
       const RealVect&    v = p.velocity();
 
       // Get the largest velocity component
@@ -2300,7 +2300,7 @@ Real ItoSolver::computeDt(const int a_lvl, const DataIndex& a_dit) const{
   }
   else if(!m_isMobile && m_isDiffusive) { // Diffusion but no advection -- set the time step as dt = dx*dx/(2*D)
     for (lit.rewind(); lit.ok(); ++lit) {
-      const ItoParticle& p = particleList[lit];
+      const ItoParticle& p = lit();
 
       // Get the diffusion coefficient and compute dt = dx*dx/(2*D) 
       const Real D      = p.diffusion();
@@ -2311,7 +2311,7 @@ Real ItoSolver::computeDt(const int a_lvl, const DataIndex& a_dit) const{
   }
   else if(m_isMobile && m_isDiffusive) { // Both advectino and diffusion. Compute dt = 1/(1/dtA + 1/dtD) where dtA and dtD are as in the code bits above. 
     for (lit.rewind(); lit.ok(); ++lit) {
-      const ItoParticle& p = particleList[lit];
+      const ItoParticle& p = lit();
       const RealVect&    v = p.velocity();
       const Real&        D = p.diffusion();
 
@@ -2417,7 +2417,7 @@ Real ItoSolver::computeHopDt(const Real a_maxCellsToMove, const int a_lvl, const
   // Advection, diffusion, and advection-diffusion cases are handled differently. 
   if(m_isMobile && !m_isDiffusive) { // Advection but no diffusion
     for (lit.rewind(); lit; ++lit) {
-      const ItoParticle& p = particleList[lit];
+      const ItoParticle& p = lit();            
       const RealVect&    v = p.velocity();
 
       // Compute the regular time step -- recall that dMax = a_maxCellsToMove*dx
@@ -2429,7 +2429,7 @@ Real ItoSolver::computeHopDt(const Real a_maxCellsToMove, const int a_lvl, const
   }
   else if(!m_isMobile && m_isDiffusive) { // Diffusion but no advection. 
     for (lit.rewind(); lit; ++lit) {
-      const ItoParticle& p = particleList[lit];
+      const ItoParticle& p = lit();      
       const Real&        D = p.diffusion();
 
       // Recall, the diffusion kernel is usually dX = sqrt(2*D*dt)*N where N is a SpaceDim vector of Gaussian numbers. But we only care about
@@ -2442,7 +2442,7 @@ Real ItoSolver::computeHopDt(const Real a_maxCellsToMove, const int a_lvl, const
   }
   else if(m_isMobile && m_isDiffusive) { // Diffusion AND advection. Much more difficult and requires us to solve a second order equation. 
     for (lit.rewind(); lit; ++lit) {
-      const ItoParticle& p = particleList[lit];
+      const ItoParticle& p = lit();
       const RealVect&    v = p.velocity();
       const Real&        D = p.diffusion();
 
@@ -2478,239 +2478,167 @@ Real ItoSolver::computeHopDt(const Real a_maxCellsToMove, const int a_lvl, const
   return dt;
 }
 
-Real ItoSolver::computeMinDriftDt(const Real a_maxCellsToMove) const{
-  CH_TIME("ItoSolver::computeMinDriftDt(allAMRlevels, maxCellsToMove)");
-  if(m_verbosity > 5) {
-    pout() << m_name + "::computeMinDriftDt(allAMRlevels, maxCellsToMove)" << endl;
-  }
-
-  Vector<Real> dt = this->computeDriftDt(a_maxCellsToMove);
-
-  Real minDt = dt[0];
-  for (int lvl = 0; lvl < dt.size(); lvl++) {
-    minDt = Min(minDt, dt[lvl]);
-  }
-
-  return minDt;
-}
-
-Vector<Real> ItoSolver::computeDriftDt(const Real a_maxCellsToMove) const {
-  CH_TIME("ItoSolver::computeDriftDt(amr, maxCellsToMove)");
-  if(m_verbosity > 5) {
-    pout() << m_name + "::computeDriftDt(amr, maxCellsToMove)" << endl;
-  }
-
-  Vector<Real> dt = this->computeDriftDt();
-  for (int lvl = 0; lvl < dt.size(); lvl++) {
-    dt[lvl] = dt[lvl]*a_maxCellsToMove;
-  }
-
-  return dt;
-
-}
-
 Real ItoSolver::computeAdvectiveDt() const {
   CH_TIME("ItoSolver::computeAdvectiveDt");
   if(m_verbosity > 5) {
     pout() << m_name + "::computeAdvectiveDt()" << endl;
   }
+
+  // TLDR: We compute dt = dx/vMax for every particle. 
   
-  Real minDt = 1.E99;
-  const Vector<Real> levelDts = this->computeDriftDt();
+  Real dt = std::numeric_limits<Real>::max();
 
-  for (int lvl = 0; lvl < levelDts.size(); lvl++) {
-    minDt = Min(levelDts[lvl], minDt);
-  }
-
-  return minDt;
-}
-
-Vector<Real> ItoSolver::computeDriftDt() const {
-  CH_TIME("ItoSolver::computeDriftDt(amr)");
-  if(m_verbosity > 5) {
-    pout() << m_name + "::computeDriftDt(amr)" << endl;
-  }
-
-  const int finest_level = m_amr->getFinestLevel();
-
-  Vector<Real> dt(1 + finest_level, 1.2345E67);
-
-  for (int lvl = 0; lvl <= finest_level; lvl++) {
-    dt[lvl] = this->computeDriftDt(lvl);
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const Real levelDt = this->computeAdvectiveDt(lvl);
+    
+    dt = std::min(levelDt, dt);
   }
 
   return dt;
 }
 
-Real ItoSolver::computeDriftDt(const int a_lvl) const {
-  CH_TIME("ItoSolver::computeDriftDt(level)");
+Real ItoSolver::computeAdvectiveDt(const int a_lvl) const {
+  CH_TIME("ItoSolver::computeAdvectiveDt(int)");
   if(m_verbosity > 5) {
-    pout() << m_name + "::computeDriftDt(level)" << endl;
+    pout() << m_name + "::computeAdvectiveDt(int)" << endl;
   }
 
-  Real dt = 1.E99;
-  
+  CH_assert(a_lvl >= 0);
+
+  // TLDR: We compute dt = dx/vMax on each grid patch on this level. 
+
+  Real dt = std::numeric_limits<Real>::max();
+
+  // Iterate over patches.
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
-  const RealVect dx = m_amr->getDx()[a_lvl]*RealVect::Unit;
-  
-  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-    const Real patchDt = this->computeDriftDt(a_lvl, dit(), dx);
-    dt = Min(dt, patchDt);
+  for (DataIterator dit(dbl); dit.ok(); ++dit) {
+    const Real patchDt = this->computeAdvectiveDt(a_lvl, dit());
+    
+    dt = std::min(dt, patchDt);
   }
 
+  // If using MPI, ranks will have computed different dts. Make sure we get the smallest one. 
 #ifdef CH_MPI
-  Real tmp = 1.;
-  int result = MPI_Allreduce(&dt, &tmp, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
+  Real tmp = dt;
+  const int result = MPI_Allreduce(&tmp, &dt, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
   if(result != MPI_SUCCESS) {
-    MayDay::Error("ItoSolver::compute_drift_level(lvl) - communication error on norm");
+    MayDay::Error("ItoSolver::computeAdvectiveDt(int) - communication error on norm");
   }
-  dt = tmp;
 #endif  
 
   return dt;
 }
 
-Real ItoSolver::computeDriftDt(const int a_lvl, const DataIndex& a_dit, const RealVect a_dx) const{
-  CH_TIME("ItoSolver::computeDriftDt(level, dataindex, dx)");
+Real ItoSolver::computeAdvectiveDt(const int a_lvl, const DataIndex& a_dit) const{
+  CH_TIME("ItoSolver::computeAdvectiveDt(int, DataIndex)");
   if(m_verbosity > 5) {
-    pout() << m_name + "::computeDriftDt(level, dataindex, dx)" << endl;
+    pout() << m_name + "::computeAdvectiveDt(int, DataIndex, dx)" << endl;
   }
 
-  const ParticleContainer<ItoParticle>& particles = m_particleContainers.at(WhichContainer::Bulk);
-
-  constexpr Real safety = 1.E-10;
-
-  const List<ItoParticle>& particleList = particles[a_lvl][a_dit].listItems();
-
-  Real dt = 1.E99;
+  Real dt = std::numeric_limits<Real>::max();
 
   if(m_isMobile) {
-    for (ListIterator<ItoParticle> lit(particleList); lit.ok(); ++lit) {
-      const ItoParticle& p = particleList[lit];
-      const RealVect& v     = p.velocity();
-      const int maxDir      = v.maxDir(true);
-      const Real thisDt     = a_dx[maxDir]/(safety + Abs(v[maxDir]));
 
-      dt = Min(dt, thisDt);
+    const Real dx = m_amr->getDx()[a_lvl];
+
+    // Particles that we iterate over. 
+    const ParticleContainer<ItoParticle>& particles    = m_particleContainers.at(WhichContainer::Bulk);
+    const List<ItoParticle>&              particleList = particles[a_lvl][a_dit].listItems();
+
+    for (ListIterator<ItoParticle> lit(particleList); lit.ok(); ++lit) {
+      const ItoParticle& p = lit();
+      const RealVect&    v = p.velocity();
+
+      // Get maximum velocity component.
+      const int maxDir     = v.maxDir(true);
+      const Real vMax      = std::abs(v[maxDir]);
+      
+      const Real thisDt    = (vMax > 0.0) ? (dx/vMax) : std::numeric_limits<Real>::max();
+
+      dt = std::min(dt, thisDt);
     }
   }
 
   return dt;
 }
 
-Real ItoSolver::computeMinDiffusionDt(const Real a_maxCellsToHop) const{
-  CH_TIME("ItoSolver::computeMinDiffusionDt(min, maxCellsToHop)");
-  if(m_verbosity > 5) {
-    pout() << m_name + "::computeMinDiffusionDt(min, maxCellsToHop)" << endl;
-  }
-
-  Vector<Real> dt = this->computeDiffusionDt(a_maxCellsToHop);
-  Real minDt = dt[0];
-  for (int lvl = 0; lvl < dt.size(); lvl++) {
-    minDt = Min(minDt, dt[lvl]);
-  }
-
-  return minDt;
-}
-
-Vector<Real> ItoSolver::computeDiffusionDt(const Real a_maxCellsToHop) const{
-  CH_TIME("ItoSolver::computeMinDiffusionDt(maxCellsToHop)");
-  if(m_verbosity > 5) {
-    pout() << m_name + "::computeMinDiffusionDt(maxCellsToHop)" << endl;
-  }
-
-  const Real factor  = a_maxCellsToHop/m_normalDistributionTruncation;
-  const Real factor2 = factor*factor;
-  
-  Vector<Real> dt = this->computeDiffusionDt();
-  for (int lvl = 0; lvl < dt.size(); lvl++) {
-    dt[lvl] = dt[lvl]*factor2;
-  }
-
-  return dt;
-}
 
 Real ItoSolver::computeDiffusiveDt() const {
-  CH_TIME("ItoSolver::computeDiffusiveDt");
+  CH_TIME("ItoSolver::computeDiffusiveDt()");
   if(m_verbosity > 5) {
-    pout() << m_name + "::computeDiffusiveDt" << endl;
+    pout() << m_name + "::computeDiffusiveDt()" << endl;
   }
 
-  Real minDt = 1.E99;
-  const Vector<Real> levelDts = this->computeDiffusionDt();
+  // TLDR: Compute dt = dx*dx/(2*D) on each grid patchon every grid level. 
 
-  for (int lvl = 0; lvl < levelDts.size(); lvl++) {
-    minDt = Min(levelDts[lvl], minDt);
-  }
-
-  return minDt;
-}
-
-Vector<Real> ItoSolver::computeDiffusionDt() const{
-  CH_TIME("ItoSolver::computeDiffusionDt");
-  if(m_verbosity > 5) {
-    pout() << m_name + "::computeDiffusionDt" << endl;
-  }
-
-  const int finest_level = m_amr->getFinestLevel();
+  Real dt = std::numeric_limits<Real>::max();
+  
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const Real levelDt = this->computeDiffusiveDt(lvl);
     
-  Vector<Real> dt(1 + finest_level, 1.2345E6);
-
-  for (int lvl = 0; lvl <= finest_level; lvl++) {
-    dt[lvl] = this->computeDiffusionDt(lvl);
+    dt = std::min(dt, levelDt);
   }
 
   return dt;
 }
 
-Real ItoSolver::computeDiffusionDt(const int a_lvl) const{
-  CH_TIME("ItoSolver::computeDiffusionDt(level)");
+Real ItoSolver::computeDiffusiveDt(const int a_lvl) const{
+  CH_TIME("ItoSolver::computeDiffusiveDt(int)");
   if(m_verbosity > 5) {
-    pout() << m_name + "::computeDiffusionDt(level)" << endl;
+    pout() << m_name + "::computeDiffusiveDt(int)" << endl;
   }
 
+  CH_assert(a_lvl >= 0);
+
+  // TLDR: Compute dt = dx*dx/(2*D) on each grid patch. 
   
-  Real dt = 1.E99;
+  Real dt = std::numeric_limits<Real>::max();
   
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
-  const RealVect dx = m_amr->getDx()[a_lvl]*RealVect::Unit;
-  
-  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-    const Real patchDt = this->computeDiffusionDt(a_lvl, dit(), dx);
-    dt = Min(dt, patchDt);
+  for (DataIterator dit(dbl); dit.ok(); ++dit) {
+    const Real patchDt = this->computeDiffusiveDt(a_lvl, dit());
+    
+    dt = std::min(dt, patchDt);
   }
 
 #ifdef CH_MPI
-  Real tmp = 1.;
-  int result = MPI_Allreduce(&dt, &tmp, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
+  Real tmp = dt;
+  const int result = MPI_Allreduce(&tmp, &dt, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
   if(result != MPI_SUCCESS) {
-    MayDay::Error("ItoSolver::compute_diffusion_level(lvl) - communication error on norm");
+    MayDay::Error("ItoSolver::computeDiffusiveDt(int) - communication error on norm");
   }
-  dt = tmp;
 #endif
 
   return dt;
 }
 
-Real ItoSolver::computeDiffusionDt(const int a_lvl, const DataIndex& a_dit, const RealVect a_dx) const{
-  CH_TIME("ItoSolver::computeDiffusionDt(level, dataindex, dx)");
+Real ItoSolver::computeDiffusiveDt(const int a_lvl, const DataIndex& a_dit) const{
+  CH_TIME("ItoSolver::computeDiffusiveDt(int, DataIndex)");
   if(m_verbosity > 5) {
-    pout() << m_name + "::computeDiffusionDt(level, dataindex, dx)" << endl;
+    pout() << m_name + "::computeDiffusiveDt(int, DataIndex)" << endl;
   }
 
-  const ParticleContainer<ItoParticle>& particles = this->getParticles(WhichContainer::Bulk);
-  
-  const List<ItoParticle>& particleList = particles[a_lvl][a_dit].listItems();
+  CH_assert(a_lvl >= 0);
 
-  Real dt = 1.E99;
+  // TLDR: Compute dt = dx*dx/(2*D) for all particles in the input grid patch. 
+
+  Real dt = std::numeric_limits<Real>::max();
 
   if(m_isDiffusive) {
+    const Real dx  = m_amr->getDx()[a_lvl];
+    const Real dx2 = dx*dx/2.0;
+
+    // These are the particles we iterate over. 
+    const ParticleContainer<ItoParticle>& particles    = this->getParticles(WhichContainer::Bulk);
+    const List<ItoParticle>&              particleList = particles[a_lvl][a_dit].listItems();
+
     for (ListIterator<ItoParticle> lit(particleList); lit.ok(); ++lit) {
-      const ItoParticle& p = particleList[lit];
+      const ItoParticle& p = lit();
+      const Real&        D = p.diffusion();
+      
+      const Real thisDt    = (D > 0.0) ? dx2/D : std::numeric_limits<Real>::max();
     
-      const Real thisDt = a_dx[0]*a_dx[0]/(2.0*p.diffusion());
-    
-      dt = Min(dt, thisDt);
+      dt = std::min(dt, thisDt);
     }
   }
 
