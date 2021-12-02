@@ -43,7 +43,7 @@ ItoSolver::ItoSolver() {
 }
 
 ItoSolver::~ItoSolver() {
-
+  CH_TIME("ItoSolver::~ItoSolver");
 }
 
 std::string ItoSolver::getName() const {
