@@ -83,7 +83,8 @@ void ItoSolver::parseOptions() {
   }
 
   this->parseSuperParticles();        
-  this->parseRng();
+  this->parseRNG();
+  this->parseTruncation();
   this->parsePlotVariables();
   this->parseDeposition();
   this->parseBisectStep();
@@ -100,8 +101,8 @@ void ItoSolver::parseRuntimeOptions() {
   }
 
   this->parseSuperParticles();
-  this->parseRng();
   this->parsePlotVariables();
+  this->parseTruncation();  
   this->parseDeposition();
   this->parseBisectStep();
   this->parseRedistribution();
@@ -115,21 +116,21 @@ void ItoSolver::parseSuperParticles() {
     pout() << m_name + "::parseSuperParticles" << endl;
   }
 
-  // Seed the RNG
   ParmParse pp(m_className.c_str());
   pp.get("kd_direction", m_directionKD);
 
-  m_directionKD = min(m_directionKD, SpaceDim-1);
+  m_directionKD = std::min(m_directionKD, SpaceDim-1);
 }
 
-void ItoSolver::parseRng() {
-  CH_TIME("ItoSolver::parseRng");
+void ItoSolver::parseRNG() {
+  CH_TIME("ItoSolver::parseRNG");
   if(m_verbosity > 5) {
-    pout() << m_name + "::parseRng" << endl;
+    pout() << m_name + "::parseRNG" << endl;
   }
 
   // Seed the RNG
   ParmParse pp(m_className.c_str());
+  
   pp.get("seed",       m_rngSeed);
   pp.get("normal_max", m_normalDistributionTruncation);
 
@@ -151,6 +152,17 @@ void ItoSolver::parseRng() {
   m_uniformDistribution11 = std::uniform_real_distribution<Real>(-one , one       ); // <- Uniform real distribution from [-1, -1]
   m_uniformDistribution0d = std::uniform_int_distribution<int>  ( 0   , SpaceDim-1); // <- Uniform integer distribution from [0, SpaceDim-1]
   m_normalDistribution01  = std::normal_distribution<Real>      ( zero, one       ); // <- Normal distribution with mean value of zero and standard deviation of one. 
+}
+
+void ItoSolver::parseTruncation() {
+  CH_TIME("ItoSolver::parseTruncation");
+  if(m_verbosity > 5) {
+    pout() << m_name + "::parseTruncation" << endl;
+  }
+
+  ParmParse pp(m_className.c_str());
+  
+  pp.get("normal_max", m_normalDistributionTruncation);
 }
 
 void ItoSolver::parsePlotVariables() {
@@ -189,9 +201,9 @@ void ItoSolver::parsePlotVariables() {
 }
 
 void ItoSolver::parseDeposition() {
-  CH_TIME("ItoSolver::parseRng");
+  CH_TIME("ItoSolver::parseDeposition");
   if(m_verbosity > 5) {
-    pout() << m_name + "::parseRng" << endl;
+    pout() << m_name + "::parseDeposition" << endl;
   }
 
   ParmParse pp(m_className.c_str());
@@ -212,7 +224,7 @@ void ItoSolver::parseDeposition() {
     m_deposition = DepositionType::W4;
   }
   else{
-    MayDay::Abort("ItoSolver::parseDeposition - unknown interpolant requested");
+    MayDay::Error("ItoSolver::parseDeposition - unknown deposition method requested");
   }
 
   // Deposition for plotting only
@@ -231,7 +243,7 @@ void ItoSolver::parseDeposition() {
     m_plotDeposition = DepositionType::W4;
   }
   else{
-    MayDay::Abort("ItoSolver::parseDeposition - unknown interpolant requested");
+    MayDay::Error("ItoSolver::parseDeposition - unknown deposition method requested");
   }
 
   // Mobility interpolation.

@@ -1160,17 +1160,22 @@ protected:
   std::map<WhichContainer, ParticleContainer<ItoParticle> > m_particleContainers;
 
   /*!
-    @brief Parse superparticles
+    @brief Parse superparticle settings -- this just sets the default direction in which we build the BVH
   */
   void parseSuperParticles();
   
   /*!
-    @brief Parse RNG options
+    @brief Parse RNG options -- this parses the RNG seed and instantiates the distributions. 
   */
-  void parseRng();
+  void parseRNG();
 
   /*!
-    @brief Parse deposition options
+    @brief Parse the normal distribution truncation level
+  */
+  void parseTruncation();
+
+  /*!
+    @brief Parse particle deposition methods.
   */
   void parseDeposition();
 
