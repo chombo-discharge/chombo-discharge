@@ -88,7 +88,6 @@ void ItoSolver::parseOptions() {
   this->parseDeposition();
   this->parseBisectStep();
   this->parsePvrBuffer();
-  this->parseDiffusionHop();
   this->parseRedistribution();
   this->parseDivergenceComputation();
   this->parseCheckpointing();
@@ -105,7 +104,6 @@ void ItoSolver::parseRuntimeOptions() {
   this->parsePlotVariables();
   this->parseDeposition();
   this->parseBisectStep();
-  this->parseDiffusionHop();
   this->parseRedistribution();
   this->parseDivergenceComputation();
   this->parseCheckpointing();
@@ -139,6 +137,10 @@ void ItoSolver::parseRng() {
   if(m_rngSeed < 0) { 
     m_rngSeed = std::chrono::system_clock::now().time_since_epoch().count();
   }
+
+#ifdef CH_MPI
+  m_rngSeed += procID();
+#endif
 
   // Initialize random number generator and distributions
   constexpr Real zero = 0.0;
@@ -280,17 +282,6 @@ void ItoSolver::parsePvrBuffer() {
   else{
     MayDay::Abort("ItoSolver::parsePvrBuffer - unknown argument to 'halo_deposition'");
   }
-}
-
-void ItoSolver::parseDiffusionHop() {
-  CH_TIME("ItoSolver::parseDiffusionHop");
-  if(m_verbosity > 5) {
-    pout() << m_name + "::parseDiffusionHop" << endl;
-  }
-
-  ParmParse pp(m_className.c_str());
-
-  pp.get("max_diffusion_hop", m_maxDiffusionHop);
 }
 
 void ItoSolver::parseRedistribution() {

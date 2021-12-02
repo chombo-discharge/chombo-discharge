@@ -902,22 +902,22 @@ protected:
   WhichMobilityInterpolation m_mobilityInterpolation;
 
   /*!
-    @brief Get number of particles used for restarting
+    @brief Number of particles used when restarting a simulation -- this is relevant only when restarting from a "fluid" checkpoint file. 
   */
   int m_restartPPC;
 
   /*!
-    @brief Splitting direction
+    @brief Splitting direction. This is used in mergeBVH to select the first direction of the BVH when merging/splitting particles. 
   */
   int m_directionKD;
 
   /*!
-    @brief Realm
+    @brief Realm where this solve lives. 
   */
   std::string m_realm;
 
   /*!
-    @brief Boundary volume hierarchy merging tree
+    @brief Boundary volume hierarchy merging tree -- used in mergeBVH. 
   */
   ItoMerge::Tree<PointMass> m_mergeTree;
 
@@ -932,22 +932,23 @@ protected:
   RefCountedPtr<AmrMesh> m_amr;
 
   /*!
-    @brief Species
+    @brief Species that this solver solves for. 
   */
   RefCountedPtr<ItoSpecies> m_species;
 
   /*!
-    @brief Phase
+    @brief Phase where this solver lives. 
   */
   phase::which_phase m_phase;
 
   /*!
-    @brief Name
+    @brief Solver name
   */
   std::string m_name;
 
   /*!
     @brief Class name
+    @details ItoSolver for parent class -- derived classes might be named something else.
   */
   std::string m_className;
 
@@ -977,22 +978,24 @@ protected:
   mutable std::uniform_int_distribution<int> m_uniformDistribution0d;
 
   /*!
-    @brief Maximum exponential
+    @brief Truncation value for normal distribution. 
+    @details This is used when drawing numbers from the Gaussian distribution, replacing all values above m_normalDistributionTruncation by m_normalDistributionTruncation.
   */
   Real m_normalDistributionTruncation;
 
   /*!
     @brief Random number generator seed.
+    @note To avoid having all MPI ranks use the same input seed - the rank seed is m_rngSeed + procID()
   */
   Real m_rngSeed;
 
   /*!
-    @brief Bisection step for particle trajectories
+    @brief Bisection step size to use for particle intersection tests with EBs.
   */
   Real m_bisectionStep;
 
   /*!
-    @brief Verbosity
+    @brief Verbosity level for this solver.
   */
   int m_verbosity;
 
@@ -1022,11 +1025,6 @@ protected:
   Real m_dt;
 
   /*!
-    @brief Length of maximum diffusion hop relative to the cell size
-  */
-  Real m_maxDiffusionHop;
-
-  /*!
     @brief NGP deposition in cut cells or not
   */
   bool m_forceIrregDepositionNGP;
@@ -1037,97 +1035,97 @@ protected:
   bool m_forceIrregInterpolationNGP;
 
   /*!
-    @brief Use ngp when depositing halo particles or not
+    @brief Force usage of NGP when depositing "halo" particles. 
   */
   bool m_forceHaloNGP;
 
   /*!
-    @brief Redistribute or not
+    @brief Use mass redistribution or not. 
   */
   bool m_useRedistribution;
 
   /*!
-    @brief Flag for blending the deposition clouds with the nonconservative divergence
+    @brief Flag for blending the deposition clouds with the "non-conservative" divergence. 
   */
   bool m_blendConservation;
 
   /*!
-    @brief Solver is diffusive
+    @brief If true, solver is diffusive. 
   */
   bool m_isDiffusive;
 
   /*!
-    @brief Also solve for advection/convection
+    @brief If true, solver is mobile, i.e. advection is turned on. 
   */
   bool m_isMobile;
 
   /*!
-    @brief Output state
+    @brief Flag for outputting m_phi to plot files. 
   */
   bool m_plotPhi;
 
   /*!
-    @brief Output state
+    @brief Flag for outputting m_velocityFunction to plot files. 
   */
   bool m_plotVelocity;
 
   /*!
-    @brief Output state
+    @brief Flag for outputting m_diffusionFunction to plot files. 
   */
   bool m_plotDiffCo;
 
   /*!
-    @brief Plot particles
+    @brief Flag for depositing and plotting the bulk particles on the mesh. 
   */
   bool m_plotParticles;
 
   /*!
-    @brief Plot EB particles
+    @brief Flag for depositing and plotting the EB particles on the mesh. 
   */
   bool m_plotParticlesEB;
 
   /*!
-    @brief Plot domain particles
+    @brief Flag for depositing and plotting the domain particles on the mesh. 
   */
   bool m_plotParticlesDomain;
 
   /*!
-    @brief Plot source particles
+    @brief Flag for depositing and plotting the source particles on the mesh. 
   */
   bool m_plotParticlesSource;
 
   /*!
-    @brief Plot covered particles
+    @brief Flag for depositing and plotting the covered particles on the mesh. 
   */
   bool m_plotParticlesCovered;
 
   /*!
-    @brief Plot energy density
+    @brief Flag for plotting the energy density on the mesh
   */
   bool m_plotEnergyDensity;
 
   /*!
-    @brief Plot average energy or not. 
+    @brief Flag for plotting the average particle energy on the mesh
   */
   bool m_plotAverageEnergy;
 
   /*!
-    @brief Mass/charge deposition type
+    @brief Deposition method when depositing particles to the mesh. 
   */
   DepositionType m_deposition; 
 
   /*!
-    @brief Plot deposition type
+    @brief Deposition method when depositing particles to mesh during plotting. 
   */
   DepositionType m_plotDeposition; 
 
   /*!
-    @brief Deposited particles
+    @brief Storage for particle mesh data. 
   */
   EBAMRCellData m_phi;
 
   /*!
-    @brief Mobility function
+    @brief Mobility function -- used when interpolating particle mobilities. 
   */
   EBAMRCellData m_mobilityFunction;
 
