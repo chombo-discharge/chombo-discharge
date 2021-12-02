@@ -247,9 +247,8 @@ void ItoSolver::parseDeposition() {
   }
 
   // Mobility interpolation.
-  pp.get("WhichMobilityInterpolation",str);
-
-  if(str == "mobility") {
+  pp.get("mobility_interp",str);
+  if(str == "direct") {
     m_mobilityInterpolation = WhichMobilityInterpolation::Direct;
   }
   else if(str == "velocity") {
