@@ -2763,7 +2763,6 @@ void ItoSolver::mergeBVH(List<ItoParticle>& a_particles, const int a_particlesPe
     const ItoParticle& p = lit();
     pointMasses[i].define(p.position(), p.mass(), p.energy()); // Note, p.energy() is average energy and not total energy. 
     mass += p.mass();
-    //    i++;
 
 #if ITO_DEBUG
     mass_before   += p.mass();
