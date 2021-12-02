@@ -2332,10 +2332,10 @@ Real ItoSolver::computeDt(const int a_lvl, const DataIndex& a_dit) const{
   return dt;
 }
 
-Real ItoSolver::computeMinDt(const Real a_maxCellsToMove) const {
-  CH_TIME("ItoSolver::computeMinDt(Real)");
+Real ItoSolver::computeHopDt(const Real a_maxCellsToMove) const {
+  CH_TIME("ItoSolver::computeHopDt(Real)");
   if(m_verbosity > 5) {
-    pout() << m_name + "::computeMinDt(Real)" << endl;
+    pout() << m_name + "::computeHopDt(Real)" << endl;
   }
 
   CH_assert(a_maxCellsToMove > 0.0);
@@ -2347,17 +2347,17 @@ Real ItoSolver::computeMinDt(const Real a_maxCellsToMove) const {
 
   // Compute time steps for each grid level.
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const Real levelDt = this->computeMinDt(a_maxCellsToMove, lvl);
+    const Real levelDt = this->computeHopDt(a_maxCellsToMove, lvl);
     dt = std::min(dt, levelDt);
   }
 
   return dt;
 }
 
-Real ItoSolver::computeMinDt(const Real a_maxCellsToMove, const int a_lvl) const{
-  CH_TIME("ItoSolver::computeMinDt(Real, int)");
+Real ItoSolver::computeHopDt(const Real a_maxCellsToMove, const int a_lvl) const{
+  CH_TIME("ItoSolver::computeHopDt(Real, int)");
   if(m_verbosity > 5) {
-    pout() << m_name + "::computeMinDt(Real, int)" << endl;
+    pout() << m_name + "::computeHopDt(Real, int)" << endl;
   }
 
   CH_assert(a_maxCellsToMove > 0.0);
@@ -2370,7 +2370,7 @@ Real ItoSolver::computeMinDt(const Real a_maxCellsToMove, const int a_lvl) const
   // Compute time steps for each grid patch.
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
   for (DataIterator dit(dbl); dit.ok(); ++dit) {
-    const Real patchDt = this->computeMinDt(a_maxCellsToMove, a_lvl, dit());
+    const Real patchDt = this->computeHopDt(a_maxCellsToMove, a_lvl, dit());
     dt = std::min(dt, patchDt);
   }
 
@@ -2378,17 +2378,17 @@ Real ItoSolver::computeMinDt(const Real a_maxCellsToMove, const int a_lvl) const
   Real tmp = dt;
   const int result = MPI_Allreduce(&tmp, &dt, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
   if(result != MPI_SUCCESS) {
-    MayDay::Error("ItoSolver::computeMinDt(Real, int) - communication error on norm");
+    MayDay::Error("ItoSolver::computeHopDt(Real, int) - communication error on norm");
   }
 #endif  
 
   return dt;
 }
 
-Real ItoSolver::computeMinDt(const Real a_maxCellsToMove, const int a_lvl, const DataIndex& a_dit) const{
-  CH_TIME("ItoSolver::computeMinDt(Real, int, DataIndex)");
+Real ItoSolver::computeHopDt(const Real a_maxCellsToMove, const int a_lvl, const DataIndex& a_dit) const{
+  CH_TIME("ItoSolver::computeHopDt(Real, int, DataIndex)");
   if(m_verbosity > 5) {
-    pout() << m_name + "::computeMinDt(Real, int, DataIndex)" << endl;
+    pout() << m_name + "::computeHopDt(Real, int, DataIndex)" << endl;
   }
 
   CH_assert(a_maxCellsToMove > 0.0);

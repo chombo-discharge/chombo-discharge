@@ -781,7 +781,7 @@ public:
     requires a solution to a quadratic equation. Fortunately, this is easy to solve for. 
     @param[in] a_maxCellsToMove
   */
-  Real computeMinDt(const Real a_maxCellsToMove) const;
+  Real computeHopDt(const Real a_maxCellsToMove) const;
 
   /*!
     @brief Compute the largest possible time step such that the particles does not move more than a specified number of grid cells on the input grid level.
@@ -795,7 +795,7 @@ public:
     @param[in] a_maxCellsToMove Maximum number of cells to move with a standard Ito kernel dX = v*dt + sqrt(2*D*dt)*N
     @param[in] a_lvl            Grid level
   */
-  Real computeMinDt(const Real a_maxCellsToMove, const int a_lvl) const;
+  Real computeHopDt(const Real a_maxCellsToMove, const int a_lvl) const;
 
   /*!
     @brief Compute the largest possible time step such that the particles does not move more than a specified number of grid cells on the input grid level.
@@ -810,7 +810,7 @@ public:
     @param[in] a_lvl            Grid level
     @param[in] a_dit            Grid index
   */
-  Real computeMinDt(const Real a_maxCellsToMove, const int a_lvl, const DataIndex& a_dit) const;
+  Real computeHopDt(const Real a_maxCellsToMove, const int a_lvl, const DataIndex& a_dit) const;
 
   /*!
     @brief Compute drift dt. This returns the minimum of (dx/dt)*a_maxCellsToMove over all levels. 

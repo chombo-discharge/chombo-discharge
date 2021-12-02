@@ -245,11 +245,11 @@ Real ItoLayout<T>::computeAdvectiveDt(){
 }
 
 template <class T>
-Real ItoLayout<T>::computeMinDt(const Real a_maxCellsToMove){
+Real ItoLayout<T>::computeHopDt(const Real a_maxCellsToMove){
   Real minDt = std::numeric_limits<Real>::max();
 
   for (ItoIterator<T> iter = this->iterator(); iter.ok(); ++iter){
-    const Real thisDt = iter()->computeMinDt(a_maxCellsToMove);
+    const Real thisDt = iter()->computeHopDt(a_maxCellsToMove);
     minDt = std::min(minDt, thisDt);
   }
   

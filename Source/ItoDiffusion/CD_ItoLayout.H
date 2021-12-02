@@ -230,11 +230,11 @@ public:
 
   /*!
     @brief Compute the largest dt which restricts all particles to move less than a_maxCellsToMove.
-    @details This calls computeMinDt for all solvers -- that function uses the maximum permitted diffusion hop to restrict the time step (the user will have
+    @details This calls computeHopDt for all solvers -- that function uses the maximum permitted diffusion hop to restrict the time step (the user will have
     restricted the normal distribution to some value). So, the result of this value will depend strongly on the user input for the ItoSolvers. 
     @param[in] a_maxCellsToMove Maximum number of cells to move. 
   */
-  virtual Real computeMinDt(const Real a_maxCellsToMove);
+  virtual Real computeHopDt(const Real a_maxCellsToMove);
 
   /*!
     @brief Get largest possible time step for advection part.
@@ -245,7 +245,7 @@ public:
 
   /*!
     @brief Get largest possible time step for diffusion part
-    @details This computes computeMinDiffusionDt for each solver and minimizes the result over the solvers. As with computeMinDt, the result of this function will
+    @details This computes computeMinDiffusionDt for each solver and minimizes the result over the solvers. As with computeHopDt, the result of this function will
     depend on the restriction of the normal distribution (which controls the diffusion hop).
     @param[in] a_maxCellsToMove Maximum number of cells to move (due to diffusion only)
   */
