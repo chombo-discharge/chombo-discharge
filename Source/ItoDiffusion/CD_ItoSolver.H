@@ -831,27 +831,32 @@ public:
   Real computeAdvectiveDt(const int a_lvl, const DataIndex& a_dit) const;  
 
   /*!
-    @brief Compute the diffusive dt
+    @brief Compute the diffusive dt. This computes dt = dx*dx/(2*D) for all particles
   */
   Real computeDiffusiveDt() const;
 
   /*!
-    @brief Compute diffusion dt as dx/(sqrt(2D)*eps) on one level
+    @brief Compute the diffusive dt. This computes dt = dx*dx/(2*D) for all particles on the input level
+    @param[in] a_lvl Grid level
   */
   Real computeDiffusiveDt(const int a_lvl) const;
 
   /*!
-    @brief Compute diffusion dt as dx/(sqrt(2D)*eps) on one level and one patch
+    @brief Compute the diffusive dt. This computes dt = dx*dx/(2*D) for all particles on the input grid patch
+    @param[in] a_lvl Grid level
+    @param[in] a_dit Grid index
   */
   Real computeDiffusiveDt(const int a_lvl, const DataIndex& a_dit) const;
 
   /*!
     @brief Get deposition method
+    @return Returns m_deposition
   */
   DepositionType getDeposition() const;
 
   /*!
     @brief Return phase
+    @return Returns m_phase
   */
   phase::which_phase getPhase() const;
   
