@@ -1575,21 +1575,23 @@ void ItoSolver::redistributeAMR(EBAMRCellData& a_phi) const {
   //       completely conservative, if that is important. 
   //
   //       If we use redistribution then we compute a hybrid update phiH = kappa*phi = a_phi in each cell. But we are then "missing"
-  //       a mass kappa*phi - kappa*phiH = a_phi(1 - kappa). This mass can be smooshed into the neighboring grid cells. 
+  //       a mass kappa*phi - kappa*phiH = a_phi(1 - kappa). This mass can be smooshed into the neighboring grid cells. The code
+  //       below does even more than that -- it can compute an update phiH = kappa*phi + (1-kappa)*phiNC where phiNC is a non-conservative
+  //       type of update. In this case the mass loss is just like for fluid models: dM = kappa*(1-kappa)(phiC - phiNC). But 
 
   if(m_useRedistribution) {
-    this->depositNonConservative(m_depositionNC, a_phi);              // Compute m_depositionNC = sum(kappa*Wc)/sum(kappa)
-    this->depositHybrid(a_phi, m_massDiff, m_depositionNC);           // Compute hybrid deposition, including mass differnce
-    this->incrementRedist(m_massDiff);                                // Increment level redistribution register
+    this->depositNonConservative(m_depositionNC, a_phi);    // Compute m_depositionNC = sum(kappa*Wc)/sum(kappa)
+    this->depositHybrid(a_phi, m_massDiff, m_depositionNC); // Compute hybrid deposition, including mass differnce
+    this->incrementRedist(m_massDiff);                      // Increment level redistribution register
 
     // Do the redistribution magic
-    const bool ebcf = m_amr->getEbCf();
+    const bool ebcf = m_amr->getEbCf(); 
     if(ebcf) { // Mucho stuff to do here...
-      this->coarseFineIncrement(m_massDiff);       // Compute C2F, F2C, and C2C mass transfers
-      this->levelRedist(a_phi);           // Level redistribution. Weights is a dummy parameter
-      this->coarseFineRedistribution(a_phi);     // Do the coarse-fine redistribution
+      this->coarseFineIncrement(m_massDiff);  // Compute C2F, F2C, and C2C mass transfers.
+      this->levelRedist(a_phi);               // Level redistribution.
+      this->coarseFineRedistribution(a_phi);  // Do the coarse-fine redistribution.
     }
-    else{ // Very simple, redistribute this level.
+    else{ // Very simple, just redistribute this level.
       this->levelRedist(a_phi);
     }
   }
@@ -1601,10 +1603,8 @@ void ItoSolver::depositNonConservative(EBAMRIVData& a_depositionNC, const EBAMRC
     pout() << m_name + "::depositNonConservative" << endl;
   }
 
-  const std::string cur_Realm = a_depositionNC.getRealm();
-
   if(m_blendConservation) {
-    const IrregAmrStencil<NonConservativeDivergenceStencil>& stencils = m_amr->getNonConservativeDivergenceStencils(cur_Realm, m_phase);
+    const IrregAmrStencil<NonConservativeDivergenceStencil>& stencils = m_amr->getNonConservativeDivergenceStencils(m_realm, m_phase);
     stencils.apply(a_depositionNC, a_depositionKappaC);
   }
   else{
@@ -1618,40 +1618,37 @@ void ItoSolver::depositHybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massD
     pout() << m_name + "::depositHybrid" << endl;
   }
 
-  const std::string cur_Realm = a_depositionH.getRealm();
-
-  const int comp  = 0;
-  const int ncomp = 1;
-
-
+  // TLDR: Compute divH = kappa*divC + (1-kappa)*divNC on each cell. Also compute mass difference.
+  
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const DisjointBoxLayout& dbl = m_amr->getGrids(cur_Realm)[lvl];
-    const ProblemDomain& domain  = m_amr->getDomains()[lvl];
-    const EBISLayout& ebisl      = m_amr->getEBISLayout(cur_Realm, m_phase)[lvl];
+    const DisjointBoxLayout& dbl     = m_amr->getGrids(m_realm)[lvl];
+    const EBISLayout&        ebisl   = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+    const ProblemDomain&     domain  = m_amr->getDomains()[lvl];    
     
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-      EBCellFAB& divH               = (*a_depositionH[lvl])[dit()];  // On input, this contains kappa*depositionWeights
-      BaseIVFAB<Real>& deltaM       = (*a_massDifference[lvl])[dit()];
-      const BaseIVFAB<Real>& divNC  = (*a_depositionNC[lvl])[dit()]; 
-      const EBISBox& ebisbox        = ebisl[dit()];
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      EBCellFAB&             divH    = (*a_depositionH   [lvl])[dit()];  // On input, this contains kappa*depositionWeights
+      BaseIVFAB<Real>&       deltaM  = (*a_massDifference[lvl])[dit()];
+      const BaseIVFAB<Real>& divNC   = (*a_depositionNC  [lvl])[dit()]; 
+      const EBISBox&         ebisbox = ebisl[dit()];
 
-      VoFIterator& vofit = (*m_amr->getVofIterator(cur_Realm, m_phase)[lvl])[dit()];
+      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
+      
       for (vofit.reset(); vofit.ok(); ++vofit) {
 	const VolIndex& vof = vofit();
+	
 	const Real kappa    = ebisbox.volFrac(vof);
-	const Real dc       = divH(vof, comp);
-	const Real dnc      = divNC(vof, comp);
+	const Real dc       = divH (vof, m_comp);
+	const Real dnc      = divNC(vof, m_comp);
 
 	// Note that if dc - kappa*dnc can be negative, i.e. we may end up STEALING mass
 	// from other cells. This is why there is a flag m_blendConservation which always
 	// gives positive definite results. 
-	divH(vof, comp)   = dc + (1.0-kappa)*dnc;        // On output, contains hybrid divergence
-	deltaM(vof, comp) = (1-kappa)*(dc - kappa*dnc);  // Remember, dc already scaled by kappa.
+	divH  (vof, m_comp) = dc + (1.0-kappa)*dnc;        // On output, contains hybrid divergence
+	deltaM(vof, m_comp) = (1-kappa)*(dc - kappa*dnc);  // Remember, dc already scaled by kappa.
       }
     }
   }
 }
-
 
 void ItoSolver::incrementRedist(const EBAMRIVData& a_massDifference) const {
   CH_TIME("ItoSolver::incrementRedist");
@@ -1659,21 +1656,16 @@ void ItoSolver::incrementRedist(const EBAMRIVData& a_massDifference) const {
     pout() << m_name + "::incrementRedist" << endl;
   }
 
-  const std::string cur_Realm = a_massDifference.getRealm();
+  const Interval interv(m_comp, m_comp);
 
-  const int comp  = 0;
-  const int ncomp = 1;
-  const int finest_level = m_amr->getFinestLevel();
-  const Interval interv(comp, comp);
-
-  for (int lvl = 0; lvl <= finest_level; lvl++) {
-    const DisjointBoxLayout& dbl = m_amr->getGrids(cur_Realm)[lvl];
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
     
-    EBLevelRedist& level_redist = *(m_amr->getLevelRedist(cur_Realm, m_phase)[lvl]);
-    level_redist.setToZero();
+    EBLevelRedist& levelRedist = *(m_amr->getLevelRedist(m_realm, m_phase)[lvl]);
+    levelRedist.setToZero();
 
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-      level_redist.increment((*a_massDifference[lvl])[dit()], dit(), interv);
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      levelRedist.increment((*a_massDifference[lvl])[dit()], dit(), interv);
     }
   }
 }
@@ -1684,17 +1676,13 @@ void ItoSolver::levelRedist(EBAMRCellData& a_phi) const {
     pout() << m_name + "::levelRedist" << endl;
   }
 
-  const std::string cur_Realm = a_phi.getRealm();
+  const Interval interv(m_comp, m_comp);
 
-  const int comp  = 0;
-  const int ncomp = 1;
-  const int finest_level = m_amr->getFinestLevel();
-  const Interval interv(comp, comp);
-
-  for (int lvl = 0; lvl <= finest_level; lvl++) {
-    EBLevelRedist& level_redist = *(m_amr->getLevelRedist(cur_Realm, m_phase)[lvl]);
-    level_redist.redistribute(*a_phi[lvl], interv);
-    level_redist.setToZero();
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
+    EBLevelRedist& levelRedist = *(m_amr->getLevelRedist(m_realm, m_phase)[lvl]);
+    
+    levelRedist.redistribute(*a_phi[lvl], interv);
+    levelRedist.setToZero();
   }
 }
 
@@ -1704,40 +1692,35 @@ void ItoSolver::coarseFineIncrement(const EBAMRIVData& a_massDifference) const {
     pout() << m_name + "::coarseFineIncrement" << endl;
   }
 
-  const std::string cur_Realm = a_massDifference.getRealm();
+  const Interval interv(m_comp,m_comp);  
 
-  const int comp  = 0;
-  const int ncomp = 1;
-  const int finest_level = m_amr->getFinestLevel();
-  const Interval interv(0,0);
+  const int finestLevel = m_amr->getFinestLevel();
 
-  for (int lvl = 0; lvl <= finest_level; lvl++) {
-    const DisjointBoxLayout& dbl = m_amr->getGrids(cur_Realm)[lvl];
+  for (int lvl = 0; lvl <= finestLevel; lvl++) {
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
 
-    RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->getFineToCoarRedist(cur_Realm, m_phase)[lvl];
-    RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->getCoarToFineRedist(cur_Realm, m_phase)[lvl];
-    RefCountedPtr<EBCoarToCoarRedist>& coar2coar_redist = m_amr->getCoarToCoarRedist(cur_Realm, m_phase)[lvl];
+    RefCountedPtr<EBFineToCoarRedist>& fine2coarRedist = m_amr->getFineToCoarRedist(m_realm, m_phase)[lvl];
+    RefCountedPtr<EBCoarToFineRedist>& coar2fineRedist = m_amr->getCoarToFineRedist(m_realm, m_phase)[lvl];
+    RefCountedPtr<EBCoarToCoarRedist>& coar2coarRedist = m_amr->getCoarToCoarRedist(m_realm, m_phase)[lvl];
 
-    const bool has_coar = lvl > 0;
-    const bool has_fine = lvl < 0;
+    const bool hasCoar = lvl > 0;
+    const bool hasFine = lvl < finestLevel;
 
-    if(has_coar) {
-      fine2coar_redist->setToZero();
-
+    if(hasCoar) {
+      fine2coarRedist->setToZero();
     }
-    if(has_fine) {
-      coar2fine_redist->setToZero();
-      coar2coar_redist->setToZero();
+    if(hasFine) {
+      coar2fineRedist->setToZero();
+      coar2coarRedist->setToZero();
     }
 
-    for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit) {
-      if(has_coar) {
-	fine2coar_redist->increment((*a_massDifference[lvl])[dit()], dit(), interv);
+    for (DataIterator dit(dbl); dit.ok(); ++dit) {
+      if(hasCoar) {
+	fine2coarRedist->increment((*a_massDifference[lvl])[dit()], dit(), interv);
       }
-
-      if(has_fine) {
-	coar2fine_redist->increment((*a_massDifference[lvl])[dit()], dit(), interv);
-	coar2coar_redist->increment((*a_massDifference[lvl])[dit()], dit(), interv);
+      if(hasFine) {
+	coar2fineRedist->increment((*a_massDifference[lvl])[dit()], dit(), interv);
+	coar2coarRedist->increment((*a_massDifference[lvl])[dit()], dit(), interv);
       }
     }
   }
@@ -1749,38 +1732,33 @@ void ItoSolver::coarseFineRedistribution(EBAMRCellData& a_phi) const {
     pout() << m_name + "::coarseFineRedistribution" << endl;
   }
 
-  const std::string cur_Realm = a_phi.getRealm();
+  const Interval interv(m_comp, m_comp);  
 
-  const int comp         = 0;
-  const int ncomp        = 1;
-  const int finest_level = m_amr->getFinestLevel();
-  const Interval interv(comp, comp);
+  const int finestLevel = m_amr->getFinestLevel();
 
+  for (int lvl = 0; lvl <= finestLevel; lvl++) {
+    
+    const bool hasCoar = lvl > 0;
+    const bool hasFine = lvl < finestLevel;
 
-  for (int lvl = 0; lvl <= finest_level; lvl++) {
-    const Real dx       = m_amr->getDx()[lvl];
-    const bool has_coar = lvl > 0;
-    const bool has_fine = lvl < finest_level;
-
-    RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->getCoarToFineRedist(cur_Realm, m_phase)[lvl];
-    RefCountedPtr<EBCoarToCoarRedist>& coar2coar_redist = m_amr->getCoarToCoarRedist(cur_Realm, m_phase)[lvl];
-    RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->getFineToCoarRedist(cur_Realm, m_phase)[lvl];
-    if(has_coar) {
-      fine2coar_redist->redistribute(*a_phi[lvl-1], interv);
-      fine2coar_redist->setToZero();
+    RefCountedPtr<EBCoarToFineRedist>& coar2fineRedist = m_amr->getCoarToFineRedist(m_realm, m_phase)[lvl];
+    RefCountedPtr<EBCoarToCoarRedist>& coar2coarRedist = m_amr->getCoarToCoarRedist(m_realm, m_phase)[lvl];
+    RefCountedPtr<EBFineToCoarRedist>& fine2coarRedist = m_amr->getFineToCoarRedist(m_realm, m_phase)[lvl];
+    
+    if(hasCoar) {
+      fine2coarRedist->redistribute(*a_phi[lvl-1], interv);
+      fine2coarRedist->setToZero();
     }
 
-    if(has_fine) {
-      coar2fine_redist->redistribute(*a_phi[lvl+1], interv);
-      coar2coar_redist->redistribute(*a_phi[lvl],   interv);
+    if(hasFine) {
+      coar2fineRedist->redistribute(*a_phi[lvl+1], interv);
+      coar2coarRedist->redistribute(*a_phi[lvl],   interv);
 
-      coar2fine_redist->setToZero();
-      coar2coar_redist->setToZero();
+      coar2fineRedist->setToZero();
+      coar2coarRedist->setToZero();
     }
   }
 }
-
-
 
 bool ItoSolver::isMobile() const{
   CH_TIME("ItoSolver::isMobile");

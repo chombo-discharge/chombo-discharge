@@ -7,6 +7,7 @@
   @file   CD_ItoSolver.H
   @brief  Declaration of solver class for Ito diffusion
   @author Robert Marskar
+  @todo mergeBVH and intersectParticlesIF
 */
 
 #ifndef CD_ItoSolver_H
@@ -1298,38 +1299,48 @@ protected:
     @details We will have deposited particles into each cell, i.e. phi_i = m_i/dx^3. To obtain the true density in an EB context we need to divide by kappa such that 
     phi_i = m_i/(kappa_i*dx^3). Unfortunately, this is numerically unstable because kappa_i can be arbitrarily small. We can set the density as phi_i = m_i/dx^3 but
     we will be missing a mass m_i*(1-kappa_i) from the cell. This mass can be smooshed into neighboring cells such as to make the total scheme conservative. As an option,
-    we can also use a "non-conservative" divergence but the scheme will not be non-negative. 
+    we can also use a "non-conservative" divergence but the scheme is not guaranteed to be non-negative. All of this is just to say that we take the mass that fell inside
+    the EB and put it back into the domain. 
     @param[inout] a_phi Quantity to be redistributed. 
   */
   void redistributeAMR(EBAMRCellData& a_phi) const;
 
   /*!
-    @brief Make the "non-conservative" kappa deposition
+    @brief Make the "non-conservative" kappa deposition -- computing depositionNC = sum(kappa*depositionC)/sum(kappa) in a neighborhood around each vof.
+    @param[out] a_depositionNC     Non-conservative deposition
+    @param[in]  a_depositionKappaC Conserved deposition
   */
   void depositNonConservative(EBAMRIVData& a_depositionNC, const EBAMRCellData& a_depositionKappaC) const;
 
   /*!
-    @brief Make the hybrid deposition. Also compute the mass difference
+    @brief Make the "hybrid" deposition phiH = kappa*phiC + (1-kappa)*phiNC. On input, a_depositionH should contain phiC
+    @param[inout] a_depositionH    On input, contains phiC. On output, contain phiH
+    @param[out]   a_massDifference On output, contains mass loss in each cut-cell.
+    @param[in]    a_depositionNC   The "non-conservative" deposited variable.
   */
   void depositHybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massDifference, const EBAMRIVData& a_depositionNC) const;
 
   /*!
     @brief Increment redistribution objects with mass to be redistributed
+    @param[in] a_massDifference mass to be redistributed. 
   */
   void incrementRedist(const EBAMRIVData& a_massDifference) const;
 
   /*!
     @brief Do redistribution on all levels, no coarse-fine stuff
+    @param[inout] a_phi Data to be redistributed into. 
   */
   void levelRedist(EBAMRCellData& a_phi) const;
 
   /*!
     @brief Increment the coarse-fine redist with mass difference (only for EB x CF)
+    @param[in] a_massDifference mass to be redistributed. 
   */
   void coarseFineIncrement(const EBAMRIVData& m_massDifference) const;
 
   /*!
-    @brief Do coarse-fine redistribution
+    @brief Do coarse-fine mass redistribution
+    @param[inout] a_phi Data to be redistributed into. 
   */
   void coarseFineRedistribution(EBAMRCellData& a_phi) const;
 
@@ -1357,17 +1368,22 @@ protected:
   virtual void writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellData& a_data, const bool a_interpToCentroids) const;  
 
   /*!
-    @brief Interpolate mobilities
+    @brief Directly interpolate mobilities. Interpolates for all particles in the specified grid patch. 
+    @param[in] a_level Grid level.
+    @param[in] a_dit   Grid index.
   */
   virtual void interpolateMobilitiesMu(const int a_level, const DataIndex& a_dit);
 
   /*!
-    @brief Interpolate mobilities
+    @brief Interpolate mobilities through the velocity. Interpolates for all particles in the specified grid patch. 
+    @param[in] a_level Grid level.
+    @param[in] a_dit   Grid index.
   */
   virtual void interpolateMobilitiesVel(const int a_level, const DataIndex& a_dit);
 
   /*!
     @brief Sign function
+    @return Returns 1.0 if a > 0 and -1 if a < 0.
   */
   inline
   Real sign(const Real& a) const;
