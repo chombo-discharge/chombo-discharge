@@ -7,7 +7,7 @@
   @file   CD_ItoSolver.H
   @brief  Declaration of solver class for Ito diffusion
   @author Robert Marskar
-  @todo mergeBVH and intersectParticlesIF
+  @todo intersectParticlesIF
 */
 
 #ifndef CD_ItoSolver_H
@@ -31,8 +31,8 @@
 #include <CD_ItoMerge.H>
 #include <CD_PointMass.H>
 #include <CD_EbRepresentation.H>
+#include <CD_EbIntersection.H>
 #include <CD_NamespaceHeader.H>
-
   
 /*!
   @brief Base class for Ito diffusion particle models.
@@ -1346,6 +1346,8 @@ protected:
 
   /*!
     @brief Superparticle merging with BVH trees
+    @param[inout] a_particles        Particles to be merged/split
+    @param[in]    a_particlesPerCell Target number of particles per cell
   */
   void mergeBVH(List<ItoParticle>& a_particles, const int a_particlesPerCell);
 
@@ -1355,7 +1357,7 @@ protected:
   void intersectParticlesIF(ParticleContainer<ItoParticle>& a_particles,
 			    ParticleContainer<ItoParticle>& a_eb_particles,
 			    ParticleContainer<ItoParticle>& a_domain_particles,
-			    const bool                        a_delete);
+			    const bool                      a_delete);
 
 
   /*!

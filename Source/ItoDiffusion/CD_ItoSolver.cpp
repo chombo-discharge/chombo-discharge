@@ -24,8 +24,6 @@
 #include <CD_ParticleOps.H>
 #include <CD_NamespaceHeader.H>
 
-#define ITO_DEBUG 0
-
 constexpr int ItoSolver::m_comp;
 constexpr int ItoSolver::m_nComp;
 

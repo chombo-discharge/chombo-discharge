@@ -838,8 +838,33 @@ public:
   template <class P>
   void transferCoveredParticlesVoxels(ParticleContainer<P>&     a_particlesFrom,
 				      ParticleContainer<P>&     a_particlesTo,				      
-				      const phase::which_phase& a_phase) const;  
-  
+				      const phase::which_phase& a_phase) const;
+
+  /*!
+    @brief Particle intersection algorithm based on ray-casting.
+    @details This routine will iterate through all the particles and check if they intersect the geometry. The template
+    parameter indicates the particle type -- it MUST have const RealVec& position() const and  const RealVect& oldPosition() const 
+    functions that determine the start and stop position of the particle trajectory. This routine uses a ray-casting method
+    to check for intersections with the EB (the domain side is much easier). If the particles are closer to the EB than
+    a_tolerance*dx (where dx is the grid resolution on the grid level), they are absorbed and placed on the EB. Their position
+    are updated and they are placed in the a_ebParticles argument. This routine uses a ray-casting method where it computes
+    the distance from the EB (assuming that the implicit function is a signed distance function). Particles are then moved that
+    distance along their trajectory and we then update the new distance to the EB. This is done recursively until the particles
+    have either moved the entire length or been absorbed by the EB or domain side. 
+    @param[inout] a_activeParticles Particles to be intersected with geometry
+    @param[out]   a_ebParticles     Particles that intersected with the EB
+    @param[out]   a_domainParticles Particles that intersected with the domain faces
+    @param[in]    a_phase           Phase where the input particles live
+    @param[in]    a_tolerance       Tolerance relative to grid resolution.
+    @param[in]    a_deleteParticles If true, particles will be removed from a_activeParticles if they intersect the geometry.
+  */
+  template <class P>
+  void intersectParticlesRaycastIF(ParticleContainer<P>&    a_activeParticles,
+				   ParticleContainer<P>&    a_ebParticles,
+				   ParticleContainer<P>&    a_domainParticles,
+				   const phase::which_phase a_phase,
+				   const Real               a_tolerance,
+				   const bool               a_deleteParticles) const;
   /*!
     @brief Interpolate ghost vectors over a realm, using the default ghost cell interpolation method. 
     @param[inout] a_data  Data to be interpolated.
@@ -1213,7 +1238,7 @@ public:
     @param[in] a_phase Phase (gas or solid)
   */
   const IrregAmrStencil<EbCentroidInterpolationStencil>& getEbCentroidInterpolationStencilStencils(const std::string        a_realm,
-										  const phase::which_phase a_phase) const;
+												   const phase::which_phase a_phase) const;
 
   /*!
     @brief Get the nonconservative divergence stencils
@@ -1457,7 +1482,7 @@ protected:
   */
   void buildGrids(Vector<IntVectSet>& a_tags, const int a_lmin, const int a_hardcap = -1);
 
-    /*!
+  /*!
     @brief Parse the low/high corners of the computational domain. 
   */
   void parseProbLoHiCorners();
