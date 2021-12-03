@@ -19,6 +19,6 @@ ItoSolver.mobility_interp     = direct        # How to interpolate mobility, 'di
 ItoSolver.plot_deposition     = cic           # Cloud-in-cell for plotting particles.
 ItoSolver.halo_deposition     = native        # Native or NGP (see documentation)
 ItoSolver.deposition          = cic           # 'ngp' = nearest grid point
-                                               # 'cic' = cloud-in-cell
-                                               # 'tsc' = triangle-shaped-cloud
-                                               # 'w4'  = 3rd order interpolation
+                                              # 'cic' = cloud-in-cell
+                                              # 'tsc' = triangle-shaped-cloud
+                                              # 'w4'  = 3rd order interpolation

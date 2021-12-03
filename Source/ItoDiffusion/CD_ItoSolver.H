@@ -1352,15 +1352,6 @@ protected:
   void mergeBVH(List<ItoParticle>& a_particles, const int a_particlesPerCell);
 
   /*!
-    @brief Do boundary intersection tests with an implicit function
-  */
-  void intersectParticlesIF(ParticleContainer<ItoParticle>& a_particles,
-			    ParticleContainer<ItoParticle>& a_eb_particles,
-			    ParticleContainer<ItoParticle>& a_domain_particles,
-			    const bool                      a_delete);
-
-
-  /*!
     @brief Write data to output. Convenience function which just copies data from one data holder to the output data holder. 
     @param[inout] a_output            Output data holder.
     @param[inout] a_icomp             Starting component where this solver begins writing the output. 
