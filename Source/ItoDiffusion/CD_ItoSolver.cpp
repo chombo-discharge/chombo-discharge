@@ -662,60 +662,65 @@ void ItoSolver::transferCoveredParticles(ParticleContainer<ItoParticle>& a_parti
   }
 }
 
-void ItoSolver::intersectParticles(const EbRepresentation a_ebRepresentation, const bool a_deleteParticles) {
-  CH_TIME("ItoSolver::intersectParticles(EbRepresentation, bool)");
+void ItoSolver::intersectParticles(const EbIntersection a_ebIntersection, const bool a_deleteParticles) {
+  CH_TIME("ItoSolver::intersectParticles(EbIntersection, bool)");
   if(m_verbosity > 5) {
-    pout() << m_name + "::intersectParticles(EbRepresentation, bool)" << endl;
+    pout() << m_name + "::intersectParticles(EbIntersection, bool)" << endl;
   }
 
-  this->intersectParticles(WhichContainer::Bulk, WhichContainer::EB, WhichContainer::Domain, a_ebRepresentation, a_deleteParticles);
+  this->intersectParticles(WhichContainer::Bulk, WhichContainer::EB, WhichContainer::Domain, a_ebIntersection, a_deleteParticles);
 }
 
-void ItoSolver::intersectParticles(const WhichContainer   a_particles,
-				   const WhichContainer   a_ebParticles,
-				   const WhichContainer   a_domainParticles,
-				   const EbRepresentation a_ebRepresentation,				     
-				   const bool             a_deleteParticles) {
-  CH_TIME("ItoSolver::intersectParticles(WhichContainerx3, EbRepresentation, bool)");
+void ItoSolver::intersectParticles(const WhichContainer a_particles,
+				   const WhichContainer a_ebParticles,
+				   const WhichContainer a_domainParticles,
+				   const EbIntersection a_ebIntersection,				     
+				   const bool           a_deleteParticles) {
+  CH_TIME("ItoSolver::intersectParticles(WhichContainerx3, EbIntersection, bool)");
   if(m_verbosity > 5) {
-    pout() << m_name + "::intersectParticles(WhichContainerx3, EbRepresentation, bool)" << endl;
+    pout() << m_name + "::intersectParticles(WhichContainerx3, EbIntersection, bool)" << endl;
   }
 
   ParticleContainer<ItoParticle>& particles       = this->getParticles(a_particles);
   ParticleContainer<ItoParticle>& ebParticles     = this->getParticles(a_ebParticles);
   ParticleContainer<ItoParticle>& domainParticles = this->getParticles(a_domainParticles);
 
-  this->intersectParticles(particles, ebParticles, domainParticles, a_ebRepresentation, a_deleteParticles);
+  this->intersectParticles(particles, ebParticles, domainParticles, a_ebIntersection, a_deleteParticles);
 }
 
 
 void ItoSolver::intersectParticles(ParticleContainer<ItoParticle>& a_particles,
 				   ParticleContainer<ItoParticle>& a_ebParticles,
 				   ParticleContainer<ItoParticle>& a_domainParticles,
-				   const EbRepresentation          a_ebRepresentation,
+				   const EbIntersection            a_ebIntersection,
 				   const bool                      a_deleteParticles) {
-  CH_TIME("ItoSolver::intersectParticles(ParticleContainerx3, EbRepresentation, bool)");
+  CH_TIME("ItoSolver::intersectParticles(ParticleContainerx3, EbIntersection, bool)");
   if(m_verbosity > 5) {
-    pout() << m_name + "::intersectParticles(ParticleContainerx3, EbRepresentation, bool)" << endl;
+    pout() << m_name + "::intersectParticles(ParticleContainerx3, EbIntersection, bool)" << endl;
   }
 
   CH_assert(!a_particles.      isCellSorted());
   CH_assert(!a_ebParticles.    isCellSorted());
-  CH_assert(!a_domainParticles.isCellSorted());  
+  CH_assert(!a_domainParticles.isCellSorted());
 
-  switch(a_ebRepresentation) {
-  case EbRepresentation::ImplicitFunction:
-    this->intersectParticlesIF(a_particles, a_ebParticles, a_domainParticles, a_deleteParticles);
+  constexpr Real tolerance = 0.0;
+
+  switch(a_ebIntersection) {
+  case EbIntersection::Raycast:
+    m_amr->intersectParticlesRaycastIF(a_particles, a_ebParticles, a_domainParticles, m_phase, tolerance, a_deleteParticles);
     break;
+  case EbIntersection::Bisection:
+    m_amr->intersectParticlesBisectIF(a_particles, a_ebParticles, a_domainParticles, m_phase, m_bisectionStep, a_deleteParticles);
+    break;    
   default:
-    MayDay::Error("ItoSolver::intersectParticles - unsupported EB representation requested");
+    MayDay::Error("ItoSolver::intersectParticles - unsupported EB intersection requested");
   }
 }
 
 void ItoSolver::intersectParticlesIF(ParticleContainer<ItoParticle>& a_particles,
 				     ParticleContainer<ItoParticle>& a_eb_particles,
 				     ParticleContainer<ItoParticle>& a_domain_particles,
-				     const bool                        a_delete) {
+				     const bool                      a_delete) {
   CH_TIME("ItoSolver::intersectParticlesIF(container, container, container, bool)");
   if(m_verbosity > 5) {
     pout() << m_name + "::intersectParticlesIF(container, container, container, bool)" << endl;

@@ -637,8 +637,8 @@ void AmrMesh::intersectParticlesRaycastIF(ParticleContainer<P>&    a_activeParti
   CH_assert(a_activeParticles.getRealm() == a_ebParticles.    getRealm());
   CH_assert(a_activeParticles.getRealm() == a_domainParticles.getRealm());
 
-  a_ebParticles.    clear();
-  a_domainParticles.clear();
+  a_ebParticles.    clearParticles();
+  a_domainParticles.clearParticles();
 
   const std::string whichRealm = a_activeParticles.getRealm();
 
@@ -720,7 +720,7 @@ void AmrMesh::intersectParticlesRaycastIF(ParticleContainer<P>&    a_activeParti
 	  // Particle bumped into something.
 	  if(contactDomain || contactEB){
 	    if(sEB <= sDomain){ // Crashed with EB "first".
-	      particle.position = oldPos + sEB * path;
+	      particle.position() = oldPos + sEB * path;
 
 	      if(a_deleteParticles){
 		ebParticles.transfer(lit);
@@ -732,7 +732,7 @@ void AmrMesh::intersectParticlesRaycastIF(ParticleContainer<P>&    a_activeParti
 	    else { // Crashed with domain "first".
 	      const Real sSafety = std::max(0.0, sDomain - safety); // To prevent particles falling off the high side of the domain
 	      
-	      particle.position = oldPos + sSafety * path;
+	      particle.position() = oldPos + sSafety * path;
 
 	      if(a_deleteParticles){
 		domainParticles.transfer(lit);
@@ -771,8 +771,8 @@ void AmrMesh::intersectParticlesBisectIF(ParticleContainer<P>&    a_activePartic
   // TLDR: This is pretty much a hard-copy of intersectParticlesRaycastIF, with the exception that the EB intersection
   //       test is replaced by a bisection test. 
 
-  a_ebParticles.    clear();
-  a_domainParticles.clear();
+  a_ebParticles.    clearParticles();
+  a_domainParticles.clearParticles();
 
   const std::string whichRealm = a_activeParticles.getRealm();
 
@@ -854,7 +854,7 @@ void AmrMesh::intersectParticlesBisectIF(ParticleContainer<P>&    a_activePartic
 	  // Particle bumped into something.
 	  if(contactDomain || contactEB){
 	    if(sEB <= sDomain){ // Crashed with EB "first".
-	      particle.position = oldPos + sEB * path;
+	      particle.position() = oldPos + sEB * path;
 
 	      if(a_deleteParticles){
 		ebParticles.transfer(lit);
@@ -866,7 +866,7 @@ void AmrMesh::intersectParticlesBisectIF(ParticleContainer<P>&    a_activePartic
 	    else { // Crashed with domain "first".
 	      const Real sSafety = std::max(0.0, sDomain - safety); // To prevent particles falling off the high side of the domain
 	      
-	      particle.position = oldPos + sSafety * path;
+	      particle.position() = oldPos + sSafety * path;
 
 	      if(a_deleteParticles){
 		domainParticles.transfer(lit);
