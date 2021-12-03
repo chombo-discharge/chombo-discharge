@@ -628,6 +628,26 @@ public:
 			const bool                  a_forceIrregNGP = false);
 
   /*!
+    @brief Deposit scalar particle quantities on the mesh. 
+    @details Precisely like the above function, except that the function signature is Real P::particleScalarField() const (C++ is not too smart about these things)
+    @param[out] a_meshData             Mesh data. Must have exactly one compnent. 
+    @param[in]  a_realm                Realm where data is registered.
+    @param[in]  a_phase                Phase where data is registered.
+    @param[in]  a_particles            Particle container. Must be in "usable state" for deposition.
+    @param[in]  a_depositionType       Specification of deposition kernel (e.g., CIC)
+    @param[in]  a_coarseFineDeposition Specification of handling of coarse-fine boundaries.
+    @param[in]  a_forceIrregNGP        Force NGP deposition in irregular cells or not. 
+  */
+  template <class P, Real(P::*particleScalarField)() const>
+  void depositParticles(EBAMRCellData&              a_meshData,
+			const std::string&          a_realm,
+			const phase::which_phase&   a_phase,	       
+			const ParticleContainer<P>& a_particles,
+			const DepositionType        a_depositionType,
+			const CoarseFineDeposition  a_coarseFineDeposition,
+			const bool                  a_forceIrregNGP = false);  
+
+  /*!
     @brief Deposit vector particle quantities on the mesh. 
     @details This routine will switch between various algorithms depending on the user input. If the user chooses to deposit with "halos" near the refinement boundaries
     then this function requires the "halo" particles to be filled before entering this routine. Thus, if depositing with halos (which requires kernels with 2x or 4x 
@@ -655,7 +675,27 @@ public:
 			const ParticleContainer<P>& a_particles,
 			const DepositionType        a_depositionType,
 			const CoarseFineDeposition  a_coarseFineDeposition,
-			const bool                  a_forceIrregNGP = false);  
+			const bool                  a_forceIrregNGP = false);
+
+  /*!
+    @brief Deposit vector particle quantities on the mesh. 
+    @details Precisely like the above function, except that the function signature is RealVect P::particleVectorField() const (C++ is not too smart about these things)
+    @param[out] a_meshData             Mesh data. Must have exactly one compnent. 
+    @param[in]  a_realm                Realm where data is registered.
+    @param[in]  a_phase                Phase where data is registered.
+    @param[in]  a_particles            Particle container. Must be in "usable state" for deposition.
+    @param[in]  a_depositionType       Specification of deposition kernel (e.g., CIC)
+    @param[in]  a_coarseFineDeposition Specification of handling of coarse-fine boundaries.
+    @param[in]  a_forceIrregNGP        Force NGP deposition in irregular cells or not. 
+  */
+  template <class P, RealVect(P::*particleVectorField)() const>
+  void depositParticles(EBAMRCellData&              a_meshData,
+			const std::string&          a_realm,
+			const phase::which_phase&   a_phase,	       
+			const ParticleContainer<P>& a_particles,
+			const DepositionType        a_depositionType,
+			const CoarseFineDeposition  a_coarseFineDeposition,
+			const bool                  a_forceIrregNGP = false);    
  
   /*!
     @brief Interpolate a scalar field onto the particle position. 
@@ -708,7 +748,145 @@ public:
 			    const EBAMRCellData&       a_meshVectorField,
 			    const DepositionType       a_interpType,
 			    const bool                 a_forceIrregNGP = false) const;
+
+  /*!
+    @brief Function which removes particles from the domain if they fall inside the EB.
+    @details The template parameter indicate the particle type -- it MUST have a const RealVect& P::position() const function. 
+    @details This version uses the implicit function to evaluate whether or not the particles are inside the EB. The particles will be removed from
+    the container if f(x) > a_tolerance*dx. 
+    @param[inout] a_particles Particle data
+    @param[in]    a_phase     Phase where the particles live. 
+    @param[in]    a_tolerance Tolerance. 
+    @note Because the implicit functions are global, this function will work even if the particles aren't mapped to the correct EBISBox.
+  */
+  template <class P>
+  void removeCoveredParticlesIF(ParticleContainer<P>&     a_particles,
+				const phase::which_phase& a_phase,
+				const Real                a_tolerance = 0.0) const;
+
+  /*!
+    @brief Function which removes particles from the domain if they fall inside the EB.
+    @details The template parameter indicate the particle type -- it MUST have a const RealVect& P::position() const function. 
+    @details This version uses the discrete information to evaluate whether or not the particles are inside the EB. The particles will be removed from
+    the container if they lie within a covered cell OR if they lie in an irregular cell but on the "wrong" side of the EB face (to within precision tolerance*dx)
+    @param[inout] a_particles Particle data
+    @param[in]    a_phase     Phase where the particles live. 
+    @param[in]    a_tolerance Tolerance when to remove particles
+    @note This function will only work if the particles are mapped to the correct EBISBox. 
+  */
+  template <class P>
+  void removeCoveredParticlesDiscrete(ParticleContainer<P>&     a_particles,
+				      const phase::which_phase& a_phase,
+				      const Real                a_tolerance = 0.0) const;
+
+  /*!
+    @brief Function which removes particles from the domain if they fall inside the EB.
+    @details The template parameter indicate the particle type -- it must have a const RealVect& P::position() function. 
+    @details This version removes all particles that live in covered cells.
+    @param[inout] a_particles Particle data
+    @param[in]    a_phase     Phase where the particles live. 
+    @note This function will only work if the particles are mapped to the correct EBISBox. 
+  */
+  template <class P>
+  void removeCoveredParticlesVoxels(ParticleContainer<P>&     a_particles,
+				    const phase::which_phase& a_phase) const;
+
+  /*!
+    @brief Function which transferse particles from one particle container to another if they fall inside the EB.
+    @details The template parameter indicate the particle type -- it MUST have a const RealVect& P::position() const function. 
+    @details This version uses the implicit function to evaluate whether or not the particles are inside the EB. The particles will be transferred from
+    the container if f(x) > a_tolerance*dx.
+    @param[inout] a_particlesFrom Container to transfer from
+    @param[inout] a_particlesTo   Container to transfer to
+    @param[in]    a_phase         Phase where the particles live. 
+    @param[in]    a_tolerance     Tolerance (Note: relative to grid resolution)
+    @note Because the implicit functions are global, this function will work even if the particles aren't mapped to the correct boxes (but remapping will be necessary)
+  */
+  template <class P>
+  void transferCoveredParticlesIF(ParticleContainer<P>&     a_particlesFrom,
+				  ParticleContainer<P>&     a_particlesTo,				  
+				  const phase::which_phase& a_phase,
+				  const Real                a_tolerance = 0.0) const;
+
+  /*!
+    @brief Function which transferse particles from one particle container to another if they fall inside the EB.
+    @details The template parameter indicate the particle type -- it MUST have a const RealVect& P::position() const function. 
+    @details This version uses the discrete information to evaluate whether or not the particles are inside the EB. The particles will be transferred from
+    the container if they lie within a covered cell OR if they lie in an irregular cell but on the "wrong" side of the EB face (to within precision tolerance*dx)
+    @param[inout] a_particlesFrom Container to transfer from
+    @param[inout] a_particlesTo   Container to transfer to
+    @param[in]    a_phase         Phase where the particles live. 
+    @param[in]    a_tolerance     Tolerance. 
+    @note This function will only work if the particles are mapped to the correct EBISBox. 
+  */
+  template <class P>
+  void transferCoveredParticlesDiscrete(ParticleContainer<P>&     a_particlesFrom,
+					ParticleContainer<P>&     a_particlesTo,				      
+					const phase::which_phase& a_phase,
+					const Real                a_tolerance = 0.0) const;
+
+  /*!
+    @brief Function which transferse particles from one particle container to another if they fall inside the EB.
+    @details The template parameter indicate the particle type -- it MUST have a const RealVect& P::position() const function. 
+    @details This version transfers all particles that live in covered cells.
+    @param[inout] a_particlesFrom Container to transfer from
+    @param[inout] a_particlesTo   Container to transfer to
+    @param[in]    a_phase         Phase where the particles live. 
+    @param[in]    a_tolerance     Tolerance. 
+    @note This function will only work if the particles are mapped to the correct EBISBox. 
+  */
+  template <class P>
+  void transferCoveredParticlesVoxels(ParticleContainer<P>&     a_particlesFrom,
+				      ParticleContainer<P>&     a_particlesTo,				      
+				      const phase::which_phase& a_phase) const;
+
+  /*!
+    @brief Particle intersection algorithm based on ray-casting.
+    @details This routine will iterate through all the particles and check if they intersect the geometry. The template
+    parameter indicates the particle type -- it MUST have const RealVec& position() const and  const RealVect& oldPosition() const 
+    functions that determine the start and stop position of the particle trajectory. This routine uses a ray-casting method
+    to check for intersections with the EB (the domain side is much easier). If the particles are closer to the EB than
+    a_tolerance, they are absorbed and placed on the EB. Their position are updated and they are placed in the 
+    a_ebParticles argument. This routine uses a ray-casting method where it computes the distance from the EB
+    (assuming that the implicit function is a signed distance function). Particles are then moved that
+    distance along their trajectory and we then update the new distance to the EB. This is done recursively until the particles
+    have either moved the entire length or been absorbed by the EB or domain side. 
+    @param[inout] a_activeParticles Particles to be intersected with geometry
+    @param[out]   a_ebParticles     Particles that intersected with the EB
+    @param[out]   a_domainParticles Particles that intersected with the domain faces
+    @param[in]    a_phase           Phase where the input particles live
+    @param[in]    a_tolerance       Tolerance
+    @param[in]    a_deleteParticles If true, particles will be removed from a_activeParticles if they intersect the geometry.
+  */
+  template <class P>
+  void intersectParticlesRaycastIF(ParticleContainer<P>&    a_activeParticles,
+				   ParticleContainer<P>&    a_ebParticles,
+				   ParticleContainer<P>&    a_domainParticles,
+				   const phase::which_phase a_phase,
+				   const Real               a_tolerance,
+				   const bool               a_deleteParticles) const;
   
+  /*!
+    @brief Particle intersection algorithm based on bisection. 
+    @details This routine will iterate through all the particles and check if they intersect the geometry. The template
+    parameter indicates the particle type -- it MUST have const RealVec& position() const and  const RealVect& oldPosition() const 
+    functions that determine the start and stop position of the particle trajectory. This routine uses a bisection method
+    to check for intersections with the EB (the domain side is much easier). Their position are updated and they are placed
+    in the a_ebParticles argument. 
+    @param[inout] a_activeParticles Particles to be intersected with geometry
+    @param[out]   a_ebParticles     Particles that intersected with the EB
+    @param[out]   a_domainParticles Particles that intersected with the domain faces
+    @param[in]    a_phase           Phase where the input particles live
+    @param[in]    a_bisectionStep   Length of the bisection step
+    @param[in]    a_deleteParticles If true, particles will be removed from a_activeParticles if they intersect the geometry.
+  */
+  template <class P>
+  void intersectParticlesBisectIF(ParticleContainer<P>&    a_activeParticles,
+				  ParticleContainer<P>&    a_ebParticles,
+				  ParticleContainer<P>&    a_domainParticles,
+				  const phase::which_phase a_phase,
+				  const Real               a_bisectionStep,
+				  const bool               a_deleteParticles) const;  
   /*!
     @brief Interpolate ghost vectors over a realm, using the default ghost cell interpolation method. 
     @param[inout] a_data  Data to be interpolated.
@@ -1082,7 +1260,7 @@ public:
     @param[in] a_phase Phase (gas or solid)
   */
   const IrregAmrStencil<EbCentroidInterpolationStencil>& getEbCentroidInterpolationStencilStencils(const std::string        a_realm,
-										  const phase::which_phase a_phase) const;
+												   const phase::which_phase a_phase) const;
 
   /*!
     @brief Get the nonconservative divergence stencils
@@ -1326,7 +1504,7 @@ protected:
   */
   void buildGrids(Vector<IntVectSet>& a_tags, const int a_lmin, const int a_hardcap = -1);
 
-    /*!
+  /*!
     @brief Parse the low/high corners of the computational domain. 
   */
   void parseProbLoHiCorners();

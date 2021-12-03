@@ -42,6 +42,25 @@ void EBParticleMesh::deposit(const List<P>& a_particleList, EBCellFAB& a_rho, co
   }  
 }
 
+template <class P, Real(P::*particleScalarField)() const>
+void EBParticleMesh::deposit(const List<P>& a_particleList, EBCellFAB& a_rho, const DepositionType a_depositionType, const bool a_forceIrregNGP) const {
+  CH_TIME("EBParticleMesh::deposit");
+
+  for (ListIterator<P> lit(a_particleList); lit; ++lit){
+    const P&        curParticle = lit();
+    const RealVect& curPosition = curParticle.position();
+    const Real&     curStrength = (curParticle.*particleScalarField)();    
+    
+    this->depositParticle(a_rho, 
+			  m_probLo, 
+			  m_dx, 
+			  curPosition, 
+			  curStrength, 
+			  a_depositionType,
+			  a_forceIrregNGP);
+  }  
+}
+
 template <class P, const Real&(P::*particleScalarField)() const>
 void EBParticleMesh::deposit2(const List<P>& a_particleList, EBCellFAB& a_rho, const DepositionType a_depositionType, const bool a_forceIrregNGP) const {
   CH_TIME("EBParticleMesh::deposit2");
@@ -64,12 +83,50 @@ void EBParticleMesh::deposit2(const List<P>& a_particleList, EBCellFAB& a_rho, c
   }  
 }
 
+template <class P,  Real(P::*particleScalarField)() const>
+void EBParticleMesh::deposit2(const List<P>& a_particleList, EBCellFAB& a_rho, const DepositionType a_depositionType, const bool a_forceIrregNGP) const {
+  CH_TIME("EBParticleMesh::deposit2");
+
+  for (ListIterator<P> lit(a_particleList); lit; ++lit){
+    const P&        curParticle = lit();
+    const RealVect& curPosition = curParticle.position();
+    const Real&     curStrength = (curParticle.*particleScalarField)();    
+
+    this->depositParticle2(a_rho, 
+			   m_probLo, 
+			   m_dx, 
+			   curPosition, 
+			   curStrength, 
+			   a_depositionType,
+			   a_forceIrregNGP);
+  }  
+}
+
 template <class P, const Real&(P::*particleScalarField)() const>
 void EBParticleMesh::deposit4(const List<P>& a_particleList, EBCellFAB& a_rho, const DepositionType a_depositionType, const bool a_forceIrregNGP) const {
   CH_TIME("EBParticleMesh::deposit4");
 
   // TLDR: This is a jack-of-all-trades deposition function. The user will use this function to supply a pointer to the field that will be
   //       deposited. As per API, this function must be of the type 'const Real& myParticleClass::myDepositionField() const'    
+
+  for (ListIterator<P> lit(a_particleList); lit; ++lit){
+    const P&        curParticle = lit();
+    const RealVect& curPosition = curParticle.position();
+    const Real&     curStrength = (curParticle.*particleScalarField)();    
+    
+    this->depositParticle4(a_rho, 
+			   m_probLo, 
+			   m_dx, 
+			   curPosition, 
+			   curStrength, 
+			   a_depositionType,
+			   a_forceIrregNGP);
+  }  
+}
+
+template <class P,  Real(P::*particleScalarField)() const>
+void EBParticleMesh::deposit4(const List<P>& a_particleList, EBCellFAB& a_rho, const DepositionType a_depositionType, const bool a_forceIrregNGP) const {
+  CH_TIME("EBParticleMesh::deposit4");
 
   for (ListIterator<P> lit(a_particleList); lit; ++lit){
     const P&        curParticle = lit();

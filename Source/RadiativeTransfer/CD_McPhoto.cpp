@@ -34,6 +34,8 @@
 #define MC_PHOTO_DEBUG 0
 
 McPhoto::McPhoto(){
+  CH_TIME("McPhoto::McPhoto");
+  
   m_name      = "McPhoto";
   m_className = "McPhoto";
 
@@ -143,8 +145,9 @@ void McPhoto::parseRNG(){
   pp.get("poiss_exp_swap", m_poissonExponentialSwapLimit);
   if(m_seed < 0) {
     m_seed = std::chrono::system_clock::now().time_since_epoch().count();
-    m_seed += procID(); 
   }
+  m_seed += procID();
+  
   m_rng = std::mt19937_64(m_seed);
 
   m_udist11 = std::uniform_real_distribution<Real>(-1.0, 1.0);
@@ -171,7 +174,7 @@ void McPhoto::parsePseudoPhotons(){
   
   pp.get("max_photons", m_maxPhotonsGeneratedPerCell);
   if(m_maxPhotonsGeneratedPerCell <= 0){ // = -1 => no restriction
-    m_maxPhotonsGeneratedPerCell = 99999999;
+    m_maxPhotonsGeneratedPerCell = std::numeric_limits<int>::max();
   }
 }
 
@@ -193,7 +196,7 @@ void McPhoto::parsePhotoGeneration(){
     m_photoGenerationMethod = PhotonGeneration::Stochastic;
   }
   else{
-    MayDay::Error("McPhoto::set_PhotonGeneration - unknown Photon generation type requested");
+    MayDay::Error("McPhoto::set_PhotonGeneration - unknown photon generation type requested");
   }
 }
 
@@ -235,18 +238,14 @@ void McPhoto::parseIntersectionEB(){
 
   std::string str;
 
-  pp.get("intersection_alg", str);
-
+  pp.get("intersection_alg", str         );
+  pp.get("bisect_step",      m_bisectStep);
+  
   if(str == "raycast"){
     m_intersectionEB = IntersectionEB::Raycast;
   }
   else if(str == "bisection"){
     m_intersectionEB = IntersectionEB::Bisection;
-
-    pp.get("bisect_step", m_bisectStep);
-  }
-  else if(str == "lsf"){
-    MayDay::Error("McPhoto::parseIntersectionEB -- 'lsf' not supported (yet)");
   }
   else{
     MayDay::Error("McPhoto::parseIntersectionEB -- logic bust");
@@ -326,11 +325,11 @@ void McPhoto::parsePlotVariables(){
     pout() << m_name + "::parsePlotVariables" << endl;
   }
 
-  m_plotPhi       = false;
-  m_plotSource       = false;
-  m_plotPhotons      = false;
-  m_plotBulkPhotons = false;
-  m_plotEBPhotons   = false;
+  m_plotPhi            = false;
+  m_plotSource         = false;
+  m_plotPhotons        = false;
+  m_plotBulkPhotons    = false;
+  m_plotEBPhotons      = false;
   m_plotDomainPhotons  = false;
   m_plotSourcePhotons  = false;
 
@@ -340,13 +339,13 @@ void McPhoto::parsePlotVariables(){
   pp.getarr("plt_vars", str, 0, num);
 
   for (int i = 0; i < num; i++){
-    if(     str[i] == "phi")       m_plotPhi       = true;
-    else if(str[i] == "src")       m_plotSource       = true;
-    else if(str[i] == "phot")      m_plotPhotons      = true;
-    else if(str[i] == "bulk_phot") m_plotBulkPhotons = true;
-    else if(str[i] == "eb_phot")   m_plotEBPhotons   = true;
-    else if(str[i] == "dom_phot")  m_plotDomainPhotons  = true;
-    else if(str[i] == "src_phot")  m_plotSourcePhotons  = true;
+    if(     str[i] == "phi")       m_plotPhi           = true;
+    else if(str[i] == "src")       m_plotSource        = true;
+    else if(str[i] == "phot")      m_plotPhotons       = true;
+    else if(str[i] == "bulk_phot") m_plotBulkPhotons   = true;
+    else if(str[i] == "eb_phot")   m_plotEBPhotons     = true;
+    else if(str[i] == "dom_phot")  m_plotDomainPhotons = true;
+    else if(str[i] == "src_phot")  m_plotSourcePhotons = true;
   }
 }
 
@@ -462,7 +461,7 @@ void McPhoto::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_n
   }
 
   // Mesh data regrids
-  m_amr->reallocate(m_phi,        m_phase, a_lmin); 
+  m_amr->reallocate(m_phi,          m_phase, a_lmin); 
   m_amr->reallocate(m_source,       m_phase, a_lmin);
   m_amr->reallocate(m_scratch,      m_phase, a_lmin);
   m_amr->reallocate(m_depositionNC, m_phase, a_lmin);
@@ -474,9 +473,9 @@ void McPhoto::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_n
   const Vector<Real>& dx                 = m_amr->getDx();
   const Vector<int>& ref_rat             = m_amr->getRefinementRatios();
 
-  m_photons.regrid(       grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
-  m_bulkPhotons.regrid(  grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
-  m_ebPhotons.regrid(    grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
+  m_photons.      regrid(grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
+  m_bulkPhotons.  regrid(grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
+  m_ebPhotons.    regrid(grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
   m_domainPhotons.regrid(grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
   m_sourcePhotons.regrid(grids, domains, dx, ref_rat, a_lmin, a_newFinestLevel);
 
@@ -648,12 +647,12 @@ Vector<std::string> McPhoto::getPlotVariableNames() const {
   
   Vector<std::string> plotVarNames(0);
   
-  if(m_plotPhi)          plotVarNames.push_back(m_name + " phi");
-  if(m_plotSource)       plotVarNames.push_back(m_name + " source");
-  if(m_plotPhotons)        plotVarNames.push_back(m_name + " Photons");
+  if(m_plotPhi)           plotVarNames.push_back(m_name + " phi");
+  if(m_plotSource)        plotVarNames.push_back(m_name + " source");
+  if(m_plotPhotons)       plotVarNames.push_back(m_name + " Photons");
   if(m_plotBulkPhotons)   plotVarNames.push_back(m_name + " bulkPhotons");
   if(m_plotEBPhotons)     plotVarNames.push_back(m_name + " ebPhotons");
-  if(m_plotDomainPhotons)    plotVarNames.push_back(m_name + " domainPhotons");
+  if(m_plotDomainPhotons) plotVarNames.push_back(m_name + " domainPhotons");
   if(m_plotSourcePhotons) plotVarNames.push_back(m_name + " sourcePhotons");
 
   return plotVarNames;
@@ -665,17 +664,17 @@ int McPhoto::getNumberOfPlotVariables() const{
     pout() << m_name + "::getNumberOfPlotVariables" << endl;
   }
 
-  int num_output = 0;
+  int numPlotVars = 0;
 
-  if(m_plotPhi)       num_output = num_output + 1;
-  if(m_plotSource)       num_output = num_output + 1;
-  if(m_plotPhotons)      num_output = num_output + 1;
-  if(m_plotBulkPhotons) num_output = num_output + 1;
-  if(m_plotEBPhotons)   num_output = num_output + 1;
-  if(m_plotDomainPhotons)  num_output = num_output + 1;
-  if(m_plotSourcePhotons)  num_output = num_output + 1;
+  if(m_plotPhi)           numPlotVars += 1;
+  if(m_plotSource)        numPlotVars += 1; 
+  if(m_plotPhotons)       numPlotVars += 1; 
+  if(m_plotBulkPhotons)   numPlotVars += 1; 
+  if(m_plotEBPhotons)     numPlotVars += 1; 
+  if(m_plotDomainPhotons) numPlotVars += 1; 
+  if(m_plotSourcePhotons) numPlotVars += 1; 
 
-  return num_output;
+  return numPlotVars;
 }
 
 int McPhoto::randomPoisson(const Real a_mean){
@@ -768,7 +767,8 @@ void McPhoto::setPVRBuffer(const int a_buffer) {
     pout() << m_name + "::setPVRBuffer" << endl;
   }
 
-  m_pvrBuffer = a_buffer;
+  m_pvrBuffer  = a_buffer;
+  m_haloBuffer = 0;
 }
 
 void McPhoto::setHaloBuffer(const int a_buffer)  {
@@ -778,6 +778,7 @@ void McPhoto::setHaloBuffer(const int a_buffer)  {
   }
 
   m_haloBuffer = a_buffer;
+  m_pvrBuffer  = 0;
 }
 
 void McPhoto::generatePhotons(ParticleContainer<Photon>& a_photons, const EBAMRCellData& a_source, const Real a_dt){
@@ -912,7 +913,7 @@ int McPhoto::drawPhotons(const Real a_source, const Real a_volume, const Real a_
   // Draw a number of Photons with the desired algorithm
   if(m_photoGenerationMethod == PhotonGeneration::Stochastic){
     const Real mean = a_source*factor;
-    numPhysicalPhotons = randomPoisson(mean);
+    numPhysicalPhotons = this->randomPoisson(mean);
   }
   else if(m_photoGenerationMethod == PhotonGeneration::Deterministic){
     numPhysicalPhotons = round(a_source*factor);
@@ -1043,11 +1044,11 @@ void McPhoto::incrementRedist(const EBAMRIVData& a_massDifference){
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
     
-    EBLevelRedist& level_redist = *(m_amr->getLevelRedist(m_realm, m_phase)[lvl]);
-    level_redist.setToZero();
+    EBLevelRedist& levelRedist = *(m_amr->getLevelRedist(m_realm, m_phase)[lvl]);
+    levelRedist.setToZero();
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-      level_redist.increment((*a_massDifference[lvl])[dit()], dit(), interv);
+      levelRedist.increment((*a_massDifference[lvl])[dit()], dit(), interv);
     }
   }
 }
@@ -1061,9 +1062,9 @@ void McPhoto::levelRedist(EBAMRCellData& a_phi){
   const Interval interv(m_comp, m_comp);
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    EBLevelRedist& level_redist = *(m_amr->getLevelRedist(m_realm, m_phase)[lvl]);
-    level_redist.redistribute(*a_phi[lvl], interv);
-    level_redist.setToZero();
+    EBLevelRedist& levelRedist = *(m_amr->getLevelRedist(m_realm, m_phase)[lvl]);
+    levelRedist.redistribute(*a_phi[lvl], interv);
+    levelRedist.setToZero();
   }
 }
 
@@ -1078,30 +1079,30 @@ void McPhoto::coarseFineIncrement(const EBAMRIVData& a_massDifference){
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
 
-    RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->getFineToCoarRedist(m_realm, m_phase)[lvl];
-    RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->getCoarToFineRedist(m_realm, m_phase)[lvl];
-    RefCountedPtr<EBCoarToCoarRedist>& coar2coar_redist = m_amr->getCoarToCoarRedist(m_realm, m_phase)[lvl];
+    RefCountedPtr<EBFineToCoarRedist>& fine2coarRedist = m_amr->getFineToCoarRedist(m_realm, m_phase)[lvl];
+    RefCountedPtr<EBCoarToFineRedist>& coar2fineRedist = m_amr->getCoarToFineRedist(m_realm, m_phase)[lvl];
+    RefCountedPtr<EBCoarToCoarRedist>& coar2coarRedist = m_amr->getCoarToCoarRedist(m_realm, m_phase)[lvl];
 
     const bool hasCoar = lvl > 0;
     const bool hasFine = lvl < 0;
 
     if(hasCoar){
-      fine2coar_redist->setToZero();
+      fine2coarRedist->setToZero();
 
     }
     if(hasFine){
-      coar2fine_redist->setToZero();
-      coar2coar_redist->setToZero();
+      coar2fineRedist->setToZero();
+      coar2coarRedist->setToZero();
     }
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       if(hasCoar){
-	fine2coar_redist->increment((*a_massDifference[lvl])[dit()], dit(), interv);
+	fine2coarRedist->increment((*a_massDifference[lvl])[dit()], dit(), interv);
       }
 
       if(hasFine){
-	coar2fine_redist->increment((*a_massDifference[lvl])[dit()], dit(), interv);
-	coar2coar_redist->increment((*a_massDifference[lvl])[dit()], dit(), interv);
+	coar2fineRedist->increment((*a_massDifference[lvl])[dit()], dit(), interv);
+	coar2coarRedist->increment((*a_massDifference[lvl])[dit()], dit(), interv);
       }
     }
   }
@@ -1121,21 +1122,21 @@ void McPhoto::coarseFineRedistribution(EBAMRCellData& a_phi){
     const bool hasCoar = lvl > 0;
     const bool hasFine = lvl < finestLevel;
 
-    RefCountedPtr<EBCoarToFineRedist>& coar2fine_redist = m_amr->getCoarToFineRedist(m_realm, m_phase)[lvl];
-    RefCountedPtr<EBCoarToCoarRedist>& coar2coar_redist = m_amr->getCoarToCoarRedist(m_realm, m_phase)[lvl];
-    RefCountedPtr<EBFineToCoarRedist>& fine2coar_redist = m_amr->getFineToCoarRedist(m_realm, m_phase)[lvl];
+    RefCountedPtr<EBCoarToFineRedist>& coar2fineRedist = m_amr->getCoarToFineRedist(m_realm, m_phase)[lvl];
+    RefCountedPtr<EBCoarToCoarRedist>& coar2coarRedist = m_amr->getCoarToCoarRedist(m_realm, m_phase)[lvl];
+    RefCountedPtr<EBFineToCoarRedist>& fine2coarRedist = m_amr->getFineToCoarRedist(m_realm, m_phase)[lvl];
     
     if(hasCoar){
-      fine2coar_redist->redistribute(*a_phi[lvl-1], interv);
-      fine2coar_redist->setToZero();
+      fine2coarRedist->redistribute(*a_phi[lvl-1], interv);
+      fine2coarRedist->setToZero();
     }
 
     if(hasFine){
-      coar2fine_redist->redistribute(*a_phi[lvl+1], interv);
-      coar2coar_redist->redistribute(*a_phi[lvl],   interv);
+      coar2fineRedist->redistribute(*a_phi[lvl+1], interv);
+      coar2coarRedist->redistribute(*a_phi[lvl],   interv);
 
-      coar2fine_redist->setToZero();
-      coar2coar_redist->setToZero();
+      coar2fineRedist->setToZero();
+      coar2coarRedist->setToZero();
     }
   }
 }
@@ -1250,9 +1251,6 @@ void McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhoto
 	      break;
 	    case IntersectionEB::Bisection:
 	      contactEB = ParticleOps::ebIntersectionBisect(impFunc, oldPos, newPos, m_bisectStep, sEB);
-	      break;
-	    case IntersectionEB::LSF:
-	      MayDay::Error("McPhoto::advancePhotonsInstantenous -- LSF not implement (yet)");
 	      break;
 	    default:
 	      MayDay::Error("McPhoto::advancePhotonsInstantenous -- logic bust in eb intersection");
@@ -1422,9 +1420,6 @@ void McPhoto::advancePhotonsTransient(ParticleContainer<Photon>& a_bulkPhotons,
 	    break;
 	  case IntersectionEB::Bisection:
 	    absorbedEB = ParticleOps::ebIntersectionBisect(impFunc, oldPos, newPos, m_bisectStep, sEB);
-	    break;
-	  case IntersectionEB::LSF:
-	    MayDay::Error("McPhoto::advancePhotonsTransient -- LSF not implement (yet)");
 	    break;
 	  default:
 	    MayDay::Error("McPhoto::advancePhotonsTransient -- logic bust in eb intersection");

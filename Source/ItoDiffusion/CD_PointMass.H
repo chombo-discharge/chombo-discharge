@@ -19,72 +19,135 @@
 #include <CD_NamespaceHeader.H>
   
 /*!
-  @brief Declaration of a simple class for storing a point with mass. This is not a computational particle. 
+  @brief Declaration of a simple class for storing a point with mass. 
+  @details This is not a computational particle -- it is used with ItoSolver in order to merge particles. 
+  @note The position and energy are average quantities. 
 */
-class PointMass{
+class PointMass {
 public:
+
+  /*!
+    @brief Constructor. Should subsequently set parameters or call define
+  */
+  inline
   PointMass();
+
+  /*!
+    @brief Full constructor. 
+    @param[in] a_pos    Physical position
+    @param[in] a_mass   Computational weight
+    @param[in] a_energy Particle energy
+  */
+  inline
   PointMass(const RealVect a_pos, const Real a_mass, const Real a_energy);
-  PointMass(const std::vector<PointMass>& a_PointMasses);
+
+  /*!
+    @brief Alternative constructor which computes an "average" PointMass.
+    @details This computes the average position as x = sum_i(m_i*x_i)/sum(m_i) etc. 
+    @param[in] a_pointMasses list of point masses.
+  */
+  inline
+  PointMass(const std::vector<PointMass>& a_pointMasses);
+
+  /*!
+    @brief Destructor (does nothing)
+  */
+  inline
   ~PointMass();
 
-  inline
-  void define(const RealVect& a_pos, const Real& a_mass, const Real& a_energy){
-    m_pos    = a_pos;
-    m_mass   = a_mass;
-    m_energy = a_energy;
-  }
-  
-  inline
-  Real& operator[](int a_dir) {
-    return m_pos[a_dir];
-  }
 
+  /*!
+    @brief Define function. 
+    @param[in] a_pos    Physical position
+    @param[in] a_mass   Computational weight
+    @param[in] a_energy Particle energy
+  */  
   inline
-  const Real& operator[](int a_dir) const {
-    return m_pos[a_dir];
-  }
+  void define(const RealVect& a_pos, const Real& a_mass, const Real& a_energy);
 
+  /*!
+    @brief Position operator. Get the physical position of the input coordinate
+    @param[in] a_dir Coordinate
+    @return Returns m_pos[a_dir]
+  */
   inline
-  RealVect& pos(){
-    return m_pos;
-  }
-  
-  inline
-  const RealVect& pos() const{
-    return m_pos;
-  }
+  Real& operator[](const int a_dir);
 
+  /*!
+    @brief Position operator. Get the physical position of the input coordinate
+    @param[in] a_dir Coordinate
+    @return Returns m_pos[a_dir]
+  */  
   inline
-  Real& mass(){
-    return m_mass;
-  }
-  
-  inline
-  const Real& mass() const{
-    return m_mass;
-  }
+  const Real& operator[](int a_dir) const;
 
+  /*!
+    @brief Get physical position
+    @return Returns m_pos
+  */
   inline
-  Real& energy(){
-    return m_energy;
-  }
-  
+  RealVect& pos();
+
+  /*!
+    @brief Get physical position
+    @return Returns m_pos
+  */  
   inline
-  const Real& energy() const{
-    return m_energy;
-  }
-  
+  const RealVect& pos() const;
+
+  /*!
+    @brief Get mass (i.e., computational weight)
+    @return Returns m_mass
+  */
   inline
-  bool canSplit() const {
-    return m_mass*(1.0 + 1.E-6) >= 2.0;
-  }
-  
-  RealVect m_pos;   // Position of this PointMass
-  Real     m_mass;  // How many points does this this PointMass represent
-  Real     m_energy;
+  Real& mass();
+
+  /*!
+    @brief Get mass (i.e., computational weight)
+    @return Returns m_mass
+  */  
+  inline
+  const Real& mass() const;
+
+  /*!
+    @brief Get energy
+    @return Returns m_energy
+  */  
+  inline
+  Real& energy();
+
+  /*!
+    @brief Get energy
+    @return Returns m_energy
+  */    
+  inline
+  const Real& energy() const;
+
+  /*!
+    @brief Return true if this PointMass can be split into finer PointMass-es.
+  */
+  inline
+  bool canSplit() const;
+
+
+  /*!
+    @brief Physical position of this PointMass
+  */
+  RealVect m_pos;
+
+  /*!
+    @brief Computational weight of this PointMass
+  */
+  Real m_mass;
+
+  /*!
+    @brief Energy of this PointMass
+  */
+  Real m_energy;
 };
 
 #include <CD_NamespaceFooter.H>
+
+#include <CD_PointMassImplem.H>
 
 #endif

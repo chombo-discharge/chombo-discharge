@@ -13,7 +13,7 @@
 #include <CD_SimpleItoParticle.H>
 #include <CD_NamespaceHeader.H>
 
-SimpleItoParticle::SimpleItoParticle() : BinItem(){
+SimpleItoParticle::SimpleItoParticle() : BinItem() {
 }
 
 SimpleItoParticle::SimpleItoParticle(const Real a_mass, const RealVect a_position, const Real a_energy) : BinItem(a_position) {
@@ -21,21 +21,21 @@ SimpleItoParticle::SimpleItoParticle(const Real a_mass, const RealVect a_positio
   m_energy = a_energy;
 }
 
-SimpleItoParticle::~SimpleItoParticle(){
+SimpleItoParticle::~SimpleItoParticle() {
 
 }
 
-void SimpleItoParticle::define(const Real a_mass, const RealVect a_position, const Real a_energy){
-  setMass(a_mass);
-  setPosition(a_position);
-  setEnergy(a_energy);
+void SimpleItoParticle::define(const Real a_mass, const RealVect a_position, const Real a_energy) {
+  this->setMass    (a_mass    );
+  this->setPosition(a_position);
+  this->setEnergy  (a_energy  );
 }
 
-void SimpleItoParticle::setMass(const Real a_mass){
+void SimpleItoParticle::setMass(const Real a_mass) {
   m_mass = a_mass;
 }
 
-Real& SimpleItoParticle::mass(){
+Real& SimpleItoParticle::mass() {
   return m_mass;
 }
 
@@ -43,11 +43,11 @@ const Real& SimpleItoParticle::mass() const{
   return m_mass;
 }
 
-void SimpleItoParticle::setEnergy(const Real a_energy){
+void SimpleItoParticle::setEnergy(const Real a_energy) {
   m_energy = a_energy;
 }
 
-Real& SimpleItoParticle::energy(){
+Real& SimpleItoParticle::energy() {
   return m_energy;
 }
 
@@ -86,7 +86,7 @@ void SimpleItoParticle::linearOut(void* buf) const{
   *buffer++ = m_energy;
 }
 
-void SimpleItoParticle::linearIn(void* buf){
+void SimpleItoParticle::linearIn(void* buf) {
   Real* buffer = (Real*)buf;
   D_TERM6( m_position[0] = *buffer++;,
 	   m_position[1] = *buffer++;,
@@ -99,11 +99,13 @@ void SimpleItoParticle::linearIn(void* buf){
   m_energy = *buffer++;
 }
 
-std::ostream & operator<<(std::ostream& ostr, const SimpleItoParticle& p){
+std::ostream & operator<<(std::ostream& ostr, const SimpleItoParticle& p) {
   ostr << " SimpleItoParticle : " << std::endl;
   ostr << " mass " << p.mass() << std::endl;
   ostr << " position ( ";
-  for ( int i=0; i<SpaceDim; ++i ){ ostr << " " << p.position(i); }
+  for ( int i=0; i<SpaceDim; ++i ) {
+    ostr << " " << p.position(i);
+  }
   ostr << " ) ";
   ostr << " energy " << p.energy() << std::endl;
   return ostr;

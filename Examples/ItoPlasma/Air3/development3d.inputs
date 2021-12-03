@@ -116,7 +116,7 @@ ItoSolver.redistribute        = false         # Turn on/off redistribution.
 ItoSolver.blend_conservation  = false         # Turn on/off blending with nonconservative divergenceo
 ItoSolver.checkpointing       = particles     # Use particle numbers for writing/reading checkpoint files
 ItoSolver.ppc_restart         = 32            # Maximum number of computational particles to generate for restarts.
-ItoSolver.WhichMobilityInterpolation     = velocity      # 'mobility' or 'velocity', depending on how you wish to compute. 
+ItoSolver.mobility_interp     = velocity      # 'direct' or 'velocity', depending on how you wish to compute. 
 ItoSolver.plot_deposition     = ngp           # Cloud-in-cell for plotting particles.
 ItoSolver.halo_deposition     = native        # 'native' or 'ngp' (see documentation)
 ItoSolver.deposition          = cic           # 'ngp' = nearest grid point
