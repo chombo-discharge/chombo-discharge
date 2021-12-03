@@ -110,8 +110,6 @@ CdrPlasmaAir3Bourdon::CdrPlasmaAir3Bourdon() {
     m_e_alpha.   makeUniform(m_uniform_entries);
     m_e_eta.     makeUniform(m_uniform_entries);
     m_e_energy.  makeUniform(m_uniform_entries);
-
-    m_e_energy.dumpTable(pout());
   }
   else{
     MayDay::Abort("CdrPlasmaAir3Bourdon::parseTransportFile - could not find transport data");
