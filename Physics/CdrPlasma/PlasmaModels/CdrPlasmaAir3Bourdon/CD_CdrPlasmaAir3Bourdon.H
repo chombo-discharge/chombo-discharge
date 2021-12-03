@@ -109,6 +109,7 @@ namespace Physics {
       static std::string s_bolsig_diffco;
       static std::string s_bolsig_alpha;
       static std::string s_bolsig_eta;
+      static std::string s_bolsig_energy;      
 
       std::string m_transport_file;
 
@@ -117,6 +118,7 @@ namespace Physics {
       LookupTable<2> m_e_diffco;
       LookupTable<2> m_e_alpha;
       LookupTable<2> m_e_eta;
+      LookupTable<2> m_e_energy;      
 
       Vector<int> m_wallBc; // Wall boundary conditions
 
