@@ -149,8 +149,8 @@ namespace ItoMerge {
   }
 
   template <class T>
-  Tree<T>::Tree(const std::vector<T>& a_data, const Real a_mass) : Tree() {
-    this->define(a_data, a_mass);
+  Tree<T>::Tree(const std::vector<T>& a_data) : Tree() {
+    this->define(a_data);
   }
 
   template <class T>
@@ -160,14 +160,22 @@ namespace ItoMerge {
 
   template <class T>
   inline
-  void Tree<T>::define(const std::vector<T>& a_data, const Real a_mass){
+  void Tree<T>::define(const std::vector<T>& a_data){
 
     // Make the root node if we don't have it. 
     if(!m_root) {
       m_root = std::make_shared<Node<T> >();
     }
 
-    m_root->setData(a_data, a_mass);
+    // Compute total mass. 
+    Real mass = 0.0;
+    for (const auto& d : a_data){
+      mass += d.mass();
+    }
+
+    CH_assert(mass >= 1.0);
+
+    m_root->setData(a_data, mass);
 
     m_leaves.resize(1);
     m_leaves[0] = m_root;

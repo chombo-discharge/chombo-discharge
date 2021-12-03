@@ -230,11 +230,10 @@ namespace ItoMerge {
     Tree();
 
     /*!
-      @brief Full constructor. Takes a list of primitives and their total mass.
+      @brief Full constructor. Takes a list of primitives to be merged/split.
       @param[in] a_point List of primitives that will be partitioned by the tree
-      @param[in] a_mass  Total mass of the primitives
     */
-    Tree(const std::vector<T>& a_points, const Real a_mass);
+    Tree(const std::vector<T>& a_points);
 
     /*!
       @brief Destructor (does nothing)
@@ -242,12 +241,11 @@ namespace ItoMerge {
     virtual ~Tree();
 
     /*!
-      @brief Full define function. Takes a list of primitives and their total mass.
+      @brief Full define function. Takes a list of primitives to be merged/split.
       @param[in] a_point List of primitives that will be partitioned by the tree
-      @param[in] a_mass  Total mass of the primitives
     */    
     inline
-    void define(const std::vector<T>& a_points, const Real a_mass);    
+    void define(const std::vector<T>& a_points);
 
     /*!
       @brief Build tree with desired number of leaves. This will recursively partition the primitives.

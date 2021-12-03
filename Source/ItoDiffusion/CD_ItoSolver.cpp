@@ -2745,70 +2745,36 @@ void ItoSolver::makeSuperparticles(const WhichContainer a_container, const int a
 
 void ItoSolver::mergeBVH(List<ItoParticle>& a_particles, const int a_particlesPerCell) {
   CH_TIME("ItoSolver::mergeBVH");
+  if(m_verbosity > 5) {
+    pout() << m_name + "::mergeBVH" << endl;
+  }  
 
-#if ITO_DEBUG
-  Real mass_before = 0.0;
-  Real energy_before = 0.0;
-  
-  Real mass_after = 0.0;
-  Real energy_after = 0.0;
-  RealVect center_before = RealVect::Zero;
-  RealVect center_after = RealVect::Zero;
-#endif
-  
-  std::vector<PointMass> pointMasses(a_particles.length());
-  int i = 0;
-  Real mass = 0.0;
-  for (ListIterator<ItoParticle> lit(a_particles); lit.ok(); ++lit, i++) {
+  // 1. Make ItoParticle into point masses. 
+  std::vector<PointMass> pointMasses(0);
+  for (ListIterator<ItoParticle> lit(a_particles); lit.ok(); ++lit) {
     const ItoParticle& p = lit();
-    pointMasses[i].define(p.position(), p.mass(), p.energy()); // Note, p.energy() is average energy and not total energy. 
-    mass += p.mass();
 
-#if ITO_DEBUG
-    mass_before   += p.mass();
-    center_before += p.mass()*p.position();
-    energy_before += p.mass()*p.energy();
-#endif
+    pointMasses.push_back(PointMass(p.position(), p.mass(), p.energy()));
   }
-
-#if ITO_DEBUG
-  center_before *= 1./mass_before;
-  if(mass_before   < 1.0)            MayDay::Abort("ItoSolver::mergeBVH - bad initial mass!");
-  if(mass_before   != mass_before)   MayDay::Abort("ItoSolver::mergeBVH - initial mass is NaN");
-  if(energy_before != energy_before) MayDay::Abort("ItoSolver::mergeBVH - initial energy is NaN");
-#endif
   
   // 2. Build the BVH tree and get the leaves of the tree
-  const int dir = (m_directionKD < 0) ? m_uniformDistribution0d(m_rng) : m_directionKD;
-  m_mergeTree.define(pointMasses, mass);
-  m_mergeTree.buildTree(dir, a_particlesPerCell);
-  const std::vector<std::shared_ptr<ItoMerge::Node<PointMass> > >& leaves = m_mergeTree.getLeaves();
+  const int firstDir = (m_directionKD < 0) ? m_uniformDistribution0d(m_rng) : m_directionKD;
+  m_mergeTree.define(pointMasses);
+  m_mergeTree.buildTree(firstDir, a_particlesPerCell);
 
-  // 3. Clear particles in this cell and add new ones.
+  // 3. Go through the leaves in the tree -- each leaf has a set of PointMass'es that we make into a single
+  //    computational particle.
   a_particles.clear();
-  for (int i = 0; i < leaves.size(); i++) {
-    PointMass pointMass(leaves[i]->getData());
+  const auto& leaves = m_mergeTree.getLeaves();    
+  for (const auto& leaf : leaves){
+
+    // Merge all the point-masses in the leaf into a single point mass.
+    const PointMass pointMass(leaf->getData());
+
+    // Make the single point mass into an ItoParticle and add it back in. 
     ItoParticle p(pointMass.mass(), pointMass.pos(), RealVect::Zero, 0.0, 0.0, pointMass.energy());
     a_particles.add(p);
-
-#if ITO_DEBUG
-    mass_after   += p.mass();
-    energy_after += p.mass()*p.energy();
-    center_after += p.mass()*p.position();
-#endif
   }
-
-#if ITO_DEBUG
-  center_after *= 1./mass_after;
-
-  constexpr Real BVH_ERR_TOL = 1.E-6;
-  const bool break_energy = Abs(energy_before/energy_after - 1.0) > BVH_ERR_TOL;
-  const bool break_center = (center_before/center_after - RealVect::Unit).vectorLength() > BVH_ERR_TOL;
-  const bool break_mass   = Abs(mass_before/mass_after - 1.0) > BVH_ERR_TOL;
-  if(break_mass)   pout() << "ItoSolver::mergeBVH failed. Mass before = "   << mass_before   << "\t Mass after = "   << mass_after << endl;
-  if(break_center) pout() << "ItoSolver::mergeBVH failed. center before = " << center_before << "\t center after = " << center_after << endl;
-  if(break_energy) pout() << "ItoSolver::mergeBVH failed. Energy before = " << energy_before << "\t Energy after = " << energy_after << endl;
-#endif
 }
 
 void ItoSolver::clear(const WhichContainer a_container) {
