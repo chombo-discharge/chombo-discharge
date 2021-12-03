@@ -78,7 +78,7 @@ ItoSolver.checkpointing       = particles     # 'particles' or 'numbers'
 ItoSolver.ppc_restart         = 32            # Maximum number of computational particles to generate for restarts.
 ItoSolver.irr_ngp_interp      = true          # Force irregular interpolation in cut cells or not
 ItoSolver.irr_ngp_deposition  = false         # How to interpolate mobility, 'mobility' or 'velocity', i.e. either mu_p = mu(X_p) or mu_p = (mu*E)(X_p)/E(X_p)
-ItoSolver.WhichMobilityInterpolation     = mobility      # How to interpolate mobility, 'mobility' or 'velocity', i.e. either mu_p = mu(X_p) or mu_p = (mu*E)(X_p)/E(X_p)
+ItoSolver.mobility_interp     = direct        # How to interpolate mobility, 'direct' or 'velocity', i.e. either mu_p = mu(X_p) or mu_p = (mu*E)(X_p)/E(X_p)
 ItoSolver.plot_deposition     = cic           # Cloud-in-cell for plotting particles.
 ItoSolver.halo_deposition     = native        # Native or NGP (see documentation)
 ItoSolver.deposition          = cic           # 'ngp' = nearest grid point

@@ -30,7 +30,8 @@
 /*!
   @brief Radiative tranfer equation solver using Monte-Carlo simulation.
   @details This class is, by default, a non-stationary radiative transfer solver which simulates computational photons that can also be deposited on the mesh. Various
-  options are available for specifying how the photons are generated, and how they are propagated (e.g. with speed of light or instantaneously). 
+  options are available for specifying how the photons are generated, and how they are propagated (e.g. with speed of light or instantaneously). Note that this solver
+  runs its own intersection tests with the EB due to dependencies on how the photons are moved (we store free-flight photons, absorbed photons, intersected photons, etc).
   @note The solver is missing appropriate boundary conditions on domain faces. 
 */
 class McPhoto : public RtSolver {
@@ -45,17 +46,6 @@ public:
     EB,
     Domain,
     Source
-  };
-
-  /*!
-    @brief An enum for switching between various types of EB intersection algorithms when intersecting photons with the EB
-    @details Raycast means ray-casting algorithm. Bisection means that the traveled path is divided into intervals and we apply a bisection algorithm
-    for computing the intersection point. LSF is just ray-casting, but it uses the implicit function on the mesh rather than calling it directly. 
-  */
-  enum class IntersectionEB {
-    Raycast,
-    Bisection,
-    LSF
   };
 
   /*!
@@ -414,6 +404,16 @@ protected:
     PerVolSecond,
     PerSecond
   };
+
+  /*!
+    @brief An enum for switching between various types of EB intersection algorithms when intersecting photons with the EB
+    @details Raycast means ray-casting algorithm. Bisection means that the traveled path is divided into intervals and we apply a bisection algorithm
+    for computing the intersection point. LSF is just ray-casting, but it uses the implicit function on the mesh rather than calling it directly. 
+  */
+  enum class IntersectionEB {
+    Raycast,
+    Bisection,
+  };  
 
   /*!
     @brief Instantaneous transport or not

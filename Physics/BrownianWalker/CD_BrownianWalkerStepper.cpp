@@ -64,9 +64,9 @@ void BrownianWalkerStepper::initialData(){
   
   m_solver->initialData();
   if(m_ppc > 0){
-    m_solver->sortParticlesByCell(ItoSolver::WhichContainer::bulk);
-    m_solver->makeSuperparticles(ItoSolver::WhichContainer::bulk,m_ppc);
-    m_solver->sortParticlesByPatch(ItoSolver::WhichContainer::bulk);
+    m_solver->sortParticlesByCell(ItoSolver::WhichContainer::Bulk);
+    m_solver->makeSuperparticles(ItoSolver::WhichContainer::Bulk,m_ppc);
+    m_solver->sortParticlesByPatch(ItoSolver::WhichContainer::Bulk);
   }
 
   if(m_solver->isDiffusive()){
@@ -89,7 +89,7 @@ void BrownianWalkerStepper::setVelocity(){
   if(m_verbosity > 5){
     pout() << "BrownianWalkerStepper::setVelocity" << endl;
   }
-  m_solver->set_mobility(1.0);
+  m_solver->setParticleMobility(1.0);
   
   const int finest_level = m_amr->getFinestLevel();
   for (int lvl = 0; lvl <= finest_level; lvl++){
@@ -128,7 +128,7 @@ void BrownianWalkerStepper::loadBalanceBoxes(Vector<Vector<int> >&            a_
   }
   
   if(m_LoadBalancing && a_realm == m_realm){
-    ParticleContainer<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::bulk);
+    ParticleContainer<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk);
   
     particles.regrid(a_grids, m_amr->getDomains(), m_amr->getDx(), m_amr->getRefinementRatios(), a_lmin, a_finestLevel);
 
@@ -212,7 +212,7 @@ void BrownianWalkerStepper::setVelocity(const int a_level){
     }
 
     // Now set the mobility for all the particles
-    List<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::bulk)[a_level][dit()].listItems();
+    List<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk)[a_level][dit()].listItems();
     for (ListIterator<ItoParticle> lit(particles); lit.ok(); ++lit){
       lit().mobility() = 1.0;
     }
@@ -249,9 +249,9 @@ void BrownianWalkerStepper::postCheckpointSetup() {
 
   m_solver->remap();
   if(m_ppc > 0){
-    m_solver->sortParticlesByCell(ItoSolver::WhichContainer::bulk);
-    m_solver->makeSuperparticles(ItoSolver::WhichContainer::bulk, m_ppc);
-    m_solver->sortParticlesByPatch(ItoSolver::WhichContainer::bulk);
+    m_solver->sortParticlesByCell(ItoSolver::WhichContainer::Bulk);
+    m_solver->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_ppc);
+    m_solver->sortParticlesByPatch(ItoSolver::WhichContainer::Bulk);
   }
   m_solver->depositParticles();
 
@@ -287,7 +287,7 @@ void BrownianWalkerStepper::computeDt(Real& a_dt, TimeCode& a_timeCode) {
     pout() << "BrownianWalkerStepper::computeDt" << endl;
   }
 
-  m_solver->set_mobility(1.0); 
+  m_solver->setParticleMobility(1.0); 
   m_solver->interpolateVelocities();
   m_solver->interpolateDiffusion();
 
@@ -314,8 +314,8 @@ void BrownianWalkerStepper::printStepReport() {
   }
 
   // Do nothing
-  const size_t local_particles  = m_solver->getNumParticles(ItoSolver::WhichContainer::bulk, true);
-  const size_t global_particles = m_solver->getNumParticles(ItoSolver::WhichContainer::bulk, false);
+  const size_t local_particles  = m_solver->getNumParticles(ItoSolver::WhichContainer::Bulk, true);
+  const size_t global_particles = m_solver->getNumParticles(ItoSolver::WhichContainer::Bulk, false);
 
   pout() << "                                   #part = " << local_particles << " (" << global_particles << ")" << endl;
   
@@ -391,7 +391,7 @@ Real BrownianWalkerStepper::advance(const Real a_dt) {
   for (int lvl = 0; lvl <= finest_level; lvl++){
     const RealVect dx                     = m_amr->getDx()[lvl]*RealVect::Unit;
     const DisjointBoxLayout& dbl          = m_amr->getGrids(m_realm)[lvl];
-    ParticleData<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::bulk)[lvl];
+    ParticleData<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
 
     const EBISLayout& ebisl = m_amr->getEBISLayout(m_realm, m_solver->getPhase())[lvl];
 
@@ -502,11 +502,11 @@ void BrownianWalkerStepper::regrid(const int a_lmin, const int a_oldFinestLevel,
   }
 
   if(m_ppc > 0){
-    m_solver->sortParticlesByCell(ItoSolver::WhichContainer::bulk);
-    m_solver->makeSuperparticles(ItoSolver::WhichContainer::bulk, m_ppc);
-    m_solver->sortParticlesByPatch(ItoSolver::WhichContainer::bulk);
+    m_solver->sortParticlesByCell(ItoSolver::WhichContainer::Bulk);
+    m_solver->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_ppc);
+    m_solver->sortParticlesByPatch(ItoSolver::WhichContainer::Bulk);
     
-    m_solver->set_mobility(1.0); // Superparticle algorithm only conserves mass, energy. Diffusion and mobility needs to be reset.
+    m_solver->setParticleMobility(1.0); // Superparticle algorithm only conserves mass, energy. Diffusion and mobility needs to be reset.
   }
 }
 

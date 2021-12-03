@@ -93,7 +93,7 @@ def write_template(args):
 
     mainf.write("  // Create solver factories\n")
     mainf.write("  auto poi_fact = new FieldSolverFactory<" + args.field_solver + ">();\n")
-    mainf.write("  auto ito_fact = new itoFactory<ItoSolver, " + args.ItoSolver + ">();\n")
+    mainf.write("  auto ito_fact = new ItoFactory<ItoSolver, " + args.ItoSolver + ">();\n")
     mainf.write("  auto rte_fact = new RtFactory<McPhoto, McPhoto>();\n")
     mainf.write("\n")
     

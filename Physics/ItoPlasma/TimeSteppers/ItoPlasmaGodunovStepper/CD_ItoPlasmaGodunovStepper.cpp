@@ -726,10 +726,10 @@ void ItoPlasmaGodunovStepper::setupRuntimeStorage(){
 
   switch (m_algorithm){
   case which_algorithm::euler_maruyama:
-    ItoParticle::setNumRunTimeVectors(1);
+    ItoParticle::setNumRuntimeVectors(1);
     break;
   case which_algorithm::trapezoidal:
-    ItoParticle::setNumRunTimeVectors(2); // For V^k and the diffusion hop. 
+    ItoParticle::setNumRuntimeVectors(2); // For V^k and the diffusion hop. 
     break;
   default:
     MayDay::Abort("ItoPlasmaGodunovStepper::setupRuntimeStorage - logic bust");
