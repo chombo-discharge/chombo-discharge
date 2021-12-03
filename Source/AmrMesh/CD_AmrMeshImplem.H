@@ -753,6 +753,140 @@ void AmrMesh::intersectParticlesRaycastIF(ParticleContainer<P>&    a_activeParti
   a_domainParticles.remap();  
 }
 
+template <class P>
+void AmrMesh::intersectParticlesBisectIF(ParticleContainer<P>&    a_activeParticles,
+					 ParticleContainer<P>&    a_ebParticles,
+					 ParticleContainer<P>&    a_domainParticles,
+					 const phase::which_phase a_phase,
+					 const Real               a_bisectionStep,
+					 const bool               a_deleteParticles) const {
+  CH_TIME("AmrMesh::intersectParticlesBisectIF");
+  if(m_verbosity > 5){
+    pout() << "AmrMesh::intersectParticlesBisectIF" << endl;
+  }
+
+  CH_assert(a_activeParticles.getRealm() == a_ebParticles.    getRealm());
+  CH_assert(a_activeParticles.getRealm() == a_domainParticles.getRealm());
+
+  // TLDR: This is pretty much a hard-copy of intersectParticlesRaycastIF, with the exception that the EB intersection
+  //       test is replaced by a bisection test. 
+
+  a_ebParticles.    clear();
+  a_domainParticles.clear();
+
+  const std::string whichRealm = a_activeParticles.getRealm();
+
+  // Figure out the implicit function
+  RefCountedPtr<BaseIF> implicitFunction;
+
+  switch(a_phase){
+  case phase::gas:
+    implicitFunction = m_baseif.at(phase::gas);
+    break;
+  case phase::solid:
+    implicitFunction = m_baseif.at(phase::solid);    
+    break;
+  default:
+    MayDay::Error("AmrMesh::intersectParticlesBisectIF - logic bust");
+  }
+
+  // Safety factor to prevent particles falling off the domain if they intersect the high-side of the domain
+  constexpr Real safety = 1.E-12;
+
+  // Level loop -- go through each AMR level
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++){
+    
+    // Handle to various grid stuff.
+    const DisjointBoxLayout& dbl   = this->getGrids     (whichRealm         )[lvl];
+    const EBISLayout&        ebisl = this->getEBISLayout(whichRealm, a_phase)[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+
+      List<P>& activeParticles = a_activeParticles[lvl][dit()].listItems();
+      List<P>& ebParticles     = a_ebParticles    [lvl][dit()].listItems();
+      List<P>& domainParticles = a_domainParticles[lvl][dit()].listItems();
+
+      for (ListIterator<P> lit(activeParticles); lit.ok(); ++lit){
+	P& particle = lit();
+
+	const RealVect newPos = particle.position();
+	const RealVect oldPos = particle.oldPosition();
+	const RealVect path   = newPos - oldPos;
+
+	// Cheap initial tests that allow us to skip some intersections tests.
+	bool checkEB     = false;
+	bool checkDomain = false;
+
+	if(!implicitFunction.isNull()){
+	  checkEB = true;
+	}
+	for (int dir = 0; dir < SpaceDim; dir++){
+	  const bool outsideLo = newPos[dir] < m_probLo[dir];
+	  const bool outsideHi = newPos[dir] > m_probHi[dir];
+
+	  if(outsideLo || outsideHi) {
+	    checkDomain = true;
+	  }
+	}
+
+	// Do the intersection tests.
+	if (checkEB || checkDomain){
+
+	  // These are the solution 
+	  Real sDomain = std::numeric_limits<Real>::max();
+	  Real sEB     = std::numeric_limits<Real>::max();
+
+	  bool contactDomain = false;
+	  bool contactEB     = false;
+
+	  // Check if the particle intersected the domain. If it did, we compute sDomain such that the intersection
+	  // point with the domain is X = X0 + sDomain * (X1-X0) where X1=newPos and X0=oldPos
+	  if(checkDomain){
+	    contactDomain = ParticleOps::domainIntersection(oldPos, newPos, m_probLo, m_probHi, sDomain);
+	  }
+
+	  // Check if the particle intersected the EB. If it did, we compute sEB such that the intersection
+	  // point with the domain is X = X0 + sEB * (X1-X0) where X1=newPos and X0=oldPos
+	  if(checkEB){
+	    contactEB = ParticleOps::ebIntersectionBisect(implicitFunction, oldPos, newPos, a_bisectionStep, sEB);
+	  }
+
+	  // Particle bumped into something.
+	  if(contactDomain || contactEB){
+	    if(sEB <= sDomain){ // Crashed with EB "first".
+	      particle.position = oldPos + sEB * path;
+
+	      if(a_deleteParticles){
+		ebParticles.transfer(lit);
+	      }
+	      else{
+		ebParticles.add(lit());
+	      }
+	    }
+	    else { // Crashed with domain "first".
+	      const Real sSafety = std::max(0.0, sDomain - safety); // To prevent particles falling off the high side of the domain
+	      
+	      particle.position = oldPos + sSafety * path;
+
+	      if(a_deleteParticles){
+		domainParticles.transfer(lit);
+	      }
+	      else{
+		domainParticles.add(lit());
+	      }
+	    }
+	  }
+	}
+      }
+    }
+    
+  }
+
+  // These need to be remapped.
+  a_ebParticles.    remap();
+  a_domainParticles.remap();  
+}
+
 #include <CD_NamespaceFooter.H>
 
 #endif

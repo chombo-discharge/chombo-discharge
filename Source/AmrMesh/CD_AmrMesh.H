@@ -846,16 +846,16 @@ public:
     parameter indicates the particle type -- it MUST have const RealVec& position() const and  const RealVect& oldPosition() const 
     functions that determine the start and stop position of the particle trajectory. This routine uses a ray-casting method
     to check for intersections with the EB (the domain side is much easier). If the particles are closer to the EB than
-    a_tolerance*dx (where dx is the grid resolution on the grid level), they are absorbed and placed on the EB. Their position
-    are updated and they are placed in the a_ebParticles argument. This routine uses a ray-casting method where it computes
-    the distance from the EB (assuming that the implicit function is a signed distance function). Particles are then moved that
+    a_tolerance, they are absorbed and placed on the EB. Their position are updated and they are placed in the 
+    a_ebParticles argument. This routine uses a ray-casting method where it computes the distance from the EB
+    (assuming that the implicit function is a signed distance function). Particles are then moved that
     distance along their trajectory and we then update the new distance to the EB. This is done recursively until the particles
     have either moved the entire length or been absorbed by the EB or domain side. 
     @param[inout] a_activeParticles Particles to be intersected with geometry
     @param[out]   a_ebParticles     Particles that intersected with the EB
     @param[out]   a_domainParticles Particles that intersected with the domain faces
     @param[in]    a_phase           Phase where the input particles live
-    @param[in]    a_tolerance       Tolerance relative to grid resolution.
+    @param[in]    a_tolerance       Tolerance
     @param[in]    a_deleteParticles If true, particles will be removed from a_activeParticles if they intersect the geometry.
   */
   template <class P>
@@ -865,6 +865,28 @@ public:
 				   const phase::which_phase a_phase,
 				   const Real               a_tolerance,
 				   const bool               a_deleteParticles) const;
+  
+  /*!
+    @brief Particle intersection algorithm based on bisection. 
+    @details This routine will iterate through all the particles and check if they intersect the geometry. The template
+    parameter indicates the particle type -- it MUST have const RealVec& position() const and  const RealVect& oldPosition() const 
+    functions that determine the start and stop position of the particle trajectory. This routine uses a bisection method
+    to check for intersections with the EB (the domain side is much easier). Their position are updated and they are placed
+    in the a_ebParticles argument. 
+    @param[inout] a_activeParticles Particles to be intersected with geometry
+    @param[out]   a_ebParticles     Particles that intersected with the EB
+    @param[out]   a_domainParticles Particles that intersected with the domain faces
+    @param[in]    a_phase           Phase where the input particles live
+    @param[in]    a_bisectionStep   Length of the bisection step
+    @param[in]    a_deleteParticles If true, particles will be removed from a_activeParticles if they intersect the geometry.
+  */
+  template <class P>
+  void intersectParticlesBisectIF(ParticleContainer<P>&    a_activeParticles,
+				  ParticleContainer<P>&    a_ebParticles,
+				  ParticleContainer<P>&    a_domainParticles,
+				  const phase::which_phase a_phase,
+				  const Real               a_bisectionStep,
+				  const bool               a_deleteParticles) const;  
   /*!
     @brief Interpolate ghost vectors over a realm, using the default ghost cell interpolation method. 
     @param[inout] a_data  Data to be interpolated.
