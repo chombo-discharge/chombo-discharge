@@ -1,6 +1,8 @@
 # Physics/AdvectionDiffusion
 This physics module solves for an advection-diffusion process of a single scalar quantity. This module contains files for setting up the initial conditions
-and advected species, basic integrators, and a cell tagger for refining grid cells. The source files consist of the following:
+and advected species, basic integrators, and a cell tagger for refining grid cells. See https://chombo-discharge.github.io/AdvectionDiffusionModel.html for implementation details.
+
+The source files consist of the following:
 
 * **CD_AdvectionDiffusionSpecies.H/cpp** Implementation of CdrSpecies, for setting up initial conditions and turning on/off advection and diffusion.
 * **CD_AdvectionDiffusionTagger.H/cpp**  Implementation of CellTagger, for flagging cells for refinement and coarsening.
