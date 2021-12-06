@@ -101,13 +101,13 @@ public:
   virtual void writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const = 0;
 #endif
 
+#ifdef CH_USE_HDF5
   /*!
     @brief Read checkpoint data from file
     @param[inout] a_handle HDF5 file
     @param[in]    a_lvl    Grid level
     @details Implement this routine for reading data for restarts. This will typically call the solvers' checkponiting routine. 
   */
-#ifdef CH_USE_HDF5  
   virtual void readCheckpointData(HDF5Handle& a_handle, const int a_lvl) = 0;
 #endif
 
