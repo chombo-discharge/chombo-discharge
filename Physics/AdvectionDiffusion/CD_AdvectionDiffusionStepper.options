@@ -12,8 +12,7 @@ AdvectionDiffusion.blob_center    = 0 0     # Blob center
 AdvectionDiffusion.diffusion      = true    # Turn on/off diffusion
 AdvectionDiffusion.advection      = true    # Turn on/off advection
 AdvectionDiffusion.fhd            = false   # Use FHD or not
-
-AdvectionDiffusion.integrator     = 1       # 0 = Heun's method. 1 = IMEX Euler
+AdvectionDiffusion.integrator     = imex    # 'heun' or 'imex'
 
 # Velocity, diffusion, and CFL
 # ----------------------------
@@ -23,6 +22,6 @@ AdvectionDiffusion.cfl            = 0.5     # CFL number
 
 # Cell tagging stuff
 # ------------------
-AdvectionDiffusion.refine_curv = 0.1          # Refine if curvature exceeds this
-AdvectionDiffusion.refine_magn = 1E-2         # Only tag if magnitude eceeds this
-AdvectionDiffusion.buffer      = 0            # Grow tagged cells     
+AdvectionDiffusion.refine_curv = 0.1        # Refine if curvature exceeds this
+AdvectionDiffusion.refine_magn = 1E-2       # Only tag if magnitude eceeds this
+AdvectionDiffusion.buffer      = 0          # Grow tagged cells     

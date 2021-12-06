@@ -29,6 +29,7 @@
 **/d/**
 **/*.a
 **/*.o
+myApplications/**
 pout.*
 time.table.*
 Research
