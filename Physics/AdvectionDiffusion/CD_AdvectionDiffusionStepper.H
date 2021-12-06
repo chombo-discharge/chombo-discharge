@@ -18,10 +18,14 @@
 #include <CD_NamespaceHeader.H>
 
 namespace Physics {
+
+  /*!
+    @brief Physics functionality for running scalar advection-diffusion code
+  */
   namespace AdvectionDiffusion {
 
     /*!
-      @brief Class that just solves the AdvectionDiffusion equation
+      @brief Implementation of TimeStepper which runs a single advection-diffusion-reaction solver.
     */
     class AdvectionDiffusionStepper : public TimeStepper {
     public:
