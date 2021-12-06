@@ -19,6 +19,9 @@
 #include <CD_Vec.H>
 #include <CD_NamespaceHeader.H>
 
+/*!
+  @brief Namespace for encapsulating various bounding volumes for usage with BVHs
+*/
 namespace BoundingVolumes {
   
   /*!

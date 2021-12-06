@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_Aerosol.H
-  @brief  Aerosol geometry
+  @brief  Declaration of an aerosol geometry
   @author Robert Marskar
 */
 
@@ -16,10 +16,20 @@
 #include <CD_ComputationalGeometry.H>
 #include <CD_NamespaceHeader.H>
 
+/*!
+  @brief Simple class for making a bunch of (manually constructored) dielectric sphere
+*/
 class Aerosol : public ComputationalGeometry {
 public:
 
+  /*!
+    @brief Constructor
+  */
   Aerosol();
+
+  /*!
+    @brief Destructor
+  */  
   ~Aerosol();
 };
 

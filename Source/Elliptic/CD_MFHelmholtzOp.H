@@ -33,6 +33,11 @@
 #include <CD_MFHelmholtzJumpBCFactory.H>
 #include <CD_NamespaceHeader.H>
 
+/*!
+  @brief Operator for solving multifluid Helmholtz on a grid level. 
+  @details This operator should typically not be constructed directly by the user but used together with Chombo's AMRMultiGrid. In this
+  case the user will want to constructor these operators through the factor.
+*/
 class MFHelmholtzOp : public LevelTGAHelmOp<LevelData<MFCellFAB>, MFFluxFAB> {
 public:
 

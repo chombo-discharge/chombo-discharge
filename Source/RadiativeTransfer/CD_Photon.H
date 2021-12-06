@@ -25,7 +25,8 @@
 #include <CD_NamespaceHeader.H>
   
 /*!
-  @brief Photon particle class. This inherits from Chombo's BinItem so it can be used in parallel with our ParticleContainer classes.
+  @brief Particle class for usage with Monte Carlo radiative transfer.
+  @deatils This inherits from Chombo's BinItem so it can be used in parallel with our ParticleContainer classes.
 */
 class Photon : public BinItem {
 public:

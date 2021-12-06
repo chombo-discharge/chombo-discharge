@@ -22,6 +22,9 @@
 #include <CD_Vec.H>
 #include <CD_NamespaceHeader.H>
 
+/*!
+  @brief Namespace for various bounding volume heirarchy (BVH) functionality.
+*/
 namespace BVH {
 
   /*!
