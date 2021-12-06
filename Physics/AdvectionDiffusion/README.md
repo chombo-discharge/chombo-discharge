@@ -9,7 +9,9 @@ and advected species, basic integrators, and a cell tagger for refining grid cel
 ## Setting up a new application
 To set up a new problem, use the Python script. For example:
 
-> ./setup.py -base_dir=myApplications -app_name=myAdvectionDiffusion -dim=2 -geometry=CoaxialCable
+```shell
+./setup.py -base_dir=myApplications -app_name=myAdvectionDiffusion -dim=2 -geometry=CoaxialCable
+```
 
 The application will be installed to $DISCHARGE_HOME/myApplications/myAdvectionDiffusion.
 The user will need to modify the geometry and set the initial conditions through the inputs file. 
