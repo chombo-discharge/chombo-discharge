@@ -7,6 +7,13 @@ and advected species, basic integrators, and a cell tagger for refining grid cel
 * **CD_AdvectionDiffusionStepper.H/cpp** Implementation of TimeStepper, for advancing the advection-diffusion equation. 
 
 ## Setting up a new application
-To set up a new problem, use
+To set up a new problem, use the Python script. For example:
+
+> ./setup.py -base_dir=myApplications -app_name=myAdvectionDiffusion -dim=2 -geometry=CoaxialCable
+
+The application will be installed to $DISCHARGE_HOME/myApplications/myAdvectionDiffusion.
+The user will need to modify the geometry and set the initial conditions through the inputs file. 
 
 ## Modifying the application
+The application is simply set up to advect and diffuse a scalar in a rotating flow.
+Users are free to modify this application, e.g. adding new initial conditions and flow fields. 
