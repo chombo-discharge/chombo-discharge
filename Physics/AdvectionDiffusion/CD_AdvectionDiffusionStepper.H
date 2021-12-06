@@ -18,88 +18,240 @@
 #include <CD_NamespaceHeader.H>
 
 namespace Physics {
+
+  /*!
+    @brief Physics functionality for running scalar advection-diffusion code
+  */
   namespace AdvectionDiffusion {
 
     /*!
-      @brief Class that just solves the AdvectionDiffusion equation
+      @brief Implementation of TimeStepper which runs a single advection-diffusion-reaction solver.
     */
     class AdvectionDiffusionStepper : public TimeStepper {
     public:
 
+      /*!
+	@brief Default constructor -- only parses options. 
+      */
       AdvectionDiffusionStepper();
+
+      /*!
+	@brief Full constructor
+	@param[in] a_solver CDR solver. 
+      */
       AdvectionDiffusionStepper(RefCountedPtr<CdrSolver>& a_solver);
+
+      /*!
+	@brief Destructor (does nothing)
+      */
       ~AdvectionDiffusionStepper();
 
-      // Setup routines
+      /*!
+	@brief Fill solver with initial data
+      */
       void initialData() override;
+
+      /*!
+	@brief Allocate memory
+      */      
       void allocate() override;
+
+      /*!
+	@brief Perform post-initialization routines (there are none)
+      */            
       void postInitialize() override;
 
       // IO routines
 #ifdef CH_USE_HDF5
+      /*!  
+	@brief Write checkpoint data to file
+	@param[inout] a_handle HDF5 fil
+	@param[in]    a_lvl    Grid level
+      */      
       void writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const override;
 #endif
-#ifdef CH_USE_HDF5      
+      
+#ifdef CH_USE_HDF5
+      /*!
+	@brief Read checkpoint data from file
+	@param[inout] a_handle HDF5 file
+	@param[in]    a_lvl    Grid level
+      */      
       void readCheckpointData(HDF5Handle& a_handle, const int a_lvl) override;
 #endif
+
+      /*!
+	@brief Perform post-checkpoint setup routines
+	@details This will set source terms, velocities, and diffusion coefficients. 
+      */
       void postCheckpointSetup() override;
+
+      /*!
+	@brief Get the number of plot variables
+      */
       int getNumberOfPlotVariables() const override;
+
+      /*!
+	@brief Write solver plot data into data holder
+	@param[inout] a_output            Output data holder.
+	@param[in]    a_plotVariableNames Plot variable names.
+	@param[inout] a_icomp             Starting component in a_output to begin at. 
+      */
       void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const override;
 
-      // Advance routines
+      /*!
+	@brief Compute a time step to be used by Driver. 
+	@param[out] a_dt       Time step to be used.
+	@param[out] a_timeCode Identifier for how the time step was computed. 
+      */
       void computeDt(Real& a_dt, TimeCode& a_timeCode) override;
 
+      /*!
+	@brief Synchronize solver times
+	@param[in] a_step Time step
+	@param[in] a_time Time (in seconds)
+	@param[in] a_dt   Time step that was used. 
+      */
       void synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) override;
+
+      /*!
+	@brief Print a step report if you want
+	@note Implementation does nothing. 
+      */
       void printStepReport() override;
 
-      //
+      /*!
+	@brief Parse runtime options
+	@details Reads in verbosity level, integrator, and CFL number to use. 
+      */
       void parseRuntimeOptions() override;
 
-      // Registration routines
+      /*!
+	@brief Register all realms that will be used
+      */
       void registerRealms() override;
+
+      /*!
+	@brief Register all operators that will be used.
+      */      
       void registerOperators() override;
 
-      // Regrid routines
+      /*!
+	@brief Internal routine for checking if TimeStepper needs to regrid. Always returns false. 
+      */
       bool needToRegrid() override;
 
+      /*!
+	@brief Perform pre-regrid operations. Calls CdrSolver::preRegrid
+	@param[in] a_lmin           The coarsest level that changes
+	@param[in] a_oldFinestLevel The finest level before the regrid. 
+      */
       void preRegrid(const int a_lbase, const int a_finestLevel) override;
 
-      // Pure routines for derived classes
+      /*!
+	@brief Instantiate the solver. 
+      */
       void setupSolvers() override;
+
+      /*!
+	@brief Advancement function -- advances one time step.
+	@param[in] a_dt Time step to be used for advancement
+	@return a_dt
+      */
       Real advance(const Real a_dt) override;
+
+      /*!
+	@brief Regrid method -- calls regrid method for solver.
+	@param[in] a_lmin           The coarsest level that changed. 
+	@param[in] a_oldFinestLevel The finest level before the regrid. 
+	@param[in] a_newFinestLevel The finest level after the regrid. 
+      */      
       void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
+
+      /*!
+	@brief Perform post-regrid routines. This does nothing
+      */
       void postRegrid() override;
-      
 
     protected:
 
+      /*!
+	@brief Switch for different integrators
+      */
+      enum Integrator {
+	Heun,
+	EulerIMEX
+      };
+
+      /*!
+	@brief Realm where the solver lives
+      */
       std::string m_realm;
 
+      /*!
+	@brief Phase where the solver lives
+      */
       phase::which_phase m_phase;
 
-      // CDR solver & species
+      /*!
+	@brief Reference to solver
+      */
       RefCountedPtr<CdrSolver>  m_solver;
+
+      /*!
+	@brief Reference to advected species
+      */      
       RefCountedPtr<CdrSpecies> m_species;
 
-      // Diffusion coefficient and velocity
+      /*!
+	@brief CFL number to use
+      */
       Real m_cfl;
-      Real m_faceCenteredDiffusionCoefficient;
+
+      /*!
+	@brief Diffusion coefficient
+      */
+      Real m_diffCo;
+
+      /*!
+	@brief Angular velocity for velocity field
+      */
       Real m_omega;
 
-      // Use stochastic diffusion
+      /*!
+	@brief If true, this will use an FHD description
+      */
       bool m_fhd;
 
-      // Integrator (yes, I'm too lazy to write an enum for holding this)
-      int m_integrator;
+      /*!
+	@brief Integrator
+      */
+      Integrator m_integrator;
 
-      void setVelocity();
-      void setVelocity(const int a_level);
-
-    private:
-
+      /*!
+	@brief Transient storage
+      */
       EBAMRCellData m_tmp;
+      
+      /*!
+	@brief Transient storage -- used for RK2 coefficients
+      */      
       EBAMRCellData m_k1;
+
+      /*!
+	@brief Transient storage -- used for RK2 coefficients
+      */            
       EBAMRCellData m_k2;
+
+      /*!
+	@brief Set advective velocity for the solver
+      */
+      void setVelocity();
+
+      /*!
+	@brief Parse the integration method
+      */
+      void parseIntegrator();      
     };
   }
 }

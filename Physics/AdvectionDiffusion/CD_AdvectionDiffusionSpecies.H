@@ -19,16 +19,47 @@
 namespace Physics {
   namespace AdvectionDiffusion {
 
+    /*!
+      @brief Advection and diffused species for AdvectionDiffusionStepper
+      @details The initial conditions and mobility/diffusion settings are initialized upon construction.
+    */
     class AdvectionDiffusionSpecies : public CdrSpecies {
     public:
-      AdvectionDiffusionSpecies();
-      ~AdvectionDiffusionSpecies();
 
+      /*!
+	@brief Constructor
+      */
+      AdvectionDiffusionSpecies();
+
+      /*!
+	@brief Destructor
+      */      
+      virtual ~AdvectionDiffusionSpecies();
+
+      /*!
+	@brief Initial data. 
+	@details This returns a super-Gaussian blob. 
+	@param[in] a_pos  Position.
+	@param[in] a_time Time
+      */
       Real initialData(const RealVect a_pos, const Real a_time) const override;
+      
     protected:
-      Real     m_blob_radius;
-      Real     m_blob_amplitude;
-      RealVect m_blob_center;
+
+      /*!
+	@brief Gaussian blob radius
+      */
+      Real m_blobRadius;
+
+      /*!
+	@brief Gaussian blob amplitude
+      */      
+      Real m_blobAmplitude;
+
+      /*!
+	@brief Gaussian blob center
+      */            
+      RealVect m_blobCenter;
     
     };
   }

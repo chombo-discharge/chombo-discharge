@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_AdvectionDiffusionTagger.H
-  @brief  Tagging class for advection-diffusion physics
+  @brief  Declaration of a cell tagger class for AdvectionDiffusion physics.
   @author Robert Marskar
 */
 
@@ -22,30 +22,74 @@ namespace Physics {
   namespace AdvectionDiffusion {
 
     /*!
-      @brief Abstract class for tagging cells across an AMR hierarchy
+      @brief Class for tagging cells in AdvectionDiffusion physics
+      @details This class refines cells if grad(phi)*dx/phi > r1 or if phi > r2.
     */
     class AdvectionDiffusionTagger : public CellTagger {
     public:
 
-      AdvectionDiffusionTagger(RefCountedPtr<CdrSolver>& a_solver,
-				 RefCountedPtr<AmrMesh>&   a_amr);
-      ~AdvectionDiffusionTagger();
+      /*!
+	@brief Disallowed weak construction.
+      */
+      AdvectionDiffusionTagger() = delete;
 
+      /*!
+	@brief Constructor 
+	@param[in] a_solver Cdr solver reference -- needed in order to fetch data used for tagging
+	@param[in] a_amr    AmrMesh solver reference
+      */
+      AdvectionDiffusionTagger(RefCountedPtr<CdrSolver>& a_solver,
+			       RefCountedPtr<AmrMesh>&   a_amr);
+
+      /*!
+	@brief Destructor (does nothing)
+      */
+      virtual ~AdvectionDiffusionTagger();
+
+      /*!
+	@brief Regrid method.
+	@details Does nothing, but is overriden because parent method is pure.
+      */
       void regrid() override;
+
+      /*!
+	@brief Parse options
+	@details Parses m_refCurv and m_refMagn.
+      */
       void parseOptions() override;
+
+      /*!
+	@brief Flag cells for refinement.
+	@param[inout] a_tags Cell tags across AMR hierarchy. See CellTagger for details.
+      */
       bool tagCells(EBAMRTags& a_tags) override;
 
     protected:
+
+      /*!
+	@brief Realm where solver is registered.
+      */
       std::string m_realm;
-      
+
+      /*!
+	@brief Reference to CdrSolver
+      */
       RefCountedPtr<CdrSolver> m_solver;
-      RefCountedPtr<AmrMesh>   m_amr;
 
-    private:
-      AdvectionDiffusionTagger() = delete;
+      /*!
+	@brief Reference to AmrMesh
+      */      
+      RefCountedPtr<AmrMesh> m_amr;
 
-      Real m_refi_curv;
-      Real m_refi_magn;
+      /*!
+	@brief Refinement threshold for curvature-based refinement.
+      */
+      Real m_refCurv;
+      
+      /*!
+	@brief Refinement threshold for magnitude-based refinement.
+      */      
+      Real m_refMagn;
     };
   }
 }
