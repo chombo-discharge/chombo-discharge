@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_BrownianWalkerSpecies.H
-  @brief  Declaration of a brownian walker species for the ItoSolver
+  @brief  Declaration of a Brownian walker species for the ItoSolver
   @author Robert Marskar
 */
 
@@ -22,24 +22,44 @@
 namespace Physics {
   namespace BrownianWalker {
 
+    /*!
+      @brief Species which is advected/diffused in Brownian walker code
+      @details The initial particles are drawn from a Gaussian distribution. The user specifies how many, and the parameters for the distribution.
+    */
     class BrownianWalkerSpecies : public ItoSpecies {
     public:
+
+      /*!
+	@brief Constructor -- reads in input parameters
+      */
       BrownianWalkerSpecies();
+
+      /*!
+	@brief Destructor (does nothing)
+      */
       ~BrownianWalkerSpecies();
+      
     protected:
-      Real     m_blob_radius;
-      Real     m_blob_amplitude;
-      int      m_num_particles;
-      RealVect m_blob_center;
 
-      int m_seed;
-      std::mt19937_64 m_rng;
-      std::uniform_real_distribution<Real> m_udist11;
-      std::normal_distribution<Real> m_gauss;
+      /*!
+	@brief Number of initial particles
+      */
+      int m_numParticles;      
 
-      void draw_initial_particles();
-      RealVect randomGaussian();
-      RealVect randomDirection();
+      /*!
+	@brief Radius for the initial Gaussian distribution of particles
+      */
+      Real m_blobRadius;
+
+      /*!
+	@brief Center-point for the Gaussian particle distribution
+      */
+      RealVect m_blobCenter;
+
+      /*!
+	@brief Draw initial particles
+      */
+      void drawInitParticles();
     };
   }
 }
