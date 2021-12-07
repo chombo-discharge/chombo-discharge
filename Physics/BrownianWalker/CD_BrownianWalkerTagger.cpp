@@ -10,6 +10,7 @@
 */
 
 // Chombo includes
+#include <CH_Timer.H>
 #include <ParmParse.H>
 
 // Our includes
@@ -21,7 +22,9 @@
 using namespace Physics::BrownianWalker;
 
 BrownianWalkerTagger::BrownianWalkerTagger(RefCountedPtr<ItoSolver>& a_solver,
-					       RefCountedPtr<AmrMesh>&   a_amr){
+					   RefCountedPtr<AmrMesh>&   a_amr){
+  CH_TIME("BrownianWalkerTagger::BrownianWalkerTagger");
+  
   m_solver    = a_solver;
   m_amr       = a_amr;
   m_name      = "BrownianWalker";
@@ -29,22 +32,24 @@ BrownianWalkerTagger::BrownianWalkerTagger(RefCountedPtr<ItoSolver>& a_solver,
 }
 
 BrownianWalkerTagger::~BrownianWalkerTagger(){
-
+  CH_TIME("BrownianWalkerTagger::~BrownianWalkerTagger");
 }
 
 void BrownianWalkerTagger::regrid(){
-
+  CH_TIME("BrownianWalkerTagger::regrid");
 }
 
 void BrownianWalkerTagger::parseOptions(){
-  ParmParse pp(m_name.c_str());
-  pp.get("refine_magn", m_refi_magn);
+  CH_TIME("BrownianWalkerTagger::parseOptions");
   
-  parseBuffer(); // Derived from CellTagger
+  ParmParse pp(m_name.c_str());
+  pp.get("refine_magn", m_refMagn);
+  
+  this->parseBuffer();
 }
 
-bool BrownianWalkerTagger::tagCells(EBAMRTags& a_tags){
-  return true;
+bool BrownianWalkerTagger::tagCells(EBAMRTags& a_tags) {
+  return false;
 }
 
 #include <CD_NamespaceFooter.H>

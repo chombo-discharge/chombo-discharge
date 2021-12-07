@@ -201,7 +201,7 @@ void AmrMesh::depositParticles(EBAMRCellData&              a_meshData,
 			       const bool                  a_forceIrregNGP){
   CH_TIME("AmrMesh::depositParticles");
 
-  EBAMRParticleMesh& particleMesh = m_realms[a_realm]->getParticleMesh(a_phase);
+  EBAMRParticleMesh& particleMesh = this->getParticleMesh(a_realm, a_phase);
 
   particleMesh.deposit<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_coarseFineDeposition, a_forceIrregNGP);
 }
@@ -216,7 +216,7 @@ void AmrMesh::depositParticles(EBAMRCellData&              a_meshData,
 			       const bool                  a_forceIrregNGP){
   CH_TIME("AmrMesh::depositParticles");
 
-  EBAMRParticleMesh& particleMesh = m_realms[a_realm]->getParticleMesh(a_phase);
+  EBAMRParticleMesh& particleMesh = this->getParticleMesh(a_realm, a_phase);  
 
   particleMesh.deposit<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_coarseFineDeposition, a_forceIrregNGP);
 }
@@ -231,7 +231,7 @@ void AmrMesh::depositParticles(EBAMRCellData&              a_meshData,
 			       const bool                  a_forceIrregNGP){
   CH_TIME("AmrMesh::depositParticles");
 
-  EBAMRParticleMesh& particleMesh = m_realms[a_realm]->getParticleMesh(a_phase);
+  EBAMRParticleMesh& particleMesh = this->getParticleMesh(a_realm, a_phase);    
 
   particleMesh.deposit<P, particleVectorField>(a_meshData, a_particles, a_depositionType, a_coarseFineDeposition, a_forceIrregNGP);
 }
@@ -245,10 +245,10 @@ void AmrMesh::interpolateParticles(ParticleContainer<P>&      a_particles,
 				   const bool                 a_forceIrregNGP) const{
   CH_TIME("AmrMesh::interpolateParticles(scalar)");
 
-  CH_assert(a_realm == a_particles.  getRealm());
-  CH_assert(a_realm == a_scalarField.getRealm());    
+  CH_assert(a_realm == a_particles.      getRealm());
+  CH_assert(a_realm == a_meshScalarField.getRealm());    
 
-  EBAMRParticleMesh& particleMesh = m_realms[a_realm]->getParticleMesh(a_phase);
+  EBAMRParticleMesh& particleMesh = this->getParticleMesh(a_realm, a_phase);      
 
   particleMesh.interpolate<P, particleScalarField>(a_particles, a_meshScalarField, a_interpType, a_forceIrregNGP);
 }
@@ -263,9 +263,9 @@ void AmrMesh::interpolateParticles(ParticleContainer<P>&      a_particles,
   CH_TIME("AmrMesh::interpolateParticles(vector)");
 
   CH_assert(a_realm == a_particles.      getRealm());
-  CH_assert(a_realm == a_meshVectorField.getRealm());  
+  CH_assert(a_realm == a_meshVectorField.getRealm());
 
-  EBAMRParticleMesh& particleMesh = m_realms[a_realm]->getParticleMesh(a_phase);
+  EBAMRParticleMesh& particleMesh = this->getParticleMesh(a_realm, a_phase);        
 
   particleMesh.interpolate<P, particleVectorField>(a_particles, a_meshVectorField, a_interpType, a_forceIrregNGP);  
 }

@@ -1001,6 +1001,46 @@ void ParticleContainer<P>::discardInvalidParticles(){
 }
 
 template <class P>
+template<Real&(P::*particleScalarField)()>
+void ParticleContainer<P>::setValue(const Real a_value) {
+  CH_TIME("ParticleContainer<P>::setValue");
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++){
+    const DisjointBoxLayout& dbl = m_grids[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      List<P>& patchParticles = (*m_particles[lvl])[dit()].listItems();
+
+      for (ListIterator<P> lit(patchParticles); lit.ok(); ++lit){
+	P& p = lit();
+
+	(p.*particleScalarField)() = a_value;
+      }
+    }
+  }
+}
+
+template <class P>
+template<RealVect&(P::*particleVectorField)()>
+void ParticleContainer<P>::setValue(const RealVect a_value) {
+  CH_TIME("ParticleContainer<P>::setValue");
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++){
+    const DisjointBoxLayout& dbl = m_grids[lvl];
+
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      List<P>& patchParticles = (*m_particles[lvl])[dit()].listItems();
+
+      for (ListIterator<P> lit(patchParticles); lit.ok(); ++lit){
+	P& p = lit();
+
+	(p.*particleVectorField)() = a_value;
+      }
+    }
+  }
+}
+
+template <class P>
 size_t ParticleContainer<P>::getNumberOfValidParticesLocal() const {
   CH_TIME("ParticleContainer<P>::getNumberOfValidParticlesLocal");
 

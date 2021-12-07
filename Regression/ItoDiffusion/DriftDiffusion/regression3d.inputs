@@ -127,12 +127,13 @@ BrownianWalker.blob_radius    = 0.5      # Blob radius
 BrownianWalker.blob_center    = 0 0.25 0 # Blob center
 BrownianWalker.seed           = 0        # RNG seed
 BrownianWalker.num_particles  = 5000000   # Number of initial particles
-BrownianWalker.max_cells_hop  = 1.0      # Maximum cells to move in one time step
+BrownianWalker.cfl            = 1.0     # CFL-like number. 
 BrownianWalker.ppc            = 64       # Target particles per cell
 BrownianWalker.load_balance   = true    # Turn on/off particle load balancing		
 
 # Velocity, diffusion, and CFL
 # ----------------------------
+BrownianWalker.mobility       = 1.0     # Mobility coefficient
 BrownianWalker.diffco         = 0.10     # Diffusion coefficient
 BrownianWalker.omega          = 1.0      # Rotation velocity
 

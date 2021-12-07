@@ -1555,7 +1555,7 @@ void DataOps::setValue(LevelData<MFCellFAB>& a_lhs, const std::function<Real(con
 	const VolIndex& vof = vofit();
 	const IntVect& iv   = vof.gridIndex();
       
-	const RealVect pos = a_probLo + (0.5*RealVect::Unit + RealVect(iv))*a_dx + ebisbox.centroid(vof)*a_dx;
+	const RealVect pos = a_probLo + (0.5*RealVect::Unit + RealVect(iv))*a_dx;
 
 	phaseData(vof, a_comp) = a_function(pos);
       }
@@ -1596,7 +1596,7 @@ void DataOps::setValue(LevelData<EBCellFAB>& a_lhs, const std::function<Real(con
       const VolIndex& vof = vofit();
       const IntVect& iv   = vof.gridIndex();
       
-      const RealVect pos = a_probLo + (0.5*RealVect::Unit + RealVect(iv))*a_dx + ebisbox.centroid(vof)*a_dx;
+      const RealVect pos = a_probLo + (0.5*RealVect::Unit + RealVect(iv))*a_dx;// + ebisbox.centroid(vof)*a_dx;
 
       lhs(vof, a_comp) = a_function(pos);
     }
@@ -1710,7 +1710,7 @@ void DataOps::setValue(LevelData<EBCellFAB>& a_lhs, const std::function<RealVect
       const VolIndex& vof = vofit();
       const IntVect& iv   = vof.gridIndex();
       
-      const RealVect pos = a_probLo + (0.5*RealVect::Unit + RealVect(iv))*a_dx + ebisbox.centroid(vof)*a_dx;
+      const RealVect pos = a_probLo + (0.5*RealVect::Unit + RealVect(iv))*a_dx;// + ebisbox.centroid(vof)*a_dx;
       const RealVect val = a_function(pos);
 
       for (int comp = 0; comp < SpaceDim; comp++){

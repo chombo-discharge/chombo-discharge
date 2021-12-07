@@ -2233,6 +2233,20 @@ const EBAMRFAB& AmrMesh::getLevelset(const std::string a_realm, const phase::whi
   return m_realms[a_realm]->getLevelset(a_phase);
 }
 
+EBAMRParticleMesh& AmrMesh::getParticleMesh(const std::string a_realm, const phase::which_phase a_phase) const {
+  CH_TIME("AmrMesh::getParticleMesh(string, phase::which_phase)");
+  if(m_verbosity > 1){
+    pout() << "AmrMesh::getParticleMesh(string, phase::which_phase)" << endl;
+  }
+
+  if(!this->queryRealm(a_realm)) {
+    const std::string str = "AmrMesh::getLevelSet(string, phase::which_phase) - could not find realm '" + a_realm + "'";
+    MayDay::Abort(str.c_str());
+  }
+
+  return m_realms[a_realm]->getParticleMesh(a_phase);
+}
+
 Vector<RefCountedPtr<EbCoarAve> >& AmrMesh::getCoarseAverage(const std::string a_realm, const phase::which_phase a_phase) const {
   CH_TIME("AmrMesh::getCoarseAverage(string, phase::which_phase)");
   if(m_verbosity > 1){

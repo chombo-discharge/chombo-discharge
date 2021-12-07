@@ -407,6 +407,28 @@ public:
   void discardInvalidParticles();
 
   /*!
+    @brief Set the particle member to the input value
+    @details This is a jack-of-all-trades kind of routine for setting a particle field. The template parameter indicates the field to be set, it must be a
+    pointer-to-member-function that returns the field to be set. For example, if the particle class P has a field mass which one wants to set, and this field
+    is returned by a function Real& P::mass(), one can set the quantity for all particles by calling ParticleContainer<P>::setValue<&P::mass>(Real)
+    @param[in] a_value Value 
+  */
+  template<Real&(P::*particleScalarField)()>
+  inline
+  void setValue(const Real a_value);
+
+  /*!
+    @brief Set the particle member to the input value
+    @details This is a jack-of-all-trades kind of routine for setting a particle field. The template parameter indicates the field to be set, it must be a
+    pointer-to-member-function that returns the field to be set. For example, if the particle class P has a field vector which one wants to set, and this field
+    is returned by a function RealVect& P::velocity(), one can set the quantity for all particles by calling ParticleContainer<P>::setValue<&P::velocity>(RealVect);
+    @param[in] a_value Value 
+  */
+  template<RealVect&(P::*particleVectorField)()>
+  inline
+  void setValue(const RealVect a_value);  
+
+  /*!
     @brief Get local number of particles
   */
   size_t getNumberOfValidParticesLocal() const;
