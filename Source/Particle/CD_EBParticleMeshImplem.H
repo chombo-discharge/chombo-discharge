@@ -148,7 +148,8 @@ void EBParticleMesh::interpolate(List<P>&             a_particleList,
 				 const EBCellFAB&     a_meshScalarField,
 				 const DepositionType a_interpType,
 				 const bool           a_forceIrregNGP) const {
-
+  CH_TIME("EBParticleMesh::interpolate(Real)");
+  
   CH_assert(a_meshScalarField.nComp() == 1);
 
   // TLDR: This is a jack-of-all-trades interpolation function. The user will use this function to supply a pointer to the field that will be
@@ -177,7 +178,8 @@ void EBParticleMesh::interpolate(List<P>&             a_particleList,
 				 const EBCellFAB&     a_meshVectorField,
 				 const DepositionType a_interpType,
 				 const bool           a_forceIrregNGP) const {
-
+  CH_TIME("EBParticleMesh::interpolate(RealVect)");
+  
   CH_assert(a_meshVectorField.nComp() == SpaceDim);
 
   // TLDR: This is a jack-of-all-trades interpolation function. The user will use this function to supply a pointer to the field that will be
