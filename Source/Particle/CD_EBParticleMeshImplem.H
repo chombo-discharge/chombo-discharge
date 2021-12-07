@@ -222,6 +222,8 @@ void EBParticleMesh::depositParticle(EBCellFAB&           a_rho,
   const RealVect rv = (a_position - a_probLo)/a_dx;
   const IntVect  iv = IntVect(D_DECL(floor(rv[0]), floor(rv[1]), floor(rv[2])));
 
+  CH_assert(m_region.contains(iv));    
+
   FArrayBox& rho = a_rho.getFArrayBox();
 
   // We can force NGP deposition in cut-cells if we want. 
@@ -300,6 +302,8 @@ void EBParticleMesh::depositParticle2(EBCellFAB&           a_rho,
   const RealVect rv  = (a_position - a_probLo)/a_dx;
   const IntVect  iv  = IntVect(D_DECL(floor(rv[0]), floor(rv[1]), floor(rv[2])));
 
+  CH_assert(m_region.contains(iv));      
+
   FArrayBox& rho = a_rho.getFArrayBox();  
 
   // Force NGP in cut-cells if we want. 
@@ -361,6 +365,8 @@ void EBParticleMesh::depositParticle4(EBCellFAB&           a_rho,
   const RealVect rv  = (a_position - a_probLo)/a_dx;
   const IntVect  iv  = IntVect(D_DECL(floor(rv[0]), floor(rv[1]), floor(rv[2])));
 
+  CH_assert(m_region.contains(iv));  
+
   FArrayBox& rho = a_rho.getFArrayBox();    
 
   // We can force NGP in cut-cells if we want. 
@@ -417,6 +423,8 @@ void EBParticleMesh::interpolateParticle(Real&                a_particleField,
   const RealVect rv  = (a_position - a_probLo)/a_dx;
   const IntVect  iv  = IntVect(D_DECL(floor(rv[0]), floor(rv[1]), floor(rv[2])));
 
+  CH_assert(m_region.contains(iv));  
+
   const FArrayBox& meshField = a_meshField.getFArrayBox();      
 
   // Irregular cells always do an NGP deposit to prevent clouds leaking into the other side. 
@@ -427,6 +435,9 @@ void EBParticleMesh::interpolateParticle(Real&                a_particleField,
 				CHF_CONST_REALVECT(a_dx),
 				CHF_CONST_REALVECT(a_position));
   }
+  else if(m_ebisbox.isCovered(iv)){ // Need to set to something. 
+    a_particleField = 0.0;
+  }  
   else{
     switch (a_interpType) {
     case DepositionType::NGP:
@@ -481,6 +492,8 @@ void EBParticleMesh::interpolateParticle(RealVect&            a_particleField,
   const RealVect rv  = (a_position - a_probLo)/a_dx;
   const IntVect  iv  = IntVect(D_DECL(floor(rv[0]), floor(rv[1]), floor(rv[2])));
 
+  CH_assert(m_region.contains(iv));
+
   const FArrayBox& meshField = a_meshField.getFArrayBox();
 
   // Irregular cells always do an NGP deposit to prevent clouds leaking into the other side.
@@ -490,6 +503,9 @@ void EBParticleMesh::interpolateParticle(RealVect&            a_particleField,
 				CHF_CONST_REALVECT(a_probLo),
 				CHF_CONST_REALVECT(a_dx),
 				CHF_CONST_REALVECT(a_position));
+  }
+  else if(m_ebisbox.isCovered(iv)){ // Need to set to something. 
+    a_particleField = RealVect::Zero;
   }
   else{
     switch (a_interpType) {
