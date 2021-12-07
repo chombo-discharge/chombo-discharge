@@ -3291,6 +3291,9 @@ void ItoPlasmaStepper::computeEdotJSourceNWO2(const Real a_dt){
 	  List<ItoParticle>& particleList = particles[lvl][dit()].listItems();
 
 	  // This interpolates the velocity function on to the particle velocities
+#if 1
+	  MayDay::Warning("EBParticleMesh should be replaced with call to AmrMesh as in ItoSolver");
+#endif
 	  EBParticleMesh meshInterp(box, ebisbox, dx, origin);
 	  //	  meshInterp.interpolateVelocity(particleList, Efab, deposition);
 	  meshInterp.interpolate<ItoParticle, &ItoParticle::velocity>(particleList, E, deposition, true);	  

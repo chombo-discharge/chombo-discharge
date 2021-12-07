@@ -229,6 +229,8 @@ public:
 
   /*!
     @brief Get EBParticleMesh deposition/interpolation object for specified grid patch.
+    @details This routine is used for when users want to interpolate on a per-patch basis. This is useful when the user has written his interpolation
+    functions on a per-patch basis. I fail to see any other reason where this routine is useful. 
     @param[in] a_lvl Grid level
     @param[in] a_dit Grid index
   */
