@@ -23,6 +23,11 @@ namespace Physics {
 
     /*!
       @brief Implementation of TimeStepper which advances an ItoSolver. 
+      @details This class is fairly simple -- we want to advance particles using an Ito kernel dX = V*dt + sqrt(2*D*dt)*N0 where N0 is a Gaussian random number. The particle
+      velocity in the ItoSolver is V = mu*v(Xp) where mu is a particle mobility and v is a "velocity field". The ItoSolver has various way of representing the velocity, but
+      here we consider a constant mobility. The diffusion coefficient is also constant (the value is fetched from the input script). 
+
+      Note that while the ItoSolver CAN interpolate the particle diffusion coefficient from a mesh quantity -- this physics module sets it directly. 
     */
     class BrownianWalkerStepper : public TimeStepper {
     public:
@@ -66,6 +71,7 @@ namespace Physics {
 
       /*!
 	@brief Load balance grid boxes for a specific realm. 
+	@details This will count the number of particles in each box and then load balance them. 
 	@param[out] a_procs       MPI ranks owning the various grid boxes. 
 	@param[out] a_boxes       Grid boxes on every level (obtain them with a_grids[lvl].boxArray())
 	@param[in]  a_realm       Realm identifier
@@ -120,7 +126,7 @@ namespace Physics {
       void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const override;
 
       /*!
-	@brief Compute a time step to be used by Driver. This returns m_maxCellsHop*ItoSolver::computeDt (i.e. m_maxCellsHop is a CFL-like number)
+	@brief Compute a time step to be used by Driver. This returns m_cfl*ItoSolver::computeDt (i.e. m_cfl is a CFL-like number)
 	@param[out] a_dt       Time step to be used.
 	@param[out] a_timeCode Identifier for how the time step was computed. 
       */
@@ -187,7 +193,7 @@ namespace Physics {
       void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
 
       /*!
-	@brief Post-regrid operations. This does nothing (because we set velocities and diffusion coefficients in the regrid routine.
+	@brief Post-regrid operations. 
       */
       void postRegrid() override;
 
@@ -224,6 +230,11 @@ namespace Physics {
       Real m_diffCo;
 
       /*!
+	@brief Particle mobility coefficients
+      */
+      Real m_mobility;
+
+      /*!
 	@brief Angular velocity for advection field
       */      
       Real m_omega;
@@ -236,18 +247,27 @@ namespace Physics {
       /*! 
 	@brief Effective CFL number for particle hops
       */
-      Real m_maxCellsHop;
+      Real m_cfl;
+
+      /*!
+	@brief Set advection and diffusion fields
+      */
+      void setAdvectionDiffusion();
 
       /*!
 	@brief Set the Brownian walker advection field
       */
       void setVelocity();
-      
+
       /*!
-	@brief Set the Brownian walker advection field (level version)
-	@param[in] a_level Grid level
-      */      
-      void setVelocity(const int a_level);
+	@brief Set the ItoSolver "diffusion field"
+      */
+      void setDiffusion();
+
+      /*!
+	@brief Make super particles
+      */
+      void makeSuperParticles();
     };
   }
 }
