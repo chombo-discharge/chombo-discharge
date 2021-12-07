@@ -484,10 +484,11 @@ void ItoSolver::registerOperators() const {
     MayDay::Abort("CdrSolver::registerOperators - need to set AmrMesh!");
   }
   else{
-    m_amr->registerOperator(s_eb_coar_ave,     m_realm, m_phase);
-    m_amr->registerOperator(s_eb_fill_patch,   m_realm, m_phase);
-    m_amr->registerOperator(s_noncons_div,     m_realm, m_phase);
-    m_amr->registerOperator(s_particle_mesh,   m_realm, m_phase);
+    m_amr->registerOperator(s_eb_coar_ave,    m_realm, m_phase);
+    m_amr->registerOperator(s_eb_fill_patch,  m_realm, m_phase);
+    m_amr->registerOperator(s_noncons_div,    m_realm, m_phase);
+    m_amr->registerOperator(s_particle_mesh,  m_realm, m_phase);
+    m_amr->registerOperator(s_eb_multigrid,   m_realm, m_phase);    
     if(m_useRedistribution) {
       m_amr->registerOperator(s_eb_redist,  m_realm, m_phase);
     }
@@ -1899,8 +1900,8 @@ void ItoSolver::interpolateMobilities() {
     case WhichMobilityInterpolation::Velocity:
       {
 	DataOps::vectorLength(m_scratch, m_velocityFunction); // Compute |E| (or whatever other function you've decided to provide).
-	m_amr->averageDown(m_scratch, m_realm, m_phase);
-	m_amr->interpGhost(m_scratch, m_realm, m_phase);
+	m_amr->averageDown  (m_scratch, m_realm, m_phase);
+	m_amr->interpGhostMG(m_scratch, m_realm, m_phase);
       }
     default: // Do nothing
       break;
