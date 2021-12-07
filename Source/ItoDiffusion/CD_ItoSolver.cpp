@@ -484,10 +484,11 @@ void ItoSolver::registerOperators() const {
     MayDay::Abort("CdrSolver::registerOperators - need to set AmrMesh!");
   }
   else{
-    m_amr->registerOperator(s_eb_coar_ave,     m_realm, m_phase);
-    m_amr->registerOperator(s_eb_fill_patch,   m_realm, m_phase);
-    m_amr->registerOperator(s_noncons_div,     m_realm, m_phase);
-    m_amr->registerOperator(s_particle_mesh,   m_realm, m_phase);
+    m_amr->registerOperator(s_eb_coar_ave,    m_realm, m_phase);
+    m_amr->registerOperator(s_eb_fill_patch,  m_realm, m_phase);
+    m_amr->registerOperator(s_noncons_div,    m_realm, m_phase);
+    m_amr->registerOperator(s_particle_mesh,  m_realm, m_phase);
+    m_amr->registerOperator(s_eb_multigrid,   m_realm, m_phase);    
     if(m_useRedistribution) {
       m_amr->registerOperator(s_eb_redist,  m_realm, m_phase);
     }
@@ -1827,17 +1828,18 @@ void ItoSolver::setParticleMobility(const Real a_mobility) {
 
   ParticleContainer<ItoParticle>& particles = this->getParticles(WhichContainer::Bulk);
 
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      List<ItoParticle>& particlesDit = particles[lvl][dit()].listItems();
+  particles.setValue<&ItoParticle::mobility>(a_mobility);
+}
 
-      for (ListIterator<ItoParticle> lit(particlesDit); lit.ok(); ++lit) {
-	lit().mobility() = a_mobility;
-      }
-    }
+void ItoSolver::setParticleDiffusion(const Real a_diffCo) {
+  CH_TIME("ItoSolver::setParticleDiffusion");
+  if(m_verbosity > 5) {
+    pout() << m_name + "::setParticleDiffusion" << endl;
   }
+
+  ParticleContainer<ItoParticle>& particles = this->getParticles(WhichContainer::Bulk);
+
+  particles.setValue<&ItoParticle::diffusion>(a_diffCo);
 }
 
 void ItoSolver::interpolateVelocities() {
@@ -1865,6 +1867,8 @@ void ItoSolver::interpolateVelocities(const int a_lvl, const DataIndex& a_dit) {
 
   ParticleContainer<ItoParticle>& particles = m_particleContainers.at(WhichContainer::Bulk);
 
+  EBAMRParticleMesh& particleMesh = m_amr->getParticleMesh(m_realm, m_phase);
+
   if(m_isMobile) {
     const EBCellFAB& velo_func = (*m_velocityFunction[a_lvl])[a_dit];
     const EBISBox& ebisbox     = velo_func.getEBISBox();
@@ -1875,7 +1879,8 @@ void ItoSolver::interpolateVelocities(const int a_lvl, const DataIndex& a_dit) {
     List<ItoParticle>& particleList = particles[a_lvl][a_dit].listItems();
 
     // This interpolates the velocity function on to the particle velocities
-    EBParticleMesh meshInterp(box, ebisbox, dx, origin);
+    const EBParticleMesh& meshInterp = particleMesh.getEBParticleMesh(a_lvl, a_dit);
+    
     meshInterp.interpolate<ItoParticle, &ItoParticle::velocity>(particleList, velo_func, m_deposition, m_forceIrregInterpolationNGP);
 
     // Go through the particles and set their velocities to velo_func*mobility
@@ -1898,8 +1903,8 @@ void ItoSolver::interpolateMobilities() {
     case WhichMobilityInterpolation::Velocity:
       {
 	DataOps::vectorLength(m_scratch, m_velocityFunction); // Compute |E| (or whatever other function you've decided to provide).
-	m_amr->averageDown(m_scratch, m_realm, m_phase);
-	m_amr->interpGhost(m_scratch, m_realm, m_phase);
+	m_amr->averageDown  (m_scratch, m_realm, m_phase);
+	m_amr->interpGhostMG(m_scratch, m_realm, m_phase);
       }
     default: // Do nothing
       break;
@@ -1949,6 +1954,8 @@ void ItoSolver::interpolateMobilitiesDirect(const int a_lvl, const DataIndex& a_
 
   ParticleContainer<ItoParticle>& particles = m_particleContainers.at(WhichContainer::Bulk);
 
+  EBAMRParticleMesh& particleMesh = m_amr->getParticleMesh(m_realm, m_phase);  
+
   const EBCellFAB& mobilityFunction = (*m_mobilityFunction[a_lvl])[a_dit];
   const EBISBox&   ebisbox          = mobilityFunction.getEBISBox();
   const RealVect   dx               = m_amr->getDx()[a_lvl]*RealVect::Unit;
@@ -1958,7 +1965,8 @@ void ItoSolver::interpolateMobilitiesDirect(const int a_lvl, const DataIndex& a_
   List<ItoParticle>& particleList = particles[a_lvl][a_dit].listItems();
 
   // Interpolate onto the mobility field
-  EBParticleMesh meshInterp(box, ebisbox, dx, probLo);
+  const EBParticleMesh& meshInterp = particleMesh.getEBParticleMesh(a_lvl, a_dit);
+  
   meshInterp.interpolate<ItoParticle, &ItoParticle::mobility>(particleList, mobilityFunction, m_deposition, m_forceIrregInterpolationNGP);
 }
 
@@ -1976,6 +1984,8 @@ void ItoSolver::interpolateMobilitiesVelocity(const int a_lvl, const DataIndex& 
 
   ParticleContainer<ItoParticle>& particles = m_particleContainers.at(WhichContainer::Bulk);
 
+  EBAMRParticleMesh& particleMesh = m_amr->getParticleMesh(m_realm, m_phase);    
+ 
   const EBCellFAB& mobilityFunction = (*m_mobilityFunction[a_lvl])[a_dit];
   const EBISBox&   ebisbox          = mobilityFunction.getEBISBox();
   const RealVect   dx               = m_amr->getDx()[a_lvl]*RealVect::Unit;
@@ -1985,7 +1995,8 @@ void ItoSolver::interpolateMobilitiesVelocity(const int a_lvl, const DataIndex& 
   EBCellFAB& scratch = (*m_scratch[a_lvl])[a_dit];
 
   List<ItoParticle>& particleList = particles[a_lvl][a_dit].listItems();
-  EBParticleMesh meshInterp(box, ebisbox, dx, probLo);
+
+  const EBParticleMesh& meshInterp = particleMesh.getEBParticleMesh(a_lvl, a_dit);  
     
   // First, interpolate |V| to the particle position, it will be stored on m_tmp. 
   meshInterp.interpolate<ItoParticle, &ItoParticle::tmp>(particleList, scratch, m_deposition, m_forceIrregInterpolationNGP);    
@@ -2064,6 +2075,8 @@ void ItoSolver::interpolateDiffusion(const int a_lvl, const DataIndex& a_dit) {
     // These are the particles that will be interpolated. 
     ParticleContainer<ItoParticle>& particles = m_particleContainers.at(WhichContainer::Bulk);
     List<ItoParticle>& particleList = particles[a_lvl][a_dit].listItems();
+
+    EBAMRParticleMesh& particleMesh = m_amr->getParticleMesh(m_realm, m_phase);        
     
     // Create the particle interpolator.
     const EBCellFAB& Dcoef   = (*m_diffusionFunction[a_lvl])[a_dit];
@@ -2072,7 +2085,7 @@ void ItoSolver::interpolateDiffusion(const int a_lvl, const DataIndex& a_dit) {
     const RealVect   probLo  = m_amr->getProbLo();
     const Box        box     = m_amr->getGrids(m_realm)[a_lvl][a_dit];
 
-    EBParticleMesh meshInterp(box, ebisbox, dx, probLo);
+    const EBParticleMesh& meshInterp = particleMesh.getEBParticleMesh(a_lvl, a_dit);
 
     // Interpolator
     meshInterp.interpolate<ItoParticle, &ItoParticle::diffusion>(particleList, Dcoef, m_deposition, m_forceIrregInterpolationNGP);    

@@ -596,10 +596,16 @@ public:
   virtual void setVelocityFunction(const RealVect a_velocity);
 
   /*!
-    @brief Sets constant mobility for all particles
-    @param[in] a_mobility Particle mobility
+    @brief Sets mobility coefficient for all particles.
+    @param[in] a_mobility Particle mobility.
   */
   virtual void setParticleMobility(const Real a_mobility);
+
+  /*!
+    @brief Sets diffusion coefficient for all particles.
+    @param[in] a_diffusion Particle diffusion value.
+  */
+  virtual void setParticleDiffusion(const Real a_diffusion);
 
   /*!
     @brief Interpolate the particle velocities.

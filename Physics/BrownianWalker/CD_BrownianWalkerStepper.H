@@ -22,22 +22,64 @@ namespace Physics {
   namespace BrownianWalker {
 
     /*!
-      @brief Class that just solves the BrownianWalker equation
+      @brief Implementation of TimeStepper which advances an ItoSolver. 
+      @details This class is fairly simple -- we want to advance particles using an Ito kernel dX = V*dt + sqrt(2*D*dt)*N0 where N0 is a Gaussian random number. The particle
+      velocity in the ItoSolver is V = mu*v(Xp) where mu is a particle mobility and v is a "velocity field". The ItoSolver has various way of representing the velocity, but
+      here we consider a constant mobility. The diffusion coefficient is also constant (the value is fetched from the input script). 
+
+      Note that while the ItoSolver CAN interpolate the particle diffusion coefficient from a mesh quantity -- this physics module sets it directly. 
     */
     class BrownianWalkerStepper : public TimeStepper {
     public:
 
+      /*!
+	@brief Default constructor -- parses basic options
+      */
       BrownianWalkerStepper();
+
+      /*!
+	@brief Full constructor. Calls the basic constructor and sets solver.
+      */      
       BrownianWalkerStepper(RefCountedPtr<ItoSolver>& a_solver);
+
+      /*!
+	@brief Destructor (does nothing)
+      */            
       ~BrownianWalkerStepper();
 
-      // Setup routines
+      /*!
+	@brief Fill solver with initial data.
+      */
       void initialData() override;
+
+      /*!
+	@brief Allocate storage for solvers and TimeStepper.
+      */
       void allocate() override;
+
+      /*!
+	@brief Perform post-initialization routines. This does nothing. 
+      */
       void postInitialize() override;
 
-      // Load balancing
+      /*!
+	@brief Check if the input realm should be load balanced.
+	@param[in] a_realm Realm to be load balanced.
+	@details This returns true if a_realm==m_realm and m_loadBalance==true.
+      */
       bool loadBalanceThisRealm(const std::string a_realm) const override;
+
+      /*!
+	@brief Load balance grid boxes for a specific realm. 
+	@details This will count the number of particles in each box and then load balance them. 
+	@param[out] a_procs       MPI ranks owning the various grid boxes. 
+	@param[out] a_boxes       Grid boxes on every level (obtain them with a_grids[lvl].boxArray())
+	@param[in]  a_realm       Realm identifier
+	@param[in]  a_grids       Original grids
+	@param[in]  a_lmin        Coarsest grid level that changed
+	@param[in]  a_finestLevel New finest grid level
+	@note This should only be called if a_realm==m_realm and m_loadBalance==true
+      */      
       void loadBalanceBoxes(Vector<Vector<int> >&            a_procs,
 			    Vector<Vector<Box> >&            a_boxes,
 			    const std::string                a_realm,
@@ -45,68 +87,187 @@ namespace Physics {
 			    const int                        a_lmin,
 			    const int                        a_finestLevel) override;
 
-      // IO routines
 #ifdef CH_USE_HDF5
+      /*!  
+	@brief Write checkpoint data to file
+	@param[inout] a_handle HDF5 fil
+	@param[in]    a_lvl    Grid level
+      */      
       void writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const override;
 #endif
-#ifdef CH_USE_HDF5      
+      
+#ifdef CH_USE_HDF5
+      /*!
+	@brief Read checkpoint data from file
+	@param[inout] a_handle HDF5 file
+	@param[in]    a_lvl    Grid level
+      */      
       void readCheckpointData(HDF5Handle& a_handle, const int a_lvl) override;
-#endif      
+#endif
+
+      /*!
+	@brief Perform post-initialization routines.
+	@details This remaps the particles and makes new superparticles. It also sets the velocity fields. 
+      */      
       void postCheckpointSetup() override;
+
+      /*!
+	@brief Get the number of plot variables for this time stepper. 
+	@details Only the solver plots to file so this just returns the number of plot variables specified for the solver
+      */
       int getNumberOfPlotVariables() const override;
+
+      /*!
+	@brief Write plot data to file. Only the solver writes plot data so this just calls the solver methods. 
+	@param[inout] a_output            Output data holder.
+	@param[in]    a_plotVariableNames Plot variable names.
+	@param[inout] a_icomp             Starting component in a_output to begin at. 
+      */      
       void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const override;
 
-      // Advance routines
+      /*!
+	@brief Compute a time step to be used by Driver. This returns m_cfl*ItoSolver::computeDt (i.e. m_cfl is a CFL-like number)
+	@param[out] a_dt       Time step to be used.
+	@param[out] a_timeCode Identifier for how the time step was computed. 
+      */
       void computeDt(Real& a_dt, TimeCode& a_timeCode) override;
 
+      /*!
+	@brief Synchronize solver times
+	@param[in] a_step Time step
+	@param[in] a_time Time (in seconds)
+	@param[in] a_dt   Time step that was used. 
+      */
       void synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) override;
+      /*!
+	@brief Print a step report -- this prints the local and global number of particles in the simulation. 
+	@details This is called by Driver after time step. 
+      */      
       void printStepReport() override;
       
-      // Registration routines
+      /*!
+	@brief Register operators -- we only need the ones the solver needs to have the solver do this.
+      */
       void registerOperators() override;
+
+      /*!
+	@brief Register realms to be used in the simulation. 
+	@details The primal realm is always register -- but you can also register a separate particle realm. 
+      */      
       void registerRealms() override;
 
-      // Runtime options
+      /*!
+	@brief Parse runtime options
+      */
       void parseRuntimeOptions() override;
 
-      // Regrid routines
+      /*!
+	@brief Always returns false.
+      */
       bool needToRegrid() override;
 
+      /*!
+	@brief Perform pre-regrid operations.
+	@param[in] a_lmin           The coarsest level that changes
+	@param[in] a_oldFinestLevel The finest level before the regrid. 
+      */
       void preRegrid(const int a_lbase, const int a_oldFinestLevel) override;
 
-      // Pure routines for derived classes
+      /*!
+	@brief Set up the Ito solver. This instantiates the solver and parses solver options. 
+      */
       void setupSolvers() override;
+
+      /*!
+	@brief Advancement method. 
+	@return a_dt
+      */
       Real advance(const Real a_dt) override;
+
+      /*!
+	@brief Regrid method. This just regrids the solver. 
+	@param[in] a_lmin           The coarsest level that changed. 
+	@param[in] a_oldFinestLevel The finest level before the regrid. 
+	@param[in] a_newFinestLevel The finest level after the regrid. 
+      */      
       void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
+
+      /*!
+	@brief Post-regrid operations. 
+      */
       void postRegrid() override;
 
     protected:
 
-      // Realm
+      /*!
+	@brief Realm where the particles live
+      */
       std::string m_realm; 
 
-      // Phase
+      /*!
+	@brief Phase where the particles live
+      */
       phase::which_phase m_phase;
 
-      // Load balance or not
-      bool m_LoadBalancing;
+      /*!
+	@brief If true, application will be load balanced
+      */
+      bool m_loadBalance;
 
-      // Ito solver & species
+      /*!
+	@brief Reference to underlying solver
+      */
       RefCountedPtr<ItoSolver>  m_solver;
+
+      /*!
+	@brief Reference to underlying species
+      */      
       RefCountedPtr<ItoSpecies> m_species;
 
-      // Diffusion coefficient and velocity
-      Real m_faceCenteredDiffusionCoefficient;
+      /*!
+	@brief Fluid diffusion coefficient
+      */
+      Real m_diffCo;
+
+      /*!
+	@brief Particle mobility coefficients
+      */
+      Real m_mobility;
+
+      /*!
+	@brief Angular velocity for advection field
+      */      
       Real m_omega;
 
-      // Particles per cell
+      /*!
+	@brief Number of particles per cell
+      */
       int m_ppc;
 
-      // Maximum hops and stuff like that
-      Real m_max_cells_hop;
+      /*! 
+	@brief Effective CFL number for particle hops
+      */
+      Real m_cfl;
 
+      /*!
+	@brief Set advection and diffusion fields
+      */
+      void setAdvectionDiffusion();
+
+      /*!
+	@brief Set the Brownian walker advection field
+      */
       void setVelocity();
-      void setVelocity(const int a_level);
+
+      /*!
+	@brief Set the ItoSolver "diffusion field"
+      */
+      void setDiffusion();
+
+      /*!
+	@brief Make super particles
+      */
+      void makeSuperParticles();
     };
   }
 }
