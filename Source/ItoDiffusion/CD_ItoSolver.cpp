@@ -1827,17 +1827,7 @@ void ItoSolver::setParticleMobility(const Real a_mobility) {
 
   ParticleContainer<ItoParticle>& particles = this->getParticles(WhichContainer::Bulk);
 
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    
-    for (DataIterator dit(dbl); dit.ok(); ++dit) {
-      List<ItoParticle>& particlesDit = particles[lvl][dit()].listItems();
-
-      for (ListIterator<ItoParticle> lit(particlesDit); lit.ok(); ++lit) {
-	lit().mobility() = a_mobility;
-      }
-    }
-  }
+  particles.setValue<&ItoParticle::mobility>(a_mobility);
 }
 
 void ItoSolver::interpolateVelocities() {
