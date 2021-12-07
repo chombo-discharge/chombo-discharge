@@ -57,6 +57,7 @@ void EBAMRParticleMesh::define(const Vector<RefCountedPtr<EBLevelGrid> >& a_eblg
 
   this->defineLevelMotion     ();
   this->defineCoarseFineMotion();
+  this->defineEBParticleMesh  ();
   
   m_isDefined = true;
 }
@@ -101,6 +102,65 @@ void EBAMRParticleMesh::defineCoarseFineMotion(){
       m_coarseFinePM[lvl] = RefCountedPtr<EBCoarseFineParticleMesh> (nullptr);
     }
   }
+}
+
+void EBAMRParticleMesh::defineEBParticleMesh() {
+  CH_TIME("EBAMRParticleMesh::defineEBParticleMesh");
+
+  m_ebParticleMesh.    resize(1 + m_finestLevel);
+  m_ebParticleMeshFiCo.resize(1 + m_finestLevel);  
+
+  for (int lvl = 0; lvl <= m_finestLevel; lvl++){
+    const DisjointBoxLayout& dbl   = m_eblgs[lvl]->getDBL();
+    const EBISLayout&        ebisl = m_eblgs[lvl]->getEBISL();
+
+    const bool hasCoar = lvl > 0;
+
+    m_ebParticleMesh[lvl] = RefCountedPtr<LayoutData<EBParticleMesh> >( new LayoutData<EBParticleMesh>(dbl));
+
+
+
+    // Define the "regular" particle-mesh interpolation objects. These are defined on the input grids. 
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      const Box      cellBox = dbl  [dit()];
+      const EBISBox& ebisBox = ebisl[dit()];
+
+      EBParticleMesh& particleMesh = (*m_ebParticleMesh[lvl])[dit()];
+
+      particleMesh.define(cellBox, ebisBox, m_dx[lvl]*RealVect::Unit, m_probLo);
+    }
+
+    // These are "special" particle-mesh interpolation objects for when we need to deposit coarse-level particles on a refined grid.
+    if(hasCoar){
+      const EBLevelGrid& eblgFiCo = m_coarseFinePM[lvl]->getEblgFiCo();
+
+      const DisjointBoxLayout& dblFiCo   = eblgFiCo.getDBL();
+      const EBISLayout&        ebislFiCo = eblgFiCo.getEBISL();
+      
+      m_ebParticleMeshFiCo[lvl] = RefCountedPtr<LayoutData<EBParticleMesh> > (new LayoutData<EBParticleMesh>(dblFiCo));
+
+      for (DataIterator dit(dblFiCo); dit.ok(); ++dit){
+	const Box      cellBox = dblFiCo  [dit()];
+	const EBISBox& ebisBox = ebislFiCo[dit()];
+
+	EBParticleMesh& particleMesh = (*m_ebParticleMeshFiCo[lvl])[dit()];
+
+	particleMesh.define(cellBox, ebisBox, m_dx[lvl]*RealVect::Unit, m_probLo);
+      }
+    }
+    else{
+      m_ebParticleMeshFiCo[lvl] = RefCountedPtr<LayoutData<EBParticleMesh> > (nullptr);
+    }
+  }
+}
+
+const EBParticleMesh& EBAMRParticleMesh::getEBParticleMesh(const int a_lvl, const DataIndex& a_dit) const {
+  CH_TIME("EBAMRParticleMesh::getEBParticleMesh");
+  
+  CH_assert(a_lvl >= 0            );
+  CH_assert(a_lvl <= m_finestLevel);
+  
+  return (*m_ebParticleMesh[a_lvl])[a_dit];
 }
 
 #include <CD_NamespaceFooter.H>

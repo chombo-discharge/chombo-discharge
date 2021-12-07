@@ -138,8 +138,7 @@ void EBAMRParticleMesh::depositPVR(EBAMRCellData&              a_meshData,
       EBCellFAB&        meshData     = (*a_meshData[lvl])[dit()];
       const ListBox<P>& boxParticles =  a_particles[lvl] [dit()];
 
-      // Note: EBParticleMesh construction is cheap.
-      EBParticleMesh interp(cellBox, ebisBox, m_dx[lvl]*RealVect::Unit, m_probLo);
+      const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[dit()];                  
 
       interp.deposit<P, particleScalarField> (boxParticles.listItems(), meshData, a_depositionType, a_forceIrregNGP);
     }
@@ -194,8 +193,7 @@ void EBAMRParticleMesh::depositPVR(EBAMRCellData&              a_meshData,
       EBCellFAB&        meshData     = (*a_meshData[lvl])[dit()];
       const ListBox<P>& boxParticles =  a_particles[lvl] [dit()];
 
-      // Note: EBParticleMesh construction is cheap.
-      EBParticleMesh interp(cellBox, ebisBox, m_dx[lvl]*RealVect::Unit, m_probLo);
+      const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[dit()];                        
 
       interp.deposit<P, particleScalarField> (boxParticles.listItems(), meshData, a_depositionType, a_forceIrregNGP);
     }
@@ -252,7 +250,7 @@ void EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       const ListBox<P>& boxParticles =   a_particles[lvl] [dit()];
 
       // Note: EBParticleMesh construction is cheap.
-      EBParticleMesh interp(cellBox, ebisBox, m_dx[lvl]*RealVect::Unit, m_probLo);
+      const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[dit()];
 
       interp.deposit<P, particleScalarField> (boxParticles.listItems(), meshData, a_depositionType, a_forceIrregNGP);
     }
@@ -284,7 +282,7 @@ void EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
 	
 	dataFiCo.setVal(0.0);
 
-	EBParticleMesh interp(cellBox, ebisBox, m_dx[lvl]*RealVect::Unit, m_probLo);
+	const EBParticleMesh& interp = (*m_ebParticleMeshFiCo[lvl])[dit()];		            	
 	
 	switch(refRat){
 	case 2:
@@ -340,8 +338,7 @@ void EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       EBCellFAB&        meshData     = (*a_meshData [lvl])[dit()];
       const ListBox<P>& boxParticles =   a_particles[lvl] [dit()];
 
-      // Note: EBParticleMesh construction is cheap.
-      EBParticleMesh interp(cellBox, ebisBox, m_dx[lvl]*RealVect::Unit, m_probLo);
+      const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[dit()];	
 
       interp.deposit<P, particleScalarField> (boxParticles.listItems(), meshData, a_depositionType, a_forceIrregNGP);
     }
@@ -373,7 +370,7 @@ void EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
 	
 	dataFiCo.setVal(0.0);
 
-	EBParticleMesh interp(cellBox, ebisBox, m_dx[lvl]*RealVect::Unit, m_probLo);
+	const EBParticleMesh& interp = (*m_ebParticleMeshFiCo[lvl])[dit()];		
 	
 	switch(refRat){
 	case 2:
@@ -432,8 +429,7 @@ void EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
       const ListBox<P>& particlesCloud = (*nonHaloParticles[lvl])[dit()];
       const ListBox<P>& particlesNGP   = (*   haloParticles[lvl])[dit()];      
 
-      // Note: EBParticleMesh construction is cheap.
-      EBParticleMesh interp(cellBox, ebisBox, m_dx[lvl]*RealVect::Unit, m_probLo);
+      const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[dit()];		      
 
       interp.deposit<P, particleScalarField> (particlesCloud.listItems(), meshData, a_depositionType,    a_forceIrregNGP);
       interp.deposit<P, particleScalarField> (particlesNGP.  listItems(), meshData, DepositionType::NGP, a_forceIrregNGP);      
@@ -487,8 +483,7 @@ void EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
       const ListBox<P>& particlesCloud = (*nonHaloParticles[lvl])[dit()];
       const ListBox<P>& particlesNGP   = (*   haloParticles[lvl])[dit()];      
 
-      // Note: EBParticleMesh construction is cheap.
-      EBParticleMesh interp(cellBox, ebisBox, m_dx[lvl]*RealVect::Unit, m_probLo);
+      const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[dit()];		            
 
       interp.deposit<P, particleScalarField> (particlesCloud.listItems(), meshData, a_depositionType,    a_forceIrregNGP);
       interp.deposit<P, particleScalarField> (particlesNGP.  listItems(), meshData, DepositionType::NGP, a_forceIrregNGP);      
@@ -531,7 +526,7 @@ void EBAMRParticleMesh::interpolate(ParticleContainer<P>& a_particles,
 	
       List<P>& particles = (*a_particles[lvl])[dit()].listItems();
       
-      EBParticleMesh interp(cellBox, ebisBox, dx*RealVect::Unit, m_probLo);
+      const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[dit()];
 
       interp.interpolate<P, particleScalarField>(particles, data, a_interpType, a_forceIrregNGP);
     }
@@ -564,8 +559,8 @@ void EBAMRParticleMesh::interpolate(ParticleContainer<P>& a_particles,
       const EBCellFAB& data    = (*a_meshVectorField[lvl])[dit()];
 	
       List<P>& particles = (*a_particles[lvl])[dit()].listItems();
-      
-      EBParticleMesh interp(cellBox, ebisBox, dx*RealVect::Unit, m_probLo);
+
+      const EBParticleMesh& interp = (*m_ebParticleMesh[lvl])[dit()];            
 
       interp.interpolate<P, particleVectorField>(particles, data, a_interpType, a_forceIrregNGP);
     }

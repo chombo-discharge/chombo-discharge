@@ -227,6 +227,13 @@ public:
   */
   Vector<RefCountedPtr<EBCoarseFineParticleMesh> >& getEBCoarseFineParticleMesh() const;
 
+  /*!
+    @brief Get EBParticleMesh deposition/interpolation object for specified grid patch.
+    @param[in] a_lvl Grid level
+    @param[in] a_dit Grid index
+  */
+  const EBParticleMesh& getEBParticleMesh(const int a_lvl, const DataIndex& a_dit) const;
+
 protected:
 
   /*!
@@ -270,6 +277,18 @@ protected:
   Vector<Real> m_dx;
 
   /*!
+    @brief Regular particle-mesh object on each grid level
+  */
+  Vector<RefCountedPtr<LayoutData<EBParticleMesh> > > m_ebParticleMesh;
+
+  /*!
+    @brief Special particle-mesh objects for depositing on the coarsened fine grid. 
+    @details These are deposition/interpolation objects defined on the refined coarse grid. They are used when we need
+    to deposit coarse-grid particles on the fine grid. 
+  */
+  Vector<RefCountedPtr<LayoutData<EBParticleMesh> > > m_ebParticleMeshFiCo;  
+
+  /*!
     @brief Buffers for handling arithmetic for mass moving from coarse to fine level and vice versa. 
     @note The buffer for handling mass transfer between level lvl and level lvl+1 lives on lvl+1. 
   */
@@ -292,6 +311,11 @@ protected:
     @details This defines the necessary constructors for 
   */
   void defineCoarseFineMotion();
+
+  /*!
+    @brief Define EBParticleMesh objects
+  */
+  void defineEBParticleMesh();
 
   /*!
     @brief Just like the deposit function, but forced to use the "PVR" algorithm for handling refinement boundaries. 
