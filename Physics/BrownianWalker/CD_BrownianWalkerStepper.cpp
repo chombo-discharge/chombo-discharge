@@ -12,6 +12,7 @@
 // Chombo includes
 #include <ParmParse.H>
 #include <PolyGeom.H>
+#include <CH_Timer.H>
 #include <BinFab.H>
 
 // Our includes
@@ -23,35 +24,42 @@
 using namespace Physics::BrownianWalker;
 
 BrownianWalkerStepper::BrownianWalkerStepper(){
+  CH_TIME("BrownianWalkerStepper::BrownianWalkerStepper");
+  
   ParmParse pp("BrownianWalker");
 
   m_phase = phase::gas;
 
   pp.get("realm",          m_realm);
-  pp.get("diffco",         m_faceCenteredDiffusionCoefficient);
+  pp.get("diffco",         m_diffCo);
   pp.get("omega",          m_omega);
   pp.get("verbosity",      m_verbosity);
   pp.get("ppc",            m_ppc);
-  pp.get("max_cells_hop",  m_max_cells_hop);
-  pp.get("load_balance",   m_LoadBalancing);
+  pp.get("max_cells_hop",  m_maxCellsHop);
+  pp.get("load_balance",   m_loadBalance);
 }
 
 BrownianWalkerStepper::BrownianWalkerStepper(RefCountedPtr<ItoSolver>& a_solver) : BrownianWalkerStepper() {
+  CH_TIME("BrownianWalkerStepper::BrownianWalkerStepper(full)");
+
+  CH_assert(!a_solver.isNull());
+  
   m_solver = a_solver;
 }
 
 BrownianWalkerStepper::~BrownianWalkerStepper(){
-
+  CH_TIME("BrownianWalkerStepper::~BrownianWalkerStepper");
 }
 
 void BrownianWalkerStepper::parseRuntimeOptions() {
-
+  CH_TIME("BrownianWalkerStepper::parseRuntimeOptions");
+  
   ParmParse pp("BrownianWalker");
   
   pp.get("verbosity",      m_verbosity);
   pp.get("ppc",            m_ppc);
-  pp.get("max_cells_hop",  m_max_cells_hop);
-  pp.get("load_balance",   m_LoadBalancing);
+  pp.get("max_cells_hop",  m_maxCellsHop);
+  pp.get("load_balance",   m_loadBalance);
   
   m_solver->parseRuntimeOptions();
 }
@@ -64,13 +72,13 @@ void BrownianWalkerStepper::initialData(){
   
   m_solver->initialData();
   if(m_ppc > 0){
-    m_solver->sortParticlesByCell(ItoSolver::WhichContainer::Bulk);
-    m_solver->makeSuperparticles(ItoSolver::WhichContainer::Bulk,m_ppc);
-    m_solver->sortParticlesByPatch(ItoSolver::WhichContainer::Bulk);
+    m_solver->sortParticlesByCell (ItoSolver::WhichContainer::Bulk       );
+    m_solver->makeSuperparticles  (ItoSolver::WhichContainer::Bulk, m_ppc);
+    m_solver->sortParticlesByPatch(ItoSolver::WhichContainer::Bulk       );
   }
 
   if(m_solver->isDiffusive()){
-    m_solver->setDiffusionFunction(m_faceCenteredDiffusionCoefficient);
+    m_solver->setDiffusionFunction(m_diffCo);
   }
   if(m_solver->isMobile()){
     this->setVelocity();
@@ -109,7 +117,7 @@ bool BrownianWalkerStepper::loadBalanceThisRealm(const std::string a_realm) cons
 
   bool ret = false;
 
-  if(m_LoadBalancing && a_realm == m_realm){
+  if(m_loadBalance && a_realm == m_realm){
     ret = true;
   }
 
@@ -126,43 +134,40 @@ void BrownianWalkerStepper::loadBalanceBoxes(Vector<Vector<int> >&            a_
   if(m_verbosity > 5){
     pout() << "BrownianWalkerStepper::loadBalanceBoxes" << endl;
   }
-  
-  if(m_LoadBalancing && a_realm == m_realm){
-    ParticleContainer<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk);
-  
-    particles.regrid(a_grids, m_amr->getDomains(), m_amr->getDx(), m_amr->getRefinementRatios(), a_lmin, a_finestLevel);
 
-    a_procs.resize(1 + a_finestLevel);
-    a_boxes.resize(1 + a_finestLevel);
+  CH_assert(m_loadBalance && a_realm == m_realm);
   
-    // Compute loads on each level
-    for (int lvl = 0; lvl < a_lmin; lvl++){
-      a_procs[lvl] = a_grids[lvl].procIDs();
-      a_boxes[lvl] = a_grids[lvl].boxArray();
-    }
+  ParticleContainer<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk);
+  
+  particles.regrid(a_grids, m_amr->getDomains(), m_amr->getDx(), m_amr->getRefinementRatios(), a_lmin, a_finestLevel);
 
-    for (int lvl = a_lmin; lvl <= a_finestLevel; lvl++){
-      Vector<long int> loads;
-      a_boxes[lvl] = a_grids[lvl].boxArray();
+  a_procs.resize(1 + a_finestLevel);
+  a_boxes.resize(1 + a_finestLevel);
+  
+  // Compute loads on each level
+  for (int lvl = 0; lvl < a_lmin; lvl++){
+    a_procs[lvl] = a_grids[lvl].procIDs();
+    a_boxes[lvl] = a_grids[lvl].boxArray();
+  }
+
+  for (int lvl = a_lmin; lvl <= a_finestLevel; lvl++){
+    Vector<long int> loads;
+    a_boxes[lvl] = a_grids[lvl].boxArray();
     
-      m_solver->computeLoads(loads, a_grids[lvl], lvl);
+    m_solver->computeLoads(loads, a_grids[lvl], lvl);
 
 #ifdef CH_MPI
-      int count = loads.size();
-      Vector<long int> tmp(count);
-      MPI_Allreduce(&(loads[0]),&(tmp[0]), count, MPI_LONG, MPI_SUM, Chombo_MPI::comm);
-      loads = tmp;
+    int count = loads.size();
+    Vector<long int> tmp(count);
+    MPI_Allreduce(&(loads[0]),&(tmp[0]), count, MPI_LONG, MPI_SUM, Chombo_MPI::comm);
+    loads = tmp;
 #endif
 
-      LoadBalance(a_procs[lvl], loads, a_boxes[lvl]);
-    }
+    LoadBalance(a_procs[lvl], loads, a_boxes[lvl]);
+  }
 
-    // Put particles back
-    particles.preRegrid(a_lmin);
-  }
-  else{
-    MayDay::Abort("BrownianWalkerStepper::loadBalanceBoxes - logic bust");
-  }
+  // Put particles back
+  particles.preRegrid(a_lmin);
 }
 
 void BrownianWalkerStepper::setVelocity(const int a_level){
@@ -256,7 +261,7 @@ void BrownianWalkerStepper::postCheckpointSetup() {
   m_solver->depositParticles();
 
   if(m_solver->isDiffusive()){
-    m_solver->setDiffusionFunction(m_faceCenteredDiffusionCoefficient);
+    m_solver->setDiffusionFunction(m_diffCo);
   }
   if(m_solver->isMobile()){
     this->setVelocity();
@@ -291,7 +296,7 @@ void BrownianWalkerStepper::computeDt(Real& a_dt, TimeCode& a_timeCode) {
   m_solver->interpolateVelocities();
   m_solver->interpolateDiffusion();
 
-  a_dt = m_max_cells_hop*m_solver->computeDt();
+  a_dt = m_maxCellsHop*m_solver->computeDt();
 }
 
 void BrownianWalkerStepper::synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) {
@@ -374,7 +379,10 @@ void BrownianWalkerStepper::registerOperators() {
 }
 
 void BrownianWalkerStepper::allocate() {
-  m_solver->allocateInternals(); // Allocate some internal storage
+  CH_TIME("BrownianWalkerStepper::allocate");
+
+  // Allocate solver storage -- it knows what to do.
+  m_solver->allocateInternals();
 }
 
 Real BrownianWalkerStepper::advance(const Real a_dt) {
@@ -495,7 +503,7 @@ void BrownianWalkerStepper::regrid(const int a_lmin, const int a_oldFinestLevel,
 
   m_solver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
   if(m_solver->isDiffusive()){
-    m_solver->setDiffusionFunction(m_faceCenteredDiffusionCoefficient);
+    m_solver->setDiffusionFunction(m_diffCo);
   }
   if(m_solver->isMobile()){
     this->setVelocity();
