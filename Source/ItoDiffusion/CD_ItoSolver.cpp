@@ -1830,6 +1830,17 @@ void ItoSolver::setParticleMobility(const Real a_mobility) {
   particles.setValue<&ItoParticle::mobility>(a_mobility);
 }
 
+void ItoSolver::setParticleDiffusion(const Real a_diffCo) {
+  CH_TIME("ItoSolver::setParticleDiffusion");
+  if(m_verbosity > 5) {
+    pout() << m_name + "::setParticleDiffusion" << endl;
+  }
+
+  ParticleContainer<ItoParticle>& particles = this->getParticles(WhichContainer::Bulk);
+
+  particles.setValue<&ItoParticle::diffusion>(a_diffCo);
+}
+
 void ItoSolver::interpolateVelocities() {
   CH_TIME("ItoSolver::interpolateVelocities");
   if(m_verbosity > 5) {
