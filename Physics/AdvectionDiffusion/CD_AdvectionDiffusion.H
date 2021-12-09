@@ -12,11 +12,14 @@
 #ifndef CD_AdvectionDiffusion_H
 #define CD_AdvectionDiffusion_H
 
-/*!
-  @brief Namespace for encapsulating AdvectionDiffusion physics code.
-*/
-namespace AdvectionDiffusion {
+namespace Physics {
+  /*!
+    @brief Namespace for encapsulating AdvectionDiffusion physics code.
+  */
+  namespace AdvectionDiffusion {
 
-};
+  };
+
+}
 
 #endif

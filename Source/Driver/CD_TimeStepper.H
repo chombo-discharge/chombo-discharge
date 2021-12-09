@@ -198,13 +198,13 @@ public:
   virtual bool needToRegrid();
 
   /*!
-    @brief Load balancing query for a specific realm. If this returns true for a_realm, load balancing routines will be called during regrids. 
+    @brief Load balancing query for a specified realm. If this returns true for a_realm, load balancing routines will be called during regrids. 
     @param[in] a_realm Realm name
   */
   virtual bool loadBalanceThisRealm(const std::string a_realm) const;
 
   /*!
-    @brief Load balance grid boxes for a specific realm. 
+    @brief Load balance grid boxes for a specified realm. 
     @param[out] a_procs       MPI ranks owning the various grid boxes. 
     @param[out] a_boxes       Grid boxes on every level (obtain them with a_grids[lvl].boxArray())
     @param[in]  a_realm       Realm identifier
