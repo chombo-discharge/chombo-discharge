@@ -1124,7 +1124,7 @@ protected:
   /*!
     @brief Deposition method when depositing particles to mesh during plotting. 
   */
-  DepositionType m_plotDeposition; 
+  DepositionType m_plotDeposition;
 
   /*!
     @brief Storage for particle mesh data. 

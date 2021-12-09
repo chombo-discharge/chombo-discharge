@@ -1692,7 +1692,16 @@ void ItoSolver::preRegrid(const int a_lbase, const int a_oldFinestLevel) {
 
   CH_assert(a_lbase >= 0);
 
-  // TLDR: Do a pre-regrid operation for all particle containers owned by the ItoSolver. 
+  // TLDR: This does two things. The first is to deposit the number of particles per cell (ish) to the mesh. This can be used to load balance the application
+  //       in the regrid step. The second this is that it puts all particle data holders in "regrid" mode. 
+
+  // Deposit mass to scratch data holder. Then make sure the number of particles per cell
+  this->depositParticles<ItoParticle, &ItoParticle::mass>(m_scratch, this->getParticles(WhichContainer::Bulk), m_deposition);
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+    const Real dx = m_amr->getDx()[lvl];
+    const Real dV = std::pow(dx, SpaceDim);
+    DataOps::scale(*m_scratch[lvl], dV);
+  }
 
   for (auto& container : m_particleContainers) {
     ParticleContainer<ItoParticle>& particles = container.second;
