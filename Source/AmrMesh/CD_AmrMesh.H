@@ -975,18 +975,6 @@ public:
   void setBaseImplicitFunction(const phase::which_phase a_phase, const RefCountedPtr<BaseIF>& a_baseIF);
 
   /*!
-    @brief Regrid function. Generate new grids and operators.
-    @param[in] a_tags    Cell tags which will generate the grid. 
-    @param[in] a_lmin    Coarsest grid level allowed to change. 
-    @param[in] a_regsize Redistribution register size. 
-    @param[in] a_hardcap Grid generation hardcap. 
-    @note This is the "full regrid" function which regrids both base AMR functionality and then the operators. 
-  */
-  void regrid(const Vector<IntVectSet>& a_tags,
-	      const int                 a_lmin,
-	      const int                 a_hardcap=-1);
-
-  /*!
     @brief Regrid AMR. This versions generates the grids and Realms, but not the operator. 
     @param[in] a_tags    Cell tags which will generate the grid. 
     @param[in] a_lmin    Coarsest grid level allowed to change. 
