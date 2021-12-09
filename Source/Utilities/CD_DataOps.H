@@ -593,6 +593,28 @@ public:
 
   static void setCoveredValue(LevelData<EBCellFAB>& a_lhs, const int a_comp, const Real a_value);
 
+  /*!
+    @brief Version of setCoveredValue which does all component
+    @param[inout] a_lhs   Data 
+    @param[in]    a_value Value in covered grid cells. 
+  */
+  static void setCoveredValue(EBAMRCellData& a_lhs, const Real a_value);
+
+  /*!
+    @brief Version of setCoveredValue which does all component
+    @param[inout] a_lhs   Data 
+    @param[in]    a_value Value in covered grid cells. 
+  */  
+  static void setCoveredValue(LevelData<EBCellFAB>& a_lhs, const Real a_value);
+
+  /*!
+    @brief Set value in cells that are covered by a finer grid.
+    @param[inout] a_lhs    AMR data
+    @param[in]    a_refRat Refinement ratios between levels.
+    @param[in]    a_value  Value to set in cells covered by a finer grid. 
+  */
+  static void setInvalidValue(EBAMRCellData& a_lhs, const Vector<int>& a_refRat, const Real a_value);
+
   static void setValue(MFAMRCellData& a_lhs, const std::function<Real(const RealVect)>& a_function, const RealVect a_probLo, const Vector<Real>& a_dx, const int a_comp);
 
   static void setValue(LevelData<MFCellFAB>& a_lhs, const std::function<Real(const RealVect)>& a_function, const RealVect a_probLo, const Real a_dx, const int a_comp);

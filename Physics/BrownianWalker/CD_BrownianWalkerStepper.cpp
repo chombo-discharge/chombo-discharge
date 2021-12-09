@@ -29,6 +29,7 @@ BrownianWalkerStepper::BrownianWalkerStepper(){
   ParmParse pp("BrownianWalker");
 
   m_phase = phase::gas;
+  m_whichLoadBalance = LoadBalancingMethod::Particle;
 
   pp.get("realm",        m_realm);
   pp.get("diffco",       m_diffCo);
@@ -172,91 +173,162 @@ void BrownianWalkerStepper::loadBalanceBoxes(Vector<Vector<int> >&            a_
 
   CH_assert(m_loadBalance && a_realm == m_realm);
 
-  // TLDR: This routine is called AFTER AmrMesh::regridAMR which means that we have all EB-related information we need for building operators. We happen to
-  //       know that ItoSolver computed the number of particles per cell in the preRegrid method and that these values are returned by a call to
-  //       EBAMRCellData& ItoSolver::getScratch(). We take that data and regrid it onto the new grids. This requires us to manually build an operator which
-  //       can regrid that data.
-
-  constexpr int comp     = 0;
-  constexpr int numComps = 1;
-
-  // This is the number of particles per cell, but it is stored on the old grids. 
-  const EBAMRCellData& oldParticlesPerCell = m_solver->getScratch();
-
-  // Make some storage for the number of particles per cell on the new grids.
-  EBAMRCellData newParticlesPerCell;
-  m_amr->allocate(newParticlesPerCell, a_realm, m_phase, 1);
-
-  // These are the EB layouts.
-  const Vector<ProblemDomain>& domains = m_amr->getDomains();
-  const Vector<EBISLayout>&    ebisl   = m_amr->getEBISLayout(a_realm, m_phase);
-  const Vector<int>&           refRat  = m_amr->getRefinementRatios();
-
-  for (int lvl = 0; lvl <= std::max(0,a_lmin-1); lvl++){
-    oldParticlesPerCell[lvl]->copyTo(*newParticlesPerCell[lvl]);
+  switch(m_whichLoadBalance){
+  case LoadBalancingMethod::Mesh:
+    this->loadBalanceBoxesMesh(a_procs, a_boxes, a_realm, a_grids, a_lmin, a_finestLevel);
+    break;
+  case LoadBalancingMethod::Particle:
+    this->loadBalanceBoxesParticles(a_procs, a_boxes, a_realm, a_grids, a_lmin, a_finestLevel);
+    break;    
+  default:
+    MayDay::Error("BrownianWalkerStepper::loadBalanceBoxes - logic bust");
+    break;
   }
 
-  // Regrid onto the new mesh
-  for (int lvl = 0; lvl <= a_finestLevel; lvl++){
+// #if 1
+//   // TLDR: This routine is called AFTER AmrMesh::regridAMR which means that we have all EB-related information we need for building operators. We happen to
+//   //       know that ItoSolver computed the number of particles per cell in the preRegrid method and that these values are returned by a call to
+//   //       EBAMRCellData& ItoSolver::getScratch(). We take that data and regrid it onto the new grids. This requires us to manually build an operator which
+//   //       can regrid that data.
 
-    const bool hasCoar = lvl > 0;
+//   constexpr int comp  = 0;
+//   constexpr int nComp = 1;
 
-    if(hasCoar){
-      EBPWLFineInterp fineInterp(a_grids[lvl],
-				 a_grids[lvl-1],
-				 ebisl[lvl],
-				 ebisl[lvl-1],
-				 domains[lvl-1],
-				 refRat[lvl-1],
-				 numComps,
-				 ebisl[lvl].getEBIS());
+//   // This is the number of particles per cell, but it is stored on the old grids. 
+//   const EBAMRCellData& oldParticlesPerCell = m_solver->getScratch();
 
-      fineInterp.interpolate(*newParticlesPerCell[lvl], *newParticlesPerCell[lvl-1], Interval(0,0));
+//   // Make some storage for the number of particles per cell on the new grids.
+//   EBAMRCellData newParticlesPerCell;
+//   m_amr->allocate(newParticlesPerCell, a_realm, m_phase, 1);
 
-      if(lvl < std::min(newParticlesPerCell.size(), oldParticlesPerCell.size())){
-	oldParticlesPerCell[lvl]->copyTo(*newParticlesPerCell[lvl]);
-      }
-    }
-  }
+//   // These are the EB layouts.
+//   const Vector<ProblemDomain>& domains = m_amr->getDomains();
+//   const Vector<EBISLayout>&    ebisl   = m_amr->getEBISLayout(a_realm, m_phase);
+//   const Vector<int>&           refRat  = m_amr->getRefinementRatios();
 
-  // At this point we need to replace the data UNDERNEATH the fine grids. This might seem weird but recall that we don't really have control
-  // over what exists on the invalid regions on the coarse grids. Our simple way is just to call DataOps and have it set the invalid data to zero, and the same
-  // with the covered data.
-  DataOps::setCoveredData(nweParticlesPerCell, 0.0);
+//   for (int lvl = 0; lvl <= std::max(0,a_lmin-1); lvl++){
+//     oldParticlesPerCell[lvl]->copyTo(*newParticlesPerCell[lvl]);
+//   }
 
-  // 
+//   // Regrid onto the new mesh
+//   for (int lvl = 0; lvl <= a_finestLevel; lvl++){
+
+//     const bool hasCoar = lvl > 0;
+
+//     if(hasCoar){
+//       EBPWLFineInterp fineInterp(a_grids[lvl],
+// 				 a_grids[lvl-1],
+// 				 ebisl[lvl],
+// 				 ebisl[lvl-1],
+// 				 domains[lvl-1],
+// 				 refRat[lvl-1],
+// 				 nComp,
+// 				 ebisl[lvl].getEBIS());
+
+//       fineInterp.interpolate(*newParticlesPerCell[lvl], *newParticlesPerCell[lvl-1], Interval(0,0));
+
+//       if(lvl < std::min(newParticlesPerCell.size(), oldParticlesPerCell.size())){
+// 	oldParticlesPerCell[lvl]->copyTo(*newParticlesPerCell[lvl]);
+//       }
+//     }
+//   }
+
+//   // At this point we need to replace the data UNDERNEATH the fine grids and in the covered cells -- we don't want to count data in those regions are valid
+//   // data (because it does not represent particles). After that's done, newParticlesPerCel should be a realistic representation of the number of particles per cell. 
+//   constexpr Real zero = 0.0;
   
-  ParticleContainer<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk);
-  
-  particles.regrid(a_grids, m_amr->getDomains(), m_amr->getDx(), m_amr->getRefinementRatios(), a_lmin, a_finestLevel);
+//   DataOps::setInvalidValue(newParticlesPerCell, refRat, zero);
+//   DataOps::setCoveredValue(newParticlesPerCell,         zero);
 
-  a_procs.resize(1 + a_finestLevel);
-  a_boxes.resize(1 + a_finestLevel);
-  
-  // Compute loads on each level
-  for (int lvl = 0; lvl < a_lmin; lvl++){
-    a_procs[lvl] = a_grids[lvl].procIDs();
-    a_boxes[lvl] = a_grids[lvl].boxArray();
-  }
+//   // At this point we have the number of particles per cell (ish). We are guaranteed that we are not counting particles that live on an overlapping
+//   // fine level -- we only count on the valid region on each level.
 
-  for (int lvl = a_lmin; lvl <= a_finestLevel; lvl++){
-    Vector<long int> loads;
-    a_boxes[lvl] = a_grids[lvl].boxArray();
+//   a_procs.resize(1 + a_finestLevel);
+//   a_boxes.resize(1 + a_finestLevel);
+
+//   // These levels should not change. 
+//   for (int lvl = 0; lvl < a_lmin; lvl++){
+//     a_procs[lvl] = a_grids[lvl].procIDs();
+//     a_boxes[lvl] = a_grids[lvl].boxArray();
+//   }
+
+
+//   // Load balance these levels. 
+//   for (int lvl = a_lmin; lvl <= a_finestLevel; lvl++){
+//     const DisjointBoxLayout& dbl = a_grids[lvl]; // Grids on this level. 
+
+//     // Boxes, loads, and ranks. This is stuff to be assigned. 
+//     Vector<Box>      boxes = dbl.boxArray(); // Input boxes. Note that these are lexicographically sorted (this is what DisjointBoxLayout does). 
+//     Vector<long int> loads;                  // Loads
+//     Vector<int>      ranks;                  // Ranks
+
+//     loads.resize(boxes.size());
+//     ranks.resize(boxes.size());    
+
+//     // Compute loads in each grid patch. 
+//     for (DataIterator dit(dbl); dit.ok(); ++dit){
+//       const Box        cellBox          = dbl[dit()];
+//       const EBCellFAB& particlesPerCell = (*newParticlesPerCell[lvl])[dit()];
+//       const BaseFab<Real>& ppcFAB       = particlesPerCell.getSingleValuedFAB();
+
+//       // Compute the number of cells (ish) per FAB.
+//       Real sum = 0.0;
+//       for (BoxIterator bit(cellBox); bit.ok(); ++ bit){
+// 	sum += std::abs(ppcFAB(bit(), comp));
+//       }
+      
+//       loads[dit().intCode()] = lround(sum);
+//     }
+
+//     // If running with MPI, loads must be gathered on all ranks. 
+// #ifdef CH_MPI
+//     Vector<long int> tmp = loads;
+//     MPI_Allreduce(&(tmp[0]),&(loads[0]), loads.size(), MPI_LONG, MPI_SUM, Chombo_MPI::comm);
+// #endif
+
+//     // Sort the boxes and loads with a Morton code. 
+//     LoadBalancing::sort(boxes, loads, BoxSorting::Morton);
+
+//     // Load balance the application
+//     LoadBalancing::makeBalance(ranks, loads, boxes);
+
+//     // Assign ranks to boxes
+//     a_boxes[lvl] = boxes;
+//     a_procs[lvl] = ranks;
+//   }
+// #else
+//   ParticleContainer<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk);
+  
+//   particles.regrid(a_grids, m_amr->getDomains(), m_amr->getDx(), m_amr->getRefinementRatios(), a_lmin, a_finestLevel);
+
+//   a_procs.resize(1 + a_finestLevel);
+//   a_boxes.resize(1 + a_finestLevel);
+  
+//   // Compute loads on each level
+//   for (int lvl = 0; lvl < a_lmin; lvl++){
+//     a_procs[lvl] = a_grids[lvl].procIDs();
+//     a_boxes[lvl] = a_grids[lvl].boxArray();
+//   }
+
+//   for (int lvl = a_lmin; lvl <= a_finestLevel; lvl++){
+//     Vector<long int> loads;
+//     a_boxes[lvl] = a_grids[lvl].boxArray();
     
-    m_solver->computeLoads(loads, a_grids[lvl], lvl);
+//     m_solver->computeLoads(loads, a_grids[lvl], lvl);
 
-#ifdef CH_MPI
-    int count = loads.size();
-    Vector<long int> tmp(count);
-    MPI_Allreduce(&(loads[0]),&(tmp[0]), count, MPI_LONG, MPI_SUM, Chombo_MPI::comm);
-    loads = tmp;
-#endif
+// #ifdef CH_MPI
+//     int count = loads.size();
+//     Vector<long int> tmp(count);
+//     MPI_Allreduce(&(loads[0]),&(tmp[0]), count, MPI_LONG, MPI_SUM, Chombo_MPI::comm);
+//     loads = tmp;
+// #endif
 
-    LoadBalance(a_procs[lvl], loads, a_boxes[lvl]);
-  }
+//     LoadBalance(a_procs[lvl], loads, a_boxes[lvl]);
+//   }
 
-  // Put particles back
-  particles.preRegrid(a_lmin);
+//   // Put particles back
+//   particles.preRegrid(a_lmin);
+// #endif
 }
 
 #ifdef CH_USE_HDF5
@@ -535,6 +607,175 @@ void BrownianWalkerStepper::makeSuperParticles() {
     m_solver->makeSuperparticles  (ItoSolver::WhichContainer::Bulk, m_ppc);
     m_solver->sortParticlesByPatch(ItoSolver::WhichContainer::Bulk       );
   }
+}
+
+void BrownianWalkerStepper::loadBalanceBoxesMesh(Vector<Vector<int> >&            a_procs,
+						 Vector<Vector<Box> >&            a_boxes,
+						 const std::string                a_realm,
+						 const Vector<DisjointBoxLayout>& a_grids,
+						 const int                        a_lmin,
+						 const int                        a_finestLevel){
+  CH_TIME("BrownianWalkerStepper::loadBalanceBoxesMesh");
+  if(m_verbosity > 5){
+    pout() << "BrownianWalkerStepper::loadBalanceBoxesMesh" << endl;
+  }
+
+  CH_assert(m_loadBalance && a_realm == m_realm);
+
+  // TLDR: This routine is called AFTER AmrMesh::regridAMR which means that we have all EB-related information we need for building operators. We happen to
+  //       know that ItoSolver computed the number of particles per cell in the preRegrid method and that these values are returned by a call to
+  //       EBAMRCellData& ItoSolver::getScratch(). We take that data and regrid it onto the new grids. This requires us to manually build an operator which
+  //       can regrid that data.
+
+  constexpr int comp  = 0;
+  constexpr int nComp = 1;
+
+  // This is the number of particles per cell, but it is stored on the old grids. 
+  const EBAMRCellData& oldParticlesPerCell = m_solver->getScratch();
+
+  // Make some storage for the number of particles per cell on the new grids.
+  EBAMRCellData newParticlesPerCell;
+  m_amr->allocate(newParticlesPerCell, a_realm, m_phase, 1);
+
+  // These are the EB layouts.
+  const Vector<ProblemDomain>& domains = m_amr->getDomains();
+  const Vector<EBISLayout>&    ebisl   = m_amr->getEBISLayout(a_realm, m_phase);
+  const Vector<int>&           refRat  = m_amr->getRefinementRatios();
+
+  for (int lvl = 0; lvl <= std::max(0,a_lmin-1); lvl++){
+    oldParticlesPerCell[lvl]->copyTo(*newParticlesPerCell[lvl]);
+  }
+
+  // Regrid onto the new mesh
+  for (int lvl = 0; lvl <= a_finestLevel; lvl++){
+
+    const bool hasCoar = lvl > 0;
+
+    if(hasCoar){
+      EBPWLFineInterp fineInterp(a_grids[lvl],
+				 a_grids[lvl-1],
+				 ebisl[lvl],
+				 ebisl[lvl-1],
+				 domains[lvl-1],
+				 refRat[lvl-1],
+				 nComp,
+				 ebisl[lvl].getEBIS());
+
+      fineInterp.interpolate(*newParticlesPerCell[lvl], *newParticlesPerCell[lvl-1], Interval(0,0));
+
+      if(lvl < std::min(newParticlesPerCell.size(), oldParticlesPerCell.size())){
+	oldParticlesPerCell[lvl]->copyTo(*newParticlesPerCell[lvl]);
+      }
+    }
+  }
+
+  // At this point we need to replace the data UNDERNEATH the fine grids and in the covered cells -- we don't want to count data in those regions are valid
+  // data (because it does not represent particles). After that's done, newParticlesPerCel should be a realistic representation of the number of particles per cell. 
+  constexpr Real zero = 0.0;
+  
+  DataOps::setInvalidValue(newParticlesPerCell, refRat, zero);
+  DataOps::setCoveredValue(newParticlesPerCell,         zero);
+
+  // At this point we have the number of particles per cell (ish). We are guaranteed that we are not counting particles that live on an overlapping
+  // fine level -- we only count on the valid region on each level.
+
+  a_procs.resize(1 + a_finestLevel);
+  a_boxes.resize(1 + a_finestLevel);
+
+  // These levels should not change. 
+  for (int lvl = 0; lvl < a_lmin; lvl++){
+    a_procs[lvl] = a_grids[lvl].procIDs();
+    a_boxes[lvl] = a_grids[lvl].boxArray();
+  }
+
+
+  // Load balance these levels. 
+  for (int lvl = a_lmin; lvl <= a_finestLevel; lvl++){
+    const DisjointBoxLayout& dbl = a_grids[lvl]; // Grids on this level. 
+
+    // Boxes, loads, and ranks. This is stuff to be assigned. 
+    Vector<Box>      boxes = dbl.boxArray(); // Input boxes. Note that these are lexicographically sorted (this is what DisjointBoxLayout does). 
+    Vector<long int> loads;                  // Loads
+    Vector<int>      ranks;                  // Ranks
+
+    loads.resize(boxes.size());
+    ranks.resize(boxes.size());    
+
+    // Compute loads in each grid patch. 
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      const Box        cellBox          = dbl[dit()];
+      const EBCellFAB& particlesPerCell = (*newParticlesPerCell[lvl])[dit()];
+      const BaseFab<Real>& ppcFAB       = particlesPerCell.getSingleValuedFAB();
+
+      // Compute the number of cells (ish) per FAB.
+      Real sum = 0.0;
+      for (BoxIterator bit(cellBox); bit.ok(); ++ bit){
+	sum += std::abs(ppcFAB(bit(), comp));
+      }
+      
+      loads[dit().intCode()] = lround(sum);
+    }
+
+    // If running with MPI, loads must be gathered on all ranks. 
+#ifdef CH_MPI
+    Vector<long int> tmp = loads;
+    MPI_Allreduce(&(tmp[0]),&(loads[0]), loads.size(), MPI_LONG, MPI_SUM, Chombo_MPI::comm);
+#endif
+
+    // Sort the boxes and loads with a Morton code. 
+    LoadBalancing::sort(boxes, loads, BoxSorting::Morton);
+
+    // Load balance the application
+    LoadBalancing::makeBalance(ranks, loads, boxes);
+
+    // Assign ranks to boxes
+    a_boxes[lvl] = boxes;
+    a_procs[lvl] = ranks;
+  }  
+}
+
+void BrownianWalkerStepper::loadBalanceBoxesParticles(Vector<Vector<int> >&            a_procs,
+						      Vector<Vector<Box> >&            a_boxes,
+						      const std::string                a_realm,
+						      const Vector<DisjointBoxLayout>& a_grids,
+						      const int                        a_lmin,
+						      const int                        a_finestLevel) {
+  CH_TIME("BrownianWalkerStepper::loadBalanceBoxesParticles");
+  if(m_verbosity > 5){
+    pout() << "BrownianWalkerStepper::loadBalanceBoxesParticles" << endl;
+  }
+  
+  ParticleContainer<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk);
+  
+  particles.regrid(a_grids, m_amr->getDomains(), m_amr->getDx(), m_amr->getRefinementRatios(), a_lmin, a_finestLevel);
+
+  a_procs.resize(1 + a_finestLevel);
+  a_boxes.resize(1 + a_finestLevel);
+  
+  // Compute loads on each level
+  for (int lvl = 0; lvl < a_lmin; lvl++){
+    a_procs[lvl] = a_grids[lvl].procIDs();
+    a_boxes[lvl] = a_grids[lvl].boxArray();
+  }
+
+  for (int lvl = a_lmin; lvl <= a_finestLevel; lvl++){
+    Vector<long int> loads;
+    a_boxes[lvl] = a_grids[lvl].boxArray();
+    
+    m_solver->computeLoads(loads, a_grids[lvl], lvl);
+
+#ifdef CH_MPI
+    int count = loads.size();
+    Vector<long int> tmp(count);
+    MPI_Allreduce(&(loads[0]),&(tmp[0]), count, MPI_LONG, MPI_SUM, Chombo_MPI::comm);
+    loads = tmp;
+#endif
+
+    LoadBalance(a_procs[lvl], loads, a_boxes[lvl]);
+  }
+
+  // Put particles back
+  particles.preRegrid(a_lmin);
 }
 
 #include <CD_NamespaceFooter.H>
