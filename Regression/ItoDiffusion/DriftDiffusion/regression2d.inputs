@@ -96,20 +96,6 @@ GeoCoarsener.box1_lvl    = 0            # up to this level
 GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 
 # ====================================================================================================
-# ROD_SPHERE CLASS OPTIONS
-# ====================================================================================================
-rod_sphere.eps0                      = 1                # Background permittivity
-rod_sphere.turn_off_electrode        = true             # Turn on/off electrode
-rod_sphere.turn_off_dielectric       = false            # Turn on/off dielectric
-rod_sphere.electrode_live            = true             # Live electrode or not
-rod_sphere.electrode_radius          = 0.05             # Electrode inner radius
-rod_sphere.electrode_center1         = 0 0.5            # Center 1
-rod_sphere.electrode_center2         = 0 2.0            # Center 2. 
-rod_sphere.dielectric_permittivity   = 4.0              # Dielectric permittivity
-rod_sphere.dielectric_center         = 0.0 0            # Dielectric center
-rod_sphere.dielectric_radius         = 0.15             # Dielectric radius
-
-# ====================================================================================================
 # ROD_DIELECTRIC CLASS OPTIONS
 # ====================================================================================================
 RodDielectric.electrode.on              = false         # Use electrode or not
@@ -143,7 +129,8 @@ BrownianWalker.seed           = 0       # RNG seed
 BrownianWalker.num_particles  = 100000  # Number of initial particles
 BrownianWalker.cfl            = 1.0     # CFL-like number. 
 BrownianWalker.ppc            = 32      # Target particles per cell
-BrownianWalker.load_balance   = false   # Turn on/off particle load balancing	
+BrownianWalker.load_balance   = true    # Turn on/off particle load balancing
+BrownianWalker.which_balance  = mesh # Switch for load balancing method. Either 'mesh' or 'particle'. 
 
 # Velocity, diffusion, and CFL
 # ----------------------------

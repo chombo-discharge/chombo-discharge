@@ -28,6 +28,9 @@ namespace Physics {
       here we consider a constant mobility. The diffusion coefficient is also constant (the value is fetched from the input script). 
 
       Note that while the ItoSolver CAN interpolate the particle diffusion coefficient from a mesh quantity -- this physics module sets it directly. 
+
+      This physics module shows how to load balance an application introspectively based on the number of particles assigned to each rank. We support two methods,
+      either by estimating the number of particles on the new mesh, or counting them directly. 
     */
     class BrownianWalkerStepper : public TimeStepper {
     public:
