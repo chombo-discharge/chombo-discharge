@@ -162,6 +162,7 @@ namespace Physics {
       auto rhoFunc = [rho0, blobCenter, blobRadius](const RealVect a_position) -> Real {
 	const RealVect dist  = a_position-blobCenter;
 	const Real     dist2 = dist.dotProduct(dist);
+	
 	return rho0*exp(-dist2/(2*blobRadius*blobRadius));
       };
 
@@ -174,9 +175,6 @@ namespace Physics {
       
       // Set space charge. 
       m_fieldSolver->setRho(rhoFunc);
-
-      // Set permittivities (not necessary?)
-      //      m_fieldSolver->setPermittivities();
     }
 
     template <class T>
@@ -230,7 +228,7 @@ namespace Physics {
       CH_TIME("FieldStepper::writeCheckpointData");
       if(m_verbosity > 5){
 	pout() << "FieldStepper<T>::writeCheckpointData" << endl;
-      }      
+      }
     }
 #endif
 
@@ -242,7 +240,7 @@ namespace Physics {
 	pout() << "FieldStepper<T>::readCheckpointData" << endl;
       }
       
-      MayDay::Error("FieldStepper<T>::readCheckpointData - checkpointing not supported for this class");
+      MayDay::Error("FieldStepper<T>::readCheckpointData - checkpointing not supported for this module");
     }
 #endif
 
