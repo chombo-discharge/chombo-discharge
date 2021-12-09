@@ -171,6 +171,60 @@ void BrownianWalkerStepper::loadBalanceBoxes(Vector<Vector<int> >&            a_
   }
 
   CH_assert(m_loadBalance && a_realm == m_realm);
+
+  // TLDR: This routine is called AFTER AmrMesh::regridAMR which means that we have all EB-related information we need for building operators. We happen to
+  //       know that ItoSolver computed the number of particles per cell in the preRegrid method and that these values are returned by a call to
+  //       EBAMRCellData& ItoSolver::getScratch(). We take that data and regrid it onto the new grids. This requires us to manually build an operator which
+  //       can regrid that data.
+
+  constexpr int comp     = 0;
+  constexpr int numComps = 1;
+
+  // This is the number of particles per cell, but it is stored on the old grids. 
+  const EBAMRCellData& oldParticlesPerCell = m_solver->getScratch();
+
+  // Make some storage for the number of particles per cell on the new grids.
+  EBAMRCellData newParticlesPerCell;
+  m_amr->allocate(newParticlesPerCell, a_realm, m_phase, 1);
+
+  // These are the EB layouts.
+  const Vector<ProblemDomain>& domains = m_amr->getDomains();
+  const Vector<EBISLayout>&    ebisl   = m_amr->getEBISLayout(a_realm, m_phase);
+  const Vector<int>&           refRat  = m_amr->getRefinementRatios();
+
+  for (int lvl = 0; lvl <= std::max(0,a_lmin-1); lvl++){
+    oldParticlesPerCell[lvl]->copyTo(*newParticlesPerCell[lvl]);
+  }
+
+  // Regrid onto the new mesh
+  for (int lvl = 0; lvl <= a_finestLevel; lvl++){
+
+    const bool hasCoar = lvl > 0;
+
+    if(hasCoar){
+      EBPWLFineInterp fineInterp(a_grids[lvl],
+				 a_grids[lvl-1],
+				 ebisl[lvl],
+				 ebisl[lvl-1],
+				 domains[lvl-1],
+				 refRat[lvl-1],
+				 numComps,
+				 ebisl[lvl].getEBIS());
+
+      fineInterp.interpolate(*newParticlesPerCell[lvl], *newParticlesPerCell[lvl-1], Interval(0,0));
+
+      if(lvl < std::min(newParticlesPerCell.size(), oldParticlesPerCell.size())){
+	oldParticlesPerCell[lvl]->copyTo(*newParticlesPerCell[lvl]);
+      }
+    }
+  }
+
+  // At this point we need to replace the data UNDERNEATH the fine grids. This might seem weird but recall that we don't really have control
+  // over what exists on the invalid regions on the coarse grids. Our simple way is just to call DataOps and have it set the invalid data to zero, and the same
+  // with the covered data.
+  DataOps::setCoveredData(nweParticlesPerCell, 0.0);
+
+  // 
   
   ParticleContainer<ItoParticle>& particles = m_solver->getParticles(ItoSolver::WhichContainer::Bulk);
   
