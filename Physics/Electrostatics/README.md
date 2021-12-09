@@ -1,5 +1,5 @@
 # Physics/Electrostatics
-This physics module solves solves the Poisson equation. It does not feature mesh refinement, but this is possible to implement by adding a CellTagger to the module. 
+This physics module solves the Poisson equation. It does not feature mesh refinement, but this is possible to implement by adding a CellTagger to the module. 
 See https://chombo-discharge.github.io/ElectrostaticsModel.html for implementation details.
 
 The source files consist of the following:

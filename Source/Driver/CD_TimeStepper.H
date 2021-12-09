@@ -124,7 +124,7 @@ public:
     @details This is necessary because Driver, not TimeStepper, is responsible for allocating the necessary memory. 
     @return Returns number of plot variables that will be written during writePlotData
   */
-  virtual int  getNumberOfPlotVariables() const = 0;
+  virtual int getNumberOfPlotVariables() const = 0;
 
   /*!
     @brief Get computational loads to be checkpointed.
@@ -174,21 +174,21 @@ public:
   virtual void preRegrid(const int a_lmin, const int a_oldFinestLevel) = 0;
 
   /*!
-    @brief Perform post-regrid operations. 
-    @details This includes all operations to be done AFTER interpolating data to new grids. 
-    @param[in] a_lmin           The coarsest level that changed. 
-    @param[in] a_oldFinestLevel The finest level before the regrid. 
-    @param[in] a_newFinestLevel The finest level after the regrid. 
-  */
-  virtual void postRegrid() = 0;
-
-  /*!
     @brief Time stepper regrid method. 
     @param[in] a_lmin           The coarsest level that changed. 
     @param[in] a_oldFinestLevel The finest level before the regrid. 
     @param[in] a_newFinestLevel The finest level after the regrid. 
   */
   virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) = 0;
+
+  /*!
+    @brief Perform post-regrid operations. 
+    @details This includes all operations to be done AFTER interpolating data to new grids. 
+    @param[in] a_lmin           The coarsest level that changed. 
+    @param[in] a_oldFinestLevel The finest level before the regrid. 
+    @param[in] a_newFinestLevel The finest level after the regrid. 
+  */
+  virtual void postRegrid() = 0;  
 
   /*!
     @brief Fuction which can have Driver do regrids at arbitrary points in the simulation. 
