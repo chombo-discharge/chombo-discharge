@@ -1080,7 +1080,7 @@ void ItoSolver::drawNewParticles(const LevelData<EBCellFAB>& a_particlesPerCell,
 	unsigned long long computationalParticleWeight;
 	unsigned long long computationalParticleNum;
 	unsigned long long computationalParticleRemainder;
-	DataOps::computeParticleWeights(computationalParticleWeight, computationalParticleNum, computationalParticleRemainder, numPhysicalParticles, a_newPPC);
+	ParticleOps::computeParticleWeights(computationalParticleWeight, computationalParticleNum, computationalParticleRemainder, numPhysicalParticles, a_newPPC);
 
 	// Settings for drawing new particles. 
 	const RealVect minLo = -0.5*RealVect::Unit;
@@ -1136,7 +1136,7 @@ void ItoSolver::drawNewParticles(const LevelData<EBCellFAB>& a_particlesPerCell,
 	unsigned long long computationalParticleWeight;
 	unsigned long long computationalParticleNum;
 	unsigned long long computationalParticleRemainder;
-	DataOps::computeParticleWeights(computationalParticleWeight, computationalParticleNum, computationalParticleRemainder, numPhysicalParticles, a_newPPC);
+	ParticleOps::computeParticleWeights(computationalParticleWeight, computationalParticleNum, computationalParticleRemainder, numPhysicalParticles, a_newPPC);
 
 	// Now add the partices. If r > 0 we add another one with weight w + r
 	for (unsigned long long i = 0; i < computationalParticleNum; i++) {
