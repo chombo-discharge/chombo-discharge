@@ -30,8 +30,9 @@ RtPhysicsStepper<T>::RtPhysicsStepper(){
   ParmParse pp("RtPhysicsStepper");
   Vector<Real> v;
 
-  pp.get   ("verbosity",      m_verbosity);
-  pp.get   ("realm",          m_realm);
+  pp.get("verbosity", m_verbosity);
+  pp.get("realm",     m_realm);
+  pp.get("dt",        m_dt);
 }
     
 template <typename T>
@@ -109,7 +110,7 @@ void RtPhysicsStepper<T>::writePlotData(EBAMRCellData& a_output, Vector<std::str
 
 template <typename T>
 void RtPhysicsStepper<T>::computeDt(Real& a_dt, TimeCode& a_timeCode) {
-  a_dt = 1.E-10;
+  a_dt = m_dt;
 }
 
 template <typename T>

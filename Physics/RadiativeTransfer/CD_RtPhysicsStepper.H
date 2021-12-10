@@ -25,12 +25,21 @@ namespace Physics {
   namespace RadiativeTransfer {
 
     /*!
-      @brief Class that just solves the rte equation using the RtSolver advance method
+      @brief Implementation of TimeStepper for solving for a single radiative transfer species. This supports both Monte Carlo photons and Helmholtz approximations
+      through the common RtSolver interface. 
     */
     template <class T>
     class RtPhysicsStepper : public TimeStepper {
     public:
+
+      /*!
+	@brief Constructor. Reads a couple of input options.
+      */
       RtPhysicsStepper();
+
+      /*!
+	@brief Destructor (does nothing)
+      */
       ~RtPhysicsStepper();
 
       // Stuff below here is derived from TimeStepper.
@@ -72,12 +81,29 @@ namespace Physics {
 
     protected:
 
+      /*!
+	@brief Realm where solver lives.
+      */
       std::string m_realm;
 
-      // Solver and species
+      /*!
+	@brief Time step to use
+      */
+      Real m_dt;      
+
+      /*!
+	@brief Reference to solver
+      */
       RefCountedPtr<RtSolver>  m_solver;
+
+      /*!
+	@brief Reference to species
+      */      
       RefCountedPtr<RtSpecies> m_species;
 
+      /*!
+	@brief For setting a Gaussian source in the radiative transfer equation solver
+      */
       void setGaussianSource();
     };
   }
