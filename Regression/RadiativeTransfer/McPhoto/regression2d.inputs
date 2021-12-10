@@ -64,7 +64,7 @@ Driver.refine_dielectrics              = -1            # Refine dielectric surfa
 # MC_PHOTO CLASS OPTIONS
 # ====================================================================================================
 McPhoto.instantaneous      = true          # Instantaneous transport or not
-McPhoto.max_photons        = 1             # Maximum no. generated in a cell (< = 0 yields physical Photons)
+McPhoto.max_photons        = 64            # Maximum no. generated in a cell (< = 0 yields physical Photons)
 McPhoto.blend_conservation = false         # Switch for blending with the nonconservative divergence
 McPhoto.pvr_buffer         = 0             # Buffer for PVR. 
 McPhoto.halo_buffer        = 1             # Halo region for particles. 
@@ -83,14 +83,14 @@ McPhoto.bc_z_high          = outflow       # Boundary condition
 McPhoto.poiss_exp_swap     = 100           # Swap out Poisson with exponential distribution above this mean
 McPhoto.photon_generation  = deterministic # Volumetric source term. 'deterministic' or 'stochastic'
 McPhoto.source_type        = number        # 'number'       = Source term contains the number of Photons produced
-                                            # 'volume'       = Source terms contains the number of Photons produced per unit volume
-                                            # 'volume_rate'  = Source terms contains the volumetric rate
-                                            # 'rate'         = Source terms contains the rate
+                                           # 'volume'       = Source terms contains the number of Photons produced per unit volume
+                                           # 'volume_rate'  = Source terms contains the volumetric rate
+                                           # 'rate'         = Source terms contains the rate
 McPhoto.deposition         = cic           # 'ngp'  = nearest grid point
-                                            # 'num'  = # of Photons per cell
-                                            # 'cic'  = cloud-in-cell
-                                            # 'tsc'  = triangle-shaped-cloud
-                                            # 'w4'   = 3rd order interpolation
+                                           # 'num'  = # of Photons per cell
+                                           # 'cic'  = cloud-in-cell
+                                           # 'tsc'  = triangle-shaped-cloud
+                                           # 'w4'   = 3rd order interpolation
 
 
 # ====================================================================================================
