@@ -106,7 +106,7 @@ void EBMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>&       a_phi
 					       const Interval              a_variables) {
   CH_TIME("EBMultigridInterpolator::coarseFineInterp");
 
-  CH_assert(m_ghostCF*IntVect::Unit == a_phiFine.ghostVect());
+  CH_assert(m_ghostCF*IntVect::Unit <= a_phiFine.ghostVect());
 
   if(a_phiFine.ghostVect() != m_ghostVector){
     MayDay::Error("EBMultigridInterpolator::coarseFineInterp -- number of ghost cells do not match!");

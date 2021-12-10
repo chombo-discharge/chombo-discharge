@@ -28,6 +28,9 @@ namespace Physics {
       here we consider a constant mobility. The diffusion coefficient is also constant (the value is fetched from the input script). 
 
       Note that while the ItoSolver CAN interpolate the particle diffusion coefficient from a mesh quantity -- this physics module sets it directly. 
+
+      This physics module shows how to load balance an application introspectively based on the number of particles assigned to each rank. We support two methods,
+      either by estimating the number of particles on the new mesh, or counting them directly. 
     */
     class BrownianWalkerStepper : public TimeStepper {
     public:
@@ -68,6 +71,15 @@ namespace Physics {
 	@details This returns true if a_realm==m_realm and m_loadBalance==true.
       */
       bool loadBalanceThisRealm(const std::string a_realm) const override;
+
+      /*!
+	@brief Get computational loads to be checkpointed. This is used by Driver both for plotting computational loads AND for checkpointing the loads for restart
+	purposes. 
+	@details This uses the number of computational particles as a load metric. 
+	@param[in] a_realm Realm
+	@param[in] a_level Grid level
+      */
+      Vector<long int> getCheckpointLoads(const std::string a_realm, const int a_level) const override;
 
       /*!
 	@brief Load balance grid boxes for a specific realm. 
@@ -200,6 +212,19 @@ namespace Physics {
     protected:
 
       /*!
+	@brief For classifying load balancing methods.
+      */
+      enum LoadBalancingMethod {
+	Mesh,
+	Particle
+      };
+
+      /*!
+	@brief Load balancing method
+      */
+      LoadBalancingMethod m_whichLoadBalance;
+
+      /*!
 	@brief Realm where the particles live
       */
       std::string m_realm; 
@@ -268,6 +293,50 @@ namespace Physics {
 	@brief Make super particles
       */
       void makeSuperParticles();
+
+      /*!
+	@brief Method that shows how to load balance the application using the number of particles per cell stored on the mesh. 
+	@details This routine will load balance based on an estimated number of particles per cell. This number is computed ON THE MESH, i.e. it does
+	not directly count the particles. Rather, we happen to know that ItoSolver deposited his particle numbers to the mesh before in the preRegrid, and we
+	use that information to estimate the number of particles per patch in the new grids. 
+
+	This is different from the other method which assign particles to the new grids and then counts them. Because this routine does not remap particles
+	(which can be expensive), this routine is typically faster than loadBalanceBoxesParticles. 
+	loadBalanceBoxesParticles 
+	@param[out] a_procs       MPI ranks owning the various grid boxes. 
+	@param[out] a_boxes       Grid boxes on every level (obtain them with a_grids[lvl].boxArray())
+	@param[in]  a_realm       Realm identifier
+	@param[in]  a_grids       Original grids
+	@param[in]  a_lmin        Coarsest grid level that changed
+	@param[in]  a_finestLevel New finest grid level
+      */      
+      void loadBalanceBoxesMesh(Vector<Vector<int> >&            a_procs,
+				Vector<Vector<Box> >&            a_boxes,
+				const std::string                a_realm,
+				const Vector<DisjointBoxLayout>& a_grids,
+				const int                        a_lmin,
+				const int                        a_finestLevel);
+
+      /*!
+	@brief Method that shows how to load balance the application using the number of particles per cell stored on the mesh. 
+	@details This routine will load balance by directly counting the particles on the new mesh. The result of that is that we regrid a particle data holder twice. 
+
+	Because this routine ends up remapping particles twice (once here, and once in BrownianWalkerStepper::regrid), this routine is usually slower than
+	loadBalanceBoxesMesh when used at large particle counts. In addition, loadBalanceBoxesMesh does it's best at estimating the final number of computatational particles
+	after particle merging/splitting, while this routine only counts the original computational particles before the regrid. 
+	@param[out] a_procs       MPI ranks owning the various grid boxes. 
+	@param[out] a_boxes       Grid boxes on every level (obtain them with a_grids[lvl].boxArray())
+	@param[in]  a_realm       Realm identifier
+	@param[in]  a_grids       Original grids
+	@param[in]  a_lmin        Coarsest grid level that changed
+	@param[in]  a_finestLevel New finest grid level
+      */      
+      void loadBalanceBoxesParticles(Vector<Vector<int> >&            a_procs,
+				     Vector<Vector<Box> >&            a_boxes,
+				     const std::string                a_realm,
+				     const Vector<DisjointBoxLayout>& a_grids,
+				     const int                        a_lmin,
+				     const int                        a_finestLevel);      
     };
   }
 }

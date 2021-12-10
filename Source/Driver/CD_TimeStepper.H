@@ -127,11 +127,18 @@ public:
   virtual int getNumberOfPlotVariables() const = 0;
 
   /*!
-    @brief Get computational loads to be checkpointed.
+    @brief Get computational loads to be checkpointed. 
+    @details This is used by Driver both for setting up load-balanced restarts AND for plotting the computational loads to a file. This routine is
+    disjoint from loadBalanceBoxes because this routine is not part of a regrid. This means that we are not operating with temporarily load balanced
+    grids where the but the final ones. 
+    @note The default implementation uses the box volume as a proxy for the load. You should overwrite this if you load balance your application, and also
+    make sure that the loads returned from this routine are consistent with what you put in loadBalanceBoxes. 
+
+    Also note that the return vector has the same ordering as the DisjointBoxLayout's boxes on the input grid level. See the implementation for further details. 
     @param[in] a_realm Realm
     @param[in] a_level Grid level
     @return Returns computational loads for each box on grid level a_level. 
-    @details The default implementation uses the box volume as a proxy for the load. 
+    
   */
   virtual Vector<long int> getCheckpointLoads(const std::string a_realm, const int a_level) const;
 

@@ -826,23 +826,6 @@ void AmrMesh::buildDomains(){
   }
 }
 
-void AmrMesh::regrid(const Vector<IntVectSet>& a_tags,
-		     const int                 a_lmin,
-		     const int                 a_hardcap){
-  CH_TIME("AmrMesh::regrid(Vector<IntVectSet>, int, int)");
-  if(m_verbosity > 1){
-    pout() << "AmrMesh::regrid(Vector<IntVectSet>, int, int)" << endl;
-  }
-
-  CH_assert(a_lmin >= 0);
-
-  // This function does a _full_ regrid, i.e. it first regrids the base AMR functionality (grids and geometric information),
-  // and then regrids every registered operator. 
-
-  this->regridAmr(a_tags, a_lmin, a_hardcap);
-  this->regridOperators(a_lmin);
-}
-
 void AmrMesh::regridAmr(const Vector<IntVectSet>& a_tags,
 			const int                 a_lmin,
 			const int                 a_hardcap){
