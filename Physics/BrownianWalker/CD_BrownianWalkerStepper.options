@@ -13,6 +13,7 @@ BrownianWalker.num_particles  = 100     # Number of initial particles
 BrownianWalker.cfl            = 1.0     # CFL-like number. 
 BrownianWalker.ppc            = -1      # Particles per cell. <= 0 turns off superparticles
 BrownianWalker.load_balance   = true    # Turn on/off particle load balancing
+BrownianWalker.which_balance  = mesh    # Switch for load balancing method. Either 'mesh' or 'particle'. 
 
 
 # Velocity, diffusion, and CFL

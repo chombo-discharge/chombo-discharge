@@ -702,6 +702,28 @@ public:
   static void setCoveredValue(LevelData<EBCellFAB>& a_lhs, const int a_comp, const Real a_value);
 
   /*!
+    @brief Version of setCoveredValue which does all component
+    @param[inout] a_lhs   Data 
+    @param[in]    a_value Value in covered grid cells. 
+  */
+  static void setCoveredValue(EBAMRCellData& a_lhs, const Real a_value);
+
+  /*!
+    @brief Version of setCoveredValue which does all component
+    @param[inout] a_lhs   Data 
+    @param[in]    a_value Value in covered grid cells. 
+  */  
+  static void setCoveredValue(LevelData<EBCellFAB>& a_lhs, const Real a_value);
+
+  /*!
+    @brief Set value in cells that are covered by a finer grid.
+    @param[inout] a_lhs    AMR data
+    @param[in]    a_refRat Refinement ratios between levels.
+    @param[in]    a_value  Value to set in cells covered by a finer grid. 
+  */
+  static void setInvalidValue(EBAMRCellData& a_lhs, const Vector<int>& a_refRat, const Real a_value);
+
+  /*!
     @brief Polymorphic set value function. Takes a spatially varying function and sets the value in the specified component from that function.
     @param[out] a_lhs      Data to set
     @param[in]  a_function Function to use for setting the value. 

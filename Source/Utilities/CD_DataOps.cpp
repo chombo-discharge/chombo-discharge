@@ -1346,6 +1346,68 @@ void DataOps::setCoveredValue(LevelData<EBCellFAB>& a_lhs, const int a_comp, con
   EBLevelDataOps::setCoveredVal(a_lhs, a_comp, a_value);
 }
 
+void DataOps::setCoveredValue(EBAMRCellData& a_lhs, const Real a_value){
+  for (int lvl = 0; lvl < a_lhs.size(); lvl++){
+    DataOps::setCoveredValue(*a_lhs[lvl], a_value);
+  }
+}
+
+void DataOps::setCoveredValue(LevelData<EBCellFAB>& a_lhs, const Real a_value) {
+  for (int comp = 0; comp < a_lhs.nComp(); comp++){
+    EBLevelDataOps::setCoveredVal(a_lhs, comp, a_value);
+  }
+}
+
+void DataOps::setInvalidValue(EBAMRCellData& a_lhs, const Vector<int>& a_refRat, const Real a_value) {
+
+  const int finestLevel = a_lhs.size() - 1;
+
+  for (int lvl = finestLevel; lvl > 0; lvl--){
+    LevelData<EBCellFAB>&       coarLD = *a_lhs[lvl-1];
+    const LevelData<EBCellFAB>& fineLD = *a_lhs[lvl  ];
+
+    const DisjointBoxLayout& dblCoar = coarLD.disjointBoxLayout();
+    const DisjointBoxLayout& dblFine = fineLD.disjointBoxLayout();
+
+    const int nComp = coarLD.nComp();
+
+    for (DataIterator dit(dblCoar); dit.ok(); ++dit){
+      EBCellFAB&     coarData = coarLD [dit()];
+      const Box      cellBox  = dblCoar[dit()];
+      
+      const EBISBox& ebisBox  = coarData.getEBISBox();
+      const EBGraph& ebGraph  = ebisBox.getEBGraph();
+
+      for (LayoutIterator lit = dblFine.layoutIterator(); lit.ok(); ++lit){
+	const Box fineBox = dblFine[lit()];
+	const Box coFiBox = coarsen(fineBox, a_refRat[lvl-1]);
+
+	const Box overlapBox = cellBox & coFiBox;
+
+	if(!overlapBox.isEmpty()){
+
+	  // Regular and covered cells.
+	  BaseFab<Real>& coarFAB = coarData.getSingleValuedFAB();
+	  for (BoxIterator bit(overlapBox); bit.ok(); ++bit){
+	    const IntVect ivCoar = bit();
+
+	    for (int comp = 0; comp < nComp; comp++){
+	      coarFAB(ivCoar, comp) = a_value;
+	    }
+	  }
+
+	  // Irregular cells. 
+	  for (VoFIterator vofit(IntVectSet(overlapBox), ebGraph); vofit.ok(); ++vofit){
+	    for (int comp = 0; comp < nComp; comp++){
+	      coarData(vofit(), comp) = a_value;
+	    }
+	  }
+	}
+      }
+    }
+  }
+}
+
 void DataOps::setValue(MFAMRCellData& a_lhs, const std::function<Real(const RealVect)>& a_function, const RealVect a_probLo, const Vector<Real>& a_dx, const int a_comp){
   CH_TIME("DataOps::setValue(MFAMRCellData, std::function)");
   

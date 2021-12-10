@@ -19,8 +19,8 @@ AmrMesh.ref_rat         = 2 2 2 2 2 2 # Refinement ratios
 AmrMesh.lsf_ghost       = 3           # Number of ghost cells when writing level-set to grid
 AmrMesh.num_ghost       = 3           # Number of ghost cells. Default is 3
 AmrMesh.eb_ghost        = 4           # Set number of of ghost cells for EB stuff
-AmrMesh.mg_interp_order  = 2           # Multigrid interpolation order
-AmrMesh.mg_interp_radius = 3           # Multigrid interpolation radius
+AmrMesh.mg_interp_order  = 1           # Multigrid interpolation order
+AmrMesh.mg_interp_radius = 1           # Multigrid interpolation radius
 AmrMesh.mg_interp_weight = 2           # Multigrid interpolation weight (for least squares)
 AmrMesh.centroid_sten   = linear      # Centroid interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
 AmrMesh.eb_sten         = pwl         # EB interp stencils. 'pwl', 'linear', 'taylor, 'lsq'
@@ -129,7 +129,8 @@ BrownianWalker.seed           = 0        # RNG seed
 BrownianWalker.num_particles  = 5000000   # Number of initial particles
 BrownianWalker.cfl            = 1.0     # CFL-like number. 
 BrownianWalker.ppc            = 64       # Target particles per cell
-BrownianWalker.load_balance   = true    # Turn on/off particle load balancing		
+BrownianWalker.load_balance   = true    # Turn on/off particle load balancing
+BrownianWalker.which_balance  = mesh    # Switch for load balancing method. Either 'mesh' or 'particle'. 
 
 # Velocity, diffusion, and CFL
 # ----------------------------

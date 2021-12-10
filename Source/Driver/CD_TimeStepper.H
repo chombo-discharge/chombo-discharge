@@ -124,14 +124,21 @@ public:
     @details This is necessary because Driver, not TimeStepper, is responsible for allocating the necessary memory. 
     @return Returns number of plot variables that will be written during writePlotData
   */
-  virtual int  getNumberOfPlotVariables() const = 0;
+  virtual int getNumberOfPlotVariables() const = 0;
 
   /*!
-    @brief Get computational loads to be checkpointed.
+    @brief Get computational loads to be checkpointed. 
+    @details This is used by Driver both for setting up load-balanced restarts AND for plotting the computational loads to a file. This routine is
+    disjoint from loadBalanceBoxes because this routine is not part of a regrid. This means that we are not operating with temporarily load balanced
+    grids where the but the final ones. 
+    @note The default implementation uses the box volume as a proxy for the load. You should overwrite this if you load balance your application, and also
+    make sure that the loads returned from this routine are consistent with what you put in loadBalanceBoxes. 
+
+    Also note that the return vector has the same ordering as the DisjointBoxLayout's boxes on the input grid level. See the implementation for further details. 
     @param[in] a_realm Realm
     @param[in] a_level Grid level
     @return Returns computational loads for each box on grid level a_level. 
-    @details The default implementation uses the box volume as a proxy for the load. 
+    
   */
   virtual Vector<long int> getCheckpointLoads(const std::string a_realm, const int a_level) const;
 
@@ -174,21 +181,21 @@ public:
   virtual void preRegrid(const int a_lmin, const int a_oldFinestLevel) = 0;
 
   /*!
-    @brief Perform post-regrid operations. 
-    @details This includes all operations to be done AFTER interpolating data to new grids. 
-    @param[in] a_lmin           The coarsest level that changed. 
-    @param[in] a_oldFinestLevel The finest level before the regrid. 
-    @param[in] a_newFinestLevel The finest level after the regrid. 
-  */
-  virtual void postRegrid() = 0;
-
-  /*!
     @brief Time stepper regrid method. 
     @param[in] a_lmin           The coarsest level that changed. 
     @param[in] a_oldFinestLevel The finest level before the regrid. 
     @param[in] a_newFinestLevel The finest level after the regrid. 
   */
   virtual void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) = 0;
+
+  /*!
+    @brief Perform post-regrid operations. 
+    @details This includes all operations to be done AFTER interpolating data to new grids. 
+    @param[in] a_lmin           The coarsest level that changed. 
+    @param[in] a_oldFinestLevel The finest level before the regrid. 
+    @param[in] a_newFinestLevel The finest level after the regrid. 
+  */
+  virtual void postRegrid() = 0;  
 
   /*!
     @brief Fuction which can have Driver do regrids at arbitrary points in the simulation. 
@@ -198,13 +205,13 @@ public:
   virtual bool needToRegrid();
 
   /*!
-    @brief Load balancing query for a specific realm. If this returns true for a_realm, load balancing routines will be called during regrids. 
+    @brief Load balancing query for a specified realm. If this returns true for a_realm, load balancing routines will be called during regrids. 
     @param[in] a_realm Realm name
   */
   virtual bool loadBalanceThisRealm(const std::string a_realm) const;
 
   /*!
-    @brief Load balance grid boxes for a specific realm. 
+    @brief Load balance grid boxes for a specified realm. 
     @param[out] a_procs       MPI ranks owning the various grid boxes. 
     @param[out] a_boxes       Grid boxes on every level (obtain them with a_grids[lvl].boxArray())
     @param[in]  a_realm       Realm identifier

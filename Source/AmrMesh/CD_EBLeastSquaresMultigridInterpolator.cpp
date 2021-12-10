@@ -109,7 +109,7 @@ void EBLeastSquaresMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>&
 							   const Interval              a_variables) {
   CH_TIME("EBLeastSquaresMultigridInterpolator::coarseFineInterp");
 
-  CH_assert(m_ghostCF*IntVect::Unit == a_phiFine.ghostVect());
+  CH_assert(m_ghostCF*IntVect::Unit <= a_phiFine.ghostVect());
 
   if(a_phiFine.ghostVect() != m_ghostVector){
     MayDay::Error("EBLeastSquaresMultigridInterpolator::coarseFineInterp -- number of ghost cells do not match!");
@@ -162,7 +162,7 @@ void EBLeastSquaresMultigridInterpolator::coarseFineInterp(LevelData<EBCellFAB>&
 void EBLeastSquaresMultigridInterpolator::coarseFineInterpH(LevelData<EBCellFAB>& a_phiFine, const Interval a_variables) const{
   CH_TIME("EBLeastSquaresMultigridInterpolator::coarseFineInterpH(LD<EBCellFAB>, Interval)");
 
-  CH_assert(m_ghostCF*IntVect::Unit == a_phiFine.ghostVect());
+  CH_assert(m_ghostCF*IntVect::Unit <= a_phiFine.ghostVect());
 
   if(a_phiFine.ghostVect() != m_ghostVector){
     MayDay::Error("EBLeastSquaresMultigridInterpolator::coarseFineInterp -- number of ghost cells do not match!");

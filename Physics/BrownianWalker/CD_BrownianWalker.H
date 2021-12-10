@@ -5,18 +5,22 @@
 
 /*!
   @file   CD_BrownianWalker.H
-  @brief  Documentation of physics namespace
+  @brief  Documentation of Physics/BrownianWalker namespace
   @author Robert Marskar
 */
 
 #ifndef CD_BrownianWalker_H
 #define CD_BrownianWalker_H
 
-/*!
-  @brief Namespace for encapsulating physics code for describing Brownian walkers. 
-*/
-namespace BrownianWalker {
+namespace Physics {
+  
+  /*!
+    @brief Namespace for encapsulating physics code for describing Brownian walkers. 
+  */
+  namespace BrownianWalker {
 
-};
+  }
+
+}
 
 #endif

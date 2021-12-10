@@ -23,7 +23,8 @@ namespace Physics {
 
     /*!
       @brief Implementation of CellTagger for tagging cells for Brownian walker physics. 
-      @details This class just implements the interface but does not flag any cells for refinement. 
+      @details This class just implements the interface but does not flag any cells for refinement. However, it returns true from the tagging routine
+      so that TimeStepper and Driver can load balance the application. 
     */
     class BrownianWalkerTagger : public CellTagger {
     public:
