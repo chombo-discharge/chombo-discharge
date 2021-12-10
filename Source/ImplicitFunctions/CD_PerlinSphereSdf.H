@@ -21,7 +21,7 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief PerlinSphereSdf function
+  @brief Noisy sphere geometry (with Perlin noise).
 */
 class PerlinSphereSdf : public BaseIF {
 public:

@@ -22,6 +22,11 @@
 #include <CD_DcelPolygon2D.H>
 #include "CD_NamespaceHeader.H"
 
+/*!
+  @namespace Dcel
+  @brief Namespace containing various double-connected edge list (DCEL) functionality.
+*/
+
 namespace Dcel {
 
   // Forward declare classes.

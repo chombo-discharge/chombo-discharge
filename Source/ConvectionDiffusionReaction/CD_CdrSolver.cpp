@@ -2349,12 +2349,14 @@ void CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_p
       }
     }
 
-    // Divide. Set to zero if there are no inflow faces. 
+    // Divide. Set to zero m_phi if there are no inflow faces.
     EBAMRCellData zero;
     m_amr->allocate(zero, m_realm, m_phase, m_nComp);
     DataOps::setValue(zero, 0.0);
-    
     DataOps::divideFallback(a_weightedUpwindPhi, m_scratch, zero);
+
+    m_amr->averageDown(a_weightedUpwindPhi, m_realm, m_phase);
+    m_amr->interpGhost(a_weightedUpwindPhi, m_realm, m_phase);
   }
   else{
     DataOps::copy(a_weightedUpwindPhi, m_phi);

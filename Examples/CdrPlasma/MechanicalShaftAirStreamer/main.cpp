@@ -5,9 +5,9 @@
 #include <CD_CdrLayoutImplem.H>
 #include <CD_CdrGodunov.H>
 #include <CD_RtLayoutImplem.H>
-#include <CD_EddingtonSP1.H>
-#include <CD_CdrPlasmaAir3Bourdon.H>
-#include <CD_RodPlaneProfile.H>
+#include <CD_McPhoto.H>
+#include <CD_CdrPlasmaAir3Zheleznyak.H>
+#include <CD_MechanicalShaft.H>
 #include <CD_CdrPlasmaGodunovStepper.H>
 #include <CD_CdrPlasmaStreamerTagger.H>
 #include "ParmParse.H"
@@ -34,26 +34,26 @@ int main(int argc, char* argv[]){
   // Get potential from input script 
   std::string basename; 
   {
-    ParmParse pp("PositiveStreamerProfiledSurface");
-    pp.get("potential", g_potential);
-    pp.get("basename",  basename);
-    setPoutBaseName(basename);
+     ParmParse pp("MechanicalShaft");
+     pp.get("potential", g_potential);
+     pp.get("basename",  basename);
+     setPoutBaseName(basename);
   }
 
   // Set geometry and AMR 
-  RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry> (new RodPlaneProfile());
+  RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry> (new MechanicalShaft());
   RefCountedPtr<AmrMesh> amr                    = RefCountedPtr<AmrMesh> (new AmrMesh());
   RefCountedPtr<GeoCoarsener> geocoarsen        = RefCountedPtr<GeoCoarsener> (new GeoCoarsener());
 
   // Set up physics 
-  RefCountedPtr<CdrPlasmaPhysics> physics      = RefCountedPtr<CdrPlasmaPhysics> (new CdrPlasmaAir3Bourdon());
+  RefCountedPtr<CdrPlasmaPhysics> physics      = RefCountedPtr<CdrPlasmaPhysics> (new CdrPlasmaAir3Zheleznyak());
   RefCountedPtr<CdrPlasmaStepper> timestepper  = RefCountedPtr<CdrPlasmaStepper> (new CdrPlasmaGodunovStepper(physics));
   RefCountedPtr<CellTagger> tagger              = RefCountedPtr<CellTagger> (new CdrPlasmaStreamerTagger(physics, timestepper, amr, compgeom));
 
   // Create solver factories
   auto poi_fact = new FieldSolverFactory<FieldSolverMultigrid>();
   auto cdr_fact = new CdrFactory<CdrSolver, CdrGodunov>();
-  auto rte_fact = new RtFactory<RtSolver, EddingtonSP1>();
+  auto rte_fact = new RtFactory<RtSolver, McPhoto>();
 
   // Instantiate solvers
   auto poi = poi_fact->newSolver();
@@ -66,15 +66,16 @@ int main(int argc, char* argv[]){
   timestepper->setRadiativeTransferSolvers(rte);
 
   // Set potential 
-  timestepper->setVoltage(potential_curve);
+timestepper->setVoltage(potential_curve);
 
   // Set up the Driver and run it
   RefCountedPtr<Driver> engine = RefCountedPtr<Driver> (new Driver(compgeom, timestepper, amr, tagger, geocoarsen));
   engine->setupAndRun(input_file);
 
+  // Clean up memory
   delete poi_fact;
   delete cdr_fact;
-  delete rte_fact;  
+  delete rte_fact;
 
 #ifdef CH_MPI
   CH_TIMER_REPORT();

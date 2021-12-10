@@ -19,14 +19,14 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  Enums for specying where cell/face data is located
+  @brief Namespace for encapsulating various data centerings. 
 */
 namespace Location {
 
   /*!
     @brief Enum for distinguishing between cell locations
   */
-  enum class Cell{
+  enum class Cell {
     Center,
     Centroid,
     Boundary

@@ -4,7 +4,7 @@
  */
 
 /*!
-  @brief  CD_ScanShop.H
+  @file   CD_ScanShop.H
   @brief  Declare a class geometry generation (ScanShop) that uses the signed distance function for optimizations. 
   @author Robert Marskar
 */

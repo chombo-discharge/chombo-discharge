@@ -19,8 +19,7 @@
 #include "CD_NamespaceHeader.H"
 
 /*!
-  @brief PerlinPlaneSdf function. 
-  @details This is an infinite plane with surface noise (Perlin noise). 
+  @brief Infinite plane with surface noise (Perlin noise). 
 */
 class PerlinPlaneSdf : public BaseIF {
 public:

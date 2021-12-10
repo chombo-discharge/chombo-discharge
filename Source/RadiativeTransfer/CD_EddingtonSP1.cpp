@@ -888,7 +888,7 @@ void EddingtonSP1::computeBoundaryFlux(EBAMRIVData& a_ebFlux, const EBAMRCellDat
 
   const int finestLevel = m_amr->getFinestLevel();
   
-  const IrregAmrStencil<EbCentroidInterpolationStencil>& sten = m_amr->getEbCentroidInterpolationStencilStencils(m_realm, m_phase);
+  const IrregAmrStencil<EbCentroidInterpolationStencil>& sten = m_amr->getEbCentroidInterpolationStencils(m_realm, m_phase);
   for(int lvl = 0; lvl <= finestLevel; lvl++){
     sten.apply(*a_ebFlux[lvl], *a_phi[lvl], lvl);
   }

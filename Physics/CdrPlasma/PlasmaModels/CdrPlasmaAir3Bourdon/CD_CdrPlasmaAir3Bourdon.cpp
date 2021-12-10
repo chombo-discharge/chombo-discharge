@@ -33,6 +33,7 @@ std::string CdrPlasmaAir3Bourdon::s_bolsig_mobility = "# Electron mobility (E/N,
 std::string CdrPlasmaAir3Bourdon::s_bolsig_diffco   = "# Electron diffusion coefficient (E/N, D*N)";
 std::string CdrPlasmaAir3Bourdon::s_bolsig_alpha    = "# Townsend ionization coeff (E/N, alpha/N)";
 std::string CdrPlasmaAir3Bourdon::s_bolsig_eta      = "# Townsend attachment coeff (E/N, eta/N)";
+std::string CdrPlasmaAir3Bourdon::s_bolsig_energy   = "# Electron mean energy (E/N, eV)";
 
 CdrPlasmaAir3Bourdon::CdrPlasmaAir3Bourdon() {
 
@@ -74,6 +75,8 @@ CdrPlasmaAir3Bourdon::CdrPlasmaAir3Bourdon() {
   if(infile.good()){
     infile.close();
 
+    constexpr Real eVtoK = 2.0*Units::Qe/(3.0*Units::kb);
+
     // Read data into LookupTables with 2 columns. After reading, we call LookupTable::sort which is a kind of requirement
     // that ensures that we can make the table uniform and used constant spacing. Note that the input electric field is
     // in Td so we also need to scale by N * 1.E-21. Likewise, transport coefficients are mu*N while ionization and
@@ -82,27 +85,31 @@ CdrPlasmaAir3Bourdon::CdrPlasmaAir3Bourdon() {
     m_e_diffco   = DataParser::fractionalFileReadASCII(m_transport_file, CdrPlasmaAir3Bourdon::s_bolsig_diffco,   "");
     m_e_alpha    = DataParser::fractionalFileReadASCII(m_transport_file, CdrPlasmaAir3Bourdon::s_bolsig_alpha,    "");
     m_e_eta      = DataParser::fractionalFileReadASCII(m_transport_file, CdrPlasmaAir3Bourdon::s_bolsig_eta,      "");
+    m_e_energy   = DataParser::fractionalFileReadASCII(m_transport_file, CdrPlasmaAir3Bourdon::s_bolsig_energy,   "");    
 
     m_e_mobility.sort();
     m_e_diffco.  sort();
     m_e_alpha.   sort();
     m_e_eta.     sort();
+    m_e_energy.  sort();    
     
     m_e_mobility.scale<0>(m_N*Units::Td);
     m_e_diffco.  scale<0>(m_N*Units::Td);
     m_e_alpha.   scale<0>(m_N*Units::Td);
     m_e_eta.     scale<0>(m_N*Units::Td);
+    m_e_energy.  scale<0>(m_N*Units::Td);    
     
     m_e_mobility.scale<1>(1./m_N); 
     m_e_diffco.  scale<1>(1./m_N); 
     m_e_alpha.   scale<1>(   m_N); 
-    m_e_eta.     scale<1>(   m_N);
+    m_e_eta.     scale<1>(   m_N); 
+    m_e_energy.  scale<1>( eVtoK);    
 
     m_e_diffco.  makeUniform(m_uniform_entries);
     m_e_mobility.makeUniform(m_uniform_entries);
     m_e_alpha.   makeUniform(m_uniform_entries);
     m_e_eta.     makeUniform(m_uniform_entries);
-
+    m_e_energy.  makeUniform(m_uniform_entries);
   }
   else{
     MayDay::Abort("CdrPlasmaAir3Bourdon::parseTransportFile - could not find transport data");
@@ -222,8 +229,11 @@ void CdrPlasmaAir3Bourdon::advanceReactionNetwork(Vector<Real>&          a_parti
     alpha = alpha*fcorr;
   }
 
+  const Real Te = m_e_energy.getEntry<1>(E);
+
   const Real R1 = alpha*ve*a_particle_densities[m_elec_idx];
   const Real R2 = eta*ve*a_particle_densities[m_elec_idx];
+  const Real R3 = 4.2E-12*sqrt(300/Te) * a_particle_densities[m_elec_idx] * a_particle_densities[m_plus_idx];
 
   Real& Se = a_particle_sources[m_elec_idx];
   Real& Sp = a_particle_sources[m_plus_idx];
@@ -240,6 +250,10 @@ void CdrPlasmaAir3Bourdon::advanceReactionNetwork(Vector<Real>&          a_parti
   // e + M => M-
   Se -= R2;
   Sm += R2;
+
+  // e + M+ => M
+  Se -= R3;
+  Sp -= R3;
 
   // Photoionization, M + y => e + M+
   const CdrPlasmaAir3Bourdon::PhotonOne*   Photon1 = static_cast<CdrPlasmaAir3Bourdon::PhotonOne*>   (&(*m_RtSpecies[m_pho1_idx]));
@@ -258,6 +272,8 @@ void CdrPlasmaAir3Bourdon::advanceReactionNetwork(Vector<Real>&          a_parti
   a_Photon_sources[m_pho1_idx] = Rgamma;
   a_Photon_sources[m_pho2_idx] = Rgamma;
   a_Photon_sources[m_pho3_idx] = Rgamma;
+
+  CH_assert(std::abs(Se + Sp + Sm) <= 1.E-10);    
 
   return;
 }
@@ -281,7 +297,7 @@ Vector<RealVect> CdrPlasmaAir3Bourdon::computeCdrDriftVelocities(const Real     
 								 const Vector<Real> a_cdr_densities) const{
   Vector<RealVect> vel(m_numCdrSpecies, RealVect::Zero);
 
-  vel[m_elec_idx] = -a_E*m_e_mobility.getEntry<DIFFCO>(a_E.vectorLength());
+  vel[m_elec_idx] = -a_E*m_e_mobility.getEntry<MU>(a_E.vectorLength());
   vel[m_plus_idx] =  a_E*m_ion_mobility;
   vel[m_minu_idx] = -a_E*m_ion_mobility;
   

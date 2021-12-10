@@ -24,8 +24,8 @@
 // Our includes
 #include <CD_NamespaceHeader.H>
 
-/*!n
-  @brief A particle class for use with ItoSolver. 
+/*!
+  @brief A particle class for reducing HDF5 I/O file sizes when using ItoSolver. 
   @details This is a computational particle class which only stores the mass, position and energy of a particle. It is used
   with ItoSolver in order to reduce the file size of HDF5 files. 
 */

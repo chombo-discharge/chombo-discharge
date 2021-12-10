@@ -80,6 +80,11 @@ public:
   */
   virtual const List<Particle>& getInitialParticles() const;
 
+  /*!
+    @brief Get initial particles
+  */
+  List<Particle>& getInitialParticles();
+
 protected:
 
   /*!

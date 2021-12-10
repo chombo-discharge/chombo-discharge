@@ -377,11 +377,6 @@ public:
   MFAMRCellData& getElectricField();
 
   /*!
-    @brief Get E-field on specific phase
-  */
-  EBAMRCellData& getElectricField(const phase::which_phase a_phase);
-
-  /*!
     @brief Get storage for the space charge density. 
     @details This lives in the FieldSolver so users don't need to allocate their own storage for the space charge. 
   */

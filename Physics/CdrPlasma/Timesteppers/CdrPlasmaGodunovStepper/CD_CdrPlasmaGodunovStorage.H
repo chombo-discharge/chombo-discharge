@@ -37,7 +37,7 @@ namespace Physics {
       EBAMRCellData& getScratch()  { return m_scratch;    }
       EBAMRCellData& getScratch2() { return m_scratch2;   }
       EBAMRCellData& getScratch3() { return m_scratch3;   }
-      EBAMRCellData& getExtrap()   { return m_cellExtr;  }
+      EBAMRCellData& getExtrap()   { return m_cellExtr;   }
       EBAMRCellData& getGradient() { return m_gradient;   }
 
       EBAMRIVData& getEbScratch1(){ return m_scratchIVs; }
@@ -58,11 +58,11 @@ namespace Physics {
       phase::which_phase m_phase;    // on this phase
       int m_ncomp;                   // with this many components
 
-      EBAMRCellData m_scratch;  // Scratch data
-      EBAMRCellData m_scratch2; // Scratch data
-      EBAMRCellData m_scratch3; // Scratch data
-      EBAMRCellData m_cellExtr; // Scratch data
-      EBAMRCellData m_gradient; // Storage for holding gradient
+      EBAMRCellData m_scratch;     // Scratch data
+      EBAMRCellData m_scratch2;    // Scratch data
+      EBAMRCellData m_scratch3;    // Scratch data
+      EBAMRCellData m_cellExtr;    // Scratch data
+      EBAMRCellData m_gradient;    // Storage for holding gradient
 
       EBAMRIVData m_scratchIVs; // Scratch data
       EBAMRIVData m_scratchIVD; // Scratch data

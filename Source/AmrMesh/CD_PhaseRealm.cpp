@@ -22,6 +22,7 @@
 #include <CD_EbFastCoarToCoarRedist.H>
 #include <CD_EbFastFluxRegister.H>
 #include <CD_EBMultigridInterpolator.H>
+#include <CD_EBLeastSquaresMultigridInterpolator.H>
 #include <CD_NamespaceHeader.H>
 
 PhaseRealm::PhaseRealm(){
@@ -433,14 +434,14 @@ void PhaseRealm::defineEBMultigrid(const int a_lmin){
 	const EBLevelGrid& eblgFine = *m_eblg[lvl  ];
 	const EBLevelGrid& eblgCoar = *m_eblg[lvl-1];
 
-	m_multigridInterpolator[lvl] = RefCountedPtr<EBMultigridInterpolator>(new EBMultigridInterpolator(eblgFine,
-													  eblgCoar,
-													  Location::Cell::Center,
-													  m_numGhostCells*IntVect::Unit,
-													  m_refinementRatios[lvl-1],
-													  m_multigridInterpolationRadius,
-													  m_multigridInterpolationOrder,
-													  m_multigridInterpolationWeight));
+	m_multigridInterpolator[lvl] = RefCountedPtr<EBMultigridInterpolator>(new EBLeastSquaresMultigridInterpolator(eblgFine,
+														      eblgCoar,
+														      Location::Cell::Center,
+														      m_numGhostCells*IntVect::Unit,
+														      m_refinementRatios[lvl-1],
+														      m_multigridInterpolationRadius,
+														      m_multigridInterpolationOrder,
+														      m_multigridInterpolationWeight));
       }
     }
   }

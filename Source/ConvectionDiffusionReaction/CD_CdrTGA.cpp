@@ -172,13 +172,13 @@ void CdrTGA::setupDiffusionSolver(){
     
     DataOps::setValue(m_zero,      0.0);
     DataOps::setValue(m_helmAcoef, 1.0);
-  }  
 
-  // This sets up the multigrid Helmholtz solver and the TGA/Euler solvers. The TGA/Euler stuff is Chombo code.
-  this->setupHelmholtzFactory();
-  this->setupMultigrid();
-  this->setupTGA();
-  this->setupEuler();
+    // This sets up the multigrid Helmholtz solver and the TGA/Euler solvers. The TGA/Euler stuff is Chombo code.
+    this->setupHelmholtzFactory();
+    this->setupMultigrid();
+    this->setupTGA();
+    this->setupEuler();
+  }  
 }
 
 void CdrTGA::setupHelmholtzFactory(){

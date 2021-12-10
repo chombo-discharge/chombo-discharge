@@ -21,8 +21,7 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief PerlinRodSdf function
-  @details This is just like a rod, but one of its end-caps is rounded and includes Perlin noise. 
+  @brief A rod geometry, but with noise on one of the end caps.
 */
 class PerlinRodSdf : public PerlinSphereSdf {
 public:

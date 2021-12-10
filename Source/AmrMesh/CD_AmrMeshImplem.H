@@ -245,6 +245,8 @@ void AmrMesh::interpolateParticles(ParticleContainer<P>&      a_particles,
 				   const bool                 a_forceIrregNGP) const{
   CH_TIME("AmrMesh::interpolateParticles(scalar)");
 
+  CH_assert(a_realm == a_particles.      getRealm());
+  CH_assert(a_realm == a_meshScalarField.getRealm());    
 
   EBAMRParticleMesh& particleMesh = this->getParticleMesh(a_realm, a_phase);      
 
@@ -260,6 +262,8 @@ void AmrMesh::interpolateParticles(ParticleContainer<P>&      a_particles,
 				   const bool                 a_forceIrregNGP) const{
   CH_TIME("AmrMesh::interpolateParticles(vector)");
 
+  CH_assert(a_realm == a_particles.      getRealm());
+  CH_assert(a_realm == a_meshVectorField.getRealm());
 
   EBAMRParticleMesh& particleMesh = this->getParticleMesh(a_realm, a_phase);        
 

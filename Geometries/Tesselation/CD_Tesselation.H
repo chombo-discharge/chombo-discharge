@@ -16,10 +16,20 @@
 #include <CD_ComputationalGeometry.H>
 #include <CD_NamespaceHeader.H>
 
+/*!
+  @brief A geometry consisting of a single polygon grid.
+*/
 class Tesselation : public ComputationalGeometry {
 public:
 
+  /*!
+    @brief Constructor
+  */
   Tesselation();
+
+  /*!
+    @brief Destructor
+  */  
   ~Tesselation();
 };
 

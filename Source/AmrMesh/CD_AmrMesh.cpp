@@ -779,7 +779,8 @@ void AmrMesh::parseRuntimeOptions(){
   if(m_verbosity > 5){
     pout() << "AmrMesh::parseRuntimeOptions()" << endl;
   }
-  
+
+  this->parseMaxSimulationDepth();  
   this->parseVerbosity();
   this->parseBlockingFactor();
   this->parseMaxBoxSize();
@@ -2370,7 +2371,7 @@ const IrregAmrStencil<CentroidInterpolationStencil>& AmrMesh::getCentroidInterpo
   return m_realms[a_realm]->getCentroidInterpolationStencils(a_phase);
 }
 
-const IrregAmrStencil<EbCentroidInterpolationStencil>& AmrMesh::getEbCentroidInterpolationStencilStencils(const std::string        a_realm,
+const IrregAmrStencil<EbCentroidInterpolationStencil>& AmrMesh::getEbCentroidInterpolationStencils(const std::string        a_realm,
 													  const phase::which_phase a_phase) const {
   CH_TIME("AmrMesh::getEbCentroidInterpolationStencil(string, phase::which_phase)");
   if(m_verbosity > 1){

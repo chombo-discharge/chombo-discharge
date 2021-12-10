@@ -78,6 +78,24 @@ public:
 				    const RealVect&              a_newPos,
 				    const Real&                  a_tolerance,
 				    Real&                        a_s);
+
+  /*!
+    @brief Compute particle weights. 
+    @param[out] a_weight               Particle weights for "whole" computational particles. 
+    @param[out] a_num                  Number of "whole" computational particles
+    @param[out] a_remainder            Weight remainder
+    @param[in]  a_numPhysicalParticles Number of physical particles
+    @param[in]  a_ppc                  Desired number of computational particles
+    @details This takes a specified number of physical particles and "desired" number of computational particles and computes
+    the number of "whole" computational particles and a remainder. So, if we have 10 physical particles but want 3 computational particles
+    we have a_weight = 3, a_num=3, and a_remainder = 1
+  */
+  static
+  inline void computeParticleWeights(unsigned long long&      a_weight,
+				     unsigned long long&      a_num,
+				     unsigned long long&      a_remainder,
+				     const unsigned long long a_numPhysicalParticles,
+				     const int                a_ppc);  
   
 };
 

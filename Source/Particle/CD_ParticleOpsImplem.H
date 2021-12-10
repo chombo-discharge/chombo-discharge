@@ -156,6 +156,24 @@ bool ParticleOps::ebIntersectionRaycast(const RefCountedPtr<BaseIF>& a_impFunc,
   return ret;
 }
 
+inline
+void ParticleOps::computeParticleWeights(unsigned long long&      a_weight,
+					 unsigned long long&      a_num,
+					 unsigned long long&      a_remainder,
+					 const unsigned long long a_numPhysicalParticles,
+					 const int                a_ppc) {
+  if(a_numPhysicalParticles <= a_ppc){  
+    a_weight    = 1;
+    a_remainder = 0;
+    a_num       = a_numPhysicalParticles; 
+  }
+  else{ // Add superparticles
+    a_weight    = a_numPhysicalParticles/a_ppc;
+    a_remainder = a_numPhysicalParticles%a_ppc;
+    a_num       = (a_remainder == 0) ? a_ppc : a_ppc - 1;
+  }
+}
+
 #include <CD_NamespaceFooter.H>
 
 #endif

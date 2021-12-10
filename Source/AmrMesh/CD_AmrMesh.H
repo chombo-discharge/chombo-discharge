@@ -1254,8 +1254,8 @@ public:
     @param[in] a_realm Realm name
     @param[in] a_phase Phase (gas or solid)
   */
-  const IrregAmrStencil<EbCentroidInterpolationStencil>& getEbCentroidInterpolationStencilStencils(const std::string        a_realm,
-												   const phase::which_phase a_phase) const;
+  const IrregAmrStencil<EbCentroidInterpolationStencil>& getEbCentroidInterpolationStencils(const std::string        a_realm,
+											    const phase::which_phase a_phase) const;
 
   /*!
     @brief Get the nonconservative divergence stencils
@@ -1276,6 +1276,10 @@ public:
   */
   BoxSorting getBoxSorting() const;
 
+  /*!
+    @brief Get EBIndexSpace corresponding to a particular phase
+    @param[in] a_phase Phase (gas/solid)
+  */
   RefCountedPtr<EBIndexSpace>& getEBIndexSpace(const phase::which_phase a_phase){
     return m_multifluidIndexSpace->getEBIndexSpace(a_phase);
   }
