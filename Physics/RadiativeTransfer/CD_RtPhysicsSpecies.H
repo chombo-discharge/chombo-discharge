@@ -20,9 +20,21 @@
 namespace Physics {
   namespace RadiativeTransfer {
 
+    /*!
+      @brief Implementation of RtSpecies for usage in RadiativeTransfer module.
+      @details This reads a constant kappa from the input file which it uses as Beer's length.
+    */
     class RtPhysicsSpecies : public RtSpecies {
     public:
+
+      /*!
+	@brief Constructor (reads from input script)
+      */
       RtPhysicsSpecies();
+
+      /*!
+	@brief Destructor (does nothing)
+      */      
       ~RtPhysicsSpecies();
     };
   }

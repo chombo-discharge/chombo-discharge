@@ -67,6 +67,50 @@ void DataOps::averageCellVectorToFaceScalar(LevelData<EBFluxFAB>&       a_faceDa
   }
 }
 
+void DataOps::averageCellScalarToFaceScalar(EBAMRFluxData&               a_faceData,
+					    const EBAMRCellData&         a_cellData,
+					    const Vector<ProblemDomain>& a_domains){
+  CH_TIME("DataOps::averageCellScalarToFaceScalar(EBAMRFluxData)");
+  
+  for (int lvl = 0; lvl < a_faceData.size(); lvl++){
+
+    CH_assert(a_faceData[lvl]->nComp() == 1);
+    CH_assert(a_cellData[lvl]->nComp() == 1);
+    
+    DataOps::averageCellScalarToFaceScalar(*a_faceData[lvl], *a_cellData[lvl], a_domains[lvl]);
+  }
+}
+
+void DataOps::averageCellScalarToFaceScalar(LevelData<EBFluxFAB>&       a_faceData,
+					    const LevelData<EBCellFAB>& a_cellData,
+					    const ProblemDomain&        a_domain){
+  CH_TIME("DataOps::averageCellScalarToFaceScalar");
+  
+  CH_assert(a_faceData.nComp() == 1);
+  CH_assert(a_cellData.nComp() == 1);
+
+  // TLDR: This computes the face-centered data from averages of the cell-centered data. Note that a single layer of
+  //       ghost faces are filled (the ones that are "tangential" to the box). 
+  
+  for (DataIterator dit = a_faceData.dataIterator(); dit.ok(); ++dit){
+    EBFluxFAB& fluxData       = a_faceData[dit()];
+    const EBCellFAB& cellData = a_cellData[dit()];
+    const EBISBox& ebisbox    = cellData.getEBISBox();
+    const EBGraph& ebgraph    = ebisbox.getEBGraph();
+    const Box& box            = a_cellData.disjointBoxLayout().get(dit());
+
+    constexpr int numTanGhost = 1;
+    
+    for (int dir = 0; dir < SpaceDim; dir++){
+      const int faceDir  = dir;
+      const int cellComp = 0;
+      const int faceComp = 0;
+      
+      EBLevelDataOps::averageCellToFace(fluxData[dir], cellData, ebgraph, box, numTanGhost, faceDir, a_domain, cellComp, faceComp);
+    }
+  }
+}
+
 void DataOps::averageCellToFace(EBAMRFluxData&               a_faceData,
 				const EBAMRCellData&         a_cellData,
 				const Vector<ProblemDomain>& a_domains){

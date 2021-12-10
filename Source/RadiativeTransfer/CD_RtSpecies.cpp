@@ -46,10 +46,6 @@ std::string RtSpecies::getName() const{
   return m_name;
 }
 
-bool RtSpecies::isKappaConstant() const {
-  return m_constant;
-}
-
 Real RtSpecies::getKappa(const RealVect a_pos) const{
   if(m_constant){
     return m_kappa;

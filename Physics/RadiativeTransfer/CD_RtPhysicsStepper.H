@@ -18,6 +18,10 @@
 #include <CD_NamespaceHeader.H>
 
 namespace Physics {
+
+  /*!
+    @brief Namespace for encapsulating the radiative transfer physics module
+  */
   namespace RadiativeTransfer {
 
     /*!

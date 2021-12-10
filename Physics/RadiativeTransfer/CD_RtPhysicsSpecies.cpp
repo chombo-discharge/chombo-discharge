@@ -10,6 +10,7 @@
 */
 
 // Chombo includes
+#include <CH_Timer.H>
 #include <ParmParse.H>
 
 // Our includes
@@ -19,9 +20,10 @@
 using namespace Physics::RadiativeTransfer;
 
 RtPhysicsSpecies::RtPhysicsSpecies(){
-
+  CH_TIME("RtPhysicsSpecies::RtPhysicsSpecies");
+  
   // This stuff sets the name and a constnat kappa taken from the input script
-  m_name = "RtPhysicsSpecies";
+  m_name     = "RtPhysicsSpecies";
   m_constant = true;
 
   ParmParse pp("RtPhysicsStepper");
@@ -29,7 +31,7 @@ RtPhysicsSpecies::RtPhysicsSpecies(){
 }
 
 RtPhysicsSpecies::~RtPhysicsSpecies(){
-
+  CH_TIME("RtPhysicsSpecies::~RtPhysicsSpecies");
 }
 
 #include <CD_NamespaceFooter.H>

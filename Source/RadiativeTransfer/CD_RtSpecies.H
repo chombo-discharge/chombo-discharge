@@ -66,11 +66,6 @@ public:
   virtual std::string getName() const;
 
   /*!
-    @brief Constant kappa or not
-  */
-  virtual bool isKappaConstant() const;
-
-  /*!
     @brief Get kappa at position. 
     @param[in] a_pos Physical coordinates. 
   */
@@ -89,9 +84,9 @@ protected:
     @brief Group name
   */
   std::string m_name;
-  
+
   /*!
-    @brief Constant kappa or not
+    @brief Switch for using constant value or function
   */
   bool m_constant;
 

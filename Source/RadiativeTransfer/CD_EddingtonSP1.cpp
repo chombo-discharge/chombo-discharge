@@ -622,38 +622,29 @@ void EddingtonSP1::setHelmholtzCoefficients(){
   }
 
   // This loop fills aco with kappa and bco_irreg with 1./kappa
-  if(m_RtSpecies->isKappaConstant()){
-    const Real kap = m_RtSpecies->getKappa(RealVect::Zero);
-    
-    DataOps::setValue(m_helmAco,         kap);
-    DataOps::setValue(m_helmBco,      1./kap);
-    DataOps::setValue(m_helmBcoIrreg, 1./kap);
-  }
-  else{ // If kappa is not constant, we must go through every cell. 
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
 
-      LevelData<EBCellFAB>&        helmAco      = *m_helmAco[lvl];
-      LevelData<EBFluxFAB>&        helmBco      = *m_helmBco[lvl];
-      LevelData<BaseIVFAB<Real> >& helmBcoIrreg = *m_helmBcoIrreg[lvl];
+    LevelData<EBCellFAB>&        helmAco      = *m_helmAco[lvl];
+    LevelData<EBFluxFAB>&        helmBco      = *m_helmBco[lvl];
+    LevelData<BaseIVFAB<Real> >& helmBcoIrreg = *m_helmBcoIrreg[lvl];
 
-      for (DataIterator dit(dbl); dit.ok(); ++dit){
-	const Box cellBox = (m_amr->getGrids(m_realm)[lvl]).get(dit());
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      const Box cellBox = (m_amr->getGrids(m_realm)[lvl]).get(dit());
 	
-	this->setHelmholtzCoefficientsBox(helmAco[dit()],
-					  helmBcoIrreg[dit()],
-					  cellBox,
-					  lvl,
-					  dit());
-      }
+      this->setHelmholtzCoefficientsBox(helmAco[dit()],
+					helmBcoIrreg[dit()],
+					cellBox,
+					lvl,
+					dit());
     }
-
-    m_amr->averageDown(m_helmAco, m_realm, m_phase);
-    m_amr->interpGhost(m_helmAco, m_realm, m_phase);
-    
-    DataOps::averageCellToFace(m_helmBco, m_helmAco, m_amr->getDomains()); // Average aco onto face
-    DataOps::invert(m_helmBco);                                            // Make m_helmBco = 1./kappa
   }
+
+  m_amr->averageDown(m_helmAco, m_realm, m_phase);
+  m_amr->interpGhost(m_helmAco, m_realm, m_phase);
+    
+  DataOps::averageCellScalarToFaceScalar(m_helmBco, m_helmAco, m_amr->getDomains()); // Average aco onto face. We must include on ghost face.     
+  DataOps::invert(m_helmBco);                                                        // Make m_helmBco = 1./kappa
 
   DataOps::scale(m_helmAco,      1.0);       // m_helmAco      = kappa
   DataOps::scale(m_helmBco,      1.0/(3.0)); // m_helmBco      = 1/(3*kappa)
