@@ -42,41 +42,124 @@ namespace Physics {
       */
       ~RtPhysicsStepper();
 
-      // Stuff below here is derived from TimeStepper.
-      // ----------------------------------------------
+      /*!
+	@brief Set up the solver
+      */      
       void setupSolvers() override;
+
+      /*!
+	@brief Fill simulation with initial data
+      */
       void initialData() override;
+
+      /*!
+	@brief Allocate necessary memory for solvers.
+      */      
       void allocate() override;
+
+      /*!
+	@brief Post-initialization functionality -- sets the source term. 
+      */            
       void postInitialize() override;
 
-      // IO routines
 #ifdef CH_USE_HDF5
+      /*!  
+	@brief Write checkpoint data to file
+	@param[inout] a_handle HDF5 fil
+	@param[in]    a_lvl    Grid level
+      */      
       void writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const override;
 #endif
-#ifdef CH_USE_HDF5      
+      
+#ifdef CH_USE_HDF5
+      /*!
+	@brief Read checkpoint data from file
+	@param[inout] a_handle HDF5 file
+	@param[in]    a_lvl    Grid level
+      */      
       void readCheckpointData(HDF5Handle& a_handle, const int a_lvl) override;
 #endif
+
+      /*!
+	@brief Perform post-checkpoint setup routines (sets the source in the solver)
+      */
       void postCheckpointSetup() override;
+
+      /*!
+	@brief Get number of plot variables for this physics module
+      */
       int getNumberOfPlotVariables() const override;
+
+      /*!
+	@brief Write plot data to file
+	@param[inout] a_output            Output data holder.
+	@param[in]    a_plotVariableNames Plot variable names.
+	@param[inout] a_icomp             Starting component in a_output to begin at. 
+      */
       void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const override;
 
-      // Advance routines
+      /*!
+	@brief Compute a time step to be used by Driver. This sets a_dt = m_dt.
+	@param[out] a_dt       Time step to be used.
+	@param[out] a_timeCode Identifier for how the time step was computed. 
+      */      
       void computeDt(Real& a_dt, TimeCode& a_timeCode) override;
+
+      /*!
+	@brief Advancement method. Calls the solver function. 
+	@param[in] a_dt Time step to be used for advancement
+	@return    a_dt
+      */      
       Real advance(const Real a_dt) override;
+
+      /*!
+	@brief Synchronzie solver times and time steps
+	@param[in] a_step Time step
+	@param[in] a_time Time (in seconds)
+	@param[in] a_dt   Time step that was used. 
+      */      
       void synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) override;
+
+      /*!
+	@brief Print a step report (does nothing)
+	@details This is called by Driver after time step. 
+      */      
       void printStepReport() override;
 
-      // Runtime options
+      /*!
+	@brief Parse runtime options.
+      */      
       void parseRuntimeOptions() override;
 
-      // Registration routines
+      /*!
+	@brief Register realms
+      */
       void registerRealms() override;
+
+      /*!
+	@brief Register operators -- calls the solver registration routine. 
+      */
       void registerOperators() override;
 
-      // Regrid routines
-      bool needToRegrid() override;
+      /*!
+	@brief Perform pre-regrid operations -- calls the solver function. 
+	operation takes a lot of memory. 
+	@param[in] a_lmin           The coarsest level that changes
+	@param[in] a_oldFinestLevel The finest level before the regrid. 
+      */      
       void preRegrid(const int a_lmin, const int a_oldFinestLevel) override;
+
+      /*!
+	@brief Regrid function. Calls the solver function. 
+	@param[in] a_lmin           The coarsest level that changed. 
+	@param[in] a_oldFinestLevel The finest level before the regrid. 
+	@param[in] a_newFinestLevel The finest level after the regrid. 
+      */      
       void regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) override;
+
+      /*!
+	@brief Post-regrid function. Sets a Gaussian source. 
+      */
       void postRegrid() override;
 
     protected:

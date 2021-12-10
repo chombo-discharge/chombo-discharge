@@ -13,6 +13,7 @@
 #include <math.h>
 
 // Chombo includes
+#include <CH_Timer.H>
 #include <ParmParse.H>
 #include <PolyGeom.H>
 
@@ -25,6 +26,7 @@ using namespace Physics::RadiativeTransfer;
 
 template <typename T>
 RtPhysicsStepper<T>::RtPhysicsStepper(){
+  CH_TIME("RtPhysicsStepper::RtPhysicsStepper");
 
   // Get shit for setting the source term
   ParmParse pp("RtPhysicsStepper");
@@ -36,10 +38,14 @@ RtPhysicsStepper<T>::RtPhysicsStepper(){
 }
     
 template <typename T>
-RtPhysicsStepper<T>::~RtPhysicsStepper(){}
+RtPhysicsStepper<T>::~RtPhysicsStepper(){
+  CH_TIME("RtPhysicsStepper::~RtPhysicsStepper");  
+}
 
 template <typename T>
 void RtPhysicsStepper<T>::setupSolvers(){
+  CH_TIME("RtPhysicsStepper::setupSolvers");
+  
   m_species = RefCountedPtr<RtSpecies> (new RtPhysicsSpecies());
 
   // Solver setup
@@ -55,32 +61,42 @@ void RtPhysicsStepper<T>::setupSolvers(){
 
 template <typename T>
 void RtPhysicsStepper<T>::parseRuntimeOptions() {
+  CH_TIME("RtPhysicsStepper::parseRuntimeOptions");
+  
   ParmParse pp("RtPhysicsStepper");
 
-  pp.get("verbosity",      m_verbosity);
+  pp.get("verbosity", m_verbosity);
+  pp.get("dt",        m_dt);
       
   m_solver->parseRuntimeOptions();
 }
 
 template <typename T>
 void RtPhysicsStepper<T>::allocate() {
+  CH_TIME("RtPhysicsStepper::allocate");
+  
   m_solver->allocateInternals();
 }
 
 template <typename T>
 void RtPhysicsStepper<T>::initialData(){
+  CH_TIME("RtPhysicsStepper::initialData");
+  
   m_solver->initialData();
-
-  this->setGaussianSource();
 }
 
 template <typename T>
 void RtPhysicsStepper<T>::postInitialize(){
+  CH_TIME("RtPhysicsStepper::postInitialize");
+  
+  this->setGaussianSource();  
 }
 
 #ifdef CH_USE_HDF5      
 template <typename T>
 void RtPhysicsStepper<T>::writeCheckpointData(HDF5Handle& a_handle, const int a_lvl) const {
+  CH_TIME("RtPhysicsStepper::writeCheckpointData");
+  
   m_solver->writeCheckpointLevel(a_handle, a_lvl);
 }
 #endif
@@ -88,33 +104,45 @@ void RtPhysicsStepper<T>::writeCheckpointData(HDF5Handle& a_handle, const int a_
 #ifdef CH_USE_HDF5      
 template <typename T>
 void RtPhysicsStepper<T>::readCheckpointData(HDF5Handle& a_handle, const int a_lvl){
+  CH_TIME("RtPhysicsStepper::readCheckpointData");
+  
   m_solver->readCheckpointLevel(a_handle, a_lvl);
 }
 #endif
 
 template <typename T>
 void RtPhysicsStepper<T>::postCheckpointSetup() {
+  CH_TIME("RtPhysicsStepper::postCheckpointSetup");
+  
   this->setGaussianSource();
 }
 
 template <typename T>
 int RtPhysicsStepper<T>::getNumberOfPlotVariables() const {
+  CH_TIME("RtPhysicsStepper::getNumberOfPlotVariables");
+  
   return m_solver->getNumberOfPlotVariables();
 }
 
 template <typename T>
 void RtPhysicsStepper<T>::writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const {
+  CH_TIME("RtPhysicsStepper::writePlotData");
+  
   a_plotVariableNames.append(m_solver->getPlotVariableNames());
   m_solver->writePlotData(a_output, a_icomp);
 }
 
 template <typename T>
 void RtPhysicsStepper<T>::computeDt(Real& a_dt, TimeCode& a_timeCode) {
+  CH_TIME("RtPhysicsStepper::computeDt");
+  
   a_dt = m_dt;
 }
 
 template <typename T>
 Real RtPhysicsStepper<T>::advance(const Real a_dt) {
+  CH_TIME("RtPhysicsStepper::advance");
+  
   m_solver->advance(a_dt);
 
   return a_dt;
@@ -122,50 +150,59 @@ Real RtPhysicsStepper<T>::advance(const Real a_dt) {
 
 template <typename T>
 void RtPhysicsStepper<T>::synchronizeSolverTimes(const int a_step, const Real a_time, const Real a_dt) {
+  CH_TIME("RtPhysicsStepper::synchronizeSolverTimes");
+  
   m_timeStep = a_step;
-  m_time = a_time;
-  m_dt   = a_dt;
+  m_time     = a_time;
+  m_dt       = a_dt;
+
+  m_solver->setTime(m_timeStep, m_time, m_dt);
 }
 
 template <typename T>
 void RtPhysicsStepper<T>::printStepReport() {
-}
-
-// Regrid routines
-template <typename T>
-bool RtPhysicsStepper<T>::needToRegrid() {
-  return false;
+  CH_TIME("RtPhysicsStepper::printStepReport");  
 }
 
 template <typename T>
 void RtPhysicsStepper<T>::registerRealms() {
+  CH_TIME("RtPhysicsStepper::registerRealms");
+  
   m_amr->registerRealm(m_realm);
 }
 
 template <typename T>
 void RtPhysicsStepper<T>::registerOperators() {
+  CH_TIME("RtPhysicsStepper::registerOperators");
+  
   m_solver->registerOperators();
 }
 
 template <typename T>
 void RtPhysicsStepper<T>::preRegrid(const int a_base, const int a_oldFinestLevel) {
+  CH_TIME("RtPhysicsStepper::preRegrid");
+  
   m_solver->preRegrid(a_base, a_oldFinestLevel);
 }
 
 template <typename T>
 void RtPhysicsStepper<T>::regrid(const int a_lmin, const int a_oldFinestLevel, const int a_newFinestLevel) {
+  CH_TIME("RtPhysicsStepper::regrid");
+  
   m_solver->regrid(a_lmin, a_oldFinestLevel, a_newFinestLevel);
-
-  // Do the rest of the setup
-  this->setGaussianSource();
 }
 
 template <typename T>
 void RtPhysicsStepper<T>::postRegrid(){
+  CH_TIME("RtPhysicsStepper::postRegrid");  
+
+  this->setGaussianSource();  
 }
 
 template <typename T>
 void RtPhysicsStepper<T>::setGaussianSource(){
+  CH_TIME("RtPhysicsStepper::setGaussianSource");
+  
   ParmParse pp("RtPhysicsStepper");
 
   Vector<Real> v(SpaceDim);
