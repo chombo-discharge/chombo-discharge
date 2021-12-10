@@ -4,8 +4,8 @@
  */
 
 /*!
-  @file   CD_RtPhysicsSpecies.cpp
-  @brief  Implementation of CD_RtPhysicsSpecies.H
+  @file   CD_RadiativeTransferSpecies.cpp
+  @brief  Implementation of CD_RadiativeTransferSpecies.H
   @author Robert Marskar
 */
 
@@ -14,24 +14,24 @@
 #include <ParmParse.H>
 
 // Our includes
-#include <CD_RtPhysicsSpecies.H>
+#include <CD_RadiativeTransferSpecies.H>
 #include <CD_NamespaceHeader.H>
 
 using namespace Physics::RadiativeTransfer;
 
-RtPhysicsSpecies::RtPhysicsSpecies(){
-  CH_TIME("RtPhysicsSpecies::RtPhysicsSpecies");
+RadiativeTransferSpecies::RadiativeTransferSpecies(){
+  CH_TIME("RadiativeTransferSpecies::RadiativeTransferSpecies");
   
   // This stuff sets the name and a constnat kappa taken from the input script
-  m_name     = "RtPhysicsSpecies";
+  m_name     = "RadiativeTransferSpecies";
   m_constant = true;
 
-  ParmParse pp("RtPhysicsStepper");
+  ParmParse pp("RadiativeTransferStepper");
   pp.get("kappa", m_kappa);
 }
 
-RtPhysicsSpecies::~RtPhysicsSpecies(){
-  CH_TIME("RtPhysicsSpecies::~RtPhysicsSpecies");
+RadiativeTransferSpecies::~RadiativeTransferSpecies(){
+  CH_TIME("RadiativeTransferSpecies::~RadiativeTransferSpecies");
 }
 
 #include <CD_NamespaceFooter.H>

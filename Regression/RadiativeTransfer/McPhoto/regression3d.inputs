@@ -120,12 +120,12 @@ RodDielectric.sphere.center             = 0 0 0         # Sphere center
 RodDielectric.sphere.radius             = 0.15          # Radius
 
 # ====================================================================================================
-# RtPhysicsStepper class options
+# RadiativeTransferStepper class options
 # ====================================================================================================
-RtPhysicsStepper.verbosity      = -1      # Verbosity
-RtPhysicsStepper.realm          = primal  # Realm 
-RtPhysicsStepper.kappa          = 0.1     # Inverse absorption coefficient
-RtPhysicsStepper.dt             = 1.E-10  # Time step
-RtPhysicsStepper.blob_amplitude = 1E2     # Blob amplitude
-RtPhysicsStepper.blob_radius    = 0.05    # Blob radius
-RtPhysicsStepper.blob_center    = 0.5 0.5 0.5 # Blob center
+RadiativeTransferStepper.verbosity      = -1      # Verbosity
+RadiativeTransferStepper.realm          = primal  # Realm 
+RadiativeTransferStepper.kappa          = 0.1     # Inverse absorption coefficient
+RadiativeTransferStepper.dt             = 1.E-10  # Time step
+RadiativeTransferStepper.blob_amplitude = 1E2     # Blob amplitude
+RadiativeTransferStepper.blob_radius    = 0.05    # Blob radius
+RadiativeTransferStepper.blob_center    = 0.5 0.5 0.5 # Blob center

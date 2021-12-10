@@ -4,14 +4,14 @@
  */
 
 /*!
-  @file   CD_RtPhysicsSpecies.H
+  @file   CD_RadiativeTransferSpecies.H
   @brief  Simple species for Physics/RadiativeTransfer
   @author Robert Marskar
   @date   March 2020
 */
 
-#ifndef CD_RtPhysicsSpecies_H
-#define CD_RtPhysicsSpecies_H
+#ifndef CD_RadiativeTransferSpecies_H
+#define CD_RadiativeTransferSpecies_H
 
 // Our includes
 #include <CD_RtSpecies.H>
@@ -24,18 +24,18 @@ namespace Physics {
       @brief Implementation of RtSpecies for usage in RadiativeTransfer module.
       @details This reads a constant kappa from the input file which it uses as Beer's length.
     */
-    class RtPhysicsSpecies : public RtSpecies {
+    class RadiativeTransferSpecies : public RtSpecies {
     public:
 
       /*!
 	@brief Constructor (reads from input script)
       */
-      RtPhysicsSpecies();
+      RadiativeTransferSpecies();
 
       /*!
 	@brief Destructor (does nothing)
       */      
-      ~RtPhysicsSpecies();
+      ~RadiativeTransferSpecies();
     };
   }
 }

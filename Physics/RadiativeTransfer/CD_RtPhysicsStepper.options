@@ -1,10 +1,10 @@
 # ====================================================================================================
-# RtPhysicsStepper class options
+# RadiativeTransferStepper class options
 # ====================================================================================================
-RtPhysicsStepper.verbosity      = -1      # Verbosity
-RtPhysicsStepper.realm          = primal  # Realm 
-RtPhysicsStepper.kappa          = 1.0     # Inverse absorption coefficient
-RtPhysicsStepper.dt             = 1.E-10  # Time step
-RtPhysicsStepper.blob_amplitude = 1.0     # Blob amplitude
-RtPhysicsStepper.blob_radius    = 0.1     # Blob radius
-RtPhysicsStepper.blob_center    = 0 0     # Blob center
+RadiativeTransferStepper.verbosity      = -1      # Verbosity
+RadiativeTransferStepper.realm          = primal  # Realm 
+RadiativeTransferStepper.kappa          = 1.0     # Inverse absorption coefficient
+RadiativeTransferStepper.dt             = 1.E-10  # Time step
+RadiativeTransferStepper.blob_amplitude = 1.0     # Blob amplitude
+RadiativeTransferStepper.blob_radius    = 0.1     # Blob radius
+RadiativeTransferStepper.blob_center    = 0 0     # Blob center

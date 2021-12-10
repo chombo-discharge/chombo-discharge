@@ -4,13 +4,13 @@
  */
 
 /*!
-  @file   CD_RtPhysicsStepper.H
+  @file   CD_RadiativeTransferStepper.H
   @brief  TimeStepper class for only evolving radiative transfer modules
   @author Robert Marskar
 */
 
-#ifndef CD_RtPhysicsStepper_H
-#define CD_RtPhysicsStepper_H
+#ifndef CD_RadiativeTransferStepper_H
+#define CD_RadiativeTransferStepper_H
 
 // Our includes
 #include <CD_TimeStepper.H>
@@ -29,18 +29,18 @@ namespace Physics {
       through the common RtSolver interface. 
     */
     template <class T>
-    class RtPhysicsStepper : public TimeStepper {
+    class RadiativeTransferStepper : public TimeStepper {
     public:
 
       /*!
 	@brief Constructor. Reads a couple of input options.
       */
-      RtPhysicsStepper();
+      RadiativeTransferStepper();
 
       /*!
 	@brief Destructor (does nothing)
       */
-      ~RtPhysicsStepper();
+      ~RadiativeTransferStepper();
 
       /*!
 	@brief Set up the solver
@@ -194,6 +194,6 @@ namespace Physics {
 
 #include <CD_NamespaceFooter.H>
 
-#include <CD_RtPhysicsStepperImplem.H>
+#include <CD_RadiativeTransferStepperImplem.H>
 
 #endif
