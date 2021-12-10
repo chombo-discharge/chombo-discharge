@@ -73,6 +73,15 @@ namespace Physics {
       bool loadBalanceThisRealm(const std::string a_realm) const override;
 
       /*!
+	@brief Get computational loads to be checkpointed. This is used by Driver both for plotting computational loads AND for checkpointing the loads for restart
+	purposes. 
+	@details This uses the number of computational particles as a load metric. 
+	@param[in] a_realm Realm
+	@param[in] a_level Grid level
+      */
+      Vector<long int> getCheckpointLoads(const std::string a_realm, const int a_level) const override;
+
+      /*!
 	@brief Load balance grid boxes for a specific realm. 
 	@details This will count the number of particles in each box and then load balance them. 
 	@param[out] a_procs       MPI ranks owning the various grid boxes. 
@@ -313,7 +322,8 @@ namespace Physics {
 	@details This routine will load balance by directly counting the particles on the new mesh. The result of that is that we regrid a particle data holder twice. 
 
 	Because this routine ends up remapping particles twice (once here, and once in BrownianWalkerStepper::regrid), this routine is usually slower than
-	loadBalanceBoxesMesh when used at large particle counts. 
+	loadBalanceBoxesMesh when used at large particle counts. In addition, loadBalanceBoxesMesh does it's best at estimating the final number of computatational particles
+	after particle merging/splitting, while this routine only counts the original computational particles before the regrid. 
 	@param[out] a_procs       MPI ranks owning the various grid boxes. 
 	@param[out] a_boxes       Grid boxes on every level (obtain them with a_grids[lvl].boxArray())
 	@param[in]  a_realm       Realm identifier
