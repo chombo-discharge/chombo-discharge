@@ -79,7 +79,6 @@ Real CdrPlasmaAir3Bourdon::MPlus::initialData(const RealVect a_pos, const Real a
 
 CdrPlasmaAir3Bourdon::PhotonOne::PhotonOne(){
   m_name     = "PhotonOne";
-  m_constant = true;
 
   Real O2_frac = 0.2;
   Real pressure;
@@ -94,7 +93,6 @@ CdrPlasmaAir3Bourdon::PhotonOne::PhotonOne(){
 
 CdrPlasmaAir3Bourdon::PhotonTwo::PhotonTwo(){
   m_name     = "PhotonTwo";
-  m_constant = true;
 
   Real O2_frac = 0.2;
   Real pressure;
@@ -109,7 +107,6 @@ CdrPlasmaAir3Bourdon::PhotonTwo::PhotonTwo(){
 
 CdrPlasmaAir3Bourdon::PhotonThree::PhotonThree(){
   m_name     = "PhotonThree";
-  m_constant = true;
 
   Real O2_frac = 0.2;
   Real pressure;

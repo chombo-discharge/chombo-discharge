@@ -619,7 +619,7 @@ CdrPlasmaMorrowBourdon::PhotonOne::~PhotonOne(){
   
 }
 
-Real CdrPlasmaMorrowBourdon::PhotonOne::getKappa(const RealVect a_pos) const {
+Real CdrPlasmaMorrowBourdon::PhotonOne::getAbsorptionCoefficient(const RealVect a_pos) const {
   return m_lambda*m_pO2/sqrt(3.0); // I think this is correct.
 }
 
@@ -640,7 +640,7 @@ CdrPlasmaMorrowBourdon::PhotonTwo::PhotonTwo(){
 CdrPlasmaMorrowBourdon::PhotonTwo::~PhotonTwo(){
 }
 
-Real CdrPlasmaMorrowBourdon::PhotonTwo::getKappa(const RealVect a_pos) const {
+Real CdrPlasmaMorrowBourdon::PhotonTwo::getAbsorptionCoefficient(const RealVect a_pos) const {
   return m_lambda*m_pO2/sqrt(3.0); // I think this is correct.
 }
 
@@ -661,7 +661,7 @@ CdrPlasmaMorrowBourdon::PhotonThree::PhotonThree(){
 CdrPlasmaMorrowBourdon::PhotonThree::~PhotonThree(){
 }
 
-Real CdrPlasmaMorrowBourdon::PhotonThree::getKappa(const RealVect a_pos) const {
+Real CdrPlasmaMorrowBourdon::PhotonThree::getAbsorptionCoefficient(const RealVect a_pos) const {
   return m_lambda*m_pO2/sqrt(3.0); // I think this is correct.
 
 }

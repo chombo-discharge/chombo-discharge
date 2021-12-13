@@ -123,7 +123,7 @@ namespace Physics {
       PhotonZ();
       ~PhotonZ();
 
-      Real getKappa(const RealVect a_pos) const override;
+      Real getAbsorptionCoefficient(const RealVect a_pos) const override;
       
     protected:
       Real m_pO2;

@@ -179,9 +179,9 @@ void ItoPlasmaStepper::initialData(){
   m_rte->initialData();
   this->initialSigma();
 
-  m_ito->sortParticlesByCell( ItoSolver::WhichContainer::bulk);
-  m_ito->makeSuperparticles(    ItoSolver::WhichContainer::bulk, m_ppc);
-  m_ito->sortParticlesByPatch(ItoSolver::WhichContainer::bulk);
+  m_ito->sortParticlesByCell( ItoSolver::WhichContainer::Bulk);
+  m_ito->makeSuperparticles(    ItoSolver::WhichContainer::Bulk, m_ppc);
+  m_ito->sortParticlesByPatch(ItoSolver::WhichContainer::Bulk);
   
   // Solve Poisson equation and compute the E-field
   this->solvePoisson();
@@ -402,7 +402,7 @@ void ItoPlasmaStepper::writeNumParticlesPerPatch(EBAMRCellData& a_output, int& a
   DataOps::setValue(m_particle_scratch1, 0.0);
   
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    const ParticleContainer<ItoParticle>& particles = solver_it()->getParticles(ItoSolver::WhichContainer::bulk);
+    const ParticleContainer<ItoParticle>& particles = solver_it()->getParticles(ItoSolver::WhichContainer::Bulk);
 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
       const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
@@ -449,17 +449,17 @@ void ItoPlasmaStepper::printStepReport(){
 
   const Real Emax = this->computeMaxElectricField(m_phase);
   
-  const size_t l_particles        = m_ito->getNumParticles(ItoSolver::WhichContainer::bulk, true);
-  const size_t g_particles        = m_ito->getNumParticles(ItoSolver::WhichContainer::bulk, false);
+  const size_t l_particles        = m_ito->getNumParticles(ItoSolver::WhichContainer::Bulk, true);
+  const size_t g_particles        = m_ito->getNumParticles(ItoSolver::WhichContainer::Bulk, false);
   
-  const size_t l_eb_particles     = m_ito->getNumParticles(ItoSolver::WhichContainer::eb, true);
-  const size_t g_eb_particles     = m_ito->getNumParticles(ItoSolver::WhichContainer::eb, false);
+  const size_t l_eb_particles     = m_ito->getNumParticles(ItoSolver::WhichContainer::EB, true);
+  const size_t g_eb_particles     = m_ito->getNumParticles(ItoSolver::WhichContainer::EB, false);
   
-  const size_t l_domain_particles = m_ito->getNumParticles(ItoSolver::WhichContainer::domain, true);
-  const size_t g_domain_particles = m_ito->getNumParticles(ItoSolver::WhichContainer::domain, false);
+  const size_t l_domain_particles = m_ito->getNumParticles(ItoSolver::WhichContainer::Domain, true);
+  const size_t g_domain_particles = m_ito->getNumParticles(ItoSolver::WhichContainer::Domain, false);
 
-  const size_t l_source_particles = m_ito->getNumParticles(ItoSolver::WhichContainer::source, true);
-  const size_t g_source_particles = m_ito->getNumParticles(ItoSolver::WhichContainer::source, false);
+  const size_t l_source_particles = m_ito->getNumParticles(ItoSolver::WhichContainer::Source, true);
+  const size_t g_source_particles = m_ito->getNumParticles(ItoSolver::WhichContainer::Source, false);
 
   Real avg;
   Real sigma;
@@ -513,7 +513,7 @@ void ItoPlasmaStepper::getParticleStatistics(Real& a_avg, Real& a_sigma, size_t&
   const int srcProc = 0; 
   const int nProc   = numProc();
 
-  const size_t numLocal = m_ito->getNumParticles(ItoSolver::WhichContainer::bulk, true);
+  const size_t numLocal = m_ito->getNumParticles(ItoSolver::WhichContainer::Bulk, true);
 
   // Gather on source proc
   Vector<size_t> allCounts(nProc);
@@ -577,7 +577,7 @@ void ItoPlasmaStepper::printTimerDiagnostics(Real& a_timer, const std::string a_
   const int srcProc = 0; 
   const int nProc   = numProc();
 
-  const size_t numLocal = m_ito->getNumParticles(ItoSolver::WhichContainer::bulk, true);
+  const size_t numLocal = m_ito->getNumParticles(ItoSolver::WhichContainer::Bulk, true);
 
   // Gather all timers on source proc
   Vector<Real> allTimers(nProc);
@@ -786,9 +786,9 @@ void ItoPlasmaStepper::regrid(const int a_lmin, const int a_oldFinestLevel, cons
   m_sigma->regrid(a_lmin,   a_oldFinestLevel, a_newFinestLevel);
 
   if(m_regrid_superparticles){
-    m_ito->sortParticlesByCell( ItoSolver::WhichContainer::bulk);
-    m_ito->makeSuperparticles(    ItoSolver::WhichContainer::bulk, m_ppc);
-    m_ito->sortParticlesByPatch(ItoSolver::WhichContainer::bulk);
+    m_ito->sortParticlesByCell( ItoSolver::WhichContainer::Bulk);
+    m_ito->makeSuperparticles(    ItoSolver::WhichContainer::Bulk, m_ppc);
+    m_ito->sortParticlesByPatch(ItoSolver::WhichContainer::Bulk);
   }
 
   // Redeposit particles
@@ -1065,7 +1065,7 @@ void ItoPlasmaStepper::computeConductivity(EBAMRCellData& a_conductivity){
     pout() << "ItoPlasmaStepper::computeConductivity(conductivity)" << endl;
   }
 
-  this->computeConductivity(a_conductivity, m_ito->getParticles(ItoSolver::WhichContainer::bulk));
+  this->computeConductivity(a_conductivity, m_ito->getParticles(ItoSolver::WhichContainer::Bulk));
   
 }
 
@@ -1079,7 +1079,7 @@ void ItoPlasmaStepper::computeConductivity(EBAMRCellData& a_conductivity, const 
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ItoSolver>&   solver = solver_it();
-    RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
+    const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
     
     const int idx = solver_it.index();
     const int q   = species->getChargeNumber();
@@ -1268,9 +1268,9 @@ void ItoPlasmaStepper::intersectParticles(const WhichParticles a_WhichParticles,
   }
 
   this->intersectParticles(a_WhichParticles,
-			   ItoSolver::WhichContainer::bulk,
-			   ItoSolver::WhichContainer::eb,
-			   ItoSolver::WhichContainer::domain,
+			   ItoSolver::WhichContainer::Bulk,
+			   ItoSolver::WhichContainer::EB,
+			   ItoSolver::WhichContainer::Domain,
 			   a_representation,
 			   a_delete);
 }
@@ -1288,7 +1288,7 @@ void ItoPlasmaStepper::intersectParticles(const WhichParticles             a_Whi
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ItoSolver>&   solver = solver_it();
-    RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
+    const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
     const int idx = solver_it.index();
 
@@ -1333,7 +1333,7 @@ void ItoPlasmaStepper::removeCoveredParticles(const WhichParticles a_WhichPartic
     pout() << "ItoPlasmaStepper::removeCoveredParticles(WhichParticles, representation, tolerance)" << endl;
   }
 
-  this->removeCoveredParticles(a_WhichParticles, ItoSolver::WhichContainer::bulk, a_representation, a_tolerance);
+  this->removeCoveredParticles(a_WhichParticles, ItoSolver::WhichContainer::Bulk, a_representation, a_tolerance);
 }
 
 void ItoPlasmaStepper::removeCoveredParticles(const WhichParticles             a_which,
@@ -1347,7 +1347,7 @@ void ItoPlasmaStepper::removeCoveredParticles(const WhichParticles             a
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ItoSolver>&   solver = solver_it();
-    RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
+    const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
     const int idx = solver_it.index();
 
@@ -1392,7 +1392,7 @@ void ItoPlasmaStepper::transferCoveredParticles(const WhichParticles a_which, co
     pout() << "ItoPlasmaStepper::transferCoveredParticles_particles(WhichParticles, EbRepresentation, tolerance)" << endl;
   }
 
-  this->transferCoveredParticles(a_which, ItoSolver::WhichContainer::bulk, ItoSolver::WhichContainer::covered, a_representation, a_tolerance);
+  this->transferCoveredParticles(a_which, ItoSolver::WhichContainer::Bulk, ItoSolver::WhichContainer::Covered, a_representation, a_tolerance);
 }
 
 void ItoPlasmaStepper::transferCoveredParticles(const WhichParticles             a_which,
@@ -1407,7 +1407,7 @@ void ItoPlasmaStepper::transferCoveredParticles(const WhichParticles            
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ItoSolver>&   solver = solver_it();
-    RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
+    const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
     const int idx = solver_it.index();
 
@@ -1452,7 +1452,7 @@ void ItoPlasmaStepper::remapParticles(const WhichParticles a_WhichParticles){
     pout() << "ItoPlasmaStepper::remapParticles(WhichParticles)" << endl;
   }
 
-  this->remapParticles(a_WhichParticles, ItoSolver::WhichContainer::bulk);
+  this->remapParticles(a_WhichParticles, ItoSolver::WhichContainer::Bulk);
 }
 
 void ItoPlasmaStepper::remapParticles(const WhichParticles a_WhichParticles, const ItoSolver::WhichContainer a_container){
@@ -1463,7 +1463,7 @@ void ItoPlasmaStepper::remapParticles(const WhichParticles a_WhichParticles, con
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ItoSolver>&   solver = solver_it();
-    RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
+    const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
     const int idx = solver_it.index();
 
@@ -1508,7 +1508,7 @@ void ItoPlasmaStepper::depositParticles(const WhichParticles a_WhichParticles){
     pout() << "ItoPlasmaStepper::depositParticles(WhichParticles)" << endl;
   }
 
-  this->depositParticles(a_WhichParticles, ItoSolver::WhichContainer::bulk);
+  this->depositParticles(a_WhichParticles, ItoSolver::WhichContainer::Bulk);
 
 }
 
@@ -1520,7 +1520,7 @@ void ItoPlasmaStepper::depositParticles(const WhichParticles a_WhichParticles, c
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ItoSolver>&   solver = solver_it();
-    RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
+    const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
     const int idx = solver_it.index();
 
@@ -1567,7 +1567,7 @@ void ItoPlasmaStepper::setItoVelocityFunctions(){
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ItoSolver>& solver   = solver_it();
-    RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
+    const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
     if(solver->isMobile()){
       EBAMRCellData& velo_func = solver->getVelocityFunction();
@@ -2011,7 +2011,7 @@ void ItoPlasmaStepper::computeReactiveParticlesPerCell(EBCellFAB& a_ppc, const i
     RefCountedPtr<ItoSolver>& solver = solver_it();
     const int idx                     = solver_it.index();
 
-    const ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::bulk);
+    const ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
     const BinFab<ItoParticle>& cellParticles         = particles.getCellParticles(a_level, a_dit);
 
 
@@ -2105,7 +2105,7 @@ void ItoPlasmaStepper::computeReactiveMeanEnergiesPerCell(EBCellFAB&      a_mean
     RefCountedPtr<ItoSolver>& solver = solver_it();
     const int idx                     = solver_it.index();
 
-    const ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::bulk);
+    const ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
     const BinFab<ItoParticle>& cellParticles         = particles.getCellParticles(a_level, a_dit);
 
     // Regular cells. 
@@ -2395,7 +2395,7 @@ void ItoPlasmaStepper::reconcileParticles(const EBCellFAB& a_newParticlesPerCell
     RefCountedPtr<ItoSolver>& solver = solver_it();
     const int idx = solver_it.index();
     
-    ParticleContainer<ItoParticle>& solverParticles = solver->getParticles(ItoSolver::WhichContainer::bulk);
+    ParticleContainer<ItoParticle>& solverParticles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
     
     particlesFAB[idx] = &(solverParticles.getCellParticles(a_level, a_dit));
   }
@@ -2544,7 +2544,7 @@ void ItoPlasmaStepper::advanceReactionNetwork(const Real a_dt){
     Vector<ParticleContainer<Photon>* > new_Photons(num_RtSpecies);      // Produced Photons go here.
 
     for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-      particles[solver_it.index()] = &(solver_it()->getParticles(ItoSolver::WhichContainer::bulk));
+      particles[solver_it.index()] = &(solver_it()->getParticles(ItoSolver::WhichContainer::Bulk));
     }
 
     for (auto solver_it = m_rte->iterator(); solver_it.ok(); ++solver_it){
@@ -3088,7 +3088,7 @@ void ItoPlasmaStepper::loadBalanceParticleRealm(Vector<Vector<int> >&           
 
   // Regrid particles onto the "dummy grids" a_grids
   for (int i = 0; i < lb_solvers.size(); i++){
-    ParticleContainer<ItoParticle>& particles = lb_solvers[i]->getParticles(ItoSolver::WhichContainer::bulk);
+    ParticleContainer<ItoParticle>& particles = lb_solvers[i]->getParticles(ItoSolver::WhichContainer::Bulk);
     
     particles.regrid(a_grids, m_amr->getDomains(), m_amr->getDx(), m_amr->getRefinementRatios(), a_lmin, a_finestLevel);
 
@@ -3096,7 +3096,7 @@ void ItoPlasmaStepper::loadBalanceParticleRealm(Vector<Vector<int> >&           
     // load estimate of the underlying grid(s) is improved.
     if(m_regrid_superparticles){
       particles.sortParticlesByCell();
-      lb_solvers[i]->makeSuperparticles(ItoSolver::WhichContainer::bulk, m_ppc);
+      lb_solvers[i]->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_ppc);
       particles.sortParticlesByPatch();
     }
   }
@@ -3115,7 +3115,7 @@ void ItoPlasmaStepper::loadBalanceParticleRealm(Vector<Vector<int> >&           
 
   // Go back to "pre-regrid" mode so we can get particles to the correct patches after load balancing. 
   for (int i = 0; i < lb_solvers.size(); i++){
-    ParticleContainer<ItoParticle>& particles = lb_solvers[i]->getParticles(ItoSolver::WhichContainer::bulk);
+    ParticleContainer<ItoParticle>& particles = lb_solvers[i]->getParticles(ItoSolver::WhichContainer::Bulk);
     particles.preRegrid(a_lmin);
   }
 }
@@ -3167,7 +3167,7 @@ void ItoPlasmaStepper::computeEdotJSource(){
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ItoSolver>& solver   = solver_it();
-    RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
+    const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
     const int idx = solver_it.index();
     const int q   = species->getChargeNumber();
@@ -3178,7 +3178,7 @@ void ItoPlasmaStepper::computeEdotJSource(){
     if(q != 0 && solver->isMobile()){
 
       // Drift contribution
-      solver->depositConductivity(m_particle_scratch1, solver->getParticles(ItoSolver::WhichContainer::bulk)); // Deposit mu*n
+      solver->depositConductivity(m_particle_scratch1, solver->getParticles(ItoSolver::WhichContainer::Bulk)); // Deposit mu*n
       DataOps::copy(m_particle_scratchD, m_particle_E); // Could use m_particle_E or solver's m_velo_func here, but m_velo_func = +/- E (depends on q)
       
       DataOps::multiplyScalar(m_particle_scratchD, m_particle_scratch1);        // m_particle_scratchD = mu*n*E
@@ -3190,7 +3190,7 @@ void ItoPlasmaStepper::computeEdotJSource(){
     if(q != 0 && solver->isDiffusive()){
 
       // Compute the negative gradient of the diffusion term
-      solver->depositDiffusivity(m_particle_scratch1, solver->getParticles(ItoSolver::WhichContainer::bulk));
+      solver->depositDiffusivity(m_particle_scratch1, solver->getParticles(ItoSolver::WhichContainer::Bulk));
       m_amr->interpGhostMG(m_particle_scratch1, m_particleRealm, m_phase);
       m_amr->computeGradient(m_particle_scratchD, m_particle_scratch1, m_particleRealm, m_phase);
       DataOps::scale(m_particle_scratchD, -1.0); // scratchD = -grad(D*n)
@@ -3215,14 +3215,14 @@ void ItoPlasmaStepper::computeEdotJSourceNWO(){
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ItoSolver>& solver   = solver_it();
-    RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
+    const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
     const int idx = solver_it.index();
     const int q   = species->getChargeNumber();
 
     // Do mobile contribution. Computes Z*e*E*mu*n*E*E
     if(q != 0 && solver->isMobile()){
-      solver->depositConductivity(m_particle_scratch1, solver->getParticles(ItoSolver::WhichContainer::bulk)); // Deposit mu*n
+      solver->depositConductivity(m_particle_scratch1, solver->getParticles(ItoSolver::WhichContainer::Bulk)); // Deposit mu*n
       m_fluid_scratch1.copy(m_particle_scratch1);                                 // Copy mu*n to fluid Realm
       DataOps::copy(m_fluid_scratchD, m_fluid_E);                                // m_fluid_scratchD = E
       DataOps::multiplyScalar(m_fluid_scratchD, m_fluid_scratch1);              // m_fluid_scratchD = E*mu*n
@@ -3236,7 +3236,7 @@ void ItoPlasmaStepper::computeEdotJSourceNWO(){
 
     // Diffusive contribution. Computes -Z*e*E*grad(D*n)
     if(q != 0 && solver->isDiffusive()){
-      solver->depositDiffusivity(m_particle_scratch1, solver->getParticles(ItoSolver::WhichContainer::bulk));            // Deposit D*n
+      solver->depositDiffusivity(m_particle_scratch1, solver->getParticles(ItoSolver::WhichContainer::Bulk));            // Deposit D*n
       m_fluid_scratch1.copy(m_particle_scratch1);                                           // Copy D*n to fluid Realm
       m_amr->interpGhostMG(m_fluid_scratch1, m_fluid_Realm, m_phase);      
       m_amr->computeGradient(m_fluid_scratchD, m_fluid_scratch1, m_fluid_Realm, m_phase);  // scratchD = grad(D*n)
@@ -3262,7 +3262,7 @@ void ItoPlasmaStepper::computeEdotJSourceNWO2(const Real a_dt){
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ItoSolver>& solver   = solver_it();
-    RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
+    const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
     const int idx = solver_it.index();
     const int q   = species->getChargeNumber();
@@ -3270,7 +3270,7 @@ void ItoPlasmaStepper::computeEdotJSourceNWO2(const Real a_dt){
     const bool mobile    = solver->isMobile();
     const bool diffusive = solver->isDiffusive();
 
-    ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::bulk);
+    ParticleContainer<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk);
 
     const DepositionType deposition = solver->getDeposition();
 

@@ -273,7 +273,7 @@ void CdrPlasmaAir3Bourdon::advanceReactionNetwork(Vector<Real>&          a_parti
   a_Photon_sources[m_pho2_idx] = Rgamma;
   a_Photon_sources[m_pho3_idx] = Rgamma;
 
-  CH_assert(std::abs(Se + Sp + Sm) <= 1.E-10);    
+  //  CH_assert(std::abs(Se + Sp + Sm) <= 1.E-10);    
 
   return;
 }

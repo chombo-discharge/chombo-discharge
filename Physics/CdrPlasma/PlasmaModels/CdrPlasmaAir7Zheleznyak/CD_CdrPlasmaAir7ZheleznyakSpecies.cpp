@@ -155,7 +155,7 @@ CdrPlasmaAir7Zheleznyak::uv_Photon::~uv_Photon(){
   
 }
 
-Real CdrPlasmaAir7Zheleznyak::uv_Photon::getKappa(const RealVect a_pos) const {
+Real CdrPlasmaAir7Zheleznyak::uv_Photon::getAbsorptionCoefficient(const RealVect a_pos) const {
   return getRandomKappa();
 }
 

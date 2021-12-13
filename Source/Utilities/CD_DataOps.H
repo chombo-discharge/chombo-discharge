@@ -65,11 +65,33 @@ public:
 					    const ProblemDomain&        a_domain);
 
   /*!
+    @brief Routine which computes the average of a cell-centered quantity on faces. This fills one tangential ghost face.
+    @param[out] a_faceData Face data. Must have one component. 
+    @param[in]  a_cellData Cell data. Must have one component. 
+    @param[in]  a_domains  AMR domains.
+    @note This routine also fills one tangential ghost face.
+  */
+  static void averageCellScalarToFaceScalar(EBAMRFluxData&               a_faceData,
+					    const EBAMRCellData&         a_cellData,
+					    const Vector<ProblemDomain>& a_domains);
+
+  /*!
+    @brief Routine which computes the average of a cell-centered quantity on faces. This fills one tangential ghost face.
+    @param[out] a_faceData Face data. Must have one component. 
+    @param[in]  a_cellData Cell data. Must have one component.
+    @param[in]  a_domain   Problem domain
+    @note This routine also fills one tangential ghost face.
+  */
+  static void averageCellScalarToFaceScalar(LevelData<EBFluxFAB>&       a_faceData,
+					    const LevelData<EBCellFAB>& a_cellData,
+					    const ProblemDomain&        a_domain);  
+
+  /*!
     @brief Average all components of the cell-centered data to faces.
     @param[out] a_faceData Face data. 
     @param[in]  a_cellData Cell data. 
     @param[in]  a_domains  AMR domains.
-    @note This does not fill "tangential" ghost faces (unlike averageCellVectorToFaceScalar)
+    @note This does not fill "tangential" ghost faces (unlike averageCellVectorToFaceScalar). 
   */
   static void averageCellToFace(EBAMRFluxData&               a_faceData,
 				const EBAMRCellData&         a_cellData,

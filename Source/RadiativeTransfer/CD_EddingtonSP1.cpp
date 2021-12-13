@@ -622,47 +622,27 @@ void EddingtonSP1::setHelmholtzCoefficients(){
   }
 
   // This loop fills aco with kappa and bco_irreg with 1./kappa
-  if(m_RtSpecies->isKappaConstant()){
-    const Real kap = m_RtSpecies->getKappa(RealVect::Zero);
-    
-    DataOps::setValue(m_helmAco,         kap);
-    DataOps::setValue(m_helmBco,      1./kap);
-    DataOps::setValue(m_helmBcoIrreg, 1./kap);
-  }
-  else{ // If kappa is not constant, we must go through every cell. 
-    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
+  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
 
-      LevelData<EBCellFAB>&        helmAco      = *m_helmAco[lvl];
-      LevelData<EBFluxFAB>&        helmBco      = *m_helmBco[lvl];
-      LevelData<BaseIVFAB<Real> >& helmBcoIrreg = *m_helmBcoIrreg[lvl];
+    LevelData<EBCellFAB>&        helmAco      = *m_helmAco     [lvl];
+    LevelData<EBFluxFAB>&        helmBco      = *m_helmBco     [lvl];
+    LevelData<BaseIVFAB<Real> >& helmBcoIrreg = *m_helmBcoIrreg[lvl];
 
-      for (DataIterator dit(dbl); dit.ok(); ++dit){
-	const Box cellBox = (m_amr->getGrids(m_realm)[lvl]).get(dit());
-	
-	this->setHelmholtzCoefficientsBox(helmAco[dit()],
-					  helmBcoIrreg[dit()],
-					  cellBox,
-					  lvl,
-					  dit());
-      }
+    // Fill data in each grid patch.
+    for (DataIterator dit(dbl); dit.ok(); ++dit){
+      this->setHelmholtzCoefficientsBox(helmAco     [dit()],
+					helmBco     [dit()],
+					helmBcoIrreg[dit()],
+					lvl,
+					dit());
     }
-
-    m_amr->averageDown(m_helmAco, m_realm, m_phase);
-    m_amr->interpGhost(m_helmAco, m_realm, m_phase);
-    
-    DataOps::averageCellToFace(m_helmBco, m_helmAco, m_amr->getDomains()); // Average aco onto face
-    DataOps::invert(m_helmBco);                                            // Make m_helmBco = 1./kappa
   }
-
-  DataOps::scale(m_helmAco,      1.0);       // m_helmAco      = kappa
-  DataOps::scale(m_helmBco,      1.0/(3.0)); // m_helmBco      = 1/(3*kappa)
-  DataOps::scale(m_helmBcoIrreg, 1.0/(3.0)); // m_helmBcoIrreg = 1/(3*kappa)
 }
 
 void EddingtonSP1::setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
+					       EBFluxFAB&       a_helmBco,
 					       BaseIVFAB<Real>& a_helmBcoIrreg,
-					       const Box        a_cellBox,
 					       const int        a_lvl,
 					       const DataIndex& a_dit){
   CH_TIME("EddingtonSP1::setHelmholtzCoefficientsBox");
@@ -670,33 +650,99 @@ void EddingtonSP1::setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
     pout() << m_name + "::setHelmholtzCoefficientsBox" << endl;
   }
 
-  const RealVect probLo        = m_amr->getProbLo();
-  const Real dx                = m_amr->getDx()[a_lvl];
+  CH_assert(a_helmAco.     nComp() == 1              );
+  CH_assert(a_helmBco.     nComp() == 1              );
+  CH_assert(a_helmBcoIrreg.nComp() == 1              );
+  CH_assert(a_helmAco.     box()   == a_helmBco.box());
+
+  // Setting this to trigger debugging.
+#ifndef NDEBUG
+  a_helmAco.     setVal(std::numeric_limits<Real>::max());
+  a_helmBco.     setVal(std::numeric_limits<Real>::max());
+  a_helmBcoIrreg.setVal(std::numeric_limits<Real>::max());
+#endif
+
+  // TLDR: This routine is for setting coefficients in the Helmholtz operator. These coefficients are set as A = kappa, B = 1/(3*kappa). We happen to know that
+  //       the interior face stencils are interpolated using the neigboring face, so we must fill the "ghost faces" around the B-coefficient grid patch. 
+
+  const RealVect probLo  = m_amr->getProbLo();
+  const Real     dx      = m_amr->getDx()[a_lvl];
   
   const EBISBox& ebisbox = a_helmAco.getEBISBox();
   const EBGraph& ebgraph = ebisbox.getEBGraph();
 
-  // Regular aco
+  const Box cellBox    = m_amr->getGrids(m_realm)[a_lvl][a_dit];
+  const Box helmAcoBox = a_helmAco.box() & m_amr->getDomains()[a_lvl];
+  const Box helmBcoBox = a_helmBco.box() & m_amr->getDomains()[a_lvl];
+
+  // Regular A-coefficient. Recall that the A-coefficient only affects the diagonal part of the stencil so there's no need to fill anything
+  // outside of the cell-centered grid patch.
   BaseFab<Real>& helmAcoReg = a_helmAco.getSingleValuedFAB();
-  for (BoxIterator bit(a_cellBox); bit.ok(); ++bit){
+  for (BoxIterator bit(cellBox); bit.ok(); ++bit){
     const IntVect iv = bit();
 
-    if(ebisbox.isRegular(iv)){
-      const RealVect pos = probLo + iv*dx*RealVect::Unit;
-      helmAcoReg(iv, m_comp) = m_RtSpecies->getKappa(pos);
-    }
+    const RealVect pos   = probLo + (0.5*RealVect::Unit + RealVect(iv))*dx;
+    const Real     kappa = m_RtSpecies->getAbsorptionCoefficient(pos);
+      
+    helmAcoReg(iv, m_comp) = kappa;
   }
 
-  // Irregular cells
+  // Regular B-coefficient. Recall that EBHelmholtzOp sets up the face centroid fluxes by interpolating with neighboring face-centered fluxes. The interpolating stencil
+  // will have a radius of 1, so we need to fill one of the ghost faces outside of the grid patch. Only the ones that are "tangential" to the face direction
+  // are necessary to fill.
+  for (int dir = 0; dir < SpaceDim; dir++){
+    EBFaceFAB& helmBcoFace = a_helmBco[dir];
+
+    // Cell-centered box, grown by one in every direction except 'dir'. This box will also contain
+    // the "ghost faces".
+    Box grownCellBox = cellBox;
+    for (int otherDir = 0; otherDir < SpaceDim; otherDir++){
+      if(otherDir != dir){
+	grownCellBox.grow(otherDir, 1);
+      }
+    }
+    grownCellBox &= m_amr->getDomains()[a_lvl];
+
+    // Cut-cells in the grown box. 
+    const IntVectSet irregIVS = ebisbox.getIrregIVS(grownCellBox);    
+
+    // Face-centered box which also contains the "ghost faces". 
+    const Box faceBox = surroundingNodes(grownCellBox, dir);
+
+    // Fill regular interior faces. 
+    BaseFab<Real>& helmBcoReg = helmBcoFace.getSingleValuedFAB();
+    for (BoxIterator bit(faceBox); bit.ok(); ++bit){
+      const IntVect iv = bit();
+
+      const RealVect pos   = probLo + dx * ((RealVect(iv) + 0.5*RealVect::Unit) - 0.5*BASISREALV(dir));
+      const Real     kappa = m_RtSpecies->getAbsorptionCoefficient(pos);
+      
+      helmBcoReg(iv, m_comp) = 1./(3.0*kappa);
+    }
+
+    // Fill interior cut-cell faces. 
+    for (FaceIterator faceIt(irregIVS, ebgraph, dir, FaceStop::SurroundingWithBoundary); faceIt.ok(); ++faceIt){
+      const FaceIndex face = faceIt();
+      
+      const RealVect pos   = probLo + Location::position(Location::Face::Center, face, ebisbox, dx);
+      const Real     kappa = m_RtSpecies->getAbsorptionCoefficient(pos);
+
+      helmBcoFace(face, m_comp) = 1./(3.0*kappa);
+    }
+  }
+  
+  // Fill A-coefficient in cut-cells and the EB-centered B-coefficient. Again, the A-part is diagonal so we don't need to fill anything outside the grid patch. For
+  // the B-coefficient on the EB face then the stencil in the cut-cell will not reach into neighboring EB faces (really, it shouldn't!) so no need for filling
+  // things outside the grid patch here, either. 
   VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[a_dit];
   for (vofit.reset(); vofit.ok(); ++vofit){
     const VolIndex& vof = vofit();
 
     const RealVect pos   = probLo + Location::position(m_dataLocation, vof, ebisbox, dx);
-    const Real     kappa = m_RtSpecies->getKappa(pos);
-    
+    const Real     kappa = m_RtSpecies->getAbsorptionCoefficient(pos);
+
     a_helmAco     (vof, m_comp) = kappa;
-    a_helmBcoIrreg(vof, m_comp) = 1./kappa;
+    a_helmBcoIrreg(vof, m_comp) = 1./(3.0*kappa);
   }
 }
 

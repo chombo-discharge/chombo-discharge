@@ -58,7 +58,7 @@ namespace Physics {
     public:
       PhotonOne();
       ~PhotonOne(){}
-      Real getKappa(const RealVect a_pos) const { return m_lambda*m_pO2/sqrt(3.0);}
+      Real getAbsorptionCoefficient(const RealVect a_pos) const { return m_lambda*m_pO2/sqrt(3.0);}
       Real get_lambda() const { return m_lambda;}
       Real get_A()      const { return m_A;}
       Real get_pO2()    const { return m_pO2; }
@@ -73,7 +73,7 @@ namespace Physics {
     public:
       PhotonTwo();
       ~PhotonTwo(){}
-      Real getKappa(const RealVect a_pos) const { return m_lambda*m_pO2/sqrt(3.0);}
+      Real getAbsorptionCoefficient(const RealVect a_pos) const { return m_lambda*m_pO2/sqrt(3.0);}
       Real get_lambda() const { return m_lambda;}
       Real get_A()      const { return m_A;}
       Real get_pO2()    const { return m_pO2; }
@@ -88,7 +88,7 @@ namespace Physics {
     public:
       PhotonThree();
       ~PhotonThree(){}
-      Real getKappa(const RealVect a_pos) const { return m_lambda*m_pO2/sqrt(3.0);}
+      Real getAbsorptionCoefficient(const RealVect a_pos) const { return m_lambda*m_pO2/sqrt(3.0);}
       Real get_lambda() const { return m_lambda;}
       Real get_A()      const { return m_A;}
       Real get_pO2()    const { return m_pO2; }

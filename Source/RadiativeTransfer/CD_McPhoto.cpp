@@ -853,7 +853,7 @@ void McPhoto::generatePhotons(ParticleContainer<Photon>& a_photons, const EBAMRC
 	      
 	      for (int i = 0; i < numComputationalPhotons; i++){
 		const RealVect v = Units::c*this->randomDirection();
-		particles.append(Photon(pos, v, m_RtSpecies->getKappa(pos), weight));
+		particles.append(Photon(pos, v, m_RtSpecies->getAbsorptionCoefficient(pos), weight));
 	      }
 	    }
 	  }
@@ -875,7 +875,7 @@ void McPhoto::generatePhotons(ParticleContainer<Photon>& a_photons, const EBAMRC
 	    // Generate computational Photons 
 	    for (int i = 0; i < numComputationalPhotons; i++){
 	      const RealVect v = Units::c*this->randomDirection();
-	      particles.append(Photon(pos, v, m_RtSpecies->getKappa(pos), weight));
+	      particles.append(Photon(pos, v, m_RtSpecies->getAbsorptionCoefficient(pos), weight));
 	    }
 	  }
 	}

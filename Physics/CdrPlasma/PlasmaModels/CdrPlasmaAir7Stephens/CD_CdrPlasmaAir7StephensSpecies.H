@@ -96,7 +96,7 @@ namespace Physics {
     public:
       phot_c4v0_X1v0();
       ~phot_c4v0_X1v0(){}
-      Real getKappa(const RealVect a_pos) const {return m_kappa;}
+      Real getAbsorptionCoefficient(const RealVect a_pos) const {return m_kappa;}
       Real getRandomKappa() const {return m_kappa;}
     protected:
       Real m_kappa;
@@ -106,7 +106,7 @@ namespace Physics {
     public:
       phot_c4v0_X1v1();
       ~phot_c4v0_X1v1(){}
-      Real getKappa(const RealVect a_pos) const { return m_kappa; }
+      Real getAbsorptionCoefficient(const RealVect a_pos) const { return m_kappa; }
       Real getRandomKappa() const {return m_kappa;}
     protected:
       Real m_kappa;
@@ -116,7 +116,7 @@ namespace Physics {
     public:
       phot_c4v1_X1v0();
       ~phot_c4v1_X1v0(){};
-      Real getKappa(const RealVect a_pos) const { return m_kappa; }
+      Real getAbsorptionCoefficient(const RealVect a_pos) const { return m_kappa; }
       Real getRandomKappa() const {return m_kappa;}
     protected:
       Real m_kappa;
@@ -126,7 +126,7 @@ namespace Physics {
     public:
       phot_c4v1_X1v1();
       ~phot_c4v1_X1v1(){}
-      Real getKappa(const RealVect a_pos) const { return m_kappa; }
+      Real getAbsorptionCoefficient(const RealVect a_pos) const { return m_kappa; }
       Real getRandomKappa() const {return m_kappa;}
     protected:
       Real m_kappa;
@@ -136,7 +136,7 @@ namespace Physics {
     public:
       phot_c4v1_X1v2();
       ~phot_c4v1_X1v2(){}
-      Real getKappa(const RealVect a_pos) const { return m_kappa; }
+      Real getAbsorptionCoefficient(const RealVect a_pos) const { return m_kappa; }
       Real getRandomKappa() const {return m_kappa;}
     protected:
       Real m_kappa;
@@ -146,7 +146,7 @@ namespace Physics {
     public:
       phot_c4v1_X1v3();
       ~phot_c4v1_X1v3(){}
-      Real getKappa(const RealVect a_pos) const { return m_kappa; }
+      Real getAbsorptionCoefficient(const RealVect a_pos) const { return m_kappa; }
       Real getRandomKappa() const {return m_kappa;}
     protected:
       Real m_kappa;
@@ -156,7 +156,7 @@ namespace Physics {
     public:
       phot_b1v1_X1v0();
       ~phot_b1v1_X1v0(){}
-      Real getKappa(const RealVect a_pos) const { return m_kappa; }
+      Real getAbsorptionCoefficient(const RealVect a_pos) const { return m_kappa; }
       Real getRandomKappa() const {return m_kappa;}
     protected:
       Real m_kappa;
@@ -165,8 +165,8 @@ namespace Physics {
     class CdrPlasmaAir7Stephens::phot_b1v1_X1v1 : public RtSpecies {
     public:
       phot_b1v1_X1v1();
-      ~phot_b1v1_X1v1();
-      Real getKappa(const RealVect a_pos) const { return m_kappa; }
+      ~phot_b1v1_X1v1(){}
+      Real getAbsorptionCoefficient(const RealVect a_pos) const { return m_kappa; }
       Real getRandomKappa() const {return m_kappa;}
     protected:
       Real m_kappa;

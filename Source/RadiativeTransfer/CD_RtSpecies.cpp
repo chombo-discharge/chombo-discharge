@@ -14,58 +14,20 @@
 #include <CD_NamespaceHeader.H>
   
 RtSpecies::RtSpecies(){
-  
   // Default settings
-  this->define("DefaultRtSpecies", 1.0);
-
-  m_scatter = 0.0;
-  m_kappa   = 0.0;
+  m_name    = "DefaultRtSpecies";
 }
 
-RtSpecies::RtSpecies(const std::string a_name, const Real a_kappa){
-  this->define(a_name, a_kappa);
+RtSpecies::~RtSpecies(){
+
 }
 
-RtSpecies::RtSpecies(const std::string a_name, const std::function<Real(const RealVect a_pos)>& a_kappa) {
-  this->define(a_name, a_kappa);
-}
-
-void RtSpecies::define(const std::string a_name, const Real a_kappa){
-  m_name     = a_name;
-  m_kappa    = a_kappa;
-  m_constant = true;
-}
-
-void RtSpecies::define(const std::string a_name, const std::function<Real(const RealVect a_pos)>& a_kappa) {
-  m_name     = a_name;
-  m_varKappa = a_kappa;
-  m_constant = false;
-}
-
-std::string RtSpecies::getName() const{
+std::string RtSpecies::getName() const {
   return m_name;
 }
 
-bool RtSpecies::isKappaConstant() const {
-  return m_constant;
-}
-
-Real RtSpecies::getKappa(const RealVect a_pos) const{
-  if(m_constant){
-    return m_kappa;
-  }
-  else{
-    return m_varKappa(a_pos);
-  }
-}
-
-Real RtSpecies::getScatteringCoefficient(const RealVect a_pos) const{
-  if(m_constant){
-    return m_scatter;
-  }
-  else{
-    return m_varScatter(a_pos);
-  }
+Real RtSpecies::getScatteringCoefficient(const RealVect a_pos) const {
+  return 0.0;
 }
 
 #include <CD_NamespaceFooter.H>

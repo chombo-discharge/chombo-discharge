@@ -270,7 +270,7 @@ namespace Physics {
       /*!
 	@brief Get the absorption coefficient
       */
-      virtual Real getKappa(const RealVect a_pos) const;
+      virtual Real getAbsorptionCoefficient(const RealVect a_pos) const;
 
       /*!
 	@brief Get the lambda coefficient
@@ -322,7 +322,7 @@ namespace Physics {
       /*!
 	@brief Get the absorption coefficient
       */
-      virtual Real getKappa(const RealVect a_pos) const;
+      virtual Real getAbsorptionCoefficient(const RealVect a_pos) const;
 
       /*!
 	@brief Get the lambda coefficient
@@ -374,7 +374,7 @@ namespace Physics {
       /*!
 	@brief Get the absorption coefficient
       */
-      virtual Real getKappa(const RealVect a_pos) const;
+      virtual Real getAbsorptionCoefficient(const RealVect a_pos) const;
 
       /*!
 	@brief Get the lambda coefficient
