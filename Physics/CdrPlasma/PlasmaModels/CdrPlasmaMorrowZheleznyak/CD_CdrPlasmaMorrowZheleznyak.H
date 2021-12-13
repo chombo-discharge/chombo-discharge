@@ -281,7 +281,7 @@ namespace Physics {
 	~UvPhoton();
 
 
-	Real getKappa(const RealVect a_pos) const;
+	Real getAbsorptionCoefficient(const RealVect a_pos) const;
 	Real getRandomKappa() const;
 
 	Real getPO2() const { return m_pO2; }

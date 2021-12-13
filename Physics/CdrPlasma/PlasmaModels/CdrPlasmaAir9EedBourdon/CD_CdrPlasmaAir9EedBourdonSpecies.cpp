@@ -320,7 +320,7 @@ Real CdrPlasmaAir9EedBourdon::Ominus::initialData(const RealVect a_pos, const Re
   return 0.0;
 }
 
-Real CdrPlasmaAir9EedBourdon::PhotonOne::getKappa(const RealVect a_pos) const {
+Real CdrPlasmaAir9EedBourdon::PhotonOne::getAbsorptionCoefficient(const RealVect a_pos) const {
   return m_lambda*m_pO2/(sqrt(3.0));
 }
 
@@ -336,7 +336,7 @@ Real CdrPlasmaAir9EedBourdon::PhotonOne::getPO2() const {
   return m_pO2;
 }
 
-Real CdrPlasmaAir9EedBourdon::PhotonTwo::getKappa(const RealVect a_pos) const {
+Real CdrPlasmaAir9EedBourdon::PhotonTwo::getAbsorptionCoefficient(const RealVect a_pos) const {
   return m_lambda*m_pO2/(sqrt(3.0));
 }
 
@@ -352,7 +352,7 @@ Real CdrPlasmaAir9EedBourdon::PhotonTwo::getPO2() const {
   return m_pO2;
 }
 
-Real CdrPlasmaAir9EedBourdon::PhotonThree::getKappa(const RealVect a_pos) const{
+Real CdrPlasmaAir9EedBourdon::PhotonThree::getAbsorptionCoefficient(const RealVect a_pos) const{
   return m_lambda*m_pO2/(sqrt(3.0));
 }
 

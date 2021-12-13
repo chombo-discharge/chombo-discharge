@@ -905,8 +905,8 @@ CdrPlasmaMorrowZheleznyak::UvPhoton::~UvPhoton(){
   
 }
 
-Real CdrPlasmaMorrowZheleznyak::UvPhoton::getKappa(const RealVect a_pos) const {
-  MayDay::Abort("CdrPlasmaMorrowZheleznyak::UvPhoton::getKappa - should not be called. CdrPlasmaMorrowZheleznyak is used with the McPhoto module");
+Real CdrPlasmaMorrowZheleznyak::UvPhoton::getAbsorptionCoefficient(const RealVect a_pos) const {
+  return this->getRandomKappa();
 }
 
 Real CdrPlasmaMorrowZheleznyak::UvPhoton::getRandomKappa() const {
