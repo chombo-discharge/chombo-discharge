@@ -992,8 +992,8 @@ void CdrPlasmaGodunovStepper::advanceTransportSemiImplicit(const Real a_dt){
   this->computeCellConductivity(m_conductivityFactor);
   DataOps::scale(m_conductivityFactor, a_dt/Units::eps0);
 
-  m_amr->averageDown(m_conductivityFactor, m_realm, m_phase);
-  m_amr->interpGhost(m_conductivityFactor, m_realm, m_phase);  
+  m_amr->averageDown  (m_conductivityFactor, m_realm, m_phase);
+  m_amr->interpGhostMG(m_conductivityFactor, m_realm, m_phase);  
 
   // Average conductivity to faces and set up the semi-implicit poisson equation. 
   this->computeFaceConductivity (m_conductivityFace, m_conductivityEB, m_conductivityFactor);
