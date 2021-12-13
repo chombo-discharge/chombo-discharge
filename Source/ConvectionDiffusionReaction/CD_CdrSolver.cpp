@@ -311,10 +311,13 @@ void CdrSolver::averageVelocityToFaces(EBAMRFluxData& a_faceVelocity, const EBAM
   CH_assert(a_faceVelocity[0]->nComp() == 1       );
   CH_assert(a_cellVelocity[0]->nComp() == SpaceDim);
 
+#ifndef NDEBUG
+  // Put in something huge in debug code so we can catch if the code breaks. 
+  DataOps::setValue(a_faceVelocity, std::numeric_limits<Real>::max());
+#endif
+
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     DataOps::averageCellVectorToFaceScalar(*a_faceVelocity[lvl], *a_cellVelocity[lvl], m_amr->getDomains()[lvl]);
-    
-    a_faceVelocity[lvl]->exchange();
   }
 }
 
@@ -496,13 +499,15 @@ void CdrSolver::computeAdvectionFlux(LevelData<EBFluxFAB>&       a_flux,
   CH_assert(a_facePhi.     nComp() == 1);
   CH_assert(a_faceVelocity.nComp() == 1);
 
-  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
-  const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[a_lvl];
+  const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[a_lvl];
+  const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[a_lvl];
+  const ProblemDomain&     domain = m_amr->getDomains()[a_lvl];
 
   for (DataIterator dit(dbl); dit.ok(); ++dit){
-    const Box box          = dbl.get(dit());
+    const Box      cellBox = dbl[dit()];
     const EBISBox& ebisbox = ebisl[dit()];
     const EBGraph& ebgraph = ebisbox.getEBGraph();
+
 
     for (int dir = 0; dir < SpaceDim; dir++){
       EBFaceFAB& flux      = a_flux        [dit()][dir];
@@ -513,9 +518,13 @@ void CdrSolver::computeAdvectionFlux(LevelData<EBFluxFAB>&       a_flux,
       flux += phi;
       flux *= vel;
 
+      // The stencil we use will interpolate to the face centroids, so we need to correct the fluxes on cell centers, but including tangential ghost faces
+      // around the grid patch. 
+      Box grownCellBox = grow(cellBox, 1) & domain;
+
       // Irregular faces
       const FaceStop::WhichFaces stopcrit = FaceStop::SurroundingWithBoundary;
-      for (FaceIterator faceit(ebisbox.getIrregIVS(box), ebgraph, dir, stopcrit); faceit.ok(); ++faceit){
+      for (FaceIterator faceit(ebisbox.getIrregIVS(grownCellBox), ebgraph, dir, stopcrit); faceit.ok(); ++faceit){
 	const FaceIndex& face = faceit();
 	
 	flux(face, m_comp) = vel(face, m_comp)*phi(face, m_comp);
@@ -558,7 +567,8 @@ void CdrSolver::computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelDa
 
   // TLDR: This routine computes the diffusion flux F = D*Grad(phi) on face centers. Since this uses centered differencing
   //       and we don't have valid data outside the computational domain we only do the differencing for interior faces,
-  //       setting the flux to zero on domain faces. 
+  //       setting the flux to zero on domain faces. Note that we need to fill flux in the tangential ghost face centers because
+  //       the face centroid flux is interpolated between face centers. 
 
   const Real dx                = m_amr->getDx()[a_lvl];
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
@@ -577,12 +587,16 @@ void CdrSolver::computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelDa
 
       flux.setVal(0.0);
       
-      // Only want interior faces -- the domain flux will be set to zero (what else would it be...?)
-      Box compBox = cellBox;
-      compBox.grow(dir, 1);
-      compBox &= domain;
-      compBox.grow(dir, -1);
-      compBox.surroundingNodes(dir);
+      // Only want interior faces -- the domain flux will be set to zero (what else would it be...?). Anyways, recall that
+      // the cut-cell face centroid fluxes are interpolated between face centers. So, if a face at the edge of a patch is cut
+      // by the EB, the interpolant will reach out of the patch. Thus, we must fill the flux for the tangential ghost faces
+      // outside the grid patch. 
+      Box grownCellBox = cellBox;
+      grownCellBox.grow(1);
+      grownCellBox &= domain;
+      grownCellBox.grow(dir, -1);
+
+      const Box grownFaceBox = surroundingNodes(grownCellBox, dir);
 
       // Fortran kernel -- this computes f = D(face)*(phi(iv_high) - phi(iv-low))/dx
       BaseFab<Real>& regFlux      = flux.getSingleValuedFAB();
@@ -594,11 +608,11 @@ void CdrSolver::computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelDa
 		     CHF_CONST_FRA1(regDco, m_comp),
 		     CHF_CONST_INT(dir),
 		     CHF_CONST_REAL(dx),
-		     CHF_BOX(compBox));
+		     CHF_BOX(grownFaceBox));
 
 
-      // Irregular faces need to be redone. 
-      for (FaceIterator faceit(ebisbox.getIrregIVS(cellBox), ebgraph, dir, FaceStop::SurroundingWithBoundary); faceit.ok(); ++faceit){
+      // Irregular faces need to be redone beacuse Fortran will not do them correctly. 
+      for (FaceIterator faceit(ebisbox.getIrregIVS(grownCellBox), ebgraph, dir, FaceStop::SurroundingWithBoundary); faceit.ok(); ++faceit){
 	const FaceIndex& face = faceit();
 
 	if(!face.isBoundary()){ 
