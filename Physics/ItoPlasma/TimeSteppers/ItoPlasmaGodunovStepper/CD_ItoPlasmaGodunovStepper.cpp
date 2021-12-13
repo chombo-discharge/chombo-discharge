@@ -388,7 +388,7 @@ Real ItoPlasmaGodunovStepper::advance(const Real a_dt) {
   // Sort the particles and Photons per cell so we can call reaction algorithms
   MPI_Barrier(Chombo_MPI::comm);
   sort_time = -Timer::wallClock();
-  m_ito->sortParticlesByCell(ItoSolver::WhichContainer::bulk);
+  m_ito->sortParticlesByCell(ItoSolver::WhichContainer::Bulk);
   this->sortPhotonsByCell(McPhoto::WhichContainer::Bulk);
   this->sortPhotonsByCell(McPhoto::WhichContainer::Source);
   sort_time += Timer::wallClock();
@@ -403,14 +403,14 @@ Real ItoPlasmaGodunovStepper::advance(const Real a_dt) {
   MPI_Barrier(Chombo_MPI::comm);
   super_time = -Timer::wallClock();
   if((m_timeStep+1) % m_merge_interval == 0 && m_merge_interval > 0){
-    m_ito->makeSuperparticles(ItoSolver::WhichContainer::bulk, m_ppc);
+    m_ito->makeSuperparticles(ItoSolver::WhichContainer::Bulk, m_ppc);
   }
   super_time += Timer::wallClock();
 
   // Sort particles per patch.
   MPI_Barrier(Chombo_MPI::comm);
   sort_time -= Timer::wallClock();
-  m_ito->sortParticlesByPatch(ItoSolver::WhichContainer::bulk);
+  m_ito->sortParticlesByPatch(ItoSolver::WhichContainer::Bulk);
   this->sortPhotonsByPatch(McPhoto::WhichContainer::Bulk);
   this->sortPhotonsByPatch(McPhoto::WhichContainer::Source);
   sort_time += Timer::wallClock();
@@ -419,8 +419,8 @@ Real ItoPlasmaGodunovStepper::advance(const Real a_dt) {
   MPI_Barrier(Chombo_MPI::comm);
   clear_time = -Timer::wallClock();
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
-    solver_it()->clear(ItoSolver::WhichContainer::eb);
-    solver_it()->clear(ItoSolver::WhichContainer::domain);
+    solver_it()->clear(ItoSolver::WhichContainer::EB);
+    solver_it()->clear(ItoSolver::WhichContainer::Domain);
   }
   clear_time += Timer::wallClock();
 
@@ -653,9 +653,9 @@ void ItoPlasmaGodunovStepper::regrid(const int a_lmin, const int a_oldFinestLeve
   MPI_Barrier(Chombo_MPI::comm);
   super_time -= Timer::wallClock();
   if(m_regrid_superparticles){
-    m_ito->sortParticlesByCell( ItoSolver::WhichContainer::bulk);
-    m_ito->makeSuperparticles(    ItoSolver::WhichContainer::bulk, m_ppc);
-    m_ito->sortParticlesByPatch(ItoSolver::WhichContainer::bulk);
+    m_ito->sortParticlesByCell( ItoSolver::WhichContainer::Bulk);
+    m_ito->makeSuperparticles(    ItoSolver::WhichContainer::Bulk, m_ppc);
+    m_ito->sortParticlesByPatch(ItoSolver::WhichContainer::Bulk);
   }
   super_time += Timer::wallClock();
 
@@ -749,7 +749,7 @@ void ItoPlasmaGodunovStepper::setOldPositions(){
     
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
       const DisjointBoxLayout& dbl          = m_amr->getGrids(m_particleRealm)[lvl];
-      ParticleData<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::bulk)[lvl];
+      ParticleData<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
@@ -773,7 +773,7 @@ void ItoPlasmaGodunovStepper::remapGodunovParticles(Vector<ParticleContainer<Ito
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ItoSolver>&   solver = solver_it();
-    RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
+    const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
     const int idx = solver_it.index();
 
@@ -820,7 +820,7 @@ void ItoPlasmaGodunovStepper::deposit_ItoPlasmaGodunovParticles(const Vector<Par
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ItoSolver>&   solver = solver_it();
-    RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
+    const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
     const int idx = solver_it.index();
 
@@ -867,7 +867,7 @@ void ItoPlasmaGodunovStepper::clearGodunovParticles(const Vector<ParticleContain
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ItoSolver>&   solver = solver_it();
-    RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
+    const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
     const int idx = solver_it.index();
 
@@ -928,7 +928,7 @@ void ItoPlasmaGodunovStepper::compute_cell_conductivity(EBAMRCellData& a_conduct
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ItoSolver>&   solver = solver_it();
-    RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
+    const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
     
     const int idx = solver_it.index();
     const int q   = species->getChargeNumber();
@@ -1072,7 +1072,7 @@ void ItoPlasmaGodunovStepper::copyConductivityParticles(Vector<ParticleContainer
       const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	const List<ItoParticle>& ito_parts = solver->getParticles(ItoSolver::WhichContainer::bulk)[lvl][dit()].listItems();
+	const List<ItoParticle>& ito_parts = solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl][dit()].listItems();
 	List<ItoPlasmaGodunovParticle>& gdnv_parts  = (*a_conductivity_particles[idx])[lvl][dit()].listItems();
 
 	if(q != 0 && solver->isMobile()){
@@ -1107,7 +1107,7 @@ void ItoPlasmaGodunovStepper::copyRhoDaggerParticles(Vector<ParticleContainer<It
       const DisjointBoxLayout& dbl = m_amr->getGrids(m_particleRealm)[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-	const List<ItoParticle>& ito_parts = solver->getParticles(ItoSolver::WhichContainer::bulk)[lvl][dit()].listItems();
+	const List<ItoParticle>& ito_parts = solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl][dit()].listItems();
 	List<ItoPlasmaGodunovParticle>& gdnv_parts  = (*a_rho_dagger_particles[idx])[lvl][dit()].listItems();
 
 	gdnv_parts.clear();
@@ -1320,7 +1320,7 @@ void ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruyama(Vector<ParticleConta
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ItoSolver>& solver   = solver_it();
-    RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
+    const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
     const int idx = solver_it.index();
 
@@ -1332,7 +1332,7 @@ void ItoPlasmaGodunovStepper::diffuseParticlesEulerMaruyama(Vector<ParticleConta
     
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
       const DisjointBoxLayout& dbl          = m_amr->getGrids(m_particleRealm)[lvl];
-      ParticleData<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::bulk)[lvl];
+      ParticleData<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
@@ -1388,7 +1388,7 @@ void ItoPlasmaGodunovStepper::stepEulerMaruyama(const Real a_dt){
       
       for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
 	const DisjointBoxLayout& dbl          = m_amr->getGrids(m_particleRealm)[lvl];
-	ParticleData<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::bulk)[lvl];
+	ParticleData<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
 
 	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
@@ -1465,7 +1465,7 @@ void ItoPlasmaGodunovStepper::preTrapezoidalPredictor(Vector<ParticleContainer<I
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ItoSolver>& solver   = solver_it();
-    RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
+    const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
     const int idx = solver_it.index();
 
@@ -1477,7 +1477,7 @@ void ItoPlasmaGodunovStepper::preTrapezoidalPredictor(Vector<ParticleContainer<I
     
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
       const DisjointBoxLayout& dbl          = m_amr->getGrids(m_particleRealm)[lvl];
-      ParticleData<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::bulk)[lvl];
+      ParticleData<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
@@ -1525,7 +1525,7 @@ void ItoPlasmaGodunovStepper::trapezoidalPredictor(const Real a_dt){
       
       for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
 	const DisjointBoxLayout& dbl          = m_amr->getGrids(m_particleRealm)[lvl];
-	ParticleData<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::bulk)[lvl];
+	ParticleData<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
 
 	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
@@ -1554,7 +1554,7 @@ void ItoPlasmaGodunovStepper::preTrapezoidalCorrector(Vector<ParticleContainer<I
 
   for (auto solver_it = m_ito->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<ItoSolver>& solver   = solver_it();
-    RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
+    const RefCountedPtr<ItoSpecies>& species = solver->getSpecies();
 
     const int idx = solver_it.index();
 
@@ -1566,7 +1566,7 @@ void ItoPlasmaGodunovStepper::preTrapezoidalCorrector(Vector<ParticleContainer<I
     
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
       const DisjointBoxLayout& dbl          = m_amr->getGrids(m_particleRealm)[lvl];
-      ParticleData<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::bulk)[lvl];
+      ParticleData<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 
@@ -1612,7 +1612,7 @@ void ItoPlasmaGodunovStepper::trapezoidalCorrector(const Real a_dt){
       
       for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
 	const DisjointBoxLayout& dbl          = m_amr->getGrids(m_particleRealm)[lvl];
-	ParticleData<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::bulk)[lvl];
+	ParticleData<ItoParticle>& particles = solver->getParticles(ItoSolver::WhichContainer::Bulk)[lvl];
 
 	for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 

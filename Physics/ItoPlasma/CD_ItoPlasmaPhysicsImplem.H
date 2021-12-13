@@ -484,14 +484,14 @@ void ItoPlasmaPhysics::reconcilePhotons(List<Photon>&      a_Photons,
     const RealVect p = this->randomPosition(a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
     const RealVect v = Units::c*randomDirection();
       
-    a_Photons.add(Photon(p, v, a_species.getKappa(p), weight));
+    a_Photons.add(Photon(p, v, a_species.getAbsorptionCoefficient(p), weight));
   }
 
   // If we used superPhotons the last Photon gets some extra oomph. 
   if(remainder > 0){
     const RealVect p = this->randomPosition(a_cellPos, a_centroidPos, a_lo, a_hi, a_bndryCentroid, a_bndryNormal, a_dx, a_kappa);
     const RealVect v = Units::c*randomDirection();
-    a_Photons.add(Photon(p, v, a_species.getKappa(p), weight + remainder));
+    a_Photons.add(Photon(p, v, a_species.getAbsorptionCoefficient(p), weight + remainder));
   }
 }
 
