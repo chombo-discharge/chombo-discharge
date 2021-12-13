@@ -1473,7 +1473,7 @@ void DataOps::setValue(LevelData<MFCellFAB>& a_lhs, const std::function<Real(con
       EBCellFAB& phaseData        = lhs.getPhase(i);
       BaseFab<Real>& phaseDataFAB = phaseData.getSingleValuedFAB();
 
-      const Box box           = dbl[dit()];
+      const Box box           = phaseData.box();
       const EBISBox& ebisbox  = phaseData.getEBISBox();
       const EBGraph& ebgraph  = ebisbox.getEBGraph();
       const IntVectSet& irreg = ebisbox.getIrregIVS(box);
@@ -1518,7 +1518,7 @@ void DataOps::setValue(LevelData<EBCellFAB>& a_lhs, const std::function<Real(con
     EBCellFAB& lhs        = a_lhs[dit()];
     BaseFab<Real>& lhsFAB = lhs.getSingleValuedFAB();
     
-    const Box box           = dbl[dit()];
+    const Box box           = lhs.box();
     const EBISBox& ebisbox  = lhs.getEBISBox();
     const EBGraph& ebgraph  = ebisbox.getEBGraph();
     const IntVectSet& irreg = ebisbox.getIrregIVS(box);
@@ -1562,7 +1562,7 @@ void DataOps::setValue(LevelData<EBFluxFAB>& a_lhs, const std::function<Real(con
       EBFaceFAB& lhs        = a_lhs[dit()][dir];
       BaseFab<Real>& lhsFAB = lhs.getSingleValuedFAB();
     
-      const Box box           = dbl[dit()];
+      const Box box           = lhs.getRegion();
       const EBISBox& ebisbox  = lhs.getEBISBox();
       const EBGraph& ebgraph  = ebisbox.getEBGraph();
       const IntVectSet& irreg = ebisbox.getIrregIVS(box);
@@ -1641,7 +1641,7 @@ void DataOps::setValue(LevelData<EBCellFAB>& a_lhs, const std::function<RealVect
     EBCellFAB& lhs        = a_lhs[dit()];
     BaseFab<Real>& lhsFAB = lhs.getSingleValuedFAB();
     
-    const Box box           = dbl[dit()];
+    const Box box           = lhs.box();
     const EBISBox& ebisbox  = lhs.getEBISBox();
     const EBGraph& ebgraph  = ebisbox.getEBGraph();
     const IntVectSet& irreg = ebisbox.getIrregIVS(box);
