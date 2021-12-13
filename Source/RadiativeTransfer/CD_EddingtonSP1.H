@@ -413,20 +413,21 @@ protected:
   virtual void setHelmholtzCoefficients();
 
   /*!
-    @brief Set aco and bco (on irregular faces only)
-    @param[out] a_helmAco      Helmholtz A-coefficient on on data centers
+    @brief Set EBHelmholtzOp A- and B-coefficients. 
+    @details For the B-coefficient, this also fills one of the tangential ghost faces. 
+    @param[out] a_helmAco      Helmholtz A-coefficient on on cell centers
+    @param[out] a_helmBco      Helmholtz B-coefficient on on face centers
     @param[out] a_helmBcoIrreg Helmholtz B-coefficient on EB faces
-    @param[in]  a_cellBox      Computation box
     @param[in]  a_lvl          Grid level
     @param[in]  a_dit          Grid index
   */
   virtual void setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
+					   EBFluxFAB&       a_helmBco,
 					   BaseIVFAB<Real>& a_helmBcoIrreg,
-					   const Box        a_cellBox,
 					   const int        a_lvl,
 					   const DataIndex& a_dit);
 
-    /*!
+  /*!
     @brief Set the operator factory
   */
   virtual void setupHelmholtzFactory();
@@ -466,7 +467,7 @@ protected:
   */
   virtual void parseDomainBC();
 
-    /*!
+  /*!
     @brief Parse domain BC settings
   */
   virtual void parseEBBC();

@@ -738,8 +738,6 @@ void AmrMesh::setBaseImplicitFunction(const phase::which_phase a_phase, const Re
     pout() << "AmrMesh::setBaseImplicitFunction(phase::which_phase, RefCountedPtr<BaseIF>)" << endl;
   }
 
-  CH_assert(!a_baseIF.isNull());
-
   m_baseif.emplace(a_phase, a_baseIF);
 }
 
