@@ -1,9 +1,0 @@
-# ====================================================================================================
-# RTE_STEPPER CLASS OPTIONS
-# ====================================================================================================
-RadiativeTransferStepper.verbosity      = -1      # Verbosity
-RadiativeTransferStepper.realm          = primal  # Realm 
-RadiativeTransferStepper.kappa          = 1.0     # Inverse absorption coefficient
-RadiativeTransferStepper.blob_amplitude = 1.0     # Blob amplitude
-RadiativeTransferStepper.blob_radius    = 0.1     # Blob radius
-RadiativeTransferStepper.blob_center    = 0 0     # Blob center
