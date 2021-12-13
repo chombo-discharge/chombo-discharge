@@ -674,7 +674,7 @@ void EddingtonSP1::setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
 
     if(ebisbox.isRegular(iv)){
       const RealVect pos = probLo + iv*dx*RealVect::Unit;
-      helmAcoReg(iv, m_comp) = m_RtSpecies->getKappa(pos);
+      helmAcoReg(iv, m_comp) = m_RtSpecies->getAbsorptionCoefficient(pos);
     }
   }
 
@@ -684,7 +684,7 @@ void EddingtonSP1::setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
     const VolIndex& vof = vofit();
 
     const RealVect pos   = probLo + Location::position(m_dataLocation, vof, ebisbox, dx);
-    const Real     kappa = m_RtSpecies->getKappa(pos);
+    const Real     kappa = m_RtSpecies->getAbsorptionCoefficient(pos);
     
     a_helmAco     (vof, m_comp) = kappa;
     a_helmBcoIrreg(vof, m_comp) = 1./kappa;

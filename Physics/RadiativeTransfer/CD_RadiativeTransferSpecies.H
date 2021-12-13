@@ -35,7 +35,21 @@ namespace Physics {
       /*!
 	@brief Destructor (does nothing)
       */      
-      ~RadiativeTransferSpecies();
+      virtual ~RadiativeTransferSpecies();
+
+      /*!
+	@brief Get absorption coefficient (i.e. the inverse absorption length) at physical coordinates. 
+	@param[in] a_pos Physical coordinates. 
+      */
+      virtual Real getAbsorptionCoefficient(const RealVect a_pos) const override;
+
+    protected:
+
+      /*!
+	@brief Absorption coefficient.
+	@details Storing this as a std::function to show to easily use lambdas for returning spatially varying coefficients. 
+      */
+      std::function<Real(const RealVect a_pos)> m_kappa;
     };
   }
 }

@@ -22,57 +22,36 @@
 #include <CD_NamespaceHeader.H>
 
 /*!
-  @brief Declaration of a class that defines an interface to radiative transfer solvers. 
-  @details This is a lightweight class - it just holds a name for the group and the kappa for the radiative transfer species.
+  @brief Declaration of a class that defines an interface to radiative transfer solvers, i.e. RtSolver. 
+  @details This is a lightweight class - it just holds a name for the species as well as a function signature for obtaining the absorption and 
+  scattering coefficients. Note that this species supports spatially varying absorption and scattering coefficients. 
 */
 class RtSpecies {
 public:
+  
   /*!
-    @brief Weak constructor, must subsequently call define
+    @brief Weak constructor. Sets absorption length and scattering coefficients to one. 
   */
   RtSpecies();
 
   /*!
-    @brief Constructor, constant kappa
-    @param[in] a_name  Species name
-    @param[in] a_kappa Kappa (inverse absorption length)
+    @brief Weak constructor. Sets absorption length and scattering coefficients to one. 
   */
-  RtSpecies(const std::string a_name, const Real a_kappa);
-
-  /*!
-    @brief Constructor, spatially dependent kappa
-    @param[in] a_name  Species name
-    @param[in] a_kappa Kappa (inverse absorption length)
-  */
-  RtSpecies(const std::string a_name, const std::function<Real(const RealVect a_pos)>& a_kappa);
-
-  /*!
-    @brief Define function. This sets a constant absorption length.
-    @param[in] a_name  Species name
-    @param[in] a_kappa Kappa (inverse absorption length)
-  */
-  virtual void define(const std::string a_name, const Real a_kappa);
-
-  /*!
-    @brief Define function. This sets a spatially varying absorption length.
-    @param[in] a_name  Species name
-    @param[in] a_kappa Kappa (inverse absorption length)
-  */
-  virtual void define(const std::string a_name, const std::function<Real(const RealVect a_pos)>& a_kappa);
+  virtual ~RtSpecies();  
 
   /*!
     @brief Get species name.
   */
-  virtual std::string getName() const;
+  std::string getName() const;
 
   /*!
-    @brief Get kappa at position. 
+    @brief Get kappa (i.e. the inverse absorption length) at physical coordinates. 
     @param[in] a_pos Physical coordinates. 
   */
-  virtual Real getKappa(const RealVect a_pos) const;
+  virtual Real getAbsorptionCoefficient(const RealVect a_pos) const = 0;
 
   /*!
-    @brief Get scattering coefficient. 
+    @brief Get scattering coefficient (i.e. the inverse scattering length) at physical coordinates. 
     @param[in] a_pos Physical coordinates. 
     @note This is not used anywhere (yet).
   */
@@ -84,31 +63,6 @@ protected:
     @brief Group name
   */
   std::string m_name;
-
-  /*!
-    @brief Switch for using constant value or function
-  */
-  bool m_constant;
-
-  /*!
-    @brief Constant kappa
-  */
-  Real m_kappa;
-
-  /*!
-    @brief Scatter coefficient
-  */
-  Real m_scatter;
-
-  /*!
-    @brief Variable kappa
-  */
-  std::function<Real(const RealVect a_pos)> m_varKappa;
-
-  /*!
-    @brief Variable kappa
-  */
-  std::function<Real(const RealVect a_pos)> m_varScatter;
 };
 
 #include <CD_NamespaceFooter.H>

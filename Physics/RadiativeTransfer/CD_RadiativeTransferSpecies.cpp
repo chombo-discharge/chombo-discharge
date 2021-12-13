@@ -24,14 +24,25 @@ RadiativeTransferSpecies::RadiativeTransferSpecies(){
   
   // This stuff sets the name and a constnat kappa taken from the input script
   m_name     = "RadiativeTransferSpecies";
-  m_constant = true;
 
+  // Set constant kappa. 
   ParmParse pp("RadiativeTransferStepper");
-  pp.get("kappa", m_kappa);
+
+  Real kappa;
+  pp.get("kappa", kappa);
+
+  // Set the spatially varying absorption coefficient to a constant. 
+  m_kappa = [kappa](const RealVect a_pos) -> Real {
+    return kappa;
+  };
 }
 
 RadiativeTransferSpecies::~RadiativeTransferSpecies(){
   CH_TIME("RadiativeTransferSpecies::~RadiativeTransferSpecies");
+}
+
+Real RadiativeTransferSpecies::getAbsorptionCoefficient(const RealVect a_pos) const {
+  return m_kappa(a_pos);
 }
 
 #include <CD_NamespaceFooter.H>
