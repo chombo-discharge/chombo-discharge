@@ -22,6 +22,10 @@ jobs:
           repository: chombo-discharge/chombo-discharge
           path: chombo-discharge
 
+      - name: amihere
+        run: |
+          ls -ahl $DISCHARGE_HOME/Local/CI
+
       - name: Install dependencies
         run: |
           sudo apt-get update

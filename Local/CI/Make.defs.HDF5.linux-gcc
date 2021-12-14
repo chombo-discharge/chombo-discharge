@@ -1,8 +1,8 @@
 #begin  -- dont change this line
 
 DIM            = 2
-DEBUG          = FALSE
-OPT            = HIGH
+DEBUG          = TRUE
+OPT            = TRUE
 PRECISION      = DOUBLE
 PROFILE        = FALSE
 CXX            = g++
