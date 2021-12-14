@@ -14,3 +14,9 @@ jobs:
         run: |
           sudo git clone https://github.com/chombo-discharge/Chombo-3.3.git
 
+      - name: Checkout chombo-discharge
+        uses: actions/checkout@v2
+        with:
+          path: chombo-discharge
+
+
