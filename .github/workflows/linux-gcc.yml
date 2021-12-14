@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   serial-no-hdf:
-    name: GNU@10.0 C++14 Serial without HDF5
+    name: GNU@10.0 C++14 serial without HDF5
     runs-on: ubuntu-latest
     env: 
       CHOMBO_HOME: ${{github.workspace}}/Chombo-3.3/lib
@@ -49,7 +49,7 @@ jobs:
         working-directory: ${{ env.CHOMBO_HOME }}
 
   serial-hdf:
-    name: GNU@10.0 C++14 Serial with HDF5    
+    name: GNU@10.0 C++14 serial with HDF5    
     runs-on: ubuntu-latest
     env: 
       CHOMBO_HOME: ${{github.workspace}}/Chombo-3.3/lib
