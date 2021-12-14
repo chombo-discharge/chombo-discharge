@@ -17,9 +17,9 @@ jobs:
           path: Chombo-3.3
 
       - name: Checkout chombo-discharge
-        uses: actions/checkout@master
+        uses: actions/checkout@v2
         with:
-          ref: ${{ github.ref }}
+          ref: ''
           repository: chombo-discharge/chombo-discharge
           path: chombo-discharge
 
