@@ -23,11 +23,6 @@ jobs:
           repository: rmrsk/chombo-discharge
           path: chombo-discharge
 
-      - name: whereami
-        run: |
-          ls -ahl $DISCHARGE_HOME/Local
-          git branch
-
       - name: Install dependencies
         run: |
           sudo apt-get update
