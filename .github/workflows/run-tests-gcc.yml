@@ -26,6 +26,8 @@ jobs:
         run: |
           pwd
           ls -ahl
+          cd ..
+          ls -ahl
 
       # - name: Install dependencies
       #   run: |
