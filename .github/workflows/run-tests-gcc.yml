@@ -22,6 +22,11 @@ jobs:
           repository: chombo-discharge/chombo-discharge
           path: ./chombo-discharge
 
+      - name: whereami
+        run: |
+          pwd
+          ls -ahl
+
       - name: Install dependencies
         run: |
           sudo apt-get update
