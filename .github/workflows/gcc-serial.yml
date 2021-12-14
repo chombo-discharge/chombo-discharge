@@ -1,9 +1,9 @@
-name: GCC-serial
+name: gcc-serial
 
 on: [push]
 
 jobs:
-  build-and-test:
+  build-serial:  
     runs-on: ubuntu-latest
     env: 
       CHOMBO_HOME: ${{github.workspace}}/Chombo-3.3/lib

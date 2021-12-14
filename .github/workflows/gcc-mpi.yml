@@ -1,9 +1,9 @@
-name: GCC-MPI
+name: gcc-mpi
 
 on: [push]
 
 jobs:
-  build-and-test:
+  build-mpi:
     runs-on: ubuntu-latest
     env: 
       CHOMBO_HOME: ${{github.workspace}}/Chombo-3.3/lib
