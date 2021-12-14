@@ -24,6 +24,8 @@ jobs:
 
       - name: whereami
         run: |
+          echo $CHOMBO_HOME          
+          echo $DISCHARGE_HOME
           pwd
           ls -ahl
           cd ..
