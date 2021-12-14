@@ -14,13 +14,13 @@ jobs:
         uses: actions/checkout@master
         with:
           repository: chombo-discharge/Chombo-3.3
-          path: ../Chombo-3.3
+          path: ./Chombo-3.3
 
       - name: Checkout chombo-discharge
         uses: actions/checkout@v2
         with:
           repository: chombo-discharge/chombo-discharge
-          path: ./
+          path: ./chombo-discharge
 
       - name: whereami
         run: |
