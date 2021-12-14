@@ -20,7 +20,7 @@ jobs:
       - name: Checkout chombo-discharge
         uses: actions/checkout@v2
         with:
-          repository: rmrsk/chombo-discharge
+          repository: chombo-discharge/chombo-discharge
           path: chombo-discharge
 
       - name: Install dependencies
@@ -65,7 +65,7 @@ jobs:
       - name: Checkout chombo-discharge
         uses: actions/checkout@v2
         with:
-          repository: rmrsk/chombo-discharge
+          repository: chombo-discharge/chombo-discharge
           path: chombo-discharge
 
       - name: Install dependencies
@@ -110,7 +110,7 @@ jobs:
       - name: Checkout chombo-discharge
         uses: actions/checkout@v2
         with:
-          repository: rmrsk/chombo-discharge
+          repository: chombo-discharge/chombo-discharge
           path: chombo-discharge
 
       - name: Install dependencies
@@ -155,7 +155,7 @@ jobs:
       - name: Checkout chombo-discharge
         uses: actions/checkout@v2
         with:
-          repository: rmrsk/chombo-discharge
+          repository: chombo-discharge/chombo-discharge
           path: chombo-discharge
 
       - name: Install dependencies
