@@ -45,6 +45,6 @@ jobs:
 
       - name: Build 2D Chombo
         run: |
-          cp $DISCHARGE_HOME//Local/Make.defs.serial.GNU $CHOMBO_HOME/mk/Make.defs.local
+          cp $DISCHARGE_HOME/Local/Make.defs.serial.GNU $CHOMBO_HOME/mk/Make.defs.local
           make -s -j4 DIM=2 DEBUG=TRUE OPT=TRUE lib
-        working-directory: $CHOMBO_HOME
+        working-directory: ${{ env.CHOMBO_HOME }}
