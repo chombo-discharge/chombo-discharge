@@ -3,7 +3,8 @@ name: Linux GCC
 on: [push]
 
 jobs:
-  GNU@10.0 C++14 Serial no-HDF5:
+  serial-no-hdf:
+    name: GNU@10.0 C++14 Serial no-HDF5
     runs-on: ubuntu-latest
     env: 
       CHOMBO_HOME: ${{github.workspace}}/Chombo-3.3/lib
