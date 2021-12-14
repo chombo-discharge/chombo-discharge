@@ -19,7 +19,7 @@ jobs:
       - name: Checkout chombo-discharge
         uses: actions/checkout@v2
         with:
-          repository: chombo-discharge/chombo-discharge
+          repository: rmrsk/chombo-discharge
           path: chombo-discharge
 
       - name: amihere
