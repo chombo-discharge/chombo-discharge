@@ -1,6 +1,6 @@
 name: Linux GCC
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   serial-no-hdf:
