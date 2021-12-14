@@ -7,7 +7,7 @@ jobs:
     runs-on: ubuntu-latest
     env: 
       CHOMBO_HOME: ${{github.workspace}}/Chombo-3.3/lib
-      DISCHARGE_HOME: ${{github.workspace}}
+      DISCHARGE_HOME: ${{github.workspace}}/chombo-discharge
 
     steps:
       - name: Clone Chombo
@@ -32,18 +32,19 @@ jobs:
           cd ..
           ls -ahl
 
-      # - name: Install dependencies
-      #   run: |
-      #     sudo apt-get update
-      #     sudo apt-get -y --no-install-recommends install csh gfortran-10 g++-10 cpp-10 libhdf5-dev libhdf5-openmpi-dev openmpi-bin libblas-dev liblapack-dev
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get -y --no-install-recommends install csh gfortran-10 g++-10 cpp-10 libhdf5-dev libhdf5-openmpi-dev openmpi-bin libblas-dev liblapack-dev
 
-      # - name: Setup compilers
-      #   run: |
-      #     sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 100
-      #     sudo update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-10 100
-      #     sudo update-alternatives --install /usr/bin/cpp cpp /usr/bin/cpp-10 100
+      - name: Setup compilers
+        run: |
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 100
+          sudo update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-10 100
+          sudo update-alternatives --install /usr/bin/cpp cpp /usr/bin/cpp-10 100
 
-      # - name: Build 2D Chombo
-      #   run: |
-      #     cp $DISCHARGE_HOME//Local/Make.defs.serial.GNU $CHOMBO_HOME/lib/mk/Make.defs.local
-      #     make -s -j4 DIM=2 DEBUG=TRUE OPT=TRUE lib
+      - name: Build 2D Chombo
+        run: |
+          cp $DISCHARGE_HOME//Local/Make.defs.serial.GNU $CHOMBO_HOME/lib/mk/Make.defs.local
+          make -s -j4 DIM=2 DEBUG=TRUE OPT=TRUE lib
+          working-directory: $CHOMBO_HOME
