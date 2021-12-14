@@ -15,8 +15,8 @@ USE_MF         = TRUE
 USE_HDF        = FALSE
 #HDFINCFLAGS   = -I/usr/lib/x86_64-linux-gnu/hdf5/serial/include
 #HDFLIBFLAGS   = -L/usr/lib/x86_64-linux-gnu/hdf5/serial/lib -lhdf5 -lz
-#HDFMPIINCFLAGS= -I<hdf_parallel_dir>/include
-#HDFMPILIBFLAGS= -L<hdf_parallel_dir>/lib -lhdf5 -lz
+#HDFMPIINCFLAGS= -I/usr/lib/x86_64-linux-gnu/hdf5/parallel/include
+#HDFMPILIBFLAGS= -L/usr/lib/x86_64-linux-gnu/hdf5/parallel/lib -lhdf5 -lz
 cxxoptflags    = -O3 -march=native
 flibflags      = -O3 -march=native
 syslibflags    = -llapack -lblas -ldl -lm
