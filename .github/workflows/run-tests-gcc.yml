@@ -6,7 +6,8 @@ jobs:
   build-and-test:
     runs-on: ubuntu-20.04
     env: 
-      CHOMBO_HOME=${{github.workspace}}/Chombo-3.3/lib
+      CHOMBO_HOME: ${{github.workspace}}/Chombo-3.3/lib
+      DISCHARGE_HOME: ${{github.workspace}}
 
     steps:
       - name: Clone Chombo
