@@ -19,7 +19,8 @@ jobs:
       - name: Checkout chombo-discharge
         uses: actions/checkout@v2
         with:
-          repository: ./chombo-discharge
+          repository: chombo-discharge/chombo-discharge
+          path: ./
 
       - name: whereami
         run: |
