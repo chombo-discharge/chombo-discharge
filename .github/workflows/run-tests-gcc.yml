@@ -24,6 +24,7 @@ jobs:
 
       - name: whereami
         run: |
+          echo $GITHUB_WORKSPACE
           echo $CHOMBO_HOME          
           echo $DISCHARGE_HOME
           pwd
