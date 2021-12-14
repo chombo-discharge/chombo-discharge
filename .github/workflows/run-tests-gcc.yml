@@ -6,13 +6,11 @@ jobs:
   build-and-test:
     runs-on: ubuntu-20.04
 
-
     steps:
       - name: Clone Chombo
         run: |
           sudo git clone https://github.com/chombo-discharge/Chombo-3.3.git
 
-    steps:
       - name: Setup environment
         env: 
           CHOMBO_HOME= ${{ github.workspace }}/Chombo-3.3/lib
