@@ -11,3 +11,9 @@ jobs:
       - name: Clone Chombo
         run: |
           sudo git clone https://github.com/chombo-discharge/Chombo-3.3.git
+
+    steps:
+      - name: Setup environment
+        env: 
+          CHOMBO_HOME= ${{ github.workspace }}/Chombo-3.3/lib
+          DISCHARGE_HOME=${{github.workspace}}          
