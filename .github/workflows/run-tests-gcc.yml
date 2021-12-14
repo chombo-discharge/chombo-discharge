@@ -4,7 +4,7 @@ on: [push]
 
 jobs:
   build-and-test:
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-latest
     env: 
       CHOMBO_HOME: ${{github.workspace}}/Chombo-3.3/lib
       DISCHARGE_HOME: ${{github.workspace}}
@@ -13,11 +13,13 @@ jobs:
       - name: Clone Chombo
         uses: actions/checkout@master
         with:
-          name: chombo-discharge/Chombo-3.3
+          repository: chombo-discharge/Chombo-3.3
+          path: ./Chombo-3.3
 
       - name: Checkout chombo-discharge
         uses: actions/checkout@v2
         with:
-          path: chombo-discharge
+          repository: chombo-discharge/chombo-discharge
+          path: ./chombo-discharge
 
 
