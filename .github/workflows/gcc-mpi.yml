@@ -26,6 +26,7 @@ jobs:
       - name: whereami
         run: |
           ls -ahl $DISCHARGE_HOME/Local
+          git branch
 
       - name: Install dependencies
         run: |
