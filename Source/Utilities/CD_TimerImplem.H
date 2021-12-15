@@ -16,6 +16,7 @@
 #include <sstream>
 #include <iostream>
 #include <fstream>
+#include <iomanip>
 
 // Chombo includes
 #ifdef CH_MPI
