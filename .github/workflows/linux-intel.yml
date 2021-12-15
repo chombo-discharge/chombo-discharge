@@ -99,7 +99,7 @@ jobs:
         
       - name: Copy makefile
         run: |
-          cp $DISCHARGE_HOME/Local/CI/Make.defs.linux-intel $CHOMBO_HOME/mk/Make.defs.local          
+          cp $DISCHARGE_HOME/Local/CI/Make.defs.MPI.linux-intel $CHOMBO_HOME/mk/Make.defs.local          
 
       - name: Build Chombo (2D)
         run: |
