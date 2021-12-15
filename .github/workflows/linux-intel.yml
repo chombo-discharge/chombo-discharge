@@ -1,0 +1,114 @@
+name: Linux Intel
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
+
+jobs:
+  serial-no-hdf:
+    if: github.event.pull_request.draft == false  
+    name: Intel C++14 serial without HDF5
+    runs-on: ubuntu-latest
+    env: 
+      CHOMBO_HOME: ${{github.workspace}}/Chombo-3.3/lib
+      DISCHARGE_HOME: ${{github.workspace}}/chombo-discharge
+
+    steps:
+      - name: Checkout Chombo
+        uses: actions/checkout@master
+        with:
+          repository: chombo-discharge/Chombo-3.3
+          path: Chombo-3.3
+
+      - name: Checkout chombo-discharge
+        uses: actions/checkout@v2
+        with:
+          repository: chombo-discharge/chombo-discharge
+          path: chombo-discharge
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get -y --no-install-recommends install csh libgetopt-complete-perl
+
+      - name: Install Intel compilers/MPI
+        run: |
+          wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
+          sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
+          sudo add-apt-repository "deb https://apt.repos.intel.com/oneapi all main"
+          sudo apt-get -y install intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic intel-oneapi-compiler-fortran intel-oneapi-mkl intel-oneapi-mpi intel-oneapi-mpi-devel intel-oneapi-openmp
+        working-directory: /tmp
+      
+      - name: Setup compilers
+        run: |
+          source /opt/intel/oneapi/setvars.sh
+        
+      - name: Copy makefile
+        run: |
+          cp $DISCHARGE_HOME/Local/CI/Make.defs.linux-intel $CHOMBO_HOME/mk/Make.defs.local          
+
+      - name: Build Chombo (2D)
+        run: |
+          source /opt/intel/oneapi/setvars.sh          
+          make -s -j2 DIM=2 lib
+        working-directory: ${{ env.CHOMBO_HOME }}
+
+      - name: Build Chombo (3D)
+        run: |
+          source /opt/intel/oneapi/setvars.sh          
+          make -s -j2 DIM=3 lib
+        working-directory: ${{ env.CHOMBO_HOME }}
+
+  mpi-no-hdf:
+    if: github.event.pull_request.draft == false  
+    name: Intel C++14 MPI without HDF5
+    runs-on: ubuntu-latest
+    env: 
+      CHOMBO_HOME: ${{github.workspace}}/Chombo-3.3/lib
+      DISCHARGE_HOME: ${{github.workspace}}/chombo-discharge
+
+    steps:
+      - name: Checkout Chombo
+        uses: actions/checkout@master
+        with:
+          repository: chombo-discharge/Chombo-3.3
+          path: Chombo-3.3
+
+      - name: Checkout chombo-discharge
+        uses: actions/checkout@v2
+        with:
+          repository: chombo-discharge/chombo-discharge
+          path: chombo-discharge
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get -y --no-install-recommends install csh libgetopt-complete-perl
+
+      - name: Install Intel compilers/MPI
+        run: |
+          wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
+          sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
+          sudo add-apt-repository "deb https://apt.repos.intel.com/oneapi all main"
+          sudo apt-get -y install intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic intel-oneapi-compiler-fortran intel-oneapi-mkl intel-oneapi-mpi intel-oneapi-mpi-devel intel-oneapi-openmp
+        working-directory: /tmp
+      
+      - name: Setup compilers
+        run: |
+          source /opt/intel/oneapi/setvars.sh
+        
+      - name: Copy makefile
+        run: |
+          cp $DISCHARGE_HOME/Local/CI/Make.defs.MPI.linux-intel $CHOMBO_HOME/mk/Make.defs.local          
+
+      - name: Build Chombo (2D)
+        run: |
+          source /opt/intel/oneapi/setvars.sh          
+          make -s -j2 DIM=2 lib
+        working-directory: ${{ env.CHOMBO_HOME }}
+
+      - name: Build Chombo (3D)
+        run: |
+          source /opt/intel/oneapi/setvars.sh          
+          make -s -j2 DIM=3 lib
+        working-directory: ${{ env.CHOMBO_HOME }}        

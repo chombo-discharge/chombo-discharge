@@ -1,9 +1,12 @@
 name: Linux GCC
 
-on: [push, pull_request]
+on:
+  pull_request:
+    types: [opened, synchronize, reopened, ready_for_review]
 
 jobs:
   serial-no-hdf:
+    if: github.event.pull_request.draft == false  
     name: GNU@10.0 C++14 serial without HDF5
     runs-on: ubuntu-latest
     env: 
@@ -20,7 +23,7 @@ jobs:
       - name: Checkout chombo-discharge
         uses: actions/checkout@v2
         with:
-          repository: rmrsk/chombo-discharge
+          repository: chombo-discharge/chombo-discharge
           path: chombo-discharge
 
       - name: Install dependencies
@@ -49,6 +52,7 @@ jobs:
         working-directory: ${{ env.CHOMBO_HOME }}
 
   serial-hdf:
+    if: github.event.pull_request.draft == false    
     name: GNU@10.0 C++14 serial with HDF5    
     runs-on: ubuntu-latest
     env: 
@@ -65,7 +69,7 @@ jobs:
       - name: Checkout chombo-discharge
         uses: actions/checkout@v2
         with:
-          repository: rmrsk/chombo-discharge
+          repository: chombo-discharge/chombo-discharge
           path: chombo-discharge
 
       - name: Install dependencies
@@ -94,6 +98,7 @@ jobs:
         working-directory: ${{ env.CHOMBO_HOME }}        
         
   mpi-no-hdf5:
+    if: github.event.pull_request.draft == false        
     name: GNU@10.0 C++14 OpenMPI without HDF5    
     runs-on: ubuntu-latest
     env: 
@@ -110,7 +115,7 @@ jobs:
       - name: Checkout chombo-discharge
         uses: actions/checkout@v2
         with:
-          repository: rmrsk/chombo-discharge
+          repository: chombo-discharge/chombo-discharge
           path: chombo-discharge
 
       - name: Install dependencies
@@ -139,6 +144,7 @@ jobs:
         working-directory: ${{ env.CHOMBO_HOME }}
 
   mpi-hdf5:
+    if: github.event.pull_request.draft == false        
     name: GNU@10.0 C++14 OpenMPI with HDF5        
     runs-on: ubuntu-latest
     env: 
@@ -155,7 +161,7 @@ jobs:
       - name: Checkout chombo-discharge
         uses: actions/checkout@v2
         with:
-          repository: rmrsk/chombo-discharge
+          repository: chombo-discharge/chombo-discharge
           path: chombo-discharge
 
       - name: Install dependencies
