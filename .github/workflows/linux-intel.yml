@@ -48,6 +48,7 @@ jobs:
           set +e
           source /opt/intel/oneapi/setvars.sh
           set -e
+          which icpc
         
       - name: Copy makefile
         run: |
