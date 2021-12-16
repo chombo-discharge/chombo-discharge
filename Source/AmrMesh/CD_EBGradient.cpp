@@ -546,9 +546,7 @@ void EBGradient::defineIteratorsEBCF(const LevelData<FArrayBox>& a_coarMaskCF, c
     if(isIrregular){
 
       // Iterate through the coarse-fine region and check if the finite difference stencil reaches into a cut-cell.
-      for (BoxIterator bit(cellBox); bit.ok(); ++bit){
-	const IntVect ivCoar = bit();
-
+      auto kernel = [&] (const IntVect& ivCoar) -> void {
 	if(coarseFineRegion(ivCoar, m_comp) > zero){
 	  const bool hasStencil = this->isFiniteDifferenceStencilValid(ivCoar, ebisBox, invalidRegion);
 
@@ -562,7 +560,10 @@ void EBGradient::defineIteratorsEBCF(const LevelData<FArrayBox>& a_coarMaskCF, c
 	    }
 	  }
 	}
-      }
+      };
+
+      // Launch kernel. 
+      BoxLoops::loop(cellBox, kernel);
 
     }
 
@@ -666,11 +667,10 @@ void EBGradient::defineBuffers(LevelData<FArrayBox>&       a_bufferCoarMaskCF,
     IntVectSet& ebcfIVS = sets[dit()];
 
     const FArrayBox& coarMaskCF      = a_bufferCoarMaskCF     [dit()];
-    const FArrayBox& coarMaskInvalid = a_bufferCoarMaskInvalid[dit()];    
+    const FArrayBox& coarMaskInvalid = a_bufferCoarMaskInvalid[dit()];
 
-    for (BoxIterator bit(cellBox); bit.ok(); ++bit){
-      const IntVect ivCoar = bit();
-
+    // Define kernel. 
+    auto kernel = [&] (const IntVect& ivCoar) -> void {
       if(coarMaskCF(ivCoar, m_comp) > zero){ // Cell lies on the CF bounary
     	const bool validStencil = this->isFiniteDifferenceStencilValid(ivCoar, ebisBox, coarMaskInvalid);
 
@@ -678,7 +678,10 @@ void EBGradient::defineBuffers(LevelData<FArrayBox>&       a_bufferCoarMaskCF,
     	  ebcfIVS |= ivCoar;
     	}
       }
-    }
+    };
+
+    // Launch kernel.
+    BoxLoops::loop(cellBox, kernel);
 
     m_bufferIterator    [dit()].define(ebcfIVS, ebgraph          );
     m_bufferStencilsFine[dit()].define(ebcfIVS, ebgraph, m_nComp );
@@ -725,9 +728,8 @@ void EBGradient::defineStencilsEBCF(const LevelData<FArrayBox>& a_bufferCoarMask
     DenseIntVectSet validRegionCoar(grownCellBox,     true);
     DenseIntVectSet validRegionFine(grownCellBoxFine, false);
 
-    for (BoxIterator bit(grownCellBox); bit.ok(); ++bit){
-      const IntVect ivCoar = bit();
-
+    // Define kernel. 
+    auto kernel = [&] (const IntVect& ivCoar) -> void {
       if(invalidRegion(ivCoar, m_comp)){
 	validRegionCoar -= ivCoar;
 
@@ -735,7 +737,10 @@ void EBGradient::defineStencilsEBCF(const LevelData<FArrayBox>& a_bufferCoarMask
 	bx.refine(m_refRat);
 	validRegionFine |= bx;
       }
-    }
+    };
+
+    // Launch kernel.
+    BoxLoops::loop(grownCellBox, kernel);
 
     // Define the iterator and stencils for places where we need to drop order.
     VoFIterator&           vofit         = m_bufferIterator    [dit()];

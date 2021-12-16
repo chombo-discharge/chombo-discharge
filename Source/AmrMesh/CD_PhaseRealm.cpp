@@ -22,6 +22,7 @@
 #include <CD_EbFastCoarToCoarRedist.H>
 #include <CD_EbFastFluxRegister.H>
 #include <CD_EBMultigridInterpolator.H>
+#include <CD_BoxLoops.H>
 #include <CD_EBLeastSquaresMultigridInterpolator.H>
 #include <CD_NamespaceHeader.H>
 
@@ -366,12 +367,13 @@ void PhaseRealm::defineLevelSet(const int a_lmin, const int a_numGhost){
 	const Box  bx  = fab.box();
 
 	if(!m_baseif.isNull()){
-	  for (BoxIterator bit(bx); bit.ok(); ++bit){
-	    const IntVect iv = bit();
-	    const RealVect pos = m_probLo + (0.5*RealVect::Unit + RealVect(iv))*dx;
+	  auto kernel = [&] (const IntVect& iv) -> void {
+	    const RealVect pos = m_probLo + (0.5*RealVect::Unit + RealVect(iv)) * dx;
 
-	    fab(iv, comp) = m_baseif->value(pos); 
-	  }
+	    fab(iv, comp) = m_baseif->value(pos);
+	  };
+
+	  BoxLoops::loop(bx, kernel);
 	}
 	else{
 	  fab.setVal(minVal, comp);

@@ -15,6 +15,7 @@
 
 // Our includes
 #include <CD_Realm.H>
+#include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
 const std::string Realm::Primal = "primal";
@@ -313,12 +314,15 @@ void Realm::defineHaloMask(LevelData<BaseFab<bool> >& a_coarMask,
       const Box box = a_gridsCoar[dit()];
 
       BaseFab<bool>& mask     = a_coarMask[dit()];
-      const FArrayBox& blMask = coarMask[dit()];
+      const FArrayBox& blMask = coarMask  [dit()];
 
-      for (BoxIterator bit(box); bit.ok(); ++bit){
-	const IntVect iv = bit();
-	if(blMask(iv, comp) > 0.0) mask(iv, comp) = true;
-      }
+      auto kernel = [&] (const IntVect& iv) -> void {
+	if(blMask(iv, comp) > 0.0){
+	  mask(iv, comp) = true;
+	}
+      };
+
+      BoxLoops::loop(box, kernel);
     }
   }
 }
