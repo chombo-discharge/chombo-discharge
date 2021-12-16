@@ -25,8 +25,7 @@
 
 /*!
   @brief Class for encapsulating random number generation. 
-  @details This class uses a singleton pattern to avoid code where many individual random number generators initialize RNGs using potentially the same seeds. This singleton
-  is MPI-safe (ish). The user can specify a seed 's' where each MPI rank will initialize their RNG with seed 's + procID()'. Otherwise, a random seed is drawn by the master
+  The user can specify a seed 's' where each MPI rank will initialize their RNG with seed 's + procID()'. Otherwise, a random seed is drawn by the master
   rank and broadcast to the other ranks. The rank seeds are like the above: 's+procID()'. 
 */
 class Random {
@@ -34,7 +33,7 @@ public:
 
   /*!
     @brief Set the RNG seed.
-    @details If using MPI, the seed is set to a_seed + procID().
+    @details If using MPI, the seed is set to a_seed +CD_Ra procID().
     @param[in] a_seed Seed to use for RNG.
   */
   inline
@@ -77,7 +76,7 @@ public:
   */
   template<typename T>
   inline  
-  static Real get( T& a_distribution);
+  static Real get(T& a_distribution);
 
 protected:
 

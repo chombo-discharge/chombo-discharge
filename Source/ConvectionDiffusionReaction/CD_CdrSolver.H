@@ -1051,11 +1051,6 @@ protected:
   virtual void parsePlotVariables();    
 
   /*!
-    @brief Parse random number generator
-  */
-  virtual void parseRngSeed();
-
-  /*!
     @brief Parse plot mode
   */
   virtual void parsePlotMode();

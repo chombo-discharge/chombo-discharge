@@ -38,7 +38,6 @@ void CdrMuscl::parseOptions(){
     pout() << m_name + "::parseOptions()" << endl;
   }
   
-  this->parseRngSeed();                // Parses RNG seed
   this->parsePlotMode();               // Parses plot mode
   this->parseDomainBc();               // Parses domain BC options
   this->parseSlopeLimiter();           // Parses slope limiter settings

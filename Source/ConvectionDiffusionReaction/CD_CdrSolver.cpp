@@ -23,6 +23,7 @@
 #include <CD_DataOps.H>
 #include <CD_BoxLoops.H>
 #include <CD_ParallelOps.H>
+#include <CD_Random.H>
 #include <CD_NamespaceHeader.H>
 
 constexpr int CdrSolver::m_comp;
@@ -52,7 +53,7 @@ void CdrSolver::setDefaultDomainBC(){
   // TLDR: This sets the domain boundary condition to be a wall BC (no incoming/outgoing mass). 
 
   // Lambda function for wall bc -- mostly left in place so I can remind myself how to do this.
-  auto zero = [](const RealVect a_position, const Real a_time){
+  auto zero = [](const RealVect a_position, const Real a_time) -> Real {
     return 0.0;
   };
 
@@ -642,14 +643,13 @@ void CdrSolver::resetDomainFlux(EBAMRFluxData& a_flux){
 
   CH_assert(a_flux[0]->nComp() == 1);
 
-  // TLDR: This routine iterates through all faces in a_flux which are boundary faces and sets the flux there to zero. No
-  //       Fortran kernel here because the box we iterate over has a smaller dimension (it's a slice). 
+  // TLDR: This routine iterates through all faces in a_flux which are boundary faces and sets the flux there to zero. 
 
   constexpr Real zero = 0.0;
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    const ProblemDomain& domain  = m_amr->getDomains()[lvl];
+    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)              [lvl];
+    const ProblemDomain& domain  = m_amr->getDomains()                   [lvl];
     const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
 
     for (DataIterator dit(dbl); dit.ok(); ++dit){
@@ -658,30 +658,33 @@ void CdrSolver::resetDomainFlux(EBAMRFluxData& a_flux){
       const EBGraph& ebgraph = ebisbox.getEBGraph();
       
       for (int dir = 0; dir < SpaceDim; dir++){
-	EBFaceFAB& flux        = (*a_flux[lvl])[dit()][dir];
+	EBFaceFAB&     flux    = (*a_flux[lvl])[dit()][dir];
 	BaseFab<Real>& regFlux = flux.getSingleValuedFAB();
 	
 	for (SideIterator sit; sit.ok(); ++sit){
 	  const Side::LoHiSide side = sit();
 	  
-	  // Create a cell box which lies next to the domain 
-	  Box boundaryCellBox;
-	  boundaryCellBox  = adjCellBox(domain.domainBox(), dir, side, -1); 
-	  boundaryCellBox &= cellBox;
+	  // Create a cell box which lies next to the domain. Also make an iterator over the cut-cell faces. 
+	  const Box boundaryCellBox = adjCellBox(domain.domainBox(), dir, side, -1) & cellBox;
+	  FaceIterator faceit(ebisbox.getIrregIVS(boundaryCellBox), ebgraph, dir, FaceStop::AllBoundaryOnly);
 
-	  // Do the regular cells -- note the shift to make sure that cell indices map to face indices. 
 	  const int     sign  = (side == Side::Lo) ? 0 : 1;
-	  const IntVect shift = sign*BASISV(dir);
+	  const IntVect shift = sign*BASISV(dir);	  
 
-	  for (BoxIterator bit(boundaryCellBox); bit.ok(); ++bit){
-	    regFlux(bit() + shift, m_comp) = zero;
-	  }
+	  // Regular kernel -- note the shift to make sure that cell indices map to face indices. I am doing this because
+	  // if we were to convert the box to a face-centered box we would do another layer of faces. So shift directly. 
+	  auto regularKernel = [&](const IntVect& iv) -> void {
+	    regFlux(iv + shift, m_comp) = zero;
+	  };
 
-	  // Do the irregular cells
-	  const IntVectSet irregIVS = ebisbox.getIrregIVS(boundaryCellBox);
-	  for (FaceIterator faceIt(irregIVS, ebgraph, dir, FaceStop::AllBoundaryOnly); faceIt.ok(); ++faceIt){
-	    flux(faceIt(), m_comp) = zero;
-	  }
+	  // Irregular kernel. Same as the above really.
+	  auto irregularKernel = [&](const FaceIndex& face) -> void {
+	    flux(face, m_comp) = 0.0;
+	  };
+
+	  // Execute kernels
+	  BoxLoops::loop(boundaryCellBox, regularKernel  );
+	  BoxLoops::loop(faceit,          irregularKernel);	  
 	}
       }
     }
@@ -779,7 +782,6 @@ void CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const int a_level) 
 		
 		sumArea            += areaFrac;
 		flux(face, m_comp) += areaFrac * flux(f, m_comp);
-		
 	      }
 	      
 	      flux(face, m_comp) = sign(sit()) * std::max(0.0, sign(sit())*flux(face, m_comp))/sumArea;
@@ -1050,45 +1052,19 @@ void CdrSolver::initialDataDistribution(){
   }
 
   // TLDR: We just run through every cell in the grid and increment by m_species->initialData
+
+  // Expose the initial data function to something DataOps can use. 
+  auto initFunc = [&](const RealVect& pos) -> Real {
+    return m_species->initialData(pos, m_time);
+  };
+
+  // Call the initial data function and stored on m_scratch. Increment, then synchronize and set covered to zero. 
+  DataOps::setValue(m_scratch, initFunc, m_amr->getProbLo(), m_amr->getDx(), m_comp);
+  DataOps::incr(m_phi, m_scratch, 1.0);
+  DataOps::setCoveredValue(m_phi, 0, 0.0);
   
-  for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const Real               dx     = m_amr->getDx()[lvl];
-    const RealVect           probLo = m_amr->getProbLo();
-    const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
-    const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-
-    for (DataIterator dit(dbl); dit.ok(); ++dit){
-      const Box        cellBox = dbl[dit()];
-      const EBISBox&   ebisbox = ebisl[dit()];
-      
-      EBCellFAB&       phi     = (*m_phi[lvl])[dit()];
-      BaseFab<Real>&   regPhi  = phi.getSingleValuedFAB();
-
-      // Regular cells
-      for (BoxIterator bit(cellBox); bit.ok(); ++bit){
-	const IntVect iv   = bit();
-	if(ebisbox.isRegular(iv)){	  
-	  const RealVect pos = probLo + RealVect(iv)*dx + 0.5*dx*RealVect::Unit;
-
-	  regPhi(iv, m_comp) = regPhi(iv, m_comp) + m_species->initialData(pos, m_time);
-	}
-      }
-
-      // Irreg and multicells
-      VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
-      for (vofit.reset(); vofit.ok(); ++vofit){
-	const VolIndex& vof = vofit();
-	const RealVect pos  = EBArith::getVofLocation(vof, m_amr->getDx()[lvl]*RealVect::Unit, probLo);
-	
-	phi(vof, m_comp) = phi(vof, m_comp) + m_species->initialData(pos, m_time);
-      }
-    }
-  }
-
   m_amr->averageDown(m_phi, m_realm, m_phase);
   m_amr->interpGhost(m_phi, m_realm, m_phase);
-
-  DataOps::setCoveredValue(m_phi, 0, 0.0);
 }
 
 void CdrSolver::initialDataParticles(){
@@ -2252,12 +2228,13 @@ void CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_p
 
       const DisjointBoxLayout& dbl    = m_amr->getGrids     (m_realm         )[lvl];
       const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-      const ProblemDomain&     domain = m_amr->getDomains()[lvl];
-      const Real&              dx     = m_amr->getDx()[lvl];
+      const ProblemDomain&     domain = m_amr->getDomains()                   [lvl];
+      const Real&              dx     = m_amr->getDx()                        [lvl];
 
       for (DataIterator dit(dbl); dit.ok(); ++dit){
 	const Box&     cellBox = dbl  [dit()];
 	const EBISBox& ebisBox = ebisl[dit()];
+	VoFIterator&   vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];	
 	
 	EBCellFAB&       sumPhi    = (*a_weightedUpwindPhi[lvl])[dit()];
 	EBCellFAB&       sumWeight = (*m_scratch          [lvl])[dit()];
@@ -2267,10 +2244,7 @@ void CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_p
 	sumPhi.   setVal(0.0);
 	sumWeight.setVal(0.0);
 
-
-	// Regular cells. Note that in the WEIGHTED_UPWIND Fortran kernel we compute the weighted sum of the upwinded value of phi. This means that the kernel
-	// will reach out of the domain boundary. We fill the first ghost layer outside the domain boundary with the value in the valid cell immediately inside
-	// the domain so that the kernel does, in fact, use the correct math.
+	// Regular cells. 
 	BaseFab<Real>& regSumPhi    = sumPhi.   getSingleValuedFAB();
 	BaseFab<Real>& regSumWeight = sumWeight.getSingleValuedFAB();
 	
@@ -2278,21 +2252,34 @@ void CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_p
 	  const BaseFab<Real>& regFacePhi = facePhi[dir].getSingleValuedFAB();
 	  const BaseFab<Real>& regFaceVel = faceVel[dir].getSingleValuedFAB();
 
-	  FORT_WEIGHTED_UPWIND(CHF_FRA1      (regSumPhi,    0),
-			       CHF_FRA1      (regSumWeight, 0),
-			       CHF_CONST_FRA1(regFacePhi,   0),
-			       CHF_CONST_FRA1(regFaceVel,   0),
-			       CHF_CONST_INT (dir),
-			       CHF_CONST_INT (a_pow),
-			       CHF_BOX       (cellBox));
+	  // Regular kernel. Note that we execute the kernel over the cell-centered box.
+	  auto regularKernel = [&](const IntVect& iv) -> void {
+	    const Real& phiLo = regFacePhi(iv              , m_comp);
+	    const Real& phiHi = regFacePhi(iv + BASISV(dir), m_comp);
+
+	    const Real& velLo = regFaceVel(iv              , m_comp);
+	    const Real& velHi = regFaceVel(iv + BASISV(dir), m_comp);
+
+
+	    if(velLo > 0.0){
+	      regSumWeight(iv, m_comp) += std::abs(std::pow(velLo, a_pow))        ;
+	      regSumPhi   (iv, m_comp) += std::abs(std::pow(velLo, a_pow)) * phiLo;
+	    }
+
+	    if(velHi < 0.0){
+	      regSumWeight(iv, m_comp) += std::abs(std::pow(velHi, a_pow))        ;
+	      regSumPhi   (iv, m_comp) += std::abs(std::pow(velHi, a_pow)) * phiHi;
+	    }	    
+	  };
+
+	  // Execute the kernel
+	  BoxLoops::loop(cellBox, regularKernel);
 	}
 
 	// Irregular cells. This is a bit more involved. Note that we do want to compute everything at face centroids since
-	// that is the flux that makes its way into the cells anyways when we advect. 
-	VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
-	for (vofit.reset(); vofit.ok(); ++vofit){
-	  const VolIndex& vof = vofit();
-
+	// that is the flux that makes its way into the cells anyways when we advect. But, m_faceStates are states on the face
+	// centers. So there's that.
+	auto irregularKernel = [&](const VolIndex& vof) -> void {
 	  sumPhi   (vof, m_comp) = 0.0;
 	  sumWeight(vof, m_comp) = 0.0;
 
@@ -2357,7 +2344,10 @@ void CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_p
 	    sumPhi(vof, m_comp)    = 0.0;
 	    sumWeight(vof, m_comp) = 1.0;
 	  }
-	}
+	};
+
+	// Execute kernel.
+	BoxLoops::loop(vofit, irregularKernel);
       }
     }
 
@@ -2725,7 +2715,9 @@ void CdrSolver::smoothHeavisideFaces(EBAMRFluxData& a_facePhi, const EBAMRCellDa
       const Box&        cellBox  = dbl  [dit()];
       const EBISBox&    ebisbox  = ebisl[dit()];
       const EBGraph&    ebgraph  = ebisbox.getEBGraph();
-      const IntVectSet& irregIVS = ebisbox.getIrregIVS(cellBox);      
+      const IntVectSet& irregIVS = ebisbox.getIrregIVS(cellBox);
+
+      VoFIterator&      vofit    = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
 
       for (int dir = 0; dir < SpaceDim; dir++){
 	EBFaceFAB&       facePhi = (*a_facePhi[lvl])[dit()][dir];
@@ -2734,27 +2726,51 @@ void CdrSolver::smoothHeavisideFaces(EBAMRFluxData& a_facePhi, const EBAMRCellDa
 	BaseFab<Real>&       faceReg = facePhi.getSingleValuedFAB();
 	const BaseFab<Real>& cellReg = cellPhi.getSingleValuedFAB();
 
-	// Regular faces (this will also do irregular faces but we fix those below)
-	Box faceBox = cellBox;
-	faceBox.surroundingNodes(dir);	
-	FORT_HEAVISIDE_MEAN(CHF_FRA1(faceReg, m_comp),  
-			    CHF_CONST_FRA1(cellReg, m_comp),
-			    CHF_CONST_INT(dir),
-			    CHF_CONST_REAL(dx),
-			    CHF_BOX(faceBox));
+	// Regular kernel
+	auto regularKernel = [&](const IntVect& iv) -> void {
+	  const Real& phiLo = cellReg(iv - BASISV(dir), m_comp);
+	  const Real& phiHi = cellReg(iv              , m_comp);
 
-	// Fix up irregular cell faces. This is the same kernel as above but irregular faces only...
-	const FaceStop::WhichFaces stopcrit = FaceStop::SurroundingNoBoundary;
-	for (FaceIterator faceit(irregIVS, ebgraph, dir, stopcrit); faceit.ok(); ++faceit){
-	  const FaceIndex& face = faceit();
+	  const Real loVal  = vol * phiLo;
+	  const Real hiVal  = vol * phiHi;
 
+	  Real Hlo = 0.0;
+	  Real Hhi = 0.0;
+	  
+	  if(loVal <= 0.0){
+	    Hlo = 0.0;
+	  }
+	  else if(loVal >= 1.0) {
+	    Hlo = 1.0;
+	  }
+	  else{
+	    Hlo = loVal;
+	  }
+
+	  if(hiVal <= 0.0){
+	    Hhi = 0.0;
+	  }
+	  else if(hiVal >= 1.0) {
+	    Hhi = 1.0;
+	  }
+	  else{
+	    Hhi = hiVal;
+	  }
+
+	  faceReg(iv, m_comp) = 0.5 * (phiLo + phiHi) * Hlo * Hhi;
+	};
+
+	// Irregular kernel. Same as the above but we need to fetch faces explicitly.
+	auto irregularKernel = [&](const FaceIndex& face) -> void {
 	  const VolIndex loVof = face.getVoF(Side::Lo);
 	  const VolIndex hiVof = face.getVoF(Side::Hi);
 
 	  const Real loVal = std::max(0.0, cellPhi(loVof, m_comp));
 	  const Real hiVal = std::max(0.0, cellPhi(hiVof, m_comp));
 
-	  Real Hlo;
+	  Real Hlo = 0.0;
+	  Real Hhi = 0.0;
+	  
 	  if(loVal*vol <= 0.0){
 	    Hlo = 0.0;
 	  }
@@ -2765,7 +2781,6 @@ void CdrSolver::smoothHeavisideFaces(EBAMRFluxData& a_facePhi, const EBAMRCellDa
 	    Hlo = loVal*vol;
 	  }
 
-	  Real Hhi;
 	  if(hiVal*vol <= 0.0){
 	    Hhi = 0.0;
 	  }
@@ -2776,8 +2791,16 @@ void CdrSolver::smoothHeavisideFaces(EBAMRFluxData& a_facePhi, const EBAMRCellDa
 	    Hhi = hiVal*vol;
 	  }
 
-	  facePhi(face, m_comp) = 0.5*(hiVal + loVal)*Hlo*Hhi;
-	}
+	  facePhi(face, m_comp) = 0.5*(hiVal + loVal)*Hlo*Hhi;	  
+	};
+
+	// These are the computation regions for the kernels.
+	const Box    faceBox = surroundingNodes(cellBox, dir);
+	FaceIterator faceit(irregIVS, ebgraph, dir, FaceStop::SurroundingNoBoundary);
+
+	// Execute the kernels.
+	BoxLoops::loop(faceBox, regularKernel  );
+	BoxLoops::loop(faceit , irregularKernel);	
       }
     }
 
@@ -2801,9 +2824,10 @@ void CdrSolver::fillGwn(EBAMRFluxData& a_noise, const Real a_sigma){
   //       in FHD routines where we want to compute a finite volume approximation to the FHD diffusion noise
   //       term. 
 
-  // Gaussian white noise distribution -- this should be centered at 0 and we will usually have a_sigma=1 
-  std::normal_distribution<double> GWN(0.0, a_sigma);
+  // Gaussian white noise distribution -- this should be centered at 0, and we will usually but not necessarily have a_sigma=1 
+  std::normal_distribution<double> whiteNoise(0.0, a_sigma);
 
+  // Initialize.
   DataOps::setValue(a_noise, 0.0);
   
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
@@ -2820,43 +2844,29 @@ void CdrSolver::fillGwn(EBAMRFluxData& a_noise, const Real a_sigma){
       const IntVectSet& irreg = ebisbox.getIrregIVS(cellBox);      
 
       for (int dir = 0; dir < SpaceDim; dir++){
-	EBFaceFAB& noise = (*a_noise[lvl])[dit()][dir];
-
-	// Regular faces
-	Box facebox = cellBox;
-	facebox.surroundingNodes(dir);
-	
+	EBFaceFAB&     noise    = (*a_noise[lvl])[dit()][dir];
 	BaseFab<Real>& noiseReg = noise.getSingleValuedFAB();
-	for (BoxIterator bit(facebox); bit.ok(); ++bit){
-	  const IntVect iv = bit();
-	  noiseReg(iv, m_comp) = GWN(m_rng)*ivol;
-	}
+	
+	// Regular faces
+	const Box facebox = surroundingNodes(cellBox, dir);
+	FaceIterator faceit(irreg, ebgraph, dir, FaceStop::SurroundingNoBoundary);
 
-	// Irregular faces
-	const FaceStop::WhichFaces stopcrit = FaceStop::SurroundingNoBoundary;
-	for (FaceIterator faceit(irreg, ebgraph, dir, stopcrit); faceit.ok(); ++faceit){
-	  const FaceIndex& face = faceit();
+	// Regular kernel
+	auto regularKernel = [&](const IntVect& iv) -> void {
+	  noiseReg(iv, m_comp) = Random::get(whiteNoise) * ivol;
+	};
 
-	  noise(face, m_comp) = GWN(m_rng)*ivol;
-	}
+	// Irregular kernel
+	auto irregularKernel = [&](const FaceIndex& face) -> void {
+	  noise(face, m_comp) = Random::get(whiteNoise) * ivol;
+	};
+
+	// Execute the kernels.
+	BoxLoops::loop(facebox, regularKernel  );
+	BoxLoops::loop(faceit , irregularKernel);	
       }
     }
   }
-}
-
-void CdrSolver::parseRngSeed(){
-  CH_TIME("CdrSolver::parseRngSeed()");
-  if(m_verbosity > 5){
-    pout() << m_name + "::parseRngSeed()" << endl;
-  }
-
-  // Parse a random seed. If a seed < 0 is used we generate one from the system clock. 
-  
-  ParmParse pp(m_className.c_str());
-  pp.get("seed", m_seed);
-  if(m_seed < 0) m_seed = std::chrono::system_clock::now().time_since_epoch().count();
-
-  m_rng = std::mt19937_64(m_seed);
 }
 
 void CdrSolver::parsePlotMode(){

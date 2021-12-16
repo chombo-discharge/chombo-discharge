@@ -43,7 +43,6 @@ void CdrGodunov::parseOptions(){
   this->parsePlotMode();               // Parses plot mode
   this->parseMultigridSettings();      // Parses multigrid settings
   this->parseExtrapolateSourceTerm();  // Parses source term extrapolation for Godunov time extrapolation. 
-  this->parseRngSeed();                // Creates a seed (if one runs with FHD). 
   this->parseDivergenceComputation();  // Parses non-conservative divergence blending
 }
 
