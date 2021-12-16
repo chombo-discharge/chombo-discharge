@@ -33,7 +33,7 @@ public:
 
   /*!
     @brief Set the RNG seed.
-    @details If using MPI, the seed is set to a_seed +CD_Ra procID().
+    @details If using MPI, the seed is set to a_seed + procID().
     @param[in] a_seed Seed to use for RNG.
   */
   inline
