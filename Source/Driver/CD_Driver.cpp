@@ -28,6 +28,7 @@
 #include <CD_Driver.H>
 #include <CD_VofUtils.H>
 #include <CD_DataOps.H>
+#include <CD_BoxLoops.H>
 #include <CD_MultifluidAlias.H>
 #include <CD_Units.H>
 #include <CD_MemoryReport.H>
@@ -707,13 +708,14 @@ void Driver::regridInternals(const int a_oldFinestLevel, const int a_newFinestLe
       const Box& box = dbl.get(dit());
 
       DenseIntVectSet& tags = (*m_tags[lvl])[dit()];
-      
-      for (BoxIterator bit(box); bit.ok(); ++bit){
-	const IntVect iv = bit();
+
+      auto kernel = [&] (const IntVect& iv) -> void {
 	if(tmpFab(iv, comp)){
 	  tags |= iv;
 	}
-      }
+      };
+
+      BoxLoops::loop(box, kernel);
     }
   }
 }
@@ -2203,12 +2205,14 @@ void Driver::writeTags(EBAMRCellData& a_output, int& a_comp){
 
       // Do regular cells only.
       BaseFab<Real>& regTags = (*tags[lvl])[dit()].getSingleValuedFAB();
-      for (BoxIterator bit(cellBox); bit.ok(); ++bit){
-	const IntVect iv = bit();
+
+      auto kernel = [&] (const IntVect& iv) -> void {
 	if(ivs[iv]){
 	  regTags(iv, 0) = 1.0;
 	}
-      }
+      };
+
+      BoxLoops::loop(cellBox, kernel);
     }
   }
 
@@ -2266,14 +2270,14 @@ void Driver::writeLevelset(EBAMRCellData& a_output, int& a_comp){
       fab.setVal(0.0, a_comp  );
       fab.setVal(0.0, a_comp+1);
 
-      for (BoxIterator bit(fab.box()); bit.ok(); ++bit){
-	const IntVect iv = bit();
-	
+      auto kernel = [&](const IntVect& iv) -> void {
 	const RealVect pos = probLo + (RealVect(iv)+ 0.5*RealVect::Unit)*dx;
 
 	if(!lsf1.isNull()) fab(iv, a_comp  ) = lsf1->value(pos);
-	if(!lsf2.isNull()) fab(iv, a_comp+1) = lsf2->value(pos);
-      }
+	if(!lsf2.isNull()) fab(iv, a_comp+1) = lsf2->value(pos);	
+      };
+
+      BoxLoops::loop(fab.box(), kernel);
     }
   }
 
@@ -2383,12 +2387,14 @@ void Driver::writeCheckpointTags(HDF5Handle& a_handle, const int a_level){
     const DenseIntVectSet& tags = (*m_tags[a_level])[dit()];
 
     BaseFab<Real>& fab = scratch[dit()].getSingleValuedFAB();
-    for (BoxIterator bit(box); bit.ok(); ++bit){
-      const IntVect iv = bit();
+
+    auto kernel = [&](const IntVect& iv) -> void {
       if(tags[iv]){
 	fab(iv, 0) = 1.0;
-      }
-    }
+      }      
+    };
+
+    BoxLoops::loop(box, kernel);
 
     DataOps::setCoveredValue(scratch, 0, 0.0);
   }
@@ -2584,12 +2590,14 @@ void Driver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
     DenseIntVectSet& taggedCells = (*m_tags[a_level])[dit()];
 
     BaseFab<Real>& fab = scratch[dit()].getSingleValuedFAB();
-    for (BoxIterator bit(box); bit.ok(); ++bit){
-      const IntVect iv = bit();
+
+    auto kernel = [&] (const IntVect& iv) -> void {
       if(fab(iv, 0) > 0.9999){
 	taggedCells |= iv;
-      }
-    }
+      }      
+    };
+
+    BoxLoops::loop(box, kernel);
   }
 }
 #endif

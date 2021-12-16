@@ -839,28 +839,31 @@ void FieldSolver::setFacePermittivities(EBFluxFAB&      a_relPerm,
 
   const EBGraph& ebgraph         = a_ebisbox.getEBGraph();
   const IntVectSet irreg         = a_ebisbox.getIrregIVS(a_cellBox);
-  FaceStop::WhichFaces stop_crit = FaceStop::SurroundingWithBoundary;
   
   for (int dir = 0; dir < SpaceDim; dir++){
 
-    // Regular faces
-    Box facebox = a_cellBox;
-    facebox.surroundingNodes(dir);
-    BaseFab<Real>& relPermFAB = a_relPerm[dir].getSingleValuedFAB();
-    for (BoxIterator bit(facebox); bit.ok(); ++bit){
-      const IntVect iv   = bit();
-      const RealVect pos = a_probLo + a_dx*(RealVect(iv) + 0.5*RealVect::Unit) - 0.5*a_dx*BASISREALV(dir);
-      
-      relPermFAB(iv, m_comp) = this->getDielectricPermittivity(pos);
-    }
-    
-    // Irregular faces
-    for (FaceIterator faceit(irreg, ebgraph, dir, stop_crit); faceit.ok(); ++faceit){
-      const FaceIndex& face  = faceit();
-      const RealVect pos     = a_probLo + Location::position(m_faceLocation, face, a_ebisbox, a_dx);
+    // Kernel regions. 
+    const Box    facebox = surroundingNodes(a_cellBox, dir);
+    FaceIterator faceit  = FaceIterator(irreg, ebgraph, dir, FaceStop::SurroundingWithBoundary);
 
+    // Single-valued data. 
+    BaseFab<Real>& relPermFAB = a_relPerm[dir].getSingleValuedFAB();    
+
+    // Regular kernel
+    auto regularKernel = [&] (const IntVect& iv) -> void {
+      const RealVect pos     = a_probLo + a_dx*(RealVect(iv) + 0.5*RealVect::Unit) - 0.5*a_dx*BASISREALV(dir);
+      relPermFAB(iv, m_comp) = this->getDielectricPermittivity(pos);
+    };
+
+    // Irregular kernel.
+    auto irregularKernel = [&] (const FaceIndex& face) -> void {
+      const RealVect pos           = a_probLo + Location::position(m_faceLocation, face, a_ebisbox, a_dx);
       a_relPerm[dir](face, m_comp) = this->getDielectricPermittivity(pos);
-    }
+    };
+
+    // Launch kernels.
+    BoxLoops::loop(facebox,   regularKernel);
+    BoxLoops::loop(faceit , irregularKernel);    
   }
 }
 
@@ -1058,8 +1061,7 @@ void FieldSolver::writeMultifluidData(EBAMRCellData& a_output, int& a_comp, cons
 	  else if(ebisboxGas.isAllRegular() && ebisboxSol.isAllCovered()) { // Case 3. Inside gas phase. Already did this. 
 	  }
 	  else{ // Case 4, needs special treatment. 
-	    for (BoxIterator bit(box); bit.ok(); ++bit){ // Loop through all cells here
-	      const IntVect iv = bit();
+	    auto kernel = [&] (const IntVect& iv) -> void {
 	      if(ebisboxGas.isCovered(iv) && !ebisboxSol.isCovered(iv)){   // Regular cells from phase 2
 		for (int comp = 0; comp < numComp; comp++){
 		  scratchGas(iv, comp) = fabSol(iv, comp);
@@ -1070,7 +1072,9 @@ void FieldSolver::writeMultifluidData(EBAMRCellData& a_output, int& a_comp, cons
 		  scratchGas(iv, comp) = fabGas(iv,comp);
 		}
 	      }
-	    }
+	    };
+
+	    BoxLoops::loop(box, kernel);
 	  }
 	}
       }
