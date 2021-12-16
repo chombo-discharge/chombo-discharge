@@ -39,16 +39,15 @@ namespace BoxLoops {
 #endif
   }
 
-  template <typename Functor>
+  template <typename Iterator, typename Functor>
   ALWAYS_INLINE
-  void loop(VoFIterator& vofit, Functor&& func){
+  void loop(Iterator& iter, Functor&& func){
 
     // TLDR: This runs through all cells in the vof-iterator and calls the kernel. 
-    for (vofit.reset(); vofit.ok(); ++vofit){
-      func(vofit());
+    for (iter.reset(); iter.ok(); ++iter){
+      func(iter());
     }
   }
-
 }
 
 #include <CD_NamespaceFooter.H>

@@ -14,6 +14,7 @@
 
 // Chombo includes
 #include <Box.H>
+#include <FaceIterator.H>
 #include <VoFIterator.H>
 
 // Our includes
@@ -29,21 +30,22 @@ namespace BoxLoops {
   
   /*!
     @brief Launch a C++ kernel over a regular grid. This version uses simd decorations to ensure that the innermost loop can be vectorized. 
-    @param[in] a_computeBox Computation box
-    @param[in] a_kernel     Kernel to launch. 
+    @param[in]    a_computeBox Computation box
+    @param[inout] a_kernel     Kernel to launch. 
   */
   template <typename Functor>
   ALWAYS_INLINE
   static void loop(const Box& a_computeBox, Functor&& kernel);
 
   /*!
-    @brief Launch a C++ kernel over a cut-cells. 
-    @param[in] a_vofit   Grid cells where we launch the kernel. 
-    @param[in] a_kernel  Kernel to launch
+    @brief Launch a C++ kernel over cut-cells. 
+    @details The Iterator template type can be e.g. FaceIterator or VoFIterator. In general it must have functions ::reset(), ::ok(), ++, and ::operator().
+    @param[inout] a_vofit   Grid cells where we launch the kernel. 
+    @param[inout] a_kernel  Kernel to launch
   */  
-  template <typename Functor>
+  template <typename Iterator, typename Functor>
   ALWAYS_INLINE
-  static void loop(VoFIterator& a_vofit, Functor&& a_kernel);
+  static void loop(Iterator& a_iter, Functor&& a_kernel);
 
 }
 
