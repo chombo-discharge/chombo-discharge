@@ -39,7 +39,7 @@ namespace BoxLoops {
   */
   template <typename Functor>
   ALWAYS_INLINE
-  static void loop(const Box& a_computeBox, Functor&& kernel, const IntVect& a_stride = IntVect::Unit);
+  void loop(const Box& a_computeBox, Functor&& kernel, const IntVect& a_stride = IntVect::Unit);
 
   /*!
     @brief Launch a C++ kernel over a subset of cells. 
@@ -48,7 +48,7 @@ namespace BoxLoops {
   */  
   template <typename Functor>
   ALWAYS_INLINE
-  static void loop(IntVectSet& a_ivs, Functor&& a_kernel);
+  void loop(IntVectSet& a_ivs, Functor&& a_kernel);
 
   /*!
     @brief Launch a C++ kernel over a subset of cells. 
@@ -57,7 +57,7 @@ namespace BoxLoops {
   */  
   template <typename Functor>
   ALWAYS_INLINE
-  static void loop(DenseIntVectSet& a_ivs, Functor&& a_kernel);    
+  void loop(DenseIntVectSet& a_ivs, Functor&& a_kernel);    
 
   /*!
     @brief Launch a C++ kernel over cut-cells. 
@@ -66,7 +66,7 @@ namespace BoxLoops {
   */  
   template <typename Functor>
   ALWAYS_INLINE
-  static void loop(VoFIterator& a_iter, Functor&& a_kernel);
+  void loop(VoFIterator& a_iter, Functor&& a_kernel);
 
   /*!
     @brief Launch a C++ kernel over faces
@@ -75,7 +75,7 @@ namespace BoxLoops {
   */  
   template <typename Functor>
   ALWAYS_INLINE
-  static void loop(FaceIterator& a_iter, Functor&& a_kernel);
+  void loop(FaceIterator& a_iter, Functor&& a_kernel);
 
   /*!
     @brief Launch a C++ kernel over a specified subset of something.
@@ -84,7 +84,7 @@ namespace BoxLoops {
   */
   template <typename T, typename Functor>
   ALWAYS_INLINE
-  static void loop(const Vector<T>& a_subset, Functor&& a_kernel);
+  void loop(const Vector<T>& a_subset, Functor&& a_kernel);
 }
 
 #include <CD_NamespaceFooter.H>
