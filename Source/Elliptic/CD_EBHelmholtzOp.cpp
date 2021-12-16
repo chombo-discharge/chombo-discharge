@@ -18,6 +18,7 @@
 // Our includes
 #include <CD_EBHelmholtzOp.H>
 #include <CD_LeastSquares.H>
+#include <CD_BoxLoops.H>
 #include <CD_EBHelmholtzOpF_F.H>
 #include <CD_NamespaceHeader.H>
 
@@ -715,6 +716,7 @@ void EBHelmholtzOp::applyOpRegular(EBCellFAB& a_Lphi, EBCellFAB& a_phi, const Bo
   const BaseFab<Real>& phi  = a_phi.getSingleValuedFAB();
   const BaseFab<Real>& aco  = (*m_Acoef)[a_dit].getSingleValuedFAB();
 
+#if 0  
   // It's an older code, sir, but it checks out.
   const BaseFab<Real> dummy(Box(IntVect::Zero, IntVect::Zero), 1);
   const BaseFab<Real>* bcoef[3];
@@ -728,6 +730,7 @@ void EBHelmholtzOp::applyOpRegular(EBCellFAB& a_Lphi, EBCellFAB& a_phi, const Bo
     }
   }
 
+
   // Fill the ghost cells outside the domain so that we don't get an extra flux from the domain side. 
   FORT_HELMHOLTZINPLACE(CHF_FRA1(Lphi, m_comp),
 			CHF_CONST_FRA1(phi, m_comp),
@@ -739,18 +742,50 @@ void EBHelmholtzOp::applyOpRegular(EBCellFAB& a_Lphi, EBCellFAB& a_phi, const Bo
 			CHF_CONST_REAL(m_alpha),
 			CHF_CONST_REAL(m_beta),
 			CHF_BOX(a_cellBox));
+#else
+
+  // Need a handle to the regular b-coefficient which also exposes it in the kernel. This is
+  // the best that I came up with. 
+  const BaseFab<Real>* bco[SpaceDim];
+  for (int dir = 0; dir < SpaceDim; dir++){
+    bco[dir] = &(*m_Bcoef)[a_dit][dir].getSingleValuedFAB();
+  }
+  
+  // This is the C++ kernel. It adds the diagonal and the Laplacian part. 
+  const Real factor = m_beta/(m_dx*m_dx);
+  
+  auto kernel = [&] (const IntVect& iv) -> void {
+    Lphi(iv, m_comp) = m_alpha * aco(iv, m_comp) * phi(iv, m_comp)
+    + factor* (
+	       + (*bco[0])(iv + BASISV(0), m_comp) * (phi(iv + BASISV(0), m_comp) - phi(iv,             m_comp))
+	       - (*bco[0])(iv            , m_comp) * (phi(iv            , m_comp) - phi(iv - BASISV(0), m_comp))
+	       + (*bco[1])(iv + BASISV(1), m_comp) * (phi(iv + BASISV(1), m_comp) - phi(iv,             m_comp))
+	       - (*bco[1])(iv            , m_comp) * (phi(iv            , m_comp) - phi(iv - BASISV(1), m_comp))
+#if CH_SPACEDIM==3
+	       + (*bco[2])(iv + BASISV(2), m_comp) * (phi(iv + BASISV(2), m_comp) - phi(iv,             m_comp))
+	       - (*bco[2])(iv            , m_comp) * (phi(iv            , m_comp) - phi(iv - BASISV(2), m_comp))
+#endif
+	       );
+  };
+
+  // Launch the kernel.
+  BoxLoops::loop(a_cellBox, kernel);
+#endif
 }
 
 void EBHelmholtzOp::applyDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, const DataIndex& a_dit, const bool a_homogeneousPhysBC){
   CH_TIME("EBHelmholtzOp::applyDomainFlux(EBCellFAB, Box, DataIndex, bool)");
   
-  // TLDR: We compute the flux on the domain edges and store it in a cell-centered box. We then monkey with the ghost cells
-  //       so that centered differences on the edge cells inject said flux. This is a simple trick for enforcing the flux
-  //       on the domain edges. 
+  // TLDR: We compute the flux on the domain edges and store it in a cell-centered box. We then monkey with the ghost cells outside
+  //       the domain so that centered differences on the edge cells inject said flux. This is a simple trick for enforcing the flux
+  //       on the domain edges when we later compute the finite volume Laplacian. 
+
+  constexpr Real tol = 1.E-15;
   
   for (int dir = 0; dir < SpaceDim; dir++){
 
     BaseFab<Real>& phiFAB = a_phi.getSingleValuedFAB();
+    BaseFab<Real>& bco    = (*m_Bcoef)[a_dit][dir].getSingleValuedFAB();      
 
     Box loBox;
     Box hiBox;
@@ -759,46 +794,65 @@ void EBHelmholtzOp::applyDomainFlux(EBCellFAB& a_phi, const Box& a_cellBox, cons
     EBArith::loHi(loBox, hasLo, hiBox, hasHi, m_eblg.getDomain(), a_cellBox, dir);
     
     if(hasLo == 1){
-      const int side = -1;
 
-      // Get domain flux. 
+
+      // Fill the domain flux. This might look weird, and we are actually putting the flux in a cell-centered data holder. By this, we implicitly
+      // understand that the flux that is stored in the box is the flux that comes in through the lo side in the coordinate direction we are looking. 
       FArrayBox faceFlux(loBox, m_nComp);
       m_domainBc->getFaceFlux(faceFlux, a_phi.getSingleValuedFAB(), dir, Side::Lo, a_dit, a_homogeneousPhysBC);
 
-      // loBox is cell-centered interior region. 
+      // The EBArith loBox is cell-centered interior box abutting the domain side. We want the box immediately outside the domain. 
       Box ghostBox = loBox;    
       ghostBox.shift(dir, -1);
       
-      BaseFab<Real>& bco = (*m_Bcoef)[a_dit][dir].getSingleValuedFAB();
-      FORT_HELMHOLTZAPPLYDOMAINFLUX(CHF_FRA1(phiFAB, m_comp),
-      				    CHF_CONST_FRA1(faceFlux, m_comp),
-      				    CHF_CONST_FRA1(bco,m_comp),
-      				    CHF_CONST_REAL(m_dx),
-				    CHF_CONST_INT(side),
-				    CHF_CONST_INT(dir),
-				    CHF_BOX(ghostBox));
+      // This kernel might look weird, but we have designed our BC classes in such a weird way -- they fill boundary fluxes but the fluxes
+      // are stored in a cell-centered box abutting the domain. So, this is just like a "regular" kernel, with the exception of that pesky flux
+      // which physically lives on the face but is computationally stored on the cell. 
+      auto kernel = [&] (const IntVect& iv) -> void {
+	const Real& B = bco(iv + BASISV(dir), m_comp);
+
+	Real scaledFlux;
+	if(std::abs(B) > tol){
+	  scaledFlux = faceFlux(iv + BASISV(dir), m_comp) / B;
+
+	}
+	else {
+	  scaledFlux = 0.0;
+	}
+	phiFAB(iv, m_comp) = phiFAB(iv + BASISV(dir), m_comp) - scaledFlux * m_dx;	
+      };
+
+      BoxLoops::loop(ghostBox, kernel);
     }
 
     if(hasHi == 1){
-      const int side = 1;
-
-      // Get domain flux. 
+      // Fill the domain flux. This might look weird, and we are actually putting the flux in a cell-centered data holder. By this, we implicitly
+      // understand that the flux that is stored in the box is the flux that comes in through the hi side in the coordinate direction we are looking. 
       FArrayBox faceFlux(hiBox, m_nComp);
       m_domainBc->getFaceFlux(faceFlux, a_phi.getSingleValuedFAB(), dir, Side::Hi, a_dit, a_homogeneousPhysBC);
 
-      // hiBox is cell-centered interior region. We will monkey with the ghost cells so that centered differences in this
-      // region injects the domain flux. 
+      // The EBArith hiBox is cell-centered interior box abutting the domain side. We want the box immediately outside the domain. 
       Box ghostBox = hiBox;
       ghostBox.shift(dir, 1);
 
-      const BaseFab<Real>& bco = (*m_Bcoef)[a_dit][dir].getSingleValuedFAB();
-      FORT_HELMHOLTZAPPLYDOMAINFLUX(CHF_FRA1(phiFAB, m_comp),
-      				    CHF_CONST_FRA1(faceFlux, m_comp),
-      				    CHF_CONST_FRA1(bco,m_comp),
-      				    CHF_CONST_REAL(m_dx),
-				    CHF_CONST_INT(side),
-				    CHF_CONST_INT(dir),
-				    CHF_BOX(ghostBox));
+      // This kernel might look weird, but we have designed our BC classes in such a weird way -- they fill boundary fluxes but the fluxes
+      // are stored in a cell-centered box abutting the domain. So, this is just like a "regular" kernel, with the exception of that pesky flux
+      // which physically lives on the face but is computationally stored on the cell.       
+      auto kernel = [&] (const IntVect& iv) -> void {
+	const Real& B = bco(iv - BASISV(dir), m_comp);
+
+	Real scaledFlux;
+	if(std::abs(B) > tol){
+	  scaledFlux = faceFlux(iv - BASISV(dir), m_comp) / B;
+
+	}
+	else {
+	  scaledFlux = 0.0;
+	}
+	phiFAB(iv, m_comp) = phiFAB(iv - BASISV(dir), m_comp) + scaledFlux * m_dx;	
+      };
+
+      BoxLoops::loop(ghostBox, kernel);
     }
   }
 }
