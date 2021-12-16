@@ -1,4 +1,4 @@
-/* chombubo-discharge
+/* chombo-discharge
  * Copyright © 2021 SINTEF Energy Research.
  * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
  */
@@ -24,10 +24,12 @@
 #include <CD_LeastSquares.H>
 #include <CD_VofUtils.H>
 #include <CD_LoadBalancing.H>
+#include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
 constexpr int EBGradient::m_comp;
 constexpr int EBGradient::m_nComp;
+
 
 EBGradient::EBGradient(const EBLevelGrid& a_eblg,
 		       const EBLevelGrid& a_eblgFine,
@@ -135,37 +137,39 @@ void EBGradient::computeLevelGradient(LevelData<EBCellFAB>&       a_gradient,
     const EBISBox&   ebisBox = ebisl     [dit()];        
     const Box        cellBox = dbl       [dit()];
 
-    const bool isAllCovered = ebisBox.isAllCovered();
+    if(!ebisBox.isAllCovered()){
 
-    if(!isAllCovered){
-      // Compute regular cells
+      // Regular kernel -- this is the kernel used in regular cells. It just uses centered differencing. 
       BaseFab<Real>&       gradFAB = grad.getSingleValuedFAB();
       const BaseFab<Real>& phiFAB  = phi. getSingleValuedFAB();
-      FORT_GRADIENT(CHF_FRA(gradFAB),
-		    CHF_CONST_FRA1(phiFAB, m_comp),
-		    CHF_CONST_REAL(m_dx),
-		    CHF_BOX(cellBox));
+      const Real           idx     = 1./(2.0*m_dx);
+      
+      auto regularKernel = [&](const IntVect& iv) {
+	for (int dir = 0; dir < SpaceDim; dir++){
+	  gradFAB(iv, dir) = idx*(phiFAB(iv+BASISV(dir), m_comp) - phiFAB(iv-BASISV(dir), m_comp));
+	}
+      };
 
-      // Now do the boundary stencils.
-      const BaseIVFAB<VoFStencil>& bndryStencils = m_levelStencils[dit()];
-
-      VoFIterator& vofit = m_levelIterator[dit()];
-      for (vofit.reset(); vofit.ok(); ++vofit){
-	const VolIndex&   vof  = vofit();
-	const VoFStencil& sten = bndryStencils(vof, m_comp);
-
+      // Irregular kernel -- this is the kernel used in the cut-cells. 
+      auto irregularKernel = [&, this](const VolIndex& vof) {
 	for (int dir = 0; dir < SpaceDim; dir++){
 	  grad(vof, dir) = 0.0;
 	}
 
+	// Apply stencil. Note that the stencil "variable" is the gradient component (i.e., direction)
+	auto& sten = m_levelStencils[dit()](vof, m_comp);
 	for (int i = 0; i < sten.size(); i++){
 	  const VolIndex& ivof    = sten.vof(i);
 	  const Real&     iweight = sten.weight(i);
-	  const int&      ivar    = sten.variable(i); // Note: For the gradient stencil the component is the direction. 
+	  const Real&     ivar    = sten.variable(i);
 
-	  grad(vof, ivar) += phi(ivof, m_comp)*iweight;
+	  grad(vof, ivar) += iweight * phi(ivof, m_comp);
 	}
-      }
+      };
+
+      // Now apply the kernels using our nifty BoxLoops.
+      BoxLoops::loop(dbl            [dit()], regularKernel  );
+      BoxLoops::loop(m_levelIterator[dit()], irregularKernel);
     }
     else{
       grad.setVal(0.0);
@@ -174,7 +178,7 @@ void EBGradient::computeLevelGradient(LevelData<EBCellFAB>&       a_gradient,
     // Covered data is bogus. 
     for (int dir = 0; dir < SpaceDim; dir++){
       a_gradient[dit()].setCoveredCellVal(0.0, dir);
-    }    
+    }
   }
 }
 
@@ -1040,28 +1044,28 @@ bool EBGradient::getLeastSquaresStencil(VoFStencil&            a_stencilCoar,
     // only account for f(x0), f(x1) etc. We need to add in the contribution from a_vofCoar, which is fortunately just the sum of the weights for 
     // each derivative.     
     for (int dir = 0; dir < SpaceDim; dir++){
-	Real coarVofWeight = 0.0;
+      Real coarVofWeight = 0.0;
 	
-	for (int i = 0; i < a_stencilFine.size(); i++){
-	  const int  curVar    = a_stencilFine.variable(i);
-	  const Real curWeight = a_stencilFine.weight(i);
+      for (int i = 0; i < a_stencilFine.size(); i++){
+	const int  curVar    = a_stencilFine.variable(i);
+	const Real curWeight = a_stencilFine.weight(i);
 	  
-	  if(curVar == dir){
-	    coarVofWeight += curWeight;
-	  }
+	if(curVar == dir){
+	  coarVofWeight += curWeight;
 	}
+      }
 
-	for (int i = 0; i < a_stencilCoar.size(); i++){
-	  const int  curVar    = a_stencilCoar.variable(i);
-	  const Real curWeight = a_stencilCoar.weight(i);
+      for (int i = 0; i < a_stencilCoar.size(); i++){
+	const int  curVar    = a_stencilCoar.variable(i);
+	const Real curWeight = a_stencilCoar.weight(i);
 	  
-	  if(curVar == dir){
-	    coarVofWeight += curWeight;
-	  }
-	}	
+	if(curVar == dir){
+	  coarVofWeight += curWeight;
+	}
+      }	
 	
-	a_stencilCoar.add(a_vofCoar, -1.0*coarVofWeight, dir);
-      }          
+      a_stencilCoar.add(a_vofCoar, -1.0*coarVofWeight, dir);
+    }          
 
     foundStencil = true;    
   }
