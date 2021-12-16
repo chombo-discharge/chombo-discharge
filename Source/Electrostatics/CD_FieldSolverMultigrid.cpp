@@ -621,13 +621,6 @@ void FieldSolverMultigrid::computeElectricField(MFAMRCellData& a_electricField, 
   // Coarsen solution and update ghost cells. 
   m_amr->averageDown(a_electricField, m_realm);
   m_amr->interpGhost(a_electricField, m_realm);
-
-#if 1 // Debug
-  MFAMRFluxData e;
-  m_amr->allocate(e, m_realm, SpaceDim);
-
-  m_amr->computeGradient(e, a_potential, m_realm);
-#endif
 }
 
 void FieldSolverMultigrid::computeElectricField(MFAMRFluxData& a_electricField, const MFAMRCellData& a_potential) const {
