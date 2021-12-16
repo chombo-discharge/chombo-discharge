@@ -18,19 +18,20 @@ namespace BoxLoops {
   
   template <typename Functor>
   ALWAYS_INLINE
-  void loop(const Box& computeBox, Functor&& func){
+  void loop(const Box& computeBox, Functor&& func, const IntVect& a_stride){
 
-    // TLDR: This runs through all cells in the computeBox and calls the kernel function.
-  
+    CH_assert(a_stride > IntVect::Zero);
+    
     const int* lo = computeBox.loVect();
     const int* hi = computeBox.hiVect();
 
+    // TLDR: This runs through all cells in the computeBox and calls the kernel function.
 #if CH_SPACEDIM==3
-    for (int k = lo[2]; k <= hi[2]; k++){
+    for (int k = lo[2]; k <= hi[2]; k += a_stride[2]){
 #endif
-      for (int j = lo[1]; j <= hi[1]; j++){
+      for (int j = lo[1]; j <= hi[1]; j += a_stride[1]){
 	CD_PRAGMA_SIMD
-	  for (int i = lo[0]; i <= hi[0]; i++){
+	  for (int i = lo[0]; i <= hi[0]; i += a_stride[0]){
 	    func(IntVect(D_DECL(i,j,k)));
 	  }
       }
@@ -39,15 +40,42 @@ namespace BoxLoops {
 #endif
   }
 
-  template <typename Iterator, typename Functor>
+  template <typename Functor>
   ALWAYS_INLINE
-  void loop(Iterator& iter, Functor&& func){
+  void loop(IntVectSet& a_ivs, Functor&& a_kernel) {
+    for (IVSIterator iter(a_ivs); iter.ok(); ++iter){
+      a_kernel(iter());
+    }
+  }
+
+
+  template <typename Functor>
+  ALWAYS_INLINE
+  void loop(DenseIntVectSet& a_ivs, Functor&& a_kernel) {
+    for (DenseIntVectSetIterator iter(a_ivs); iter.ok(); ++iter){
+      a_kernel(iter());
+    }
+  }
+
+  template <typename Functor>
+  ALWAYS_INLINE
+  void loop(VoFIterator& iter, Functor&& a_kernel){
 
     // TLDR: This runs through all cells in the vof-iterator and calls the kernel. 
     for (iter.reset(); iter.ok(); ++iter){
-      func(iter());
+      a_kernel(iter());
     }
   }
+
+  template <typename Functor>
+  ALWAYS_INLINE
+  void loop(FaceIterator& iter, Functor&& a_kernel){
+
+    // TLDR: This runs through all cells in the vof-iterator and calls the kernel. 
+    for (iter.reset(); iter.ok(); ++iter){
+      a_kernel(iter());
+    }
+  }  
 }
 
 #include <CD_NamespaceFooter.H>

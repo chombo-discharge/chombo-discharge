@@ -144,14 +144,14 @@ void EBGradient::computeLevelGradient(LevelData<EBCellFAB>&       a_gradient,
       const BaseFab<Real>& phiFAB  = phi. getSingleValuedFAB();
       const Real           idx     = 1./(2.0*m_dx);
       
-      auto regularKernel = [&](const IntVect& iv) {
+      auto regularKernel = [&](const IntVect& iv) -> void {
 	for (int dir = 0; dir < SpaceDim; dir++){
 	  gradFAB(iv, dir) = idx*(phiFAB(iv+BASISV(dir), m_comp) - phiFAB(iv-BASISV(dir), m_comp));
 	}
       };
 
-      // Irregular kernel -- this is the kernel used in the cut-cells. 
-      auto irregularKernel = [&, this](const VolIndex& vof) {
+      // Irregular kernel -- this is the kernel used in the cut-cells. It simply applies the finite difference based stencil.
+      auto irregularKernel = [&, this](const VolIndex& vof) -> void {
 	for (int dir = 0; dir < SpaceDim; dir++){
 	  grad(vof, dir) = 0.0;
 	}
@@ -175,7 +175,7 @@ void EBGradient::computeLevelGradient(LevelData<EBCellFAB>&       a_gradient,
       grad.setVal(0.0);
     }
 
-    // Covered data is bogus. 
+    // Covered data is always bogus. 
     for (int dir = 0; dir < SpaceDim; dir++){
       a_gradient[dit()].setCoveredCellVal(0.0, dir);
     }
@@ -189,55 +189,55 @@ void EBGradient::computeNormalDerivative(LevelData<EBFluxFAB>& a_gradient,
   CH_assert(a_gradient.nComp() == SpaceDim);
   CH_assert(a_phi.     nComp() == 1       );
 
-
   // TLDR: This routine computes the level gradient, i.e. using finite difference stencils isolated to this level. It only does this for interior
   // faces, and it only computes the component of the gradient that is normal to the face. 
   const DisjointBoxLayout& dbl    = m_eblg.getDBL();
   const EBISLayout&        ebisl  = m_eblg.getEBISL();
   const ProblemDomain&     domain = m_eblg.getDomain();
+  const Real               idx    = 1./m_dx;   // Needed for the kernels. 
 
   for (DataIterator dit(dbl); dit.ok(); ++dit){
+    const Box        cellBox = dbl  [dit()];    
     const EBCellFAB& phi     = a_phi[dit()];
     const EBISBox&   ebisBox = ebisl[dit()];
-    const Box        cellBox = dbl  [dit()];
-
     const EBGraph&   ebgraph = ebisBox.getEBGraph();
 
     for (int dir = 0; dir < SpaceDim; dir++){
-      EBFaceFAB& grad = a_gradient[dit()][dir];
-      
+      EBFaceFAB&           grad        = a_gradient[dit()][dir];
       BaseFab<Real>&       regGradient = grad.getSingleValuedFAB();
       const BaseFab<Real>& regPhi      = phi. getSingleValuedFAB();
 
-      // Do interior faces. This computes the gradient using a standard two-point stencil reaching across the face. 
-      Box interiorFaces = cellBox;
-      interiorFaces.grow(dir, 1);
-      interiorFaces &= domain;
-      interiorFaces.grow(dir, -1);
-      interiorFaces.surroundingNodes(dir);
-
-      FORT_FACENORMALDERIVATIVE(CHF_FRA1(regGradient, dir),
-				CHF_CONST_FRA1(regPhi, m_comp),
-				CHF_CONST_INT(dir),
-				CHF_CONST_REAL(m_dx),
-				CHF_BOX(interiorFaces));
-
-      // Do the same for all interior faces.
+      // Get all cells that do abut the domain edge. 
       Box interiorCells = cellBox;
       interiorCells.grow(dir, 1);
       interiorCells &= domain;
       interiorCells.grow(dir, -1);
 
-      const IntVectSet irregIVS = ebisBox.getIrregIVS(interiorCells);
-      
-      for (FaceIterator faceIt(irregIVS, ebgraph, dir, FaceStop::SurroundingNoBoundary); faceIt.ok(); ++faceIt){
-	const FaceIndex& face = faceIt();
+      // Turn the interiorCells Box to a face-centered box in the dir-direction. When we do this we get all faces that are oriented along the direction
+      // dir, but which are not boundary faces. Also define an iterator for going through the subset of those cells that shared a cell edge/face with a cut-cell. 
+      const Box         interiorFaces = surroundingNodes(interiorCells, dir);
+      const IntVectSet& irregIVS      = ebisBox.getIrregIVS(interiorCells);
 
+      FaceIterator faceit(irregIVS, ebgraph, dir, FaceStop::SurroundingNoBoundary);
+
+
+      // C++ kernel for regular grid faces. Note that we iterate over the IntVects in the face-centered boxes, so
+      // the cell on the high side of the face has index iv and on the low side it has index iv - BASISV(dir);      
+      auto regularFaceDerivative = [&](const IntVect& iv) -> void {
+	regGradient(iv, dir) = idx*regPhi(iv, m_comp) - regPhi(iv - BASISV(dir), m_comp);
+      };
+
+      // Cut-cell version of the above. 
+      auto irregularFaceDerivative = [&](const FaceIndex& face) -> void {
 	const VolIndex& vofHi = face.getVoF(Side::Hi);
-	const VolIndex& vofLo = face.getVoF(Side::Lo);	
+	const VolIndex& vofLo = face.getVoF(Side::Lo);
 
-	grad(face, dir) = (phi(vofHi, m_comp) - phi(vofLo, m_comp))/m_dx;
-      }
+	grad(face, dir) = idx * (phi(vofHi, m_comp) - phi(vofLo, m_comp));
+      };
+
+      // Launch our C++ kernels. 
+      BoxLoops::loop(interiorFaces,   regularFaceDerivative);
+      BoxLoops::loop(faceit,        irregularFaceDerivative);      
     }
   }
 }
