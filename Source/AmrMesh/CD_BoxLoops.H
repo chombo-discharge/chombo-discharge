@@ -5,7 +5,7 @@
 
 /*!
   @file   CD_BoxLoops.H
-  @brief  Agglomeration of useful data operations
+  @brief  Declaration of a namespace for proto-typing grid and EB loops. 
   @author Robert Marskar
 */
 

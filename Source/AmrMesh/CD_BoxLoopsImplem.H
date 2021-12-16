@@ -4,8 +4,9 @@
  */
 
 /*!
-  @file  CD_BoxLoopsImplem.H
-  @brief Implementation of CD_BoxLoops.H
+  @file   CD_BoxLoopsImplem.H
+  @brief  Implementation of CD_BoxLoops.H
+  @author Robert Marskar
 */
 
 #ifndef CD_BoxLoopsImplem_H
