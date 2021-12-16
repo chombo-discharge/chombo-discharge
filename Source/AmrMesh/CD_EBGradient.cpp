@@ -29,7 +29,6 @@
 constexpr int EBGradient::m_comp;
 constexpr int EBGradient::m_nComp;
 
-
 EBGradient::EBGradient(const EBLevelGrid& a_eblg,
 		       const EBLevelGrid& a_eblgFine,
 		       const Real         a_dx,
