@@ -21,6 +21,8 @@
 #include <CD_CdrSolverF_F.H>
 #include <CD_CdrFhdF_F.H>
 #include <CD_DataOps.H>
+#include <CD_BoxLoops.H>
+#include <CD_ParallelOps.H>
 #include <CD_NamespaceHeader.H>
 
 constexpr int CdrSolver::m_comp;
@@ -568,9 +570,11 @@ void CdrSolver::computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelDa
   // TLDR: This routine computes the diffusion flux F = D*Grad(phi) on face centers. Since this uses centered differencing
   //       and we don't have valid data outside the computational domain we only do the differencing for interior faces,
   //       setting the flux to zero on domain faces. Note that we need to fill flux in the tangential ghost face centers because
-  //       the face centroid flux is interpolated between face centers. 
+  //       the face centroid flux is interpolated between face centers.
+  //
 
   const Real dx                = m_amr->getDx()[a_lvl];
+  const Real inverseDx         = 1./dx;  
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
   const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[a_lvl];
   const ProblemDomain& domain  = m_amr->getDomains()[a_lvl];
@@ -582,8 +586,13 @@ void CdrSolver::computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelDa
     const EBGraph&   ebgraph = ebisbox.getEBGraph();
 
     for (int dir = 0; dir < SpaceDim; dir++){
-      EBFaceFAB& flux      = a_flux[dit()][dir];
-      const EBFaceFAB& dco = (*m_faceCenteredDiffusionCoefficient[a_lvl])[dit()][dir];
+      EBFaceFAB&       flux = a_flux[dit()][dir];
+      const EBFaceFAB& dco  = (*m_faceCenteredDiffusionCoefficient[a_lvl])[dit()][dir];
+
+      // Regular grid data. 
+      BaseFab<Real>&       regFlux = flux.getSingleValuedFAB();
+      const BaseFab<Real>& regPhi = phi. getSingleValuedFAB();
+      const BaseFab<Real>& regDco = dco. getSingleValuedFAB();      
 
       flux.setVal(0.0);
       
@@ -596,32 +605,31 @@ void CdrSolver::computeDiffusionFlux(LevelData<EBFluxFAB>& a_flux, const LevelDa
       grownCellBox &= domain;
       grownCellBox.grow(dir, -1);
 
+      // These are the "regions" for the regular and cut-cell kernels. 
       const Box grownFaceBox = surroundingNodes(grownCellBox, dir);
-
-      // Fortran kernel -- this computes f = D(face)*(phi(iv_high) - phi(iv-low))/dx
-      BaseFab<Real>& regFlux      = flux.getSingleValuedFAB();
-      const BaseFab<Real>& regPhi = phi. getSingleValuedFAB();
-      const BaseFab<Real>& regDco = dco. getSingleValuedFAB();
-      
-      FORT_DFLUX_REG(CHF_FRA1(regFlux, m_comp),
-		     CHF_CONST_FRA1(regPhi, m_comp),
-		     CHF_CONST_FRA1(regDco, m_comp),
-		     CHF_CONST_INT(dir),
-		     CHF_CONST_REAL(dx),
-		     CHF_BOX(grownFaceBox));
+      FaceIterator faceit(ebisbox.getIrregIVS(grownCellBox), ebgraph, dir, FaceStop::SurroundingWithBoundary);
 
 
-      // Irregular faces need to be redone beacuse Fortran will not do them correctly. 
-      for (FaceIterator faceit(ebisbox.getIrregIVS(grownCellBox), ebgraph, dir, FaceStop::SurroundingWithBoundary); faceit.ok(); ++faceit){
-	const FaceIndex& face = faceit();
+      // Regular kernel. Note that we call the kernel on a face-centered box, so the cell on the high side is located at
+      // iv, and the cell at the low side is at iv - BASISV(dir).
+      auto regularKernel = [&](const IntVect& iv) -> void {
+	regFlux(iv, m_comp) = inverseDx * regDco(iv, m_comp) * (regPhi(iv, m_comp) - regPhi(iv - BASISV(dir), m_comp));
+      };
 
-	if(!face.isBoundary()){ 
+      // Cut-cell kernel. Basically the same as the above but we need to explicity get vofs on the low/high side (because
+      // we may have multi-cells but the above kernel only does single-valued cells). 
+      auto irregularKernel = [&](const FaceIndex& face) -> void {
+	if(!face.isBoundary()){
 	  const VolIndex hiVoF = face.getVoF(Side::Hi);
 	  const VolIndex loVoF = face.getVoF(Side::Lo);
 
 	  flux(face, m_comp) = dco(face,m_comp) * (phi(hiVoF,m_comp) - phi(loVoF, m_comp))/dx;
 	}
-      }
+      };
+
+      // Execute kernels.
+      BoxLoops::loop(grownFaceBox,   regularKernel);
+      BoxLoops::loop(faceit,       irregularKernel);      
     }
   }
 }
@@ -898,13 +906,13 @@ void CdrSolver::conservativeDivergenceRegular(LevelData<EBCellFAB>& a_divJ, cons
   // kappa*div(J) = sum(fluxes)/dx
 
 
-  const DisjointBoxLayout dbl = m_amr->getGrids(m_realm)[a_lvl];
-  const ProblemDomain domain  = m_amr->getDomains()[a_lvl];
-  const Real dx               = m_amr->getDx()[a_lvl];
+  const DisjointBoxLayout dbl       = m_amr->getGrids(m_realm)[a_lvl];
+  const ProblemDomain     domain    = m_amr->getDomains()     [a_lvl];
+  const Real              dx        = m_amr->getDx()          [a_lvl];
+  const Real              inverseDx = 1./dx;
 
-  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-    const Box cellBox       = dbl.get(dit());
-    
+  for (DataIterator dit(dbl); dit.ok(); ++dit){
+    const Box      cellBox  = dbl   [dit()];
     EBCellFAB&     divJ     = a_divJ[dit()];
     BaseFab<Real>& divJReg  = divJ.getSingleValuedFAB();
 
@@ -914,20 +922,25 @@ void CdrSolver::conservativeDivergenceRegular(LevelData<EBCellFAB>& a_divJ, cons
       const EBFaceFAB&     flux    = a_flux[dit()][dir];
       const BaseFab<Real>& fluxReg = flux.getSingleValuedFAB();
 
-      // Fortran kernel -- this does divJ(iv) += (fluxReg(iv+1)-fluxReg(iv))/dx. 
-      FORT_CONSDIV_REG(CHF_FRA1(divJReg, m_comp),
-		       CHF_CONST_FRA1(fluxReg, m_comp),
-		       CHF_CONST_INT(dir),
-		       CHF_CONST_REAL(dx),
-		       CHF_BOX(cellBox));
+      // Regular kernel. We call this for a cell-centered box so the high flux is on iv + BASISV(dir) and the low flux
+      // on iv + BASISV(dir);
+      auto regularKernel = [&](const IntVect& iv) -> void {
+	divJReg(iv, m_comp) += inverseDx * (fluxReg(iv + BASISV(dir), m_comp) - fluxReg(iv, m_comp));
+      };
+
+      // Execute the kernel. 
+      BoxLoops::loop(cellBox, regularKernel);
     }
 
-    // Reset irregular grid cells -- these are set by interpolating fluxes to centroids and calling computeDivergenceIrregular(....)
+    
+    // Reset irregular grid cells. These will be computed in a different way. 
     VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[dit()];
-    for (vofit.reset(); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
+    
+    auto irregularKernel = [&](const VolIndex& vof) -> void {
       divJ(vof, m_comp) = 0.0;
-    }
+    };
+
+    BoxLoops::loop(vofit, irregularKernel);
   }
 
   a_divJ.exchange();
@@ -1905,55 +1918,58 @@ Real CdrSolver::computeAdvectionDt(){
   }
 
   // TLDR: For advection we must have dt <= dx/(|vx|+|vy|+|vz|). E.g., with first order upwind phi^(k+1)_i = phi^k_i - (v*dt) * (phi^k_i - phi^k_(i-1))/dx so
-  //       if phi^k_(i-1) == 0 then (1 - v*dt/dx) > 0.0 yields a positive definite solution (more general analysis certainly possible..)
+  //       if phi^k_(i-1) == 0 then (1 - v*dt/dx) > 0.0 yields a positive definite solution (more general analysis when we have limiters is probably possible...)
 
   Real minDt = std::numeric_limits<Real>::max();
 
   if(m_isMobile){
-
-    // We use m_scratch for holding dx/(|vx| + |vy| + |vz|)
-    DataOps::setValue(m_scratch, minDt);
-
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-      const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-      const Real dx                = m_amr->getDx()[lvl];
+      const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)              [lvl];
+      const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+      const Real               dx    = m_amr->getDx()                        [lvl];
 
       for (DataIterator dit(dbl); dit.ok(); ++dit){
-	EBCellFAB& dt          = (*m_scratch     [lvl])[dit()];
-	const EBCellFAB& velo  = (*m_cellVelocity[lvl])[dit()];
-	const Box cellBox      = dbl.get(dit());
+	const Box        cellBox = dbl  [dit()];	
+	const EBCellFAB& velo    = (*m_cellVelocity[lvl])[dit()];
+	const EBISBox&   ebisBox = ebisl[dit()];
 
-	// Regular cells -- the Fortran kernels computes dtReg = dx/(|vx|+|vy|+|vz|)
-	BaseFab<Real>&       dtReg   = dt.getSingleValuedFAB();
-	const BaseFab<Real>& veloReg = velo.getSingleValuedFAB();
-	FORT_ADVECTION_DT(CHF_FRA1(dtReg, m_comp),
-			  CHF_CONST_FRA(veloReg),
-			  CHF_CONST_REAL(dx),
-			  CHF_BOX(cellBox));
-
-
-	// Same kernel as above, but for irregular cells. 
 	VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
-	for (vofit.reset(); vofit.ok(); ++vofit){
-	  const VolIndex& vof = vofit();
-	
+
+	// Regular grid data.
+	const BaseFab<Real>& veloReg = velo.getSingleValuedFAB();	
+
+	// Compute dt = dx/(|vx|+|vy|+|vz|) and check if it's smaller than the smallest so far. 
+	auto regularKernel = [&](const IntVect& iv) -> void {
+	  if(!ebisBox.isCovered(iv)){
+	    Real vel = 0.0;
+	    for (int dir = 0; dir < SpaceDim; dir++){
+	      vel += std::abs(veloReg(iv, dir));
+	    }
+
+	    minDt = std::min(dx/vel, minDt);
+	  }
+	};
+
+	// Same kernel, but for cut-cells.
+	auto irregularKernel = [&](const VolIndex& vof) -> void {
 	  Real vel = 0.0;
 	  for (int dir = 0; dir < SpaceDim; dir++){
 	    vel += std::abs(velo(vof, dir));
 	  }
 
-	  dt(vof, m_comp) = dx/vel;
-	}
+	  minDt = std::min(dx/vel, minDt);
+	};
+
+
+	// Execute the kernels.
+	BoxLoops::loop(cellBox, regularKernel  );
+	BoxLoops::loop(vofit,   irregularKernel);
       }
     }
 
-    Real maxVal = std::numeric_limits<Real>::max();
-    
-    DataOps::setCoveredValue(m_scratch, m_comp, maxVal);  // Covered cells don't matter -- make sure they don't trigger anything (because MaxMin might reach into them). 
-    DataOps::getMaxMin(maxVal, minDt, m_scratch, m_comp); // Get maximum and minimum. 
+    // If we are using MPI then ranks need to know of each other's time steps.
+    minDt = ParallelOps::Min(minDt);
   }
-
 
   return minDt;
 }
@@ -1976,67 +1992,66 @@ Real CdrSolver::computeDiffusionDt(){
 
   if(m_isDiffusive){
 
-    // We use scratch for holding dx*dx/(2*d*D)
-    DataOps::setValue(m_scratch, minDt);
-
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-      const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-      const Real dx                = m_amr->getDx()[lvl];
+      const DisjointBoxLayout& dbl   = m_amr->getGrids     (m_realm         )[lvl];
+      const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+      const Real               dx    = m_amr->getDx()                        [lvl];
+      const Real               dx2   = dx*dx;
 
       for (DataIterator dit(dbl); dit.ok(); ++dit){
-	EBCellFAB&             dt         = (*m_scratch[lvl])[dit()];
 	const Box              cellBox    = dbl  [dit()];
 	const EBISBox&         ebisbox    = ebisl[dit()];
 	const EBFluxFAB&       diffCoFace = (*m_faceCenteredDiffusionCoefficient[lvl])[dit()];
-	const BaseIVFAB<Real>& diffcoEB   = (*m_ebCenteredDiffusionCoefficient[lvl])[dit()];
+	VoFIterator&           vofit      = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];	
 
-	// Fortran kernel. Strictly speaking, we should have a kernel which increments with the diffusion coefficients on each face since the finite volume
+	// Regular kernel. Strictly speaking, we should have a kernel which increments with the diffusion coefficients on each face since the finite volume
 	// approximation to the Laplacian becomes (in 1D) Div*(D*Grad(phi)) = -D_(i-1/2)*(phi_i - phi_(i-1)) + D_(i+1/2)*(phi_(i+1)-phi_i). A good kernel
-	// would do just that, but a lazy programmer just find the largest diffusion coefficient and uses that as an approximation. 
+	// would do just that, but a lazy programmer just find the largest diffusion coefficient and uses that as an approximation.
 	for (int dir = 0; dir < SpaceDim; dir++){
-	  BaseFab<Real>&       dtReg     = dt.getSingleValuedFAB();
-	  const EBFaceFAB&     diffCo    = diffCoFace[dir];
-	  const BaseFab<Real>& diffCoReg = diffCo.getSingleValuedFAB();
-	  
-	  FORT_DIFFUSION_DT(CHF_FRA1(dtReg, m_comp),
-			    CHF_CONST_FRA1(diffCoReg, m_comp),
-			    CHF_CONST_REAL(dx),
-			    CHF_CONST_INT(dir),
-			    CHF_BOX(cellBox));
+	  const BaseFab<Real>& diffCoReg = diffCoFace[dir].getSingleValuedFAB();
+
+	  auto regularKernel = [&](const IntVect& iv) -> void {
+	    if(ebisbox.isRegular(iv)){
+	      Real D = 0.0;
+	      for (int dir = 0; dir < SpaceDim; dir++){
+		D = std::max(D, diffCoReg(iv,             m_comp));
+		D = std::max(D, diffCoReg(iv-BASISV(dir), m_comp));	      
+	      }
+
+	      minDt = std::min(minDt, dx2/(2*SpaceDim*D));
+	    }
+	  };
+
+	  // Execute the kernel.
+	  BoxLoops::loop(cellBox, regularKernel);
 	}
-
-	// Same kernel as above, but including the EB face. 
-	VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
-	for (vofit.reset(); vofit.ok(); ++vofit){
-	  const VolIndex vof = vofit();
-
-	  // Go through faces in the cut cell and fine the face which has the largest diffusion coefficient. We just
-	  // use that as an approximation for computing dt. 
-	  Real maxD  = diffcoEB(vof, m_comp);
 	  
-	  for (int dir = 0; dir < SpaceDim; dir++){
-	    const EBFaceFAB& diffcoFace = diffCoFace[dir];
-	    for (SideIterator sit; sit.ok(); ++sit){
-	      const Vector<FaceIndex> faces = ebisbox.getFaces(vof, dir, sit());
 
-	      for (int iface = 0; iface < faces.size(); iface++){
-		const FaceIndex& face = faces[iface];
-		
-		maxD = std::max(maxD, diffcoFace(face, m_comp));
+	// Same kernel as above, but we need to fetch grid faces differently.
+	auto irregularKernel = [&](const VolIndex& vof) -> void {
+	  Real D = 0.0;
+
+	  for (int dir = 0; dir < SpaceDim; dir++){
+	    const EBFaceFAB& Dface = diffCoFace[dir];
+
+	    for (SideIterator sit; sit.ok(); ++sit){
+	      const std::vector<FaceIndex> faces = ebisbox.getFaces(vof, dir, sit()).stdVector();
+
+	      for (const auto& face : faces){
+		D = std::max(D, Dface(face, m_comp));
 	      }
 	    }
 	  }
 
-	  dt(vof, m_comp) = (dx*dx) / (2.0*SpaceDim*maxD);
-	}
-      }
+	  minDt = std::min(minDt, dx2/(2*SpaceDim*D));
+	};
 
-      Real maxVal = std::numeric_limits<Real>::max();
-    
-      DataOps::setCoveredValue(m_scratch, m_comp, maxVal);  // Set covered to something large (in case MaxMin triggers covered cells)
-      DataOps::getMaxMin(maxVal, minDt, m_scratch, m_comp);
+	// Execute the kernel
+	BoxLoops::loop(vofit, irregularKernel);
+      }
     }
+
+    minDt = ParallelOps::Min(minDt);
   }
 
   return minDt;
@@ -2075,91 +2090,81 @@ Real CdrSolver::computeAdvectionDiffusionDt(){
   }
   else if(m_isMobile && m_isDiffusive){
 
-    // scratch is used for holding dt in the form above. 
-    DataOps::setValue(m_scratch, 0.0);
-
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-      const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-      const Real dx                = m_amr->getDx()[lvl];
+      const DisjointBoxLayout& dbl   = m_amr->getGrids     (m_realm         )[lvl];
+      const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
+      const Real               dx    = m_amr->getDx()[lvl];
+      const Real               dx2   = dx*dx;
 
       for (DataIterator dit(dbl); dit.ok(); ++dit){
-	EBCellFAB&             dt         = (*m_scratch                       [lvl])[dit()];
-	const EBCellFAB&       velo       = (*m_cellVelocity                  [lvl])[dit()];
-	const BaseIVFAB<Real>& diffCoEB   = (*m_ebCenteredDiffusionCoefficient[lvl])[dit()];
-	const EBFluxFAB&       diffCoFace = (*m_faceCenteredDiffusionCoefficient[lvl])[dit()];
+	const EBCellFAB& velo       = (*m_cellVelocity                    [lvl])[dit()];
+	const EBFluxFAB& diffCoFace = (*m_faceCenteredDiffusionCoefficient[lvl])[dit()];
+	const EBISBox&   ebisbox    = ebisl[dit()];	
+	const Box        cellBox    = dbl  [dit()];
 	
-	const EBISBox& ebisbox          = ebisl[dit()];	
-	const Box      cellBox          = dbl  [dit()];
+	VoFIterator&     vofit      = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];		
 
-	dt.setVal(0.0);
-
-	// Regular faces. The first kernel finds the diffusion contribution only, using the maximum diffusion coefficient
-	// on one of the faces. After the dir-loop dtReg will contain 2*d*D/(dx*dx) where D is the largest coefficient on one
-	// of the faces of the cell. 
-	BaseFab<Real>& dtReg = dt.getSingleValuedFAB();
-	
-	for (int dir = 0; dir < SpaceDim; dir++){
-	  const BaseFab<Real>& diffCoReg = diffCoFace[dir].getSingleValuedFAB();
-	  FORT_ADVECTION_DIFFUSION_DT_ONE(CHF_FRA1(dtReg, m_comp),
-					  CHF_CONST_FRA1(diffCoReg, m_comp),
-					  CHF_CONST_REAL(dx),
-					  CHF_CONST_INT(dir),
-					  CHF_BOX(cellBox));
-	}
-
-	// The second kernel increments with the advective contribution so that dtReg = (|Vx|+|Vy|+|Vz|)/dx + 2*d*D/(dx*dx)
+	// Single-valued data. 
 	const BaseFab<Real>& veloReg = velo.getSingleValuedFAB();
-	FORT_ADVECTION_DIFFUSION_DT_TWO(CHF_FRA1(dtReg, m_comp),  
-					CHF_CONST_FRA(veloReg),
-					CHF_CONST_REAL(dx),
-					CHF_BOX(cellBox));
 
-	// Invert the result so dtReg = 1/(|Vx|+|Vy|+|Vz|)/dx + 2*d*D/(dx*dx). 
-	FORT_ADVECTION_DIFFUSION_DT_INVERT(CHF_FRA1(dtReg, m_comp),
-					   CHF_BOX(cellBox));
+	// Regular kernel.
+	auto regularKernel = [&](const IntVect& iv) -> void {
+	  if(ebisbox.isRegular(iv)){
+	    Real v = 0.0;
+	    Real D = 0.0;
 
+	    // Compute |v|
+	    for (int dir = 0; dir < SpaceDim; dir++){
+	      v += std::abs(veloReg(iv, dir));
+	    }
 
-	// Same kernel as above, but for cut-cells only. 
-	VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
-	for (vofit.reset(); vofit.ok(); ++vofit){
-	  const VolIndex vof = vofit();
+	    // Get biggest diffusion coefficient in this cell.
+	    for (int dir = 0; dir < SpaceDim; dir++){
+	      D = std::max(D, diffCoFace[dir].getSingleValuedFAB()(iv              , m_comp));
+	      D = std::max(D, diffCoFace[dir].getSingleValuedFAB()(iv + BASISV(dir), m_comp));			   
+	    }
+	    
+	    const Real curDt = 1./(v/dx + 2*D*SpaceDim/dx2);
 
-	  // Compute |vx|+|vy|+|vz| in the cut-cell. 
-	  Real vel = 0.0;
+	    minDt = std::min(minDt, curDt);
+	  }
+	};
+
+	// Irregular kernel.
+	auto irregularKernel = [&](const VolIndex& vof) -> void {
+	  Real v = 0.0;
+	  Real D = 0.0;
+
+	  // Compute |v|
 	  for (int dir = 0; dir < SpaceDim; dir++){
-	    vel += std::abs(velo(vof, dir));
+	    v += std::abs(velo(vof, dir));
 	  }
 
-	  // Find largest diffusion coefficient in one of the faces of the cut-cell. 
-	  Real maxD  = diffCoEB(vof, m_comp);
-	  
+	  // Compute largest D
 	  for (int dir = 0; dir < SpaceDim; dir++){
-	    const EBFaceFAB& diffCo = diffCoFace[dir];
-	    
-	    for (SideIterator sit; sit.ok(); ++sit){
-	      const Vector<FaceIndex> faces = ebisbox.getFaces(vof, dir, sit());
+	    const EBFaceFAB& Dface = diffCoFace[dir];
 
-	      for (int iface = 0; iface < faces.size(); iface++){
-		const FaceIndex& face = faces[iface];
-		
-		maxD = std::max(maxD, diffCo(face, m_comp));
+	    for (SideIterator sit; sit.ok(); ++sit){
+	      const std::vector<FaceIndex> faces = ebisbox.getFaces(vof, dir, sit()).stdVector();
+
+	      for (const auto& face : faces){
+		D = std::max(D, Dface(face, m_comp));
 	      }
 	    }
 	  }
 
-	  const Real inverseDtA  = vel/dx;
-	  const Real inverseDtD  = (2*SpaceDim*maxD)/(dx*dx);
+	  const Real curDt = 1./(v/dx + 2*D*SpaceDim/dx2);
 
-	  dt(vof, m_comp) = 1.0/(inverseDtA + inverseDtD);
-	}
+	  minDt = std::min(minDt, curDt);
+	};
+
+	// Execute the kernels.
+	BoxLoops::loop(dbl[dit()],   regularKernel);
+	BoxLoops::loop(vofit,      irregularKernel);	
       }
     }
 
-    Real maxVal = std::numeric_limits<Real>::max();
-    
-    DataOps::setCoveredValue(m_scratch, m_comp, maxVal);  // Covered cells are bogus -- set them to a large value for safety. 
-    DataOps::getMaxMin(maxVal, minDt, m_scratch, m_comp);
+    minDt = ParallelOps::Min(minDt);
   }
 
   return minDt;
@@ -2178,54 +2183,47 @@ Real CdrSolver::computeSourceDt(const Real a_max, const Real a_tolerance){
 
   if(a_max > 0.0){
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-      const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-      const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-      const Real dx                = m_amr->getDx()[lvl];
+      const DisjointBoxLayout& dbl   = m_amr->getGrids     (m_realm         )[lvl];
+      const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 	const EBCellFAB& phi     = (*m_phi   [lvl])[dit()];
 	const EBCellFAB& source  = (*m_source[lvl])[dit()];
 	const Box        cellBox = dbl             [dit()];
 
-	// Fortran kernel -- computes dt = phi/source but only if phi > a_max*a_tolerance and source > 0.0
-	const BaseFab<Real>& phiReg = phi.getSingleValuedFAB();
+	VoFIterator&     vofit   = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];	
+
+	const BaseFab<Real>& phiReg = phi.   getSingleValuedFAB();
 	const BaseFab<Real>& srcReg = source.getSingleValuedFAB();
 
-	FORT_SOURCE_DT(CHF_REAL(minDt),
-		       CHF_CONST_FRA1(phiReg, m_comp),
-		       CHF_CONST_FRA1(srcReg, m_comp),
-		       CHF_CONST_REAL(a_tolerance),
-		       CHF_CONST_REAL(a_max),
-		       CHF_BOX(cellBox));
+	// Regular kernel. 
+	auto regularKernel = [&](const IntVect& iv) -> void {
+	  const Real curPhi = phiReg(iv, m_comp);
+	  const Real curSrc = srcReg(iv, m_comp);
 
-	// Same as the Fortran kernel, but for cut-cells only. 
-	VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
-	for (vofit.reset(); vofit.ok(); ++vofit){
-	  const VolIndex vof = vofit();
+	  if(curPhi > a_tolerance*a_max && curSrc > 0.0){
+	    minDt = std::min(minDt, std::abs(curPhi/curSrc));
+	  }
+	};
 
+	// Irregular kernel.
+	auto irregularKernel = [&](const VolIndex& vof) -> void {
 	  const Real curPhi = phi   (vof, m_comp);
 	  const Real curSrc = source(vof, m_comp);
 
-	  Real curDt = std::numeric_limits<Real>::max();
-	  
-	  if(std::abs(curPhi) > a_tolerance*a_max && curSrc > 0.0){
-	    curDt = std::abs(curPhi/curSrc);
+	  if(curPhi > a_tolerance*a_max && curSrc > 0.0){
+	    minDt = std::min(minDt, std::abs(curPhi/curSrc));
 	  }
-	  
-	  minDt = std::min(minDt, curDt);
-	}
+	};
+
+	// Execute kernels.
+	BoxLoops::loop(dbl[dit()], regularKernel  );
+	BoxLoops::loop(vofit,      irregularKernel);	
       }
     }
-  }
 
-#ifdef CH_MPI
-  Real tmp = 1.;
-  int result = MPI_Allreduce(&minDt, &tmp, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
-  if(result != MPI_SUCCESS){
-    MayDay::Error("CdrSolver::computeSourceDt() - communication error on norm");
+    minDt = ParallelOps::Min(minDt);
   }
-  minDt = tmp;
-#endif
   
   return minDt;
 }
