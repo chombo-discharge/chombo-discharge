@@ -75,7 +75,17 @@ namespace BoxLoops {
     for (iter.reset(); iter.ok(); ++iter){
       a_kernel(iter());
     }
-  }  
+  }
+
+  template <typename T, typename Functor>
+  ALWAYS_INLINE
+  void loop(const Vector<T>& a_subset, Functor&& a_kernel) {
+    const std::vector<T>& stdVec = ((Vector<T>&) a_subset).stdVector();
+    
+    for (const auto& v : stdVec){
+      a_kernel(v);
+    }
+  }
 }
 
 #include <CD_NamespaceFooter.H>

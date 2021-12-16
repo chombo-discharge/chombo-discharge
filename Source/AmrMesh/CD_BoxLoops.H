@@ -18,7 +18,7 @@
 #include <DenseIntVectSet.H>
 #include <VoFIterator.H>
 #include <FaceIterator.H>
-
+#include <Vector.H>
 
 // Our includes
 #include <CD_Decorations.H>
@@ -75,7 +75,16 @@ namespace BoxLoops {
   */  
   template <typename Functor>
   ALWAYS_INLINE
-  static void loop(FaceIterator& a_iter, Functor&& a_kernel);  
+  static void loop(FaceIterator& a_iter, Functor&& a_kernel);
+
+  /*!
+    @brief Launch a C++ kernel over a specified subset of something.
+    @param[inout] a_subset Subset. E.g. a std::vector<VolIndex>
+    @param[inout] a_kernel Kernel to launch
+  */
+  template <typename T, typename Functor>
+  ALWAYS_INLINE
+  static void loop(const Vector<T>& a_subset, Functor&& a_kernel);
 }
 
 #include <CD_NamespaceFooter.H>

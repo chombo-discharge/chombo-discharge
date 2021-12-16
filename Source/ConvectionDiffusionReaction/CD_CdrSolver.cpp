@@ -18,8 +18,6 @@
 
 // Our includes
 #include <CD_CdrSolver.H>
-#include <CD_CdrSolverF_F.H>
-#include <CD_CdrFhdF_F.H>
 #include <CD_DataOps.H>
 #include <CD_BoxLoops.H>
 #include <CD_ParallelOps.H>
