@@ -20,7 +20,6 @@
 // Our includes
 #include <CD_Timer.H>
 #include <CD_EBGradient.H>
-#include <CD_EBGradientF_F.H>
 #include <CD_LeastSquares.H>
 #include <CD_VofUtils.H>
 #include <CD_LoadBalancing.H>

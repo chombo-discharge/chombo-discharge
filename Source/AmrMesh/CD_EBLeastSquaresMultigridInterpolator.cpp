@@ -23,9 +23,9 @@
 // Our includes
 #include <CD_Timer.H>
 #include <CD_EBLeastSquaresMultigridInterpolator.H>
-#include <CD_EBMultigridInterpolatorF_F.H>
 #include <CD_VofUtils.H>
 #include <CD_LeastSquares.H>
+#include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
 constexpr int EBLeastSquaresMultigridInterpolator::m_stenComp;
@@ -193,14 +193,20 @@ void EBLeastSquaresMultigridInterpolator::coarseFineInterpH(EBCellFAB& a_phi, co
 	const Box ghostBox = m_cfivs[a_dit].at(std::make_pair(dir, sit()));
 	
 	if(!ghostBox.isEmpty()){
-	  const int hiLo = sign(sit()); // Low side => -1, high side => 1
 	  BaseFab<Real>& phiReg = a_phi.getSingleValuedFAB();
-	  FORT_MGINTERPHOMO(CHF_FRA1(phiReg, ivar),
-	  		    CHF_CONST_REAL(dxFine),
-	  		    CHF_CONST_REAL(dxCoar),
-	  		    CHF_CONST_INT(dir),
-	  		    CHF_CONST_INT(hiLo),
-	  		    CHF_BOX(ghostBox));
+
+	  // C++ kernel for homogeneous interpolation along a line, assumning that coarse-grid
+	  // data is zero. 
+	  const Real    c1    = 2*(dxCoar-dxFine)/(dxCoar +   dxFine);
+	  const Real    c2    =  -(dxCoar-dxFine)/(dxCoar + 3*dxFine);
+	  const IntVect shift = sign(sit()) * BASISV(dir);
+
+	  auto interpHomo = [&] (const IntVect& iv) -> void {
+	    phiReg(iv, ivar) = c1 * phiReg(iv-shift, ivar) + c2 * phiReg(iv-2*shift, ivar);
+	  };
+
+	  // Apply the kernel. 
+	  BoxLoops::loop(ghostBox, interpHomo);
 	}
       }
     }
@@ -210,140 +216,6 @@ void EBLeastSquaresMultigridInterpolator::coarseFineInterpH(EBCellFAB& a_phi, co
     // are, in fact, not writing to data that is used by the other stencils
     constexpr int numComp = 1;
     m_aggFineStencils[a_dit]->apply(a_phi, a_phi, ivar, ivar, numComp, false);
-  }
-}
-
-void EBLeastSquaresMultigridInterpolator::slowCoarseFineInterp(LevelData<EBCellFAB>&       a_phiFine,
-							       const LevelData<EBCellFAB>& a_phiCoar,
-							       const Interval              a_variables){
-  CH_TIME("EBLeastSquaresMultigridInterpolator::slowCoarseFineInterp");
-  
-  CH_assert(m_ghostCF*IntVect::Unit <= a_phiFine.ghostVect());
-
-  // TLDR: This routine does the inhomogeneous coarse-fine interpolation, i.e. the coarse data is not set to zero. 
-
-  // Do the regular interpolation -- let QuadCFInterp take care of that. 
-  LevelData<FArrayBox> fineAlias;
-  LevelData<FArrayBox> coarAlias;
-
-  aliasEB(fineAlias, (LevelData<EBCellFAB>&) a_phiFine);
-  aliasEB(coarAlias, (LevelData<EBCellFAB>&) a_phiCoar);
-
-  //  QuadCFInterp::coarseFineInterp(fineAlias, coarAlias);
-  RefCountedPtr<QuadCFInterp> interpolator;
-  if(a_variables == Interval(0, 0)){
-    interpolator = m_scalarInterpolator;
-  }
-  else if(a_variables == Interval(0, SpaceDim-1)){
-    interpolator = m_vectorInterpolator;
-  }
-  interpolator->coarseFineInterp(fineAlias, coarAlias);    
-
-  // Interpolate all variables near the EB. We will copy a_phiCoar to m_grownCoarData which holds the data on the coarse grid cells around each fine-grid
-  // patch. Note that m_grownCoarData provides a LOCAL view of the coarse grid around each fine-level patch, so we can apply the stencils directly. 
-  for (int icomp = a_variables.begin(); icomp <= a_variables.end(); icomp++){
-
-    // Copy data to scratch data holders. We need the coarse-data to be accessible by the fine data (through the same iterators), so we can't
-    // get away from a copy here (I think). 
-    const Interval srcInterv = Interval(icomp,   icomp);
-    const Interval dstInterv = Interval(m_comp,  m_comp);
-    a_phiCoar.copyTo(srcInterv, m_grownCoarData, dstInterv);
-
-    // Go through each grid patch and the to-be-interpolated ghost cells across the refinement boundary. We simply
-    // apply the stencils here.
-    for (DataIterator dit = a_phiFine.dataIterator(); dit.ok(); ++dit){
-      EBCellFAB&       dstFine = a_phiFine      [dit()];
-      const EBCellFAB& srcFine = a_phiFine      [dit()];
-      const EBCellFAB& srcCoar = m_grownCoarData[dit()];
-
-      const BaseIVFAB<VoFStencil>& fineStencils = m_fineStencils[dit()];
-      const BaseIVFAB<VoFStencil>& coarStencils = m_coarStencils[dit()];
-
-      VoFIterator& vofit = m_vofIterFine[dit()];
-      for (vofit.reset(); vofit.ok(); ++vofit){
-	const VolIndex& ghostVoF = vofit();
-
-	dstFine(ghostVoF, icomp) = 0.0;
-
-	// Fine and coarse stencils for this ghost vof
-	const VoFStencil& fineSten = fineStencils(ghostVoF, m_stenComp);
-	const VoFStencil& coarSten = coarStencils(ghostVoF, m_stenComp);
-
-	// Apply fine stencil
-	for (int ifine = 0; ifine < fineSten.size(); ifine++){
-	  dstFine(ghostVoF, icomp) += fineSten.weight(ifine) * srcFine(fineSten.vof(ifine), icomp);
-	}
-
-	// Apply coarse stencil
-	for (int icoar = 0; icoar < coarSten.size(); icoar++){
-	  dstFine(ghostVoF, icomp) += coarSten.weight(icoar) * srcCoar(coarSten.vof(icoar), m_comp);
-	}
-      }
-    }
-  }
-}
-
-void EBLeastSquaresMultigridInterpolator::slowCoarseFineInterpH(LevelData<EBCellFAB>& a_phiFine, const Interval a_variables) const{
-  CH_TIME("EBLeastSquaresMultigridInterpolator::slowCoarseFineInterpH(LD<EBCellFAB>, Interval)");
-
-  CH_assert(m_ghostCF*IntVect::Unit <= a_phiFine.ghostVect());  
-
-  // TLDR: This routine does the coarse-fine interpolation with the coarse-grid data set to zero. 
-  for (DataIterator dit(m_eblgFine.getDBL()); dit.ok(); ++dit){
-    this->slowCoarseFineInterpH(a_phiFine[dit()], a_variables, dit());
-  }
-}
-
-void EBLeastSquaresMultigridInterpolator::slowCoarseFineInterpH(EBCellFAB& a_phi, const Interval a_variables, const DataIndex& a_dit) const{
-  CH_TIME("EBLeastSquaresMultigridInterpolator::slowCoarseFineInterpH(LD<EBCellFAB>, Interval, DataIndex)");
-
-  // TLDR: This routine does the coarse-fine interpolation with the coarse-grid data set to zero. This is the kernel version,
-  //       operating on a grid patch. It first does a direct kernel for regular data, and then does the interpolation near the
-  //       EB after that. 
-  
-  const Real dxFine = 1.0;
-  const Real dxCoar = 1.0 * m_refRat;
-
-  VoFIterator& vofit = m_vofIterFine[a_dit];
-  
-  for (int ivar = a_variables.begin(); ivar <= a_variables.end(); ivar++){
-    
-    // Do the regular interp on all sides of the current patch. 
-    for (int dir = 0; dir < SpaceDim; dir++){
-      for (SideIterator sit; sit.ok(); ++sit){
-
-	// Regular homogeneous interpolation on side sit() in direction dir
-	const Box ghostBox = m_cfivs[a_dit].at(std::make_pair(dir, sit()));
-	
-	if(!ghostBox.isEmpty()){
-	  const int hiLo = sign(sit()); // Low side => -1, high side => 1
-	  BaseFab<Real>& phiReg = a_phi.getSingleValuedFAB();
-	  FORT_MGINTERPHOMO(CHF_FRA1(phiReg, ivar),
-	  		    CHF_CONST_REAL(dxFine),
-	  		    CHF_CONST_REAL(dxCoar),
-	  		    CHF_CONST_INT(dir),
-	  		    CHF_CONST_INT(hiLo),
-	  		    CHF_BOX(ghostBox));
-	}
-      }
-    }
-
-    // Apply fine stencil near the EB. It might look weird that we apply the stencil to a_phi AND put the result in a_phi. This
-    // is because the stencils are defined in the ghost cells we will fill, but the stencils only reach into valid data. So, we
-    // are, in fact, not writing to data that is used by the other stencils
-    for (vofit.reset(); vofit.ok(); ++vofit){
-      const VolIndex&   ghostVof = vofit();
-      const VoFStencil& fineStencil = m_fineStencils[a_dit](ghostVof, m_stenComp);
-
-      a_phi(ghostVof, ivar) = 0.0;
-      for (int i = 0; i < fineStencil.size(); i++){
-	const VolIndex& vof    = fineStencil.vof   (i);
-	const Real&     weight = fineStencil.weight(i);
-
-	a_phi(ghostVof, ivar) += weight * a_phi(vof, ivar);
-      }
-      
-    }
   }
 }
 

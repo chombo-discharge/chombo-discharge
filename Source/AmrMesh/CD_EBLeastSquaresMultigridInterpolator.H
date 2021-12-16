@@ -103,32 +103,11 @@ public:
   void coarseFineInterp(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar, const Interval a_variables) override;
 
   /*!
-    @brief Do inhomogeneous interpolation
-    @param[inout] a_phiFine   Fine phi
-    @param[in]    a_phiCoar   Coarse phi
-    @param[in]    a_variables Variables to interpolate
-    @details This is the "slow" version which does not use the AggStencil performance optimization objects. 
-    @note This exists mostly for debugging, but this will be safe to use even if you input fine-grid data which does not
-    have ghostCells == a_ghostVector.
-  */
-  void slowCoarseFineInterp(LevelData<EBCellFAB>& a_phiFine, const LevelData<EBCellFAB>& a_phiCoar, const Interval a_variables);  
-
-  /*!
     @brief Do homogeneous interpolation
     @param[in] a_phiFine   Fine phi
     @param[in] a_variables Variables to interpolate
   */
   void coarseFineInterpH(LevelData<EBCellFAB>& a_phiFine, const Interval a_variables) const override;
-
-  /*!
-    @brief Do homogeneous interpolation
-    @param[in] a_phiFine   Fine phi
-    @param[in] a_variables Variables to interpolate
-    @details This is the "slow" version which does not use the AggStencil performance optimization objects. 
-    @note This exists mostly for debugging, but this will be safe to use even if you input fine-grid data which does not
-    have ghostCells == a_ghostVector.
-  */
-  void slowCoarseFineInterpH(LevelData<EBCellFAB>& a_phiFine, const Interval a_variables) const;  
 
   /*!
     @brief Do homogeneous coarse-fine interpolation on a grid patch
@@ -140,18 +119,6 @@ public:
     contain enough ghost cells. 
   */
   void coarseFineInterpH(EBCellFAB& a_phiFine, const Interval a_variables, const DataIndex& a_dit) const;
-
-  /*!
-    @brief Do homogeneous coarse-fine interpolation on a grid patch
-    @param[in] a_phiFine   Fine-level data
-    @param[in] a_variables Variables to be interpolated
-    @param[in] a_dit       Data index
-    @details This is the "slow" version which does not use the AggStencil performance optimization objects. 
-    @note This is the kernel version. The constructor guarantees that the fine-grid stencil will not out of the ghost region defined by a_ghostVector. However, this is
-    the direct kernel version which is public because multigrid operators might need it for performance reasons. This routine does NOT warn against input data that do not
-    contain enough ghost cells. 
-  */
-  void slowCoarseFineInterpH(EBCellFAB& a_phiFine, const Interval a_variables, const DataIndex& a_dit) const;  
 
 protected:
 
