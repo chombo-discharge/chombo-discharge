@@ -17,6 +17,7 @@
 
 // Our includes
 #include <CD_EBParticleMesh.H>
+#include <CD_BoxLoops.H>
 #include <CD_EBParticleMeshF_F.H>
 #include <CD_NamespaceHeader.H>
 
@@ -211,65 +212,138 @@ void EBParticleMesh::depositParticle(EBCellFAB&           a_rho,
 				     const Real&          a_mass,
 				     const DepositionType a_depositionType,
 				     const bool           a_forceIrregNGP) const {
-  CH_assert(a_rho.nComp() == 1);
+  CH_TIME("EBParticleMesh::depositParticle");
   
+  CH_assert(a_rho.nComp() == 1);
+
   // TLDR: This performs regular deposition as if the particle lives on regular mesh data. If the cell is irregular we can use a class option
-  //       to enforce NGP deposition in those cells. If the particle lives in a multi-valued cell I have no idea how to handle deposition.
+  //       to enforce NGP deposition in those cells. If the particle lives in a multi-valued cell I have no idea how to handle deposition.  
 
-  constexpr int comp = 0;
+  constexpr int comp  = 0;
+  constexpr int nComp = 1;  
 
-  // Check if the cell is irregular. 
-  const RealVect rv = (a_position - a_probLo)/a_dx;
-  const IntVect  iv = IntVect(D_DECL(floor(rv[0]), floor(rv[1]), floor(rv[2])));
+  // Nifty lambda for converting RealVect position to IntVect (lower-left corner). Note that the input vector
+  // is the displacement from a_probLo and not the physical position. 
+  auto getCellIndex = [&dx=a_dx] (const RealVect a_rv) -> IntVect {
+    return IntVect(D_DECL(std::floor(a_rv[0]/dx[0]), std::floor(a_rv[1]/dx[1]), std::floor(a_rv[2]/dx[2])));
+  };
 
-  CH_assert(m_region.contains(iv));    
+  // Get grid cell corresponding to this particle. 
+  const IntVect particleIndex = getCellIndex(a_position - a_probLo);
 
-  FArrayBox& rho = a_rho.getFArrayBox();
+  // Assertion -- particle must live on this patch. 
+  CH_assert(m_region.contains(particleIndex));
 
+  // Factors needed for the kernels. density is the, well, density = mass/volume. The little lambda will give us the distance
+  // between the cell we're looking at and the particle position (in units of the grid resolution)
+  const Real density = a_mass/std::pow(a_dx[0], SpaceDim);
+
+  auto particleDisplacement = [&] (const IntVect& iv) -> RealVect {
+    return (a_probLo + (RealVect(iv) + 0.5*RealVect::Unit)*a_dx - a_position)/a_dx;
+  };
+  
+  // Get regular data. 
+  FArrayBox& rho = a_rho.getFArrayBox();  
+  
   // We can force NGP deposition in cut-cells if we want. 
-  if(m_ebisbox.isIrregular(iv) && a_forceIrregNGP){
-    FORT_NGP_DEPOSIT_SCALAR(CHF_FRA1(rho, comp),
-			    CHF_CONST_REALVECT(a_probLo),
-			    CHF_CONST_REALVECT(a_dx),
-			    CHF_CONST_REALVECT(a_position),
-			    CHF_CONST_REAL(a_mass));
+  if(m_ebisbox.isIrregular(particleIndex) && a_forceIrregNGP){
+    rho(particleIndex, comp) += density;    
   }
   else{
     switch (a_depositionType){
     case DepositionType::NGP:
       {
-	FORT_NGP_DEPOSIT_SCALAR(CHF_FRA1(rho, comp),
-				CHF_CONST_REALVECT(a_probLo),
-				CHF_CONST_REALVECT(a_dx),
-				CHF_CONST_REALVECT(a_position),
-				CHF_CONST_REAL(a_mass));
+	rho(particleIndex, comp) += density;
 	break;
       }
     case DepositionType::CIC:
       {
-	FORT_CIC_DEPOSIT_SCALAR(CHF_FRA1(rho, comp),
-				CHF_CONST_REALVECT(a_probLo),
-				CHF_CONST_REALVECT(a_dx),
-				CHF_CONST_REALVECT(a_position),
-				CHF_CONST_REAL(a_mass));
+	// Compute the index of the cell that contains the lower-left corner of this particle cloud. Also compute
+	// the box corresponding to the cloud. 
+	const IntVect loIndex  = getCellIndex(a_position - a_probLo - 0.5*a_dx);
+	const Box     cloudBox = Box(loIndex, loIndex + IntVect::Unit);
+
+	// This is the cloud-in-cell deposition kernel.
+	auto cicKernel = [&](const IntVect& iv) -> void {
+	  Real weight = density;
+
+	  // L is the distance between the grid cell and the particle. 
+	  const RealVect L = particleDisplacement(iv);
+	  for (int dir = 0; dir < SpaceDim; dir++){
+	    weight *= (1. - std::abs(L[dir]));
+	  }
+
+	  rho(iv,comp) += weight;
+	};
+
+	// Add mass to cells. 
+	BoxLoops::loop(cloudBox, cicKernel);
+
 	break;
       }
     case DepositionType::TSC:
       {
-	FORT_TSC_DEPOSIT_SCALAR(CHF_FRA1(rho, comp),
-				CHF_CONST_REALVECT(a_probLo),
-				CHF_CONST_REALVECT(a_dx),
-				CHF_CONST_REALVECT(a_position),
-				CHF_CONST_REAL(a_mass));
+
+	// Compute the index of the cell that contains the lower-left corner of this particle cloud. Also compute
+	// the box corresponding to the cloud. 
+	const IntVect loIndex = getCellIndex(a_position - a_probLo - a_dx);
+	const Box     tscBox  = Box(loIndex, loIndex + 2*IntVect::Unit);
+
+	// This is the triangle-shaped cloud kernel. 
+	auto tscKernel = [&](const IntVect& iv) -> void {
+	  Real weight = density;
+
+	  const RealVect L = particleDisplacement(iv);	  
+	  for (int dir = 0; dir < SpaceDim; dir++){
+	    const Real l = std::abs(L[dir]);
+
+	    if(l < 0.5){
+	      weight *= 0.75 - l*l;
+	    }
+	    else{
+	      weight *= 0.5 * (1.5 - l) * (1.5 - l);
+	    }
+	  }
+
+	  rho(iv, comp) += weight;
+	};
+
+	// Run the kernel. 
+	BoxLoops::loop(tscBox, tscKernel);
+
 	break;
       }
     case DepositionType::W4:
       {
-	FORT_W4_DEPOSIT_SCALAR(CHF_FRA1(rho, comp),
-			       CHF_CONST_REALVECT(a_probLo),
-			       CHF_CONST_REALVECT(a_dx),
-			       CHF_CONST_REALVECT(a_position),
-			       CHF_CONST_REAL(a_mass));
+
+	// Compute the index of the cell that contains the lower-left corner of this particle cloud. Also compute
+	// the box corresponding to the cloud. 
+	const IntVect loIndex = getCellIndex(a_position - a_probLo - 1.5*a_dx);
+	const Box     w4Box   = Box(loIndex, loIndex + 3*IntVect::Unit);
+
+	// This is the fourth order kernel.
+	auto w4Kernel = [&](const IntVect& iv) -> void {
+	  Real weight = density;
+	  
+	  // L is the distance between the grid cell and the particle. 
+	  const RealVect L = particleDisplacement(iv);	  	  
+	  for (int dir = 0; dir < SpaceDim; dir++){
+	    const Real l = std::abs(L[dir]);
+
+	    if(l < 1.0) {
+	      weight *= 1.0 - 2.5*l*l + 1.5*l*l*l;
+	    }
+	    else {
+	      weight *= 0.5 * (2. - l) * (2. - l) * (1. - l);
+	    }
+	  }
+
+	  rho(iv, comp) += weight;
+	};
+
+	// Run the kernel.
+	BoxLoops::loop(w4Box, w4Kernel);
+
 	break;
       }
     default:
