@@ -22,6 +22,7 @@
 #include <CD_ItoSolver.H>
 #include <CD_DataOps.H>
 #include <CD_ParticleOps.H>
+#include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
 constexpr int ItoSolver::m_comp;
@@ -923,10 +924,8 @@ void ItoSolver::writeCheckPointLevelFluid(HDF5Handle& a_handle, const int a_leve
     BinFab<ItoParticle> cellSortedParticles(cellBox, dx, probLo);
     cellSortedParticles.addItems(particles[a_level][dit()].listItems());
 
-    // Go through the patch and get the number of particles per cell. 
-    for (BoxIterator bit(cellBox); bit.ok(); ++bit) {
-      const IntVect iv = bit();
-
+    // Kernel - go through the patch and get the number of particles per cell. 
+    auto kernel = [&] (const IntVect& iv) -> void {
       const List<ItoParticle>& cellParticles = cellSortedParticles(iv, m_comp);      
 
       // Go through the particles in the current grid cell and set the number of particles. 
@@ -936,7 +935,10 @@ void ItoSolver::writeCheckPointLevelFluid(HDF5Handle& a_handle, const int a_leve
 	
 	particleNumbersFAB(iv, m_comp) += p.mass();
       }
-    }
+    };
+
+    // Execute kernel.
+    BoxLoops::loop(cellBox, kernel);
   }
 
   // Finally, write the particle numbers to HDF5. 
@@ -2663,17 +2665,20 @@ void ItoSolver::makeSuperparticles(const WhichContainer a_container, const int a
   ParticleContainer<ItoParticle>& particles     = this->getParticles(a_container);  
   BinFab<ItoParticle>&            cellParticles = particles.getCellParticles(a_level, a_dit);
 
-  // Iterate over particles in each cell and merge them. 
-  const Box cellBox  = m_amr->getGrids(m_realm)[a_level][a_dit];
-  for (BoxIterator bit(cellBox); bit.ok(); ++bit) {
-    const IntVect iv = bit();
-  
+  // Kernel for particle merging. 
+  auto kernel = [&] (const IntVect& iv) -> void {
     List<ItoParticle>& particles = cellParticles(iv, m_comp);
 
     if(particles.length() > 0) {
       this->mergeBVH(particles, a_particlesPerCell);
     }
-  }
+  };
+
+  // Iteration space. 
+  const Box cellBox  = m_amr->getGrids(m_realm)[a_level][a_dit];  
+
+  // Run kernel
+  BoxLoops::loop(cellBox, kernel);
 }
 
 void ItoSolver::mergeBVH(List<ItoParticle>& a_particles, const int a_particlesPerCell) {
