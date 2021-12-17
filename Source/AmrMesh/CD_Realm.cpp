@@ -241,8 +241,8 @@ void Realm::defineHaloMask(LevelData<BaseFab<bool> >& a_coarMask,
   //       cells that overlap with other boxes. This set of cells is then put on a LevelData<FArrayBox> mask so we can copy the result to the coarse grid and
   //       set the mask. 
   
-  const int comp  = 0;
-  const int ncomp = 1;
+  constexpr int comp  = 0;
+  constexpr int ncomp = 1;
 
   // First, reset the mask.
   for (DataIterator dit(a_gridsCoar); dit.ok(); ++dit){
@@ -295,9 +295,12 @@ void Realm::defineHaloMask(LevelData<BaseFab<bool> >& a_coarMask,
       coarMask[dit()].setVal(0.0);
     }
 
-    // Run through the halo and set the halo cells to 1 on the coarsened fine grids (these are essentially "ghost cells")
+    // Run through the halo and set the halo cells to 1 on the coarsened fine grids. Since dblCoFi was a coarsening of the fine
+    // grid, the mask value in the valid region (i.e., not including ghosts) is always zero. There used to be a bug here because
+    // we only iterated through that region, but obviously the halo masks will always be zero in that case...
     for (DataIterator dit(dblCoFi); dit.ok(); ++dit){
-      IntVectSet curHalo = halo & dblCoFi[dit()];
+      const Box        region  = coFiMask[dit()].box();
+      const IntVectSet curHalo = halo & region;
       for (IVSIterator ivsit(curHalo); ivsit.ok(); ++ivsit){
 	coFiMask[dit()](ivsit(), comp) = 1.0;
       }
@@ -309,16 +312,17 @@ void Realm::defineHaloMask(LevelData<BaseFab<bool> >& a_coarMask,
     const Interval interv(0,0);
     coFiMask.copyTo(interv, coarMask, interv, copier, LDaddOp<FArrayBox>());
 
+
     // Run through the grids and make the boolean mask
     for (DataIterator dit(a_gridsCoar); dit.ok(); ++dit){
       const Box box = a_gridsCoar[dit()];
 
-      BaseFab<bool>& mask     = a_coarMask[dit()];
-      const FArrayBox& blMask = coarMask  [dit()];
+      BaseFab<bool>&   boolMask = a_coarMask[dit()];
+      const FArrayBox& realMask =   coarMask[dit()];
 
       auto kernel = [&] (const IntVect& iv) -> void {
-	if(blMask(iv, comp) > 0.0){
-	  mask(iv, comp) = true;
+	if(realMask(iv, comp) > 0.0){
+	  boolMask(iv, comp) = true;
 	}
       };
 
