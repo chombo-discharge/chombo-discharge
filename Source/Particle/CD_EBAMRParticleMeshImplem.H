@@ -34,13 +34,13 @@ void EBAMRParticleMesh::deposit(EBAMRCellData&              a_meshData,
 
   switch(a_coarseFineDeposition){
   case CoarseFineDeposition::PVR:
-    EBAMRParticleMesh::depositPVR<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
+    this->depositPVR<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
     break;
   case CoarseFineDeposition::Halo:
-    EBAMRParticleMesh::depositHalo<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);    
+    this->depositHalo<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
     break;
   case CoarseFineDeposition::HaloNGP:
-    EBAMRParticleMesh::depositHaloNGP<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);    
+    this->depositHaloNGP<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
     break;    
   default:
     MayDay::Error("EBAMRParticleMesh::deposit(scalar) - logic bust");
@@ -62,13 +62,13 @@ void EBAMRParticleMesh::deposit(EBAMRCellData&              a_meshData,
 
   switch(a_coarseFineDeposition){
   case CoarseFineDeposition::PVR:
-    EBAMRParticleMesh::depositPVR<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
+    this->depositPVR<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
     break;
   case CoarseFineDeposition::Halo:
-    EBAMRParticleMesh::depositHalo<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);    
+    this->depositHalo<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
     break;
   case CoarseFineDeposition::HaloNGP:
-    EBAMRParticleMesh::depositHaloNGP<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);    
+    this->depositHaloNGP<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
     break;    
   default:
     MayDay::Error("EBAMRParticleMesh::deposit(scalar) - logic bust");
