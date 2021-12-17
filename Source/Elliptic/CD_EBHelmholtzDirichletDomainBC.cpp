@@ -15,6 +15,7 @@
 
 // Our includes
 #include <CD_EBHelmholtzOpF_F.H>
+#include <CD_BoxLoops.H>
 #include <CD_EBHelmholtzDirichletDomainBC.H>
 #include <CD_NamespaceHeader.H>
 
@@ -68,57 +69,49 @@ void EBHelmholtzDirichletDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
   CH_TIME("EBHelmholtzDirichletDomainBC::getFaceFlux(BaseFab<Real>, BaseFab<Real>, int, Side::LoHiSide, DataIndex, bool)");
 
   CH_assert(m_useConstant || m_useFunction);
+  CH_assert(a_faceFlux.nComp() == 1);
+  CH_assert(a_phi.     nComp() == 1);    
+
+  // TLDR: This fill the regular flux on the domain edge/face. 
+
+  const Real ihdx = 2.0/m_dx;                      // Spatial step is dx/2 because the finite difference goes between cell center and domain edge (so half a cell).
+  const Real sign = (a_side == Side::Lo) ? -1 : 1; // For getting the direction of the derivative correctly.         
+
+  std::function<void(const IntVect&)> kernel;
   
-  const Box cellBox        = a_faceFlux.box();
-  const BaseFab<Real>& Bco = (*m_Bcoef)[a_dit][a_dir].getSingleValuedFAB();
-  const int isign          = (a_side == Side::Lo) ? -1 : 1;
-
-  // Compute dphi/dn, using the first interior cell and the value on the domain side. 
+  // Need to figure which kernel we should compute. If we have homogeneous BCs then the boundary value is zero. Likewise, with a non-zero value
+  // we have the dphi/dn = (phi-bc_value)/(dx/2) on the low side and (bc_value - phi)/(dx/2) on the high side. So make a switch between homogeneous/inhomogeneous
+  // and constant/non-constant values. 
   if(a_useHomogeneous){
-    const Real value = 0.0;
-
-    FORT_HELMHOLTZDIRICHLETFLUX(CHF_FRA1(a_faceFlux, m_comp),
-				CHF_CONST_FRA1(a_phi, m_comp),
-				CHF_CONST_REAL(value),
-				CHF_CONST_REAL(m_dx),				  
-				CHF_CONST_INT(a_dir),
-				CHF_CONST_INT(isign),
-				CHF_BOX(cellBox));
+    kernel = [&](const IntVect& iv) -> void {
+      a_faceFlux(iv, m_comp) =  - sign * ihdx * a_phi(iv, m_comp);
+    };
   }
-  else{
-    if(m_useConstant){
-      const Real value = m_constantValue;
-
-      FORT_HELMHOLTZDIRICHLETFLUX(CHF_FRA1(a_faceFlux, m_comp),
-				  CHF_CONST_FRA1(a_phi, m_comp),
-				  CHF_CONST_REAL(value),
-				  CHF_CONST_REAL(m_dx),				    
-				  CHF_CONST_INT(a_dir),
-				  CHF_CONST_INT(isign),
-				  CHF_BOX(cellBox));
+  else{ // Physical BCs, select whether or not we use a constant value of spatially varying value. 
+    if(m_useConstant){ // Constant value. 
+      kernel = [&](const IntVect& iv) -> void {
+	a_faceFlux(iv, m_comp) = sign * ihdx * (m_constantValue - a_phi(iv, m_comp));
+      };
     }
-    else if(m_useFunction){
-      const Real ihdx = 2.0/m_dx;
-      for (BoxIterator bit(cellBox); bit.ok(); ++bit){
-	const IntVect iv = bit();
-
+    else if(m_useFunction){ // Spatially varying. 
+      kernel = [&] (const IntVect& iv) -> void {
 	const RealVect pos = this->getBoundaryPosition(iv, a_dir, a_side);
 	const Real value   = m_functionValue(pos);
 
-	a_faceFlux(iv, m_comp) = isign * ihdx * (value - a_phi(iv, m_comp));
-      }
+	a_faceFlux(iv, m_comp) = sign * ihdx * (value - a_phi(iv, m_comp));
+      };
     }
     else{
       MayDay::Error("EBHelmholtzDirichletDomainBC::getFaceFlux -- logic bust");
     }
   }
 
-  // Multiplies by B-coefficient.   
-  FORT_HELMHOLTZMULTFLUXBYBCO(CHF_FRA1(a_faceFlux, m_comp),
-			      CHF_CONST_FRA1(Bco, m_comp),
-			      CHF_CONST_INT(a_dir),
-			      CHF_CONST_INT(isign),
-			      CHF_BOX(cellBox));      
+  // Execute the kernel. 
+  BoxLoops::loop(a_faceFlux.box(), kernel);  
+
+  // Multiplies by B-coefficient so that a_faceFlux = B*dphi/dn.
+  const BaseFab<Real>& Bco = (*m_Bcoef)[a_dit][a_dir].getSingleValuedFAB();  
+  this->multiplyByBcoef(a_faceFlux, Bco, a_dir, a_side);
 }
 
 Real EBHelmholtzDirichletDomainBC::getFaceFlux(const VolIndex&       a_vof,

@@ -15,6 +15,7 @@
 
 // Our includes
 #include <CD_EBHelmholtzOpF_F.H>
+#include <CD_BoxLoops.H>
 #include <CD_EBHelmholtzNeumannDomainBC.H>
 #include <CD_NamespaceHeader.H>
 
@@ -88,11 +89,13 @@ void EBHelmholtzNeumannDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
 					     const DataIndex&      a_dit,
 					     const bool            a_useHomogeneous) const {
   CH_TIME("EBHelmholtzNeumannDomainBC::getFaceFlux(BaseFab<Real>, BaseFab<Real>, int, DataIndex, bool)");
+
+  CH_assert(a_faceFlux.nComp() == 1);
+  CH_assert(a_phi.     nComp() == 1);  
   
-  const Box cellbox        = a_faceFlux.box();
   const BaseFab<Real>& Bco = (*m_Bcoef)[a_dit][a_dir].getSingleValuedFAB();
   const int isign          = (a_side == Side::Lo) ? -1 : 1;
-  
+
   if(a_useHomogeneous){
     a_faceFlux.setVal(0.0);
   }
@@ -102,24 +105,23 @@ void EBHelmholtzNeumannDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
       a_faceFlux.setVal(-isign*m_constantDphiDn); 
     }
     else if(m_useFunction){
-      for (BoxIterator bit(cellbox); bit.ok(); ++bit){
-	const IntVect iv   = bit();
-	const RealVect pos = this->getBoundaryPosition(iv, a_dir, a_side);
 
+      // Kernel -- get dphi/dn at spatial position. 
+      auto kernel = [&](const IntVect& iv) -> void {
+	const RealVect pos = this->getBoundaryPosition(iv, a_dir, a_side);
 	const Real DphiDn  = m_functionDphiDn(pos);
 
-	a_faceFlux(iv, m_comp) = -isign * DphiDn;
-      }
+	a_faceFlux(iv, m_comp) = -isign * DphiDn;	
+      };
+
+      // Execute the kernel.
+      BoxLoops::loop(a_faceFlux.box(), kernel);
     }
 
     // Multiply by B-coefficient. We always do this unless the user specifically called setBxDphiDn in which case the input value
     // is already multiplied by the B-coefficient. 
     if(m_multByBco){
-      FORT_HELMHOLTZMULTFLUXBYBCO(CHF_FRA1(a_faceFlux, m_comp),
-				  CHF_CONST_FRA1(Bco, m_comp),
-				  CHF_CONST_INT(a_dir),
-				  CHF_CONST_INT(isign),
-				  CHF_BOX(cellbox));      
+      this->multiplyByBcoef(a_faceFlux, Bco, a_dir, a_side);      
     }
   }
 }

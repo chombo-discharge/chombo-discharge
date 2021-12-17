@@ -15,6 +15,7 @@
 
 // Our includes
 #include <CD_EBHelmholtzOpF_F.H>
+#include <CD_BoxLoops.H>
 #include <CD_EBHelmholtzRobinDomainBC.H>
 #include <CD_NamespaceHeader.H>
 
@@ -61,18 +62,20 @@ void EBHelmholtzRobinDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
 					   const DataIndex&      a_dit,
 					   const bool            a_useHomogeneous) const {
   CH_TIME("EBHelmholtzRobinDomainBC::getFaceFlux(BaseFab<Real>, BaseFab<Real>, int, Side::LoHiSide, DataIndex, bool)");
-  
-  const Box cellbox = a_faceFlux.box();
+
+  CH_assert(a_faceFlux.nComp() == 1);
+  CH_assert(a_phi.     nComp() == 1);    
+
+  // For getting the extrapolation sign correct. 
   const int isign   = (a_side == Side::Lo) ? -1 : 1;
   
   const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
   const EBISBox& ebgraph = m_eblg.getEBISL()[a_dit];
 
-  for (BoxIterator bit(cellbox); bit.ok(); ++bit){
-    const IntVect iv     = bit();
-    const IntVect ivNear = iv - isign*BASISV(a_dir);
-
-    const bool hasNear = !ebisbox.isCovered(ivNear);
+  // Kernel. As always, we linearly extrapolate to the boundary and set the flux from that. 
+  auto kernel = [&] (const IntVect& iv) -> void {
+    const IntVect ivNear  = iv - isign*BASISV(a_dir);
+    const bool    hasNear = !ebisbox.isCovered(ivNear);
 
     // Linear extrapolation if we can (should always be possible AFAIK, since we're dealing with regular cells). 
     Real phiExtrap;
@@ -104,15 +107,14 @@ void EBHelmholtzRobinDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
 
     //    a_faceFlux(iv, m_comp) = C/B + isign*A*phiExtrap/B;
     a_faceFlux(iv, m_comp) = C/B + isign*A*phiExtrap/B;
-  }
+  };
+
+  // Run the kernel
+  BoxLoops::loop(a_faceFlux.box(), kernel);
 
   // Multiplies by B-coefficient.   
   const BaseFab<Real>& Bco = (*m_Bcoef)[a_dit][a_dir].getSingleValuedFAB();
-  FORT_HELMHOLTZMULTFLUXBYBCO(CHF_FRA1(a_faceFlux, m_comp),
-			      CHF_CONST_FRA1(Bco, m_comp),
-			      CHF_CONST_INT(a_dir),
-			      CHF_CONST_INT(isign),
-			      CHF_BOX(cellbox));      
+  this->multiplyByBcoef(a_faceFlux, Bco, a_dir, a_side);        
 }
   
 Real EBHelmholtzRobinDomainBC::getFaceFlux(const VolIndex&       a_vof,
