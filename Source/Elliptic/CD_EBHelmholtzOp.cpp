@@ -20,7 +20,6 @@
 #include <CD_LeastSquares.H>
 #include <CD_BoxLoops.H>
 #include <CD_ParallelOps.H>
-#include <CD_EBHelmholtzOpF_F.H>
 #include <CD_NamespaceHeader.H>
 
 constexpr int EBHelmholtzOp::m_nComp;

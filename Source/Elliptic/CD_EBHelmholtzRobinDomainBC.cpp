@@ -14,7 +14,6 @@
 #include <CH_Timer.H>
 
 // Our includes
-#include <CD_EBHelmholtzOpF_F.H>
 #include <CD_BoxLoops.H>
 #include <CD_EBHelmholtzRobinDomainBC.H>
 #include <CD_NamespaceHeader.H>
