@@ -747,7 +747,7 @@ void ParticleContainer<P>::remap(){
 			    *m_particles[lvl-1],
 			     m_pvr      [lvl  ]->mask(),
 			     m_dx       [lvl  ],
-			     m_refRat   [lvl  ],
+			     m_refRat   [lvl-1],
 			     flipMask, 
 			     m_probLo);
 
