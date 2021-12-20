@@ -245,43 +245,28 @@ protected:
 			const RealVect&      a_position,
 			const Real&          a_strength,
 			const DepositionType a_depositionType,			
-			const bool           a_forceIrregNGP) const;			
-  
-  /*!
-    @brief Wrapper function that interpolates a scalar field onto the particle position
-    @param[out] a_particleField  Field evaluation at the particle position. 
-    @param[in]  a_field          Field. Must have exactly one component. 
-    @param[in]  a_probLo         Lower-left corner of domain
-    @param[in]  a_dx             Grid resolution
-    @param[in]  a_position       Particle position
-    @param[in]  a_interpType     Interpolation type. 
-    @param[in]  a_forceIrregNGP  Force NGP in cut-cells
-  */
-  inline
-  void interpolateParticle(Real&                a_particleField,
-			   const EBCellFAB&     a_field,
-			   const RealVect&      a_probLo,
-			   const RealVect&      a_dx,
-			   const RealVect&      a_position,
-			   const DepositionType a_interpType,
-			   const bool           a_forceIrregNGP) const;			  
+			const bool           a_forceIrregNGP) const;
 
   /*!
-    @brief Wrapper function that interpolates a vector field onto the particle position
-    @param[out] a_particleField  Field evaluation at the particle position. 
-    @param[in]  a_field          Field. Must have exactly one component. 
+    @brief Wrapper function that interpolates a particle fields onto positions. 
+    @details This switches between various possible kernels, NGP, CIC, TSC, W4. It can interpolate both vectors and scalars, the user inputs the data holder 
+    as a Real[] and specifies the components to interpolate. 
+    @param[out] a_particleField  Field evaluations at the particle position. Must be of type Real[]. 
+    @param[in]  a_field          Field. 
     @param[in]  a_probLo         Lower-left corner of domain
     @param[in]  a_dx             Grid resolution
     @param[in]  a_position       Particle position
+    @param[in]  a_interval       Components to interpolate
     @param[in]  a_interpType     Interpolation type. 
     @param[in]  a_forceIrregNGP  Force NGP in cut-cells
   */
   inline
-  void interpolateParticle(RealVect&            a_particleField,
+  void interpolateParticle(Real*                a_particleField,
 			   const EBCellFAB&     a_field,
 			   const RealVect&      a_probLo,
 			   const RealVect&      a_dx,
 			   const RealVect&      a_position,
+			   const Interval&      a_interval,			   
 			   const DepositionType a_interpType,
 			   const bool           a_forceIrregNGP) const;
   
