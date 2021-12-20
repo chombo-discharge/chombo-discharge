@@ -19,6 +19,7 @@
 #include <CD_BrownianWalkerStepper.H>
 #include <CD_BrownianWalkerSpecies.H>
 #include <CD_PolyUtils.H>
+#include <CD_Random.H>
 #include <CD_NamespaceHeader.H>
 
 using namespace Physics::BrownianWalker;
@@ -50,7 +51,6 @@ BrownianWalkerStepper::BrownianWalkerStepper(){
   else{
     MayDay::Error("BrownianWalkerStepper::BrownianWalkerStepper -- logic bust. Do not understand the load balancing argument 'which_balance'");
   }
-  
 }
 
 BrownianWalkerStepper::BrownianWalkerStepper(RefCountedPtr<ItoSolver>& a_solver) : BrownianWalkerStepper() {
@@ -402,7 +402,7 @@ Real BrownianWalkerStepper::advance(const Real a_dt) {
       if(m_solver->isDiffusive()){
 	for (ListIterator<ItoParticle> lit(particleList); lit; ++lit){ 
 	  ItoParticle& p      = lit();	    
-	  const RealVect ran  = m_solver->randomGaussian();
+	  const RealVect ran  = Random::getNormal01() * Random::getDirection();
 	  const RealVect hop  = ran*sqrt(2.0*p.diffusion()*a_dt);
 	  p.position()       += hop;
 	}
@@ -410,16 +410,16 @@ Real BrownianWalkerStepper::advance(const Real a_dt) {
     }
   }
 
-  // 2. Remap particles and assign them to correct patches. This discards particles outside the simulation domain. 
+  // 2. Remap particles and assign them to correct patches. This discards particles outside the simulation domain.
   m_solver->remap();
 
-  // 3. Particles that strike the EB are absorbed on it, and removed from the simulation. 
+  // 3. Particles that strike the EB are absorbed on it, and removed from the simulation.
   m_solver->removeCoveredParticles(EbRepresentation::ImplicitFunction, 0.0);
 
-  // 4. Make new super-particles. 
+  // 4. Make new super-particles.
   this->makeSuperParticles();
 
-  // 5. Update particle diffusion and velocities. 
+  // 5. Update particle diffusion and velocities.
   m_solver->setParticleMobility(m_mobility);
   m_solver->setParticleDiffusion(m_diffCo);
   m_solver->interpolateVelocities();  

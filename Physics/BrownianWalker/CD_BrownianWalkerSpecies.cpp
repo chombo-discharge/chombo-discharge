@@ -40,14 +40,6 @@ BrownianWalkerSpecies::BrownianWalkerSpecies() {
   
   pp.getarr("blob_center",    v, 0, SpaceDim); m_blobCenter = RealVect(D_DECL(v[0], v[1], v[2]));
 
-  // Set up the RNG with the input seed.
-  if(seed < 0){
-    Random::init();
-  }
-  else {
-    Random::setSeed(seed);
-  }
-
   // Draw initial particles
   this->drawInitParticles();
 }
