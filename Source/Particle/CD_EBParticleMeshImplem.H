@@ -263,8 +263,6 @@ void EBParticleMesh::depositParticle(EBCellFAB&           a_rho,
 	const IntVect loIndex  = getCellIndex(a_position - a_probLo - 0.5*a_dx);
 	const Box     cicBox = Box(loIndex, loIndex + IntVect::Unit);
 
-	CH_assert(a_rho.box().contains(cicBox));		
-
 	// This is the cloud-in-cell deposition kernel.
 	auto cicKernel = [&](const IntVect& iv) -> void {
 	  Real weight = density;
@@ -290,8 +288,6 @@ void EBParticleMesh::depositParticle(EBCellFAB&           a_rho,
 	// the box corresponding to the cloud. 
 	const IntVect loIndex = getCellIndex(a_position - a_probLo - a_dx);
 	const Box     tscBox  = Box(loIndex, loIndex + 2*IntVect::Unit);
-
-	CH_assert(a_rho.box().contains(tscBox));
 
 	// This is the triangle-shaped cloud kernel. 
 	auto tscKernel = [&](const IntVect& iv) -> void {
@@ -324,8 +320,6 @@ void EBParticleMesh::depositParticle(EBCellFAB&           a_rho,
 	// the box corresponding to the cloud. 
 	const IntVect loIndex = getCellIndex(a_position - a_probLo - 1.5*a_dx);
 	const Box     w4Box   = Box(loIndex, loIndex + 3*IntVect::Unit);
-
-	CH_assert(a_rho.box().contains(w4Box));
 
 	// This is the fourth order kernel.
 	auto w4Kernel = [&](const IntVect& iv) -> void {
@@ -423,8 +417,6 @@ void EBParticleMesh::depositParticle2(EBCellFAB&           a_rho,
 	const IntVect loIndex = getCellIndex(a_position - a_probLo - 1.0*a_dx);
 	const Box     cic2Box = Box(loIndex, loIndex + 2*IntVect::Unit);
 
-	CH_assert(a_rho.box().contains(cic2Box));	
-
 	// This is the kernel for a CIC particle with with 2*dx
 	auto cic2Kernel = [&](const IntVect& iv) -> void {
 	  Real weight = density;
@@ -519,10 +511,6 @@ void EBParticleMesh::depositParticle4(EBCellFAB&           a_rho,
 	// the box corresponding to the cloud. 
 	const IntVect loIndex = getCellIndex(a_position - a_probLo - 2.0*a_dx);
 	const Box     cic4Box = Box(loIndex, loIndex + 4*IntVect::Unit);
-
-	// This is a warnign that will trigger if there are not enough ghost cells in the box. In principle, there needs to be at least four ghost cells
-	// available in order to use this kernel. That being said -- this routine is called on refined coarse-grid data so that should not be a problem (normally). 
-	CH_assert(a_rho.box().contains(cic4Box));
 
 	// This is the kernel for a CIC particle with with 4*dx
 	auto cic4Kernel = [&](const IntVect& iv) -> void {
