@@ -524,12 +524,12 @@ void CdrSolver::computeAdvectionFlux(LevelData<EBFluxFAB>&       a_flux,
       Box grownCellBox = grow(cellBox, 1) & domain;
 
       // Irregular faces
-      const FaceStop::WhichFaces stopcrit = FaceStop::SurroundingWithBoundary;
-      for (FaceIterator faceit(ebisbox.getIrregIVS(grownCellBox), ebgraph, dir, stopcrit); faceit.ok(); ++faceit){
-	const FaceIndex& face = faceit();
-	
+      FaceIterator faceit(ebisbox.getIrregIVS(grownCellBox), ebgraph, dir, FaceStop::SurroundingWithBoundary);
+      auto kernel = [&] (const FaceIndex& face) -> void {
 	flux(face, m_comp) = vel(face, m_comp)*phi(face, m_comp);
-      }
+      };
+
+      BoxLoops::loop(faceit, kernel);
     }
   }
 }
@@ -746,9 +746,9 @@ void CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const int a_level) 
 	//
 	// A FaceIterator may be inefficient, but we are REALLY going through a very small number of faces so there shouldn't be a performance hit here. 
 	const IntVectSet ivs(boundaryCellBox);
-	for (FaceIterator faceit(ivs, ebgraph, dir, FaceStop::AllBoundaryOnly); faceit.ok(); ++faceit){
-	  const FaceIndex& face = faceit();
-
+	FaceIterator faceit(ivs, ebgraph, dir, FaceStop::AllBoundaryOnly);
+	
+	auto kernel = [&] (const FaceIndex& face) -> void {
 	  // Set the flux on the BC. This can be data-based, wall, function-based, outflow (extrapolated). 
 	  switch(bcType){
 	  case CdrDomainBC::BcType::DataBased:{
@@ -791,10 +791,13 @@ void CdrSolver::fillDomainFlux(LevelData<EBFluxFAB>& a_flux, const int a_level) 
 	    break; 
 	  }
 	  default:
-	    MayDay::Error("CdrSolver::fillDomainFlux(LD<EBFluxFAB>, int) - trying to fill unsupported domain bc flux type");
-	    break;
+	  MayDay::Error("CdrSolver::fillDomainFlux(LD<EBFluxFAB>, int) - trying to fill unsupported domain bc flux type");
+	  break;
 	  }
-	}
+	};
+
+	// Run the kernel
+	BoxLoops::loop(faceit, kernel);
       }
     }
   }
@@ -861,8 +864,8 @@ void CdrSolver::computeDivergenceIrregular(LevelData<EBCellFAB>&              a_
     const BaseIVFAB<Real>& ebflux = a_ebFlux[dit()];
 
     VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[dit()];
-    for (vofit.reset(); vofit.ok(); ++vofit){
-      const VolIndex& vof    = vofit();
+
+    auto kernel = [&] (const VolIndex& vof) -> void {
       const Real      ebArea = ebisbox.bndryArea(vof);
 
       // Add the EB flux contribution to our sum(fluxes)
@@ -889,7 +892,9 @@ void CdrSolver::computeDivergenceIrregular(LevelData<EBCellFAB>&              a_
 
       // Scale divG by dx but not by kappa.
       divG(vof, m_comp) *= 1./dx;
-    }
+    };
+
+    BoxLoops::loop(vofit, kernel);
   }
 }
 
@@ -975,11 +980,13 @@ void CdrSolver::defineInterpolationStencils(){
 
 	sten.define(irregIVS, ebisbox.getEBGraph(), dir, m_nComp);
 	
-	for (FaceIterator faceIt(irregIVS, ebgraph, dir, FaceStop::SurroundingWithBoundary); faceIt.ok(); ++faceIt){
-	  const FaceIndex& face = faceIt();
-
+	FaceIterator faceIt(irregIVS, ebgraph, dir, FaceStop::SurroundingWithBoundary);
+	
+	auto kernel = [&] (const FaceIndex& face) -> void {
 	  sten(face, m_comp) = EBArith::getInterpStencil(face, IntVectSet(), ebisbox, domain.domainBox());
-	}
+	};
+
+	BoxLoops::loop(faceIt, kernel);
       }
     }
   }
@@ -1166,8 +1173,7 @@ void CdrSolver::hybridDivergence(LevelData<EBCellFAB>&              a_hybridDive
     const EBISBox& ebisbox = ebisl[dit()];
 
     VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[dit()];
-    for (vofit.reset(); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
+    auto kernel = [&] (const VolIndex& vof) -> void {
       const Real kappa    = ebisbox.volFrac(vof);
       const Real dc       = divH (vof, m_comp);
       const Real dnc      = divNC(vof, m_comp);
@@ -1176,7 +1182,9 @@ void CdrSolver::hybridDivergence(LevelData<EBCellFAB>&              a_hybridDive
       // which it would be otherwise. 
       divH  (vof, m_comp) = dc + (1-kappa)*dnc;          // On output, contains hybrid divergence
       deltaM(vof, m_comp) = (1-kappa)*(dc - kappa*dnc);  // On output, contains mass loss/gain. 
-    }
+    };
+
+    BoxLoops::loop(vofit, kernel);
   }
 }
 
@@ -1288,8 +1296,9 @@ void CdrSolver::interpolateFluxToFaceCentroids(LevelData<EBFluxFAB>& a_flux, con
 
 	// Compute face centroid flux on cut-cell face centroids. Since a_flux enforces boundary conditions
 	// we include domain boundary cut-cell faces in the interpolation. 
-	for (FaceIterator faceit(irregIVS, ebgraph, dir, FaceStop::SurroundingWithBoundary); faceit.ok(); ++faceit){
-	  const FaceIndex& face   = faceit();
+	FaceIterator faceit(irregIVS, ebgraph, dir, FaceStop::SurroundingWithBoundary); 
+
+	auto kernel = [&] (const FaceIndex& face) -> void {
 	  const FaceStencil& sten = (*m_interpStencils[dir][a_lvl])[dit()](face, m_comp);
 
 	  faceFlux(face, m_comp) = 0.;
@@ -1300,7 +1309,9 @@ void CdrSolver::interpolateFluxToFaceCentroids(LevelData<EBFluxFAB>& a_flux, con
 	  
 	    faceFlux(face, m_comp) += iweight * clone(iface, m_comp);
 	  }
-	}
+	};
+
+	BoxLoops::loop(faceit, kernel);
       }
     }
   }

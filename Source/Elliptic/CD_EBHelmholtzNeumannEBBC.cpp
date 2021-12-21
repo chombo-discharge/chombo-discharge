@@ -14,6 +14,7 @@
 
 // Our includes
 #include <CD_EBHelmholtzNeumannEBBC.H>
+#include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
 EBHelmholtzNeumannEBBC::EBHelmholtzNeumannEBBC(){
@@ -90,9 +91,14 @@ void EBHelmholtzNeumannEBBC::define() {
 
     stencils.define(ivs, ebgraph, m_nComp);
 
-    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-      stencils(vofit(), m_comp).clear();
-    }
+    // Iteration space for kernel
+    VoFIterator vofit(ivs, ebgraph);
+
+    auto kernel = [&] (const VolIndex& vof) -> void {
+      stencils(vof, m_comp).clear();
+    };
+
+    BoxLoops::loop(vofit, kernel);
   }
 }
 
@@ -109,9 +115,7 @@ void EBHelmholtzNeumannEBBC::applyEBFlux(VoFIterator&       a_vofit,
   // TLDR: For Neumann, we want to add the flux beta*bco*area*(dphi/dn)/dx where the
   //       dx comes from the fact that the term we are computing will be added to kappa*div(F)
   if(!a_homogeneousPhysBC){
-    for (a_vofit.reset(); a_vofit.ok(); ++a_vofit){
-      const VolIndex& vof = a_vofit();
-    
+    auto kernel = [&] (const VolIndex& vof) -> void {
       Real value;
       if(m_useConstant){
 	value = m_constantDphiDn;
@@ -129,7 +133,9 @@ void EBHelmholtzNeumannEBBC::applyEBFlux(VoFIterator&       a_vofit,
       const Real kappaDivF   = a_beta*B*value*areaFrac/m_dx;
   
       a_Lphi(vof, m_comp) += kappaDivF;
-    }
+    };
+
+    BoxLoops::loop(a_vofit, kernel);
   }
   
   return;

@@ -975,8 +975,9 @@ void EddingtonSP1::computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellD
 
 	  // Extrapolate to the boundary. Use face-centered stuff for all faces (also multivalued ones)
 	  const FaceStop::WhichFaces crit = FaceStop::AllBoundaryOnly;
-	  for (FaceIterator faceit(ivs, ebgraph, dir, crit); faceit.ok(); ++faceit){
-	    const FaceIndex& face = faceit();
+	  FaceIterator faceit(ivs, ebgraph, dir, crit); 
+
+	  auto kernel = [&] (const FaceIndex& face) -> void {
 
 	    const int sgn = sign(sit()); // Lo = -1, Hi = 1
 	    
@@ -998,7 +999,9 @@ void EddingtonSP1::computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellD
 
 	    // Necessary scaling
 	    extrap(face, m_comp) = 0.5*Units::c*extrap(face, m_comp);
-	  }
+	  };
+
+	  BoxLoops::loop(faceit, kernel);
 	}
       }
     }

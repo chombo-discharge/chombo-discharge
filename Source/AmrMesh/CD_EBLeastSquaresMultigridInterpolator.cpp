@@ -401,8 +401,8 @@ void EBLeastSquaresMultigridInterpolator::defineStencilsEBCF(){
 
     // Build stencils.
     VoFIterator& vofit = m_vofIterFine[dit()];
-    for (vofit.reset(); vofit.ok(); ++vofit){
-      const VolIndex& ghostVofFine = vofit();
+
+    auto kernel = [&] (const VolIndex& ghostVofFine) -> void {
       const VolIndex& ghostVofCoar = ebislFine.coarsen(ghostVofFine, m_refRat, dit());
       
       VoFStencil& fineSten = m_fineStencils[dit()](ghostVofFine, comp);
@@ -445,7 +445,9 @@ void EBLeastSquaresMultigridInterpolator::defineStencilsEBCF(){
 	
 	pout() << "EBLeastSquaresMultigridInterpolator::defineStencilsEBCF -- could not find stencil and dropping to order 0" << endl;
       }
-    }
+    };
+
+    BoxLoops::loop(vofit, kernel);
   }
 
   // We now have all the stencils we need. Make them into an AggStencil for performance
@@ -620,15 +622,17 @@ void EBLeastSquaresMultigridInterpolator::makeAggStencils(){
     Vector<RefCountedPtr<BaseStencil> > dstBaseStencilCoar;    
 
     VoFIterator& vofit = m_vofIterFine[dit()];
-    for (vofit.reset(); vofit.ok(); ++vofit){
-      const VolIndex&   vofFine     = vofit();
+
+    auto kernel = [&] (const VolIndex& vofFine) -> void {      
       const VoFStencil& stencilFine = m_fineStencils[dit()](vofFine, m_stenComp);
       const VoFStencil& stencilCoar = m_coarStencils[dit()](vofFine, m_stenComp);      
 
       dstBaseIndex.      push_back(RefCountedPtr<BaseIndex>   (new VolIndex  (vofFine    )));
       dstBaseStencilFine.push_back(RefCountedPtr<BaseStencil> (new VoFStencil(stencilFine)));
       dstBaseStencilCoar.push_back(RefCountedPtr<BaseStencil> (new VoFStencil(stencilCoar)));      
-    }
+    };
+
+    BoxLoops::loop(vofit, kernel);
 
     m_aggFineStencils[dit()] = RefCountedPtr<AggStencil<EBCellFAB, EBCellFAB> >
       (new AggStencil<EBCellFAB, EBCellFAB>(dstBaseIndex, dstBaseStencilFine, phiProxy[dit()], phiProxy[dit()]));

@@ -1094,12 +1094,6 @@ void ItoSolver::drawNewParticles(const LevelData<EBCellFAB>& a_particlesPerCell,
       }
     };
 
-    // Run the regular kernel.
-
-      
-
-
-
     // Irregular kernel. Do the same for irregular cells. This differs from the regular-cell case only in that the positions       
     auto irregularKernel = [&] (const VolIndex& vof) -> void {
       const IntVect   iv    = vof.gridIndex();
@@ -1536,11 +1530,10 @@ void ItoSolver::depositHybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massD
       const BaseIVFAB<Real>& divNC   = (*a_depositionNC  [lvl])[dit()]; 
       const EBISBox&         ebisbox = ebisl[dit()];
 
+      // Iteration space. 
       VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
-      
-      for (vofit.reset(); vofit.ok(); ++vofit) {
-	const VolIndex& vof = vofit();
-	
+
+      auto kernel = [&] (const VolIndex& vof) -> void {
 	const Real kappa    = ebisbox.volFrac(vof);
 	const Real dc       = divH (vof, m_comp);
 	const Real dnc      = divNC(vof, m_comp);
@@ -1550,7 +1543,9 @@ void ItoSolver::depositHybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massD
 	// gives positive definite results. 
 	divH  (vof, m_comp) = dc + (1.0-kappa)*dnc;        // On output, contains hybrid divergence
 	deltaM(vof, m_comp) = (1-kappa)*(dc - kappa*dnc);  // Remember, dc already scaled by kappa.
-      }
+      };
+
+      BoxLoops::loop(vofit, kernel);
     }
   }
 }

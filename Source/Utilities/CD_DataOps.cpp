@@ -529,13 +529,18 @@ void DataOps::incr(LevelData<BaseIVFAB<Real> >& a_lhs, const LevelData<BaseIVFAB
     BaseIVFAB<Real>& lhs       = a_lhs[dit()];
     const BaseIVFAB<Real>& rhs = a_rhs[dit()];
 
-    for (VoFIterator vofit(lhs.getIVS(), lhs.getEBGraph()); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
+    // Iteration space
+    VoFIterator vofit(lhs.getIVS(), lhs.getEBGraph());
 
+    auto kernel = [&] (const VolIndex& vof) -> void {
       for (int comp = 0; comp < numComp; comp++){
 	lhs(vof, comp) += rhs(vof, comp)*a_scale;
       }
-    }
+    };
+
+    // Run kernel
+
+    BoxLoops::loop(vofit, kernel);
   }
 }
 
@@ -566,13 +571,15 @@ void DataOps::incr(LevelData<DomainFluxIFFAB>& a_lhs, const LevelData<DomainFlux
 	const IntVectSet& ivs  = curLHS.getIVS();
 	const EBGraph& ebgraph = curLHS.getEBGraph();
 
-	for (FaceIterator faceit(ivs, ebgraph, dir, FaceStop::SurroundingWithBoundary); faceit.ok(); ++faceit){
-	  const FaceIndex& face = faceit();
+	FaceIterator faceit(ivs, ebgraph, dir, FaceStop::SurroundingWithBoundary); 
 
+	auto kernel = [&] (const FaceIndex& face) -> void {
 	  for (int comp = 0; comp < numComp; comp++){
 	    curLHS(face, comp) += curRHS(face, comp) * a_scale;
 	  }
-	}
+	};
+
+	BoxLoops::loop(faceit, kernel);
       }
     }
   }
@@ -599,13 +606,16 @@ void DataOps::incr(LevelData<EBCellFAB>& a_lhs, const LevelData<BaseIVFAB<Real> 
     const EBGraph&         ebgraph = rhs.getEBGraph();
     const IntVectSet&      ivs     = rhs.getIVS();
 
-    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
+    // Kernel space
+    VoFIterator vofit(ivs, ebgraph);
 
+    auto kernel = [&] (const VolIndex& vof) -> void {
       for (int comp = 0; comp < numComp; comp++){
 	lhs(vof, comp) += rhs(vof, comp) * a_scale;
       }
-    }
+    };
+
+    BoxLoops::loop(vofit, kernel);
   }
 }
 
@@ -628,13 +638,16 @@ void DataOps::incr(LevelData<BaseIVFAB<Real> >& a_lhs, const LevelData<EBCellFAB
     BaseIVFAB<Real>& lhs = a_lhs[dit()];
     const EBCellFAB& rhs = a_rhs[dit()];
 
-    for (VoFIterator vofit(lhs.getIVS(), lhs.getEBGraph()); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
+    // Kernel space
+    VoFIterator vofit(lhs.getIVS(), lhs.getEBGraph()); 
 
+    auto kernel = [&] (const VolIndex& vof) -> void {
       for (int comp = 0; comp < numComp; comp++){
 	lhs(vof, comp) += rhs(vof, comp)*a_scale;
       }
-    }
+    };
+
+    BoxLoops::loop(vofit, kernel);
   }
 }
 
@@ -1077,10 +1090,10 @@ void DataOps::getMaxMinNorm(Real& a_max, Real& a_min, LevelData<BaseIVFAB<Real> 
     const Box& box              = a_data.disjointBoxLayout().get(dit());
     const BaseIVFAB<Real>& data = a_data[dit()];
 
-    // Irregular and multivalued cells
-    for (VoFIterator vofit(data.getIVS(), data.getEBGraph()); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
+    // Iteration space
+    VoFIterator vofit(data.getIVS(), data.getEBGraph()); 
 
+    auto kernel = [&] (const VolIndex& vof) -> void {
       Real cur = 0.0;
       for (int comp = 0; comp < numComp; comp++){
 	cur += data(vof, comp)*data(vof, comp);
@@ -1089,7 +1102,9 @@ void DataOps::getMaxMinNorm(Real& a_max, Real& a_min, LevelData<BaseIVFAB<Real> 
 
       a_max = std::max(a_max, cur);
       a_min = std::min(a_min, cur);
-    }
+    };
+
+    BoxLoops::loop(vofit, kernel);
   }
 
   // If running with MPI then we need to reduce the result.
@@ -1172,11 +1187,13 @@ void DataOps::kappaSum(Real& a_mass, const LevelData<EBCellFAB>& a_lhs){
     const EBGraph& ebgraph = ebisbox.getEBGraph();
     const IntVectSet ivs(box);
     
-    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
-
+    VoFIterator vofit(ivs, ebgraph);
+    
+    auto kernel = [&] (const VolIndex& vof) -> void {
       mass += ebisbox.volFrac(vof) * lhs(vof, comp);
-    }
+    };
+
+    BoxLoops::loop(vofit, kernel);
   }
 
   a_mass = EBLevelDataOps::parallelSum(mass);
@@ -1261,13 +1278,17 @@ void DataOps::multiply(LevelData<BaseIVFAB<Real> >& a_lhs, const LevelData<BaseI
     const EBGraph& ebgraph     = lhs.getEBGraph();
     const IntVectSet& ivs      = lhs.getIVS() & rhs.getIVS();
 
-    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
+    // Kernel space
+    VoFIterator vofit(ivs, ebgraph);
 
+    // Kernel
+    auto kernel = [&] (const VolIndex& vof) -> void {
       for (int comp = 0; comp < ncomp; comp++){
 	lhs(vof, comp) *= rhs(vof, comp);
       }
-    }
+    };
+
+    BoxLoops::loop(vofit, kernel);
   }
 }
 
@@ -1315,13 +1336,15 @@ void DataOps::multiplyScalar(LevelData<BaseIVFAB<Real> >& a_lhs, const LevelData
     const EBGraph& ebgraph     = lhs.getEBGraph();
     const IntVectSet& ivs      = lhs.getIVS();
 
-    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
+    VoFIterator vofit(ivs, ebgraph); 
 
+    auto kernel = [&] (const VolIndex& vof) -> void {
       for (int comp = 0; comp < ncomp; comp++){
 	lhs(vof, comp) *= rhs(vof, 0);
       }
-    }
+    };
+
+    BoxLoops::loop(vofit, kernel);
   }
 }
 
@@ -1405,11 +1428,15 @@ void DataOps::scale(LevelData<BaseIVFAB<Real> >& a_lhs, const Real& a_scale){
   for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
     BaseIVFAB<Real>& lhs = a_lhs[dit()];
 
-    for (VoFIterator vofit(lhs.getIVS(), lhs.getEBGraph()); vofit.ok(); ++vofit){
+    VoFIterator vofit(lhs.getIVS(), lhs.getEBGraph());
+
+    auto kernel = [&] (const VolIndex& vof) -> void {
       for (int comp = 0; comp < a_lhs.nComp(); comp++){
 	lhs(vofit(), comp) *= a_scale;
       }
-    }
+    };
+
+    BoxLoops::loop(vofit, kernel);
   }
 }
 

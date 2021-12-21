@@ -883,12 +883,15 @@ void FieldSolver::setEbPermittivities(BaseIVFAB<Real>& a_relPerm,
   const IntVectSet& ivs  = a_relPerm.getIVS();
   const EBGraph& ebgraph = a_relPerm.getEBGraph();
 
-  for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-    const VolIndex& vof = vofit();
+  VoFIterator vofit(ivs, ebgraph);
+
+  auto kernel = [&] (const VolIndex& vof) -> void {
     const RealVect pos  = Location::position(Location::Cell::Boundary, vof, a_ebisbox, a_dx);
 
     a_relPerm(vof, m_comp) = this->getDielectricPermittivity(pos);
-  }
+  };
+
+  BoxLoops::loop(vofit, kernel);
 }
 
 void FieldSolver::writePlotFile(){

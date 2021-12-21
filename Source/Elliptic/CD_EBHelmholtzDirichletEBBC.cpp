@@ -17,6 +17,7 @@
 // Our includes
 #include <CD_LeastSquares.H>
 #include <CD_EBHelmholtzDirichletEBBC.H>
+#include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
 EBHelmholtzDirichletEBBC::EBHelmholtzDirichletEBBC(){
@@ -95,9 +96,12 @@ void EBHelmholtzDirichletEBBC::define() {
 
     weights. define(ivs, ebgraph, m_nComp);
     stencils.define(ivs, ebgraph, m_nComp);
+    
+    // Iteration space for kernel
+    VoFIterator vofit(ivs, ebgraph);
 
-    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
+    // Kernel
+    auto kernel = [&] (const VolIndex& vof) -> void {
       const Real areaFrac = ebisbox.bndryArea(vof);
       const Real B        = Bcoef(vof, m_comp);
 
@@ -142,7 +146,9 @@ void EBHelmholtzDirichletEBBC::define() {
 	weights (vof, m_comp) = 0.0;
 	stencils(vof, m_comp).clear();
       }
-    }
+    };
+
+    BoxLoops::loop(vofit, kernel);
   }
 }
 
@@ -157,9 +163,8 @@ void EBHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&       a_vofit,
   CH_assert(m_useConstant || m_useFunction);
   
   if(!a_homogeneousPhysBC){  
-    for (a_vofit.reset(); a_vofit.ok(); ++a_vofit){
-      const VolIndex& vof = a_vofit();
 
+    auto kernel = [&] (const VolIndex& vof) -> void {
       Real value;
     
       if(m_useConstant){
@@ -173,7 +178,9 @@ void EBHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&       a_vofit,
       // B-coefficient, area fraction, and division by dx (from Div(F)) already a part of the boundary weights, but
       // beta is not. 
       a_Lphi(vof, m_comp) += a_beta*value*m_boundaryWeights[a_dit](vof, m_comp);
-    }
+    };
+
+    BoxLoops::loop(a_vofit, kernel);
   }
   
   return;

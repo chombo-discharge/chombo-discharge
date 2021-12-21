@@ -210,16 +210,17 @@ void EBHelmholtzOp::defineStencils(){
     const IntVectSet irregIVS = ebisbox.getIrregIVS  (cellBox);
     const IntVectSet multiIVS = ebisbox.getMultiCells(cellBox);
 
-
     // Define the cells where we explicitly store stencils. If we use cell-centered data we only
     // need explicit stencils for kappa*L(phi) on the cut-cells. If this is a centroid-based discretization
     // we also need those stencils for cells that share a grid face with a cut-cell. Those cells will have at least one
     // grid face where we can't use centered differencing. 
     IntVectSet stencIVS = irregIVS;
     if(m_dataLocation == Location::Cell::Centroid){
-      for (VoFIterator vofit(irregIVS, ebgraph); vofit.ok(); ++vofit){
-	const VolIndex& vof = vofit();
 
+      // Iteration space
+      VoFIterator vofit(irregIVS, ebgraph);
+
+      auto kernel = [&] (const VolIndex& vof) -> void {
 	for (int dir = 0; dir < SpaceDim; dir++){
 	  for (SideIterator sit; sit.ok(); ++sit){
 	    Vector<VolIndex> neighborVoFs = ebisbox.getVoFs(vof, dir, sit(), 1);
@@ -231,7 +232,9 @@ void EBHelmholtzOp::defineStencils(){
 	    }
 	  }
 	}
-      }
+      };
+
+      BoxLoops::loop(vofit, kernel);
       
       stencIVS &= cellBox;
     }
@@ -307,9 +310,9 @@ void EBHelmholtzOp::defineStencils(){
       BaseIFFAB<VoFStencil>& fluxStencils = m_centroidFluxStencil[dir][dit()];
 
       // 1. 
-      for (FaceIterator faceIt(stencIVS, ebgraph, dir, FaceStop::SurroundingNoBoundary); faceIt.ok(); ++faceIt){ 
-	const FaceIndex& face = faceIt();
+      FaceIterator faceIt(stencIVS, ebgraph, dir, FaceStop::SurroundingNoBoundary); 
 
+      auto kernel = [&] (const FaceIndex& face) -> void {
 	if(!face.isBoundary()){
 	  const VolIndex vofLo = face.getVoF(Side::Lo);
 	  const VolIndex vofHi = face.getVoF(Side::Hi);
@@ -330,7 +333,9 @@ void EBHelmholtzOp::defineStencils(){
 	  if(stencIVS.contains(vofLo.gridIndex())) opStencil(vofLo, m_comp) += loKappaDivFSten;
 	  if(stencIVS.contains(vofHi.gridIndex())) opStencil(vofHi, m_comp) += hiKappaDivFSten;
 	}
-      }
+      };
+
+      BoxLoops::loop(faceIt, kernel);
     }
 
     // 5. Add contributions to the operator from the EB faces. 
@@ -862,25 +867,25 @@ void EBHelmholtzOp::applyOpIrregular(EBCellFAB& a_Lphi, const EBCellFAB& a_phi, 
 
   // Do irregular faces on domain sides. This was not included in the stencils above. m_domainBc should give the centroid-centered flux so we don't do interpolations here. 
   for (int dir = 0; dir < SpaceDim; dir++){
-    // Lo side.
+    
+    // Iterators for high and low sides.
     VoFIterator& vofitLo = m_vofIterDomLo[dir][a_dit];    
-    for (vofitLo.reset(); vofitLo.ok(); ++vofitLo){
-      const VolIndex& vof = vofitLo();
-      
-      const Real flux = m_domainBc->getFaceFlux(vof, a_phi, dir, Side::Lo, a_dit, a_homogeneousPhysBC);
-
-      a_Lphi(vof, m_comp) -= flux*m_beta/m_dx;
-    }
-
-    // Hi side. 
     VoFIterator& vofitHi = m_vofIterDomHi[dir][a_dit];
-    for (vofitHi.reset(); vofitHi.ok(); ++vofitHi){
-      const VolIndex& vof = vofitHi();
 
+    // Kernels for high and low sides. 
+    auto kernelLo = [&] (const VolIndex& vof) -> void {
+      const Real flux = m_domainBc->getFaceFlux(vof, a_phi, dir, Side::Lo, a_dit, a_homogeneousPhysBC);
+      a_Lphi(vof, m_comp) -= flux*m_beta/m_dx;
+    };
+
+    auto kernelHi = [&] (const VolIndex& vof) -> void {
       const Real flux = m_domainBc->getFaceFlux(vof, a_phi, dir, Side::Hi, a_dit, a_homogeneousPhysBC);      
-
       a_Lphi(vof, m_comp) += flux*m_beta/m_dx;
-    }
+    };
+
+    // Execute kernels on lo and hi side
+    BoxLoops::loop(vofitLo, kernelLo);
+    BoxLoops::loop(vofitHi, kernelHi);    
   }
 }
 
@@ -1201,14 +1206,15 @@ void EBHelmholtzOp::computeAlphaWeight(){
   // Compute the diagonal term in the kappa-weighted operator. We put the result into m_alphaDiagWeight = kappa * A;
   for (DataIterator dit(m_eblg.getDBL().dataIterator()); dit.ok(); ++dit){
     VoFIterator& vofit = m_vofIterStenc[dit()];
-    for (vofit.reset(); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
 
+    auto kernel = [&] (const VolIndex& vof) -> void {
       const Real volFrac = m_eblg.getEBISL()[dit()].volFrac(vof);
       const Real Aco     = (*m_Acoef)[dit()](vof, m_comp);
 
       m_alphaDiagWeight[dit()](vof, m_comp) = volFrac * Aco;
-    }
+    };
+
+    BoxLoops::loop(vofit, kernel);
   }
 }
 
@@ -1276,13 +1282,14 @@ void EBHelmholtzOp::makeAggStencil(){
 
     VoFIterator& vofit = m_vofIterStenc[dit()];
 
-    for(vofit.reset(); vofit.ok(); ++vofit){
-      const VolIndex& vof     = vofit();
+    auto kernel = [&] (const VolIndex& vof) -> void {
       const VoFStencil opSten = m_relaxStencils[dit()](vof, m_comp);
 
       dstBaseIndex.  push_back(RefCountedPtr<BaseIndex>   (new VolIndex  (vof   )));
       dstBaseStencil.push_back(RefCountedPtr<BaseStencil> (new VoFStencil(opSten)));
-    }
+    };
+
+    BoxLoops::loop(vofit, kernel);
  
     m_aggRelaxStencil[dit()] = RefCountedPtr<VCAggStencil> (new VCAggStencil(dstBaseIndex,
 									     dstBaseStencil,
@@ -1451,8 +1458,9 @@ void EBHelmholtzOp::computeFaceCentroidFlux(EBFaceFAB&       a_flux,
 
   ivs &= a_cellBox;
 
-  for (FaceIterator faceIt(ivs, ebgraph, a_dir, FaceStop::SurroundingNoBoundary); faceIt.ok(); ++faceIt){
-    const FaceIndex& face  = faceIt();
+  FaceIterator faceIt(ivs, ebgraph, a_dir, FaceStop::SurroundingNoBoundary);
+
+  auto kernel = [&] (const FaceIndex& face) -> void {
     const VoFStencil& sten = fluxStencils(face, m_comp);
 
     a_flux(face, m_comp) = 0.0;
@@ -1462,7 +1470,9 @@ void EBHelmholtzOp::computeFaceCentroidFlux(EBFaceFAB&       a_flux,
 
       a_flux(face, m_comp) += iweight * a_phi(ivof, m_comp);
     }
-  }
+  };
+
+  BoxLoops::loop(faceIt, kernel);
 }
 
 void EBHelmholtzOp::incrementFRCoar(const LevelData<EBCellFAB>& a_phi){

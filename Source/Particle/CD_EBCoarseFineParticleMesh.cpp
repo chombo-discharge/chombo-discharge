@@ -310,16 +310,17 @@ void EBCoarseFineParticleMesh::addInvalidCoarseToFine(LevelData<EBCellFAB>& a_fi
     // Now do the irregular cells. Here, we loop over all the coarse cells (including ghosts) and set the value in the
     // fine cells to be the same as the value in the underlying coarse cell. 
     VoFIterator& vofit = m_vofIterCoar[dit()];
-    for (vofit.reset(); vofit.ok(); ++vofit){
-      const VolIndex& coarVoF = vofit();
 
+    auto kernel = [&] (const VolIndex& coarVoF) -> void {
       const Vector<VolIndex>& fineVoFs = ebislCoar.refine(coarVoF, m_refRat, dit());
 
       for (int ivof = 0; ivof < fineVoFs.size(); ivof++){
 	const VolIndex& fineVoF = fineVoFs[ivof];
 	fiCoData(fineVoF, m_comp) = coarData(coarVoF, m_comp);
       }
-    }
+    };
+
+    BoxLoops::loop(vofit, kernel);
   }
 
   // Finally, add the data to the valid region on the fine grid.

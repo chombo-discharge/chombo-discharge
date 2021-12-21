@@ -967,9 +967,11 @@ void McPhoto::depositHybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massDif
       const EBGraph& ebgraph = ebisbox.getEBGraph();
       const IntVectSet ivs   = ebisbox.getIrregIVS(box);
 
+      // Iteration space for kernel. 
       VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
-      for (vofit.reset(); vofit.ok(); ++vofit){
-	const VolIndex& vof = vofit();
+
+      // Kernel
+      auto kernel = [&] (const VolIndex& vof) -> void {
 	const Real kappa    = ebisbox.volFrac(vof);
 	const Real dc       = divH(vof, m_comp);
 	const Real dnc      = divNC(vof, m_comp);
@@ -979,7 +981,9 @@ void McPhoto::depositHybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massDif
 	// gives positive definite results. 
 	divH(vof, m_comp)   = dc + (1-kappa)*dnc;          // On output, contains hybrid divergence
 	deltaM(vof, m_comp) = (1-kappa)*(dc - kappa*dnc);  // Remember, dc already scaled by kappa. 
-      }
+      };
+
+      BoxLoops::loop(vofit, kernel);
     }
   }
 }

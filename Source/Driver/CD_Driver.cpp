@@ -249,8 +249,9 @@ void Driver::getGeometryTags(){
       const EBGraph& ebgraph = ebisbox.getEBGraph();
       const IntVectSet irreg = ebisbox.getIrregIVS(box);
 
-      for (VoFIterator vofit(irreg, ebgraph); vofit.ok(); ++vofit){
-	const VolIndex& vof    = vofit();
+      VoFIterator vofit(irreg, ebgraph); 
+
+      auto kernel = [&] (const VolIndex& vof) -> void {
 	const IntVect   iv     = vof.gridIndex();
 	const RealVect  normal = ebisbox.normal(vof);
 	
@@ -273,7 +274,9 @@ void Driver::getGeometryTags(){
 	    }
 	  }
 	}
-      }
+      };
+
+      BoxLoops::loop(vofit, kernel);
     }
   }
 

@@ -15,6 +15,7 @@
 // Our includes
 #include <CD_SigmaSolver.H>
 #include <CD_DataOps.H>
+#include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
 constexpr int SigmaSolver::m_comp;
@@ -166,8 +167,10 @@ void SigmaSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int
       const IntVectSet ivs   = fineState.getIVS();
       const EBGraph& ebgraph = fineState.getEBGraph();
 
-      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	const VolIndex& fineVof = vofit();
+      // Iterate space for kernel.
+      VoFIterator vofit(ivs, ebgraph);
+
+      auto kernel = [&] (const VolIndex& fineVof) -> void {
 	const VolIndex  coarVof = fineEBISL.coarsen(fineVof, nref, dit());
 	const Real coarArea     = coarEBISBox.bndryArea(coarVof);
 	
@@ -185,7 +188,9 @@ void SigmaSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int
 	else{
 	  fineState(fineVof, m_comp) = 0.0;
 	}
-      }
+      };
+
+      BoxLoops::loop(vofit, kernel);
     }
 
     // If data already exists, it takes precedence
@@ -231,11 +236,17 @@ void SigmaSolver::resetCells(EBAMRIVData& a_data){
       
       ivs -= mflg.interfaceRegion(box, dit());
 
-      for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
+      // Iteration space
+      VoFIterator vofit(ivs, ebgraph);
+
+      // Kernel
+      auto kernel = [&] (const VolIndex& vof) -> void {
 	for (int comp = 0; comp < data.nComp(); comp++){
 	  data(vofit(), comp) = 0.0;
 	}
-      }
+      };
+
+      BoxLoops::loop(vofit, kernel);
     }
   }
 }
@@ -447,13 +458,18 @@ Real SigmaSolver::computeCharge(){
     
     const EBGraph&   ebgraph  = ebisbox.getEBGraph();
     const IntVectSet irregIVS = ebisbox.getIrregIVS(box);
+    
+    // Kernel space
+    VoFIterator vofit(irregIVS, ebgraph);
 
-    for (VoFIterator vofit(irregIVS, ebgraph); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
+    // Kernel
+    auto kernel = [&] (const VolIndex& vof) -> void {
       const Real& area    = ebisbox.bndryArea(vof);
 
       charge += area*(*m_phi[0])[dit()](vof, comp);
-    }
+    };
+
+    BoxLoops::loop(vofit, kernel);
   }
 
   DataOps::sum(charge); // Parallell sum.

@@ -268,9 +268,7 @@ void EBGradient::computeAMRGradient(LevelData<EBCellFAB>&       a_gradient,
       const EBCellFAB& phiFine  = m_bufferFine    [dit()];
 
       // Go through all cells that have a two-level stencil. 
-      for (vofit.reset(); vofit.ok(); ++vofit){
-	const VolIndex& vof = vofit();
-
+      auto kernel = [&] (const VolIndex& vof) -> void {
 	const VoFStencil& coarSten = m_bufferStencilsCoar[dit()](vof, m_comp);
 	const VoFStencil& fineSten = m_bufferStencilsFine[dit()](vof, m_comp);	
 
@@ -295,7 +293,9 @@ void EBGradient::computeAMRGradient(LevelData<EBCellFAB>&       a_gradient,
 
 	  gradCoar(vof, ivar) += iweight * phiFine(ivof, m_comp);
 	}	
-      }
+      };
+
+      BoxLoops::loop(vofit, kernel);
     }
 
     // Now copy the result from the buffer grids to the "real" grids. Here, m_bufferGradient is a BaseIVFAB<Real> (for memory reasons)
@@ -308,13 +308,13 @@ void EBGradient::computeAMRGradient(LevelData<EBCellFAB>&       a_gradient,
 
       VoFIterator& vofit = m_ebcfIterator[dit()];
 
-      for (vofit.reset(); vofit.ok(); ++vofit){
-	const VolIndex& vof = vofit();
-
+      auto kernel = [&] (const VolIndex& vof) -> void {
 	for (int dir = 0; dir < SpaceDim; dir++){
 	  gradient(vof, dir) = ebcfGradient(vof, dir);
 	}
-      }
+      };
+
+      BoxLoops::loop(vofit, kernel);
     }
   }
 }
@@ -729,7 +729,7 @@ void EBGradient::defineStencilsEBCF(const LevelData<FArrayBox>& a_bufferCoarMask
     DenseIntVectSet validRegionFine(grownCellBoxFine, false);
 
     // Define kernel. 
-    auto kernel = [&] (const IntVect& ivCoar) -> void {
+    auto regularKernel = [&] (const IntVect& ivCoar) -> void {
       if(invalidRegion(ivCoar, m_comp)){
 	validRegionCoar -= ivCoar;
 
@@ -740,15 +740,14 @@ void EBGradient::defineStencilsEBCF(const LevelData<FArrayBox>& a_bufferCoarMask
     };
 
     // Launch kernel.
-    BoxLoops::loop(grownCellBox, kernel);
+    BoxLoops::loop(grownCellBox, regularKernel);
 
     // Define the iterator and stencils for places where we need to drop order.
     VoFIterator&           vofit         = m_bufferIterator    [dit()];
     BaseIVFAB<VoFStencil>& coarStencils  = m_bufferStencilsCoar[dit()];
     BaseIVFAB<VoFStencil>& fineStencils  = m_bufferStencilsFine[dit()];
 
-    for (vofit.reset(); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
+    auto irregularKernel = [&] (const VolIndex& vof) -> void {
 
       VoFStencil& coarStencil = coarStencils(vof, m_comp);
       VoFStencil& fineStencil = fineStencils(vof, m_comp);
@@ -785,7 +784,9 @@ void EBGradient::defineStencilsEBCF(const LevelData<FArrayBox>& a_bufferCoarMask
 
 	MayDay::Warning("CD_EBGradient::defineStencilsEBCF -- could not find stencil!");
       }
-    }
+    };
+
+    BoxLoops::loop(vofit, irregularKernel);
   }
 }
 
