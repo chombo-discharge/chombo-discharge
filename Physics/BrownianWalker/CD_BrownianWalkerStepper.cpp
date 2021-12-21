@@ -585,17 +585,18 @@ void BrownianWalkerStepper::loadBalanceBoxesMesh(Vector<Vector<int> >&          
       // in each cell. This might not be the same as the contents in newParticlesPerCell*dV because the stepper will
       // later run with superparticle merging/splitting. 
       Real sum = 0.0;
-      for (BoxIterator bit(cellBox); bit.ok(); ++ bit){
-	const IntVect iv = bit();
 	
-	// We will have at most m_ppc particles per grid cell.
+      // We will have at most m_ppc particles per grid cell. This kernel does that. 
+      auto kernel = [&] (const IntVect& iv) -> void {
 	if(!ebisBox.isCovered(iv)){
-	  const Real numPhysParticles = std::abs(ppcFAB(bit())*dV);
+	  const Real numPhysParticles = std::abs(ppcFAB(iv, comp)*dV);
 	  const Real numCompParticles = std::min(numPhysParticles, Real(m_ppc));
 
 	  sum += numCompParticles;	  
 	}
-      }
+      };
+
+      BoxLoops::loop(cellBox, kernel);
       
       loads[dit().intCode()] = lround(sum);
     }
