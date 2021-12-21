@@ -25,25 +25,41 @@
 
 /*!
   @brief Class for encapsulating random number generation. 
-  The user can specify a seed 's' where each MPI rank will initialize their RNG with seed 's + procID()'. Otherwise, a random seed is drawn by the master
-  rank and broadcast to the other ranks. The rank seeds are like the above: 's+procID()'. 
+  @details The user can specify a seed 's' where each MPI rank will initialize their RNG with seed 's + procID()'. Note that unless the user specifies 
+  Random.seed = <number> in the input script, the RNG will use a seed of '0 + procID()' for the various ranks. If the user specifies a <number> less than 0, 
+  a random seed will be used.
 */
 class Random {
 public:
 
   /*!
-    @brief Set the RNG seed.
-    @details If using MPI, the seed is set to a_seed + procID().
-    @param[in] a_seed Seed to use for RNG.
+    @brief Disallowed constructor. 
   */
-  inline
-  static void setSeed(const int a_seed);
+  Random() = delete;
 
   /*!
-    @brief Set a random RNG seed
+    @brief Deleted copy constructor. Must be impossible because this is a singleton. 
+    @param[in] a_other Other RNG engine. 
   */
-  inline
-  static void init();
+  Random(const Random& a_other) = delete;
+
+  /*!
+    @brief Deleted copy constructor. Must be impossible because this is a singleton. 
+    @param[in] a_other Other RNG engine. 
+  */
+  Random(const Random&& a_other) = delete;
+
+  /*!
+    @brief Disallowed copy assignemtn. 
+    @param[in] a_other Other RNG engine. 
+  */
+  Random& operator=(const Random& a_other) = delete;
+
+  /*!
+    @brief Disallowed move assignment. 
+    @param[in] a_other Other RNG engine. 
+  */
+  Random& operator=(const Random&& a_other) = delete;    
 
   /*!
     @brief Get a uniform real number on the interval [0,1]
@@ -78,8 +94,13 @@ public:
   inline  
   static Real get(T& a_distribution);
 
-protected:
+private:
 
+  /*!
+    @brief For checking if RNG has been seeded or not.
+  */
+  static bool s_seeded;
+  
   /*!
     @brief Random number generator
   */
@@ -100,6 +121,25 @@ protected:
   */
   static std::normal_distribution<Real> s_normal01;
 
+  /*!
+    @brief Seed the RNG
+  */
+  inline
+  static void seed();
+
+  /*!
+    @brief Set the RNG seed.
+    @details If using MPI, the seed is set to a_seed + procID().
+    @param[in] a_seed Seed to use for RNG.
+  */
+  inline
+  static void setSeed(const int a_seed);
+
+  /*!
+    @brief Set a random RNG seed
+  */
+  inline
+  static void setRandomSeed();    
 };
 
 #include <CD_NamespaceFooter.H>

@@ -18,4 +18,6 @@ std::uniform_real_distribution<Real> Random::s_uniform01 = std::uniform_real_dis
 std::uniform_real_distribution<Real> Random::s_uniform11 = std::uniform_real_distribution<Real>(-1.0,  1.0);
 std::normal_distribution      <Real> Random::s_normal01  = std::normal_distribution      <Real>( 0.0,  1.0);
 
+bool Random::s_seeded = false;
+
 #include <CD_NamespaceFooter.H>

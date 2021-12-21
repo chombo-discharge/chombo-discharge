@@ -17,11 +17,36 @@
 
 // Chombo includes
 #include <SPMD.H>
+#include <ParmParse.H>
 
 // Our includes
 #include <CD_Random.H>
 #include <CD_NamespaceHeader.H>
 
+inline
+void Random::seed() {
+
+  // Set the RNG seed.
+  ParmParse pp("Random");
+
+  if(pp.contains("seed")){
+    int seed;
+    pp.get("seed", seed);
+    if(seed < 0){
+      Random::setRandomSeed();
+    }
+    else{
+      Random::setSeed(seed);
+    }
+  }
+  else{
+    Random::setSeed(0);
+  }
+
+  s_seeded = true;
+}
+
+inline
 void Random::setSeed(const int a_seed) {
 #ifdef CH_MPI
   const int seed = a_seed + procID();
@@ -30,31 +55,62 @@ void Random::setSeed(const int a_seed) {
 #endif
 
   s_rng = std::mt19937_64(seed);
+
+  s_seeded = true;
 }
 
-void Random::init() {
+inline
+void Random::setRandomSeed() {
+
   int seed = std::chrono::system_clock::now().time_since_epoch().count();
 
+  // Special hook for MPI -- master rank broadcasts the seed and everyone increments by their processor ID. 
 #ifdef CH_MPI
-  seed += procID();
+  MPI_Bcast(&seed, 1, MPI_INT, 0, Chombo_MPI::comm);
+
+  seed += procID();  
 #endif
-  
+
+  // Init the RNG
   s_rng = std::mt19937_64(seed);
+
+  // Duh. 
+  s_seeded = true;  
 }
 
+inline
 Real Random::getUniformReal01() {
+  if(!s_seeded) {
+    Random::seed();
+  }
+  
   return s_uniform01(s_rng);
 }
 
+inline
 Real Random::getUniformReal11() {
+  if(!s_seeded) {
+    Random::seed();
+  }
+  
   return s_uniform11(s_rng);
 }
 
+inline
 Real Random::getNormal01() {
+  if(!s_seeded) {
+    Random::seed();
+  }
+  
   return s_normal01(s_rng);
 }
 
+inline
 RealVect Random::getDirection() {
+  if(!s_seeded) {
+    Random::seed();
+  }
+  
   constexpr Real safety = 1.E-12;
 
 #if CH_SPACEDIM==2
@@ -87,7 +143,12 @@ RealVect Random::getDirection() {
 }
 
 template<typename T>
+inline
 Real Random::get(T& a_distribution){
+  if(!s_seeded) {
+    Random::seed();
+  }
+  
   return a_distribution(s_rng);
 }
 
