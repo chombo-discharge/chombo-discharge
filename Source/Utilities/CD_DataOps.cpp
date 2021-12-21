@@ -1510,30 +1510,32 @@ void DataOps::setValue(LevelData<MFCellFAB>& a_lhs, const std::function<Real(con
       EBCellFAB& phaseData        = lhs.getPhase(i);
       BaseFab<Real>& phaseDataFAB = phaseData.getSingleValuedFAB();
 
+      // Kernel regions
       const Box box           = phaseData.box();
       const EBISBox& ebisbox  = phaseData.getEBISBox();
       const EBGraph& ebgraph  = ebisbox.getEBGraph();
       const IntVectSet& irreg = ebisbox.getIrregIVS(box);
+      VoFIterator vofit(irreg, ebgraph);      
 
       // Regular cells
-      for (BoxIterator bit(box); bit.ok(); ++bit){
-	const IntVect iv = bit();
-
+      auto regularKernel = [&] (const IntVect& iv) -> void{
 	const RealVect pos = a_probLo + (0.5*RealVect::Unit + RealVect(iv))*a_dx;
 
 	phaseDataFAB(iv, a_comp) = a_function(pos);
-      }
+      };
 
-      // Irregular cells
-      for (VoFIterator vofit(irreg, ebgraph); vofit.ok(); ++vofit){
-	const VolIndex& vof = vofit();
+      // Cut-cells. 
+      auto irregularKernel = [&] (const VolIndex& vof) -> void {
 	const IntVect& iv   = vof.gridIndex();
       
 	const RealVect pos = a_probLo + (0.5*RealVect::Unit + RealVect(iv))*a_dx;
 
 	phaseData(vof, a_comp) = a_function(pos);
-      }
-      
+      };
+
+      // Run kernels.
+      BoxLoops::loop(box,     regularKernel);
+      BoxLoops::loop(vofit, irregularKernel);      
     }
   }
 }
@@ -1554,30 +1556,32 @@ void DataOps::setValue(LevelData<EBCellFAB>& a_lhs, const std::function<Real(con
   for (DataIterator dit(dbl); dit.ok(); ++dit){
     EBCellFAB& lhs        = a_lhs[dit()];
     BaseFab<Real>& lhsFAB = lhs.getSingleValuedFAB();
-    
+
+    // Kernel regions. 
     const Box box           = lhs.box();
     const EBISBox& ebisbox  = lhs.getEBISBox();
     const EBGraph& ebgraph  = ebisbox.getEBGraph();
     const IntVectSet& irreg = ebisbox.getIrregIVS(box);
+    VoFIterator vofit(irreg, ebgraph); 
 
     // Regular cells
-    for (BoxIterator bit(box); bit.ok(); ++bit){
-      const IntVect iv = bit();
-
+    auto regularKernel = [&] (const IntVect& iv) -> void {
       const RealVect pos = a_probLo + (0.5*RealVect::Unit + RealVect(iv))*a_dx;
 
       lhsFAB(iv, a_comp) = a_function(pos);
-    }
+    };
 
-    // Irregular cells
-    for (VoFIterator vofit(irreg, ebgraph); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
+    auto irregularKernel = [&] (const VolIndex& vof) -> void {    
       const IntVect& iv   = vof.gridIndex();
       
       const RealVect pos = a_probLo + (0.5*RealVect::Unit + RealVect(iv))*a_dx;// + ebisbox.centroid(vof)*a_dx;
 
       lhs(vof, a_comp) = a_function(pos);
-    }
+    };
+
+    // Run kernels.
+    BoxLoops::loop(box,     regularKernel);
+    BoxLoops::loop(vofit, irregularKernel);          
   }
 }
 
@@ -1598,33 +1602,31 @@ void DataOps::setValue(LevelData<EBFluxFAB>& a_lhs, const std::function<Real(con
     for (int dir = 0; dir < SpaceDim; dir++){
       EBFaceFAB& lhs        = a_lhs[dit()][dir];
       BaseFab<Real>& lhsFAB = lhs.getSingleValuedFAB();
-    
-      const Box box           = lhs.getRegion();
-      const EBISBox& ebisbox  = lhs.getEBISBox();
-      const EBGraph& ebgraph  = ebisbox.getEBGraph();
-      const IntVectSet& irreg = ebisbox.getIrregIVS(box);
 
-      Box facebox = box;
-      facebox.surroundingNodes(dir);
+      // Kernel regions. 
+      const Box         box     = lhs.getRegion();
+      const EBISBox&    ebisbox = lhs.getEBISBox();
+      const EBGraph&    ebgraph = ebisbox.getEBGraph();
+      const IntVectSet& irreg   = ebisbox.getIrregIVS(box);
+      const Box         facebox = surroundingNodes(box, dir);
+      FaceIterator faceit(irreg, ebgraph, dir, FaceStop::SurroundingWithBoundary);
 
       // Regular cells
-      for (BoxIterator bit(facebox); bit.ok(); ++bit){
-	const IntVect iv = bit();
-
+      auto regularKernel = [&] (const IntVect& iv) -> void {
 	const RealVect pos = a_probLo + RealVect(iv)*a_dx;
 
 	lhsFAB(iv, a_comp) = a_function(pos);
-      }
+      };
 
-      // Irregular cells. 
-      const FaceStop::WhichFaces stopCrit = FaceStop::SurroundingWithBoundary;
-      for (FaceIterator faceIt(irreg, ebgraph, dir, stopCrit); faceIt.ok(); ++faceIt){
-	const FaceIndex& face = faceIt();
-	
+      auto irregularKernel = [&] (const FaceIndex& face) -> void {
 	const RealVect pos = EBArith::getFaceLocation(face, a_dx, a_probLo);
 
 	lhs(face, a_comp) = a_function(pos);
-      }
+      };
+
+      // Run the kernels.
+      BoxLoops::loop(facebox,   regularKernel);
+      BoxLoops::loop(faceit,  irregularKernel);      
     }
   }
 }
@@ -1646,16 +1648,20 @@ void DataOps::setValue(LevelData<BaseIVFAB<Real> >& a_lhs, const std::function<R
   for (DataIterator dit(dbl); dit.ok(); ++dit){
     BaseIVFAB<Real>& lhs    = a_lhs[dit()];
 
+    // Kernel region. 
     const EBGraph& ebgraph  = lhs.getEBGraph();
     const IntVectSet& irreg = lhs.getIVS();
+    VoFIterator vofit(irreg, ebgraph);    
 
-    for (VoFIterator vofit(irreg, ebgraph); vofit.ok(); ++vofit){
-      const VolIndex vof = vofit();
+    // Irregular kernel. 
+    auto kernel = [&] (const VolIndex& vof) {
       const IntVect  iv  = vof.gridIndex();
       const RealVect pos = a_probLo + (0.5*RealVect::Unit + RealVect(iv))*a_dx;
 
       lhs(vof, a_comp) = a_function(pos);
-    }
+    };
+
+    BoxLoops::loop(vofit, kernel);
   }
 }
 
@@ -1677,27 +1683,26 @@ void DataOps::setValue(LevelData<EBCellFAB>& a_lhs, const std::function<RealVect
   for (DataIterator dit(dbl); dit.ok(); ++dit){
     EBCellFAB& lhs        = a_lhs[dit()];
     BaseFab<Real>& lhsFAB = lhs.getSingleValuedFAB();
-    
+
+    // Kernel regions. 
     const Box box           = lhs.box();
     const EBISBox& ebisbox  = lhs.getEBISBox();
     const EBGraph& ebgraph  = ebisbox.getEBGraph();
     const IntVectSet& irreg = ebisbox.getIrregIVS(box);
+    VoFIterator vofit(irreg, ebgraph);    
 
-    // Regular cells
-    for (BoxIterator bit(box); bit.ok(); ++bit){
-      const IntVect iv = bit();
-
+    // Regular kernel. 
+    auto regularKernel = [&] (const IntVect& iv) -> void {
       const RealVect pos = a_probLo + (0.5*RealVect::Unit + RealVect(iv))*a_dx;
       const RealVect val = a_function(pos);
       
       for (int comp = 0; comp < SpaceDim; comp++){
 	lhsFAB(iv, comp) = val[comp];
       }
-    }
+    };
 
     // Irregular cells
-    for (VoFIterator vofit(irreg, ebgraph); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
+    auto irregularKernel = [&] (const VolIndex& vof) -> void {
       const IntVect& iv   = vof.gridIndex();
       
       const RealVect pos = a_probLo + (0.5*RealVect::Unit + RealVect(iv))*a_dx;// + ebisbox.centroid(vof)*a_dx;
@@ -1706,7 +1711,11 @@ void DataOps::setValue(LevelData<EBCellFAB>& a_lhs, const std::function<RealVect
       for (int comp = 0; comp < SpaceDim; comp++){
 	lhs(vof, comp) = val[comp];
       }
-    }
+    };
+
+    // Run the kernels.
+    BoxLoops::loop(box,     regularKernel);
+    BoxLoops::loop(vofit, irregularKernel);    
   }
 }
 
