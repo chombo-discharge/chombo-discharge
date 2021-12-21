@@ -18,7 +18,6 @@
 #include <PolyGeom.H>
 #include <EBAlias.H>
 #include <EBLevelDataOps.H>
-#include <BoxIterator.H>
 #include <EBArith.H>
 #include <ParmParse.H>
 #include <ParticleIO.H>
@@ -784,11 +783,12 @@ void McPhoto::generatePhotons(ParticleContainer<Photon>& a_photons, const EBAMRC
       // Generate new particles in this box
       List<Photon> particles;
       if(sum > 0.0){
+
+	// Kernel region for cut-cells. 
+	VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];	
 	
 	// Regular cells. Note that we make superphotons if we have to. 
-	for (BoxIterator bit(box); bit.ok(); ++bit){
-	  const IntVect iv = bit();
-
+	auto regularKernel = [&] (const IntVect& iv) -> void {
 	  if(ebisbox.isRegular(iv)){
 	    const RealVect pos = probLo + (RealVect(iv) + 0.5*RealVect::Unit)*dx;
 
@@ -806,16 +806,13 @@ void McPhoto::generatePhotons(ParticleContainer<Photon>& a_photons, const EBAMRC
 	      }
 	    }
 	  }
-	}
+	};
 
-	// Do the same for the cut cells. 
-	VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
-	
-	for (vofit.reset(); vofit.ok(); ++vofit){
-	  const VolIndex& vof      = vofit();
+	// Irregular kernel. Same as the above really. 
+	auto irregularKernel = [&] (const VolIndex& vof) -> void {
 	  const RealVect pos       = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
 	  const Real kappa         = ebisbox.volFrac(vof);
-	  const int numPhysPhotons = drawPhotons(source(vof,srcComp), vol, a_dt);
+	  const int numPhysPhotons = this->drawPhotons(source(vof,srcComp), vol, a_dt);
 	  
 	  if(numPhysPhotons > 0){
 	    const int numComputationalPhotons = (numPhysPhotons <= m_maxPhotonsGeneratedPerCell) ? numPhysPhotons : m_maxPhotonsGeneratedPerCell;
@@ -827,11 +824,16 @@ void McPhoto::generatePhotons(ParticleContainer<Photon>& a_photons, const EBAMRC
 	      particles.append(Photon(pos, v, m_RtSpecies->getAbsorptionCoefficient(pos), weight));
 	    }
 	  }
-	}
-      }
+	};
 
-      // Add new particles to data holder
-      (*photons[lvl])[dit()].addItemsDestructive(particles);
+	  
+	// Run the irregular kernl
+	BoxLoops::loop(box,     regularKernel);	
+	BoxLoops::loop(vofit, irregularKernel);
+	
+	// Add new particles to data holder
+	(*photons[lvl])[dit()].addItemsDestructive(particles);
+      }
     }
   }
 }
