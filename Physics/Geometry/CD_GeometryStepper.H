@@ -44,12 +44,12 @@ namespace Physics {
       /*!
 	@brief Set up solvers (does nothing)
       */
-      virtual void setupSolvers() override
+      virtual void setupSolvers() override;
       
       /*!
 	@brief Allocate solver internals (does nothing)
       */      
-      virtual void allocate() override
+      virtual void allocate() override;
 
       /*!
 	@brief Fill solver initial data (does nothing)
@@ -136,7 +136,6 @@ namespace Physics {
 	@details This is called by Driver after time step. The routine can be used to display use information about the simulation progress. 
       */      
       virtual void printStepReport() override;
-
 
       /*!
 	@brief Perform pre-regrid operations (does nothing)
