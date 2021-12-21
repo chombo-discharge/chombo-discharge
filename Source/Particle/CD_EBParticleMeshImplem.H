@@ -37,7 +37,8 @@ void EBParticleMesh::deposit(const List<P>& a_particleList, EBCellFAB& a_rho, co
 			  m_probLo, 
 			  m_dx, 
 			  curPosition, 
-			  curStrength, 
+			  &curStrength,
+			  Interval(0,0),
 			  a_depositionType,
 			  a_forceIrregNGP);
   }  
@@ -56,7 +57,8 @@ void EBParticleMesh::deposit(const List<P>& a_particleList, EBCellFAB& a_rho, co
 			  m_probLo, 
 			  m_dx, 
 			  curPosition, 
-			  curStrength, 
+			  &curStrength,
+			  Interval(0,0),			  
 			  a_depositionType,
 			  a_forceIrregNGP);
   }  
@@ -78,7 +80,8 @@ void EBParticleMesh::deposit2(const List<P>& a_particleList, EBCellFAB& a_rho, c
 			   m_probLo, 
 			   m_dx, 
 			   curPosition, 
-			   curStrength, 
+			   &curStrength,
+			   Interval(0,0),
 			   a_depositionType,
 			   a_forceIrregNGP);
   }  
@@ -97,7 +100,8 @@ void EBParticleMesh::deposit2(const List<P>& a_particleList, EBCellFAB& a_rho, c
 			   m_probLo, 
 			   m_dx, 
 			   curPosition, 
-			   curStrength, 
+			   &curStrength,
+			   Interval(0,0),
 			   a_depositionType,
 			   a_forceIrregNGP);
   }  
@@ -118,8 +122,9 @@ void EBParticleMesh::deposit4(const List<P>& a_particleList, EBCellFAB& a_rho, c
     this->depositParticle4(a_rho, 
 			   m_probLo, 
 			   m_dx, 
-			   curPosition, 
-			   curStrength, 
+			   curPosition,
+			   &curStrength,
+			   Interval(0,0),
 			   a_depositionType,
 			   a_forceIrregNGP);
   }  
@@ -137,8 +142,9 @@ void EBParticleMesh::deposit4(const List<P>& a_particleList, EBCellFAB& a_rho, c
     this->depositParticle4(a_rho, 
 			   m_probLo, 
 			   m_dx, 
-			   curPosition, 
-			   curStrength, 
+			   curPosition,
+			   &curStrength,
+			   Interval(0,0),
 			   a_depositionType,
 			   a_forceIrregNGP);
   }  
@@ -210,18 +216,21 @@ void EBParticleMesh::depositParticle(EBCellFAB&           a_rho,
 				     const RealVect&      a_probLo,
 				     const RealVect&      a_dx,
 				     const RealVect&      a_position,
-				     const Real&          a_mass,
+				     const Real*          a_strength,
+				     const Interval       a_components,
 				     const DepositionType a_depositionType,
 				     const bool           a_forceIrregNGP) const {
   CH_TIME("EBParticleMesh::depositParticle");
+
+
+  const int startComp = a_components.begin();
+  const int endComp   = a_components.end  ();
+  const int numComp   = a_components.size ();
   
-  CH_assert(a_rho.nComp() == 1);
+  CH_assert(a_rho.nComp() >= endComp - 1);  
 
   // TLDR: This performs regular deposition as if the particle lives on regular mesh data. If the cell is irregular we can use a class option
   //       to enforce NGP deposition in those cells. If the particle lives in a multi-valued cell I have no idea how to handle deposition.  
-
-  constexpr int comp  = 0;
-  constexpr int nComp = 1;  
 
   // Nifty lambda for converting RealVect position to IntVect (lower-left corner). Note that the input vector
   // is the displacement from a_probLo and not the physical position. 
@@ -235,9 +244,9 @@ void EBParticleMesh::depositParticle(EBCellFAB&           a_rho,
   // Assertion -- particle must live on this patch. 
   CH_assert(m_region.contains(particleIndex));
 
-  // Factors needed for the kernels. density is the, well, density = mass/volume. The little lambda will give us the distance
+  // Factors needed for the kernels. The little lambda will give us the distance
   // between the cell we're looking at and the particle position (in units of the grid resolution)
-  const Real density = a_mass/std::pow(a_dx[0], SpaceDim);
+  const Real invVol = 1./std::pow(a_dx[0], SpaceDim);
 
   auto particleDisplacement = [&] (const IntVect& iv) -> RealVect {
     return (a_probLo + (RealVect(iv) + 0.5*RealVect::Unit)*a_dx - a_position)/a_dx;
@@ -248,13 +257,17 @@ void EBParticleMesh::depositParticle(EBCellFAB&           a_rho,
   
   // We can force NGP deposition in cut-cells if we want. 
   if(m_ebisbox.isIrregular(particleIndex) && a_forceIrregNGP){
-    rho(particleIndex, comp) += density;    
+    for (int comp = startComp; comp <= endComp; comp++){
+      rho(particleIndex, comp) += a_strength[comp] * invVol;
+    }    
   }
   else{
     switch (a_depositionType){
     case DepositionType::NGP:
       {
-	rho(particleIndex, comp) += density;
+	for (int comp = startComp; comp <= endComp; comp++){
+	  rho(particleIndex, comp) += a_strength[comp] * invVol;	  
+	}
 	break;
       }
     case DepositionType::CIC:
@@ -266,7 +279,7 @@ void EBParticleMesh::depositParticle(EBCellFAB&           a_rho,
 
 	// This is the cloud-in-cell deposition kernel.
 	auto cicKernel = [&](const IntVect& iv) -> void {
-	  Real weight = density;
+	  Real weight = invVol;
 
 	  // L is the distance between the grid cell and the particle. 
 	  const RealVect L = particleDisplacement(iv);
@@ -274,7 +287,9 @@ void EBParticleMesh::depositParticle(EBCellFAB&           a_rho,
 	    weight *= (1. - std::abs(L[dir]));
 	  }
 
-	  rho(iv,comp) += weight;
+	  for (int comp = startComp; comp <= endComp; comp++){	  
+	    rho(iv,comp) += weight * a_strength[comp];
+	  }
 	};
 
 	// Add mass to cells. 
@@ -292,7 +307,7 @@ void EBParticleMesh::depositParticle(EBCellFAB&           a_rho,
 
 	// This is the triangle-shaped cloud kernel. 
 	auto tscKernel = [&](const IntVect& iv) -> void {
-	  Real weight = density;
+	  Real weight = invVol;
 
 	  const RealVect L = particleDisplacement(iv);	  
 	  for (int dir = 0; dir < SpaceDim; dir++){
@@ -306,7 +321,9 @@ void EBParticleMesh::depositParticle(EBCellFAB&           a_rho,
 	    }
 	  }
 
-	  rho(iv, comp) += weight;
+	  for (int comp = startComp; comp <= endComp; comp++){	  
+	    rho(iv,comp) += weight * a_strength[comp];
+	  }	  
 	};
 
 	// Run the kernel. 
@@ -324,7 +341,7 @@ void EBParticleMesh::depositParticle(EBCellFAB&           a_rho,
 
 	// This is the fourth order kernel.
 	auto w4Kernel = [&](const IntVect& iv) -> void {
-	  Real weight = density;
+	  Real weight = invVol;
 	  
 	  // L is the distance between the grid cell and the particle. 
 	  const RealVect L = particleDisplacement(iv);	  	  
@@ -338,8 +355,10 @@ void EBParticleMesh::depositParticle(EBCellFAB&           a_rho,
 	      weight *= 0.5 * (2. - l) * (2. - l) * (1. - l);
 	    }
 	  }
-
-	  rho(iv, comp) += weight;
+	  
+	  for (int comp = startComp; comp <= endComp; comp++){	  
+	    rho(iv,comp) += weight * a_strength[comp];
+	  }	  
 	};
 
 	// Run the kernel.
@@ -361,15 +380,17 @@ void EBParticleMesh::depositParticle2(EBCellFAB&           a_rho,
 				      const RealVect&      a_probLo,
 				      const RealVect&      a_dx,
 				      const RealVect&      a_position,
-				      const Real&          a_mass,
+				      const Real*          a_strength,
+				      const Interval       a_components,
 				      const DepositionType a_depositionType,
 				      const bool           a_forceIrregNGP) const {
   CH_TIME("EBParticleMesh::depositParticle2");
-  
-  CH_assert(a_rho.nComp() == 1);
 
-  constexpr int comp  = 0;
-  constexpr int nComp = 1;    
+  const int startComp = a_components.begin();
+  const int endComp   = a_components.end  ();
+  const int numComp   = a_components.size ();
+  
+  CH_assert(a_rho.nComp() >= endComp - 1);    
   
   // TLDR: This performs regular deposition as if the particle lives on regular mesh data. If the cell is irregular we can use a class option
   //       to enforce NGP deposition in those cells. If the particle lives in a multi-valued cell I have no idea how to handle deposition.
@@ -389,9 +410,9 @@ void EBParticleMesh::depositParticle2(EBCellFAB&           a_rho,
   // Assertion -- particle must live on this patch. 
   CH_assert(m_region.contains(particleIndex));
 
-  // Factors needed for the kernels. density is the, well, density = mass/volume. The little lambda will give us the distance
+  // Factors needed for the kernels. The little lambda will give us the distance
   // between the cell we're looking at and the particle position (in units of the grid resolution)
-  const Real density = a_mass/std::pow(a_dx[0], SpaceDim);
+  const Real invVol = 1./std::pow(a_dx[0], SpaceDim);  
 
   auto particleDisplacement = [&] (const IntVect& iv) -> RealVect {
     return (a_probLo + (RealVect(iv) + 0.5*RealVect::Unit)*a_dx - a_position)/a_dx;
@@ -402,13 +423,18 @@ void EBParticleMesh::depositParticle2(EBCellFAB&           a_rho,
 
   // Force NGP in cut-cells if we want. 
   if(m_ebisbox.isIrregular(particleIndex) && a_forceIrregNGP){
-    rho(particleIndex, comp) += density;        
+    for (int comp = startComp; comp <= endComp; comp++){
+      rho(particleIndex, comp) += a_strength[comp] * invVol;
+    }
   }
   else{
     switch (a_depositionType){
     case DepositionType::NGP:
       {
-	rho(particleIndex, comp) += density;        	
+	for (int comp = startComp; comp <= endComp; comp++){
+	  rho(particleIndex, comp) += a_strength[comp] * invVol;
+	}
+	
 	break;
       }
     case DepositionType::CIC:
@@ -420,7 +446,7 @@ void EBParticleMesh::depositParticle2(EBCellFAB&           a_rho,
 
 	// This is the kernel for a CIC particle with with 2*dx
 	auto cic2Kernel = [&](const IntVect& iv) -> void {
-	  Real weight = density;
+	  Real weight = invVol;
 	  
 	  // L is the distance between the grid cell and the particle. 
 	  const RealVect L = particleDisplacement(iv);
@@ -434,8 +460,10 @@ void EBParticleMesh::depositParticle2(EBCellFAB&           a_rho,
 	      weight *= 0.5;
 	    }
 	  }
-	  
-	  rho(iv, comp) += weight;	    	  
+
+	  for (int comp = startComp; comp <= endComp; comp++){
+	    rho(iv, comp) += a_strength[comp] * weight;
+	  }	  
 	};
 
 	BoxLoops::loop(cic2Box, cic2Kernel);
@@ -456,15 +484,18 @@ void EBParticleMesh::depositParticle4(EBCellFAB&           a_rho,
 				      const RealVect&      a_probLo,
 				      const RealVect&      a_dx,
 				      const RealVect&      a_position,
-				      const Real&          a_mass,
+				      const Real*          a_strength,
+				      const Interval       a_components,				      
 				      const DepositionType a_depositionType,
 				      const bool           a_forceIrregNGP) const {
   CH_TIME("EBParticleMesh::depositParticle2");
-  
-  CH_assert(a_rho.nComp() == 1);
 
-  constexpr int comp  = 0;
-  constexpr int nComp = 1;    
+  const int startComp = a_components.begin();
+  const int endComp   = a_components.end  ();
+  const int numComp   = a_components.size ();
+  
+  CH_assert(a_rho.nComp() >= endComp - 1);      
+  
   
   // TLDR: This performs regular deposition as if the particle lives on regular mesh data. If the cell is irregular we can use a class option
   //       to enforce NGP deposition in those cells. If the particle lives in a multi-valued cell I have no idea how to handle deposition.
@@ -484,9 +515,9 @@ void EBParticleMesh::depositParticle4(EBCellFAB&           a_rho,
   // Assertion -- particle must live on this patch. 
   CH_assert(m_region.contains(particleIndex));
 
-  // Factors needed for the kernels. density is the, well, density = mass/volume. The little lambda will give us the distance
+  // Factors needed for the kernels. The little lambda will give us the distance
   // between the cell we're looking at and the particle position (in units of the grid resolution)
-  const Real density = a_mass/std::pow(a_dx[0], SpaceDim);
+  const Real invVol = 1.0/std::pow(a_dx[0], SpaceDim);
 
   auto particleDisplacement = [&] (const IntVect& iv) -> RealVect {
     return (a_probLo + (RealVect(iv) + 0.5*RealVect::Unit)*a_dx - a_position)/a_dx;
@@ -497,13 +528,17 @@ void EBParticleMesh::depositParticle4(EBCellFAB&           a_rho,
 
   // Force NGP in cut-cells if we want. 
   if(m_ebisbox.isIrregular(particleIndex) && a_forceIrregNGP){
-    rho(particleIndex, comp) += density;        
+    for (int comp = startComp; comp >= endComp; comp++){
+      rho(particleIndex, comp) += a_strength[comp] * invVol;
+    }
   }
   else{
     switch (a_depositionType){
     case DepositionType::NGP:
       {
-	rho(particleIndex, comp) += density;        	
+	for (int comp = startComp; comp >= endComp; comp++){
+	  rho(particleIndex, comp) += a_strength[comp] * invVol;
+	}	
 	break;
       }
     case DepositionType::CIC:
@@ -515,7 +550,7 @@ void EBParticleMesh::depositParticle4(EBCellFAB&           a_rho,
 
 	// This is the kernel for a CIC particle with with 4*dx
 	auto cic4Kernel = [&](const IntVect& iv) -> void {
-	  Real weight = density;
+	  Real weight = invVol;
 	  
 	  // L is the distance between the grid cell and the particle -- in units of dx. 
 	  const RealVect L = particleDisplacement(iv);
@@ -529,8 +564,10 @@ void EBParticleMesh::depositParticle4(EBCellFAB&           a_rho,
 	      weight *= 0.25;
 	    }
 	  }
-	  
-	  rho(iv, comp) += weight;	    	  
+
+	  for (int comp = startComp; comp >= endComp; comp++){
+	    rho(iv, comp) += a_strength[comp] * weight;
+	  }		  
 	};
 
 	BoxLoops::loop(cic4Box, cic4Kernel);

@@ -196,7 +196,8 @@ protected:
     @param[in]    a_probLo         Lower-left corner of domain
     @param[in]    a_dx             Grid resolution
     @param[in]    a_position       Particle position
-    @param[in]    a_strength       Mass (or similar quantity) to be deposited. 
+    @param[in]    a_strength       Mass (or similar quantity) to be deposited. Must be of type Real[] (or &Real if single comopnent)
+    @param[in]    a_components     Components to deposit
     @param[in]    a_depositionType Deposition type
     @param[in]    a_forceIrregNGP  Force NGP in cut-cells
   */
@@ -205,7 +206,8 @@ protected:
 		       const RealVect&      a_probLo,
 		       const RealVect&      a_dx,
 		       const RealVect&      a_position,
-		       const Real&          a_strength,
+		       const Real*          a_strength,
+		       const Interval       a_components,
 		       const DepositionType a_depositionType,
 		       const bool           a_forceIrregNGP) const;
 
@@ -215,7 +217,8 @@ protected:
     @param[in]    a_probLo         Lower-left corner of domain
     @param[in]    a_dx             Grid resolution
     @param[in]    a_position       Particle position
-    @param[in]    a_strength       Mass (or similar quantity) to be deposited. 
+    @param[in]    a_strength       Mass (or similar quantity) to be deposited. Must be of type Real[] (or &Real if single comopnent)
+    @param[in]    a_components     Components to deposit
     @param[in]    a_depositionType Deposition type
     @param[in]    a_forceIrregNGP  Force NGP in cut-cells
   */
@@ -224,7 +227,8 @@ protected:
 			const RealVect&      a_probLo,
 			const RealVect&      a_dx,
 			const RealVect&      a_position,
-			const Real&          a_strength,
+			const Real*          a_strength,
+			const Interval       a_components,
 			const DepositionType a_depositionType,						
 			const bool           a_forceIrregNGP) const;
 
@@ -234,7 +238,8 @@ protected:
     @param[in]    a_probLo         Lower-left corner of domain
     @param[in]    a_dx             Grid resolution
     @param[in]    a_position       Particle position
-    @param[in]    a_strength       Mass (or similar quantity) to be deposited. 
+    @param[in]    a_strength       Mass (or similar quantity) to be deposited. Must be of type Real[] (or &Real if single comopnent)
+    @param[in]    a_components     Components to deposit
     @param[in]    a_depositionType Deposition type
     @param[in]    a_forceIrregNGP  Force NGP in cut-cells
   */
@@ -243,7 +248,8 @@ protected:
 			const RealVect&      a_probLo,
 			const RealVect&      a_dx,
 			const RealVect&      a_position,
-			const Real&          a_strength,
+			const Real*          a_strength,
+			const Interval       a_components,			
 			const DepositionType a_depositionType,			
 			const bool           a_forceIrregNGP) const;
 
