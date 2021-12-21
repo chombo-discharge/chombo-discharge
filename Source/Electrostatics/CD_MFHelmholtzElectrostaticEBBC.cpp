@@ -12,6 +12,7 @@
 // Our includes
 #include <CD_MFHelmholtzElectrostaticEBBC.H>
 #include <CD_LeastSquares.H>
+#include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
 MFHelmholtzElectrostaticEBBC::MFHelmholtzElectrostaticEBBC(const int a_phase, const ElectrostaticEbBc& a_electrostaticBCs, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC)
