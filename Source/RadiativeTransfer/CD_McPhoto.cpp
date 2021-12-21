@@ -29,6 +29,7 @@
 #include <CD_DataOps.H>
 #include <CD_Units.H>
 #include <CD_ParticleOps.H>
+#include <CD_Random.H>
 #include <CD_NamespaceHeader.H>
 
 #define MC_PHOTO_DEBUG 0
@@ -141,16 +142,8 @@ void McPhoto::parseRNG(){
 
   // Seed the RNG
   ParmParse pp(m_className.c_str());
-  pp.get("seed", m_seed);
-  pp.get("poiss_exp_swap", m_poissonExponentialSwapLimit);
-  if(m_seed < 0) {
-    m_seed = std::chrono::system_clock::now().time_since_epoch().count();
-  }
-  m_seed += procID();
   
-  m_rng = std::mt19937_64(m_seed);
-
-  m_udist11 = std::uniform_real_distribution<Real>(-1.0, 1.0);
+  pp.get("poiss_exp_swap", m_poissonExponentialSwapLimit);
 }
 
 void McPhoto::parseInstantaneous(){
@@ -680,11 +673,11 @@ int McPhoto::getNumberOfPlotVariables() const{
 int McPhoto::randomPoisson(const Real a_mean){
   if(a_mean < m_poissonExponentialSwapLimit){
     std::poisson_distribution<int> pdist(a_mean);
-    return pdist(m_rng);
+    return Random::get(pdist);
   }
   else {
     std::normal_distribution<Real> ndist(a_mean, sqrt(a_mean));
-    return (int) round(ndist(m_rng));
+    return (int) round(Random::get(ndist));
   }
 }
 
@@ -696,52 +689,8 @@ int McPhoto::domainBcMap(const int a_dir, const Side::LoHiSide a_side) {
 
 Real McPhoto::randomExponential(const Real a_mean){
   std::exponential_distribution<Real> dist(a_mean);
-  return dist(m_rng);
+  return Random::get(dist);
 }
-
-RealVect McPhoto::randomDirection(){
-#if CH_SPACEDIM == 2
-  return randomDirection2D();
-#else
-  return randomDirection3D();
-#endif
-}
-
-#if CH_SPACEDIM == 2
-RealVect McPhoto::randomDirection2D(){
-  const Real EPS = 1.E-8;
-  Real x1 = 2.0;
-  Real x2 = 2.0;
-  Real r  = x1*x1 + x2*x2;
-  while(r >= 1.0 || r < EPS){
-    x1 = (m_udist11)(m_rng);
-    x2 = (m_udist11)(m_rng);
-    r  = x1*x1 + x2*x2;
-  }
-
-  return RealVect(x1,x2)/sqrt(r);
-}
-#endif
-
-#if CH_SPACEDIM==3
-RealVect McPhoto::randomDirection3D(){
-  const Real EPS = 1.E-8;
-  Real x1 = 2.0;
-  Real x2 = 2.0;
-  Real r  = x1*x1 + x2*x2;
-  while(r >= 1.0 || r < EPS){
-    x1 = (m_udist11)(m_rng);
-    x2 = (m_udist11)(m_rng);
-    r  = x1*x1 + x2*x2;
-  }
-
-  const Real x = 2*x1*sqrt(1-r);
-  const Real y = 2*x2*sqrt(1-r);
-  const Real z = 1 - 2*r;
-
-  return RealVect(x,y,z);
-}
-#endif
 
 int McPhoto::getPVRBuffer() const {
   CH_TIME("McPhoto::getPVRBuffer");
@@ -852,7 +801,7 @@ void McPhoto::generatePhotons(ParticleContainer<Photon>& a_photons, const EBAMRC
 	      const Real weight     = (1.0*numPhysPhotons)/numComputationalPhotons; 
 	      
 	      for (int i = 0; i < numComputationalPhotons; i++){
-		const RealVect v = Units::c*this->randomDirection();
+		const RealVect v = Units::c*Random::getDirection();
 		particles.append(Photon(pos, v, m_RtSpecies->getAbsorptionCoefficient(pos), weight));
 	      }
 	    }
@@ -874,7 +823,7 @@ void McPhoto::generatePhotons(ParticleContainer<Photon>& a_photons, const EBAMRC
 
 	    // Generate computational Photons 
 	    for (int i = 0; i < numComputationalPhotons; i++){
-	      const RealVect v = Units::c*this->randomDirection();
+	      const RealVect v = Units::c*Random::getDirection();
 	      particles.append(Photon(pos, v, m_RtSpecies->getAbsorptionCoefficient(pos), weight));
 	    }
 	  }
