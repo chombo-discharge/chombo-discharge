@@ -20,6 +20,7 @@
 #include <CD_EBCoarseFineParticleMeshF_F.H>
 #include <CD_EBAddOp.H>
 #include <CD_DataOps.H>
+#include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
 constexpr int EBCoarseFineParticleMesh::m_comp;
@@ -187,11 +188,14 @@ void EBCoarseFineParticleMesh::addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coa
     
     const Box fineBox = fineDataReg.box() & domainFine;
     for (int comp = 0; comp < m_nComp; comp++){
-      FORT_AVERAGE_GHOSTS(CHF_FRA1(coFiDataReg, comp),
-			  CHF_CONST_FRA1(fineDataReg, comp),
-			  CHF_BOX(fineBox),
-			  CHF_CONST_INT(m_refRat),
-			  CHF_CONST_REAL(factor));
+
+      auto regularKernel = [&](const IntVect& ivFine) -> void {
+	const IntVect ivCoar = coarsen(ivFine, m_refRat);
+
+	coFiDataReg(ivCoar, comp) += fineDataReg(ivFine, comp) * factor;
+      };
+
+      BoxLoops::loop(fineBox, regularKernel);
     }
 
     // Now do the irregular cells. First reset the coarse cell values and then increment with the fine-grid values.
@@ -277,8 +281,8 @@ void EBCoarseFineParticleMesh::addInvalidCoarseToFine(LevelData<EBCellFAB>& a_fi
   for (DataIterator dit(dblCoar); dit.ok(); ++dit){
     EBCellFAB&       fiCoData   = m_bufferFiCo[dit()];
     const EBCellFAB& coarData   = a_coarData  [dit()];
-    const Box        computeBox = dblCoar     [dit()];
-    const Box        refinedBox = Box(IntVect::Zero, m_refRat*IntVect::Unit);
+    const Box        coarBox    = dblCoar     [dit()];
+
 
     fiCoData.setVal(0.0);
 
@@ -286,12 +290,23 @@ void EBCoarseFineParticleMesh::addInvalidCoarseToFine(LevelData<EBCellFAB>& a_fi
     BaseFab<Real>&       fiCoDataReg = fiCoData.getSingleValuedFAB();
     const BaseFab<Real>& coarDataReg = coarData.getSingleValuedFAB();
 
-    FORT_PIECEWISE_CONSTANT_INTERP(CHF_FRA1      (fiCoDataReg, m_comp),
-				   CHF_CONST_FRA1(coarDataReg, m_comp),
-				   CHF_CONST_INT (m_refRat),
-				   CHF_BOX       (refinedBox),
-				   CHF_BOX       (computeBox));
+    // This is the regular kernel -- it sets the fine data equal to the coarse data. 
+    auto regularKernel = [&] (const IntVect& ivCoar) -> void {
 
+      // May seem weird, but we are running nested box loops here. The second kernel runs over the refined box Box(IntVect::Zero, m_refRat*IntVect::Unit),
+      // which gives the number of fine-grid cells that lie on top of a coarse grid cell. So, we are iterating over that box and figuring out which cells in 
+      // that box correspond to which fine cells (we just need to increment by m_refRat * ivCoar). 
+      auto fineKernel = [&](const IntVect& iv) {
+	const IntVect ivFine = m_refRat * ivCoar + iv;
+
+	fiCoDataReg(ivFine, m_comp) = coarDataReg(ivCoar, m_comp);	
+      };
+
+      BoxLoops::loop(Box(IntVect::Zero, m_refRat*IntVect::Unit), fineKernel);
+    };
+
+    // Execute kernel over the entire coarse-grid patch. 
+    BoxLoops::loop(coarBox, regularKernel);
 
     // Now do the irregular cells. Here, we loop over all the coarse cells (including ghosts) and set the value in the
     // fine cells to be the same as the value in the underlying coarse cell. 
