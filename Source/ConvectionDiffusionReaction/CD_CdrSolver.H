@@ -796,11 +796,6 @@ protected:
   bool m_plotNumbers;
 
   /*!
-    @brief RNG engine
-  */
-  std::mt19937_64 m_rng;
-
-  /*!
     @brief RNG seed
   */
   int m_seed;

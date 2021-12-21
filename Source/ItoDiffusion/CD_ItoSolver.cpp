@@ -23,6 +23,7 @@
 #include <CD_DataOps.H>
 #include <CD_ParticleOps.H>
 #include <CD_BoxLoops.H>
+#include <CD_Random.H>
 #include <CD_NamespaceHeader.H>
 
 constexpr int ItoSolver::m_comp;
@@ -128,28 +129,10 @@ void ItoSolver::parseRNG() {
 
   // Seed the RNG
   ParmParse pp(m_className.c_str());
-  
-  pp.get("seed",       m_rngSeed);
+
   pp.get("normal_max", m_normalDistributionTruncation);
 
-  // Use a random seed if the input was < 0.
-  if(m_rngSeed < 0) { 
-    m_rngSeed = std::chrono::system_clock::now().time_since_epoch().count();
-  }
-
-#ifdef CH_MPI
-  m_rngSeed += procID();
-#endif
-
-  // Initialize random number generator and distributions
-  constexpr Real zero = 0.0;
-  constexpr Real one  = 1.0;
-  
-  m_rng                   = std::mt19937_64(m_rngSeed);
-  m_uniformDistribution01 = std::uniform_real_distribution<Real>( zero, one       ); // <- Uniform real distribution from [ 0   1]
-  m_uniformDistribution11 = std::uniform_real_distribution<Real>(-one , one       ); // <- Uniform real distribution from [-1, -1]
   m_uniformDistribution0d = std::uniform_int_distribution<int>  ( 0   , SpaceDim-1); // <- Uniform integer distribution from [0, SpaceDim-1]
-  m_normalDistribution01  = std::normal_distribution<Real>      ( zero, one       ); // <- Normal distribution with mean value of zero and standard deviation of one. 
 }
 
 void ItoSolver::parseTruncation() {
@@ -2696,7 +2679,7 @@ void ItoSolver::mergeBVH(List<ItoParticle>& a_particles, const int a_particlesPe
   }
   
   // 2. Build the BVH tree and get the leaves of the tree
-  const int firstDir = (m_directionKD < 0) ? m_uniformDistribution0d(m_rng) : m_directionKD;
+  const int firstDir = (m_directionKD < 0) ? Random::get(m_uniformDistribution0d) : m_directionKD;
   m_mergeTree.define(pointMasses);
   m_mergeTree.buildTree(firstDir, a_particlesPerCell);
 
