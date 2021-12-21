@@ -17,7 +17,6 @@
 
 // Our includes
 #include <CD_EBCoarseFineParticleMesh.H>
-#include <CD_EBCoarseFineParticleMeshF_F.H>
 #include <CD_EBAddOp.H>
 #include <CD_DataOps.H>
 #include <CD_BoxLoops.H>

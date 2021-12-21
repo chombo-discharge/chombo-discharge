@@ -14,7 +14,6 @@
 
 // Our includes
 #include <CD_EBParticleMesh.H>
-#include <CD_EBParticleMeshF_F.H>
 #include <CD_NamespaceHeader.H>
 
 EBParticleMesh::EBParticleMesh(){

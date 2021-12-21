@@ -18,7 +18,6 @@
 // Our includes
 #include <CD_EBParticleMesh.H>
 #include <CD_BoxLoops.H>
-#include <CD_EBParticleMeshF_F.H>
 #include <CD_NamespaceHeader.H>
 
 template <class P, const Real&(P::*particleScalarField)() const>
