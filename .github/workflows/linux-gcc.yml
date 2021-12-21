@@ -39,7 +39,7 @@ jobs:
 
       - name: Copy makefile
         run: |
-          cp $DISCHARGE_HOME/Local/CI/Make.defs.linux-gcc $CHOMBO_HOME/mk/Make.defs.local          
+          cp $DISCHARGE_HOME/Local/GitHub/Make.defs.linux-gcc $CHOMBO_HOME/mk/Make.defs.local          
 
       - name: Build Chombo (2D)
         run: |
@@ -85,7 +85,7 @@ jobs:
 
       - name: Copy makefile
         run: |
-          cp $DISCHARGE_HOME/Local/CI/Make.defs.HDF5.linux-gcc $CHOMBO_HOME/mk/Make.defs.local
+          cp $DISCHARGE_HOME/Local/GitHub/Make.defs.HDF5.linux-gcc $CHOMBO_HOME/mk/Make.defs.local
           
       - name: Build Chombo (2D)
         run: |
@@ -131,7 +131,7 @@ jobs:
 
       - name: Copy makefile
         run: |
-          cp $DISCHARGE_HOME/Local/CI/Make.defs.MPI.linux-gcc $CHOMBO_HOME/mk/Make.defs.local
+          cp $DISCHARGE_HOME/Local/GitHub/Make.defs.MPI.linux-gcc $CHOMBO_HOME/mk/Make.defs.local
           
       - name: Build Chombo (2D)
         run: |
@@ -177,7 +177,7 @@ jobs:
 
       - name: Copy makefile
         run: |
-          cp $DISCHARGE_HOME/Local/CI/Make.defs.MPI.HDF5.linux-gcc $CHOMBO_HOME/mk/Make.defs.local
+          cp $DISCHARGE_HOME/Local/GitHub/Make.defs.MPI.HDF5.linux-gcc $CHOMBO_HOME/mk/Make.defs.local
           
       - name: Build Chombo (2D)
         run: |
