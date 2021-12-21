@@ -20,7 +20,8 @@
 
 // Our includes
 #include <CD_DataOps.H>
-#include <CD_DataOpsF_F.H>
+#include <CD_BoxLoops.H>
+#include <CD_ParallelOps.H>
 #include <CD_NamespaceHeader.H>
 
 void DataOps::averageCellVectorToFaceScalar(EBAMRFluxData&               a_faceData,
@@ -152,29 +153,29 @@ void DataOps::averageCellToFace(LevelData<EBFluxFAB>&       a_faceData,
       EBFaceFAB&     faceData    = a_faceData[dit()][dir];
       BaseFab<Real>& regFaceData = faceData.getSingleValuedFAB();
 
-      // Face-centered box. 
-      Box faceBox = cellBox;
-      faceBox.surroundingNodes(dir);
+      // Face-centered box and irregular region. Note that the irregular kernel only does interior faces. We patch up those later. 
+      const Box faceBox = surroundingNodes(cellBox, dir);
+      FaceIterator faceit(ivsIrreg, ebgraph, dir, FaceStop::SurroundingNoBoundary);
 
       // Do each component. Regular cells are done in Fortran while cut-cell faces 
       for (int comp = 0; comp < numComp; comp++){
-	
-	// Do regular cells in fortran for the faces in faceBox
-	FORT_EBAVECELLTOFACE(CHF_FRA1(      regFaceData, comp),
-			     CHF_CONST_FRA1(regCellData, comp),
-			     CHF_CONST_INT(dir),
-			     CHF_BOX(faceBox));
 
+	// Regular kernel. 
+	auto regularKernel = [&] (const IntVect& iv) -> void {
+	  regFaceData(iv, comp) = 0.5 * ( regCellData(iv, comp) + regCellData(iv - BASISV(dir), comp));
+	};
 
-	// Fix up irregular faces. Note that this only does the internal cut-cell faces. 
-	for (FaceIterator faceit(ivsIrreg, ebgraph, dir, FaceStop::SurroundingNoBoundary); faceit.ok(); ++faceit){
-	  const FaceIndex& face = faceit();
-
+	// Irregular kernel. 
+	auto irregularKernel = [&] (const FaceIndex& face) -> void {
 	  const VolIndex& vofLo = face.getVoF(Side::Lo);
 	  const VolIndex& vofHi = face.getVoF(Side::Hi);
 	  
-	  faceData(face, comp) = 0.5 * (cellData(vofLo, comp) + cellData(vofHi, comp));
-	}
+	  faceData(face, comp) = 0.5 * (cellData(vofLo, comp) + cellData(vofHi, comp));	  
+	};
+
+	// Run the kernels. 
+	BoxLoops::loop(faceBox,  regularKernel);
+	BoxLoops::loop(faceit, irregularKernel);	
       }
 
       // Now fix up domain faces
@@ -245,6 +246,8 @@ void DataOps::averageCellToFace(LevelData<EBFluxFAB>&       a_faceData,
 void DataOps::averageFaceToCell(EBAMRCellData&               a_cellData,
 				const EBAMRFluxData&         a_faceData,
 				const Vector<ProblemDomain>& a_domains){
+  CH_TIME("DataOps::averageFaceToCell(EBAMRCellData, EBAMRFluxData, Vector<ProblemDomain>)");
+  
   for (int lvl = 0; lvl < a_faceData.size(); lvl++){
     DataOps::averageFaceToCell(*a_cellData[lvl], *a_faceData[lvl], a_domains[lvl]);
   }
@@ -253,60 +256,66 @@ void DataOps::averageFaceToCell(EBAMRCellData&               a_cellData,
 void DataOps::averageFaceToCell(LevelData<EBCellFAB>&       a_cellData,
 				const LevelData<EBFluxFAB>& a_fluxData,
 				const ProblemDomain&        a_domain){
-  CH_TIME("DataOps::averageFaceToCell");
+  CH_TIME("DataOps::averageFaceToCell(LD<EBCellFAB>, LD<EBCellFAB>, ProblemDomain)");
   
-  const int nc = a_cellData.nComp();
-  CH_assert(a_fluxData.nComp() == nc);
+  CH_assert(a_fluxData.nComp() == a_cellData.nComp());
+
+  const int numComp = a_cellData.nComp();
 
   for (DataIterator dit = a_cellData.dataIterator(); dit.ok(); ++dit){
-    EBCellFAB& cellData       = a_cellData[dit()];
+    EBCellFAB&       cellData = a_cellData[dit()];
     const EBFluxFAB& fluxData = a_fluxData[dit()];
-    const Box& box            = a_cellData.disjointBoxLayout().get(dit());
+    const EBISBox&   ebisbox  = cellData.getEBISBox();
+    const EBGraph&   ebgraph  = ebisbox.getEBGraph();
 
-    // Irregular cells
-    const EBISBox& ebisbox = cellData.getEBISBox();
-    const EBGraph& ebgraph = ebisbox.getEBGraph();
-    const IntVectSet& ivs  = ebisbox.getIrregIVS(box);
+    // Regions for the kernels. 
+    const Box&        cellBox = a_cellData.disjointBoxLayout()[dit()];
+    const IntVectSet& ivs     = ebisbox.getIrregIVS(cellBox);
+    VoFIterator vofit(ivs, ebgraph);
 
-    // Reset
-    cellData.setVal(0.0);
+    // Component loop. 
+    for (int comp = 0; comp < numComp; comp++){
 
-    // Do regular cells; all components in each direction
-    for (int dir = 0; dir < SpaceDim; dir++){
-      BaseFab<Real>& cellreg       = cellData.getSingleValuedFAB();
-      //      const BaseFab<Real>& facereg = fluxData[dir].getSingleValuedFAB();
-      auto& facereg = fluxData[dir].getSingleValuedFAB();
-      FORT_AVERAGE_FACE_TO_CELL(CHF_FRA(cellreg),
-				CHF_CONST_FRA(facereg),
-				CHF_CONST_INT(dir),
-				CHF_CONST_INT(nc),
-				CHF_BOX(box));
-    }
+      // Hooks for single-valued data. 
+      BaseFab<Real>&       cellreg = cellData.getSingleValuedFAB();
 
-    // Reset irregular cells
-    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
-      for (int ic = 0; ic < nc; ic++){
-	cellData(vof, ic) = 0.0;
-      }
 
-      int nfaces = 0;
-      for (int dir = 0; dir < SpaceDim; dir++){
-	for (SideIterator sit; sit.ok(); ++sit){
-	  Vector<FaceIndex> faces = ebisbox.getFaces(vof, dir, sit());
+      // Regular kernel. We compute phi(cell) = sum(phi(face))/sum(faces). 
+      auto regularKernel = [&](const IntVect& iv) -> void {
+	constexpr Real factor = 1./(2*SpaceDim);
 
-	  nfaces += faces.size();
+	cellreg(iv, comp) = 0.0;
+	for (int dir = 0; dir < SpaceDim; dir++){
+	  const BaseFab<Real>& facereg = fluxData[dir].getSingleValuedFAB();
+	  
+	  cellreg(iv, comp) += factor * (facereg(iv + BASISV(dir), comp) + facereg(iv, comp));
+	}
+      };
 
-	  for (int iface = 0; iface < faces.size(); iface++){
-	    for (int ic = 0; ic < nc; ic++){
-	      cellData(vof, ic) += fluxData[dir](faces[iface],ic);
+      // Irregular kernel. Same as the above except that we need to explicitly get the faces. Note that this is an arithmetic average,
+      // i.e. not weighted by the face area fractions. 
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+	cellData(vof, comp) = 0.0;
+
+	int numFaces = 0;
+	for (int dir = 0; dir < SpaceDim; dir++){
+	  for (SideIterator sit; sit.ok(); ++sit){
+	    const std::vector<FaceIndex>& faces = ebisbox.getFaces(vof, dir, sit()).stdVector();
+
+	    for (const auto& face : faces){
+	      cellData(vof, comp) += fluxData[dir](face, comp);
 	    }
+	    
+	    numFaces += faces.size();
 	  }
 	}
-      }
-      for (int ic = 0; ic < nc; ic++){
-	cellData(vof,ic) *= 1./(nfaces);
-      }
+
+	cellData(vof, comp) *= 1./numFaces;
+      };
+
+      // Run the kernels. 
+      BoxLoops::loop(cellBox,   regularKernel);
+      BoxLoops::loop(vofit,   irregularKernel);
     }
   }
 }
@@ -383,25 +392,33 @@ void DataOps::dotProduct(EBCellFAB& a_result, const EBCellFAB& a_data1, const EB
   BaseFab<Real>&       resultReg = a_result.getSingleValuedFAB();
   const BaseFab<Real>& data1Reg  = a_data1. getSingleValuedFAB();
   const BaseFab<Real>& data2Reg  = a_data2. getSingleValuedFAB();
-  FORT_DOT_PRODUCT(CHF_FRA1     (resultReg, dstComp),
-		   CHF_CONST_FRA(data1Reg),
-		   CHF_CONST_FRA(data2Reg),
-		   CHF_CONST_INT(numComp),
-		   CHF_BOX(a_box));
-    
 
-  // Irregular cells
-  const EBISBox& ebisbox = a_result.getEBISBox();
-  const EBGraph& ebgraph = ebisbox.getEBGraph();
-  const IntVectSet& ivs  = ebisbox.getIrregIVS(a_box);
-  for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-    const VolIndex& vof = vofit();
-    
-    a_result(vof, dstComp) = 0.0;
+  // Kernel region. 
+  const EBISBox&    ebisbox = a_result.getEBISBox();
+  const EBGraph&    ebgraph = ebisbox.getEBGraph();
+  const IntVectSet& ivs     = ebisbox.getIrregIVS(a_box);
+  VoFIterator vofit(ivs, ebgraph);
+
+  // Regular dot product kernel. 
+  auto regularKernel = [&](const IntVect& iv) -> void {
+    resultReg(iv, dstComp) = 0.0;
     for (int comp = 0; comp < numComp; comp++){
-      a_result(vof, dstComp) += a_data1(vof, comp)*a_data2(vof,comp);
+      resultReg(iv, dstComp) += data1Reg(iv, comp) * data2Reg(iv, comp);
     }
-  }
+  };
+
+  // Cut-cell kernel. Same as the above but the data access is obviously different (because of multi-valued cells). 
+  auto irregularKernel = [&](const VolIndex& vof) -> void {
+    a_result(vof, dstComp) = 0.0;
+
+    for (int comp = 0; comp < numComp; comp++){
+      a_result(vof, dstComp) += a_data1(vof, comp) * a_data2(vof, comp);
+    }
+  };
+
+  // Run the kernels. 
+  BoxLoops::loop(a_box,   regularKernel);
+  BoxLoops::loop(vofit, irregularKernel);  
 }
 
 void DataOps::incr(MFAMRCellData& a_lhs, const MFAMRCellData& a_rhs, const Real a_scale){
@@ -723,41 +740,50 @@ void DataOps::divideFallback(LevelData<EBCellFAB>& a_numerator, const LevelData<
     const EBCellFAB& denominator = a_denominator[dit()];
     const EBCellFAB& fallback    = a_fallback   [dit()];
 
+    // Hooks to single-valued data. 
     BaseFab<Real>&       regNumerator   = numerator.  getSingleValuedFAB();
     const BaseFab<Real>& regDenominator = denominator.getSingleValuedFAB();
     const BaseFab<Real>& regFallback    = fallback.   getSingleValuedFAB();
 
-    const Box cellBox = a_numerator.disjointBoxLayout()[dit()];
+    // Kernel regions
+    const Box        cellBox  = a_numerator.disjointBoxLayout()[dit()];
+    const EBISBox&   ebisBox  = numerator.getEBISBox();
+    const EBGraph&   ebGraph  = ebisBox.getEBGraph();
+    const IntVectSet irregIVS = ebisBox.getIrregIVS(cellBox);
+    VoFIterator vofit(irregIVS, ebGraph);
 
-    // I need to clone the input data because the regular kernel will screw with it. 
+    // I need to clone the input data because the regular kernel will screw with it, breaking our cut-cell kernels. 
     EBCellFAB cloneNumerator;
     cloneNumerator.clone(numerator);
 
     // Regular cells    
     for (int comp = 0; comp < a_numerator.nComp(); comp++){
-      FORT_DIVIDE_FALLBACK(CHF_FRA1      (regNumerator,   comp),
-			   CHF_CONST_FRA1(regDenominator, comp),
-			   CHF_CONST_FRA1(regFallback,    comp),
-			   CHF_BOX(cellBox));
 
-    }
-    
-    // Irregular cells
-    const EBISBox&   ebisBox  = numerator.getEBISBox();
-    const EBGraph&   ebGraph  = ebisBox.getEBGraph();
-    const IntVectSet irregIVS = ebisBox.getIrregIVS(cellBox);
-    for (VoFIterator vofit(irregIVS, ebGraph); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
+      // Regular kernel. 
+      auto regularKernel = [&] (const IntVect& iv) -> void {
+	if(std::abs(regDenominator(iv, comp)) > 0.0){
+	  regNumerator(iv, comp) /= regDenominator(iv, comp);
+	}
+	else{
+	  regNumerator(iv, comp) = regFallback(iv, comp);
+	}
+      };
 
-      for (int comp = 0; comp < a_numerator.nComp(); comp++){
-	const Real denom = denominator(vof, comp);
+      // Irregular kernel. Same as the above but recall that we may have multi-valued cells. 
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+	const Real& denom = denominator(vof, comp);
+
 	if(std::abs(denom) > 0.0){
 	  numerator(vof, comp) = cloneNumerator(vof, comp)/denom;
 	}
 	else{
 	  numerator(vof, comp) = fallback(vof, comp);
-	}
-      }
+	}	
+      };
+
+      // Run the kernels. 
+      BoxLoops::loop(cellBox,   regularKernel);
+      BoxLoops::loop(vofit,   irregularKernel);      
     }
   }
 }
@@ -779,16 +805,16 @@ void DataOps::divideFallback(LevelData<EBCellFAB>& a_numerator, const LevelData<
     EBCellFAB&       numerator   = a_numerator  [dit()];
     const EBCellFAB& denominator = a_denominator[dit()];
 
-    // Set a fallback code option. 
-    EBCellFAB fallback;
-    fallback.clone(denominator);
-    fallback.setVal(a_fallback);
-
+    // Hook to single-valued data. 
     BaseFab<Real>&       regNumerator   = numerator.  getSingleValuedFAB();
     const BaseFab<Real>& regDenominator = denominator.getSingleValuedFAB();
-    const BaseFab<Real>& regFallback    = fallback.   getSingleValuedFAB();
 
-    const Box cellBox = a_numerator.disjointBoxLayout()[dit()];
+    // Kernel regions
+    const Box        cellBox  = a_numerator.disjointBoxLayout()[dit()];
+    const EBISBox&   ebisBox  = numerator.getEBISBox();
+    const EBGraph&   ebGraph  = ebisBox.getEBGraph();
+    const IntVectSet irregIVS = ebisBox.getIrregIVS(cellBox);
+    VoFIterator vofit(irregIVS, ebGraph);    
 
     // I need to clone the input data because the regular kernel will screw with it. 
     EBCellFAB cloneNumerator;
@@ -796,29 +822,32 @@ void DataOps::divideFallback(LevelData<EBCellFAB>& a_numerator, const LevelData<
 
     // Regular cells    
     for (int comp = 0; comp < a_numerator.nComp(); comp++){
-      FORT_DIVIDE_FALLBACK(CHF_FRA1      (regNumerator,   comp),
-			   CHF_CONST_FRA1(regDenominator, comp),
-			   CHF_CONST_FRA1(regFallback,    comp),
-			   CHF_BOX(cellBox));
 
-    }
-    
-    // Irregular cells
-    const EBISBox&   ebisBox  = numerator.getEBISBox();
-    const EBGraph&   ebGraph  = ebisBox.getEBGraph();
-    const IntVectSet irregIVS = ebisBox.getIrregIVS(cellBox);
-    for (VoFIterator vofit(irregIVS, ebGraph); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
+      // Regular kernel. 
+      auto regularKernel = [&] (const IntVect& iv) -> void {
+	if(std::abs(regDenominator(iv, comp)) > 0.0){
+	  regNumerator(iv, comp) /= regDenominator(iv, comp);
+	}
+	else{
+	  regNumerator(iv, comp) = a_fallback;
+	}
+      };
 
-      for (int comp = 0; comp < a_numerator.nComp(); comp++){
-	const Real denom = denominator(vof, comp);
+      // Irregular kernel. Same as the above but recall that we may have multi-valued cells. 
+      auto irregularKernel = [&](const VolIndex& vof) -> void {
+	const Real& denom = denominator(vof, comp);
+
 	if(std::abs(denom) > 0.0){
 	  numerator(vof, comp) = cloneNumerator(vof, comp)/denom;
 	}
 	else{
-	  numerator(vof, comp) = fallback(vof, comp);
-	}
-      }
+	  numerator(vof, comp) = a_fallback;
+	}	
+      };      
+
+      // Execute the kernels. 
+      BoxLoops::loop(cellBox,   regularKernel);
+      BoxLoops::loop(vofit,   irregularKernel);      
     }
   }  
 }
@@ -841,20 +870,28 @@ void DataOps::floor(LevelData<EBCellFAB>& a_lhs, const Real a_value){
     const EBGraph& ebgraph = ebisbox.getEBGraph();
     const int      numComp = a_lhs.nComp();
 
-      // Regular cells. This also does ghost cells
+    // Hook to single-valued data. 
     BaseFab<Real>& lhs_reg = lhs.getSingleValuedFAB();
-    FORT_FLOOR(CHF_FRA(lhs_reg),
-	       CHF_CONST_INT(numComp),
-	       CHF_CONST_REAL(a_value),
-	       CHF_BOX(box));
 
-    // Irregular and multivalued cells
-    for (VoFIterator vofit(ebisbox.getIrregIVS(box), ebgraph); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
-      for (int comp = 0; comp < numComp; comp++){
-	const Real value = lhs(vof, comp);
-	lhs(vof, comp) = std::max(value, a_value);
-      }
+    // Irregular kernel region
+    VoFIterator vofit(ebisbox.getIrregIVS(box), ebgraph);
+
+    // Components loop -- we do all components. 
+    for (int comp = 0; comp < numComp; comp++){
+
+      // Regular kernel. 
+      auto regularKernel = [&] (const IntVect& iv) -> void {
+	lhs_reg(iv, comp) = std::max(a_value, lhs_reg(iv, comp));
+      };
+
+      // Irregular kernel
+      auto irregularKernel = [&] (const VolIndex& vof) -> void {
+	lhs(vof, comp) = std::max(a_value, lhs(vof, comp));
+      };
+
+      // Execute the kernels. 
+      BoxLoops::loop(box,     regularKernel);
+      BoxLoops::loop(vofit, irregularKernel);      
     }
   }
 }
@@ -874,13 +911,20 @@ void DataOps::floor(LevelData<BaseIVFAB<Real> >& a_lhs, const Real a_value){
   
   for (DataIterator dit = a_lhs.dataIterator(); dit.ok(); ++dit){
     BaseIVFAB<Real>& lhs = a_lhs[dit()];
-    
-    for (VoFIterator vofit(lhs.getIVS(), lhs.getEBGraph()); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
-      for (int comp = 0; comp < numComp; comp++){
-	const Real value = lhs(vof, comp);
-	lhs(vof, comp) = std::max(value, a_value);
-      }
+
+    // Irregular kernel region.
+    VoFIterator vofit(lhs.getIVS(), lhs.getEBGraph());
+
+    // Do all components. 
+    for (int comp = 0; comp < numComp; comp++){
+
+      // Irregular kernel.
+      auto irregularKernel = [&] (const VolIndex& vof) -> void {
+	lhs(vof, comp) = std::max(a_value, lhs(vof, comp));
+      };
+
+      // Run kernel
+      BoxLoops::loop(vofit, irregularKernel);
     }
   }
 }
@@ -961,20 +1005,29 @@ void DataOps::getMaxMinNorm(Real& a_max, Real& a_min, LevelData<EBCellFAB>& a_da
     coveredMask.setVal(1.0);
     coveredMask.setCoveredCellVal(-1.0, 0);
 
-    const BaseFab<Real>& mask = coveredMask.getSingleValuedFAB();
-    
+    // Hooks to single-valued data
+    const BaseFab<Real>& mask    = coveredMask.getSingleValuedFAB();
     const BaseFab<Real>& dataReg = data.getSingleValuedFAB();
-    FORT_MAX_MIN_NORM(CHF_REAL(a_max),
-		      CHF_REAL(a_min),
-		      CHF_CONST_FRA(dataReg),
-		      CHF_CONST_FRA1(mask, maskComp),
-		      CHF_CONST_INT(numComp),
-		      CHF_BOX(box));
 
-    // Irregular and multivalued cells
-    for (VoFIterator vofit(ebisbox.getIrregIVS(box), ebgraph); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
+    // Irregular kernel region. 
+    VoFIterator vofit(ebisbox.getIrregIVS(box), ebgraph);    
 
+    // Regular kernel. This computes the max/min values from sqrt(x1*x1 + x2*x2 + x3*x3 + ...).
+    auto regularKernel = [&] (const IntVect& iv) -> void {
+      if(mask(iv, maskComp) > 0.0){
+	Real curValue = 0.0;
+	for (int comp = 0; comp < numComp; comp++) {
+	  curValue += dataReg(iv, comp) * dataReg(iv, comp);
+	}
+	curValue = sqrt(curValue);
+	  
+	a_max = std::max(a_max, curValue);
+	a_min = std::min(a_min, curValue);	  
+      }
+    };
+
+    // Irregular kernel. This computes the max/min values from sqrt(x1*x1 + x2*x2 + x3*x3 + ...).    
+    auto irregularKernel = [&] (const VolIndex& vof) -> void {
       Real cur = 0.0;
       for (int comp = 0; comp < numComp; comp++){
 	cur += data(vof, comp) * data(vof, comp);
@@ -982,27 +1035,17 @@ void DataOps::getMaxMinNorm(Real& a_max, Real& a_min, LevelData<EBCellFAB>& a_da
       cur = sqrt(cur);
 
       a_max = std::max(a_max, cur);
-      a_min = std::min(a_min, cur);
-    }
+      a_min = std::min(a_min, cur);      
+    };
+
+    // Run the kernels. 
+    BoxLoops::loop(box,     regularKernel);
+    BoxLoops::loop(vofit, irregularKernel);    
   }
 
-  // Communicate result
-#ifdef CH_MPI
-  int result;
-  Real tmp = 1.;
-  
-  result = MPI_Allreduce(&a_max, &tmp, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
-  if(result != MPI_SUCCESS){
-    MayDay::Error("DataOps::getMaxMinNorm - communication error on norm");
-  }
-  a_max = tmp;
-  
-  result = MPI_Allreduce(&a_min, &tmp, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
-  if(result != MPI_SUCCESS){
-    MayDay::Error("DataOps::getMaxMinNorm - communication error on norm");
-  }
-  a_min = tmp;
-#endif
+  // If running with MPI then we need to reduce the result.
+  a_max = ParallelOps::Max(a_max);
+  a_min = ParallelOps::Min(a_min);  
 }
 
 void DataOps::getMaxMinNorm(Real& a_max, Real& a_min, EBAMRIVData& a_data){
@@ -1049,23 +1092,9 @@ void DataOps::getMaxMinNorm(Real& a_max, Real& a_min, LevelData<BaseIVFAB<Real> 
     }
   }
 
-  // Communicate result
-#ifdef CH_MPI
-  int result;
-  Real tmp = 1.;
-  
-  result = MPI_Allreduce(&a_max, &tmp, 1, MPI_CH_REAL, MPI_MAX, Chombo_MPI::comm);
-  if(result != MPI_SUCCESS){
-    MayDay::Error("DataOps::getMaxMinNorm - communication error on norm");
-  }
-  a_max = tmp;
-  
-  result = MPI_Allreduce(&a_min, &tmp, 1, MPI_CH_REAL, MPI_MIN, Chombo_MPI::comm);
-  if(result != MPI_SUCCESS){
-    MayDay::Error("DataOps::getMaxMinNorm - communication error on norm");
-  }
-  a_min = tmp;
-#endif
+  // If running with MPI then we need to reduce the result.
+  a_max = ParallelOps::Max(a_max);
+  a_min = ParallelOps::Min(a_min);    
 }
 
 void DataOps::invert(EBAMRFluxData& a_data){
@@ -1088,30 +1117,38 @@ void DataOps::invert(LevelData<EBFluxFAB>& a_data){
     const Box box          = a_data.disjointBoxLayout().get(dit());
     const IntVectSet irreg = ebisbox.getIrregIVS(box);
 
-    // Do each dircetion
+    // Get faces oriented in direction dir
     for (int dir = 0; dir < SpaceDim; dir++){
       EBFaceFAB& data = a_data[dit()][dir];
 
-      // Need a copy because regular Fortran loop inverts irregular face cells
+      // Kernel regions. 
+      const Box facebox = surroundingNodes(box, dir);      
+      FaceIterator faceit(irreg, ebgraph, dir, FaceStop::SurroundingWithBoundary);
+
+      // Need a copy because regular kernel inverts face data also. 
       EBFaceFAB cpy(ebisbox, box, dir, numComp);
       cpy.setVal(0.0);
-      cpy += data;
+      cpy += data;      
       
-      // Regular cells
-      Box facebox = box;
-      facebox.surroundingNodes(dir);
-      BaseFab<Real>& data_fab = data.getSingleValuedFAB();
-      FORT_INVERT(CHF_FRA(data_fab),
-		  CHF_CONST_INT(numComp),
-		  CHF_BOX(facebox));
-      
+      // Hook to single-valued data. 
+      BaseFab<Real>& dataReg = data.getSingleValuedFAB();
 
-      // Irregular cells.
-      for (FaceIterator faceit(irreg, ebgraph, dir, FaceStop::SurroundingWithBoundary); faceit.ok(); ++faceit){
-	const FaceIndex& face  = faceit();
-	for (int comp = 0; comp < numComp; comp++){
-	  data(face, comp) = 1./cpy(face, comp);
-	}
+      // Component loop -- we do all components. 
+      for (int comp = 0; comp < numComp; comp++){	
+
+	// Regular kernel. 
+	auto regularKernel = [&] (const IntVect& iv) -> void {
+	  dataReg(iv, comp) = 1./dataReg(iv, comp);
+	};
+
+	// Irregular kernel.
+	auto irregularKernel = [&] (const FaceIndex& face) -> void {
+	  data(face, comp) = 1./data(face, comp);
+	};
+
+	// Run the kernels. 
+	BoxLoops::loop(facebox,   regularKernel);
+	BoxLoops::loop(faceit,  irregularKernel);	
       }
     }
   }
@@ -1832,27 +1869,39 @@ void DataOps::squareRoot(LevelData<EBFluxFAB>& a_lhs){
     
     for (int dir = 0; dir < SpaceDim; dir++){
       EBFaceFAB& lhs         = a_lhs[dit()][dir];
-      BaseFab<Real>& lhs_reg = lhs.getSingleValuedFAB();
 
-      // Face centered box
-      Box facebox = box;
-      facebox.surroundingNodes(dir);
+      // Kernel regions. 
+      const Box         facebox = surroundingNodes(box, dir);
+      const EBISBox& ebisbox = lhs.getEBISBox();      
+      const EBGraph&    ebgraph = ebisbox.getEBGraph();
+      const IntVectSet& ivs     = ebisbox.getIrregIVS(box);
+      FaceIterator faceit(ivs, ebgraph, dir, FaceStop::SurroundingWithBoundary);
+
+      // Need a copy because regular kernel will invert cells also.
+      EBFaceFAB cpy(ebisbox, box, dir, lhs.nComp());
+      cpy.setVal(0.0);
+      cpy += lhs;
+
+      // Hook to single-valued data. 
+      BaseFab<Real>& lhs_reg = lhs.getSingleValuedFAB();      
 
       // All comps
       for (int comp = 0; comp < lhs.nComp(); comp++){
-	FORT_SQUARE_ROOT(CHF_FRA1(lhs_reg, comp),
-			 CHF_CONST_INT(dir),
-			 CHF_BOX(facebox));
 
-	const FaceStop::WhichFaces stop_crit = FaceStop::SurroundingWithBoundary;
-	const EBISBox& ebisbox = lhs.getEBISBox();
-	const EBGraph& ebgraph = ebisbox.getEBGraph();
-	const IntVectSet& ivs  = ebisbox.getIrregIVS(box);
-	
-	for (FaceIterator faceit(ivs, ebgraph, dir, stop_crit); faceit.ok(); ++faceit){
-	  const FaceIndex& face  = faceit();
-	  lhs(face, comp) = sqrt(lhs(face, comp));
-	}
+	// Regular kernel. 
+	auto regularKernel = [&] (const IntVect& iv) -> void {
+	  lhs_reg(iv, comp) = sqrt(lhs_reg(iv, comp));
+	};
+
+	// Irregular kernel. Reaches into the cpy data holder because the regular kernel will have messed
+	// with the data. 
+	auto irregularKernel = [&] (const FaceIndex& face) -> void {
+	  lhs(face, comp) = sqrt(cpy(face, comp));
+	};
+
+	// Execute the kernels. 
+	BoxLoops::loop(facebox,   regularKernel);
+	BoxLoops::loop(faceit,  irregularKernel);	
       }
     }
   }
@@ -1887,30 +1936,37 @@ void DataOps::vectorLength(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& 
   CH_assert(a_lhs.nComp() == 1);
   CH_assert(a_rhs.nComp() == SpaceDim);
 
+  // Component in a_lhs that put the data into. 
   constexpr int comp = 0;
 
-  const EBISBox& ebisbox = a_lhs.getEBISBox();
-
   // Mask for skipping computation on covered cells
+  const EBISBox& ebisbox = a_lhs.getEBISBox();  
   EBCellFAB coveredMask(ebisbox, a_box, 1);
   coveredMask.setVal(1.0);
   coveredMask.setCoveredCellVal(-1.0, 0);
+
+  // Kernel regions
+  VoFIterator vofit(ebisbox.getIrregIVS(a_box), ebisbox.getEBGraph());
   
-  // Regular cells
+  // Hooks to single-valued data. 
   BaseFab<Real>& lhsReg       = a_lhs.getSingleValuedFAB();
   const BaseFab<Real>& rhsReg = a_rhs.getSingleValuedFAB();
   const BaseFab<Real>& mask    = coveredMask.getSingleValuedFAB();
 
-  FORT_VECTOR_LENGTH(CHF_FRA1(lhsReg, comp),
-		     CHF_CONST_FRA(rhsReg),
-		     CHF_CONST_FRA1(mask,comp),
-		     CHF_BOX(a_box));
+  auto regularKernel = [&] (const IntVect& iv) -> void {
+    lhsReg(iv, comp) = 0.0;
 
+    if(mask(iv, comp) > 0.0){
+      for (int dir = 0; dir < SpaceDim; dir++){
+	lhsReg(iv, comp) += rhsReg(iv, dir) * rhsReg(iv, dir);
+      }
 
-  // Irregular cells and multivalued cells
-  for (VoFIterator vofit(ebisbox.getIrregIVS(a_box), ebisbox.getEBGraph()); vofit.ok(); ++vofit){
-    const VolIndex& vof = vofit();
+      lhsReg(iv, comp) = sqrt(lhsReg(iv, comp));
+    }
+  };
 
+  // Irregular kernel. Same as the above. 
+  auto irregularKernel = [&] (const VolIndex& vof) -> void {
     a_lhs(vof, comp) = 0.;
 
     for (int i = 0; i < SpaceDim; i++){
@@ -1918,7 +1974,11 @@ void DataOps::vectorLength(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& 
     }
 
     a_lhs(vof, comp) = sqrt(a_lhs(vof, comp));
-  }
+  };
+
+  // Run the kernels
+  BoxLoops::loop(a_box,   regularKernel);
+  BoxLoops::loop(vofit, irregularKernel);  
 }
 
 void DataOps::vectorLength2(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs){
@@ -1946,40 +2006,49 @@ void DataOps::vectorLength2(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellF
 
 void DataOps::vectorLength2(EBCellFAB& a_lhs, const EBCellFAB& a_rhs, const Box& a_box){
   CH_TIME("DataOps::vectorLength2(EBCellFAB)");
-  
+
   CH_assert(a_lhs.nComp() == 1);
   CH_assert(a_rhs.nComp() == SpaceDim);
 
-  const int comp = 0;
-
-  const EBISBox& ebisbox = a_lhs.getEBISBox();
+  // Component in a_lhs that put the data into. 
+  constexpr int comp = 0;
 
   // Mask for skipping computation on covered cells
+  const EBISBox& ebisbox = a_lhs.getEBISBox();  
   EBCellFAB coveredMask(ebisbox, a_box, 1);
   coveredMask.setVal(1.0);
   coveredMask.setCoveredCellVal(-1.0, 0);
+
+  // Kernel regions
+  VoFIterator vofit(ebisbox.getIrregIVS(a_box), ebisbox.getEBGraph());
   
-  // Regular cells
+  // Hooks to single-valued data. 
   BaseFab<Real>& lhsReg       = a_lhs.getSingleValuedFAB();
   const BaseFab<Real>& rhsReg = a_rhs.getSingleValuedFAB();
   const BaseFab<Real>& mask    = coveredMask.getSingleValuedFAB();
 
-  FORT_VECTOR_LENGTH2(CHF_FRA1(lhsReg, comp),
-		      CHF_CONST_FRA(rhsReg),
-		      CHF_CONST_FRA1(mask,comp),
-		      CHF_BOX(a_box));
+  auto regularKernel = [&] (const IntVect& iv) -> void {
+    lhsReg(iv, comp) = 0.0;
 
+    if(mask(iv, comp) > 0.0){
+      for (int dir = 0; dir < SpaceDim; dir++){
+	lhsReg(iv, comp) += rhsReg(iv, dir) * rhsReg(iv, dir);
+      }
+    }
+  };
 
-  // Irregular cells and multivalued cells
-  for (VoFIterator vofit(ebisbox.getIrregIVS(a_box), ebisbox.getEBGraph()); vofit.ok(); ++vofit){
-    const VolIndex& vof = vofit();
-
+  // Irregular kernel. Same as the above. 
+  auto irregularKernel = [&] (const VolIndex& vof) -> void {
     a_lhs(vof, comp) = 0.;
 
     for (int i = 0; i < SpaceDim; i++){
       a_lhs(vof, comp) += a_rhs(vof, i)*a_rhs(vof, i);
     }
-  }
+  };
+
+  // Run the kernels
+  BoxLoops::loop(a_box,   regularKernel);
+  BoxLoops::loop(vofit, irregularKernel);    
 }
 
 void DataOps::computeMinValidBox(RealVect& a_lo, RealVect& a_hi, const RealVect a_normal, const RealVect a_centroid){
@@ -2065,59 +2134,5 @@ void DataOps::shiftCorners(Vector<RealVect>& a_corners, const RealVect& a_distan
     a_corners[i] += a_distance;
   }
 }
-
-void DataOps::filterSmooth(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const int a_stride, const Real a_alpha){
-  CH_TIME("DataOps::filterSmooth(EBAMRCellData)");
-  
-  for (int lvl = 0; lvl < a_lhs.size(); lvl++){
-    DataOps::filterSmooth(*a_lhs[lvl], *a_rhs[lvl], a_stride, a_alpha);
-  }
-}
-
-void DataOps::filterSmooth(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const int a_stride, const Real a_alpha){
-  CH_TIME("DataOps::filterSmooth(LD<EBCellFAB>)");
-  
-  const DisjointBoxLayout& dbl = a_lhs.disjointBoxLayout();
-  const IntVect ghostVec       = a_lhs.ghostVect();
-  const int ncomp              = a_lhs.nComp();
-
-  // Dummy check. 
-  for (int dir = 0; dir < SpaceDim; dir++){
-    if(ghostVec[dir] < a_stride) MayDay::Error("DataOps::filterSmooth - stride is too large!");
-  }
-
-  for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
-    EBCellFAB& lhs       = a_lhs[dit()];
-    const EBCellFAB& rhs = a_rhs[dit()];
-    
-    const Box box  = dbl[dit()];
-
-
-    BaseFab<Real>&       lhs_fab = lhs.getSingleValuedFAB();
-    const BaseFab<Real>& rhs_fab = rhs.getSingleValuedFAB();
-
-    for (int icomp = 0; icomp < ncomp; icomp++){
-      FORT_FILTER_SMOOTH(CHF_FRA1(lhs_fab, icomp),
-			 CHF_CONST_FRA1(rhs_fab, icomp),
-			 CHF_CONST_INT(a_stride),
-			 CHF_CONST_REAL(a_alpha),
-			 CHF_BOX(box));
-    }
-
-    // No filtering of irregular cells. 
-    const EBISBox& ebisbox = lhs.getEBISBox();
-    const EBGraph& ebgraph = ebisbox.getEBGraph();
-    const IntVectSet ivs   = ebisbox.getIrregIVS(box);
-
-    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
-
-      for (int icomp = 0; icomp < ncomp; icomp++){
-	lhs(vof, icomp) = rhs(vof, icomp);
-      }
-    }
-  }
-}
-
 
 #include <CD_NamespaceFooter.H>

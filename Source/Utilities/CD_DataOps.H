@@ -1061,24 +1061,6 @@ public:
   */
   static void shiftCorners(Vector<RealVect>& a_corners, const RealVect& a_distance);
 
-  /*!
-    @brief Apply a smoother filter to data. Relic of an ancient past and I don't even remember what it does. Soon to be deprecated.
-    @param[out] a_lhs    Smoothed data
-    @param[in]  a_rhs    Non-smoothed data
-    @param[in]  a_stride Smoothing distance (number of cells)
-    @param[in]  a_alpha  I don't even remember -- check DataOpsF.ChF to look into it. 
-  */
-  static void filterSmooth(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const int a_stride, const Real a_alpha);
-
-  /*!
-    @brief Apply a smoother filter to data. Relic of an ancient past and I don't even remember what it does. Soon to be deprecated.
-    @param[out] a_lhs    Smoothed data
-    @param[in]  a_rhs    Non-smoothed data
-    @param[in]  a_stride Smoothing distance (number of cells)
-    @param[in]  a_alpha  I don't even remember -- check DataOpsF.ChF to look into it. 
-  */  
-  static void filterSmooth(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const int a_stride, const Real a_alpha);
-
 };
 
 #include <CD_NamespaceFooter.H>
