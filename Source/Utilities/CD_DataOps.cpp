@@ -186,30 +186,26 @@ void DataOps::averageCellToFace(LevelData<EBFluxFAB>&       a_faceData,
 	
 	if (!a_domain.contains(outsideBox)){
 
-	  // This is a box which is the first strip of cells on the inside of the domain. 
+	  // Define kernel regions. This is a box which is the first strip of cells on the inside of the domain. 
 	  const Box insideBox = adjCellBox(cellBox, dir, sit(), -1);
+	  FaceIterator faceit(IntVectSet(insideBox), ebgraph, dir, FaceStop::AllBoundaryOnly);
 
 	  // Go through cells in that box and set the covered faces to something reasonable. 
-	  for (BoxIterator bit(insideBox); bit.ok(); ++bit){
-	    const IntVect ivCell = bit();
-
+	  auto regularKernel = [&] (const IntVect& iv) -> void {
 	    // Find face index corresponding to cell index. 
-	    IntVect ivFace = ivCell;
+	    IntVect ivFace = iv;
 	    if(sit() == Side::Hi){
 	      ivFace.shift(BASISV(dir));
 	    }
 
 	    // Put reasonable values in face at domain boundaries.
 	    for (int comp = 0; comp < numComp; comp++){
-	      regFaceData(ivFace, comp) = regCellData(ivCell, comp);
+	      regFaceData(ivFace, comp) = regCellData(iv, comp);
 	    }
-	  }
+	  };
 
-	  // Next, go through cut-cell faces on the domain boundaries.
-	  const IntVectSet boundaryIVS(insideBox);
-	  for (FaceIterator faceIt(boundaryIVS, ebgraph, dir, FaceStop::AllBoundaryOnly); faceIt.ok(); ++faceIt){
-	    const FaceIndex& face = faceIt();
-
+	  // Irregular kernel.
+	  auto irregularKernel = [&] (const FaceIndex& face) -> void {
 	    // Get the vof just inside the domain on this face. 
 	    const VolIndex& vof = face.getVoF(flip(sit()));
 
@@ -236,7 +232,11 @@ void DataOps::averageCellToFace(LevelData<EBFluxFAB>&       a_faceData,
 		faceData(face, comp) = 0.5*(3.0*valClose - valFar);
 	      }
 	    }
-	  }
+	  };
+
+	  // Execute the kernels. 
+	  BoxLoops::loop(insideBox,   regularKernel);
+	  BoxLoops::loop(faceit,    irregularKernel);	  	  
 	}
       }
     }
@@ -1440,7 +1440,8 @@ void DataOps::setCoveredValue(LevelData<EBCellFAB>& a_lhs, const Real a_value) {
 }
 
 void DataOps::setInvalidValue(EBAMRCellData& a_lhs, const Vector<int>& a_refRat, const Real a_value) {
-
+  CH_TIME("DataOps::setInvalidValud(EBAMRCellData, Vector<int>, Real)");
+  
   const int finestLevel = a_lhs.size() - 1;
 
   for (int lvl = finestLevel; lvl > 0; lvl--){
@@ -1467,22 +1468,31 @@ void DataOps::setInvalidValue(EBAMRCellData& a_lhs, const Vector<int>& a_refRat,
 
 	if(!overlapBox.isEmpty()){
 
-	  // Regular and covered cells.
+	  // Irregular kernel region. 
+	  VoFIterator vofit(IntVectSet(overlapBox), ebGraph);
+
+	  // Regular and covered cells' kernel. 
 	  BaseFab<Real>& coarFAB = coarData.getSingleValuedFAB();
-	  for (BoxIterator bit(overlapBox); bit.ok(); ++bit){
-	    const IntVect ivCoar = bit();
 
-	    for (int comp = 0; comp < nComp; comp++){
-	      coarFAB(ivCoar, comp) = a_value;
-	    }
-	  }
+	  // Do all components. 
+	  for (int comp = 0; comp < nComp; comp++){
 
-	  // Irregular cells. 
-	  for (VoFIterator vofit(IntVectSet(overlapBox), ebGraph); vofit.ok(); ++vofit){
-	    for (int comp = 0; comp < nComp; comp++){
-	      coarData(vofit(), comp) = a_value;
-	    }
-	  }
+	    // Kernel called for all cells. 
+	    auto regularKernel = [&](const IntVect& iv) -> void {
+	      coarFAB(iv, comp) = a_value;
+	    };
+
+	    // Kernel called for irregular cells. 
+	    auto irregularKernel = [&] (const VolIndex& vof) -> void {
+	      for (int comp = 0; comp < nComp; comp++){
+		coarData(vof, comp) = a_value;
+	      }
+	    };
+
+	    // Execute kernels. 
+	    BoxLoops::loop(overlapBox,   regularKernel);
+	    BoxLoops::loop(vofit,      irregularKernel);
+	  }	  
 	}
       }
     }
