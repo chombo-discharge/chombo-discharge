@@ -14,6 +14,7 @@
 
 // Our includes
 #include <CD_MFHelmholtzNeumannEBBC.H>
+#include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
 MFHelmholtzNeumannEBBC::MFHelmholtzNeumannEBBC(const int a_phase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC) : MFHelmholtzEBBC(a_phase, a_jumpBC) {
@@ -85,9 +86,8 @@ void MFHelmholtzNeumannEBBC::applyEBFluxSinglePhase(VoFIterator&       a_singleP
   // TLDR: For Neumann, we want to add the flux beta*bco*area*(dphi/dn)/dx where the
   //       dx comes from the fact that the term we are computing will be added to kappa*div(F)
   if(!a_homogeneousPhysBC){  
-    for (a_singlePhaseVofs.reset(); a_singlePhaseVofs.ok(); ++a_singlePhaseVofs){
-      const VolIndex& vof = a_singlePhaseVofs();
 
+    auto kernel = [&] (const VolIndex& vof) -> void {
       Real value;
       if(m_useConstant){
 	value = m_constantDphiDn;
@@ -105,7 +105,9 @@ void MFHelmholtzNeumannEBBC::applyEBFluxSinglePhase(VoFIterator&       a_singleP
       const Real kappaDivF   = a_beta*B*value*areaFrac/m_dx;
   
       a_Lphi(vof, m_comp) += kappaDivF;
-    }
+    };
+
+    BoxLoops::loop(a_singlePhaseVofs, kernel);
   }
   
   return;

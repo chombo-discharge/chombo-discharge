@@ -66,8 +66,7 @@ void MFHelmholtzElectrostaticEBBC::defineSinglePhase() {
 
     VoFIterator& singlePhaseVofs = m_jumpBC->getSinglePhaseVofs(m_phase, dit());
 
-    for (singlePhaseVofs.reset(); singlePhaseVofs.ok(); ++singlePhaseVofs){
-      const VolIndex& vof = singlePhaseVofs();
+    auto kernel = [&] (const VolIndex& vof) -> void {
       const Real areaFrac = ebisbox.bndryArea(vof);
       const Real B        = Bcoef(vof, m_comp);
 
@@ -112,7 +111,9 @@ void MFHelmholtzElectrostaticEBBC::defineSinglePhase() {
 	weights (vof, m_comp) = 0.0;
 	stencils(vof, m_comp).clear();
       }
-    }
+    };
+
+    BoxLoops::loop(singlePhaseVofs, kernel);
   }
 }
 
@@ -129,14 +130,15 @@ void MFHelmholtzElectrostaticEBBC::applyEBFluxSinglePhase(VoFIterator&       a_s
 
   // Do single phase cells
   if(!a_homogeneousPhysBC){  
-    for(a_singlePhaseVofs.reset(); a_singlePhaseVofs.ok(); ++a_singlePhaseVofs){
-      const VolIndex& vof  = a_singlePhaseVofs();
+    auto kernel = [&] (const VolIndex& vof) -> void {
       
       const RealVect pos   = this->getBoundaryPosition(vof, a_dit);      
       const Real     value = this->getElectrodePotential(pos);      
 
       a_Lphi(vof, m_comp) += a_beta*value*m_boundaryWeights[a_dit](vof, m_comp);
-    }
+    };
+
+    BoxLoops::loop(a_singlePhaseVofs, kernel);    
   }
   
   return;

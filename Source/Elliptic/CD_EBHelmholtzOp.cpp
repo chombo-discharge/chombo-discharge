@@ -300,9 +300,9 @@ void EBHelmholtzOp::defineStencils(){
     VoFIterator& vofitStenc          = m_vofIterStenc   [dit()];
     VoFIterator& vofitIrreg          = m_vofIterIrreg   [dit()];
 
-    for (vofitStenc.reset(); vofitStenc.ok(); ++vofitStenc){
-      opStencil(vofitStenc(), m_comp).clear(); 
-    }
+    BoxLoops::loop(vofitStenc, [&](const VolIndex& vof) -> void {
+	opStencil(vof, m_comp).clear();
+      });
     
     for (int dir = 0; dir < SpaceDim; dir++){
       m_centroidFluxStencil[dir][dit()].define(stencIVS, ebgraph, dir, m_nComp);
@@ -338,15 +338,13 @@ void EBHelmholtzOp::defineStencils(){
       BoxLoops::loop(faceIt, kernel);
     }
 
-    // 5. Add contributions to the operator from the EB faces. 
-    for (vofitIrreg.reset(); vofitIrreg.ok(); ++vofitIrreg){
-      const VolIndex& vof = vofitIrreg();
-      opStencil(vof, m_comp) += ebFluxStencil[dit()](vof, m_comp);
-    }
+    // 5. Add contributions to the operator from the EB faces.
+    BoxLoops::loop(vofitIrreg, [&] (const VolIndex& vof) -> void {
+	opStencil(vof, m_comp) += ebFluxStencil[dit()](vof, m_comp);
+      });
 
     // Compute relaxation factor. Adjust the weight with domain boundary faces. 
-    for (vofitStenc.reset(); vofitStenc.ok(); ++vofitStenc){
-      const VolIndex& vof = vofitStenc();
+    auto relaxFactorKernel = [&] (const VolIndex& vof) -> void {
       const IntVect iv    = vof.gridIndex();
 
       VoFStencil& curStencil = opStencil(vof, m_comp);
@@ -368,7 +366,9 @@ void EBHelmholtzOp::defineStencils(){
       }
 
       m_betaDiagWeight[dit()](vof, m_comp) = betaWeight;
-    }
+    };
+
+    BoxLoops::loop(vofitStenc, relaxFactorKernel);
   }
     
   // Compute the alpha-weight and relaxation coefficient. 

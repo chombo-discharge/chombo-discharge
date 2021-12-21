@@ -202,34 +202,35 @@ void EBCoarseFineParticleMesh::addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coa
     VoFIterator& vofitFine = m_vofIterFineGhosts[dit()];
 
     // Set the value in the coarse cell.
-    for (vofitFine.reset(); vofitFine.ok(); ++vofitFine){
-      const VolIndex fineVof = vofitFine();
+    auto setCoarData = [&] (const VolIndex& fineVof) -> void {
       const VolIndex coarVof = ebislFine.coarsen(fineVof, m_refRat, dit());
 
       for (int comp = 0; comp < m_nComp; comp++){
 	coFiData(coarVof, comp) = 0.0;
       }
-    }
+    };
 
     // Add mass from the fine vof to the coarse vof.
-    for (vofitFine.reset(); vofitFine.ok(); ++vofitFine){
-      const VolIndex& fineVof = vofitFine();
+    auto addFineToCoar = [&] (const VolIndex& fineVof) -> void {      
       const VolIndex& coarVof = ebislFine.coarsen(fineVof, m_refRat, dit());
-
       for (int comp = 0; comp < m_nComp; comp++){
 	coFiData(coarVof, comp) += fineData(fineVof, comp);
       }
-    }
+    };
 
     // Scale the value in the coarse cell.
-    for (vofitCoar.reset(); vofitCoar.ok(); ++vofitCoar){
-      const VolIndex&        coarVof  = vofitCoar();
+    auto scaleCoar = [&] (const VolIndex& coarVof) -> void {
       const Vector<VolIndex> fineVofs = ebislCoFi.refine(coarVof, m_refRat, dit());
 
       for (int comp = 0; comp < m_nComp; comp++){
 	coFiData(coarVof, comp) *= 1./fineVofs.size();
       }
-    }
+    };    
+
+    // Execute kernels. 
+    BoxLoops::loop(vofitFine, setCoarData);    
+    BoxLoops::loop(vofitFine, addFineToCoar);
+    BoxLoops::loop(vofitCoar, scaleCoar);
   }
 
   // At this point we have coarsened the data in the ghost regions around the fine grid onto m_bufferCoFi. We should be table to take that data and add

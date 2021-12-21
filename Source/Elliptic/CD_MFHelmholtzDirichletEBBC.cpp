@@ -15,6 +15,7 @@
 // Our includes
 #include <CD_MFHelmholtzDirichletEBBC.H>
 #include <CD_LeastSquares.H>
+#include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
 MFHelmholtzDirichletEBBC::MFHelmholtzDirichletEBBC(const int a_phase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC) : MFHelmholtzEBBC(a_phase, a_jumpBC) {
@@ -99,8 +100,7 @@ void MFHelmholtzDirichletEBBC::defineSinglePhase() {
 
     VoFIterator& singlePhaseVofs = m_jumpBC->getSinglePhaseVofs(m_phase, dit());
 
-    for (singlePhaseVofs.reset(); singlePhaseVofs.ok(); ++singlePhaseVofs){
-      const VolIndex& vof = singlePhaseVofs();
+    auto kernel = [&] (const VolIndex& vof) -> void {
       const Real areaFrac = ebisbox.bndryArea(vof);
       const Real B        = Bcoef(vof, m_comp);
 
@@ -145,7 +145,9 @@ void MFHelmholtzDirichletEBBC::defineSinglePhase() {
 	weights (vof, m_comp) = 0.0;
 	stencils(vof, m_comp).clear();
       }
-    }
+    };
+
+    BoxLoops::loop(singlePhaseVofs, kernel);
   }
 }
 
@@ -162,9 +164,8 @@ void MFHelmholtzDirichletEBBC::applyEBFluxSinglePhase(VoFIterator&     a_singleP
 
   // Do single phase cells. Only inhomogeneous contribution here. 
   if(!a_homogeneousPhysBC){  
-    for(a_singlePhaseVofs.reset(); a_singlePhaseVofs.ok(); ++a_singlePhaseVofs){
-      const VolIndex& vof = a_singlePhaseVofs();
 
+    auto kernel = [&] (const VolIndex& vof) -> void {
       Real value;
     
       if(m_useConstant){
@@ -176,7 +177,9 @@ void MFHelmholtzDirichletEBBC::applyEBFluxSinglePhase(VoFIterator&     a_singleP
       }
 
       a_Lphi(vof, m_comp) += a_beta*value*m_boundaryWeights[a_dit](vof, m_comp);
-    }
+    };
+
+    BoxLoops::loop(a_singlePhaseVofs, kernel);
   }
   
   return;

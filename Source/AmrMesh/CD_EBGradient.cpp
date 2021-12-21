@@ -361,8 +361,8 @@ void EBGradient::defineLevelStencils(){
     bndryIterator.define(bndryIVS, ebgraph);
     bndryStencils.define(bndryIVS, ebgraph, m_nComp);
 
-    for (bndryIterator.reset(); bndryIterator.ok(); ++bndryIterator){
-      const VolIndex& vof = bndryIterator();
+
+    auto kernel = [&] (const VolIndex& vof) -> void {
       VoFStencil& stencil = bndryStencils(vof, m_comp);
       
       stencil.clear();
@@ -373,7 +373,9 @@ void EBGradient::defineLevelStencils(){
 	EBArith::getFirstDerivStencilWidthOne(derivDirStencil, vof, ebisbox, dir, m_dx, nullptr, dir);
 	stencil += derivDirStencil;	
       }
-    }
+    };
+
+    BoxLoops::loop(bndryIterator, kernel);
   }
 }
 

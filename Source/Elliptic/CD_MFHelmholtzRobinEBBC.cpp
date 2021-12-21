@@ -16,6 +16,7 @@
 #include <CD_MFHelmholtzRobinEBBC.H>
 #include <CD_VofUtils.H>
 #include <CD_LeastSquares.H>
+#include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
 MFHelmholtzRobinEBBC::MFHelmholtzRobinEBBC(const int a_phase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC) : MFHelmholtzEBBC(a_phase, a_jumpBC) {
@@ -104,8 +105,8 @@ void MFHelmholtzRobinEBBC::defineSinglePhase() {
 
     // Build interpolation stencils. 
     VoFIterator& singlePhaseVofs = m_jumpBC->getSinglePhaseVofs(m_phase, dit());
-    for (singlePhaseVofs.reset(); singlePhaseVofs.ok(); ++singlePhaseVofs){
-      const VolIndex& vof = singlePhaseVofs();
+
+    auto kernel = [&] (const VolIndex& vof) -> void {
       const Real areaFrac = ebisbox.bndryArea(vof);
       const Real helmBco  = (*m_Bcoef)[dit()](vof, m_comp);
 
@@ -168,7 +169,9 @@ void MFHelmholtzRobinEBBC::defineSinglePhase() {
       else{ // Dead cell
 	fluxStencil.clear();
       }
-    }
+    };
+
+    BoxLoops::loop(singlePhaseVofs, kernel);
   }
 }
 
@@ -183,9 +186,7 @@ void MFHelmholtzRobinEBBC::applyEBFluxSinglePhase(VoFIterator&       a_singlePha
   //       the term b*A*phi/B in the interpolation stencil and return it to the operator. The other term we compute below.
 
   if(!a_homogeneousPhysBC){  
-    for (a_singlePhaseVofs.reset(); a_singlePhaseVofs.ok(); ++a_singlePhaseVofs){
-      const VolIndex& vof = a_singlePhaseVofs();
-
+    auto kernel = [&] (const VolIndex& vof) -> void {
       Real B;
       Real C;
       if(m_useConstant){
@@ -206,7 +207,9 @@ void MFHelmholtzRobinEBBC::applyEBFluxSinglePhase(VoFIterator&       a_singlePha
       if(std::abs(B) > 0.0){
 	a_Lphi(vof, m_comp) += kappaDivF;
       }
-    }
+    };
+
+    BoxLoops::loop(a_singlePhaseVofs, kernel);
   }
 
   
