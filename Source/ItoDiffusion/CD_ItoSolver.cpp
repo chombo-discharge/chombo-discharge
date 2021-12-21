@@ -1051,10 +1051,11 @@ void ItoSolver::drawNewParticles(const LevelData<EBCellFAB>& a_particlesPerCell,
     List<ItoParticle>& myParticles = particles[a_level][dit()].listItems();
     myParticles.clear();
 
-    // Do regular cells
-    for (BoxIterator bit(cellBox); bit.ok(); ++bit) {
-      const IntVect iv = bit();
+    // Kernel region for cut-cells. 
+    VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_level])[dit()];    
 
+    // Regular kernel
+    auto regularKernel = [&] (const IntVect& iv) -> void {
       // Do regular cells -- in these cells we only need to draw a random position somewhere inside the cubic cell. Easy.
       if(ebisbox.isRegular(iv)) {
 
@@ -1091,12 +1092,16 @@ void ItoSolver::drawNewParticles(const LevelData<EBCellFAB>& a_particlesPerCell,
 	  myParticles.add(ItoParticle(particleWeight, particlePosition));
 	}
       }
-    }
+    };
 
-    // Do the same for irregular cells. This differs from the regular-cell case only in that the positions 
-    VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_level])[dit()];
-    for (vofit.reset(); vofit.ok(); ++vofit) {
-      const VolIndex& vof   = vofit();
+    // Run the regular kernel.
+
+      
+
+
+
+    // Irregular kernel. Do the same for irregular cells. This differs from the regular-cell case only in that the positions       
+    auto irregularKernel = [&] (const VolIndex& vof) -> void {
       const IntVect   iv    = vof.gridIndex();
       const RealVect  cent  = ebisbox.bndryCentroid(vof);
       const RealVect  norm  = ebisbox.normal(vof);
@@ -1138,7 +1143,11 @@ void ItoSolver::drawNewParticles(const LevelData<EBCellFAB>& a_particlesPerCell,
 	  myParticles.add(ItoParticle(particleWeight, particlePosition));
 	}
       }
-    }
+    };
+
+    // Run the kernels.
+    BoxLoops::loop(cellBox,   regularKernel);
+    BoxLoops::loop(vofit,   irregularKernel);        
   }
 }
 
