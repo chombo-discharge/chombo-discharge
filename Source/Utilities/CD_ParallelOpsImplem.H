@@ -76,6 +76,17 @@ int ParallelOps::Max(const int& a_input) {
 #endif
 }
 
+inline
+void ParallelOps::VectorSum(Vector<long int>& a_data) {
+#ifdef CH_MPI
+  const Vector<long int> tmp = a_data;
+  const int result = MPI_Allreduce(&(tmp[0]),&(a_data[0]), a_data.size(), MPI_LONG, MPI_SUM, Chombo_MPI::comm);
+  if(result != MPI_SUCCESS){
+    MayDay::Error("In file ParallelOps::VectorSum -- MPI communication error");
+  }
+#endif
+}
+
 #include <CD_NamespaceFooter.H>
 
 #endif

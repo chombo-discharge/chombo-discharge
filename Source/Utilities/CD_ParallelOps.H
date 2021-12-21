@@ -46,7 +46,16 @@ namespace ParallelOps {
     @param[in] a_input Data input. 
   */
   inline
-  int Max(const int& a_input);  
+  int Max(const int& a_input);
+
+  /*!
+    @brief Perform a summation of all the MPI ranks's input data. 
+    @details This performs a rank-wise summation. If rank 1 has data (1,2,3) and rank 2 has data (3,4,5), the output data
+    on both ranks is (4,6,8).
+    @param[inout] a_data On 
+  */
+  inline
+  void VectorSum(Vector<long int>& a_data);
 }
 
 #include <CD_NamespaceFooter.H>
