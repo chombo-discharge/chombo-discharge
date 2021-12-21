@@ -20,6 +20,7 @@
 #include <CD_BrownianWalkerSpecies.H>
 #include <CD_PolyUtils.H>
 #include <CD_Random.H>
+#include <CD_ParallelOps.H>
 #include <CD_NamespaceHeader.H>
 
 using namespace Physics::BrownianWalker;
@@ -600,12 +601,9 @@ void BrownianWalkerStepper::loadBalanceBoxesMesh(Vector<Vector<int> >&          
     }
 
     // If running with MPI, loads must be gathered on all ranks. 
-#ifdef CH_MPI
-    Vector<long int> tmp = loads;
-    MPI_Allreduce(&(tmp[0]),&(loads[0]), loads.size(), MPI_LONG, MPI_SUM, Chombo_MPI::comm);
-#endif
+    ParallelOps::VectorSum(loads);
 
-    // Sort the boxes and loads using a Morton code. Then load balance the application. 
+    // Sort the boxes and loads using a Morton code. Then load balance the application.
     LoadBalancing::sort       (boxes, loads, BoxSorting::Morton);
     LoadBalancing::makeBalance(ranks, loads, boxes             );
 
@@ -669,10 +667,7 @@ void BrownianWalkerStepper::loadBalanceBoxesParticles(Vector<Vector<int> >&     
     }
 
     // If running with MPI, loads must be gathered on all ranks. 
-#ifdef CH_MPI
-    Vector<long int> tmp = loads;
-    MPI_Allreduce(&(tmp[0]),&(loads[0]), loads.size(), MPI_LONG, MPI_SUM, Chombo_MPI::comm);
-#endif
+    ParallelOps::VectorSum(loads);    
 
     // Sort the boxes and loads using a Morton code. Then load balance the application. 
     LoadBalancing::sort       (boxes, loads, BoxSorting::Morton);
@@ -707,11 +702,8 @@ Vector<long int> BrownianWalkerStepper::getCheckpointLoads(const std::string a_r
     loads[dit().intCode()] = patchParticles.length();
   }
 
-  // If running with MPI, loads must be gathered on all ranks. 
-#ifdef CH_MPI
-    Vector<long int> tmp = loads;
-    MPI_Allreduce(&(tmp[0]),&(loads[0]), loads.size(), MPI_LONG, MPI_SUM, Chombo_MPI::comm);
-#endif  
+  // If running with MPI, loads must be gathered on all ranks.
+  ParallelOps::VectorSum(loads);      
 
   return loads;
 }
