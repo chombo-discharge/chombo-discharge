@@ -164,8 +164,3 @@ jobs:
         run: |
           make -s -j2 DIM=3 DEBUG=TRUE OPT=TRUE lib
         working-directory: ${{ env.CHOMBO_HOME }}
-
-      - name: Run Geometry regression suite
-        run: |
-          python3 regtest.py --compile --silent --clean --benchmark -suites Geometry
-        working-directory: ${{ env.CHOMBO_HOME}}/Regression
