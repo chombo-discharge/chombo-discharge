@@ -19,7 +19,7 @@ jobs:
       #   with:
       #     repository: chombo-discharge/Chombo-3.3
       #     path: Chombo-3.3
-      - name: Cancel Previous Runs
+      - name: Cancel previous runs
         uses: styfle/cancel-workflow-action@0.8.0
         with:
           access_token: ${{ github.token }}
@@ -27,8 +27,7 @@ jobs:
       - name: Checkout chombo-discharge
         uses: actions/checkout@v2
         with:
-          repository: chombo-discharge/chombo-discharge
-          path: chombo-discharge
+          submodules: true
 
       - name: Install dependencies
         run: |
