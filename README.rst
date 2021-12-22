@@ -64,7 +64,26 @@ chombo-discharge is dependent on the following packages:
 Test build
 ^^^^^^^^^^
 
-chombo-discharge can be compiled in serial or with MPI.
+chombo-discharge can be compiled in serial or with MPI, and with or without HDF5.
+The user need to configure the Chombo makefile to ensure that the chombo-discharge is properly configured.
+
+For a quick test, the user can copy the GNU configuration to the Chombo configuration makefile ``Make.defs.local`` as follows:
+
+.. code-block:: text
+
+   cp $DISCHARGE_HOME/Local/Make.defs.GNU $CHOMBO_HOME/lib/mk/Make.defs.local
+
+Next, try to compile one of the applications by
+
+.. code-block:: text
+
+   cd $DISCHARGE_HOME/Regression/AdvectionDiffusion/Godunov
+   make -s -j4 main
+
+This will compile one of the chombo-discharge applications (scalar advection) in serial and without HDF5.   
+
+Configuration for workstations
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Contributing
 _____________
