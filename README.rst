@@ -121,7 +121,7 @@ After installing the dependencies, copy the desired configuration file to ``$CHO
 
      cp $DISCHARGE_HOME/Local/Make.defs.MPI.HDF5.GNU $CHOMBO_HOME/lib/mk/Make.defs.local               
 
-After that, compile and run one of the applications by
+After that, compile one of the applications by
 
 .. code-block:: text
 
@@ -140,7 +140,19 @@ if using a serial build, and
 
    mpirun -np 4 main2d.<bunch_of_options>.ex regression2d.inputs
 
-if using a parallel build.    
+if using a parallel build.
+
+Troubleshooting
+_______________
+
+Compilation is normally straightforward, but if experiencing problems, try cleaning ``Chombo`` by
+
+.. code-block:: text
+
+   cd $CHOMBO_HOME
+   make realclean
+
+Likewise, when compiling applications, compile with ``make clean`` rather than just ``make``. 
    
 
 Contributing
