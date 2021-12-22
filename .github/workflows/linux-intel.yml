@@ -5,7 +5,7 @@ on:
     types: [push, opened, synchronize, reopened, ready_for_review]
 
 concurrency:
-  group: ${{ github.head }}
+  group: ${{ github.head_ref }}
   cancel-in-progress: true    
 
 jobs:
