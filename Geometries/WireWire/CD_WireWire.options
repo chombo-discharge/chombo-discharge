@@ -1,5 +1,5 @@
 # ====================================================================================================
-# WIRE_WIRE CLASS OPTIONS
+# WireWire geometry class options
 #
 # Note: For this geometry a live wire gets V = 0.5V0 and a dead wire gets V=-0.5V0
 # In 2D the wires are spheres and only endpoint1 is used. 

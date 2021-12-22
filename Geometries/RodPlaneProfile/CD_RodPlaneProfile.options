@@ -1,5 +1,5 @@
 # ====================================================================================================
-# ROD_PLANE_PROFILE_PROFILE CLASS OPTIONS
+# RodPlaneProfile geometry class options
 #
 # This class described a rod-plane geometry with holes on the dielectric plane. The plane_point
 # argument determines the point on the plane (oriented along the y axis), and acts as a reference

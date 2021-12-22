@@ -1,5 +1,5 @@
 # ====================================================================================================
-# COAXIAL_CABLE CLASS OPTIONS
+# CoaxialCable geometry class options
 #
 # This is a coaxial cable class with outer and inner electrodes, and a dielectric.
 # Use CoaxialCable.endpoint1(2) to specify endpoints. Only endpoint1 is used in 2D. 

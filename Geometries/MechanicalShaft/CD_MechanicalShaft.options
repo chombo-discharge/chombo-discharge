@@ -1,5 +1,5 @@
 # ====================================================================================================
-# MECHANICAL_SHAFT CLASS OPTIONS
+# MechanicalShaft geometry class options
 # ====================================================================================================
 MechanicalShaft.eps0                      = 1               # Background permittivity
 MechanicalShaft.turn_on_electrode         = true            # Turn on/off electrode

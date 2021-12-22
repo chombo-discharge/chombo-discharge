@@ -1,5 +1,5 @@
 # ====================================================================================================
-# ROUGH_SPHERE CLASS OPTIONS
+# RoughSphere geometry class options
 # ====================================================================================================
 RoughSphere.on                = true         # Turn on/off geometry
 RoughSphere.material          = electrode    # 'electrode' or 'dielectric'

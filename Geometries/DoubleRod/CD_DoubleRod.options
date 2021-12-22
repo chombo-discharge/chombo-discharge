@@ -1,5 +1,5 @@
 # ====================================================================================================
-# DOUBLE_ROD CLASS OPTIONS
+# DoubleRod geometry class options
 # ====================================================================================================
 DoubleRod.rod1.on        = true       # Use rod 1 or not
 DoubleRod.rod1.endpoint1 = 0 0 0.5    # One endpoint
