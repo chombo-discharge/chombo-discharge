@@ -11,7 +11,7 @@ jobs:
     runs-on: ubuntu-latest
     env: 
       DISCHARGE_HOME: ${{github.workspace}}
-      CHOMBO_HOME: $DISCHARGE_HOME/Chombo-3.3/lib
+      CHOMBO_HOME: ${DISCHARGE_HOME}/Chombo-3.3/lib
 
     steps:
       - name: Cancel previous runs
