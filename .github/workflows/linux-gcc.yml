@@ -2,7 +2,7 @@ name: Linux GCC
 
 on:
   pull_request:
-    types: [push, opened, synchronize, reopened, ready_for_review]
+    types: [push, ready_for_review]
 
 concurrency:
   group: ${{ github.head_ref }}
