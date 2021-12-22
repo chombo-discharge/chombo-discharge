@@ -23,8 +23,9 @@ chombo-discharge is dependent on the following packages:
 
 * Chombo (supplied with chombo-discharge)
 * LAPACK and BLAS (required). 
-* HDF5 (optional).
-* MPI (optional).
+* HDF5 (optional, used for writing plot and checkpoint file).
+* MPI (optional, used for parallelization).
+* VisIt visualization (optional, but frequently used for visualization). 
 
 Obtaining chombo-discharge
 --------------------------
@@ -151,6 +152,7 @@ if using a serial build, and
    mpirun -np 4 main2d.<bunch_of_options>.ex regression2d.inputs
 
 if using a parallel build.
+If compiling with HDF5, plot files will then appear in ``$DISCHARGE_HOME/Regression/AdvectionDiffusion/Godunov/plt``. 
 
 Configuration on clusters
 -------------------------
