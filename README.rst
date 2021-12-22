@@ -1,5 +1,5 @@
 chombo-discharge
-================
+----------------
 
 This is chombo-discharge, a multiphysics code which uses Chombo for plasma
 simulations with adaptive mesh refinement (AMR) on embedded boundary grids. 
