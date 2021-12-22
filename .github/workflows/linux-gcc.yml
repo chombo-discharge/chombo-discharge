@@ -11,11 +11,11 @@ jobs:
     runs-on: ubuntu-latest
     env: 
       DISCHARGE_HOME: ${{github.workspace}}
-      CHOMBO_HOME: ${DISCHARGE_HOME}/Chombo-3.3/lib
+      CHOMBO_HOME: ${{github.workspace}}/Chombo-3.3/lib
 
     steps:
       - name: Cancel previous runs
-        uses: styfle/cancel-workflow-action@0.8.0
+        uses: styfle/cancel-workflow-action@0.9.1
         with:
           access_token: ${{ github.token }}
 
@@ -55,11 +55,11 @@ jobs:
     runs-on: ubuntu-latest
     env:
       DISCHARGE_HOME: ${{github.workspace}}
-      CHOMBO_HOME: $DISCHARGE_HOME/Chombo-3.3/lib
+      CHOMBO_HOME: ${{github.workspace}}/Chombo-3.3/lib      
 
     steps:
       - name: Cancel previous runs
-        uses: styfle/cancel-workflow-action@0.8.0
+        uses: styfle/cancel-workflow-action@0.9.1
         with:
           access_token: ${{ github.token }}      
 
