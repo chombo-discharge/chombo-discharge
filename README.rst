@@ -16,11 +16,18 @@ Documentation
 -------------
 Documentation is available at https://chombo-discharge.github.io
 
-Getting started
----------------
+Dependencies
+------------
+
+chombo-discharge is dependent on the following packages:
+
+* Chombo (supplied with chombo-discharge)
+* LAPACK and BLAS (required). 
+* HDF5 (optional).
+* MPI (optional).
 
 Obtaining chombo-discharge
-__________________________
+--------------------------
 
 To clone chombo-discharge, set the environment variable ``$DISCHARGE_HOME`` as follows
 
@@ -31,7 +38,7 @@ To clone chombo-discharge, set the environment variable ``$DISCHARGE_HOME`` as f
 There are two ways of cloning ``chombo-discharge``: 
 
 Using submodules
-^^^^^^^^^^^^^^^^
+________________
 
 By including ``Chombo`` as a submodule in ``chombo-discharge``.
 To clone ``chombo-discharge`` and the dependency ``Chombo``, do
@@ -47,7 +54,7 @@ Next, set the ``Chombo`` environment variable ``$CHOMBO_HOME`` to ``$DISCHARGE_H
 		export CHOMBO_HOME=$DISCHARGE_HOME/Chombo-3.3/lib
 
 Maintaining  ``Chombo`` separately.
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+___________________________________
 
 First clone ``chombo-discharge`` *without* submodules by
 
@@ -62,14 +69,7 @@ Next, set the ``$CHOMBO_HOME`` environment variable and clone ``Chombo`` there, 
 		export DISCHARGE_HOME=<Location for chombo-discharge>
 		git clone git@github.com:chombo-discharge/Chombo-3-3.git ${CHOMBO_HOME}
 
-Dependencies
-------------
 
-chombo-discharge is dependent on the following packages:
-
-* LAPACK and BLAS (required). 
-* HDF5 (optional).
-* MPI (optional).
 		   
 Test build
 ----------
