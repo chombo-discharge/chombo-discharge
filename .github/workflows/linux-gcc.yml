@@ -134,7 +134,7 @@ jobs:
       - name: Checkout chombo-discharge
         uses: actions/checkout@v2
         with:
-          submodule: true
+          submodules: true
 
       - name: Install dependencies
         run: |
