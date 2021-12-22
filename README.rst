@@ -170,8 +170,8 @@ Compilation is normally straightforward, but if experiencing problems, try clean
    cd $CHOMBO_HOME
    make realclean
 
-Likewise, when compiling applications, compile with ``make clean`` rather than just ``make``. 
-   
+Likewise, when compiling applications, compile with ``make clean`` rather than just ``make``.
+More tips and tricks are given in the documentation at https://chombo-discharge.github.io. 
 
 Contributing
 ------------
