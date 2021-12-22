@@ -12,7 +12,10 @@ _____________
 Documentation is available at https://chombo-discharge.github.io
 
 Getting started
-_____________
+_______________
+
+Obtaining chombo-discharge
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To clone chombo-discharge, set the environment variable ``$DISCHARGE_HOME`` as follows
 
@@ -49,7 +52,8 @@ There are two ways of cloning ``chombo-discharge``.
       export DISCHARGE_HOME=<Location for chombo-discharge>
       git clone git@github.com:chombo-discharge/Chombo-3-3.git ${CHOMBO_HOME}      
 		   
-
+Configuring chombo-discharge
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Contributing
 _____________
