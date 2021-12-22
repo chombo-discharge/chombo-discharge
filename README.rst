@@ -29,7 +29,7 @@ There are two ways of cloning ``chombo-discharge``.
 		   
       git clone --recursive git@github.com:chombo-discharge/chombo-discharge.git ${DISCHARGE_HOME}
 
-   Next, set the ``Chombo`` environment variable ``$CHOMBO_HOME`` to :file:`$DISCHARGE_HOME/Chombo-3.3/lib`, i.e.
+   Next, set the ``Chombo`` environment variable ``$CHOMBO_HOME`` to ``$DISCHARGE_HOME/Chombo-3.3/lib``, i.e.
 
    .. code-block:: text
 
@@ -44,7 +44,7 @@ There are two ways of cloning ``chombo-discharge``.
 
    Next, set the ``$CHOMBO_HOME`` environment variable and clone ``Chombo`` there, i.e.
 
-   ::
+   .. code-block:: text
 
       export DISCHARGE_HOME=<Location for chombo-discharge>
       git clone git@github.com:chombo-discharge/Chombo-3-3.git ${CHOMBO_HOME}      
