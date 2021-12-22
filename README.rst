@@ -50,10 +50,21 @@ There are two ways of cloning ``chombo-discharge``.
    .. code-block:: text
 
       export DISCHARGE_HOME=<Location for chombo-discharge>
-      git clone git@github.com:chombo-discharge/Chombo-3-3.git ${CHOMBO_HOME}      
+      git clone git@github.com:chombo-discharge/Chombo-3-3.git ${CHOMBO_HOME}
+
+Dependencies
+^^^^^^^^^^^^
+
+chombo-discharge is dependent on the following packages:
+
+* LAPACK and BLAS (required). 
+* HDF5 (optional).
+* MPI (optional).
 		   
-Configuring chombo-discharge
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Test build
+^^^^^^^^^^
+
+chombo-discharge can be compiled in serial or with MPI.
 
 Contributing
 _____________
