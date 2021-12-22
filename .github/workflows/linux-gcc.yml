@@ -6,7 +6,7 @@ on:
 
 concurrency:
   group: ${{ github.ref }}-${{ github.head_ref }}-linux-gcc    
-  cancel-in-progress: true    
+  cancel-in-progress: true
 
 jobs:
   serial-no-hdf:
