@@ -7,6 +7,11 @@ simulations with adaptive mesh refinement (AMR) on embedded boundary grids.
 A modified version of Chombo is distributed together with this code.
 chombo-discharge only uses Chombo; it is not affiliated nor endorsed by LBNL.
 
+License
+-------
+
+See LICENSE and Copyright.txt for redistribution rights. 
+
 Documentation
 -------------
 Documentation is available at https://chombo-discharge.github.io
@@ -23,7 +28,7 @@ To clone chombo-discharge, set the environment variable ``$DISCHARGE_HOME`` as f
 		
    export DISCHARGE_HOME=<Location for chombo-discharge>
 
-There are two ways of cloning ``chombo-discharge``. 
+There are two ways of cloning ``chombo-discharge``: 
 
 Using submodules
 ^^^^^^^^^^^^^^^^
@@ -148,7 +153,7 @@ if using a serial build, and
 if using a parallel build.
 
 Troubleshooting
-_______________
+---------------
 
 Compilation is normally straightforward, but if experiencing problems, try cleaning ``Chombo`` by
 
@@ -161,11 +166,8 @@ Likewise, when compiling applications, compile with ``make clean`` rather than j
    
 
 Contributing
-_____________
+------------
 We welcome feedback, bug reports, or code contributions. Use the github issue tracker and pull request system for code contributions
 See code documentation for coding style and review system. 
 
-License
-_______
 
-See LICENSE and Copyright.txt for redistribution rights. 
