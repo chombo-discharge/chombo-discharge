@@ -16,6 +16,15 @@ _____________
 
 To clone chombo-discharge, set the environment variable ``$DISCHARGE_HOME`` as follows
 
+export DISCHARGE_HOME=<Location for chombo-discharge>
+
+#. ``Chombo`` is included as a submodule in ``chombo-discharge``.
+   To clone ``chombo-discharge`` and the dependency ``Chombo``, do
+
+   .. code-block:: bash
+		   
+      git clone --recursive git@github.com:chombo-discharge/chombo-discharge.git
+
 
 Contributing
 _____________
