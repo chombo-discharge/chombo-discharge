@@ -15,7 +15,7 @@ Getting started
 ---------------
 
 Obtaining chombo-discharge
-^^^^^^^^^^^^^^^^^^^^^^^^^^
+__________________________
 
 To clone chombo-discharge, set the environment variable ``$DISCHARGE_HOME`` as follows
 
