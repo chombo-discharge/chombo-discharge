@@ -10,15 +10,10 @@ jobs:
     name: GNU@10.0 C++14 serial without HDF5
     runs-on: ubuntu-latest
     env: 
-      DISCHARGE_HOME: ${{github.workspace}}/chombo-discharge
-      CHOMBO_HOME: ${{github.workspace}}/chombo-discharge/Chombo-3.3/lib
+      DISCHARGE_HOME: ${{github.workspace}}
+      CHOMBO_HOME: ${{github.workspace}}/Chombo-3.3/lib
 
     steps:
-      # - name: Checkout Chombo
-      #   uses: actions/checkout@master
-      #   with:
-      #     repository: chombo-discharge/Chombo-3.3
-      #     path: Chombo-3.3
       - name: Cancel previous runs
         uses: styfle/cancel-workflow-action@0.8.0
         with:
