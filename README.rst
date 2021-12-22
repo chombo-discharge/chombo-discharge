@@ -1,5 +1,5 @@
 chombo-discharge
-----------------
+================
 
 This is chombo-discharge, a multiphysics code which uses Chombo for plasma
 simulations with adaptive mesh refinement (AMR) on embedded boundary grids. 
@@ -8,11 +8,11 @@ A modified version of Chombo is distributed together with this code.
 chombo-discharge only uses Chombo; it is not affiliated nor endorsed by LBNL.
 
 Documentation
-_____________
+-------------
 Documentation is available at https://chombo-discharge.github.io
 
 Getting started
-_______________
+---------------
 
 Obtaining chombo-discharge
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -25,35 +25,40 @@ To clone chombo-discharge, set the environment variable ``$DISCHARGE_HOME`` as f
 
 There are two ways of cloning ``chombo-discharge``. 
 
-#. By including ``Chombo`` as a submodule in ``chombo-discharge``.
-   To clone ``chombo-discharge`` and the dependency ``Chombo``, do
+Using submodules
+^^^^^^^^^^^^^^^^
 
-   .. code-block:: text
-		   
-      git clone --recursive git@github.com:chombo-discharge/chombo-discharge.git ${DISCHARGE_HOME}
+By including ``Chombo`` as a submodule in ``chombo-discharge``.
+To clone ``chombo-discharge`` and the dependency ``Chombo``, do
 
-   Next, set the ``Chombo`` environment variable ``$CHOMBO_HOME`` to ``$DISCHARGE_HOME/Chombo-3.3/lib``, i.e.
+.. code-block:: text
+		
+		git clone --recursive git@github.com:chombo-discharge/chombo-discharge.git ${DISCHARGE_HOME}
 
-   .. code-block:: text
+Next, set the ``Chombo`` environment variable ``$CHOMBO_HOME`` to ``$DISCHARGE_HOME/Chombo-3.3/lib``, i.e.
 
-      export CHOMBO_HOME=$DISCHARGE_HOME/Chombo-3.3/lib
+.. code-block:: text
 
-#. By cloning ``Chombo`` separately.
-   First clone ``chombo-discharge`` without submodules by
+		export CHOMBO_HOME=$DISCHARGE_HOME/Chombo-3.3/lib
 
-   .. code-block:: text
-		   
-      git clone git@github.com:chombo-discharge/chombo-discharge.git ${DISCHARGE_HOME}
+Maintaining  ``Chombo`` separately.
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-   Next, set the ``$CHOMBO_HOME`` environment variable and clone ``Chombo`` there, i.e.
+First clone ``chombo-discharge`` without submodules by
 
-   .. code-block:: text
+.. code-block:: text
+		
+		git clone git@github.com:chombo-discharge/chombo-discharge.git ${DISCHARGE_HOME}
 
-      export DISCHARGE_HOME=<Location for chombo-discharge>
-      git clone git@github.com:chombo-discharge/Chombo-3-3.git ${CHOMBO_HOME}
+Next, set the ``$CHOMBO_HOME`` environment variable and clone ``Chombo`` there, i.e.
+
+.. code-block:: text
+
+		export DISCHARGE_HOME=<Location for chombo-discharge>
+		git clone git@github.com:chombo-discharge/Chombo-3-3.git ${CHOMBO_HOME}
 
 Dependencies
-^^^^^^^^^^^^
+------------
 
 chombo-discharge is dependent on the following packages:
 
@@ -62,7 +67,7 @@ chombo-discharge is dependent on the following packages:
 * MPI (optional).
 		   
 Test build
-^^^^^^^^^^
+----------
 
 chombo-discharge can be compiled in serial or with MPI, and with or without HDF5.
 The user need to configure the Chombo makefile to ensure that the chombo-discharge is properly configured.
@@ -83,7 +88,7 @@ Next, try to compile one of the applications by
 This will compile one of the chombo-discharge applications (scalar advection) in serial and without HDF5.   
 
 GNU configuration for workstations
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+----------------------------------
 
 On a workstation, one can currently install all dependencies by HDF5 and MPI by
 
