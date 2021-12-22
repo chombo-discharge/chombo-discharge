@@ -49,7 +49,7 @@ Next, set the ``Chombo`` environment variable ``$CHOMBO_HOME`` to ``$DISCHARGE_H
 Maintaining  ``Chombo`` separately.
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-First clone ``chombo-discharge`` without submodules by
+First clone ``chombo-discharge`` *without* submodules by
 
 .. code-block:: text
 		
@@ -90,7 +90,7 @@ Next, try to compile one of the applications by
    cd $DISCHARGE_HOME/Regression/AdvectionDiffusion/Godunov
    make -s -j4 main
 
-This will compile one of the chombo-discharge applications (scalar advection) in serial and without HDF5.   
+This will compile one of the chombo-discharge applications (scalar advection) in serial and without HDF5.
 
 GNU configuration for workstations
 ----------------------------------
@@ -151,6 +151,14 @@ if using a serial build, and
    mpirun -np 4 main2d.<bunch_of_options>.ex regression2d.inputs
 
 if using a parallel build.
+
+Configuration on clusters
+-------------------------
+
+To configure chombo-discharge for executation on a cluster, use one of the makefiles supplied in ``$DISCHARGE_HOME/Local`` if it exists for your computer.
+Alternatively, copy ``$DISCHARGE_HOME/Local/Make.defs.local.template`` to ``$CHOMBO_HOME/lib/mk/Make.defs.local`` and set the compilers, optimization flags, and paths to HDF5 library.
+
+On clusters, MPI and HDF5 are usually already installed, but must usually be loaded (e.g. as modules) before compilation.
 
 Troubleshooting
 ---------------
