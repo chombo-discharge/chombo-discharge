@@ -14,7 +14,7 @@ Documentation is available at https://chombo-discharge.github.io
 Getting started
 _____________
 
-To clone chombo-discharge, set the environment variable $DISCHARGE_HOME
+To clone chombo-discharge, set the environment variable ``$DISCHARGE_HOME`` as follows
 
 
 Contributing
