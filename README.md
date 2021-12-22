@@ -8,6 +8,10 @@ chombo-discharge only uses Chombo; it is not affiliated nor endorsed by LBNL.
 ## Documentation
 Documentation is available at https://chombo-discharge.github.io
 
+## Getting started
+To clone chombo-discharge, set the environment variable $DISCHARGE_HOME
+
+
 ## Contributing
 We welcome feedback, bug reports, or code contributions. Use the github issue tracker and pull request system for code contributions
 See code documentation for coding style and review system. 
