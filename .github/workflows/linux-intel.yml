@@ -2,7 +2,11 @@ name: Linux Intel
 
 on:
   pull_request:
-    types: [opened, synchronize, reopened, ready_for_review]
+    types: [push, opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: ${{ github.head_ref }}
+  cancel-in-progress: true    
 
 jobs:
   serial-no-hdf:
@@ -10,21 +14,14 @@ jobs:
     name: Intel C++14 serial without HDF5
     runs-on: ubuntu-latest
     env: 
-      CHOMBO_HOME: ${{github.workspace}}/Chombo-3.3/lib
-      DISCHARGE_HOME: ${{github.workspace}}/chombo-discharge
+      DISCHARGE_HOME: ${{github.workspace}}
+      CHOMBO_HOME: ${{github.workspace}}/Chombo-3.3/lib      
 
     steps:
-      - name: Checkout Chombo
-        uses: actions/checkout@master
-        with:
-          repository: chombo-discharge/Chombo-3.3
-          path: Chombo-3.3
-
       - name: Checkout chombo-discharge
         uses: actions/checkout@v2
         with:
-          repository: chombo-discharge/chombo-discharge
-          path: chombo-discharge
+          submodules: true
 
       - name: Install dependencies
         run: |
@@ -63,22 +60,15 @@ jobs:
     if: github.event.pull_request.draft == false  
     name: Intel C++14 MPI without HDF5
     runs-on: ubuntu-latest
-    env: 
+    env:
+      DISCHARGE_HOME: ${{github.workspace}}
       CHOMBO_HOME: ${{github.workspace}}/Chombo-3.3/lib
-      DISCHARGE_HOME: ${{github.workspace}}/chombo-discharge
 
     steps:
-      - name: Checkout Chombo
-        uses: actions/checkout@master
-        with:
-          repository: chombo-discharge/Chombo-3.3
-          path: Chombo-3.3
-
       - name: Checkout chombo-discharge
         uses: actions/checkout@v2
         with:
-          repository: chombo-discharge/chombo-discharge
-          path: chombo-discharge
+          submodules: true
 
       - name: Install dependencies
         run: |
