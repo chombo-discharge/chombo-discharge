@@ -82,8 +82,66 @@ Next, try to compile one of the applications by
 
 This will compile one of the chombo-discharge applications (scalar advection) in serial and without HDF5.   
 
-Configuration for workstations
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+GNU configuration for workstations
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+On a workstation, one can currently install all dependencies by HDF5 and MPI by
+
+.. code-block::
+   
+   sudo apt install csh gfortran g++ libhdf5-dev libhdf5-openmpi-dev openmpi-bin libblas-dev liblapack-dev
+
+This will install LAPACK, BLAS, GNU compilers for Fortran and C++, OpenMPI and HDF5.
+The steps for Intel compilers will differ slightly. 
+Both serial and parallel HDF5 will be installed (usually in folders ``/usr/lib/x86_64-linux-gnu/serial/`` and ``/usr/lib/x86_64-linux-gnu/parallel/``.
+
+After installing the dependencies, copy the desired configuration file to ``$CHOMBO_HOME/lib/mk``:
+
+* For serial build without HDF5:
+
+  .. code-block:: text
+
+     cp $DISCHARGE_HOME/Local/Make.defs.GNU $CHOMBO_HOME/lib/mk/Make.defs.local
+
+* For serial build with HDF5:
+
+  .. code-block:: text
+
+     cp $DISCHARGE_HOME/Local/Make.defs.HDF5.GNU $CHOMBO_HOME/lib/mk/Make.defs.local
+
+* For MPI build without HDF5:
+
+  .. code-block:: text
+
+     cp $DISCHARGE_HOME/Local/Make.defs.MPI.GNU $CHOMBO_HOME/lib/mk/Make.defs.local
+
+* For MPI build with HDF5:
+
+  .. code-block:: text
+
+     cp $DISCHARGE_HOME/Local/Make.defs.MPI.HDF5.GNU $CHOMBO_HOME/lib/mk/Make.defs.local               
+
+After that, compile and run one of the applications by
+
+.. code-block:: text
+
+   cd $DISCHARGE_HOME/Regression/AdvectionDiffusion/Godunov
+   make -s -j4 main
+
+To run the application, do
+
+.. code-block:: text
+
+   ./main2d.<bunch_of_options>.ex regression2d.inputs
+
+if using a serial build, and
+
+.. code-block:: text
+
+   mpirun -np 4 main2d.<bunch_of_options>.ex regression2d.inputs
+
+if using a parallel build.    
+   
 
 Contributing
 _____________
