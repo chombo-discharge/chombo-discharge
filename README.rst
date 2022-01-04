@@ -85,7 +85,7 @@ Test build
 chombo-discharge can be compiled in serial or with MPI, and with or without HDF5.
 The user need to configure the Chombo makefile to ensure that the chombo-discharge is properly configured.
 
-For a quick test, the user can copy the GNU configuration to the Chombo configuration makefile :file:`Make.defs.local` as follows:
+An example configuration process for workstations is included below, but for a quick test the user can use the GNU configuration file as follows:
 
 .. code-block:: text
 
