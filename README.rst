@@ -115,7 +115,7 @@ Next, compile ``chombo-discharge`` by
    make -s -j4 lib
 
 This will compile the ``chombo-discharge`` source code in serial and without HDF5 (using four cores for the compilation).
-If successful, ``chombo-discharge`` libraries will appear in :file:`$DISCARGE_HOME/Lib`.
+If successful, ``chombo-discharge`` libraries will appear in ``$DISCARGE_HOME/Lib``.
 
 GNU configuration for workstations
 ----------------------------------
