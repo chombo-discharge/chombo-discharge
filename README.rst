@@ -128,13 +128,11 @@ This will install
 Equivalent steps for Intel compilers will differ slightly.
 
 Both serial and parallel HDF5 will be installed, and these are *usually* found in folders ``/usr/lib/x86_64-linux-gnu/serial/`` and ``/usr/lib/x86_64-linux-gnu/parallel/``.
-However, if compiling with HDF5 the user needs to ensure that the paths are correct. 
+Before proceeding further, the user should ensure that he can locate both the serial and parallel HDF5 libraries.
 
 After installing the dependencies, copy the desired configuration file to ``$CHOMBO_HOME/lib/mk``:
 
 * For serial build without HDF5:
-
-  .. code-block:: text
 
      cp $DISCHARGE_HOME/Local/Make.defs.GNU $CHOMBO_HOME/lib/mk/Make.defs.local
 
