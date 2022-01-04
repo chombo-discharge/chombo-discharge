@@ -70,28 +70,42 @@ Next, set the ``$CHOMBO_HOME`` environment variable and clone ``Chombo`` there, 
 		export DISCHARGE_HOME=<Location for chombo-discharge>
 		git clone git@github.com:chombo-discharge/Chombo-3-3.git ${CHOMBO_HOME}
 
+Configuration
+-------------
 
-		   
+``chombo-discharge`` is compiled using the ``Chombo`` makefile system.
+Compilers, libraries, and configuration options are defined in a file :file:`Make.defs.local` which resides in :file:`$CHOMBO_HOME/mk`.
+Users need to supply this file in order to compile ``chombo-discharge``.
+Typically, these steps include
+
+* Specifying Fortran and C++ compilers
+* Specifying configurations. E.g., serial or parallel builds, and compiler flags. 
+* Specifying library paths (in particular for HDF5).
+
+Some commonly used configuration files are found in :file:`$DISCHARGE_HOME/Local`. 
+
 Test build
 ----------
 
 chombo-discharge can be compiled in serial or with MPI, and with or without HDF5.
 The user need to configure the Chombo makefile to ensure that the chombo-discharge is properly configured.
 
-For a quick test, the user can copy the GNU configuration to the Chombo configuration makefile ``Make.defs.local`` as follows:
+For a quick test, the user can copy the GNU configuration to the Chombo configuration makefile :file:`Make.defs.local` as follows:
 
 .. code-block:: text
 
    cp $DISCHARGE_HOME/Local/Make.defs.GNU $CHOMBO_HOME/lib/mk/Make.defs.local
 
-Next, try to compile one of the applications by
+Next, compile ``chombo-discharge`` by
 
 .. code-block:: text
 
-   cd $DISCHARGE_HOME/Regression/AdvectionDiffusion/Godunov
-   make -s -j4 main
+   cd $DISCHARGE_HOME
+   make -s -j4 lib
 
-This will compile one of the chombo-discharge applications (scalar advection) in serial and without HDF5.
+This will compile the ``chombo-discharge`` source code in serial and without HDF5 (using four cores for the compilation).
+If successful, ``chombo-discharge`` libraries will appear in :file:`$DISCARGE_HOME/Lib`.
+To test a compilation with MPI and/or HDF5, use one of the files :file:`
 
 GNU configuration for workstations
 ----------------------------------
@@ -102,9 +116,17 @@ On a workstation, one can currently install all dependencies by HDF5 and MPI by
    
    sudo apt install csh gfortran g++ libhdf5-dev libhdf5-openmpi-dev openmpi-bin libblas-dev liblapack-dev
 
-This will install LAPACK, BLAS, GNU compilers for Fortran and C++, OpenMPI and HDF5.
-The steps for Intel compilers will differ slightly. 
+This will install
+
+* LAPACK and BLAS
+* GNU compilers for Fortran and C++
+* OpenMPI
+* HDF5, both serial and parallel.
+  
+Equivalent steps for Intel compilers will differ slightly.
+
 Both serial and parallel HDF5 will be installed (usually in folders ``/usr/lib/x86_64-linux-gnu/serial/`` and ``/usr/lib/x86_64-linux-gnu/parallel/``.
+However, if compiling with HDF5 the user needs to ensure that the paths are correct. 
 
 After installing the dependencies, copy the desired configuration file to ``$CHOMBO_HOME/lib/mk``:
 
