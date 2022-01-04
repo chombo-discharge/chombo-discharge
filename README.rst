@@ -154,25 +154,25 @@ Before proceeding further, the user should ensure that he can locate both the se
 
 After installing the dependencies, copy the desired configuration file to ``$CHOMBO_HOME/lib/mk``:
 
-* For serial build without HDF5:
+* **Serial build without HDF5**:
 
   .. code-block:: text
 
      cp $DISCHARGE_HOME/Local/Make.defs.GNU $CHOMBO_HOME/lib/mk/Make.defs.local
 
-* For serial build with HDF5:
+* **Serial build with HDF5**:
 
   .. code-block:: text
 
      cp $DISCHARGE_HOME/Local/Make.defs.HDF5.GNU $CHOMBO_HOME/lib/mk/Make.defs.local
 
-* For MPI build without HDF5:
+* **MPI build without HDF5**:
 
   .. code-block:: text
 
      cp $DISCHARGE_HOME/Local/Make.defs.MPI.GNU $CHOMBO_HOME/lib/mk/Make.defs.local
 
-* For MPI build with HDF5:
+* **MPI build with HDF5**:
 
   .. code-block:: text
 
