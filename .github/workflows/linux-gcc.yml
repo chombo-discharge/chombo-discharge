@@ -13,6 +13,8 @@ jobs:
     if: github.event.pull_request.draft == false  
     name: GNU@10.0 C++14 serial without HDF5
     runs-on: ubuntu-latest
+    timeout-minutes: 45
+    
     env: 
       DISCHARGE_HOME: ${{github.workspace}}
       CHOMBO_HOME: ${{github.workspace}}/Chombo-3.3/lib
@@ -38,37 +40,37 @@ jobs:
         run: |
           cp $DISCHARGE_HOME/Local/GitHub/Make.defs.linux-gcc $CHOMBO_HOME/mk/Make.defs.local          
 
-      # - name: Build Chombo (2D)
-      #   run: |
-      #     make -s -j2 DIM=2 lib
-      #   working-directory: ${{ env.CHOMBO_HOME }}
+      - name: Build Chombo (2D)
+        run: |
+          make -s -j2 DIM=2 lib
+        working-directory: ${{ env.CHOMBO_HOME }}
 
-      # - name: Build source (2D)
-      #   run: |
-      #     make -s -j2 DIM=2 source
+      - name: Build chombo-discharge/source (2D)
+        run: |
+          make -s -j2 DIM=2 source
 
-      # - name: Build geometries (2D)
-      #   run: |
-      #     make -s -j2 DIM=2 geometries
+      - name: Build chombo-discharge/geometries (2D)
+        run: |
+          make -s -j2 DIM=2 geometries
 
-      # - name: Build physics (2D)
-      #   run: |
-      #     make -s -j2 DIM=2 physics
+      - name: Build chombo-discharge/physics (2D)
+        run: |
+          make -s -j2 DIM=2 physics
 
       - name: Build Chombo (3D)
         run: |
           make -s -j2 DIM=3 lib
         working-directory: ${{ env.CHOMBO_HOME }}
 
-      - name: Build source (3D)
+      - name: Build chombo-discharge/source (3D)
         run: |
           make -s -j2 DIM=3 source
 
-      - name: Build geometries (3D)
+      - name: Build chombo-discharge/geometries (3D)
         run: |
           make -s -j2 DIM=3 geometries
 
-      - name: Build physics (2D)
+      - name: Build chombo-discharge/physics (3D)
         run: |
           make -s -j2 DIM=3 physics        
 
@@ -76,6 +78,8 @@ jobs:
     if: github.event.pull_request.draft == false    
     name: GNU@10.0 C++14 serial with HDF5    
     runs-on: ubuntu-latest
+    timeout-minutes: 45
+    
     env:
       DISCHARGE_HOME: ${{github.workspace}}
       CHOMBO_HOME: ${{github.workspace}}/Chombo-3.3/lib      
@@ -100,21 +104,47 @@ jobs:
       - name: Copy makefile
         run: |
           cp $DISCHARGE_HOME/Local/GitHub/Make.defs.HDF5.linux-gcc $CHOMBO_HOME/mk/Make.defs.local
-          
+
       - name: Build Chombo (2D)
         run: |
           make -s -j2 DIM=2 lib
         working-directory: ${{ env.CHOMBO_HOME }}
 
+      - name: Build chombo-discharge/source (2D)
+        run: |
+          make -s -j2 DIM=2 source
+
+      - name: Build chombo-discharge/geometries (2D)
+        run: |
+          make -s -j2 DIM=2 geometries
+
+      - name: Build chombo-discharge/physics (2D)
+        run: |
+          make -s -j2 DIM=2 physics
+
       - name: Build Chombo (3D)
         run: |
           make -s -j2 DIM=3 lib
-        working-directory: ${{ env.CHOMBO_HOME }}        
+        working-directory: ${{ env.CHOMBO_HOME }}
+
+      - name: Build chombo-discharge/source (3D)
+        run: |
+          make -s -j2 DIM=3 source
+
+      - name: Build chombo-discharge/geometries (3D)
+        run: |
+          make -s -j2 DIM=3 geometries
+
+      - name: Build chombo-discharge/physics (3D)
+        run: |
+          make -s -j2 DIM=3 physics
         
   mpi-no-hdf5:
     if: github.event.pull_request.draft == false        
     name: GNU@10.0 C++14 OpenMPI without HDF5    
     runs-on: ubuntu-latest
+    timeout-minutes: 45
+    
     env: 
       DISCHARGE_HOME: ${{github.workspace}}
       CHOMBO_HOME: ${{github.workspace}}/Chombo-3.3/lib      
@@ -139,21 +169,47 @@ jobs:
       - name: Copy makefile
         run: |
           cp $DISCHARGE_HOME/Local/GitHub/Make.defs.MPI.linux-gcc $CHOMBO_HOME/mk/Make.defs.local
-          
+
       - name: Build Chombo (2D)
         run: |
-          make -s -j2 DIM=2 DEBUG=TRUE OPT=TRUE lib
+          make -s -j2 DIM=2 lib
         working-directory: ${{ env.CHOMBO_HOME }}
+
+      - name: Build chombo-discharge/source (2D)
+        run: |
+          make -s -j2 DIM=2 source
+
+      - name: Build chombo-discharge/geometries (2D)
+        run: |
+          make -s -j2 DIM=2 geometries
+
+      - name: Build chombo-discharge/physics (2D)
+        run: |
+          make -s -j2 DIM=2 physics
 
       - name: Build Chombo (3D)
         run: |
-          make -s -j2 DIM=3 DEBUG=TRUE OPT=TRUE lib
+          make -s -j2 DIM=3 lib
         working-directory: ${{ env.CHOMBO_HOME }}
+
+      - name: Build chombo-discharge/source (3D)
+        run: |
+          make -s -j2 DIM=3 source
+
+      - name: Build chombo-discharge/geometries (3D)
+        run: |
+          make -s -j2 DIM=3 geometries
+
+      - name: Build chombo-discharge/physics (3D)
+        run: |
+          make -s -j2 DIM=3 physics
 
   mpi-hdf5:
     if: github.event.pull_request.draft == false        
     name: GNU@10.0 C++14 OpenMPI with HDF5        
     runs-on: ubuntu-latest
+    timeout-minutes: 45
+    
     env: 
       DISCHARGE_HOME: ${{github.workspace}}
       CHOMBO_HOME: ${{github.workspace}}/Chombo-3.3/lib      
@@ -178,13 +234,37 @@ jobs:
       - name: Copy makefile
         run: |
           cp $DISCHARGE_HOME/Local/GitHub/Make.defs.MPI.HDF5.linux-gcc $CHOMBO_HOME/mk/Make.defs.local
-          
+
       - name: Build Chombo (2D)
         run: |
-          make -s -j2 DIM=2 DEBUG=TRUE OPT=TRUE lib
+          make -s -j2 DIM=2 lib
         working-directory: ${{ env.CHOMBO_HOME }}
+
+      - name: Build chombo-discharge/source (2D)
+        run: |
+          make -s -j2 DIM=2 source
+
+      - name: Build chombo-discharge/geometries (2D)
+        run: |
+          make -s -j2 DIM=2 geometries
+
+      - name: Build chombo-discharge/physics (2D)
+        run: |
+          make -s -j2 DIM=2 physics
 
       - name: Build Chombo (3D)
         run: |
-          make -s -j2 DIM=3 DEBUG=TRUE OPT=TRUE lib
+          make -s -j2 DIM=3 lib
         working-directory: ${{ env.CHOMBO_HOME }}
+
+      - name: Build chombo-discharge/source (3D)
+        run: |
+          make -s -j2 DIM=3 source
+
+      - name: Build chombo-discharge/geometries (3D)
+        run: |
+          make -s -j2 DIM=3 geometries
+
+      - name: Build chombo-discharge/physics (3D)
+        run: |
+          make -s -j2 DIM=3 physics
