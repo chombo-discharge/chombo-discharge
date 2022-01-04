@@ -1,4 +1,4 @@
-:name: Linux GCC
+name: Linux GCC
 
 on:
   pull_request:
