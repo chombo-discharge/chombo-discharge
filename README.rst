@@ -1,10 +1,10 @@
 chombo-discharge
 ----------------
 
-This is chombo-discharge, a multiphysics code which uses Chombo for plasma simulations with adaptive mesh refinement (AMR) on embedded boundary grids.
+This is ``chombo-discharge``, a multiphysics code which uses ``Chombo`` for plasma simulations with adaptive mesh refinement (AMR) on embedded boundary grids.
 
-A modified version of Chombo is distributed together with this code.
-chombo-discharge only uses Chombo; it is not affiliated nor endorsed by LBNL.
+A modified version of ``Chombo`` is distributed together with this code.
+``chombo-discharge`` only uses ``Chombo``; it is not affiliated nor endorsed by LBNL.
 
 Installation instructions are found below, and also included in the full user documentation which is available at https://chombo-discharge.github.io.
 
@@ -13,9 +13,9 @@ See LICENSE and Copyright.txt for redistribution rights.
 Dependencies
 ------------
 
-chombo-discharge is dependent on the following packages:
+``chombo-discharge`` is dependent on the following packages:
 
-* Chombo (supplied with chombo-discharge)
+* ``Chombo`` (supplied with ``chombo-discharge``)
 * LAPACK and BLAS (required). 
 * HDF5 (optional, used for writing plot and checkpoint file).
 * MPI (optional, used for parallelization).
@@ -24,7 +24,7 @@ chombo-discharge is dependent on the following packages:
 Obtaining chombo-discharge
 --------------------------
 
-To clone chombo-discharge, set the environment variable ``$DISCHARGE_HOME`` as follows
+To clone ``chombo-discharge``, set the environment variable ``$DISCHARGE_HOME`` as follows
 
 .. code-block:: text
 		
@@ -88,7 +88,7 @@ E.g.,
    echo $CHOMBO_HOME
 
 ``chombo-discharge`` can be compiled in serial or with MPI, and with or without HDF5.
-The user need to configure the Chombo makefile to ensure that the chombo-discharge is properly configured.
+The user need to configure the ``Chombo`` makefile to ensure that the ``chombo-discharge`` is properly configured.
 
 Below, we include brief instructions for compilation in serial without HDF5 (for testing purposes), full configuration with MPI and HDF5 on a workstation, and for a cluster. 
 
@@ -191,7 +191,7 @@ If successful, ``chombo-discharge`` libraries will appear in ``$DISCARGE_HOME/Li
 Configuration on clusters
 -------------------------
 
-To configure chombo-discharge for executation on a cluster, use one of the makefiles supplied in ``$DISCHARGE_HOME/Local`` if it exists for your computer.
+To configure ``chombo-discharge`` for executation on a cluster, use one of the makefiles supplied in ``$DISCHARGE_HOME/Local`` if it exists for your computer.
 Alternatively, copy ``$DISCHARGE_HOME/Local/Make.defs.local.template`` to ``$CHOMBO_HOME/lib/mk/Make.defs.local`` and set the compilers, optimization flags, and paths to HDF5 library.
 
 On clusters, MPI and HDF5 are usually already installed, but must usually be loaded (e.g. as modules) before compilation.
@@ -260,5 +260,3 @@ Contributing
 ------------
 We welcome feedback, bug reports, or code contributions. Use the github issue tracker and pull request system for code contributions
 See code documentation for coding style and review system. 
-
-
