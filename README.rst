@@ -134,6 +134,8 @@ After installing the dependencies, copy the desired configuration file to ``$CHO
 
 * For serial build without HDF5:
 
+  .. code-block:: text
+
      cp $DISCHARGE_HOME/Local/Make.defs.GNU $CHOMBO_HOME/lib/mk/Make.defs.local
 
 * For serial build with HDF5:
