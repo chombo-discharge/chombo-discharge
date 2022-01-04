@@ -16,6 +16,7 @@
 #include <CD_Location.H>
 #include <CD_NamespaceHeader.H>
 
+inline
 RealVect Location::position(const Location::Cell a_position,
 			    const VolIndex&      a_vof,
 			    const EBISBox&       a_ebisbox,
@@ -43,6 +44,7 @@ RealVect Location::position(const Location::Cell a_position,
   return ret;
 }
 
+inline
 RealVect Location::position(const Location::Face a_position,
 			    const FaceIndex&     a_face,
 			    const EBISBox&       a_ebisbox,
