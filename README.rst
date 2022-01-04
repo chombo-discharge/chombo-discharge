@@ -68,7 +68,7 @@ Next, set the ``$CHOMBO_HOME`` environment variable and clone ``Chombo`` there, 
 Configuration
 -------------
 
-``chombo-discharge`` is compiled using GNUmake, following the ``Chombo`` makefiles.
+``chombo-discharge`` is compiled using Make, following the ``Chombo`` makefiles.
 Compilers, libraries, and configuration options are defined in a file ``Make.defs.local`` which resides in ``$CHOMBO_HOME/mk``.
 Users need to supply this file in order to compile ``chombo-discharge``.
 Typically, these steps include
@@ -100,16 +100,23 @@ Next, compile ``chombo-discharge`` by
 
 This will compile the ``chombo-discharge`` source code in serial and without HDF5 (using four cores for the compilation).
 If successful, ``chombo-discharge`` libraries will appear in :file:`$DISCARGE_HOME/Lib`.
-To test a compilation with MPI and/or HDF5, use one of the files :file:`
 
 GNU configuration for workstations
 ----------------------------------
 
-On a workstation, one can currently install all dependencies by HDF5 and MPI by
+Here, we provide an example installation process using GNU compilers for a workstation.
+
+First, one can currently install the GNU compiler suite by
 
 .. code-block::
    
-   sudo apt install csh gfortran g++ libhdf5-dev libhdf5-openmpi-dev openmpi-bin libblas-dev liblapack-dev
+   sudo apt install csh gfortran g++ libblas-dev liblapack-dev
+
+To also install OpenMPI and HDF5:
+
+.. code-block::
+
+   sudo apt install libhdf5-dev libhdf5-openmpi-dev openmpi-bin
 
 This will install
 
@@ -120,7 +127,7 @@ This will install
   
 Equivalent steps for Intel compilers will differ slightly.
 
-Both serial and parallel HDF5 will be installed (usually in folders ``/usr/lib/x86_64-linux-gnu/serial/`` and ``/usr/lib/x86_64-linux-gnu/parallel/``.
+Both serial and parallel HDF5 will be installed, and these are *usually* found in folders ``/usr/lib/x86_64-linux-gnu/serial/`` and ``/usr/lib/x86_64-linux-gnu/parallel/``.
 However, if compiling with HDF5 the user needs to ensure that the paths are correct. 
 
 After installing the dependencies, copy the desired configuration file to ``$CHOMBO_HOME/lib/mk``:
