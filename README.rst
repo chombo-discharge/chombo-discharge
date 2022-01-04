@@ -10,16 +10,7 @@ Installation instructions are found below, and also included in the full user do
 
 See LICENSE and Copyright.txt for redistribution rights. 
 
-Dependencies
-------------
 
-``chombo-discharge`` is dependent on the following packages:
-
-* ``Chombo`` (supplied with ``chombo-discharge``)
-* LAPACK and BLAS (required). 
-* HDF5 (optional, used for writing plot and checkpoint file).
-* MPI (optional, used for parallelization).
-* VisIt visualization (optional, but frequently used for visualization). 
 
 Obtaining chombo-discharge
 --------------------------
@@ -65,8 +56,22 @@ Next, set the ``$CHOMBO_HOME`` environment variable and clone ``Chombo`` there, 
    export CHOMBO_HOME=<Location for Chombo>
    git clone git@github.com:chombo-discharge/Chombo-3-3.git ${CHOMBO_HOME}
 
-Configuration
+Installation
 -------------
+
+Dependencies
+____________
+
+``chombo-discharge`` is dependent on the following packages:
+
+* ``Chombo`` (supplied with ``chombo-discharge``)
+* LAPACK and BLAS (required). 
+* HDF5 (optional, used for writing plot and checkpoint file).
+* MPI (optional, used for parallelization).
+* VisIt visualization (optional, but frequently used for visualization). 
+
+Configuration
+_____________
 
 ``chombo-discharge`` is compiled using Make, following the ``Chombo`` makefiles.
 Compilers, libraries, and configuration options are defined in a file ``Make.defs.local`` which resides in ``$CHOMBO_HOME/mk``.
