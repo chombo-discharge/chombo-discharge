@@ -2685,7 +2685,7 @@ void ItoSolver::mergeBVH(List<ItoParticle>& a_particles, const int a_particlesPe
   // 2. Build the BVH tree and get the leaves of the tree
   const int firstDir = (m_directionKD < 0) ? Random::get(m_uniformDistribution0d) : m_directionKD;
   m_mergeTree.define(pointMasses);
-  m_mergeTree.buildTree(firstDir, a_particlesPerCell);
+  m_mergeTree.buildTree(firstDir, a_particlesPerCell, ItoMerge::NodePartitionEqualMass<PointMass>);
 
   // 3. Go through the leaves in the tree -- each leaf has a set of PointMass'es that we make into a single
   //    computational particle.

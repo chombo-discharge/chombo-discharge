@@ -209,8 +209,6 @@ namespace ItoMerge {
     @param[in]    a_dir  Coordinate to split along
     @note Implemented in CD_ItoMergeImplem.H
   */
-  template <class T>
-  NodePartitioner<T> NodePartitionEqualMass;
 
   /*!
     @brief Class for making a tree structure with ItoMerge::Node<T> in it. 
@@ -254,7 +252,7 @@ namespace ItoMerge {
       @param[in] a_partitioner     Partitioning function. 
     */
     inline
-    void buildTree(const int a_firstDir, const int a_numTargetLeaves, const NodePartitioner<T>& a_partitioner = ItoMerge::NodePartitionEqualMass<T>); 
+    void buildTree(const int a_firstDir, const int a_numTargetLeaves, const NodePartitioner<T>& a_partitioner);// = ItoMerge::NodePartitionEqualMass<T>); 
 
     /*!
       @brief Get the leaf nodes
