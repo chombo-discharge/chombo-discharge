@@ -1,8 +1,8 @@
 chombo-discharge
 ----------------
 
-This is chombo-discharge, a multiphysics code which uses Chombo for plasma
-simulations with adaptive mesh refinement (AMR) on embedded boundary grids. 
+This is chombo-discharge, a multiphysics code which uses Chombo for plasma simulations with adaptive mesh refinement (AMR) on embedded boundary grids.
+For a list of features, see the full documentation at the 'user documentatio <https://chombo-discharge.github.io>'_
 
 A modified version of Chombo is distributed together with this code.
 chombo-discharge only uses Chombo; it is not affiliated nor endorsed by LBNL.
