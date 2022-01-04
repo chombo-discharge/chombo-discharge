@@ -33,7 +33,7 @@ To clone chombo-discharge, set the environment variable ``$DISCHARGE_HOME`` as f
 There are two ways of cloning ``chombo-discharge``: 
 
 Using submodules
-^^^^^^^^^^^^^^^^
+****************
 
 By including ``Chombo`` as a submodule in ``chombo-discharge``.
 To clone ``chombo-discharge`` and the dependency ``Chombo``, do
