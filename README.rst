@@ -77,15 +77,25 @@ Typically, these steps include
 * Specifying configurations. E.g., serial or parallel builds, and compiler flags. 
 * Specifying library paths (in particular for HDF5).
 
-Some commonly used configuration files are found in :file:`$DISCHARGE_HOME/Local`. 
+Some commonly used configuration files are found in ``$DISCHARGE_HOME/Local``.
+
+Before proceeding further, ensure that both ``$DISCHARGE_HOME`` and ``$CHOMBO_HOME`` are defined and point to correct locations.
+E.g.,
+
+.. code-block:: txt
+
+   echo $DISCHARGE_HOME
+   echo $CHOMBO_HOME
+
+``chombo-discharge`` can be compiled in serial or with MPI, and with or without HDF5.
+The user need to configure the Chombo makefile to ensure that the chombo-discharge is properly configured.
+
+Below, we include brief recipes for quick compilation in serial, full configuration on a workstation, and for a cluster. 
 
 Test build
 ----------
 
-chombo-discharge can be compiled in serial or with MPI, and with or without HDF5.
-The user need to configure the Chombo makefile to ensure that the chombo-discharge is properly configured.
-
-An example configuration process for workstations is included below, but for a quick test the user can use the GNU configuration file as follows:
+For a quick test the user can use the GNU configuration file as follows:
 
 .. code-block:: text
 
