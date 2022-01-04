@@ -7,14 +7,9 @@ simulations with adaptive mesh refinement (AMR) on embedded boundary grids.
 A modified version of Chombo is distributed together with this code.
 chombo-discharge only uses Chombo; it is not affiliated nor endorsed by LBNL.
 
-License
--------
+Installation instructions are found below, and full user documentation is available at https://chombo-discharge.github.io.
 
 See LICENSE and Copyright.txt for redistribution rights. 
-
-Documentation
--------------
-Documentation is available at https://chombo-discharge.github.io
 
 Dependencies
 ------------
