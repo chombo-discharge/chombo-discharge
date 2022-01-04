@@ -101,6 +101,12 @@ For a quick test the user can use the GNU configuration file supplied with ``cho
 
    cp $DISCHARGE_HOME/Local/Make.defs.GNU $CHOMBO_HOME/lib/mk/Make.defs.local
 
+To install compiler dependencies, do
+
+.. code-block::
+   
+   sudo apt install csh gfortran g++ libblas-dev liblapack-dev
+
 Next, compile ``chombo-discharge`` by
 
 .. code-block:: text
