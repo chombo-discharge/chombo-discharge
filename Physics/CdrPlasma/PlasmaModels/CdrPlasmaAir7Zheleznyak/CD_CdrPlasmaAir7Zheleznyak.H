@@ -121,13 +121,13 @@ namespace Physics {
       ChemistryAlgorithm m_ChemistryAlgorithm;
 
       // Tables built from BOLSIG+
-      LookupTable m_e_mobility;    // Mobility
-      LookupTable m_e_diffco;      // Diffusion coefficient
-      LookupTable m_e_alphaN2;     // Ionization rate
-      LookupTable m_e_alphaO2;     // Ionization rate
-      LookupTable m_e_alpha;       // Townsend alpha
-      LookupTable m_e_eta;         // Townsend eta
-      LookupTable m_e_temperature; // Electron temperature (K)
+      LookupTable<2> m_e_mobility;    // Mobility
+      LookupTable<2> m_e_diffco;      // Diffusion coefficient
+      LookupTable<2> m_e_alphaN2;     // Ionization rate
+      LookupTable<2> m_e_alphaO2;     // Ionization rate
+      LookupTable<2> m_e_alpha;       // Townsend alpha
+      LookupTable<2> m_e_eta;         // Townsend eta
+      LookupTable<2> m_e_temperature; // Electron temperature (K)
 
 
       Vector<int> m_wallBc; // Wall boundary conditions
@@ -181,7 +181,7 @@ namespace Physics {
 
       int poissonReaction(const Real a_propensity, const Real a_dt) const;
 
-      void readFileEntries(LookupTable& a_table, const std::string a_string);
+      void readFileEntries(LookupTable<2>& a_table, const std::string a_string);
       void parseTransportFile();
       void parseTransport();
       void parseGasParameters();

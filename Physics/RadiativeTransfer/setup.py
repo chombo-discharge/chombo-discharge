@@ -4,7 +4,6 @@ import os
 import sys
 sys.path.append('./python')
 import app_main
-import app_make
 import app_options
 import app_inc
 
@@ -18,14 +17,12 @@ parser.add_argument('-silent',          type=bool, help='Silent build of executa
 parser.add_argument('-discharge_home',    type=str,  help="Source code base directory", default=os.environ.get('DISCHARGE_HOME', os.getcwd()))
 parser.add_argument('-base_dir',        type=str,  help="Base directory of mini-app", default="./mini_apps")
 parser.add_argument('-app_name',        type=str,  help="Mini app name. An error message is issued if the name already exists")
-parser.add_argument('-filename',        type=str,  help="File name of main file", default="main")
-parser.add_argument('-RtSolver',      type=str,  help="Poisson solver implementation", default="field_solver_multigrid")
+parser.add_argument('-RtSolver',      type=str,  help="Radiative transfer solver implementation", default="EddingtonSP1")
 parser.add_argument('-geometry',        type=str,  help="Geometry class", default="RegularGeometry")
 
 args = parser.parse_args()
 
 app_main.write_template(args)    # Write main file
-app_make.write_template(args)    # Write makefile
 app_options.write_template(args) # Write options file
 
 # Check if DISCHARGE_HOME and CHOMBO_HOME has been set
@@ -39,17 +36,19 @@ else:
     print 'Setting up problem in directory ' + args.discharge_home + "/" + args.base_dir + "/" + args.app_name
 
     app_main.write_template(args)    # Write main file
-    app_make.write_template(args)    # Write makefile
     app_options.write_template(args) # Write options file
+
+    # Copy the makefile
+    os.system('cp ./python/GNUmakefile ' + args.discharge_home + "/" + args.base_dir + "/" + args.app_name + "/GNUmakefile")                    
 
     # Build executable if called for it
     if args.build:
         os.chdir(args.discharge_home + "/" + args.base_dir + "/" + args.app_name)
         os.system('pwd')
         if args.silent:
-            os.system('make -s -j ' + str(args.procs) + ' ' + args.filename)
+            os.system('make -s -j ' + str(args.procs) + ' main')
         else:
-            os.system('make -j ' + str(args.procs) + ' ' + args.filename)
+            os.system('make -j ' + str(args.procs) + ' main')
             print 'Created and built your mini app - it resides in ' + args.discharge_home + "/" + args.base_dir + "/" + args.app_name
     else:
         print 'Problem setup successful'

@@ -1,33 +1,17 @@
-include $(CHOMBO_HOME)/mk/Make.defs
+include $(DISCHARGE_HOME)/Lib/Definitions.make
 
-USE_EB=TRUE
-USE_MF=TRUE
-DIM=2
-
-
-# Base file containing int main()
-ebase := main
-
-LibNames:= MFElliptic MFTools EBAMRTimeDependent EBAMRElliptic EBAMRTools EBTools AMRElliptic AMRTools \
-	AMRTimeDependent BaseTools BoxTools Workshop ParticleTools
-
-
-# Target
-all: all-test
-
-base_dir = .
-src_dirs = $(DISCHARGE_HOME)/Source \
-	$(DISCHARGE_HOME)/Source/AmrMesh \
-	$(DISCHARGE_HOME)/Source/CellTagger \
-	$(DISCHARGE_HOME)/Source/Driver \
-	$(DISCHARGE_HOME)/Source/Geometry \
-	$(DISCHARGE_HOME)/Source/ImplicitFunctions \
-	$(DISCHARGE_HOME)/Source/Multifluid \
-	$(DISCHARGE_HOME)/Source/Utilities \
-	$(DISCHARGE_HOME)/Source/Particle \
-	$(DISCHARGE_HOME)/Physics/Geometry \
-	$(DISCHARGE_HOME)/Geometries/Vessel\
-
-
+# Things for the Chombo makefile system. 
+ebase    = main
 include $(CHOMBO_HOME)/mk/Make.example
 
+# For building this application -- it needs the chombo-discharge source code. 
+$(ebase): dependencies
+
+# Build dependencies if they do not exis. 
+dependencies: 
+	$(MAKE) --directory=$(DISCHARGE_HOME) lib
+	$(MAKE) --directory=$(DISCHARGE_HOME) geometry
+
+# Make advection-diffusion headers and library visible. 
+XTRACPPFLAGS += $(GEOMETRYONLY_INCLUDE)
+XTRALIBFLAGS += $(addprefix -l, $(GEOMETRYONLY_LIB))$(config)

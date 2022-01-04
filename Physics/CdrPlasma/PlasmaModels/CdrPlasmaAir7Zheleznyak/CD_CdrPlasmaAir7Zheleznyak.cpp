@@ -57,7 +57,7 @@ CdrPlasmaAir7Zheleznyak::~CdrPlasmaAir7Zheleznyak() {
 
 }
 
-void CdrPlasmaAir7Zheleznyak::readFileEntries(LookupTable& a_table, const std::string a_string){
+void CdrPlasmaAir7Zheleznyak::readFileEntries(LookupTable<2>& a_table, const std::string a_string){
   Real x, y;
   bool read_line = false;
   std::ifstream infile(m_transport_file);
@@ -156,8 +156,8 @@ void CdrPlasmaAir7Zheleznyak::parseElectronMobility(){
   ParmParse pp("CdrPlasmaAir7Zheleznyak");
 
   readFileEntries(m_e_mobility, CdrPlasmaAir7Zheleznyak::s_bolsig_mobility);
-  m_e_mobility.scaleX(m_N*Units::Td);
-  m_e_mobility.scaleY(1./m_N); 
+  m_e_mobility.scale<0>(m_N*Units::Td);
+  m_e_mobility.scale<1>(1./m_N); 
   m_e_mobility.makeUniform(m_uniform_entries);
 }
 
@@ -165,8 +165,8 @@ void CdrPlasmaAir7Zheleznyak::parseElectronDiffusionCoefficient(){
   ParmParse pp("CdrPlasmaAir7Zheleznyak");
   
   readFileEntries(m_e_diffco, CdrPlasmaAir7Zheleznyak::s_bolsig_diffco);
-  m_e_diffco.scaleX(m_N*Units::Td);
-  m_e_diffco.scaleY(1./m_N); 
+  m_e_diffco.scale<0>(m_N*Units::Td);
+  m_e_diffco.scale<1>(1./m_N); 
   m_e_diffco.makeUniform(m_uniform_entries);
 }
 
@@ -176,13 +176,13 @@ void CdrPlasmaAir7Zheleznyak::parseAlpha(){
   readFileEntries(m_e_alphaN2, CdrPlasmaAir7Zheleznyak::s_bolsig_alphaN2);
   readFileEntries(m_e_alphaO2, CdrPlasmaAir7Zheleznyak::s_bolsig_alphaO2);
   
-  m_e_alpha.scaleX(m_N*Units::Td);
-  m_e_alphaN2.scaleX(m_N*Units::Td);
-  m_e_alphaO2.scaleX(m_N*Units::Td);
+  m_e_alpha.scale<0>(m_N*Units::Td);
+  m_e_alphaN2.scale<0>(m_N*Units::Td);
+  m_e_alphaO2.scale<0>(m_N*Units::Td);
   
-  m_e_alpha.scaleY(m_N);
-  m_e_alphaN2.scaleY(m_N*m_N2frac);
-  m_e_alphaO2.scaleY(m_N*m_O2frac);
+  m_e_alpha.scale<1>(m_N);
+  m_e_alphaN2.scale<1>(m_N*m_N2frac);
+  m_e_alphaO2.scale<1>(m_N*m_O2frac);
   
   m_e_alpha.makeUniform(m_uniform_entries);
   m_e_alphaN2.makeUniform(m_uniform_entries);
@@ -192,16 +192,16 @@ void CdrPlasmaAir7Zheleznyak::parseAlpha(){
 void CdrPlasmaAir7Zheleznyak::parseEta(){
   ParmParse pp("CdrPlasmaAir7Zheleznyak");
   readFileEntries(m_e_eta, CdrPlasmaAir7Zheleznyak::s_bolsig_eta);
-  m_e_eta.scaleX(m_N*Units::Td);
-  m_e_eta.scaleY(m_N);
+  m_e_eta.scale<0>(m_N*Units::Td);
+  m_e_eta.scale<1>(m_N);
   m_e_eta.makeUniform(m_uniform_entries);
 }
 
 void CdrPlasmaAir7Zheleznyak::parseTemperature(){
   ParmParse pp("CdrPlasmaAir7Zheleznyak");
   readFileEntries(m_e_temperature, CdrPlasmaAir7Zheleznyak::s_bolsig_energy);
-  m_e_temperature.scaleX(m_N*Units::Td);
-  m_e_temperature.scaleY(2.0*Units::Qe/(3.0*Units::kb));
+  m_e_temperature.scale<0>(m_N*Units::Td);
+  m_e_temperature.scale<1>(2.0*Units::Qe/(3.0*Units::kb));
   m_e_temperature.makeUniform(m_uniform_entries);
 }
 
@@ -439,8 +439,8 @@ void CdrPlasmaAir7Zheleznyak::advanceChemistryEuler(Vector<Real>&          a_par
 						    const Real             a_kappa) const{
   const Real volume = pow(a_dx, SpaceDim);
   const Real E      = a_E.vectorLength();
-  const Real ve     = E*m_e_mobility.getEntry(E);
-  const Real Te     = Max(m_e_temperature.getEntry(E), 300.);
+  const Real ve     = E*m_e_mobility.getEntry<1>(E);
+  const Real Te     = Max(m_e_temperature.getEntry<1>(E), 300.);
 
   const Real Ne    = a_particle_densities[m_elec_idx];
   const Real N2p   = a_particle_densities[m_N2plus_idx];
@@ -473,7 +473,7 @@ void CdrPlasmaAir7Zheleznyak::advanceChemistryEuler(Vector<Real>&          a_par
   Real fcorr = 1.0;
   if(m_alpha_corr){
     const RealVect Eunit = a_E/a_E.vectorLength();
-    const Real De        = m_e_diffco.getEntry(E);
+    const Real De        = m_e_diffco.getEntry<1>(E);
     const RealVect gNe   = a_particle_gradients[m_elec_idx];
 
     fcorr = 1.0 + PolyGeom::dot(Eunit, De*gNe)/(1.0+a_particle_densities[m_elec_idx]*ve);
@@ -481,8 +481,8 @@ void CdrPlasmaAir7Zheleznyak::advanceChemistryEuler(Vector<Real>&          a_par
     fcorr = Max(0.0, fcorr);
   }
 
-  const Real R1  = fcorr*m_e_alphaN2.getEntry(E)*Ne;
-  const Real R2  = fcorr*m_e_alphaO2.getEntry(E)*Ne;
+  const Real R1  = fcorr*m_e_alphaN2.getEntry<1>(E)*Ne;
+  const Real R2  = fcorr*m_e_alphaO2.getEntry<1>(E)*Ne;
   const Real R3  = (5.E-41)*N2p*N2*M;
   const Real R4  = 2.5E-16*N4p*O2;
   const Real R5  = 6E-17*N2p*O2;
@@ -597,7 +597,7 @@ Vector<Real> CdrPlasmaAir7Zheleznyak::computeCdrDiffusionCoefficients(const Real
 								      const Vector<Real> a_cdr_densities) const {
 
   Vector<Real> dco(m_numCdrSpecies, 0.0);
-  dco[m_elec_idx] = m_e_diffco.getEntry(a_E.vectorLength());
+  dco[m_elec_idx] = m_e_diffco.getEntry<1>(a_E.vectorLength());
   if(m_isDiffusive_ions){
     dco[m_N2plus_idx]   = m_ion_diffusion;
     dco[m_O2plus_idx]   = m_ion_diffusion;
@@ -617,7 +617,7 @@ Vector<RealVect> CdrPlasmaAir7Zheleznyak::computeCdrDriftVelocities(const Real  
 								    const Vector<Real> a_cdr_densities) const{
   Vector<RealVect> vel(m_numCdrSpecies, RealVect::Zero);
 
-  vel[m_elec_idx] = -a_E*m_e_mobility.getEntry(a_E.vectorLength());
+  vel[m_elec_idx] = -a_E*m_e_mobility.getEntry<1>(a_E.vectorLength());
   if(m_isMobile_ions){
     vel[m_N2plus_idx]   =  a_E*m_ion_mobility;
     vel[m_O2plus_idx]   =  a_E*m_ion_mobility;
@@ -724,8 +724,8 @@ Real CdrPlasmaAir7Zheleznyak::initialSigma(const Real a_time, const RealVect a_p
 
 Real CdrPlasmaAir7Zheleznyak::computeAlpha(const RealVect a_E) const{
   const Real E     = a_E.vectorLength();
-  const Real alpha = m_e_alpha.getEntry(E);
-  const Real eta   = m_e_eta.getEntry(E);
+  const Real alpha = m_e_alpha.getEntry<1>(E);
+  const Real eta   = m_e_eta.getEntry<1>(E);
 
   return alpha;
 }

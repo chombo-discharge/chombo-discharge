@@ -10,8 +10,8 @@ $(ebase): dependencies
 # Build dependencies if they do not exis. 
 dependencies: 
 	$(MAKE) --directory=$(DISCHARGE_HOME) lib
-	$(MAKE) --directory=$(DISCHARGE_HOME) electrostatics
+	$(MAKE) --directory=$(DISCHARGE_HOME) brownianwalker
 
 # Make advection-diffusion headers and library visible. 
-XTRACPPFLAGS += $(ELECTROSTATICS_INCLUDE)
-XTRALIBFLAGS += $(addprefix -l, $(ELECTROSTATICS_LIB))$(config)
+XTRACPPFLAGS += $(BROWNIAN_INCLUDE)
+XTRALIBFLAGS += $(addprefix -l, $(BROWNIAN_LIB))$(config)

@@ -799,7 +799,6 @@ CdrPlasmaMorrowZheleznyak::Electron::Electron(){
   m_chargeNumber    = -1;
   m_isDiffusive = true;
   m_isMobile    = true;
-  m_unit      = "m-3";
 
   Vector<Real> pos(SpaceDim);
   std::string str;
@@ -818,7 +817,6 @@ CdrPlasmaMorrowZheleznyak::PositiveSpecies::PositiveSpecies(){
   m_chargeNumber    = 1;
   m_isDiffusive = false;
   m_isMobile    = false;
-  m_unit      = "m-3";
 
   Vector<Real> pos(SpaceDim);
   std::string str;
@@ -837,7 +835,6 @@ CdrPlasmaMorrowZheleznyak::negative_species::negative_species(){
   m_chargeNumber    = -1;
   m_isDiffusive = false;
   m_isMobile    = false;
-  m_unit      = "m-3";
 
   std::string str;
 
@@ -1039,26 +1036,6 @@ void CdrPlasmaMorrowZheleznyak::parseInitialParticles(){
   m_CdrSpecies[m_nplus_idx]->getInitialParticles() = p;
 
   // Get the initial deposition scheme
-  ParmParse pp("CdrPlasmaMorrowZheleznyak");
-  std::string str;
-  InterpType deposition;
-
-  pp.get("particle_deposition", str);
-  if(str == "cic"){
-    deposition = InterpType::CIC;
-  }
-  else if(str == "ngp"){
-    deposition = InterpType::NGP;
-  }
-  else if(str == "tsc"){
-    deposition = InterpType::TSC;
-  }
-  else{
-    MayDay::Abort("CdrPlasmaMorrowZheleznyak::parseInitialParticles - unknown deposition type requested");
-  }
-  
-  m_CdrSpecies[m_nelec_idx]->getDeposition() = deposition;
-  m_CdrSpecies[m_nplus_idx]->getDeposition() = deposition;
 }
 
 void CdrPlasmaMorrowZheleznyak::addUniformParticles(List<Particle>& a_particles){

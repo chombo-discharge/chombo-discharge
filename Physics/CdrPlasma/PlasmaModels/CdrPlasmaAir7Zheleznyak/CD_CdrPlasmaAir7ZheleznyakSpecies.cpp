@@ -12,6 +12,9 @@
 // Std includes
 #include <chrono>
 
+// Chombo includes
+#include <ParmParse.H>
+
 // Our includes
 #include <CD_CdrPlasmaAir7Zheleznyak.H>
 #include <CD_CdrPlasmaAir7ZheleznyakSpecies.H>
