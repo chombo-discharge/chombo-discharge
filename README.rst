@@ -6,8 +6,7 @@ This is chombo-discharge, a multiphysics code which uses Chombo for plasma simul
 A modified version of Chombo is distributed together with this code.
 chombo-discharge only uses Chombo; it is not affiliated nor endorsed by LBNL.
 
-Installation instructions are found below, and full user documentation is available at https://chombo-discharge.github.io.
-For a list of features, see [Overview](https://chombo-discharge.github.io/Overview.html).
+Installation instructions are found below, and also included in the full user documentation which is available at https://chombo-discharge.github.io.
 
 See LICENSE and Copyright.txt for redistribution rights. 
 
