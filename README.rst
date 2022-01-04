@@ -30,39 +30,40 @@ To clone chombo-discharge, set the environment variable ``$DISCHARGE_HOME`` as f
 		
    export DISCHARGE_HOME=<Location for chombo-discharge>
 
-There are two ways of cloning ``chombo-discharge``: 
+There are two ways of cloning ``chombo-discharge``, using submodules or maintaining ``Chombo`` separately.
+The use of submodules is recommended.
 
 Using submodules
 ________________
 
 ``Chombo`` can be included as a submodule in ``chombo-discharge``.
-To clone the ``chombo-discharge`` code and ``Chombo``, do
+To clone both, do
 
 .. code-block:: text
 		
-		git clone --recursive git@github.com:chombo-discharge/chombo-discharge.git ${DISCHARGE_HOME}
+   git clone --recursive git@github.com:chombo-discharge/chombo-discharge.git ${DISCHARGE_HOME}
 
 Next, set the ``Chombo`` environment variable ``$CHOMBO_HOME`` to ``$DISCHARGE_HOME/Chombo-3.3/lib``, i.e.
 
 .. code-block:: text
 
-		export CHOMBO_HOME=$DISCHARGE_HOME/Chombo-3.3/lib
+   export CHOMBO_HOME=$DISCHARGE_HOME/Chombo-3.3/lib
 
 Maintaining  ``Chombo`` separately.
 ___________________________________
 
-First clone ``chombo-discharge`` *without* submodules by
+When maintaining ``Chombo`` separately, first clone ``chombo-discharge`` *without* submodules by
 
 .. code-block:: text
 		
-		git clone git@github.com:chombo-discharge/chombo-discharge.git ${DISCHARGE_HOME}
+   git clone git@github.com:chombo-discharge/chombo-discharge.git ${DISCHARGE_HOME}
 
 Next, set the ``$CHOMBO_HOME`` environment variable and clone ``Chombo`` there, i.e.
 
 .. code-block:: text
 
-		export CHOMBO_HOME=<Location for Chombo>
-		git clone git@github.com:chombo-discharge/Chombo-3-3.git ${CHOMBO_HOME}
+   export CHOMBO_HOME=<Location for Chombo>
+   git clone git@github.com:chombo-discharge/Chombo-3-3.git ${CHOMBO_HOME}
 
 Configuration
 -------------
