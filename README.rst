@@ -178,27 +178,15 @@ After installing the dependencies, copy the desired configuration file to ``$CHO
 
      cp $DISCHARGE_HOME/Local/Make.defs.MPI.HDF5.GNU $CHOMBO_HOME/lib/mk/Make.defs.local               
 
-After that, compile one of the applications by
+After that, compile the ``chombo-discharge`` source code by
 
 .. code-block:: text
 
-   cd $DISCHARGE_HOME/Regression/AdvectionDiffusion/Godunov
-   make -s -j4 main
+   cd $DISCHARGE_HOME
+   make -s -j4 lib
 
-To run the application, do
-
-.. code-block:: text
-
-   ./main2d.<bunch_of_options>.ex regression2d.inputs
-
-if using a serial build, and
-
-.. code-block:: text
-
-   mpirun -np 4 main2d.<bunch_of_options>.ex regression2d.inputs
-
-if using a parallel build.
-If compiling with HDF5, plot files will then appear in ``$DISCHARGE_HOME/Regression/AdvectionDiffusion/Godunov/plt``. 
+This will compile the ``chombo-discharge`` source code using the configuration settings set by the user. 
+If successful, ``chombo-discharge`` libraries will appear in ``$DISCARGE_HOME/Lib``.
 
 Configuration on clusters
 -------------------------
@@ -207,6 +195,53 @@ To configure chombo-discharge for executation on a cluster, use one of the makef
 Alternatively, copy ``$DISCHARGE_HOME/Local/Make.defs.local.template`` to ``$CHOMBO_HOME/lib/mk/Make.defs.local`` and set the compilers, optimization flags, and paths to HDF5 library.
 
 On clusters, MPI and HDF5 are usually already installed, but must usually be loaded (e.g. as modules) before compilation.
+
+Compiling physics modules
+-------------------------
+
+The ``chombo-discharge`` physics modules are maintained separately from the ``chombo-discharge`` source code. 
+To compile the physics modules, navigate to ``$DISCHARGE_HOME`` and compile the physics modules by
+
+.. code-block:: text
+
+   cd $DISCHARGE_HOME
+   make -s -j4 physics
+
+This will compile all physics modules.
+If successful, ``chombo-discharge`` libraries will appear in ``$DISCHARGE_HOME/Lib``. 
+
+Running an example application
+------------------------------
+
+In ``chombo-discharge``, applications are set up so that they use the ``chombo-discharge`` source code and one ``chombo-discharge`` physics module. 
+To run one of the applications that use a particular ``chombo-discharge`` physics module, we will run a simple advection-diffusion code.
+
+First, compile the application by
+
+.. code-block:: text
+
+   cd $DISCHARGE_HOME/Tests/AdvectionDiffusion/Godunov
+   make -s -j4 main
+
+This will provide an executable named ``main2d.<bunch_of_options>.ex``.
+If the application was compiled in 3D, the file will be named ``main3d.<bunch_of_options>.ex``.
+
+To run the application do:
+
+* **Serial build**
+
+  .. code-block:: text
+
+     ./main2d.<bunch_of_options>.ex regression2d.inputs
+
+* **Parallel build**
+  
+  .. code-block:: text
+
+     ./main2d.<bunch_of_options>.ex regression2d.inputs   
+
+If the user also compiled with HDF5, plot files will appear in ``$DISCHARGE_HOME/Tests/AdvectionDiffusion/Godunov``. 
+
 
 Troubleshooting
 ---------------
