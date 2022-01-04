@@ -90,12 +90,12 @@ E.g.,
 ``chombo-discharge`` can be compiled in serial or with MPI, and with or without HDF5.
 The user need to configure the Chombo makefile to ensure that the chombo-discharge is properly configured.
 
-Below, we include brief recipes for quick compilation in serial, full configuration on a workstation, and for a cluster. 
+Below, we include brief instructions for compilation in serial without HDF5 (for testing purposes), full configuration with MPI and HDF5 on a workstation, and for a cluster. 
 
 Test build
 ----------
 
-For a quick test the user can use the GNU configuration file as follows:
+For a quick test the user can use the GNU configuration file supplied with ``chombo-discharge`` as follows:
 
 .. code-block:: text
 
