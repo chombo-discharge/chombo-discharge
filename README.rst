@@ -149,7 +149,7 @@ This will install
 * OpenMPI
 * HDF5, both serial and parallel.
 
-Both serial and parallel HDF5 will be installed, and these are *usually* found in folders ``/usr/lib/x86_64-linux-gnu/serial/`` and ``/usr/lib/x86_64-linux-gnu/parallel/``.
+Both serial and parallel HDF5 will be installed, and these are *usually* found in folders ``/usr/lib/x86_64-linux-gnu/hdf5/serial/`` and ``/usr/lib/x86_64-linux-gnu/hdf5/parallel/``.
 Before proceeding further, the user should ensure that he can locate both the serial and parallel HDF5 libraries.
 
 After installing the dependencies, copy the desired configuration file to ``$CHOMBO_HOME/lib/mk``:
