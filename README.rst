@@ -6,10 +6,9 @@ This is ``chombo-discharge``, a multiphysics code which uses ``Chombo`` for plas
 A modified version of ``Chombo`` is distributed together with this code.
 ``chombo-discharge`` only uses ``Chombo``; it is not affiliated nor endorsed by LBNL.
 
-Installation instructions are found below, and also included in the full user documentation which is available at https://chombo-discharge.github.io.
+Installation instructions are found below and in the user documentation which is available at https://chombo-discharge.github.io. 
 
 See LICENSE and Copyright.txt for redistribution rights. 
-
 
 
 Obtaining chombo-discharge
@@ -220,6 +219,8 @@ Running an example application
 
 In ``chombo-discharge``, applications are set up so that they use the ``chombo-discharge`` source code and one ``chombo-discharge`` physics module. 
 To run one of the applications that use a particular ``chombo-discharge`` physics module, we will run a simple advection-diffusion code.
+
+The application code is located in ``$DISCHARGE_HOME/Tests/AdvectionDiffusion/Godunov`` and it uses the advection-diffusion physics module. 
 
 First, compile the application by
 
