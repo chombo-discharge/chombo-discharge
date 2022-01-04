@@ -62,14 +62,14 @@ Next, set the ``$CHOMBO_HOME`` environment variable and clone ``Chombo`` there, 
 
 .. code-block:: text
 
-		export DISCHARGE_HOME=<Location for chombo-discharge>
+		export CHOMBO_HOME=<Location for Chombo>
 		git clone git@github.com:chombo-discharge/Chombo-3-3.git ${CHOMBO_HOME}
 
 Configuration
 -------------
 
-``chombo-discharge`` is compiled using the ``Chombo`` makefile system.
-Compilers, libraries, and configuration options are defined in a file :file:`Make.defs.local` which resides in :file:`$CHOMBO_HOME/mk`.
+``chombo-discharge`` is compiled using GNUmake, following the ``Chombo`` makefiles.
+Compilers, libraries, and configuration options are defined in a file ``Make.defs.local`` which resides in ``$CHOMBO_HOME/mk``.
 Users need to supply this file in order to compile ``chombo-discharge``.
 Typically, these steps include
 
