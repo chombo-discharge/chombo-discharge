@@ -107,6 +107,11 @@ To install compiler dependencies, do
    
    sudo apt install csh gfortran g++ libblas-dev liblapack-dev
 
+This will install
+
+* LAPACK and BLAS
+* GNU compilers for Fortran and C++   
+
 Next, compile ``chombo-discharge`` by
 
 .. code-block:: text
@@ -122,11 +127,16 @@ GNU configuration for workstations
 
 Here, we provide an example installation process using GNU compilers for a workstation.
 
-First, one can currently install the GNU compiler suite by
+First, install GNU compiler dependencies by
 
 .. code-block::
    
    sudo apt install csh gfortran g++ libblas-dev liblapack-dev
+
+This will install
+
+* LAPACK and BLAS
+* GNU compilers for Fortran and C++   
 
 To also install OpenMPI and HDF5:
 
@@ -136,12 +146,8 @@ To also install OpenMPI and HDF5:
 
 This will install
 
-* LAPACK and BLAS
-* GNU compilers for Fortran and C++
 * OpenMPI
 * HDF5, both serial and parallel.
-  
-Equivalent steps for Intel compilers will differ slightly.
 
 Both serial and parallel HDF5 will be installed, and these are *usually* found in folders ``/usr/lib/x86_64-linux-gnu/serial/`` and ``/usr/lib/x86_64-linux-gnu/parallel/``.
 Before proceeding further, the user should ensure that he can locate both the serial and parallel HDF5 libraries.
