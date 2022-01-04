@@ -98,7 +98,7 @@ The user need to configure the ``Chombo`` makefile to ensure that the ``chombo-d
 Below, we include brief instructions for compilation in serial without HDF5 (for testing purposes), full configuration with MPI and HDF5 on a workstation, and for a cluster. 
 
 Test build
-----------
+__________
 
 For a quick test the user can use the GNU configuration file supplied with ``chombo-discharge`` as follows:
 
@@ -128,7 +128,7 @@ This will compile the ``chombo-discharge`` source code in serial and without HDF
 If successful, ``chombo-discharge`` libraries will appear in ``$DISCARGE_HOME/Lib``.
 
 GNU configuration for workstations
-----------------------------------
+__________________________________
 
 Here, we provide an example installation process using GNU compilers for a workstation.
 
@@ -194,7 +194,7 @@ This will compile the ``chombo-discharge`` source code using the configuration s
 If successful, ``chombo-discharge`` libraries will appear in ``$DISCARGE_HOME/Lib``.
 
 Configuration on clusters
--------------------------
+_________________________
 
 To configure ``chombo-discharge`` for executation on a cluster, use one of the makefiles supplied in ``$DISCHARGE_HOME/Local`` if it exists for your computer.
 Alternatively, copy ``$DISCHARGE_HOME/Local/Make.defs.local.template`` to ``$CHOMBO_HOME/lib/mk/Make.defs.local`` and set the compilers, optimization flags, and paths to HDF5 library.
