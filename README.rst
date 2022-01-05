@@ -114,7 +114,7 @@ For a quick test the user can use the GNU configuration file supplied with ``cho
       sudo apt install csh gfortran g++ libblas-dev liblapack-dev
 
    This will install
-
+   
    * LAPACK and BLAS
    * GNU compilers for Fortran and C++   
 
@@ -143,7 +143,7 @@ Here, we provide a more complete installation example using GNU compilers for a 
    This will install
 
    * LAPACK and BLAS
-     * GNU compilers for Fortran and C++   
+   * GNU compilers for Fortran and C++   
 
 #. To also install OpenMPI and HDF5:
 
@@ -167,32 +167,34 @@ Here, we provide a more complete installation example using GNU compilers for a 
 
      cp $DISCHARGE_HOME/Local/Make.defs.GNU $CHOMBO_HOME/lib/mk/Make.defs.local
 
-* **Serial build with HDF5**:
+   * **Serial build with HDF5**:
 
-  .. code-block:: text
+     .. code-block:: text
 
-     cp $DISCHARGE_HOME/Local/Make.defs.HDF5.GNU $CHOMBO_HOME/lib/mk/Make.defs.local
+	cp $DISCHARGE_HOME/Local/Make.defs.HDF5.GNU $CHOMBO_HOME/lib/mk/Make.defs.local
 
-* **MPI build without HDF5**:
+   * **MPI build without HDF5**:
 
-  .. code-block:: text
+     .. code-block:: text
 
-     cp $DISCHARGE_HOME/Local/Make.defs.MPI.GNU $CHOMBO_HOME/lib/mk/Make.defs.local
+	cp $DISCHARGE_HOME/Local/Make.defs.MPI.GNU $CHOMBO_HOME/lib/mk/Make.defs.local
 
-* **MPI build with HDF5**:
+   * **MPI build with HDF5**:
 
-  .. code-block:: text
+     .. code-block:: text
 
-     cp $DISCHARGE_HOME/Local/Make.defs.MPI.HDF5.GNU $CHOMBO_HOME/lib/mk/Make.defs.local               
+	cp $DISCHARGE_HOME/Local/Make.defs.MPI.HDF5.GNU $CHOMBO_HOME/lib/mk/Make.defs.local               
 
-After that, compile the ``chombo-discharge`` source code by
+#. Compile the ``chombo-discharge`` source code library:
 
-.. code-block:: text
+   .. code-block:: text
 
-   cd $DISCHARGE_HOME
-   make -s -j4 lib
+      cd $DISCHARGE_HOME
+      make -s -j4 lib
 
-This will compile the ``chombo-discharge`` source code using the configuration settings set by the user. 
+      This will compile the ``chombo-discharge`` source code using the configuration settings set by the user.
+      To compile ``chombo-discharge`` in 3D, do ``make -s -j4 DIM=3 lib``.
+      
 If successful, ``chombo-discharge`` libraries will appear in ``$DISCARGE_HOME/Lib``.
 
 Configuration on clusters
