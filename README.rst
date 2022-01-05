@@ -232,10 +232,10 @@ First, compile the application by
 .. code-block:: text
 
    cd $DISCHARGE_HOME/Examples/CdrPlasma/AirStreamer
-   make -s -j4 program
+   make -s -j4 DIM=2 program
 
 This will provide an executable named ``program2d.<bunch_of_options>.ex``.
-If the application was compiled in 3D, the file will be named ``program2d.<bunch_of_options>.ex``.
+If one compiles for 3D, i.e. ``DIM=3``, the executable will be named ``program2d.<bunch_of_options>.ex``.
 
 To run the application do:
 
@@ -243,15 +243,15 @@ To run the application do:
 
   .. code-block:: text
 
-     ./program2d.<bunch_of_options>.ex regression2d.inputs
+     ./program2d.<bunch_of_options>.ex positive2d.inputs
 
 * **Parallel build**
   
   .. code-block:: text
 
-     ./program2d.<bunch_of_options>.ex regression2d.inputs   
+     ./program2d.<bunch_of_options>.ex positive2d.inputs   
 
-If the user also compiled with HDF5, plot files will appear in ``$DISCHARGE_HOME/Tests/AdvectionDiffusion/Godunov``. 
+If the user also compiled with HDF5, plot files will appear in the subfolder ``plt``. 
 
 
 Troubleshooting
