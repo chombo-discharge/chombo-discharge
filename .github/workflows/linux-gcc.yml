@@ -43,7 +43,7 @@ jobs:
       - name: Run tests (2D)
         working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
         run: |
-          python3 regtest.py --compile --silent --benchmark                    
+          python3 regtest.py --compile --benchmark                    
 
       - name: Build Chombo (2D)
         working-directory: ${{ env.CHOMBO_HOME }}        
