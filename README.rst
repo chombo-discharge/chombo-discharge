@@ -225,7 +225,7 @@ Running an example application
 In ``chombo-discharge``, applications are set up so that they use the ``chombo-discharge`` source code and one ``chombo-discharge`` physics module. 
 To run one of the applications that use a particular ``chombo-discharge`` physics module, we will run a simple advection-diffusion code.
 
-The application code is located in ``$DISCHARGE_HOME/Tests/AdvectionDiffusion/Godunov`` and it uses the advection-diffusion physics module. 
+The application code is located in ``$DISCHARGE_HOME/Tests/AdvectionDiffusion/Godunov`` and it uses the advection-diffusion physics module (located in ``$DISCHARGE_HOME/Physics/AdvectionDiffusion``).
 
 First, compile the application by
 
