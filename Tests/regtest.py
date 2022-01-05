@@ -86,7 +86,7 @@ def compile_test(silent, build_procs, dim, clean, main):
     makeCommand += "DIM=" + str(dim) + " "
     if clean:
         makeCommand += "clean "
-    makeCommand += str(main)
+    makeCommand += str(config[str(test)]['exec'])        
 
     if not silent:
         print("\t Compiling with = '" + str(makeCommand) + "'\n")

@@ -99,31 +99,34 @@ Below, we include brief instructions for compilation in serial without HDF5 (for
 Test build
 __________
 
-For a quick test the user can use the GNU configuration file supplied with ``chombo-discharge`` as follows:
+For a quick test the user can use the GNU configuration file supplied with ``chombo-discharge`` by following the steps below:
 
-.. code-block:: text
+#. Copy the GNU configuration file
 
-   cp $DISCHARGE_HOME/Local/Make.defs.GNU $CHOMBO_HOME/lib/mk/Make.defs.local
+   .. code-block:: text
 
-To install compiler dependencies, do
+      cp $DISCHARGE_HOME/Local/Make.defs.GNU $CHOMBO_HOME/lib/mk/Make.defs.local
 
-.. code-block::
+#. Install dependencies
+
+   .. code-block::
    
-   sudo apt install csh gfortran g++ libblas-dev liblapack-dev
+      sudo apt install csh gfortran g++ libblas-dev liblapack-dev
 
-This will install
+   This will install
 
-* LAPACK and BLAS
-* GNU compilers for Fortran and C++   
+   * LAPACK and BLAS
+   * GNU compilers for Fortran and C++   
 
-Next, compile ``chombo-discharge`` by
+#. Compile ``chombo-discharge`` 
 
-.. code-block:: text
+   .. code-block:: text
 
-   cd $DISCHARGE_HOME
-   make -s -j4 lib
+      cd $DISCHARGE_HOME
+      make -s -j4 lib
 
-This will compile the ``chombo-discharge`` source code in serial and without HDF5 (using four cores for the compilation).
+   This will compile the ``chombo-discharge`` source code in serial and without HDF5 (using four cores for the compilation).
+   
 If successful, ``chombo-discharge`` libraries will appear in ``$DISCARGE_HOME/Lib``.
 
 GNU configuration for workstations
