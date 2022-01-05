@@ -232,10 +232,10 @@ First, compile the application by
 .. code-block:: text
 
    cd $DISCHARGE_HOME/Tests/AdvectionDiffusion/Godunov
-   make -s -j4 main
+   make -s -j4 program
 
-This will provide an executable named ``main2d.<bunch_of_options>.ex``.
-If the application was compiled in 3D, the file will be named ``main3d.<bunch_of_options>.ex``.
+This will provide an executable named ``program2d.<bunch_of_options>.ex``.
+If the application was compiled in 3D, the file will be named ``program2d.<bunch_of_options>.ex``.
 
 To run the application do:
 
@@ -243,13 +243,13 @@ To run the application do:
 
   .. code-block:: text
 
-     ./main2d.<bunch_of_options>.ex regression2d.inputs
+     ./program2d.<bunch_of_options>.ex regression2d.inputs
 
 * **Parallel build**
   
   .. code-block:: text
 
-     ./main2d.<bunch_of_options>.ex regression2d.inputs   
+     ./program2d.<bunch_of_options>.ex regression2d.inputs   
 
 If the user also compiled with HDF5, plot files will appear in ``$DISCHARGE_HOME/Tests/AdvectionDiffusion/Godunov``. 
 
@@ -257,14 +257,17 @@ If the user also compiled with HDF5, plot files will appear in ``$DISCHARGE_HOME
 Troubleshooting
 ---------------
 
-Compilation is normally straightforward, but if experiencing problems, try cleaning ``Chombo`` by
+Compilation is normally straightforward, but if experiencing problems, try cleaning ``Chombo`` and ``chombo-discharge`` by
 
 .. code-block:: text
 
    cd $CHOMBO_HOME
    make realclean
 
-Likewise, when compiling applications, compile with ``make clean`` rather than just ``make``.
+   cd $DISCHARGE_HOME
+   make pristine
+
+Likewise, when compiling applications, compile with ``make clean <target>`` rather than just ``make <target>``.
 More tips and tricks are given in the documentation at https://chombo-discharge.github.io. 
 
 Contributing
