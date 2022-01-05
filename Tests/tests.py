@@ -215,7 +215,7 @@ for test in config.sections():
         # --------------------------------------------------
         if run_suite:
             if args.no_exec:
-                print("\t Exiting test '" + str(test) + "' because of --no_exec'")
+                print("\t Exiting test '" + str(test) + "' because of --no_exec")
             else:
                 # --------------------------------------------------
                 # Set up the run command

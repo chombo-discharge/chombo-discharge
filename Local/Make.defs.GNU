@@ -19,6 +19,6 @@ HDFMPIINCFLAGS = -I/usr/lib/x86_64-linux-gnu/hdf5/openmpi/include
 HDFMPILIBFLAGS = -L/usr/lib/x86_64-linux-gnu/hdf5/openmpi/lib -lhdf5 -lz
 cxxoptflags    = -O3 -march=native
 flibflags      = -O3 -march=native
-syslibflags    = -llapack -lblas -ldl -lm
+syslibflags    = -llapack -lblas -ldl -lm -lgfortran
 
 #end  -- dont change this line
