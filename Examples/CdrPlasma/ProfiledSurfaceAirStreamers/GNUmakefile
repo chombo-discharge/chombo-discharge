@@ -5,7 +5,7 @@ ebase    = main
 include $(CHOMBO_HOME)/mk/Make.example
 
 # For building this application -- it needs the chombo-discharge source code. 
-$(ebase): dependencies
+$(ebaseobject): dependencies
 
 # Build dependencies if they do not exis. 
 dependencies: 
