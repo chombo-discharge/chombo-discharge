@@ -165,7 +165,7 @@ Here, we provide a more complete installation example using GNU compilers for a 
 
      .. code-block:: text
 
-     cp $DISCHARGE_HOME/Local/Make.defs.GNU $CHOMBO_HOME/lib/mk/Make.defs.local
+	cp $DISCHARGE_HOME/Local/Make.defs.GNU $CHOMBO_HOME/lib/mk/Make.defs.local
 
    * **Serial build with HDF5**:
 
