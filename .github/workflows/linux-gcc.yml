@@ -82,7 +82,7 @@ jobs:
       - name: Run tests
         working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
         run: |
-          python3 tests.py --no_compare -cores 2          
+          python3 tests.py --no_compare -cores 2
 
   serial-hdf:
     if: github.event.pull_request.draft == false    

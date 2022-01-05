@@ -31,12 +31,13 @@ jobs:
           sudo apt-get -y --no-install-recommends install csh libgetopt-complete-perl
 
       - name: Install Intel compilers/MPI
+        working-directory: /tmp        
         run: |
           wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
           sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
           sudo add-apt-repository "deb https://apt.repos.intel.com/oneapi all main"
           sudo apt-get -y install intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic intel-oneapi-compiler-fortran intel-oneapi-mkl intel-oneapi-mpi intel-oneapi-mpi-devel intel-oneapi-openmp
-        working-directory: /tmp
+
       
       - name: Setup compilers
         run: |
@@ -47,10 +48,10 @@ jobs:
           cp $DISCHARGE_HOME/Local/GitHub/Make.defs.linux-intel $CHOMBO_HOME/mk/Make.defs.local          
 
       - name: Build Chombo (2D)
+        working-directory: ${{ env.CHOMBO_HOME }}        
         run: |
           source /opt/intel/oneapi/setvars.sh          
           make -s -j2 DIM=2 lib
-        working-directory: ${{ env.CHOMBO_HOME }}
 
       - name: Build chombo-discharge/source (2D)
         run: |
@@ -68,10 +69,10 @@ jobs:
           make -s -j2 DIM=2 physics
 
       - name: Build Chombo (3D)
+        working-directory: ${{ env.CHOMBO_HOME }}        
         run: |
           source /opt/intel/oneapi/setvars.sh          
           make -s -j2 DIM=3 lib
-        working-directory: ${{ env.CHOMBO_HOME }}
 
       - name: Build chombo-discharge/source (3D)
         run: |
@@ -87,6 +88,16 @@ jobs:
         run: |
           source /opt/intel/oneapi/setvars.sh
           make -s -j2 DIM=3 physics
+
+      - name: Compile tests
+        working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
+        run: |
+          python3 tests.py --compile --benchmark --no_exec -cores 2
+
+      - name: Run tests
+        working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
+        run: |
+          python3 tests.py --no_compare -cores 2          
 
   mpi-no-hdf:
     if: github.event.pull_request.draft == false  
@@ -110,12 +121,12 @@ jobs:
           sudo apt-get -y --no-install-recommends install csh libgetopt-complete-perl
 
       - name: Install Intel compilers/MPI
+        working-directory: /tmp        
         run: |
           wget https://apt.repos.intel.com/intel-gpg-keys/GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
           sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
           sudo add-apt-repository "deb https://apt.repos.intel.com/oneapi all main"
           sudo apt-get -y install intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic intel-oneapi-compiler-fortran intel-oneapi-mkl intel-oneapi-mpi intel-oneapi-mpi-devel intel-oneapi-openmp
-        working-directory: /tmp
       
       - name: Setup compilers
         run: |
@@ -126,10 +137,10 @@ jobs:
           cp $DISCHARGE_HOME/Local/GitHub/Make.defs.MPI.linux-intel $CHOMBO_HOME/mk/Make.defs.local          
 
       - name: Build Chombo (2D)
+        working-directory: ${{ env.CHOMBO_HOME }}        
         run: |
           source /opt/intel/oneapi/setvars.sh          
           make -s -j2 DIM=2 lib
-        working-directory: ${{ env.CHOMBO_HOME }}
 
       - name: Build chombo-discharge/source (2D)
         run: |
@@ -147,10 +158,10 @@ jobs:
           make -s -j2 DIM=2 physics
 
       - name: Build Chombo (3D)
+        working-directory: ${{ env.CHOMBO_HOME }}        
         run: |
           source /opt/intel/oneapi/setvars.sh          
           make -s -j2 DIM=3 lib
-        working-directory: ${{ env.CHOMBO_HOME }}
 
       - name: Build chombo-discharge/source (3D)
         run: |
@@ -166,3 +177,13 @@ jobs:
         run: |
           source /opt/intel/oneapi/setvars.sh
           make -s -j2 DIM=3 physics
+
+      - name: Compile tests
+        working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
+        run: |
+          python3 tests.py --compile --benchmark --no_exec -cores 2
+
+      - name: Run tests
+        working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
+        run: |
+          python3 tests.py --no_compare -cores 2 --parallel
