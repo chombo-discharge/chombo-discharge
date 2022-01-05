@@ -68,7 +68,7 @@ namespace Location {
 		    const FaceIndex&     a_face,
 		    const EBISBox&       a_ebisbox,
 		    const Real&          a_dx);
-};
+}
 
 #include <CD_NamespaceFooter.H>
 

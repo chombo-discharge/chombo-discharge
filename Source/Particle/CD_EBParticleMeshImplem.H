@@ -224,7 +224,6 @@ void EBParticleMesh::depositParticle(EBCellFAB&           a_rho,
 
   const int startComp = a_components.begin();
   const int endComp   = a_components.end  ();
-  const int numComp   = a_components.size ();
   
   CH_assert(a_rho.nComp() >= endComp - 1);  
 
@@ -387,7 +386,6 @@ void EBParticleMesh::depositParticle2(EBCellFAB&           a_rho,
 
   const int startComp = a_components.begin();
   const int endComp   = a_components.end  ();
-  const int numComp   = a_components.size ();
   
   CH_assert(a_rho.nComp() >= endComp - 1);    
   
@@ -491,7 +489,6 @@ void EBParticleMesh::depositParticle4(EBCellFAB&           a_rho,
 
   const int startComp = a_components.begin();
   const int endComp   = a_components.end  ();
-  const int numComp   = a_components.size ();
   
   CH_assert(a_rho.nComp() >= endComp - 1);      
   
@@ -595,7 +592,6 @@ void EBParticleMesh::interpolateParticle(Real*                a_particleField,
 
   const int startComp = a_interval.begin();
   const int endComp   = a_interval.end  ();
-  const int numComp   = a_interval.size();
   
   CH_assert(a_meshField.nComp() >= endComp - 1);
 
