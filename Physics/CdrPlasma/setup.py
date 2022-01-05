@@ -49,9 +49,9 @@ else:
         os.chdir(args.discharge_home + "/" + args.base_dir + "/" + args.app_name)
         os.system('pwd')
         if args.silent:
-            os.system('make -s -j ' + str(args.procs) + ' main')
+            os.system('make -s -j ' + str(args.procs) + ' program')
         else:
-            os.system('make -j ' + str(args.procs) + ' main')
+            os.system('make -j ' + str(args.procs) + ' program')
             print 'Created and built your mini app - it resides in ' + args.discharge_home + "/" + args.base_dir + "/" + args.app_name
     else:
         print 'Problem setup successful'
