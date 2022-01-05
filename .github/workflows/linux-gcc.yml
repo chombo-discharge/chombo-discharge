@@ -62,7 +62,6 @@ jobs:
         run: |
           make -s -j2 DIM=3 lib
 
-
       - name: Build chombo-discharge/source (3D)
         run: |
           make -s -j2 DIM=3 source
@@ -120,7 +119,6 @@ jobs:
         working-directory: ${{ env.CHOMBO_HOME }}                  
         run: |
           make -s -j2 DIM=2 lib
-
 
       - name: Build chombo-discharge/source (2D)
         run: |
@@ -197,7 +195,6 @@ jobs:
         working-directory: ${{ env.CHOMBO_HOME }}        
         run: |
           make -s -j2 DIM=2 lib
-
 
       - name: Build chombo-discharge/source (2D)
         run: |
