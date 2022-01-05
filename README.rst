@@ -1,7 +1,7 @@
 chombo-discharge
 ----------------
 
-This is ``chombo-discharge``, a multiphysics code which uses ``Chombo`` for plasma simulations with adaptive mesh refinement (AMR) on embedded boundary grids.
+This is ``chombo-discharge``, a multiphysics code which uses ``Chombo`` for discharge simulations with adaptive mesh refinement (AMR) on embedded boundary grids.
 
 A modified version of ``Chombo`` is distributed together with this code.
 ``chombo-discharge`` only uses ``Chombo``; it is not affiliated nor endorsed by LBNL.
@@ -63,7 +63,7 @@ ____________
 
 ``chombo-discharge`` is dependent on the following packages:
 
-* ``Chombo`` (supplied with ``chombo-discharge``)
+* ``Chombo`` (required, and supplied with ``chombo-discharge``)
 * LAPACK and BLAS (required). 
 * HDF5 (optional, used for writing plot and checkpoint file).
 * MPI (optional, used for parallelization).
@@ -72,7 +72,7 @@ ____________
 Configuration
 _____________
 
-``chombo-discharge`` is compiled using Make, following the ``Chombo`` makefiles.
+``chombo-discharge`` is compiled using GNU Make, following the ``Chombo`` makefiles.
 Compilers, libraries, and configuration options are defined in a file ``Make.defs.local`` which resides in ``$CHOMBO_HOME/mk``.
 Users need to supply this file in order to compile ``chombo-discharge``.
 Typically, these steps include
@@ -129,38 +129,38 @@ If successful, ``chombo-discharge`` libraries will appear in ``$DISCARGE_HOME/Li
 GNU configuration for workstations
 __________________________________
 
-Here, we provide an example installation process using GNU compilers for a workstation.
+Here, we provide a more complete installation example using GNU compilers for a workstation.
 
-First, install GNU compiler dependencies by
+#. Install GNU compiler dependencies by
 
-.. code-block::
+   .. code-block::
    
-   sudo apt install csh gfortran g++ libblas-dev liblapack-dev
+      sudo apt install csh gfortran g++ libblas-dev liblapack-dev
 
-This will install
+   This will install
 
-* LAPACK and BLAS
-* GNU compilers for Fortran and C++   
+   * LAPACK and BLAS
+     * GNU compilers for Fortran and C++   
 
-To also install OpenMPI and HDF5:
+#. To also install OpenMPI and HDF5:
 
-.. code-block::
+   .. code-block::
 
-   sudo apt install libhdf5-dev libhdf5-openmpi-dev openmpi-bin
+      sudo apt install libhdf5-dev libhdf5-openmpi-dev openmpi-bin
 
-This will install
+   This will install
 
-* OpenMPI
-* HDF5, both serial and parallel.
+   * OpenMPI
+   * HDF5, both serial and parallel.
 
-Both serial and parallel HDF5 will be installed, and these are *usually* found in folders ``/usr/lib/x86_64-linux-gnu/hdf5/serial/`` and ``/usr/lib/x86_64-linux-gnu/hdf5/parallel/``.
-Before proceeding further, the user should ensure that he can locate both the serial and parallel HDF5 libraries.
+   Both serial and parallel HDF5 will be installed, and these are *usually* found in folders ``/usr/lib/x86_64-linux-gnu/hdf5/serial/`` and ``/usr/lib/x86_64-linux-gnu/hdf5/parallel/``.
+   Before proceeding further, the user should ensure that he can locate both the serial and parallel HDF5 libraries.
 
-After installing the dependencies, copy the desired configuration file to ``$CHOMBO_HOME/lib/mk``:
+#. After installing the dependencies, copy the desired configuration file to ``$CHOMBO_HOME/lib/mk``:
 
-* **Serial build without HDF5**:
+   * **Serial build without HDF5**:
 
-  .. code-block:: text
+     .. code-block:: text
 
      cp $DISCHARGE_HOME/Local/Make.defs.GNU $CHOMBO_HOME/lib/mk/Make.defs.local
 
