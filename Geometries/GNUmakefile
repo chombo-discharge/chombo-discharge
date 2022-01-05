@@ -9,10 +9,10 @@ include $(CHOMBO_HOME)/mk/Make.example
 # Name of the library
 SrcLib = $(DISCHARGE_HOME)/Lib/lib$(GEOMETRIES_LIB)$(config).a
 
-.PHONY: all lib pristine
+.DEFAULT_GOAL=DischargeGeometries
 
 # For making the library. 
-lib: $(objects)
+DischargeGeometries: $(objects)
 	if test -f $(SrcLib); then $(RM) $(SrcLib); fi
 	ar -cr $(SrcLib) o/$(config)/*.o
 
@@ -22,5 +22,4 @@ pristine:
 	$(RM) -r [odpf]/$(config)
 	if test -f $(SrcLib); then $(RM) $(SrcLib); fi 
 
-
-all: lib
+.PHONY: pristine DischargeGeometries

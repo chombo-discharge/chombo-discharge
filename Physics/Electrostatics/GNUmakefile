@@ -9,10 +9,10 @@ include $(CHOMBO_HOME)/mk/Make.example
 # Name of the library
 SrcLib = $(DISCHARGE_HOME)/Lib/lib$(ELECTROSTATICS_LIB)$(config).a
 
-.PHONY: all lib pristine
+.DEFAULT_GOAL=ElectrostaticsPhysics
 
 # For making the library.
-lib: $(objects)
+ElectrostaticsPhysics: $(objects)
 	if test -f $(SrcLib); then $(RM) $(SrcLib); fi
 	ar -cr $(SrcLib) o/$(config)/*.o
 
@@ -21,6 +21,4 @@ pristine:
 	$(RM) -r [odpf]/$(config)
 	if test -f $(SrcLib); then $(RM) $(SrcLib); fi
 
-all: lib
-
-
+.PHONY: pristine ElectrostaticsPhysics

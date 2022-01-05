@@ -9,10 +9,10 @@ include $(CHOMBO_HOME)/mk/Make.example
 # Name of the library
 SrcLib = $(DISCHARGE_HOME)/Lib/lib$(CDRPLASMA_LIB)$(config).a
 
-.PHONY: all lib pristine
+.DEFAULT_GOAL=CdrPlasmaPhysics
 
 # For making the library.
-lib: $(objects)
+CdrPlasmaPhysics: $(objects)
 	if test -f $(SrcLib); then $(RM) $(SrcLib); fi
 	ar -cr $(SrcLib) o/$(config)/*.o
 
@@ -21,4 +21,4 @@ pristine:
 	$(RM) -r [odpf]/$(config)
 	if test -f $(SrcLib); then $(RM) $(SrcLib); fi
 
-all: lib
+.PHONY: pristine CdrPlasmaPhysics
