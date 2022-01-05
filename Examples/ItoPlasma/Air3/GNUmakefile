@@ -9,7 +9,7 @@ $(ebaseobject): dependencies
 
 # Build dependencies if they do not exis. 
 dependencies: 
-	$(MAKE) --directory=$(DISCHARGE_HOME) lib
+	$(MAKE) --directory=$(DISCHARGE_HOME)
 	$(MAKE) --directory=$(DISCHARGE_HOME) itoplasma
 
 # Make advection-diffusion headers and library visible. 

@@ -9,7 +9,7 @@ $(ebaseobject): dependencies
 
 # Build dependencies.
 dependencies: 
-	$(MAKE) --directory=$(DISCHARGE_HOME) lib
+	$(MAKE) --directory=$(DISCHARGE_HOME)
 	$(MAKE) --directory=$(DISCHARGE_HOME) radiativetransfer
 
 # Make advection-diffusion headers and library visible. 
