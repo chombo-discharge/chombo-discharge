@@ -157,7 +157,7 @@ Here, we provide a more complete installation example using GNU compilers for a 
    * HDF5, both serial and parallel.
 
    Both serial and parallel HDF5 will be installed, and these are *usually* found in folders ``/usr/lib/x86_64-linux-gnu/hdf5/serial/`` and ``/usr/lib/x86_64-linux-gnu/hdf5/parallel/``.
-   Before proceeding further, the user should ensure that he can locate both the serial and parallel HDF5 libraries.
+   Before proceeding further, the user need to locate the HDF5 libraries (if building with HDF5). 
 
 #. After installing the dependencies, copy the desired configuration file to ``$CHOMBO_HOME/lib/mk``:
 
@@ -192,8 +192,8 @@ Here, we provide a more complete installation example using GNU compilers for a 
       cd $DISCHARGE_HOME
       make -s -j4 lib
 
-      This will compile the ``chombo-discharge`` source code using the configuration settings set by the user.
-      To compile ``chombo-discharge`` in 3D, do ``make -s -j4 DIM=3 lib``.
+   This will compile the ``chombo-discharge`` source code using the configuration settings set by the user.
+   To compile ``chombo-discharge`` in 3D, do ``make -s -j4 DIM=3 lib``.
       
 If successful, ``chombo-discharge`` libraries will appear in ``$DISCARGE_HOME/Lib``.
 
