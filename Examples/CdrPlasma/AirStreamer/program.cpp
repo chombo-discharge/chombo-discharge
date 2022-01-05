@@ -7,7 +7,7 @@
 #include <CD_RtLayoutImplem.H>
 #include <CD_EddingtonSP1.H>
 #include <CD_CdrPlasmaAir3Bourdon.H>
-#include <CD_RoughRod.H>
+#include <CD_Vessel.H>
 #include <CD_CdrPlasmaGodunovStepper.H>
 #include <CD_CdrPlasmaStreamerTagger.H>
 #include <CD_DataParser.H>
@@ -52,7 +52,7 @@ int main(int argc, char* argv[]){
   }
 
   // Set geometry and AMR 
-  RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry> (new RoughRod());
+  RefCountedPtr<ComputationalGeometry> compgeom = RefCountedPtr<ComputationalGeometry> (new Vessel());
   RefCountedPtr<AmrMesh> amr                    = RefCountedPtr<AmrMesh> (new AmrMesh());
   RefCountedPtr<GeoCoarsener> geocoarsen        = RefCountedPtr<GeoCoarsener> (new GeoCoarsener());
 

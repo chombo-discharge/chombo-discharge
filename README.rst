@@ -223,15 +223,15 @@ Running an example application
 ------------------------------
 
 In ``chombo-discharge``, applications are set up so that they use the ``chombo-discharge`` source code and one ``chombo-discharge`` physics module. 
-To run one of the applications that use a particular ``chombo-discharge`` physics module, we will run a simple advection-diffusion code.
+To run one of the applications that use a particular ``chombo-discharge`` physics module, we will run a simulation of a positive streamer (in air). 
 
-The application code is located in ``$DISCHARGE_HOME/Tests/AdvectionDiffusion/Godunov`` and it uses the advection-diffusion physics module (located in ``$DISCHARGE_HOME/Physics/AdvectionDiffusion``).
+The application code is located in ``$DISCHARGE_HOME/Examples/CdrPlasma/AirStreamer`` and it uses the convection-diffusion-reaction plasma module (located in ``$DISCHARGE_HOME/Physics/CdrPlasma``).
 
 First, compile the application by
 
 .. code-block:: text
 
-   cd $DISCHARGE_HOME/Tests/AdvectionDiffusion/Godunov
+   cd $DISCHARGE_HOME/Examples/CdrPlasma/AirStreamer
    make -s -j4 program
 
 This will provide an executable named ``program2d.<bunch_of_options>.ex``.
