@@ -38,12 +38,17 @@ jobs:
 
       - name: Copy makefile
         run: |
-          cp $DISCHARGE_HOME/Local/GitHub/Make.defs.linux-gcc $CHOMBO_HOME/mk/Make.defs.local          
+          cp $DISCHARGE_HOME/Local/GitHub/Make.defs.linux-gcc $CHOMBO_HOME/mk/Make.defs.local
+
+      - name: Run tests (2D)
+        working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
+        run: |
+          python3 regtest.py --compile --silent --benchmark                    
 
       - name: Build Chombo (2D)
+        working-directory: ${{ env.CHOMBO_HOME }}        
         run: |
           make -s -j2 DIM=2 lib
-        working-directory: ${{ env.CHOMBO_HOME }}
 
       - name: Build chombo-discharge/source (2D)
         run: |
@@ -58,9 +63,10 @@ jobs:
           make -s -j2 DIM=2 physics
 
       - name: Build Chombo (3D)
+        working-directory: ${{ env.CHOMBO_HOME }}        
         run: |
           make -s -j2 DIM=3 lib
-        working-directory: ${{ env.CHOMBO_HOME }}
+
 
       - name: Build chombo-discharge/source (3D)
         run: |
@@ -106,9 +112,10 @@ jobs:
           cp $DISCHARGE_HOME/Local/GitHub/Make.defs.HDF5.linux-gcc $CHOMBO_HOME/mk/Make.defs.local
 
       - name: Build Chombo (2D)
+        working-directory: ${{ env.CHOMBO_HOME }}                  
         run: |
           make -s -j2 DIM=2 lib
-        working-directory: ${{ env.CHOMBO_HOME }}
+
 
       - name: Build chombo-discharge/source (2D)
         run: |
@@ -123,9 +130,10 @@ jobs:
           make -s -j2 DIM=2 physics
 
       - name: Build Chombo (3D)
+        working-directory: ${{ env.CHOMBO_HOME }}        
         run: |
           make -s -j2 DIM=3 lib
-        working-directory: ${{ env.CHOMBO_HOME }}
+
 
       - name: Build chombo-discharge/source (3D)
         run: |
@@ -171,9 +179,10 @@ jobs:
           cp $DISCHARGE_HOME/Local/GitHub/Make.defs.MPI.linux-gcc $CHOMBO_HOME/mk/Make.defs.local
 
       - name: Build Chombo (2D)
+        working-directory: ${{ env.CHOMBO_HOME }}        
         run: |
           make -s -j2 DIM=2 lib
-        working-directory: ${{ env.CHOMBO_HOME }}
+
 
       - name: Build chombo-discharge/source (2D)
         run: |
@@ -188,9 +197,10 @@ jobs:
           make -s -j2 DIM=2 physics
 
       - name: Build Chombo (3D)
+        working-directory: ${{ env.CHOMBO_HOME }}        
         run: |
           make -s -j2 DIM=3 lib
-        working-directory: ${{ env.CHOMBO_HOME }}
+
 
       - name: Build chombo-discharge/source (3D)
         run: |
@@ -236,9 +246,9 @@ jobs:
           cp $DISCHARGE_HOME/Local/GitHub/Make.defs.MPI.HDF5.linux-gcc $CHOMBO_HOME/mk/Make.defs.local
 
       - name: Build Chombo (2D)
+        working-directory: ${{ env.CHOMBO_HOME }}        
         run: |
           make -s -j2 DIM=2 lib
-        working-directory: ${{ env.CHOMBO_HOME }}
 
       - name: Build chombo-discharge/source (2D)
         run: |
@@ -253,9 +263,9 @@ jobs:
           make -s -j2 DIM=2 physics
 
       - name: Build Chombo (3D)
+        working-directory: ${{ env.CHOMBO_HOME }}        
         run: |
           make -s -j2 DIM=3 lib
-        working-directory: ${{ env.CHOMBO_HOME }}
 
       - name: Build chombo-discharge/source (3D)
         run: |
