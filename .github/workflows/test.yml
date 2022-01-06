@@ -15,8 +15,8 @@ jobs:
     timeout-minutes: 1
     
     env: 
-      DISCHARGE_HOME: ${{runner.workspace}}
-      CHOMBO_HOME: ${{runner.workspace}}/Chombo-3.3/lib
+      DISCHARGE_HOME: ${{github.workspace}}
+      CHOMBO_HOME: ${{github.workspace}}/Chombo-3.3/lib
 
     steps:
       - name: Install dependencies
@@ -43,6 +43,7 @@ jobs:
       - name: Copy makefile
         run: |
           echo $DISCHARGE_HOME
+          echo ${{github.procs}}
 
   parallel-no-hdf5:
     name: Parallel
