@@ -118,7 +118,7 @@ For a quick test the user can use the GNU configuration file supplied with ``cho
    * LAPACK and BLAS
    * GNU compilers for Fortran and C++
 
-#. Compile ``Chombo``
+#. Optionally, compile ``Chombo`` before compiling ``chombo-discharge``
 
    .. code-block:: text
 
@@ -191,7 +191,7 @@ Here, we provide a more complete installation example using GNU compilers for a 
 
 	cp $DISCHARGE_HOME/Local/Make.defs.MPI.HDF5.GNU $CHOMBO_HOME/lib/mk/Make.defs.local
 
-#. Compile ``Chombo``
+#. Optionally, compile ``Chombo`` before compiling ``chombo-discharge``
 
    .. code-block:: text
 
