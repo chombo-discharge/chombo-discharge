@@ -4,4 +4,11 @@ runs:
   steps:
     - run: echo "hello world"
       shell: bash
+
+name: 'my other action'
+runs:
+  using: "composite"
+  steps:
+    - run: echo "hello world 2"
+      shell: bash      
     

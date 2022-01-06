@@ -20,7 +20,7 @@ jobs:
       - name: checkout
         uses: actions/checkout@v2        
 
-      - id: foo
+      - name: Run actions
         uses: ./.github/workflows/
 
           
