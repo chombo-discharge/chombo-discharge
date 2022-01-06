@@ -20,7 +20,7 @@ jobs:
     needs: setup
     name: Install GNU dependencies
     steps:
-      - sanity: Sanity check
+      - name: Sanity check
         run: |
           echo ${{env.DISCHARGE_HOME}}
           
@@ -33,7 +33,7 @@ jobs:
     needs: setup
     name: Install GNU dependencies
     steps:
-      - sanity: Sanity check
+      - name: Sanity check
         run: |
           echo ${{env.DISCHARGE_HOME}}
           
