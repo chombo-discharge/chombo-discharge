@@ -11,7 +11,7 @@ concurrency:
 jobs:
   serial-no-hdf:
     if: github.event.pull_request.draft == false  
-    name: GNU@10.0 C++14 serial without HDF5
+    name: test1
     runs-on: ubuntu-latest
     timeout-minutes: 90
     
@@ -42,7 +42,7 @@ jobs:
 
   serial-hdf:
     if: github.event.pull_request.draft == false    
-    name: GNU@10.0 C++14 serial with HDF5    
+    name: test2
     runs-on: ubuntu-latest
     timeout-minutes: 90
     
