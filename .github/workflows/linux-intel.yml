@@ -89,11 +89,13 @@ jobs:
       - name: Compile tests
         working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
         run: |
+          source /opt/intel/oneapi/setvars.sh          
           python3 tests.py --compile --benchmark --no_exec -cores 2
 
       - name: Run tests
         working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
         run: |
+          source /opt/intel/oneapi/setvars.sh          
           python3 tests.py --no_compare -cores 2          
 
   mpi-no-hdf:
@@ -176,9 +178,11 @@ jobs:
       - name: Compile tests
         working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
         run: |
+          source /opt/intel/oneapi/setvars.sh          
           python3 tests.py --compile --benchmark --no_exec -cores 2
 
       - name: Run tests
         working-directory: ${{ env.DISCHARGE_HOME}}/Tests        
         run: |
+          source /opt/intel/oneapi/setvars.sh          
           python3 tests.py --no_compare -cores 2 --parallel
