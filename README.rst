@@ -116,7 +116,14 @@ For a quick test the user can use the GNU configuration file supplied with ``cho
    This will install
    
    * LAPACK and BLAS
-   * GNU compilers for Fortran and C++   
+   * GNU compilers for Fortran and C++
+
+#. Compile ``Chombo``
+
+   .. code-block:: text
+
+      cd $DISCHARGE_HOME
+      make -s -j4 chombo   
 
 #. Compile ``chombo-discharge`` 
 
@@ -125,8 +132,7 @@ For a quick test the user can use the GNU configuration file supplied with ``cho
       cd $DISCHARGE_HOME
       make -s -j4 lib
 
-   This will compile the ``chombo-discharge`` source code in serial and without HDF5 (using four cores for the compilation).
-   
+This will compile the ``chombo-discharge`` source code in serial and without HDF5 (using four cores for the compilation).
 If successful, ``chombo-discharge`` libraries will appear in ``$DISCARGE_HOME/Lib``.
 
 GNU configuration for workstations
@@ -183,19 +189,26 @@ Here, we provide a more complete installation example using GNU compilers for a 
 
      .. code-block:: text
 
-	cp $DISCHARGE_HOME/Local/Make.defs.MPI.HDF5.GNU $CHOMBO_HOME/lib/mk/Make.defs.local               
+	cp $DISCHARGE_HOME/Local/Make.defs.MPI.HDF5.GNU $CHOMBO_HOME/lib/mk/Make.defs.local
 
-#. Compile the ``chombo-discharge`` source code library:
+#. Compile ``Chombo``
+
+   .. code-block:: text
+
+      cd $DISCHARGE_HOME
+      make -s -j4 chombo
+
+#. Compile the ``chombo-discharge``
 
    .. code-block:: text
 
       cd $DISCHARGE_HOME
       make -s -j4 lib
 
-   This will compile the ``chombo-discharge`` source code using the configuration settings set by the user.
-   To compile ``chombo-discharge`` in 3D, do ``make -s -j4 DIM=3 lib``.
-      
+This will compile the ``chombo-discharge`` source code using the configuration settings set by the user.
+To compile ``chombo-discharge`` in 3D, do ``make -s -j4 DIM=3 lib``.
 If successful, ``chombo-discharge`` libraries will appear in ``$DISCARGE_HOME/Lib``.
+
 
 Configuration on clusters
 _________________________

@@ -2,9 +2,12 @@ lib: source geometries
 
 physics: source advectiondiffusion brownianwalker cdrplasma electrostatics geometry radiativetransfer
 
+chombo:
+	$(MAKE) --directory=$(CHOMBO_HOME) USE_EB=TRUE USE_MF=TRUE lib
+
 all: lib physics
 
-source:
+source: chombo
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Source 
 
 geometries: source
@@ -39,9 +42,9 @@ allclean: libclean
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/Electrostatics     pristine
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/Geometry           pristine
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/RadiativeTransfer  pristine
-
-pristine: allclean
 	$(RM) $(DISCHARGE_HOME)/Lib/*.a
 
+pristine: allclean
+	$(MAKE) --directory=$(CHOMBO_HOME) realclean
 
 .PHONY: lib physics all source geometries advectiondiffusion brownianwalker cdrplasma electrostatics geometry radiativetransfer libclean allclean pristine

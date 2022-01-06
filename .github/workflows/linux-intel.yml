@@ -37,7 +37,6 @@ jobs:
           sudo apt-key add GPG-PUB-KEY-INTEL-SW-PRODUCTS-2023.PUB
           sudo add-apt-repository "deb https://apt.repos.intel.com/oneapi all main"
           sudo apt-get -y install intel-oneapi-compiler-dpcpp-cpp-and-cpp-classic intel-oneapi-compiler-fortran intel-oneapi-mkl intel-oneapi-mpi intel-oneapi-mpi-devel intel-oneapi-openmp
-
       
       - name: Setup compilers
         run: |
@@ -48,10 +47,9 @@ jobs:
           cp $DISCHARGE_HOME/Local/GitHub/Make.defs.linux-intel $CHOMBO_HOME/mk/Make.defs.local          
 
       - name: Build Chombo (2D)
-        working-directory: ${{ env.CHOMBO_HOME }}        
         run: |
           source /opt/intel/oneapi/setvars.sh          
-          make -s -j2 DIM=2 lib
+          make -s -j2 DIM=2 chombo
 
       - name: Build chombo-discharge/source (2D)
         run: |
@@ -69,10 +67,9 @@ jobs:
           make -s -j2 DIM=2 physics
 
       - name: Build Chombo (3D)
-        working-directory: ${{ env.CHOMBO_HOME }}        
         run: |
           source /opt/intel/oneapi/setvars.sh          
-          make -s -j2 DIM=3 lib
+          make -s -j2 DIM=3 chombo
 
       - name: Build chombo-discharge/source (3D)
         run: |
@@ -137,10 +134,9 @@ jobs:
           cp $DISCHARGE_HOME/Local/GitHub/Make.defs.MPI.linux-intel $CHOMBO_HOME/mk/Make.defs.local          
 
       - name: Build Chombo (2D)
-        working-directory: ${{ env.CHOMBO_HOME }}        
         run: |
           source /opt/intel/oneapi/setvars.sh          
-          make -s -j2 DIM=2 lib
+          make -s -j2 DIM=2 chombo
 
       - name: Build chombo-discharge/source (2D)
         run: |
@@ -158,10 +154,9 @@ jobs:
           make -s -j2 DIM=2 physics
 
       - name: Build Chombo (3D)
-        working-directory: ${{ env.CHOMBO_HOME }}        
         run: |
           source /opt/intel/oneapi/setvars.sh          
-          make -s -j2 DIM=3 lib
+          make -s -j2 DIM=3 chombo
 
       - name: Build chombo-discharge/source (3D)
         run: |
