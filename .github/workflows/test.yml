@@ -17,6 +17,9 @@ jobs:
       - name: print
         run: ls -ahl
 
+      - name: checkout
+        uses: actions/checkout@v2        
+
       - id: foo
         uses: ./.github/workflows/
 
