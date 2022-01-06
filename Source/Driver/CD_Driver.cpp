@@ -33,6 +33,7 @@
 #include <CD_Units.H>
 #include <CD_MemoryReport.H>
 #include <CD_Timer.H>
+#include <CD_ParallelOps.H>
 #include <CD_NamespaceHeader.H>
 
 Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry,
@@ -289,16 +290,14 @@ void Driver::getGeometryTags(){
     m_geoCoarsen->coarsenTags(m_geomTags, m_amr->getDx(), m_amr->getProbLo());
   }
 
-#ifdef CH_MPI
-  // Processes may not agree what is the maximum tag depth. Make sure they're all on the same page. 
+
+  // Processes may not agree what is the maximum tag depth. Make sure they're all on the same page.
   int deepestTagLevel = 0;
   for (int lvl = 0; lvl < m_geomTags.size(); lvl++){
     if(!m_geomTags[lvl].isEmpty()) deepestTagLevel = lvl;
   }
-
-  int tmp = -1;
-  MPI_Allreduce(&deepestTagLevel, &m_geometricTagsDepth, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
-#endif
+  
+  m_geometricTagsDepth = ParallelOps::Max(deepestTagLevel);
 }
 
 void Driver::getCellsAndBoxes(long long&         a_numLocalCells,
@@ -1712,14 +1711,12 @@ void Driver::stepReport(const Real a_startTime, const Real a_endTime, const int 
   int max_unfreed_mem;
   int max_peak_mem;
 
-  int result1 = MPI_Allreduce(&unfreed_mem, &max_unfreed_mem, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
-  int result2 = MPI_Allreduce(&peak_mem,    &max_peak_mem,    1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
+  MPI_Allreduce(&unfreed_mem, &max_unfreed_mem, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
+  MPI_Allreduce(&peak_mem,    &max_peak_mem,    1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
   pout() << "                                -- Max unfreed memory    : " << max_unfreed_mem/BytesPerMB << "(MB)" << endl;
   pout() << "                                -- Max peak memory usage : " << max_peak_mem/BytesPerMB << "(MB)" << endl;
 #endif
 #endif
-
-
 
 }
 
@@ -2376,7 +2373,6 @@ void Driver::writeCheckpointTags(HDF5Handle& a_handle, const int a_level){
 
   // Set tags = 1
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
-  const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, phase::gas)[a_level];
     
   for (DataIterator dit(dbl); dit.ok(); ++dit){
     const Box box = dbl[dit()];
@@ -2409,7 +2405,6 @@ void Driver::writeCheckpointRealmLoads(HDF5Handle& a_handle, const int a_level){
   }
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
-  const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, phase::gas)[a_level];
 
   // Make some storage and set the computational load to be the same in every patch. Later when
   // we read the file we can just fetch the computational load from one of the cells.
@@ -2480,7 +2475,7 @@ void Driver::readCheckpointFile(const std::string& a_restartFile){
   }
 
   // Abort if base resolution has changed. 
-  if(!coarsestDx == m_amr->getDx()[0]){
+  if(!(coarsestDx == m_amr->getDx()[0])){
     MayDay::Error("Driver::readCheckpointFile - coarsestDx != dx[0], did you change the base level resolution when restarting?!?");
   }
 

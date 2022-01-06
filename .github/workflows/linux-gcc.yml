@@ -58,7 +58,7 @@ jobs:
 
       - name: Build Chombo (3D)
         run: |
-          make -s -j2 DIM=2 chombo          
+          make -s -j2 DIM=3 chombo          
 
       - name: Build chombo-discharge/source (3D)
         run: |
