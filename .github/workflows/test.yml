@@ -19,35 +19,33 @@ jobs:
       CHOMBO_HOME: ${{github.workspace}}/Chombo-3.3/lib
 
     steps:
+      - name: Install dependencies
+        run: |
+          sudo apt update
+          sudo apt install csh gfortran-10 g++-10 cpp-10 libhdf5-dev libhdf5-openmpi-dev openmpi-bin libblas-dev liblapack-dev
+    steps:
       - name: Checkout chombo-discharge
         uses: actions/checkout@v2
         with:
           submodules: true      
 
-  GNU:
+  serial-no-hdf5:
+    name: Serial
     needs: Formatting
     runs-on: ubuntu-latest    
-    name: Install GNU dependencies
+
     steps:
-      - name: Sanity check
+      - name: Copy makefile
         run: |
           echo $DISCHARGE_HOME
-          
-      - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install csh gfortran-10 g++-10 cpp-10 libhdf5-dev libhdf5-openmpi-dev openmpi-bin libblas-dev liblapack-dev
 
-  GNUU:
+  parallel-no-hdf5:
+    name: Parallel
     needs: Formatting
-    runs-on: ubuntu-latest
-    name: Install GNUU dependencies
+    runs-on: ubuntu-latest    
+
     steps:
-      - name: Sanity check
+      - name: Copy makefile
         run: |
-          echo ${{env.DISCHARGE_HOME}}
+          echo $DISCHARGE_HOME          
           
-      - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install csh gfortran-10 g++-10 cpp-10 libhdf5-dev libhdf5-openmpi-dev openmpi-bin libblas-dev liblapack-dev                    
