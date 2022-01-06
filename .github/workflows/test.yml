@@ -1,0 +1,72 @@
+name: Linux GCC
+
+on:
+  pull_request:
+    types: [push, opened, synchronize, reopened, ready_for_review]
+
+concurrency:
+  group: ${{ github.ref }}-${{ github.head_ref }}-linux-gcc    
+  cancel-in-progress: true
+
+jobs:
+  serial-no-hdf:
+    if: github.event.pull_request.draft == false  
+    name: GNU@10.0 C++14 serial without HDF5
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    
+    env: 
+      DISCHARGE_HOME: ${{github.workspace}}
+      CHOMBO_HOME: ${{github.workspace}}/Chombo-3.3/lib
+
+    steps:
+      - name: Checkout chombo-discharge
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get -y --no-install-recommends install csh gfortran-10 g++-10 cpp-10 libhdf5-dev libhdf5-openmpi-dev openmpi-bin libblas-dev liblapack-dev
+
+      - name: Setup compilers
+        run: |
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 100
+          sudo update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-10 100
+          sudo update-alternatives --install /usr/bin/cpp cpp /usr/bin/cpp-10 100
+
+      - name: Copy makefile
+        run: |
+          cp $DISCHARGE_HOME/Local/GitHub/Make.defs.linux-gcc $CHOMBO_HOME/mk/Make.defs.local
+
+  serial-hdf:
+    if: github.event.pull_request.draft == false    
+    name: GNU@10.0 C++14 serial with HDF5    
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    
+    env:
+      DISCHARGE_HOME: ${{github.workspace}}
+      CHOMBO_HOME: ${{github.workspace}}/Chombo-3.3/lib      
+
+    steps:
+      - name: Checkout chombo-discharge
+        uses: actions/checkout@v2
+        with:
+          submodules: true
+
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          sudo apt-get -y --no-install-recommends install csh gfortran-10 g++-10 cpp-10 libhdf5-dev libhdf5-openmpi-dev openmpi-bin libblas-dev liblapack-dev
+
+      - name: Setup compilers
+        run: |
+          sudo update-alternatives --install /usr/bin/g++ g++ /usr/bin/g++-10 100
+          sudo update-alternatives --install /usr/bin/gfortran gfortran /usr/bin/gfortran-10 100
+          sudo update-alternatives --install /usr/bin/cpp cpp /usr/bin/cpp-10 100
+
+      - name: Copy makefile
+        run: |
+          cp $DISCHARGE_HOME/Local/GitHub/Make.defs.HDF5.linux-gcc $CHOMBO_HOME/mk/Make.defs.local
