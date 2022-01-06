@@ -32,7 +32,12 @@ jobs:
   serial-no-hdf5:
     name: Serial
     needs: Formatting
-    runs-on: ubuntu-latest    
+    runs-on: ubuntu-latest
+    timeout-minutes: 1
+    
+    env: 
+      DISCHARGE_HOME: ${{github.workspace}}
+      CHOMBO_HOME: ${{github.workspace}}/Chombo-3.3/lib    
 
     steps:
       - name: Copy makefile
@@ -47,5 +52,5 @@ jobs:
     steps:
       - name: Copy makefile
         run: |
-          echo $DISCHARGE_HOME          
+          echo ${{ env.DISCHARGE_HOME}}
           
