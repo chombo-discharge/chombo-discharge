@@ -46,8 +46,7 @@ jobs:
     steps:
       - name: Copy makefile
         run: |
-          echo $DISCHARGE_HOME
-          echo ${{github.procs}}
+          ls -ahl
 
   parallel-no-hdf5:
     name: Parallel
@@ -57,5 +56,5 @@ jobs:
     steps:
       - name: Copy makefile
         run: |
-          echo ${{ env.DISCHARGE_HOME}}
+          ls -ahl
           
