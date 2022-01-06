@@ -78,7 +78,6 @@ void EBHelmholtzDirichletEBBC::define() {
   if(!(m_useConstant || m_useFunction)) MayDay::Error("EBHelmholtzDirichletEBBC - not using constant or function!");
 
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
-  const ProblemDomain& domain  = m_eblg.getDomain();
   
   m_boundaryWeights.  define(dbl);
   m_kappaDivFStencils.define(dbl);
@@ -174,6 +173,10 @@ void EBHelmholtzDirichletEBBC::applyEBFlux(VoFIterator&       a_vofit,
 	const RealVect pos = this->getBoundaryPosition(vof, a_dit);
 	value = m_functionValue(pos);
       }
+      else{
+	value = 0.0;
+	MayDay::Error("EBHelmholtzDirichletEBBC::applyEBFlux -- logic bust");
+      }
 
       // B-coefficient, area fraction, and division by dx (from Div(F)) already a part of the boundary weights, but
       // beta is not. 
@@ -253,7 +256,6 @@ bool EBHelmholtzDirichletEBBC::getJohansenStencil(std::pair<Real, VoFStencil>& a
     
     if(a_order == 1){
       const Real x1 = distanceAlongLine[0];
-      const Real di = 1./x1;
 
       weight   = 1./x1;
       stencil  = pointStencils[0];

@@ -85,7 +85,7 @@ protected:
   /*!
     @brief Value on MF
   */
-  Real m_constantDphiDn;;
+  Real m_constantDphiDn;
 
   /*!
     @brief Value on the MF. 

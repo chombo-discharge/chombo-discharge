@@ -132,8 +132,6 @@ void CdrTGA::advanceTGA(EBAMRCellData&       a_newPhi,
     
     bool converged = false;
 
-    const int comp         = 0;
-    const int ncomp        = 1;
     const int finestLevel = m_amr->getFinestLevel();
 
     // Do the aliasing stuff
@@ -186,8 +184,6 @@ void CdrTGA::setupHelmholtzFactory(){
   if(m_verbosity > 5){
     pout() << m_name + "::setupHelmholtzFactory()" << endl;
   }
-  
-  const int finestLevel = m_amr->getFinestLevel();
 
   const Vector<RefCountedPtr<EBLevelGrid> >&             levelGrids   = m_amr->getEBLevelGrid          (m_realm, m_phase);
   const Vector<RefCountedPtr<EbCoarAve> >&               coarAve      = m_amr->getCoarseAverage        (m_realm, m_phase);

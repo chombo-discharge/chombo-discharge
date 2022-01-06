@@ -670,7 +670,6 @@ void AmrMesh::intersectParticlesRaycastIF(ParticleContainer<P>&    a_activeParti
     
     // Handle to various grid stuff.
     const DisjointBoxLayout& dbl   = this->getGrids     (whichRealm         )[lvl];
-    const EBISLayout&        ebisl = this->getEBISLayout(whichRealm, a_phase)[lvl];
 
     for (DataIterator dit(dbl); dit.ok(); ++dit){
 
@@ -804,7 +803,6 @@ void AmrMesh::intersectParticlesBisectIF(ParticleContainer<P>&    a_activePartic
     
     // Handle to various grid stuff.
     const DisjointBoxLayout& dbl   = this->getGrids     (whichRealm         )[lvl];
-    const EBISLayout&        ebisl = this->getEBISLayout(whichRealm, a_phase)[lvl];
 
     for (DataIterator dit(dbl); dit.ok(); ++dit){
 

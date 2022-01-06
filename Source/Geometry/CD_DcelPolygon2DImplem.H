@@ -43,6 +43,7 @@ namespace Dcel {
       ret = this->isPointInsidePolygonWindingNumber(a_point);
       break;
     default:
+      ret = false;
       std::cerr << "In file 'CD_DcelPolygon2DImplem.H' function Dcel::Polygon2D<T>::isPointInside - unsupported algorithm requested.\n";
     }
 
@@ -58,10 +59,6 @@ namespace Dcel {
   template <class T>
   inline
   void Polygon2D<T>::define(const Vec3& a_normal, const std::vector<Vec3>& a_points) {
-    const auto& nx = std::abs(a_normal[0]);
-    const auto& ny = std::abs(a_normal[1]);
-    const auto& nz = std::abs(a_normal[2]);
-
     m_ignoreDir = 0;
   
     for (int dir = 0; dir < 3; dir++){
@@ -126,8 +123,6 @@ namespace Dcel {
 
     const int N = m_points.size();
 
-    constexpr T thresh = 1.E-6;
-  
     for (int i = 0; i < N; i++) {    // edge from V[i]  to V[i+1]
       const Vec2& P1 = m_points[i];
       const Vec2& P2 = m_points[(i+1)%N];
@@ -153,8 +148,6 @@ namespace Dcel {
     T sumTheta = 0.0;
   
     const int N = m_points.size();
-
-    constexpr T thresh = 1.E-6;
   
     for (int i = 0; i < N; i++){
       const Vec2 p1 = m_points[i]       - p;

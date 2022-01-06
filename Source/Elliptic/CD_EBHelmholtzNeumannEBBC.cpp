@@ -124,6 +124,10 @@ void EBHelmholtzNeumannEBBC::applyEBFlux(VoFIterator&       a_vofit,
 	const RealVect pos = this->getBoundaryPosition(vof, a_dit);
 	value = m_functionDphiDn(pos);
       }
+      else{
+	value = 0.0;
+	MayDay::Error("EBHelmholtzNeumannEBBC::applyEBFlux - logic bust");
+      }
 
       // B-coefficient, area fraction, and division by dx (from Div(F)) already a part of the boundary weights, but
       // beta is not.

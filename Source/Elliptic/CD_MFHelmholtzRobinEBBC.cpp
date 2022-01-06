@@ -96,8 +96,6 @@ void MFHelmholtzRobinEBBC::defineSinglePhase() {
   for (DataIterator dit(dbl); dit.ok(); ++dit){
     const Box box          = dbl[dit()];
     const EBISBox& ebisbox = m_eblg.getEBISL()[dit()];
-    const EBGraph& ebgraph = ebisbox.getEBGraph();
-    const IntVectSet& ivs  = ebisbox.getIrregIVS(box);
 
     BaseIVFAB<Real>&       weights  = m_boundaryWeights [dit()];
     BaseIVFAB<VoFStencil>& stencils = m_kappaDivFStencils[dit()];
@@ -156,6 +154,12 @@ void MFHelmholtzRobinEBBC::defineSinglePhase() {
 	  A = m_functionA(pos);
 	  B = m_functionB(pos);
 	}
+	else{
+	  A = 0.0;
+	  B = 0.0;
+
+	  MayDay::Error("MFHelmholtzRobinEBBC::defineSinglePhase - logic bust");
+	}	
 
 	// The normal derivative is dphi/dn = (A*phi - C)/B and the (stencil) flux is
 	// kappaDivF = area*b*dphidn/Delta x. Scale accordingly.
@@ -197,6 +201,12 @@ void MFHelmholtzRobinEBBC::applyEBFluxSinglePhase(VoFIterator&       a_singlePha
 	const RealVect pos = this->getBoundaryPosition(vof, a_dit);
 	B = m_functionB(pos);
 	C = m_functionC(pos);
+      }
+      else{
+	B = 0.0;
+	C = 0.0;
+
+	MayDay::Error("MFHelmholtzRobinEBBC::applyEBFluxSinglePhase - logic bust");
       }
 
       const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];

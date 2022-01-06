@@ -187,7 +187,8 @@ namespace ItoMerge {
       CH_assert(r.mass() >= std::numeric_limits<Real>::min());
     }
   };
-};
+}
+
 #include <CD_NamespaceFooter.H>
 
 #endif

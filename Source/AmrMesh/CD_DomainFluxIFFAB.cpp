@@ -229,29 +229,34 @@ void DomainFluxIFFAB::copy(const Box&             Rfrom,
 BaseIFFAB<Real>& DomainFluxIFFAB::operator()(const int a_dir, const Side::LoHiSide a_side){
   CH_assert(m_isDefined);
 
-  BaseIFFAB<Real>* ptr;
-  if(a_side == Side::Lo){
-    ptr = m_fluxLo[a_dir];
-  }
-  else if(a_side == Side::Hi){
-    ptr = m_fluxHi[a_dir];
-  }
+  // BaseIFFAB<Real>* ptr;
+  // if(a_side == Side::Lo){
+  //   ptr = m_fluxLo[a_dir];
+  // }
+  // else if(a_side == Side::Hi){
+  //   ptr = m_fluxHi[a_dir];
+  // }
 
-  return *ptr;
+  // return *ptr;  
+
+  return (a_side == Side::Lo) ? *m_fluxLo[a_dir] : *m_fluxHi[a_dir];
+
 }
 
 const BaseIFFAB<Real>& DomainFluxIFFAB::operator()(const int a_dir, const Side::LoHiSide a_side) const {
   CH_assert(m_isDefined);
 
-  BaseIFFAB<Real>* ptr;
-  if(a_side == Side::Lo){
-    ptr = m_fluxLo[a_dir];
-  }
-  else if(a_side == Side::Hi){
-    ptr = m_fluxHi[a_dir];
-  }
+  // BaseIFFAB<Real>* ptr;
+  // if(a_side == Side::Lo){
+  //   ptr = m_fluxLo[a_dir];
+  // }
+  // else if(a_side == Side::Hi){
+  //   ptr = m_fluxHi[a_dir];
+  // }
 
-  return *ptr;
+  // return *ptr;
+
+  return (a_side == Side::Lo) ? *m_fluxLo[a_dir] : *m_fluxHi[a_dir];
 }
 
 #include <CD_NamespaceFooter.H>

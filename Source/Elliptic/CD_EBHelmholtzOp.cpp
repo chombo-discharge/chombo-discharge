@@ -52,32 +52,32 @@ EBHelmholtzOp::EBHelmholtzOp(const Location::Cell                               
 			     const IntVect&                                     a_ghostRhs,
 			     const Smoother&                                    a_smoother) :
   LevelTGAHelmOp<LevelData<EBCellFAB>, EBFluxFAB>(false), // Time-independent
+  m_smoother(a_smoother),  
   m_dataLocation(a_dataLocation),
+  m_hasMGObjects(a_hasMGObjects),  
+  m_hasFine(a_hasFine),
+  m_hasCoar(a_hasCoar),
+  m_refToCoar(a_hasCoar ? a_refToCoar : 1),
+  m_refToFine(a_hasFine ? a_refToFine : 1),
+  m_ghostPhi(a_ghostPhi),
+  m_ghostRhs(a_ghostRhs),
+  m_alpha(a_alpha),
+  m_beta(a_beta),
+  m_dx(a_dx),
+  m_probLo(a_probLo),  
   m_eblgFine(),
   m_eblg(a_eblg),
   m_eblgCoFi(),
   m_eblgCoar(),
   m_eblgCoarMG(),
-  m_interpolator(a_interpolator),
-  m_coarAve(a_coarAve),
-  m_fluxReg(a_fluxReg),
   m_domainBc(a_domainBc),
-  m_ebBc(a_ebBc),
-  m_probLo(a_probLo),
-  m_dx(a_dx),
-  m_refToCoar(a_hasCoar ? a_refToCoar : 1),
-  m_refToFine(a_hasFine ? a_refToFine : 1),
-  m_hasFine(a_hasFine),
-  m_hasCoar(a_hasCoar),
-  m_hasMGObjects(a_hasMGObjects),
-  m_alpha(a_alpha),
-  m_beta(a_beta),
+  m_ebBc(a_ebBc),  
+  m_interpolator(a_interpolator),
+  m_fluxReg(a_fluxReg),  
+  m_coarAve(a_coarAve),
   m_Acoef(a_Acoef),
   m_Bcoef(a_Bcoef),
-  m_BcoefIrreg(a_BcoefIrreg),
-  m_ghostPhi(a_ghostPhi),
-  m_ghostRhs(a_ghostRhs),
-  m_smoother(a_smoother) {
+  m_BcoefIrreg(a_BcoefIrreg) {
 
   CH_TIME("EBHelmholtzOp::EBHelmholtzOp(...)");
 
@@ -455,7 +455,6 @@ Real EBHelmholtzOp::norm(const LevelData<EBCellFAB>& a_rhs, const int a_order) {
     const EBCellFAB& rhs       = a_rhs[dit()];
     const FArrayBox& regRhs    = rhs.getFArrayBox();
     const EBISBox& ebisbox     = rhs.getEBISBox();
-    const EBGraph& ebgraph     = ebisbox.getEBGraph();
     const Box box              = a_rhs.disjointBoxLayout()[dit()];
 
     // Do the regular cells. We can replace this with a Fortran kernel if we have to, but this won't be performance-critical, I think.
@@ -1410,9 +1409,6 @@ void EBHelmholtzOp::computeFaceCenteredFlux(EBFaceFAB&       a_fluxCenter,
 					    const DataIndex& a_dit,
 					    const int        a_dir){
   CH_TIME("EBHelmholtzOp::computeFaceCenteredFlux(EBFaceFAB, EBCellFAB, Box, DataIndex, int)");
-  
-  const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
-  const EBGraph& ebgraph = ebisbox.getEBGraph();
     
   // Since a_fluxCenter is used as a basis for interpolation near the cut-cells, we need to fill fluxes on faces in direction that extends one cell
   // outside of the cellbox in directions that are tangential to a_dir. We do not want to include domain faces here since that

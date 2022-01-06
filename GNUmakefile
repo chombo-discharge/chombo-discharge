@@ -28,11 +28,11 @@ geometry: source
 radiativetransfer: source
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/RadiativeTransfer
 
-clean:
+libclean:
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Source     pristine
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Geometries pristine
 
-realclean: clean
+allclean: libclean
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/AdvectionDiffusion pristine
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/BrownianWalker     pristine
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/CdrPlasma          pristine
@@ -40,8 +40,8 @@ realclean: clean
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/Geometry           pristine
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Physics/RadiativeTransfer  pristine
 
-pristine: realclean
+pristine: allclean
 	$(RM) $(DISCHARGE_HOME)/Lib/*.a
 
 
-.PHONY: source geometries advectiondiffusion brownianwalker cdrplasma electrostatics geometry radiativetransfer clean realclean physics lib all
+.PHONY: lib physics all source geometries advectiondiffusion brownianwalker cdrplasma electrostatics geometry radiativetransfer libclean allclean pristine

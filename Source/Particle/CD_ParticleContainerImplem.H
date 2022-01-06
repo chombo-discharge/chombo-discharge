@@ -121,7 +121,6 @@ void ParticleContainer<P>::setupPVR(const int a_base, const int a_finestLevel){
   m_pvr.resize(1 + a_finestLevel);
   for (int lvl = a_base; lvl <= a_finestLevel; lvl++){
     const DisjointBoxLayout& dbl = m_grids  [lvl];
-    const ProblemDomain& domain  = m_domains[lvl];
 
     const bool hasCoar = (lvl > 0);
 
@@ -733,7 +732,6 @@ void ParticleContainer<P>::remap(){
   
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
     const bool hasCoar = (lvl > 0            );
-    const bool hasFine = (lvl < m_finestLevel);
 
     // Rebin this level
     m_particles[lvl]->gatherOutcast();

@@ -37,8 +37,6 @@ GeoCoarsener::GeoCoarsener(){
     m_coarsenLevels.resize(num_boxes);
     m_inverse.      resize(num_boxes, 0);
       
-    const int ndigits = (int) log10((double) num_boxes) + 1;
-
     // Read string in type format GeoCoarsener.box1_lo and GeoCoarsener.box2_hi etc. 
     for (int ibox = 0; ibox < num_boxes; ibox++){
       const std::string boxNum = std::to_string(1+ibox);

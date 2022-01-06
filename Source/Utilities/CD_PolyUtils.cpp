@@ -28,7 +28,6 @@ RealVect PolyUtils::brentRootFinder(const RefCountedPtr<BaseIF>& a_impFunc, cons
 #error Unknown Chombo precision
 #endif
 
-  unsigned int i;
   RealVect aPt, bPt, cPt, unitTangent;
   Real fa, fb, fc;
   Real a, b, c, d, e;
@@ -52,6 +51,8 @@ RealVect PolyUtils::brentRootFinder(const RefCountedPtr<BaseIF>& a_impFunc, cons
   }
 
   // Init to be safe
+  a = 0.;
+  b = 0.;
   c = 0.;
   d = 0.;
   e = 0.;

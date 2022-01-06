@@ -239,7 +239,6 @@ void Driver::getGeometryTags(){
     EBISLayout ebisl;
     ebisGas->fillEBISLayout(ebisl, irregGrids, curDomain, 1); // Need one ghost cell because we fetch normal vectors from neighboring cut-cells. 
 
-    const Real dx         = m_amr->getDx()[lvl];
     const RealVect probLo = m_amr->getProbLo();
     
     for (DataIterator dit(irregGrids); dit.ok(); ++dit){
@@ -431,7 +430,6 @@ void Driver::gridReport(){
   pout() << endl;
 
   const int finestLevel                  = m_amr->getFinestLevel();
-  const Vector<DisjointBoxLayout>& grids = m_amr->getGrids(m_realm);
   const Vector<ProblemDomain>& domains   = m_amr->getDomains();
   const Vector<Real> dx                  = m_amr->getDx();
 
@@ -1607,10 +1605,7 @@ void Driver::stepReport(const Real a_startTime, const Real a_endTime, const int 
   // Get the total number of poitns across all levels
   const int finestLevel                 = m_amr->getFinestLevel();
   const Vector<DisjointBoxLayout>& grids = m_amr->getGrids(m_realm);
-  const Vector<ProblemDomain>& domains   = m_amr->getDomains();
-  const Vector<Real>& dx                 = m_amr->getDx();
   long long totalPoints = 0;
-  long long uniformPoints = (domains[finestLevel].domainBox()).numPts();
   
   for (int lvl = 0; lvl <= finestLevel; lvl++){
     long long pointsThisLevel = 0;
@@ -2180,8 +2175,8 @@ void Driver::writePlotData(EBAMRCellData& a_output, int& a_comp){
     pout() << "Driver::writePlotData(EBAMRCellData, int)" << endl;
   }
 
-  if(m_plotTags)     this->writeTags(a_output, a_comp);
-  if(m_plotRanks)    this->writeRanks(a_output, a_comp);
+  if(m_plotTags)     this->writeTags    (a_output, a_comp);
+  if(m_plotRanks)    this->writeRanks   (a_output, a_comp);
   if(m_plotLevelset) this->writeLevelset(a_output, a_comp);
 }
 
@@ -2200,7 +2195,6 @@ void Driver::writeTags(EBAMRCellData& a_output, int& a_comp){
   // Set tagged cells = 1
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, phase::gas)[lvl];
     
     for (DataIterator dit(dbl); dit.ok(); ++dit){
       const DenseIntVectSet& ivs = (*m_tags[lvl])[dit()];

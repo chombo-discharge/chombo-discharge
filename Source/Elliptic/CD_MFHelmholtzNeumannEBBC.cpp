@@ -88,7 +88,7 @@ void MFHelmholtzNeumannEBBC::applyEBFluxSinglePhase(VoFIterator&       a_singleP
   if(!a_homogeneousPhysBC){  
 
     auto kernel = [&] (const VolIndex& vof) -> void {
-      Real value;
+      Real value = 0.0;
       if(m_useConstant){
 	value = m_constantDphiDn;
       }

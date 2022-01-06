@@ -227,8 +227,6 @@ namespace BoundingVolumes {
 
   template <class T>
   AABBT<T>::AABBT(const std::vector<AABBT<T> >& a_others) {
-    constexpr int DIM = 3;
-  
     m_loCorner = a_others.front().getLowCorner();
     m_hiCorner = a_others.front().getHighCorner();
 
@@ -253,7 +251,6 @@ namespace BoundingVolumes {
   template <class P>
   inline
   void AABBT<T>::define(const std::vector<Vec3T<P> >& a_points) noexcept {
-    constexpr int DIM = 3;
     m_loCorner = a_points.front();
     m_hiCorner = a_points.front();
 
@@ -337,8 +334,6 @@ namespace BoundingVolumes {
   template <class T>
   inline
   T AABBT<T>::getDistance2(const Vec3& a_point) const noexcept {
-    constexpr T zero = 0.0;
-    
     const Vec3 u = Vec3(std::max(m_loCorner[0] - a_point[0], a_point[0] - m_hiCorner[0]),
 			std::max(m_loCorner[1] - a_point[1], a_point[1] - m_hiCorner[1]),
 			std::max(m_loCorner[2] - a_point[2], a_point[2] - m_hiCorner[2]));

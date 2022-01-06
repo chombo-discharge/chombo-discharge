@@ -50,7 +50,6 @@ void MFHelmholtzEBBC::defineMultiPhase(){
   //       a known term in the expansion. 
   
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
-  const ProblemDomain& domain  = m_eblg.getDomain();
 
   m_boundaryWeights.  define(dbl);
   m_kappaDivFStencils.define(dbl);

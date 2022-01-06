@@ -34,7 +34,7 @@ RodPlaneProfile::RodPlaneProfile(){
   Vector<Real> vec(SpaceDim);
 
   bool rod_live, has_rod, has_plane;
-  Real eps, eps0, rod_rad, xshift, curv, dist, yshift, width;
+  Real eps, rod_rad, xshift, curv, dist, yshift, width;
   int numl, numr;
   RealVect center1, center2, point, normal;
   std::string profile;

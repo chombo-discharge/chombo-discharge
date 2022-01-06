@@ -125,7 +125,6 @@ void SigmaSolver::regrid(const int a_lmin, const int a_oldFinestLevel, const int
   // These levels have changed and so we need to do the interpolation here. 
   for (int lvl = std::max(1,a_lmin); lvl <= a_newFinestLevel; lvl++){
     const DisjointBoxLayout& fineGrid = m_amr->getGrids(m_realm)              [lvl  ];
-    const ProblemDomain& fineDomain   = m_amr->getDomains()                   [lvl  ];
     const ProblemDomain& coarDomain   = m_amr->getDomains()                   [lvl-1];
     const EBISLayout& fineEBISL       = m_amr->getEBISLayout(m_realm, m_phase)[lvl  ];    
     const int nref                    = m_amr->getRefinementRatios()          [lvl-1];
@@ -224,7 +223,6 @@ void SigmaSolver::resetCells(EBAMRIVData& a_data){
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl =  m_amr->getGrids(m_realm)      [lvl];
-    const Real dx                =  m_amr->getDx()                [lvl];
     const MFLevelGrid& mflg      = *m_amr->getMFLevelGrid(m_realm)[lvl];
 
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){

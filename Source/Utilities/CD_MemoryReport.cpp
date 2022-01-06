@@ -61,10 +61,10 @@ void MemoryReport::getMaxMinMemoryUsage(Real& a_maxPeak, Real& a_minPeak, Real& 
   MPI_Allreduce(&unfreedMem, &maxUnfreedMem, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
   MPI_Allreduce(&unfreedMem, &minUnfreedMem, 1, MPI_INT, MPI_MIN, Chombo_MPI::comm);
 #else
-  maxUnfreedMem = unfreedMem;
   maxPeakMem    = peakMem;
+  minPeakMem    = peakMem;  
   maxUnfreedMem = unfreedMem;
-  minPeakMem    = peakMem;
+  minUnfreedMem = unfreedMem;
 #endif
 
   // Convert to real. 
@@ -107,8 +107,8 @@ void MemoryReport::getMemoryUsage(Vector<Real>& a_peak, Vector<Real>& a_unfreed)
   a_peak.   resize(1);
   a_unfreed.resize(1);
 
-  a_peak   [0] = peakMem;
-  a_unfreed[0] = unfreedMem;
+  a_peak   [0] = peakMem   /BytesPerMB;
+  a_unfreed[0] = unfreedMem/BytesPerMB;
 #endif
 }
 

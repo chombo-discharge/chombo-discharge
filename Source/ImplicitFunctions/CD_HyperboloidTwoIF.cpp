@@ -32,7 +32,7 @@ HyperboloidTwoIF::HyperboloidTwoIF(const HyperboloidTwoIF& a_inputIF){
 
 Real HyperboloidTwoIF::value(const RealVect& a_point) const{
   Real retval;
-  Real sum;
+  Real sum = 0.0;
 
   for (int dir = 0; dir < SpaceDim; dir++){
     Real cur;

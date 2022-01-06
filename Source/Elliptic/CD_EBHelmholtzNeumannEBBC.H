@@ -101,7 +101,7 @@ protected:
   /*!
     @brief Value on EB
   */
-  Real m_constantDphiDn;;
+  Real m_constantDphiDn;
 
   /*!
     @brief Value on the EB. 

@@ -745,7 +745,6 @@ void McPhoto::generatePhotons(ParticleContainer<Photon>& a_photons, const EBAMRC
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    const ProblemDomain& dom     = m_amr->getDomains()[lvl];
     const Real dx                = m_amr->getDx()[lvl];
     const Real vol               = pow(dx, SpaceDim);
     const bool hasCoar          = (lvl > 0);
@@ -772,8 +771,6 @@ void McPhoto::generatePhotons(ParticleContainer<Photon>& a_photons, const EBAMRC
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box box          = dbl.get(dit());
       const EBISBox& ebisbox = (*a_source[lvl])[dit()].getEBISBox();
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
-      const IntVectSet ivs   = IntVectSet(box);
 
       const EBCellFAB& source = (*a_source[lvl])[dit()];
       const FArrayBox& srcFAB = source.getFArrayBox();
@@ -811,7 +808,6 @@ void McPhoto::generatePhotons(ParticleContainer<Photon>& a_photons, const EBAMRC
 	// Irregular kernel. Same as the above really. 
 	auto irregularKernel = [&] (const VolIndex& vof) -> void {
 	  const RealVect pos       = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
-	  const Real kappa         = ebisbox.volFrac(vof);
 	  const int numPhysPhotons = this->drawPhotons(source(vof,srcComp), vol, a_dt);
 	  
 	  if(numPhysPhotons > 0){
@@ -859,6 +855,10 @@ int McPhoto::drawPhotons(const Real a_source, const Real a_volume, const Real a_
   }
   else if(m_sourceType == SourceType::PerSecond){
     factor = a_dt;
+  }
+  else {
+    factor = 0.0;
+    MayDay::Error("McPhoto::drawPhotons -- logic bust");
   }
 
   // Draw a number of Photons with the desired algorithm
@@ -954,7 +954,6 @@ void McPhoto::depositHybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massDif
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    const ProblemDomain& domain  = m_amr->getDomains()[lvl];
     const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
     
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -964,8 +963,6 @@ void McPhoto::depositHybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massDif
 
       const Box box          = dbl.get(dit());
       const EBISBox& ebisbox = ebisl[dit()];
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
-      const IntVectSet ivs   = ebisbox.getIrregIVS(box);
 
       // Iteration space for kernel. 
       VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
@@ -1073,7 +1070,6 @@ void McPhoto::coarseFineRedistribution(EBAMRCellData& a_phi){
   const int finestLevel = m_amr->getFinestLevel();
   
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const Real dx       = m_amr->getDx()[lvl];
     const bool hasCoar = lvl > 0;
     const bool hasFine = lvl < finestLevel;
 
@@ -1159,7 +1155,6 @@ void McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhoto
 	const RealVect direction = p.velocity()/(p.velocity().vectorLength());
 	const RealVect newPos    = oldPos + direction*this->randomExponential(p.kappa());
 	const RealVect path      = newPos - oldPos;
-	const Real     pathLen   = path.vectorLength();
 
 	// Check if we should check of different types of boundary intersections. These are cheap initial tests that allow
 	// us to skip intersection tests for some photons.

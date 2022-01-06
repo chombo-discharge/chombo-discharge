@@ -821,13 +821,9 @@ void CdrSolver::conservativeDivergenceNoKappaDivision(EBAMRCellData& a_conservat
   //
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     a_flux[lvl]->exchange();
-    
-    const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    const ProblemDomain& domain  = m_amr->getDomains()[lvl];
-    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
 
-    this->conservativeDivergenceRegular(*a_conservativeDivergence[lvl], *a_flux[lvl], lvl);              // Compute kappa*div(F) in regular cells
-    this->computeDivergenceIrregular(*a_conservativeDivergence[lvl], *a_flux[lvl], *a_ebFlux[lvl], lvl); // Recompute divergence on irregular cells
+    this->conservativeDivergenceRegular(*a_conservativeDivergence[lvl], *a_flux[lvl], lvl);                 // Compute kappa*div(F) in regular cells
+    this->computeDivergenceIrregular   (*a_conservativeDivergence[lvl], *a_flux[lvl], *a_ebFlux[lvl], lvl); // Recompute divergence on irregular cells
 
     a_conservativeDivergence[lvl]->exchange();
   }
@@ -853,7 +849,6 @@ void CdrSolver::computeDivergenceIrregular(LevelData<EBCellFAB>&              a_
   // must be face centroid centered!
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
-  const ProblemDomain& domain  = m_amr->getDomains()[a_lvl];
   const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[a_lvl];
   const Real dx                = m_amr->getDx()[a_lvl];
 
@@ -1007,7 +1002,6 @@ void CdrSolver::incrementRedistFlux(){
 
   for (int lvl = 0; lvl <= finestLevel; lvl++){
     const Real dx       = m_amr->getDx()[lvl];
-    const bool hasCoar = lvl > 0;
     const bool hasFine = lvl < finestLevel;
     
     if(hasFine){
@@ -1110,10 +1104,10 @@ void CdrSolver::initialDataParticles(){
 	const EBISBox& ebisbox = ebisl[dit()];
 
 	// Make the deposition object and put the particles on the grid. 
-	const bool forceIrregNGP = true;
+	constexpr bool forceIrregNGP = true;
 	EBParticleMesh interp(cellBox, ebisbox, dx, probLo);
 	
-	interp.deposit<Particle, &Particle::mass>(particles[lvl][dit()].listItems(), (*m_phi[lvl])[dit()], DepositionType::NGP, true);
+	interp.deposit<Particle, &Particle::mass>(particles[lvl][dit()].listItems(), (*m_phi[lvl])[dit()], DepositionType::NGP, forceIrregNGP);
       }
 
 #if CH_SPACEDIM==2 // Scale for 2D Cartesian. We do this because the 2D deposition object will normalize by 1/(dx*dx), but we want 1/(dx*dx*dx) in both 2D and 3D
@@ -1161,9 +1155,8 @@ void CdrSolver::hybridDivergence(LevelData<EBCellFAB>&              a_hybridDive
   //       Dh is the hybrid divergence and Dc/Dnc are the conservative and non-conservative divergences. On the way in
   //       we had a_hybridDivergence = kappa*Dc. 
   
-  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
-  const ProblemDomain& domain  = m_amr->getDomains()[a_lvl];
-  const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[a_lvl];
+  const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[a_lvl];
+  const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[a_lvl];
     
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     EBCellFAB&             divH   = a_hybridDivergence         [dit()];  // On input, this contains kappa*div(F)
@@ -1270,9 +1263,8 @@ void CdrSolver::interpolateFluxToFaceCentroids(LevelData<EBFluxFAB>& a_flux, con
   // TLDR: We are given face-centered fluxes which we want to put on face centroids. To do this we store face-centered
   //       fluxes on temporary storage and just interpolate them to face centroids.
   
-  const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_lvl];
-  const ProblemDomain& domain  = m_amr->getDomains()[a_lvl];
-  const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[a_lvl];
+  const DisjointBoxLayout& dbl   = m_amr->getGrids(m_realm)[a_lvl];
+  const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[a_lvl];
 
   for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
     const Box        cellBox  = dbl.get(dit());
@@ -1354,7 +1346,6 @@ void CdrSolver::incrementFluxRegister(const EBAMRFluxData& a_flux){
   
   for (int lvl = 0; lvl <= finestLevel; lvl++){
     const DisjointBoxLayout& dbl    = m_amr->getGrids(m_realm)[lvl];
-    const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
     
     const bool hasCoar = lvl > 0;
     const bool hasFine = lvl < finestLevel;
@@ -1486,8 +1477,6 @@ void CdrSolver::reflux(EBAMRCellData& a_phi){
   const int finestLevel = m_amr->getFinestLevel();
   
   const Interval interv(m_comp, m_comp);
-
-  Vector<RefCountedPtr<EBFluxRegister > >& fluxreg = m_amr->getFluxRegister(m_realm, m_phase);
 
   for (int lvl = 0; lvl <= finestLevel; lvl++){
     if(lvl < finestLevel){
@@ -1835,7 +1824,6 @@ void CdrSolver::writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellD
   //       us from using one-line methods). A special flag (a_interp) tells us to interpolate to cell centroids or not.
 
   // Number of components we are working with. 
-  const int comp  = 0;
   const int ncomp = a_data[0]->nComp();
 
   const Interval srcInterv(0, ncomp-1);                 // This is the component range in scratch which we want to copy from
@@ -2169,7 +2157,6 @@ Real CdrSolver::computeSourceDt(const Real a_max, const Real a_tolerance){
   if(a_max > 0.0){
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
       const DisjointBoxLayout& dbl   = m_amr->getGrids     (m_realm         )[lvl];
-      const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
 
       for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
 	const EBCellFAB& phi     = (*m_phi   [lvl])[dit()];
@@ -2237,8 +2224,6 @@ void CdrSolver::weightedUpwind(EBAMRCellData& a_weightedUpwindPhi, const int a_p
 
       const DisjointBoxLayout& dbl    = m_amr->getGrids     (m_realm         )[lvl];
       const EBISLayout&        ebisl  = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-      const ProblemDomain&     domain = m_amr->getDomains()                   [lvl];
-      const Real&              dx     = m_amr->getDx()                        [lvl];
 
       for (DataIterator dit(dbl); dit.ok(); ++dit){
 	const Box&     cellBox = dbl  [dit()];
@@ -2715,7 +2700,6 @@ void CdrSolver::smoothHeavisideFaces(EBAMRFluxData& a_facePhi, const EBAMRCellDa
   // Loop over levels. 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    const ProblemDomain& domain  = m_amr->getDomains()[lvl];
     const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
     const Real dx                = m_amr->getDx()[lvl];
     const Real vol               = pow(dx, SpaceDim);
@@ -2725,8 +2709,6 @@ void CdrSolver::smoothHeavisideFaces(EBAMRFluxData& a_facePhi, const EBAMRCellDa
       const EBISBox&    ebisbox  = ebisl[dit()];
       const EBGraph&    ebgraph  = ebisbox.getEBGraph();
       const IntVectSet& irregIVS = ebisbox.getIrregIVS(cellBox);
-
-      VoFIterator&      vofit    = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
 
       for (int dir = 0; dir < SpaceDim; dir++){
 	EBFaceFAB&       facePhi = (*a_facePhi[lvl])[dit()][dir];

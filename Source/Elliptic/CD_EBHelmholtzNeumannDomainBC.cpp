@@ -140,7 +140,6 @@ Real EBHelmholtzNeumannDomainBC::getFaceFlux(const VolIndex&       a_vof,
   }
   else{
     const int isign             = (a_side == Side::Lo) ? -1 : 1;
-    const Real ihdx             = 2.0/m_dx;
     const IntVect iv            = a_vof.gridIndex();
     const EBISBox& ebisbox      = m_eblg.getEBISL()[a_dit];
     const ProblemDomain& domain = m_eblg.getDomain();
@@ -163,6 +162,10 @@ Real EBHelmholtzNeumannDomainBC::getFaceFlux(const VolIndex&       a_vof,
 	  }
 	  else if(m_useFunction){
 	    centeredDphiDn = m_functionDphiDn(this->getBoundaryPosition(curVof.gridIndex(), a_dir, a_side));
+	  }
+	  else{
+	    centeredDphiDn = 0.0;
+	    MayDay::Error("EBHelmholtzNeumannDomainBC::getFaceFlux - logic bust");
 	  }
 
 	  centroidFlux += weight * centeredDphiDn;

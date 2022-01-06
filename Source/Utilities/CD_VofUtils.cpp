@@ -395,8 +395,6 @@ void VofUtils::getVofsInMonotonePath(Vector<VolIndex>& a_vofList,
 	if(a_timesMoved[dir] < a_radius){
 	  const IntVect newTimesMoved = a_timesMoved + BASISV(dir);
 
-	  Side::LoHiSide whichSide;
-	
 	  // Move in the low direction. If we have already moved in the high direction we are not allowed to "turn back".
 	  if(a_pathSign[dir] == -1 || a_pathSign[dir] == 0){
 	    IntVect newPathSign = a_pathSign;

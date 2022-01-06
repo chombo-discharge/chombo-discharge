@@ -175,7 +175,7 @@ void FieldSolver::computeDisplacementField(MFAMRCellData& a_displacementField, c
     // Lambda which returns the relative permittivity at some position
     auto permittivity = [&dielectrics](const RealVect& pos) -> Real{
       Real minDist = std::numeric_limits<Real>::infinity();
-      int closest;
+      int closest = 0;
 	    
       for (int i = 0; i < dielectrics.size(); i++){
 	const RefCountedPtr<BaseIF> func = dielectrics[i].getImplicitFunction();
@@ -879,7 +879,6 @@ void FieldSolver::setEbPermittivities(BaseIVFAB<Real>& a_relPerm,
 
   CH_assert(a_relPerm.nComp() == 1);  
   
-  const int comp         = 0;
   const IntVectSet& ivs  = a_relPerm.getIVS();
   const EBGraph& ebgraph = a_relPerm.getEBGraph();
 

@@ -180,6 +180,11 @@ void EBHelmholtzRobinEBBC::define() {
 	  A = m_functionA(pos);
 	  B = m_functionB(pos);
 	}
+	else{
+	  A = 0.0;
+	  B = 0.0;
+	  MayDay::Error("EBHelmholtzRobinEBBC::define - logic bust");	  
+	}
 
 	// The normal derivative is dphi/dn = (A*phi - C)/B and the (stencil) flux is
 	// kappaDivF = area*b*dphidn/Delta x. Scale accordingly.
@@ -226,6 +231,11 @@ void EBHelmholtzRobinEBBC::applyEBFlux(VoFIterator&       a_vofit,
 	const RealVect pos = this->getBoundaryPosition(vof, a_dit);
 	B = m_functionB(pos);
 	C = m_functionC(pos);
+      }
+      else{
+	B = 0.0;
+	C = 0.0;
+	MayDay::Error("EBHelmholtzRobinEBBC::applyEBFlux - logic bust");
       }
 
       const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];

@@ -722,7 +722,6 @@ void DataOps::divideByScalar(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCell
   CH_TIME("DataOps::divideByScalar(LD<EBCellFAB>)");
   
   const int numCompsLHS = a_lhs.nComp();
-  const int numCompsRHS = a_rhs.nComp();
   
   CH_assert(a_rhs.nComp() == 1);
   CH_assert(a_lhs.nComp() >= 1);
@@ -1087,7 +1086,6 @@ void DataOps::getMaxMinNorm(Real& a_max, Real& a_min, LevelData<BaseIVFAB<Real> 
   const int numComp = a_data.nComp();
   
   for (DataIterator dit = a_data.dataIterator(); dit.ok(); ++dit){
-    const Box& box              = a_data.disjointBoxLayout().get(dit());
     const BaseIVFAB<Real>& data = a_data[dit()];
 
     // Iteration space

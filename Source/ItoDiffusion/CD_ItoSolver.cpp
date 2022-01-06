@@ -1522,7 +1522,6 @@ void ItoSolver::depositHybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massD
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl     = m_amr->getGrids(m_realm)[lvl];
     const EBISLayout&        ebisl   = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-    const ProblemDomain&     domain  = m_amr->getDomains()[lvl];    
     
     for (DataIterator dit(dbl); dit.ok(); ++dit) {
       EBCellFAB&             divH    = (*a_depositionH   [lvl])[dit()];  // On input, this contains kappa*depositionWeights
@@ -1869,7 +1868,6 @@ void ItoSolver::interpolateVelocities(const int a_lvl, const DataIndex& a_dit) {
 
   if(m_isMobile) {
     const EBCellFAB& velo_func = (*m_velocityFunction[a_lvl])[a_dit];
-    const EBISBox& ebisbox     = velo_func.getEBISBox();
     const RealVect dx          = m_amr->getDx()[a_lvl]*RealVect::Unit;
     const RealVect origin      = m_amr->getProbLo();
     const Box box              = m_amr->getGrids(m_realm)[a_lvl][a_dit];
@@ -1955,7 +1953,6 @@ void ItoSolver::interpolateMobilitiesDirect(const int a_lvl, const DataIndex& a_
   EBAMRParticleMesh& particleMesh = m_amr->getParticleMesh(m_realm, m_phase);  
 
   const EBCellFAB& mobilityFunction = (*m_mobilityFunction[a_lvl])[a_dit];
-  const EBISBox&   ebisbox          = mobilityFunction.getEBISBox();
   const RealVect   dx               = m_amr->getDx()[a_lvl]*RealVect::Unit;
   const RealVect   probLo           = m_amr->getProbLo();
   const Box        box              = m_amr->getGrids(m_realm)[a_lvl][a_dit];
@@ -1985,7 +1982,6 @@ void ItoSolver::interpolateMobilitiesVelocity(const int a_lvl, const DataIndex& 
   EBAMRParticleMesh& particleMesh = m_amr->getParticleMesh(m_realm, m_phase);    
  
   const EBCellFAB& mobilityFunction = (*m_mobilityFunction[a_lvl])[a_dit];
-  const EBISBox&   ebisbox          = mobilityFunction.getEBISBox();
   const RealVect   dx               = m_amr->getDx()[a_lvl]*RealVect::Unit;
   const RealVect   probLo           = m_amr->getProbLo();
   const Box        box              = m_amr->getGrids(m_realm)[a_lvl][a_dit];
@@ -2078,10 +2074,7 @@ void ItoSolver::interpolateDiffusion(const int a_lvl, const DataIndex& a_dit) {
     
     // Create the particle interpolator.
     const EBCellFAB& Dcoef   = (*m_diffusionFunction[a_lvl])[a_dit];
-    const EBISBox&   ebisbox = Dcoef.getEBISBox();
     const RealVect   dx      = m_amr->getDx()[a_lvl]*RealVect::Unit;
-    const RealVect   probLo  = m_amr->getProbLo();
-    const Box        box     = m_amr->getGrids(m_realm)[a_lvl][a_dit];
 
     const EBParticleMesh& meshInterp = particleMesh.getEBParticleMesh(a_lvl, a_dit);
 

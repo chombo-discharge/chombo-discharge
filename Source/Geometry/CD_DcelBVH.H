@@ -68,7 +68,6 @@ namespace Dcel {
   template <class T, class BV, int K> 
   BVH::StopFunctionT<T, FaceT<T>, BV, K> defaultStopFunction = [](const BVH::NodeT<T, FaceT<T>, BV, K>& a_node){
     const auto& primitives = a_node.getPrimitives();
-    const int depth        = a_node.getDepth();
     const int numPrims     = primitives.size();
     
     return numPrims <= primitivesPerLeafNode || numPrims < K;

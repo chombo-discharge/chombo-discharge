@@ -440,8 +440,6 @@ MFHelmholtzOp* MFHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, 
   }
 
   const int amrLevel = this->findAmrLevel(a_fineDomain); // Run-time abort if a_fineDomain is not found in anhy amr level. 
-  
-  const AmrLevelGrids& mgLevelGrids = m_mgLevelGrids[amrLevel];
 
   const int mgRefRat = 2;
 

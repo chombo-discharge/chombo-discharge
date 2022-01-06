@@ -230,9 +230,7 @@ void EBLeastSquaresMultigridInterpolator::defineGhostRegions(){
   // has a width of 1 in regular cells. 
   m_cfivs.define(dbl);
   for (DataIterator dit(dbl); dit.ok(); ++dit){
-    const Box      cellBox = dbl  [dit()];
-    const EBISBox& ebisbox = ebisl[dit()];
-    const EBGraph& ebgraph = ebisbox.getEBGraph();
+    const Box cellBox = dbl  [dit()];
 
     std::map<std::pair<int, Side::LoHiSide>, Box>& cfivsBoxes = m_cfivs[dit()];
     
@@ -261,13 +259,11 @@ void EBLeastSquaresMultigridInterpolator::defineGhostRegions(){
   for (DataIterator dit(dbl); dit.ok(); ++dit){
     const Box cellBox      = dbl[dit()];
     const EBISBox& ebisbox = ebisl[dit()];
-    const EBGraph& ebgraph = ebisbox.getEBGraph();
+    
     if(ebisbox.isAllRegular() || ebisbox.isAllCovered()){
       m_ghostCells[dit()] = IntVectSet();
     }
     else{
-
-
       // 1. Define the width of the ghost layer region around current (irregular grid) patch
       Box grownBox = grow(cellBox, m_ghostCF);
       grownBox &= domain;
@@ -322,7 +318,6 @@ void EBLeastSquaresMultigridInterpolator::defineBuffers(){
   
   const DisjointBoxLayout& coFiGrids  = m_eblgCoFi.getDBL();
   const EBISLayout&        coFiEBISL  = m_eblgCoFi.getEBISL();
-  const ProblemDomain&     coarDomain = m_eblgCoFi.getDomain();
 
   m_grownCoarData.define(coFiGrids, 1, coarRadius*IntVect::Unit, EBCellFactory(coFiEBISL));
 }
@@ -332,7 +327,6 @@ void EBLeastSquaresMultigridInterpolator::defineStencilsEBCF(){
 
   // This routine defines stencils for all the ghost cells we need to fill across the EBCF boundary.
   const int comp  = 0;
-  const int nComp = 1;
 
   const Real dxFine = 1.0;
   const Real dxCoar = dxFine*m_refRat;
@@ -393,7 +387,6 @@ void EBLeastSquaresMultigridInterpolator::defineStencilsEBCF(){
     const EBISBox& ebisboxCoar = m_eblgCoFi.getEBISL()[dit()];
 
     const EBGraph& fineGraph   = ebisboxFine.getEBGraph();
-    const EBGraph& coarGraph   = ebisboxCoar.getEBGraph();
 
     m_fineStencils[dit()].define(m_ghostCells[dit()], fineGraph, m_numStenComp);
     m_coarStencils[dit()].define(m_ghostCells[dit()], fineGraph, m_numStenComp);

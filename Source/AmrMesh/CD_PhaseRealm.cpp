@@ -584,9 +584,6 @@ void PhaseRealm::defineRedistOper(const int a_lmin, const int a_regsize){
     
     for (int lvl = Max(0, a_lmin-1); lvl <= m_finestLevel; lvl++){
 
-      const bool hasCoar = lvl > 0;
-      const bool hasFine = lvl < m_finestLevel;
-
       if(lvl >= a_lmin){
 	m_levelRedist[lvl] = RefCountedPtr<EBLevelRedist> (new EBLevelRedist(m_grids  [lvl],
 									     m_ebisl  [lvl],
@@ -616,7 +613,6 @@ void PhaseRealm::defineFineToCoarRedistOper(const int a_lmin, const int a_regsiz
     for (int lvl = Max(0, a_lmin-1); lvl <= m_finestLevel; lvl++){
 
       const bool hasCoar = lvl > 0;
-      const bool hasFine = lvl < m_finestLevel;
 
       if(m_hasEbCf){
 	if(hasCoar){
@@ -658,7 +654,6 @@ void PhaseRealm::defineCoarToFineRedistOper(const int a_lmin, const int a_regsiz
 
     for (int lvl = std::max(0, a_lmin-1); lvl <= m_finestLevel; lvl++){
 
-      const bool hasCoar = lvl > 0;
       const bool hasFine = lvl < m_finestLevel;
     
       if(m_hasEbCf){
@@ -701,7 +696,6 @@ void PhaseRealm::defineCoarToCoarRedistOper(const int a_lmin, const int a_regsiz
 
     for (int lvl = std::max(0, a_lmin-1); lvl <= m_finestLevel; lvl++){
 
-      const bool hasCoar = lvl > 0;
       const bool hasFine = lvl < m_finestLevel;
     
       if(m_hasEbCf){
@@ -750,7 +744,6 @@ void PhaseRealm::defineGradSten(const int a_lmin){
     // Define gradient operator. 
     for (int lvl = 0; lvl <= m_finestLevel; lvl++){
 
-      const bool hasCoar = lvl > 0;
       const bool hasFine = lvl < m_finestLevel;
 
       EBLevelGrid eblg;
@@ -829,7 +822,6 @@ void PhaseRealm::defineNonConsDivSten(){
 
   if(doThisOperator){
     const int order = 1; // Dummy argument
-    const int rad   = m_redistributionRadius;
     
     m_NonConservativeDivergenceStencil = RefCountedPtr<IrregAmrStencil<NonConservativeDivergenceStencil> >
       (new IrregAmrStencil<NonConservativeDivergenceStencil>(m_grids,

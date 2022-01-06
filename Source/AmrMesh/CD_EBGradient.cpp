@@ -399,7 +399,6 @@ void EBGradient::defineMasks(LevelData<FArrayBox>& a_coarMaskCF, LevelData<FArra
   const DisjointBoxLayout& dblFine    = m_eblgFine.getDBL();
   
   const ProblemDomain&     domainCoar = m_eblg.    getDomain();
-  const ProblemDomain&     domainFine = m_eblgFine.getDomain();
 
   // Create some temporary storage. We coarsen the fine grid and create a Level<FArrayBox> object where each
   // Box is grown by one. We do this because we want to put some data in the ghost cells outside the valid region
@@ -510,7 +509,6 @@ void EBGradient::defineIteratorsEBCF(const LevelData<FArrayBox>& a_coarMaskCF, c
   //       buffer grids, which consist of all boxes that contain at least one cell that requires a least squares stencil. 
   
   constexpr Real zero   = 0.0;
-  constexpr Real one    = 1.0;      
 
   const DisjointBoxLayout& dbl        = m_eblg.    getDBL();
   const DisjointBoxLayout& dblFine    = m_eblgFine.getDBL();
@@ -609,17 +607,11 @@ void EBGradient::defineBuffers(LevelData<FArrayBox>&       a_bufferCoarMaskCF,
   const EBIndexSpace* const ebisPtr = m_eblg.getEBIS();  
 
   constexpr Real zero   = 0.0;
-  constexpr Real one    = 1.0;
   
   const Interval interv = Interval(m_comp, m_comp);
 
   const DisjointBoxLayout& dblCoar    = m_bufferDblCoar;
-  const DisjointBoxLayout& dblFine    = m_bufferDblFine;
-  
   const EBISLayout&        ebislCoar  = m_bufferEBISLCoar;
-  const EBISLayout&        ebislFine  = m_bufferEBISLFine;
-  
-  const ProblemDomain&     domainCoar = m_eblg.    getDomain();
   const ProblemDomain&     domainFine = m_eblgFine.getDomain();
 
   // Fill a refinement of dblCoar. 
@@ -706,19 +698,12 @@ void EBGradient::defineStencilsEBCF(const LevelData<FArrayBox>& a_bufferCoarMask
   
   const EBISLayout&        ebisl      = m_bufferEBISLCoar;
   const EBISLayout&        ebislFine  = m_bufferEBISLFine;
-  
-  const ProblemDomain&     domain     = m_eblg.    getDomain();
-  const ProblemDomain&     domainFine = m_eblgFine.getDomain();
 
   for (DataIterator dit(dbl); dit.ok(); ++dit){
     const Box      cellBox     = dbl      [dit()];
     const Box      cellBoxFine = dblFine  [dit()];
     
     const EBISBox& ebisBox     = ebisl    [dit()];
-    const EBISBox& ebisBoxFine = ebislFine[dit()];
-    
-    const EBGraph& ebgraph     = ebisBox.    getEBGraph();
-    const EBGraph& ebgraphFine = ebisBoxFine.getEBGraph();
 
     const Box grownCellBox     = grow(cellBox, 1);
     const Box grownCellBoxFine = refine(grownCellBox, m_refRat);
@@ -906,7 +891,6 @@ bool EBGradient::getLeastSquaresStencil(VoFStencil&            a_stencilCoar,
     
   // Get all coarse cells within radius 1.
   const int coarRadius = 1;
-  const int fineRadius = m_refRat;
 
   // Get coar vofs in range. The fine VoFs are defined as the VoFs that are available through refinement of the coarse vofs. 
   Vector<VolIndex> coarVoFs = VofUtils::getVofsInRadius(a_vofCoar, ebisBoxCoar, coarRadius, VofUtils::Connectivity::MonotonePath, false);

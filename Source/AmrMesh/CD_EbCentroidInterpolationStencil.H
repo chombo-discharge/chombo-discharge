@@ -48,7 +48,7 @@ public:
   /*!
     @brief Destructor (does nothing)
   */
-  ~EbCentroidInterpolationStencil();
+  virtual ~EbCentroidInterpolationStencil();
 
 protected:
   

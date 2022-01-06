@@ -69,7 +69,6 @@ void EBHelmholtzRobinDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
   const int isign   = (a_side == Side::Lo) ? -1 : 1;
   
   const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
-  const EBISBox& ebgraph = m_eblg.getEBISL()[a_dit];
 
   // Kernel. As always, we linearly extrapolate to the boundary and set the flux from that. 
   auto kernel = [&] (const IntVect& iv) -> void {
@@ -103,6 +102,13 @@ void EBHelmholtzRobinDomainBC::getFaceFlux(BaseFab<Real>&        a_faceFlux,
       B = this->m_functionB(pos);
       C = a_useHomogeneous ? 0 : this->m_functionC(pos);
     }
+    else{
+      A = 0.0;
+      B = 0.0;
+      C = 0.0;
+
+      MayDay::Error("EBHelmholtzRobinDomainBC::getFaceFlux (BaseFab<Real> version) - logic bust");
+    }
 
     //    a_faceFlux(iv, m_comp) = C/B + isign*A*phiExtrap/B;
     a_faceFlux(iv, m_comp) = C/B + isign*A*phiExtrap/B;
@@ -125,7 +131,6 @@ Real EBHelmholtzRobinDomainBC::getFaceFlux(const VolIndex&       a_vof,
   CH_TIME("EBHelmholtzRobinDomainBC::getFaceFlux(VolIndex, EBCellFAB, int, Side::LoHiSide, DataIndex, bool)");
   
   const int isign             = (a_side == Side::Lo) ? -1 : 1;
-  const Real ihdx             = 2.0/m_dx;
   const IntVect iv            = a_vof.gridIndex();
   const EBISBox& ebisbox      = m_eblg.getEBISL()[a_dit];
   const ProblemDomain& domain = m_eblg.getDomain();
@@ -188,6 +193,13 @@ Real EBHelmholtzRobinDomainBC::getFaceFlux(const VolIndex&       a_vof,
 	B = this->m_functionB(pos);
 	C = a_useHomogeneous ? 0 : this->m_functionC(pos);
       }
+      else{
+	A = 0.0;
+	B = 0.0;
+	C = 0.0;
+
+	MayDay::Error("EBHelmholtzRobinDomainBC::getFaceFlux (VolIndex version) - logic bust");
+      }      
 
       // A*phi + B*dphi/dn = C => dphi/dn = C/B - A*phi/B, with n pointing into the boundary. 
       centroidFlux = C/B + isign*A*phiExtrap/B;

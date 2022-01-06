@@ -94,7 +94,6 @@ void EBCoarseFineParticleMesh::defineVoFIterators(){
   const EBISLayout&        ebislFine  = m_eblgFine.getEBISL ();
 
   const DisjointBoxLayout& dblCoFi    = m_eblgCoFi.getDBL   ();
-  const ProblemDomain&     domainCoFi = m_eblgCoFi.getDomain();
   const EBISLayout&        ebislCoFi  = m_eblgCoFi.getEBISL ();  
 
   m_vofIterFineGhosts.define(dblFine);
@@ -106,7 +105,6 @@ void EBCoarseFineParticleMesh::defineVoFIterators(){
     const EBISBox& ebisBoxFine = ebislFine[dit()];
     const EBGraph& ebgraphFine = ebisBoxFine.getEBGraph();
 
-    const Box&     cellBoxCoFi = dblCoFi  [dit()];    
     const EBISBox& ebisBoxCoFi = ebislCoFi[dit()];
     const EBGraph& ebgraphCoFi = ebisBoxCoFi.getEBGraph();    
     
@@ -154,7 +152,6 @@ void EBCoarseFineParticleMesh::addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coa
   const EBISLayout&        ebislFine  = m_eblgFine.getEBISL ();
 
   const DisjointBoxLayout& dblCoFi    = m_eblgCoFi.getDBL   ();
-  const ProblemDomain&     domainCoFi = m_eblgCoFi.getDomain();
   const EBISLayout&        ebislCoFi  = m_eblgCoFi.getEBISL ();
   
   // Copy the fine data to scratch and reset the interior cells. We do this by copying everything to the fine scratch data,
@@ -174,8 +171,6 @@ void EBCoarseFineParticleMesh::addFineGhostsToCoarse(LevelData<EBCellFAB>& a_coa
   // so the coarse data underneath those regions will be zero, also. 
   const Real factor = 1./pow(m_refRat, SpaceDim);  
   for (DataIterator dit(dblFine); dit.ok(); ++dit){
-    const EBISBox&   ebisBoxFine = ebislFine   [dit()];
-    const EBISBox&   ebisBoxCoFi = ebislCoFi   [dit()];    
     EBCellFAB&       coFiData    = m_bufferCoFi[dit()];
     const EBCellFAB& fineData    = m_bufferFine[dit()];
 
@@ -270,11 +265,9 @@ void EBCoarseFineParticleMesh::addInvalidCoarseToFine(LevelData<EBCellFAB>& a_fi
   //       the function signature indicates that we only add invalid coarse data, we do run kernels over all data. The addition is done only at the end in
   //       copyTo.
 
-  const ProblemDomain&     domainCoar = m_eblgCoar.getDomain();    
   const DisjointBoxLayout& dblCoar    = m_eblgCoar.getDBL();
   const EBISLayout&        ebislCoar  = m_eblgCoar.getEBISL();
 
-  const ProblemDomain&     domainFiCo = m_eblgFiCo.getDomain();    
   const DisjointBoxLayout& dblFiCo    = m_eblgFiCo.getDBL();
   const EBISLayout&        ebislFiCo  = m_eblgFiCo.getEBISL();    
 

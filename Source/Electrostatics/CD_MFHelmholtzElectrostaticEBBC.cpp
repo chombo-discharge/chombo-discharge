@@ -52,12 +52,10 @@ void MFHelmholtzElectrostaticEBBC::defineSinglePhase() {
   CH_assert(m_weight >= 0);  
 
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
-  const ProblemDomain& domain  = m_eblg.getDomain();
 
   for (DataIterator dit(dbl); dit.ok(); ++dit){
     const Box box          = dbl[dit()];
     const EBISBox& ebisbox = m_eblg.getEBISL()[dit()];
-    const EBGraph& ebgraph = ebisbox.getEBGraph();
     const IntVectSet& ivs  = ebisbox.getIrregIVS(box);
 
     BaseIVFAB<Real>&       weights  = m_boundaryWeights [dit()];

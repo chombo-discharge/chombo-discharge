@@ -155,7 +155,6 @@ namespace Physics {
 
       // Fetch the potential and surface/space charges and initialize them. 
       MFAMRCellData& state = m_fieldSolver->getPotential();  
-      MFAMRCellData& rho   = m_fieldSolver->getRho();
       EBAMRIVData& sigma   = m_sigma->getPhi();
 
       // Nifty lambda for making a Gaussian blob. 

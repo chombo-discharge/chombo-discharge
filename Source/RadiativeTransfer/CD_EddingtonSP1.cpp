@@ -756,8 +756,6 @@ void EddingtonSP1::setupHelmholtzFactory(){
     pout() << m_name + "::setupHelmholtzFactory" << endl;
   }
 
-  const int finestLevel = m_amr->getFinestLevel();
-
   const Vector<RefCountedPtr<EBLevelGrid> >&             levelGrids   = m_amr->getEBLevelGrid          (m_realm, m_phase);
   const Vector<RefCountedPtr<EbCoarAve> >&               coarAve      = m_amr->getCoarseAverage        (m_realm, m_phase);
   const Vector<RefCountedPtr<EBFluxRegister> >&          fluxReg      = m_amr->getFluxRegister         (m_realm, m_phase);
@@ -822,9 +820,6 @@ void EddingtonSP1::setupHelmholtzFactory(){
 										       m_multigridRelaxMethod,
 										       bottomDomain,
 										       m_amr->getMaxBoxSize()));
-										       
-
-  
 }
 
 void EddingtonSP1::setupMultigrid(){

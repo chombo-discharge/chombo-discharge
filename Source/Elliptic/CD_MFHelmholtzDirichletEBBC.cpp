@@ -85,12 +85,10 @@ void MFHelmholtzDirichletEBBC::defineSinglePhase() {
   // TLDR: We compute the stencil for reconstructing dphi/dn on the boundary. This is done with least squares reconstruction. 
 
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
-  const ProblemDomain& domain  = m_eblg.getDomain();
 
   for (DataIterator dit(dbl); dit.ok(); ++dit){
     const Box box          = dbl[dit()];
     const EBISBox& ebisbox = m_eblg.getEBISL()[dit()];
-    const EBGraph& ebgraph = ebisbox.getEBGraph();
     const IntVectSet& ivs  = ebisbox.getIrregIVS(box);
 
     BaseIVFAB<Real>&       weights  = m_boundaryWeights [dit()];
@@ -174,6 +172,10 @@ void MFHelmholtzDirichletEBBC::applyEBFluxSinglePhase(VoFIterator&     a_singleP
       else if(m_useFunction){
 	const RealVect pos = this->getBoundaryPosition(vof, a_dit);
 	value = m_functionValue(pos);
+      }
+      else{
+	value = 0.0;
+	MayDay::Error("MFHelmholtzDirichletEBBC::applyEBFluxSinglePhase - logic bust");
       }
 
       a_Lphi(vof, m_comp) += a_beta*value*m_boundaryWeights[a_dit](vof, m_comp);

@@ -383,7 +383,7 @@ void MFHelmholtzJumpBC::matchBC(BaseIVFAB<Real>& a_jump,
     const VoFStencil& derivStenPhase1 = m_avgStencils[a_dit].getIVFAB(secondPhase)(vof0, vofComp);
 
     const Real& denomPhase0 = m_denom[a_dit].getIVFAB(firstPhase) (vof0, vofComp);
-    const Real& denomPhase1 = m_denom[a_dit].getIVFAB(secondPhase)(vof0, vofComp);
+    //    const Real& denomPhase1 = m_denom[a_dit].getIVFAB(secondPhase)(vof0, vofComp);
 
     // Compute the average jump.
     Real jump = 0.0; 

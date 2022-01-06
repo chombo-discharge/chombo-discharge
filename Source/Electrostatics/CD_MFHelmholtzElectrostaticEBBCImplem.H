@@ -23,7 +23,7 @@ Real MFHelmholtzElectrostaticEBBC::getElectrodePotential(const RealVect& a_pos) 
   CH_TIME("MFHelmholtzElectrostaticEBBC::getElectrodePotential(RealVect)");
 
   // Find closest electrode
-  int closestElectrode;
+  int closestElectrode = 0;
   Real minDist = std::numeric_limits<Real>::infinity();
 
   const std::vector<std::pair<Electrode, ElectrostaticEbBc::BcFunction> >& electrodeBCs = m_electrostaticBCs.getBcs();
