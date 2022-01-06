@@ -16,6 +16,12 @@ jobs:
       DISCHARGE_HOME: ${{github.workspace}}
       CHOMBO_HOME: ${{github.workspace}}/Chombo-3.3/lib
 
+    steps:
+      - name: Checkout chombo-discharge
+        uses: actions/checkout@v2
+        with:
+          submodules: true      
+
   GNU:
     needs: Formatting
     runs-on: ubuntu-latest    
