@@ -1,4 +1,4 @@
-name: Linux GCC
+name: TEST
 
 on:
   pull_request:
