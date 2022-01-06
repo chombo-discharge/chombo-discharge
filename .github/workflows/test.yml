@@ -18,6 +18,6 @@ jobs:
         run: ls -ahl
 
       - id: foo
-        uses: ./.github/workflows/action
+        uses: ./.github/workflows/
 
           
