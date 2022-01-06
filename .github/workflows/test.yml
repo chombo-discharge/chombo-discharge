@@ -16,4 +16,8 @@ jobs:
     steps:
       - name: print
         run: ls -ahl
+
+      - id: foo
+        uses: ./.github/workflows/action
+
           
