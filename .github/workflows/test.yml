@@ -12,6 +12,8 @@ jobs:
   Formatting:
     name: Setup environment
     runs-on: ubuntu-latest
+    timeout-minutes: 1
+    
     env: 
       DISCHARGE_HOME: ${{github.workspace}}
       CHOMBO_HOME: ${{github.workspace}}/Chombo-3.3/lib
@@ -29,7 +31,7 @@ jobs:
     steps:
       - name: Sanity check
         run: |
-          echo ${{env.DISCHARGE_HOME}}
+          echo $DISCHARGE_HOME
           
       - name: Install dependencies
         run: |
