@@ -19,6 +19,10 @@ jobs:
       CHOMBO_HOME: ${{github.workspace}}/Chombo-3.3/lib
 
     steps:
+      - name: Setup environment
+        run: |
+          export DISCHARGE_HOME = ${{github.workspace}}
+          
       - name: Install dependencies
         run: |
           sudo apt update
