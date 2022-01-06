@@ -9,52 +9,12 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  Formatting:
-    name: Setup environment
-    runs-on: ubuntu-latest
-    timeout-minutes: 1
-    
-    env: 
-      DISCHARGE_HOME: ${{github.workspace}}
-      CHOMBO_HOME: ${{github.workspace}}/Chombo-3.3/lib
-
-    steps:
-      - name: blabla
-        run: |
-          export DISCHARGE_HOME=${{github.workspace}}
-          
-      - name: Install dependencies
-        run: |
-          sudo apt update
-          sudo apt install csh gfortran-10 g++-10 cpp-10 libhdf5-dev libhdf5-openmpi-dev openmpi-bin libblas-dev liblapack-dev
-          
-      - name: Checkout chombo-discharge
-        uses: actions/checkout@v2
-        with:
-          submodules: true      
-
   serial-no-hdf5:
     name: Serial
     needs: Formatting
     runs-on: ubuntu-latest
-    timeout-minutes: 1
-    
-    env: 
-      DISCHARGE_HOME: ${{github.workspace}}
-      CHOMBO_HOME: ${{github.workspace}}/Chombo-3.3/lib    
 
     steps:
-      - name: Copy makefile
-        run: |
-          ls -ahl
-
-  parallel-no-hdf5:
-    name: Parallel
-    needs: Formatting
-    runs-on: ubuntu-latest    
-
-    steps:
-      - name: Copy makefile
-        run: |
-          ls -ahl
+      - name: print
+        run: ls -ahl
           
