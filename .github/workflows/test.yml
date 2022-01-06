@@ -5,11 +5,11 @@ on:
     types: [push, opened, synchronize, reopened, ready_for_review]
 
 concurrency:
-  group: ${{ github.ref }}-${{ github.head_ref }}-linux-gcc    
+  group: ${{ github.ref }}-${{ github.head_ref }}-test
   cancel-in-progress: true
 
 jobs:
-  setup:
+  Formatting:
     name: Setup environment
     runs-on: ubuntu-latest
     env: 
@@ -17,7 +17,8 @@ jobs:
       CHOMBO_HOME: ${{github.workspace}}/Chombo-3.3/lib
 
   GNU:
-    needs: setup
+    needs: Formatting
+    runs-on: ubuntu-latest    
     name: Install GNU dependencies
     steps:
       - name: Sanity check
@@ -30,8 +31,9 @@ jobs:
           sudo apt install csh gfortran-10 g++-10 cpp-10 libhdf5-dev libhdf5-openmpi-dev openmpi-bin libblas-dev liblapack-dev
 
   GNUU:
-    needs: setup
-    name: Install GNU dependencies
+    needs: Formatting
+    runs-on: ubuntu-latest
+    name: Install GNUU dependencies
     steps:
       - name: Sanity check
         run: |
