@@ -1,16 +1,16 @@
-lib: source geometries 
+discharge-lib: source geometries 
 
 physics: source advectiondiffusion brownianwalker cdrplasma electrostatics geometry radiativetransfer
 
-chombo:
+chombo-lib:
 	$(MAKE) --directory=$(CHOMBO_HOME) USE_EB=TRUE USE_MF=TRUE lib
 
-all: lib physics
+all: discharge-lib physics
 
-source: chombo
+discharge-source: lib-chombo
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Source 
 
-geometries: source
+discharge-geometries: source
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Geometries
 
 advectiondiffusion: source
@@ -47,4 +47,4 @@ allclean: libclean
 pristine: allclean
 	$(MAKE) --directory=$(CHOMBO_HOME) realclean
 
-.PHONY: lib physics all source geometries advectiondiffusion brownianwalker cdrplasma electrostatics geometry radiativetransfer libclean allclean pristine
+.PHONY: discharge-lib physics all source geometries advectiondiffusion brownianwalker cdrplasma electrostatics geometry radiativetransfer libclean allclean pristine
