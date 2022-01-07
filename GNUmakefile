@@ -46,5 +46,6 @@ allclean: libclean
 
 pristine: allclean
 	$(MAKE) --directory=$(CHOMBO_HOME) realclean
+	find . -type f -name "*.ex" -delete
 
 .PHONY: discharge-lib physics all source geometries advectiondiffusion brownianwalker cdrplasma electrostatics geometry radiativetransfer libclean allclean pristine
