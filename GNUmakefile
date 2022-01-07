@@ -7,10 +7,10 @@ chombo:
 
 all: discharge-lib physics
 
-discharge-source: chombo
+source: chombo
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Source 
 
-discharge-geometries: source
+geometries: source
 	$(MAKE) --directory=$(DISCHARGE_HOME)/Geometries
 
 advectiondiffusion: source
