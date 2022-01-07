@@ -130,7 +130,7 @@ For a quick test the user can use the GNU configuration file supplied with ``cho
    .. code-block:: text
 
       cd $DISCHARGE_HOME
-      make -s -j4 lib
+      make -s -j4 discharge-lib
 
 This will compile the ``chombo-discharge`` source code in serial and without HDF5 (using four cores for the compilation).
 If successful, ``chombo-discharge`` libraries will appear in ``$DISCARGE_HOME/Lib``.
@@ -203,10 +203,10 @@ Here, we provide a more complete installation example using GNU compilers for a 
    .. code-block:: text
 
       cd $DISCHARGE_HOME
-      make -s -j4 lib
+      make -s -j4 discharge-lib
 
 This will compile the ``chombo-discharge`` source code using the configuration settings set by the user.
-To compile ``chombo-discharge`` in 3D, do ``make -s -j4 DIM=3 lib``.
+To compile ``chombo-discharge`` in 3D, do ``make -s -j4 DIM=3 discharge-lib``.
 If successful, ``chombo-discharge`` libraries will appear in ``$DISCARGE_HOME/Lib``.
 
 
