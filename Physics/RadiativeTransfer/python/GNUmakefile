@@ -10,6 +10,7 @@ $(ebaseobject): dependencies
 
 # Build dependencies.
 dependencies: 
+	$(MAKE) --directory=$(DISCHARGE_HOME) discharge-lib
 	$(MAKE) --directory=$(DISCHARGE_HOME) radiativetransfer
 
 # Make advection-diffusion headers and library visible. 
