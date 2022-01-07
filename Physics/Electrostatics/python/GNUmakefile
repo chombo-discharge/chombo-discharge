@@ -10,7 +10,6 @@ $(ebaseobject): dependencies
 
 # Build dependencies if they do not exis. 
 dependencies: 
-	$(MAKE) --directory=$(DISCHARGE_HOME)
 	$(MAKE) --directory=$(DISCHARGE_HOME) electrostatics
 
 # Make advection-diffusion headers and library visible. 

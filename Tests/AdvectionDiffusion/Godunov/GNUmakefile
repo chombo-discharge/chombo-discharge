@@ -8,9 +8,8 @@ include $(CHOMBO_HOME)/mk/Make.example
 $(ebaseobject): dependencies
 .DEFAULT_GOAL=$(ebase)
 
-# Build dependencies if they do not exis. 
+# Build dependencies.
 dependencies: 
-	$(MAKE) --directory=$(DISCHARGE_HOME)
 	$(MAKE) --directory=$(DISCHARGE_HOME) advectiondiffusion
 
 # Make advection-diffusion headers and library visible. 
