@@ -34,13 +34,13 @@ void EBAMRParticleMesh::deposit(EBAMRCellData&              a_meshData,
 
   switch(a_coarseFineDeposition){
   case CoarseFineDeposition::PVR:
-    EBAMRParticleMesh::depositPVR<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
+    this->depositPVR<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
     break;
   case CoarseFineDeposition::Halo:
-    EBAMRParticleMesh::depositHalo<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);    
+    this->depositHalo<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
     break;
   case CoarseFineDeposition::HaloNGP:
-    EBAMRParticleMesh::depositHaloNGP<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);    
+    this->depositHaloNGP<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
     break;    
   default:
     MayDay::Error("EBAMRParticleMesh::deposit(scalar) - logic bust");
@@ -62,13 +62,13 @@ void EBAMRParticleMesh::deposit(EBAMRCellData&              a_meshData,
 
   switch(a_coarseFineDeposition){
   case CoarseFineDeposition::PVR:
-    EBAMRParticleMesh::depositPVR<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
+    this->depositPVR<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
     break;
   case CoarseFineDeposition::Halo:
-    EBAMRParticleMesh::depositHalo<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);    
+    this->depositHalo<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
     break;
   case CoarseFineDeposition::HaloNGP:
-    EBAMRParticleMesh::depositHaloNGP<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);    
+    this->depositHaloNGP<P, particleScalarField>(a_meshData, a_particles, a_depositionType, a_forceIrregNGP);
     break;    
   default:
     MayDay::Error("EBAMRParticleMesh::deposit(scalar) - logic bust");
@@ -124,17 +124,11 @@ void EBAMRParticleMesh::depositPVR(EBAMRCellData&              a_meshData,
   const Interval interv(0,0);
 
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
-    const DisjointBoxLayout& dbl       = m_eblgs[lvl]->getDBL   ();
-    const EBISLayout&        ebisl     = m_eblgs[lvl]->getEBISL ();
-    const ProblemDomain&     domain    = m_eblgs[lvl]->getDomain();
-
+    const DisjointBoxLayout& dbl = m_eblgs[lvl]->getDBL   ();
     const bool hasCoar = lvl > 0;
     
     // 1. Deposit particles on this level.
     for (DataIterator dit(dbl); dit.ok(); ++dit){
-      const Box      cellBox = dbl  [dit()];
-      const EBISBox& ebisBox = ebisl[dit()];
-
       EBCellFAB&        meshData     = (*a_meshData[lvl])[dit()];
       const ListBox<P>& boxParticles =  a_particles[lvl] [dit()];
 
@@ -181,15 +175,11 @@ void EBAMRParticleMesh::depositPVR(EBAMRCellData&              a_meshData,
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
     const DisjointBoxLayout& dbl       = m_eblgs[lvl]->getDBL   ();
     const EBISLayout&        ebisl     = m_eblgs[lvl]->getEBISL ();
-    const ProblemDomain&     domain    = m_eblgs[lvl]->getDomain();
 
     const bool hasCoar = lvl > 0;
     
     // 1. Deposit particles on this level.
     for (DataIterator dit(dbl); dit.ok(); ++dit){
-      const Box      cellBox = dbl  [dit()];
-      const EBISBox& ebisBox = ebisl[dit()];
-
       EBCellFAB&        meshData     = (*a_meshData[lvl])[dit()];
       const ListBox<P>& boxParticles =  a_particles[lvl] [dit()];
 
@@ -237,15 +227,11 @@ void EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
     const DisjointBoxLayout& dbl       = m_eblgs[lvl]->getDBL   ();
     const EBISLayout&        ebisl     = m_eblgs[lvl]->getEBISL ();
-    const ProblemDomain&     domain    = m_eblgs[lvl]->getDomain();
 
     const bool hasCoar = (lvl > 0);
 
     // 1. Deposit particles on this level.
     for (DataIterator dit(dbl); dit.ok(); ++dit){
-      const Box      cellBox = dbl  [dit()];
-      const EBISBox& ebisBox = ebisl[dit()];
-
       EBCellFAB&        meshData     = (*a_meshData [lvl])[dit()];
       const ListBox<P>& boxParticles =   a_particles[lvl] [dit()];
 
@@ -269,16 +255,12 @@ void EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       const int                refRat            =  m_refRat[lvl-1];                        // Refinement between coarse level and this level.
       const EBLevelGrid&       eblgFiCo          =  m_coarseFinePM[lvl]->getEblgFiCo();     // This is the refinement of the coarse grid.
       const DisjointBoxLayout& dblFiCo           =  eblgFiCo.getDBL();                      // Refinement of coarse grid
-      const ProblemDomain&     domainFiCo        =  eblgFiCo.getDomain();                   // Refinement of coarse domain
-      const EBISLayout&        ebislFiCo         =  eblgFiCo.getEBISL();                    // Refinement of coarse EBISL
       
       LevelData<EBCellFAB>&  bufferFiCo          = m_coarseFinePM[lvl]->getFiCoBuffer();   // Data that is a refinement of the coarse level.
 
       for (DataIterator dit(dblFiCo); dit.ok(); ++dit){
 	EBCellFAB&        dataFiCo      = bufferFiCo       [dit()];
 	const ListBox<P>& haloParticles = coarHaloParticles[dit()];
-	const Box         cellBox       = dblFiCo          [dit()];
-	const EBISBox&    ebisBox       = ebislFiCo        [dit()];
 	
 	dataFiCo.setVal(0.0);
 
@@ -326,15 +308,11 @@ void EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
     const DisjointBoxLayout& dbl       = m_eblgs[lvl]->getDBL   ();
     const EBISLayout&        ebisl     = m_eblgs[lvl]->getEBISL ();
-    const ProblemDomain&     domain    = m_eblgs[lvl]->getDomain();
 
     const bool hasCoar = (lvl > 0);
 
     // 1. Deposit particles on this level.
     for (DataIterator dit(dbl); dit.ok(); ++dit){
-      const Box      cellBox = dbl  [dit()];
-      const EBISBox& ebisBox = ebisl[dit()];
-
       EBCellFAB&        meshData     = (*a_meshData [lvl])[dit()];
       const ListBox<P>& boxParticles =   a_particles[lvl] [dit()];
 
@@ -357,16 +335,12 @@ void EBAMRParticleMesh::depositHalo(EBAMRCellData&              a_meshData,
       const int                refRat            =  m_refRat[lvl-1];                        // Refinement between coarse level and this level.
       const EBLevelGrid&       eblgFiCo          =  m_coarseFinePM[lvl]->getEblgFiCo();     // This is the refinement of the coarse grid.
       const DisjointBoxLayout& dblFiCo           =  eblgFiCo.getDBL();                      // Refinement of coarse grid
-      const ProblemDomain&     domainFiCo        =  eblgFiCo.getDomain();                   // Refinement of coarse domain
-      const EBISLayout&        ebislFiCo         =  eblgFiCo.getEBISL();                    // Refinement of coarse EBISL
       
       LevelData<EBCellFAB>&  bufferFiCo          = m_coarseFinePM[lvl]->getFiCoBuffer();   // Data that is a refinement of the coarse level.
 
       for (DataIterator dit(dblFiCo); dit.ok(); ++dit){
 	EBCellFAB&        dataFiCo      = bufferFiCo       [dit()];
 	const ListBox<P>& haloParticles = coarHaloParticles[dit()];
-	const Box         cellBox       = dblFiCo          [dit()];
-	const EBISBox&    ebisBox       = ebislFiCo        [dit()];
 	
 	dataFiCo.setVal(0.0);
 
@@ -422,9 +396,6 @@ void EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
 
     // 1. Deposit particles on this level.
     for (DataIterator dit(dbl); dit.ok(); ++dit){
-      const Box      cellBox = dbl  [dit()];
-      const EBISBox& ebisBox = ebisl[dit()];
-
       EBCellFAB&        meshData       = (*a_meshData      [lvl])[dit()];
       const ListBox<P>& particlesCloud = (*nonHaloParticles[lvl])[dit()];
       const ListBox<P>& particlesNGP   = (*   haloParticles[lvl])[dit()];      
@@ -476,9 +447,6 @@ void EBAMRParticleMesh::depositHaloNGP(EBAMRCellData&              a_meshData,
 
     // 1. Deposit particles on this level.
     for (DataIterator dit(dbl); dit.ok(); ++dit){
-      const Box      cellBox = dbl  [dit()];
-      const EBISBox& ebisBox = ebisl[dit()];
-
       EBCellFAB&        meshData       = (*a_meshData      [lvl])[dit()];
       const ListBox<P>& particlesCloud = (*nonHaloParticles[lvl])[dit()];
       const ListBox<P>& particlesNGP   = (*   haloParticles[lvl])[dit()];      
@@ -520,8 +488,6 @@ void EBAMRParticleMesh::interpolate(ParticleContainer<P>& a_particles,
     CH_assert(a_meshScalarField[lvl]->nComp() == 1);    
 
     for (DataIterator dit(dbl); dit.ok(); ++dit){
-      const Box        cellBox = dbl  [dit()];
-      const EBISBox&   ebisBox = ebisl[dit()];
       const EBCellFAB& data    = (*a_meshScalarField[lvl])[dit()];
 	
       List<P>& particles = (*a_particles[lvl])[dit()].listItems();
@@ -554,8 +520,6 @@ void EBAMRParticleMesh::interpolate(ParticleContainer<P>& a_particles,
     CH_assert(a_meshVectorField[lvl]->nComp() == SpaceDim);
 
     for (DataIterator dit(dbl); dit.ok(); ++dit){
-      const Box        cellBox = dbl  [dit()];
-      const EBISBox&   ebisBox = ebisl[dit()];
       const EBCellFAB& data    = (*a_meshVectorField[lvl])[dit()];
 	
       List<P>& particles = (*a_particles[lvl])[dit()].listItems();

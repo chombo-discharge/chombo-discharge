@@ -22,6 +22,8 @@
 #include <CD_ItoSolver.H>
 #include <CD_DataOps.H>
 #include <CD_ParticleOps.H>
+#include <CD_BoxLoops.H>
+#include <CD_Random.H>
 #include <CD_NamespaceHeader.H>
 
 constexpr int ItoSolver::m_comp;
@@ -127,28 +129,10 @@ void ItoSolver::parseRNG() {
 
   // Seed the RNG
   ParmParse pp(m_className.c_str());
-  
-  pp.get("seed",       m_rngSeed);
+
   pp.get("normal_max", m_normalDistributionTruncation);
 
-  // Use a random seed if the input was < 0.
-  if(m_rngSeed < 0) { 
-    m_rngSeed = std::chrono::system_clock::now().time_since_epoch().count();
-  }
-
-#ifdef CH_MPI
-  m_rngSeed += procID();
-#endif
-
-  // Initialize random number generator and distributions
-  constexpr Real zero = 0.0;
-  constexpr Real one  = 1.0;
-  
-  m_rng                   = std::mt19937_64(m_rngSeed);
-  m_uniformDistribution01 = std::uniform_real_distribution<Real>( zero, one       ); // <- Uniform real distribution from [ 0   1]
-  m_uniformDistribution11 = std::uniform_real_distribution<Real>(-one , one       ); // <- Uniform real distribution from [-1, -1]
   m_uniformDistribution0d = std::uniform_int_distribution<int>  ( 0   , SpaceDim-1); // <- Uniform integer distribution from [0, SpaceDim-1]
-  m_normalDistribution01  = std::normal_distribution<Real>      ( zero, one       ); // <- Normal distribution with mean value of zero and standard deviation of one. 
 }
 
 void ItoSolver::parseTruncation() {
@@ -923,10 +907,8 @@ void ItoSolver::writeCheckPointLevelFluid(HDF5Handle& a_handle, const int a_leve
     BinFab<ItoParticle> cellSortedParticles(cellBox, dx, probLo);
     cellSortedParticles.addItems(particles[a_level][dit()].listItems());
 
-    // Go through the patch and get the number of particles per cell. 
-    for (BoxIterator bit(cellBox); bit.ok(); ++bit) {
-      const IntVect iv = bit();
-
+    // Kernel - go through the patch and get the number of particles per cell. 
+    auto kernel = [&] (const IntVect& iv) -> void {
       const List<ItoParticle>& cellParticles = cellSortedParticles(iv, m_comp);      
 
       // Go through the particles in the current grid cell and set the number of particles. 
@@ -936,7 +918,10 @@ void ItoSolver::writeCheckPointLevelFluid(HDF5Handle& a_handle, const int a_leve
 	
 	particleNumbersFAB(iv, m_comp) += p.mass();
       }
-    }
+    };
+
+    // Execute kernel.
+    BoxLoops::loop(cellBox, kernel);
   }
 
   // Finally, write the particle numbers to HDF5. 
@@ -1066,10 +1051,11 @@ void ItoSolver::drawNewParticles(const LevelData<EBCellFAB>& a_particlesPerCell,
     List<ItoParticle>& myParticles = particles[a_level][dit()].listItems();
     myParticles.clear();
 
-    // Do regular cells
-    for (BoxIterator bit(cellBox); bit.ok(); ++bit) {
-      const IntVect iv = bit();
+    // Kernel region for cut-cells. 
+    VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_level])[dit()];    
 
+    // Regular kernel
+    auto regularKernel = [&] (const IntVect& iv) -> void {
       // Do regular cells -- in these cells we only need to draw a random position somewhere inside the cubic cell. Easy.
       if(ebisbox.isRegular(iv)) {
 
@@ -1106,12 +1092,10 @@ void ItoSolver::drawNewParticles(const LevelData<EBCellFAB>& a_particlesPerCell,
 	  myParticles.add(ItoParticle(particleWeight, particlePosition));
 	}
       }
-    }
+    };
 
-    // Do the same for irregular cells. This differs from the regular-cell case only in that the positions 
-    VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_level])[dit()];
-    for (vofit.reset(); vofit.ok(); ++vofit) {
-      const VolIndex& vof   = vofit();
+    // Irregular kernel. Do the same for irregular cells. This differs from the regular-cell case only in that the positions       
+    auto irregularKernel = [&] (const VolIndex& vof) -> void {
       const IntVect   iv    = vof.gridIndex();
       const RealVect  cent  = ebisbox.bndryCentroid(vof);
       const RealVect  norm  = ebisbox.normal(vof);
@@ -1153,7 +1137,11 @@ void ItoSolver::drawNewParticles(const LevelData<EBCellFAB>& a_particlesPerCell,
 	  myParticles.add(ItoParticle(particleWeight, particlePosition));
 	}
       }
-    }
+    };
+
+    // Run the kernels.
+    BoxLoops::loop(cellBox,   regularKernel);
+    BoxLoops::loop(vofit,   irregularKernel);        
   }
 }
 
@@ -1534,7 +1522,6 @@ void ItoSolver::depositHybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massD
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++) {
     const DisjointBoxLayout& dbl     = m_amr->getGrids(m_realm)[lvl];
     const EBISLayout&        ebisl   = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-    const ProblemDomain&     domain  = m_amr->getDomains()[lvl];    
     
     for (DataIterator dit(dbl); dit.ok(); ++dit) {
       EBCellFAB&             divH    = (*a_depositionH   [lvl])[dit()];  // On input, this contains kappa*depositionWeights
@@ -1542,11 +1529,10 @@ void ItoSolver::depositHybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massD
       const BaseIVFAB<Real>& divNC   = (*a_depositionNC  [lvl])[dit()]; 
       const EBISBox&         ebisbox = ebisl[dit()];
 
+      // Iteration space. 
       VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
-      
-      for (vofit.reset(); vofit.ok(); ++vofit) {
-	const VolIndex& vof = vofit();
-	
+
+      auto kernel = [&] (const VolIndex& vof) -> void {
 	const Real kappa    = ebisbox.volFrac(vof);
 	const Real dc       = divH (vof, m_comp);
 	const Real dnc      = divNC(vof, m_comp);
@@ -1556,7 +1542,9 @@ void ItoSolver::depositHybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massD
 	// gives positive definite results. 
 	divH  (vof, m_comp) = dc + (1.0-kappa)*dnc;        // On output, contains hybrid divergence
 	deltaM(vof, m_comp) = (1-kappa)*(dc - kappa*dnc);  // Remember, dc already scaled by kappa.
-      }
+      };
+
+      BoxLoops::loop(vofit, kernel);
     }
   }
 }
@@ -1880,7 +1868,6 @@ void ItoSolver::interpolateVelocities(const int a_lvl, const DataIndex& a_dit) {
 
   if(m_isMobile) {
     const EBCellFAB& velo_func = (*m_velocityFunction[a_lvl])[a_dit];
-    const EBISBox& ebisbox     = velo_func.getEBISBox();
     const RealVect dx          = m_amr->getDx()[a_lvl]*RealVect::Unit;
     const RealVect origin      = m_amr->getProbLo();
     const Box box              = m_amr->getGrids(m_realm)[a_lvl][a_dit];
@@ -1966,7 +1953,6 @@ void ItoSolver::interpolateMobilitiesDirect(const int a_lvl, const DataIndex& a_
   EBAMRParticleMesh& particleMesh = m_amr->getParticleMesh(m_realm, m_phase);  
 
   const EBCellFAB& mobilityFunction = (*m_mobilityFunction[a_lvl])[a_dit];
-  const EBISBox&   ebisbox          = mobilityFunction.getEBISBox();
   const RealVect   dx               = m_amr->getDx()[a_lvl]*RealVect::Unit;
   const RealVect   probLo           = m_amr->getProbLo();
   const Box        box              = m_amr->getGrids(m_realm)[a_lvl][a_dit];
@@ -1996,7 +1982,6 @@ void ItoSolver::interpolateMobilitiesVelocity(const int a_lvl, const DataIndex& 
   EBAMRParticleMesh& particleMesh = m_amr->getParticleMesh(m_realm, m_phase);    
  
   const EBCellFAB& mobilityFunction = (*m_mobilityFunction[a_lvl])[a_dit];
-  const EBISBox&   ebisbox          = mobilityFunction.getEBISBox();
   const RealVect   dx               = m_amr->getDx()[a_lvl]*RealVect::Unit;
   const RealVect   probLo           = m_amr->getProbLo();
   const Box        box              = m_amr->getGrids(m_realm)[a_lvl][a_dit];
@@ -2089,10 +2074,7 @@ void ItoSolver::interpolateDiffusion(const int a_lvl, const DataIndex& a_dit) {
     
     // Create the particle interpolator.
     const EBCellFAB& Dcoef   = (*m_diffusionFunction[a_lvl])[a_dit];
-    const EBISBox&   ebisbox = Dcoef.getEBISBox();
     const RealVect   dx      = m_amr->getDx()[a_lvl]*RealVect::Unit;
-    const RealVect   probLo  = m_amr->getProbLo();
-    const Box        box     = m_amr->getGrids(m_realm)[a_lvl][a_dit];
 
     const EBParticleMesh& meshInterp = particleMesh.getEBParticleMesh(a_lvl, a_dit);
 
@@ -2663,17 +2645,20 @@ void ItoSolver::makeSuperparticles(const WhichContainer a_container, const int a
   ParticleContainer<ItoParticle>& particles     = this->getParticles(a_container);  
   BinFab<ItoParticle>&            cellParticles = particles.getCellParticles(a_level, a_dit);
 
-  // Iterate over particles in each cell and merge them. 
-  const Box cellBox  = m_amr->getGrids(m_realm)[a_level][a_dit];
-  for (BoxIterator bit(cellBox); bit.ok(); ++bit) {
-    const IntVect iv = bit();
-  
+  // Kernel for particle merging. 
+  auto kernel = [&] (const IntVect& iv) -> void {
     List<ItoParticle>& particles = cellParticles(iv, m_comp);
 
     if(particles.length() > 0) {
       this->mergeBVH(particles, a_particlesPerCell);
     }
-  }
+  };
+
+  // Iteration space. 
+  const Box cellBox  = m_amr->getGrids(m_realm)[a_level][a_dit];  
+
+  // Run kernel
+  BoxLoops::loop(cellBox, kernel);
 }
 
 void ItoSolver::mergeBVH(List<ItoParticle>& a_particles, const int a_particlesPerCell) {
@@ -2691,9 +2676,9 @@ void ItoSolver::mergeBVH(List<ItoParticle>& a_particles, const int a_particlesPe
   }
   
   // 2. Build the BVH tree and get the leaves of the tree
-  const int firstDir = (m_directionKD < 0) ? m_uniformDistribution0d(m_rng) : m_directionKD;
+  const int firstDir = (m_directionKD < 0) ? Random::get(m_uniformDistribution0d) : m_directionKD;
   m_mergeTree.define(pointMasses);
-  m_mergeTree.buildTree(firstDir, a_particlesPerCell);
+  m_mergeTree.buildTree(firstDir, a_particlesPerCell, ItoMerge::NodePartitionEqualMass<PointMass>);
 
   // 3. Go through the leaves in the tree -- each leaf has a set of PointMass'es that we make into a single
   //    computational particle.

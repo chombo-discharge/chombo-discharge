@@ -38,11 +38,11 @@ PolygonRodIF::PolygonRodIF(const RealVect a_endPoint1,
   const Real alpha  = M_PI/(a_numSides);   // Internal half angle 
   const Real beta   = 0.5*M_PI - alpha;    // External half angle
   
-  const Real a = sin(alpha);             // Triangle factor, opposite internal angle
+  //  const Real a = sin(alpha);             // Triangle factor, opposite internal angle
   const Real b = sin(beta);              // Triangle factor, opposite external angle
   const Real r = a_cornerCurv;           // Radius of curvature. Shortcut. 
   const Real R = a_radius - r + r/b;     // Radius accounts for curvature
-  const Real c = R - r/b;                // Sphere center for rounding
+  //  const Real c = R - r/b;                // Sphere center for rounding
   
   const RealVect zhat = RealVect(D_DECL(0., 0., 1.0));
   

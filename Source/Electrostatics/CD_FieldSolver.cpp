@@ -23,6 +23,7 @@
 #include <CD_MultifluidAlias.H>
 #include <CD_DataOps.H>
 #include <CD_Units.H>
+#include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
 constexpr int FieldSolver::m_comp;
@@ -168,13 +169,13 @@ void FieldSolver::computeDisplacementField(MFAMRCellData& a_displacementField, c
   // Make D = eps0*E
   DataOps::copy (a_displacementField, a_electricField);
   DataOps::scale(a_displacementField, Units::eps0);  
-  //
+
   if(m_multifluidIndexSpace->numPhases() > 1 && dielectrics.size() > 0){
 
     // Lambda which returns the relative permittivity at some position
     auto permittivity = [&dielectrics](const RealVect& pos) -> Real{
       Real minDist = std::numeric_limits<Real>::infinity();
-      int closest;
+      int closest = 0;
 	    
       for (int i = 0; i < dielectrics.size(); i++){
 	const RefCountedPtr<BaseIF> func = dielectrics[i].getImplicitFunction();
@@ -208,30 +209,34 @@ void FieldSolver::computeDisplacementField(MFAMRCellData& a_displacementField, c
 	EBCellFAB& Dsol = D.getPhase(phase::solid);
 	FArrayBox& Dreg = Dsol.getFArrayBox();
 
-	// Regular cells
-	for (BoxIterator bit(cellBox); bit.ok(); ++bit){
-	  const IntVect iv   = bit();
-	  
+	// Iteration space for irregular cells.
+	VoFIterator vofit(ivs, ebgraph);
+
+	// Regular kernel
+	auto regularKernel = [&](const IntVect& iv) -> void {
 	  if(ebisbox.isRegular(iv)){
-	    const RealVect pos = probLo + dx*RealVect(iv);
-	    const Real epsRel  = permittivity(pos);
-	  
+	    const RealVect pos    = probLo + (0.5*RealVect::Unit + RealVect(iv)) * dx;
+	    const Real     epsRel = permittivity(pos);
+
 	    for (int comp = 0; comp < SpaceDim; comp++){
 	      Dreg(iv, comp) *= epsRel;
 	    }
 	  }
-	}
+	};
 
-	// Irregular cells
-	for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	  const VolIndex& vof = vofit();
-	  const RealVect pos  = probLo + Location::position(m_dataLocation, vof, ebisbox, dx);
-	  const Real epsRel   = permittivity(pos);
+	// Irregular kernel
+	auto irregularKernel = [&] (const VolIndex& vof) -> void {
+	  const RealVect pos    = probLo + Location::position(m_dataLocation, vof, ebisbox, dx);
+	  const Real     epsRel = permittivity(pos);
 
 	  for (int comp = 0; comp < SpaceDim; comp++){
 	    Dsol(vof, comp) *= epsRel;
 	  }
-	}
+	};
+
+	// Launch kernels.
+	BoxLoops::loop(cellBox, regularKernel  );
+	BoxLoops::loop(vofit  , irregularKernel);	
       }
     }
   }
@@ -793,25 +798,31 @@ void FieldSolver::setCellPermittivities(EBCellFAB&      a_relPerm,
 
   CH_assert(a_relPerm.nComp() == 1);
 
-  const EBGraph& ebgraph = a_ebisbox.getEBGraph();
-  const IntVectSet irreg = a_ebisbox.getIrregIVS(a_cellBox);
-  
-  // Regular cells
-  BaseFab<Real>& relPermFAB = a_relPerm.getSingleValuedFAB();
-  for (BoxIterator bit(a_cellBox); bit.ok(); ++bit){
-    const IntVect iv = bit();
+  const EBGraph&   ebgraph = a_ebisbox.getEBGraph();
+  const IntVectSet irreg   = a_ebisbox.getIrregIVS(a_cellBox);
+
+  BaseFab<Real>& relPermFAB = a_relPerm.getSingleValuedFAB();  
+
+  // Regular kernel
+  auto regularKernel = [&] (const IntVect& iv) -> void {
     if(a_ebisbox.isRegular(iv)){
-      const RealVect pos = a_probLo + a_dx*RealVect(iv) + 0.5*RealVect::Unit;
+      const RealVect pos = a_probLo + (0.5*RealVect::Unit + RealVect(iv)) * a_dx;
       relPermFAB(iv, m_comp) = this->getDielectricPermittivity(pos);
     }
-  }
+  };
 
-  // Irregular cells
-  for (VoFIterator vofit(irreg, ebgraph); vofit.ok(); ++vofit){
-    const VolIndex& vof = vofit();
+  // Irregular kernel
+  auto irregularKernel = [&](const VolIndex& vof) -> void {
     const RealVect pos  = Location::position(m_dataLocation, vof, a_ebisbox, a_dx);
-    a_relPerm(vof, m_comp) = this->getDielectricPermittivity(pos);
-  }
+    a_relPerm(vof, m_comp) = this->getDielectricPermittivity(pos);    
+  };
+
+  // Kernel regions.
+  VoFIterator irregRegion(irreg, ebgraph);
+
+  // Launch kernels. 
+  BoxLoops::loop(a_cellBox  , regularKernel);
+  BoxLoops::loop(irregRegion, irregularKernel);
 }
 
 void FieldSolver::setFacePermittivities(EBFluxFAB&      a_relPerm,
@@ -828,28 +839,31 @@ void FieldSolver::setFacePermittivities(EBFluxFAB&      a_relPerm,
 
   const EBGraph& ebgraph         = a_ebisbox.getEBGraph();
   const IntVectSet irreg         = a_ebisbox.getIrregIVS(a_cellBox);
-  FaceStop::WhichFaces stop_crit = FaceStop::SurroundingWithBoundary;
   
   for (int dir = 0; dir < SpaceDim; dir++){
 
-    // Regular faces
-    Box facebox = a_cellBox;
-    facebox.surroundingNodes(dir);
-    BaseFab<Real>& relPermFAB = a_relPerm[dir].getSingleValuedFAB();
-    for (BoxIterator bit(facebox); bit.ok(); ++bit){
-      const IntVect iv   = bit();
-      const RealVect pos = a_probLo + a_dx*(RealVect(iv) + 0.5*RealVect::Unit) - 0.5*a_dx*BASISREALV(dir);
-      
-      relPermFAB(iv, m_comp) = this->getDielectricPermittivity(pos);
-    }
-    
-    // Irregular faces
-    for (FaceIterator faceit(irreg, ebgraph, dir, stop_crit); faceit.ok(); ++faceit){
-      const FaceIndex& face  = faceit();
-      const RealVect pos     = a_probLo + Location::position(m_faceLocation, face, a_ebisbox, a_dx);
+    // Kernel regions. 
+    const Box    facebox = surroundingNodes(a_cellBox, dir);
+    FaceIterator faceit  = FaceIterator(irreg, ebgraph, dir, FaceStop::SurroundingWithBoundary);
 
+    // Single-valued data. 
+    BaseFab<Real>& relPermFAB = a_relPerm[dir].getSingleValuedFAB();    
+
+    // Regular kernel
+    auto regularKernel = [&] (const IntVect& iv) -> void {
+      const RealVect pos     = a_probLo + a_dx*(RealVect(iv) + 0.5*RealVect::Unit) - 0.5*a_dx*BASISREALV(dir);
+      relPermFAB(iv, m_comp) = this->getDielectricPermittivity(pos);
+    };
+
+    // Irregular kernel.
+    auto irregularKernel = [&] (const FaceIndex& face) -> void {
+      const RealVect pos           = a_probLo + Location::position(m_faceLocation, face, a_ebisbox, a_dx);
       a_relPerm[dir](face, m_comp) = this->getDielectricPermittivity(pos);
-    }
+    };
+
+    // Launch kernels.
+    BoxLoops::loop(facebox,   regularKernel);
+    BoxLoops::loop(faceit , irregularKernel);    
   }
 }
 
@@ -865,16 +879,18 @@ void FieldSolver::setEbPermittivities(BaseIVFAB<Real>& a_relPerm,
 
   CH_assert(a_relPerm.nComp() == 1);  
   
-  const int comp         = 0;
   const IntVectSet& ivs  = a_relPerm.getIVS();
   const EBGraph& ebgraph = a_relPerm.getEBGraph();
 
-  for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-    const VolIndex& vof = vofit();
+  VoFIterator vofit(ivs, ebgraph);
+
+  auto kernel = [&] (const VolIndex& vof) -> void {
     const RealVect pos  = Location::position(Location::Cell::Boundary, vof, a_ebisbox, a_dx);
 
     a_relPerm(vof, m_comp) = this->getDielectricPermittivity(pos);
-  }
+  };
+
+  BoxLoops::loop(vofit, kernel);
 }
 
 void FieldSolver::writePlotFile(){
@@ -1047,8 +1063,7 @@ void FieldSolver::writeMultifluidData(EBAMRCellData& a_output, int& a_comp, cons
 	  else if(ebisboxGas.isAllRegular() && ebisboxSol.isAllCovered()) { // Case 3. Inside gas phase. Already did this. 
 	  }
 	  else{ // Case 4, needs special treatment. 
-	    for (BoxIterator bit(box); bit.ok(); ++bit){ // Loop through all cells here
-	      const IntVect iv = bit();
+	    auto kernel = [&] (const IntVect& iv) -> void {
 	      if(ebisboxGas.isCovered(iv) && !ebisboxSol.isCovered(iv)){   // Regular cells from phase 2
 		for (int comp = 0; comp < numComp; comp++){
 		  scratchGas(iv, comp) = fabSol(iv, comp);
@@ -1059,7 +1074,9 @@ void FieldSolver::writeMultifluidData(EBAMRCellData& a_output, int& a_comp, cons
 		  scratchGas(iv, comp) = fabGas(iv,comp);
 		}
 	      }
-	    }
+	    };
+
+	    BoxLoops::loop(box, kernel);
 	  }
 	}
       }

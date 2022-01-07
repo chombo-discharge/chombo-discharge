@@ -232,7 +232,6 @@ void EbFastFluxRegister::defineMasks(){
 
   const DisjointBoxLayout& gridsCoar  = m_eblgCoar.getDBL();
   const DisjointBoxLayout& gridsCoFi  = m_eblgCoFi.getDBL();
-  const ProblemDomain&     coarDomain = m_eblgCoar.getDomain();
 
   // Make a BoxLayoutData<FArrayBox> on gridsCoFi but where each box is grown by one cell.
   // We will be able to use DataIterator(gridsCoFi) to iterate through this construct. 

@@ -214,7 +214,6 @@ void RtSolver::setSource(const Real a_source){
     pout() << m_name + "::setSource(constant)" << endl;
   }
 
-  const int finestLevel = m_amr->getFinestLevel();
 
   DataOps::setValue(m_source, a_source);
 
@@ -265,7 +264,6 @@ void RtSolver::writeData(EBAMRCellData& a_output, int& a_comp, const EBAMRCellDa
   //       a copy but in the case where we want to have the solution on the centroids then we need to interpolate,
   //       and so we copy to a scratch data holder first. 
 
-  const int comp    = 0;
   const int numComp = a_data[0]->nComp();
 
   const Interval srcInterval(0, numComp-1);

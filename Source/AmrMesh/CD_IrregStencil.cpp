@@ -14,6 +14,7 @@
 
 // Our includes
 #include <CD_IrregStencil.H>
+#include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
 constexpr int IrregStencil::m_defaultStenComp;
@@ -80,8 +81,7 @@ void IrregStencil::define(const DisjointBoxLayout&        a_dbl,
     VoFIterator& vofit = m_vofIter[dit()];
     vofit.define(ivs, ebgraph);
     
-    for (vofit.reset(); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
+    auto kernel = [&] (const VolIndex& vof) -> void {
       VoFStencil& stencil = (*m_stencils[dit()])(vof, 0);
       this->buildStencil(stencil, vof, m_dbl, m_domain, ebisbox, box, m_dx, cfivs[dit()]);
 
@@ -96,7 +96,9 @@ void IrregStencil::define(const DisjointBoxLayout&        a_dbl,
 	stencil *= 1./sum;
       }
 #endif
-    }
+    };
+
+    BoxLoops::loop(vofit, kernel);
   }  
 }
 
@@ -107,8 +109,7 @@ void IrregStencil::apply(EBCellFAB& a_dst, const EBCellFAB& a_src, const DataInd
 
   VoFIterator& vofit = m_vofIter[a_dit];
   
-  for (vofit.reset(); vofit.ok(); ++vofit){
-    const VolIndex&   vof     = vofit();
+  auto kernel = [&] (const VolIndex& vof) -> void {
     const VoFStencil& stencil = stencils(vof, m_defaultStenComp);
 
     for (int comp = 0; comp < a_dst.nComp(); comp++){
@@ -122,7 +123,9 @@ void IrregStencil::apply(EBCellFAB& a_dst, const EBCellFAB& a_src, const DataInd
 	a_dst(vof, comp) += iweight * a_src(ivof, comp);
       }
     }
-  }
+  };
+
+  BoxLoops::loop(vofit, kernel);
 }
 
 void IrregStencil::apply(BaseIVFAB<Real>& a_dst, const EBCellFAB& a_src, const DataIndex& a_dit) const {
@@ -132,8 +135,7 @@ void IrregStencil::apply(BaseIVFAB<Real>& a_dst, const EBCellFAB& a_src, const D
 
   VoFIterator& vofit = m_vofIter[a_dit];
   
-  for (vofit.reset(); vofit.ok(); ++vofit){
-    const VolIndex&   vof     = vofit();
+  auto kernel = [&] (const VolIndex& vof) -> void {
     const VoFStencil& stencil = stencils(vof, m_defaultStenComp);
 
     for (int comp = 0; comp < a_dst.nComp(); comp++){
@@ -147,7 +149,9 @@ void IrregStencil::apply(BaseIVFAB<Real>& a_dst, const EBCellFAB& a_src, const D
 	a_dst(vof, comp) += iweight * a_src(ivof, comp);
       }
     }
-  }  
+  };
+
+  BoxLoops::loop(vofit, kernel);
 }
 
 #include <CD_NamespaceFooter.H>

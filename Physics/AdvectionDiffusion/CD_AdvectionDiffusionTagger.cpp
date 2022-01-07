@@ -106,10 +106,8 @@ bool AdvectionDiffusionTagger::tagCells(EBAMRTags& a_tags){
       const BaseFab<Real>& gradReg = gradPhi.getSingleValuedFAB();
       const BaseFab<Real>& phiReg  = phi.    getSingleValuedFAB();
 
-      // Do regular cells
-      for (BoxIterator bit(cellBox); bit.ok(); ++bit){
-	const IntVect iv = bit();
-
+      // Kernel for tagging
+      auto taggingKernel = [&] (const IntVect& iv) -> void {
 	if(ebisBox.isRegular(iv)){
 
 	  const Real curv = std::abs(gradReg(iv,0))/(SAFETY + std::abs(phiReg(iv,0)));
@@ -118,7 +116,10 @@ bool AdvectionDiffusionTagger::tagCells(EBAMRTags& a_tags){
 	    foundTags  = true;
 	  }
 	}
-      }
+      };
+
+      // Execute kernel. Regular cells only. 
+      BoxLoops::loop(cellBox, taggingKernel);
     }
   }
 

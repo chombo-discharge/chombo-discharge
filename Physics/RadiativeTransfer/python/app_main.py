@@ -11,12 +11,12 @@ def write_template(args):
         os.makedirs(app_dir)
                         
         # Write main file. This should be a separate routine. 
-    main_filename = app_dir + "/" + args.filename + ".cpp"
+    main_filename = app_dir + "/program.cpp"
     mainf = open(main_filename, "w")
     mainf.write('#include "CD_Driver.H"\n')
-    mainf.write('#include "' + args.RtSolver + '.H"\n')
-    mainf.write('#include "' + args.geometry + '.H"\n')
-    mainf.write('#include <CD_RtPhysicsStepper.H>\n')
+    mainf.write('#include "CD_' + args.RtSolver + '.H"\n')
+    mainf.write('#include "CD_' + args.geometry + '.H"\n')
+    mainf.write('#include <CD_RadiativeTransferStepper.H>\n')
     mainf.write('#include "ParmParse.H"\n')
     mainf.write("\n")
 
@@ -45,8 +45,8 @@ def write_template(args):
 
     mainf.write("\n")
     mainf.write("  // Set up basic Poisson, potential = 1 \n")
-    mainf.write("  auto timestepper = RefCountedPtr<RtPhysicsStepper<" + args.RtSolver + "> >\n")
-    mainf.write("     (new RtPhysicsStepper<" + args.RtSolver + ">());\n")
+    mainf.write("  auto timestepper = RefCountedPtr<RadiativeTransferStepper<" + args.RtSolver + "> >\n")
+    mainf.write("     (new RadiativeTransferStepper<" + args.RtSolver + ">());\n")
     mainf.write("\n")
 
 

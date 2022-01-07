@@ -343,8 +343,6 @@ protected:
   bool isFiniteDifferenceStencilValid(const IntVect&   a_ivCoar,
 				      const EBISBox&   a_ebisBox,
 				      const FArrayBox& a_invalidRegion);
-				      
-
 };
 
 #include <CD_NamespaceFooter.H>

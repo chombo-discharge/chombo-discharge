@@ -7,14 +7,10 @@
   @file   CD_ItoSolver.H
   @brief  Declaration of solver class for Ito diffusion
   @author Robert Marskar
-  @todo intersectParticlesIF
 */
 
 #ifndef CD_ItoSolver_H
 #define CD_ItoSolver_H
-
-// Std includes
-#include <random>
 
 // Chombo includes
 #include <Particle.H>
@@ -960,26 +956,6 @@ protected:
   std::string m_className;
 
   /*!
-    @brief Random number generator engine.
-  */
-  mutable std::mt19937_64 m_rng;
-
-  /*!
-    @brief Uniform real distribution on [0,1]
-  */
-  mutable std::uniform_real_distribution<Real> m_uniformDistribution01; 
-
-  /*!
-    @brief Uniform real distribution on [-1,1]
-  */
-  mutable std::uniform_real_distribution<Real> m_uniformDistribution11;
-
-  /*!
-    @brief Gaussian distribution centered on 0, std=1
-  */
-  mutable std::normal_distribution<Real> m_normalDistribution01;
-
-  /*!
     @brief Uniform integer distribution between [0,SpaceDim-1]
   */
   mutable std::uniform_int_distribution<int> m_uniformDistribution0d;
@@ -989,12 +965,6 @@ protected:
     @details This is used when drawing numbers from the Gaussian distribution, replacing all values above m_normalDistributionTruncation by m_normalDistributionTruncation.
   */
   Real m_normalDistributionTruncation;
-
-  /*!
-    @brief Random number generator seed.
-    @note To avoid having all MPI ranks use the same input seed - the rank seed is m_rngSeed + procID()
-  */
-  Real m_rngSeed;
 
   /*!
     @brief Bisection step size to use for particle intersection tests with EBs.

@@ -31,7 +31,7 @@ namespace phase {
     gas   = 0,
     solid = 1
   };
-};
+}
 
 /*!
   @brief Two-fluid index space. 
@@ -49,7 +49,7 @@ public:
   /*!
     @brief Destructor
   */
-  ~MultiFluidIndexSpace();
+  virtual ~MultiFluidIndexSpace();
 
   /*!
     @brief Define function

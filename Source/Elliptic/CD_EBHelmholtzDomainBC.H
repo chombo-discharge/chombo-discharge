@@ -150,6 +150,23 @@ protected:
   */
   inline
   RealVect getBoundaryPosition(const IntVect& a_iv, const int& a_dir, const Side::LoHiSide& a_side) const;
+
+  /*!
+    @brief Utility function which multiplies the flux (or actually, dphi/dn) by the B-coefficient. This is used 
+    by the implementation classes when they compute the regular flux at the domain edges/faces. 
+    @param[inout] a_flux    On input, contains dphi/dn. On output, contains B*dphi/dn
+    @param[in]    a_bco     Helmholtz B-coefficient
+    @param[in]    a_dir     Coordinate direction
+    @param[in]    a_side    Side
+    @note This routine is weird because the flux data holder in the BC classes lives on the cell centers next to the domain
+    face/edge. So we need to shift the box over when we multiply. Because both Dirichlet, Neumann, and the Robin Bcs need to do this,
+    I'm putting this routine in the parent class. 
+  */
+  void multiplyByBcoef(BaseFab<Real>&       a_flux,
+		       const BaseFab<Real>& a_bco,
+		       const int            a_dir,
+		       const Side::LoHiSide a_side) const;
+
 };
 
 #include <CD_NamespaceFooter.H>

@@ -18,7 +18,6 @@
 #include <PolyGeom.H>
 #include <EBAlias.H>
 #include <EBLevelDataOps.H>
-#include <BoxIterator.H>
 #include <EBArith.H>
 #include <ParmParse.H>
 #include <ParticleIO.H>
@@ -29,6 +28,7 @@
 #include <CD_DataOps.H>
 #include <CD_Units.H>
 #include <CD_ParticleOps.H>
+#include <CD_Random.H>
 #include <CD_NamespaceHeader.H>
 
 #define MC_PHOTO_DEBUG 0
@@ -141,16 +141,8 @@ void McPhoto::parseRNG(){
 
   // Seed the RNG
   ParmParse pp(m_className.c_str());
-  pp.get("seed", m_seed);
-  pp.get("poiss_exp_swap", m_poissonExponentialSwapLimit);
-  if(m_seed < 0) {
-    m_seed = std::chrono::system_clock::now().time_since_epoch().count();
-  }
-  m_seed += procID();
   
-  m_rng = std::mt19937_64(m_seed);
-
-  m_udist11 = std::uniform_real_distribution<Real>(-1.0, 1.0);
+  pp.get("poiss_exp_swap", m_poissonExponentialSwapLimit);
 }
 
 void McPhoto::parseInstantaneous(){
@@ -680,11 +672,11 @@ int McPhoto::getNumberOfPlotVariables() const{
 int McPhoto::randomPoisson(const Real a_mean){
   if(a_mean < m_poissonExponentialSwapLimit){
     std::poisson_distribution<int> pdist(a_mean);
-    return pdist(m_rng);
+    return Random::get(pdist);
   }
   else {
     std::normal_distribution<Real> ndist(a_mean, sqrt(a_mean));
-    return (int) round(ndist(m_rng));
+    return (int) round(Random::get(ndist));
   }
 }
 
@@ -696,52 +688,8 @@ int McPhoto::domainBcMap(const int a_dir, const Side::LoHiSide a_side) {
 
 Real McPhoto::randomExponential(const Real a_mean){
   std::exponential_distribution<Real> dist(a_mean);
-  return dist(m_rng);
+  return Random::get(dist);
 }
-
-RealVect McPhoto::randomDirection(){
-#if CH_SPACEDIM == 2
-  return randomDirection2D();
-#else
-  return randomDirection3D();
-#endif
-}
-
-#if CH_SPACEDIM == 2
-RealVect McPhoto::randomDirection2D(){
-  const Real EPS = 1.E-8;
-  Real x1 = 2.0;
-  Real x2 = 2.0;
-  Real r  = x1*x1 + x2*x2;
-  while(r >= 1.0 || r < EPS){
-    x1 = (m_udist11)(m_rng);
-    x2 = (m_udist11)(m_rng);
-    r  = x1*x1 + x2*x2;
-  }
-
-  return RealVect(x1,x2)/sqrt(r);
-}
-#endif
-
-#if CH_SPACEDIM==3
-RealVect McPhoto::randomDirection3D(){
-  const Real EPS = 1.E-8;
-  Real x1 = 2.0;
-  Real x2 = 2.0;
-  Real r  = x1*x1 + x2*x2;
-  while(r >= 1.0 || r < EPS){
-    x1 = (m_udist11)(m_rng);
-    x2 = (m_udist11)(m_rng);
-    r  = x1*x1 + x2*x2;
-  }
-
-  const Real x = 2*x1*sqrt(1-r);
-  const Real y = 2*x2*sqrt(1-r);
-  const Real z = 1 - 2*r;
-
-  return RealVect(x,y,z);
-}
-#endif
 
 int McPhoto::getPVRBuffer() const {
   CH_TIME("McPhoto::getPVRBuffer");
@@ -797,7 +745,6 @@ void McPhoto::generatePhotons(ParticleContainer<Photon>& a_photons, const EBAMRC
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    const ProblemDomain& dom     = m_amr->getDomains()[lvl];
     const Real dx                = m_amr->getDx()[lvl];
     const Real vol               = pow(dx, SpaceDim);
     const bool hasCoar          = (lvl > 0);
@@ -824,8 +771,6 @@ void McPhoto::generatePhotons(ParticleContainer<Photon>& a_photons, const EBAMRC
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
       const Box box          = dbl.get(dit());
       const EBISBox& ebisbox = (*a_source[lvl])[dit()].getEBISBox();
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
-      const IntVectSet ivs   = IntVectSet(box);
 
       const EBCellFAB& source = (*a_source[lvl])[dit()];
       const FArrayBox& srcFAB = source.getFArrayBox();
@@ -835,11 +780,12 @@ void McPhoto::generatePhotons(ParticleContainer<Photon>& a_photons, const EBAMRC
       // Generate new particles in this box
       List<Photon> particles;
       if(sum > 0.0){
+
+	// Kernel region for cut-cells. 
+	VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];	
 	
 	// Regular cells. Note that we make superphotons if we have to. 
-	for (BoxIterator bit(box); bit.ok(); ++bit){
-	  const IntVect iv = bit();
-
+	auto regularKernel = [&] (const IntVect& iv) -> void {
 	  if(ebisbox.isRegular(iv)){
 	    const RealVect pos = probLo + (RealVect(iv) + 0.5*RealVect::Unit)*dx;
 
@@ -852,21 +798,17 @@ void McPhoto::generatePhotons(ParticleContainer<Photon>& a_photons, const EBAMRC
 	      const Real weight     = (1.0*numPhysPhotons)/numComputationalPhotons; 
 	      
 	      for (int i = 0; i < numComputationalPhotons; i++){
-		const RealVect v = Units::c*this->randomDirection();
+		const RealVect v = Units::c*Random::getDirection();
 		particles.append(Photon(pos, v, m_RtSpecies->getAbsorptionCoefficient(pos), weight));
 	      }
 	    }
 	  }
-	}
+	};
 
-	// Do the same for the cut cells. 
-	VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
-	
-	for (vofit.reset(); vofit.ok(); ++vofit){
-	  const VolIndex& vof      = vofit();
+	// Irregular kernel. Same as the above really. 
+	auto irregularKernel = [&] (const VolIndex& vof) -> void {
 	  const RealVect pos       = probLo + Location::position(Location::Cell::Centroid, vof, ebisbox, dx);
-	  const Real kappa         = ebisbox.volFrac(vof);
-	  const int numPhysPhotons = drawPhotons(source(vof,srcComp), vol, a_dt);
+	  const int numPhysPhotons = this->drawPhotons(source(vof,srcComp), vol, a_dt);
 	  
 	  if(numPhysPhotons > 0){
 	    const int numComputationalPhotons = (numPhysPhotons <= m_maxPhotonsGeneratedPerCell) ? numPhysPhotons : m_maxPhotonsGeneratedPerCell;
@@ -874,15 +816,20 @@ void McPhoto::generatePhotons(ParticleContainer<Photon>& a_photons, const EBAMRC
 
 	    // Generate computational Photons 
 	    for (int i = 0; i < numComputationalPhotons; i++){
-	      const RealVect v = Units::c*this->randomDirection();
+	      const RealVect v = Units::c*Random::getDirection();
 	      particles.append(Photon(pos, v, m_RtSpecies->getAbsorptionCoefficient(pos), weight));
 	    }
 	  }
-	}
-      }
+	};
 
-      // Add new particles to data holder
-      (*photons[lvl])[dit()].addItemsDestructive(particles);
+	  
+	// Run the irregular kernl
+	BoxLoops::loop(box,     regularKernel);	
+	BoxLoops::loop(vofit, irregularKernel);
+	
+	// Add new particles to data holder
+	(*photons[lvl])[dit()].addItemsDestructive(particles);
+      }
     }
   }
 }
@@ -908,6 +855,10 @@ int McPhoto::drawPhotons(const Real a_source, const Real a_volume, const Real a_
   }
   else if(m_sourceType == SourceType::PerSecond){
     factor = a_dt;
+  }
+  else {
+    factor = 0.0;
+    MayDay::Error("McPhoto::drawPhotons -- logic bust");
   }
 
   // Draw a number of Photons with the desired algorithm
@@ -1003,7 +954,6 @@ void McPhoto::depositHybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massDif
 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    const ProblemDomain& domain  = m_amr->getDomains()[lvl];
     const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
     
     for (DataIterator dit = dbl.dataIterator(); dit.ok(); ++dit){
@@ -1013,12 +963,12 @@ void McPhoto::depositHybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massDif
 
       const Box box          = dbl.get(dit());
       const EBISBox& ebisbox = ebisl[dit()];
-      const EBGraph& ebgraph = ebisbox.getEBGraph();
-      const IntVectSet ivs   = ebisbox.getIrregIVS(box);
 
+      // Iteration space for kernel. 
       VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[lvl])[dit()];
-      for (vofit.reset(); vofit.ok(); ++vofit){
-	const VolIndex& vof = vofit();
+
+      // Kernel
+      auto kernel = [&] (const VolIndex& vof) -> void {
 	const Real kappa    = ebisbox.volFrac(vof);
 	const Real dc       = divH(vof, m_comp);
 	const Real dnc      = divNC(vof, m_comp);
@@ -1028,7 +978,9 @@ void McPhoto::depositHybrid(EBAMRCellData& a_depositionH, EBAMRIVData& a_massDif
 	// gives positive definite results. 
 	divH(vof, m_comp)   = dc + (1-kappa)*dnc;          // On output, contains hybrid divergence
 	deltaM(vof, m_comp) = (1-kappa)*(dc - kappa*dnc);  // Remember, dc already scaled by kappa. 
-      }
+      };
+
+      BoxLoops::loop(vofit, kernel);
     }
   }
 }
@@ -1118,7 +1070,6 @@ void McPhoto::coarseFineRedistribution(EBAMRCellData& a_phi){
   const int finestLevel = m_amr->getFinestLevel();
   
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
-    const Real dx       = m_amr->getDx()[lvl];
     const bool hasCoar = lvl > 0;
     const bool hasFine = lvl < finestLevel;
 
@@ -1204,7 +1155,6 @@ void McPhoto::advancePhotonsInstantaneous(ParticleContainer<Photon>& a_bulkPhoto
 	const RealVect direction = p.velocity()/(p.velocity().vectorLength());
 	const RealVect newPos    = oldPos + direction*this->randomExponential(p.kappa());
 	const RealVect path      = newPos - oldPos;
-	const Real     pathLen   = path.vectorLength();
 
 	// Check if we should check of different types of boundary intersections. These are cheap initial tests that allow
 	// us to skip intersection tests for some photons.

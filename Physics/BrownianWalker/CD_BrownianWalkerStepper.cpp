@@ -19,6 +19,8 @@
 #include <CD_BrownianWalkerStepper.H>
 #include <CD_BrownianWalkerSpecies.H>
 #include <CD_PolyUtils.H>
+#include <CD_Random.H>
+#include <CD_ParallelOps.H>
 #include <CD_NamespaceHeader.H>
 
 using namespace Physics::BrownianWalker;
@@ -50,7 +52,6 @@ BrownianWalkerStepper::BrownianWalkerStepper(){
   else{
     MayDay::Error("BrownianWalkerStepper::BrownianWalkerStepper -- logic bust. Do not understand the load balancing argument 'which_balance'");
   }
-  
 }
 
 BrownianWalkerStepper::BrownianWalkerStepper(RefCountedPtr<ItoSolver>& a_solver) : BrownianWalkerStepper() {
@@ -402,7 +403,7 @@ Real BrownianWalkerStepper::advance(const Real a_dt) {
       if(m_solver->isDiffusive()){
 	for (ListIterator<ItoParticle> lit(particleList); lit; ++lit){ 
 	  ItoParticle& p      = lit();	    
-	  const RealVect ran  = m_solver->randomGaussian();
+	  const RealVect ran  = Random::getNormal01() * Random::getDirection();
 	  const RealVect hop  = ran*sqrt(2.0*p.diffusion()*a_dt);
 	  p.position()       += hop;
 	}
@@ -410,16 +411,16 @@ Real BrownianWalkerStepper::advance(const Real a_dt) {
     }
   }
 
-  // 2. Remap particles and assign them to correct patches. This discards particles outside the simulation domain. 
+  // 2. Remap particles and assign them to correct patches. This discards particles outside the simulation domain.
   m_solver->remap();
 
-  // 3. Particles that strike the EB are absorbed on it, and removed from the simulation. 
+  // 3. Particles that strike the EB are absorbed on it, and removed from the simulation.
   m_solver->removeCoveredParticles(EbRepresentation::ImplicitFunction, 0.0);
 
-  // 4. Make new super-particles. 
+  // 4. Make new super-particles.
   this->makeSuperParticles();
 
-  // 5. Update particle diffusion and velocities. 
+  // 5. Update particle diffusion and velocities.
   m_solver->setParticleMobility(m_mobility);
   m_solver->setParticleDiffusion(m_diffCo);
   m_solver->interpolateVelocities();  
@@ -584,28 +585,26 @@ void BrownianWalkerStepper::loadBalanceBoxesMesh(Vector<Vector<int> >&          
       // in each cell. This might not be the same as the contents in newParticlesPerCell*dV because the stepper will
       // later run with superparticle merging/splitting. 
       Real sum = 0.0;
-      for (BoxIterator bit(cellBox); bit.ok(); ++ bit){
-	const IntVect iv = bit();
 	
-	// We will have at most m_ppc particles per grid cell.
+      // We will have at most m_ppc particles per grid cell. This kernel does that. 
+      auto kernel = [&] (const IntVect& iv) -> void {
 	if(!ebisBox.isCovered(iv)){
-	  const Real numPhysParticles = std::abs(ppcFAB(bit())*dV);
+	  const Real numPhysParticles = std::abs(ppcFAB(iv, comp)*dV);
 	  const Real numCompParticles = std::min(numPhysParticles, Real(m_ppc));
 
 	  sum += numCompParticles;	  
 	}
-      }
+      };
+
+      BoxLoops::loop(cellBox, kernel);
       
       loads[dit().intCode()] = lround(sum);
     }
 
     // If running with MPI, loads must be gathered on all ranks. 
-#ifdef CH_MPI
-    Vector<long int> tmp = loads;
-    MPI_Allreduce(&(tmp[0]),&(loads[0]), loads.size(), MPI_LONG, MPI_SUM, Chombo_MPI::comm);
-#endif
+    ParallelOps::VectorSum(loads);
 
-    // Sort the boxes and loads using a Morton code. Then load balance the application. 
+    // Sort the boxes and loads using a Morton code. Then load balance the application.
     LoadBalancing::sort       (boxes, loads, BoxSorting::Morton);
     LoadBalancing::makeBalance(ranks, loads, boxes             );
 
@@ -669,10 +668,7 @@ void BrownianWalkerStepper::loadBalanceBoxesParticles(Vector<Vector<int> >&     
     }
 
     // If running with MPI, loads must be gathered on all ranks. 
-#ifdef CH_MPI
-    Vector<long int> tmp = loads;
-    MPI_Allreduce(&(tmp[0]),&(loads[0]), loads.size(), MPI_LONG, MPI_SUM, Chombo_MPI::comm);
-#endif
+    ParallelOps::VectorSum(loads);    
 
     // Sort the boxes and loads using a Morton code. Then load balance the application. 
     LoadBalancing::sort       (boxes, loads, BoxSorting::Morton);
@@ -707,11 +703,8 @@ Vector<long int> BrownianWalkerStepper::getCheckpointLoads(const std::string a_r
     loads[dit().intCode()] = patchParticles.length();
   }
 
-  // If running with MPI, loads must be gathered on all ranks. 
-#ifdef CH_MPI
-    Vector<long int> tmp = loads;
-    MPI_Allreduce(&(tmp[0]),&(loads[0]), loads.size(), MPI_LONG, MPI_SUM, Chombo_MPI::comm);
-#endif  
+  // If running with MPI, loads must be gathered on all ranks.
+  ParallelOps::VectorSum(loads);      
 
   return loads;
 }

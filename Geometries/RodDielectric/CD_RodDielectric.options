@@ -1,5 +1,5 @@
 # ====================================================================================================
-# ROD_DIELECTRIC CLASS OPTIONS
+# RodDielectric geometry class options
 # ====================================================================================================
 RodDielectric.electrode.on              = true          # Use electrode or not
 RodDielectric.electrode.endpoint1       = 0 0 1         # One endpoint

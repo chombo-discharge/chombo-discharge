@@ -38,23 +38,14 @@ MechanicalShaft::MechanicalShaft(){
   m_electrodes.resize(0);
   m_dielectrics.resize(0);
 
+  ParmParse pp("MechanicalShaft");  
+
   std::string str;
   Vector<Real> vec;
-  
+
   Real eps0;
-  Real corner_curv;
-
-  ParmParse pp("MechanicalShaft");
-
-
-  std::string shape;
-  int dielectric_num_sides     = 6;       // Number of sides for the rod rod
-  bool electrode_live;
   bool has_electrode;
   bool has_dielectric;
-  Real dielectric_radius       = 5.E-3;   // Rod radius
-  Real dielectric_length       = 1;       // Rod length
-  Real dielectric_permittivity = 4.0;     // Rod permittivity
   
   pp.get("eps0",               eps0);
   pp.get("turn_on_dielectric", has_dielectric);
@@ -65,7 +56,7 @@ MechanicalShaft::MechanicalShaft(){
   if(has_electrode)  this->defineElectrode();
   if(has_dielectric) this->defineDielectric();
 
-  setGasPermittivity(eps0);
+  this->setGasPermittivity(eps0);
 }
 
 MechanicalShaft::~MechanicalShaft(){
@@ -156,9 +147,8 @@ RefCountedPtr<BaseIF> MechanicalShaft::getPolygon(){
 RefCountedPtr<BaseIF> MechanicalShaft::getCylinder(){
   ParmParse pp("MechanicalShaft.dielectric.polygon");
     
-  int numSides;
   RealVect c1, c2;
-  Real radius, length, curv;
+  Real radius, curv;
 
   Vector<Real> vec;
 

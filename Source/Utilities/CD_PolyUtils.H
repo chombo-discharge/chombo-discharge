@@ -32,7 +32,7 @@ namespace PolyUtils {
     @note The root MUST be bracketed, i.e. f(x1)*f(x2) < 0.0. Anything else is an error.
   */
   RealVect brentRootFinder(const RefCountedPtr<BaseIF>& a_impFunc, const RealVect& a_point1, const RealVect& a_point2);
-};
+}
 
 #include <CD_NamespaceFooter.H>
 

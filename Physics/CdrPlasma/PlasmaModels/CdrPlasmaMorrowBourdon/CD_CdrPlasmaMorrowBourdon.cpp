@@ -603,7 +603,6 @@ Real CdrPlasmaMorrowBourdon::negative_species::initialData(const RealVect a_pos,
 
 CdrPlasmaMorrowBourdon::PhotonOne::PhotonOne(){
   m_name     = "PhotonOne";
-  m_constant = true;
 
   Real O2_frac, pressure;
   ParmParse pp("CdrPlasmaMorrowBourdon");
@@ -625,7 +624,6 @@ Real CdrPlasmaMorrowBourdon::PhotonOne::getAbsorptionCoefficient(const RealVect 
 
 CdrPlasmaMorrowBourdon::PhotonTwo::PhotonTwo(){
   m_name     = "PhotonTwo";
-  m_constant = true;
 
   Real O2_frac, pressure;
   ParmParse pp("CdrPlasmaMorrowBourdon");
@@ -646,7 +644,6 @@ Real CdrPlasmaMorrowBourdon::PhotonTwo::getAbsorptionCoefficient(const RealVect 
 
 CdrPlasmaMorrowBourdon::PhotonThree::PhotonThree(){
   m_name     = "PhotonThree";
-  m_constant = true;
 
   Real O2_frac, pressure;
   ParmParse pp("CdrPlasmaMorrowBourdon");

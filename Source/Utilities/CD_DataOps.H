@@ -12,8 +12,6 @@
 #ifndef CD_DataOps_H
 #define CD_DataOps_H
 
-// Std includes
-
 // Our includes
 #include <CD_EBAMRData.H>
 #include <CD_Decorations.H>
@@ -29,24 +27,6 @@ class DataOps {
 public:
 
   /*!
-    @brief Launch a C++ kernel over a regular grid. This version uses simd decorations to ensure that the innermost loop can be vectorized. 
-    @param[in] a_computeBox Computation box
-    @param[in] a_kernel     Kernel to launch. 
-  */
-  template <typename Functor>
-  ALWAYS_INLINE
-  static void loop(const Box& a_computeBox, Functor&& kernel);
-
-  /*!
-    @brief Launch a C++ kernel over a cut-cells. 
-    @param[in] a_vofit   Grid cells where we launch the kernel. 
-    @param[in] a_kernel  Kernel to launch
-  */  
-  template <typename Functor>
-  ALWAYS_INLINE
-  static void loop(VoFIterator& a_vofit, Functor&& a_kernel);
-
-  /*!
     @brief Set value in an MFInterfaceFAB data holder
     @param[in] a_lhs   Data holder
     @param[in] a_value Value to set
@@ -60,8 +40,6 @@ public:
   */
   template <typename T>
   static int sgn(const T a_value);
-
-
 
   /*!
     @brief Routine which computes the average of a cell-centered quantity on faces for the normal component only.
@@ -1082,24 +1060,6 @@ public:
     @param[in]    a_distance Shift vector
   */
   static void shiftCorners(Vector<RealVect>& a_corners, const RealVect& a_distance);
-
-  /*!
-    @brief Apply a smoother filter to data. Relic of an ancient past and I don't even remember what it does. Soon to be deprecated.
-    @param[out] a_lhs    Smoothed data
-    @param[in]  a_rhs    Non-smoothed data
-    @param[in]  a_stride Smoothing distance (number of cells)
-    @param[in]  a_alpha  I don't even remember -- check DataOpsF.ChF to look into it. 
-  */
-  static void filterSmooth(EBAMRCellData& a_lhs, const EBAMRCellData& a_rhs, const int a_stride, const Real a_alpha);
-
-  /*!
-    @brief Apply a smoother filter to data. Relic of an ancient past and I don't even remember what it does. Soon to be deprecated.
-    @param[out] a_lhs    Smoothed data
-    @param[in]  a_rhs    Non-smoothed data
-    @param[in]  a_stride Smoothing distance (number of cells)
-    @param[in]  a_alpha  I don't even remember -- check DataOpsF.ChF to look into it. 
-  */  
-  static void filterSmooth(LevelData<EBCellFAB>& a_lhs, const LevelData<EBCellFAB>& a_rhs, const int a_stride, const Real a_alpha);
 
 };
 

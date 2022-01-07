@@ -23,6 +23,7 @@
 // Our includes
 #include <CD_ItoSolver.H>
 #include <CD_DataOps.H>
+#include <CD_Random.H>
 #include <CD_NamespaceHeader.H>
 
 inline
@@ -36,43 +37,11 @@ RealVect ItoSolver::randomGaussian() const {
   
   RealVect r = RealVect::Zero;
   for (int i = 0; i < SpaceDim; i++){
-    r[i] = m_normalDistribution01(m_rng);
+    r[i] = Random::getNormal01();
     r[i] = sign(r[i])*std::min(std::abs(r[i]), m_normalDistributionTruncation);
   }
 
   return r;
-}
-
-inline
-RealVect ItoSolver::randomDirection() const {
-  constexpr Real EPS = 1.E-8;
-#if CH_SPACEDIM==2 // 2D version -- not that this is just picking a point on a circle.
-  Real x1 = 2.0;
-  Real x2 = 2.0;
-  Real r  = x1*x1 + x2*x2;
-  while(r >= 1.0 || r < EPS){
-    x1 = m_uniformDistribution11(m_rng);
-    x2 = m_uniformDistribution11(m_rng);
-    r  = x1*x1 + x2*x2;
-  }
-
-  return RealVect(x1,x2)/sqrt(r);
-#elif CH_SPACEDIM==3 // Marsaglia 1972 algorithm.
-  Real x1 = 2.0;
-  Real x2 = 2.0;
-  Real r  = x1*x1 + x2*x2;
-  while(r >= 1.0 || r < EPS){
-    x1 = m_uniformDistribution11(m_rng);
-    x2 = m_uniformDistribution11(m_rng);
-    r  = x1*x1 + x2*x2;
-  }
-
-  const Real x = 2*x1*sqrt(1-r);
-  const Real y = 2*x2*sqrt(1-r);
-  const Real z = 1 - 2*r;
-
-  return RealVect(x,y,z);
-#endif
 }
 
 inline
@@ -123,7 +92,7 @@ RealVect ItoSolver::randomPosition(const RealVect a_lo, const RealVect a_hi) con
   RealVect pos;
 
   for (int dir = 0; dir < SpaceDim; dir++){
-    pos[dir] = a_lo[dir] + 0.5*(1.0 + m_uniformDistribution11(m_rng))*(a_hi[dir] - a_lo[dir]);
+    pos[dir] = a_lo[dir] + 0.5*(1.0 + Random::getUniformReal11())*(a_hi[dir] - a_lo[dir]);
   }
 
   return pos;

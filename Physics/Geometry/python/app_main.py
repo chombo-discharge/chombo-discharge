@@ -11,7 +11,7 @@ def write_template(args):
         os.makedirs(app_dir)
                         
         # Write main file. This should be a separate routine. 
-    main_filename = app_dir + "/" + args.filename + ".cpp"
+    main_filename = app_dir + "/program.cpp"
     mainf = open(main_filename, "w")
     mainf.write('#include "CD_Driver.H"\n')
     mainf.write('#include "CD_' + args.geometry + '.H"\n')

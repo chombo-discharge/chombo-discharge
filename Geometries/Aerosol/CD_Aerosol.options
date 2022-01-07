@@ -1,5 +1,5 @@
 # ====================================================================================================
-# AEROSOL CLASS OPTIONS
+# Aerosol geometry class options
 #
 # This class can add an arbitrary number of dielectric spheres, possibly roughy spheres. To use it,
 # you need to set 'num_spheres' to the number of spheres that you want. Each sphere needs a separate

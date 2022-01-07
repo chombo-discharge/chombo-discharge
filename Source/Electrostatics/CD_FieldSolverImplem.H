@@ -32,7 +32,7 @@ Real FieldSolver::getDielectricPermittivity(const RealVect& a_pos) const {
     // the user has two overlapping dielectrics, but those cases are not supported
     // anyways. 
     Real minDist = std::numeric_limits<Real>::infinity();
-    int closest;
+    int closest = 0;
 
     for (int i = 0; i < dielectrics.size(); i++){
       const RefCountedPtr<BaseIF> func = dielectrics[i].getImplicitFunction();

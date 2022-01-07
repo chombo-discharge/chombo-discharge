@@ -98,7 +98,6 @@ bool CentroidInterpolationStencil::getTaylorExtrapolationStencil(VoFStencil&    
 								 const IntVectSet&        a_cfivs){
   CH_TIME("CentroidInterpolationStencil::getTaylorExtrapolationStencil");
 
-  const Real tol           = 1.E-6;
   const int comp           = 0;
   const RealVect& centroid = a_ebisbox.centroid(a_vof);
   IntVectSet* cfivs        = const_cast<IntVectSet*>(&a_cfivs);

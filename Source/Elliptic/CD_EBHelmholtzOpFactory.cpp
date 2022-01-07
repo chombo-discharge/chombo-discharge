@@ -188,7 +188,6 @@ void EBHelmholtzOpFactory::defineMultigridLevels(){
 	  const DisjointBoxLayout& gridsFine = eblgFine.getDBL();
 
 	  const ProblemDomain& domainCoar    = eblgCoar.getDomain();
-	  const ProblemDomain& domainFine    = eblgFine.getDomain();
 
 	  // Make the irregular sets. 
 	  constexpr int nghost = 1;
@@ -288,7 +287,6 @@ bool EBHelmholtzOpFactory::getCoarserLayout(EBLevelGrid& a_coarEblg, const EBLev
   // Check if we can get a coarsenable domain. Don't want to coarsen to 1x1 so hence the factor of 2 in the test here. 
   ProblemDomain test = fineDomain;
   if(refine(coarsen(test, 2*a_refRat), 2*a_refRat) == fineDomain){
-    const bool doCoarsen = a_fineEblg.getDBL().coarsenable(2*a_refRat);
 
     // Use coarsening if we can. 
     if(a_fineEblg.getDBL().coarsenable(2*a_refRat)){
@@ -379,9 +377,6 @@ EBHelmholtzOp* EBHelmholtzOpFactory::MGnewOp(const ProblemDomain& a_fineDomain, 
   // Find the AMR level corresponding to a coarsen of a_fineDomain by a factor 2^a_depth. This will issue a run-time
   // error if the domain is not found!
   const int amrLevel = this->findAmrLevel(a_fineDomain); 
-
-  // Corresponding level. 
-  const AmrLevelGrids& mgLevelGrids = m_mgLevelGrids[amrLevel];
 
   constexpr int mgRefRat = 2;
 

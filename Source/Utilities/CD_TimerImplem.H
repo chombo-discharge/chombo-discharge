@@ -133,7 +133,6 @@ void Timer::eventReport(std::ostream& a_outputStream, const bool a_localReportOn
 
   const std::pair<Real, Real> totalTime = this->computeTotalElapsedTime(a_localReportOnly);
   const Real totalTimeLocal  = totalTime.first;
-  const Real totalTimeGlobal = totalTime.second;  
     
   for (const auto& e : m_events){
 
@@ -300,10 +299,11 @@ void Timer::writeReportToFile(const std::string a_fileName) const noexcept {
   // numRank long
   std::vector<std::vector<Real> > finishedEvents;
 
-  constexpr int srcRank = 0;
+
 
 #if CH_MPI
-  const int numRanks = numProc();
+  constexpr int srcRank  = 0;  
+  const     int numRanks = numProc();
 #else
   const int numRanks = 1;
 #endif

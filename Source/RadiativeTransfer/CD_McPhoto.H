@@ -506,16 +506,6 @@ protected:
   IntersectionEB m_intersectionEB;
 
   /*!
-    @brief RNG engine
-  */
-  std::mt19937_64 m_rng; 
-
-  /*!
-    @brief Distribution on [-1,1]
-  */
-  std::uniform_real_distribution<Real> m_udist11; 
-
-  /*!
     @brief Deposition type
   */
   DepositionType m_deposition;
@@ -592,25 +582,6 @@ protected:
     @param[in] a_mean Mean value in exponential distribution. 
   */
   Real randomExponential(const Real a_mean);
-
-  /*!
-    @brief Compute and return a random direction in 2D/3D space. 
-  */
-  RealVect randomDirection();
-
-#if CH_SPACEDIM==2
-  /*!
-    @brief Random direction in 2D
-    @return Returns a random direction (in 2D)
-  */
-  RealVect randomDirection2D();
-#elif CH_SPACEDIM==3
-  /*!
-    @brief Random direction in 3D
-    @return Returns a random direction (in 3D)
-  */
-  RealVect randomDirection3D();
-#endif
 
   /*!
     @brief This computes the "conservative" deposition, multiplied by kappa

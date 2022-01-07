@@ -704,8 +704,6 @@ void AmrMesh::reallocate(MFAMRIVData& a_data, const int a_lmin) const {
   const RefCountedPtr<EBIndexSpace>& ebisGas = m_realms[a_realm]->getEBIndexSpace(phase::gas);
   const RefCountedPtr<EBIndexSpace>& ebisSol = m_realms[a_realm]->getEBIndexSpace(phase::solid);
 
-  const int lmin = Max(0, a_lmin+1);
-
   for (int lvl = a_lmin; lvl <= m_finestLevel; lvl++){
     Vector<EBISLayout> ebisl(nphases);
     Vector<int>        comps(nphases, nComp);

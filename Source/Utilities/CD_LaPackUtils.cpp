@@ -32,7 +32,7 @@ bool LaPackUtils::computeSVD(std::vector<double>&       a_linU,
 
 
   // linA must be stored as a double array in order to interface into LaPack
-  double A[a_M*a_N];
+  double* A = new double[a_M*a_N];
   for (int i = 0; i < a_linA.size(); i++){
     A[i] = a_linA[i];
   }
@@ -49,11 +49,12 @@ bool LaPackUtils::computeSVD(std::vector<double>&       a_linU,
   int LDVT   = N;
   int INFO   = 0;
   int LWORK  = 4*mn*mn + 6*mn + mx;
-  int IWORK[8*std::min(M,N)];
-  double S[std::min(M, N)];
-  double U[M*M];
-  double VT[N*N];
-  double WORK[std::max(1, LWORK)];
+  int* IWORK = new int[8*std::min(M,N)];
+  
+  double* S    = new double[std::min(M, N)];
+  double* U    = new double[M*M];
+  double* VT   = new double[N*N];
+  double* WORK = new double[std::max(1, LWORK)];
 
   // Do the SVD decomposition
   dgesdd_(&JOBZ,
@@ -75,9 +76,9 @@ bool LaPackUtils::computeSVD(std::vector<double>&       a_linU,
 
   if(foundSVD){
 
-    a_linU.resize(M*M, 0.0);
+    a_linU.    resize(M*M, 0.0);
     a_linSigma.resize(M*N, 0.0);
-    a_linVT.resize(N*N, 0.0);
+    a_linVT.   resize(N*N, 0.0);
     
     // Build the linearized matrices
     for (int i = 0; i < M*M; i++){
@@ -91,6 +92,13 @@ bool LaPackUtils::computeSVD(std::vector<double>&       a_linU,
     }
   }
 
+  delete[] A;
+  delete[] S;
+  delete[] U;
+  delete[] VT;
+  delete[] WORK;
+  delete[] IWORK;
+
   return foundSVD;
 }
 
@@ -103,7 +111,7 @@ bool LaPackUtils::computeSVD(std::vector<float>&       a_linU,
 
 
   // linA must be stored as a float array in order to interface into LaPack
-  float A[a_M*a_N];
+  float* A = new float[a_M*a_N];
   for (int i = 0; i < a_linA.size(); i++){
     A[i] = a_linA[i];
   }
@@ -120,11 +128,12 @@ bool LaPackUtils::computeSVD(std::vector<float>&       a_linU,
   int LDVT   = N;
   int INFO   = 0;
   int LWORK  = 4*mn*mn + 6*mn + mx;
-  int IWORK[8*std::min(M,N)];
-  float S[std::min(M, N)];
-  float U[M*M];
-  float VT[N*N];
-  float WORK[std::max(1, LWORK)];
+  int* IWORK = new int[8*std::min(M,N)];
+  
+  float* S    = new float[std::min(M, N)];
+  float* U    = new float[M*M];
+  float* VT   = new float[N*N];
+  float* WORK = new float[std::max(1, LWORK)];
 
   // Do the SVD decomposition
   sgesdd_(&JOBZ,
@@ -162,6 +171,13 @@ bool LaPackUtils::computeSVD(std::vector<float>&       a_linU,
     }
   }
 
+  delete[] A;
+  delete[] S;
+  delete[] U;
+  delete[] VT;
+  delete[] WORK;
+  delete[] IWORK;  
+
   return foundSVD;
 }
 
@@ -184,9 +200,9 @@ bool LaPackUtils::computePseudoInverse(std::vector<double>&       a_linAplus,
     const double tol = eps*std::max(a_M,a_N)*maxS;
     
     // Need to storage the matrices in a form useable by LaPack, and then use dgemm to multiply them. 
-    double U[a_M*a_M];
-    double SigmaReciprocal[a_M*a_N];
-    double VT[a_N*a_N];
+    double* U               = new double[a_M*a_M];
+    double* SigmaReciprocal = new double[a_M*a_N];
+    double* VT              = new double[a_N*a_N];
 
     for (int i = 0; i < linU.size(); i++){
       U[i] = linU[i];
@@ -210,7 +226,7 @@ bool LaPackUtils::computePseudoInverse(std::vector<double>&       a_linAplus,
     //
     // We want to compute V*Transpose(SigmaReciprocal) onto C, which is N*M big.
     //
-    double C[a_N*a_M];
+    double* C = new double[a_N*a_M];
     {
       char TRANSA  = 'T';
       char TRANSB  = 'T';
@@ -242,7 +258,7 @@ bool LaPackUtils::computePseudoInverse(std::vector<double>&       a_linAplus,
     //
     // op(A) => M*M
     // op(B) => N*M
-    double Aplus[a_N*a_M];
+    double* Aplus = new double[a_N*a_M];
     {
       char TRANSA  = 'N';
       char TRANSB  = 'T';
@@ -275,6 +291,12 @@ bool LaPackUtils::computePseudoInverse(std::vector<double>&       a_linAplus,
     for (int i = 0; i < a_N*a_M; i++){
       a_linAplus[i] = Aplus[i];
     }
+
+    delete[] U;
+    delete[] SigmaReciprocal;
+    delete[] VT;
+    delete[] C    ;        
+    delete[] Aplus;    
   }
 
   return foundSVD;
@@ -299,9 +321,9 @@ bool LaPackUtils::computePseudoInverse(std::vector<float>&       a_linAplus,
     const float tol = eps*std::max(a_M,a_N)*maxS;
     
     // Need to storage the matrices in a form useable by LaPack, and then use dgemm to multiply them. 
-    float U[a_M*a_M];
-    float SigmaReciprocal[a_M*a_N];
-    float VT[a_N*a_N];
+    float* U = new float[a_M*a_M];
+    float* SigmaReciprocal = new float[a_M*a_N];
+    float* VT = new float[a_N*a_N];
 
     for (int i = 0; i < linU.size(); i++){
       U[i] = linU[i];
@@ -325,7 +347,7 @@ bool LaPackUtils::computePseudoInverse(std::vector<float>&       a_linAplus,
     //
     // We want to compute V*Transpose(SigmaReciprocal) onto C, which is N*M big.
     //
-    float C[a_N*a_M];
+    float* C = new float[a_N*a_M];
     {
       char TRANSA  = 'T';
       char TRANSB  = 'T';
@@ -357,7 +379,7 @@ bool LaPackUtils::computePseudoInverse(std::vector<float>&       a_linAplus,
     //
     // op(A) => M*M
     // op(B) => N*M
-    float Aplus[a_N*a_M];
+    float* Aplus = new float[a_N*a_M];
     {
       char TRANSA  = 'N';
       char TRANSB  = 'T';
@@ -390,6 +412,12 @@ bool LaPackUtils::computePseudoInverse(std::vector<float>&       a_linAplus,
     for (int i = 0; i < a_N*a_M; i++){
       a_linAplus[i] = Aplus[i];
     }
+
+    delete[] U;
+    delete[] SigmaReciprocal;
+    delete[] VT;
+    delete[] C    ;        
+    delete[] Aplus;
   }
 
   return foundSVD;

@@ -13,6 +13,7 @@
 #include <CD_MFHelmholtzJumpBC.H>
 #include <CD_VofUtils.H>
 #include <CD_LeastSquares.H>
+#include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
 constexpr int MFHelmholtzJumpBC::m_comp;
@@ -115,10 +116,12 @@ void MFHelmholtzJumpBC::defineStencils(){
 	// Build stencils like we always do
 	BaseIVFAB<VoFStencil> gradStencils(ivs, ebgraph, m_nComp);
 	BaseIVFAB<Real>       bndryWeights(ivs, ebgraph, m_nComp);
-	
-	for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-	  const VolIndex& vof = vofit();
 
+	// Iteration space for kernel 
+	VoFIterator vofit(ivs, ebgraph);
+
+	// Kernel
+	auto kernel = [&] (const VolIndex& vof) -> void {
 	  int order;
 	  bool foundStencil = false;
 	  std::pair<Real, VoFStencil> pairSten;
@@ -155,7 +158,10 @@ void MFHelmholtzJumpBC::defineStencils(){
 	    bndryWeights(vof, m_comp) = 0.0;
 	    gradStencils(vof, m_comp).clear();
 	  }
-	}
+	};
+
+	// Execute kernel and build stencils. 
+	BoxLoops::loop(vofit, kernel);
 
 	// Build the average stencils. Only matters if the cell is a multi-valued cell. 
 	BaseIVFAB<VoFStencil>& avgStencils =   m_avgStencils[dit()].getIVFAB(iphase);
@@ -377,7 +383,7 @@ void MFHelmholtzJumpBC::matchBC(BaseIVFAB<Real>& a_jump,
     const VoFStencil& derivStenPhase1 = m_avgStencils[a_dit].getIVFAB(secondPhase)(vof0, vofComp);
 
     const Real& denomPhase0 = m_denom[a_dit].getIVFAB(firstPhase) (vof0, vofComp);
-    const Real& denomPhase1 = m_denom[a_dit].getIVFAB(secondPhase)(vof0, vofComp);
+    //    const Real& denomPhase1 = m_denom[a_dit].getIVFAB(secondPhase)(vof0, vofComp);
 
     // Compute the average jump.
     Real jump = 0.0; 

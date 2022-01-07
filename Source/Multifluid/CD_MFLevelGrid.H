@@ -56,7 +56,7 @@ public:
   /*!
     @brief Destructor
   */
-  ~MFLevelGrid();
+  virtual ~MFLevelGrid();
 
   /*!
     @brief Get number of phases

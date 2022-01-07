@@ -10,6 +10,7 @@
 */
 
 #include <CD_VofUtils.H>
+#include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
 Vector<VolIndex> VofUtils::getVofsInRadius(const VolIndex&    a_startVof,
@@ -129,16 +130,18 @@ Vector<VolIndex> VofUtils::getAllVofsInRadius(const VolIndex& a_startVof, const 
   bx.grow(a_radius);
   bx &= a_ebisbox.getDomain();
   bx &= a_ebisbox.getRegion();
-  for (BoxIterator bit(bx); bit.ok(); ++bit){
 
-    const std::vector<VolIndex> vofsInThisCell = a_ebisbox.getVoFs(bit()).stdVector();
+  auto kernel = [&] (const IntVect& iv) -> void {
+    const std::vector<VolIndex> vofsInThisCell = a_ebisbox.getVoFs(iv).stdVector();
 
     for (const auto& ivof : vofsInThisCell){
       if(ivof != a_startVof){
 	allVofs.push_back(ivof);
       }
     }
-  }
+  };
+
+  BoxLoops::loop(bx, kernel);
 
   if(a_addStartVof){
     allVofs.push_back(a_startVof);
@@ -392,8 +395,6 @@ void VofUtils::getVofsInMonotonePath(Vector<VolIndex>& a_vofList,
 	if(a_timesMoved[dir] < a_radius){
 	  const IntVect newTimesMoved = a_timesMoved + BASISV(dir);
 
-	  Side::LoHiSide whichSide;
-	
 	  // Move in the low direction. If we have already moved in the high direction we are not allowed to "turn back".
 	  if(a_pathSign[dir] == -1 || a_pathSign[dir] == 0){
 	    IntVect newPathSign = a_pathSign;

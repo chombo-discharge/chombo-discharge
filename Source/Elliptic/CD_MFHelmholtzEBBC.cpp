@@ -15,8 +15,8 @@
 // Our includes
 #include <CD_MFHelmholtzEBBC.H>
 #include <CD_LeastSquares.H>
+#include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
-
 
 MFHelmholtzEBBC::MFHelmholtzEBBC(const int a_phase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC){
   CH_TIME("MFHelmholtzEBBC::MFHelmholtzEBBC(int, RefCountedPtr<MFHelmholtzJumpBC>)");
@@ -50,7 +50,6 @@ void MFHelmholtzEBBC::defineMultiPhase(){
   //       a known term in the expansion. 
   
   const DisjointBoxLayout& dbl = m_eblg.getDBL();
-  const ProblemDomain& domain  = m_eblg.getDomain();
 
   m_boundaryWeights.  define(dbl);
   m_kappaDivFStencils.define(dbl);
@@ -76,8 +75,7 @@ void MFHelmholtzEBBC::defineMultiPhase(){
     stencils.define(ivs, ebgraph, m_nComp);
 
     // Build stencils for each vof. The order for the multiphase VoFs should follow the order for jumpBC, I think. 
-    for (multiPhaseVofs.reset(); multiPhaseVofs.ok(); ++multiPhaseVofs){
-      const VolIndex& vof = multiPhaseVofs();
+    auto kernel = [&] (const VolIndex& vof) -> void {
       const Real areaFrac = ebisbox.bndryArea(vof);
       const Real B        = Bcoef(vof, m_comp);
       const int weight    = m_jumpBC->getWeight();
@@ -123,7 +121,9 @@ void MFHelmholtzEBBC::defineMultiPhase(){
 	weights (vof, m_comp) = 0.0;
 	stencils(vof, m_comp).clear();
       }
-    }
+    };
+
+    BoxLoops::loop(multiPhaseVofs, kernel);
   }
 }
   
@@ -154,13 +154,14 @@ void MFHelmholtzEBBC::applyEBFluxMultiPhase(VoFIterator&       a_multiPhaseVofs,
   
   // Apply the stencil for computing the contribution to kappaDivF. Note divF is sum(faces) B*grad(Phi)/dx and that this
   // is the contribution from the EB face. B/dx is already included in the stencils and boundary weights, but beta is not.
-  for(a_multiPhaseVofs.reset(); a_multiPhaseVofs.ok(); ++a_multiPhaseVofs){
-    const VolIndex& vof = a_multiPhaseVofs();
 
+  auto kernel = [&] (const VolIndex& vof) -> void {
     // Homogeneous contribution
     const Real phiB = m_jumpBC->getBndryPhi(m_phase, a_dit)(vof, m_comp);
     a_Lphi(vof, m_comp) += a_beta*phiB*m_boundaryWeights[a_dit](vof, m_comp);
-  }
+  };
+
+  BoxLoops::loop(a_multiPhaseVofs, kernel);
   
   return;
 }

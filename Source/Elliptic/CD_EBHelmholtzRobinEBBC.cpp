@@ -16,6 +16,7 @@
 // Our includes
 #include <CD_LeastSquares.H>
 #include <CD_EBHelmholtzRobinEBBC.H>
+#include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
 EBHelmholtzRobinEBBC::EBHelmholtzRobinEBBC(){
@@ -128,8 +129,10 @@ void EBHelmholtzRobinEBBC::define() {
 
     stencils.define(ivs, ebgraph, m_nComp);
 
-    for (VoFIterator vofit(ivs, ebgraph); vofit.ok(); ++vofit){
-      const VolIndex& vof = vofit();
+    // Kernel space
+    VoFIterator vofit(ivs, ebgraph);
+
+    auto kernel = [&] (const VolIndex& vof) -> void {
       const Real areaFrac = ebisbox.bndryArea(vof);
       const Real helmBco  = (*m_Bcoef)[dit()](vof, m_comp);
 
@@ -177,6 +180,11 @@ void EBHelmholtzRobinEBBC::define() {
 	  A = m_functionA(pos);
 	  B = m_functionB(pos);
 	}
+	else{
+	  A = 0.0;
+	  B = 0.0;
+	  MayDay::Error("EBHelmholtzRobinEBBC::define - logic bust");	  
+	}
 
 	// The normal derivative is dphi/dn = (A*phi - C)/B and the (stencil) flux is
 	// kappaDivF = area*b*dphidn/Delta x. Scale accordingly.
@@ -190,7 +198,10 @@ void EBHelmholtzRobinEBBC::define() {
       else{ // Dead cell
 	fluxStencil.clear();
       }
-    }
+    };
+
+    // Run kernel
+    BoxLoops::loop(vofit, kernel);
   }
 }
 
@@ -206,10 +217,10 @@ void EBHelmholtzRobinEBBC::applyEBFlux(VoFIterator&       a_vofit,
   
   // Recall that the "flux" is kappaDivF = area*dphi/dn/DeltaX where dphi/dn = (A*phi - C)/B. We already have the phi
   // term in the stencil so only need to add -C/B.
-  if(!a_homogeneousPhysBC){  
-    for (a_vofit.reset(); a_vofit.ok(); ++a_vofit){
-      const VolIndex& vof = a_vofit();
+  if(!a_homogeneousPhysBC){
 
+    // Kernel
+    auto kernel = [&] (const VolIndex& vof) -> void {
       Real B;
       Real C;
       if(m_useConstant){
@@ -221,6 +232,11 @@ void EBHelmholtzRobinEBBC::applyEBFlux(VoFIterator&       a_vofit,
 	B = m_functionB(pos);
 	C = m_functionC(pos);
       }
+      else{
+	B = 0.0;
+	C = 0.0;
+	MayDay::Error("EBHelmholtzRobinEBBC::applyEBFlux - logic bust");
+      }
 
       const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
       const Real areaFrac    = ebisbox.bndryArea(vof);
@@ -230,7 +246,9 @@ void EBHelmholtzRobinEBBC::applyEBFlux(VoFIterator&       a_vofit,
       if(std::abs(B) > 0.0){
 	a_Lphi(vof, m_comp) += kappaDivF;
       }
-    }
+    };
+
+    BoxLoops::loop(a_vofit, kernel);
   }
 }
 

@@ -17,6 +17,7 @@
 
 // Our includes
 #include <CD_ParticleContainer.H>
+#include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
   
 template <class P>
@@ -120,7 +121,6 @@ void ParticleContainer<P>::setupPVR(const int a_base, const int a_finestLevel){
   m_pvr.resize(1 + a_finestLevel);
   for (int lvl = a_base; lvl <= a_finestLevel; lvl++){
     const DisjointBoxLayout& dbl = m_grids  [lvl];
-    const ProblemDomain& domain  = m_domains[lvl];
 
     const bool hasCoar = (lvl > 0);
 
@@ -452,11 +452,13 @@ void ParticleContainer<P>::sortParticlesByPatch(){
       for (DataIterator dit(dbl); dit.ok(); ++dit){
 	ListBox<P>& patchParticles = (*m_particles          [lvl])[dit()];
 	BinFab<P>&  cellParticles  = (*m_cellSortedParticles[lvl])[dit()];
-	
-	const Box box = dbl[dit()];
-	for (BoxIterator bit(box); bit.ok(); ++bit){
-	  patchParticles.addItemsDestructive(cellParticles(bit(), comp));
-	}
+
+	// Kernel which adds moves particles from the cell container to the patch container. 
+	auto kernel = [&] (const IntVect& iv) -> void {
+	  patchParticles.addItemsDestructive(cellParticles(iv, comp));
+	};
+
+	BoxLoops::loop(dbl[dit()], kernel);
 
 	cellParticles.clear();
       }
@@ -546,15 +548,14 @@ void ParticleContainer<P>::addParticles(const BinFab<P>& a_particles, const int 
   
   BinFab<P>& boxParticles = (*m_cellSortedParticles[a_lvl])[a_dit];
 
-  const Box box = m_grids[a_lvl][a_dit];
-  for (BoxIterator bit(box); bit.ok(); ++bit){
-    const IntVect iv = bit();
-
+  auto kernel = [&] (const IntVect& iv) -> void {
     List<P>&       myParticles    = boxParticles(iv, comp);
     const List<P>& inputParticles = a_particles (iv, comp);
 
     myParticles.join(inputParticles);
-  }
+  };
+
+  BoxLoops::loop(m_grids[a_lvl][a_dit], kernel);
 }
 
 template <class P>
@@ -572,15 +573,15 @@ void ParticleContainer<P>::addParticlesDestructive(BinFab<P>& a_particles, const
 
   BinFab<P>& boxParticles = (*m_cellSortedParticles[a_lvl])[a_dit];
 
-  const Box box = m_grids[a_lvl][a_dit];
-  for (BoxIterator bit(box); bit.ok(); ++bit){
-    const IntVect iv = bit();
-
+  auto kernel = [&](const IntVect& iv) -> void {
     List<P>&       myParticles    = boxParticles(iv, comp);
     const List<P>& inputParticles = a_particles (iv, comp);
 
+
     myParticles.catenate(inputParticles);
-  }
+  };
+
+  BoxLoops::loop(m_grids[a_lvl][a_dit], kernel);
 }
 
 template <class P>
@@ -731,7 +732,6 @@ void ParticleContainer<P>::remap(){
   
   for (int lvl = 0; lvl <= m_finestLevel; lvl++){
     const bool hasCoar = (lvl > 0            );
-    const bool hasFine = (lvl < m_finestLevel);
 
     // Rebin this level
     m_particles[lvl]->gatherOutcast();
@@ -745,7 +745,7 @@ void ParticleContainer<P>::remap(){
 			    *m_particles[lvl-1],
 			     m_pvr      [lvl  ]->mask(),
 			     m_dx       [lvl  ],
-			     m_refRat   [lvl  ],
+			     m_refRat   [lvl-1],
 			     flipMask, 
 			     m_probLo);
 

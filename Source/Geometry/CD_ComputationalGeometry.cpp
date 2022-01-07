@@ -89,12 +89,7 @@ const RefCountedPtr<BaseIF>& ComputationalGeometry::getSolidImplicitFunction() c
 const RefCountedPtr<BaseIF>& ComputationalGeometry::getImplicitFunction(const phase::which_phase a_phase) const {
   CH_TIME("ComputationalGeometry::getImplicitFunction(phase::which_phase)");
 
-  if(a_phase == phase::gas){
-    return m_implicitFunctionGas;
-  }
-  else if(a_phase == phase::solid){
-    return m_implicitFunctionSolid;
-  }
+  return (a_phase == phase::gas) ? m_implicitFunctionGas : m_implicitFunctionSolid;
 }
 
 Real ComputationalGeometry::getGasPermittivity() const {

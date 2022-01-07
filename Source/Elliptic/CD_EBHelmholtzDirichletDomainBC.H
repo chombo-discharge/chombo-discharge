@@ -60,7 +60,7 @@ public:
   void setValue(const std::function<Real(const RealVect& a_pos)>& a_value);
 
   /*!
-    @brief Get face flux. This is for regular cells
+    @brief Get face flux. This is for regular cells, and it uses first order finite differences for filling the flux. 
     @param[inout] a_faceFlux       Face-centered flux. 
     @param[in]    a_phi            Cell-centered data
     @param[in]    a_dir            Coordinate direction

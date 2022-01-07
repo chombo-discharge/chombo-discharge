@@ -28,10 +28,12 @@
 #include <CD_Driver.H>
 #include <CD_VofUtils.H>
 #include <CD_DataOps.H>
+#include <CD_BoxLoops.H>
 #include <CD_MultifluidAlias.H>
 #include <CD_Units.H>
 #include <CD_MemoryReport.H>
 #include <CD_Timer.H>
+#include <CD_ParallelOps.H>
 #include <CD_NamespaceHeader.H>
 
 Driver::Driver(const RefCountedPtr<ComputationalGeometry>& a_computationalGeometry,
@@ -238,7 +240,6 @@ void Driver::getGeometryTags(){
     EBISLayout ebisl;
     ebisGas->fillEBISLayout(ebisl, irregGrids, curDomain, 1); // Need one ghost cell because we fetch normal vectors from neighboring cut-cells. 
 
-    const Real dx         = m_amr->getDx()[lvl];
     const RealVect probLo = m_amr->getProbLo();
     
     for (DataIterator dit(irregGrids); dit.ok(); ++dit){
@@ -248,8 +249,9 @@ void Driver::getGeometryTags(){
       const EBGraph& ebgraph = ebisbox.getEBGraph();
       const IntVectSet irreg = ebisbox.getIrregIVS(box);
 
-      for (VoFIterator vofit(irreg, ebgraph); vofit.ok(); ++vofit){
-	const VolIndex& vof    = vofit();
+      VoFIterator vofit(irreg, ebgraph); 
+
+      auto kernel = [&] (const VolIndex& vof) -> void {
 	const IntVect   iv     = vof.gridIndex();
 	const RealVect  normal = ebisbox.normal(vof);
 	
@@ -272,7 +274,9 @@ void Driver::getGeometryTags(){
 	    }
 	  }
 	}
-      }
+      };
+
+      BoxLoops::loop(vofit, kernel);
     }
   }
 
@@ -286,16 +290,14 @@ void Driver::getGeometryTags(){
     m_geoCoarsen->coarsenTags(m_geomTags, m_amr->getDx(), m_amr->getProbLo());
   }
 
-#ifdef CH_MPI
-  // Processes may not agree what is the maximum tag depth. Make sure they're all on the same page. 
+
+  // Processes may not agree what is the maximum tag depth. Make sure they're all on the same page.
   int deepestTagLevel = 0;
   for (int lvl = 0; lvl < m_geomTags.size(); lvl++){
     if(!m_geomTags[lvl].isEmpty()) deepestTagLevel = lvl;
   }
-
-  int tmp = -1;
-  MPI_Allreduce(&deepestTagLevel, &m_geometricTagsDepth, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
-#endif
+  
+  m_geometricTagsDepth = ParallelOps::Max(deepestTagLevel);
 }
 
 void Driver::getCellsAndBoxes(long long&         a_numLocalCells,
@@ -427,7 +429,6 @@ void Driver::gridReport(){
   pout() << endl;
 
   const int finestLevel                  = m_amr->getFinestLevel();
-  const Vector<DisjointBoxLayout>& grids = m_amr->getGrids(m_realm);
   const Vector<ProblemDomain>& domains   = m_amr->getDomains();
   const Vector<Real> dx                  = m_amr->getDx();
 
@@ -707,13 +708,14 @@ void Driver::regridInternals(const int a_oldFinestLevel, const int a_newFinestLe
       const Box& box = dbl.get(dit());
 
       DenseIntVectSet& tags = (*m_tags[lvl])[dit()];
-      
-      for (BoxIterator bit(box); bit.ok(); ++bit){
-	const IntVect iv = bit();
+
+      auto kernel = [&] (const IntVect& iv) -> void {
 	if(tmpFab(iv, comp)){
 	  tags |= iv;
 	}
-      }
+      };
+
+      BoxLoops::loop(box, kernel);
     }
   }
 }
@@ -1602,10 +1604,7 @@ void Driver::stepReport(const Real a_startTime, const Real a_endTime, const int 
   // Get the total number of poitns across all levels
   const int finestLevel                 = m_amr->getFinestLevel();
   const Vector<DisjointBoxLayout>& grids = m_amr->getGrids(m_realm);
-  const Vector<ProblemDomain>& domains   = m_amr->getDomains();
-  const Vector<Real>& dx                 = m_amr->getDx();
   long long totalPoints = 0;
-  long long uniformPoints = (domains[finestLevel].domainBox()).numPts();
   
   for (int lvl = 0; lvl <= finestLevel; lvl++){
     long long pointsThisLevel = 0;
@@ -1712,14 +1711,12 @@ void Driver::stepReport(const Real a_startTime, const Real a_endTime, const int 
   int max_unfreed_mem;
   int max_peak_mem;
 
-  int result1 = MPI_Allreduce(&unfreed_mem, &max_unfreed_mem, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
-  int result2 = MPI_Allreduce(&peak_mem,    &max_peak_mem,    1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
+  MPI_Allreduce(&unfreed_mem, &max_unfreed_mem, 1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
+  MPI_Allreduce(&peak_mem,    &max_peak_mem,    1, MPI_INT, MPI_MAX, Chombo_MPI::comm);
   pout() << "                                -- Max unfreed memory    : " << max_unfreed_mem/BytesPerMB << "(MB)" << endl;
   pout() << "                                -- Max peak memory usage : " << max_peak_mem/BytesPerMB << "(MB)" << endl;
 #endif
 #endif
-
-
 
 }
 
@@ -2175,8 +2172,8 @@ void Driver::writePlotData(EBAMRCellData& a_output, int& a_comp){
     pout() << "Driver::writePlotData(EBAMRCellData, int)" << endl;
   }
 
-  if(m_plotTags)     this->writeTags(a_output, a_comp);
-  if(m_plotRanks)    this->writeRanks(a_output, a_comp);
+  if(m_plotTags)     this->writeTags    (a_output, a_comp);
+  if(m_plotRanks)    this->writeRanks   (a_output, a_comp);
   if(m_plotLevelset) this->writeLevelset(a_output, a_comp);
 }
 
@@ -2195,7 +2192,6 @@ void Driver::writeTags(EBAMRCellData& a_output, int& a_comp){
   // Set tagged cells = 1
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, phase::gas)[lvl];
     
     for (DataIterator dit(dbl); dit.ok(); ++dit){
       const DenseIntVectSet& ivs = (*m_tags[lvl])[dit()];
@@ -2203,12 +2199,14 @@ void Driver::writeTags(EBAMRCellData& a_output, int& a_comp){
 
       // Do regular cells only.
       BaseFab<Real>& regTags = (*tags[lvl])[dit()].getSingleValuedFAB();
-      for (BoxIterator bit(cellBox); bit.ok(); ++bit){
-	const IntVect iv = bit();
+
+      auto kernel = [&] (const IntVect& iv) -> void {
 	if(ivs[iv]){
 	  regTags(iv, 0) = 1.0;
 	}
-      }
+      };
+
+      BoxLoops::loop(cellBox, kernel);
     }
   }
 
@@ -2266,14 +2264,14 @@ void Driver::writeLevelset(EBAMRCellData& a_output, int& a_comp){
       fab.setVal(0.0, a_comp  );
       fab.setVal(0.0, a_comp+1);
 
-      for (BoxIterator bit(fab.box()); bit.ok(); ++bit){
-	const IntVect iv = bit();
-	
+      auto kernel = [&](const IntVect& iv) -> void {
 	const RealVect pos = probLo + (RealVect(iv)+ 0.5*RealVect::Unit)*dx;
 
 	if(!lsf1.isNull()) fab(iv, a_comp  ) = lsf1->value(pos);
-	if(!lsf2.isNull()) fab(iv, a_comp+1) = lsf2->value(pos);
-      }
+	if(!lsf2.isNull()) fab(iv, a_comp+1) = lsf2->value(pos);	
+      };
+
+      BoxLoops::loop(fab.box(), kernel);
     }
   }
 
@@ -2375,7 +2373,6 @@ void Driver::writeCheckpointTags(HDF5Handle& a_handle, const int a_level){
 
   // Set tags = 1
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
-  const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, phase::gas)[a_level];
     
   for (DataIterator dit(dbl); dit.ok(); ++dit){
     const Box box = dbl[dit()];
@@ -2383,12 +2380,14 @@ void Driver::writeCheckpointTags(HDF5Handle& a_handle, const int a_level){
     const DenseIntVectSet& tags = (*m_tags[a_level])[dit()];
 
     BaseFab<Real>& fab = scratch[dit()].getSingleValuedFAB();
-    for (BoxIterator bit(box); bit.ok(); ++bit){
-      const IntVect iv = bit();
+
+    auto kernel = [&](const IntVect& iv) -> void {
       if(tags[iv]){
 	fab(iv, 0) = 1.0;
-      }
-    }
+      }      
+    };
+
+    BoxLoops::loop(box, kernel);
 
     DataOps::setCoveredValue(scratch, 0, 0.0);
   }
@@ -2406,7 +2405,6 @@ void Driver::writeCheckpointRealmLoads(HDF5Handle& a_handle, const int a_level){
   }
 
   const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[a_level];
-  const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, phase::gas)[a_level];
 
   // Make some storage and set the computational load to be the same in every patch. Later when
   // we read the file we can just fetch the computational load from one of the cells.
@@ -2477,7 +2475,7 @@ void Driver::readCheckpointFile(const std::string& a_restartFile){
   }
 
   // Abort if base resolution has changed. 
-  if(!coarsestDx == m_amr->getDx()[0]){
+  if(!(coarsestDx == m_amr->getDx()[0])){
     MayDay::Error("Driver::readCheckpointFile - coarsestDx != dx[0], did you change the base level resolution when restarting?!?");
   }
 
@@ -2584,12 +2582,14 @@ void Driver::readCheckpointLevel(HDF5Handle& a_handle, const int a_level){
     DenseIntVectSet& taggedCells = (*m_tags[a_level])[dit()];
 
     BaseFab<Real>& fab = scratch[dit()].getSingleValuedFAB();
-    for (BoxIterator bit(box); bit.ok(); ++bit){
-      const IntVect iv = bit();
+
+    auto kernel = [&] (const IntVect& iv) -> void {
       if(fab(iv, 0) > 0.9999){
 	taggedCells |= iv;
-      }
-    }
+      }      
+    };
+
+    BoxLoops::loop(box, kernel);
   }
 }
 #endif

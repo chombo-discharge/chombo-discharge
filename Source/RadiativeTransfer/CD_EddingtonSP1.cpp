@@ -675,17 +675,17 @@ void EddingtonSP1::setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
   const Box helmAcoBox = a_helmAco.box() & m_amr->getDomains()[a_lvl];
   const Box helmBcoBox = a_helmBco.box() & m_amr->getDomains()[a_lvl];
 
-  // Regular A-coefficient. Recall that the A-coefficient only affects the diagonal part of the stencil so there's no need to fill anything
+  // Regular A-coefficient kernel. Recall that the A-coefficient only affects the diagonal part of the stencil so there's no need to fill anything
   // outside of the cell-centered grid patch.
   BaseFab<Real>& helmAcoReg = a_helmAco.getSingleValuedFAB();
-  for (BoxIterator bit(cellBox); bit.ok(); ++bit){
-    const IntVect iv = bit();
-
+  auto regularAcoKernel = [&] (const IntVect& iv) -> void {
     const RealVect pos   = probLo + (0.5*RealVect::Unit + RealVect(iv))*dx;
     const Real     kappa = m_RtSpecies->getAbsorptionCoefficient(pos);
       
     helmAcoReg(iv, m_comp) = kappa;
-  }
+  };
+
+  BoxLoops::loop(cellBox, regularAcoKernel); // Fill single-valued a-coefficient.   
 
   // Regular B-coefficient. Recall that EBHelmholtzOp sets up the face centroid fluxes by interpolating with neighboring face-centered fluxes. The interpolating stencil
   // will have a radius of 1, so we need to fill one of the ghost faces outside of the grid patch. Only the ones that are "tangential" to the face direction
@@ -693,7 +693,7 @@ void EddingtonSP1::setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
   for (int dir = 0; dir < SpaceDim; dir++){
     EBFaceFAB& helmBcoFace = a_helmBco[dir];
 
-    // Cell-centered box, grown by one in every direction except 'dir'. This box will also contain
+    // Kernel region -- make a cell-centered box, grown by one in every direction except 'dir'. This box will also contain
     // the "ghost faces".
     Box grownCellBox = cellBox;
     for (int otherDir = 0; otherDir < SpaceDim; otherDir++){
@@ -706,44 +706,48 @@ void EddingtonSP1::setHelmholtzCoefficientsBox(EBCellFAB&       a_helmAco,
     // Cut-cells in the grown box. 
     const IntVectSet irregIVS = ebisbox.getIrregIVS(grownCellBox);    
 
-    // Face-centered box which also contains the "ghost faces". 
+    // Actual kernel region. The face-centered box which also contains the "ghost faces" and a FaceIterator for
+    // doing the irregular face stuff. 
     const Box faceBox = surroundingNodes(grownCellBox, dir);
+    FaceIterator faceit(irregIVS, ebgraph, dir, FaceStop::SurroundingWithBoundary);
 
-    // Fill regular interior faces. 
+    // Regular kernel. 
     BaseFab<Real>& helmBcoReg = helmBcoFace.getSingleValuedFAB();
-    for (BoxIterator bit(faceBox); bit.ok(); ++bit){
-      const IntVect iv = bit();
-
+    auto regularBcoKernel = [&] (const IntVect& iv) -> void {
       const RealVect pos   = probLo + dx * ((RealVect(iv) + 0.5*RealVect::Unit) - 0.5*BASISREALV(dir));
       const Real     kappa = m_RtSpecies->getAbsorptionCoefficient(pos);
       
       helmBcoReg(iv, m_comp) = 1./(3.0*kappa);
-    }
+    };
 
-    // Fill interior cut-cell faces. 
-    for (FaceIterator faceIt(irregIVS, ebgraph, dir, FaceStop::SurroundingWithBoundary); faceIt.ok(); ++faceIt){
-      const FaceIndex face = faceIt();
-      
+    // Irregular Bco-kernel. Does exactly the same. 
+    auto irregularBcoKernel = [&] (const FaceIndex& face) -> void {
       const RealVect pos   = probLo + Location::position(Location::Face::Center, face, ebisbox, dx);
       const Real     kappa = m_RtSpecies->getAbsorptionCoefficient(pos);
 
       helmBcoFace(face, m_comp) = 1./(3.0*kappa);
-    }
+    };
+
+    // Run the kernels
+    BoxLoops::loop(faceBox,   regularBcoKernel);
+    BoxLoops::loop(faceit,  irregularBcoKernel);    
   }
   
   // Fill A-coefficient in cut-cells and the EB-centered B-coefficient. Again, the A-part is diagonal so we don't need to fill anything outside the grid patch. For
   // the B-coefficient on the EB face then the stencil in the cut-cell will not reach into neighboring EB faces (really, it shouldn't!) so no need for filling
   // things outside the grid patch here, either. 
+  // Kernel region for cut-cells
   VoFIterator& vofit = (*m_amr->getVofIterator(m_realm, m_phase)[a_lvl])[a_dit];
-  for (vofit.reset(); vofit.ok(); ++vofit){
-    const VolIndex& vof = vofit();
-
+  auto irregularKernel = [&] (const VolIndex& vof) -> void {
     const RealVect pos   = probLo + Location::position(m_dataLocation, vof, ebisbox, dx);
     const Real     kappa = m_RtSpecies->getAbsorptionCoefficient(pos);
 
     a_helmAco     (vof, m_comp) = kappa;
     a_helmBcoIrreg(vof, m_comp) = 1./(3.0*kappa);
-  }
+  };
+
+  // Run the irregular kernel
+  BoxLoops::loop(vofit, irregularKernel);
 }
 
 void EddingtonSP1::setupHelmholtzFactory(){
@@ -751,8 +755,6 @@ void EddingtonSP1::setupHelmholtzFactory(){
   if(m_verbosity > 5){
     pout() << m_name + "::setupHelmholtzFactory" << endl;
   }
-
-  const int finestLevel = m_amr->getFinestLevel();
 
   const Vector<RefCountedPtr<EBLevelGrid> >&             levelGrids   = m_amr->getEBLevelGrid          (m_realm, m_phase);
   const Vector<RefCountedPtr<EbCoarAve> >&               coarAve      = m_amr->getCoarseAverage        (m_realm, m_phase);
@@ -818,9 +820,6 @@ void EddingtonSP1::setupHelmholtzFactory(){
 										       m_multigridRelaxMethod,
 										       bottomDomain,
 										       m_amr->getMaxBoxSize()));
-										       
-
-  
 }
 
 void EddingtonSP1::setupMultigrid(){
@@ -971,8 +970,9 @@ void EddingtonSP1::computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellD
 
 	  // Extrapolate to the boundary. Use face-centered stuff for all faces (also multivalued ones)
 	  const FaceStop::WhichFaces crit = FaceStop::AllBoundaryOnly;
-	  for (FaceIterator faceit(ivs, ebgraph, dir, crit); faceit.ok(); ++faceit){
-	    const FaceIndex& face = faceit();
+	  FaceIterator faceit(ivs, ebgraph, dir, crit); 
+
+	  auto kernel = [&] (const FaceIndex& face) -> void {
 
 	    const int sgn = sign(sit()); // Lo = -1, Hi = 1
 	    
@@ -994,7 +994,9 @@ void EddingtonSP1::computeDomainFlux(EBAMRIFData& a_domainflux, const EBAMRCellD
 
 	    // Necessary scaling
 	    extrap(face, m_comp) = 0.5*Units::c*extrap(face, m_comp);
-	  }
+	  };
+
+	  BoxLoops::loop(faceit, kernel);
 	}
       }
     }

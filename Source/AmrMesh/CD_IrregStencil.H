@@ -73,7 +73,7 @@ public:
   /*!
     @brief Destructor
   */
-  ~IrregStencil();
+  virtual ~IrregStencil();
 
   /*!
     @brief Get the stencils over a single box

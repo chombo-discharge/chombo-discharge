@@ -4,8 +4,9 @@
  */
 
 /*!
-  @file  CD_DataOpsImplem.H
-  @brief Implementation of CD_DataOps.H
+  @file   CD_DataOpsImplem.H
+  @brief  Implementation of CD_DataOps.H
+  @author Robert Marskar
 */
 
 #ifndef CD_DataOpsImplem_H
@@ -16,39 +17,6 @@
 
 // Our includes
 #include <CD_NamespaceHeader.H>
-
-template <typename Functor>
-ALWAYS_INLINE
-void DataOps::loop(const Box& computeBox, Functor&& func){
-
-  // TLDR: This runs through all cells in the computeBox and calls the kernel function.
-  
-  const int* lo = computeBox.loVect();
-  const int* hi = computeBox.hiVect();
-
-#if CH_SPACEDIM==3
-  for (int k = lo[2]; k <= hi[2]; k++){
-#endif
-    for (int j = lo[1]; j <= hi[1]; j++){
-      CD_PRAGMA_SIMD
-      for (int i = lo[0]; i <= hi[0]; i++){
-	func(IntVect(D_DECL(i,j,k)));
-      }
-    }
-#if CH_SPACEDIM==3      
-  }
-#endif
-}
-
-template <typename Functor>
-ALWAYS_INLINE
-void DataOps::loop(VoFIterator& vofit, Functor&& func){
-
-  // TLDR: This runs through all cells in the vof-iterator and calls the kernel. 
-  for (vofit.reset(); vofit.ok(); ++vofit){
-    func(vofit());
-  }
-}    
 
 template <typename T> void DataOps::setValue(LevelData<MFInterfaceFAB<T> >& a_lhs, const T& a_value){
   CH_TIME("DataOps::setValue");

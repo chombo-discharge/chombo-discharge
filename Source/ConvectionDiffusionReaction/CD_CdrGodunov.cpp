@@ -43,7 +43,6 @@ void CdrGodunov::parseOptions(){
   this->parsePlotMode();               // Parses plot mode
   this->parseMultigridSettings();      // Parses multigrid settings
   this->parseExtrapolateSourceTerm();  // Parses source term extrapolation for Godunov time extrapolation. 
-  this->parseRngSeed();                // Creates a seed (if one runs with FHD). 
   this->parseDivergenceComputation();  // Parses non-conservative divergence blending
 }
 
@@ -98,7 +97,6 @@ void CdrGodunov::allocateInternals(){
   // Allocate levelAdvect only if the solver is mobile. See Chombo design docs for how the EBAdvectLevelIntegrator operates. 
   if(m_isMobile){
     const Vector<RefCountedPtr<EBLevelGrid> >& eblgs = m_amr->getEBLevelGrid(m_realm, m_phase);
-    const Vector<DisjointBoxLayout>& grids           = m_amr->getGrids(m_realm);
     const Vector<int>& refRatios                     = m_amr->getRefinementRatios();
     const Vector<Real>& dx                           = m_amr->getDx();
     const int finestLevel                            = m_amr->getFinestLevel();
@@ -153,9 +151,6 @@ void CdrGodunov::advectToFaces(EBAMRFluxData& a_facePhi, const EBAMRCellData& a_
   // This code extrapolates the cell-centered state to face centers on every grid level, in both space and time. 
   for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
     const DisjointBoxLayout& dbl = m_amr->getGrids(m_realm)[lvl];
-    const EBISLayout& ebisl      = m_amr->getEBISLayout(m_realm, m_phase)[lvl];
-    const ProblemDomain& domain  = m_amr->getDomains()[lvl];
-    const Real dx                = m_amr->getDx()[lvl];
 
     for (DataIterator dit(dbl); dit.ok(); ++dit){
       EBFluxFAB&       facePhi = (*a_facePhi     [lvl])[dit()];

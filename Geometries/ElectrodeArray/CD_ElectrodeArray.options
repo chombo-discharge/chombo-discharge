@@ -1,5 +1,5 @@
-# ----------------------------------------------------------------------------------------------------
-# ELECTRODE_ARRAY CLASS OPTIONS. 
+# ====================================================================================================
+# ElectrodeArray geometry class options. 
 # 
 # The endpoint1 and endpoint2 arguments indicate the one of the corners of the electrode array. Use
 # num_x, num_y, and the spacings delta_x and delta_y to adjust the number of electrodes. Everything
@@ -7,8 +7,8 @@
 #
 # In 3D, the electrodes are moved in the positive x and y directions only.
 #
-# In 2D, the electrodes are moved in the x-direction only and 'num_y' and 'delta_y' are not used. 
-# ----------------------------------------------------------------------------------------------------
+# In 2D, the electrodes are moved in the x-direction only and 'num_y' and 'delta_y' are not used.
+# ====================================================================================================
 ElectrodeArray.live      = 1             # Live voltage (1) or not (0)
 ElectrodeArray.radius    = 0.1           # Radius 
 ElectrodeArray.endpoint1 = 0 0 0         # One endpoint for first electrode

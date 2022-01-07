@@ -91,8 +91,6 @@ VoFStencil LeastSquares::getGradSten(const FaceIndex&   a_face,
   VoFStencil gradSten;
 
   if(!a_face.isBoundary()){
-    const int faceDir = a_face.direction();
-
     const VolIndex vofLo = a_face.getVoF(Side::Lo);
     const VolIndex vofHi = a_face.getVoF(Side::Hi);
 
@@ -479,7 +477,6 @@ std::map<IntVect, VoFStencil> LeastSquares::computeSingleLevelStencils(const Int
       for (IVSIterator ivsIt(a_derivs); ivsIt.ok(); ++ivsIt){
 	const IntVect deriv = ivsIt();
 
-	int irow;
 	if(rowMap.find(ivsIt()) != rowMap.end()){
 	  row = rowMap.at(ivsIt());
 	}

@@ -16,13 +16,13 @@
 using namespace Physics::Geometry;
 
 GeometryStepper::GeometryStepper(){}
-GeometryStepper::~GeometryStepper(){};
+GeometryStepper::~GeometryStepper(){}
 
-void GeometryStepper::setupSolvers() {};
-void GeometryStepper::allocate() {};
-void GeometryStepper::initialData() {};
-void GeometryStepper::postInitialize() {};
-void GeometryStepper::postCheckpointSetup() {};
+void GeometryStepper::setupSolvers() {}
+void GeometryStepper::allocate() {}
+void GeometryStepper::initialData() {}
+void GeometryStepper::postInitialize() {}
+void GeometryStepper::postCheckpointSetup() {}
 void GeometryStepper::registerRealms(){}
 void GeometryStepper::registerOperators(){}
 #ifdef CH_USE_HDF5

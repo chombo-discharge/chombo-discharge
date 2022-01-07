@@ -48,7 +48,7 @@ public:
   /*!
     @brief Destructor
   */
-  ~CentroidInterpolationStencil();
+  virtual ~CentroidInterpolationStencil();
   
 protected:
   

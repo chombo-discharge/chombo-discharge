@@ -16,6 +16,7 @@
 #include <CD_MFHelmholtzRobinEBBC.H>
 #include <CD_VofUtils.H>
 #include <CD_LeastSquares.H>
+#include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
 MFHelmholtzRobinEBBC::MFHelmholtzRobinEBBC(const int a_phase, const RefCountedPtr<MFHelmholtzJumpBC>& a_jumpBC) : MFHelmholtzEBBC(a_phase, a_jumpBC) {
@@ -95,8 +96,6 @@ void MFHelmholtzRobinEBBC::defineSinglePhase() {
   for (DataIterator dit(dbl); dit.ok(); ++dit){
     const Box box          = dbl[dit()];
     const EBISBox& ebisbox = m_eblg.getEBISL()[dit()];
-    const EBGraph& ebgraph = ebisbox.getEBGraph();
-    const IntVectSet& ivs  = ebisbox.getIrregIVS(box);
 
     BaseIVFAB<Real>&       weights  = m_boundaryWeights [dit()];
     BaseIVFAB<VoFStencil>& stencils = m_kappaDivFStencils[dit()];
@@ -104,8 +103,8 @@ void MFHelmholtzRobinEBBC::defineSinglePhase() {
 
     // Build interpolation stencils. 
     VoFIterator& singlePhaseVofs = m_jumpBC->getSinglePhaseVofs(m_phase, dit());
-    for (singlePhaseVofs.reset(); singlePhaseVofs.ok(); ++singlePhaseVofs){
-      const VolIndex& vof = singlePhaseVofs();
+
+    auto kernel = [&] (const VolIndex& vof) -> void {
       const Real areaFrac = ebisbox.bndryArea(vof);
       const Real helmBco  = (*m_Bcoef)[dit()](vof, m_comp);
 
@@ -155,6 +154,12 @@ void MFHelmholtzRobinEBBC::defineSinglePhase() {
 	  A = m_functionA(pos);
 	  B = m_functionB(pos);
 	}
+	else{
+	  A = 0.0;
+	  B = 0.0;
+
+	  MayDay::Error("MFHelmholtzRobinEBBC::defineSinglePhase - logic bust");
+	}	
 
 	// The normal derivative is dphi/dn = (A*phi - C)/B and the (stencil) flux is
 	// kappaDivF = area*b*dphidn/Delta x. Scale accordingly.
@@ -168,7 +173,9 @@ void MFHelmholtzRobinEBBC::defineSinglePhase() {
       else{ // Dead cell
 	fluxStencil.clear();
       }
-    }
+    };
+
+    BoxLoops::loop(singlePhaseVofs, kernel);
   }
 }
 
@@ -183,9 +190,7 @@ void MFHelmholtzRobinEBBC::applyEBFluxSinglePhase(VoFIterator&       a_singlePha
   //       the term b*A*phi/B in the interpolation stencil and return it to the operator. The other term we compute below.
 
   if(!a_homogeneousPhysBC){  
-    for (a_singlePhaseVofs.reset(); a_singlePhaseVofs.ok(); ++a_singlePhaseVofs){
-      const VolIndex& vof = a_singlePhaseVofs();
-
+    auto kernel = [&] (const VolIndex& vof) -> void {
       Real B;
       Real C;
       if(m_useConstant){
@@ -197,6 +202,12 @@ void MFHelmholtzRobinEBBC::applyEBFluxSinglePhase(VoFIterator&       a_singlePha
 	B = m_functionB(pos);
 	C = m_functionC(pos);
       }
+      else{
+	B = 0.0;
+	C = 0.0;
+
+	MayDay::Error("MFHelmholtzRobinEBBC::applyEBFluxSinglePhase - logic bust");
+      }
 
       const EBISBox& ebisbox = m_eblg.getEBISL()[a_dit];
       const Real areaFrac    = ebisbox.bndryArea(vof);
@@ -206,7 +217,9 @@ void MFHelmholtzRobinEBBC::applyEBFluxSinglePhase(VoFIterator&       a_singlePha
       if(std::abs(B) > 0.0){
 	a_Lphi(vof, m_comp) += kappaDivF;
       }
-    }
+    };
+
+    BoxLoops::loop(a_singlePhaseVofs, kernel);
   }
 
   

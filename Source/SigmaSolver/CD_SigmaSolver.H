@@ -33,7 +33,7 @@ public:
   /*!
     @brief Destructor (does nothing).
   */
-  ~SigmaSolver();
+  virtual ~SigmaSolver();
 
   /*!
     @brief Get the realm where the solver is registered.

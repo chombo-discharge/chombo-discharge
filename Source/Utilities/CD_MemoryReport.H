@@ -45,7 +45,7 @@ namespace MemoryReport {
     @param[in]  a_unfreed Unfreed memory usage
   */
   void getMemoryUsage(Vector<Real>& a_peak, Vector<Real>& a_unfreed);
-};
+}
 
 #include <CD_NamespaceFooter.H>
 
