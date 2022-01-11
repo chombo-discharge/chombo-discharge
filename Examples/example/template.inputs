@@ -214,8 +214,8 @@ CdrPlasmaGodunovStepper.debug            = false     # Turn on debugging message
 
 
 # ====================================================================================================
-# CdrPlasmaGenericModel class options
+# CdrPlasmaJSON class options
 # ====================================================================================================
-CdrPlasmaGenericModel.verbose        = true
-CdrPlasmaGenericModel.chemistry_file = test.json
+CdrPlasmaJSON.verbose        = true
+CdrPlasmaJSON.chemistry_file = test.json
 

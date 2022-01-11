@@ -156,6 +156,8 @@ void RtLayout<T>::setPhase(phase::which_phase a_phase){
     pout() << "RtLayout<T>::setPhase" << endl;
   }
 
+  m_phase = a_phase;
+
   for (RtIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
     RefCountedPtr<T>& solver = solver_it();
     solver->setPhase(a_phase);
@@ -334,13 +336,7 @@ phase::which_phase RtLayout<T>::getPhase(){
     pout() << "RtLayout<T>::getPhase" << endl;
   }
 
-  phase::which_phase p;
-  for (RtIterator<T> solver_it = this->iterator(); solver_it.ok(); ++solver_it){
-    RefCountedPtr<T>& solver = solver_it();
-    p = solver->getPhase();
-  }
-
-  return p;
+  return m_phase;
 }
 
 template <class T>

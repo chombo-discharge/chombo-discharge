@@ -29,9 +29,14 @@ CdrPlasmaJSON::CdrPlasmaJSON(){
   this->parseOptions();
   this->parseJSON();
   this->instantiateCdrSpecies();
+  this->initializeSigma();
 
   // Populate the stuff that is needed by CdrPlasmaPhysics
+  m_RtSpecies.resize(0);
   m_CdrSpecies = m_trackedCdrSpecies;
+
+  m_numCdrSpecies = m_CdrSpecies.size();
+  m_numRtSpecies  = 0;
   
 }
 
@@ -245,71 +250,93 @@ void CdrPlasmaJSON::initializeSigma() {
 
 Real CdrPlasmaJSON::computeAlpha(const RealVect a_E) const {
   MayDay::Warning("CdrPlasmaJSON::computeAlpha -- don't know how to do this yet");
+
+  return 0.0;
 }
 
 void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
-						   Vector<Real>&          a_rteSources,
-						   const Vector<Real>     a_cdrDensities,
-						   const Vector<RealVect> a_cdrGradients,
-						   const Vector<Real>     a_rteDensities,
-						   const RealVect         a_E,
-						   const RealVect         a_pos,
-						   const Real             a_dx,
-						   const Real             a_dt,
-						   const Real             a_time,
-						   const Real             a_kappa) const {
-  MayDay::Warning("CdrPlasmaJSON::advanceReactionnetwork -- don't know how to do this yet");
+					   Vector<Real>&          a_rteSources,
+					   const Vector<Real>     a_cdrDensities,
+					   const Vector<RealVect> a_cdrGradients,
+					   const Vector<Real>     a_rteDensities,
+					   const RealVect         a_E,
+					   const RealVect         a_pos,
+					   const Real             a_dx,
+					   const Real             a_dt,
+					   const Real             a_time,
+					   const Real             a_kappa) const {
+  //  MayDay::Warning("CdrPlasmaJSON::advanceReactionnetwork -- don't know how to do this yet");
+
+  for (int i = 0; i < a_cdrSources.size(); i++){
+    a_cdrSources[i] = 0.0;
+  }
+
+  for (int i = 0; i < a_rteSources.size(); i++){
+    a_rteSources[i] = 0.0;
+  }
+
+  return;
 }
 
 Vector<RealVect> CdrPlasmaJSON::computeCdrDriftVelocities(const Real         a_time,
-								  const RealVect     a_pos,
-								  const RealVect     a_E,
-								  const Vector<Real> a_cdrDensities) const {
-  MayDay::Warning("CdrPlasmaJSON::computeCdrDriftVelocities -- don't know how to do this yet");
+							  const RealVect     a_pos,
+							  const RealVect     a_E,
+							  const Vector<Real> a_cdrDensities) const {
+  //  MayDay::Warning("CdrPlasmaJSON::computeCdrDriftVelocities -- don't know how to do this yet");
+
+  return Vector<RealVect>(m_numCdrSpecies, RealVect::Zero);
 }
 
 Vector<Real> CdrPlasmaJSON::computeCdrDiffusionCoefficients(const Real         a_time,
-								    const RealVect     a_pos,
-								    const RealVect     a_E,
-								    const Vector<Real> a_cdrDensities) const {
-  MayDay::Warning("CdrPlasmaJSON::computeCdrDriftVelocities -- don't know how to do this yet");
+							    const RealVect     a_pos,
+							    const RealVect     a_E,
+							    const Vector<Real> a_cdrDensities) const {
+  //  MayDay::Warning("CdrPlasmaJSON::computeDiffusionCoefficients -- don't know how to do this yet");
+
+  return Vector<Real>(m_numCdrSpecies, 0.0);
 }
 
 Vector<Real> CdrPlasmaJSON::computeCdrElectrodeFluxes(const Real         a_time,
-							      const RealVect     a_pos,
-							      const RealVect     a_normal,
-							      const RealVect     a_E,
-							      const Vector<Real> a_cdrDensities,
-							      const Vector<Real> a_cdrVelocities,
-							      const Vector<Real> a_cdrGradients,
-							      const Vector<Real> a_rteFluxeses,
-							      const Vector<Real> a_extrapCdrFluxes) const {
-  MayDay::Warning("CdrPlasmaJSON::computeCdrElectrodeFluxes -- don't know how to do this yet");
+						      const RealVect     a_pos,
+						      const RealVect     a_normal,
+						      const RealVect     a_E,
+						      const Vector<Real> a_cdrDensities,
+						      const Vector<Real> a_cdrVelocities,
+						      const Vector<Real> a_cdrGradients,
+						      const Vector<Real> a_rteFluxeses,
+						      const Vector<Real> a_extrapCdrFluxes) const {
+  //  MayDay::Warning("CdrPlasmaJSON::computeCdrElectrodeFluxes -- don't know how to do this yet");
+
+  return Vector<Real>(m_numCdrSpecies, 0.0);  
 }
 
 Vector<Real> CdrPlasmaJSON::computeCdrDielectricFluxes(const Real         a_time,
-							       const RealVect     a_pos,
-							       const RealVect     a_normal,
-							       const RealVect     a_E,
-							       const Vector<Real> a_cdrDensities,
-							       const Vector<Real> a_cdrVelocities,
-							       const Vector<Real> a_cdrGradients,
-							       const Vector<Real> a_rteFluxeses,
-							       const Vector<Real> a_extrapCdrFluxes) const {
-  MayDay::Warning("CdrPlasmaJSON::computeCdrDielectricFluxes -- don't know how to do this yet");
+						       const RealVect     a_pos,
+						       const RealVect     a_normal,
+						       const RealVect     a_E,
+						       const Vector<Real> a_cdrDensities,
+						       const Vector<Real> a_cdrVelocities,
+						       const Vector<Real> a_cdrGradients,
+						       const Vector<Real> a_rteFluxeses,
+						       const Vector<Real> a_extrapCdrFluxes) const {
+  //  MayDay::Warning("CdrPlasmaJSON::computeCdrDielectricFluxes -- don't know how to do this yet");
+
+  return Vector<Real>(m_numCdrSpecies, 0.0);    
 }
 
 Vector<Real> CdrPlasmaJSON::computeCdrDomainFluxes(const Real           a_time,
-							   const RealVect       a_pos,
-							   const int            a_dir,
-							   const Side::LoHiSide a_side,
-							   const RealVect       a_E,
-							   const Vector<Real>   a_cdrDensities,
-							   const Vector<Real>   a_cdrVelocities,
-							   const Vector<Real>   a_cdrGradients,
-							   const Vector<Real>   a_rteFluxeses,
-							   const Vector<Real>   a_extrapCdrFluxes) const {
-  MayDay::Warning("CdrPlasmaJSON::computeCdrDomainFluxes -- don't know how to do this yet");
+						   const RealVect       a_pos,
+						   const int            a_dir,
+						   const Side::LoHiSide a_side,
+						   const RealVect       a_E,
+						   const Vector<Real>   a_cdrDensities,
+						   const Vector<Real>   a_cdrVelocities,
+						   const Vector<Real>   a_cdrGradients,
+						   const Vector<Real>   a_rteFluxeses,
+						   const Vector<Real>   a_extrapCdrFluxes) const {
+  //  MayDay::Warning("CdrPlasmaJSON::computeCdrDomainFluxes -- don't know how to do this yet");
+  
+  return Vector<Real>(m_numCdrSpecies, 0.0);      
 }
 
 Real CdrPlasmaJSON::initialSigma(const Real a_time, const RealVect a_pos) const {
