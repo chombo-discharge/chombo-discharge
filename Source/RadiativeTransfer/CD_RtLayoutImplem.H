@@ -328,8 +328,8 @@ bool RtLayout<T>::isStationary(){
 
   return stationary;
 }
-template <class T>
 
+template <class T>
 phase::which_phase RtLayout<T>::getPhase(){
   CH_TIME("RtLayout<T>::getPhase");
   if(m_verbosity > 5){
