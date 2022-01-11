@@ -73,6 +73,7 @@ namespace Physics {
       virtual int getNumberOfPlotVariables() const;
       virtual void writePlotData(EBAMRCellData& a_output, Vector<std::string>& a_plotVariableNames, int& a_icomp) const;
       virtual void writeJ(EBAMRCellData& a_output, int& a_comp) const;
+      virtual void writePhysics(EBAMRCellData& a_output, int& a_comp) const;      
       virtual void postCheckpointSetup();
       virtual void printStepReport() override;
       virtual void registerOperators() override;

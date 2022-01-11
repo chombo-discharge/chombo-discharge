@@ -21,6 +21,7 @@
 #include <CD_RtIterator.H>
 #include <CD_Units.H>
 #include <CD_Timer.H>
+#include <CD_BoxLoops.H>
 #include <CD_NamespaceHeader.H>
 
 // C-style VLA methods can have occasional memory issues. Use them at your own peril. 
@@ -4429,6 +4430,9 @@ int CdrPlasmaStepper::getNumberOfPlotVariables() const{
   ncomp += m_sigma->getNumberOfPlotVariables();
   ncomp += SpaceDim; // For plotting the current density
 
+  // CdrPlasmaPhysics plotting
+  ncomp += m_physics->getNumberOfPlotVariables();
+
   return ncomp;
 }
 
@@ -4467,7 +4471,10 @@ void CdrPlasmaStepper::writePlotData(EBAMRCellData& a_output, Vector<std::string
   if(SpaceDim == 3){
     a_plotVariableNames.push_back("z-J");
   }
-  
+
+  // Physics writes to output as well.
+  a_plotVariableNames.append(m_physics->getPlotVariableNames());
+  this->writePhysics(a_output, a_icomp);
 }
 
 void CdrPlasmaStepper::writeJ(EBAMRCellData& a_output, int& a_icomp) const{
@@ -4487,6 +4494,58 @@ void CdrPlasmaStepper::writeJ(EBAMRCellData& a_output, int& a_icomp) const{
     scratch[lvl]->localCopyTo(src_interv, *a_output[lvl], dst_interv);
   }
   a_icomp += SpaceDim;
+}
+
+void CdrPlasmaStepper::writePhysics(EBAMRCellData& a_output, int& a_icomp) const{
+  CH_TIME("CdrPlasmaStepper::writePhysics");
+  if(m_verbosity > 3){
+    pout() << "CdrPlasmaStepper::writePhysics" << endl;
+  }
+
+  const int numVars = m_physics->getNumberOfPlotVariables();
+
+  if(numVars > 0){
+
+    EBAMRCellData scratch;
+    m_amr->allocate(scratch, m_realm, phase::gas, numVars);
+    DataOps::setValue(scratch, 0.0);
+
+    const RealVect probLo = m_amr->getProbLo();
+
+    // Write data to scratch data holder. 
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+      const DisjointBoxLayout& dbl   = m_amr->getGrids     (m_realm            )[lvl];
+      const EBISLayout&        ebisl = m_amr->getEBISLayout(m_realm, phase::gas)[lvl];
+      const Real               dx    = m_amr->getDx()[lvl];
+
+      for (DataIterator dit(dbl); dit.ok(); ++dit){
+	const Box&     cellBox = dbl  [dit()];
+	const EBISBox& ebisBox = ebisl[dit()];
+      
+
+	BaseFab<Real>& regularData = (*scratch[lvl])[dit()].getSingleValuedFAB();
+      
+	auto regularKernel = [&] (const IntVect& iv) -> void {
+	  const RealVect position = probLo + (0.5*RealVect::Unit + RealVect(iv))*dx;
+
+	  const Vector<Real> plotVars = m_physics->getPlotVariables(position, m_time);
+
+	  for (int icomp = 0; icomp < numVars; icomp++){
+	    regularData(iv, icomp) = plotVars[icomp];
+	  }
+	};
+
+	BoxLoops::loop(cellBox, regularKernel);
+      }
+    }
+
+    // Copy data to output data holder. 
+    const Interval srcInterv(0, numVars-1);
+    const Interval dstInterv(a_icomp, a_icomp + numVars -1);
+    for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
+      scratch[lvl]->localCopyTo(srcInterv, *a_output[lvl], dstInterv);
+    }    
+  }
 }
 
 void CdrPlasmaStepper::postCheckpointSetup(){

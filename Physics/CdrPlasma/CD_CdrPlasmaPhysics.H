@@ -45,6 +45,31 @@ namespace Physics {
       virtual ~CdrPlasmaPhysics(){}
 
       /*!
+	@brief Get number of plot variables for this physics class. 
+	@details This is used by CdrPlasmaStepper for pre-allocating data that will be put in a plot file. 
+      */
+      virtual int getNumberOfPlotVariables() const {
+	return 0;
+      }
+
+      /*!
+	@brief Get plot variable names. The names and positions between this routine and getPlotVariables must be consistent!
+      */
+      virtual Vector<std::string> getPlotVariableNames() const {
+	return Vector<std::string>(this->getNumberOfPlotVariables(), std::string("empty data"));
+      }
+
+      /*!
+	@brief Provide plot variables. This is used by CdrPlasmaStepper when writing plot files. 
+	@details The plot variables should have length this->getNumberOfPlotVariables (as should getPlotVariableNames)
+	@param[in] a_position Physical coordinates
+	@param[in] a_time     Time. 
+      */
+      virtual Vector<Real> getPlotVariables(const RealVect a_position, const Real a_time) const {
+	return Vector<Real> (this->getNumberOfPlotVariables(), 1.0);
+      }
+
+      /*!
 	@brief Compute alpha. 
 	@details This function is mostly used for the cell tagging classes
       */
