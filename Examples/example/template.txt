@@ -1,0 +1,14 @@
+species: e N2 O2+
+
+photons: uv1 uv2
+
+e:
+   Z: -1
+   diffusive: false
+   mobile: false
+
+N2 {
+
+}
+
+photons: uv1 uv2

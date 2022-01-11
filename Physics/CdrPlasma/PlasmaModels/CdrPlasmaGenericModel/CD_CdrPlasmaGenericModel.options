@@ -1,0 +1,5 @@
+# ====================================================================================================
+# CdrPlasmaGenericModel class options
+# ====================================================================================================
+CdrPlasmaGenericModel.verbose        = true
+CdrPlasmaGenericModel.chemistry_file = test.json

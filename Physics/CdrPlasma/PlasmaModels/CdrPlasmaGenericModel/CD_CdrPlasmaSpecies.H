@@ -1,0 +1,125 @@
+/* chombo-discharge
+ * Copyright © 2021 SINTEF Energy Research.
+ * Please refer to Copyright.txt and LICENSE in the chombo-discharge root directory.
+ */
+
+/*!
+  @file   CD_CdrPlasmaSpecies.H
+  @brief  Declaration of a class that encapsulates a species reaction. 
+  @author Robert Marskar
+*/
+
+#ifndef CD_CdrPlasmaSpecies_H
+#define CD_CdrPlasmaSpecies_H
+
+// Std includes
+#include <list>
+
+// Chombo includes
+#include <RealVect.H>
+
+// Our includes
+#include <CD_CdrSpecies.H>
+#include <CD_NamespaceHeader.H>
+
+namespace Physics {
+  namespace CdrPlasma {
+
+    /*!
+      @brief Encapsulation of species settings and initial conditiosn for use with CdrPlasma. This is for tracked species.
+    */
+    class CdrPlasmaSpecies : public CdrSpecies {
+    public:
+
+      /*!
+	@brief Alias for initial data function
+      */
+      using InitFunction = std::function<Real(const RealVect a_pos, const Real a_time)>;
+
+      /*!
+	@brief Disallowed constructor.
+      */
+      CdrPlasmaSpecies() = default;
+
+      /*!
+	@brief Full constructor. Calls the define function. 
+	@param[in] a_name        Species name
+	@param[in] a_Z           Charge number
+	@param[in] a_mobile      Mobile species or not
+	@param[in] a_diffusive   Diffusive species or not
+	@param[in] a_initialData Initial data function
+      */
+      CdrPlasmaSpecies(const std::string  a_name,
+		       const int          a_Z,
+		       const bool         a_diffusive,
+		       const bool         a_mobile,
+		       const InitFunction a_initialData);      
+
+      /*!
+	@brief Disallowed constructor.
+	@param[in] a_other Other species
+      */
+      CdrPlasmaSpecies(const CdrPlasmaSpecies& a_other) = delete;
+
+      /*!
+	@brief Disallowed move constructor.
+	@param[in] a_other Other species
+      */
+      CdrPlasmaSpecies(const CdrPlasmaSpecies&& a_other) = delete;
+
+      /*!
+	@brief Disallowed copy assignment. 
+	@param[in] a_other Other species
+      */
+      CdrPlasmaSpecies& operator=(const CdrPlasmaSpecies& a_other) = delete;
+
+      /*!
+	@brief Disallowed move assignment
+	@param[in] a_other Other species
+      */
+      CdrPlasmaSpecies& operator=(const CdrPlasmaSpecies&& a_other) = delete;
+
+      /*!
+	@brief Destructor
+      */
+      virtual ~CdrPlasmaSpecies();
+
+      /*!
+	@brief Full constructor. Calls the define function. 
+	@param[in] a_name        Species name
+	@param[in] a_Z           Charge number
+	@param[in] a_mobile      Mobile species or not
+	@param[in] a_diffusive   Diffusive species or not
+	@param[in] a_initialData Initial data function
+      */
+      void define(const std::string  a_name,
+		  const int          a_Z,
+		  const bool         a_diffusive,
+		  const bool         a_mobile,
+		  const InitFunction a_initialData);                  
+
+      /*!
+	@brief Initial data function. 
+	@param[in] a_pos  Physical coordinates 
+	@param[in] a_time Time
+      */
+      Real initialData(const RealVect a_pos, const Real a_time) const override final;
+      
+    protected:
+
+      /*!
+	@brief Make sure model has initial data
+      */
+      bool m_isDefined;
+
+      /*!
+	@brief Initial data function. Set by CdrPlasmaGenericModel
+      */
+      InitFunction m_initFunction;
+    };
+  }
+}
+  
+#include <CD_NamespaceFooter.H>
+
+#endif

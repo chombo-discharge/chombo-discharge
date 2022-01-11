@@ -1,3 +1,6 @@
 [submodule "Chombo-3.3"]
-	path = Chombo-3.3
+	path = Submodules/Chombo-3.3
 	url = https://github.com/chombo-discharge/Chombo-3.3
+[submodule "json"]
+	path = Submodules/json
+	url = https://github.com/nlohmann/json
