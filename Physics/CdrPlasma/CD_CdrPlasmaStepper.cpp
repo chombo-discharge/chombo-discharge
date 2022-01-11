@@ -2851,7 +2851,7 @@ void CdrPlasmaStepper::computeCdrDiffusion(const EBAMRCellData& a_E_cell, const 
   }
 }
 
-void CdrPlasmaStepper::computeElectricField(MFAMRCellData& a_E, const MFAMRCellData& a_potential){
+void CdrPlasmaStepper::computeElectricField(MFAMRCellData& a_E, const MFAMRCellData& a_potential) const {
   CH_TIME("CdrPlasmaStepper::computeElectricField(mfamrcell, mfamrcell)");
   if(m_verbosity > 5){
     pout() << "CdrPlasmaStepper::computeElectricField(mfamrcell, mfamrcell)" << endl;
@@ -2863,7 +2863,7 @@ void CdrPlasmaStepper::computeElectricField(MFAMRCellData& a_E, const MFAMRCellD
   m_amr->interpGhostMG(a_E, m_realm);
 }
 
-void CdrPlasmaStepper::computeElectricField(EBAMRCellData& a_E, const phase::which_phase a_phase){
+void CdrPlasmaStepper::computeElectricField(EBAMRCellData& a_E, const phase::which_phase a_phase) const {
   CH_TIME("CdrPlasmaStepper::computeElectricField(ebamrcell, phase)");
   if(m_verbosity > 5){
     pout() << "CdrPlasmaStepper::computeElectricField(ebamrcell, phase)" << endl;
@@ -2872,7 +2872,7 @@ void CdrPlasmaStepper::computeElectricField(EBAMRCellData& a_E, const phase::whi
   this->computeElectricField(a_E, a_phase, m_fieldSolver->getPotential());
 }
 
-void CdrPlasmaStepper::computeElectricField(EBAMRCellData& a_E, const phase::which_phase a_phase, const MFAMRCellData& a_potential){
+void CdrPlasmaStepper::computeElectricField(EBAMRCellData& a_E, const phase::which_phase a_phase, const MFAMRCellData& a_potential) const {
   CH_TIME("CdrPlasmaStepper::computeElectricField(ebamrcell, phase, mfamrcell)");
   if(m_verbosity > 5){
     pout() << "CdrPlasmaStepper::computeElectricField(ebamrcell, phase, mfamrcell)" << endl;
@@ -2884,7 +2884,7 @@ void CdrPlasmaStepper::computeElectricField(EBAMRCellData& a_E, const phase::whi
   m_amr->interpGhostMG(a_E, m_realm, a_phase);
 }
 
-void CdrPlasmaStepper::computeElectricField(EBAMRFluxData& a_E_face, const phase::which_phase a_phase, const EBAMRCellData& a_E_cell){
+void CdrPlasmaStepper::computeElectricField(EBAMRFluxData& a_E_face, const phase::which_phase a_phase, const EBAMRCellData& a_E_cell) const {
   CH_TIME("CdrPlasmaStepper::computeElectricField(ebamrflux, phase, ebamrcell)");
   if(m_verbosity > 5){
     pout() << "CdrPlasmaStepper::computeElectricField(ebamrflux, phase, ebamrcell)" << endl;
@@ -2927,7 +2927,7 @@ void CdrPlasmaStepper::computeElectricField(EBAMRFluxData& a_E_face, const phase
   }
 }
 
-void CdrPlasmaStepper::computeElectricField(EBAMRIVData& a_E_eb, const phase::which_phase a_phase, const EBAMRCellData& a_E_cell){
+void CdrPlasmaStepper::computeElectricField(EBAMRIVData& a_E_eb, const phase::which_phase a_phase, const EBAMRCellData& a_E_cell) const {
   CH_TIME("CdrPlasmaStepper::computeElectricField(ebamriv, phase, ebamrcell)");
   if(m_verbosity > 5){
     pout() << "CdrPlasmaStepper::computeElectricField(ebamriv, phase, ebamrcell)" << endl;
@@ -4496,7 +4496,7 @@ void CdrPlasmaStepper::writeJ(EBAMRCellData& a_output, int& a_icomp) const{
   a_icomp += SpaceDim;
 }
 
-void CdrPlasmaStepper::writePhysics(EBAMRCellData& a_output, int& a_icomp) const{
+void CdrPlasmaStepper::writePhysics(EBAMRCellData& a_output, int& a_icomp) const {
   CH_TIME("CdrPlasmaStepper::writePhysics");
   if(m_verbosity > 3){
     pout() << "CdrPlasmaStepper::writePhysics" << endl;
@@ -4506,11 +4506,25 @@ void CdrPlasmaStepper::writePhysics(EBAMRCellData& a_output, int& a_icomp) const
 
   if(numVars > 0){
 
+    // Compute the electric field
+    EBAMRCellData E;
+    m_amr->allocate(E, m_realm, phase::gas, SpaceDim);
+    this->computeElectricField(E, m_cdr->getPhase(), m_fieldSolver->getPotential());    
+
+    // Scratch storage
     EBAMRCellData scratch;
     m_amr->allocate(scratch, m_realm, phase::gas, numVars);
     DataOps::setValue(scratch, 0.0);
 
+    // Lower-left corner -- physical coordinates.
     const RealVect probLo = m_amr->getProbLo();
+
+    // CDR and RTE densities
+    const Vector<EBAMRCellData*> cdrDensities = m_cdr->getPhis();
+    const Vector<EBAMRCellData*> rteDensities = m_rte->getPhis();
+
+    Vector<Real> localCdrDensities(cdrDensities.size());
+    Vector<Real> localRteDensities(rteDensities.size());
 
     // Write data to scratch data holder. 
     for (int lvl = 0; lvl <= m_amr->getFinestLevel(); lvl++){
@@ -4528,7 +4542,19 @@ void CdrPlasmaStepper::writePhysics(EBAMRCellData& a_output, int& a_icomp) const
 	auto regularKernel = [&] (const IntVect& iv) -> void {
 	  const RealVect position = probLo + (0.5*RealVect::Unit + RealVect(iv))*dx;
 
-	  const Vector<Real> plotVars = m_physics->getPlotVariables(position, m_time);
+	  const RealVect localE = RealVect(D_DECL((*E[lvl])[dit()].getSingleValuedFAB()(iv, 0),
+						  (*E[lvl])[dit()].getSingleValuedFAB()(iv, 1),
+						  (*E[lvl])[dit()].getSingleValuedFAB()(iv, 2)));
+
+	  for (int i = 0; i < cdrDensities.size(); i++){
+	    localCdrDensities[i] = (*(*cdrDensities[i])[lvl])[dit()].getSingleValuedFAB()(iv, 0);
+	  }
+
+	  for (int i = 0; i < rteDensities.size(); i++){
+	    localRteDensities[i] = (*(*rteDensities[i])[lvl])[dit()].getSingleValuedFAB()(iv, 0);
+	  }	  
+
+	  const Vector<Real> plotVars = m_physics->getPlotVariables(localCdrDensities, localRteDensities, localE, position, m_time);
 
 	  for (int icomp = 0; icomp < numVars; icomp++){
 	    regularData(iv, icomp) = plotVars[icomp];

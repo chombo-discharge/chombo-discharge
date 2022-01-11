@@ -248,6 +248,22 @@ void CdrPlasmaJSON::initializeSigma() {
   }
 }
 
+int CdrPlasmaJSON::getNumberOfPlotVariables() const {
+  return 0;
+}
+
+Vector<std::string> CdrPlasmaJSON::getPlotVariableNames() const {
+  return Vector<std::string>(0);
+}
+
+Vector<Real> CdrPlasmaJSON::getPlotVariables(const Vector<Real> a_cdrDensities,
+					     const Vector<Real> a_rteDensities,
+					     const RealVect     a_E,
+					     const RealVect     a_position,
+					     const Real         a_time) const {
+  return Vector<Real>(0);
+}
+
 Real CdrPlasmaJSON::computeAlpha(const RealVect a_E) const {
   MayDay::Warning("CdrPlasmaJSON::computeAlpha -- don't know how to do this yet");
 

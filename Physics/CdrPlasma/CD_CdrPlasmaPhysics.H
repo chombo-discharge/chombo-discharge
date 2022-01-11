@@ -65,7 +65,11 @@ namespace Physics {
 	@param[in] a_position Physical coordinates
 	@param[in] a_time     Time. 
       */
-      virtual Vector<Real> getPlotVariables(const RealVect a_position, const Real a_time) const {
+      virtual Vector<Real> getPlotVariables(const Vector<Real> a_cdrDensities,
+					    const Vector<Real> a_rteDensities,
+					    const RealVect     a_E,
+					    const RealVect     a_position,
+					    const Real         a_time) const {
 	return Vector<Real> (this->getNumberOfPlotVariables(), 1.0);
       }
 

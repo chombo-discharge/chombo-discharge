@@ -40,6 +40,31 @@ namespace Physics {
       virtual ~CdrPlasmaJSON();
 
       /*!
+	@brief Get number of plot variables for this physics class. 
+	@details This is used by CdrPlasmaStepper for pre-allocating data that will be put in a plot file. 
+      */
+      virtual int getNumberOfPlotVariables() const override;
+
+      /*!
+	@brief Get plot variable names. The names and positions between this routine and getPlotVariables must be consistent!
+      */
+      virtual Vector<std::string> getPlotVariableNames() const override;
+
+      /*!
+	@brief Provide plot variables. This is used by CdrPlasmaStepper when writing plot files. 
+	@details The plot variables should have length this->getNumberOfPlotVariables (as should getPlotVariableNames)
+	@param[in] a_cdrDensities CDR densities
+	@param[in] a_rteDensities RTE densities
+	@param[in] a_position     Physical coordinates
+	@param[in] a_time         Time. 
+      */
+      virtual Vector<Real> getPlotVariables(const Vector<Real> a_cdrDensities,
+					    const Vector<Real> a_rteDensities,
+					    const RealVect     a_E,
+					    const RealVect     a_position,
+					    const Real         a_time) const override;
+
+      /*!
 	@brief Compute alpha. Should return Townsend ionization coefficient. 
 	@details This function is mostly used for the cell tagging classes
 	@param[in] a_E Electric field.
