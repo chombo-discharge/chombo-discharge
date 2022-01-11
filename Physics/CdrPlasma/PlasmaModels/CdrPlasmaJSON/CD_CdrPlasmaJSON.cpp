@@ -278,7 +278,7 @@ Vector<std::string> CdrPlasmaJSON::getPlotVariableNames() const {
 
   for (const auto& plotCdr : m_plotCdr){
     if(plotCdr.second){
-      ret.push_back(plotCdr.first + " density");
+      ret.push_back(plotCdr.first + " density (untracked)");
     }
   }
 
@@ -294,17 +294,21 @@ Vector<Real> CdrPlasmaJSON::getPlotVariables(const Vector<Real> a_cdrDensities,
 
   for (const auto & plotCdr : m_plotCdr){
     if(plotCdr.second){
-      const RefCountedPtr<CdrSpecies>& species = this->getUntrackedSpecies(plotCdr.first);
-
-      ret.push_back(species->initialData(a_position, a_time));
+      ret.push_back(this->getUntrackedCdrDensity(plotCdr.first, a_position, a_time));
     }
   }
   
   return ret;
 }
 
-const RefCountedPtr<CdrSpecies>& CdrPlasmaJSON::getUntrackedSpecies(const std::string a_name) const {
+const RefCountedPtr<CdrSpecies>& CdrPlasmaJSON::getUntrackedCdrSpecies(const std::string a_name) const {
   return m_untrackedCdrSpecies[m_untrackedCdrSpeciesMap.at(a_name)];
+}
+
+Real CdrPlasmaJSON::getUntrackedCdrDensity(const std::string& a_name, const RealVect& a_pos, const Real& a_time) const {
+  const RefCountedPtr<CdrSpecies>& species = this->getUntrackedCdrSpecies(a_name);
+  
+  return species->initialData(a_pos, a_time);
 }
 
 Real CdrPlasmaJSON::computeAlpha(const RealVect a_E) const {

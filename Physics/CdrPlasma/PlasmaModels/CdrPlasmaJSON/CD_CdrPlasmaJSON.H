@@ -271,7 +271,15 @@ namespace Physics {
 	@brief Get an untracked species. This will yield an error if you try to obtain a species which does not exist. 
 	@param[in] a_name Species name. 
       */
-      const RefCountedPtr<CdrSpecies>& getUntrackedSpecies(const std::string a_name) const;
+      const RefCountedPtr<CdrSpecies>& getUntrackedCdrSpecies(const std::string a_name) const;
+
+      /*!
+	@brief Get untracked species density
+	@param[in] a_name Untracked species name
+	@param[in] a_pos  Physical coordinates
+	@param[in] a_time Time
+      */
+      Real getUntrackedCdrDensity(const std::string& a_name, const RealVect& a_pos, const Real& a_time) const;
 
       /*!
 	@brief Parse class options
