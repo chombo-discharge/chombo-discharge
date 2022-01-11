@@ -49,7 +49,7 @@ void CdrPlasmaJSON::parseOptions() {
   
   ParmParse pp("CdrPlasmaJSON");
 
-  pp.get("verbose",        m_verbose);
+  pp.get("verbose",        m_verbose );
   pp.get("chemistry_file", m_jsonFile);
 }
 
@@ -79,6 +79,7 @@ void CdrPlasmaJSON::instantiateCdrSpecies() {
     bool        mobile      = false;
     bool        diffusive   = false;
     bool        hasInitData = false;
+    bool        plot        = false; // Irrelevant for tracked species
 
     std::function<Real(const RealVect, const Real)> initFunc = [](const RealVect, const Real) -> Real {
       return 0.0;
@@ -112,6 +113,14 @@ void CdrPlasmaJSON::instantiateCdrSpecies() {
       const std::string err = "CdrPlasmaJSON::instantiateSpecies -- field 'Z' is missing for species " + name;
       pout() << err << endl;
       MayDay::Error(err.c_str());
+    }
+
+    // Figure out if we should plot the species
+    if(species.contains("plot")){
+      plot = species["plot"].get<bool>();
+    }
+    else{
+      plot = false;
     }
 
     // Find whether or not the species is mobile. If it contains a mobility field, it must also contain the 'mobile' field. 
@@ -179,7 +188,7 @@ void CdrPlasmaJSON::instantiateCdrSpecies() {
 	if(data.contains("exp_falloff")){
 	  const Real     amplitude = data["exp_falloff"]["amplitude"].get<Real>();	  
 	  const Real     l         = data["exp_falloff"]["l"].        get<Real>();
-	  const Real     h0        = data["exp_falloff"]["h0"].        get<Real>();	  
+	  const Real     h0        = data["exp_falloff"]["h0"].       get<Real>();	  
 	  const RealVect axis      = RealVect(D_DECL(data["exp_falloff"]["axis"][0].get<Real>(),
 						     data["exp_falloff"]["axis"][1].get<Real>(),
 						     data["exp_falloff"]["axis"][2].get<Real>()));
@@ -215,14 +224,18 @@ void CdrPlasmaJSON::instantiateCdrSpecies() {
 
     // Instantiate the species.
     if(tracked){
-      m_trackedCdrSpeciesMap.emplace(std::make_pair(m_trackedCdrSpecies.size(), name));
+      m_trackedCdrSpeciesMap.emplace(std::make_pair(name, m_trackedCdrSpecies.size()));
       m_trackedCdrSpecies.emplace_back(RefCountedPtr<CdrSpecies> (new CdrSpeciesJSON(name, Z, diffusive, mobile, initFunc)));
-      m_trackedMap.emplace(std::make_pair(true, name));
+      m_trackedMap.emplace(std::make_pair(name, true));
+
+      m_plotCdr.emplace(std::make_pair(name, false));
     }
     else {
-      m_untrackedCdrSpeciesMap.emplace(std::make_pair(m_untrackedCdrSpecies.size(), name));
+      m_untrackedCdrSpeciesMap.emplace(std::make_pair(name, m_untrackedCdrSpecies.size()));
       m_untrackedCdrSpecies.emplace_back(RefCountedPtr<CdrSpecies> (new CdrSpeciesJSON(name, Z, false, false, initFunc)));
-      m_trackedMap.emplace(std::make_pair(false, name));      
+      m_trackedMap.emplace(std::make_pair(name, false));      
+
+      m_plotCdr.emplace(std::make_pair(name, plot));
     }
   }
 }
@@ -249,11 +262,27 @@ void CdrPlasmaJSON::initializeSigma() {
 }
 
 int CdrPlasmaJSON::getNumberOfPlotVariables() const {
-  return 0;
+  int ret = 0;
+
+  for (const auto& plotCdr : m_plotCdr){
+    if(plotCdr.second){
+      ret++;
+    }
+  }
+
+  return ret;
 }
 
 Vector<std::string> CdrPlasmaJSON::getPlotVariableNames() const {
-  return Vector<std::string>(0);
+  Vector<std::string> ret;
+
+  for (const auto& plotCdr : m_plotCdr){
+    if(plotCdr.second){
+      ret.push_back(plotCdr.first + " density");
+    }
+  }
+
+  return ret;
 }
 
 Vector<Real> CdrPlasmaJSON::getPlotVariables(const Vector<Real> a_cdrDensities,
@@ -261,7 +290,21 @@ Vector<Real> CdrPlasmaJSON::getPlotVariables(const Vector<Real> a_cdrDensities,
 					     const RealVect     a_E,
 					     const RealVect     a_position,
 					     const Real         a_time) const {
-  return Vector<Real>(0);
+  Vector<Real> ret;
+
+  for (const auto & plotCdr : m_plotCdr){
+    if(plotCdr.second){
+      const RefCountedPtr<CdrSpecies>& species = this->getUntrackedSpecies(plotCdr.first);
+
+      ret.push_back(species->initialData(a_position, a_time));
+    }
+  }
+  
+  return ret;
+}
+
+const RefCountedPtr<CdrSpecies>& CdrPlasmaJSON::getUntrackedSpecies(const std::string a_name) const {
+  return m_untrackedCdrSpecies[m_untrackedCdrSpeciesMap.at(a_name)];
 }
 
 Real CdrPlasmaJSON::computeAlpha(const RealVect a_E) const {

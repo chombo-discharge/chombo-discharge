@@ -12,6 +12,10 @@
 #ifndef CD_CdrPlasmaJSON_H
 #define CD_CdrPlasmaJSON_H
 
+// Std includes
+#include <map>
+#include <string>
+
 // Third-party includes
 #include <nlohmann/json.hpp>
 
@@ -26,6 +30,9 @@ using json = nlohmann::json;
 namespace Physics {
   namespace CdrPlasma {
 
+    /*!
+      @brief Class which implements CdrPlasmaPhysics and parses plasma chemistry from a JSON input file
+    */
     class CdrPlasmaJSON : public CdrPlasmaPhysics {
     public:
 
@@ -41,7 +48,8 @@ namespace Physics {
 
       /*!
 	@brief Get number of plot variables for this physics class. 
-	@details This is used by CdrPlasmaStepper for pre-allocating data that will be put in a plot file. 
+	@details This is used by CdrPlasmaStepper for pre-allocating data that will be put in a plot file. The CdrPlasmaJSON version will plot the untracked
+	species if the user adds "plot": true to the species
       */
       virtual int getNumberOfPlotVariables() const override;
 
@@ -216,33 +224,38 @@ namespace Physics {
       json m_json;
 
       /*!
+	@brief Input JSON file name
+      */
+      std::string m_jsonFile;      
+
+      /*!
 	@brief Initial surface charge
       */
       std::function<Real(const Real a_time, const RealVect a_pos) > m_initialSigma;
 
       /*!
-	@brief Input file name
-      */
-      std::string m_jsonFile;
-
-      /*!
 	@brief int-string encoding of the tracked species. 
 	@details This is needed because we sometimes need to use the species name for indexing in the vector. 
       */
-      std::map<int, std::string> m_trackedCdrSpeciesMap;
+      std::map<std::string, int> m_trackedCdrSpeciesMap;
 
       /*!
 	@brief int-string encoding of the untracked species. 
 	@details This is needed because we sometimes need to use the species name for indexing in the vector. 
       */
-      std::map<int, std::string> m_untrackedCdrSpeciesMap;
+      std::map<std::string, int> m_untrackedCdrSpeciesMap;
 
       /*!
 	@brief Map for checking if a species is tracked or not. It returns true if a species is tracked by a CDR solver. 
 	@details For given a species name we can check whether or not it is tracked through a CDR solver or just included parametrically. In reactions, this gives us
 	the opportunity to check if we should get the density through a CDR solver OR through an initial data function. 
       */
-      std::map<bool, std::string> m_trackedMap;
+      std::map<std::string, bool> m_trackedMap;
+
+      /*!
+	@brief Map over which species that will be plotted AND are not tracked. I.e. all the densities that are only parametrically defined. 
+      */
+      std::map<std::string, bool> m_plotCdr;
 
       /*!
 	@brief Tracked CDR species. Note that this is the one that is needed by CdrPlasmaPhysics, i.e. they become CdrSolvers. 
@@ -252,7 +265,13 @@ namespace Physics {
       /*!
 	@brief Untracked species. These do not become CdrSolvers. 
       */
-      std::vector<RefCountedPtr<CdrSpecies> > m_untrackedCdrSpecies;      
+      std::vector<RefCountedPtr<CdrSpecies> > m_untrackedCdrSpecies;
+
+      /*!
+	@brief Get an untracked species. This will yield an error if you try to obtain a species which does not exist. 
+	@param[in] a_name Species name. 
+      */
+      const RefCountedPtr<CdrSpecies>& getUntrackedSpecies(const std::string a_name) const;
 
       /*!
 	@brief Parse class options
