@@ -4,13 +4,13 @@
  */
 
 /*!
-  @file   CD_CdrPlasmaSpecies.H
-  @brief  Declaration of a class that encapsulates a species reaction. 
+  @file   CD_CdrSpeciesJSON.H
+  @brief  Declaration of a class that encapsulates a CDR species for use with CdrPlasmaJSON
   @author Robert Marskar
 */
 
-#ifndef CD_CdrPlasmaSpecies_H
-#define CD_CdrPlasmaSpecies_H
+#ifndef CD_CdrSpeciesJSON_H
+#define CD_CdrSpeciesJSON_H
 
 // Std includes
 #include <list>
@@ -28,7 +28,7 @@ namespace Physics {
     /*!
       @brief Encapsulation of species settings and initial conditiosn for use with CdrPlasma. This is for tracked species.
     */
-    class CdrPlasmaSpecies : public CdrSpecies {
+    class CdrSpeciesJSON : public CdrSpecies {
     public:
 
       /*!
@@ -39,7 +39,7 @@ namespace Physics {
       /*!
 	@brief Disallowed constructor.
       */
-      CdrPlasmaSpecies() = default;
+      CdrSpeciesJSON() = default;
 
       /*!
 	@brief Full constructor. Calls the define function. 
@@ -49,40 +49,40 @@ namespace Physics {
 	@param[in] a_diffusive   Diffusive species or not
 	@param[in] a_initialData Initial data function
       */
-      CdrPlasmaSpecies(const std::string  a_name,
-		       const int          a_Z,
-		       const bool         a_diffusive,
-		       const bool         a_mobile,
-		       const InitFunction a_initialData);      
+      CdrSpeciesJSON(const std::string  a_name,
+		     const int          a_Z,
+		     const bool         a_diffusive,
+		     const bool         a_mobile,
+		     const InitFunction a_initialData);      
 
       /*!
 	@brief Disallowed constructor.
 	@param[in] a_other Other species
       */
-      CdrPlasmaSpecies(const CdrPlasmaSpecies& a_other) = delete;
+      CdrSpeciesJSON(const CdrSpeciesJSON& a_other) = delete;
 
       /*!
 	@brief Disallowed move constructor.
 	@param[in] a_other Other species
       */
-      CdrPlasmaSpecies(const CdrPlasmaSpecies&& a_other) = delete;
+      CdrSpeciesJSON(const CdrSpeciesJSON&& a_other) = delete;
 
       /*!
 	@brief Disallowed copy assignment. 
 	@param[in] a_other Other species
       */
-      CdrPlasmaSpecies& operator=(const CdrPlasmaSpecies& a_other) = delete;
+      CdrSpeciesJSON& operator=(const CdrSpeciesJSON& a_other) = delete;
 
       /*!
 	@brief Disallowed move assignment
 	@param[in] a_other Other species
       */
-      CdrPlasmaSpecies& operator=(const CdrPlasmaSpecies&& a_other) = delete;
+      CdrSpeciesJSON& operator=(const CdrSpeciesJSON&& a_other) = delete;
 
       /*!
 	@brief Destructor
       */
-      virtual ~CdrPlasmaSpecies();
+      virtual ~CdrSpeciesJSON();
 
       /*!
 	@brief Full constructor. Calls the define function. 

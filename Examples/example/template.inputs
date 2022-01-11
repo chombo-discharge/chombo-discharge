@@ -1,8 +1,8 @@
 # ====================================================================================================
 # POTENTIAL CURVE
 # ====================================================================================================
-example.potential = 1
-example.basename  = pout
+example2.potential = 1
+example2.basename  = pout
 
 # ====================================================================================================
 # AmrMesh class options
@@ -172,8 +172,26 @@ GeoCoarsener.box1_lvl    = 0            # up to this level
 GeoCoarsener.box1_inv    = false        # Remove except inside box (true)
 
 # ====================================================================================================
-# REGULAR_GEOMETRY CLASS OPTIONS
+# Vessel geometry class options
+#
+# This class is a pin-mushroom type geometry commonly used in high-voltage pressure/vaccum
+# Vessel. It (currently) consists of a rod electrode and a "mushroom" flat plate electrode, set up
+# along +y/+z in 2D/3D
 # ====================================================================================================
+Vessel.use_rod       = true           # Rod is on/off
+Vessel.use_shroom    = true           # Plate is on/off
+
+Vessel.rod_point     = 0. 0. 0.5      # Rod center point
+Vessel.rod_radius    = 0.2            # Rod radius
+
+Vessel.shroom_point  = 0. 0. -0.5     # Mushroom center point
+Vessel.shroom_R      = 0.5            # Mushroom head radius
+Vessel.shroom_r      = 0.2            # Mushroom stem radius
+Vessel.shroom_d      = 0.2            # Mushroom head thickness
+Vessel.shroom_curv   = 0.05           # Mushroom corner curvatures
+
+Vessel.live_rod      = true           # Rod is live or not
+Vessel.live_shroom   = false          # Mushroom is live or not
 
 # ====================================================================================================
 # GODUNOV CLASS OPTIONS
@@ -200,19 +218,4 @@ CdrPlasmaGodunovStepper.debug            = false     # Turn on debugging message
 # ====================================================================================================
 CdrPlasmaGenericModel.verbose        = true
 CdrPlasmaGenericModel.chemistry_file = test.json
-
-# ====================================================================================================
-# STREAMER_TAGGER CLASS OPTIONS
-# ====================================================================================================
-CdrPlasmaStreamerTagger.verbosity         = -1           # Verbosity
-CdrPlasmaStreamerTagger.num_boxes         = 0            # Number of allowed tag boxes (0 = tags allowe everywhere)
-CdrPlasmaStreamerTagger.box1_lo           = 0.0 0.0 0.0  # Only allow tags that fall between
-CdrPlasmaStreamerTagger.box1_hi           = 0.0 0.0 0.0  # these two corners
-CdrPlasmaStreamerTagger.buffer            = 0            # Grow tagged cells
-
-CdrPlasmaStreamerTagger.refine_curvature  = 10.0         # Curvature refinement
-CdrPlasmaStreamerTagger.coarsen_curvature = 10.0         # Curvature coarsening	
-CdrPlasmaStreamerTagger.refine_alpha      = 2.0          # Set alpha refinement. Lower  => More mesh
-CdrPlasmaStreamerTagger.coarsen_alpha     = 0.1          # Set alpha coarsening. Higher => Less mesh
-CdrPlasmaStreamerTagger.max_coarsen_lvl   = 0            # Set max coarsening depth
 

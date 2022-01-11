@@ -1,0 +1,68 @@
+{"species":
+ [
+     {
+	 "name": "O2",
+	 "Z": 0,
+	 "tracked": false,
+	 "initial_data": {
+	     "uniform": 1E5,
+	     "exp_falloff": {
+		 "amplitude": 1E5,
+		 "l":  100,
+		 "h0": 100,		 
+		 "axis": [0, 0, 1]
+	     }
+	 }
+     },
+     {
+	 "name": "e",
+	 "Z": -1,
+	 "tracked": true,
+	 "mobility": {
+	     "mobile": true,
+	     "lookup" : "E/N",
+	     "value": 0.05,
+	     "file": {
+		 "name": "myfile.dat",
+		 "header": "# Electron mobility (E/N, mu*N)",
+		 "E/N ": 0,
+		 "mu*N": 1
+	     }
+	 },
+	 "diffusion": {
+	     "diffusive": true,
+	     "constant": true,
+	     "value": 0.05
+	 },
+	 "initial_data": {
+	     "uniform": 1.0,
+	     "gauss2": {
+		 "radius": 1.0,
+		 "amplitude": 1.0,
+		 "position": [1, 2, 3]
+	     },
+	     "gauss4": {
+		 "radius": 500E-6,
+		 "amplitude": 1.2345,
+		 "position": [1, 2, 3]
+	     }
+	 }
+     }
+ ]
+}
+
+{"sigma":
+ "initial_density": 0.0
+}
+
+{"photons":
+ [{"name": "uv1", "Z": -1, "diffusive": true,  "mobile": true },
+  {"name": "uv2", "Z":  1, "diffusive": true,  "mobile": true },
+ ]
+}
+
+{"reactions":
+ [
+     
+ ]
+}

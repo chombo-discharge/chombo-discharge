@@ -4,20 +4,20 @@
  */
 
 /*!
-  @file   CD_CdrPlasmaGenericModel.H
+  @file   CD_CdrPlasmaJSON.H
   @brief  Declaration of a generic CdrPlasma model.
   @author Robert Marskar
 */
 
-#ifndef CD_CdrPlasmaGenericModel_H
-#define CD_CdrPlasmaGenericModel_H
+#ifndef CD_CdrPlasmaJSON_H
+#define CD_CdrPlasmaJSON_H
 
 // Third-party includes
 #include <nlohmann/json.hpp>
 
 // Our includes
 #include <CD_CdrPlasmaPhysics.H>
-#include <CD_CdrPlasmaSpecies.H>
+#include <CD_CdrSpeciesJSON.H>
 #include <CD_LookupTable.H>
 #include <CD_NamespaceHeader.H>
 
@@ -26,18 +26,18 @@ using json = nlohmann::json;
 namespace Physics {
   namespace CdrPlasma {
 
-    class CdrPlasmaGenericModel : public CdrPlasmaPhysics {
+    class CdrPlasmaJSON : public CdrPlasmaPhysics {
     public:
 
       /*!
 	@brief Default constructor.
       */
-      CdrPlasmaGenericModel();
+      CdrPlasmaJSON();
 
       /*!
 	@brief Destructor
       */
-      virtual ~CdrPlasmaGenericModel();
+      virtual ~CdrPlasmaJSON();
 
       /*!
 	@brief Compute alpha. Should return Townsend ionization coefficient. 
