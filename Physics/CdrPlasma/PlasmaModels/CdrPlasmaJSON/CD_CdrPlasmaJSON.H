@@ -268,10 +268,33 @@ namespace Physics {
       std::vector<RefCountedPtr<CdrSpecies> > m_untrackedCdrSpecies;
 
       /*!
-	@brief Get an untracked species. This will yield an error if you try to obtain a species which does not exist. 
+	@brief Get a species. This will return the species whether it is tracked or not. This yields an error if the species does not exist. 
+	@param[in] a_name Species name. 
+      */
+      const RefCountedPtr<CdrSpecies>& getCdrSpecies(const std::string a_name) const;
+
+      /*!
+	@brief Get an untracked species. This will yield an error if you try to obtain a species which does not exist, or it is tracked. 
 	@param[in] a_name Species name. 
       */
       const RefCountedPtr<CdrSpecies>& getUntrackedCdrSpecies(const std::string a_name) const;
+
+      /*!
+	@brief Get tracked species. This will yield an error if you try to obtain a species which does not exist, or if it is untracked. 
+	@param[in] a_name Species name. 
+      */
+      const RefCountedPtr<CdrSpecies>& getTrackedCdrSpecies(const std::string a_name) const;
+
+      /*!
+	@brief Get a CdrSpecies density.
+	@details This will return the density for the species a_name. If the species is actively tracked, then it will return the entry
+	in a_cdrDensities that corresponds to the species name. If the species is NOT tracked, it will return the initial density of the species. 
+	@param[in] a_name         Species name. 
+	@param[in] a_cdrDensities List of CDR densities for tracked species. 
+	@param[in] a_pos          Physical coordinates
+	@param[in] a_time         Time
+      */
+      Real getCdrDensity(const std::string& a_name, const Vector<Real>& a_cdrDensities, const RealVect& a_pos, const Real& a_time) const;
 
       /*!
 	@brief Get untracked species density
@@ -280,6 +303,13 @@ namespace Physics {
 	@param[in] a_time Time
       */
       Real getUntrackedCdrDensity(const std::string& a_name, const RealVect& a_pos, const Real& a_time) const;
+
+      /*!
+	@brief Get a tracked species density
+	@param[in] a_name         Tracked species name
+	@param[in] a_cdrDensities List of CDR densities for tracked species. 
+      */
+      Real getTrackedCdrDensity(const std::string& a_name, const Vector<Real>& a_cdrDensities) const;
 
       /*!
 	@brief Parse class options

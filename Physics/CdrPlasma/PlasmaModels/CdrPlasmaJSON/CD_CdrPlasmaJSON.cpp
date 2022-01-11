@@ -301,14 +301,30 @@ Vector<Real> CdrPlasmaJSON::getPlotVariables(const Vector<Real> a_cdrDensities,
   return ret;
 }
 
+const RefCountedPtr<CdrSpecies>& CdrPlasmaJSON::getCdrSpecies(const std::string a_name) const {
+  return m_trackedMap.at(a_name) ? this->getTrackedCdrSpecies(a_name) : this->getUntrackedCdrSpecies(a_name);
+}
+
 const RefCountedPtr<CdrSpecies>& CdrPlasmaJSON::getUntrackedCdrSpecies(const std::string a_name) const {
   return m_untrackedCdrSpecies[m_untrackedCdrSpeciesMap.at(a_name)];
+}
+
+const RefCountedPtr<CdrSpecies>& CdrPlasmaJSON::getTrackedCdrSpecies(const std::string a_name) const {
+  return m_trackedCdrSpecies[m_trackedCdrSpeciesMap.at(a_name)];
+}
+
+Real CdrPlasmaJSON::getCdrDensity(const std::string& a_name, const Vector<Real>& a_cdrDensities, const RealVect& a_pos, const Real& a_time) const {
+  return m_trackedMap.at(a_name) ? this->getTrackedCdrDensity(a_name, a_cdrDensities) : this->getUntrackedCdrDensity(a_name, a_pos, a_time);
 }
 
 Real CdrPlasmaJSON::getUntrackedCdrDensity(const std::string& a_name, const RealVect& a_pos, const Real& a_time) const {
   const RefCountedPtr<CdrSpecies>& species = this->getUntrackedCdrSpecies(a_name);
   
   return species->initialData(a_pos, a_time);
+}
+
+Real CdrPlasmaJSON::getTrackedCdrDensity(const std::string& a_name, const Vector<Real>& a_cdrDensities) const {
+  return a_cdrDensities[m_trackedCdrSpeciesMap.at(a_name)];
 }
 
 Real CdrPlasmaJSON::computeAlpha(const RealVect a_E) const {
