@@ -67,16 +67,16 @@ namespace Physics {
 	@param[in]  a_E                  Electric field
       */
       virtual void advanceReactionNetwork(Vector<Real>&          a_particle_sources,
-					    Vector<Real>&          a_Photon_sources,
-					    const Vector<Real>     a_particle_densities,
-					    const Vector<RealVect> a_particle_gradients,
-					    const Vector<Real>     a_Photon_densities,
-					    const RealVect         a_E,
-					    const RealVect         a_pos,
-					    const Real             a_dx,
-					    const Real             a_dt,
-					    const Real             a_time,
-					    const Real             a_kappa) const = 0;
+					  Vector<Real>&          a_Photon_sources,
+					  const Vector<Real>     a_particle_densities,
+					  const Vector<RealVect> a_particle_gradients,
+					  const Vector<Real>     a_Photon_densities,
+					  const RealVect         a_E,
+					  const RealVect         a_pos,
+					  const Real             a_dx,
+					  const Real             a_dt,
+					  const Real             a_time,
+					  const Real             a_kappa) const = 0;
 
       /*!
 	@brief Compute velocities for the CDR equations
@@ -86,9 +86,9 @@ namespace Physics {
 	@param[in] a_cdr_densities CDR densities
       */
       virtual Vector<RealVect> computeCdrDriftVelocities(const Real         a_time,
-						      const RealVect     a_pos,
-						      const RealVect     a_E,
-						      const Vector<Real> a_cdr_densities) const = 0;
+							 const RealVect     a_pos,
+							 const RealVect     a_E,
+							 const Vector<Real> a_cdr_densities) const = 0;
 
       /*!
 	@brief Compute the cdr diffusion coefficients
@@ -98,9 +98,9 @@ namespace Physics {
 	@param[in] a_cdr_densities CDR densities
       */
       virtual Vector<Real> computeCdrDiffusionCoefficients(const Real         a_time,
-							      const RealVect     a_pos,
-							      const RealVect     a_E,
-							      const Vector<Real> a_cdr_densities) const = 0;
+							   const RealVect     a_pos,
+							   const RealVect     a_E,
+							   const Vector<Real> a_cdr_densities) const = 0;
 
 
       /*!
@@ -116,14 +116,14 @@ namespace Physics {
 	@param[in] a_extrap_cdr_fluxes Extrapolated fluxes from the gas side. 
       */
       virtual Vector<Real> computeCdrElectrodeFluxes(const Real         a_time,
-							const RealVect     a_pos,
-							const RealVect     a_normal,
-							const RealVect     a_E,
-							const Vector<Real> a_cdr_densities,
-							const Vector<Real> a_cdr_velocities,
-							const Vector<Real> a_cdr_gradients,
-							const Vector<Real> a_rte_fluxes,
-							const Vector<Real> a_extrap_cdr_fluxes) const = 0;
+						     const RealVect     a_pos,
+						     const RealVect     a_normal,
+						     const RealVect     a_E,
+						     const Vector<Real> a_cdr_densities,
+						     const Vector<Real> a_cdr_velocities,
+						     const Vector<Real> a_cdr_gradients,
+						     const Vector<Real> a_rte_fluxes,
+						     const Vector<Real> a_extrap_cdr_fluxes) const = 0;
 
       /*!
 	@brief Compute cdr fluxes through dielectric-gas interfaces
@@ -138,14 +138,14 @@ namespace Physics {
 	@param[in] a_extrap_cdr_fluxes Extrapolated fluxes from the gas side. 
       */
       virtual Vector<Real> computeCdrDielectricFluxes(const Real         a_time,
-							 const RealVect     a_pos,
-							 const RealVect     a_normal,
-							 const RealVect     a_E,
-							 const Vector<Real> a_cdr_densities,
-							 const Vector<Real> a_cdr_velocities,
-							 const Vector<Real> a_cdr_gradients,
-							 const Vector<Real> a_rte_fluxes,
-							 const Vector<Real> a_extrap_cdr_fluxes) const = 0;
+						      const RealVect     a_pos,
+						      const RealVect     a_normal,
+						      const RealVect     a_E,
+						      const Vector<Real> a_cdr_densities,
+						      const Vector<Real> a_cdr_velocities,
+						      const Vector<Real> a_cdr_gradients,
+						      const Vector<Real> a_rte_fluxes,
+						      const Vector<Real> a_extrap_cdr_fluxes) const = 0;
 
       /*!
 	@brief Compute cdr fluxes through domain sides
@@ -161,15 +161,15 @@ namespace Physics {
 	@param[in] a_extrap_cdr_fluxes Extrapolated fluxes from the gas side. 
       */
       virtual Vector<Real> computeCdrDomainFluxes(const Real           a_time,
-						     const RealVect       a_pos,
-						     const int            a_dir,
-						     const Side::LoHiSide a_side,
-						     const RealVect       a_E,
-						     const Vector<Real>   a_cdr_densities,
-						     const Vector<Real>   a_cdr_velocities,
-						     const Vector<Real>   a_cdr_gradients,
-						     const Vector<Real>   a_rte_fluxes,
-						     const Vector<Real>   a_extrap_cdr_fluxes) const = 0;
+						  const RealVect       a_pos,
+						  const int            a_dir,
+						  const Side::LoHiSide a_side,
+						  const RealVect       a_E,
+						  const Vector<Real>   a_cdr_densities,
+						  const Vector<Real>   a_cdr_velocities,
+						  const Vector<Real>   a_cdr_gradients,
+						  const Vector<Real>   a_rte_fluxes,
+						  const Vector<Real>   a_extrap_cdr_fluxes) const = 0;
 
 
       /*!
@@ -178,7 +178,7 @@ namespace Physics {
 	@param[in] a_pos Position
       */
       virtual Real initialSigma(const Real      a_time,
-				 const RealVect a_pos) const = 0;
+				const RealVect a_pos) const = 0;
 
       /*!
 	@brief Initialize electron energy density

@@ -29,6 +29,10 @@ CdrPlasmaGenericModel::CdrPlasmaGenericModel(){
   this->parseOptions();
   this->parseJSON();
   this->instantiateCdrSpecies();
+
+  // Populate the stuff that is needed by CdrPlasmaPhysics
+  m_CdrSpecies = m_trackedCdrSpecies;
+  
 }
 
 CdrPlasmaGenericModel::~CdrPlasmaGenericModel(){
@@ -196,24 +200,121 @@ void CdrPlasmaGenericModel::instantiateCdrSpecies() {
     // Print out a message if we're verbose.
     if(m_verbose){
       pout() << "CdrPlasmaGenericModel::instantiateSpecies: instantiating species" << "\n"
-	      << "\tName        = " << name        << "\n"
-	      << "\tTracked     = " << tracked     << "\n"
-	      << "\tZ           = " << Z           << "\n"
-	      << "\tMobile      = " << mobile      << "\n"
-	      << "\tDiffusive   = " << diffusive   << "\n"
-	      << "\tInitialData = " << hasInitData << "\n";    	
+	     << "\tName        = " << name        << "\n"
+	     << "\tTracked     = " << tracked     << "\n"
+	     << "\tZ           = " << Z           << "\n"
+	     << "\tMobile      = " << mobile      << "\n"
+	     << "\tDiffusive   = " << diffusive   << "\n"
+	     << "\tInitialData = " << hasInitData << "\n";    	
     }
 
     // Instantiate the species.
     if(tracked){
       m_trackedCdrSpeciesMap.emplace(std::make_pair(m_trackedCdrSpecies.size(), name));
       m_trackedCdrSpecies.emplace_back(RefCountedPtr<CdrSpecies> (new CdrPlasmaSpecies(name, Z, diffusive, mobile, initFunc)));
+      m_trackedMap.emplace(std::make_pair(true, name));
     }
     else {
       m_untrackedCdrSpeciesMap.emplace(std::make_pair(m_untrackedCdrSpecies.size(), name));
       m_untrackedCdrSpecies.emplace_back(RefCountedPtr<CdrSpecies> (new CdrPlasmaSpecies(name, Z, false, false, initFunc)));
+      m_trackedMap.emplace(std::make_pair(false, name));      
     }
   }
 }
+
+void CdrPlasmaGenericModel::initializeSigma() {
+  CH_TIME("CdrPlasmaGenericModel::initializeSigma");
+  if(m_verbose){
+    pout() << "CdrPlasmaGenericModel::initializeSigma()" << endl;
+  }
+
+  m_initialSigma = [](const Real a_time, const RealVect a_pos) -> Real {
+    return 0.0;
+  };
+
+  if(m_json.contains("sigma")){
+    if(m_json["sigma"].contains("initial_density")){
+      const Real sigma = m_json["sigma"]["initial_density"].get<Real>();
+      
+      m_initialSigma = [sigma] (const Real a_time, const RealVect a_pos) -> Real {
+	return sigma;
+      };
+    }
+  }
+}
+
+Real CdrPlasmaGenericModel::computeAlpha(const RealVect a_E) const {
+  MayDay::Warning("CdrPlasmaGenericModel::computeAlpha -- don't know how to do this yet");
+}
+
+void CdrPlasmaGenericModel::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
+						   Vector<Real>&          a_rteSources,
+						   const Vector<Real>     a_cdrDensities,
+						   const Vector<RealVect> a_cdrGradients,
+						   const Vector<Real>     a_rteDensities,
+						   const RealVect         a_E,
+						   const RealVect         a_pos,
+						   const Real             a_dx,
+						   const Real             a_dt,
+						   const Real             a_time,
+						   const Real             a_kappa) const {
+  MayDay::Warning("CdrPlasmaGenericModel::advanceReactionnetwork -- don't know how to do this yet");
+}
+
+Vector<RealVect> CdrPlasmaGenericModel::computeCdrDriftVelocities(const Real         a_time,
+								  const RealVect     a_pos,
+								  const RealVect     a_E,
+								  const Vector<Real> a_cdrDensities) const {
+  MayDay::Warning("CdrPlasmaGenericModel::computeCdrDriftVelocities -- don't know how to do this yet");
+}
+
+Vector<Real> CdrPlasmaGenericModel::computeCdrDiffusionCoefficients(const Real         a_time,
+								    const RealVect     a_pos,
+								    const RealVect     a_E,
+								    const Vector<Real> a_cdrDensities) const {
+  MayDay::Warning("CdrPlasmaGenericModel::computeCdrDriftVelocities -- don't know how to do this yet");
+}
+
+Vector<Real> CdrPlasmaGenericModel::computeCdrElectrodeFluxes(const Real         a_time,
+							      const RealVect     a_pos,
+							      const RealVect     a_normal,
+							      const RealVect     a_E,
+							      const Vector<Real> a_cdrDensities,
+							      const Vector<Real> a_cdrVelocities,
+							      const Vector<Real> a_cdrGradients,
+							      const Vector<Real> a_rteFluxeses,
+							      const Vector<Real> a_extrapCdrFluxes) const {
+  MayDay::Warning("CdrPlasmaGenericModel::computeCdrElectrodeFluxes -- don't know how to do this yet");
+}
+
+Vector<Real> CdrPlasmaGenericModel::computeCdrDielectricFluxes(const Real         a_time,
+							       const RealVect     a_pos,
+							       const RealVect     a_normal,
+							       const RealVect     a_E,
+							       const Vector<Real> a_cdrDensities,
+							       const Vector<Real> a_cdrVelocities,
+							       const Vector<Real> a_cdrGradients,
+							       const Vector<Real> a_rteFluxeses,
+							       const Vector<Real> a_extrapCdrFluxes) const {
+  MayDay::Warning("CdrPlasmaGenericModel::computeCdrDielectricFluxes -- don't know how to do this yet");
+}
+
+Vector<Real> CdrPlasmaGenericModel::computeCdrDomainFluxes(const Real           a_time,
+							   const RealVect       a_pos,
+							   const int            a_dir,
+							   const Side::LoHiSide a_side,
+							   const RealVect       a_E,
+							   const Vector<Real>   a_cdrDensities,
+							   const Vector<Real>   a_cdrVelocities,
+							   const Vector<Real>   a_cdrGradients,
+							   const Vector<Real>   a_rteFluxeses,
+							   const Vector<Real>   a_extrapCdrFluxes) const {
+  MayDay::Warning("CdrPlasmaGenericModel::computeCdrDomainFluxes -- don't know how to do this yet");
+}
+
+Real CdrPlasmaGenericModel::initialSigma(const Real a_time, const RealVect a_pos) const {
+  return m_initialSigma(a_time, a_pos);
+}
+
 
 #include <CD_NamespaceFooter.H>

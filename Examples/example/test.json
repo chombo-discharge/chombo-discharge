@@ -51,6 +51,10 @@
  ]
 }
 
+{"sigma":
+ "initial_density": 0.0
+}
+
 {"photons":
  [{"name": "uv1", "Z": -1, "diffusive": true,  "mobile": true },
   {"name": "uv2", "Z":  1, "diffusive": true,  "mobile": true },
