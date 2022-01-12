@@ -34,7 +34,9 @@ CdrPlasmaJSON::CdrPlasmaJSON(){
   // Parse initial data.
   this->initializeNeutralSpecies();
   this->initializePlasmaSpecies();
-  this->initializeSigma();  
+  this->initializeSigma();
+
+  // Parse CDR mobilities and diffusion coefficients. 
   this->parseMobilities();
 
   // Populate the stuff that is needed by CdrPlasmaPhysics
@@ -306,9 +308,6 @@ void CdrPlasmaJSON::parseMobilities() {
       }
     }
 
-    // Create the map over mobile species
-    m_isMobile.emplace(std::make_pair(idx, reallyMobile));
-
     if(reallyMobile){
       if(!(species.contains("mobility"))){ // This is an error -- if a species is tracked AND is mobile it must contain the field 'mobility'
 	const std::string err = "species " + name + " is mobile but file does not contain field 'mobility'";
@@ -431,20 +430,20 @@ Vector<RealVect> CdrPlasmaJSON::computeCdrDriftVelocities(const Real         a_t
 							  const Vector<Real> a_cdrDensities) const {
   Vector<RealVect> velocities(m_numCdrSpecies, RealVect::Zero);
 
-  for (const auto& mobileSpecies : m_isMobile){
-    if(mobileSpecies.second){ // Ok, species is mobile. 
-      const int idx = mobileSpecies.first;
-      const int Z   = m_CdrSpecies[idx]->getChargeNumber();
-
+  for (int i = 0; i < a_cdrDensities.size(); i++){
+    const bool isMobile = m_CdrSpecies[i]->isMobile();
+    const int  Z        = m_CdrSpecies[i]->getChargeNumber();
+    
+    if(isMobile && Z != 0){
       // Figure out the mobility.
-      const LookupMethod& method = m_mobilityLookup.at(idx);
+      const LookupMethod& method = m_mobilityLookup.at(i);
 
       Real mobility = 0.0;
       
       switch(method) {
       case LookupMethod::Constant:
 	{
-	  mobility = m_mobilityConstant.at(idx);
+	  mobility = m_mobilityConstant.at(i);
 	  break;
 	}
       case LookupMethod::Function:
@@ -473,7 +472,7 @@ Vector<RealVect> CdrPlasmaJSON::computeCdrDriftVelocities(const Real         a_t
 
       mobility *= sgn;
 
-      velocities[idx] = mobility * a_E;
+      velocities[i] = mobility * a_E;
     }
   }
 

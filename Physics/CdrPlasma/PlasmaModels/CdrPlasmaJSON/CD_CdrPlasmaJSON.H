@@ -243,7 +243,12 @@ namespace Physics {
       /*!
 	@brief Input JSON file name
       */
-      std::string m_jsonFile;            
+      std::string m_jsonFile;
+
+      /*!
+	@brief JSON entries for species in plasma_species
+      */
+      std::vector<json> m_cdrSpeciesJSON;      
 
       /*!
 	@brief Gas pressure (in atmospheres)
@@ -292,16 +297,6 @@ namespace Physics {
 	@note This is the inverse of m_trackedCdrSpeciesMap
       */
       std::map<int, std::string> m_cdrSpeciesInverseMap;      
-
-      /*!
-	@brief JSON entries for species in plasma_species
-      */
-      std::vector<json> m_cdrSpeciesJSON;
-
-      /*!
-	@brief Map for checking if a species is mobile or not
-      */
-      std::map<int, bool> m_isMobile;
 
       /*!
 	@brief Mobility lookup method. This is only for tracked species. 
