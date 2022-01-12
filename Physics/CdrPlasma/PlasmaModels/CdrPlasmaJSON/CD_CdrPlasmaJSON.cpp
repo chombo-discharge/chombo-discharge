@@ -349,13 +349,32 @@ void CdrPlasmaJSON::parseMobilities() {
 	mobilityTable.sort(0);
 	mobilityTable.makeUniform(numPoints);
 
-	m_mobilityLookup.emplace(std::make_pair(idx, LookupMethod::TableEN));
-	m_mobilityTables.emplace(std::make_pair(idx, mobilityTable      ));
+	m_mobilityLookup.emplace(std::make_pair(idx, LookupMethod::TableLFA));
+	m_mobilityTables.emplace(std::make_pair(idx, mobilityTable         ));
       }		
       else if (lookup == "function E/N"){
-	pout() << "using function" << endl;
+	if(!(mobilityJSON.contains("function"))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- using function E/N but did not find function specification");
 
-	m_mobilityLookup.emplace(std::make_pair(idx, LookupMethod::FunctionEN));	  
+	FunctionEN func;
+	
+	const std::string whichFunction = mobilityJSON["function"].get<std::string>();
+	if(whichFunction == "ABC"){
+	  if(!(mobilityJSON.contains("A"))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- using function 'ABC'  did not find 'A'");
+	  if(!(mobilityJSON.contains("B"))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- using function 'ABC'  did not find 'B'");
+	  if(!(mobilityJSON.contains("C"))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- using function 'ABC'  did not find 'C'");
+
+	  const Real A = mobilityJSON["A"].get<Real>();
+	  const Real B = mobilityJSON["B"].get<Real>();
+	  const Real C = mobilityJSON["C"].get<Real>();
+
+	  func = [A, B, C](const Real a_E, const Real a_N) -> Real {return A * std::pow(a_E, B) / std::pow(a_N, C);};
+	}
+	else{
+	  this->throwParserError("CdrPlasmaJSON::parseMobilities -- using function E/N but do not recognize specification '" + whichFunction + "'");
+	}
+
+	m_mobilityLookup.     emplace(std::make_pair(idx, LookupMethod::FunctionLFA));
+	m_mobilityFunctionsEN.emplace(std::make_pair(idx, func                     ));	
       }
       else{
 	this->throwParserError("CdrPlasmaJSON::parseMobilities -- lookup = '" + lookup + "' was specified but this is not 'constant', 'function', or 'table'");
@@ -458,15 +477,17 @@ Vector<RealVect> CdrPlasmaJSON::computeCdrDriftVelocities(const Real         a_t
 	  mobility = m_mobilityConstant.at(i);
 	  break;
 	}
-      case LookupMethod::FunctionEN:
+      case LookupMethod::FunctionLFA:
 	{
+	  
+	  const Real E = a_E.vectorLength();	  
 	  const Real N = m_gasDensity(a_position);
 
-	  mobility = (*m_mobilityFunctionsEN.at(i))(a_E, N);
+	  mobility = m_mobilityFunctionsEN.at(i)(E, N);
 
 	  break;
 	}
-      case LookupMethod::TableEN:
+      case LookupMethod::TableLFA:
 	{
 	  // Recall; the mobility tables are stored as (E/N, mu*N) so we need to extract mu from that. 
 	  const LookupTable<2>& mobilityTable = m_mobilityTables.at(i);

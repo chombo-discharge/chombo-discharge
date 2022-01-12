@@ -40,6 +40,14 @@ namespace Physics {
     public:
 
       /*!
+	@brief Function for encapsulating operations f = f(E,N). Useful for local field approximation.
+	@param[in] a_E Electric field
+	@param[in] a_N Neutral density
+	@return Returns f = f(E,N)
+      */
+      using FunctionEN = std::function<Real(const Real a_E, const Real a_N)>;
+
+      /*!
 	@brief Default constructor.
       */
       CdrPlasmaJSON();
@@ -221,8 +229,8 @@ namespace Physics {
       */
       enum class LookupMethod {
 	Constant,
-	FunctionEN,
-	TableEN
+	FunctionLFA,
+	TableLFA
       };
 
       /*!
@@ -311,7 +319,7 @@ namespace Physics {
       /*!
 	@brief Map for function-based mobilities.
       */
-      std::map<int, std::shared_ptr<CdrPlasmaJSONFunctionEN> > m_mobilityFunctionsEN;
+      std::map<int, FunctionEN> m_mobilityFunctionsEN;
 
       /*!
 	@brief Map for table-based mobilities. 
