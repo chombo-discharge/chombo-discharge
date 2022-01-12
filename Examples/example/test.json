@@ -27,14 +27,12 @@
 	 "mobile": true,
 	 "diffusive": false,
 	 "mobility": {
-	     "lookup" : "constant",
+	     "lookup" : "table",
 	     "value": 0.05,
-	     "file": {
-		 "name": "myfile.dat",
-		 "header": "# Electron mobility (E/N, mu*N)",
-		 "E/N ": 0,
-		 "mu*N": 1
-	     }
+	     "file": "transport_data.txt",
+	     "header": "# Electron mobility (E/N, mu*N)",
+	     "E/N": 0,
+	     "mu*N": 1
 	 },
 	 "diffusion": {
 	     "constant": true,

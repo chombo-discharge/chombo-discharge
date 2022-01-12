@@ -19,6 +19,7 @@
 
 // Our includes
 #include <CD_CdrPlasmaJSON.H>
+#include <CD_DataParser.H>
 #include <CD_Units.H>
 #include <CD_NamespaceHeader.H>
 
@@ -299,54 +300,54 @@ void CdrPlasmaJSON::parseMobilities() {
     const std::string name = species["name"].get<std::string>();
     const int         idx  = m_cdrSpeciesMap.at(name);
 
-    // Only do tracked species.
-    bool reallyMobile = false;
+    if(m_CdrSpecies[idx]->isMobile()){
 
-    if(species.contains("mobile")){
-      if(species["mobile"].get<bool>()) {
-	reallyMobile = true;
+      // This is a required field. We use it for specifying the mobility. 
+      if(!(species.contains("mobility"))) this->throwParserError("species " + name + " is mobile but file does not contain field 'mobility'");
+      const json& mobilityJSON = species["mobility"];
+
+      // Get the mobility lookup method. This must either be a constant, a function, or a table. We parse these cases differently.
+      const std::string lookup = mobilityJSON["lookup"].get<std::string>();
+	
+      if(lookup == "constant"){
+	// User specified a constant mobility. We look for a field 'value' in the JSON file and set the mobility from that. If the
+	// field does not exist then it's an error. 
+	if(!(mobilityJSON.contains("value"))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- constant lookup was specified but I can't find the field 'value'");
+
+	const Real value = mobilityJSON["value"].get<Real>();
+
+	m_mobilityLookup.  emplace(std::make_pair(idx, LookupMethod::Constant));
+	m_mobilityConstant.emplace(std::make_pair(idx, value                 ));
       }
-    }
+      else if(lookup == "table"){
 
-    if(reallyMobile){
-      if(!(species.contains("mobility"))){ // This is an error -- if a species is tracked AND is mobile it must contain the field 'mobility'
-	const std::string err = "species " + name + " is mobile but file does not contain field 'mobility'";
-	pout() << err << endl;
-	MayDay::Error(err.c_str());	
+	if(!(mobilityJSON.contains("file"  ))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- tabulated mobility was specified but field 'file' was not"  );
+	if(!(mobilityJSON.contains("header"))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- tabulated mobility was specified but field 'header' was not");
+	if(!(mobilityJSON.contains("E/N"   ))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- tabulated mobility was specified but field 'E/N' was not"   );
+	if(!(mobilityJSON.contains("mu*N"  ))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- tabulated mobility was specified but field 'mu*N' was not"  );
+
+	const std::string filename  = mobilityJSON["file"  ].get<std::string>();
+	const std::string startRead = mobilityJSON["header"].get<std::string>();
+	const std::string stopRead  = "";
+
+	const int xCol = mobilityJSON["E/N" ].get<int>();
+	const int yCol = mobilityJSON["mu*N"].get<int>();
+
+	LookupTable<2> mobilityTable = DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xCol, yCol);
+
+	mobilityTable.dumpTable();
+	
+	m_mobilityLookup.emplace(std::make_pair(idx, LookupMethod::Table));
+
+	MayDay::Abort("stop here");
+      }		
+      else if (lookup == "function"){
+	pout() << "using function" << endl;
+
+	m_mobilityLookup.emplace(std::make_pair(idx, LookupMethod::Function));	  
       }
       else{
-	const json& mobilityJSON = species["mobility"];
-
-	// Get the mobility lookup method. This must either be a constant, a function, or a table. We parse these cases differently.
-	
-	const std::string lookup = mobilityJSON["lookup"].get<std::string>();
-	if(lookup == "constant"){
-
-	  // User specified a constant mobility. We look for a field 'value' in the JSON file and set the mobility from that. If the
-	  // field does not exist then it's an error. 
-	  if(!(mobilityJSON.contains("value"))) {
-	    const std::string err = "CdrPlasmaJSON::parseMobilities -- constant lookup was specified but I can't find the field 'value'";
-	    pout() << err << endl;
-	    MayDay::Error(err.c_str());
-	  }
-	  else{
-	    const Real value = mobilityJSON["value"].get<Real>();
-
-	    m_mobilityLookup.  emplace(std::make_pair(idx, LookupMethod::Constant));
-	    m_mobilityConstant.emplace(std::make_pair(idx, value                 ));
-	  }
-	}
-	else if (lookup == "function"){
-	  pout() << "using function" << endl;
-	}
-	else if(lookup == "table"){
-	  pout() << "using table" << endl;
-	}	
-	else{
-	  const std::string err = "CdrPlasmaJSON::parseMobilities -- lookup = '" + lookup + "' was specified but this is not 'constant', 'function', or 'table'";
-	  pout() << err << endl;
-	  MayDay::Error(err.c_str());
-	}
+	this->throwParserError("CdrPlasmaJSON::parseMobilities -- lookup = '" + lookup + "' was specified but this is not 'constant', 'function', or 'table'");
       }
     }
   }

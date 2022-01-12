@@ -311,12 +311,12 @@ namespace Physics {
       /*!
 	@brief Map for function-based mobilities.
       */
-      std::map<int, std::shared_ptr<CdrPlasmaJSONFunctionEN> > m_constantMobilities;
+      std::map<int, std::shared_ptr<CdrPlasmaJSONFunctionEN> > m_mobilityFunctions;
 
       /*!
 	@brief Map for table-based mobilities. 
       */
-      std::map<int, LookupTable<2> > m_tabulatedMobilities;
+      std::map<int, LookupTable<2> > m_mobilityTables;
       
       /*!
 	@brief Get a species. This will return the species whether it is tracked or not. This yields an error if the species does not exist. 
