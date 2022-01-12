@@ -24,7 +24,6 @@
 #include <CD_CdrPlasmaPhysics.H>
 #include <CD_CdrSpeciesJSON.H>
 #include <CD_NeutralSpeciesJSON.H>
-#include <CD_CdrPlasmaJSONFunctions.H>
 #include <CD_LookupTable.H>
 #include <CD_NamespaceHeader.H>
 
@@ -40,10 +39,12 @@ namespace Physics {
     public:
 
       /*!
-	@brief Function for encapsulating operations f = f(E,N). Useful for local field approximation.
-	@param[in] a_E Electric field
+	@brief Function for encapsulating operations f = f(E,N). 
+	field in Townsend units
+	@param[in] a_E Electric field in SI units.
 	@param[in] a_N Neutral density
-	@return Returns f = f(E,N)
+	@return Returns f = f(E,N). 
+	@note a_E is in physical units. 
       */
       using FunctionEN = std::function<Real(const Real a_E, const Real a_N)>;
 

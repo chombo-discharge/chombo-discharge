@@ -479,7 +479,6 @@ Vector<RealVect> CdrPlasmaJSON::computeCdrDriftVelocities(const Real         a_t
 	}
       case LookupMethod::FunctionLFA:
 	{
-	  
 	  const Real E = a_E.vectorLength();	  
 	  const Real N = m_gasDensity(a_position);
 
@@ -494,8 +493,9 @@ Vector<RealVect> CdrPlasmaJSON::computeCdrDriftVelocities(const Real         a_t
 
 	  const Real E = a_E.vectorLength();
 	  const Real N = m_gasDensity(a_position);
+	  const Real Etd = (E/(N * Units::Td));
 
-	  mobility  = mobilityTable.getEntry<1>(E/N); // Get mu*N
+	  mobility  = mobilityTable.getEntry<1>(Etd); // Get mu*N
 	  mobility /= N;                              // Get mu
 
 	  break;
@@ -505,6 +505,8 @@ Vector<RealVect> CdrPlasmaJSON::computeCdrDriftVelocities(const Real         a_t
 	  MayDay::Error("CdrPlasmaJSON::computeCdrDriftVelocities -- logic bust");
 	}
       }
+
+      std::cout << mobility << std::endl;      
 
       int sgn = 0;
       if (Z > 0){

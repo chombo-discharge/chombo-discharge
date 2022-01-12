@@ -2457,6 +2457,7 @@ void CdrPlasmaStepper::computeCdrDriftVelocitiesRegular(Vector<EBCellFAB*>&     
   const int comp         = 0;
   const RealVect origin  = m_amr->getProbLo();
   const BaseFab<Real>& E = a_E.getSingleValuedFAB();
+  const EBISBox& ebisbox = a_E.getEBISBox();
 
 
   for (BoxIterator bit(a_box); bit.ok(); ++bit){
@@ -2464,16 +2465,20 @@ void CdrPlasmaStepper::computeCdrDriftVelocitiesRegular(Vector<EBCellFAB*>&     
     const RealVect pos  = origin + a_dx*iv;
     const RealVect e    = RealVect(D_DECL(E(iv, 0), E(iv, 1), E(iv, 2)));
 
+    Vector<RealVect> velocities(a_cdr_densities.size(), RealVect::Zero);
 
-    // Get densities
-    Vector<Real> cdr_densities;
-    for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
-      const int idx = solver_it.index();
-      cdr_densities.push_back((*a_cdr_densities[idx]).getSingleValuedFAB()(iv, comp));
+    if(ebisbox.isRegular(iv)){
+
+      // Get densities
+      Vector<Real> cdr_densities;
+      for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
+	const int idx = solver_it.index();
+	cdr_densities.push_back((*a_cdr_densities[idx]).getSingleValuedFAB()(iv, comp));
+      }
+
+      // Compute velocities
+      velocities = m_physics->computeCdrDriftVelocities(a_time, pos, e, cdr_densities);
     }
-
-    // Compute velocities
-    Vector<RealVect> velocities = m_physics->computeCdrDriftVelocities(a_time, pos, e, cdr_densities);
 
     // Put velocities in the appropriate place. 
     for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
@@ -2488,7 +2493,7 @@ void CdrPlasmaStepper::computeCdrDriftVelocitiesRegular(Vector<EBCellFAB*>&     
   }
 
 
-  // Covered is bogus.
+  // Covered is always bogus.
   for (CdrIterator<CdrSolver> solver_it = m_cdr->iterator(); solver_it.ok(); ++solver_it){
     if(solver_it()->isMobile()){
       const int idx = solver_it.index();
