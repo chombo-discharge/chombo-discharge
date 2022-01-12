@@ -1,18 +1,28 @@
-{"species":
- [
-     {
-	 "name": "N2",
-	 "Z": 0,
-	 "plot": true,
-	 "tracked": false,
-	 "initial_data": {
-	     "ideal_gas": {
-		 "T": 300,
-		 "P": 1,
-		 "molar_fraction": 0.8
-	     }
+{"gas":
+ {
+     "law": "troposphere",
+     "temperature": 300,
+     "pressure": 1,
+     "molar_mass": 1,
+     "gravity": 9.81,
+     "lapse_rate": 0.0065,
+     "plot": true,
+     "neutral_species":
+     [
+	 {
+	     "name": "O2",
+	     "molar_fraction": 0.2
+	 },
+	 {
+	     "name": "N2",
+	     "molar_fraction": 0.8
 	 }
-     },     
+     ]
+ }
+}
+
+{"plasma_species":
+ [
      {
 	 "name": "e",
 	 "Z": -1,
@@ -51,11 +61,7 @@
 }
 
 {"sigma":
- "initial_density": 0.0
-}
-
-{"photons":
- [{"name": "uv1", "Z": -1, "diffusive": true,  "mobile": true },
-  {"name": "uv2", "Z":  1, "diffusive": true,  "mobile": true },
- ]
+ {
+     "initial_density": 0.0
+ }
 }

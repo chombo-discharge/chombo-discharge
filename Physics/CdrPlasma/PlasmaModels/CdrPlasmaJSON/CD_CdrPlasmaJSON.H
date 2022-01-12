@@ -14,6 +14,7 @@
 
 // Std includes
 #include <map>
+#include <memory>
 #include <string>
 
 // Third-party includes
@@ -22,6 +23,7 @@
 // Our includes
 #include <CD_CdrPlasmaPhysics.H>
 #include <CD_CdrSpeciesJSON.H>
+#include <CD_NeutralSpeciesJSON.H>
 #include <CD_CdrPlasmaJSONFunctions.H>
 #include <CD_LookupTable.H>
 #include <CD_NamespaceHeader.H>
@@ -229,6 +231,11 @@ namespace Physics {
       bool m_verbose;
 
       /*!
+	@brief Plot gas pressure, density, and temperature
+      */
+      bool m_plotGas;
+
+      /*!
 	@brief JSON definition. This is populated when calling parseJSON.
       */
       json m_json;
@@ -236,12 +243,42 @@ namespace Physics {
       /*!
 	@brief Input JSON file name
       */
-      std::string m_jsonFile;      
+      std::string m_jsonFile;            
+
+      /*!
+	@brief Gas pressure (in atmospheres)
+      */
+      std::function<Real(const RealVect a_position)> m_gasPressure;
+
+      /*!
+	@brief Gas temperature (in atmospheres)
+      */
+      std::function<Real(const RealVect a_position)> m_gasTemperature;
+
+      /*!
+	@brief Gas number density (in atmospheres)
+      */
+      std::function<Real(const RealVect a_position)> m_gasDensity;      
 
       /*!
 	@brief Initial surface charge
       */
       std::function<Real(const Real a_time, const RealVect a_pos) > m_initialSigma;
+
+      /*!
+	@brief These are the neutral species.
+      */
+      std::vector<std::shared_ptr<NeutralSpeciesJSON> > m_neutralSpecies;
+
+      /*!
+	@brief Map for figuring out which where in m_neutralSpecies a neutral species is found. 
+      */
+      std::map<std::string, int> m_neutralSpeciesMap;
+
+      /*!
+	@brief Inverse of m_neutralSpeciesMap
+      */
+      std::map<int, std::string> m_neutralSpeciesInverseMap;
 
       /*!
 	@brief string-int encoding of the tracked species. 
@@ -371,6 +408,13 @@ namespace Physics {
       Real getTrackedCdrDensity(const std::string& a_name, const Vector<Real>& a_cdrDensities) const;
 
       /*!
+	@brief Get neutral species density
+	@param[in] a_name Species name
+	@param[in] a_pos  Physical coordinates
+      */      
+      virtual Real getNeutralSpeciesDensity(const std::string a_name, const RealVect& a_position) const;
+
+      /*!
 	@brief Parse class options
       */
       virtual void parseOptions();
@@ -382,22 +426,33 @@ namespace Physics {
 
       /*!
 	@brief Initialize surface charge
-	@details This will instantiate the surface charge based on the "sigma" field in the JSON file. If you want more complex initial surface charges, 
+	@details This will initialize the surface charge based on the "sigma" field in the JSON file. If you want more complex initial surface charges, 
 	you will have to either extend this routine or overwrite it. 
       */
-      virtual void initializeSigma();      
-      
-      /*!
-	@brief Instantiate species. 
-	@details This will instantiate the species based on the "species" field in the JSON file. If you want e.g. new boundary conditions, 
-	you will have either extend this routine or overwrite it. 
-      */
-      virtual void instantiateCdrSpecies();
+      virtual void initializeSigma();
 
       /*!
-	@brief Instantiate species mobilities
+	@brief Initialize neutral species
+      */
+      virtual void initializeNeutralSpecies();
+      
+      /*!
+	@brief Initialize species. 
+	@details This will initialize the species based on the "species" field in the JSON file. If you want e.g. new boundary conditions, 
+	you will have either extend this routine or overwrite it. 
+      */
+      virtual void initializePlasmaSpecies();
+
+      /*!
+	@brief Initialize species mobilities
       */
       virtual void parseMobilities();
+
+      /*!
+	@brief Throw a parser error
+	@param[in] a_error Error code.
+      */
+      void throwParserError(const std::string a_error) const;
     };
   }
 }

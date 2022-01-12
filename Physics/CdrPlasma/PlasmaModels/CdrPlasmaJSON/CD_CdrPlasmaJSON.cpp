@@ -29,8 +29,9 @@ CdrPlasmaJSON::CdrPlasmaJSON(){
   
   this->parseOptions();
   this->parseJSON();
-  this->initializeSigma();  
-  this->instantiateCdrSpecies();
+  this->initializeSigma();
+  this->initializeNeutralSpecies();
+  this->initializePlasmaSpecies();
   this->parseMobilities();
 
   // Populate the stuff that is needed by CdrPlasmaPhysics
@@ -65,6 +66,12 @@ void CdrPlasmaJSON::parseJSON() {
   istream >> m_json;  
 }
 
+void CdrPlasmaJSON::throwParserError(const std::string a_error) const {
+  pout() << a_error << endl;
+
+  MayDay::Error(a_error.c_str());
+}
+
 void CdrPlasmaJSON::initializeSigma() {
   CH_TIME("CdrPlasmaJSON::initializeSigma");
   if(m_verbose){
@@ -86,14 +93,109 @@ void CdrPlasmaJSON::initializeSigma() {
   }
 }
 
-void CdrPlasmaJSON::instantiateCdrSpecies() {
-  CH_TIME("CdrPlasmaJSON::instantiateCdrSpecies");
+void CdrPlasmaJSON::initializeNeutralSpecies() {
+  CH_TIME("CdrNeutralJSON::initializeNeutralSpecies");
   if(m_verbose){
-    pout() << "CdrPlasmaJSON::instantiateCdrSpecies()" << endl;
+    pout() << "CdrNeutralJSON::initializeNeutralSpecies()" << endl;
+  }
+
+  // These fields are required
+  if(!(m_json["gas"].contains("temperature"    ))) this->throwParserError("In JSON field 'gas' - field 'temperature' is missing"    );
+  if(!(m_json["gas"].contains("pressure"       ))) this->throwParserError("In JSON field 'gas' - field 'pressure' is missing"       );
+  if(!(m_json["gas"].contains("law"            ))) this->throwParserError("In JSON field 'gas' - field 'law' is missing"            );
+  if(!(m_json["gas"].contains("neutral_species"))) this->throwParserError("In JSON field 'gas' - field 'neutral_species' is missing");
+
+  const auto referenceTemperature = m_json["gas"]["temperature"].get<Real       >();
+  const auto referencePressure    = m_json["gas"]["pressure"   ].get<Real       >();
+  const auto gasLaw               = m_json["gas"]["law"        ].get<std::string>();
+
+  // Instantiate the pressure, density, and temperature of the gas. Note: The density  is the NUMBER density. 
+  if(gasLaw == "ideal"){
+    // Set the gas temperature, density, and pressure from the ideal gas law. No extra parameters needed and no variation in space either. 
+      
+    const Real referenceDensity = (referencePressure * Units::atm2pascal * Units::Na)/ (referenceTemperature * Units::R);	
+
+    m_gasTemperature = [T   = referenceTemperature] (const RealVect a_position) -> Real { return T;   };
+    m_gasPressure    = [P   = referencePressure   ] (const RealVect a_position) -> Real { return P;   };
+    m_gasDensity     = [Rho = referenceDensity    ] (const RealVect a_position) -> Real { return Rho; };
+  }
+  else if(gasLaw == "troposphere"){
+
+    // These fields are required.  
+    if(!(m_json["gas"].contains("molar_mass"      ))) this->throwParserError("gas_law is 'troposphere' but I did not find field 'molar_mass'"      );
+    if(!(m_json["gas"].contains("gravity"         ))) this->throwParserError("gas_law is 'troposphere' but I did not find field 'gravity'"         );
+    if(!(m_json["gas"].contains("lapse_rate"      ))) this->throwParserError("gas_law is 'troposphere' but I did not find field 'lapse_rate'"      );
+
+    const Real g    = m_json["gas"]["gravity"   ].get<Real>();
+    const Real L    = m_json["gas"]["lapse_rate"].get<Real>();
+    const Real M    = m_json["gas"]["molar_mass"].get<Real>();
+    const Real gMRL = (g * M) / (Units::R * L);
+
+    // Temperature is T = T0 - L*(z-h0)
+    m_gasTemperature = [T  = referenceTemperature, L] (const RealVect a_position) -> Real {
+      return T - L * a_position[SpaceDim-1];
+    };
+
+    // Pressure is p = p0 * (1 - L*h/T0)^(g*M/(R*L)
+    m_gasPressure = [T  = referenceTemperature, P = referencePressure, L, gMRL ] (const RealVect a_position) -> Real {
+      return P * std::pow(( 1 - L*a_position[SpaceDim-1]/T), gMRL);
+    };
+
+    // Density is rho = P*Na/(T*R)
+    m_gasDensity = [P = this->m_gasPressure, T = this->m_gasTemperature] (const RealVect a_position) -> Real {
+      return (P(a_position) * Units::atm2pascal * Units::Na)/ (T(a_position) * Units::R);          
+    };
+  }
+  else{
+    this->throwParserError("CdrPlasmaJSON::initializeNeutralSpecies gas law '" + gasLaw + "' not recognized.");
+  }
+
+  // Instantiate the species densities. Note that we need to go through this twice because we need to normalize the molar fractions in case users
+  // were a bit inconsiderate when setting them. 
+  Real molarSum = 0.0;
+  for (const auto& species : m_json["gas"]["neutral_species"]){
+    if(!(species.contains("name")))           this->throwParserError("In JSON field 'neutral_species' - field 'name' is required"          );
+    if(!(species.contains("molar_fraction"))) this->throwParserError("In JSON field 'neutral_species' - field 'molar_fraction' is required");
+
+    molarSum += species["molar_fraction"].get<Real>();
+  }
+
+  // Initialize the species
+  for (const auto& species : m_json["gas"]["neutral_species"]){
+    const std::string speciesName     = species["name"          ].get<std::string>();
+    const Real        speciesFraction = species["molar_fraction"].get<Real>() / molarSum;
+
+    // Set the species density function. 
+    const std::function<Real(const RealVect)> speciesDensity  = [f = speciesFraction, N = this->m_gasDensity] (const RealVect a_position) {
+      return f * N(a_position);
+    };
+
+    // Add the species. Make sure the maps are consist.
+    const int idx = m_neutralSpecies.size();
+    
+    // Create the neutral species.
+    m_neutralSpecies.push_back(std::shared_ptr<NeutralSpeciesJSON>((new NeutralSpeciesJSON(speciesName, speciesDensity))));
+
+    // Create the string-int maps
+    m_neutralSpeciesMap.       insert(std::make_pair(speciesName, idx        ));
+    m_neutralSpeciesInverseMap.insert(std::make_pair(idx ,        speciesName));
+  }
+
+  // Figure out if we should plot the gas quantities
+  m_plotGas = false;
+  if(m_json["gas"].contains("plot")){
+    m_plotGas = m_json["gas"]["plot"].get<bool>();
+  }
+}
+
+void CdrPlasmaJSON::initializePlasmaSpecies() {
+  CH_TIME("CdrPlasmaJSON::initializePlasmaSpecies");
+  if(m_verbose){
+    pout() << "CdrPlasmaJSON::initializePlasmaSpecies()" << endl;
   }
 
   // Iterate through all species defined in the JSON file. 
-  for (const auto& species : m_json["species"]){
+  for (const auto& species : m_json["plasma_species"]){
 
     std::string name        = "default_name";
     int         Z           = 0;    
@@ -112,7 +214,7 @@ void CdrPlasmaJSON::instantiateCdrSpecies() {
       name = species["name"].get<std::string>();
     }
     else{
-      const std::string err = "CdrPlasmaJSON::instantiateSpecies -- name is missing for field " + species.dump();
+      const std::string err = "CdrPlasmaJSON::initializeSpecies -- name is missing for field " + species.dump();
       pout() << err << endl;
       MayDay::Error(err.c_str());
     }
@@ -122,7 +224,7 @@ void CdrPlasmaJSON::instantiateCdrSpecies() {
       tracked = species["tracked"].get<bool>();
     }
     else{
-      const std::string err = "CdrPlasmaJSON::instantiateSpecies -- field 'tracked' is missing for species " + name;
+      const std::string err = "CdrPlasmaJSON::initializeSpecies -- field 'tracked' is missing for species " + name;
       pout() << err << endl;     
       MayDay::Error(err.c_str());
     }
@@ -132,7 +234,7 @@ void CdrPlasmaJSON::instantiateCdrSpecies() {
       Z = species["Z"].get<int>();
     }
     else{
-      const std::string err = "CdrPlasmaJSON::instantiateSpecies -- field 'Z' is missing for species " + name;
+      const std::string err = "CdrPlasmaJSON::initializeSpecies -- field 'Z' is missing for species " + name;
       pout() << err << endl;
       MayDay::Error(err.c_str());
     }
@@ -220,7 +322,7 @@ void CdrPlasmaJSON::instantiateCdrSpecies() {
 
     // Print out a message if we're verbose.
     if(m_verbose){
-      pout() << "CdrPlasmaJSON::instantiateSpecies: instantiating species" << "\n"
+      pout() << "CdrPlasmaJSON::initializeSpecies: instantiating species" << "\n"
 	     << "\tName        = " << name        << "\n"
 	     << "\tTracked     = " << tracked     << "\n"
 	     << "\tZ           = " << Z           << "\n"
@@ -229,7 +331,7 @@ void CdrPlasmaJSON::instantiateCdrSpecies() {
 	     << "\tInitialData = " << hasInitData << "\n";    	
     }
 
-    // Instantiate the species.
+    // Initialize the species.
     if(tracked){
       const int num = m_trackedCdrSpecies.size();
 
@@ -334,22 +436,20 @@ void CdrPlasmaJSON::parseMobilities() {
 int CdrPlasmaJSON::getNumberOfPlotVariables() const {
   int ret = 0;
 
-  for (const auto& plotCdr : m_plotCdr){
-    if(plotCdr.second){
-      ret++;
-    }
+  if(m_plotGas){
+    ret = 3;
   }
 
   return ret;
 }
 
 Vector<std::string> CdrPlasmaJSON::getPlotVariableNames() const {
-  Vector<std::string> ret;
+  Vector<std::string> ret(0);
 
-  for (const auto& plotCdr : m_plotCdr){
-    if(plotCdr.second){
-      ret.push_back(plotCdr.first + " untracked density");
-    }
+  if(m_plotGas){
+    ret.push_back("gas pressure"   );
+    ret.push_back("gas temperature");
+    ret.push_back("gas density"    );
   }
 
   return ret;
@@ -360,14 +460,14 @@ Vector<Real> CdrPlasmaJSON::getPlotVariables(const Vector<Real> a_cdrDensities,
 					     const RealVect     a_E,
 					     const RealVect     a_position,
 					     const Real         a_time) const {
-  Vector<Real> ret;
+  Vector<Real> ret(0);
 
-  for (const auto & plotCdr : m_plotCdr){
-    if(plotCdr.second){
-      ret.push_back(this->getUntrackedCdrDensity(plotCdr.first, a_position, a_time));
-    }
+  if(m_plotGas){
+    ret.push_back(m_gasPressure   (a_position));
+    ret.push_back(m_gasTemperature(a_position));
+    ret.push_back(m_gasDensity    (a_position));
   }
-  
+
   return ret;
 }
 
@@ -395,6 +495,10 @@ Real CdrPlasmaJSON::getUntrackedCdrDensity(const std::string& a_name, const Real
 
 Real CdrPlasmaJSON::getTrackedCdrDensity(const std::string& a_name, const Vector<Real>& a_cdrDensities) const {
   return a_cdrDensities[m_trackedCdrSpeciesMap.at(a_name)];
+}
+
+Real CdrPlasmaJSON::getNeutralSpeciesDensity(const std::string a_name, const RealVect& a_position) const {
+  //  return m_neutralSpecies[m_neutralSpeciesMap.at(a_name)] (a_position);
 }
 
 Real CdrPlasmaJSON::computeAlpha(const RealVect a_E) const {
