@@ -311,7 +311,7 @@ namespace Physics {
       /*!
 	@brief Map for function-based mobilities.
       */
-      std::map<int, std::shared_ptr<CdrPlasmaJSONFunctionEN> > m_mobilityFunctions;
+      std::map<int, std::shared_ptr<CdrPlasmaJSONFunctionEN> > m_mobilityFunctionsEN;
 
       /*!
 	@brief Map for table-based mobilities. 

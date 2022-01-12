@@ -460,7 +460,10 @@ Vector<RealVect> CdrPlasmaJSON::computeCdrDriftVelocities(const Real         a_t
 	}
       case LookupMethod::FunctionEN:
 	{
-	  MayDay::Error("CdrPlasmaJSON::computeCdrDriftVelocities -- function not implemented yet");
+	  const Real N = m_gasDensity(a_position);
+
+	  mobility = (*m_mobilityFunctionsEN.at(i))(a_E, N);
+
 	  break;
 	}
       case LookupMethod::TableEN:
