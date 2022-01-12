@@ -27,12 +27,15 @@
 	 "mobile": true,
 	 "diffusive": false,
 	 "mobility": {
-	     "lookup" : "table",
+	     "lookup" : "table E/N",
 	     "value": 0.05,
 	     "file": "transport_data.txt",
 	     "header": "# Electron mobility (E/N, mu*N)",
 	     "E/N": 0,
-	     "mu*N": 1
+	     "mu*N": 1,
+	     "min E/N": 10,
+	     "max E/N": 1000,
+	     "num_points": 100	     
 	 },
 	 "diffusion": {
 	     "constant": true,

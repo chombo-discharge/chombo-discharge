@@ -221,8 +221,8 @@ namespace Physics {
       */
       enum class LookupMethod {
 	Constant,
-	Function,
-	Table
+	FunctionEN,
+	TableEN
       };
 
       /*!

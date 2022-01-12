@@ -319,32 +319,44 @@ void CdrPlasmaJSON::parseMobilities() {
 	m_mobilityLookup.  emplace(std::make_pair(idx, LookupMethod::Constant));
 	m_mobilityConstant.emplace(std::make_pair(idx, value                 ));
       }
-      else if(lookup == "table"){
+      else if(lookup == "table E/N"){
 
-	if(!(mobilityJSON.contains("file"  ))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- tabulated mobility was specified but field 'file' was not"  );
-	if(!(mobilityJSON.contains("header"))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- tabulated mobility was specified but field 'header' was not");
-	if(!(mobilityJSON.contains("E/N"   ))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- tabulated mobility was specified but field 'E/N' was not"   );
-	if(!(mobilityJSON.contains("mu*N"  ))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- tabulated mobility was specified but field 'mu*N' was not"  );
-
+	if(!(mobilityJSON.contains("file"      ))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- tabulated mobility was specified but field 'file' was not"   );
+	if(!(mobilityJSON.contains("header"    ))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- tabulated mobility was specified but field 'header' was not" );
+	if(!(mobilityJSON.contains("E/N"       ))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- tabulated mobility was specified but field 'E/N' was not"    );
+	if(!(mobilityJSON.contains("mu*N"      ))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- tabulated mobility was specified but field 'mu*N' was not"   );
+	if(!(mobilityJSON.contains("min E/N"   ))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- tabulated mobility was specified but field 'min E/N' was not");
+	if(!(mobilityJSON.contains("max E/N"   ))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- tabulated mobility was specified but field 'max E/N' was not");
+	if(!(mobilityJSON.contains("num_points"))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- tabulated mobility was specified but field 'num_points' was not");
+	
 	const std::string filename  = mobilityJSON["file"  ].get<std::string>();
 	const std::string startRead = mobilityJSON["header"].get<std::string>();
 	const std::string stopRead  = "";
 
-	const int xCol = mobilityJSON["E/N" ].get<int>();
-	const int yCol = mobilityJSON["mu*N"].get<int>();
+	const int xColumn   = mobilityJSON["E/N" ].get<int>();
+	const int yColumn   = mobilityJSON["mu*N"].get<int>();
+	const int numPoints = mobilityJSON["num_points"].get<int>();
 
-	LookupTable<2> mobilityTable = DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xCol, yCol);
+	const Real minEN = mobilityJSON["min E/N"].get<Real>();
+	const Real maxEN = mobilityJSON["max E/N"].get<Real>();	
 
-	mobilityTable.dumpTable();
-	
-	m_mobilityLookup.emplace(std::make_pair(idx, LookupMethod::Table));
+	// Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
+	// the user specified the correct E/N column then that data will be put in the first column. The data for mu*N will be in the
+	// second column. 
+	LookupTable<2> mobilityTable = DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
 
-	MayDay::Abort("stop here");
+	// Format the table
+	mobilityTable.setRange(minEN, maxEN, 0);
+	mobilityTable.sort(0);
+	mobilityTable.makeUniform(numPoints);
+
+	m_mobilityLookup.emplace(std::make_pair(idx, LookupMethod::TableEN));
+	m_mobilityTables.emplace(std::make_pair(idx, mobilityTable      ));
       }		
-      else if (lookup == "function"){
+      else if (lookup == "function EN"){
 	pout() << "using function" << endl;
 
-	m_mobilityLookup.emplace(std::make_pair(idx, LookupMethod::Function));	  
+	m_mobilityLookup.emplace(std::make_pair(idx, LookupMethod::FunctionEN));	  
       }
       else{
 	this->throwParserError("CdrPlasmaJSON::parseMobilities -- lookup = '" + lookup + "' was specified but this is not 'constant', 'function', or 'table'");
@@ -426,7 +438,7 @@ void CdrPlasmaJSON::advanceReactionNetwork(Vector<Real>&          a_cdrSources,
 }
 
 Vector<RealVect> CdrPlasmaJSON::computeCdrDriftVelocities(const Real         a_time,
-							  const RealVect     a_pos,
+							  const RealVect     a_position,
 							  const RealVect     a_E,
 							  const Vector<Real> a_cdrDensities) const {
   Vector<RealVect> velocities(m_numCdrSpecies, RealVect::Zero);
@@ -447,14 +459,22 @@ Vector<RealVect> CdrPlasmaJSON::computeCdrDriftVelocities(const Real         a_t
 	  mobility = m_mobilityConstant.at(i);
 	  break;
 	}
-      case LookupMethod::Function:
+      case LookupMethod::FunctionEN:
 	{
 	  MayDay::Error("CdrPlasmaJSON::computeCdrDriftVelocities -- function not implemented yet");
 	  break;
 	}
-      case LookupMethod::Table:
+      case LookupMethod::TableEN:
 	{
-	  MayDay::Error("CdrPlasmaJSON::computeCdrDriftVelocities -- table not implemented yet");
+	  // Recall; the mobility tables are stored as (E/N, mu*N) so we need to extract mu from that. 
+	  const LookupTable<2>& mobilityTable = m_mobilityTables.at(i);
+
+	  const Real E = a_E.vectorLength();
+	  const Real N = m_gasDensity(a_position);
+
+	  mobility  = mobilityTable.getEntry<1>(E/N); // Get mu*N
+	  mobility /= N;                              // Get mu
+
 	  break;
 	}
       default:
