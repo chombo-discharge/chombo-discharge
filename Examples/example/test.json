@@ -18,15 +18,12 @@
 	     "molar_fraction": 0.8
 	 }
      ]
- }
-}
-
-{"plasma_species":
+ },
+ "plasma_species":
  [
      {
 	 "name": "e",
 	 "Z": -1,
-	 "tracked": true,
 	 "mobile": true,
 	 "diffusive": false,
 	 "mobility": {
@@ -56,12 +53,14 @@
 		 "position": [1, 2, 3]
 	     }
 	 }
-     }
- ]
-}
-
-{"sigma":
- {
+     },
+     {"name": "N2+", "Z":  1, "mobile": false, "diffusive": false},
+     {"name": "O2+", "Z":  1, "mobile": false, "diffusive": false},
+     {"name": "O4+", "Z":  1, "mobile": false, "diffusive": false},
+     {"name": "O-",  "Z": -1, "mobile": false, "diffusive": false},
+     {"name": "O2-", "Z": -1, "mobile": false, "diffusive": false}               
+ ],
+ "sigma": {
      "initial_density": 0.0
  }
 }

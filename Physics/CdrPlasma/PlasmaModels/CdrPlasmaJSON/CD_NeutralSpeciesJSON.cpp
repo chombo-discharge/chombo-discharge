@@ -32,7 +32,7 @@ void NeutralSpeciesJSON::define(const std::string  a_name, const NeutralSpeciesJ
   m_isDefined = true;
 }
 
-Real NeutralSpeciesJSON::operator()(const RealVect a_pos) {
+Real NeutralSpeciesJSON::operator()(const RealVect a_pos) const {
   return m_function(a_pos);
 }
   

@@ -51,8 +51,8 @@ namespace Physics {
 
       /*!
 	@brief Get number of plot variables for this physics class. 
-	@details This is used by CdrPlasmaStepper for pre-allocating data that will be put in a plot file. The CdrPlasmaJSON version will plot the untracked
-	species if the user adds "plot": true to the species
+	@details This is used by CdrPlasmaStepper for pre-allocating data that will be put in a plot file. The current implementation 
+	plots the gas pressure, temperature, and density
       */
       virtual int getNumberOfPlotVariables() const override;
 
@@ -284,59 +284,19 @@ namespace Physics {
 	@brief string-int encoding of the tracked species. 
 	@details This is needed because we sometimes need to use the species name for indexing in the vector. 
       */
-      std::map<std::string, int> m_trackedCdrSpeciesMap;
+      std::map<std::string, int> m_cdrSpeciesMap;
 
       /*!
 	@brief int-string encoding of the tracked species. 
 	@details This is needed because we sometimes need to use the species name for indexing in the vector. 
 	@note This is the inverse of m_trackedCdrSpeciesMap
       */
-      std::map<int, std::string> m_trackedCdrSpeciesInverseMap;      
+      std::map<int, std::string> m_cdrSpeciesInverseMap;      
 
       /*!
-	@brief string-int encoding of the untracked species. 
-	@details This is needed because we sometimes need to use the species name for indexing in the vector. 
+	@brief JSON entries for species in plasma_species
       */
-      std::map<std::string, int> m_untrackedCdrSpeciesMap;
-
-      /*!
-	@brief int-string encoding of the untracked species. 
-	@details This is needed because we sometimes need to use the species name for indexing in the vector. 
-	@note This is the inverse of m_untrackedCdrSpeciesMap
-      */
-      std::map<int, std::string> m_untrackedCdrSpeciesInverseMap;      
-
-      /*!
-	@brief Map for checking if a species is tracked or not. It returns true if a species is tracked by a CDR solver. 
-	@details For given a species name we can check whether or not it is tracked through a CDR solver or just included parametrically. In reactions, this gives us
-	the opportunity to check if we should get the density through a CDR solver OR through an initial data function. 
-      */
-      std::map<std::string, bool> m_trackedMap;
-
-      /*!
-	@brief Map over which species that will be plotted AND are not tracked. I.e. all the densities that are only parametrically defined. 
-      */
-      std::map<std::string, bool> m_plotCdr;
-
-      /*!
-	@brief Tracked CDR species. Note that this is the one that is needed by CdrPlasmaPhysics, i.e. they become CdrSolvers. 
-      */
-      std::vector<RefCountedPtr<CdrSpecies> > m_trackedCdrSpecies;
-
-      /*!
-	@brief Untracked species. These do not become CdrSolvers. 
-      */
-      std::vector<RefCountedPtr<CdrSpecies> > m_untrackedCdrSpecies;
-
-      /*!
-	@brief Tracked JSON CDR entries
-      */
-      std::vector<json> m_trackedCdrJSON;
-
-      /*!
-	@brief Untracked JSON CDR entries
-      */
-      std::vector<json> m_untrackedCdrJSON;
+      std::vector<json> m_cdrSpeciesJSON;
 
       /*!
 	@brief Map for checking if a species is mobile or not
@@ -370,18 +330,6 @@ namespace Physics {
       const RefCountedPtr<CdrSpecies>& getCdrSpecies(const std::string a_name) const;
 
       /*!
-	@brief Get an untracked species. This will yield an error if you try to obtain a species which does not exist, or it is tracked. 
-	@param[in] a_name Species name. 
-      */
-      const RefCountedPtr<CdrSpecies>& getUntrackedCdrSpecies(const std::string a_name) const;
-
-      /*!
-	@brief Get tracked species. This will yield an error if you try to obtain a species which does not exist, or if it is untracked. 
-	@param[in] a_name Species name. 
-      */
-      const RefCountedPtr<CdrSpecies>& getTrackedCdrSpecies(const std::string a_name) const;
-
-      /*!
 	@brief Get a CdrSpecies density.
 	@details This will return the density for the species a_name. If the species is actively tracked, then it will return the entry
 	in a_cdrDensities that corresponds to the species name. If the species is NOT tracked, it will return the initial density of the species. 
@@ -391,21 +339,6 @@ namespace Physics {
 	@param[in] a_time         Time
       */
       Real getCdrDensity(const std::string& a_name, const Vector<Real>& a_cdrDensities, const RealVect& a_pos, const Real& a_time) const;
-
-      /*!
-	@brief Get untracked species density
-	@param[in] a_name Untracked species name
-	@param[in] a_pos  Physical coordinates
-	@param[in] a_time Time
-      */
-      Real getUntrackedCdrDensity(const std::string& a_name, const RealVect& a_pos, const Real& a_time) const;
-
-      /*!
-	@brief Get a tracked species density
-	@param[in] a_name         Tracked species name
-	@param[in] a_cdrDensities List of CDR densities for tracked species. 
-      */
-      Real getTrackedCdrDensity(const std::string& a_name, const Vector<Real>& a_cdrDensities) const;
 
       /*!
 	@brief Get neutral species density
@@ -453,6 +386,12 @@ namespace Physics {
 	@param[in] a_error Error code.
       */
       void throwParserError(const std::string a_error) const;
+
+      /*!
+	@brief Throw a parser wearning
+	@param[in] a_error Warning
+      */
+      void throwParserWarning(const std::string a_warning) const;      
     };
   }
 }

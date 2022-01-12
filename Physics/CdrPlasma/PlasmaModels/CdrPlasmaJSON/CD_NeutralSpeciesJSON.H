@@ -62,7 +62,7 @@ namespace Physics {
       /*!
 	@brief Get density.
       */
-      Real operator()(const RealVect a_pos);
+      Real operator()(const RealVect a_pos) const;
       
     protected:
 
