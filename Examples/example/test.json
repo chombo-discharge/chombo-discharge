@@ -1,9 +1,9 @@
 {"gas":
  {
-     "law": "troposphere",
+     "law": "ideal",
      "temperature": 300,
      "pressure": 1,
-     "molar_mass": 1,
+     "molar_mass": 0.0289652,
      "gravity": 9.81,
      "lapse_rate": 0.0065,
      "plot": true,
@@ -25,7 +25,7 @@
 	 "name": "e",
 	 "Z": -1,
 	 "mobile": true,
-	 "diffusive": false,
+	 "diffusive": true,
 	 "mobility": {
 	     "lookup" : "function E/N",
 	     "value": 1,
@@ -42,8 +42,15 @@
 	     "C": 0.74
 	 },
 	 "diffusion": {
-	     "constant": true,
-	     "value": 0.05
+	     "lookup": "table E/N",
+	     "value": 1,
+	     "file": "transport_data.txt",
+	     "header": "# Electron diffusion coefficient (E/N, D*N)",
+	     "E/N": 0,
+	     "D*N": 1,
+	     "min E/N": 10,
+	     "max E/N": 1000,
+	     "num_points": 100
 	 },
 	 "initial_data": {
 	     "uniform": 1.0,

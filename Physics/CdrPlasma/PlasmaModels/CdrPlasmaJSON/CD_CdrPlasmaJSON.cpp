@@ -39,6 +39,7 @@ CdrPlasmaJSON::CdrPlasmaJSON(){
 
   // Parse CDR mobilities and diffusion coefficients. 
   this->parseMobilities();
+  this->parseDiffusion();
 
   // Populate the stuff that is needed by CdrPlasmaPhysics
   m_RtSpecies.resize(0);
@@ -316,16 +317,16 @@ void CdrPlasmaJSON::parseMobilities() {
 
 	const Real value = mobilityJSON["value"].get<Real>();
 
-	m_mobilityLookup.  emplace(std::make_pair(idx, LookupMethod::Constant));
-	m_mobilityConstant.emplace(std::make_pair(idx, value                 ));
+	m_mobilityLookup.   emplace(std::make_pair(idx, LookupMethod::Constant));
+	m_mobilityConstants.emplace(std::make_pair(idx, value                 ));
       }
       else if(lookup == "table E/N"){
-	if(!(mobilityJSON.contains("file"      ))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- tabulated mobility was specified but field 'file' was not"   );
-	if(!(mobilityJSON.contains("header"    ))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- tabulated mobility was specified but field 'header' was not" );
-	if(!(mobilityJSON.contains("E/N"       ))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- tabulated mobility was specified but field 'E/N' was not"    );
-	if(!(mobilityJSON.contains("mu*N"      ))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- tabulated mobility was specified but field 'mu*N' was not"   );
-	if(!(mobilityJSON.contains("min E/N"   ))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- tabulated mobility was specified but field 'min E/N' was not");
-	if(!(mobilityJSON.contains("max E/N"   ))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- tabulated mobility was specified but field 'max E/N' was not");
+	if(!(mobilityJSON.contains("file"      ))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- tabulated mobility was specified but field 'file' was not"      );
+	if(!(mobilityJSON.contains("header"    ))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- tabulated mobility was specified but field 'header' was not"    );
+	if(!(mobilityJSON.contains("E/N"       ))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- tabulated mobility was specified but field 'E/N' was not"       );
+	if(!(mobilityJSON.contains("mu*N"      ))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- tabulated mobility was specified but field 'mu*N' was not"      );
+	if(!(mobilityJSON.contains("min E/N"   ))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- tabulated mobility was specified but field 'min E/N' was not"   );
+	if(!(mobilityJSON.contains("max E/N"   ))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- tabulated mobility was specified but field 'max E/N' was not"   );
 	if(!(mobilityJSON.contains("num_points"))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- tabulated mobility was specified but field 'num_points' was not");
 	
 	const std::string filename  = mobilityJSON["file"  ].get<std::string>();
@@ -349,8 +350,8 @@ void CdrPlasmaJSON::parseMobilities() {
 	mobilityTable.sort(0);
 	mobilityTable.makeUniform(numPoints);
 
-	m_mobilityLookup.emplace(std::make_pair(idx, LookupMethod::TableLFA));
-	m_mobilityTables.emplace(std::make_pair(idx, mobilityTable         ));
+	m_mobilityLookup.  emplace(std::make_pair(idx, LookupMethod::TableLFA));
+	m_mobilityTablesEN.emplace(std::make_pair(idx, mobilityTable         ));
       }		
       else if (lookup == "function E/N"){
 	if(!(mobilityJSON.contains("function"))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- using function E/N but did not find function specification");
@@ -378,6 +379,100 @@ void CdrPlasmaJSON::parseMobilities() {
       }
       else{
 	this->throwParserError("CdrPlasmaJSON::parseMobilities -- lookup = '" + lookup + "' was specified but this is not 'constant', 'function', or 'table'");
+      }
+    }
+  }
+}
+
+void CdrPlasmaJSON::parseDiffusion() {
+  CH_TIME("CdrPlasmaJSON::parseDiffusion");
+  if(m_verbose){
+    pout() << "CdrPlasmaJSON::parseDiffusion - file is = " << m_jsonFile << endl;
+  }
+
+  // Iterate through all tracked species.
+  for (const auto& species : m_cdrSpeciesJSON){
+    const std::string name = species["name"].get<std::string>();
+    const int         idx  = m_cdrSpeciesMap.at(name);
+
+    if(m_CdrSpecies[idx]->isDiffusive()){
+
+      // This is a required field. We use it for specifying the mobility. 
+      if(!(species.contains("diffusion"))) this->throwParserError("species " + name + " is diffusive but file does not contain field 'diffusion'");
+      const json& diffusionJSON = species["diffusion"];
+
+      // Get the mobility lookup method. This must either be a constant, a function, or a table. We parse these cases differently.
+      const std::string lookup = diffusionJSON["lookup"].get<std::string>();
+	
+      if(lookup == "constant"){
+	// User specified a constant mobility. We look for a field 'value' in the JSON file and set the mobility from that. If the
+	// field does not exist then it's an error. 
+	if(!(diffusionJSON.contains("value"))) this->throwParserError("CdrPlasmaJSON::parseDiffusion -- constant lookup was specified but I can't find the field 'value'");
+
+	const Real value = diffusionJSON["value"].get<Real>();
+
+	m_diffusionLookup.  emplace(std::make_pair(idx, LookupMethod::Constant));
+	m_diffusionConstants.emplace(std::make_pair(idx, value                 ));
+      }
+      else if(lookup == "table E/N"){
+	if(!(diffusionJSON.contains("file"      ))) this->throwParserError("CdrPlasmaJSON::parseDiffusion -- tabulated diffusion was specified but field 'file' was not."      );
+	if(!(diffusionJSON.contains("header"    ))) this->throwParserError("CdrPlasmaJSON::parseDiffusion -- tabulated diffusion was specified but field 'header' was not."    );
+	if(!(diffusionJSON.contains("E/N"       ))) this->throwParserError("CdrPlasmaJSON::parseDiffusion -- tabulated diffusion was specified but field 'E/N' was not."       );
+	if(!(diffusionJSON.contains("D*N"       ))) this->throwParserError("CdrPlasmaJSON::parseDiffusion -- tabulated diffusion was specified but field 'D*N' was not"        );
+	if(!(diffusionJSON.contains("min E/N"   ))) this->throwParserError("CdrPlasmaJSON::parseDiffusion -- tabulated diffusion was specified but field 'min E/N' was not."   );
+	if(!(diffusionJSON.contains("max E/N"   ))) this->throwParserError("CdrPlasmaJSON::parseDiffusion -- tabulated diffusion was specified but field 'max E/N' was not."   );
+	if(!(diffusionJSON.contains("num_points"))) this->throwParserError("CdrPlasmaJSON::parseDiffusion -- tabulated diffusion was specified but field 'num_points' was not.");
+	
+	const std::string filename  = diffusionJSON["file"  ].get<std::string>();
+	const std::string startRead = diffusionJSON["header"].get<std::string>();
+	const std::string stopRead  = "";
+
+	const int xColumn   = diffusionJSON["E/N"       ].get<int>();
+	const int yColumn   = diffusionJSON["D*N"       ].get<int>();
+	const int numPoints = diffusionJSON["num_points"].get<int>();
+
+	const Real minEN = diffusionJSON["min E/N"].get<Real>();
+	const Real maxEN = diffusionJSON["max E/N"].get<Real>();	
+
+	// Read the table and format it. We happen to know that this function reads data into the approprate columns. So if
+	// the user specified the correct E/N column then that data will be put in the first column. The data for D*N will be in the
+	// second column. 
+	LookupTable<2> diffusionTable = DataParser::fractionalFileReadASCII(filename, startRead, stopRead, xColumn, yColumn);
+
+	// Format the table
+	diffusionTable.setRange(minEN, maxEN, 0);
+	diffusionTable.sort(0);
+	diffusionTable.makeUniform(numPoints);
+
+	m_diffusionLookup.  emplace(std::make_pair(idx, LookupMethod::TableLFA));
+	m_diffusionTablesEN.emplace(std::make_pair(idx, diffusionTable         ));
+      }		
+      else if (lookup == "function E/N"){
+	if(!(diffusionJSON.contains("function"))) this->throwParserError("CdrPlasmaJSON::parseDiffusion -- using function E/N but did not find function specification");
+
+	FunctionEN func;
+	
+	const std::string whichFunction = diffusionJSON["function"].get<std::string>();
+	if(whichFunction == "ABC"){
+	  if(!(diffusionJSON.contains("A"))) this->throwParserError("CdrPlasmaJSON::parseDiffusion -- using function 'ABC'  did not find 'A'");
+	  if(!(diffusionJSON.contains("B"))) this->throwParserError("CdrPlasmaJSON::parseDiffusion -- using function 'ABC'  did not find 'B'");
+	  if(!(diffusionJSON.contains("C"))) this->throwParserError("CdrPlasmaJSON::parseDiffusion -- using function 'ABC'  did not find 'C'");
+
+	  const Real A = diffusionJSON["A"].get<Real>();
+	  const Real B = diffusionJSON["B"].get<Real>();
+	  const Real C = diffusionJSON["C"].get<Real>();
+
+	  func = [A, B, C](const Real a_E, const Real a_N) -> Real {return A * std::pow(a_E, B) / std::pow(a_N, C);};
+	}
+	else{
+	  this->throwParserError("CdrPlasmaJSON::parseDiffusion -- using function E/N but do not recognize specification '" + whichFunction + "'");
+	}
+
+	m_diffusionLookup.     emplace(std::make_pair(idx, LookupMethod::FunctionLFA));
+	m_diffusionFunctionsEN.emplace(std::make_pair(idx, func                     ));	
+      }
+      else{
+	this->throwParserError("CdrPlasmaJSON::parseDiffusion -- lookup = '" + lookup + "' was specified but this is not 'constant', 'function', or 'table'");
       }
     }
   }
@@ -461,6 +556,10 @@ Vector<RealVect> CdrPlasmaJSON::computeCdrDriftVelocities(const Real         a_t
 							  const Vector<Real> a_cdrDensities) const {
   Vector<RealVect> velocities(m_numCdrSpecies, RealVect::Zero);
 
+  const Real E   = a_E.vectorLength();
+  const Real N   = m_gasDensity(a_position);
+  const Real Etd = (E/(N * Units::Td));  
+
   for (int i = 0; i < a_cdrDensities.size(); i++){
     const bool isMobile = m_CdrSpecies[i]->isMobile();
     const int  Z        = m_CdrSpecies[i]->getChargeNumber();
@@ -474,26 +573,18 @@ Vector<RealVect> CdrPlasmaJSON::computeCdrDriftVelocities(const Real         a_t
       switch(method) {
       case LookupMethod::Constant:
 	{
-	  mobility = m_mobilityConstant.at(i);
+	  mobility = m_mobilityConstants.at(i);
 	  break;
 	}
       case LookupMethod::FunctionLFA:
 	{
-	  const Real E = a_E.vectorLength();	  
-	  const Real N = m_gasDensity(a_position);
-
 	  mobility = m_mobilityFunctionsEN.at(i)(E, N);
-
 	  break;
 	}
       case LookupMethod::TableLFA:
 	{
 	  // Recall; the mobility tables are stored as (E/N, mu*N) so we need to extract mu from that. 
-	  const LookupTable<2>& mobilityTable = m_mobilityTables.at(i);
-
-	  const Real E = a_E.vectorLength();
-	  const Real N = m_gasDensity(a_position);
-	  const Real Etd = (E/(N * Units::Td));
+	  const LookupTable<2>& mobilityTable = m_mobilityTablesEN.at(i);
 
 	  mobility  = mobilityTable.getEntry<1>(Etd); // Get mu*N
 	  mobility /= N;                              // Get mu
@@ -505,8 +596,6 @@ Vector<RealVect> CdrPlasmaJSON::computeCdrDriftVelocities(const Real         a_t
 	  MayDay::Error("CdrPlasmaJSON::computeCdrDriftVelocities -- logic bust");
 	}
       }
-
-      std::cout << mobility << std::endl;      
 
       int sgn = 0;
       if (Z > 0){
@@ -526,12 +615,59 @@ Vector<RealVect> CdrPlasmaJSON::computeCdrDriftVelocities(const Real         a_t
 }
 
 Vector<Real> CdrPlasmaJSON::computeCdrDiffusionCoefficients(const Real         a_time,
-							    const RealVect     a_pos,
+							    const RealVect     a_position,
 							    const RealVect     a_E,
 							    const Vector<Real> a_cdrDensities) const {
-  //  MayDay::Warning("CdrPlasmaJSON::computeDiffusionCoefficients -- don't know how to do this yet");
+  Vector<Real> diffusionCoefficients(m_numCdrSpecies, 0.0);
 
-  return Vector<Real>(m_numCdrSpecies, 0.0);
+  const Real E   = a_E.vectorLength();
+  const Real N   = m_gasDensity(a_position);
+  const Real Etd = (E/(N * Units::Td));    
+
+  for (int i = 0; i < a_cdrDensities.size(); i++){
+    if(m_CdrSpecies[i]->isDiffusive()){
+      
+      // Figure out how we compute the diffusion coefficient for this species. 
+      const LookupMethod& method = m_diffusionLookup.at(i);
+
+      Real Dco = 0.0;
+      
+      switch(method) {
+      case LookupMethod::Constant:
+	{
+	  Dco = m_diffusionConstants.at(i);
+	  break;
+	}
+      case LookupMethod::FunctionLFA:
+	{
+	  const Real E = a_E.vectorLength();	  
+	  const Real N = m_gasDensity(a_position);
+
+	  Dco = m_diffusionFunctionsEN.at(i)(E, N);
+
+	  break;
+	}
+      case LookupMethod::TableLFA:
+	{
+	  // Recall; the diffusion tables are stored as (E/N, D*N) so we need to extract D from that. 
+	  const LookupTable<2>& diffusionTable = m_diffusionTablesEN.at(i);
+
+	  Dco  = diffusionTable.getEntry<1>(Etd); // Get D*N
+	  Dco /= N;                               // Get D
+
+	  break;
+	}
+      default:
+	{
+	  MayDay::Error("CdrPlasmaJSON::computeCdrDiffusionCoefficients -- logic bust");
+	}
+      }
+
+      diffusionCoefficients[i] = Dco;
+    }
+  }
+
+  return diffusionCoefficients;  
 }
 
 Vector<Real> CdrPlasmaJSON::computeCdrElectrodeFluxes(const Real         a_time,

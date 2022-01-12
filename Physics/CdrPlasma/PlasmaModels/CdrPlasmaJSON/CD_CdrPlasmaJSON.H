@@ -308,24 +308,44 @@ namespace Physics {
       std::map<int, std::string> m_cdrSpeciesInverseMap;      
 
       /*!
-	@brief Mobility lookup method. This is only for tracked species. 
+	@brief Mobility lookup method for each species. 
       */
       std::map<int, LookupMethod> m_mobilityLookup;
 
       /*!
-	@brief Map for constant mobilities.
+	@brief Map for constant mobilities. 
       */
-      std::map<int, Real> m_mobilityConstant;
+      std::map<int, Real> m_mobilityConstants;
 
       /*!
-	@brief Map for function-based mobilities.
+	@brief Map for table-based mobilities.
       */
       std::map<int, FunctionEN> m_mobilityFunctionsEN;
 
       /*!
-	@brief Map for table-based mobilities. 
+	@brief Map for function-based mobilities. 
       */
-      std::map<int, LookupTable<2> > m_mobilityTables;
+      std::map<int, LookupTable<2> > m_mobilityTablesEN;
+
+      /*!
+	@brief Diffusion lookup method. 
+      */
+      std::map<int, LookupMethod> m_diffusionLookup;
+
+      /*!
+	@brief Map for constant diffusion coefficients. 
+      */
+      std::map<int, Real> m_diffusionConstants;
+
+      /*!
+	@brief Map for function-based diffusion coefficients. .
+      */
+      std::map<int, FunctionEN> m_diffusionFunctionsEN;
+
+      /*!
+	@brief Map for table-based diffusion coefficients. 
+      */
+      std::map<int, LookupTable<2> > m_diffusionTablesEN;      
       
       /*!
 	@brief Get a species. This will return the species whether it is tracked or not. This yields an error if the species does not exist. 
@@ -384,6 +404,11 @@ namespace Physics {
 	@brief Initialize species mobilities
       */
       virtual void parseMobilities();
+
+      /*!
+	@brief Initialize species diffusion coefficients
+      */
+      virtual void parseDiffusion();      
 
       /*!
 	@brief Throw a parser error
