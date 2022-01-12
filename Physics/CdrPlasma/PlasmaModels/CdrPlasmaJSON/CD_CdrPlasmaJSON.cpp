@@ -320,7 +320,6 @@ void CdrPlasmaJSON::parseMobilities() {
 	m_mobilityConstant.emplace(std::make_pair(idx, value                 ));
       }
       else if(lookup == "table E/N"){
-
 	if(!(mobilityJSON.contains("file"      ))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- tabulated mobility was specified but field 'file' was not"   );
 	if(!(mobilityJSON.contains("header"    ))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- tabulated mobility was specified but field 'header' was not" );
 	if(!(mobilityJSON.contains("E/N"       ))) this->throwParserError("CdrPlasmaJSON::parseMobilities -- tabulated mobility was specified but field 'E/N' was not"    );
@@ -333,8 +332,8 @@ void CdrPlasmaJSON::parseMobilities() {
 	const std::string startRead = mobilityJSON["header"].get<std::string>();
 	const std::string stopRead  = "";
 
-	const int xColumn   = mobilityJSON["E/N" ].get<int>();
-	const int yColumn   = mobilityJSON["mu*N"].get<int>();
+	const int xColumn   = mobilityJSON["E/N"       ].get<int>();
+	const int yColumn   = mobilityJSON["mu*N"      ].get<int>();
 	const int numPoints = mobilityJSON["num_points"].get<int>();
 
 	const Real minEN = mobilityJSON["min E/N"].get<Real>();
@@ -353,7 +352,7 @@ void CdrPlasmaJSON::parseMobilities() {
 	m_mobilityLookup.emplace(std::make_pair(idx, LookupMethod::TableEN));
 	m_mobilityTables.emplace(std::make_pair(idx, mobilityTable      ));
       }		
-      else if (lookup == "function EN"){
+      else if (lookup == "function E/N"){
 	pout() << "using function" << endl;
 
 	m_mobilityLookup.emplace(std::make_pair(idx, LookupMethod::FunctionEN));	  

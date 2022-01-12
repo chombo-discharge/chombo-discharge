@@ -59,7 +59,7 @@
      {"name": "O2+", "Z":  1, "mobile": false, "diffusive": false},
      {"name": "O4+", "Z":  1, "mobile": false, "diffusive": false},
      {"name": "O-",  "Z": -1, "mobile": false, "diffusive": false},
-     {"name": "O2-", "Z": -1, "mobile": false, "diffusive": false}               
+     {"name": "O2-", "Z": -1, "mobile": false, "diffusive": false}
  ],
  "sigma": {
      "initial_density": 0.0
