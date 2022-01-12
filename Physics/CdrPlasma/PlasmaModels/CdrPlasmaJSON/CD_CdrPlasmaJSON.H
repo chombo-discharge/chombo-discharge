@@ -22,6 +22,7 @@
 // Our includes
 #include <CD_CdrPlasmaPhysics.H>
 #include <CD_CdrSpeciesJSON.H>
+#include <CD_CdrPlasmaJSONFunctions.H>
 #include <CD_LookupTable.H>
 #include <CD_NamespaceHeader.H>
 
@@ -214,6 +215,15 @@ namespace Physics {
     protected:
 
       /*!
+	@brief Enum class for distinguishing types of mobility lookups. 
+      */
+      enum class LookupMethod {
+	Constant,
+	Function,
+	Table
+      };
+
+      /*!
 	@brief Verbose or not
       */
       bool m_verbose;
@@ -234,16 +244,30 @@ namespace Physics {
       std::function<Real(const Real a_time, const RealVect a_pos) > m_initialSigma;
 
       /*!
-	@brief int-string encoding of the tracked species. 
+	@brief string-int encoding of the tracked species. 
 	@details This is needed because we sometimes need to use the species name for indexing in the vector. 
       */
       std::map<std::string, int> m_trackedCdrSpeciesMap;
 
       /*!
-	@brief int-string encoding of the untracked species. 
+	@brief int-string encoding of the tracked species. 
+	@details This is needed because we sometimes need to use the species name for indexing in the vector. 
+	@note This is the inverse of m_trackedCdrSpeciesMap
+      */
+      std::map<int, std::string> m_trackedCdrSpeciesInverseMap;      
+
+      /*!
+	@brief string-int encoding of the untracked species. 
 	@details This is needed because we sometimes need to use the species name for indexing in the vector. 
       */
       std::map<std::string, int> m_untrackedCdrSpeciesMap;
+
+      /*!
+	@brief int-string encoding of the untracked species. 
+	@details This is needed because we sometimes need to use the species name for indexing in the vector. 
+	@note This is the inverse of m_untrackedCdrSpeciesMap
+      */
+      std::map<int, std::string> m_untrackedCdrSpeciesInverseMap;      
 
       /*!
 	@brief Map for checking if a species is tracked or not. It returns true if a species is tracked by a CDR solver. 
@@ -267,6 +291,41 @@ namespace Physics {
       */
       std::vector<RefCountedPtr<CdrSpecies> > m_untrackedCdrSpecies;
 
+      /*!
+	@brief Tracked JSON CDR entries
+      */
+      std::vector<json> m_trackedCdrJSON;
+
+      /*!
+	@brief Untracked JSON CDR entries
+      */
+      std::vector<json> m_untrackedCdrJSON;
+
+      /*!
+	@brief Map for checking if a species is mobile or not
+      */
+      std::map<int, bool> m_isMobile;
+
+      /*!
+	@brief Mobility lookup method. This is only for tracked species. 
+      */
+      std::map<int, LookupMethod> m_mobilityLookup;
+
+      /*!
+	@brief Map for constant mobilities.
+      */
+      std::map<int, Real> m_mobilityConstant;
+
+      /*!
+	@brief Map for function-based mobilities.
+      */
+      std::map<int, std::shared_ptr<CdrPlasmaJSONFunctionEN> > m_constantMobilities;
+
+      /*!
+	@brief Map for table-based mobilities. 
+      */
+      std::map<int, LookupTable<2> > m_tabulatedMobilities;
+      
       /*!
 	@brief Get a species. This will return the species whether it is tracked or not. This yields an error if the species does not exist. 
 	@param[in] a_name Species name. 
@@ -320,6 +379,13 @@ namespace Physics {
 	@brief Parse the JSON file
       */
       virtual void parseJSON();
+
+      /*!
+	@brief Initialize surface charge
+	@details This will instantiate the surface charge based on the "sigma" field in the JSON file. If you want more complex initial surface charges, 
+	you will have to either extend this routine or overwrite it. 
+      */
+      virtual void initializeSigma();      
       
       /*!
 	@brief Instantiate species. 
@@ -329,11 +395,9 @@ namespace Physics {
       virtual void instantiateCdrSpecies();
 
       /*!
-	@brief Initialize surface charge
-	@details This will instantiate the surface charge based on the "sigma" field in the JSON file. If you want more complex initial surface charges, 
-	you will have to either extend this routine or overwrite it. 
+	@brief Instantiate species mobilities
       */
-      virtual void initializeSigma();
+      virtual void parseMobilities();
     };
   }
 }

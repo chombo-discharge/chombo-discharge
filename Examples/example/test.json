@@ -1,27 +1,26 @@
 {"species":
  [
      {
-	 "name": "O2",
+	 "name": "N2",
 	 "Z": 0,
-	 "tracked": false,
 	 "plot": true,
+	 "tracked": false,
 	 "initial_data": {
-	     "uniform": 1E5,
-	     "exp_falloff": {
-		 "amplitude": 1E5,
-		 "l":  0.1,
-		 "h0": 0,		 
-		 "axis": [0, 1, 0]
+	     "ideal_gas": {
+		 "T": 300,
+		 "P": 1,
+		 "molar_fraction": 0.8
 	     }
 	 }
-     },
+     },     
      {
 	 "name": "e",
 	 "Z": -1,
 	 "tracked": true,
+	 "mobile": true,
+	 "diffusive": false,
 	 "mobility": {
-	     "mobile": true,
-	     "lookup" : "E/N",
+	     "lookup" : "constant",
 	     "value": 0.05,
 	     "file": {
 		 "name": "myfile.dat",
@@ -31,7 +30,6 @@
 	     }
 	 },
 	 "diffusion": {
-	     "diffusive": true,
 	     "constant": true,
 	     "value": 0.05
 	 },
@@ -59,11 +57,5 @@
 {"photons":
  [{"name": "uv1", "Z": -1, "diffusive": true,  "mobile": true },
   {"name": "uv2", "Z":  1, "diffusive": true,  "mobile": true },
- ]
-}
-
-{"reactions":
- [
-     
  ]
 }

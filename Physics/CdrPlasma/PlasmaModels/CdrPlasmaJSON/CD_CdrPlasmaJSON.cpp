@@ -19,6 +19,7 @@
 
 // Our includes
 #include <CD_CdrPlasmaJSON.H>
+#include <CD_Units.H>
 #include <CD_NamespaceHeader.H>
 
 using namespace Physics::CdrPlasma;
@@ -28,8 +29,9 @@ CdrPlasmaJSON::CdrPlasmaJSON(){
   
   this->parseOptions();
   this->parseJSON();
+  this->initializeSigma();  
   this->instantiateCdrSpecies();
-  this->initializeSigma();
+  this->parseMobilities();
 
   // Populate the stuff that is needed by CdrPlasmaPhysics
   m_RtSpecies.resize(0);
@@ -37,7 +39,6 @@ CdrPlasmaJSON::CdrPlasmaJSON(){
 
   m_numCdrSpecies = m_CdrSpecies.size();
   m_numRtSpecies  = 0;
-  
 }
 
 CdrPlasmaJSON::~CdrPlasmaJSON(){
@@ -64,6 +65,27 @@ void CdrPlasmaJSON::parseJSON() {
   istream >> m_json;  
 }
 
+void CdrPlasmaJSON::initializeSigma() {
+  CH_TIME("CdrPlasmaJSON::initializeSigma");
+  if(m_verbose){
+    pout() << "CdrPlasmaJSON::initializeSigma()" << endl;
+  }
+
+  m_initialSigma = [](const Real a_time, const RealVect a_pos) -> Real {
+    return 0.0;
+  };
+
+  if(m_json.contains("sigma")){
+    if(m_json["sigma"].contains("initial_density")){
+      const Real sigma = m_json["sigma"]["initial_density"].get<Real>();
+      
+      m_initialSigma = [sigma] (const Real a_time, const RealVect a_pos) -> Real {
+	return sigma;
+      };
+    }
+  }
+}
+
 void CdrPlasmaJSON::instantiateCdrSpecies() {
   CH_TIME("CdrPlasmaJSON::instantiateCdrSpecies");
   if(m_verbose){
@@ -87,7 +109,7 @@ void CdrPlasmaJSON::instantiateCdrSpecies() {
 
     // Find the species name.
     if(species.contains("name")){
-      name = species["name"];
+      name = species["name"].get<std::string>();
     }
     else{
       const std::string err = "CdrPlasmaJSON::instantiateSpecies -- name is missing for field " + species.dump();
@@ -107,7 +129,7 @@ void CdrPlasmaJSON::instantiateCdrSpecies() {
 
     // Find the charge number.
     if(species.contains("Z")){
-      Z = species["Z"];
+      Z = species["Z"].get<int>();
     }
     else{
       const std::string err = "CdrPlasmaJSON::instantiateSpecies -- field 'Z' is missing for species " + name;
@@ -123,28 +145,20 @@ void CdrPlasmaJSON::instantiateCdrSpecies() {
       plot = false;
     }
 
-    // Find whether or not the species is mobile. If it contains a mobility field, it must also contain the 'mobile' field. 
-    if(species.contains("mobility")){
-      if(species["mobility"].contains("mobile")) {
-	mobile = species["mobility"]["mobile"].get<bool>();
-      }
-      else{
-	const std::string err = "CdrPlasmaJSON::instantiateSpecies -- field 'mobile' is missing for species " + name;
-	pout() << err << endl;	
-	MayDay::Error(err.c_str());
-      }
+    // Find whether or not the species is mobile. If it contains a mobility field, it must also contain the 'mobile' field.
+    if(species.contains("mobile")){
+      mobile = species["mobile"].get<bool>();
+    }
+    else{
+      mobile = false;
     }
 
     // Find whether or not the species is diffusive. If it contains a 'diffusion' field, it must also contain the 'diffusive' field. 
-    if(species.contains("mobility")){
-      if(species["diffusion"].contains("diffusive")) {
-	mobile = species["diffusion"]["diffusive"].get<bool>();
-      }
-      else{
-	const std::string err = "CdrPlasmaJSON::instantiateSpecies -- field 'diffusive' is missing for species " + name;
-	pout() << err << endl;
-	MayDay::Error(err.c_str());
-      }
+    if(species.contains("diffusive")){
+      diffusive = species["diffusive"].get<bool>();
+    }
+    else{
+      diffusive = false;
     }
     
     // Initial data -- we build an incrementing function. 
@@ -184,20 +198,13 @@ void CdrPlasmaJSON::instantiateCdrSpecies() {
 	  ret += amplitude * exp(-std::pow(delta.dotProduct(delta),2)/(2*std::pow(radius, 4)));
 	}
 
-	// Add exponential fall-off
-	if(data.contains("exp_falloff")){
-	  const Real     amplitude = data["exp_falloff"]["amplitude"].get<Real>();	  
-	  const Real     l         = data["exp_falloff"]["l"].        get<Real>();
-	  const Real     h0        = data["exp_falloff"]["h0"].       get<Real>();	  
-	  const RealVect axis      = RealVect(D_DECL(data["exp_falloff"]["axis"][0].get<Real>(),
-						     data["exp_falloff"]["axis"][1].get<Real>(),
-						     data["exp_falloff"]["axis"][2].get<Real>()));
+	// Ideal gas. 
+	if(data.contains("ideal_gas")){
+	  const Real T = data["ideal_gas"]["T"].             get<Real>();
+	  const Real P = data["ideal_gas"]["P"].             get<Real>();
+	  const Real f = data["ideal_gas"]["molar_fraction"].get<Real>();
 
-	  const RealVect n          = axis/axis.vectorLength();
-	  const RealVect delta      = a_point - h0*n;
-
-
-	  ret += amplitude * exp(-delta.dotProduct(n)/l);
+	  ret += f * (P * Units::atm2pascal * Units::Na)/ (T * Units::R);
 	}
 
 	return ret;
@@ -224,39 +231,102 @@ void CdrPlasmaJSON::instantiateCdrSpecies() {
 
     // Instantiate the species.
     if(tracked){
-      m_trackedCdrSpeciesMap.emplace(std::make_pair(name, m_trackedCdrSpecies.size()));
-      m_trackedCdrSpecies.emplace_back(RefCountedPtr<CdrSpecies> (new CdrSpeciesJSON(name, Z, diffusive, mobile, initFunc)));
-      m_trackedMap.emplace(std::make_pair(name, true));
+      const int num = m_trackedCdrSpecies.size();
 
-      m_plotCdr.emplace(std::make_pair(name, false));
+      // Make the string-int map encodings. 
+      m_trackedCdrSpeciesMap.       emplace(std::make_pair(name, num ));
+      m_trackedCdrSpeciesInverseMap.emplace(std::make_pair(num , name));
+
+      // Tracked/plot maps.
+      m_trackedMap.emplace(std::make_pair(name, true));      
+      m_plotCdr.   emplace(std::make_pair(name, false));
+
+      // Push the JSON entry and the new CdrSpecies to corresponding vectors. 
+      m_trackedCdrSpecies.emplace_back(RefCountedPtr<CdrSpecies> (new CdrSpeciesJSON(name, Z, diffusive, mobile, initFunc)));
+      m_trackedCdrJSON.   emplace_back(species);
+
     }
     else {
-      m_untrackedCdrSpeciesMap.emplace(std::make_pair(name, m_untrackedCdrSpecies.size()));
-      m_untrackedCdrSpecies.emplace_back(RefCountedPtr<CdrSpecies> (new CdrSpeciesJSON(name, Z, false, false, initFunc)));
-      m_trackedMap.emplace(std::make_pair(name, false));      
+      const int num = m_untrackedCdrSpecies.size();
+      
+      // Make the name-int encoding. 
+      m_untrackedCdrSpeciesMap.       emplace(std::make_pair(name, num));
+      m_untrackedCdrSpeciesInverseMap.emplace(std::make_pair(num , name));
 
-      m_plotCdr.emplace(std::make_pair(name, plot));
+      // Tracked/plot maps.
+      m_trackedMap.emplace(std::make_pair(name, false));      
+      m_plotCdr.   emplace(std::make_pair(name, plot ));
+
+      // Push the JSON entry and the new CdrSpecies to corresponding vectors. 
+      m_untrackedCdrSpecies.emplace_back(RefCountedPtr<CdrSpecies> (new CdrSpeciesJSON(name, Z, false, false, initFunc)));      
+      m_untrackedCdrJSON.   emplace_back(species);      
     }
   }
 }
 
-void CdrPlasmaJSON::initializeSigma() {
-  CH_TIME("CdrPlasmaJSON::initializeSigma");
+void CdrPlasmaJSON::parseMobilities() {
+  CH_TIME("CdrPlasmaJSON::parseMobilities");
   if(m_verbose){
-    pout() << "CdrPlasmaJSON::initializeSigma()" << endl;
+    pout() << "CdrPlasmaJSON::parseMobilities - file is = " << m_jsonFile << endl;
   }
 
-  m_initialSigma = [](const Real a_time, const RealVect a_pos) -> Real {
-    return 0.0;
-  };
+  // Iterate through all tracked species.
+  for (const auto& species : m_trackedCdrJSON){
+    const std::string name = species["name"].get<std::string>();
+    const int         idx  = m_trackedCdrSpeciesMap.at(name);
 
-  if(m_json.contains("sigma")){
-    if(m_json["sigma"].contains("initial_density")){
-      const Real sigma = m_json["sigma"]["initial_density"].get<Real>();
-      
-      m_initialSigma = [sigma] (const Real a_time, const RealVect a_pos) -> Real {
-	return sigma;
-      };
+    // Only do tracked species.
+    bool reallyMobile = false;
+
+    if(species.contains("mobile")){
+      if(species["mobile"].get<bool>()) {
+	reallyMobile = true;
+      }
+    }
+
+    // Create the map over mobile species
+    m_isMobile.emplace(std::make_pair(idx, reallyMobile));
+
+    if(reallyMobile){
+      if(!(species.contains("mobility"))){ // This is an error -- if a species is tracked AND is mobile it must contain the field 'mobility'
+	const std::string err = "species " + name + " is mobile but file does not contain field 'mobility'";
+	pout() << err << endl;
+	MayDay::Error(err.c_str());	
+      }
+      else{
+	const json& mobilityJSON = species["mobility"];
+
+	// Get the mobility lookup method. This must either be a constant, a function, or a table. We parse these cases differently.
+	
+	const std::string lookup = mobilityJSON["lookup"].get<std::string>();
+	if(lookup == "constant"){
+
+	  // User specified a constant mobility. We look for a field 'value' in the JSON file and set the mobility from that. If the
+	  // field does not exist then it's an error. 
+	  if(!(mobilityJSON.contains("value"))) {
+	    const std::string err = "CdrPlasmaJSON::parseMobilities -- constant lookup was specified but I can't find the field 'value'";
+	    pout() << err << endl;
+	    MayDay::Error(err.c_str());
+	  }
+	  else{
+	    const Real value = mobilityJSON["value"].get<Real>();
+
+	    m_mobilityLookup.  emplace(std::make_pair(idx, LookupMethod::Constant));
+	    m_mobilityConstant.emplace(std::make_pair(idx, value                 ));
+	  }
+	}
+	else if (lookup == "function"){
+	  pout() << "using function" << endl;
+	}
+	else if(lookup == "table"){
+	  pout() << "using table" << endl;
+	}	
+	else{
+	  const std::string err = "CdrPlasmaJSON::parseMobilities -- lookup = '" + lookup + "' was specified but this is not 'constant', 'function', or 'table'";
+	  pout() << err << endl;
+	  MayDay::Error(err.c_str());
+	}
+      }
     }
   }
 }
@@ -278,7 +348,7 @@ Vector<std::string> CdrPlasmaJSON::getPlotVariableNames() const {
 
   for (const auto& plotCdr : m_plotCdr){
     if(plotCdr.second){
-      ret.push_back(plotCdr.first + " density (untracked)");
+      ret.push_back(plotCdr.first + " untracked density");
     }
   }
 
@@ -361,9 +431,55 @@ Vector<RealVect> CdrPlasmaJSON::computeCdrDriftVelocities(const Real         a_t
 							  const RealVect     a_pos,
 							  const RealVect     a_E,
 							  const Vector<Real> a_cdrDensities) const {
-  //  MayDay::Warning("CdrPlasmaJSON::computeCdrDriftVelocities -- don't know how to do this yet");
+  Vector<RealVect> velocities(m_numCdrSpecies, RealVect::Zero);
 
-  return Vector<RealVect>(m_numCdrSpecies, RealVect::Zero);
+  for (const auto& mobileSpecies : m_isMobile){
+    if(mobileSpecies.second){ // Ok, species is mobile. 
+      const int idx = mobileSpecies.first;
+      const int Z   = m_trackedCdrSpecies[idx]->getChargeNumber();
+
+      // Figure out the mobility.
+      const LookupMethod& method = m_mobilityLookup.at(idx);
+
+      Real mobility = 0.0;
+      
+      switch(method) {
+      case LookupMethod::Constant:
+	{
+	  mobility = m_mobilityConstant.at(idx);
+	  break;
+	}
+      case LookupMethod::Function:
+	{
+	  MayDay::Error("CdrPlasmaJSON::computeCdrDriftVelocities -- function not implemented yet");
+	  break;
+	}
+      case LookupMethod::Table:
+	{
+	  MayDay::Error("CdrPlasmaJSON::computeCdrDriftVelocities -- table not implemented yet");
+	  break;
+	}
+      default:
+	{
+	  MayDay::Error("CdrPlasmaJSON::computeCdrDriftVelocities -- logic bust");
+	}
+      }
+
+      int sgn = 0;
+      if (Z > 0){
+	sgn = 1;
+      }
+      else if (Z < 0){
+	sgn = -1;
+      }
+
+      mobility *= sgn;
+
+      velocities[idx] = mobility * a_E;
+    }
+  }
+
+  return velocities;
 }
 
 Vector<Real> CdrPlasmaJSON::computeCdrDiffusionCoefficients(const Real         a_time,
