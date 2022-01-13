@@ -35,19 +35,21 @@ CdrPlasmaJSON::CdrPlasmaJSON(){
   // Parse initial data.
   this->initializeNeutralSpecies();
   this->initializePlasmaSpecies();
+  this->initializePhotonSpecies();  
   this->initializeSigma();
 
   // Parse CDR mobilities and diffusion coefficients. 
   this->parseMobilities();
   this->parseDiffusion();
 
+  // Parse reactions
+  this->parsePlasmaReactions();
+
   // Populate the stuff that is needed by CdrPlasmaPhysics
   m_RtSpecies.resize(0);
 
   m_numCdrSpecies = m_CdrSpecies.size();
   m_numRtSpecies  = m_RtSpecies. size();
-
-  CdrPlasmaReaction reaction({0}, {0,0, 1}, {0});
 }
 
 CdrPlasmaJSON::~CdrPlasmaJSON(){
@@ -84,27 +86,6 @@ void CdrPlasmaJSON::throwParserWarning(const std::string a_warning) const {
   pout() << a_warning << endl;
 
   MayDay::Warning(a_warning.c_str());
-}
-
-void CdrPlasmaJSON::initializeSigma() {
-  CH_TIME("CdrPlasmaJSON::initializeSigma");
-  if(m_verbose){
-    pout() << "CdrPlasmaJSON::initializeSigma()" << endl;
-  }
-
-  m_initialSigma = [](const Real a_time, const RealVect a_pos) -> Real {
-    return 0.0;
-  };
-
-  if(m_json.contains("sigma")){
-    if(m_json["sigma"].contains("initial_density")){
-      const Real sigma = m_json["sigma"]["initial_density"].get<Real>();
-      
-      m_initialSigma = [sigma] (const Real a_time, const RealVect a_pos) -> Real {
-	return sigma;
-      };
-    }
-  }
 }
 
 void CdrPlasmaJSON::initializeNeutralSpecies() {
@@ -289,6 +270,40 @@ void CdrPlasmaJSON::initializePlasmaSpecies() {
     // Push the JSON entry and the new CdrSpecies to corresponding vectors. 
     m_CdrSpecies.    push_back(RefCountedPtr<CdrSpecies> (new CdrSpeciesJSON(name, Z, diffusive, mobile, initFunc)));
     m_cdrSpeciesJSON.push_back(species);
+  }
+}
+
+void CdrPlasmaJSON::initializePhotonSpecies() {
+  CH_TIME("CdrPlasmaJSON::initializePhotonSpecies");
+  if(m_verbose){
+    pout() << "CdrPlasmaJSON::initializePhotonSpecies - file is = " << m_jsonFile << endl;
+  }
+
+  if(!(m_json.contains("photon_species"))) this->throwParserWarning("CdrPlasmaJSON::initializeSpecies -- did not find any photon species");
+
+  for (const auto& species : m_json["photon_species"]){
+
+  }
+}
+
+void CdrPlasmaJSON::initializeSigma() {
+  CH_TIME("CdrPlasmaJSON::initializeSigma");
+  if(m_verbose){
+    pout() << "CdrPlasmaJSON::initializeSigma()" << endl;
+  }
+
+  m_initialSigma = [](const Real a_time, const RealVect a_pos) -> Real {
+    return 0.0;
+  };
+
+  if(m_json.contains("sigma")){
+    if(m_json["sigma"].contains("initial_density")){
+      const Real sigma = m_json["sigma"]["initial_density"].get<Real>();
+      
+      m_initialSigma = [sigma] (const Real a_time, const RealVect a_pos) -> Real {
+	return sigma;
+      };
+    }
   }
 }
 
@@ -477,6 +492,13 @@ void CdrPlasmaJSON::parseDiffusion() {
 	this->throwParserError("CdrPlasmaJSON::parseDiffusion -- lookup = '" + lookup + "' was specified but this is not 'constant', 'function', or 'table'");
       }
     }
+  }
+}
+
+void CdrPlasmaJSON::parsePlasmaReactions() {
+  CH_TIME("CdrPlasmaJSON::parsePlasmaReactions");
+  if(m_verbose){
+    pout() << "CdrPlasmaJSON::parsePlasmaReactions - file is = " << m_jsonFile << endl;
   }
 }
 

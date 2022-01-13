@@ -68,14 +68,16 @@
      },
      {"name": "N2+", "Z":  1, "mobile": false, "diffusive": false},
      {"name": "O2+", "Z":  1, "mobile": false, "diffusive": false},
-     {"name": "O4+", "Z":  1, "mobile": false, "diffusive": false},
-     {"name": "O-",  "Z": -1, "mobile": false, "diffusive": false},
      {"name": "O2-", "Z": -1, "mobile": false, "diffusive": false}
+ ],
+ "photon_species":
+ [
+     {"name": "uv1"}
  ],
  "sigma": {
      "initial_density": 0.0
  },
- "reactions": 
+ "plasma_reactions": 
      [
 	 {"reaction": "e + O2 -> e + e + O2+", "rate": "constant", "value": 0.1, "description": "O2 ionization"},
 	 {"reaction": "e + O2 -> O2-",         "rate": "constant", "value": 0.1, "description": "O2 electron attachment"}	 

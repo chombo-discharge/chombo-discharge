@@ -51,12 +51,30 @@ namespace Physics {
 	@param[in] a_particleProducts  Particles on the right-hand side of the reaction. 
 	@param[in] a_photonProducts    Photons on the right-hand side of the reaction.
       */
+      CdrPlasmaReaction(const std::list<int> a_particleReactants,
+			const std::list<int> a_particleProducts,
+			const std::list<int> a_photonProducts);            
+
+      /*!
+	@brief Full constructor. Permits construction as CdrPlasmaReaction({0,0,1}, {0,2}) etc. 
+	@param[in] a_particleReactants Particles on the left-hand side of the reaction. 
+	@param[in] a_particleProducts  Particles on the right-hand side of the reaction. 
+	@param[in] a_photonProducts    Photons on the right-hand side of the reaction.
+      */
       CdrPlasmaReaction(const std::initializer_list<int> a_particleReactants,
 			const std::initializer_list<int> a_particleProducts,
 			const std::initializer_list<int> a_photonProducts);
 
       /*!
-	@brief Constructor, assuming no photon products. 
+	@brief Full constructor, assuming no photon products. 
+	@param[in] a_particleReactants Particles on the left-hand side of the reaction. 
+	@param[in] a_particleProducts  Particles on the right-hand side of the reaction. 
+      */
+      CdrPlasmaReaction(const std::list<int> a_particleReactants,
+			const std::list<int> a_particleProducts);      
+
+      /*!
+	@brief Full constructor, assuming no photon products. Permits construction as CdrPlasmaReaction({0,0,1}, {0,2}) etc. 
 	@param[in] a_particleReactants Particles on the left-hand side of the reaction. 
 	@param[in] a_particleProducts  Particles on the right-hand side of the reaction. 
       */

@@ -346,7 +346,12 @@ namespace Physics {
       /*!
 	@brief Map for table-based diffusion coefficients. 
       */
-      std::map<int, LookupTable<2> > m_diffusionTablesEN;      
+      std::map<int, LookupTable<2> > m_diffusionTablesEN;
+
+      /*!
+	@brief Plasma reactions. 
+      */
+      std::vector<CdrPlasmaReaction> m_plasmaReactions;
       
       /*!
 	@brief Get a species. This will return the species whether it is tracked or not. This yields an error if the species does not exist. 
@@ -396,10 +401,15 @@ namespace Physics {
       
       /*!
 	@brief Initialize species. 
-	@details This will initialize the species based on the "species" field in the JSON file. If you want e.g. new boundary conditions, 
-	you will have either extend this routine or overwrite it. 
+	@details This will initialize the species based on the "plasma_species" field in the JSON file. 
       */
       virtual void initializePlasmaSpecies();
+
+      /*!
+	@brief Initialize photon species
+	@details This will initialize the radiative transfer species absed on the "photon_species" field in the JSON file. 
+      */
+      virtual void initializePhotonSpecies();
 
       /*!
 	@brief Initialize species mobilities
@@ -409,7 +419,12 @@ namespace Physics {
       /*!
 	@brief Initialize species diffusion coefficients
       */
-      virtual void parseDiffusion();      
+      virtual void parseDiffusion();
+
+      /*!
+	@brief Parse plasma reactions
+      */
+      virtual void parsePlasmaReactions();
 
       /*!
 	@brief Throw a parser error

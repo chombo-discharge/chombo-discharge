@@ -19,6 +19,15 @@ CdrPlasmaReaction::CdrPlasmaReaction() {
   m_isDefined = false;
 }
 
+CdrPlasmaReaction::CdrPlasmaReaction(const std::list<int> a_particleReactants,
+				     const std::list<int> a_particleProducts,
+				     const std::list<int> a_photonProducts)  :  m_particleReactants(a_particleReactants),
+										m_particleProducts (a_particleProducts ),
+										m_photonProducts   (a_photonProducts   )
+{
+  this->computeStateChanges();
+}
+
 CdrPlasmaReaction::CdrPlasmaReaction(const std::initializer_list<int> a_particleReactants,
 				     const std::initializer_list<int> a_particleProducts,
 				     const std::initializer_list<int> a_photonProducts)  :  m_particleReactants(a_particleReactants),
@@ -32,6 +41,14 @@ CdrPlasmaReaction::CdrPlasmaReaction(const std::initializer_list<int> a_particle
 				     const std::initializer_list<int> a_particleProducts) : m_particleReactants(a_particleReactants),
 											    m_particleProducts (a_particleProducts ),
 											    m_photonProducts   (0)
+{
+  this->computeStateChanges();
+}
+
+CdrPlasmaReaction::CdrPlasmaReaction(const std::list<int> a_particleReactants,
+				     const std::list<int> a_particleProducts) : m_particleReactants(a_particleReactants),
+										m_particleProducts (a_particleProducts ),
+										m_photonProducts   (0)
 {
   this->computeStateChanges();
 }
