@@ -73,7 +73,7 @@
  "photon_species":
  [
      {
-	 "name": "bourdon1",
+	 "name": "zheleznyak_uv_photon",
 	 "kappa": "stochastic_chanrion",
 	 "value": 0.1,
 	 "lambda": 0.1,
