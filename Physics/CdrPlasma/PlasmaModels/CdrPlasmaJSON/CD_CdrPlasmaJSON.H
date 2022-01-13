@@ -22,8 +22,9 @@
 
 // Our includes
 #include <CD_CdrPlasmaPhysics.H>
-#include <CD_CdrSpeciesJSON.H>
 #include <CD_NeutralSpeciesJSON.H>
+#include <CD_CdrSpeciesJSON.H>
+#include <CD_RteSpeciesJSON.H>
 #include <CD_CdrPlasmaReaction.H>
 #include <CD_LookupTable.H>
 #include <CD_NamespaceHeader.H>
@@ -258,7 +259,12 @@ namespace Physics {
       /*!
 	@brief JSON entries for species in plasma_species
       */
-      std::vector<json> m_cdrSpeciesJSON;      
+      std::vector<json> m_cdrSpeciesJSON;
+
+      /*!
+	@brief JSON entries for species in photon_species
+      */
+      std::vector<json> m_rteSpeciesJSON;      
 
       /*!
 	@brief Gas pressure (in atmospheres)
@@ -266,14 +272,14 @@ namespace Physics {
       std::function<Real(const RealVect a_position)> m_gasPressure;
 
       /*!
-	@brief Gas temperature (in atmospheres)
+	@brief Gas temperature (in Kelvin)
       */
       std::function<Real(const RealVect a_position)> m_gasTemperature;
 
       /*!
-	@brief Gas number density (in atmospheres)
+	@brief Gas number density (in m^(-3))
       */
-      std::function<Real(const RealVect a_position)> m_gasDensity;      
+      std::function<Real(const RealVect a_position)> m_gasDensity;
 
       /*!
 	@brief Initial surface charge
@@ -296,17 +302,30 @@ namespace Physics {
       std::map<int, std::string> m_neutralSpeciesInverseMap;
 
       /*!
-	@brief string-int encoding of the tracked species. 
+	@brief string-int encoding of the CDr species. 
 	@details This is needed because we sometimes need to use the species name for indexing in the vector. 
       */
       std::map<std::string, int> m_cdrSpeciesMap;
 
       /*!
-	@brief int-string encoding of the tracked species. 
+	@brief int-string encoding of the CDR species. 
 	@details This is needed because we sometimes need to use the species name for indexing in the vector. 
-	@note This is the inverse of m_trackedCdrSpeciesMap
+	@note This is the inverse of m_cdrSpeciesMap
       */
-      std::map<int, std::string> m_cdrSpeciesInverseMap;      
+      std::map<int, std::string> m_cdrSpeciesInverseMap;
+
+      /*!
+	@brief string-int encoding of the RTE species. 
+	@details This is needed because we sometimes need to use the species name for indexing in the vector. 
+      */
+      std::map<std::string, int> m_rteSpeciesMap;
+
+      /*!
+	@brief int-string encoding of the RTE species. 
+	@details This is needed because we sometimes need to use the species name for indexing in the vector. 
+	@note This is the inverse of m_rteSpeciesMap
+      */
+      std::map<int, std::string> m_rteSpeciesInverseMap;      
 
       /*!
 	@brief Mobility lookup method for each species. 

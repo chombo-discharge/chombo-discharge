@@ -72,7 +72,12 @@
  ],
  "photon_species":
  [
-     {"name": "uv1"}
+     {
+	 "name": "bourdon1",
+	 "kappa": "bourdon",
+	 "lambda": 0.1,
+	 "neutral": "O2"
+     }
  ],
  "sigma": {
      "initial_density": 0.0

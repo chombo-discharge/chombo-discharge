@@ -42,11 +42,11 @@ CdrPlasmaJSON::CdrPlasmaJSON(){
   this->parseMobilities();
   this->parseDiffusion();
 
-  // Parse reactions
+  // Parse plasma-reactions and photo-reactions
   this->parsePlasmaReactions();
 
-  // Populate the stuff that is needed by CdrPlasmaPhysics
-  m_RtSpecies.resize(0);
+  // Parse boundary conditions and surface reactions
+
 
   m_numCdrSpecies = m_CdrSpecies.size();
   m_numRtSpecies  = m_RtSpecies. size();
@@ -169,7 +169,7 @@ void CdrPlasmaJSON::initializeNeutralSpecies() {
     const int idx = m_neutralSpecies.size();
     
     // Create the neutral species.
-    m_neutralSpecies.push_back(std::shared_ptr<NeutralSpeciesJSON>((new NeutralSpeciesJSON(speciesName, speciesDensity))));
+    m_neutralSpecies.push_back(std::shared_ptr<NeutralSpeciesJSON>((new NeutralSpeciesJSON(speciesName, speciesFraction, speciesDensity))));
 
     // Create the string-int maps
     m_neutralSpeciesMap.       insert(std::make_pair(speciesName, idx        ));
@@ -189,14 +189,14 @@ void CdrPlasmaJSON::initializePlasmaSpecies() {
     pout() << "CdrPlasmaJSON::initializePlasmaSpecies()" << endl;
   }
 
-  if(!(m_json.contains("plasma_species"))) this->throwParserWarning("CdrPlasmaJSON::initializeSpecies -- did not find any plasma species");
+  if(!(m_json.contains("plasma_species"))) this->throwParserWarning("CdrPlasmaJSON::initializePlasmaSpecies -- did not find any plasma species");
 
   // Iterate through all species defined in the JSON file. 
   for (const auto& species : m_json["plasma_species"]){
-    if(!(species.contains("name"     ))) this->throwParserError("CdrPlasmaJSON::initializeSpecies -- 'plasma_species' must have field 'name'"     );
-    if(!(species.contains("Z"        ))) this->throwParserError("CdrPlasmaJSON::initializeSpecies -- 'plasma_species' must have field 'Z'"        );
-    if(!(species.contains("mobile"   ))) this->throwParserError("CdrPlasmaJSON::initializeSpecies -- 'plasma_species' must have field 'mobile'"   );
-    if(!(species.contains("diffusive"))) this->throwParserError("CdrPlasmaJSON::initializeSpecies -- 'plasma_species' must have field 'diffusive'");
+    if(!(species.contains("name"     ))) this->throwParserError("CdrPlasmaJSON::initializePlasmaSpecies -- 'plasma_species' must have field 'name'"     );
+    if(!(species.contains("Z"        ))) this->throwParserError("CdrPlasmaJSON::initializePlasmaSpecies -- 'plasma_species' must have field 'Z'"        );
+    if(!(species.contains("mobile"   ))) this->throwParserError("CdrPlasmaJSON::initializePlasmaSpecies -- 'plasma_species' must have field 'mobile'"   );
+    if(!(species.contains("diffusive"))) this->throwParserError("CdrPlasmaJSON::initializePlasmaSpecies -- 'plasma_species' must have field 'diffusive'");
 
     const auto name        = species["name"].     get<std::string>();
     const auto Z           = species["Z"].        get<int        >();
@@ -252,7 +252,7 @@ void CdrPlasmaJSON::initializePlasmaSpecies() {
 
     // Print out a message if we're verbose.
     if(m_verbose){
-      pout() << "CdrPlasmaJSON::initializeSpecies: instantiating species" << "\n"
+      pout() << "CdrPlasmaJSON::initializePlasmaSpecies: instantiating species" << "\n"
 	     << "\tName        = " << name        << "\n"
 	     << "\tZ           = " << Z           << "\n"
 	     << "\tMobile      = " << mobile      << "\n"
@@ -279,10 +279,73 @@ void CdrPlasmaJSON::initializePhotonSpecies() {
     pout() << "CdrPlasmaJSON::initializePhotonSpecies - file is = " << m_jsonFile << endl;
   }
 
-  if(!(m_json.contains("photon_species"))) this->throwParserWarning("CdrPlasmaJSON::initializeSpecies -- did not find any photon species");
+  if(!(m_json.contains("photon_species"))) this->throwParserWarning("CdrPlasmaJSON::initializePhotonSpecies -- did not find any photon species");
 
   for (const auto& species : m_json["photon_species"]){
+    if(!(species.contains("name" ))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- 'photon_species' must have field 'name'"     );
+    if(!(species.contains("kappa"))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- 'photon_species' must have field 'mobile'"   );
 
+    const auto name  = species["name" ].get<std::string>();
+    const auto kappa = species["kappa"].get<std::string>();
+
+    // Set the kappa-function needed by RteSpeciesJSON.
+    std::function<Real(const RealVect a_position)> kappaFunction = [](const RealVect a_position) -> Real {return 1.0;};
+    
+    if(kappa == "constant"){
+      if(!(species.contains("value"))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- got 'constant' but field 'value' is missing");
+
+      const Real value = species["value"].get<Real>();
+
+      kappaFunction = [value](const RealVect a_position) {return value;};
+    }
+    else if (kappa == "bourdon"){
+      // For the Bourdon model the translation between the Eddington and Bourdon model is
+      //
+      //    kappa = pX*lambda/sqrt(3).
+      //
+      // where pX is the partial pressure for a species. This requires that we are able to compute the partial pressure. Fortunately, we have m_gasPressure
+      // which computes the pressure, and m_neutralSpecies also stores the molar fraction for each species so this is comparatively easy to reconstruct.     
+
+      // Make sure that 'lambda' is found in the photon species and that O2 is found in the neutral species. 
+      if(!(species.contains("lambda" ))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- got 'bourdon' but field 'lambda' is missing" );
+      if(!(species.contains("neutral"))) this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- got 'bourdon' but field 'neutral' is missing");
+
+      // Get lambda and the neutral species that we base the partial pressure upon. 
+      const auto lambda  = species["lambda" ].get<Real       >();
+      const auto neutral = species["neutral"].get<std::string>();
+
+      // Make sure that the neutral is in the list of species. 
+      if(m_neutralSpeciesMap.find(neutral) == m_neutralSpeciesMap.end()) {
+	this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- got 'bourdon' but '" + neutral + "' is not in the list of neutral species");
+      }
+
+      // Get the molar fraction for this specific neutral
+      const Real molarFraction = m_neutralSpecies[m_neutralSpeciesMap.at(neutral)]->getMolarFraction();
+
+      kappaFunction = [lambda, P = this->m_gasPressure, m = molarFraction](const RealVect a_position) -> Real {
+	return m*P(a_position)*Units::atm2pascal*lambda/sqrt(3.0);
+      };
+    }
+    else if (kappa == "luque"){
+      MayDay::Error("luque not yet supported");
+    }    
+    else if (kappa == "discrete_zheleznyak"){
+      MayDay::Error("discrete_zheleznyak not yet supported");
+    }
+    else{
+      this->throwParserError("CdrPlasmaJSON::initializePhotonSpecies -- 'kappa ' is neither 'constant', 'bourdon', 'zheleznyak', or 'luque'");
+    }
+
+    // Initialize the species.
+    const int num = m_RtSpecies.size();
+
+    // Make the string-int map encodings. 
+    m_rteSpeciesMap.       emplace(std::make_pair(name, num ));
+    m_rteSpeciesInverseMap.emplace(std::make_pair(num , name));
+
+    // Push the JSON entry and the new CdrSpecies to corresponding vectors. 
+    m_RtSpecies.     push_back(RefCountedPtr<RtSpecies> (new RteSpeciesJSON(name, kappaFunction)));
+    m_rteSpeciesJSON.push_back(species);    
   }
 }
 

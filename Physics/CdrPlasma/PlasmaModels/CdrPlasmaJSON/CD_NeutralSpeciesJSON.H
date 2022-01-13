@@ -42,10 +42,11 @@ namespace Physics {
 
       /*!
 	@brief Full constructor. Calls the define function. 
-	@param[in] a_name        Species name
-	@param[in] a_function Number density function
+	@param[in] a_name          Species name
+	@param[in] a_molarFraction Molar fraction
+	@param[in] a_function      Number density function
       */
-      NeutralSpeciesJSON(const std::string a_name, const NumberDensityFunction a_function);
+      NeutralSpeciesJSON(const std::string a_name, const Real a_molarFraction, const NumberDensityFunction a_function);
 
       /*!
 	@brief Destructor
@@ -54,15 +55,29 @@ namespace Physics {
 
       /*!
 	@brief Full constructor. Calls the define function. 
-	@param[in] a_name     Species name
-	@param[in] a_function Number density function
+	@param[in] a_name          Species name
+	@param[in] a_molarFraction Molar fraction
+	@param[in] a_function      Number density function
       */
-      void define(const std::string  a_name, const NumberDensityFunction a_function);
+      void define(const std::string  a_name, const Real a_molarFraction, const NumberDensityFunction a_function);
 
       /*!
-	@brief Get density.
+	@brief Get (number) density at the physical coordinates.
+	@param[in] a_pos Physical position
       */
       Real operator()(const RealVect a_pos) const;
+
+      /*!
+	@brief Get the molar fraction
+	@return m_molarFraction
+      */
+      Real getMolarFraction() const;
+
+      /*!
+	@brief Get the species name
+	@return m_name
+      */
+      std::string getName() const;      
       
     protected:
 
@@ -75,6 +90,11 @@ namespace Physics {
 	@brief Neutral species name
       */
       std::string m_name;
+
+      /*!
+	@brief Molar fraction
+      */
+      Real m_molarFraction;
 
       /*!
 	@brief Initial data function. Set by CdrPlasmaGenericModel

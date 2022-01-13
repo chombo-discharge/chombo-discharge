@@ -26,18 +26,18 @@ namespace Physics {
   namespace CdrPlasma {
 
     /*!
-      @brief Encapsulation of species settings and initial conditiosn for use with CdrPlasma. This is for tracked species.
+      @brief Encapsulation of species settings and initial conditions for CDR species in CdrPlasma. 
     */
     class CdrSpeciesJSON : public CdrSpecies {
     public:
 
       /*!
-	@brief Alias for initial data function
+	@brief Alias for initial data function.
       */
       using InitFunction = std::function<Real(const RealVect a_pos, const Real a_time)>;
 
       /*!
-	@brief Disallowed constructor.
+	@brief Default constructor. Must subsequently call define.
       */
       CdrSpeciesJSON() = default;
 
@@ -85,7 +85,7 @@ namespace Physics {
       virtual ~CdrSpeciesJSON();
 
       /*!
-	@brief Full constructor. Calls the define function. 
+	@brief Define function.
 	@param[in] a_name        Species name
 	@param[in] a_Z           Charge number
 	@param[in] a_mobile      Mobile species or not
@@ -113,7 +113,7 @@ namespace Physics {
       bool m_isDefined;
 
       /*!
-	@brief Initial data function. Set by CdrPlasmaGenericModel
+	@brief Initial data function. 
       */
       InitFunction m_initFunction;
     };
