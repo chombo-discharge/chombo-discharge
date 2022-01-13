@@ -74,5 +74,10 @@
  ],
  "sigma": {
      "initial_density": 0.0
- }
+ },
+ "reactions": 
+     [
+	 {"reaction": "e + O2 -> e + e + O2+", "rate": "constant", "value": 0.1, "description": "O2 ionization"},
+	 {"reaction": "e + O2 -> O2-",         "rate": "constant", "value": 0.1, "description": "O2 electron attachment"}	 
+     ]
 }

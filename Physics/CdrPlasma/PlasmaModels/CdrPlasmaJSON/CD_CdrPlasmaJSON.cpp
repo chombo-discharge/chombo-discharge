@@ -46,6 +46,8 @@ CdrPlasmaJSON::CdrPlasmaJSON(){
 
   m_numCdrSpecies = m_CdrSpecies.size();
   m_numRtSpecies  = m_RtSpecies. size();
+
+  CdrPlasmaReaction reaction({0}, {0,0, 1}, {0});
 }
 
 CdrPlasmaJSON::~CdrPlasmaJSON(){

@@ -24,6 +24,7 @@
 #include <CD_CdrPlasmaPhysics.H>
 #include <CD_CdrSpeciesJSON.H>
 #include <CD_NeutralSpeciesJSON.H>
+#include <CD_CdrPlasmaReaction.H>
 #include <CD_LookupTable.H>
 #include <CD_NamespaceHeader.H>
 
